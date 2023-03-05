@@ -20,10 +20,7 @@
 		},
 		"bundle": {
 			"active": true,
-			"icon": [
-				"icons/icon.png",
-				"icons/icon.ico"
-			],
+			"icon": ["icons/icon.png", "icons/icon.ico"],
 			"identifier": "com.tauri.dev",
 			"targets": "all"
 		},
