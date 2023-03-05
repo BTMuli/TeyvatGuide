@@ -1,10 +1,11 @@
 import Home from "../pages/Home.vue";
+import News from "../pages/News.vue";
 import Config from "../pages/Config.vue";
 
 const routes = [
 	{
 		path: "/",
-		name: "Home",
+		name: "首页",
 		component: Home,
 	},
 	{
@@ -12,8 +13,13 @@ const routes = [
 		redirect: "/",
 	},
 	{
+		path: "/news",
+		name: "咨讯",
+		component: News,
+	},
+	{
 		path: "/config",
-		name: "Config",
+		name: "设置",
 		component: Config,
 	},
 ];

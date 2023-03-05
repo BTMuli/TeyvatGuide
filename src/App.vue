@@ -3,7 +3,7 @@
 		<!-- 侧边栏 -->
 		<t-sidebar />
 		<!-- 内容区 -->
-		<a-layout-content class="container">
+		<a-layout-content>
 			<!-- 路由组件 -->
 			<router-view></router-view>
 		</a-layout-content>
@@ -22,4 +22,4 @@ export default defineComponent({
 });
 </script>
 
-<style></style>
+<style lang="css"></style>

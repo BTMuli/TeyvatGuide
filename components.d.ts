@@ -5,17 +5,17 @@
 // Read more: https://github.com/vuejs/core/pull/3399
 import '@vue/runtime-core'
 
-export {}
+export {};
 
-declare module '@vue/runtime-core' {
-  export interface GlobalComponents {
-    ALayout: typeof import('ant-design-vue/es')['Layout']
-    ALayoutContent: typeof import('ant-design-vue/es')['LayoutContent']
-    ALayoutSider: typeof import('ant-design-vue/es')['LayoutSider']
-    AMenu: typeof import('ant-design-vue/es')['Menu']
-    AMenuItem: typeof import('ant-design-vue/es')['MenuItem']
-    RouterLink: typeof import('vue-router')['RouterLink']
-    RouterView: typeof import('vue-router')['RouterView']
-    TSidebar: typeof import('./src/components/t-sidebar.vue')['default']
-  }
+declare module "@vue/runtime-core" {
+	export interface GlobalComponents {
+		ALayout: typeof import("ant-design-vue/es")["Layout"];
+		ALayoutContent: typeof import("ant-design-vue/es")["LayoutContent"];
+		ALayoutSider: typeof import("ant-design-vue/es")["LayoutSider"];
+		AMenu: typeof import("ant-design-vue/es")["Menu"];
+		AMenuItem: typeof import("ant-design-vue/es")["MenuItem"];
+		RouterLink: typeof import("vue-router")["RouterLink"];
+		RouterView: typeof import("vue-router")["RouterView"];
+		TSidebar: typeof import("./src/components/t-sidebar.vue")["default"];
+	}
 }

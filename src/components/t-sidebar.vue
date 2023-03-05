@@ -8,11 +8,15 @@
 		>
 			<a-menu-item key="home">
 				<HomeOutlined />
-				<span>Home</span>
+				<span>首页</span>
+			</a-menu-item>
+			<a-menu-item key="news">
+				<ScheduleOutlined />
+				<span>咨讯</span>
 			</a-menu-item>
 			<a-menu-item key="config">
 				<SettingOutlined />
-				<span>Config</span>
+				<span>设置</span>
 			</a-menu-item>
 		</a-menu>
 	</a-layout-sider>
@@ -20,13 +24,14 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { HomeOutlined, SettingOutlined } from "@ant-design/icons-vue";
+import { HomeOutlined, ScheduleOutlined, SettingOutlined } from "@ant-design/icons-vue";
 import { useRouter } from "vue-router";
 
 export default defineComponent({
 	name: "TSidebar",
 	components: {
 		HomeOutlined,
+		ScheduleOutlined,
 		SettingOutlined,
 	},
 	data() {
