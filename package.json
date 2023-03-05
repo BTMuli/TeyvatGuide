@@ -1,14 +1,33 @@
 {
   "name": "tauri-genshin",
+  "description": "A Tauri App Demo",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "tauri": "tauri"
   },
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BTMuli/Tauri.Genshin.git"
+  },
+  "keywords": [
+    "Tauri",
+    "Node",
+    "Typescript",
+    "Vite"
+  ],
+  "author": "BTMuli <bt-muli@outlook.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BTMuli/Tauri.Genshin/issues"
+  },
+  "homepage": "https://github.com/BTMuli/Tauri.Genshin#readme",
   "dependencies": {
     "vue": "^3.2.45",
     "@tauri-apps/api": "^1.2.0"
