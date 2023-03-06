@@ -9,11 +9,15 @@ export {};
 
 declare module "@vue/runtime-core" {
 	export interface GlobalComponents {
+		ACard: typeof import("ant-design-vue/es")["Card"];
+		ACardMeta: typeof import("ant-design-vue/es")["CardMeta"];
 		ALayout: typeof import("ant-design-vue/es")["Layout"];
 		ALayoutContent: typeof import("ant-design-vue/es")["LayoutContent"];
 		ALayoutSider: typeof import("ant-design-vue/es")["LayoutSider"];
 		AMenu: typeof import("ant-design-vue/es")["Menu"];
 		AMenuItem: typeof import("ant-design-vue/es")["MenuItem"];
+		ATabPane: typeof import("ant-design-vue/es")["TabPane"];
+		ATabs: typeof import("ant-design-vue/es")["Tabs"];
 		RouterLink: typeof import("vue-router")["RouterLink"];
 		RouterView: typeof import("vue-router")["RouterView"];
 		TSidebar: typeof import("./src/components/t-sidebar.vue")["default"];

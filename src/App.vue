@@ -3,7 +3,7 @@
 		<!-- 侧边栏 -->
 		<t-sidebar />
 		<!-- 内容区 -->
-		<a-layout-content>
+		<a-layout-content class="app-content">
 			<!-- 路由组件 -->
 			<router-view></router-view>
 		</a-layout-content>
@@ -22,4 +22,9 @@ export default defineComponent({
 });
 </script>
 
-<style lang="css"></style>
+<style lang="css">
+.app-content {
+	padding: 10px;
+	min-height: 100%;
+}
+</style>
