@@ -1,9 +1,6 @@
 <template>
 	<v-card>
 		<v-layout>
-			<!-- 顶部导航栏 -->
-			<!-- todo 写个组件 -->
-			<v-app-bar title="App Bar" />
 			<!-- 侧边栏菜单 -->
 			<t-sidebar />
 			<!-- 主体内容 -->
