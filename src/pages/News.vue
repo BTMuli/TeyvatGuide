@@ -13,7 +13,7 @@
 					class="justify-space-between flex-nowrap"
 					width="320"
 				>
-					<v-img :src="item.cover" class="post-cover"></v-img>
+					<v-img :src="item.cover" cover style="height: 150px"></v-img>
 					<v-card-title>{{ item.title }}</v-card-title>
 					<v-card-actions>
 						<v-btn
@@ -35,7 +35,7 @@
 					class="justify-space-between flex-nowrap"
 					width="320"
 				>
-					<v-img :src="item.cover" class="post-cover"></v-img>
+					<v-img :src="item.cover" cover style="height: 150px"></v-img>
 					<v-card-title>{{ item.title }}</v-card-title>
 					<v-card-actions>
 						<v-btn
@@ -50,15 +50,14 @@
 			</div>
 		</v-window-item>
 		<v-window-item value="notice">
-			<div v-show="postData.news === {}">暂无新闻</div>
-			<div class="cards-grid" v-show="postData.news !== {}">
+			<div v-show="postData.notice === {}">暂无公告</div>
+			<div class="cards-grid" v-show="postData.notice !== {}">
 				<v-card
 					v-for="item in postData.notice"
 					class="justify-space-between flex-nowrap"
 					width="320"
 				>
-					<!-- todo: 优化图片显示 -->
-					<v-img :src="item.cover" class="post-cover"></v-img>
+					<v-img :src="item.cover" cover style="height: 150px"></v-img>
 					<v-card-title>{{ item.title }}</v-card-title>
 					<v-card-actions>
 						<v-btn
@@ -149,16 +148,25 @@ export default defineComponent({
 			const postHtml = new DOMParser().parseFromString(post.content, "text/html");
 			// 用帖子标题替换 html 中的标题
 			postHtml.title = post.subject;
+			// html 两侧添加 12% 的空白
+			postHtml.body.style.margin = "0 12%";
+			postHtml.querySelectorAll("img").forEach(img => {
+				img.style.width = "75%";
+			});
 			// 将 html 转为能够通过 window.open 打开的 url
 			const postUrl = URL.createObjectURL(
 				new Blob([postHtml.documentElement.outerHTML], { type: "text/html;charset=utf-8" })
 			);
-			// 调用 tauri 打开无边框窗口
-			window.open(
-				postUrl,
-				"_blank",
-				"height=720, width=960, toolbar=no, menubar=no, scrollbars=no,status=no"
-			);
+			// 打开新窗口，窗口位置居中
+			// 获取窗口宽度
+			const width = window.screen.width;
+			// 获取窗口高度
+			const height = window.screen.height;
+			// 计算窗口位置
+			const left = width / 2 - 480;
+			const top = height / 2 - 360;
+			// 打开窗口
+			window.open(postUrl, "_blank", `width=960,height=720,left=${left},top=${top}`);
 		},
 		getPost(post_id: number) {
 			const postUrl = `https://bbs-api.mihoyo.com/post/wapi/getPostFull?gids=2&post_id=${post_id}`;
@@ -178,18 +186,11 @@ export default defineComponent({
 </script>
 
 <style lang="css">
-/* todo 样式优化 */
 .cards-grid {
 	display: grid;
 	/* 卡片大小固定，自动填充 */
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 	/* 卡片间距 */
 	grid-gap: 20px;
-}
-
-.post-cover {
-	object-fit: cover;
-	width: 100%;
-	min-height: 150px;
 }
 </style>
