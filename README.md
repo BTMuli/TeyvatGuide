@@ -7,7 +7,7 @@ Update: 2023-03-06
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-05 14:41:55`
 > 
-> 更新于 `2023-03-06 16:14:02`
+> 更新于 `2023-03-06 18:48:45`
 
 # Tauri.Genshin
 
@@ -20,6 +20,10 @@ Tauri 练手项目
 - [Vite](https://cn.vitejs.dev/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Vuetify](https://vuetifyjs.com/en/)
+
+## UI 参考
+
+- [Snap.Hutao](http://snaphutao.com/)
 
 ## 开发
 
