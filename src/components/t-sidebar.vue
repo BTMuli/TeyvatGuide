@@ -1,7 +1,16 @@
 <template>
+	<!-- todo 侧边栏宽度调整 -->
 	<v-navigation-drawer permanent :rail="rail">
+		<!-- todo 选中没有高亮 -->
 		<v-list>
-			<!-- 第一个图标，负责收缩侧边栏 -->
+			<!-- 第一个图标，负责返回上一个页面 -->
+			<!-- todo 如果没有上一个页面，则灰色不可点击 -->
+			<v-list-item @click="back">
+				<v-list-item-action>
+					<v-icon>mdi-arrow-left</v-icon>
+				</v-list-item-action>
+			</v-list-item>
+			<!-- 第二个图标，负责收缩侧边栏 -->
 			<v-list-item @click="collapse">
 				<v-list-item-action>
 					<v-icon>mdi-menu</v-icon>
@@ -12,7 +21,7 @@
 				<v-icon>mdi-bug-outline</v-icon>
 				<span v-show="!rail"> 测试功能 </span>
 			</v-list-subheader>
-			<v-list-item @click="toPage('/news')">
+			<v-list-item link href="/news">
 				<template v-slot:prepend>
 					<v-icon>mdi-calendar-text-outline</v-icon>
 				</template>
@@ -22,7 +31,7 @@
 				<v-icon>mdi-cog-outline</v-icon>
 				<span v-show="!rail"> 开发功能 </span>
 			</v-list-subheader>
-			<v-list-item @click="toPage('/config')">
+			<v-list-item link href="/config">
 				<template v-slot:prepend>
 					<v-icon>mdi-cog-outline</v-icon>
 				</template>
@@ -50,13 +59,11 @@ export default defineComponent({
 		};
 	},
 	methods: {
+		back() {
+			this.router.go(-1);
+		},
 		collapse() {
 			this.rail = !this.rail;
-		},
-		toPage(path: string) {
-			if (this.router.currentRoute.path !== path) {
-				this.router.push(path);
-			}
 		},
 	},
 });
