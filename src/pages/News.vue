@@ -148,10 +148,10 @@ export default defineComponent({
 			const postHtml = new DOMParser().parseFromString(post.content, "text/html");
 			// 用帖子标题替换 html 中的标题
 			postHtml.title = post.subject;
-			// html 两侧添加 12% 的空白
-			postHtml.body.style.margin = "0 12%";
+			// 四周留白
+			postHtml.body.style.padding = "12%";
 			postHtml.querySelectorAll("img").forEach(img => {
-				img.style.width = "75%";
+				img.style.width = "100%";
 			});
 			// 将 html 转为能够通过 window.open 打开的 url
 			const postUrl = URL.createObjectURL(
@@ -188,9 +188,7 @@ export default defineComponent({
 <style lang="css">
 .cards-grid {
 	display: grid;
-	/* 卡片大小固定，自动填充 */
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-	/* 卡片间距 */
 	grid-gap: 20px;
 }
 </style>
