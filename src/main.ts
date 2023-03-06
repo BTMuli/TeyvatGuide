@@ -2,7 +2,10 @@ import { createApp } from "vue";
 import App from "./App.vue";
 // 路由
 import router from "./router";
-// Pinia
-import { pinia } from "./store";
+import store from "./store";
+// Vuetify
+import "@mdi/font/css/materialdesignicons.css";
+import "vuetify/styles";
+import { createVuetify } from "vuetify";
 
-createApp(App).use(router).use(pinia).mount("#app");
+createApp(App).use(router).use(store).use(createVuetify()).mount("#app");

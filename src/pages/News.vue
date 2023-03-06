@@ -1,48 +1,84 @@
 <template>
-	<a-tabs v-model:active-key="activeKey" type="card">
-		<!-- todo 专门写一个卡片组件来展示数据 -->
-		<a-tab-pane key="activity" tab="活动">
-			<!-- 遍历渲染活动卡片 -->
+	<v-tabs v-model="tab" align-tabs="start" stacked>
+		<v-tab value="activity">活动</v-tab>
+		<v-tab value="news">新闻</v-tab>
+		<v-tab value="notice">公告</v-tab>
+	</v-tabs>
+	<v-window v-model="tab">
+		<v-window-item value="activity">
 			<div v-show="postData.activity === {}">暂无活动</div>
 			<div class="cards-grid" v-show="postData.activity !== {}">
-				<a-card v-for="item in postData.activity" @click="toPost(item.post_id)">
-					<template #cover>
-						<img :src="item.cover" alt="cover" class="card-cover" />
-					</template>
-					<a-card-meta :title="item.title" :description="item.post_id" />
-				</a-card>
+				<v-card
+					v-for="item in postData.activity"
+					class="justify-space-between flex-nowrap"
+					width="320"
+				>
+					<v-img :src="item.cover" class="post-cover"></v-img>
+					<v-card-title>{{ item.title }}</v-card-title>
+					<v-card-actions>
+						<v-btn
+							@click="toPost(item.post_id)"
+							prepend-icon="mdi-arrow-right-circle"
+							class="ms-2 bg-blue-accent-2"
+							>查看</v-btn
+						>
+						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+					</v-card-actions>
+				</v-card>
 			</div>
-		</a-tab-pane>
-		<a-tab-pane key="news" tab="新闻">
+		</v-window-item>
+		<v-window-item value="news">
 			<div v-show="postData.news === {}">暂无新闻</div>
 			<div class="cards-grid" v-show="postData.news !== {}">
-				<a-card v-for="item in postData.news" @click="toPost(item.post_id)">
-					<template #cover>
-						<img :src="item.cover" alt="cover" class="card-cover" />
-					</template>
-					<a-card-meta :title="item.title" :description="item.post_id" />
-				</a-card>
+				<v-card
+					v-for="item in postData.news"
+					class="justify-space-between flex-nowrap"
+					width="320"
+				>
+					<v-img :src="item.cover" class="post-cover"></v-img>
+					<v-card-title>{{ item.title }}</v-card-title>
+					<v-card-actions>
+						<v-btn
+							@click="toPost(item.post_id)"
+							prepend-icon="mdi-arrow-right-circle"
+							class="ms-2 bg-blue-accent-2"
+							>查看</v-btn
+						>
+						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+					</v-card-actions>
+				</v-card>
 			</div>
-		</a-tab-pane>
-		<a-tab-pane key="notice" tab="公告">
-			<div v-show="postData.notice === {}">暂无公告</div>
-			<div class="cards-grid" v-show="postData.notice !== {}">
-				<a-card v-for="item in postData.notice" @click="toPost(item.post_id)">
-					<template #cover>
-						<img :src="item.cover" alt="cover" class="card-cover" />
-					</template>
-					<a-card-meta :title="item.title" :description="item.post_id" />
-				</a-card>
+		</v-window-item>
+		<v-window-item value="notice">
+			<div v-show="postData.news === {}">暂无新闻</div>
+			<div class="cards-grid" v-show="postData.news !== {}">
+				<v-card
+					v-for="item in postData.notice"
+					class="justify-space-between flex-nowrap"
+					width="320"
+				>
+					<!-- todo: 优化图片显示 -->
+					<v-img :src="item.cover" class="post-cover"></v-img>
+					<v-card-title>{{ item.title }}</v-card-title>
+					<v-card-actions>
+						<v-btn
+							@click="toPost(item.post_id)"
+							prepend-icon="mdi-arrow-right-circle"
+							class="ms-2 bg-blue-accent-2"
+							>查看</v-btn
+						>
+						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+					</v-card-actions>
+				</v-card>
 			</div>
-		</a-tab-pane>
-	</a-tabs>
+		</v-window-item>
+	</v-window>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { MysPostType, ResponseListType, ResponseType } from "../interface/MysPost";
 import { http } from "@tauri-apps/api";
-import { ResponseType as TauriResponseType } from "@tauri-apps/api/http";
 
 const MysApi = "https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids=2&type=";
 const enum MysType {
@@ -59,7 +95,7 @@ export default defineComponent({
 	},
 	data() {
 		return {
-			activeKey: "activity",
+			tab: "activity",
 			postData: {
 				activity: {},
 				news: {},
@@ -151,10 +187,9 @@ export default defineComponent({
 	grid-gap: 20px;
 }
 
-.card-cover {
+.post-cover {
+	object-fit: cover;
 	width: 100%;
-	height: 150px;
-	object-fit: contain;
-	background-color: #f0f2f5;
+	min-height: 150px;
 }
 </style>

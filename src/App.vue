@@ -1,13 +1,19 @@
 <template>
-	<a-layout style="min-height: 100vh">
-		<!-- 侧边栏 -->
-		<t-sidebar />
-		<!-- 内容区 -->
-		<a-layout-content class="app-content">
-			<!-- 路由组件 -->
-			<router-view></router-view>
-		</a-layout-content>
-	</a-layout>
+	<v-card>
+		<v-layout>
+			<!-- 顶部导航栏 -->
+			<!-- todo 写个组件 -->
+			<v-app-bar title="App Bar" />
+			<!-- 侧边栏菜单 -->
+			<t-sidebar />
+			<!-- 主体内容 -->
+			<v-main>
+				<v-container fluid>
+					<router-view />
+				</v-container>
+			</v-main>
+		</v-layout>
+	</v-card>
 </template>
 
 <script lang="ts">
@@ -21,10 +27,3 @@ export default defineComponent({
 	},
 });
 </script>
-
-<style lang="css">
-.app-content {
-	padding: 10px;
-	min-height: 100%;
-}
-</style>
