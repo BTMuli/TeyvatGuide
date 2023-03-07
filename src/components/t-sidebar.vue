@@ -17,6 +17,12 @@
 				</v-list-item-action>
 			</v-list-item>
 			<!-- 菜单项 -->
+			<v-list-item link href="/">
+				<template v-slot:prepend>
+					<v-icon>mdi-home-outline</v-icon>
+				</template>
+				<v-list-item-title v-show="!rail"> 首页 </v-list-item-title>
+			</v-list-item>
 			<v-list-subheader v-show="!rail">
 				<v-icon>mdi-bug-outline</v-icon>
 				<span> 测试功能 </span>
@@ -54,12 +60,13 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useRouter } from "vue-router";
+import { useAppStore } from "../store/modules/app";
 
 export default defineComponent({
 	name: "TSidebar",
 	data() {
 		return {
-			rail: false,
+			rail: this.getRail(),
 			router: useRouter(),
 		};
 	},
@@ -67,8 +74,14 @@ export default defineComponent({
 		back() {
 			this.router.go(-1);
 		},
+		getRail() {
+			const appStore = useAppStore();
+			return appStore.sidebar.expand;
+		},
 		collapse() {
-			this.rail = !this.rail;
+			const appStore = useAppStore();
+			appStore.sidebar.expand = !appStore.sidebar.expand;
+			this.rail = appStore.sidebar.expand;
 		},
 	},
 });
