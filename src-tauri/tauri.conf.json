@@ -40,8 +40,8 @@
 				"fullscreen": false,
 				"resizable": true,
 				"title": "tauri-genshin",
-				"width": 800,
-				"height": 600
+				"width": 1540,
+				"height": 912
 			}
 		]
 	}

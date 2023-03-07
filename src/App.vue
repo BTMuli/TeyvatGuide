@@ -1,16 +1,14 @@
 <template>
-	<v-card>
-		<v-layout>
-			<!-- 侧边栏菜单 -->
-			<t-sidebar />
-			<!-- 主体内容 -->
-			<v-main>
-				<v-container fluid>
-					<router-view />
-				</v-container>
-			</v-main>
-		</v-layout>
-	</v-card>
+	<v-layout>
+		<!-- 侧边栏菜单 -->
+		<t-sidebar />
+		<!-- 主体内容 -->
+		<v-main>
+			<v-container fluid>
+				<router-view />
+			</v-container>
+		</v-main>
+	</v-layout>
 </template>
 
 <script lang="ts">
