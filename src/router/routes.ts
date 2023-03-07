@@ -1,5 +1,6 @@
 import Home from "../pages/Home.vue";
 import News from "../pages/News.vue";
+import Achievements from "../pages/Achievements.vue";
 import Config from "../pages/Config.vue";
 
 const routes = [
@@ -11,6 +12,11 @@ const routes = [
 	{
 		path: "/home",
 		redirect: "/",
+	},
+	{
+		path: "/achievements",
+		name: "成就",
+		component: Achievements,
 	},
 	{
 		path: "/news",

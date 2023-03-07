@@ -17,9 +17,9 @@
 				</v-list-item-action>
 			</v-list-item>
 			<!-- 菜单项 -->
-			<v-list-subheader>
+			<v-list-subheader v-show="!rail">
 				<v-icon>mdi-bug-outline</v-icon>
-				<span v-show="!rail"> 测试功能 </span>
+				<span> 测试功能 </span>
 			</v-list-subheader>
 			<v-list-item link href="/news">
 				<template v-slot:prepend>
@@ -27,9 +27,19 @@
 				</template>
 				<v-list-item-title v-show="!rail"> 咨讯 </v-list-item-title>
 			</v-list-item>
-			<v-list-subheader>
+			<v-list-subheader v-show="!rail">
 				<v-icon>mdi-cog-outline</v-icon>
-				<span v-show="!rail"> 开发功能 </span>
+				<span> 开发功能 </span>
+			</v-list-subheader>
+			<v-list-item link href="/achievements">
+				<template v-slot:prepend>
+					<v-icon>mdi-trophy-outline</v-icon>
+				</template>
+				<v-list-item-title v-show="!rail"> 成就 </v-list-item-title>
+			</v-list-item>
+			<v-list-subheader v-show="!rail">
+				<v-icon>mdi-rocket-outline</v-icon>
+				<span> 预期功能 </span>
 			</v-list-subheader>
 			<v-list-item link href="/config">
 				<template v-slot:prepend>
@@ -37,11 +47,6 @@
 				</template>
 				<v-list-item-title v-show="!rail"> 设置 </v-list-item-title>
 			</v-list-item>
-
-			<v-list-subheader>
-				<v-icon>mdi-rocket-outline</v-icon>
-				<span v-show="!rail"> 预期功能 </span>
-			</v-list-subheader>
 		</v-list>
 	</v-navigation-drawer>
 </template>
@@ -54,7 +59,7 @@ export default defineComponent({
 	name: "TSidebar",
 	data() {
 		return {
-			rail: true,
+			rail: false,
 			router: useRouter(),
 		};
 	},
