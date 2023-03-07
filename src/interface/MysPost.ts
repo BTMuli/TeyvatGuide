@@ -1,4 +1,87 @@
 /**
+ * @description 获取 News 的返回类型
+ * @see https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids=2&type={EnumPostType}
+ * @interface ResponseNewsList
+ * @property {number} retcode 返回码
+ * @property {string} message 返回信息
+ * @property data 返回数据
+ * @property data.list {ResponseListType[]} 返回列表
+ * @property {number} data.last_id 最后ID
+ * @property {boolean} data.is_last 是否最后
+ * @return ResponseNewsList
+ */
+export interface ResponseNewsList {
+	retcode: number;
+	message: string;
+	data: {
+		list: ResponseNews[];
+		last_id: number;
+		is_last: boolean;
+	};
+}
+
+/**
+ * @description 获取 Post 的返回类型
+ * @see https://bbs-api.mihoyo.com/post/wapi/getPostFull?gids=2&post_id={post_id}
+ * @interface ResponsePost
+ * @property {number} retcode 返回码
+ * @property {string} message 返回信息
+ * @property data 返回数据
+ * @property data.post 帖子
+ * @property {string} data.post.collection 是否收藏
+ * @property {string} data.post.cover 封面 URL
+ * @property {MysForumType} data.post.forum 板块
+ * @property {string} data.post.forum_rank_info 板块等级信息
+ * @property {string} data.post.help_sys 是否有帮助系统
+ * @property {boolean} data.post.hot_reply_exist 是否有热门回复
+ * @property {ImageType[]} data.post.iamge_list 图片列表
+ * @property {boolean} data.post.is_block_on 是否被屏蔽
+ * @property {boolean} data.post.is_official_master 是否官方
+ * @property {boolean} data.post.is_user_master 是否用户
+ * @property {number} data.post.last_modify_time 最后修改时间
+ * @property {string[]} data.post.like_card_list 点赞卡片列表
+ * @property {NewsMetaType} data.post.news_meta 新闻元数据
+ * @property {MysPostType} data.post.post 帖子
+ * @property {string} data.post.recommend_type 推荐类型
+ * @property {SelfOperationType} data.post.self_operation 自己的操作
+ * @property {StatType} data.post.stat 统计
+ * @property {MysTopicType[]} data.post.topics 话题
+ * @property {MysUserType} data.post.user 用户
+ * @property {string[]} data.post.vod_list 视频列表
+ * @property {number} data.post.vod_count 视频数量
+ * @return ResponsePost
+ */
+export interface ResponsePost {
+	retcode: number;
+	message: string;
+	data: {
+		post: {
+			collection: string;
+			cover: string;
+			forum: MysForumType;
+			forum_rank_info: string;
+			help_sys: string;
+			hot_reply_exist: boolean;
+			image_list: ImageType[];
+			is_block_on: boolean;
+			is_official_master: boolean;
+			is_user_master: boolean;
+			last_modify_time: number;
+			like_card_list: string[];
+			news_meta: NewsMetaType;
+			post: MysPostType;
+			recommend_type: string;
+			self_operation: SelfOperationType;
+			stat: StatType;
+			topics: MysTopicType[];
+			user: MysUserType;
+			vod_list: string[];
+			vod_count: number;
+		};
+	};
+}
+
+/**
  * @description 官方动态类型
  * @enum {number}
  * @return {number}
@@ -11,11 +94,11 @@ export enum EnumPostType {
 	/**
 	 * @description 公告
 	 */
-	Notice = 2,
+	News = 2,
 	/**
 	 * @description 咨讯
 	 */
-	News = 3,
+	Notice = 3,
 }
 
 /**
@@ -273,8 +356,8 @@ interface NewsMetaType {
 }
 
 /**
- * @description 返回列表类型
- * @interface ResponseListType
+ * @description 单个 News 的返回类型
+ * @interface ResponseNews
  * @property {MysPostType} post 帖子
  * @property {MysForumType} forum 论坛
  * @property {MysTopicType} topics 话题
@@ -299,9 +382,9 @@ interface NewsMetaType {
  * @property {string} forum_rank_info 论坛排名信息
  * @property {string[]} link_card_list 链接卡片列表
  * @property {NewsMetaType} news_meta 元数据
- * @return ResponseListType
+ * @return ResponseNews
  */
-export interface ResponseListType {
+export interface ResponseNews {
 	post: MysPostType;
 	forum: MysForumType;
 	topics: MysTopicType;
@@ -327,25 +410,4 @@ export interface ResponseListType {
 	forum_rank_info: string;
 	link_card_list: string[];
 	news_meta: NewsMetaType;
-}
-
-/**
- * @description 返回内容类型
- * @interface ResponseType
- * @property {number} retcode 返回码
- * @property {string} message 返回信息
- * @property data 返回数据
- * @property data.list {ResponseListType[]} 返回列表
- * @property {number} data.last_id 最后ID
- * @property {boolean} data.is_last 是否最后
- * @return ResponseType
- */
-export interface ResponseType {
-	retcode: number;
-	message: string;
-	data: {
-		list: ResponseListType[];
-		last_id: number;
-		is_last: boolean;
-	};
 }

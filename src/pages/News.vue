@@ -6,8 +6,7 @@
 	</v-tabs>
 	<v-window v-model="tab">
 		<v-window-item value="activity">
-			<div v-show="postData.activity === {}">暂无活动</div>
-			<div class="cards-grid" v-show="postData.activity !== {}">
+			<div class="cards-grid">
 				<v-card
 					v-for="item in postData.activity"
 					class="justify-space-between flex-nowrap"
@@ -28,8 +27,7 @@
 			</div>
 		</v-window-item>
 		<v-window-item value="news">
-			<div v-show="postData.news === {}">暂无新闻</div>
-			<div class="cards-grid" v-show="postData.news !== {}">
+			<div class="cards-grid">
 				<v-card
 					v-for="item in postData.news"
 					class="justify-space-between flex-nowrap"
@@ -50,8 +48,7 @@
 			</div>
 		</v-window-item>
 		<v-window-item value="notice">
-			<div v-show="postData.notice === {}">暂无公告</div>
-			<div class="cards-grid" v-show="postData.notice !== {}">
+			<div class="cards-grid">
 				<v-card
 					v-for="item in postData.notice"
 					class="justify-space-between flex-nowrap"
@@ -76,14 +73,21 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { MysPostType, ResponseListType, ResponseType } from "../interface/MysPost";
+import {
+	MysPostType,
+	ResponseNewsList,
+	ResponseNews,
+	EnumPostType,
+	ResponsePost,
+} from "../interface/MysPost";
 import { http } from "@tauri-apps/api";
 
 const MysApi = "https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids=2&type=";
-const enum MysType {
-	activity = 1,
-	news = 2,
-	notice = 3,
+
+export interface CardDataType {
+	title: string;
+	cover: string;
+	post_id: string;
 }
 
 export default defineComponent({
@@ -96,9 +100,9 @@ export default defineComponent({
 		return {
 			tab: "activity",
 			postData: {
-				activity: {},
-				news: {},
-				notice: {},
+				activity: {} as CardDataType[],
+				news: {} as CardDataType[],
+				notice: {} as CardDataType[],
 			},
 		};
 	},
@@ -106,17 +110,17 @@ export default defineComponent({
 		async getPosts() {
 			console.log("正在获取数据...");
 			console.log("正在获取活动数据...");
-			const activityRaw: ResponseType = await http
-				.fetch(MysApi + MysType.activity)
-				.then(res => res.data as Promise<ResponseType>);
+			const activityRaw: ResponseNewsList = await http
+				.fetch(MysApi + EnumPostType.Activity)
+				.then(res => res.data as Promise<ResponseNewsList>);
 			console.log("正在获取新闻数据...");
-			const newsRaw: ResponseType = await http
-				.fetch(MysApi + MysType.news)
-				.then(res => res.data as Promise<ResponseType>);
+			const newsRaw: ResponseNewsList = await http
+				.fetch(MysApi + EnumPostType.News)
+				.then(res => res.data as Promise<ResponseNewsList>);
 			console.log("正在获取公告数据...");
-			const noticeRaw: ResponseType = await http
-				.fetch(MysApi + MysType.notice)
-				.then(res => res.data as Promise<ResponseType>);
+			const noticeRaw: ResponseNewsList = await http
+				.fetch(MysApi + EnumPostType.Notice)
+				.then(res => res.data as Promise<ResponseNewsList>);
 			console.log("数据获取完毕,正在转换数据...");
 			console.log("正在转换数据...");
 			this.postData = {
@@ -126,11 +130,11 @@ export default defineComponent({
 			};
 			console.log("数据转换完毕");
 		},
-		transData(rawData: ResponseType) {
-			let cardData: any[] = [];
-			rawData.data.list.map((item: ResponseListType) => {
+		transData(rawData: ResponseNewsList) {
+			let cardData: CardDataType[] = [];
+			rawData.data.list.map((item: ResponseNews) => {
 				const postData: MysPostType = item.post;
-				const card = {
+				const card: CardDataType = {
 					title: postData.subject,
 					cover: postData.images[0],
 					post_id: postData.post_id,
@@ -139,7 +143,7 @@ export default defineComponent({
 			});
 			return cardData;
 		},
-		async toPost(post_id: number) {
+		async toPost(post_id: string) {
 			// 获取帖子内容
 			const post: MysPostType = await this.getPost(post_id).then(res => {
 				return res.data.post.post;
@@ -168,7 +172,7 @@ export default defineComponent({
 			// 打开窗口
 			window.open(postUrl, "_blank", `width=960,height=720,left=${left},top=${top}`);
 		},
-		getPost(post_id: number) {
+		getPost(post_id: string): Promise<ResponsePost> {
 			const postUrl = `https://bbs-api.mihoyo.com/post/wapi/getPostFull?gids=2&post_id=${post_id}`;
 			return http
 				.fetch(postUrl, {
@@ -178,7 +182,7 @@ export default defineComponent({
 					},
 				})
 				.then(res => {
-					return res.data as Promise<ResponseType>;
+					return res.data as Promise<ResponsePost>;
 				});
 		},
 	},
