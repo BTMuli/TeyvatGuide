@@ -42,6 +42,7 @@ export interface Achievement {
  * @description 像是天地万象这种一直更新的成就系列，这边的 version 可能为 undefined
  * @property {string} version - 成就系列版本
  * @property {string} icon - 成就系列图标 todo
+ * @todo 为了方便列表展示，可能的话也加上成就系列包含的成就数以及已完成的成就数
  * @return AchievementSeries
  */
 export interface AchievementSeries {
