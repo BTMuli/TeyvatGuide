@@ -1,8 +1,10 @@
-import appData from "./app";
-import userDate from "./user";
+import achievements from "./achievements.json?raw";
 
-const TauriGenshinData = {
-	appData: appData,
-	userData: userDate,
-};
+const TauriGenshinData = [
+	{
+		name: "achievements",
+		data: achievements,
+	},
+];
+
 export default TauriGenshinData;

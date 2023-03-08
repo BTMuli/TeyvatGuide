@@ -19,6 +19,43 @@
 			</v-list-item>
 		</v-list>
 	</v-card>
+	<v-card>
+		<v-card-title>相关路径</v-card-title>
+		<v-list>
+			<v-list-item>
+				<v-list-item-title>用户数据目录</v-list-item-title>
+				<v-list-item-subtitle>{{ appStore.dataPath.user }}</v-list-item-subtitle>
+			</v-list-item>
+			<v-list-item>
+				<v-list-item-title>应用数据目录</v-list-item-title>
+				<v-list-item-subtitle>{{ appStore.dataPath.app }}</v-list-item-subtitle>
+			</v-list-item>
+			<v-list-item>
+				<v-list-item-title>appDir</v-list-item-title>
+				<v-list-item-subtitle>{{ tauriPath.appDir }}</v-list-item-subtitle>
+			</v-list-item>
+			<v-list-item>
+				<v-list-item-title>cacheDir</v-list-item-title>
+				<v-list-item-subtitle>{{ tauriPath.cacheDir }}</v-list-item-subtitle>
+			</v-list-item>
+			<v-list-item>
+				<v-list-item-title>configDir</v-list-item-title>
+				<v-list-item-subtitle>{{ tauriPath.configDir }}</v-list-item-subtitle>
+			</v-list-item>
+			<v-list-item>
+				<v-list-item-title>dataDir</v-list-item-title>
+				<v-list-item-subtitle>{{ tauriPath.dataDir }}</v-list-item-subtitle>
+			</v-list-item>
+			<v-list-item>
+				<v-list-item-title>executableDir</v-list-item-title>
+				<v-list-item-subtitle>{{ tauriPath.executableDir }}</v-list-item-subtitle>
+			</v-list-item>
+			<v-list-item>
+				<v-list-item-title>homeDir</v-list-item-title>
+				<v-list-item-subtitle>{{ tauriPath.homeDir }}</v-list-item-subtitle>
+			</v-list-item>
+		</v-list>
+	</v-card>
 </template>
 
 <script lang="ts">
@@ -29,9 +66,21 @@ import { BaseDirectory } from "@tauri-apps/api/fs";
 import TauriGenshinData from "../data";
 export default defineComponent({
 	name: "Config",
+	async mounted() {
+		await this.getTauriPath();
+	},
 	data() {
 		return {
 			source: "本地",
+			appStore: useAppStore(),
+			tauriPath: {
+				appDir: "",
+				cacheDir: "",
+				configDir: "",
+				dataDir: "",
+				executableDir: "",
+				homeDir: "",
+			},
 		};
 	},
 	methods: {
@@ -60,11 +109,8 @@ export default defineComponent({
 		// 导入数据
 		async setAppData() {
 			const appStore = useAppStore();
-			TauriGenshinData.appData.map(async item => {
+			TauriGenshinData.map(async item => {
 				await fs.writeFile(`${appStore.dataPath.app}\\${item.name}`, item.data);
-			});
-			TauriGenshinData.userData.map(async item => {
-				await fs.writeFile(`${appStore.dataPath.user}\\${item.name}`, item.data);
 			});
 			await dialog.message("数据导入成功");
 		},
@@ -101,6 +147,15 @@ export default defineComponent({
 				};
 				await dialog.message("已恢复默认配置!");
 			}
+		},
+		// 相关路径
+		async getTauriPath() {
+			this.tauriPath.appDir = await path.appDir();
+			this.tauriPath.cacheDir = await path.cacheDir();
+			this.tauriPath.configDir = await path.configDir();
+			this.tauriPath.dataDir = await path.dataDir();
+			this.tauriPath.executableDir = await path.executableDir();
+			this.tauriPath.homeDir = await path.homeDir();
 		},
 	},
 });

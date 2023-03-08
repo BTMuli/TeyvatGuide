@@ -1,4 +1,8 @@
 import { defineStore } from "pinia";
+import { path } from "@tauri-apps/api";
+
+const appDataDir = `${await path.appLocalDataDir()}appData`;
+const userDataDir = `${await path.appLocalDataDir()}userData`;
 
 const useAppStore = defineStore({
 	id: "app",
@@ -9,8 +13,8 @@ const useAppStore = defineStore({
 				expand: true,
 			},
 			dataPath: {
-				app: "",
-				user: "",
+				app: appDataDir,
+				user: userDataDir,
 			},
 		};
 	},
