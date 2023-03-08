@@ -4,7 +4,7 @@
 		"beforeBuildCommand": "npm run build",
 		"devPath": "http://localhost:1420",
 		"distDir": "../dist",
-		"withGlobalTauri": false
+		"withGlobalTauri": true
 	},
 	"package": {
 		"productName": "tauri-genshin",
@@ -13,6 +13,10 @@
 	"tauri": {
 		"allowlist": {
 			"all": true,
+			"fs": {
+				"all": true,
+				"scope": ["**", "**/*"]
+			},
 			"http": {
 				"all": true,
 				"request": true,
@@ -26,7 +30,7 @@
 		"bundle": {
 			"active": true,
 			"icon": ["icons/icon.png", "icons/icon.ico"],
-			"identifier": "com.tauri.dev",
+			"identifier": "tauri-genshin",
 			"targets": "all"
 		},
 		"security": {

@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-export const useAppStore = defineStore({
+const useAppStore = defineStore({
 	id: "app",
 	state: () => {
 		return {
@@ -8,7 +8,15 @@ export const useAppStore = defineStore({
 			sidebar: {
 				expand: true,
 			},
+			dataPath: "",
 		};
+	},
+	actions: {
+		setDataPath(path: string) {
+			this.dataPath = path;
+		},
 	},
 	persist: true,
 });
+
+export default useAppStore;
