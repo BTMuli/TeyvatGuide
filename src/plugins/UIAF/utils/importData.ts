@@ -21,9 +21,9 @@ export async function checkUIAFData(path: string): Promise<boolean> {
 }
 
 /**
- * @description 读取本地 UIAF 数据
+ * @description 读取 UIAF 数据
  * @param {string} userPath - UIAF 数据路径
- * @return {Promise<string>|Promise<false>} UIAF 数据
+ * @return {Promise<string|false>} UIAF 数据
  */
 export async function readUIAFData(userPath: string): Promise<string | false> {
 	if (await fs.exists(userPath)) {
@@ -40,39 +40,35 @@ export async function readUIAFData(userPath: string): Promise<string | false> {
 
 /**
  * @description 数据合并
- * @param {UIAF_Achievement[]|false} localData - 本地数据
+ * @param {UIAF_Achievement[]} localData - 本地数据
  * @param {Achievements} remoteData - 远程数据
  * @return {Promise<UIAF_Achievement[]|false>} 合并后的数据，如果合并失败则返回 false
  */
-export async function importUIAFData(
-	localData: UIAF_Achievement[] | false,
+export async function mergeUIAFData(
+	localData: UIAF_Achievement[],
 	remoteData: Achievements
 ): Promise<UIAF_Achievement[] | false> {
-	if (localData !== false) {
-		// 遍历 remoteData.list
-		remoteData.list.map((remoteAchievement: UIAF_Achievement) => {
-			// 查找 id 相同的 localAchievement
-			const localAchievement = localData.find(
-				achievement => achievement.id === remoteAchievement.id
-			);
-			// 如果没找到，就直接添加
-			if (localAchievement === undefined) {
-				localData.push(remoteAchievement);
-			} else {
-				// 检测数据是否需要更新
-				if (localAchievement.timestamp < remoteAchievement.timestamp) {
-					// 更新数据
-					localAchievement.timestamp = remoteAchievement.timestamp;
-					localAchievement.current = remoteAchievement.current;
-					localAchievement.status = remoteAchievement.status;
-				}
+	// 遍历 remoteData.list
+	remoteData.list.map((remoteAchievement: UIAF_Achievement) => {
+		// 查找 id 相同的 localAchievement
+		const localAchievement = localData.find(
+			achievement => achievement.id === remoteAchievement.id
+		);
+		// 如果没找到，就直接添加
+		if (localAchievement === undefined) {
+			localData.push(remoteAchievement);
+		} else {
+			// 检测数据是否需要更新
+			if (localAchievement.timestamp < remoteAchievement.timestamp) {
+				// 更新数据
+				localAchievement.timestamp = remoteAchievement.timestamp;
+				localAchievement.current = remoteAchievement.current;
+				localAchievement.status = remoteAchievement.status;
 			}
-		});
-		// 按照 id 排序
-		localData.sort((a, b) => a.id - b.id);
-		// 返回合并后的数据
-		return localData;
-	} else {
-		return remoteData.list;
-	}
+		}
+	});
+	// 按照 id 排序
+	localData.sort((a, b) => a.id - b.id);
+	// 返回合并后的数据
+	return localData;
 }

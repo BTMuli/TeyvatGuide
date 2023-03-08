@@ -1,11 +1,18 @@
-import { checkUIAFData, readUIAFData, importUIAFData } from "./utils/importData";
+/**
+ * @file plugins UIAF index.ts
+ * @description UIAF plugin index
+ * @author BTMuli<bt-muli@outlook.com>
+ * @since Alpha
+ */
+
+import { checkUIAFData, readUIAFData, mergeUIAFData } from "./utils/importData";
 import { getAchievements } from "./utils/exportData";
 
 const UIAF_Oper = {
 	importOper: {
 		checkUIAFData,
 		readUIAFData,
-		importUIAFData,
+		mergeUIAFData,
 	},
 	exportOper: {
 		getAchievements,
