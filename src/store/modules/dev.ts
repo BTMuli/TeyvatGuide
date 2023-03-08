@@ -8,21 +8,7 @@ const useDevStore = defineStore({
 			magicCount: 0,
 		};
 	},
-	actions: {
-		addMagic() {
-			if (!this.showDev) {
-				this.magicCount++;
-				if (this.magicCount >= 5) {
-					this.toggleDev();
-				}
-			}
-		},
-		toggleDev() {
-			this.showDev = !this.showDev;
-			this.magicCount = 0;
-		},
-	},
-	persist: false,
+	persist: true,
 });
 
 export default useDevStore;
