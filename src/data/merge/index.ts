@@ -9,7 +9,7 @@ import achievements from "./achievements.json";
 import achievementSeries from "./achievementSeries.json";
 import { AchievementDisplay, AchievementSeriesDisplay } from "../../interface/Achievements";
 
-export const MergeData = [
+export const MergeDataList = [
 	{
 		name: "achievements.json",
 		data: achievements as AchievementDisplay[],
@@ -20,7 +20,7 @@ export const MergeData = [
 	},
 ];
 
-export const MergeDataList = {
+export const MergeData = {
 	achievements: achievements as AchievementDisplay[],
 	achievementSeries: achievementSeries as AchievementSeriesDisplay[],
 };
