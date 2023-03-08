@@ -51,7 +51,13 @@
 				<template v-slot:prepend>
 					<v-icon>mdi-cog-outline</v-icon>
 				</template>
-				<v-list-item-title v-show="!rail"> 设置 </v-list-item-title>
+				<v-list-item-title v-show="!rail" @click="getDev"> 设置 </v-list-item-title>
+			</v-list-item>
+			<v-list-item link href="/dev" v-show="showDev">
+				<template v-slot:prepend>
+					<v-icon>mdi-bug-outline</v-icon>
+				</template>
+				<v-list-item-title v-show="!rail"> 开发 </v-list-item-title>
 			</v-list-item>
 		</v-list>
 	</v-navigation-drawer>
@@ -61,6 +67,7 @@
 import { defineComponent } from "vue";
 import { useRouter } from "vue-router";
 import useAppStore from "../store/modules/app";
+import useDevStore from "../store/modules/dev";
 
 export default defineComponent({
 	name: "TSidebar",
@@ -68,6 +75,7 @@ export default defineComponent({
 		return {
 			rail: this.getRail(),
 			router: useRouter(),
+			showDev: this.getShowDev(),
 		};
 	},
 	methods: {
@@ -82,6 +90,15 @@ export default defineComponent({
 			const appStore = useAppStore();
 			appStore.sidebar.expand = !appStore.sidebar.expand;
 			this.rail = appStore.sidebar.expand;
+		},
+		getShowDev() {
+			const devStore = useDevStore();
+			return devStore.showDev;
+		},
+		getDev() {
+			const devStore = useDevStore();
+			devStore.addMagic();
+			this.showDev = devStore.showDev;
 		},
 	},
 });
