@@ -160,13 +160,16 @@ export default defineComponent({
 			// 输出成就系列数据
 			await console.log("正在输出成就系列数据...");
 			await fs.writeFile(
-				`${appDataDir}\\achievement.json`,
-				JSON.stringify(achievementSeries)
+				`${appDataDir}\\achievementSeries.json`,
+				JSON.stringify(achievementSeries, null, 2)
 			);
 			await console.log("输出成就系列数据成功！");
 			// 输出成就数据
 			await console.log("正在输出成就数据...");
-			await fs.writeFile(`${appDataDir}\\achievements.json`, JSON.stringify(achievement));
+			await fs.writeFile(
+				`${appDataDir}\\achievements.json`,
+				JSON.stringify(achievement, null, 2)
+			);
 			await console.log("输出成就数据成功！");
 		},
 	},
