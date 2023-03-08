@@ -8,13 +8,11 @@ const useAppStore = defineStore({
 			sidebar: {
 				expand: true,
 			},
-			dataPath: "",
+			dataPath: {
+				app: "",
+				user: "",
+			},
 		};
-	},
-	actions: {
-		setDataPath(path: string) {
-			this.dataPath = path;
-		},
 	},
 	persist: true,
 });

@@ -1,0 +1,5302 @@
+{
+	"info": {
+		"export_app": "胡桃",
+		"export_timestamp": 1678020709,
+		"export_app_version": "1.5.1.0",
+		"uiaf_version": "v1.1"
+	},
+	"list": [
+		{
+			"id": 80001,
+			"timestamp": 1602484669,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80002,
+			"timestamp": 1602342291,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80003,
+			"timestamp": 1602571919,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80004,
+			"timestamp": 1604294493,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80005,
+			"timestamp": 1602572889,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80006,
+			"timestamp": 1602850528,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80007,
+			"timestamp": 1604162796,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80008,
+			"timestamp": 1602338649,
+			"current": 134,
+			"status": 3
+		},
+		{
+			"id": 80009,
+			"timestamp": 1604149305,
+			"current": 134,
+			"status": 3
+		},
+		{
+			"id": 80010,
+			"timestamp": 1607245560,
+			"current": 134,
+			"status": 3
+		},
+		{
+			"id": 80011,
+			"timestamp": 1604162350,
+			"current": 134,
+			"status": 3
+		},
+		{
+			"id": 80012,
+			"timestamp": 1605763911,
+			"current": 134,
+			"status": 3
+		},
+		{
+			"id": 80013,
+			"timestamp": 1611579380,
+			"current": 134,
+			"status": 3
+		},
+		{
+			"id": 80014,
+			"timestamp": 1603163187,
+			"current": 51,
+			"status": 3
+		},
+		{
+			"id": 80015,
+			"timestamp": 1604977558,
+			"current": 51,
+			"status": 3
+		},
+		{
+			"id": 80016,
+			"timestamp": 1612078385,
+			"current": 44,
+			"status": 3
+		},
+		{
+			"id": 80017,
+			"timestamp": 1605362759,
+			"current": 107,
+			"status": 3
+		},
+		{
+			"id": 80018,
+			"timestamp": 1607442907,
+			"current": 62,
+			"status": 3
+		},
+		{
+			"id": 80019,
+			"timestamp": 1612525112,
+			"current": 38,
+			"status": 3
+		},
+		{
+			"id": 80020,
+			"timestamp": 1615782977,
+			"current": 49,
+			"status": 3
+		},
+		{
+			"id": 80021,
+			"timestamp": 1621093280,
+			"current": 49,
+			"status": 3
+		},
+		{
+			"id": 80022,
+			"timestamp": 1630464610,
+			"current": 49,
+			"status": 3
+		},
+		{
+			"id": 80023,
+			"timestamp": 1615784239,
+			"current": 2023,
+			"status": 3
+		},
+		{
+			"id": 80024,
+			"timestamp": 1625972219,
+			"current": 2023,
+			"status": 3
+		},
+		{
+			"id": 80025,
+			"timestamp": 1636814784,
+			"current": 2023,
+			"status": 3
+		},
+		{
+			"id": 80026,
+			"timestamp": 1602406712,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80027,
+			"timestamp": 1603765644,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80028,
+			"timestamp": 1606816077,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80029,
+			"timestamp": 1607441684,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80030,
+			"timestamp": 1602562935,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80031,
+			"timestamp": 1602563842,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80032,
+			"timestamp": 1604655845,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80033,
+			"timestamp": 1605420786,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80034,
+			"timestamp": 1602255596,
+			"current": 52,
+			"status": 3
+		},
+		{
+			"id": 80035,
+			"timestamp": 1602404391,
+			"current": 52,
+			"status": 3
+		},
+		{
+			"id": 80036,
+			"timestamp": 1604506174,
+			"current": 52,
+			"status": 3
+		},
+		{
+			"id": 80037,
+			"timestamp": 1602387921,
+			"current": 487,
+			"status": 3
+		},
+		{
+			"id": 80038,
+			"timestamp": 1603344735,
+			"current": 487,
+			"status": 3
+		},
+		{
+			"id": 80039,
+			"timestamp": 1611329285,
+			"current": 487,
+			"status": 3
+		},
+		{
+			"id": 80040,
+			"timestamp": 1603344320,
+			"current": 17,
+			"status": 3
+		},
+		{
+			"id": 80041,
+			"timestamp": 1605282700,
+			"current": 17,
+			"status": 3
+		},
+		{
+			"id": 80042,
+			"timestamp": 1611328773,
+			"current": 17,
+			"status": 3
+		},
+		{
+			"id": 80043,
+			"timestamp": 1602569570,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80044,
+			"timestamp": 1602827496,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80045,
+			"timestamp": 1608003258,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80046,
+			"timestamp": 1608993727,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80047,
+			"timestamp": 1603616502,
+			"current": 83,
+			"status": 3
+		},
+		{
+			"id": 80048,
+			"timestamp": 1604068858,
+			"current": 83,
+			"status": 3
+		},
+		{
+			"id": 80049,
+			"timestamp": 1605105519,
+			"current": 83,
+			"status": 3
+		},
+		{
+			"id": 80050,
+			"timestamp": 1603613944,
+			"current": 1072,
+			"status": 3
+		},
+		{
+			"id": 80051,
+			"timestamp": 1604074283,
+			"current": 1072,
+			"status": 3
+		},
+		{
+			"id": 80052,
+			"timestamp": 1611575297,
+			"current": 1072,
+			"status": 3
+		},
+		{
+			"id": 80053,
+			"timestamp": 1604120088,
+			"current": 47,
+			"status": 3
+		},
+		{
+			"id": 80054,
+			"timestamp": 1605930492,
+			"current": 47,
+			"status": 3
+		},
+		{
+			"id": 80055,
+			"timestamp": 1611577076,
+			"current": 47,
+			"status": 3
+		},
+		{
+			"id": 80056,
+			"timestamp": 1608701281,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80057,
+			"timestamp": 1608895519,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80058,
+			"timestamp": 1608779563,
+			"current": 32,
+			"status": 3
+		},
+		{
+			"id": 80059,
+			"timestamp": 1608787354,
+			"current": 32,
+			"status": 3
+		},
+		{
+			"id": 80060,
+			"timestamp": 1608818978,
+			"current": 32,
+			"status": 3
+		},
+		{
+			"id": 80061,
+			"timestamp": 1608788186,
+			"current": 209,
+			"status": 3
+		},
+		{
+			"id": 80062,
+			"timestamp": 1608895340,
+			"current": 209,
+			"status": 3
+		},
+		{
+			"id": 80063,
+			"timestamp": 1609432281,
+			"current": 209,
+			"status": 3
+		},
+		{
+			"id": 80064,
+			"timestamp": 1608896437,
+			"current": 9,
+			"status": 3
+		},
+		{
+			"id": 80065,
+			"timestamp": 1609432597,
+			"current": 5,
+			"status": 3
+		},
+		{
+			"id": 80066,
+			"timestamp": 1611295764,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80067,
+			"timestamp": 1608898201,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80068,
+			"timestamp": 1608909695,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80069,
+			"timestamp": 1626838256,
+			"current": 7,
+			"status": 3
+		},
+		{
+			"id": 80070,
+			"timestamp": 1626834946,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80071,
+			"timestamp": 1626834946,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80072,
+			"timestamp": 1626834946,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80073,
+			"timestamp": 1626834946,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80074,
+			"timestamp": 1626859952,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80075,
+			"timestamp": 1626929128,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80076,
+			"timestamp": 1627126877,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80077,
+			"timestamp": 1634139185,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80078,
+			"timestamp": 1641383680,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80079,
+			"timestamp": 1626861635,
+			"current": 42,
+			"status": 3
+		},
+		{
+			"id": 80080,
+			"timestamp": 1626969009,
+			"current": 42,
+			"status": 3
+		},
+		{
+			"id": 80081,
+			"timestamp": 1630907154,
+			"current": 42,
+			"status": 3
+		},
+		{
+			"id": 80082,
+			"timestamp": 1626862418,
+			"current": 20,
+			"status": 3
+		},
+		{
+			"id": 80083,
+			"timestamp": 1626867237,
+			"current": 20,
+			"status": 3
+		},
+		{
+			"id": 80084,
+			"timestamp": 1627039143,
+			"current": 20,
+			"status": 3
+		},
+		{
+			"id": 80085,
+			"timestamp": 1626876381,
+			"current": 331,
+			"status": 3
+		},
+		{
+			"id": 80086,
+			"timestamp": 1627028679,
+			"current": 331,
+			"status": 3
+		},
+		{
+			"id": 80087,
+			"timestamp": 1630907229,
+			"current": 331,
+			"status": 3
+		},
+		{
+			"id": 80088,
+			"timestamp": 1626877699,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80089,
+			"timestamp": 1627438797,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80090,
+			"timestamp": 1626864482,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80092,
+			"timestamp": 1633320779,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80093,
+			"timestamp": 1626868226,
+			"current": 36,
+			"status": 3
+		},
+		{
+			"id": 80094,
+			"timestamp": 1626925973,
+			"current": 36,
+			"status": 3
+		},
+		{
+			"id": 80095,
+			"timestamp": 1627042363,
+			"current": 36,
+			"status": 3
+		},
+		{
+			"id": 80096,
+			"timestamp": 1630473122,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80097,
+			"timestamp": 1630475458,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80098,
+			"timestamp": 1630571207,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80099,
+			"timestamp": 1630492254,
+			"current": 19,
+			"status": 3
+		},
+		{
+			"id": 80100,
+			"timestamp": 1630499279,
+			"current": 19,
+			"status": 3
+		},
+		{
+			"id": 80101,
+			"timestamp": 1630634106,
+			"current": 19,
+			"status": 3
+		},
+		{
+			"id": 80102,
+			"timestamp": 1630593979,
+			"current": 7,
+			"status": 3
+		},
+		{
+			"id": 80105,
+			"timestamp": 1630492633,
+			"current": 201,
+			"status": 3
+		},
+		{
+			"id": 80106,
+			"timestamp": 1630557404,
+			"current": 201,
+			"status": 3
+		},
+		{
+			"id": 80107,
+			"timestamp": 1630628304,
+			"current": 201,
+			"status": 3
+		},
+		{
+			"id": 80108,
+			"timestamp": 1630471317,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80109,
+			"timestamp": 1630475030,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80110,
+			"timestamp": 1630555830,
+			"current": 28,
+			"status": 3
+		},
+		{
+			"id": 80111,
+			"timestamp": 1630563875,
+			"current": 28,
+			"status": 3
+		},
+		{
+			"id": 80112,
+			"timestamp": 1630631003,
+			"current": 28,
+			"status": 3
+		},
+		{
+			"id": 80113,
+			"timestamp": 1634100387,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80114,
+			"timestamp": 1634129657,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80115,
+			"timestamp": 1634192408,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80116,
+			"timestamp": 1634187765,
+			"current": 10,
+			"status": 3
+		},
+		{
+			"id": 80119,
+			"timestamp": 1634103389,
+			"current": 9,
+			"status": 3
+		},
+		{
+			"id": 80120,
+			"timestamp": 1634129314,
+			"current": 168,
+			"status": 3
+		},
+		{
+			"id": 80121,
+			"timestamp": 1634133279,
+			"current": 168,
+			"status": 3
+		},
+		{
+			"id": 80122,
+			"timestamp": 1634192417,
+			"current": 168,
+			"status": 3
+		},
+		{
+			"id": 80123,
+			"timestamp": 1634131271,
+			"current": 16,
+			"status": 3
+		},
+		{
+			"id": 80124,
+			"timestamp": 1634132787,
+			"current": 16,
+			"status": 3
+		},
+		{
+			"id": 80125,
+			"timestamp": 1634136371,
+			"current": 16,
+			"status": 3
+		},
+		{
+			"id": 80126,
+			"timestamp": 1634355959,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80127,
+			"timestamp": 1639967783,
+			"current": 101,
+			"status": 3
+		},
+		{
+			"id": 80128,
+			"timestamp": 1641787947,
+			"current": 101,
+			"status": 3
+		},
+		{
+			"id": 80129,
+			"timestamp": 1650250732,
+			"current": 101,
+			"status": 3
+		},
+		{
+			"id": 80130,
+			"timestamp": 1641361795,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80131,
+			"timestamp": 1641396755,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80132,
+			"timestamp": 1641361918,
+			"current": 36,
+			"status": 3
+		},
+		{
+			"id": 80133,
+			"timestamp": 1641375035,
+			"current": 36,
+			"status": 3
+		},
+		{
+			"id": 80134,
+			"timestamp": 1641443043,
+			"current": 36,
+			"status": 3
+		},
+		{
+			"id": 80135,
+			"timestamp": 1641374050,
+			"current": 182,
+			"status": 3
+		},
+		{
+			"id": 80136,
+			"timestamp": 1641390292,
+			"current": 182,
+			"status": 3
+		},
+		{
+			"id": 80137,
+			"timestamp": 1641449666,
+			"current": 182,
+			"status": 3
+		},
+		{
+			"id": 80138,
+			"timestamp": 1641372702,
+			"current": 18,
+			"status": 3
+		},
+		{
+			"id": 80139,
+			"timestamp": 1641374107,
+			"current": 18,
+			"status": 3
+		},
+		{
+			"id": 80140,
+			"timestamp": 1641393220,
+			"current": 18,
+			"status": 3
+		},
+		{
+			"id": 80141,
+			"timestamp": 1641388256,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80142,
+			"timestamp": 1648606385,
+			"current": 87,
+			"status": 3
+		},
+		{
+			"id": 80143,
+			"timestamp": 1648870559,
+			"current": 87,
+			"status": 3
+		},
+		{
+			"id": 80144,
+			"timestamp": 1655536505,
+			"current": 87,
+			"status": 3
+		},
+		{
+			"id": 80145,
+			"timestamp": 1648613739,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80146,
+			"timestamp": 1648626214,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80147,
+			"timestamp": 1648639494,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80148,
+			"timestamp": 1648617820,
+			"current": 37,
+			"status": 3
+		},
+		{
+			"id": 80149,
+			"timestamp": 1648622682,
+			"current": 37,
+			"status": 3
+		},
+		{
+			"id": 80150,
+			"timestamp": 1648633812,
+			"current": 37,
+			"status": 3
+		},
+		{
+			"id": 80151,
+			"timestamp": 1648619166,
+			"current": 234,
+			"status": 3
+		},
+		{
+			"id": 80152,
+			"timestamp": 1648630546,
+			"current": 234,
+			"status": 3
+		},
+		{
+			"id": 80153,
+			"timestamp": 1648651725,
+			"current": 234,
+			"status": 3
+		},
+		{
+			"id": 80154,
+			"timestamp": 1648619261,
+			"current": 19,
+			"status": 3
+		},
+		{
+			"id": 80155,
+			"timestamp": 1648631118,
+			"current": 19,
+			"status": 3
+		},
+		{
+			"id": 80156,
+			"timestamp": 1648634450,
+			"current": 19,
+			"status": 3
+		},
+		{
+			"id": 80157,
+			"timestamp": 1648642327,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80158,
+			"timestamp": 1648614453,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80159,
+			"timestamp": 1648627846,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80160,
+			"timestamp": 1661478035,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80161,
+			"timestamp": 1661512359,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80162,
+			"timestamp": 1661703266,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80165,
+			"timestamp": 1661350725,
+			"current": 53,
+			"status": 3
+		},
+		{
+			"id": 80166,
+			"timestamp": 1661419036,
+			"current": 53,
+			"status": 3
+		},
+		{
+			"id": 80167,
+			"timestamp": 1661524477,
+			"current": 53,
+			"status": 3
+		},
+		{
+			"id": 80168,
+			"timestamp": 1661415452,
+			"current": 546,
+			"status": 3
+		},
+		{
+			"id": 80169,
+			"timestamp": 1661474918,
+			"current": 546,
+			"status": 3
+		},
+		{
+			"id": 80170,
+			"timestamp": 1661701108,
+			"current": 546,
+			"status": 3
+		},
+		{
+			"id": 80171,
+			"timestamp": 1661347643,
+			"current": 44,
+			"status": 3
+		},
+		{
+			"id": 80172,
+			"timestamp": 1661434744,
+			"current": 44,
+			"status": 3
+		},
+		{
+			"id": 80173,
+			"timestamp": 1661835430,
+			"current": 44,
+			"status": 3
+		},
+		{
+			"id": 80174,
+			"timestamp": 1661478207,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80175,
+			"timestamp": 1661309334,
+			"current": 5,
+			"status": 3
+		},
+		{
+			"id": 80176,
+			"timestamp": 1661334793,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80177,
+			"timestamp": 1661334954,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80178,
+			"timestamp": 1661334869,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80179,
+			"timestamp": 1664344365,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80180,
+			"timestamp": 1664413331,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80181,
+			"timestamp": 1664635822,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 80182,
+			"timestamp": 1664354298,
+			"current": 52,
+			"status": 3
+		},
+		{
+			"id": 80183,
+			"timestamp": 1664377915,
+			"current": 52,
+			"status": 3
+		},
+		{
+			"id": 80184,
+			"timestamp": 1664463175,
+			"current": 52,
+			"status": 3
+		},
+		{
+			"id": 80185,
+			"timestamp": 1664369163,
+			"current": 345,
+			"status": 3
+		},
+		{
+			"id": 80186,
+			"timestamp": 1664379731,
+			"current": 345,
+			"status": 3
+		},
+		{
+			"id": 80187,
+			"timestamp": 1664589327,
+			"current": 345,
+			"status": 3
+		},
+		{
+			"id": 80188,
+			"timestamp": 1664356293,
+			"current": 50,
+			"status": 3
+		},
+		{
+			"id": 80189,
+			"timestamp": 1664374397,
+			"current": 50,
+			"status": 3
+		},
+		{
+			"id": 80190,
+			"timestamp": 1664590246,
+			"current": 50,
+			"status": 3
+		},
+		{
+			"id": 80191,
+			"timestamp": 1664371542,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80192,
+			"timestamp": 1670404991,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80193,
+			"timestamp": 1672625724,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80197,
+			"timestamp": 1670415119,
+			"current": 981,
+			"status": 3
+		},
+		{
+			"id": 80198,
+			"timestamp": 1670561235,
+			"current": 981,
+			"status": 3
+		},
+		{
+			"id": 80199,
+			"timestamp": 1671447371,
+			"current": 981,
+			"status": 3
+		},
+		{
+			"id": 80203,
+			"timestamp": 1670409748,
+			"current": 1798,
+			"status": 3
+		},
+		{
+			"id": 80204,
+			"timestamp": 1670489421,
+			"current": 1798,
+			"status": 3
+		},
+		{
+			"id": 80205,
+			"timestamp": 1670939878,
+			"current": 1798,
+			"status": 3
+		},
+		{
+			"id": 80206,
+			"timestamp": 1670472299,
+			"current": 520,
+			"status": 3
+		},
+		{
+			"id": 80207,
+			"timestamp": 1671445182,
+			"current": 520,
+			"status": 3
+		},
+		{
+			"id": 80208,
+			"timestamp": 1671630290,
+			"current": 520,
+			"status": 3
+		},
+		{
+			"id": 80209,
+			"timestamp": 1670417353,
+			"current": 18,
+			"status": 3
+		},
+		{
+			"id": 80210,
+			"timestamp": 1670824480,
+			"current": 18,
+			"status": 3
+		},
+		{
+			"id": 80211,
+			"timestamp": 1671498732,
+			"current": 18,
+			"status": 3
+		},
+		{
+			"id": 80212,
+			"timestamp": 1670469304,
+			"current": 1016,
+			"status": 3
+		},
+		{
+			"id": 80213,
+			"timestamp": 1670558437,
+			"current": 1016,
+			"status": 3
+		},
+		{
+			"id": 80214,
+			"timestamp": 1671500378,
+			"current": 1016,
+			"status": 3
+		},
+		{
+			"id": 80215,
+			"timestamp": 1670409330,
+			"current": 55,
+			"status": 3
+		},
+		{
+			"id": 80216,
+			"timestamp": 1670507471,
+			"current": 55,
+			"status": 3
+		},
+		{
+			"id": 80217,
+			"timestamp": 1670822357,
+			"current": 55,
+			"status": 3
+		},
+		{
+			"id": 80218,
+			"timestamp": 1670477707,
+			"current": 191550,
+			"status": 3
+		},
+		{
+			"id": 80219,
+			"timestamp": 1671500457,
+			"current": 191550,
+			"status": 3
+		},
+		{
+			"id": 80220,
+			"timestamp": 1674450356,
+			"current": 191550,
+			"status": 3
+		},
+		{
+			"id": 80221,
+			"timestamp": 1670402384,
+			"current": 161,
+			"status": 3
+		},
+		{
+			"id": 80222,
+			"timestamp": 1670410122,
+			"current": 161,
+			"status": 3
+		},
+		{
+			"id": 80223,
+			"timestamp": 1670465988,
+			"current": 161,
+			"status": 3
+		},
+		{
+			"id": 80224,
+			"timestamp": 1674008385,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80225,
+			"timestamp": 1674034471,
+			"current": 20,
+			"status": 3
+		},
+		{
+			"id": 80226,
+			"timestamp": 1674115344,
+			"current": 3,
+			"status": 3
+		},
+		{
+			"id": 80227,
+			"timestamp": 1674028397,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 80228,
+			"timestamp": 1674019339,
+			"current": 27,
+			"status": 3
+		},
+		{
+			"id": 80229,
+			"timestamp": 1674023966,
+			"current": 27,
+			"status": 3
+		},
+		{
+			"id": 80230,
+			"timestamp": 1674036418,
+			"current": 27,
+			"status": 3
+		},
+		{
+			"id": 80231,
+			"timestamp": 1674021584,
+			"current": 278,
+			"status": 3
+		},
+		{
+			"id": 80232,
+			"timestamp": 1674031251,
+			"current": 278,
+			"status": 3
+		},
+		{
+			"id": 80233,
+			"timestamp": 1674098020,
+			"current": 278,
+			"status": 3
+		},
+		{
+			"id": 80234,
+			"timestamp": 1674016940,
+			"current": 34,
+			"status": 3
+		},
+		{
+			"id": 80235,
+			"timestamp": 1674031753,
+			"current": 34,
+			"status": 3
+		},
+		{
+			"id": 80236,
+			"timestamp": 1674102639,
+			"current": 34,
+			"status": 3
+		},
+		{
+			"id": 81000,
+			"timestamp": 1602756252,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81001,
+			"timestamp": 1603087341,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81002,
+			"timestamp": 1604652787,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81003,
+			"timestamp": 1631113625,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81004,
+			"timestamp": 1602483934,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81005,
+			"timestamp": 1602571446,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81010,
+			"timestamp": 1602407757,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81014,
+			"timestamp": 1602570700,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81015,
+			"timestamp": 1602405196,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81016,
+			"timestamp": 1603272790,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81017,
+			"timestamp": 1602665988,
+			"current": 16,
+			"status": 3
+		},
+		{
+			"id": 81018,
+			"timestamp": 1604149367,
+			"current": 16,
+			"status": 3
+		},
+		{
+			"id": 81019,
+			"timestamp": 1607241581,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81020,
+			"timestamp": 1604641295,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81021,
+			"timestamp": 1604641295,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81022,
+			"timestamp": 1602571556,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81023,
+			"timestamp": 1626484538,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81024,
+			"timestamp": 1610635572,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81025,
+			"timestamp": 1612753416,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81026,
+			"timestamp": 1608184141,
+			"current": 340,
+			"status": 3
+		},
+		{
+			"id": 81027,
+			"timestamp": 1610634259,
+			"current": 340,
+			"status": 3
+		},
+		{
+			"id": 81028,
+			"timestamp": 1612180889,
+			"current": 340,
+			"status": 3
+		},
+		{
+			"id": 81029,
+			"timestamp": 1607662753,
+			"current": 350,
+			"status": 3
+		},
+		{
+			"id": 81030,
+			"timestamp": 1609133506,
+			"current": 350,
+			"status": 3
+		},
+		{
+			"id": 81031,
+			"timestamp": 1611543586,
+			"current": 350,
+			"status": 3
+		},
+		{
+			"id": 81032,
+			"timestamp": 1607493039,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81033,
+			"timestamp": 1608732248,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81034,
+			"timestamp": 1608963746,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81035,
+			"timestamp": 1612712554,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81036,
+			"timestamp": 1608820170,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81037,
+			"timestamp": 1608963910,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81038,
+			"timestamp": 1612712067,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81039,
+			"timestamp": 1611818351,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81040,
+			"timestamp": 1608896278,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81041,
+			"timestamp": 1608802725,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81042,
+			"timestamp": 1608902539,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81043,
+			"timestamp": 1612712983,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81044,
+			"timestamp": 1608903092,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81045,
+			"timestamp": 1608824949,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81046,
+			"timestamp": 1609232245,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81047,
+			"timestamp": 1612322289,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81048,
+			"timestamp": 1615956635,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81049,
+			"timestamp": 1619586475,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81050,
+			"timestamp": 1623314938,
+			"current": 2,
+			"status": 3
+		},
+		{
+			"id": 81051,
+			"timestamp": 1639187605,
+			"current": 2,
+			"status": 3
+		},
+		{
+			"id": 81052,
+			"timestamp": 1641573367,
+			"current": 2,
+			"status": 3
+		},
+		{
+			"id": 81053,
+			"timestamp": 1619774500,
+			"current": 7,
+			"status": 3
+		},
+		{
+			"id": 81054,
+			"timestamp": 1621574595,
+			"current": 4,
+			"status": 3
+		},
+		{
+			"id": 81055,
+			"timestamp": 1622695684,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 81056,
+			"timestamp": 1619588265,
+			"current": 9367,
+			"status": 3
+		},
+		{
+			"id": 81057,
+			"timestamp": 1619710927,
+			"current": 9367,
+			"status": 3
+		},
+		{
+			"id": 81058,
+			"timestamp": 1620008887,
+			"current": 9367,
+			"status": 3
+		},
+		{
+			"id": 81059,
+			"timestamp": 1620099611,
+			"current": 522574,
+			"status": 3
+		},
+		{
+			"id": 81060,
+			"timestamp": 1621406232,
+			"current": 522574,
+			"status": 3
+		},
+		{
+			"id": 81061,
+			"timestamp": 1626660072,
+			"current": 522574,
+			"status": 3
+		},
+		{
+			"id": 81062,
+			"timestamp": 1621322655,
+			"current": 676,
+			"status": 3
+		},
+		{
+			"id": 81063,
+			"timestamp": 1627358532,
+			"current": 676,
+			"status": 3
+		},
+		{
+			"id": 81064,
+			"timestamp": 1671721711,
+			"current": 676,
+			"status": 3
+		},
+		{
+			"id": 81065,
+			"timestamp": 1619588889,
+			"current": 4886,
+			"status": 3
+		},
+		{
+			"id": 81066,
+			"timestamp": 1619588889,
+			"current": 4886,
+			"status": 3
+		},
+		{
+			"id": 81067,
+			"timestamp": 1619588889,
+			"current": 4886,
+			"status": 3
+		},
+		{
+			"id": 81068,
+			"timestamp": 1620293327,
+			"current": 590,
+			"status": 3
+		},
+		{
+			"id": 81069,
+			"timestamp": 1621661275,
+			"current": 590,
+			"status": 3
+		},
+		{
+			"id": 81070,
+			"timestamp": 1622695834,
+			"current": 590,
+			"status": 3
+		},
+		{
+			"id": 81071,
+			"timestamp": 1619589396,
+			"current": 318,
+			"status": 3
+		},
+		{
+			"id": 81072,
+			"timestamp": 1620008669,
+			"current": 318,
+			"status": 3
+		},
+		{
+			"id": 81073,
+			"timestamp": 1622437483,
+			"current": 318,
+			"status": 3
+		},
+		{
+			"id": 81074,
+			"timestamp": 1623215398,
+			"current": 574,
+			"status": 3
+		},
+		{
+			"id": 81075,
+			"timestamp": 1623215713,
+			"current": 19,
+			"status": 3
+		},
+		{
+			"id": 81076,
+			"timestamp": 1623238877,
+			"current": 25,
+			"status": 3
+		},
+		{
+			"id": 81077,
+			"timestamp": 1623466234,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 81078,
+			"timestamp": 1623215465,
+			"current": 196,
+			"status": 3
+		},
+		{
+			"id": 81079,
+			"timestamp": 1623229226,
+			"current": 985,
+			"status": 3
+		},
+		{
+			"id": 81080,
+			"timestamp": 1623462997,
+			"current": 142,
+			"status": 3
+		},
+		{
+			"id": 81081,
+			"timestamp": 1623464646,
+			"current": 142,
+			"status": 3
+		},
+		{
+			"id": 81082,
+			"timestamp": 1623465083,
+			"current": 142,
+			"status": 3
+		},
+		{
+			"id": 81083,
+			"timestamp": 1623464692,
+			"current": 90,
+			"status": 3
+		},
+		{
+			"id": 81084,
+			"timestamp": 1623465153,
+			"current": 90,
+			"status": 3
+		},
+		{
+			"id": 81085,
+			"timestamp": 1623554496,
+			"current": 90,
+			"status": 3
+		},
+		{
+			"id": 81086,
+			"timestamp": 1626919914,
+			"current": 4,
+			"status": 3
+		},
+		{
+			"id": 81087,
+			"timestamp": 1628128142,
+			"current": 1628,
+			"status": 3
+		},
+		{
+			"id": 81088,
+			"timestamp": 1631676228,
+			"current": 1628,
+			"status": 3
+		},
+		{
+			"id": 81089,
+			"timestamp": 1640491301,
+			"current": 1628,
+			"status": 3
+		},
+		{
+			"id": 81090,
+			"timestamp": 1628643920,
+			"current": 893,
+			"status": 3
+		},
+		{
+			"id": 81091,
+			"timestamp": 1634706296,
+			"current": 893,
+			"status": 3
+		},
+		{
+			"id": 81092,
+			"timestamp": 1652711310,
+			"current": 893,
+			"status": 3
+		},
+		{
+			"id": 81093,
+			"timestamp": 1628643881,
+			"current": 804,
+			"status": 3
+		},
+		{
+			"id": 81094,
+			"timestamp": 1634706297,
+			"current": 804,
+			"status": 3
+		},
+		{
+			"id": 81095,
+			"timestamp": 1655622793,
+			"current": 804,
+			"status": 3
+		},
+		{
+			"id": 81096,
+			"timestamp": 1627433999,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81097,
+			"timestamp": 1627025287,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81098,
+			"timestamp": 1627217772,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81099,
+			"timestamp": 1627112826,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81100,
+			"timestamp": 1628232808,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81104,
+			"timestamp": 1626930733,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81105,
+			"timestamp": 1641787496,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81106,
+			"timestamp": 1627049627,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81108,
+			"timestamp": 1626849140,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81109,
+			"timestamp": 1626855826,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81111,
+			"timestamp": 1627785942,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81112,
+			"timestamp": 1627219565,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81113,
+			"timestamp": 1627361138,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81114,
+			"timestamp": 1631114307,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81115,
+			"timestamp": 1627218858,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81116,
+			"timestamp": 1627702327,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81117,
+			"timestamp": 1626925622,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81118,
+			"timestamp": 1627024422,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81119,
+			"timestamp": 1626870329,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81120,
+			"timestamp": 1645623070,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81121,
+			"timestamp": 1628472586,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81122,
+			"timestamp": 1627873203,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81123,
+			"timestamp": 1627219745,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81124,
+			"timestamp": 1627042278,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81125,
+			"timestamp": 1627203654,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81130,
+			"timestamp": 1627786950,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81131,
+			"timestamp": 1630466716,
+			"current": 917,
+			"status": 3
+		},
+		{
+			"id": 81132,
+			"timestamp": 1630466864,
+			"current": 53,
+			"status": 3
+		},
+		{
+			"id": 81133,
+			"timestamp": 1630506551,
+			"current": 146,
+			"status": 3
+		},
+		{
+			"id": 81134,
+			"timestamp": 1630511891,
+			"current": 917,
+			"status": 3
+		},
+		{
+			"id": 81135,
+			"timestamp": 1642134478,
+			"current": 917,
+			"status": 3
+		},
+		{
+			"id": 81136,
+			"timestamp": 0,
+			"current": 917,
+			"status": 1
+		},
+		{
+			"id": 81137,
+			"timestamp": 1630505916,
+			"current": 147,
+			"status": 3
+		},
+		{
+			"id": 81138,
+			"timestamp": 1641567537,
+			"current": 4,
+			"status": 3
+		},
+		{
+			"id": 81139,
+			"timestamp": 1630505658,
+			"current": 692,
+			"status": 3
+		},
+		{
+			"id": 81140,
+			"timestamp": 1630554127,
+			"current": 29,
+			"status": 3
+		},
+		{
+			"id": 81141,
+			"timestamp": 1631022064,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 81142,
+			"timestamp": 1630505301,
+			"current": 252,
+			"status": 3
+		},
+		{
+			"id": 81143,
+			"timestamp": 1630510940,
+			"current": 230,
+			"status": 3
+		},
+		{
+			"id": 81144,
+			"timestamp": 1630553123,
+			"current": 6,
+			"status": 3
+		},
+		{
+			"id": 81150,
+			"timestamp": 1630906609,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81151,
+			"timestamp": 1630562826,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81152,
+			"timestamp": 1630634638,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81153,
+			"timestamp": 1630634577,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81154,
+			"timestamp": 1630472432,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81155,
+			"timestamp": 1630504542,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81156,
+			"timestamp": 1631021902,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81157,
+			"timestamp": 1630468298,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81158,
+			"timestamp": 1631162623,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81159,
+			"timestamp": 1631855434,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81160,
+			"timestamp": 1630467586,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81161,
+			"timestamp": 1630566256,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81162,
+			"timestamp": 1630501458,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81163,
+			"timestamp": 1630561485,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81164,
+			"timestamp": 1630558661,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81165,
+			"timestamp": 1630490620,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81167,
+			"timestamp": 1634100998,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81168,
+			"timestamp": 1634187253,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81170,
+			"timestamp": 1634381884,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81171,
+			"timestamp": 1634706613,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81172,
+			"timestamp": 1634190429,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81173,
+			"timestamp": 1634267274,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81174,
+			"timestamp": 1634449330,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81175,
+			"timestamp": 1634104814,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81176,
+			"timestamp": 1634191847,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81177,
+			"timestamp": 1634449143,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81179,
+			"timestamp": 1634223362,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81180,
+			"timestamp": 1634132101,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81181,
+			"timestamp": 1634355770,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81182,
+			"timestamp": 1639968692,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81183,
+			"timestamp": 1640324171,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81184,
+			"timestamp": 1641358698,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81185,
+			"timestamp": 1641360384,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81186,
+			"timestamp": 1641375365,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81187,
+			"timestamp": 1641397337,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81188,
+			"timestamp": 1641396144,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81189,
+			"timestamp": 1641396616,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81191,
+			"timestamp": 1641402225,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81192,
+			"timestamp": 1641450085,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81193,
+			"timestamp": 1641452598,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81194,
+			"timestamp": 1641452055,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81195,
+			"timestamp": 1641394288,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81196,
+			"timestamp": 1641386730,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81197,
+			"timestamp": 1641451098,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81198,
+			"timestamp": 1641450124,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81199,
+			"timestamp": 1648648780,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81200,
+			"timestamp": 1648783783,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81201,
+			"timestamp": 1648635113,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81202,
+			"timestamp": 1648743641,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81203,
+			"timestamp": 1648743290,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81204,
+			"timestamp": 1648642262,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81205,
+			"timestamp": 1649211348,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81206,
+			"timestamp": 1648745010,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81207,
+			"timestamp": 1648783992,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81208,
+			"timestamp": 1648620651,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81209,
+			"timestamp": 1648625317,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81210,
+			"timestamp": 1648618368,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81211,
+			"timestamp": 1648963036,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81212,
+			"timestamp": 1648643767,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81213,
+			"timestamp": 1648633244,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81214,
+			"timestamp": 1648647411,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81215,
+			"timestamp": 1648638159,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81216,
+			"timestamp": 1648628728,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81217,
+			"timestamp": 1648619797,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81218,
+			"timestamp": 1648743171,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81220,
+			"timestamp": 1648618803,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81221,
+			"timestamp": 1648867273,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81222,
+			"timestamp": 1648616017,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81223,
+			"timestamp": 1667406445,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81224,
+			"timestamp": 1662017642,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81225,
+			"timestamp": 1661338895,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81226,
+			"timestamp": 1661338381,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81227,
+			"timestamp": 1661418532,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81228,
+			"timestamp": 1661487512,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81229,
+			"timestamp": 1661422913,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81230,
+			"timestamp": 1661478420,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81231,
+			"timestamp": 1661475543,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81232,
+			"timestamp": 1661477897,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81233,
+			"timestamp": 1661682320,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81234,
+			"timestamp": 1661485466,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81235,
+			"timestamp": 1661411416,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81236,
+			"timestamp": 1661685027,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81237,
+			"timestamp": 1661487512,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81238,
+			"timestamp": 1661424877,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81239,
+			"timestamp": 1661699100,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81240,
+			"timestamp": 1662018785,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81241,
+			"timestamp": 1661425555,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81242,
+			"timestamp": 1661421893,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81243,
+			"timestamp": 1661701954,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81244,
+			"timestamp": 1661958643,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81245,
+			"timestamp": 1661667828,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81246,
+			"timestamp": 1661612451,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81247,
+			"timestamp": 1661485722,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81248,
+			"timestamp": 1661697440,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81249,
+			"timestamp": 1661488275,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81250,
+			"timestamp": 1661509532,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81251,
+			"timestamp": 1661332928,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81252,
+			"timestamp": 1661418238,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81253,
+			"timestamp": 1661700018,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81254,
+			"timestamp": 1661350348,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81255,
+			"timestamp": 1661351364,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81256,
+			"timestamp": 1661414471,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81257,
+			"timestamp": 1661700362,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81258,
+			"timestamp": 1661696587,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81259,
+			"timestamp": 1661772578,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81260,
+			"timestamp": 1661308570,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81261,
+			"timestamp": 1661771543,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81262,
+			"timestamp": 1661696384,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81263,
+			"timestamp": 1661519610,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81264,
+			"timestamp": 1664348737,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81265,
+			"timestamp": 1664349985,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81266,
+			"timestamp": 1664352038,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81267,
+			"timestamp": 1664370134,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81268,
+			"timestamp": 1664353236,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81269,
+			"timestamp": 1664357879,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81270,
+			"timestamp": 1664429627,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81271,
+			"timestamp": 1664429927,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81272,
+			"timestamp": 1664430265,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81273,
+			"timestamp": 1664558420,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81274,
+			"timestamp": 1664380561,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81275,
+			"timestamp": 1664380444,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81276,
+			"timestamp": 1664380448,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81277,
+			"timestamp": 1664460781,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81278,
+			"timestamp": 1665222186,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81280,
+			"timestamp": 1664459994,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81281,
+			"timestamp": 1664461719,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81282,
+			"timestamp": 1665098801,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81283,
+			"timestamp": 1664340733,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81284,
+			"timestamp": 1664373075,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81285,
+			"timestamp": 1664591862,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81286,
+			"timestamp": 1664335489,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81288,
+			"timestamp": 1664339298,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81289,
+			"timestamp": 1666425780,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81290,
+			"timestamp": 1665223081,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81291,
+			"timestamp": 1674099476,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81292,
+			"timestamp": 1674014571,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81293,
+			"timestamp": 1674103928,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81295,
+			"timestamp": 1674027136,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81296,
+			"timestamp": 1675663710,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81297,
+			"timestamp": 1674101906,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81298,
+			"timestamp": 1674018383,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81299,
+			"timestamp": 1674009505,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81300,
+			"timestamp": 1674111769,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81301,
+			"timestamp": 1674045910,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81302,
+			"timestamp": 1674099021,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81303,
+			"timestamp": 1674032639,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81304,
+			"timestamp": 1674049928,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81306,
+			"timestamp": 1674043301,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81307,
+			"timestamp": 1674027815,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81308,
+			"timestamp": 1674013054,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81309,
+			"timestamp": 1674014376,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81310,
+			"timestamp": 1674016468,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81311,
+			"timestamp": 1674024538,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81312,
+			"timestamp": 1674115119,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 81313,
+			"timestamp": 1674123057,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82001,
+			"timestamp": 1602755818,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82002,
+			"timestamp": 1601461803,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82003,
+			"timestamp": 1601464352,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82004,
+			"timestamp": 1602402231,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82005,
+			"timestamp": 1602342056,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82006,
+			"timestamp": 1602051008,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82007,
+			"timestamp": 1602138669,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82008,
+			"timestamp": 1607225822,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82009,
+			"timestamp": 1607263764,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82010,
+			"timestamp": 1607224753,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82012,
+			"timestamp": 1645518657,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82013,
+			"timestamp": 1602052402,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82014,
+			"timestamp": 1601465333,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82015,
+			"timestamp": 1606886505,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82017,
+			"timestamp": 1602560425,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82019,
+			"timestamp": 1604806052,
+			"current": 107,
+			"status": 3
+		},
+		{
+			"id": 82020,
+			"timestamp": 1611117206,
+			"current": 107,
+			"status": 3
+		},
+		{
+			"id": 82021,
+			"timestamp": 1611920203,
+			"current": 107,
+			"status": 3
+		},
+		{
+			"id": 82022,
+			"timestamp": 1624769030,
+			"current": 11,
+			"status": 3
+		},
+		{
+			"id": 82023,
+			"timestamp": 1631109222,
+			"current": 11,
+			"status": 3
+		},
+		{
+			"id": 82024,
+			"timestamp": 1631109442,
+			"current": 11,
+			"status": 3
+		},
+		{
+			"id": 82025,
+			"timestamp": 1604638146,
+			"current": 1839,
+			"status": 3
+		},
+		{
+			"id": 82026,
+			"timestamp": 1607442104,
+			"current": 1839,
+			"status": 3
+		},
+		{
+			"id": 82027,
+			"timestamp": 1610083096,
+			"current": 1839,
+			"status": 3
+		},
+		{
+			"id": 82028,
+			"timestamp": 1614763639,
+			"current": 10,
+			"status": 3
+		},
+		{
+			"id": 82029,
+			"timestamp": 1614764089,
+			"current": 10,
+			"status": 3
+		},
+		{
+			"id": 82030,
+			"timestamp": 1614764436,
+			"current": 10,
+			"status": 3
+		},
+		{
+			"id": 82031,
+			"timestamp": 1620100794,
+			"current": 12,
+			"status": 3
+		},
+		{
+			"id": 82032,
+			"timestamp": 1628586976,
+			"current": 12,
+			"status": 3
+		},
+		{
+			"id": 82033,
+			"timestamp": 1631108471,
+			"current": 12,
+			"status": 3
+		},
+		{
+			"id": 82034,
+			"timestamp": 1614409776,
+			"current": 17,
+			"status": 3
+		},
+		{
+			"id": 82035,
+			"timestamp": 1620661368,
+			"current": 17,
+			"status": 3
+		},
+		{
+			"id": 82036,
+			"timestamp": 1627660755,
+			"current": 17,
+			"status": 3
+		},
+		{
+			"id": 82037,
+			"timestamp": 1614762612,
+			"current": 16,
+			"status": 3
+		},
+		{
+			"id": 82038,
+			"timestamp": 1614762855,
+			"current": 16,
+			"status": 3
+		},
+		{
+			"id": 82039,
+			"timestamp": 1614763054,
+			"current": 16,
+			"status": 3
+		},
+		{
+			"id": 82040,
+			"timestamp": 1603088654,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82041,
+			"timestamp": 1608182222,
+			"current": 192212,
+			"status": 3
+		},
+		{
+			"id": 82042,
+			"timestamp": 1611752275,
+			"current": 192212,
+			"status": 3
+		},
+		{
+			"id": 82043,
+			"timestamp": 1616424804,
+			"current": 192212,
+			"status": 3
+		},
+		{
+			"id": 82044,
+			"timestamp": 1611803354,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 82045,
+			"timestamp": 1614865850,
+			"current": 3,
+			"status": 3
+		},
+		{
+			"id": 82046,
+			"timestamp": 1622816677,
+			"current": 47,
+			"status": 3
+		},
+		{
+			"id": 82047,
+			"timestamp": 1612237842,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 82048,
+			"timestamp": 1622649799,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 82049,
+			"timestamp": 1622650320,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 82050,
+			"timestamp": 1611803747,
+			"current": 1,
+			"status": 3
+		},
+		{
+			"id": 82051,
+			"timestamp": 1614865850,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82052,
+			"timestamp": 1607058929,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82053,
+			"timestamp": 1607268413,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82054,
+			"timestamp": 1611236378,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82055,
+			"timestamp": 1605420575,
+			"current": 71,
+			"status": 3
+		},
+		{
+			"id": 82056,
+			"timestamp": 1613484658,
+			"current": 71,
+			"status": 3
+		},
+		{
+			"id": 82057,
+			"timestamp": 1614340065,
+			"current": 71,
+			"status": 3
+		},
+		{
+			"id": 82058,
+			"timestamp": 1605712224,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82059,
+			"timestamp": 1606972676,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82060,
+			"timestamp": 1611239603,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82061,
+			"timestamp": 1608901442,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82062,
+			"timestamp": 1605085480,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82063,
+			"timestamp": 1607271149,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82064,
+			"timestamp": 1605927924,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82065,
+			"timestamp": 1608899624,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82066,
+			"timestamp": 1608700104,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82067,
+			"timestamp": 1608730346,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82068,
+			"timestamp": 1608701967,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82069,
+			"timestamp": 1608700081,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82070,
+			"timestamp": 1609123745,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82071,
+			"timestamp": 1608781001,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82072,
+			"timestamp": 1608902974,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82073,
+			"timestamp": 1613190454,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82074,
+			"timestamp": 1612320291,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82075,
+			"timestamp": 1616579025,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82076,
+			"timestamp": 1612698516,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82077,
+			"timestamp": 1612700212,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82078,
+			"timestamp": 1612701095,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82079,
+			"timestamp": 1612698948,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82080,
+			"timestamp": 1612699072,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82081,
+			"timestamp": 1612702299,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82082,
+			"timestamp": 1612320594,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82083,
+			"timestamp": 1612700458,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82084,
+			"timestamp": 1612701352,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82085,
+			"timestamp": 1612697241,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82086,
+			"timestamp": 1612699829,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82087,
+			"timestamp": 1612321673,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82088,
+			"timestamp": 1621260821,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82089,
+			"timestamp": 1619588769,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82090,
+			"timestamp": 1619712195,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82091,
+			"timestamp": 1627113511,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82092,
+			"timestamp": 1627571227,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82093,
+			"timestamp": 1627572616,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82094,
+			"timestamp": 1626843948,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82095,
+			"timestamp": 1626841052,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82096,
+			"timestamp": 1626850883,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82097,
+			"timestamp": 1627034006,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82098,
+			"timestamp": 1627033555,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82099,
+			"timestamp": 1627983360,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82100,
+			"timestamp": 1627982539,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82101,
+			"timestamp": 1627206197,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82102,
+			"timestamp": 1627220462,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82103,
+			"timestamp": 1627220462,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82104,
+			"timestamp": 1627626387,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82105,
+			"timestamp": 1631523836,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82106,
+			"timestamp": 1626839893,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82107,
+			"timestamp": 1626848563,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82108,
+			"timestamp": 1627219946,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82109,
+			"timestamp": 1627107815,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82110,
+			"timestamp": 1631110506,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82111,
+			"timestamp": 1630502664,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82112,
+			"timestamp": 1630471147,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82113,
+			"timestamp": 1630489408,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82114,
+			"timestamp": 1631022235,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82115,
+			"timestamp": 1648701431,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82116,
+			"timestamp": 1649772819,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82117,
+			"timestamp": 1649040961,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82118,
+			"timestamp": 1649775662,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82119,
+			"timestamp": 1648871225,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82120,
+			"timestamp": 1649773077,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82121,
+			"timestamp": 1645086907,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82122,
+			"timestamp": 1645081801,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82123,
+			"timestamp": 1645086577,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82124,
+			"timestamp": 1645086757,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82125,
+			"timestamp": 1645074405,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82126,
+			"timestamp": 1649776585,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82127,
+			"timestamp": 1648871404,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82128,
+			"timestamp": 1648627509,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82129,
+			"timestamp": 1661480902,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82130,
+			"timestamp": 1661772835,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82131,
+			"timestamp": 1661314535,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82132,
+			"timestamp": 1661772931,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82133,
+			"timestamp": 1661773081,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82134,
+			"timestamp": 1666368243,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82135,
+			"timestamp": 1665675012,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82136,
+			"timestamp": 1666428411,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82137,
+			"timestamp": 1666427720,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82138,
+			"timestamp": 1665031668,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82139,
+			"timestamp": 1666427839,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82140,
+			"timestamp": 1664892654,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82141,
+			"timestamp": 1666428073,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82142,
+			"timestamp": 1666427652,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82143,
+			"timestamp": 1673697764,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82144,
+			"timestamp": 1666428182,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82145,
+			"timestamp": 1664348127,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82146,
+			"timestamp": 1666428704,
+			"current": 11,
+			"status": 3
+		},
+		{
+			"id": 82147,
+			"timestamp": 1666429034,
+			"current": 11,
+			"status": 3
+		},
+		{
+			"id": 82148,
+			"timestamp": 1666429149,
+			"current": 11,
+			"status": 3
+		},
+		{
+			"id": 82149,
+			"timestamp": 1666429954,
+			"current": 11,
+			"status": 3
+		},
+		{
+			"id": 82150,
+			"timestamp": 1666430584,
+			"current": 11,
+			"status": 3
+		},
+		{
+			"id": 82151,
+			"timestamp": 1666430761,
+			"current": 11,
+			"status": 3
+		},
+		{
+			"id": 82155,
+			"timestamp": 1667404518,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82156,
+			"timestamp": 1667367320,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82157,
+			"timestamp": 1667446334,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82158,
+			"timestamp": 1667446513,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 82159,
+			"timestamp": 1666429458,
+			"current": 3,
+			"status": 3
+		},
+		{
+			"id": 82160,
+			"timestamp": 1674122303,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84000,
+			"timestamp": 1604140005,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84001,
+			"timestamp": 1602054289,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84002,
+			"timestamp": 1602388448,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84003,
+			"timestamp": 1604140005,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84004,
+			"timestamp": 1601267659,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84005,
+			"timestamp": 1601270328,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84006,
+			"timestamp": 1602139627,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84007,
+			"timestamp": 1602253416,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84008,
+			"timestamp": 1604138496,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84009,
+			"timestamp": 1604152117,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84010,
+			"timestamp": 1604375380,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84011,
+			"timestamp": 1604148096,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84012,
+			"timestamp": 1604151800,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84013,
+			"timestamp": 1604372654,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84014,
+			"timestamp": 1604373477,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84015,
+			"timestamp": 1604373835,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84016,
+			"timestamp": 1604375053,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84017,
+			"timestamp": 1604375141,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84018,
+			"timestamp": 1605107222,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84019,
+			"timestamp": 1605107461,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84020,
+			"timestamp": 1605108440,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84021,
+			"timestamp": 1605931659,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84022,
+			"timestamp": 1605932637,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84023,
+			"timestamp": 1605933107,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84024,
+			"timestamp": 1605933328,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84025,
+			"timestamp": 1612319786,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84026,
+			"timestamp": 1616768983,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84028,
+			"timestamp": 1616207678,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84029,
+			"timestamp": 1618203970,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84030,
+			"timestamp": 1618204237,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84031,
+			"timestamp": 1618204851,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84032,
+			"timestamp": 1618206171,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84033,
+			"timestamp": 1618206365,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84034,
+			"timestamp": 1624934425,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84035,
+			"timestamp": 1624935449,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84036,
+			"timestamp": 1624938043,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84037,
+			"timestamp": 1626837665,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84038,
+			"timestamp": 1626839947,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84039,
+			"timestamp": 1626843601,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84040,
+			"timestamp": 1626844482,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84041,
+			"timestamp": 1626854013,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84042,
+			"timestamp": 1626854880,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84043,
+			"timestamp": 1626883860,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84044,
+			"timestamp": 1626884524,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84045,
+			"timestamp": 1626855004,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84046,
+			"timestamp": 1626885011,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84047,
+			"timestamp": 1630475147,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84048,
+			"timestamp": 1630476595,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84049,
+			"timestamp": 1630478296,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84050,
+			"timestamp": 1630479112,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84051,
+			"timestamp": 1630479625,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84052,
+			"timestamp": 1630480092,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84053,
+			"timestamp": 1641611099,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84054,
+			"timestamp": 1671424329,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84055,
+			"timestamp": 1672377530,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84056,
+			"timestamp": 1641385372,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84057,
+			"timestamp": 1641385878,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84058,
+			"timestamp": 1641385048,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84059,
+			"timestamp": 1641386189,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84060,
+			"timestamp": 1648638847,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84061,
+			"timestamp": 1648639801,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84062,
+			"timestamp": 1648640144,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84063,
+			"timestamp": 1648640854,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84064,
+			"timestamp": 1654061493,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84065,
+			"timestamp": 1654137397,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84066,
+			"timestamp": 1654137740,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84067,
+			"timestamp": 1661313143,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84068,
+			"timestamp": 1661317054,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84069,
+			"timestamp": 1661317410,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84070,
+			"timestamp": 1661318049,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84071,
+			"timestamp": 1661319017,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84072,
+			"timestamp": 1661319098,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84073,
+			"timestamp": 1661322061,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84074,
+			"timestamp": 1661322137,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84075,
+			"timestamp": 1664333978,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84076,
+			"timestamp": 1664334562,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84077,
+			"timestamp": 1664335245,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84078,
+			"timestamp": 1664336741,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84079,
+			"timestamp": 1664343094,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84080,
+			"timestamp": 1664344067,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84081,
+			"timestamp": 1664344776,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84082,
+			"timestamp": 1667367757,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84083,
+			"timestamp": 1667370041,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84084,
+			"timestamp": 1667374480,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84085,
+			"timestamp": 1667378295,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84086,
+			"timestamp": 1667406373,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84087,
+			"timestamp": 1670419980,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84088,
+			"timestamp": 1670420540,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84089,
+			"timestamp": 1670420920,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84090,
+			"timestamp": 1670422074,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84091,
+			"timestamp": 1670423198,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84092,
+			"timestamp": 1677644078,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84093,
+			"timestamp": 1677644300,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84094,
+			"timestamp": 1677645509,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84095,
+			"timestamp": 1677646129,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84100,
+			"timestamp": 1616767458,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84101,
+			"timestamp": 1619855673,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84102,
+			"timestamp": 1615960239,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84103,
+			"timestamp": 1615969976,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84104,
+			"timestamp": 1616210088,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84105,
+			"timestamp": 1615958885,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84106,
+			"timestamp": 1615968783,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84107,
+			"timestamp": 1616208819,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84108,
+			"timestamp": 1615959491,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84109,
+			"timestamp": 1619855852,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84110,
+			"timestamp": 1619859816,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84111,
+			"timestamp": 1619857386,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84112,
+			"timestamp": 1619858894,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84113,
+			"timestamp": 1619862923,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84114,
+			"timestamp": 1619862923,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84115,
+			"timestamp": 1619860373,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84116,
+			"timestamp": 1634657185,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84117,
+			"timestamp": 1634656239,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84118,
+			"timestamp": 1634656618,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84119,
+			"timestamp": 1636032069,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84120,
+			"timestamp": 1636031373,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84121,
+			"timestamp": 1636030994,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84122,
+			"timestamp": 1637756550,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84123,
+			"timestamp": 1637756550,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84124,
+			"timestamp": 1637731112,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84125,
+			"timestamp": 1637758222,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84126,
+			"timestamp": 1637758396,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84127,
+			"timestamp": 1637757214,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84128,
+			"timestamp": 1641472336,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84129,
+			"timestamp": 1641471940,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84130,
+			"timestamp": 1641472336,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84131,
+			"timestamp": 1641469861,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84132,
+			"timestamp": 1641468655,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84133,
+			"timestamp": 1641470038,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84134,
+			"timestamp": 1655998963,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84135,
+			"timestamp": 1655996269,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84136,
+			"timestamp": 1655998486,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84137,
+			"timestamp": 1657809653,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84138,
+			"timestamp": 1657807611,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84139,
+			"timestamp": 1657809610,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84140,
+			"timestamp": 1677666173,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84141,
+			"timestamp": 1677666381,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84142,
+			"timestamp": 1677665630,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84501,
+			"timestamp": 1604711294,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84502,
+			"timestamp": 1609496108,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84503,
+			"timestamp": 1659930045,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84504,
+			"timestamp": 1617943001,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84505,
+			"timestamp": 1651034858,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84506,
+			"timestamp": 1675576907,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84507,
+			"timestamp": 1626483931,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84508,
+			"timestamp": 1636257440,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84509,
+			"timestamp": 1611294898,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84510,
+			"timestamp": 1625887731,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84512,
+			"timestamp": 0,
+			"current": 4,
+			"status": 1
+		},
+		{
+			"id": 84513,
+			"timestamp": 1603256446,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84514,
+			"timestamp": 1620098108,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84515,
+			"timestamp": 1607662566,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84516,
+			"timestamp": 1622694942,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84519,
+			"timestamp": 1637375525,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84520,
+			"timestamp": 1652454688,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84522,
+			"timestamp": 1619153290,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84523,
+			"timestamp": 1645494112,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84524,
+			"timestamp": 1608434099,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84525,
+			"timestamp": 1605084641,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84526,
+			"timestamp": 1671249621,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84527,
+			"timestamp": 1646367947,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84528,
+			"timestamp": 1663198356,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84529,
+			"timestamp": 1667616434,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84530,
+			"timestamp": 1670734415,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84531,
+			"timestamp": 1632632005,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84532,
+			"timestamp": 1636080151,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84533,
+			"timestamp": 1633575843,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84534,
+			"timestamp": 1673503595,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84535,
+			"timestamp": 1648278686,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84536,
+			"timestamp": 1632633055,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84537,
+			"timestamp": 1627032131,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84538,
+			"timestamp": 1675749025,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84539,
+			"timestamp": 1647319215,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84540,
+			"timestamp": 1626856016,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84541,
+			"timestamp": 1675749838,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84542,
+			"timestamp": 1638161259,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84543,
+			"timestamp": 1672715300,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84548,
+			"timestamp": 1664248879,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84550,
+			"timestamp": 1674875486,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84551,
+			"timestamp": 1661695982,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84554,
+			"timestamp": 1661334692,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84555,
+			"timestamp": 1661750592,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84556,
+			"timestamp": 1661353455,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84558,
+			"timestamp": 1668047963,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84561,
+			"timestamp": 1665801844,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 84562,
+			"timestamp": 1669783983,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 85000,
+			"timestamp": 1604765891,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 85001,
+			"timestamp": 1602847584,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 85002,
+			"timestamp": 1603085004,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 85003,
+			"timestamp": 1608299186,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 85004,
+			"timestamp": 1605278058,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 85005,
+			"timestamp": 1603614656,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 85006,
+			"timestamp": 1602567421,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86001,
+			"timestamp": 1607228702,
+			"current": 1994,
+			"status": 3
+		},
+		{
+			"id": 86002,
+			"timestamp": 1608219912,
+			"current": 1994,
+			"status": 3
+		},
+		{
+			"id": 86003,
+			"timestamp": 1611675291,
+			"current": 1994,
+			"status": 3
+		},
+		{
+			"id": 86004,
+			"timestamp": 1607227398,
+			"current": 3424,
+			"status": 3
+		},
+		{
+			"id": 86005,
+			"timestamp": 1607264689,
+			"current": 3424,
+			"status": 3
+		},
+		{
+			"id": 86006,
+			"timestamp": 1607396188,
+			"current": 3424,
+			"status": 3
+		},
+		{
+			"id": 86007,
+			"timestamp": 1607224753,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86008,
+			"timestamp": 1602481102,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86009,
+			"timestamp": 1607225822,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86010,
+			"timestamp": 1607226154,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86011,
+			"timestamp": 1607226495,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86012,
+			"timestamp": 1607226797,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86013,
+			"timestamp": 1607227257,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86015,
+			"timestamp": 1627035029,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86016,
+			"timestamp": 1627029381,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86017,
+			"timestamp": 1627034828,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86018,
+			"timestamp": 1627034160,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86019,
+			"timestamp": 1627034006,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86020,
+			"timestamp": 1627033819,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86021,
+			"timestamp": 1627034326,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86022,
+			"timestamp": 1661516741,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86023,
+			"timestamp": 1661516903,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86024,
+			"timestamp": 1661515642,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86025,
+			"timestamp": 1661517504,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86026,
+			"timestamp": 1661517175,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86027,
+			"timestamp": 1661352782,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86028,
+			"timestamp": 1661517623,
+			"current": 0,
+			"status": 3
+		},
+		{
+			"id": 86029,
+			"timestamp": 1661517714,
+			"current": 0,
+			"status": 3
+		}
+	]
+}
