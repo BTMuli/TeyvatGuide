@@ -2,11 +2,11 @@
 	<v-card>
 		<v-card-title>配置</v-card-title>
 		<v-list>
-			<v-list-item @click="openUserData" prepend-icon="mdi-folder">
+			<v-list-item @click="openMergeData" prepend-icon="mdi-folder">
 				<v-list-item-title>打开用户数据目录</v-list-item-title>
 			</v-list-item>
-			<v-list-item @click="deleteUserData" prepend-icon="mdi-delete">
-				<v-list-item-title>删除用户数据</v-list-item-title>
+			<v-list-item @click="deleteData" prepend-icon="mdi-delete">
+				<v-list-item-title>删除本地数据</v-list-item-title>
 			</v-list-item>
 			<v-list-item @click="setDefaultConfig" prepend-icon="mdi-cog">
 				<v-list-item-title>恢复默认配置</v-list-item-title>
@@ -20,6 +20,7 @@ import { defineComponent } from "vue";
 import useAppStore from "../store/modules/app";
 import { dialog, fs } from "@tauri-apps/api";
 import { BaseDirectory } from "@tauri-apps/api/fs";
+import { TGAppDataList } from "../data";
 export default defineComponent({
 	name: "Config",
 	data() {
@@ -30,16 +31,16 @@ export default defineComponent({
 	},
 	methods: {
 		// 打开数据文件夹
-		async openUserData() {
+		async openMergeData() {
 			const appStore = useAppStore();
-			const appDataPath = appStore.dataPath.user;
+			const mergeDataPath = appStore.dataPath.merge;
 			await dialog.open({
-				defaultPath: appDataPath,
+				defaultPath: mergeDataPath,
 				filters: [],
 			});
 		},
 		// 删除数据
-		async deleteUserData() {
+		async deleteData() {
 			const res = await dialog.confirm("确定要删除用户数据吗?");
 			if (res) {
 				await fs.removeDir("userData", {
@@ -53,6 +54,13 @@ export default defineComponent({
 				await dialog.message("用户数据已删除!");
 				await fs.createDir("userData", { dir: BaseDirectory.AppLocalData });
 				await fs.createDir("mergeData", { dir: BaseDirectory.AppLocalData });
+				const appStore = useAppStore();
+				TGAppDataList.MergeData.map(async item => {
+					await fs.writeFile(
+						`${appStore.dataPath.merge}\\${item.name}`,
+						JSON.stringify(item.data, null, 4)
+					);
+				});
 			}
 		},
 		// 恢复默认配置
