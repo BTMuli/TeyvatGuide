@@ -60,7 +60,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useRouter } from "vue-router";
-import { useAppStore } from "../store/modules/app";
+import useAppStore from "../store/modules/app";
 
 export default defineComponent({
 	name: "TSidebar",
