@@ -39,6 +39,7 @@ export interface Achievement {
  * @property {string} name - 成就系列名称
  * @description 有的成就系列没有名片奖励，这边的 card 可能为 undefined
  * @property {number} card - 成就系列奖励，这边是名片 ID
+ * @description 像是天地万象这种一直更新的成就系列，这边的 version 可能为 undefined
  * @property {string} version - 成就系列版本
  * @return AchievementSeries
  */
@@ -47,5 +48,5 @@ export interface AchievementSeries {
 	order: number;
 	name: string;
 	card?: number;
-	version: string;
+	version?: string;
 }
