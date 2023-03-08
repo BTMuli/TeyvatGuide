@@ -1,10 +1,12 @@
 /**
- * @file UIAF.ts
+ * @file plugins UIAF interface UIAF.ts
  * @description UIAF interface
  * @author BTMuli<bt-muli@outlook.com>
  * @see https://github.com/DGP-Studio/Snap.Genshin.Docs/blob/main/docs/development/UIAF.md
  * @version v1.1
+ * @since Alpha
  */
+
 /**
  * @interface Achievements
  * @description Achievements interface
