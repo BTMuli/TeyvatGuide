@@ -15,7 +15,7 @@ import { app, fs } from "@tauri-apps/api";
 async function getUIAFInfo(): Promise<UIAF_Info> {
 	return {
 		export_app: "Tauri.Genshin",
-		export_timestamp: Date.now(),
+		export_timestamp: Math.floor(Date.now() / 1000),
 		export_app_version: await app.getVersion(),
 		uiaf_version: "v1.1",
 	};
