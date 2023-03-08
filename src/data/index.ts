@@ -1,15 +1,15 @@
-import Achievement from "./Achievement.json";
-import AchievementGoal from "./AchievementGoal.json";
+import achievements from "./achievements.json";
+import achievementSeries from "./achievementSeries.json";
 
-const TauriGenshinData = [
+const TGAppData = [
 	{
-		name: "Achievement.json",
-		data: Achievement,
+		name: "achievements.json",
+		data: achievements,
 	},
 	{
-		name: "AchievementGoal.json",
-		data: AchievementGoal,
-	}
+		name: "achievementSeries.json",
+		data: achievementSeries,
+	},
 ];
 
-export default TauriGenshinData;
+export default TGAppData;
