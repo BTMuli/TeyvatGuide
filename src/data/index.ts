@@ -1,15 +1,19 @@
-import achievements from "./achievements.json";
-import achievementSeries from "./achievementSeries.json";
+/**
+ * @file data index
+ * @description data index
+ * @author BTMuli<bt-muli@outlook.com>
+ * @since Alpha
+ */
 
-const TGAppData = [
-	{
-		name: "achievements.json",
-		data: achievements,
-	},
-	{
-		name: "achievementSeries.json",
-		data: achievementSeries,
-	},
-];
+import { AppData, AppDataList } from "./app";
+import { MergeData, MergeDataList } from "./merge";
 
-export default TGAppData;
+export const TGAppData = {
+	AppData: AppData,
+	MergeData: MergeData,
+};
+
+export const TGAppDataList = {
+	AppData: AppDataList,
+	MergeData: MergeDataList,
+};
