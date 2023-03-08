@@ -46,8 +46,13 @@ export default defineComponent({
 					dir: BaseDirectory.AppLocalData,
 					recursive: true,
 				});
+				await fs.removeDir("mergeData", {
+					dir: BaseDirectory.AppLocalData,
+					recursive: true,
+				});
 				await dialog.message("用户数据已删除!");
 				await fs.createDir("userData", { dir: BaseDirectory.AppLocalData });
+				await fs.createDir("mergeData", { dir: BaseDirectory.AppLocalData });
 			}
 		},
 		// 恢复默认配置
