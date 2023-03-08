@@ -182,8 +182,8 @@ export default defineComponent({
 			const appStore = useAppStore();
 			const mergeDataDir = appStore.dataPath.merge;
 			console.log("正在读取原始数据...");
-			const oriAchievement = TGAppData.achievements;
-			const oriAchievementSeries = TGAppData.achievementSeries;
+			const oriAchievement = TGAppData.AppData.achievements;
+			const oriAchievementSeries = TGAppData.AppData.achievementSeries;
 			console.log("读取原始数据成功！");
 			console.log("正在进行处理...");
 			// 处理成就系列数据
