@@ -2,12 +2,12 @@
 Author: 目棃
 Date: 2023-03-05
 Description: 说明文档
-Update: 2023-03-06
+Update: 2023-03-08
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-05 14:41:55`
 > 
-> 更新于 `2023-03-06 18:48:45`
+> 更新于 `2023-03-08 14:38:21`
 
 # Tauri.Genshin
 
@@ -24,6 +24,13 @@ Tauri 练手项目
 ## UI 参考
 
 - [Snap.Hutao](http://snaphutao.com/)
+
+## 数据来源
+
+Json 数据来源于如下几个项目：
+
+- [Snap.Metadata](https://github.com/DGP-Studio/Snap.Metadata/blob/main/Output/CHS/)
+- [Paimon.Moe](https://github.com/MadeBaruna/paimon-moe/blob/main/src/data/)
 
 ## 开发
 
