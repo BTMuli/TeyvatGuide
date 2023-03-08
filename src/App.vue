@@ -29,18 +29,30 @@ export default defineComponent({
 		if (!appStore.loading) {
 			try {
 				await fs.readDir(`${appStore.dataPath.app}`);
-				await fs.readDir(`${appStore.dataPath.user}`);
-				await fs.readDir(`${appStore.dataPath.merge}`);
 			} catch (e) {
 				await fs.createDir("appData", { dir: BaseDirectory.AppLocalData });
+			}
+			try {
+				await fs.readDir(`${appStore.dataPath.user}`);
+			} catch (e) {
 				await fs.createDir("userData", { dir: BaseDirectory.AppLocalData });
+			}
+			try {
+				await fs.readDir(`${appStore.dataPath.merge}`);
+			} catch (e) {
 				await fs.createDir("mergeData", { dir: BaseDirectory.AppLocalData });
 			}
 			await console.log("检测到数据未加载，开始加载数据...");
-			TGAppDataList.map(async item => {
+			TGAppDataList.AppData.map(async item => {
 				await fs.writeFile(
 					`${appStore.dataPath.app}\\${item.name}`,
-					JSON.stringify(item.data, null, 2)
+					JSON.stringify(item.data, null, 4)
+				);
+			});
+			TGAppDataList.MergeData.map(async item => {
+				await fs.writeFile(
+					`${appStore.dataPath.merge}\\${item.name}`,
+					JSON.stringify(item.data, null, 4)
 				);
 			});
 			appStore.loading = true;
