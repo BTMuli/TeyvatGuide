@@ -2,47 +2,50 @@
  * @file Achievements.ts
  * @description Achievements interface
  * @author BTMuli<bt-muli@outlook.com>
+ * @since Alpha
  */
 
 /**
- * @interface AchievementsType
- * @description Achievements interface
- * @property {UIAF_InfoType} info - UIAF info
- * @property {UIAF_AchievementType[]} list - Achievements data
- * @return AchievementsType
+ * @description 本应用的成就类型
+ * @since Alpha
+ * @interface Achievement
+ * @property {number} id - 成就 ID
+ * @property {number} series - 成就系列 ID
+ * @property {number} order - 成就排列顺序，用于展示全部成就
+ * @property {string} name - 成就名称
+ * @property {string} description - 成就描述
+ * @property {number} reward - 成就奖励
+ * @property {number} progress - 成就进度
+ * @property {string} version - 成就版本
+ * @return Achievement
  */
-export interface AchievementsType {
-	info: UIAF_InfoType;
-	list: UIAF_AchievementType[];
-}
-
-/**
- * @interface UIAF_InfoType
- * @description UIAF info interface
- * @property {string} export_app - Export app name
- * @property {number} export_timestamp - Export timestamp
- * @property {string} export_app_version - Export app version
- * @property {string} uiaf_version - UIAF version
- */
-export interface UIAF_InfoType {
-	export_app: string;
-	export_timestamp: number;
-	export_app_version: string;
-	uiaf_version: string;
-}
-
-/**
- * @interface UIAF_AchievementType
- * @description Achievements data interface
- * @property {number} id - Achievement ID
- * @property {number} timestamp - Achievement timestamp
- * @property {number} current - Current progress
- * @property {number} status - Achievement status
- * @return UIAF_AchievementType
- */
-export interface UIAF_AchievementType {
+export interface Achievement {
 	id: number;
-	timestamp: number;
-	current: number;
-	status: number;
+	series: number;
+	order: number;
+	name: string;
+	description: string;
+	reward: number;
+	progress: number;
+	version: string;
+}
+
+/**
+ * @description 本应用的成就系列类型
+ * @since Alpha
+ * @interface AchievementSeries
+ * @property {number} id - 成就系列 ID
+ * @property {number} order - 成就系列排列顺序，用于展示全部成就系列
+ * @property {string} name - 成就系列名称
+ * @description 有的成就系列没有名片奖励，这边的 card 可能为 undefined
+ * @property {number} card - 成就系列奖励，这边是名片 ID
+ * @property {string} version - 成就系列版本
+ * @return AchievementSeries
+ */
+export interface AchievementSeries {
+	id: number;
+	order: number;
+	name: string;
+	card?: number;
+	version: string;
 }
