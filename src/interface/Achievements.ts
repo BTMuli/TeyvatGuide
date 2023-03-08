@@ -41,6 +41,7 @@ export interface Achievement {
  * @property {number} card - 成就系列奖励，这边是名片 ID
  * @description 像是天地万象这种一直更新的成就系列，这边的 version 可能为 undefined
  * @property {string} version - 成就系列版本
+ * @property {string} icon - 成就系列图标 todo
  * @return AchievementSeries
  */
 export interface AchievementSeries {
@@ -49,4 +50,5 @@ export interface AchievementSeries {
 	name: string;
 	card?: number;
 	version?: string;
+	icon?: string;
 }
