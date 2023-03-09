@@ -1,7 +1,6 @@
 "semi": true # 是否使用分号 true:使用
 "singleQuote": false # 是否使用单引号
 "printWidth": 100 # 一行最多多少个字符
-"tabWidth": 4 # 一个tab代表几个空格
 "useTabs": true # 是否使用tab
 "proseWrap": "preserve" # 是否换行
 "arrowParens": "avoid" # 箭头函数参数是否使用括号
