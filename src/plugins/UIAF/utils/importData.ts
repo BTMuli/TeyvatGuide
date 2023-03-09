@@ -11,6 +11,7 @@ import { fs } from "@tauri-apps/api";
 /**
  * @description 检测是否存在 UIAF 数据
  * @description 粗略检测，不保证数据完整性
+ * @since Alpha
  * @param {string} path - UIAF 数据路径
  * @return {Promise<boolean>} 是否存在 UIAF 数据
  */
@@ -22,6 +23,7 @@ export async function checkUIAFData(path: string): Promise<boolean> {
 
 /**
  * @description 读取 UIAF 数据
+ * @since Alpha
  * @param {string} userPath - UIAF 数据路径
  * @return {Promise<string|false>} UIAF 数据
  */
@@ -40,14 +42,15 @@ export async function readUIAFData(userPath: string): Promise<string | false> {
 
 /**
  * @description 数据合并
+ * @since Alpha
  * @param {UIAF_Achievement[]} localData - 本地数据
  * @param {Achievements} remoteData - 远程数据
- * @return {Promise<UIAF_Achievement[]|false>} 合并后的数据，如果合并失败则返回 false
+ * @return {Promise<UIAF_Achievement[]>} 合并后的数据
  */
 export async function mergeUIAFData(
 	localData: UIAF_Achievement[],
 	remoteData: Achievements
-): Promise<UIAF_Achievement[] | false> {
+): Promise<UIAF_Achievement[]> {
 	// 遍历 remoteData.list
 	remoteData.list.map((remoteAchievement: UIAF_Achievement) => {
 		// 查找 id 相同的 localAchievement
