@@ -22,6 +22,13 @@
 							>查看</v-btn
 						>
 						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+						<v-btn
+							v-show="showLog"
+							@click="logPost(item.post_id)"
+							prepend-icon="mdi-arrow-right-circle"
+							class="ms-2 bg-blue-accent-2"
+							>原始数据</v-btn
+						>
 					</v-card-actions>
 				</v-card>
 			</div>
@@ -39,6 +46,13 @@
 							>查看</v-btn
 						>
 						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+						<v-btn
+							v-show="showLog"
+							@click="logPost(item.post_id)"
+							prepend-icon="mdi-arrow-right-circle"
+							class="ms-2 bg-blue-accent-2"
+							>原始数据</v-btn
+						>
 					</v-card-actions>
 				</v-card>
 			</div>
@@ -60,6 +74,13 @@
 							>查看</v-btn
 						>
 						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+						<v-btn
+							v-show="showLog"
+							@click="logPost(item.post_id)"
+							prepend-icon="mdi-arrow-right-circle"
+							class="ms-2 bg-blue-accent-2"
+							>原始数据</v-btn
+						>
 					</v-card-actions>
 				</v-card>
 			</div>
@@ -69,6 +90,7 @@
 
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
+import useDevStore from "../store/modules/dev";
 import {
 	MysPostType,
 	ResponseNewsList,
@@ -78,6 +100,9 @@ import {
 } from "../interface/MysPost";
 // import { http,window as TauriWindow } from "@tauri-apps/api";
 import { http } from "@tauri-apps/api";
+
+// Store
+const devStore = useDevStore();
 
 // 常量
 const MysNewsApi = "https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids=2&type=";
@@ -97,6 +122,7 @@ const postData = ref({
 	news: [] as CardDataType[],
 	notice: [] as CardDataType[],
 });
+const showLog = ref(devStore.showDev);
 
 onMounted(async () => {
 	const activityRaw: ResponseNewsList = await http
@@ -105,9 +131,15 @@ onMounted(async () => {
 	const newsRaw: ResponseNewsList = await http
 		.fetch(MysNewsApi + EnumPostType.News)
 		.then(res => res.data as Promise<ResponseNewsList>);
+
 	const noticeRaw: ResponseNewsList = await http
 		.fetch(MysNewsApi + EnumPostType.Notice)
 		.then(res => res.data as Promise<ResponseNewsList>);
+	if (showLog) {
+		console.log("activityRaw", activityRaw);
+		console.log("newsRaw", newsRaw);
+		console.log("noticeRaw", noticeRaw);
+	}
 	postData.value = {
 		activity: transData(activityRaw),
 		news: transData(newsRaw),
@@ -122,7 +154,7 @@ function transData(rawData: ResponseNewsList): CardDataType[] {
 		const postData: MysPostType = item.post;
 		const card: CardDataType = {
 			title: postData.subject,
-			cover: postData.images[0],
+			cover: postData.images.length === 0 ? postData.cover : postData.images[0],
 			post_id: postData.post_id,
 		};
 		return cardData.push(card);
@@ -167,6 +199,29 @@ async function toPost(post_id: string) {
 	// 	height: 720,
 	// 	resizable: false,
 	// });
+}
+async function logPost(post_id: string) {
+	const post = await getPost(post_id).then(res => {
+		return res.data.post.post;
+	});
+	// 将 Json 内容写入 html
+	const postHtml = new DOMParser().parseFromString(JSON.stringify(post), "text/html");
+	// 四周留白
+	postHtml.body.style.padding = "12%";
+	// 将 html 转为能够通过 window.open 打开的 url
+	const postUrl = URL.createObjectURL(
+		new Blob([postHtml.documentElement.outerHTML], { type: "text/html;charset=utf-8" })
+	);
+	// 打开新窗口，窗口位置居中
+	// 获取窗口宽度
+	const width = window.screen.width;
+	// 获取窗口高度
+	const height = window.screen.height;
+	// 计算窗口位置
+	const left = width / 2 - 480;
+	const top = height / 2 - 360;
+	// 打开窗口
+	window.open(postUrl, "_blank", `width=960,height=720,left=${left},top=${top}`);
 }
 async function getPost(post_id: string): Promise<ResponsePost> {
 	return http
