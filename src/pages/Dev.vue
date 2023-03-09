@@ -19,7 +19,7 @@
 import { defineComponent } from "vue";
 import useDevStore from "../store/modules/dev";
 import useAppStore from "../store/modules/app";
-import { fs } from "@tauri-apps/api";
+import { dialog, fs } from "@tauri-apps/api";
 import { SnapHutaoData } from "../plugins/Snap.Hutao";
 import {
 	Achievement as HutaoAchievement,
@@ -47,14 +47,14 @@ export default defineComponent({
 		};
 	},
 	methods: {
-		initDev() {
+		async initDev() {
 			const devStore = useDevStore();
 			devStore.showDev = false;
 			devStore.magicCount = 0;
 		},
 		async parseAchievement() {
 			const appStore = useAppStore();
-			const appDataDir = appStore.dataPath.app;
+			const appDataDir = appStore.devPath.app;
 			console.log("正在读取原始数据...");
 			// 读取原始数据
 			console.log("正在读取 Snap.Hutao 数据库...");
@@ -164,20 +164,21 @@ export default defineComponent({
 			console.log("正在输出成就系列数据...");
 			await fs.writeFile(
 				`${appDataDir}\\achievementSeries.json`,
-				JSON.stringify(achievementSeries, null, 2)
+				JSON.stringify(achievementSeries, null, 4)
 			);
 			console.log("输出成就系列数据成功！");
 			// 输出成就数据
 			console.log("正在输出成就数据...");
 			await fs.writeFile(
 				`${appDataDir}\\achievements.json`,
-				JSON.stringify(achievement, null, 2)
+				JSON.stringify(achievement, null, 4)
 			);
 			console.log("输出成就数据成功！");
+			await dialog.message("文件已导出至 " + appDataDir);
 		},
 		async mergeAchievement() {
 			const appStore = useAppStore();
-			const mergeDataDir = appStore.dataPath.merge;
+			const mergeDataDir = appStore.devPath.merge;
 			console.log("正在读取原始数据...");
 			const oriAchievement = TGAppData.AppData.achievements;
 			const oriSeries = TGAppData.AppData.achievementSeries;
@@ -215,14 +216,7 @@ export default defineComponent({
 				seriesItem.total_count += 1;
 				transSeries.set(oriAchievementItem.series.toString(), seriesItem);
 			});
-			// 对成就系列按照 order 进行排序
-			transSeries.sort((a, b) => {
-				return a.order - b.order;
-			});
-			// 对成就按照 order 进行排序
-			transAchievement.sort((a, b) => {
-				return a.order - b.order;
-			});
+			console.log("处理完成！");
 			// 写入文件
 			console.log("正在写入文件...");
 			console.log("正在写入成就系列数据...");
@@ -236,6 +230,7 @@ export default defineComponent({
 				JSON.stringify(transAchievement.getMap(), null, 4)
 			);
 			console.log("写入成就数据成功!");
+			await dialog.message("文件已导出至 " + mergeDataDir);
 		},
 	},
 });
