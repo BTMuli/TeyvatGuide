@@ -188,7 +188,7 @@ export default defineComponent({
 			const transAchievement: TGMap<TGAchievementMap> = new TGMap<TGAchievementMap>();
 			// 先遍历成就系列生成成就系列数据
 			oriSeries.map(oriSeriesItem => {
-				transSeries.set(oriSeriesItem.id.toString(), {
+				transSeries.set(oriSeriesItem.id, {
 					id: oriSeriesItem.id,
 					order: oriSeriesItem.order,
 					name: oriSeriesItem.name,
@@ -200,7 +200,7 @@ export default defineComponent({
 			// 遍历成就
 			oriAchievement.map(oriAchievementItem => {
 				// 生成成就数据
-				transAchievement.set(oriAchievementItem.id.toString(), {
+				transAchievement.set(oriAchievementItem.id, {
 					id: oriAchievementItem.id,
 					series: oriAchievementItem.series,
 					order: oriAchievementItem.order,
@@ -211,10 +211,10 @@ export default defineComponent({
 				});
 				// 默认成就系列是完备的，所以不需要判断成就系列是否存在
 				// 更新成就系列数据的 achievements 跟 total_count
-				const seriesItem = transSeries.get(oriAchievementItem.series.toString());
+				const seriesItem = transSeries.get(oriAchievementItem.series);
 				seriesItem.achievements.push(oriAchievementItem.id);
 				seriesItem.total_count += 1;
-				transSeries.set(oriAchievementItem.series.toString(), seriesItem);
+				transSeries.set(oriAchievementItem.series, seriesItem);
 			});
 			console.log("处理完成！");
 			// 写入文件

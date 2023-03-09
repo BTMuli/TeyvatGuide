@@ -46,103 +46,46 @@ class TGMap<T> {
 	}
 
 	/**
-	 * @description Map<T> 的 keys 方法
-	 * @since Alpha
-	 * @return string[]
-	 */
-	keys(): string[] {
-		return Object.keys(this.map);
-	}
-
-	/**
-	 * @description Map<T> 的 values 方法
-	 * @since Alpha
-	 * @return ArrayLike<T>
-	 */
-	values(): ArrayLike<T> {
-		return Object.values(this.map);
-	}
-
-	/**
 	 * @description Map<T> 的 forEach 方法
 	 * @since Alpha
-	 * @param {(value: T, key: string, map: Map<T>) => void} callback - 回调函数
+	 * @param {(value: T, key: number, map: Map<T>) => void} callback - 回调函数
 	 * @return void
 	 */
-	forEach(callback: (value: T, key: string, map: Map<T>) => void): void {
+	forEach(callback: (value: T, key: number, map: Map<T>) => void): void {
 		Object.keys(this.map).forEach(key => {
-			callback(this.map[key], key, this.map);
+			callback(this.map[Number(key)], Number(key), this.map);
 		});
 	}
 
 	/**
 	 * @description Map<T> 的 get 方法
 	 * @since Alpha
-	 * @param {string} key - 键
+	 * @param {number} key - 键
 	 * @return T
 	 */
-	get(key: string): T {
+	get(key: number): T {
 		return this.map[key];
 	}
 
 	/**
 	 * @description Map<T> 的 set 方法
 	 * @since Alpha
-	 * @param {string} key - 键
+	 * @param {number} key - 键
 	 * @param {T} value - 值
 	 * @return void
 	 */
-	set(key: string, value: T): void {
+	set(key: number, value: T): void {
 		this.map[key] = value;
-	}
-
-	/**
-	 * @description Map<T> 的 delete 方法
-	 * @since Alpha
-	 * @param {string} key - 键
-	 * @return void
-	 */
-	delete(key: string): void {
-		delete this.map[key];
-	}
-
-	/**
-	 * @description Map<T> 的 clear 方法
-	 * @since Alpha
-	 * @return void
-	 */
-	clear(): void {
-		Object.keys(this.map).forEach(key => {
-			delete this.map[key];
-		});
 	}
 
 	/**
 	 * @description Map<T> 的 has 方法
 	 * @since Alpha
-	 * @param {string} key - 键
+	 * @param {number} key - 键
 	 * @return boolean
 	 */
-	has(key: string): boolean {
+	has(key: number): boolean {
 		return this.map.hasOwnProperty(key);
-	}
-
-	/**
-	 * @description Map<T> 的 size 方法
-	 * @since Alpha
-	 * @return number
-	 */
-	size(): number {
-		return Object.keys(this.map).length;
-	}
-
-	/**
-	 * @description Map<T> 的 isEmpty 方法
-	 * @since Alpha
-	 * @return boolean
-	 */
-	isEmpty(): boolean {
-		return Object.keys(this.map).length === 0;
 	}
 
 	/**
@@ -157,7 +100,7 @@ class TGMap<T> {
 		const sortedValues: T[] = values.sort(callback);
 		const sortedMap: Map<T> = {};
 		keys.forEach((key, index) => {
-			sortedMap[key] = sortedValues[index];
+			sortedMap[Number(key)] = sortedValues[index];
 		});
 		return new TGMap(sortedMap);
 	}

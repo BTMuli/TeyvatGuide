@@ -15,5 +15,5 @@
  * @return Map
  */
 export interface Map<T> {
-	[key: string]: T;
+	[key: number]: T;
 }
