@@ -2,13 +2,13 @@
 	<h1>开发</h1>
 	<v-card>
 		<v-list>
-			<v-list-item @click="devStore.init()" prepend-icon="mdi-refresh">
+			<v-list-item @click="devInit" prepend-icon="mdi-refresh">
 				<v-list-item-title>初始化开发</v-list-item-title>
 			</v-list-item>
-			<v-list-item @click="parseAchievement()" prepend-icon="mdi-export">
+			<v-list-item @click="parseAchievement" prepend-icon="mdi-export">
 				<v-list-item-title>解析成就数据</v-list-item-title>
 			</v-list-item>
-			<v-list-item @click="mergeAchievement()" prepend-icon="mdi-export">
+			<v-list-item @click="mergeAchievement" prepend-icon="mdi-export">
 				<v-list-item-title>合并成就数据</v-list-item-title>
 			</v-list-item>
 		</v-list>
@@ -38,6 +38,10 @@ import { TGAppData } from "../data";
 // Store
 const appStore = useAppStore();
 const devStore = useDevStore();
+
+async function devInit() {
+	await devStore.init();
+}
 
 async function parseAchievement() {
 	const appDataDir = appStore.devPath.app;

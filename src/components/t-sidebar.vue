@@ -73,7 +73,7 @@ const router = useRouter();
 const appStore = useAppStore();
 const devStore = useDevStore();
 
-const rail = ref(appStore.sidebar.expand);
+const rail = ref(appStore.sidebar);
 const showDev = ref(devStore.showDev);
 
 const back = () => {
@@ -85,6 +85,7 @@ const back = () => {
 };
 function collapse() {
 	rail.value = !rail.value;
+	appStore.sidebar = rail.value;
 }
 function magicClick() {
 	if (!showDev.value) {

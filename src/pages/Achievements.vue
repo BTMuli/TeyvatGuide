@@ -3,7 +3,7 @@
 	<v-app-bar app>
 		<template v-slot:prepend>
 			<!-- 标题 -->
-			<v-card-text class="text-h5">{{ getTitle() }}</v-card-text>
+			<v-card-text class="text-h5">{{ title }}</v-card-text>
 		</template>
 		<template v-slot:append>
 			<!-- 导入按钮 -->
@@ -39,18 +39,11 @@ import { onMounted, ref } from "vue";
 const appStore = useAppStore();
 const achievementsStore = useAchievementsStore();
 
-// FileData
-const mergeAchievementMap: TGMap<TGAchievementMap> = new TGMap<TGAchievementMap>(
-	JSON.parse(await fs.readTextFile(appStore.mergePath.achievements))
-);
-const mergeSeriesMap: TGMap<TGSeriesMap> = new TGMap<TGSeriesMap>(
-	JSON.parse(await fs.readTextFile(appStore.mergePath.achievementSeries))
-);
-
 // Data
-let seriesList = ref(mergeSeriesMap.getMap() as Map<TGSeriesMap>);
-let achievementsList = ref(mergeAchievementMap.getMap() as Map<TGAchievementMap>);
-let selectedSeries = ref(-1);
+const title = ref("");
+const seriesList = ref({} as Map<TGSeriesMap>);
+const achievementsList = ref({} as Map<TGAchievementMap>);
+const selectedSeries = ref(-1);
 
 onMounted(async () => {
 	await loadData();
@@ -58,7 +51,16 @@ onMounted(async () => {
 
 // 加载数据，数据源：合并后的本地数据
 async function loadData() {
-	await achievementsStore.flushData(mergeSeriesMap);
+	const mergeAchievementMap: TGMap<TGAchievementMap> = new TGMap<TGAchievementMap>(
+		JSON.parse(await fs.readTextFile(appStore.mergePath.achievements))
+	);
+	const mergeSeriesMap: TGMap<TGSeriesMap> = new TGMap<TGSeriesMap>(
+		JSON.parse(await fs.readTextFile(appStore.mergePath.achievementSeries))
+	);
+	seriesList.value = mergeSeriesMap.getMap();
+	achievementsList.value = mergeAchievementMap.getMap();
+	achievementsStore.flushData(mergeSeriesMap);
+	title.value = await getTitle();
 }
 // 获取标题
 async function getTitle() {
@@ -71,6 +73,12 @@ async function getTitle() {
 }
 // 导入 UIAF 数据，进行数据合并、刷新
 async function importJson() {
+	const mergeAchievementMap: TGMap<TGAchievementMap> = new TGMap<TGAchievementMap>(
+		JSON.parse(await fs.readTextFile(appStore.mergePath.achievements))
+	);
+	const mergeSeriesMap: TGMap<TGSeriesMap> = new TGMap<TGSeriesMap>(
+		JSON.parse(await fs.readTextFile(appStore.mergePath.achievementSeries))
+	);
 	const localPath = appStore.userPath.achievements;
 	const selectedFile = await dialog.open({
 		multiple: false,

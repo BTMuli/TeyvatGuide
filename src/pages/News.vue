@@ -91,18 +91,14 @@ interface CardDataType {
 }
 
 // 数据
-const tab = ref("activity");
-let postData = {
-	activity: {} as CardDataType[],
-	news: {} as CardDataType[],
-	notice: {} as CardDataType[],
-};
-
-onMounted(async () => {
-	await getPosts();
+const tab = ref("");
+const postData = ref({
+	activity: [] as CardDataType[],
+	news: [] as CardDataType[],
+	notice: [] as CardDataType[],
 });
 
-async function getPosts() {
+onMounted(async () => {
 	const activityRaw: ResponseNewsList = await http
 		.fetch(MysNewsApi + EnumPostType.Activity)
 		.then(res => res.data as Promise<ResponseNewsList>);
@@ -112,13 +108,15 @@ async function getPosts() {
 	const noticeRaw: ResponseNewsList = await http
 		.fetch(MysNewsApi + EnumPostType.Notice)
 		.then(res => res.data as Promise<ResponseNewsList>);
-	postData = {
+	postData.value = {
 		activity: transData(activityRaw),
 		news: transData(newsRaw),
 		notice: transData(noticeRaw),
 	};
-}
-function transData(rawData: ResponseNewsList) {
+	tab.value = "activity";
+});
+
+function transData(rawData: ResponseNewsList): CardDataType[] {
 	let cardData: CardDataType[] = [];
 	rawData.data.list.map((item: ResponseNews) => {
 		const postData: MysPostType = item.post;
