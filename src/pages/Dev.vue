@@ -23,19 +23,17 @@ import { fs } from "@tauri-apps/api";
 import { SnapHutaoData } from "../plugins/Snap.Hutao";
 import {
 	Achievement as HutaoAchievement,
-	AchievementGoal as HutaoAchievementGoal,
+	AchievementGoal as HutaoGoal,
 } from "../plugins/Snap.Hutao/interface/achievement";
 import { PaimonMoeData } from "../plugins/Paimon.moe";
-import {
-	AchievementJson as PaimonAchievementJson,
-	AchievementSeries as PaimonAchievementSeries,
-} from "../plugins/Paimon.moe/interface/achievement";
+import { AchievementSeries as PaimonSeries } from "../plugins/Paimon.moe/interface/achievement";
 import {
 	Achievement as TGAchievement,
-	AchievementSeries as TGAchievementSeries,
-	AchievementSeriesDisplay as TGAchievementSeriesDisplay,
-	AchievementDisplay as TGAchievementDisplay,
+	AchievementMap as TGAchievementMap,
+	AchievementSeries as TGSeries,
+	SeriesMap as TGSeriesMap,
 } from "../interface/achievements";
+import TGMap from "../utils/TGMap";
 import { TGAppData } from "../data";
 
 export default defineComponent({
@@ -62,53 +60,52 @@ export default defineComponent({
 			console.log("正在读取 Snap.Hutao 数据库...");
 			const hutaoAchievementData: HutaoAchievement[] = SnapHutaoData.Achievement.data;
 			console.log("读取胡桃成就数据成功！");
-			const hutaoAchievementGoalData: HutaoAchievementGoal[] =
-				SnapHutaoData.AchievementGoal.data;
+			const hutaoGoalData: HutaoGoal[] = SnapHutaoData.AchievementGoal.data;
 			console.log("读取胡桃成就系列数据成功！");
 			console.log("正在读取 Paimon.moe 数据库...");
-			const paimonAchievementJsonData: PaimonAchievementJson = PaimonMoeData.Achievement.data;
+			const paimonSeriesMap: TGMap<PaimonSeries> = new TGMap<PaimonSeries>(
+				PaimonMoeData.Achievement.data
+			);
 			console.log("读取 Paimon.moe 成就数据成功！");
 			// 新建目标数据
 			console.log("正在生成目标数据...");
-			const achievementSeries: TGAchievementSeries[] = [];
+			const achievementSeries: TGSeries[] = [];
 			const achievement: TGAchievement[] = [];
 			// 先解析 Hutao 的成就数据
 			console.log("正在解析胡桃成就系列数据...");
-			hutaoAchievementGoalData.map(hutaoAchievementGoal => {
-				const achievementSeriesItem: TGAchievementSeries = {
-					id: hutaoAchievementGoal.Id,
-					order: hutaoAchievementGoal.Order,
-					name: hutaoAchievementGoal.Name,
-					card: hutaoAchievementGoal?.FinishReward?.ID,
+			hutaoGoalData.map(hutaoGoalItem => {
+				const achievementSeriesItem: TGSeries = {
+					id: hutaoGoalItem.Id,
+					order: hutaoGoalItem.Order,
+					name: hutaoGoalItem.Name,
+					card: hutaoGoalItem?.FinishReward?.ID,
 				};
 				achievementSeries.push(achievementSeriesItem);
 			});
 			console.log("解析胡桃成就系列数据成功！");
 			console.log("正在解析胡桃成就数据...");
-			hutaoAchievementData.map(hutaoAchievement => {
+			hutaoAchievementData.map(hutaoAchievementItem => {
 				const achievementItem: TGAchievement = {
-					id: hutaoAchievement.Id,
-					series: hutaoAchievement.Goal,
-					order: hutaoAchievement.Order,
-					name: hutaoAchievement.Title,
-					description: hutaoAchievement.Description,
-					reward: hutaoAchievement.FinishReward.ID,
+					id: hutaoAchievementItem.Id,
+					series: hutaoAchievementItem.Goal,
+					order: hutaoAchievementItem.Order,
+					name: hutaoAchievementItem.Title,
+					description: hutaoAchievementItem.Description,
+					reward: hutaoAchievementItem.FinishReward.ID,
 					version: "",
-					progress: hutaoAchievement.Progress,
+					progress: hutaoAchievementItem.Progress,
 				};
 				achievement.push(achievementItem);
 			});
 			console.log("解析胡桃成就数据成功！");
 			// 再解析 Paimon.moe 的成就数据
 			console.log("正在解析 Paimon.moe 成就数据...");
-			for (let paimonAchievementJsonDataKey in paimonAchievementJsonData) {
-				const paimonSeries: PaimonAchievementSeries =
-					paimonAchievementJsonData[paimonAchievementJsonDataKey];
+			// 遍历 Paimon.moe 成就数据
+			paimonSeriesMap.forEach(paimonSeries => {
 				// 寻找成就系列中名称相同的成就系列
-				const achievementSeriesItem: TGAchievementSeries | undefined =
-					achievementSeries.find(
-						achievementSeriesItem => achievementSeriesItem.name === paimonSeries.name
-					);
+				const seriesItem: TGSeries | undefined = achievementSeries.find(
+					achievementSeriesItem => achievementSeriesItem.name === paimonSeries.name
+				);
 				// 成就版本-暂存
 				let achievementVersion: string = "";
 				paimonSeries.achievements.map(paimonAchievementItem => {
@@ -122,7 +119,7 @@ export default defineComponent({
 							if (achievementItem) {
 								// 更新数据
 								achievementItem.version = paimonAchievement.ver;
-								if (achievementSeriesItem) {
+								if (seriesItem) {
 									if (achievementVersion === "") {
 										achievementVersion = paimonAchievement.ver;
 									} else {
@@ -142,7 +139,7 @@ export default defineComponent({
 						if (achievementItem) {
 							// 更新数据
 							achievementItem.version = paimonAchievementItem.ver;
-							if (achievementSeriesItem) {
+							if (seriesItem) {
 								if (achievementVersion === "") {
 									achievementVersion = paimonAchievementItem.ver;
 								} else {
@@ -156,10 +153,10 @@ export default defineComponent({
 					}
 				});
 				// 更新成就系列版本
-				if (achievementSeriesItem && achievementVersion !== "") {
-					achievementSeriesItem.version = achievementVersion;
+				if (seriesItem && achievementVersion !== "") {
+					seriesItem.version = achievementVersion;
 				}
-			}
+			});
 			console.log("解析 Paimon.moe 成就数据成功！");
 			//	输出数据
 			console.log("正在输出目标数据...");
@@ -183,45 +180,43 @@ export default defineComponent({
 			const mergeDataDir = appStore.dataPath.merge;
 			console.log("正在读取原始数据...");
 			const oriAchievement = TGAppData.AppData.achievements;
-			const oriAchievementSeries = TGAppData.AppData.achievementSeries;
+			const oriSeries = TGAppData.AppData.achievementSeries;
 			console.log("读取原始数据成功！");
 			console.log("正在进行处理...");
-			// 处理成就系列数据
-			console.log("正在处理成就系列数据...");
-			const transAchievementSeries: TGAchievementSeriesDisplay[] = [];
-			const transAchievement: TGAchievementDisplay[] = [];
-			oriAchievementSeries.map(oriAchievementSeriesItem => {
-				// 查找成就中 series_id 与 oriAchievementSeriesItem.id 相同的成就
-				const achievementItem: TGAchievement[] = oriAchievement.filter(
-					oriAchievementItem => oriAchievementItem.series === oriAchievementSeriesItem.id
-				);
-				const transAchievementDisplay: TGAchievementDisplay[] = [];
-				// 处理成就数据
-				achievementItem.map(singleAchievement => {
-					const transAchievementDisplayItem: TGAchievementDisplay = {
-						id: singleAchievement.id,
-						order: singleAchievement.order,
-						name: singleAchievement.name,
-						description: singleAchievement.description,
-						reward: singleAchievement.reward,
-						completed: false,
-					};
-					transAchievement.push(transAchievementDisplayItem);
-					transAchievementDisplay.push(transAchievementDisplayItem);
-				});
-				// 生成成就系列数据
-				const seriesDisplayItem: TGAchievementSeriesDisplay = {
-					id: oriAchievementSeriesItem.id,
-					order: oriAchievementSeriesItem.order,
-					name: oriAchievementSeriesItem.name,
-					achievements: transAchievementDisplay,
-					total_count: achievementItem.length,
+			const transSeries: TGMap<TGSeriesMap> = new TGMap<TGSeriesMap>();
+			const transAchievement: TGMap<TGAchievementMap> = new TGMap<TGAchievementMap>();
+			// 先遍历成就系列生成成就系列数据
+			oriSeries.map(oriSeriesItem => {
+				transSeries.set(oriSeriesItem.id.toString(), {
+					id: oriSeriesItem.id,
+					order: oriSeriesItem.order,
+					name: oriSeriesItem.name,
+					achievements: [],
+					total_count: 0,
 					completed_count: 0,
-				};
-				transAchievementSeries.push(seriesDisplayItem);
+				});
+			});
+			// 遍历成就
+			oriAchievement.map(oriAchievementItem => {
+				// 生成成就数据
+				transAchievement.set(oriAchievementItem.id.toString(), {
+					id: oriAchievementItem.id,
+					series: oriAchievementItem.series,
+					order: oriAchievementItem.order,
+					name: oriAchievementItem.name,
+					description: oriAchievementItem.description,
+					reward: oriAchievementItem.reward,
+					completed: false,
+				});
+				// 默认成就系列是完备的，所以不需要判断成就系列是否存在
+				// 更新成就系列数据的 achievements 跟 total_count
+				const seriesItem = transSeries.get(oriAchievementItem.series.toString());
+				seriesItem.achievements.push(oriAchievementItem.id);
+				seriesItem.total_count += 1;
+				transSeries.set(oriAchievementItem.series.toString(), seriesItem);
 			});
 			// 对成就系列按照 order 进行排序
-			transAchievementSeries.sort((a, b) => {
+			transSeries.sort((a, b) => {
 				return a.order - b.order;
 			});
 			// 对成就按照 order 进行排序
@@ -233,12 +228,12 @@ export default defineComponent({
 			console.log("正在写入成就系列数据...");
 			await fs.writeTextFile(
 				`${mergeDataDir}\\achievementSeries.json`,
-				JSON.stringify(transAchievementSeries, null, 2)
+				JSON.stringify(transSeries.getMap(), null, 4)
 			);
 			console.log("写入成就系列数据成功!正在写入成就数据...");
 			await fs.writeTextFile(
 				`${mergeDataDir}\\achievements.json`,
-				JSON.stringify(transAchievement, null, 2)
+				JSON.stringify(transAchievement.getMap(), null, 4)
 			);
 			console.log("写入成就数据成功!");
 		},
