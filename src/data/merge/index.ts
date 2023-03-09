@@ -7,20 +7,21 @@
 
 import achievements from "./achievements.json";
 import achievementSeries from "./achievementSeries.json";
-import { AchievementDisplay, AchievementSeriesDisplay } from "../../interface/Achievements";
+import { AchievementMap, SeriesMap } from "../../interface/Achievements";
+import { Map } from "../../interface/Base";
 
 export const MergeDataList = [
 	{
 		name: "achievements.json",
-		data: achievements as AchievementDisplay[],
+		data: achievements as unknown as Map<AchievementMap>,
 	},
 	{
 		name: "achievementSeries.json",
-		data: achievementSeries as AchievementSeriesDisplay[],
+		data: achievementSeries as unknown as Map<SeriesMap>,
 	},
 ];
 
 export const MergeData = {
-	achievements: achievements as AchievementDisplay[],
-	achievementSeries: achievementSeries as AchievementSeriesDisplay[],
+	achievements: achievements as unknown as Map<AchievementMap>,
+	achievementSeries: achievementSeries as unknown as Map<SeriesMap>,
 };
