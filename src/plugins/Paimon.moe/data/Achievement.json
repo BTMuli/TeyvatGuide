@@ -2650,11 +2650,7 @@
 				"ver": "3.0",
 				"commissions": "sumeru",
 				"quest": { "id": ["Supreme Hookshot?"], "name": ["鱼钩上的绝景？"] },
-				"checklist": [
-					"Mushroom Version",
-					"Special Bird Eggs Version",
-					"Zaytun Peach Version"
-				]
+				"checklist": ["Mushroom Version", "Special Bird Eggs Version", "Zaytun Peach Version"]
 			},
 			{
 				"id": 84544,
