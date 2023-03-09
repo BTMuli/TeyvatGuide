@@ -28,11 +28,7 @@
 		</v-window-item>
 		<v-window-item value="news">
 			<div class="cards-grid">
-				<v-card
-					v-for="item in postData.news"
-					class="justify-space-between flex-nowrap"
-					width="320"
-				>
+				<v-card v-for="item in postData.news" class="justify-space-between flex-nowrap" width="320">
 					<v-img :src="item.cover" cover style="height: 150px"></v-img>
 					<v-card-title>{{ item.title }}</v-card-title>
 					<v-card-actions>
@@ -80,6 +76,7 @@ import {
 	EnumPostType,
 	ResponsePost,
 } from "../interface/MysPost";
+// import { http,window as TauriWindow } from "@tauri-apps/api";
 import { http } from "@tauri-apps/api";
 
 const MysApi = "https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids=2&type=";
@@ -171,6 +168,16 @@ export default defineComponent({
 			const top = height / 2 - 360;
 			// 打开窗口
 			window.open(postUrl, "_blank", `width=960,height=720,left=${left},top=${top}`);
+			// new TauriWindow.WebviewWindow("blob", {
+			// 	url: postUrl,
+			// 	title: post.subject,
+			// 	decorations: true,
+			// 	width: 960,
+			// 	x: left,
+			// 	y: top,
+			// 	height: 720,
+			// 	resizable: false,
+			// });
 		},
 		getPost(post_id: string): Promise<ResponsePost> {
 			const postUrl = `https://bbs-api.mihoyo.com/post/wapi/getPostFull?gids=2&post_id=${post_id}`;
