@@ -42,7 +42,6 @@ export interface Achievement {
  * @description 像是天地万象这种一直更新的成就系列，这边的 version 可能为 undefined
  * @property {string} version - 成就系列版本
  * @property {string} icon - 成就系列图标 todo
- * @todo 为了方便列表展示，可能的话也加上成就系列包含的成就数以及已完成的成就数
  * @return AchievementSeries
  */
 export interface AchievementSeries {
@@ -55,23 +54,25 @@ export interface AchievementSeries {
 }
 
 /**
- * @description 用于展示的成就系列类型-菜单栏左侧
- * @interface AchievementSeriesDisplay
+ * @description 成就系列 Map 的 value 类型
+ * @since Alpha
+ * @interface SeriesMap
+ * @property {string} key - 成就系列 ID
  * @property {number} id - 成就系列 ID
  * @property {number} order - 成就系列排列顺序，用于展示全部成就系列
  * @property {string} name - 成就系列名称
- * @property {AchievementDisplay[]} achievements - 成就系列包含的成就
+ * @property {number[]} achievements - 成就系列包含的成就
  * @property {number} total_count - 成就系列包含的成就数
  * @property {number} completed_count - 成就系列已完成的成就数
  * @property {number} card - 成就系列奖励，这边是名片 ID todo
  * @property {string} icon - 成就系列图标 todo
- * @return AchievementSeriesDisplay
+ * @return SeriesMap
  */
-export interface AchievementSeriesDisplay {
+export interface SeriesMap {
 	id: number;
 	order: number;
 	name: string;
-	achievements: AchievementDisplay[];
+	achievements: number[];
 	total_count: number;
 	completed_count: number;
 	card?: number;
@@ -79,19 +80,22 @@ export interface AchievementSeriesDisplay {
 }
 
 /**
- * @description 用于展示的成就类型-菜单栏右侧
- * @interface AchievementDisplay
+ * @description 成就 Map 的 value 类型
+ * @since Alpha
+ * @interface AchievementMap
  * @property {number} id - 成就 ID
+ * @property {number} series - 成就系列 ID
  * @property {number} order - 成就排列顺序，用于展示全部成就
  * @property {string} name - 成就名称
  * @property {string} description - 成就描述
  * @property {number} reward - 成就奖励
  * @property {boolean} completed - 成就是否已完成
  * @property {string} completed_time - 成就完成时间
- * @return AchievementDisplay
+ * @return AchievementMap
  */
-export interface AchievementDisplay {
+export interface AchievementMap {
 	id: number;
+	series: number;
 	order: number;
 	name: string;
 	description: string;

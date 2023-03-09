@@ -7,16 +7,6 @@
  */
 
 /**
- * @description Paimon.moe Achievement json data interface
- * @interface AchievementJson
- * @example [key: string]: { AchievementSeries }
- * @return {AchievementJson}
- */
-export interface AchievementJson {
-	[key: string]: AchievementSeries;
-}
-
-/**
  * @description Paimon.moe Achievement series
  * @interface AchievementSeries
  * @property {string} name - Achievement series name
