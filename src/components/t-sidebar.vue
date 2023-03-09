@@ -43,7 +43,7 @@
 				</template>
 				<v-list-item-title v-show="!rail"> 成就 </v-list-item-title>
 			</v-list-item>
-			<v-list-subheader v-show="!rail" @click="getDev()">
+			<v-list-subheader v-show="!rail" @click="magicClick">
 				<v-icon>mdi-rocket-outline</v-icon>
 				<span> 预期功能 </span>
 			</v-list-subheader>
@@ -63,49 +63,37 @@
 	</v-navigation-drawer>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script lang="ts" setup>
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import useAppStore from "../store/modules/app";
 import useDevStore from "../store/modules/dev";
 
-export default defineComponent({
-	name: "TSidebar",
-	data() {
-		return {
-			rail: this.getRail(),
-			router: useRouter(),
-			showDev: this.getShowDev(),
-		};
-	},
-	methods: {
-		back() {
-			this.router.go(-1);
-		},
-		getRail() {
-			const appStore = useAppStore();
-			return appStore.sidebar.expand;
-		},
-		collapse() {
-			const appStore = useAppStore();
-			appStore.sidebar.expand = !appStore.sidebar.expand;
-			this.rail = appStore.sidebar.expand;
-		},
-		getShowDev() {
-			const devStore = useDevStore();
-			return devStore.showDev;
-		},
-		getDev() {
-			const devStore = useDevStore();
-			devStore.magicCount++;
-			if (devStore.magicCount >= 10) {
-				devStore.showDev = true;
-			}
-			console.log(devStore.magicCount);
-			this.showDev = devStore.showDev;
-		},
-	},
-});
+const router = useRouter();
+const appStore = useAppStore();
+const devStore = useDevStore();
+
+const rail = ref(appStore.sidebar.expand);
+const showDev = ref(devStore.showDev);
+
+const back = () => {
+	try {
+		router.back();
+	} catch (e) {
+		console.error(e);
+	}
+};
+function collapse() {
+	rail.value = !rail.value;
+}
+function magicClick() {
+	if (!showDev.value) {
+		devStore.magicCount++;
+		if (devStore.magicCount >= 10) {
+			showDev.value = true;
+		}
+	}
+}
 </script>
 
 <style lang="css"></style>
