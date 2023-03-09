@@ -24,9 +24,7 @@ const useAppStore = defineStore({
 			// 是否加载数据
 			loading: false,
 			// 侧边栏设置
-			sidebar: {
-				expand: true,
-			},
+			sidebar: true,
 			// 数据路径
 			dataPath: {
 				app: appDataDir,
@@ -61,9 +59,7 @@ const useAppStore = defineStore({
 			// 初始化加载状态
 			this.loading = false;
 			// 初始化侧边栏设置
-			this.sidebar = {
-				expand: true,
-			};
+			this.sidebar = true;
 			// 初始化数据路径
 			this.dataPath = {
 				app: appDataDir,
