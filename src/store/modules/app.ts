@@ -14,6 +14,8 @@ const appDataDir = `${await path.appLocalDataDir()}appData`;
 const userDataDir = `${await path.appLocalDataDir()}userData`;
 // 用于存储合并数据的路径-列表渲染时使用，减少重复计算
 const mergeDataDir = `${await path.appLocalDataDir()}mergeData`;
+// 用于开发者模式的路径
+const devDataDir = `${await path.resolve("../")}\\src\\data`;
 
 const useAppStore = defineStore({
 	id: "app",
@@ -30,6 +32,7 @@ const useAppStore = defineStore({
 				app: appDataDir,
 				user: userDataDir,
 				merge: mergeDataDir,
+				dev: devDataDir,
 			},
 			// 应用数据路径
 			appPath: {
@@ -44,6 +47,11 @@ const useAppStore = defineStore({
 			mergePath: {
 				achievements: `${mergeDataDir}\\achievements.json`,
 				achievementSeries: `${mergeDataDir}\\achievementSeries.json`,
+			},
+			// 开发者模式
+			devPath: {
+				app: `${devDataDir}\\app`,
+				merge: `${devDataDir}\\merge`,
 			},
 		};
 	},
@@ -61,6 +69,7 @@ const useAppStore = defineStore({
 				app: appDataDir,
 				user: userDataDir,
 				merge: mergeDataDir,
+				dev: devDataDir,
 			};
 			// 初始化应用数据路径
 			this.appPath = {
@@ -75,6 +84,11 @@ const useAppStore = defineStore({
 			this.mergePath = {
 				achievements: `${mergeDataDir}\\achievements.json`,
 				achievementSeries: `${mergeDataDir}\\achievementSeries.json`,
+			};
+			// 初始化开发者模式
+			this.devPath = {
+				app: `${devDataDir}\\app`,
+				merge: `${devDataDir}\\merge`,
 			};
 		},
 	},

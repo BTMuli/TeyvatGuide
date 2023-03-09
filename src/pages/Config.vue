@@ -1,6 +1,8 @@
 <template>
-	<v-card>
+	<v-card style="margin-bottom: 10px">
 		<v-card-title>配置</v-card-title>
+	</v-card>
+	<v-card style="margin-bottom: 10px">
 		<v-list>
 			<v-list-item @click="openMergeData" prepend-icon="mdi-folder">
 				<v-list-item-title>打开用户数据目录</v-list-item-title>
@@ -10,6 +12,18 @@
 			</v-list-item>
 			<v-list-item @click="setDefaultConfig" prepend-icon="mdi-cog">
 				<v-list-item-title>恢复默认配置</v-list-item-title>
+			</v-list-item>
+		</v-list>
+	</v-card>
+	<v-card style="margin-bottom: 10px">
+		<v-list>
+			<v-list-item prepend-icon="mdi-folder">
+				<v-list-item-title>本地应用数据路径</v-list-item-title>
+				<v-list-item-subtitle>{{ appStore.devPath.app }}</v-list-item-subtitle>
+			</v-list-item>
+			<v-list-item prepend-icon="mdi-folder">
+				<v-list-item-title>本地用户数据路径</v-list-item-title>
+				<v-list-item-subtitle>{{ appStore.devPath.merge }}</v-list-item-subtitle>
 			</v-list-item>
 		</v-list>
 	</v-card>
