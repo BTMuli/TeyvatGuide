@@ -14,10 +14,48 @@
 			</v-btn>
 		</template>
 	</v-app-bar>
-	<!-- 主体内容 考虑 tabs?-->
-	<v-layout>
-		<!-- 左侧菜单 todo -->
-		<!-- 右侧内容 todo -->
+	<!-- todo 样式优化，目前左侧跟右侧滚动是同步的，应该根据鼠标位置来判断是否滚动 -->
+	<!-- todo 另外，右侧间距过大了，排布不紧凑 -->
+	<v-layout class="container">
+		<!-- 左侧菜单 -->
+		<!-- todo 样式优化，不能说要多好看，但起码列表项之间有明显的分割 -->
+		<v-layout class="left-series">
+			<v-card>
+				<v-list>
+					<v-list-item
+						v-for="series in seriesList"
+						prepend-icon="mdi-trophy-outline"
+						:key="series.order"
+						@click="selectSeries(series.id)"
+					>
+						<v-list-item-title>{{ series.name }}</v-list-item-title>
+						<v-list-item-action>
+							<v-list-item-title
+								>{{ series.completed_count }} / {{ series.total_count }}</v-list-item-title
+							>
+						</v-list-item-action>
+					</v-list-item>
+				</v-list>
+			</v-card>
+		</v-layout>
+		<!-- 右侧内容-->
+		<!-- todo 样式优化，每个 item 都是一个 card，前面加上复选框，后面显示奖励，下面左侧显示描述，右侧显示完成时间 -->
+		<v-layout class="right-items">
+			<v-list>
+				<v-card v-for="achievement in selectedAchievement" :key="achievement.order">
+					<v-list-item
+						prepend-icon="mdi-trophy-variant-outline"
+					>
+						<v-list-item-title>{{ achievement.name }}</v-list-item-title>
+						<v-list-item-action>
+							<v-list-item-title>{{
+								achievement.completed ? achievement.completed_time : achievement.description
+							}}</v-list-item-title>
+						</v-list-item-action>
+					</v-list-item>
+				</v-card>
+			</v-list>
+		</v-layout>
 	</v-layout>
 </template>
 
@@ -26,7 +64,7 @@ import useAppStore from "../store/modules/app";
 import useAchievementsStore from "../store/modules/achievements";
 import UIAF_Oper from "../plugins/UIAF";
 import { dialog, fs } from "@tauri-apps/api";
-import { UIAF_Achievement, Achievements } from "../plugins/UIAF/interface/UIAF";
+import { Achievements, UIAF_Achievement } from "../plugins/UIAF/interface/UIAF";
 import {
 	AchievementMap as TGAchievementMap,
 	SeriesMap as TGSeriesMap,
@@ -44,6 +82,7 @@ const title = ref("");
 const seriesList = ref({} as Map<TGSeriesMap>);
 const achievementsList = ref({} as Map<TGAchievementMap>);
 const selectedSeries = ref(-1);
+const selectedAchievement = ref({} as Map<TGAchievementMap>);
 
 onMounted(async () => {
 	await loadData();
@@ -59,8 +98,26 @@ async function loadData() {
 	);
 	seriesList.value = mergeSeriesMap.getMap();
 	achievementsList.value = mergeAchievementMap.getMap();
+	selectedAchievement.value = mergeAchievementMap.getMap();
 	achievementsStore.flushData(mergeSeriesMap);
 	title.value = await getTitle();
+}
+// 渲染选中的成就系列
+function selectSeries(series_id: number) {
+	console.log(series_id);
+	selectedSeries.value = series_id;
+	// 清空选中的成就列表
+	selectedAchievement.value = {};
+	// 创建一个新的 TGMap
+	const mergeSeriesMap = new TGMap<TGSeriesMap>(seriesList.value);
+	const mergeAchievementMap = new TGMap<TGAchievementMap>(achievementsList.value);
+	// 获取选中的成就系列
+	const series = mergeSeriesMap.get(series_id);
+	// 获取选中的成就系列的成就列表
+	series.achievements.forEach(achievement_id => {
+		// 添加到选中的成就列表
+		selectedAchievement.value[achievement_id] = mergeAchievementMap.get(achievement_id);
+	});
 }
 // 获取标题
 async function getTitle() {
@@ -163,4 +220,18 @@ async function exportJson() {
 }
 </script>
 
-<style lang="css"></style>
+<style lang="css">
+/*  分栏布局，左侧较窄，显示系列，右侧较宽，显示成就*/
+.container {
+	display: flex;
+	width: 100%;
+}
+/*左侧系列*/
+.left-series {
+	width: 20%;
+}
+/*右侧成就*/
+.right-achievement {
+	width: 80%;
+}
+</style>
