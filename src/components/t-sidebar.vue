@@ -92,6 +92,7 @@ function magicClick() {
 		devStore.magicCount++;
 		if (devStore.magicCount >= 10) {
 			showDev.value = true;
+			devStore.showDev = true;
 		}
 	}
 }
