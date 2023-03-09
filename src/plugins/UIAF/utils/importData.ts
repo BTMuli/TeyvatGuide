@@ -54,9 +54,7 @@ export async function mergeUIAFData(
 	// 遍历 remoteData.list
 	remoteData.list.map((remoteAchievement: UIAF_Achievement) => {
 		// 查找 id 相同的 localAchievement
-		const localAchievement = localData.find(
-			achievement => achievement.id === remoteAchievement.id
-		);
+		const localAchievement = localData.find(achievement => achievement.id === remoteAchievement.id);
 		// 如果没找到，就直接添加
 		if (localAchievement === undefined) {
 			localData.push(remoteAchievement);

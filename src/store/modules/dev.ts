@@ -8,6 +8,12 @@ const useDevStore = defineStore({
 			magicCount: 0,
 		};
 	},
+	actions: {
+		init() {
+			this.showDev = false;
+			this.magicCount = 0;
+		},
+	},
 	persist: true,
 });
 

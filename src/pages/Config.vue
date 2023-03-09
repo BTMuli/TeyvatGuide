@@ -29,65 +29,53 @@
 	</v-card>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script lang="ts" setup>
 import useAppStore from "../store/modules/app";
 import { dialog, fs } from "@tauri-apps/api";
 import { BaseDirectory } from "@tauri-apps/api/fs";
 import { TGAppDataList } from "../data";
-export default defineComponent({
-	name: "Config",
-	data() {
-		return {
-			source: "本地",
-			appStore: useAppStore(),
-		};
-	},
-	methods: {
-		// 打开数据文件夹
-		async openMergeData() {
-			const appStore = useAppStore();
-			const mergeDataPath = appStore.dataPath.merge;
-			await dialog.open({
-				defaultPath: mergeDataPath,
-				filters: [],
-			});
-		},
-		// 删除数据
-		async deleteData() {
-			const res = await dialog.confirm("确定要删除用户数据吗?");
-			if (res) {
-				await fs.removeDir("userData", {
-					dir: BaseDirectory.AppLocalData,
-					recursive: true,
-				});
-				await fs.removeDir("mergeData", {
-					dir: BaseDirectory.AppLocalData,
-					recursive: true,
-				});
-				await dialog.message("用户数据已删除!");
-				await fs.createDir("userData", { dir: BaseDirectory.AppLocalData });
-				await fs.createDir("mergeData", { dir: BaseDirectory.AppLocalData });
-				const appStore = useAppStore();
-				TGAppDataList.MergeData.map(async item => {
-					await fs.writeFile(
-						`${appStore.dataPath.merge}\\${item.name}`,
-						JSON.stringify(item.data, null, 4)
-					);
-				});
-			}
-		},
-		// 恢复默认配置
-		async setDefaultConfig() {
-			const res = await dialog.confirm("确定要恢复默认配置吗?");
-			if (res) {
-				const appStore = useAppStore();
-				await appStore.init();
-				await dialog.message("已恢复默认配置!");
-			}
-		},
-	},
-});
+
+// Store
+const appStore = useAppStore();
+
+// 打开用户数据目录
+async function openMergeData() {
+	await dialog.open({
+		defaultPath: appStore.dataPath.merge,
+		filters: [],
+	});
+}
+// 删除本地数据
+async function deleteData() {
+	const res = await dialog.confirm("确定要删除用户数据吗?");
+	if (res) {
+		await fs.removeDir("userData", {
+			dir: BaseDirectory.AppLocalData,
+			recursive: true,
+		});
+		await fs.removeDir("mergeData", {
+			dir: BaseDirectory.AppLocalData,
+			recursive: true,
+		});
+		await dialog.message("用户数据已删除!");
+		await fs.createDir("userData", { dir: BaseDirectory.AppLocalData });
+		await fs.createDir("mergeData", { dir: BaseDirectory.AppLocalData });
+		TGAppDataList.MergeData.map(async item => {
+			await fs.writeFile(
+				`${appStore.dataPath.merge}\\${item.name}`,
+				JSON.stringify(item.data, null, 4)
+			);
+		});
+	}
+}
+// 恢复默认配置
+async function setDefaultConfig() {
+	const res = await dialog.confirm("确定要恢复默认配置吗?");
+	if (res) {
+		await appStore.init();
+		await dialog.message("已恢复默认配置!");
+	}
+}
 </script>
 
 <style lang="css"></style>
