@@ -40,8 +40,10 @@
 		<v-col cols="10" class="right-wrap">
 			<div class="right-list">
 				<v-card
-					v-for="achievement in selectedAchievement"
-					:key="achievement.order"
+					v-for="achievement in selectedSeries === -1
+						? achievementsList
+						: selectedAchievement[selectedSeries]"
+					:key="achievement.id"
 					style="margin-bottom: 10px"
 				>
 					<v-list>
@@ -81,10 +83,10 @@ const title = ref("");
 const seriesList = ref({} as Map<TGSeriesMap>);
 const achievementsList = ref({} as Map<TGAchievementMap>);
 const selectedSeries = ref(-1);
-const selectedAchievement = ref({} as Map<TGAchievementMap>);
+const selectedAchievement = ref({} as Map<Array<TGAchievementMap>>);
 
-onMounted(async () => {
-	await loadData();
+onMounted(() => {
+	loadData();
 });
 
 // 加载数据，数据源：合并后的本地数据
@@ -97,26 +99,24 @@ async function loadData() {
 	);
 	seriesList.value = mergeSeriesMap.getMap();
 	achievementsList.value = mergeAchievementMap.getMap();
-	selectedAchievement.value = mergeAchievementMap.getMap();
+	selectedAchievement.value = transGroup(mergeSeriesMap, mergeAchievementMap);
 	achievementsStore.flushData(mergeSeriesMap);
 	title.value = await getTitle();
 }
+// 将所有成就分组
+function transGroup(seriesMap: TGMap<TGSeriesMap>, achievementsMap: TGMap<TGAchievementMap>) {
+	const transList = {} as Map<Array<TGAchievementMap>>;
+	seriesMap.forEach(series => {
+		transList[series.id] = [];
+	});
+	achievementsMap.forEach(achievement => {
+		transList[achievement.series].push(achievement);
+	});
+	return transList;
+}
 // 渲染选中的成就系列
 function selectSeries(series_id: number) {
-	console.log(series_id);
 	selectedSeries.value = series_id;
-	// 清空选中的成就列表
-	selectedAchievement.value = {};
-	// 创建一个新的 TGMap
-	const mergeSeriesMap = new TGMap<TGSeriesMap>(seriesList.value);
-	const mergeAchievementMap = new TGMap<TGAchievementMap>(achievementsList.value);
-	// 获取选中的成就系列
-	const series = mergeSeriesMap.get(series_id);
-	// 获取选中的成就系列的成就列表
-	series.achievements.forEach(achievement_id => {
-		// 添加到选中的成就列表
-		selectedAchievement.value[achievement_id] = mergeAchievementMap.get(achievement_id);
-	});
 }
 // 获取标题
 async function getTitle() {
