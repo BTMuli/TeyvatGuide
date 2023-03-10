@@ -21,12 +21,14 @@
 			<v-card
 				class="left-list"
 				v-for="series in seriesList"
-				:key="series.order"
 				@click="selectSeries(series.id)"
 				style="margin-bottom: 10px"
 			>
 				<v-list>
-					<v-list-item prepend-icon="mdi-trophy-outline">
+					<v-list-item>
+						<template v-slot:prepend>
+							<v-img width="40px" style="margin-right: 10px" :src="getImgSrc(series.icon)" />
+						</template>
 						<v-list-item-title>{{ series.name }}</v-list-item-title>
 						<v-list-item-subtitle
 							>{{ series.completed_count }} / {{ series.total_count }}</v-list-item-subtitle
@@ -55,7 +57,7 @@
 								<v-btn variant="flat" disabled>
 									<template v-slot:append>
 										<img
-											src="../source/material/原石.png"
+											src="/source/material/原石.png"
 											alt="原石"
 											class="icon"
 											style="width: 32px"
@@ -73,18 +75,23 @@
 </template>
 
 <script lang="ts" setup>
+// Node
+import { dialog, fs } from "@tauri-apps/api";
+import { onMounted, ref } from "vue";
+// Store
 import useAppStore from "../store/modules/app";
 import useAchievementsStore from "../store/modules/achievements";
-import UIAF_Oper from "../plugins/UIAF";
-import { dialog, fs } from "@tauri-apps/api";
+// Interface
 import { Achievements, UIAF_Achievement } from "../plugins/UIAF/interface/UIAF";
 import {
 	AchievementMap as TGAchievementMap,
 	SeriesMap as TGSeriesMap,
 } from "../interface/Achievements";
-import TGMap from "../utils/TGMap";
 import { Map } from "../interface/Base";
-import { onMounted, ref } from "vue";
+// Plugins
+import UIAF_Oper from "../plugins/UIAF";
+// Utils
+import TGMap from "../utils/TGMap";
 
 // Store
 const appStore = useAppStore();
@@ -101,6 +108,15 @@ onMounted(() => {
 	loadData();
 });
 
+// 转换图像路径
+function getImgSrc(img: string) {
+	// todo 目前缺失了一些图像，需要补充
+	if (img === "achievements/38.png") {
+		return `/source/material/原石.png`;
+	}
+	return `/source/${img}`;
+}
+
 // 加载数据，数据源：合并后的本地数据
 async function loadData() {
 	const mergeAchievementMap: TGMap<TGAchievementMap> = new TGMap<TGAchievementMap>(
@@ -109,7 +125,8 @@ async function loadData() {
 	const mergeSeriesMap: TGMap<TGSeriesMap> = new TGMap<TGSeriesMap>(
 		JSON.parse(await fs.readTextFile(appStore.mergePath.achievementSeries))
 	);
-	seriesList.value = mergeSeriesMap.getMap();
+	// 按照 order 排序
+	seriesList.value = mergeSeriesMap.sort((a, b) => a.order - b.order).getMap();
 	achievementsList.value = mergeAchievementMap.getMap();
 	selectedAchievement.value = transGroup(mergeSeriesMap, mergeAchievementMap);
 	achievementsStore.flushData(mergeSeriesMap);

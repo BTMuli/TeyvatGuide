@@ -61,6 +61,7 @@ async function parseAchievement() {
 			order: hutaoGoalItem.Order,
 			name: hutaoGoalItem.Name,
 			card: hutaoGoalItem?.FinishReward?.ID,
+			icon: `achievements/${hutaoGoalItem.Id}.png`,
 		};
 		achievementSeries.push(achievementSeriesItem);
 	});
@@ -154,6 +155,7 @@ async function mergeAchievement() {
 			id: oriSeriesItem.id,
 			order: oriSeriesItem.order,
 			name: oriSeriesItem.name,
+			icon: oriSeriesItem.icon,
 			achievements: [],
 			total_count: 0,
 			completed_count: 0,
