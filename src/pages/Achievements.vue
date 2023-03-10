@@ -15,48 +15,47 @@
 		</template>
 	</v-app-bar>
 	<!-- todo 样式优化，目前左侧跟右侧滚动是同步的，应该根据鼠标位置来判断是否滚动 -->
-	<!-- todo 另外，右侧间距过大了，排布不紧凑 -->
-	<v-layout class="container">
+	<v-row class="wrap-view">
 		<!-- 左侧菜单 -->
-		<!-- todo 样式优化，不能说要多好看，但起码列表项之间有明显的分割 -->
-		<v-layout class="left-series">
-			<v-card>
-				<v-list>
-					<v-list-item
-						v-for="series in seriesList"
-						prepend-icon="mdi-trophy-outline"
-						:key="series.order"
-						@click="selectSeries(series.id)"
-					>
-						<v-list-item-title>{{ series.name }}</v-list-item-title>
-						<v-list-item-action>
-							<v-list-item-title
-								>{{ series.completed_count }} / {{ series.total_count }}</v-list-item-title
+		<v-col cols="2" class="left-wrap">
+			<div class="left-list">
+				<v-card
+					v-for="series in seriesList"
+					:key="series.order"
+					@click="selectSeries(series.id)"
+					style="margin-bottom: 10px"
+				>
+					<v-list>
+						<v-list-item prepend-icon="mdi-trophy-outline">
+							<v-list-item-title>{{ series.name }}</v-list-item-title>
+							<v-list-item-subtitle
+								>{{ series.completed_count }} / {{ series.total_count }}</v-list-item-subtitle
 							>
-						</v-list-item-action>
-					</v-list-item>
-				</v-list>
-			</v-card>
-		</v-layout>
-		<!-- 右侧内容-->
-		<!-- todo 样式优化，每个 item 都是一个 card，前面加上复选框，后面显示奖励，下面左侧显示描述，右侧显示完成时间 -->
-		<v-layout class="right-items">
-			<v-list>
-				<v-card v-for="achievement in selectedAchievement" :key="achievement.order">
-					<v-list-item
-						prepend-icon="mdi-trophy-variant-outline"
-					>
-						<v-list-item-title>{{ achievement.name }}</v-list-item-title>
-						<v-list-item-action>
-							<v-list-item-title>{{
-								achievement.completed ? achievement.completed_time : achievement.description
-							}}</v-list-item-title>
-						</v-list-item-action>
-					</v-list-item>
+						</v-list-item>
+					</v-list>
 				</v-card>
-			</v-list>
-		</v-layout>
-	</v-layout>
+			</div>
+		</v-col>
+		<!-- 右侧内容-->
+		<v-col cols="10" class="right-wrap">
+			<div class="right-list">
+				<v-card
+					v-for="achievement in selectedAchievement"
+					:key="achievement.order"
+					style="margin-bottom: 10px"
+				>
+					<v-list>
+						<v-list-item prepend-icon="mdi-trophy-variant-outline">
+							<v-list-item-title>{{ achievement.name }}</v-list-item-title>
+							<v-list-item-subtitle>{{
+								achievement.completed ? achievement.completed_time : achievement.description
+							}}</v-list-item-subtitle>
+						</v-list-item>
+					</v-list>
+				</v-card>
+			</div>
+		</v-col>
+	</v-row>
 </template>
 
 <script lang="ts" setup>
@@ -221,17 +220,31 @@ async function exportJson() {
 </script>
 
 <style lang="css">
-/*  分栏布局，左侧较窄，显示系列，右侧较宽，显示成就*/
-.container {
-	display: flex;
-	width: 100%;
+/*内容区域*/
+.wrap-view {
+	overflow: auto;
+	height: 100%;
 }
 /*左侧系列*/
-.left-series {
-	width: 20%;
+.left-wrap {
+	display: flex;
+	overflow: auto;
+}
+.left-list {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	height: 100%;
 }
 /*右侧成就*/
-.right-achievement {
-	width: 80%;
+.right-wrap {
+	display: flex;
+	overflow: auto;
+}
+.right-list {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	height: 100%;
 }
 </style>
