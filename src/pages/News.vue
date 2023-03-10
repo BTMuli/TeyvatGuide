@@ -4,7 +4,7 @@
 		<v-tab value="activity">活动</v-tab>
 		<v-tab value="news">咨讯</v-tab>
 	</v-tabs>
-	<v-window v-model="tab" style="height: 800px;overflow: auto">
+	<v-window v-model="tab" class="stick-window">
 		<v-window-item value="notice">
 			<div class="cards-grid">
 				<v-card
@@ -250,6 +250,12 @@ async function getPost(post_id: string): Promise<ResponsePost> {
 </script>
 
 <style lang="css">
+/* todo @media */
+.stick-window {
+	height: 800px;
+	overflow: auto;
+}
+
 .cards-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

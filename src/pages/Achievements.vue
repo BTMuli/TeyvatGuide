@@ -55,7 +55,7 @@
 								<v-btn variant="flat" disabled>
 									<template v-slot:append>
 										<img
-											src="src/source/material/原石.png"
+											src="../source/material/原石.png"
 											alt="原石"
 											class="icon"
 											style="width: 32px"
@@ -232,7 +232,7 @@ async function exportJson() {
 </script>
 
 <style lang="css">
-/*内容区域*/
+/*内容区域 todo @media*/
 .wrap-view {
 	overflow: auto;
 	height: 840px;
