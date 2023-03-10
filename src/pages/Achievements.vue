@@ -14,30 +14,29 @@
 			</v-btn>
 		</template>
 	</v-app-bar>
-	<!-- todo 样式优化，目前左侧跟右侧滚动是同步的，应该根据鼠标位置来判断是否滚动 -->
+	<!-- todo 列表加载速度优化，主要是天地万象的数据量太大了 -->
 	<v-row class="wrap-view">
 		<!-- 左侧菜单 -->
-		<v-col cols="2" class="left-wrap">
-			<div class="left-list">
-				<v-card
-					v-for="series in seriesList"
-					:key="series.order"
-					@click="selectSeries(series.id)"
-					style="margin-bottom: 10px"
-				>
-					<v-list>
-						<v-list-item prepend-icon="mdi-trophy-outline">
-							<v-list-item-title>{{ series.name }}</v-list-item-title>
-							<v-list-item-subtitle
-								>{{ series.completed_count }} / {{ series.total_count }}</v-list-item-subtitle
-							>
-						</v-list-item>
-					</v-list>
-				</v-card>
-			</div>
+		<v-col class="left-wrap">
+			<v-card
+				class="left-list"
+				v-for="series in seriesList"
+				:key="series.order"
+				@click="selectSeries(series.id)"
+				style="margin-bottom: 10px"
+			>
+				<v-list>
+					<v-list-item prepend-icon="mdi-trophy-outline">
+						<v-list-item-title>{{ series.name }}</v-list-item-title>
+						<v-list-item-subtitle
+							>{{ series.completed_count }} / {{ series.total_count }}</v-list-item-subtitle
+						>
+					</v-list-item>
+				</v-list>
+			</v-card>
 		</v-col>
 		<!-- 右侧内容-->
-		<v-col cols="10" class="right-wrap">
+		<v-col cols="9" class="right-wrap">
 			<div class="right-list">
 				<v-card
 					v-for="achievement in selectedSeries === -1
@@ -158,7 +157,7 @@ async function importJson() {
 			localData,
 			remoteData
 		);
-		await fs.writeTextFile(localPath, JSON.stringify(mergeUIAF, null, 4));
+		await fs.writeTextFile(localPath, JSON.stringify(mergeUIAF));
 		// 遍历 mergeUIAF，对 mergeData 进行更新
 		mergeUIAF.map(UIAF_Item => {
 			// 更新成就
@@ -190,11 +189,11 @@ async function importJson() {
 		// 写入数据
 		await fs.writeTextFile(
 			appStore.mergePath.achievements,
-			JSON.stringify(mergeAchievementMap.getMap(), null, 4)
+			JSON.stringify(mergeAchievementMap.getMap())
 		);
 		await fs.writeTextFile(
 			appStore.mergePath.achievementSeries,
-			JSON.stringify(mergeSeriesMap.getMap(), null, 4)
+			JSON.stringify(mergeSeriesMap.getMap())
 		);
 		// 刷新数据
 		await loadData();
@@ -223,28 +222,18 @@ async function exportJson() {
 /*内容区域*/
 .wrap-view {
 	overflow: auto;
-	height: 100%;
+	height: 840px;
+	border-bottom: 2px solid #e6e6e6;
 }
 /*左侧系列*/
 .left-wrap {
-	display: flex;
+	height: 100%;
 	overflow: auto;
 }
-.left-list {
-	display: flex;
-	flex: 1;
-	flex-direction: column;
-	height: 100%;
-}
+
 /*右侧成就*/
 .right-wrap {
-	display: flex;
-	overflow: auto;
-}
-.right-list {
-	display: flex;
-	flex: 1;
-	flex-direction: column;
 	height: 100%;
+	overflow: auto;
 }
 </style>
