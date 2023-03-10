@@ -4,7 +4,7 @@
 		<v-tab value="activity">活动</v-tab>
 		<v-tab value="news">咨讯</v-tab>
 	</v-tabs>
-	<v-window v-model="tab">
+	<v-window v-model="tab" style="height: 800px;overflow: auto">
 		<v-window-item value="notice">
 			<div class="cards-grid">
 				<v-card
@@ -50,9 +50,17 @@
 							class="ms-2 bg-blue-accent-2"
 							>查看</v-btn
 						>
-						<v-btn v-if="item.status === 1" color="ms-2 bg-green-accent-3">进行中</v-btn>
-						<v-btn v-else-if="item.status === 2" color="ms-2 bg-red-accent-3">已结束</v-btn>
-						<v-btn v-else color="ms-2 bg-orange-accent-3">评选中</v-btn>
+						<v-btn v-if="item.status === 1" color="ms-2 bg-green-accent-1" variant="flat" disabled
+							>进行中</v-btn
+						>
+						<v-btn
+							v-else-if="item.status === 2"
+							color="ms-2 bg-red-accent-1"
+							variant="flat"
+							disabled
+							>已结束</v-btn
+						>
+						<v-btn v-else color="ms-2 bg-orange-accent-1" variant="flat" disabled>评选中</v-btn>
 						<v-btn
 							v-show="showLog"
 							@click="logPost(item.post_id)"
