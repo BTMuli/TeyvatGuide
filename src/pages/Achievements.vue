@@ -51,6 +51,19 @@
 							<v-list-item-subtitle>{{
 								achievement.completed ? achievement.completed_time : achievement.description
 							}}</v-list-item-subtitle>
+							<template v-slot:append>
+								<v-btn variant="flat" disabled>
+									<template v-slot:append>
+										<img
+											src="src/source/material/原石.png"
+											alt="原石"
+											class="icon"
+											style="width: 32px"
+										/>
+									</template>
+									测试
+								</v-btn>
+							</template>
 						</v-list-item>
 					</v-list>
 				</v-card>
