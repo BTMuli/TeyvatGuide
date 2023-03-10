@@ -1,14 +1,14 @@
 <template>
 	<v-tabs v-model="tab" align-tabs="start" stacked>
-		<v-tab value="activity">活动</v-tab>
-		<v-tab value="news">新闻</v-tab>
 		<v-tab value="notice">公告</v-tab>
+		<v-tab value="activity">活动</v-tab>
+		<v-tab value="news">咨讯</v-tab>
 	</v-tabs>
 	<v-window v-model="tab">
-		<v-window-item value="activity">
+		<v-window-item value="notice">
 			<div class="cards-grid">
 				<v-card
-					v-for="item in postData.activity"
+					v-for="item in postData.notice"
 					class="justify-space-between flex-nowrap"
 					width="320"
 				>
@@ -22,6 +22,37 @@
 							>查看</v-btn
 						>
 						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+						<v-btn
+							v-show="showLog"
+							@click="logPost(item.post_id)"
+							prepend-icon="mdi-arrow-right-circle"
+							class="ms-2 bg-blue-accent-2"
+							>原始数据</v-btn
+						>
+					</v-card-actions>
+				</v-card>
+			</div>
+		</v-window-item>
+		<v-window-item value="activity">
+			<div class="cards-grid">
+				<v-card
+					v-for="item in postData.activity"
+					class="justify-space-between flex-nowrap"
+					width="320"
+				>
+					<v-img :src="item.cover" cover style="height: 150px"></v-img>
+					<v-card-title>{{ item.title }}</v-card-title>
+					<v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
+					<v-card-actions>
+						<v-btn
+							@click="toPost(item.post_id)"
+							prepend-icon="mdi-arrow-right-circle"
+							class="ms-2 bg-blue-accent-2"
+							>查看</v-btn
+						>
+						<v-btn v-if="item.status === 1" color="ms-2 bg-green-accent-3">进行中</v-btn>
+						<v-btn v-else-if="item.status === 2" color="ms-2 bg-red-accent-3">已结束</v-btn>
+						<v-btn v-else color="ms-2 bg-orange-accent-3">评选中</v-btn>
 						<v-btn
 							v-show="showLog"
 							@click="logPost(item.post_id)"
@@ -36,34 +67,6 @@
 		<v-window-item value="news">
 			<div class="cards-grid">
 				<v-card v-for="item in postData.news" class="justify-space-between flex-nowrap" width="320">
-					<v-img :src="item.cover" cover style="height: 150px"></v-img>
-					<v-card-title>{{ item.title }}</v-card-title>
-					<v-card-actions>
-						<v-btn
-							@click="toPost(item.post_id)"
-							prepend-icon="mdi-arrow-right-circle"
-							class="ms-2 bg-blue-accent-2"
-							>查看</v-btn
-						>
-						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-						<v-btn
-							v-show="showLog"
-							@click="logPost(item.post_id)"
-							prepend-icon="mdi-arrow-right-circle"
-							class="ms-2 bg-blue-accent-2"
-							>原始数据</v-btn
-						>
-					</v-card-actions>
-				</v-card>
-			</div>
-		</v-window-item>
-		<v-window-item value="notice">
-			<div class="cards-grid">
-				<v-card
-					v-for="item in postData.notice"
-					class="justify-space-between flex-nowrap"
-					width="320"
-				>
 					<v-img :src="item.cover" cover style="height: 150px"></v-img>
 					<v-card-title>{{ item.title }}</v-card-title>
 					<v-card-actions>
@@ -113,50 +116,53 @@ interface CardDataType {
 	title: string;
 	cover: string;
 	post_id: string;
+	subtitle: string;
+	status?: number;
 }
 
 // 数据
 const tab = ref("");
 const postData = ref({
+	notice: [] as CardDataType[],
 	activity: [] as CardDataType[],
 	news: [] as CardDataType[],
-	notice: [] as CardDataType[],
 });
 const showLog = ref(devStore.showDev);
 
 onMounted(async () => {
+	const noticeRaw: ResponseNewsList = await http
+		.fetch(MysNewsApi + EnumPostType.Notice)
+		.then(res => res.data as Promise<ResponseNewsList>);
 	const activityRaw: ResponseNewsList = await http
 		.fetch(MysNewsApi + EnumPostType.Activity)
 		.then(res => res.data as Promise<ResponseNewsList>);
 	const newsRaw: ResponseNewsList = await http
 		.fetch(MysNewsApi + EnumPostType.News)
 		.then(res => res.data as Promise<ResponseNewsList>);
-
-	const noticeRaw: ResponseNewsList = await http
-		.fetch(MysNewsApi + EnumPostType.Notice)
-		.then(res => res.data as Promise<ResponseNewsList>);
-	if (showLog) {
-		console.log("activityRaw", activityRaw);
-		console.log("newsRaw", newsRaw);
-		console.log("noticeRaw", noticeRaw);
-	}
 	postData.value = {
-		activity: transData(activityRaw),
-		news: transData(newsRaw),
-		notice: transData(noticeRaw),
+		notice: transData(noticeRaw, "notice"),
+		activity: transData(activityRaw, "activity"),
+		news: transData(newsRaw, "news"),
 	};
-	tab.value = "activity";
+	tab.value = "notice";
 });
 
-function transData(rawData: ResponseNewsList): CardDataType[] {
-	let cardData: CardDataType[] = [];
+function transData(rawData: ResponseNewsList, dataType: string): CardDataType[] {
+	const cardData: CardDataType[] = [];
 	rawData.data.list.map((item: ResponseNews) => {
 		const postData: MysPostType = item.post;
 		const card: CardDataType = {
 			title: postData.subject,
 			cover: postData.images.length === 0 ? postData.cover : postData.images[0],
 			post_id: postData.post_id,
+			subtitle: postData.post_id,
 		};
+		if (dataType === "activity") {
+			card.status = item.news_meta.activity_status;
+			const startTime = new Date(Number(item.news_meta.start_at_sec) * 1000).toLocaleDateString();
+			const endTime = new Date(Number(item.news_meta.end_at_sec) * 1000).toLocaleDateString();
+			card.subtitle = `${startTime} - ${endTime}`;
+		}
 		return cardData.push(card);
 	});
 	return cardData;
@@ -202,12 +208,10 @@ async function toPost(post_id: string) {
 }
 async function logPost(post_id: string) {
 	const post = await getPost(post_id).then(res => {
-		return res.data.post.post;
+		return res.data;
 	});
 	// 将 Json 内容写入 html
 	const postHtml = new DOMParser().parseFromString(JSON.stringify(post), "text/html");
-	// 四周留白
-	postHtml.body.style.padding = "12%";
 	// 将 html 转为能够通过 window.open 打开的 url
 	const postUrl = URL.createObjectURL(
 		new Blob([postHtml.documentElement.outerHTML], { type: "text/html;charset=utf-8" })

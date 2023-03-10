@@ -83,22 +83,24 @@ export interface ResponsePost {
 
 /**
  * @description 官方动态类型
+ * @description 参考米游社官方页面
  * @enum {number}
  * @return {number}
  */
 export enum EnumPostType {
 	/**
 	 * @description 活动
+	 * @description 这个有 news_meta
 	 */
-	Activity = 1,
+	Activity = 2,
 	/**
 	 * @description 公告
 	 */
-	News = 2,
+	Notice = 1,
 	/**
 	 * @description 咨讯
 	 */
-	Notice = 3,
+	News = 3,
 }
 
 /**
