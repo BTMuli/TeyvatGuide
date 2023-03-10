@@ -27,7 +27,7 @@
 				<v-list>
 					<v-list-item>
 						<template v-slot:prepend>
-							<v-img width="40px" style="margin-right: 10px" :src="getImgSrc(series.icon)" />
+							<v-img width="40px" style="margin-right: 10px" :src="series.icon" />
 						</template>
 						<v-list-item-title>{{ series.name }}</v-list-item-title>
 						<v-list-item-subtitle
@@ -57,7 +57,7 @@
 								<v-btn variant="flat" disabled>
 									<template v-slot:append>
 										<img
-											src="/source/material/原石.png"
+											src="/source/material/原石.webp"
 											alt="原石"
 											class="icon"
 											style="width: 32px"
@@ -107,15 +107,6 @@ const selectedAchievement = ref({} as Map<Array<TGAchievementMap>>);
 onMounted(() => {
 	loadData();
 });
-
-// 转换图像路径
-function getImgSrc(img: string) {
-	// todo 目前缺失了一些图像，需要补充
-	if (img === "achievements/38.png") {
-		return `/source/material/原石.png`;
-	}
-	return `/source/${img}`;
-}
 
 // 加载数据，数据源：合并后的本地数据
 async function loadData() {

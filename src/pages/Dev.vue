@@ -61,7 +61,7 @@ async function parseAchievement() {
 			order: hutaoGoalItem.Order,
 			name: hutaoGoalItem.Name,
 			card: hutaoGoalItem?.FinishReward?.ID,
-			icon: `achievements/${hutaoGoalItem.Id}.png`,
+			icon: `/source/achievementSeries/${hutaoGoalItem.Id}.webp`,
 		};
 		achievementSeries.push(achievementSeriesItem);
 	});

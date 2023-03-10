@@ -3,7 +3,7 @@
 		"id": 0,
 		"order": 1,
 		"name": "天地万象",
-		"icon": "achievements/0.png",
+		"icon": "/source/achievementSeries/0.webp",
 		"achievements": [
 			80091, 80127, 80128, 80129, 80142, 80143, 80144, 81000, 81001, 81002, 81003, 81004, 81005,
 			81010, 81014, 81015, 81016, 81017, 81018, 81019, 81020, 81021, 81022, 81023, 81024, 81025,
@@ -49,7 +49,7 @@
 		"id": 1,
 		"order": 3,
 		"name": "尘世巡游·第一辑",
-		"icon": "achievements/1.png",
+		"icon": "/source/achievementSeries/1.webp",
 		"achievements": [80001, 80002, 80003, 80004, 80005, 80006],
 		"total_count": 6,
 		"completed_count": 0
@@ -58,7 +58,7 @@
 		"id": 2,
 		"order": 6,
 		"name": "冒险手艺",
-		"icon": "achievements/2.png",
+		"icon": "/source/achievementSeries/2.webp",
 		"achievements": [80007, 80008, 80009, 80010, 80011, 80012, 80013],
 		"total_count": 7,
 		"completed_count": 0
@@ -67,7 +67,7 @@
 		"id": 3,
 		"order": 7,
 		"name": "英雄之旅",
-		"icon": "achievements/3.png",
+		"icon": "/source/achievementSeries/3.webp",
 		"achievements": [
 			80014, 80015, 80016, 80017, 80018, 80019, 80020, 80021, 80022, 80023, 80024, 80025, 80026,
 			80027, 80028, 80029
@@ -79,7 +79,7 @@
 		"id": 4,
 		"order": 8,
 		"name": "蒙德·风与牧歌的城邦",
-		"icon": "achievements/4.png",
+		"icon": "/source/achievementSeries/4.webp",
 		"achievements": [
 			80030, 80031, 80032, 80033, 80034, 80035, 80036, 80037, 80038, 80039, 80040, 80041, 80042
 		],
@@ -90,7 +90,7 @@
 		"id": 5,
 		"order": 9,
 		"name": "璃月·岩与契约的海港",
-		"icon": "achievements/5.png",
+		"icon": "/source/achievementSeries/5.webp",
 		"achievements": [
 			80043, 80044, 80045, 80046, 80047, 80048, 80049, 80050, 80051, 80052, 80053, 80054, 80055
 		],
@@ -101,7 +101,7 @@
 		"id": 6,
 		"order": 10,
 		"name": "元素专家·第一辑",
-		"icon": "achievements/6.png",
+		"icon": "/source/achievementSeries/6.webp",
 		"achievements": [
 			82019, 82020, 82021, 82022, 82023, 82024, 82025, 82026, 82027, 82028, 82029, 82030, 82031,
 			82032, 82033, 82034, 82035, 82036, 82037, 82038, 82039
@@ -113,7 +113,7 @@
 		"id": 7,
 		"order": 12,
 		"name": "神射手",
-		"icon": "achievements/7.png",
+		"icon": "/source/achievementSeries/7.webp",
 		"achievements": [82001, 82002, 82003],
 		"total_count": 3,
 		"completed_count": 0
@@ -122,7 +122,7 @@
 		"id": 8,
 		"order": 13,
 		"name": "挑战者·第一辑",
-		"icon": "achievements/8.png",
+		"icon": "/source/achievementSeries/8.webp",
 		"achievements": [82004, 82005, 82006, 82007],
 		"total_count": 4,
 		"completed_count": 0
@@ -131,7 +131,7 @@
 		"id": 9,
 		"order": 20,
 		"name": "秘境与深境螺旋·第一辑",
-		"icon": "achievements/9.png",
+		"icon": "/source/achievementSeries/9.webp",
 		"achievements": [82044, 82045, 82046, 82047, 82048, 82049, 82050, 82051],
 		"total_count": 8,
 		"completed_count": 0
@@ -140,7 +140,7 @@
 		"id": 10,
 		"order": 21,
 		"name": "Olah！第一辑",
-		"icon": "achievements/10.png",
+		"icon": "/source/achievementSeries/10.webp",
 		"achievements": [84501, 84502],
 		"total_count": 2,
 		"completed_count": 0
@@ -149,7 +149,7 @@
 		"id": 11,
 		"order": 22,
 		"name": "至冬国不相信眼泪·第一辑",
-		"icon": "achievements/11.png",
+		"icon": "/source/achievementSeries/11.webp",
 		"achievements": [84503, 84504],
 		"total_count": 2,
 		"completed_count": 0
@@ -158,7 +158,7 @@
 		"id": 12,
 		"order": 23,
 		"name": "岩港往事·第一辑",
-		"icon": "achievements/12.png",
+		"icon": "/source/achievementSeries/12.webp",
 		"achievements": [84505, 84506, 84507],
 		"total_count": 3,
 		"completed_count": 0
@@ -167,7 +167,7 @@
 		"id": 13,
 		"order": 24,
 		"name": "异世相逢·第一辑",
-		"icon": "achievements/13.png",
+		"icon": "/source/achievementSeries/13.webp",
 		"achievements": [
 			86001, 86002, 86003, 86004, 86005, 86006, 86007, 86008, 86009, 86010, 86011, 86012, 86013
 		],
@@ -178,7 +178,7 @@
 		"id": 14,
 		"order": 14,
 		"name": "挑战者·第二辑",
-		"icon": "achievements/14.png",
+		"icon": "/source/achievementSeries/14.webp",
 		"achievements": [82053, 82054, 82055, 82056, 82057, 82058, 82059, 82060, 82061, 82062],
 		"total_count": 10,
 		"completed_count": 0
@@ -187,7 +187,7 @@
 		"id": 15,
 		"order": 15,
 		"name": "挑战者·第三辑",
-		"icon": "achievements/15.png",
+		"icon": "/source/achievementSeries/15.webp",
 		"achievements": [82066, 82067, 82068, 82069, 82070, 82071, 82072, 82073],
 		"total_count": 8,
 		"completed_count": 0
@@ -196,7 +196,7 @@
 		"id": 16,
 		"order": 27,
 		"name": "雪山上的来客",
-		"icon": "achievements/16.png",
+		"icon": "/source/achievementSeries/16.webp",
 		"achievements": [
 			80056, 80057, 80058, 80059, 80060, 80061, 80062, 80063, 80064, 80065, 80066, 80067, 80068
 		],
@@ -207,7 +207,7 @@
 		"id": 17,
 		"order": 2,
 		"name": "心跳的记忆",
-		"icon": "achievements/17.png",
+		"icon": "/source/achievementSeries/17.webp",
 		"achievements": [
 			84026, 84100, 84101, 84104, 84028, 84107, 84102, 84108, 84105, 84103, 84106, 84109, 84110,
 			84111, 84112, 84113, 84114, 84115, 84116, 84117, 84118, 84119, 84120, 84121, 84122, 84123,
@@ -221,7 +221,7 @@
 		"id": 18,
 		"order": 28,
 		"name": "世外洞天·第一辑",
-		"icon": "achievements/18.png",
+		"icon": "/source/achievementSeries/18.webp",
 		"achievements": [
 			81049, 81050, 81051, 81052, 81053, 81054, 81055, 81056, 81057, 81058, 81059, 81060, 81061,
 			81062, 81063, 81064, 81065, 81066, 81067, 81068, 81069, 81070, 81071, 81072, 81073
@@ -233,7 +233,7 @@
 		"id": 19,
 		"order": 29,
 		"name": "世外洞天·第二辑",
-		"icon": "achievements/19.png",
+		"icon": "/source/achievementSeries/19.webp",
 		"achievements": [81079, 81080, 81081, 81082, 81083, 81084, 81085],
 		"total_count": 7,
 		"completed_count": 0
@@ -242,7 +242,7 @@
 		"id": 20,
 		"order": 16,
 		"name": "挑战者·第四辑",
-		"icon": "achievements/20.png",
+		"icon": "/source/achievementSeries/20.webp",
 		"achievements": [82091, 82092, 82093, 82094, 82095, 82096, 82097, 82098, 82109],
 		"total_count": 9,
 		"completed_count": 0
@@ -251,7 +251,7 @@
 		"id": 21,
 		"order": 25,
 		"name": "异世相逢·第二辑",
-		"icon": "achievements/21.png",
+		"icon": "/source/achievementSeries/21.webp",
 		"achievements": [86021, 86015, 86016, 86017, 86018, 86019, 86020],
 		"total_count": 7,
 		"completed_count": 0
@@ -260,7 +260,7 @@
 		"id": 22,
 		"order": 4,
 		"name": "尘世巡游·第二辑",
-		"icon": "achievements/22.png",
+		"icon": "/source/achievementSeries/22.webp",
 		"achievements": [80069, 80070, 80071, 80072, 80073],
 		"total_count": 5,
 		"completed_count": 0
@@ -269,7 +269,7 @@
 		"id": 23,
 		"order": 30,
 		"name": "世外洞天·第三辑",
-		"icon": "achievements/23.png",
+		"icon": "/source/achievementSeries/23.webp",
 		"achievements": [81086, 81087, 81088, 81089, 81090, 81091, 81092, 81093, 81094, 81095],
 		"total_count": 10,
 		"completed_count": 0
@@ -278,7 +278,7 @@
 		"id": 24,
 		"order": 31,
 		"name": "稻妻·雷与永恒的群岛·其之一",
-		"icon": "achievements/24.png",
+		"icon": "/source/achievementSeries/24.webp",
 		"achievements": [
 			80074, 80075, 80076, 80077, 80078, 80079, 80080, 80081, 80082, 80083, 80084, 80085, 80086,
 			80087, 80088, 80089, 80090, 80093, 80094, 80095
@@ -290,7 +290,7 @@
 		"id": 25,
 		"order": 34,
 		"name": "提瓦特钓鱼指南·第一辑",
-		"icon": "achievements/25.png",
+		"icon": "/source/achievementSeries/25.webp",
 		"achievements": [
 			81131, 81132, 81133, 81134, 81135, 81136, 81137, 81138, 81139, 81140, 81143, 81144
 		],
@@ -301,7 +301,7 @@
 		"id": 26,
 		"order": 32,
 		"name": "稻妻·雷与永恒的群岛·其之二",
-		"icon": "achievements/26.png",
+		"icon": "/source/achievementSeries/26.webp",
 		"achievements": [
 			80096, 80097, 80098, 80099, 80100, 80101, 80102, 80105, 80106, 80107, 80110, 80111, 80112,
 			80108, 80109
@@ -313,7 +313,7 @@
 		"id": 27,
 		"order": 33,
 		"name": "雾海纪行",
-		"icon": "achievements/27.png",
+		"icon": "/source/achievementSeries/27.webp",
 		"achievements": [
 			80113, 80114, 80115, 80116, 80119, 80120, 80121, 80122, 80123, 80124, 80125, 80126
 		],
@@ -324,7 +324,7 @@
 		"id": 28,
 		"order": 35,
 		"name": "白昼之光",
-		"icon": "achievements/28.png",
+		"icon": "/source/achievementSeries/28.webp",
 		"achievements": [
 			80130, 80131, 80132, 80133, 80134, 80135, 80136, 80137, 80138, 80139, 80140, 80141
 		],
@@ -335,7 +335,7 @@
 		"id": 29,
 		"order": 17,
 		"name": "挑战者·第五辑",
-		"icon": "achievements/29.png",
+		"icon": "/source/achievementSeries/29.webp",
 		"achievements": [82115, 82116, 82117, 82118, 82119, 82120, 82126, 82128],
 		"total_count": 8,
 		"completed_count": 0
@@ -344,7 +344,7 @@
 		"id": 30,
 		"order": 36,
 		"name": "岩窟流明",
-		"icon": "achievements/30.png",
+		"icon": "/source/achievementSeries/30.webp",
 		"achievements": [
 			80145, 80146, 80147, 80148, 80149, 80150, 80151, 80152, 80153, 80154, 80155, 80156, 80157,
 			80158, 80159
@@ -356,7 +356,7 @@
 		"id": 31,
 		"order": 37,
 		"name": "须弥·玄识深藏的雨林",
-		"icon": "achievements/31.png",
+		"icon": "/source/achievementSeries/31.webp",
 		"achievements": [
 			80160, 80161, 80162, 80163, 80164, 80165, 80166, 80167, 80168, 80169, 80170, 80171, 80172,
 			80173, 80174
@@ -368,7 +368,7 @@
 		"id": 32,
 		"order": 5,
 		"name": "尘世巡游·第三辑",
-		"icon": "achievements/32.png",
+		"icon": "/source/achievementSeries/32.webp",
 		"achievements": [80175, 80176, 80177, 80178],
 		"total_count": 4,
 		"completed_count": 0
@@ -377,7 +377,7 @@
 		"id": 33,
 		"order": 26,
 		"name": "异世相逢·第三辑",
-		"icon": "achievements/33.png",
+		"icon": "/source/achievementSeries/33.webp",
 		"achievements": [86022, 86023, 86024, 86025, 86026, 86027, 86028, 86029],
 		"total_count": 8,
 		"completed_count": 0
@@ -386,7 +386,7 @@
 		"id": 34,
 		"order": 18,
 		"name": "挑战者·第六辑",
-		"icon": "achievements/34.png",
+		"icon": "/source/achievementSeries/34.webp",
 		"achievements": [82134, 82135, 82136, 82137, 82138, 82139, 82140, 82141],
 		"total_count": 8,
 		"completed_count": 0
@@ -395,7 +395,7 @@
 		"id": 35,
 		"order": 38,
 		"name": "须弥·饰金砂原·其之一",
-		"icon": "achievements/35.png",
+		"icon": "/source/achievementSeries/35.webp",
 		"achievements": [
 			80179, 80180, 80181, 80182, 80183, 80184, 80185, 80186, 80187, 80188, 80189, 80190, 80191
 		],
@@ -406,7 +406,7 @@
 		"id": 36,
 		"order": 11,
 		"name": "元素专家·第二辑",
-		"icon": "achievements/36.png",
+		"icon": "/source/achievementSeries/36.webp",
 		"achievements": [82146, 82147, 82148, 82149, 82150, 82151, 82159],
 		"total_count": 7,
 		"completed_count": 0
@@ -415,7 +415,7 @@
 		"id": 37,
 		"order": 40,
 		"name": "七圣召唤",
-		"icon": "achievements/37.png",
+		"icon": "/source/achievementSeries/37.webp",
 		"achievements": [
 			80192, 80193, 80197, 80198, 80199, 80203, 80204, 80205, 80206, 80207, 80208, 80209, 80210,
 			80211, 80212, 80213, 80214, 80215, 80216, 80217, 80218, 80219, 80220, 80221, 80222, 80223
@@ -427,7 +427,7 @@
 		"id": 38,
 		"order": 39,
 		"name": "须弥·饰金砂原·其之二",
-		"icon": "achievements/38.png",
+		"icon": "/source/achievementSeries/38.webp",
 		"achievements": [
 			80224, 80225, 80226, 80228, 80229, 80230, 80231, 80232, 80233, 80234, 80235, 80236, 80227
 		],
