@@ -37,10 +37,10 @@ export interface Achievement {
  * @property {number} id - 成就系列 ID
  * @property {number} order - 成就系列排列顺序，用于展示全部成就系列
  * @property {string} name - 成就系列名称
+ * @property {string} version - 成就系列版本
  * @description 有的成就系列没有名片奖励，这边的 card 可能为 undefined
  * @property {string} card - 成就系列奖励，这边是名片名称
  * @description 像是天地万象这种一直更新的成就系列，这边的 version 可能为 undefined
- * @property {string} version - 成就系列版本
  * @property {string} icon - 成就系列图标
  * @return AchievementSeries
  */
@@ -48,8 +48,8 @@ export interface AchievementSeries {
 	id: number;
 	order: number;
 	name: string;
+	version: string;
 	card?: string;
-	version?: string;
 	icon: string;
 }
 
