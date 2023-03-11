@@ -1,10 +1,10 @@
 <template>
-	<v-tabs v-model="tab" align-tabs="start" stacked>
+	<v-tabs v-model="tab" align-tabs="start">
 		<v-tab value="notice">公告</v-tab>
 		<v-tab value="activity">活动</v-tab>
 		<v-tab value="news">咨讯</v-tab>
 	</v-tabs>
-	<v-window v-model="tab" class="stick-window">
+	<v-window v-model="tab">
 		<v-window-item value="notice">
 			<div class="cards-grid">
 				<v-card
@@ -112,6 +112,7 @@ import {
 } from "../interface/MysPost";
 import { http, fs } from "@tauri-apps/api";
 import { createTGWindow } from "../utils/TGWindow";
+import { parseMys } from "../utils/MysParse";
 
 // Store
 const devStore = useDevStore();
@@ -182,19 +183,12 @@ async function toPost(post_id: string) {
 	const post: MysPostType = await getPost(post_id).then(res => {
 		return res.data.post.post;
 	});
-	// 将内容转换为 html
-	const postHtml = new DOMParser().parseFromString(post.content, "text/html");
-	// 用帖子标题替换 html 中的标题
-	postHtml.title = post.subject;
-	// 四周留白
-	postHtml.body.style.padding = "12%";
-	postHtml.querySelectorAll("img").forEach(img => {
-		img.style.width = "100%";
-	});
-	// 将 html 保存到 文件
+	// 解析 json
+	const parseDoc = parseMys(post.structured_content);
+	// 将解析后的 doc 保存到 文件
 	await fs.writeTextFile(
-		`${appStore.dataPath.temp}\\${post.post_id}.html`,
-		postHtml.documentElement.outerHTML
+		`${appStore.dataPath.temp}\\${post_id}.html`,
+		parseDoc.documentElement.outerHTML
 	);
 	const postUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post.post_id}.html`;
 	createTGWindow(postUrl, "MysPost", post.subject, 960, 720, false);
@@ -208,9 +202,9 @@ async function logPost(post_id: string) {
 		`${appStore.dataPath.temp}\\${post_id}_log.json`,
 		JSON.stringify(post, null, 4)
 	);
-	const postUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post_id}_log.json`;
+	const logUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post_id}_log.json`;
 	// 打开窗口
-	createTGWindow(postUrl, "MysPostLog", post_id, 960, 720, false);
+	createTGWindow(logUrl, "MysPostLog", post_id, 960, 720, false);
 }
 async function getPost(post_id: string): Promise<ResponsePost> {
 	return http
@@ -227,12 +221,6 @@ async function getPost(post_id: string): Promise<ResponsePost> {
 </script>
 
 <style lang="css">
-/* todo @media */
-.stick-window {
-	height: 800px;
-	overflow: auto;
-}
-
 .cards-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
