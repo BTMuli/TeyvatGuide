@@ -82,7 +82,7 @@ export function parseMys(data: string): Document {
 		}
 	});
 	// doc 宽度设为 800,居中
-	doc.body.style.width = "900px";
+	doc.body.style.width = "800px";
 	doc.body.style.margin = "20px auto";
 	return doc;
 }
