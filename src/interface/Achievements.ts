@@ -38,7 +38,7 @@ export interface Achievement {
  * @property {number} order - 成就系列排列顺序，用于展示全部成就系列
  * @property {string} name - 成就系列名称
  * @description 有的成就系列没有名片奖励，这边的 card 可能为 undefined
- * @property {number} card - 成就系列奖励，这边是名片 ID
+ * @property {string} card - 成就系列奖励，这边是名片名称
  * @description 像是天地万象这种一直更新的成就系列，这边的 version 可能为 undefined
  * @property {string} version - 成就系列版本
  * @property {string} icon - 成就系列图标
@@ -48,7 +48,7 @@ export interface AchievementSeries {
 	id: number;
 	order: number;
 	name: string;
-	card?: number;
+	card?: string;
 	version?: string;
 	icon: string;
 }
@@ -64,7 +64,7 @@ export interface AchievementSeries {
  * @property {number[]} achievements - 成就系列包含的成就
  * @property {number} total_count - 成就系列包含的成就数
  * @property {number} completed_count - 成就系列已完成的成就数
- * @property {number} card - 成就系列奖励，这边是名片 ID todo
+ * @property {string} card - 成就系列奖励，这边是名片名称
  * @property {string} icon - 成就系列图标
  * @return SeriesMap
  */
@@ -75,7 +75,7 @@ export interface SeriesMap {
 	achievements: number[];
 	total_count: number;
 	completed_count: number;
-	card?: number;
+	card?: string;
 	icon: string;
 }
 
