@@ -98,7 +98,7 @@
 
 <script lang="ts" setup>
 // Node
-import { dialog, fs, window as TauriWindow } from "@tauri-apps/api";
+import { dialog, fs } from "@tauri-apps/api";
 import { onMounted, ref } from "vue";
 // Store
 import useAppStore from "../store/modules/app";
@@ -115,6 +115,7 @@ import { Map } from "../interface/Base";
 import UIAF_Oper from "../plugins/UIAF";
 // Utils
 import TGMap from "../utils/TGMap";
+import { createTGWindow } from "../utils/TGWindow";
 
 // Store
 const appStore = useAppStore();
@@ -172,36 +173,7 @@ function selectSeries(index: number) {
 }
 // 打开图片
 function openImg() {
-	// 获取窗口宽度
-	const width = window.screen.width;
-	// 获取窗口高度
-	const height = window.screen.height;
-	// 计算窗口位置
-	const left = width / 2 - 480;
-	const top = height / 2 - 360;
-	if (TauriWindow.WebviewWindow.getByLabel("nameCard")) {
-		new TauriWindow.WindowManager("nameCard").close().then(() => {
-			new TauriWindow.WebviewWindow("nameCard", {
-				height: 400,
-				width: 840,
-				x: left,
-				y: top,
-				resizable: false,
-				url: getCardInfo.value.profile,
-				title: getCardInfo.value.name,
-			});
-		});
-	} else {
-		new TauriWindow.WebviewWindow("nameCard", {
-			height: 400,
-			width: 840,
-			x: left,
-			y: top,
-			resizable: false,
-			url: getCardInfo.value.profile,
-			title: getCardInfo.value.name,
-		});
-	}
+	createTGWindow(getCardInfo.value.profile, "nameCard", getCardInfo.value.name, 840, 400, false);
 }
 // 获取标题
 async function getTitle() {

@@ -102,6 +102,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 import useDevStore from "../store/modules/dev";
+import useAppStore from "../store/modules/app";
 import {
 	MysPostType,
 	ResponseNewsList,
@@ -109,11 +110,12 @@ import {
 	EnumPostType,
 	ResponsePost,
 } from "../interface/MysPost";
-// import { http,window as TauriWindow } from "@tauri-apps/api";
-import { http } from "@tauri-apps/api";
+import { http, fs } from "@tauri-apps/api";
+import { createTGWindow } from "../utils/TGWindow";
 
 // Store
 const devStore = useDevStore();
+const appStore = useAppStore();
 
 // 常量
 const MysNewsApi = "https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids=2&type=";
@@ -189,51 +191,26 @@ async function toPost(post_id: string) {
 	postHtml.querySelectorAll("img").forEach(img => {
 		img.style.width = "100%";
 	});
-	// 将 html 转为能够通过 window.open 打开的 url
-	const postUrl = URL.createObjectURL(
-		new Blob([postHtml.documentElement.outerHTML], { type: "text/html;charset=utf-8" })
+	// 将 html 保存到 文件
+	await fs.writeTextFile(
+		`${appStore.dataPath.temp}\\${post.post_id}.html`,
+		postHtml.documentElement.outerHTML
 	);
-	// 打开新窗口，窗口位置居中
-	// 获取窗口宽度
-	const width = window.screen.width;
-	// 获取窗口高度
-	const height = window.screen.height;
-	// 计算窗口位置
-	const left = width / 2 - 480;
-	const top = height / 2 - 360;
-	// 打开窗口
-	window.open(postUrl, "_blank", `width=960,height=720,left=${left},top=${top}`);
-	// new TauriWindow.WebviewWindow("blob", {
-	// 	url: postUrl,
-	// 	title: post.subject,
-	// 	decorations: true,
-	// 	width: 960,
-	// 	x: left,
-	// 	y: top,
-	// 	height: 720,
-	// 	resizable: false,
-	// });
+	const postUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post.post_id}.html`;
+	createTGWindow(postUrl, "MysPost", post.subject, 960, 720, false);
 }
 async function logPost(post_id: string) {
 	const post = await getPost(post_id).then(res => {
 		return res.data;
 	});
-	// 将 Json 内容写入 html
-	const postHtml = new DOMParser().parseFromString(JSON.stringify(post), "text/html");
-	// 将 html 转为能够通过 window.open 打开的 url
-	const postUrl = URL.createObjectURL(
-		new Blob([postHtml.documentElement.outerHTML], { type: "text/html;charset=utf-8" })
+	// 将 json 保存到 文件
+	await fs.writeTextFile(
+		`${appStore.dataPath.temp}\\${post_id}_log.json`,
+		JSON.stringify(post, null, 4)
 	);
-	// 打开新窗口，窗口位置居中
-	// 获取窗口宽度
-	const width = window.screen.width;
-	// 获取窗口高度
-	const height = window.screen.height;
-	// 计算窗口位置
-	const left = width / 2 - 480;
-	const top = height / 2 - 360;
+	const postUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post_id}_log.json`;
 	// 打开窗口
-	window.open(postUrl, "_blank", `width=960,height=720,left=${left},top=${top}`);
+	createTGWindow(postUrl, "MysPostLog", post_id, 960, 720, false);
 }
 async function getPost(post_id: string): Promise<ResponsePost> {
 	return http

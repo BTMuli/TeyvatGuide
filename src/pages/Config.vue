@@ -8,7 +8,10 @@
 				<v-list-item-title>打开用户数据目录</v-list-item-title>
 			</v-list-item>
 			<v-list-item @click="deleteData" prepend-icon="mdi-delete">
-				<v-list-item-title>删除本地数据</v-list-item-title>
+				<v-list-item-title>删除用户数据</v-list-item-title>
+			</v-list-item>
+			<v-list-item @click="deleteTemp" prepend-icon="mdi-delete">
+				<v-list-item-title>删除临时数据</v-list-item-title>
 			</v-list-item>
 			<v-list-item @click="setDefaultConfig" prepend-icon="mdi-cog">
 				<v-list-item-title>恢复默认配置</v-list-item-title>
@@ -71,6 +74,18 @@ async function deleteData() {
 				JSON.stringify(item.data, null, 4)
 			);
 		});
+	}
+}
+// 删除临时数据
+async function deleteTemp() {
+	const res = await dialog.confirm("确定要删除临时数据吗?");
+	if (res) {
+		await fs.removeDir("tempData", {
+			dir: BaseDirectory.AppLocalData,
+			recursive: true,
+		});
+		await fs.createDir("tempData", { dir: BaseDirectory.AppLocalData });
+		await dialog.message("临时数据已删除!");
 	}
 }
 // 恢复默认配置
