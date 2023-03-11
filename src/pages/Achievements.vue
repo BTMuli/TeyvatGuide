@@ -20,8 +20,8 @@
 		<v-col class="left-wrap">
 			<v-card
 				class="left-list"
-				v-for="series in seriesList"
-				@click="selectSeries(series.id)"
+				v-for="(series, index) in seriesList"
+				@click="selectSeries(index)"
 				style="margin-bottom: 10px"
 			>
 				<v-list>
@@ -41,9 +41,31 @@
 		<v-col cols="9" class="right-wrap">
 			<div class="right-list">
 				<v-card
-					v-for="achievement in selectedSeries === -1
+					v-show="selectedIndex !== -1 && selectedSeries !== 0 && selectedSeries !== 17"
+					@click="openImg()"
+				>
+					<v-list
+						:style="{
+							backgroundImage: 'url(' + getCardInfo.bg || null + ')',
+							backgroundPosition: 'right',
+							backgroundSize: 'auto 100%',
+							backgroundRepeat: 'no-repeat',
+						}"
+					>
+						<v-list-item>
+							<template v-slot:prepend>
+								<v-img width="80px" style="margin-right: 10px" :src="getCardInfo.icon" />
+							</template>
+							<v-list-item-title>{{ getCardInfo.name }}</v-list-item-title>
+							<v-list-item-subtitle>{{ getCardInfo.description }}</v-list-item-subtitle>
+						</v-list-item>
+					</v-list>
+				</v-card>
+				<v-divider></v-divider>
+				<v-card
+					v-for="achievement in selectedIndex === -1
 						? achievementsList
-						: selectedAchievement[selectedSeries]"
+						: selectedAchievement[selectedIndex]"
 					:key="achievement.id"
 					style="margin-bottom: 10px"
 				>
@@ -76,7 +98,7 @@
 
 <script lang="ts" setup>
 // Node
-import { dialog, fs } from "@tauri-apps/api";
+import { dialog, fs, window as TauriWindow } from "@tauri-apps/api";
 import { onMounted, ref } from "vue";
 // Store
 import useAppStore from "../store/modules/app";
@@ -87,6 +109,7 @@ import {
 	AchievementMap as TGAchievementMap,
 	SeriesMap as TGSeriesMap,
 } from "../interface/Achievements";
+import { NameCard } from "../interface/NameCard";
 import { Map } from "../interface/Base";
 // Plugins
 import UIAF_Oper from "../plugins/UIAF";
@@ -101,8 +124,11 @@ const achievementsStore = useAchievementsStore();
 const title = ref("");
 const seriesList = ref({} as Map<TGSeriesMap>);
 const achievementsList = ref({} as Map<TGAchievementMap>);
+const selectedIndex = ref(-1);
 const selectedSeries = ref(-1);
 const selectedAchievement = ref({} as Map<Array<TGAchievementMap>>);
+const CardsInfo = ref([] as NameCard[]);
+const getCardInfo = ref({} as NameCard);
 
 onMounted(() => {
 	loadData();
@@ -116,11 +142,11 @@ async function loadData() {
 	const mergeSeriesMap: TGMap<TGSeriesMap> = new TGMap<TGSeriesMap>(
 		JSON.parse(await fs.readTextFile(appStore.mergePath.achievementSeries))
 	);
+	CardsInfo.value = JSON.parse(await fs.readTextFile(appStore.appPath.nameCards))["1"];
 	// 按照 order 排序
 	seriesList.value = mergeSeriesMap.sort((a, b) => a.order - b.order).getMap();
 	achievementsList.value = mergeAchievementMap.getMap();
 	selectedAchievement.value = transGroup(mergeSeriesMap, mergeAchievementMap);
-	achievementsStore.flushData(mergeSeriesMap);
 	title.value = await getTitle();
 }
 // 将所有成就分组
@@ -135,8 +161,47 @@ function transGroup(seriesMap: TGMap<TGSeriesMap>, achievementsMap: TGMap<TGAchi
 	return transList;
 }
 // 渲染选中的成就系列
-function selectSeries(series_id: number) {
-	selectedSeries.value = series_id;
+function selectSeries(index: number) {
+	selectedIndex.value = index;
+	selectedSeries.value = seriesList.value[index].id;
+	if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
+		getCardInfo.value = CardsInfo.value.find(card => card.name === seriesList.value[index].card)!;
+	} else {
+		getCardInfo.value = {} as NameCard;
+	}
+}
+// 打开图片
+function openImg() {
+	// 获取窗口宽度
+	const width = window.screen.width;
+	// 获取窗口高度
+	const height = window.screen.height;
+	// 计算窗口位置
+	const left = width / 2 - 480;
+	const top = height / 2 - 360;
+	if (TauriWindow.WebviewWindow.getByLabel("nameCard")) {
+		new TauriWindow.WindowManager("nameCard").close().then(() => {
+			new TauriWindow.WebviewWindow("nameCard", {
+				height: 400,
+				width: 840,
+				x: left,
+				y: top,
+				resizable: false,
+				url: getCardInfo.value.profile,
+				title: getCardInfo.value.name,
+			});
+		});
+	} else {
+		new TauriWindow.WebviewWindow("nameCard", {
+			height: 400,
+			width: 840,
+			x: left,
+			y: top,
+			resizable: false,
+			url: getCardInfo.value.profile,
+			title: getCardInfo.value.name,
+		});
+	}
 }
 // 获取标题
 async function getTitle() {
@@ -218,6 +283,7 @@ async function importJson() {
 		);
 		// 刷新数据
 		await loadData();
+		await achievementsStore.flushData(mergeSeriesMap);
 	}
 }
 // 导出

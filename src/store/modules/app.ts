@@ -36,6 +36,7 @@ const useAppStore = defineStore({
 			appPath: {
 				achievements: `${appDataDir}\\achievements.json`,
 				achievementSeries: `${appDataDir}\\achievementSeries.json`,
+				nameCards: `${appDataDir}\\nameCards.json`,
 			},
 			// 用户数据路径
 			userPath: {
@@ -60,18 +61,6 @@ const useAppStore = defineStore({
 			this.loading = false;
 			// 初始化侧边栏设置
 			this.sidebar = true;
-			// 初始化数据路径
-			this.dataPath = {
-				app: appDataDir,
-				user: userDataDir,
-				merge: mergeDataDir,
-				dev: devDataDir,
-			};
-			// 初始化应用数据路径
-			this.appPath = {
-				achievements: `${appDataDir}\\achievements.json`,
-				achievementSeries: `${appDataDir}\\achievementSeries.json`,
-			};
 			// 初始化用户数据路径
 			this.userPath = {
 				achievements: `${userDataDir}\\achievements.json`,
