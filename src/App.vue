@@ -41,6 +41,11 @@ async function checkLoad() {
 		} catch (e) {
 			await fs.createDir("mergeData", { dir: BaseDirectory.AppLocalData });
 		}
+		try {
+			await fs.readDir(`${appStore.dataPath.temp}`);
+		} catch (e) {
+			await fs.createDir("tempData", { dir: BaseDirectory.AppLocalData });
+		}
 		console.log("检测到数据未加载，开始加载数据...");
 		TGAppDataList.AppData.map(async item => {
 			await fs.writeFile(

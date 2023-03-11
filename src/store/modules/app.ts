@@ -14,6 +14,8 @@ const appDataDir = `${await path.appLocalDataDir()}appData`;
 const userDataDir = `${await path.appLocalDataDir()}userData`;
 // 用于存储合并数据的路径-列表渲染时使用，减少重复计算
 const mergeDataDir = `${await path.appLocalDataDir()}mergeData`;
+// 用于各种临时数据的路径
+const tempDataDir = `${await path.appLocalDataDir()}tempData`;
 // 用于开发者模式的路径
 const devDataDir = `${await path.resolve("../")}\\src\\data`;
 
@@ -31,6 +33,7 @@ const useAppStore = defineStore({
 				user: userDataDir,
 				merge: mergeDataDir,
 				dev: devDataDir,
+				temp: tempDataDir,
 			},
 			// 应用数据路径
 			appPath: {

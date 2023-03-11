@@ -57,9 +57,14 @@ async function deleteData() {
 			dir: BaseDirectory.AppLocalData,
 			recursive: true,
 		});
+		await fs.removeDir("tempData", {
+			dir: BaseDirectory.AppLocalData,
+			recursive: true,
+		});
 		await dialog.message("用户数据已删除!");
 		await fs.createDir("userData", { dir: BaseDirectory.AppLocalData });
 		await fs.createDir("mergeData", { dir: BaseDirectory.AppLocalData });
+		await fs.createDir("tempData", { dir: BaseDirectory.AppLocalData });
 		TGAppDataList.MergeData.map(async item => {
 			await fs.writeFile(
 				`${appStore.dataPath.merge}\\${item.name}`,
