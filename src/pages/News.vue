@@ -109,6 +109,8 @@ import {
 	ResponseNews,
 	EnumPostType,
 	ResponsePost,
+	MysPostApi,
+	MysNewsApi,
 } from "../interface/MysPost";
 import { http, fs } from "@tauri-apps/api";
 import { createTGWindow } from "../utils/TGWindow";
@@ -117,10 +119,6 @@ import { parseMys } from "../utils/MysParse";
 // Store
 const devStore = useDevStore();
 const appStore = useAppStore();
-
-// 常量
-const MysNewsApi = "https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids=2&type=";
-const MysPostApi = "https://bbs-api.mihoyo.com/post/wapi/getPostFull?gids=2&post_id=";
 
 // 接口 todo：考虑放到 interface 文件夹下?
 interface CardDataType {

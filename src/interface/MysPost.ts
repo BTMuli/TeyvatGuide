@@ -1,3 +1,8 @@
+export const MysNewsApi = "https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids=2&type=";
+export const MysPostApi = "https://bbs-api.mihoyo.com/post/wapi/getPostFull?gids=2&post_id=";
+export const MysGachaInfo =
+	"https://api-takumi.mihoyo.com/common/blackboard/ys_obc/v1/gacha_pool?app_sn=ys_obc";
+
 /**
  * @description 获取 News 的返回类型
  * @see https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids=2&type={EnumPostType}
@@ -78,6 +83,51 @@ export interface ResponsePost {
 			vod_list: string[];
 			vod_count: number;
 		};
+	};
+}
+
+/**
+ * @description 获取卡池信息的返回类型
+ * @see https://api-takumi.mihoyo.com/common/blackboard/ys_obc/v1/gacha_pool?app_sn=ys_obc
+ * @interface ResponseGachaPool
+ * @property {number} retcode 返回码
+ * @property {string} message 返回信息
+ * @property data 返回数据
+ * @property data.list 卡池列表
+ * @property {string} data.list[].id 卡池ID
+ * @property {string} data.list[].title 卡池标题
+ * @property {string} data.list[].activity_url 卡池对应帖子
+ * @property {string} data.list[].content_before_act 卡池内容
+ * @property {string} data.list[].pool 卡池包含的角色
+ * @property {string} data.list[].pool[].icon 卡池角色头像
+ * @property {string} data.list[].pool[].url 卡池角色URL
+ * @property {string} data.list[].voice_icon 卡池角色语音头像
+ * @property {string} data.list[].voice_url 卡池角色语音URL
+ * @property {string} data.list[].voice_status 卡池角色语音状态
+ * @description 如下时间示例：2023-03-21 17:59:59
+ * @property {string} data.list[].start_time 卡池开始时间
+ * @property {string} data.list[].end_time 卡池结束时间
+ * @return ResponseGachaPool
+ */
+export interface ResponseGachaPool {
+	retcode: number;
+	message: string;
+	data: {
+		list: {
+			id: string;
+			title: string;
+			activity_url: string;
+			content_before_act: string;
+			pool: {
+				icon: string;
+				url: string;
+			}[];
+			voice_icon: string;
+			voice_url: string;
+			voice_status: string;
+			start_time: string;
+			end_time: string;
+		}[];
 	};
 }
 
