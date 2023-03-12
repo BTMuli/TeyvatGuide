@@ -18,6 +18,7 @@
 <script lang="ts" setup>
 import useDevStore from "../store/modules/dev";
 import useAppStore from "../store/modules/app";
+import { useRouter } from "vue-router";
 import { dialog, fs } from "@tauri-apps/api";
 import { SnapHutaoData } from "../plugins/Snap.Hutao";
 import {
@@ -41,6 +42,10 @@ const devStore = useDevStore();
 
 async function devInit() {
 	await devStore.init();
+	await dialog.message("初始化完成!");
+	// 跳转到首页
+	const router = useRouter();
+	await router.push({ path: "/", replace: true });
 }
 
 async function parseAchievement() {

@@ -21,6 +21,10 @@ const useAchievementsStore = defineStore({
 		};
 	},
 	actions: {
+		init() {
+			this.total_achievements = 899;
+			this.fin_achievements = 0;
+		},
 		flushData(seriesMap: TGMap<SeriesMap>) {
 			let total = 0;
 			let fin = 0;

@@ -22,11 +22,11 @@
 		<v-list>
 			<v-list-item prepend-icon="mdi-folder">
 				<v-list-item-title>本地应用数据路径</v-list-item-title>
-				<v-list-item-subtitle>{{ appStore.devPath.app }}</v-list-item-subtitle>
+				<v-list-item-subtitle>{{ appStore.dataPath.app }}</v-list-item-subtitle>
 			</v-list-item>
 			<v-list-item prepend-icon="mdi-folder">
 				<v-list-item-title>本地用户数据路径</v-list-item-title>
-				<v-list-item-subtitle>{{ appStore.devPath.merge }}</v-list-item-subtitle>
+				<v-list-item-subtitle>{{ appStore.dataPath.user }}</v-list-item-subtitle>
 			</v-list-item>
 		</v-list>
 	</v-card>
@@ -34,12 +34,14 @@
 
 <script lang="ts" setup>
 import useAppStore from "../store/modules/app";
+import useAchievementsStore from "../store/modules/achievements";
 import { dialog, fs } from "@tauri-apps/api";
 import { BaseDirectory } from "@tauri-apps/api/fs";
 import { TGAppDataList } from "../data";
 
 // Store
 const appStore = useAppStore();
+const achievementsStore = useAchievementsStore();
 
 // 打开用户数据目录
 async function openMergeData() {
@@ -65,6 +67,7 @@ async function deleteData() {
 			recursive: true,
 		});
 		await dialog.message("用户数据已删除!");
+		await achievementsStore.init();
 		await fs.createDir("userData", { dir: BaseDirectory.AppLocalData });
 		await fs.createDir("mergeData", { dir: BaseDirectory.AppLocalData });
 		await fs.createDir("tempData", { dir: BaseDirectory.AppLocalData });
