@@ -92,7 +92,6 @@ onMounted(async () => {
 			.then(response => {
 				return response.data.data.post.post.images[0];
 			});
-		console.log(gachaCover);
 		poolInfo.value.push({
 			title: gachaPool.title,
 			subtitle: gachaPool.content_before_act,

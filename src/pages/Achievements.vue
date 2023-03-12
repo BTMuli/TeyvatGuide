@@ -65,7 +65,7 @@
 				<v-card
 					v-for="achievement in selectedIndex === -1
 						? achievementsList
-						: selectedAchievement[selectedIndex]"
+						: selectedAchievement[selectedSeries]"
 					:key="achievement.id"
 					style="margin-bottom: 10px"
 				>
