@@ -19,7 +19,7 @@
 			<!-- 菜单项 -->
 			<v-list-item link href="/">
 				<template v-slot:prepend>
-					<v-icon>mdi-home-outline</v-icon>
+					<img src="/source/UI/paimon.webp" alt="homeIcon" class="sideIcon" />
 				</template>
 				<v-list-item-title v-show="!rail"> 首页 </v-list-item-title>
 			</v-list-item>
@@ -29,7 +29,7 @@
 			</v-list-subheader>
 			<v-list-item link href="/news">
 				<template v-slot:prepend>
-					<v-icon>mdi-calendar-text-outline</v-icon>
+					<img src="/source/UI/news.webp" alt="newsIcon" class="sideIcon" />
 				</template>
 				<v-list-item-title v-show="!rail"> 咨讯 </v-list-item-title>
 			</v-list-item>
@@ -39,7 +39,7 @@
 			</v-list-subheader>
 			<v-list-item link href="/achievements">
 				<template v-slot:prepend>
-					<v-icon>mdi-trophy-outline</v-icon>
+					<img src="/source/UI/achievements.webp" alt="achievementsIcon" class="sideIcon" />
 				</template>
 				<v-list-item-title v-show="!rail"> 成就 </v-list-item-title>
 			</v-list-item>
@@ -98,4 +98,9 @@ function magicClick() {
 }
 </script>
 
-<style lang="css"></style>
+<style lang="css">
+.sideIcon {
+	width: 24px;
+	height: 24px;
+}
+</style>
