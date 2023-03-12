@@ -20,6 +20,25 @@
 	</v-card>
 	<v-card style="margin-bottom: 10px">
 		<v-list>
+			<v-list-item>
+				<v-list-item-title>咨讯页渲染模式</v-list-item-title>
+				<v-list-item-subtitle
+					>样式上 raw 数据渲染更为合适，如果帖子有视频，建议采用结构化渲染</v-list-item-subtitle
+				>
+				<template v-slot:append>
+					<v-switch
+						:label="renderMode"
+						inset
+						v-model="renderBool"
+						@click="changeRenderMode"
+						color="primary"
+					/>
+				</template>
+			</v-list-item>
+		</v-list>
+	</v-card>
+	<v-card style="margin-bottom: 10px">
+		<v-list>
 			<v-list-item prepend-icon="mdi-folder">
 				<v-list-item-title>本地应用数据路径</v-list-item-title>
 				<v-list-item-subtitle>{{ appStore.dataPath.app }}</v-list-item-subtitle>
@@ -33,6 +52,7 @@
 </template>
 
 <script lang="ts" setup>
+import { ref } from "vue";
 import useAppStore from "../store/modules/app";
 import useAchievementsStore from "../store/modules/achievements";
 import { dialog, fs } from "@tauri-apps/api";
@@ -42,6 +62,17 @@ import { TGAppDataList } from "../data";
 // Store
 const appStore = useAppStore();
 const achievementsStore = useAchievementsStore();
+
+const renderBool = ref(appStore.structureRender);
+const renderMode = ref("raw渲染");
+
+// 切换渲染模式
+function changeRenderMode() {
+	renderBool.value = !renderBool.value;
+	renderBool.value ? (renderMode.value = "结构化渲染") : (renderMode.value = " raw 渲染");
+	appStore.structureRender = renderBool.value;
+	dialog.message("已切换渲染模式为" + renderMode.value);
+}
 
 // 打开用户数据目录
 async function openMergeData() {

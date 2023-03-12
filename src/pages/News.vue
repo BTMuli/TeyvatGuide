@@ -120,6 +120,9 @@ import { parseMys } from "../utils/MysParse";
 const devStore = useDevStore();
 const appStore = useAppStore();
 
+// 渲染模式
+const renderMode = ref(appStore.structureRender);
+
 // 接口 todo：考虑放到 interface 文件夹下?
 interface CardDataType {
 	title: string;
@@ -181,8 +184,15 @@ async function toPost(post_id: string) {
 	const post: MysPostType = await getPost(post_id).then(res => {
 		return res.data.post.post;
 	});
-	// 解析 json
-	const parseDoc = parseMys(post.structured_content);
+	let parseDoc: Document;
+	// 获取渲染模式
+	if (renderMode.value) {
+		// 结构化渲染
+		parseDoc = parseMys(post.structured_content);
+	} else {
+		// 原始渲染
+		parseDoc = new DOMParser().parseFromString(post.content, "text/html");
+	}
 	// 将解析后的 doc 保存到 文件
 	await fs.writeTextFile(
 		`${appStore.dataPath.temp}\\${post_id}.html`,

@@ -27,6 +27,8 @@ const useAppStore = defineStore({
 			loading: false,
 			// 侧边栏设置
 			sidebar: true,
+			// 咨讯页渲染模式
+			structureRender: true, // 是否采用结构化渲染，否则采用 raw 渲染
 			// 数据路径
 			dataPath: {
 				app: appDataDir,
@@ -64,6 +66,8 @@ const useAppStore = defineStore({
 			this.loading = false;
 			// 初始化侧边栏设置
 			this.sidebar = true;
+			// 初始化咨讯页渲染模式
+			this.structureRender = true;
 			// 初始化用户数据路径
 			this.userPath = {
 				achievements: `${userDataDir}\\achievements.json`,
