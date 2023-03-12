@@ -1,0 +1,9 @@
+/* 设置全局字体 */
+@font-face {
+	font-family: "Genshin";
+	src: url("./Genshin.ttf") format("truetype");
+}
+
+* {
+	font-family: "Genshin", sans-serif;
+}

@@ -7,5 +7,7 @@ import store from "./store";
 import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";
 import { createVuetify } from "vuetify";
+// 全局样式
+import "./assets/fonts/index.css";
 
 createApp(App).use(router).use(store).use(createVuetify()).mount("#app");
