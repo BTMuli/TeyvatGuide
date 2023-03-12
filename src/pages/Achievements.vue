@@ -70,7 +70,10 @@
 					style="margin-bottom: 10px"
 				>
 					<v-list>
-						<v-list-item prepend-icon="mdi-trophy-variant-outline">
+						<v-list-item>
+							<template v-slot:prepend>
+								<v-icon color="rgb(205, 182, 145)">mdi-trophy-variant-outline</v-icon>
+							</template>
 							<v-list-item-title>{{ achievement.name }}</v-list-item-title>
 							<v-list-item-subtitle>{{
 								achievement.completed ? achievement.completed_time : achievement.description

@@ -7,57 +7,40 @@
 			<!-- todo 如果没有上一个页面，则灰色不可点击 -->
 			<v-list-item @click="back">
 				<v-list-item-action>
-					<v-icon>mdi-arrow-left</v-icon>
+					<v-icon color="rgb(205, 182, 145)">mdi-arrow-left</v-icon>
 				</v-list-item-action>
 			</v-list-item>
 			<!-- 第二个图标，负责收缩侧边栏 -->
 			<v-list-item @click="collapse">
 				<v-list-item-action>
-					<v-icon>mdi-menu</v-icon>
+					<v-icon color="rgb(205, 182, 145)">mdi-menu</v-icon>
 				</v-list-item-action>
 			</v-list-item>
 			<!-- 菜单项 -->
-			<v-list-item link href="/">
+			<v-list-item link href="/" title="首页">
 				<template v-slot:prepend>
 					<img src="/source/UI/paimon.webp" alt="homeIcon" class="sideIcon" />
 				</template>
-				<v-list-item-title v-show="!rail"> 首页 </v-list-item-title>
 			</v-list-item>
-			<v-list-subheader v-show="!rail">
-				<v-icon>mdi-bug-outline</v-icon>
-				<span> 测试功能 </span>
-			</v-list-subheader>
-			<v-list-item link href="/news">
+			<v-list-item link href="/news" title="咨讯">
 				<template v-slot:prepend>
 					<img src="/source/UI/news.webp" alt="newsIcon" class="sideIcon" />
 				</template>
-				<v-list-item-title v-show="!rail"> 咨讯 </v-list-item-title>
 			</v-list-item>
-			<v-list-subheader v-show="!rail">
-				<v-icon>mdi-cog-outline</v-icon>
-				<span> 开发功能 </span>
-			</v-list-subheader>
-			<v-list-item link href="/achievements">
+			<v-list-item link href="/achievements" title="成就">
 				<template v-slot:prepend>
 					<img src="/source/UI/achievements.webp" alt="achievementsIcon" class="sideIcon" />
 				</template>
-				<v-list-item-title v-show="!rail"> 成就 </v-list-item-title>
 			</v-list-item>
-			<v-list-subheader v-show="!rail" @click="magicClick">
-				<v-icon>mdi-rocket-outline</v-icon>
-				<span> 预期功能 </span>
-			</v-list-subheader>
-			<v-list-item link href="/config">
+			<v-list-item link href="/config" title="设置">
 				<template v-slot:prepend>
-					<v-icon>mdi-cog-outline</v-icon>
+					<v-icon color="rgb(205, 182, 145)">mdi-cog-outline</v-icon>
 				</template>
-				<v-list-item-title v-show="!rail"> 设置 </v-list-item-title>
 			</v-list-item>
-			<v-list-item link href="/dev" v-show="showDev">
+			<v-list-item link href="/dev" v-show="showDev" title="开发">
 				<template v-slot:prepend>
 					<v-icon>mdi-bug-outline</v-icon>
 				</template>
-				<v-list-item-title v-show="!rail"> 开发 </v-list-item-title>
 			</v-list-item>
 		</v-list>
 	</v-navigation-drawer>
@@ -88,13 +71,14 @@ function collapse() {
 	appStore.sidebar = rail.value;
 }
 function magicClick() {
-	if (!showDev.value) {
-		devStore.magicCount++;
-		if (devStore.magicCount >= 10) {
-			showDev.value = true;
-			devStore.showDev = true;
-		}
-	}
+	// 打包的时候不显示开发功能
+	// if (!showDev.value) {
+	// 	devStore.magicCount++;
+	// 	if (devStore.magicCount >= 10) {
+	// 		showDev.value = true;
+	// 		devStore.showDev = true;
+	// 	}
+	// }
 }
 </script>
 
@@ -102,5 +86,6 @@ function magicClick() {
 .sideIcon {
 	width: 24px;
 	height: 24px;
+	margin-right: 32px;
 }
 </style>
