@@ -34,7 +34,7 @@
 			</v-list-item>
 			<v-list-item link href="/config" title="设置">
 				<template v-slot:prepend>
-					<v-icon color="rgb(205, 182, 145)">mdi-cog-outline</v-icon>
+					<img src="../assets/icons/setting.svg" alt="setting" class="sideIcon" />
 				</template>
 			</v-list-item>
 			<v-list-item link href="/dev" v-show="showDev" title="开发">
