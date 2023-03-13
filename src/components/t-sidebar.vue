@@ -29,7 +29,7 @@
 			</v-list-item>
 			<v-list-item link href="/achievements" title="成就">
 				<template v-slot:prepend>
-					<img src="/source/UI/achievements.webp" alt="achievementsIcon" class="sideIcon" />
+					<img src="../assets/icons/achievements.svg" alt="achievementsIcon" class="sideIcon" />
 				</template>
 			</v-list-item>
 			<v-list-item link href="/config" title="设置">
