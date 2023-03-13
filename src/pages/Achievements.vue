@@ -3,11 +3,16 @@
 	<v-app-bar app>
 		<template v-slot:prepend>
 			<!-- 标题 -->
-			<v-card-text class="text-h5">{{ title }}</v-card-text>
+			<v-card-text class="text-h5;global-font">{{ title }}</v-card-text>
 		</template>
 		<template v-slot:append>
 			<!-- 导入按钮 -->
-			<v-btn @click="importJson" prepend-icon="mdi-import" class="bg-green-accent-2"> 导入 </v-btn>
+			<v-btn
+				@click="importJson"
+				prepend-icon="mdi-import"
+				class="bg-green-accent-2;global-font;global-font;"
+				title="导入"
+			/>
 			<!-- 导出按钮 -->
 			<v-btn @click="exportJson" prepend-icon="mdi-export" class="ms-2 bg-green-accent-2">
 				导出
@@ -286,6 +291,7 @@ async function exportJson() {
 	overflow: auto;
 	height: 840px;
 	border-bottom: 2px solid #e6e6e6;
+	font-family: Genshin, "serif";
 }
 /*左侧系列*/
 .left-wrap {

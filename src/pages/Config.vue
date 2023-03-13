@@ -1,8 +1,8 @@
 <template>
-	<v-card style="margin-bottom: 10px">
+	<v-card class="common-card">
 		<v-card-title>配置</v-card-title>
 	</v-card>
-	<v-card style="margin-bottom: 10px">
+	<v-card class="common-card">
 		<v-list>
 			<v-list-item @click="openMergeData" prepend-icon="mdi-folder">
 				<v-list-item-title>打开用户数据目录</v-list-item-title>
@@ -18,7 +18,7 @@
 			</v-list-item>
 		</v-list>
 	</v-card>
-	<v-card style="margin-bottom: 10px">
+	<v-card class="common-card">
 		<v-list>
 			<v-list-item>
 				<v-list-item-title>咨讯页渲染模式</v-list-item-title>
@@ -37,7 +37,7 @@
 			</v-list-item>
 		</v-list>
 	</v-card>
-	<v-card style="margin-bottom: 10px">
+	<v-card class="common-card">
 		<v-list>
 			<v-list-item prepend-icon="mdi-folder">
 				<v-list-item-title>本地应用数据路径</v-list-item-title>

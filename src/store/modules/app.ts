@@ -64,8 +64,6 @@ const useAppStore = defineStore({
 		async init() {
 			// 初始化加载状态
 			this.loading = false;
-			// 初始化侧边栏设置
-			this.sidebar = true;
 			// 初始化咨讯页渲染模式
 			this.structureRender = true;
 			// 初始化用户数据路径

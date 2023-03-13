@@ -2,7 +2,7 @@
 	<!-- todo 侧边栏宽度调整 -->
 	<v-navigation-drawer permanent :rail="rail">
 		<!-- todo 选中没有高亮 -->
-		<v-list>
+		<v-list class="sideList">
 			<!-- 第一个图标，负责返回上一个页面 -->
 			<!-- todo 如果没有上一个页面，则灰色不可点击 -->
 			<v-list-item @click="back">
@@ -83,6 +83,11 @@ function magicClick() {
 </script>
 
 <style lang="css">
+.sideList {
+	font-family: "Genshin", serif;
+	/* 磨砂 */
+	backdrop-filter: blur(10px);
+}
 .sideIcon {
 	width: 24px;
 	height: 24px;

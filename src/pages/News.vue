@@ -1,8 +1,8 @@
 <template>
-	<v-tabs v-model="tab" align-tabs="start">
-		<v-tab value="notice">公告</v-tab>
-		<v-tab value="activity">活动</v-tab>
-		<v-tab value="news">咨讯</v-tab>
+	<v-tabs v-model="tab" align-tabs="start" class="global-font">
+		<v-tab value="notice" title="公告" />
+		<v-tab value="activity" title="活动" />
+		<v-tab value="news" title="新闻" />
 	</v-tabs>
 	<v-window v-model="tab">
 		<v-window-item value="notice">
@@ -230,6 +230,7 @@ async function getPost(post_id: string): Promise<ResponsePost> {
 
 <style lang="css">
 .cards-grid {
+	font-family: Genshin, serif;
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 	grid-gap: 20px;

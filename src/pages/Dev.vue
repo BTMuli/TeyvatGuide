@@ -1,6 +1,6 @@
 <template>
 	<h1>开发</h1>
-	<v-card>
+	<v-card class="common-card">
 		<v-list>
 			<v-list-item @click="devInit" prepend-icon="mdi-refresh">
 				<v-list-item-title>初始化开发</v-list-item-title>

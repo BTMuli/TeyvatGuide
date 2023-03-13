@@ -119,6 +119,7 @@ function toOuter(url: string, title: string) {
 
 <style lang="css">
 .pool-cards {
+	font-family: Genshin, serif;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
