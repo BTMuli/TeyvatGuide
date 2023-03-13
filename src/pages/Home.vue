@@ -2,8 +2,12 @@
 	<div v-show="poolInfo" class="pool-cards">
 		<v-card v-for="pool in poolInfo" style="margin-top: 20px">
 			<template v-slot:prepend>
-				<img src="/source/UI/wish.webp" alt="wish" style="width: 40px; height: 40px; float: left" />
-				<v-card-title>{{ pool.title }}</v-card-title>
+				<img
+					src="../assets/icons/note-wish-circle.svg"
+					alt="wish"
+					style="width: 32px; height: auto; margin-right: 10px; float: left"
+				/>
+				<v-card-title style="display: inline-block">{{ pool.title }}</v-card-title>
 			</template>
 			<!-- 卡池封面 -->
 			<v-row style="margin-left: 10px">

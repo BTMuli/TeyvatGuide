@@ -1,0 +1,16 @@
+<svg width="256.000000" height="256.000000" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<desc>
+			Created with Pixso.
+	</desc>
+	<g clip-path="url(#clip11_5)">
+		<circle id="椭圆 1" cx="128.000000" cy="126.000000" r="125.000000" fill="#7893C8"/>
+		<circle id="椭圆 1" cx="128.000000" cy="126.000000" r="115.000000" fill="#7893C8"/>
+		<circle id="椭圆 1" cx="128.000000" cy="126.000000" r="110.000000" stroke="#92A7D0" stroke-width="10.000000"/>
+		<path id="矩形 2 (边框)" d="M44.0135 126.853L110.599 144.596L128.853 211.706L146.601 144.596L213.692 126.853L146.601 109.204L128.853 42L110.599 109.204L44.0135 126.853Z" fill-rule="evenodd" fill="#F1EFE9"/>
+	</g>
+	<defs>
+		<clipPath id="clip11_5">
+			<rect id="note-wish-circle" width="256.000000" height="256.000000" fill="white"/>
+		</clipPath>
+	</defs>
+</svg>
