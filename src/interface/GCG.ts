@@ -22,6 +22,143 @@ export enum BaseCardType {
 }
 
 /**
+ * @description Gcg 角色卡牌
+ * @interface  CharacterCard
+ * @since Alpha
+ * @see CharacterCardType
+ * @property {string} name 角色名称
+ * @property icon 卡牌图标
+ * @property {string} icon.normal 正常图标
+ * @property {string} icon.special 特殊图标
+ * @property info 卡牌信息
+ * @property {EnumElement} info.element 元素
+ * @property {EnumWeapon} info.weapon 武器
+ * @property {EnumCamp} info.camp 阵营
+ * @property {string} info.source 卡牌来源
+ * @property {string} info.title 卡牌标题
+ * @property {string} info.description 卡牌描述
+ * @property skills 卡牌技能
+ * @property {string} skills[].name 技能名称
+ * @property {string} skills[].type 技能类型
+ * @property {string} skills[].description 技能描述
+ * @property {string} skills[].cost 技能花费
+ * @property {string} skills[].cost.type 花费类型
+ * @property {string} skills[].cost.value 花费值
+ * @description 当技能类型为 “召唤物” 时，会有以下属性
+ * @property {number} skills[].count 可用次数
+ * @return CharacterCard
+ */
+export interface CharacterCard {
+	name: string;
+	icon: {
+		normal: string;
+		special?: string;
+	};
+	info: {
+		element: EnumElement;
+		weapon: EnumWeapon;
+		camp: EnumCamp;
+		source: string;
+		title: string;
+		description: string;
+	};
+	skills: {
+		name: string;
+		type: string;
+		description: string;
+		cost: {
+			type: string;
+			value: string;
+		};
+		count?: number;
+	}[];
+}
+
+/**
+ * @description Gcg 行动卡牌
+ * @interface  ActionCard
+ * @since Alpha
+ * @see ActionCardType
+ * @property {string} name 卡牌名称
+ * @property icon 卡牌图标
+ * @property {string} icon.normal 正常图标
+ * @property {string} icon.special 特殊图标
+ * @property info 卡牌信息
+ * @property {EnumActionType} info.actionType 类型
+ * @property {EnumActionTag} info.actionTag 标签
+ * @property {EnumActionCost} info.actionCost 花费
+ * @property {string} info.source 卡牌来源
+ * @property {string} info.title 卡牌标题
+ * @property {string} info.description 卡牌描述
+ * @description 当类型为“天赋”时，可能会有以下属性
+ * @property {string} info.charge 充能
+ * @property {string} affect 卡牌效果
+ * @return ActionCard
+ */
+export interface ActionCard {
+	name: string;
+	icon: {
+		normal: string;
+		special?: string;
+	};
+	info: {
+		actionType: EnumActionType;
+		actionTag: EnumActionTag;
+		actionCost: EnumActionCost;
+		source: string;
+		title: string;
+		description: string;
+		charge?: string;
+	};
+	affect: string;
+}
+
+/**
+ * @description Gcg 魔物卡牌
+ * @description 与角色卡牌类似
+ * @interface  MonsterCard
+ * @since Alpha
+ * @see CharacterCardType
+ * @property {string} name 角色名称
+ * @description 只有一个图标
+ * @property {string} icon 卡牌图标
+ * @property info 卡牌信息
+ * @property {EnumElement} info.element 元素
+ * @property {EnumWeapon} info.weapon 武器
+ * @property {EnumCamp} info.camp 阵营
+ * @property {string} info.source 卡牌来源
+ * @description 无标题跟描述
+ * @property skills 卡牌技能
+ * @property {string} skills[].name 技能名称
+ * @property {string} skills[].type 技能类型
+ * @property {string} skills[].description 技能描述
+ * @property {string} skills[].cost 技能花费
+ * @property {string} skills[].cost.type 花费类型
+ * @property {string} skills[].cost.value 花费值
+ * @description 当技能类型为 “召唤物” 时，会有以下属性
+ * @return MonsterCard
+ */
+export interface MonsterCard {
+	name: string;
+	icon: string;
+	info: {
+		element: EnumElement;
+		weapon: EnumWeapon;
+		camp: EnumCamp;
+		source: string;
+	};
+	skills: {
+		name: string;
+		type: string;
+		description: string;
+		cost: {
+			type: string;
+			value: string;
+		};
+	}[];
+}
+
+/**
  * @description Gcg 角色牌分类依据
  * @interface  CharacterCardType
  * @since Alpha
@@ -58,23 +195,23 @@ export interface ActionCardType {
  * @enum EnumElement
  * @since Alpha
  * @see CharacterCardType
- * @property {string} pyro 火
- * @property {string} hydro 水
- * @property {string} cryo 冰
- * @property {string} electro 雷
- * @property {string} anemo 风
- * @property {string} geo 岩
- * @property {string} dendro 草
+ * @property {string} pyro 火元素
+ * @property {string} hydro 水元素
+ * @property {string} cryo 冰元素
+ * @property {string} electro 雷元素
+ * @property {string} anemo 风元素
+ * @property {string} geo 岩元素
+ * @property {string} dendro 草元素
  * @return EnumElement
  */
 export enum EnumElement {
-	pyro = "火",
-	hydro = "水",
-	cryo = "冰",
-	electro = "雷",
-	anemo = "风",
-	geo = "岩",
-	dendro = "草",
+	pyro = "火元素",
+	hydro = "水元素",
+	cryo = "冰元素",
+	electro = "雷元素",
+	anemo = "风元素",
+	geo = "岩元素",
+	dendro = "草元素",
 }
 
 /**
