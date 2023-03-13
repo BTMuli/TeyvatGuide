@@ -24,7 +24,7 @@
 			</v-list-item>
 			<v-list-item link href="/news" title="咨讯">
 				<template v-slot:prepend>
-					<img src="/source/UI/news.webp" alt="newsIcon" class="sideIcon" />
+					<img src="/source/UI/news.svg" alt="newsIcon" class="sideIcon" />
 				</template>
 			</v-list-item>
 			<v-list-item link href="/achievements" title="成就">
