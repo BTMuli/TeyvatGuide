@@ -50,17 +50,9 @@
 							class="ms-2 card-btn"
 							>查看</v-btn
 						>
-						<v-btn v-if="item.status === 1" color="ms-2 bg-green-accent-1" variant="flat" disabled
-							>进行中</v-btn
-						>
-						<v-btn
-							v-else-if="item.status === 2"
-							color="ms-2 bg-red-accent-1"
-							variant="flat"
-							disabled
-							>已结束</v-btn
-						>
-						<v-btn v-else color="ms-2 bg-orange-accent-1" variant="flat" disabled>评选中</v-btn>
+						<v-btn v-if="item.status === 1" color="ms-2 card-btn-0">进行中</v-btn>
+						<v-btn v-else-if="item.status === 2" color="ms-2 card-btn-2">已结束</v-btn>
+						<v-btn v-else color="ms-2 card-btn-1">评选中</v-btn>
 						<v-btn
 							v-show="showLog"
 							@click="logPost(item.post_id)"
@@ -237,7 +229,23 @@ async function getPost(post_id: string): Promise<ResponsePost> {
 }
 
 .card-btn {
-	background: #ffe14c !important;
-	color: #704a1d !important;
+	background: #455167 !important;
+	color: #faf7e8 !important;
+}
+
+/* 进行中 */
+.card-btn-0 {
+	background: #3c99aa !important;
+	color: #faf7e8 !important;
+}
+/* 评选中 */
+.card-btn-1 {
+	background: #849cc7 !important;
+	color: #faf7e8 !important;
+}
+/* 已结束 */
+.card-btn-2 {
+	background: #c7674b !important;
+	color: #faf7e8 !important;
 }
 </style>
