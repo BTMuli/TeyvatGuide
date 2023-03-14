@@ -64,7 +64,7 @@ const appStore = useAppStore();
 const achievementsStore = useAchievementsStore();
 
 const renderBool = ref(appStore.structureRender);
-const renderMode = ref("raw渲染");
+const renderMode = ref(renderBool.value ? "结构化渲染" : " raw 渲染")
 
 // 切换渲染模式
 function changeRenderMode() {
