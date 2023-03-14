@@ -23,7 +23,7 @@
 			<v-list-item>
 				<v-list-item-title>咨讯页渲染模式</v-list-item-title>
 				<v-list-item-subtitle
-					>样式上 raw 数据渲染更为合适，如果帖子有视频，建议采用结构化渲染</v-list-item-subtitle
+					>推荐采用结构化渲染，当出现内容缺失时建议采用 raw 渲染</v-list-item-subtitle
 				>
 				<template v-slot:append>
 					<v-switch
@@ -31,7 +31,7 @@
 						inset
 						v-model="renderBool"
 						@click="changeRenderMode"
-						color="primary"
+						color="#1E96D5"
 					/>
 				</template>
 			</v-list-item>
@@ -64,7 +64,7 @@ const appStore = useAppStore();
 const achievementsStore = useAchievementsStore();
 
 const renderBool = ref(appStore.structureRender);
-const renderMode = ref(renderBool.value ? "结构化渲染" : " raw 渲染")
+const renderMode = ref(renderBool.value ? "结构化渲染" : " raw 渲染");
 
 // 切换渲染模式
 function changeRenderMode() {

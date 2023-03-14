@@ -18,7 +18,7 @@
 						<v-btn
 							@click="toPost(item.post_id)"
 							prepend-icon="mdi-arrow-right-circle"
-							class="ms-2 bg-blue-accent-2"
+							class="ms-2 card-btn"
 							>查看</v-btn
 						>
 						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
@@ -26,7 +26,7 @@
 							v-show="showLog"
 							@click="logPost(item.post_id)"
 							prepend-icon="mdi-arrow-right-circle"
-							class="ms-2 bg-blue-accent-2"
+							class="ms-2 card-btn"
 							>原始数据</v-btn
 						>
 					</v-card-actions>
@@ -47,7 +47,7 @@
 						<v-btn
 							@click="toPost(item.post_id)"
 							prepend-icon="mdi-arrow-right-circle"
-							class="ms-2 bg-blue-accent-2"
+							class="ms-2 card-btn"
 							>查看</v-btn
 						>
 						<v-btn v-if="item.status === 1" color="ms-2 bg-green-accent-1" variant="flat" disabled
@@ -65,7 +65,7 @@
 							v-show="showLog"
 							@click="logPost(item.post_id)"
 							prepend-icon="mdi-arrow-right-circle"
-							class="ms-2 bg-blue-accent-2"
+							class="ms-2 card-btn"
 							>原始数据</v-btn
 						>
 					</v-card-actions>
@@ -79,9 +79,9 @@
 					<v-card-title>{{ item.title }}</v-card-title>
 					<v-card-actions>
 						<v-btn
+							class="ms-2 card-btn"
 							@click="toPost(item.post_id)"
 							prepend-icon="mdi-arrow-right-circle"
-							class="ms-2 bg-blue-accent-2"
 							>查看</v-btn
 						>
 						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
@@ -89,7 +89,7 @@
 							v-show="showLog"
 							@click="logPost(item.post_id)"
 							prepend-icon="mdi-arrow-right-circle"
-							class="ms-2 bg-blue-accent-2"
+							class="ms-2 card-btn"
 							>原始数据</v-btn
 						>
 					</v-card-actions>
@@ -234,5 +234,10 @@ async function getPost(post_id: string): Promise<ResponsePost> {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 	grid-gap: 20px;
+}
+
+.card-btn {
+	background: #ffe14c !important;
+	color: #704a1d !important;
 }
 </style>

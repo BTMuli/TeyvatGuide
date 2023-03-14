@@ -3,20 +3,13 @@
 	<v-app-bar app>
 		<template v-slot:prepend>
 			<!-- 标题 -->
-			<v-card-text class="text-h5;global-font">{{ title }}</v-card-text>
+			<v-card-text class="top-title">{{ title }}</v-card-text>
 		</template>
 		<template v-slot:append>
 			<!-- 导入按钮 -->
-			<v-btn
-				@click="importJson"
-				prepend-icon="mdi-import"
-				class="bg-green-accent-2;global-font;global-font;"
-				title="导入"
-			/>
+			<v-btn @click="importJson" prepend-icon="mdi-import" class="ms-2 top-btn">导入</v-btn>
 			<!-- 导出按钮 -->
-			<v-btn @click="exportJson" prepend-icon="mdi-export" class="ms-2 bg-green-accent-2">
-				导出
-			</v-btn>
+			<v-btn @click="exportJson" prepend-icon="mdi-export" class="ms-2 top-btn"> 导出 </v-btn>
 		</template>
 	</v-app-bar>
 	<!-- todo 列表加载速度优化，主要是天地万象的数据量太大了 -->
@@ -286,20 +279,32 @@ async function exportJson() {
 </script>
 
 <style lang="css">
-/*内容区域 todo @media*/
+/* 顶部标题 */
+.top-title {
+	font-family: Genshin, "serif";
+	font-size: 30px;
+}
+/* 顶部按钮 */
+.top-btn {
+	font-family: Genshin, "serif";
+	background: #393b40;
+	color: #f4d8a8 !important;
+}
+
+/* 内容区域 */
 .wrap-view {
 	overflow: auto;
 	height: 840px;
 	border-bottom: 2px solid #e6e6e6;
 	font-family: Genshin, "serif";
 }
-/*左侧系列*/
+/* 左侧系列 */
 .left-wrap {
 	height: 100%;
 	overflow: auto;
 }
 
-/*右侧成就*/
+/* 右侧成就 */
 .right-wrap {
 	height: 100%;
 	overflow: auto;
