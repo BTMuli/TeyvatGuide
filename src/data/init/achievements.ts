@@ -4,9 +4,8 @@
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha
  */
-
-import { MergeData } from "../merge";
-import { AchievementMap } from "../../interface/Achievements";
+import { TGAppData } from "../index";
+import { Achievement } from "../../interface/Achievements";
 import { Map } from "../../interface/Base";
 
 /**
@@ -14,7 +13,7 @@ import { Map } from "../../interface/Base";
  * @since Alpha
  */
 export const Config = {
-	storeName: "Achievement",
+	storeName: "Achievements",
 	keyPath: "id",
 	indexes: ["name", "description", "series", "order", "reward", "version"],
 };
@@ -22,10 +21,10 @@ export const Config = {
 /**
  * @description 成就数据
  * @since Alpha
- * @return {AchievementMap[]}
+ * @return {Achievement[]}
  */
 export function getData() {
-	const data: Map<AchievementMap> = MergeData.achievements;
+	const data: Map<Achievement> = TGAppData.achievements;
 	return Object.keys(data).map(key => {
 		return data[Number(key)];
 	});

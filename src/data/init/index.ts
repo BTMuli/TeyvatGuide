@@ -5,10 +5,10 @@
  * @since Alpha
  */
 import { Config as NameCardConfig, getData as getNameCardData } from "./nameCard";
-import { Config as AchievementConfig, getData as getAchievementData } from "./achievements";
+import { Config as AchievementsConfig, getData as getAchievementsData } from "./achievements";
 import { Config as SeriesConfig, getData as getSeriesData } from "./achievementSeries";
 
-export const ConfigList = [NameCardConfig, AchievementConfig, SeriesConfig];
+export const ConfigList = [NameCardConfig, AchievementsConfig, SeriesConfig];
 
 export const getDataList = [
 	{
@@ -16,8 +16,8 @@ export const getDataList = [
 		data: getNameCardData(),
 	},
 	{
-		name: "Achievement",
-		data: getAchievementData(),
+		name: "Achievements",
+		data: getAchievementsData(),
 	},
 	{
 		name: "AchievementSeries",

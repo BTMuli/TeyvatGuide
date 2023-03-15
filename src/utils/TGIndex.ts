@@ -18,7 +18,7 @@ export const DB_VERSION = 1;
  */
 export async function InitTGData() {
 	const request = window.indexedDB.open(DB_NAME, DB_VERSION);
-	request.onupgradeneeded = event => {
+	request.onupgradeneeded = () => {
 		const db = request.result;
 		// 创建表
 		ConfigList.forEach(config => {
@@ -50,7 +50,7 @@ export async function DeleteTGData() {
  */
 export async function WriteTGData(storeName: string, data: any[]) {
 	const request = window.indexedDB.open(DB_NAME, DB_VERSION);
-	request.onsuccess = event => {
+	request.onsuccess = () => {
 		const db = request.result;
 		const transaction = db.transaction(storeName, "readwrite");
 		const store = transaction.objectStore(storeName);
@@ -58,4 +58,95 @@ export async function WriteTGData(storeName: string, data: any[]) {
 			store.put(item);
 		});
 	};
+}
+
+/**
+ * @description 更新数据库中的单条数据
+ * @since Alpha
+ * @param {string} storeName 表名
+ * @param {string} indexName 索引名
+ * @param {any} key 索引值
+ * @param {any} data 数据
+ * @return {Promise<void>}
+ */
+export async function UpdateTGData(
+	storeName: string,
+	indexName: string,
+	key: any,
+	data: any
+): Promise<void> {
+	const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+	request.onsuccess = () => {
+		const db = request.result;
+		const transaction = db.transaction(storeName, "readwrite");
+		const store = transaction.objectStore(storeName);
+		const index = store.index(indexName);
+		const requestData = index.getAll(key);
+		requestData.onsuccess = () => {
+			const result = requestData.result;
+			result.forEach(item => {
+				Object.keys(data).forEach(key => {
+					item[key] = data[key];
+				});
+				store.put(item);
+			});
+		};
+	};
+}
+
+/**
+ * @description 从数据库中读取某些数据
+ * @since Alpha
+ * @param {string} storeName 表名
+ * @param {string} indexName 索引名
+ * @param {any} key 索引值
+ * @return {Promise<any[]>}
+ */
+export async function ReadTGData(storeName: string, indexName: string, key: any): Promise<any[]> {
+	const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+	return new Promise((resolve, reject) => {
+		request.onsuccess = () => {
+			const db = request.result;
+			const transaction = db.transaction(storeName, "readonly");
+			const store = transaction.objectStore(storeName);
+			const index = store.index(indexName);
+			const requestData = index.getAll(key);
+			requestData.onsuccess = () => {
+				resolve(requestData.result);
+			};
+			requestData.onerror = () => {
+				reject(requestData.error);
+			};
+		};
+		request.onerror = () => {
+			reject(request.error);
+		};
+	});
+}
+
+/**
+ * @description 从数据库中读取所有数据
+ * @since Alpha
+ * @param {string} storeName 表名
+ * @return {Promise<any[]>}
+ */
+export async function ReadAllTGData(storeName: string): Promise<any[]> {
+	const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+	return new Promise((resolve, reject) => {
+		request.onsuccess = () => {
+			const db = request.result;
+			const transaction = db.transaction(storeName, "readonly");
+			const store = transaction.objectStore(storeName);
+			const requestData = store.getAll();
+			requestData.onsuccess = () => {
+				resolve(requestData.result);
+			};
+			requestData.onerror = () => {
+				reject(requestData.error);
+			};
+		};
+		request.onerror = () => {
+			reject(request.error);
+		};
+	});
 }
