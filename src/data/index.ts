@@ -6,14 +6,9 @@
  */
 
 import { AppData, AppDataList } from "./app";
-import { MergeData, MergeDataList } from "./merge";
+import { ConfigList, getDataList } from "./init";
 
-export const TGAppData = {
-	AppData: AppData,
-	MergeData: MergeData,
-};
-
-export const TGAppDataList = {
-	AppData: AppDataList,
-	MergeData: MergeDataList,
-};
+export const TGAppData = AppData;
+export const TGAppDataList = AppDataList;
+export const TGConfigList = ConfigList;
+export const TGGetDataList = getDataList;

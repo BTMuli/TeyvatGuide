@@ -12,8 +12,6 @@ import { path } from "@tauri-apps/api";
 const appDataDir = `${await path.appLocalDataDir()}appData`;
 // 用于存储用户数据的路径
 const userDataDir = `${await path.appLocalDataDir()}userData`;
-// 用于存储合并数据的路径-列表渲染时使用，减少重复计算
-const mergeDataDir = `${await path.appLocalDataDir()}mergeData`;
 // 用于各种临时数据的路径
 const tempDataDir = `${await path.appLocalDataDir()}tempData`;
 // 用于开发者模式的路径
@@ -33,7 +31,6 @@ const useAppStore = defineStore({
 			dataPath: {
 				app: appDataDir,
 				user: userDataDir,
-				merge: mergeDataDir,
 				dev: devDataDir,
 				temp: tempDataDir,
 			},
@@ -46,11 +43,6 @@ const useAppStore = defineStore({
 			// 用户数据路径
 			userPath: {
 				achievements: `${userDataDir}\\achievements.json`,
-			},
-			// 合并数据路径
-			mergePath: {
-				achievements: `${mergeDataDir}\\achievements.json`,
-				achievementSeries: `${mergeDataDir}\\achievementSeries.json`,
 			},
 			// 开发者模式
 			devPath: {
@@ -69,11 +61,6 @@ const useAppStore = defineStore({
 			// 初始化用户数据路径
 			this.userPath = {
 				achievements: `${userDataDir}\\achievements.json`,
-			};
-			// 初始化合并数据路径
-			this.mergePath = {
-				achievements: `${mergeDataDir}\\achievements.json`,
-				achievementSeries: `${mergeDataDir}\\achievementSeries.json`,
 			};
 			// 初始化开发者模式
 			this.devPath = {

@@ -15,20 +15,20 @@ import { Map } from "../../interface/Base";
 export const AppDataList = [
 	{
 		name: "achievements.json",
-		data: achievements as Achievement[],
+		data: achievements as Map<Achievement>,
 	},
 	{
 		name: "achievementSeries.json",
-		data: achievementSeries as AchievementSeries[],
+		data: achievementSeries as Map<AchievementSeries>,
 	},
 	{
 		name: "nameCards.json",
-		data: nameCards as unknown as Map<NameCard>,
+		data: nameCards as unknown as Map<NameCard[]>,
 	},
 ];
 
 export const AppData = {
-	achievements: achievements as Achievement[],
-	achievementSeries: achievementSeries as AchievementSeries[],
+	achievements: achievements as Map<Achievement>,
+	achievementSeries: achievementSeries as Map<AchievementSeries>,
 	nameCards: nameCards as unknown as Map<NameCard[]>,
 };

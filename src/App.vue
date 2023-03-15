@@ -43,18 +43,14 @@ async function createDataDir() {
 	console.log("开始创建数据文件夹...");
 	await fs.createDir("appData", { dir: BaseDirectory.AppLocalData, recursive: true });
 	await fs.createDir("userData", { dir: BaseDirectory.AppLocalData, recursive: true });
-	await fs.createDir("mergeData", { dir: BaseDirectory.AppLocalData, recursive: true });
 	await fs.createDir("tempData", { dir: BaseDirectory.AppLocalData, recursive: true });
 	console.log("数据文件夹创建完成！");
 }
 // 将数据写入文件夹
 async function writeData() {
 	console.log("开始写入数据...");
-	TGAppDataList.AppData.map(async item => {
+	TGAppDataList.map(async item => {
 		await fs.writeFile(`${appStore.dataPath.app}\\${item.name}`, JSON.stringify(item.data));
-	});
-	TGAppDataList.MergeData.map(async item => {
-		await fs.writeFile(`${appStore.dataPath.merge}\\${item.name}`, JSON.stringify(item.data));
 	});
 	console.log("数据写入完成！");
 }

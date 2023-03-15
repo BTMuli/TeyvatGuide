@@ -6,8 +6,6 @@
  */
 
 import { defineStore } from "pinia";
-import TGMap from "../../utils/TGMap";
-import { SeriesMap } from "../../interface/Achievements";
 
 const useAchievementsStore = defineStore({
 	id: "achievements",
@@ -25,13 +23,7 @@ const useAchievementsStore = defineStore({
 			this.total_achievements = 899;
 			this.fin_achievements = 0;
 		},
-		flushData(seriesMap: TGMap<SeriesMap>) {
-			let total = 0;
-			let fin = 0;
-			seriesMap.forEach(series => {
-				total += series.total_count;
-				fin += series.completed_count;
-			});
+		flushData(total: number, fin: number) {
 			this.total_achievements = total;
 			this.fin_achievements = fin;
 		},
