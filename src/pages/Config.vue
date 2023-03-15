@@ -57,7 +57,6 @@ import useAppStore from "../store/modules/app";
 import useAchievementsStore from "../store/modules/achievements";
 import { dialog, fs } from "@tauri-apps/api";
 import { BaseDirectory } from "@tauri-apps/api/fs";
-import { TGAppDataList } from "../data";
 
 // Store
 const appStore = useAppStore();
@@ -77,7 +76,7 @@ function changeRenderMode() {
 // 打开用户数据目录
 async function openMergeData() {
 	await dialog.open({
-		defaultPath: appStore.dataPath.merge,
+		defaultPath: appStore.dataPath.user,
 		filters: [],
 	});
 }
@@ -100,14 +99,7 @@ async function deleteData() {
 		await dialog.message("用户数据已删除!");
 		await achievementsStore.init();
 		await fs.createDir("userData", { dir: BaseDirectory.AppLocalData });
-		await fs.createDir("mergeData", { dir: BaseDirectory.AppLocalData });
 		await fs.createDir("tempData", { dir: BaseDirectory.AppLocalData });
-		TGAppDataList.MergeData.map(async item => {
-			await fs.writeFile(
-				`${appStore.dataPath.merge}\\${item.name}`,
-				JSON.stringify(item.data, null, 4)
-			);
-		});
 	}
 }
 // 删除临时数据

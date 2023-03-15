@@ -37,11 +37,6 @@
 					<img src="../assets/icons/setting.svg" alt="setting" class="sideIcon" />
 				</template>
 			</v-list-item>
-			<v-list-item link href="/dev" v-show="showDev" title="开发">
-				<template v-slot:prepend>
-					<v-icon>mdi-bug-outline</v-icon>
-				</template>
-			</v-list-item>
 		</v-list>
 	</v-navigation-drawer>
 </template>
@@ -50,14 +45,11 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import useAppStore from "../store/modules/app";
-import useDevStore from "../store/modules/dev";
 
 const router = useRouter();
 const appStore = useAppStore();
-const devStore = useDevStore();
 
 const rail = ref(appStore.sidebar);
-const showDev = ref(devStore.showDev);
 
 const back = () => {
 	try {
@@ -69,16 +61,6 @@ const back = () => {
 function collapse() {
 	rail.value = !rail.value;
 	appStore.sidebar = rail.value;
-}
-function magicClick() {
-	// 打包的时候不显示开发功能
-	// if (!showDev.value) {
-	// 	devStore.magicCount++;
-	// 	if (devStore.magicCount >= 10) {
-	// 		showDev.value = true;
-	// 		devStore.showDev = true;
-	// 	}
-	// }
 }
 </script>
 

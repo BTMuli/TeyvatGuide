@@ -22,13 +22,6 @@
 							>查看</v-btn
 						>
 						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-						<v-btn
-							v-show="showLog"
-							@click="logPost(item.post_id)"
-							prepend-icon="mdi-arrow-right-circle"
-							class="ms-2 card-btn"
-							>原始数据</v-btn
-						>
 					</v-card-actions>
 				</v-card>
 			</div>
@@ -50,16 +43,10 @@
 							class="ms-2 card-btn"
 							>查看</v-btn
 						>
+						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
 						<v-btn v-if="item.status === 1" color="ms-2 card-btn-0">进行中</v-btn>
 						<v-btn v-else-if="item.status === 2" color="ms-2 card-btn-2">已结束</v-btn>
 						<v-btn v-else color="ms-2 card-btn-1">评选中</v-btn>
-						<v-btn
-							v-show="showLog"
-							@click="logPost(item.post_id)"
-							prepend-icon="mdi-arrow-right-circle"
-							class="ms-2 card-btn"
-							>原始数据</v-btn
-						>
 					</v-card-actions>
 				</v-card>
 			</div>
@@ -77,13 +64,6 @@
 							>查看</v-btn
 						>
 						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-						<v-btn
-							v-show="showLog"
-							@click="logPost(item.post_id)"
-							prepend-icon="mdi-arrow-right-circle"
-							class="ms-2 card-btn"
-							>原始数据</v-btn
-						>
 					</v-card-actions>
 				</v-card>
 			</div>
@@ -93,7 +73,6 @@
 
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
-import useDevStore from "../store/modules/dev";
 import useAppStore from "../store/modules/app";
 import {
 	MysPostType,
@@ -109,7 +88,6 @@ import { createTGWindow } from "../utils/TGWindow";
 import { parseMys } from "../utils/MysParse";
 
 // Store
-const devStore = useDevStore();
 const appStore = useAppStore();
 
 // 渲染模式
@@ -131,7 +109,6 @@ const postData = ref({
 	activity: [] as CardDataType[],
 	news: [] as CardDataType[],
 });
-const showLog = ref(devStore.showDev);
 
 onMounted(async () => {
 	const noticeRaw: ResponseNewsList = await http

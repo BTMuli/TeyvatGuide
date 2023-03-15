@@ -61,7 +61,24 @@ export async function WriteTGData(storeName: string, data: any[]) {
 }
 
 /**
- * @description 更新数据库中的单条数据
+ * @description 更新数据库中的单条数据-根据主键
+ * @since Alpha
+ * @param {string} storeName 表名
+ * @param {any} data 数据
+ * @return {Promise<void>}
+ */
+export async function UpdateTGDataByKey(storeName: string, data: any): Promise<void> {
+	const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+	request.onsuccess = () => {
+		const db = request.result;
+		const transaction = db.transaction(storeName, "readwrite");
+		const store = transaction.objectStore(storeName);
+		store.put(data);
+	};
+}
+
+/**
+ * @description 更新数据库中的单条数据-根据索引
  * @since Alpha
  * @param {string} storeName 表名
  * @param {string} indexName 索引名
@@ -69,7 +86,7 @@ export async function WriteTGData(storeName: string, data: any[]) {
  * @param {any} data 数据
  * @return {Promise<void>}
  */
-export async function UpdateTGData(
+export async function UpdateTGDataByIndex(
 	storeName: string,
 	indexName: string,
 	key: any,
@@ -95,14 +112,50 @@ export async function UpdateTGData(
 }
 
 /**
- * @description 从数据库中读取某些数据
+ * @description 从数据库中读取某些数据-按照主键
+ * @since Alpha
+ * @param {string} storeName 表名
+ * @param {any[]} keys 主键值
+ * @return {Promise<any[]>}
+ */
+export async function ReadTGDataByKey(storeName: string, keys: any[]): Promise<any[]> {
+	const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+	return new Promise((resolve, reject) => {
+		request.onsuccess = () => {
+			const db = request.result;
+			const transaction = db.transaction(storeName, "readonly");
+			const store = transaction.objectStore(storeName);
+			const requestData = store.getAll();
+			requestData.onsuccess = () => {
+				const result = requestData.result;
+				const data = result.filter(item => {
+					return keys.includes(item.id);
+				});
+				resolve(data);
+			};
+			requestData.onerror = () => {
+				reject(requestData.error);
+			};
+		};
+		request.onerror = () => {
+			reject(request.error);
+		};
+	});
+}
+
+/**
+ * @description 从数据库中读取某些数据-按照索引
  * @since Alpha
  * @param {string} storeName 表名
  * @param {string} indexName 索引名
  * @param {any} key 索引值
  * @return {Promise<any[]>}
  */
-export async function ReadTGData(storeName: string, indexName: string, key: any): Promise<any[]> {
+export async function ReadTGDataByIndex(
+	storeName: string,
+	indexName: string,
+	key: any
+): Promise<any[]> {
 	const request = window.indexedDB.open(DB_NAME, DB_VERSION);
 	return new Promise((resolve, reject) => {
 		request.onsuccess = () => {

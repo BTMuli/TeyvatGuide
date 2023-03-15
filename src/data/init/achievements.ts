@@ -4,7 +4,7 @@
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha
  */
-import { TGAppData } from "../index";
+import { AppData } from "../app";
 import { Achievement } from "../../interface/Achievements";
 import { Map } from "../../interface/Base";
 
@@ -24,7 +24,7 @@ export const Config = {
  * @return {Achievement[]}
  */
 export function getData() {
-	const data: Map<Achievement> = TGAppData.achievements;
+	const data: Map<Achievement> = AppData.achievements;
 	return Object.keys(data).map(key => {
 		return data[Number(key)];
 	});

@@ -4,9 +4,9 @@
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha
  */
-import { MergeData } from "../merge";
-import { SeriesMap } from "../../interface/Achievements";
+import { AchievementSeries } from "../../interface/Achievements";
 import { Map } from "../../interface/Base";
+import { AppData } from "../app";
 
 /**
  * @description 成就系列表参数
@@ -15,16 +15,16 @@ import { Map } from "../../interface/Base";
 export const Config = {
 	storeName: "AchievementSeries",
 	keyPath: "id",
-	indexes: ["order", "name", "version", "card", "total_count", "complete_count"],
+	indexes: ["order", "name", "card"],
 };
 
 /**
  * @description 成就系列数据
  * @since Alpha
- * @return {SeriesMap[]}
+ * @return {AchievementSeries[]}
  */
 export function getData() {
-	const data: Map<SeriesMap> = MergeData.achievementSeries;
+	const data: Map<AchievementSeries> = AppData.achievementSeries;
 	return Object.keys(data).map(key => {
 		return data[Number(key)];
 	});

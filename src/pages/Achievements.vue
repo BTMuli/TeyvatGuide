@@ -102,7 +102,7 @@ import { onMounted, ref } from "vue";
 // Store
 import useAchievementsStore from "../store/modules/achievements";
 // Interface
-import { Achievements } from "../plugins/UIAF/interface/UIAF";
+import { Achievements, UIAF_Info, UIAF_Achievement } from "../plugins/UIAF/interface/UIAF";
 import {
 	Achievement as TGAchievement,
 	AchievementSeries as TGSeries,
@@ -112,7 +112,12 @@ import { NameCard } from "../interface/NameCard";
 import UIAF_Oper from "../plugins/UIAF";
 // Utils
 import { createTGWindow } from "../utils/TGWindow";
-import { ReadAllTGData, ReadTGData, UpdateTGData } from "../utils/TGIndex";
+import {
+	ReadAllTGData,
+	ReadTGDataByIndex,
+	ReadTGDataByKey,
+	UpdateTGDataByKey,
+} from "../utils/TGIndex";
 
 // Store
 const achievementsStore = useAchievementsStore();
@@ -133,7 +138,7 @@ onMounted(() => {
 // 加载数据，数据源：合并后的本地数据
 async function loadData() {
 	const seriesDB: TGSeries[] = await ReadAllTGData("AchievementSeries");
-	CardsInfo.value = await ReadTGData("NameCard", "type", 1);
+	CardsInfo.value = await ReadTGDataByIndex("NameCard", "type", 1);
 	// 按照 order 排序
 	seriesList.value = seriesDB.sort((a, b) => a.order - b.order);
 	selectedAchievement.value = await ReadAllTGData("Achievements");
@@ -143,7 +148,11 @@ async function loadData() {
 async function selectSeries(index: number) {
 	selectedIndex.value = index;
 	selectedSeries.value = seriesList.value[index].id;
-	selectedAchievement.value = await ReadTGData("Achievements", "series", selectedSeries.value);
+	selectedAchievement.value = await ReadTGDataByIndex(
+		"Achievements",
+		"series",
+		selectedSeries.value
+	);
 	if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
 		getCardInfo.value = CardsInfo.value.find(card => card.name === seriesList.value[index].card)!;
 	} else {
@@ -174,8 +183,8 @@ async function importJson() {
 			},
 		],
 	});
-	if (selectedFile && (await UIAF_Oper.importOper.checkUIAFData(<string>selectedFile))) {
-		const remoteRaw: string | false = await UIAF_Oper.importOper.readUIAFData(<string>selectedFile);
+	if (selectedFile && (await UIAF_Oper.checkUIAFData(<string>selectedFile))) {
+		const remoteRaw: string | false = await UIAF_Oper.readUIAFData(<string>selectedFile);
 		if (remoteRaw === false) {
 			await dialog.message("文件格式不正确，导入失败");
 			return;
@@ -185,7 +194,7 @@ async function importJson() {
 		remoteData.list.map(async data => {
 			// 获取 id
 			const id = data.id;
-			let localData: TGAchievement = (await ReadTGData("Achievements", "id", id))[0];
+			let localData: TGAchievement = (await ReadTGDataByKey("Achievements", [id]))[0];
 			// 获取 timeStamp 2023-03-15 00:00:00
 			const localTime = localData.completed_time;
 			// 如果本地数据不存在，或者本地数据的 timeStamp 小于远程数据的 timeStamp，更新数据
@@ -203,21 +212,46 @@ async function importJson() {
 				localData.completed = data.status === 3;
 			}
 			// 更新数据
-			await UpdateTGData("Achievements", "id", id, localData);
+			await UpdateTGDataByKey("Achievements", localData);
 		});
-		const fin_achievements = (await ReadTGData("Achievements", "completed", true)).length;
-		const total_achievements = (await ReadAllTGData("Achievements")).length;
-		await achievementsStore.flushData(fin_achievements, total_achievements);
+		// 更新成就系列的完成数
+		const seriesDB = await ReadAllTGData("AchievementSeries");
+		seriesDB.map(async data => {
+			const seriesId = data.id;
+			const achievementsDB = await ReadTGDataByIndex("Achievements", "series", seriesId);
+			data.completed_count = achievementsDB.filter(data => {
+				return data.completed === true;
+			}).length;
+			await UpdateTGDataByKey("AchievementSeries", data);
+		});
+		const achievementsDB = await ReadAllTGData("Achievements");
+		const fin_achievements = achievementsDB.filter(data => {
+			return data.completed === true;
+		}).length;
+		const total_achievements = achievementsDB.length;
+		console.log(fin_achievements, total_achievements);
+		achievementsStore.flushData(total_achievements, fin_achievements);
 		// 刷新数据
 		await loadData();
 	}
 }
 // 导出
 async function exportJson() {
+	// 判断是否有数据
+	if (achievementsStore.fin_achievements === 0) {
+		await dialog.message("没有数据可以导出");
+		return;
+	}
 	// 获取本地数据
-	const achievements = await ReadTGData("Achievements", "completed", true);
+	const achievements = (await ReadAllTGData("Achievements")).filter(data => {
+		return data.progress !== 0 || data.completed === true;
+	});
+	let UIAF_DATA = {
+		info: {} as UIAF_Info,
+		list: [] as UIAF_Achievement[],
+	};
 	// 转换数据
-	let achievementsList = achievements.map(data => {
+	UIAF_DATA.list = achievements.map(data => {
 		let status;
 		// 计算点数但是没有完成
 		if (data.progress !== 0 && data.completed === false) {
@@ -238,6 +272,7 @@ async function exportJson() {
 			status: status,
 		};
 	});
+	UIAF_DATA.info = await UIAF_Oper.getUIAFInfo();
 	const is_save = await dialog.save({
 		filters: [
 			{
@@ -247,7 +282,7 @@ async function exportJson() {
 		],
 	});
 	if (is_save) {
-		await fs.writeTextFile(is_save, JSON.stringify(achievementsList, null, 4));
+		await fs.writeTextFile(is_save, JSON.stringify(UIAF_DATA));
 	}
 }
 </script>

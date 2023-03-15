@@ -14,8 +14,6 @@ const appDataDir = `${await path.appLocalDataDir()}appData`;
 const userDataDir = `${await path.appLocalDataDir()}userData`;
 // 用于各种临时数据的路径
 const tempDataDir = `${await path.appLocalDataDir()}tempData`;
-// 用于开发者模式的路径
-const devDataDir = `${await path.resolve("../")}\\src\\data`;
 
 const useAppStore = defineStore({
 	id: "app",
@@ -31,7 +29,6 @@ const useAppStore = defineStore({
 			dataPath: {
 				app: appDataDir,
 				user: userDataDir,
-				dev: devDataDir,
 				temp: tempDataDir,
 			},
 			// 应用数据路径
@@ -43,11 +40,6 @@ const useAppStore = defineStore({
 			// 用户数据路径
 			userPath: {
 				achievements: `${userDataDir}\\achievements.json`,
-			},
-			// 开发者模式
-			devPath: {
-				app: `${devDataDir}\\app`,
-				merge: `${devDataDir}\\merge`,
 			},
 		};
 	},
@@ -61,11 +53,6 @@ const useAppStore = defineStore({
 			// 初始化用户数据路径
 			this.userPath = {
 				achievements: `${userDataDir}\\achievements.json`,
-			};
-			// 初始化开发者模式
-			this.devPath = {
-				app: `${devDataDir}\\app`,
-				merge: `${devDataDir}\\merge`,
 			};
 		},
 	},

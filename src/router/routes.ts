@@ -5,7 +5,6 @@ import News from "../pages/News.vue";
 import Achievements from "../pages/Achievements.vue";
 // 应用配置相关
 import Config from "../pages/Config.vue";
-import Dev from "../pages/Dev.vue";
 
 const routes = [
 	{
@@ -26,11 +25,6 @@ const routes = [
 		path: "/news",
 		name: "咨讯",
 		component: News,
-	},
-	{
-		path: "/dev",
-		name: "开发者工具",
-		component: Dev,
 	},
 	{
 		path: "/config",

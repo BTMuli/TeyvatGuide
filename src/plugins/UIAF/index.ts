@@ -5,18 +5,13 @@
  * @since Alpha
  */
 
-import { checkUIAFData, readUIAFData, mergeUIAFData } from "./utils/importData";
-import { getAchievements } from "./utils/exportData";
+import { checkUIAFData, readUIAFData } from "./utils/importData";
+import { getUIAFInfo } from "./utils/exportData";
 
 const UIAF_Oper = {
-	importOper: {
-		checkUIAFData,
-		readUIAFData,
-		mergeUIAFData,
-	},
-	exportOper: {
-		getAchievements,
-	},
+	checkUIAFData,
+	readUIAFData,
+	getUIAFInfo,
 };
 
 export default UIAF_Oper;
