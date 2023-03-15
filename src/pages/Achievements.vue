@@ -75,7 +75,7 @@
 								achievement.completed ? achievement.completed_time : achievement.description
 							}}</v-list-item-subtitle>
 							<template v-slot:append>
-								<v-btn variant="flat" disabled>
+								<v-btn width="80px" class="reward-btn">
 									<template v-slot:append>
 										<img
 											src="/source/material/原石.webp"
@@ -84,7 +84,7 @@
 											style="width: 32px"
 										/>
 									</template>
-									测试
+									{{ achievement.reward }}
 								</v-btn>
 							</template>
 						</v-list-item>
@@ -317,5 +317,11 @@ async function exportJson() {
 .right-wrap {
 	height: 100%;
 	overflow: auto;
+}
+
+/* 成就奖励 */
+.reward-btn {
+	background: #565f6f !important;
+	color: #ece5d8 !important;
 }
 </style>
