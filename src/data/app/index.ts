@@ -30,5 +30,5 @@ export const AppDataList = [
 export const AppData = {
 	achievements: achievements as Achievement[],
 	achievementSeries: achievementSeries as AchievementSeries[],
-	nameCards: nameCards as unknown as Map<NameCard>,
+	nameCards: nameCards as unknown as Map<NameCard[]>,
 };

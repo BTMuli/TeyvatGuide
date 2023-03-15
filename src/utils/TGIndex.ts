@@ -5,186 +5,57 @@
  * @since Alpha
  */
 
-// 一些常量
-const DB_NAME = "TGData";
-const DB_VERSION = 1;
-// 创建数据库
-export const TGDatabases = window.indexedDB.open(DB_NAME, DB_VERSION);
+import { ConfigList } from "../data/init";
+
+// 数据库参数
+export const DB_NAME = "TGData";
+export const DB_VERSION = 1;
 
 /**
- * @description 创建数据表
- * @param {string} name 表名
- * @param {string} keyPath 主键
- * @param {Array<string>} indexs 索引
- * @param {boolean} autoIncrement 是否自增
- * @returns {Promise<IDBObjectStore>} 返回数据表
+ * @description 初始化数据库
+ * @description 只会在第一次打开游戏时执行
+ * @since Alpha
  */
-export const createTable = (
-	name: string,
-	keyPath: string,
-	indexs: Array<string>,
-	autoIncrement: boolean
-): Promise<IDBObjectStore> => {
-	return new Promise((resolve, reject) => {
-		TGDatabases.onsuccess = () => {
-			const db = TGDatabases.result;
-			const store = db.createObjectStore(name, {
-				keyPath: keyPath,
-				autoIncrement: autoIncrement,
+export async function InitTGData() {
+	const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+	request.onupgradeneeded = event => {
+		const db = request.result;
+		// 创建表
+		ConfigList.forEach(config => {
+			const store = db.createObjectStore(config.storeName, {
+				keyPath: config.keyPath,
 			});
-			indexs.forEach(index => {
+			config.indexes.forEach(index => {
 				store.createIndex(index, index, { unique: false });
 			});
-			resolve(store);
-		};
-		TGDatabases.onerror = () => {
-			reject(TGDatabases.error);
-		};
-	});
-};
+		});
+	};
+}
 
 /**
- * @description 删除数据表
- * @param {string} name 表名
- * @returns {Promise<void>} 返回空
+ * @description 删除数据库
+ * @since Alpha
+ * @return {Promise<void>}
  */
-export const deleteTable = (name: string): Promise<void> => {
-	return new Promise((resolve, reject) => {
-		TGDatabases.onsuccess = () => {
-			const db = TGDatabases.result;
-			db.deleteObjectStore(name);
-			resolve();
-		};
-		TGDatabases.onerror = () => {
-			reject(TGDatabases.error);
-		};
-	});
-};
+export async function DeleteTGData() {
+	await window.indexedDB.deleteDatabase(DB_NAME);
+}
 
 /**
- * @description 添加数据
- * @param {string} name 表名
- * @param {any} data 数据
- * @returns {Promise<void>} 返回空
+ * @description 向数据库中写入数据
+ * @since Alpha
+ * @param {string} storeName 表名
+ * @param {any[]} data 数据
+ * @return {Promise<void>}
  */
-export const addData = (name: string, data: any): Promise<void> => {
-	return new Promise((resolve, reject) => {
-		TGDatabases.onsuccess = () => {
-			const db = TGDatabases.result;
-			const store = db.transaction(name, "readwrite").objectStore(name);
-			store.add(data);
-			resolve();
-		};
-		TGDatabases.onerror = () => {
-			reject(TGDatabases.error);
-		};
-	});
-};
-
-/**
- * @description 删除数据
- * @param {string} name 表名
- * @param {any} data 数据
- * @returns {Promise<void>} 返回空
- */
-export const deleteData = (name: string, data: any): Promise<void> => {
-	return new Promise((resolve, reject) => {
-		TGDatabases.onsuccess = () => {
-			const db = TGDatabases.result;
-			const store = db.transaction(name, "readwrite").objectStore(name);
-			store.delete(data);
-			resolve();
-		};
-		TGDatabases.onerror = () => {
-			reject(TGDatabases.error);
-		};
-	});
-};
-
-/**
- * @description 修改数据
- * @param {string} name 表名
- * @param {any} data 数据
- * @returns {Promise<void>} 返回空
- */
-export const updateData = (name: string, data: any): Promise<void> => {
-	return new Promise((resolve, reject) => {
-		TGDatabases.onsuccess = () => {
-			const db = TGDatabases.result;
-			const store = db.transaction(name, "readwrite").objectStore(name);
-			store.put(data);
-			resolve();
-		};
-		TGDatabases.onerror = () => {
-			reject(TGDatabases.error);
-		};
-	});
-};
-
-/**
- * @description 查询数据
- * @param {string} name 表名
- * @param {any} data 数据
- * @returns {Promise<any>} 返回数据
- */
-export const getData = (name: string, data: any): Promise<any> => {
-	return new Promise((resolve, reject) => {
-		TGDatabases.onsuccess = () => {
-			const db = TGDatabases.result;
-			const store = db.transaction(name, "readwrite").objectStore(name);
-			const request = store.get(data);
-			request.onsuccess = () => {
-				resolve(request.result);
-			};
-			request.onerror = () => {
-				reject(request.error);
-			};
-		};
-		TGDatabases.onerror = () => {
-			reject(TGDatabases.error);
-		};
-	});
-};
-
-/**
- * @description 查询所有数据
- * @param {string} name 表名
- * @returns {Promise<Array<any>>} 返回数据
- */
-export const getAllData = (name: string): Promise<Array<any>> => {
-	return new Promise((resolve, reject) => {
-		TGDatabases.onsuccess = () => {
-			const db = TGDatabases.result;
-			const store = db.transaction(name, "readwrite").objectStore(name);
-			const request = store.getAll();
-			request.onsuccess = () => {
-				resolve(request.result);
-			};
-			request.onerror = () => {
-				reject(request.error);
-			};
-		};
-		TGDatabases.onerror = () => {
-			reject(TGDatabases.error);
-		};
-	});
-};
-
-/**
- * @description 清空数据表
- * @param {string} name 表名
- * @returns {Promise<void>} 返回空
- */
-export const clearTable = (name: string): Promise<void> => {
-	return new Promise((resolve, reject) => {
-		TGDatabases.onsuccess = () => {
-			const db = TGDatabases.result;
-			const store = db.transaction(name, "readwrite").objectStore(name);
-			store.clear();
-			resolve();
-		};
-		TGDatabases.onerror = () => {
-			reject(TGDatabases.error);
-		};
-	});
-};
+export async function WriteTGData(storeName: string, data: any[]) {
+	const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+	request.onsuccess = event => {
+		const db = request.result;
+		const transaction = db.transaction(storeName, "readwrite");
+		const store = transaction.objectStore(storeName);
+		data.forEach(item => {
+			store.put(item);
+		});
+	};
+}
