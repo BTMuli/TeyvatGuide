@@ -44,17 +44,17 @@ export function parseMys(data: string): Document {
 			const div = document.createElement("div");
 			// 创建视频
 			const video = document.createElement("video");
+			// 获取 resolutions，将其作为 source
+			const resolution = item.insert.vod.resolutions.pop();
 			// 设置一些属性
 			video.poster = item.insert.vod.cover; // 设置封面
-			video.height = item.insert.vod.resolutions[0].height; // 设置高度
-			video.width = item.insert.vod.resolutions[0].width; // 设置宽度
+			video.width = resolution.width > 800 ? 800 : resolution.width; // 设置宽度（取最高分辨率的宽度）
+			video.height = resolution.width > 800 ? 450 : resolution.height; // 设置高度（取最高分辨率的高度）
 			video.controls = true; // 设置 controls
-			// 获取 resolutions，将其作为 source
-			const resolutions = item.insert.vod.resolutions;
 			// 添加 source
 			const source = document.createElement("source");
-			source.src = resolutions[0].url;
-			source.type = resolutions[0].format === ".mp4" ? "video/mp4" : "video/webm";
+			source.src = resolution.url;
+			source.type = resolution.format === ".mp4" ? "video/mp4" : "video/webm";
 			video.appendChild(source);
 			// 添加 controls
 			video.controls = true;
