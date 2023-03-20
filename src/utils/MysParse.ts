@@ -45,7 +45,7 @@ export function parseMys(data: string): Document {
 			// 创建视频
 			const video = document.createElement("video");
 			// 获取 resolutions，将其作为 source
-			const resolution = item.insert.vod.resolutions.pop();
+			const resolution = item.insert.vod.resolutions.slice(-1)[0]; // 获取最高分辨率的视频
 			// 设置一些属性
 			video.poster = item.insert.vod.cover; // 设置封面
 			video.width = resolution.width > 800 ? 800 : resolution.width; // 设置宽度（取最高分辨率的宽度）
