@@ -44,8 +44,22 @@ export function parseMys(data: string): Document {
 			const div = document.createElement("div");
 			// 创建视频
 			const video = document.createElement("video");
-			// 获取 resolutions，将其作为 source
-			const resolution = item.insert.vod.resolutions.slice(-1)[0]; // 获取最高分辨率的视频
+			// 获取最高分辨率的视频
+			let resolution;
+			// 获取 resolutions中definition="1080P"的视频
+			resolution = item.insert.vod.resolutions.find(
+				(resolution: any) => resolution.definition === "1080P"
+			);
+			if (!resolution) {
+				// 如果没有找到，就获取720P的视频
+				resolution = item.insert.vod.resolutions.find(
+					(resolution: any) => resolution.definition === "720P"
+				);
+			}
+			if (!resolution) {
+				// 如果还是没有找到，就获取第一个
+				resolution = item.insert.vod.resolutions[0];
+			}
 			// 设置一些属性
 			video.poster = item.insert.vod.cover; // 设置封面
 			video.width = resolution.width > 800 ? 800 : resolution.width; // 设置宽度（取最高分辨率的宽度）
