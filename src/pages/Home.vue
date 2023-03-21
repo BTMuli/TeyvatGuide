@@ -1,5 +1,8 @@
 <template>
-	<div v-show="poolInfo" class="pool-cards">
+	<div v-if="poolInfo == null || poolInfo.length === 0" class="loading-bar">
+		<v-progress-circular indeterminate color="primary" />
+	</div>
+	<div v-else class="pool-cards">
 		<v-card v-for="pool in poolInfo" style="margin-top: 20px">
 			<template v-slot:prepend>
 				<img
@@ -122,6 +125,13 @@ function toOuter(url: string, title: string) {
 </script>
 
 <style lang="css">
+.loading-bar {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+}
+
 .pool-cards {
 	font-family: Genshin, serif;
 	display: flex;
