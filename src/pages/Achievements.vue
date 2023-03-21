@@ -12,87 +12,91 @@
 			<v-btn @click="exportJson" prepend-icon="mdi-export" class="ms-2 top-btn"> 导出 </v-btn>
 		</template>
 	</v-app-bar>
-	<!-- todo 列表加载速度优化，主要是天地万象的数据量太大了 -->
-	<v-row class="wrap-view">
-		<!-- 左侧菜单 -->
-		<v-col class="left-wrap">
-			<v-card
-				class="left-list"
-				v-for="(series, index) in seriesList"
-				@click="selectSeries(index)"
-				style="margin-bottom: 10px"
-			>
-				<v-list>
-					<v-list-item>
-						<template v-slot:prepend>
-							<v-img width="40px" style="margin-right: 10px" :src="series.icon" />
-						</template>
-						<v-list-item-title>{{ series.name }}</v-list-item-title>
-						<v-list-item-subtitle
-							>{{ series.completed_count }} / {{ series.total_count }}</v-list-item-subtitle
-						>
-					</v-list-item>
-				</v-list>
-			</v-card>
-		</v-col>
-		<!-- 右侧内容-->
-		<v-col cols="9" class="right-wrap">
-			<div class="right-list">
+	<div v-if="loading" class="loading-bar">
+		<v-progress-circular indeterminate color="primary" />
+	</div>
+	<div v-else class="wrap">
+		<v-row class="wrap-view">
+			<!-- 左侧菜单 -->
+			<v-col class="left-wrap">
 				<v-card
-					v-show="selectedIndex !== -1 && selectedSeries !== 0 && selectedSeries !== 17"
-					@click="openImg()"
-				>
-					<v-list
-						:style="{
-							backgroundImage: 'url(' + getCardInfo.bg || null + ')',
-							backgroundPosition: 'right',
-							backgroundSize: 'auto 100%',
-							backgroundRepeat: 'no-repeat',
-						}"
-					>
-						<v-list-item>
-							<template v-slot:prepend>
-								<v-img width="80px" style="margin-right: 10px" :src="getCardInfo.icon" />
-							</template>
-							<v-list-item-title>{{ getCardInfo.name }}</v-list-item-title>
-							<v-list-item-subtitle>{{ getCardInfo.description }}</v-list-item-subtitle>
-						</v-list-item>
-					</v-list>
-				</v-card>
-				<v-divider></v-divider>
-				<v-card
-					v-for="achievement in selectedAchievement"
-					:key="achievement.id"
+					class="left-list"
+					v-for="(series, index) in seriesList"
+					@click="selectSeries(index)"
 					style="margin-bottom: 10px"
 				>
 					<v-list>
 						<v-list-item>
 							<template v-slot:prepend>
-								<v-icon color="rgb(205, 182, 145)">mdi-trophy-variant-outline</v-icon>
+								<v-img width="40px" style="margin-right: 10px" :src="series.icon" />
 							</template>
-							<v-list-item-title>{{ achievement.name }}</v-list-item-title>
-							<v-list-item-subtitle>{{
-								achievement.completed ? achievement.completed_time : achievement.description
-							}}</v-list-item-subtitle>
-							<template v-slot:append>
-								<v-btn width="80px" class="reward-btn">
-									<template v-slot:append>
-										<img
-											src="/source/material/原石.webp"
-											alt="原石"
-											class="icon"
-											style="width: 32px"
-										/>
-									</template>
-									{{ achievement.reward }}
-								</v-btn>
-							</template>
+							<v-list-item-title>{{ series.name }}</v-list-item-title>
+							<v-list-item-subtitle
+								>{{ series.completed_count }} / {{ series.total_count }}</v-list-item-subtitle
+							>
 						</v-list-item>
 					</v-list>
 				</v-card>
-			</div>
-		</v-col>
-	</v-row>
+			</v-col>
+			<!-- 右侧内容-->
+			<v-col cols="9" class="right-wrap">
+				<div class="right-list">
+					<v-card
+						v-show="selectedIndex !== -1 && selectedSeries !== 0 && selectedSeries !== 17"
+						@click="openImg()"
+					>
+						<v-list
+							:style="{
+								backgroundImage: 'url(' + getCardInfo.bg || null + ')',
+								backgroundPosition: 'right',
+								backgroundSize: 'auto 100%',
+								backgroundRepeat: 'no-repeat',
+							}"
+						>
+							<v-list-item>
+								<template v-slot:prepend>
+									<v-img width="80px" style="margin-right: 10px" :src="getCardInfo.icon" />
+								</template>
+								<v-list-item-title>{{ getCardInfo.name }}</v-list-item-title>
+								<v-list-item-subtitle>{{ getCardInfo.description }}</v-list-item-subtitle>
+							</v-list-item>
+						</v-list>
+					</v-card>
+					<v-divider></v-divider>
+					<v-card
+						v-for="achievement in selectedAchievement"
+						:key="achievement.id"
+						style="margin-bottom: 10px"
+					>
+						<v-list>
+							<v-list-item>
+								<template v-slot:prepend>
+									<v-icon color="rgb(205, 182, 145)">mdi-trophy-variant-outline</v-icon>
+								</template>
+								<v-list-item-title>{{ achievement.name }}</v-list-item-title>
+								<v-list-item-subtitle>{{
+									achievement.completed ? achievement.completed_time : achievement.description
+								}}</v-list-item-subtitle>
+								<template v-slot:append>
+									<v-btn width="80px" class="reward-btn">
+										<template v-slot:append>
+											<img
+												src="/source/material/原石.webp"
+												alt="原石"
+												class="icon"
+												style="width: 32px"
+											/>
+										</template>
+										{{ achievement.reward }}
+									</v-btn>
+								</template>
+							</v-list-item>
+						</v-list>
+					</v-card>
+				</div>
+			</v-col>
+		</v-row>
+	</div>
 </template>
 
 <script lang="ts" setup>
@@ -130,9 +134,11 @@ const selectedSeries = ref(-1);
 const selectedAchievement = ref([] as TGAchievement[]);
 const CardsInfo = ref([] as NameCard[]);
 const getCardInfo = ref({} as NameCard);
+const loading = ref(true);
 
-onMounted(() => {
-	loadData();
+onMounted(async () => {
+	await loadData();
+	loading.value = false;
 });
 
 // 加载数据，数据源：合并后的本地数据

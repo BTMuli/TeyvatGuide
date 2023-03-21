@@ -1,74 +1,83 @@
 <template>
-	<v-tabs v-model="tab" align-tabs="start" class="global-font">
-		<v-tab value="notice" title="公告" />
-		<v-tab value="activity" title="活动" />
-		<v-tab value="news" title="新闻" />
-	</v-tabs>
-	<v-window v-model="tab">
-		<v-window-item value="notice">
-			<div class="cards-grid">
-				<v-card
-					v-for="item in postData.notice"
-					class="justify-space-between flex-nowrap"
-					width="320"
-				>
-					<v-img :src="item.cover" cover style="height: 150px"></v-img>
-					<v-card-title>{{ item.title }}</v-card-title>
-					<v-card-actions>
-						<v-btn
-							@click="toPost(item.post_id)"
-							prepend-icon="mdi-arrow-right-circle"
-							class="ms-2 card-btn"
-							>查看</v-btn
-						>
-						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-					</v-card-actions>
-				</v-card>
-			</div>
-		</v-window-item>
-		<v-window-item value="activity">
-			<div class="cards-grid">
-				<v-card
-					v-for="item in postData.activity"
-					class="justify-space-between flex-nowrap"
-					width="320"
-				>
-					<v-img :src="item.cover" cover style="height: 150px"></v-img>
-					<v-card-title>{{ item.title }}</v-card-title>
-					<v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
-					<v-card-actions>
-						<v-btn
-							@click="toPost(item.post_id)"
-							prepend-icon="mdi-arrow-right-circle"
-							class="ms-2 card-btn"
-							>查看</v-btn
-						>
-						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-						<v-btn v-if="item.status === 1" color="ms-2 card-btn-0">进行中</v-btn>
-						<v-btn v-else-if="item.status === 2" color="ms-2 card-btn-2">已结束</v-btn>
-						<v-btn v-else color="ms-2 card-btn-1">评选中</v-btn>
-					</v-card-actions>
-				</v-card>
-			</div>
-		</v-window-item>
-		<v-window-item value="news">
-			<div class="cards-grid">
-				<v-card v-for="item in postData.news" class="justify-space-between flex-nowrap" width="320">
-					<v-img :src="item.cover" cover style="height: 150px"></v-img>
-					<v-card-title>{{ item.title }}</v-card-title>
-					<v-card-actions>
-						<v-btn
-							class="ms-2 card-btn"
-							@click="toPost(item.post_id)"
-							prepend-icon="mdi-arrow-right-circle"
-							>查看</v-btn
-						>
-						<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-					</v-card-actions>
-				</v-card>
-			</div>
-		</v-window-item>
-	</v-window>
+	<div v-if="loading" class="loading-bar">
+		<v-progress-circular indeterminate color="primary" />
+	</div>
+	<div v-else>
+		<v-tabs v-model="tab" align-tabs="start" class="global-font">
+			<v-tab value="notice" title="公告" />
+			<v-tab value="activity" title="活动" />
+			<v-tab value="news" title="新闻" />
+		</v-tabs>
+		<v-window v-model="tab">
+			<v-window-item value="notice">
+				<div class="cards-grid">
+					<v-card
+						v-for="item in postData.notice"
+						class="justify-space-between flex-nowrap"
+						width="320"
+					>
+						<v-img :src="item.cover" cover style="height: 150px"></v-img>
+						<v-card-title>{{ item.title }}</v-card-title>
+						<v-card-actions>
+							<v-btn
+								@click="toPost(item.post_id)"
+								prepend-icon="mdi-arrow-right-circle"
+								class="ms-2 card-btn"
+								>查看</v-btn
+							>
+							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+						</v-card-actions>
+					</v-card>
+				</div>
+			</v-window-item>
+			<v-window-item value="activity">
+				<div class="cards-grid">
+					<v-card
+						v-for="item in postData.activity"
+						class="justify-space-between flex-nowrap"
+						width="320"
+					>
+						<v-img :src="item.cover" cover style="height: 150px"></v-img>
+						<v-card-title>{{ item.title }}</v-card-title>
+						<v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
+						<v-card-actions>
+							<v-btn
+								@click="toPost(item.post_id)"
+								prepend-icon="mdi-arrow-right-circle"
+								class="ms-2 card-btn"
+								>查看</v-btn
+							>
+							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+							<v-btn v-if="item.status === 1" color="ms-2 card-btn-0">进行中</v-btn>
+							<v-btn v-else-if="item.status === 2" color="ms-2 card-btn-2">已结束</v-btn>
+							<v-btn v-else color="ms-2 card-btn-1">评选中</v-btn>
+						</v-card-actions>
+					</v-card>
+				</div>
+			</v-window-item>
+			<v-window-item value="news">
+				<div class="cards-grid">
+					<v-card
+						v-for="item in postData.news"
+						class="justify-space-between flex-nowrap"
+						width="320"
+					>
+						<v-img :src="item.cover" cover style="height: 150px"></v-img>
+						<v-card-title>{{ item.title }}</v-card-title>
+						<v-card-actions>
+							<v-btn
+								class="ms-2 card-btn"
+								@click="toPost(item.post_id)"
+								prepend-icon="mdi-arrow-right-circle"
+								>查看</v-btn
+							>
+							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+						</v-card-actions>
+					</v-card>
+				</div>
+			</v-window-item>
+		</v-window>
+	</div>
 </template>
 
 <script lang="ts" setup>
@@ -92,6 +101,8 @@ const appStore = useAppStore();
 
 // 渲染模式
 const renderMode = ref(appStore.structureRender);
+// loading
+const loading = ref(true);
 
 // 接口 todo：考虑放到 interface 文件夹下?
 interface CardDataType {
@@ -126,6 +137,7 @@ onMounted(async () => {
 		news: transData(newsRaw, "news"),
 	};
 	tab.value = "notice";
+	loading.value = false;
 });
 
 function transData(rawData: ResponseNewsList, dataType: string): CardDataType[] {
@@ -203,11 +215,6 @@ async function getPost(post_id: string): Promise<ResponsePost> {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 	grid-gap: 20px;
-}
-
-.card-btn {
-	background: #455167 !important;
-	color: #faf7e8 !important;
 }
 
 /* 进行中 */

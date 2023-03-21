@@ -125,13 +125,6 @@ function toOuter(url: string, title: string) {
 </script>
 
 <style lang="css">
-.loading-bar {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 100%;
-}
-
 .pool-cards {
 	font-family: Genshin, serif;
 	display: flex;
