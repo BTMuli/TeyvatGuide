@@ -127,7 +127,7 @@ import {
 const achievementsStore = useAchievementsStore();
 
 // Data
-const title = ref("");
+const title = ref(achievementsStore.title);
 const seriesList = ref([] as TGSeries[]);
 const selectedIndex = ref(-1);
 const selectedSeries = ref(-1);
@@ -138,7 +138,6 @@ const loading = ref(true);
 
 onMounted(async () => {
 	await loadData();
-	loading.value = false;
 });
 
 // 加载数据，数据源：合并后的本地数据
@@ -148,7 +147,8 @@ async function loadData() {
 	// 按照 order 排序
 	seriesList.value = seriesDB.sort((a, b) => a.order - b.order);
 	selectedAchievement.value = await ReadAllTGData("Achievements");
-	title.value = await getTitle();
+	loading.value = false;
+	title.value = achievementsStore.title;
 }
 // 渲染选中的成就系列
 async function selectSeries(index: number) {
@@ -169,15 +169,6 @@ async function selectSeries(index: number) {
 function openImg() {
 	createTGWindow(getCardInfo.value.profile, "nameCard", getCardInfo.value.name, 840, 400, false);
 }
-// 获取标题
-async function getTitle() {
-	return `成就完成数：${achievementsStore.fin_achievements}/${
-		achievementsStore.total_achievements
-	} 完成率：${(
-		(achievementsStore.fin_achievements / achievementsStore.total_achievements) *
-		100
-	).toFixed(2)}%`;
-}
 // 导入 UIAF 数据，进行数据合并、刷新
 async function importJson() {
 	const selectedFile = await dialog.open({
@@ -196,6 +187,8 @@ async function importJson() {
 			return;
 		}
 		let remoteData: Achievements = JSON.parse(remoteRaw);
+		// loading
+		loading.value = true;
 		// 遍历 remoteData
 		remoteData.list.map(async data => {
 			// 获取 id
@@ -235,7 +228,6 @@ async function importJson() {
 			return data.completed === true;
 		}).length;
 		const total_achievements = achievementsDB.length;
-		console.log(fin_achievements, total_achievements);
 		achievementsStore.flushData(total_achievements, fin_achievements);
 		// 刷新数据
 		await loadData();
