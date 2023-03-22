@@ -10,7 +10,8 @@ export const MysPostApi = "https://bbs-api.mihoyo.com/post/wapi/getPostFull?gids
 export const MysGachaInfo =
 	"https://api-takumi.mihoyo.com/common/blackboard/ys_obc/v1/gacha_pool?app_sn=ys_obc";
 
-export const MysContent = "https://api-static.mihoyo.com/common/blackboard/ys_obc/v1/content/info?app_sn=ys_obc&content_id="
+export const MysContent =
+	"https://bbs.mihoyo.com/ys/obc/content/content_id/detail?bbs_presentation_style=no_header";
 
 /**
  * @description 获取 News 的返回类型

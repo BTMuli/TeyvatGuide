@@ -32,6 +32,11 @@
 					<img src="../assets/icons/achievements.svg" alt="achievementsIcon" class="sideIcon" />
 				</template>
 			</v-list-item>
+			<v-list-item link href="/GCG" title="GCG">
+				<template v-slot:prepend>
+					<img src="../assets/icons/GCG.svg" alt="gcgIcon" class="sideIcon" />
+				</template>
+			</v-list-item>
 			<v-list-item link href="/config" title="设置">
 				<template v-slot:prepend>
 					<img src="../assets/icons/setting.svg" alt="setting" class="sideIcon" />

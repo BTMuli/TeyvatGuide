@@ -1,4 +1,5 @@
 // 信息展示
+import GCG from "../pages/GCG.vue";
 import Home from "../pages/Home.vue";
 import News from "../pages/News.vue";
 // 数据交互
@@ -13,23 +14,28 @@ const routes = [
 		component: Home,
 	},
 	{
-		path: "/home",
-		redirect: "/",
-	},
-	{
 		path: "/achievements",
 		name: "成就",
 		component: Achievements,
 	},
 	{
-		path: "/news",
-		name: "咨讯",
-		component: News,
-	},
-	{
 		path: "/config",
 		name: "设置",
 		component: Config,
+	},
+	{
+		path: "/GCG",
+		name: "卡牌",
+		component: GCG,
+	},
+	{
+		path: "/home",
+		redirect: "/",
+	},
+	{
+		path: "/news",
+		name: "咨讯",
+		component: News,
 	},
 ];
 
