@@ -24,12 +24,18 @@ const useAchievementsStore = defineStore({
 		init() {
 			this.total_achievements = 899;
 			this.fin_achievements = 0;
-			this.title = "成就完成数：0/899 完成率：0%";
+			this.title = this.getTitle();
 		},
 		flushData(total: number, fin: number) {
 			this.total_achievements = total;
 			this.fin_achievements = fin;
-			this.title = `成就完成数：${fin}/${total} 完成率：${((fin / total) * 100).toFixed(2)}%`;
+			this.title = this.getTitle();
+		},
+		getTitle() {
+			return `成就完成数：${this.fin_achievements}/${this.total_achievements} 完成率：${(
+				(this.fin_achievements / this.total_achievements) *
+				100
+			).toFixed(2)}%`;
 		},
 	},
 	persist: true,

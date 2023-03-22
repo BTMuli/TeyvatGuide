@@ -46,6 +46,10 @@ const useAppStore = defineStore({
 	actions: {
 		// 初始化配置
 		async init() {
+			// 防止数据清空
+			if (this.sidebar === undefined) {
+				this.sidebar = true;
+			}
 			// 初始化加载状态
 			this.loading = false;
 			// 初始化咨讯页渲染模式
