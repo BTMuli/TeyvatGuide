@@ -30,6 +30,7 @@ export enum BaseCardType {
  * @see ActionCard
  * @see MonsterCard
  * @property {string} name 卡牌名称
+ * @property {int} id 卡牌 ID // TODO: 用于短期外链跳转
  * @property {string} type 卡牌类型
  * @property {unknown} icon 卡牌图标
  * @property {unknown} info 卡牌信息
@@ -39,6 +40,7 @@ export enum BaseCardType {
  */
 export interface BaseCard {
 	name: string;
+	id: number;
 	type: BaseCardType;
 	icon: unknown;
 	info: unknown;

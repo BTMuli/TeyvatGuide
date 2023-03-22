@@ -14,7 +14,7 @@ import { BaseCard } from "../../interface/GCG";
  */
 export const Config = {
 	storeName: "GCG",
-	keyPath: "name",
+	keyPath: "id",
 	// 根据 type 分类
 	indexes: [
 		"type",

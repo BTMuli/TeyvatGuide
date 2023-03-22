@@ -1,7 +1,16 @@
+/**
+ * @file interface MysPost
+ * @description interface MysPost
+ * @author BTMuli<bt-muli@outlook.com>
+ * @since Alpha
+ */
+
 export const MysNewsApi = "https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids=2&type=";
 export const MysPostApi = "https://bbs-api.mihoyo.com/post/wapi/getPostFull?gids=2&post_id=";
 export const MysGachaInfo =
 	"https://api-takumi.mihoyo.com/common/blackboard/ys_obc/v1/gacha_pool?app_sn=ys_obc";
+
+export const MysContent = "https://api-static.mihoyo.com/common/blackboard/ys_obc/v1/content/info?app_sn=ys_obc&content_id="
 
 /**
  * @description 获取 News 的返回类型
