@@ -162,7 +162,16 @@ async function loadData() {
 	CardsInfo.value = await ReadTGDataByIndex("NameCard", "type", 1);
 	// 按照 order 排序
 	seriesList.value = seriesDB.sort((a, b) => a.order - b.order);
-	selectedAchievement.value = await ReadAllTGData("Achievements");
+	const getAchievements = await ReadAllTGData("Achievements");
+	// 未完成的排在前面
+	getAchievements.sort((a, b) => {
+		if (a.completed === b.completed) {
+			return a.id - b.id;
+		} else {
+			return a.completed ? 1 : -1;
+		}
+	});
+	selectedAchievement.value = getAchievements;
 	loading.value = false;
 	title.value = achievementsStore.title;
 }

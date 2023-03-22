@@ -17,11 +17,14 @@
 			></v-text-field>
 		</v-app-bar>
 		<div class="GCG-grid">
-			<div v-for="item in CardsInfo" :key="item.id" class="card-cls" @click="toOuter(item)">
+			<v-card v-for="item in CardsInfo" :key="item.id" class="card-cls" @click="toOuter(item)">
 				<!-- 外部卡牌边框 -->
 				<v-img src="/source/GCG/base/bg-normal.webp" class="GCG-border"></v-img>
 				<v-img :src="item.icon" class="GCG-cover"></v-img>
-			</div>
+				<div class="GCG-content">
+					<span>{{ item.name }}</span>
+				</div>
+			</v-card>
 		</div>
 	</div>
 </template>
@@ -64,35 +67,41 @@ async function searchCard() {
 }
 </script>
 <style lang="css">
-/* 多排卡牌 */
 .GCG-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
 	grid-gap: 10px;
 	padding: 10px;
+	border-radius: 0 0 10px 10px;
+	overflow: hidden;
 }
+
 .card-cls {
 	position: relative;
 	width: 140px;
 	height: 240px;
-	border-radius: 10px;
 	overflow: hidden;
 }
+
 .GCG-border {
 	position: absolute;
 	top: 0;
 	left: 0;
 	width: 140px;
 	height: 240px;
+	overflow: hidden;
 }
+
 .GCG-cover {
 	position: absolute;
+	transition: all 0.3s;
 	top: 0;
 	left: 0;
 	width: 140px;
 	height: 240px;
 	z-index: -1;
 }
+
 .GCG-grid :hover {
 	cursor: pointer;
 }
@@ -101,5 +110,21 @@ async function searchCard() {
 	transform: scale(1.1);
 	transition: all 0.3s;
 	overflow: hidden;
+}
+
+.GCG-content {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 40px;
+	background: rgba(0, 0, 0, 0.5);
+	color: white;
+	display: flex;
+	font-size: small;
+	font-family: Genshin, serif;
+	border-radius: 0 0 10px 10px;
+	justify-content: center;
+	align-items: center;
 }
 </style>

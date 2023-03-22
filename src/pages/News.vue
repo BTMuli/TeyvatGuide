@@ -10,13 +10,18 @@
 		</v-tabs>
 		<v-window v-model="tab">
 			<v-window-item value="notice">
-				<div class="cards-grid">
+				<div class="News-grid">
 					<v-card
 						v-for="item in postData.notice"
 						class="justify-space-between flex-nowrap"
 						width="320"
 					>
-						<v-img :src="item.cover" cover style="height: 150px"></v-img>
+						<v-img
+							:src="item.cover"
+							cover
+							style="height: 150px"
+							@click="toPost(item.post_id)"
+						></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-actions>
 							<v-btn
@@ -31,13 +36,18 @@
 				</div>
 			</v-window-item>
 			<v-window-item value="activity">
-				<div class="cards-grid">
+				<div class="News-grid">
 					<v-card
 						v-for="item in postData.activity"
 						class="justify-space-between flex-nowrap"
 						width="320"
 					>
-						<v-img :src="item.cover" cover style="height: 150px"></v-img>
+						<v-img
+							:src="item.cover"
+							cover
+							style="height: 150px"
+							@click="toPost(item.post_id)"
+						></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
 						<v-card-actions>
@@ -56,13 +66,18 @@
 				</div>
 			</v-window-item>
 			<v-window-item value="news">
-				<div class="cards-grid">
+				<div class="News-grid">
 					<v-card
 						v-for="item in postData.news"
 						class="justify-space-between flex-nowrap"
 						width="320"
 					>
-						<v-img :src="item.cover" cover style="height: 150px"></v-img>
+						<v-img
+							:src="item.cover"
+							cover
+							style="height: 150px"
+							@click="toPost(item.post_id)"
+						></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-actions>
 							<v-btn
@@ -210,11 +225,21 @@ async function getPost(post_id: string): Promise<ResponsePost> {
 </script>
 
 <style lang="css">
-.cards-grid {
+.News-grid {
 	font-family: Genshin, serif;
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 	grid-gap: 20px;
+}
+
+.News-grid img {
+	transition: all 0.3s linear;
+}
+
+.News-grid :hover img {
+	cursor: pointer;
+	transform: scale(1.1);
+	transition: all 0.3s linear;
 }
 
 /* 进行中 */
