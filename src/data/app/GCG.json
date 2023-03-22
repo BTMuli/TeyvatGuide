@@ -3,7 +3,9 @@
 		"name": "芭芭拉",
 		"id": 5372,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/芭芭拉.webp",
+		"icon": {
+			"normal": "/source/GCG/character/芭芭拉.webp"
+		},
 		"info": {
 			"element": "水元素",
 			"weapon": "法器",
@@ -14,7 +16,9 @@
 		"name": "班尼特",
 		"id": 5367,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/班尼特.webp",
+		"icon": {
+			"normal": "/source/GCG/character/班尼特.webp"
+		},
 		"info": {
 			"element": "火元素",
 			"weapon": "单手剑",
@@ -25,7 +29,9 @@
 		"name": "北斗",
 		"id": 5886,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/北斗.webp",
+		"icon": {
+			"normal": "/source/GCG/character/北斗.webp"
+		},
 		"info": {
 			"element": "雷元素",
 			"weapon": "双手剑",
@@ -36,7 +42,9 @@
 		"name": "纯水精灵·洛蒂娅",
 		"id": 5528,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/纯水精灵·洛蒂娅.webp",
+		"icon": {
+			"normal": "/source/GCG/character/纯水精灵·洛蒂娅.webp"
+		},
 		"info": {
 			"element": "水元素",
 			"weapon": "其他武器",
@@ -47,7 +55,9 @@
 		"name": "翠翎恐蕈",
 		"id": 5523,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/翠翎恐蕈.webp",
+		"icon": {
+			"normal": "/source/GCG/character/翠翎恐蕈.webp"
+		},
 		"info": {
 			"element": "草元素",
 			"weapon": "其他武器",
@@ -58,7 +68,9 @@
 		"name": "迪奥娜",
 		"id": 5356,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/迪奥娜.webp",
+		"icon": {
+			"normal": "/source/GCG/character/迪奥娜.webp"
+		},
 		"info": {
 			"element": "冰元素",
 			"weapon": "弓",
@@ -69,7 +81,9 @@
 		"name": "迪卢克",
 		"id": 5369,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/迪卢克.webp",
+		"icon": {
+			"normal": "/source/GCG/character/迪卢克.webp"
+		},
 		"info": {
 			"element": "火元素",
 			"weapon": "双手剑",
@@ -80,7 +94,9 @@
 		"name": "菲谢尔",
 		"id": 5365,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/菲谢尔.webp",
+		"icon": {
+			"normal": "/source/GCG/character/菲谢尔.webp"
+		},
 		"info": {
 			"element": "雷元素",
 			"weapon": "弓",
@@ -91,7 +107,9 @@
 		"name": "甘雨",
 		"id": 5376,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/甘雨.webp",
+		"icon": {
+			"normal": "/source/GCG/character/甘雨.webp"
+		},
 		"info": {
 			"element": "冰元素",
 			"weapon": "弓",
@@ -102,7 +120,9 @@
 		"name": "九条裟罗",
 		"id": 6174,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/九条裟罗.webp",
+		"icon": {
+			"normal": "/source/GCG/character/九条裟罗.webp"
+		},
 		"info": {
 			"element": "雷元素",
 			"weapon": "弓",
@@ -113,7 +133,9 @@
 		"name": "凯亚",
 		"id": 5375,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/凯亚.webp",
+		"icon": {
+			"normal": "/source/GCG/character/凯亚.webp"
+		},
 		"info": {
 			"element": "冰元素",
 			"weapon": "单手剑",
@@ -124,7 +146,9 @@
 		"name": "柯莱",
 		"id": 5357,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/柯莱.webp",
+		"icon": {
+			"normal": "/source/GCG/character/柯莱.webp"
+		},
 		"info": {
 			"element": "草元素",
 			"weapon": "弓",
@@ -135,7 +159,9 @@
 		"name": "可莉",
 		"id": 5885,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/可莉.webp",
+		"icon": {
+			"normal": "/source/GCG/character/可莉.webp"
+		},
 		"info": {
 			"element": "火元素",
 			"weapon": "法器",
@@ -146,7 +172,9 @@
 		"name": "刻晴",
 		"id": 5363,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/刻晴.webp",
+		"icon": {
+			"normal": "/source/GCG/character/刻晴.webp"
+		},
 		"info": {
 			"element": "雷元素",
 			"weapon": "单手剑",
@@ -157,7 +185,9 @@
 		"name": "雷泽",
 		"id": 5364,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/雷泽.webp",
+		"icon": {
+			"normal": "/source/GCG/character/雷泽.webp"
+		},
 		"info": {
 			"element": "雷元素",
 			"weapon": "双手剑",
@@ -168,7 +198,9 @@
 		"name": "魔偶剑鬼",
 		"id": 5525,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/魔偶剑鬼.webp",
+		"icon": {
+			"normal": "/source/GCG/character/魔偶剑鬼.webp"
+		},
 		"info": {
 			"element": "风元素",
 			"weapon": "其他武器",
@@ -179,7 +211,9 @@
 		"name": "莫娜",
 		"id": 5370,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/莫娜.webp",
+		"icon": {
+			"normal": "/source/GCG/character/莫娜.webp"
+		},
 		"info": {
 			"element": "水元素",
 			"weapon": "法器",
@@ -190,7 +224,9 @@
 		"name": "凝光",
 		"id": 5359,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/凝光.webp",
+		"icon": {
+			"normal": "/source/GCG/character/凝光.webp"
+		},
 		"info": {
 			"element": "岩元素",
 			"weapon": "法器",
@@ -201,7 +237,9 @@
 		"name": "诺艾尔",
 		"id": 5358,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/诺艾尔.webp",
+		"icon": {
+			"normal": "/source/GCG/character/诺艾尔.webp"
+		},
 		"info": {
 			"element": "岩元素",
 			"weapon": "双手剑",
@@ -212,7 +250,9 @@
 		"name": "琴",
 		"id": 5360,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/琴.webp",
+		"icon": {
+			"normal": "/source/GCG/character/琴.webp"
+		},
 		"info": {
 			"element": "风元素",
 			"weapon": "单手剑",
@@ -223,7 +263,9 @@
 		"name": "丘丘岩盔王",
 		"id": 5524,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/丘丘岩盔王.webp",
+		"icon": {
+			"normal": "/source/GCG/character/丘丘岩盔王.webp"
+		},
 		"info": {
 			"element": "岩元素",
 			"weapon": "其他武器",
@@ -234,7 +276,9 @@
 		"name": "赛诺",
 		"id": 5362,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/赛诺.webp",
+		"icon": {
+			"normal": "/source/GCG/character/赛诺.webp"
+		},
 		"info": {
 			"element": "雷元素",
 			"weapon": "长柄武器",
@@ -245,7 +289,9 @@
 		"name": "砂糖",
 		"id": 5361,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/砂糖.webp",
+		"icon": {
+			"normal": "/source/GCG/character/砂糖.webp"
+		},
 		"info": {
 			"element": "风元素",
 			"weapon": "法器",
@@ -256,7 +302,9 @@
 		"name": "珊瑚宫心海",
 		"id": 6175,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/珊瑚宫心海.webp",
+		"icon": {
+			"normal": "/source/GCG/character/珊瑚宫心海.webp"
+		},
 		"info": {
 			"element": "水元素",
 			"weapon": "法器",
@@ -267,7 +315,9 @@
 		"name": "神里绫华",
 		"id": 5373,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/神里绫华.webp",
+		"icon": {
+			"normal": "/source/GCG/character/神里绫华.webp"
+		},
 		"info": {
 			"element": "冰元素",
 			"weapon": "单手剑",
@@ -278,7 +328,9 @@
 		"name": "香菱",
 		"id": 5368,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/香菱.webp",
+		"icon": {
+			"normal": "/source/GCG/character/香菱.webp"
+		},
 		"info": {
 			"element": "火元素",
 			"weapon": "长柄武器",
@@ -289,7 +341,9 @@
 		"name": "宵宫",
 		"id": 5366,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/宵宫.webp",
+		"icon": {
+			"normal": "/source/GCG/character/宵宫.webp"
+		},
 		"info": {
 			"element": "火元素",
 			"weapon": "弓",
@@ -300,7 +354,9 @@
 		"name": "行秋",
 		"id": 5371,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/行秋.webp",
+		"icon": {
+			"normal": "/source/GCG/character/行秋.webp"
+		},
 		"info": {
 			"element": "水元素",
 			"weapon": "单手剑",
@@ -311,7 +367,9 @@
 		"name": "优菈",
 		"id": 6176,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/优菈.webp",
+		"icon": {
+			"normal": "/source/GCG/character/优菈.webp"
+		},
 		"info": {
 			"element": "冰元素",
 			"weapon": "双手剑",
@@ -322,7 +380,9 @@
 		"name": "愚人众·藏镜仕女",
 		"id": 5527,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/愚人众·藏镜仕女.webp",
+		"icon": {
+			"normal": "/source/GCG/character/愚人众·藏镜仕女.webp"
+		},
 		"info": {
 			"element": "水元素",
 			"weapon": "其他武器",
@@ -333,7 +393,9 @@
 		"name": "愚人众·火之债务处理人",
 		"id": 5526,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/愚人众·火之债务处理人.webp",
+		"icon": {
+			"normal": "/source/GCG/character/愚人众·火之债务处理人.webp"
+		},
 		"info": {
 			"element": "火元素",
 			"weapon": "其他武器",
@@ -344,7 +406,9 @@
 		"name": "重云",
 		"id": 5374,
 		"type": "角色牌",
-		"icon": "/source/GCG/character/重云.webp",
+		"icon": {
+			"normal": "/source/GCG/character/重云.webp"
+		},
 		"info": {
 			"element": "冰元素",
 			"weapon": "双手剑",
@@ -355,175 +419,225 @@
 		"name": "冰盾丘丘暴徒",
 		"id": 5589,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/冰盾丘丘暴徒.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/冰盾丘丘暴徒.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "冰箭丘丘人",
 		"id": 5592,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/冰箭丘丘人.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/冰箭丘丘人.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "冰深渊法师",
 		"id": 5601,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/冰深渊法师.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/冰深渊法师.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "草丘丘萨满",
 		"id": 5586,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/草丘丘萨满.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/草丘丘萨满.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "冲锋丘丘人",
 		"id": 5682,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/冲锋丘丘人.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/冲锋丘丘人.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "打手丘丘人",
 		"id": 5595,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/打手丘丘人.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/打手丘丘人.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "风丘丘萨满",
 		"id": 5588,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/风丘丘萨满.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/风丘丘萨满.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "海乱鬼·雷腾",
 		"id": 5585,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/海乱鬼·雷腾.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/海乱鬼·雷腾.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "海乱鬼·炎威",
 		"id": 5584,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/海乱鬼·炎威.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/海乱鬼·炎威.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "火斧丘丘暴徒",
 		"id": 5593,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/火斧丘丘暴徒.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/火斧丘丘暴徒.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "火深渊法师",
 		"id": 5603,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/火深渊法师.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/火深渊法师.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "雷斧丘丘暴徒",
 		"id": 5590,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/雷斧丘丘暴徒.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/雷斧丘丘暴徒.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "雷箭丘丘人",
 		"id": 5591,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/雷箭丘丘人.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/雷箭丘丘人.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "雷史莱姆",
 		"id": 5604,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/雷史莱姆.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/雷史莱姆.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "射手丘丘人",
 		"id": 5594,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/射手丘丘人.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/射手丘丘人.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "水丘丘萨满",
 		"id": 5587,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/水丘丘萨满.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/水丘丘萨满.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "水深渊法师",
 		"id": 5602,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/水深渊法师.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/水深渊法师.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "水史莱姆",
 		"id": 5605,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/水史莱姆.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/水史莱姆.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "野伏·火付番",
 		"id": 5597,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/野伏·火付番.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/野伏·火付番.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "野伏·机巧番",
 		"id": 5596,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/野伏·机巧番.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/野伏·机巧番.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "野伏·阵刀番",
 		"id": 5598,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/野伏·阵刀番.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/野伏·阵刀番.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "有翼草本真蕈",
 		"id": 5683,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/有翼草本真蕈.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/有翼草本真蕈.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "愚人众先遣队·风拳前锋军",
 		"id": 5600,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/愚人众先遣队·风拳前锋军.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/愚人众先遣队·风拳前锋军.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "愚人众先遣队·水铳重卫士",
 		"id": 5599,
 		"type": "魔物牌",
-		"icon": "/source/GCG/monster/愚人众先遣队·水铳重卫士.webp",
+		"icon": {
+			"normal": "/source/GCG/monster/愚人众先遣队·水铳重卫士.webp"
+		},
 		"info": {}
 	},
 	{
 		"name": "阿圆",
 		"id": 5454,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/阿圆.webp",
+		"icon": {
+			"normal": "/source/GCG/action/阿圆.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "伙伴",
@@ -534,7 +648,9 @@
 		"name": "艾琳",
 		"id": 5457,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/艾琳.webp",
+		"icon": {
+			"normal": "/source/GCG/action/艾琳.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "伙伴",
@@ -545,7 +661,9 @@
 		"name": "白垩之术",
 		"id": 5492,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/白垩之术.webp",
+		"icon": {
+			"normal": "/source/GCG/action/白垩之术.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -556,7 +674,9 @@
 		"name": "白铁大剑",
 		"id": 5412,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/白铁大剑.webp",
+		"icon": {
+			"normal": "/source/GCG/action/白铁大剑.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -567,7 +687,9 @@
 		"name": "白缨枪",
 		"id": 5415,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/白缨枪.webp",
+		"icon": {
+			"normal": "/source/GCG/action/白缨枪.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -578,7 +700,9 @@
 		"name": "百川奔流",
 		"id": 5509,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/百川奔流.webp",
+		"icon": {
+			"normal": "/source/GCG/action/百川奔流.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -589,7 +713,9 @@
 		"name": "孢子增殖",
 		"id": 5379,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/孢子增殖.webp",
+		"icon": {
+			"normal": "/source/GCG/action/孢子增殖.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -600,7 +726,9 @@
 		"name": "北地烟熏鸡",
 		"id": 5491,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/北地烟熏鸡.webp",
+		"icon": {
+			"normal": "/source/GCG/action/北地烟熏鸡.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "料理",
@@ -611,7 +739,9 @@
 		"name": "本大爷还没有输！",
 		"id": 5490,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/本大爷还没有输！.webp",
+		"icon": {
+			"normal": "/source/GCG/action/本大爷还没有输！.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -622,7 +752,9 @@
 		"name": "便携营养袋",
 		"id": 5447,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/便携营养袋.webp",
+		"icon": {
+			"normal": "/source/GCG/action/便携营养袋.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "道具",
@@ -633,7 +765,9 @@
 		"name": "冰风迷途的勇士",
 		"id": 5428,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/冰风迷途的勇士.webp",
+		"icon": {
+			"normal": "/source/GCG/action/冰风迷途的勇士.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -644,7 +778,9 @@
 		"name": "不动玄石之相",
 		"id": 5437,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/不动玄石之相.webp",
+		"icon": {
+			"normal": "/source/GCG/action/不动玄石之相.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -655,7 +791,9 @@
 		"name": "参量质变仪",
 		"id": 5446,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/参量质变仪.webp",
+		"icon": {
+			"normal": "/source/GCG/action/参量质变仪.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "道具",
@@ -666,7 +804,9 @@
 		"name": "常九爷",
 		"id": 5456,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/常九爷.webp",
+		"icon": {
+			"normal": "/source/GCG/action/常九爷.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "伙伴",
@@ -677,7 +817,9 @@
 		"name": "沉沦之心",
 		"id": 5430,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/沉沦之心.webp",
+		"icon": {
+			"normal": "/source/GCG/action/沉沦之心.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -688,7 +830,9 @@
 		"name": "沉没的预言",
 		"id": 5442,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/沉没的预言.webp",
+		"icon": {
+			"normal": "/source/GCG/action/沉没的预言.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -699,7 +843,9 @@
 		"name": "晨曦酒庄",
 		"id": 5461,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/晨曦酒庄.webp",
+		"icon": {
+			"normal": "/source/GCG/action/晨曦酒庄.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "场地",
@@ -710,7 +856,9 @@
 		"name": "炽烈的炎之魔女",
 		"id": 5432,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/炽烈的炎之魔女.webp",
+		"icon": {
+			"normal": "/source/GCG/action/炽烈的炎之魔女.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -721,7 +869,9 @@
 		"name": "储之千日，用之一刻",
 		"id": 5510,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/储之千日，用之一刻.webp",
+		"icon": {
+			"normal": "/source/GCG/action/储之千日，用之一刻.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -732,7 +882,9 @@
 		"name": "翠绿的猎人之冠",
 		"id": 5435,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/翠绿的猎人之冠.webp",
+		"icon": {
+			"normal": "/source/GCG/action/翠绿的猎人之冠.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -743,7 +895,9 @@
 		"name": "翠绿之影",
 		"id": 5436,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/翠绿之影.webp",
+		"icon": {
+			"normal": "/source/GCG/action/翠绿之影.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -754,7 +908,9 @@
 		"name": "抵天雷罚",
 		"id": 5505,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/抵天雷罚.webp",
+		"icon": {
+			"normal": "/source/GCG/action/抵天雷罚.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -765,7 +921,9 @@
 		"name": "蒂玛乌斯",
 		"id": 5451,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/蒂玛乌斯.webp",
+		"icon": {
+			"normal": "/source/GCG/action/蒂玛乌斯.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "伙伴",
@@ -776,7 +934,9 @@
 		"name": "赌徒的耳环",
 		"id": 5424,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/赌徒的耳环.webp",
+		"icon": {
+			"normal": "/source/GCG/action/赌徒的耳环.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -787,7 +947,9 @@
 		"name": "飞叶迴斜",
 		"id": 5441,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/飞叶迴斜.webp",
+		"icon": {
+			"normal": "/source/GCG/action/飞叶迴斜.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -798,7 +960,9 @@
 		"name": "风鹰剑",
 		"id": 5420,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/风鹰剑.webp",
+		"icon": {
+			"normal": "/source/GCG/action/风鹰剑.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -809,7 +973,9 @@
 		"name": "光辉的季节",
 		"id": 5496,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/光辉的季节.webp",
+		"icon": {
+			"normal": "/source/GCG/action/光辉的季节.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -820,7 +986,9 @@
 		"name": "寒天宣命祝词",
 		"id": 5499,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/寒天宣命祝词.webp",
+		"icon": {
+			"normal": "/source/GCG/action/寒天宣命祝词.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -831,7 +999,9 @@
 		"name": "鹤归之时",
 		"id": 5489,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/鹤归之时.webp",
+		"icon": {
+			"normal": "/source/GCG/action/鹤归之时.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -842,7 +1012,9 @@
 		"name": "护法之誓",
 		"id": 5401,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/护法之誓.webp",
+		"icon": {
+			"normal": "/source/GCG/action/护法之誓.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -853,7 +1025,9 @@
 		"name": "华饰之兜",
 		"id": 6173,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/华饰之兜.webp",
+		"icon": {
+			"normal": "/source/GCG/action/华饰之兜.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -864,7 +1038,9 @@
 		"name": "唤雷的头冠",
 		"id": 5433,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/唤雷的头冠.webp",
+		"icon": {
+			"normal": "/source/GCG/action/唤雷的头冠.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -875,7 +1051,9 @@
 		"name": "换班时间",
 		"id": 5488,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/换班时间.webp",
+		"icon": {
+			"normal": "/source/GCG/action/换班时间.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -886,7 +1064,9 @@
 		"name": "混元熵增论",
 		"id": 5507,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/混元熵增论.webp",
+		"icon": {
+			"normal": "/source/GCG/action/混元熵增论.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -897,7 +1077,9 @@
 		"name": "机巧神通",
 		"id": 5381,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/机巧神通.webp",
+		"icon": {
+			"normal": "/source/GCG/action/机巧神通.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -908,7 +1090,9 @@
 		"name": "祭礼残章",
 		"id": 5407,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/祭礼残章.webp",
+		"icon": {
+			"normal": "/source/GCG/action/祭礼残章.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -919,7 +1103,9 @@
 		"name": "祭礼大剑",
 		"id": 5413,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/祭礼大剑.webp",
+		"icon": {
+			"normal": "/source/GCG/action/祭礼大剑.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -930,7 +1116,9 @@
 		"name": "祭礼弓",
 		"id": 5410,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/祭礼弓.webp",
+		"icon": {
+			"normal": "/source/GCG/action/祭礼弓.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -941,7 +1129,9 @@
 		"name": "祭礼剑",
 		"id": 5419,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/祭礼剑.webp",
+		"icon": {
+			"normal": "/source/GCG/action/祭礼剑.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -952,7 +1142,9 @@
 		"name": "将帅兜鍪",
 		"id": 6172,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/将帅兜鍪.webp",
+		"icon": {
+			"normal": "/source/GCG/action/将帅兜鍪.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -963,7 +1155,9 @@
 		"name": "交叉火力",
 		"id": 5501,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/交叉火力.webp",
+		"icon": {
+			"normal": "/source/GCG/action/交叉火力.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -974,7 +1168,9 @@
 		"name": "交给我吧！",
 		"id": 5487,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/交给我吧！.webp",
+		"icon": {
+			"normal": "/source/GCG/action/交给我吧！.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -985,7 +1181,9 @@
 		"name": "焦灼的魔女帽",
 		"id": 5431,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/焦灼的魔女帽.webp",
+		"icon": {
+			"normal": "/source/GCG/action/焦灼的魔女帽.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -996,7 +1194,9 @@
 		"name": "教官的帽子",
 		"id": 5425,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/教官的帽子.webp",
+		"icon": {
+			"normal": "/source/GCG/action/教官的帽子.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -1007,7 +1207,9 @@
 		"name": "镜锢之笼",
 		"id": 5382,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/镜锢之笼.webp",
+		"icon": {
+			"normal": "/source/GCG/action/镜锢之笼.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1018,7 +1220,9 @@
 		"name": "酒渍船帽",
 		"id": 5429,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/酒渍船帽.webp",
+		"icon": {
+			"normal": "/source/GCG/action/酒渍船帽.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -1029,7 +1233,9 @@
 		"name": "绝云锅巴",
 		"id": 5479,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/绝云锅巴.webp",
+		"icon": {
+			"normal": "/source/GCG/action/绝云锅巴.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "料理",
@@ -1040,7 +1246,9 @@
 		"name": "觉醒",
 		"id": 5506,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/觉醒.webp",
+		"icon": {
+			"normal": "/source/GCG/action/觉醒.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1051,7 +1259,9 @@
 		"name": "凯瑟琳",
 		"id": 5450,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/凯瑟琳.webp",
+		"icon": {
+			"normal": "/source/GCG/action/凯瑟琳.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "伙伴",
@@ -1062,7 +1272,9 @@
 		"name": "烤蘑菇披萨",
 		"id": 5478,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/烤蘑菇披萨.webp",
+		"icon": {
+			"normal": "/source/GCG/action/烤蘑菇披萨.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "料理",
@@ -1073,7 +1285,9 @@
 		"name": "快快缝补术",
 		"id": 5486,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/快快缝补术.webp",
+		"icon": {
+			"normal": "/source/GCG/action/快快缝补术.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -1084,7 +1298,9 @@
 		"name": "狼的末路",
 		"id": 5414,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/狼的末路.webp",
+		"icon": {
+			"normal": "/source/GCG/action/狼的末路.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -1095,7 +1311,9 @@
 		"name": "雷楔",
 		"id": 5583,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/雷楔.webp",
+		"icon": {
+			"normal": "/source/GCG/action/雷楔.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -1106,7 +1324,9 @@
 		"name": "冷血之剑",
 		"id": 5498,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/冷血之剑.webp",
+		"icon": {
+			"normal": "/source/GCG/action/冷血之剑.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1117,7 +1337,9 @@
 		"name": "璃月港口",
 		"id": 5460,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/璃月港口.webp",
+		"icon": {
+			"normal": "/source/GCG/action/璃月港口.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "场地",
@@ -1128,7 +1350,9 @@
 		"name": "立本",
 		"id": 5455,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/立本.webp",
+		"icon": {
+			"normal": "/source/GCG/action/立本.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "伙伴",
@@ -1139,7 +1363,9 @@
 		"name": "莲花酥",
 		"id": 5477,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/莲花酥.webp",
+		"icon": {
+			"normal": "/source/GCG/action/莲花酥.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "料理",
@@ -1150,7 +1376,9 @@
 		"name": "刘苏",
 		"id": 5483,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/刘苏.webp",
+		"icon": {
+			"normal": "/source/GCG/action/刘苏.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "伙伴",
@@ -1161,7 +1389,9 @@
 		"name": "流放者头冠",
 		"id": 5426,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/流放者头冠.webp",
+		"icon": {
+			"normal": "/source/GCG/action/流放者头冠.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -1172,7 +1402,9 @@
 		"name": "流火焦灼",
 		"id": 5445,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/流火焦灼.webp",
+		"icon": {
+			"normal": "/source/GCG/action/流火焦灼.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1183,7 +1415,9 @@
 		"name": "旅行剑",
 		"id": 5418,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/旅行剑.webp",
+		"icon": {
+			"normal": "/source/GCG/action/旅行剑.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -1194,7 +1428,9 @@
 		"name": "落羽的裁择",
 		"id": 5503,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/落羽的裁择.webp",
+		"icon": {
+			"normal": "/source/GCG/action/落羽的裁择.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1205,7 +1441,9 @@
 		"name": "猫爪冰摇",
 		"id": 5497,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/猫爪冰摇.webp",
+		"icon": {
+			"normal": "/source/GCG/action/猫爪冰摇.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1216,7 +1454,9 @@
 		"name": "卯师傅",
 		"id": 5453,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/卯师傅.webp",
+		"icon": {
+			"normal": "/source/GCG/action/卯师傅.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "伙伴",
@@ -1227,7 +1467,9 @@
 		"name": "冒险憧憬",
 		"id": 5385,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/冒险憧憬.webp",
+		"icon": {
+			"normal": "/source/GCG/action/冒险憧憬.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1238,7 +1480,9 @@
 		"name": "冒险家头带",
 		"id": 5421,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/冒险家头带.webp",
+		"icon": {
+			"normal": "/source/GCG/action/冒险家头带.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -1249,7 +1493,9 @@
 		"name": "蒙德土豆饼",
 		"id": 5529,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/蒙德土豆饼.webp",
+		"icon": {
+			"normal": "/source/GCG/action/蒙德土豆饼.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "料理",
@@ -1260,7 +1506,9 @@
 		"name": "魔导绪论",
 		"id": 5406,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/魔导绪论.webp",
+		"icon": {
+			"normal": "/source/GCG/action/魔导绪论.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -1271,7 +1519,9 @@
 		"name": "派蒙",
 		"id": 5448,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/派蒙.webp",
+		"icon": {
+			"normal": "/source/GCG/action/派蒙.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "伙伴",
@@ -1282,7 +1532,9 @@
 		"name": "砰砰礼物",
 		"id": 5873,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/砰砰礼物.webp",
+		"icon": {
+			"normal": "/source/GCG/action/砰砰礼物.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1293,7 +1545,9 @@
 		"name": "霹雳连霄",
 		"id": 5874,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/霹雳连霄.webp",
+		"icon": {
+			"normal": "/source/GCG/action/霹雳连霄.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1304,7 +1558,9 @@
 		"name": "破冰踏雪的回音",
 		"id": 5427,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/破冰踏雪的回音.webp",
+		"icon": {
+			"normal": "/source/GCG/action/破冰踏雪的回音.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -1315,7 +1571,9 @@
 		"name": "蒲公英的国土",
 		"id": 5508,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/蒲公英的国土.webp",
+		"icon": {
+			"normal": "/source/GCG/action/蒲公英的国土.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1326,7 +1584,9 @@
 		"name": "骑士团图书馆",
 		"id": 5462,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/骑士团图书馆.webp",
+		"icon": {
+			"normal": "/source/GCG/action/骑士团图书馆.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "场地",
@@ -1337,7 +1597,9 @@
 		"name": "千岩长枪",
 		"id": 5416,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/千岩长枪.webp",
+		"icon": {
+			"normal": "/source/GCG/action/千岩长枪.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -1348,7 +1610,9 @@
 		"name": "群玉阁",
 		"id": 5484,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/群玉阁.webp",
+		"icon": {
+			"normal": "/source/GCG/action/群玉阁.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "场地",
@@ -1359,7 +1623,9 @@
 		"name": "如雷的盛怒",
 		"id": 5434,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/如雷的盛怒.webp",
+		"icon": {
+			"normal": "/source/GCG/action/如雷的盛怒.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -1370,7 +1636,9 @@
 		"name": "深林的记忆",
 		"id": 5440,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/深林的记忆.webp",
+		"icon": {
+			"normal": "/source/GCG/action/深林的记忆.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -1381,7 +1649,9 @@
 		"name": "深渊的呼唤",
 		"id": 5400,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/深渊的呼唤.webp",
+		"icon": {
+			"normal": "/source/GCG/action/深渊的呼唤.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -1392,7 +1662,9 @@
 		"name": "神宝迁宫祝词",
 		"id": 5485,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/神宝迁宫祝词.webp",
+		"icon": {
+			"normal": "/source/GCG/action/神宝迁宫祝词.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -1403,7 +1675,9 @@
 		"name": "噬星魔鸦",
 		"id": 5504,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/噬星魔鸦.webp",
+		"icon": {
+			"normal": "/source/GCG/action/噬星魔鸦.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1414,7 +1688,9 @@
 		"name": "兽肉薄荷卷",
 		"id": 5476,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/兽肉薄荷卷.webp",
+		"icon": {
+			"normal": "/source/GCG/action/兽肉薄荷卷.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "料理",
@@ -1425,7 +1701,9 @@
 		"name": "送你一程",
 		"id": 5402,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/送你一程.webp",
+		"icon": {
+			"normal": "/source/GCG/action/送你一程.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -1436,7 +1714,9 @@
 		"name": "提米",
 		"id": 5449,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/提米.webp",
+		"icon": {
+			"normal": "/source/GCG/action/提米.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "伙伴",
@@ -1447,7 +1727,9 @@
 		"name": "天空之脊",
 		"id": 5417,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/天空之脊.webp",
+		"icon": {
+			"normal": "/source/GCG/action/天空之脊.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -1458,7 +1740,9 @@
 		"name": "天空之卷",
 		"id": 5408,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/天空之卷.webp",
+		"icon": {
+			"normal": "/source/GCG/action/天空之卷.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -1469,7 +1753,9 @@
 		"name": "天空之翼",
 		"id": 5411,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/天空之翼.webp",
+		"icon": {
+			"normal": "/source/GCG/action/天空之翼.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -1480,7 +1766,9 @@
 		"name": "田铁嘴",
 		"id": 5458,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/田铁嘴.webp",
+		"icon": {
+			"normal": "/source/GCG/action/田铁嘴.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "伙伴",
@@ -1491,7 +1779,9 @@
 		"name": "甜甜花酿鸡",
 		"id": 5475,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/甜甜花酿鸡.webp",
+		"icon": {
+			"normal": "/source/GCG/action/甜甜花酿鸡.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "料理",
@@ -1502,7 +1792,9 @@
 		"name": "吐纳真定",
 		"id": 5444,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/吐纳真定.webp",
+		"icon": {
+			"normal": "/source/GCG/action/吐纳真定.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1513,7 +1805,9 @@
 		"name": "瓦格纳",
 		"id": 5452,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/瓦格纳.webp",
+		"icon": {
+			"normal": "/source/GCG/action/瓦格纳.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "伙伴",
@@ -1524,7 +1818,9 @@
 		"name": "望舒客栈",
 		"id": 5463,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/望舒客栈.webp",
+		"icon": {
+			"normal": "/source/GCG/action/望舒客栈.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "场地",
@@ -1535,7 +1831,9 @@
 		"name": "唯此一心",
 		"id": 5384,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/唯此一心.webp",
+		"icon": {
+			"normal": "/source/GCG/action/唯此一心.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1546,7 +1844,9 @@
 		"name": "我界",
 		"id": 6169,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/我界.webp",
+		"icon": {
+			"normal": "/source/GCG/action/我界.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1557,7 +1857,9 @@
 		"name": "西风大教堂",
 		"id": 5459,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/西风大教堂.webp",
+		"icon": {
+			"normal": "/source/GCG/action/西风大教堂.webp"
+		},
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "场地",
@@ -1568,7 +1870,9 @@
 		"name": "悉数讨回",
 		"id": 5443,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/悉数讨回.webp",
+		"icon": {
+			"normal": "/source/GCG/action/悉数讨回.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1579,7 +1883,9 @@
 		"name": "匣中玉栉",
 		"id": 6170,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/匣中玉栉.webp",
+		"icon": {
+			"normal": "/source/GCG/action/匣中玉栉.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1590,7 +1896,9 @@
 		"name": "仙跳墙",
 		"id": 5474,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/仙跳墙.webp",
+		"icon": {
+			"normal": "/source/GCG/action/仙跳墙.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "料理",
@@ -1601,7 +1909,9 @@
 		"name": "星天之兆",
 		"id": 5482,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/星天之兆.webp",
+		"icon": {
+			"normal": "/source/GCG/action/星天之兆.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -1612,7 +1922,9 @@
 		"name": "幸运儿银冠",
 		"id": 5422,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/幸运儿银冠.webp",
+		"icon": {
+			"normal": "/source/GCG/action/幸运儿银冠.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -1623,7 +1935,9 @@
 		"name": "鸦羽弓",
 		"id": 5409,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/鸦羽弓.webp",
+		"icon": {
+			"normal": "/source/GCG/action/鸦羽弓.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "武器",
@@ -1634,7 +1948,9 @@
 		"name": "一掷乾坤",
 		"id": 5530,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/一掷乾坤.webp",
+		"icon": {
+			"normal": "/source/GCG/action/一掷乾坤.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -1645,7 +1961,9 @@
 		"name": "悠古的磐岩",
 		"id": 5438,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/悠古的磐岩.webp",
+		"icon": {
+			"normal": "/source/GCG/action/悠古的磐岩.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -1656,7 +1974,9 @@
 		"name": "游医的方巾",
 		"id": 5423,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/游医的方巾.webp",
+		"icon": {
+			"normal": "/source/GCG/action/游医的方巾.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -1667,7 +1987,9 @@
 		"name": "元素共鸣：粉碎之冰",
 		"id": 5386,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：粉碎之冰.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：粉碎之冰.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1678,7 +2000,9 @@
 		"name": "元素共鸣：坚定之岩",
 		"id": 5396,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：坚定之岩.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：坚定之岩.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1689,7 +2013,9 @@
 		"name": "元素共鸣：交织之冰",
 		"id": 5377,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：交织之冰.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：交织之冰.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1700,7 +2026,9 @@
 		"name": "元素共鸣：交织之草",
 		"id": 5397,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：交织之草.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：交织之草.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1711,7 +2039,9 @@
 		"name": "元素共鸣：交织之风",
 		"id": 5393,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：交织之风.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：交织之风.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1722,7 +2052,9 @@
 		"name": "元素共鸣：交织之火",
 		"id": 5389,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：交织之火.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：交织之火.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1733,7 +2065,9 @@
 		"name": "元素共鸣：交织之雷",
 		"id": 5391,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：交织之雷.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：交织之雷.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1744,7 +2078,9 @@
 		"name": "元素共鸣：交织之水",
 		"id": 5387,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：交织之水.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：交织之水.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1755,7 +2091,9 @@
 		"name": "元素共鸣：交织之岩",
 		"id": 5395,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：交织之岩.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：交织之岩.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1766,7 +2104,9 @@
 		"name": "元素共鸣：蔓生之草",
 		"id": 5398,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：蔓生之草.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：蔓生之草.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1777,7 +2117,9 @@
 		"name": "元素共鸣：强能之雷",
 		"id": 5392,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：强能之雷.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：强能之雷.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1788,7 +2130,9 @@
 		"name": "元素共鸣：热诚之火",
 		"id": 5390,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：热诚之火.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：热诚之火.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1799,7 +2143,9 @@
 		"name": "元素共鸣：迅捷之风",
 		"id": 5394,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：迅捷之风.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：迅捷之风.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1810,7 +2156,9 @@
 		"name": "元素共鸣：愈疗之水",
 		"id": 5388,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/元素共鸣：愈疗之水.webp",
+		"icon": {
+			"normal": "/source/GCG/action/元素共鸣：愈疗之水.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "元素共鸣",
@@ -1821,7 +2169,9 @@
 		"name": "月桂的宝冠",
 		"id": 5439,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/月桂的宝冠.webp",
+		"icon": {
+			"normal": "/source/GCG/action/月桂的宝冠.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "圣遗物",
@@ -1832,7 +2182,9 @@
 		"name": "运筹帷幄",
 		"id": 5481,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/运筹帷幄.webp",
+		"icon": {
+			"normal": "/source/GCG/action/运筹帷幄.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -1843,7 +2195,9 @@
 		"name": "战欲涌现",
 		"id": 6171,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/战欲涌现.webp",
+		"icon": {
+			"normal": "/source/GCG/action/战欲涌现.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1854,7 +2208,9 @@
 		"name": "长野原龙势流星群",
 		"id": 5502,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/长野原龙势流星群.webp",
+		"icon": {
+			"normal": "/source/GCG/action/长野原龙势流星群.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1865,7 +2221,9 @@
 		"name": "支援就交给我吧",
 		"id": 5511,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/支援就交给我吧.webp",
+		"icon": {
+			"normal": "/source/GCG/action/支援就交给我吧.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1876,7 +2234,9 @@
 		"name": "重帘留香",
 		"id": 5500,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/重帘留香.webp",
+		"icon": {
+			"normal": "/source/GCG/action/重帘留香.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1887,7 +2247,9 @@
 		"name": "重铸：岩盔",
 		"id": 5380,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/重铸：岩盔.webp",
+		"icon": {
+			"normal": "/source/GCG/action/重铸：岩盔.webp"
+		},
 		"info": {
 			"actionType": "装备牌",
 			"actionTag": "天赋",
@@ -1898,7 +2260,9 @@
 		"name": "诸武精通",
 		"id": 5399,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/诸武精通.webp",
+		"icon": {
+			"normal": "/source/GCG/action/诸武精通.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",
@@ -1909,7 +2273,9 @@
 		"name": "最好的伙伴！",
 		"id": 5480,
 		"type": "行动牌",
-		"icon": "/source/GCG/action/最好的伙伴！.webp",
+		"icon": {
+			"normal": "/source/GCG/action/最好的伙伴！.webp"
+		},
 		"info": {
 			"actionType": "事件牌",
 			"actionTag": "其他标签",

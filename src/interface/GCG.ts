@@ -32,7 +32,9 @@ export enum BaseCardType {
  * @property {string} name 卡牌名称
  * @property {int} id 卡牌 ID // TODO: 用于短期外链跳转
  * @property {string} type 卡牌类型
- * @property {unknown} icon 卡牌图标
+ * @property icon 卡牌图标
+ * @property {string} icon.normal 正常图标
+ * @property {string} icon.special 特殊图标
  * @property {unknown} info 卡牌信息
  * @property {unknown} skills 卡牌技能，仅角色卡与魔物卡有
  * @property {unknown} affect 卡牌效果，仅行动卡有
@@ -42,7 +44,7 @@ export interface BaseCard {
 	name: string;
 	id: number;
 	type: BaseCardType;
-	icon: unknown;
+	icon: { normal: string; special?: string };
 	info: unknown;
 	skills?: unknown;
 	affect?: unknown;
@@ -54,8 +56,6 @@ export interface BaseCard {
  * @since Alpha
  * @see BaseCard
  * @see CharacterCardType
- * @property {string} icon.normal 正常图标
- * @property {string} icon.special 特殊图标
  * @property {EnumElement} info.element 元素
  * @property {EnumWeapon} info.weapon 武器
  * @property {EnumCamp} info.camp 阵营
@@ -74,10 +74,6 @@ export interface BaseCard {
  */
 export interface CharacterCard extends BaseCard {
 	type: BaseCardType.characterCard;
-	icon: {
-		normal: string;
-		special?: string;
-	};
 	info: {
 		element: EnumElement;
 		weapon: EnumWeapon;
@@ -104,8 +100,6 @@ export interface CharacterCard extends BaseCard {
  * @since Alpha
  * @see BaseCard
  * @see ActionCardType
- * @property {string} icon.normal 正常图标
- * @property {string} icon.special 特殊图标
  * @property {EnumActionType} info.actionType 类型
  * @property {EnumActionTag} info.actionTag 标签
  * @property {EnumActionCost} info.actionCost 花费
@@ -119,10 +113,6 @@ export interface CharacterCard extends BaseCard {
  */
 export interface ActionCard extends BaseCard {
 	type: BaseCardType.actionCard;
-	icon: {
-		normal: string;
-		special?: string;
-	};
 	info: {
 		actionType: EnumActionType;
 		actionTag: EnumActionTag;
@@ -142,7 +132,6 @@ export interface ActionCard extends BaseCard {
  * @since Alpha
  * @see BaseCard
  * @see CharacterCardType
- * @property {string} icon 卡牌图标
  * @property {EnumElement} info.element 元素
  * @property {EnumWeapon} info.weapon 武器
  * @property {EnumCamp} info.camp 阵营
@@ -159,7 +148,6 @@ export interface ActionCard extends BaseCard {
  */
 export interface MonsterCard extends BaseCard {
 	type: BaseCardType.monsterCard;
-	icon: string;
 	info: {
 		element: EnumElement;
 		weapon: EnumWeapon;

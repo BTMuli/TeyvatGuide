@@ -1,5 +1,4 @@
 <template>
-	<!-- todo 顶部筛选栏 -->
 	<div v-if="loading" class="loading-bar">
 		<v-progress-circular indeterminate color="primary" />
 	</div>
@@ -16,15 +15,78 @@
 				@click:append="searchCard"
 			></v-text-field>
 		</v-app-bar>
-		<div class="GCG-grid">
-			<v-card v-for="item in CardsInfo" :key="item.id" class="card-cls" @click="toOuter(item)">
-				<!-- 外部卡牌边框 -->
-				<v-img src="/source/GCG/base/bg-normal.webp" class="GCG-border"></v-img>
-				<v-img :src="item.icon" class="GCG-cover"></v-img>
-				<div class="GCG-content">
-					<span>{{ item.name }}</span>
-				</div>
-			</v-card>
+		<div v-if="!doSearch">
+			<v-tabs v-model="tab" align-tabs="start" class="global-font">
+				<v-tab value="character" title="角色牌" />
+				<v-tab value="action" title="行动牌" />
+				<v-tab value="monster" title="魔物牌" />
+			</v-tabs>
+			<v-window v-model="tab">
+				<v-window-item value="character">
+					<div class="GCG-grid">
+						<v-card
+							v-for="item in CardsInfoC"
+							:key="item.id"
+							class="card-cls"
+							@click="toOuter(item.name, item.id)"
+						>
+							<v-img src="/source/GCG/base/bg-normal.webp" class="GCG-border"></v-img>
+							<v-img :src="item.icon.normal" class="GCG-cover"></v-img>
+							<div class="GCG-content">
+								<span>{{ item.name }}</span>
+							</div>
+						</v-card>
+					</div>
+				</v-window-item>
+				<v-window-item value="action">
+					<div class="GCG-grid">
+						<v-card
+							v-for="item in CardsInfoA"
+							:key="item.id"
+							class="card-cls"
+							@click="toOuter(item.name, item.id)"
+						>
+							<v-img src="/source/GCG/base/bg-normal.webp" class="GCG-border"></v-img>
+							<v-img :src="item.icon.normal" class="GCG-cover"></v-img>
+							<div class="GCG-content">
+								<span>{{ item.name }}</span>
+							</div>
+						</v-card>
+					</div>
+				</v-window-item>
+				<v-window-item value="monster">
+					<div class="GCG-grid">
+						<v-card
+							v-for="item in CardsInfoM"
+							:key="item.id"
+							class="card-cls"
+							@click="toOuter(item.name, item.id)"
+						>
+							<v-img src="/source/GCG/base/bg-normal.webp" class="GCG-border"></v-img>
+							<v-img :src="item.icon.normal" class="GCG-cover"></v-img>
+							<div class="GCG-content">
+								<span>{{ item.name }}</span>
+							</div>
+						</v-card>
+					</div>
+				</v-window-item>
+			</v-window>
+		</div>
+		<div v-else>
+			<div class="GCG-grid">
+				<v-card
+					v-for="item in CardsInfoS"
+					:key="item.id"
+					class="card-cls"
+					@click="toOuter(item.name, item.id)"
+				>
+					<v-img src="/source/GCG/base/bg-normal.webp" class="GCG-border"></v-img>
+					<v-img :src="item.icon.normal" class="GCG-cover"></v-img>
+					<div class="GCG-content">
+						<span>{{ item.name }}</span>
+					</div>
+				</v-card>
+			</div>
 		</div>
 	</div>
 </template>
@@ -32,37 +94,46 @@
 import { ref, onMounted } from "vue";
 import { createTGWindow } from "../utils/TGWindow";
 import { ReadAllTGData } from "../utils/TGIndex";
-import { BaseCard } from "../interface/GCG";
+import { BaseCard, ActionCard, CharacterCard, MonsterCard } from "../interface/GCG";
 import { MysContent } from "../interface/MysPost";
 import { dialog } from "@tauri-apps/api";
 
 const loading = ref(true);
+const doSearch = ref(false);
 const search = ref("");
-const CardsInfo = ref([] as BaseCard[]);
+const tab = ref("character");
+const CardsInfoC = ref([] as CharacterCard[]);
+const CardsInfoA = ref([] as ActionCard[]);
+const CardsInfoM = ref([] as MonsterCard[]);
+const CardsInfoS = ref([] as BaseCard[]);
 
 onMounted(async () => {
 	await loadData();
 });
 
 async function loadData() {
-	CardsInfo.value = await ReadAllTGData("GCG");
+	const CardsInfo = await ReadAllTGData("GCG");
+	CardsInfoC.value = CardsInfo.filter(item => item.type == "角色牌") as CharacterCard[];
+	CardsInfoA.value = CardsInfo.filter(item => item.type == "行动牌") as ActionCard[];
+	CardsInfoM.value = CardsInfo.filter(item => item.type == "魔物牌") as MonsterCard[];
 	loading.value = false;
 }
-function toOuter(card: BaseCard) {
-	const url = MysContent.replace("content_id", card.id.toString());
-	createTGWindow(url, "GCG", card.name, 1600, 900, true);
+function toOuter(card_name: string, card_id: number) {
+	const url = MysContent.replace("content_id", card_id.toString());
+	createTGWindow(url, "GCG", card_name, 1600, 900, true);
 }
 async function searchCard() {
 	loading.value = true;
+	doSearch.value = true;
 	const res: BaseCard[] = [];
 	const allCardsInfo = await ReadAllTGData("GCG");
 	allCardsInfo.map(item => (item.name.includes(search.value) ? res.push(item) : null));
 	loading.value = false;
 	if (res.length == 0) {
 		await dialog.message("未找到相关卡牌");
-		CardsInfo.value = allCardsInfo;
+		doSearch.value = false;
 	} else {
-		CardsInfo.value = res;
+		CardsInfoS.value = res;
 	}
 }
 </script>
