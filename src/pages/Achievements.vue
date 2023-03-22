@@ -5,6 +5,15 @@
 			<!-- 标题 -->
 			<v-card-text class="top-title">{{ title }}</v-card-text>
 		</template>
+		<v-spacer></v-spacer>
+		<v-text-field
+			v-model="search"
+			append-icon="mdi-magnify"
+			label="搜索"
+			single-line
+			hide-details
+			@click:append="searchCard"
+		></v-text-field>
 		<template v-slot:append>
 			<!-- 导入按钮 -->
 			<v-btn @click="importJson" prepend-icon="mdi-import" class="ms-2 top-btn">导入</v-btn>
@@ -140,6 +149,7 @@ const selectedSeries = ref(-1);
 const selectedAchievement = ref([] as TGAchievement[]);
 const CardsInfo = ref([] as NameCard[]);
 const getCardInfo = ref({} as NameCard);
+const search = ref("");
 const loading = ref(true);
 
 onMounted(async () => {
@@ -158,22 +168,65 @@ async function loadData() {
 }
 // 渲染选中的成就系列
 async function selectSeries(index: number) {
-	selectedIndex.value = index;
-	selectedSeries.value = seriesList.value[index].id;
-	selectedAchievement.value = await ReadTGDataByIndex(
+	loading.value = true;
+	const getAchievements = await ReadTGDataByIndex(
 		"Achievements",
 		"series",
-		selectedSeries.value
+		seriesList.value[index].id
 	);
+	selectedIndex.value = index;
+	selectedSeries.value = seriesList.value[index].id;
+	let getCard: NameCard;
 	if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
-		getCardInfo.value = CardsInfo.value.find(card => card.name === seriesList.value[index].card)!;
+		getCard = CardsInfo.value.find(card => card.name === seriesList.value[index].card)!;
 	} else {
-		getCardInfo.value = {} as NameCard;
+		getCard = {} as NameCard;
 	}
+	// 未完成的排在前面
+	getAchievements.sort((a, b) => {
+		if (a.completed === b.completed) {
+			return a.id - b.id;
+		} else {
+			return a.completed ? 1 : -1;
+		}
+	});
+	selectedAchievement.value = getAchievements;
+	getCardInfo.value = getCard;
+	loading.value = false;
 }
 // 打开图片
 function openImg() {
 	createTGWindow(getCardInfo.value.profile, "nameCard", getCardInfo.value.name, 840, 400, false);
+}
+async function searchCard() {
+	if (search.value === "") {
+		await dialog.message("请输入关键字");
+		return;
+	}
+	loading.value = true;
+	const res: TGAchievement[] = [];
+	const allAchievements = await ReadAllTGData("Achievements");
+	allAchievements.map(achievement => {
+		if (achievement.name.includes(search.value) || achievement.description.includes(search.value)) {
+			res.push(achievement);
+		}
+	});
+	selectedIndex.value = -1;
+	search.value = "";
+	loading.value = false;
+	if (res.length === 0) {
+		await dialog.message("没有找到相关成就");
+		selectedAchievement.value = allAchievements;
+	} else {
+		res.sort((a, b) => {
+			if (a.completed === b.completed) {
+				return a.id - b.id;
+			} else {
+				return a.completed ? 1 : -1;
+			}
+		});
+		selectedAchievement.value = res;
+	}
 }
 // 导入 UIAF 数据，进行数据合并、刷新
 async function importJson() {
