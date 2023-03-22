@@ -16,19 +16,12 @@
 				@click:append="searchCard"
 			></v-text-field>
 		</v-app-bar>
-		<div class="cards-grid">
-			<v-card v-for="item in CardsInfo" :key="item.id" width="280" height="480">
+		<div class="GCG-grid">
+			<div v-for="item in CardsInfo" :key="item.id" class="card-cls" @click="toOuter(item)">
 				<!-- 外部卡牌边框 -->
-				<v-img src="/source/GCG/base/bg-normal.webp" class="GCG-cover"></v-img>
-				<v-img :src="item.icon" class="GCG-cover" style="z-index: -1"></v-img>
-				<!-- todo 样式优化 -->
-				<v-card-actions class="GCG-content">
-					<span>{{ item.name }}</span>
-					<v-btn @click="toOuter(item)" prepend-icon="mdi-arrow-right-circle" class="ms-2 card-btn"
-						>查看</v-btn
-					>
-				</v-card-actions>
-			</v-card>
+				<v-img src="/source/GCG/base/bg-normal.webp" class="GCG-border"></v-img>
+				<v-img :src="item.icon" class="GCG-cover"></v-img>
+			</div>
 		</div>
 	</div>
 </template>
@@ -71,26 +64,42 @@ async function searchCard() {
 }
 </script>
 <style lang="css">
-.cards-grid {
+/* 多排卡牌 */
+.GCG-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-	grid-gap: 1rem;
-	padding: 1rem;
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	grid-gap: 10px;
+	padding: 10px;
+}
+.card-cls {
+	position: relative;
+	width: 140px;
+	height: 240px;
+	border-radius: 10px;
+	overflow: hidden;
+}
+.GCG-border {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 140px;
+	height: 240px;
 }
 .GCG-cover {
 	position: absolute;
 	top: 0;
 	left: 0;
-	width: 280px;
-	height: 480px;
+	width: 140px;
+	height: 240px;
+	z-index: -1;
 }
-.GCG-content {
-	position: absolute;
-	bottom: 0;
-	background: rgba(0, 0, 0, 0.5);
-	color: #f4d8a8;
-	font-size: 20px;
-	width: 100%;
-	border-radius: 0 0 10px 10px;
+.GCG-grid :hover {
+	cursor: pointer;
+}
+
+.GCG-grid :hover .GCG-cover {
+	transform: scale(1.1);
+	transition: all 0.3s;
+	overflow: hidden;
 }
 </style>
