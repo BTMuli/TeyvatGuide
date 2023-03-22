@@ -5,7 +5,7 @@
  * @since Alpha
  */
 
-import { ConfigList } from "../data/init";
+import { TGConfigList } from "../data";
 
 // 数据库参数
 export const DB_NAME = "TGData";
@@ -21,7 +21,7 @@ export async function InitTGData() {
 	request.onupgradeneeded = () => {
 		const db = request.result;
 		// 创建表
-		ConfigList.forEach(config => {
+		TGConfigList.forEach(config => {
 			const store = db.createObjectStore(config.storeName, {
 				keyPath: config.keyPath,
 			});

@@ -14,8 +14,7 @@
 <script lang="ts" setup>
 import TSidebar from "./components/t-sidebar.vue";
 import useAppStore from "./store/modules/app";
-import { TGAppDataList } from "./data";
-import { getDataList } from "./data/init";
+import { TGAppDataList, TGGetDataList } from "./data";
 import { fs } from "@tauri-apps/api";
 import { BaseDirectory } from "@tauri-apps/api/fs";
 import { onMounted } from "vue";
@@ -58,7 +57,7 @@ async function writeData() {
 async function writeIndex() {
 	console.log("开始写入 IndexedDB...");
 	await InitTGData();
-	getDataList.map(async item => {
+	TGGetDataList.map(async item => {
 		await WriteTGData(item.name, item.data);
 	});
 	console.log("IndexedDB 写入完成！");

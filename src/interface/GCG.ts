@@ -22,22 +22,44 @@ export enum BaseCardType {
 }
 
 /**
+ * @description Gcg 基本卡牌
+ * @interface  BaseCard
+ * @since Alpha
+ * @see BaseCardType
+ * @see CharacterCard
+ * @see ActionCard
+ * @see MonsterCard
+ * @property {string} name 卡牌名称
+ * @property {string} type 卡牌类型
+ * @property {unknown} icon 卡牌图标
+ * @property {unknown} info 卡牌信息
+ * @property {unknown} skills 卡牌技能，仅角色卡与魔物卡有
+ * @property {unknown} affect 卡牌效果，仅行动卡有
+ * @return BaseCard
+ */
+export interface BaseCard {
+	name: string;
+	type: BaseCardType;
+	icon: unknown;
+	info: unknown;
+	skills?: unknown;
+	affect?: unknown;
+}
+
+/**
  * @description Gcg 角色卡牌
  * @interface  CharacterCard
  * @since Alpha
+ * @see BaseCard
  * @see CharacterCardType
- * @property {string} name 角色名称
- * @property icon 卡牌图标
  * @property {string} icon.normal 正常图标
  * @property {string} icon.special 特殊图标
- * @property info 卡牌信息
  * @property {EnumElement} info.element 元素
  * @property {EnumWeapon} info.weapon 武器
  * @property {EnumCamp} info.camp 阵营
  * @property {string} info.source 卡牌来源
  * @property {string} info.title 卡牌标题
  * @property {string} info.description 卡牌描述
- * @property skills 卡牌技能
  * @property {string} skills[].name 技能名称
  * @property {string} skills[].type 技能类型
  * @property {string} skills[].description 技能描述
@@ -48,8 +70,8 @@ export enum BaseCardType {
  * @property {number} skills[].count 可用次数
  * @return CharacterCard
  */
-export interface CharacterCard {
-	name: string;
+export interface CharacterCard extends BaseCard {
+	type: BaseCardType.characterCard;
 	icon: {
 		normal: string;
 		special?: string;
@@ -78,12 +100,10 @@ export interface CharacterCard {
  * @description Gcg 行动卡牌
  * @interface  ActionCard
  * @since Alpha
+ * @see BaseCard
  * @see ActionCardType
- * @property {string} name 卡牌名称
- * @property icon 卡牌图标
  * @property {string} icon.normal 正常图标
  * @property {string} icon.special 特殊图标
- * @property info 卡牌信息
  * @property {EnumActionType} info.actionType 类型
  * @property {EnumActionTag} info.actionTag 标签
  * @property {EnumActionCost} info.actionCost 花费
@@ -95,8 +115,8 @@ export interface CharacterCard {
  * @property {string} affect 卡牌效果
  * @return ActionCard
  */
-export interface ActionCard {
-	name: string;
+export interface ActionCard extends BaseCard {
+	type: BaseCardType.actionCard;
 	icon: {
 		normal: string;
 		special?: string;
@@ -118,17 +138,14 @@ export interface ActionCard {
  * @description 与角色卡牌类似
  * @interface  MonsterCard
  * @since Alpha
+ * @see BaseCard
  * @see CharacterCardType
- * @property {string} name 角色名称
- * @description 只有一个图标
  * @property {string} icon 卡牌图标
- * @property info 卡牌信息
  * @property {EnumElement} info.element 元素
  * @property {EnumWeapon} info.weapon 武器
  * @property {EnumCamp} info.camp 阵营
  * @property {string} info.source 卡牌来源
  * @description 无标题跟描述
- * @property skills 卡牌技能
  * @property {string} skills[].name 技能名称
  * @property {string} skills[].type 技能类型
  * @property {string} skills[].description 技能描述
@@ -138,8 +155,8 @@ export interface ActionCard {
  * @description 当技能类型为 “召唤物” 时，会有以下属性
  * @return MonsterCard
  */
-export interface MonsterCard {
-	name: string;
+export interface MonsterCard extends BaseCard {
+	type: BaseCardType.monsterCard;
 	icon: string;
 	info: {
 		element: EnumElement;
