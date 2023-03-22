@@ -265,21 +265,24 @@ async function importJson() {
 			// 获取 timeStamp 2023-03-15 00:00:00
 			const localTime = localData.completed_time;
 			// 如果本地数据不存在，或者本地数据的 timeStamp 小于远程数据的 timeStamp，更新数据
-			if (!localTime) {
-				localData.completed_time = new Date(data.timestamp * 1000).toLocaleString();
-				localData.progress = data.current;
-				localData.completed = data.status === 3;
-			} else if (new Date(localTime).getTime() < new Date(data.timestamp * 1000).getTime()) {
-				localData.completed_time = new Date(data.timestamp * 1000).toLocaleString();
-				localData.progress = data.current;
-				localData.completed = data.status === 3;
-			} else if (localData.progress < data.current) {
-				localData.completed_time = new Date(data.timestamp * 1000).toLocaleString();
-				localData.progress = data.current;
-				localData.completed = data.status === 3;
+			if (data.timestamp !== 0) {
+				const fin_time = new Date(data.timestamp * 1000).toLocaleString();
+				if (fin_time !== localTime || localData.progress !== data.current) {
+					localData.completed_time = fin_time;
+					localData.progress = data.current;
+					localData.completed = true;
+					// 更新数据
+					await UpdateTGDataByKey("Achievements", localData);
+				}
+			} else {
+				if (localData.progress !== data.current) {
+					localData.completed_time = "";
+					localData.progress = data.current;
+					localData.completed = false;
+					// 更新数据
+					await UpdateTGDataByKey("Achievements", localData);
+				}
 			}
-			// 更新数据
-			await UpdateTGDataByKey("Achievements", localData);
 		});
 		// 更新成就系列的完成数
 		const seriesDB = await ReadAllTGData("AchievementSeries");
@@ -333,7 +336,7 @@ async function exportJson() {
 		}
 		return {
 			id: data.id,
-			timestamp: Math.round(new Date(data.completed_time).getTime() / 1000),
+			timestamp: data.completed ? Math.round(new Date(data.completed_time).getTime() / 1000) : 0,
 			current: data.progress,
 			status: status,
 		};
