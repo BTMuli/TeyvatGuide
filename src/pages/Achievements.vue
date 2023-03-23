@@ -266,7 +266,14 @@ async function importJson() {
 			const localTime = localData.completed_time;
 			// 如果本地数据不存在，或者本地数据的 timeStamp 小于远程数据的 timeStamp，更新数据
 			if (data.timestamp !== 0) {
-				const fin_time = new Date(data.timestamp * 1000).toLocaleString();
+				const fin_time = new Date(data.timestamp * 1000).toLocaleString("zh", {
+					year: "numeric",
+					month: "2-digit",
+					day: "2-digit",
+					hour: "2-digit",
+					minute: "2-digit",
+					second: "2-digit",
+				});
 				if (fin_time !== localTime || localData.progress !== data.current) {
 					localData.completed_time = fin_time;
 					localData.progress = data.current;

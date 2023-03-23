@@ -120,7 +120,7 @@ async function loadData() {
 }
 function toOuter(card_name: string, card_id: number) {
 	const url = MysContent.replace("content_id", card_id.toString());
-	createTGWindow(url, "GCG", card_name, 1600, 900, true);
+	createTGWindow(url, "GCG", card_name, 1200, 800, true);
 }
 async function searchCard() {
 	loading.value = true;
@@ -128,6 +128,7 @@ async function searchCard() {
 	const res: BaseCard[] = [];
 	const allCardsInfo = await ReadAllTGData("GCG");
 	allCardsInfo.map(item => (item.name.includes(search.value) ? res.push(item) : null));
+	res.sort((a, b) => a.name.localeCompare(b.name));
 	loading.value = false;
 	if (res.length == 0) {
 		await dialog.message("未找到相关卡牌");

@@ -251,7 +251,7 @@ async function toPost(post_id: string) {
 
 .Home-pool-clock {
 	width: auto;
-	margin-left: 120px;
+	margin-left: 40px;
 	float: right;
 	font-size: small;
 	height: 80px;

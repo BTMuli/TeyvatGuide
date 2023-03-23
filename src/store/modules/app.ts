@@ -22,7 +22,14 @@ const useAppStore = defineStore({
 			// 是否加载数据
 			loading: false,
 			// 侧边栏设置
-			sidebar: true,
+			sidebar: {
+				// 是否折叠
+				collapse: false,
+				// 是否显示
+				submenu: {
+					database: false,
+				},
+			},
 			// 咨讯页渲染模式
 			structureRender: true, // 是否采用结构化渲染，否则采用 raw 渲染
 			// 数据路径
@@ -44,11 +51,22 @@ const useAppStore = defineStore({
 		};
 	},
 	actions: {
+		// 获取折叠
+		getSubmenu() {
+			let open = [];
+			if (this.sidebar.submenu.database) open.push("database");
+			return open;
+		},
 		// 初始化配置
 		async init() {
 			// 防止数据清空
 			if (this.sidebar === undefined) {
-				this.sidebar = true;
+				this.sidebar = {
+					collapse: false,
+					submenu: {
+						database: false,
+					},
+				};
 			}
 			// 初始化加载状态
 			this.loading = false;
