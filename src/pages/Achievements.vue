@@ -21,8 +21,8 @@
 			<v-btn @click="exportJson" prepend-icon="mdi-export" class="ms-2 top-btn"> 导出 </v-btn>
 		</template>
 	</v-app-bar>
-	<div v-if="loading" class="loading-bar">
-		<v-progress-circular indeterminate color="primary" />
+	<div v-if="loading">
+		<t-loading title="正在加载成就" />
 	</div>
 	<div v-else class="wrap">
 		<v-row class="wrap-view">
@@ -137,6 +137,7 @@ import {
 	ReadTGDataByKey,
 	UpdateTGDataByKey,
 } from "../utils/TGIndex";
+import TLoading from "../components/t-loading.vue";
 
 // Store
 const achievementsStore = useAchievementsStore();

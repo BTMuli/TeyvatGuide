@@ -1,6 +1,6 @@
 <template>
-	<div v-if="loading" class="loading-bar">
-		<v-progress-circular indeterminate color="primary" />
+	<div v-if="loading">
+		<t-loading title="正在加载卡牌列表" />
 	</div>
 	<div v-else>
 		<v-app-bar color="white" class="global-font">
@@ -97,6 +97,7 @@ import { ReadAllTGData } from "../utils/TGIndex";
 import { BaseCard, ActionCard, CharacterCard, MonsterCard } from "../interface/GCG";
 import { MysContent } from "../interface/MysPost";
 import { dialog } from "@tauri-apps/api";
+import TLoading from "../components/t-loading.vue";
 
 const loading = ref(true);
 const doSearch = ref(false);

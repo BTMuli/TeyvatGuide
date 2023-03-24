@@ -1,6 +1,6 @@
 <template>
-	<div v-if="loading" class="loading-bar">
-		<v-progress-circular indeterminate color="primary" />
+	<div v-if="loading">
+		<t-loading title="正在加载卡池信息" />
 	</div>
 	<div v-else>
 		<div v-if="empty">
@@ -67,6 +67,7 @@ import {
 	MysPostType,
 } from "../interface/MysPost";
 import { parseMys } from "../utils/MysParse";
+import TLoading from "../components/t-loading.vue";
 
 interface GachaPool {
 	title: string;
@@ -88,7 +89,6 @@ interface GachaPool {
 }
 
 const appStore = useAppStore();
-const renderMode = ref(appStore.structureRender);
 const poolInfo = ref([] as GachaPool[]);
 const loading = ref(true);
 const empty = ref(false);

@@ -1,6 +1,6 @@
 <template>
-	<div v-if="loading" class="loading-bar">
-		<v-progress-circular indeterminate color="primary" />
+	<div v-if="loading">
+		<t-loading title="加载中..." />
 	</div>
 	<div v-else>
 		<v-tabs v-model="tab" align-tabs="start" class="global-font">
@@ -110,6 +110,7 @@ import {
 import { http, fs } from "@tauri-apps/api";
 import { createTGWindow } from "../utils/TGWindow";
 import { parseMys } from "../utils/MysParse";
+import TLoading from "../components/t-loading.vue";
 
 // Store
 const appStore = useAppStore();

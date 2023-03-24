@@ -1,10 +1,3 @@
-/* 顶部加载条 */
-.loading-bar {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 100%;
-}
 /* card action 内的按钮 */
 .card-btn {
 	background: #455167 !important;
