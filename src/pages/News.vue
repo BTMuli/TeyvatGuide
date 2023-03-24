@@ -24,12 +24,16 @@
 						></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-actions>
-							<v-btn
-								@click="toPost(item.post_id)"
-								prepend-icon="mdi-arrow-right-circle"
-								class="ms-2 card-btn"
-								>查看</v-btn
-							>
+							<v-btn @click="toPost(item.post_id)" class="ms-2 card-btn">
+								<template v-slot:prepend>
+									<img
+										src="src/assets/icons/arrow-right.svg"
+										alt="right"
+										onload="SVGInject(this)"
+									/>
+								</template>
+								查看
+							</v-btn>
 							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
 						</v-card-actions>
 					</v-card>
@@ -51,12 +55,16 @@
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
 						<v-card-actions>
-							<v-btn
-								@click="toPost(item.post_id)"
-								prepend-icon="mdi-arrow-right-circle"
-								class="ms-2 card-btn"
-								>查看</v-btn
-							>
+							<v-btn @click="toPost(item.post_id)" class="ms-2 card-btn">
+								<template v-slot:prepend>
+									<img
+										src="src/assets/icons/arrow-right.svg"
+										alt="right"
+										onload="SVGInject(this)"
+									/>
+								</template>
+								查看
+							</v-btn>
 							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
 							<v-btn v-if="item.status === 1" color="ms-2 card-btn-0">进行中</v-btn>
 							<v-btn v-else-if="item.status === 2" color="ms-2 card-btn-2">已结束</v-btn>
@@ -80,12 +88,16 @@
 						></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-actions>
-							<v-btn
-								class="ms-2 card-btn"
-								@click="toPost(item.post_id)"
-								prepend-icon="mdi-arrow-right-circle"
-								>查看</v-btn
-							>
+							<v-btn @click="toPost(item.post_id)" class="ms-2 card-btn">
+								<template v-slot:prepend>
+									<img
+										src="src/assets/icons/arrow-right.svg"
+										alt="right"
+										onload="SVGInject(this)"
+									/>
+								</template>
+								查看
+							</v-btn>
 							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
 						</v-card-actions>
 					</v-card>
@@ -96,6 +108,8 @@
 </template>
 
 <script lang="ts" setup>
+// @ts-ignore
+import "../tools/svg-inject.js";
 import { onMounted, ref } from "vue";
 import useAppStore from "../store/modules/app";
 import {
@@ -243,6 +257,20 @@ async function getPost(post_id: string): Promise<ResponsePost> {
 	transition: all 0.3s linear;
 }
 
+/* card action 内的按钮 */
+.card-btn {
+	background: #455167 !important;
+	color: #faf7e8 !important;
+}
+
+.card-btn svg {
+	width: 18px;
+	height: 18px;
+}
+
+.card-btn svg path {
+	fill: #faf7e8;
+}
 /* 进行中 */
 .card-btn-0 {
 	background: #3c99aa !important;
