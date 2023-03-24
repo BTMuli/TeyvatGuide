@@ -4,7 +4,7 @@
 	</div>
 	<div v-else>
 		<div v-if="empty">
-			<!-- todo 放个空白图 -->
+			<t-loading title="暂无卡池信息" empty />
 		</div>
 		<div v-else class="pool-cards">
 			<v-card v-for="pool in poolInfo" class="Home-card">

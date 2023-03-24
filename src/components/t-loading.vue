@@ -3,11 +3,14 @@
 		<div class="loading-content">
 			<div class="loading-title">
 				{{ props.title }}
-				<v-progress-circular indeterminate color="#f4d8a8" />
+				<v-progress-circular indeterminate color="#f4d8a8" v-show="!props.empty" />
 			</div>
 			<div class="loading-subtitle" v-show="props.subtitle">{{ props.subtitle }}</div>
-			<div class="loading-img">
+			<div class="loading-img" v-if="!props.empty">
 				<img src="/source/UI/loading.webp" alt="loading" />
+			</div>
+			<div class="loading-img" v-else>
+				<img src="/source/UI/empty.webp" alt="empty" />
 			</div>
 			<div class="loading-text" v-show="props.content">{{ props.content }}</div>
 		</div>
@@ -24,6 +27,10 @@ const props = defineProps({
 	},
 	content: {
 		type: String,
+	},
+	empty: {
+		type: Boolean,
+		default: false,
 	},
 });
 </script>
