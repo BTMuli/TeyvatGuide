@@ -1,72 +1,124 @@
 <template>
-	<v-card class="common-card">
-		<v-card-title>配置</v-card-title>
-	</v-card>
-	<v-card class="common-card">
-		<v-list>
-			<v-list-item @click="openMergeData" prepend-icon="mdi-folder">
-				<v-list-item-title>打开用户数据目录</v-list-item-title>
-			</v-list-item>
-			<v-list-item @click="deleteData" prepend-icon="mdi-delete">
-				<v-list-item-title>清除用户缓存</v-list-item-title>
-			</v-list-item>
-			<v-list-item @click="deleteTemp" prepend-icon="mdi-delete">
-				<v-list-item-title>删除临时数据</v-list-item-title>
-			</v-list-item>
-			<v-list-item @click="setDefaultConfig" prepend-icon="mdi-cog">
-				<v-list-item-title>初始化数据</v-list-item-title>
-			</v-list-item>
-		</v-list>
-	</v-card>
-	<v-card class="common-card">
-		<v-list>
-			<v-list-item>
-				<v-list-item-title>咨讯页渲染模式</v-list-item-title>
-				<v-list-item-subtitle
-					>推荐采用结构化渲染，当出现内容缺失时建议采用 raw 渲染</v-list-item-subtitle
-				>
-				<template v-slot:append>
-					<v-switch
-						:label="renderMode"
-						inset
-						v-model="renderBool"
-						@click="changeRenderMode"
-						color="#1E96D5"
-					/>
-				</template>
-			</v-list-item>
-		</v-list>
-	</v-card>
-	<v-card class="common-card">
-		<v-list>
-			<v-list-item prepend-icon="mdi-folder">
-				<v-list-item-title>本地应用数据路径</v-list-item-title>
-				<v-list-item-subtitle>{{ appStore.dataPath.app }}</v-list-item-subtitle>
-			</v-list-item>
-			<v-list-item prepend-icon="mdi-folder">
-				<v-list-item-title>本地用户数据路径</v-list-item-title>
-				<v-list-item-subtitle>{{ appStore.dataPath.user }}</v-list-item-subtitle>
-			</v-list-item>
-		</v-list>
-	</v-card>
+	<div v-if="loading">
+		<t-loading />
+	</div>
+	<div v-else>
+		<v-card class="common-card" title="关于">
+			<v-list>
+				<v-list-item title="应用版本" @click="toOuter('https://github.com/BTMuli/Tauri.Genshin')">
+					<template v-slot:prepend>
+						<img class="v-icon" src="/icon.png" alt="Tauri" />
+					</template>
+					<template v-slot:append>
+						<v-list-item-subtitle>{{ versionApp }}</v-list-item-subtitle>
+					</template>
+				</v-list-item>
+				<v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
+					<template v-slot:prepend>
+						<img
+							class="v-icon"
+							src="https://next--tauri.netlify.app/meta/favicon-32x32.png"
+							alt="Tauri"
+						/>
+					</template>
+					<template v-slot:append>
+						<v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
+					</template>
+				</v-list-item>
+				<v-list-item title="成就版本">
+					<template v-slot:prepend>
+						<img class="v-icon" src="../assets/icons/achievements.svg" alt="Achievements" />
+					</template>
+					<template v-slot:append>
+						<v-list-item-subtitle>{{ achievementsStore.last_version }}</v-list-item-subtitle>
+					</template>
+				</v-list-item>
+			</v-list>
+		</v-card>
+		<v-card class="common-card" title="配置">
+			<v-list>
+				<v-list-item @click="openMergeData" prepend-icon="mdi-folder">
+					<v-list-item-title>打开用户数据目录</v-list-item-title>
+				</v-list-item>
+				<v-list-item @click="deleteData" prepend-icon="mdi-delete">
+					<v-list-item-title>清除用户缓存</v-list-item-title>
+				</v-list-item>
+				<v-list-item @click="deleteTemp" prepend-icon="mdi-delete">
+					<v-list-item-title>删除临时数据</v-list-item-title>
+				</v-list-item>
+				<v-list-item @click="setDefaultConfig" prepend-icon="mdi-cog">
+					<v-list-item-title>初始化数据</v-list-item-title>
+				</v-list-item>
+			</v-list>
+		</v-card>
+		<v-card class="common-card">
+			<v-list>
+				<v-list-item>
+					<v-list-item-title>咨讯页渲染模式</v-list-item-title>
+					<v-list-item-subtitle
+						>推荐采用结构化渲染，当出现内容缺失时建议采用 raw 渲染</v-list-item-subtitle
+					>
+					<template v-slot:append>
+						<v-switch
+							:label="renderMode"
+							inset
+							v-model="renderBool"
+							@click="changeRenderMode"
+							color="#1E96D5"
+						/>
+					</template>
+				</v-list-item>
+			</v-list>
+		</v-card>
+		<v-card class="common-card">
+			<v-list>
+				<v-list-item prepend-icon="mdi-folder">
+					<v-list-item-title>本地应用数据路径</v-list-item-title>
+					<v-list-item-subtitle>{{ appStore.dataPath.app }}</v-list-item-subtitle>
+				</v-list-item>
+				<v-list-item prepend-icon="mdi-folder">
+					<v-list-item-title>本地用户数据路径</v-list-item-title>
+					<v-list-item-subtitle>{{ appStore.dataPath.user }}</v-list-item-subtitle>
+				</v-list-item>
+			</v-list>
+		</v-card>
+	</div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import useAppStore from "../store/modules/app";
 import useAchievementsStore from "../store/modules/achievements";
-import { dialog, fs } from "@tauri-apps/api";
+import { dialog, fs, app } from "@tauri-apps/api";
 import { BaseDirectory } from "@tauri-apps/api/fs";
 import { getDataList } from "../data/init";
 import { WriteTGData } from "../utils/TGIndex";
-
+import TLoading from "../components/t-loading.vue";
 // Store
 const appStore = useAppStore();
 const achievementsStore = useAchievementsStore();
 
+// About
+const loading = ref(true);
+const versionApp = ref("");
+const versionTauri = ref("");
+
 const renderBool = ref(appStore.structureRender);
 const renderMode = ref(renderBool.value ? "结构化渲染" : " raw 渲染");
 
+// load version
+onMounted(async () => {
+	versionApp.value = await app.getVersion();
+	versionTauri.value = await app.getTauriVersion();
+	setInterval(() => {
+		loading.value = false;
+	}, 1000);
+});
+
+// 打开外部链接
+function toOuter(url: string) {
+	window.open(url);
+}
 // 切换渲染模式
 function changeRenderMode() {
 	renderBool.value = !renderBool.value;
