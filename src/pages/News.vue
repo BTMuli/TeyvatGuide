@@ -31,6 +31,12 @@
 								查看
 							</v-btn>
 							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+							<v-btn @click="toJson(item.post_id)" class="ms-2 card-btn" v-show="appStore.devMode">
+								<template v-slot:prepend>
+									<img src="../assets/icons/arrow-right.svg" alt="right" onload="SVGInject(this)" />
+								</template>
+								JSON
+							</v-btn>
 						</v-card-actions>
 					</v-card>
 				</div>
@@ -58,9 +64,17 @@
 								查看
 							</v-btn>
 							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-							<v-btn v-if="item.status === 1" color="ms-2 card-btn-0">进行中</v-btn>
-							<v-btn v-else-if="item.status === 2" color="ms-2 card-btn-2">已结束</v-btn>
-							<v-btn v-else color="ms-2 card-btn-1">评选中</v-btn>
+							<div v-show="!appStore.devMode">
+								<v-btn v-if="item.status === 1" color="ms-2 card-btn-0">进行中</v-btn>
+								<v-btn v-else-if="item.status === 2" color="ms-2 card-btn-2">已结束</v-btn>
+								<v-btn v-else color="ms-2 card-btn-1">评选中</v-btn>
+							</div>
+							<v-btn @click="toJson(item.post_id)" class="ms-2 card-btn" v-show="appStore.devMode">
+								<template v-slot:prepend>
+									<img src="../assets/icons/arrow-right.svg" alt="right" onload="SVGInject(this)" />
+								</template>
+								JSON
+							</v-btn>
 						</v-card-actions>
 					</v-card>
 				</div>
@@ -87,6 +101,12 @@
 								查看
 							</v-btn>
 							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+							<v-btn @click="toJson(item.post_id)" class="ms-2 card-btn" v-show="appStore.devMode">
+								<template v-slot:prepend>
+									<img src="../assets/icons/arrow-right.svg" alt="right" onload="SVGInject(this)" />
+								</template>
+								JSON
+							</v-btn>
 						</v-card-actions>
 					</v-card>
 				</div>
@@ -200,18 +220,18 @@ async function toPost(post_id: string) {
 	const postUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post.post_id}.html`;
 	createTGWindow(postUrl, "MysPost", post.subject, 960, 720, false);
 }
-async function logPost(post_id: string) {
+async function toJson(post_id: string) {
 	const post = await getPost(post_id).then(res => {
 		return res.data;
 	});
 	// 将 json 保存到 文件
 	await fs.writeTextFile(
-		`${appStore.dataPath.temp}\\${post_id}_log.json`,
+		`${appStore.dataPath.temp}\\${post_id}.json`,
 		JSON.stringify(post, null, 4)
 	);
-	const logUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post_id}_log.json`;
+	const logUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post_id}.json`;
 	// 打开窗口
-	createTGWindow(logUrl, "MysPostLog", post_id, 960, 720, false);
+	createTGWindow(logUrl, "MysPostJson", post_id, 960, 720, false);
 }
 async function getPost(post_id: string): Promise<ResponsePost> {
 	return http

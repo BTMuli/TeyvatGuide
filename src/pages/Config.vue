@@ -15,11 +15,7 @@
 				</v-list-item>
 				<v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
 					<template v-slot:prepend>
-						<img
-							class="config-icon"
-							src="https://next--tauri.netlify.app/meta/favicon-32x32.png"
-							alt="Tauri"
-						/>
+						<img class="config-icon" src="/tauri.png" alt="Tauri" />
 					</template>
 					<template v-slot:append>
 						<v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
@@ -64,6 +60,18 @@
 							inset
 							v-model="renderBool"
 							@click="changeRenderMode"
+							color="#0781D8"
+						/>
+					</template>
+				</v-list-item>
+				<v-list-item>
+					<v-list-item-title>开发者模式</v-list-item-title>
+					<v-list-item-subtitle>开启后将显示调试信息</v-list-item-subtitle>
+					<template v-slot:append>
+						<v-switch
+							:label="appStore.devMode ? '开启' : '关闭'"
+							inset
+							v-model="appStore.devMode"
 							color="#0781D8"
 						/>
 					</template>
