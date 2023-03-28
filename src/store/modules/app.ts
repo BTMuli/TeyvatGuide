@@ -51,11 +51,20 @@ const useAppStore = defineStore({
 		};
 	},
 	actions: {
-		// 获取折叠
-		getSubmenu() {
-			let open = [];
-			if (this.sidebar.submenu.database) open.push("database");
-			return open;
+		// 检测 store 数据兼容，主要是 sideBar 数据
+		async check() {
+			if (this.sidebar === undefined) {
+				this.sidebar = {
+					collapse: false,
+					submenu: {
+						database: false,
+					},
+				};
+			} else {
+				if (this.sidebar.collapse === undefined) this.sidebar.collapse = false;
+				if (this.sidebar.submenu === undefined) this.sidebar.submenu = { database: false };
+				if (this.sidebar.submenu.database === undefined) this.sidebar.submenu.database = false;
+			}
 		},
 		// 初始化配置
 		async init() {
@@ -76,6 +85,12 @@ const useAppStore = defineStore({
 			this.userPath = {
 				achievements: `${userDataDir}\\achievements.json`,
 			};
+		},
+		// 获取折叠
+		getSubmenu() {
+			let open = [];
+			if (this.sidebar.submenu.database) open.push("database");
+			return open;
 		},
 	},
 	persist: true,
