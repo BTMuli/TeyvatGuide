@@ -7,7 +7,7 @@
 			<v-list>
 				<v-list-item title="应用版本" @click="toOuter('https://github.com/BTMuli/Tauri.Genshin')">
 					<template v-slot:prepend>
-						<img class="v-icon" src="/icon.png" alt="Tauri" />
+						<img class="config-icon" src="/icon.svg" alt="App" />
 					</template>
 					<template v-slot:append>
 						<v-list-item-subtitle>{{ versionApp }}</v-list-item-subtitle>
@@ -16,7 +16,7 @@
 				<v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
 					<template v-slot:prepend>
 						<img
-							class="v-icon"
+							class="config-icon"
 							src="https://next--tauri.netlify.app/meta/favicon-32x32.png"
 							alt="Tauri"
 						/>
@@ -27,7 +27,7 @@
 				</v-list-item>
 				<v-list-item title="成就版本">
 					<template v-slot:prepend>
-						<img class="v-icon" src="../assets/icons/achievements.svg" alt="Achievements" />
+						<img class="config-icon" src="../assets/icons/achievements.svg" alt="Achievements" />
 					</template>
 					<template v-slot:append>
 						<v-list-item-subtitle>{{ achievementsStore.last_version }}</v-list-item-subtitle>
@@ -64,7 +64,7 @@
 							inset
 							v-model="renderBool"
 							@click="changeRenderMode"
-							color="#1E96D5"
+							color="#0781D8"
 						/>
 					</template>
 				</v-list-item>
@@ -86,14 +86,19 @@
 </template>
 
 <script lang="ts" setup>
+// vue
 import { onMounted, ref } from "vue";
+import TLoading from "../components/t-loading.vue";
+// tauri
+import { dialog, fs, app } from "@tauri-apps/api";
+// store
 import useAppStore from "../store/modules/app";
 import useAchievementsStore from "../store/modules/achievements";
-import { dialog, fs, app } from "@tauri-apps/api";
-import { BaseDirectory } from "@tauri-apps/api/fs";
-import { getDataList } from "../data/init";
+// utils
 import { WriteTGData } from "../utils/TGIndex";
-import TLoading from "../components/t-loading.vue";
+// data
+import { getDataList } from "../data/init";
+
 // Store
 const appStore = useAppStore();
 const achievementsStore = useAchievementsStore();
@@ -139,11 +144,11 @@ async function deleteData() {
 	const res = await dialog.confirm("确定要删除用户数据吗?");
 	if (res) {
 		await fs.removeDir("userData", {
-			dir: BaseDirectory.AppLocalData,
+			dir: fs.BaseDirectory.AppLocalData,
 			recursive: true,
 		});
 		await fs.removeDir("tempData", {
-			dir: BaseDirectory.AppLocalData,
+			dir: fs.BaseDirectory.AppLocalData,
 			recursive: true,
 		});
 		getDataList.map(async item => {
@@ -151,8 +156,8 @@ async function deleteData() {
 		});
 		await dialog.message("用户数据已删除!");
 		await achievementsStore.init();
-		await fs.createDir("userData", { dir: BaseDirectory.AppLocalData });
-		await fs.createDir("tempData", { dir: BaseDirectory.AppLocalData });
+		await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData });
+		await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
 	}
 }
 // 删除临时数据
@@ -160,10 +165,10 @@ async function deleteTemp() {
 	const res = await dialog.confirm("确定要删除临时数据吗?");
 	if (res) {
 		await fs.removeDir("tempData", {
-			dir: BaseDirectory.AppLocalData,
+			dir: fs.BaseDirectory.AppLocalData,
 			recursive: true,
 		});
-		await fs.createDir("tempData", { dir: BaseDirectory.AppLocalData });
+		await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
 		await dialog.message("临时数据已删除!");
 	}
 }
@@ -180,4 +185,13 @@ async function setDefaultConfig() {
 }
 </script>
 
-<style lang="css"></style>
+<style lang="css">
+.config-icon {
+	width: 40px;
+	height: 40px;
+	margin-right: 5px;
+	padding: 5px;
+	background: #393b40;
+	border-radius: 5px;
+}
+</style>
