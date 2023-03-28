@@ -65,9 +65,15 @@
 							</v-btn>
 							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
 							<div v-show="!appStore.devMode">
-								<v-btn v-if="item.status === 1" color="ms-2 card-btn-0">进行中</v-btn>
-								<v-btn v-else-if="item.status === 2" color="ms-2 card-btn-2">已结束</v-btn>
-								<v-btn v-else color="ms-2 card-btn-1">评选中</v-btn>
+								<v-btn v-show="item.status === ActivityStatus.STARTED" color="ms-2 card-btn-0"
+									>进行中</v-btn
+								>
+								<v-btn v-show="item.status === ActivityStatus.FINISHED" color="ms-2 card-btn-2"
+									>已结束</v-btn
+								>
+								<v-btn v-show="item.status === ActivityStatus.SELECTION" color="ms-2 card-btn-1"
+									>评选中</v-btn
+								>
 							</div>
 							<v-btn @click="toJson(item.post_id)" class="ms-2 card-btn" v-show="appStore.devMode">
 								<template v-slot:prepend>
@@ -116,23 +122,35 @@
 </template>
 
 <script lang="ts" setup>
+// vue
+import { onMounted, ref } from "vue";
+import TLoading from "../components/t-loading.vue";
+// tauri
+import { http, fs } from "@tauri-apps/api";
+// store
+import useAppStore from "../store/modules/app";
+// tools
 // @ts-ignore
 import "../tools/svg-inject.js";
-import { onMounted, ref } from "vue";
-import useAppStore from "../store/modules/app";
-import {
-	MysPostType,
-	ResponseNewsList,
-	ResponseNews,
-	EnumPostType,
-	ResponsePost,
-	MysPostApi,
-	MysNewsApi,
-} from "../interface/MysPost";
-import { http, fs } from "@tauri-apps/api";
+// utils
 import { createTGWindow } from "../utils/TGWindow";
 import { parseMys } from "../utils/MysParse";
-import TLoading from "../components/t-loading.vue";
+// interface
+import {
+	Post,
+	PostResponse,
+	POST_FULL_API,
+	POST_FULL_REFERER,
+	PostData,
+} from "../plugins/Mys/interface/post";
+import {
+	NewsResponse,
+	NewsType,
+	NEWS_LIST_API,
+	ActivityStatus,
+	NewsCard,
+	NewsItem,
+} from "../plugins/Mys/interface/news";
 
 // Store
 const appStore = useAppStore();
@@ -142,33 +160,24 @@ const renderMode = ref(appStore.structureRender);
 // loading
 const loading = ref(true);
 
-// 接口 todo：考虑放到 interface 文件夹下?
-interface CardDataType {
-	title: string;
-	cover: string;
-	post_id: string;
-	subtitle: string;
-	status?: number;
-}
-
 // 数据
 const tab = ref("");
 const postData = ref({
-	notice: [] as CardDataType[],
-	activity: [] as CardDataType[],
-	news: [] as CardDataType[],
+	notice: [] as NewsCard[],
+	activity: [] as NewsCard[],
+	news: [] as NewsCard[],
 });
 
 onMounted(async () => {
-	const noticeRaw: ResponseNewsList = await http
-		.fetch(MysNewsApi + EnumPostType.Notice)
-		.then(res => res.data as Promise<ResponseNewsList>);
-	const activityRaw: ResponseNewsList = await http
-		.fetch(MysNewsApi + EnumPostType.Activity)
-		.then(res => res.data as Promise<ResponseNewsList>);
-	const newsRaw: ResponseNewsList = await http
-		.fetch(MysNewsApi + EnumPostType.News)
-		.then(res => res.data as Promise<ResponseNewsList>);
+	const noticeRaw: NewsResponse = await http
+		.fetch(NEWS_LIST_API.replace("{news_type}", NewsType.NOTICE.toString()))
+		.then(res => res.data as Promise<NewsResponse>);
+	const activityRaw: NewsResponse = await http
+		.fetch(NEWS_LIST_API.replace("{news_type}", NewsType.ACTIVITY.toString()))
+		.then(res => res.data as Promise<NewsResponse>);
+	const newsRaw: NewsResponse = await http
+		.fetch(NEWS_LIST_API.replace("{news_type}", NewsType.NEWS.toString()))
+		.then(res => res.data as Promise<NewsResponse>);
 	postData.value = {
 		notice: transData(noticeRaw, "notice"),
 		activity: transData(activityRaw, "activity"),
@@ -178,11 +187,11 @@ onMounted(async () => {
 	loading.value = false;
 });
 
-function transData(rawData: ResponseNewsList, dataType: string): CardDataType[] {
-	const cardData: CardDataType[] = [];
-	rawData.data.list.map((item: ResponseNews) => {
-		const postData: MysPostType = item.post;
-		const card: CardDataType = {
+function transData(rawData: NewsResponse, dataType: string): NewsCard[] {
+	const cardData: NewsCard[] = [];
+	rawData.data.list.map((item: NewsItem) => {
+		const postData: Post = item.post;
+		const card: NewsCard = {
 			title: postData.subject,
 			cover: postData.images.length === 0 ? postData.cover : postData.images[0],
 			post_id: postData.post_id,
@@ -200,7 +209,7 @@ function transData(rawData: ResponseNewsList, dataType: string): CardDataType[] 
 }
 async function toPost(post_id: string) {
 	// 获取帖子内容
-	const post: MysPostType = await getPost(post_id).then(res => {
+	const post: Post = await getPost(post_id).then(res => {
 		return res.data.post.post;
 	});
 	let parseDoc: Document;
@@ -233,16 +242,16 @@ async function toJson(post_id: string) {
 	// 打开窗口
 	createTGWindow(logUrl, "MysPostJson", post_id, 960, 720, false);
 }
-async function getPost(post_id: string): Promise<ResponsePost> {
+async function getPost(post_id: string): Promise<PostResponse> {
 	return http
-		.fetch(`${MysPostApi}${post_id}`, {
+		.fetch(POST_FULL_API.replace("{post_id}", post_id), {
 			method: "GET",
 			headers: {
-				referer: `https://bbs.mihoyo.com/ys/article/${post_id}`,
+				referer: POST_FULL_REFERER.replace("{post_id}", post_id),
 			},
 		})
 		.then(res => {
-			return res.data as Promise<ResponsePost>;
+			return res.data as Promise<PostResponse>;
 		});
 }
 </script>

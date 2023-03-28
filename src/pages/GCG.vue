@@ -91,13 +91,17 @@
 	</div>
 </template>
 <script lang="ts" setup>
+// vue
 import { ref, onMounted } from "vue";
+import TLoading from "../components/t-loading.vue";
+// tauri
+import { dialog } from "@tauri-apps/api";
+// utils
 import { createTGWindow } from "../utils/TGWindow";
 import { ReadAllTGData } from "../utils/TGIndex";
+// interface
 import { BaseCard, ActionCard, CharacterCard, MonsterCard } from "../interface/GCG";
-import { MysContent } from "../interface/MysPost";
-import { dialog } from "@tauri-apps/api";
-import TLoading from "../components/t-loading.vue";
+import { OBC_CONTENT_API } from "../plugins/Mys/interface/utils";
 
 const loading = ref(true);
 const doSearch = ref(false);
@@ -120,7 +124,7 @@ async function loadData() {
 	loading.value = false;
 }
 function toOuter(card_name: string, card_id: number) {
-	const url = MysContent.replace("content_id", card_id.toString());
+	const url = OBC_CONTENT_API.replace("{content_id}", card_id.toString());
 	createTGWindow(url, "GCG", card_name, 1200, 800, true);
 }
 async function searchCard() {

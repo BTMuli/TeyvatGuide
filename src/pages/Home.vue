@@ -55,49 +55,40 @@
 </template>
 
 <script lang="ts" setup>
+// vue
 import { onMounted, ref } from "vue";
-import useAppStore from "../store/modules/app";
-import { fs, http } from "@tauri-apps/api";
-import { createTGWindow } from "../utils/TGWindow";
-import {
-	ResponseGachaPool,
-	ResponsePost,
-	MysPostApi,
-	MysGachaInfo,
-	MysPostType,
-} from "../interface/MysPost";
-import { parseMys } from "../utils/MysParse";
 import TLoading from "../components/t-loading.vue";
-
-interface GachaPool {
-	title: string;
-	subtitle: string;
-	cover: string;
-	post_id: string;
-	characters: {
-		icon: string;
-		url: string;
-	}[];
-	voice: {
-		icon: string;
-		url: string;
-	};
-	time: {
-		start: string;
-		end: string;
-	};
-}
+// tauri
+import { fs, http } from "@tauri-apps/api";
+// store
+import useAppStore from "../store/modules/app";
+// utils
+import { createTGWindow } from "../utils/TGWindow";
+import { parseMys } from "../utils/MysParse";
+// interface
+import {
+	GachaResponse,
+	GachaData,
+	GachaPoolRender,
+	GACHA_POOL_API,
+} from "../plugins/Mys/interface/gacha";
+import {
+	PostResponse,
+	Post,
+	POST_FULL_API,
+	POST_FULL_REFERER,
+} from "../plugins/Mys/interface/post";
 
 const appStore = useAppStore();
-const poolInfo = ref([] as GachaPool[]);
+const poolInfo = ref([] as GachaPoolRender[]);
 const loading = ref(true);
 const empty = ref(false);
 const timeGet = ref("");
 const timePass = ref(0);
 
 onMounted(async () => {
-	const responseGachaPool = await http
-		.fetch<ResponseGachaPool>(MysGachaInfo, {
+	const responseGachaPool: GachaData[] = await http
+		.fetch<GachaResponse>(GACHA_POOL_API, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",
@@ -113,15 +104,15 @@ onMounted(async () => {
 		return;
 	}
 	empty.value = false;
-	responseGachaPool.map(async gachaPool => {
+	responseGachaPool.map(async (gachaPool: GachaData) => {
 		// 获取卡池 article post_id
 		const post_id = gachaPool.activity_url.split("/").pop();
 		if (!post_id) return;
 		const gachaCover = await http
-			.fetch<ResponsePost>(MysPostApi + post_id, {
+			.fetch<PostResponse>(POST_FULL_API.replace("{post_id}", post_id), {
 				method: "GET",
 				headers: {
-					referer: `https://bbs.mihoyo.com/ys/article/${post_id}`,
+					referer: POST_FULL_REFERER.replace("{post_id}", post_id),
 				},
 			})
 			.then(response => {
@@ -175,15 +166,15 @@ function toOuter(url: string, title: string) {
 
 async function toPost(post_id: string) {
 	// 获取帖子内容
-	const post: MysPostType = await http
-		.fetch(`${MysPostApi}${post_id}`, {
+	const post: Post = await http
+		.fetch(POST_FULL_API.replace("{post_id}", post_id), {
 			method: "GET",
 			headers: {
-				referer: `https://bbs.mihoyo.com/ys/article/${post_id}`,
+				referer: POST_FULL_REFERER.replace("{post_id}", post_id),
 			},
 		})
 		.then(res => {
-			return res.data as Promise<ResponsePost>;
+			return res.data as Promise<PostResponse>;
 		})
 		.then(res => {
 			return res.data.post.post;
