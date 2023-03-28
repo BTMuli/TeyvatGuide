@@ -2,9 +2,9 @@
 name = "tauri-genshin"
 version = "0.0.0"
 description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+authors = ["BTMuli<bt-muli@outlook.com>"]
+license = "MIT"
+repository = "https://github.com/BTMuli/Tauri.Genshin"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
