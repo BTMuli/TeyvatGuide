@@ -65,23 +65,11 @@ const props = defineProps({
 	color: #f4d8a8;
 }
 
-.loading-subtitle {
-	font-size: 1.5rem;
-	font-weight: 500;
-	color: #38393a;
-}
-
 .loading-img {
 	width: 256px;
 	height: 256px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-}
-
-.loading-text {
-	font-size: 1.5rem;
-	font-weight: 500;
-	color: #38393a;
 }
 </style>

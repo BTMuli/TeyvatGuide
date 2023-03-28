@@ -26,11 +26,7 @@
 						<v-card-actions>
 							<v-btn @click="toPost(item.post_id)" class="ms-2 card-btn">
 								<template v-slot:prepend>
-									<img
-										src="../assets/icons/arrow-right.svg"
-										alt="right"
-										onload="SVGInject(this)"
-									/>
+									<img src="../assets/icons/arrow-right.svg" alt="right" onload="SVGInject(this)" />
 								</template>
 								查看
 							</v-btn>
@@ -57,11 +53,7 @@
 						<v-card-actions>
 							<v-btn @click="toPost(item.post_id)" class="ms-2 card-btn">
 								<template v-slot:prepend>
-									<img
-										src="../assets/icons/arrow-right.svg"
-										alt="right"
-										onload="SVGInject(this)"
-									/>
+									<img src="../assets/icons/arrow-right.svg" alt="right" onload="SVGInject(this)" />
 								</template>
 								查看
 							</v-btn>
@@ -90,11 +82,7 @@
 						<v-card-actions>
 							<v-btn @click="toPost(item.post_id)" class="ms-2 card-btn">
 								<template v-slot:prepend>
-									<img
-										src="../assets/icons/arrow-right.svg"
-										alt="right"
-										onload="SVGInject(this)"
-									/>
+									<img src="../assets/icons/arrow-right.svg" alt="right" onload="SVGInject(this)" />
 								</template>
 								查看
 							</v-btn>

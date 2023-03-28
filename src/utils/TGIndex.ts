@@ -35,10 +35,10 @@ export async function InitTGData() {
 /**
  * @description 删除数据库
  * @since Alpha
- * @return {Promise<void>}
+ * @return {void}
  */
-export async function DeleteTGData() {
-	await window.indexedDB.deleteDatabase(DB_NAME);
+export function DeleteTGData() {
+	window.indexedDB.deleteDatabase(DB_NAME);
 }
 
 /**

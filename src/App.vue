@@ -12,25 +12,31 @@
 </template>
 
 <script lang="ts" setup>
-import TSidebar from "./components/t-sidebar.vue";
-import useAppStore from "./store/modules/app";
-import { TGAppDataList, TGGetDataList } from "./data";
-import { fs } from "@tauri-apps/api";
-import { BaseDirectory } from "@tauri-apps/api/fs";
+// vue
 import { onMounted } from "vue";
+import TSidebar from "./components/t-sidebar.vue";
+// tauri
+import { fs } from "@tauri-apps/api";
+// store
+import useAppStore from "./store/modules/app";
+// utils
 import { InitTGData, DeleteTGData, WriteTGData } from "./utils/TGIndex";
+// data
+import { TGAppDataList, TGGetDataList } from "./data";
 
 const appStore = useAppStore();
 
 onMounted(async () => {
 	await checkLoad();
 });
+
 async function checkLoad() {
+	await appStore.check();
 	if (appStore.loading) {
 		console.log("数据已加载！");
 		return;
 	}
-	await DeleteTGData();
+	DeleteTGData();
 	await createDataDir();
 	await writeData();
 	await writeIndex();
@@ -40,9 +46,9 @@ async function checkLoad() {
 // 创建数据文件夹
 async function createDataDir() {
 	console.log("开始创建数据文件夹...");
-	await fs.createDir("appData", { dir: BaseDirectory.AppLocalData, recursive: true });
-	await fs.createDir("userData", { dir: BaseDirectory.AppLocalData, recursive: true });
-	await fs.createDir("tempData", { dir: BaseDirectory.AppLocalData, recursive: true });
+	await fs.createDir("appData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
+	await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
+	await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
 	console.log("数据文件夹创建完成！");
 }
 // 将数据写入文件夹
