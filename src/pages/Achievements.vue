@@ -13,7 +13,9 @@
 			single-line
 			hide-details
 			@click:append="searchCard"
+			@keyup.enter="searchCard"
 		></v-text-field>
+		<v-spacer></v-spacer>
 		<template v-slot:append>
 			<!-- 导入按钮 -->
 			<v-btn @click="importJson" prepend-icon="mdi-import" class="ms-2 top-btn">导入</v-btn>
@@ -91,17 +93,12 @@
 								<span v-show="achievement.completed" class="right-time">{{
 									achievement.completed_time
 								}}</span>
-								<v-btn width="80px" class="reward-btn">
-									<template v-slot:append>
-										<img
-											src="/source/material/原石.webp"
-											alt="原石"
-											class="icon"
-											style="width: 32px"
-										/>
-									</template>
-									{{ achievement.reward }}
-								</v-btn>
+								<v-card class="reward-card" @click="showMaterial('/source/material/原石.webp')">
+									<v-img src="/source/material/原石.webp" sizes="32" />
+									<div class="reward-num">
+										<span>{{ achievement.reward }}</span>
+									</div>
+								</v-card>
 							</template>
 						</v-list-item>
 					</v-list>
@@ -204,6 +201,9 @@ async function selectSeries(index: number) {
 // 打开图片
 function openImg() {
 	createTGWindow(getCardInfo.value.profile, "nameCard", getCardInfo.value.name, 840, 400, false);
+}
+function showMaterial(path: string) {
+	createTGWindow(path, "material", "原石", 256, 256, false);
 }
 async function searchCard() {
 	if (search.value === "") {
@@ -411,8 +411,27 @@ async function exportJson() {
 }
 
 /* 成就奖励 */
-.reward-btn {
-	background: #565f6f !important;
-	color: #ece5d8 !important;
+.reward-card {
+	position: relative;
+	width: 32px;
+	height: 42px;
+	background: #414244;
+	border-radius: 5px;
+}
+
+.reward-num {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 15px;
+	background: rgba(255, 255, 255, 0.1);
+	color: #ffffff;
+	display: flex;
+	font-size: 10px;
+	font-family: Genshin, serif;
+	border-radius: 0 0 5px 5px;
+	justify-content: center;
+	align-items: center;
 }
 </style>
