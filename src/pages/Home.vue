@@ -64,7 +64,7 @@ import { fs, http } from "@tauri-apps/api";
 import useAppStore from "../store/modules/app";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
-import { parseMys } from "../utils/MysParse";
+import { StructuredPostParser } from "../plugins/Mys/utils/parser";
 // interface
 import {
 	GachaResponse,
@@ -180,7 +180,7 @@ async function toPost(post_id: string) {
 			return res.data.post.post;
 		});
 	// 结构化渲染
-	const parseDoc = parseMys(post.structured_content);
+	const parseDoc = StructuredPostParser(post.structured_content);
 	// 将解析后的 doc 保存到 文件
 	await fs.writeTextFile(
 		`${appStore.dataPath.temp}\\${post_id}_home.html`,

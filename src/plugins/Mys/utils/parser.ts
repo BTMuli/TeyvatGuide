@@ -1,9 +1,11 @@
 /**
- * @file utils MysParse.ts
+ * @file plugins Mys utils PostParser.ts
  * @description 用于解析Mys数据的工具
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha
  */
+
+import { PostStructuredContent } from "../interface/post";
 
 /**
  * @description 解析Mys数据
@@ -11,10 +13,9 @@
  * @description 为了安全考虑，不会解析所有的属性，只会解析几个常用的属性
  * @returns {Document} 解析后的 HTML 文档
  */
-export function parseMys(data: string): Document {
+export function StructuredPostParser(data: string): Document {
 	// Json 化
-	let jsonData = JSON.parse(data);
-	while (typeof jsonData === "string") jsonData = JSON.parse(jsonData);
+	let jsonData: PostStructuredContent[] = JSON.parse(data);
 	// 创建 HTML 文档
 	const doc = document.implementation.createHTMLDocument();
 	// 遍历 Json 数据

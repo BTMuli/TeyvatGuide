@@ -134,14 +134,13 @@ import useAppStore from "../store/modules/app";
 import "../tools/svg-inject.js";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
-import { parseMys } from "../utils/MysParse";
+import { StructuredPostParser } from "../plugins/Mys/utils/parser";
 // interface
 import {
 	Post,
 	PostResponse,
 	POST_FULL_API,
 	POST_FULL_REFERER,
-	PostData,
 } from "../plugins/Mys/interface/post";
 import {
 	NewsResponse,
@@ -216,7 +215,7 @@ async function toPost(post_id: string) {
 	// 获取渲染模式
 	if (renderMode.value) {
 		// 结构化渲染
-		parseDoc = parseMys(post.structured_content);
+		parseDoc = StructuredPostParser(post.structured_content);
 	} else {
 		// 原始渲染
 		parseDoc = new DOMParser().parseFromString(post.content, "text/html");
@@ -231,12 +230,12 @@ async function toPost(post_id: string) {
 }
 async function toJson(post_id: string) {
 	const post = await getPost(post_id).then(res => {
-		return res.data;
+		return res.data.post.post.structured_content;
 	});
 	// 将 json 保存到 文件
 	await fs.writeTextFile(
 		`${appStore.dataPath.temp}\\${post_id}.json`,
-		JSON.stringify(post, null, 4)
+		JSON.stringify(JSON.parse(post), null, 4)
 	);
 	const logUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post_id}.json`;
 	// 打开窗口

@@ -247,3 +247,79 @@ export interface PostStat {
 	bookmark_num: number;
 	forward_num: number;
 }
+
+/**
+ * @description 帖子结构化内容
+ * @since Alpha
+ * @interface PostStructuredContent
+ * @property {string|object} insert 插入内容
+ * @property {string} insert.image 图片 URL
+ * @property {object} insert.vod 视频信息
+ * @property {number} insert.vod.id 视频 ID
+ * @property {number} insert.vod.duration 时长
+ * @property {string} insert.vod.cover 封面图 URL
+ * @property {object[]} insert.vod.resolutions 分辨率
+ * @property {string} insert.vod.resolutions.url URL
+ * @property {string} insert.vod.resolutions.definition 清晰度
+ * @property {number} insert.vod.resolutions.height 高度
+ * @property {number} insert.vod.resolutions.width 宽度
+ * @property {number} insert.vod.resolutions.bitrate 比特率
+ * @property {number} insert.vod.resolutions.size 大小
+ * @property {string} insert.vod.resolutions.format 格式
+ * @property {string} insert.vod.resolutions.label 标签
+ * @property {number} insert.vod.view_num 浏览数
+ * @property {number} insert.vod.transcode_status 转码状态
+ * @property {number} insert.vod.review_status 审核状态
+ * @property {string} insert.backup_text 折叠文本
+ * @property {object} insert.fold 折叠内容
+ * @property {string} insert.fold.title 折叠标题，反序列化后为 PostStructuredContent[]
+ * @property {string} insert.fold.content 折叠文本，反序列化后为 PostStructuredContent[]
+ * @property {object} attributes 属性
+ * @property {number} attributes.height 高度
+ * @property {number} attributes.width 宽度
+ * @property {number} attributes.size 大小
+ * @property {string} attributes.ext 扩展名
+ * @property {boolean} attributes.bold 是否加粗
+ * @property {string} attributes.color 颜色
+ * @property {string} attributes.link 链接
+ * @return {PostStructuredContent}
+ */
+export interface PostStructuredContent {
+	insert:
+		| {
+				image?: string;
+				vod?: {
+					id: number;
+					duration: number;
+					cover: string;
+					resolutions: {
+						url: string;
+						definition: string;
+						height: number;
+						width: number;
+						bitrate: number;
+						size: number;
+						format: string;
+						label: string;
+					}[];
+					view_num: number;
+					transcoding_status: number;
+					review_status: number;
+				};
+				backup_text?: string;
+				fold?: {
+					title: string;
+					content: string;
+				};
+		  }
+		| string;
+	attributes?: {
+		height?: number;
+		width?: number;
+		size?: number;
+		ext?: string;
+		bold?: boolean;
+		color?: string;
+		link?: string;
+	};
+}
