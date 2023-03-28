@@ -175,6 +175,11 @@ async function searchCard() {
 	z-index: -1;
 }
 
+.GCG-cover img {
+	height: 240px;
+	width: auto;
+}
+
 .GCG-grid :hover {
 	cursor: pointer;
 }
