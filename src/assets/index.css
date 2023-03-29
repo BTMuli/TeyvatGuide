@@ -27,3 +27,18 @@
 .mys-post-span {
 	line-height: 2;
 }
+
+.mys-post-json {
+	padding: 20px;
+	border-radius: 20px;
+}
+
+.mys-post-json * {
+	color: #faf7e8 !important;
+	background-color: #2b2b2b !important;
+	font-family: "Consolas", monospace;
+}
+
+.mys-post-json .jv-toggle {
+	background-color: #faf7e8 !important;
+}

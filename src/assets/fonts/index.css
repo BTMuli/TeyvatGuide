@@ -3,6 +3,10 @@
 	font-family: "Genshin";
 	src: url("./Genshin.ttf") format("truetype");
 }
+@font-face {
+	font-family: "Consolas";
+	src: url("./consolas.ttf") format("truetype");
+}
 /* 全局字体样式 */
 .global-font {
 	font-family: "Genshin", sans-serif;

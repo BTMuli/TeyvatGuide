@@ -26,7 +26,7 @@
 								查看
 							</v-btn>
 							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-							<v-btn @click="toJson(item.post_id)" class="ms-2 card-btn" v-show="appStore.devMode">
+							<v-btn @click="toJson(item)" class="ms-2 card-btn" v-show="appStore.devMode">
 								<template v-slot:prepend>
 									<img src="../assets/icons/arrow-right.svg" alt="right" onload="SVGInject(this)" />
 								</template>
@@ -66,13 +66,13 @@
 								<v-btn
 									class="ms-2"
 									:style="{
-										background: item.status.colorCss,
+										background: item.status?.colorCss,
 										color: '#faf7e8 !important',
 									}"
-									>{{ item.status.status }}</v-btn
+									>{{ item.status?.status }}</v-btn
 								>
 							</div>
-							<v-btn @click="toJson(item.post_id)" class="ms-2 card-btn" v-show="appStore.devMode">
+							<v-btn @click="toJson(item)" class="ms-2 card-btn" v-show="appStore.devMode">
 								<template v-slot:prepend>
 									<img src="../assets/icons/arrow-right.svg" alt="right" onload="SVGInject(this)" />
 								</template>
@@ -107,7 +107,7 @@
 								查看
 							</v-btn>
 							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-							<v-btn @click="toJson(item.post_id)" class="ms-2 card-btn" v-show="appStore.devMode">
+							<v-btn @click="toJson(item)" class="ms-2 card-btn" v-show="appStore.devMode">
 								<template v-slot:prepend>
 									<img src="../assets/icons/arrow-right.svg" alt="right" onload="SVGInject(this)" />
 								</template>
@@ -134,7 +134,7 @@
 import { onMounted, ref } from "vue";
 import TLoading from "../components/t-loading.vue";
 // tauri
-import { dialog, fs } from "@tauri-apps/api";
+import { dialog } from "@tauri-apps/api";
 // store
 import useAppStore from "../store/modules/app";
 // tools
@@ -238,16 +238,16 @@ async function toPost(item: NewsCard) {
 	// 打开新窗口
 	createTGWindow(path, "帖子", item.title, 960, 720, false);
 }
-async function toJson(post_id: number) {
-	const post: string = (await MysOper.Post.get(post_id)).post.structured_content;
-	// 将 json 保存到 文件
-	await fs.writeTextFile(
-		`${appStore.dataPath.temp}\\${post_id}.json`,
-		JSON.stringify(JSON.parse(post), null, 4)
-	);
-	const logUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post_id}.json`;
-	// 打开窗口
-	createTGWindow(logUrl, "MysPostJson", post_id.toString(), 960, 720, false);
+async function toJson(item: NewsCard) {
+	// 获取路由路径
+	const path = router.resolve({
+		name: "帖子详情（JSON）",
+		params: {
+			post_id: item.post_id.toString(),
+		},
+	}).href;
+	// 打开新窗口
+	createTGWindow(path, "帖子-JSON", `${item.title}-JSON`, 960, 720, false);
 }
 </script>
 

@@ -1,3 +1,4 @@
+// vue
 import { createApp } from "vue";
 import App from "./App.vue";
 // 路由
@@ -9,5 +10,8 @@ import "vuetify/styles";
 import { createVuetify } from "vuetify";
 // 全局样式
 import "./assets/index.css";
+// plugins
+// @ts-ignore
+import JsonViewer from "vue-json-viewer";
 
-createApp(App).use(router).use(store).use(createVuetify()).mount("#app");
+createApp(App).use(router).use(store).use(createVuetify()).use(JsonViewer).mount("#app");
