@@ -1,19 +1,32 @@
 <template>
-	<v-layout>
-		<!-- 侧边栏菜单 -->
-		<t-sidebar />
-		<!-- 主体内容 -->
-		<v-main>
-			<v-container fluid>
-				<router-view />
-			</v-container>
-		</v-main>
-	</v-layout>
+	<div v-if="isMain">
+		<v-layout>
+			<!-- 侧边栏菜单 -->
+			<t-sidebar />
+			<!-- 主体内容 -->
+			<v-main>
+				<v-container fluid>
+					<router-view />
+				</v-container>
+			</v-main>
+		</v-layout>
+	</div>
+	<div v-else>
+		<v-layout>
+			<!-- 主体内容 -->
+			<v-main>
+				<v-container fluid>
+					<router-view />
+				</v-container>
+			</v-main>
+		</v-layout>
+	</div>
 </template>
 
 <script lang="ts" setup>
 // vue
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import TSidebar from "./components/t-sidebar.vue";
 // tauri
 import { fs } from "@tauri-apps/api";
@@ -25,9 +38,15 @@ import { InitTGData, DeleteTGData, WriteTGData } from "./utils/TGIndex";
 import { TGAppDataList, TGGetDataList } from "./data";
 
 const appStore = useAppStore();
+const isMain = ref(true as boolean);
+const route = useRouter();
 
 onMounted(async () => {
-	await checkLoad();
+	// 判断路由meta.isMain
+	isMain.value = route.currentRoute.value.meta.isMain as boolean;
+	if (isMain.value) {
+		await checkLoad();
+	}
 });
 
 async function checkLoad() {
