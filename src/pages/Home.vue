@@ -23,7 +23,7 @@
 				</template>
 				<!-- 卡池封面 -->
 				<v-row class="Home-pool">
-					<div class="Home-pool-cover" @click="toPost(pool.post_id)">
+					<div class="Home-pool-cover" @click="toPost(pool)">
 						<img :src="pool.cover" alt="cover" />
 					</div>
 					<div class="Home-pool-character">
@@ -57,20 +57,16 @@
 <script lang="ts" setup>
 // vue
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import TLoading from "../components/t-loading.vue";
-// tauri
-import { fs } from "@tauri-apps/api";
-// store
-import useAppStore from "../store/modules/app";
 // plugin
 import MysOper from "../plugins/Mys";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
 // interface
 import { GachaData, GachaCard } from "../plugins/Mys/interface/gacha";
-import { Post } from "../plugins/Mys/interface/post";
 
-const appStore = useAppStore();
+const router = useRouter();
 const poolInfo = ref([] as GachaCard[]);
 const loading = ref(true);
 const empty = ref(false);
@@ -116,18 +112,16 @@ function toOuter(url: string, title: string) {
 	createTGWindow(url, "祈愿", title, 1200, 800, true);
 }
 
-async function toPost(post_id: number) {
-	// 获取帖子内容
-	const post: Post = (await MysOper.Post.get(post_id)).post;
-	// 结构化渲染
-	const parseDoc = MysOper.Post.parser(post.structured_content);
-	// 将解析后的 doc 保存到 文件
-	await fs.writeTextFile(
-		`${appStore.dataPath.temp}\\${post_id}_home.html`,
-		parseDoc.documentElement.outerHTML
-	);
-	const postUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post.post_id}_home.html`;
-	createTGWindow(postUrl, "祈愿卡池", post.subject, 960, 720, false);
+async function toPost(pool: GachaCard) {
+	// 获取路由路径
+	const path = router.resolve({
+		name: "帖子详情",
+		params: {
+			post_id: pool.post_id.toString(),
+		},
+	}).href;
+	// 打开新窗口
+	createTGWindow(path, "祈愿", pool.title, 960, 720, false);
 }
 </script>
 

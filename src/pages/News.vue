@@ -16,15 +16,10 @@
 						class="justify-space-between flex-nowrap"
 						width="320"
 					>
-						<v-img
-							:src="item.cover"
-							cover
-							style="height: 150px"
-							@click="toPost(item.post_id)"
-						></v-img>
+						<v-img :src="item.cover" cover style="height: 150px" @click="toPost(item)"></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-actions>
-							<v-btn @click="toPost(item.post_id)" class="ms-2 card-btn">
+							<v-btn @click="toPost(item)" class="ms-2 card-btn">
 								<template v-slot:prepend>
 									<img src="../assets/icons/arrow-right.svg" alt="right" onload="SVGInject(this)" />
 								</template>
@@ -56,16 +51,11 @@
 						class="justify-space-between flex-nowrap"
 						width="320"
 					>
-						<v-img
-							:src="item.cover"
-							cover
-							style="height: 150px"
-							@click="toPost(item.post_id)"
-						></v-img>
+						<v-img :src="item.cover" cover style="height: 150px" @click="toPost(item)"></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
 						<v-card-actions>
-							<v-btn @click="toPost(item.post_id)" class="ms-2 card-btn">
+							<v-btn @click="toPost(item)" class="ms-2 card-btn">
 								<template v-slot:prepend>
 									<img src="../assets/icons/arrow-right.svg" alt="right" onload="SVGInject(this)" />
 								</template>
@@ -107,15 +97,10 @@
 						class="justify-space-between flex-nowrap"
 						width="320"
 					>
-						<v-img
-							:src="item.cover"
-							cover
-							style="height: 150px"
-							@click="toPost(item.post_id)"
-						></v-img>
+						<v-img :src="item.cover" cover style="height: 150px" @click="toPost(item)"></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-actions>
-							<v-btn @click="toPost(item.post_id)" class="ms-2 card-btn">
+							<v-btn @click="toPost(item)" class="ms-2 card-btn">
 								<template v-slot:prepend>
 									<img src="../assets/icons/arrow-right.svg" alt="right" onload="SVGInject(this)" />
 								</template>
@@ -132,7 +117,7 @@
 					</v-card>
 				</div>
 				<div class="load-news">
-					<v-btn @click="loadMore('notice')">
+					<v-btn @click="loadMore('news')">
 						<template v-slot:append>
 							<img src="../assets/icons/arrow-left.svg" alt="right" onload="SVGInject(this)" />
 						</template>
@@ -160,17 +145,17 @@ import MysOper from "../plugins/Mys";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
 // interface
-import { Post } from "../plugins/Mys/interface/post";
 import { NewsCard, NewsData } from "../plugins/Mys/interface/news";
+import { useRouter } from "vue-router";
 
 // Store
 const appStore = useAppStore();
 
-// 渲染模式
-const renderMode = ref(appStore.structureRender);
 // loading
 const loading = ref(true);
 const loadingTitle = ref("正在加载");
+// 路由
+const router = useRouter();
 
 // 数据
 const tab = ref("");
@@ -242,25 +227,16 @@ async function loadMore(data: string) {
 	}
 }
 
-async function toPost(post_id: number) {
-	// 获取帖子内容
-	const post: Post = (await MysOper.Post.get(post_id)).post;
-	let parseDoc: Document;
-	// 获取渲染模式
-	if (renderMode.value) {
-		// 结构化渲染
-		parseDoc = MysOper.Post.parser(post.structured_content);
-	} else {
-		// 原始渲染
-		parseDoc = new DOMParser().parseFromString(post.content, "text/html");
-	}
-	// 将解析后的 doc 保存到 文件
-	await fs.writeTextFile(
-		`${appStore.dataPath.temp}\\${post_id}.html`,
-		parseDoc.documentElement.outerHTML
-	);
-	const postUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post.post_id}.html`;
-	createTGWindow(postUrl, "MysPost", post.subject, 960, 720, false);
+async function toPost(item: NewsCard) {
+	// 获取路由路径
+	const path = router.resolve({
+		name: "帖子详情",
+		params: {
+			post_id: item.post_id.toString(),
+		},
+	}).href;
+	// 打开新窗口
+	createTGWindow(path, "帖子", item.title, 960, 720, false);
 }
 async function toJson(post_id: number) {
 	const post: string = (await MysOper.Post.get(post_id)).post.structured_content;

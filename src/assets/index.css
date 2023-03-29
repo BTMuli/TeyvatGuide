@@ -1,1 +1,29 @@
 @import "fonts/index.css";
+
+/* 米游社解析 css */
+.mys-post-body {
+	margin: 20px auto;
+	width: 800px;
+}
+
+.mys-post-div {
+	margin: 20px auto;
+}
+
+.mys-post-cover {
+	border-radius: 10px;
+}
+
+.mys-post-img {
+	width: 800px;
+	height: auto;
+}
+
+.mys-post-vod {
+	width: 800px;
+	height: 450px;
+}
+
+.mys-post-span {
+	line-height: 2;
+}

@@ -10,40 +10,37 @@ import { PostStructuredContent } from "../interface/post";
  * @description 解析Mys数据
  * @param {string} data Mys数据
  * @description 为了安全考虑，不会解析所有的属性，只会解析几个常用的属性
- * @returns {Document} 解析后的 HTML 文档
+ * @returns {string} 解析后的HTML，可作为 v-html 使用
  */
-export function PostParser(data: string): Document {
+export function PostParser(data: string): string {
 	// Json 化
 	let jsonData: PostStructuredContent[] = JSON.parse(data);
-	// 创建 HTML 文档
-	const doc = document.implementation.createHTMLDocument();
+	// 创建 div
+	const doc = document.createElement("div");
 	// cover flag
 	let coverFlag = false;
 	// 遍历 Json 数据
 	jsonData.forEach((item: any) => {
 		if (typeof item.insert === "string") {
 			const text = TextParser(item);
-			doc.body.appendChild(text);
+			doc.appendChild(text);
 		} else if (item.insert.image) {
 			const img = ImageParser(item, coverFlag);
 			coverFlag = img[1];
-			doc.body.appendChild(img[0]);
+			doc.appendChild(img[0]);
 		} else if (item.insert.vod) {
 			// 创建 div
 			const video = VideoParser(item);
 			// 插入 div
-			doc.body.appendChild(video);
+			doc.appendChild(video);
 		} else if (item.insert.backup_text) {
 			// 创建 div
 			const backup = BackupTextParser(item);
 			// 插入 div
-			doc.body.appendChild(backup);
+			doc.appendChild(backup);
 		}
 	});
-	// doc 宽度设为 800,居中
-	doc.body.style.width = "800px";
-	doc.body.style.margin = "20px auto";
-	return doc;
+	return doc.innerHTML;
 }
 
 /**
@@ -71,8 +68,8 @@ function TextParser(data: PostStructuredContent): HTMLSpanElement {
 			return a;
 		}
 	}
-	// 行间距
-	text.style.lineHeight = "2";
+	// 添加 class
+	text.classList.add("mys-post-span");
 	// 设置 span 内容
 	text.innerText = data.insert;
 	// 返回文本
@@ -107,21 +104,19 @@ function ImageParser(data: PostStructuredContent, coverFlag: boolean): [HTMLDivE
 	// 创建图片
 	const img = document.createElement("img");
 	img.src = data.insert.image;
-	// 设置图片属性，窗口宽度 900，页面宽度 800
-	img.style.height = "auto"; // 高度自适应
-	img.width = 800; // 设置宽度
+	// 添加 class
+	img.classList.add("mys-post-img");
 	// 判断是否是 cover
 	if (!coverFlag) {
-		// 添加 border-radius
-		img.style.borderRadius = "10px";
+		// 添加 class
+		img.classList.add("mys-post-cover");
 		// 设置 coverFlag
 		coverFlag = true;
 	}
 	// 插入图片
 	div.appendChild(img);
-	// 设置 div 属性
-	div.style.display = "center"; // 居中
-	div.style.margin = "20px auto"; // 设置 margin
+	// 添加 class
+	div.classList.add("mys-post-div");
 	// 返回 div
 	return [div, coverFlag];
 }
@@ -151,9 +146,9 @@ function VideoParser(data: PostStructuredContent): HTMLDivElement {
 	});
 	// 设置视频属性
 	video.poster = data.insert.vod.cover; // 设置封面
-	video.width = 800; // 设置宽度
-	video.height = 450; // 设置高度
 	video.controls = true; // 设置 controls
+	// 添加 class
+	video.classList.add("mys-post-vod");
 	// 添加 source
 	const source = document.createElement("source");
 	source.src = resolution.url;
@@ -162,9 +157,8 @@ function VideoParser(data: PostStructuredContent): HTMLDivElement {
 	video.appendChild(source);
 	// 插入 video
 	div.appendChild(video);
-	// 设置 div 属性
-	div.style.display = "center"; // 居中
-	div.style.margin = "20px auto"; // 设置 margin
+	// 添加 class
+	div.classList.add("mys-post-div");
 	// 返回 div
 	return div;
 }
@@ -213,19 +207,20 @@ function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
 	// 解析内容
 	contentJson.forEach(item => {
 		// 数据检查
-		if (typeof item.insert !== "string") {
-			throw new Error("item.insert is not a string");
+		if (typeof item.insert === "string") {
+			// 解析
+			content.appendChild(TextParser(item));
+		} else if (item.insert.image) {
+			// 解析
+			content.appendChild(ImageParser(item, false)[0]);
 		}
-		// 解析
-		content.appendChild(TextParser(item));
 	});
 	// 插入标题
 	div.appendChild(title);
 	// 插入内容
 	div.appendChild(content);
-	// 设置 div 属性
-	div.style.display = "center"; // 居中
-	div.style.margin = "20px auto"; // 设置 margin
+	// 添加 class
+	div.classList.add("mys-post-div");
 	// 返回 div
 	return div;
 }

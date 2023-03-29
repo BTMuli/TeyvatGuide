@@ -28,7 +28,7 @@
 import { onMounted, ref } from "vue";
 import TSidebar from "./components/t-sidebar.vue";
 // tauri
-import { fs,window } from "@tauri-apps/api";
+import { fs, window } from "@tauri-apps/api";
 // store
 import useAppStore from "./store/modules/app";
 // utils
