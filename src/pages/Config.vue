@@ -7,7 +7,7 @@
 			<v-list>
 				<v-list-item title="应用版本" @click="toOuter('https://github.com/BTMuli/Tauri.Genshin')">
 					<template v-slot:prepend>
-						<img class="config-icon" src="/icon.svg" alt="App" />
+						<img class="config-icon" src="/icon.webp" alt="App" />
 					</template>
 					<template v-slot:append>
 						<v-list-item-subtitle>{{ versionApp }}</v-list-item-subtitle>
@@ -15,7 +15,7 @@
 				</v-list-item>
 				<v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
 					<template v-slot:prepend>
-						<img class="config-icon" src="/tauri.png" alt="Tauri" />
+						<img class="config-icon" src="/tauri.webp" alt="Tauri" />
 					</template>
 					<template v-slot:append>
 						<v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
