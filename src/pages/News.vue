@@ -132,9 +132,10 @@ import useAppStore from "../store/modules/app";
 // tools
 // @ts-ignore
 import "../tools/svg-inject.js";
+// plugin
+import Mys_Oper from "../plugins/Mys";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
-import { StructuredPostParser } from "../plugins/Mys/utils/parser";
 // interface
 import {
 	Post,
@@ -215,7 +216,7 @@ async function toPost(post_id: string) {
 	// 获取渲染模式
 	if (renderMode.value) {
 		// 结构化渲染
-		parseDoc = StructuredPostParser(post.structured_content);
+		parseDoc = Mys_Oper.PostParser(post.structured_content);
 	} else {
 		// 原始渲染
 		parseDoc = new DOMParser().parseFromString(post.content, "text/html");
