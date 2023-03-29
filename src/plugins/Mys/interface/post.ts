@@ -10,28 +10,6 @@ import { NewsMeta } from "./news";
 import { User, SelfOperation } from "./user";
 import { ImageData, HelpSys } from "./utils";
 
-// Post API
-
-/**
- * @description 帖子完整信息 API
- * @since Alpha
- * @see PostResponse
- * @param {number} post_id 帖子 ID
- * @return {string}
- */
-export const POST_FULL_API =
-	"https://bbs-api.mihoyo.com/post/wapi/getPostFull?gids=2&post_id={post_id}";
-
-/**
- * @description 帖子完整信息 Referer
- * @since Alpha
- * @param {number} post_id 帖子 ID
- * @return {string}
- */
-export const POST_FULL_REFERER = "https://bbs.mihoyo.com/ys/article/{post_id}"; // 与 POST_FULL_API 中的 post_id 对应, 用于伪造 Referer
-
-// Post Interface
-
 /**
  * @description 帖子返回数据
  * @since Alpha

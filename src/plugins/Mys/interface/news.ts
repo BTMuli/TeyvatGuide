@@ -10,52 +10,6 @@ import { Post, Forum, Topic, PostStat } from "./post";
 import { User, SelfOperation } from "./user";
 import { ImageData, HelpSys } from "./utils";
 
-// 咨讯 API
-
-/**
- * @description 咨讯列表 API
- * @since Alpha
- * @param {number} ews_type 咨讯类型
- * @see NewsType
- * @return {string}
- */
-export const NEWS_LIST_API =
-	"https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids=2&type={news_type}";
-
-// 咨讯相关枚举数据
-
-/**
- * @description 咨讯类型
- * @enum NewsType
- * @since Alpha
- * @property {number} NOTICE 公告
- * @property {number} ACTIVITY 活动
- * @property {number} NEWS 咨讯
- * @return {NewsType}
- */
-export enum NewsType {
-	NOTICE = 1,
-	ACTIVITY = 2,
-	NEWS = 3,
-}
-
-/**
- * @description 活动状态
- * @enum ActivityStatus
- * @since Alpha
- * @property {number} STARTED 进行中
- * @property {number} FINISHED 已结束
- * @property {number} SELECTION 评选中
- * @return {ActivityStatus}
- */
-export enum ActivityStatus {
-	STARTED = 1,
-	FINISHED = 2,
-	SELECTION = 3,
-}
-
-// 咨讯接口
-
 /**
  * @description 咨讯返回数据
  * @since Alpha
@@ -155,15 +109,17 @@ export interface NewsMeta {
  * @interface NewsCard
  * @property {string} title 标题
  * @property {string} cover 封面图片 URL
- * @property {string} post_id 帖子 ID
+ * @property {number} post_id 帖子 ID
  * @property {string} subtitle 副标题
- * @property {number} status 活动状态，仅活动咨讯有
+ * @property {string} status 活动状态，仅活动咨讯有
+ * @property {string} status_color 活动状态按钮背景色，仅活动咨讯有
  * @return {NewsCard}
  */
 export interface NewsCard {
 	title: string;
 	cover: string;
-	post_id: string;
+	post_id: number;
 	subtitle: string;
-	status?: number;
+	status?: string;
+	status_color?: string;
 }

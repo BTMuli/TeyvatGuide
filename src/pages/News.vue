@@ -1,6 +1,6 @@
 <template>
 	<div v-if="loading">
-		<t-loading title="加载中..." />
+		<t-loading :title="loadingTitle" />
 	</div>
 	<div v-else>
 		<v-tabs v-model="tab" align-tabs="start" class="global-font">
@@ -40,6 +40,7 @@
 						</v-card-actions>
 					</v-card>
 				</div>
+				<!-- todo 加载更多 -->
 			</v-window-item>
 			<v-window-item value="activity">
 				<div class="News-grid">
@@ -65,14 +66,13 @@
 							</v-btn>
 							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
 							<div v-show="!appStore.devMode">
-								<v-btn v-show="item.status === ActivityStatus.STARTED" color="ms-2 card-btn-0"
-									>进行中</v-btn
-								>
-								<v-btn v-show="item.status === ActivityStatus.FINISHED" color="ms-2 card-btn-2"
-									>已结束</v-btn
-								>
-								<v-btn v-show="item.status === ActivityStatus.SELECTION" color="ms-2 card-btn-1"
-									>评选中</v-btn
+								<v-btn
+									class="ms-2"
+									:style="{
+										background: item.status_color + ' !important',
+										color: '#faf7e8 !important',
+									}"
+									>{{ item.status }}</v-btn
 								>
 							</div>
 							<v-btn @click="toJson(item.post_id)" class="ms-2 card-btn" v-show="appStore.devMode">
@@ -84,6 +84,7 @@
 						</v-card-actions>
 					</v-card>
 				</div>
+				<!-- todo 加载更多 -->
 			</v-window-item>
 			<v-window-item value="news">
 				<div class="News-grid">
@@ -116,6 +117,7 @@
 						</v-card-actions>
 					</v-card>
 				</div>
+				<!-- todo 加载更多 -->
 			</v-window-item>
 		</v-window>
 	</div>
@@ -126,31 +128,19 @@
 import { onMounted, ref } from "vue";
 import TLoading from "../components/t-loading.vue";
 // tauri
-import { http, fs } from "@tauri-apps/api";
+import { fs } from "@tauri-apps/api";
 // store
 import useAppStore from "../store/modules/app";
 // tools
 // @ts-ignore
 import "../tools/svg-inject.js";
 // plugin
-import Mys_Oper from "../plugins/Mys";
+import MysOper from "../plugins/Mys";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
 // interface
-import {
-	Post,
-	PostResponse,
-	POST_FULL_API,
-	POST_FULL_REFERER,
-} from "../plugins/Mys/interface/post";
-import {
-	NewsResponse,
-	NewsType,
-	NEWS_LIST_API,
-	ActivityStatus,
-	NewsCard,
-	NewsItem,
-} from "../plugins/Mys/interface/news";
+import { Post } from "../plugins/Mys/interface/post";
+import { NewsCard, NewsData } from "../plugins/Mys/interface/news";
 
 // Store
 const appStore = useAppStore();
@@ -159,6 +149,7 @@ const appStore = useAppStore();
 const renderMode = ref(appStore.structureRender);
 // loading
 const loading = ref(true);
+const loadingTitle = ref("正在加载");
 
 // 数据
 const tab = ref("");
@@ -167,56 +158,35 @@ const postData = ref({
 	activity: [] as NewsCard[],
 	news: [] as NewsCard[],
 });
+const noticeData = ref({} as NewsData);
+const activityData = ref({} as NewsData);
+const newsData = ref({} as NewsData);
 
 onMounted(async () => {
-	const noticeRaw: NewsResponse = await http
-		.fetch(NEWS_LIST_API.replace("{news_type}", NewsType.NOTICE.toString()))
-		.then(res => res.data as Promise<NewsResponse>);
-	const activityRaw: NewsResponse = await http
-		.fetch(NEWS_LIST_API.replace("{news_type}", NewsType.ACTIVITY.toString()))
-		.then(res => res.data as Promise<NewsResponse>);
-	const newsRaw: NewsResponse = await http
-		.fetch(NEWS_LIST_API.replace("{news_type}", NewsType.NEWS.toString()))
-		.then(res => res.data as Promise<NewsResponse>);
+	loadingTitle.value = "正在获取公告数据...";
+	noticeData.value = await MysOper.News.get.notice();
+	loadingTitle.value = "正在获取活动数据...";
+	activityData.value = await MysOper.News.get.activity();
+	loadingTitle.value = "正在获取新闻数据...";
+	newsData.value = await MysOper.News.get.news();
+	loadingTitle.value = "正在渲染数据...";
 	postData.value = {
-		notice: transData(noticeRaw, "notice"),
-		activity: transData(activityRaw, "activity"),
-		news: transData(newsRaw, "news"),
+		notice: MysOper.News.card.notice(noticeData.value),
+		activity: MysOper.News.card.activity(activityData.value),
+		news: MysOper.News.card.news(newsData.value),
 	};
 	tab.value = "notice";
 	loading.value = false;
 });
 
-function transData(rawData: NewsResponse, dataType: string): NewsCard[] {
-	const cardData: NewsCard[] = [];
-	rawData.data.list.map((item: NewsItem) => {
-		const postData: Post = item.post;
-		const card: NewsCard = {
-			title: postData.subject,
-			cover: postData.images.length === 0 ? postData.cover : postData.images[0],
-			post_id: postData.post_id,
-			subtitle: postData.post_id,
-		};
-		if (dataType === "activity") {
-			card.status = item.news_meta.activity_status;
-			const startTime = new Date(Number(item.news_meta.start_at_sec) * 1000).toLocaleDateString();
-			const endTime = new Date(Number(item.news_meta.end_at_sec) * 1000).toLocaleDateString();
-			card.subtitle = `${startTime} - ${endTime}`;
-		}
-		return cardData.push(card);
-	});
-	return cardData;
-}
-async function toPost(post_id: string) {
+async function toPost(post_id: number) {
 	// 获取帖子内容
-	const post: Post = await getPost(post_id).then(res => {
-		return res.data.post.post;
-	});
+	const post: Post = (await MysOper.Post.get(post_id)).post;
 	let parseDoc: Document;
 	// 获取渲染模式
 	if (renderMode.value) {
 		// 结构化渲染
-		parseDoc = Mys_Oper.PostParser(post.structured_content);
+		parseDoc = MysOper.Post.parser(post.structured_content);
 	} else {
 		// 原始渲染
 		parseDoc = new DOMParser().parseFromString(post.content, "text/html");
@@ -229,10 +199,8 @@ async function toPost(post_id: string) {
 	const postUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post.post_id}.html`;
 	createTGWindow(postUrl, "MysPost", post.subject, 960, 720, false);
 }
-async function toJson(post_id: string) {
-	const post = await getPost(post_id).then(res => {
-		return res.data.post.post.structured_content;
-	});
+async function toJson(post_id: number) {
+	const post: string = (await MysOper.Post.get(post_id)).post.structured_content;
 	// 将 json 保存到 文件
 	await fs.writeTextFile(
 		`${appStore.dataPath.temp}\\${post_id}.json`,
@@ -240,19 +208,7 @@ async function toJson(post_id: string) {
 	);
 	const logUrl = `file:\\\\\\${appStore.dataPath.temp}\\${post_id}.json`;
 	// 打开窗口
-	createTGWindow(logUrl, "MysPostJson", post_id, 960, 720, false);
-}
-async function getPost(post_id: string): Promise<PostResponse> {
-	return http
-		.fetch(POST_FULL_API.replace("{post_id}", post_id), {
-			method: "GET",
-			headers: {
-				referer: POST_FULL_REFERER.replace("{post_id}", post_id),
-			},
-		})
-		.then(res => {
-			return res.data as Promise<PostResponse>;
-		});
+	createTGWindow(logUrl, "MysPostJson", post_id.toString(), 960, 720, false);
 }
 </script>
 
@@ -287,20 +243,5 @@ async function getPost(post_id: string): Promise<PostResponse> {
 
 .card-btn svg path {
 	fill: #faf7e8;
-}
-/* 进行中 */
-.card-btn-0 {
-	background: #3c99aa !important;
-	color: #faf7e8 !important;
-}
-/* 评选中 */
-.card-btn-1 {
-	background: #849cc7 !important;
-	color: #faf7e8 !important;
-}
-/* 已结束 */
-.card-btn-2 {
-	background: #c7674b !important;
-	color: #faf7e8 !important;
 }
 </style>

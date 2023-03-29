@@ -7,19 +7,6 @@
 
 import { MysResponse } from "./base";
 
-// 卡池 API
-
-/**
- * @description 获取卡池信息的返回类型
- * @since Alpha
- * @see GachaResponse
- * @return {string}
- */
-export const GACHA_POOL_API =
-	"https://api-takumi.mihoyo.com/common/blackboard/ys_obc/v1/gacha_pool?app_sn=ys_obc";
-
-// 卡池接口
-
 /**
  * @description 获取卡池信息的返回类型
  * @since Alpha
@@ -80,23 +67,23 @@ export interface GachaPool {
 /**
  * @description 用于渲染的卡池数据
  * @since Alpha
- * @interface GachaPoolRender
+ * @interface GachaCard
  * @property {string} title 卡池标题
  * @property {string} subtitle 卡池副标题
  * @property {string} cover 卡池封面
- * @property {string} post_id 卡池对应帖子ID
+ * @property {number} post_id 卡池对应帖子ID
  * @property {GachaPool[]} characters 卡池包含的角色
  * @property {GachaPool} voice 卡池角色语音
  * @property time 卡池时间
  * @property {string} time.start 卡池开始时间
  * @property {string} time.end 卡池结束时间
- * @return {GachaPoolRender}
+ * @return {GachaCard}
  */
-export interface GachaPoolRender {
+export interface GachaCard {
 	title: string;
 	subtitle: string;
 	cover: string;
-	post_id: string;
+	post_id: number;
 	characters: GachaPool[];
 	voice: GachaPool;
 	time: {

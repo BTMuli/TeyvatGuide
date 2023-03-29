@@ -59,45 +59,28 @@
 import { onMounted, ref } from "vue";
 import TLoading from "../components/t-loading.vue";
 // tauri
-import { fs, http } from "@tauri-apps/api";
+import { fs } from "@tauri-apps/api";
 // store
 import useAppStore from "../store/modules/app";
 // plugin
-import Mys_Oper from "../plugins/Mys";
+import MysOper from "../plugins/Mys";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
 // interface
-import {
-	GachaResponse,
-	GachaData,
-	GachaPoolRender,
-	GACHA_POOL_API,
-} from "../plugins/Mys/interface/gacha";
-import {
-	PostResponse,
-	Post,
-	POST_FULL_API,
-	POST_FULL_REFERER,
-} from "../plugins/Mys/interface/post";
+import { GachaData, GachaCard } from "../plugins/Mys/interface/gacha";
+import { Post } from "../plugins/Mys/interface/post";
 
 const appStore = useAppStore();
-const poolInfo = ref([] as GachaPoolRender[]);
+const poolInfo = ref([] as GachaCard[]);
 const loading = ref(true);
 const empty = ref(false);
 const timeGet = ref("");
 const timePass = ref(0);
 
 onMounted(async () => {
-	const responseGachaPool: GachaData[] = await http
-		.fetch<GachaResponse>(GACHA_POOL_API, {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-		.then(response => {
-			return response.data.data.list;
-		});
+	const responseGachaPool: GachaData[] = await MysOper.Gacha.get();
+	const start_time = responseGachaPool[0].start_time;
+	const end_time = responseGachaPool[0].end_time;
 	// 如果没有卡池信息则不进行后续操作
 	if (responseGachaPool.length === 0) {
 		loading.value = false;
@@ -105,43 +88,11 @@ onMounted(async () => {
 		return;
 	}
 	empty.value = false;
-	responseGachaPool.map(async (gachaPool: GachaData) => {
-		// 获取卡池 article post_id
-		const post_id = gachaPool.activity_url.split("/").pop();
-		if (!post_id) return;
-		const gachaCover = await http
-			.fetch<PostResponse>(POST_FULL_API.replace("{post_id}", post_id), {
-				method: "GET",
-				headers: {
-					referer: POST_FULL_REFERER.replace("{post_id}", post_id),
-				},
-			})
-			.then(response => {
-				return response.data.data.post.post.images[0];
-			});
-		poolInfo.value.push({
-			title: gachaPool.title,
-			subtitle: gachaPool.content_before_act,
-			post_id: post_id,
-			cover: gachaCover,
-			characters: gachaPool.pool.map(character => ({
-				icon: character.icon,
-				url: character.url,
-			})),
-			voice: {
-				icon: gachaPool.voice_icon,
-				url: gachaPool.voice_url,
-			},
-			time: {
-				start: gachaPool.start_time,
-				end: gachaPool.end_time,
-			},
-		});
-		getTimeNow(gachaPool.start_time, gachaPool.end_time);
-		setInterval(() => {
-			loading.value = false;
-		}, 1000);
-	});
+	poolInfo.value = await MysOper.Gacha.card(responseGachaPool);
+	getTimeNow(start_time, end_time);
+	setInterval(() => {
+		loading.value = false;
+	}, 1000);
 });
 
 function getTimeNow(start_time: string, end_time: string) {
@@ -165,23 +116,11 @@ function toOuter(url: string, title: string) {
 	createTGWindow(url, "祈愿", title, 1200, 800, true);
 }
 
-async function toPost(post_id: string) {
+async function toPost(post_id: number) {
 	// 获取帖子内容
-	const post: Post = await http
-		.fetch(POST_FULL_API.replace("{post_id}", post_id), {
-			method: "GET",
-			headers: {
-				referer: POST_FULL_REFERER.replace("{post_id}", post_id),
-			},
-		})
-		.then(res => {
-			return res.data as Promise<PostResponse>;
-		})
-		.then(res => {
-			return res.data.post.post;
-		});
+	const post: Post = (await MysOper.Post.get(post_id)).post;
 	// 结构化渲染
-	const parseDoc = Mys_Oper.PostParser(post.structured_content);
+	const parseDoc = MysOper.Post.parser(post.structured_content);
 	// 将解析后的 doc 保存到 文件
 	await fs.writeTextFile(
 		`${appStore.dataPath.temp}\\${post_id}_home.html`,
