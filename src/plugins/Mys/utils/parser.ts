@@ -34,7 +34,10 @@ export function PostParser(data: string): Document {
 			// 插入 div
 			doc.body.appendChild(video);
 		} else if (item.insert.backup_text) {
-			// TODO: 折叠内容
+			// 创建 div
+			const backup = BackupTextParser(item);
+			// 插入 div
+			doc.body.appendChild(backup);
 		}
 	});
 	// doc 宽度设为 800,居中
@@ -159,6 +162,67 @@ function VideoParser(data: PostStructuredContent): HTMLDivElement {
 	video.appendChild(source);
 	// 插入 video
 	div.appendChild(video);
+	// 设置 div 属性
+	div.style.display = "center"; // 居中
+	div.style.margin = "20px auto"; // 设置 margin
+	// 返回 div
+	return div;
+}
+
+/**
+ * @description 解析折叠内容
+ * @since Alpha
+ * @param {PostStructuredContent} data Mys数据
+ * @returns {HTMLDivElement} 解析后的折叠内容
+ */
+function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
+	// 检查数据
+	if (typeof data.insert === "string") {
+		throw new Error("data.insert is a string");
+	}
+	if (!data.insert.backup_text) {
+		throw new Error("data.insert.backup_text is not defined");
+	}
+	if (!data.insert.fold) {
+		throw new Error("data.insert.fold is not defined");
+	}
+	if (!data.insert.fold.title) {
+		throw new Error("data.insert.fold.title is not defined");
+	}
+	if (!data.insert.fold.content) {
+		throw new Error("data.insert.fold.content is not defined");
+	}
+	// 转换
+	const titleJson: PostStructuredContent[] = JSON.parse(data.insert.fold.title);
+	const contentJson: PostStructuredContent[] = JSON.parse(data.insert.fold.content);
+	// 创建 div
+	const div = document.createElement("div");
+	// 创建标题
+	const title = document.createElement("div");
+	// 解析标题
+	titleJson.forEach(item => {
+		// 数据检查
+		if (typeof item.insert !== "string") {
+			throw new Error("item.insert is not a string");
+		}
+		// 解析
+		title.appendChild(TextParser(item));
+	});
+	// 创建内容
+	const content = document.createElement("div");
+	// 解析内容
+	contentJson.forEach(item => {
+		// 数据检查
+		if (typeof item.insert !== "string") {
+			throw new Error("item.insert is not a string");
+		}
+		// 解析
+		content.appendChild(TextParser(item));
+	});
+	// 插入标题
+	div.appendChild(title);
+	// 插入内容
+	div.appendChild(content);
 	// 设置 div 属性
 	div.style.display = "center"; // 居中
 	div.style.margin = "20px auto"; // 设置 margin
