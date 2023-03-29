@@ -50,21 +50,6 @@
 		<v-card class="common-card">
 			<v-list>
 				<v-list-item>
-					<v-list-item-title>咨讯页渲染模式</v-list-item-title>
-					<v-list-item-subtitle
-						>推荐采用结构化渲染，当出现内容缺失时建议采用 raw 渲染</v-list-item-subtitle
-					>
-					<template v-slot:append>
-						<v-switch
-							:label="renderMode"
-							inset
-							v-model="renderBool"
-							@click="changeRenderMode"
-							color="#0781D8"
-						/>
-					</template>
-				</v-list-item>
-				<v-list-item>
 					<v-list-item-title>开发者模式</v-list-item-title>
 					<v-list-item-subtitle>开启后将显示调试信息</v-list-item-subtitle>
 					<template v-slot:append>
@@ -116,9 +101,6 @@ const loading = ref(true);
 const versionApp = ref("");
 const versionTauri = ref("");
 
-const renderBool = ref(appStore.structureRender);
-const renderMode = ref(renderBool.value ? "结构化渲染" : " raw 渲染");
-
 // load version
 onMounted(async () => {
 	versionApp.value = await app.getVersion();
@@ -131,13 +113,6 @@ onMounted(async () => {
 // 打开外部链接
 function toOuter(url: string) {
 	window.open(url);
-}
-// 切换渲染模式
-function changeRenderMode() {
-	renderBool.value = !renderBool.value;
-	renderBool.value ? (renderMode.value = "结构化渲染") : (renderMode.value = " raw 渲染");
-	appStore.structureRender = renderBool.value;
-	dialog.message("已切换渲染模式为" + renderMode.value);
 }
 
 // 打开用户数据目录
