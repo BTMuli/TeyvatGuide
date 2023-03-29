@@ -17,14 +17,17 @@ export function PostParser(data: string): Document {
 	let jsonData: PostStructuredContent[] = JSON.parse(data);
 	// 创建 HTML 文档
 	const doc = document.implementation.createHTMLDocument();
+	// cover flag
+	let coverFlag = false;
 	// 遍历 Json 数据
 	jsonData.forEach((item: any) => {
 		if (typeof item.insert === "string") {
 			const text = TextParser(item);
 			doc.body.appendChild(text);
 		} else if (item.insert.image) {
-			const img = ImageParser(item);
-			doc.body.appendChild(img);
+			const img = ImageParser(item, coverFlag);
+			coverFlag = img[1];
+			doc.body.appendChild(img[0]);
 		} else if (item.insert.vod) {
 			// 创建 div
 			const video = VideoParser(item);
@@ -77,9 +80,10 @@ function TextParser(data: PostStructuredContent): HTMLSpanElement {
  * @description 解析图片
  * @since Alpha
  * @param {PostStructuredContent} data Mys数据
- * @returns {HTMLDivElement} 解析后的图片
+ * @param {boolean} coverFlag cover 是否已经存在
+ * @returns {[HTMLDivElement, boolean]} 解析后的图片.第一个是图片，第二个是 coverFlag
  */
-function ImageParser(data: PostStructuredContent): HTMLDivElement {
+function ImageParser(data: PostStructuredContent, coverFlag: boolean): [HTMLDivElement, boolean] {
 	// 检查数据
 	if (typeof data.insert === "string") {
 		throw new Error("data.insert is a string");
@@ -104,9 +108,11 @@ function ImageParser(data: PostStructuredContent): HTMLDivElement {
 	img.style.height = "auto"; // 高度自适应
 	img.width = 800; // 设置宽度
 	// 判断是否是 cover
-	if (data.attributes.width === 690 && data.attributes.height === 320) {
+	if (!coverFlag) {
 		// 添加 border-radius
 		img.style.borderRadius = "10px";
+		// 设置 coverFlag
+		coverFlag = true;
 	}
 	// 插入图片
 	div.appendChild(img);
@@ -114,7 +120,7 @@ function ImageParser(data: PostStructuredContent): HTMLDivElement {
 	div.style.display = "center"; // 居中
 	div.style.margin = "20px auto"; // 设置 margin
 	// 返回 div
-	return div;
+	return [div, coverFlag];
 }
 
 /**

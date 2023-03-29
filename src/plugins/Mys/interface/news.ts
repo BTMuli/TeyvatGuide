@@ -111,8 +111,7 @@ export interface NewsMeta {
  * @property {string} cover 封面图片 URL
  * @property {number} post_id 帖子 ID
  * @property {string} subtitle 副标题
- * @property {string} status 活动状态，仅活动咨讯有
- * @property {string} status_color 活动状态按钮背景色，仅活动咨讯有
+ * @property {ActivityStatus} status 活动状态，仅活动咨讯有
  * @return {NewsCard}
  */
 export interface NewsCard {
@@ -120,6 +119,17 @@ export interface NewsCard {
 	cover: string;
 	post_id: number;
 	subtitle: string;
-	status?: string;
-	status_color?: string;
+	status?: ActivityStatus;
+}
+
+/**
+ * @description 活动状态
+ * @since Alpha
+ * @property {string} status 活动状态
+ * @property {string} colorCss 活动状态按钮背景色
+ * @return {ActivityStatus}
+ */
+export interface ActivityStatus {
+	status: string;
+	colorCss: string;
 }

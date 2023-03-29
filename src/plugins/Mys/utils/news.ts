@@ -5,22 +5,35 @@
  * @since Alpha
  */
 
-import { NewsData, NewsItem, NewsCard } from "../interface/news";
+import { NewsData, NewsItem, NewsCard, ActivityStatus } from "../interface/news";
 
 /**
  * @description 活动状态
- * @enum ActivityStatus
  * @since Alpha
- * @property {string} STARTED 进行中
- * @property {string} FINISHED 已结束
- * @property {string} SELECTION 评选中
- * @return {ActivityStatus}
+ * @enum {ActivityStatus}
+ * @property {ActivityStatus} STARTED 进行中
+ * @property {ActivityStatus} FINISHED 已结束
+ * @property {ActivityStatus} SELECTION 评选中
+ * @return {EnumStatus}
  */
-enum ActivityStatus {
-	STARTED = "进行中",
-	FINISHED = "已结束",
-	SELECTION = "评选中",
-}
+const EnumStatus = {
+	STARTED: {
+		status: "进行中",
+		colorCss: "#3c99aa !important",
+	},
+	FINISHED: {
+		status: "已结束",
+		colorCss: "#c7674b !important",
+	},
+	SELECTION: {
+		status: "评选中",
+		colorCss: "#849cc7 !important",
+	},
+	UNKNOWN: {
+		status: "未知",
+		colorCss: "#3C3F41 !important",
+	},
+};
 
 /**
  * @description 获取活动状态
@@ -28,28 +41,16 @@ enum ActivityStatus {
  * @param {number} status 活动状态码
  * @return {string}
  */
-export function getActivityStatus(status: number): { status: ActivityStatus; color: string } {
+export function getActivityStatus(status: number): ActivityStatus {
 	switch (status) {
 		case 1:
-			return {
-				status: ActivityStatus.STARTED,
-				color: "#3c99aa",
-			};
+			return EnumStatus.STARTED;
 		case 2:
-			return {
-				status: ActivityStatus.FINISHED,
-				color: "#c7674b",
-			};
+			return EnumStatus.FINISHED;
 		case 3:
-			return {
-				status: ActivityStatus.SELECTION,
-				color: "#849cc7",
-			};
+			return EnumStatus.SELECTION;
 		default:
-			return {
-				status: ActivityStatus.FINISHED,
-				color: "#c7674b",
-			};
+			return EnumStatus.UNKNOWN;
 	}
 }
 
@@ -64,7 +65,7 @@ export function getNoticeCard(noticeData: NewsData): NewsCard[] {
 	noticeData.list.map((item: NewsItem) => {
 		noticeCard.push({
 			title: item.post.subject,
-			cover: item.cover.url || item.post.cover || item.post.images[0],
+			cover: item.cover?.url || item.post.cover || item.post.images[0],
 			post_id: Number(item.post.post_id),
 			subtitle: item.post.post_id,
 		});
@@ -86,11 +87,10 @@ export function getActivityCard(activityData: NewsData): NewsCard[] {
 		const status_info = getActivityStatus(item.news_meta.activity_status);
 		activityCard.push({
 			title: item.post.subject,
-			cover: item.cover.url || item.post.cover || item.post.images[0],
+			cover: item.cover?.url || item.post.cover || item.post.images[0],
 			post_id: Number(item.post.post_id),
 			subtitle: `${start_time} - ${end_time}`,
-			status: status_info.status,
-			status_color: status_info.color,
+			status: status_info,
 		});
 	});
 	return activityCard;
@@ -107,7 +107,7 @@ export function getNewsCard(newsData: NewsData): NewsCard[] {
 	newsData.list.map((item: NewsItem) => {
 		newsCard.push({
 			title: item.post.subject,
-			cover: item.cover.url || item.post.cover || item.post.images[0],
+			cover: item.cover?.url || item.post.cover || item.post.images[0],
 			post_id: Number(item.post.post_id),
 			subtitle: item.post.post_id,
 		});

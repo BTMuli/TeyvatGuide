@@ -69,10 +69,10 @@
 								<v-btn
 									class="ms-2"
 									:style="{
-										background: item.status_color + ' !important',
+										background: item.status.colorCss,
 										color: '#faf7e8 !important',
 									}"
-									>{{ item.status }}</v-btn
+									>{{ item.status.status }}</v-btn
 								>
 							</div>
 							<v-btn @click="toJson(item.post_id)" class="ms-2 card-btn" v-show="appStore.devMode">
