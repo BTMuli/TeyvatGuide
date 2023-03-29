@@ -26,10 +26,9 @@
 <script lang="ts" setup>
 // vue
 import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
 import TSidebar from "./components/t-sidebar.vue";
 // tauri
-import { fs } from "@tauri-apps/api";
+import { fs,window } from "@tauri-apps/api";
 // store
 import useAppStore from "./store/modules/app";
 // utils
@@ -39,11 +38,11 @@ import { TGAppDataList, TGGetDataList } from "./data";
 
 const appStore = useAppStore();
 const isMain = ref(true as boolean);
-const route = useRouter();
 
 onMounted(async () => {
-	// 判断路由meta.isMain
-	isMain.value = route.currentRoute.value.meta.isMain as boolean;
+	// 获取当前窗口
+	const win = await window.getCurrent();
+	isMain.value = win.label === "tauri-genshin";
 	if (isMain.value) {
 		await checkLoad();
 	}
