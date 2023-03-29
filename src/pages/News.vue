@@ -40,7 +40,14 @@
 						</v-card-actions>
 					</v-card>
 				</div>
-				<!-- todo 加载更多 -->
+				<div class="load-news">
+					<v-btn @click="loadMore('notice')">
+						<template v-slot:append>
+							<img src="../assets/icons/arrow-left.svg" alt="right" onload="SVGInject(this)" />
+						</template>
+						已加载：{{ noticeData.last_id }}，加载更多
+					</v-btn>
+				</div>
 			</v-window-item>
 			<v-window-item value="activity">
 				<div class="News-grid">
@@ -84,7 +91,14 @@
 						</v-card-actions>
 					</v-card>
 				</div>
-				<!-- todo 加载更多 -->
+				<div class="load-news">
+					<v-btn @click="loadMore('notice')">
+						<template v-slot:append>
+							<img src="../assets/icons/arrow-left.svg" alt="right" onload="SVGInject(this)" />
+						</template>
+						已加载:{{ activityData.last_id }}，加载更多
+					</v-btn>
+				</div>
 			</v-window-item>
 			<v-window-item value="news">
 				<div class="News-grid">
@@ -117,7 +131,14 @@
 						</v-card-actions>
 					</v-card>
 				</div>
-				<!-- todo 加载更多 -->
+				<div class="load-news">
+					<v-btn @click="loadMore('notice')">
+						<template v-slot:append>
+							<img src="../assets/icons/arrow-left.svg" alt="right" onload="SVGInject(this)" />
+						</template>
+						已加载：{{ newsData.last_id }}，加载更多
+					</v-btn>
+				</div>
 			</v-window-item>
 		</v-window>
 	</div>
@@ -128,7 +149,7 @@
 import { onMounted, ref } from "vue";
 import TLoading from "../components/t-loading.vue";
 // tauri
-import { fs } from "@tauri-apps/api";
+import { dialog, fs } from "@tauri-apps/api";
 // store
 import useAppStore from "../store/modules/app";
 // tools
@@ -178,6 +199,48 @@ onMounted(async () => {
 	tab.value = "notice";
 	loading.value = false;
 });
+
+// 加载更多
+async function loadMore(data: string) {
+	switch (data) {
+		case "notice":
+			if (noticeData.value.is_last || noticeData.value.last_id === 50) {
+				await dialog.message("已经是最后一页了");
+				return;
+			}
+			loading.value = true;
+			loadingTitle.value = "正在获取公告数据...";
+			noticeData.value = await MysOper.News.get.notice(noticeData.value.last_id + 10);
+			loadingTitle.value = "正在渲染数据...";
+			postData.value.notice = MysOper.News.card.notice(noticeData.value);
+			loading.value = false;
+			break;
+		case "activity":
+			if (activityData.value.is_last || activityData.value.last_id === 50) {
+				await dialog.message("已经是最后一页了");
+				return;
+			}
+			loading.value = true;
+			loadingTitle.value = "正在获取活动数据...";
+			activityData.value = await MysOper.News.get.activity(activityData.value.last_id + 10);
+			loadingTitle.value = "正在渲染数据...";
+			postData.value.activity = MysOper.News.card.activity(activityData.value);
+			loading.value = false;
+			break;
+		case "news":
+			if (newsData.value.is_last || newsData.value.last_id === 50) {
+				await dialog.message("已经是最后一页了");
+				return;
+			}
+			loading.value = true;
+			loadingTitle.value = "正在获取新闻数据...";
+			newsData.value = await MysOper.News.get.news(newsData.value.last_id + 10);
+			loadingTitle.value = "正在渲染数据...";
+			postData.value.news = MysOper.News.card.news(newsData.value);
+			loading.value = false;
+			break;
+	}
+}
 
 async function toPost(post_id: number) {
 	// 获取帖子内容
@@ -242,6 +305,33 @@ async function toJson(post_id: number) {
 }
 
 .card-btn svg path {
+	fill: #faf7e8;
+}
+
+/* load more */
+.load-news {
+	font-family: Genshin, serif;
+	margin-top: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 10px;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: all 0.3s linear;
+}
+
+.load-news button {
+	background: #455167 !important;
+	color: #faf7e8 !important;
+}
+
+.load-news button svg {
+	width: 18px;
+	height: 18px;
+}
+
+.load-news button svg path {
 	fill: #faf7e8;
 }
 </style>
