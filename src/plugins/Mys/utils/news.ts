@@ -46,9 +46,9 @@ export function getActivityStatus(status: number): ActivityStatus {
 		case 1:
 			return EnumStatus.STARTED;
 		case 2:
-			return EnumStatus.FINISHED;
-		case 3:
 			return EnumStatus.SELECTION;
+		case 3:
+			return EnumStatus.FINISHED;
 		default:
 			return EnumStatus.UNKNOWN;
 	}

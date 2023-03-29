@@ -82,7 +82,7 @@
 					</v-card>
 				</div>
 				<div class="load-news">
-					<v-btn @click="loadMore('notice')">
+					<v-btn @click="loadMore('activity')">
 						<template v-slot:append>
 							<img src="../assets/icons/arrow-left.svg" alt="right" onload="SVGInject(this)" />
 						</template>

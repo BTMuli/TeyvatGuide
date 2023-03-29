@@ -63,7 +63,7 @@ function TextParser(data: PostStructuredContent): HTMLSpanElement {
 		if (data.attributes.link) {
 			const a = document.createElement("a");
 			a.href = data.attributes.link;
-			a.target = "_blank";
+			a.target = "void(0)";
 			a.innerText = data.insert;
 			return a;
 		}
