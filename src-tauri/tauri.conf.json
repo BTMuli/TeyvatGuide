@@ -8,7 +8,7 @@
 	},
 	"package": {
 		"productName": "tauri-genshin",
-		"version": "0.0.0"
+		"version": "0.1.0"
 	},
 	"tauri": {
 		"allowlist": {
@@ -48,14 +48,14 @@
 		"updater": {
 			"active": false,
 			"dialog": true,
-			"endpoint": "https://github.com/BTMuli/Tauri.Genshin/latest/releases/download/updater/update.json",
+			"endpoints": ["https://github.com/BTMuli/Tauri.Genshin/latest/releases/download/updater/update.json"],
 			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU5OEE2RkU0QUZCMTMzMUEKUldRYU03R3Y1RytLNlI4bytTRDhpYTNTL2lTOUVZeWQwOTAxNHBock8zY3FrdVliR2kvdHhoN2IK"
 		},
 		"windows": [
 			{
 				"fullscreen": false,
 				"resizable": true,
-				"title": "Tauri.Genshin v0.0.0-alpha",
+				"title": "Tauri.Genshin v0.1.0-alpha",
 				"label": "tauri-genshin",
 				"width": 1600,
 				"height": 900,
