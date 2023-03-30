@@ -30,9 +30,15 @@ onMounted(async () => {
 	}
 	// 获取数据
 	loadingTitle.value = "正在获取数据...";
-	const postData = await MysOper.Post.get(post_id);
-	loadingTitle.value = "正在渲染数据...";
-	postHtml.value = MysOper.Post.parser(postData.post.structured_content);
+	try {
+		const postData = await MysOper.Post.get(post_id);
+		loadingTitle.value = "正在渲染数据...";
+		postHtml.value = MysOper.Post.parser(postData.post.structured_content);
+	} catch (error) {
+		loadingEmpty.value = true;
+		loadingTitle.value = "帖子不存在或解析失败";
+		return;
+	}
 	setInterval(() => {
 		loading.value = false;
 	}, 200);

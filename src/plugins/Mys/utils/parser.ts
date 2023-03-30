@@ -7,6 +7,19 @@
 import { PostStructuredContent } from "../interface/post";
 
 /**
+ * @description 检测链接是否是米游社帖子
+ * @since Alpha v0.1.1
+ * @param {string} url 链接
+ * @returns {boolean} 是否是米游社帖子
+ */
+export function IsMysPost(url: string): boolean {
+	return (
+		url.startsWith("https://bbs.mihoyo.com/ys/article/") ||
+		url.startsWith("https://www.miyoushe.com/ys/article/")
+	);
+}
+
+/**
  * @description 解析Mys数据
  * @since Alpha v0.1.1
  * @param {string} data Mys数据
@@ -106,7 +119,7 @@ function LinkTextParser(data: PostStructuredContent): HTMLSpanElement {
 	const link = document.createElement("a");
 	const link_url = data.attributes.link;
 	link.classList.add("mys-post-link");
-	if (link_url.startsWith("https://www.miyoushe.com/ys/article/")) {
+	if (IsMysPost(link_url)) {
 		link.href = "/post_detail/" + link_url.split("/").pop();
 		link.target = "_self";
 	} else {
@@ -374,7 +387,7 @@ function LinkCardParser(data: PostStructuredContent): HTMLDivElement {
 	button.classList.add("mys-post-link-card-btn");
 	button.innerHTML = data.insert.link_card.button_text || "详情" + " >";
 	const link_url = data.insert.link_card.origin_url;
-	if (link_url.startsWith("https://www.miyoushe.com/ys/article/")) {
+	if (IsMysPost(link_url)) {
 		button.href = "/post_detail/" + link_url.split("/").pop();
 		button.target = "_self";
 	} else {
