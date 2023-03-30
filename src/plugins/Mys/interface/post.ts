@@ -228,30 +228,16 @@ export interface PostStat {
 
 /**
  * @description 帖子结构化内容
- * @since Alpha
+ * @since Alpha v0.1.1
  * @interface PostStructuredContent
  * @property {string|object} insert 插入内容
  * @property {string} insert.image 图片 URL
- * @property {object} insert.vod 视频信息
- * @property {number} insert.vod.id 视频 ID
- * @property {number} insert.vod.duration 时长
- * @property {string} insert.vod.cover 封面图 URL
- * @property {object[]} insert.vod.resolutions 分辨率
- * @property {string} insert.vod.resolutions.url URL
- * @property {string} insert.vod.resolutions.definition 清晰度
- * @property {number} insert.vod.resolutions.height 高度
- * @property {number} insert.vod.resolutions.width 宽度
- * @property {number} insert.vod.resolutions.bitrate 比特率
- * @property {number} insert.vod.resolutions.size 大小
- * @property {string} insert.vod.resolutions.format 格式
- * @property {string} insert.vod.resolutions.label 标签
- * @property {number} insert.vod.view_num 浏览数
- * @property {number} insert.vod.transcode_status 转码状态
- * @property {number} insert.vod.review_status 审核状态
+ * @property {PostStructuredContentVod} insert.vod 视频信息
  * @property {string} insert.backup_text 折叠文本
  * @property {object} insert.fold 折叠内容
  * @property {string} insert.fold.title 折叠标题，反序列化后为 PostStructuredContent[]
  * @property {string} insert.fold.content 折叠文本，反序列化后为 PostStructuredContent[]
+ * @property {PostStructuredContentLinkCard} link_card 链接卡片
  * @property {object} attributes 属性
  * @property {number} attributes.height 高度
  * @property {number} attributes.width 宽度
@@ -266,29 +252,13 @@ export interface PostStructuredContent {
 	insert:
 		| {
 				image?: string;
-				vod?: {
-					id: number;
-					duration: number;
-					cover: string;
-					resolutions: {
-						url: string;
-						definition: string;
-						height: number;
-						width: number;
-						bitrate: number;
-						size: number;
-						format: string;
-						label: string;
-					}[];
-					view_num: number;
-					transcoding_status: number;
-					review_status: number;
-				};
+				vod?: PostStructuredContentVod;
 				backup_text?: string;
 				fold?: {
 					title: string;
 					content: string;
 				};
+				link_card?: PostStructuredContentLinkCard;
 		  }
 		| string;
 	attributes?: {
@@ -300,4 +270,75 @@ export interface PostStructuredContent {
 		color?: string;
 		link?: string;
 	};
+}
+
+/**
+ * @description 帖子结构化内容-视频
+ * @since Alpha v0.1.1
+ * @interface PostStructuredContentVod
+ * @property {number} id 视频 ID
+ * @property {number} duration 时长
+ * @property {string} cover 封面图 URL
+ * @property {object[]} resolutions 分辨率
+ * @property {string} resolutions.url URL
+ * @property {string} resolutions.definition 清晰度
+ * @property {number} resolutions.height 高度
+ * @property {number} resolutions.width 宽度
+ * @property {number} resolutions.bitrate 比特率
+ * @property {number} resolutions.size 大小
+ * @property {string} resolutions.format 格式
+ * @property {string} resolutions.label 标签
+ * @property {number} view_num 浏览数
+ * @property {number} transcode_status 转码状态
+ * @property {number} review_status 审核状态
+ * @return {PostStructuredContentVod}
+ */
+export interface PostStructuredContentVod {
+	id: number;
+	duration: number;
+	cover: string;
+	resolutions: {
+		url: string;
+		definition: string;
+		height: number;
+		width: number;
+		bitrate: number;
+		size: number;
+		format: string;
+		label: string;
+	}[];
+	view_num: number;
+	transcoding_status: number;
+	review_status: number;
+}
+
+/**
+ * @description 帖子结构化内容-链接卡片
+ * @since Alpha v0.1.1
+ * @interface PostStructuredContentLinkCard
+ * @property {number} link_type 链接类型 // TODO: 未知
+ * @property {string} origin_url 原始链接
+ * @property {string} landing_url 落地页链接
+ * @property {string} cover 封面图 URL
+ * @property {string} title 标题
+ * @property {string} card_id 卡片 ID
+ * @property {number} card_status 卡片状态 // TODO: 未知
+ * @property {string} market_price 市场价
+ * @property {string} price 价格
+ * @property {string} button_text 按钮文本
+ * @property {number} landing_url_type 落地链接类型 // TODO: 未知
+ * @return {PostStructuredContentLinkCard}
+ */
+export interface PostStructuredContentLinkCard {
+	link_type: number;
+	origin_url: string;
+	landing_url: string;
+	cover: string;
+	title: string;
+	card_id: string;
+	card_status: number;
+	market_price: string;
+	price: string;
+	button_text: string;
+	landing_url_type: number;
 }
