@@ -224,3 +224,16 @@ function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
 	// 返回 div
 	return div;
 }
+
+/**
+ * @description 解析链接卡片
+ * @since Alpha
+ * @todo 待完成
+ * @see post_id:37414431
+ * @param {PostStructuredContent} data Mys数据
+ * @returns {HTMLDivElement} 解析后的链接卡片
+ */
+function LinkCardParser(data: PostStructuredContent): HTMLDivElement {
+	// TODO: 待完成
+	return document.createElement("div");
+}
