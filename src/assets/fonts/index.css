@@ -1,7 +1,11 @@
 /* 设置全局字体 */
 @font-face {
 	font-family: "Genshin";
-	src: url("./Genshin.ttf") format("truetype");
+	src: url("./汉仪文黑-85W.ttf") format("truetype");
+}
+@font-face {
+	font-family: "Genshin-Light";
+	src: url("./汉仪文黑-55W.ttf") format("truetype");
 }
 @font-face {
 	font-family: "Consolas";
