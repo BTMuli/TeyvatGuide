@@ -5,10 +5,19 @@
 	<div v-else>
 		<v-card class="common-card" title="关于">
 			<v-list>
-				<v-list-item title="应用版本" @click="toOuter('https://github.com/BTMuli/Tauri.Genshin')">
+				<v-list-item>
 					<template v-slot:prepend>
 						<img class="config-icon" src="/icon.webp" alt="App" />
 					</template>
+					<v-list-item-title>
+						应用版本
+						<v-btn
+							color="info"
+							size="small"
+							@click="toOuter('https://github.com/BTMuli/Tauri.Genshin/releases/latest')"
+							>Alpha</v-btn
+						>
+					</v-list-item-title>
 					<template v-slot:append>
 						<v-list-item-subtitle>{{ versionApp }}</v-list-item-subtitle>
 					</template>
