@@ -7,6 +7,8 @@
 // 帖子相关
 import TPost from "../../views/t-post.vue";
 import TPostJson from "../../views/t-post-json.vue";
+// 抽奖
+import TLottery from "../../views/t-lottery.vue";
 
 const subRoutes = [
 	{
@@ -18,6 +20,11 @@ const subRoutes = [
 		path: "/post_detail_json/:post_id",
 		name: "帖子详情（JSON）",
 		component: TPostJson,
+	},
+	{
+		path: "/lottery/:lottery_id",
+		name: "抽奖详情",
+		component: TLottery,
 	},
 ];
 

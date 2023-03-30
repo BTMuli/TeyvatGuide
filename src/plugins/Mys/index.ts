@@ -2,7 +2,7 @@
  * @file plugins Mys index.ts
  * @description Mys plugin index
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha
+ * @since Alpha v0.1.1
  */
 
 // Post
@@ -14,6 +14,8 @@ import { getGachaCard } from "./utils/gacha";
 // News
 import { getNoticeList, getActivityList, getNewsList } from "./request/news";
 import { getNoticeCard, getActivityCard, getNewsCard } from "./utils/news";
+// Lottery
+import { getLotteryData } from "./request/lottery";
 
 const MysOper = {
 	Post: {
@@ -35,6 +37,9 @@ const MysOper = {
 			activity: getActivityCard,
 			news: getNewsCard,
 		},
+	},
+	Lottery: {
+		get: getLotteryData,
 	},
 };
 
