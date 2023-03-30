@@ -81,3 +81,40 @@ export interface LotteryReward {
 	users: User[];
 	id: string;
 }
+
+/**
+ * @description 渲染用的抽奖信息
+ * @since Alpha v0.1.1
+ * @interface LotteryCard
+ * @property {string} id 抽奖 ID
+ * @property {string} participantWay 参与方式
+ * @property {string} status 状态
+ * @property {User} creator 创建者
+ * @property {string} drawTime 开奖时间
+ * @property {LotteryRewardCard[]} rewards 奖励列表
+ * @return {LotteryCard}
+ */
+export interface LotteryCard {
+	id: string;
+	participantWay: string;
+	status: string;
+	creator: User;
+	drawTime: string;
+	rewards: LotteryRewardCard[];
+}
+
+/**
+ * @description 渲染用的奖励信息
+ * @since Alpha v0.1.1
+ * @interface LotteryRewardCard
+ * @property {string} rewardName 奖励名称
+ * @property {number} winnerNumber 获奖人数
+ * @property {number} scheduledWinnerNumber 预计获奖人数
+ * @property {User[]} users 用户列表
+ */
+export interface LotteryRewardCard {
+	rewardName: string;
+	winnerNumber: number;
+	scheduledWinnerNumber: number;
+	users: User[];
+}

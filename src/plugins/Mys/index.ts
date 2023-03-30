@@ -16,6 +16,7 @@ import { getNoticeList, getActivityList, getNewsList } from "./request/news";
 import { getNoticeCard, getActivityCard, getNewsCard } from "./utils/news";
 // Lottery
 import { getLotteryData } from "./request/lottery";
+import { getLotteryCard, getLotteryRewardCard } from "./utils/lottery";
 
 const MysOper = {
 	Post: {
@@ -40,6 +41,10 @@ const MysOper = {
 	},
 	Lottery: {
 		get: getLotteryData,
+		card: {
+			lottery: getLotteryCard,
+			reward: getLotteryRewardCard,
+		}
 	},
 };
 
