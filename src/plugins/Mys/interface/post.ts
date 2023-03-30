@@ -234,6 +234,9 @@ export interface PostStat {
  * @property {string} insert.image 图片 URL
  * @property {PostStructuredContentVod} insert.vod 视频信息
  * @property {string} insert.backup_text 折叠文本
+ * @property {object} insert.lottery 抽奖，当 backup_text 为 [抽奖]
+ * @property {string} insert.lottery.id 抽奖 ID
+ * @property {string} insert.lottery.toast 抽奖提示
  * @property {object} insert.fold 折叠内容
  * @property {string} insert.fold.title 折叠标题，反序列化后为 PostStructuredContent[]
  * @property {string} insert.fold.content 折叠文本，反序列化后为 PostStructuredContent[]
@@ -255,6 +258,10 @@ export interface PostStructuredContent {
 				image?: string;
 				vod?: PostStructuredContentVod;
 				backup_text?: string;
+				lottery?: {
+					id: string;
+					toast: string;
+				};
 				fold?: {
 					title: string;
 					content: string;
