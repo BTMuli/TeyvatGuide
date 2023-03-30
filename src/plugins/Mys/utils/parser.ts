@@ -104,9 +104,15 @@ function LinkTextParser(data: PostStructuredContent): HTMLSpanElement {
 	icon.classList.add("mdi", "mdi-link-variant");
 	// 创建链接
 	const link = document.createElement("a");
+	const link_url = data.attributes.link;
 	link.classList.add("mys-post-link");
-	link.href = data.attributes.link;
-	link.target = "view_window";
+	if (link_url.startsWith("https://www.miyoushe.com/ys/article/")) {
+		link.href = "/post_detail/" + link_url.split("/").pop();
+		link.target = "_self";
+	} else {
+		link.href = link_url;
+		link.target = "view_window";
+	}
 	link.innerText = data.insert;
 	// 插入图标作为链接前缀
 	link.prepend(icon);
