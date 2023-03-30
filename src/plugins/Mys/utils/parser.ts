@@ -8,6 +8,7 @@ import { PostStructuredContent } from "../interface/post";
 
 /**
  * @description 解析Mys数据
+ * @since Alpha v0.1.1
  * @param {string} data Mys数据
  * @description 为了安全考虑，不会解析所有的属性，只会解析几个常用的属性
  * @returns {string} 解析后的HTML，可作为 v-html 使用
@@ -17,30 +18,36 @@ export function PostParser(data: string): string {
 	let jsonData: PostStructuredContent[] = JSON.parse(data);
 	// 创建 div
 	const doc = document.createElement("div");
-	// cover flag
-	let coverFlag = false;
 	// 遍历 Json 数据
 	jsonData.forEach((item: any) => {
-		if (typeof item.insert === "string") {
-			const text = TextParser(item);
-			doc.appendChild(text);
-		} else if (item.insert.image) {
-			const img = ImageParser(item, coverFlag);
-			coverFlag = img[1];
-			doc.appendChild(img[0]);
-		} else if (item.insert.vod) {
-			// 创建 div
-			const video = VideoParser(item);
-			// 插入 div
-			doc.appendChild(video);
-		} else if (item.insert.backup_text) {
-			// 创建 div
-			const backup = BackupTextParser(item);
-			// 插入 div
-			doc.appendChild(backup);
-		}
+		// 解析
+		const parsed = ParserTransfer(item);
+		// 插入
+		doc.appendChild(parsed);
 	});
 	return doc.innerHTML;
+}
+
+/**
+ * @description 解析中转
+ * @since Alpha v0.1.1
+ * @param {PostStructuredContent} data Mys数据
+ * @returns {HTMLDivElement | HTMLSpanElement} 解析后的中转
+ */
+function ParserTransfer(data: PostStructuredContent): HTMLDivElement | HTMLSpanElement {
+	if (typeof data.insert === "string") {
+		return TextParser(data);
+	} else if (data.insert.image) {
+		return ImageParser(data);
+	} else if (data.insert.vod) {
+		return VideoParser(data);
+	} else if (data.insert.backup_text) {
+		return BackupTextParser(data);
+	} else if (data.insert.link_card) {
+		return LinkCardParser(data);
+	} else {
+		throw new Error("Unknown data.insert type");
+	}
 }
 
 /**
@@ -78,12 +85,11 @@ function TextParser(data: PostStructuredContent): HTMLSpanElement {
 
 /**
  * @description 解析图片
- * @since Alpha
+ * @since Alpha v0.1.1
  * @param {PostStructuredContent} data Mys数据
- * @param {boolean} coverFlag cover 是否已经存在
- * @returns {[HTMLDivElement, boolean]} 解析后的图片.第一个是图片，第二个是 coverFlag
+ * @returns {HTMLDivElement} 解析后的图片
  */
-function ImageParser(data: PostStructuredContent, coverFlag: boolean): [HTMLDivElement, boolean] {
+function ImageParser(data: PostStructuredContent): HTMLDivElement {
 	// 检查数据
 	if (typeof data.insert === "string") {
 		throw new Error("data.insert is a string");
@@ -91,34 +97,27 @@ function ImageParser(data: PostStructuredContent, coverFlag: boolean): [HTMLDivE
 	if (!data.insert.image) {
 		throw new Error("data.insert.image is not defined");
 	}
-	if (!data.attributes) {
-		throw new Error("data.attributes is not defined");
-	}
-	if (!data.attributes.width) {
-		throw new Error("data.attributes.width is not defined");
-	}
-	if (!data.attributes.height) {
-		throw new Error("data.attributes.height is not defined");
-	}
+	// if (!data.attributes) {
+	// 	throw new Error("data.attributes is not defined");
+	// }
+	// if (!data.attributes.width) {
+	// 	throw new Error("data.attributes.width is not defined");
+	// }
+	// if (!data.attributes.height) {
+	// 	throw new Error("data.attributes.height is not defined");
+	// }
 	const div = document.createElement("div");
 	// 创建图片
 	const img = document.createElement("img");
 	img.src = data.insert.image;
 	// 添加 class
 	img.classList.add("mys-post-img");
-	// 判断是否是 cover
-	if (!coverFlag) {
-		// 添加 class
-		img.classList.add("mys-post-cover");
-		// 设置 coverFlag
-		coverFlag = true;
-	}
 	// 插入图片
 	div.appendChild(img);
 	// 添加 class
 	div.classList.add("mys-post-div");
 	// 返回 div
-	return [div, coverFlag];
+	return div;
 }
 
 /**
@@ -165,7 +164,7 @@ function VideoParser(data: PostStructuredContent): HTMLDivElement {
 
 /**
  * @description 解析折叠内容
- * @since Alpha
+ * @since Alpha v0.1.1
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的折叠内容
  */
@@ -174,17 +173,11 @@ function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
 	if (typeof data.insert === "string") {
 		throw new Error("data.insert is a string");
 	}
-	if (!data.insert.backup_text) {
-		throw new Error("data.insert.backup_text is not defined");
-	}
+	// if (!data.insert.backup_text) {
+	// 	throw new Error("data.insert.backup_text is not defined");
+	// }
 	if (!data.insert.fold) {
 		throw new Error("data.insert.fold is not defined");
-	}
-	if (!data.insert.fold.title) {
-		throw new Error("data.insert.fold.title is not defined");
-	}
-	if (!data.insert.fold.content) {
-		throw new Error("data.insert.fold.content is not defined");
 	}
 	// 转换
 	const titleJson: PostStructuredContent[] = JSON.parse(data.insert.fold.title);
@@ -195,25 +188,19 @@ function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
 	const title = document.createElement("div");
 	// 解析标题
 	titleJson.forEach(item => {
-		// 数据检查
-		if (typeof item.insert !== "string") {
-			throw new Error("item.insert is not a string");
-		}
 		// 解析
-		title.appendChild(TextParser(item));
+		const parsed = ParserTransfer(item);
+		// 插入
+		title.appendChild(parsed);
 	});
 	// 创建内容
 	const content = document.createElement("div");
 	// 解析内容
 	contentJson.forEach(item => {
-		// 数据检查
-		if (typeof item.insert === "string") {
-			// 解析
-			content.appendChild(TextParser(item));
-		} else if (item.insert.image) {
-			// 解析
-			content.appendChild(ImageParser(item, false)[0]);
-		}
+		// 解析
+		const parsed = ParserTransfer(item);
+		// 插入
+		content.appendChild(parsed);
 	});
 	// 插入标题
 	div.appendChild(title);
@@ -227,13 +214,57 @@ function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
 
 /**
  * @description 解析链接卡片
- * @since Alpha
- * @todo 待完成
+ * @since Alpha v0.1.1
  * @see post_id:37414431
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的链接卡片
  */
 function LinkCardParser(data: PostStructuredContent): HTMLDivElement {
-	// TODO: 待完成
-	return document.createElement("div");
+	// 检查数据
+	if (typeof data.insert === "string") {
+		throw new Error("data.insert is a string");
+	}
+	if (!data.insert.link_card) {
+		throw new Error("data.insert.link_card is not defined");
+	}
+	// 创建 div
+	const div = document.createElement("div");
+	// 创建 cover
+	const cover = document.createElement("div");
+	cover.classList.add("mys-post-link-card-cover");
+	// 创建 img
+	const img = document.createElement("img");
+	img.src = data.insert.link_card.cover;
+	// 插入 img
+	cover.appendChild(img);
+	// 插入 cover
+	div.appendChild(cover);
+	// 创建 content
+	const content = document.createElement("div");
+	content.classList.add("mys-post-link-card-content");
+	// 创建标题
+	const title = document.createElement("div");
+	title.classList.add("mys-post-link-card-title");
+	title.innerHTML = data.insert.link_card.title;
+	// 插入 title
+	content.appendChild(title);
+	// 创建价格
+	const price = document.createElement("div");
+	price.classList.add("mys-post-link-card-price");
+	price.innerHTML = data.insert.link_card.price;
+	// 插入 price
+	content.appendChild(price);
+	// 创建 button
+	const button = document.createElement("a");
+	button.classList.add("mys-post-link-card-btn");
+	button.innerHTML = data.insert.link_card.button_text + " >";
+	button.href = data.insert.link_card.origin_url;
+	button.target = "void(0)";
+	// 插入 button
+	content.appendChild(button);
+	// 插入 content
+	div.appendChild(content);
+	// 添加 class
+	div.classList.add("mys-post-link-card");
+	return div;
 }
