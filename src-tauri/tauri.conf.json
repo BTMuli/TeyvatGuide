@@ -2,7 +2,7 @@
 	"build": {
 		"beforeDevCommand": "npm run dev",
 		"beforeBuildCommand": "npm run build",
-		"devPath": "http://localhost:1420",
+		"devPath": "http://localhost:3000",
 		"distDir": "../dist",
 		"withGlobalTauri": true
 	},
@@ -20,7 +20,11 @@
 			"http": {
 				"all": true,
 				"request": true,
-				"scope": ["https://**", "http://**"]
+				"scope": [
+					"https://api-takumi.mihoyo.com/*",
+					"https://bbs-api.mihoyo.com/*",
+					"https://bbs.mihoyo.com/*"
+				]
 			},
 			"shell": {
 				"all": false,
@@ -42,15 +46,20 @@
 			"csp": null
 		},
 		"updater": {
-			"active": false
+			"active": true,
+			"dialog": true,
+			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU5OEE2RkU0QUZCMTMzMUEKUldRYU03R3Y1RytLNlI4bytTRDhpYTNTL2lTOUVZeWQwOTAxNHBock8zY3FrdVliR2kvdHhoN2IK"
 		},
 		"windows": [
 			{
 				"fullscreen": false,
 				"resizable": true,
-				"title": "tauri-genshin",
-				"width": 1540,
-				"height": 912
+				"title": "Tauri.Genshin v0.0.0-alpha",
+				"label": "tauri-genshin",
+				"width": 1600,
+				"height": 900,
+				"center": true,
+				"transparent": true
 			}
 		]
 	}
