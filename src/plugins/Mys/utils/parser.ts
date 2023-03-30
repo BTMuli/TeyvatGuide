@@ -133,10 +133,20 @@ function DividerParser(data: PostStructuredContent): HTMLDivElement {
 	div.classList.add("mys-post-divider");
 	// 创建 img
 	const img = document.createElement("img");
-	if (data.insert.divider === "line_2") {
+	if (data.insert.divider === "line_1") {
+		img.src =
+			"https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/40eb5281cb24042bf34a9f1bcc61eaf5.png";
+	} else if (data.insert.divider === "line_2") {
 		img.src =
 			"https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/477d4c535e965bec1791203aecdfa8e6.png";
+	} else if (data.insert.divider === "line_3") {
+		img.src =
+			"https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/e7047588e912d60ff87a975e037c7606.png";
+	} else if (data.insert.divider === "line_4") {
+		img.src =
+			"https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2022/07/13/line_4.png";
 	} else {
+		console.log(data);
 		throw new Error("Unknown divider type");
 	}
 	// 插入 img
@@ -235,9 +245,9 @@ function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
 	if (typeof data.insert === "string") {
 		throw new Error("data.insert is a string");
 	}
-	// if (!data.insert.backup_text) {
-	// 	throw new Error("data.insert.backup_text is not defined");
-	// }
+	if (data.insert.backup_text === "[抽奖]") {
+		return LotteryParser(data);
+	}
 	if (!data.insert.fold) {
 		throw new Error("data.insert.fold is not defined");
 	}
@@ -275,9 +285,46 @@ function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
 }
 
 /**
+ * @description 解析抽奖
+ * @since Alpha v0.1.1
+ * @param {PostStructuredContent} data Mys数据
+ * @returns {HTMLDivElement} 解析后的抽奖
+ */
+function LotteryParser(data: PostStructuredContent): HTMLDivElement {
+	// 检查数据
+	if (typeof data.insert === "string") {
+		throw new Error("data.insert is a string");
+	}
+	if (!data.insert.backup_text) {
+		throw new Error("data.insert.backup_text is not defined");
+	}
+	if (data.insert.backup_text !== "[抽奖]") {
+		throw new Error("data.insert.backup_text is not [抽奖]");
+	}
+	if (!data.insert.lottery) {
+		throw new Error("data.insert.lottery is not defined");
+	}
+	// 创建 div
+	const div = document.createElement("div");
+	// 创建图标
+	const icon = document.createElement("i");
+	icon.classList.add("mdi", "mdi-gift");
+	// 创建标题
+	const title = document.createElement("a");
+	title.classList.add("mys-post-link");
+	title.href = `/lottery/${data.insert.lottery.id}`;
+	title.innerText = data.insert.lottery.toast;
+	// 插入图标
+	title.prepend(icon);
+	// 插入标题
+	div.appendChild(title);
+	// 返回 div
+	return div;
+}
+
+/**
  * @description 解析链接卡片
  * @since Alpha v0.1.1
- * @see post_id:37414431
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的链接卡片
  */
