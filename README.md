@@ -2,12 +2,14 @@
 Author: 目棃
 Date: 2023-03-05
 Description: 说明文档
-Update: 2023-03-28
+Update: 2023-03-30
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-05 14:41:55`
 > 
-> 更新于 `2023-03-28 14:44:57`
+> 更新于 `2023-03-30 15:25:13`
+
+![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/downloads-pre/BTMuli/Tauri.Genshin/latest/total?style=for-the-badge) ![](https://img.shields.io/github/v/release/BTMuli/Tauri.Genshin?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge)
 
 # Tauri.Genshin
 
@@ -36,6 +38,7 @@ Tauri 练手项目
 ## 相关文档 
 
 + 资源来源：[项目资源说明](docs/项目资源说明.md)
++ UIAF：[UIAFv1.1](docs/UIAF.md)
 
 ## 开发
 
