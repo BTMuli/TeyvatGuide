@@ -9,7 +9,7 @@ import { NewsData, NewsItem, NewsCard, ActivityStatus } from "../interface/news"
 
 /**
  * @description 活动状态
- * @since Alpha
+ * @since Alpha v0.1.1
  * @enum {ActivityStatus}
  * @property {ActivityStatus} STARTED 进行中
  * @property {ActivityStatus} FINISHED 已结束
@@ -19,15 +19,15 @@ import { NewsData, NewsItem, NewsCard, ActivityStatus } from "../interface/news"
 const EnumStatus = {
 	STARTED: {
 		status: "进行中",
-		colorCss: "#3c99aa !important",
+		colorCss: "#1EE2BA !important",
 	},
 	FINISHED: {
 		status: "已结束",
-		colorCss: "#c7674b !important",
+		colorCss: "#C0C5C8 !important",
 	},
 	SELECTION: {
 		status: "评选中",
-		colorCss: "#849cc7 !important",
+		colorCss: "#FF983B !important",
 	},
 	UNKNOWN: {
 		status: "未知",
