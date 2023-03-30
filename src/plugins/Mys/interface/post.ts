@@ -318,7 +318,7 @@ export interface PostStructuredContentVod {
  * @description 帖子结构化内容-链接卡片
  * @since Alpha v0.1.1
  * @interface PostStructuredContentLinkCard
- * @property {number} link_type 链接类型 // TODO: 未知
+ * @property {number} link_type 链接类型 // 1: 帖子，2：商品 TODO: 未知
  * @property {string} origin_url 原始链接
  * @property {string} landing_url 落地页链接
  * @property {string} cover 封面图 URL

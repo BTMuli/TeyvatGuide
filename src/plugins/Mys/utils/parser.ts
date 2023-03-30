@@ -310,18 +310,24 @@ function LinkCardParser(data: PostStructuredContent): HTMLDivElement {
 	title.innerHTML = data.insert.link_card.title;
 	// 插入 title
 	content.appendChild(title);
-	// 创建价格
-	const price = document.createElement("div");
-	price.classList.add("mys-post-link-card-price");
-	price.innerHTML = data.insert.link_card.price;
-	// 插入 price
-	content.appendChild(price);
+	if (data.insert.link_card.price) {
+		const price = document.createElement("div");
+		price.classList.add("mys-post-link-card-price");
+		price.innerHTML = data.insert.link_card.price;
+		content.appendChild(price);
+	}
 	// 创建 button
 	const button = document.createElement("a");
 	button.classList.add("mys-post-link-card-btn");
-	button.innerHTML = data.insert.link_card.button_text + " >";
-	button.href = data.insert.link_card.origin_url;
-	button.target = "view_window";
+	button.innerHTML = data.insert.link_card.button_text || "详情" + " >";
+	const link_url = data.insert.link_card.origin_url;
+	if (link_url.startsWith("https://www.miyoushe.com/ys/article/")) {
+		button.href = "/post_detail/" + link_url.split("/").pop();
+		button.target = "_self";
+	} else {
+		button.href = link_url;
+		button.target = "view_window";
+	}
 	// 插入 button
 	content.appendChild(button);
 	// 插入 content

@@ -51,13 +51,13 @@
 }
 
 .mys-post-link-card-cover {
-	width: 180px;
+	width: auto;
 	height: 180px;
 	border-radius: 10px;
 }
 
 .mys-post-link-card-cover img {
-	width: 180px;
+	width: auto;
 	height: 180px;
 	border-radius: 10px;
 }
