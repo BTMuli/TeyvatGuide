@@ -58,7 +58,7 @@
 		</v-card>
 		<v-card class="common-card">
 			<v-list>
-				<v-list-item disabled>
+				<v-list-item>
 					<v-list-item-title>开发者模式</v-list-item-title>
 					<v-list-item-subtitle>开启后将显示调试信息</v-list-item-subtitle>
 					<template v-slot:append>

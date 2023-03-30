@@ -44,7 +44,7 @@ const MysOper = {
 		card: {
 			lottery: getLotteryCard,
 			reward: getLotteryRewardCard,
-		}
+		},
 	},
 };
 
