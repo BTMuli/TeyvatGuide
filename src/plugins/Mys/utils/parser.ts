@@ -45,7 +45,10 @@ function ParserTransfer(data: PostStructuredContent): HTMLDivElement | HTMLSpanE
 		return BackupTextParser(data);
 	} else if (data.insert.link_card) {
 		return LinkCardParser(data);
+	} else if (data.insert.divider) {
+		return DividerParser(data);
 	} else {
+		console.log(data);
 		throw new Error("Unknown data.insert type");
 	}
 }
@@ -68,11 +71,7 @@ function TextParser(data: PostStructuredContent): HTMLSpanElement {
 		if (data.attributes.bold) text.style.fontWeight = "bold";
 		if (data.attributes.color) text.style.color = data.attributes.color;
 		if (data.attributes.link) {
-			const a = document.createElement("a");
-			a.href = data.attributes.link;
-			a.target = "void(0)";
-			a.innerText = data.insert;
-			return a;
+			return LinkTextParser(data);
 		}
 	}
 	// 添加 class
@@ -81,6 +80,69 @@ function TextParser(data: PostStructuredContent): HTMLSpanElement {
 	text.innerText = data.insert;
 	// 返回文本
 	return text;
+}
+
+/**
+ * @description 解析链接
+ * @since Alpha v0.1.1
+ * @param {PostStructuredContent} data Mys数据
+ * @returns {HTMLSpanElement} 解析后的链接
+ */
+function LinkTextParser(data: PostStructuredContent): HTMLSpanElement {
+	// 检查数据
+	if (typeof data.insert !== "string") {
+		throw new Error("data.insert is not a string");
+	}
+	if (!data.attributes) {
+		throw new Error("data.attributes is not defined");
+	}
+	if (!data.attributes.link) {
+		throw new Error("data.attributes.link is not defined");
+	}
+	// 创建图标
+	const icon = document.createElement("i");
+	icon.classList.add("mdi", "mdi-link-variant");
+	// 创建链接
+	const link = document.createElement("a");
+	link.classList.add("mys-post-link");
+	link.href = data.attributes.link;
+	link.target = "view_window";
+	link.innerText = data.insert;
+	// 插入图标作为链接前缀
+	link.prepend(icon);
+	// 返回链接
+	return link;
+}
+
+/**
+ * @description 解析分割线
+ * @since Alpha v0.1.1
+ * @param {PostStructuredContent} data Mys数据
+ * @returns {HTMLDivElement} 解析后的分割线
+ */
+function DividerParser(data: PostStructuredContent): HTMLDivElement {
+	// 数据检查
+	if (typeof data.insert === "string") {
+		throw new Error("data.insert is a string");
+	}
+	if (!data.insert.divider) {
+		throw new Error("data.insert.divider is not defined");
+	}
+	// 创建分割线
+	const div = document.createElement("div");
+	div.classList.add("mys-post-divider");
+	// 创建 img
+	const img = document.createElement("img");
+	if (data.insert.divider === "line_2") {
+		img.src =
+			"https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/477d4c535e965bec1791203aecdfa8e6.png";
+	} else {
+		throw new Error("Unknown divider type");
+	}
+	// 插入 img
+	div.appendChild(img);
+	// 返回分割线
+	return div;
 }
 
 /**
@@ -259,7 +321,7 @@ function LinkCardParser(data: PostStructuredContent): HTMLDivElement {
 	button.classList.add("mys-post-link-card-btn");
 	button.innerHTML = data.insert.link_card.button_text + " >";
 	button.href = data.insert.link_card.origin_url;
-	button.target = "void(0)";
+	button.target = "view_window";
 	// 插入 button
 	content.appendChild(button);
 	// 插入 content

@@ -237,7 +237,8 @@ export interface PostStat {
  * @property {object} insert.fold 折叠内容
  * @property {string} insert.fold.title 折叠标题，反序列化后为 PostStructuredContent[]
  * @property {string} insert.fold.content 折叠文本，反序列化后为 PostStructuredContent[]
- * @property {PostStructuredContentLinkCard} link_card 链接卡片
+ * @property {PostStructuredContentLinkCard} insert.link_card 链接卡片
+ * @property {string} insert.divider 分割线
  * @property {object} attributes 属性
  * @property {number} attributes.height 高度
  * @property {number} attributes.width 宽度
@@ -259,6 +260,7 @@ export interface PostStructuredContent {
 					content: string;
 				};
 				link_card?: PostStructuredContentLinkCard;
+				divider?: string;
 		  }
 		| string;
 	attributes?: {

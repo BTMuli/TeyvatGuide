@@ -1,0 +1,89 @@
+/*
+ * @description 米游社解析 css
+ * @since Alpha v0.1.1
+ */
+.mys-post-body {
+	margin: 20px auto;
+	width: 800px;
+	font-family: "Genshin", serif;
+}
+
+.mys-post-div {
+	margin: 20px auto;
+}
+
+.mys-post-span {
+	line-height: 2;
+}
+
+.mys-post-link {
+	color: #00c3ff;
+	text-decoration: none;
+}
+
+.mys-post-divider {
+	margin: 20px auto;
+}
+
+.mys-post-divider img {
+	width: 800px;
+	height: auto;
+}
+
+.mys-post-img {
+	width: 800px;
+	height: auto;
+	border-radius: 10px;
+}
+
+.mys-post-vod {
+	width: 800px;
+	height: 450px;
+}
+
+.mys-post-link-card {
+	width: 800px;
+	height: 200px;
+	padding: 10px;
+	border-radius: 10px;
+	display: flex;
+	background: #e1e1e1;
+}
+
+.mys-post-link-card-cover {
+	width: 180px;
+	height: 180px;
+	border-radius: 10px;
+}
+
+.mys-post-link-card-cover img {
+	width: 180px;
+	height: 180px;
+	border-radius: 10px;
+}
+
+.mys-post-link-card-content {
+	width: 100%;
+	padding-left: 20px;
+	height: 180px;
+}
+
+.mys-post-link-card-title {
+	font-size: 20px;
+	color: black;
+	height: 150px;
+}
+
+.mys-post-link-card-price {
+	font-size: 20px;
+	color: #ff667f;
+	display: inline-block;
+}
+
+.mys-post-link-card-btn {
+	display: inline-block;
+	float: right;
+	color: #00c3ff;
+	margin-right: 20px;
+	text-decoration: none;
+}
