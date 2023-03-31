@@ -381,7 +381,7 @@ function LinkCardParser(data: PostStructuredContent): HTMLDivElement {
 	// 创建 button
 	const button = document.createElement("a");
 	button.classList.add("mys-post-link-card-btn");
-	button.innerHTML = data.insert.link_card.button_text || "详情" + " >";
+	button.innerHTML = (data.insert.link_card.button_text || "详情") + " >";
 	const link_url = data.insert.link_card.origin_url;
 	if (IsMysPost(link_url)) {
 		button.href = "/post_detail/" + link_url.split("/").pop();
