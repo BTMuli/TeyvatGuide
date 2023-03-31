@@ -5,7 +5,7 @@
 				近期活动 <span v-show="loading"><v-progress-circular indeterminate color="blue" /></span>
 			</v-list-item-title>
 			<div v-show="!loading" class="Position-grid">
-				<v-card class="Position-single" v-for="card in postionCards">
+				<v-card class="Position-single" v-for="card in positionCards">
 					<v-card-title>
 						<v-list class="single-list">
 							<v-list-item>
@@ -30,7 +30,7 @@
 						<span style="width: 80%; margin-left: 10px">
 							<v-icon>mdi-clock-outline</v-icon>
 							剩余时间：
-							<span style="color: #90caf9">{{ lastTime[card.end_time] }}</span>
+							<span style="color: #90caf9">{{ lastTime[Number(card.end_time)] }}</span>
 						</span>
 						<v-btn @click="toPost(card)" class="ms-2 card-btn mr-2">
 							<template v-slot:prepend>
@@ -61,16 +61,16 @@ import { Map } from "../interface/Base";
 const loading = ref(true as boolean);
 
 // 数据
-const postionCards = ref([] as PositionCard[]);
+const positionCards = ref([] as PositionCard[]);
 const lastTime = ref({} as Map<string>);
 const router = useRouter();
 
 onMounted(async () => {
 	try {
 		const positionData = await MysOper.Position.get();
-		postionCards.value = MysOper.Position.card(positionData);
+		positionCards.value = MysOper.Position.card(positionData);
 		const time: Map<string> = {};
-		postionCards.value.forEach(card => {
+		positionCards.value.forEach(card => {
 			time[Number(card.end_time)] = getLastTime(Number(card.end_time) - Date.now());
 		});
 		lastTime.value = time;
