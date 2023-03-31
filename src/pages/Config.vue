@@ -3,7 +3,7 @@
 		<t-loading />
 	</div>
 	<div v-else>
-		<v-card class="common-card" title="关于">
+		<v-card class="config-card" title="关于">
 			<v-list>
 				<v-list-item>
 					<template v-slot:prepend>
@@ -40,7 +40,7 @@
 				</v-list-item>
 			</v-list>
 		</v-card>
-		<v-card class="common-card" title="配置">
+		<v-card class="config-card" title="配置">
 			<v-list>
 				<v-list-item @click="openMergeData" prepend-icon="mdi-folder">
 					<v-list-item-title>打开用户数据目录</v-list-item-title>
@@ -56,7 +56,7 @@
 				</v-list-item>
 			</v-list>
 		</v-card>
-		<v-card class="common-card">
+		<v-card class="config-card">
 			<v-list>
 				<v-list-item>
 					<v-list-item-title>开发者模式</v-list-item-title>
@@ -72,7 +72,7 @@
 				</v-list-item>
 			</v-list>
 		</v-card>
-		<v-card class="common-card">
+		<v-card class="config-card">
 			<v-list>
 				<v-list-item prepend-icon="mdi-folder">
 					<v-list-item-title>本地应用数据路径</v-list-item-title>
@@ -178,6 +178,11 @@ async function setDefaultConfig() {
 </script>
 
 <style lang="css">
+.config-card {
+	margin-bottom: 10px;
+	font-family: "Genshin", sans-serif;
+}
+
 .config-icon {
 	width: 40px;
 	height: 40px;

@@ -15,8 +15,3 @@
 .global-font {
 	font-family: "Genshin", sans-serif;
 }
-/* 常见卡片样式 */
-.common-card {
-	margin-bottom: 10px;
-	font-family: "Genshin", sans-serif;
-}
