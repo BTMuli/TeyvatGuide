@@ -25,5 +25,16 @@ export default defineConfig({
 		minify: !process.env.TAURI_DEBUG ? "esbuild" : false,
 		// produce sourcemaps for debug builds
 		sourcemap: !!process.env.TAURI_DEBUG,
+		// rollup options
+		rollupOptions: {
+			// chunking
+			output: {
+				manualChunks(id) {
+					if (id.includes("node_modules")) {
+						return id.toString().split("node_modules/")[1].split("/")[0].toString();
+					}
+				}
+			}
+		}
 	},
 });
