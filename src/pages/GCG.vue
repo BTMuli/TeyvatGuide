@@ -3,8 +3,12 @@
 		<t-loading title="正在加载卡牌列表" />
 	</div>
 	<div v-else>
-		<v-app-bar color="white" class="global-font">
-			<v-toolbar-title>卡牌列表</v-toolbar-title>
+		<v-tabs v-model="tab" align-tabs="start" class="global-font">
+			<div v-show="doSearch">
+				<v-tab value="character" title="角色牌" />
+				<v-tab value="action" title="行动牌" />
+				<v-tab value="monster" title="魔物牌" />
+			</div>
 			<v-spacer></v-spacer>
 			<v-text-field
 				v-model="search"
@@ -13,14 +17,10 @@
 				single-line
 				hide-details
 				@click:append="searchCard"
+				@keyup.enter="searchCard"
 			></v-text-field>
-		</v-app-bar>
+		</v-tabs>
 		<div v-if="!doSearch">
-			<v-tabs v-model="tab" align-tabs="start" class="global-font">
-				<v-tab value="character" title="角色牌" />
-				<v-tab value="action" title="行动牌" />
-				<v-tab value="monster" title="魔物牌" />
-			</v-tabs>
 			<v-window v-model="tab">
 				<v-window-item value="character">
 					<div class="GCG-grid">
