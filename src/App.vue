@@ -4,7 +4,7 @@
 			<!-- 侧边栏菜单 -->
 			<t-sidebar />
 			<!-- 主体内容 -->
-			<v-main>
+			<v-main class="app-main">
 				<v-container fluid>
 					<router-view />
 				</v-container>
@@ -14,7 +14,7 @@
 	<div v-else>
 		<v-layout>
 			<!-- 主体内容 -->
-			<v-main>
+			<v-main class="app-main">
 				<v-container fluid>
 					<router-view />
 				</v-container>
@@ -87,3 +87,10 @@ async function writeIndex() {
 	console.log("IndexedDB 写入完成！");
 }
 </script>
+<style lang="css">
+.app-main {
+	min-height: 100vh;
+	background: rgba(255, 255, 255, 75%);
+	backdrop-filter: blur(20px);
+}
+</style>
