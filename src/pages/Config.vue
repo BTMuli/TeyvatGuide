@@ -3,87 +3,74 @@
 		<t-loading />
 	</div>
 	<div v-else>
-		<v-card class="config-card" title="关于">
-			<v-list>
-				<v-list-item>
-					<template v-slot:prepend>
-						<img class="config-icon" src="/icon.webp" alt="App" />
-					</template>
-					<v-list-item-title>
-						应用版本
-						<v-btn
-							color="info"
-							size="small"
-							@click="toOuter('https://github.com/BTMuli/Tauri.Genshin/releases/latest')"
-							>Alpha</v-btn
-						>
-					</v-list-item-title>
-					<template v-slot:append>
-						<v-list-item-subtitle>{{ versionApp }}</v-list-item-subtitle>
-					</template>
-				</v-list-item>
-				<v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
-					<template v-slot:prepend>
-						<img class="config-icon" src="/tauri.webp" alt="Tauri" />
-					</template>
-					<template v-slot:append>
-						<v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
-					</template>
-				</v-list-item>
-				<v-list-item title="成就版本">
-					<template v-slot:prepend>
-						<img class="config-icon" src="../assets/icons/achievements.svg" alt="Achievements" />
-					</template>
-					<template v-slot:append>
-						<v-list-item-subtitle>{{ achievementsStore.last_version }}</v-list-item-subtitle>
-					</template>
-				</v-list-item>
-			</v-list>
-		</v-card>
-		<v-card class="config-card" title="配置">
-			<v-list>
-				<v-list-item @click="openMergeData" prepend-icon="mdi-folder">
-					<v-list-item-title>打开用户数据目录</v-list-item-title>
-				</v-list-item>
-				<v-list-item @click="deleteData" prepend-icon="mdi-delete">
-					<v-list-item-title>清除用户缓存</v-list-item-title>
-				</v-list-item>
-				<v-list-item @click="deleteTemp" prepend-icon="mdi-delete">
-					<v-list-item-title>删除临时数据</v-list-item-title>
-				</v-list-item>
-				<v-list-item @click="setDefaultConfig" prepend-icon="mdi-cog">
-					<v-list-item-title>初始化数据</v-list-item-title>
-				</v-list-item>
-			</v-list>
-		</v-card>
-		<v-card class="config-card">
-			<v-list>
-				<v-list-item>
-					<v-list-item-title>开发者模式</v-list-item-title>
-					<v-list-item-subtitle>开启后将显示调试信息</v-list-item-subtitle>
-					<template v-slot:append>
-						<v-switch
-							:label="appStore.devMode ? '开启' : '关闭'"
-							inset
-							v-model="appStore.devMode"
-							color="#0781D8"
-						/>
-					</template>
-				</v-list-item>
-			</v-list>
-		</v-card>
-		<v-card class="config-card">
-			<v-list>
-				<v-list-item prepend-icon="mdi-folder">
-					<v-list-item-title>本地应用数据路径</v-list-item-title>
-					<v-list-item-subtitle>{{ appStore.dataPath.app }}</v-list-item-subtitle>
-				</v-list-item>
-				<v-list-item prepend-icon="mdi-folder">
-					<v-list-item-title>本地用户数据路径</v-list-item-title>
-					<v-list-item-subtitle>{{ appStore.dataPath.user }}</v-list-item-subtitle>
-				</v-list-item>
-			</v-list>
-		</v-card>
+		<v-list class="config-list">
+			<v-list-subheader inset class="config-header">关于</v-list-subheader>
+			<v-divider inset class="border-opacity-75" />
+			<v-list-item>
+				<template v-slot:prepend>
+					<img class="config-icon" src="/icon.webp" alt="App" />
+				</template>
+				<v-list-item-title>
+					应用版本
+					<v-btn
+						color="#455167"
+						size="small"
+						@click="toOuter('https://github.com/BTMuli/Tauri.Genshin/releases/latest')"
+						>Alpha</v-btn
+					>
+				</v-list-item-title>
+				<template v-slot:append>
+					<v-list-item-subtitle>{{ versionApp }}</v-list-item-subtitle>
+				</template>
+			</v-list-item>
+			<v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
+				<template v-slot:prepend>
+					<img class="config-icon" src="/tauri.webp" alt="Tauri" />
+				</template>
+				<template v-slot:append>
+					<v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
+				</template>
+			</v-list-item>
+			<v-list-item title="成就版本">
+				<template v-slot:prepend>
+					<img class="config-icon" src="../assets/icons/achievements.svg" alt="Achievements" />
+				</template>
+				<template v-slot:append>
+					<v-list-item-subtitle>{{ achievementsStore.last_version }}</v-list-item-subtitle>
+				</template>
+			</v-list-item>
+			<v-list-subheader inset class="config-header">设置</v-list-subheader>
+			<v-divider inset class="border-opacity-75" />
+			<v-list-item @click="openMergeData" prepend-icon="mdi-folder" title="打开用户数据目录" />
+			<v-list-item @click="deleteData" prepend-icon="mdi-delete" title="清除用户缓存" />
+			<v-list-item @click="deleteTemp" prepend-icon="mdi-delete" title="清除临时数据" />
+			<v-list-item @click="setDefaultConfig" prepend-icon="mdi-cog" title="恢复默认设置" />
+			<v-list-subheader inset class="config-header">调试</v-list-subheader>
+			<v-divider inset class="border-opacity-75" />
+			<v-list-item title="开发者模式" subtitle="开启后将显示调试信息">
+				<template v-slot:prepend>
+					<v-icon>mdi-bug</v-icon>
+				</template>
+				<template v-slot:append>
+					<v-switch
+						:label="appStore.devMode ? '开启' : '关闭'"
+						inset
+						v-model="appStore.devMode"
+						color="#FAC51E"
+					/>
+				</template>
+			</v-list-item>
+			<v-list-subheader inset class="config-header">路径</v-list-subheader>
+			<v-divider inset class="border-opacity-75" />
+			<v-list-item prepend-icon="mdi-folder">
+				<v-list-item-title>本地应用数据路径</v-list-item-title>
+				<v-list-item-subtitle>{{ appStore.dataPath.app }}</v-list-item-subtitle>
+			</v-list-item>
+			<v-list-item prepend-icon="mdi-folder">
+				<v-list-item-title>本地用户数据路径</v-list-item-title>
+				<v-list-item-subtitle>{{ appStore.dataPath.user }}</v-list-item-subtitle>
+			</v-list-item>
+		</v-list>
 	</div>
 </template>
 
@@ -178,17 +165,27 @@ async function setDefaultConfig() {
 </script>
 
 <style lang="css">
-.config-card {
-	margin-bottom: 10px;
-	font-family: "Genshin", sans-serif;
+.config-list {
+	margin: 10px;
+	font-family: "Genshin-Light", serif;
+	background: rgba(0, 0, 0, 0.5);
+	color: #faf7e8;
+	border-radius: 10px;
+}
+
+.config-header {
+	margin-top: 10px;
+	background: #76726c;
+	color: #f4d8a8;
+	font-size: large;
 }
 
 .config-icon {
 	width: 40px;
 	height: 40px;
-	margin-right: 5px;
+	margin-right: 15px;
 	padding: 5px;
-	background: #393b40;
-	border-radius: 5px;
+	background: #2d2f33;
+	border-radius: 10px;
 }
 </style>
