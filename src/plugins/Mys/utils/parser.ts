@@ -2,7 +2,7 @@
  * @file plugins Mys utils PostParser.ts
  * @description 用于解析Mys数据的工具
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha
+ * @since Alpha v0.1.1
  */
 import { PostStructuredContent } from "../interface/post";
 
@@ -275,30 +275,26 @@ function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
 	const contentJson: PostStructuredContent[] = JSON.parse(data.insert.fold.content);
 	// 创建 div
 	const div = document.createElement("div");
+	div.classList.add("mys-post-div");
+	// 创建折叠内容
+	const details = document.createElement("details");
+	details.classList.add("mys-post-details");
 	// 创建标题
-	const title = document.createElement("div");
+	const title = document.createElement("summary");
 	// 解析标题
 	titleJson.forEach(item => {
-		// 解析
 		const parsed = ParserTransfer(item);
-		// 插入
 		title.appendChild(parsed);
 	});
 	// 创建内容
 	const content = document.createElement("div");
-	// 解析内容
 	contentJson.forEach(item => {
-		// 解析
 		const parsed = ParserTransfer(item);
-		// 插入
 		content.appendChild(parsed);
 	});
-	// 插入标题
-	div.appendChild(title);
-	// 插入内容
-	div.appendChild(content);
-	// 添加 class
-	div.classList.add("mys-post-div");
+	details.appendChild(title);
+	details.appendChild(content);
+	div.appendChild(details);
 	// 返回 div
 	return div;
 }

@@ -21,6 +21,17 @@
 	text-decoration: none;
 }
 
+.mys-post-details {
+	border: #35acce 2px solid;
+	padding: 10px;
+	border-radius: 10px;
+}
+
+.mys-post-details ::marker {
+	color: #35acce;
+	content: "✧";
+}
+
 .mys-post-divider {
 	margin: 20px auto;
 }
