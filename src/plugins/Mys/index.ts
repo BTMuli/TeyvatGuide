@@ -11,6 +11,9 @@ import { PostParser } from "./utils/parser";
 // Gacha
 import { getGachaData } from "./request/gacha";
 import { getGachaCard } from "./utils/gacha";
+// Position
+import { getPositionData } from "./request/position";
+import { getPositionCard } from "./utils/position";
 // News
 import { getNoticeList, getActivityList, getNewsList } from "./request/news";
 import { getNoticeCard, getActivityCard, getNewsCard } from "./utils/news";
@@ -26,6 +29,10 @@ const MysOper = {
 	Gacha: {
 		get: getGachaData,
 		card: getGachaCard,
+	},
+	Position: {
+		get: getPositionData,
+		card: getPositionCard,
 	},
 	News: {
 		get: {
