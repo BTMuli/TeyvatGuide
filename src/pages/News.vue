@@ -3,19 +3,15 @@
 		<t-loading :title="loadingTitle" />
 	</div>
 	<div v-else>
-		<v-tabs v-model="tab" align-tabs="start" class="global-font">
+		<v-tabs v-model="tab" align-tabs="start" class="global-font mb-2">
 			<v-tab value="notice" title="公告" />
 			<v-tab value="activity" title="活动" />
 			<v-tab value="news" title="新闻" />
 		</v-tabs>
 		<v-window v-model="tab">
 			<v-window-item value="notice">
-				<div class="News-grid">
-					<v-card
-						v-for="item in postData.notice"
-						class="justify-space-between flex-nowrap"
-						width="320"
-					>
+				<div class="news-grid">
+					<v-card v-for="item in postData.notice" class="news-card" width="320">
 						<v-img :src="item.cover" cover style="height: 150px" @click="toPost(item)"></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-actions>
@@ -45,12 +41,8 @@
 				</div>
 			</v-window-item>
 			<v-window-item value="activity">
-				<div class="News-grid">
-					<v-card
-						v-for="item in postData.activity"
-						class="justify-space-between flex-nowrap"
-						width="320"
-					>
+				<div class="news-grid">
+					<v-card class="news-card" v-for="item in postData.activity" width="320">
 						<v-img :src="item.cover" cover style="height: 150px" @click="toPost(item)"></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
@@ -91,12 +83,8 @@
 				</div>
 			</v-window-item>
 			<v-window-item value="news">
-				<div class="News-grid">
-					<v-card
-						v-for="item in postData.news"
-						class="justify-space-between flex-nowrap"
-						width="320"
-					>
+				<div class="news-grid">
+					<v-card class="news-card" v-for="item in postData.news" width="320">
 						<v-img :src="item.cover" cover style="height: 150px" @click="toPost(item)"></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-actions>
@@ -252,26 +240,32 @@ async function toJson(item: NewsCard) {
 </script>
 
 <style lang="css">
-.News-grid {
+.news-grid {
 	font-family: Genshin, serif;
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 	grid-gap: 20px;
 }
 
-.News-grid img {
+.news-grid img {
 	transition: all 0.3s linear;
 }
 
-.News-grid :hover img {
+.news-grid :hover img {
 	cursor: pointer;
 	transform: scale(1.1);
 	transition: all 0.3s linear;
 }
 
+.news-card {
+	border-radius: 10px;
+	background: #faf7e8;
+	color: #546d8b;
+}
+
 /* card action 内的按钮 */
 .card-btn {
-	background: #455167 !important;
+	background: #546d8b !important;
 	color: #faf7e8 !important;
 }
 
@@ -298,7 +292,7 @@ async function toJson(item: NewsCard) {
 }
 
 .load-news button {
-	background: #455167 !important;
+	background: #546d8b !important;
 	color: #faf7e8 !important;
 }
 
