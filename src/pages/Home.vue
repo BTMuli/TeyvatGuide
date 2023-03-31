@@ -51,6 +51,7 @@
 				</v-card-text>
 			</v-card>
 		</div>
+		<t-position />
 	</div>
 </template>
 
@@ -59,6 +60,7 @@
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import TLoading from "../components/t-loading.vue";
+import TPosition from "../components/t-position.vue";
 // plugin
 import MysOper from "../plugins/Mys";
 // utils
@@ -139,6 +141,7 @@ async function toPost(pool: GachaCard) {
 
 .Home-pool {
 	margin-left: 10px;
+	margin-right: 10px;
 }
 
 .Home-pool-cover {
