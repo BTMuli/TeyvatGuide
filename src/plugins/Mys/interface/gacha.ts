@@ -66,7 +66,7 @@ export interface GachaPool {
 
 /**
  * @description 用于渲染的卡池数据
- * @since Alpha
+ * @since Alpha v0.1.1
  * @interface GachaCard
  * @property {string} title 卡池标题
  * @property {string} subtitle 卡池副标题
@@ -76,7 +76,9 @@ export interface GachaPool {
  * @property {GachaPool} voice 卡池角色语音
  * @property time 卡池时间
  * @property {string} time.start 卡池开始时间
+ * @property {string} time.start_stamp 卡池开始时间戳
  * @property {string} time.end 卡池结束时间
+ * @property {string} time.end_stamp 卡池结束时间戳
  * @return {GachaCard}
  */
 export interface GachaCard {
@@ -88,6 +90,8 @@ export interface GachaCard {
 	voice: GachaPool;
 	time: {
 		start: string;
+		start_stamp: number;
 		end: string;
+		end_stamp: number;
 	};
 }

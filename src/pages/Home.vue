@@ -1,13 +1,15 @@
 <template>
 	<div v-if="loading">
-		<t-loading title="正在加载卡池信息" />
+		<t-loading :title="loadingTitle" />
 	</div>
 	<div v-else>
-		<div v-if="empty">
-			<t-loading title="暂无卡池信息" empty />
+		<div v-if="poolEmpty">
+			<v-card class="pool-card">
+				<v-card-title>暂无卡池信息</v-card-title>
+			</v-card>
 		</div>
-		<div v-else class="pool-cards">
-			<v-card v-for="pool in poolInfo" class="Home-card">
+		<div class="pool-cards" v-else>
+			<v-card v-for="pool in poolCards" class="pool-card">
 				<template v-slot:prepend>
 					<v-img
 						:src="pool.voice.icon"
@@ -23,21 +25,21 @@
 				</template>
 				<!-- 卡池封面 -->
 				<v-row class="Home-pool">
-					<div class="Home-pool-cover" @click="toPost(pool)">
+					<div class="pool-cover" @click="toPost(pool)">
 						<img :src="pool.cover" alt="cover" />
 					</div>
-					<div class="Home-pool-character">
+					<div class="pool-character">
 						<div v-for="character in pool.characters" @click="toOuter(character.url, pool.title)">
-							<img :src="character.icon" class="Home-pool-icon" alt="character" />
+							<img :src="character.icon" class="pool-icon" alt="character" />
 						</div>
-						<div class="Home-pool-clock">
+						<div class="pool-clock">
 							<v-progress-circular
-								:model-value="timePass"
+								:model-value="poolTimePass[pool.post_id]"
 								size="100"
 								color="blue-lighten-3"
 								width="10"
 							>
-								{{ timeGet }}
+								{{ poolTimeGet[pool.post_id] }}
 							</v-progress-circular>
 						</div>
 					</div>
@@ -60,54 +62,55 @@
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import TLoading from "../components/t-loading.vue";
-import TPosition from "../components/t-position.vue";
 // plugin
 import MysOper from "../plugins/Mys";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
 // interface
-import { GachaData, GachaCard } from "../plugins/Mys/interface/gacha";
+import { GachaCard } from "../plugins/Mys/interface/gacha";
+import { Map } from "../interface/Base";
+import TPosition from "../components/t-position.vue";
 
+// vue
 const router = useRouter();
-const poolInfo = ref([] as GachaCard[]);
+
+// loading
 const loading = ref(true);
-const empty = ref(false);
-const timeGet = ref("");
-const timePass = ref(0);
+const loadingTitle = ref("加载中...");
+const poolEmpty = ref(false);
+
+// data
+const poolCards = ref([] as GachaCard[]);
+const poolTimeGet = ref({} as Map<string>);
+const poolTimePass = ref({} as Map<number>);
 
 onMounted(async () => {
-	const responseGachaPool: GachaData[] = await MysOper.Gacha.get();
-	const start_time = responseGachaPool[0].start_time;
-	const end_time = responseGachaPool[0].end_time;
-	// 如果没有卡池信息则不进行后续操作
-	if (responseGachaPool.length === 0) {
-		loading.value = false;
-		empty.value = true;
-		return;
+	loadingTitle.value = "正在获取卡池信息...";
+	const gachaData = await MysOper.Gacha.get();
+	if (!gachaData || gachaData.length === 0) {
+		poolEmpty.value = true;
+		loadingTitle.value = "暂无卡池信息";
 	}
-	empty.value = false;
-	poolInfo.value = await MysOper.Gacha.card(responseGachaPool);
-	getTimeNow(start_time, end_time);
-	setInterval(() => {
-		loading.value = false;
+	loadingTitle.value = "正在渲染卡池信息...";
+	poolCards.value = await MysOper.Gacha.card(gachaData);
+	poolCards.value.map(pool => {
+		poolTimeGet.value[pool.post_id] = getLastPoolTime(pool.time.end_stamp - Date.now());
+		poolTimePass.value[pool.post_id] = pool.time.end_stamp - Date.now();
+	});
+	await setInterval(() => {
+		poolCards.value.map(pool => {
+			poolTimeGet.value[pool.post_id] = getLastPoolTime(pool.time.end_stamp - Date.now());
+			poolTimePass.value[pool.post_id] = (pool.time.end_stamp - Date.now()) / (pool.time.end_stamp - pool.time.start_stamp) * 100;
+		});
 	}, 1000);
+	loading.value = false;
 });
 
-function getTimeNow(start_time: string, end_time: string) {
-	setInterval(() => {
-		const start = new Date(start_time);
-		const now = new Date();
-		const end = new Date(end_time);
-		const time = end.getTime() - now.getTime();
-		// 截断，取 0.000%
-		timePass.value = (time / (end.getTime() - start.getTime())) * 100;
-		const hour = Math.floor(time / 1000 / 60 / 60);
-		const minute = Math.floor((time / 1000 / 60 / 60 - hour) * 60);
-		const second = Math.floor(((time / 1000 / 60 / 60 - hour) * 60 - minute) * 60);
-		timeGet.value = `${hour}:${minute.toFixed(0).padStart(2, "0")}:${second
-			.toFixed(0)
-			.padStart(2, "0")}`;
-	}, 1000);
+function getLastPoolTime(time: number) {
+	const hour = Math.floor(time / 1000 / 60 / 60);
+	const minute = Math.floor((time / 1000 / 60 / 60 - hour) * 60);
+	const second = Math.floor(((time / 1000 / 60 / 60 - hour) * 60 - minute) * 60);
+	return `${hour}:${minute.toFixed(0).padStart(2, "0")}:${second.toFixed(0).padStart(2, "0")}`;
 }
 
 function toOuter(url: string, title: string) {
@@ -135,7 +138,7 @@ async function toPost(pool: GachaCard) {
 	align-items: center;
 }
 
-.Home-card {
+.pool-card {
 	margin: 10px;
 }
 
@@ -144,42 +147,42 @@ async function toPost(pool: GachaCard) {
 	margin-right: 10px;
 }
 
-.Home-pool-cover {
+.pool-cover {
 	width: 690px;
 	height: auto;
 	margin-bottom: 10px;
 	overflow: hidden;
 }
 
-.Home-pool-cover img {
+.pool-cover img {
 	width: 100%;
 	height: auto;
 	transition: all 0.5s;
 }
 
-.Home-pool-cover :hover {
+.pool-cover :hover {
 	cursor: pointer;
 	transform: scale(1.1);
 	transition: all 0.5s;
 }
 
-.Home-pool-character {
+.pool-character {
 	width: 100%;
 	height: 80px;
 	display: flex;
 }
 
-.Home-pool-icon {
+.pool-icon {
 	width: 80px;
 	height: 80px;
 	margin: 0 10px;
 }
 
-.Home-pool-character :hover .Home-pool-icon {
+.pool-character :hover .pool-icon {
 	cursor: pointer;
 }
 
-.Home-pool-clock {
+.pool-clock {
 	width: auto;
 	margin-left: 40px;
 	float: right;

@@ -1,36 +1,30 @@
 <template>
-	<v-list class="Position-card">
+	<v-list class="position-card">
 		<v-list-item>
-			<v-list-item-title style="color: #fec90b">
-				近期活动 <span v-show="loading"><v-progress-circular indeterminate color="blue" /></span>
-			</v-list-item-title>
-			<div v-show="!loading" class="Position-grid">
-				<v-card class="Position-single" v-for="card in positionCards">
-					<v-card-title>
-						<v-list class="single-list">
-							<v-list-item>
-								<template v-slot:prepend>
-									<v-avatar>
-										<v-img :src="card.icon" />
-									</v-avatar>
-								</template>
-								<v-list-item-title>{{ card.title }}</v-list-item-title>
-								<v-list-item-subtitle>{{ card.abstract }}</v-list-item-subtitle>
-							</v-list-item>
-						</v-list>
-					</v-card-title>
+			<v-list-item-title style="color: #fec90b">近期活动</v-list-item-title>
+			<div class="position-grid">
+				<v-card v-for="card in positionCards" style="background: #5c6474;color: #f4d8a8">
+					<v-list style="background: #5c6474;color: #f4d8a8">
+						<v-list-item :title="card.title" :subtitle="card.abstract">
+						<template v-slot:prepend>
+						<v-avatar>
+							<v-img :src="card.icon" />
+						</v-avatar>
+						</template>
+						</v-list-item>
+					</v-list>
 					<v-divider></v-divider>
 					<v-card-text>
 						<span style="width: 60%">
 							<v-icon>mdi-calendar-clock</v-icon>
-							{{ card.create_time }}~{{ transTime(card.end_time) }}
+							{{ card.time.start }}~{{ card.time.end }}
 						</span>
 					</v-card-text>
 					<v-card-actions>
 						<span style="width: 80%; margin-left: 10px">
 							<v-icon>mdi-clock-outline</v-icon>
 							剩余时间：
-							<span style="color: #90caf9">{{ lastTime[Number(card.end_time)] }}</span>
+							<span style="color: #90caf9">{{ positionTimeGet[card.post_id] }}</span>
 						</span>
 						<v-btn @click="toPost(card)" class="ms-2 card-btn mr-2">
 							<template v-slot:prepend>
@@ -49,7 +43,6 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 // utils
-import TGMap from "../utils/TGMap";
 import { createTGWindow } from "../utils/TGWindow";
 // plugins
 import MysOper from "../plugins/Mys";
@@ -62,22 +55,21 @@ const loading = ref(true as boolean);
 
 // 数据
 const positionCards = ref([] as PositionCard[]);
-const lastTime = ref({} as Map<string>);
+const positionTimeGet = ref({} as Map<string>);
+const positionTimeEnd = ref({} as Map<number>);
 const router = useRouter();
 
 onMounted(async () => {
 	try {
 		const positionData = await MysOper.Position.get();
 		positionCards.value = MysOper.Position.card(positionData);
-		const time: Map<string> = {};
 		positionCards.value.forEach(card => {
-			time[Number(card.end_time)] = getLastTime(Number(card.end_time) - Date.now());
+			positionTimeGet.value[card.post_id] = getLastPositionTime(card.time.end_stamp - Date.now());
+			positionTimeEnd.value[card.post_id] = card.time.end_stamp;
 		});
-		lastTime.value = time;
-		setInterval(() => {
-			const timeMap = new TGMap(lastTime.value);
-			timeMap.forEach((value, key) => {
-				timeMap.set(key, getLastTime(Number(key) - Date.now()));
+		await setInterval(() => {
+			positionCards.value.forEach(card => {
+				positionTimeGet.value[card.post_id] = getLastPositionTime(card.time.end_stamp - Date.now());
 			});
 		}, 1000);
 	} catch (error) {
@@ -88,15 +80,7 @@ onMounted(async () => {
 	}
 });
 
-function transTime(time: string) {
-	return new Date(Number(time))
-		.toLocaleString("zh-CN", {
-			hour12: false,
-		})
-		.replace(/\//g, "-");
-}
-
-function getLastTime(time: number) {
+function getLastPositionTime(time: number) {
 	const day = Math.floor(time / (24 * 3600 * 1000));
 	const hour = Math.floor((time % (24 * 3600 * 1000)) / (3600 * 1000));
 	const minute = Math.floor((time % (3600 * 1000)) / (60 * 1000));
@@ -107,7 +91,7 @@ function getLastTime(time: number) {
 }
 
 async function toPost(card: PositionCard) {
-	const post_id = card.url.split("/").pop();
+	const post_id = card.post_id;
 	// 获取路由路径
 	const path = router.resolve({
 		name: "帖子详情",
@@ -116,27 +100,22 @@ async function toPost(card: PositionCard) {
 		},
 	}).href;
 	// 打开新窗口
-	createTGWindow(path, "活动", card.title, 960, 720, false);
+	createTGWindow(path, "祈愿", card.title, 960, 720, false);
 }
 </script>
 
 <style lang="css">
-.Position-card {
+.position-card {
 	margin: 0 10px;
 	font-family: "Genshin", serif;
 	background: rgba(0, 0, 0, 0.5);
 	border-radius: 10px;
 }
 
-.Position-grid {
+.position-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
 	grid-gap: 20px;
 	padding: 10px;
-}
-
-.Position-single {
-	background: rgba(0, 0, 0, 0.5);
-	border-radius: 10px;
 }
 </style>

@@ -37,11 +37,19 @@ export function getPositionCard(positionData: PositionData[]): PositionCard[] {
 	positionData.map(position => {
 		res.push({
 			title: position.title,
-			url: position.url,
+			post_id: Number(position.url.split("/").pop()),
 			icon: position.icon,
 			abstract: position.abstract,
-			create_time: position.create_time,
-			end_time: position.end_time,
+			time: {
+				start: position.create_time,
+				start_stamp: new Date(position.create_time).getTime(),
+				end: new Date(Number(position.end_time))
+					.toLocaleString("zh-CN", {
+						hour12: false,
+					})
+					.replace(/\//g, "-"),
+				end_stamp: Number(position.end_time),
+			},
 		});
 	});
 	return res;

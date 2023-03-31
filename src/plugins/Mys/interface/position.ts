@@ -73,18 +73,25 @@ export interface PositionData {
  * @since Alpha v0.1.1
  * @interface PositionCard
  * @property {string} title 标题
- * @property {string} url 链接
+ * @property {number} post_id 帖子ID
  * @property {string} icon 图标
  * @property {string} abstract 摘要
- * @property {string} create_time 创建时间
- * @property {string} end_time 结束时间
+ * @property time 时间
+ * @property {string} time.start 开始时间
+ * @property {number} time.start_stamp 开始时间戳
+ * @property {string} time.end 结束时间
+ * @property {number} time.end_stamp 结束时间戳
  * @return {PositionCard}
  */
 export interface PositionCard {
 	title: string;
-	url: string;
+	post_id: number;
 	icon: string;
 	abstract: string;
-	create_time: string;
-	end_time: string;
+	time: {
+		start: string;
+		start_stamp: number;
+		end: string;
+		end_stamp: number;
+	};
 }
