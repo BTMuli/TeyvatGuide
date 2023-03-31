@@ -136,17 +136,17 @@ async function toPost(pool: GachaCard) {
 
 .pool-card {
 	margin: 10px;
-	background: rgba(0, 0, 0, 0.5);
+	background: #546d8b;
 	border-radius: 10px;
-	color: #f4d8a8;
+	color: #faf7e8;
 }
 
 .pool-list {
-	background: #76726c;
+	background: #546d8b;
 }
 
 .pool-list-item {
-	background: #76726c;
+	background: #546d8b;
 	font-family: Genshin, serif;
 	color: #fec90b;
 }

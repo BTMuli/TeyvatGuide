@@ -19,3 +19,18 @@
 .mys-post-json .jv-toggle {
 	background-color: #faf7e8 !important;
 }
+
+/* card action 内的按钮 */
+.card-btn {
+	background: #546d8b !important;
+	color: #faf7e8 !important;
+}
+
+.card-btn svg {
+	width: 18px;
+	height: 18px;
+}
+
+.card-btn svg path {
+	fill: #faf7e8;
+}

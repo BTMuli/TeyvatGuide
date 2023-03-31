@@ -7,9 +7,9 @@
 			<div class="position-grid">
 				<v-card
 					v-for="card in positionCards"
-					style="background: #2d2f33; color: #f4d8a8; border-radius: 10px"
+					style="background: #faf7e8; color: #546d8b; border-radius: 10px"
 				>
-					<v-list style="background: #2d2f33; color: #f4d8a8">
+					<v-list style="background: #faf7e8; color: #546d8b">
 						<v-list-item :title="card.title" :subtitle="card.abstract">
 							<template v-slot:prepend>
 								<v-avatar rounded="0" @click="toPost(card)" style="cursor: pointer">
@@ -112,8 +112,8 @@ async function toPost(card: PositionCard) {
 <style lang="css">
 .position-card {
 	margin: 0 10px;
-	font-family: "Genshin-Light", serif;
-	background: rgba(0, 0, 0, 0.5);
+	font-family: "Genshin", serif;
+	background: #546d8b;
 	border-radius: 10px;
 }
 

@@ -1,6 +1,5 @@
 <template>
-	<!-- todo 侧边栏宽度调整 -->
-	<v-navigation-drawer permanent :rail="rail" style="background: #485466; color: #ece5d8">
+	<v-navigation-drawer permanent :rail="rail" style="background: #485466; color: #faf7e8">
 		<v-list class="sideList" density="compact" v-model:opened="open" nav>
 			<!-- 负责收缩侧边栏 -->
 			<v-list-item @click="collapse">

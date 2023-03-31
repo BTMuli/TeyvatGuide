@@ -11,7 +11,7 @@
 		<v-window v-model="tab">
 			<v-window-item value="notice">
 				<div class="news-grid">
-					<v-card v-for="item in postData.notice" class="news-card" width="320">
+					<v-card v-for="item in postData.notice" class="news-card" width="340">
 						<v-img :src="item.cover" cover style="height: 150px" @click="toPost(item)"></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-actions>
@@ -42,7 +42,7 @@
 			</v-window-item>
 			<v-window-item value="activity">
 				<div class="news-grid">
-					<v-card class="news-card" v-for="item in postData.activity" width="320">
+					<v-card class="news-card" v-for="item in postData.activity" width="340">
 						<v-img :src="item.cover" cover style="height: 150px" @click="toPost(item)"></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
@@ -84,7 +84,7 @@
 			</v-window-item>
 			<v-window-item value="news">
 				<div class="news-grid">
-					<v-card class="news-card" v-for="item in postData.news" width="320">
+					<v-card class="news-card" v-for="item in postData.news" width="340">
 						<v-img :src="item.cover" cover style="height: 150px" @click="toPost(item)"></v-img>
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-actions>
@@ -243,7 +243,7 @@ async function toJson(item: NewsCard) {
 .news-grid {
 	font-family: Genshin, serif;
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 	grid-gap: 20px;
 }
 
@@ -261,21 +261,6 @@ async function toJson(item: NewsCard) {
 	border-radius: 10px;
 	background: #faf7e8;
 	color: #546d8b;
-}
-
-/* card action 内的按钮 */
-.card-btn {
-	background: #546d8b !important;
-	color: #faf7e8 !important;
-}
-
-.card-btn svg {
-	width: 18px;
-	height: 18px;
-}
-
-.card-btn svg path {
-	fill: #faf7e8;
 }
 
 /* load more */

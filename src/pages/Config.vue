@@ -13,7 +13,7 @@
 				<v-list-item-title>
 					应用版本
 					<v-btn
-						color="#455167"
+						class="card-btn"
 						size="small"
 						@click="toOuter('https://github.com/BTMuli/Tauri.Genshin/releases/latest')"
 						>Alpha</v-btn
@@ -168,15 +168,16 @@ async function setDefaultConfig() {
 .config-list {
 	margin: 10px;
 	font-family: "Genshin-Light", serif;
-	background: rgba(0, 0, 0, 0.5);
-	color: #faf7e8;
+	background: #faf7e8;
+	color: #546d8b;
 	border-radius: 10px;
 }
 
 .config-header {
 	margin-top: 10px;
-	background: #76726c;
-	color: #f4d8a8;
+	font-family: Genshin, serif;
+	background: #faf7e8;
+	color: #fec90b;
 	font-size: large;
 }
 
@@ -185,7 +186,7 @@ async function setDefaultConfig() {
 	height: 40px;
 	margin-right: 15px;
 	padding: 5px;
-	background: #2d2f33;
+	background: #5b738f;
 	border-radius: 10px;
 }
 </style>

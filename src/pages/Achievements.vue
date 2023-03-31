@@ -67,7 +67,8 @@
 				<v-list class="card-right" v-for="achievement in selectedAchievement" :key="achievement.id">
 					<v-list-item>
 						<template v-slot:prepend>
-							<v-icon :color="achievement.completed ? '#FFD22F' : '#393B40'">
+							<v-icon :color="achievement.completed ? '#fec90b' : '#485466'">
+								<!-- todo 图标替换 -->
 								{{ achievement.completed ? "mdi-check-circle" : "mdi-circle" }}
 							</v-icon>
 						</template>
@@ -388,8 +389,8 @@ async function exportJson() {
 .card-right {
 	border-radius: 10px;
 	margin: 10px;
-	background: rgba(0, 0, 0, 0.5);
-	color: #f4d8a8;
+	background: #546d8b;
+	color: #faf7e8;
 }
 
 /* 成就完成时间 */
