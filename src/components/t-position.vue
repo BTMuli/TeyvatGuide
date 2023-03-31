@@ -1,19 +1,24 @@
 <template>
 	<v-list class="position-card">
 		<v-list-item>
-			<v-list-item-title style="color: #fec90b; margin-left: 10px">近期活动</v-list-item-title>
+			<v-list-item-title style="color: #fec90b; margin-left: 10px; font-family: Genshin, serif"
+				>近期活动</v-list-item-title
+			>
 			<div class="position-grid">
-				<v-card v-for="card in positionCards" style="background: #5c6474; color: #faf7e8">
-					<v-list style="background: #5c6474; color: #f4d8a8">
+				<v-card
+					v-for="card in positionCards"
+					style="background: #2d2f33; color: #f4d8a8; border-radius: 10px"
+				>
+					<v-list style="background: #2d2f33; color: #f4d8a8">
 						<v-list-item :title="card.title" :subtitle="card.abstract">
 							<template v-slot:prepend>
-								<v-avatar>
-									<v-img :src="card.icon" />
+								<v-avatar rounded="0" @click="toPost(card)" style="cursor: pointer">
+									<v-img :src="card.icon" style="border-radius: 10px" />
 								</v-avatar>
 							</template>
 						</v-list-item>
 					</v-list>
-					<v-divider></v-divider>
+					<v-divider class="border-opacity-75"></v-divider>
 					<v-card-text>
 						<span style="width: 60%">
 							<v-icon>mdi-calendar-clock</v-icon>
@@ -107,7 +112,7 @@ async function toPost(card: PositionCard) {
 <style lang="css">
 .position-card {
 	margin: 0 10px;
-	font-family: "Genshin", serif;
+	font-family: "Genshin-Light", serif;
 	background: rgba(0, 0, 0, 0.5);
 	border-radius: 10px;
 }

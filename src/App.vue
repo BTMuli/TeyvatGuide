@@ -90,7 +90,7 @@ async function writeIndex() {
 <style lang="css">
 .app-main {
 	min-height: 100vh;
-	background: rgba(255, 255, 255, 75%);
+	background: #ece5d8;
 	backdrop-filter: blur(20px);
 }
 </style>

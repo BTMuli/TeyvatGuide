@@ -1,6 +1,6 @@
 <template>
 	<!-- todo 侧边栏宽度调整 -->
-	<v-navigation-drawer permanent :rail="rail">
+	<v-navigation-drawer permanent :rail="rail" style="background: #485466; color: #ece5d8">
 		<v-list class="sideList" density="compact" v-model:opened="open" nav>
 			<!-- 负责收缩侧边栏 -->
 			<v-list-item @click="collapse">
@@ -79,7 +79,7 @@ function submenu(value: string) {
 
 <style lang="css">
 .sideList {
-	font-family: "Genshin", serif;
+	font-family: "Genshin-Light", serif;
 }
 
 .sideIcon {

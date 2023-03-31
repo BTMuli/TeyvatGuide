@@ -10,23 +10,21 @@
 		</div>
 		<div class="pool-cards" v-else>
 			<v-card v-for="pool in poolCards" class="pool-card">
-				<template v-slot:prepend>
-					<v-img
-						:src="pool.voice.icon"
-						width="80px"
-						height="80px"
-						alt="voice"
-						style="display: inline-block"
-					/>
-					<v-card-title style="display: inline-block; color: #fec90b">{{
-						pool.title
-					}}</v-card-title>
-				</template>
-				<template v-slot:append>
-					<audio :src="pool.voice.url" controls />
-				</template>
+				<v-list class="pool-list">
+					<v-list-item :title="pool.title" :subtitle="pool.subtitle" class="pool-list-item">
+						<template v-slot:prepend>
+							<v-img
+								:src="pool.voice.icon"
+								style="transform: translate(0, -10px); width: 60px; height: 60px"
+							/>
+						</template>
+						<template v-slot:append>
+							<audio :src="pool.voice.url" controls />
+						</template>
+					</v-list-item>
+				</v-list>
 				<!-- 卡池封面 -->
-				<v-row class="Home-pool">
+				<v-row>
 					<div class="pool-cover" @click="toPost(pool)">
 						<img :src="pool.cover" alt="cover" />
 					</div>
@@ -35,12 +33,7 @@
 							<img :src="character.icon" class="pool-icon" alt="character" />
 						</div>
 						<div class="pool-clock">
-							<v-progress-circular
-								:model-value="poolTimePass[pool.post_id]"
-								size="100"
-								color="blue-lighten-3"
-								width="10"
-							>
+							<v-progress-circular :model-value="poolTimePass[pool.post_id]" size="100" width="10">
 								{{ poolTimeGet[pool.post_id] }}
 							</v-progress-circular>
 						</div>
@@ -135,7 +128,7 @@ async function toPost(pool: GachaCard) {
 
 <style lang="css">
 .pool-cards {
-	font-family: Genshin, serif;
+	font-family: Genshin-Light, serif;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -145,25 +138,30 @@ async function toPost(pool: GachaCard) {
 	margin: 10px;
 	background: rgba(0, 0, 0, 0.5);
 	border-radius: 10px;
-	color: #faf7e8;
+	color: #f4d8a8;
 }
 
-.Home-pool {
-	margin-left: 10px;
-	margin-right: 10px;
+.pool-list {
+	background: #76726c;
+}
+
+.pool-list-item {
+	background: #76726c;
+	font-family: Genshin, serif;
+	color: #fec90b;
 }
 
 .pool-cover {
-	width: 690px;
-	height: auto;
-	margin-bottom: 10px;
+	width: 100%;
+	height: 330px;
+	margin: 20px;
 	overflow: hidden;
 	border-radius: 10px;
 }
 
 .pool-cover img {
 	width: 100%;
-	height: auto;
+	height: 330px;
 	transition: all 0.5s;
 	border-radius: 10px;
 }
@@ -175,6 +173,7 @@ async function toPost(pool: GachaCard) {
 }
 
 .pool-character {
+	margin: 0 20px;
 	width: 100%;
 	height: 80px;
 	display: flex;
