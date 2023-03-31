@@ -1,16 +1,16 @@
 <template>
 	<v-list class="position-card">
 		<v-list-item>
-			<v-list-item-title style="color: #fec90b">近期活动</v-list-item-title>
+			<v-list-item-title style="color: #fec90b; margin-left: 10px">近期活动</v-list-item-title>
 			<div class="position-grid">
-				<v-card v-for="card in positionCards" style="background: #5c6474;color: #f4d8a8">
-					<v-list style="background: #5c6474;color: #f4d8a8">
+				<v-card v-for="card in positionCards" style="background: #5c6474; color: #faf7e8">
+					<v-list style="background: #5c6474; color: #f4d8a8">
 						<v-list-item :title="card.title" :subtitle="card.abstract">
-						<template v-slot:prepend>
-						<v-avatar>
-							<v-img :src="card.icon" />
-						</v-avatar>
-						</template>
+							<template v-slot:prepend>
+								<v-avatar>
+									<v-img :src="card.icon" />
+								</v-avatar>
+							</template>
 						</v-list-item>
 					</v-list>
 					<v-divider></v-divider>

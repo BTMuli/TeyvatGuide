@@ -18,7 +18,9 @@
 						alt="voice"
 						style="display: inline-block"
 					/>
-					<v-card-title style="display: inline-block">{{ pool.title }}</v-card-title>
+					<v-card-title style="display: inline-block; color: #fec90b">{{
+						pool.title
+					}}</v-card-title>
 				</template>
 				<template v-slot:append>
 					<audio :src="pool.voice.url" controls />
@@ -100,7 +102,8 @@ onMounted(async () => {
 	await setInterval(() => {
 		poolCards.value.map(pool => {
 			poolTimeGet.value[pool.post_id] = getLastPoolTime(pool.time.end_stamp - Date.now());
-			poolTimePass.value[pool.post_id] = (pool.time.end_stamp - Date.now()) / (pool.time.end_stamp - pool.time.start_stamp) * 100;
+			poolTimePass.value[pool.post_id] =
+				((pool.time.end_stamp - Date.now()) / (pool.time.end_stamp - pool.time.start_stamp)) * 100;
 		});
 	}, 1000);
 	loading.value = false;
@@ -140,6 +143,9 @@ async function toPost(pool: GachaCard) {
 
 .pool-card {
 	margin: 10px;
+	background: rgba(0, 0, 0, 0.5);
+	border-radius: 10px;
+	color: #faf7e8;
 }
 
 .Home-pool {
@@ -152,12 +158,14 @@ async function toPost(pool: GachaCard) {
 	height: auto;
 	margin-bottom: 10px;
 	overflow: hidden;
+	border-radius: 10px;
 }
 
 .pool-cover img {
 	width: 100%;
 	height: auto;
 	transition: all 0.5s;
+	border-radius: 10px;
 }
 
 .pool-cover :hover {
@@ -170,6 +178,10 @@ async function toPost(pool: GachaCard) {
 	width: 100%;
 	height: 80px;
 	display: flex;
+}
+
+.pool-character img {
+	border-radius: 10px;
 }
 
 .pool-icon {
