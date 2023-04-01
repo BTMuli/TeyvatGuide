@@ -20,9 +20,9 @@
 					<img src="/source/UI/paimon.webp" alt="homeIcon" class="sideIcon" />
 				</template>
 			</v-list-item>
-			<v-list-item title="咨讯" value="news" link href="/news">
+			<v-list-item title="公告" value="announcements" link href="/announcements">
 				<template v-slot:prepend>
-					<img src="../assets/icons/board.svg" alt="newsIcon" class="sideIcon" />
+					<img src="../assets/icons/board.svg" alt="annoIcon" class="sideIcon" />
 				</template>
 			</v-list-item>
 			<v-list-item title="成就" value="achievements" link href="/achievements">

@@ -2,10 +2,11 @@
  * @file router modules main.ts
  * @description 主路由模块
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha
+ * @since Alpha v0.1.1
  */
 
 // 信息展示
+import Announcements from "../../pages/Announcements.vue";
 import Home from "../../pages/Home.vue";
 import News from "../../pages/News.vue";
 import GCG from "../../pages/GCG.vue";
@@ -24,6 +25,11 @@ const mainRoutes = [
 		path: "/achievements",
 		name: "成就",
 		component: Achievements,
+	},
+	{
+		path: "/announcements",
+		name: "公告",
+		component: Announcements,
 	},
 	{
 		path: "/config",

@@ -25,7 +25,8 @@
 					"https://api-static.mihoyo.com/*",
 					"https://bbs-api.mihoyo.com/*",
 					"https://bbs-api.miyoushe.com/*",
-					"https://bbs.mihoyo.com/*"
+					"https://bbs.mihoyo.com/*",
+					"https://hk4e-api.mihoyo.com/*"
 				]
 			},
 			"shell": {
