@@ -21,12 +21,14 @@
 			</v-main>
 		</v-layout>
 	</div>
+	<t-back-top />
 </template>
 
 <script lang="ts" setup>
 // vue
 import { onMounted, ref } from "vue";
 import TSidebar from "./components/t-sidebar.vue";
+import TBackTop from "./components/t-backTop.vue";
 // tauri
 import { fs, window } from "@tauri-apps/api";
 // store
