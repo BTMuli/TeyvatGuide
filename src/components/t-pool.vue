@@ -135,7 +135,7 @@ async function toPost(pool: GachaCard) {
 }
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
 .pool-card {
 	font-family: "Genshin", serif;
 	width: 100%;

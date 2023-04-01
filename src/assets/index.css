@@ -26,11 +26,7 @@
 	color: #faf7e8 !important;
 }
 
-.card-btn svg {
+.card-btn img {
 	width: 18px;
 	height: 18px;
-}
-
-.card-btn svg path {
-	fill: #faf7e8;
 }

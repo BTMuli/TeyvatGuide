@@ -348,7 +348,7 @@ async function exportJson() {
 }
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
 /* 顶部按钮 */
 .top-btn {
 	background: #393b40;

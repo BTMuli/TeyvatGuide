@@ -123,7 +123,7 @@ async function toPost(card: PositionCard) {
 }
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
 .position-card {
 	margin-top: 10px;
 	font-family: "Genshin", serif;

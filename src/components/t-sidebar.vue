@@ -76,7 +76,7 @@ function submenu(value: string) {
 }
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
 .sideList {
 	font-family: "Genshin-Light", serif;
 }

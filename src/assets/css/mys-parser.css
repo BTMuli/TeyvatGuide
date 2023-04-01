@@ -51,6 +51,7 @@
 .mys-post-vod {
 	width: 800px;
 	height: 450px;
+	border-radius: 10px;
 }
 
 .mys-post-iframe {

@@ -38,7 +38,7 @@ const props = defineProps({
 	},
 });
 </script>
-<style lang="css">
+<style lang="css" scoped>
 .loading-div {
 	position: v-bind(position);
 	display: flex;

@@ -164,7 +164,7 @@ async function setDefaultConfig() {
 }
 </script>
 
-<style lang="css">
+<style lang="css" scoped>
 .config-list {
 	margin: 10px;
 	font-family: "Genshin-Light", serif;
