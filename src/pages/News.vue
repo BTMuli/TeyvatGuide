@@ -8,6 +8,12 @@
 			<v-tab value="activity" title="活动" />
 			<v-tab value="news" title="新闻" />
 			<v-spacer></v-spacer>
+			<v-btn class="switch-btn" @click="switchAnno">
+				<template v-slot:prepend>
+					<v-icon>mdi-bullhorn</v-icon>
+				</template>
+				切换游戏内公告
+			</v-btn>
 			<v-text-field
 				v-show="appStore.devMode"
 				v-model="search"
@@ -136,6 +142,7 @@
 <script lang="ts" setup>
 // vue
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import TLoading from "../components/t-loading.vue";
 // tauri
 import { dialog } from "@tauri-apps/api";
@@ -147,7 +154,6 @@ import MysOper from "../plugins/Mys";
 import { createTGWindow } from "../utils/TGWindow";
 // interface
 import { NewsCard, NewsData } from "../plugins/Mys/interface/news";
-import { useRouter } from "vue-router";
 
 // Store
 const appStore = useAppStore();
@@ -188,6 +194,10 @@ onMounted(async () => {
 	tab.value = "notice";
 	loading.value = false;
 });
+
+function switchAnno() {
+	router.push("/announcements");
+}
 
 // 加载更多
 async function loadMore(data: string) {
@@ -321,6 +331,15 @@ async function searchPost() {
 	width: 100%;
 	height: 150px;
 	transition: all 0.3s linear;
+}
+/* switch */
+.switch-btn {
+	font-family: Genshin, serif;
+	background: #ffca0a;
+	height: 40px;
+	margin-right: 10px;
+	margin-top: 5px;
+	color: #546d8b;
 }
 /* load more */
 .load-news {
