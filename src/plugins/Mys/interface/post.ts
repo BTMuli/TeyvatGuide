@@ -2,7 +2,7 @@
  * @file plugins Mys interface post.ts
  * @description Mys 插件帖子接口
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha
+ * @since Alpha v0.1.1
  */
 
 import { MysResponse } from "./base";
@@ -227,12 +227,27 @@ export interface PostStat {
 }
 
 /**
+ * @description 帖子内容-结构化
+ * @description 当用户发帖时，解析内容用这个，为 post.content 的反序列化
+ * @since Alpha v0.1.1
+ * @interface PostContent
+ * @property {string} describe 描述
+ * @property {string[]} imgs 图片 URL
+ * @return {PostContent}
+ */
+export interface PostContent {
+	describe: string;
+	imgs?: string[];
+}
+
+/**
  * @description 帖子结构化内容
  * @since Alpha v0.1.1
  * @interface PostStructuredContent
  * @property {string|object} insert 插入内容
  * @property {string} insert.image 图片 URL
  * @property {PostStructuredContentVod} insert.vod 视频信息
+ * @property {string} insert.video 外部视频 URL
  * @property {string} insert.backup_text 折叠文本
  * @property {object} insert.lottery 抽奖，当 backup_text 为 [抽奖]
  * @property {string} insert.lottery.id 抽奖 ID
@@ -256,6 +271,7 @@ export interface PostStructuredContent {
 	insert:
 		| {
 				image?: string;
+				video?: string;
 				vod?: PostStructuredContentVod;
 				backup_text?: string;
 				lottery?: {

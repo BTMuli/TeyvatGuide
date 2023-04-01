@@ -4,7 +4,7 @@
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.1
  */
-import { PostStructuredContent } from "../interface/post";
+import { PostContent, PostData, PostStructuredContent } from "../interface/post";
 
 /**
  * @description 检测链接是否是米游社帖子
@@ -20,15 +20,59 @@ export function IsMysPost(url: string): boolean {
 }
 
 /**
+ * @description 解析用户帖子，将其转换为 PostStructContent
+ * @since Alpha v0.1.1
+ * @see PostContent
+ * @param {string} content 帖子内容
+ * @returns {string} 解析后的内容
+ */
+export function contentParser(content: string): string {
+	const data = JSON.parse(content);
+	const result: PostStructuredContent[] = [];
+	// 遍历 data 属性，值
+	Object.keys(data).forEach(key => {
+		switch (key) {
+			case "describe":
+				result.push({
+					insert: data.describe,
+				});
+				break;
+			case "imgs":
+				for (const image of data.imgs) {
+					result.push({
+						insert: {
+							image: image,
+						},
+					});
+				}
+				break;
+			default:
+				// 如果是其他属性，就直接插入
+				result.push({
+					insert: JSON.stringify(data[key]),
+				});
+		}
+	});
+	return JSON.stringify(result);
+}
+
+/**
  * @description 解析Mys数据
  * @since Alpha v0.1.1
- * @param {string} data Mys数据
+ * @param {PostData} post Mys数据
  * @description 为了安全考虑，不会解析所有的属性，只会解析几个常用的属性
  * @returns {string} 解析后的HTML，可作为 v-html 使用
  */
-export function PostParser(data: string): string {
+export function PostParser(post: PostData): string {
+	const postContent = post.post.content;
+	let parserData;
+	if (postContent.startsWith("<")) {
+		parserData = post.post.structured_content;
+	} else {
+		parserData = contentParser(postContent);
+	}
 	// Json 化
-	let jsonData: PostStructuredContent[] = JSON.parse(data);
+	let jsonData: PostStructuredContent[] = JSON.parse(parserData);
 	// 创建 div
 	const doc = document.createElement("div");
 	// 遍历 Json 数据
@@ -54,6 +98,8 @@ function ParserTransfer(data: PostStructuredContent): HTMLDivElement | HTMLSpanE
 		return ImageParser(data);
 	} else if (data.insert.vod) {
 		return VideoParser(data);
+	} else if (data.insert.video) {
+		return VideoParser(data);
 	} else if (data.insert.backup_text) {
 		return BackupTextParser(data);
 	} else if (data.insert.link_card) {
@@ -61,9 +107,27 @@ function ParserTransfer(data: PostStructuredContent): HTMLDivElement | HTMLSpanE
 	} else if (data.insert.divider) {
 		return DividerParser(data);
 	} else {
-		console.log(data);
-		throw new Error("Unknown data.insert type");
+		return UnknownParser(data);
 	}
+}
+
+/**
+ * @description 解析未知数据
+ * @since Alpha v0.1.1
+ * @param {PostStructuredContent} data Mys数据
+ * @returns {HTMLDivElement} 解析后的未知数据
+ */
+function UnknownParser(data: PostStructuredContent): HTMLDivElement {
+	// 创建 div
+	const div = document.createElement("div");
+	div.classList.add("mys-post-unknown");
+	// 创建 code，将数据放入 code
+	const code = document.createElement("code");
+	code.innerText = JSON.stringify(data);
+	// 插入 code
+	div.appendChild(code);
+	// 返回 div
+	return div;
 }
 
 /**
@@ -222,34 +286,42 @@ function VideoParser(data: PostStructuredContent): HTMLDivElement {
 	if (typeof data.insert === "string") {
 		throw new Error("data.insert is a string");
 	}
-	if (!data.insert.vod) {
+	if (!data.insert.vod && !data.insert.video) {
 		throw new Error("data.insert.vod is not defined");
 	}
 	// 创建 div
 	const div = document.createElement("div");
-	// 创建视频
-	const video = document.createElement("video");
-	// 获取 resolutions中size最大的视频
-	const resolution = data.insert.vod.resolutions.reduce((prev: any, curr: any) => {
-		if (prev.size > curr.size) return prev;
-		return curr;
-	});
-	// 设置视频属性
-	video.poster = data.insert.vod.cover; // 设置封面
-	video.controls = true; // 设置 controls
-	// 添加 class
-	video.classList.add("mys-post-vod");
-	// 添加 source
-	const source = document.createElement("source");
-	source.src = resolution.url;
-	source.type = resolution.format === ".mp4" ? "video/mp4" : "video/webm";
-	// 插入 source
-	video.appendChild(source);
-	// 插入 video
-	div.appendChild(video);
-	// 添加 class
 	div.classList.add("mys-post-div");
-	// 返回 div
+	if (data.insert.vod) {
+		// 创建视频
+		const video = document.createElement("video");
+		video.classList.add("mys-post-vod");
+		// 获取 resolutions中size最大的视频
+		const resolution = data.insert.vod.resolutions.reduce((prev: any, curr: any) => {
+			if (prev.size > curr.size) return prev;
+			return curr;
+		});
+		video.poster = data.insert.vod.cover; // 设置封面
+		video.controls = true; // 设置 controls
+		// 添加 source
+		const source = document.createElement("source");
+		source.src = resolution.url;
+		source.type = resolution.format === ".mp4" ? "video/mp4" : "video/webm";
+		// 插入 source
+		video.appendChild(source);
+		// 插入 video
+		div.appendChild(video);
+	} else if (data.insert.video) {
+		// 创建 iframe
+		const video = document.createElement("iframe");
+		video.classList.add("mys-post-iframe");
+		// 设置 iframe 属性
+		video.src = data.insert.video;
+		video.allowFullscreen = true;
+		video.sandbox.add("allow-top-navigation", "allow-same-origin", "allow-forms", "allow-scripts");
+		// 插入 video
+		div.appendChild(video);
+	}
 	return div;
 }
 

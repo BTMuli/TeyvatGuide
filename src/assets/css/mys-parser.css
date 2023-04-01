@@ -53,6 +53,14 @@
 	height: 450px;
 }
 
+.mys-post-iframe {
+	width: 800px;
+	height: 450px;
+	overflow: hidden;
+	border: 0;
+	border-radius: 10px;
+}
+
 .mys-post-link-card {
 	width: 800px;
 	height: 200px;
@@ -62,6 +70,17 @@
 	background: #faf7e8;
 }
 
+.mys-post-unknown {
+	width: 800px;
+	background: #5b738f;
+	color: #faf7e8;
+	font-family: Consolas, monospace;
+	border-radius: 10px;
+	padding: 10px;
+	margin: 10px auto;
+	border: 2px solid #485466;
+}
+
 .mys-post-link-card-cover {
 	width: auto;
 	height: 180px;
@@ -69,6 +88,7 @@
 }
 
 .mys-post-link-card-cover img {
+	max-width: 320px;
 	width: auto;
 	height: 180px;
 	border-radius: 10px;
