@@ -4,7 +4,7 @@
 	</div>
 	<div v-else>
 		<v-tabs v-model="tab" align-tabs="start" class="global-font">
-			<div v-show="doSearch">
+			<div v-show="!doSearch">
 				<v-tab value="character" title="角色牌" />
 				<v-tab value="action" title="行动牌" />
 				<v-tab value="monster" title="魔物牌" />
