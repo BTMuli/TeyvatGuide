@@ -4,7 +4,10 @@
 			<v-list-item-title style="color: #fec90b; margin-left: 10px; font-family: Genshin, serif"
 				>近期活动</v-list-item-title
 			>
-			<div class="position-grid">
+			<div v-if="loading">
+				<t-loading :title="loadingTitle" :empty="loadingEmpty" position="relative" />
+			</div>
+			<div v-else class="position-grid">
 				<v-card
 					v-for="card in positionCards"
 					style="background: #faf7e8; color: #546d8b; border-radius: 10px"
@@ -46,6 +49,7 @@
 <script lang="ts" setup>
 // vue
 import { ref, onMounted } from "vue";
+import TLoading from "./t-loading.vue";
 import { useRouter } from "vue-router";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
@@ -57,6 +61,8 @@ import { Map } from "../interface/Base";
 
 // loading
 const loading = ref(true as boolean);
+const loadingTitle = ref("正在加载近期活动");
+const loadingEmpty = ref(false as boolean);
 
 // 数据
 const positionCards = ref([] as PositionCard[]);
@@ -66,7 +72,15 @@ const router = useRouter();
 
 onMounted(async () => {
 	try {
+		loadingTitle.value = "正在获取近期活动数据";
 		const positionData = await MysOper.Position.get();
+		if (!positionData) {
+			loadingEmpty.value = true;
+			loadingTitle.value = "暂无近期活动";
+			return;
+		}
+		loadingEmpty.value = false;
+		loadingTitle.value = "正在渲染近期活动";
 		positionCards.value = MysOper.Position.card(positionData);
 		positionCards.value.forEach(card => {
 			positionTimeGet.value[card.post_id] = getLastPositionTime(card.time.end_stamp - Date.now());
@@ -105,13 +119,13 @@ async function toPost(card: PositionCard) {
 		},
 	}).href;
 	// 打开新窗口
-	createTGWindow(path, "祈愿", card.title, 960, 720, false);
+	createTGWindow(path, "近期活动", card.title, 960, 720, false);
 }
 </script>
 
 <style lang="css">
 .position-card {
-	margin: 0 10px;
+	margin-top: 10px;
 	font-family: "Genshin", serif;
 	background: #546d8b;
 	border-radius: 10px;
@@ -119,8 +133,8 @@ async function toPost(card: PositionCard) {
 
 .position-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+	grid-template-columns: repeat(3, minmax(400px, 1fr));
 	grid-gap: 20px;
-	padding: 10px;
+	margin-top: 10px;
 }
 </style>
