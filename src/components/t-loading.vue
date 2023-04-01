@@ -32,11 +32,15 @@ const props = defineProps({
 		type: Boolean,
 		default: false,
 	},
+	position: {
+		type: String,
+		default: "absolute",
+	},
 });
 </script>
 <style lang="css">
 .loading-div {
-	position: fixed;
+	position: v-bind(position);
 	display: flex;
 	top: 25%;
 	left: 25%;
