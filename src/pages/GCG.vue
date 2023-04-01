@@ -30,8 +30,12 @@
 							class="card-cls"
 							@click="toOuter(item.name, item.id)"
 						>
-							<v-img src="/source/GCG/base/bg-normal.webp" class="GCG-border"></v-img>
-							<v-img :src="item.icon.normal" class="GCG-cover"></v-img>
+							<div class="GCG-border">
+								<img src="/source/GCG/base/bg-normal.webp" alt="border" />
+							</div>
+							<div class="GCG-cover">
+								<img :src="item.icon.normal" alt="cover" />
+							</div>
 							<div class="GCG-content">
 								<span>{{ item.name }}</span>
 							</div>
@@ -46,8 +50,12 @@
 							class="card-cls"
 							@click="toOuter(item.name, item.id)"
 						>
-							<v-img src="/source/GCG/base/bg-normal.webp" class="GCG-border"></v-img>
-							<v-img :src="item.icon.normal" class="GCG-cover"></v-img>
+							<div class="GCG-border">
+								<img src="/source/GCG/base/bg-normal.webp" alt="border" />
+							</div>
+							<div class="GCG-cover">
+								<img :src="item.icon.normal" alt="cover" />
+							</div>
 							<div class="GCG-content">
 								<span>{{ item.name }}</span>
 							</div>
@@ -62,8 +70,12 @@
 							class="card-cls"
 							@click="toOuter(item.name, item.id)"
 						>
-							<v-img src="/source/GCG/base/bg-normal.webp" class="GCG-border"></v-img>
-							<v-img :src="item.icon.normal" class="GCG-cover"></v-img>
+							<div class="GCG-border">
+								<img src="/source/GCG/base/bg-normal.webp" alt="border" />
+							</div>
+							<div class="GCG-cover">
+								<img :src="item.icon.normal" alt="cover" />
+							</div>
 							<div class="GCG-content">
 								<span>{{ item.name }}</span>
 							</div>
@@ -74,18 +86,22 @@
 		</div>
 		<div v-else>
 			<div class="GCG-grid">
-				<v-card
+				<div
 					v-for="item in CardsInfoS"
 					:key="item.id"
 					class="card-cls"
 					@click="toOuter(item.name, item.id)"
 				>
-					<v-img src="/source/GCG/base/bg-normal.webp" class="GCG-border"></v-img>
-					<v-img :src="item.icon.normal" class="GCG-cover"></v-img>
+					<div class="GCG-border">
+						<img src="/source/GCG/base/bg-normal.webp" alt="border" />
+					</div>
+					<div class="GCG-cover">
+						<img :src="item.icon.normal" alt="cover" />
+					</div>
 					<div class="GCG-content">
 						<span>{{ item.name }}</span>
 					</div>
-				</v-card>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -143,7 +159,7 @@ async function searchCard() {
 	}
 }
 </script>
-<style lang="css">
+<style lang="css" scoped>
 .GCG-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -158,15 +174,27 @@ async function searchCard() {
 	width: 140px;
 	height: 240px;
 	overflow: hidden;
+	transition: all 0.3s;
+	border-radius: 10px;
+}
+
+.card-cls:hover .GCG-cover {
+	transform: scale(1.1);
+	transition: all 0.3s;
 }
 
 .GCG-border {
 	position: absolute;
+	border-radius: 10px;
 	top: 0;
 	left: 0;
-	width: 140px;
-	height: 240px;
 	overflow: hidden;
+}
+
+.GCG-border img {
+	width: 100%;
+	height: 100%;
+	border-radius: 10px;
 }
 
 .GCG-cover {
@@ -174,24 +202,16 @@ async function searchCard() {
 	transition: all 0.3s;
 	top: 0;
 	left: 0;
-	width: 140px;
-	height: 240px;
+	width: 100%;
+	height: 100%;
 	z-index: -1;
 }
 
 .GCG-cover img {
-	height: 240px;
-	width: auto;
-}
-
-.GCG-grid :hover {
-	cursor: pointer;
-}
-
-.GCG-grid :hover .GCG-cover {
-	transform: scale(1.1);
-	transition: all 0.3s;
-	overflow: hidden;
+	width: 100%;
+	height: 100%;
+	border-radius: 10px;
+	object-fit: cover;
 }
 
 .GCG-content {
@@ -204,6 +224,7 @@ async function searchCard() {
 	color: white;
 	display: flex;
 	font-size: small;
+	overflow: hidden;
 	font-family: Genshin, serif;
 	border-radius: 0 0 10px 10px;
 	justify-content: center;
