@@ -7,6 +7,17 @@
 			<v-tab value="notice" title="公告" />
 			<v-tab value="activity" title="活动" />
 			<v-tab value="news" title="新闻" />
+			<v-spacer></v-spacer>
+			<v-text-field
+				v-show="appStore.devMode"
+				v-model="search"
+				append-icon="mdi-magnify"
+				label="搜索"
+				single-line
+				hide-details
+				@click:append="searchPost"
+				@keyup.enter="searchPost"
+			></v-text-field>
 		</v-tabs>
 		<v-window v-model="tab">
 			<v-window-item value="notice">
@@ -144,6 +155,8 @@ const loading = ref(true);
 const loadingTitle = ref("正在加载");
 // 路由
 const router = useRouter();
+// search
+const search = ref("");
 
 // 数据
 const tab = ref("");
@@ -175,11 +188,16 @@ onMounted(async () => {
 
 // 加载更多
 async function loadMore(data: string) {
+	let check = true;
 	switch (data) {
 		case "notice":
-			if (noticeData.value.is_last || noticeData.value.last_id === 50) {
+			if (noticeData.value.is_last) {
 				await dialog.message("已经是最后一页了");
 				return;
+			}
+			if (noticeData.value.last_id === 50) {
+				check = await dialog.confirm("由于API限制，获取到的数据数量可能变更为20，是否继续？");
+				if (!check) return;
 			}
 			loading.value = true;
 			loadingTitle.value = "正在获取公告数据...";
@@ -189,9 +207,13 @@ async function loadMore(data: string) {
 			loading.value = false;
 			break;
 		case "activity":
-			if (activityData.value.is_last || activityData.value.last_id === 50) {
+			if (activityData.value.is_last) {
 				await dialog.message("已经是最后一页了");
 				return;
+			}
+			if (activityData.value.last_id === 50) {
+				check = await dialog.confirm("由于API限制，获取到的数据数量可能变更为20，是否继续？");
+				if (!check) return;
 			}
 			loading.value = true;
 			loadingTitle.value = "正在获取活动数据...";
@@ -201,9 +223,13 @@ async function loadMore(data: string) {
 			loading.value = false;
 			break;
 		case "news":
-			if (newsData.value.is_last || newsData.value.last_id === 50) {
+			if (newsData.value.is_last) {
 				await dialog.message("已经是最后一页了");
 				return;
+			}
+			if (newsData.value.last_id === 50) {
+				check = await dialog.confirm("由于API限制，获取到的数据数量可能变更为20，是否继续？");
+				if (!check) return;
 			}
 			loading.value = true;
 			loadingTitle.value = "正在获取新闻数据...";
@@ -215,27 +241,59 @@ async function loadMore(data: string) {
 	}
 }
 
-async function toPost(item: NewsCard) {
-	// 获取路由路径
-	const path = router.resolve({
-		name: "帖子详情",
-		params: {
-			post_id: item.post_id.toString(),
-		},
-	}).href;
-	// 打开新窗口
-	createTGWindow(path, "帖子", item.title, 960, 720, false);
+async function toPost(item: NewsCard | string) {
+	if (typeof item === "string") {
+		const path = router.resolve({
+			name: "帖子详情",
+			params: {
+				post_id: item,
+			},
+		}).href;
+		createTGWindow(path, "帖子-Dev", item, 960, 720, false);
+	} else {
+		const path = router.resolve({
+			name: "帖子详情",
+			params: {
+				post_id: item.post_id.toString(),
+			},
+		}).href;
+		createTGWindow(path, "帖子", item.title, 960, 720, false);
+	}
 }
-async function toJson(item: NewsCard) {
-	// 获取路由路径
-	const path = router.resolve({
-		name: "帖子详情（JSON）",
-		params: {
-			post_id: item.post_id.toString(),
-		},
-	}).href;
-	// 打开新窗口
-	createTGWindow(path, "帖子-JSON", `${item.title}-JSON`, 960, 720, false);
+async function toJson(item: NewsCard | string) {
+	if (typeof item === "string") {
+		const path = router.resolve({
+			name: "帖子详情（JSON）",
+			params: {
+				post_id: item,
+			},
+		}).href;
+		createTGWindow(path, "帖子-JSON-Dev", `${item}-JSON`, 960, 720, false);
+		return;
+	} else {
+		const path = router.resolve({
+			name: "帖子详情（JSON）",
+			params: {
+				post_id: item.post_id.toString(),
+			},
+		}).href;
+		createTGWindow(path, "帖子-JSON", `${item.title}-JSON`, 960, 720, false);
+		return;
+	}
+}
+
+async function searchPost() {
+	if (search.value === "") {
+		await dialog.message("请输入搜索内容");
+		return;
+	}
+	if (!isNaN(Number(search.value))) {
+		await toPost(search.value);
+		await toJson(search.value);
+	} else {
+		await dialog.message("请输入数字");
+		return;
+	}
 }
 </script>
 
