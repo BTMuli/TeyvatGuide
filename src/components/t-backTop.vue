@@ -15,7 +15,14 @@ const canTop = ref(false); //默认不显示
 // 监听滚动事件
 function handleScroll() {
 	scrollTop.value = document.documentElement.scrollTop || document.body.scrollTop;
+	// 超过500px显示回到顶部按钮
 	canTop.value = scrollTop.value > 500;
+	// 没超过500，但是到底部了，也显示回到顶部按钮
+	if (!canTop.value) {
+		const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+		const clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
+		canTop.value = scrollHeight - clientHeight - scrollTop.value <= 0;
+	}
 }
 
 // 点击回到顶部

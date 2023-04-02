@@ -124,7 +124,6 @@ onMounted(async () => {
 		activity: activityCard,
 		game: newsCard,
 	};
-	console.log(annoCards.value);
 	tab.value = "activity";
 	loading.value = false;
 });
@@ -166,6 +165,7 @@ async function toJson(item: AnnoListCard) {
 	border-radius: 10px;
 	background: #faf7e8;
 	color: #546d8b;
+	border-bottom: #4b5366 1px solid;
 }
 
 .anno-cover {
