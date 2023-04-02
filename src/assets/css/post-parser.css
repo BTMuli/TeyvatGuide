@@ -2,6 +2,7 @@
  * @description 米游社解析 css
  * @since Alpha v0.1.1
  */
+/* todo scoped 不生效 */
 .mys-post-body {
 	margin: 20px auto;
 	width: 800px;

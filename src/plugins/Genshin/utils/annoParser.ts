@@ -15,13 +15,30 @@ export function parseAnnoContent(data: string): string {
 	const htmlBase = new DOMParser().parseFromString(data, "text/html");
 	// 遍历所有 span 标签
 	htmlBase.querySelectorAll("span").forEach(span => {
-		return (span.innerHTML = decodeRegExp(span.innerHTML));
+		if (span.style.fontSize) {
+			span.style.fontSize = "";
+		}
+		if (span.children.length === 0) {
+			return (span.innerHTML = decodeRegExp(span.innerHTML));
+		} else {
+			span.querySelectorAll("*").forEach(child => {
+				if (child.children.length === 0) {
+					return (child.innerHTML = decodeRegExp(child.innerHTML));
+				}
+			});
+		}
 	});
 	// 遍历所有 p 标签
 	htmlBase.querySelectorAll("p").forEach(p => {
 		// 如果没有子元素
 		if (p.children.length === 0) {
 			return (p.innerHTML = decodeRegExp(p.innerHTML));
+		} else {
+			p.querySelectorAll("*").forEach(child => {
+				if (child.children.length === 0) {
+					return (child.innerHTML = decodeRegExp(child.innerHTML));
+				}
+			});
 		}
 	});
 	// 遍历所有 a 标签
