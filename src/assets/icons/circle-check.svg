@@ -1,0 +1,14 @@
+<svg width="256.000000" height="256.000000" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<desc>
+			Created with Pixso.
+	</desc>
+	<g clip-path="url(#clip6_1)">
+		<circle id="椭圆 3" cx="128.000000" cy="128.000000" r="125.000000" fill="#313131"/>
+		<ellipse id="椭圆 4" cx="128.000000" cy="128.000000" rx="72.499992" ry="72.500000" stroke="#FFCB32" stroke-width="15.000000"/>
+	</g>
+	<defs>
+		<clipPath id="clip6_1">
+			<rect id="circle-check" width="256.000000" height="256.000000" fill="white"/>
+		</clipPath>
+	</defs>
+</svg>

@@ -12,11 +12,24 @@
 
 /* card action 内的按钮 */
 .card-btn {
-	background: #546d8b !important;
-	color: #faf7e8 !important;
+	background: #4a5366;
+	color: #ece5d8;
+	border-radius: 50px;
+	margin-left: 5px;
 }
 
 .card-btn img {
+	width: 20px;
+	height: 20px;
+	margin: 5px;
+}
+
+.card-dev-btn {
+	background: #546d8b;
+	color: #faf7e8;
+}
+
+.card-dev-btn img {
 	width: 18px;
 	height: 18px;
 }

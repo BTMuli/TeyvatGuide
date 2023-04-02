@@ -34,11 +34,10 @@
 							剩余时间：
 							<span style="color: #90caf9">{{ positionTimeGet[card.post_id] }}</span>
 						</span>
-						<v-btn @click="toPost(card)" class="ms-2 card-btn mr-2">
+						<v-btn @click="toPost(card)" class="card-btn">
 							<template v-slot:prepend>
-								<img src="../assets/icons/arrow-right.svg" alt="right" onload="SVGInject(this)" />
+								<img src="../assets/icons/circle-check.svg" alt="check" />查看
 							</template>
-							查看
 						</v-btn>
 					</v-card-actions>
 				</v-card>

@@ -3,7 +3,7 @@
 		<t-loading :title="loadingTitle" />
 	</div>
 	<div v-else>
-		<v-tabs v-model="tab" align-tabs="start" class="global-font mb-2">
+		<v-tabs v-model="tab" align-tabs="start" class="news-tabs">
 			<v-tab value="notice" title="公告" />
 			<v-tab value="activity" title="活动" />
 			<v-tab value="news" title="新闻" />
@@ -36,12 +36,11 @@
 						<v-card-actions>
 							<v-btn @click="toPost(item)" class="card-btn">
 								<template v-slot:prepend>
-									<img src="../assets/icons/arrow-right.svg" alt="right" />
+									<img src="../assets/icons/circle-check.svg" alt="check" />查看
 								</template>
-								查看
 							</v-btn>
 							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-							<v-btn @click="toJson(item)" class="card-btn" v-show="appStore.devMode">
+							<v-btn @click="toJson(item)" class="card-dev-btn" v-show="appStore.devMode">
 								<template v-slot:prepend>
 									<img src="../assets/icons/arrow-right.svg" alt="right" />
 								</template>
@@ -70,9 +69,8 @@
 						<v-card-actions>
 							<v-btn @click="toPost(item)" class="card-btn">
 								<template v-slot:prepend>
-									<img src="../assets/icons/arrow-right.svg" alt="right" />
+									<img src="../assets/icons/circle-check.svg" alt="check" />查看
 								</template>
-								查看
 							</v-btn>
 							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
 							<div v-show="!appStore.devMode">
@@ -84,7 +82,7 @@
 									>{{ item.status?.status }}</v-btn
 								>
 							</div>
-							<v-btn @click="toJson(item)" class="card-btn" v-show="appStore.devMode">
+							<v-btn @click="toJson(item)" class="card-dev-btn" v-show="appStore.devMode">
 								<template v-slot:prepend>
 									<img src="../assets/icons/arrow-right.svg" alt="right" />
 								</template>
@@ -112,12 +110,11 @@
 						<v-card-actions>
 							<v-btn @click="toPost(item)" class="card-btn">
 								<template v-slot:prepend>
-									<img src="../assets/icons/arrow-right.svg" alt="right" />
+									<img src="../assets/icons/circle-check.svg" alt="check" />查看
 								</template>
-								查看
 							</v-btn>
 							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-							<v-btn @click="toJson(item)" class="card-btn" v-show="appStore.devMode">
+							<v-btn @click="toJson(item)" class="card-dev-btn" v-show="appStore.devMode">
 								<template v-slot:prepend>
 									<img src="../assets/icons/arrow-right.svg" alt="right" />
 								</template>
@@ -319,6 +316,11 @@ async function searchPost() {
 </script>
 
 <style lang="css" scoped>
+.news-tabs {
+	font-family: Genshin, serif;
+	margin-bottom: 10px;
+}
+
 .news-grid {
 	font-family: Genshin, serif;
 	display: grid;

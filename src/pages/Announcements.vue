@@ -38,7 +38,7 @@
 								{{ item.end_time.split(" ")[0] }}</v-card-subtitle
 							>
 							<v-card-subtitle v-show="appStore.devMode">id: {{ item.id }}</v-card-subtitle>
-							<v-btn v-show="appStore.devMode" class="card-btn" @click="toJson(item)">
+							<v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
 								<template v-slot:prepend>
 									<img src="../assets/icons/arrow-right.svg" alt="right" />
 								</template>
@@ -69,7 +69,7 @@
 								{{ item.end_time.split(" ")[0] }}</v-card-subtitle
 							>
 							<v-card-subtitle v-show="appStore.devMode">id: {{ item.id }}</v-card-subtitle>
-							<v-btn v-show="appStore.devMode" class="card-btn" @click="toJson(item)">
+							<v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
 								<template v-slot:prepend>
 									<img src="../assets/icons/arrow-right.svg" alt="right" />
 								</template>
@@ -187,6 +187,7 @@ async function toJson(item: AnnoListCard) {
 }
 
 .anno-btn {
+	margin-left: 5px;
 	background: #546d8b;
 	color: #faf7e8;
 }
