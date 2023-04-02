@@ -229,8 +229,8 @@ function DividerParser(data: PostStructuredContent): HTMLDivElement {
 		img.src =
 			"https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2022/07/13/line_4.png";
 	} else {
-		console.log(data);
-		throw new Error("Unknown divider type");
+		console.error("Unknown divider type", data);
+		return UnknownParser(data);
 	}
 	// 插入 img
 	div.appendChild(img);
