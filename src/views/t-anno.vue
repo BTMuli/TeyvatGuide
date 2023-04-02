@@ -52,6 +52,4 @@ onMounted(async () => {
 	}, 200);
 });
 </script>
-<style lang="css">
-@import "../assets/css/anno-parser.css";
-</style>
+<style lang="css" src="../assets/css/anno-parser.css" scoped />
