@@ -1,9 +1,10 @@
 <template>
 	<v-list class="position-card">
 		<v-list-item>
-			<v-list-item-title style="color: #fec90b; margin-left: 10px; font-family: Genshin, serif"
-				>近期活动</v-list-item-title
-			>
+			<v-list-item-title style="color: #fec90b; margin-left: 10px; font-family: Genshin, serif">
+				<img src="../assets/icons/board.svg" alt="act" class="position-act-icon" />
+				近期活动
+			</v-list-item-title>
 			<div v-if="loading">
 				<t-loading :title="loadingTitle" :empty="loadingEmpty" position="relative" />
 			</div>
@@ -123,6 +124,12 @@ async function toPost(card: PositionCard) {
 </script>
 
 <style lang="css" scoped>
+.position-act-icon {
+	width: 20px;
+	height: 20px;
+	display: inline-block;
+}
+
 .position-card {
 	margin-top: 10px;
 	font-family: "Genshin", serif;

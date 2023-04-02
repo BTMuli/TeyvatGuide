@@ -1,8 +1,9 @@
 <template>
 	<v-list class="pool-card">
 		<v-list-item>
-			<v-list-item-title style="color: #fec90b; margin-left: 10px; font-family: Genshin, serif"
-				>限时祈愿</v-list-item-title
+			<v-list-item-title style="color: #fec90b; margin-left: 10px; font-family: Genshin, serif">
+				<img src="../assets/icons/icon-wish.svg" alt="wish" class="pool-wish-icon" />
+				限时祈愿</v-list-item-title
 			>
 			<div v-if="loading">
 				<t-loading :title="loadingTitle" :empty="loadingEmpty" position="relative" />
@@ -136,6 +137,12 @@ async function toPost(pool: GachaCard) {
 </script>
 
 <style lang="css" scoped>
+.pool-wish-icon {
+	width: 20px;
+	height: 20px;
+	display: inline-block;
+}
+
 .pool-card {
 	font-family: "Genshin", serif;
 	width: 100%;
