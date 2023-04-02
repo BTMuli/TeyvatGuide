@@ -44,4 +44,6 @@ onMounted(async () => {
 	}, 200);
 });
 </script>
-<style lang="css"></style>
+<style lang="css" scoped>
+@import "../assets/css/post-parser.css";
+</style>

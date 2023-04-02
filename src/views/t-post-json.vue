@@ -2,7 +2,7 @@
 	<div v-if="loading">
 		<t-loading :empty="loadingEmpty" :title="loadingTitle" />
 	</div>
-	<div v-else class="mys-post-json">
+	<div v-else class="dev-json">
 		<json-viewer :value="jsonData" copyable boxed />
 	</div>
 </template>
