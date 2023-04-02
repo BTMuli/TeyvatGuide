@@ -2,7 +2,7 @@
  * @file store modules app.ts
  * @description App store module
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha
+ * @since Alpha v0.1.1
  */
 
 import { defineStore } from "pinia";

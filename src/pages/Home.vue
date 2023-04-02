@@ -1,7 +1,7 @@
 <template>
-	<t-pool v-show="homeStore.pool.show" />
-	<t-position v-show="homeStore.position.show" />
-	<t-calendar v-show="homeStore.calendar.show" />
+	<t-pool v-if="homeStore.pool.show" />
+	<t-position v-if="homeStore.position.show" />
+	<t-calendar v-if="homeStore.calendar.show" />
 </template>
 
 <script lang="ts" setup>

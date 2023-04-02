@@ -27,12 +27,20 @@ const useHomeStore = defineStore({
 	},
 	actions: {
 		async init() {
-			this.calendar.show = true;
-			this.calendar.order = 3;
-			this.pool.show = true;
-			this.pool.order = 1;
-			this.position.show = true;
-			this.position.order = 2;
+			this.$state = {
+				calendar: {
+					show: true,
+					order: 3,
+				},
+				pool: {
+					show: true,
+					order: 1,
+				},
+				position: {
+					show: true,
+					order: 2,
+				},
+			};
 		},
 		getShowItem() {
 			return ["素材日历", "限时祈愿", "近期活动"];

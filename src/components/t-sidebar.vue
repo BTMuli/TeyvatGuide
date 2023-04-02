@@ -20,7 +20,7 @@
 					<img src="/source/UI/paimon.webp" alt="homeIcon" class="sideIcon" />
 				</template>
 			</v-list-item>
-			<v-list-item title="公告" value="announcements" link href="/announcements">
+			<v-list-item title="公告" value="news" link href="/news">
 				<template v-slot:prepend>
 					<img src="../assets/icons/board.svg" alt="annoIcon" class="sideIcon" />
 				</template>
@@ -56,7 +56,9 @@
 </template>
 
 <script lang="ts" setup>
+// vue
 import { ref } from "vue";
+// store
 import useAppStore from "../store/modules/app";
 
 const appStore = useAppStore();
