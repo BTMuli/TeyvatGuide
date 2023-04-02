@@ -1,0 +1,58 @@
+/**
+ * @file plugins Genshin utils annoParser.ts
+ * @description 原神游戏内公告解析工具
+ * @author BTMuli<bt-muli@outlook.com>
+ * @since Alpha v0.1.1
+ */
+
+/**
+ * @description 解析游戏内公告数据
+ * @since Alpha v0.1.1
+ * @param {string} data 游戏内公告数据
+ * @return {string} 解析后的数据
+ */
+export function parseAnnoContent(data: string): string {
+	const htmlBase = new DOMParser().parseFromString(data, "text/html");
+	// 遍历所有 span 标签
+	htmlBase.querySelectorAll("span").forEach(span => {
+		return (span.innerHTML = deleteRedundantTag(span.innerHTML));
+	});
+	// 遍历所有 p 标签
+	htmlBase.querySelectorAll("p").forEach(p => {
+		// 如果没有子元素
+		if (p.children.length === 0) {
+			return (p.innerHTML = deleteRedundantTag(p.innerHTML));
+		}
+	});
+	return htmlBase.body.innerHTML;
+}
+
+/**
+ * @description 删除冗余的标签
+ * @since Alpha v0.1.1
+ * @param {string} data 内容
+ * @return {string} 删除后的内容
+ */
+export function deleteRedundantTag(data: string): string {
+	// 先转义一下
+	return decodeRegExp(data);
+}
+
+/**
+ * @description 转义正则表达式
+ * @since Alpha v0.1.1
+ * @param {string} data 内容
+ * @return {string} 转义后的内容
+ */
+export function decodeRegExp(data: string): string {
+	let res = data;
+	if (res.length === 0) return res;
+	res = res.replace(/&amp;/g, "&");
+	res = res.replace(/&lt;/g, "<");
+	res = res.replace(/&gt;/g, ">");
+	res = res.replace(/&nbsp;/g, " ");
+	res = res.replace(/&#39;/g, "'");
+	res = res.replace(/&quot;/g, '"');
+	res = res.replace(/&apos;/g, "'");
+	return res;
+}

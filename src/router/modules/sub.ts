@@ -11,6 +11,7 @@ import TPostJson from "../../views/t-post-json.vue";
 import TLottery from "../../views/t-lottery.vue";
 // 游戏内公告
 import TAnno from "../../views/t-anno.vue";
+import TAnnoJson from "../../views/t-anno-json.vue";
 
 const subRoutes = [
 	{
@@ -29,9 +30,14 @@ const subRoutes = [
 		component: TLottery,
 	},
 	{
-		path: "/anno/:anno_id",
+		path: "/anno_detail/:anno_id",
 		name: "游戏内公告",
 		component: TAnno,
+	},
+	{
+		path: "/anno_detail_json/:anno_id",
+		name: "游戏内公告（JSON）",
+		component: TAnnoJson,
 	},
 ];
 

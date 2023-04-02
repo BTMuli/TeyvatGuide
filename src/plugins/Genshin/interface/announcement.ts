@@ -194,6 +194,7 @@ export interface AnnoContentItem {
  * @property {string} subtitle 公告副标题
  * @property {string} banner 公告图片
  * @property {string} type_label 公告类型标签
+ * @property {string} tag_icon 公告标签图标
  * @property {string} start_time 公告开始时间
  * @property {string} end_time 公告结束时间
  * @return {AnnoListCard}
@@ -204,6 +205,7 @@ export interface AnnoListCard {
 	subtitle: string;
 	banner: string;
 	type_label: string;
+	tag_icon: string;
 	start_time: string;
 	end_time: string;
 }

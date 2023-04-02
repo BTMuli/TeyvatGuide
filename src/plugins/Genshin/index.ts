@@ -8,14 +8,14 @@
 // Announcement
 import { getAnnouncementList, getAnnouncementContent } from "./request/announcements";
 import { getAnnoCards } from "./utils/announcements";
+import { parseAnnoContent } from "./utils/annoParser";
 
 const GenshinOper = {
 	Announcement: {
-		get: {
-			list: getAnnouncementList,
-			content: getAnnouncementContent,
-		},
+		getList: getAnnouncementList,
+		getContent: getAnnouncementContent,
 		card: getAnnoCards,
+		parser: parseAnnoContent,
 	},
 };
 

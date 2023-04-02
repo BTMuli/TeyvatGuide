@@ -5,8 +5,8 @@
 	<div v-else class="anno-body">
 		<div class="anno-title">{{ annoData.title }}</div>
 		<div class="anno-subtitle">{{ annoData.subtitle }}</div>
-		<img :src="annoData.banner" alt="cover" class="mys-post-img" />
-		<div v-html="annoHtml" />
+		<img :src="annoData.banner" alt="cover" class="anno-img" />
+		<div v-html="annoHtml" class="anno-content" />
 	</div>
 </template>
 <script lang="ts" setup>
@@ -39,9 +39,9 @@ onMounted(async () => {
 	// 获取数据
 	loadingTitle.value = "正在获取数据...";
 	try {
-		annoData.value = await GenshinOper.Announcement.get.content(anno_id);
+		annoData.value = await GenshinOper.Announcement.getContent(anno_id);
 		loadingTitle.value = "正在渲染数据...";
-		annoHtml.value = annoData.value.content;
+		annoHtml.value = GenshinOper.Announcement.parser(annoData.value.content);
 	} catch (error) {
 		loadingEmpty.value = true;
 		loadingTitle.value = "公告不存在或解析失败";
@@ -53,7 +53,8 @@ onMounted(async () => {
 });
 </script>
 <style lang="css" scoped>
-/* todo 完善样式 */
+@import "../assets/css/anno-parser.css";
+
 .anno-body {
 	margin: 20px auto;
 	width: 800px;
@@ -72,5 +73,13 @@ onMounted(async () => {
 	font-size: 16px;
 	color: #a1aeb6;
 	margin-bottom: 16px;
+}
+
+.anno-img {
+	max-width: 100%;
+	width: 800px;
+	height: auto;
+	border-radius: 10px;
+	margin-bottom: 10px;
 }
 </style>

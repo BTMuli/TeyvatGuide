@@ -1,23 +1,13 @@
 @import "fonts/index.css";
-@import "css/mys-parser.css";
 
 /*
  * @description 米游社解析 json
  * @since Alpha v0.1.1
  */
-.mys-post-json {
+.dev-json {
 	padding: 20px;
 	border-radius: 20px;
-}
-
-.mys-post-json * {
-	color: #faf7e8 !important;
-	background-color: #2b2b2b !important;
-	font-family: "Consolas", monospace;
-}
-
-.mys-post-json .jv-toggle {
-	background-color: #faf7e8 !important;
+	font-family: Consolas, serif;
 }
 
 /* card action 内的按钮 */

@@ -23,6 +23,7 @@ export function getAnnoCards(data: AnnoListData): AnnoListCard[] {
 				subtitle: anno.subtitle,
 				banner: anno.banner,
 				type_label: anno.type_label,
+				tag_icon: anno.tag_icon,
 				start_time: anno.start_time,
 				end_time: anno.end_time,
 			});

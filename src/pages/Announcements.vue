@@ -21,19 +21,29 @@
 						<div class="anno-cover" @click="toPost(item)">
 							<img :src="item.banner" alt="cover" />
 						</div>
-						<v-card-title>{{ item.title }}</v-card-title>
+						<v-card-title>
+							{{ item.title }}
+						</v-card-title>
 						<v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
 						<v-card-actions>
-							<v-btn @click="toPost(item)" class="card-btn">
+							<v-btn @click="toPost(item)" class="anno-btn">
 								<template v-slot:prepend>
-									<img src="../assets/icons/arrow-right.svg" alt="right" />
+									<img :src="item.tag_icon || '../assets/icons/arrow-right.svg'" alt="right" />
 								</template>
 								查看
 							</v-btn>
-							<v-card-subtitle
-								><v-icon>mdi-calendar</v-icon> {{ item.start_time.split(" ")[0] }} -
+							<v-card-subtitle v-show="!appStore.devMode">
+								<v-icon>mdi-calendar</v-icon>
+								{{ item.start_time.split(" ")[0] }} -
 								{{ item.end_time.split(" ")[0] }}</v-card-subtitle
 							>
+							<v-card-subtitle v-show="appStore.devMode">id: {{ item.id }}</v-card-subtitle>
+							<v-btn v-show="appStore.devMode" class="card-btn" @click="toJson(item)">
+								<template v-slot:prepend>
+									<img src="../assets/icons/arrow-right.svg" alt="right" />
+								</template>
+								查看数据
+							</v-btn>
 						</v-card-actions>
 					</v-card>
 				</div>
@@ -47,17 +57,24 @@
 						<v-card-title>{{ item.title }}</v-card-title>
 						<v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
 						<v-card-actions>
-							<v-btn @click="toPost(item)" class="card-btn">
+							<v-btn @click="toPost(item)" class="anno-btn">
 								<template v-slot:prepend>
-									<img src="../assets/icons/arrow-right.svg" alt="right" />
+									<img :src="item.tag_icon || '../assets/icons/arrow-right.svg'" alt="right" />
 								</template>
 								查看
 							</v-btn>
-							<v-card-subtitle>
+							<v-card-subtitle v-show="!appStore.devMode">
 								<v-icon>mdi-calendar</v-icon>
 								{{ item.start_time.split(" ")[0] }} -
 								{{ item.end_time.split(" ")[0] }}</v-card-subtitle
 							>
+							<v-card-subtitle v-show="appStore.devMode">id: {{ item.id }}</v-card-subtitle>
+							<v-btn v-show="appStore.devMode" class="card-btn" @click="toJson(item)">
+								<template v-slot:prepend>
+									<img src="../assets/icons/arrow-right.svg" alt="right" />
+								</template>
+								查看数据
+							</v-btn>
 						</v-card-actions>
 					</v-card>
 				</div>
@@ -77,6 +94,10 @@ import GenshinOper from "../plugins/Genshin";
 import { createTGWindow } from "../utils/TGWindow";
 // interface
 import { AnnoListData, AnnoListCard } from "../plugins/Genshin/interface/announcement";
+import useAppStore from "../store/modules/app";
+
+// store
+const appStore = useAppStore();
 
 // loading
 const loading = ref(true);
@@ -94,7 +115,7 @@ const annoData = ref({} as AnnoListData);
 
 onMounted(async () => {
 	loadingTitle.value = "正在获取公告数据";
-	annoData.value = await GenshinOper.Announcement.get.list();
+	annoData.value = await GenshinOper.Announcement.getList();
 	loadingTitle.value = "正在转换公告数据";
 	const listCards = GenshinOper.Announcement.card(annoData.value);
 	const activityCard = listCards.filter(item => item.type_label === "活动公告");
@@ -120,6 +141,16 @@ async function toPost(item: AnnoListCard) {
 		},
 	}).href;
 	createTGWindow(path, "游戏内公告", item.title, 960, 720, false);
+}
+
+async function toJson(item: AnnoListCard) {
+	const path = router.resolve({
+		name: "游戏内公告（JSON）",
+		params: {
+			anno_id: item.id,
+		},
+	}).href;
+	createTGWindow(path, "游戏内公告-JSON", item.title, 960, 720, false);
 }
 </script>
 
@@ -153,6 +184,16 @@ async function toPost(item: AnnoListCard) {
 	width: 100%;
 	height: 130px;
 	transition: all 0.3s linear;
+}
+
+.anno-btn {
+	background: #546d8b;
+	color: #faf7e8;
+}
+
+.anno-btn img {
+	height: 30px;
+	width: 30px;
 }
 
 /* switch */
