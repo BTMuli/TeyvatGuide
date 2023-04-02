@@ -24,7 +24,7 @@ const useAppStore = defineStore({
 			// 侧边栏设置
 			sidebar: {
 				// 是否折叠
-				collapse: false,
+				collapse: true,
 				// 是否显示
 				submenu: {
 					database: false,
@@ -55,7 +55,7 @@ const useAppStore = defineStore({
 		async check() {
 			if (this.sidebar === undefined) {
 				this.sidebar = {
-					collapse: false,
+					collapse: true,
 					submenu: {
 						database: false,
 					},

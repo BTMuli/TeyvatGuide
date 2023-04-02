@@ -60,6 +60,25 @@
 					/>
 				</template>
 			</v-list-item>
+			<v-list-item>
+				<template v-slot:prepend>
+					<v-icon>mdi-view-dashboard</v-icon>
+				</template>
+				<v-select
+					v-model="showHome"
+					:items="homeStore.getShowItem()"
+					label="首页显示组件"
+					multiple
+					chips
+				></v-select>
+				<template v-slot:append>
+					<v-btn @click="submitHome" class="card-btn">
+						<template v-slot:prepend>
+							<img src="../assets/icons/circle-check.svg" alt="check" />提交
+						</template>
+					</v-btn>
+				</template>
+			</v-list-item>
 			<v-list-subheader inset class="config-header">路径</v-list-subheader>
 			<v-divider inset class="border-opacity-75" />
 			<v-list-item prepend-icon="mdi-folder">
@@ -82,6 +101,7 @@ import TLoading from "../components/t-loading.vue";
 import { dialog, fs, app } from "@tauri-apps/api";
 // store
 import useAppStore from "../store/modules/app";
+import useHomeStore from "../store/modules/home";
 import useAchievementsStore from "../store/modules/achievements";
 // utils
 import { WriteTGData } from "../utils/TGIndex";
@@ -90,12 +110,16 @@ import { getDataList } from "../data/init";
 
 // Store
 const appStore = useAppStore();
+const homeStore = useHomeStore();
 const achievementsStore = useAchievementsStore();
 
 // About
 const loading = ref(true);
 const versionApp = ref("");
 const versionTauri = ref("");
+
+// data
+const showHome = ref(homeStore.getShowValue());
 
 // load version
 onMounted(async () => {
@@ -151,11 +175,26 @@ async function deleteTemp() {
 		await dialog.message("临时数据已删除!");
 	}
 }
+
+// 修改首页显示
+async function submitHome() {
+	// 获取已选
+	const show = showHome.value;
+	if (show.length < 1) {
+		await dialog.message("请至少选择一个!");
+		return;
+	}
+	// 设置
+	await homeStore.setShowValue(show);
+	await dialog.message("已修改!");
+}
+
 // 恢复默认配置
 async function setDefaultConfig() {
 	const res = await dialog.confirm("确定要初始化数据吗?");
 	if (res) {
 		await appStore.init();
+		await homeStore.init();
 		await achievementsStore.init();
 		dialog.message("已恢复默认配置!").then(() => {
 			window.location.reload();
