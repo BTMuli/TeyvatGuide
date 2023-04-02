@@ -2,10 +2,13 @@
  * @file plugins Mys utils news.ts
  * @description Mys 插件咨讯工具
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha
+ * @since Alpha v0.1.1
  */
 
 import { NewsData, NewsItem, NewsCard, ActivityStatus } from "../interface/news";
+
+// 默认封面图
+const defaultCover = "/source/cover/news.webp";
 
 /**
  * @description 活动状态
@@ -65,7 +68,7 @@ export function getNoticeCard(noticeData: NewsData): NewsCard[] {
 	noticeData.list.map((item: NewsItem) => {
 		noticeCard.push({
 			title: item.post.subject,
-			cover: item.cover?.url || item.post.cover || item.post.images[0],
+			cover: item.cover?.url || item.post.cover || item.post.images[0] || defaultCover,
 			post_id: Number(item.post.post_id),
 			subtitle: item.post.post_id,
 		});
@@ -87,7 +90,7 @@ export function getActivityCard(activityData: NewsData): NewsCard[] {
 		const status_info = getActivityStatus(item.news_meta.activity_status);
 		activityCard.push({
 			title: item.post.subject,
-			cover: item.cover?.url || item.post.cover || item.post.images[0],
+			cover: item.cover?.url || item.post.cover || item.post.images[0] || defaultCover,
 			post_id: Number(item.post.post_id),
 			subtitle: `${start_time} - ${end_time}`,
 			status: status_info,
@@ -107,7 +110,7 @@ export function getNewsCard(newsData: NewsData): NewsCard[] {
 	newsData.list.map((item: NewsItem) => {
 		newsCard.push({
 			title: item.post.subject,
-			cover: item.cover?.url || item.post.cover || item.post.images[0],
+			cover: item.cover?.url || item.post.cover || item.post.images[0] || defaultCover,
 			post_id: Number(item.post.post_id),
 			subtitle: item.post.post_id,
 		});
