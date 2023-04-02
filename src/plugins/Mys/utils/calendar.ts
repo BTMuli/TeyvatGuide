@@ -18,11 +18,13 @@ export function getCalendarCard(calendarData: CalendarData[]): CalendarCard[] {
 	calendarData.forEach((data: CalendarData) => {
 		return calendarCard.push({
 			id: Number(data.id),
+			type: Number(data.break_type),
 			title: data.title,
 			cover: data.img_url,
 			url: data.jump_type === "1" ? data.jump_url : data.content_id,
 			drop_day: data.drop_day,
-			sort: JSON.parse(data.sort),
+			sort_day: JSON.parse(data.sort),
+			contentInfos: data.contentInfos,
 		});
 	});
 	return calendarCard;

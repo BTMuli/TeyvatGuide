@@ -87,19 +87,22 @@ export interface CalendarContent {
  * @since Alpha v0.1.1
  * @interface CalendarCard
  * @property {number} id 角色/武器 ID
+ * @property {number} type 角色/武器，角色为 2，武器为 1
  * @property {string} title 角色/武器 名称
  * @property {string} cover 角色/武器 封面
- * @property {string} url 跳转链接
+ * @property {string} url 跳转链接，一般为 content_id
  * @property {string[]} drop_day 掉落日
- * @property {Map<number>} sort 排序
+ * @property {Map<number>} sort_day 排序
  * @property {CalendarContent[]} contentInfos 材料内容
  * @return {CalendarCard}
  */
 export interface CalendarCard {
 	id: number;
+	type: number;
 	title: string;
 	cover: string;
 	url: string;
 	drop_day: string[];
-	sort: Map<number>;
+	sort_day: Map<number>;
+	contentInfos: CalendarContent[];
 }

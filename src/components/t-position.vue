@@ -49,8 +49,8 @@
 <script lang="ts" setup>
 // vue
 import { ref, onMounted } from "vue";
-import TLoading from "./t-loading.vue";
 import { useRouter } from "vue-router";
+import TLoading from "./t-loading.vue";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
 // plugins
