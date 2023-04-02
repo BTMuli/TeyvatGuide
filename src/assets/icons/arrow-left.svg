@@ -1,13 +1,7 @@
-<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="219.199905" height="218.074081" viewBox="0 0 219.2 218.074" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 	<desc>
 			Created with Pixso.
 	</desc>
-	<g clip-path="url(#clip3_11)">
-		<path id="2 (边框)" d="M163.2 237.037L163.2 188.84L84.2667 130.37L80 127.21L163.2 65.5802L163.2 18.963L16.0001 128L163.2 237.037ZM163.2 73.8765L235.2 127.21L163.2 180.543L91.2 127.21L163.2 73.8765Z" fill-rule="evenodd" fill="#faf7e8"/>
-	</g>
-	<defs>
-		<clipPath id="clip3_11">
-			<rect id="left" width="256" height="256" />
-		</clipPath>
-	</defs>
+	<path id="left" d="M147.2 218.074L147.2 169.877L68.2666 111.407L63.9999 108.247L147.2 46.6173L147.2 0L0 109.037L147.2 218.074ZM147.2 54.9135L219.2 108.247L147.2 161.58L75.1999 108.247L147.2 54.9135Z" fill-rule="evenodd" fill="#FAF7E8"/>
+	<defs/>
 </svg>
