@@ -2,11 +2,76 @@
  * @description 游戏公告解析 css
  * @since Alpha v0.1.1
  */
-/* todo 样式美化 */
-.anno-content {
+
+.anno-body {
+	margin: 20px auto;
+	width: 800px;
+	font-family: "Genshin-Light", serif;
+}
+
+.anno-title {
+	font-family: Genshin, serif;
+	color: #5b738f;
+	font-size: 24px;
+	font-weight: 500;
+	margin-bottom: 8px;
+}
+
+.anno-subtitle {
 	font-size: 16px;
+	color: #a1aeb6;
+	margin-bottom: 16px;
+}
+
+.anno-img {
+	max-width: 100%;
+	width: 800px;
+	height: auto;
+	border-radius: 10px;
+	margin-bottom: 10px;
+}
+
+.anno-content {
 	line-height: 2;
 }
 
-.anno-content p span {
+.anno-link-icon {
+	width: 18px;
+	height: 18px;
+	color: #00c3ff;
+}
+
+.anno-content :deep(a) {
+	color: #00c3ff;
+	text-decoration: none;
+}
+
+.anno-content :deep(span) {
+	color: #4b5366;
+}
+
+.anno-content :deep(p) {
+	line-height: 2;
+	color: #4b5366;
+}
+
+.anno-content :deep(details) {
+	border: #35acce 2px solid;
+	padding: 10px;
+	border-radius: 10px;
+	margin: 10px;
+}
+
+.anno-content :deep(details) ::marker {
+	color: #35acce;
+	content: "✧";
+}
+
+.anno-content :deep(ol) {
+	list-style: "✧";
+}
+
+.anno-content :deep(td) {
+	line-height: 2;
+	padding-left: 10px;
 }

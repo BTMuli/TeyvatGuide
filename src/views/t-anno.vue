@@ -54,32 +54,4 @@ onMounted(async () => {
 </script>
 <style lang="css" scoped>
 @import "../assets/css/anno-parser.css";
-
-.anno-body {
-	margin: 20px auto;
-	width: 800px;
-	font-family: "Genshin-Light", serif;
-}
-
-.anno-title {
-	font-family: Genshin, serif;
-	color: #5b738f;
-	font-size: 24px;
-	font-weight: 500;
-	margin-bottom: 8px;
-}
-
-.anno-subtitle {
-	font-size: 16px;
-	color: #a1aeb6;
-	margin-bottom: 16px;
-}
-
-.anno-img {
-	max-width: 100%;
-	width: 800px;
-	height: auto;
-	border-radius: 10px;
-	margin-bottom: 10px;
-}
 </style>

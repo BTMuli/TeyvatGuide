@@ -15,27 +15,30 @@ export function parseAnnoContent(data: string): string {
 	const htmlBase = new DOMParser().parseFromString(data, "text/html");
 	// 遍历所有 span 标签
 	htmlBase.querySelectorAll("span").forEach(span => {
-		return (span.innerHTML = deleteRedundantTag(span.innerHTML));
+		return (span.innerHTML = decodeRegExp(span.innerHTML));
 	});
 	// 遍历所有 p 标签
 	htmlBase.querySelectorAll("p").forEach(p => {
 		// 如果没有子元素
 		if (p.children.length === 0) {
-			return (p.innerHTML = deleteRedundantTag(p.innerHTML));
+			return (p.innerHTML = decodeRegExp(p.innerHTML));
+		}
+	});
+	// 遍历所有 a 标签
+	htmlBase.querySelectorAll("a").forEach(a => {
+		const span = htmlBase.createElement("i");
+		span.classList.add("mdi", "mdi-link-variant", "anno-link-icon");
+		// 添加到 a 标签中
+		a.prepend(span);
+		if (a.href.startsWith("javascript:miHoYoGameJSSDK.openInBrowser")) {
+			a.href = a.href.replace("javascript:miHoYoGameJSSDK.openInBrowser('", "").replace("');", "");
+			a.target = "_blank";
+		} else if (a.href.startsWith("javascript:miHoYoGameJSSDK.openInWebview")) {
+			a.href = a.href.replace("javascript:miHoYoGameJSSDK.openInWebview('", "").replace("');", "");
+			a.target = "_blank";
 		}
 	});
 	return htmlBase.body.innerHTML;
-}
-
-/**
- * @description 删除冗余的标签
- * @since Alpha v0.1.1
- * @param {string} data 内容
- * @return {string} 删除后的内容
- */
-export function deleteRedundantTag(data: string): string {
-	// 先转义一下
-	return decodeRegExp(data);
 }
 
 /**
