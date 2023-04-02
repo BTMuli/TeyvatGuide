@@ -3,7 +3,6 @@
  * @since Alpha v0.1.1
  */
 
-/* todo scoped 不生效 */
 .anno-body {
 	margin: 20px auto;
 	width: 800px;
@@ -42,37 +41,37 @@
 	color: #00c3ff;
 }
 
-.anno-content a {
+.anno-content :deep(a) {
 	color: #00c3ff;
 	text-decoration: none;
 }
 
-.anno-content p {
+.anno-content :deep(p) {
 	line-height: 2;
 	color: #4b5366;
 }
 
-.anno-content details {
+.anno-content :deep(details) {
 	border: #35acce 2px solid;
 	padding: 10px;
 	border-radius: 10px;
 	margin: 10px;
 }
 
-.anno-content details div {
+.anno-content :deep(details) div {
 	margin-left: 10px;
 }
 
-.anno-content details ::marker {
+.anno-content :deep(details) ::marker {
 	color: #35acce;
 	content: "✧";
 }
 
-.anno-content ol {
+.anno-content :deep(ol) {
 	list-style: "✧";
 }
 
-.anno-content td {
+.anno-content :deep(td) {
 	line-height: 2;
 	padding-left: 10px;
 }
