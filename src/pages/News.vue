@@ -55,7 +55,7 @@
 						<template v-slot:append>
 							<img src="../assets/icons/arrow-left.svg" alt="right" />
 						</template>
-						已加载：{{ noticeData.last_id }}，加载更多
+						已加载：{{ rawData.notice.last_id }}，加载更多
 					</v-btn>
 				</div>
 			</v-window-item>
@@ -98,7 +98,7 @@
 						<template v-slot:append>
 							<img src="../assets/icons/arrow-left.svg" alt="right" />
 						</template>
-						已加载:{{ activityData.last_id }}，加载更多
+						已加载:{{ rawData.activity.last_id }}，加载更多
 					</v-btn>
 				</div>
 			</v-window-item>
@@ -131,7 +131,7 @@
 						<template v-slot:append>
 							<img src="../assets/icons/arrow-left.svg" alt="right" />
 						</template>
-						已加载：{{ newsData.last_id }}，加载更多
+						已加载：{{ rawData.news.last_id }}，加载更多
 					</v-btn>
 				</div>
 			</v-window-item>
@@ -153,7 +153,7 @@ import MysOper from "../plugins/Mys";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
 // interface
-import { NewsCard, NewsData } from "../plugins/Mys/interface/news";
+import { NewsCard } from "../plugins/Mys/interface/news";
 
 // Store
 const appStore = useAppStore();
@@ -174,22 +174,39 @@ const postData = ref({
 	activity: [] as NewsCard[],
 	news: [] as NewsCard[],
 });
-const noticeData = ref({} as NewsData);
-const activityData = ref({} as NewsData);
-const newsData = ref({} as NewsData);
+const rawData = ref({
+	notice: {
+		is_last: false,
+		last_id: 0,
+	},
+	activity: {
+		is_last: false,
+		last_id: 0,
+	},
+	news: {
+		is_last: false,
+		last_id: 0,
+	},
+});
 
 onMounted(async () => {
 	loadingTitle.value = "正在获取公告数据...";
-	noticeData.value = await MysOper.News.get.notice();
+	const noticeData = await MysOper.News.get.notice();
+	rawData.value.notice.is_last = noticeData.is_last;
+	rawData.value.notice.last_id = noticeData.last_id;
 	loadingTitle.value = "正在获取活动数据...";
-	activityData.value = await MysOper.News.get.activity();
+	const activityData = await MysOper.News.get.activity();
+	rawData.value.activity.is_last = activityData.is_last;
+	rawData.value.activity.last_id = activityData.last_id;
 	loadingTitle.value = "正在获取新闻数据...";
-	newsData.value = await MysOper.News.get.news();
+	const newsData = await MysOper.News.get.news();
+	rawData.value.news.is_last = newsData.is_last;
+	rawData.value.news.last_id = newsData.last_id;
 	loadingTitle.value = "正在渲染数据...";
 	postData.value = {
-		notice: MysOper.News.card.notice(noticeData.value),
-		activity: MysOper.News.card.activity(activityData.value),
-		news: MysOper.News.card.news(newsData.value),
+		notice: MysOper.News.card.notice(noticeData),
+		activity: MysOper.News.card.activity(activityData),
+		news: MysOper.News.card.news(newsData),
 	};
 	tab.value = "notice";
 	loading.value = false;
@@ -204,42 +221,42 @@ async function loadMore(data: string) {
 	loadingSub.value = true;
 	switch (data) {
 		case "notice":
-			if (noticeData.value.is_last) {
+			if (rawData.value.notice.is_last) {
 				await dialog.message("已经是最后一页了");
 				loadingSub.value = false;
 				return;
 			}
-			const getNotice = await MysOper.News.get.notice(20, noticeData.value.last_id);
-			noticeData.value.last_id = getNotice.last_id;
-			noticeData.value.is_last = getNotice.is_last;
-			noticeData.value.list = noticeData.value.list.concat(getNotice.list);
-			postData.value.notice = MysOper.News.card.notice(noticeData.value);
+			const getNotice = await MysOper.News.get.notice(20, rawData.value.notice.last_id);
+			rawData.value.notice.last_id = getNotice.last_id;
+			rawData.value.notice.is_last = getNotice.is_last;
+			const noticeCard = MysOper.News.card.notice(getNotice);
+			postData.value.notice = postData.value.notice.concat(noticeCard);
 			loadingSub.value = false;
 			break;
 		case "activity":
-			if (activityData.value.is_last) {
+			if (rawData.value.activity.is_last) {
 				await dialog.message("已经是最后一页了");
 				loadingSub.value = false;
 				return;
 			}
-			const getActivity = await MysOper.News.get.activity(20, activityData.value.last_id);
-			activityData.value.last_id = getActivity.last_id;
-			activityData.value.is_last = getActivity.is_last;
-			activityData.value.list = activityData.value.list.concat(getActivity.list);
-			postData.value.activity = MysOper.News.card.activity(activityData.value);
+			const getActivity = await MysOper.News.get.activity(20, rawData.value.activity.last_id);
+			rawData.value.activity.last_id = getActivity.last_id;
+			rawData.value.activity.is_last = getActivity.is_last;
+			const activityCard = MysOper.News.card.activity(getActivity);
+			postData.value.activity = postData.value.activity.concat(activityCard);
 			loadingSub.value = false;
 			break;
 		case "news":
-			if (newsData.value.is_last) {
+			if (rawData.value.news.is_last) {
 				await dialog.message("已经是最后一页了");
 				loadingSub.value = false;
 				return;
 			}
-			const getNews = await MysOper.News.get.news(20, newsData.value.last_id);
-			newsData.value.last_id = getNews.last_id;
-			newsData.value.is_last = getNews.is_last;
-			newsData.value.list = newsData.value.list.concat(getNews.list);
-			postData.value.news = MysOper.News.card.news(newsData.value);
+			const getNews = await MysOper.News.get.news(20, rawData.value.news.last_id);
+			rawData.value.news.last_id = getNews.last_id;
+			rawData.value.news.is_last = getNews.is_last;
+			const newsCard = MysOper.News.card.news(getNews);
+			postData.value.news = postData.value.news.concat(newsCard);
 			loadingSub.value = false;
 			break;
 	}
