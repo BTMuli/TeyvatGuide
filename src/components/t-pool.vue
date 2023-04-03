@@ -160,7 +160,7 @@ async function toPost(pool: GachaCard) {
 }
 
 .pool-cover img {
-	width: 100%;
+	max-width: 100%;
 	transition: all 0.5s;
 	border-radius: 10px;
 }

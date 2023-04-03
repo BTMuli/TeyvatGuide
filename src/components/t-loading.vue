@@ -60,12 +60,18 @@ const props = defineProps({
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	font-family: Genshin, serif;
 }
 
 .loading-title {
 	font-size: 2rem;
+	font-family: Genshin, serif;
 	font-weight: 600;
+	color: #f4d8a8;
+}
+
+.loading-subtitle {
+	font-size: 1rem;
+	font-family: Genshin-Light, serif;
 	color: #f4d8a8;
 }
 
