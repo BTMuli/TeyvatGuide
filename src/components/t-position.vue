@@ -5,10 +5,7 @@
 				<img src="../assets/icons/board.svg" alt="act" class="position-act-icon" />
 				近期活动
 			</v-list-item-title>
-			<div v-if="loading">
-				<t-loading :title="loadingTitle" :empty="loadingEmpty" position="relative" />
-			</div>
-			<div v-else class="position-grid">
+			<div v-if="!loading" class="position-grid">
 				<v-card
 					v-for="card in positionCards"
 					style="background: #faf7e8; color: #546d8b; border-radius: 10px"
@@ -55,7 +52,6 @@
 // vue
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import TLoading from "./t-loading.vue";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
 // plugins
@@ -66,8 +62,6 @@ import { Map } from "../interface/Base";
 
 // loading
 const loading = ref(true as boolean);
-const loadingTitle = ref("正在加载近期活动");
-const loadingEmpty = ref(false as boolean);
 
 // 数据
 const positionCards = ref([] as PositionCard[]);
@@ -75,38 +69,34 @@ const positionTimeGet = ref({} as Map<string>);
 const positionTimeEnd = ref({} as Map<number>);
 const router = useRouter();
 
+// expose
+defineExpose({
+	name: "近期活动",
+	loading,
+});
+
 onMounted(async () => {
-	try {
-		loadingTitle.value = "正在获取近期活动数据";
-		const positionData = await MysOper.Position.get();
-		if (!positionData) {
-			loadingEmpty.value = true;
-			loadingTitle.value = "暂无近期活动";
-			return;
-		}
-		loadingEmpty.value = false;
-		loadingTitle.value = "正在渲染近期活动";
-		positionCards.value = MysOper.Position.card(positionData);
-		positionCards.value.forEach(card => {
-			positionTimeGet.value[card.post_id] = getLastPositionTime(card.time.end_stamp - Date.now());
-			positionTimeEnd.value[card.post_id] = card.time.end_stamp;
-		});
-		await setInterval(() => {
-			positionCards.value.forEach(card => {
-				const time = card.time.end_stamp - Date.now();
-				if (time <= 0) {
-					positionTimeGet.value[card.post_id] = "已结束";
-					return;
-				}
-				positionTimeGet.value[card.post_id] = getLastPositionTime(time);
-			});
-		}, 1000);
-	} catch (error) {
-		console.error(error);
+	const positionData = await MysOper.Position.get();
+	if (!positionData) {
+		console.error("获取近期活动失败");
 		return;
-	} finally {
-		loading.value = false;
 	}
+	positionCards.value = MysOper.Position.card(positionData);
+	positionCards.value.forEach(card => {
+		positionTimeGet.value[card.post_id] = getLastPositionTime(card.time.end_stamp - Date.now());
+		positionTimeEnd.value[card.post_id] = card.time.end_stamp;
+	});
+	await setInterval(() => {
+		positionCards.value.forEach(card => {
+			const time = card.time.end_stamp - Date.now();
+			if (time <= 0) {
+				positionTimeGet.value[card.post_id] = "已结束";
+				return;
+			}
+			positionTimeGet.value[card.post_id] = getLastPositionTime(time);
+		});
+	}, 1000);
+	loading.value = false;
 });
 
 function getLastPositionTime(time: number) {

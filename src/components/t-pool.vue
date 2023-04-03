@@ -5,10 +5,7 @@
 				<img src="../assets/icons/icon-wish.svg" alt="wish" class="pool-wish-icon" />
 				限时祈愿</v-list-item-title
 			>
-			<div v-if="loading">
-				<t-loading :title="loadingTitle" :empty="loadingEmpty" position="relative" />
-			</div>
-			<div v-else class="pool-grid">
+			<div v-if="!loading" class="pool-grid">
 				<v-card
 					v-for="pool in poolCards"
 					style="background: #faf7e8; color: #546d8b; border-radius: 10px"
@@ -66,50 +63,43 @@ import MysOper from "../plugins/Mys";
 // interface
 import { GachaCard } from "../plugins/Mys/interface/gacha";
 import { Map } from "../interface/Base";
-import TLoading from "./t-loading.vue";
 
 // vue
 const router = useRouter();
 
 // loading
 const loading = ref(true as boolean);
-const loadingTitle = ref("正在加载祈愿数据");
-const loadingEmpty = ref(false as boolean);
 
 // data
 const poolCards = ref([] as GachaCard[]);
 const poolTimeGet = ref({} as Map<string>);
 const poolTimePass = ref({} as Map<number>);
 
+// expose
+defineExpose({
+	name: "限时祈愿",
+	loading,
+});
+
 onMounted(async () => {
-	try {
-		loadingTitle.value = "正在获取限时祈愿数据";
-		const gachaData = await MysOper.Gacha.get();
-		if (!gachaData) {
-			loadingEmpty.value = true;
-			return;
-		}
-		loadingEmpty.value = false;
-		loadingTitle.value = "正在渲染限时祈愿";
-		poolCards.value = await MysOper.Gacha.card(gachaData);
+	const gachaData = await MysOper.Gacha.get();
+	if (!gachaData) {
+		await console.error("获取限时祈愿数据失败");
+		return;
+	}
+	poolCards.value = await MysOper.Gacha.card(gachaData);
+	poolCards.value.map(pool => {
+		poolTimeGet.value[pool.post_id] = getLastPoolTime(pool.time.end_stamp - Date.now());
+		poolTimePass.value[pool.post_id] = pool.time.end_stamp - Date.now();
+	});
+	await setInterval(() => {
 		poolCards.value.map(pool => {
 			poolTimeGet.value[pool.post_id] = getLastPoolTime(pool.time.end_stamp - Date.now());
-			poolTimePass.value[pool.post_id] = pool.time.end_stamp - Date.now();
+			poolTimePass.value[pool.post_id] =
+				((pool.time.end_stamp - Date.now()) / (pool.time.end_stamp - pool.time.start_stamp)) * 100;
 		});
-		await setInterval(() => {
-			poolCards.value.map(pool => {
-				poolTimeGet.value[pool.post_id] = getLastPoolTime(pool.time.end_stamp - Date.now());
-				poolTimePass.value[pool.post_id] =
-					((pool.time.end_stamp - Date.now()) / (pool.time.end_stamp - pool.time.start_stamp)) *
-					100;
-			});
-		}, 1000);
-	} catch (error) {
-		console.error(error);
-		return;
-	} finally {
-		loading.value = false;
-	}
+	}, 1000);
+	loading.value = false;
 });
 
 function toOuter(url: string, title: string) {

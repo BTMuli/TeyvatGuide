@@ -1,35 +1,72 @@
 <template>
-	<component v-for="item in components" :is="item" :key="item" />
+	<t-loading v-if="loading" :title="loadingTitle" :subtitle="loadingSubtitle" />
+	<component
+		v-show="!loading"
+		v-for="item in components"
+		:is="item"
+		:key="item"
+		:ref="setItemRef"
+	/>
 </template>
 
 <script lang="ts" setup>
 // vue
-import { shallowRef, onMounted } from "vue";
+import { ref, markRaw, onMounted, onUnmounted } from "vue";
+import TLoading from "../components/t-loading.vue";
 import TPool from "../components/t-pool.vue";
 import TPosition from "../components/t-position.vue";
 import TCalendar from "../components/t-calendar.vue";
 // store
 import useHomeStore from "../store/modules/home";
 
+// store
 const homeStore = useHomeStore();
-const showItems = homeStore.getShowValue();
-const components = shallowRef([] as any[]);
 
-onMounted(() => {
-	showItems.map(item => {
-		switch (item) {
-			case "限时祈愿":
-				components.value.push(TPool);
-				break;
-			case "近期活动":
-				components.value.push(TPosition);
-				break;
-			case "素材日历":
-				components.value.push(TCalendar);
-				break;
-			default:
-				break;
+// loading
+const loading = ref(true as boolean);
+const loadingTitle = ref("正在加载首页");
+const loadingSubtitle = ref("");
+
+// data
+const components = ref([] as any[]);
+let itemRefs = ref([] as any[]);
+
+!onMounted(() => {
+	loadingTitle.value = "正在加载首页";
+	const showItems = homeStore.getShowValue();
+	Promise.allSettled(
+		showItems.map(item => {
+			switch (item) {
+				case "限时祈愿":
+					return components.value.push(markRaw(TPool));
+				case "近期活动":
+					return components.value.push(markRaw(TPosition));
+				case "素材日历":
+					return components.value.push(markRaw(TCalendar));
+				default:
+					break;
+			}
+		})
+	);
+	setInterval(() => {
+		if (!loading.value) clearInterval(this);
+		const loadingMap = itemRefs.value.map(item => {
+			if (item.loading) {
+				return item.name;
+			}
+		});
+		loadingSubtitle.value = "正在加载 " + loadingMap.filter(item => item)?.join("、");
+		if (loadingMap.every(item => !item)) {
+			loading.value = false;
 		}
-	});
+	}, 100);
+});
+function setItemRef(item: any) {
+	if (itemRefs.value.includes(item)) return;
+	itemRefs.value.push(item);
+}
+
+onUnmounted(() => {
+	itemRefs.value = [];
 });
 </script>

@@ -2,7 +2,7 @@
  * @file store modules home.ts
  * @description Home store module
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  */
 
 import { defineStore } from "pinia";
@@ -43,7 +43,12 @@ const useHomeStore = defineStore({
 			};
 		},
 		getShowItem() {
-			return ["素材日历", "限时祈愿", "近期活动"];
+			const defaultList = ["素材日历", "限时祈愿", "近期活动"];
+			defaultList.sort((a, b) => {
+				return this.getItemOrder(a) - this.getItemOrder(b);
+			});
+			console.info("getShowItem", defaultList);
+			return defaultList;
 		},
 		getShowValue() {
 			let showValue = [];
@@ -68,28 +73,46 @@ const useHomeStore = defineStore({
 			}
 		},
 		setShowValue(value: string[]) {
+			let order = 1;
 			// 遍历 value
 			value.forEach(item => {
 				if (!this.getShowItem().includes(item)) {
 					throw new Error("传入的值不在可选范围内");
 				}
-				// 获取 item 在 value 中的索引
-				const index = value.indexOf(item);
 				switch (item) {
 					case "素材日历":
-						this.calendar.order = index;
+						this.calendar.order = order;
 						this.calendar.show = true;
+						order++;
 						break;
 					case "限时祈愿":
-						this.pool.order = index;
+						this.pool.order = order;
 						this.pool.show = true;
+						order++;
 						break;
 					case "近期活动":
-						this.position.order = index;
+						this.position.order = order;
 						this.position.show = true;
+						order++;
 						break;
 					default:
 						break;
+				}
+				// 没有显示的 item
+				if (!value.includes("素材日历")) {
+					this.calendar.show = false;
+					this.calendar.order = order;
+					order++;
+				}
+				if (!value.includes("限时祈愿")) {
+					this.pool.show = false;
+					this.pool.order = order;
+					order++;
+				}
+				if (!value.includes("近期活动")) {
+					this.position.show = false;
+					this.position.order = order;
+					order++;
 				}
 			});
 		},

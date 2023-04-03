@@ -18,10 +18,7 @@
 					{{ text.text }}
 				</v-btn>
 			</v-list-item-title>
-			<div v-if="loading">
-				<t-loading :title="loadingTitle" :empty="loadingEmpty" position="relative" />
-			</div>
-			<div v-else class="calendar-grid">
+			<div v-if="!loading" class="calendar-grid">
 				<v-card title="天赋培养" class="calendar-single">
 					<v-card-text class="calendar-icons">
 						<v-img
@@ -50,7 +47,6 @@
 // vue
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import TLoading from "./t-loading.vue";
 // plugins
 import MysOper from "../plugins/Mys";
 // interface
@@ -59,8 +55,6 @@ import { OBC_CONTENT_API } from "../plugins/Mys/interface/utils";
 
 // loading
 const loading = ref(true as boolean);
-const loadingTitle = ref("正在加载材料日历");
-const loadingEmpty = ref(false as boolean);
 
 // data
 const characterCards = ref([] as CalendarCard[]);
@@ -104,16 +98,18 @@ const showCharacters = ref([] as CalendarCard[]);
 const showWeapons = ref([] as CalendarCard[]);
 const router = useRouter();
 
+// expose
+defineExpose({
+	name: "素材日历",
+	loading,
+});
+
 onMounted(async () => {
-	loadingTitle.value = "正在获取材料日历数据";
 	const calendarData = await MysOper.Calendar.get();
 	if (!calendarData) {
-		loadingEmpty.value = true;
-		loadingTitle.value = "暂无材料日历";
+		await console.error("获取材料日历失败");
 		return;
 	}
-	loadingEmpty.value = false;
-	loadingTitle.value = "正在渲染材料日历";
 	const calendarCards = MysOper.Calendar.card(calendarData);
 	const week = new Date().getDay();
 	btnNow.value = week;
