@@ -18,91 +18,91 @@
 			<v-btn @click="exportJson" prepend-icon="mdi-export" class="ms-2 top-btn"> 导出 </v-btn>
 		</template>
 	</v-app-bar>
-	<div v-if="loading">
-		<t-loading title="正在加载成就" />
+	<div v-show="loading">
+		<t-loading :title="loadingTitle" />
 	</div>
-	<div v-else class="wrap">
-		<v-row class="wrap-view">
-			<!-- 左侧菜单 -->
-			<v-col class="left-wrap">
-				<v-list
-					class="card-left"
-					v-for="(series, index) in seriesList"
-					@click="selectSeries(index)"
-				>
-					<div class="version-icon-series">v{{ series.version }}</div>
-					<v-list-item>
-						<template v-slot:prepend>
-							<v-img width="40px" style="margin-right: 10px" :src="series.icon" />
-						</template>
-						<v-list-item-title>
-							{{ series.name }}
-						</v-list-item-title>
-						<v-list-item-subtitle>
-							{{ series.completed_count }} / {{ series.total_count }}
-						</v-list-item-subtitle>
-					</v-list-item>
-				</v-list>
-			</v-col>
-			<!-- 右侧内容-->
-			<v-col cols="9" class="right-wrap">
-				<v-list
-					v-show="selectedIndex !== -1 && selectedSeries !== 0 && selectedSeries !== 17"
-					@click="openImg()"
-					:style="{
-						backgroundImage: 'url(' + getCardInfo.bg || null + ')',
-						backgroundPosition: 'right',
-						backgroundSize: 'auto 100%',
-						backgroundRepeat: 'no-repeat',
-						margin: '10px',
-						borderRadius: '10px 50px 50px 10px',
-						color: '#485466',
-						fontFamily: 'Genshin,serif',
-						cursor: 'pointer',
-					}"
-				>
-					<v-list-item :title="getCardInfo.name" :subtitle="getCardInfo.description">
-						<template v-slot:prepend>
-							<v-img width="80px" style="margin-right: 10px" :src="getCardInfo.icon" />
-						</template>
-					</v-list-item>
-				</v-list>
-				<v-list class="card-right" v-for="achievement in selectedAchievement" :key="achievement.id">
-					<v-list-item>
-						<template v-slot:prepend>
-							<v-icon :color="achievement.completed ? '#fec90b' : '#485466'">
-								<!-- todo 图标替换 -->
-								{{ achievement.completed ? "mdi-check-circle" : "mdi-circle" }}
-							</v-icon>
-						</template>
-						<v-list-item-title>
-							{{ achievement.name }}
-							{{ achievement.progress !== 0 ? "| " + achievement.progress : null }}
-							<span class="version-icon-single">v{{ achievement.version }}</span>
-						</v-list-item-title>
-						<v-list-item-subtitle>{{ achievement.description }}</v-list-item-subtitle>
-						<template v-slot:append>
-							<span v-show="achievement.completed" class="right-time">{{
-								achievement.completed_time
-							}}</span>
-							<v-card class="reward-card" @click="showMaterial('/source/material/原石.webp')">
-								<v-img src="/source/material/原石.webp" sizes="32" />
-								<div class="reward-num">
-									<span>{{ achievement.reward }}</span>
-								</div>
-							</v-card>
-						</template>
-					</v-list-item>
-				</v-list>
-			</v-col>
-		</v-row>
+	<div v-show="!loading" class="wrap">
+		<!-- 左侧菜单 -->
+		<div class="left-wrap">
+			<v-list class="card-left" v-for="(series, index) in seriesList" @click="selectSeries(index)">
+				<div class="version-icon-series">v{{ series.version }}</div>
+				<v-list-item>
+					<template v-slot:prepend>
+						<v-img width="40px" style="margin-right: 10px" :src="series.icon" />
+					</template>
+					<v-list-item-title>
+						{{ series.name }}
+					</v-list-item-title>
+					<v-list-item-subtitle>
+						{{ series.completed_count }} / {{ series.total_count }}
+					</v-list-item-subtitle>
+				</v-list-item>
+			</v-list>
+		</div>
+		<!-- 右侧内容-->
+		<div class="right-wrap">
+			<v-list
+				v-show="selectedIndex !== -1 && selectedSeries !== 0 && selectedSeries !== 17"
+				@click="openImg()"
+				:style="{
+					backgroundImage: 'url(' + getCardInfo.bg || null + ')',
+					backgroundPosition: 'right',
+					backgroundSize: 'auto 100%',
+					backgroundRepeat: 'no-repeat',
+					margin: '10px',
+					borderRadius: '10px 50px 50px 10px',
+					color: '#485466',
+					fontFamily: 'Genshin,serif',
+					cursor: 'pointer',
+				}"
+			>
+				<v-list-item :title="getCardInfo.name" :subtitle="getCardInfo.description">
+					<template v-slot:prepend>
+						<v-img width="80px" style="margin-right: 10px" :src="getCardInfo.icon" />
+					</template>
+				</v-list-item>
+			</v-list>
+			<v-list class="card-right" v-for="achievement in selectedAchievement" :key="achievement.id">
+				<v-list-item>
+					<template v-slot:prepend>
+						<v-icon :color="achievement.completed ? '#fec90b' : '#485466'">
+							<!-- todo 图标替换 -->
+							{{ achievement.completed ? "mdi-check-circle" : "mdi-circle" }}
+						</v-icon>
+					</template>
+					<v-list-item-title>
+						{{ achievement.name }}
+						{{ achievement.progress !== 0 ? "| " + achievement.progress : null }}
+						<span class="version-icon-single">v{{ achievement.version }}</span>
+					</v-list-item-title>
+					<v-list-item-subtitle>{{ achievement.description }}</v-list-item-subtitle>
+					<template v-slot:append>
+						<span v-show="achievement.completed" class="right-time">{{
+							achievement.completed_time
+						}}</span>
+						<v-card class="reward-card" @click="showMaterial('/source/material/原石.webp')">
+							<v-img src="/source/material/原石.webp" sizes="32" />
+							<div class="reward-num">
+								<span>{{ achievement.reward }}</span>
+							</div>
+						</v-card>
+					</template>
+				</v-list-item>
+			</v-list>
+		</div>
+		<!-- 弹窗提示 -->
+		<v-snackbar v-model="snackbar" timeout="1500" color="#F5810A" top>
+			{{ snackbarText }}
+		</v-snackbar>
 	</div>
 </template>
 
 <script lang="ts" setup>
-// Node
-import { dialog, fs } from "@tauri-apps/api";
+// vue
 import { onMounted, ref } from "vue";
+import TLoading from "../components/t-loading.vue";
+// tauri
+import { dialog, fs } from "@tauri-apps/api";
 // Store
 import useAchievementsStore from "../store/modules/achievements";
 // Interface
@@ -122,21 +122,28 @@ import {
 	ReadTGDataByKey,
 	UpdateTGDataByKey,
 } from "../utils/TGIndex";
-import TLoading from "../components/t-loading.vue";
 
 // Store
 const achievementsStore = useAchievementsStore();
 
-// Data
+// loading
+const loading = ref(true);
+const loadingTitle = ref("正在加载数据");
+
+// data
 const title = ref(achievementsStore.title);
+const CardsInfo = ref([] as NameCard[]);
+const getCardInfo = ref({} as NameCard);
+// series
 const seriesList = ref([] as TGSeries[]);
 const selectedIndex = ref(-1);
 const selectedSeries = ref(-1);
 const selectedAchievement = ref([] as TGAchievement[]);
-const CardsInfo = ref([] as NameCard[]);
-const getCardInfo = ref({} as NameCard);
+
+// render
 const search = ref("");
-const loading = ref(true);
+const snackbar = ref(false);
+const snackbarText = ref("");
 
 onMounted(async () => {
 	await loadData();
@@ -144,12 +151,15 @@ onMounted(async () => {
 
 // 加载数据，数据源：合并后的本地数据
 async function loadData() {
+	loadingTitle.value = "正在获取成就系列数据";
 	const seriesDB: TGSeries[] = await ReadAllTGData("AchievementSeries");
+	loadingTitle.value = "正在获取成就系列名片数据";
 	CardsInfo.value = await ReadTGDataByIndex("NameCard", "type", 1);
-	// 按照 order 排序
+	loadingTitle.value = "对成就系列数据进行排序";
 	seriesList.value = seriesDB.sort((a, b) => a.order - b.order);
+	loadingTitle.value = "正在获取成就数据";
 	const getAchievements = await ReadAllTGData("Achievements");
-	// 未完成的排在前面
+	loadingTitle.value = "正在对成就数据进行排序";
 	getAchievements.sort((a, b) => {
 		if (a.completed === b.completed) {
 			return a.id - b.id;
@@ -157,13 +167,21 @@ async function loadData() {
 			return a.completed ? 1 : -1;
 		}
 	});
+	loadingTitle.value = "正在渲染成就数据";
 	selectedAchievement.value = getAchievements;
-	loading.value = false;
 	title.value = achievementsStore.title;
+	loading.value = false;
 }
 // 渲染选中的成就系列
 async function selectSeries(index: number) {
+	// 如果选中的是已经选中的系列，则不进行操作
+	if (selectedIndex.value === index) {
+		snackbarText.value = "已经选中该系列";
+		snackbar.value = true;
+		return;
+	}
 	loading.value = true;
+	loadingTitle.value = "正在获取对应的成就数据";
 	const getAchievements = await ReadTGDataByIndex(
 		"Achievements",
 		"series",
@@ -171,13 +189,14 @@ async function selectSeries(index: number) {
 	);
 	selectedIndex.value = index;
 	selectedSeries.value = seriesList.value[index].id;
+	loadingTitle.value = "正在查找对应的成就名片";
 	let getCard: NameCard;
 	if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
 		getCard = CardsInfo.value.find(card => card.name === seriesList.value[index].card)!;
 	} else {
 		getCard = {} as NameCard;
 	}
-	// 未完成的排在前面
+	loadingTitle.value = "正在对成就数据进行排序";
 	getAchievements.sort((a, b) => {
 		if (a.completed === b.completed) {
 			return a.id - b.id;
@@ -185,6 +204,7 @@ async function selectSeries(index: number) {
 			return a.completed ? 1 : -1;
 		}
 	});
+	loadingTitle.value = "正在渲染成就数据";
 	selectedAchievement.value = getAchievements;
 	getCardInfo.value = getCard;
 	loading.value = false;
@@ -363,12 +383,23 @@ async function exportJson() {
 .wrap {
 	display: flex;
 	flex-direction: row;
-}
-
-.wrap-view {
 	overflow: auto;
 	max-height: 90vh;
 	font-family: Genshin-Light, "serif";
+}
+/* 左侧系列 */
+.left-wrap {
+	float: left;
+	width: 25%;
+	max-height: calc(100vh - 100px);
+	overflow: auto;
+}
+/* 右侧成就 */
+.right-wrap {
+	float: right;
+	width: 75%;
+	max-height: calc(100vh - 100px);
+	overflow: auto;
 }
 /* 版本信息 */
 .version-icon-series {
@@ -394,11 +425,6 @@ async function exportJson() {
 	font-size: 10px;
 }
 
-/* 左侧系列 */
-.left-wrap {
-	height: 100%;
-	overflow: auto;
-}
 .card-left {
 	border-radius: 10px;
 	margin: 10px;
@@ -407,11 +433,6 @@ async function exportJson() {
 	cursor: pointer;
 }
 
-/* 右侧成就 */
-.right-wrap {
-	height: 100%;
-	overflow: auto;
-}
 /* 成就卡片 */
 .card-right {
 	border-radius: 10px;
