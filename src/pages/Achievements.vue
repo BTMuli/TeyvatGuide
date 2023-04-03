@@ -30,14 +30,17 @@
 					v-for="(series, index) in seriesList"
 					@click="selectSeries(index)"
 				>
+					<div class="version-icon-series">v{{ series.version }}</div>
 					<v-list-item>
 						<template v-slot:prepend>
 							<v-img width="40px" style="margin-right: 10px" :src="series.icon" />
 						</template>
-						<v-list-item-title>{{ series.name }}</v-list-item-title>
-						<v-list-item-subtitle
-							>{{ series.completed_count }} / {{ series.total_count }}</v-list-item-subtitle
-						>
+						<v-list-item-title>
+							{{ series.name }}
+						</v-list-item-title>
+						<v-list-item-subtitle>
+							{{ series.completed_count }} / {{ series.total_count }}
+						</v-list-item-subtitle>
 					</v-list-item>
 				</v-list>
 			</v-col>
@@ -75,6 +78,7 @@
 						<v-list-item-title>
 							{{ achievement.name }}
 							{{ achievement.progress !== 0 ? "| " + achievement.progress : null }}
+							<span class="version-icon-single">v{{ achievement.version }}</span>
 						</v-list-item-title>
 						<v-list-item-subtitle>{{ achievement.description }}</v-list-item-subtitle>
 						<template v-slot:append>
@@ -365,6 +369,29 @@ async function exportJson() {
 	overflow: auto;
 	max-height: 90vh;
 	font-family: Genshin-Light, "serif";
+}
+/* 版本信息 */
+.version-icon-series {
+	font-family: Genshin, serif;
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	text-align: center;
+	width: 80px;
+	background: #546d8b;
+	border-radius: 10px 0 0 0;
+	border-top: #ffffff 2px solid;
+	border-left: #ffffff 2px solid;
+	color: #fec90b;
+	font-size: 10px;
+}
+
+.version-icon-single {
+	font-family: Genshin, serif;
+	border-radius: 5px;
+	text-align: center;
+	color: #ff6d6d !important;
+	font-size: 10px;
 }
 
 /* 左侧系列 */
