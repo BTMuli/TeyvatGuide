@@ -1,7 +1,7 @@
 <template>
 	<transition name="fade">
 		<div class="back-top" v-show="canTop" @click="handleScrollTop">
-			<img src="../assets/icons/arrow-top.svg" class="back-icon" alt="back-icon" />
+			<img src="../assets/icons/arrow-top.svg" alt="back-icon" />
 		</div>
 	</transition>
 </template>
@@ -56,19 +56,19 @@ onMounted(() => {
 	width: 60px;
 	height: 60px;
 	border-radius: 50%;
-	border: 0;
-	transition: all 0.3s;
+	transition: all 0.3s linear;
 }
 
 .back-top :hover {
-	border: 5px solid #4b5366;
 	border-radius: 50%;
 	cursor: pointer;
-	transition: all 0.3s;
+	transform: scale(0.9);
+	transition: all 0.3s linear;
+	box-shadow: 0 0 10px 5px #546d8b;
 }
 
-.back-icon {
-	transition: all 0.3s;
+.back-top img {
+	transition: all 0.3s linear;
 	width: 60px;
 	height: 60px;
 }
