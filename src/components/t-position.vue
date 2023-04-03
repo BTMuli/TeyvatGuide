@@ -33,7 +33,12 @@
 						<span style="width: 80%; margin-left: 10px">
 							<v-icon>mdi-clock-outline</v-icon>
 							剩余时间：
-							<span style="color: #90caf9">{{ positionTimeGet[card.post_id] }}</span>
+							<span style="color: #90caf9" v-if="positionTimeGet[card.post_id] !== '已结束'">{{
+								positionTimeGet[card.post_id]
+							}}</span>
+							<span style="color: #ff6d6d" v-if="positionTimeGet[card.post_id] === '已结束'"
+								>已结束</span
+							>
 						</span>
 						<v-btn @click="toPost(card)" class="card-btn">
 							<template v-slot:prepend>
@@ -88,7 +93,12 @@ onMounted(async () => {
 		});
 		await setInterval(() => {
 			positionCards.value.forEach(card => {
-				positionTimeGet.value[card.post_id] = getLastPositionTime(card.time.end_stamp - Date.now());
+				const time = card.time.end_stamp - Date.now();
+				if (time <= 0) {
+					positionTimeGet.value[card.post_id] = "已结束";
+					return;
+				}
+				positionTimeGet.value[card.post_id] = getLastPositionTime(time);
 			});
 		}, 1000);
 	} catch (error) {
