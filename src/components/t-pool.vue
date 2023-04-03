@@ -148,6 +148,7 @@ async function toPost(pool: GachaCard) {
 	width: 100%;
 	background: #546d8b;
 	border-radius: 10px;
+	margin-top: 10px;
 }
 
 .pool-grid {

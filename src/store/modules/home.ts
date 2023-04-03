@@ -50,12 +50,48 @@ const useHomeStore = defineStore({
 			if (this.calendar.show) showValue.push("素材日历");
 			if (this.pool.show) showValue.push("限时祈愿");
 			if (this.position.show) showValue.push("近期活动");
+			showValue.sort((a, b) => {
+				return this.getItemOrder(a) - this.getItemOrder(b);
+			});
 			return showValue;
 		},
+		getItemOrder(item: string) {
+			switch (item) {
+				case "素材日历":
+					return this.calendar.order;
+				case "限时祈愿":
+					return this.pool.order;
+				case "近期活动":
+					return this.position.order;
+				default:
+					return 4;
+			}
+		},
 		setShowValue(value: string[]) {
-			this.calendar.show = value.includes("素材日历");
-			this.pool.show = value.includes("限时祈愿");
-			this.position.show = value.includes("近期活动");
+			// 遍历 value
+			value.forEach(item => {
+				if (!this.getShowItem().includes(item)) {
+					throw new Error("传入的值不在可选范围内");
+				}
+				// 获取 item 在 value 中的索引
+				const index = value.indexOf(item);
+				switch (item) {
+					case "素材日历":
+						this.calendar.order = index;
+						this.calendar.show = true;
+						break;
+					case "限时祈愿":
+						this.pool.order = index;
+						this.pool.show = true;
+						break;
+					case "近期活动":
+						this.position.order = index;
+						this.position.show = true;
+						break;
+					default:
+						break;
+				}
+			});
 		},
 	},
 	persist: true,
