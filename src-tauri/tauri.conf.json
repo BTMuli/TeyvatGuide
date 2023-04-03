@@ -8,7 +8,7 @@
 	},
 	"package": {
 		"productName": "tauri-genshin",
-		"version": "0.1.1"
+		"version": "0.1.2"
 	},
 	"tauri": {
 		"allowlist": {
@@ -60,7 +60,7 @@
 			{
 				"fullscreen": false,
 				"resizable": true,
-				"title": "Tauri.Genshin v0.1.0-alpha",
+				"title": "Tauri.Genshin",
 				"label": "tauri-genshin",
 				"width": 1600,
 				"height": 900,
