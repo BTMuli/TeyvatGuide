@@ -1,3 +1,10 @@
+/**
+ * @file main.ts
+ * @description Main entry
+ * @author BTMuli<bt-muli@outlook.com>
+ * @since Alpha v0.1.2
+ */
+
 // vue
 import { createApp } from "vue";
 import App from "./App.vue";
@@ -10,8 +17,5 @@ import "vuetify/styles";
 import { createVuetify } from "vuetify";
 // 全局样式
 import "./assets/index.css";
-// plugins
-// @ts-ignore
-import JsonViewer from "vue-json-viewer";
 
-createApp(App).use(router).use(store).use(createVuetify()).use(JsonViewer).mount("#app");
+createApp(App).use(router).use(store).use(createVuetify()).mount("#app");

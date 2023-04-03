@@ -13,6 +13,7 @@
 // vue
 import { ref, onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
+import JsonViewer from "vue-json-viewer";
 import TLoading from "../components/t-loading.vue";
 // plugins
 import GenshinOper from "../plugins/Genshin";
