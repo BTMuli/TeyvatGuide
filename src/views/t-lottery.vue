@@ -86,7 +86,7 @@ onMounted(async () => {
 	}
 	loadingTitle.value = "正在渲染数据...";
 	lotteryCard.value = MysOper.Lottery.card.lottery(lotteryData);
-	setInterval(() => {
+	setTimeout(() => {
 		loading.value = false;
 	}, 200);
 });

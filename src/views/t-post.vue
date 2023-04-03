@@ -44,7 +44,7 @@ onMounted(async () => {
 		await appWindow.setTitle("帖子不存在或解析失败");
 		return;
 	}
-	setInterval(() => {
+	setTimeout(() => {
 		loading.value = false;
 	}, 200);
 });

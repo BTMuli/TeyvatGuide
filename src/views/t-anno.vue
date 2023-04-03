@@ -47,7 +47,7 @@ onMounted(async () => {
 		loadingTitle.value = "公告不存在或解析失败";
 		return;
 	}
-	setInterval(() => {
+	setTimeout(() => {
 		loading.value = false;
 	}, 200);
 });

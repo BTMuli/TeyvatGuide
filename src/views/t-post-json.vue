@@ -33,7 +33,7 @@ onMounted(async () => {
 	// 获取数据
 	loadingTitle.value = "正在获取数据...";
 	jsonData = await MysOper.Post.get(post_id);
-	setInterval(() => {
+	setTimeout(() => {
 		loading.value = false;
 	}, 200);
 });

@@ -48,7 +48,7 @@ onMounted(async () => {
 		});
 	});
 	jsonContent = await GenshinOper.Announcement.getContent(anno_id);
-	setInterval(() => {
+	setTimeout(() => {
 		loading.value = false;
 	}, 200);
 });

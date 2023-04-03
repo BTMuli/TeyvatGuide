@@ -125,7 +125,7 @@ const showHome = ref(homeStore.getShowValue());
 onMounted(async () => {
 	versionApp.value = await app.getVersion();
 	versionTauri.value = await app.getTauriVersion();
-	setInterval(() => {
+	setTimeout(() => {
 		loading.value = false;
 	}, 1000);
 });
