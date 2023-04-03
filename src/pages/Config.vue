@@ -91,16 +91,8 @@
 			</v-list-item>
 		</v-list>
 		<!-- 弹窗提示条 -->
-		<v-snackbar
-			v-model="snackbar"
-			timeout="1500"
-			color="#50596B"
-			rounded="pill"
-			width="50px"
-			class="snack-div"
-		>
-			<img src="../assets/icons/circle-check.svg" alt="check" />
-			<span>{{ snackbarText }}</span>
+		<v-snackbar v-model="snackbar" timeout="1500" color="success">
+			{{ snackbarText }}
 		</v-snackbar>
 	</div>
 </template>
@@ -248,17 +240,5 @@ async function setDefaultConfig() {
 	padding: 5px;
 	background: #5b738f;
 	border-radius: 10px;
-}
-
-.snack-div img {
-	position: absolute;
-	width: 20px;
-	height: 20px;
-}
-
-.snack-div span {
-	margin-left: 30px;
-	font-family: Genshin-Light, serif;
-	color: #faf7e8;
 }
 </style>
