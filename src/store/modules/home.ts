@@ -6,6 +6,7 @@
  */
 
 import { defineStore } from "pinia";
+import { Map } from "../../interface/Base";
 
 const useHomeStore = defineStore({
 	id: "home",
@@ -23,6 +24,7 @@ const useHomeStore = defineStore({
 				show: true,
 				order: 2,
 			},
+			poolCover: {} as Map<string>,
 		};
 	},
 	actions: {
@@ -40,6 +42,7 @@ const useHomeStore = defineStore({
 					show: true,
 					order: 2,
 				},
+				poolCover: {},
 			};
 		},
 		getShowItem() {
@@ -47,7 +50,6 @@ const useHomeStore = defineStore({
 			defaultList.sort((a, b) => {
 				return this.getItemOrder(a) - this.getItemOrder(b);
 			});
-			console.info("getShowItem", defaultList);
 			return defaultList;
 		},
 		getShowValue() {

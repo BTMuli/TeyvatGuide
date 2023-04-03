@@ -56,16 +56,21 @@
 // vue
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+// store
+import useHomeStore from "../store/modules/home";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
 // plugins
 import MysOper from "../plugins/Mys";
 // interface
-import { GachaCard } from "../plugins/Mys/interface/gacha";
+import { GachaCard, GachaData } from "../plugins/Mys/interface/gacha";
 import { Map } from "../interface/Base";
 
 // vue
 const router = useRouter();
+
+// store
+const homeStore = useHomeStore();
 
 // loading
 const loading = ref(true as boolean);
@@ -87,7 +92,16 @@ onMounted(async () => {
 		await console.error("获取限时祈愿数据失败");
 		return;
 	}
-	poolCards.value = await MysOper.Gacha.card(gachaData);
+	if (!checkCover(gachaData)) {
+		poolCards.value = await MysOper.Gacha.card(gachaData);
+		let coverData: Map<string> = {};
+		poolCards.value.map(pool => {
+			coverData[pool.post_id] = pool.cover;
+		});
+		homeStore.poolCover = coverData;
+	} else {
+		poolCards.value = await MysOper.Gacha.card(gachaData, homeStore.poolCover);
+	}
 	poolCards.value.map(pool => {
 		poolTimeGet.value[pool.post_id] = getLastPoolTime(pool.time.end_stamp - Date.now());
 		poolTimePass.value[pool.post_id] = pool.time.end_stamp - Date.now();
@@ -102,6 +116,25 @@ onMounted(async () => {
 	loading.value = false;
 });
 
+// 检测是否有新的限时祈愿
+function checkCover(data: GachaData[]) {
+	// 如果没有缓存
+	if (!homeStore.poolCover || Object.keys(homeStore.poolCover).length === 0) {
+		return false;
+	}
+	// 获取缓存
+	const cover = homeStore.poolCover;
+	return data.every(item => {
+		const post_id = item.activity_url.split("/").pop();
+		if (!post_id || isNaN(Number(post_id))) {
+			return false;
+		}
+		return (
+			cover[Number(post_id)] !== undefined && cover[Number(post_id)] !== "/source/UI/empty.webp"
+		);
+	});
+}
+
 function toOuter(url: string, title: string) {
 	createTGWindow(url, "祈愿", title, 1200, 800, true);
 }
@@ -114,14 +147,12 @@ function getLastPoolTime(time: number) {
 }
 
 async function toPost(pool: GachaCard) {
-	// 获取路由路径
 	const path = router.resolve({
 		name: "帖子详情",
 		params: {
 			post_id: pool.post_id.toString(),
 		},
 	}).href;
-	// 打开新窗口
 	createTGWindow(path, "限时祈愿", pool.title, 960, 720, false);
 }
 </script>

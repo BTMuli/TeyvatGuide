@@ -7,27 +7,37 @@
 
 import { getPostData } from "../request/post";
 import { GachaCard, GachaData } from "../interface/gacha";
+import { Map } from "../../../interface/Base";
 
 /**
  * @description 根据卡池信息转为渲染用的卡池信息
  * @since Alpha v0.1.2
  * @param {GachaData[]} gachaData 卡池信息
+ * @param {Map<string>} poolCover 卡池封面
  * @return {Promise<GachaCard[]>}
  */
-export async function getGachaCard(gachaData: GachaData[]): Promise<GachaCard[]> {
+export async function getGachaCard(
+	gachaData: GachaData[],
+	poolCover: Map<string> | undefined = undefined
+): Promise<GachaCard[]> {
 	const gachaCard: GachaCard[] = [];
 	await Promise.allSettled(
 		gachaData.map(async (data: GachaData) => {
+			let cover = "/source/UI/empty.webp";
 			const post_id: number | undefined = Number(data.activity_url.split("/").pop()) || undefined;
-			if (post_id === undefined) {
+			if (post_id === undefined || isNaN(post_id)) {
 				throw new Error("无法获取帖子 ID");
 			}
-			let cover = "/source/UI/empty.webp";
-			try {
-				const post = await getPostData(post_id);
-				cover = post.cover?.url || post.post.images[0];
-			} catch (error) {
-				await console.error(error);
+			if (poolCover !== undefined) {
+				cover = poolCover[post_id];
+			} else {
+				try {
+					await console.log("调用 getPostData");
+					const post = await getPostData(post_id);
+					cover = post.cover?.url || post.post.images[0];
+				} catch (error) {
+					await console.error(error);
+				}
 			}
 			return gachaCard.push({
 				title: data.title,
