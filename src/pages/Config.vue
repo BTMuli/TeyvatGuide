@@ -90,6 +90,18 @@
 				<v-list-item-subtitle>{{ appStore.dataPath.user }}</v-list-item-subtitle>
 			</v-list-item>
 		</v-list>
+		<!-- 弹窗提示条 -->
+		<v-snackbar
+			v-model="snackbar"
+			timeout="1500"
+			color="#50596B"
+			rounded="pill"
+			width="50px"
+			class="snack-div"
+		>
+			<img src="../assets/icons/circle-check.svg" alt="check" />
+			<span>{{ snackbarText }}</span>
+		</v-snackbar>
 	</div>
 </template>
 
@@ -120,6 +132,10 @@ const versionTauri = ref("");
 
 // data
 const showHome = ref(homeStore.getShowValue());
+
+// snackbar
+const snackbar = ref(false);
+const snackbarText = ref("");
 
 // load version
 onMounted(async () => {
@@ -157,7 +173,8 @@ async function deleteData() {
 		getDataList.map(async item => {
 			await WriteTGData(item.name, item.data);
 		});
-		await dialog.message("用户数据已删除!");
+		snackbarText.value = "用户数据已删除!";
+		snackbar.value = true;
 		await achievementsStore.init();
 		await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData });
 		await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
@@ -172,7 +189,8 @@ async function deleteTemp() {
 			recursive: true,
 		});
 		await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
-		await dialog.message("临时数据已删除!");
+		snackbarText.value = "临时数据已删除!";
+		snackbar.value = true;
 	}
 }
 
@@ -186,7 +204,8 @@ async function submitHome() {
 	}
 	// 设置
 	await homeStore.setShowValue(show);
-	await dialog.message("已修改!");
+	snackbarText.value = "已修改!";
+	snackbar.value = true;
 }
 
 // 恢复默认配置
@@ -196,9 +215,11 @@ async function setDefaultConfig() {
 		await appStore.init();
 		await homeStore.init();
 		await achievementsStore.init();
-		dialog.message("已恢复默认配置!").then(() => {
+		snackbarText.value = "已恢复默认配置!";
+		snackbar.value = true;
+		setTimeout(() => {
 			window.location.reload();
-		});
+		}, 1500);
 	}
 }
 </script>
@@ -227,5 +248,17 @@ async function setDefaultConfig() {
 	padding: 5px;
 	background: #5b738f;
 	border-radius: 10px;
+}
+
+.snack-div img {
+	position: absolute;
+	width: 20px;
+	height: 20px;
+}
+
+.snack-div span {
+	margin-left: 30px;
+	font-family: Genshin-Light, serif;
+	color: #faf7e8;
 }
 </style>
