@@ -30,7 +30,7 @@ import { onMounted, ref } from "vue";
 import TSidebar from "./components/t-sidebar.vue";
 import TBackTop from "./components/t-backTop.vue";
 // tauri
-import { fs, window } from "@tauri-apps/api";
+import { fs, window, app } from "@tauri-apps/api";
 // store
 import useAppStore from "./store/modules/app";
 // utils
@@ -46,6 +46,8 @@ onMounted(async () => {
 	const win = await window.getCurrent();
 	isMain.value = win.label === "tauri-genshin";
 	if (isMain.value) {
+		const title = "Tauri.Genshin v" + (await app.getVersion()) + " Alpha";
+		await win.setTitle(title);
 		await checkLoad();
 	}
 });
