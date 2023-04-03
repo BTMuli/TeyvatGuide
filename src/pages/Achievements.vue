@@ -127,23 +127,23 @@ import {
 const achievementsStore = useAchievementsStore();
 
 // loading
-const loading = ref(true);
-const loadingTitle = ref("正在加载数据");
+const loading = ref(true as boolean);
+const loadingTitle = ref("正在加载数据" as string);
 
 // data
-const title = ref(achievementsStore.title);
+const title = ref(achievementsStore.title as string);
 const CardsInfo = ref([] as NameCard[]);
 const getCardInfo = ref({} as NameCard);
 // series
 const seriesList = ref([] as TGSeries[]);
-const selectedIndex = ref(-1);
-const selectedSeries = ref(-1);
+const selectedIndex = ref(-1 as number);
+const selectedSeries = ref(-1 as number);
 const selectedAchievement = ref([] as TGAchievement[]);
 
 // render
-const search = ref("");
-const snackbar = ref(false);
-const snackbarText = ref("");
+const search = ref("" as string);
+const snackbar = ref(false as boolean);
+const snackbarText = ref("" as string);
 
 onMounted(async () => {
 	await loadData();
@@ -218,9 +218,11 @@ function showMaterial(path: string) {
 }
 async function searchCard() {
 	if (search.value === "") {
-		await dialog.message("请输入关键字");
+		snackbarText.value = "请输入搜索内容";
+		snackbar.value = true;
 		return;
 	}
+	loadingTitle.value = "正在搜索";
 	loading.value = true;
 	const res: TGAchievement[] = [];
 	const allAchievements = await ReadAllTGData("Achievements");
@@ -230,10 +232,12 @@ async function searchCard() {
 		}
 	});
 	selectedIndex.value = -1;
-	search.value = "";
-	loading.value = false;
+	setTimeout(() => {
+		loading.value = false;
+	}, 500);
 	if (res.length === 0) {
-		await dialog.message("没有找到相关成就");
+		snackbarText.value = "没有找到对应的成就";
+		snackbar.value = true;
 		selectedAchievement.value = allAchievements;
 	} else {
 		res.sort((a, b) => {
@@ -260,61 +264,68 @@ async function importJson() {
 	if (selectedFile && (await UIAF_Oper.checkUIAFData(<string>selectedFile))) {
 		const remoteRaw: string | false = await UIAF_Oper.readUIAFData(<string>selectedFile);
 		if (remoteRaw === false) {
-			await dialog.message("文件格式不正确，导入失败");
+			snackbarText.value = "读取 UIAF 数据失败，请检查文件是否符合规范";
+			snackbar.value = true;
 			return;
 		}
-		let remoteData: Achievements = JSON.parse(remoteRaw);
-		// loading
+		loadingTitle.value = "正在解析数据";
 		loading.value = true;
-		// 遍历 remoteData
-		remoteData.list.map(async data => {
-			// 获取 id
-			const id = data.id;
-			let localData: TGAchievement = (await ReadTGDataByKey("Achievements", [id]))[0];
-			// 获取 timeStamp 2023-03-15 00:00:00
-			const localTime = localData.completed_time;
-			// 如果本地数据不存在，或者本地数据的 timeStamp 小于远程数据的 timeStamp，更新数据
-			if (data.timestamp !== 0) {
-				const fin_time = new Date(data.timestamp * 1000).toLocaleString("zh", {
-					year: "numeric",
-					month: "2-digit",
-					day: "2-digit",
-					hour: "2-digit",
-					minute: "2-digit",
-					second: "2-digit",
-				});
-				if (fin_time !== localTime || localData.progress !== data.current) {
-					localData.completed_time = fin_time;
-					localData.progress = data.current;
-					localData.completed = true;
-					// 更新数据
-					await UpdateTGDataByKey("Achievements", localData);
+		let remoteData: Achievements = JSON.parse(remoteRaw);
+		loadingTitle.value = "正在合并成就数据";
+		await Promise.allSettled(
+			remoteData.list.map(async data => {
+				const id = data.id;
+				let localData: TGAchievement = (await ReadTGDataByKey("Achievements", [id]))[0];
+				// 获取 timeStamp 2023-03-15 00:00:00
+				const localTime = localData.completed_time;
+				// 如果本地数据不存在，或者本地数据的 timeStamp 小于远程数据的 timeStamp，更新数据
+				if (data.timestamp !== 0) {
+					const fin_time = new Date(data.timestamp * 1000).toLocaleString("zh", {
+						year: "numeric",
+						month: "2-digit",
+						day: "2-digit",
+						hour: "2-digit",
+						minute: "2-digit",
+						second: "2-digit",
+					});
+					if (fin_time !== localTime || localData.progress !== data.current) {
+						localData.completed_time = fin_time;
+						localData.progress = data.current;
+						localData.completed = true;
+						// 更新数据
+						await UpdateTGDataByKey("Achievements", localData);
+					}
+				} else {
+					if (localData.progress !== data.current) {
+						localData.completed_time = "";
+						localData.progress = data.current;
+						localData.completed = false;
+						// 更新数据
+						await UpdateTGDataByKey("Achievements", localData);
+					}
 				}
-			} else {
-				if (localData.progress !== data.current) {
-					localData.completed_time = "";
-					localData.progress = data.current;
-					localData.completed = false;
-					// 更新数据
-					await UpdateTGDataByKey("Achievements", localData);
-				}
-			}
-		});
-		// 更新成就系列的完成数
-		const seriesDB = await ReadAllTGData("AchievementSeries");
-		seriesDB.map(async data => {
-			const seriesId = data.id;
-			const achievementsDB = await ReadTGDataByIndex("Achievements", "series", seriesId);
-			data.completed_count = achievementsDB.filter(data => {
-				return data.completed === true;
-			}).length;
-			await UpdateTGDataByKey("AchievementSeries", data);
-		});
-		const achievementsDB = await ReadAllTGData("Achievements");
-		const fin_achievements = achievementsDB.filter(data => {
-			return data.completed === true;
-		}).length;
-		const total_achievements = achievementsDB.length;
+			})
+		);
+		loadingTitle.value = "正在更新成就系列数据";
+		let seriesDB = await ReadAllTGData("AchievementSeries");
+		await Promise.allSettled(
+			seriesDB.map(async data => {
+				const seriesId = data.id;
+				const achievementsDB = await ReadTGDataByIndex("Achievements", "series", seriesId);
+				data.completed_count = achievementsDB.filter(data => {
+					return data.completed === true;
+				}).length;
+				await UpdateTGDataByKey("AchievementSeries", data);
+			})
+		);
+		loadingTitle.value = "正在刷新数据";
+		seriesDB = await ReadAllTGData("AchievementSeries");
+		const fin_achievements = seriesDB.reduce((a, b) => {
+			return a + b.completed_count;
+		}, 0);
+		const total_achievements = seriesDB.reduce((a, b) => {
+			return a + b.total_count;
+		}, 0);
 		achievementsStore.flushData(total_achievements, fin_achievements);
 		// 刷新数据
 		await loadData();
@@ -324,7 +335,8 @@ async function importJson() {
 async function exportJson() {
 	// 判断是否有数据
 	if (achievementsStore.fin_achievements === 0) {
-		await dialog.message("没有数据可以导出");
+		snackbarText.value = "没有可导出的数据";
+		snackbar.value = true;
 		return;
 	}
 	// 获取本地数据
