@@ -56,19 +56,19 @@ onMounted(() => {
 	width: 60px;
 	height: 60px;
 	border-radius: 50%;
-	transition: all 0.3s linear;
+	transition: all 0.3s ease-in-out;
 }
 
 .back-top :hover {
 	border-radius: 50%;
 	cursor: pointer;
 	transform: scale(0.9);
-	transition: all 0.3s linear;
+	transition: all 0.3s ease-in-out;
 	box-shadow: 0 0 10px 5px #546d8b;
 }
 
 .back-top img {
-	transition: all 0.3s linear;
+	transition: all 0.3s ease-in-out;
 	width: 60px;
 	height: 60px;
 }

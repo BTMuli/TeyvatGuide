@@ -31,10 +31,10 @@ const loadingSubtitle = ref("");
 const components = ref([] as any[]);
 let itemRefs = ref([] as any[]);
 
-!onMounted(() => {
+onMounted(async () => {
 	loadingTitle.value = "正在加载首页";
 	const showItems = homeStore.getShowValue();
-	Promise.allSettled(
+	await Promise.allSettled(
 		showItems.map(item => {
 			switch (item) {
 				case "限时祈愿":
