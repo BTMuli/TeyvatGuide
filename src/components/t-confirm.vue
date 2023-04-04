@@ -1,16 +1,16 @@
 <template>
-	<v-overlay v-model="propsConfirm.show">
-		<div class="confirm-div" v-if="propsConfirm.show">
+	<v-overlay v-model="showVal">
+		<div class="confirm-div">
 			<div class="confirm-box">
-				<div class="confirm-title">{{ propsConfirm.title }}</div>
+				<div class="confirm-title">{{ title }}</div>
 				<div class="confirm-btn-box">
 					<button class="confirm-btn" @click="setCancel">
 						<img class="btn-icon" src="../assets/icons/circle-cancel.svg" alt="cancel" />
-						<span class="btn-text">{{ propsConfirm.cancel }}</span>
+						<span class="btn-text">{{ cancel }}</span>
 					</button>
 					<button class="confirm-btn" @click="setConfirm">
 						<img class="btn-icon" src="../assets/icons/circle-check.svg" alt="confirm" />
-						<span class="btn-text">{{ propsConfirm.confirm }}</span>
+						<span class="btn-text">{{ confirm }}</span>
 					</button>
 				</div>
 			</div>
@@ -19,53 +19,55 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { defineProps, defineEmits } from "vue";
+import { defineEmits, ref } from "vue";
 
-// props
-const propsConfirm = defineProps({
-	show: {
-		type: Boolean,
-		required: true,
-		default: false,
-	},
-	title: {
-		type: String,
-		required: true,
-	},
-	cancel: {
-		type: String,
-		default: "取消",
-	},
-	confirm: {
-		type: String,
-		default: "确定",
-	},
-	value: {
-		type: Boolean,
-		required: true,
-	},
-});
+withDefaults(
+	defineProps<{
+		title: string;
+		cancel?: string;
+		confirm?: string;
+		value: boolean;
+	}>(),
+	{
+		title: "确认",
+		cancel: "取消",
+		confirm: "确定",
+		value: false,
+	}
+);
+
+const showVal = ref(false);
 
 // emits
-const emitConfirm = defineEmits(["update:value", "update:show"]);
+const emitConfirm = defineEmits(["update:value"]);
+
+// expose
+defineExpose({
+	showConfirm,
+});
 
 // methods
-async function setCancel() {
-	await emitConfirm("update:show", false);
-	await emitConfirm("update:value", false);
+function showConfirm() {
+	showVal.value = true;
 }
 
-async function setConfirm() {
-	await emitConfirm("update:show", false);
-	await emitConfirm("update:value", true);
+function setCancel() {
+	emitConfirm("update:value", false);
+	showVal.value = false;
+}
+
+function setConfirm() {
+	emitConfirm("update:value", true);
+	showVal.value = false;
 }
 </script>
 <style lang="css" scoped>
 .confirm-div {
+	position: absolute;
 	width: 40vw;
 	height: 20vh;
-	margin-top: 40vh;
-	margin-left: 30vw;
+	top: 40vh;
+	left: 30vw;
 	background: #ffffff;
 	border-radius: 10px;
 	padding: 10px;

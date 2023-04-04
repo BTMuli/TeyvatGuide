@@ -96,7 +96,7 @@
 			{{ snackbarText }}
 		</v-snackbar>
 		<!-- 确认弹窗 -->
-		<t-confirm :title="confirmText" v-model:show="confirmShow" v-model:value="confirmValue" />
+		<t-confirm :title="confirmText" v-model:value="confirmValue" ref="confirmRef" />
 	</div>
 </template>
 
@@ -135,7 +135,7 @@ const snackbarText = ref("");
 const snackbarColor = ref("success");
 
 // confirm
-const confirmShow = ref(false);
+const confirmRef = ref();
 const confirmText = ref("");
 const confirmValue = ref(false);
 
@@ -162,8 +162,8 @@ async function openMergeData() {
 }
 // 删除本地数据
 async function deleteData() {
-	confirmShow.value = true;
 	confirmText.value = "确定要删除用户数据吗?";
+	confirmRef.value.showConfirm();
 	await new Promise(resolve => setTimeout(resolve, 1500));
 	const res = confirmValue.value;
 	if (res) {
@@ -188,7 +188,7 @@ async function deleteData() {
 // 删除临时数据
 async function deleteTemp() {
 	confirmText.value = "确定要删除临时数据吗?";
-	confirmShow.value = true;
+	confirmRef.value.showConfirm();
 	await new Promise(resolve => setTimeout(resolve, 1500));
 	const res = confirmValue.value;
 	if (res) {
@@ -232,7 +232,7 @@ async function submitHome() {
 // 恢复默认配置
 async function setDefaultConfig() {
 	confirmText.value = "确定要恢复默认配置吗?";
-	confirmShow.value = true;
+	confirmRef.value.showConfirm();
 	await new Promise(resolve => setTimeout(resolve, 1500));
 	const res = confirmValue.value;
 	if (res) {

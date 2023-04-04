@@ -2,41 +2,35 @@
 	<div class="loading-div">
 		<div class="loading-content">
 			<div class="loading-title">
-				{{ propsLoading.title }}
-				<v-progress-circular indeterminate color="#f4d8a8" v-show="!propsLoading.empty" />
+				{{ title }}
+				<v-progress-circular indeterminate color="#f4d8a8" v-show="!empty" />
 			</div>
-			<div class="loading-subtitle" v-show="propsLoading.subtitle">{{ propsLoading.subtitle }}</div>
-			<div class="loading-img" v-if="!propsLoading.empty">
+			<div class="loading-subtitle" v-show="subtitle">{{ subtitle }}</div>
+			<div class="loading-img" v-if="!empty">
 				<img src="/source/UI/loading.webp" alt="loading" />
 			</div>
 			<div class="loading-img" v-else>
 				<img src="/source/UI/empty.webp" alt="empty" />
 			</div>
-			<div class="loading-text" v-show="propsLoading.content">{{ propsLoading.content }}</div>
+			<div class="loading-text" v-show="content">{{ content }}</div>
 		</div>
 	</div>
 </template>
 <script lang="ts" setup>
-const propsLoading = defineProps({
-	title: {
-		type: String,
-		default: "加载中",
-	},
-	subtitle: {
-		type: String,
-	},
-	content: {
-		type: String,
-	},
-	empty: {
-		type: Boolean,
-		default: false,
-	},
-	position: {
-		type: String,
-		default: "absolute",
-	},
-});
+withDefaults(
+	defineProps<{
+		title?: string;
+		subtitle?: string;
+		content?: string;
+		empty?: boolean;
+		position?: string;
+	}>(),
+	{
+		title: "加载中",
+		empty: false,
+		position: "absolute",
+	}
+);
 </script>
 <style lang="css" scoped>
 .loading-div {
