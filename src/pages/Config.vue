@@ -57,6 +57,7 @@
 						inset
 						v-model="appStore.devMode"
 						color="#FAC51E"
+						@click="submitDevMode"
 					/>
 				</template>
 			</v-list-item>
@@ -91,9 +92,11 @@
 			</v-list-item>
 		</v-list>
 		<!-- 弹窗提示条 -->
-		<v-snackbar v-model="snackbar" timeout="1500" color="success">
+		<v-snackbar v-model="snackbar" timeout="1500" :color="snackbarColor">
 			{{ snackbarText }}
 		</v-snackbar>
+		<!-- 确认弹窗 -->
+		<t-confirm :title="confirmText" v-model:show="confirmShow" v-model:value="confirmValue" />
 	</div>
 </template>
 
@@ -101,6 +104,7 @@
 // vue
 import { onMounted, ref } from "vue";
 import TLoading from "../components/t-loading.vue";
+import TConfirm from "../components/t-confirm.vue";
 // tauri
 import { dialog, fs, app } from "@tauri-apps/api";
 // store
@@ -128,6 +132,12 @@ const showHome = ref(homeStore.getShowValue());
 // snackbar
 const snackbar = ref(false);
 const snackbarText = ref("");
+const snackbarColor = ref("success");
+
+// confirm
+const confirmShow = ref(false);
+const confirmText = ref("");
+const confirmValue = ref(false);
 
 // load version
 onMounted(async () => {
@@ -152,7 +162,10 @@ async function openMergeData() {
 }
 // 删除本地数据
 async function deleteData() {
-	const res = await dialog.confirm("确定要删除用户数据吗?");
+	confirmShow.value = true;
+	confirmText.value = "确定要删除用户数据吗?";
+	await new Promise(resolve => setTimeout(resolve, 1500));
+	const res = confirmValue.value;
 	if (res) {
 		await fs.removeDir("userData", {
 			dir: fs.BaseDirectory.AppLocalData,
@@ -174,7 +187,10 @@ async function deleteData() {
 }
 // 删除临时数据
 async function deleteTemp() {
-	const res = await dialog.confirm("确定要删除临时数据吗?");
+	confirmText.value = "确定要删除临时数据吗?";
+	confirmShow.value = true;
+	await new Promise(resolve => setTimeout(resolve, 1500));
+	const res = confirmValue.value;
 	if (res) {
 		await fs.removeDir("tempData", {
 			dir: fs.BaseDirectory.AppLocalData,
@@ -186,23 +202,39 @@ async function deleteTemp() {
 	}
 }
 
+// 开启 dev 模式
+async function submitDevMode() {
+	await new Promise(resolve => setTimeout(resolve, 200));
+	appStore.devMode
+		? (snackbarText.value = "已开启 dev 模式!")
+		: (snackbarText.value = "已关闭 dev 模式!");
+	snackbarColor.value = "success";
+	snackbar.value = true;
+}
+
 // 修改首页显示
 async function submitHome() {
 	// 获取已选
 	const show = showHome.value;
 	if (show.length < 1) {
-		await dialog.message("请至少选择一个!");
+		snackbarText.value = "请至少选择一个!";
+		snackbarColor.value = "error";
+		snackbar.value = true;
 		return;
 	}
 	// 设置
 	await homeStore.setShowValue(show);
 	snackbarText.value = "已修改!";
+	snackbarColor.value = "success";
 	snackbar.value = true;
 }
 
 // 恢复默认配置
 async function setDefaultConfig() {
-	const res = await dialog.confirm("确定要初始化数据吗?");
+	confirmText.value = "确定要恢复默认配置吗?";
+	confirmShow.value = true;
+	await new Promise(resolve => setTimeout(resolve, 1500));
+	const res = confirmValue.value;
 	if (res) {
 		await appStore.init();
 		await homeStore.init();
