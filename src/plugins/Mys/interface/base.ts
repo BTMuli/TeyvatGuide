@@ -2,7 +2,7 @@
  * @file plugins Mys interface base.ts
  * @description Mys 插件基础接口
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha
+ * @since Alpha v0.1.2
  */
 
 /**
@@ -55,4 +55,28 @@ export interface MysObc {
 	ch_ext: string;
 	children: MysObc[];
 	list: unknown[];
+}
+
+/**
+ * @description Mys GID 对应的数据
+ * @since Alpha v0.1.2
+ * @interface MysGid
+ * @enum {number}
+ * @property {number} 1 崩坏3
+ * @property {number} 2 原神
+ * @property {number} 3 崩坏2
+ * @property {number} 4 未定事件簿
+ * @property {number} 5 大别野
+ * @property {number} 6 崩坏：星穹铁道
+ * @property {number} 8 绝区零
+ * @return {MysGid}
+ */
+export enum MysGid {
+	BH3 = 1,
+	YS = 2,
+	BH2 = 3,
+	WD = 4,
+	DBY = 5,
+	SR = 6,
+	ZZZ = 8,
 }
