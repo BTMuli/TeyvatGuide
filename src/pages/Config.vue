@@ -4,8 +4,16 @@
 	</div>
 	<div v-else>
 		<v-list class="config-list">
-			<v-list-subheader inset class="config-header">关于</v-list-subheader>
+			<v-list-subheader inset class="config-header">应用信息</v-list-subheader>
 			<v-divider inset class="border-opacity-75" />
+			<v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
+				<template v-slot:prepend>
+					<img class="config-icon" src="/tauri.webp" alt="Tauri" />
+				</template>
+				<template v-slot:append>
+					<v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
+				</template>
+			</v-list-item>
 			<v-list-item>
 				<template v-slot:prepend>
 					<img class="config-icon" src="/icon.webp" alt="App" />
@@ -23,14 +31,6 @@
 					<v-list-item-subtitle>{{ versionApp }}</v-list-item-subtitle>
 				</template>
 			</v-list-item>
-			<v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
-				<template v-slot:prepend>
-					<img class="config-icon" src="/tauri.webp" alt="Tauri" />
-				</template>
-				<template v-slot:append>
-					<v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
-				</template>
-			</v-list-item>
 			<v-list-item title="成就版本">
 				<template v-slot:prepend>
 					<img class="config-icon" src="../assets/icons/achievements.svg" alt="Achievements" />
@@ -42,9 +42,9 @@
 			<v-list-subheader inset class="config-header">设置</v-list-subheader>
 			<v-divider inset class="border-opacity-75" />
 			<v-list-item @click="openMergeData" prepend-icon="mdi-folder" title="打开用户数据目录" />
-			<v-list-item @click="deleteData" prepend-icon="mdi-delete" title="清除用户缓存" />
-			<v-list-item @click="deleteTemp" prepend-icon="mdi-delete" title="清除临时数据" />
-			<v-list-item @click="setDefaultConfig" prepend-icon="mdi-cog" title="恢复默认设置" />
+			<v-list-item @click="tryConfirm('delUser')" prepend-icon="mdi-delete" title="清除用户缓存" />
+			<v-list-item @click="tryConfirm('delTemp')" prepend-icon="mdi-delete" title="清除临时数据" />
+			<v-list-item @click="tryConfirm('delApp')" prepend-icon="mdi-cog" title="恢复默认设置" />
 			<v-list-subheader inset class="config-header">调试</v-list-subheader>
 			<v-divider inset class="border-opacity-75" />
 			<v-list-item title="开发者模式" subtitle="开启后将显示调试信息">
@@ -75,7 +75,8 @@
 				<template v-slot:append>
 					<v-btn @click="submitHome" class="card-btn">
 						<template v-slot:prepend>
-							<img src="../assets/icons/circle-check.svg" alt="check" />提交
+							<img src="../assets/icons/circle-check.svg" alt="check" />
+							提交
 						</template>
 					</v-btn>
 				</template>
@@ -96,7 +97,7 @@
 			{{ snackbarText }}
 		</v-snackbar>
 		<!-- 确认弹窗 -->
-		<t-confirm :title="confirmText" v-model:value="confirmValue" ref="confirmRef" />
+		<t-confirm :title="confirmText" v-model="confirmShow" @confirm="doConfirm(confirmOper)" />
 	</div>
 </template>
 
@@ -121,23 +122,25 @@ const appStore = useAppStore();
 const homeStore = useHomeStore();
 const achievementsStore = useAchievementsStore();
 
-// About
-const loading = ref(true);
-const versionApp = ref("");
-const versionTauri = ref("");
+// About App
+const versionApp = ref("" as string);
+const versionTauri = ref("" as string);
+
+// loading
+const loading = ref(true as boolean);
 
 // data
-const showHome = ref(homeStore.getShowValue());
+const showHome = ref(homeStore.getShowValue() as string[]);
 
 // snackbar
-const snackbar = ref(false);
-const snackbarText = ref("");
-const snackbarColor = ref("success");
+const snackbar = ref(false as boolean);
+const snackbarText = ref("" as string);
+const snackbarColor = ref("success" as string);
 
 // confirm
-const confirmRef = ref();
-const confirmText = ref("");
-const confirmValue = ref(false);
+const confirmText = ref("" as string);
+const confirmOper = ref("" as string);
+const confirmShow = ref(false as boolean);
 
 // load version
 onMounted(async () => {
@@ -160,46 +163,85 @@ async function openMergeData() {
 		filters: [],
 	});
 }
-// 删除本地数据
-async function deleteData() {
-	confirmText.value = "确定要删除用户数据吗?";
-	confirmRef.value.showConfirm();
-	await new Promise(resolve => setTimeout(resolve, 1500));
-	const res = confirmValue.value;
-	if (res) {
-		await fs.removeDir("userData", {
-			dir: fs.BaseDirectory.AppLocalData,
-			recursive: true,
-		});
-		await fs.removeDir("tempData", {
-			dir: fs.BaseDirectory.AppLocalData,
-			recursive: true,
-		});
-		getDataList.map(async item => {
-			await WriteTGData(item.name, item.data);
-		});
-		snackbarText.value = "用户数据已删除!";
-		snackbar.value = true;
-		await achievementsStore.init();
-		await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData });
-		await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
+
+// open confirm
+function tryConfirm(oper: string) {
+	switch (oper) {
+		case "delTemp":
+			confirmText.value = "确认清除临时数据吗？";
+			confirmOper.value = "delTemp";
+			confirmShow.value = true;
+			break;
+		case "delUser":
+			confirmText.value = "确认清除用户缓存吗？";
+			confirmOper.value = "delUser";
+			confirmShow.value = true;
+			break;
+		case "delApp":
+			confirmText.value = "确认恢复默认设置吗？";
+			confirmOper.value = "delApp";
+			confirmShow.value = true;
+			break;
 	}
 }
-// 删除临时数据
-async function deleteTemp() {
-	confirmText.value = "确定要删除临时数据吗?";
-	confirmRef.value.showConfirm();
-	await new Promise(resolve => setTimeout(resolve, 1500));
-	const res = confirmValue.value;
-	if (res) {
-		await fs.removeDir("tempData", {
-			dir: fs.BaseDirectory.AppLocalData,
-			recursive: true,
-		});
-		await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
-		snackbarText.value = "临时数据已删除!";
-		snackbar.value = true;
+
+// transfer confirm oper
+function doConfirm(oper: string) {
+	switch (oper) {
+		case "delTemp":
+			delTempData();
+			break;
+		case "delUser":
+			delUserData();
+			break;
+		case "delApp":
+			initAppData();
+			break;
+		default:
+			break;
 	}
+}
+
+// confirmOper
+async function delTempData() {
+	await fs.removeDir("tempData", {
+		dir: fs.BaseDirectory.AppLocalData,
+		recursive: true,
+	});
+	await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
+	snackbarText.value = "临时数据已删除!";
+	snackbar.value = true;
+}
+
+async function delUserData() {
+	await fs.removeDir("userData", {
+		dir: fs.BaseDirectory.AppLocalData,
+		recursive: true,
+	});
+	await fs.removeDir("tempData", {
+		dir: fs.BaseDirectory.AppLocalData,
+		recursive: true,
+	});
+	getDataList.map(async item => {
+		await WriteTGData(item.name, item.data);
+	});
+	snackbarText.value = "用户数据已删除!";
+	snackbar.value = true;
+	await achievementsStore.init();
+	await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData });
+	await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
+}
+
+// 恢复默认配置
+async function initAppData() {
+	await appStore.init();
+	await homeStore.init();
+	await achievementsStore.init();
+	snackbarText.value = "已恢复默认配置!";
+	snackbar.value = true;
+	setTimeout(() => {
+		window.location.reload();
+	}, 1500);
 }
 
 // 开启 dev 模式
@@ -227,24 +269,6 @@ async function submitHome() {
 	snackbarText.value = "已修改!";
 	snackbarColor.value = "success";
 	snackbar.value = true;
-}
-
-// 恢复默认配置
-async function setDefaultConfig() {
-	confirmText.value = "确定要恢复默认配置吗?";
-	confirmRef.value.showConfirm();
-	await new Promise(resolve => setTimeout(resolve, 1500));
-	const res = confirmValue.value;
-	if (res) {
-		await appStore.init();
-		await homeStore.init();
-		await achievementsStore.init();
-		snackbarText.value = "已恢复默认配置!";
-		snackbar.value = true;
-		setTimeout(() => {
-			window.location.reload();
-		}, 1500);
-	}
 }
 </script>
 

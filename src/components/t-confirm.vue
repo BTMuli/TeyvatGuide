@@ -1,67 +1,72 @@
 <template>
-	<v-overlay v-model="showVal">
+	<v-overlay v-model="visible">
 		<div class="confirm-div">
 			<div class="confirm-box">
-				<div class="confirm-title">{{ title }}</div>
+				<div class="confirm-title">
+					{{ title }}
+				</div>
 				<div class="confirm-btn-box">
-					<button class="confirm-btn" @click="setCancel">
+					<button class="confirm-btn" @click="onCancel">
 						<img class="btn-icon" src="../assets/icons/circle-cancel.svg" alt="cancel" />
-						<span class="btn-text">{{ cancel }}</span>
+						<span class="btn-text">
+							{{ cancel }}
+						</span>
 					</button>
-					<button class="confirm-btn" @click="setConfirm">
+					<button class="confirm-btn" @click="onConfirm">
 						<img class="btn-icon" src="../assets/icons/circle-check.svg" alt="confirm" />
-						<span class="btn-text">{{ confirm }}</span>
+						<span class="btn-text">
+							{{ confirm }}
+						</span>
 					</button>
 				</div>
 			</div>
 		</div>
 	</v-overlay>
 </template>
+
 <script lang="ts" setup>
 // vue
-import { ref } from "vue";
+import { computed } from "vue";
 
-withDefaults(
-	defineProps<{
-		title: string;
-		cancel?: string;
-		confirm?: string;
-		value: boolean;
-	}>(),
-	{
-		title: "确认",
-		cancel: "取消",
-		confirm: "确定",
-		value: false,
-	}
-);
+interface TConfirmProps {
+	title: string;
+	cancel?: string;
+	confirm?: string;
+	/** 此值为 true 时显示对话框 */
+	modelValue: boolean;
+}
 
-const showVal = ref(false);
+interface TConfirmEmits {
+	(e: "update:show", v: boolean): void;
+	(e: "update:modelValue", v: boolean): void;
+	(e: "confirm"): void;
+	(e: "cancel"): void;
+}
 
-// emits
-const emitConfirm = defineEmits(["update:value"]);
-
-// expose
-defineExpose({
-	showConfirm,
+const emits = defineEmits<TConfirmEmits>();
+const props = withDefaults(defineProps<TConfirmProps>(), {
+	title: "确认",
+	cancel: "取消",
+	confirm: "确定",
 });
 
-// methods
-function showConfirm() {
-	showVal.value = true;
-}
+const visible = computed({
+	get: () => props.modelValue,
+	set: v => emits("update:modelValue", v),
+});
 
-function setCancel() {
-	emitConfirm("update:value", false);
-	showVal.value = false;
-}
+const onCancel = () => {
+	visible.value = false;
+	emits("cancel");
+};
 
-function setConfirm() {
-	emitConfirm("update:value", true);
-	showVal.value = false;
-}
+const onConfirm = () => {
+	visible.value = false;
+	emits("confirm");
+};
 </script>
-<style lang="css" scoped>
+
+<style scoped>
 .confirm-div {
 	position: absolute;
 	width: 40vw;
