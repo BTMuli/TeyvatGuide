@@ -2,22 +2,22 @@
 	<div class="loading-div">
 		<div class="loading-content">
 			<div class="loading-title">
-				{{ props.title }}
-				<v-progress-circular indeterminate color="#f4d8a8" v-show="!props.empty" />
+				{{ propsLoading.title }}
+				<v-progress-circular indeterminate color="#f4d8a8" v-show="!propsLoading.empty" />
 			</div>
-			<div class="loading-subtitle" v-show="props.subtitle">{{ props.subtitle }}</div>
-			<div class="loading-img" v-if="!props.empty">
+			<div class="loading-subtitle" v-show="propsLoading.subtitle">{{ propsLoading.subtitle }}</div>
+			<div class="loading-img" v-if="!propsLoading.empty">
 				<img src="/source/UI/loading.webp" alt="loading" />
 			</div>
 			<div class="loading-img" v-else>
 				<img src="/source/UI/empty.webp" alt="empty" />
 			</div>
-			<div class="loading-text" v-show="props.content">{{ props.content }}</div>
+			<div class="loading-text" v-show="propsLoading.content">{{ propsLoading.content }}</div>
 		</div>
 	</div>
 </template>
 <script lang="ts" setup>
-const props = defineProps({
+const propsLoading = defineProps({
 	title: {
 		type: String,
 		default: "加载中",
