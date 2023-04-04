@@ -19,7 +19,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { defineEmits, ref } from "vue";
+import { ref } from "vue";
 
 withDefaults(
 	defineProps<{

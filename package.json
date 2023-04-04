@@ -2,7 +2,7 @@
 	"name": "tauri-genshin",
 	"description": "A Tauri App Demo",
 	"private": true,
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"author": "BTMuli <bt-muli@outlook.com>",
 	"scripts": {
 		"format": "prettier --write .",
