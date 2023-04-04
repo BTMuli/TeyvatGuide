@@ -133,6 +133,9 @@
 				</div>
 			</v-window-item>
 		</v-window>
+		<v-snackbar v-model="snackbar" timeout="1500" :color="snackbarColor">
+			{{ snackbarText }}
+		</v-snackbar>
 	</div>
 </template>
 
@@ -141,8 +144,6 @@
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import TLoading from "../components/t-loading.vue";
-// tauri
-import { dialog } from "@tauri-apps/api";
 // store
 import useAppStore from "../store/modules/app";
 // plugin
@@ -159,6 +160,10 @@ const appStore = useAppStore();
 const loading = ref(true);
 const loadingTitle = ref("正在加载");
 const loadingSub = ref(false);
+// snackbar
+const snackbar = ref(false);
+const snackbarText = ref("");
+const snackbarColor = ref("success");
 // 路由
 const router = useRouter();
 // search
@@ -219,7 +224,9 @@ async function loadMore(data: string) {
 	switch (data) {
 		case "notice":
 			if (rawData.value.notice.is_last) {
-				await dialog.message("已经是最后一页了");
+				snackbarText.value = "已经是最后一页了";
+				snackbarColor.value = "#35acce";
+				snackbar.value = true;
 				loadingSub.value = false;
 				return;
 			}
@@ -232,7 +239,9 @@ async function loadMore(data: string) {
 			break;
 		case "activity":
 			if (rawData.value.activity.is_last) {
-				await dialog.message("已经是最后一页了");
+				snackbarText.value = "已经是最后一页了";
+				snackbarColor.value = "#35acce";
+				snackbar.value = true;
 				loadingSub.value = false;
 				return;
 			}
@@ -245,7 +254,9 @@ async function loadMore(data: string) {
 			break;
 		case "news":
 			if (rawData.value.news.is_last) {
-				await dialog.message("已经是最后一页了");
+				snackbarText.value = "已经是最后一页了";
+				snackbarColor.value = "#35acce";
+				snackbar.value = true;
 				loadingSub.value = false;
 				return;
 			}
@@ -302,14 +313,18 @@ async function toJson(item: NewsCard | string) {
 
 async function searchPost() {
 	if (search.value === "") {
-		await dialog.message("请输入搜索内容");
+		snackbarText.value = "请输入搜索内容";
+		snackbarColor.value = "error";
+		snackbar.value = true;
 		return;
 	}
 	if (!isNaN(Number(search.value))) {
 		await toPost(search.value);
 		await toJson(search.value);
 	} else {
-		await dialog.message("请输入数字");
+		snackbarText.value = "请输入搜索内容";
+		snackbarColor.value = "error";
+		snackbar.value = true;
 		return;
 	}
 }

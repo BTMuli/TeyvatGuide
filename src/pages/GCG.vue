@@ -104,14 +104,13 @@
 				</div>
 			</div>
 		</div>
+		<v-snackbar v-model="snackbar" timeout="1500" color="error"> 未找到相关卡牌 </v-snackbar>
 	</div>
 </template>
 <script lang="ts" setup>
 // vue
 import { ref, onMounted } from "vue";
 import TLoading from "../components/t-loading.vue";
-// tauri
-import { dialog } from "@tauri-apps/api";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
 import { ReadAllTGData } from "../utils/TGIndex";
@@ -119,9 +118,14 @@ import { ReadAllTGData } from "../utils/TGIndex";
 import { BaseCard, ActionCard, CharacterCard, MonsterCard } from "../interface/GCG";
 import { OBC_CONTENT_API } from "../plugins/Mys/interface/utils";
 
+// loading
 const loading = ref(true);
+// snackbar
+const snackbar = ref(false);
+// search
 const doSearch = ref(false);
 const search = ref("");
+// data
 const tab = ref("character");
 const CardsInfoC = ref([] as CharacterCard[]);
 const CardsInfoA = ref([] as ActionCard[]);
@@ -152,7 +156,7 @@ async function searchCard() {
 	res.sort((a, b) => a.name.localeCompare(b.name));
 	loading.value = false;
 	if (res.length == 0) {
-		await dialog.message("未找到相关卡牌");
+		snackbar.value = true;
 		doSearch.value = false;
 	} else {
 		CardsInfoS.value = res;
