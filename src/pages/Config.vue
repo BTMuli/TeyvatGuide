@@ -39,6 +39,24 @@
 					<v-list-item-subtitle>{{ achievementsStore.last_version }}</v-list-item-subtitle>
 				</template>
 			</v-list-item>
+			<v-list-subheader inset class="config-header">系统信息</v-list-subheader>
+			<v-divider inset class="border-opacity-75" />
+			<v-list-item title="系统平台">
+				<template v-slot:prepend>
+					<v-icon>mdi-desktop-classic</v-icon>
+				</template>
+				<template v-slot:append>
+					<v-list-item-subtitle>{{ osPlatform }}</v-list-item-subtitle>
+				</template>
+			</v-list-item>
+			<v-list-item title="系统版本">
+				<template v-slot:prepend>
+					<v-icon>mdi-desktop-classic</v-icon>
+				</template>
+				<template v-slot:append>
+					<v-list-item-subtitle>{{ osVersion }}</v-list-item-subtitle>
+				</template>
+			</v-list-item>
 			<v-list-subheader inset class="config-header">设置</v-list-subheader>
 			<v-divider inset class="border-opacity-75" />
 			<v-list-item @click="openMergeData" prepend-icon="mdi-folder" title="打开用户数据目录" />
@@ -107,7 +125,7 @@ import { onMounted, ref } from "vue";
 import TLoading from "../components/t-loading.vue";
 import TConfirm from "../components/t-confirm.vue";
 // tauri
-import { dialog, fs, app } from "@tauri-apps/api";
+import { dialog, fs, app, os } from "@tauri-apps/api";
 // store
 import useAppStore from "../store/modules/app";
 import useHomeStore from "../store/modules/home";
@@ -125,6 +143,10 @@ const achievementsStore = useAchievementsStore();
 // About App
 const versionApp = ref("" as string);
 const versionTauri = ref("" as string);
+
+// About OS
+const osPlatform = ref("" as string);
+const osVersion = ref("" as string);
 
 // loading
 const loading = ref(true as boolean);
@@ -146,6 +168,8 @@ const confirmShow = ref(false as boolean);
 onMounted(async () => {
 	versionApp.value = await app.getVersion();
 	versionTauri.value = await app.getTauriVersion();
+	osPlatform.value = `${await os.platform()}`;
+	osVersion.value = await os.version();
 	setTimeout(() => {
 		loading.value = false;
 	}, 1000);
