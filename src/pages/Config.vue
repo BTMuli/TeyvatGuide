@@ -8,7 +8,7 @@
 			<v-divider inset class="border-opacity-75" />
 			<v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
 				<template v-slot:prepend>
-					<img class="config-icon" src="/tauri.webp" alt="Tauri" />
+					<img class="config-icon" src="/platforms/tauri.webp" alt="Tauri" />
 				</template>
 				<template v-slot:append>
 					<v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
