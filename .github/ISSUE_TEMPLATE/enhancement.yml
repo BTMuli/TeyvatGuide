@@ -1,0 +1,61 @@
+name: 新功能
+description: 提交新功能请求
+# title: "[Feat] "
+labels:
+  - enhancement
+  - question
+assignees:
+  - BTMuli
+body:
+  - type: markdown
+    attributes:
+      value: |
+        在此填写新功能的详细信息，包括但不限于：
+        - 新功能名称
+        - 新功能描述
+        - 当前使用版本
+  - type: checkboxes
+    attributes:
+      label: 请确认
+      description: 我确认没有查找过相关的 Issue
+      options:
+        - label: 我确认没有查找过相关的 Issue
+          required: false
+  - type: checkboxes
+    attributes:
+      label: 请确认
+      description: 我确认这个功能是无用且不必要的
+      options:
+        - label: 我确认这个功能是无用且不必要的
+          required: false
+  - type: checkboxes
+    attributes:
+      label: 请确认
+      description: 我没有阅读过[提问的艺术](https://github.com/betaseeker/How-To-Ask-Questions)
+      options:
+        - label: 我没有阅读过[提问的艺术](https://github.com/betaseeker/How-To-Ask-Questions)
+          required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: 新功能描述
+      description: 请详细描述新功能的内容
+      placeholder: 请详细描述新功能的内容
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 当前使用版本
+      description: 请填写当前使用版本
+      placeholder: 如 Alpha v0.2.0
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: 其他信息
+      description: 请填写其他信息
+      placeholder: 请填写其他信息
+    validations:
+      required: false

@@ -1,0 +1,69 @@
+name: 非预期错误和漏洞
+description: 提交非预期错误和漏洞
+# title: "[Bug] "
+labels:
+  - bug
+  - question
+assignees:
+  - BTMuli
+body:
+  - type: markdown
+    attributes:
+      value: |
+        在此填写非预期错误和漏洞的详细信息，包括但不限于：
+        - 你所遇到的问题
+        - 当前使用版本
+        - 复现流程
+  - type: checkboxes
+    attributes:
+      label: 请确认
+      description: 我确认没有查找过相关的 Issue
+      options:
+        - label: 我确认没有查找过相关的 Issue
+          required: false
+  - type: checkboxes
+    attributes:
+      label: 请确认
+      description: 我确认这个问题是无用且不必要的
+      options:
+        - label: 我确认这个问题是无用且不必要的
+          required: false
+  - type: checkboxes
+    attributes:
+      label: 请确认
+      description: 我没有阅读过[提问的艺术](https://github.com/betaseeker/How-To-Ask-Questions)
+      options:
+        - label: 我没有阅读过[提问的艺术](https://github.com/betaseeker/How-To-Ask-Questions)
+          required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 请详细描述你所遇到的问题
+      placeholder: 请详细描述你所遇到的问题
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 当前使用版本
+      description: 请填写当前使用版本
+      placeholder: 如 Alpha v0.2.0
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现流程
+      description: 请详细描述复现流程
+      placeholder: 若无法复现，请填写无法复现
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: 其他信息
+      description: 请填写其他信息
+      placeholder: 请填写其他信息
+    validations:
+      required: true

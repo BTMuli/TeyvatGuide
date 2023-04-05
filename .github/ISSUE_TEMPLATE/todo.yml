@@ -1,0 +1,50 @@
+name: 开发目标（开发人员）
+description: 用于开发人员 Issue 的模板
+# title: "[TODO] "
+labels:
+  - todo
+  - enhancement
+  - help wanted
+assignees:
+  - BTMuli
+body:
+  - type: markdown
+    attributes:
+      value: |
+        在此填写开发目标的详细信息，包括但不限于：
+        - 任务名称
+        - 任务描述
+        - 预期版本
+        - 当前提交
+  - type: textarea
+    id: description
+    attributes:
+      label: 任务描述
+      description: 请详细描述任务的内容
+      placeholder: 请详细描述任务的内容
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 预期版本
+      description: 请填写预期版本
+      placeholder: 如 Alpha v0.2.0
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: 当前提交
+      description: 请填写当前提交
+      placeholder: 如 0.2.0
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: 其他信息
+      description: 请填写其他信息
+      placeholder: 请填写其他信息
+    validations:
+      required: false
