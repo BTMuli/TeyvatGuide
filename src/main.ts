@@ -18,4 +18,14 @@ import { createVuetify } from "vuetify";
 // 全局样式
 import "./assets/index.css";
 
-createApp(App).use(router).use(store).use(createVuetify()).mount("#app");
+if (import.meta.env.MODE === "development") {
+  await import("@vue/devtools").then(i => {
+    i.default.connect(/* host, port */);
+  });
+}
+
+createApp(App)
+  .use(router)
+  .use(store)
+  .use(createVuetify())
+  .mount("#app");

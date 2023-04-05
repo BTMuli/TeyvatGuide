@@ -5,14 +5,16 @@
 	"version": "0.1.2",
 	"author": "BTMuli <bt-muli@outlook.com>",
 	"scripts": {
-		"lint:all": "lint:code && lint:style",
-		"linx:all:fix": "lint:code:fix && lint:style:fix",
-		"lint:code": "eslint --ext .ts,.vue .",
-		"lint:code:fix": "lint:code --fix",
-		"lint:style": "stylelint './src/**/*.{vue}'",
-		"lint:style:fix": "lint:style --fix",
-		"dev": "vite",
-		"build": "vue-tsc --noEmit && vite build",
+		"lint": "concurrently \"npm:lint:*(!fix)\"",
+		"lint:fix": "concurrently \"npm:lint:fix:*\"",
+		"lint:code": "eslint \"./src/**/*.{vue,ts,tsx,js,jsx}\"",
+		"lint:code:fix": "npm run lint:code -- --fix",
+		"lint:style": "stylelint \"./src/**/*.{vue,css}\"",
+		"lint:style:fix": "npm run lint:style -- --fix",
+		"dev": "concurrently -k \"tauri dev --exit-on-panic\" \"vue-devtools\"",
+		"vite:dev": "vite dev",
+		"vite:build": "vite build",
+		"build": "tauri build",
 		"preview": "vite preview",
 		"tauri": "tauri"
 	},
@@ -53,6 +55,7 @@
 		"@typescript-eslint/eslint-plugin": "^5.57.1",
 		"@typescript-eslint/parser": "^5.57.1",
 		"@vitejs/plugin-vue": "^4.1.0",
+		"@vue/devtools": "^6.5.0",
 		"concurrently": "^8.0.1",
 		"eslint": "^8.37.0",
 		"eslint-config-standard-with-typescript": "^34.0.1",
@@ -67,7 +70,6 @@
 		"stylelint-order": "^6.0.3",
 		"typescript": "^5.0.3",
 		"vite": "^4.2.1",
-		"vite-plugin-vuetify": "^1.0.2",
-		"vue-devtools": "^5.1.4"
+		"vite-plugin-vuetify": "^1.0.2"
 	}
 }

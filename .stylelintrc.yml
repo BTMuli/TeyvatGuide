@@ -3,4 +3,4 @@ extends:
   - stylelint-order
   - stylelint-declaration-block-no-ignored-properties
   - stylelint-config-standard-vue
-# rules: 
+rules: {}
