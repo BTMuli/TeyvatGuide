@@ -16,21 +16,21 @@ body:
         - 复现流程
   - type: checkboxes
     attributes:
-      label: 请确认
+      label: Issue重复性检查
       description: 我确认没有查找过相关的 Issue
       options:
         - label: 我确认没有查找过相关的 Issue
           required: false
   - type: checkboxes
     attributes:
-      label: 请确认
+      label: 问题必要性检查
       description: 我确认这个问题是无用且不必要的
       options:
         - label: 我确认这个问题是无用且不必要的
           required: false
   - type: checkboxes
     attributes:
-      label: 请确认
+      label: 提问的艺术
       description: 我没有阅读过[提问的艺术](https://github.com/betaseeker/How-To-Ask-Questions)
       options:
         - label: 我没有阅读过[提问的艺术](https://github.com/betaseeker/How-To-Ask-Questions)
