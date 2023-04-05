@@ -1,0 +1,20 @@
+{
+    "workbench.iconTheme": "material-icon-theme",
+    "editor.inlineSuggest.enabled": true,
+    "editor.fontFamily": "Consolas, 'Courier New', monospaced",
+    "workbench.colorTheme": "Atom One Dark",
+    "editor.guides.bracketPairs": "active",
+    "github.copilot.enable": {
+        "*": true,
+    },
+    "eslint.validate": [
+        "typescript",
+        "html",
+        "vue",
+        "markdown",
+        "json",
+        "yaml",
+        "plaintext"
+    ],
+    "stylelint.configBasedir": "${workspaceFolder}",
+}
