@@ -1,13 +1,18 @@
+<!-- eslint-disable vue/no-v-html -->
 <template>
-	<div v-if="loading" class="loading">
-		<t-loading :title="loadingTitle" :empty="loadingEmpty" />
-	</div>
-	<div v-else class="anno-body">
-		<div class="anno-title">{{ annoData.title }}</div>
-		<div class="anno-subtitle">{{ annoData.subtitle }}</div>
-		<img :src="annoData.banner" alt="cover" class="anno-img" />
-		<div v-html="annoHtml" class="anno-content" />
-	</div>
+<div v-if="loading" class="loading">
+  <TLoading :title="loadingTitle" :empty="loadingEmpty" />
+</div>
+<div v-else class="anno-body">
+  <div class="anno-title">
+    {{ annoData.title }}
+  </div>
+  <div class="anno-subtitle">
+    {{ annoData.subtitle }}
+  </div>
+  <img :src="annoData.banner" alt="cover" class="anno-img">
+  <div class="anno-content" v-html="annoHtml" />
+</div>
 </template>
 <script lang="ts" setup>
 // vue
@@ -32,27 +37,27 @@ const annoData = ref({} as AnnoContentItem);
 const annoHtml = ref("");
 
 onMounted(async () => {
-	await appWindow.show();
-	// 检查数据
-	if (!anno_id) {
-		loadingEmpty.value = true;
-		loadingTitle.value = "未找到数据";
-		return;
-	}
-	// 获取数据
-	loadingTitle.value = "正在获取数据...";
-	try {
-		annoData.value = await GenshinOper.Announcement.getContent(anno_id);
-		loadingTitle.value = "正在渲染数据...";
-		annoHtml.value = GenshinOper.Announcement.parser(annoData.value.content);
-	} catch (error) {
-		loadingEmpty.value = true;
-		loadingTitle.value = "公告不存在或解析失败";
-		return;
-	}
-	setTimeout(() => {
-		loading.value = false;
-	}, 200);
+  await appWindow.show();
+  // 检查数据
+  if (!anno_id) {
+    loadingEmpty.value = true;
+    loadingTitle.value = "未找到数据";
+    return;
+  }
+  // 获取数据
+  loadingTitle.value = "正在获取数据...";
+  try {
+    annoData.value = await GenshinOper.Announcement.getContent(anno_id);
+    loadingTitle.value = "正在渲染数据...";
+    annoHtml.value = GenshinOper.Announcement.parser(annoData.value.content);
+  } catch (error) {
+    loadingEmpty.value = true;
+    loadingTitle.value = "公告不存在或解析失败";
+    return;
+  }
+  setTimeout(() => {
+    loading.value = false;
+  }, 200);
 });
 </script>
 <style lang="css" src="../assets/css/anno-parser.css" scoped />

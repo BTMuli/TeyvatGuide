@@ -1,10 +1,10 @@
 <template>
-	<div v-if="loading">
-		<t-loading :empty="loadingEmpty" :title="loadingTitle" />
-	</div>
-	<div v-else class="dev-json">
-		<json-viewer :value="jsonData" copyable boxed />
-	</div>
+<div v-if="loading">
+  <TLoading :empty="loadingEmpty" :title="loadingTitle" />
+</div>
+<div v-else class="dev-json">
+  <JsonViewer :value="jsonData" copyable boxed />
+</div>
 </template>
 <script lang="ts" setup>
 // vue
@@ -27,18 +27,18 @@ const post_id = Number(useRoute().params.post_id);
 let jsonData = reactive({});
 
 onMounted(async () => {
-	await appWindow.show();
-	// 检查数据
-	if (!post_id) {
-		loadingEmpty.value = true;
-		loadingTitle.value = "未找到数据";
-		return;
-	}
-	// 获取数据
-	loadingTitle.value = "正在获取数据...";
-	jsonData = await MysOper.Post.get(post_id);
-	setTimeout(() => {
-		loading.value = false;
-	}, 200);
+  await appWindow.show();
+  // 检查数据
+  if (!post_id) {
+    loadingEmpty.value = true;
+    loadingTitle.value = "未找到数据";
+    return;
+  }
+  // 获取数据
+  loadingTitle.value = "正在获取数据...";
+  jsonData = await MysOper.Post.get(post_id);
+  setTimeout(() => {
+    loading.value = false;
+  }, 200);
 });
 </script>

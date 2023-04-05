@@ -1,13 +1,17 @@
 <template>
-	<div v-if="loading">
-		<t-loading :empty="loadingEmpty" :title="loadingTitle" />
-	</div>
-	<div v-else class="dev-json">
-		<div class="anno-title">活动列表 JSON</div>
-		<json-viewer :value="jsonList" copyable boxed />
-		<div class="anno-title">活动内容 JSON</div>
-		<json-viewer :value="jsonContent" copyable boxed />
-	</div>
+<div v-if="loading">
+  <TLoading :empty="loadingEmpty" :title="loadingTitle" />
+</div>
+<div v-else class="dev-json">
+  <div class="anno-title">
+    活动列表 JSON
+  </div>
+  <JsonViewer :value="jsonList" copyable boxed />
+  <div class="anno-title">
+    活动内容 JSON
+  </div>
+  <JsonViewer :value="jsonContent" copyable boxed />
+</div>
 </template>
 <script lang="ts" setup>
 // vue
@@ -33,28 +37,25 @@ let jsonList = reactive({});
 let jsonContent = reactive({});
 
 onMounted(async () => {
-	await appWindow.show();
-	// 检查数据
-	if (!anno_id) {
-		loadingEmpty.value = true;
-		loadingTitle.value = "未找到数据";
-		return;
-	}
-	// 获取数据
-	loadingTitle.value = "正在获取数据...";
-	const listData = await GenshinOper.Announcement.getList();
-	listData.list.map((item: Announcement) => {
-		return item.list.map((single: AnnoListItem) => {
-			if (single.ann_id === anno_id) {
-				jsonList = single;
-				return;
-			}
-		});
-	});
-	jsonContent = await GenshinOper.Announcement.getContent(anno_id);
-	setTimeout(() => {
-		loading.value = false;
-	}, 200);
+  await appWindow.show();
+  // 检查数据
+  if (!anno_id) {
+    loadingEmpty.value = true;
+    loadingTitle.value = "未找到数据";
+    return;
+  }
+  // 获取数据
+  loadingTitle.value = "正在获取数据...";
+  const listData = await GenshinOper.Announcement.getList();
+  listData.list.map((item: Announcement) => {
+    return item.list.map((single: AnnoListItem) => {
+      return single.ann_id === anno_id ? (jsonList = single) : null;
+    });
+  });
+  jsonContent = await GenshinOper.Announcement.getContent(anno_id);
+  setTimeout(() => {
+    loading.value = false;
+  }, 200);
 });
 </script>
 <style lang="css" scoped>

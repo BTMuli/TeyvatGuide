@@ -1,8 +1,9 @@
+<!-- eslint-disable vue/no-v-html -->
 <template>
-	<div v-if="loading">
-		<t-loading :empty="loadingEmpty" :title="loadingTitle" />
-	</div>
-	<div v-else v-html="postHtml" class="mys-post-body" />
+<div v-if="loading">
+  <TLoading :empty="loadingEmpty" :title="loadingTitle" />
+</div>
+<div v-else class="mys-post-body" v-html="postHtml" />
 </template>
 <script lang="ts" setup>
 // vue
@@ -24,31 +25,31 @@ const post_id = Number(useRoute().params.post_id);
 const postHtml = ref("");
 
 onMounted(async () => {
-	await appWindow.show();
-	// 检查数据
-	if (!post_id) {
-		loadingEmpty.value = true;
-		loadingTitle.value = "未找到数据";
-		await appWindow.setTitle("未找到数据");
-		return;
-	}
-	// 获取数据
-	loadingTitle.value = "正在获取数据...";
-	try {
-		const postData = await MysOper.Post.get(post_id);
-		loadingTitle.value = "正在渲染数据...";
-		postHtml.value = MysOper.Post.parser(postData);
-		await appWindow.setTitle(postData.post.subject);
-	} catch (error) {
-		console.error(error);
-		loadingEmpty.value = true;
-		loadingTitle.value = "帖子不存在或解析失败";
-		await appWindow.setTitle("帖子不存在或解析失败");
-		return;
-	}
-	setTimeout(() => {
-		loading.value = false;
-	}, 200);
+  await appWindow.show();
+  // 检查数据
+  if (!post_id) {
+    loadingEmpty.value = true;
+    loadingTitle.value = "未找到数据";
+    await appWindow.setTitle("未找到数据");
+    return;
+  }
+  // 获取数据
+  loadingTitle.value = "正在获取数据...";
+  try {
+    const postData = await MysOper.Post.get(post_id);
+    loadingTitle.value = "正在渲染数据...";
+    postHtml.value = MysOper.Post.parser(postData);
+    await appWindow.setTitle(postData.post.subject);
+  } catch (error) {
+    console.error(error);
+    loadingEmpty.value = true;
+    loadingTitle.value = "帖子不存在或解析失败";
+    await appWindow.setTitle("帖子不存在或解析失败");
+    return;
+  }
+  setTimeout(() => {
+    loading.value = false;
+  }, 200);
 });
 </script>
 <style lang="css" scoped src="../assets/css/post-parser.css"></style>

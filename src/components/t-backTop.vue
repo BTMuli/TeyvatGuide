@@ -1,50 +1,50 @@
 <template>
-	<transition name="fade">
-		<div class="back-top" v-show="canTop" @click="handleScrollTop">
-			<img src="../assets/icons/arrow-top.svg" alt="back-icon" />
-		</div>
-	</transition>
+<transition name="fade">
+  <div v-show="canTop" class="back-top" @click="handleScrollTop">
+    <img src="../assets/icons/arrow-top.svg" alt="back-icon">
+  </div>
+</transition>
 </template>
 <script lang="ts" setup>
 // vue
 import { ref, onMounted } from "vue";
 
-const scrollTop = ref(0); //滚动条距离顶部的距离
-const canTop = ref(false); //默认不显示
+const scrollTop = ref(0); // 滚动条距离顶部的距离
+const canTop = ref(false); // 默认不显示
 
 // 监听滚动事件
-function handleScroll() {
-	scrollTop.value = document.documentElement.scrollTop || document.body.scrollTop;
-	// 超过500px显示回到顶部按钮
-	canTop.value = scrollTop.value > 500;
-	// 没超过500，但是到底部了，也显示回到顶部按钮
-	if (!canTop.value) {
-		const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-		const clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
-		canTop.value = scrollHeight - clientHeight - scrollTop.value <= 0;
-	}
+function handleScroll () {
+  scrollTop.value = document.documentElement.scrollTop || document.body.scrollTop;
+  // 超过500px显示回到顶部按钮
+  canTop.value = scrollTop.value > 500;
+  // 没超过500，但是到底部了，也显示回到顶部按钮
+  if (!canTop.value) {
+    const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
+    canTop.value = scrollHeight - clientHeight - scrollTop.value <= 0;
+  }
 }
 
 // 点击回到顶部
-function handleScrollTop() {
-	let timer = 0;
-	cancelAnimationFrame(timer);
-	timer = requestAnimationFrame(function fn() {
-		if (scrollTop.value > 0) {
-			scrollTop.value -= 50;
-			document.body.scrollTop = document.documentElement.scrollTop = scrollTop.value;
-			timer = requestAnimationFrame(fn);
-		} else {
-			cancelAnimationFrame(timer);
-			canTop.value = false;
-		}
-	});
+function handleScrollTop () {
+  let timer = 0;
+  cancelAnimationFrame(timer);
+  timer = requestAnimationFrame(function fn () {
+    if (scrollTop.value > 0) {
+      scrollTop.value -= 50;
+      document.body.scrollTop = document.documentElement.scrollTop = scrollTop.value;
+      timer = requestAnimationFrame(fn);
+    } else {
+      cancelAnimationFrame(timer);
+      canTop.value = false;
+    }
+  });
 }
 
 // 监听滚动事件
 // @ts-ignore
 onMounted(() => {
-	window.addEventListener("scroll", handleScroll);
+  window.addEventListener("scroll", handleScroll);
 });
 </script>
 

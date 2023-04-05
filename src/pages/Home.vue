@@ -1,12 +1,6 @@
 <template>
-	<t-loading v-if="loading" :title="loadingTitle" :subtitle="loadingSubtitle" />
-	<component
-		v-show="!loading"
-		v-for="item in components"
-		:is="item"
-		:key="item"
-		:ref="setItemRef"
-	/>
+<TLoading v-if="loading" :title="loadingTitle" :subtitle="loadingSubtitle" />
+<component :is="item" v-for="item in components" v-show="!loading" :key="item" :ref="setItemRef" />
 </template>
 
 <script lang="ts" setup>
@@ -29,44 +23,42 @@ const loadingSubtitle = ref("");
 
 // data
 const components = ref([] as any[]);
-let itemRefs = ref([] as any[]);
+const itemRefs = ref([] as any[]);
 
 onMounted(async () => {
-	loadingTitle.value = "正在加载首页";
-	const showItems = homeStore.getShowValue();
-	await Promise.allSettled(
-		showItems.map(item => {
-			switch (item) {
-				case "限时祈愿":
-					return components.value.push(markRaw(TPool));
-				case "近期活动":
-					return components.value.push(markRaw(TPosition));
-				case "素材日历":
-					return components.value.push(markRaw(TCalendar));
-				default:
-					break;
-			}
-		})
-	);
-	setInterval(() => {
-		if (!loading.value) clearInterval(this);
-		const loadingMap = itemRefs.value.map(item => {
-			if (item.loading) {
-				return item.name;
-			}
-		});
-		loadingSubtitle.value = "正在加载 " + loadingMap.filter(item => item)?.join("、");
-		if (loadingMap.every(item => !item)) {
-			loading.value = false;
-		}
-	}, 100);
+  loadingTitle.value = "正在加载首页";
+  const showItems = homeStore.getShowValue();
+  await Promise.allSettled(
+    showItems.map((item) => {
+      switch (item) {
+        case "限时祈愿":
+          return components.value.push(markRaw(TPool));
+        case "近期活动":
+          return components.value.push(markRaw(TPosition));
+        case "素材日历":
+          return components.value.push(markRaw(TCalendar));
+        default:
+          return null;
+      }
+    }),
+  );
+  setInterval(() => {
+    if (!loading.value) clearInterval(this);
+    const loadingMap = itemRefs.value.map((item) => {
+      return item.loading ? item.name : null;
+    });
+    loadingSubtitle.value = "正在加载 " + loadingMap.filter((item) => item)?.join("、");
+    if (loadingMap.every((item) => !item)) {
+      loading.value = false;
+    }
+  }, 100);
 });
-function setItemRef(item: any) {
-	if (itemRefs.value.includes(item)) return;
-	itemRefs.value.push(item);
+function setItemRef (item: any) {
+  if (itemRefs.value.includes(item)) return;
+  itemRefs.value.push(item);
 }
 
 onUnmounted(() => {
-	itemRefs.value = [];
+  itemRefs.value = [];
 });
 </script>

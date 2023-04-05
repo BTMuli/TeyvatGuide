@@ -1,142 +1,143 @@
 <template>
-	<div v-if="loading">
-		<t-loading :title="loadingTitle" />
-	</div>
-	<div v-else>
-		<v-tabs v-model="tab" align-tabs="start" class="news-tabs">
-			<v-tab value="notice" title="公告" />
-			<v-tab value="activity" title="活动" />
-			<v-tab value="news" title="新闻" v-if="showNews" />
-			<v-spacer></v-spacer>
-			<v-btn class="switch-btn" @click="switchAnno" v-if="showSwitch">
-				<template v-slot:prepend>
-					<v-icon>mdi-bullhorn</v-icon>
-				</template>
-				切换游戏内公告
-			</v-btn>
-			<v-text-field
-				v-show="appStore.devMode"
-				v-model="search"
-				append-icon="mdi-magnify"
-				label="搜索"
-				single-line
-				hide-details
-				@click:append="searchPost"
-				@keyup.enter="searchPost"
-			></v-text-field>
-		</v-tabs>
-		<v-window v-model="tab">
-			<v-window-item value="notice">
-				<div class="news-grid">
-					<v-card v-for="item in postData.notice" class="news-card" width="340">
-						<div class="news-cover" @click="toPost(item)">
-							<img :src="item.cover" alt="cover" />
-						</div>
-						<v-card-title>{{ item.title }}</v-card-title>
-						<v-card-actions>
-							<v-btn @click="toPost(item)" class="card-btn">
-								<template v-slot:prepend>
-									<img src="../assets/icons/circle-check.svg" alt="check" />查看
-								</template>
-							</v-btn>
-							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-							<v-btn @click="toJson(item)" class="card-dev-btn" v-show="appStore.devMode">
-								<template v-slot:prepend>
-									<img src="../assets/icons/arrow-right.svg" alt="right" />
-								</template>
-								JSON
-							</v-btn>
-						</v-card-actions>
-					</v-card>
-				</div>
-				<div class="load-news">
-					<v-btn @click="loadMore('notice')" :loading="loadingSub">
-						<template v-slot:append>
-							<img src="../assets/icons/arrow-left.svg" alt="right" />
-						</template>
-						已加载：{{ rawData.notice.last_id }}，加载更多
-					</v-btn>
-				</div>
-			</v-window-item>
-			<v-window-item value="activity">
-				<div class="news-grid">
-					<v-card class="news-card" v-for="item in postData.activity" width="340">
-						<div class="news-cover" @click="toPost(item)">
-							<img :src="item.cover" alt="cover" />
-						</div>
-						<v-card-title>{{ item.title }}</v-card-title>
-						<v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
-						<v-card-actions>
-							<v-btn @click="toPost(item)" class="card-btn">
-								<template v-slot:prepend>
-									<img src="../assets/icons/circle-check.svg" alt="check" />查看
-								</template>
-							</v-btn>
-							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-							<div v-show="!appStore.devMode">
-								<v-btn
-									:style="{
-										background: item.status?.colorCss,
-										color: '#faf7e8 !important',
-									}"
-									>{{ item.status?.status }}</v-btn
-								>
-							</div>
-							<v-btn @click="toJson(item)" class="card-dev-btn" v-show="appStore.devMode">
-								<template v-slot:prepend>
-									<img src="../assets/icons/arrow-right.svg" alt="right" />
-								</template>
-								JSON
-							</v-btn>
-						</v-card-actions>
-					</v-card>
-				</div>
-				<div class="load-news">
-					<v-btn @click="loadMore('activity')" :loading="loadingSub">
-						<template v-slot:append>
-							<img src="../assets/icons/arrow-left.svg" alt="right" />
-						</template>
-						已加载:{{ rawData.activity.last_id }}，加载更多
-					</v-btn>
-				</div>
-			</v-window-item>
-			<v-window-item value="news" v-if="showNews">
-				<div class="news-grid">
-					<v-card class="news-card" v-for="item in postData.news" width="340">
-						<div class="news-cover" @click="toPost(item)">
-							<img :src="item.cover" alt="cover" />
-						</div>
-						<v-card-title>{{ item.title }}</v-card-title>
-						<v-card-actions>
-							<v-btn @click="toPost(item)" class="card-btn">
-								<template v-slot:prepend>
-									<img src="../assets/icons/circle-check.svg" alt="check" />查看
-								</template>
-							</v-btn>
-							<v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-							<v-btn @click="toJson(item)" class="card-dev-btn" v-show="appStore.devMode">
-								<template v-slot:prepend>
-									<img src="../assets/icons/arrow-right.svg" alt="right" />
-								</template>
-								JSON
-							</v-btn>
-						</v-card-actions>
-					</v-card>
-				</div>
-				<div class="load-news">
-					<v-btn @click="loadMore('news')" :loading="loadingSub">
-						<template v-slot:append>
-							<img src="../assets/icons/arrow-left.svg" alt="right" />
-						</template>
-						已加载：{{ rawData.news.last_id }}，加载更多
-					</v-btn>
-				</div>
-			</v-window-item>
-		</v-window>
-		<v-snackbar v-model="snackbar" timeout="1500" :color="snackbarColor">
-			{{ snackbarText }}
-		</v-snackbar>
-	</div>
+<div v-if="loading">
+  <TLoading :title="loadingTitle" />
+</div>
+<div v-else>
+  <v-tabs v-model="tab" align-tabs="start" class="news-tabs">
+    <v-tab value="notice" title="公告" />
+    <v-tab value="activity" title="活动" />
+    <v-tab v-if="showNews" value="news" title="新闻" />
+    <v-spacer />
+    <v-btn v-if="showSwitch" class="switch-btn" @click="switchAnno">
+      <template #prepend>
+        <v-icon>mdi-bullhorn</v-icon>
+      </template>
+      切换游戏内公告
+    </v-btn>
+    <v-text-field
+      v-show="appStore.devMode"
+      v-model="search"
+      append-icon="mdi-magnify"
+      label="搜索"
+      single-line
+      hide-details
+      @click:append="searchPost"
+      @keyup.enter="searchPost"
+    />
+  </v-tabs>
+  <v-window v-model="tab">
+    <v-window-item value="notice">
+      <div class="news-grid">
+        <v-card v-for="item in postData.notice" :key="item.post_id" class="news-card" width="340">
+          <div class="news-cover" @click="toPost(item)">
+            <img :src="item.cover" alt="cover">
+          </div>
+          <v-card-title>{{ item.title }}</v-card-title>
+          <v-card-actions>
+            <v-btn class="card-btn" @click="toPost(item)">
+              <template #prepend>
+                <img src="../assets/icons/circle-check.svg" alt="check">查看
+              </template>
+            </v-btn>
+            <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+            <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
+              <template #prepend>
+                <img src="../assets/icons/arrow-right.svg" alt="right">
+              </template>
+              JSON
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </div>
+      <div class="load-news">
+        <v-btn :loading="loadingSub" @click="loadMore('notice')">
+          <template #append>
+            <img src="../assets/icons/arrow-left.svg" alt="right">
+          </template>
+          已加载：{{ rawData.notice.last_id }}，加载更多
+        </v-btn>
+      </div>
+    </v-window-item>
+    <v-window-item value="activity">
+      <div class="news-grid">
+        <v-card v-for="item in postData.activity" :key="item.post_id" class="news-card" width="340">
+          <div class="news-cover" @click="toPost(item)">
+            <img :src="item.cover" alt="cover">
+          </div>
+          <v-card-title>{{ item.title }}</v-card-title>
+          <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
+          <v-card-actions>
+            <v-btn class="card-btn" @click="toPost(item)">
+              <template #prepend>
+                <img src="../assets/icons/circle-check.svg" alt="check">查看
+              </template>
+            </v-btn>
+            <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+            <div v-show="!appStore.devMode">
+              <v-btn
+                :style="{
+                  background: item.status?.colorCss,
+                  color: '#faf7e8 !important',
+                }"
+              >
+                {{ item.status?.status }}
+              </v-btn>
+            </div>
+            <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
+              <template #prepend>
+                <img src="../assets/icons/arrow-right.svg" alt="right">
+              </template>
+              JSON
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </div>
+      <div class="load-news">
+        <v-btn :loading="loadingSub" @click="loadMore('activity')">
+          <template #append>
+            <img src="../assets/icons/arrow-left.svg" alt="right">
+          </template>
+          已加载:{{ rawData.activity.last_id }}，加载更多
+        </v-btn>
+      </div>
+    </v-window-item>
+    <v-window-item v-if="showNews" value="news">
+      <div class="news-grid">
+        <v-card v-for="item in postData.news" :key="item.post_id" class="news-card" width="340">
+          <div class="news-cover" @click="toPost(item)">
+            <img :src="item.cover" alt="cover">
+          </div>
+          <v-card-title>{{ item.title }}</v-card-title>
+          <v-card-actions>
+            <v-btn class="card-btn" @click="toPost(item)">
+              <template #prepend>
+                <img src="../assets/icons/circle-check.svg" alt="check">查看
+              </template>
+            </v-btn>
+            <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+            <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
+              <template #prepend>
+                <img src="../assets/icons/arrow-right.svg" alt="right">
+              </template>
+              JSON
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </div>
+      <div class="load-news">
+        <v-btn :loading="loadingSub" @click="loadMore('news')">
+          <template #append>
+            <img src="../assets/icons/arrow-left.svg" alt="right">
+          </template>
+          已加载：{{ rawData.news.last_id }}，加载更多
+        </v-btn>
+      </div>
+    </v-window-item>
+  </v-window>
+  <v-snackbar v-model="snackbar" timeout="1500" :color="snackbarColor">
+    {{ snackbarText }}
+  </v-snackbar>
+</div>
 </template>
 
 <script lang="ts" setup>
@@ -177,170 +178,167 @@ const search = ref("" as string);
 // 数据
 const tab = ref("" as string);
 const postData = ref({
-	notice: [] as NewsCard[],
-	activity: [] as NewsCard[],
-	news: [] as NewsCard[],
+  notice: [] as NewsCard[],
+  activity: [] as NewsCard[],
+  news: [] as NewsCard[],
 });
 const rawData = ref({
-	notice: {
-		is_last: false,
-		last_id: 0,
-	},
-	activity: {
-		is_last: false,
-		last_id: 0,
-	},
-	news: {
-		is_last: false,
-		last_id: 0,
-	},
+  notice: {
+    is_last: false,
+    last_id: 0,
+  },
+  activity: {
+    is_last: false,
+    last_id: 0,
+  },
+  news: {
+    is_last: false,
+    last_id: 0,
+  },
 });
 
 onMounted(async () => {
-	loadingTitle.value = "正在获取公告数据...";
-	const noticeData = await MysOper.News.get.notice(gid);
-	rawData.value.notice.is_last = noticeData.is_last;
-	rawData.value.notice.last_id = noticeData.list.length;
-	loadingTitle.value = "正在获取活动数据...";
-	const activityData = await MysOper.News.get.activity(gid);
-	rawData.value.activity.is_last = activityData.is_last;
-	rawData.value.activity.last_id = activityData.list.length;
-	if (showNews.value) {
-		loadingTitle.value = "正在获取新闻数据...";
-		const newsData = await MysOper.News.get.news(gid);
-		rawData.value.news.is_last = newsData.is_last;
-		rawData.value.news.last_id = newsData.list.length;
-		postData.value = {
-			notice: MysOper.News.card.notice(noticeData),
-			activity: MysOper.News.card.activity(activityData),
-			news: MysOper.News.card.news(newsData),
-		};
-	} else {
-		postData.value = {
-			notice: MysOper.News.card.notice(noticeData),
-			activity: MysOper.News.card.activity(activityData),
-			news: [],
-		};
-	}
-	tab.value = "notice";
-	loading.value = false;
+  loadingTitle.value = "正在获取公告数据...";
+  const noticeData = await MysOper.News.get.notice(gid);
+  rawData.value.notice.is_last = noticeData.is_last;
+  rawData.value.notice.last_id = noticeData.list.length;
+  loadingTitle.value = "正在获取活动数据...";
+  const activityData = await MysOper.News.get.activity(gid);
+  rawData.value.activity.is_last = activityData.is_last;
+  rawData.value.activity.last_id = activityData.list.length;
+  if (showNews.value) {
+    loadingTitle.value = "正在获取新闻数据...";
+    const newsData = await MysOper.News.get.news(gid);
+    rawData.value.news.is_last = newsData.is_last;
+    rawData.value.news.last_id = newsData.list.length;
+    postData.value = {
+      notice: MysOper.News.card.notice(noticeData),
+      activity: MysOper.News.card.activity(activityData),
+      news: MysOper.News.card.news(newsData),
+    };
+  } else {
+    postData.value = {
+      notice: MysOper.News.card.notice(noticeData),
+      activity: MysOper.News.card.activity(activityData),
+      news: [],
+    };
+  }
+  tab.value = "notice";
+  loading.value = false;
 });
 
-function switchAnno() {
-	router.push("/announcements");
+async function switchAnno () {
+  await router.push("/announcements");
 }
 
 // 加载更多
-async function loadMore(data: string) {
-	loadingSub.value = true;
-	switch (data) {
-		case "notice":
-			if (rawData.value.notice.is_last) {
-				snackbarText.value = "已经是最后一页了";
-				snackbarColor.value = "#35acce";
-				snackbar.value = true;
-				loadingSub.value = false;
-				return;
-			}
-			const getNotice = await MysOper.News.get.notice(gid, 20, rawData.value.notice.last_id);
-			rawData.value.notice.last_id = rawData.value.notice.last_id + getNotice.list.length;
-			rawData.value.notice.is_last = getNotice.is_last;
-			const noticeCard = MysOper.News.card.notice(getNotice);
-			postData.value.notice = postData.value.notice.concat(noticeCard);
-			loadingSub.value = false;
-			break;
-		case "activity":
-			if (rawData.value.activity.is_last) {
-				snackbarText.value = "已经是最后一页了";
-				snackbarColor.value = "#35acce";
-				snackbar.value = true;
-				loadingSub.value = false;
-				return;
-			}
-			const getActivity = await MysOper.News.get.activity(gid, 20, rawData.value.activity.last_id);
-			rawData.value.activity.last_id = rawData.value.activity.last_id + getActivity.list.length;
-			rawData.value.activity.is_last = getActivity.is_last;
-			const activityCard = MysOper.News.card.activity(getActivity);
-			postData.value.activity = postData.value.activity.concat(activityCard);
-			loadingSub.value = false;
-			break;
-		case "news":
-			if (rawData.value.news.is_last) {
-				snackbarText.value = "已经是最后一页了";
-				snackbarColor.value = "#35acce";
-				snackbar.value = true;
-				loadingSub.value = false;
-				return;
-			}
-			const getNews = await MysOper.News.get.news(gid, 20, rawData.value.news.last_id);
-			rawData.value.news.last_id = rawData.value.news.last_id + getNews.list.length;
-			rawData.value.news.is_last = getNews.is_last;
-			const newsCard = MysOper.News.card.news(getNews);
-			postData.value.news = postData.value.news.concat(newsCard);
-			loadingSub.value = false;
-			break;
-		default:
-			break;
-	}
+async function loadMore (data: string) {
+  loadingSub.value = true;
+  switch (data) {
+    case "notice":
+      if (rawData.value.notice.is_last) {
+        snackbarText.value = "已经是最后一页了";
+        snackbarColor.value = "#35acce";
+        snackbar.value = true;
+        loadingSub.value = false;
+        return;
+      }
+      const getNotice = await MysOper.News.get.notice(gid, 20, rawData.value.notice.last_id);
+      rawData.value.notice.last_id = rawData.value.notice.last_id + getNotice.list.length;
+      rawData.value.notice.is_last = getNotice.is_last;
+      const noticeCard = MysOper.News.card.notice(getNotice);
+      postData.value.notice = postData.value.notice.concat(noticeCard);
+      loadingSub.value = false;
+      break;
+    case "activity":
+      if (rawData.value.activity.is_last) {
+        snackbarText.value = "已经是最后一页了";
+        snackbarColor.value = "#35acce";
+        snackbar.value = true;
+        loadingSub.value = false;
+        return;
+      }
+      const getActivity = await MysOper.News.get.activity(gid, 20, rawData.value.activity.last_id);
+      rawData.value.activity.last_id = rawData.value.activity.last_id + getActivity.list.length;
+      rawData.value.activity.is_last = getActivity.is_last;
+      const activityCard = MysOper.News.card.activity(getActivity);
+      postData.value.activity = postData.value.activity.concat(activityCard);
+      loadingSub.value = false;
+      break;
+    case "news":
+      if (rawData.value.news.is_last) {
+        snackbarText.value = "已经是最后一页了";
+        snackbarColor.value = "#35acce";
+        snackbar.value = true;
+        loadingSub.value = false;
+        return;
+      }
+      const getNews = await MysOper.News.get.news(gid, 20, rawData.value.news.last_id);
+      rawData.value.news.last_id = rawData.value.news.last_id + getNews.list.length;
+      rawData.value.news.is_last = getNews.is_last;
+      const newsCard = MysOper.News.card.news(getNews);
+      postData.value.news = postData.value.news.concat(newsCard);
+      loadingSub.value = false;
+      break;
+    default:
+      break;
+  }
 }
 
-async function toPost(item: NewsCard | string) {
-	if (typeof item === "string") {
-		const path = router.resolve({
-			name: "帖子详情",
-			params: {
-				post_id: item,
-			},
-		}).href;
-		createTGWindow(path, "帖子-Dev", item, 960, 720, false);
-	} else {
-		const path = router.resolve({
-			name: "帖子详情",
-			params: {
-				post_id: item.post_id.toString(),
-			},
-		}).href;
-		createTGWindow(path, "帖子", item.title, 960, 720, false);
-	}
+async function toPost (item: NewsCard | string) {
+  if (typeof item === "string") {
+    const path = router.resolve({
+      name: "帖子详情",
+      params: {
+        post_id: item,
+      },
+    }).href;
+    createTGWindow(path, "帖子-Dev", item, 960, 720, false);
+  } else {
+    const path = router.resolve({
+      name: "帖子详情",
+      params: {
+        post_id: item.post_id.toString(),
+      },
+    }).href;
+    createTGWindow(path, "帖子", item.title, 960, 720, false);
+  }
 }
-async function toJson(item: NewsCard | string) {
-	if (typeof item === "string") {
-		const path = router.resolve({
-			name: "帖子详情（JSON）",
-			params: {
-				post_id: item,
-			},
-		}).href;
-		createTGWindow(path, "帖子-JSON-Dev", `${item}-JSON`, 960, 720, false);
-		return;
-	} else {
-		const path = router.resolve({
-			name: "帖子详情（JSON）",
-			params: {
-				post_id: item.post_id.toString(),
-			},
-		}).href;
-		createTGWindow(path, "帖子-JSON", `${item.title}-JSON`, 960, 720, false);
-		return;
-	}
+async function toJson (item: NewsCard | string) {
+  if (typeof item === "string") {
+    const path = router.resolve({
+      name: "帖子详情（JSON）",
+      params: {
+        post_id: item,
+      },
+    }).href;
+    createTGWindow(path, "帖子-JSON-Dev", `${item}-JSON`, 960, 720, false);
+  } else {
+    const path = router.resolve({
+      name: "帖子详情（JSON）",
+      params: {
+        post_id: item.post_id.toString(),
+      },
+    }).href;
+    createTGWindow(path, "帖子-JSON", `${item.title}-JSON`, 960, 720, false);
+  }
 }
 
-async function searchPost() {
-	if (search.value === "") {
-		snackbarText.value = "请输入搜索内容";
-		snackbarColor.value = "error";
-		snackbar.value = true;
-		return;
-	}
-	if (!isNaN(Number(search.value))) {
-		await toPost(search.value);
-		await toJson(search.value);
-	} else {
-		snackbarText.value = "请输入搜索内容";
-		snackbarColor.value = "error";
-		snackbar.value = true;
-		return;
-	}
+async function searchPost () {
+  if (search.value === "") {
+    snackbarText.value = "请输入搜索内容";
+    snackbarColor.value = "error";
+    snackbar.value = true;
+    return;
+  }
+  if (!isNaN(Number(search.value))) {
+    await toPost(search.value);
+    await toJson(search.value);
+  } else {
+    snackbarText.value = "请输入搜索内容";
+    snackbarColor.value = "error";
+    snackbar.value = true;
+  }
 }
 </script>
 
@@ -380,6 +378,7 @@ async function searchPost() {
 	height: 150px;
 	transition: all 0.3s linear;
 }
+
 /* switch */
 .switch-btn {
 	font-family: Genshin, serif;
@@ -389,6 +388,7 @@ async function searchPost() {
 	margin-top: 5px;
 	color: #546d8b;
 }
+
 /* load more */
 .load-news {
 	font-family: Genshin, serif;

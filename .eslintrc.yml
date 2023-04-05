@@ -29,9 +29,6 @@ rules:
   no-case-declarations: off # 禁止在 case 子句中使用词法声明
   no-useless-constructor: off # 禁用不必要的构造函数
   # rules of standard
-  strictNullChecks: # 严格空值检查
-    - warn
-    - true
   array-callback-return:
     - error
     - allowImplicit: true
@@ -65,9 +62,7 @@ rules:
   "@typescript-eslint/comma-dangle":
     - warn
     - always-multiline
-  "@typescript-eslint/prefer-unllish-coalescing": # 优先使用 ?? 而不是 || 进行空值判断
-    - warn
-    - ignoreConditionalTests: true
+  "@typescript-eslint/prefer-nullish-coalescing": off # on 会出现一些问题
   "@typescript-eslint/space-before-function-paren":
     - warn
     - always # 函数名和括号之间必须有空格

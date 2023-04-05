@@ -1,27 +1,27 @@
 <template>
-	<v-overlay v-model="visible">
-		<div class="confirm-div">
-			<div class="confirm-box">
-				<div class="confirm-title">
-					{{ title }}
-				</div>
-				<div class="confirm-btn-box">
-					<button class="confirm-btn" @click="onCancel">
-						<img class="btn-icon" src="../assets/icons/circle-cancel.svg" alt="cancel" />
-						<span class="btn-text">
-							{{ cancel }}
-						</span>
-					</button>
-					<button class="confirm-btn" @click="onConfirm">
-						<img class="btn-icon" src="../assets/icons/circle-check.svg" alt="confirm" />
-						<span class="btn-text">
-							{{ confirm }}
-						</span>
-					</button>
-				</div>
-			</div>
-		</div>
-	</v-overlay>
+<v-overlay v-model="visible">
+  <div class="confirm-div">
+    <div class="confirm-box">
+      <div class="confirm-title">
+        {{ title }}
+      </div>
+      <div class="confirm-btn-box">
+        <button class="confirm-btn" @click="onCancel">
+          <img class="btn-icon" src="../assets/icons/circle-cancel.svg" alt="cancel">
+          <span class="btn-text">
+            {{ cancel }}
+          </span>
+        </button>
+        <button class="confirm-btn" @click="onConfirm">
+          <img class="btn-icon" src="../assets/icons/circle-check.svg" alt="confirm">
+          <span class="btn-text">
+            {{ confirm }}
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</v-overlay>
 </template>
 
 <script lang="ts" setup>
@@ -29,40 +29,40 @@
 import { computed } from "vue";
 
 interface TConfirmProps {
-	title: string;
-	cancel?: string;
-	confirm?: string;
-	/** 此值为 true 时显示对话框 */
-	modelValue: boolean;
+  title: string;
+  cancel?: string;
+  confirm?: string;
+  /** 此值为 true 时显示对话框 */
+  modelValue: boolean;
 }
 
 interface TConfirmEmits {
-	(e: "update:show", v: boolean): void;
-	(e: "update:modelValue", v: boolean): void;
-	(e: "confirm"): void;
-	(e: "cancel"): void;
+  (e: "update:show", v: boolean): void;
+  (e: "update:modelValue", v: boolean): void;
+  (e: "confirm"): void;
+  (e: "cancel"): void;
 }
 
 const emits = defineEmits<TConfirmEmits>();
 const props = withDefaults(defineProps<TConfirmProps>(), {
-	title: "确认",
-	cancel: "取消",
-	confirm: "确定",
+  title: "确认",
+  cancel: "取消",
+  confirm: "确定",
 });
 
 const visible = computed({
-	get: () => props.modelValue,
-	set: v => emits("update:modelValue", v),
+  get: () => props.modelValue,
+  set: (v) => emits("update:modelValue", v),
 });
 
 const onCancel = () => {
-	visible.value = false;
-	emits("cancel");
+  visible.value = false;
+  emits("cancel");
 };
 
 const onConfirm = () => {
-	visible.value = false;
-	emits("confirm");
+  visible.value = false;
+  emits("confirm");
 };
 </script>
 
@@ -73,7 +73,7 @@ const onConfirm = () => {
 	height: 20vh;
 	top: 40vh;
 	left: 30vw;
-	background: #ffffff;
+	background: #fff;
 	border-radius: 10px;
 	padding: 10px;
 	display: flex;
