@@ -51,9 +51,7 @@
 		"updater": {
 			"active": false,
 			"dialog": true,
-			"endpoints": [
-				"https://github.com/BTMuli/Tauri.Genshin/latest/releases/download/updater/update.json"
-			],
+			"endpoints": ["https://github.com/BTMuli/Tauri.Genshin/latest/releases/download/updater/update.json"],
 			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU5OEE2RkU0QUZCMTMzMUEKUldRYU03R3Y1RytLNlI4bytTRDhpYTNTL2lTOUVZeWQwOTAxNHBock8zY3FrdVliR2kvdHhoN2IK"
 		},
 		"windows": [

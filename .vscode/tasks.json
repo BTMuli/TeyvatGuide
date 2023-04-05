@@ -4,10 +4,7 @@
 		{
 			"type": "npm",
 			"script": "lint:code",
-			"problemMatcher": [
-				"$eslint-compact",
-				"$eslint-stylish"
-			],
+			"problemMatcher": ["$eslint-compact", "$eslint-stylish"],
 			"label": "npm: lint:code"
 		}
 	]

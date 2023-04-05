@@ -32,7 +32,7 @@ rules:
   strictNullChecks: # 严格空值检查
     - warn
     - true
-  array-callback-return: 
+  array-callback-return:
     - error
     - allowImplicit: true
   # rules of vue

@@ -1,10 +1,10 @@
 {
-  "recommendations": [
-    "dbaeumer.vscode-eslint",
-    "rust-lang.rust-analyzer",
-    "stylelint.vscode-stylelint",
-    "tauri-apps.tauri-vscode",
-    "Vue.vscode-typescript-vue-plugin",
-    "Vue.volar",
-  ]
+	"recommendations": [
+		"dbaeumer.vscode-eslint",
+		"rust-lang.rust-analyzer",
+		"stylelint.vscode-stylelint",
+		"tauri-apps.tauri-vscode",
+		"Vue.vscode-typescript-vue-plugin",
+		"Vue.volar"
+	]
 }
