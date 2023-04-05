@@ -51,6 +51,8 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import TLoading from "../components/t-loading.vue";
+// tauri
+import { appWindow } from "@tauri-apps/api/window";
 // plugins
 import MysOper from "../plugins/Mys";
 // interface
@@ -70,6 +72,7 @@ function backPost() {
 }
 
 onMounted(async () => {
+	await appWindow.show();
 	// 检查数据
 	if (!lottery_id) {
 		loadingEmpty.value = true;

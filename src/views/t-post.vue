@@ -24,6 +24,7 @@ const post_id = Number(useRoute().params.post_id);
 const postHtml = ref("");
 
 onMounted(async () => {
+	await appWindow.show();
 	// 检查数据
 	if (!post_id) {
 		loadingEmpty.value = true;
@@ -39,6 +40,7 @@ onMounted(async () => {
 		postHtml.value = MysOper.Post.parser(postData);
 		await appWindow.setTitle(postData.post.subject);
 	} catch (error) {
+		console.error(error);
 		loadingEmpty.value = true;
 		loadingTitle.value = "帖子不存在或解析失败";
 		await appWindow.setTitle("帖子不存在或解析失败");

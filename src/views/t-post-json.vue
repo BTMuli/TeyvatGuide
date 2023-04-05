@@ -12,6 +12,8 @@ import { ref, onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import JsonViewer from "vue-json-viewer";
 import TLoading from "../components/t-loading.vue";
+// tauri
+import { appWindow } from "@tauri-apps/api/window";
 // plugins
 import MysOper from "../plugins/Mys";
 
@@ -25,6 +27,7 @@ const post_id = Number(useRoute().params.post_id);
 let jsonData = reactive({});
 
 onMounted(async () => {
+	await appWindow.show();
 	// 检查数据
 	if (!post_id) {
 		loadingEmpty.value = true;

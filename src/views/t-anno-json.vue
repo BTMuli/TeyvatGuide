@@ -15,6 +15,8 @@ import { ref, onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import JsonViewer from "vue-json-viewer";
 import TLoading from "../components/t-loading.vue";
+// tauri
+import { appWindow } from "@tauri-apps/api/window";
 // plugins
 import GenshinOper from "../plugins/Genshin";
 // interface
@@ -31,6 +33,7 @@ let jsonList = reactive({});
 let jsonContent = reactive({});
 
 onMounted(async () => {
+	await appWindow.show();
 	// 检查数据
 	if (!anno_id) {
 		loadingEmpty.value = true;

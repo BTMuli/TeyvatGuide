@@ -14,6 +14,8 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import TLoading from "../components/t-loading.vue";
+// tauri
+import { appWindow } from "@tauri-apps/api/window";
 // plugins
 import GenshinOper from "../plugins/Genshin";
 // interface
@@ -30,6 +32,7 @@ const annoData = ref({} as AnnoContentItem);
 const annoHtml = ref("");
 
 onMounted(async () => {
+	await appWindow.show();
 	// 检查数据
 	if (!anno_id) {
 		loadingEmpty.value = true;

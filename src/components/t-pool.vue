@@ -146,7 +146,7 @@ function getLastPoolTime(time: number) {
 	return `${hour}:${minute.toFixed(0).padStart(2, "0")}:${second.toFixed(0).padStart(2, "0")}`;
 }
 
-async function toPost(pool: GachaCard) {
+function toPost(pool: GachaCard) {
 	const path = router.resolve({
 		name: "帖子详情",
 		params: {

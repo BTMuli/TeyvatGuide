@@ -205,10 +205,9 @@ onMounted(async () => {
 	const activityData = await MysOper.News.get.activity(gid);
 	rawData.value.activity.is_last = activityData.is_last;
 	rawData.value.activity.last_id = activityData.list.length;
-	if (showNews) {
+	if (showNews.value) {
 		loadingTitle.value = "正在获取新闻数据...";
 		const newsData = await MysOper.News.get.news(gid);
-		console.log(newsData);
 		rawData.value.news!.is_last = newsData.is_last;
 		rawData.value.news!.last_id = newsData.list.length;
 		postData.value = {
