@@ -2,13 +2,13 @@
  * @file plugins Mys utils news.ts
  * @description Mys 插件咨讯工具
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  */
 
 import { NewsData, NewsItem, NewsCard, ActivityStatus } from "../interface/news";
 
 // 默认封面图
-const defaultCover = "/source/cover/news.webp";
+const defaultCover = "/source/UI/defaultCover.webp";
 
 /**
  * @description 活动状态
