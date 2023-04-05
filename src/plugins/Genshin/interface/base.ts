@@ -12,10 +12,10 @@
  * @property {number} retcode 状态码
  * @property {string} message 状态信息
  * @property {any} data 数据
- * @return {Hk4eResponse}
+ * @returns {Hk4eResponse}
  */
 export interface Hk4eResponse {
-	retcode: number;
-	message: string;
-	data: any;
+  retcode: number
+  message: string
+  data: any
 }

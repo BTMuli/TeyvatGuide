@@ -12,20 +12,20 @@ import { Config as SeriesConfig, getData as getSeriesData } from "./achievementS
 export const ConfigList = [AchievementsConfig, GCGConfig, NameCardConfig, SeriesConfig];
 
 export const getDataList = [
-	{
-		name: "Achievements",
-		data: getAchievementsData(),
-	},
-	{
-		name: "AchievementSeries",
-		data: getSeriesData(),
-	},
-	{
-		name: "GCG",
-		data: getGCGData(),
-	},
-	{
-		name: "NameCard",
-		data: getNameCardData(),
-	},
+  {
+    name: "Achievements",
+    data: getAchievementsData(),
+  },
+  {
+    name: "AchievementSeries",
+    data: getSeriesData(),
+  },
+  {
+    name: "GCG",
+    data: getGCGData(),
+  },
+  {
+    name: "NameCard",
+    data: getNameCardData(),
+  },
 ];

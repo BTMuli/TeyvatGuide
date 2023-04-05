@@ -5,7 +5,7 @@
  * @since Alpha v0.1.1
  */
 
-import { Hk4eResponse } from "./base";
+import { type Hk4eResponse } from "./base";
 
 /**
  * @description 原神游戏内公告列表返回
@@ -14,10 +14,10 @@ import { Hk4eResponse } from "./base";
  * @interface AnnoListResponse
  * @extends Hk4eResponse
  * @property {AnnoListData} data 公告数据
- * @return {AnnoListResponse}
+ * @returns {AnnoListResponse}
  */
 export interface AnnoListResponse extends Hk4eResponse {
-	data: AnnoListData;
+  data: AnnoListData
 }
 
 /**
@@ -27,10 +27,10 @@ export interface AnnoListResponse extends Hk4eResponse {
  * @interface AnnoContentResponse
  * @extends Hk4eResponse
  * @property {AnnoContentData} data 公告数据
- * @return {AnnoContentResponse}
+ * @returns {AnnoContentResponse}
  */
 export interface AnnoContentResponse extends Hk4eResponse {
-	data: AnnoContentData;
+  data: AnnoContentData
 }
 
 /**
@@ -50,22 +50,22 @@ export interface AnnoContentResponse extends Hk4eResponse {
  * @property {boolean} pic_alert 是否有紧急图片
  * @property {number} pic_alert_id 紧急图片 ID
  * @property {unknown} static_sign 静态签名
- * @return {AnnoListData}
+ * @returns {AnnoListData}
  */
 export interface AnnoListData {
-	list: Announcement[];
-	total: number;
-	type_list: AnnoTypeList[];
-	alert: boolean;
-	alert_id: number;
-	time_zone: number;
-	t: string;
-	pic_list: unknown[];
-	pic_total: number;
-	pic_type_list: unknown[];
-	pic_alert: boolean;
-	pic_alert_id: number;
-	static_sign: unknown;
+  list: Announcement[]
+  total: number
+  type_list: AnnoTypeList[]
+  alert: boolean
+  alert_id: number
+  time_zone: number
+  t: string
+  pic_list: unknown[]
+  pic_total: number
+  pic_type_list: unknown[]
+  pic_alert: boolean
+  pic_alert_id: number
+  static_sign: unknown
 }
 
 /**
@@ -76,13 +76,13 @@ export interface AnnoListData {
  * @property {number} total 公告总数
  * @property {unknown[]} pic_list 图片列表
  * @property {number} pic_total 图片总数
- * @return {AnnoContentData}
+ * @returns {AnnoContentData}
  */
 export interface AnnoContentData {
-	list: AnnoContentItem[];
-	total: number;
-	pic_list: unknown[];
-	pic_total: number;
+  list: AnnoContentItem[]
+  total: number
+  pic_list: unknown[]
+  pic_total: number
 }
 
 /**
@@ -92,12 +92,12 @@ export interface AnnoContentData {
  * @property {number} id 类型 ID
  * @property {string} name 类型名称
  * @property {string} mi18n_name 类型名称
- * @return {AnnoTypeList}
+ * @returns {AnnoTypeList}
  */
 export interface AnnoTypeList {
-	id: number;
-	name: string;
-	mi18n_name: string;
+  id: number
+  name: string
+  mi18n_name: string
 }
 
 /**
@@ -107,12 +107,12 @@ export interface AnnoTypeList {
  * @property {AnnoListItem[]} list 公告列表
  * @property {number} type_id 类型 ID
  * @property {string} type_label 类型标签
- * @return {Announcement}
+ * @returns {Announcement}
  */
 export interface Announcement {
-	list: AnnoListItem[];
-	type_id: number;
-	type_label: string;
+  list: AnnoListItem[]
+  type_id: number
+  type_label: string
 }
 
 /**
@@ -139,29 +139,29 @@ export interface Announcement {
  * @property {number} remind_ver 公告提醒版本
  * @property {boolean} has_content 是否有内容
  * @property {boolean} extra_remind 是否有额外提醒
- * @return {AnnoListItem}
+ * @returns {AnnoListItem}
  */
 export interface AnnoListItem {
-	ann_id: number;
-	title: string;
-	subtitle: string;
-	banner: string;
-	content: unknown;
-	type_label: string;
-	tag_label: string;
-	tag_icon: string;
-	login_alert: number;
-	lang: string;
-	start_time: string;
-	end_time: string;
-	type: number;
-	remind: number;
-	alert: number;
-	tag_start_time: string;
-	tag_end_time: string;
-	remind_ver: number;
-	has_content: boolean;
-	extra_remind: boolean;
+  ann_id: number
+  title: string
+  subtitle: string
+  banner: string
+  content: unknown
+  type_label: string
+  tag_label: string
+  tag_icon: string
+  login_alert: number
+  lang: string
+  start_time: string
+  end_time: string
+  type: number
+  remind: number
+  alert: number
+  tag_start_time: string
+  tag_end_time: string
+  remind_ver: number
+  has_content: boolean
+  extra_remind: boolean
 }
 
 /**
@@ -174,15 +174,15 @@ export interface AnnoListItem {
  * @property {string} banner 公告图片
  * @property {string} content 公告内容为 HTML
  * @property {string} lang 公告语言
- * @return {AnnoContentItem}
+ * @returns {AnnoContentItem}
  */
 export interface AnnoContentItem {
-	ann_id: number;
-	title: string;
-	subtitle: string;
-	banner: string;
-	content: string;
-	lang: string;
+  ann_id: number
+  title: string
+  subtitle: string
+  banner: string
+  content: string
+  lang: string
 }
 
 /**
@@ -197,15 +197,15 @@ export interface AnnoContentItem {
  * @property {string} tag_icon 公告标签图标
  * @property {string} start_time 公告开始时间
  * @property {string} end_time 公告结束时间
- * @return {AnnoListCard}
+ * @returns {AnnoListCard}
  */
 export interface AnnoListCard {
-	id: number;
-	title: string;
-	subtitle: string;
-	banner: string;
-	type_label: string;
-	tag_icon: string;
-	start_time: string;
-	end_time: string;
+  id: number
+  title: string
+  subtitle: string
+  banner: string
+  type_label: string
+  tag_icon: string
+  start_time: string
+  end_time: string
 }

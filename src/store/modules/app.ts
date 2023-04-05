@@ -16,106 +16,107 @@ const userDataDir = `${await path.appLocalDataDir()}userData`;
 const tempDataDir = `${await path.appLocalDataDir()}tempData`;
 
 const useAppStore = defineStore({
-	id: "app",
-	state: () => {
-		return {
-			// 是否加载数据
-			loading: false,
-			// 侧边栏设置
-			sidebar: {
-				// 是否折叠
-				collapse: true,
-				// 是否显示
-				submenu: {
-					// 米游社
-					mihoyo: false,
-					// 数据库
-					database: false,
-				},
-			},
-			// 开发者模式
-			devMode: false,
-			// 数据路径
-			dataPath: {
-				app: appDataDir,
-				user: userDataDir,
-				temp: tempDataDir,
-			},
-			// 应用数据路径
-			appPath: {
-				achievements: `${appDataDir}\\achievements.json`,
-				achievementSeries: `${appDataDir}\\achievementSeries.json`,
-				nameCards: `${appDataDir}\\nameCards.json`,
-			},
-			// 用户数据路径
-			userPath: {
-				achievements: `${userDataDir}\\achievements.json`,
-			},
-		};
-	},
-	actions: {
-		// 检测 store 数据兼容，主要是 sideBar 数据
-		async check() {
-			if (this.sidebar === undefined) {
-				this.sidebar = {
-					collapse: true,
-					submenu: {
-						mihoyo: false,
-						database: false,
-					},
-				};
-			} else {
-				if (this.sidebar.collapse === undefined) this.sidebar.collapse = false;
-				if (this.sidebar.submenu === undefined)
-					this.sidebar.submenu = { database: false, mihoyo: false };
-				if (this.sidebar.submenu.database === undefined) this.sidebar.submenu.database = false;
-				if (this.sidebar.submenu.mihoyo === undefined) this.sidebar.submenu.mihoyo = false;
-			}
-		},
-		// 初始化配置
-		async init() {
-			// 初始化侧边栏设置
-			this.sidebar = {
-				collapse: false,
-				submenu: {
-					mihoyo: false,
-					database: false,
-				},
-			};
-			// 初始化加载状态
-			this.loading = false;
-			// 初始化开发者模式
-			this.devMode = false;
-			// 初始化用户数据路径
-			this.userPath = {
-				achievements: `${userDataDir}\\achievements.json`,
-			};
-		},
-		// 获取折叠
-		getSubmenu() {
-			let open = [];
-			if (this.sidebar.submenu.database) open.push("database");
-			if (this.sidebar.submenu.mihoyo) open.push("mihoyo");
-			return open;
-		},
-	},
-	persist: [
-		{
-			key: "appPath",
-			storage: window.localStorage,
-			paths: ["dataPath", "appPath", "userPath"],
-		},
-		{
-			key: "app",
-			storage: window.localStorage,
-			paths: ["devMode", "loading"],
-		},
-		{
-			key: "sidebar",
-			storage: window.localStorage,
-			paths: ["sidebar"],
-		},
-	],
+  id: "app",
+  state: () => {
+    return {
+      // 是否加载数据
+      loading: false,
+      // 侧边栏设置
+      sidebar: {
+        // 是否折叠
+        collapse: true,
+        // 是否显示
+        submenu: {
+          // 米游社
+          mihoyo: false,
+          // 数据库
+          database: false,
+        },
+      },
+      // 开发者模式
+      devMode: false,
+      // 数据路径
+      dataPath: {
+        app: appDataDir,
+        user: userDataDir,
+        temp: tempDataDir,
+      },
+      // 应用数据路径
+      appPath: {
+        achievements: `${appDataDir}\\achievements.json`,
+        achievementSeries: `${appDataDir}\\achievementSeries.json`,
+        nameCards: `${appDataDir}\\nameCards.json`,
+      },
+      // 用户数据路径
+      userPath: {
+        achievements: `${userDataDir}\\achievements.json`,
+      },
+    };
+  },
+  actions: {
+    // 检测 store 数据兼容，主要是 sideBar 数据
+    async check () {
+      if (this.sidebar === undefined) {
+        this.sidebar = {
+          collapse: true,
+          submenu: {
+            mihoyo: false,
+            database: false,
+          },
+        };
+      } else {
+        if (this.sidebar.collapse === undefined) this.sidebar.collapse = false;
+        if (this.sidebar.submenu === undefined) {
+          this.sidebar.submenu = { database: false, mihoyo: false };
+        }
+        if (this.sidebar.submenu.database === undefined) this.sidebar.submenu.database = false;
+        if (this.sidebar.submenu.mihoyo === undefined) this.sidebar.submenu.mihoyo = false;
+      }
+    },
+    // 初始化配置
+    async init () {
+      // 初始化侧边栏设置
+      this.sidebar = {
+        collapse: false,
+        submenu: {
+          mihoyo: false,
+          database: false,
+        },
+      };
+      // 初始化加载状态
+      this.loading = false;
+      // 初始化开发者模式
+      this.devMode = false;
+      // 初始化用户数据路径
+      this.userPath = {
+        achievements: `${userDataDir}\\achievements.json`,
+      };
+    },
+    // 获取折叠
+    getSubmenu () {
+      const open = [];
+      if (this.sidebar.submenu.database) open.push("database");
+      if (this.sidebar.submenu.mihoyo) open.push("mihoyo");
+      return open;
+    },
+  },
+  persist: [
+    {
+      key: "appPath",
+      storage: window.localStorage,
+      paths: ["dataPath", "appPath", "userPath"],
+    },
+    {
+      key: "app",
+      storage: window.localStorage,
+      paths: ["devMode", "loading"],
+    },
+    {
+      key: "sidebar",
+      storage: window.localStorage,
+      paths: ["sidebar"],
+    },
+  ],
 });
 
 export default useAppStore;

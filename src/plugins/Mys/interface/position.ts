@@ -5,7 +5,7 @@
  * @since Alpha v0.1.1
  */
 
-import { MysObcResponse, MysObc } from "./base";
+import { type MysObcResponse, type MysObc } from "./base";
 
 /**
  * @description 获取热点追踪信息的返回类型
@@ -13,12 +13,12 @@ import { MysObcResponse, MysObc } from "./base";
  * @interface PositionResponse
  * @extends MysObcResponse
  * @property {PositionObc[]} data.list obc 列表
- * @return {PositionResponse}
+ * @returns {PositionResponse}
  */
 export interface PositionResponse extends MysObcResponse {
-	data: {
-		list: PositionObc[];
-	};
+  data: {
+    list: PositionObc[]
+  }
 }
 
 /**
@@ -27,10 +27,10 @@ export interface PositionResponse extends MysObcResponse {
  * @interface PositionObc
  * @extends MysObc
  * @property {PositionData[]} list 列表
- * @return {PositionObc}
+ * @returns {PositionObc}
  */
 export interface PositionObc extends MysObc {
-	list: PositionData[];
+  list: PositionData[]
 }
 
 /**
@@ -50,22 +50,22 @@ export interface PositionObc extends MysObc {
  * @property {string} article_time 时间
  * @property {string} create_time 创建时间 // 2023-03-31 11:16:57
  * @property {string} end_time 结束时间 // 1680465599000
- * @return {PositionData}
+ * @returns {PositionData}
  */
 export interface PositionData {
-	recommend_id: number;
-	content_id: number;
-	title: string;
-	ext: string;
-	type: number;
-	url: string;
-	icon: string;
-	abstract: string;
-	article_user_name: string;
-	avatar_url: string;
-	article_time: string;
-	create_time: string;
-	end_time: string;
+  recommend_id: number
+  content_id: number
+  title: string
+  ext: string
+  type: number
+  url: string
+  icon: string
+  abstract: string
+  article_user_name: string
+  avatar_url: string
+  article_time: string
+  create_time: string
+  end_time: string
 }
 
 /**
@@ -81,17 +81,17 @@ export interface PositionData {
  * @property {number} time.start_stamp 开始时间戳
  * @property {string} time.end 结束时间
  * @property {number} time.end_stamp 结束时间戳
- * @return {PositionCard}
+ * @returns {PositionCard}
  */
 export interface PositionCard {
-	title: string;
-	post_id: number;
-	icon: string;
-	abstract: string;
-	time: {
-		start: string;
-		start_stamp: number;
-		end: string;
-		end_stamp: number;
-	};
+  title: string
+  post_id: number
+  icon: string
+  abstract: string
+  time: {
+    start: string
+    start_stamp: number
+    end: string
+    end_stamp: number
+  }
 }

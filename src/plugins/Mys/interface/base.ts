@@ -12,12 +12,12 @@
  * @property {number} retcode 状态码
  * @property {string} message 状态信息
  * @property {any} data 数据
- * @return {MysResponse}
+ * @returns {MysResponse}
  */
 export interface MysResponse {
-	retcode: number;
-	message: string;
-	data: any;
+  retcode: number
+  message: string
+  data: any
 }
 
 /**
@@ -26,12 +26,12 @@ export interface MysResponse {
  * @interface MysObcResponse
  * @extends MysResponse
  * @property {MysObc[]} data.list obc 列表
- * @return {MysObcResponse}
+ * @returns {MysObcResponse}
  */
 export interface MysObcResponse extends MysResponse {
-	data: {
-		list: MysObc[];
-	};
+  data: {
+    list: MysObc[]
+  }
 }
 
 /**
@@ -45,16 +45,16 @@ export interface MysObcResponse extends MysResponse {
  * @property {string} ch_ext 结构化扩展信息
  * @property {any[]} children 子节点
  * @property {unknown[]} list 列表
- * @return {MysObc}
+ * @returns {MysObc}
  */
 export interface MysObc {
-	id: number;
-	name: string;
-	parent_id: number;
-	depth: number;
-	ch_ext: string;
-	children: MysObc[];
-	list: unknown[];
+  id: number
+  name: string
+  parent_id: number
+  depth: number
+  ch_ext: string
+  children: MysObc[]
+  list: unknown[]
 }
 
 /**
@@ -69,14 +69,14 @@ export interface MysObc {
  * @property {number} 5 大别野
  * @property {number} 6 崩坏：星穹铁道
  * @property {number} 8 绝区零
- * @return {MysGid}
+ * @returns {MysGid}
  */
 export enum MysGid {
-	BH3 = 1,
-	YS = 2,
-	BH2 = 3,
-	WD = 4,
-	DBY = 5,
-	SR = 6,
-	ZZZ = 8,
+  BH3 = 1,
+  YS = 2,
+  BH2 = 3,
+  WD = 4,
+  DBY = 5,
+  SR = 6,
+  ZZZ = 8,
 }

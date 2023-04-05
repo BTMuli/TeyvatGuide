@@ -2,11 +2,11 @@
  * @file plugins Mys interface lottery.ts
  * @description Mys 插件抽奖接口
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  */
 
-import { MysResponse } from "./base";
-import { User } from "./user";
+import { type MysResponse } from "./base";
+import { type User } from "./user";
 
 /**
  * @description 抽奖返回数据
@@ -14,12 +14,12 @@ import { User } from "./user";
  * @interface LotteryResponse
  * @extends {MysResponse}
  * @property {LotteryData} data.show_lottery 抽奖数据
- * @return {LotteryResponse}
+ * @returns {LotteryResponse}
  */
 export interface LotteryResponse extends MysResponse {
-	data: {
-		show_lottery: LotteryData;
-	};
+  data: {
+    show_lottery: LotteryData
+  }
 }
 
 /**
@@ -41,24 +41,24 @@ export interface LotteryResponse extends MysResponse {
  * @property {string} entity_id 实体 ID // 若为帖子，则为帖子 ID
  * @property {string} entity_type 实体类型 // Post: 帖子
  * @property {string} now_time 当前时间
- * @return {LotteryData}
+ * @returns {LotteryData}
  */
 export interface LotteryData {
-	id: string;
-	creator: User;
-	draw_time: string;
-	participant_way: string;
-	is_expect_unfocus_user: boolean;
-	is_expect_non_real_name_user: boolean;
-	user_rewards: LotteryReward[];
-	status: string;
-	is_blocked: boolean;
-	user_status: string;
-	is_upload_address: boolean;
-	lottery_entity_summary: string;
-	entity_id: string;
-	entity_type: string;
-	now_time: string;
+  id: string
+  creator: User
+  draw_time: string
+  participant_way: string
+  is_expect_unfocus_user: boolean
+  is_expect_non_real_name_user: boolean
+  user_rewards: LotteryReward[]
+  status: string
+  is_blocked: boolean
+  user_status: string
+  is_upload_address: boolean
+  lottery_entity_summary: string
+  entity_id: string
+  entity_type: string
+  now_time: string
 }
 
 /**
@@ -71,15 +71,15 @@ export interface LotteryData {
  * @property {boolean} is_send_by_post 是否通过帖子发放
  * @property {User[]} users 用户列表
  * @property {string} id 奖励 ID
- * @return {LotteryReward}
+ * @returns {LotteryReward}
  */
 export interface LotteryReward {
-	reward_name: string;
-	winner_number: number;
-	scheduled_winner_number: number;
-	is_send_by_post: boolean;
-	users: User[];
-	id: string;
+  reward_name: string
+  winner_number: number
+  scheduled_winner_number: number
+  is_send_by_post: boolean
+  users: User[]
+  id: string
 }
 
 /**
@@ -92,29 +92,30 @@ export interface LotteryReward {
  * @property {User} creator 创建者
  * @property {string} drawTime 开奖时间
  * @property {LotteryRewardCard[]} rewards 奖励列表
- * @return {LotteryCard}
+ * @returns {LotteryCard}
  */
 export interface LotteryCard {
-	id: string;
-	participantWay: string;
-	status: string;
-	creator: User;
-	drawTime: string;
-	rewards: LotteryRewardCard[];
+  id: string
+  participantWay: string
+  status: string
+  creator: User
+  drawTime: string
+  rewards: LotteryRewardCard[]
 }
 
 /**
  * @description 渲染用的奖励信息
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  * @interface LotteryRewardCard
  * @property {string} rewardName 奖励名称
  * @property {number} winnerNumber 获奖人数
  * @property {number} scheduledWinnerNumber 预计获奖人数
  * @property {User[]} users 用户列表
+ * @returns {LotteryRewardCard}
  */
 export interface LotteryRewardCard {
-	rewardName: string;
-	winnerNumber: number;
-	scheduledWinnerNumber: number;
-	users: User[];
+  rewardName: string
+  winnerNumber: number
+  scheduledWinnerNumber: number
+  users: User[]
 }

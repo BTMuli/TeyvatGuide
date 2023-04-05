@@ -5,7 +5,7 @@
  * @since Alpha
  */
 
-import { MysResponse } from "./base";
+import { type MysResponse } from "./base";
 
 /**
  * @description 获取卡池信息的返回类型
@@ -13,12 +13,12 @@ import { MysResponse } from "./base";
  * @interface GachaResponse
  * @extends MysResponse
  * @property {GachaData[]} data.list 卡池数据
- * @return {GachaResponse}
+ * @returns {GachaResponse}
  */
 export interface GachaResponse extends MysResponse {
-	data: {
-		list: GachaData[];
-	};
+  data: {
+    list: GachaData[]
+  }
 }
 
 /**
@@ -36,19 +36,19 @@ export interface GachaResponse extends MysResponse {
  * @description 如下时间示例：2023-03-21 17:59:59
  * @property {string} start_time 卡池开始时间
  * @property {string} end_time 卡池结束时间
- * @return {GachaData}
+ * @returns {GachaData}
  */
 export interface GachaData {
-	id: string;
-	title: string;
-	activity_url: string;
-	content_before_act: string;
-	pool: GachaPool[];
-	voice_icon: string;
-	voice_url: string;
-	voice_status: string;
-	start_time: string;
-	end_time: string;
+  id: string
+  title: string
+  activity_url: string
+  content_before_act: string
+  pool: GachaPool[]
+  voice_icon: string
+  voice_url: string
+  voice_status: string
+  start_time: string
+  end_time: string
 }
 
 /**
@@ -57,11 +57,11 @@ export interface GachaData {
  * @interface GachaPool
  * @property {string} icon 卡池角色头像
  * @property {string} url 卡池角色URL
- * @return {GachaPool}
+ * @returns {GachaPool}
  */
 export interface GachaPool {
-	icon: string;
-	url: string;
+  icon: string
+  url: string
 }
 
 /**
@@ -79,19 +79,19 @@ export interface GachaPool {
  * @property {string} time.start_stamp 卡池开始时间戳
  * @property {string} time.end 卡池结束时间
  * @property {string} time.end_stamp 卡池结束时间戳
- * @return {GachaCard}
+ * @returns {GachaCard}
  */
 export interface GachaCard {
-	title: string;
-	subtitle: string;
-	cover: string;
-	post_id: number;
-	characters: GachaPool[];
-	voice: GachaPool;
-	time: {
-		start: string;
-		start_stamp: number;
-		end: string;
-		end_stamp: number;
-	};
+  title: string
+  subtitle: string
+  cover: string
+  post_id: number
+  characters: GachaPool[]
+  voice: GachaPool
+  time: {
+    start: string
+    start_stamp: number
+    end: string
+    end_stamp: number
+  }
 }

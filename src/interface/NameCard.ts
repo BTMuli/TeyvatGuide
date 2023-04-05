@@ -16,14 +16,14 @@
  * @property {string} profile - 名片 Profile 图路径
  * @property {number} type - 名片类型 (0: 其他，1: 成就，2：角色，3：纪行，4：活动)
  * @property {string} source - 名片来源
- * @return NameCard
+ * @returns {NameCard}
  */
 export interface NameCard {
-	name: string;
-	description: string;
-	icon: string;
-	bg: string;
-	profile: string;
-	type: string;
-	source: string;
+  name: string
+  description: string
+  icon: string
+  bg: string
+  profile: string
+  type: string
+  source: string
 }

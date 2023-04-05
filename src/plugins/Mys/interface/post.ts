@@ -5,10 +5,10 @@
  * @since Alpha v0.1.1
  */
 
-import { MysResponse } from "./base";
-import { NewsMeta } from "./news";
-import { User, SelfOperation } from "./user";
-import { ImageData, HelpSys } from "./utils";
+import { type MysResponse } from "./base";
+import { type NewsMeta } from "./news";
+import { type User, type SelfOperation } from "./user";
+import { type ImageData, type HelpSys } from "./utils";
 
 /**
  * @description 帖子返回数据
@@ -16,12 +16,12 @@ import { ImageData, HelpSys } from "./utils";
  * @interface PostResponse
  * @extends {MysResponse}
  * @property {PostData} data.post 帖子数据
- * @return {PostResponse}
+ * @returns {PostResponse}
  */
 export interface PostResponse extends MysResponse {
-	data: {
-		post: PostData;
-	};
+  data: {
+    post: PostData
+  }
 }
 
 /**
@@ -49,30 +49,30 @@ export interface PostResponse extends MysResponse {
  * @property {unknown} forum_rank_info 版块排行信息，可能为 null // TODO: 未知
  * @property {unknown[]} link_card_list 链接卡片列表，可能为空 // TODO: 未知
  * @property {NewsMeta} news_meta 咨讯元数据，可能为 null
- * @return {PostData}
+ * @returns {PostData}
  */
 export interface PostData {
-	post: Post;
-	forum: Forum;
-	topics: Topic[];
-	user: User;
-	self_operation: SelfOperation;
-	stat: PostStat;
-	help_sys: HelpSys | null;
-	cover: ImageData | null;
-	image_list: ImageData[];
-	is_official_master: boolean;
-	is_user_master: boolean;
-	hot_reply_exist: boolean;
-	vot_count: number;
-	last_modify_time: number;
-	recommend_type: string;
-	collection: unknown | null;
-	vod_list: unknown[];
-	is_block_on: boolean;
-	forum_rank_info: unknown | null;
-	link_card_list: unknown[];
-	news_meta: NewsMeta | null;
+  post: Post
+  forum: Forum
+  topics: Topic[]
+  user: User
+  self_operation: SelfOperation
+  stat: PostStat
+  help_sys: HelpSys | null
+  cover: ImageData | null
+  image_list: ImageData[]
+  is_official_master: boolean
+  is_user_master: boolean
+  hot_reply_exist: boolean
+  vot_count: number
+  last_modify_time: number
+  recommend_type: string
+  collection: unknown | null
+  vod_list: unknown[]
+  is_block_on: boolean
+  forum_rank_info: unknown | null
+  link_card_list: unknown[]
+  news_meta: NewsMeta | null
 }
 
 /**
@@ -118,49 +118,49 @@ export interface PostData {
  * @property {boolean} is_showing_missing 是否显示缺失 // TODO: 未知
  * @property {number} block_latest_reply_time 是否屏蔽最新回复时间 // TODO: 未知
  * @property {number} selected_comment 是否选择评论 // TODO: 未知
- * @return {Post}
+ * @returns {Post}
  */
 export interface Post {
-	game_id: number;
-	post_id: string;
-	f_forum_id: number;
-	uid: string;
-	subject: string;
-	content: string;
-	cover: string;
-	view_type: number;
-	created_at: number;
-	images: string[];
-	post_status: {
-		is_top: boolean;
-		is_good: boolean;
-		is_official: boolean;
-	};
-	topic_ids: number[];
-	view_status: number;
-	max_floor: number;
-	is_original: number;
-	republish_authorization: number;
-	reply_time: string;
-	is_deleted: number;
-	is_interactive: boolean;
-	structured_content: string;
-	structured_content_rows: string[];
-	review_id: number;
-	is_profit: boolean;
-	is_in_profit: boolean;
-	updated_at: number;
-	deleted_at: number;
-	pre_pub_status: number;
-	cate_id: number;
-	profit_post_status: number;
-	audit_status: number;
-	meta_content: string;
-	is_missing: boolean;
-	block_reply_img: number;
-	is_showing_missing: boolean;
-	block_latest_reply_time: number;
-	selected_comment: number;
+  game_id: number
+  post_id: string
+  f_forum_id: number
+  uid: string
+  subject: string
+  content: string
+  cover: string
+  view_type: number
+  created_at: number
+  images: string[]
+  post_status: {
+    is_top: boolean
+    is_good: boolean
+    is_official: boolean
+  }
+  topic_ids: number[]
+  view_status: number
+  max_floor: number
+  is_original: number
+  republish_authorization: number
+  reply_time: string
+  is_deleted: number
+  is_interactive: boolean
+  structured_content: string
+  structured_content_rows: string[]
+  review_id: number
+  is_profit: boolean
+  is_in_profit: boolean
+  updated_at: number
+  deleted_at: number
+  pre_pub_status: number
+  cate_id: number
+  profit_post_status: number
+  audit_status: number
+  meta_content: string
+  is_missing: boolean
+  block_reply_img: number
+  is_showing_missing: boolean
+  block_latest_reply_time: number
+  selected_comment: number
 }
 
 /**
@@ -172,14 +172,14 @@ export interface Post {
  * @property {string} icon 版块图标 URL
  * @property {number} game_id 游戏 ID // 2 为原神
  * @property {unknown} forum_cate 版块分类，可能为 null
- * @return {Forum}
+ * @returns {Forum}
  */
 export interface Forum {
-	id: number;
-	name: string;
-	icon: string;
-	game_id: number;
-	forum_cate: unknown | null;
+  id: number
+  name: string
+  icon: string
+  game_id: number
+  forum_cate: unknown | null
 }
 
 /**
@@ -194,17 +194,17 @@ export interface Forum {
  * @property {boolean} is_interactive 是否互动
  * @property {number} game_id 游戏 ID
  * @property {number} content_type 内容类型
- * @return {Topic}
+ * @returns {Topic}
  */
 export interface Topic {
-	id: number;
-	name: string;
-	cover: string;
-	is_top: boolean;
-	is_good: boolean;
-	is_interactive: boolean;
-	game_id: number;
-	content_type: number;
+  id: number
+  name: string
+  cover: string
+  is_top: boolean
+  is_good: boolean
+  is_interactive: boolean
+  game_id: number
+  content_type: number
 }
 
 /**
@@ -216,14 +216,14 @@ export interface Topic {
  * @property {number} like_num 点赞数
  * @property {number} bookmark_num 收藏数
  * @property {number} forward_num 转发数
- * @return {PostStat}
+ * @returns {PostStat}
  */
 export interface PostStat {
-	view_num: number;
-	reply_num: number;
-	like_num: number;
-	bookmark_num: number;
-	forward_num: number;
+  view_num: number
+  reply_num: number
+  like_num: number
+  bookmark_num: number
+  forward_num: number
 }
 
 /**
@@ -233,11 +233,11 @@ export interface PostStat {
  * @interface PostContent
  * @property {string} describe 描述
  * @property {string[]} imgs 图片 URL
- * @return {PostContent}
+ * @returns {PostContent}
  */
 export interface PostContent {
-	describe: string;
-	imgs?: string[];
+  describe: string
+  imgs?: string[]
 }
 
 /**
@@ -265,36 +265,36 @@ export interface PostContent {
  * @property {boolean} attributes.bold 是否加粗
  * @property {string} attributes.color 颜色
  * @property {string} attributes.link 链接
- * @return {PostStructuredContent}
+ * @returns {PostStructuredContent}
  */
 export interface PostStructuredContent {
-	insert:
-		| {
-				image?: string;
-				video?: string;
-				vod?: PostStructuredContentVod;
-				backup_text?: string;
-				lottery?: {
-					id: string;
-					toast: string;
-				};
-				fold?: {
-					title: string;
-					content: string;
-				};
-				link_card?: PostStructuredContentLinkCard;
-				divider?: string;
-		  }
-		| string;
-	attributes?: {
-		height?: number;
-		width?: number;
-		size?: number;
-		ext?: string;
-		bold?: boolean;
-		color?: string;
-		link?: string;
-	};
+  insert:
+  | {
+    image?: string
+    video?: string
+    vod?: PostStructuredContentVod
+    backup_text?: string
+    lottery?: {
+      id: string
+      toast: string
+    }
+    fold?: {
+      title: string
+      content: string
+    }
+    link_card?: PostStructuredContentLinkCard
+    divider?: string
+  }
+  | string
+  attributes?: {
+    height?: number
+    width?: number
+    size?: number
+    ext?: string
+    bold?: boolean
+    color?: string
+    link?: string
+  }
 }
 
 /**
@@ -316,25 +316,25 @@ export interface PostStructuredContent {
  * @property {number} view_num 浏览数
  * @property {number} transcode_status 转码状态
  * @property {number} review_status 审核状态
- * @return {PostStructuredContentVod}
+ * @returns {PostStructuredContentVod}
  */
 export interface PostStructuredContentVod {
-	id: number;
-	duration: number;
-	cover: string;
-	resolutions: {
-		url: string;
-		definition: string;
-		height: number;
-		width: number;
-		bitrate: number;
-		size: number;
-		format: string;
-		label: string;
-	}[];
-	view_num: number;
-	transcoding_status: number;
-	review_status: number;
+  id: number
+  duration: number
+  cover: string
+  resolutions: Array<{
+    url: string
+    definition: string
+    height: number
+    width: number
+    bitrate: number
+    size: number
+    format: string
+    label: string
+  }>
+  view_num: number
+  transcoding_status: number
+  review_status: number
 }
 
 /**
@@ -352,18 +352,18 @@ export interface PostStructuredContentVod {
  * @property {string} price 价格
  * @property {string} button_text 按钮文本
  * @property {number} landing_url_type 落地链接类型 // TODO: 未知
- * @return {PostStructuredContentLinkCard}
+ * @returns {PostStructuredContentLinkCard}
  */
 export interface PostStructuredContentLinkCard {
-	link_type: number;
-	origin_url: string;
-	landing_url: string;
-	cover: string;
-	title: string;
-	card_id: string;
-	card_status: number;
-	market_price: string;
-	price: string;
-	button_text: string;
-	landing_url_type: number;
+  link_type: number
+  origin_url: string
+  landing_url: string
+  cover: string
+  title: string
+  card_id: string
+  card_status: number
+  market_price: string
+  price: string
+  button_text: string
+  landing_url_type: number
 }

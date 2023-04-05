@@ -17,38 +17,38 @@ import { window as TauriWindow } from "@tauri-apps/api";
  * @param {boolean} resizable 是否可调整大小
  * @returns {void}
  */
-export function createTGWindow(
-	url: string,
-	label: string,
-	title: string,
-	width: number,
-	height: number,
-	resizable: boolean
+export function createTGWindow (
+  url: string,
+  label: string,
+  title: string,
+  width: number,
+  height: number,
+  resizable: boolean,
 ): void {
-	// 计算窗口位置
-	const left = (window.screen.width - width) / 2;
-	const top = (window.screen.height - height) / 2;
-	// https://github.com/tauri-apps/tauri/issues/5380
-	new TauriWindow.WebviewWindow(label, {
-		height: height,
-		width: width,
-		x: left,
-		y: top,
-		resizable: resizable,
-		url: url,
-		title: title,
-		visible: false,
-	});
-	new TauriWindow.WindowManager(label).close().then(() => {
-		new TauriWindow.WebviewWindow(label, {
-			height: height,
-			width: width,
-			x: left,
-			y: top,
-			resizable: resizable,
-			url: url,
-			title: title,
-			visible: false,
-		});
-	});
+  // 计算窗口位置
+  const left = (window.screen.width - width) / 2;
+  const top = (window.screen.height - height) / 2;
+  // https://github.com/tauri-apps/tauri/issues/5380
+  void new TauriWindow.WebviewWindow(label, {
+    height,
+    width,
+    x: left,
+    y: top,
+    resizable,
+    url,
+    title,
+    visible: false,
+  });
+  void new TauriWindow.WindowManager(label).close().then(() => {
+    void new TauriWindow.WebviewWindow(label, {
+      height,
+      width,
+      x: left,
+      y: top,
+      resizable,
+      url,
+      title,
+      visible: false,
+    });
+  });
 }

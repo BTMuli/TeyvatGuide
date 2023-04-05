@@ -4,49 +4,50 @@
  * @author BTMuli<bt-muli@outlook.com>
  * @see https://github.com/DGP-Studio/Snap.Genshin.Docs/blob/main/docs/development/UIAF.md
  * @version v1.1
- * @since Alpha
+ * @since Alpha v0.1.2
  */
 
 /**
  * @interface Achievements
- * @description Achievements interface
- * @property {UIAF_Info} info - UIAF info
- * @property {UIAF_Achievement[]} list - Achievements data
- * @return Achievements
+ * @description UIAF 成就数据
+ * @property {UIAF_Info} info UIAF 头部信息
+ * @property {UIAF_Achievement[]} list UIAF 成就列表
+ * @returns {Achievements}
  */
 export interface Achievements {
-	info: UIAF_Info;
-	list: UIAF_Achievement[];
+  info: UiafHeader
+  list: UiafAchievement[]
 }
 
 /**
- * @interface UIAF_Info
- * @description UIAF info interface
- * @property {string} export_app - Export app name
- * @property {number} export_timestamp - Export timestamp
- * @property {string} export_app_version - Export app version
- * @property {string} uiaf_version - UIAF version
- * @return UIAF_Info
+ * @interface UiafHeader
+ * @description UIAF 头部信息
+ * @property {string} export_app 导出的应用名称
+ * @property {number} export_timestamp 导出时间戳，正确时间戳得乘以 1000
+ * @property {string} export_app_version 导出的应用版本
+ * @property {string} uiaf_version UIAF 版本
+ * @returns {UiafHeader}
  */
-export interface UIAF_Info {
-	export_app: string;
-	export_timestamp: number;
-	export_app_version: string;
-	uiaf_version: string;
+export interface UiafHeader {
+  export_app: string
+  export_timestamp: number
+  export_app_version: string
+  uiaf_version: string
 }
 
 /**
- * @interface UIAF_Achievement
- * @description Achievements data interface
- * @property {number} id - Achievement ID
- * @property {number} timestamp - Achievement timestamp
- * @property {number} current - Current progress
- * @property {number} status - Achievement status
- * @return UIAF_Achievement
+ * @interface UiafAchievement
+ * @since Alpha v0.1.2
+ * @description UIAF 单个成就数据
+ * @property {number} id 成就 ID
+ * @property {number} timestamp 成就记录时间戳，正确时间戳得乘以 1000
+ * @property {number} current 成就进度
+ * @property {number} status 成就状态，0 为未完成，1 为已完成
+ * @returns {UiafAchievement}
  */
-export interface UIAF_Achievement {
-	id: number;
-	timestamp: number;
-	current: number;
-	status: number;
+export interface UiafAchievement {
+  id: number
+  timestamp: number
+  current: number
+  status: number
 }

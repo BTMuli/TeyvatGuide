@@ -19,13 +19,9 @@ import { createVuetify } from "vuetify";
 import "./assets/index.css";
 
 if (import.meta.env.MODE === "development") {
-  await import("@vue/devtools").then(i => {
+  await import("@vue/devtools").then((i) => {
     i.default.connect(/* host, port */);
   });
 }
 
-createApp(App)
-  .use(router)
-  .use(store)
-  .use(createVuetify())
-  .mount("#app");
+createApp(App).use(router).use(store).use(createVuetify()).mount("#app");

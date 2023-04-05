@@ -2,16 +2,16 @@
  * @file plugins UIAF index.ts
  * @description UIAF plugin index
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha
+ * @since Alpha v0.1.2
  */
 
-import { checkUIAFData, readUIAFData } from "./utils/importData";
-import { getUIAFInfo } from "./utils/exportData";
+import { checkUiafData, readUiafData } from "./utils/importData";
+import { getUiafInfo } from "./utils/exportData";
 
-const UIAF_Oper = {
-	checkUIAFData,
-	readUIAFData,
-	getUIAFInfo,
+const UiafOper = {
+  checkUiafData,
+  readUiafData,
+  getUiafInfo,
 };
 
-export default UIAF_Oper;
+export default UiafOper;

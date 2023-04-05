@@ -19,19 +19,19 @@
  * @property {string} completed_time - 成就完成时间
  * @property {number} progress - 成就进度
  * @property {string} version - 成就版本
- * @return Achievement
+ * @returns {Achievement}
  */
 export interface Achievement {
-	id: number;
-	series: number;
-	order: number;
-	name: string;
-	description: string;
-	reward: number;
-	completed: boolean;
-	completed_time: string | null;
-	progress: number;
-	version: string;
+  id: number
+  series: number
+  order: number
+  name: string
+  description: string
+  reward: number
+  completed: boolean
+  completed_time: string | null
+  progress: number
+  version: string
 }
 
 /**
@@ -49,16 +49,16 @@ export interface Achievement {
  * @property {string} card - 成就系列奖励，这边是名片名称
  * @description 像是天地万象这种一直更新的成就系列，这边的 version 可能为 undefined
  * @property {string} icon - 成就系列图标
- * @return AchievementSeries
+ * @returns {AchievementSeries}
  */
 export interface AchievementSeries {
-	id: number;
-	order: number;
-	name: string;
-	version: string;
-	achievements: number[];
-	total_count: number;
-	completed_count: number;
-	card?: string;
-	icon: string;
+  id: number
+  order: number
+  name: string
+  version: string
+  achievements: number[]
+  total_count: number
+  completed_count: number
+  card?: string
+  icon: string
 }

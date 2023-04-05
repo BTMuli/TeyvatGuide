@@ -15,35 +15,35 @@ import Achievements from "../../pages/Achievements.vue";
 import Config from "../../pages/Config.vue";
 
 const mainRoutes = [
-	{
-		path: "/",
-		name: "首页",
-		component: Home,
-	},
-	{
-		path: "/achievements",
-		name: "成就",
-		component: Achievements,
-	},
-	{
-		path: "/announcements",
-		name: "公告",
-		component: Announcements,
-	},
-	{
-		path: "/config",
-		name: "设置",
-		component: Config,
-	},
-	{
-		path: "/GCG",
-		name: "卡牌",
-		component: GCG,
-	},
-	{
-		path: "/home",
-		redirect: "/",
-	},
+  {
+    path: "/",
+    name: "首页",
+    component: Home,
+  },
+  {
+    path: "/achievements",
+    name: "成就",
+    component: Achievements,
+  },
+  {
+    path: "/announcements",
+    name: "公告",
+    component: Announcements,
+  },
+  {
+    path: "/config",
+    name: "设置",
+    component: Config,
+  },
+  {
+    path: "/GCG",
+    name: "卡牌",
+    component: GCG,
+  },
+  {
+    path: "/home",
+    redirect: "/",
+  },
 ];
 
 export default mainRoutes;

@@ -5,8 +5,8 @@
  * @since Alpha v0.1.1
  */
 
-import { MysResponse } from "./base";
-import { Map } from "../../../interface/Base";
+import { type MysResponse } from "./base";
+import { type Map } from "../../../interface/Base";
 
 /**
  * @description 日历返回数据
@@ -14,12 +14,12 @@ import { Map } from "../../../interface/Base";
  * @interface CalendarResponse
  * @extends {MysResponse}
  * @property {CalendarData[]} data.list 日历数据
- * @return {CalendarResponse}
+ * @returns {CalendarResponse}
  */
 export interface CalendarResponse extends MysResponse {
-	data: {
-		list: CalendarData[];
-	};
+  data: {
+    list: CalendarData[]
+  }
 }
 
 /**
@@ -43,26 +43,26 @@ export interface CalendarResponse extends MysResponse {
  * @property {CalendarContent[]} contentInfos 材料内容，kind 为 2 时不为空
  * @property {string} sort 排序，kind 为 2 时不为空，反序列化后为 Map<number, number>，前者为星期，后者为排序
  * @property {CalendarContent[]} contentSource 材料来源，kind 为 2 时不为空
- * @return {CalendarData}
+ * @returns {CalendarData}
  */
 export interface CalendarData {
-	id: string;
-	title: string;
-	kind: string;
-	img_url: string;
-	jump_type: string;
-	jump_url: string;
-	content_id: string;
-	style: string;
-	start_time: string;
-	end_time: string;
-	font_color: string;
-	padding_color: string;
-	drop_day: string[];
-	break_type: string;
-	contentInfos: CalendarContent[];
-	sort: string;
-	contentSource: CalendarContent[];
+  id: string
+  title: string
+  kind: string
+  img_url: string
+  jump_type: string
+  jump_url: string
+  content_id: string
+  style: string
+  start_time: string
+  end_time: string
+  font_color: string
+  padding_color: string
+  drop_day: string[]
+  break_type: string
+  contentInfos: CalendarContent[]
+  sort: string
+  contentSource: CalendarContent[]
 }
 
 /**
@@ -73,13 +73,13 @@ export interface CalendarData {
  * @property {string} title 材料/秘境 名称
  * @property {string} icon 材料/秘境 图片 URL
  * @property {string} bbs_url 链接，一般为空
- * @return {CalendarContent}
+ * @returns {CalendarContent}
  */
 export interface CalendarContent {
-	id: string;
-	title: string;
-	icon: string;
-	bbs_url: string;
+  id: string
+  title: string
+  icon: string
+  bbs_url: string
 }
 
 /**
@@ -94,15 +94,15 @@ export interface CalendarContent {
  * @property {string[]} drop_day 掉落日
  * @property {Map<number>} sort_day 排序
  * @property {CalendarContent[]} contentInfos 材料内容
- * @return {CalendarCard}
+ * @returns {CalendarCard}
  */
 export interface CalendarCard {
-	id: number;
-	type: number;
-	title: string;
-	cover: string;
-	url: string;
-	drop_day: string[];
-	sort_day: Map<number>;
-	contentInfos: CalendarContent[];
+  id: number
+  type: number
+  title: string
+  cover: string
+  url: string
+  drop_day: string[]
+  sort_day: Map<number>
+  contentInfos: CalendarContent[]
 }

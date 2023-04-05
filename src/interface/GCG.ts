@@ -13,12 +13,12 @@
  * @property {string} characterCard 角色卡
  * @property {string} actionCard 行动卡
  * @property {string} monsterCard 魔物卡
- * @return  BaseCardType
+ * @returns {BaseCardType}
  */
 export enum BaseCardType {
-	characterCard = "角色牌",
-	actionCard = "行动牌",
-	monsterCard = "魔物牌",
+  characterCard = "角色牌",
+  actionCard = "行动牌",
+  monsterCard = "魔物牌",
 }
 
 /**
@@ -38,16 +38,16 @@ export enum BaseCardType {
  * @property {unknown} info 卡牌信息
  * @property {unknown} skills 卡牌技能，仅角色卡与魔物卡有
  * @property {unknown} affect 卡牌效果，仅行动卡有
- * @return BaseCard
+ * @returns {BaseCard}
  */
 export interface BaseCard {
-	name: string;
-	id: number;
-	type: BaseCardType;
-	icon: { normal: string; special?: string };
-	info: unknown;
-	skills?: unknown;
-	affect?: unknown;
+  name: string
+  id: number
+  type: BaseCardType
+  icon: { normal: string, special?: string }
+  info: unknown
+  skills?: unknown
+  affect?: unknown
 }
 
 /**
@@ -70,28 +70,28 @@ export interface BaseCard {
  * @property {string} skills[].cost.value 花费值
  * @description 当技能类型为 “召唤物” 时，会有以下属性
  * @property {number} skills[].count 可用次数
- * @return CharacterCard
+ * @returns {CharacterCard}
  */
 export interface CharacterCard extends BaseCard {
-	type: BaseCardType.characterCard;
-	info: {
-		element: EnumElement;
-		weapon: EnumWeapon;
-		camp: EnumCamp;
-		source: string;
-		title: string;
-		description: string;
-	};
-	skills: {
-		name: string;
-		type: string;
-		description: string;
-		cost: {
-			type: string;
-			value: string;
-		};
-		count?: number;
-	}[];
+  type: BaseCardType.characterCard
+  info: {
+    element: EnumElement
+    weapon: EnumWeapon
+    camp: EnumCamp
+    source: string
+    title: string
+    description: string
+  }
+  skills: Array<{
+    name: string
+    type: string
+    description: string
+    cost: {
+      type: string
+      value: string
+    }
+    count?: number
+  }>
 }
 
 /**
@@ -109,20 +109,20 @@ export interface CharacterCard extends BaseCard {
  * @description 当类型为“天赋”时，可能会有以下属性
  * @property {string} info.charge 充能
  * @property {string} affect 卡牌效果
- * @return ActionCard
+ * @returns {ActionCard}
  */
 export interface ActionCard extends BaseCard {
-	type: BaseCardType.actionCard;
-	info: {
-		actionType: EnumActionType;
-		actionTag: EnumActionTag;
-		actionCost: EnumActionCost;
-		source: string;
-		title: string;
-		description: string;
-		charge?: string;
-	};
-	affect: string;
+  type: BaseCardType.actionCard
+  info: {
+    actionType: EnumActionType
+    actionTag: EnumActionTag
+    actionCost: EnumActionCost
+    source: string
+    title: string
+    description: string
+    charge?: string
+  }
+  affect: string
 }
 
 /**
@@ -144,25 +144,25 @@ export interface ActionCard extends BaseCard {
  * @property {string} skills[].cost.type 花费类型
  * @property {string} skills[].cost.value 花费值
  * @description 当技能类型为 “召唤物” 时，会有以下属性
- * @return MonsterCard
+ * @returns {MonsterCard}
  */
 export interface MonsterCard extends BaseCard {
-	type: BaseCardType.monsterCard;
-	info: {
-		element: EnumElement;
-		weapon: EnumWeapon;
-		camp: EnumCamp;
-		source: string;
-	};
-	skills: {
-		name: string;
-		type: string;
-		description: string;
-		cost: {
-			type: string;
-			value: string;
-		};
-	}[];
+  type: BaseCardType.monsterCard
+  info: {
+    element: EnumElement
+    weapon: EnumWeapon
+    camp: EnumCamp
+    source: string
+  }
+  skills: Array<{
+    name: string
+    type: string
+    description: string
+    cost: {
+      type: string
+      value: string
+    }
+  }>
 }
 
 /**
@@ -173,12 +173,12 @@ export interface MonsterCard extends BaseCard {
  * @property {EnumElement} element 元素
  * @property {EnumWeapon} weapon 武器
  * @property {EnumCamp} camp 阵营
- * @return	CharacterCardType
+ * @returns	{CharacterCardType}
  */
 export interface CharacterCardType {
-	element: EnumElement;
-	weapon: EnumWeapon;
-	camp: EnumCamp;
+  element: EnumElement
+  weapon: EnumWeapon
+  camp: EnumCamp
 }
 
 /**
@@ -189,12 +189,12 @@ export interface CharacterCardType {
  * @property {EnumActionType} actionType 类型
  * @property {EnumActionTag} actionTag 标签
  * @property {EnumActionCost} actionCost 花费
- * @return	ActionCardType
+ * @returns	{ActionCardType}
  */
 export interface ActionCardType {
-	actionType: EnumActionType;
-	actionTag: EnumActionTag;
-	actionCost: EnumActionCost;
+  actionType: EnumActionType
+  actionTag: EnumActionTag
+  actionCost: EnumActionCost
 }
 
 /**
@@ -209,16 +209,16 @@ export interface ActionCardType {
  * @property {string} anemo 风元素
  * @property {string} geo 岩元素
  * @property {string} dendro 草元素
- * @return EnumElement
+ * @returns {EnumElement}
  */
 export enum EnumElement {
-	pyro = "火元素",
-	hydro = "水元素",
-	cryo = "冰元素",
-	electro = "雷元素",
-	anemo = "风元素",
-	geo = "岩元素",
-	dendro = "草元素",
+  pyro = "火元素",
+  hydro = "水元素",
+  cryo = "冰元素",
+  electro = "雷元素",
+  anemo = "风元素",
+  geo = "岩元素",
+  dendro = "草元素",
 }
 
 /**
@@ -232,20 +232,20 @@ export enum EnumElement {
  * @property {string} bow 弓
  * @property {string} catalyst 法器
  * @property {string} other 其他武器
- * @return EnumWeapon
+ * @returns {EnumWeapon}
  */
 export enum EnumWeapon {
-	sword = "单手剑",
-	claymore = "双手剑",
-	pole = "长柄武器",
-	bow = "弓",
-	catalyst = "法器",
-	other = "其他武器",
+  sword = "单手剑",
+  claymore = "双手剑",
+  pole = "长柄武器",
+  bow = "弓",
+  catalyst = "法器",
+  other = "其他武器",
 }
 
 /**
  * @description 角色牌阵营
- * @enum EnumCamp
+ * @enum {EnumCamp}
  * @since Alpha
  * @see CharacterCardType
  * @property {string} mondstadt 蒙德
@@ -254,15 +254,15 @@ export enum EnumWeapon {
  * @property {string} sumeru 须弥
  * @property {string} fatui 愚人众
  * @property {string} monster 魔物
- * @return EnumCamp
+ * @returns {EnumCamp}
  */
 export enum EnumCamp {
-	mondstadt = "蒙德",
-	liyue = "璃月",
-	inazuma = "稻妻",
-	sumeru = "须弥",
-	fatui = "愚人众",
-	monster = "魔物",
+  mondstadt = "蒙德",
+  liyue = "璃月",
+  inazuma = "稻妻",
+  sumeru = "须弥",
+  fatui = "愚人众",
+  monster = "魔物",
 }
 
 /**
@@ -273,12 +273,12 @@ export enum EnumCamp {
  * @property {string} equipment 装备牌
  * @property {string} event 事件牌
  * @property {string} support 支援牌
- * @return EnumActionType
+ * @returns {EnumActionType}
  */
 export enum EnumActionType {
-	equipment = "装备牌",
-	event = "事件牌",
-	support = "支援牌",
+  equipment = "装备牌",
+  event = "事件牌",
+  support = "支援牌",
 }
 
 /**
@@ -295,18 +295,18 @@ export enum EnumActionType {
  * @property {string} filed 场地
  * @property {string} elementResonance 元素共鸣
  * @property {string} other 其他标签
- * @return EnumActionTag
+ * @returns {EnumActionTag}
  */
 export enum EnumActionTag {
-	weapon = "武器",
-	artifact = "圣遗物",
-	talent = "天赋",
-	food = "料理",
-	item = "道具",
-	partner = "伙伴",
-	filed = "场地",
-	elementResonance = "元素共鸣",
-	other = "其他标签",
+  weapon = "武器",
+  artifact = "圣遗物",
+  talent = "天赋",
+  food = "料理",
+  item = "道具",
+  partner = "伙伴",
+  filed = "场地",
+  elementResonance = "元素共鸣",
+  other = "其他标签",
 }
 
 /**
@@ -322,15 +322,15 @@ export enum EnumActionTag {
  * @property {string} cost5 花费5
  * @property {string} cost6 花费6
  * @property {string} other 其他花费
- * @return EnumActionCost
+ * @returns {EnumActionCost}
  */
 export enum EnumActionCost {
-	cost0 = "花费0",
-	cost1 = "花费1",
-	cost2 = "花费2",
-	cost3 = "花费3",
-	cost4 = "花费4",
-	cost5 = "花费5",
-	cost6 = "花费6",
-	other = "其他花费",
+  cost0 = "花费0",
+  cost1 = "花费1",
+  cost2 = "花费2",
+  cost3 = "花费3",
+  cost4 = "花费4",
+  cost5 = "花费5",
+  cost6 = "花费6",
+  other = "其他花费",
 }

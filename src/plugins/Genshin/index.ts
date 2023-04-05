@@ -11,12 +11,12 @@ import { getAnnoCards } from "./utils/announcements";
 import { parseAnnoContent } from "./utils/annoParser";
 
 const GenshinOper = {
-	Announcement: {
-		getList: getAnnouncementList,
-		getContent: getAnnouncementContent,
-		card: getAnnoCards,
-		parser: parseAnnoContent,
-	},
+  Announcement: {
+    getList: getAnnouncementList,
+    getContent: getAnnouncementContent,
+    card: getAnnoCards,
+    parser: parseAnnoContent,
+  },
 };
 
 export default GenshinOper;

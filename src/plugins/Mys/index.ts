@@ -25,41 +25,41 @@ import { getCalendarData } from "./request/calendar";
 import { getCalendarCard } from "./utils/calendar";
 
 const MysOper = {
-	Post: {
-		get: getPostData,
-		parser: PostParser,
-	},
-	Gacha: {
-		get: getGachaData,
-		card: getGachaCard,
-	},
-	Position: {
-		get: getPositionData,
-		card: getPositionCard,
-	},
-	News: {
-		get: {
-			notice: getNoticeList,
-			activity: getActivityList,
-			news: getNewsList,
-		},
-		card: {
-			notice: getNoticeCard,
-			activity: getActivityCard,
-			news: getNewsCard,
-		},
-	},
-	Lottery: {
-		get: getLotteryData,
-		card: {
-			lottery: getLotteryCard,
-			reward: getLotteryRewardCard,
-		},
-	},
-	Calendar: {
-		get: getCalendarData,
-		card: getCalendarCard,
-	},
+  Post: {
+    get: getPostData,
+    parser: PostParser,
+  },
+  Gacha: {
+    get: getGachaData,
+    card: getGachaCard,
+  },
+  Position: {
+    get: getPositionData,
+    card: getPositionCard,
+  },
+  News: {
+    get: {
+      notice: getNoticeList,
+      activity: getActivityList,
+      news: getNewsList,
+    },
+    card: {
+      notice: getNoticeCard,
+      activity: getActivityCard,
+      news: getNewsCard,
+    },
+  },
+  Lottery: {
+    get: getLotteryData,
+    card: {
+      lottery: getLotteryCard,
+      reward: getLotteryRewardCard,
+    },
+  },
+  Calendar: {
+    get: getCalendarData,
+    card: getCalendarCard,
+  },
 };
 
 export default MysOper;

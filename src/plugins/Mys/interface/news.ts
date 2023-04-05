@@ -5,10 +5,10 @@
  * @since Alpha
  */
 
-import { MysResponse } from "./base";
-import { Post, Forum, Topic, PostStat } from "./post";
-import { User, SelfOperation } from "./user";
-import { ImageData, HelpSys } from "./utils";
+import { type MysResponse } from "./base";
+import { type Post, type Forum, type Topic, type PostStat } from "./post";
+import { type User, type SelfOperation } from "./user";
+import { type ImageData, type HelpSys } from "./utils";
 
 /**
  * @description 咨讯返回数据
@@ -16,10 +16,10 @@ import { ImageData, HelpSys } from "./utils";
  * @interface NewsResponse
  * @extends {MysResponse}
  * @property {NewsData} data 咨讯数据
- * @return {NewsResponse}
+ * @returns {NewsResponse}
  */
 export interface NewsResponse extends MysResponse {
-	data: NewsData;
+  data: NewsData
 }
 
 /**
@@ -29,12 +29,12 @@ export interface NewsResponse extends MysResponse {
  * @property {number} last_id 最后一条咨讯 ID
  * @property {boolean} is_last 是否最后一页
  * @property {NewsItem[]} list 咨讯列表
- * @return {NewsData}
+ * @returns {NewsData}
  */
 export interface NewsData {
-	last_id: number;
-	is_last: boolean;
-	list: NewsItem[];
+  last_id: number
+  is_last: boolean
+  list: NewsItem[]
 }
 
 /**
@@ -62,30 +62,30 @@ export interface NewsData {
  * @property {unknown} forum_rank_info 版块排名信息，可能为 null // TODO: 未知
  * @property {unknown[]} link_card_list 链接卡片列表，可能为 null // TODO: 未知
  * @property {NewsMeta} news_meta 元数据
- * @return {NewsItem}
+ * @returns {NewsItem}
  */
 export interface NewsItem {
-	post: Post;
-	forum: Forum;
-	topics: Topic[];
-	user: User;
-	self_operation: SelfOperation;
-	stat: PostStat;
-	help_sys: HelpSys;
-	cover: ImageData;
-	image_list: ImageData[];
-	is_official_master: boolean;
-	is_user_master: boolean;
-	hot_reply_exist: boolean;
-	vote_count: number;
-	last_modify_time: number;
-	recommend_type: string;
-	collection: unknown;
-	vod_list: unknown[];
-	is_block_on: boolean;
-	forum_rank_info: unknown;
-	link_card_list: unknown[];
-	news_meta: NewsMeta;
+  post: Post
+  forum: Forum
+  topics: Topic[]
+  user: User
+  self_operation: SelfOperation
+  stat: PostStat
+  help_sys: HelpSys
+  cover: ImageData
+  image_list: ImageData[]
+  is_official_master: boolean
+  is_user_master: boolean
+  hot_reply_exist: boolean
+  vote_count: number
+  last_modify_time: number
+  recommend_type: string
+  collection: unknown
+  vod_list: unknown[]
+  is_block_on: boolean
+  forum_rank_info: unknown
+  link_card_list: unknown[]
+  news_meta: NewsMeta
 }
 
 /**
@@ -95,12 +95,12 @@ export interface NewsItem {
  * @property {number} activity_status 活动状态 // ActivityStatus
  * @property {string} start_at_sec 活动开始时间戳，单位秒
  * @property {string} end_at_sec 活动结束时间戳，单位秒
- * @return {NewsMeta}
+ * @returns {NewsMeta}
  */
 export interface NewsMeta {
-	activity_status: number;
-	start_at_sec: string;
-	end_at_sec: string;
+  activity_status: number
+  start_at_sec: string
+  end_at_sec: string
 }
 
 /**
@@ -112,14 +112,14 @@ export interface NewsMeta {
  * @property {number} post_id 帖子 ID
  * @property {string} subtitle 副标题
  * @property {ActivityStatus} status 活动状态，仅活动咨讯有
- * @return {NewsCard}
+ * @returns {NewsCard}
  */
 export interface NewsCard {
-	title: string;
-	cover: string;
-	post_id: number;
-	subtitle: string;
-	status?: ActivityStatus;
+  title: string
+  cover: string
+  post_id: number
+  subtitle: string
+  status?: ActivityStatus
 }
 
 /**
@@ -127,9 +127,9 @@ export interface NewsCard {
  * @since Alpha
  * @property {string} status 活动状态
  * @property {string} colorCss 活动状态按钮背景色
- * @return {ActivityStatus}
+ * @returns {ActivityStatus}
  */
 export interface ActivityStatus {
-	status: string;
-	colorCss: string;
+  status: string
+  colorCss: string
 }

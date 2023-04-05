@@ -26,26 +26,26 @@
  * @property {boolean} is_follower 是否被关注
  * @property {string} avatar_url 用户头像链接
  * @property {string} pendant 用户挂件 URL，可能为 ""
- * @return {User}
+ * @returns {User}
  */
 export interface User {
-	uid: string;
-	nickname: string;
-	introduce: string;
-	avatar: string;
-	gender: number;
-	certification: {
-		type: number;
-		label: string;
-	};
-	level_exp: {
-		level: number;
-		exp: number;
-	};
-	is_following: boolean;
-	is_follower: boolean;
-	avatar_url: string;
-	pendant: string;
+  uid: string
+  nickname: string
+  introduce: string
+  avatar: string
+  gender: number
+  certification: {
+    type: number
+    label: string
+  }
+  level_exp: {
+    level: number
+    exp: number
+  }
+  is_following: boolean
+  is_follower: boolean
+  avatar_url: string
+  pendant: string
 }
 
 /**
@@ -54,9 +54,9 @@ export interface User {
  * @interface SelfOperation
  * @property {number} attitude 操作类型 // TODO: 未知
  * @property {boolean} is_collected 是否收藏
- * @return {SelfOperation}
+ * @returns {SelfOperation}
  */
 export interface SelfOperation {
-	attitude: number;
-	is_collected: boolean;
+  attitude: number
+  is_collected: boolean
 }
