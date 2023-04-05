@@ -4,7 +4,7 @@
 	</div>
 	<div v-else>
 		<div class="lottery-div">
-			<div class="lottery-title">抽奖详情</div>
+			<div class="lottery-title">抽奖详情 {{ timeStatus }}</div>
 			<v-list class="lottery-list">
 				<v-list-item>
 					<template v-slot:prepend>
@@ -23,6 +23,15 @@
 				</v-list-item>
 			</v-list>
 			<v-btn class="lottery-back" @click="backPost">返回</v-btn>
+			<v-btn @click="showJson = true" class="card-dev-btn" v-show="appStore.devMode">
+				<template v-slot:prepend>
+					<img src="../assets/icons/arrow-right.svg" alt="right" />
+				</template>
+				JSON
+			</v-btn>
+		</div>
+		<div class="dev-json" v-show="showJson">
+			<json-viewer :value="jsonData" copyable boxed />
 		</div>
 		<div class="lottery-div">
 			<div class="lottery-title">奖品详情</div>
@@ -48,24 +57,33 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
+import JsonViewer from "vue-json-viewer";
 import TLoading from "../components/t-loading.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
+// store
+import useAppStore from "../store/modules/app";
 // plugins
 import MysOper from "../plugins/Mys";
 // interface
-import { LotteryCard } from "../plugins/Mys/interface/lottery";
+import { LotteryCard, LotteryData } from "../plugins/Mys/interface/lottery";
 
 // loading
 const loading = ref(true as boolean);
 const loadingTitle = ref("正在加载");
 const loadingEmpty = ref(false as boolean);
 
+// store
+const appStore = useAppStore();
+
 // 数据
 const lottery_id = useRoute().params.lottery_id as string;
 const lotteryCard = ref({} as LotteryCard);
+const showJson = ref(false as boolean);
+let jsonData = reactive({} as LotteryData);
+const timeStatus = ref("未知" as string);
 
 function backPost() {
 	window.history.back();
@@ -81,14 +99,33 @@ onMounted(async () => {
 	}
 	// 获取数据
 	loadingTitle.value = "正在获取数据...";
-	const lotteryData = await MysOper.Lottery.get(lottery_id);
-	if (!lotteryData) {
+	jsonData = await MysOper.Lottery.get(lottery_id);
+	if (!jsonData) {
 		loadingEmpty.value = true;
 		loadingTitle.value = "未找到数据";
 		return;
 	}
+	await appWindow.setTitle("抽奖详情 " + jsonData.lottery_entity_summary);
 	loadingTitle.value = "正在渲染数据...";
-	lotteryCard.value = MysOper.Lottery.card.lottery(lotteryData);
+	lotteryCard.value = MysOper.Lottery.card.lottery(jsonData);
+	if (jsonData.status === "Settled") {
+		timeStatus.value = "已开奖";
+	} else {
+		await setInterval(() => {
+			const timeNow = new Date().getTime();
+			const timeDiff = Number(jsonData.draw_time) * 1000 - timeNow;
+			if (timeDiff <= 0) {
+				timeStatus.value = "已开奖";
+				clearInterval(this);
+			} else {
+				const day = Math.floor(timeDiff / (24 * 3600 * 1000));
+				const hour = Math.floor((timeDiff % (24 * 3600 * 1000)) / (3600 * 1000));
+				const minute = Math.floor((timeDiff % (3600 * 1000)) / (60 * 1000));
+				const second = Math.floor((timeDiff % (60 * 1000)) / 1000);
+				timeStatus.value = `${day}天${hour}小时${minute}分${second}秒`;
+			}
+		}, 1000);
+	}
 	setTimeout(() => {
 		loading.value = false;
 	}, 200);
@@ -96,7 +133,7 @@ onMounted(async () => {
 </script>
 <style lang="css">
 .lottery-div {
-	background: #546d8b;
+	background: #faf7e8;
 	border-radius: 10px;
 	margin: 10px;
 	padding: 10px;
@@ -105,19 +142,11 @@ onMounted(async () => {
 .lottery-title {
 	font-family: Genshin, serif;
 	font-size: 20px;
-	color: #faf7e8;
+	color: #546d8b;
 	margin: 10px;
 }
 
 .lottery-list {
-	background: #faf7e8;
-	border-radius: 10px;
-	margin: 10px;
-	color: #546d8b;
-	font-family: Genshin-Light, serif;
-}
-
-.lottery-sub-list {
 	background: #546d8b;
 	border-radius: 10px;
 	margin: 10px;
@@ -125,15 +154,23 @@ onMounted(async () => {
 	font-family: Genshin-Light, serif;
 }
 
+.lottery-sub-list {
+	background: #faf7e8;
+	border-radius: 10px;
+	margin: 10px;
+	color: #546d8b;
+	font-family: Genshin-Light, serif;
+}
+
 .lottery-back {
 	margin: 10px;
 	font-family: Genshin, serif;
-	color: #546d8b !important;
-	background: #faf7e8 !important;
+	color: #faf7e8 !important;
+	background: #546d8b !important;
 }
 
 .lottery-grid {
-	background: #faf7e8;
+	background: #546d8b;
 	border-radius: 10px;
 	margin: 10px;
 	display: grid;
