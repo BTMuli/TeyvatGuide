@@ -208,8 +208,8 @@ onMounted(async () => {
 	if (showNews.value) {
 		loadingTitle.value = "正在获取新闻数据...";
 		const newsData = await MysOper.News.get.news(gid);
-		rawData.value.news!.is_last = newsData.is_last;
-		rawData.value.news!.last_id = newsData.list.length;
+		rawData.value.news.is_last = newsData.is_last;
+		rawData.value.news.last_id = newsData.list.length;
 		postData.value = {
 			notice: MysOper.News.card.notice(noticeData),
 			activity: MysOper.News.card.activity(activityData),
@@ -273,7 +273,7 @@ async function loadMore(data: string) {
 				return;
 			}
 			const getNews = await MysOper.News.get.news(gid, 20, rawData.value.news.last_id);
-			rawData.value.news.last_id = getNews.last_id;
+			rawData.value.news.last_id = rawData.value.news.last_id + getNews.list.length;
 			rawData.value.news.is_last = getNews.is_last;
 			const newsCard = MysOper.News.card.news(getNews);
 			postData.value.news = postData.value.news.concat(newsCard);
