@@ -1,0 +1,90 @@
+root: true
+env:
+  browser: true
+  es2021: true
+extends:
+  - plugin:vue/vue3-recommended
+  - standard-with-typescript
+overrides: []
+parser: vue-eslint-parser
+parserOptions:
+  parser: "@typescript-eslint/parser"
+  ecmaVersion: latest
+  sourceType: module
+  extraFileExtensions:
+    - .vue
+  project:
+    - ./tsconfig.json
+    - ./tsconfig.node.json
+plugins:
+  - vue
+rules:
+  # some rules that not normal disabled
+  semi: off
+  quotes: off
+  indent: off
+  no-tabs: off
+  camelcase: off
+  comma-dangle: off
+  no-case-declarations: off # 禁止在 case 子句中使用词法声明
+  no-useless-constructor: off # 禁用不必要的构造函数
+  # rules of standard
+  strictNullChecks: # 严格空值检查
+    - warn
+    - true
+  array-callback-return: 
+    - error
+    - allowImplicit: true
+  # rules of vue
+  vue/max-attributes-per-line:
+    - off
+  # vue/max-len: # 限制代码长度不得超过这个长度
+  #   - warn
+  #   - code: 80
+  vue/html-indent:
+    - warn
+    - 2 # Vue 标签缩进
+    - baseIndent: 0 # 最外面的template缩进
+  vue/component-name-in-template-casing:
+    - warn # 组件应使用PascalCase命名
+    - "PascalCase"
+  vue/multi-word-component-names:
+    - off # 组件名应该是由多个单词组成
+  # rules of typescript
+  "@typescript-eslint/strict-boolean-expressions":
+    - off
+  "@typescript-eslint/indent":
+    - warn
+    - 2 # js/ts缩进
+  "@typescript-eslint/semi":
+    - warn
+    - always # 语句末尾必须加分号
+  "@typescript-eslint/quotes":
+    - warn
+    - double # 引号使用双引号
+  "@typescript-eslint/comma-dangle":
+    - warn
+    - always-multiline
+  "@typescript-eslint/prefer-unllish-coalescing": # 优先使用 ?? 而不是 || 进行空值判断
+    - warn
+    - ignoreConditionalTests: true
+  "@typescript-eslint/space-before-function-paren":
+    - warn
+    - always # 函数名和括号之间必须有空格
+  "@typescript-eslint/ban-types":
+    - warn
+    - types:
+        Object: # 禁止使用 Object
+          message: "Use {} instead"
+          fixWith: "{}"
+        Boolean: # 禁止使用 Boolean
+          message: "Use boolean instead"
+        Number: # 禁止使用 Number
+          message: "Use number instead"
+        String: # 禁止使用 String
+          message: "Use string instead"
+        Symbol: # 禁止使用 Symbol
+          message: "Use symbol instead"
+  "@typescript-eslint/no-floating-promises":
+    - warn
+    - ignoreVoid: true # 忽略 void 类型

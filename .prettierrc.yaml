@@ -1,8 +1,0 @@
-"semi": true # 是否使用分号 true:使用
-"singleQuote": false # 是否使用单引号
-"printWidth": 100 # 一行最多多少个字符
-"useTabs": true # 是否使用tab
-"proseWrap": "preserve" # 是否换行
-"arrowParens": "avoid" # 箭头函数参数是否使用括号
-"bracketSpacing": true # 对象大括号是否有空格
-"endOfLine": "auto" # 换行符
