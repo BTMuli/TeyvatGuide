@@ -2,21 +2,20 @@
  * @file plugins Mys utils PostParser.ts
  * @description 用于解析Mys数据的工具
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  */
 import { PostContent, PostData, PostStructuredContent } from "../interface/post";
 
 /**
  * @description 检测链接是否是米游社帖子
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  * @param {string} url 链接
  * @returns {boolean} 是否是米游社帖子
  */
 export function IsMysPost(url: string): boolean {
-	return (
-		url.startsWith("https://bbs.mihoyo.com/ys/article/") ||
-		url.startsWith("https://www.miyoushe.com/ys/article/")
-	);
+	const regBBS = /^https:\/\/bbs\.mihoyo\.com\/\w+\/article\/\d+$/;
+	const regMYS = /^https:\/\/www\.miyoushe\.com\/\w+\/article\/\d+$/;
+	return regBBS.test(url) || regMYS.test(url);
 }
 
 /**
@@ -58,7 +57,7 @@ export function contentParser(content: string): string {
 
 /**
  * @description 解析Mys数据
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  * @param {PostData} post Mys数据
  * @description 为了安全考虑，不会解析所有的属性，只会解析几个常用的属性
  * @returns {string} 解析后的HTML，可作为 v-html 使用
@@ -69,17 +68,16 @@ export function PostParser(post: PostData): string {
 	if (postContent.startsWith("<")) {
 		parserData = post.post.structured_content;
 	} else {
-		parserData = contentParser(postContent);
+		try {
+			parserData = contentParser(post.post.content);
+		} catch (error) {
+			parserData = post.post.structured_content;
+		}
 	}
-	// Json 化
 	let jsonData: PostStructuredContent[] = JSON.parse(parserData);
-	// 创建 div
 	const doc = document.createElement("div");
-	// 遍历 Json 数据
 	jsonData.forEach((item: any) => {
-		// 解析
 		const parsed = ParserTransfer(item);
-		// 插入
 		doc.appendChild(parsed);
 	});
 	return doc.innerHTML;

@@ -6,9 +6,9 @@
 		<v-tabs v-model="tab" align-tabs="start" class="news-tabs">
 			<v-tab value="notice" title="公告" />
 			<v-tab value="activity" title="活动" />
-			<v-tab value="news" title="新闻" />
+			<v-tab value="news" title="新闻" v-if="showNews" />
 			<v-spacer></v-spacer>
-			<v-btn class="switch-btn" @click="switchAnno">
+			<v-btn class="switch-btn" @click="switchAnno" v-if="showSwitch">
 				<template v-slot:prepend>
 					<v-icon>mdi-bullhorn</v-icon>
 				</template>
@@ -100,7 +100,7 @@
 					</v-btn>
 				</div>
 			</v-window-item>
-			<v-window-item value="news">
+			<v-window-item value="news" v-if="showNews">
 				<div class="news-grid">
 					<v-card class="news-card" v-for="item in postData.news" width="340">
 						<div class="news-cover" @click="toPost(item)">
@@ -142,7 +142,7 @@
 <script lang="ts" setup>
 // vue
 import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import TLoading from "../components/t-loading.vue";
 // store
 import useAppStore from "../store/modules/app";
@@ -153,24 +153,29 @@ import { createTGWindow } from "../utils/TGWindow";
 // interface
 import { NewsCard } from "../plugins/Mys/interface/news";
 
+// 路由
+const router = useRouter();
+const gid = useRoute().params.gid as string;
+const showNews = ref((gid !== "5") as boolean);
+const showSwitch = ref((gid === "2") as boolean);
+
 // Store
 const appStore = useAppStore();
 
 // loading
-const loading = ref(true);
-const loadingTitle = ref("正在加载");
-const loadingSub = ref(false);
+const loading = ref(true as boolean);
+const loadingTitle = ref("正在加载" as string);
+const loadingSub = ref(false as boolean);
 // snackbar
-const snackbar = ref(false);
-const snackbarText = ref("");
-const snackbarColor = ref("success");
-// 路由
-const router = useRouter();
+const snackbar = ref(false as boolean);
+const snackbarText = ref("" as string);
+const snackbarColor = ref("success" as string);
+
 // search
-const search = ref("");
+const search = ref("" as string);
 
 // 数据
-const tab = ref("");
+const tab = ref("" as string);
 const postData = ref({
 	notice: [] as NewsCard[],
 	activity: [] as NewsCard[],
@@ -193,23 +198,31 @@ const rawData = ref({
 
 onMounted(async () => {
 	loadingTitle.value = "正在获取公告数据...";
-	const noticeData = await MysOper.News.get.notice();
+	const noticeData = await MysOper.News.get.notice(gid);
 	rawData.value.notice.is_last = noticeData.is_last;
-	rawData.value.notice.last_id = noticeData.last_id;
+	rawData.value.notice.last_id = noticeData.list.length;
 	loadingTitle.value = "正在获取活动数据...";
-	const activityData = await MysOper.News.get.activity();
+	const activityData = await MysOper.News.get.activity(gid);
 	rawData.value.activity.is_last = activityData.is_last;
-	rawData.value.activity.last_id = activityData.last_id;
-	loadingTitle.value = "正在获取新闻数据...";
-	const newsData = await MysOper.News.get.news();
-	rawData.value.news.is_last = newsData.is_last;
-	rawData.value.news.last_id = newsData.last_id;
-	loadingTitle.value = "正在渲染数据...";
-	postData.value = {
-		notice: MysOper.News.card.notice(noticeData),
-		activity: MysOper.News.card.activity(activityData),
-		news: MysOper.News.card.news(newsData),
-	};
+	rawData.value.activity.last_id = activityData.list.length;
+	if (showNews) {
+		loadingTitle.value = "正在获取新闻数据...";
+		const newsData = await MysOper.News.get.news(gid);
+		console.log(newsData);
+		rawData.value.news!.is_last = newsData.is_last;
+		rawData.value.news!.last_id = newsData.list.length;
+		postData.value = {
+			notice: MysOper.News.card.notice(noticeData),
+			activity: MysOper.News.card.activity(activityData),
+			news: MysOper.News.card.news(newsData),
+		};
+	} else {
+		postData.value = {
+			notice: MysOper.News.card.notice(noticeData),
+			activity: MysOper.News.card.activity(activityData),
+			news: [],
+		};
+	}
 	tab.value = "notice";
 	loading.value = false;
 });
@@ -230,8 +243,8 @@ async function loadMore(data: string) {
 				loadingSub.value = false;
 				return;
 			}
-			const getNotice = await MysOper.News.get.notice(20, rawData.value.notice.last_id);
-			rawData.value.notice.last_id = getNotice.last_id;
+			const getNotice = await MysOper.News.get.notice(gid, 20, rawData.value.notice.last_id);
+			rawData.value.notice.last_id = rawData.value.notice.last_id + getNotice.list.length;
 			rawData.value.notice.is_last = getNotice.is_last;
 			const noticeCard = MysOper.News.card.notice(getNotice);
 			postData.value.notice = postData.value.notice.concat(noticeCard);
@@ -245,8 +258,8 @@ async function loadMore(data: string) {
 				loadingSub.value = false;
 				return;
 			}
-			const getActivity = await MysOper.News.get.activity(20, rawData.value.activity.last_id);
-			rawData.value.activity.last_id = getActivity.last_id;
+			const getActivity = await MysOper.News.get.activity(gid, 20, rawData.value.activity.last_id);
+			rawData.value.activity.last_id = rawData.value.activity.last_id + getActivity.list.length;
 			rawData.value.activity.is_last = getActivity.is_last;
 			const activityCard = MysOper.News.card.activity(getActivity);
 			postData.value.activity = postData.value.activity.concat(activityCard);
@@ -260,12 +273,14 @@ async function loadMore(data: string) {
 				loadingSub.value = false;
 				return;
 			}
-			const getNews = await MysOper.News.get.news(20, rawData.value.news.last_id);
+			const getNews = await MysOper.News.get.news(gid, 20, rawData.value.news.last_id);
 			rawData.value.news.last_id = getNews.last_id;
 			rawData.value.news.is_last = getNews.is_last;
 			const newsCard = MysOper.News.card.news(getNews);
 			postData.value.news = postData.value.news.concat(newsCard);
 			loadingSub.value = false;
+			break;
+		default:
 			break;
 	}
 }

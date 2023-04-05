@@ -2,13 +2,12 @@
  * @file router modules main.ts
  * @description 主路由模块
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  */
 
 // 信息展示
 import Announcements from "../../pages/Announcements.vue";
 import Home from "../../pages/Home.vue";
-import News from "../../pages/News.vue";
 import GCG from "../../pages/GCG.vue";
 // 数据交互
 import Achievements from "../../pages/Achievements.vue";
@@ -44,11 +43,6 @@ const mainRoutes = [
 	{
 		path: "/home",
 		redirect: "/",
-	},
-	{
-		path: "/news",
-		name: "咨讯",
-		component: News,
 	},
 ];
 

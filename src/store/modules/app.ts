@@ -27,6 +27,9 @@ const useAppStore = defineStore({
 				collapse: true,
 				// 是否显示
 				submenu: {
+					// 米游社
+					mihoyo: false,
+					// 数据库
 					database: false,
 				},
 			},
@@ -57,13 +60,16 @@ const useAppStore = defineStore({
 				this.sidebar = {
 					collapse: true,
 					submenu: {
+						mihoyo: false,
 						database: false,
 					},
 				};
 			} else {
 				if (this.sidebar.collapse === undefined) this.sidebar.collapse = false;
-				if (this.sidebar.submenu === undefined) this.sidebar.submenu = { database: false };
+				if (this.sidebar.submenu === undefined)
+					this.sidebar.submenu = { database: false, mihoyo: false };
 				if (this.sidebar.submenu.database === undefined) this.sidebar.submenu.database = false;
+				if (this.sidebar.submenu.mihoyo === undefined) this.sidebar.submenu.mihoyo = false;
 			}
 		},
 		// 初始化配置
@@ -72,6 +78,7 @@ const useAppStore = defineStore({
 			this.sidebar = {
 				collapse: false,
 				submenu: {
+					mihoyo: false,
 					database: false,
 				},
 			};
@@ -88,6 +95,7 @@ const useAppStore = defineStore({
 		getSubmenu() {
 			let open = [];
 			if (this.sidebar.submenu.database) open.push("database");
+			if (this.sidebar.submenu.mihoyo) open.push("mihoyo");
 			return open;
 		},
 	},
