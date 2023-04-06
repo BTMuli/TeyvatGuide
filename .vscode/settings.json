@@ -3,7 +3,7 @@
 	"eslint.format.enable": true,
 	"eslint.quiet": false,
 	"eslint.lintTask.enable": true,
-	"eslint.validate": ["typescript", "html", "vue"],
+	"eslint.validate": ["typescript", "vue"],
 	"stylelint.enable": true,
 	"stylelint.validate": ["css", "less", "postcss"],
 	"css.validate": false,

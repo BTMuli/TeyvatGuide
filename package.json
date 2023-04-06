@@ -11,7 +11,7 @@
 		"lint:code:fix": "npm run lint:code -- --fix",
 		"lint:style": "stylelint \"./src/**/*.{vue,css}\"",
 		"lint:style:fix": "npm run lint:style -- --fix",
-		"prettier": "prettier \"**/*.{json,yml}\" --write",
+		"prettier": "prettier \"**/*.{json,yml,html}\" --write",
 		"dev": "concurrently -k \"tauri dev --exit-on-panic\" \"vue-devtools\"",
 		"vite:dev": "vite dev",
 		"vite:build": "vite build",

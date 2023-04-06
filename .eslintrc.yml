@@ -22,13 +22,16 @@ rules:
   # some rules that not normal disabled
   semi: off
   quotes: off
-  indent: off
-  no-tabs: off
-  camelcase: off
-  comma-dangle: off
-  no-case-declarations: off # 禁止在 case 子句中使用词法声明
-  no-useless-constructor: off # 禁用不必要的构造函数
   # rules of standard
+  no-tabs:
+    - warn
+    - allowIndentationTabs: false # 禁止使用 tab 缩进
+  comma-dangle:
+    - warn
+    - always-multiline # 多行时，尾随逗号必须存在
+  camelcase:
+    - warn
+    - properties: always # 对象属性名必须使用驼峰命名
   array-callback-return:
     - error
     - allowImplicit: true
@@ -41,7 +44,7 @@ rules:
   vue/html-indent:
     - warn
     - 2 # Vue 标签缩进
-    - baseIndent: 0 # 最外面的template缩进
+    - baseIndent: 1 # 最外面的template缩进
   vue/component-name-in-template-casing:
     - warn # 组件应使用PascalCase命名
     - "PascalCase"
