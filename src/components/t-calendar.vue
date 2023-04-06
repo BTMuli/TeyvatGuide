@@ -1,38 +1,50 @@
 <template>
-<v-list class="calendar-card">
-  <v-list-item>
-    <v-list-item-title style="color: #fec90b; margin-left: 10px; margin-bottom: 10px; font-family: Genshin, serif">
-      <v-icon color="#EBD49E">
-        mdi-calendar-clock
-      </v-icon> 今日素材
-      <span style="color: #faf7e8">{{ new Date().toLocaleDateString() }}</span>
-      <v-btn
-        v-for="text of btnText"
-        :key="text.week"
-        class="calendar-btn"
-        :style="{
-          border: text.week === weekNow ? '2px solid #fec90b' : '0',
-          background: text.week === btnNow ? '#fec90b' : '#4A5366',
-        }"
-        @click="getShowCards(text.week)"
-      >
-        {{ text.text }}
-      </v-btn>
-    </v-list-item-title>
-    <div v-if="!loading" class="calendar-grid">
-      <v-card title="天赋培养" class="calendar-single">
-        <v-card-text class="calendar-icons">
-          <v-img v-for="item in showCharacters" :key="item.id" :src="item.cover" class="calendar-icon" @click="showContent(item)" />
-        </v-card-text>
-      </v-card>
-      <v-card title="武器突破" class="calendar-single">
-        <v-card-text class="calendar-icons">
-          <v-img v-for="item in showWeapons" :key="item.id" :src="item.cover" class="calendar-icon" @click="showContent(item)" />
-        </v-card-text>
-      </v-card>
-    </div>
-  </v-list-item>
-</v-list>
+  <v-list class="calendar-card">
+    <v-list-item>
+      <v-list-item-title style="color: #fec90b; margin-left: 10px; margin-bottom: 10px; font-family: Genshin, serif">
+        <v-icon color="#EBD49E">
+          mdi-calendar-clock
+        </v-icon> 今日素材
+        <span style="color: #faf7e8">{{ new Date().toLocaleDateString() }}</span>
+        <v-btn
+          v-for="text of btnText"
+          :key="text.week"
+          class="calendar-btn"
+          :style="{
+            border: text.week === weekNow ? '2px solid #fec90b' : '0',
+            background: text.week === btnNow ? '#fec90b' : '#4A5366',
+          }"
+          @click="getShowCards(text.week)"
+        >
+          {{ text.text }}
+        </v-btn>
+      </v-list-item-title>
+      <div v-if="!loading" class="calendar-grid">
+        <v-card title="天赋培养" class="calendar-single">
+          <v-card-text class="calendar-icons">
+            <v-img
+              v-for="item in showCharacters"
+              :key="item.id"
+              :src="item.cover"
+              class="calendar-icon"
+              @click="showContent(item)"
+            />
+          </v-card-text>
+        </v-card>
+        <v-card title="武器突破" class="calendar-single">
+          <v-card-text class="calendar-icons">
+            <v-img
+              v-for="item in showWeapons"
+              :key="item.id"
+              :src="item.cover"
+              class="calendar-icon"
+              @click="showContent(item)"
+            />
+          </v-card-text>
+        </v-card>
+      </div>
+    </v-list-item>
+  </v-list>
 </template>
 <script lang="ts" setup>
 // vue
@@ -127,46 +139,46 @@ function showContent (item: CalendarCard) {
 </script>
 <style lang="css" scoped>
 .calendar-card {
-	margin-top: 10px;
-	font-family: Genshin-Light, serif;
-	background: #546d8b;
-	border-radius: 10px;
+  margin-top: 10px;
+  font-family: Genshin-Light, serif;
+  background: #546d8b;
+  border-radius: 10px;
 }
 
 .calendar-grid {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	grid-gap: 10px;
-	margin: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 10px;
+  margin: 10px;
 }
 
 .calendar-single {
-	background: #faf7e8;
-	color: #546d8b;
-	border-radius: 10px;
+  background: #faf7e8;
+  color: #546d8b;
+  border-radius: 10px;
 }
 
 .calendar-icons {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-	grid-gap: 5px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  grid-gap: 5px;
 }
 
 .calendar-icon {
-	width: 50px;
-	height: 50px;
-	margin: 5px;
-	border-radius: 10px;
+  width: 50px;
+  height: 50px;
+  margin: 5px;
+  border-radius: 10px;
 }
 
 .calendar-icon :hover {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 .calendar-btn {
-	margin-left: 10px;
-	font-family: Genshin-Light, serif;
-	color: #faf7e8;
-	border-radius: 10px;
+  margin-left: 10px;
+  font-family: Genshin-Light, serif;
+  color: #faf7e8;
+  border-radius: 10px;
 }
 </style>

@@ -1,47 +1,51 @@
 <template>
-<v-list class="position-card">
-  <v-list-item>
-    <v-list-item-title style="color: #fec90b; margin-left: 10px; font-family: Genshin, serif">
-      <img src="../assets/icons/board.svg" alt="act" class="position-act-icon">
-      近期活动
-    </v-list-item-title>
-    <div v-if="!loading" class="position-grid">
-      <v-card v-for="card in positionCards" :key="card.post_id" style="background: #faf7e8; color: #546d8b; border-radius: 10px">
-        <v-list style="background: #faf7e8; color: #546d8b">
-          <v-list-item :title="card.title" :subtitle="card.abstract">
-            <template #prepend>
-              <v-avatar rounded="0" style="cursor: pointer" @click="toPost(card)">
-                <v-img :src="card.icon" style="border-radius: 10px" />
-              </v-avatar>
-            </template>
-          </v-list-item>
-        </v-list>
-        <v-divider class="border-opacity-75" />
-        <v-card-text>
-          <span style="width: 60%">
-            <v-icon>mdi-calendar-clock</v-icon>
-            {{ card.time.start }}~{{ card.time.end }}
-          </span>
-        </v-card-text>
-        <v-card-actions>
-          <span style="width: 80%; margin-left: 10px">
-            <v-icon>mdi-clock-outline</v-icon>
-            剩余时间：
-            <span v-if="positionTimeGet[card.post_id] !== '已结束'" style="color: #90caf9">{{
-              positionTimeGet[card.post_id]
-            }}</span>
-            <span v-if="positionTimeGet[card.post_id] === '已结束'" style="color: #ff6d6d">已结束</span>
-          </span>
-          <v-btn class="card-btn" @click="toPost(card)">
-            <template #prepend>
-              <img src="../assets/icons/circle-check.svg" alt="check">查看
-            </template>
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </div>
-  </v-list-item>
-</v-list>
+  <v-list class="position-card">
+    <v-list-item>
+      <v-list-item-title style="color: #fec90b; margin-left: 10px; font-family: Genshin, serif">
+        <img src="../assets/icons/board.svg" alt="act" class="position-act-icon">
+        近期活动
+      </v-list-item-title>
+      <div v-if="!loading" class="position-grid">
+        <v-card
+          v-for="card in positionCards"
+          :key="card.post_id"
+          style="background: #faf7e8; color: #546d8b; border-radius: 10px"
+        >
+          <v-list style="background: #faf7e8; color: #546d8b">
+            <v-list-item :title="card.title" :subtitle="card.abstract">
+              <template #prepend>
+                <v-avatar rounded="0" style="cursor: pointer" @click="toPost(card)">
+                  <v-img :src="card.icon" style="border-radius: 10px" />
+                </v-avatar>
+              </template>
+            </v-list-item>
+          </v-list>
+          <v-divider class="border-opacity-75" />
+          <v-card-text>
+            <span style="width: 60%">
+              <v-icon>mdi-calendar-clock</v-icon>
+              {{ card.time.start }}~{{ card.time.end }}
+            </span>
+          </v-card-text>
+          <v-card-actions>
+            <span style="width: 80%; margin-left: 10px">
+              <v-icon>mdi-clock-outline</v-icon>
+              剩余时间：
+              <span v-if="positionTimeGet[card.post_id] !== '已结束'" style="color: #90caf9">{{
+                positionTimeGet[card.post_id]
+              }}</span>
+              <span v-if="positionTimeGet[card.post_id] === '已结束'" style="color: #ff6d6d">已结束</span>
+            </span>
+            <v-btn class="card-btn" @click="toPost(card)">
+              <template #prepend>
+                <img src="../assets/icons/circle-check.svg" alt="check">查看
+              </template>
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </div>
+    </v-list-item>
+  </v-list>
 </template>
 <script lang="ts" setup>
 // vue
@@ -105,12 +109,12 @@ function getLastPositionTime (time: number) {
 }
 
 async function toPost (card: PositionCard) {
-  const post_id = card.post_id;
   // 获取路由路径
   const path = router.resolve({
     name: "帖子详情",
     params: {
-      post_id,
+      // eslint-disable-next-line camelcase
+      post_id: card.post_id,
     },
   }).href;
   // 打开新窗口
@@ -120,22 +124,22 @@ async function toPost (card: PositionCard) {
 
 <style lang="css" scoped>
 .position-act-icon {
-	width: 20px;
-	height: 20px;
-	display: inline-block;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
 }
 
 .position-card {
-	margin-top: 10px;
-	font-family: Genshin, serif;
-	background: #546d8b;
-	border-radius: 10px;
+  margin-top: 10px;
+  font-family: Genshin, serif;
+  background: #546d8b;
+  border-radius: 10px;
 }
 
 .position-grid {
-	display: grid;
-	grid-template-columns: repeat(3, minmax(400px, 1fr));
-	grid-gap: 20px;
-	margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(400px, 1fr));
+  grid-gap: 20px;
+  margin-top: 10px;
 }
 </style>

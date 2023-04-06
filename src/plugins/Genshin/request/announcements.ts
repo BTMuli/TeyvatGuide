@@ -19,7 +19,7 @@ const ANNO_LIST_API = `${Hk4eAnnoApi}/getAnnList?`;
 const ANNO_CONTENT_API = `${Hk4eAnnoApi}/getAnnContent?`;
 // 公告 Query
 const ANNO_QUERY =
-	"game=hk4e&game_biz=hk4e_cn&lang=zh-cn&bundle_id=hk4e_cn&platform=pc&region=cn_gf01&level=60&uid=500299765";
+  "game=hk4e&game_biz=hk4e_cn&lang=zh-cn&bundle_id=hk4e_cn&platform=pc&region=cn_gf01&level=60&uid=500299765";
 
 /**
  * @description 获取游戏内公告列表

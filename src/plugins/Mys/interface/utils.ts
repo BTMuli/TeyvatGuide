@@ -14,7 +14,7 @@
  * @returns {string} API
  */
 export const OBC_CONTENT_API =
-	"https://bbs.mihoyo.com/ys/obc/content/{content_id}/detail?bbs_presentation_style=no_header";
+  "https://bbs.mihoyo.com/ys/obc/content/{content_id}/detail?bbs_presentation_style=no_header";
 
 // 杂项接口
 

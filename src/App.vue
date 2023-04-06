@@ -1,27 +1,27 @@
 <template>
-<div v-if="isMain">
-  <v-layout>
-    <!-- 侧边栏菜单 -->
-    <TSidebar />
-    <!-- 主体内容 -->
-    <v-main class="app-main">
-      <v-container fluid>
-        <router-view />
-      </v-container>
-    </v-main>
-  </v-layout>
-</div>
-<div v-else>
-  <v-layout>
-    <!-- 主体内容 -->
-    <v-main class="app-main">
-      <v-container fluid>
-        <router-view />
-      </v-container>
-    </v-main>
-  </v-layout>
-</div>
-<TBackTop />
+  <div v-if="isMain">
+    <v-layout>
+      <!-- 侧边栏菜单 -->
+      <TSidebar />
+      <!-- 主体内容 -->
+      <v-main class="app-main">
+        <v-container fluid>
+          <router-view />
+        </v-container>
+      </v-main>
+    </v-layout>
+  </div>
+  <div v-else>
+    <v-layout>
+      <!-- 主体内容 -->
+      <v-main class="app-main">
+        <v-container fluid>
+          <router-view />
+        </v-container>
+      </v-main>
+    </v-layout>
+  </div>
+  <TBackTop />
 </template>
 
 <script lang="ts" setup>
@@ -43,7 +43,7 @@ const isMain = ref(true as boolean);
 
 onMounted(async () => {
   // 获取当前窗口
-  const win = await window.getCurrent();
+  const win = window.getCurrent();
   isMain.value = win.label === "tauri-genshin";
   if (isMain.value) {
     const title = "Tauri.Genshin v" + (await app.getVersion()) + " Alpha";
@@ -93,8 +93,8 @@ async function writeIndex () {
 </script>
 <style lang="css">
 .app-main {
-	min-height: 100vh;
-	background: #ece5d8;
-	backdrop-filter: blur(20px);
+  min-height: 100vh;
+  background: #ece5d8;
+  backdrop-filter: blur(20px);
 }
 </style>

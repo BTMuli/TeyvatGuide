@@ -1,6 +1,6 @@
 <template>
-<TLoading v-if="loading" :title="loadingTitle" :subtitle="loadingSubtitle" />
-<component :is="item" v-for="item in components" v-show="!loading" :key="item" :ref="setItemRef" />
+  <TLoading v-if="loading" :title="loadingTitle" :subtitle="loadingSubtitle" />
+  <component :is="item" v-for="item in components" v-show="!loading" :key="item" :ref="setItemRef" />
 </template>
 
 <script lang="ts" setup>

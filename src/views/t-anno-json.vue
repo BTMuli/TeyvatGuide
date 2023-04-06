@@ -1,17 +1,17 @@
 <template>
-<div v-if="loading">
-  <TLoading :empty="loadingEmpty" :title="loadingTitle" />
-</div>
-<div v-else class="dev-json">
-  <div class="anno-title">
-    活动列表 JSON
+  <div v-if="loading">
+    <TLoading :empty="loadingEmpty" :title="loadingTitle" />
   </div>
-  <JsonViewer :value="jsonList" copyable boxed />
-  <div class="anno-title">
-    活动内容 JSON
+  <div v-else class="dev-json">
+    <div class="anno-title">
+      活动列表 JSON
+    </div>
+    <JsonViewer :value="jsonList" copyable boxed />
+    <div class="anno-title">
+      活动内容 JSON
+    </div>
+    <JsonViewer :value="jsonContent" copyable boxed />
   </div>
-  <JsonViewer :value="jsonContent" copyable boxed />
-</div>
 </template>
 <script lang="ts" setup>
 // vue
@@ -32,14 +32,14 @@ const loadingTitle = ref("正在加载");
 const loadingEmpty = ref(false as boolean);
 
 // 数据
-const anno_id = Number(useRoute().params.anno_id);
+const annoId = Number(useRoute().params.anno_id);
 let jsonList = reactive({});
 let jsonContent = reactive({});
 
 onMounted(async () => {
   await appWindow.show();
   // 检查数据
-  if (!anno_id) {
+  if (!annoId) {
     loadingEmpty.value = true;
     loadingTitle.value = "未找到数据";
     return;
@@ -49,10 +49,10 @@ onMounted(async () => {
   const listData = await GenshinOper.Announcement.getList();
   listData.list.map((item: Announcement) => {
     return item.list.map((single: AnnoListItem) => {
-      return single.ann_id === anno_id ? (jsonList = single) : null;
+      return single.ann_id === annoId ? (jsonList = single) : null;
     });
   });
-  jsonContent = await GenshinOper.Announcement.getContent(anno_id);
+  jsonContent = await GenshinOper.Announcement.getContent(annoId);
   setTimeout(() => {
     loading.value = false;
   }, 200);
@@ -60,10 +60,10 @@ onMounted(async () => {
 </script>
 <style lang="css" scoped>
 .anno-title {
-	font-size: 20px;
-	color: #546d8b;
-	font-family: Genshin-Light, serif;
-	font-weight: 600;
-	margin: 20px 0;
+  font-size: 20px;
+  color: #546d8b;
+  font-family: Genshin-Light, serif;
+  font-weight: 600;
+  margin: 20px 0;
 }
 </style>

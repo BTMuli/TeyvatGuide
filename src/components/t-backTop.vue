@@ -1,9 +1,9 @@
 <template>
-<transition name="fade">
-  <div v-show="canTop" class="back-top" @click="handleScrollTop">
-    <img src="../assets/icons/arrow-top.svg" alt="back-icon">
-  </div>
-</transition>
+  <transition name="fade">
+    <div v-show="canTop" class="back-top" @click="handleScrollTop">
+      <img src="../assets/icons/arrow-top.svg" alt="back-icon">
+    </div>
+  </transition>
 </template>
 <script lang="ts" setup>
 // vue
@@ -50,37 +50,37 @@ onMounted(() => {
 
 <style scoped>
 .back-top {
-	position: fixed;
-	right: 0.4rem;
-	bottom: 1rem;
-	width: 60px;
-	height: 60px;
-	border-radius: 50%;
-	transition: all 0.3s ease-in-out;
+  position: fixed;
+  right: 0.4rem;
+  bottom: 1rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  transition: all 0.3s ease-in-out;
 }
 
 .back-top :hover {
-	border-radius: 50%;
-	cursor: pointer;
-	transform: scale(0.9);
-	transition: all 0.3s ease-in-out;
-	box-shadow: 0 0 10px 5px #546d8b;
+  border-radius: 50%;
+  cursor: pointer;
+  transform: scale(0.9);
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 0 10px 5px #546d8b;
 }
 
 .back-top img {
-	transition: all 0.3s ease-in-out;
-	width: 60px;
-	height: 60px;
+  transition: all 0.3s ease-in-out;
+  width: 60px;
+  height: 60px;
 }
 
 /* 动画 */
 .fade-enter-active,
 .fade-leave-active {
-	transition: opacity 0.5s;
+  transition: opacity 0.5s;
 }
 
 .fade-enter,
 .fade-leave-to {
-	opacity: 0;
+  opacity: 0;
 }
 </style>

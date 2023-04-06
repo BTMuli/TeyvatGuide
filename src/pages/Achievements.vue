@@ -1,102 +1,102 @@
 <template>
-<!-- 顶部操作栏 -->
-<v-app-bar style="background: rgb(0 0 0 / 50%); color: #f4d8a8; font-family: Genshin, serif">
-  <template #prepend>
-    <span style="font-size: 30px">{{ title }}</span>
-  </template>
-  <v-spacer />
-  <v-text-field
-    v-model="search"
-    append-icon="mdi-magnify"
-    label="搜索"
-    hide-details
-    @click:append="searchCard"
-    @keyup.enter="searchCard"
-  />
-  <template #append>
-    <v-btn prepend-icon="mdi-import" class="ms-2 top-btn" @click="importJson">
-      导入
-    </v-btn>
-    <v-btn prepend-icon="mdi-export" class="ms-2 top-btn" @click="exportJson">
-      导出
-    </v-btn>
-  </template>
-</v-app-bar>
-<div v-show="loading">
-  <TLoading :title="loadingTitle" />
-</div>
-<div v-show="!loading" class="wrap">
-  <!-- 左侧菜单 -->
-  <div class="left-wrap">
-    <v-list v-for="(series, index) in seriesList" :key="series.id" class="card-left" @click="selectSeries(index)">
-      <div class="version-icon-series">
-        v{{ series.version }}
-      </div>
-      <v-list-item>
-        <template #prepend>
-          <v-img width="40px" style="margin-right: 10px" :src="series.icon" />
-        </template>
-        <v-list-item-title>
-          {{ series.name }}
-        </v-list-item-title>
-        <v-list-item-subtitle> {{ series.completed_count }} / {{ series.total_count }} </v-list-item-subtitle>
-      </v-list-item>
-    </v-list>
+  <!-- 顶部操作栏 -->
+  <v-app-bar style="background: rgb(0 0 0 / 50%); color: #f4d8a8; font-family: Genshin, serif">
+    <template #prepend>
+      <span style="font-size: 30px">{{ title }}</span>
+    </template>
+    <v-spacer />
+    <v-text-field
+      v-model="search"
+      append-icon="mdi-magnify"
+      label="搜索"
+      hide-details
+      @click:append="searchCard"
+      @keyup.enter="searchCard"
+    />
+    <template #append>
+      <v-btn prepend-icon="mdi-import" class="ms-2 top-btn" @click="importJson">
+        导入
+      </v-btn>
+      <v-btn prepend-icon="mdi-export" class="ms-2 top-btn" @click="exportJson">
+        导出
+      </v-btn>
+    </template>
+  </v-app-bar>
+  <div v-show="loading">
+    <TLoading :title="loadingTitle" />
   </div>
-  <!-- 右侧内容-->
-  <div class="right-wrap">
-    <v-list
-      v-show="selectedIndex !== -1 && selectedSeries !== 0 && selectedSeries !== 17"
-      :style="{
-        backgroundImage: 'url(' + getCardInfo.bg || null + ')',
-        backgroundPosition: 'right',
-        backgroundSize: 'auto 100%',
-        backgroundRepeat: 'no-repeat',
-        margin: '10px',
-        borderRadius: '10px 50px 50px 10px',
-        color: '#485466',
-        fontFamily: 'Genshin,serif',
-        cursor: 'pointer',
-      }"
-      @click="openImg()"
-    >
-      <v-list-item :title="getCardInfo.name" :subtitle="getCardInfo.description">
-        <template #prepend>
-          <v-img width="80px" style="margin-right: 10px" :src="getCardInfo.icon" />
-        </template>
-      </v-list-item>
-    </v-list>
-    <v-list v-for="achievement in selectedAchievement" :key="achievement.id" class="card-right">
-      <v-list-item>
-        <template #prepend>
-          <v-icon :color="achievement.completed ? '#fec90b' : '#485466'">
-            <!-- todo 图标替换 -->
-            {{ achievement.completed ? "mdi-check-circle" : "mdi-circle" }}
-          </v-icon>
-        </template>
-        <v-list-item-title>
-          {{ achievement.name }}
-          {{ achievement.progress !== 0 ? "| " + achievement.progress : null }}
-          <span class="version-icon-single">v{{ achievement.version }}</span>
-        </v-list-item-title>
-        <v-list-item-subtitle>{{ achievement.description }}</v-list-item-subtitle>
-        <template #append>
-          <span v-show="achievement.completed" class="right-time">{{ achievement.completed_time }}</span>
-          <v-card class="reward-card" @click="showMaterial('/source/material/原石.webp')">
-            <v-img src="/source/material/原石.webp" sizes="32" />
-            <div class="reward-num">
-              <span>{{ achievement.reward }}</span>
-            </div>
-          </v-card>
-        </template>
-      </v-list-item>
-    </v-list>
+  <div v-show="!loading" class="wrap">
+    <!-- 左侧菜单 -->
+    <div class="left-wrap">
+      <v-list v-for="(series, index) in seriesList" :key="series.id" class="card-left" @click="selectSeries(index)">
+        <div class="version-icon-series">
+          v{{ series.version }}
+        </div>
+        <v-list-item>
+          <template #prepend>
+            <v-img width="40px" style="margin-right: 10px" :src="series.icon" />
+          </template>
+          <v-list-item-title>
+            {{ series.name }}
+          </v-list-item-title>
+          <v-list-item-subtitle> {{ series.completed_count }} / {{ series.total_count }} </v-list-item-subtitle>
+        </v-list-item>
+      </v-list>
+    </div>
+    <!-- 右侧内容-->
+    <div class="right-wrap">
+      <v-list
+        v-show="selectedIndex !== -1 && selectedSeries !== 0 && selectedSeries !== 17"
+        :style="{
+          backgroundImage: 'url(' + getCardInfo.bg || null + ')',
+          backgroundPosition: 'right',
+          backgroundSize: 'auto 100%',
+          backgroundRepeat: 'no-repeat',
+          margin: '10px',
+          borderRadius: '10px 50px 50px 10px',
+          color: '#485466',
+          fontFamily: 'Genshin,serif',
+          cursor: 'pointer',
+        }"
+        @click="openImg()"
+      >
+        <v-list-item :title="getCardInfo.name" :subtitle="getCardInfo.description">
+          <template #prepend>
+            <v-img width="80px" style="margin-right: 10px" :src="getCardInfo.icon" />
+          </template>
+        </v-list-item>
+      </v-list>
+      <v-list v-for="achievement in selectedAchievement" :key="achievement.id" class="card-right">
+        <v-list-item>
+          <template #prepend>
+            <v-icon :color="achievement.completed ? '#fec90b' : '#485466'">
+              <!-- todo 图标替换 -->
+              {{ achievement.completed ? "mdi-check-circle" : "mdi-circle" }}
+            </v-icon>
+          </template>
+          <v-list-item-title>
+            {{ achievement.name }}
+            {{ achievement.progress !== 0 ? "| " + achievement.progress : null }}
+            <span class="version-icon-single">v{{ achievement.version }}</span>
+          </v-list-item-title>
+          <v-list-item-subtitle>{{ achievement.description }}</v-list-item-subtitle>
+          <template #append>
+            <span v-show="achievement.completed" class="right-time">{{ achievement.completed_time }}</span>
+            <v-card class="reward-card" @click="showMaterial('/source/material/原石.webp')">
+              <v-img src="/source/material/原石.webp" sizes="32" />
+              <div class="reward-num">
+                <span>{{ achievement.reward }}</span>
+              </div>
+            </v-card>
+          </template>
+        </v-list-item>
+      </v-list>
+    </div>
+    <!-- 弹窗提示 -->
+    <v-snackbar v-model="snackbar" timeout="1500" color="#F5810A" top>
+      {{ snackbarText }}
+    </v-snackbar>
   </div>
-  <!-- 弹窗提示 -->
-  <v-snackbar v-model="snackbar" timeout="1500" color="#F5810A" top>
-    {{ snackbarText }}
-  </v-snackbar>
-</div>
 </template>
 
 <script lang="ts" setup>
@@ -271,7 +271,7 @@ async function importJson () {
         const localTime = localData.completed_time;
         // 如果本地数据不存在，或者本地数据的 timeStamp 小于远程数据的 timeStamp，更新数据
         if (data.timestamp !== 0) {
-          const fin_time = new Date(data.timestamp * 1000).toLocaleString("zh", {
+          const finishTime = new Date(data.timestamp * 1000).toLocaleString("zh", {
             year: "numeric",
             month: "2-digit",
             day: "2-digit",
@@ -279,8 +279,9 @@ async function importJson () {
             minute: "2-digit",
             second: "2-digit",
           });
-          if (fin_time !== localTime || localData.progress !== data.current) {
-            localData.completed_time = fin_time;
+          if (finishTime !== localTime || localData.progress !== data.current) {
+            // eslint-disable-next-line camelcase
+            localData.completed_time = finishTime;
             localData.progress = data.current;
             localData.completed = true;
             // 更新数据
@@ -288,6 +289,7 @@ async function importJson () {
           }
         } else {
           if (localData.progress !== data.current) {
+            // eslint-disable-next-line camelcase
             localData.completed_time = "";
             localData.progress = data.current;
             localData.completed = false;
@@ -303,6 +305,7 @@ async function importJson () {
       seriesDB.map(async (data) => {
         const seriesId = data.id;
         const achievementsDB = await ReadTGDataByIndex("Achievements", "series", seriesId);
+        // eslint-disable-next-line camelcase
         data.completed_count = achievementsDB.filter((data) => {
           return data.completed === true;
         }).length;
@@ -311,13 +314,13 @@ async function importJson () {
     );
     loadingTitle.value = "正在刷新数据";
     seriesDB = await ReadAllTGData("AchievementSeries");
-    const fin_achievements = seriesDB.reduce((a, b) => {
+    const finishAchievments = seriesDB.reduce((a, b) => {
       return a + b.completed_count;
     }, 0);
-    const total_achievements = seriesDB.reduce((a, b) => {
+    const totalAchievements = seriesDB.reduce((a, b) => {
       return a + b.total_count;
     }, 0);
-    achievementsStore.flushData(total_achievements, fin_achievements);
+    achievementsStore.flushData(totalAchievements, finishAchievments);
     // 刷新数据
     await loadData();
   }
@@ -361,7 +364,7 @@ async function exportJson () {
     };
   });
   UIAF_DATA.info = await UiafOper.getUiafInfo();
-  const is_save = await dialog.save({
+  const isSave = await dialog.save({
     filters: [
       {
         name: "achievements",
@@ -369,8 +372,8 @@ async function exportJson () {
       },
     ],
   });
-  if (is_save) {
-    await fs.writeTextFile(is_save, JSON.stringify(UIAF_DATA));
+  if (isSave) {
+    await fs.writeTextFile(isSave, JSON.stringify(UIAF_DATA));
   }
 }
 </script>
@@ -378,102 +381,102 @@ async function exportJson () {
 <style lang="css" scoped>
 /* 顶部按钮 */
 .top-btn {
-	background: #393b40;
-	color: #faf7e8 !important;
+  background: #393b40;
+  color: #faf7e8 !important;
 }
 
 /* 内容区域 */
 .wrap {
-	display: flex;
-	flex-direction: row;
-	overflow: auto;
-	max-height: 90vh;
-	font-family: Genshin-Light, serif;
+  display: flex;
+  flex-direction: row;
+  overflow: auto;
+  max-height: 90vh;
+  font-family: Genshin-Light, serif;
 }
 
 /* 左侧系列 */
 .left-wrap {
-	float: left;
-	width: 25%;
-	max-height: calc(100vh - 100px);
-	overflow: auto;
+  float: left;
+  width: 25%;
+  max-height: calc(100vh - 100px);
+  overflow: auto;
 }
 
 /* 右侧成就 */
 .right-wrap {
-	float: right;
-	width: 75%;
-	max-height: calc(100vh - 100px);
-	overflow: auto;
+  float: right;
+  width: 75%;
+  max-height: calc(100vh - 100px);
+  overflow: auto;
 }
 
 /* 版本信息 */
 .version-icon-series {
-	font-family: Genshin, serif;
-	position: absolute;
-	right: 0;
-	bottom: 0;
-	text-align: center;
-	width: 80px;
-	background: #546d8b;
-	border-radius: 10px 0 0;
-	border-top: #fff 2px solid;
-	border-left: #fff 2px solid;
-	color: #fec90b;
-	font-size: 10px;
+  font-family: Genshin, serif;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  width: 80px;
+  background: #546d8b;
+  border-radius: 10px 0 0;
+  border-top: #fff 2px solid;
+  border-left: #fff 2px solid;
+  color: #fec90b;
+  font-size: 10px;
 }
 
 .version-icon-single {
-	font-family: Genshin, serif;
-	border-radius: 5px;
-	text-align: center;
-	color: #ff6d6d !important;
-	font-size: 10px;
+  font-family: Genshin, serif;
+  border-radius: 5px;
+  text-align: center;
+  color: #ff6d6d !important;
+  font-size: 10px;
 }
 
 .card-left {
-	border-radius: 10px;
-	margin: 10px;
-	background: #485466;
-	color: #fec90b;
-	cursor: pointer;
+  border-radius: 10px;
+  margin: 10px;
+  background: #485466;
+  color: #fec90b;
+  cursor: pointer;
 }
 
 /* 成就卡片 */
 .card-right {
-	border-radius: 10px;
-	margin: 10px;
-	background: #546d8b;
-	color: #faf7e8;
+  border-radius: 10px;
+  margin: 10px;
+  background: #546d8b;
+  color: #faf7e8;
 }
 
 /* 成就完成时间 */
 .right-time {
-	margin-right: 10px;
-	font-size: small;
-	color: #faf7e8;
+  margin-right: 10px;
+  font-size: small;
+  color: #faf7e8;
 }
 
 /* 成就奖励 */
 .reward-card {
-	position: relative;
-	width: 40px;
-	height: 40px;
-	border-radius: 10px;
-	background: url("/source/material/bg/5-Star.webp");
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: url("/source/material/bg/5-Star.webp");
 }
 
 .reward-num {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	width: 100%;
-	height: 10px;
-	background: rgb(0 0 0 / 50%);
-	color: #faf7e8;
-	display: flex;
-	font-size: 8px;
-	justify-content: center;
-	align-items: center;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  background: rgb(0 0 0 / 50%);
+  color: #faf7e8;
+  display: flex;
+  font-size: 8px;
+  justify-content: center;
+  align-items: center;
 }
 </style>

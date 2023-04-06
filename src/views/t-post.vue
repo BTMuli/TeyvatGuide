@@ -1,9 +1,9 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
-<div v-if="loading">
-  <TLoading :empty="loadingEmpty" :title="loadingTitle" />
-</div>
-<div v-else class="mys-post-body" v-html="postHtml" />
+  <div v-if="loading">
+    <TLoading :empty="loadingEmpty" :title="loadingTitle" />
+  </div>
+  <div v-else class="mys-post-body" v-html="postHtml" />
 </template>
 <script lang="ts" setup>
 // vue
@@ -21,13 +21,13 @@ const loadingTitle = ref("正在加载");
 const loadingEmpty = ref(false as boolean);
 
 // 数据
-const post_id = Number(useRoute().params.post_id);
+const postId = Number(useRoute().params.post_id);
 const postHtml = ref("");
 
 onMounted(async () => {
   await appWindow.show();
   // 检查数据
-  if (!post_id) {
+  if (!postId) {
     loadingEmpty.value = true;
     loadingTitle.value = "未找到数据";
     await appWindow.setTitle("未找到数据");
@@ -36,7 +36,7 @@ onMounted(async () => {
   // 获取数据
   loadingTitle.value = "正在获取数据...";
   try {
-    const postData = await MysOper.Post.get(post_id);
+    const postData = await MysOper.Post.get(postId);
     loadingTitle.value = "正在渲染数据...";
     postHtml.value = MysOper.Post.parser(postData);
     await appWindow.setTitle(postData.post.subject);

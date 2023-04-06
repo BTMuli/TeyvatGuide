@@ -1,17 +1,17 @@
 /* 设置全局字体 */
 @font-face {
-	font-family: "Genshin";
-	src: url("./汉仪文黑-85W.ttf") format("truetype");
+  font-family: "Genshin";
+  src: url("./汉仪文黑-85W.ttf") format("truetype");
 }
 @font-face {
-	font-family: "Genshin-Light";
-	src: url("./汉仪文黑-55W.ttf") format("truetype");
+  font-family: "Genshin-Light";
+  src: url("./汉仪文黑-55W.ttf") format("truetype");
 }
 @font-face {
-	font-family: "Consolas";
-	src: url("./consolas.ttf") format("truetype");
+  font-family: "Consolas";
+  src: url("./consolas.ttf") format("truetype");
 }
 /* 全局字体样式 */
 .global-font {
-	font-family: "Genshin", sans-serif;
+  font-family: "Genshin", sans-serif;
 }

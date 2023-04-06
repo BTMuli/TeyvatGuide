@@ -10,7 +10,7 @@ import { type NewsData, type NewsResponse } from "../interface/news";
 
 // 咨讯 API
 const NEWS_LIST_API =
-	"https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids={gid}&page_size={page_size}&type={news_type}&last_id={last_id}";
+  "https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids={gid}&page_size={page_size}&type={news_type}&last_id={last_id}";
 
 /**
  * @description 咨讯类型
@@ -53,11 +53,7 @@ export async function getNoticeList (gid: string = "2", pageSize: number = 20, l
  * @param {number} lastId 上一次请求的最后一条数据的 id
  * @return {Promise<NewsData>}
  */
-export async function getActivityList (
-  gid: string = "2",
-  pageSize: number = 20,
-  lastId: number = 0,
-): Promise<NewsData> {
+export async function getActivityList (gid: string = "2", pageSize: number = 20, lastId: number = 0): Promise<NewsData> {
   const url = NEWS_LIST_API.replace("{page_size}", pageSize.toString())
     .replace("{gid}", gid)
     .replace("{news_type}", NewsType.ACTIVITY)

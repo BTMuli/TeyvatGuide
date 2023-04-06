@@ -4,122 +4,122 @@
  */
 /* todo scoped 不生效 */
 .mys-post-body {
-	margin: 20px auto;
-	width: 800px;
-	font-family: "Genshin-Light", serif;
+  margin: 20px auto;
+  width: 800px;
+  font-family: "Genshin-Light", serif;
 }
 
 :deep(.mys-post-div) {
-	margin: 20px auto;
+  margin: 20px auto;
 }
 
 :deep(.mys-post-span) {
-	line-height: 2;
+  line-height: 2;
 }
 
 :deep(.mys-post-link) {
-	color: #00c3ff;
-	text-decoration: none;
+  color: #00c3ff;
+  text-decoration: none;
 }
 
 :deep(.mys-post-details) {
-	border: #35acce 2px solid;
-	padding: 10px;
-	border-radius: 10px;
+  border: #35acce 2px solid;
+  padding: 10px;
+  border-radius: 10px;
 }
 
 :deep(.mys-post-details) ::marker {
-	color: #35acce;
-	content: "✧";
+  color: #35acce;
+  content: "✧";
 }
 
 :deep(.mys-post-divider) {
-	margin: 20px auto;
+  margin: 20px auto;
 }
 
 :deep(.mys-post-divider) img {
-	width: 800px;
-	height: auto;
+  width: 800px;
+  height: auto;
 }
 
 :deep(.mys-post-img) {
-	max-width: 100%;
-	width: 800px;
-	height: auto;
-	border-radius: 10px;
+  max-width: 100%;
+  width: 800px;
+  height: auto;
+  border-radius: 10px;
 }
 
 :deep(.mys-post-vod) {
-	width: 800px;
-	height: 450px;
-	border-radius: 10px;
+  width: 800px;
+  height: 450px;
+  border-radius: 10px;
 }
 
 :deep(.mys-post-iframe) {
-	width: 800px;
-	height: 450px;
-	overflow: hidden;
-	border: 0;
-	border-radius: 10px;
+  width: 800px;
+  height: 450px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 10px;
 }
 
 :deep(.mys-post-link-card) {
-	width: 800px;
-	height: 200px;
-	padding: 10px;
-	border-radius: 10px;
-	display: flex;
-	background: #faf7e8;
+  width: 800px;
+  height: 200px;
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  background: #faf7e8;
 }
 
 :deep(.mys-post-unknown) {
-	width: 800px;
-	background: #5b738f;
-	color: #faf7e8;
-	font-family: Consolas, monospace;
-	border-radius: 10px;
-	padding: 10px;
-	margin: 10px auto;
-	border: 2px solid #485466;
+  width: 800px;
+  background: #5b738f;
+  color: #faf7e8;
+  font-family: Consolas, monospace;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px auto;
+  border: 2px solid #485466;
 }
 
 :deep(.mys-post-link-card-cover) {
-	width: auto;
-	height: 180px;
-	border-radius: 10px;
+  width: auto;
+  height: 180px;
+  border-radius: 10px;
 }
 
 :deep(.mys-post-link-card-cover) img {
-	max-width: 400px;
-	width: auto;
-	height: 180px;
-	border-radius: 10px;
+  max-width: 400px;
+  width: auto;
+  height: 180px;
+  border-radius: 10px;
 }
 
 :deep(.mys-post-link-card-content) {
-	width: 100%;
-	padding-left: 20px;
-	height: 180px;
+  width: 100%;
+  padding-left: 20px;
+  height: 180px;
 }
 
 :deep(.mys-post-link-card-title) {
-	font-size: 20px;
-	font-family: Genshin, serif;
-	color: #546d8b;
-	height: 150px;
+  font-size: 20px;
+  font-family: Genshin, serif;
+  color: #546d8b;
+  height: 150px;
 }
 
 :deep(.mys-post-link-card-price) {
-	font-size: 20px;
-	font-weight: bold;
-	color: #ff6d6d;
-	display: inline-block;
+  font-size: 20px;
+  font-weight: bold;
+  color: #ff6d6d;
+  display: inline-block;
 }
 
 :deep(.mys-post-link-card-btn) {
-	display: inline-block;
-	float: right;
-	color: #00c3ff;
-	margin-right: 20px;
-	text-decoration: none;
+  display: inline-block;
+  float: right;
+  color: #00c3ff;
+  margin-right: 20px;
+  text-decoration: none;
 }

@@ -231,13 +231,13 @@ function DividerParser (data: PostStructuredContent): HTMLDivElement {
   const img = document.createElement("img");
   if (data.insert.divider === "line_1") {
     img.src =
-			"https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/40eb5281cb24042bf34a9f1bcc61eaf5.png";
+      "https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/40eb5281cb24042bf34a9f1bcc61eaf5.png";
   } else if (data.insert.divider === "line_2") {
     img.src =
-			"https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/477d4c535e965bec1791203aecdfa8e6.png";
+      "https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/477d4c535e965bec1791203aecdfa8e6.png";
   } else if (data.insert.divider === "line_3") {
     img.src =
-			"https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/e7047588e912d60ff87a975e037c7606.png";
+      "https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/e7047588e912d60ff87a975e037c7606.png";
   } else if (data.insert.divider === "line_4") {
     img.src = "https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2022/07/13/line_4.png";
   } else {
@@ -265,13 +265,13 @@ function ImageParser (data: PostStructuredContent): HTMLDivElement {
     throw new Error("data.insert.image is not defined");
   }
   // if (!data.attributes) {
-  // 	throw new Error("data.attributes is not defined");
+  //  throw new Error("data.attributes is not defined");
   // }
   // if (!data.attributes.width) {
-  // 	throw new Error("data.attributes.width is not defined");
+  //  throw new Error("data.attributes.width is not defined");
   // }
   // if (!data.attributes.height) {
-  // 	throw new Error("data.attributes.height is not defined");
+  //  throw new Error("data.attributes.height is not defined");
   // }
   const div = document.createElement("div");
   // 创建图片
