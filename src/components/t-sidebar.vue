@@ -111,7 +111,7 @@
 // vue
 import { computed, ref } from "vue";
 // store
-import useAppStore from "../store/modules/app";
+import { useAppStore } from "../store/modules/app";
 
 const appStore = useAppStore();
 

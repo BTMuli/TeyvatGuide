@@ -11,7 +11,7 @@ import TPool from "../components/t-pool.vue";
 import TPosition from "../components/t-position.vue";
 import TCalendar from "../components/t-calendar.vue";
 // store
-import useHomeStore from "../store/modules/home";
+import { useHomeStore } from "../store/modules/home";
 
 // store
 const homeStore = useHomeStore();

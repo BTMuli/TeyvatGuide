@@ -5,121 +5,126 @@
  * @since Alpha v0.1.2
  */
 
+// vue
+import { ref } from "vue";
+// pinia
 import { defineStore } from "pinia";
+// interface
 import { type Map } from "../../interface/Base";
 
-const useHomeStore = defineStore({
-  id: "home",
-  state: () => {
-    return {
-      calendar: {
+export const useHomeStore = defineStore(
+  "home", () => {
+    const calendarShow = ref({
+      show: true,
+      order: 3,
+    });
+    const poolShow = ref({
+      show: true,
+      order: 1,
+    });
+    const positionShow = ref({
+      show: true,
+      order: 2,
+    });
+    const hoemShow = ref({
+      calendarShow,
+      poolShow,
+      positionShow,
+    });
+    const poolCover = ref({} satisfies Map<string>);
+
+    function init (): void {
+      calendarShow.value = {
         show: true,
         order: 3,
-      },
-      pool: {
+      };
+      poolShow.value = {
         show: true,
         order: 1,
-      },
-      position: {
+      };
+      positionShow.value = {
         show: true,
         order: 2,
-      },
-      poolCover: {} satisfies Map<string>,
-    };
-  },
-  actions: {
-    async init () {
-      this.$state = {
-        calendar: {
-          show: true,
-          order: 3,
-        },
-        pool: {
-          show: true,
-          order: 1,
-        },
-        position: {
-          show: true,
-          order: 2,
-        },
-        poolCover: {},
       };
-    },
-    getShowItem () {
+      poolCover.value = {};
+    }
+
+    function getShowItems (): string[] {
       const defaultList = ["素材日历", "限时祈愿", "近期活动"];
       defaultList.sort((a, b) => {
-        return this.getItemOrder(a) - this.getItemOrder(b);
+        return getItemOrder(a) - getItemOrder(b);
       });
       return defaultList;
-    },
-    getShowValue () {
+    }
+
+    function getShowValue (): string[] {
       const showValue = [];
-      if (this.calendar.show) showValue.push("素材日历");
-      if (this.pool.show) showValue.push("限时祈愿");
-      if (this.position.show) showValue.push("近期活动");
+      if (calendarShow.value.show) showValue.push("素材日历");
+      if (poolShow.value.show) showValue.push("限时祈愿");
+      if (positionShow.value.show) showValue.push("近期活动");
       showValue.sort((a, b) => {
-        return this.getItemOrder(a) - this.getItemOrder(b);
+        return getItemOrder(a) - getItemOrder(b);
       });
       return showValue;
-    },
-    getItemOrder (item: string) {
-      switch (item) {
-        case "素材日历":
-          return this.calendar.order;
-        case "限时祈愿":
-          return this.pool.order;
-        case "近期活动":
-          return this.position.order;
-        default:
-          return 4;
-      }
-    },
-    setShowValue (value: string[]) {
+    }
+
+    function getItemOrder (item: string): number {
+      if (item === "素材日历") return calendarShow.value.order;
+      if (item === "限时祈愿") return poolShow.value.order;
+      if (item === "近期活动") return positionShow.value.order;
+      return 4;
+    }
+
+    function setShowValue (value: string[]): void {
       let order = 1;
       // 遍历 value
       value.forEach((item) => {
-        if (!this.getShowItem().includes(item)) {
+        if (!getShowItems().includes(item)) {
           throw new Error("传入的值不在可选范围内");
         }
-        switch (item) {
-          case "素材日历":
-            this.calendar.order = order;
-            this.calendar.show = true;
-            order++;
-            break;
-          case "限时祈愿":
-            this.pool.order = order;
-            this.pool.show = true;
-            order++;
-            break;
-          case "近期活动":
-            this.position.order = order;
-            this.position.show = true;
-            order++;
-            break;
-          default:
-            break;
-        }
-        // 没有显示的 item
-        if (!value.includes("素材日历")) {
-          this.calendar.show = false;
-          this.calendar.order = order;
+        if (item === "素材日历") {
+          calendarShow.value.order = order;
+          calendarShow.value.show = true;
           order++;
         }
-        if (!value.includes("限时祈愿")) {
-          this.pool.show = false;
-          this.pool.order = order;
+        if (item === "限时祈愿") {
+          poolShow.value.order = order;
+          poolShow.value.show = true;
           order++;
         }
-        if (!value.includes("近期活动")) {
-          this.position.show = false;
-          this.position.order = order;
+        if (item === "近期活动") {
+          positionShow.value.order = order;
+          positionShow.value.show = true;
           order++;
         }
       });
-    },
-  },
-  persist: true,
-});
+      // 遍历 getShowItems()
+      getShowItems().forEach((item) => {
+        if (!value.includes(item)) {
+          if (item === "素材日历") {
+            calendarShow.value.show = false;
+          }
+          if (item === "限时祈愿") {
+            poolShow.value.show = false;
+          }
+          if (item === "近期活动") {
+            positionShow.value.show = false;
+          }
+        }
+      });
+    }
 
-export default useHomeStore;
+    return {
+      hoemShow,
+      poolCover,
+      init,
+      getShowItems,
+      getShowValue,
+      setShowValue,
+    };
+  }
+  ,
+  {
+    persist: true,
+  },
+);

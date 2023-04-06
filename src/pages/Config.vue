@@ -23,8 +23,7 @@
         <v-list-item-title>
           应用版本
           <v-btn
-            class="card-btn"
-            size="small"
+            class="card-btn" size="small"
             @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/releases/latest')"
           >
             Alpha
@@ -39,7 +38,7 @@
           <img class="config-icon" src="../assets/icons/achievements.svg" alt="Achievements">
         </template>
         <template #append>
-          <v-list-item-subtitle>{{ achievementsStore.last_version }}</v-list-item-subtitle>
+          <v-list-item-subtitle>{{ achievementsStore.lastVersion }}</v-list-item-subtitle>
         </template>
       </v-list-item>
       <v-list-subheader inset class="config-header">
@@ -80,10 +79,7 @@
         </template>
         <template #append>
           <v-switch
-            v-model="appStore.devMode"
-            :label="appStore.devMode ? '开启' : '关闭'"
-            inset
-            color="#FAC51E"
+            v-model="appStore.devMode" :label="appStore.devMode ? '开启' : '关闭'" inset color="#FAC51E"
             @click="submitDevMode"
           />
         </template>
@@ -92,7 +88,7 @@
         <template #prepend>
           <v-icon>mdi-view-dashboard</v-icon>
         </template>
-        <v-select v-model="showHome" :items="homeStore.getShowItem()" label="首页显示组件" multiple chips />
+        <v-select v-model="showHome" :items="homeStore.getShowItems()" label="首页显示组件" multiple chips />
         <template #append>
           <v-btn class="card-btn" @click="submitHome">
             <template #prepend>
@@ -108,11 +104,11 @@
       <v-divider inset class="border-opacity-75" />
       <v-list-item prepend-icon="mdi-folder">
         <v-list-item-title>本地应用数据路径</v-list-item-title>
-        <v-list-item-subtitle>{{ appStore.dataPath.app }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{ appStore.dataPath.appDataDir }}</v-list-item-subtitle>
       </v-list-item>
       <v-list-item prepend-icon="mdi-folder">
         <v-list-item-title>本地用户数据路径</v-list-item-title>
-        <v-list-item-subtitle>{{ appStore.dataPath.user }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{ appStore.dataPath.userDataDir }}</v-list-item-subtitle>
       </v-list-item>
     </v-list>
     <!-- 弹窗提示条 -->
@@ -132,9 +128,9 @@ import TConfirm from "../components/t-confirm.vue";
 // tauri
 import { dialog, fs, app, os } from "@tauri-apps/api";
 // store
-import useAppStore from "../store/modules/app";
-import useHomeStore from "../store/modules/home";
-import useAchievementsStore from "../store/modules/achievements";
+import { useAppStore } from "../store/modules/app";
+import { useHomeStore } from "../store/modules/home";
+import { useAchievementsStore } from "../store/modules/achievements";
 // utils
 import { WriteTGData } from "../utils/TGIndex";
 // data
@@ -188,7 +184,7 @@ function toOuter (url: string) {
 // 打开用户数据目录
 async function openMergeData () {
   await dialog.open({
-    defaultPath: appStore.dataPath.user,
+    defaultPath: appStore.dataPath.userDataDir,
     filters: [],
   });
 }
@@ -263,7 +259,6 @@ async function delUserData () {
 
 // 恢复默认配置
 async function initAppData () {
-  await appStore.init();
   await homeStore.init();
   await achievementsStore.init();
   snackbarText.value = "已恢复默认配置!";

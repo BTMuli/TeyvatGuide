@@ -74,7 +74,7 @@ import TLoading from "../components/t-loading.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
 // store
-import useAppStore from "../store/modules/app";
+import { useAppStore } from "../store/modules/app";
 // plugins
 import MysOper from "../plugins/Mys";
 // interface

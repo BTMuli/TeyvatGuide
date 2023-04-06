@@ -50,7 +50,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 // store
-import useHomeStore from "../store/modules/home";
+import { useHomeStore } from "../store/modules/home";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
 // plugins

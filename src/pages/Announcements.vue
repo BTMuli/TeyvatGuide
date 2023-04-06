@@ -98,7 +98,7 @@ import GenshinOper from "../plugins/Genshin";
 import { createTGWindow } from "../utils/TGWindow";
 // interface
 import { AnnoListData, AnnoListCard } from "../plugins/Genshin/interface/announcement";
-import useAppStore from "../store/modules/app";
+import { useAppStore } from "../store/modules/app";
 
 // store
 const appStore = useAppStore();

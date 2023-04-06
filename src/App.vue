@@ -32,7 +32,7 @@ import TBackTop from "./components/t-backTop.vue";
 // tauri
 import { fs, window, app } from "@tauri-apps/api";
 // store
-import useAppStore from "./store/modules/app";
+import { useAppStore } from "./store/modules/app";
 // utils
 import { InitTGData, DeleteTGData, WriteTGData } from "./utils/TGIndex";
 // data
@@ -53,7 +53,6 @@ onMounted(async () => {
 });
 
 async function checkLoad () {
-  await appStore.check();
   if (appStore.loading) {
     console.info("数据已加载！");
     return;
@@ -77,7 +76,7 @@ async function createDataDir () {
 async function writeData () {
   console.info("开始写入数据...");
   TGAppDataList.map(async (item) => {
-    await fs.writeFile(`${appStore.dataPath.app}\\${item.name}`, JSON.stringify(item.data));
+    await fs.writeFile(`${appStore.dataPath.appDataDir}\\${item.name}`, JSON.stringify(item.data));
   });
   console.info("数据写入完成！");
 }

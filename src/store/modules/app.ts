@@ -2,10 +2,14 @@
  * @file store modules app.ts
  * @description App store module
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  */
 
+// vue
+import { reactive, ref } from "vue";
+// pinia
 import { defineStore } from "pinia";
+// tauri
 import { path } from "@tauri-apps/api";
 
 // 用于存储原生数据的路径
@@ -15,108 +19,77 @@ const userDataDir = `${await path.appLocalDataDir()}userData`;
 // 用于各种临时数据的路径
 const tempDataDir = `${await path.appLocalDataDir()}tempData`;
 
-const useAppStore = defineStore({
-  id: "app",
-  state: () => {
-    return {
-      // 是否加载数据
-      loading: false,
-      // 侧边栏设置
-      sidebar: {
-        // 是否折叠
-        collapse: true,
-        // 是否显示
-        submenu: {
-          // 米游社
-          mihoyo: false,
-          // 数据库
-          database: false,
-        },
+export const useAppStore = defineStore(
+  "app",
+  () => {
+    // 应用加载状态
+    const loading = ref(false);
+    // 侧边栏设置
+    const sidebar = reactive({
+      // 是否折叠
+      collapse: true,
+      // 是否显示
+      submenu: {
+        // 米游社
+        mihoyo: false,
+        // 数据库
+        database: false,
       },
-      // 开发者模式
-      devMode: false,
-      // 数据路径
-      dataPath: {
-        app: appDataDir,
-        user: userDataDir,
-        temp: tempDataDir,
-      },
-      // 应用数据路径
-      appPath: {
-        achievements: `${appDataDir}\\achievements.json`,
-        achievementSeries: `${appDataDir}\\achievementSeries.json`,
-        nameCards: `${appDataDir}\\nameCards.json`,
-      },
+    });
+    // 开发者模式
+    const devMode = ref(false);
+
+    const dataPath = reactive({
+      appDataDir,
+      userDataDir,
+      tempDataDir,
+    });
+
+    // 应用数据路径
+    const appPath = ref({
+      achievements: `${dataPath.appDataDir}/achievements.json`,
+      achievementSeries: `${dataPath.appDataDir}/achievementSeries.json`,
+      nameCards: `${dataPath.appDataDir}/nameCards.json`,
+    });
       // 用户数据路径
-      userPath: {
-        achievements: `${userDataDir}\\achievements.json`,
-      },
+    const userPath = ref({
+      achievements: `${dataPath.userDataDir}/achievements.json`,
+    });
+
+    function getSubmenu (): string[] {
+      const open = [];
+      if (sidebar.submenu.database) open.push("database");
+      if (sidebar.submenu.mihoyo) open.push("mihoyo");
+      return open;
+    }
+
+    return {
+      loading,
+      sidebar,
+      devMode,
+      dataPath,
+      appPath,
+      userPath,
+      getSubmenu,
     };
   },
-  actions: {
-    // 检测 store 数据兼容，主要是 sideBar 数据
-    async check () {
-      if (this.sidebar === undefined) {
-        this.sidebar = {
-          collapse: true,
-          submenu: {
-            mihoyo: false,
-            database: false,
-          },
-        };
-      } else {
-        if (this.sidebar.collapse === undefined) this.sidebar.collapse = false;
-        if (this.sidebar.submenu === undefined) {
-          this.sidebar.submenu = { database: false, mihoyo: false };
-        }
-        if (this.sidebar.submenu.database === undefined) this.sidebar.submenu.database = false;
-        if (this.sidebar.submenu.mihoyo === undefined) this.sidebar.submenu.mihoyo = false;
-      }
-    },
-    // 初始化配置
-    async init () {
-      // 初始化侧边栏设置
-      this.sidebar = {
-        collapse: false,
-        submenu: {
-          mihoyo: false,
-          database: false,
-        },
-      };
-      // 初始化加载状态
-      this.loading = false;
-      // 初始化开发者模式
-      this.devMode = false;
-      // 初始化用户数据路径
-      this.userPath = {
-        achievements: `${userDataDir}\\achievements.json`,
-      };
-    },
-    // 获取折叠
-    getSubmenu () {
-      const open = [];
-      if (this.sidebar.submenu.database) open.push("database");
-      if (this.sidebar.submenu.mihoyo) open.push("mihoyo");
-      return open;
-    },
+  {
+    persist: [
+      {
+        key: "appPath",
+        storage: window.localStorage,
+        paths: ["dataPath", "appPath", "userPath"],
+      },
+      {
+        key: "app",
+        storage: window.localStorage,
+        paths: ["devMode", "loading"],
+      },
+      {
+        key: "sidebar",
+        storage: window.localStorage,
+        paths: ["sidebar"],
+      },
+    ],
   },
-  persist: [
-    {
-      key: "appPath",
-      storage: window.localStorage,
-      paths: ["dataPath", "appPath", "userPath"],
-    },
-    {
-      key: "app",
-      storage: window.localStorage,
-      paths: ["devMode", "loading"],
-    },
-    {
-      key: "sidebar",
-      storage: window.localStorage,
-      paths: ["sidebar"],
-    },
-  ],
-});
-
-export default useAppStore;
+);

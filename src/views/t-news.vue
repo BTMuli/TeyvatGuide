@@ -146,7 +146,7 @@ import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import TLoading from "../components/t-loading.vue";
 // store
-import useAppStore from "../store/modules/app";
+import { useAppStore } from "../store/modules/app";
 // plugin
 import MysOper from "../plugins/Mys";
 // utils

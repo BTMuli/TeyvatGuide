@@ -106,7 +106,7 @@ import TLoading from "../components/t-loading.vue";
 // tauri
 import { dialog, fs } from "@tauri-apps/api";
 // Store
-import useAchievementsStore from "../store/modules/achievements";
+import { useAchievementsStore } from "../store/modules/achievements";
 // Interface
 import { Achievements, UiafHeader, UiafAchievement } from "../plugins/UIAF/interface/UIAF";
 import { Achievement as TGAchievement, AchievementSeries as TGSeries } from "../interface/Achievements";
@@ -328,7 +328,7 @@ async function importJson () {
 // 导出
 async function exportJson () {
   // 判断是否有数据
-  if (achievementsStore.fin_achievements === 0) {
+  if (achievementsStore.finAchievements === 0) {
     snackbarText.value = "没有可导出的数据";
     snackbar.value = true;
     return;
