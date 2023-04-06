@@ -5,7 +5,7 @@
 
 <script lang="ts" setup>
 // vue
-import { ref, markRaw, onMounted, onUnmounted } from "vue";
+import { ref, markRaw, onMounted, onUnmounted, onUpdated } from "vue";
 import TLoading from "../components/t-loading.vue";
 import TPool from "../components/t-pool.vue";
 import TPosition from "../components/t-position.vue";
@@ -25,6 +25,20 @@ const loadingSubtitle = ref("");
 const components = ref([] as any[]);
 const itemRefs = ref([] as any[]);
 
+// 定时器
+const timer = ref(null as any);
+
+function readLoading (): void {
+  if (!loading.value) return;
+  const loadingMap = itemRefs.value.map((item) => {
+    return item.loading ? item.name : null;
+  });
+  loadingSubtitle.value = "正在加载 " + loadingMap.filter((item) => item)?.join("、");
+  if (loadingMap.every((item) => !item)) {
+    loading.value = false;
+  }
+}
+
 onMounted(async () => {
   loadingTitle.value = "正在加载首页";
   const showItems = homeStore.getShowValue();
@@ -42,21 +56,18 @@ onMounted(async () => {
       }
     }),
   );
-  setInterval(() => {
-    if (!loading.value) clearInterval(this);
-    const loadingMap = itemRefs.value.map((item) => {
-      return item.loading ? item.name : null;
-    });
-    loadingSubtitle.value = "正在加载 " + loadingMap.filter((item) => item)?.join("、");
-    if (loadingMap.every((item) => !item)) {
-      loading.value = false;
-    }
-  }, 100);
+  timer.value = setInterval(readLoading, 100);
 });
+
 function setItemRef (item: any) {
   if (itemRefs.value.includes(item)) return;
   itemRefs.value.push(item);
 }
+
+// 监听定时器
+onUpdated(() => {
+  if (!loading.value) clearInterval(timer.value);
+});
 
 onUnmounted(() => {
   itemRefs.value = [];

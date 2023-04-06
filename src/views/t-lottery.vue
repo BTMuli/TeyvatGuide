@@ -67,7 +67,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { ref, onMounted, reactive } from "vue";
+import { ref, onMounted, reactive, onUpdated } from "vue";
 import { useRoute } from "vue-router";
 import JsonViewer from "vue-json-viewer";
 import TLoading from "../components/t-loading.vue";
@@ -87,6 +87,24 @@ const loadingEmpty = ref(false as boolean);
 
 // store
 const appStore = useAppStore();
+
+// 定时器
+const lotteryTimer = ref(null as any);
+
+function flushTimeStatus () {
+  const timeNow = new Date().getTime();
+  const timeDiff = Number(jsonData.draw_time) * 1000 - timeNow;
+  if (timeDiff <= 0) {
+    timeStatus.value = "已开奖";
+    clearInterval(lotteryTimer);
+  } else {
+    const day = Math.floor(timeDiff / (24 * 3600 * 1000));
+    const hour = Math.floor((timeDiff % (24 * 3600 * 1000)) / (3600 * 1000));
+    const minute = Math.floor((timeDiff % (3600 * 1000)) / (60 * 1000));
+    const second = Math.floor((timeDiff % (60 * 1000)) / 1000);
+    timeStatus.value = `${day}天${hour}小时${minute}分${second}秒`;
+  }
+}
 
 // 数据
 const lotteryId = useRoute().params.lottery_id as string;
@@ -121,25 +139,22 @@ onMounted(async () => {
   if (jsonData.status === "Settled") {
     timeStatus.value = "已开奖";
   } else {
-    await setInterval(() => {
-      const timeNow = new Date().getTime();
-      const timeDiff = Number(jsonData.draw_time) * 1000 - timeNow;
-      if (timeDiff <= 0) {
-        timeStatus.value = "已开奖";
-        clearInterval(this);
-      } else {
-        const day = Math.floor(timeDiff / (24 * 3600 * 1000));
-        const hour = Math.floor((timeDiff % (24 * 3600 * 1000)) / (3600 * 1000));
-        const minute = Math.floor((timeDiff % (3600 * 1000)) / (60 * 1000));
-        const second = Math.floor((timeDiff % (60 * 1000)) / 1000);
-        timeStatus.value = `${day}天${hour}小时${minute}分${second}秒`;
-      }
+    lotteryTimer.value = setInterval(() => {
+      flushTimeStatus();
     }, 1000);
   }
   setTimeout(() => {
     loading.value = false;
   }, 200);
 });
+
+// 监听 timeStatus
+onUpdated(() => {
+  if (timeStatus.value === "已开奖") {
+    clearInterval(lotteryTimer);
+  }
+});
+
 </script>
 <style lang="css">
 .lottery-div {
