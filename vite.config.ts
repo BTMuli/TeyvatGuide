@@ -2,10 +2,12 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 // Vuetify
 import vuetify from "vite-plugin-vuetify";
+// build time
+import buildTimePlugin from "./src/utils/TGBuild";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), vuetify()],
+  plugins: [vue(), vuetify(), buildTimePlugin()],
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   // prevent vite from obscuring rust errors

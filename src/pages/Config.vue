@@ -30,7 +30,7 @@
           </v-btn>
         </v-list-item-title>
         <template #append>
-          <v-list-item-subtitle>{{ versionApp }}</v-list-item-subtitle>
+          <v-list-item-subtitle>{{ versionApp }}.{{ buildTime }}</v-list-item-subtitle>
         </template>
       </v-list-item>
       <v-list-item title="成就版本">
@@ -123,6 +123,7 @@
 <script lang="ts" setup>
 // vue
 import { onMounted, ref } from "vue";
+import { getBuildTime } from "../utils/TGBuild";
 import TLoading from "../components/t-loading.vue";
 import TConfirm from "../components/t-confirm.vue";
 // tauri
@@ -144,6 +145,7 @@ const achievementsStore = useAchievementsStore();
 // About App
 const versionApp = ref("" as string);
 const versionTauri = ref("" as string);
+const buildTime = ref(getBuildTime());
 
 // About OS
 const osPlatform = ref("" as string);
