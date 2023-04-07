@@ -99,7 +99,7 @@ export function PostParser (post: PostData): string {
 
 /**
  * @description 解析中转
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLDivElement | HTMLSpanElement} 解析后的中转
  */
@@ -118,6 +118,8 @@ function ParserTransfer (data: PostStructuredContent): HTMLDivElement | HTMLSpan
     return LinkCardParser(data);
   } else if (data.insert.divider) {
     return DividerParser(data);
+  } else if (data.insert.mention) {
+    return MentionParser(data);
   } else {
     return UnknownParser(data);
   }
@@ -482,4 +484,32 @@ function LinkCardParser (data: PostStructuredContent): HTMLDivElement {
   // 添加 class
   div.classList.add("mys-post-link-card");
   return div;
+}
+
+/**
+ * @description 解析 Mention
+ * @since Alpha v0.1.2
+ * @param {PostStructuredContent} data Mys数据
+ * @returns {HTMLAnchorElement} 解析后的 Mention
+ */
+function MentionParser (data: PostStructuredContent): HTMLAnchorElement {
+  // 检查数据
+  if (typeof data.insert === "string") {
+    throw new Error("data.insert is a string");
+  }
+  if (!data.insert.mention) {
+    throw new Error("data.insert.mention is not defined");
+  }
+  // 创建图标
+  const icon = document.createElement("i");
+  icon.classList.add("mdi", "mdi-account-circle-outline");
+  // 创建链接
+  const link = document.createElement("a");
+  link.classList.add("mys-post-link");
+  link.href = `https://www.miyoushe.com/ys/accountCenter/postList?id=${data.insert.mention.uid}`;
+  link.target = "_blank";
+  link.innerText = data.insert.mention.nickname;
+  // 插入图标
+  link.prepend(icon);
+  return link;
 }

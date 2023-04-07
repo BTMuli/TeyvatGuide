@@ -2,7 +2,7 @@
  * @file plugins Mys interface post.ts
  * @description Mys 插件帖子接口
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  */
 
 import { type MysResponse } from "./base";
@@ -242,7 +242,7 @@ export interface PostContent {
 
 /**
  * @description 帖子结构化内容
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  * @interface PostStructuredContent
  * @property {string|object} insert 插入内容
  * @property {string} insert.image 图片 URL
@@ -257,6 +257,9 @@ export interface PostContent {
  * @property {string} insert.fold.content 折叠文本，反序列化后为 PostStructuredContent[]
  * @property {PostStructuredContentLinkCard} insert.link_card 链接卡片
  * @property {string} insert.divider 分割线
+ * @property {object} insert.mention 提及
+ * @property {string} insert.mention.uid 用户 ID
+ * @property {string} insert.mention.nickname 用户昵称
  * @property {object} attributes 属性
  * @property {number} attributes.height 高度
  * @property {number} attributes.width 宽度
@@ -268,6 +271,7 @@ export interface PostContent {
  * @returns {PostStructuredContent}
  */
 export interface PostStructuredContent {
+
   insert:
   | {
     image?: string
@@ -284,6 +288,10 @@ export interface PostStructuredContent {
     }
     link_card?: PostStructuredContentLinkCard
     divider?: string
+    mention?: {
+      uid: string
+      nickname: string
+    }
   }
   | string
   attributes?: {
