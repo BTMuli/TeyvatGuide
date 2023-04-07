@@ -5,7 +5,7 @@
         <v-icon color="#EBD49E">
           mdi-calendar-clock
         </v-icon> 今日素材
-        <span style="color: #faf7e8">{{ new Date().toLocaleDateString() }}</span>
+        <span style="color: #faf7e8">{{ dateNow }}</span>
         <v-btn
           v-for="text of btnText"
           :key="text.week"
@@ -14,34 +14,80 @@
             border: text.week === weekNow ? '2px solid #fec90b' : '0',
             background: text.week === btnNow ? '#fec90b' : '#4A5366',
           }"
-          @click="getShowCards(text.week)"
+          @click="getContents(text.week)"
         >
           {{ text.text }}
         </v-btn>
       </v-list-item-title>
       <div v-if="!loading" class="calendar-grid">
-        <v-card title="天赋培养" class="calendar-single">
-          <v-card-text class="calendar-icons">
-            <v-img
-              v-for="item in showCharacters"
-              :key="item.id"
-              :src="item.cover"
-              class="calendar-icon"
-              @click="showContent(item)"
-            />
-          </v-card-text>
-        </v-card>
-        <v-card title="武器突破" class="calendar-single">
-          <v-card-text class="calendar-icons">
-            <v-img
-              v-for="item in showWeapons"
-              :key="item.id"
-              :src="item.cover"
-              class="calendar-icon"
-              @click="showContent(item)"
-            />
-          </v-card-text>
-        </v-card>
+        <div class="calendar-single">
+          <div class="card-title">
+            天赋培养
+          </div>
+          <div
+            v-for="character of characterCards"
+            :key="character.title"
+            class="calendar-content"
+          >
+            <div class="content-title">
+              {{ character.title }}
+            </div>
+            <div class="content-material">
+              <v-img
+                v-for="material of character.materials"
+                :key="material.content_id"
+                alt="material.content_id"
+                :src="material.icon"
+                class="calendar-icon"
+                @click="showContent(material.content_id)"
+              />
+            </div>
+            <div class="content-detail">
+              <v-img
+                v-for="content of character.contents"
+                :key="content.content_id"
+                alt="content.content_id"
+                :src="content.icon"
+                class="calendar-icon"
+                @click="showContent(content.content_id)"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="calendar-single">
+          <div class="card-title">
+            武器突破
+          </div>
+          <div
+            v-for="weapon of weaponCards"
+            :key="weapon.title"
+            class="calendar-content"
+          >
+            <div class="content-title">
+              {{ weapon.title }}
+            </div>
+            <div class="content-material">
+              <v-img
+                v-for="material of weapon.materials"
+                :key="material.content_id"
+                alt="material.content_id"
+                :src="material.icon"
+                class="calendar-icon"
+                @click="showContent(material.content_id)"
+              />
+            </div>
+            <div class="content-detail">
+              <v-img
+                v-for="content of weapon.contents"
+                :key="content.content_id"
+                alt="content.content_id"
+                :src="content.icon"
+                class="calendar-icon"
+                @click="showContent(content.content_id)"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </v-list-item>
   </v-list>
@@ -49,20 +95,24 @@
 <script lang="ts" setup>
 // vue
 import { ref, onMounted } from "vue";
-// plugins
-import MysOper from "../plugins/Mys";
+// data
+import { TGAppData } from "../data/index";
 // interface
-import { CalendarCard } from "../plugins/Mys/interface/calendar";
+import { type Map } from "../interface/Base";
+import { CalendarData, CalendarItem } from "../interface/Calendar";
 import { OBC_CONTENT_API } from "../plugins/Mys/interface/utils";
 
 // loading
 const loading = ref(true as boolean);
 
 // data
-const characterCards = ref([] as CalendarCard[]);
-const weaponCards = ref([] as CalendarCard[]);
-const weekNow = ref(new Date().getDay());
+const calendarData = ref(TGAppData.calendar as Map<CalendarData>);
+const weekNow = ref(0 as number);
 const btnNow = ref(0 as number);
+const dateNow = ref(new Date().toLocaleDateString());
+const calendarNow = ref({} as CalendarData);
+const characterCards = ref({} as Map<CalendarItem>);
+const weaponCards = ref({} as Map<CalendarItem>);
 
 const btnText = [
   {
@@ -94,47 +144,45 @@ const btnText = [
     text: "周六",
   },
 ];
-
-// show data
-const showCharacters = ref([] as CalendarCard[]);
-const showWeapons = ref([] as CalendarCard[]);
-
 // expose
 defineExpose({
   name: "素材日历",
   loading,
 });
 
-onMounted(async () => {
-  const calendarData = await MysOper.Calendar.get();
-  if (!calendarData) {
-    await console.error("获取材料日历失败");
-    return;
-  }
-  const calendarCards = MysOper.Calendar.card(calendarData);
-  const week = new Date().getDay();
-  btnNow.value = week;
-  characterCards.value = calendarCards.filter((card) => card.type === 2);
-  weaponCards.value = calendarCards.filter((card) => card.type === 1);
-  getShowCards(week);
+onMounted(() => {
+  const dayNow = new Date().getDay();
+  weekNow.value = dayNow;
+  btnNow.value = dayNow;
+  calendarNow.value = getCalendar(dayNow);
+  characterCards.value = calendarNow.value.characters;
+  weaponCards.value = calendarNow.value.weapons;
   loading.value = false;
 });
 
-// 根据星期几获取显示内容
-function getShowCards (choice: number) {
-  btnNow.value = choice;
-  const week = choice === 0 ? 7 : choice;
-  showCharacters.value = characterCards.value
-    .filter((card) => card.drop_day.includes(week.toString()))
-    .sort((a, b) => a.sort_day[week] - b.sort_day[week]);
-  showWeapons.value = weaponCards.value
-    .filter((card) => card.drop_day.includes(week.toString()))
-    .sort((a, b) => a.sort_day[week] - b.sort_day[week]);
+// 获取当前日历
+function getCalendar (day: number) {
+  let week;
+  if (day < 4) week = day;
+  else week = day - 3;
+  return calendarData.value[week];
 }
 
-function showContent (item: CalendarCard) {
+function showContent (contentId: number) {
   // todo：二级跳转，目前先直接跳到角色详情页
-  window.open(OBC_CONTENT_API.replace("{content_id}", item.url));
+  window.open(OBC_CONTENT_API.replace("{content_id}", contentId.toString()));
+}
+
+function getContents (day: number) {
+  const oldValue = btnNow.value % 4;
+  btnNow.value = day;
+  if (oldValue % 3 === day % 3 && oldValue !== 0 && day !== 0) {
+    return;
+  }
+  calendarNow.value = getCalendar(day);
+  characterCards.value = calendarNow.value.characters;
+  weaponCards.value = calendarNow.value.weapons;
+  console.log(characterCards.value);
 }
 </script>
 <style lang="css" scoped>
@@ -142,6 +190,13 @@ function showContent (item: CalendarCard) {
   margin-top: 10px;
   font-family: Genshin-Light, serif;
   background: #546d8b;
+  border-radius: 10px;
+}
+
+.calendar-btn {
+  margin-left: 10px;
+  font-family: Genshin-Light, serif;
+  color: #faf7e8;
   border-radius: 10px;
 }
 
@@ -158,27 +213,48 @@ function showContent (item: CalendarCard) {
   border-radius: 10px;
 }
 
-.calendar-icons {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-  grid-gap: 5px;
+.card-title {
+  font-size: 1.5rem;
+  font-family: Genshin, serif;
+  color: #546D8B;
+  padding: 10px;
+}
+
+.calendar-content {
+  background: #546D8B;
+  color:#faf7e8;
+  margin: 10px;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.content-title {
+  font-size: 1.2rem;
+  font-family: Genshin, serif;
+  color: #faf7e8;
+  padding: 10px;
+  display: v-bind("btnNow === 0 ? 'block' : 'inline-block'")
+}
+
+.content-material {
+  display: inline-block;
+  margin-bottom: 10px;
 }
 
 .calendar-icon {
-  width: 50px;
-  height: 50px;
-  margin: 5px;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
+  display: inline-block;
+  margin-left: 10px;
 }
 
 .calendar-icon :hover {
   cursor: pointer;
 }
 
-.calendar-btn {
-  margin-left: 10px;
-  font-family: Genshin-Light, serif;
-  color: #faf7e8;
-  border-radius: 10px;
+.content-detail {
+  border-top: 1px solid #faf7e8;
+  padding-top: 10px;
 }
 </style>

@@ -5,53 +5,47 @@
  * @since Alpha v0.1.2
  */
 
-import { type GameCountry } from "./Base";
+import { type Map } from "./Base";
 
 /**
  * @description 素材日历接口
- * @interface Calendar
+ * @interface CalendarData
  * @since Alpha v0.1.2
  * @example Map<Calendar>
- * @property {number} weekDay - 一周的第几天
- * @property {CalendarCharacter} characters - 该天的角色相关数据
- * @property {CalendarWeapon} weapons - 该天的武器相关数据
- * @returns {Calendar}
+ * @property {Map<CalendarItem>} characters - 该天的角色相关数据
+ * @property {Map<CalendarItem>} weapons - 该天的武器相关数据
+ * @returns {CalendarData}
  */
-export interface Calendar {
-  weekDay: number
-  characters: Record<GameCountry, CalendarItem>
-  weapons: Record<GameCountry, CalendarItem>
+export interface CalendarData {
+  characters: Map<CalendarItem>
+  weapons: Map<CalendarItem>
 }
 
 /**
  * @description 单日单秘境的素材日历接口
  * @interface CalendarItem
  * @since Alpha v0.1.2
- * @property {string} area - 地区
- * @property {string} source - 来源秘境
- * @todo 后续换成更为完善的类型
+ * @property {string} title - 地区 秘境名称
  * @property {MiniMaterial[]} materials - 素材 url
  * @property {MiniMaterial[]} contents - 角色/武器 url
  * @returns {CalendarItem}
  */
 export interface CalendarItem {
-  area: string
-  source: string
-  materials: string[]
-  contents: string[]
+  title: string
+  materials: MiniMaterial[]
+  contents: MiniMaterial[]
 }
 
 /**
  * @description 材料类型
  * @interface MiniMaterial
  * @since Alpha v0.1.2
- * @property {number} star - 星级，或者说稀有度
- * @property {string} name - 材料名称
- * @property {string} url - 材料图片 url
- * @returns {MiniMaterial}
+ * @property {number} content_id - 观测枢的 content_id
+ * @property {string} name - 名称
+ * @property {string} icon - 图标 url
  */
 export interface MiniMaterial {
-  star: number
+  content_id: number
   name: string
-  url: string
+  icon: string
 }
