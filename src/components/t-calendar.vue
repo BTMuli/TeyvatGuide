@@ -175,7 +175,7 @@ function showContent (contentId: number, name: string) {
 }
 
 function getContents (day: number) {
-  const oldValue = btnNow.value % 4;
+  const oldValue = btnNow.value;
   btnNow.value = day;
   if (oldValue % 3 === day % 3 && oldValue !== 0 && day !== 0) {
     return;
@@ -183,7 +183,6 @@ function getContents (day: number) {
   calendarNow.value = getCalendar(day);
   characterCards.value = calendarNow.value.characters;
   weaponCards.value = calendarNow.value.weapons;
-  console.log(characterCards.value);
 }
 </script>
 <style lang="css" scoped>
