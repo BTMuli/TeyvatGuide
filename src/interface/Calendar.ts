@@ -40,11 +40,15 @@ export interface CalendarItem {
  * @description 材料类型
  * @interface MiniMaterial
  * @since Alpha v0.1.2
+ * @property {number} id - 角色/武器的 id
+ * @property {number} star - 角色/武器的星级
  * @property {number} content_id - 观测枢的 content_id
  * @property {string} name - 名称
  * @property {string} icon - 图标 url
  */
 export interface MiniMaterial {
+  id?: number
+  star: number
   content_id: number
   name: string
   icon: string
