@@ -39,7 +39,7 @@
                 alt="material.content_id"
                 :src="material.icon"
                 class="calendar-icon"
-                @click="showContent(material.content_id)"
+                @click="showContent(material.content_id, material.name)"
               />
             </div>
             <div class="content-detail">
@@ -49,7 +49,7 @@
                 alt="content.content_id"
                 :src="content.icon"
                 class="calendar-icon"
-                @click="showContent(content.content_id)"
+                @click="showContent(content.content_id, content.name)"
               />
             </div>
           </div>
@@ -73,7 +73,7 @@
                 alt="material.content_id"
                 :src="material.icon"
                 class="calendar-icon"
-                @click="showContent(material.content_id)"
+                @click="showContent(material.content_id, material.name)"
               />
             </div>
             <div class="content-detail">
@@ -83,7 +83,7 @@
                 alt="content.content_id"
                 :src="content.icon"
                 class="calendar-icon"
-                @click="showContent(content.content_id)"
+                @click="showContent(content.content_id, content.name)"
               />
             </div>
           </div>
@@ -101,6 +101,7 @@ import { TGAppData } from "../data/index";
 import { type Map } from "../interface/Base";
 import { CalendarData, CalendarItem } from "../interface/Calendar";
 import { OBC_CONTENT_API } from "../plugins/Mys/interface/utils";
+import { createTGWindow } from "../utils/TGWindow";
 
 // loading
 const loading = ref(true as boolean);
@@ -168,9 +169,9 @@ function getCalendar (day: number) {
   return calendarData.value[week];
 }
 
-function showContent (contentId: number) {
-  // todo：二级跳转，目前先直接跳到角色详情页
-  window.open(OBC_CONTENT_API.replace("{content_id}", contentId.toString()));
+function showContent (contentId: number, name: string) {
+  const url = OBC_CONTENT_API.replace("{content_id}", contentId.toString());
+  createTGWindow(url, "素材详情", name, 800, 600, true);
 }
 
 function getContents (day: number) {

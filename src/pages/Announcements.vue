@@ -144,7 +144,7 @@ async function toPost (item: AnnoListCard) {
       anno_id: item.id,
     },
   }).href;
-  createTGWindow(path, "游戏内公告", item.title, 960, 720, false);
+  createTGWindow(path, "游戏内公告", item.title, 960, 720, false, false);
 }
 
 async function toJson (item: AnnoListCard) {
@@ -155,7 +155,7 @@ async function toJson (item: AnnoListCard) {
       anno_id: item.id,
     },
   }).href;
-  createTGWindow(path, "游戏内公告-JSON", item.title, 960, 720, false);
+  createTGWindow(path, "游戏内公告-JSON", item.title, 960, 720, false, false);
 }
 </script>
 

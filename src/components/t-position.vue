@@ -118,7 +118,7 @@ async function toPost (card: PositionCard) {
     },
   }).href;
   // 打开新窗口
-  createTGWindow(path, "近期活动", card.title, 960, 720, false);
+  createTGWindow(path, "近期活动", card.title, 960, 720, false, false);
 }
 </script>
 

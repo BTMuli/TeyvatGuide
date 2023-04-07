@@ -296,7 +296,7 @@ async function toPost (item: NewsCard | string) {
         post_id: item,
       },
     }).href;
-    createTGWindow(path, "帖子-Dev", item, 960, 720, false);
+    createTGWindow(path, "帖子-Dev", item, 960, 720, false, false);
   } else {
     const path = router.resolve({
       name: "帖子详情",
@@ -305,7 +305,7 @@ async function toPost (item: NewsCard | string) {
         post_id: item.post_id.toString(),
       },
     }).href;
-    createTGWindow(path, "帖子", item.title, 960, 720, false);
+    createTGWindow(path, "帖子", item.title, 960, 720, false, false);
   }
 }
 async function toJson (item: NewsCard | string) {
@@ -317,7 +317,7 @@ async function toJson (item: NewsCard | string) {
         post_id: item,
       },
     }).href;
-    createTGWindow(path, "帖子-JSON-Dev", `${item}-JSON`, 960, 720, false);
+    createTGWindow(path, "帖子-JSON-Dev", `${item}-JSON`, 960, 720, false, false);
   } else {
     const path = router.resolve({
       name: "帖子详情（JSON）",
@@ -326,7 +326,7 @@ async function toJson (item: NewsCard | string) {
         post_id: item.post_id.toString(),
       },
     }).href;
-    createTGWindow(path, "帖子-JSON", `${item.title}-JSON`, 960, 720, false);
+    createTGWindow(path, "帖子-JSON", `${item.title}-JSON`, 960, 720, false, false);
   }
 }
 

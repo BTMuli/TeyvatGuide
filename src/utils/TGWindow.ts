@@ -15,6 +15,7 @@ import { window as TauriWindow } from "@tauri-apps/api";
  * @param {number} width 窗口宽度
  * @param {number} height 窗口高度
  * @param {boolean} resizable 是否可调整大小
+ * @param {boolean} visible 是否可见
  * @returns {void}
  */
 export function createTGWindow (
@@ -24,6 +25,7 @@ export function createTGWindow (
   width: number,
   height: number,
   resizable: boolean,
+  visible: boolean = true,
 ): void {
   // 计算窗口位置
   const left = (window.screen.width - width) / 2;
@@ -37,7 +39,7 @@ export function createTGWindow (
     resizable,
     url,
     title,
-    visible: false,
+    visible,
   });
   void new TauriWindow.WindowManager(label).close().then(() => {
     void new TauriWindow.WebviewWindow(label, {
@@ -48,7 +50,7 @@ export function createTGWindow (
       resizable,
       url,
       title,
-      visible: false,
+      visible,
     });
   });
 }

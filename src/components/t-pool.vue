@@ -138,7 +138,7 @@ function checkCover (data: GachaData[]) {
 }
 
 function toOuter (url: string, title: string) {
-  createTGWindow(url, "祈愿", title, 1200, 800, true);
+  createTGWindow(url, "祈愿", title, 1200, 800, true, false);
 }
 
 function getLastPoolTime (time: number) {
@@ -156,7 +156,7 @@ function toPost (pool: GachaCard) {
       post_id: pool.post_id.toString(),
     },
   }).href;
-  createTGWindow(path, "限时祈愿", pool.title, 960, 720, false);
+  createTGWindow(path, "限时祈愿", pool.title, 960, 720, false, false);
 }
 </script>
 
