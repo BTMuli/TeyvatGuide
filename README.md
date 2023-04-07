@@ -2,12 +2,12 @@
 Author: 目棃
 Date: 2023-03-05
 Description: 说明文档
-Update: 2023-04-03
+Update: 2023-04-07
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-05 14:41:55`
 > 
-> 更新于 `2023-04-03 00:03:38`
+> 更新于 `2023-04-07 16:56:13`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/v/release/BTMuli/Tauri.Genshin?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge)
 
@@ -45,6 +45,7 @@ Tauri 练手项目
 
 - [Snap.Hutao](https://github.com/DGP-Studio/Snap.Hutao)
 - [米游社](https://www.miyoushe.com/ys/)
+- [原神](https://yuanshen.com/)
 
 ## 相关文档 
 
@@ -55,13 +56,13 @@ Tauri 练手项目
 ## 开发
 
 ```bash
-npm run tauri dev
+npm run dev
 ```
 
 ## 构建
 
 ```bash
-npm run tauri build
+npm run build
 ```
 
 # License
@@ -73,4 +74,5 @@ npm run tauri build
 # Contributors
 
 - [BTMuli](https://github.com/BTMuli)
+- [舰队的偶像岛风酱！](https://github.com/frg2089)
 - [jerry765](https://github.com/jerry765)
