@@ -108,9 +108,8 @@ import { dialog, fs } from "@tauri-apps/api";
 // Store
 import { useAchievementsStore } from "../store/modules/achievements";
 // Interface
+import type TGTypes from "../core/types/TGTypes";
 import { Achievements, UiafHeader, UiafAchievement } from "../plugins/UIAF/interface/UIAF";
-import { Achievement as TGAchievement, AchievementSeries as TGSeries } from "../interface/Achievements";
-import { NameCard } from "../interface/NameCard";
 // Plugins
 import UiafOper from "../plugins/UIAF";
 // Utils
@@ -126,13 +125,13 @@ const loadingTitle = ref("正在加载数据" as string);
 
 // data
 const title = ref(achievementsStore.title as string);
-const CardsInfo = ref([] as NameCard[]);
-const getCardInfo = ref({} as NameCard);
+const CardsInfo = ref([] as TGTypes.NameCard[]);
+const getCardInfo = ref({} as TGTypes.NameCard);
 // series
-const seriesList = ref([] as TGSeries[]);
+const seriesList = ref([] as TGTypes.AchievementSeries[]);
 const selectedIndex = ref(-1 as number);
 const selectedSeries = ref(-1 as number);
-const selectedAchievement = ref([] as TGAchievement[]);
+const selectedAchievement = ref([] as TGTypes.Achievement[]);
 
 // render
 const search = ref("" as string);
@@ -146,7 +145,7 @@ onMounted(async () => {
 // 加载数据，数据源：合并后的本地数据
 async function loadData () {
   loadingTitle.value = "正在获取成就系列数据";
-  const seriesDB: TGSeries[] = await ReadAllTGData("AchievementSeries");
+  const seriesDB: TGTypes.AchievementSeries[] = await ReadAllTGData("AchievementSeries");
   loadingTitle.value = "正在获取成就系列名片数据";
   CardsInfo.value = await ReadTGDataByIndex("NameCard", "type", 1);
   loadingTitle.value = "对成就系列数据进行排序";
@@ -180,11 +179,11 @@ async function selectSeries (index: number) {
   selectedIndex.value = index;
   selectedSeries.value = seriesList.value[index].id;
   loadingTitle.value = "正在查找对应的成就名片";
-  let getCard: NameCard;
+  let getCard: TGTypes.NameCard;
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
     getCard = CardsInfo.value.find((card) => card.name === seriesList.value[index].card)!;
   } else {
-    getCard = {} as NameCard;
+    getCard = {} as TGTypes.NameCard;
   }
   loadingTitle.value = "正在对成就数据进行排序";
   getAchievements.sort((a, b) => {
@@ -214,7 +213,7 @@ async function searchCard () {
   }
   loadingTitle.value = "正在搜索";
   loading.value = true;
-  const res: TGAchievement[] = [];
+  const res: TGTypes.Achievement[] = [];
   const allAchievements = await ReadAllTGData("Achievements");
   allAchievements.map((achievement) => {
     if (achievement.name.includes(search.value) || achievement.description.includes(search.value)) {
@@ -266,7 +265,7 @@ async function importJson () {
     await Promise.allSettled(
       remoteData.list.map(async (data) => {
         const id = data.id;
-        const localData: TGAchievement = (await ReadTGDataByKey("Achievements", [id]))[0];
+        const localData: TGTypes.Achievement = (await ReadTGDataByKey("Achievements", [id]))[0];
         // 获取 timeStamp 2023-03-15 00:00:00
         const localTime = localData.completed_time;
         // 如果本地数据不存在，或者本地数据的 timeStamp 小于远程数据的 timeStamp，更新数据

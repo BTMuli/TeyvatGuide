@@ -7,7 +7,6 @@
 
 import { getPostData } from "../request/post";
 import { type GachaCard, type GachaData } from "../interface/gacha";
-import { type Map } from "../../../interface/Base";
 
 /**
  * @description 根据卡池信息转为渲染用的卡池信息
@@ -18,7 +17,7 @@ import { type Map } from "../../../interface/Base";
  */
 export async function getGachaCard (
   gachaData: GachaData[],
-  poolCover: Map<string> | undefined = undefined,
+  poolCover: Record<number, string> | undefined = undefined,
 ): Promise<GachaCard[]> {
   const gachaCard: GachaCard[] = [];
   await Promise.allSettled(

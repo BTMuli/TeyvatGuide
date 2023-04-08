@@ -57,15 +57,13 @@ import { createTGWindow } from "../utils/TGWindow";
 import MysOper from "../plugins/Mys";
 // interface
 import { PositionCard } from "../plugins/Mys/interface/position";
-import { Map } from "../interface/Base";
-
 // loading
 const loading = ref(true as boolean);
 
 // 数据
 const positionCards = ref([] as PositionCard[]);
-const positionTimeGet = ref({} as Map<string>);
-const positionTimeEnd = ref({} as Map<number>);
+const positionTimeGet = ref({} as Record<number, string>);
+const positionTimeEnd = ref({} as Record<number, number>);
 const router = useRouter();
 
 // expose

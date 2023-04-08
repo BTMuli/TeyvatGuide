@@ -6,15 +6,15 @@
  * @since Alpha v0.1.2
  */
 import { AppData } from "../app";
+import type TGTypes from "../../core/types/TGTypes";
 import { type BaseCard } from "../../interface/GCG";
-import { type DBConfig } from "../../interface/Base";
 
 /**
  * @description 卡牌表参数
  * @since Alpha v0.1.2
- * @returns {DBConfig}
+ * @returns {TGTypes.DBConfig}
  */
-export const Config: DBConfig = {
+export const Config: TGTypes.DBConfig = {
   storeName: "GCG",
   keyPath: "id",
   // 根据 type 分类

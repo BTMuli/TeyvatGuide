@@ -5,7 +5,7 @@
  * @ since Alpha v0.1.2
  */
 
-namespace TGAchievements {
+namespace TGAchievement {
   /**
    * @description 本应用的成就类型
    * @since Alpha v0.1.2
@@ -62,3 +62,5 @@ namespace TGAchievements {
     icon: string
   }
 }
+
+export default TGAchievement;

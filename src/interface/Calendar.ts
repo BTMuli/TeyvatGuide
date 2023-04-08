@@ -5,8 +5,6 @@
  * @since Alpha v0.1.2
  */
 
-import { type Map } from "./Base";
-
 /**
  * @description 素材日历接口
  * @interface CalendarData
@@ -17,8 +15,8 @@ import { type Map } from "./Base";
  * @returns {CalendarData}
  */
 export interface CalendarData {
-  characters: Map<CalendarItem>
-  weapons: Map<CalendarItem>
+  characters: Record<number, CalendarItem>
+  weapons: Record<number, CalendarItem>
 }
 
 /**

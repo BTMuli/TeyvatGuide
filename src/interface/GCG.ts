@@ -173,7 +173,7 @@ export interface MonsterCard extends BaseCard {
  * @property {EnumElement} element 元素
  * @property {EnumWeapon} weapon 武器
  * @property {EnumCamp} camp 阵营
- * @returns	{CharacterCardType}
+ * @returns {CharacterCardType}
  */
 export interface CharacterCardType {
   element: EnumElement
@@ -189,7 +189,7 @@ export interface CharacterCardType {
  * @property {EnumActionType} actionType 类型
  * @property {EnumActionTag} actionTag 标签
  * @property {EnumActionCost} actionCost 花费
- * @returns	{ActionCardType}
+ * @returns {ActionCardType}
  */
 export interface ActionCardType {
   actionType: EnumActionType

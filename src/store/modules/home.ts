@@ -9,8 +9,6 @@
 import { ref } from "vue";
 // pinia
 import { defineStore } from "pinia";
-// interface
-import { type Map } from "../../interface/Base";
 
 export const useHomeStore = defineStore(
   "home", () => {
@@ -31,7 +29,7 @@ export const useHomeStore = defineStore(
       poolShow,
       positionShow,
     });
-    const poolCover = ref({} satisfies Map<string>);
+    const poolCover = ref({} satisfies Record<number, string>);
 
     function init (): void {
       calendarShow.value = {

@@ -2,11 +2,10 @@
  * @file plugins Mys interface calendar.ts
  * @description Mys 插件日历接口
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  */
 
 import { type MysResponse } from "./base";
-import { type Map } from "../../../interface/Base";
 
 /**
  * @description 日历返回数据
@@ -84,7 +83,7 @@ export interface CalendarContent {
 
 /**
  * @description 渲染用的日历数据
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  * @interface CalendarCard
  * @property {number} id 角色/武器 ID
  * @property {number} type 角色/武器，角色为 2，武器为 1
@@ -92,7 +91,7 @@ export interface CalendarContent {
  * @property {string} cover 角色/武器 封面
  * @property {string} url 跳转链接，一般为 content_id
  * @property {string[]} drop_day 掉落日
- * @property {Map<number>} sort_day 排序
+ * @property {Record<number, number>} sort_day 排序
  * @property {CalendarContent[]} contentInfos 材料内容
  * @returns {CalendarCard}
  */
@@ -103,6 +102,6 @@ export interface CalendarCard {
   cover: string
   url: string
   drop_day: string[]
-  sort_day: Map<number>
+  sort_day: Record<number, number>
   contentInfos: CalendarContent[]
 }

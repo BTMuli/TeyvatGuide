@@ -12,20 +12,18 @@ import GCG from "./GCG.json";
 import nameCards from "./nameCards.json";
 import calendar from "./calendar.json";
 // Interface
-import { type Achievement, type AchievementSeries } from "../../interface/Achievements";
-import { type Map } from "../../interface/Base";
+import type TGAppTypes from "../../core/types/TGTypes";
 import { type BaseCard } from "../../interface/GCG";
-import { type NameCard } from "../../interface/NameCard";
 import { type CalendarData } from "../../interface/Calendar";
 
 export const AppDataList = [
   {
     name: "achievements.json",
-    data: achievements as Map<Achievement>,
+    data: achievements as Record<number, TGAppTypes.Achievement>,
   },
   {
     name: "achievementSeries.json",
-    data: achievementSeries as Map<AchievementSeries>,
+    data: achievementSeries as Record<number, TGAppTypes.AchievementSeries>,
   },
   {
     name: "GCG.json",
@@ -33,18 +31,18 @@ export const AppDataList = [
   },
   {
     name: "nameCards.json",
-    data: nameCards as unknown as Map<NameCard[]>,
+    data: nameCards as Record<number, TGAppTypes.NameCard[]>,
   },
   {
     name: "calendar.json",
-    data: calendar as Map<CalendarData>,
+    data: calendar as Record<number, CalendarData>,
   },
 ];
 
 export const AppData = {
-  achievements: achievements as Map<Achievement>,
-  achievementSeries: achievementSeries as Map<AchievementSeries>,
+  achievements: achievements as Record<number, TGAppTypes.Achievement>,
+  achievementSeries: achievementSeries as Record<number, TGAppTypes.AchievementSeries>,
   GCG: GCG as BaseCard[],
-  nameCards: nameCards as unknown as Map<NameCard[]>,
-  calendar: calendar as Map<CalendarData>,
+  nameCards: nameCards as Record<number, TGAppTypes.NameCard[]>,
+  calendar: calendar as Record<number, CalendarData>,
 };

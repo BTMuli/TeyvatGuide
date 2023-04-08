@@ -98,7 +98,6 @@ import { ref, onMounted } from "vue";
 // data
 import { TGAppData } from "../data/index";
 // interface
-import { type Map } from "../interface/Base";
 import { CalendarData, CalendarItem, MiniMaterial } from "../interface/Calendar";
 import { OBC_CONTENT_API } from "../plugins/Mys/interface/utils";
 import { createTGWindow } from "../utils/TGWindow";
@@ -107,13 +106,13 @@ import { createTGWindow } from "../utils/TGWindow";
 const loading = ref(true as boolean);
 
 // data
-const calendarData = ref(TGAppData.calendar as Map<CalendarData>);
+const calendarData = ref(TGAppData.calendar as Record<number, CalendarData>);
 const weekNow = ref(0 as number);
 const btnNow = ref(0 as number);
 const dateNow = ref(new Date().toLocaleDateString());
 const calendarNow = ref({} as CalendarData);
-const characterCards = ref({} as Map<CalendarItem>);
-const weaponCards = ref({} as Map<CalendarItem>);
+const characterCards = ref({} as Record<number, CalendarItem>);
+const weaponCards = ref({} as Record<number, CalendarItem>);
 
 const btnText = [
   {

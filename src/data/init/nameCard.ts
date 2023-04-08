@@ -6,15 +6,14 @@
  */
 
 import { AppData } from "../app";
-import { type NameCard } from "../../interface/NameCard";
-import { type Map, type DBConfig } from "../../interface/Base";
+import type TGTypes from "../../core/types/TGTypes";
 
 /**
  * @description 名片表参数
  * @since Alpha v0.1.2
- * @returns {DBConfig}
+ * @returns {TGTypes.DBConfig}
  */
-export const Config: DBConfig = {
+export const Config: TGTypes.DBConfig = {
   storeName: "NameCard",
   keyPath: "name",
   indexes: ["type"],
@@ -23,13 +22,13 @@ export const Config: DBConfig = {
 /**
  * @description 名片数据
  * @since Alpha v0.1.2
- * @return {NameCard[]}
+ * @return {TGTypes.NameCard[]}
  */
-export function getData (): NameCard[] {
-  const data: Map<NameCard[]> = AppData.nameCards;
-  const result: NameCard[] = [];
+export function getData (): TGTypes.NameCard[] {
+  const data: Record<number, TGTypes.NameCard[]> = AppData.nameCards;
+  const result: TGTypes.NameCard[] = [];
   Object.keys(data).map((key) => {
-    const cards: NameCard[] = data[Number(key)];
+    const cards: TGTypes.NameCard[] = data[Number(key)];
     return cards.map((card) => result.push(card));
   });
   return result;

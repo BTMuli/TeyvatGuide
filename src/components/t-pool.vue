@@ -57,7 +57,6 @@ import { createTGWindow } from "../utils/TGWindow";
 import MysOper from "../plugins/Mys";
 // interface
 import { GachaCard, GachaData } from "../plugins/Mys/interface/gacha";
-import { Map } from "../interface/Base";
 
 // vue
 const router = useRouter();
@@ -70,8 +69,8 @@ const loading = ref(true as boolean);
 
 // data
 const poolCards = ref([] as GachaCard[]);
-const poolTimeGet = ref({} as Map<string>);
-const poolTimePass = ref({} as Map<number>);
+const poolTimeGet = ref({} as Record<number, string>);
+const poolTimePass = ref({} as Record<number, number>);
 
 // expose
 defineExpose({
@@ -87,7 +86,7 @@ onMounted(async () => {
   }
   if (!checkCover(gachaData)) {
     poolCards.value = await MysOper.Gacha.card(gachaData);
-    const coverData: Map<string> = {};
+    const coverData: Record<number, string> = {};
     poolCards.value.map((pool) => {
       coverData[pool.post_id] = pool.cover;
       return pool;
@@ -119,7 +118,7 @@ function checkCover (data: GachaData[]) {
     return false;
   }
   // 获取缓存
-  const cover = homeStore.poolCover satisfies Map<string>;
+  const cover = homeStore.poolCover satisfies Record<number, string>;
   if (cover === undefined || cover === null) {
     return false;
   }
