@@ -19,38 +19,40 @@
           {{ text.text }}
         </v-btn>
       </v-list-item-title>
-      <div v-if="!loading" class="calendar-grid">
+      <div v-if="!loading" class="calendar-box">
         <div class="calendar-single">
           <div class="card-title">
             天赋培养
           </div>
-          <div
-            v-for="character of characterCards"
-            :key="character.title"
-            class="calendar-content"
-          >
-            <div class="content-title">
-              {{ character.title }}
-            </div>
-            <div class="content-material">
-              <v-img
-                v-for="material of character.materials"
-                :key="material.content_id"
-                alt="material.content_id"
-                :src="material.icon"
-                class="calendar-icon"
-                @click="showContent(material)"
-              />
-            </div>
-            <div class="content-detail">
-              <v-img
-                v-for="content of character.contents"
-                :key="content.content_id"
-                alt="content.content_id"
-                :src="content.icon"
-                class="calendar-icon"
-                @click="showContent(content)"
-              />
+          <div class="calendar-grid">
+            <div
+              v-for="character of characterCards"
+              :key="character.title"
+              class="calendar-content"
+            >
+              <div class="content-title">
+                {{ character.title }}
+              </div>
+              <div class="content-material">
+                <v-img
+                  v-for="material of character.materials"
+                  :key="material.content_id"
+                  alt="material.content_id"
+                  :src="material.icon"
+                  class="calendar-icon"
+                  @click="showContent(material)"
+                />
+              </div>
+              <div class="content-detail">
+                <v-img
+                  v-for="content of character.contents"
+                  :key="content.content_id"
+                  alt="content.content_id"
+                  :src="content.icon"
+                  class="calendar-icon"
+                  @click="showContent(content)"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -58,33 +60,35 @@
           <div class="card-title">
             武器突破
           </div>
-          <div
-            v-for="weapon of weaponCards"
-            :key="weapon.title"
-            class="calendar-content"
-          >
-            <div class="content-title">
-              {{ weapon.title }}
-            </div>
-            <div class="content-material">
-              <v-img
-                v-for="material of weapon.materials"
-                :key="material.content_id"
-                alt="material.content_id"
-                :src="material.icon"
-                class="calendar-icon"
-                @click="showContent(material)"
-              />
-            </div>
-            <div class="content-detail">
-              <v-img
-                v-for="content of weapon.contents"
-                :key="content.content_id"
-                alt="content.content_id"
-                :src="content.icon"
-                class="calendar-icon"
-                @click="showContent(content)"
-              />
+          <div class="calendar-grid">
+            <div
+              v-for="weapon of weaponCards"
+              :key="weapon.title"
+              class="calendar-content"
+            >
+              <div class="content-title">
+                {{ weapon.title }}
+              </div>
+              <div class="content-material">
+                <v-img
+                  v-for="material of weapon.materials"
+                  :key="material.content_id"
+                  alt="material.content_id"
+                  :src="material.icon"
+                  class="calendar-icon"
+                  @click="showContent(material)"
+                />
+              </div>
+              <div class="content-detail">
+                <v-img
+                  v-for="content of weapon.contents"
+                  :key="content.content_id"
+                  alt="content.content_id"
+                  :src="content.icon"
+                  class="calendar-icon"
+                  @click="showContent(content)"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -199,14 +203,18 @@ function getContents (day: number) {
   border-radius: 10px;
 }
 
+.calendar-box {
+  margin:5px;
+}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-gap: 10px;
-  margin: 10px;
 }
 
 .calendar-single {
+  margin-bottom: 10px;
   background: #faf7e8;
   color: #546d8b;
   border-radius: 10px;
@@ -216,13 +224,14 @@ function getContents (day: number) {
   font-size: 1.5rem;
   font-family: Genshin, serif;
   color: #546D8B;
-  padding: 10px;
+  padding-left: 15px;
+  padding-top: 10px;
 }
 
 .calendar-content {
   background: #546D8B;
   color:#faf7e8;
-  margin: 10px;
+  margin: 5px;
   border-radius: 10px;
   padding: 10px;
 }
