@@ -98,6 +98,11 @@
           </v-btn>
         </template>
       </v-list-item>
+      <v-list-item title="获取Cookie" @click="tryConfirm('getCookie')">
+        <template #prepend>
+          <v-icon>mdi-cookie</v-icon>
+        </template>
+      </v-list-item>
       <v-list-subheader inset class="config-header">
         路径
       </v-list-subheader>
@@ -127,7 +132,7 @@ import { getBuildTime } from "../utils/TGBuild";
 import TLoading from "../components/t-loading.vue";
 import TConfirm from "../components/t-confirm.vue";
 // tauri
-import { dialog, fs, app, os } from "@tauri-apps/api";
+import { dialog, fs, app, os, tauri } from "@tauri-apps/api";
 // store
 import { useAppStore } from "../store/modules/app";
 import { useHomeStore } from "../store/modules/home";
@@ -209,6 +214,11 @@ function tryConfirm (oper: string) {
       confirmOper.value = "delApp";
       confirmShow.value = true;
       break;
+    case "getCookie":
+      confirmText.value = "请根据新窗口的提示操作。";
+      confirmOper.value = "getCookie";
+      confirmShow.value = true;
+      break;
   }
 }
 
@@ -223,6 +233,9 @@ async function doConfirm (oper: string) {
       break;
     case "delApp":
       await initAppData();
+      break;
+    case "getCookie":
+      await getCookie();
       break;
     default:
       break;
@@ -289,10 +302,15 @@ async function submitHome () {
     return;
   }
   // 设置
-  await homeStore.setShowValue(show);
+  homeStore.setShowValue(show);
   snackbarText.value = "已修改!";
   snackbarColor.value = "success";
   snackbar.value = true;
+}
+
+// 获取 Cookie
+async function getCookie () {
+  await tauri.invoke("mys_login");
 }
 </script>
 
