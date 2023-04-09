@@ -2,12 +2,12 @@
  * @file plugins Mys interface news.ts
  * @description Mys 插件咨讯接口
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha
+ * @since Alpha v0.1.2
  */
 
 import { type MysResponse } from "./base";
 import { type Post, type Forum, type Topic, type PostStat } from "./post";
-import { type User, type SelfOperation } from "./user";
+import { type UserInfoPost, type SelfOperation } from "./user";
 import { type ImageData, type HelpSys } from "./utils";
 
 /**
@@ -39,12 +39,12 @@ export interface NewsData {
 
 /**
  * @description 咨讯列表项
- * @since Alpha
+ * @since Alpha v0.1.2
  * @interface NewsItem
  * @property {Post} post 帖子
  * @property {Forum} forum 版块
  * @property {Topic[]} topics 话题
- * @property {User} user 发帖用户
+ * @property {UserInfoPost} user 发帖用户
  * @property {SelfOperation} self_operation 用户操作
  * @property {PostStat} stat 帖子统计
  * @property {HelpSys} help_sys 帮助系统，可能为 null
@@ -68,7 +68,7 @@ export interface NewsItem {
   post: Post
   forum: Forum
   topics: Topic[]
-  user: User
+  user: UserInfoPost
   self_operation: SelfOperation
   stat: PostStat
   help_sys: HelpSys

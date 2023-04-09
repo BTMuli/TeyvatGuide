@@ -6,7 +6,7 @@
  */
 
 import { type MysResponse } from "./base";
-import { type User } from "./user";
+import { type UserInfoPost } from "./user";
 
 /**
  * @description 抽奖返回数据
@@ -27,7 +27,7 @@ export interface LotteryResponse extends MysResponse {
  * @since Alpha v0.1.1
  * @interface LotteryData
  * @property {string} id 抽奖 ID
- * @property {User} creator 创建者
+ * @property {UserInfoPost} creator 创建者
  * @property {string} draw_time 抽奖时间
  * @property {string} participant_way 参与方式 // Forward: 转发
  * @property {boolean} is_expect_unfocus_user 是否限制未关注用户
@@ -45,7 +45,7 @@ export interface LotteryResponse extends MysResponse {
  */
 export interface LotteryData {
   id: string
-  creator: User
+  creator: UserInfoPost
   draw_time: string
   participant_way: string
   is_expect_unfocus_user: boolean
@@ -78,7 +78,7 @@ export interface LotteryReward {
   winner_number: number
   scheduled_winner_number: number
   is_send_by_post: boolean
-  users: User[]
+  users: UserInfoPost[]
   id: string
 }
 
@@ -98,7 +98,7 @@ export interface LotteryCard {
   id: string
   participantWay: string
   status: string
-  creator: User
+  creator: UserInfoPost
   drawTime: string
   rewards: LotteryRewardCard[]
 }
@@ -117,5 +117,5 @@ export interface LotteryRewardCard {
   rewardName: string
   winnerNumber: number
   scheduledWinnerNumber: number
-  users: User[]
+  users: UserInfoPost[]
 }

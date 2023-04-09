@@ -7,7 +7,7 @@
 
 import { type MysResponse } from "./base";
 import { type NewsMeta } from "./news";
-import { type User, type SelfOperation } from "./user";
+import { type UserInfoPost, type SelfOperation } from "./user";
 import { type ImageData, type HelpSys } from "./utils";
 
 /**
@@ -55,7 +55,7 @@ export interface PostData {
   post: Post
   forum: Forum
   topics: Topic[]
-  user: User
+  user: UserInfoPost
   self_operation: SelfOperation
   stat: PostStat
   help_sys: HelpSys | null
