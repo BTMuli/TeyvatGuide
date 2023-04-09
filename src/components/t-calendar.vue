@@ -102,7 +102,7 @@ import { ref, onMounted } from "vue";
 // data
 import { TGAppData } from "../data/index";
 // interface
-import { CalendarData, CalendarItem, MiniMaterial } from "../interface/Calendar";
+import type TGTypes from "../core/types/TGTypes";
 import { OBC_CONTENT_API } from "../plugins/Mys/interface/utils";
 import { createTGWindow } from "../utils/TGWindow";
 
@@ -110,13 +110,13 @@ import { createTGWindow } from "../utils/TGWindow";
 const loading = ref(true as boolean);
 
 // data
-const calendarData = ref(TGAppData.calendar as Record<number, CalendarData>);
+const calendarData = ref(TGAppData.calendar as Record<number, TGTypes.CalendarData>);
 const weekNow = ref(0 as number);
 const btnNow = ref(0 as number);
 const dateNow = ref(new Date().toLocaleDateString());
-const calendarNow = ref({} as CalendarData);
-const characterCards = ref({} as Record<number, CalendarItem>);
-const weaponCards = ref({} as Record<number, CalendarItem>);
+const calendarNow = ref({} as TGTypes.CalendarData);
+const characterCards = ref({} as Record<number, TGTypes.CalendarItem>);
+const weaponCards = ref({} as Record<number, TGTypes.CalendarItem>);
 
 const btnText = [
   {
@@ -172,7 +172,7 @@ function getCalendar (day: number) {
   return calendarData.value[week];
 }
 
-function showContent (material: MiniMaterial) {
+function showContent (material: TGTypes.CalendarMaterial) {
   const url = OBC_CONTENT_API.replace("{content_id}", material.content_id.toString());
   createTGWindow(url, "素材详情", material.name, 1200, 800, true);
 }

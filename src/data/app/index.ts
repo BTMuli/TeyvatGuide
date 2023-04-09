@@ -14,7 +14,6 @@ import calendar from "./calendar.json";
 // Interface
 import type TGAppTypes from "../../core/types/TGTypes";
 import { type BaseCard } from "../../interface/GCG";
-import { type CalendarData } from "../../interface/Calendar";
 
 export const AppDataList = [
   {
@@ -35,7 +34,7 @@ export const AppDataList = [
   },
   {
     name: "calendar.json",
-    data: calendar as Record<number, CalendarData>,
+    data: calendar as Record<number, TGAppTypes.CalendarData>,
   },
 ];
 
@@ -44,5 +43,5 @@ export const AppData = {
   achievementSeries: achievementSeries as Record<number, TGAppTypes.AchievementSeries>,
   GCG: GCG as BaseCard[],
   nameCards: nameCards as Record<number, TGAppTypes.NameCard[]>,
-  calendar: calendar as Record<number, CalendarData>,
+  calendar: calendar as Record<number, TGAppTypes.CalendarData>,
 };

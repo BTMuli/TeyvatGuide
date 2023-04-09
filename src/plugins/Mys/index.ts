@@ -2,7 +2,7 @@
  * @file plugins Mys index.ts
  * @description Mys plugin index
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  */
 
 // Post
@@ -20,9 +20,6 @@ import { getNoticeCard, getActivityCard, getNewsCard } from "./utils/news";
 // Lottery
 import { getLotteryData } from "./request/lottery";
 import { getLotteryCard, getLotteryRewardCard } from "./utils/lottery";
-// Calendar
-import { getCalendarData } from "./request/calendar";
-import { getCalendarCard } from "./utils/calendar";
 
 const MysOper = {
   Post: {
@@ -55,10 +52,6 @@ const MysOper = {
       lottery: getLotteryCard,
       reward: getLotteryRewardCard,
     },
-  },
-  Calendar: {
-    get: getCalendarData,
-    card: getCalendarCard,
   },
 };
 
