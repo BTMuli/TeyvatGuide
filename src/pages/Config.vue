@@ -98,9 +98,20 @@
           </v-btn>
         </template>
       </v-list-item>
-      <v-list-item title="获取Cookie" @click="tryConfirm('getCookie')">
+      <v-list-item>
         <template #prepend>
           <v-icon>mdi-cookie</v-icon>
+        </template>
+        <v-list-item-title style="cursor: pointer;" @click="tryConfirm('getCookie')">
+          重新获取 Cookie
+        </v-list-item-title>
+        <template #append>
+          <v-btn class="card-btn" @click="readCookie()">
+            <template #prepend>
+              <img src="../assets/icons/circle-check.svg" alt="check">
+              查看 Cookie
+            </template>
+          </v-btn>
         </template>
       </v-list-item>
       <v-list-subheader inset class="config-header">
@@ -219,6 +230,11 @@ function tryConfirm (oper: string) {
       confirmOper.value = "getCookie";
       confirmShow.value = true;
       break;
+    case "readCookie":
+      confirmText.value = "请确认已经获取到Cookie。";
+      confirmOper.value = "readCookie";
+      confirmShow.value = true;
+      break;
   }
 }
 
@@ -232,10 +248,14 @@ async function doConfirm (oper: string) {
       await delUserData();
       break;
     case "delApp":
-      await initAppData();
+      initAppData();
       break;
     case "getCookie":
-      await getCookie();
+      await tauri.invoke("mys_login");
+      tryConfirm("readCookie");
+      break;
+    case "readCookie":
+      await readCookie();
       break;
     default:
       break;
@@ -267,15 +287,15 @@ async function delUserData () {
   });
   snackbarText.value = "用户数据已删除!";
   snackbar.value = true;
-  await achievementsStore.init();
+  achievementsStore.init();
   await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData });
   await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
 }
 
 // 恢复默认配置
-async function initAppData () {
-  await homeStore.init();
-  await achievementsStore.init();
+function initAppData () {
+  homeStore.init();
+  achievementsStore.init();
   snackbarText.value = "已恢复默认配置!";
   snackbar.value = true;
   setTimeout(() => {
@@ -284,15 +304,14 @@ async function initAppData () {
 }
 
 // 开启 dev 模式
-async function submitDevMode () {
-  await new Promise((resolve) => setTimeout(resolve, 200));
+function submitDevMode () {
   appStore.devMode ? (snackbarText.value = "已开启 dev 模式!") : (snackbarText.value = "已关闭 dev 模式!");
   snackbarColor.value = "success";
   snackbar.value = true;
 }
 
 // 修改首页显示
-async function submitHome () {
+function submitHome () {
   // 获取已选
   const show = showHome.value;
   if (show.length < 1) {
@@ -309,8 +328,9 @@ async function submitHome () {
 }
 
 // 获取 Cookie
-async function getCookie () {
-  await tauri.invoke("mys_login");
+async function readCookie () {
+  const cookie = await tauri.invoke("read_cookie");
+  alert(cookie);
 }
 </script>
 
