@@ -140,6 +140,7 @@
 // vue
 import { onMounted, ref } from "vue";
 import { getBuildTime } from "../utils/TGBuild";
+
 import TLoading from "../components/t-loading.vue";
 import TConfirm from "../components/t-confirm.vue";
 // tauri
@@ -147,6 +148,7 @@ import { dialog, fs, app, os, tauri } from "@tauri-apps/api";
 // store
 import { useAppStore } from "../store/modules/app";
 import { useHomeStore } from "../store/modules/home";
+import { useHk4eStore } from "../store/modules/hk4e";
 import { useAchievementsStore } from "../store/modules/achievements";
 // utils
 import { WriteTGData } from "../utils/TGIndex";
@@ -172,6 +174,7 @@ const loading = ref(true as boolean);
 
 // data
 const showHome = ref(homeStore.getShowValue() as string[]);
+const hk4eStore = useHk4eStore();
 
 // snackbar
 const snackbar = ref(false as boolean);
@@ -329,9 +332,10 @@ function submitHome () {
 
 // 获取 Cookie
 async function readCookie () {
+  const cookie = hk4eStore.getCookie();
   // todo 验证 cookie 是否有效
-  const cookie = await tauri.invoke("read_cookie") as string || document.cookie;
-  if (cookie === null || cookie === "") {
+  const tryReadCookie = await tauri.invoke("read_cookie") as string || cookie;
+  if (cookie === null || tryReadCookie === "") {
     snackbarText.value = "Cookie 为空!";
     snackbarColor.value = "error";
     snackbar.value = true;
@@ -339,10 +343,9 @@ async function readCookie () {
     snackbarText.value = "Cookie 获取成功!";
     snackbarColor.value = "success";
     snackbar.value = true;
-    alert(cookie);
+    hk4eStore.setCookie(tryReadCookie);
+    alert(`Cookie 获取成功！\n\n${tryReadCookie}`);
   }
-  // 将 cookie 保存到本地
-  document.cookie = cookie;
 }
 </script>
 
