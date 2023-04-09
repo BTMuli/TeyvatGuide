@@ -21,10 +21,10 @@ import JsonViewer from "vue-json-viewer";
 import TLoading from "../components/t-loading.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
-// plugins
-import GenshinOper from "../plugins/Genshin";
+// utils
+import TGRequest from "../core/request/TGRequest";
 // interface
-import { AnnoListItem, Announcement } from "../plugins/Genshin/interface/announcement";
+import type TGTypes from "../core/types/TGTypes";
 
 // loading
 const loading = ref(true as boolean);
@@ -46,13 +46,13 @@ onMounted(async () => {
   }
   // 获取数据
   loadingTitle.value = "正在获取数据...";
-  const listData = await GenshinOper.Announcement.getList();
-  listData.list.map((item: Announcement) => {
-    return item.list.map((single: AnnoListItem) => {
+  const listData = await TGRequest.Anno.getList();
+  listData.list.map((item: TGTypes.Announcement) => {
+    return item.list.map((single: TGTypes.AnnoListItem) => {
       return single.ann_id === annoId ? (jsonList = single) : null;
     });
   });
-  jsonContent = await GenshinOper.Announcement.getContent(annoId);
+  jsonContent = await TGRequest.Anno.getContent(annoId);
   setTimeout(() => {
     loading.value = false;
   }, 200);

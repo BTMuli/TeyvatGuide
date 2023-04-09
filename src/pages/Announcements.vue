@@ -28,14 +28,14 @@
             <v-card-actions>
               <v-btn class="anno-btn" @click="toPost(item)">
                 <template #prepend>
-                  <img :src="item.tag_icon || '../assets/icons/arrow-right.svg'" alt="right">
+                  <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right">
                 </template>
                 查看
               </v-btn>
               <v-card-subtitle v-show="!appStore.devMode">
                 <v-icon>mdi-calendar</v-icon>
-                {{ item.start_time.split(" ")[0] }} -
-                {{ item.end_time.split(" ")[0] }}
+                {{ item.startTime.split(" ")[0] }} -
+                {{ item.endTime.split(" ")[0] }}
               </v-card-subtitle>
               <v-card-subtitle v-show="appStore.devMode">
                 id: {{ item.id }}
@@ -61,14 +61,14 @@
             <v-card-actions>
               <v-btn class="anno-btn" @click="toPost(item)">
                 <template #prepend>
-                  <img :src="item.tag_icon || '../assets/icons/arrow-right.svg'" alt="right">
+                  <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right">
                 </template>
                 查看
               </v-btn>
               <v-card-subtitle v-show="!appStore.devMode">
                 <v-icon>mdi-calendar</v-icon>
-                {{ item.start_time.split(" ")[0] }} -
-                {{ item.end_time.split(" ")[0] }}
+                {{ item.startTime.split(" ")[0] }} -
+                {{ item.endTime.split(" ")[0] }}
               </v-card-subtitle>
               <v-card-subtitle v-show="appStore.devMode">
                 id: {{ item.id }}
@@ -92,13 +92,15 @@
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import TLoading from "../components/t-loading.vue";
-// plugin
-import GenshinOper from "../plugins/Genshin";
-// utils
-import { createTGWindow } from "../utils/TGWindow";
-// interface
-import { AnnoListData, AnnoListCard } from "../plugins/Genshin/interface/announcement";
+// store
 import { useAppStore } from "../store/modules/app";
+// utils
+import TGRequest from "../core/request/TGRequest";
+import TGUtils from "../core/utils/TGUtils";
+import { createTGWindow } from "../utils/TGWindow";
+
+// interface
+import type TGTypes from "../core/types/TGTypes";
 
 // store
 const appStore = useAppStore();
@@ -112,18 +114,18 @@ const router = useRouter();
 // 数据
 const tab = ref("");
 const annoCards = ref({
-  activity: [] as AnnoListCard[],
-  game: [] as AnnoListCard[],
+  activity: [] as TGTypes.AnnoListCard[],
+  game: [] as TGTypes.AnnoListCard[],
 });
-const annoData = ref({} as AnnoListData);
+const annoData = ref({} as TGTypes.AnnoListData);
 
 onMounted(async () => {
   loadingTitle.value = "正在获取公告数据";
-  annoData.value = await GenshinOper.Announcement.getList();
+  annoData.value = await TGRequest.Anno.getList();
   loadingTitle.value = "正在转换公告数据";
-  const listCards = GenshinOper.Announcement.card(annoData.value);
-  const activityCard = listCards.filter((item) => item.type_label === "活动公告");
-  const newsCard = listCards.filter((item) => item.type_label === "游戏公告");
+  const listCards = TGUtils.Anno.getCard(annoData.value);
+  const activityCard = listCards.filter((item) => item.typeLabel === "活动公告");
+  const newsCard = listCards.filter((item) => item.typeLabel === "游戏公告");
   annoCards.value = {
     activity: activityCard,
     game: newsCard,
@@ -136,7 +138,7 @@ async function switchNews () {
   await router.push("/news");
 }
 
-async function toPost (item: AnnoListCard) {
+async function toPost (item: TGTypes.AnnoListCard) {
   const path = router.resolve({
     name: "游戏内公告",
     params: {
@@ -147,7 +149,7 @@ async function toPost (item: AnnoListCard) {
   createTGWindow(path, "游戏内公告", item.title, 960, 720, false, false);
 }
 
-async function toJson (item: AnnoListCard) {
+async function toJson (item: TGTypes.AnnoListCard) {
   const path = router.resolve({
     name: "游戏内公告（JSON）",
     params: {

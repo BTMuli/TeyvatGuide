@@ -22,9 +22,10 @@ import TLoading from "../components/t-loading.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
 // plugins
-import GenshinOper from "../plugins/Genshin";
+import TGRequest from "../core/request/TGRequest";
+import TGUtils from "../core/utils/TGUtils";
 // interface
-import { AnnoContentItem } from "../plugins/Genshin/interface/announcement";
+import type TGTypes from "../core/types/TGTypes";
 
 // loading
 const loading = ref(true as boolean);
@@ -33,7 +34,7 @@ const loadingEmpty = ref(false as boolean);
 
 // 数据
 const annoId = Number(useRoute().params.anno_id);
-const annoData = ref({} as AnnoContentItem);
+const annoData = ref({} as TGTypes.AnnoContentItem);
 const annoHtml = ref("");
 
 onMounted(async () => {
@@ -47,9 +48,9 @@ onMounted(async () => {
   // 获取数据
   loadingTitle.value = "正在获取数据...";
   try {
-    annoData.value = await GenshinOper.Announcement.getContent(annoId);
+    annoData.value = await TGRequest.Anno.getContent(annoId);
     loadingTitle.value = "正在渲染数据...";
-    annoHtml.value = GenshinOper.Announcement.parser(annoData.value.content);
+    annoHtml.value = TGUtils.Anno.parseContent(annoData.value.content);
   } catch (error) {
     loadingEmpty.value = true;
     loadingTitle.value = "公告不存在或解析失败";

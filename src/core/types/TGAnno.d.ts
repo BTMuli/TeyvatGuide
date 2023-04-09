@@ -1,41 +1,42 @@
 /**
- * @file plugins Genshin annoList.ts
- * @description 原神游戏内公告列表接口
+ * @file core types TGAnnouncement.d.ts
+ * @description 类型定义，用于定义原神游戏内公告相关类型
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  */
 
-import { type Hk4eResponse } from "./base";
+import type TGBase from "./TGBase";
 
-/**
+namespace TGAnno {
+  /**
  * @description 原神游戏内公告列表返回
- * @since Alpha v0.1.1
- * @see ANNO_LIST_API
+ * @since Alpha v0.1.2
+ * @see TGApi.GameAnnoList
  * @interface AnnoListResponse
- * @extends Hk4eResponse
+ * @extends TGBase.BaseResponse
  * @property {AnnoListData} data 公告数据
  * @returns {AnnoListResponse}
  */
-export interface AnnoListResponse extends Hk4eResponse {
-  data: AnnoListData
-}
+  export interface AnnoListResponse extends TGBase.BaseResponse {
+    data: AnnoListData
+  }
 
-/**
+  /**
  * @description 原神游戏内公告内容返回
- * @since Alpha v0.1.1
- * @see ANNO_CONTENT_API
+ * @since Alpha v0.1.2
+ * @see TGApi.GameAnnoContent
  * @interface AnnoContentResponse
  * @extends Hk4eResponse
  * @property {AnnoContentData} data 公告数据
  * @returns {AnnoContentResponse}
  */
-export interface AnnoContentResponse extends Hk4eResponse {
-  data: AnnoContentData
-}
+  export interface AnnoContentResponse extends Hk4eResponse {
+    data: AnnoContentData
+  }
 
-/**
+  /**
  * @description 公告列表数据
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  * @interface AnnoListData
  * @property {Announcement[]} list 公告列表
  * @property {number} total 公告总数
@@ -52,25 +53,25 @@ export interface AnnoContentResponse extends Hk4eResponse {
  * @property {unknown} static_sign 静态签名
  * @returns {AnnoListData}
  */
-export interface AnnoListData {
-  list: Announcement[]
-  total: number
-  type_list: AnnoTypeList[]
-  alert: boolean
-  alert_id: number
-  time_zone: number
-  t: string
-  pic_list: unknown[]
-  pic_total: number
-  pic_type_list: unknown[]
-  pic_alert: boolean
-  pic_alert_id: number
-  static_sign: unknown
-}
+  export interface AnnoListData {
+    list: Announcement[]
+    total: number
+    type_list: AnnoTypeList[]
+    alert: boolean
+    alert_id: number
+    time_zone: number
+    t: string
+    pic_list: unknown[]
+    pic_total: number
+    pic_type_list: unknown[]
+    pic_alert: boolean
+    pic_alert_id: number
+    static_sign: unknown
+  }
 
-/**
+  /**
  * @description 公告内容数据
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  * @interface AnnoContentData
  * @property {AnnoContentItem[]} list 公告列表
  * @property {number} total 公告总数
@@ -78,46 +79,46 @@ export interface AnnoListData {
  * @property {number} pic_total 图片总数
  * @returns {AnnoContentData}
  */
-export interface AnnoContentData {
-  list: AnnoContentItem[]
-  total: number
-  pic_list: unknown[]
-  pic_total: number
-}
+  export interface AnnoContentData {
+    list: AnnoContentItem[]
+    total: number
+    pic_list: unknown[]
+    pic_total: number
+  }
 
-/**
+  /**
  * @description 公告类型列表
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  * @interface AnnoTypeList
  * @property {number} id 类型 ID
  * @property {string} name 类型名称
  * @property {string} mi18n_name 类型名称
  * @returns {AnnoTypeList}
  */
-export interface AnnoTypeList {
-  id: number
-  name: string
-  mi18n_name: string
-}
+  export interface AnnoTypeList {
+    id: number
+    name: string
+    mi18n_name: string
+  }
 
-/**
+  /**
  * @description 公告
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  * @interface Announcement
  * @property {AnnoListItem[]} list 公告列表
  * @property {number} type_id 类型 ID
  * @property {string} type_label 类型标签
  * @returns {Announcement}
  */
-export interface Announcement {
-  list: AnnoListItem[]
-  type_id: number
-  type_label: string
-}
+  export interface Announcement {
+    list: AnnoListItem[]
+    type_id: number
+    type_label: string
+  }
 
-/**
+  /**
  * @description 公告列表项
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  * @interface AnnoListItem
  * @property {number} ann_id 公告 ID
  * @property {string} title 公告标题
@@ -141,32 +142,32 @@ export interface Announcement {
  * @property {boolean} extra_remind 是否有额外提醒
  * @returns {AnnoListItem}
  */
-export interface AnnoListItem {
-  ann_id: number
-  title: string
-  subtitle: string
-  banner: string
-  content: unknown
-  type_label: string
-  tag_label: string
-  tag_icon: string
-  login_alert: number
-  lang: string
-  start_time: string
-  end_time: string
-  type: number
-  remind: number
-  alert: number
-  tag_start_time: string
-  tag_end_time: string
-  remind_ver: number
-  has_content: boolean
-  extra_remind: boolean
-}
+  export interface AnnoListItem {
+    ann_id: number
+    title: string
+    subtitle: string
+    banner: string
+    content: unknown
+    type_label: string
+    tag_label: string
+    tag_icon: string
+    login_alert: number
+    lang: string
+    start_time: string
+    end_time: string
+    type: number
+    remind: number
+    alert: number
+    tag_start_time: string
+    tag_end_time: string
+    remind_ver: number
+    has_content: boolean
+    extra_remind: boolean
+  }
 
-/**
+  /**
  * @description 公告内容列表
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  * @interface AnnoContentItem
  * @property {number} ann_id 公告 ID
  * @property {string} title 公告标题
@@ -176,36 +177,40 @@ export interface AnnoListItem {
  * @property {string} lang 公告语言
  * @returns {AnnoContentItem}
  */
-export interface AnnoContentItem {
-  ann_id: number
-  title: string
-  subtitle: string
-  banner: string
-  content: string
-  lang: string
-}
+  export interface AnnoContentItem {
+    ann_id: number
+    title: string
+    subtitle: string
+    banner: string
+    content: string
+    lang: string
+  }
 
-/**
+  /**
  * @description 渲染用公告列表数据
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.2
  * @interface AnnoListCard
  * @property {number} id 公告 ID
  * @property {string} title 公告标题
  * @property {string} subtitle 公告副标题
  * @property {string} banner 公告图片
- * @property {string} type_label 公告类型标签
- * @property {string} tag_icon 公告标签图标
- * @property {string} start_time 公告开始时间
- * @property {string} end_time 公告结束时间
+ * @property {string} typeLabel 公告类型标签
+ * @property {string} tagIcon 公告标签图标
+ * @property {string} startTime 公告开始时间
+ * @property {string} endTime 公告结束时间
  * @returns {AnnoListCard}
  */
-export interface AnnoListCard {
-  id: number
-  title: string
-  subtitle: string
-  banner: string
-  type_label: string
-  tag_icon: string
-  start_time: string
-  end_time: string
+  export interface AnnoListCard {
+    id: number
+    title: string
+    subtitle: string
+    banner: string
+    typeLabel: string
+    tagIcon: string
+    startTime: string
+    endTime: string
+  }
+
 }
+
+export default TGAnno;
