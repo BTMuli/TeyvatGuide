@@ -329,8 +329,20 @@ function submitHome () {
 
 // 获取 Cookie
 async function readCookie () {
-  const cookie = await tauri.invoke("read_cookie");
-  alert(cookie);
+  // todo 验证 cookie 是否有效
+  const cookie = await tauri.invoke("read_cookie") as string || document.cookie;
+  if (cookie === null || cookie === "") {
+    snackbarText.value = "Cookie 为空!";
+    snackbarColor.value = "error";
+    snackbar.value = true;
+  } else {
+    snackbarText.value = "Cookie 获取成功!";
+    snackbarColor.value = "success";
+    snackbar.value = true;
+    alert(cookie);
+  }
+  // 将 cookie 保存到本地
+  document.cookie = cookie;
 }
 </script>
 
