@@ -98,11 +98,18 @@
         </v-list-item>
       </v-list-group>
       <v-divider />
-      <v-list-item title="设置" value="config" link href="/config">
-        <template #prepend>
-          <img src="../assets/icons/setting.svg" alt="setting" class="side-icon">
-        </template>
-      </v-list-item>
+      <div class="bottom-menu">
+        <!-- <v-list-item :title="userInfo.nickname" value="user" link href="/user">
+          <template #prepend>
+            <img :src="userInfo.avatar" alt="userIcon" class="side-icon">
+          </template>
+        </v-list-item> -->
+        <v-list-item title="设置" value="config" link href="/config">
+          <template #prepend>
+            <img src="../assets/icons/setting.svg" alt="setting" class="side-icon">
+          </template>
+        </v-list-item>
+      </div>
     </v-list>
   </v-navigation-drawer>
 </template>
@@ -116,6 +123,7 @@ import { useAppStore } from "../store/modules/app";
 const appStore = useAppStore();
 
 const rail = ref(appStore.sidebar.collapse);
+
 const open = computed({
   get () {
     return appStore.getSubmenu();
@@ -135,6 +143,13 @@ function collapse () {
 <style lang="css" scoped>
 .side-list {
   font-family: Genshin-Light, serif;
+  height: 100vh;
+}
+
+.bottom-menu {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
 }
 
 .side-icon {
