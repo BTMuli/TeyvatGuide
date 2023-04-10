@@ -5,32 +5,26 @@
  * @since Alpha v0.1.2
  */
 
-// vue
-import { ref } from "vue";
 // pinia
 import { defineStore } from "pinia";
 
 export const useHk4eStore = defineStore(
   "hk4e",
   () => {
-    // cookie
-    const cookie = ref("");
-    // 解析后的 cookie
-    const cookieParsed = ref<Record<string, string>>({});
-
     // getCookie
     function getCookie (): string {
-      return cookie.value;
+      return localStorage.getItem("hk4eCookie") || "{}";
     }
 
     // 获取具体的 cookie
     function getCookieItem (key: string): string {
+      const cookie = getCookie();
+      const cookieParsed = JSON.parse(cookie);
       return cookieParsed.value[key];
     }
 
     // setCookie
     function setCookie (value: string): void {
-      cookie.value = value;
       // 解析 cookie
       const cookieObj: Record<string, string> = {};
       value.split(";").forEach((item) => {
@@ -39,7 +33,6 @@ export const useHk4eStore = defineStore(
       });
       // 保存 cookie
       localStorage.setItem("hk4eCookie", JSON.stringify(cookieObj));
-      cookieParsed.value = cookieObj;
     }
 
     return {
