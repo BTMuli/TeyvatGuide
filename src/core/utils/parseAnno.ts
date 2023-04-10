@@ -40,6 +40,11 @@ export function parseAnnoContent (data: string): string {
       });
     }
   });
+  htmlBase.querySelectorAll("img").forEach((img) => {
+    img.style.maxWidth = "100%";
+    img.style.borderRadius = "10px";
+    img.style.margin = "10px 0";
+  });
   htmlBase.querySelectorAll("a").forEach((a) => {
     const span = htmlBase.createElement("i");
     span.classList.add("mdi", "mdi-link-variant", "anno-link-icon");
