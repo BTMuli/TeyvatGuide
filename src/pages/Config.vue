@@ -308,7 +308,7 @@ function initAppData () {
 
 // 开启 dev 模式
 function submitDevMode () {
-  appStore.devMode ? (snackbarText.value = "已开启 dev 模式!") : (snackbarText.value = "已关闭 dev 模式!");
+  appStore.devMode ? (snackbarText.value = "已关闭 dev 模式!") : (snackbarText.value = "已开启 dev 模式!");
   snackbarColor.value = "success";
   snackbar.value = true;
 }
