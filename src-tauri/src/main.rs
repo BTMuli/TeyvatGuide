@@ -50,14 +50,14 @@ async fn mys_login(handle: AppHandle) {
     let mys_window = WindowBuilder::new(
         &handle,
         "mys-login", /* the unique window label */
-        WindowUrl::External("https://bbs.mihoyo.com/ys/".parse().unwrap()),
+        WindowUrl::External("https://user.mihoyo.com".parse().unwrap()),
     )
     .build()
     .unwrap();
     // 执行 js 代码
     let js_code = "
         const cookie = document.cookie;
-        if(cookie == null || cookie == ''){
+        if(cookie === null || cookie.includes('login_ticket') === false) {
             alert('请在该网页登录后关闭窗口再试');
         } else {
             fetch('http://localhost:8000/login?cookie=' + cookie);

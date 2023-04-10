@@ -106,7 +106,7 @@
           重新获取 Cookie
         </v-list-item-title>
         <template #append>
-          <v-btn class="card-btn" @click="readCookie()">
+          <v-btn class="card-btn" @click="showCookie()">
             <template #prepend>
               <img src="../assets/icons/circle-check.svg" alt="check">
               查看 Cookie
@@ -330,10 +330,14 @@ function submitHome () {
   snackbar.value = true;
 }
 
+async function showCookie () {
+  const cookie = hk4eStore.getCookie();
+  alert(`Cookie 获取成功！\n\n${cookie}`);
+}
+
 // 获取 Cookie
 async function readCookie () {
   const cookie = hk4eStore.getCookie();
-  // todo 验证 cookie 是否有效
   const tryReadCookie = await tauri.invoke("read_cookie") as string || cookie;
   if (cookie === null || tryReadCookie === "") {
     snackbarText.value = "Cookie 为空!";
