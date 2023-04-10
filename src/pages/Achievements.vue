@@ -107,13 +107,10 @@ import TLoading from "../components/t-loading.vue";
 import { dialog, fs } from "@tauri-apps/api";
 // Store
 import { useAchievementsStore } from "../store/modules/achievements";
-// Interface
-import { Achievements, UiafHeader, UiafAchievement } from "../plugins/UIAF/interface/UIAF";
-// Plugins
-import UiafOper from "../plugins/UIAF";
 // Utils
 import { createTGWindow } from "../utils/TGWindow";
 import { ReadAllTGData, ReadTGDataByIndex, ReadTGDataByKey, UpdateTGDataByKey } from "../utils/TGIndex";
+import { getHeader, readUIAF, verifyUIAF } from "../utils/UIAF";
 
 // Store
 const achievementsStore = useAchievementsStore();
@@ -124,8 +121,8 @@ const loadingTitle = ref("正在加载数据" as string);
 
 // data
 const title = ref(achievementsStore.title as string);
-const CardsInfo = ref([] as BTMuli.Genshin.NameCard.NameCard[]);
-const getCardInfo = ref({} as BTMuli.Genshin.NameCard.NameCard);
+const CardsInfo = ref([] as BTMuli.Genshin.NameCard[]);
+const getCardInfo = ref({} as BTMuli.Genshin.NameCard);
 // series
 const seriesList = ref([] as BTMuli.Genshin.AchievementSeries[]);
 const selectedIndex = ref(-1 as number);
@@ -178,11 +175,11 @@ async function selectSeries (index: number) {
   selectedIndex.value = index;
   selectedSeries.value = seriesList.value[index].id;
   loadingTitle.value = "正在查找对应的成就名片";
-  let getCard: BTMuli.Genshin.NameCard.NameCard;
+  let getCard: BTMuli.Genshin.NameCard;
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
     getCard = CardsInfo.value.find((card) => card.name === seriesList.value[index].card)!;
   } else {
-    getCard = {} as BTMuli.Genshin.NameCard.NameCard;
+    getCard = {} as BTMuli.Genshin.NameCard;
   }
   loadingTitle.value = "正在对成就数据进行排序";
   getAchievements.sort((a, b) => {
@@ -250,8 +247,8 @@ async function importJson () {
       },
     ],
   });
-  if (selectedFile && (await UiafOper.checkUiafData(<string>selectedFile))) {
-    const remoteRaw: string | false = await UiafOper.readUiafData(<string>selectedFile);
+  if (selectedFile && (await verifyUIAF(<string>selectedFile))) {
+    const remoteRaw: string | false = await readUIAF(<string>selectedFile);
     if (remoteRaw === false) {
       snackbarText.value = "读取 UIAF 数据失败，请检查文件是否符合规范";
       snackbar.value = true;
@@ -259,7 +256,7 @@ async function importJson () {
     }
     loadingTitle.value = "正在解析数据";
     loading.value = true;
-    const remoteData: Achievements = JSON.parse(remoteRaw);
+    const remoteData: TGPlugin.UIAF.BaseData = JSON.parse(remoteRaw);
     loadingTitle.value = "正在合并成就数据";
     await Promise.allSettled(
       remoteData.list.map(async (data) => {
@@ -335,12 +332,12 @@ async function exportJson () {
   const achievements = (await ReadAllTGData("Achievements")).filter((data) => {
     return data.progress !== 0 || data.completed === true;
   });
-  const UIAF_DATA = {
-    info: {} as UiafHeader,
-    list: [] as UiafAchievement[],
+  const UiafData = {
+    info: await getHeader(),
+    list: [] as TGPlugin.UIAF.Achievement[],
   };
   // 转换数据
-  UIAF_DATA.list = achievements.map((data) => {
+  UiafData.list = achievements.map((data) => {
     let status;
     // 计算点数但是没有完成
     if (data.progress !== 0 && data.completed === false) {
@@ -361,7 +358,6 @@ async function exportJson () {
       status,
     };
   });
-  UIAF_DATA.info = await UiafOper.getUiafInfo();
   const isSave = await dialog.save({
     filters: [
       {
@@ -371,7 +367,7 @@ async function exportJson () {
     ],
   });
   if (isSave) {
-    await fs.writeTextFile(isSave, JSON.stringify(UIAF_DATA));
+    await fs.writeTextFile(isSave, JSON.stringify(UiafData));
   }
 }
 </script>

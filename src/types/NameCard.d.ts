@@ -28,6 +28,4 @@ declare namespace BTMuli.Genshin {
     type: number
     source: string
   }
-  export namespace NameCard {
-  }
 }

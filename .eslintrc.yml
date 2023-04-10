@@ -18,6 +18,7 @@ parserOptions:
     - ./tsconfig.node.json
 globals:
   BTMuli: readonly
+  TGPlugin: readonly
 plugins:
   - vue
 rules:
