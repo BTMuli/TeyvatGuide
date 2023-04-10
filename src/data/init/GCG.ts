@@ -6,15 +6,14 @@
  * @since Alpha v0.1.2
  */
 import { AppData } from "../app";
-import type TGTypes from "../../core/types/TGTypes";
 import { type BaseCard } from "../../interface/GCG";
 
 /**
  * @description 卡牌表参数
  * @since Alpha v0.1.2
- * @returns {TGTypes.DBConfig}
+ * @returns {BTMuli.Genshin.Base.DBConfig}
  */
-export const Config: TGTypes.DBConfig = {
+export const Config: BTMuli.Genshin.Base.DBConfig = {
   storeName: "GCG",
   keyPath: "id",
   // 根据 type 分类

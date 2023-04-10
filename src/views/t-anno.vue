@@ -24,8 +24,6 @@ import { appWindow } from "@tauri-apps/api/window";
 // plugins
 import TGRequest from "../core/request/TGRequest";
 import TGUtils from "../core/utils/TGUtils";
-// interface
-import type TGTypes from "../core/types/TGTypes";
 
 // loading
 const loading = ref(true as boolean);
@@ -34,7 +32,7 @@ const loadingEmpty = ref(false as boolean);
 
 // 数据
 const annoId = Number(useRoute().params.anno_id);
-const annoData = ref({} as TGTypes.AnnoContentItem);
+const annoData = ref({} as BTMuli.Genshin.Announcement.ContentItem);
 const annoHtml = ref("");
 
 onMounted(async () => {

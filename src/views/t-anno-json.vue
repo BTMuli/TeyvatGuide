@@ -23,8 +23,6 @@ import TLoading from "../components/t-loading.vue";
 import { appWindow } from "@tauri-apps/api/window";
 // utils
 import TGRequest from "../core/request/TGRequest";
-// interface
-import type TGTypes from "../core/types/TGTypes";
 
 // loading
 const loading = ref(true as boolean);
@@ -47,8 +45,8 @@ onMounted(async () => {
   // 获取数据
   loadingTitle.value = "正在获取数据...";
   const listData = await TGRequest.Anno.getList();
-  listData.list.map((item: TGTypes.Announcement) => {
-    return item.list.map((single: TGTypes.AnnoListItem) => {
+  listData.list.map((item: BTMuli.Genshin.Announcement.Announcement) => {
+    return item.list.map((single: BTMuli.Genshin.Announcement.ListItem) => {
       return single.ann_id === annoId ? (jsonList = single) : null;
     });
   });

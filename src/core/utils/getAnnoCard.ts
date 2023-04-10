@@ -5,18 +5,16 @@
  * @since Alpha v0.1.2
  */
 
-import type TGTypes from "../types/TGTypes";
-
 /**
  * @description 将获取到的数据转为渲染用的卡片
  * @since Alpha v0.1.2
- * @param {TGTypes.AnnoListData} data 公告数据
+ * @param {BTMuli.Genshin.Announcement.ListData} data 公告数据
  * @returns {AnnoListCard[]} 渲染用的卡片
  */
-export function getAnnoCard (data: TGTypes.AnnoListData): TGTypes.AnnoListCard[] {
-  const cards: TGTypes.AnnoListCard[] = [];
-  data.list.map((annoList: TGTypes.Announcement) => {
-    return annoList.list.map((anno: TGTypes.AnnoListItem) => {
+export function getAnnoCard (data: BTMuli.Genshin.Announcement.ListData): BTMuli.Genshin.Announcement.ListCard[] {
+  const cards: BTMuli.Genshin.Announcement.ListCard[] = [];
+  data.list.map((annoList: BTMuli.Genshin.Announcement) => {
+    return annoList.list.map((anno: BTMuli.Genshin.Announcement.ListItem) => {
       return cards.push({
         id: anno.ann_id,
         title: anno.title,

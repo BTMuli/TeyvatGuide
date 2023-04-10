@@ -6,14 +6,13 @@
  */
 
 import { AppData } from "../app";
-import type TGTypes from "../../core/types/TGTypes";
 
 /**
  * @description 名片表参数
  * @since Alpha v0.1.2
- * @returns {TGTypes.DBConfig}
+ * @returns {BTMuli.Genshin.Base.DBConfig}
  */
-export const Config: TGTypes.DBConfig = {
+export const Config: BTMuli.Genshin.Base.DBConfig = {
   storeName: "NameCard",
   keyPath: "name",
   indexes: ["type"],
@@ -22,13 +21,13 @@ export const Config: TGTypes.DBConfig = {
 /**
  * @description 名片数据
  * @since Alpha v0.1.2
- * @return {TGTypes.NameCard[]}
+ * @return {BTMuli.Genshin.NameCard[]}
  */
-export function getData (): TGTypes.NameCard[] {
-  const data: Record<number, TGTypes.NameCard[]> = AppData.nameCards;
-  const result: TGTypes.NameCard[] = [];
+export function getData (): BTMuli.Genshin.NameCard[] {
+  const data: Record<number, BTMuli.Genshin.NameCard[]> = AppData.nameCards;
+  const result: BTMuli.Genshin.NameCard[] = [];
   Object.keys(data).map((key) => {
-    const cards: TGTypes.NameCard[] = data[Number(key)];
+    const cards: BTMuli.Genshin.NameCard[] = data[Number(key)];
     return cards.map((card) => result.push(card));
   });
   return result;

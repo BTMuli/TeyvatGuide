@@ -4,15 +4,14 @@
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.2
  */
-import type TGTypes from "../../core/types/TGTypes";
 import { AppData } from "../app";
 
 /**
  * @description 成就系列表参数
  * @since Alpha v0.1.2
- * @returns {TGTypes.DBConfig}
+ * @returns {BTMuli.Genshin.Base.DBConfig}
  */
-export const Config: TGTypes.DBConfig = {
+export const Config: BTMuli.Genshin.Base.DBConfig = {
   storeName: "AchievementSeries",
   keyPath: "id",
   indexes: ["order", "name", "card"],
@@ -21,10 +20,10 @@ export const Config: TGTypes.DBConfig = {
 /**
  * @description 成就系列数据
  * @since Alpha v0.1.2
- * @return {TGTypes.AchievementSeries[]}
+ * @return {BTMuli.Genshin.AchievementSeries[]}
  */
-export function getData (): TGTypes.AchievementSeries[] {
-  const data: Record<number, TGTypes.AchievementSeries> = AppData.achievementSeries;
+export function getData (): BTMuli.Genshin.AchievementSeries[] {
+  const data: Record<number, BTMuli.Genshin.AchievementSeries> = AppData.achievementSeries;
   return Object.keys(data).map((key) => {
     return data[Number(key)];
   });

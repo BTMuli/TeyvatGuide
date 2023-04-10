@@ -12,17 +12,16 @@ import GCG from "./GCG.json";
 import nameCards from "./nameCards.json";
 import calendar from "./calendar.json";
 // Interface
-import type TGAppTypes from "../../core/types/TGTypes";
 import { type BaseCard } from "../../interface/GCG";
 
 export const AppDataList = [
   {
     name: "achievements.json",
-    data: achievements as Record<number, TGAppTypes.Achievement>,
+    data: achievements as Record<number, BTMuli.Genshin.Achievement>,
   },
   {
     name: "achievementSeries.json",
-    data: achievementSeries as Record<number, TGAppTypes.AchievementSeries>,
+    data: achievementSeries as Record<number, BTMuli.Genshin.AchievementSeries>,
   },
   {
     name: "GCG.json",
@@ -30,18 +29,18 @@ export const AppDataList = [
   },
   {
     name: "nameCards.json",
-    data: nameCards as Record<number, TGAppTypes.NameCard[]>,
+    data: nameCards as Record<number, BTMuli.Genshin.NameCard[]>,
   },
   {
     name: "calendar.json",
-    data: calendar as Record<number, TGAppTypes.CalendarData>,
+    data: calendar as Record<number, BTMuli.Genshin.Calendar.CalendarData>,
   },
 ];
 
 export const AppData = {
-  achievements: achievements as Record<number, TGAppTypes.Achievement>,
-  achievementSeries: achievementSeries as Record<number, TGAppTypes.AchievementSeries>,
+  achievements: achievements as Record<number, BTMuli.Genshin.Achievement>,
+  achievementSeries: achievementSeries as Record<number, BTMuli.Genshin.AchievementSeries>,
   GCG: GCG as BaseCard[],
-  nameCards: nameCards as Record<number, TGAppTypes.NameCard[]>,
-  calendar: calendar as Record<number, TGAppTypes.CalendarData>,
+  nameCards: nameCards as Record<number, BTMuli.Genshin.NameCard[]>,
+  calendar: calendar as Record<number, BTMuli.Genshin.Calendar.CalendarData>,
 };
