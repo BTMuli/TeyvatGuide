@@ -29,7 +29,7 @@
               <img :src="character.icon" class="pool-icon" alt="character">
             </div>
             <div class="pool-clock">
-              <v-progress-circular :model-value="poolTimePass[pool.post_id]" size="100" width="10" color="#90caf9">
+              <v-progress-circular :model-value="poolTimePass[pool.post_id]" size="100" width="10" :color="poolColor">
                 {{ poolTimeGet[pool.post_id] }}
               </v-progress-circular>
             </div>
@@ -47,7 +47,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUpdated } from "vue";
 import { useRouter } from "vue-router";
 // store
 import { useHomeStore } from "../store/modules/home";
@@ -71,17 +71,41 @@ const loading = ref(true as boolean);
 const poolCards = ref([] as GachaCard[]);
 const poolTimeGet = ref({} as Record<number, string>);
 const poolTimePass = ref({} as Record<number, number>);
-
+const poolColor = ref("#fec90b" as string);
+const timer = ref(null as any);
 // expose
 defineExpose({
   name: "限时祈愿",
   loading,
 });
 
+function poolLastInterval () {
+  poolCards.value.map((pool) => {
+    poolTimeGet.value[pool.post_id] = getLastPoolTime(pool.time.end_stamp - Date.now());
+    poolTimePass.value[pool.post_id] =
+        ((pool.time.end_stamp - Date.now()) / (pool.time.end_stamp - pool.time.start_stamp)) * 100;
+    return pool;
+  });
+}
+
+// 监听 poolTimePass
+onUpdated(() => {
+  poolCards.value.map((pool) => {
+    if (poolTimePass.value[pool.post_id] <= 0) {
+      clearInterval(timer.value);
+      timer.value = null;
+      poolTimeGet.value[pool.post_id] = "已结束";
+      poolTimePass.value[pool.post_id] = 100;
+      poolColor.value = "#f44336";
+    }
+    return pool;
+  });
+});
+
 onMounted(async () => {
   const gachaData = await MysOper.Gacha.get();
   if (!gachaData) {
-    await console.error("获取限时祈愿数据失败");
+    console.error("获取限时祈愿数据失败");
     return;
   }
   if (!checkCover(gachaData)) {
@@ -100,13 +124,8 @@ onMounted(async () => {
     poolTimePass.value[pool.post_id] = pool.time.end_stamp - Date.now();
     return pool;
   });
-  await setInterval(() => {
-    poolCards.value.map((pool) => {
-      poolTimeGet.value[pool.post_id] = getLastPoolTime(pool.time.end_stamp - Date.now());
-      poolTimePass.value[pool.post_id] =
-        ((pool.time.end_stamp - Date.now()) / (pool.time.end_stamp - pool.time.start_stamp)) * 100;
-      return pool;
-    });
+  timer.value = setInterval(() => {
+    poolLastInterval();
   }, 1000);
   loading.value = false;
 });
