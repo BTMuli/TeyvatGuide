@@ -29,6 +29,11 @@
           <img src="../assets/icons/board.svg" alt="annoIcon" class="side-icon">
         </template>
       </v-list-item>
+      <v-list-item title="成就" value="achievements" link href="/achievements">
+        <template #prepend>
+          <img src="../assets/icons/achievements.svg" alt="achievementsIcon" class="side-icon">
+        </template>
+      </v-list-item>
       <v-divider />
       <v-list-group value="mihoyo" fluid>
         <template #activator="{ props }">
@@ -74,12 +79,6 @@
           </template>
         </v-list-item>
       </v-list-group>
-      <v-divider />
-      <v-list-item title="成就" value="achievements" link href="/achievements">
-        <template #prepend>
-          <img src="../assets/icons/achievements.svg" alt="achievementsIcon" class="side-icon">
-        </template>
-      </v-list-item>
       <v-divider />
       <v-list-group value="database" fluid>
         <template #activator="{ props }">

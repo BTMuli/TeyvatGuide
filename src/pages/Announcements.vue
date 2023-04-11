@@ -132,7 +132,7 @@ onMounted(async () => {
 });
 
 async function switchNews () {
-  await router.push("/news");
+  await router.push("/news/2");
 }
 
 async function toPost (item: BTMuli.Genshin.Announcement.ListCard) {
