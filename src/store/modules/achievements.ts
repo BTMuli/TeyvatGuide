@@ -13,14 +13,14 @@ import { defineStore } from "pinia";
 export const useAchievementsStore = defineStore(
   "achievements", () => {
     // 成就数据
-    const totalAchievements = ref(899);
+    const totalAchievements = ref(950);
     const finAchievements = ref(0);
-    const lastVersion = ref("v3.5");
+    const lastVersion = ref("v3.6");
     const UIAFVersion = ref("v1.1");
-    const title = ref("成就完成数：0/899 完成率：0%");
+    const title = ref("成就完成数：0/950 完成率：0%");
 
     function init (): void {
-      totalAchievements.value = 899;
+      totalAchievements.value = 950;
       finAchievements.value = 0;
       title.value = getTitle();
     }
