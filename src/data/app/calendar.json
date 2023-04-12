@@ -325,6 +325,13 @@
 						"icon": "/source/calendar/character/申鹤.webp"
 					},
 					{
+						"id": 10000082,
+						"star": 5,
+						"content_id": null,
+						"name": "白术",
+						"icon": "/source/calendar/character/白术.webp"
+					},
+					{
 						"id": 10000023,
 						"star": 4,
 						"content_id": 112,
@@ -683,6 +690,13 @@
 						"content_id": 5493,
 						"name": "珐露珊",
 						"icon": "/source/calendar/character/珐露珊.webp"
+					},
+					{
+						"id": 10000081,
+						"star": 4,
+						"content_id": null,
+						"name": "卡维",
+						"icon": "/source/calendar/character/卡维.webp"
 					}
 				]
 			}
@@ -1215,6 +1229,13 @@
 						"content_id": 4082,
 						"name": "若水",
 						"icon": "/source/calendar/weapon/若水.webp"
+					},
+					{
+						"id": 14505,
+						"star": 5,
+						"content_id": null,
+						"name": "碧落之珑",
+						"icon": "/source/calendar/weapon/碧落之珑.webp"
 					},
 					{
 						"id": 11405,
@@ -2236,6 +2257,13 @@
 						"icon": "/source/calendar/weapon/若水.webp"
 					},
 					{
+						"id": 14505,
+						"star": 5,
+						"content_id": null,
+						"name": "碧落之珑",
+						"icon": "/source/calendar/weapon/碧落之珑.webp"
+					},
+					{
 						"id": 11405,
 						"star": 4,
 						"content_id": 141,
@@ -2701,6 +2729,13 @@
 						"content_id": 5297,
 						"name": "莱依拉",
 						"icon": "/source/calendar/character/莱依拉.webp"
+					},
+					{
+						"id": 10000081,
+						"star": 4,
+						"content_id": null,
+						"name": "卡维",
+						"icon": "/source/calendar/character/卡维.webp"
 					}
 				]
 			}
@@ -3210,6 +3245,13 @@
 						"content_id": 1290,
 						"name": "钟离",
 						"icon": "/source/calendar/character/钟离.webp"
+					},
+					{
+						"id": 10000082,
+						"star": 5,
+						"content_id": null,
+						"name": "白术",
+						"icon": "/source/calendar/character/白术.webp"
 					},
 					{
 						"id": 10000024,
