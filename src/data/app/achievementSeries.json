@@ -490,7 +490,7 @@
 		"achievements": [82161, 82162, 82163, 82164, 82165, 82166, 82167, 82169],
 		"total_count": 8,
 		"completed_count": 0,
-		"card": "",
+		"card": "成就·槿暮",
 		"icon": "/source/achievementSeries/39.webp"
 	},
 	"41": {
@@ -501,7 +501,7 @@
 		"achievements": [80237, 80238, 80239, 80240, 80241, 80242, 80243, 80244, 80245, 80246, 80247, 80248, 80250, 80249],
 		"total_count": 14,
 		"completed_count": 0,
-		"card": "",
+		"card": "成就·万种",
 		"icon": "/source/achievementSeries/41.webp"
 	}
 }
