@@ -117,6 +117,19 @@
 		}
 	},
 	{
+		"name": "荒泷一斗",
+		"id": 6320,
+		"type": "角色牌",
+		"icon": {
+			"normal": "/source/GCG/character/荒泷一斗.webp"
+		},
+		"info": {
+			"element": "岩元素",
+			"weapon": "双手剑",
+			"camp": "稻妻"
+		}
+	},
+	{
 		"name": "九条裟罗",
 		"id": 6174,
 		"type": "角色牌",
@@ -322,6 +335,32 @@
 			"element": "冰元素",
 			"weapon": "单手剑",
 			"camp": "稻妻"
+		}
+	},
+	{
+		"name": "神里绫人",
+		"id": 6319,
+		"type": "角色牌",
+		"icon": {
+			"normal": "/source/GCG/character/神里绫人.webp"
+		},
+		"info": {
+			"element": "水元素",
+			"weapon": "单手剑",
+			"camp": "稻妻"
+		}
+	},
+	{
+		"name": "提纳里",
+		"id": 6321,
+		"type": "角色牌",
+		"icon": {
+			"normal": "/source/GCG/character/提纳里.webp"
+		},
+		"info": {
+			"element": "草元素",
+			"weapon": "弓",
+			"camp": "须弥"
 		}
 	},
 	{
@@ -1061,6 +1100,19 @@
 		}
 	},
 	{
+		"name": "荒泷第一",
+		"id": 6323,
+		"type": "行动牌",
+		"icon": {
+			"normal": "/source/GCG/action/荒泷第一.webp"
+		},
+		"info": {
+			"actionType": "装备牌",
+			"actionTag": "天赋",
+			"actionCost": "花费3"
+		}
+	},
+	{
 		"name": "混元熵增论",
 		"id": 5507,
 		"type": "行动牌",
@@ -1217,6 +1269,19 @@
 		}
 	},
 	{
+		"name": "镜华风姿",
+		"id": 6322,
+		"type": "行动牌",
+		"icon": {
+			"normal": "/source/GCG/action/镜华风姿.webp"
+		},
+		"info": {
+			"actionType": "装备牌",
+			"actionTag": "天赋",
+			"actionCost": "花费3"
+		}
+	},
+	{
 		"name": "酒渍船帽",
 		"id": 5429,
 		"type": "行动牌",
@@ -1265,7 +1330,7 @@
 		"info": {
 			"actionType": "支援牌",
 			"actionTag": "伙伴",
-			"actionCost": "花费2"
+			"actionCost": "花费1"
 		}
 	},
 	{
@@ -1500,6 +1565,19 @@
 			"actionType": "事件牌",
 			"actionTag": "料理",
 			"actionCost": "花费1"
+		}
+	},
+	{
+		"name": "鸣神大社",
+		"id": 6325,
+		"type": "行动牌",
+		"icon": {
+			"normal": "/source/GCG/action/鸣神大社.webp"
+		},
+		"info": {
+			"actionType": "支援牌",
+			"actionTag": "场地",
+			"actionCost": "花费2"
 		}
 	},
 	{
@@ -1867,6 +1945,19 @@
 		}
 	},
 	{
+		"name": "西风剑",
+		"id": 6326,
+		"type": "行动牌",
+		"icon": {
+			"normal": "/source/GCG/action/西风剑.webp"
+		},
+		"info": {
+			"actionType": "装备牌",
+			"actionTag": "武器",
+			"actionCost": "花费3"
+		}
+	},
+	{
 		"name": "悉数讨回",
 		"id": 5443,
 		"type": "行动牌",
@@ -1942,6 +2033,19 @@
 			"actionType": "装备牌",
 			"actionTag": "武器",
 			"actionCost": "花费2"
+		}
+	},
+	{
+		"name": "眼识殊明",
+		"id": 6324,
+		"type": "行动牌",
+		"icon": {
+			"normal": "/source/GCG/action/眼识殊明.webp"
+		},
+		"info": {
+			"actionType": "装备牌",
+			"actionTag": "天赋",
+			"actionCost": "花费4"
 		}
 	},
 	{
