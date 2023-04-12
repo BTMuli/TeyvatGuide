@@ -71,7 +71,7 @@ const loading = ref(true as boolean);
 const poolCards = ref([] as GachaCard[]);
 const poolTimeGet = ref({} as Record<number, string>);
 const poolTimePass = ref({} as Record<number, number>);
-const poolColor = ref("#fec90b" as string);
+const poolColor = ref("#90caf9" as string);
 const timer = ref(null as any);
 // expose
 defineExpose({
