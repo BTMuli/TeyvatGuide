@@ -2,14 +2,39 @@
 Author: 目棃
 Date: 2023-03-30
 Description: CHANGELOG
-Update: 2023-04-03
+Update: 2023-04-12
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-30 15:39:49`
->
-> 更新于 `2023-04-03 00:24:29`
+> 
+> 更新于 `2023-04-12 19:27:56`
 
 # CHANGELOG
+
+## [0.1.2](https://github.com/BTMuli/Tauri.Genshin/releases/v0.1.2) (2023-04-12)
+
+### Feat
+
+- 窗口：根据内容改变标题
+- 成就：添加版本信息
+- 首页：组件展示顺序自定义
+- 组件：新建 confirm 组件
+- 设置：添加系统信息、添加打包时间戳
+- 咨讯：支持多种游戏咨讯查看
+- 米游社解析：添加 `mention` 类型解析
+
+
+### Fix
+
+- 首页：近期活动、限时祈愿结束处理
+- 组件：回顶组件 hover 效果美化
+- 组件：用 snackebar 替换 alert
+- 咨讯：无封面时替换为默认图
+- 抽奖详情：配色调整
+- 首页：素材日历资源本地化
+- 侧边栏：设置置底
+
+FullCommits: [v0.1.1 ~ v0.1.2](https://github.com/BTMuli/Tauri.Genshin/compare/v0.1.1...v0.1.2)
 
 ## [0.1.1](https://github.com/BTMuli/Tauri.Genshin/releases/v0.1.1) (2023-04-03)
 

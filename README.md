@@ -2,12 +2,12 @@
 Author: 目棃
 Date: 2023-03-05
 Description: 说明文档
-Update: 2023-04-07
+Update: 2023-04-12
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-05 14:41:55`
 > 
-> 更新于 `2023-04-07 19:55:56`
+> 更新于 `2023-04-12 19:16:31`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/v/release/BTMuli/Tauri.Genshin?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge)
 
@@ -28,7 +28,7 @@ Tauri 练手项目
 - [TypeScript](https://www.typescriptlang.org/)
 - [Vuetify](https://vuetifyjs.com/en/)
 
-## 当前进度(v0.1.1 Alpha)
+## 当前进度(v0.1.2 Alpha)
 
 > 以下进度仅为开发进度，不代表最终版本
 
