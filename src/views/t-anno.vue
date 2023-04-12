@@ -10,7 +10,7 @@
     <div class="anno-subtitle">
       {{ annoData.subtitle }}
     </div>
-    <img :src="annoData.banner" alt="cover" class="anno-img">
+    <img v-if="annoData.banner !== ''" :src="annoData.banner" alt="cover" class="anno-img">
     <div class="anno-content" v-html="annoHtml" />
   </div>
 </template>

@@ -5,6 +5,9 @@
  * @since Alpha v0.1.2
  */
 
+// 默认封面图
+const defaultCover = "/source/UI/defaultCover.webp";
+
 /**
  * @description 将获取到的数据转为渲染用的卡片
  * @since Alpha v0.1.2
@@ -19,7 +22,7 @@ export function getAnnoCard (data: BTMuli.Genshin.Announcement.ListData): BTMuli
         id: anno.ann_id,
         title: anno.title,
         subtitle: anno.subtitle,
-        banner: anno.banner,
+        banner: anno.banner || defaultCover,
         typeLabel: anno.type_label,
         tagIcon: anno.tag_icon,
         startTime: anno.start_time,
