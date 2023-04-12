@@ -95,6 +95,14 @@
       </div>
     </v-list-item>
   </v-list>
+  <v-snackbar v-model="snackbar" :timeout="1500" :color="snackbarColor">
+    {{ snackbarText }}
+    <template #action="{ attrs }">
+      <v-btn text v-bind="attrs" @click="snackbar = false">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </template>
+  </v-snackbar>
 </template>
 <script lang="ts" setup>
 // vue
@@ -109,13 +117,18 @@ import { createTGWindow } from "../utils/TGWindow";
 const loading = ref(true as boolean);
 
 // data
-const calendarData = ref(TGAppData.calendar as Record<number, BTMuli.Genshin.Calendar.CalendarData>);
+const calendarData = ref(TGAppData.calendar as Record<number, BTMuli.Genshin.Calendar.Data>);
 const weekNow = ref(0 as number);
 const btnNow = ref(0 as number);
 const dateNow = ref(new Date().toLocaleDateString());
-const calendarNow = ref({} as BTMuli.Genshin.Calendar.CalendarData);
-const characterCards = ref({} as Record<number, BTMuli.Genshin.Calendar.CalendarItem>);
-const weaponCards = ref({} as Record<number, BTMuli.Genshin.Calendar.CalendarItem>);
+const calendarNow = ref({} as BTMuli.Genshin.Calendar.Data);
+const characterCards = ref({} as Record<number, BTMuli.Genshin.Calendar.Item>);
+const weaponCards = ref({} as Record<number, BTMuli.Genshin.Calendar.Item>);
+
+// snackbar
+const snackbar = ref(false as boolean);
+const snackbarText = ref("" as string);
+const snackbarColor = ref("success" as string);
 
 const btnText = [
   {
@@ -172,6 +185,12 @@ function getCalendar (day: number) {
 }
 
 function showContent (material: BTMuli.Genshin.Calendar.Material) {
+  if (material.content_id === null) {
+    snackbarText.value = "暂无详情";
+    snackbarColor.value = "error";
+    snackbar.value = true;
+    return;
+  }
   const url = OBC_CONTENT_API.replace("{content_id}", material.content_id.toString());
   createTGWindow(url, "素材详情", material.name, 1200, 800, true);
 }
