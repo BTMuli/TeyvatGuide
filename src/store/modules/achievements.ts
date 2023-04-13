@@ -2,7 +2,7 @@
  * @file store modules achievements.ts
  * @description Achievements store module
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @since Alpha v0.1.3
  */
 
 // vue
@@ -22,6 +22,7 @@ export const useAchievementsStore = defineStore(
     function init (): void {
       totalAchievements.value = 950;
       finAchievements.value = 0;
+      lastVersion.value = "v3.6";
       title.value = getTitle();
     }
 
