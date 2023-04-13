@@ -108,6 +108,7 @@ import { dialog, fs } from "@tauri-apps/api";
 // Store
 import { useAchievementsStore } from "../store/modules/achievements";
 // Utils
+import { TGAppData } from "../data";
 import { createTGWindow } from "../utils/TGWindow";
 import { ReadAllTGData, ReadTGDataByIndex, ReadTGDataByKey, UpdateTGDataByKey } from "../utils/TGIndex";
 import { getHeader, readUIAF, verifyUIAF } from "../utils/UIAF";
@@ -142,8 +143,7 @@ onMounted(async () => {
 async function loadData () {
   loadingTitle.value = "正在获取成就系列数据";
   const seriesDB: BTMuli.Genshin.AchievementSeries[] = await ReadAllTGData("AchievementSeries");
-  loadingTitle.value = "正在获取成就系列名片数据";
-  CardsInfo.value = await ReadTGDataByIndex("NameCard", "type", 1);
+  CardsInfo.value = TGAppData.nameCards[1];
   loadingTitle.value = "对成就系列数据进行排序";
   seriesList.value = seriesDB.sort((a, b) => a.order - b.order);
   loadingTitle.value = "正在获取成就数据";
