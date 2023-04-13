@@ -75,7 +75,7 @@ fn read_cookie() -> String {
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![mys_login, read_cookie])
-        .setup(|app| {
+        .setup(|_app| {
             tauri::async_runtime::spawn(
                 rocket::build()
                     .attach(Cors)
@@ -84,7 +84,7 @@ fn main() {
             );
             #[cfg(debug_assertions)] // only include this code on debug builds
             {
-                let window = app.get_window("tauri-genshin").unwrap();
+                let window = _app.get_window("tauri-genshin").unwrap();
                 window.open_devtools(); // open the devtools on startup
             }
             Ok(())
