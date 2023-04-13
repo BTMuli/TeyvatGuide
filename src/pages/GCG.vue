@@ -95,7 +95,7 @@ import { ref, onMounted } from "vue";
 import TLoading from "../components/t-loading.vue";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
-import { ReadAllTGData } from "../utils/TGIndex";
+import { TGAppData } from "../data";
 // interface
 import { BaseCard, ActionCard, CharacterCard, MonsterCard } from "../interface/GCG";
 import { OBC_CONTENT_API } from "../plugins/Mys/interface/utils";
@@ -119,7 +119,7 @@ onMounted(async () => {
 });
 
 async function loadData () {
-  const CardsInfo = await ReadAllTGData("GCG");
+  const CardsInfo = TGAppData.GCG;
   CardsInfoC.value = CardsInfo.filter((item) => item.type === "角色牌") as CharacterCard[];
   CardsInfoA.value = CardsInfo.filter((item) => item.type === "行动牌") as ActionCard[];
   CardsInfoM.value = CardsInfo.filter((item) => item.type === "魔物牌") as MonsterCard[];
@@ -133,7 +133,7 @@ async function searchCard () {
   loading.value = true;
   doSearch.value = true;
   const res: BaseCard[] = [];
-  const allCardsInfo = await ReadAllTGData("GCG");
+  const allCardsInfo = TGAppData.GCG;
   allCardsInfo.map((item) => (item.name.includes(search.value) ? res.push(item) : null));
   res.sort((a, b) => a.name.localeCompare(b.name));
   loading.value = false;
