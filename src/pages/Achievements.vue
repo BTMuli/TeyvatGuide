@@ -93,7 +93,7 @@
       </v-list>
     </div>
     <!-- 弹窗提示 -->
-    <v-snackbar v-model="snackbar" timeout="1500" color="#F5810A" top>
+    <v-snackbar v-model="snackbar" timeout="1500" :color="snackbarColor" top>
       {{ snackbarText }}
     </v-snackbar>
   </div>
@@ -134,6 +134,7 @@ const selectedAchievement = ref([] as BTMuli.Genshin.Achievement[]);
 const search = ref("" as string);
 const snackbar = ref(false as boolean);
 const snackbarText = ref("" as string);
+const snackbarColor = ref("#F5810A" as string);
 
 onMounted(async () => {
   await loadData();
@@ -203,6 +204,7 @@ function showMaterial (path: string) {
 }
 async function searchCard () {
   if (search.value === "") {
+    snackbarColor.value = "#F5810A";
     snackbarText.value = "请输入搜索内容";
     snackbar.value = true;
     return;
@@ -222,6 +224,7 @@ async function searchCard () {
     loading.value = false;
   }, 500);
   if (res.length === 0) {
+    snackbarColor.value = "#F5810A";
     snackbarText.value = "没有找到对应的成就";
     snackbar.value = true;
     selectedAchievement.value = allAchievements;
@@ -324,6 +327,7 @@ async function importJson () {
 async function exportJson () {
   // 判断是否有数据
   if (achievementsStore.finAchievements === 0) {
+    snackbarColor.value = "#F5810A";
     snackbarText.value = "没有可导出的数据";
     snackbar.value = true;
     return;
@@ -359,9 +363,10 @@ async function exportJson () {
     };
   });
   const isSave = await dialog.save({
+    // TODO: 设置保存文件名
     filters: [
       {
-        name: "achievements",
+        name: "uiaf",
         extensions: ["json"],
       },
     ],
@@ -369,6 +374,9 @@ async function exportJson () {
   if (isSave) {
     await fs.writeTextFile(isSave, JSON.stringify(UiafData));
   }
+  snackbarColor.value = "#00BFA5";
+  snackbarText.value = "导出成功";
+  snackbar.value = true;
 }
 </script>
 
