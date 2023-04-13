@@ -155,6 +155,10 @@ async function searchCard () {
   overflow: hidden;
 }
 
+.cards-grid :hover {
+  cursor: pointer;
+}
+
 .card-cls {
   position: relative;
   width: 140px;
