@@ -114,6 +114,7 @@
           </v-btn>
         </template>
       </v-list-item>
+      <v-list-item title="删除 IndexedDB" prepend-icon="mdi-delete" @click="tryConfirm('delDB')" />
       <v-list-subheader inset class="config-header">
         路径
       </v-list-subheader>
@@ -151,7 +152,7 @@ import { useHomeStore } from "../store/modules/home";
 import { useHk4eStore } from "../store/modules/hk4e";
 import { useAchievementsStore } from "../store/modules/achievements";
 // utils
-import { WriteTGData } from "../utils/TGIndex";
+import { WriteTGData, DeleteTGData } from "../utils/TGIndex";
 // data
 import { getDataList } from "../data/init";
 
@@ -238,6 +239,11 @@ function tryConfirm (oper: string) {
       confirmOper.value = "readCookie";
       confirmShow.value = true;
       break;
+    case "delDB":
+      confirmText.value = "确认清除 IndexedDB 吗？";
+      confirmOper.value = "delDB";
+      confirmShow.value = true;
+      break;
   }
 }
 
@@ -259,6 +265,9 @@ async function doConfirm (oper: string) {
       break;
     case "readCookie":
       await readCookie();
+      break;
+    case "delDB":
+      delDB();
       break;
     default:
       break;
@@ -351,6 +360,14 @@ async function readCookie () {
     hk4eStore.setCookie(tryReadCookie);
     alert(`Cookie 获取成功！\n\n${tryReadCookie}`);
   }
+}
+
+// 删除 IndexedDB
+function delDB () {
+  DeleteTGData();
+  snackbarText.value = "IndexedDB 已清除!若无法正常使用，请初始化配置。";
+  snackbarColor.value = "success";
+  snackbar.value = true;
 }
 </script>
 
