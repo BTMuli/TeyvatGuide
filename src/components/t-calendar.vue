@@ -94,15 +94,10 @@
         </div>
       </div>
     </v-list-item>
+    <v-snackbar v-model="snackbar" :timeout="1500" :color="snackbarColor">
+      {{ snackbarText }}
+    </v-snackbar>
   </v-list>
-  <v-snackbar v-model="snackbar" :timeout="1500" :color="snackbarColor">
-    {{ snackbarText }}
-    <template #action="{ attrs }">
-      <v-btn text v-bind="attrs" @click="snackbar = false">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </template>
-  </v-snackbar>
 </template>
 <script lang="ts" setup>
 // vue
