@@ -46,7 +46,7 @@
     <!-- 右侧内容-->
     <div class="right-wrap">
       <v-list
-        v-if="selectedIndex !== -1 && selectedSeries !== 0 && selectedSeries !== 17 && selectedSeries !== 39"
+        v-if="selectedIndex !== -1 && selectedSeries !== 0 && selectedSeries !== 17"
         :style="{
           backgroundImage: 'url(' + getCardInfo.bg || null + ')',
           backgroundPosition: 'right',
