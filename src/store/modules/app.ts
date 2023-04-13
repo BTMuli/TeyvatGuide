@@ -2,7 +2,7 @@
  * @file store modules app.ts
  * @description App store module
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @since Alpha v0.1.3
  */
 
 // vue
@@ -56,6 +56,12 @@ export const useAppStore = defineStore(
       achievements: `${dataPath.userDataDir}/achievements.json`,
     });
 
+    // 初始化
+    function init (): void {
+      loading.value = false;
+      devMode.value = false;
+    }
+
     function getSubmenu (): string[] {
       const open = [];
       if (sidebar.submenu.database) open.push("database");
@@ -70,6 +76,7 @@ export const useAppStore = defineStore(
       dataPath,
       appPath,
       userPath,
+      init,
       getSubmenu,
     };
   },

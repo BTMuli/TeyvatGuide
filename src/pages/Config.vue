@@ -297,6 +297,7 @@ async function delUserData () {
 
 // 恢复默认配置
 function initAppData () {
+  appStore.init();
   homeStore.init();
   achievementsStore.init();
   snackbarText.value = "已恢复默认配置!";
