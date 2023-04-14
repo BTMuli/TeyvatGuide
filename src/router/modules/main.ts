@@ -8,7 +8,7 @@
 // 信息展示
 import Announcements from "../../pages/Announcements.vue";
 import Home from "../../pages/Home.vue";
-import GCG from "../../pages/GCG.vue";
+import GCG from "../../pages/WIKI/GCG.vue";
 // 数据交互
 import Achievements from "../../pages/Achievements.vue";
 // 应用配置相关

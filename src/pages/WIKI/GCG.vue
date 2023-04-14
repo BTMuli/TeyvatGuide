@@ -24,12 +24,12 @@
       <v-window v-model="tab">
         <v-window-item value="character">
           <div class="cards-grid">
-            <v-card v-for="item in CardsInfoC" :key="item.id" class="card-cls" @click="toOuter(item.name, item.id)">
+            <v-card v-for="item in CardsInfoC" :key="item.content_id" class="card-cls" @click="toOuter(item.name, item.content_id)">
               <div class="card-border">
                 <img src="/source/GCG/base/bg-normal.webp" alt="border">
               </div>
               <div class="card-cover">
-                <img :src="item.icon.normal" alt="cover">
+                <img :src="item.icon" alt="cover">
               </div>
               <div class="card-content">
                 <span>{{ item.name }}</span>
@@ -39,12 +39,12 @@
         </v-window-item>
         <v-window-item value="action">
           <div class="cards-grid">
-            <v-card v-for="item in CardsInfoA" :key="item.id" class="card-cls" @click="toOuter(item.name, item.id)">
+            <v-card v-for="item in CardsInfoA" :key="item.content_id" class="card-cls" @click="toOuter(item.name, item.content_id)">
               <div class="card-border">
                 <img src="/source/GCG/base/bg-normal.webp" alt="border">
               </div>
               <div class="card-cover">
-                <img :src="item.icon.normal" alt="cover">
+                <img :src="item.icon" alt="cover">
               </div>
               <div class="card-content">
                 <span>{{ item.name }}</span>
@@ -54,12 +54,12 @@
         </v-window-item>
         <v-window-item value="monster">
           <div class="cards-grid">
-            <v-card v-for="item in CardsInfoM" :key="item.id" class="card-cls" @click="toOuter(item.name, item.id)">
+            <v-card v-for="item in CardsInfoM" :key="item.content_id" class="card-cls" @click="toOuter(item.name, item.content_id)">
               <div class="card-border">
                 <img src="/source/GCG/base/bg-normal.webp" alt="border">
               </div>
               <div class="card-cover">
-                <img :src="item.icon.normal" alt="cover">
+                <img :src="item.icon" alt="cover">
               </div>
               <div class="card-content">
                 <span>{{ item.name }}</span>
@@ -71,12 +71,12 @@
     </div>
     <div v-else>
       <div class="cards-grid">
-        <div v-for="item in CardsInfoS" :key="item.id" class="card-cls" @click="toOuter(item.name, item.id)">
+        <div v-for="item in CardsInfoS" :key="item.content_id" class="card-cls" @click="toOuter(item.name, item.content_id)">
           <div class="card-border">
             <img src="/source/GCG/base/bg-normal.webp" alt="border">
           </div>
           <div class="card-cover">
-            <img :src="item.icon.normal" alt="cover">
+            <img :src="item.icon" alt="cover">
           </div>
           <div class="card-content">
             <span>{{ item.name }}</span>
@@ -92,13 +92,12 @@
 <script lang="ts" setup>
 // vue
 import { ref, onMounted } from "vue";
-import TLoading from "../components/t-loading.vue";
+import TLoading from "../../components/t-loading.vue";
 // utils
-import { createTGWindow } from "../utils/TGWindow";
-import { TGAppData } from "../data";
+import { createTGWindow } from "../../utils/TGWindow";
+import { TGAppData } from "../../data";
 // interface
-import { BaseCard, ActionCard, CharacterCard, MonsterCard } from "../interface/GCG";
-import { OBC_CONTENT_API } from "../plugins/Mys/interface/utils";
+import { OBC_CONTENT_API } from "../../plugins/Mys/interface/utils";
 
 // loading
 const loading = ref(true);
@@ -109,10 +108,10 @@ const doSearch = ref(false);
 const search = ref("");
 // data
 const tab = ref("character");
-const CardsInfoC = ref([] as CharacterCard[]);
-const CardsInfoA = ref([] as ActionCard[]);
-const CardsInfoM = ref([] as MonsterCard[]);
-const CardsInfoS = ref([] as BaseCard[]);
+const CardsInfoC = ref([] as BTMuli.Genshin.Wiki.GCG.BriefInfo[]);
+const CardsInfoA = ref([] as BTMuli.Genshin.Wiki.GCG.BriefInfo[]);
+const CardsInfoM = ref([] as BTMuli.Genshin.Wiki.GCG.BriefInfo[]);
+const CardsInfoS = ref([] as BTMuli.Genshin.Wiki.GCG.BriefInfo[]);
 
 onMounted(async () => {
   await loadData();
@@ -120,9 +119,9 @@ onMounted(async () => {
 
 async function loadData () {
   const CardsInfo = TGAppData.GCG;
-  CardsInfoC.value = CardsInfo.filter((item) => item.type === "角色牌") as CharacterCard[];
-  CardsInfoA.value = CardsInfo.filter((item) => item.type === "行动牌") as ActionCard[];
-  CardsInfoM.value = CardsInfo.filter((item) => item.type === "魔物牌") as MonsterCard[];
+  CardsInfoC.value = CardsInfo.filter((item) => item.type === "角色牌");
+  CardsInfoA.value = CardsInfo.filter((item) => item.type === "行动牌");
+  CardsInfoM.value = CardsInfo.filter((item) => item.type === "魔物牌");
   loading.value = false;
 }
 function toOuter (cardName: string, cardId: number) {
@@ -132,7 +131,7 @@ function toOuter (cardName: string, cardId: number) {
 async function searchCard () {
   loading.value = true;
   doSearch.value = true;
-  const res: BaseCard[] = [];
+  const res: BTMuli.Genshin.Wiki.GCG.BriefInfo[] = [];
   const allCardsInfo = TGAppData.GCG;
   allCardsInfo.map((item) => (item.name.includes(search.value) ? res.push(item) : null));
   res.sort((a, b) => a.name.localeCompare(b.name));

@@ -2,7 +2,7 @@
  * @file data app index
  * @description data app index
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @since Alpha v0.1.3
  */
 
 // Data
@@ -11,8 +11,6 @@ import achievementSeries from "./achievementSeries.json";
 import GCG from "./GCG.json";
 import nameCards from "./nameCards.json";
 import calendar from "./calendar.json";
-// Interface
-import { type BaseCard } from "../../interface/GCG";
 
 export const AppDataList = [
   {
@@ -25,7 +23,7 @@ export const AppDataList = [
   },
   {
     name: "GCG.json",
-    data: GCG as BaseCard[],
+    data: GCG as BTMuli.Genshin.Wiki.GCG.BriefInfo[],
   },
   {
     name: "nameCards.json",
@@ -33,14 +31,14 @@ export const AppDataList = [
   },
   {
     name: "calendar.json",
-    data: calendar as Record<number, BTMuli.Genshin.Calendar.CalendarData>,
+    data: calendar as Record<number, BTMuli.Genshin.Calendar.Data>,
   },
 ];
 
 export const AppData = {
   achievements: achievements as Record<number, BTMuli.Genshin.Achievement>,
   achievementSeries: achievementSeries as Record<number, BTMuli.Genshin.AchievementSeries>,
-  GCG: GCG as BaseCard[],
+  GCG: GCG as BTMuli.Genshin.Wiki.GCG.BriefInfo[],
   nameCards: nameCards as Record<number, BTMuli.Genshin.NameCard[]>,
-  calendar: calendar as Record<number, BTMuli.Genshin.Calendar.CalendarData>,
+  calendar: calendar as Record<number, BTMuli.Genshin.Calendar.Data>,
 };
