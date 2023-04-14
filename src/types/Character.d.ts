@@ -43,6 +43,7 @@ declare namespace BTMuli.Genshin.Wiki.Character {
    * @property {string} cvZh - 中文配音
    * @property {string} cvJp - 日文配音
    * @property {string} description - 角色描述
+   * @property {string[]} source - 角色获取途径
    * @return BaseInfo
    */
   export interface BaseInfo {
@@ -76,6 +77,8 @@ declare namespace BTMuli.Genshin.Wiki.Character {
    * @interface Talent
    * @property {number} id - 天赋 ID
    * @property {string} name - 天赋名称
+   * @property {string} type - 天赋类型
+   * @property {UpInfo[]} upInfos - 天赋升级信息
    * @description 描述可作为 v-html 使用
    * @property {string} description - 天赋描述
    * @return Talent
@@ -83,19 +86,40 @@ declare namespace BTMuli.Genshin.Wiki.Character {
   export interface Talent {
     id: number
     name: string
+    type: string
+    upInfos?: UpInfo[]
     description: string
+  }
+
+  /**
+   * @description 天赋升级信息
+   * @since Alpha v0.1.3
+   * @interface UpInfo
+   * @property {number} level - 天赋升级原始等级
+   * @property {BTMuli.Genshin.Wiki.Material[]} materials - 天赋升级所需材料
+   * @property {Record<string, number>} oriAttr - 天赋升级前属性
+   * @property {Record<string, number>} upAttr - 天赋升级后属性
+   * @return UpInfo
+   */
+  export interface UpInfo {
+    level: number
+    materials: BTMuli.Genshin.Wiki.Material[]
+    oriAttr: Record<string, number>
+    upAttr: Record<string, number>
   }
 
   /**
    * @description 角色附加信息
    * @since Alpha v0.1.3
    * @interface AddInfo
+   * @property {BTMuli.Genshin.Wiki.levelUp[]} levelUps - 角色升级信息
    * @property {SpecialFood} specialFood - 特色料理
    * @property {Uniform[]} uniforms - 角色衣装
    * @property {Story[]} stories - 角色故事
    * @return AddInfo
    */
   export interface AddInfo {
+    levelUps: BTMuli.Genshin.Wiki.levelUp[]
     specialFood: SpecialFood
     uniforms: Uniform[]
     stories: Story[]
@@ -105,17 +129,14 @@ declare namespace BTMuli.Genshin.Wiki.Character {
    * @description 角色特色料理
    * @since Alpha v0.1.3
    * @interface SpecialFood
-   * @property {string} name - 特色料理名称
-   * @property {string} origin - 特色料理来源
-   * @property {string} description - 特色料理描述
-   * @property {string} effect - 特色料理效果
+   * @extends {BTMuli.Genshin.Wiki.Food}
+   * @property {number} oriId - 原料理 ID
+   * @property {string} oriName - 原料理名称
    * @return SpecialFood
    */
-  export interface SpecialFood {
-    name: string
-    origin: string
-    description: string
-    effect: string
+  export interface SpecialFood extends BTMuli.Genshin.Wiki.Food {
+    oriId: number
+    oriName: string
   }
 
   /**
