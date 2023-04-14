@@ -7,6 +7,25 @@
 
 declare namespace BTMuli.Genshin.Wiki.Character {
   /**
+   * @description 简略信息，用于整体展示
+   * @since Alpha v0.1.3
+   * @interface BriefInfo
+   * @property {number} id - 角色 ID
+   * @property {string} name - 角色名称
+   * @property {number} star - 角色星级
+   * @property {string} element - 角色元素
+   * @property {string} weapon - 角色武器类型
+   * @return BriefInfo
+   */
+  export interface BriefInfo {
+    id: number
+    name: string
+    star: number
+    element: string
+    weapon: string
+  }
+
+  /**
    * @description 本应用的角色类型
    * @since Alpha v0.1.3
    * @interface FullInfo

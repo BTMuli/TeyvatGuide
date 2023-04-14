@@ -6,6 +6,24 @@
  */
 
 declare namespace BTMuli.Genshin.Wiki.Weapon {
+
+  /**
+   * @description 简略信息，用于整体展示
+   * @since Alpha v0.1.3
+   * @interface BriefInfo
+   * @property {number} id - 武器 ID
+   * @property {string} name - 武器名称
+   * @property {number} star - 武器星级
+   * @property {string} type - 武器类型
+   * @return BriefInfo
+   */
+  export interface BriefInfo {
+    id: number
+    name: string
+    star: number
+    type: string
+  }
+
   /**
    * @description 本应用的武器类型
    * @since Alpha v0.1.3
