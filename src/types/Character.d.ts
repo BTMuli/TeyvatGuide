@@ -11,18 +11,24 @@ declare namespace BTMuli.Genshin.Wiki.Character {
    * @since Alpha v0.1.3
    * @interface BriefInfo
    * @property {number} id - 角色 ID
+   * @property {number} content_id - 观测枢 id
    * @property {string} name - 角色名称
    * @property {number} star - 角色星级
-   * @property {string} element - 角色元素
-   * @property {string} weapon - 角色武器类型
+   * @property {string} bg - 角色背景图
+   * @property {string} element - 角色元素图标
+   * @property {string} weapon - 角色武器类型图标
+   * @property {string} icon - 角色图标
    * @return BriefInfo
    */
   export interface BriefInfo {
     id: number
+    content_id?: number
     name: string
     star: number
+    bg: string
     element: string
     weapon: string
+    icon: string
   }
 
   /**
