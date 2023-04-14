@@ -80,19 +80,36 @@
         </v-list-item>
       </v-list-group>
       <v-divider />
-      <v-list-group value="database" fluid>
+      <v-list-group value="wiki" fluid>
         <template #activator="{ props }">
-          <v-list-item title="数据库" v-bind="props">
+          <v-list-item title="图鉴" v-bind="props">
             <template #prepend>
+              <!-- TODO: 后续更换图标-->
               <v-icon color="rgb(205, 182, 145)">
-                mdi-database
+                mdi-book-open-variant
               </v-icon>
             </template>
           </v-list-item>
         </template>
-        <v-list-item title="GCG" value="db-GCG" link href="/GCG">
+        <v-list-item title="GCG" value="wiki-GCG" link href="/wiki/GCG">
           <template #prepend>
             <img src="../assets/icons/GCG.svg" alt="gcgIcon" class="side-icon">
+          </template>
+        </v-list-item>
+        <v-list-item title="角色图鉴" value="wiki-character" link href="/wiki/character">
+          <template #prepend>
+            <!-- TODO: 后续更换图标-->
+            <v-icon style="color:#FDE7AC !important">
+              mdi-account
+            </v-icon>
+          </template>
+        </v-list-item>
+        <v-list-item title="武器图鉴" value="wiki-weapon" link href="/wiki/weapon">
+          <template #prepend>
+            <!-- TODO: 后续更换图标 -->
+            <v-icon style="color:#FDE7AC !important">
+              mdi-sword
+            </v-icon>
           </template>
         </v-list-item>
       </v-list-group>
@@ -129,7 +146,7 @@ const open = computed({
   },
   set (value: string[]) {
     appStore.sidebar.submenu.mihoyo = value.includes("mihoyo");
-    appStore.sidebar.submenu.database = value.includes("database");
+    appStore.sidebar.submenu.wiki = value.includes("wiki");
   },
 });
 

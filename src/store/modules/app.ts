@@ -33,7 +33,7 @@ export const useAppStore = defineStore(
         // 米游社
         mihoyo: false,
         // 数据库
-        database: false,
+        wiki: false,
       },
     });
     // 开发者模式
@@ -60,11 +60,13 @@ export const useAppStore = defineStore(
     function init (): void {
       loading.value = false;
       devMode.value = false;
+      sidebar.submenu.mihoyo = false;
+      sidebar.submenu.wiki = false;
     }
 
     function getSubmenu (): string[] {
       const open = [];
-      if (sidebar.submenu.database) open.push("database");
+      if (sidebar.submenu.wiki) open.push("wiki");
       if (sidebar.submenu.mihoyo) open.push("mihoyo");
       return open;
     }
