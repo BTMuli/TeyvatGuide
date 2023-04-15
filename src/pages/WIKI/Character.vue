@@ -14,10 +14,8 @@
         <div class="card-element">
           <img :src="item.element" alt="element">
         </div>
-        <div class="card-weapon">
-          <img :src="item.weapon" alt="weapon">
-        </div>
         <div class="card-name">
+          <img :src="item.weapon" alt="weapon">
           <span>{{ item.name }}</span>
         </div>
       </div>
@@ -57,8 +55,8 @@ function toOuter (item: BTMuli.Genshin.Wiki.Character.BriefInfo) {
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
-  grid-gap: 10px;
-  padding: 10px;
+  grid-gap: 20px;
+  padding: 20px;
 }
 
 .card-box {
@@ -74,7 +72,7 @@ function toOuter (item: BTMuli.Genshin.Wiki.Character.BriefInfo) {
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 10px;
+  border-radius: 5px;
   overflow: hidden;
 }
 
@@ -83,7 +81,7 @@ function toOuter (item: BTMuli.Genshin.Wiki.Character.BriefInfo) {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: 5px;
 }
 
 .card-icon img {
@@ -98,7 +96,7 @@ function toOuter (item: BTMuli.Genshin.Wiki.Character.BriefInfo) {
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 10px;
+  border-radius: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -111,9 +109,6 @@ function toOuter (item: BTMuli.Genshin.Wiki.Character.BriefInfo) {
   left: 0;
   width: 40px;
   height: 40px;
-  border-top-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  background: rgba(0, 0, 0, 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -125,24 +120,10 @@ function toOuter (item: BTMuli.Genshin.Wiki.Character.BriefInfo) {
   object-fit: cover;
 }
 
-.card-weapon {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 40px;
-  height: 40px;
-  border-top-right-radius: 10px;
-  border-bottom-left-radius: 10px;
-  background: rgba(0, 0, 0, 0.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.card-weapon img {
-  width: 30px;
-  height: 30px;
-  object-fit: cover;
+.card-name img {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
 }
 
 .card-name {
@@ -154,9 +135,9 @@ function toOuter (item: BTMuli.Genshin.Wiki.Character.BriefInfo) {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(0, 0, 0, 0.5);
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
+  background: rgba(20, 20, 20, 0.5);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
   color: #fff;
   font-size: 20px;
   text-shadow: 0 0 5px #000;
