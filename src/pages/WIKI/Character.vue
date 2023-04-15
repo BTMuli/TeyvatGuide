@@ -30,8 +30,9 @@
 // vue
 import { ref, onMounted } from "vue";
 // utils
-// import { createTGWindow } from "../../utils/TGWindow";
+import { createTGWindow } from "../../utils/TGWindow";
 import { TGAppData } from "../../data";
+import { OBC_CONTENT_API } from "../../plugins/Mys/interface/utils";
 
 // snackbar
 const snackbar = ref(false);
@@ -43,11 +44,12 @@ onMounted(async () => {
 });
 
 function toOuter (item: BTMuli.Genshin.Wiki.Character.BriefInfo) {
-  if (item.content_id === null) {
+  if (item.content_id === null || item.content_id === undefined) {
     snackbar.value = true;
-    // return;
+    return;
   }
-  // createTGWindow("character", item.id);
+  const url = OBC_CONTENT_API.replace("{content_id}", item.content_id.toString());
+  createTGWindow(url, "角色详情", item.name, 1200, 800, true);
 }
 
 </script>
