@@ -26,7 +26,7 @@
           <div class="cards-grid">
             <v-card v-for="item in CardsInfoC" :key="item.content_id" class="card-cls" @click="toOuter(item.name, item.content_id)">
               <div class="card-border">
-                <img src="/source/GCG/base/bg-normal.webp" alt="border">
+                <img src="/WIKI/GCG/bg/normal.webp" alt="border">
               </div>
               <div class="card-cover">
                 <img :src="item.icon" alt="cover">
@@ -41,7 +41,7 @@
           <div class="cards-grid">
             <v-card v-for="item in CardsInfoA" :key="item.content_id" class="card-cls" @click="toOuter(item.name, item.content_id)">
               <div class="card-border">
-                <img src="/source/GCG/base/bg-normal.webp" alt="border">
+                <img src="/WIKI/GCG/bg/normal.webp" alt="border">
               </div>
               <div class="card-cover">
                 <img :src="item.icon" alt="cover">
@@ -56,7 +56,7 @@
           <div class="cards-grid">
             <v-card v-for="item in CardsInfoM" :key="item.content_id" class="card-cls" @click="toOuter(item.name, item.content_id)">
               <div class="card-border">
-                <img src="/source/GCG/base/bg-normal.webp" alt="border">
+                <img src="/WIKI/GCG/bg/normal.webp" alt="border">
               </div>
               <div class="card-cover">
                 <img :src="item.icon" alt="cover">
@@ -73,7 +73,7 @@
       <div class="cards-grid">
         <div v-for="item in CardsInfoS" :key="item.content_id" class="card-cls" @click="toOuter(item.name, item.content_id)">
           <div class="card-border">
-            <img src="/source/GCG/base/bg-normal.webp" alt="border">
+            <img src="/WIKI/GCG/bg/normal.webp" alt="border">
           </div>
           <div class="card-cover">
             <img :src="item.icon" alt="cover">
