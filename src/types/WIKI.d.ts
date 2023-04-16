@@ -117,4 +117,19 @@ declare namespace BTMuli.Genshin.Wiki {
     source: string[]
     effect: string
   }
+
+  /**
+   * @description 本应用的基础属性类型
+   * @since Alpha v0.1.3
+   * @interface BaseAttri
+   * @property {string} icon - 属性图标
+   * @property {string} name - 属性名称
+   * @property {string} value - 属性值
+   * @return BaseAttri
+   */
+  export interface BaseAttri {
+    icon: string
+    name: string
+    value: string
+  }
 }
