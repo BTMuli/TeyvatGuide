@@ -44,50 +44,84 @@
                 />
               </div>
               <div class="content-detail">
-                <v-img
-                  v-for="content of character.contents"
-                  :key="content.content_id"
-                  alt="content.content_id"
-                  :src="content.icon"
-                  class="calendar-icon"
-                  @click="showContent(content)"
-                />
+                <div
+                  v-for="item of character.contents"
+                  :key="item.id"
+                  class="card-box"
+                  @click="showContent(item)"
+                >
+                  <!-- 底层背景图 -->
+                  <div class="card-bg">
+                    <img :src="item.bg" alt="bg">
+                  </div>
+                  <!-- 中层角色图 -->
+                  <div class="card-icon">
+                    <img :src="item.icon" alt="icon">
+                  </div>
+                  <!-- 上层图标&内容 -->
+                  <div class="card-cover">
+                    <div class="card-element">
+                      <img :src="item.element" alt="element">
+                    </div>
+                    <div class="card-name">
+                      <img :src="item.weapon" alt="weapon">
+                      <span>{{ item.name }}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="calendar-single">
-          <div class="card-title">
-            武器突破
-          </div>
-          <div class="calendar-grid">
-            <div
-              v-for="weapon of weaponCards"
-              :key="weapon.title"
-              class="calendar-content"
-            >
-              <div class="content-title">
-                {{ weapon.title }}
-              </div>
-              <div class="content-material">
-                <v-img
-                  v-for="material of weapon.materials"
-                  :key="material.content_id"
-                  alt="material.content_id"
-                  :src="material.icon"
-                  class="calendar-icon"
-                  @click="showContent(material)"
-                />
-              </div>
-              <div class="content-detail">
-                <v-img
-                  v-for="content of weapon.contents"
-                  :key="content.content_id"
-                  alt="content.content_id"
-                  :src="content.icon"
-                  class="calendar-icon"
-                  @click="showContent(content)"
-                />
+      </div>
+      <div class="calendar-single">
+        <div class="card-title">
+          武器突破
+        </div>
+        <div class="calendar-grid">
+          <div
+            v-for="weapon of weaponCards"
+            :key="weapon.title"
+            class="calendar-content"
+          >
+            <div class="content-title">
+              {{ weapon.title }}
+            </div>
+            <div class="content-material">
+              <v-img
+                v-for="material of weapon.materials"
+                :key="material.content_id"
+                alt="material.content_id"
+                :src="material.icon"
+                class="calendar-icon"
+                @click="showContent(material)"
+              />
+            </div>
+            <div class="content-detail">
+              <div
+                v-for="item of weapon.contents"
+                :key="item.id"
+                alt="content.content_id"
+                class="card-box"
+                @click="showContent(item)"
+              >
+                <!-- 底层背景图 -->
+                <div class="card-bg">
+                  <img :src="item.bg" alt="bg">
+                </div>
+                <!-- 中层武器图 -->
+                <div class="card-icon">
+                  <img :src="item.icon" alt="icon">
+                </div>
+                <!-- 上层图标&内容 -->
+                <div class="card-cover">
+                  <div class="card-type">
+                    <img :src="item.type" alt="type">
+                  </div>
+                  <div class="card-name">
+                    <span>{{ item.name }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -117,8 +151,8 @@ const weekNow = ref(0 as number);
 const btnNow = ref(0 as number);
 const dateNow = ref(new Date().toLocaleDateString());
 const calendarNow = ref({} as BTMuli.Genshin.Calendar.Data);
-const characterCards = ref({} as Record<number, BTMuli.Genshin.Calendar.Item>);
-const weaponCards = ref({} as Record<number, BTMuli.Genshin.Calendar.Item>);
+const characterCards = ref({} as Record<number, BTMuli.Genshin.Calendar.CharaacterItem>);
+const weaponCards = ref({} as Record<number, BTMuli.Genshin.Calendar.WeaponItem>);
 
 // snackbar
 const snackbar = ref(false as boolean);
@@ -179,8 +213,8 @@ function getCalendar (day: number) {
   return calendarData.value[week];
 }
 
-function showContent (material: BTMuli.Genshin.Calendar.Material) {
-  if (material.content_id === null) {
+function showContent (material: BTMuli.Genshin.Calendar.Material | BTMuli.Genshin.Wiki.Character.BriefInfo | BTMuli.Genshin.Wiki.Weapon.BriefInfo) {
+  if (material.content_id === null || material.content_id === undefined) {
     snackbarText.value = "暂无详情";
     snackbarColor.value = "error";
     snackbar.value = true;
@@ -275,7 +309,117 @@ function getContents (day: number) {
 }
 
 .content-detail {
-  border-top: 1px solid #faf7e8;
-  padding-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  grid-gap: 10px;
+  padding: 5px;
+}
+
+.card-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.card-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.card-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-icon {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.card-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.card-element {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-type {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-element img {
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+}
+
+.card-type img {
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+}
+
+.card-name img {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}
+
+.card-name {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(20, 20, 20, 0.5);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  color: #fff;
+  font-size: 10px;
+  text-shadow: 0 0 5px #000;
+  font-family: Genshin, serif;
 }
 </style>
