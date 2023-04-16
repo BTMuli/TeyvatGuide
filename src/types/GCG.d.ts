@@ -47,12 +47,60 @@ declare namespace BTMuli.Genshin.Wiki.GCG {
   }
 
   /**
+   * @description 卡牌点数消耗类型枚举
+   * @enum PointType
+   * @since Alpha v0.1.3
+   * @see Point
+   * @property {string} NONE - 无消耗
+   * @property {string} SAME - 任意相同骰子
+   * @property {string} ALL - 任意骰子
+   * @property {string} ELEMENT_PYRO - 元素骰子-火
+   * @property {string} ELEMENT_HYDRO - 元素骰子-水
+   * @property {string} ELEMENT_CRYO - 元素骰子-冰
+   * @property {string} ELEMENT_ELECTRO - 元素骰子-雷
+   * @property {string} ELEMENT_ANEMO - 元素骰子-风
+   * @property {string} ELEMENT_GEO - 元素骰子-岩
+   * @property {string} ELEMENT_DENDRO - 元素骰子-草
+   * @property {string} HP - 血量
+   * @property {string} CHARGE - 充能
+   * @return PointType
+   */
+  export enum PointType {
+    NONE = "NONE",
+    SAME = "SAME",
+    ALL = "ALL",
+    ELEMENT_PYRO = "ELEMENT_PYRO",
+    ELEMENT_HYDRO = "ELEMENT_HYDRO",
+    ELEMENT_CRYO = "ELEMENT_CRYO",
+    ELEMENT_ELECTRO = "ELEMENT_ELECTRO",
+    ELEMENT_ANEMO = "ELEMENT_ANEMO",
+    ELEMENT_GEO = "ELEMENT_GEO",
+    ELEMENT_DENDRO = "ELEMENT_DENDRO",
+    HP = "HP",
+    CHARGE = "CHARGE",
+  }
+
+  /**
+   * @description 卡牌点数消耗
+   * @since Alpha v0.1.3
+   * @interface Point
+   * @property {number} point - 点数
+   * @property {PointType} type - 点数类型
+   * @return Point
+   */
+  export interface Point {
+    point: number
+    type: PointType
+  }
+
+  /**
    * @description 基础信息
    * @since Alpha v0.1.3
    * @interface BaseInfo
    * @property {string} title - 卡牌称号
    * @property {string} icon - 卡牌图标
    * @property {BTMuli.Genshin.Wiki.BaseAttri[]} tags - 卡牌标签
+   * @property {Point[]} cost - 卡牌点数消耗
    * @property {string} source - 卡牌获取途径
    * @property {string} description - 卡牌描述
    * @return BaseInfo
@@ -61,6 +109,7 @@ declare namespace BTMuli.Genshin.Wiki.GCG {
     title: string
     icon: string
     tags: BTMuli.Genshin.Wiki.BaseAttri[]
+    cost: Point[]
     source: string
     description: string
   }
@@ -72,6 +121,7 @@ declare namespace BTMuli.Genshin.Wiki.GCG {
    * @property {string} type - 技能类型
    * @property {string} name - 技能名称
    * @property {string} description - 技能描述
+   * @property {Point[]} cost - 技能点数消耗
    * @property {string} icon - 技能图标
    * @return SkillInfo
    */
@@ -79,6 +129,7 @@ declare namespace BTMuli.Genshin.Wiki.GCG {
     type: string
     name: string
     description: string
+    cost: Point[]
     icon: string
   }
 
