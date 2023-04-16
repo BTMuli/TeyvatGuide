@@ -78,6 +78,12 @@ function toOuter (item: BTMuli.Genshin.Wiki.Character.BriefInfo) {
   overflow: hidden;
 }
 
+.card-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .card-icon {
   position: relative;
   width: 100%;
