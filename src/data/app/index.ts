@@ -2,7 +2,7 @@
  * @file data app index
  * @description data app index
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.
+ * @since Alpha v0.1.3
  */
 
 // Data
@@ -12,6 +12,7 @@ import calendar from "./calendar.json";
 import character from "./character.json";
 import GCG from "./GCG.json";
 import nameCards from "./nameCards.json";
+import weapon from "./weapon.json";
 
 export const AppDataList = [
   {
@@ -38,7 +39,10 @@ export const AppDataList = [
     name: "nameCards.json",
     data: nameCards as Record<number, BTMuli.Genshin.NameCard[]>,
   },
-
+  {
+    name: "weapon.json",
+    data: weapon as BTMuli.Genshin.Wiki.Weapon.BriefInfo[],
+  },
 ];
 
 export const AppData = {
@@ -48,4 +52,5 @@ export const AppData = {
   character: character as BTMuli.Genshin.Wiki.Character.BriefInfo[],
   GCG: GCG as BTMuli.Genshin.Wiki.GCG.BriefInfo[],
   nameCards: nameCards as Record<number, BTMuli.Genshin.NameCard[]>,
+  weapon: weapon as BTMuli.Genshin.Wiki.Weapon.BriefInfo[],
 };

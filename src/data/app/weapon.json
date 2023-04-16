@@ -1,0 +1,1388 @@
+[
+	{
+		"id": 15511,
+		"content_id": 4330,
+		"name": "猎人之径",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15511.webp"
+	},
+	{
+		"id": 15509,
+		"content_id": 2555,
+		"name": "飞雷之弦振",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15509.webp"
+	},
+	{
+		"id": 15508,
+		"content_id": 4082,
+		"name": "若水",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15508.webp"
+	},
+	{
+		"id": 15507,
+		"content_id": 2905,
+		"name": "冬极白星",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15507.webp"
+	},
+	{
+		"id": 15503,
+		"content_id": 1682,
+		"name": "终末嗟叹之诗",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15503.webp"
+	},
+	{
+		"id": 15502,
+		"content_id": 219,
+		"name": "阿莫斯之弓",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15502.webp"
+	},
+	{
+		"id": 15501,
+		"content_id": 323,
+		"name": "天空之翼",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15501.webp"
+	},
+	{
+		"id": 14512,
+		"content_id": 5378,
+		"name": "图莱杜拉的回忆",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14512.webp"
+	},
+	{
+		"id": 14511,
+		"content_id": 5110,
+		"name": "千夜浮梦",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14511.webp"
+	},
+	{
+		"id": 14509,
+		"content_id": 3563,
+		"name": "神乐之真意",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14509.webp"
+	},
+	{
+		"id": 14506,
+		"content_id": 2807,
+		"name": "不灭月华",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14506.webp"
+	},
+	{
+		"id": 14505,
+		"content_id": null,
+		"name": "碧落之珑",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14505.webp"
+	},
+	{
+		"id": 14504,
+		"content_id": 1222,
+		"name": "尘世之锁",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14504.webp"
+	},
+	{
+		"id": 14502,
+		"content_id": 297,
+		"name": "四风原典",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14502.webp"
+	},
+	{
+		"id": 14501,
+		"content_id": 227,
+		"name": "天空之卷",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14501.webp"
+	},
+	{
+		"id": 13511,
+		"content_id": 4794,
+		"name": "赤沙之杖",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13511.webp"
+	},
+	{
+		"id": 13509,
+		"content_id": 2602,
+		"name": "薙草之稻光",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13509.webp"
+	},
+	{
+		"id": 13507,
+		"content_id": 3398,
+		"name": "息灾",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13507.webp"
+	},
+	{
+		"id": 13505,
+		"content_id": 296,
+		"name": "和璞鸢",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13505.webp"
+	},
+	{
+		"id": 13504,
+		"content_id": 1289,
+		"name": "贯虹之槊",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13504.webp"
+	},
+	{
+		"id": 13502,
+		"content_id": 1077,
+		"name": "天空之脊",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13502.webp"
+	},
+	{
+		"id": 13501,
+		"content_id": 1612,
+		"name": "护摩之杖",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13501.webp"
+	},
+	{
+		"id": 12511,
+		"content_id": 6179,
+		"name": "苇海信标",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12511.webp"
+	},
+	{
+		"id": 12510,
+		"content_id": 3274,
+		"name": "赤角石溃杵",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12510.webp"
+	},
+	{
+		"id": 12504,
+		"content_id": 1288,
+		"name": "无工之剑",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12504.webp"
+	},
+	{
+		"id": 12503,
+		"content_id": 2039,
+		"name": "松籁响起之时",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12503.webp"
+	},
+	{
+		"id": 12502,
+		"content_id": 218,
+		"name": "狼的末路",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12502.webp"
+	},
+	{
+		"id": 12501,
+		"content_id": 291,
+		"name": "天空之傲",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12501.webp"
+	},
+	{
+		"id": 11512,
+		"content_id": 5887,
+		"name": "裁叶萃光",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11512.webp"
+	},
+	{
+		"id": 11511,
+		"content_id": 5018,
+		"name": "圣显之钥",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11511.webp"
+	},
+	{
+		"id": 11510,
+		"content_id": 3871,
+		"name": "波乱月白经津",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11510.webp"
+	},
+	{
+		"id": 11509,
+		"content_id": 2289,
+		"name": "雾切之回光",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11509.webp"
+	},
+	{
+		"id": 11505,
+		"content_id": 1497,
+		"name": "磐岩结绿",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11505.webp"
+	},
+	{
+		"id": 11504,
+		"content_id": 1356,
+		"name": "斫峰之刃",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11504.webp"
+	},
+	{
+		"id": 11503,
+		"content_id": 2129,
+		"name": "苍古自由之誓",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11503.webp"
+	},
+	{
+		"id": 11502,
+		"content_id": 215,
+		"name": "天空之刃",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11502.webp"
+	},
+	{
+		"id": 11501,
+		"content_id": 293,
+		"name": "风鹰剑",
+		"star": 5,
+		"bg": "/icon/bg/5-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11501.webp"
+	},
+	{
+		"id": 15419,
+		"content_id": null,
+		"name": "鹮穿之喙",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15419.webp"
+	},
+	{
+		"id": 15418,
+		"content_id": 4437,
+		"name": "竭泽",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15418.webp"
+	},
+	{
+		"id": 15417,
+		"content_id": 4446,
+		"name": "王下近侍",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15417.webp"
+	},
+	{
+		"id": 15416,
+		"content_id": 3076,
+		"name": "曚云之月",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15416.webp"
+	},
+	{
+		"id": 15415,
+		"content_id": 2639,
+		"name": "掠食者",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15415.webp"
+	},
+	{
+		"id": 15414,
+		"content_id": 2287,
+		"name": "破魔之弓",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15414.webp"
+	},
+	{
+		"id": 15413,
+		"content_id": 1705,
+		"name": "风花之颂",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15413.webp"
+	},
+	{
+		"id": 15412,
+		"content_id": 2127,
+		"name": "幽夜华尔兹",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15412.webp"
+	},
+	{
+		"id": 15411,
+		"content_id": 4090,
+		"name": "落霞",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15411.webp"
+	},
+	{
+		"id": 15410,
+		"content_id": 1684,
+		"name": "暗巷猎手",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15410.webp"
+	},
+	{
+		"id": 15409,
+		"content_id": 994,
+		"name": "苍翠猎弓",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15409.webp"
+	},
+	{
+		"id": 15408,
+		"content_id": 694,
+		"name": "黑岩战弓",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15408.webp"
+	},
+	{
+		"id": 15407,
+		"content_id": 391,
+		"name": "钢轮弓",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15407.webp"
+	},
+	{
+		"id": 15406,
+		"content_id": 240,
+		"name": "试作澹月",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15406.webp"
+	},
+	{
+		"id": 15405,
+		"content_id": 181,
+		"name": "弓藏",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15405.webp"
+	},
+	{
+		"id": 15404,
+		"content_id": 178,
+		"name": "宗室长弓",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15404.webp"
+	},
+	{
+		"id": 15403,
+		"content_id": 177,
+		"name": "祭礼弓",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15403.webp"
+	},
+	{
+		"id": 15402,
+		"content_id": 176,
+		"name": "绝弦",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15402.webp"
+	},
+	{
+		"id": 15401,
+		"content_id": 195,
+		"name": "西风猎弓",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15401.webp"
+	},
+	{
+		"id": 14417,
+		"content_id": 4444,
+		"name": "盈满之实",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14417.webp"
+	},
+	{
+		"id": 14416,
+		"content_id": 5017,
+		"name": "流浪的晚星",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14416.webp"
+	},
+	{
+		"id": 14415,
+		"content_id": 3611,
+		"name": "证誓之明瞳",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14415.webp"
+	},
+	{
+		"id": 14414,
+		"content_id": 2288,
+		"name": "白辰之环",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14414.webp"
+	},
+	{
+		"id": 14413,
+		"content_id": 2141,
+		"name": "嘟嘟可故事集",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14413.webp"
+	},
+	{
+		"id": 14412,
+		"content_id": 1377,
+		"name": "忍冬之果",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14412.webp"
+	},
+	{
+		"id": 14410,
+		"content_id": 1685,
+		"name": "暗巷的酒与诗",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14410.webp"
+	},
+	{
+		"id": 14409,
+		"content_id": 690,
+		"name": "昭心",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14409.webp"
+	},
+	{
+		"id": 14408,
+		"content_id": 193,
+		"name": "黑岩绯玉",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14408.webp"
+	},
+	{
+		"id": 14407,
+		"content_id": 198,
+		"name": "万国诸海图谱",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14407.webp"
+	},
+	{
+		"id": 14406,
+		"content_id": 319,
+		"name": "试作金珀",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14406.webp"
+	},
+	{
+		"id": 14405,
+		"content_id": 217,
+		"name": "匣里日月",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14405.webp"
+	},
+	{
+		"id": 14404,
+		"content_id": 194,
+		"name": "宗室秘法录",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14404.webp"
+	},
+	{
+		"id": 14403,
+		"content_id": 197,
+		"name": "祭礼残章",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14403.webp"
+	},
+	{
+		"id": 14402,
+		"content_id": 192,
+		"name": "流浪乐章",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14402.webp"
+	},
+	{
+		"id": 14401,
+		"content_id": 185,
+		"name": "西风秘典",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14401.webp"
+	},
+	{
+		"id": 13419,
+		"content_id": 4855,
+		"name": "风信之锋",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13419.webp"
+	},
+	{
+		"id": 13417,
+		"content_id": 4443,
+		"name": "贯月矢",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13417.webp"
+	},
+	{
+		"id": 13416,
+		"content_id": 3077,
+		"name": "断浪长鳍",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13416.webp"
+	},
+	{
+		"id": 13415,
+		"content_id": 2604,
+		"name": "「渔获」",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13415.webp"
+	},
+	{
+		"id": 13414,
+		"content_id": 2310,
+		"name": "喜多院十文字",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13414.webp"
+	},
+	{
+		"id": 13409,
+		"content_id": 1363,
+		"name": "龙脊长枪",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13409.webp"
+	},
+	{
+		"id": 13408,
+		"content_id": 1287,
+		"name": "宗室猎枪",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13408.webp"
+	},
+	{
+		"id": 13407,
+		"content_id": 1079,
+		"name": "西风长枪",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13407.webp"
+	},
+	{
+		"id": 13406,
+		"content_id": 1610,
+		"name": "千岩长枪",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13406.webp"
+	},
+	{
+		"id": 13405,
+		"content_id": 972,
+		"name": "决斗之枪",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13405.webp"
+	},
+	{
+		"id": 13404,
+		"content_id": 172,
+		"name": "黑岩刺枪",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13404.webp"
+	},
+	{
+		"id": 13403,
+		"content_id": 321,
+		"name": "流月针",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13403.webp"
+	},
+	{
+		"id": 13402,
+		"content_id": 393,
+		"name": "试作星镰",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13402.webp"
+	},
+	{
+		"id": 13401,
+		"content_id": 171,
+		"name": "匣里灭辰",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13401.webp"
+	},
+	{
+		"id": 12418,
+		"content_id": 6234,
+		"name": "饰铁之花",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12418.webp"
+	},
+	{
+		"id": 12417,
+		"content_id": 4445,
+		"name": "森林王器",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12417.webp"
+	},
+	{
+		"id": 12416,
+		"content_id": 2904,
+		"name": "恶王丸",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12416.webp"
+	},
+	{
+		"id": 12415,
+		"content_id": 4792,
+		"name": "玛海菈的水色",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12415.webp"
+	},
+	{
+		"id": 12414,
+		"content_id": 2302,
+		"name": "桂木斩长正",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12414.webp"
+	},
+	{
+		"id": 12412,
+		"content_id": 2603,
+		"name": "衔珠海皇",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12412.webp"
+	},
+	{
+		"id": 12411,
+		"content_id": 1362,
+		"name": "雪葬的星银",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12411.webp"
+	},
+	{
+		"id": 12410,
+		"content_id": 1611,
+		"name": "千岩古剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12410.webp"
+	},
+	{
+		"id": 12409,
+		"content_id": 995,
+		"name": "螭骨剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12409.webp"
+	},
+	{
+		"id": 12408,
+		"content_id": 704,
+		"name": "黑岩斩刀",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12408.webp"
+	},
+	{
+		"id": 12407,
+		"content_id": 290,
+		"name": "白影剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12407.webp"
+	},
+	{
+		"id": 12406,
+		"content_id": 144,
+		"name": "试作古华",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12406.webp"
+	},
+	{
+		"id": 12405,
+		"content_id": 180,
+		"name": "雨裁",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12405.webp"
+	},
+	{
+		"id": 12404,
+		"content_id": 206,
+		"name": "宗室大剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12404.webp"
+	},
+	{
+		"id": 12403,
+		"content_id": 418,
+		"name": "祭礼大剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12403.webp"
+	},
+	{
+		"id": 12402,
+		"content_id": 214,
+		"name": "钟剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12402.webp"
+	},
+	{
+		"id": 12401,
+		"content_id": 174,
+		"name": "西风大剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12401.webp"
+	},
+	{
+		"id": 11422,
+		"content_id": 5675,
+		"name": "东花坊时雨",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11422.webp"
+	},
+	{
+		"id": 11418,
+		"content_id": 5019,
+		"name": "西福斯的月光",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11418.webp"
+	},
+	{
+		"id": 11417,
+		"content_id": 4440,
+		"name": "原木刀",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11417.webp"
+	},
+	{
+		"id": 11416,
+		"content_id": 4201,
+		"name": "笼钓瓶一心",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11416.webp"
+	},
+	{
+		"id": 11415,
+		"content_id": 3170,
+		"name": "辰砂之纺锤",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11415.webp"
+	},
+	{
+		"id": 11414,
+		"content_id": 2307,
+		"name": "天目影打刀",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11414.webp"
+	},
+	{
+		"id": 11413,
+		"content_id": 1361,
+		"name": "腐殖之剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11413.webp"
+	},
+	{
+		"id": 11412,
+		"content_id": 1298,
+		"name": "降临之剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11412.webp"
+	},
+	{
+		"id": 11410,
+		"content_id": 1683,
+		"name": "暗巷闪光",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11410.webp"
+	},
+	{
+		"id": 11409,
+		"content_id": 942,
+		"name": "黑剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11409.webp"
+	},
+	{
+		"id": 11408,
+		"content_id": 289,
+		"name": "黑岩长剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11408.webp"
+	},
+	{
+		"id": 11407,
+		"content_id": 175,
+		"name": "铁蜂刺",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11407.webp"
+	},
+	{
+		"id": 11406,
+		"content_id": 226,
+		"name": "试作斩岩",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11406.webp"
+	},
+	{
+		"id": 11405,
+		"content_id": 141,
+		"name": "匣里龙吟",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11405.webp"
+	},
+	{
+		"id": 11404,
+		"content_id": 199,
+		"name": "宗室长剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11404.webp"
+	},
+	{
+		"id": 11403,
+		"content_id": 239,
+		"name": "祭礼剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11403.webp"
+	},
+	{
+		"id": 11402,
+		"content_id": 207,
+		"name": "笛剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11402.webp"
+	},
+	{
+		"id": 11401,
+		"content_id": 208,
+		"name": "西风剑",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11401.webp"
+	},
+	{
+		"id": 15305,
+		"content_id": 686,
+		"name": "信使",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15305.webp"
+	},
+	{
+		"id": 15304,
+		"content_id": 138,
+		"name": "弹弓",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15304.webp"
+	},
+	{
+		"id": 15303,
+		"content_id": 687,
+		"name": "反曲弓",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15303.webp"
+	},
+	{
+		"id": 15302,
+		"content_id": 167,
+		"name": "神射手之誓",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15302.webp"
+	},
+	{
+		"id": 15301,
+		"content_id": 139,
+		"name": "鸦羽弓",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15301.webp"
+	},
+	{
+		"id": 14305,
+		"content_id": 684,
+		"name": "甲级宝珏",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14305.webp"
+	},
+	{
+		"id": 14304,
+		"content_id": 709,
+		"name": "翡玉法球",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14304.webp"
+	},
+	{
+		"id": 14303,
+		"content_id": 685,
+		"name": "异世界行记",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14303.webp"
+	},
+	{
+		"id": 14302,
+		"content_id": 137,
+		"name": "讨龙英杰谭",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14302.webp"
+	},
+	{
+		"id": 14301,
+		"content_id": 162,
+		"name": "魔导绪论",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14301.webp"
+	},
+	{
+		"id": 13303,
+		"content_id": 134,
+		"name": "黑缨枪",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13303.webp"
+	},
+	{
+		"id": 13302,
+		"content_id": 724,
+		"name": "钺矛",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13302.webp"
+	},
+	{
+		"id": 13301,
+		"content_id": 683,
+		"name": "白缨枪",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13301.webp"
+	},
+	{
+		"id": 12306,
+		"content_id": 220,
+		"name": "飞天大御剑",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12306.webp"
+	},
+	{
+		"id": 12305,
+		"content_id": 131,
+		"name": "以理服人",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12305.webp"
+	},
+	{
+		"id": 12303,
+		"content_id": 1076,
+		"name": "白铁大剑",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12303.webp"
+	},
+	{
+		"id": 12302,
+		"content_id": 130,
+		"name": "沐浴龙血的剑",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12302.webp"
+	},
+	{
+		"id": 12301,
+		"content_id": 129,
+		"name": "铁影阔剑",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12301.webp"
+	},
+	{
+		"id": 11306,
+		"content_id": 128,
+		"name": "飞天御剑",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11306.webp"
+	},
+	{
+		"id": 11305,
+		"content_id": 698,
+		"name": "吃虎鱼刀",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11305.webp"
+	},
+	{
+		"id": 11303,
+		"content_id": 708,
+		"name": "旅行剑",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11303.webp"
+	},
+	{
+		"id": 11302,
+		"content_id": 164,
+		"name": "黎明神剑",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11302.webp"
+	},
+	{
+		"id": 11301,
+		"content_id": 161,
+		"name": "冷刃",
+		"star": 3,
+		"bg": "/icon/bg/3-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11301.webp"
+	},
+	{
+		"id": 15201,
+		"content_id": 143,
+		"name": "历练的猎弓",
+		"star": 2,
+		"bg": "/icon/bg/2-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15201.webp"
+	},
+	{
+		"id": 14201,
+		"content_id": 142,
+		"name": "口袋魔导书",
+		"star": 2,
+		"bg": "/icon/bg/2-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14201.webp"
+	},
+	{
+		"id": 13201,
+		"content_id": 160,
+		"name": "铁尖枪",
+		"star": 2,
+		"bg": "/icon/bg/2-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13201.webp"
+	},
+	{
+		"id": 12201,
+		"content_id": 158,
+		"name": "佣兵重剑",
+		"star": 2,
+		"bg": "/icon/bg/2-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12201.webp"
+	},
+	{
+		"id": 11201,
+		"content_id": 126,
+		"name": "银剑",
+		"star": 2,
+		"bg": "/icon/bg/2-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11201.webp"
+	},
+	{
+		"id": 15101,
+		"content_id": 125,
+		"name": "猎弓",
+		"star": 1,
+		"bg": "/icon/bg/1-Star.webp",
+		"type": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15101.webp"
+	},
+	{
+		"id": 14101,
+		"content_id": 124,
+		"name": "学徒笔记",
+		"star": 1,
+		"bg": "/icon/bg/1-Star.webp",
+		"type": "/icon/weapon/法器.webp",
+		"icon": "/WIKI/weapon/icon/14101.webp"
+	},
+	{
+		"id": 13101,
+		"content_id": 118,
+		"name": "新手长枪",
+		"star": 1,
+		"bg": "/icon/bg/1-Star.webp",
+		"type": "/icon/weapon/长柄武器.webp",
+		"icon": "/WIKI/weapon/icon/13101.webp"
+	},
+	{
+		"id": 12101,
+		"content_id": 123,
+		"name": "训练大剑",
+		"star": 1,
+		"bg": "/icon/bg/1-Star.webp",
+		"type": "/icon/weapon/双手剑.webp",
+		"icon": "/WIKI/weapon/icon/12101.webp"
+	},
+	{
+		"id": 11101,
+		"content_id": 127,
+		"name": "无锋剑",
+		"star": 1,
+		"bg": "/icon/bg/1-Star.webp",
+		"type": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/weapon/icon/11101.webp"
+	}
+]

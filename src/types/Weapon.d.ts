@@ -12,16 +12,22 @@ declare namespace BTMuli.Genshin.Wiki.Weapon {
    * @since Alpha v0.1.3
    * @interface BriefInfo
    * @property {number} id - 武器 ID
+   * @property {number} content_id - 观测枢 id
    * @property {string} name - 武器名称
    * @property {number} star - 武器星级
+   * @property {string} bg - 武器背景图
    * @property {string} type - 武器类型
+   * @property {string} icon - 武器图标
    * @return BriefInfo
    */
   export interface BriefInfo {
     id: number
+    content_id?: number
     name: string
     star: number
+    bg: string
     type: string
+    icon: string
   }
 
   /**
