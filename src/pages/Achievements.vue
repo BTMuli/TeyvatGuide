@@ -465,7 +465,7 @@ async function exportJson () {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: url("/source/material/bg/5-Star.webp");
+  background: url("/icon/bg/5-Star.webp");
 }
 
 .reward-num {
