@@ -67,6 +67,9 @@
         </v-list-item>
       </v-list>
       <v-list v-for="achievement in selectedAchievement" :key="achievement.id" class="card-right">
+        <div v-if="achievement.progress !== 0" class="achievement-progress">
+          {{ achievement.progress }}
+        </div>
         <v-list-item>
           <template #prepend>
             <v-icon :color="achievement.completed ? '#fec90b' : '#485466'">
@@ -76,7 +79,6 @@
           </template>
           <v-list-item-title>
             {{ achievement.name }}
-            {{ achievement.progress !== 0 ? "| " + achievement.progress : null }}
             <span class="version-icon-single">v{{ achievement.version }}</span>
           </v-list-item-title>
           <v-list-item-subtitle>{{ achievement.description }}</v-list-item-subtitle>
@@ -432,7 +434,7 @@ async function exportJson () {
   font-family: Genshin, serif;
   border-radius: 5px;
   text-align: center;
-  color: #ff6d6d !important;
+  color: #ff6d6d;
   font-size: 10px;
 }
 
@@ -452,6 +454,22 @@ async function exportJson () {
   color: #faf7e8;
 }
 
+/* 成就进度 */
+.achievement-progress {
+  font-family: Genshin, serif;
+  position: absolute;
+  left: 0;
+  top: 0;
+  text-align: center;
+  width: 65px;
+  background: #8BA5C5;
+  border-bottom-right-radius: 20px;
+  border-bottom: #fff 2px solid;
+  border-right: #fff 2px solid;
+  color: #485466;
+  font-size: 10px;
+}
+
 /* 成就完成时间 */
 .right-time {
   margin-right: 10px;
@@ -464,8 +482,9 @@ async function exportJson () {
   position: relative;
   width: 40px;
   height: 40px;
-  border-radius: 10px;
-  background: url("/icon/bg/5-Star.webp");
+  border-radius: 5px;
+  background-image: url("/icon/bg/5-Star.webp");
+  background-size: cover;
 }
 
 .reward-num {
