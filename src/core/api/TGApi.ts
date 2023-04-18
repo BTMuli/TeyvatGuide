@@ -5,6 +5,7 @@
  * @since Alpha v0.1.3
  */
 
+import { ENKA_API } from "./ENKA";
 import { Hk4eAnnoListApi, Hk4eAnnoContentApi, Hk4eAnnoQuery } from "./Hk4e";
 import { TakumiTokensApi } from "./Takumi";
 
@@ -13,6 +14,7 @@ const TGApi = {
   GameAnnoList: Hk4eAnnoListApi, // 游戏公告 API
   GameAnnoContent: Hk4eAnnoContentApi, // 游戏公告内容 API
   GameAnnoQuery: Hk4eAnnoQuery, // 游戏公告 Query
+  GameEnka: ENKA_API, // 游戏 ENKA API
   GameTokens: TakumiTokensApi, // 游戏 Token API
 };
 
