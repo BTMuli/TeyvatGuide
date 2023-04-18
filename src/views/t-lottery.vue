@@ -5,7 +5,8 @@
   <div v-else>
     <div class="lottery-div">
       <div class="lottery-title">
-        抽奖详情 {{ timeStatus }}
+        抽奖详情
+        <span style="color:#E06C63">{{ timeStatus === "已开奖" ? timeStatus : `待开奖 ${timeStatus}` }}</span>
       </div>
       <v-list class="lottery-list">
         <v-list-item>
@@ -41,7 +42,7 @@
     <div v-show="showJson" class="dev-json">
       <JsonViewer :value="jsonData" copyable boxed />
     </div>
-    <div class="lottery-div">
+    <div v-if="timeStatus === '已开奖'" class="lottery-div">
       <div class="lottery-title">
         奖品详情
       </div>
@@ -50,16 +51,14 @@
           <v-list-item :title="reward.rewardName" :subtitle="'中奖人数' + reward.winnerNumber" />
         </v-list>
         <div class="lottery-grid">
-          <v-list v-for="user in reward.users" :key="user.uid" class="lottery-sub-list">
-            <v-list-item>
-              <template #prepend>
-                <v-avatar>
-                  <v-img :src="user.avatar_url" />
-                </v-avatar>
-              </template>
+          <div v-for="user in reward.users" :key="user.uid" class="lottery-sub-list">
+            <div class="lottery-user-avatar">
+              <img :src="user.avatar_url" alt="avatar">
+            </div>
+            <div class="lottery-user-nickname">
               {{ user.nickname }}
-            </v-list-item>
-          </v-list>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -174,16 +173,8 @@ onUpdated(() => {
 .lottery-list {
   background: #546d8b;
   border-radius: 10px;
-  margin: 10px;
+  margin-bottom: 10px;
   color: #faf7e8;
-  font-family: Genshin-Light, serif;
-}
-
-.lottery-sub-list {
-  background: #faf7e8;
-  border-radius: 10px;
-  margin: 10px;
-  color: #546d8b;
   font-family: Genshin-Light, serif;
 }
 
@@ -195,11 +186,42 @@ onUpdated(() => {
 }
 
 .lottery-grid {
-  background: #546d8b;
   border-radius: 10px;
-  margin: 10px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  grid-gap: 10px;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.lottery-sub-list {
+  background: #546d8b;
+  border-radius: 40px;
+  height: 40px;
+  margin: 5px;
+  color: #faf7e8;
+  font-family: Genshin-Light, serif;
+  align-items: center;
+  display: flex;
+}
+
+.lottery-user-avatar {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 5px;
+}
+
+.lottery-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lottery-user-nickname {
+  display: inline-block;
+  font-size: 14px;
+  font-family: Genshin-Light, 仿宋;
+  color: #faf7e8;
+  overflow: auto;
 }
 </style>
