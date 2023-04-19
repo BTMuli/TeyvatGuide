@@ -113,7 +113,7 @@ import { useAchievementsStore } from "../store/modules/achievements";
 import { TGAppData } from "../data";
 import { createTGWindow } from "../utils/TGWindow";
 import { ReadAllTGData, ReadTGDataByIndex, ReadTGDataByKey, UpdateTGDataByKey } from "../utils/TGIndex";
-import { getHeader, readUIAF, verifyUIAF } from "../utils/UIAF";
+import { getUiafHeader, readUiafData, verifyUiafData } from "../utils/UIAF";
 
 // Store
 const achievementsStore = useAchievementsStore();
@@ -147,11 +147,9 @@ async function loadData () {
   loadingTitle.value = "正在获取成就系列数据";
   const seriesDB: BTMuli.Genshin.AchievementSeries[] = await ReadAllTGData("AchievementSeries");
   CardsInfo.value = TGAppData.nameCards[1];
-  loadingTitle.value = "对成就系列数据进行排序";
   seriesList.value = seriesDB.sort((a, b) => a.order - b.order);
   loadingTitle.value = "正在获取成就数据";
   const getAchievements = await ReadAllTGData("Achievements");
-  loadingTitle.value = "正在对成就数据进行排序";
   getAchievements.sort((a, b) => {
     if (a.completed === b.completed) {
       return a.id - b.id;
@@ -159,7 +157,6 @@ async function loadData () {
       return a.completed ? 1 : -1;
     }
   });
-  loadingTitle.value = "正在渲染成就数据";
   selectedAchievement.value = getAchievements;
   title.value = achievementsStore.title;
   loading.value = false;
@@ -184,7 +181,6 @@ async function selectSeries (index: number) {
   } else {
     getCard = {} as BTMuli.Genshin.NameCard;
   }
-  loadingTitle.value = "正在对成就数据进行排序";
   getAchievements.sort((a, b) => {
     if (a.completed === b.completed) {
       return a.id - b.id;
@@ -192,7 +188,6 @@ async function selectSeries (index: number) {
       return a.completed ? 1 : -1;
     }
   });
-  loadingTitle.value = "正在渲染成就数据";
   selectedAchievement.value = getAchievements;
   getCardInfo.value = getCard;
   loading.value = false;
@@ -252,8 +247,8 @@ async function importJson () {
       },
     ],
   });
-  if (selectedFile && (await verifyUIAF(<string>selectedFile))) {
-    const remoteRaw: string | false = await readUIAF(<string>selectedFile);
+  if (selectedFile && (await verifyUiafData(<string>selectedFile))) {
+    const remoteRaw: string | false = await readUiafData(<string>selectedFile);
     if (remoteRaw === false) {
       snackbarText.value = "读取 UIAF 数据失败，请检查文件是否符合规范";
       snackbar.value = true;
@@ -339,7 +334,7 @@ async function exportJson () {
     return data.progress !== 0 || data.completed === true;
   });
   const UiafData = {
-    info: await getHeader(),
+    info: await getUiafHeader(),
     list: [] as TGPlugin.UIAF.Achievement[],
   };
   // 转换数据
