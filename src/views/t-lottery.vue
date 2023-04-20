@@ -8,7 +8,7 @@
         抽奖详情
         <span style="color:#E06C63">{{ timeStatus === "已开奖" ? timeStatus : `待开奖 ${timeStatus}` }}</span>
       </div>
-      <v-list class="lottery-list">
+      <div class="lottery-list">
         <v-list-item>
           <template #prepend>
             <v-avatar>
@@ -17,20 +17,23 @@
           </template>
           {{ lotteryCard.creator.nickname }}
           <v-list-item-subtitle>{{ lotteryCard.creator.introduce }}</v-list-item-subtitle>
-          <template #append>
-            发起人
-          </template>
         </v-list-item>
-        <v-list-item>
-          <v-list-item-title>{{ lotteryCard.participantWay }}</v-list-item-title>
-          <v-list-item-subtitle>{{ lotteryCard.id }}</v-list-item-subtitle>
-          <template #append>
-            抽奖 ID
-          </template>
-        </v-list-item>
-      </v-list>
-      <v-btn class="lottery-back" @click="backPost">
-        返回
+        <div class="reward-title">
+          参与方式：{{ participationMethod }}
+        </div>
+        <div class="reward-title">
+          抽奖 ID：{{ lotteryCard.id }}
+        </div>
+        <div class="reward-title">
+          奖品详情
+          <div v-for="reward in lotteryCard.rewards" :key="reward.rewardName" class="reward-subtitle">
+            {{ reward.rewardName }} {{ reward.scheduledWinnerNumber }}份
+          </div>
+        </div>
+      </div>
+      <v-btn class="lottery-back" @click="backPost()">
+        <img src="../assets/icons/circle-cancel.svg" alt="back">
+        <span>返回</span>
       </v-btn>
       <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="showJson = true">
         <template #prepend>
@@ -44,12 +47,12 @@
     </div>
     <div v-if="timeStatus === '已开奖'" class="lottery-div">
       <div class="lottery-title">
-        奖品详情
+        中奖详情
       </div>
-      <div v-for="reward in lotteryCard.rewards" :key="reward.rewardName">
-        <v-list class="lottery-list">
-          <v-list-item :title="reward.rewardName" :subtitle="'中奖人数' + reward.winnerNumber" />
-        </v-list>
+      <div v-for="reward in lotteryCard.rewards" :key="reward.rewardName" class="lottery-list">
+        <div class="reward-title">
+          {{ reward.rewardName }} {{ reward.scheduledWinnerNumber }}/{{ reward.winnerNumber }}
+        </div>
         <div class="lottery-grid">
           <div v-for="user in reward.users" :key="user.uid" class="lottery-sub-list">
             <div class="lottery-user-avatar">
@@ -89,6 +92,8 @@ const appStore = useAppStore();
 
 // 定时器
 const lotteryTimer = ref(null as any);
+// 参与方式
+const participationMethod = ref("未知" as string);
 
 function flushTimeStatus () {
   const timeNow = new Date().getTime();
@@ -142,10 +147,21 @@ onMounted(async () => {
       flushTimeStatus();
     }, 1000);
   }
+  participationMethod.value = getParticipationMethod(lotteryCard.value.participantWay);
   setTimeout(() => {
     loading.value = false;
-  }, 200);
+  }, 1000);
 });
+
+// 获取参与方式
+function getParticipationMethod (participantWay: string) {
+  switch (participantWay) {
+    case "Forward":
+      return "转发";
+    default:
+      return participantWay;
+  }
+}
 
 // 监听 timeStatus
 onUpdated(() => {
@@ -170,19 +186,48 @@ onUpdated(() => {
   margin: 10px;
 }
 
+.reward-title {
+  font-family: Genshin-Light, serif;
+  font-size: 16px;
+  color: #faf7e8;
+  margin: 10px;
+}
+
+.reward-subtitle {
+  font-family: Genshin-Light, serif;
+  font-size: 16px;
+  color: #faf7e8;
+  opacity: 0.5;
+}
+
 .lottery-list {
   background: #546d8b;
   border-radius: 10px;
-  margin-bottom: 10px;
+  margin: 10px;
+  padding: 10px;
   color: #faf7e8;
   font-family: Genshin-Light, serif;
 }
 
 .lottery-back {
-  margin: 10px;
+  margin: 5px;
+  height: 30px;
+  border-radius: 40px;
   font-family: Genshin, serif;
-  color: #faf7e8 !important;
-  background: #546d8b !important;
+  background: #4A5366;
+}
+
+.lottery-back img {
+  position: absolute;
+  left: 5px;
+  width: 25px;
+  height: 25px;
+}
+
+.lottery-back span {
+  color: #faf7e8;
+  font-size: 16px;
+  margin-left: 10px;
 }
 
 .lottery-grid {
@@ -192,11 +237,13 @@ onUpdated(() => {
 }
 
 .lottery-sub-list {
-  background: #546d8b;
+  /* background: #546d8b; */
+  background: #faf7e8;
   border-radius: 40px;
   height: 40px;
   margin: 5px;
-  color: #faf7e8;
+  /* color: #faf7e8; */
+  color: #546d8b;
   font-family: Genshin-Light, serif;
   align-items: center;
   display: flex;
@@ -221,7 +268,8 @@ onUpdated(() => {
   display: inline-block;
   font-size: 14px;
   font-family: Genshin-Light, 仿宋;
-  color: #faf7e8;
-  overflow: auto;
+  /* color: #faf7e8; */
+  color: #546d8b;
+  overflow: hidden;
 }
 </style>
