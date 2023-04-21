@@ -375,15 +375,15 @@ function delDB () {
 .config-list {
   margin: 10px;
   font-family: Genshin-Light, serif;
-  background: #faf7e8;
-  color: #546d8b;
+  background: var(--content-bg-2);
+  color: var(--content-text-3);
   border-radius: 10px;
 }
 
 .config-header {
   margin-top: 10px;
   font-family: Genshin, serif;
-  background: #faf7e8;
+  background: var(--content-bg-2);
   color: #fec90b;
   font-size: large;
 }
@@ -393,7 +393,7 @@ function delDB () {
   height: 40px;
   margin-right: 15px;
   padding: 5px;
-  background: #5b738f;
+  background: var(--content-bg-3);
   border-radius: 10px;
 }
 </style>

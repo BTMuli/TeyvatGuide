@@ -1,5 +1,6 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
+  <TSwitchTheme />
   <div v-if="loading" class="loading">
     <TLoading :title="loadingTitle" :empty="loadingEmpty" />
   </div>
@@ -19,6 +20,7 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import TLoading from "../components/t-loading.vue";
+import TSwitchTheme from "../components/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
 // plugins

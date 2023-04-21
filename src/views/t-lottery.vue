@@ -1,4 +1,5 @@
 <template>
+  <TSwitchTheme />
   <div v-if="loading">
     <TLoading :empty="loadingEmpty" :title="loadingTitle" />
   </div>
@@ -42,7 +43,7 @@
         JSON
       </v-btn>
     </div>
-    <div v-show="showJson" class="dev-json">
+    <div v-show="showJson" class="lottery-json">
       <JsonViewer :value="jsonData" copyable boxed />
     </div>
     <div v-if="timeStatus === '已开奖'" class="lottery-div">
@@ -73,6 +74,7 @@ import { ref, onMounted, reactive, onUpdated } from "vue";
 import { useRoute } from "vue-router";
 import JsonViewer from "vue-json-viewer";
 import TLoading from "../components/t-loading.vue";
+import TSwitchTheme from "../components/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
 // store
@@ -173,17 +175,17 @@ onUpdated(() => {
 </script>
 <style lang="css">
 .lottery-div {
-  background: #faf7e8;
+  background: var(--content-bg-2);
   border-radius: 10px;
-  margin: 10px;
+  margin-bottom: 10px;
   padding: 10px;
 }
 
 .lottery-title {
   font-family: Genshin, serif;
   font-size: 20px;
-  color: #546d8b;
-  margin: 10px;
+  color: var(--content-text-3);
+  margin-left: 40px;
 }
 
 .reward-title {
@@ -201,7 +203,7 @@ onUpdated(() => {
 }
 
 .lottery-list {
-  background: #546d8b;
+  background: var(--content-bg-1);
   border-radius: 10px;
   margin: 10px;
   padding: 10px;
@@ -237,13 +239,10 @@ onUpdated(() => {
 }
 
 .lottery-sub-list {
-  /* background: #546d8b; */
-  background: #faf7e8;
+  background: var(--content-bg-2);
   border-radius: 40px;
   height: 40px;
   margin: 5px;
-  /* color: #faf7e8; */
-  color: #546d8b;
   font-family: Genshin-Light, serif;
   align-items: center;
   display: flex;
@@ -267,9 +266,18 @@ onUpdated(() => {
 .lottery-user-nickname {
   display: inline-block;
   font-size: 14px;
-  font-family: Genshin-Light, 仿宋;
-  /* color: #faf7e8; */
-  color: #546d8b;
+  font-family: Genshin-Light, "仿宋";
+  color: var(--content-text-3);
   overflow: hidden;
+}
+
+.lottery-json {
+  padding: 20px;
+  border-radius: 20px;
+  font-family: Consolas, serif;
+}
+
+.jv-container {
+  background: var(--content-bg-2) !important;
 }
 </style>

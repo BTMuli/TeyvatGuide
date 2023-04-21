@@ -40,11 +40,11 @@ import { TGAppDataList, TGGetDataList } from "./data";
 
 const appStore = useAppStore();
 const isMain = ref(true as boolean);
+const theme = ref(appStore.theme as string);
 
 onMounted(async () => {
   // 获取当前主题
-  const theme = appStore.theme;
-  document.documentElement.className = theme;
+  document.documentElement.className = theme.value;
   // 获取当前窗口
   const win = window.getCurrent();
   isMain.value = win.label === "tauri-genshin";

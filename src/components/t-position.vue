@@ -9,9 +9,9 @@
         <v-card
           v-for="card in positionCards"
           :key="card.post_id"
-          style="background: #faf7e8; color: #546d8b; border-radius: 10px"
+          style="background: var(--content-bg-2); color: #546d8b; border-radius: 10px"
         >
-          <v-list style="background: #faf7e8; color: #546d8b">
+          <v-list style="background: var(--content-bg-2); color: #546d8b">
             <v-list-item :title="card.title" :subtitle="card.abstract">
               <template #prepend>
                 <v-avatar rounded="0" style="cursor: pointer" @click="toPost(card)">
@@ -130,7 +130,7 @@ async function toPost (card: PositionCard) {
 .position-card {
   margin-top: 10px;
   font-family: Genshin, serif;
-  background: #546d8b;
+  background: var(--content-bg-1);
   border-radius: 10px;
 }
 

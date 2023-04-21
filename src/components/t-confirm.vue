@@ -73,7 +73,7 @@ const onConfirm = () => {
   height: 20vh;
   top: 40vh;
   left: 30vw;
-  background: #fff;
+  background: var(--content-bg-2);
   border-radius: 10px;
   padding: 10px;
   display: flex;
@@ -92,7 +92,7 @@ const onConfirm = () => {
   text-align: center;
   height: 20%;
   width: 100%;
-  color: #393b40;
+  color: var(--content-text-2);
   margin: 20px;
   font-size: 30px;
 }
@@ -109,8 +109,8 @@ const onConfirm = () => {
   width: 30%;
   min-width: 150px;
   min-height: 30px;
-  background: #4a5366;
-  color: #faf7e8;
+  background: var(--btn-bg-2);
+  color: var(--btn-text-1);
   border-radius: 50px;
   display: flex;
   align-items: center;

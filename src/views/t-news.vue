@@ -3,7 +3,7 @@
     <TLoading :title="loadingTitle" />
   </div>
   <div v-else>
-    <v-tabs v-model="tab" align-tabs="start" class="news-tabs">
+    <v-tabs v-model="tab" align-tabs="start" class="news-tab">
       <v-tab value="notice" title="公告" />
       <v-tab value="activity" title="活动" />
       <v-tab v-if="showNews" value="news" title="新闻" />
@@ -349,9 +349,10 @@ async function searchPost () {
 </script>
 
 <style lang="css" scoped>
-.news-tabs {
+.news-tab {
   font-family: Genshin, serif;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  color: var(--content-text-3)
 }
 
 .news-grid {
@@ -363,8 +364,8 @@ async function searchPost () {
 
 .news-card {
   border-radius: 10px;
-  background: #faf7e8;
-  color: #546d8b;
+  background: var(--content-bg-2);
+  color: var(--content-text-2);
 }
 
 .news-cover {
@@ -388,11 +389,11 @@ async function searchPost () {
 /* switch */
 .switch-btn {
   font-family: Genshin, serif;
-  background: #ffca0a;
+  background: var(--btn-bg-1);
   height: 40px;
   margin-right: 10px;
   margin-top: 5px;
-  color: #546d8b;
+  color: var(--content-text-3);
 }
 
 /* load more */
@@ -408,8 +409,8 @@ async function searchPost () {
 }
 
 .load-news button {
-  background: #546d8b !important;
-  color: #faf7e8 !important;
+  background: var(--btn-bg-3);
+  color: #faf7e8;
 }
 
 .load-news button img {

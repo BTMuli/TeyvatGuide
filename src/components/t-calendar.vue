@@ -11,8 +11,9 @@
           :key="text.week"
           class="calendar-btn"
           :style="{
-            border: text.week === weekNow ? '2px solid #fec90b' : '0',
-            background: text.week === btnNow ? '#fec90b' : '#4A5366',
+            border: text.week === weekNow ? '2px solid var(--btn-bg-1)' : '0',
+            background: text.week === btnNow ? 'var(--btn-bg-1)' : 'var(--btn-bg-2)',
+            color: '#faf7e8'
           }"
           @click="getContents(text.week)"
         >
@@ -239,14 +240,14 @@ function getContents (day: number) {
 .calendar-card {
   margin-top: 10px;
   font-family: Genshin-Light, serif;
-  background: #546d8b;
+  background: var(--content-bg-1);
   border-radius: 10px;
 }
 
 .calendar-btn {
   margin-left: 10px;
   font-family: Genshin-Light, serif;
-  color: #faf7e8;
+  color: var(--btn-text-1);
   border-radius: 10px;
 }
 
@@ -262,8 +263,8 @@ function getContents (day: number) {
 
 .calendar-single {
   margin-bottom: 10px;
-  background: #faf7e8;
-  color: #546d8b;
+  background: var(--content-bg-2);
+  color: var(--content-bg-1);
   border-radius: 10px;
 }
 
@@ -276,8 +277,8 @@ function getContents (day: number) {
 }
 
 .calendar-content {
-  background: #546D8B;
-  color:#faf7e8;
+  background: var(--content-bg-1);
+  color:var(--content-bg-2);
   margin: 5px;
   border-radius: 10px;
   padding: 10px;
@@ -414,7 +415,7 @@ function getContents (day: number) {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(20, 20, 20, 0.5);
+  background: rgb(20 20 20 / 50%);
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   color: #fff;

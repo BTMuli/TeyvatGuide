@@ -2,9 +2,24 @@
  * @file plugins Mys utils PostParser.ts
  * @description 用于解析Mys数据的工具
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @since Alpha v0.1.3
  */
 import { type PostData, type PostStructuredContent } from "../interface/post";
+
+/**
+ * @description 在 dark 模式下显示模糊的 color
+ * @since Alpha v0.1.3
+ * @constant {string[]} darkColorList 模糊的 color
+ * @readonly
+ * @returns {string[]} 模糊的 color
+ */
+const darkColorList: string[] = [
+  "#111111",
+  "#333333",
+  "#0f141a",
+  "#494949",
+  "#666666",
+];
 
 /**
  * @description 检测链接是否是米游社帖子
@@ -146,7 +161,7 @@ function UnknownParser (data: PostStructuredContent): HTMLDivElement {
 
 /**
  * @description 解析文本
- * @since Alpha
+ * @since Alpha v0.1.3
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLSpanElement} 解析后的文本
  */
@@ -160,7 +175,14 @@ function TextParser (data: PostStructuredContent): HTMLSpanElement {
   // 设置文本属性
   if (data.attributes) {
     if (data.attributes.bold) text.style.fontWeight = "bold";
-    if (data.attributes.color) text.style.color = data.attributes.color;
+    if (data.attributes.color) {
+      let colorGet = data.attributes.color;
+      // 如果 colorGet 在 darkColorList 中，就设置为对应的颜色
+      if (darkColorList.includes(colorGet)) {
+        colorGet = "var(--post-default-text)";
+      }
+      text.style.color = colorGet;
+    }
     if (data.attributes.link) {
       return LinkTextParser(data);
     }

@@ -1,8 +1,12 @@
 <template>
+  <TSwitchTheme />
   <div v-if="loading">
     <TLoading :empty="loadingEmpty" :title="loadingTitle" />
   </div>
-  <div v-else class="dev-json">
+  <div v-else class="post-json">
+    <div class="post-title">
+      帖子返回内容 JSON
+    </div>
     <JsonViewer :value="jsonData" copyable boxed />
   </div>
 </template>
@@ -12,6 +16,7 @@ import { ref, onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import JsonViewer from "vue-json-viewer";
 import TLoading from "../components/t-loading.vue";
+import TSwitchTheme from "../components/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
 // plugins
@@ -42,3 +47,22 @@ onMounted(async () => {
   }, 200);
 });
 </script>
+<style>
+.post-json {
+  padding: 20px;
+  border-radius: 20px;
+  font-family: Consolas, serif;
+}
+
+.post-title {
+  font-size: 20px;
+  color: #546d8b;
+  font-family: Genshin-Light, serif;
+  font-weight: 600;
+  margin: 20px 0;
+}
+
+.jv-container {
+  background: var(--content-bg-2) !important;
+}
+</style>

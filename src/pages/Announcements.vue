@@ -3,7 +3,7 @@
     <TLoading :title="loadingTitle" />
   </div>
   <div v-else>
-    <v-tabs v-model="tab" align-tabs="start" class="global-font mb-2">
+    <v-tabs v-model="tab" align-tabs="start" class="anno-tab">
       <v-tab value="activity" title="活动公告" />
       <v-tab value="game" title="游戏公告" />
       <v-spacer />
@@ -159,6 +159,12 @@ async function toJson (item: BTMuli.Genshin.Announcement.ListCard) {
 </script>
 
 <style lang="css" scoped>
+.anno-tab {
+  font-family: Genshin, serif;
+  margin-bottom: 20px;
+  color: var(--content-text-3)
+}
+
 .anno-grid {
   font-family: Genshin, serif;
   display: grid;
@@ -168,8 +174,8 @@ async function toJson (item: BTMuli.Genshin.Announcement.ListCard) {
 
 .anno-card {
   border-radius: 10px;
-  background: #faf7e8;
-  color: #546d8b;
+  background: var(--content-bg-2);
+  color: var(--content-text-2);
   border-bottom: #4b5366 1px solid;
 }
 
@@ -193,7 +199,7 @@ async function toJson (item: BTMuli.Genshin.Announcement.ListCard) {
 
 .anno-btn {
   margin-left: 5px;
-  background: #546d8b;
+  background: var(--btn-bg-3);
   color: #faf7e8;
 }
 
@@ -205,10 +211,10 @@ async function toJson (item: BTMuli.Genshin.Announcement.ListCard) {
 /* switch */
 .switch-btn {
   font-family: Genshin, serif;
-  background: #ffca0a;
+  background: var(--btn-bg-1);
   height: 40px;
   margin-right: 10px;
   margin-top: 5px;
-  color: #546d8b;
+  color: var(--content-text-3);
 }
 </style>

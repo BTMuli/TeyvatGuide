@@ -142,7 +142,7 @@ function toOuter (item: BTMuli.Genshin.Wiki.Weapon.BriefInfo) {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(20, 20, 20, 0.5);
+  background: rgb(20 20 20 / 50%);
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   color: #fff;

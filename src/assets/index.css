@@ -26,16 +26,6 @@
   background: #555;
 }
 
-/*
- * @description 米游社解析 json
- * @since Alpha v0.1.1
- */
-.dev-json {
-  padding: 20px;
-  border-radius: 20px;
-  font-family: Consolas, serif;
-}
-
 /* card action 内的按钮 */
 .card-btn {
   background: #4a5366;

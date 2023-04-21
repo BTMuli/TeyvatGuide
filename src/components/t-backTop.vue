@@ -64,7 +64,7 @@ onMounted(() => {
   cursor: pointer;
   transform: scale(0.9);
   transition: all 0.3s ease-in-out;
-  box-shadow: 0 0 10px 5px #546d8b;
+  box-shadow: 0 0 10px 5px var(--back-top-shadow);
 }
 
 .back-top img {

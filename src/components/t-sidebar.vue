@@ -5,14 +5,14 @@
       <v-list-item @click="collapse">
         <template v-if="rail" #prepend>
           <v-list-item-action>
-            <v-icon color="rgb(205, 182, 145)">
+            <v-icon style="color:var(--sidebar-icon)">
               mdi-chevron-right
             </v-icon>
           </v-list-item-action>
         </template>
         <template v-else #append>
           <v-list-item-action>
-            <v-icon color="rgb(205, 182, 145)">
+            <v-icon style="color:var(--sidebar-icon)">
               mdi-chevron-left
             </v-icon>
           </v-list-item-action>
@@ -85,7 +85,7 @@
           <v-list-item title="图鉴" v-bind="props">
             <template #prepend>
               <!-- TODO: 后续更换图标-->
-              <v-icon color="rgb(205, 182, 145)">
+              <v-icon style="color:var(--sidebar-icon)">
                 mdi-book-open-variant
               </v-icon>
             </template>
@@ -99,7 +99,7 @@
         <v-list-item title="角色图鉴" value="wiki-character" link href="/wiki/character">
           <template #prepend>
             <!-- TODO: 后续更换图标-->
-            <v-icon style="color:#FDE7AC !important">
+            <v-icon style="color:var(--sidebar-icon)">
               mdi-account
             </v-icon>
           </template>
@@ -107,7 +107,7 @@
         <v-list-item title="武器图鉴" value="wiki-weapon" link href="/wiki/weapon">
           <template #prepend>
             <!-- TODO: 后续更换图标 -->
-            <v-icon style="color:#FDE7AC !important">
+            <v-icon style="color:var(--sidebar-icon)">
               mdi-sword
             </v-icon>
           </template>
@@ -122,8 +122,8 @@
         </v-list-item> -->
         <v-list-item :title="themeTitle" value="theme" @click="switchTheme">
           <template #prepend>
-            <v-icon color="rgb(205, 182, 145)">
-              {{ themeGet === 'default' ? 'mdi-weather-sunny' : 'mdi-weather-night' }}
+            <v-icon style="color:var(--sidebar-icon)">
+              {{ themeGet === 'default' ? 'mdi-weather-night' : 'mdi-weather-sunny' }}
             </v-icon>
           </template>
         </v-list-item>
@@ -175,8 +175,7 @@ function collapse () {
 }
 
 function switchTheme () {
-  themeGet.value = themeGet.value === "default" ? "dark" : "default";
-  appStore.theme = themeGet.value;
+  appStore.changeTheme();
   document.documentElement.className = themeGet.value;
 }
 

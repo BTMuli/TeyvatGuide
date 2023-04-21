@@ -9,9 +9,9 @@
         <v-card
           v-for="pool in poolCards"
           :key="pool.post_id"
-          style="background: #faf7e8; color: #546d8b; border-radius: 10px"
+          style="background: var(--content-bg-2); color: #546d8b; border-radius: 10px"
         >
-          <v-list style="background: #faf7e8; color: #546d8b">
+          <v-list style="background: var(--content-bg-2); color: #546d8b">
             <v-list-item :title="pool.title" :subtitle="pool.subtitle">
               <template #prepend>
                 <v-img :src="pool.voice.icon" style="transform: translate(0, -10px); width: 60px; height: 60px" />
@@ -188,7 +188,7 @@ function toPost (pool: GachaCard) {
 .pool-card {
   font-family: Genshin, serif;
   width: 100%;
-  background: #546d8b;
+  background: var(--content-bg-1);
   border-radius: 10px;
   margin-top: 10px;
 }

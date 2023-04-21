@@ -1,5 +1,6 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
+  <TSwitchTheme />
   <div v-if="loading">
     <TLoading :empty="loadingEmpty" :title="loadingTitle" />
   </div>
@@ -14,6 +15,7 @@ import TLoading from "../components/t-loading.vue";
 import { appWindow } from "@tauri-apps/api/window";
 // plugins
 import MysOper from "../plugins/Mys";
+import TSwitchTheme from "../components/t-switchTheme.vue";
 
 // loading
 const loading = ref(true as boolean);

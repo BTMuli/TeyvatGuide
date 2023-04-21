@@ -1,16 +1,17 @@
 <template>
+  <TSwitchTheme />
   <div v-if="loading">
     <TLoading :empty="loadingEmpty" :title="loadingTitle" />
   </div>
-  <div v-else class="dev-json">
+  <div v-else class="anno-json">
     <div class="anno-title">
       活动列表 JSON
     </div>
-    <JsonViewer :value="jsonList" copyable boxed />
+    <JsonViewer :value="jsonList" copyable boxed class="anno-data" />
     <div class="anno-title">
       活动内容 JSON
     </div>
-    <JsonViewer :value="jsonContent" copyable boxed />
+    <JsonViewer :value="jsonContent" copyable boxed class="anno-data" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -19,6 +20,7 @@ import { ref, onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import JsonViewer from "vue-json-viewer";
 import TLoading from "../components/t-loading.vue";
+import TSwitchTheme from "../components/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
 // utils
@@ -45,7 +47,7 @@ onMounted(async () => {
   // 获取数据
   loadingTitle.value = "正在获取数据...";
   const listData = await TGRequest.Anno.getList();
-  listData.list.map((item: BTMuli.Genshin.Announcement.Announcement) => {
+  listData.list.map((item: BTMuli.Genshin.Announcement) => {
     return item.list.map((single: BTMuli.Genshin.Announcement.ListItem) => {
       return single.ann_id === annoId ? (jsonList = single) : null;
     });
@@ -57,11 +59,21 @@ onMounted(async () => {
 });
 </script>
 <style lang="css" scoped>
+.anno-json {
+  padding: 20px;
+  border-radius: 20px;
+  font-family: Consolas, serif;
+}
+
 .anno-title {
   font-size: 20px;
   color: #546d8b;
   font-family: Genshin-Light, serif;
   font-weight: 600;
   margin: 20px 0;
+}
+
+.jv-container {
+  background: var(--content-bg-2) !important;
 }
 </style>

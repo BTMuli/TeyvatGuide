@@ -3,7 +3,7 @@
     <TLoading title="正在加载卡牌列表" />
   </div>
   <div v-else>
-    <v-tabs v-model="tab" align-tabs="start" class="global-font">
+    <v-tabs v-model="tab" align-tabs="start" class="cards-tab">
       <div v-show="!doSearch">
         <v-tab value="character" title="角色牌" />
         <v-tab value="action" title="行动牌" />
@@ -145,6 +145,12 @@ async function searchCard () {
 }
 </script>
 <style lang="css" scoped>
+.cards-tab {
+  font-family: Genshin,serif;
+  margin-bottom: 20px;
+  color: var(--content-text-3);
+}
+
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));

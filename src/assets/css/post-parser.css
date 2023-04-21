@@ -1,12 +1,13 @@
 /*
  * @description 米游社解析 css
- * @since Alpha v0.1.1
+ * @since Alpha v0.1.3
  */
-/* todo scoped 不生效 */
+
 .mys-post-body {
   margin: 20px auto;
   width: 800px;
   font-family: "Genshin-Light", serif;
+  color: var(--post-default-text);
 }
 
 :deep(.mys-post-div) {
@@ -69,7 +70,7 @@
   padding: 10px;
   border-radius: 10px;
   display: flex;
-  background: #faf7e8;
+  background: var(--content-bg-2);
 }
 
 :deep(.mys-post-unknown) {
