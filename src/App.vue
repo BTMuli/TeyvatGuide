@@ -42,6 +42,9 @@ const appStore = useAppStore();
 const isMain = ref(true as boolean);
 
 onMounted(async () => {
+  // 获取当前主题
+  const theme = appStore.theme;
+  document.documentElement.className = theme;
   // 获取当前窗口
   const win = window.getCurrent();
   isMain.value = win.label === "tauri-genshin";
@@ -93,7 +96,7 @@ async function writeIndex () {
 <style lang="css">
 .app-main {
   min-height: 100vh;
-  background: #ece5d8;
+  background: var(--page-bg);
   backdrop-filter: blur(20px);
 }
 </style>

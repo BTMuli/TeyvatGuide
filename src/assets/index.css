@@ -1,4 +1,6 @@
 @import "fonts/index.css";
+@import url("themes/default.css");
+@import url("themes/dark.css");
 
 /*
  * @description 侧边滚动条样式

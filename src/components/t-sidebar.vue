@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer permanent :rail="rail" style="background: #485466; color: #faf7e8">
+  <v-navigation-drawer permanent :rail="rail" style="background: var(--sidebar-bg); color: #faf7e8">
     <v-list v-model:opened="open" class="side-list" density="compact" nav>
       <!-- 负责收缩侧边栏 -->
       <v-list-item @click="collapse">
@@ -120,6 +120,13 @@
             <img :src="userInfo.avatar" alt="userIcon" class="side-icon">
           </template>
         </v-list-item> -->
+        <v-list-item :title="themeTitle" value="theme" @click="switchTheme">
+          <template #prepend>
+            <v-icon color="rgb(205, 182, 145)">
+              {{ themeGet === 'default' ? 'mdi-weather-sunny' : 'mdi-weather-night' }}
+            </v-icon>
+          </template>
+        </v-list-item>
         <v-list-item title="设置" value="config" link href="/config">
           <template #prepend>
             <img src="../assets/icons/setting.svg" alt="setting" class="side-icon">
@@ -139,6 +146,18 @@ import { useAppStore } from "../store/modules/app";
 const appStore = useAppStore();
 
 const rail = ref(appStore.sidebar.collapse);
+// theme
+const themeGet = computed({
+  get () {
+    return appStore.theme;
+  },
+  set (value: string) {
+    appStore.theme = value;
+  },
+});
+const themeTitle = computed(() => {
+  return themeGet.value === "default" ? "切换为夜间模式" : "切换为日间模式";
+});
 
 const open = computed({
   get () {
@@ -154,6 +173,13 @@ function collapse () {
   rail.value = !rail.value;
   appStore.sidebar.collapse = rail.value;
 }
+
+function switchTheme () {
+  themeGet.value = themeGet.value === "default" ? "dark" : "default";
+  appStore.theme = themeGet.value;
+  document.documentElement.className = themeGet.value;
+}
+
 </script>
 
 <style lang="css" scoped>
