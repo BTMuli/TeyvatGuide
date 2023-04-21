@@ -38,6 +38,8 @@ export const useAppStore = defineStore(
     });
     // 开发者模式
     const devMode = ref(false);
+    // 应用主题
+    const theme = ref("default");
 
     const dataPath = reactive({
       appDataDir,
@@ -62,6 +64,7 @@ export const useAppStore = defineStore(
       devMode.value = false;
       sidebar.submenu.mihoyo = false;
       sidebar.submenu.wiki = false;
+      theme.value = "default";
     }
 
     function getSubmenu (): string[] {
@@ -71,7 +74,13 @@ export const useAppStore = defineStore(
       return open;
     }
 
+    function changeTheme (): void {
+      if (theme.value === "default") theme.value = "dark";
+      else theme.value = "default";
+    }
+
     return {
+      theme,
       loading,
       sidebar,
       devMode,
@@ -80,6 +89,7 @@ export const useAppStore = defineStore(
       userPath,
       init,
       getSubmenu,
+      changeTheme,
     };
   },
   {
@@ -98,6 +108,11 @@ export const useAppStore = defineStore(
         key: "sidebar",
         storage: window.localStorage,
         paths: ["sidebar"],
+      },
+      {
+        key: "theme",
+        storage: window.localStorage,
+        paths: ["theme"],
       },
     ],
   },
