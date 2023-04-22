@@ -139,7 +139,9 @@
 
 <script lang="ts" setup>
 // vue
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
+// tauri
+import { event } from "@tauri-apps/api";
 // store
 import { useAppStore } from "../store/modules/app";
 
@@ -174,11 +176,20 @@ function collapse () {
   appStore.sidebar.collapse = rail.value;
 }
 
-function switchTheme () {
-  appStore.changeTheme();
-  document.documentElement.className = themeGet.value;
+onMounted(async () => {
+  await listenOnTheme();
+});
+
+async function listenOnTheme () {
+  await event.listen("readTheme", (e) => {
+    const theme = e.payload as string;
+    themeGet.value = theme === "default" ? "default" : "dark";
+  });
 }
 
+async function switchTheme () {
+  await event.emit("readTheme", themeGet.value === "default" ? "dark" : "default");
+}
 </script>
 
 <style lang="css" scoped>

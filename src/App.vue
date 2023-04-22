@@ -30,7 +30,7 @@ import { onMounted, ref } from "vue";
 import TSidebar from "./components/t-sidebar.vue";
 import TBackTop from "./components/t-backTop.vue";
 // tauri
-import { fs, window, app } from "@tauri-apps/api";
+import { fs, window, app, event } from "@tauri-apps/api";
 // store
 import { useAppStore } from "./store/modules/app";
 // utils
@@ -45,6 +45,7 @@ const theme = ref(appStore.theme as string);
 onMounted(async () => {
   // 获取当前主题
   document.documentElement.className = theme.value;
+  await listenOnTheme();
   // 获取当前窗口
   const win = window.getCurrent();
   isMain.value = win.label === "tauri-genshin";
@@ -54,6 +55,17 @@ onMounted(async () => {
     await checkLoad();
   }
 });
+
+// 监听主题变化
+async function listenOnTheme () {
+  await event.listen("readTheme", (e) => {
+    const themeGet = e.payload as string;
+    if (theme.value !== themeGet) {
+      theme.value = themeGet;
+      document.documentElement.className = theme.value;
+    }
+  });
+}
 
 async function checkLoad () {
   if (appStore.loading) {

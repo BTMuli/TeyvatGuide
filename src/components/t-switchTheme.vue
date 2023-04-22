@@ -9,7 +9,9 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
+// tauri
+import { event } from "@tauri-apps/api";
 // store
 import { useAppStore } from "../store/modules/app";
 
@@ -25,11 +27,21 @@ const themeGet = computed({
   },
 });
 
-function swithcTheme () {
+onMounted(async () => {
+  await listenOnTheme();
+});
+
+async function swithcTheme () {
   appStore.changeTheme();
-  document.documentElement.className = themeGet.value;
+  await event.emit("readTheme", themeGet.value);
 }
 
+async function listenOnTheme () {
+  await event.listen("readTheme", (e) => {
+    const theme = e.payload as string;
+    themeGet.value = theme === "default" ? "default" : "dark";
+  });
+}
 </script>
 <style lang="css" scoped>
 .switch-box {
