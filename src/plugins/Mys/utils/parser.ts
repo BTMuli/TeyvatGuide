@@ -7,19 +7,42 @@
 import { type PostData, type PostStructuredContent } from "../interface/post";
 
 /**
- * @description 在 dark 模式下显示模糊的 color
+ * @description 16进制颜色转 RGB
  * @since Alpha v0.1.3
- * @constant {string[]} darkColorList 模糊的 color
- * @readonly
- * @returns {string[]} 模糊的 color
+ * @param {string} hex 16进制颜色
+ * @returns {object} RGB 颜色
  */
-const darkColorList: string[] = [
-  "#111111",
-  "#333333",
-  "#0f141a",
-  "#494949",
-  "#666666",
-];
+function hexToRgb (hex: string): { r: number, g: number, b: number } {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (result === null) {
+    throw new Error("无法解析颜色");
+  }
+  return {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16),
+  };
+}
+
+/**
+ * @description 给定两个16进制颜色值，确认两者是否相近
+ * @since Alpha v0.1.3
+ * @param {string} colorBg 背景颜色
+ * @param {string} colorFg 前景颜色
+ * @returns {boolean} 是否相近
+ */
+function isColorSimilar (colorBg: string, colorFg: string): boolean {
+  const colorBgRGB = hexToRgb(colorBg);
+  const colorFgRGB = hexToRgb(colorFg);
+  const colorBgL = 0.2126 * colorBgRGB.r + 0.7152 * colorBgRGB.g + 0.0722 * colorBgRGB.b;
+  const colorFgL = 0.2126 * colorFgRGB.r + 0.7152 * colorFgRGB.g + 0.0722 * colorFgRGB.b;
+  const colorBgLum = colorBgL / 255;
+  const colorFgLum = colorFgL / 255;
+  const colorBgLumFinal = colorBgLum <= 0.03928 ? colorBgLum / 12.92 : Math.pow((colorBgLum + 0.055) / 1.055, 2.4);
+  const colorFgLumFinal = colorFgLum <= 0.03928 ? colorFgLum / 12.92 : Math.pow((colorFgLum + 0.055) / 1.055, 2.4);
+  const contrast = (Math.max(colorBgLumFinal, colorFgLumFinal) + 0.05) / (Math.min(colorBgLumFinal, colorFgLumFinal) + 0.05);
+  return contrast <= 2.5;
+}
 
 /**
  * @description 检测链接是否是米游社帖子
@@ -178,7 +201,7 @@ function TextParser (data: PostStructuredContent): HTMLSpanElement {
     if (data.attributes.color) {
       let colorGet = data.attributes.color;
       // 如果 colorGet 在 darkColorList 中，就设置为对应的颜色
-      if (darkColorList.includes(colorGet)) {
+      if (isColorSimilar("#ece5d8", colorGet) || isColorSimilar("#2a2a2a", colorGet)) {
         colorGet = "var(--post-default-text)";
       }
       text.style.color = colorGet;
