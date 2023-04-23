@@ -71,10 +71,12 @@ async function listenOnTheme () {
 async function checkLoad () {
   const localBuildTime = appStore.buildTime;
   const buildTime = getBuildTime();
-  if (localBuildTime !== buildTime) {
-    appStore.buildTime = buildTime;
-    console.info("数据已过期，开始加载数据...");
-    appStore.loading = false;
+  if (!buildTime.startsWith("dev")) {
+    if (localBuildTime.startsWith("dev") || localBuildTime < buildTime) {
+      appStore.buildTime = buildTime;
+      console.info("数据已过期，开始加载数据...");
+      appStore.loading = false;
+    }
   }
   if (appStore.loading) {
     console.info("数据已加载！");
