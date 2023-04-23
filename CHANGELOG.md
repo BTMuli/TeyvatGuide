@@ -7,7 +7,7 @@ Update: 2023-04-23
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-30 15:39:49`
 > 
-> 更新于 `2023-04-23 13:33:35`
+> 更新于 `2023-04-23 14:00:25`
 
 # CHANGELOG
 
@@ -17,19 +17,19 @@ Update: 2023-04-23
 
 - 应用：支持浅色\深色主题切换
 - 应用：支持检测更新
-- 图鉴：角色图鉴草创 [`d154b5bd`](https://BTMuli/Tauri.Genshin/commit/d154b5bd)
-- 图鉴：武器图鉴草创 [`1c309e38`](https://BTMuli/Tauri.Genshin/commit/1c309e38)
-- 滚动条：样式美化 [`4022504`](https://BTMuli/Tauri.Genshin/commit/4022504)
+- 图鉴：角色图鉴草创 [`d154b5bd`](https://github.com/BTMuli/Tauri.Genshin/commit/d154b5bd)
+- 图鉴：武器图鉴草创 [`1c309e38`](https://github.com/BTMuli/Tauri.Genshin/commit/1c309e38)
+- 滚动条：样式美化 [`4022504`](https://github.com/BTMuli/Tauri.Genshin/commit/4022504)
 
 ### Fix
 
-- 应用：修复初始化未重新加载资源的问题 [`513be2e`](https://BTMuli/Tauri.Genshin/commit/513be2e)
+- 应用：修复初始化未重新加载资源的问题 [`513be2e`](https://github.com/BTMuli/Tauri.Genshin/commit/513be2e)
 - 应用：除成就数据外的 `readonly` 数据直接读取应用内 `json` 文件
 - 应用：添加游戏新版本资源
 - GCG：相关资源归到 `WIKI` 下
 - 首页：素材日历资源采用 WIKI 资源
 
-FullCommits: [`v0.1.2 ~ v0.1.3`](https://BTMuli/Tauri.Genshin/compare/v0.1.2...v0.1.3)
+FullCommits: [`v0.1.2 ~ v0.1.3`](https://github.com/BTMuli/Tauri.Genshin/compare/v0.1.2...v0.1.3)
 
 ## [0.1.2](https://github.com/BTMuli/Tauri.Genshin/releases/v0.1.2) (2023-04-12)
 
