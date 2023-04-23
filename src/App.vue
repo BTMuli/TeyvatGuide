@@ -35,6 +35,7 @@ import { fs, window, app, event } from "@tauri-apps/api";
 import { useAppStore } from "./store/modules/app";
 // utils
 import { InitTGData, DeleteTGData, WriteTGData } from "./utils/TGIndex";
+import { getBuildTime } from "./utils/TGBuild";
 // data
 import { TGAppDataList, TGGetDataList } from "./data";
 
@@ -68,6 +69,13 @@ async function listenOnTheme () {
 }
 
 async function checkLoad () {
+  const localBuildTime = appStore.buildTime;
+  const buildTime = getBuildTime();
+  if (localBuildTime !== buildTime) {
+    appStore.buildTime = buildTime;
+    console.info("数据已过期，开始加载数据...");
+    appStore.loading = false;
+  }
   if (appStore.loading) {
     console.info("数据已加载！");
     return;

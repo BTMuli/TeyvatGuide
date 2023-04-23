@@ -2,7 +2,7 @@
  * @file store modules app.ts
  * @description App store module
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.3
+ * @since Alpha v0.1.4
  */
 
 // vue
@@ -24,6 +24,8 @@ export const useAppStore = defineStore(
   () => {
     // 应用加载状态
     const loading = ref(false);
+    // 应用打包时间
+    const buildTime = ref("");
     // 侧边栏设置
     const sidebar = reactive({
       // 是否折叠
@@ -82,6 +84,7 @@ export const useAppStore = defineStore(
     return {
       theme,
       loading,
+      buildTime,
       sidebar,
       devMode,
       dataPath,
@@ -102,7 +105,7 @@ export const useAppStore = defineStore(
       {
         key: "app",
         storage: window.localStorage,
-        paths: ["devMode", "loading"],
+        paths: ["devMode", "loading", "buildTime"],
       },
       {
         key: "sidebar",
