@@ -14,7 +14,7 @@ tauri-build = { version = "1.2", features = [] }
 
 [dependencies]
 rocket = "0.5.0-rc.1"
-tauri = { version = "1.2", features = ["api-all"] }
+tauri = { version = "1.2", features = ["api-all", "updater"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 

@@ -4,3 +4,5 @@
 node_modules
 # Tauri build
 dist
+# Secrets
+.env.sh
