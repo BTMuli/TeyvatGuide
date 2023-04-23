@@ -1,0 +1,50 @@
+name: Publish Release
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+
+jobs:
+  publish-tauri:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: Restore Cargo dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/src-tauri/.cargo/bin/
+            ~/src-tauri/.cargo/registry/index/
+            ~/src-tauri/.cargo/registry/cache/
+            ~/src-tauri/.cargo/git/db/
+            ~/src-tauri/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+      - name: Install frontend dependencies
+        run: npm install
+      - uses: tauri-apps/tauri-action@dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+        with:
+          tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
+          releaseName: v__VERSION__-alpha
+          releaseBody: See the assets to download this version and install.
+          releaseDraft: true
+          prerelease: false
