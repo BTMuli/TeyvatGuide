@@ -12,8 +12,6 @@ import { defineStore } from "pinia";
 // tauri
 import { path } from "@tauri-apps/api";
 
-// 用于存储原生数据的路径
-const appDataDir = `${await path.appLocalDataDir()}appData`;
 // 用于存储用户数据的路径
 const userDataDir = `${await path.appLocalDataDir()}userData`;
 // 用于各种临时数据的路径
@@ -44,20 +42,12 @@ export const useAppStore = defineStore(
     const theme = ref("default");
 
     const dataPath = reactive({
-      appDataDir,
       userDataDir,
       tempDataDir,
     });
-
-    // 应用数据路径
-    const appPath = ref({
-      achievements: `${dataPath.appDataDir}/achievements.json`,
-      achievementSeries: `${dataPath.appDataDir}/achievementSeries.json`,
-      nameCards: `${dataPath.appDataDir}/nameCards.json`,
-    });
-      // 用户数据路径
+    // 用户数据路径
     const userPath = ref({
-      achievements: `${dataPath.userDataDir}/achievements.json`,
+      UIAF: `${dataPath.userDataDir}/UIAF.json`,
     });
 
     // 初始化
@@ -88,7 +78,6 @@ export const useAppStore = defineStore(
       sidebar,
       devMode,
       dataPath,
-      appPath,
       userPath,
       init,
       getSubmenu,
@@ -100,7 +89,7 @@ export const useAppStore = defineStore(
       {
         key: "appPath",
         storage: window.localStorage,
-        paths: ["dataPath", "appPath", "userPath"],
+        paths: ["dataPath", "userPath"],
       },
       {
         key: "app",

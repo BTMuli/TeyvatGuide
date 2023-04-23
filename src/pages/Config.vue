@@ -65,7 +65,8 @@
         设置
       </v-list-subheader>
       <v-divider inset class="border-opacity-75" />
-      <v-list-item prepend-icon="mdi-folder" title="打开用户数据目录" @click="openMergeData" />
+      <v-list-item prepend-icon="mdi-content-save" title="数据备份" @click="tryConfirm('backup')" />
+      <v-list-item prepend-icon="mdi-content-save" title="数据恢复" @click="tryConfirm('restore')" />
       <v-list-item prepend-icon="mdi-delete" title="清除用户缓存" @click="tryConfirm('delUser')" />
       <v-list-item prepend-icon="mdi-delete" title="清除临时数据" @click="tryConfirm('delTemp')" />
       <v-list-item prepend-icon="mdi-cog" title="恢复默认设置" @click="tryConfirm('delApp')" />
@@ -120,8 +121,8 @@
       </v-list-subheader>
       <v-divider inset class="border-opacity-75" />
       <v-list-item prepend-icon="mdi-folder">
-        <v-list-item-title>本地应用数据路径</v-list-item-title>
-        <v-list-item-subtitle>{{ appStore.dataPath.appDataDir }}</v-list-item-subtitle>
+        <v-list-item-title>本地临时数据路径</v-list-item-title>
+        <v-list-item-subtitle>{{ appStore.dataPath.tempDataDir }}</v-list-item-subtitle>
       </v-list-item>
       <v-list-item prepend-icon="mdi-folder">
         <v-list-item-title>本地用户数据路径</v-list-item-title>
@@ -145,14 +146,15 @@ import { getBuildTime } from "../utils/TGBuild";
 import TLoading from "../components/t-loading.vue";
 import TConfirm from "../components/t-confirm.vue";
 // tauri
-import { dialog, fs, app, os, tauri } from "@tauri-apps/api";
+import { fs, app, os, tauri } from "@tauri-apps/api";
 // store
 import { useAppStore } from "../store/modules/app";
 import { useHomeStore } from "../store/modules/home";
 import { useHk4eStore } from "../store/modules/hk4e";
 import { useAchievementsStore } from "../store/modules/achievements";
 // utils
-import { WriteTGData, DeleteTGData } from "../utils/TGIndex";
+import { WriteTGData, DeleteTGData, ReadAllTGData } from "../utils/TGIndex";
+import { backupUiafData, restoreUiafData } from "../utils/UIAF";
 // data
 import { getDataList } from "../data/init";
 
@@ -203,17 +205,19 @@ function toOuter (url: string) {
   window.open(url);
 }
 
-// 打开用户数据目录
-async function openMergeData () {
-  await dialog.open({
-    defaultPath: appStore.dataPath.userDataDir,
-    filters: [],
-  });
-}
-
 // open confirm
 function tryConfirm (oper: string) {
   switch (oper) {
+    case "backup":
+      confirmText.value = "确认备份数据吗？";
+      confirmOper.value = "backup";
+      confirmShow.value = true;
+      break;
+    case "restore":
+      confirmText.value = "确认恢复数据吗？";
+      confirmOper.value = "restore";
+      confirmShow.value = true;
+      break;
     case "delTemp":
       confirmText.value = "确认清除临时数据吗？";
       confirmOper.value = "delTemp";
@@ -250,6 +254,12 @@ function tryConfirm (oper: string) {
 // transfer confirm oper
 async function doConfirm (oper: string) {
   switch (oper) {
+    case "backup":
+      await backupData();
+      break;
+    case "restore":
+      await restoreData();
+      break;
     case "delTemp":
       await delTempData();
       break;
@@ -275,6 +285,28 @@ async function doConfirm (oper: string) {
 }
 
 // confirmOper
+async function backupData () {
+  const achievements = await ReadAllTGData("achievements");
+  await backupUiafData(achievements);
+  snackbarText.value = "数据已备份!";
+  snackbarColor.value = "success";
+  snackbar.value = true;
+}
+
+async function restoreData () {
+  const res = await restoreUiafData();
+  if (res !== false) {
+    achievementsStore.flushData(res.total, res.completed);
+    snackbarText.value = "数据已恢复!";
+    snackbarColor.value = "success";
+    snackbar.value = true;
+  } else {
+    snackbarText.value = "未检测到备份数据!";
+    snackbarColor.value = "error";
+    snackbar.value = true;
+  }
+}
+
 async function delTempData () {
   await fs.removeDir("tempData", {
     dir: fs.BaseDirectory.AppLocalData,
@@ -290,10 +322,6 @@ async function delUserData () {
     dir: fs.BaseDirectory.AppLocalData,
     recursive: true,
   });
-  await fs.removeDir("tempData", {
-    dir: fs.BaseDirectory.AppLocalData,
-    recursive: true,
-  });
   getDataList.map(async (item) => {
     await WriteTGData(item.name, item.data);
   });
@@ -301,7 +329,6 @@ async function delUserData () {
   snackbar.value = true;
   achievementsStore.init();
   await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData });
-  await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
 }
 
 // 恢复默认配置
@@ -309,7 +336,7 @@ function initAppData () {
   appStore.init();
   homeStore.init();
   achievementsStore.init();
-  snackbarText.value = "已恢复默认配置!";
+  snackbarText.value = "已恢复默认配置!即将刷新页面...";
   snackbar.value = true;
   setTimeout(() => {
     window.location.reload();

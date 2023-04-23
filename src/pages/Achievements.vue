@@ -113,7 +113,7 @@ import { useAchievementsStore } from "../store/modules/achievements";
 import { TGAppData } from "../data";
 import { createTGWindow } from "../utils/TGWindow";
 import { ReadAllTGData, ReadTGDataByIndex, ReadTGDataByKey, UpdateTGDataByKey } from "../utils/TGIndex";
-import { getUiafHeader, readUiafData, verifyUiafData } from "../utils/UIAF";
+import { getUiafHeader, getUiafStatus, readUiafData, verifyUiafData, backupUiafData, timestampToDate } from "../utils/UIAF";
 
 // Store
 const achievementsStore = useAchievementsStore();
@@ -266,14 +266,7 @@ async function importJson () {
         const localTime = localData.completed_time;
         // 如果本地数据不存在，或者本地数据的 timeStamp 小于远程数据的 timeStamp，更新数据
         if (data.timestamp !== 0) {
-          const finishTime = new Date(data.timestamp * 1000).toLocaleString("zh", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          });
+          const finishTime = timestampToDate(data.timestamp);
           if (finishTime !== localTime || localData.progress !== data.current) {
             // eslint-disable-next-line camelcase
             localData.completed_time = finishTime;
@@ -307,6 +300,8 @@ async function importJson () {
         await UpdateTGDataByKey("AchievementSeries", data);
       }),
     );
+    loadingTitle.value = "正在备份数据";
+    await backupAchievementData();
     loadingTitle.value = "正在刷新数据";
     seriesDB = await ReadAllTGData("AchievementSeries");
     const finishAchievments = seriesDB.reduce((a, b) => {
@@ -321,6 +316,13 @@ async function importJson () {
     selectedIndex.value = -1;
   }
 }
+
+// 备份成就数据
+async function backupAchievementData () {
+  const achievements = await ReadAllTGData("Achievements");
+  await backupUiafData(achievements);
+}
+
 // 导出
 async function exportJson () {
   // 判断是否有数据
@@ -340,24 +342,11 @@ async function exportJson () {
   };
   // 转换数据
   UiafData.list = achievements.map((data) => {
-    let status;
-    // 计算点数但是没有完成
-    if (data.progress !== 0 && data.completed === false) {
-      status = 1;
-      // 已完成且未计算点数
-    } else if (data.progress === 0 && data.completed === true) {
-      status = 2;
-      // 已完成且已计算点数
-    } else if (data.progress !== 0 && data.completed === true) {
-      status = 3;
-    } else {
-      status = 0;
-    }
     return {
       id: data.id,
-      timestamp: data.completed ? Math.round(new Date(data.completed_time).getTime() / 1000) : 0,
+      timestamp: data.completed && data.completed_time ? Math.round(new Date(data.completed_time).getTime() / 1000) : 0,
       current: data.progress,
-      status,
+      status: getUiafStatus(data.completed, data.progress),
     };
   });
   const isSave = await dialog.save({

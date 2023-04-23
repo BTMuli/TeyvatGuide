@@ -33,11 +33,13 @@ import TBackTop from "./components/t-backTop.vue";
 import { fs, window, app, event } from "@tauri-apps/api";
 // store
 import { useAppStore } from "./store/modules/app";
+import { useAchievementsStore } from "./store/modules/achievements";
 // utils
 import { InitTGData, DeleteTGData, WriteTGData } from "./utils/TGIndex";
 import { getBuildTime } from "./utils/TGBuild";
 // data
-import { TGAppDataList, TGGetDataList } from "./data";
+import { TGGetDataList } from "./data";
+import { restoreUiafData } from "./utils/UIAF";
 
 const appStore = useAppStore();
 const isMain = ref(true as boolean);
@@ -84,26 +86,18 @@ async function checkLoad () {
   }
   DeleteTGData();
   await createDataDir();
-  await writeData();
   await writeIndex();
+  await writeData();
   appStore.loading = true;
   console.info("数据加载完成！");
 }
 // 创建数据文件夹
 async function createDataDir () {
   console.info("开始创建数据文件夹...");
-  await fs.createDir("appData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
-  await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
-  await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
+  // 如果不存在则创建
+  if (!await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData })) { await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true }); }
+  if (!await fs.exists("tempData", { dir: fs.BaseDirectory.AppLocalData })) { await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData, recursive: true }); }
   console.info("数据文件夹创建完成！");
-}
-// 将数据写入文件夹
-async function writeData () {
-  console.info("开始写入数据...");
-  TGAppDataList.map(async (item) => {
-    await fs.writeFile(`${appStore.dataPath.appDataDir}\\${item.name}`, JSON.stringify(item.data));
-  });
-  console.info("数据写入完成！");
 }
 // 写入 IndexedDB
 async function writeIndex () {
@@ -113,6 +107,20 @@ async function writeIndex () {
     await WriteTGData(item.name, item.data);
   });
   console.info("IndexedDB 写入完成！");
+}
+// 恢复数据
+async function writeData () {
+  console.info("开始恢复数据...");
+  const res = await restoreUiafData();
+  if (res !== false) {
+    const { total, completed } = res;
+    console.info("开始恢复成就数据...");
+    const achievementsStore = useAchievementsStore();
+    achievementsStore.flushData(total, completed);
+    console.info("成就数据恢复完成！");
+  } else {
+    console.info("未找到成就数据！");
+  }
 }
 </script>
 <style lang="css">
