@@ -318,6 +318,7 @@ async function importJson () {
     achievementsStore.flushData(totalAchievements, finishAchievments);
     // 刷新数据
     await loadData();
+    selectedIndex.value = -1;
   }
 }
 // 导出
