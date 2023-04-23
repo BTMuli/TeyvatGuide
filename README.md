@@ -2,12 +2,12 @@
 Author: 目棃
 Date: 2023-03-05
 Description: 说明文档
-Update: 2023-04-12
+Update: 2023-04-23
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-05 14:41:55`
 > 
-> 更新于 `2023-04-12 19:16:31`
+> 更新于 `2023-04-23 12:55:01`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/v/release/BTMuli/Tauri.Genshin?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge)
 
@@ -28,18 +28,25 @@ Tauri 练手项目
 - [TypeScript](https://www.typescriptlang.org/)
 - [Vuetify](https://vuetifyjs.com/en/)
 
-## 当前进度(v0.1.2 Alpha)
+## 当前进度(v0.1.3 Alpha)
 
 > 以下进度仅为开发进度，不代表最终版本
 
-- [x] 米游社咨讯获取&展示
+### 已完成
+
+- [x] 米游社咨讯获取&展示（支持多种游戏）
 - [x] 游戏内公告&活动获取&展示
 - [x] UIAF 成就数据导入导出&展示
+- [x] 首页素材日历、近期活动、限时祈愿可选展示
+- [x] Wiki 页面草创（包含 GCG、角色、武器等）
+- [x] 浅色/深色主题切换
+- [x] 应用更新检测
+
+### 计划中
+
 - [ ] UIGF 祈愿数据导入导出&展示
-- [x] GCG 卡牌数据展示
-- [x] 素材日历展示
-- [x] 首页展示可选
-- [ ] ...
+- [ ] Wiki 详情页
+- [ ] 游戏数据获取
 
 ## UI 参考
 
