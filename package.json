@@ -2,7 +2,7 @@
 	"name": "tauri-genshin",
 	"description": "A Tauri App Demo",
 	"private": true,
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"author": "BTMuli <bt-muli@outlook.com>",
 	"scripts": {
 		"lint": "concurrently \"npm:lint:*(!fix)\"",
