@@ -2,6 +2,14 @@
 @import url("themes/default.css");
 @import url("themes/dark.css");
 
+/**
+ * @description 隐藏应用最右边的滚动条
+ * @since Alpha v0.1.4  
+ */
+html {
+  overflow-y: hidden;
+}
+
 /*
  * @description 侧边滚动条样式
  * @since Alpha v0.1.3
@@ -13,7 +21,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--scroll-bg);
   border-radius: 10px;
 }
 

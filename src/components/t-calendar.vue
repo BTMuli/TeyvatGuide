@@ -12,8 +12,9 @@
           class="calendar-btn"
           :style="{
             border: text.week === weekNow ? '2px solid var(--btn-bg-1)' : '0',
-            background: text.week === btnNow ? 'var(--btn-bg-1)' : 'var(--btn-bg-2)',
-            color: '#faf7e8'
+            background: text.week === btnNow ? 'var(--btn-bg-1)' : 'var(--calendar-btn-bg)',
+            color: '#faf7e8',
+            marginBottom: '1px'
           }"
           @click="getContents(text.week)"
         >
