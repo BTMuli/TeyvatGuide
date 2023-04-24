@@ -35,11 +35,10 @@ import { fs, window, app, event } from "@tauri-apps/api";
 import { useAppStore } from "./store/modules/app";
 import { useAchievementsStore } from "./store/modules/achievements";
 // utils
-import { InitTGData, DeleteTGData, WriteTGData } from "./utils/TGIndex";
 import { getBuildTime } from "./utils/TGBuild";
 // data
-import { TGGetDataList, TGInitDBT } from "./data";
 import { restoreUiafData } from "./utils/UIAF";
+import TGSqlite from "./core/database/TGSqlite";
 
 const appStore = useAppStore();
 const isMain = ref(true as boolean);
@@ -84,9 +83,8 @@ async function checkLoad () {
     console.info("数据已加载！");
     return;
   }
-  DeleteTGData();
   await createDataDir();
-  await writeIndex();
+  await writeDB();
   await writeData();
   appStore.loading = true;
   console.info("数据加载完成！");
@@ -100,16 +98,17 @@ async function createDataDir () {
   console.info("数据文件夹创建完成！");
 }
 // 写入 IndexedDB
-async function writeIndex () {
-  console.info("开始写入 IndexedDB...");
-  await InitTGData();
-  TGGetDataList.map(async (item) => {
-    await WriteTGData(item.name, item.data);
-  });
-  console.info("IndexedDB 写入完成！");
-  console.info("开始写入 SQLite...");
-  await TGInitDBT();
-  console.info("SQLite 写入完成！");
+async function writeDB () {
+  const res = await TGSqlite.checkDB();
+  if (!res) {
+    console.info("检测到数据库不完整，正在重置数据库...");
+    await TGSqlite.resetDB();
+  } else {
+    console.info("正在更新成就系列数据...");
+    await TGSqlite.update.achievementSeries();
+    console.info("正在更新成就数据...");
+    await TGSqlite.update.achievement();
+  }
 }
 // 恢复数据
 async function writeData () {

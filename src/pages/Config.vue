@@ -158,13 +158,8 @@ import { useHomeStore } from "../store/modules/home";
 import { useHk4eStore } from "../store/modules/hk4e";
 import { useAchievementsStore } from "../store/modules/achievements";
 // utils
-import { WriteTGData, DeleteTGData, ReadAllTGData } from "../utils/TGIndex";
 import { backupUiafData, restoreUiafData } from "../utils/UIAF";
 import TGSqlite from "../core/database/TGSqlite";
-// data
-import { getDataList } from "../data/init";
-import Database from "tauri-plugin-sql-api";
-import { onUnmounted } from "vue";
 
 // Store
 const appStore = useAppStore();
@@ -311,8 +306,11 @@ async function doConfirm (oper: string) {
 
 // confirmOper
 async function backupData () {
-  const achievements = await ReadAllTGData("achievements");
+  loadingTitle.value = "正在备份数据...";
+  loading.value = true;
+  const achievements = await TGSqlite.UIAF.export();
   await backupUiafData(achievements);
+  loading.value = false;
   snackbarText.value = "数据已备份!";
   snackbarColor.value = "success";
   snackbar.value = true;
@@ -321,7 +319,7 @@ async function backupData () {
 async function restoreData () {
   const res = await restoreUiafData();
   if (res !== false) {
-    achievementsStore.flushData(res.total, res.completed);
+    achievementsStore.flushData(res.total, res.fin);
     snackbarText.value = "数据已恢复!";
     snackbarColor.value = "success";
     snackbar.value = true;
@@ -346,9 +344,6 @@ async function delUserData () {
   await fs.removeDir("userData", {
     dir: fs.BaseDirectory.AppLocalData,
     recursive: true,
-  });
-  getDataList.map(async (item) => {
-    await WriteTGData(item.name, item.data);
   });
   snackbarText.value = "用户数据已删除!";
   snackbar.value = true;
@@ -416,7 +411,7 @@ async function readCookie () {
 
 // 删除 IndexedDB
 function delDB () {
-  DeleteTGData();
+  window.indexedDB.deleteDatabase("TGData");
   snackbarText.value = "IndexedDB 已清除!若无法正常使用，请初始化配置。";
   snackbarColor.value = "success";
   snackbar.value = true;
@@ -433,8 +428,8 @@ async function checkDB () {
     confirmShow.value = true;
   } else {
     loadingTitle.value = "正在检查数据库数据完整性...";
-    await TGSqlite.update.achievement();
     await TGSqlite.update.achievementSeries();
+    await TGSqlite.update.achievement();
     loading.value = false;
     snackbarText.value = "数据库检查完毕!";
     snackbarColor.value = "success";

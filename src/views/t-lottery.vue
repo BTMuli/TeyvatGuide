@@ -266,7 +266,7 @@ onUpdated(() => {
 .lottery-user-nickname {
   display: inline-block;
   font-size: 14px;
-  font-family: Genshin-Light, "仿宋";
+  font-family: Genshin-Light, "仿宋", serif;
   color: var(--content-text-3);
   overflow: hidden;
 }

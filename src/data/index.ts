@@ -5,11 +5,6 @@
  * @since Alpha v0.1.4
  */
 
-import { AppData, AppDataList } from "./app";
-import { ConfigList, getDataList, initDBT } from "./init";
+import { AppData } from "./app";
 
 export const TGAppData = AppData;
-export const TGAppDataList = AppDataList;
-export const TGConfigList = ConfigList;
-export const TGGetDataList = getDataList;
-export const TGInitDBT = initDBT;

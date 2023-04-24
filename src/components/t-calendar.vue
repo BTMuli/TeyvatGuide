@@ -103,7 +103,6 @@
               <div
                 v-for="item of weapon.contents"
                 :key="item.id"
-                alt="content.content_id"
                 class="card-box"
                 @click="showContent(item)"
               >
@@ -139,7 +138,7 @@
 // vue
 import { ref, onMounted } from "vue";
 // data
-import { TGAppData } from "../data/index";
+import { TGAppData } from "../data";
 // interface
 import { OBC_CONTENT_API } from "../plugins/Mys/interface/utils";
 import { createTGWindow } from "../utils/TGWindow";

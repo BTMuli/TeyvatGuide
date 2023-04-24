@@ -2,7 +2,7 @@
   <v-navigation-drawer permanent :rail="rail" style="background: var(--sidebar-bg); color: #faf7e8">
     <v-list v-model:opened="open" class="side-list" density="compact" nav>
       <!-- 负责收缩侧边栏 -->
-      <v-list-item @click="collapse">
+      <v-list-item @click="collapse()">
         <template v-if="rail" #prepend>
           <v-list-item-action>
             <v-icon style="color:var(--sidebar-icon)">
@@ -120,7 +120,7 @@
             <img :src="userInfo.avatar" alt="userIcon" class="side-icon">
           </template>
         </v-list-item> -->
-        <v-list-item :title="themeTitle" value="theme" @click="switchTheme">
+        <v-list-item :title="themeTitle" value="theme" @click="switchTheme()">
           <template #prepend>
             <v-icon style="color:var(--sidebar-icon)">
               {{ themeGet === 'default' ? 'mdi-weather-night' : 'mdi-weather-sunny' }}
