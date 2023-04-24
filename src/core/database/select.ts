@@ -51,7 +51,7 @@ export async function getAchievementsBySeries (series?: number): Promise<BTMuli.
  */
 export async function searchAchievement (search: string): Promise<BTMuli.SQLite.Achievements[]> {
   const db = await Database.load(sqlitePath);
-  const sql = `SELECT * FROM Achievements WHERE name LIKE '%${search}%' AND description LIKE '%${search}%'`;
+  const sql = `SELECT * FROM Achievements WHERE name LIKE '%${search}%' OR description LIKE '%${search}%'`;
   const result = await db.select(sql);
   await db.close();
   return result as BTMuli.SQLite.Achievements[];
