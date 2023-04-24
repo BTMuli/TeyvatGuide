@@ -1,6 +1,6 @@
 <template>
   <div v-if="loading">
-    <TLoading />
+    <TLoading :title="loadingTitle" />
   </div>
   <div v-else>
     <v-list class="config-list">
@@ -116,6 +116,7 @@
         </template>
       </v-list-item>
       <v-list-item title="删除 IndexedDB" prepend-icon="mdi-delete" @click="tryConfirm('delDB')" />
+      <v-list-item title="检测 SQLite 数据库完整性" prepend-icon="mdi-database-check" @click="tryConfirm('checkDB')" />
       <v-list-subheader inset class="config-header">
         路径
       </v-list-subheader>
@@ -146,7 +147,6 @@
 // vue
 import { onMounted, ref } from "vue";
 import { getBuildTime } from "../utils/TGBuild";
-
 import TLoading from "../components/t-loading.vue";
 import TConfirm from "../components/t-confirm.vue";
 // tauri
@@ -159,8 +159,11 @@ import { useAchievementsStore } from "../store/modules/achievements";
 // utils
 import { WriteTGData, DeleteTGData, ReadAllTGData } from "../utils/TGIndex";
 import { backupUiafData, restoreUiafData } from "../utils/UIAF";
+import TGSqlite from "../core/database/TGSqlite";
 // data
 import { getDataList } from "../data/init";
+import Database from "tauri-plugin-sql-api";
+import { onUnmounted } from "vue";
 
 // Store
 const appStore = useAppStore();
@@ -178,6 +181,7 @@ const osVersion = ref("" as string);
 
 // loading
 const loading = ref(true as boolean);
+const loadingTitle = ref("正在加载..." as string);
 
 // data
 const showHome = ref(homeStore.getShowValue() as string[]);
@@ -252,6 +256,11 @@ function tryConfirm (oper: string) {
       confirmOper.value = "delDB";
       confirmShow.value = true;
       break;
+    case "checkDB":
+      confirmText.value = "请确认已经备份关键数据。";
+      confirmOper.value = "checkDB";
+      confirmShow.value = true;
+      break;
   }
 }
 
@@ -282,6 +291,9 @@ async function doConfirm (oper: string) {
       break;
     case "delDB":
       delDB();
+      break;
+    case "checkDB":
+      await checkDB();
       break;
     default:
       break;
@@ -399,6 +411,28 @@ function delDB () {
   snackbarText.value = "IndexedDB 已清除!若无法正常使用，请初始化配置。";
   snackbarColor.value = "success";
   snackbar.value = true;
+}
+
+// 检查 SQLite 数据库
+async function checkDB () {
+  loadingTitle.value = "正在检查数据库表单完整性...";
+  const res = await TGSqlite.checkDB();
+  if (!res) {
+    loadingTitle.value = "检测到表单不完整，正在重置数据库...";
+    await TGSqlite.resetDB();
+    loading.value = false;
+    snackbarText.value = "数据库已重置!请载入备份数据。";
+    snackbarColor.value = "success";
+    snackbar.value = true;
+  } else {
+    loadingTitle.value = "正在检查数据库数据完整性...";
+    await TGSqlite.update.achievement();
+    await TGSqlite.update.achievementSeries();
+    loading.value = false;
+    snackbarText.value = "数据库检查完毕!";
+    snackbarColor.value = "success";
+    snackbar.value = true;
+  }
 }
 </script>
 

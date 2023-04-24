@@ -5,18 +5,18 @@
  * @since Alpha v0.1.4
  */
 
-import { initDatabase } from "./init";
+import { initDatabase, resetDatabase, checkDatabase, sqlitePath } from "./init";
 import { checkAchievement, checkAchievementSeries } from "./update";
-import { deleteDatabase, checkDatabase } from "./utils";
 
 const TGSqlite = {
-  clearDB: deleteDatabase,
   initDB: initDatabase,
+  resetDB: resetDatabase,
   checkDB: checkDatabase,
   update: {
     achievement: checkAchievement,
     achievementSeries: checkAchievementSeries,
   },
+  dbPath: sqlitePath,
 };
 
 export default TGSqlite;

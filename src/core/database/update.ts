@@ -8,6 +8,7 @@
 import Database from "tauri-plugin-sql-api";
 // local
 import { TGAppData } from "../../data";
+import { sqlitePath } from "./init";
 
 /**
  * @description 数据比对-成就系列数据
@@ -16,10 +17,10 @@ import { TGAppData } from "../../data";
  * @returns {Promise<boolean>}
  */
 export async function checkAchievement (): Promise<void> {
-  const db = await Database.load("sqlite:tauri-genshin.db");
-  Object.values(TGAppData.achievements).map(async (item) => {
+  const db = await Database.load(sqlitePath);
+  await Promise.all(Object.values(TGAppData.achievements).map(async (item) => {
     // 检测是否存在
-    const selectRes: BTMuli.SQLite.Achievements[] = await db.select(`SELECT * FROM achievement WHERE id = ${item.id}`);
+    const selectRes: BTMuli.SQLite.Achievements[] = await db.select(`SELECT * FROM Achievements WHERE id = ${item.id}`);
     if (!selectRes || selectRes.length === 0) {
       // 不存在则插入
       const sql = `INSERT INTO Achievements (id, series, \`order\`, name, description, reward, version) VALUES (${item.id}, ${item.series}, ${item.order}, '${item.name}', '${item.description}', ${item.reward}, '${item.version}')`;
@@ -33,7 +34,7 @@ export async function checkAchievement (): Promise<void> {
         await db.execute(sql);
       }
     }
-  });
+  }));
   await db.close();
 }
 
@@ -44,20 +45,20 @@ export async function checkAchievement (): Promise<void> {
  * @returns {Promise<void>}
  */
 export async function checkAchievementSeries (): Promise<void> {
-  const db = await Database.load("sqlite:tauri-genshin.db");
-  Object.values(TGAppData.achievementSeries).map(async (item) => {
+  const db = await Database.load(sqlitePath);
+  await Promise.all(Object.values(TGAppData.achievementSeries).map(async (item) => {
     // 检测是否存在
-    const selectRes: BTMuli.SQLite.AchievementSeries[] = await db.select(`SELECT * FROM achievement_series WHERE id = ${item.id}`);
+    const selectRes: BTMuli.SQLite.AchievementSeries[] = await db.select(`SELECT * FROM AchievementSeries WHERE id = ${item.id}`);
     if (!selectRes || selectRes.length === 0) {
       // 不存在则插入
       let sql;
       if (item.card) {
         sql = `INSERT INTO AchievementSeries (id, \`order\`, name, version, icon, nameCard) VALUES (${item.id}, ${item.order}, '${item.name}', '${item.version}', '${item.icon}', '${item.card}')`;
       } else {
-        sql = `INSERT INTO AchievementSeries (id, \`order\`, name, version, icon) VALUES (${item.id}, ${item.order}, '${item.name}', '${item.version}', '${item.icon}')`;
+        sql = `INSERT INTO AchievementSeries (id, \`order\`, name, version, icon, nameCard) VALUES (${item.id}, ${item.order}, '${item.name}', '${item.version}', '${item.icon}', NULL)`;
       }
       await db.execute(sql);
     }
-  });
+  }));
   await db.close();
 }
