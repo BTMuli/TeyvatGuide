@@ -38,7 +38,7 @@ import { useAchievementsStore } from "./store/modules/achievements";
 import { InitTGData, DeleteTGData, WriteTGData } from "./utils/TGIndex";
 import { getBuildTime } from "./utils/TGBuild";
 // data
-import { TGGetDataList } from "./data";
+import { TGGetDataList, TGInitDBT } from "./data";
 import { restoreUiafData } from "./utils/UIAF";
 
 const appStore = useAppStore();
@@ -107,6 +107,9 @@ async function writeIndex () {
     await WriteTGData(item.name, item.data);
   });
   console.info("IndexedDB 写入完成！");
+  console.info("开始写入 SQLite...");
+  await TGInitDBT();
+  console.info("SQLite 写入完成！");
 }
 // 恢复数据
 async function writeData () {

@@ -4,6 +4,7 @@
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.2
  */
+
 import { AppData } from "../app";
 
 /**
@@ -27,4 +28,46 @@ export function getData (): BTMuli.Genshin.AchievementSeries[] {
   return Object.keys(data).map((key) => {
     return data[Number(key)];
   });
+}
+
+/**
+ * @description 创建表的 SQL 语句
+ * @since Alpha v0.1.4
+ * @see BTMuli.Genshin.AchievementSeries
+ * @returns {string}
+ */
+export const CTS = `CREATE TABLE  IF NOT EXISTS ${Config.storeName} (
+    id INTEGER PRIMARY KEY,
+    'order' INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    version TEXT NOT NULL,
+    total INTEGER NOT NULL,
+    finished INTEGER NOT NULL,
+    card TEXT NOT NULL,
+    icon TEXT NOT NULL
+  );`;
+
+/**
+ * @description 初始化数据的 SQL 语句
+ * @since Alpha v0.1.4
+ * @see BTMuli.Genshin.AchievementSeries
+ * @returns {string[]}
+ */
+export function getInsertSqls (): string[] {
+  const data = getData();
+  const sql: string[] = [];
+  data.forEach((item) => {
+    const card = item.card ? item.card : "";
+    sql.push(`INSERT INTO ${Config.storeName} VALUES (
+      ${item.id},
+      ${item.order},
+      "${item.name}",
+      "${item.version}",
+      ${item.total_count},
+      ${item.completed_count},
+      "${card}",
+      "${item.icon}"
+    )`);
+  });
+  return sql;
 }

@@ -28,3 +28,50 @@ export function getData (): BTMuli.Genshin.Achievement[] {
     return data[Number(key)];
   });
 }
+
+/**
+ * @description 创建表的 SQLite 语句
+ * @since Alpha v0.1.4
+ * @todo 外键约束
+ * @see BTMuli.Genshin.Achievement
+ */
+export const CTS: string = `CREATE TABLE IF NOT EXISTS ${Config.storeName} (
+    id INTEGER PRIMARY KEY,
+    series INTEGER NOT NULL,
+    'order' INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    reward INTEGER NOT NULL,
+    completed INTEGER NOT NULL,
+    completed_time TEXT NOT NULL,
+    progress INTEGER NOT NULL,
+    version TEXT NOT NULL
+  );`;
+
+/**
+ * @description 初始化数据的 SQL 语句
+ * @since Alpha v0.1.4
+ * @see BTMuli.Genshin.Achievement
+ * @returns {string[]}
+ */
+export function getInsertSqls (): string[] {
+  const data = getData();
+  const sql: string[] = [];
+  data.forEach((item) => {
+    const completedTime = item.completed_time ? item.completed_time : "";
+    const completed = item.completed ? 1 : 0;
+    sql.push(`INSERT INTO ${Config.storeName} VALUES (
+      ${item.id},
+      ${item.series},
+      ${item.order},
+      '${item.name}',
+      '${item.description}',
+      ${item.reward},
+      ${completed},
+      '${completedTime}',
+      ${item.progress},
+      '${item.version}'
+    )`);
+  });
+  return sql;
+}
