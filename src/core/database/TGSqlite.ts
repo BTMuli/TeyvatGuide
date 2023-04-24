@@ -6,12 +6,26 @@
  */
 
 import { initDatabase, resetDatabase, checkDatabase, sqlitePath } from "./init";
+import { getAllSeries, getAchievementsBySeries, searchAchievement, getAchievementOverview } from "./select";
+import { importUIAFData, exportUIAFData } from "./UIAF";
 import { checkAchievement, checkAchievementSeries } from "./update";
 
 const TGSqlite = {
   initDB: initDatabase,
   resetDB: resetDatabase,
   checkDB: checkDatabase,
+  search: {
+    achievement: {
+      bySeries: getAchievementsBySeries,
+      bySearch: searchAchievement,
+    },
+    achievementSeries: getAllSeries,
+    overview: getAchievementOverview,
+  },
+  UIAF: {
+    import: importUIAFData,
+    export: exportUIAFData,
+  },
   update: {
     achievement: checkAchievement,
     achievementSeries: checkAchievementSeries,

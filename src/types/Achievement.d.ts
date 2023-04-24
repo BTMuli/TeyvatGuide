@@ -164,7 +164,7 @@ declare namespace BTMuli.SQLite {
     version: string | null
     totalCount: number
     finCount: number
-    icon: string | null
+    icon: string
     nameCard: string | null
     updated: string | null
   }

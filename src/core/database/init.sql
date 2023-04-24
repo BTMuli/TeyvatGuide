@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS AchievementSeries
     version    TEXT    DEFAULT NULL,
     totalCount INTEGER DEFAULT 0,
     finCount   INTEGER DEFAULT 0,
-    icon       TEXT    DEFAULT NULL,
+    icon       TEXT    NOT NULL,
     nameCard   TEXT    DEFAULT NULL,
     updated    TEXT    DEFAULT NULL
 );

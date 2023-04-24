@@ -39,7 +39,7 @@
           <v-list-item-title>
             {{ series.name }}
           </v-list-item-title>
-          <v-list-item-subtitle> {{ series.completed_count }} / {{ series.total_count }} </v-list-item-subtitle>
+          <v-list-item-subtitle> {{ series.finCount }} / {{ series.totalCount }} </v-list-item-subtitle>
         </v-list-item>
       </v-list>
     </div>
@@ -72,9 +72,9 @@
         </div>
         <v-list-item>
           <template #prepend>
-            <v-icon :color="achievement.completed ? '#fec90b' : '#485466'">
+            <v-icon :color="achievement.isCompleted ? '#fec90b' : '#485466'">
               <!-- todo 图标替换 -->
-              {{ achievement.completed ? "mdi-check-circle" : "mdi-circle" }}
+              {{ achievement.isCompleted ? "mdi-check-circle" : "mdi-circle" }}
             </v-icon>
           </template>
           <v-list-item-title>
@@ -83,7 +83,7 @@
           </v-list-item-title>
           <v-list-item-subtitle>{{ achievement.description }}</v-list-item-subtitle>
           <template #append>
-            <span v-show="achievement.completed" class="right-time">{{ achievement.completed_time }}</span>
+            <span v-show="achievement.isCompleted" class="right-time">{{ achievement.completedTime }}</span>
             <v-card class="reward-card" @click="showMaterial('/source/material/原石.webp')">
               <v-img src="/source/material/原石.webp" sizes="32" />
               <div class="reward-num">
@@ -112,8 +112,8 @@ import { useAchievementsStore } from "../store/modules/achievements";
 // Utils
 import { TGAppData } from "../data";
 import { createTGWindow } from "../utils/TGWindow";
-import { ReadAllTGData, ReadTGDataByIndex, ReadTGDataByKey, UpdateTGDataByKey } from "../utils/TGIndex";
-import { getUiafHeader, getUiafStatus, readUiafData, verifyUiafData, backupUiafData, timestampToDate } from "../utils/UIAF";
+import { getUiafHeader, readUiafData, verifyUiafData, backupUiafData } from "../utils/UIAF";
+import TGSqlite from "../core/database/TGSqlite";
 
 // Store
 const achievementsStore = useAchievementsStore();
@@ -127,10 +127,10 @@ const title = ref(achievementsStore.title as string);
 const CardsInfo = ref([] as BTMuli.Genshin.NameCard[]);
 const getCardInfo = ref({} as BTMuli.Genshin.NameCard);
 // series
-const seriesList = ref([] as BTMuli.Genshin.AchievementSeries[]);
+const seriesList = ref([] as BTMuli.SQLite.AchievementSeries[]);
 const selectedIndex = ref(-1 as number);
 const selectedSeries = ref(-1 as number);
-const selectedAchievement = ref([] as BTMuli.Genshin.Achievement[]);
+const selectedAchievement = ref([] as BTMuli.SQLite.Achievements[]);
 
 // render
 const search = ref("" as string);
@@ -144,17 +144,18 @@ onMounted(async () => {
 
 // 加载数据，数据源：合并后的本地数据
 async function loadData () {
+  const { total, fin } = await TGSqlite.search.overview();
+  achievementsStore.flushData(total, fin);
   loadingTitle.value = "正在获取成就系列数据";
-  const seriesDB: BTMuli.Genshin.AchievementSeries[] = await ReadAllTGData("AchievementSeries");
   CardsInfo.value = TGAppData.nameCards[1];
-  seriesList.value = seriesDB.sort((a, b) => a.order - b.order);
+  seriesList.value = await TGSqlite.search.achievementSeries();
   loadingTitle.value = "正在获取成就数据";
-  const getAchievements = await ReadAllTGData("Achievements");
+  const getAchievements = await TGSqlite.search.achievement.bySeries();
   getAchievements.sort((a, b) => {
-    if (a.completed === b.completed) {
+    if (a.isCompleted === b.isCompleted) {
       return a.id - b.id;
     } else {
-      return a.completed ? 1 : -1;
+      return a.isCompleted ? 1 : -1;
     }
   });
   selectedAchievement.value = getAchievements;
@@ -171,21 +172,21 @@ async function selectSeries (index: number) {
   }
   loading.value = true;
   loadingTitle.value = "正在获取对应的成就数据";
-  const getAchievements = await ReadTGDataByIndex("Achievements", "series", seriesList.value[index].id);
   selectedIndex.value = index;
   selectedSeries.value = seriesList.value[index].id;
+  const getAchievements = await TGSqlite.search.achievement.bySeries(selectedSeries.value);
   loadingTitle.value = "正在查找对应的成就名片";
   let getCard: BTMuli.Genshin.NameCard;
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
-    getCard = CardsInfo.value.find((card) => card.name === seriesList.value[index].card)!;
+    getCard = CardsInfo.value.find((card) => card.name === seriesList.value[index].nameCard)!;
   } else {
     getCard = {} as BTMuli.Genshin.NameCard;
   }
   getAchievements.sort((a, b) => {
-    if (a.completed === b.completed) {
+    if (a.isCompleted === b.isCompleted) {
       return a.id - b.id;
     } else {
-      return a.completed ? 1 : -1;
+      return a.isCompleted ? 1 : -1;
     }
   });
   selectedAchievement.value = getAchievements;
@@ -208,14 +209,7 @@ async function searchCard () {
   }
   loadingTitle.value = "正在搜索";
   loading.value = true;
-  const res: BTMuli.Genshin.Achievement[] = [];
-  const allAchievements = await ReadAllTGData("Achievements");
-  allAchievements.map((achievement) => {
-    if (achievement.name.includes(search.value) || achievement.description.includes(search.value)) {
-      return res.push(achievement);
-    }
-    return null;
-  });
+  const res = await TGSqlite.search.achievement.bySearch(search.value);
   selectedIndex.value = -1;
   setTimeout(() => {
     loading.value = false;
@@ -224,13 +218,13 @@ async function searchCard () {
     snackbarColor.value = "#F5810A";
     snackbarText.value = "没有找到对应的成就";
     snackbar.value = true;
-    selectedAchievement.value = allAchievements;
+    selectedAchievement.value = await TGSqlite.search.achievement.bySeries();
   } else {
     res.sort((a, b) => {
-      if (a.completed === b.completed) {
+      if (a.isCompleted === b.isCompleted) {
         return a.id - b.id;
       } else {
-        return a.completed ? 1 : -1;
+        return a.isCompleted ? 1 : -1;
       }
     });
     selectedAchievement.value = res;
@@ -258,59 +252,12 @@ async function importJson () {
     loading.value = true;
     const remoteData: TGPlugin.UIAF.BaseData = JSON.parse(remoteRaw);
     loadingTitle.value = "正在合并成就数据";
-    await Promise.allSettled(
-      remoteData.list.map(async (data) => {
-        const id = data.id;
-        const localData: BTMuli.Genshin.Achievement = (await ReadTGDataByKey("Achievements", [id]))[0];
-        // 获取 timeStamp 2023-03-15 00:00:00
-        const localTime = localData.completed_time;
-        // 如果本地数据不存在，或者本地数据的 timeStamp 小于远程数据的 timeStamp，更新数据
-        if (data.timestamp !== 0) {
-          const finishTime = timestampToDate(data.timestamp);
-          if (finishTime !== localTime || localData.progress !== data.current) {
-            // eslint-disable-next-line camelcase
-            localData.completed_time = finishTime;
-            localData.progress = data.current;
-            localData.completed = true;
-            // 更新数据
-            await UpdateTGDataByKey("Achievements", localData);
-          }
-        } else {
-          if (localData.progress !== data.current) {
-            // eslint-disable-next-line camelcase
-            localData.completed_time = "";
-            localData.progress = data.current;
-            localData.completed = false;
-            // 更新数据
-            await UpdateTGDataByKey("Achievements", localData);
-          }
-        }
-      }),
-    );
-    loadingTitle.value = "正在更新成就系列数据";
-    let seriesDB = await ReadAllTGData("AchievementSeries");
-    await Promise.allSettled(
-      seriesDB.map(async (data) => {
-        const seriesId = data.id;
-        const achievementsDB = await ReadTGDataByIndex("Achievements", "series", seriesId);
-        // eslint-disable-next-line camelcase
-        data.completed_count = achievementsDB.filter((data) => {
-          return data.completed === true;
-        }).length;
-        await UpdateTGDataByKey("AchievementSeries", data);
-      }),
-    );
+    await TGSqlite.UIAF.import(remoteData.list);
     loadingTitle.value = "正在备份数据";
     await backupAchievementData();
     loadingTitle.value = "正在刷新数据";
-    seriesDB = await ReadAllTGData("AchievementSeries");
-    const finishAchievments = seriesDB.reduce((a, b) => {
-      return a + b.completed_count;
-    }, 0);
-    const totalAchievements = seriesDB.reduce((a, b) => {
-      return a + b.total_count;
-    }, 0);
-    achievementsStore.flushData(totalAchievements, finishAchievments);
+    const overview = await TGSqlite.search.overview();
+    achievementsStore.flushData(overview.total, overview.fin);
     // 刷新数据
     await loadData();
     selectedIndex.value = -1;
@@ -319,7 +266,7 @@ async function importJson () {
 
 // 备份成就数据
 async function backupAchievementData () {
-  const achievements = await ReadAllTGData("Achievements");
+  const achievements = await TGSqlite.UIAF.export();
   await backupUiafData(achievements);
 }
 
@@ -333,22 +280,10 @@ async function exportJson () {
     return;
   }
   // 获取本地数据
-  const achievements = (await ReadAllTGData("Achievements")).filter((data) => {
-    return data.progress !== 0 || data.completed === true;
-  });
   const UiafData = {
     info: await getUiafHeader(),
-    list: [] as TGPlugin.UIAF.Achievement[],
+    list: await TGSqlite.UIAF.export(),
   };
-  // 转换数据
-  UiafData.list = achievements.map((data) => {
-    return {
-      id: data.id,
-      timestamp: data.completed && data.completed_time ? Math.round(new Date(data.completed_time).getTime() / 1000) : 0,
-      current: data.progress,
-      status: getUiafStatus(data.completed, data.progress),
-    };
-  });
   const isSave = await dialog.save({
     // TODO: 设置保存文件名
     filters: [
