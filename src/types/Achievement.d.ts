@@ -109,3 +109,63 @@ declare namespace TGPlugin.UIAF {
     status: number
   }
 }
+
+declare namespace BTMuli.SQLite {
+  /**
+   * @description 数据库-成就表
+   * @since Alpha v0.1.4
+   * @interface Achievements
+   * @property {number} id - 成就 ID
+   * @property {number} series - 成就系列 ID
+   * @property {number} order - 成就排列顺序，用于展示全部成就
+   * @property {string} name - 成就名称
+   * @property {string} description - 成就描述
+   * @property {number} reward - 成就奖励
+   * @property {number} isCompleted - 成就是否完成
+   * @property {string} completedTime - 成就完成时间
+   * @property {number} progress - 成就进度
+   * @property {string} version - 成就版本
+   * @property {string} updated - 数据库更新时间
+   * @return Achievements
+   */
+  export interface Achievements {
+    id: number
+    series: number
+    order: number
+    name: string | null
+    description: string | null
+    reward: number
+    isCompleted: 0 | 1
+    completedTime: string | null
+    progress: number
+    version: string | null
+    updated: string | null
+  }
+
+  /**
+   * @description 数据库-成就系列表
+   * @since Alpha v0.1.4
+   * @interface AchievementSeries
+   * @property {number} id - 成就系列 ID
+   * @property {number} order - 成就系列排列顺序，用于展示全部成就系列
+   * @property {string} name - 成就系列名称
+   * @property {string} version - 成就系列版本
+   * @property {number} totalConut - 成就系列包含的成就数
+   * @property {number} finCount - 成就系列已完成的成就数
+   * @property {string} icon - 成就系列图标
+   * @property {string} nameCard - 成就系列对应名片
+   * @property {string} updated - 数据库更新时间
+   * @returns AchievementSeries
+   */
+  export interface AchievementSeries {
+    id: number
+    order: number
+    name: string | null
+    version: string | null
+    totalCount: number
+    finCount: number
+    icon: string | null
+    nameCard: string | null
+    updated: string | null
+  }
+}
