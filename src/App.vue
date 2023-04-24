@@ -116,10 +116,10 @@ async function writeData () {
   console.info("开始恢复数据...");
   const res = await restoreUiafData();
   if (res !== false) {
-    const { total, completed } = res;
+    const { total, fin } = res;
     console.info("开始恢复成就数据...");
     const achievementsStore = useAchievementsStore();
-    achievementsStore.flushData(total, completed);
+    achievementsStore.flushData(total, fin);
     console.info("成就数据恢复完成！");
   } else {
     console.info("未找到成就数据！");

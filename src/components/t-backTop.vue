@@ -51,8 +51,8 @@ onMounted(() => {
 <style scoped>
 .back-top {
   position: fixed;
-  right: 0.4rem;
-  bottom: 1rem;
+  right: 20px;
+  bottom: 20px;
   width: 60px;
   height: 60px;
   border-radius: 50%;
