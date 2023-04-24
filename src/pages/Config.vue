@@ -120,6 +120,10 @@
         路径
       </v-list-subheader>
       <v-divider inset class="border-opacity-75" />
+      <v-list-item prepend-icon="mdi-database">
+        <v-list-item-title>本地数据库路径</v-list-item-title>
+        <v-list-item-subtitle>{{ appStore.dataPath.dbDataPath }}</v-list-item-subtitle>
+      </v-list-item>
       <v-list-item prepend-icon="mdi-folder">
         <v-list-item-title>本地临时数据路径</v-list-item-title>
         <v-list-item-subtitle>{{ appStore.dataPath.tempDataDir }}</v-list-item-subtitle>
