@@ -2,7 +2,7 @@
  * @file data app index
  * @description data app index
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.3
+ * @since Alpha v0.1.4
  */
 
 // Data
@@ -17,11 +17,11 @@ import weapon from "./weapon.json";
 export const AppDataList = [
   {
     name: "achievements.json",
-    data: achievements as Record<number, BTMuli.Genshin.Achievement>,
+    data: achievements as BTMuli.Genshin.Achievement[],
   },
   {
     name: "achievementSeries.json",
-    data: achievementSeries as Record<number, BTMuli.Genshin.AchievementSeries>,
+    data: achievementSeries as BTMuli.Genshin.AchievementSeries[],
   },
   {
     name: "calendar.json",
