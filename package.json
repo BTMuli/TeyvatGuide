@@ -16,6 +16,7 @@
 		"vite:dev": "vite dev",
 		"vite:build": "vite build",
 		"build": "tauri build",
+		"debug": "tauri build --debug",
 		"preview": "vite preview",
 		"tauri": "tauri"
 	},
