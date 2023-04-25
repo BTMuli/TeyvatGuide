@@ -37,7 +37,7 @@ export const AppDataList = [
   },
   {
     name: "nameCards.json",
-    data: nameCards as Record<number, BTMuli.Genshin.NameCard[]>,
+    data: nameCards as BTMuli.Genshin.NameCard[],
   },
   {
     name: "weapon.json",
@@ -46,11 +46,11 @@ export const AppDataList = [
 ];
 
 export const AppData = {
-  achievements: achievements as Record<number, BTMuli.Genshin.Achievement>,
-  achievementSeries: achievementSeries as Record<number, BTMuli.Genshin.AchievementSeries>,
+  achievements: achievements as BTMuli.Genshin.Achievement[],
+  achievementSeries: achievementSeries as BTMuli.Genshin.AchievementSeries[],
   calendar: calendar as Record<number, BTMuli.Genshin.Calendar.Data>,
   character: character as BTMuli.Genshin.Wiki.Character.BriefInfo[],
   GCG: GCG as BTMuli.Genshin.Wiki.GCG.BriefInfo[],
-  nameCards: nameCards as Record<number, BTMuli.Genshin.NameCard[]>,
+  nameCards: nameCards as BTMuli.Genshin.NameCard[],
   weapon: weapon as BTMuli.Genshin.Wiki.Weapon.BriefInfo[],
 };

@@ -6,7 +6,7 @@
  */
 
 import Database from "tauri-plugin-sql-api";
-import TGSql from "./TGSql";
+import { importUIAFData, initSQLiteData, initSQLiteTable } from "./TGSql";
 import { getUiafStatus } from "./UIAF";
 
 const dbLink = await Database.load("sqlite:tauri-genshin.db");
@@ -39,6 +39,7 @@ class TGSqlite {
     "AppData",
     "Achievements",
     "AchievementSeries",
+    "NameCard",
   ];
 
   /**
@@ -60,11 +61,11 @@ class TGSqlite {
    * @memberof TGSqlite
    */
   public async init (): Promise<void> {
-    const sqlT = TGSql.initTable.all;
+    const sqlT = initSQLiteTable();
     for (const item of sqlT) {
       await this.db.execute(item);
     }
-    const sqlD = await TGSql.initData.all;
+    const sqlD = await initSQLiteData();
     for (const item of sqlD) {
       await this.db.execute(item);
     }
@@ -128,6 +129,19 @@ class TGSqlite {
   }
 
   /**
+   * @description 获取成就系列对应的名片
+   * @memberof TGSqlite
+   * @since Alpha v0.1.4
+   * @param {number} seriesId 系列 ID
+   * @returns {Promise<BTMuli.SQLite.NameCard>}
+   */
+  public async getNameCard (seriesId: number): Promise<BTMuli.SQLite.NameCard> {
+    const sql = `SELECT * FROM NameCard WHERE name=(SELECT nameCard FROM AchievementSeries WHERE id=${seriesId});`;
+    const res: BTMuli.SQLite.NameCard[] = await this.db.select(sql);
+    return res[0];
+  }
+
+  /**
    * @description 获取成就列表
    * @memberof TGSqlite
    * @param {number} [seriesId] 系列 ID
@@ -184,7 +198,7 @@ class TGSqlite {
    * @returns {Promise<void>}
    */
   public async mergeUIAF (achievements: TGPlugin.UIAF.Achievement[]): Promise<void> {
-    const sql = TGSql.insert.UIAF(achievements);
+    const sql = importUIAFData(achievements);
     for (const item of sql) {
       await this.db.execute(item);
     }

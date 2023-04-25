@@ -110,7 +110,6 @@ import { dialog, fs } from "@tauri-apps/api";
 // Store
 import { useAchievementsStore } from "../store/modules/achievements";
 // Utils
-import { TGAppData } from "../data";
 import { createTGWindow } from "../utils/TGWindow";
 import { getUiafHeader, readUiafData, verifyUiafData } from "../utils/UIAF";
 import TGSqlite from "../utils/TGSqlite";
@@ -124,8 +123,7 @@ const loadingTitle = ref("正在加载数据" as string);
 
 // data
 const title = ref(achievementsStore.title as string);
-const CardsInfo = ref([] as BTMuli.Genshin.NameCard[]);
-const getCardInfo = ref({} as BTMuli.Genshin.NameCard);
+const getCardInfo = ref({} as BTMuli.SQLite.NameCard);
 // series
 const seriesList = ref([] as BTMuli.SQLite.AchievementSeries[]);
 const selectedIndex = ref(-1 as number);
@@ -147,18 +145,9 @@ async function loadData () {
   const { total, fin } = await TGSqlite.getAchievementsOverview();
   achievementsStore.flushData(total, fin);
   loadingTitle.value = "正在获取成就系列数据";
-  CardsInfo.value = TGAppData.nameCards[1];
   seriesList.value = await TGSqlite.getAchievementSeries();
   loadingTitle.value = "正在获取成就数据";
-  const getAchievements = await TGSqlite.getAchievements();
-  getAchievements.sort((a, b) => {
-    if (a.isCompleted === b.isCompleted) {
-      return a.id - b.id;
-    } else {
-      return a.isCompleted ? 1 : -1;
-    }
-  });
-  selectedAchievement.value = getAchievements;
+  selectedAchievement.value = await TGSqlite.getAchievements();
   title.value = achievementsStore.title;
   loading.value = false;
 }
@@ -174,16 +163,11 @@ async function selectSeries (index: number) {
   loadingTitle.value = "正在获取对应的成就数据";
   selectedIndex.value = index;
   selectedSeries.value = seriesList.value[index].id;
-  const getAchievements = await TGSqlite.getAchievements(selectedSeries.value);
+  selectedAchievement.value = await TGSqlite.getAchievements(selectedSeries.value);
   loadingTitle.value = "正在查找对应的成就名片";
-  let getCard: BTMuli.Genshin.NameCard;
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
-    getCard = CardsInfo.value.find((card) => card.name === seriesList.value[index].nameCard)!;
-  } else {
-    getCard = {} as BTMuli.Genshin.NameCard;
+    getCardInfo.value = await TGSqlite.getNameCard(selectedSeries.value);
   }
-  selectedAchievement.value = getAchievements;
-  getCardInfo.value = getCard;
   loading.value = false;
 }
 // 打开图片
@@ -202,18 +186,13 @@ async function searchCard () {
   }
   loadingTitle.value = "正在搜索";
   loading.value = true;
-  const res = await TGSqlite.searchAchievements(search.value);
+  selectedAchievement.value = await TGSqlite.searchAchievements(search.value);
   selectedIndex.value = -1;
-  setTimeout(() => {
-    loading.value = false;
-  }, 500);
-  if (res.length === 0) {
+  loading.value = false;
+  if (selectedAchievement.value.length === 0) {
     snackbarColor.value = "#F5810A";
     snackbarText.value = "没有找到对应的成就";
     snackbar.value = true;
-    selectedAchievement.value = await TGSqlite.getAchievements();
-  } else {
-    selectedAchievement.value = res;
   }
 }
 // 导入 UIAF 数据，进行数据合并、刷新
@@ -236,12 +215,9 @@ async function importJson () {
     }
     loadingTitle.value = "正在解析数据";
     loading.value = true;
-    const remoteData: TGPlugin.UIAF.BaseData = JSON.parse(remoteRaw);
     loadingTitle.value = "正在合并成就数据";
-    await TGSqlite.mergeUIAF(remoteData.list);
+    await TGSqlite.mergeUIAF(JSON.parse(remoteRaw).list);
     loadingTitle.value = "正在刷新数据";
-    const overview = await TGSqlite.getAchievementsOverview();
-    achievementsStore.flushData(overview.total, overview.fin);
     // 刷新数据
     await loadData();
     selectedIndex.value = -1;
