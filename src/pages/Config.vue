@@ -128,6 +128,7 @@
         </template>
       </v-list-item>
       <v-list-item title="删除 IndexedDB" prepend-icon="mdi-delete" @click="tryConfirm('delDB')" />
+      <v-list-item title="重置数据库" prepend-icon="mdi-delete" @click="tryConfirm('resetDB')" />
       <v-list-item title="检测 SQLite 数据库完整性" prepend-icon="mdi-database-check" @click="tryConfirm('checkDB')" />
       <v-list-subheader inset class="config-header">
         路径
@@ -151,7 +152,7 @@
       {{ snackbarText }}
     </v-snackbar>
     <!-- 确认弹窗 -->
-    <TConfirm v-model="confirmShow" :title="confirmText" @confirm="doConfirm(confirmOper)" />
+    <TConfirm v-model="confirmShow" :title="confirmText" :subtitle="confirmSub" @confirm="doConfirm(confirmOper)" />
   </div>
 </template>
 
@@ -202,6 +203,7 @@ const snackbarColor = ref("success" as string);
 
 // confirm
 const confirmText = ref("" as string);
+const confirmSub = ref("" as string);
 const confirmOper = ref("" as string);
 const confirmShow = ref(false as boolean);
 
@@ -222,14 +224,17 @@ function toOuter (url: string) {
 
 // open confirm
 function tryConfirm (oper: string) {
+  confirmSub.value = "";
   switch (oper) {
     case "backup":
       confirmText.value = "确认备份数据吗？";
+      confirmSub.value = "若已备份将会被覆盖";
       confirmOper.value = "backup";
       confirmShow.value = true;
       break;
     case "restore":
       confirmText.value = "确认恢复数据吗？";
+      confirmSub.value = "请确保存在备份数据";
       confirmOper.value = "restore";
       confirmShow.value = true;
       break;
@@ -240,6 +245,7 @@ function tryConfirm (oper: string) {
       break;
     case "delUser":
       confirmText.value = "确认清除用户缓存吗？";
+      confirmSub.value = "备份数据也将被清除";
       confirmOper.value = "delUser";
       confirmShow.value = true;
       break;
@@ -260,12 +266,20 @@ function tryConfirm (oper: string) {
       break;
     case "delDB":
       confirmText.value = "确认清除 IndexedDB 吗？";
+      confirmSub.value = "Alpha v0.1.4 后不再支持 IndexedDB";
       confirmOper.value = "delDB";
       confirmShow.value = true;
       break;
     case "checkDB":
-      confirmText.value = "请确认已经备份关键数据。";
+      confirmText.value = "将检测数据库表单完整性";
+      confirmSub.value = "数据库版本与更新时间也会进行检测";
       confirmOper.value = "checkDB";
+      confirmShow.value = true;
+      break;
+    case "resetDB":
+      confirmText.value = "确认重置数据库吗？";
+      confirmSub.value = "请确认已经备份关键数据";
+      confirmOper.value = "resetDB";
       confirmShow.value = true;
       break;
   }
@@ -440,7 +454,6 @@ async function checkDB () {
     confirmShow.value = true;
   } else {
     const appVersion = await app.getVersion();
-    const buildTime = getBuildTime();
     const dbVersion = dbInfo.value.find((item) => item.key === "appVersion")?.value;
     const dbUpdatedTime = dbInfo.value.find((item) => item.key === "dataUpdated")?.value;
     if (!dbVersion || dbVersion < appVersion) {
@@ -449,8 +462,8 @@ async function checkDB () {
       loading.value = false;
       confirmShow.value = true;
       return;
-    } else if (!buildTime.startsWith("dev")) {
-      if (!dbUpdatedTime || dbUpdatedTime < buildTime) {
+    } else if (!buildTime.value.startsWith("dev")) {
+      if (!dbUpdatedTime || dbUpdatedTime < buildTime.value) {
         confirmOper.value = "updateDB";
         confirmText.value = "数据库可能过时，是否更新数据库？";
         loading.value = false;

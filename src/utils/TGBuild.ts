@@ -3,7 +3,7 @@
  * @description 用于获取 vite 打包时间
  * @see https://gitee.com/lihanspace/vite-plugin-build-time
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @since Alpha v0.1.4
  */
 
 import { type Plugin } from "vite";
@@ -21,7 +21,7 @@ const buildTimePlugin = (modes: string[] = []): Plugin => {
       if (_mode !== "production" && !modes.includes(_mode)) return;
       return [{
         tag: "script",
-        children: `window.${buildTimeKey} = ${Math.floor(Date.now() / 1000)}`,
+        children: `window.${buildTimeKey} = '${Math.floor(Date.now() / 1000)}'`,
       }];
     },
   };
