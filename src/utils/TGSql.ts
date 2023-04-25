@@ -25,16 +25,6 @@ function initAppTable (): string[] {
         updated TEXT    DEFAULT NULL
     );
   `);
-  // 创建触发器
-  sqlRes.push(`
-    CREATE TRIGGER IF NOT EXISTS updateAppData
-      AFTER UPDATE OF value ON AppData
-      FOR EACH ROW
-      BEGIN
-          UPDATE BBSPost SET isRead = 1, updated = datetime('now', 'localtime')
-          WHERE created < NEW.value OR modified < NEW.value AND NEW.key = 'bbsPost';
-      END;
-  `);
   return sqlRes;
 }
 
@@ -184,9 +174,8 @@ function initAchievementSeriesData (): string[] {
   const oriData = TGAppData.achievementSeries;
   oriData.map((data) => {
     const sql = `
-      INSERT INTO AchievementSeries (id, "order", name, version, icon, nameCard, updated)
-      VALUES (${data.id}, ${data.order}, '${data.name}', '${data.version}', '${data.icon}', '${data.card}', datetime('now', 'localtime'))
-      ON CONFLICT(id) DO NOTHING;
+      INSERT OR IGNORE INTO AchievementSeries (id, "order", name, version, icon, nameCard, updated)
+      VALUES (${data.id}, ${data.order}, '${data.name}', '${data.version}', '${data.icon}', '${data.card}', datetime('now', 'localtime'));
     `;
     return sqlRes.push(sql);
   });
@@ -203,9 +192,8 @@ function initAchievementData (): string[] {
   const oriData = TGAppData.achievements;
   oriData.map((data) => {
     const sql = `
-      INSERT INTO Achievements (id, series, "order", name, description, reward, version, updated)
-      VALUES (${data.id}, ${data.series}, ${data.order}, '${data.name}', '${data.description}', ${data.reward}, '${data.version}', datetime('now', 'localtime'))
-      ON CONFLICT(id) DO NOTHING;
+      INSERT OR IGNORE INTO Achievements (id, series, "order", name, description, reward, version, updated)
+      VALUES (${data.id}, ${data.series}, ${data.order}, '${data.name}', '${data.description}', ${data.reward}, '${data.version}', datetime('now', 'localtime'));
     `;
     return sqlRes.push(sql);
   });
@@ -222,9 +210,8 @@ function initNameCardData (): string[] {
   const oriData = TGAppData.nameCards;
   oriData.map((data) => {
     const sql = `
-      INSERT INTO NameCard (name, description, icon, bg, profile, type, source, updated)
-      VALUES ('${data.name}', '${data.description}', '${data.icon}', '${data.bg}', '${data.profile}', ${data.type}, '${data.source}', datetime('now', 'localtime'))
-      ON CONFLICT(id) DO NOTHING;
+      INSERT OR IGNORE INTO NameCard (name, description, icon, bg, profile, type, source, updated)
+      VALUES ('${data.name}', '${data.description}', '${data.icon}', '${data.bg}', '${data.profile}', ${data.type}, '${data.source}', datetime('now', 'localtime'));
     `;
     return sqlRes.push(sql);
   });
@@ -258,7 +245,8 @@ export function importUIAFData (data: TGPlugin.UIAF.Achievement[]): string[] {
     // 获取完成状态
     const isCompleted = achievement.status === 2 || achievement.status === 3;
     if (isCompleted) {
-      const completedTime = new Date(achievement.timestamp * 1000).toISOString().replace("T", " ").replace("Z", "");
+      const completedTime = new Date(achievement.timestamp * 1000).toISOString().replace("T", " ").slice(0, 19);
+      console.log(completedTime);
       sql = `
         UPDATE Achievements
         SET isCompleted = 1, completedTime = '${completedTime}', progress = ${achievement.current}, updated = datetime('now', 'localtime')

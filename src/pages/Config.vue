@@ -61,6 +61,18 @@
           <v-list-item-subtitle>{{ osVersion }}</v-list-item-subtitle>
         </template>
       </v-list-item>
+      <v-list-item title="数据库更新时间" prepend-icon="mdi-database">
+        <template #append>
+          <v-list-item-subtitle>{{ dbInfo.find(item => item.key === "dataUpdated")?.value }}</v-list-item-subtitle>
+        </template>
+        <v-list-item-subtitle>更新于 {{ dbInfo.find(item => item.key === "dataUpdated")?.updated }}</v-list-item-subtitle>
+      </v-list-item>
+      <v-list-item title="数据库版本" prepend-icon="mdi-database">
+        <template #append>
+          <v-list-item-subtitle>{{ dbInfo.find(item => item.key === "appVersion")?.value }}</v-list-item-subtitle>
+        </template>
+        <v-list-item-subtitle>更新于 {{ dbInfo.find(item => item.key === "appVersion")?.updated }}</v-list-item-subtitle>
+      </v-list-item>
       <v-list-subheader inset class="config-header">
         设置
       </v-list-subheader>
@@ -117,7 +129,6 @@
       </v-list-item>
       <v-list-item title="删除 IndexedDB" prepend-icon="mdi-delete" @click="tryConfirm('delDB')" />
       <v-list-item title="检测 SQLite 数据库完整性" prepend-icon="mdi-database-check" @click="tryConfirm('checkDB')" />
-      <v-list-item title="重置 SQLite 数据库" prepend-icon="mdi-database-remove" @click="tryConfirm('resetDB')" />
       <v-list-subheader inset class="config-header">
         路径
       </v-list-subheader>
@@ -174,6 +185,7 @@ const buildTime = ref(getBuildTime());
 // About OS
 const osPlatform = ref("" as string);
 const osVersion = ref("" as string);
+const dbInfo = ref([] as { key: string, value: string, updated: string }[]);
 
 // loading
 const loading = ref(true as boolean);
@@ -199,9 +211,8 @@ onMounted(async () => {
   versionTauri.value = await app.getTauriVersion();
   osPlatform.value = `${await os.platform()}`;
   osVersion.value = await os.version();
-  setTimeout(() => {
-    loading.value = false;
-  }, 1000);
+  dbInfo.value = await TGSqlite.getAppData();
+  loading.value = false;
 });
 
 // 打开外部链接
@@ -257,11 +268,6 @@ function tryConfirm (oper: string) {
       confirmOper.value = "checkDB";
       confirmShow.value = true;
       break;
-    case "resetDB":
-      confirmText.value = "确认重置 SQlite 数据库吗？";
-      confirmOper.value = "resetDB";
-      confirmShow.value = true;
-      break;
   }
 }
 
@@ -295,9 +301,6 @@ async function doConfirm (oper: string) {
       break;
     case "checkDB":
       await checkDB();
-      break;
-    case "resetDB":
-      await resetDB();
       break;
     default:
       break;
@@ -430,6 +433,7 @@ async function checkDB () {
     confirmShow.value = true;
   } else {
     loadingTitle.value = "正在更新数据库表单...";
+    loading.value = true;
     await TGSqlite.update();
     loading.value = false;
     snackbarText.value = "数据库已是最新!";
@@ -444,7 +448,7 @@ async function resetDB () {
   loading.value = true;
   await TGSqlite.reset();
   loading.value = false;
-  snackbarText.value = "数据库已重置!请载入备份数据。";
+  snackbarText.value = "数据库已重置!请进行再次检查。";
   snackbarColor.value = "success";
   snackbar.value = true;
 }

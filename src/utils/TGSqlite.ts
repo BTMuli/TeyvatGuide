@@ -54,6 +54,20 @@ class TGSqlite {
   }
 
   /**
+   * @description 获取数据库信息
+   * @memberof TGSqlite
+   * @since Alpha v0.1.4
+   * @returns {Promise<{ key: string, value: string, updated: string }[]>}
+   */
+  public async getAppData (): Promise<Array<{ key: string, value: string, updated: string }>> {
+    const db = await Database.load(this.dbPath);
+    const sql = "SELECT * FROM AppData;";
+    const res: Array<{ key: string, value: string, updated: string }> = await db.select(sql);
+    await db.close();
+    return res;
+  }
+
+  /**
    * @description 已有数据表跟触发器不变的情况下，更新数据库数据
    * @memberof TGSqlite
    * @since Alpha v0.1.4
@@ -80,8 +94,9 @@ class TGSqlite {
     // 检测数据表是否都存在
     const sqlT = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
     const res: Array<{ name: string }> = await db.select(sqlT);
-    if (res.length === this.tables.length) {
-      if (res.every((item) => this.tables.includes(item.name))) {
+    // 考虑到 sqlite_sequence 表，所以需要 +1
+    if (res.length === this.tables.length + 1) {
+      if (this.tables.every((item) => res.map((i) => i.name).includes(item))) {
         isVertified = true;
       }
     }
