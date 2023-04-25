@@ -176,9 +176,9 @@ class TGSqlite {
     const db = await Database.load(this.dbPath);
     let sql;
     if (seriesId) {
-      sql = `SELECT * FROM Achievements WHERE series=${seriesId} ORDER BY isCompleted DESC, \`order\` ASC;`;
+      sql = `SELECT * FROM Achievements WHERE series=${seriesId} ORDER BY isCompleted ASC, \`order\` ASC;`;
     } else {
-      sql = "SELECT * FROM Achievements ORDER BY isCompleted DESC, `order` ASC;";
+      sql = "SELECT * FROM Achievements ORDER BY isCompleted ASC, `order` ASC;";
     }
     const res: BTMuli.SQLite.Achievements[] = await db.select(sql);
     await db.close();
@@ -211,9 +211,9 @@ class TGSqlite {
     let sql;
     if (keyword.startsWith("v")) {
       const version = keyword.replace("v", "");
-      sql = `SELECT * FROM Achievements WHERE version='${version}' ORDER BY isCompleted DESC, \`order\` ASC;`;
+      sql = `SELECT * FROM Achievements WHERE version='${version}' ORDER BY isCompleted ASC, \`order\` ASC;`;
     } else {
-      sql = `SELECT * FROM Achievements WHERE name LIKE '%${keyword}%' OR description LIKE '%${keyword}%' ORDER BY isCompleted DESC, \`order\` ASC;`;
+      sql = `SELECT * FROM Achievements WHERE name LIKE '%${keyword}%' OR description LIKE '%${keyword}%' ORDER BY isCompleted ASC, \`order\` ASC;`;
     }
     const res: BTMuli.SQLite.Achievements[] = await db.select(sql);
     await db.close();

@@ -28,7 +28,7 @@
   <div v-show="!loading" class="wrap">
     <!-- 左侧菜单 -->
     <div class="left-wrap">
-      <v-list v-for="(series, index) in seriesList" :key="series.id" class="card-left" @click="selectSeries(index)">
+      <v-list v-for="series in seriesList" :key="series.id" class="card-left" @click="selectSeries(series.id)">
         <div class="version-icon-series">
           v{{ series.version }}
         </div>
@@ -46,7 +46,7 @@
     <!-- 右侧内容-->
     <div class="right-wrap">
       <v-list
-        v-if="selectedIndex !== -1 && selectedSeries !== 0 && selectedSeries !== 17"
+        v-if="selectedSeries !== 0 && selectedSeries !== 17 && selectedSeries !== -1"
         :style="{
           backgroundImage: 'url(' + getCardInfo.bg || null + ')',
           backgroundPosition: 'right',
@@ -126,7 +126,6 @@ const title = ref(achievementsStore.title as string);
 const getCardInfo = ref({} as BTMuli.SQLite.NameCard);
 // series
 const seriesList = ref([] as BTMuli.SQLite.AchievementSeries[]);
-const selectedIndex = ref(-1 as number);
 const selectedSeries = ref(-1 as number);
 const selectedAchievement = ref([] as BTMuli.SQLite.Achievements[]);
 
@@ -154,15 +153,14 @@ async function loadData () {
 // 渲染选中的成就系列
 async function selectSeries (index: number) {
   // 如果选中的是已经选中的系列，则不进行操作
-  if (selectedIndex.value === index) {
+  if (selectedSeries.value === index) {
     snackbarText.value = "已经选中该系列";
     snackbar.value = true;
     return;
   }
   loading.value = true;
   loadingTitle.value = "正在获取对应的成就数据";
-  selectedIndex.value = index;
-  selectedSeries.value = seriesList.value[index].id;
+  selectedSeries.value = index;
   selectedAchievement.value = await TGSqlite.getAchievements(selectedSeries.value);
   loadingTitle.value = "正在查找对应的成就名片";
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
@@ -187,7 +185,7 @@ async function searchCard () {
   loadingTitle.value = "正在搜索";
   loading.value = true;
   selectedAchievement.value = await TGSqlite.searchAchievements(search.value);
-  selectedIndex.value = -1;
+  selectedSeries.value = -1;
   loading.value = false;
   if (selectedAchievement.value.length === 0) {
     snackbarColor.value = "#F5810A";
@@ -220,7 +218,6 @@ async function importJson () {
     loadingTitle.value = "正在刷新数据";
     // 刷新数据
     await loadData();
-    selectedIndex.value = -1;
   }
 }
 

@@ -246,7 +246,6 @@ export function importUIAFData (data: TGPlugin.UIAF.Achievement[]): string[] {
     const isCompleted = achievement.status === 2 || achievement.status === 3;
     if (isCompleted) {
       const completedTime = new Date(achievement.timestamp * 1000).toISOString().replace("T", " ").slice(0, 19);
-      console.log(completedTime);
       sql = `
         UPDATE Achievements
         SET isCompleted = 1, completedTime = '${completedTime}', progress = ${achievement.current}, updated = datetime('now', 'localtime')
