@@ -5,12 +5,11 @@
  * @since Alpha v0.1.4
  */
 
+// tauri
 import Database from "tauri-plugin-sql-api";
+// utils
 import { importUIAFData, initSQLiteData, initSQLiteTable } from "./TGSql";
 import { getUiafStatus } from "./UIAF";
-
-const dbLink = await Database.load("sqlite:tauri-genshin.db");
-
 class TGSqlite {
   /**
    * @description 数据库地址
@@ -20,14 +19,6 @@ class TGSqlite {
    * @since Alpha v0.1.4
    */
   private readonly dbPath: string = "sqlite:tauri-genshin.db";
-  /**
-   * @description 数据库实例
-   * @private
-   * @type {Database}
-   * @memberof TGSqlite
-   * @since Alpha v0.1.4
-   */
-  private readonly db: Database;
   /**
    * @description 数据库包含的表
    * @private
@@ -43,17 +34,6 @@ class TGSqlite {
   ];
 
   /**
-   * @description 构造函数
-   * @constructor
-   * @memberof TGSqlite
-   * @since Alpha v0.1.4
-   */
-  constructor () {
-    // 异步
-    this.db = dbLink;
-  }
-
-  /**
    * @description 初始化数据库
    * @memberof TGSqlite
    * @since Alpha v0.1.4
@@ -61,14 +41,16 @@ class TGSqlite {
    * @memberof TGSqlite
    */
   public async init (): Promise<void> {
+    const db = await Database.load(this.dbPath);
     const sqlT = initSQLiteTable();
     for (const item of sqlT) {
-      await this.db.execute(item);
+      await db.execute(item);
     }
     const sqlD = await initSQLiteData();
     for (const item of sqlD) {
-      await this.db.execute(item);
+      await db.execute(item);
     }
+    await db.close();
   }
 
   /**
@@ -78,14 +60,18 @@ class TGSqlite {
    * @returns {Promise<boolean>}
    */
   public async check (): Promise<boolean> {
+    const db = await Database.load(this.dbPath);
+    let isVertified = false;
     // 检测数据表是否都存在
     const sqlT = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
-    const res: Array<{ name: string }> = await this.db.select(sqlT);
-    if (res.length !== this.tables.length) return false;
-    for (const item of res) {
-      if (!this.tables.includes(item.name)) return false;
+    const res: Array<{ name: string }> = await db.select(sqlT);
+    if (res.length === this.tables.length) {
+      if (res.every((item) => this.tables.includes(item.name))) {
+        isVertified = true;
+      }
     }
-    return true;
+    await db.close();
+    return isVertified;
   }
 
   /**
@@ -95,10 +81,12 @@ class TGSqlite {
    * @returns {Promise<void>}
    */
   public async reset (): Promise<void> {
+    const db = await Database.load(this.dbPath);
     this.tables.map(async (item) => {
       const sql = `DROP TABLE IF EXISTS ${item};`;
-      await this.db.execute(sql);
+      await db.execute(sql);
     });
+    await db.close();
     await this.init();
   }
 
@@ -109,10 +97,12 @@ class TGSqlite {
    * @returns {Promise<{ version: string, buildTime: string }>}
    */
   public async getMetadata (): Promise<{ version: string, buildTime: string }> {
+    const db = await Database.load(this.dbPath);
     const sql = "SELECT * FROM AppData WHERE key='appVersion' OR key='dataUpdated';";
-    const res: Array<{ key: string, value: string }> = await this.db.select(sql);
+    const res: Array<{ key: string, value: string }> = await db.select(sql);
     const version = res.find((item) => item.key === "appVersion")?.value ?? "0.0.0";
     const buildTime = res.find((item) => item.key === "dataUpdated")?.value ?? "1970-01-01 00:00:00";
+    await db.close();
     return { version, buildTime };
   }
 
@@ -123,8 +113,10 @@ class TGSqlite {
    * @returns {Promise<BTMuli.SQLite.AchievementSeries[]>}
    */
   public async getAchievementSeries (): Promise<BTMuli.SQLite.AchievementSeries[]> {
+    const db = await Database.load(this.dbPath);
     const sql = "SELECT * FROM AchievementSeries ORDER BY `order` ASC;";
-    const res: BTMuli.SQLite.AchievementSeries[] = await this.db.select(sql);
+    const res: BTMuli.SQLite.AchievementSeries[] = await db.select(sql);
+    await db.close();
     return res;
   }
 
@@ -136,8 +128,10 @@ class TGSqlite {
    * @returns {Promise<BTMuli.SQLite.NameCard>}
    */
   public async getNameCard (seriesId: number): Promise<BTMuli.SQLite.NameCard> {
+    const db = await Database.load(this.dbPath);
     const sql = `SELECT * FROM NameCard WHERE name=(SELECT nameCard FROM AchievementSeries WHERE id=${seriesId});`;
-    const res: BTMuli.SQLite.NameCard[] = await this.db.select(sql);
+    const res: BTMuli.SQLite.NameCard[] = await db.select(sql);
+    await db.close();
     return res[0];
   }
 
@@ -149,13 +143,15 @@ class TGSqlite {
    * @returns {Promise<BTMuli.SQLite.Achievements[]>}
    */
   public async getAchievements (seriesId?: number): Promise<BTMuli.SQLite.Achievements[]> {
+    const db = await Database.load(this.dbPath);
     let sql;
     if (seriesId) {
       sql = `SELECT * FROM Achievements WHERE series=${seriesId} ORDER BY isCompleted DESC, \`order\` ASC;`;
     } else {
       sql = "SELECT * FROM Achievements ORDER BY isCompleted DESC, `order` ASC;";
     }
-    const res: BTMuli.SQLite.Achievements[] = await this.db.select(sql);
+    const res: BTMuli.SQLite.Achievements[] = await db.select(sql);
+    await db.close();
     return res;
   }
 
@@ -166,8 +162,10 @@ class TGSqlite {
    * @returns {Promise<{total:number,fin:number}>}
    */
   public async getAchievementsOverview (): Promise<{ total: number, fin: number }> {
+    const db = await Database.load(this.dbPath);
     const sql = "SELECT SUM(totalCount) AS total, SUM(finCount) AS fin FROM AchievementSeries;";
-    const res: Array<{ total: number, fin: number }> = await this.db.select(sql);
+    const res: Array<{ total: number, fin: number }> = await db.select(sql);
+    await db.close();
     return res[0];
   }
 
@@ -179,6 +177,7 @@ class TGSqlite {
    * @returns {Promise<BTMuli.SQLite.Achievements[]>}
    */
   public async searchAchievements (keyword: string): Promise<BTMuli.SQLite.Achievements[]> {
+    const db = await Database.load(this.dbPath);
     let sql;
     if (keyword.startsWith("v")) {
       const version = keyword.replace("v", "");
@@ -186,7 +185,8 @@ class TGSqlite {
     } else {
       sql = `SELECT * FROM Achievements WHERE name LIKE '%${keyword}%' OR description LIKE '%${keyword}%' ORDER BY isCompleted DESC, \`order\` ASC;`;
     }
-    const res: BTMuli.SQLite.Achievements[] = await this.db.select(sql);
+    const res: BTMuli.SQLite.Achievements[] = await db.select(sql);
+    await db.close();
     return res;
   }
 
@@ -198,10 +198,12 @@ class TGSqlite {
    * @returns {Promise<void>}
    */
   public async mergeUIAF (achievements: TGPlugin.UIAF.Achievement[]): Promise<void> {
+    const db = await Database.load(this.dbPath);
     const sql = importUIAFData(achievements);
     for (const item of sql) {
-      await this.db.execute(item);
+      await db.execute(item);
     }
+    await db.close();
   }
 
   /**
@@ -211,8 +213,10 @@ class TGSqlite {
    * @returns {Promise<TGPlugin.UIAF.Achievement[]>}
    */
   public async getUIAF (): Promise<TGPlugin.UIAF.Achievement[]> {
+    const db = await Database.load(this.dbPath);
     const sql = "SELECT * FROM Achievements WHERE isCompleted = 1 OR progress > 0";
-    const res: BTMuli.SQLite.Achievements[] = await this.db.select(sql);
+    const res: BTMuli.SQLite.Achievements[] = await db.select(sql);
+    await db.close();
     const achievements: TGPlugin.UIAF.Achievement[] = [];
     for (const item of res) {
       const completed = item.isCompleted === 1;
