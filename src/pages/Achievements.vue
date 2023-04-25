@@ -112,8 +112,8 @@ import { useAchievementsStore } from "../store/modules/achievements";
 // Utils
 import { TGAppData } from "../data";
 import { createTGWindow } from "../utils/TGWindow";
-import { getUiafHeader, readUiafData, verifyUiafData, backupUiafData } from "../utils/UIAF";
-import TGSqlite from "../core/database/TGSqlite";
+import { getUiafHeader, readUiafData, verifyUiafData } from "../utils/UIAF";
+import TGSqlite from "../utils/TGSqlite";
 
 // Store
 const achievementsStore = useAchievementsStore();
@@ -144,13 +144,13 @@ onMounted(async () => {
 
 // 加载数据，数据源：合并后的本地数据
 async function loadData () {
-  const { total, fin } = await TGSqlite.search.overview();
+  const { total, fin } = await TGSqlite.getAchievementsOverview();
   achievementsStore.flushData(total, fin);
   loadingTitle.value = "正在获取成就系列数据";
   CardsInfo.value = TGAppData.nameCards[1];
-  seriesList.value = await TGSqlite.search.achievementSeries();
+  seriesList.value = await TGSqlite.getAchievementSeries();
   loadingTitle.value = "正在获取成就数据";
-  const getAchievements = await TGSqlite.search.achievement.bySeries();
+  const getAchievements = await TGSqlite.getAchievements();
   getAchievements.sort((a, b) => {
     if (a.isCompleted === b.isCompleted) {
       return a.id - b.id;
@@ -174,7 +174,7 @@ async function selectSeries (index: number) {
   loadingTitle.value = "正在获取对应的成就数据";
   selectedIndex.value = index;
   selectedSeries.value = seriesList.value[index].id;
-  const getAchievements = await TGSqlite.search.achievement.bySeries(selectedSeries.value);
+  const getAchievements = await TGSqlite.getAchievements(selectedSeries.value);
   loadingTitle.value = "正在查找对应的成就名片";
   let getCard: BTMuli.Genshin.NameCard;
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
@@ -182,13 +182,6 @@ async function selectSeries (index: number) {
   } else {
     getCard = {} as BTMuli.Genshin.NameCard;
   }
-  getAchievements.sort((a, b) => {
-    if (a.isCompleted === b.isCompleted) {
-      return a.id - b.id;
-    } else {
-      return a.isCompleted ? 1 : -1;
-    }
-  });
   selectedAchievement.value = getAchievements;
   getCardInfo.value = getCard;
   loading.value = false;
@@ -209,7 +202,7 @@ async function searchCard () {
   }
   loadingTitle.value = "正在搜索";
   loading.value = true;
-  const res = await TGSqlite.search.achievement.bySearch(search.value);
+  const res = await TGSqlite.searchAchievements(search.value);
   selectedIndex.value = -1;
   setTimeout(() => {
     loading.value = false;
@@ -218,15 +211,8 @@ async function searchCard () {
     snackbarColor.value = "#F5810A";
     snackbarText.value = "没有找到对应的成就";
     snackbar.value = true;
-    selectedAchievement.value = await TGSqlite.search.achievement.bySeries();
+    selectedAchievement.value = await TGSqlite.getAchievements();
   } else {
-    res.sort((a, b) => {
-      if (a.isCompleted === b.isCompleted) {
-        return a.id - b.id;
-      } else {
-        return a.isCompleted ? 1 : -1;
-      }
-    });
     selectedAchievement.value = res;
   }
 }
@@ -252,22 +238,14 @@ async function importJson () {
     loading.value = true;
     const remoteData: TGPlugin.UIAF.BaseData = JSON.parse(remoteRaw);
     loadingTitle.value = "正在合并成就数据";
-    await TGSqlite.UIAF.import(remoteData.list);
-    loadingTitle.value = "正在备份数据";
-    await backupAchievementData();
+    await TGSqlite.mergeUIAF(remoteData.list);
     loadingTitle.value = "正在刷新数据";
-    const overview = await TGSqlite.search.overview();
+    const overview = await TGSqlite.getAchievementsOverview();
     achievementsStore.flushData(overview.total, overview.fin);
     // 刷新数据
     await loadData();
     selectedIndex.value = -1;
   }
-}
-
-// 备份成就数据
-async function backupAchievementData () {
-  const achievements = await TGSqlite.UIAF.export();
-  await backupUiafData(achievements);
 }
 
 // 导出
@@ -282,7 +260,7 @@ async function exportJson () {
   // 获取本地数据
   const UiafData = {
     info: await getUiafHeader(),
-    list: await TGSqlite.UIAF.export(),
+    list: await TGSqlite.getUIAF(),
   };
   const isSave = await dialog.save({
     // TODO: 设置保存文件名
@@ -295,10 +273,14 @@ async function exportJson () {
   });
   if (isSave) {
     await fs.writeTextFile(isSave, JSON.stringify(UiafData));
+    snackbarColor.value = "#00BFA5";
+    snackbarText.value = "导出成功";
+    snackbar.value = true;
+  } else {
+    snackbarColor.value = "#F5810A";
+    snackbarText.value = "导出已取消";
+    snackbar.value = true;
   }
-  snackbarColor.value = "#00BFA5";
-  snackbarText.value = "导出成功";
-  snackbar.value = true;
 }
 </script>
 

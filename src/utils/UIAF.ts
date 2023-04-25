@@ -8,7 +8,7 @@
 // tauri
 import { app, fs, path } from "@tauri-apps/api";
 // utils
-import TGSqlite from "../core/database/TGSqlite";
+import TGSqlite from "./TGSqlite";
 
 /**
  * @description 时间戳转换为日期
@@ -110,16 +110,15 @@ export async function backupUiafData (achievementData: TGPlugin.UIAF.Achievement
 /**
  * @description 根据 UIAF 数据恢复成就数据
  * @since Alpha v0.1.4
- * @returns {Promise<{total: number, fin: number}> | false} 恢复的成就数量
+ * @returns {Promise<boolean>} 恢复的成就数量
  */
-export async function restoreUiafData (): Promise<{ total: number, fin: number } | false> {
+export async function restoreUiafData (): Promise<boolean> {
   const uiafPath = `${await path.appLocalDataDir()}\\userData\\UIAF.json`;
   // 检测是否存在 UIAF 数据
   if (!await fs.exists(uiafPath)) {
     return false;
   }
   const uiafData = JSON.parse(await fs.readTextFile(uiafPath)) as TGPlugin.UIAF.Achievement[];
-  await TGSqlite.UIAF.import(uiafData);
-  // 返回
-  return await TGSqlite.search.overview();
+  await TGSqlite.mergeUIAF(uiafData);
+  return true;
 }

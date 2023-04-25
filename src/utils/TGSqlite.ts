@@ -7,6 +7,10 @@
 
 import Database from "tauri-plugin-sql-api";
 import TGSql from "./TGSql";
+import { getUiafStatus } from "./UIAF";
+import { TGAppData } from "../data";
+
+const dbLink = await Database.load("sqlite:tauri-genshin.db");
 
 class TGSqlite {
   /**
@@ -46,7 +50,8 @@ class TGSqlite {
    * @since Alpha v0.1.4
    */
   constructor () {
-    this.db = new Database(this.dbPath);
+    // 异步
+    this.db = dbLink;
   }
 
   /**
@@ -91,8 +96,10 @@ class TGSqlite {
    * @returns {Promise<void>}
    */
   public async reset (): Promise<void> {
-    const sql = "DROP TABLE IF EXISTS AppData, Achievement, AchievementSeries, BbsPost;";
-    await this.db.execute(sql);
+    this.tables.map(async (item) => {
+      const sql = `DROP TABLE IF EXISTS ${item};`;
+      await this.db.execute(sql);
+    });
     await this.init();
   }
 
@@ -129,17 +136,11 @@ class TGSqlite {
   /**
    * @description 获取成就系列列表
    * @memberof TGSqlite
-   * @param {number} [seriesId] 系列 ID
    * @since Alpha v0.1.4
    * @returns {Promise<BTMuli.SQLite.AchievementSeries[]>}
    */
-  public async getAchievementSeries (seriesId?: number): Promise<BTMuli.SQLite.AchievementSeries[]> {
-    let sql;
-    if (seriesId) {
-      sql = `SELECT * FROM AchievementSeries WHERE id=${seriesId};`;
-    } else {
-      sql = "SELECT * FROM AchievementSeries;";
-    }
+  public async getAchievementSeries (): Promise<BTMuli.SQLite.AchievementSeries[]> {
+    const sql = "SELECT * FROM AchievementSeries ORDER BY `order` ASC;";
     const res: BTMuli.SQLite.AchievementSeries[] = await this.db.select(sql);
     return res;
   }
@@ -154,12 +155,24 @@ class TGSqlite {
   public async getAchievements (seriesId?: number): Promise<BTMuli.SQLite.Achievements[]> {
     let sql;
     if (seriesId) {
-      sql = `SELECT * FROM Achievement WHERE seriesId=${seriesId};`;
+      sql = `SELECT * FROM Achievements WHERE series=${seriesId} ORDER BY isCompleted DESC, \`order\` ASC;`;
     } else {
-      sql = "SELECT * FROM Achievement;";
+      sql = "SELECT * FROM Achievements ORDER BY isCompleted DESC, `order` ASC;";
     }
     const res: BTMuli.SQLite.Achievements[] = await this.db.select(sql);
     return res;
+  }
+
+  /**
+   * @description 获取成就概况
+   * @since Alpha v0.1.4
+   * @memberof TGSqlite
+   * @returns {Promise<{total:number,fin:number}>}
+   */
+  public async getAchievementsOverview (): Promise<{ total: number, fin: number }> {
+    const sql = "SELECT SUM(totalCount) AS total, SUM(finCount) AS fin FROM AchievementSeries;";
+    const res: Array<{ total: number, fin: number }> = await this.db.select(sql);
+    return res[0];
   }
 
   /**
@@ -173,13 +186,50 @@ class TGSqlite {
     let sql;
     if (keyword.startsWith("v")) {
       const version = keyword.replace("v", "");
-      sql = `SELECT * FROM Achievement WHERE version='${version}';`;
+      sql = `SELECT * FROM Achievements WHERE version='${version}' ORDER BY isCompleted DESC, \`order\` ASC;`;
     } else {
-      sql = `SELECT * FROM Achievement WHERE name LIKE '%${keyword}%' OR description LIKE '%${keyword}%';`;
+      sql = `SELECT * FROM Achievements WHERE name LIKE '%${keyword}%' OR description LIKE '%${keyword}%' ORDER BY isCompleted DESC, \`order\` ASC;`;
     }
     const res: BTMuli.SQLite.Achievements[] = await this.db.select(sql);
     return res;
   }
+
+  /**
+   * @description 合并 UIAF 数据
+   * @memberof TGSqlite
+   * @param {BTMuli.UIAF.Achievement[]} achievements UIAF 数据
+   * @since Alpha v0.1.4
+   * @returns {Promise<void>}
+   */
+  public async mergeUIAF (achievements: TGPlugin.UIAF.Achievement[]): Promise<void> {
+    const sql = TGSql.insert.UIAF(achievements);
+    for (const item of sql) {
+      await this.db.execute(item);
+    }
+  }
+
+  /**
+   * @description 获取 UIAF 数据
+   * @memberof TGSqlite
+   * @since Alpha v0.1.4
+   * @returns {Promise<TGPlugin.UIAF.Achievement[]>}
+   */
+  public async getUIAF (): Promise<TGPlugin.UIAF.Achievement[]> {
+    const sql = "SELECT * FROM Achievements WHERE isCompleted = 1 OR progress > 0";
+    const res: BTMuli.SQLite.Achievements[] = await this.db.select(sql);
+    const achievements: TGPlugin.UIAF.Achievement[] = [];
+    for (const item of res) {
+      const completed = item.isCompleted === 1;
+      const status = getUiafStatus(completed, item.progress);
+      achievements.push({
+        id: item.id,
+        status,
+        timestamp: completed && item.completedTime ? new Date(item.completedTime).getTime() : 0,
+        current: item.progress,
+      });
+    }
+    return achievements;
+  }
 }
 
-export default TGSqlite;
+export default new TGSqlite();

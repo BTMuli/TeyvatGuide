@@ -12,6 +12,8 @@ import TPosition from "../components/t-position.vue";
 import TCalendar from "../components/t-calendar.vue";
 // store
 import { useHomeStore } from "../store/modules/home";
+// utils
+import TGSqlite from "../utils/TGSqlite";
 
 // store
 const homeStore = useHomeStore();
@@ -40,6 +42,12 @@ function readLoading (): void {
 }
 
 onMounted(async () => {
+  loadingTitle.value = "正在检测数据完整性";
+  const isOK = await TGSqlite.check();
+  if (!isOK) {
+    loadingTitle.value = "正在修复数据";
+    await TGSqlite.reset();
+  }
   loadingTitle.value = "正在加载首页";
   const showItems = homeStore.getShowValue();
   await Promise.allSettled(

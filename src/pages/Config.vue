@@ -159,7 +159,7 @@ import { useHk4eStore } from "../store/modules/hk4e";
 import { useAchievementsStore } from "../store/modules/achievements";
 // utils
 import { backupUiafData, restoreUiafData } from "../utils/UIAF";
-import TGSqlite from "../core/database/TGSqlite";
+import TGSqlite from "../utils/TGSqlite";
 
 // Store
 const appStore = useAppStore();
@@ -308,7 +308,7 @@ async function doConfirm (oper: string) {
 async function backupData () {
   loadingTitle.value = "正在备份数据...";
   loading.value = true;
-  const achievements = await TGSqlite.UIAF.export();
+  const achievements = await TGSqlite.getUIAF();
   await backupUiafData(achievements);
   loading.value = false;
   snackbarText.value = "数据已备份!";
@@ -319,7 +319,6 @@ async function backupData () {
 async function restoreData () {
   const res = await restoreUiafData();
   if (res !== false) {
-    achievementsStore.flushData(res.total, res.fin);
     snackbarText.value = "数据已恢复!";
     snackbarColor.value = "success";
     snackbar.value = true;
@@ -420,18 +419,14 @@ function delDB () {
 // 检查 SQLite 数据库
 async function checkDB () {
   loadingTitle.value = "正在检查数据库表单完整性...";
-  const res = await TGSqlite.checkDB();
+  const res = await TGSqlite.check();
   if (!res) {
     confirmOper.value = "resetDB";
     confirmText.value = "数据库表单不完整，是否重置数据库？";
     loading.value = false;
     confirmShow.value = true;
   } else {
-    loadingTitle.value = "正在检查数据库数据完整性...";
-    await TGSqlite.update.achievementSeries();
-    await TGSqlite.update.achievement();
-    loading.value = false;
-    snackbarText.value = "数据库检查完毕!";
+    snackbarText.value = "数据库表单完整!";
     snackbarColor.value = "success";
     snackbar.value = true;
   }
@@ -439,7 +434,7 @@ async function checkDB () {
 
 // 重置 SQLite 数据库
 async function resetDB () {
-  await TGSqlite.resetDB();
+  await TGSqlite.reset();
   snackbarText.value = "数据库已重置!请载入备份数据。";
   snackbarColor.value = "success";
   snackbar.value = true;

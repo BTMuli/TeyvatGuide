@@ -27,6 +27,7 @@ const TGSql = {
     achievement: insertAchievementData,
     achievementSeries: insertAchievementSeriesData,
     bbsPost: insertBBSPostData,
+    UIAF: importUIAFData,
   },
   update: {
     achievement: updateAchievementData,
@@ -151,7 +152,7 @@ function initBbsPostTable (): string[] {
         created    TEXT    DEFAULT NULL,
         modified   TEXT    DEFAULT NULL,
         isRead     BOOLEAN DEFAULT 0,
-        updated    TEXT    DEFAULT NULL,
+        updated    TEXT    DEFAULT NULL
     );
   `);
   return sqlRes;
@@ -345,6 +346,37 @@ function updateBBSPostData (data: BTMuli.SQLite.BBSPost, isRead: boolean = false
     `;
   }
   return sql;
+}
+
+/**
+ * @description 导入UIAF数据
+ * @since Alpha v0.1.4
+ * @param {TGPlugin.UIAF.Achievement[]} data
+ * @returns {string[]} sql
+ */
+function importUIAFData (data: TGPlugin.UIAF.Achievement[]): string[] {
+  const sqlRes: string[] = [];
+  data.map((achievement) => {
+    let sql;
+    // 获取完成状态
+    const isCompleted = achievement.status === 2 || achievement.status === 3;
+    if (isCompleted) {
+      const completedTime = new Date(achievement.timestamp * 1000).toISOString().replace("T", " ").replace("Z", "");
+      sql = `
+        UPDATE Achievements
+        SET isCompleted = 1, completedTime = '${completedTime}', progress = ${achievement.current}, updated = datetime('now', 'localtime')
+        WHERE id = ${achievement.id} AND (isCompleted = 0 OR completedTime != '${completedTime}' OR progress != ${achievement.current});
+      `;
+    } else {
+      sql = `
+        UPDATE Achievements
+        SET progress = ${achievement.current}, updated = datetime('now', 'localtime')
+        WHERE id = ${achievement.id} AND progress != ${achievement.current};
+      `;
+    }
+    return sqlRes.push(sql);
+  });
+  return sqlRes;
 }
 
 export default TGSql;
