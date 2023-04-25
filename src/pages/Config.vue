@@ -487,6 +487,8 @@ async function resetDB () {
   snackbarText.value = "数据库已重置!请进行再次检查。";
   snackbarColor.value = "success";
   snackbar.value = true;
+  // 刷新
+  window.location.reload();
 }
 
 // 更新 SQLite 数据库
@@ -498,6 +500,8 @@ async function updateDB () {
   snackbarText.value = "数据库已是最新！";
   snackbarColor.value = "success";
   snackbar.value = true;
+  // 刷新
+  window.location.reload();
 }
 </script>
 
