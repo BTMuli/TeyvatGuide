@@ -5,6 +5,9 @@
         <div class="confirm-title">
           {{ title }}
         </div>
+        <div v-show="subtitle!==''" class="confirm-subtitle">
+          {{ subtitle }}
+        </div>
         <div class="confirm-btn-box">
           <button class="confirm-btn" @click="onCancel">
             <img class="btn-icon" src="../assets/icons/circle-cancel.svg" alt="cancel">
@@ -30,6 +33,7 @@ import { computed } from "vue";
 
 interface TConfirmProps {
   title: string;
+  subtitle?: string;
   cancel?: string;
   confirm?: string;
   /** 此值为 true 时显示对话框 */
@@ -46,6 +50,7 @@ interface TConfirmEmits {
 const emits = defineEmits<TConfirmEmits>();
 const props = withDefaults(defineProps<TConfirmProps>(), {
   title: "确认",
+  subtitle: "",
   cancel: "取消",
   confirm: "确定",
 });
@@ -93,12 +98,24 @@ const onConfirm = () => {
   height: 20%;
   width: 100%;
   color: var(--content-text-2);
-  margin: 20px;
+  margin: 10px;
   font-size: 30px;
 }
 
+.confirm-subtitle {
+  border-top: 1px solid var(--btn-bg-2);
+  font-family: Genshin-Light, serif;
+  text-align: center;
+  height: 20%;
+  width: 100%;
+  color: var(--content-text-2);
+  font-size: 20px;
+}
+
 .confirm-btn-box {
-  height: 60%;
+  position: absolute;
+  bottom: 0;
+  height: 40%;
   width: 100%;
   display: flex;
   justify-content: space-around;
