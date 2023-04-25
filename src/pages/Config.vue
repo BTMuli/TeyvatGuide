@@ -302,6 +302,12 @@ async function doConfirm (oper: string) {
     case "checkDB":
       await checkDB();
       break;
+    case "resetDB":
+      await resetDB();
+      break;
+    case "updateDB":
+      await updateDB();
+      break;
     default:
       break;
   }
@@ -425,6 +431,7 @@ function delDB () {
 // 检查 SQLite 数据库
 async function checkDB () {
   loadingTitle.value = "正在检查数据库表单完整性...";
+  loading.value = true;
   const res = await TGSqlite.check();
   if (!res) {
     confirmOper.value = "resetDB";
@@ -432,9 +439,25 @@ async function checkDB () {
     loading.value = false;
     confirmShow.value = true;
   } else {
-    loadingTitle.value = "正在更新数据库表单...";
-    loading.value = true;
-    await TGSqlite.update();
+    const appVersion = await app.getVersion();
+    const buildTime = getBuildTime();
+    const dbVersion = dbInfo.value.find((item) => item.key === "appVersion")?.value;
+    const dbUpdatedTime = dbInfo.value.find((item) => item.key === "dataUpdated")?.value;
+    if (!dbVersion || dbVersion < appVersion) {
+      confirmOper.value = "updateDB";
+      confirmText.value = "数据库版本过低，是否更新数据库？";
+      loading.value = false;
+      confirmShow.value = true;
+      return;
+    } else if (!buildTime.startsWith("dev")) {
+      if (!dbUpdatedTime || dbUpdatedTime < buildTime) {
+        confirmOper.value = "updateDB";
+        confirmText.value = "数据库可能过时，是否更新数据库？";
+        loading.value = false;
+        confirmShow.value = true;
+        return;
+      }
+    }
     loading.value = false;
     snackbarText.value = "数据库已是最新!";
     snackbarColor.value = "success";
@@ -449,6 +472,17 @@ async function resetDB () {
   await TGSqlite.reset();
   loading.value = false;
   snackbarText.value = "数据库已重置!请进行再次检查。";
+  snackbarColor.value = "success";
+  snackbar.value = true;
+}
+
+// 更新 SQLite 数据库
+async function updateDB () {
+  loadingTitle.value = "正在更新数据库...";
+  loading.value = true;
+  await TGSqlite.update();
+  loading.value = false;
+  snackbarText.value = "数据库已是最新！";
   snackbarColor.value = "success";
   snackbar.value = true;
 }
