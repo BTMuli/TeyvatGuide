@@ -83,7 +83,7 @@ onMounted(async () => {
     positionTimeGet.value[card.post_id] = getLastPositionTime(card.time.end_stamp - Date.now());
     positionTimeEnd.value[card.post_id] = card.time.end_stamp;
   });
-  await setInterval(() => {
+  setInterval(() => {
     positionCards.value.forEach((card) => {
       const time = card.time.end_stamp - Date.now();
       if (time <= 0) {

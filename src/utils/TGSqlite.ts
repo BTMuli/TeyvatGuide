@@ -8,7 +8,6 @@
 import Database from "tauri-plugin-sql-api";
 import TGSql from "./TGSql";
 import { getUiafStatus } from "./UIAF";
-import { TGAppData } from "../data";
 
 const dbLink = await Database.load("sqlite:tauri-genshin.db");
 
@@ -40,7 +39,6 @@ class TGSqlite {
     "AppData",
     "Achievements",
     "AchievementSeries",
-    "BBSPost",
   ];
 
   /**
@@ -115,22 +113,6 @@ class TGSqlite {
     const version = res.find((item) => item.key === "appVersion")?.value ?? "0.0.0";
     const buildTime = res.find((item) => item.key === "dataUpdated")?.value ?? "1970-01-01 00:00:00";
     return { version, buildTime };
-  }
-
-  /**
-   * @description 清除 BBSPost 数据
-   * @memberof TGSqlite
-   * @since Alpha v0.1.4
-   * @returns {Promise<void>}
-   */
-  public async clearBbsPost (): Promise<void> {
-    const sql = [];
-    sql.push("DROP TABLE IF EXISTS BBSPost;");
-    sql.push(...TGSql.initTable.bbsPost);
-    sql.push("UPDATE AppData SET value=datetime('now', 'localtime') WHERE key='bbsPostLine';");
-    for (const item of sql) {
-      await this.db.execute(item);
-    }
   }
 
   /**
@@ -224,7 +206,7 @@ class TGSqlite {
       achievements.push({
         id: item.id,
         status,
-        timestamp: completed && item.completedTime ? new Date(item.completedTime).getTime() : 0,
+        timestamp: completed && item.completedTime ? new Date(item.completedTime).getTime() / 1000 : 0,
         current: item.progress,
       });
     }

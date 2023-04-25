@@ -317,7 +317,10 @@ async function backupData () {
 }
 
 async function restoreData () {
+  loadingTitle.value = "正在恢复数据...";
+  loading.value = true;
   const res = await restoreUiafData();
+  loading.value = false;
   if (res !== false) {
     snackbarText.value = "数据已恢复!";
     snackbarColor.value = "success";
@@ -434,7 +437,10 @@ async function checkDB () {
 
 // 重置 SQLite 数据库
 async function resetDB () {
+  loadingTitle.value = "正在重置数据库...";
+  loading.value = true;
   await TGSqlite.reset();
+  loading.value = false;
   snackbarText.value = "数据库已重置!请载入备份数据。";
   snackbarColor.value = "success";
   snackbar.value = true;
