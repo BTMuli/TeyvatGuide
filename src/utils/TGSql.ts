@@ -1,7 +1,7 @@
 /**
  * @file utils TGSql.ts
  * @description 数据库sql语句
- * @auther BTMuli<bt-muli@outlook.com>
+ * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.4
  */
 
@@ -112,8 +112,7 @@ function initNameCardTable (): string[] {
   sqlRes.push(`
       CREATE TABLE IF NOT EXISTS NameCard
     (
-        id         INTEGER PRIMARY KEY AUTOINCREMENT,
-        name       TEXT    DEFAULT NULL,
+        name       TEXT    PRIMARY KEY,
         description TEXT    DEFAULT NULL,
         icon       TEXT    NOT NULL,
         bg         TEXT    NOT NULL,
