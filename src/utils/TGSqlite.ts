@@ -54,6 +54,21 @@ class TGSqlite {
   }
 
   /**
+   * @description 已有数据表跟触发器不变的情况下，更新数据库数据
+   * @memberof TGSqlite
+   * @since Alpha v0.1.4
+   * @returns {Promise<void>}
+   */
+  public async update (): Promise<void> {
+    const db = await Database.load(this.dbPath);
+    const sqlD = await initSQLiteData();
+    for (const item of sqlD) {
+      await db.execute(item);
+    }
+    await db.close();
+  }
+
+  /**
    * @description 检测数据库完整性
    * @memberof TGSqlite
    * @since Alpha v0.1.4

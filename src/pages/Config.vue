@@ -429,7 +429,10 @@ async function checkDB () {
     loading.value = false;
     confirmShow.value = true;
   } else {
-    snackbarText.value = "数据库表单完整!";
+    loadingTitle.value = "正在更新数据库表单...";
+    await TGSqlite.update();
+    loading.value = false;
+    snackbarText.value = "数据库已是最新!";
     snackbarColor.value = "success";
     snackbar.value = true;
   }

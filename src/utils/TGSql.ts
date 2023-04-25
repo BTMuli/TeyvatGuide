@@ -162,12 +162,14 @@ async function initAppData (): Promise<string[]> {
   // 初始化应用版本
   sqlRes.push(`
     INSERT INTO AppData (key, value, updated)
-    VALUES ('appVersion', '${appVersion}', datetime('now', 'localtime'));
+    VALUES ('appVersion', '${appVersion}', datetime('now', 'localtime'))
+    ON CONFLICT(key) DO UPDATE SET value = '${appVersion}', updated = datetime('now', 'localtime');
   `);
   // 初始化应用数据更新时间
   sqlRes.push(`
     INSERT INTO AppData (key, value, updated)
-    VALUES ('dataUpdated', '${dataUpdated}', datetime('now', 'localtime'));
+    VALUES ('dataUpdated', '${dataUpdated}', datetime('now', 'localtime'))
+    ON CONFLICT(key) DO UPDATE SET value = '${dataUpdated}', updated = datetime('now', 'localtime');
   `);
   return sqlRes;
 }
@@ -183,7 +185,8 @@ function initAchievementSeriesData (): string[] {
   oriData.map((data) => {
     const sql = `
       INSERT INTO AchievementSeries (id, "order", name, version, icon, nameCard, updated)
-      VALUES (${data.id}, ${data.order}, '${data.name}', '${data.version}', '${data.icon}', '${data.card}', datetime('now', 'localtime'));
+      VALUES (${data.id}, ${data.order}, '${data.name}', '${data.version}', '${data.icon}', '${data.card}', datetime('now', 'localtime'))
+      ON CONFLICT(id) DO NOTHING;
     `;
     return sqlRes.push(sql);
   });
@@ -201,7 +204,8 @@ function initAchievementData (): string[] {
   oriData.map((data) => {
     const sql = `
       INSERT INTO Achievements (id, series, "order", name, description, reward, version, updated)
-      VALUES (${data.id}, ${data.series}, ${data.order}, '${data.name}', '${data.description}', ${data.reward}, '${data.version}', datetime('now', 'localtime'));
+      VALUES (${data.id}, ${data.series}, ${data.order}, '${data.name}', '${data.description}', ${data.reward}, '${data.version}', datetime('now', 'localtime'))
+      ON CONFLICT(id) DO NOTHING;
     `;
     return sqlRes.push(sql);
   });
@@ -219,7 +223,8 @@ function initNameCardData (): string[] {
   oriData.map((data) => {
     const sql = `
       INSERT INTO NameCard (name, description, icon, bg, profile, type, source, updated)
-      VALUES ('${data.name}', '${data.description}', '${data.icon}', '${data.bg}', '${data.profile}', ${data.type}, '${data.source}', datetime('now', 'localtime'));
+      VALUES ('${data.name}', '${data.description}', '${data.icon}', '${data.bg}', '${data.profile}', ${data.type}, '${data.source}', datetime('now', 'localtime'))
+      ON CONFLICT(id) DO NOTHING;
     `;
     return sqlRes.push(sql);
   });
