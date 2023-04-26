@@ -109,7 +109,7 @@
 
 <script lang="ts" setup>
 // vue
-import { onMounted, ref, onBeforeMount, onBeforeUnmount, computed } from "vue";
+import { onMounted, ref, onBeforeMount, computed } from "vue";
 import TLoading from "../components/t-loading.vue";
 // tauri
 import { dialog, fs } from "@tauri-apps/api";
@@ -219,6 +219,7 @@ async function searchCard () {
     snackbar.value = true;
     return;
   }
+  selectedSeries.value = -1;
   loadingTitle.value = "正在搜索";
   loading.value = true;
   selectedAchievement.value = await TGSqlite.searchAchievements(search.value);
