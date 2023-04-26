@@ -140,10 +140,10 @@ const renderAchievement = computed(() => {
 // virtual list
 const start = ref(0 as number);
 const itemCount = computed(() => {
-  return Math.ceil((window.innerHeight - 100) / 75);
+  return Math.ceil((window.innerHeight - 100) / 76);
 });
 const emptyHeight = computed(() => {
-  return selectedAchievement.value.length * 75 + 40;
+  return selectedAchievement.value.length * 76;
 });
 const translateY = ref("0px" as string);
 // render
@@ -168,21 +168,37 @@ onMounted(async () => {
 });
 
 function handleScroll (e: Event) {
+  // 如果 scrollTop 到底部了
+  if ((e.target as HTMLElement).scrollTop + (e.target as HTMLElement).offsetHeight >= (e.target as HTMLElement).scrollHeight) {
+    // 如果 selectedAchievement 的长度小于 itemCount，不进行偏移
+    if (selectedAchievement.value.length <= itemCount.value) {
+      window.requestAnimationFrame(() => {
+        start.value = 0;
+        translateY.value = "0px";
+      });
+      return;
+    }
+    window.requestAnimationFrame(() => {
+      start.value = selectedAchievement.value.length - itemCount.value;
+      translateY.value = `${(selectedAchievement.value.length - itemCount.value) * 76}px`;
+    });
+    return;
+  }
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17 && selectedSeries.value !== -1) {
     window.requestAnimationFrame(() => {
       const { scrollTop } = e.target as HTMLElement;
-      if (scrollTop < 76.8) {
+      if (scrollTop < 86.8) {
         start.value = 0;
         translateY.value = "0px";
       } else {
-        start.value = Math.floor((scrollTop - 76.8) / 75);
-        translateY.value = `${scrollTop - 76.8}px`;
+        start.value = Math.floor((scrollTop - 86.8) / 76);
+        translateY.value = `${scrollTop - 86.8}px`;
       }
     });
   } else {
     window.requestAnimationFrame(() => {
       const { scrollTop } = e.target as HTMLElement;
-      start.value = Math.floor(scrollTop / 75);
+      start.value = Math.floor(scrollTop / 76);
       translateY.value = `${scrollTop}px`;
     });
   }
