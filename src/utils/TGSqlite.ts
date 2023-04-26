@@ -211,7 +211,7 @@ class TGSqlite {
     let sql;
     if (keyword.startsWith("v")) {
       const version = keyword.replace("v", "");
-      sql = `SELECT * FROM Achievements WHERE version='${version}' ORDER BY isCompleted ASC, \`order\` ASC;`;
+      sql = `SELECT * FROM Achievements WHERE version LIKE '%${version}%' ORDER BY isCompleted ASC, \`order\` ASC;`;
     } else {
       sql = `SELECT * FROM Achievements WHERE name LIKE '%${keyword}%' OR description LIKE '%${keyword}%' ORDER BY isCompleted ASC, \`order\` ASC;`;
     }
