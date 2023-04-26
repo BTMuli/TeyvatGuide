@@ -44,7 +44,7 @@
       </v-list>
     </div>
     <!-- 右侧内容-->
-    <div class="right-wrap">
+    <div class="right-wrap" @scroll="handleScroll">
       <v-list
         v-if="selectedSeries !== 0 && selectedSeries !== 17 && selectedSeries !== -1"
         :style="{
@@ -57,6 +57,7 @@
           color: '#485466',
           fontFamily: 'Genshin,serif',
           cursor: 'pointer',
+          position: 'relative',
         }"
         @click="openImg()"
       >
@@ -66,33 +67,38 @@
           </template>
         </v-list-item>
       </v-list>
-      <v-list v-for="achievement in selectedAchievement" :key="achievement.id" class="card-right">
-        <div v-if="achievement.progress !== 0" class="achievement-progress">
-          {{ achievement.progress }}
-        </div>
-        <v-list-item>
-          <template #prepend>
-            <v-icon :color="achievement.isCompleted ? '#fec90b' : '#485466'">
-              <!-- todo 图标替换 -->
-              {{ achievement.isCompleted ? "mdi-check-circle" : "mdi-circle" }}
-            </v-icon>
-          </template>
-          <v-list-item-title>
-            {{ achievement.name }}
-            <span class="version-icon-single">v{{ achievement.version }}</span>
-          </v-list-item-title>
-          <v-list-item-subtitle>{{ achievement.description }}</v-list-item-subtitle>
-          <template #append>
-            <span v-show="achievement.isCompleted" class="right-time">{{ achievement.completedTime }}</span>
-            <v-card class="reward-card" @click="showMaterial('/source/material/原石.webp')">
-              <v-img src="/source/material/原石.webp" sizes="32" />
-              <div class="reward-num">
-                <span>{{ achievement.reward }}</span>
-              </div>
-            </v-card>
-          </template>
-        </v-list-item>
-      </v-list>
+      <div
+        class="list-empty"
+        :style="{height: `${emptyHeight}px`}"
+      >
+        <v-list v-for="achievement in renderAchievement" :key="achievement.id" class="card-right" :style="{Transform:`translateY(${translateY})`}">
+          <div v-if="achievement.progress !== 0" class="achievement-progress">
+            {{ achievement.progress }}
+          </div>
+          <v-list-item>
+            <template #prepend>
+              <v-icon :color="achievement.isCompleted ? '#fec90b' : '#485466'">
+                <!-- todo 图标替换 -->
+                {{ achievement.isCompleted ? "mdi-check-circle" : "mdi-circle" }}
+              </v-icon>
+            </template>
+            <v-list-item-title>
+              {{ achievement.name }}
+              <span class="version-icon-single">v{{ achievement.version }}</span>
+            </v-list-item-title>
+            <v-list-item-subtitle>{{ achievement.description }}</v-list-item-subtitle>
+            <template #append>
+              <span v-show="achievement.isCompleted" class="right-time">{{ achievement.completedTime }}</span>
+              <v-card class="reward-card">
+                <v-img src="/source/material/原石.webp" sizes="32" />
+                <div class="reward-num">
+                  <span>{{ achievement.reward }}</span>
+                </div>
+              </v-card>
+            </template>
+          </v-list-item>
+        </v-list>
+      </div>
     </div>
     <!-- 弹窗提示 -->
     <v-snackbar v-model="snackbar" timeout="1500" :color="snackbarColor" top>
@@ -103,7 +109,7 @@
 
 <script lang="ts" setup>
 // vue
-import { onMounted, ref } from "vue";
+import { onMounted, ref, onBeforeMount, onBeforeUnmount, computed } from "vue";
 import TLoading from "../components/t-loading.vue";
 // tauri
 import { dialog, fs } from "@tauri-apps/api";
@@ -128,28 +134,60 @@ const getCardInfo = ref({} as BTMuli.SQLite.NameCard);
 const seriesList = ref([] as BTMuli.SQLite.AchievementSeries[]);
 const selectedSeries = ref(-1 as number);
 const selectedAchievement = ref([] as BTMuli.SQLite.Achievements[]);
-
+const renderAchievement = computed(() => {
+  return selectedAchievement.value.slice(start.value, start.value + itemCount.value + 1);
+});
+// virtual list
+const start = ref(0 as number);
+const itemCount = computed(() => {
+  return Math.ceil((window.innerHeight - 100) / 75);
+});
+const emptyHeight = computed(() => {
+  return selectedAchievement.value.length * 75 + 40;
+});
+const translateY = ref("0px" as string);
 // render
 const search = ref("" as string);
 const snackbar = ref(false as boolean);
 const snackbarText = ref("" as string);
 const snackbarColor = ref("#F5810A" as string);
 
-onMounted(async () => {
-  await loadData();
-});
-
-// 加载数据，数据源：合并后的本地数据
-async function loadData () {
+onBeforeMount(async () => {
   const { total, fin } = await TGSqlite.getAchievementsOverview();
   achievementsStore.flushData(total, fin);
+  title.value = achievementsStore.title;
+});
+
+onMounted(async () => {
+  loading.value = true;
   loadingTitle.value = "正在获取成就系列数据";
   seriesList.value = await TGSqlite.getAchievementSeries();
   loadingTitle.value = "正在获取成就数据";
   selectedAchievement.value = await TGSqlite.getAchievements();
-  title.value = achievementsStore.title;
   loading.value = false;
+});
+
+function handleScroll (e: Event) {
+  if (selectedSeries.value !== 0 && selectedSeries.value !== 17 && selectedSeries.value !== -1) {
+    window.requestAnimationFrame(() => {
+      const { scrollTop } = e.target as HTMLElement;
+      if (scrollTop < 76.8) {
+        start.value = 0;
+        translateY.value = "0px";
+      } else {
+        start.value = Math.floor((scrollTop - 76.8) / 75);
+        translateY.value = `${scrollTop - 76.8}px`;
+      }
+    });
+  } else {
+    window.requestAnimationFrame(() => {
+      const { scrollTop } = e.target as HTMLElement;
+      start.value = Math.floor(scrollTop / 75);
+      translateY.value = `${scrollTop}px`;
+    });
+  }
 }
+
 // 渲染选中的成就系列
 async function selectSeries (index: number) {
   // 如果选中的是已经选中的系列，则不进行操作
@@ -161,20 +199,19 @@ async function selectSeries (index: number) {
   loading.value = true;
   loadingTitle.value = "正在获取对应的成就数据";
   selectedSeries.value = index;
-  selectedAchievement.value = await TGSqlite.getAchievements(selectedSeries.value);
+  selectedAchievement.value = await TGSqlite.getAchievements(index);
   loadingTitle.value = "正在查找对应的成就名片";
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
-    getCardInfo.value = await TGSqlite.getNameCard(selectedSeries.value);
+    getCardInfo.value = await TGSqlite.getNameCard(index);
   }
   loading.value = false;
 }
+
 // 打开图片
 function openImg () {
   createTGWindow(getCardInfo.value.profile, "nameCard", getCardInfo.value.name, 840, 400, false);
 }
-function showMaterial (path: string) {
-  createTGWindow(path, "material", "原石", 256, 256, false);
-}
+
 async function searchCard () {
   if (search.value === "") {
     snackbarColor.value = "#F5810A";
@@ -185,13 +222,12 @@ async function searchCard () {
   loadingTitle.value = "正在搜索";
   loading.value = true;
   selectedAchievement.value = await TGSqlite.searchAchievements(search.value);
-  selectedSeries.value = -1;
-  loading.value = false;
   if (selectedAchievement.value.length === 0) {
     snackbarColor.value = "#F5810A";
     snackbarText.value = "没有找到对应的成就";
     snackbar.value = true;
   }
+  loading.value = false;
 }
 // 导入 UIAF 数据，进行数据合并、刷新
 async function importJson () {
@@ -215,9 +251,10 @@ async function importJson () {
     loading.value = true;
     loadingTitle.value = "正在合并成就数据";
     await TGSqlite.mergeUIAF(JSON.parse(remoteRaw).list);
-    loadingTitle.value = "正在刷新数据";
-    // 刷新数据
-    await loadData();
+    loadingTitle.value = "即将刷新页面";
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   }
 }
 
@@ -283,12 +320,24 @@ async function exportJson () {
 
 /* 右侧成就 */
 .right-wrap {
+  position: relative;
   float: right;
   width: 75%;
   max-height: calc(100vh - 100px);
   overflow: auto;
 }
 
+.list-empty {
+  position: relative;
+  width: 100%;
+}
+
+.list-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-height: calc(100vh - 100px);
+}
 /* 版本信息 */
 .version-icon-series {
   font-family: Genshin, serif;
