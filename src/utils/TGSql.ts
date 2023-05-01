@@ -96,6 +96,8 @@ function initAchievementTable (): string[] {
       BEGIN
           UPDATE AchievementSeries SET totalCount = totalCount + 1, updated = datetime('now', 'localtime')
           WHERE id = NEW.series;
+          UPDATE AchievementSeries SET version = NEW.version, updated = datetime('now', 'localtime')
+          WHERE id = NEW.series AND NEW.version > version;
       END;
   `);
   return sqlRes;
