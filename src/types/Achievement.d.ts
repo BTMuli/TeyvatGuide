@@ -120,14 +120,14 @@ declare namespace BTMuli.SQLite {
     id: number
     series: number
     order: number
-    name: string | null
-    description: string | null
+    name: string
+    description: string
     reward: number
     isCompleted: 0 | 1
-    completedTime: string | null
+    completedTime: string
     progress: number
-    version: string | null
-    updated: string | null
+    version: string
+    updated: string
   }
 
   /**
