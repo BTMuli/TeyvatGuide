@@ -2,12 +2,12 @@
 Author: 目棃
 Date: 2023-03-05
 Description: 说明文档
-Update: 2023-04-23
+Update: 2023-05-01
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-05 14:41:55`
 > 
-> 更新于 `2023-04-23 12:55:01`
+> 更新于 `2023-05-01 21:51:54`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/v/release/BTMuli/Tauri.Genshin?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge)
 
@@ -22,13 +22,13 @@ Tauri 练手项目
 
 ## 技术栈
 
-- [Tauri](https://tauri.studio/zh-CN/)
-- [Vue3](https://v3.cn.vuejs.org/)
-- [Vite](https://cn.vitejs.dev/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Vuetify](https://vuetifyjs.com/en/)
+- [Tauri](https://github.com/tauri-apps/tauri)
+- [Vue3](https://github.com/vuejs/core)
+- [Vite](https://github.com/vitejs/vite)
+- [TypeScript](https://github.com/microsoft/TypeScript)
+- [Vuetify](https://github.com/vuetifyjs/vuetify)
 
-## 当前进度(v0.1.3 Alpha)
+## 当前进度
 
 > 以下进度仅为开发进度，不代表最终版本
 
@@ -45,8 +45,16 @@ Tauri 练手项目
 ### 计划中
 
 - [ ] UIGF 祈愿数据导入导出&展示
-- [ ] Wiki 详情页
 - [ ] 游戏数据获取
+
+### 长期计划
+
+- [ ] Wiki 详情页
+- [ ] 游戏资源更新
+
+## 仓库概况
+
+![Status](https://repobeats.axiom.co/api/embed/0edac184a5892f2520e83e3fe6519c4168db2e1b.svg "Repobeats analytics image")
 
 ## UI 参考
 
@@ -73,14 +81,14 @@ npm run dev
 npm run build
 ```
 
-# License
-
-项目基于 [MIT](LICENSE) 协议开源。
-
-应用版本号遵循 [Semantic Versioning 2.0.0](https://semver.org/lang/zh-CN/) 规范。
-
 # Contributors
 
 - [BTMuli](https://github.com/BTMuli)
 - [舰队的偶像岛风酱！](https://github.com/frg2089)
 - [jerry765](https://github.com/jerry765)
+
+# License
+
+项目基于 [MIT](LICENSE) 协议开源。
+
+应用版本号遵循 [Semantic Versioning 2.0.0](https://semver.org/lang/zh-CN/) 规范。
