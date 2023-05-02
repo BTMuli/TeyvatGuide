@@ -355,6 +355,7 @@ async function exportJson () {
   height: 100%;
   max-height: calc(100vh - 100px);
 }
+
 /* 版本信息 */
 .version-icon-series {
   font-family: Genshin, serif;

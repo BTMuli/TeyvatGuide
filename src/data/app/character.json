@@ -1,7 +1,7 @@
 [
 	{
 		"id": 10000082,
-		"content_id": null,
+		"content_id": 6489,
 		"name": "白术",
 		"star": 5,
 		"bg": "/icon/bg/5-Star.webp",
@@ -331,7 +331,7 @@
 	},
 	{
 		"id": 10000081,
-		"content_id": null,
+		"content_id": 6490,
 		"name": "卡维",
 		"star": 4,
 		"bg": "/icon/bg/4-Star.webp",
