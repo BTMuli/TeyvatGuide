@@ -14,9 +14,9 @@
           <v-list style="background: var(--content-bg-2); color: #546d8b">
             <v-list-item :title="pool.title" :subtitle="pool.subtitle">
               <template #prepend>
-                <v-img :src="pool.voice.icon" style="transform: translate(0, -10px); width: 60px; height: 60px" />
+                <v-img :src="pool.voice.icon" class="pool-sideIcon" />
               </template>
-              <template #append>
+              <template v-if="pool.voice.url" #append>
                 <audio :src="pool.voice.url" controls />
               </template>
             </v-list-item>
@@ -29,7 +29,7 @@
               <img :src="character.icon" class="pool-icon" alt="character">
             </div>
             <div class="pool-clock">
-              <v-progress-circular :model-value="poolTimePass[pool.post_id]" size="100" width="10" :color="poolColor">
+              <v-progress-circular :model-value="poolTimePass[pool.post_id]" size="100" width="10" :color="poolColor[pool.post_id]">
                 {{ poolTimeGet[pool.post_id] }}
               </v-progress-circular>
             </div>
@@ -47,8 +47,10 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { ref, onMounted, onUpdated } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
+// tauri
+import { dialog } from "@tauri-apps/api";
 // store
 import { useHomeStore } from "../store/modules/home";
 // utils
@@ -71,36 +73,37 @@ const loading = ref(true as boolean);
 const poolCards = ref([] as GachaCard[]);
 const poolTimeGet = ref({} as Record<number, string>);
 const poolTimePass = ref({} as Record<number, number>);
-const poolColor = ref("#90caf9" as string);
-const timer = ref(null as any);
+const poolColor = ref({} as Record<number, string>);
+const timer = ref({} as Record<number, any>);
 // expose
 defineExpose({
   name: "限时祈愿",
   loading,
 });
 
-function poolLastInterval () {
-  poolCards.value.map((pool) => {
-    poolTimeGet.value[pool.post_id] = getLastPoolTime(pool.time.end_stamp - Date.now());
-    poolTimePass.value[pool.post_id] =
+function poolLastInterval (postId: number) {
+  const pool = poolCards.value.find((pool) => pool.post_id === postId);
+  if (!pool) return;
+  if (poolTimeGet.value[postId] === "未开始") {
+    const isStart = pool.time.start_stamp - Date.now();
+    if (isStart > 0) return;
+    poolTimeGet.value[postId] = getLastPoolTime(pool.time.end_stamp - Date.now());
+    poolTimePass.value[postId] = pool.time.end_stamp - Date.now();
+    poolColor.value[postId] = "#90caf9";
+  } else {
+    const isEnd = pool.time.end_stamp - Date.now();
+    poolTimeGet.value[postId] = getLastPoolTime(isEnd);
+    poolTimePass.value[postId] =
         ((pool.time.end_stamp - Date.now()) / (pool.time.end_stamp - pool.time.start_stamp)) * 100;
-    return pool;
-  });
+    if (isEnd >= 0) return;
+    clearInterval(timer.value[postId]);
+    timer.value[postId] = null;
+    poolTimePass.value[postId] = 100;
+    poolTimeGet.value[postId] = "已结束";
+    poolColor.value[postId] = "#f44336";
+  }
+  return pool;
 }
-
-// 监听 poolTimePass
-onUpdated(() => {
-  poolCards.value.map((pool) => {
-    if (poolTimePass.value[pool.post_id] <= 0) {
-      clearInterval(timer.value);
-      timer.value = null;
-      poolTimeGet.value[pool.post_id] = "已结束";
-      poolTimePass.value[pool.post_id] = 100;
-      poolColor.value = "#f44336";
-    }
-    return pool;
-  });
-});
 
 onMounted(async () => {
   const gachaData = await MysOper.Gacha.get();
@@ -122,11 +125,22 @@ onMounted(async () => {
   poolCards.value.map((pool) => {
     poolTimeGet.value[pool.post_id] = getLastPoolTime(pool.time.end_stamp - Date.now());
     poolTimePass.value[pool.post_id] = pool.time.end_stamp - Date.now();
+    if (poolTimePass.value[pool.post_id] <= 0) {
+      poolTimeGet.value[pool.post_id] = "已结束";
+      poolTimePass.value[pool.post_id] = 100;
+      poolColor.value[pool.post_id] = "#f44336";
+    } else if (pool.time.start_stamp - Date.now() > 0) {
+      poolTimeGet.value[pool.post_id] = "未开始";
+      poolTimePass.value[pool.post_id] = 100;
+      poolColor.value[pool.post_id] = "#32A9CA";
+    } else {
+      poolColor.value[pool.post_id] = "#90caf9";
+    }
+    timer.value[pool.post_id] = setInterval(() => {
+      poolLastInterval(pool.post_id);
+    }, 1000);
     return pool;
   });
-  timer.value = setInterval(() => {
-    poolLastInterval();
-  }, 1000);
   loading.value = false;
 });
 
@@ -155,8 +169,15 @@ function checkCover (data: GachaData[]) {
   });
 }
 
-function toOuter (url: string, title: string) {
-  createTGWindow(url, "祈愿", title, 1200, 800, true, false);
+async function toOuter (url: string, title: string) {
+  if (!url) {
+    await dialog.message("该角色池暂无详情", {
+      title,
+      type: "error",
+    });
+    return;
+  }
+  createTGWindow(url, "祈愿", title, 1200, 800, true, true);
 }
 
 function getLastPoolTime (time: number) {
@@ -176,6 +197,12 @@ function toPost (pool: GachaCard) {
   }).href;
   createTGWindow(path, "限时祈愿", pool.title, 960, 720, false, false);
 }
+
+onUnmounted(() => {
+  Object.keys(timer.value).forEach((key) => {
+    clearInterval(timer.value[Number(key)]);
+  });
+});
 </script>
 
 <style lang="css" scoped>
@@ -198,6 +225,20 @@ function toPost (pool: GachaCard) {
   grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
   grid-gap: 20px;
   margin-top: 10px;
+}
+
+.pool-sideIcon {
+  margin-top: 10px;
+  transform: translate(0, -10px);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.pool-sideIcon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
 }
 
 .pool-cover {
