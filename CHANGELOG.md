@@ -2,14 +2,32 @@
 Author: 目棃
 Date: 2023-03-30
 Description: CHANGELOG
-Update: 2023-04-23
+Update: 2023-05-02
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-30 15:39:49`
 > 
-> 更新于 `2023-04-23 14:00:25`
+> 更新于 `2023-05-02 18:24:21`
 
 # CHANGELOG
+
+## [0.1.4](https://github.com/BTMuli/Tauri.Genshin/releases/v0.1.4) (2023-05-02)
+
+### Feat
+
+- 应用：支持资源完整性检测&更新 [`bbfd608`](https://github.com/BTMuli/Tauri.Genshin/commit/bbfd608)
+- 应用：支持数据备份&恢复 [`214d1d1`](https://github.com/BTMuli/Tauri.Genshin/commit/214d1d10)
+- 应用：数据源更改为 Sqlite 而非之前的 IndexedDB [`26048dc`](https://github.com/BTMuli/Tauri.Genshin/commit/26048dc) [#11](https://github.com/BTMuli/Tauri.Genshin/issues/11)
+
+### Fix
+
+- 成就：使用虚拟列表优化内存占用及浏览体验 [`5963e9a`](https://github.com/BTMuli/Tauri.Genshin/commit/5963e9a) [#13](https://github.com/BTMuli/Tauri.Genshin/issues/13)
+- 组件：优化 `TConfirm` 组件表现
+- 应用：优化侧边滚动条表现
+- 应用：检测更新 Key 更改，下版本更新将提示更新 [`ceea064`](https://github.com/BTMuli/Tauri.Genshin/commit/ceea064)
+- 应用：添加 `3.6` 版本遗漏数据 [`91fc39b`](https://github.com/BTMuli/Tauri.Genshin/commit/91fc39b)
+
+FullCommits: [`v0.1.3 ~ v0.1.4`](https://github.com/BTMuli/Tauri.Genshin/compare/v0.1.3...v0.1.4)
 
 ## [0.1.3](https://github.com/BTMuli/Tauri.Genshin/releases/v0.1.3) (2023-04-23)
 
