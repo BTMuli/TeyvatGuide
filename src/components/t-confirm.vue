@@ -5,8 +5,11 @@
         <div class="confirm-title">
           {{ title }}
         </div>
-        <div v-show="subtitle!==''" class="confirm-subtitle">
+        <div v-show="subtitle!=='' && !isInput" class="confirm-subtitle">
           {{ subtitle }}
+        </div>
+        <div v-show="isInput" class="confirm-input">
+          <v-text-field v-model="inputVal" :label="subtitle" hide-details="auto" @keyup.enter="onConfirm" />
         </div>
         <div class="confirm-btn-box">
           <button class="confirm-btn" @click="onCancel">
@@ -34,15 +37,18 @@ import { computed } from "vue";
 interface TConfirmProps {
   title: string;
   subtitle?: string;
+  isInput?: boolean;
   cancel?: string;
   confirm?: string;
   /** 此值为 true 时显示对话框 */
   modelValue: boolean;
+  modelInput: string;
 }
 
 interface TConfirmEmits {
   (e: "update:show", v: boolean): void;
   (e: "update:modelValue", v: boolean): void;
+  (e: "update:modelInput", v: string): void;
   (e: "confirm"): void;
   (e: "cancel"): void;
 }
@@ -51,6 +57,7 @@ const emits = defineEmits<TConfirmEmits>();
 const props = withDefaults(defineProps<TConfirmProps>(), {
   title: "确认",
   subtitle: "",
+  isInput: false,
   cancel: "取消",
   confirm: "确定",
 });
@@ -58,6 +65,11 @@ const props = withDefaults(defineProps<TConfirmProps>(), {
 const visible = computed({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),
+});
+
+const inputVal = computed({
+  get: () => props.modelInput,
+  set: (v) => emits("update:modelInput", v),
 });
 
 const onCancel = () => {
@@ -68,6 +80,9 @@ const onCancel = () => {
 const onConfirm = () => {
   visible.value = false;
   emits("confirm");
+  if (props.isInput) {
+    inputVal.value = "";
+  }
 };
 </script>
 
@@ -112,14 +127,22 @@ const onConfirm = () => {
   font-size: 20px;
 }
 
+.confirm-input {
+  font-family: Genshin-Light, serif;
+  text-align: center;
+  height: 20%;
+  width: 100%;
+  color: var(--content-text-2);
+  font-size: 20px;
+}
+
 .confirm-btn-box {
   position: absolute;
-  bottom: 0;
   height: 40%;
   width: 100%;
   display: flex;
   justify-content: space-around;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .confirm-btn {
