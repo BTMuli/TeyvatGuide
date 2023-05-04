@@ -99,6 +99,24 @@ class TGSqlite {
   }
 
   /**
+   * @description 保存 appData
+   * @memberof TGSqlite
+   * @since Alpha v0.2.0
+   * @param {string} key
+   * @param {string} value
+   * @returns {Promise<void>}
+   */
+  public async saveAppData (key: string, value: string): Promise<void> {
+    const db = await Database.load(this.dbPath);
+    const sql = `
+    INSERT INTO AppData (key, value, updated)
+    VALUES ('${key}', '${value}', datetime('now', 'localtime'))
+    ON CONFLICT(key) DO UPDATE SET value = '${value}', updated = datetime('now', 'localtime');`;
+    await db.execute(sql);
+    await db.close();
+  }
+
+  /**
    * @description 已有数据表跟触发器不变的情况下，更新数据库数据
    * @memberof TGSqlite
    * @since Alpha v0.1.4
