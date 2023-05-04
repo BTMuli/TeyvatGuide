@@ -77,6 +77,20 @@
         设置
       </v-list-subheader>
       <v-divider inset class="border-opacity-75" />
+      <v-list-item>
+        <template #prepend>
+          <v-icon>mdi-view-dashboard</v-icon>
+        </template>
+        <v-select v-model="showHome" :items="homeStore.getShowItems()" label="首页显示组件" multiple chips />
+        <template #append>
+          <v-btn class="card-btn" @click="submitHome">
+            <template #prepend>
+              <img src="../assets/icons/circle-check.svg" alt="check">
+              确定
+            </template>
+          </v-btn>
+        </template>
+      </v-list-item>
       <v-list-item prepend-icon="mdi-content-save" title="数据备份" @click="tryConfirm('backup')" />
       <v-list-item prepend-icon="mdi-content-save" title="数据恢复" @click="tryConfirm('restore')" />
       <v-list-item prepend-icon="mdi-delete" title="清除用户缓存" @click="tryConfirm('delUser')" />
@@ -99,27 +113,13 @@
       </v-list-item>
       <v-list-item>
         <template #prepend>
-          <v-icon>mdi-view-dashboard</v-icon>
-        </template>
-        <v-select v-model="showHome" :items="homeStore.getShowItems()" label="首页显示组件" multiple chips />
-        <template #append>
-          <v-btn class="card-btn" @click="submitHome">
-            <template #prepend>
-              <img src="../assets/icons/circle-check.svg" alt="check">
-              提交
-            </template>
-          </v-btn>
-        </template>
-      </v-list-item>
-      <v-list-item>
-        <template #prepend>
           <v-icon>mdi-cookie</v-icon>
         </template>
         <v-list-item-title style="cursor: pointer;" @click="tryConfirm('getCookie')">
           重新获取 Cookie
         </v-list-item-title>
         <template #append>
-          <v-btn class="card-btn" @click="showCookie()">
+          <v-btn class="card-btn" @click="tryConfirm('readCookie')">
             <template #prepend>
               <img src="../assets/icons/circle-check.svg" alt="check">
               查看 Cookie
@@ -127,6 +127,7 @@
           </v-btn>
         </template>
       </v-list-item>
+      <v-list-item title="手动输入 Cookie" prepend-icon="mdi-cookie" @click="tryConfirm('inputCookie')" />
       <v-list-item title="删除 IndexedDB" prepend-icon="mdi-delete" @click="tryConfirm('delDB')" />
       <v-list-item title="重置数据库" prepend-icon="mdi-delete" @click="tryConfirm('resetDB')" />
       <v-list-item title="检测 SQLite 数据库完整性" prepend-icon="mdi-database-check" @click="tryConfirm('checkDB')" />
@@ -152,7 +153,7 @@
       {{ snackbarText }}
     </v-snackbar>
     <!-- 确认弹窗 -->
-    <TConfirm v-model="confirmShow" :title="confirmText" :subtitle="confirmSub" @confirm="doConfirm(confirmOper)" />
+    <TConfirm v-model:model-value="confirmShow" v-model:model-input="confirmInput" :title="confirmText" :subtitle="confirmSub" :is-input="isConfirmInput" @confirm="doConfirm(confirmOper)" />
   </div>
 </template>
 
@@ -167,7 +168,6 @@ import { fs, app, os, tauri } from "@tauri-apps/api";
 // store
 import { useAppStore } from "../store/modules/app";
 import { useHomeStore } from "../store/modules/home";
-import { useHk4eStore } from "../store/modules/hk4e";
 import { useAchievementsStore } from "../store/modules/achievements";
 // utils
 import { backupUiafData, restoreUiafData } from "../utils/UIAF";
@@ -194,7 +194,6 @@ const loadingTitle = ref("正在加载..." as string);
 
 // data
 const showHome = ref(homeStore.getShowValue() as string[]);
-const hk4eStore = useHk4eStore();
 
 // snackbar
 const snackbar = ref(false as boolean);
@@ -203,6 +202,8 @@ const snackbarColor = ref("success" as string);
 
 // confirm
 const confirmText = ref("" as string);
+const isConfirmInput = ref(false as boolean);
+const confirmInput = ref("" as string);
 const confirmSub = ref("" as string);
 const confirmOper = ref("" as string);
 const confirmShow = ref(false as boolean);
@@ -225,6 +226,7 @@ function toOuter (url: string) {
 // open confirm
 function tryConfirm (oper: string) {
   confirmSub.value = "";
+  isConfirmInput.value = false;
   switch (oper) {
     case "backup":
       confirmText.value = "确认备份数据吗？";
@@ -252,6 +254,13 @@ function tryConfirm (oper: string) {
     case "delApp":
       confirmText.value = "确认恢复默认设置吗？";
       confirmOper.value = "delApp";
+      confirmShow.value = true;
+      break;
+    case "inputCookie":
+      isConfirmInput.value = true;
+      confirmText.value = "请输入 Cookie";
+      confirmSub.value = "Cookie 用于获取用户信息";
+      confirmOper.value = "inputCookie";
       confirmShow.value = true;
       break;
     case "getCookie":
@@ -302,6 +311,9 @@ async function doConfirm (oper: string) {
       break;
     case "delApp":
       initAppData();
+      break;
+    case "inputCookie":
+      await inputCookie();
       break;
     case "getCookie":
       await tauri.invoke("mys_login");
@@ -412,25 +424,43 @@ function submitHome () {
   snackbar.value = true;
 }
 
-async function showCookie () {
-  const cookie = hk4eStore.getCookie();
-  alert(`Cookie 获取成功！\n\n${cookie}`);
+// 输入 Cookie
+async function inputCookie () {
+  // 将 Cookie 从 string 转为 object
+  const cookie = confirmInput.value;
+  if (cookie === "") {
+    snackbarText.value = "Cookie 为空!";
+    snackbarColor.value = "error";
+    snackbar.value = true;
+    return;
+  }
+  //  格式为 key=value;key=value，去除多余空格
+  const cookieArr = cookie.replace(/\s+/g, "").split(";");
+  const cookieObj: any = {};
+  cookieArr.forEach((item) => {
+    const itemArr = item.split("=");
+    cookieObj[itemArr[0]] = itemArr[1];
+  });
+  // 保存到数据库
+  await TGSqlite.inputCookie(JSON.stringify(cookieObj));
+  snackbarText.value = "Cookie 已经保存到数据库!";
+  snackbarColor.value = "success";
+  snackbar.value = true;
 }
 
 // 获取 Cookie
 async function readCookie () {
-  const cookie = hk4eStore.getCookie();
-  const tryReadCookie = await tauri.invoke("read_cookie") as string || cookie;
-  if (cookie === null || tryReadCookie === "") {
-    snackbarText.value = "Cookie 为空!";
-    snackbarColor.value = "error";
-    snackbar.value = true;
-  } else {
-    snackbarText.value = "Cookie 获取成功!";
-    snackbarColor.value = "success";
-    snackbar.value = true;
-    hk4eStore.setCookie(tryReadCookie);
-    alert(`Cookie 获取成功！\n\n${tryReadCookie}`);
+  const cookie = JSON.parse(await TGSqlite.getCookie());
+  if (cookie) {
+    confirmShow.value = false;
+    let cookieStr = "";
+    Object.keys(cookie).forEach((key: any) => {
+      cookieStr += `${key}=${cookie[key]};\n`;
+    });
+    setTimeout(() => {
+      prompt("Cookie", cookieStr);
+    }, 1000);
+    console.log(cookieStr);
   }
 }
 

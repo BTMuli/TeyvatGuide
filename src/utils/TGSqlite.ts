@@ -2,7 +2,7 @@
  * @description 数据库操作类
  * @class TGSqlite
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.4
+ * @since Alpha v0.2.0
  */
 
 // tauri
@@ -65,6 +65,37 @@ class TGSqlite {
     const res: Array<{ key: string, value: string, updated: string }> = await db.select(sql);
     await db.close();
     return res;
+  }
+
+  /**
+   * @description 输入 cookie
+   * @memberof TGSqlite
+   * @since Alpha v0.2.0
+   * @param {string} cookie
+   * @returns {Promise<void>}
+   */
+  public async inputCookie (cookie: string): Promise<void> {
+    const db = await Database.load(this.dbPath);
+    const sql = `
+    INSERT INTO AppData (key, value, updated)
+    VALUES ('cookie', '${cookie}', datetime('now', 'localtime'))
+    ON CONFLICT(key) DO UPDATE SET value = '${cookie}', updated = datetime('now', 'localtime');`;
+    await db.execute(sql);
+    await db.close();
+  }
+
+  /**
+   * @description 获取 cookie
+   * @memberof TGSqlite
+   * @since Alpha v0.2.0
+   * @returns {Promise<string>}
+   */
+  public async getCookie (): Promise<string> {
+    const db = await Database.load(this.dbPath);
+    const sql = "SELECT value FROM AppData WHERE key='cookie';";
+    const res: Array<{ value: string }> = await db.select(sql);
+    await db.close();
+    return res[0].value;
   }
 
   /**
