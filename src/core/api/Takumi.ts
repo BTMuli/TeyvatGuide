@@ -17,4 +17,5 @@ export const TakumiRecordCardApi = `${TakumiRecordApi}game_record/app/card/wapi/
 export const TakumiRecordGenshinIndexApi = `${TakumiRecordGenshinApi}index`; // 原神游戏记录索引 API
 export const TakumiRecordGenshinCharacterApi = `${TakumiRecordGenshinApi}character`; // 原神游戏记录角色 API
 export const TakumiRecordGenshinSpiralAbyssApi = `${TakumiRecordGenshinApi}spiralAbyss`; // 原神游戏记录深境螺旋 API
-export const TakumiBingdingRolesApi = `${TakumiBindingApi}getUserGameRolesByStoken`; // 获取绑定角色 API
+export const TakumiSTokenBingdingRolesApi = `${TakumiBindingApi}getUserGameRolesBySToken`; // 获取绑定角色 API-根据 stoken
+export const TakumiCookieBingdingRolesApi = `${TakumiBindingApi}getUserGameRolesByCookie`; // 获取绑定角色 API-根据 Cookie

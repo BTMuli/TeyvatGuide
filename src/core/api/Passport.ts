@@ -5,7 +5,7 @@
  * @since Alpha v0.2.0
  */
 
-const PassportApi = "https://passport.mihoyo.com/"; // 基础 API
+const PassportApi = "https://passport-api.mihoyo.com/"; // 基础 API
 const PassportV4Api = "https://passport-api-v4.mihoyo.com/"; // 基础 API
 const PassportAuthApi = `${PassportApi}account/auth/api/`; // 认证 API
 

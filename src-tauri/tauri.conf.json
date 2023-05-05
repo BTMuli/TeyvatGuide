@@ -28,7 +28,7 @@
 					"https://bbs-api.miyoushe.com/*",
 					"https://bbs.mihoyo.com/*",
 					"https://hk4e-api.mihoyo.com/*",
-					"https://passport.mihoyo.com/*",
+					"https://passport-api.mihoyo.com/*",
 					"https://passport-api-v4.mihoyo.com/*"
 				]
 			},

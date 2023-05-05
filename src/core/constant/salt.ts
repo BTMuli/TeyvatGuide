@@ -16,7 +16,7 @@ const SALT = {
     LK2: "DG8lqMyc9gquwAUFc7zBS62ijQRX9XF7",
   },
   Other: {
-    X4: "OYcKGMRDRpnluotQHWwPDnV4xZG4WRMx",
+    X4: "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs",
     X6: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
   },
 };

@@ -19,6 +19,12 @@
     <v-btn @click="getBindRole">
       获取绑定角色
     </v-btn>
+    <v-btn @click="getBindRoleV2">
+      获取绑定角色 v2
+    </v-btn>
+    <v-btn @click="getCookieToken">
+      获取 cookieToken
+    </v-btn>
   </div>
 </template>
 <script setup lang="ts">
@@ -29,6 +35,7 @@ import { dialog } from "@tauri-apps/api";
 // utils
 import TGRequest from "../core/request/TGRequest";
 import TGSqlite from "../utils/TGSqlite";
+import TGUtils from "../core/utils/TGUtils";
 
 const cookie = ref({} as BTMuli.User.Base.Cookie);
 const tokens = ref([] as BTMuli.User.Base.TokenItem[]);
@@ -87,16 +94,32 @@ async function getLToken () {
   console.log(tokenRes);
 }
 
+// 获取 cookieToken, done, 但是登录失效
+async function getCookieToken () {
+  const stoken = await TGSqlite.getAppDataItem("stoken");
+  console.log("stoken", stoken);
+  const cookieRes = await TGRequest.User.byStoken.getCookieToken(cookie.value, stoken);
+  console.log(cookieRes);
+}
+
 // 获取游戏数据
 async function getUserGameCard () {
   const gameCard = await TGRequest.User.getGameCard(cookie.value);
   console.log(gameCard);
 }
 
-// 获取绑定角色
+// 获取绑定角色 done，但是登录失效
 async function getBindRole () {
+  const ck = TGUtils.Tools.cookieToString(cookie.value);
   const stoken = await TGSqlite.getAppDataItem("stoken");
-  const bindRole = await TGRequest.User.getGameRoles(cookie.value, stoken);
+  const bindRole = await TGRequest.User.byStoken.getAccounts(ck, stoken);
+  console.log(bindRole);
+}
+
+// 获取绑定角色 v2, done，但是登录失效
+async function getBindRoleV2 () {
+  const ck = TGUtils.Tools.cookieToString(cookie.value);
+  const bindRole = await TGRequest.User.byCookie.getAccounts(ck);
   console.log(bindRole);
 }
 
@@ -104,7 +127,9 @@ async function getBindRole () {
 <style scoped>
 .testDiv {
   display: flex;
-  flex-direction: row;
-  justify-content: space-around;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 20px;
 }
 </style>

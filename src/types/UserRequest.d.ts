@@ -63,4 +63,17 @@ declare namespace BTMuli.User.Response {
       list: TokenItem[]
     }
   }
+  /**
+   * @description 获取游戏账号的响应
+   * @since Alpha v0.2.0
+   * @interface GameAccounts
+   * @extends {BTMuli.Genshin.Base.Response}
+   * @property {BTMuli.User.Game.Account[]} data.list 游戏账号
+   * @returns {GameAccounts}
+   */
+  export interface GameAccounts extends BTMuli.Genshin.Base.Response {
+    data: {
+      list: BTMuli.User.Game.Account[]
+    }
+  }
 }

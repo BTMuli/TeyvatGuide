@@ -8,7 +8,12 @@
 import { ENKA_API } from "./ENKA";
 import { Hk4eAnnoListApi, Hk4eAnnoContentApi, Hk4eAnnoQuery } from "./Hk4e";
 import { PassportTokenApi, PassportCookieTokenApi, PassportVetifyApi } from "./Passport";
-import { TakumiTokensApi, TakumiRecordCardApi, TakumiRecordGenshinCharacterApi, TakumiRecordGenshinIndexApi, TakumiRecordGenshinSpiralAbyssApi, TakumiBingdingRolesApi } from "./Takumi";
+import {
+  TakumiTokensApi, TakumiRecordCardApi,
+  TakumiRecordGenshinCharacterApi, TakumiRecordGenshinIndexApi,
+  TakumiRecordGenshinSpiralAbyssApi, TakumiSTokenBingdingRolesApi,
+  TakumiCookieBingdingRolesApi,
+} from "./Takumi";
 
 // 应用 API
 const TGApi = {
@@ -23,10 +28,15 @@ const TGApi = {
     vetifyStoken: PassportVetifyApi, // 验证 stoken 有效性
   },
   GameData: {
+    byCookie: {
+      getAccounts: TakumiCookieBingdingRolesApi, // 获取绑定角色
+      getCharacter: TakumiRecordGenshinCharacterApi, // 获取角色信息
+    },
+    bySToken: {
+      getGameRoles: TakumiSTokenBingdingRolesApi, // 获取绑定角色
+    },
     getUserCard: TakumiRecordCardApi, // 获取用户卡片
     getUserBase: TakumiRecordGenshinIndexApi, // 获取用户基本信息
-    getCharacter: TakumiRecordGenshinCharacterApi, // 获取角色信息
-    getGameRoles: TakumiBingdingRolesApi, // 获取绑定角色
     getAbyss: TakumiRecordGenshinSpiralAbyssApi, // 获取深境螺旋信息
   },
 };

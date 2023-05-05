@@ -64,6 +64,7 @@ export async function getLtokenByStoken (cookie: BTMuli.User.Base.Cookie, stoken
  */
 export async function getCookieTokenByStoken (cookie: BTMuli.User.Base.Cookie, stoken: string): Promise<unknown> {
   const url = `${TGApi.GameTokens.getCookieToken}?stoken=${stoken}`;
+  console.log(url);
   const ck = TGUtils.Tools.cookieToString(cookie);
   const query = `stoken=${stoken}`;
   const header = TGUtils.User.getHeader(ck, query);
