@@ -8,6 +8,7 @@
 import { parseAnnoContent } from "./parseAnno";
 import { getAnnoCard } from "./getAnnoCard";
 import { getDS } from "./getDS";
+import { getRequestHeader } from "./getRequestHeader";
 
 const TGUtils = {
   Anno: {
@@ -16,6 +17,7 @@ const TGUtils = {
   },
   User: {
     getDS,
+    getHeader: getRequestHeader,
   },
 };
 

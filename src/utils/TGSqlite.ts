@@ -68,6 +68,21 @@ class TGSqlite {
   }
 
   /**
+   * @description 获取应用数据某一项
+   * @memberof TGSqlite
+   * @since Alpha v0.2.0
+   * @param {string} key
+   * @returns {Promise<string>}
+   */
+  public async getAppDataItem (key: string): Promise<string> {
+    const db = await Database.load(this.dbPath);
+    const sql = `SELECT value FROM AppData WHERE key='${key}';`;
+    const res: Array<{ value: string }> = await db.select(sql);
+    await db.close();
+    return res[0].value;
+  }
+
+  /**
    * @description 输入 cookie
    * @memberof TGSqlite
    * @since Alpha v0.2.0

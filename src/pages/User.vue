@@ -7,6 +7,15 @@
     <v-btn @click="saveToken">
       保存 Token 到数据库
     </v-btn>
+    <v-btn @click="vertifyStoken">
+      验证 stoken
+    </v-btn>
+    <v-btn @click="getLToken">
+      获取 ltoken
+    </v-btn>
+    <v-btn @click="getUserGameCard">
+      获取游戏数据
+    </v-btn>
   </div>
 </template>
 <script setup lang="ts">
@@ -30,6 +39,7 @@ onMounted(async () => {
   cookie.value = JSON.parse(await TGSqlite.getCookie()) as BTMuli.User.Base.Cookie;
 });
 
+// 根据获取到的 cookie.login_ticket 获取 stoken 和 ltoken
 async function getTokens () {
   const tokenRes = await TGRequest.User.getTokens(cookie.value);
   if (Array.isArray(tokenRes)) tokens.value = tokenRes;
@@ -46,6 +56,7 @@ async function getTokens () {
   }
 }
 
+// 将获取到的 token 保存到数据库
 async function saveToken () {
   console.log(tokens.value);
   const lToken = tokens.value.find((item) => item.name === "ltoken");
@@ -53,6 +64,29 @@ async function saveToken () {
   if (lToken) await TGSqlite.saveAppData("ltoken", lToken.token);
   if (sToken) await TGSqlite.saveAppData("stoken", sToken.token);
   console.log("保存成功");
+}
+
+// 验证 stoken 的有效性
+async function vertifyStoken () {
+  // 获取 stoken
+  const stoken = await TGSqlite.getAppDataItem("stoken");
+  console.log("stoken", stoken);
+  const vertifyRes = await TGRequest.User.vetifyStoken(cookie.value, stoken);
+  console.log(vertifyRes);
+}
+
+// 获取 stoken
+async function getLToken () {
+  const ltoken = await TGSqlite.getAppDataItem("ltoken");
+  console.log("ltoken", ltoken);
+  const tokenRes = await TGRequest.User.getLToken(cookie.value, ltoken);
+  console.log(tokenRes);
+}
+
+// 获取游戏数据
+async function getUserGameCard () {
+  const gameCard = await TGRequest.User.getGameCard(cookie.value);
+  console.log(gameCard);
 }
 
 </script>
