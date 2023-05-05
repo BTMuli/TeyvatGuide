@@ -450,7 +450,12 @@ async function inputCookie () {
 
 // 获取 Cookie
 async function readCookie () {
-  const cookie = JSON.parse(await TGSqlite.getCookie());
+  const getCookie = await TGSqlite.getDataByKey("AppData", "key", "cookie") as Array<{
+    key: string;
+    value: string;
+    updated: string;
+  }>;
+  const cookie = JSON.parse(getCookie[0].value);
   if (cookie) {
     confirmShow.value = false;
     let cookieStr = "";

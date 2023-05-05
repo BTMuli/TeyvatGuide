@@ -2,7 +2,7 @@
  * @file utils TGSql.ts
  * @description 数据库sql语句
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.4
+ * @since Alpha v0.2.0
  */
 
 import { app } from "@tauri-apps/api";
@@ -23,6 +23,33 @@ function initAppTable (): string[] {
         key     TEXT    PRIMARY KEY,
         value   TEXT    DEFAULT NULL,
         updated TEXT    DEFAULT NULL
+    );
+  `);
+  return sqlRes;
+}
+
+/**
+ * @description 初始化游戏账号数据表
+ * @since Alpha v0.2.0
+ * @see BTMuli.User.Game.Account
+ * @returns {string[]} sql
+ */
+function initGameAccountTable (): string[] {
+  const sqlRes = [];
+  // 创建游戏账号数据表
+  sqlRes.push(`
+    CREATE TABLE IF NOT EXISTS GameAccount
+    (
+        gameBiz TEXT    PRIMARY KEY,
+        gameUid TEXT    DEFAULT NULL,
+        isChosen BOOLEAN DEFAULT 0,
+        isOfficial BOOLEAN DEFAULT 0,
+        level INTEGER DEFAULT 0,
+        nickname TEXT    DEFAULT NULL,
+        region TEXT    DEFAULT NULL,
+        regionName TEXT    DEFAULT NULL,
+        updated TEXT    DEFAULT NULL,
+        PRIMARY KEY (gameBiz, gameUid)
     );
   `);
   return sqlRes;
@@ -126,14 +153,16 @@ function initNameCardTable (): string[] {
   `);
   return sqlRes;
 }
+
 /**
  * @description 初始化数据库表
- * @since Alpha v0.1.4
+ * @since Alpha v0.2.0
  * @returns {string[]} sql
  */
 export function initSQLiteTable (): string[] {
   const sqlRes = [];
   sqlRes.push(...initAppTable());
+  sqlRes.push(...initGameAccountTable());
   sqlRes.push(...initAchievementSeriesTable());
   sqlRes.push(...initAchievementTable());
   sqlRes.push(...initNameCardTable());

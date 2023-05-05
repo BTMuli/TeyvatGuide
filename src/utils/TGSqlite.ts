@@ -30,6 +30,7 @@ class TGSqlite {
     "AppData",
     "Achievements",
     "AchievementSeries",
+    "GameAccount",
     "NameCard",
   ];
 
@@ -68,18 +69,33 @@ class TGSqlite {
   }
 
   /**
-   * @description 获取应用数据某一项
+   * @description 封装-根据 table keys 获取数据
    * @memberof TGSqlite
    * @since Alpha v0.2.0
-   * @param {string} key
-   * @returns {Promise<string>}
+   * @param {string} table 表名
+   * @param {string} keyName 键名
+   * @param {string} keyValue 键值
+   * @returns {Promise<unknown[]>} 数据
    */
-  public async getAppDataItem (key: string): Promise<string> {
+  public async getDataByKey (table: string, keyName: string, keyValue: string): Promise<unknown[]> {
     const db = await Database.load(this.dbPath);
-    const sql = `SELECT value FROM AppData WHERE key='${key}';`;
-    const res: Array<{ value: string }> = await db.select(sql);
+    const sql = `SELECT * FROM ${table} WHERE ${keyName}='${keyValue}';`;
+    const res: unknown[] = await db.select(sql);
     await db.close();
-    return res[0].value;
+    return res;
+  }
+
+  /**
+   * @description 封装-保存数据
+   * @memberof TGSqlite
+   * @since Alpha v0.2.0
+   * @param {string} sql sql语句
+   * @returns {Promise<void>}
+   */
+  public async saveData (sql: string): Promise<void> {
+    const db = await Database.load(this.dbPath);
+    await db.execute(sql);
+    await db.close();
   }
 
   /**
@@ -97,20 +113,6 @@ class TGSqlite {
     ON CONFLICT(key) DO UPDATE SET value = '${cookie}', updated = datetime('now', 'localtime');`;
     await db.execute(sql);
     await db.close();
-  }
-
-  /**
-   * @description 获取 cookie
-   * @memberof TGSqlite
-   * @since Alpha v0.2.0
-   * @returns {Promise<string>}
-   */
-  public async getCookie (): Promise<string> {
-    const db = await Database.load(this.dbPath);
-    const sql = "SELECT value FROM AppData WHERE key='cookie';";
-    const res: Array<{ value: string }> = await db.select(sql);
-    await db.close();
-    return res[0].value;
   }
 
   /**

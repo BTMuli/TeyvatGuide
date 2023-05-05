@@ -46,7 +46,12 @@ export interface tokenRes {
 }
 
 onMounted(async () => {
-  cookie.value = JSON.parse(await TGSqlite.getCookie()) as BTMuli.User.Base.Cookie;
+  const getCookie = await TGSqlite.getDataByKey("AppData", "key", "cookie") as Array<{
+    key: string;
+    value: string;
+    updated: string;
+  }>;
+  cookie.value = JSON.parse(getCookie[0].value) as BTMuli.User.Base.Cookie;
 });
 
 // 根据获取到的 cookie.login_ticket 获取 stoken 和 ltoken
@@ -80,7 +85,10 @@ async function saveToken () {
 // 验证 stoken 的有效性
 async function vertifyStoken () {
   // 获取 stoken
-  const stoken = await TGSqlite.getAppDataItem("stoken");
+  const stoken = (await TGSqlite.getDataByKey("AppData", "key", "stoken") as unknown as Array<{
+    key: string;
+    value: string;
+  }>)[0].value as string;
   console.log("stoken", stoken);
   const vertifyRes = await TGRequest.User.vetifyStoken(cookie.value, stoken);
   console.log(vertifyRes);
@@ -88,7 +96,10 @@ async function vertifyStoken () {
 
 // 获取 ltoken
 async function getLToken () {
-  const stoken = await TGSqlite.getAppDataItem("stoken");
+  const stoken = (await TGSqlite.getDataByKey("AppData", "key", "stoken") as unknown as Array<{
+    key: string;
+    value: string;
+  }>)[0].value as string;
   console.log("stoken", stoken);
   const tokenRes = await TGRequest.User.getLToken(cookie.value, stoken);
   console.log(tokenRes);
@@ -96,7 +107,10 @@ async function getLToken () {
 
 // 获取 cookieToken, done, 但是登录失效
 async function getCookieToken () {
-  const stoken = await TGSqlite.getAppDataItem("stoken");
+  const stoken = (await TGSqlite.getDataByKey("AppData", "key", "stoken") as unknown as Array<{
+    key: string;
+    value: string;
+  }>)[0].value as string;
   console.log("stoken", stoken);
   const cookieRes = await TGRequest.User.byStoken.getCookieToken(cookie.value, stoken);
   console.log(cookieRes);
@@ -108,19 +122,50 @@ async function getUserGameCard () {
   console.log(gameCard);
 }
 
-// 获取绑定角色 done，但是登录失效
+// 通过 stoken 获取绑定角色，但是登录失效
 async function getBindRole () {
   const ck = TGUtils.Tools.cookieToString(cookie.value);
-  const stoken = await TGSqlite.getAppDataItem("stoken");
+  const stoken = (await TGSqlite.getDataByKey("AppData", "key", "stoken") as unknown as Array<{
+    key: string;
+    value: string;
+  }>)[0].value as string;
   const bindRole = await TGRequest.User.byStoken.getAccounts(ck, stoken);
   console.log(bindRole);
 }
 
-// 获取绑定角色 v2, done，但是登录失效
+// 通过 cookie 获取绑定角色
 async function getBindRoleV2 () {
   const ck = TGUtils.Tools.cookieToString(cookie.value);
   const bindRole = await TGRequest.User.byCookie.getAccounts(ck);
   console.log(bindRole);
+  // 如果是数组，说明数据获取成功
+  if (Array.isArray(bindRole)) {
+    bindRole.map(async (role: BTMuli.User.Game.Account) => {
+      const sql = `
+        INSERT INTO GameAccount (gameBiz, gameUid, isChosen, isOfficial, level, nickname, region, regionName, updated)
+        Values ('${role.game_biz}', '${role.game_uid}', ${role.is_chosen ? 1 : 0}, ${role.is_official ? 1 : 0}, '${role.level}', '${role.nickname}', '${role.region}', '${role.region_name}', datetime('now', 'localtime')
+        ON CONFILCT (gameBiz, gameUid) DO UPDATE SET
+        isChosen = ${role.is_chosen ? 1 : 0},
+        isOfficial = ${role.is_official ? 1 : 0},
+        level = '${role.level}',
+        nickname = '${role.nickname}',
+        region = '${role.region}',
+        regionName = '${role.region_name}',
+        updated = datetime('now', 'localtime');
+      `;
+      // 保存到数据库
+      await TGSqlite.saveData(sql);
+    });
+    console.log("保存成功");
+  } else {
+    await dialog.message(
+      bindRole.message,
+      {
+        type: "error",
+        title: `获取绑定角色失败,retcode: ${bindRole.retcode}`,
+      },
+    );
+  }
 }
 
 </script>
