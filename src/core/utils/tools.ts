@@ -5,7 +5,7 @@
  * @since Alpha v0.2.0
  */
 
-import crypto from "crypto";
+import md5 from "js-md5";
 
 /**
  * @description 转义正则表达式
@@ -47,6 +47,6 @@ export function getRandomString (length: number): string {
  * @param {string} data 要加密的内容
  * @returns {string} 加密后的内容
  */
-export function md5 (data: string): string {
-  return crypto.createHash("md5").update(data).digest("hex");
+export function MD5 (data: string): string {
+  return md5.update(data).hex();
 }

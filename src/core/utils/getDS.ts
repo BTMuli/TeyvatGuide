@@ -6,9 +6,9 @@
  */
 
 // Node
-import { stringify } from "querystring";
+import qs from "qs";
 // Tauri.Genshin
-import { md5 } from "./tools";
+import { MD5 } from "./tools";
 import TGConstant from "../constant/TGConstant";
 
 /**
@@ -27,7 +27,7 @@ export function getDS (query: string, body: string): string {
     b: body,
     q: query,
   };
-  const md5Str = md5(stringify(params));
+  const md5Str = MD5(qs.stringify(params));
   const ds = `${params.t},${params.r},${md5Str}`;
   return ds;
 }
