@@ -22,6 +22,7 @@
 				"request": true,
 				"scope": [
 					"https://api-takumi.mihoyo.com/*",
+					"https://api-takumi-record.mihoyo.com/*",
 					"https://api-static.mihoyo.com/*",
 					"https://bbs-api.mihoyo.com/*",
 					"https://bbs-api.miyoushe.com/*",
