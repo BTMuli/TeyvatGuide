@@ -143,8 +143,8 @@ async function getBindRoleV2 () {
     bindRole.map(async (role: BTMuli.User.Game.Account) => {
       const sql = `
         INSERT INTO GameAccount (gameBiz, gameUid, isChosen, isOfficial, level, nickname, region, regionName, updated)
-        Values ('${role.game_biz}', '${role.game_uid}', ${role.is_chosen ? 1 : 0}, ${role.is_official ? 1 : 0}, '${role.level}', '${role.nickname}', '${role.region}', '${role.region_name}', datetime('now', 'localtime')
-        ON CONFILCT (gameBiz, gameUid) DO UPDATE SET
+        VALUES ('${role.game_biz}', '${role.game_uid}', ${role.is_chosen ? 1 : 0}, ${role.is_official ? 1 : 0}, '${role.level}', '${role.nickname}', '${role.region}', '${role.region_name}', datetime('now', 'localtime'))
+        ON CONFLICT (gameBiz, gameUid) DO UPDATE SET
         isChosen = ${role.is_chosen ? 1 : 0},
         isOfficial = ${role.is_official ? 1 : 0},
         level = '${role.level}',

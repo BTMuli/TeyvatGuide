@@ -40,16 +40,16 @@ function initGameAccountTable (): string[] {
   sqlRes.push(`
     CREATE TABLE IF NOT EXISTS GameAccount
     (
-        gameBiz TEXT    PRIMARY KEY,
-        gameUid TEXT    DEFAULT NULL,
-        isChosen BOOLEAN DEFAULT 0,
-        isOfficial BOOLEAN DEFAULT 0,
-        level INTEGER DEFAULT 0,
-        nickname TEXT    DEFAULT NULL,
-        region TEXT    DEFAULT NULL,
-        regionName TEXT    DEFAULT NULL,
-        updated TEXT    DEFAULT NULL,
-        PRIMARY KEY (gameBiz, gameUid)
+      gameBiz    TEXT NOT NULL,
+      gameUid    TEXT NOT NULL,
+      isChosen   BOOLEAN DEFAULT 0,
+      isOfficial BOOLEAN DEFAULT 0,
+      level      INTEGER DEFAULT 0,
+      nickname   TEXT    DEFAULT NULL,
+      region     TEXT    DEFAULT NULL,
+      regionName TEXT    DEFAULT NULL,
+      updated    TEXT    DEFAULT NULL,
+      PRIMARY KEY (gameBiz, gameUid)
     );
   `);
   return sqlRes;
