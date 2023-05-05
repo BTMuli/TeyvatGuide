@@ -33,7 +33,7 @@ const TGApi = {
       getCharacter: TakumiRecordGenshinCharacterApi, // 获取角色信息
     },
     bySToken: {
-      getGameRoles: TakumiSTokenBingdingRolesApi, // 获取绑定角色
+      getAccounts: TakumiSTokenBingdingRolesApi, // 获取绑定角色
     },
     getUserCard: TakumiRecordCardApi, // 获取用户卡片
     getUserBase: TakumiRecordGenshinIndexApi, // 获取用户基本信息

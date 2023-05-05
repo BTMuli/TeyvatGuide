@@ -40,7 +40,7 @@ export async function getTokensByLoginTicket (cookie: BTMuli.User.Base.Cookie): 
  * @param {string} stoken stoken
  * @returns {Promise<unknown>}
  */
-export async function getLtokenByStoken (cookie: BTMuli.User.Base.Cookie, stoken: string): Promise<unknown> {
+export async function getLtokenBySToken (cookie: BTMuli.User.Base.Cookie, stoken: string): Promise<unknown> {
   const url = `${TGApi.GameTokens.getLToken}`;
   const ck = TGUtils.Tools.cookieToString(cookie);
   const query = `stoken=${stoken}`;
@@ -62,7 +62,7 @@ export async function getLtokenByStoken (cookie: BTMuli.User.Base.Cookie, stoken
  * @param {string} stoken stoken
  * @returns {Promise<unknown>}
  */
-export async function getCookieTokenByStoken (cookie: BTMuli.User.Base.Cookie, stoken: string): Promise<unknown> {
+export async function getCookieTokenBySToken (cookie: BTMuli.User.Base.Cookie, stoken: string): Promise<unknown> {
   const url = `${TGApi.GameTokens.getCookieToken}?stoken=${stoken}`;
   console.log(url);
   const ck = TGUtils.Tools.cookieToString(cookie);
@@ -85,7 +85,7 @@ export async function getCookieTokenByStoken (cookie: BTMuli.User.Base.Cookie, s
  * @param {string} stoken stoken
  * @returns {Promise<unknown>}
  */
-export async function vetifyStoken (cookie: BTMuli.User.Base.Cookie, stoken: string): Promise<unknown> {
+export async function vetifySToken (cookie: BTMuli.User.Base.Cookie, stoken: string): Promise<unknown> {
   const url = `${TGApi.GameTokens.vetifyStoken}`;
   const ck = TGUtils.Tools.cookieToString(cookie);
   const query = `stoken=${stoken}`;

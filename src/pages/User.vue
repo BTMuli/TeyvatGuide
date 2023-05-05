@@ -56,7 +56,7 @@ onMounted(async () => {
 
 // 根据获取到的 cookie.login_ticket 获取 stoken 和 ltoken
 async function getTokens () {
-  const tokenRes = await TGRequest.User.getTokens(cookie.value);
+  const tokenRes = await TGRequest.User.byLoginTicket.getLTokens(cookie.value);
   console.log(tokenRes);
   if (Array.isArray(tokenRes)) tokens.value = tokenRes;
   else {
@@ -90,7 +90,7 @@ async function vertifyStoken () {
     value: string;
   }>)[0].value as string;
   console.log("stoken", stoken);
-  const vertifyRes = await TGRequest.User.vetifyStoken(cookie.value, stoken);
+  const vertifyRes = await TGRequest.User.bySToken.vertify(cookie.value, stoken);
   console.log(vertifyRes);
 }
 
@@ -101,7 +101,7 @@ async function getLToken () {
     value: string;
   }>)[0].value as string;
   console.log("stoken", stoken);
-  const tokenRes = await TGRequest.User.getLToken(cookie.value, stoken);
+  const tokenRes = await TGRequest.User.bySToken.getLToken(cookie.value, stoken);
   console.log(tokenRes);
 }
 
@@ -112,13 +112,13 @@ async function getCookieToken () {
     value: string;
   }>)[0].value as string;
   console.log("stoken", stoken);
-  const cookieRes = await TGRequest.User.byStoken.getCookieToken(cookie.value, stoken);
+  const cookieRes = await TGRequest.User.bySToken.getCookieToken(cookie.value, stoken);
   console.log(cookieRes);
 }
 
 // 获取游戏数据
 async function getUserGameCard () {
-  const gameCard = await TGRequest.User.getGameCard(cookie.value);
+  const gameCard = await TGRequest.User.byCookie.getGameCard(cookie.value);
   console.log(gameCard);
 }
 
@@ -129,7 +129,7 @@ async function getBindRole () {
     key: string;
     value: string;
   }>)[0].value as string;
-  const bindRole = await TGRequest.User.byStoken.getAccounts(ck, stoken);
+  const bindRole = await TGRequest.User.bySToken.getAccounts(ck, stoken);
   console.log(bindRole);
 }
 

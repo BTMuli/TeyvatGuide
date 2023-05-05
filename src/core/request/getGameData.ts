@@ -18,7 +18,7 @@ import TGConstant from "../constant/TGConstant";
  * @param {BTMuli.User.Base.Cookie} cookie 用户的 Cookie
  * @returns {Promise<unknown>} 用户基本信息
  */
-export async function getGameCard (cookie: BTMuli.User.Base.Cookie): Promise<unknown> {
+export async function getGameCardByCookie (cookie: BTMuli.User.Base.Cookie): Promise<unknown> {
   const url = `${TGApi.GameData.getUserCard}?uid=${cookie.login_uid}`;
   const query = `uid=${cookie.login_uid}`;
   const ck = TGUtils.Tools.cookieToString(cookie);
@@ -45,8 +45,8 @@ export async function getGameCard (cookie: BTMuli.User.Base.Cookie): Promise<unk
  * @param {string} stoken stoken
  * @returns {Promise<unknown>} 用户绑定角色
  */
-export async function getGameRolesbyStoken (cookie: string, stoken: string): Promise<unknown> {
-  const url = TGApi.GameData.bySToken.getGameRoles;
+export async function getAccountsbySToken (cookie: string, stoken: string): Promise<unknown> {
+  const url = TGApi.GameData.bySToken.getAccounts;
   console.log("url:", url);
   // eslint-disable-next-line camelcase
   const data = { stoken, game_biz: TGConstant.UTILS.GAME_BIZ };
