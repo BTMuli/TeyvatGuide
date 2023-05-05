@@ -2,8 +2,10 @@
  * @file core utils tools.ts
  * @description 应用用到的工具函数
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @since Alpha v0.2.0
  */
+
+import crypto from "crypto";
 
 /**
  * @description 转义正则表达式
@@ -22,4 +24,29 @@ export function decodeRegExp (data: string): string {
   res = res.replace(/&apos;/g, "'");
   res = res.replace(/&amp;/g, "&");
   return res;
+}
+
+/**
+ * @description 获取随机字符串
+ * @since Alpha v0.2.0
+ * @param {number} length 字符串长度
+ * @returns {string} 随机字符串
+ */
+export function getRandomString (length: number): string {
+  const str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let res = "";
+  for (let i = 0; i < length; i++) {
+    res += str[Math.floor(Math.random() * str.length)];
+  }
+  return res;
+}
+
+/**
+ * @description md5 加密
+ * @since Alpha v0.2.0
+ * @param {string} data 要加密的内容
+ * @returns {string} 加密后的内容
+ */
+export function md5 (data: string): string {
+  return crypto.createHash("md5").update(data).digest("hex");
 }
