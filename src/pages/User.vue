@@ -1,11 +1,8 @@
 <template>
   <h1>用户页</h1>
   <div class="testDiv">
-    <v-btn @click="getTokens">
-      获取 Tokens
-    </v-btn>
-    <v-btn @click="saveToken">
-      保存 Token 到数据库
+    <v-btn @click="updateTokens">
+      更新 Tokens
     </v-btn>
     <v-btn @click="vertifyStoken">
       验证 stoken
@@ -38,7 +35,6 @@ import TGSqlite from "../utils/TGSqlite";
 import TGUtils from "../core/utils/TGUtils";
 
 const cookie = ref({} as BTMuli.User.Base.Cookie);
-const tokens = ref([] as BTMuli.User.Base.TokenItem[]);
 
 export interface tokenRes {
   name: string;
@@ -55,13 +51,15 @@ onMounted(async () => {
 });
 
 // 根据获取到的 cookie.login_ticket 获取 stoken 和 ltoken
-async function getTokens () {
+async function updateTokens () {
   const tokenRes = await TGRequest.User.byLoginTicket.getLTokens(cookie.value);
   console.log(tokenRes);
-  if (Array.isArray(tokenRes)) tokens.value = tokenRes;
-  else {
-    console.log(tokenRes);
-    tokens.value = [];
+  if (Array.isArray(tokenRes)) {
+    const lToken = tokenRes.find((item) => item.name === "ltoken");
+    const sToken = tokenRes.find((item) => item.name === "stoken");
+    if (lToken) await TGSqlite.saveAppData("ltoken", lToken.token);
+    if (sToken) await TGSqlite.saveAppData("stoken", sToken.token);
+  } else {
     await dialog.message(
       tokenRes.message,
       {
@@ -70,16 +68,6 @@ async function getTokens () {
       },
     );
   }
-}
-
-// 将获取到的 token 保存到数据库
-async function saveToken () {
-  console.log(tokens.value);
-  const lToken = tokens.value.find((item) => item.name === "ltoken");
-  const sToken = tokens.value.find((item) => item.name === "stoken");
-  if (lToken) await TGSqlite.saveAppData("ltoken", lToken.token);
-  if (sToken) await TGSqlite.saveAppData("stoken", sToken.token);
-  console.log("保存成功");
 }
 
 // 验证 stoken 的有效性

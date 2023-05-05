@@ -172,6 +172,7 @@ import { useAchievementsStore } from "../store/modules/achievements";
 // utils
 import { backupUiafData, restoreUiafData } from "../utils/UIAF";
 import TGSqlite from "../utils/TGSqlite";
+import TGRequest from "../core/request/TGRequest";
 
 // Store
 const appStore = useAppStore();
@@ -317,7 +318,6 @@ async function doConfirm (oper: string) {
       break;
     case "getCookie":
       await tauri.invoke("mys_login");
-      tryConfirm("readCookie");
       break;
     case "readCookie":
       await readCookie();
@@ -434,6 +434,8 @@ async function inputCookie () {
     snackbar.value = true;
     return;
   }
+  loadingTitle.value = "正在保存 Cookie...";
+  loading.value = true;
   //  格式为 key=value;key=value，去除多余空格
   const cookieArr = cookie.replace(/\s+/g, "").split(";");
   const cookieObj: any = {};
@@ -443,9 +445,24 @@ async function inputCookie () {
   });
   // 保存到数据库
   await TGSqlite.inputCookie(JSON.stringify(cookieObj));
-  snackbarText.value = "Cookie 已经保存到数据库!";
-  snackbarColor.value = "success";
-  snackbar.value = true;
+  loadingTitle.value = "正在获取 tokens...";
+  const tokenRes = await TGRequest.User.byLoginTicket.getLTokens(cookieObj);
+  if (Array.isArray(tokenRes)) {
+    loadingTitle.value = "正在保存 tokens...";
+    const lToken = tokenRes.find((item) => item.name === "ltoken");
+    const sToken = tokenRes.find((item) => item.name === "stoken");
+    if (lToken) await TGSqlite.saveAppData("ltoken", lToken.token);
+    if (sToken) await TGSqlite.saveAppData("stoken", sToken.token);
+    loading.value = false;
+    snackbarText.value = "Cookie 已保存!";
+    snackbarColor.value = "success";
+    snackbar.value = true;
+  } else {
+    loading.value = false;
+    snackbarText.value = "Cookie 无效!";
+    snackbarColor.value = "error";
+    snackbar.value = true;
+  }
 }
 
 // 获取 Cookie
