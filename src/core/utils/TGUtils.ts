@@ -7,8 +7,8 @@
 
 import { parseAnnoContent } from "./parseAnno";
 import { getAnnoCard } from "./getAnnoCard";
-import { getDS } from "./getDS";
 import { getRequestHeader } from "./getRequestHeader";
+import { cookieToString } from "./tools";
 
 const TGUtils = {
   Anno: {
@@ -16,8 +16,10 @@ const TGUtils = {
     parseContent: parseAnnoContent,
   },
   User: {
-    getDS,
     getHeader: getRequestHeader,
+  },
+  Tools: {
+    cookieToString,
   },
 };
 

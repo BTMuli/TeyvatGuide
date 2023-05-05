@@ -6,17 +6,26 @@
  */
 
 import TGConstant from "../constant/TGConstant";
+import { getDS } from "./getDS";
 
-export function getRequestHeader (cookie: BTMuli.User.Base.Cookie): Record<string, string> {
+/**
+ * @description 获取请求头
+ * @since Alpha v0.2.0
+ * @param {string} cookie cookie
+ * @param {string} q query
+ * @param {string} b body
+ * @returns {Record<string, string>} 请求头
+ */
+export function getRequestHeader (cookie: string, q: string, b: string = ""): Record<string, string> {
   const header = {
     "User-Agent": TGConstant.BBS.USER_AGENT,
-    "content-type": "application/json;charset=UTF-8",
-    "x-requested-with": "com.mihoyo.hyperion",
+    // "x-requested-with": "com.mihoyo.hyperion",
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "5",
-    "x-rpc-device_id": cookie.DEVICEFP,
-    Origin: "https://www.miyoushe.com",
-    Referer: "https://www.miyoushe.com",
+    Origin: "https://webstatic.mihoyo.com/",
+    Referer: "https://webstatic.mihoyo.com/",
+    DS: getDS(q, b),
+    Cookie: cookie,
   };
   return header;
 }

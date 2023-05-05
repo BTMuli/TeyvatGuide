@@ -16,6 +16,9 @@
     <v-btn @click="getUserGameCard">
       获取游戏数据
     </v-btn>
+    <v-btn @click="getBindRole">
+      获取绑定角色
+    </v-btn>
   </div>
 </template>
 <script setup lang="ts">
@@ -42,6 +45,7 @@ onMounted(async () => {
 // 根据获取到的 cookie.login_ticket 获取 stoken 和 ltoken
 async function getTokens () {
   const tokenRes = await TGRequest.User.getTokens(cookie.value);
+  console.log(tokenRes);
   if (Array.isArray(tokenRes)) tokens.value = tokenRes;
   else {
     console.log(tokenRes);
@@ -75,11 +79,11 @@ async function vertifyStoken () {
   console.log(vertifyRes);
 }
 
-// 获取 stoken
+// 获取 ltoken
 async function getLToken () {
-  const ltoken = await TGSqlite.getAppDataItem("ltoken");
-  console.log("ltoken", ltoken);
-  const tokenRes = await TGRequest.User.getLToken(cookie.value, ltoken);
+  const stoken = await TGSqlite.getAppDataItem("stoken");
+  console.log("stoken", stoken);
+  const tokenRes = await TGRequest.User.getLToken(cookie.value, stoken);
   console.log(tokenRes);
 }
 
@@ -87,6 +91,13 @@ async function getLToken () {
 async function getUserGameCard () {
   const gameCard = await TGRequest.User.getGameCard(cookie.value);
   console.log(gameCard);
+}
+
+// 获取绑定角色
+async function getBindRole () {
+  const stoken = await TGSqlite.getAppDataItem("stoken");
+  const bindRole = await TGRequest.User.getGameRoles(cookie.value, stoken);
+  console.log(bindRole);
 }
 
 </script>

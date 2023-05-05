@@ -7,7 +7,7 @@
 
 import { getAnnoList, getAnnoContent } from "./getAnno";
 import { getTokensByLoginTicket, getLtokenByStoken, getCookieTokenByStoken, vetifyStoken } from "./getTokens";
-import { getGameCard } from "./getGameData";
+import { getGameCard, getGameRoles } from "./getGameData";
 
 const TGRequest = {
   Anno: {
@@ -20,6 +20,7 @@ const TGRequest = {
     getCookieToken: getCookieTokenByStoken,
     vetifyStoken,
     getGameCard,
+    getGameRoles,
   },
 };
 

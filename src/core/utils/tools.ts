@@ -6,6 +6,7 @@
  */
 
 import md5 from "js-md5";
+import qs from "qs";
 
 /**
  * @description 转义正则表达式
@@ -49,4 +50,16 @@ export function getRandomString (length: number): string {
  */
 export function MD5 (data: string): string {
   return md5.update(data).hex();
+}
+
+/**
+ * @description 将 ck JSON 对象转换为字符串
+ * @since Alpha v0.2.0
+ * @param {object} ck ck JSON 对象
+ * @returns {string} ck 字符串
+ */
+export function cookieToString (ck: object): string {
+  let res = qs.stringify(ck);
+  res = res.replace(/&/g, ";");
+  return res;
 }

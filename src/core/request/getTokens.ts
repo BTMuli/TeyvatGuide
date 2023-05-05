@@ -20,7 +20,10 @@ import TGUtils from "../utils/TGUtils";
  */
 export async function getTokensByLoginTicket (cookie: BTMuli.User.Base.Cookie): Promise<BTMuli.User.Base.TokenItem[] | BTMuli.Genshin.Base.Response> {
   const url = `${TGApi.GameTokens.getTokens}?login_ticket=${cookie.login_ticket}&token_types=3&uid=${cookie.login_uid}`;
-  const header = TGUtils.User.getHeader(cookie);
+  const ck = TGUtils.Tools.cookieToString(cookie);
+  const query = `login_ticket=${cookie.login_ticket}&token_types=3&uid=${cookie.login_uid}`;
+  const header = TGUtils.User.getHeader(ck, query);
+  console.log("header:", header);
   return await http.fetch<BTMuli.User.Response.Token>(url, {
     method: "GET",
     headers: header,
@@ -39,17 +42,13 @@ export async function getTokensByLoginTicket (cookie: BTMuli.User.Base.Cookie): 
  */
 export async function getLtokenByStoken (cookie: BTMuli.User.Base.Cookie, stoken: string): Promise<unknown> {
   const url = `${TGApi.GameTokens.getLToken}`;
-  const header = TGUtils.User.getHeader(cookie);
-  const ds = TGUtils.User.getDS(`stoken=${stoken}`, "");
-  console.log("DS:", ds);
-  console.log("Cookie:", JSON.stringify(cookie));
+  const ck = TGUtils.Tools.cookieToString(cookie);
+  const query = `stoken=${stoken}`;
+  const header = TGUtils.User.getHeader(ck, query);
+  console.log("header:", header);
   return await http.fetch<BTMuli.User.Response.Token>(url, {
     method: "POST",
-    headers: {
-      ...header,
-      cookie: JSON.stringify(cookie),
-      DS: `${ds}`,
-    },
+    headers: header,
   }).then((res) => {
     console.log(res.data);
     if (res.data.retcode !== 0) return res.data;
@@ -65,13 +64,16 @@ export async function getLtokenByStoken (cookie: BTMuli.User.Base.Cookie, stoken
  */
 export async function getCookieTokenByStoken (cookie: BTMuli.User.Base.Cookie, stoken: string): Promise<unknown> {
   const url = `${TGApi.GameTokens.getCookieToken}?stoken=${stoken}`;
-  const header = TGUtils.User.getHeader(cookie);
-  return await http.fetch<BTMuli.User.Response.Token>(url, {
+  const ck = TGUtils.Tools.cookieToString(cookie);
+  const query = `stoken=${stoken}`;
+  const header = TGUtils.User.getHeader(ck, query);
+  console.log("header:", header);
+  return await http.fetch(url, {
     method: "GET",
     headers: header,
   }).then((res) => {
     console.log(res.data);
-    if (res.data.retcode !== 0) return res.data;
+    return res.data;
   });
 }
 
@@ -84,8 +86,11 @@ export async function getCookieTokenByStoken (cookie: BTMuli.User.Base.Cookie, s
  */
 export async function vetifyStoken (cookie: BTMuli.User.Base.Cookie, stoken: string): Promise<unknown> {
   const url = `${TGApi.GameTokens.vetifyStoken}`;
-  const header = TGUtils.User.getHeader(cookie);
-  return await http.fetch<BTMuli.User.Response.Token>(url, {
+  const ck = TGUtils.Tools.cookieToString(cookie);
+  const query = `stoken=${stoken}`;
+  const header = TGUtils.User.getHeader(ck, query);
+  console.log("header:", header);
+  return await http.fetch(url, {
     method: "POST",
     headers: header,
     body: http.Body.json({
@@ -93,6 +98,6 @@ export async function vetifyStoken (cookie: BTMuli.User.Base.Cookie, stoken: str
     }),
   }).then((res) => {
     console.log(res.data);
-    if (res.data.retcode !== 0) return res.data;
+    return res.data;
   });
 }
