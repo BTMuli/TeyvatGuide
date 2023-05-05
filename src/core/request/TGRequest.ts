@@ -6,7 +6,7 @@
  */
 
 import { getAnnoList, getAnnoContent } from "./getAnno";
-import { getTokens } from "./getTokens";
+import { getTokensByLoginTicket, getLtokenByStoken, getCookieTokenByStoken, vetifyStoken } from "./getTokens";
 
 const TGRequest = {
   Anno: {
@@ -14,7 +14,10 @@ const TGRequest = {
     getContent: getAnnoContent,
   },
   User: {
-    getTokens,
+    getTokens: getTokensByLoginTicket,
+    getLToken: getLtokenByStoken,
+    getCookieToken: getCookieTokenByStoken,
+    vetifyStoken,
   },
 };
 
