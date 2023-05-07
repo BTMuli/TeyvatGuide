@@ -48,6 +48,11 @@
             <img src="/platforms/mhy/ys.webp" alt="ys" class="side-icon">
           </template>
         </v-list-item>
+        <v-list-item title="星穹铁道" value="mhy-sr" link href="/news/6">
+          <template #prepend>
+            <img src="/platforms/mhy/sr.webp" alt="sr" class="side-icon">
+          </template>
+        </v-list-item>
         <v-list-item title="崩坏3" value="mhy-bh3" link href="/news/1">
           <template #prepend>
             <img src="/platforms/mhy/bh3.webp" alt="bh3" class="side-icon">
@@ -61,11 +66,6 @@
         <v-list-item title="未定事件簿" value="mhy-wd" link href="/news/4">
           <template #prepend>
             <img src="/platforms/mhy/wd.webp" alt="wd" class="side-icon">
-          </template>
-        </v-list-item>
-        <v-list-item title="星穹铁道" value="mhy-sr" link href="/news/6">
-          <template #prepend>
-            <img src="/platforms/mhy/sr.webp" alt="sr" class="side-icon">
           </template>
         </v-list-item>
         <v-list-item title="绝区零" value="mhy-zzz" link href="/news/8">
@@ -84,10 +84,7 @@
         <template #activator="{ props }">
           <v-list-item title="图鉴" v-bind="props">
             <template #prepend>
-              <!-- TODO: 后续更换图标-->
-              <v-icon style="color:var(--sidebar-icon)">
-                mdi-book-open-variant
-              </v-icon>
+              <img src="/source/UI/guideMini.webp" alt="wikiIcon" class="side-icon-mini">
             </template>
           </v-list-item>
         </template>
@@ -98,18 +95,12 @@
         </v-list-item>
         <v-list-item title="角色图鉴" value="wiki-character" link href="/wiki/character">
           <template #prepend>
-            <!-- TODO: 后续更换图标-->
-            <v-icon style="color:var(--sidebar-icon)">
-              mdi-account
-            </v-icon>
+            <img src="/source/UI/avatarMini.webp" alt="characterIcon" class="side-icon-mini">
           </template>
         </v-list-item>
         <v-list-item title="武器图鉴" value="wiki-weapon" link href="/wiki/weapon">
           <template #prepend>
-            <!-- TODO: 后续更换图标 -->
-            <v-icon style="color:var(--sidebar-icon)">
-              mdi-sword
-            </v-icon>
+            <img src="/source/UI/weaponMini.webp" alt="weaponIcon" class="side-icon-mini">
           </template>
         </v-list-item>
       </v-list-group>
@@ -216,5 +207,12 @@ async function switchTheme () {
   height: 24px;
   margin-right: 32px;
   border-radius: 5px;
+}
+
+.side-icon-mini {
+  width: 36px;
+  height: 36px;
+  transform: translateX(-6px);
+  margin-right: 20px;
 }
 </style>
