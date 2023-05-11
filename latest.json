@@ -1,11 +1,11 @@
 {
-  "version": "0.1.4",
-  "notes": "See the assets to download this version and install.",
-  "pub_date": "2023-05-02T10:45:45.017Z",
-  "platforms": {
-    "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWkdzekNNZjh1aG54TWY5cWpnNW02d3dxSFNRSFg2aDlTOGdmSlRaM0VoQWUrR2JERE1MdGdDYUJXYUYybDlLa0RycW5SZjdjRndKVVNLdDhoQzltNVp3ZWhIVzhwRkFNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgzMDI0MzM4CWZpbGU6dGF1cmktZ2Vuc2hpbl8wLjEuNF94NjRfemgtQ04ubXNpLnppcApuOFNqamJqN0FwVXI2OHlTODhHVEl3Q1FTQzU2R1JVNi96b1Z4ZU5nRlk3aEY2WnMzaHZNTGJVdmpXc2wraTNWZUlkK2VZdlBxd1JYaWt3MUdGVWhBQT09Cg==",
-      "url": "https://github.com/BTMuli/Tauri.Genshin/releases/download/v0.1.4/tauri-genshin_0.1.4_x64_zh-CN.msi.zip"
-    }
-  }
+	"version": "0.1.4",
+	"notes": "See the assets to download this version and install.",
+	"pub_date": "2023-05-02T10:45:45.017Z",
+	"platforms": {
+		"windows-x86_64": {
+			"signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWkdzekNNZjh1aG54TWY5cWpnNW02d3dxSFNRSFg2aDlTOGdmSlRaM0VoQWUrR2JERE1MdGdDYUJXYUYybDlLa0RycW5SZjdjRndKVVNLdDhoQzltNVp3ZWhIVzhwRkFNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgzMDI0MzM4CWZpbGU6dGF1cmktZ2Vuc2hpbl8wLjEuNF94NjRfemgtQ04ubXNpLnppcApuOFNqamJqN0FwVXI2OHlTODhHVEl3Q1FTQzU2R1JVNi96b1Z4ZU5nRlk3aEY2WnMzaHZNTGJVdmpXc2wraTNWZUlkK2VZdlBxd1JYaWt3MUdGVWhBQT09Cg==",
+			"url": "https://github.com/BTMuli/Tauri.Genshin/releases/download/v0.1.4/tauri-genshin_0.1.4_x64_zh-CN.msi.zip"
+		}
+	}
 }
