@@ -21,107 +21,61 @@
           {{ text.text }}
         </v-btn>
       </v-list-item-title>
-      <div v-if="!loading" class="calendar-box">
+      <div class="calendar-box">
         <div class="calendar-single">
-          <div class="card-title">
+          <div class="calendar-title">
             天赋培养
           </div>
-          <div class="calendar-grid">
+          <div class="cards-grid">
             <div
-              v-for="character of characterCards"
-              :key="character.title"
-              class="calendar-content"
+              v-for="item in characterCards"
+              :key="item.id"
+              class="card-box"
+              @click="showContent(item)"
             >
-              <div class="content-title">
-                {{ character.title }}
+              <div class="card-bg">
+                <img :src="item.bg" alt="bg">
               </div>
-              <div class="content-material">
-                <v-img
-                  v-for="material of character.materials"
-                  :key="material.content_id"
-                  alt="material.content_id"
-                  :src="material.icon"
-                  class="calendar-icon"
-                  @click="showContent(material)"
-                />
+              <div class="card-icon">
+                <img :src="item.icon" alt="icon">
               </div>
-              <div class="content-detail">
-                <div
-                  v-for="item of character.contents"
-                  :key="item.id"
-                  class="card-box"
-                  @click="showContent(item)"
-                >
-                  <!-- 底层背景图 -->
-                  <div class="card-bg">
-                    <img :src="item.bg" alt="bg">
-                  </div>
-                  <!-- 中层角色图 -->
-                  <div class="card-icon">
-                    <img :src="item.icon" alt="icon">
-                  </div>
-                  <!-- 上层图标&内容 -->
-                  <div class="card-cover">
-                    <div class="card-element">
-                      <img :src="item.element" alt="element">
-                    </div>
-                    <div class="card-name">
-                      <img :src="item.weapon" alt="weapon">
-                      <span>{{ item.name }}</span>
-                    </div>
-                  </div>
+              <div class="card-cover">
+                <div class="card-element">
+                  <img :src="item.element" alt="element">
+                </div>
+                <div class="card-weapon">
+                  <img :src="item.weapon_type" alt="weapon">
+                </div>
+                <div class="card-name">
+                  <span>{{ item.name }}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="calendar-single">
-        <div class="card-title">
-          武器突破
-        </div>
-        <div class="calendar-grid">
-          <div
-            v-for="weapon of weaponCards"
-            :key="weapon.title"
-            class="calendar-content"
-          >
-            <div class="content-title">
-              {{ weapon.title }}
-            </div>
-            <div class="content-material">
-              <v-img
-                v-for="material of weapon.materials"
-                :key="material.content_id"
-                alt="material.content_id"
-                :src="material.icon"
-                class="calendar-icon"
-                @click="showContent(material)"
-              />
-            </div>
-            <div class="content-detail">
-              <div
-                v-for="item of weapon.contents"
-                :key="item.id"
-                class="card-box"
-                @click="showContent(item)"
-              >
-                <!-- 底层背景图 -->
-                <div class="card-bg">
-                  <img :src="item.bg" alt="bg">
+        <div class="calendar-single">
+          <div class="calendar-title">
+            武器突破
+          </div>
+          <div class="cards-grid">
+            <div
+              v-for="item in weaponCards"
+              :key="item.id"
+              class="card-box"
+              @click="showContent(item)"
+            >
+              <div class="card-bg">
+                <img :src="item.bg" alt="bg">
+              </div>
+              <div class="card-icon">
+                <img :src="item.icon" alt="icon">
+              </div>
+              <div class="card-cover">
+                <div class="card-type">
+                  <img :src="item.weapon_type" alt="element">
                 </div>
-                <!-- 中层武器图 -->
-                <div class="card-icon">
-                  <img :src="item.icon" alt="icon">
-                </div>
-                <!-- 上层图标&内容 -->
-                <div class="card-cover">
-                  <div class="card-type">
-                    <img :src="item.type" alt="type">
-                  </div>
-                  <div class="card-name">
-                    <span>{{ item.name }}</span>
-                  </div>
+                <div class="card-name">
+                  <span>{{ item.name }}</span>
                 </div>
               </div>
             </div>
@@ -147,13 +101,13 @@ import { createTGWindow } from "../utils/TGWindow";
 const loading = ref(true as boolean);
 
 // data
-const calendarData = ref(TGAppData.calendar as Record<number, BTMuli.Genshin.Calendar.Data>);
+const calendarData = ref(TGAppData.calendar);
 const weekNow = ref(0 as number);
 const btnNow = ref(0 as number);
 const dateNow = ref(new Date().toLocaleDateString());
-const calendarNow = ref({} as BTMuli.Genshin.Calendar.Data);
-const characterCards = ref({} as Record<number, BTMuli.Genshin.Calendar.CharaacterItem>);
-const weaponCards = ref({} as Record<number, BTMuli.Genshin.Calendar.WeaponItem>);
+const calendarNow = ref([] as BTMuli.Genshin.Calendar.Data[]);
+const characterCards = ref({} as Record<number, BTMuli.Genshin.Calendar.Data>);
+const weaponCards = ref({} as Record<number, BTMuli.Genshin.Calendar.Data>);
 
 // snackbar
 const snackbar = ref(false as boolean);
@@ -162,7 +116,7 @@ const snackbarColor = ref("success" as string);
 
 const btnText = [
   {
-    week: 0,
+    week: 7,
     text: "周日",
   },
   {
@@ -197,43 +151,36 @@ defineExpose({
 });
 
 onMounted(() => {
-  const dayNow = new Date().getDay();
+  const dayNow = (new Date().getDay()) === 0 ? 7 : (new Date().getDay());
   weekNow.value = dayNow;
   btnNow.value = dayNow;
   calendarNow.value = getCalendar(dayNow);
-  characterCards.value = calendarNow.value.characters;
-  weaponCards.value = calendarNow.value.weapons;
+  characterCards.value = calendarNow.value.filter((item) => item.item_type === "character");
+  weaponCards.value = calendarNow.value.filter((item) => item.item_type === "weapon");
   loading.value = false;
 });
 
 // 获取当前日历
 function getCalendar (day: number) {
-  let week;
-  if (day < 4) week = day;
-  else week = day - 3;
-  return calendarData.value[week];
+  return calendarData.value.filter((item) => item.drop_day.includes(day));
 }
 
-function showContent (material: BTMuli.Genshin.Calendar.Material | BTMuli.Genshin.Wiki.Character.BriefInfo | BTMuli.Genshin.Wiki.Weapon.BriefInfo) {
-  if (material.content_id === null || material.content_id === undefined) {
+function showContent (item: BTMuli.Genshin.Calendar.Data) {
+  if (item.content_id === null) {
     snackbarText.value = "暂无详情";
     snackbarColor.value = "error";
     snackbar.value = true;
     return;
   }
-  const url = OBC_CONTENT_API.replace("{content_id}", material.content_id.toString());
-  createTGWindow(url, "素材详情", material.name, 1200, 800, true);
+  const url = OBC_CONTENT_API.replace("{content_id}", item.content_id.toString());
+  createTGWindow(url, "素材详情", item.name, 1200, 800, true);
 }
 
 function getContents (day: number) {
-  const oldValue = btnNow.value;
   btnNow.value = day;
-  if (oldValue % 3 === day % 3 && oldValue !== 0 && day !== 0) {
-    return;
-  }
   calendarNow.value = getCalendar(day);
-  characterCards.value = calendarNow.value.characters;
-  weaponCards.value = calendarNow.value.weapons;
+  characterCards.value = calendarNow.value.filter((item) => item.item_type === "character");
+  weaponCards.value = calendarNow.value.filter((item) => item.item_type === "weapon");
 }
 </script>
 <style lang="css" scoped>
@@ -255,12 +202,6 @@ function getContents (day: number) {
   margin:5px;
 }
 
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-gap: 10px;
-}
-
 .calendar-single {
   margin-bottom: 10px;
   background: var(--content-bg-2);
@@ -268,7 +209,7 @@ function getContents (day: number) {
   border-radius: 10px;
 }
 
-.card-title {
+.calendar-title {
   font-size: 1.5rem;
   font-family: Genshin, serif;
   color: #546D8B;
@@ -276,50 +217,17 @@ function getContents (day: number) {
   padding-top: 10px;
 }
 
-.calendar-content {
-  background: var(--content-bg-1);
-  color:var(--content-bg-2);
-  margin: 5px;
-  border-radius: 10px;
-  padding: 10px;
-}
-
-.content-title {
-  font-size: 1.2rem;
-  font-family: Genshin, serif;
-  color: #faf7e8;
-  padding: 10px;
-  display: v-bind("btnNow === 0 ? 'block' : 'inline-block'")
-}
-
-.content-material {
-  display: inline-block;
-  margin-bottom: 10px;
-}
-
-.calendar-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: inline-block;
-  margin-left: 10px;
-}
-
-.calendar-icon :hover {
-  cursor: pointer;
-}
-
-.content-detail {
+.cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  grid-gap: 10px;
-  padding: 5px;
+  grid-gap: 5px;
+  padding: 10px;
 }
 
 .card-box {
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: 80px;
+  height: 80px;
   cursor: pointer;
 }
 
@@ -377,6 +285,29 @@ function getContents (day: number) {
   align-items: center;
 }
 
+.card-element img {
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+}
+
+.card-weapon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-weapon img {
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+}
+
 .card-type {
   position: absolute;
   top: 0;
@@ -388,22 +319,10 @@ function getContents (day: number) {
   align-items: center;
 }
 
-.card-element img {
-  width: 20px;
-  height: 20px;
-  object-fit: cover;
-}
-
 .card-type img {
   width: 20px;
   height: 20px;
   object-fit: cover;
-}
-
-.card-name img {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
 }
 
 .card-name {
@@ -419,8 +338,14 @@ function getContents (day: number) {
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   color: #fff;
-  font-size: 10px;
+  font-size: 8px;
   text-shadow: 0 0 5px #000;
   font-family: Genshin, serif;
+}
+
+.card-name img {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
 }
 </style>
