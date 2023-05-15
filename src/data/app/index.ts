@@ -2,7 +2,7 @@
  * @file data app index
  * @description data app index
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.4
+ * @since Alpha v0.2.0
  */
 
 // Data
@@ -11,7 +11,8 @@ import achievementSeries from "./achievementSeries.json";
 import calendar from "./calendar.json";
 import character from "./character.json";
 import GCG from "./GCG.json";
-import nameCards from "./nameCards.json";
+import material from "./material.json";
+import nameCards from "./namecard.json";
 import weapon from "./weapon.json";
 
 export const AppDataList = [
@@ -25,7 +26,7 @@ export const AppDataList = [
   },
   {
     name: "calendar.json",
-    data: calendar as Record<number, BTMuli.Genshin.Calendar.Data>,
+    data: calendar as BTMuli.Genshin.Calendar.Data[],
   },
   {
     name: "character.json",
@@ -36,7 +37,11 @@ export const AppDataList = [
     data: GCG as BTMuli.Genshin.Wiki.GCG.BriefInfo[],
   },
   {
-    name: "nameCards.json",
+    name: "material.json",
+    data: material as BTMuli.Genshin.Material.BriefInfo[],
+  },
+  {
+    name: "namecard.json",
     data: nameCards as BTMuli.Genshin.NameCard[],
   },
   {
@@ -48,7 +53,7 @@ export const AppDataList = [
 export const AppData = {
   achievements: achievements as BTMuli.Genshin.Achievement[],
   achievementSeries: achievementSeries as BTMuli.Genshin.AchievementSeries[],
-  calendar: calendar as Record<number, BTMuli.Genshin.Calendar.Data>,
+  calendar: calendar as BTMuli.Genshin.Calendar.Data[],
   character: character as BTMuli.Genshin.Wiki.Character.BriefInfo[],
   GCG: GCG as BTMuli.Genshin.Wiki.GCG.BriefInfo[],
   nameCards: nameCards as BTMuli.Genshin.NameCard[],
