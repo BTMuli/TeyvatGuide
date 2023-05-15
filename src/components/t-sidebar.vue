@@ -106,11 +106,11 @@
       </v-list-group>
       <v-divider />
       <div class="bottom-menu">
-        <v-list-item v-show="isDev" :title="userInfo.nickname" value="user" link href="/user">
+        <!-- <v-list-item v-show="isDev" :title="userInfo.nickname" value="user" link href="/user">
           <template #prepend>
             <img :src="userInfo.avatar" alt="userIcon" class="side-icon">
           </template>
-        </v-list-item>
+        </v-list-item> -->
         <v-list-item :title="themeTitle" value="theme" @click="switchTheme()">
           <template #prepend>
             <v-icon style="color:var(--sidebar-icon)">
@@ -139,13 +139,13 @@ import { useAppStore } from "../store/modules/app";
 const appStore = useAppStore();
 
 // 测试数据
-const userInfo = {
-  nickname: "测试用户",
-  avatar: "/source/UI/defaultUser.webp",
-};
+// const userInfo = {
+//   nickname: "测试用户",
+//   avatar: "/source/UI/defaultUser.webp",
+// };
 
 const rail = ref(appStore.sidebar.collapse);
-const isDev = ref(appStore.devMode);
+// const isDev = ref(appStore.devMode);
 // theme
 const themeGet = computed({
   get () {
