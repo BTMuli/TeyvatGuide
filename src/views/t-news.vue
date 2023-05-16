@@ -4,9 +4,15 @@
   </div>
   <div v-else>
     <v-tabs v-model="tab" align-tabs="start" class="news-tab">
-      <v-tab value="notice">公告</v-tab>
-      <v-tab value="activity">活动</v-tab>
-      <v-tab v-if="showNews" value="news">新闻</v-tab>
+      <v-tab value="notice">
+        公告
+      </v-tab>
+      <v-tab value="activity">
+        活动
+      </v-tab>
+      <v-tab v-if="showNews" value="news">
+        新闻
+      </v-tab>
       <v-spacer />
       <v-btn v-if="showSwitch" class="switch-btn" @click="switchAnno">
         <template #prepend>
@@ -352,7 +358,7 @@ async function searchPost () {
 .news-tab {
   font-family: Genshin, serif;
   margin-bottom: 20px;
-  color: var(--content-text-3) !important;
+  color: var(--content-text-3);
 }
 
 .news-grid {

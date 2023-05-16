@@ -4,8 +4,12 @@
   </div>
   <div v-else>
     <v-tabs v-model="tab" align-tabs="start" class="anno-tab">
-      <v-tab value="activity">活动公告</v-tab>
-      <v-tab value="game">游戏公告</v-tab>
+      <v-tab value="activity">
+        活动公告
+      </v-tab>
+      <v-tab value="game">
+        游戏公告
+      </v-tab>
       <v-spacer />
       <v-btn class="switch-btn" @click="switchNews">
         <template #prepend>
