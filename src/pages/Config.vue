@@ -115,19 +115,18 @@
         <template #prepend>
           <v-icon>mdi-cookie</v-icon>
         </template>
-        <v-list-item-title style="cursor: pointer;" @click="tryConfirm('getCookie')">
-          重新获取 Cookie
-        </v-list-item-title>
+        <template #title>
+          <span style="cursor: pointer" @click="tryConfirm('inputCookie')">手动输入 Cookie</span>
+        </template>
         <template #append>
-          <v-btn class="card-btn" @click="tryConfirm('readCookie')">
-            <template #prepend>
-              <img src="../assets/icons/circle-check.svg" alt="check">
-              查看 Cookie
-            </template>
-          </v-btn>
+          <div style="cursor: pointer" @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/issues/18')">
+            <span>如何获取 Cookie</span>
+            <v-icon @click="">
+              mdi-help-circle-outline
+            </v-icon>
+          </div>
         </template>
       </v-list-item>
-      <v-list-item title="手动输入 Cookie" prepend-icon="mdi-cookie" @click="tryConfirm('inputCookie')" />
       <v-list-item title="删除 IndexedDB" prepend-icon="mdi-delete" @click="tryConfirm('delDB')" />
       <v-list-item title="重置数据库" prepend-icon="mdi-delete" @click="tryConfirm('resetDB')" />
       <v-list-item title="检测 SQLite 数据库完整性" prepend-icon="mdi-database-check" @click="tryConfirm('checkDB')" />
@@ -164,7 +163,7 @@ import { getBuildTime } from "../utils/TGBuild";
 import TLoading from "../components/t-loading.vue";
 import TConfirm from "../components/t-confirm.vue";
 // tauri
-import { fs, app, os, tauri } from "@tauri-apps/api";
+import { fs, app, os } from "@tauri-apps/api";
 // store
 import { useAppStore } from "../store/modules/app";
 import { useHomeStore } from "../store/modules/home";
@@ -264,16 +263,6 @@ function tryConfirm (oper: string) {
       confirmOper.value = "inputCookie";
       confirmShow.value = true;
       break;
-    case "getCookie":
-      confirmText.value = "请根据新窗口的提示操作。";
-      confirmOper.value = "getCookie";
-      confirmShow.value = true;
-      break;
-    case "readCookie":
-      confirmText.value = "请确认已经获取到Cookie。";
-      confirmOper.value = "readCookie";
-      confirmShow.value = true;
-      break;
     case "delDB":
       confirmText.value = "确认清除 IndexedDB 吗？";
       confirmSub.value = "Alpha v0.1.4 后不再支持 IndexedDB";
@@ -316,12 +305,6 @@ async function doConfirm (oper: string) {
     case "inputCookie":
       await inputCookie();
       break;
-    case "getCookie":
-      await tauri.invoke("mys_login");
-      break;
-    case "readCookie":
-      await readCookie();
-      break;
     case "delDB":
       delDB();
       break;
@@ -356,7 +339,7 @@ async function restoreData () {
   loading.value = true;
   const res = await restoreUiafData();
   loading.value = false;
-  if (res !== false) {
+  if (res) {
     snackbarText.value = "数据已恢复!";
     snackbarColor.value = "success";
     snackbar.value = true;
@@ -436,53 +419,50 @@ async function inputCookie () {
   }
   loadingTitle.value = "正在保存 Cookie...";
   loading.value = true;
-  //  格式为 key=value;key=value，去除多余空格
-  const cookieArr = cookie.replace(/\s+/g, "").split(";");
   const cookieObj: any = {};
-  cookieArr.forEach((item) => {
+  cookie.replace(/\s+/g, "").split(";").forEach((item) => {
     const itemArr = item.split("=");
     cookieObj[itemArr[0]] = itemArr[1];
   });
+  const saveCookie:BTMuli.User.Base.Cookie = {
+    account_id: cookieObj.account_id || "",
+    cookie_token: cookieObj.cookie_token || "",
+    ltoken: cookieObj.ltoken || "",
+    ltuid: cookieObj.ltuid || "",
+    mid: cookieObj.mid || "",
+    stoken: cookieObj.stoken || "",
+    stuid: cookieObj.stuid || "",
+    login_ticket: cookieObj.login_ticket || "",
+    login_uid: cookieObj.login_uid || "",
+  };
   // 保存到数据库
-  await TGSqlite.inputCookie(JSON.stringify(cookieObj));
-  loadingTitle.value = "正在获取 tokens...";
-  const tokenRes = await TGRequest.User.byLoginTicket.getLTokens(cookieObj);
-  if (Array.isArray(tokenRes)) {
-    loadingTitle.value = "正在保存 tokens...";
-    const lToken = tokenRes.find((item) => item.name === "ltoken");
-    const sToken = tokenRes.find((item) => item.name === "stoken");
-    if (lToken) await TGSqlite.saveAppData("ltoken", lToken.token);
-    if (sToken) await TGSqlite.saveAppData("stoken", sToken.token);
+  await TGSqlite.inputCookie(JSON.stringify(saveCookie));
+  // 保存到 store
+  localStorage.setItem("cookie", JSON.stringify(saveCookie));
+  if (saveCookie.stoken === "") {
+    loadingTitle.value = "正在获取 tokens...";
+    const tokenRes = await TGRequest.User.byLoginTicket.getLTokens(cookie, cookieObj.login_ticket, cookieObj.login_uid);
+    if (Array.isArray(tokenRes)) {
+      loadingTitle.value = "正在保存 tokens...";
+      const lToken = tokenRes.find((item) => item.name === "ltoken");
+      const sToken = tokenRes.find((item) => item.name === "stoken");
+      if (lToken) await TGSqlite.saveAppData("ltoken", lToken.token);
+      if (sToken) await TGSqlite.saveAppData("stoken", sToken.token);
+      loading.value = false;
+      snackbarText.value = "Cookie 已保存!";
+      snackbarColor.value = "success";
+      snackbar.value = true;
+    } else {
+      loading.value = false;
+      snackbarText.value = "Cookie 无效!";
+      snackbarColor.value = "error";
+      snackbar.value = true;
+    }
+  } else {
     loading.value = false;
     snackbarText.value = "Cookie 已保存!";
     snackbarColor.value = "success";
     snackbar.value = true;
-  } else {
-    loading.value = false;
-    snackbarText.value = "Cookie 无效!";
-    snackbarColor.value = "error";
-    snackbar.value = true;
-  }
-}
-
-// 获取 Cookie
-async function readCookie () {
-  const getCookie = await TGSqlite.getDataByKey("AppData", "key", "cookie") as Array<{
-    key: string;
-    value: string;
-    updated: string;
-  }>;
-  const cookie = JSON.parse(getCookie[0].value);
-  if (cookie) {
-    confirmShow.value = false;
-    let cookieStr = "";
-    Object.keys(cookie).forEach((key: any) => {
-      cookieStr += `${key}=${cookie[key]};\n`;
-    });
-    setTimeout(() => {
-      prompt("Cookie", cookieStr);
-    }, 1000);
-    console.log(cookieStr);
   }
 }
 
