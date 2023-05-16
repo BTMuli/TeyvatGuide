@@ -459,6 +459,8 @@ async function inputCookie () {
       snackbar.value = true;
     }
   } else {
+    await TGSqlite.saveAppData("ltoken", saveCookie.ltoken);
+    await TGSqlite.saveAppData("stoken", saveCookie.stoken);
     loading.value = false;
     snackbarText.value = "Cookie 已保存!";
     snackbarColor.value = "success";
