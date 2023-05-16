@@ -12,14 +12,26 @@ declare namespace BTMuli.User.Base {
    * @description 这边只写了需要的，其他的可以自行添加
    * @interface Cookie
    * @property {string} login_ticket 登录凭证
-   * @property {string} login_uid 登录 UID
-   * @property {string} DEVICEFP 设备指纹
+   * @property {string} login_uid 登录 uid
+   * @property {string} account_id 账号 id
+   * @property {string} cookie_token cookie token
+   * @property {string} ltoken lToken
+   * @property {string} ltuid lToken uid
+   * @property {string} mid mid
+   * @property {string} stoken sToken
+   * @property {string} stuid sToken uid
    * @returns Cookie
    */
   export interface Cookie {
     login_ticket: string
     login_uid: string
-    DEVICEFP: string
+    account_id: string
+    cookie_token: string
+    ltoken: string
+    ltuid: string
+    mid: string
+    stoken: string
+    stuid: string
   }
 
   /**
