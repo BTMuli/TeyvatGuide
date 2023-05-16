@@ -25,7 +25,7 @@ declare namespace BTMuli.Genshin {
     /**
      * @description 定义基础返回数据
      * @since Alpha v0.1.2
-     * @interface BaseResponse
+     * @interface Response
      * @property {number} retcode 状态码
      * @property {string} message 状态信息
      * @property {any} data 数据
