@@ -43,10 +43,8 @@
                 <div class="card-element">
                   <img :src="item.element" alt="element">
                 </div>
-                <div class="card-weapon">
-                  <img :src="item.weapon_type" alt="weapon">
-                </div>
                 <div class="card-name">
+                  <img :src="item.weapon_type" alt="weapon">
                   <span>{{ item.name }}</span>
                 </div>
               </div>
@@ -219,15 +217,15 @@ function getContents (day: number) {
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  grid-gap: 5px;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-gap: 10px;
   padding: 10px;
 }
 
 .card-box {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   cursor: pointer;
 }
 
@@ -289,17 +287,6 @@ function getContents (day: number) {
   width: 20px;
   height: 20px;
   object-fit: cover;
-}
-
-.card-weapon {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .card-weapon img {
