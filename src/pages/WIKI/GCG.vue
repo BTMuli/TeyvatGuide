@@ -5,9 +5,9 @@
   <div v-else>
     <v-tabs v-model="tab" align-tabs="start" class="cards-tab">
       <div v-show="!doSearch">
-        <v-tab value="character" title="角色牌" />
-        <v-tab value="action" title="行动牌" />
-        <v-tab value="monster" title="魔物牌" />
+        <v-tab value="character">角色牌</v-tab>
+        <v-tab value="action">行动牌</v-tab>
+        <v-tab value="monster">魔物牌</v-tab>
       </div>
       <v-spacer />
       <v-text-field
