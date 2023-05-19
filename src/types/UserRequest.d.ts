@@ -11,15 +11,26 @@ declare namespace BTMuli.User.Base {
    * @since Alpha v0.2.0
    * @description 这边只写了需要的，其他的可以自行添加
    * @interface Cookie
+   * @description login_ticket 与 login_uid 一起使用
+   * @see TGRequest.User.byLoginTicket.getTokens
    * @property {string} login_ticket 登录凭证
    * @property {string} login_uid 登录 uid
+   * @description account_id 与 cookie_token 一起使用
+   * @see TGRequest.User.byCookie.getAccounts
    * @property {string} account_id 账号 id
    * @property {string} cookie_token cookie token
-   * @property {string} ltoken lToken
-   * @property {string} ltuid lToken uid
+   * @description ltoken 与 ltuid 一起使用
+   * @see TGRequest.User.byLToken.verify
+   * @property {string} ltoken ltoken
+   * @property {string} ltuid ltoken 对应的 uid
+   * @description stoken 与 stuid 一起使用，这是旧版本的 token
+   * @see TGRequest.User.bySToken.getCookieToken
+   * @property {string} stoken stoken
+   * @property {string} stuid stoken 对应的 uid
+   * @description stoken_v2 与 mid 一起使用，这是新版本的 token
+   * @todo 目前只完成 mid 的获取，stoken_v2 的获取还没完成
+   * @property {string} stokenV2 stoken_v2
    * @property {string} mid mid
-   * @property {string} stoken sToken
-   * @property {string} stuid sToken uid
    * @returns Cookie
    */
   export interface Cookie {
@@ -31,61 +42,7 @@ declare namespace BTMuli.User.Base {
     ltuid: string
     mid: string
     stoken: string
+    stoken_v2?: string
     stuid: string
-  }
-
-  /**
-   * @description 游戏 Token
-   * @since Alpha v0.2.0
-   * @interface TokenItem
-   * @property {TokenType} name 游戏 Token 名称
-   * @property {string} token 游戏 Token
-   * @returns TokenItem
-   */
-  export interface TokenItem {
-    name: TokenType
-    token: string
-  }
-
-  /**
-   * @description 游戏 Token 类型
-   * @since Alpha v0.2.0
-   * @enum {string}
-   * @property {string} ltoken longTime Token
-   * @property {string} stoken shortTime Token
-   * @returns string
-   */
-  export enum TokenType {
-    LToken = "ltoken",
-    SToken = "stoken",
-  }
-}
-
-declare namespace BTMuli.User.Response {
-  /**
-   * @description 获取 ltoken 跟 stoken 的响应
-   * @since Alpha v0.2.0
-   * @interface Token
-   * @extends {BTMuli.Genshin.Base.Response}
-   * @property {TokenItem[]} data.list 游戏 Token
-   * @returns {Token}
-   */
-  export interface Token extends BTMuli.Genshin.Base.Response {
-    data: {
-      list: TokenItem[]
-    }
-  }
-  /**
-   * @description 获取游戏账号的响应
-   * @since Alpha v0.2.0
-   * @interface GameAccounts
-   * @extends {BTMuli.Genshin.Base.Response}
-   * @property {BTMuli.User.Game.Account[]} data.list 游戏账号
-   * @returns {GameAccounts}
-   */
-  export interface GameAccounts extends BTMuli.Genshin.Base.Response {
-    data: {
-      list: BTMuli.User.Game.Account[]
-    }
   }
 }
