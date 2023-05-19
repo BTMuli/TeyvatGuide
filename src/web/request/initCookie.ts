@@ -48,6 +48,8 @@ async function initCookie (ticket: string, uid: string): Promise<void> {
     const mid = await verifyLToken(cookie.ltoken, cookie.ltuid, cookie.stoken);
     if (typeof mid === "string") cookie.mid = mid;
     await TGSqlite.saveAppData("cookie", JSON.stringify(cookie));
+  } else {
+    throw new Error("获取 token 失败");
   }
 }
 

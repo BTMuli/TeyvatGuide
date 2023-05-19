@@ -409,7 +409,6 @@ function submitHome () {
 
 // 输入 Cookie
 async function inputCookie () {
-  // 将 Cookie 从 string 转为 object
   const cookie = confirmInput.value;
   if (cookie === "") {
     snackbarText.value = "Cookie 为空!";
@@ -417,53 +416,28 @@ async function inputCookie () {
     snackbar.value = true;
     return;
   }
-  loadingTitle.value = "正在保存 Cookie...";
-  loading.value = true;
-  const cookieObj: any = {};
-  cookie.replace(/\s+/g, "").split(";").forEach((item) => {
-    const itemArr = item.split("=");
-    cookieObj[itemArr[0]] = itemArr[1];
-  });
-  const saveCookie:BTMuli.User.Base.Cookie = {
-    account_id: cookieObj.account_id || "",
-    cookie_token: cookieObj.cookie_token || "",
-    ltoken: cookieObj.ltoken || "",
-    ltuid: cookieObj.ltuid || "",
-    mid: cookieObj.mid || "",
-    stoken: cookieObj.stoken || "",
-    stuid: cookieObj.stuid || "",
-    login_ticket: cookieObj.login_ticket || "",
-    login_uid: cookieObj.login_uid || "",
-  };
-  // 保存到数据库
-  await TGSqlite.inputCookie(JSON.stringify(saveCookie));
-  // 保存到 store
-  localStorage.setItem("cookie", JSON.stringify(saveCookie));
-  if (saveCookie.stoken === "") {
-    loadingTitle.value = "正在获取 tokens...";
-    const tokenRes = await TGRequest.User.byLoginTicket.getLTokens(cookie, cookieObj.login_ticket, cookieObj.login_uid);
-    if (Array.isArray(tokenRes)) {
-      loadingTitle.value = "正在保存 tokens...";
-      const lToken = tokenRes.find((item) => item.name === "ltoken");
-      const sToken = tokenRes.find((item) => item.name === "stoken");
-      if (lToken) await TGSqlite.saveAppData("ltoken", lToken.token);
-      if (sToken) await TGSqlite.saveAppData("stoken", sToken.token);
-      loading.value = false;
-      snackbarText.value = "Cookie 已保存!";
-      snackbarColor.value = "success";
-      snackbar.value = true;
-    } else {
-      loading.value = false;
-      snackbarText.value = "Cookie 无效!";
-      snackbarColor.value = "error";
-      snackbar.value = true;
-    }
-  } else {
-    await TGSqlite.saveAppData("ltoken", saveCookie.ltoken);
-    await TGSqlite.saveAppData("stoken", saveCookie.stoken);
+  loadingTitle.value = "正在获取 tokens...";
+  // 提取 cookie.login_ticket 和 cookie.login_uid
+  const ticket = cookie.match(/login_ticket=(.*?);/)?.toString();
+  const uid = cookie.match(/login_uid=(.*?);/)?.toString();
+  // 如果两者不存在
+  if (!ticket || !uid) {
+    snackbarText.value = "Cookie 无效!";
+    snackbarColor.value = "error";
+    snackbar.value = true;
+    return;
+  }
+  console.log(ticket, uid);
+  try {
+    await TGRequest.User.init(ticket, uid);
     loading.value = false;
     snackbarText.value = "Cookie 已保存!";
     snackbarColor.value = "success";
+    snackbar.value = true;
+  } catch (err) {
+    loading.value = false;
+    snackbarText.value = "Cookie 无效!";
+    snackbarColor.value = "error";
     snackbar.value = true;
   }
 }
