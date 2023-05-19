@@ -25,7 +25,7 @@ const TGApi = {
     getTokens: TakumiTokensApi, // 根据 login_ticket 获取游戏 Token
     getLToken: PassportTokenApi, // 根据 stoken 获取 ltoken
     getCookieToken: PassportCookieTokenApi, // 根据 Cookie 获取 Token
-    verifyStoken: PassportVerifyApi, // 验证 stoken 有效性
+    verifyLToken: PassportVerifyApi, // 验证 ltoken 有效性
   },
   GameData: {
     byCookie: {
