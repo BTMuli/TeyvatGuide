@@ -70,14 +70,16 @@ export function qs (obj: Record<string, string>, encode: boolean = false): strin
 }
 
 /**
- * @description 将 ck JSON 对象转换为字符串
+ * @description 将 cookie 对象转换为字符串
  * @since Alpha v0.2.0
- * @param {object} ck ck JSON 对象
- * @returns {string} ck 字符串
+ * @param {Record<string, string>} cookie cookie
+ * @returns {string} 转换后的 cookie
  */
-export function cookieToString (ck: object): string {
-  let res = stringify(ck);
-  res = res.replace(/&/g, ";");
+export function transCookie (cookie: Record<string, string>) {
+  let res = "";
+  for (const [key, value] of Object.entries(cookie)) {
+    res += `${key}=${value};`;
+  }
   return res;
 }
 
