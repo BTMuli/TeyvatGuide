@@ -5,8 +5,6 @@
  * @since Alpha v0.2.0
  */
 
-// Node
-import { stringify } from "qs";
 // TauriGenshin
 import TGConstant from "../constant/TGConstant";
 
@@ -42,17 +40,6 @@ export function getRandomString (length: number): string {
     res += str[Math.floor(Math.random() * str.length)];
   }
   return res;
-}
-
-/**
- * @description 获取随机数
- * @since Alpha v0.2.0
- * @param {number} min 最小值
- * @param {number} max 最大值
- * @returns {number} 随机数
- */
-export function random (min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 /**

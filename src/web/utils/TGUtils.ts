@@ -5,10 +5,10 @@
  * @since Alpha v0.2.0
  */
 
-import { parseAnnoContent } from "./parseAnno";
 import { getAnnoCard } from "./getAnnoCard";
 import { getRequestHeader } from "./getRequestHeader";
-import { cookieToString, getServerByUid } from "./tools";
+import { parseAnnoContent } from "./parseAnno";
+import { transCookie, getServerByUid } from "./tools";
 
 const TGUtils = {
   Anno: {
@@ -19,7 +19,7 @@ const TGUtils = {
     getHeader: getRequestHeader,
   },
   Tools: {
-    cookieToString,
+    transCookie,
     getServerByUid,
   },
 };
