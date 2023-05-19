@@ -417,9 +417,9 @@ async function inputCookie () {
     return;
   }
   loadingTitle.value = "正在获取 tokens...";
-  // 提取 cookie.login_ticket 和 cookie.login_uid
-  const ticket = cookie.match(/login_ticket=(.*?);/)?.toString();
-  const uid = cookie.match(/login_uid=(.*?);/)?.toString();
+  const cookieObj = cookie.trim().split(";").map((item) => item.trim().split("="));
+  const ticket = cookieObj.find((item) => item[0] === "login_ticket")?.[1];
+  const uid = cookieObj.find((item) => item[0] === "login_uid")?.[1];
   // 如果两者不存在
   if (!ticket || !uid) {
     snackbarText.value = "Cookie 无效!";
@@ -427,7 +427,6 @@ async function inputCookie () {
     snackbar.value = true;
     return;
   }
-  console.log(ticket, uid);
   try {
     await TGRequest.User.init(ticket, uid);
     loading.value = false;
