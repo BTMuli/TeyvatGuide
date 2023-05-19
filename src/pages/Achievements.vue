@@ -90,7 +90,7 @@
             <template #append>
               <span v-show="achievement.isCompleted" class="right-time">{{ achievement.completedTime }}</span>
               <v-card class="reward-card">
-                <v-img src="/source/material/原石.webp" sizes="32" />
+                <v-img src="/icon/material/201.webp" sizes="32" />
                 <div class="reward-num">
                   <span>{{ achievement.reward }}</span>
                 </div>
