@@ -22,7 +22,7 @@ declare namespace BTMuli.Genshin.Wiki.Weapon {
    */
   export interface BriefInfo {
     id: number
-    content_id?: number
+    content_id?: number | null
     name: string
     star: number
     bg: string

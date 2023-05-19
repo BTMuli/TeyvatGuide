@@ -2,13 +2,13 @@
  * @file types Character.d.ts
  * @author BTMuli<bt-muli@outlook.com>
  * @description 角色相关类型定义
- * @since Alpha v0.1.3
+ * @since Alpha v0.1.5
  */
 
 declare namespace BTMuli.Genshin.Wiki.Character {
   /**
    * @description 简略信息，用于整体展示
-   * @since Alpha v0.1.3
+   * @since Alpha v0.1.5
    * @interface BriefInfo
    * @property {number} id - 角色 ID
    * @property {number} content_id - 观测枢 id
@@ -22,7 +22,7 @@ declare namespace BTMuli.Genshin.Wiki.Character {
    */
   export interface BriefInfo {
     id: number
-    content_id?: number
+    content_id?: number | null
     name: string
     star: number
     bg: string

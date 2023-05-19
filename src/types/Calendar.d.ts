@@ -26,7 +26,7 @@ declare namespace BTMuli.Genshin.Calendar {
      */
   export interface Data {
     id: number
-    content_id: number
+    content_id: number | null
     drop_day: number[]
     name: string
     item_type: string
