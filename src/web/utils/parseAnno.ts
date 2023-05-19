@@ -1,5 +1,5 @@
 /**
- * @file core utils parseAnno.ts
+ * @file web utils parseAnno.ts
  * @description 解析游戏内公告数据
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.2

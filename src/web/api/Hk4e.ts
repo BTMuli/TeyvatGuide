@@ -1,8 +1,8 @@
 /**
- * @file core api Hk4e.ts
+ * @file web api Hk4e.ts
  * @description 定义 Hk4e API
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @since Alpha v0.2.0
  */
 
 const Hk4eApi = "https://hk4e-api.mihoyo.com"; // 基础 API

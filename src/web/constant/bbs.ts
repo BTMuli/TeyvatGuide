@@ -1,5 +1,5 @@
 /**
- * @file core constant bbs.ts
+ * @file web constant bbs.ts
  * @description 常量-应用数据
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.2.0

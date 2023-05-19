@@ -1,11 +1,13 @@
 /**
- * @file core request getAnnouncement.ts
+ * @file web request getAnnouncement.ts
  * @description 获取游戏内公告
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.2
  */
 
+// Tauri
 import { http } from "@tauri-apps/api";
+// Tauri.Genshin
 import TGApi from "../api/TGApi";
 
 /**
@@ -21,7 +23,7 @@ export async function getAnnoList (): Promise<BTMuli.Genshin.Announcement.ListDa
  * @description 获取游戏内公告内容
  * @since Alpha v0.1.2
  * @param {number} annId 公告 ID
- * @returns {Promise<AnnoContentItem>}
+ * @returns {Promise<BTMuli.Genshin.Announcement.ContentItem>}
  */
 export async function getAnnoContent (annId: number): Promise<BTMuli.Genshin.Announcement.ContentItem> {
   const annoContents: BTMuli.Genshin.Announcement.ContentItem[] = await http

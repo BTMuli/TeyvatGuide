@@ -1,5 +1,5 @@
 /**
- * @file core utils transAnno.ts
+ * @file web utils transAnno.ts
  * @description 公告数据转换工具
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.2
@@ -12,7 +12,7 @@ const defaultCover = "/source/UI/defaultCover.webp";
  * @description 将获取到的数据转为渲染用的卡片
  * @since Alpha v0.1.2
  * @param {BTMuli.Genshin.Announcement.ListData} data 公告数据
- * @returns {AnnoListCard[]} 渲染用的卡片
+ * @returns {BTMuli.Genshin.Announcement.ListCard[]} 渲染用的卡片
  */
 export function getAnnoCard (data: BTMuli.Genshin.Announcement.ListData): BTMuli.Genshin.Announcement.ListCard[] {
   const cards: BTMuli.Genshin.Announcement.ListCard[] = [];

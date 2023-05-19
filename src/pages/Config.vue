@@ -171,7 +171,7 @@ import { useAchievementsStore } from "../store/modules/achievements";
 // utils
 import { backupUiafData, restoreUiafData } from "../utils/UIAF";
 import TGSqlite from "../utils/TGSqlite";
-import TGRequest from "../core/request/TGRequest";
+import TGRequest from "../web/request/TGRequest";
 
 // Store
 const appStore = useAppStore();

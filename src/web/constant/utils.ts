@@ -1,5 +1,5 @@
 /**
- * @file core constant utils.ts
+ * @file web constant utils.ts
  * @description 一些杂项的常量
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.2.0

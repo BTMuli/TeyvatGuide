@@ -24,7 +24,7 @@ import TSwitchTheme from "../components/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
 // utils
-import TGRequest from "../core/request/TGRequest";
+import TGRequest from "../web/request/TGRequest";
 
 // loading
 const loading = ref(true as boolean);

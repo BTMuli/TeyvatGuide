@@ -1,12 +1,13 @@
 /**
- * @file core utils tools.ts
+ * @file web utils tools.ts
  * @description 应用用到的工具函数
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
 
-import md5 from "js-md5";
+// Node
 import { stringify } from "qs";
+// TauriGenshin
 import TGConstant from "../constant/TGConstant";
 
 /**
@@ -41,16 +42,6 @@ export function getRandomString (length: number): string {
     res += str[Math.floor(Math.random() * str.length)];
   }
   return res;
-}
-
-/**
- * @description md5 加密
- * @since Alpha v0.2.0
- * @param {string} data 要加密的内容
- * @returns {string} 加密后的内容
- */
-export function MD5 (data: string): string {
-  return md5.update(data).hex();
 }
 
 /**
@@ -100,17 +91,17 @@ export function getServerByUid (uid: string): string {
   // 获取第一个字符
   const first = uid[0];
   // 1-4 为国服-天空岛
-  if (first >= "1" && first <= "4") return TGConstant.SERVER.CN_ISLAND;
+  if (first >= "1" && first <= "4") return TGConstant.Server.CN_ISLAND;
   // 5 为国服-世界树
-  if (first === "5") return TGConstant.SERVER.CN_TREE;
+  if (first === "5") return TGConstant.Server.CN_TREE;
   // 6 为美服
-  if (first === "6") return TGConstant.SERVER.OS_USA;
+  if (first === "6") return TGConstant.Server.OS_USA;
   // 7 为欧服
-  if (first === "7") return TGConstant.SERVER.OS_EURO;
+  if (first === "7") return TGConstant.Server.OS_EURO;
   // 8 为亚服
-  if (first === "8") return TGConstant.SERVER.OS_AISA;
+  if (first === "8") return TGConstant.Server.OS_ASIA;
   // 9 为台服
-  if (first === "9") return TGConstant.SERVER.OS_CHT;
+  if (first === "9") return TGConstant.Server.OS_CHT;
   // 其他情况返回未知
-  return TGConstant.SERVER.UNKNOWN;
+  return TGConstant.Server.UNKNOWN;
 }

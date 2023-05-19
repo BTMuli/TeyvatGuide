@@ -11,8 +11,8 @@ import {
   getCookieTokenBySToken, vetifySToken,
 } from "./getTokens";
 import {
-  getGameCardByCookie, getGameAccountsbyCookie,
-  getAccountsbySToken, getGameRoleList,
+  getGameCardByCookie, getGameAccountsByCookie,
+  getAccountsBySToken, getGameRoleListByCookie,
 } from "./getGameData";
 
 const TGRequest = {
@@ -25,14 +25,14 @@ const TGRequest = {
       getLTokens: getTokensByLoginTicket,
     },
     byCookie: {
-      getAccounts: getGameAccountsbyCookie,
+      getAccounts: getGameAccountsByCookie,
       getGameCard: getGameCardByCookie,
-      getCharacter: getGameRoleList,
+      getCharacter: getGameRoleListByCookie,
     },
     bySToken: {
-      vertify: vetifySToken,
+      verify: vetifySToken,
       getLToken: getLtokenBySToken,
-      getAccounts: getAccountsbySToken,
+      getAccounts: getAccountsBySToken,
       getCookieToken: getCookieTokenBySToken,
     },
   },

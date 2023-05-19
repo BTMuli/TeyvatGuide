@@ -99,8 +99,8 @@ import TLoading from "../components/t-loading.vue";
 // store
 import { useAppStore } from "../store/modules/app";
 // utils
-import TGRequest from "../core/request/TGRequest";
-import TGUtils from "../core/utils/TGUtils";
+import TGRequest from "../web/request/TGRequest";
+import TGUtils from "../web/utils/TGUtils";
 import { createTGWindow } from "../utils/TGWindow";
 
 // store

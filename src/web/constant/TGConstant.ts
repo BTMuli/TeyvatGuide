@@ -1,5 +1,5 @@
 /**
- * @file core constant TGConstant.ts
+ * @file web constant TGConstant.ts
  * @description 常量
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.2.0
@@ -16,9 +16,9 @@ const TGConstant = {
     USER_AGENT: BBS_HEADER_AGENT,
     REFERER: BBS_REFERER,
   },
-  SALT,
-  SERVER,
-  UTILS: {
+  Salt: SALT,
+  Server: SERVER,
+  Utils: {
     GAME_BIZ,
   },
 };
