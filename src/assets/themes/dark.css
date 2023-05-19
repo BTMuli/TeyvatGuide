@@ -2,7 +2,7 @@
  * @file assets themes light.css
  * @description 主题样式文件
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.4
+ * @since Alpha v0.1.5
  */
 
 /* 主题色 */
@@ -15,6 +15,7 @@ html.dark {
   --back-top-shadow: #000000;
   --theme-switch-icon: #e1e1e1;
   --post-default-text: #faf7e8;
+  --calendar-item-btn: #faf7e8;
 
   --content-bg-1: #1e1e1e;
   --content-bg-2: #393b40;

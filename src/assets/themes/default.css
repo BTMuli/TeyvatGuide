@@ -2,7 +2,7 @@
  * @file assets themes dark.css
  * @description 主题样式文件
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.4
+ * @since Alpha v0.1.5
  */
 
 /* 主题色 */
@@ -15,6 +15,7 @@ html.default {
   --back-top-shadow: #546d8b;
   --theme-switch-icon: #393b40;
   --post-default-text: #1e1e1e;
+  --calendar-item-btn: #fec90b;
 
   --content-bg-1: #546d8b;
   --content-bg-2: #faf7e8;
