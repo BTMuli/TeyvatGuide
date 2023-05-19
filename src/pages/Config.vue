@@ -429,6 +429,7 @@ async function inputCookie () {
   }
   try {
     await TGRequest.User.init(ticket, uid);
+    loadingTitle.value = "正在获取用户信息...";
     loading.value = false;
     snackbarText.value = "Cookie 已保存!";
     snackbarColor.value = "success";

@@ -9,7 +9,7 @@
           {{ subtitle }}
         </div>
         <div v-show="isInput" class="confirm-input">
-          <v-text-field v-model="inputVal" :label="subtitle" hide-details="auto" @keyup.enter="onConfirm" />
+          <v-text-field v-model="inputVal" :label="subtitle||''" hide-details="auto" @keyup.enter="onConfirm" />
         </div>
         <div class="confirm-btn-box">
           <button class="confirm-btn" @click="onCancel">
