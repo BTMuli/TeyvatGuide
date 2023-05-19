@@ -1,6 +1,6 @@
 /**
+ * @file utils TGSqlite.ts
  * @description 数据库操作类
- * @class TGSqlite
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
@@ -10,12 +10,13 @@ import Database from "tauri-plugin-sql-api";
 // utils
 import { importUIAFData, initSQLiteData, initSQLiteTable } from "./TGSql";
 import { getUiafStatus } from "./UIAF";
+
 class TGSqlite {
   /**
 	 * @description 数据库地址
 	 * @private
 	 * @type {string}
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.1.4
 	 */
   private readonly dbPath: string = "sqlite:tauri-genshin.db";
@@ -23,7 +24,7 @@ class TGSqlite {
 	 * @description 数据库包含的表
 	 * @private
 	 * @type {string[]}
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.1.4
 	 */
   private readonly tables: string[] = [
@@ -36,10 +37,10 @@ class TGSqlite {
 
   /**
 	 * @description 初始化数据库
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.1.4
 	 * @returns {Promise<void>}
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 */
   public async init (): Promise<void> {
     const db = await Database.load(this.dbPath);
@@ -56,7 +57,7 @@ class TGSqlite {
 
   /**
 	 * @description 获取数据库信息
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.1.4
 	 * @returns {Promise<{ key: string, value: string, updated: string }[]>}
 	 */
@@ -70,7 +71,7 @@ class TGSqlite {
 
   /**
 	 * @description 封装-根据 table keys 获取数据
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.2.0
 	 * @param {string} table 表名
 	 * @param {string} keyName 键名
@@ -87,7 +88,7 @@ class TGSqlite {
 
   /**
 	 * @description 封装-保存数据
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.2.0
 	 * @param {string} sql sql语句
 	 * @returns {Promise<void>}
@@ -100,7 +101,7 @@ class TGSqlite {
 
   /**
 	 * @description 输入 cookie
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.2.0
 	 * @param {string} cookie
 	 * @returns {Promise<void>}
@@ -118,27 +119,34 @@ class TGSqlite {
 
   /**
 	 * @description 获取 cookie
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.2.0
-	 * @returns {Promise<string>}
+	 * @returns {Promise<Record<string, string>>}
 	 */
-  public async getCookie (): Promise<string> {
+  public async getCookie (): Promise<Record<string, string>> {
     const db = await Database.load(this.dbPath);
     const sql = "SELECT value FROM AppData WHERE key='cookie';";
-    const cookieSelect: Array<{ value: string }> = await db.select(sql);
+    const res: Array<{ value: string }> = await db.select(sql);
     await db.close();
-    const cookieGet = JSON.parse(cookieSelect[0].value);
-    let res = "";
-    const cookieKeys = Object.keys(cookieGet);
-    for (const key of cookieKeys) {
-      if (cookieGet[key] !== "") res += `${key}=${cookieGet[key]};`;
-    }
-    return res;
+    return JSON.parse(res[0].value);
+  }
+
+  /**
+	 * @description 获取 cookie 某项值
+	 * @memberOf TGSqlite
+	 * @since Alpha v0.2.0
+	 * @param {string} itemKey 项名
+	 * @returns {Promise<string>} 项值
+	 */
+  public async getCookieItem (itemKey: string): Promise<string> {
+    const cookie = await this.getCookie();
+    if (Object.keys(cookie).includes(itemKey)) return cookie[itemKey];
+    return "";
   }
 
   /**
 	 * @description 保存 appData
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.2.0
 	 * @param {string} key
 	 * @param {string} value
@@ -157,7 +165,7 @@ class TGSqlite {
 
   /**
 	 * @description 已有数据表跟触发器不变的情况下，更新数据库数据
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.1.4
 	 * @returns {Promise<void>}
 	 */
@@ -172,7 +180,7 @@ class TGSqlite {
 
   /**
 	 * @description 检测数据库完整性
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.2.0
 	 * @returns {Promise<boolean>}
 	 */
@@ -194,7 +202,7 @@ class TGSqlite {
 
   /**
 	 * @description 重置数据库
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.1.4
 	 * @returns {Promise<void>}
 	 */
@@ -210,7 +218,7 @@ class TGSqlite {
 
   /**
 	 * @description 获取数据库版本及构建时间
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.1.4
 	 * @returns {Promise<{ version: string, buildTime: string }>}
 	 */
@@ -226,7 +234,7 @@ class TGSqlite {
 
   /**
 	 * @description 获取成就系列列表
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.1.4
 	 * @returns {Promise<BTMuli.SQLite.AchievementSeries[]>}
 	 */
@@ -240,7 +248,7 @@ class TGSqlite {
 
   /**
 	 * @description 获取成就系列对应的名片
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.1.4
 	 * @param {number} seriesId 系列 ID
 	 * @returns {Promise<BTMuli.SQLite.NameCard>}
@@ -258,7 +266,7 @@ class TGSqlite {
 
   /**
 	 * @description 获取成就列表
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @param {number} [seriesId] 系列 ID
 	 * @since Alpha v0.1.4
 	 * @returns {Promise<BTMuli.SQLite.Achievements[]>}
@@ -279,7 +287,7 @@ class TGSqlite {
   /**
 	 * @description 获取成就概况
 	 * @since Alpha v0.1.4
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @returns {Promise<{total:number,fin:number}>}
 	 */
   public async getAchievementsOverview (): Promise<{ total: number, fin: number }> {
@@ -292,7 +300,7 @@ class TGSqlite {
 
   /**
 	 * @description 查询成就
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @param {string} keyword 关键词
 	 * @since Alpha v0.1.4
 	 * @returns {Promise<BTMuli.SQLite.Achievements[]>}
@@ -318,7 +326,7 @@ class TGSqlite {
 
   /**
 	 * @description 合并 UIAF 数据
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @param {BTMuli.UIAF.Achievement[]} achievements UIAF 数据
 	 * @since Alpha v0.1.4
 	 * @returns {Promise<void>}
@@ -334,7 +342,7 @@ class TGSqlite {
 
   /**
 	 * @description 获取 UIAF 数据
-	 * @memberof TGSqlite
+	 * @memberOf TGSqlite
 	 * @since Alpha v0.1.4
 	 * @returns {Promise<TGPlugin.UIAF.Achievement[]>}
 	 */
