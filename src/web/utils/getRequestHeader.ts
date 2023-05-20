@@ -36,7 +36,7 @@ function getSalt (saltType: string) {
  * @param {number} max 最大值
  * @returns {number} 随机数
  */
-function random (min: number, max: number): number {
+function getRandomNumber (min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
@@ -51,15 +51,13 @@ function random (min: number, max: number): number {
  */
 function getDS (method: string, data: string, saltType: string): string {
   const salt = getSalt(saltType);
-  const params = {
-    salt,
-    t: Math.floor(Date.now() / 1000).toString(),
-    r: random(100000, 200000).toString(),
-    b: method === "GET" ? "" : data,
-    q: method === "GET" ? data : "",
-  };
-  const md5Str = md5.update(qs.stringify(params)).hex();
-  return `${params.t},${params.r},${md5Str}`;
+  const time = Math.floor(Date.now() / 1000).toString();
+  const random = getRandomNumber(100000, 200000).toString();
+  const body = method === "GET" ? "" : data;
+  const query = method === "GET" ? data : "";
+  const hashStr = `salt=${salt}&t=${time}&r=${random}&b=${body}&q=${query}`;
+  const md5Str = md5.update(qs.stringify(hashStr)).hex();
+  return `${time},${random},${md5Str}`;
 }
 
 /**
