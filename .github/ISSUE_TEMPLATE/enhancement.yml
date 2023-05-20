@@ -1,9 +1,9 @@
 name: 新功能
 description: 提交新功能请求
-# title: "[Feat] "
+title: "[Feat] "
 labels:
-  - enhancement
-  - question
+  - 新特性
+  - 待处理
 assignees:
   - BTMuli
 body:

@@ -1,10 +1,9 @@
 name: 开发目标（开发人员）
 description: 用于开发人员 Issue 的模板
-# title: "[TODO] "
+title: "[TODO] "
 labels:
-  - todo
-  - enhancement
-  - help wanted
+  - 计划中
+  - 新特性
 assignees:
   - BTMuli
 body:

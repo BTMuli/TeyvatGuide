@@ -1,9 +1,10 @@
 name: 非预期错误和漏洞
 description: 提交非预期错误和漏洞
-# title: "[Bug] "
+title: "[Bug] "
 labels:
-  - bug
-  - question
+  - BUG
+  - Question
+  - 待处理
 assignees:
   - BTMuli
 body:
