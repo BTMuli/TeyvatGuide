@@ -65,17 +65,23 @@ function getDS (method: string, data: string, saltType: string): string {
  * @since Alpha v0.2.0
  * @param {Record<string, string>} cookie cookie
  * @param {string} method 请求方法
- * @param {Record<string, string|number>} data 请求数据
+ * @param {Record<string, string|number>|string} data 请求数据
  * @param {string} saltType salt 类型
  * @returns {Record<string, string>} 请求头
  */
-export function getRequestHeader (cookie: Record<string, string>, method: string, data: Record<string, string | number>, saltType: string): Record<string, string> {
+export function getRequestHeader (cookie: Record<string, string>, method: string, data: Record<string, string | number> | string, saltType: string): Record<string, string> {
+  let ds;
+  if (typeof data === "string") {
+    ds = getDS(method, data, saltType);
+  } else {
+    ds = getDS(method, transParams(data), saltType);
+  }
   return {
     "User-Agent": TGConstant.BBS.USER_AGENT,
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "5",
     Referer: "https://webstatic.mihoyo.com/",
-    DS: getDS(method, transParams(data), saltType),
+    DS: ds,
     Cookie: transCookie(cookie),
   };
 }
