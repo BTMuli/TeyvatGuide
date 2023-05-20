@@ -152,7 +152,7 @@ function checkCover (data: GachaData[]) {
   }
   // 获取缓存
   const cover = homeStore.poolCover satisfies Record<number, string>;
-  if (cover === undefined || cover === null) {
+  if (cover === undefined) {
     return false;
   }
   return data.every((item) => {

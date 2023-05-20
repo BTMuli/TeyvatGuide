@@ -62,8 +62,8 @@
       <div class="calendar-item-box">
         <div class="calendar-item-top">
           <div class="calendar-item-icon">
-            <Component :is="TMiniAvatar" v-if="selectedType=== 'character'" :model-value="selectedItem" size="100px" />
-            <Component :is="TMiniWeapon" v-if="selectedType=== 'weapon'" :model-value="selectedItem" size="100px" />
+            <TMiniAvatar v-if="selectedType=== 'character'" :model-value="selectedItem" size="100px" />
+            <TMiniWeapon v-if="selectedType=== 'weapon'" :model-value="selectedItem" size="100px" />
           </div>
           <div class="calendar-item-content">
             <div v-for="item in selectedItem.materials" class="calendar-item-sub">
@@ -102,7 +102,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { onMounted, ref } from "vue";
+import { onMounted, ref, shallowRef } from "vue";
 import TMiniAvatar from "./t-mini-avatar.vue";
 import TMiniWeapon from "./t-mini-weapon.vue";
 import TCalendarMaterial from "./t-calendar-material.vue";
