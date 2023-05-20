@@ -7,13 +7,10 @@
 
 // tauri
 import { http } from "@tauri-apps/api";
-// Node
-import qs from "qs";
 // api
 import TGApi from "../api/TGApi";
 // utils
 import TGUtils from "../utils/TGUtils";
-import { transCookie } from "../utils/tools";
 
 /**
  * @description 根据 login_ticket 获取游戏 Token，包括 stoken 和 ltoken
@@ -30,7 +27,7 @@ export async function getTokensByLoginTicket (ticket: string, uid: string): Prom
   const url = TGApi.GameTokens.getTokens;
   // eslint-disable-next-line camelcase
   const params = { login_ticket: ticket, token_types: 3, uid };
-  const header = TGUtils.User.getHeader(transCookie(cookie), "GET", qs.stringify(params), "common");
+  const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http.fetch<BTMuli.User.Response.Tokens>(url, {
     method: "GET",
     headers: header,

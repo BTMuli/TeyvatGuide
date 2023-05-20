@@ -7,13 +7,10 @@
 
 // tauri
 import { http } from "@tauri-apps/api";
-// Node
-import qs from "qs";
 // api
 import TGApi from "../api/TGApi";
 // utils
 import TGUtils from "../utils/TGUtils";
-import { transCookie } from "../utils/tools";
 import TGConstant from "../constant/TGConstant";
 
 /**
@@ -30,7 +27,6 @@ export async function getGameAccountsBySToken (stoken: string, stuid: string): P
     stoken,
   };
   const params = { stoke: stoken, game_biz: TGConstant.Utils.GAME_BIZ };
-  const header = TGUtils.User.getHeader(transCookie(cookie), "GET", qs.stringify(params), "common");
   return await getGameAccounts(url, cookie, params);
 }
 
@@ -60,7 +56,7 @@ export async function getGameAccountsByCookie (cookie_token: string, account_id:
  * @returns {Promise<BTMuli.User.Game.Account[]|BTMuli.Genshin.Base.Response>}
  */
 async function getGameAccounts (url: string, cookie: Record<string, string>, params: Record<string, string>): Promise<BTMuli.User.Game.Account[] | BTMuli.Genshin.Base.Response> {
-  const header = TGUtils.User.getHeader(transCookie(cookie), "GET", qs.stringify(params), "common");
+  const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http.fetch<BTMuli.User.Response.GameAccounts>(url, {
     method: "GET",
     headers: header,

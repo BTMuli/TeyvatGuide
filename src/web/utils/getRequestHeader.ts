@@ -7,9 +7,9 @@
 
 // Node
 import md5 from "js-md5";
-import qs from "qs";
 // Tauri.Genshin
 import TGConstant from "../constant/TGConstant";
+import { transCookie, transParams } from "./tools";
 
 /**
  * @description 获取 salt
@@ -56,26 +56,26 @@ function getDS (method: string, data: string, saltType: string): string {
   const body = method === "GET" ? "" : data;
   const query = method === "GET" ? data : "";
   const hashStr = `salt=${salt}&t=${time}&r=${random}&b=${body}&q=${query}`;
-  const md5Str = md5.update(qs.stringify(hashStr)).hex();
+  const md5Str = md5.update(hashStr).hex();
   return `${time},${random},${md5Str}`;
 }
 
 /**
  * @description 获取请求头
  * @since Alpha v0.2.0
- * @param {string} cookie cookie
+ * @param {Record<string, string>} cookie cookie
  * @param {string} method 请求方法
- * @param {string} data 请求数据
+ * @param {Record<string, string|number>} data 请求数据
  * @param {string} saltType salt 类型
  * @returns {Record<string, string>} 请求头
  */
-export function getRequestHeader (cookie: string, method: string, data: string, saltType: string): Record<string, string> {
+export function getRequestHeader (cookie: Record<string, string>, method: string, data: Record<string, string | number>, saltType: string): Record<string, string> {
   return {
     "User-Agent": TGConstant.BBS.USER_AGENT,
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "5",
     Referer: "https://webstatic.mihoyo.com/",
-    DS: getDS(method, data, saltType),
-    Cookie: cookie,
+    DS: getDS(method, transParams(data), saltType),
+    Cookie: transCookie(cookie),
   };
 }

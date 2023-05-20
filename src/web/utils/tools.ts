@@ -43,20 +43,6 @@ export function getRandomString (length: number): string {
 }
 
 /**
- * @description object 转换为 query string
- * @since Alpha v0.2.0
- * @param {Record<string, string>} obj object
- * @param {boolean} encode 是否编码
- * @returns {string} query string
- */
-export function qs (obj: Record<string, string>, encode: boolean = false): string {
-  let res = "";
-  for (const [k, v] of Object.entries(obj)) res += `${k}=${encode ? encodeURIComponent(v) : v}&`;
-  res = res.slice(0, res.length - 1);
-  return res;
-}
-
-/**
  * @description 将 cookie 对象转换为字符串
  * @since Alpha v0.2.0
  * @param {Record<string, string>} cookie cookie
@@ -68,6 +54,21 @@ export function transCookie (cookie: Record<string, string>) {
     res += `${key}=${value};`;
   }
   return res;
+}
+
+/**
+ * @description ds 算法需要数据转换后的字符串是按照字典序排序的
+ * @since Alpha v0.2.0
+ * @param {Record<string, string|number>} obj object
+ * @returns {string} query string
+ */
+export function transParams (obj: Record<string, string | number>): string {
+  let res = "";
+  const keys = Object.keys(obj).sort();
+  for (const key of keys) {
+    res += `${key}=${obj[key]}&`;
+  }
+  return res.slice(0, -1);
 }
 
 /**

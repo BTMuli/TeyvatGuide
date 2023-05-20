@@ -7,13 +7,10 @@
 
 // tauri
 import { http } from "@tauri-apps/api";
-// Node
-import qs from "qs";
 // api
 import TGApi from "../api/TGApi";
 // utils
 import TGUtils from "../utils/TGUtils";
-import { transCookie } from "../utils/tools";
 
 /**
  * @description 根据 stoken 获取 cookie_token
@@ -29,7 +26,7 @@ export async function getCookieTokenBySToken (stuid: string, stoken: string): Pr
     stoken,
   };
   const params = { stoken };
-  const header = TGUtils.User.getHeader(transCookie(cookie), "GET", qs.stringify(params), "common");
+  const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http.fetch<BTMuli.User.Response.CookieToken>(url, {
     method: "GET",
     headers: header,
