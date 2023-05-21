@@ -32,7 +32,7 @@ export const useUserStore = defineStore(
       return cookie.value[key] || "";
     }
 
-    async function initCookie (ck: Record<string, string>): Promise<void> {
+    function initCookie (ck: Record<string, string>): void {
       if (cookie.value !== ck) {
         cookie.value = ck;
       }
