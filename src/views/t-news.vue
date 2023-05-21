@@ -453,7 +453,7 @@ async function searchPost () {
   overflow: hidden;
 }
 
-.news-cover:hover {
+.news-cover :hover {
   transform: scale(1.1);
   transition: all 0.3s linear;
   cursor: pointer;
