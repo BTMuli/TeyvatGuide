@@ -41,6 +41,25 @@
           <v-list-item-subtitle>{{ achievementsStore.lastVersion }}</v-list-item-subtitle>
         </template>
       </v-list-item>
+      <v-list-item title="登录信息">
+        <v-list-item-subtitle v-show="userInfo.nickname!=='未登录'">
+          {{ userInfo.nickname }} uid:{{ userInfo.uid }}
+        </v-list-item-subtitle>
+        <v-list-item-subtitle v-show="userInfo.nickname==='未登录'">
+          未登录，请输入 Cookie 登录！
+        </v-list-item-subtitle>
+        <template #prepend>
+          <img class="config-icon" :src="userInfo.avatar" alt="Login">
+        </template>
+        <template #append>
+          <v-btn class="card-btn" @click="tryConfirm('refreshUser')">
+            <template #prepend>
+              <img src="../assets/icons/circle-check.svg" alt="check">
+              刷新数据
+            </template>
+          </v-btn>
+        </template>
+      </v-list-item>
       <v-list-subheader inset class="config-header">
         系统信息
       </v-list-subheader>
@@ -158,7 +177,7 @@
 
 <script lang="ts" setup>
 // vue
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { getBuildTime } from "../utils/TGBuild";
 import TLoading from "../components/t-loading.vue";
 import TConfirm from "../components/t-confirm.vue";
@@ -196,6 +215,15 @@ const loadingTitle = ref("正在加载..." as string);
 
 // data
 const showHome = ref(homeStore.getShowValue() as string[]);
+const userInfo = computed(() => {
+  const info = userStore.getBriefInfo();
+  return {
+    nickname: info.nickname || "未登录",
+    uid: info.uid || "-1",
+    desc: info.desc || "未登录",
+    avatar: info.avatar || "/source/UI/defaultUser.webp",
+  };
+});
 
 // snackbar
 const snackbar = ref(false as boolean);
@@ -283,6 +311,12 @@ function tryConfirm (oper: string) {
       confirmOper.value = "resetDB";
       confirmShow.value = true;
       break;
+    case "refreshUser":
+      confirmText.value = "确认刷新用户信息吗？";
+      confirmSub.value = "将会重新获取用户信息";
+      confirmOper.value = "refreshUser";
+      confirmShow.value = true;
+      break;
   }
 }
 
@@ -318,6 +352,9 @@ async function doConfirm (oper: string) {
       break;
     case "updateDB":
       await updateDB();
+      break;
+    case "refreshUser":
+      await refreshUser();
       break;
     default:
       break;
@@ -409,6 +446,51 @@ function submitHome () {
   snackbar.value = true;
 }
 
+// 刷新用户数据
+async function refreshUser () {
+  const ck = userStore.cookie;
+  let failCount = 0;
+  loadingTitle.value = "正在验证 ltoken...";
+  loading.value = true;
+  const verifyLTokenRes = await TGRequest.User.byLToken.verify(ck.ltoken, ck.ltuid);
+  if (typeof verifyLTokenRes === "string") {
+    loadingTitle.value = "验证成功!正在刷新 cookie_token";
+  } else {
+    loadingTitle.value = "验证失败!正在刷新 cookie_token";
+    failCount++;
+  }
+  const cookieTokenRes = await TGRequest.User.bySToken.getCookieToken(ck.stuid, ck.stoken);
+  if (typeof cookieTokenRes === "string") {
+    ck.cookie_token = cookieTokenRes;
+    await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
+    await userStore.initCookie(ck);
+    console.log(JSON.stringify(ck));
+    loadingTitle.value = "刷新成功!正在获取用户信息";
+  } else {
+    loadingTitle.value = "刷新失败!正在获取用户信息";
+    failCount++;
+  }
+  const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
+  if (infoRes.hasOwnProperty("nickname")) {
+    const info = infoRes as BTMuli.User.Base.BriefInfo;
+    userStore.setBriefInfo(info);
+    loadingTitle.value = "获取成功!";
+  } else {
+    loadingTitle.value = "获取失败!";
+    failCount++;
+  }
+  if (failCount === 3) {
+    snackbarText.value = "刷新失败!请重新输入 cookie!";
+    snackbarColor.value = "error";
+    snackbar.value = true;
+  } else {
+    snackbarText.value = "刷新成功!";
+    snackbarColor.value = "success";
+    snackbar.value = true;
+  }
+  loading.value = false;
+}
+
 // 输入 Cookie
 async function inputCookie () {
   const cookie = confirmInput.value;
@@ -431,7 +513,8 @@ async function inputCookie () {
   }
   try {
     await TGRequest.User.init(ticket, uid);
-    await userStore.initCookie();
+    const ck = await TGSqlite.getCookie();
+    await userStore.initCookie(ck);
     loadingTitle.value = "正在获取用户信息...";
     const cookie_token = userStore.getCookieItem("cookie_token");
     const res = await TGRequest.User.byCookie.getUserInfo(cookie_token, uid);
@@ -439,6 +522,7 @@ async function inputCookie () {
     if (res.hasOwnProperty("nickname")) {
       const info = res as BTMuli.User.Base.BriefInfo;
       userStore.setBriefInfo(info);
+      appStore.isLogin = true;
     }
     loading.value = false;
     snackbarText.value = "Cookie 已保存!";

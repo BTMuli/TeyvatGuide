@@ -7,4 +7,4 @@
 
 const BBS_API = "https://bbs-api.miyoushe.com/"; // 基础 API
 
-export const BBSUserInfoAPI = `${BBS_API}user/wapi/getUserFullInfo`; // 用户信息 API
+export const BBSUserInfoApi = `${BBS_API}user/wapi/getUserFullInfo`; // 用户信息 API

@@ -34,13 +34,12 @@ export async function getUserInfoByCookie (cookie_token: string, account_id: str
     headers: header,
     body: http.Body.json(params),
   }).then((res) => {
-    console.log(res);
     if (res.data.retcode !== 0) return res.data;
     const info = res.data.data.user_info;
     return {
       nickname: info.nickname,
       uid: info.uid,
-      avatar: info.avatar,
+      avatar: info.avatar_url,
       desc: info.introduce,
     };
   });

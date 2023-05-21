@@ -9,8 +9,6 @@
 import { ref } from "vue";
 // pinia
 import { defineStore } from "pinia";
-// utils
-import TGSqlite from "../../utils/TGSqlite";
 
 export const useUserStore = defineStore(
   "user", () => {
@@ -34,13 +32,14 @@ export const useUserStore = defineStore(
       return cookie.value[key] || "";
     }
 
-    async function initCookie (): Promise<void> {
-      const ck = await TGSqlite.getCookie();
+    async function initCookie (ck: Record<string, string>): Promise<void> {
       if (cookie.value !== ck) {
         cookie.value = ck;
       }
     }
     return {
+      briefInfo,
+      cookie,
       getBriefInfo,
       setBriefInfo,
       getCookieItem,
@@ -48,6 +47,14 @@ export const useUserStore = defineStore(
     };
   },
   {
-    persist: true,
+    persist: [{
+      key: "cookie",
+      storage: window.localStorage,
+      paths: ["cookie"],
+    }, {
+      key: "briefInfo",
+      storage: window.localStorage,
+      paths: ["briefInfo"],
+    }],
   },
 );

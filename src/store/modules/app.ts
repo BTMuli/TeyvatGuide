@@ -2,7 +2,7 @@
  * @file store modules app.ts
  * @description App store module
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.4
+ * @since Alpha v0.1.5
  */
 
 // vue
@@ -42,6 +42,8 @@ export const useAppStore = defineStore(
     const devMode = ref(false);
     // 应用主题
     const theme = ref("default");
+    // 是否登录
+    const isLogin = ref(false);
 
     const dataPath = reactive({
       userDataDir,
@@ -75,6 +77,7 @@ export const useAppStore = defineStore(
     }
 
     return {
+      isLogin,
       theme,
       loading,
       buildTime,
@@ -97,7 +100,7 @@ export const useAppStore = defineStore(
       {
         key: "app",
         storage: window.localStorage,
-        paths: ["devMode", "loading", "buildTime"],
+        paths: ["devMode", "loading", "buildTime", "isLogin"],
       },
       {
         key: "sidebar",

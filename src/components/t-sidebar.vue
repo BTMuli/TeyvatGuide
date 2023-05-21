@@ -106,14 +106,14 @@
       </v-list-group>
       <v-divider />
       <div class="bottom-menu">
-        <v-list-item :title="userInfo.nickname" value="user" link href="/user">
+        <v-list-item>
           <template #prepend>
             <img :src="userInfo.avatar" alt="userIcon" class="side-icon">
           </template>
-          <template #append>
-            <v-icon style="color:var(--sidebar-icon)" @click="refreshUser()">
-              mdi-refresh
-            </v-icon>
+          <template #default>
+            <v-list-item-title>
+              {{ userInfo.nickname }}
+            </v-list-item-title>
           </template>
         </v-list-item>
         <v-list-item :title="themeTitle" value="theme" @click="switchTheme()">
@@ -148,7 +148,11 @@ const appStore = useAppStore();
 const userStore = useUserStore();
 
 const userInfo = computed(() => {
-  return userStore.getBriefInfo();
+  const info = userStore.getBriefInfo();
+  return {
+    nickname: info.nickname || "未登录",
+    avatar: info.avatar || "source/UI/defaultUser.webp",
+  };
 });
 const rail = ref(appStore.sidebar.collapse);
 // theme
@@ -182,16 +186,6 @@ function collapse () {
 onMounted(async () => {
   await listenOnTheme();
 });
-
-async function refreshUser () {
-  const cookie_token = userStore.getCookieItem("cookie_token");
-  const account_id = userStore.getCookieItem("account_id");
-  const res = await TGRequest.User.byCookie.getUserInfo(cookie_token, account_id);
-  if (res.hasOwnProperty("nickname")) {
-    const info = res as BTMuli.User.Base.BriefInfo;
-    userStore.setBriefInfo(info);
-  }
-}
 
 async function listenOnTheme () {
   await event.listen("readTheme", (e) => {

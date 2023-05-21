@@ -33,10 +33,8 @@ import TBackTop from "./components/t-backTop.vue";
 import { fs, window, app, event } from "@tauri-apps/api";
 // store
 import { useAppStore } from "./store/modules/app";
-import { useUserStore } from "./store/modules/user";
 
 const appStore = useAppStore();
-const userStore = useUserStore();
 const isMain = ref(true as boolean);
 const theme = ref(appStore.theme as string);
 
@@ -52,8 +50,6 @@ onMounted(async () => {
     await win.setTitle(title);
     await checkLoad();
   }
-  // 保存 cookie
-  await userStore.initCookie();
 });
 
 // 监听主题变化
