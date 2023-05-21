@@ -45,4 +45,21 @@ declare namespace BTMuli.User.Base {
     stoken_v2?: string
     stuid: string
   }
+
+  /**
+   * @description 用户简略信息
+   * @since Alpha v0.2.0
+   * @interface BriefInfo
+   * @property {string} nickname 用户昵称
+   * @property {string} uid 用户 uid
+   * @property {string} avatar 用户头像
+   * @property {string} desc 用户简介
+   * @returns BriefInfo
+   */
+  export interface BriefInfo {
+    nickname: string
+    uid: string
+    avatar: string
+    desc: string
+  }
 }

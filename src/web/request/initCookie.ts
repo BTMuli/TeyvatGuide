@@ -35,17 +35,11 @@ async function initCookie (ticket: string, uid: string): Promise<void> {
   if (Array.isArray(tokenRes)) {
     const lToken = tokenRes.find((item) => item.name === "ltoken");
     const sToken = tokenRes.find((item) => item.name === "stoken");
-    if (lToken) {
-      await TGSqlite.saveAppData("ltoken", lToken.token);
-      cookie.ltoken = lToken.token;
-    }
-    if (sToken) {
-      await TGSqlite.saveAppData("stoken", sToken.token);
-      cookie.stoken = sToken.token;
-    }
+    if (lToken) cookie.ltoken = lToken.token;
+    if (sToken) cookie.stoken = sToken.token;
     const cookieToken = await getCookieTokenBySToken(uid, cookie.stoken);
     if (typeof cookieToken === "string") cookie.cookie_token = cookieToken;
-    const mid = await verifyLToken(cookie.ltoken, cookie.ltuid, cookie.stoken);
+    const mid = await verifyLToken(cookie.ltoken, cookie.ltuid);
     if (typeof mid === "string") cookie.mid = mid;
     await TGSqlite.saveAppData("cookie", JSON.stringify(cookie));
   } else {

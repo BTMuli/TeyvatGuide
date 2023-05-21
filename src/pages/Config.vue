@@ -168,6 +168,7 @@ import { fs, app, os } from "@tauri-apps/api";
 import { useAppStore } from "../store/modules/app";
 import { useHomeStore } from "../store/modules/home";
 import { useAchievementsStore } from "../store/modules/achievements";
+import { useUserStore } from "../store/modules/user";
 // utils
 import { backupUiafData, restoreUiafData } from "../utils/UIAF";
 import TGSqlite from "../utils/TGSqlite";
@@ -175,6 +176,7 @@ import TGRequest from "../web/request/TGRequest";
 
 // Store
 const appStore = useAppStore();
+const userStore = useUserStore();
 const homeStore = useHomeStore();
 const achievementsStore = useAchievementsStore();
 
@@ -429,7 +431,15 @@ async function inputCookie () {
   }
   try {
     await TGRequest.User.init(ticket, uid);
+    await userStore.initCookie();
     loadingTitle.value = "正在获取用户信息...";
+    const cookie_token = userStore.getCookieItem("cookie_token");
+    const res = await TGRequest.User.byCookie.getUserInfo(cookie_token, uid);
+    // . 判断返回是否为 BTMuli.User.Base.BriefInfo
+    if (res.hasOwnProperty("nickname")) {
+      const info = res as BTMuli.User.Base.BriefInfo;
+      userStore.setBriefInfo(info);
+    }
     loading.value = false;
     snackbarText.value = "Cookie 已保存!";
     snackbarColor.value = "success";

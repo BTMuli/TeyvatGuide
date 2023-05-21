@@ -6,7 +6,7 @@
  */
 
 import { getAnnoCard } from "./getAnnoCard";
-import { getRequestHeader } from "./getRequestHeader";
+import { getRequestHeader, getRequestSignHeader } from "./getRequestHeader";
 import { parseAnnoContent } from "./parseAnno";
 import { transCookie, getServerByUid } from "./tools";
 
@@ -17,6 +17,7 @@ const TGUtils = {
   },
   User: {
     getHeader: getRequestHeader,
+    getSignHeader: getRequestSignHeader,
   },
   Tools: {
     transCookie,

@@ -13,6 +13,7 @@ import { getLTokenBySToken } from "./getLToken";
 // import * from "./getRoleList.ts";
 // import * from "./getTickets.ts";
 import { getTokensByLoginTicket } from "./getTokens";
+import { getUserInfoByCookie } from "./getUserInfo";
 // import * from "./getUserCard";
 import initCookie from "./initCookie";
 import { verifyLToken } from "./verifyLToken";
@@ -29,6 +30,7 @@ const TGRequest = {
     },
     byCookie: {
       getAccounts: getGameAccountsByCookie,
+      getUserInfo: getUserInfoByCookie,
     },
     byLToken: {
       verify: verifyLToken,

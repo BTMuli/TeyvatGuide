@@ -5,6 +5,7 @@
  * @since Alpha v0.2.0
  */
 
+import { BBSUserInfoApi } from "./BBS";
 import { ENKA_API } from "./ENKA";
 import { Hk4eAnnoListApi, Hk4eAnnoContentApi, Hk4eAnnoQuery } from "./Hk4e";
 import { PassportTokenApi, PassportCookieTokenApi, PassportVerifyApi } from "./Passport";
@@ -29,6 +30,7 @@ const TGApi = {
   },
   GameData: {
     byCookie: {
+      getUserInfo: BBSUserInfoApi, // 获取用户信息
       getAccounts: TakumiCookieBindingRolesApi, // 获取绑定角色
       getCharacter: TakumiRecordGenshinCharacterApi, // 获取角色信息
     },

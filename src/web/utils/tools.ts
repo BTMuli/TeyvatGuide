@@ -28,21 +28,6 @@ export function decodeRegExp (data: string): string {
 }
 
 /**
- * @description 获取随机字符串
- * @since Alpha v0.2.0
- * @param {number} length 字符串长度
- * @returns {string} 随机字符串
- */
-export function getRandomString (length: number): string {
-  const str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let res = "";
-  for (let i = 0; i < length; i++) {
-    res += str[Math.floor(Math.random() * str.length)];
-  }
-  return res;
-}
-
-/**
  * @description 将 cookie 对象转换为字符串
  * @since Alpha v0.2.0
  * @param {Record<string, string>} cookie cookie

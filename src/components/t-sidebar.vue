@@ -106,11 +106,16 @@
       </v-list-group>
       <v-divider />
       <div class="bottom-menu">
-        <!-- <v-list-item v-show="isDev" :title="userInfo.nickname" value="user" link href="/user">
+        <v-list-item :title="userInfo.nickname" value="user" link href="/user">
           <template #prepend>
             <img :src="userInfo.avatar" alt="userIcon" class="side-icon">
           </template>
-        </v-list-item> -->
+          <template #append>
+            <v-icon style="color:var(--sidebar-icon)" @click="refreshUser()">
+              mdi-refresh
+            </v-icon>
+          </template>
+        </v-list-item>
         <v-list-item :title="themeTitle" value="theme" @click="switchTheme()">
           <template #prepend>
             <v-icon style="color:var(--sidebar-icon)">
@@ -135,17 +140,17 @@ import { computed, ref, onMounted } from "vue";
 import { event } from "@tauri-apps/api";
 // store
 import { useAppStore } from "../store/modules/app";
+import { useUserStore } from "../store/modules/user";
+// utils
+import TGRequest from "../web/request/TGRequest";
 
 const appStore = useAppStore();
+const userStore = useUserStore();
 
-// 测试数据
-// const userInfo = {
-//   nickname: "测试用户",
-//   avatar: "/source/UI/defaultUser.webp",
-// };
-
+const userInfo = computed(() => {
+  return userStore.getBriefInfo();
+});
 const rail = ref(appStore.sidebar.collapse);
-// const isDev = ref(appStore.devMode);
 // theme
 const themeGet = computed({
   get () {
@@ -177,6 +182,16 @@ function collapse () {
 onMounted(async () => {
   await listenOnTheme();
 });
+
+async function refreshUser () {
+  const cookie_token = userStore.getCookieItem("cookie_token");
+  const account_id = userStore.getCookieItem("account_id");
+  const res = await TGRequest.User.byCookie.getUserInfo(cookie_token, account_id);
+  if (res.hasOwnProperty("nickname")) {
+    const info = res as BTMuli.User.Base.BriefInfo;
+    userStore.setBriefInfo(info);
+  }
+}
 
 async function listenOnTheme () {
   await event.listen("readTheme", (e) => {
