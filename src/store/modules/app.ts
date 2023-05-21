@@ -32,8 +32,6 @@ export const useAppStore = defineStore(
       collapse: true,
       // 是否显示
       submenu: {
-        // 米游社
-        mihoyo: false,
         // 数据库
         wiki: false,
       },
@@ -59,15 +57,15 @@ export const useAppStore = defineStore(
     function init (): void {
       loading.value = false;
       devMode.value = false;
-      sidebar.submenu.mihoyo = false;
-      sidebar.submenu.wiki = false;
+      sidebar.submenu = {
+        wiki: false,
+      };
       theme.value = "default";
     }
 
     function getSubmenu (): string[] {
       const open = [];
       if (sidebar.submenu.wiki) open.push("wiki");
-      if (sidebar.submenu.mihoyo) open.push("mihoyo");
       return open;
     }
 

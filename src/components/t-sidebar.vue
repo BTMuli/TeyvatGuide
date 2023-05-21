@@ -29,56 +29,16 @@
           <img src="../assets/icons/board.svg" alt="annoIcon" class="side-icon">
         </template>
       </v-list-item>
+      <v-list-item title="咨讯" value="news" link href="/news/2">
+        <template #prepend>
+          <img src="/platforms/mhy/mys.webp" alt="mihoyo" class="side-icon">
+        </template>
+      </v-list-item>
       <v-list-item title="成就" value="achievements" link href="/achievements">
         <template #prepend>
           <img src="../assets/icons/achievements.svg" alt="achievementsIcon" class="side-icon">
         </template>
       </v-list-item>
-      <v-divider />
-      <v-list-group value="mihoyo" fluid>
-        <template #activator="{ props }">
-          <v-list-item title="米游社" v-bind="props">
-            <template #prepend>
-              <img src="/platforms/mhy/mys.webp" alt="mihoyo" class="side-icon">
-            </template>
-          </v-list-item>
-        </template>
-        <v-list-item title="原神" value="mhy-ys" link href="/news/2">
-          <template #prepend>
-            <img src="/platforms/mhy/ys.webp" alt="ys" class="side-icon">
-          </template>
-        </v-list-item>
-        <v-list-item title="星穹铁道" value="mhy-sr" link href="/news/6">
-          <template #prepend>
-            <img src="/platforms/mhy/sr.webp" alt="sr" class="side-icon">
-          </template>
-        </v-list-item>
-        <v-list-item title="崩坏3" value="mhy-bh3" link href="/news/1">
-          <template #prepend>
-            <img src="/platforms/mhy/bh3.webp" alt="bh3" class="side-icon">
-          </template>
-        </v-list-item>
-        <v-list-item title="崩坏2" value="mhy-bh2" link href="/news/3">
-          <template #prepend>
-            <img src="/platforms/mhy/bh2.webp" alt="bh2" class="side-icon">
-          </template>
-        </v-list-item>
-        <v-list-item title="未定事件簿" value="mhy-wd" link href="/news/4">
-          <template #prepend>
-            <img src="/platforms/mhy/wd.webp" alt="wd" class="side-icon">
-          </template>
-        </v-list-item>
-        <v-list-item title="绝区零" value="mhy-zzz" link href="/news/8">
-          <template #prepend>
-            <img src="/platforms/mhy/zzz.webp" alt="zzz" class="side-icon">
-          </template>
-        </v-list-item>
-        <v-list-item title="大别野" value="mhy-dby" link href="/news/5">
-          <template #prepend>
-            <img src="/platforms/mhy/dby.webp" alt="dby" class="side-icon">
-          </template>
-        </v-list-item>
-      </v-list-group>
       <v-divider />
       <v-list-group value="wiki" fluid>
         <template #activator="{ props }">
@@ -141,8 +101,6 @@ import { event } from "@tauri-apps/api";
 // store
 import { useAppStore } from "../store/modules/app";
 import { useUserStore } from "../store/modules/user";
-// utils
-import TGRequest from "../web/request/TGRequest";
 
 const appStore = useAppStore();
 const userStore = useUserStore();
@@ -173,7 +131,6 @@ const open = computed({
     return appStore.getSubmenu();
   },
   set (value: string[]) {
-    appStore.sidebar.submenu.mihoyo = value.includes("mihoyo");
     appStore.sidebar.submenu.wiki = value.includes("wiki");
   },
 });
