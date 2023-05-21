@@ -224,7 +224,7 @@ export interface UserCommunityInfo {
 /**
  * @description 用户信息-在 post 中的用户信息
  * @since Alpha v0.1.2
- * @interface UserUserInfoPost
+ * @interface UserInfoPost
  * @property {string} uid 用户 ID
  * @property {string} nickname 用户昵称
  * @property {string} introduce 用户简介

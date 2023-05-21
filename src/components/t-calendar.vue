@@ -102,7 +102,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { onMounted, ref, shallowRef } from "vue";
+import { onMounted, ref } from "vue";
 import TMiniAvatar from "./t-mini-avatar.vue";
 import TMiniWeapon from "./t-mini-weapon.vue";
 import TCalendarMaterial from "./t-calendar-material.vue";

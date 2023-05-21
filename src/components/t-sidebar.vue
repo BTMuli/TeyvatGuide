@@ -64,7 +64,6 @@
           </template>
         </v-list-item>
       </v-list-group>
-      <v-divider />
       <div class="bottom-menu">
         <v-list-item>
           <template #prepend>

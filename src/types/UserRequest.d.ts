@@ -28,7 +28,7 @@ declare namespace BTMuli.User.Base {
    * @property {string} stoken stoken
    * @property {string} stuid stoken 对应的 uid
    * @description stoken_v2 与 mid 一起使用，这是新版本的 token
-   * @todo 目前只完成 mid 的获取，stoken_v2 的获取还没完成
+   * @see https://github.com/BTMuli/Tauri.Genshin/issues/18
    * @property {string} stokenV2 stoken_v2
    * @property {string} mid mid
    * @returns Cookie

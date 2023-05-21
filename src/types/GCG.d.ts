@@ -11,7 +11,7 @@ declare namespace BTMuli.Genshin.Wiki.GCG {
    * @since Alpha v0.1.3
    * @interface BriefInfo
    * @property {number} id - 卡牌 ID
-   * @property {umber} content_id - 观测枢 ID
+   * @property {number} content_id - 观测枢 ID
    * @property {string} name - 卡牌名称
    * @property {string} type - 卡牌类型
    * @property {string} icon - 卡牌图标

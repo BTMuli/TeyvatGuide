@@ -27,6 +27,6 @@ enum SERVER {
   OS_ASIA = "os_asia",
   OS_CHT = "os_cht",
   UNKNOWN = "unknown",
-};
+}
 
 export default SERVER;

@@ -59,7 +59,7 @@ onMounted(() => {
   transition: all 0.3s ease-in-out;
 }
 
-.back-top :hover {
+.back-top:hover {
   border-radius: 50%;
   cursor: pointer;
   transform: scale(0.9);
