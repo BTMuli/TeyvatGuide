@@ -4,4 +4,4 @@
 "useTabs": true
 "proseWrap": "preserve"
 "bracketSpacing": true
-"endOfLine": "auto"
+"endOfLine": "crlf"
