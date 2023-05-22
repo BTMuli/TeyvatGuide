@@ -2,14 +2,14 @@
  * @file web utils parseAnno.ts
  * @description 解析游戏内公告数据
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @since Alpha v0.1.5
  */
 
 import { decodeRegExp } from "./tools";
 
 /**
  * @description 解析游戏内公告数据
- * @since Alpha v0.1.2
+ * @since Alpha v0.1.5
  * @param {string} data 游戏内公告数据
  * @returns {string} 解析后的数据
  */
@@ -56,6 +56,9 @@ export function parseAnnoContent (data: string): string {
       a.href = a.href.replace("javascript:miHoYoGameJSSDK.openInWebview('", "").replace("');", "");
       a.target = "_blank";
     }
+  });
+  htmlBase.querySelectorAll("table").forEach((table) => {
+    table.style.borderColor = "#546d8b";
   });
   return htmlBase.body.innerHTML;
 }
