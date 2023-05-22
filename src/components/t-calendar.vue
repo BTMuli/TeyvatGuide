@@ -258,6 +258,7 @@ function getContents (day: number) {
     position: absolute;
     width: 440px;
     height: 200px;
+    color: #faf7e8;
     top: calc(50vh - 100px);
     left: calc(50vw - 220px);
     background: var(--content-bg-2);
@@ -335,7 +336,6 @@ function getContents (day: number) {
 
 .calendar-source-text {
   height: 50px;
-  color: #fff;
   font-size: 20px;
   font-family: Genshin-Light, serif;
   display: flex;
@@ -371,7 +371,7 @@ function getContents (day: number) {
     width: 30px;
     height: 30px;
     background: var(--content-bg-2);
-    color: var(--calendar-item-btn);
+    color: #546D8B;
     cursor: pointer;
     display: flex;
     justify-content: center;
