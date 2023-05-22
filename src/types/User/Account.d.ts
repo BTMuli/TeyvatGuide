@@ -5,7 +5,7 @@
  * @since Alpha v0.1.5
  */
 
-declare namespace BTMuli.User.Account {
+declare namespace TGApp.User.Account {
   /**
    * @description 游戏账号返回类型
    * @interface GameResponse
@@ -27,7 +27,7 @@ declare namespace BTMuli.User.Account {
    * @property {string} game_biz 游戏 biz，例如 hk4e_cn
    * @property {string} game_uid 游戏 uid
    * @property {boolean} is_chosen 是否为当前选中账号
-   * @property {string} is_official 是否为官服账号
+   * @property {boolean} is_official 是否为官服账号
    * @property {string} level 游戏等级
    * @property {string} nickname 游戏昵称
    * @property {string} region 游戏区域

@@ -6,7 +6,7 @@
  * @since Alpha v0.1.5
  */
 
-declare namespace BTMuli.Sqlite.Achievement {
+declare namespace TGApp.Sqlite.Achievement {
   /**
    * @description 数据库-成就表
    * @since Alpha v0.1.5
