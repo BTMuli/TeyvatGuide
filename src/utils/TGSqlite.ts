@@ -70,54 +70,6 @@ class TGSqlite {
   }
 
   /**
-	 * @description 封装-根据 table keys 获取数据
-	 * @memberOf TGSqlite
-	 * @since Alpha v0.2.0
-	 * @param {string} table 表名
-	 * @param {string} keyName 键名
-	 * @param {string} keyValue 键值
-	 * @returns {Promise<unknown[]>} 数据
-	 */
-  public async getDataByKey (table: string, keyName: string, keyValue: string): Promise<unknown[]> {
-    const db = await Database.load(this.dbPath);
-    const sql = `SELECT * FROM ${table} WHERE ${keyName}='${keyValue}';`;
-    const res: unknown[] = await db.select(sql);
-    await db.close();
-    return res;
-  }
-
-  /**
-	 * @description 封装-保存数据
-	 * @memberOf TGSqlite
-	 * @since Alpha v0.2.0
-	 * @param {string} sql sql语句
-	 * @returns {Promise<void>}
-	 */
-  public async saveData (sql: string): Promise<void> {
-    const db = await Database.load(this.dbPath);
-    await db.execute(sql);
-    await db.close();
-  }
-
-  /**
-	 * @description 输入 cookie
-	 * @memberOf TGSqlite
-	 * @since Alpha v0.2.0
-	 * @param {string} cookie
-	 * @returns {Promise<void>}
-	 */
-  public async inputCookie (cookie: string): Promise<void> {
-    const db = await Database.load(this.dbPath);
-    const sql = `
-        INSERT INTO AppData (key, value, updated)
-        VALUES ('cookie', '${cookie}', datetime('now', 'localtime'))
-        ON CONFLICT(key) DO UPDATE SET value = '${cookie}',updated = datetime('now', 'localtime');
-		`;
-    await db.execute(sql);
-    await db.close();
-  }
-
-  /**
 	 * @description 获取 cookie
 	 * @memberOf TGSqlite
 	 * @since Alpha v0.2.0
@@ -129,19 +81,6 @@ class TGSqlite {
     const res: Array<{ value: string }> = await db.select(sql);
     await db.close();
     return JSON.parse(res[0].value);
-  }
-
-  /**
-	 * @description 获取 cookie 某项值
-	 * @memberOf TGSqlite
-	 * @since Alpha v0.2.0
-	 * @param {string} itemKey 项名
-	 * @returns {Promise<string>} 项值
-	 */
-  public async getCookieItem (itemKey: string): Promise<string> {
-    const cookie = await this.getCookie();
-    if (Object.keys(cookie).includes(itemKey)) return cookie[itemKey];
-    return "";
   }
 
   /**

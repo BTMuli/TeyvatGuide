@@ -40,16 +40,16 @@ function initGameAccountTable (): string[] {
   sqlRes.push(`
     CREATE TABLE IF NOT EXISTS GameAccount
     (
-      gameBiz    TEXT NOT NULL,
-      gameUid    TEXT NOT NULL,
-      isChosen   BOOLEAN DEFAULT 0,
-      isOfficial BOOLEAN DEFAULT 0,
+      game_biz    TEXT NOT NULL,
+      game_uid    TEXT NOT NULL,
+      is_chosen   BOOLEAN DEFAULT 0,
+      is_official BOOLEAN DEFAULT 0,
       level      INTEGER DEFAULT 0,
       nickname   TEXT    DEFAULT NULL,
       region     TEXT    DEFAULT NULL,
-      regionName TEXT    DEFAULT NULL,
+      region_name TEXT    DEFAULT NULL,
       updated    TEXT    DEFAULT NULL,
-      PRIMARY KEY (gameBiz, gameUid)
+      PRIMARY KEY (game_biz, game_uid)
     );
   `);
   return sqlRes;
@@ -190,6 +190,12 @@ async function initAppData (): Promise<string[]> {
     INSERT INTO AppData (key, value, updated)
     VALUES ('dataUpdated', '${dataUpdated}', datetime('now', 'localtime'))
     ON CONFLICT(key) DO UPDATE SET value = '${dataUpdated}', updated = datetime('now', 'localtime');
+  `);
+  // 初始化 cookie
+  sqlRes.push(`
+    INSERT INTO AppData (key, value, updated)
+    VALUES ('cookie', '{}', datetime('now', 'localtime'))
+    ON CONFLICT(key) DO NOTHING;
   `);
   return sqlRes;
 }

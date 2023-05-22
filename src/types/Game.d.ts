@@ -8,7 +8,7 @@
 declare namespace BTMuli.User.Game {
   /**
    * @description 游戏账号
-   * @see TGRequest.User.byCookie.getGameAccounts
+   * @see TGRequest.User.byCookie.getAccounts
    * @since Alpha v0.2.0
    * @property {string} game_biz 游戏 biz，例如 hk4e_cn
    * @property {string} game_uid 游戏 uid
