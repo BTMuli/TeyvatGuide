@@ -12,13 +12,9 @@ import TPosition from "../components/t-position.vue";
 import TCalendar from "../components/t-calendar.vue";
 // store
 import { useHomeStore } from "../store/modules/home";
-import { useUserStore } from "../store/modules/user";
-// utils
-import TGSqlite from "../utils/TGSqlite";
 
 // store
 const homeStore = useHomeStore();
-const userStore = useUserStore();
 
 // loading
 const loading = ref(true as boolean);
@@ -44,14 +40,6 @@ function readLoading (): void {
 }
 
 onMounted(async () => {
-  const ck = await TGSqlite.getCookie();
-  userStore.initCookie(ck);
-  loadingTitle.value = "正在检测数据完整性";
-  const isOK = await TGSqlite.check();
-  if (!isOK) {
-    loadingTitle.value = "正在修复数据";
-    await TGSqlite.reset();
-  }
   loadingTitle.value = "正在加载首页";
   const showItems = homeStore.getShowValue();
   await Promise.allSettled(
