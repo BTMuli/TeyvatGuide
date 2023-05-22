@@ -11,8 +11,8 @@ import { Hk4eAnnoListApi, Hk4eAnnoContentApi, Hk4eAnnoQuery } from "./Hk4e";
 import { PassportTokenApi, PassportCookieTokenApi, PassportVerifyApi } from "./Passport";
 import {
   TakumiTokensApi, TakumiRecordCardApi,
-  TakumiRecordGenshinCharacterApi, TakumiRecordGenshinIndexApi,
-  TakumiRecordGenshinSpiralAbyssApi, TakumiSTokenBindingRolesApi,
+  TakumiRecordCharactersApi, TakumiRecordIndexApi,
+  TakumiRecordAbyssApi, TakumiSTokenBindingRolesApi,
   TakumiCookieBindingRolesApi,
 } from "./Takumi";
 
@@ -32,14 +32,14 @@ const TGApi = {
     byCookie: {
       getUserInfo: BBSUserInfoApi, // 获取用户信息
       getAccounts: TakumiCookieBindingRolesApi, // 获取绑定角色
-      getCharacter: TakumiRecordGenshinCharacterApi, // 获取角色信息
+      getCharacter: TakumiRecordCharactersApi, // 获取角色信息
     },
     bySToken: {
       getAccounts: TakumiSTokenBindingRolesApi, // 获取绑定角色
     },
     getUserCard: TakumiRecordCardApi, // 获取用户卡片
-    getUserBase: TakumiRecordGenshinIndexApi, // 获取用户基本信息
-    getAbyss: TakumiRecordGenshinSpiralAbyssApi, // 获取深境螺旋信息
+    getUserBase: TakumiRecordIndexApi, // 获取用户基本信息
+    getAbyss: TakumiRecordAbyssApi, // 获取深境螺旋信息
   },
 };
 

@@ -5,6 +5,7 @@
  * @since Alpha v0.2.0
  */
 
+import { getAbyss } from "./getAbyss";
 import { getAnnoList, getAnnoContent } from "./getAnno";
 import { getCookieTokenBySToken } from "./getCookieToken";
 // import * from "./getEnkaData.ts";
@@ -29,6 +30,7 @@ const TGRequest = {
       getTokens: getTokensByLoginTicket,
     },
     byCookie: {
+      getAbyss,
       getAccounts: getGameAccountsByCookie,
       getUserInfo: getUserInfoByCookie,
     },

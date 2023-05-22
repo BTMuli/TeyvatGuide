@@ -97,7 +97,8 @@ export function getRequestHeader (cookie: Record<string, string>, method: string
     "User-Agent": TGConstant.BBS.USER_AGENT,
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "5",
-    Referer: TGConstant.BBS.REFERER,
+    "x-requested-with": "com.mihoyo.hyperion",
+    Referer: "https://webstatic.mihoyo.com",
     DS: ds,
     Cookie: transCookie(cookie),
   };
@@ -117,7 +118,8 @@ export function getRequestSignHeader (cookie: Record<string, string>, method: st
     "User-Agent": TGConstant.BBS.USER_AGENT,
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "5",
-    Referer: TGConstant.BBS.REFERER,
+    "x-requested-with": "com.mihoyo.hyperion",
+    Referer: "https://webstatic.mihoyo.com",
     DS: getDS(method, transParams(data), saltType, true),
     Cookie: transCookie(cookie),
   };
