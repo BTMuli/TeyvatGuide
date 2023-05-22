@@ -8,6 +8,10 @@
 // user test
 import test from "../../pages/User/test.vue";
 // user main
+import Abyss from "../../pages/User/Abyss.vue";
+import Characters from "../../pages/User/Characters.vue";
+import Gacha from "../../pages/User/Gacha.vue";
+import Info from "../../pages/User/Info.vue";
 // user sub
 
 const userRoutes = [
@@ -15,6 +19,26 @@ const userRoutes = [
     path: "/user/test",
     name: "测试",
     component: test,
+  },
+  {
+    path: "/user/abyss",
+    name: "深渊记录",
+    component: Abyss,
+  },
+  {
+    path: "/user/characters",
+    name: "我的角色",
+    component: Characters,
+  },
+  {
+    path: "/user/gacha",
+    name: "祈愿记录",
+    component: Gacha,
+  },
+  {
+    path: "/user/info",
+    name: "基本信息",
+    component: Info,
   },
 ];
 
