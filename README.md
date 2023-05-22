@@ -2,18 +2,18 @@
 Author: 目棃
 Date: 2023-03-05
 Description: 说明文档
-Update: 2023-05-19
+Update: 2023-05-22
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-05 14:41:55`
 > 
-> 更新于 `2023-05-19 23:03:06`
+> 更新于 `2023-05-22 12:37:52`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/v/release/BTMuli/Tauri.Genshin?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge)
 
 # Tauri.Genshin
 
-Tauri 练手项目
+Tauri 练手项目，子模块：[TGAssistant](https://github.com/BTMuli/TGAssistant)
 
 ## Release
 
@@ -26,17 +26,7 @@ Tauri 练手项目
 - [Vue3](https://github.com/vuejs/core)
 - [Vite](https://github.com/vitejs/vite)
 - [TypeScript](https://github.com/microsoft/TypeScript)
-- [Vuetify](https://github.com/vuetifyjs/vuetify)
-
-## Submodule
-
-[TGAssistant](https://github.com/BTMuli/TGAssistant)
-
-子模块更新：
-
-```bash
-git submodule update --remote --recursive
-```
+- [Vuetify](https://github.com/vuetifyjs/vuetify)`
 
 ## 当前进度
 
@@ -79,25 +69,13 @@ git submodule update --remote --recursive
 + UIAF：[UIAF v1.1](docs/UIAF.md)
 + UIGF：[UIGF v2.3](docs/UIGF.md)
 
-## 开发
-
-```bash
-npm run dev
-```
-
-## 构建
-
-```bash
-npm run build
-```
-
-# Contributors
+## Contributors
 
 - [BTMuli](https://github.com/BTMuli)
 - [舰队的偶像岛风酱！](https://github.com/frg2089)
 - [jerry765](https://github.com/jerry765)
 
-# License
+## License
 
 项目基于 [MIT](LICENSE) 协议开源。
 
