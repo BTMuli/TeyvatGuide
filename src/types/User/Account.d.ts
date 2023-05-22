@@ -10,13 +10,13 @@ declare namespace TGApp.User.Account {
    * @description 游戏账号返回类型
    * @interface GameResponse
    * @since Alpha v0.1.5
-   * @extends BTMuli.Constant.Response.Base
-   * @property {Game} data.list 游戏账号列表
+   * @extends TGApp.BBS.Response.Base
+   * @property {Game[]} data.list 游戏账号列表
    * @return GameResponse
    */
-  export interface GameResponse extends BTMuli.Constant.Response.Base {
+  export interface GameResponse extends TGApp.BBS.Response.Base {
     data: {
-      list: Game
+      list: Game[]
     }
   }
 

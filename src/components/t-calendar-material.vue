@@ -23,7 +23,7 @@
 </template>
 <script lang="ts" setup>
 interface TMiniWeaponProps {
-  item: BTMuli.Genshin.Material.BriefInfo;
+  item: TGApp.App.Calendar.Material;
 }
 defineProps<TMiniWeaponProps>();
 </script>

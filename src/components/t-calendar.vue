@@ -102,12 +102,12 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import TMiniAvatar from "./t-mini-avatar.vue";
 import TMiniWeapon from "./t-mini-weapon.vue";
 import TCalendarMaterial from "./t-calendar-material.vue";
 // data
-import { TGAppData } from "../data";
+import { AppCalendarData } from "../data";
 // interface
 import { OBC_CONTENT_API } from "../plugins/Mys/interface/utils";
 import { createTGWindow } from "../utils/TGWindow";
@@ -116,19 +116,19 @@ import { createTGWindow } from "../utils/TGWindow";
 const loading = ref(true as boolean);
 
 // data
-const calendarData = ref(TGAppData.calendar);
+const calendarData = computed(() => AppCalendarData);
 const weekNow = ref(0 as number);
 const btnNow = ref(0 as number);
 const dateNow = ref(new Date().toLocaleDateString());
 
 // calendar
-const calendarNow = ref([] as BTMuli.Genshin.Calendar.Data[]);
-const characterCards = ref([] as BTMuli.Genshin.Calendar.Data[]);
-const weaponCards = ref([] as BTMuli.Genshin.Calendar.Data[]);
+const calendarNow = ref([] as TGApp.App.Calendar.Item[]);
+const characterCards = ref([] as TGApp.App.Calendar.Item[]);
+const weaponCards = ref([] as TGApp.App.Calendar.Item[]);
 
 // calendar item
 const showItem = ref(false as boolean);
-const selectedItem = ref({} as BTMuli.Genshin.Calendar.Data);
+const selectedItem = ref({} as TGApp.App.Calendar.Item);
 const selectedType = ref("character");
 
 // snackbar
@@ -177,38 +177,38 @@ onMounted(() => {
   weekNow.value = dayNow;
   btnNow.value = dayNow;
   calendarNow.value = getCalendar(dayNow);
-  characterCards.value = calendarNow.value.filter((item) => item.item_type === "character");
-  weaponCards.value = calendarNow.value.filter((item) => item.item_type === "weapon");
+  characterCards.value = calendarNow.value.filter((item) => item.itemType === "character");
+  weaponCards.value = calendarNow.value.filter((item) => item.itemType === "weapon");
   loading.value = false;
 });
 
 // 获取当前日历
 function getCalendar (day: number) {
-  return calendarData.value.filter((item) => item.drop_day.includes(day));
+  return calendarData.value.filter((item) => item.dropDays.includes(day));
 }
 
-function selectContent (item: BTMuli.Genshin.Calendar.Data, type: string) {
+function selectContent (item: TGApp.App.Calendar.Item, type: string) {
   selectedItem.value = item;
   selectedType.value = type;
   showItem.value = true;
 }
 
-function showDetail (item: BTMuli.Genshin.Calendar.Data) {
-  if (item.content_id === null) {
+function showDetail (item: TGApp.App.Calendar.Item) {
+  if (item.contentId === 0) {
     snackbarText.value = "暂无详情";
     snackbarColor.value = "error";
     snackbar.value = true;
     return;
   }
-  const url = OBC_CONTENT_API.replace("{content_id}", item.content_id.toString());
+  const url = OBC_CONTENT_API.replace("{content_id}", item.contentId.toString());
   createTGWindow(url, "素材详情", item.name, 1200, 800, true);
 }
 
 function getContents (day: number) {
   btnNow.value = day;
   calendarNow.value = getCalendar(day);
-  characterCards.value = calendarNow.value.filter((item) => item.item_type === "character");
-  weaponCards.value = calendarNow.value.filter((item) => item.item_type === "weapon");
+  characterCards.value = calendarNow.value.filter((item) => item.itemType === "character");
+  weaponCards.value = calendarNow.value.filter((item) => item.itemType === "weapon");
 }
 </script>
 <style lang="css" scoped>

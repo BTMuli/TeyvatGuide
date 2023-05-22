@@ -34,7 +34,7 @@ const loadingEmpty = ref(false as boolean);
 
 // 数据
 const annoId = Number(useRoute().params.anno_id);
-const annoData = ref({} as BTMuli.Genshin.Announcement.ContentItem);
+const annoData = ref({} as TGApp.BBS.Announcement.ContentItem);
 const annoHtml = ref("");
 
 onMounted(async () => {

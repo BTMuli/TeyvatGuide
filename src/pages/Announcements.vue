@@ -115,10 +115,10 @@ const router = useRouter();
 // 数据
 const tab = ref("");
 const annoCards = ref({
-  activity: [] as BTMuli.Genshin.Announcement.ListCard[],
-  game: [] as BTMuli.Genshin.Announcement.ListCard[],
+  activity: [] as TGApp.App.Announcement.ListCard[],
+  game: [] as TGApp.App.Announcement.ListCard[],
 });
-const annoData = ref({} as BTMuli.Genshin.Announcement.ListData);
+const annoData = ref({} as TGApp.BBS.Announcement.ListData);
 
 onMounted(async () => {
   loadingTitle.value = "正在获取公告数据";
@@ -139,7 +139,7 @@ async function switchNews () {
   await router.push("/news/2");
 }
 
-async function toPost (item: BTMuli.Genshin.Announcement.ListCard) {
+async function toPost (item: TGApp.App.Announcement.ListCard) {
   const path = router.resolve({
     name: "游戏内公告",
     params: {
@@ -150,7 +150,7 @@ async function toPost (item: BTMuli.Genshin.Announcement.ListCard) {
   createTGWindow(path, "游戏内公告", item.title, 960, 720, false, false);
 }
 
-async function toJson (item: BTMuli.Genshin.Announcement.ListCard) {
+async function toJson (item: TGApp.App.Announcement.ListCard) {
   const path = router.resolve({
     name: "游戏内公告（JSON）",
     params: {

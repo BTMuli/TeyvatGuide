@@ -430,16 +430,6 @@
 		"icon": "/WIKI/character/icon/10000064.webp"
 	},
 	{
-		"id": 10000061,
-		"contentId": 0,
-		"name": "绮良良",
-		"star": 4,
-		"bg": "/icon/bg/4-Star.webp",
-		"elementIcon": "/icon/element/草元素.webp",
-		"weaponIcon": "/icon/weapon/单手剑.webp",
-		"icon": "/WIKI/character/icon/10000061.webp"
-	},
-	{
 		"id": 10000059,
 		"contentId": 4197,
 		"name": "鹿野院平藏",

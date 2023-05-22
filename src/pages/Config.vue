@@ -246,7 +246,13 @@ onMounted(async () => {
   versionTauri.value = await app.getTauriVersion();
   osPlatform.value = `${await os.platform()}`;
   osVersion.value = await os.version();
-  dbInfo.value = await TGSqlite.getAppData();
+  try {
+    dbInfo.value = await TGSqlite.getAppData();
+  } catch (e) {
+    snackbarText.value = "读取数据库失败！";
+    snackbarColor.value = "warn";
+    snackbar.value = true;
+  }
   loading.value = false;
 });
 
@@ -484,7 +490,7 @@ async function refreshUser () {
   }
   const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
   if (infoRes.hasOwnProperty("nickname")) {
-    const info = infoRes as BTMuli.User.Base.BriefInfo;
+    const info = infoRes as TGApp.App.Account.BriefInfo;
     userStore.setBriefInfo(info);
     loadingTitle.value = "获取成功!正在获取用户游戏账号信息";
   } else {
@@ -493,8 +499,8 @@ async function refreshUser () {
   }
   const accountRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);
   if (Array.isArray(accountRes)) {
+    loadingTitle.value = "获取成功!正在保存到数据库!";
     await TGSqlite.insertAccount(accountRes);
-    loadingTitle.value = "获取成功!";
   } else {
     loadingTitle.value = "获取失败!";
     failCount++;
@@ -538,9 +544,9 @@ async function inputCookie () {
     loadingTitle.value = "正在获取用户信息...";
     const cookie_token = userStore.getCookieItem("cookie_token");
     const resUser = await TGRequest.User.byCookie.getUserInfo(cookie_token, uid);
-    // . 判断返回是否为 BTMuli.User.Base.BriefInfo
+    // . 判断返回是否为 BTMuli.User.Account.BriefInfo
     if (resUser.hasOwnProperty("nickname")) {
-      const info = resUser as BTMuli.User.Base.BriefInfo;
+      const info = resUser as TGApp.App.Account.BriefInfo;
       userStore.setBriefInfo(info);
       appStore.isLogin = true;
     }

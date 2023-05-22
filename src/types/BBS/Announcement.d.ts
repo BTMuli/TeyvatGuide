@@ -5,7 +5,7 @@
  * @since Alpha v0.1.5
  */
 
-declare namespace BTMuli.BBS.Announcement {
+declare namespace TGApp.BBS.Announcement {
   /**
    * @description 公告列表返回响应类型
    * @interface ListResponse
@@ -84,6 +84,21 @@ declare namespace BTMuli.BBS.Announcement {
    * @description 公告列表项
    * @interface ListItem
    * @since Alpha v0.1.5
+   * @property {AnnoSingle[]} list - 公告列表
+   * @property {number} type_id - 公告类型 ID
+   * @property {string} type_label - 公告类型标签
+   * @return ListItem
+   */
+  export interface ListItem {
+    list: AnnoSingle[]
+    type_id: number
+    type_label: string
+  }
+
+  /**
+   * @description 单个公告内容
+   * @interface AnnoSingle
+   * @since Alpha v0.1.5
    * @property {number} ann_id 公告 ID
    * @property {string} title 公告标题
    * @property {string} subtitle 公告副标题
@@ -104,9 +119,9 @@ declare namespace BTMuli.BBS.Announcement {
    * @property {number} remind_ver 公告提醒版本
    * @property {boolean} has_content 是否有内容
    * @property {boolean} extra_remind 是否有额外提醒
-   * @return ListItem
+   * @return AnnoSingle
    */
-  export interface ListItem {
+  export interface AnnoSingle {
     ann_id: number
     title: string
     subtitle: string

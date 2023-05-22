@@ -47,8 +47,8 @@ onMounted(async () => {
   // 获取数据
   loadingTitle.value = "正在获取数据...";
   const listData = await TGRequest.Anno.getList();
-  listData.list.map((item: BTMuli.Genshin.Announcement) => {
-    return item.list.map((single: BTMuli.Genshin.Announcement.ListItem) => {
+  listData.list.map((item: TGApp.BBS.Announcement.ListItem) => {
+    return item.list.map((single: TGApp.BBS.Announcement.AnnoSingle) => {
       return single.ann_id === annoId ? (jsonList = single) : null;
     });
   });

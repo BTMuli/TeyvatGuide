@@ -30,7 +30,7 @@
       <v-window v-model="tab">
         <v-window-item value="character">
           <div class="cards-grid">
-            <v-card v-for="item in CardsInfoC" :key="item.content_id" class="card-cls" @click="toOuter(item.name, item.content_id)">
+            <v-card v-for="item in CardsInfoC" :key="item.contentId" class="card-cls" @click="toOuter(item.name, item.contentId)">
               <div class="card-border">
                 <img src="/WIKI/GCG/bg/normal.webp" alt="border">
               </div>
@@ -45,7 +45,7 @@
         </v-window-item>
         <v-window-item value="action">
           <div class="cards-grid">
-            <v-card v-for="item in CardsInfoA" :key="item.content_id" class="card-cls" @click="toOuter(item.name, item.content_id)">
+            <v-card v-for="item in CardsInfoA" :key="item.contentId" class="card-cls" @click="toOuter(item.name, item.contentId)">
               <div class="card-border">
                 <img src="/WIKI/GCG/bg/normal.webp" alt="border">
               </div>
@@ -60,7 +60,7 @@
         </v-window-item>
         <v-window-item value="monster">
           <div class="cards-grid">
-            <v-card v-for="item in CardsInfoM" :key="item.content_id" class="card-cls" @click="toOuter(item.name, item.content_id)">
+            <v-card v-for="item in CardsInfoM" :key="item.contentId" class="card-cls" @click="toOuter(item.name, item.contentId)">
               <div class="card-border">
                 <img src="/WIKI/GCG/bg/normal.webp" alt="border">
               </div>
@@ -77,7 +77,7 @@
     </div>
     <div v-else>
       <div class="cards-grid">
-        <div v-for="item in CardsInfoS" :key="item.content_id" class="card-cls" @click="toOuter(item.name, item.content_id)">
+        <div v-for="item in CardsInfoS" :key="item.contentId" class="card-cls" @click="toOuter(item.name, item.contentId)">
           <div class="card-border">
             <img src="/WIKI/GCG/bg/normal.webp" alt="border">
           </div>
@@ -97,16 +97,17 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import TLoading from "../../components/t-loading.vue";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
-import { TGAppData } from "../../data";
+import { AppGCGData } from "../../data";
 // interface
 import { OBC_CONTENT_API } from "../../plugins/Mys/interface/utils";
 
 // loading
 const loading = ref(true);
+const allCards = computed(() => AppGCGData);
 // snackbar
 const snackbar = ref(false);
 // search
@@ -114,20 +115,19 @@ const doSearch = ref(false);
 const search = ref("");
 // data
 const tab = ref("character");
-const CardsInfoC = ref([] as BTMuli.Genshin.Wiki.GCG.BriefInfo[]);
-const CardsInfoA = ref([] as BTMuli.Genshin.Wiki.GCG.BriefInfo[]);
-const CardsInfoM = ref([] as BTMuli.Genshin.Wiki.GCG.BriefInfo[]);
-const CardsInfoS = ref([] as BTMuli.Genshin.Wiki.GCG.BriefInfo[]);
+const CardsInfoC = ref([] as TGApp.App.GCG.WikiBriefInfo[]);
+const CardsInfoA = ref([] as TGApp.App.GCG.WikiBriefInfo[]);
+const CardsInfoM = ref([] as TGApp.App.GCG.WikiBriefInfo[]);
+const CardsInfoS = ref([] as TGApp.App.GCG.WikiBriefInfo[]);
 
 onMounted(async () => {
   await loadData();
 });
 
 async function loadData () {
-  const CardsInfo = TGAppData.GCG;
-  CardsInfoC.value = CardsInfo.filter((item) => item.type === "角色牌");
-  CardsInfoA.value = CardsInfo.filter((item) => item.type === "行动牌");
-  CardsInfoM.value = CardsInfo.filter((item) => item.type === "魔物牌");
+  CardsInfoC.value = allCards.value.filter((item) => item.type === "角色牌");
+  CardsInfoA.value = allCards.value.filter((item) => item.type === "行动牌");
+  CardsInfoM.value = allCards.value.filter((item) => item.type === "魔物牌");
   loading.value = false;
 }
 function toOuter (cardName: string, cardId: number) {
@@ -137,9 +137,8 @@ function toOuter (cardName: string, cardId: number) {
 async function searchCard () {
   loading.value = true;
   doSearch.value = true;
-  const res: BTMuli.Genshin.Wiki.GCG.BriefInfo[] = [];
-  const allCardsInfo = TGAppData.GCG;
-  allCardsInfo.map((item) => (item.name.includes(search.value) ? res.push(item) : null));
+  const res: TGApp.App.GCG.WikiBriefInfo[] = [];
+  allCards.value.map((item) => (item.name.includes(search.value) ? res.push(item) : null));
   res.sort((a, b) => a.name.localeCompare(b.name));
   loading.value = false;
   if (res.length === 0) {

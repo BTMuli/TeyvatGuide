@@ -2,7 +2,7 @@
  * @file web request getLToken.ts
  * @description 获取 ltoken 的请求
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.1.5
  */
 
 // tauri
@@ -14,12 +14,12 @@ import TGUtils from "../utils/TGUtils";
 
 /**
  * @description 根据 stoken 获取 ltoken
- * @since Alpha v0.2.0
+ * @since Alpha v0.1.5
  * @param {string} stuid 登录用户 uid
  * @param {string} stoken stoken
- * @returns {Promise<string|BTMuli.Genshin.Base.Response>}
+ * @returns {Promise<string|TGApp.BBS.Response.Base>}
  */
-export async function getLTokenBySToken (stuid: string, stoken: string): Promise<string | BTMuli.Genshin.Base.Response> {
+export async function getLTokenBySToken (stuid: string, stoken: string): Promise<string | TGApp.BBS.Response.Base> {
   const url = TGApi.GameTokens.getLToken;
   const cookie = {
     stuid,
@@ -27,10 +27,10 @@ export async function getLTokenBySToken (stuid: string, stoken: string): Promise
   };
   const params = { stoken };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
-  return await http.fetch<BTMuli.User.Response.LToken>(url, {
+  return await http.fetch<TGApp.BBS.Response.getLTokenBySToken>(url, {
     method: "GET",
     headers: header,
-    body: http.Body.json(params),
+    query: params,
   }).then((res) => {
     if (res.data.retcode !== 0) return res.data;
     return res.data.data.ltoken;

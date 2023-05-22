@@ -2,20 +2,20 @@
   <div class="card-box">
     <!-- 底层背景图 -->
     <div class="card-bg">
-      <img :src="item.bg" alt="bg">
+      <img :src="props.modelValue.bg" alt="bg">
     </div>
     <!-- 中层角色图 -->
     <div class="card-icon">
-      <img :src="item.icon" alt="icon">
+      <img :src="props.modelValue.icon" alt="icon">
     </div>
     <!-- 上层图标&内容 -->
     <div class="card-cover">
       <div class="card-element">
-        <img :src="item.element" alt="element">
+        <img :src="props.modelValue.elementIcon" alt="element">
       </div>
       <div class="card-name">
-        <img :src="item.weapon_type" alt="weapon">
-        <span>{{ item.name }}</span>
+        <img :src="props.modelValue.weaponIcon" alt="weapon">
+        <span>{{ props.modelValue.name }}</span>
       </div>
     </div>
   </div>
@@ -24,36 +24,13 @@
 import { computed } from "vue";
 interface TMiniWeaponProps {
   size: string;
-  modelValue: BTMuli.Genshin.Wiki.Character.BriefInfo | BTMuli.Genshin.Calendar.Data
+  modelValue: TGApp.App.Character.WikiBriefInfo | TGApp.App.Calendar.Item;
 }
 
 const props = defineProps<TMiniWeaponProps>();
 
 const getSize = computed(() => {
   return props.size === "100px" ? "30px" : "40px";
-});
-
-const item = computed(() => {
-  let res;
-  if (props.modelValue.hasOwnProperty("weapon_type")) {
-    res = props.modelValue as BTMuli.Genshin.Wiki.Character.BriefInfo;
-    return {
-      bg: res.bg,
-      icon: res.icon,
-      element: res.element,
-      weapon_type: res.weapon_type,
-      name: res.name,
-    };
-  } else {
-    res = props.modelValue as BTMuli.Genshin.Calendar.Data;
-    return {
-      bg: res.bg,
-      icon: res.icon,
-      element: res.element,
-      weapon_type: res.weapon,
-      name: res.name,
-    };
-  }
 });
 </script>
 <style lang="css" scoped>

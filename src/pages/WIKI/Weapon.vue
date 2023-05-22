@@ -11,28 +11,24 @@
 
 <script lang="ts" setup>
 // vue
-import { ref, onMounted } from "vue";
+import { ref, computed } from "vue";
 import TMiniWeapon from "../../components/t-mini-weapon.vue";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
-import { TGAppData } from "../../data";
+import { AppWeaponData } from "../../data";
 import { OBC_CONTENT_API } from "../../plugins/Mys/interface/utils";
 
 // snackbar
 const snackbar = ref(false);
 // data
-const cardsInfo = ref([] as BTMuli.Genshin.Wiki.Weapon.BriefInfo[]);
+const cardsInfo = computed(() => AppWeaponData);
 
-onMounted(async () => {
-  cardsInfo.value = TGAppData.weapon;
-});
-
-function toOuter (item: BTMuli.Genshin.Wiki.Weapon.BriefInfo) {
-  if (item.content_id === null || item.content_id === undefined) {
+function toOuter (item: TGApp.App.Weapon.WikiBriefInfo) {
+  if (item.contentId === 0) {
     snackbar.value = true;
     return;
   }
-  const url = OBC_CONTENT_API.replace("{content_id}", item.content_id.toString());
+  const url = OBC_CONTENT_API.replace("{content_id}", item.contentId.toString());
   createTGWindow(url, "武器详情", item.name, 1200, 800, true);
 }
 

@@ -2,13 +2,14 @@
  * @file utils TGSqlite.ts
  * @description 数据库操作类
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.1.5
  */
 
 // tauri
 import Database from "tauri-plugin-sql-api";
 // utils
 import { importUIAFData, initSQLiteData, initSQLiteTable } from "./TGSql";
+import minifySql from "./minifySql";
 import { getUiafStatus } from "./UIAF";
 
 class TGSqlite {
@@ -59,12 +60,12 @@ class TGSqlite {
 	 * @description 获取数据库信息
 	 * @memberOf TGSqlite
 	 * @since Alpha v0.1.4
-	 * @returns {Promise<{ key: string, value: string, updated: string }[]>}
+	 * @returns {Promise<TGApp.Sqlite.AppData.Item[]>}
 	 */
-  public async getAppData (): Promise<Array<{ key: string, value: string, updated: string }>> {
+  public async getAppData (): Promise<TGApp.Sqlite.AppData.Item[]> {
     const db = await Database.load(this.dbPath);
     const sql = "SELECT * FROM AppData;";
-    const res: Array<{ key: string, value: string, updated: string }> = await db.select(sql);
+    const res: TGApp.Sqlite.AppData.Item[] = await db.select(sql);
     await db.close();
     return res;
   }
@@ -86,29 +87,28 @@ class TGSqlite {
   /**
    * @description 插入 Account 数据
    * @memberOf TGSqlite
-   * @since Alpha v0.2.0
-   * @param {BTMuli.User.Game.Account[]} accounts
+   * @since Alpha v0.1.5
+   * @param {TGApp.User.Account.Game[]} accounts
    * @returns {Promise<void>}
    */
-  public async insertAccount (accounts: BTMuli.User.Game.Account[]): Promise<void> {
+  public async insertAccount (accounts: TGApp.User.Account.Game[]): Promise<void> {
     const db = await Database.load(this.dbPath);
     for (const a of accounts) {
-      const is_chosen = a.is_chosen ? 1 : 0;
-      const is_official = a.is_official ? 1 : 0;
-      const sql = `
-            INSERT INTO GameAccount (game_biz, game_uid, is_chosen, is_official, level, nickname, region, region_name, updated)
-            VALUES ('${a.game_biz}', '${a.game_uid}', ${is_chosen}, ${is_official}, '${a.level}', '${a.nickname}',
-                    '${a.region}', '${a.region_name}', datetime('now', 'localtime'))
-            ON CONFLICT(game_biz, game_uid) DO UPDATE SET 
-                is_chosen   = ${is_chosen},
-                is_official = ${is_official},
-                level       = ${a.level},
-                nickname    = '${a.nickname}',
-                region      = '${a.region}',
-                region_name = '${a.region_name}',
-                updated     = datetime('now', 'localtime');
-            `;
-      console.log(sql);
+      const isChosen = a.is_chosen ? 1 : 0;
+      const isOfficial = a.is_official ? 1 : 0;
+      const sql = minifySql(`
+        INSERT INTO GameAccount (gameBiz, gameUid, isChosen, isOfficial, level, nickname, region, regionName, updated)
+        VALUES ('${a.game_biz}', '${a.game_uid}', ${isChosen}, ${isOfficial}, '${a.level}', '${a.nickname}',
+                '${a.region}', '${a.region_name}', datetime('now', 'localtime'))
+        ON CONFLICT(gameBiz, gameUid) DO UPDATE SET 
+          isChosen   = ${isChosen},
+          isOfficial = ${isOfficial},
+          level       = ${a.level},
+          nickname    = '${a.nickname}',
+          region      = '${a.region}',
+          regionName = '${a.region_name}',
+          updated     = datetime('now', 'localtime');
+        `);
       await db.execute(sql);
     }
     await db.close();
@@ -118,12 +118,12 @@ class TGSqlite {
    * @description 获取当前选择的游戏账号
    * @memberOf TGSqlite
    * @since Alpha v0.2.0
-   * @returns {Promise<BTMuli.User.Game.Account|false>}
+   * @returns {Promise<TGApp.User.Account.Game|false>}
    */
-  public async getCurAccount (): Promise<BTMuli.User.Game.Account | false> {
+  public async getCurAccount (): Promise<TGApp.User.Account.Game | false> {
     const db = await Database.load(this.dbPath);
-    const sql = "SELECT * FROM GameAccount WHERE is_chosen=1;";
-    const res: BTMuli.User.Game.Account[] = await db.select(sql);
+    const sql = "SELECT * FROM GameAccount WHERE isChosen=1;";
+    const res: TGApp.User.Account.Game[] = await db.select(sql);
     await db.close();
     return res.length === 0 ? false : res[0];
   }
@@ -131,18 +131,18 @@ class TGSqlite {
   /**
 	 * @description 保存 appData
 	 * @memberOf TGSqlite
-	 * @since Alpha v0.2.0
+	 * @since Alpha v0.1.5
 	 * @param {string} key
 	 * @param {string} value
 	 * @returns {Promise<void>}
 	 */
   public async saveAppData (key: string, value: string): Promise<void> {
     const db = await Database.load(this.dbPath);
-    const sql = `
+    const sql = minifySql(`
         INSERT INTO AppData (key, value, updated)
         VALUES ('${key}', '${value}', datetime('now', 'localtime'))
         ON CONFLICT(key) DO UPDATE SET value = '${value}',updated = datetime('now', 'localtime');
-		`;
+		`);
     await db.execute(sql);
     await db.close();
   }
@@ -175,7 +175,7 @@ class TGSqlite {
     const sqlT = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
     const res: Array<{ name: string }> = await db.select(sqlT);
     // 考虑到 sqlite_sequence 表，所以需要 +1
-    if (res.length === this.tables.length + 1) {
+    if (res.length === this.tables.length) {
       if (this.tables.every((item) => res.map((i) => i.name).includes(item))) {
         isVerified = true;
       }
@@ -203,13 +203,13 @@ class TGSqlite {
   /**
 	 * @description 获取成就系列列表
 	 * @memberOf TGSqlite
-	 * @since Alpha v0.1.4
-	 * @returns {Promise<BTMuli.SQLite.AchievementSeries[]>}
+	 * @since Alpha v0.1.5
+	 * @returns {Promise<TGApp.Sqlite.Achievement.SeriesTable[]>}
 	 */
-  public async getAchievementSeries (): Promise<BTMuli.SQLite.AchievementSeries[]> {
+  public async getAchievementSeries (): Promise<TGApp.Sqlite.Achievement.SeriesTable[]> {
     const db = await Database.load(this.dbPath);
     const sql = "SELECT * FROM AchievementSeries ORDER BY `order`;";
-    const res: BTMuli.SQLite.AchievementSeries[] = await db.select(sql);
+    const res: TGApp.Sqlite.Achievement.SeriesTable[] = await db.select(sql);
     await db.close();
     return res;
   }
@@ -217,17 +217,14 @@ class TGSqlite {
   /**
 	 * @description 获取成就系列对应的名片
 	 * @memberOf TGSqlite
-	 * @since Alpha v0.1.4
+	 * @since Alpha v0.1.5
 	 * @param {number} seriesId 系列 ID
-	 * @returns {Promise<BTMuli.SQLite.NameCard>}
+	 * @returns {Promise<TGApp.Sqlite.NameCard.Item>}
 	 */
-  public async getNameCard (seriesId: number): Promise<BTMuli.SQLite.NameCard> {
+  public async getNameCard (seriesId: number): Promise<TGApp.Sqlite.NameCard.Item> {
     const db = await Database.load(this.dbPath);
-    const sql = `SELECT *
-                 FROM NameCard
-                 WHERE name = (SELECT nameCard FROM AchievementSeries WHERE id = ${seriesId});
-		`;
-    const res: BTMuli.SQLite.NameCard[] = await db.select(sql);
+    const sql = `SELECT * FROM NameCard WHERE name = (SELECT nameCard FROM AchievementSeries WHERE id = ${seriesId});`;
+    const res: TGApp.Sqlite.NameCard.Item[] = await db.select(sql);
     await db.close();
     return res[0];
   }
@@ -236,10 +233,10 @@ class TGSqlite {
 	 * @description 获取成就列表
 	 * @memberOf TGSqlite
 	 * @param {number} [seriesId] 系列 ID
-	 * @since Alpha v0.1.4
-	 * @returns {Promise<BTMuli.SQLite.Achievements[]>}
+	 * @since Alpha v0.1.5
+	 * @returns {Promise<TGApp.Sqlite.Achievement.SingleTable[]>}
 	 */
-  public async getAchievements (seriesId?: number): Promise<BTMuli.SQLite.Achievements[]> {
+  public async getAchievements (seriesId?: number): Promise<TGApp.Sqlite.Achievement.SingleTable[]> {
     const db = await Database.load(this.dbPath);
     let sql;
     if (seriesId) {
@@ -247,7 +244,7 @@ class TGSqlite {
     } else {
       sql = "SELECT * FROM Achievements ORDER BY isCompleted, `order`;";
     }
-    const res: BTMuli.SQLite.Achievements[] = await db.select(sql);
+    const res: TGApp.Sqlite.Achievement.SingleTable[] = await db.select(sql);
     await db.close();
     return res;
   }
@@ -270,24 +267,20 @@ class TGSqlite {
 	 * @description 查询成就
 	 * @memberOf TGSqlite
 	 * @param {string} keyword 关键词
-	 * @since Alpha v0.1.4
-	 * @returns {Promise<BTMuli.SQLite.Achievements[]>}
+	 * @since Alpha v0.1.5
+	 * @returns {Promise<TGApp.Sqlite.Achievement.SingleTable[]>}
 	 */
-  public async searchAchievements (keyword: string): Promise<BTMuli.SQLite.Achievements[]> {
+  public async searchAchievements (keyword: string): Promise<TGApp.Sqlite.Achievement.SingleTable[]> {
     const db = await Database.load(this.dbPath);
     let sql;
     if (keyword.startsWith("v")) {
       const version = keyword.replace("v", "");
       sql = `SELECT * FROM Achievements WHERE version LIKE '%${version}%' ORDER BY isCompleted, \`order\`;`;
     } else {
-      sql = `SELECT *
-             FROM Achievements
-             WHERE name LIKE '%${keyword}%'
-                OR description LIKE '%${keyword}%'
-             ORDER BY isCompleted, \`order\`;
-			`;
+      sql = `SELECT * FROM Achievements WHERE name LIKE '%${keyword}%' OR description LIKE '%${keyword}%'
+             ORDER BY isCompleted, \`order\`;`;
     }
-    const res: BTMuli.SQLite.Achievements[] = await db.select(sql);
+    const res: TGApp.Sqlite.Achievement.SingleTable[] = await db.select(sql);
     await db.close();
     return res;
   }
@@ -295,11 +288,11 @@ class TGSqlite {
   /**
 	 * @description 合并 UIAF 数据
 	 * @memberOf TGSqlite
-	 * @param {BTMuli.UIAF.Achievement[]} achievements UIAF 数据
+	 * @param {TGApp.Plugins.UIAF.Achievement[]} achievements UIAF 数据
 	 * @since Alpha v0.1.4
 	 * @returns {Promise<void>}
 	 */
-  public async mergeUIAF (achievements: TGPlugin.UIAF.Achievement[]): Promise<void> {
+  public async mergeUIAF (achievements: TGApp.Plugins.UIAF.Achievement[]): Promise<void> {
     const db = await Database.load(this.dbPath);
     const sql = importUIAFData(achievements);
     for (const item of sql) {
@@ -312,14 +305,14 @@ class TGSqlite {
 	 * @description 获取 UIAF 数据
 	 * @memberOf TGSqlite
 	 * @since Alpha v0.1.4
-	 * @returns {Promise<TGPlugin.UIAF.Achievement[]>}
+	 * @returns {Promise<TGApp.Plugins.UIAF.Achievement[]>}
 	 */
-  public async getUIAF (): Promise<TGPlugin.UIAF.Achievement[]> {
+  public async getUIAF (): Promise<TGApp.Plugins.UIAF.Achievement[]> {
     const db = await Database.load(this.dbPath);
     const sql = "SELECT * FROM Achievements WHERE isCompleted = 1 OR progress > 0";
-    const res: BTMuli.SQLite.Achievements[] = await db.select(sql);
+    const res: TGApp.Sqlite.Achievement.SingleTable[] = await db.select(sql);
     await db.close();
-    const achievements: TGPlugin.UIAF.Achievement[] = [];
+    const achievements: TGApp.Plugins.UIAF.Achievement[] = [];
     for (const item of res) {
       const completed = item.isCompleted === 1;
       const status = getUiafStatus(completed, item.progress);

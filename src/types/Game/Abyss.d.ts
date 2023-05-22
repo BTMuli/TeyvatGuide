@@ -6,7 +6,7 @@
  * @since Alpha v0.2.0
  */
 
-declare namespace BTMuli.Game.Abyss {
+declare namespace TGApp.Game.Abyss {
   /**
    * @description 深渊数据返回类型
    * @interface Response

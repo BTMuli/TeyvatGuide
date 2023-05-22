@@ -26,7 +26,7 @@ const abyssCookie = ref({
   ltoken: "",
   ltuid: "",
 });
-const user = ref({} as BTMuli.User.Game.Account);
+const user = ref({} as TGApp.User.Account.Game);
 
 onMounted(async () => {
   const curUser = await TGSqlite.getCurAccount();
@@ -44,7 +44,7 @@ onMounted(async () => {
 async function getAbyssData (schedule:string): Promise<void> {
   const res = await TGRequest.User.byCookie.getAbyss(abyssCookie.value, schedule, user.value);
   if (res.hasOwnProperty("retcode")) {
-    const warn = res as BTMuli.Genshin.Base.Response;
+    const warn = res as TGApp.BBS.Response.Base;
     console.warn(warn);
   } else {
     console.log(res);

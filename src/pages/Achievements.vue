@@ -61,7 +61,7 @@
         }"
         @click="openImg()"
       >
-        <v-list-item :title="getCardInfo.name" :subtitle="getCardInfo.description">
+        <v-list-item :title="getCardInfo.name" :subtitle="getCardInfo.desc">
           <template #prepend>
             <v-img width="80px" style="margin-right: 10px" :src="getCardInfo.icon" />
           </template>
@@ -129,11 +129,11 @@ const loadingTitle = ref("正在加载数据" as string);
 
 // data
 const title = ref(achievementsStore.title as string);
-const getCardInfo = ref({} as BTMuli.SQLite.NameCard);
+const getCardInfo = ref({} as TGApp.Sqlite.NameCard.Item);
 // series
-const seriesList = ref([] as BTMuli.SQLite.AchievementSeries[]);
+const seriesList = ref([] as TGApp.Sqlite.Achievement.SeriesTable[]);
 const selectedSeries = ref(-1 as number);
-const selectedAchievement = ref([] as BTMuli.SQLite.Achievements[]);
+const selectedAchievement = ref([] as TGApp.Sqlite.Achievement.SingleTable[]);
 const renderAchievement = computed(() => {
   return selectedAchievement.value.slice(start.value, start.value + itemCount.value + 1);
 });
@@ -347,13 +347,6 @@ async function exportJson () {
 .list-empty {
   position: relative;
   width: 100%;
-}
-
-.list-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  max-height: calc(100vh - 100px);
 }
 
 /* 版本信息 */

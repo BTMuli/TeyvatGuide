@@ -2,7 +2,7 @@
  * @file web request verifyLToken.ts
  * @description 验证 stoken 的请求函数
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.1.5
  */
 
 // tauri
@@ -14,12 +14,12 @@ import TGUtils from "../utils/TGUtils";
 
 /**
  * @description 验证 ltoken 有效性，返回 mid
- * @since Alpha v0.2.0
+ * @since Alpha v0.1.5
  * @param {string} ltoken ltoken
  * @param {string} ltuid 登录用户 uid
- * @returns {Promise<string | BTMuli.Genshin.Base.Response>}
+ * @returns {Promise<string | TGApp.BBS.Response.Base>}
  */
-export async function verifyLToken (ltoken: string, ltuid: string): Promise<string | BTMuli.Genshin.Base.Response> {
+export async function verifyLToken (ltoken: string, ltuid: string): Promise<string | TGApp.BBS.Response.Base> {
   const url = TGApi.GameTokens.verifyLToken;
   const cookie = {
     ltoken,
@@ -27,8 +27,7 @@ export async function verifyLToken (ltoken: string, ltuid: string): Promise<stri
   };
   const data = { ltoken };
   const header = TGUtils.User.getHeader(cookie, "POST", data, "common");
-  console.log("header:", header);
-  return await http.fetch<BTMuli.User.Response.Verify>(url, {
+  return await http.fetch<TGApp.BBS.Response.verifyUserInfoBySToken>(url, {
     method: "POST",
     headers: header,
     body: http.Body.json(data),

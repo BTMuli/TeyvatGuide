@@ -2,7 +2,7 @@
  * @file web request initCookie.ts
  * @description 首次输入 cookie 后的一系列请求
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.1.5
  */
 
 // utils
@@ -14,14 +14,14 @@ import { verifyLToken } from "./verifyLToken";
 
 /**
  * @description 根据输入 cookie 获取一堆 token
- * @since Alpha v0.2.0
+ * @since Alpha v0.1.5
  * @param {string} ticket login_ticket
  * @param {string} uid login_uid
  * @returns {Promise<void>}
  */
 async function initCookie (ticket: string, uid: string): Promise<void> {
   const tokenRes = await getTokensByLoginTicket(ticket, uid);
-  const cookie: BTMuli.User.Base.Cookie = {
+  const cookie: TGApp.BBS.Constant.Cookie = {
     account_id: uid,
     cookie_token: "",
     login_ticket: ticket,

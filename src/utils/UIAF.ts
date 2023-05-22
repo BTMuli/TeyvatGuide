@@ -49,9 +49,9 @@ export function getUiafStatus (completed: boolean, progress: number): number {
 /**
  * @description 获取 UIAF 头部信息
  * @since Alpha v0.1.3
- * @returns {Promise<TGPlugin.UIAF.Header>}
+ * @returns {Promise<TGApp.Plugins.UIAF.Export>}
  */
-export async function getUiafHeader (): Promise<TGPlugin.UIAF.Header> {
+export async function getUiafHeader (): Promise<TGApp.Plugins.UIAF.Export> {
   return {
     // eslint-disable-next-line camelcase
     export_app: "Tauri.Genshin",
@@ -73,7 +73,7 @@ export async function getUiafHeader (): Promise<TGPlugin.UIAF.Header> {
  */
 export async function verifyUiafData (path: string): Promise<boolean> {
   const fileData: string = await fs.readTextFile(path);
-  const UiafData: TGPlugin.UIAF.Header = JSON.parse(fileData).info;
+  const UiafData: TGApp.Plugins.UIAF.Export = JSON.parse(fileData).info;
   return UiafData.uiaf_version !== undefined;
 }
 
@@ -99,10 +99,10 @@ export async function readUiafData (userPath: string): Promise<string | false> {
 /**
  * @description 根据成就数据导出 UIAF 数据
  * @since Alpha v0.1.4
- * @param {TGPlugin.UIAF.Achievement[]} achievementData - 成就数据
+ * @param {TGApp.Plugins.UIAF.Achievement[]} achievementData - 成就数据
  * @returns {Promise<void>}
  */
-export async function backupUiafData (achievementData: TGPlugin.UIAF.Achievement[]): Promise<void> {
+export async function backupUiafData (achievementData: TGApp.Plugins.UIAF.Achievement[]): Promise<void> {
   const savePath = `${await path.appLocalDataDir()}\\userData\\UIAF.json`;
   await fs.writeTextFile(savePath, JSON.stringify(achievementData, null, 2));
 }
@@ -118,7 +118,7 @@ export async function restoreUiafData (): Promise<boolean> {
   if (!await fs.exists(uiafPath)) {
     return false;
   }
-  const uiafData = JSON.parse(await fs.readTextFile(uiafPath)) as TGPlugin.UIAF.Achievement[];
+  const uiafData = JSON.parse(await fs.readTextFile(uiafPath)) as TGApp.Plugins.UIAF.Achievement[];
   await TGSqlite.mergeUIAF(uiafData);
   return true;
 }

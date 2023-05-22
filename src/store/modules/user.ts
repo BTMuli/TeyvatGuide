@@ -17,10 +17,10 @@ export const useUserStore = defineStore(
       avatar: "",
       uid: "",
       desc: "",
-    } as BTMuli.User.Base.BriefInfo);
+    } as TGApp.App.Account.BriefInfo);
     const cookie = ref({} as Record<string, string>);
 
-    function setBriefInfo (info: BTMuli.User.Base.BriefInfo): void {
+    function setBriefInfo (info: TGApp.App.Account.BriefInfo): void {
       briefInfo.value = info;
     }
 

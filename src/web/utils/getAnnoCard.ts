@@ -11,13 +11,13 @@ const defaultCover = "/source/UI/defaultCover.webp";
 /**
  * @description 将获取到的数据转为渲染用的卡片
  * @since Alpha v0.1.2
- * @param {BTMuli.Genshin.Announcement.ListData} data 公告数据
- * @returns {BTMuli.Genshin.Announcement.ListCard[]} 渲染用的卡片
+ * @param {TGApp.BBS.Announcement.ListData[]} data 公告数据
+ * @returns {TGApp.App.Announcement.ListCard[]} 渲染用的卡片
  */
-export function getAnnoCard (data: BTMuli.Genshin.Announcement.ListData): BTMuli.Genshin.Announcement.ListCard[] {
-  const cards: BTMuli.Genshin.Announcement.ListCard[] = [];
-  data.list.map((annoList: BTMuli.Genshin.Announcement) => {
-    return annoList.list.map((anno: BTMuli.Genshin.Announcement.ListItem) => {
+export function getAnnoCard (data: TGApp.BBS.Announcement.ListData): TGApp.App.Announcement.ListCard[] {
+  const cards: TGApp.App.Announcement.ListCard[] = [];
+  data.list.map((annoList: TGApp.BBS.Announcement.ListItem) => {
+    return annoList.list.map((anno: TGApp.BBS.Announcement.AnnoSingle) => {
       return cards.push({
         id: anno.ann_id,
         title: anno.title,
