@@ -6,20 +6,20 @@
 	"author": "BTMuli <bt-muli@outlook.com>",
 	"packageManager": "npm@9.6.6",
 	"scripts": {
+		"build": "tauri build",
+		"debug": "tauri build --debug",
+		"dev": "concurrently -k \"tauri dev --exit-on-panic\" \"vue-devtools\"",
 		"lint": "concurrently \"npm:lint:*(!fix)\"",
-		"lint:fix": "concurrently \"npm:lint:*:fix\"",
 		"lint:code": "eslint \"./src/**/*.{vue,ts,tsx,js,jsx}\"",
 		"lint:code:fix": "npm run lint:code -- --fix",
+		"lint:fix": "concurrently \"npm:lint:*:fix\"",
 		"lint:style": "stylelint \"./src/**/*.{vue,css}\"",
 		"lint:style:fix": "npm run lint:style -- --fix",
 		"prettier": "prettier \"**/*.{json,yml,html}\" --write",
-		"dev": "concurrently -k \"tauri dev --exit-on-panic\" \"vue-devtools\"",
+		"tauri": "tauri",
+		"update:submodule": "git submodule update --remote --recursive",
 		"vite:dev": "vite dev",
-		"vite:build": "vite build",
-		"build": "tauri build",
-		"debug": "tauri build --debug",
-		"preview": "vite preview",
-		"tauri": "tauri"
+		"vite:build": "vite build"
 	},
 	"bugs": {
 		"url": "https://github.com/BTMuli/Tauri.Genshin/issues"
