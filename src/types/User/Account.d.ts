@@ -1,15 +1,29 @@
 /**
- * @file types Game.d.ts
- * @description 游戏数据相关接口
+ * @file types User Account.d.ts
+ * @description 用户账号相关类型定义文件
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.1.5
  */
 
-declare namespace BTMuli.User.Game {
+declare namespace BTMuli.User.Account {
   /**
-   * @description 游戏账号
-   * @see TGRequest.User.byCookie.getAccounts
-   * @since Alpha v0.2.0
+   * @description 游戏账号返回类型
+   * @interface GameResponse
+   * @since Alpha v0.1.5
+   * @extends BTMuli.Constant.Response.Base
+   * @property {Game} data.list 游戏账号列表
+   * @return GameResponse
+   */
+  export interface GameResponse extends BTMuli.Constant.Response.Base {
+    data: {
+      list: Game
+    }
+  }
+
+  /**
+   * @description 游戏账号类型
+   * @interface Game
+   * @since Alpha v0.1.5
    * @property {string} game_biz 游戏 biz，例如 hk4e_cn
    * @property {string} game_uid 游戏 uid
    * @property {boolean} is_chosen 是否为当前选中账号
@@ -18,9 +32,9 @@ declare namespace BTMuli.User.Game {
    * @property {string} nickname 游戏昵称
    * @property {string} region 游戏区域
    * @property {string} region_name 游戏区域名称
-   * @returns Account
+   * @return Game
    */
-  export interface Account {
+  export interface Game {
     game_biz: string
     game_uid: string
     is_chosen: boolean
@@ -30,4 +44,5 @@ declare namespace BTMuli.User.Game {
     region: string
     region_name: string
   }
+
 }
