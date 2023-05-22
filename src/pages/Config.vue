@@ -190,6 +190,8 @@ import { useAchievementsStore } from "../store/modules/achievements";
 import { useUserStore } from "../store/modules/user";
 // utils
 import { backupUiafData, restoreUiafData } from "../utils/UIAF";
+import { backupCookieData } from "../web/utils/backupData";
+import { restoreCookieData } from "../web/utils/restoreData";
 import TGSqlite from "../utils/TGSqlite";
 import TGRequest from "../web/request/TGRequest";
 
@@ -367,6 +369,8 @@ async function backupData () {
   loading.value = true;
   const achievements = await TGSqlite.getUIAF();
   await backupUiafData(achievements);
+  const cookie = await TGSqlite.getCookie();
+  await backupCookieData(cookie);
   loading.value = false;
   snackbarText.value = "数据已备份!";
   snackbarColor.value = "success";
@@ -376,17 +380,25 @@ async function backupData () {
 async function restoreData () {
   loadingTitle.value = "正在恢复数据...";
   loading.value = true;
-  const res = await restoreUiafData();
-  loading.value = false;
-  if (res) {
+  const fail = [];
+  let res = await restoreUiafData();
+  if (!res) {
+    fail.push("成就数据");
+  }
+  res = await restoreCookieData();
+  if (!res) {
+    fail.push("Cookie");
+  }
+  if (fail.length > 0) {
+    snackbarText.value = `${fail.join("、")} 恢复失败!`;
+    snackbarColor.value = "error";
+  } else {
     snackbarText.value = "数据已恢复!";
     snackbarColor.value = "success";
-    snackbar.value = true;
-  } else {
-    snackbarText.value = "未检测到备份数据!";
-    snackbarColor.value = "error";
-    snackbar.value = true;
   }
+  const cookie = await TGSqlite.getCookie();
+  userStore.initCookie(cookie);
+  loading.value = false;
 }
 
 async function delTempData () {
