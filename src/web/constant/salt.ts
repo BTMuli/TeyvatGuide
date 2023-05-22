@@ -7,13 +7,13 @@
 
 /**
  * @description salt 值
- * @version 2.49.1
+ * @version 2.50.1
  * @since Alpha v0.2.0
  */
 const SALT = {
   BBS: {
-    K2: "egBrFMO1BPBG0UX5XOuuwMRLZKwTVKRV",
-    LK2: "DG8lqMyc9gquwAUFc7zBS62ijQRX9XF7",
+    K2: "A4lPYtN0KGRVwE5M5Fm0DqQiC5VVMVM3",
+    LK2: "kkFiNdhyHqZ1VnDRHnU1podIvO4eiHcs",
   },
   Other: {
     X4: "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs",
