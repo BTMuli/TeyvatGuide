@@ -2,7 +2,7 @@
 	{
 		"name": "稻妻·雷电之纹",
 		"type": 0,
-		"description": "名片纹饰。大御所将军的纹样，亦即麾下军势之旗印，「雷之三重巴」。",
+		"desc": "名片纹饰。大御所将军的纹样，亦即麾下军势之旗印，「雷之三重巴」。",
 		"source": "稻妻的声望等级达到7级时获取。",
 		"icon": "/source/nameCard/icon/稻妻·雷电之纹.webp",
 		"bg": "/source/nameCard/bg/稻妻·雷电之纹.webp",
@@ -11,7 +11,7 @@
 	{
 		"name": "稻妻·神里之纹",
 		"type": 0,
-		"description": "名片纹饰。三奉行中，社奉行·神里家的椿纹。",
+		"desc": "名片纹饰。三奉行中，社奉行·神里家的椿纹。",
 		"source": "稻妻的声望等级达到4级时获取。",
 		"icon": "/source/nameCard/icon/稻妻·神里之纹.webp",
 		"bg": "/source/nameCard/bg/稻妻·神里之纹.webp",
@@ -20,7 +20,7 @@
 	{
 		"name": "稻妻·神樱",
 		"type": 0,
-		"description": "名片纹饰。绯樱飘落之处，尽在神木的守护之下。",
+		"desc": "名片纹饰。绯樱飘落之处，尽在神木的守护之下。",
 		"source": "「神樱眷顾」等级达到48级时领取。",
 		"icon": "/source/nameCard/icon/稻妻·神樱.webp",
 		"bg": "/source/nameCard/bg/稻妻·神樱.webp",
@@ -29,7 +29,7 @@
 	{
 		"name": "璃月·千帆",
 		"type": 0,
-		"description": "名片纹饰。坐看日月行，细数千帆过。",
+		"desc": "名片纹饰。坐看日月行，细数千帆过。",
 		"source": "璃月的声望等级达到4级时获取。",
 		"icon": "/source/nameCard/icon/璃月·千帆.webp",
 		"bg": "/source/nameCard/bg/璃月·千帆.webp",
@@ -38,7 +38,7 @@
 	{
 		"name": "璃月·云间",
 		"type": 0,
-		"description": "名片纹饰。岩间琉璃云间月。",
+		"desc": "名片纹饰。岩间琉璃云间月。",
 		"source": "璃月的声望等级达到7级时获取。",
 		"icon": "/source/nameCard/icon/璃月·云间.webp",
 		"bg": "/source/nameCard/bg/璃月·云间.webp",
@@ -47,7 +47,7 @@
 	{
 		"name": "流明·辉石",
 		"type": 0,
-		"description": "名片纹饰。无名无言的湛蓝晶石，其中流动的是高天的秘辛，或是巨渊的低语…？",
+		"desc": "名片纹饰。无名无言的湛蓝晶石，其中流动的是高天的秘辛，或是巨渊的低语…？",
 		"source": "流明石触媒强化至10级时获取。",
 		"icon": "/source/nameCard/icon/流明·辉石.webp",
 		"bg": "/source/nameCard/bg/流明·辉石.webp",
@@ -56,7 +56,7 @@
 	{
 		"name": "蒙德·英名",
 		"type": 0,
-		"description": "名片纹饰。荣誉骑士的好名声早已远扬全城。",
+		"desc": "名片纹饰。荣誉骑士的好名声早已远扬全城。",
 		"source": "蒙德的声望等级达到4级时获取。",
 		"icon": "/source/nameCard/icon/蒙德·英名.webp",
 		"bg": "/source/nameCard/bg/蒙德·英名.webp",
@@ -65,7 +65,7 @@
 	{
 		"name": "蒙德·祝愿",
 		"type": 0,
-		"description": "名片纹饰。喜欢帮助他人的仁心，大家都会相应地予之祝福。",
+		"desc": "名片纹饰。喜欢帮助他人的仁心，大家都会相应地予之祝福。",
 		"source": "蒙德的声望等级达到7级时获取。",
 		"icon": "/source/nameCard/icon/蒙德·祝愿.webp",
 		"bg": "/source/nameCard/bg/蒙德·祝愿.webp",
@@ -74,7 +74,7 @@
 	{
 		"name": "庆典·倾耳",
 		"type": 0,
-		"description": "名片纹饰。星海啊，山岩啊，请你们倾耳听我的曲调吧。",
+		"desc": "名片纹饰。星海啊，山岩啊，请你们倾耳听我的曲调吧。",
 		"source": "「万籁协奏」礼包获取。",
 		"icon": "/source/nameCard/icon/庆典·倾耳.webp",
 		"bg": "/source/nameCard/bg/庆典·倾耳.webp",
@@ -83,7 +83,7 @@
 	{
 		"name": "忍冬·古树",
 		"type": 0,
-		"description": "名片纹饰。我等必将复起，古木已发新枝。",
+		"desc": "名片纹饰。我等必将复起，古木已发新枝。",
 		"source": "忍冬之树供奉至9级时获取。",
 		"icon": "/source/nameCard/icon/忍冬·古树.webp",
 		"bg": "/source/nameCard/bg/忍冬·古树.webp",
@@ -92,7 +92,7 @@
 	{
 		"name": "须弥·大梦",
 		"type": 0,
-		"description": "名片纹饰。「新芽萌发的时节尚未到来，请小心将我藏起，在草木亦流连的梦境。」",
+		"desc": "名片纹饰。「新芽萌发的时节尚未到来，请小心将我藏起，在草木亦流连的梦境。」",
 		"source": "梦之树等级达到48级时领取。",
 		"icon": "/source/nameCard/icon/须弥·大梦.webp",
 		"bg": "/source/nameCard/bg/须弥·大梦.webp",
@@ -101,7 +101,7 @@
 	{
 		"name": "须弥·甘露",
 		"type": 0,
-		"description": "名片纹饰。遗世的甘露池水虽盛满了属于过去时代的追忆，但其中或许也蕴藏着将要创造未来的力量。",
+		"desc": "名片纹饰。遗世的甘露池水虽盛满了属于过去时代的追忆，但其中或许也蕴藏着将要创造未来的力量。",
 		"source": "甘露池供奉6次后领取。",
 		"icon": "/source/nameCard/icon/须弥·甘露.webp",
 		"bg": "/source/nameCard/bg/须弥·甘露.webp",
@@ -110,7 +110,7 @@
 	{
 		"name": "须弥·照览",
 		"type": 0,
-		"description": "名片纹饰。遍览世间相，一念彻天光。",
+		"desc": "名片纹饰。遍览世间相，一念彻天光。",
 		"source": "须弥的声望等级达到4级时获取。",
 		"icon": "/source/nameCard/icon/须弥·照览.webp",
 		"bg": "/source/nameCard/bg/须弥·照览.webp",
@@ -119,7 +119,7 @@
 	{
 		"name": "须弥·正明",
 		"type": 0,
-		"description": "名片纹饰。洞悉真谛的智者不受罪恶沾染，如沐濯雨露却依然清净的月莲。",
+		"desc": "名片纹饰。洞悉真谛的智者不受罪恶沾染，如沐濯雨露却依然清净的月莲。",
 		"source": "须弥的声望等级达到7级时获取。",
 		"icon": "/source/nameCard/icon/须弥·正明.webp",
 		"bg": "/source/nameCard/bg/须弥·正明.webp",
@@ -128,7 +128,7 @@
 	{
 		"name": "原神·印象",
 		"type": 0,
-		"description": "名片纹饰。「欢迎来到提瓦特。」",
+		"desc": "名片纹饰。「欢迎来到提瓦特。」",
 		"source": "初次登录游戏获取。",
 		"icon": "/source/nameCard/icon/原神·印象.webp",
 		"bg": "/source/nameCard/bg/原神·印象.webp",
@@ -137,7 +137,7 @@
 	{
 		"name": "成就·遍历",
 		"type": 1,
-		"description": "名片纹饰。旅人将遍历的一万个故事，都将成为旅人灵魂的一部分。",
+		"desc": "名片纹饰。旅人将遍历的一万个故事，都将成为旅人灵魂的一部分。",
 		"source": "达成「尘世巡游·第二辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·遍历.webp",
 		"bg": "/source/nameCard/bg/成就·遍历.webp",
@@ -146,7 +146,7 @@
 	{
 		"name": "成就·层岩",
 		"type": 1,
-		"description": "名片纹饰。矿工曾奔忙穿梭的栈道与矿山，如今被寂静笼罩。仅有千年的琉璃晶砂与玉髓闪烁着幽光。",
+		"desc": "名片纹饰。矿工曾奔忙穿梭的栈道与矿山，如今被寂静笼罩。仅有千年的琉璃晶砂与玉髓闪烁着幽光。",
 		"source": "达成「岩窟流明」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·层岩.webp",
 		"bg": "/source/nameCard/bg/成就·层岩.webp",
@@ -155,7 +155,7 @@
 	{
 		"name": "成就·繁花",
 		"type": 1,
-		"description": "名片纹饰。宇宙四方各取土一坯，养育天地万花。",
+		"desc": "名片纹饰。宇宙四方各取土一坯，养育天地万花。",
 		"source": "达成「世外洞天·第三辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·繁花.webp",
 		"bg": "/source/nameCard/bg/成就·繁花.webp",
@@ -164,7 +164,7 @@
 	{
 		"name": "成就·逢缘",
 		"type": 1,
-		"description": "名片纹饰。总有一天，此刻的相逢，将会成为值得眷恋的思念。",
+		"desc": "名片纹饰。总有一天，此刻的相逢，将会成为值得眷恋的思念。",
 		"source": "达成「异世相逢·第三辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·逢缘.webp",
 		"bg": "/source/nameCard/bg/成就·逢缘.webp",
@@ -173,7 +173,7 @@
 	{
 		"name": "成就·合扇",
 		"type": 1,
-		"description": "名片纹饰。说书人合扇说从头——但是你已经听过所有的故事了。",
+		"desc": "名片纹饰。说书人合扇说从头——但是你已经听过所有的故事了。",
 		"source": "达成「岩港往事·第一辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·合扇.webp",
 		"bg": "/source/nameCard/bg/成就·合扇.webp",
@@ -182,7 +182,7 @@
 	{
 		"name": "成就·虹色",
 		"type": 1,
-		"description": "名片纹饰。其实白昼之光，可以被色散成为无数种颜色。但是人们懒得数了，就简单分了七种。元素，大概也一样吧。",
+		"desc": "名片纹饰。其实白昼之光，可以被色散成为无数种颜色。但是人们懒得数了，就简单分了七种。元素，大概也一样吧。",
 		"source": "达成「元素专家·第一辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·虹色.webp",
 		"bg": "/source/nameCard/bg/成就·虹色.webp",
@@ -191,7 +191,7 @@
 	{
 		"name": "成就·壶歌",
 		"type": 1,
-		"description": "名片纹饰。壶里日月长。",
+		"desc": "名片纹饰。壶里日月长。",
 		"source": "达成「世外洞天·第一辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·壶歌.webp",
 		"bg": "/source/nameCard/bg/成就·壶歌.webp",
@@ -200,7 +200,7 @@
 	{
 		"name": "成就·槿暮",
 		"type": 1,
-		"description": "名片纹饰。「我终将遗忘昔时的繁花、昼光和雨露。愿你为我铭记，在新生的世界中，铭记那不复的梦。」",
+		"desc": "名片纹饰。「我终将遗忘昔时的繁花、昼光和雨露。愿你为我铭记，在新生的世界中，铭记那不复的梦。」",
 		"source": "达成「挑战者·第七辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·槿暮.webp",
 		"bg": "/source/nameCard/bg/成就·槿暮.webp",
@@ -209,7 +209,7 @@
 	{
 		"name": "成就·镜梦",
 		"type": 1,
-		"description": "名片纹饰。「千年的妄执与悲愿，都已经消逝在了灼夜的风沙中。但她梦里那片永恒的绿洲，应当依旧柔茂如初吧…」",
+		"desc": "名片纹饰。「千年的妄执与悲愿，都已经消逝在了灼夜的风沙中。但她梦里那片永恒的绿洲，应当依旧柔茂如初吧…」",
 		"source": "达成「挑战者·第六辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·镜梦.webp",
 		"bg": "/source/nameCard/bg/成就·镜梦.webp",
@@ -218,7 +218,7 @@
 	{
 		"name": "成就·雷音",
 		"type": 1,
-		"description": "名片纹饰。听啊，丛云间回荡的声响。那是它的嗟怨忿怒，与一个小小的愿望。",
+		"desc": "名片纹饰。听啊，丛云间回荡的声响。那是它的嗟怨忿怒，与一个小小的愿望。",
 		"source": "达成「挑战者·第五辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·雷音.webp",
 		"bg": "/source/nameCard/bg/成就·雷音.webp",
@@ -227,7 +227,7 @@
 	{
 		"name": "成就·旅居",
 		"type": 1,
-		"description": "名片纹饰。檐下天地宽。",
+		"desc": "名片纹饰。檐下天地宽。",
 		"source": "达成「世外洞天·第二辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·旅居.webp",
 		"bg": "/source/nameCard/bg/成就·旅居.webp",
@@ -236,7 +236,7 @@
 	{
 		"name": "成就·漫行",
 		"type": 1,
-		"description": "名片纹饰。每一段旅途、每一段回忆，都是只属于旅人的、独一无二的奇迹。",
+		"desc": "名片纹饰。每一段旅途、每一段回忆，都是只属于旅人的、独一无二的奇迹。",
 		"source": "达成「尘世巡游·第三辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·漫行.webp",
 		"bg": "/source/nameCard/bg/成就·漫行.webp",
@@ -245,7 +245,7 @@
 	{
 		"name": "成就·门扉",
 		"type": 1,
-		"description": "名片纹饰。在门扉的对面，会有什么样的相遇呢。",
+		"desc": "名片纹饰。在门扉的对面，会有什么样的相遇呢。",
 		"source": "达成「异世相逢·第二辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·门扉.webp",
 		"bg": "/source/nameCard/bg/成就·门扉.webp",
@@ -254,7 +254,7 @@
 	{
 		"name": "成就·七芒",
 		"type": 1,
-		"description": "名片纹饰。无论是谁，都能奏响属于自己的美妙乐章，正如草上的浅露，也能映出天光的七芒。",
+		"desc": "名片纹饰。无论是谁，都能奏响属于自己的美妙乐章，正如草上的浅露，也能映出天光的七芒。",
 		"source": "达成「元素专家·第二辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·七芒.webp",
 		"bg": "/source/nameCard/bg/成就·七芒.webp",
@@ -263,7 +263,7 @@
 	{
 		"name": "成就·七圣",
 		"type": 1,
-		"description": "名片纹饰。「村子里还没人能胜得了我！」",
+		"desc": "名片纹饰。「村子里还没人能胜得了我！」",
 		"source": "达成「七圣召唤」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·七圣.webp",
 		"bg": "/source/nameCard/bg/成就·七圣.webp",
@@ -272,7 +272,7 @@
 	{
 		"name": "成就·强弓",
 		"type": 1,
-		"description": "名片纹饰。挽弓当挽强！",
+		"desc": "名片纹饰。挽弓当挽强！",
 		"source": "达成「神射手」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·强弓.webp",
 		"bg": "/source/nameCard/bg/成就·强弓.webp",
@@ -281,7 +281,7 @@
 	{
 		"name": "成就·敲针",
 		"type": 1,
-		"description": "名片纹饰。「既然这些鱼都不能吃，何苦敲针做钩呢？」「这你就不懂了吧。」",
+		"desc": "名片纹饰。「既然这些鱼都不能吃，何苦敲针做钩呢？」「这你就不懂了吧。」",
 		"source": "达成「提瓦特钓鱼指南·第一辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·敲针.webp",
 		"bg": "/source/nameCard/bg/成就·敲针.webp",
@@ -290,7 +290,7 @@
 	{
 		"name": "成就·山民",
 		"type": 1,
-		"description": "名片纹饰。其实一开始丘丘人会被命名为「山丘的鬼怪」。但是有某个马斯克小女孩坚持称他们为山丘的子民。",
+		"desc": "名片纹饰。其实一开始丘丘人会被命名为「山丘的鬼怪」。但是有某个马斯克小女孩坚持称他们为山丘的子民。",
 		"source": "达成「Olah！第一辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·山民.webp",
 		"bg": "/source/nameCard/bg/成就·山民.webp",
@@ -299,7 +299,7 @@
 	{
 		"name": "成就·深秘",
 		"type": 1,
-		"description": "名片纹饰。行向地心越深，所知的秘密就越多。",
+		"desc": "名片纹饰。行向地心越深，所知的秘密就越多。",
 		"source": "达成「秘境与深境螺旋·第一辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·深秘.webp",
 		"bg": "/source/nameCard/bg/成就·深秘.webp",
@@ -308,7 +308,7 @@
 	{
 		"name": "成就·石龙",
 		"type": 1,
-		"description": "名片纹饰。我们曾经同行于巍岩之间。",
+		"desc": "名片纹饰。我们曾经同行于巍岩之间。",
 		"source": "达成「挑战者·第四辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·石龙.webp",
 		"bg": "/source/nameCard/bg/成就·石龙.webp",
@@ -317,7 +317,7 @@
 	{
 		"name": "成就·殊技",
 		"type": 1,
-		"description": "名片纹饰。既然掌握了这些技术，或许不需要战斗也能很好地活下去吧。如果没有使命在身的话。",
+		"desc": "名片纹饰。既然掌握了这些技术，或许不需要战斗也能很好地活下去吧。如果没有使命在身的话。",
 		"source": "达成「冒险手艺」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·殊技.webp",
 		"bg": "/source/nameCard/bg/成就·殊技.webp",
@@ -326,7 +326,7 @@
 	{
 		"name": "成就·挑战",
 		"type": 1,
-		"description": "名片纹饰。就算你只是想出门采一朵蒲公英，仍然会有阻碍横在你的面前。你当然欣然接受一切挑战，对吧？",
+		"desc": "名片纹饰。就算你只是想出门采一朵蒲公英，仍然会有阻碍横在你的面前。你当然欣然接受一切挑战，对吧？",
 		"source": "达成「挑战者·第一辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·挑战.webp",
 		"bg": "/source/nameCard/bg/成就·挑战.webp",
@@ -335,7 +335,7 @@
 	{
 		"name": "成就·挑战·其二",
 		"type": 1,
-		"description": "名片纹饰。挑战的尽头看到的居然是…",
+		"desc": "名片纹饰。挑战的尽头看到的居然是…",
 		"source": "达成「挑战者·第二辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·挑战·其二.webp",
 		"bg": "/source/nameCard/bg/成就·挑战·其二.webp",
@@ -344,7 +344,7 @@
 	{
 		"name": "成就·挑战·其三",
 		"type": 1,
-		"description": "名片纹饰。终于有一个值得一战的对手了，这场战斗必定载入史诗。",
+		"desc": "名片纹饰。终于有一个值得一战的对手了，这场战斗必定载入史诗。",
 		"source": "达成「挑战者·第三辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·挑战·其三.webp",
 		"bg": "/source/nameCard/bg/成就·挑战·其三.webp",
@@ -353,7 +353,7 @@
 	{
 		"name": "成就·万种",
 		"type": 1,
-		"description": "名片纹饰。「万种的灵光啊，护佑着永劫的大地。世间流转的枯荣，不过是种子现行的幻象。」",
+		"desc": "名片纹饰。「万种的灵光啊，护佑着永劫的大地。世间流转的枯荣，不过是种子现行的幻象。」",
 		"source": "达成「佑灵砾漠」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·万种.webp",
 		"bg": "/source/nameCard/bg/成就·万种.webp",
@@ -362,7 +362,7 @@
 	{
 		"name": "成就·侠行",
 		"type": 1,
-		"description": "名片纹饰。英雄的旅程在一念之间就开始了。重要的还是旅程中途经历了多少事情。",
+		"desc": "名片纹饰。英雄的旅程在一念之间就开始了。重要的还是旅程中途经历了多少事情。",
 		"source": "达成「英雄之旅」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·侠行.webp",
 		"bg": "/source/nameCard/bg/成就·侠行.webp",
@@ -371,7 +371,7 @@
 	{
 		"name": "成就·相逢",
 		"type": 1,
-		"description": "名片纹饰。人生何处不相逢。",
+		"desc": "名片纹饰。人生何处不相逢。",
 		"source": "达成「异世相逢·第一辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·相逢.webp",
 		"bg": "/source/nameCard/bg/成就·相逢.webp",
@@ -380,7 +380,7 @@
 	{
 		"name": "成就·雪峰",
 		"type": 1,
-		"description": "名片纹饰。人问寒山道。",
+		"desc": "名片纹饰。人问寒山道。",
 		"source": "达成「雪山上的来客」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·雪峰.webp",
 		"bg": "/source/nameCard/bg/成就·雪峰.webp",
@@ -389,7 +389,7 @@
 	{
 		"name": "成就·雪乡",
 		"type": 1,
-		"description": "名片纹饰。听了很多关于至冬的故事呢。在你想象里它是什么样的地方呢？",
+		"desc": "名片纹饰。听了很多关于至冬的故事呢。在你想象里它是什么样的地方呢？",
 		"source": "达成「至冬国不相信眼泪·第一辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·雪乡.webp",
 		"bg": "/source/nameCard/bg/成就·雪乡.webp",
@@ -398,7 +398,7 @@
 	{
 		"name": "成就·游遍",
 		"type": 1,
-		"description": "名片纹饰。走遍了大陆所有的地方之后，还要记得最初的心哦。",
+		"desc": "名片纹饰。走遍了大陆所有的地方之后，还要记得最初的心哦。",
 		"source": "达成「尘世巡游·第一辑」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/成就·游遍.webp",
 		"bg": "/source/nameCard/bg/成就·游遍.webp",
@@ -407,7 +407,7 @@
 	{
 		"name": "稻妻·常世",
 		"type": 1,
-		"description": "名片纹饰。「啊，伟大的太阳啊！假若你不拥有你照耀的一切，你的光热有何意义？」",
+		"desc": "名片纹饰。「啊，伟大的太阳啊！假若你不拥有你照耀的一切，你的光热有何意义？」",
 		"source": "达成「白昼之光」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/稻妻·常世.webp",
 		"bg": "/source/nameCard/bg/稻妻·常世.webp",
@@ -416,7 +416,7 @@
 	{
 		"name": "稻妻·九条之纹",
 		"type": 1,
-		"description": "名片纹饰。三奉行中，天领奉行·九条家的钴纹。",
+		"desc": "名片纹饰。三奉行中，天领奉行·九条家的钴纹。",
 		"source": "达成「稻妻·雷与永恒的群岛·其之一」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/稻妻·九条之纹.webp",
 		"bg": "/source/nameCard/bg/稻妻·九条之纹.webp",
@@ -425,7 +425,7 @@
 	{
 		"name": "稻妻·鹫羽",
 		"type": 1,
-		"description": "名片纹饰。啊啊，美丽的鸟，如神的鹫鸟啊。",
+		"desc": "名片纹饰。啊啊，美丽的鸟，如神的鹫鸟啊。",
 		"source": "达成「雾海纪行」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/稻妻·鹫羽.webp",
 		"bg": "/source/nameCard/bg/稻妻·鹫羽.webp",
@@ -434,7 +434,7 @@
 	{
 		"name": "稻妻·珊瑚宫之纹",
 		"type": 1,
-		"description": "名片纹饰。海祇民之领袖，珊瑚宫家的家纹。",
+		"desc": "名片纹饰。海祇民之领袖，珊瑚宫家的家纹。",
 		"source": "达成「稻妻·雷与永恒的群岛·其之二」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/稻妻·珊瑚宫之纹.webp",
 		"bg": "/source/nameCard/bg/稻妻·珊瑚宫之纹.webp",
@@ -443,7 +443,7 @@
 	{
 		"name": "璃月·岩寂",
 		"type": 1,
-		"description": "名片纹饰。看璃月的云寂岩静。",
+		"desc": "名片纹饰。看璃月的云寂岩静。",
 		"source": "达成「璃月·岩与契约的海港」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/璃月·岩寂.webp",
 		"bg": "/source/nameCard/bg/璃月·岩寂.webp",
@@ -452,7 +452,7 @@
 	{
 		"name": "蒙德·风吟",
 		"type": 1,
-		"description": "名片纹饰。听蒙德的鸟吟风唱。",
+		"desc": "名片纹饰。听蒙德的鸟吟风唱。",
 		"source": "达成「蒙德·风与牧歌的城邦」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/蒙德·风吟.webp",
 		"bg": "/source/nameCard/bg/蒙德·风吟.webp",
@@ -461,7 +461,7 @@
 	{
 		"name": "须弥·砂岚",
 		"type": 1,
-		"description": "名片纹饰。永不停息的沙暴之内，隐匿着古老的梦想…",
+		"desc": "名片纹饰。永不停息的沙暴之内，隐匿着古老的梦想…",
 		"source": "达成「须弥·饰金砂原·其之二」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/须弥·砂岚.webp",
 		"bg": "/source/nameCard/bg/须弥·砂岚.webp",
@@ -470,7 +470,7 @@
 	{
 		"name": "须弥·踏沙",
 		"type": 1,
-		"description": "名片纹饰。砂原埋藏下旅人的足迹，等待来日的尘风卷起饰金的回忆。",
+		"desc": "名片纹饰。砂原埋藏下旅人的足迹，等待来日的尘风卷起饰金的回忆。",
 		"source": "达成「须弥·饰金砂原·其之一」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/须弥·踏沙.webp",
 		"bg": "/source/nameCard/bg/须弥·踏沙.webp",
@@ -479,7 +479,7 @@
 	{
 		"name": "须弥·瑶林",
 		"type": 1,
-		"description": "名片纹饰。那些静静沉睡在林中的故事，又寄托着什么样的美梦呢。",
+		"desc": "名片纹饰。那些静静沉睡在林中的故事，又寄托着什么样的美梦呢。",
 		"source": "达成「须弥·玄识深藏的雨林」下所有成就时获取。",
 		"icon": "/source/nameCard/icon/须弥·瑶林.webp",
 		"bg": "/source/nameCard/bg/须弥·瑶林.webp",
@@ -488,7 +488,7 @@
 	{
 		"name": "？？？",
 		"type": 2,
-		"description": "？？？",
+		"desc": "？？？",
 		"source": "绮良良的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/？？？.webp",
 		"bg": "/source/nameCard/bg/？？？.webp",
@@ -497,7 +497,7 @@
 	{
 		"name": "阿贝多·阳花",
 		"type": 2,
-		"description": "名片纹饰。请让我来当这项奇迹的见证者吧。",
+		"desc": "名片纹饰。请让我来当这项奇迹的见证者吧。",
 		"source": "阿贝多的好感度达到10级时获取。",
 		"icon": "/source/nameCard/icon/阿贝多·阳花.webp",
 		"bg": "/source/nameCard/bg/阿贝多·阳花.webp",
@@ -506,7 +506,7 @@
 	{
 		"name": "埃洛伊·曙光记",
 		"type": 2,
-		"description": "名片纹饰。「真想让罗斯特也看看这些。」",
+		"desc": "名片纹饰。「真想让罗斯特也看看这些。」",
 		"source": "埃洛伊的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/埃洛伊·曙光记.webp",
 		"bg": "/source/nameCard/bg/埃洛伊·曙光记.webp",
@@ -515,7 +515,7 @@
 	{
 		"name": "艾尔海森·诲明",
 		"type": 2,
-		"description": "名片纹饰。「学者应当遵循之物，唯有知论与证辩。只有时刻保持对一切的质疑，才能避免陷入偏见。」",
+		"desc": "名片纹饰。「学者应当遵循之物，唯有知论与证辩。只有时刻保持对一切的质疑，才能避免陷入偏见。」",
 		"source": "艾尔海森的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/艾尔海森·诲明.webp",
 		"bg": "/source/nameCard/bg/艾尔海森·诲明.webp",
@@ -524,7 +524,7 @@
 	{
 		"name": "安柏·兔兔",
 		"type": 2,
-		"description": "名片纹饰。「是兔兔伯爵哦！」",
+		"desc": "名片纹饰。「是兔兔伯爵哦！」",
 		"source": "安柏的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/安柏·兔兔.webp",
 		"bg": "/source/nameCard/bg/安柏·兔兔.webp",
@@ -533,7 +533,7 @@
 	{
 		"name": "八重神子·梦狐",
 		"type": 2,
-		"description": "名片纹饰。八重神子的狐狸形态在哪里能看到呢？在梦里吧。",
+		"desc": "名片纹饰。八重神子的狐狸形态在哪里能看到呢？在梦里吧。",
 		"source": "八重神子的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/八重神子·梦狐.webp",
 		"bg": "/source/nameCard/bg/八重神子·梦狐.webp",
@@ -542,7 +542,7 @@
 	{
 		"name": "芭芭拉·流淌",
 		"type": 2,
-		"description": "名片纹饰。什么东西会流淌？治愈的清泉和芭芭拉的歌声与旋律。",
+		"desc": "名片纹饰。什么东西会流淌？治愈的清泉和芭芭拉的歌声与旋律。",
 		"source": "芭芭拉的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/芭芭拉·流淌.webp",
 		"bg": "/source/nameCard/bg/芭芭拉·流淌.webp",
@@ -551,7 +551,7 @@
 	{
 		"name": "白术·祛风",
 		"type": 2,
-		"description": "名片纹饰。「谨道成术，长有摄生。」",
+		"desc": "名片纹饰。「谨道成术，长有摄生。」",
 		"source": "白术的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/白术·祛风.webp",
 		"bg": "/source/nameCard/bg/白术·祛风.webp",
@@ -560,7 +560,7 @@
 	{
 		"name": "班尼特·认可",
 		"type": 2,
-		"description": "名片纹饰。班尼冒险团的认可。",
+		"desc": "名片纹饰。班尼冒险团的认可。",
 		"source": "班尼特的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/班尼特·认可.webp",
 		"bg": "/source/nameCard/bg/班尼特·认可.webp",
@@ -569,7 +569,7 @@
 	{
 		"name": "北斗·拔锚",
 		"type": 2,
-		"description": "名片纹饰。 「若拔锚入海，惑而不知东西。则须仰天，识认北辰斗极。」",
+		"desc": "名片纹饰。 「若拔锚入海，惑而不知东西。则须仰天，识认北辰斗极。」",
 		"source": "北斗的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/北斗·拔锚.webp",
 		"bg": "/source/nameCard/bg/北斗·拔锚.webp",
@@ -578,7 +578,7 @@
 	{
 		"name": "迪奥娜·呜喵",
 		"type": 2,
-		"description": "名片纹饰。凯茨莱茵一家都有这种猫一样的特征。是远古时代里谁人的恶趣味吧。",
+		"desc": "名片纹饰。凯茨莱茵一家都有这种猫一样的特征。是远古时代里谁人的恶趣味吧。",
 		"source": "迪奥娜的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/迪奥娜·呜喵.webp",
 		"bg": "/source/nameCard/bg/迪奥娜·呜喵.webp",
@@ -587,7 +587,7 @@
 	{
 		"name": "迪卢克·燃烧",
 		"type": 2,
-		"description": "名片纹饰。克利普斯老爷生前经常画鹰。但是他未曾预料如此炽烈燃烧的鹰，也出自自己之手。",
+		"desc": "名片纹饰。克利普斯老爷生前经常画鹰。但是他未曾预料如此炽烈燃烧的鹰，也出自自己之手。",
 		"source": "迪卢克的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/迪卢克·燃烧.webp",
 		"bg": "/source/nameCard/bg/迪卢克·燃烧.webp",
@@ -596,7 +596,7 @@
 	{
 		"name": "迪希雅·净焰",
 		"type": 2,
-		"description": "名片纹饰。那些该被烧却的将化作飞灰，于是所有应被保留的珍贵之物得以显出形廓。",
+		"desc": "名片纹饰。那些该被烧却的将化作飞灰，于是所有应被保留的珍贵之物得以显出形廓。",
 		"source": "迪希雅的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/迪希雅·净焰.webp",
 		"bg": "/source/nameCard/bg/迪希雅·净焰.webp",
@@ -605,7 +605,7 @@
 	{
 		"name": "多莉·魔灯",
 		"type": 2,
-		"description": "名片纹饰。擦一擦递给你的魔灯，再擦一擦递给她的摩拉，无论是什么样的愿望都能实现…大概吧？",
+		"desc": "名片纹饰。擦一擦递给你的魔灯，再擦一擦递给她的摩拉，无论是什么样的愿望都能实现…大概吧？",
 		"source": "多莉的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/多莉·魔灯.webp",
 		"bg": "/source/nameCard/bg/多莉·魔灯.webp",
@@ -614,7 +614,7 @@
 	{
 		"name": "珐露珊·封秘",
 		"type": 2,
-		"description": "名片纹饰。「总、总之，下次提问之前，要先叫前辈！真是的…」",
+		"desc": "名片纹饰。「总、总之，下次提问之前，要先叫前辈！真是的…」",
 		"source": "珐露珊的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/珐露珊·封秘.webp",
 		"bg": "/source/nameCard/bg/珐露珊·封秘.webp",
@@ -623,7 +623,7 @@
 	{
 		"name": "菲谢尔·夜鸦",
 		"type": 2,
-		"description": "名片纹饰。持有遮日挡月之翼的漆黑夜鸦。「许可你拓画它的纹样！」",
+		"desc": "名片纹饰。持有遮日挡月之翼的漆黑夜鸦。「许可你拓画它的纹样！」",
 		"source": "菲谢尔的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/菲谢尔·夜鸦.webp",
 		"bg": "/source/nameCard/bg/菲谢尔·夜鸦.webp",
@@ -632,7 +632,7 @@
 	{
 		"name": "枫原万叶·秋山椛狩",
 		"type": 2,
-		"description": "名片纹饰。「松籁枯波送红叶。」",
+		"desc": "名片纹饰。「松籁枯波送红叶。」",
 		"source": "枫原万叶的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/枫原万叶·秋山椛狩.webp",
 		"bg": "/source/nameCard/bg/枫原万叶·秋山椛狩.webp",
@@ -641,7 +641,7 @@
 	{
 		"name": "甘雨·麟迹",
 		"type": 2,
-		"description": "名片纹饰。不折草，不履虫。",
+		"desc": "名片纹饰。不折草，不履虫。",
 		"source": "甘雨的好感度达到10级时获取。",
 		"icon": "/source/nameCard/icon/甘雨·麟迹.webp",
 		"bg": "/source/nameCard/bg/甘雨·麟迹.webp",
@@ -650,7 +650,7 @@
 	{
 		"name": "公子·魔装",
 		"type": 2,
-		"description": "名片纹饰。借由万般变化的武炼之技，肆意驰骋大地的他的记号。但这名为「魔王」的武艺并非他的独创，而是师承自踞身宇宙至暗之处的那位孤高少女…",
+		"desc": "名片纹饰。借由万般变化的武炼之技，肆意驰骋大地的他的记号。但这名为「魔王」的武艺并非他的独创，而是师承自踞身宇宙至暗之处的那位孤高少女…",
 		"source": "达达利亚的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/公子·魔装.webp",
 		"bg": "/source/nameCard/bg/公子·魔装.webp",
@@ -659,7 +659,7 @@
 	{
 		"name": "胡桃·安神",
 		"type": 2,
-		"description": "名片纹饰。胡桃堂主一点都不可怕。大概。",
+		"desc": "名片纹饰。胡桃堂主一点都不可怕。大概。",
 		"source": "胡桃的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/胡桃·安神.webp",
 		"bg": "/source/nameCard/bg/胡桃·安神.webp",
@@ -668,7 +668,7 @@
 	{
 		"name": "九条裟罗·天狗",
 		"type": 2,
-		"description": "名片纹饰。裟罗摒弃了天狗一众傲慢的生存方式，但是对于磨炼剑技和神通却并没有怠慢。",
+		"desc": "名片纹饰。裟罗摒弃了天狗一众傲慢的生存方式，但是对于磨炼剑技和神通却并没有怠慢。",
 		"source": "九条裟罗的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/九条裟罗·天狗.webp",
 		"bg": "/source/nameCard/bg/九条裟罗·天狗.webp",
@@ -677,7 +677,7 @@
 	{
 		"name": "久岐忍·络",
 		"type": 2,
-		"description": "名片纹饰。「稻妻不是有那种鸣草轮吗？穿过去可以驱邪落秽那种。小忍就想到既然邪物不愿意主动钻圈，把草轮做成主动卷人的样子就好了。妹妹她做巫女的才能，真是可怕啊。」",
+		"desc": "名片纹饰。「稻妻不是有那种鸣草轮吗？穿过去可以驱邪落秽那种。小忍就想到既然邪物不愿意主动钻圈，把草轮做成主动卷人的样子就好了。妹妹她做巫女的才能，真是可怕啊。」",
 		"source": "久岐忍的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/久岐忍·络.webp",
 		"bg": "/source/nameCard/bg/久岐忍·络.webp",
@@ -686,7 +686,7 @@
 	{
 		"name": "卡维·穹庭",
 		"type": 2,
-		"description": "名片纹饰。「构思建筑之时，不妨设想，我们正在建筑的，是逾越穹天与繁星的永恒。」",
+		"desc": "名片纹饰。「构思建筑之时，不妨设想，我们正在建筑的，是逾越穹天与繁星的永恒。」",
 		"source": "卡维的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/卡维·穹庭.webp",
 		"bg": "/source/nameCard/bg/卡维·穹庭.webp",
@@ -695,7 +695,7 @@
 	{
 		"name": "凯亚·孔雀",
 		"type": 2,
-		"description": "名片纹饰。孔雀漂亮尾羽上的花纹很像是永不闭上的眼睛。所以凯亚并非少了一只眼睛，而是…",
+		"desc": "名片纹饰。孔雀漂亮尾羽上的花纹很像是永不闭上的眼睛。所以凯亚并非少了一只眼睛，而是…",
 		"source": "凯亚的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/凯亚·孔雀.webp",
 		"bg": "/source/nameCard/bg/凯亚·孔雀.webp",
@@ -704,7 +704,7 @@
 	{
 		"name": "坎蒂丝·苍鹭",
 		"type": 2,
-		"description": "名片纹饰。往昔的炽风撩拂着苍鹭的尾羽，那鸟儿却只是望向初晓的晨星。",
+		"desc": "名片纹饰。往昔的炽风撩拂着苍鹭的尾羽，那鸟儿却只是望向初晓的晨星。",
 		"source": "坎蒂丝的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/坎蒂丝·苍鹭.webp",
 		"bg": "/source/nameCard/bg/坎蒂丝·苍鹭.webp",
@@ -713,7 +713,7 @@
 	{
 		"name": "柯莱·豹蔚",
 		"type": 2,
-		"description": "名片纹饰。「是…是柯里安巴哦！…呜…」",
+		"desc": "名片纹饰。「是…是柯里安巴哦！…呜…」",
 		"source": "柯莱的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/柯莱·豹蔚.webp",
 		"bg": "/source/nameCard/bg/柯莱·豹蔚.webp",
@@ -722,7 +722,7 @@
 	{
 		"name": "可莉·爆弹",
 		"type": 2,
-		"description": "名片纹饰。可莉的幸运爆弹。仔细观察尾巴，告诉大家，这个是蹦蹦还是嘟嘟可？",
+		"desc": "名片纹饰。可莉的幸运爆弹。仔细观察尾巴，告诉大家，这个是蹦蹦还是嘟嘟可？",
 		"source": "可莉的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/可莉·爆弹.webp",
 		"bg": "/source/nameCard/bg/可莉·爆弹.webp",
@@ -731,7 +731,7 @@
 	{
 		"name": "刻晴·雷楔",
 		"type": 2,
-		"description": "名片纹饰。其实一开始这个是为了目测土地使用情况，方便登高而发明的。",
+		"desc": "名片纹饰。其实一开始这个是为了目测土地使用情况，方便登高而发明的。",
 		"source": "刻晴的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/刻晴·雷楔.webp",
 		"bg": "/source/nameCard/bg/刻晴·雷楔.webp",
@@ -740,7 +740,7 @@
 	{
 		"name": "莱依拉·昼梦",
 		"type": 2,
-		"description": "名片纹饰。「梦中的星空会将你的前路照亮，只是你那颗心中的水晶，也要映出澄净的辉光。」",
+		"desc": "名片纹饰。「梦中的星空会将你的前路照亮，只是你那颗心中的水晶，也要映出澄净的辉光。」",
 		"source": "莱依拉的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/莱依拉·昼梦.webp",
 		"bg": "/source/nameCard/bg/莱依拉·昼梦.webp",
@@ -749,7 +749,7 @@
 	{
 		"name": "雷电将军·开眼",
 		"type": 2,
-		"description": "名片纹饰。不仅是影，也不只是将军。留一只雷曜之眼观照自己，方能得始终。",
+		"desc": "名片纹饰。不仅是影，也不只是将军。留一只雷曜之眼观照自己，方能得始终。",
 		"source": "雷电将军的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/雷电将军·开眼.webp",
 		"bg": "/source/nameCard/bg/雷电将军·开眼.webp",
@@ -758,7 +758,7 @@
 	{
 		"name": "雷泽·奔狼",
 		"type": 2,
-		"description": "名片纹饰。雷泽和群狼一起弄晚饭的姿态十分飒爽。但是不能给可莉和旅行者看到。",
+		"desc": "名片纹饰。雷泽和群狼一起弄晚饭的姿态十分飒爽。但是不能给可莉和旅行者看到。",
 		"source": "雷泽的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/雷泽·奔狼.webp",
 		"bg": "/source/nameCard/bg/雷泽·奔狼.webp",
@@ -767,7 +767,7 @@
 	{
 		"name": "丽莎·沙漏",
 		"type": 2,
-		"description": "名片纹饰。什么东西会流逝？时间，和丽莎计算下班时间的沙漏。",
+		"desc": "名片纹饰。什么东西会流逝？时间，和丽莎计算下班时间的沙漏。",
 		"source": "丽莎的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/丽莎·沙漏.webp",
 		"bg": "/source/nameCard/bg/丽莎·沙漏.webp",
@@ -776,7 +776,7 @@
 	{
 		"name": "流浪者·浮歌",
 		"type": 2,
-		"description": "名片纹饰。浮世隐昔话，薄雪伴流花。",
+		"desc": "名片纹饰。浮世隐昔话，薄雪伴流花。",
 		"source": "流浪者的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/流浪者·浮歌.webp",
 		"bg": "/source/nameCard/bg/流浪者·浮歌.webp",
@@ -785,7 +785,7 @@
 	{
 		"name": "鹿野院平藏·鞠毬",
 		"type": 2,
-		"description": "名片纹饰。本是殚精竭虑用彩线周匝而成，却未料在其手中不过是简单抽出丝缕的游戏。",
+		"desc": "名片纹饰。本是殚精竭虑用彩线周匝而成，却未料在其手中不过是简单抽出丝缕的游戏。",
 		"source": "鹿野院平藏的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/鹿野院平藏·鞠毬.webp",
 		"bg": "/source/nameCard/bg/鹿野院平藏·鞠毬.webp",
@@ -794,7 +794,7 @@
 	{
 		"name": "罗莎莉亚·苦役",
 		"type": 2,
-		"description": "名片纹饰。人们无私散出的温暖和善意，在她心里就是必须回报的恩情，因此也是永生伴随她的苦役。",
+		"desc": "名片纹饰。人们无私散出的温暖和善意，在她心里就是必须回报的恩情，因此也是永生伴随她的苦役。",
 		"source": "罗莎莉亚的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/罗莎莉亚·苦役.webp",
 		"bg": "/source/nameCard/bg/罗莎莉亚·苦役.webp",
@@ -803,7 +803,7 @@
 	{
 		"name": "米卡·索引",
 		"type": 2,
-		"description": "名片纹饰。每次将绘制的地图捧在手中，男孩都觉得自己捧起了一小片世界的拓印。",
+		"desc": "名片纹饰。每次将绘制的地图捧在手中，男孩都觉得自己捧起了一小片世界的拓印。",
 		"source": "米卡的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/米卡·索引.webp",
 		"bg": "/source/nameCard/bg/米卡·索引.webp",
@@ -812,7 +812,7 @@
 	{
 		"name": "莫娜·天星",
 		"type": 2,
-		"description": "名片纹饰。倒映着漫天的星辰，少女低头看着水中的离合悲欢。",
+		"desc": "名片纹饰。倒映着漫天的星辰，少女低头看着水中的离合悲欢。",
 		"source": "莫娜的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/莫娜·天星.webp",
 		"bg": "/source/nameCard/bg/莫娜·天星.webp",
@@ -821,7 +821,7 @@
 	{
 		"name": "纳西妲·仰月",
 		"type": 2,
-		"description": "名片纹饰。初升的新月将日景仰羡，因为她的光芒遍照世间；沉落的暮日却向往月弦，因为她有万千美梦作伴。",
+		"desc": "名片纹饰。初升的新月将日景仰羡，因为她的光芒遍照世间；沉落的暮日却向往月弦，因为她有万千美梦作伴。",
 		"source": "纳西妲的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/纳西妲·仰月.webp",
 		"bg": "/source/nameCard/bg/纳西妲·仰月.webp",
@@ -830,7 +830,7 @@
 	{
 		"name": "妮露·莲舞",
 		"type": 2,
-		"description": "名片纹饰。绽于净水的莲华，不过是她足尖下的一刹流光。",
+		"desc": "名片纹饰。绽于净水的莲华，不过是她足尖下的一刹流光。",
 		"source": "妮露的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/妮露·莲舞.webp",
 		"bg": "/source/nameCard/bg/妮露·莲舞.webp",
@@ -839,7 +839,7 @@
 	{
 		"name": "凝光·凤仪",
 		"type": 2,
-		"description": "名片纹饰。 常说「麟止凤仪，所患在少」。另一位不论，凝光大人这样的人，一个就够了…",
+		"desc": "名片纹饰。 常说「麟止凤仪，所患在少」。另一位不论，凝光大人这样的人，一个就够了…",
 		"source": "凝光的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/凝光·凤仪.webp",
 		"bg": "/source/nameCard/bg/凝光·凤仪.webp",
@@ -848,7 +848,7 @@
 	{
 		"name": "诺艾尔·守护",
 		"type": 2,
-		"description": "名片纹饰。诺艾尔比较特殊，诺艾尔不会让你受伤。",
+		"desc": "名片纹饰。诺艾尔比较特殊，诺艾尔不会让你受伤。",
 		"source": "诺艾尔的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/诺艾尔·守护.webp",
 		"bg": "/source/nameCard/bg/诺艾尔·守护.webp",
@@ -857,7 +857,7 @@
 	{
 		"name": "七七·冷藏",
 		"type": 2,
-		"description": "名片纹饰。有什么需要冷藏？白先生的药材、椰奶…还有胡桃。",
+		"desc": "名片纹饰。有什么需要冷藏？白先生的药材、椰奶…还有胡桃。",
 		"source": "七七的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/七七·冷藏.webp",
 		"bg": "/source/nameCard/bg/七七·冷藏.webp",
@@ -866,7 +866,7 @@
 	{
 		"name": "琴·风向",
 		"type": 2,
-		"description": "名片纹饰。蒲公英又被叫做「狮子牙」，是对于风的方向感觉最敏锐的花。",
+		"desc": "名片纹饰。蒲公英又被叫做「狮子牙」，是对于风的方向感觉最敏锐的花。",
 		"source": "琴的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/琴·风向.webp",
 		"bg": "/source/nameCard/bg/琴·风向.webp",
@@ -875,7 +875,7 @@
 	{
 		"name": "赛诺·幽缄",
 		"type": 2,
-		"description": "名片纹饰。赛诺看上去幽沉而肃默的时候，未必总是在想着什么沉肃的审判，也有可能只是在思考幽默的笑点。",
+		"desc": "名片纹饰。赛诺看上去幽沉而肃默的时候，未必总是在想着什么沉肃的审判，也有可能只是在思考幽默的笑点。",
 		"source": "赛诺的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/赛诺·幽缄.webp",
 		"bg": "/source/nameCard/bg/赛诺·幽缄.webp",
@@ -884,7 +884,7 @@
 	{
 		"name": "砂糖·创生",
 		"type": 2,
-		"description": "名片纹饰。如果在无相之风消逝前仔细观察的话，会发现它们其实也挺方的。",
+		"desc": "名片纹饰。如果在无相之风消逝前仔细观察的话，会发现它们其实也挺方的。",
 		"source": "砂糖的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/砂糖·创生.webp",
 		"bg": "/source/nameCard/bg/砂糖·创生.webp",
@@ -893,7 +893,7 @@
 	{
 		"name": "珊瑚宫心海·渊",
 		"type": 2,
-		"description": "名片纹饰。这是海祇之民都知晓的传说：在渊下有着曾经的故乡。",
+		"desc": "名片纹饰。这是海祇之民都知晓的传说：在渊下有着曾经的故乡。",
 		"source": "珊瑚宫心海的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/珊瑚宫心海·渊.webp",
 		"bg": "/source/nameCard/bg/珊瑚宫心海·渊.webp",
@@ -902,7 +902,7 @@
 	{
 		"name": "申鹤·栉掠",
 		"type": 2,
-		"description": "名片纹饰。早生白发，多缘愁苦。因为「梳」「疏」同音，璃月人认为，以梳栉发，可以疏愁。",
+		"desc": "名片纹饰。早生白发，多缘愁苦。因为「梳」「疏」同音，璃月人认为，以梳栉发，可以疏愁。",
 		"source": "申鹤的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/申鹤·栉掠.webp",
 		"bg": "/source/nameCard/bg/申鹤·栉掠.webp",
@@ -911,7 +911,7 @@
 	{
 		"name": "神里绫华·扇子",
 		"type": 2,
-		"description": "名片纹饰。绫华的配扇当然一直在换。如果想作为赠礼送给她的话，记得不要送成了夏扇或者投扇，舞扇或者茶扇是不错的选择。",
+		"desc": "名片纹饰。绫华的配扇当然一直在换。如果想作为赠礼送给她的话，记得不要送成了夏扇或者投扇，舞扇或者茶扇是不错的选择。",
 		"source": "神里绫华的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/神里绫华·扇子.webp",
 		"bg": "/source/nameCard/bg/神里绫华·扇子.webp",
@@ -920,7 +920,7 @@
 	{
 		"name": "神里绫人·涟漪",
 		"type": 2,
-		"description": "名片纹饰。椿花浮镜，澄水泛波。",
+		"desc": "名片纹饰。椿花浮镜，澄水泛波。",
 		"source": "神里绫人的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/神里绫人·涟漪.webp",
 		"bg": "/source/nameCard/bg/神里绫人·涟漪.webp",
@@ -929,7 +929,7 @@
 	{
 		"name": "提纳里·沐露",
 		"type": 2,
-		"description": "名片纹饰。提纳里用花露精心调制的精油，用来保养毛茸茸的大尾巴，淡淡的清香有着安神的功效。",
+		"desc": "名片纹饰。提纳里用花露精心调制的精油，用来保养毛茸茸的大尾巴，淡淡的清香有着安神的功效。",
 		"source": "提纳里的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/提纳里·沐露.webp",
 		"bg": "/source/nameCard/bg/提纳里·沐露.webp",
@@ -938,7 +938,7 @@
 	{
 		"name": "托马·炎袖",
 		"type": 2,
-		"description": "名片纹饰。真红炽火铠，炎彩大袖甲。",
+		"desc": "名片纹饰。真红炽火铠，炎彩大袖甲。",
 		"source": "托马的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/托马·炎袖.webp",
 		"bg": "/source/nameCard/bg/托马·炎袖.webp",
@@ -947,7 +947,7 @@
 	{
 		"name": "温迪·天青",
 		"type": 2,
-		"description": "名片纹饰。天空的青色和「斐林」的音色应该很般配吧。",
+		"desc": "名片纹饰。天空的青色和「斐林」的音色应该很般配吧。",
 		"source": "温迪的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/温迪·天青.webp",
 		"bg": "/source/nameCard/bg/温迪·天青.webp",
@@ -956,7 +956,7 @@
 	{
 		"name": "五郎·悠犬",
 		"type": 2,
-		"description": "名片纹饰。只要相信自己行走的道路，那么这漫长旅途中遇到的一切都将是令人愉快的。",
+		"desc": "名片纹饰。只要相信自己行走的道路，那么这漫长旅途中遇到的一切都将是令人愉快的。",
 		"source": "五郎的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/五郎·悠犬.webp",
 		"bg": "/source/nameCard/bg/五郎·悠犬.webp",
@@ -965,7 +965,7 @@
 	{
 		"name": "香菱·出锅",
 		"type": 2,
-		"description": "名片纹饰。快速而且准确地读出下面的话：「出锅锅巴！」、「锅巴出锅！」、「锅巴出击！」、「出击锅巴！」",
+		"desc": "名片纹饰。快速而且准确地读出下面的话：「出锅锅巴！」、「锅巴出锅！」、「锅巴出击！」、「出击锅巴！」",
 		"source": "香菱的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/香菱·出锅.webp",
 		"bg": "/source/nameCard/bg/香菱·出锅.webp",
@@ -974,7 +974,7 @@
 	{
 		"name": "宵宫·琉金火花",
 		"type": 2,
-		"description": "名片纹饰。即使只是片刻的火花，也能在仰望黑夜的人心中留下久久不灭的美丽光芒。",
+		"desc": "名片纹饰。即使只是片刻的火花，也能在仰望黑夜的人心中留下久久不灭的美丽光芒。",
 		"source": "宵宫的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/宵宫·琉金火花.webp",
 		"bg": "/source/nameCard/bg/宵宫·琉金火花.webp",
@@ -983,7 +983,7 @@
 	{
 		"name": "魈·傩面",
 		"type": 2,
-		"description": "名片纹饰。他总想着有一天，能戴着这傩面起舞。不为除魔之故，只为伴随那花洲的笛声。",
+		"desc": "名片纹饰。他总想着有一天，能戴着这傩面起舞。不为除魔之故，只为伴随那花洲的笛声。",
 		"source": "魈的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/魈·傩面.webp",
 		"bg": "/source/nameCard/bg/魈·傩面.webp",
@@ -992,7 +992,7 @@
 	{
 		"name": "辛焱·唱罢",
 		"type": 2,
-		"description": "名片纹饰。辛焱唱罢之时才有机会仔细观察她的乐器。其实它静时也是一位美人。",
+		"desc": "名片纹饰。辛焱唱罢之时才有机会仔细观察她的乐器。其实它静时也是一位美人。",
 		"source": "辛焱的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/辛焱·唱罢.webp",
 		"bg": "/source/nameCard/bg/辛焱·唱罢.webp",
@@ -1001,7 +1001,7 @@
 	{
 		"name": "行秋·雨虹",
 		"type": 2,
-		"description": "名片纹饰。来看宿雨断虹收。",
+		"desc": "名片纹饰。来看宿雨断虹收。",
 		"source": "行秋的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/行秋·雨虹.webp",
 		"bg": "/source/nameCard/bg/行秋·雨虹.webp",
@@ -1010,7 +1010,7 @@
 	{
 		"name": "烟绯·公正",
 		"type": 2,
-		"description": "名片纹饰。朱漆火印，以证公平。",
+		"desc": "名片纹饰。朱漆火印，以证公平。",
 		"source": "烟绯的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/烟绯·公正.webp",
 		"bg": "/source/nameCard/bg/烟绯·公正.webp",
@@ -1019,7 +1019,7 @@
 	{
 		"name": "瑶瑶·月桂",
 		"type": 2,
-		"description": "名片纹饰。「猜猜看，这里哪一个是月桂？没错，大家都是月桂喔！」",
+		"desc": "名片纹饰。「猜猜看，这里哪一个是月桂？没错，大家都是月桂喔！」",
 		"source": "瑶瑶的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/瑶瑶·月桂.webp",
 		"bg": "/source/nameCard/bg/瑶瑶·月桂.webp",
@@ -1028,7 +1028,7 @@
 	{
 		"name": "夜兰·一掷",
 		"type": 2,
-		"description": "名片纹饰。「做骰子本来就难得公平。做工糙一点的骰子，不同点数掏空的重量肯定会不一样。」",
+		"desc": "名片纹饰。「做骰子本来就难得公平。做工糙一点的骰子，不同点数掏空的重量肯定会不一样。」",
 		"source": "夜兰的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/夜兰·一掷.webp",
 		"bg": "/source/nameCard/bg/夜兰·一掷.webp",
@@ -1037,7 +1037,7 @@
 	{
 		"name": "一斗·鬼颜",
 		"type": 2,
-		"description": "名片纹饰。男子汉，就要把痛苦和愤怒藏在背后，然后露出最爽朗的笑容！",
+		"desc": "名片纹饰。男子汉，就要把痛苦和愤怒藏在背后，然后露出最爽朗的笑容！",
 		"source": "一斗的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/一斗·鬼颜.webp",
 		"bg": "/source/nameCard/bg/一斗·鬼颜.webp",
@@ -1046,7 +1046,7 @@
 	{
 		"name": "优菈·冰印",
 		"type": 2,
-		"description": "名片纹饰。冷酷的心只是保护自己的外壳。",
+		"desc": "名片纹饰。冷酷的心只是保护自己的外壳。",
 		"source": "优菈的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/优菈·冰印.webp",
 		"bg": "/source/nameCard/bg/优菈·冰印.webp",
@@ -1055,7 +1055,7 @@
 	{
 		"name": "云堇·对韵",
 		"type": 2,
-		"description": "名片纹饰。云先生有师二种。一种在外，戏台之上时「说我孬者，是我师也」；一种在内，创作戏文，需要对照韵书。",
+		"desc": "名片纹饰。云先生有师二种。一种在外，戏台之上时「说我孬者，是我师也」；一种在内，创作戏文，需要对照韵书。",
 		"source": "云堇的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/云堇·对韵.webp",
 		"bg": "/source/nameCard/bg/云堇·对韵.webp",
@@ -1064,7 +1064,7 @@
 	{
 		"name": "早柚·不倒貉貉",
 		"type": 2,
-		"description": "名片纹饰。虽然个子比早柚小，但却能帮早柚做早柚不想做的事情。",
+		"desc": "名片纹饰。虽然个子比早柚小，但却能帮早柚做早柚不想做的事情。",
 		"source": "早柚的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/早柚·不倒貉貉.webp",
 		"bg": "/source/nameCard/bg/早柚·不倒貉貉.webp",
@@ -1073,7 +1073,7 @@
 	{
 		"name": "钟离·天星",
 		"type": 2,
-		"description": "名片纹饰。天陨岩星，命昭昏暝。",
+		"desc": "名片纹饰。天陨岩星，命昭昏暝。",
 		"source": "钟离的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/钟离·天星.webp",
 		"bg": "/source/nameCard/bg/钟离·天星.webp",
@@ -1082,7 +1082,7 @@
 	{
 		"name": "重云·灵刃",
 		"type": 2,
-		"description": "名片纹饰。 本意只是用冰来制作桃木剑。不过做大了之后比起桃木更好驱魔了。",
+		"desc": "名片纹饰。 本意只是用冰来制作桃木剑。不过做大了之后比起桃木更好驱魔了。",
 		"source": "重云的好感等级达到10级时获取。",
 		"icon": "/source/nameCard/icon/重云·灵刃.webp",
 		"bg": "/source/nameCard/bg/重云·灵刃.webp",
@@ -1091,7 +1091,7 @@
 	{
 		"name": "纪行·白垩",
 		"type": 3,
-		"description": "名片纹饰。踏足雪山，注意保暖。",
+		"desc": "名片纹饰。踏足雪山，注意保暖。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·白垩.webp",
 		"bg": "/source/nameCard/bg/纪行·白垩.webp",
@@ -1100,7 +1100,7 @@
 	{
 		"name": "纪行·白英",
 		"type": 3,
-		"description": "名片纹饰。高峰之上万树凋零，唯有此花。",
+		"desc": "名片纹饰。高峰之上万树凋零，唯有此花。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·白英.webp",
 		"bg": "/source/nameCard/bg/纪行·白英.webp",
@@ -1109,7 +1109,7 @@
 	{
 		"name": "纪行·捕风",
 		"type": 3,
-		"description": "名片纹饰。完成了游记写作最困难的部分，就是写个开头。",
+		"desc": "名片纹饰。完成了游记写作最困难的部分，就是写个开头。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·捕风.webp",
 		"bg": "/source/nameCard/bg/纪行·捕风.webp",
@@ -1118,7 +1118,7 @@
 	{
 		"name": "纪行·风花",
 		"type": 3,
-		"description": "名片纹饰。谁也没有见过风，更别说我和你了。谁也没有见过爱情，直到有花束抛向自己。",
+		"desc": "名片纹饰。谁也没有见过风，更别说我和你了。谁也没有见过爱情，直到有花束抛向自己。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·风花.webp",
 		"bg": "/source/nameCard/bg/纪行·风花.webp",
@@ -1127,7 +1127,7 @@
 	{
 		"name": "纪行·归风",
 		"type": 3,
-		"description": "名片纹饰。岁月流转，唯有思念与归风不变。",
+		"desc": "名片纹饰。岁月流转，唯有思念与归风不变。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·归风.webp",
 		"bg": "/source/nameCard/bg/纪行·归风.webp",
@@ -1136,7 +1136,7 @@
 	{
 		"name": "纪行·海蓝",
 		"type": 3,
-		"description": "名片纹饰。就像你多年后，从旧梦中醒来。纪念的螺壳里，仍存在着那年夏天的海。",
+		"desc": "名片纹饰。就像你多年后，从旧梦中醒来。纪念的螺壳里，仍存在着那年夏天的海。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·海蓝.webp",
 		"bg": "/source/nameCard/bg/纪行·海蓝.webp",
@@ -1145,7 +1145,7 @@
 	{
 		"name": "纪行·合韵",
 		"type": 3,
-		"description": "名片纹饰。霞明玉映海灯天，今宵共奏华年。金殿珠帘，月彻银栏，虹歌流彩绣筵。花如烟。瑟彼清弦，鸾笙瑶管，和乐且湛。",
+		"desc": "名片纹饰。霞明玉映海灯天，今宵共奏华年。金殿珠帘，月彻银栏，虹歌流彩绣筵。花如烟。瑟彼清弦，鸾笙瑶管，和乐且湛。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·合韵.webp",
 		"bg": "/source/nameCard/bg/纪行·合韵.webp",
@@ -1154,7 +1154,7 @@
 	{
 		"name": "纪行·灵津",
 		"type": 3,
-		"description": "名片纹饰。旧宴何为名，三川流散烟云中，秋津犹尚浮暮景。",
+		"desc": "名片纹饰。旧宴何为名，三川流散烟云中，秋津犹尚浮暮景。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·灵津.webp",
 		"bg": "/source/nameCard/bg/纪行·灵津.webp",
@@ -1163,7 +1163,7 @@
 	{
 		"name": "纪行·流彩",
 		"type": 3,
-		"description": "名片纹饰。华光流彩万象新。",
+		"desc": "名片纹饰。华光流彩万象新。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·流彩.webp",
 		"bg": "/source/nameCard/bg/纪行·流彩.webp",
@@ -1172,7 +1172,7 @@
 	{
 		"name": "纪行·秘典",
 		"type": 3,
-		"description": "名片纹饰。勿忘那些与友人相伴游戏的岁月，勿忘那些不必忧虑未来的时光。",
+		"desc": "名片纹饰。勿忘那些与友人相伴游戏的岁月，勿忘那些不必忧虑未来的时光。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·秘典.webp",
 		"bg": "/source/nameCard/bg/纪行·秘典.webp",
@@ -1181,7 +1181,7 @@
 	{
 		"name": "纪行·明霄",
 		"type": 3,
-		"description": "名片纹饰。大家的愿望聚在一起，就能变成点亮长夜的光。",
+		"desc": "名片纹饰。大家的愿望聚在一起，就能变成点亮长夜的光。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·明霄.webp",
 		"bg": "/source/nameCard/bg/纪行·明霄.webp",
@@ -1190,7 +1190,7 @@
 	{
 		"name": "纪行·鸣神大社",
 		"type": 3,
-		"description": "名片纹饰。鸣神大社的纹样，「影向山樱」。",
+		"desc": "名片纹饰。鸣神大社的纹样，「影向山樱」。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·鸣神大社.webp",
 		"bg": "/source/nameCard/bg/纪行·鸣神大社.webp",
@@ -1199,7 +1199,7 @@
 	{
 		"name": "纪行·绕尘",
 		"type": 3,
-		"description": "名片纹饰。前生何年枕石眠。",
+		"desc": "名片纹饰。前生何年枕石眠。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·绕尘.webp",
 		"bg": "/source/nameCard/bg/纪行·绕尘.webp",
@@ -1208,7 +1208,7 @@
 	{
 		"name": "纪行·荣冕",
 		"type": 3,
-		"description": "名片纹饰。「才识是年岁的冠冕，正如思念是我们共度的时间。」",
+		"desc": "名片纹饰。「才识是年岁的冠冕，正如思念是我们共度的时间。」",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·荣冕.webp",
 		"bg": "/source/nameCard/bg/纪行·荣冕.webp",
@@ -1217,7 +1217,7 @@
 	{
 		"name": "纪行·容彩",
 		"type": 3,
-		"description": "名片纹饰。同好之人，谓之「同人」。趁着狐狸总编还没想到版权法，大家好好描绘心中的故事吧。——又或者，她想到了，但并不在乎？",
+		"desc": "名片纹饰。同好之人，谓之「同人」。趁着狐狸总编还没想到版权法，大家好好描绘心中的故事吧。——又或者，她想到了，但并不在乎？",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·容彩.webp",
 		"bg": "/source/nameCard/bg/纪行·容彩.webp",
@@ -1226,7 +1226,7 @@
 	{
 		"name": "纪行·深林",
 		"type": 3,
-		"description": "名片纹饰。深林幽谷之间，蔷薇伴月安绽。若得与你相伴，此处便是乐园。",
+		"desc": "名片纹饰。深林幽谷之间，蔷薇伴月安绽。若得与你相伴，此处便是乐园。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·深林.webp",
 		"bg": "/source/nameCard/bg/纪行·深林.webp",
@@ -1235,7 +1235,7 @@
 	{
 		"name": "纪行·神将",
 		"type": 3,
-		"description": "名片纹饰。「你的存在意义，可并非恶行罚示哦。至于是什么，小生也不知道。」",
+		"desc": "名片纹饰。「你的存在意义，可并非恶行罚示哦。至于是什么，小生也不知道。」",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·神将.webp",
 		"bg": "/source/nameCard/bg/纪行·神将.webp",
@@ -1244,7 +1244,7 @@
 	{
 		"name": "纪行·盛夏",
 		"type": 3,
-		"description": "名片纹饰。是大冒险的时间！",
+		"desc": "名片纹饰。是大冒险的时间！",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·盛夏.webp",
 		"bg": "/source/nameCard/bg/纪行·盛夏.webp",
@@ -1253,7 +1253,7 @@
 	{
 		"name": "纪行·天命",
 		"type": 3,
-		"description": "名片纹饰。「昔有忠魂，似那飞鸿散东西。」「今我引灯，唯愿英灵毋歧迷。」",
+		"desc": "名片纹饰。「昔有忠魂，似那飞鸿散东西。」「今我引灯，唯愿英灵毋歧迷。」",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·天命.webp",
 		"bg": "/source/nameCard/bg/纪行·天命.webp",
@@ -1262,7 +1262,7 @@
 	{
 		"name": "纪行·熄星",
 		"type": 3,
-		"description": "名片纹饰。只要你的渴望尚未平息，那抬头应该可以看到那无光的闪耀吧。",
+		"desc": "名片纹饰。只要你的渴望尚未平息，那抬头应该可以看到那无光的闪耀吧。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·熄星.webp",
 		"bg": "/source/nameCard/bg/纪行·熄星.webp",
@@ -1271,7 +1271,7 @@
 	{
 		"name": "纪行·蕈原",
 		"type": 3,
-		"description": "名片纹饰。「…旅人啊，不必哀伤，因为那黎明的风儿，定会将载着美梦的蕈孢，吹向你希冀中的原野…」",
+		"desc": "名片纹饰。「…旅人啊，不必哀伤，因为那黎明的风儿，定会将载着美梦的蕈孢，吹向你希冀中的原野…」",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·蕈原.webp",
 		"bg": "/source/nameCard/bg/纪行·蕈原.webp",
@@ -1280,7 +1280,7 @@
 	{
 		"name": "纪行·意巧",
 		"type": 3,
-		"description": "名片纹饰。都说真爱如同鬼魅，谈论者众而见者少，但既然在此处鬼魅也偶尔现身，或许真爱也正等在下一个街角。",
+		"desc": "名片纹饰。都说真爱如同鬼魅，谈论者众而见者少，但既然在此处鬼魅也偶尔现身，或许真爱也正等在下一个街角。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·意巧.webp",
 		"bg": "/source/nameCard/bg/纪行·意巧.webp",
@@ -1289,7 +1289,7 @@
 	{
 		"name": "纪行·蛰醒",
 		"type": 3,
-		"description": "名片纹饰。三界震动，天地醒转。珊瑚王虫也从永眠中恢复了过来。",
+		"desc": "名片纹饰。三界震动，天地醒转。珊瑚王虫也从永眠中恢复了过来。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·蛰醒.webp",
 		"bg": "/source/nameCard/bg/纪行·蛰醒.webp",
@@ -1298,7 +1298,7 @@
 	{
 		"name": "纪行·逐月",
 		"type": 3,
-		"description": "名片纹饰。愿逐月华流照君。",
+		"desc": "名片纹饰。愿逐月华流照君。",
 		"source": "纪行系统奖励获取。",
 		"icon": "/source/nameCard/icon/纪行·逐月.webp",
 		"bg": "/source/nameCard/bg/纪行·逐月.webp",
@@ -1307,7 +1307,7 @@
 	{
 		"name": "庆典·灯昼",
 		"type": 4,
-		"description": "名片纹饰。年年今日，灯明如昼。愿火不灭，愿人依旧。",
+		"desc": "名片纹饰。年年今日，灯明如昼。愿火不灭，愿人依旧。",
 		"source": "海灯节活动商店兑换。",
 		"icon": "/source/nameCard/icon/庆典·灯昼.webp",
 		"bg": "/source/nameCard/bg/庆典·灯昼.webp",
@@ -1316,7 +1316,7 @@
 	{
 		"name": "庆典·斗剧",
 		"type": 4,
-		"description": "名片纹饰。吉兆要出现三次，幸运才会降临；谢幕时应当三次鞠躬；而在风来人的剑斗剧中，胜负的对手也有三名。",
+		"desc": "名片纹饰。吉兆要出现三次，幸运才会降临；谢幕时应当三次鞠躬；而在风来人的剑斗剧中，胜负的对手也有三名。",
 		"source": "「风来人剑斗绮谭」活动获取。",
 		"icon": "/source/nameCard/icon/庆典·斗剧.webp",
 		"bg": "/source/nameCard/bg/庆典·斗剧.webp",
@@ -1325,7 +1325,7 @@
 	{
 		"name": "庆典·躲猫",
 		"type": 4,
-		"description": "名片纹饰。你看不到我，你看不到我。",
+		"desc": "名片纹饰。你看不到我，你看不到我。",
 		"source": "「风行迷踪」活动获取。",
 		"icon": "/source/nameCard/icon/庆典·躲猫.webp",
 		"bg": "/source/nameCard/bg/庆典·躲猫.webp",
@@ -1334,7 +1334,7 @@
 	{
 		"name": "庆典·觥筹",
 		"type": 4,
-		"description": "名片纹饰。这里有很多很多的故事，但是没有酒精。派蒙也可以喝。",
+		"desc": "名片纹饰。这里有很多很多的故事，但是没有酒精。派蒙也可以喝。",
 		"source": "「曲生酌微梦」活动获取。",
 		"icon": "/source/nameCard/icon/庆典·觥筹.webp",
 		"bg": "/source/nameCard/bg/庆典·觥筹.webp",
@@ -1343,7 +1343,7 @@
 	{
 		"name": "庆典·光鳞",
 		"type": 4,
-		"description": "名片纹饰。宇宙里真的有这样一条蛇，闪烁着这样颜色的光辉鳞片。",
+		"desc": "名片纹饰。宇宙里真的有这样一条蛇，闪烁着这样颜色的光辉鳞片。",
 		"source": "活动兑换获取。",
 		"icon": "/source/nameCard/icon/庆典·光鳞.webp",
 		"bg": "/source/nameCard/bg/庆典·光鳞.webp",
@@ -1352,7 +1352,7 @@
 	{
 		"name": "庆典·浩瀚",
 		"type": 4,
-		"description": "名片纹饰。试着想象星海的浩瀚无垠。试着想象，一的后面写上一百个零。",
+		"desc": "名片纹饰。试着想象星海的浩瀚无垠。试着想象，一的后面写上一百个零。",
 		"source": "活动兑换获取。",
 		"icon": "/source/nameCard/icon/庆典·浩瀚.webp",
 		"bg": "/source/nameCard/bg/庆典·浩瀚.webp",
@@ -1361,7 +1361,7 @@
 	{
 		"name": "庆典·慧果",
 		"type": 4,
-		"description": "名片纹饰。智慧的果实要是落在大地之中，它会结出许多智慧来。但如果遇到了迪奥娜，那一定会很好喝就是了。",
+		"desc": "名片纹饰。智慧的果实要是落在大地之中，它会结出许多智慧来。但如果遇到了迪奥娜，那一定会很好喝就是了。",
 		"source": "「导能原盘」活动获取。",
 		"icon": "/source/nameCard/icon/庆典·慧果.webp",
 		"bg": "/source/nameCard/bg/庆典·慧果.webp",
@@ -1370,7 +1370,7 @@
 	{
 		"name": "庆典·妙算",
 		"type": 4,
-		"description": "名片纹饰。真正的棋手能算尽千步之后的局面。",
+		"desc": "名片纹饰。真正的棋手能算尽千步之后的局面。",
 		"source": "「机关棋谭·灵妙之局」活动获取。",
 		"icon": "/source/nameCard/icon/庆典·妙算.webp",
 		"bg": "/source/nameCard/bg/庆典·妙算.webp",
@@ -1379,7 +1379,7 @@
 	{
 		"name": "庆典·魔球",
 		"type": 4,
-		"description": "名片纹饰。「在好远好远的地方，有个叫『大联盟』的王国，住在那里的人能丢出变来变去、又快又厉害的『魔球』。」",
+		"desc": "名片纹饰。「在好远好远的地方，有个叫『大联盟』的王国，住在那里的人能丢出变来变去、又快又厉害的『魔球』。」",
 		"source": "「砰砰魔球总动员」活动获取。",
 		"icon": "/source/nameCard/icon/庆典·魔球.webp",
 		"bg": "/source/nameCard/bg/庆典·魔球.webp",
@@ -1388,7 +1388,7 @@
 	{
 		"name": "庆典·棋谭",
 		"type": 4,
-		"description": "名片纹饰。你道你见过机关算尽，可你真算到了自己也要下场当棋子吗？",
+		"desc": "名片纹饰。你道你见过机关算尽，可你真算到了自己也要下场当棋子吗？",
 		"source": "「机关棋谭」活动获取。",
 		"icon": "/source/nameCard/icon/庆典·棋谭.webp",
 		"bg": "/source/nameCard/bg/庆典·棋谭.webp",
@@ -1397,7 +1397,7 @@
 	{
 		"name": "庆典·盛宴",
 		"type": 4,
-		"description": "名片纹饰。好极了！",
+		"desc": "名片纹饰。好极了！",
 		"source": "「原神异世相遇礼」活动兑换获取。",
 		"icon": "/source/nameCard/icon/庆典·盛宴.webp",
 		"bg": "/source/nameCard/bg/庆典·盛宴.webp",
@@ -1406,7 +1406,7 @@
 	{
 		"name": "庆典·无相",
 		"type": 4,
-		"description": "名片纹饰。今天挑战的对手是什么艺术风格吗？",
+		"desc": "名片纹饰。今天挑战的对手是什么艺术风格吗？",
 		"source": "「无相交响诗」活动获取。",
 		"icon": "/source/nameCard/icon/庆典·无相.webp",
 		"bg": "/source/nameCard/bg/庆典·无相.webp",
@@ -1415,7 +1415,7 @@
 	{
 		"name": "庆典·岫云",
 		"type": 4,
-		"description": "名片纹饰。浮云晓向千峰散。",
+		"desc": "名片纹饰。浮云晓向千峰散。",
 		"source": "活动兑换获取。",
 		"icon": "/source/nameCard/icon/庆典·岫云.webp",
 		"bg": "/source/nameCard/bg/庆典·岫云.webp",
@@ -1424,7 +1424,7 @@
 	{
 		"name": "庆典·一揆",
 		"type": 4,
-		"description": "名片纹饰。「我来问你问题，你只准用剑来回答。」",
+		"desc": "名片纹饰。「我来问你问题，你只准用剑来回答。」",
 		"source": "「百人一揆」活动获取。",
 		"icon": "/source/nameCard/icon/庆典·一揆.webp",
 		"bg": "/source/nameCard/bg/庆典·一揆.webp",

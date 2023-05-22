@@ -2,7 +2,7 @@
  * @file data app index
  * @description data app index
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.1.5
  */
 
 // Data
@@ -15,47 +15,11 @@ import material from "./material.json";
 import nameCards from "./namecard.json";
 import weapon from "./weapon.json";
 
-export const AppDataList = [
-  {
-    name: "achievements.json",
-    data: achievements as BTMuli.Genshin.Achievement[],
-  },
-  {
-    name: "achievementSeries.json",
-    data: achievementSeries as BTMuli.Genshin.AchievementSeries[],
-  },
-  {
-    name: "calendar.json",
-    data: calendar as BTMuli.Genshin.Calendar.Data[],
-  },
-  {
-    name: "character.json",
-    data: character as BTMuli.Genshin.Wiki.Character.BriefInfo[],
-  },
-  {
-    name: "GCG.json",
-    data: GCG as BTMuli.Genshin.Wiki.GCG.BriefInfo[],
-  },
-  {
-    name: "material.json",
-    data: material as BTMuli.Genshin.Material.BriefInfo[],
-  },
-  {
-    name: "namecard.json",
-    data: nameCards as BTMuli.Genshin.NameCard[],
-  },
-  {
-    name: "weapon.json",
-    data: weapon as BTMuli.Genshin.Wiki.Weapon.BriefInfo[],
-  },
-];
-
-export const AppData = {
-  achievements: achievements as BTMuli.Genshin.Achievement[],
-  achievementSeries: achievementSeries as BTMuli.Genshin.AchievementSeries[],
-  calendar: calendar as BTMuli.Genshin.Calendar.Data[],
-  character: character as BTMuli.Genshin.Wiki.Character.BriefInfo[],
-  GCG: GCG as BTMuli.Genshin.Wiki.GCG.BriefInfo[],
-  nameCards: nameCards as BTMuli.Genshin.NameCard[],
-  weapon: weapon as BTMuli.Genshin.Wiki.Weapon.BriefInfo[],
-};
+export const AppAchievementsData = achievements as TGApp.App.Achievement.Item[];
+export const AppAchievementSeriesData = achievementSeries as TGApp.App.Achievement.Series[];
+export const AppCalendarData = calendar as TGApp.App.Calendar.Item[];
+export const AppCharacterData = character as TGApp.App.Character.WikiBriefInfo[];
+export const AppGCGData = GCG as TGApp.App.GCG.WikiBriefInfo[];
+export const AppMaterialData = material as TGApp.App.Calendar.Material[];
+export const AppNameCardsData = nameCards as TGApp.App.NameCard.Item[];
+export const AppWeaponData = weapon as TGApp.App.Weapon.WikiBriefInfo[];
