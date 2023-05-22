@@ -12,7 +12,7 @@
       </div>
       <!-- 上层星级 -->
       <div class="card-star">
-        <img :src="`/icon/star/${item.star}.webp`" alt="element">
+        <img :src="item.starIcon" alt="element">
       </div>
     </div>
     <!-- 右侧内容 -->
