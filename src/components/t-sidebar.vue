@@ -40,6 +40,12 @@
         </template>
       </v-list-item>
       <v-divider />
+      <v-list-item title="测试" value="test" link href="/user/test">
+        <template #prepend>
+          <v-icon>mdi-test-tube</v-icon>
+        </template>
+      </v-list-item>
+      <v-divider />
       <v-list-group value="wiki" fluid>
         <template #activator="{ props }">
           <v-list-item title="图鉴" v-bind="props">
