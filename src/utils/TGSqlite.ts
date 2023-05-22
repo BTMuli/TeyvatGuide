@@ -84,6 +84,51 @@ class TGSqlite {
   }
 
   /**
+   * @description 插入 Account 数据
+   * @memberOf TGSqlite
+   * @since Alpha v0.2.0
+   * @param {BTMuli.User.Game.Account[]} accounts
+   * @returns {Promise<void>}
+   */
+  public async insertAccount (accounts: BTMuli.User.Game.Account[]): Promise<void> {
+    const db = await Database.load(this.dbPath);
+    for (const a of accounts) {
+      const is_chosen = a.is_chosen ? 1 : 0;
+      const is_official = a.is_official ? 1 : 0;
+      const sql = `
+            INSERT INTO GameAccount (game_biz, game_uid, is_chosen, is_official, level, nickname, region, region_name, updated)
+            VALUES ('${a.game_biz}', '${a.game_uid}', ${is_chosen}, ${is_official}, '${a.level}', '${a.nickname}',
+                    '${a.region}', '${a.region_name}', datetime('now', 'localtime'))
+            ON CONFLICT(game_biz, game_uid) DO UPDATE SET 
+                is_chosen   = ${is_chosen},
+                is_official = ${is_official},
+                level       = ${a.level},
+                nickname    = '${a.nickname}',
+                region      = '${a.region}',
+                region_name = '${a.region_name}',
+                updated     = datetime('now', 'localtime');
+            `;
+      console.log(sql);
+      await db.execute(sql);
+    }
+    await db.close();
+  }
+
+  /**
+   * @description 获取当前选择的游戏账号
+   * @memberOf TGSqlite
+   * @since Alpha v0.2.0
+   * @returns {Promise<BTMuli.User.Game.Account|false>}
+   */
+  public async getCurAccount (): Promise<BTMuli.User.Game.Account | false> {
+    const db = await Database.load(this.dbPath);
+    const sql = "SELECT * FROM GameAccount WHERE is_chosen=1;";
+    const res: BTMuli.User.Game.Account[] = await db.select(sql);
+    await db.close();
+    return res.length === 0 ? false : res[0];
+  }
+
+  /**
 	 * @description 保存 appData
 	 * @memberOf TGSqlite
 	 * @since Alpha v0.2.0
@@ -153,22 +198,6 @@ class TGSqlite {
     });
     await db.close();
     await this.init();
-  }
-
-  /**
-	 * @description 获取数据库版本及构建时间
-	 * @memberOf TGSqlite
-	 * @since Alpha v0.1.4
-	 * @returns {Promise<{ version: string, buildTime: string }>}
-	 */
-  public async getMetadata (): Promise<{ version: string, buildTime: string }> {
-    const db = await Database.load(this.dbPath);
-    const sql = "SELECT * FROM AppData WHERE key='appVersion' OR key='dataUpdated';";
-    const res: Array<{ key: string, value: string }> = await db.select(sql);
-    const version = res.find((item) => item.key === "appVersion")?.value ?? "0.0.0";
-    const buildTime = res.find((item) => item.key === "dataUpdated")?.value ?? "1970-01-01 00:00:00";
-    await db.close();
-    return { version, buildTime };
   }
 
   /**

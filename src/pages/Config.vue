@@ -477,21 +477,29 @@ async function refreshUser () {
     await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
     await userStore.initCookie(ck);
     console.log(JSON.stringify(ck));
-    loadingTitle.value = "刷新成功!正在获取用户信息";
+    loadingTitle.value = "刷新成功!正在获取用户头像、昵称信息";
   } else {
-    loadingTitle.value = "刷新失败!正在获取用户信息";
+    loadingTitle.value = "刷新失败!正在获取用户头像、昵称信息";
     failCount++;
   }
   const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
   if (infoRes.hasOwnProperty("nickname")) {
     const info = infoRes as BTMuli.User.Base.BriefInfo;
     userStore.setBriefInfo(info);
+    loadingTitle.value = "获取成功!正在获取用户游戏账号信息";
+  } else {
+    loadingTitle.value = "获取失败!正在获取用户游戏账号信息";
+    failCount++;
+  }
+  const accountRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);
+  if (Array.isArray(accountRes)) {
+    await TGSqlite.insertAccount(accountRes);
     loadingTitle.value = "获取成功!";
   } else {
     loadingTitle.value = "获取失败!";
     failCount++;
   }
-  if (failCount === 3) {
+  if (failCount > 0) {
     snackbarText.value = "刷新失败!请重新输入 cookie!";
     snackbarColor.value = "error";
     snackbar.value = true;
@@ -529,12 +537,16 @@ async function inputCookie () {
     await userStore.initCookie(ck);
     loadingTitle.value = "正在获取用户信息...";
     const cookie_token = userStore.getCookieItem("cookie_token");
-    const res = await TGRequest.User.byCookie.getUserInfo(cookie_token, uid);
+    const resUser = await TGRequest.User.byCookie.getUserInfo(cookie_token, uid);
     // . 判断返回是否为 BTMuli.User.Base.BriefInfo
-    if (res.hasOwnProperty("nickname")) {
-      const info = res as BTMuli.User.Base.BriefInfo;
+    if (resUser.hasOwnProperty("nickname")) {
+      const info = resUser as BTMuli.User.Base.BriefInfo;
       userStore.setBriefInfo(info);
       appStore.isLogin = true;
+    }
+    const resAccounts = await TGRequest.User.byCookie.getAccounts(cookie_token, uid);
+    if (Array.isArray(resAccounts)) {
+      await TGSqlite.insertAccount(resAccounts);
     }
     loading.value = false;
     snackbarText.value = "Cookie 已保存!";

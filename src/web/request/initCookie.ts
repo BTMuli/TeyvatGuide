@@ -8,8 +8,8 @@
 // utils
 import TGSqlite from "../../utils/TGSqlite";
 // request
-import { getTokensByLoginTicket } from "./getTokens";
 import { getCookieTokenBySToken } from "./getCookieToken";
+import { getTokensByLoginTicket } from "./getTokens";
 import { verifyLToken } from "./verifyLToken";
 
 /**
