@@ -3022,7 +3022,11 @@
 				"icon": "/icon/material/104301.webp"
 			}
 		],
-		"source": {}
+		"source": {
+			"type": "character",
+			"area": "蒙德",
+			"name": "忘却之峡"
+		}
 	},
 	{
 		"id": 10000063,
@@ -3748,7 +3752,11 @@
 				"icon": "/icon/material/114013.webp"
 			}
 		],
-		"source": {}
+		"source": {
+			"type": "weapon",
+			"area": "璃月",
+			"name": "震雷连山密宫"
+		}
 	},
 	{
 		"id": 11406,
@@ -4113,7 +4121,11 @@
 				"icon": "/icon/material/114025.webp"
 			}
 		],
-		"source": {}
+		"source": {
+			"type": "weapon",
+			"area": "稻妻",
+			"name": "砂流之庭"
+		}
 	},
 	{
 		"id": 11415,
@@ -4901,7 +4913,11 @@
 				"icon": "/icon/material/114013.webp"
 			}
 		],
-		"source": {}
+		"source": {
+			"type": "weapon",
+			"area": "璃月",
+			"name": "震雷连山密宫"
+		}
 	},
 	{
 		"id": 12411,
@@ -5113,7 +5129,11 @@
 				"icon": "/icon/material/114025.webp"
 			}
 		],
-		"source": {}
+		"source": {
+			"type": "weapon",
+			"area": "稻妻",
+			"name": "砂流之庭"
+		}
 	},
 	{
 		"id": 12417,
@@ -6225,7 +6245,11 @@
 				"icon": "/icon/material/114013.webp"
 			}
 		],
-		"source": {}
+		"source": {
+			"type": "weapon",
+			"area": "璃月",
+			"name": "震雷连山密宫"
+		}
 	},
 	{
 		"id": 14406,
@@ -6644,7 +6668,11 @@
 				"icon": "/icon/material/114025.webp"
 			}
 		],
-		"source": {}
+		"source": {
+			"type": "weapon",
+			"area": "稻妻",
+			"name": "砂流之庭"
+		}
 	},
 	{
 		"id": 14415,
@@ -7225,7 +7253,11 @@
 				"icon": "/icon/material/114013.webp"
 			}
 		],
-		"source": {}
+		"source": {
+			"type": "weapon",
+			"area": "璃月",
+			"name": "震雷连山密宫"
+		}
 	},
 	{
 		"id": 15409,
