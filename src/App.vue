@@ -1,26 +1,14 @@
 <template>
-  <div v-if="isMain">
-    <v-layout>
-      <!-- 侧边栏菜单 -->
-      <TSidebar />
-      <!-- 主体内容 -->
-      <v-main class="app-main">
-        <v-container fluid>
-          <router-view />
-        </v-container>
-      </v-main>
-    </v-layout>
-  </div>
-  <div v-else>
-    <v-layout>
-      <!-- 主体内容 -->
-      <v-main class="app-main">
-        <v-container fluid>
-          <router-view />
-        </v-container>
-      </v-main>
-    </v-layout>
-  </div>
+  <v-layout>
+    <!-- 侧边栏菜单 -->
+    <TSidebar v-if="isMain" />
+    <!-- 主体内容 -->
+    <v-main class="app-main">
+      <v-container fluid>
+        <router-view />
+      </v-container>
+    </v-main>
+  </v-layout>
   <TBackTop />
 </template>
 
@@ -30,7 +18,7 @@ import { onMounted, ref } from "vue";
 import TSidebar from "./components/t-sidebar.vue";
 import TBackTop from "./components/t-backTop.vue";
 // tauri
-import { fs, window, app, event } from "@tauri-apps/api";
+import { app, event, fs, window } from "@tauri-apps/api";
 // store
 import { useAppStore } from "./store/modules/app";
 
@@ -72,19 +60,24 @@ async function checkLoad () {
   appStore.loading = true;
   console.info("数据加载完成！");
 }
+
 // 创建数据文件夹
 async function createDataDir () {
   console.info("开始创建数据文件夹...");
   // 如果不存在则创建
-  if (!await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData })) { await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true }); }
-  if (!await fs.exists("tempData", { dir: fs.BaseDirectory.AppLocalData })) { await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData, recursive: true }); }
+  if (!await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData })) {
+    await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
+  }
+  if (!await fs.exists("tempData", { dir: fs.BaseDirectory.AppLocalData })) {
+    await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
+  }
   console.info("数据文件夹创建完成！");
 }
 </script>
 <style lang="css">
 .app-main {
-  min-height: 100vh;
-  background: var(--page-bg);
-  backdrop-filter: blur(20px);
+    min-height: 100vh;
+    background: var(--page-bg);
+    backdrop-filter: blur(20px);
 }
 </style>
