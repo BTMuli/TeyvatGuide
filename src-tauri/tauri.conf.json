@@ -29,7 +29,8 @@
 					"https://bbs.mihoyo.com/*",
 					"https://hk4e-api.mihoyo.com/*",
 					"https://passport-api.mihoyo.com/*",
-					"https://passport-api-v4.mihoyo.com/*"
+					"https://passport-api-v4.mihoyo.com/*",
+					"https://act-webstatic.mihoyo.com/*"
 				]
 			},
 			"shell": {
