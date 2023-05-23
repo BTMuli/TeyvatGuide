@@ -43,14 +43,15 @@
         </v-card>
       </div>
     </v-list-item>
+    <v-snackbar v-model="showBar" :color="barColor" timeout="1000">
+      {{ barText }}
+    </v-snackbar>
   </v-list>
 </template>
 <script lang="ts" setup>
 // vue
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
-// tauri
-import { dialog } from "@tauri-apps/api";
 // store
 import { useHomeStore } from "../store/modules/home";
 // utils
@@ -68,6 +69,10 @@ const homeStore = useHomeStore();
 
 // loading
 const loading = ref(true as boolean);
+// snackbar
+const showBar = ref(false as boolean);
+const barText = ref("");
+const barColor = ref("error" as string);
 
 // data
 const poolCards = ref([] as GachaCard[]);
@@ -171,10 +176,9 @@ function checkCover (data: GachaData[]) {
 
 async function toOuter (url: string, title: string) {
   if (!url) {
-    await dialog.message("该角色池暂无详情", {
-      title,
-      type: "error",
-    });
+    barText.value = "链接为空!";
+    barColor.value = "error";
+    showBar.value = true;
     return;
   }
   createTGWindow(url, "祈愿", title, 1200, 800, true, true);
