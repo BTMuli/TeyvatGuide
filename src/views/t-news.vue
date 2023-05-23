@@ -1,16 +1,16 @@
 <template>
-  <div v-if="loading">
+  <div v-show="loading">
     <TLoading :title="loadingTitle" />
   </div>
-  <div v-else>
+  <div v-show="!loading">
     <v-tabs v-model="tab" align-tabs="start" class="news-tab">
       <v-tab value="notice">
         公告
       </v-tab>
-      <v-tab value="activity">
+      <v-tab value="activity" @click="firstLoad('activity')">
         活动
       </v-tab>
-      <v-tab v-if="showNews" value="news">
+      <v-tab v-if="showNews" value="news" @click="firstLoad('news')">
         新闻
       </v-tab>
       <v-spacer />
@@ -272,34 +272,38 @@ const rawData = ref({
 });
 
 onMounted(async () => {
-  loadingTitle.value = "正在获取公告数据...";
+  loadingTitle.value = "正在获取公告数据";
   const noticeData = await MysOper.News.get.notice(gid);
   rawData.value.notice.isLast = noticeData.is_last;
   rawData.value.notice.lastId = noticeData.list.length;
-  loadingTitle.value = "正在获取活动数据...";
-  const activityData = await MysOper.News.get.activity(gid);
-  rawData.value.activity.isLast = activityData.is_last;
-  rawData.value.activity.lastId = activityData.list.length;
-  if (showNews.value) {
-    loadingTitle.value = "正在获取新闻数据...";
-    const newsData = await MysOper.News.get.news(gid);
-    rawData.value.news.isLast = newsData.is_last;
-    rawData.value.news.lastId = newsData.list.length;
-    postData.value = {
-      notice: MysOper.News.card.notice(noticeData),
-      activity: MysOper.News.card.activity(activityData),
-      news: MysOper.News.card.news(newsData),
-    };
-  } else {
-    postData.value = {
-      notice: MysOper.News.card.notice(noticeData),
-      activity: MysOper.News.card.activity(activityData),
-      news: [],
-    };
-  }
+  postData.value.notice = MysOper.News.card.notice(noticeData);
   tab.value = "notice";
   loading.value = false;
 });
+
+async function firstLoad (data:string) {
+  if (rawData.value.activity.lastId !== 0 && rawData.value.news.lastId !== 0) {
+    return;
+  }
+  if (data === "activity" && rawData.value.activity.lastId === 0) {
+    loadingTitle.value = "正在获取活动数据...";
+    loading.value = true;
+    const activityData = await MysOper.News.get.activity(gid);
+    rawData.value.activity.isLast = activityData.is_last;
+    rawData.value.activity.lastId = activityData.list.length;
+    postData.value.activity = MysOper.News.card.activity(activityData);
+    loading.value = false;
+  }
+  if (data === "news" && rawData.value.news.lastId === 0) {
+    loadingTitle.value = "正在获取咨讯数据...";
+    loading.value = true;
+    const newsData = await MysOper.News.get.news(gid);
+    rawData.value.news.isLast = newsData.is_last;
+    rawData.value.news.lastId = newsData.list.length;
+    postData.value.news = MysOper.News.card.news(newsData);
+    loading.value = false;
+  }
+}
 
 async function switchAnno () {
   await router.push("/announcements");
