@@ -114,7 +114,7 @@ const userInfo = computed(() => {
   const info = userStore.getBriefInfo();
   return {
     nickname: info.nickname || "未登录",
-    avatar: info.avatar || "source/UI/defaultUser.webp",
+    avatar: info.avatar || "/source/UI/defaultUser.webp",
   };
 });
 const rail = ref(appStore.sidebar.collapse);
