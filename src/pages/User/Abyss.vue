@@ -26,7 +26,7 @@ const abyssCookie = ref({
   ltoken: "",
   ltuid: "",
 });
-const user = ref({} as TGApp.User.Account.Game);
+const user = ref({} as TGApp.Sqlite.Account.Game);
 
 onMounted(async () => {
   const curUser = await TGSqlite.getCurAccount();

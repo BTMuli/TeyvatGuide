@@ -118,12 +118,12 @@ class TGSqlite {
    * @description 获取当前选择的游戏账号
    * @memberOf TGSqlite
    * @since Alpha v0.2.0
-   * @returns {Promise<TGApp.User.Account.Game|false>}
+   * @returns {Promise<TGApp.Sqlite.Account.Game|false>}
    */
-  public async getCurAccount (): Promise<TGApp.User.Account.Game | false> {
+  public async getCurAccount (): Promise<TGApp.Sqlite.Account.Game | false> {
     const db = await Database.load(this.dbPath);
     const sql = "SELECT * FROM GameAccount WHERE isChosen=1;";
-    const res: TGApp.User.Account.Game[] = await db.select(sql);
+    const res: TGApp.Sqlite.Account.Game[] = await db.select(sql);
     await db.close();
     return res.length === 0 ? false : res[0];
   }
