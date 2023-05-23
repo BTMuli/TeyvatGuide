@@ -23,3 +23,16 @@ export const AppGCGData = GCG as TGApp.App.GCG.WikiBriefInfo[];
 export const AppMaterialData = material as TGApp.App.Calendar.Material[];
 export const AppNameCardsData = nameCards as TGApp.App.NameCard.Item[];
 export const AppWeaponData = weapon as TGApp.App.Weapon.WikiBriefInfo[];
+
+const wikiFiles = import.meta.glob("./wiki/**/*.json");
+
+/**
+ * @description 动态读取wiki文件
+ * @since Alpha v0.1.5
+ * @param {string} dir 目录
+ * @param {string} name 文件名
+ * @returns {Promise<any>} 文件内容
+ */
+export async function getWikiData (dir: string, name: string) {
+  return await wikiFiles[`./wiki/${dir}/${name}.json`]();
+}
