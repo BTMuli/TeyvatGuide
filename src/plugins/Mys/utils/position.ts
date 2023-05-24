@@ -2,7 +2,7 @@
  * @file plugins Mys utils position.ts
  * @description Mys 插件热点追踪工具
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @since Alpha v0.1.5
  */
 
 import { type PositionObc, type PositionData, type PositionCard } from "../interface/position";
@@ -28,13 +28,23 @@ export function dfs (list: PositionObc[]): PositionData[] {
 
 /**
  * @description 根据热点追踪信息转为渲染用的数据
- * @since Alpha v0.1.2
+ * @since Alpha v0.1.5
  * @param {PositionData[]} positionData 列表
  * @returns {PositionCard[]} 返回列表
  */
 export function getPositionCard (positionData: PositionData[]): PositionCard[] {
   const res: PositionCard[] = [];
   positionData.map((position) => {
+    let endStr: string;
+    if (position.end_time === "0") {
+      endStr = "";
+    } else {
+      endStr = new Date(Number(position.end_time))
+        .toLocaleString("zh-CN", {
+          hour12: false,
+        })
+        .replace(/\//g, "-");
+    }
     return res.push({
       title: position.title,
       post_id: Number(position.url.split("/").pop()),
@@ -43,11 +53,7 @@ export function getPositionCard (positionData: PositionData[]): PositionCard[] {
       time: {
         start: position.create_time,
         start_stamp: new Date(position.create_time).getTime(),
-        end: new Date(Number(position.end_time))
-          .toLocaleString("zh-CN", {
-            hour12: false,
-          })
-          .replace(/\//g, "-"),
+        end: endStr,
         end_stamp: Number(position.end_time),
       },
     });

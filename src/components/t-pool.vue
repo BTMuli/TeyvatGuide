@@ -80,6 +80,7 @@ const poolTimeGet = ref({} as Record<number, string>);
 const poolTimePass = ref({} as Record<number, number>);
 const poolColor = ref({} as Record<number, string>);
 const timer = ref({} as Record<number, any>);
+
 // expose
 defineExpose({
   name: "限时祈愿",

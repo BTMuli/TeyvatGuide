@@ -49,7 +49,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
@@ -57,20 +57,42 @@ import { createTGWindow } from "../utils/TGWindow";
 import MysOper from "../plugins/Mys";
 // interface
 import { PositionCard } from "../plugins/Mys/interface/position";
+
+// vue
+const router = useRouter();
+
 // loading
 const loading = ref(true as boolean);
 
-// 数据
+// data
 const positionCards = ref([] as PositionCard[]);
-const positionTimeGet = ref({} as Record<number, string>);
-const positionTimeEnd = ref({} as Record<number, number>);
-const router = useRouter();
+const positionTimeGet = ref({} as Record<number, string>); // 剩余时间/已结束/未知
+const positionTimeEnd = ref({} as Record<number, number>); // 结束时间戳
+const positionTimer = ref({} as Record<number, null>); // 定时器
 
 // expose
 defineExpose({
   name: "近期活动",
   loading,
 });
+
+function positionLastInterval (postId: number) {
+  const timeGet = positionTimeGet.value[postId];
+  console.log(timeGet, postId);
+  console.log(positionTimer.value);
+  if (timeGet === "未知" || timeGet === "已结束") {
+    console.log("清除计时器");
+    clearInterval(positionTimer.value[postId]);
+    positionTimer.value[postId] = null;
+    return;
+  }
+  const timeLast = positionTimeEnd[postId] - Date.now();
+  if (timeLast <= 0) {
+    positionTimeGet.value[postId] = "已结束";
+  } else {
+    positionTimeGet.value[postId] = getLastPositionTime(timeLast);
+  }
+}
 
 onMounted(async () => {
   const positionData = await MysOper.Position.get();
@@ -80,19 +102,16 @@ onMounted(async () => {
   }
   positionCards.value = MysOper.Position.card(positionData);
   positionCards.value.forEach((card) => {
-    positionTimeGet.value[card.post_id] = getLastPositionTime(card.time.end_stamp - Date.now());
+    if (card.time.end_stamp === 0) {
+      positionTimeGet.value[card.post_id] = "未知";
+    } else {
+      positionTimeGet.value[card.post_id] = getLastPositionTime(card.time.end_stamp - Date.now());
+    }
     positionTimeEnd.value[card.post_id] = card.time.end_stamp;
+    positionTimer.value[card.post_id] = setInterval(() => {
+      positionLastInterval(card.post_id);
+    }, 1000);
   });
-  setInterval(() => {
-    positionCards.value.forEach((card) => {
-      const time = card.time.end_stamp - Date.now();
-      if (time <= 0) {
-        positionTimeGet.value[card.post_id] = "已结束";
-        return;
-      }
-      positionTimeGet.value[card.post_id] = getLastPositionTime(time);
-    });
-  }, 1000);
   loading.value = false;
 });
 
@@ -118,6 +137,12 @@ async function toPost (card: PositionCard) {
   // 打开新窗口
   createTGWindow(path, "近期活动", card.title, 960, 720, false, false);
 }
+
+onUnmounted(() => {
+  Object.keys(positionTimer.value).forEach((key) => {
+    clearInterval(positionTimer.value[Number(key)]);
+  });
+});
 </script>
 
 <style lang="css" scoped>
