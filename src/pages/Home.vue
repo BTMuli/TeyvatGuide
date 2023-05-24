@@ -12,8 +12,12 @@ import TPosition from "../components/t-position.vue";
 import TCalendar from "../components/t-calendar.vue";
 // store
 import { useHomeStore } from "../store/modules/home";
+import { useAppStore } from "../store/modules/app";
+// utils
+import { getBuildTime } from "../utils/TGBuild";
 
 // store
+const appStore = useAppStore();
 const homeStore = useHomeStore();
 
 // loading
@@ -57,6 +61,13 @@ onMounted(async () => {
     }),
   );
   timer.value = setInterval(readLoading, 100);
+  // 获取当前环境
+  const timeGet = getBuildTime();
+  appStore.devEnv = timeGet.startsWith("dev");
+  if (!appStore.devEnv && appStore.devMode) {
+    appStore.devMode = false;
+  }
+  appStore.buildTime = getBuildTime();
 });
 
 function setItemRef (item: any) {

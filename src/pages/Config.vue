@@ -119,7 +119,7 @@
         调试
       </v-list-subheader>
       <v-divider inset class="border-opacity-75" />
-      <v-list-item title="开发者模式" subtitle="开启后将显示调试信息">
+      <v-list-item v-if="appStore.devEnv" title="调试模式" subtitle="开启后将显示调试信息">
         <template #prepend>
           <v-icon>mdi-bug</v-icon>
         </template>
@@ -138,12 +138,9 @@
           <span style="cursor: pointer" @click="tryConfirm('inputCookie')">手动输入 Cookie</span>
         </template>
         <template #append>
-          <div style="cursor: pointer" @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/issues/18')">
-            <span>如何获取 Cookie</span>
-            <v-icon @click="">
-              mdi-help-circle-outline
-            </v-icon>
-          </div>
+          <v-icon style="cursor: pointer" @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/issues/18')">
+            mdi-help-circle-outline
+          </v-icon>
         </template>
       </v-list-item>
       <v-list-item title="删除 IndexedDB" prepend-icon="mdi-delete" @click="tryConfirm('delDB')" />
@@ -178,7 +175,6 @@
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
-import { getBuildTime } from "../utils/TGBuild";
 import TLoading from "../components/t-loading.vue";
 import TConfirm from "../components/t-confirm.vue";
 // tauri
@@ -204,7 +200,7 @@ const achievementsStore = useAchievementsStore();
 // About App
 const versionApp = ref("" as string);
 const versionTauri = ref("" as string);
-const buildTime = ref(getBuildTime());
+const buildTime = computed(() => appStore.buildTime);
 
 // About OS
 const osPlatform = ref("" as string);
