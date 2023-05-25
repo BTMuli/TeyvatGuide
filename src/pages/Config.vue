@@ -175,8 +175,8 @@
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
-import TLoading from "../components/t-loading.vue";
-import TConfirm from "../components/t-confirm.vue";
+import TLoading from "../components/overlay/t-loading.vue";
+import TConfirm from "../components/overlay/t-confirm.vue";
 // tauri
 import { fs, app, os } from "@tauri-apps/api";
 // store

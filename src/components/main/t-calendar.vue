@@ -1,60 +1,61 @@
 <template>
-  <v-list class="calendar-card">
-    <v-list-item>
-      <v-list-item-title style="color: #fec90b; margin-left: 10px; margin-bottom: 10px; font-family: Genshin, serif">
-        <v-icon color="#EBD49E">
+  <div class="calendar-box">
+    <div class="calendar-title">
+      <div class="calendar-title-left">
+        <v-icon size="small">
           mdi-calendar-clock
         </v-icon>
-        今日素材
-        <span style="color: #faf7e8">{{ dateNow }}</span>
+        <span>今日素材</span>
+        <span>{{ dateNow }}</span>
+      </div>
+      <div class="calendar-title-right">
         <v-btn
           v-for="text of btnText"
           :key="text.week"
-          class="calendar-btn"
+          class="calendar-title-btn"
           :style="{
-            border: text.week === weekNow ? '2px solid var(--btn-bg-1)' : '0',
-            background: text.week === btnNow ? 'var(--btn-bg-1)' : 'var(--calendar-btn-bg)',
-            color: '#faf7e8',
-            marginBottom: '1px'
+            boxShadow: text.week === weekNow ? '0 0 5px #FEC90B' : 'none',
+            background: text.week === btnNow ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)',
           }"
           @click="getContents(text.week)"
         >
           {{ text.text }}
         </v-btn>
-      </v-list-item-title>
-      <div class="calendar-box">
-        <div class="calendar-single">
-          <div class="calendar-title">
-            天赋培养
-          </div>
-          <div class="cards-grid">
-            <div
-              v-for="item in characterCards"
-              :key="item.id"
-              class="card-box"
-              @click="selectContent(item, 'character')"
-            >
-              <TMiniAvatar size="100px" :model-value="item" />
-            </div>
-          </div>
-        </div>
-        <div class="calendar-single">
-          <div class="calendar-title">
-            武器突破
-          </div>
-          <div class="cards-grid">
-            <div
-              v-for="item in weaponCards"
-              :key="item.id"
-              class="card-box"
-              @click="selectContent(item, 'weapon')"
-            >
-              <TMiniWeapon size="100px" :model-value="item" />
-            </div>
-          </div>
+      </div>
+    </div>
+    <div class="calendar-divider" />
+    <div class="calendar-sub">
+      <div class="calendar-sub-title">
+        <img src="/src/assets/icons/arrow-right.svg" alt="character">
+        <span>角色突破</span>
+      </div>
+      <div class="cards-grid">
+        <div
+          v-for="item in characterCards"
+          :key="item.id"
+          class="card-box"
+          @click="selectContent(item, 'character')"
+        >
+          <TMiniAvatar size="100px" :model-value="item" />
         </div>
       </div>
-    </v-list-item>
+    </div>
+    <div class="calendar-sub">
+      <div class="calendar-sub-title">
+        <img src="/src/assets/icons/arrow-right.svg" alt="character">
+        <span>武器突破</span>
+      </div>
+      <div class="cards-grid">
+        <div
+          v-for="item in weaponCards"
+          :key="item.id"
+          class="card-box"
+          @click="selectContent(item, 'weapon')"
+        >
+          <TMiniWeapon size="100px" :model-value="item" />
+        </div>
+      </div>
+    </div>
     <v-snackbar v-model="snackbar" :timeout="1500" :color="snackbarColor">
       {{ snackbarText }}
     </v-snackbar>
@@ -87,7 +88,7 @@
           <div class="detail-btn">
             <v-btn @click="showDetail(selectedItem)">
               <template #append>
-                <img src="../assets/icons/arrow-right.svg" alt="right">
+                <img src="../../assets/icons/arrow-right.svg" alt="right">
               </template>
               详情
             </v-btn>
@@ -98,19 +99,19 @@
         <v-icon>mdi-close</v-icon>
       </div>
     </v-overlay>
-  </v-list>
+  </div>
 </template>
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
-import TMiniAvatar from "./t-mini-avatar.vue";
-import TMiniWeapon from "./t-mini-weapon.vue";
-import TCalendarMaterial from "./t-calendar-material.vue";
+import TMiniAvatar from "../mini/t-mini-avatar.vue";
+import TMiniWeapon from "../mini/t-mini-weapon.vue";
+import TCalendarMaterial from "../mini/t-calendar-material.vue";
 // data
-import { AppCalendarData } from "../data";
+import { AppCalendarData } from "../../data";
 // interface
-import { OBC_CONTENT_API } from "../plugins/Mys/interface/utils";
-import { createTGWindow } from "../utils/TGWindow";
+import { OBC_CONTENT_API } from "../../plugins/Mys/interface/utils";
+import { createTGWindow } from "../../utils/TGWindow";
 
 // loading
 const loading = ref(true as boolean);
@@ -212,45 +213,79 @@ function getContents (day: number) {
 }
 </script>
 <style lang="css" scoped>
-/* calendar 大盒子 */
-.calendar-card {
-    margin-top: 10px;
-    font-family: Genshin-Light, serif;
-    background: var(--content-bg-1);
-    border-radius: 10px;
-}
-
-.calendar-btn {
-    margin-left: 10px;
-    font-family: Genshin-Light, serif;
-    color: var(--btn-text-1);
-    border-radius: 10px;
-}
-
 .calendar-box {
-    margin: 5px;
-}
-
-.calendar-single {
-    margin-bottom: 10px;
-    background: var(--content-bg-2);
-    color: var(--content-bg-1);
-    border-radius: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  border-radius: 5px;
 }
 
 .calendar-title {
-    font-size: 1.5rem;
-    font-family: Genshin, serif;
-    color: #546D8B;
-    padding-left: 15px;
-    padding-top: 10px;
+  height: 45px;
+  font-size: 20px;
+  display: flex;
+  color:rgba(255, 255, 255, 0.8);
+}
+
+.calendar-title-left {
+  width: 20%;
+  height: 45px;
+  font-family: Genshin, serif;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+}
+
+.calendar-title-left span {
+  margin-left: 10px;
+}
+
+.calendar-title-right {
+  width: 80%;
+  font-family: Genshin-Light, serif;
+  height: 45px;
+}
+
+.calendar-title-btn {
+    margin-left: 10px;
+    border-radius: 5px;
+}
+
+.calendar-divider {
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.calendar-sub {
+    margin: 5px;
+}
+
+.calendar-sub-title {
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  font-family: Genshin-Light, serif;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+.calendar-sub-title img {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
 }
 
 .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    grid-gap: 10px;
-    padding: 10px;
+    grid-gap: 8px;
 }
 
 /* overlay 盒子 */

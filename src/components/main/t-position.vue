@@ -1,62 +1,57 @@
 <template>
-  <v-list class="position-card">
-    <v-list-item>
-      <v-list-item-title style="color: #fec90b; margin-left: 10px; font-family: Genshin, serif">
-        <img src="../assets/icons/board.svg" alt="act" class="position-act-icon">
-        近期活动
-      </v-list-item-title>
-      <div v-if="!loading" class="position-grid">
-        <v-card
-          v-for="card in positionCards"
-          :key="card.post_id"
-          style="background: var(--content-bg-2); color: #546d8b; border-radius: 10px"
-        >
-          <v-list style="background: var(--content-bg-2); color: #546d8b">
-            <v-list-item :title="card.title" :subtitle="card.abstract">
-              <template #prepend>
-                <v-avatar rounded="0" style="cursor: pointer" @click="toPost(card)">
-                  <v-img :src="card.icon" style="border-radius: 10px" />
-                </v-avatar>
-              </template>
-            </v-list-item>
-          </v-list>
-          <v-divider class="border-opacity-75" />
-          <v-card-text>
-            <span style="width: 60%">
-              <v-icon>mdi-calendar-clock</v-icon>
-              {{ card.time.start }}~{{ card.time.end }}
-            </span>
-          </v-card-text>
-          <v-card-actions>
-            <span style="width: 80%; margin-left: 10px">
-              <v-icon>mdi-clock-outline</v-icon>
-              剩余时间：
-              <span v-if="positionTimeGet[card.post_id] !== '已结束'" style="color: #90caf9">{{
-                positionTimeGet[card.post_id]
-              }}</span>
-              <span v-if="positionTimeGet[card.post_id] === '已结束'" style="color: #ff6d6d">已结束</span>
-            </span>
-            <v-btn class="card-btn" @click="toPost(card)">
-              <template #prepend>
-                <img src="../assets/icons/circle-check.svg" alt="check">查看
-              </template>
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </div>
-    </v-list-item>
-  </v-list>
+  <div class="position-box">
+    <div class="position-title">
+      <img src="../../assets/icons/board.svg" alt="act" class="position-icon">
+      近期活动
+    </div>
+    <div v-if="!loading" class="position-grid">
+      <v-card
+        v-for="card in positionCards"
+        :key="card.post_id"
+        style="background: var(--content-bg-2); color: #546d8b; border-radius: 5px"
+      >
+        <v-list style="background: var(--content-bg-2); color: #546d8b">
+          <v-list-item :title="card.title" :subtitle="card.abstract">
+            <template #prepend>
+              <v-avatar rounded="0" style="cursor: pointer" @click="toPost(card)">
+                <v-img :src="card.icon" style="border-radius: 10px" />
+              </v-avatar>
+            </template>
+            <template #append>
+              <v-btn variant="outlined" @click="toPost(card)">
+                查看
+              </v-btn>
+            </template>
+          </v-list-item>
+        </v-list>
+        <v-divider class="border-opacity-75" />
+        <v-card-text>
+          <div style="min-width: 200px;display: inline-block">
+            <v-icon>mdi-calendar-clock</v-icon>
+            {{ card.time.start }} ~ {{ card.time.end }}
+          </div>
+          <div style="min-width: 200px;display: inline-block">
+            <v-icon>mdi-clock-outline</v-icon>剩余时间：
+            <span v-if="positionTimeGet[card.post_id] !== '已结束'" style="color: #90caf9">{{
+              positionTimeGet[card.post_id]
+            }}</span>
+            <span v-if="positionTimeGet[card.post_id] === '已结束'" style="color: #ff6d6d">已结束</span>
+          </div>
+        </v-card-text>
+      </v-card>
+    </div>
+  </div>
 </template>
 <script lang="ts" setup>
 // vue
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 // utils
-import { createTGWindow } from "../utils/TGWindow";
+import { createTGWindow } from "../../utils/TGWindow";
 // plugins
-import MysOper from "../plugins/Mys";
+import MysOper from "../../plugins/Mys";
 // interface
-import { PositionCard } from "../plugins/Mys/interface/position";
+import { PositionCard } from "../../plugins/Mys/interface/position";
 
 // vue
 const router = useRouter();
@@ -143,22 +138,31 @@ onUnmounted(() => {
 </script>
 
 <style lang="css" scoped>
-.position-act-icon {
-  width: 20px;
-  height: 20px;
-  display: inline-block;
+.position-box {
+  margin-bottom: 10px;
+  padding: 10px;
+  font-family: Genshin, serif;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  border-radius: 5px;
 }
 
-.position-card {
-  margin-top: 10px;
-  font-family: Genshin, serif;
-  background: var(--content-bg-1);
-  border-radius: 10px;
+.position-title {
+  color:rgba(255, 255, 255, 0.8);
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  font-size: 20px;
+  display: flex;
+}
+
+.position-icon {
+  width: 25px;
+  height: 25px;
+  margin-right: 10px;
 }
 
 .position-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(400px, 1fr));
+  grid-template-columns: repeat(3, minmax(calc(400px + 2rem), 1fr));
   grid-gap: 20px;
   margin-top: 10px;
 }

@@ -13,13 +13,13 @@
         </div>
         <div class="confirm-btn-box">
           <button class="confirm-btn" @click="onCancel">
-            <img class="btn-icon" src="../assets/icons/circle-cancel.svg" alt="cancel">
+            <img class="btn-icon" src="../../assets/icons/circle-cancel.svg" alt="cancel">
             <span class="btn-text">
               {{ cancel }}
             </span>
           </button>
           <button class="confirm-btn" @click="onConfirm">
-            <img class="btn-icon" src="../assets/icons/circle-check.svg" alt="confirm">
+            <img class="btn-icon" src="../../assets/icons/circle-check.svg" alt="confirm">
             <span class="btn-text">
               {{ confirm }}
             </span>

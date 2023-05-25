@@ -98,7 +98,7 @@
 <script lang="ts" setup>
 // vue
 import { ref, onMounted, computed } from "vue";
-import TLoading from "../../components/t-loading.vue";
+import TLoading from "../../components/overlay/t-loading.vue";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
 import { AppGCGData } from "../../data";

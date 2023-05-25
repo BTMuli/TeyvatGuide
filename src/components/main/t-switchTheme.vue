@@ -13,7 +13,7 @@ import { computed, onMounted } from "vue";
 // tauri
 import { event } from "@tauri-apps/api";
 // store
-import { useAppStore } from "../store/modules/app";
+import { useAppStore } from "../../store/modules/app";
 
 // store
 const appStore = useAppStore();

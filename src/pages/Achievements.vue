@@ -110,7 +110,7 @@
 <script lang="ts" setup>
 // vue
 import { onMounted, ref, onBeforeMount, computed } from "vue";
-import TLoading from "../components/t-loading.vue";
+import TLoading from "../components/overlay/t-loading.vue";
 // tauri
 import { dialog, fs } from "@tauri-apps/api";
 // Store

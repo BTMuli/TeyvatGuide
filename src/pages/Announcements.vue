@@ -95,7 +95,7 @@
 // vue
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import TLoading from "../components/t-loading.vue";
+import TLoading from "../components/overlay/t-loading.vue";
 // store
 import { useAppStore } from "../store/modules/app";
 // utils

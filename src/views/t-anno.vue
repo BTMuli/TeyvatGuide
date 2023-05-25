@@ -19,8 +19,8 @@
 // vue
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import TLoading from "../components/t-loading.vue";
-import TSwitchTheme from "../components/t-switchTheme.vue";
+import TLoading from "../components/overlay/t-loading.vue";
+import TSwitchTheme from "../components/main/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
 // plugins

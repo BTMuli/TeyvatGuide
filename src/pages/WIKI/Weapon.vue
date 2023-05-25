@@ -12,7 +12,7 @@
 <script lang="ts" setup>
 // vue
 import { ref, computed } from "vue";
-import TMiniWeapon from "../../components/t-mini-weapon.vue";
+import TMiniWeapon from "../../components/mini/t-mini-weapon.vue";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
 import { AppWeaponData } from "../../data";

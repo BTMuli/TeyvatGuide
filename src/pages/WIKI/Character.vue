@@ -12,7 +12,7 @@
 <script lang="ts" setup>
 // vue
 import { ref, computed } from "vue";
-import TMiniAvatar from "../../components/t-mini-avatar.vue";
+import TMiniAvatar from "../../components/mini/t-mini-avatar.vue";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
 import { AppCharacterData } from "../../data";

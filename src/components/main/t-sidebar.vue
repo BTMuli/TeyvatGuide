@@ -26,7 +26,7 @@
       </v-list-item>
       <v-list-item title="公告" value="announcements" link href="/announcements">
         <template #prepend>
-          <img src="../assets/icons/board.svg" alt="annoIcon" class="side-icon">
+          <img src="../../assets/icons/board.svg" alt="annoIcon" class="side-icon">
         </template>
       </v-list-item>
       <v-list-item title="咨讯" value="news" link href="/news/2">
@@ -36,7 +36,7 @@
       </v-list-item>
       <v-list-item title="成就" value="achievements" link href="/achievements">
         <template #prepend>
-          <img src="../assets/icons/achievements.svg" alt="achievementsIcon" class="side-icon">
+          <img src="../../assets/icons/achievements.svg" alt="achievementsIcon" class="side-icon">
         </template>
       </v-list-item>
       <v-divider />
@@ -56,7 +56,7 @@
         </template>
         <v-list-item title="GCG" value="wiki-GCG" link href="/wiki/GCG">
           <template #prepend>
-            <img src="../assets/icons/GCG.svg" alt="gcgIcon" class="side-icon">
+            <img src="../../assets/icons/GCG.svg" alt="gcgIcon" class="side-icon">
           </template>
         </v-list-item>
         <v-list-item title="角色图鉴" value="wiki-character" link href="/wiki/character">
@@ -90,7 +90,7 @@
         </v-list-item>
         <v-list-item title="设置" value="config" link href="/config">
           <template #prepend>
-            <img src="../assets/icons/setting.svg" alt="setting" class="side-icon">
+            <img src="../../assets/icons/setting.svg" alt="setting" class="side-icon">
           </template>
         </v-list-item>
       </div>
@@ -104,8 +104,8 @@ import { computed, ref, onMounted } from "vue";
 // tauri
 import { event } from "@tauri-apps/api";
 // store
-import { useAppStore } from "../store/modules/app";
-import { useUserStore } from "../store/modules/user";
+import { useAppStore } from "../../store/modules/app";
+import { useUserStore } from "../../store/modules/user";
 
 const appStore = useAppStore();
 const userStore = useUserStore();

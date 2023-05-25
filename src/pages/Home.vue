@@ -6,10 +6,10 @@
 <script lang="ts" setup>
 // vue
 import { ref, markRaw, onMounted, onUnmounted, onUpdated } from "vue";
-import TLoading from "../components/t-loading.vue";
-import TPool from "../components/t-pool.vue";
-import TPosition from "../components/t-position.vue";
-import TCalendar from "../components/t-calendar.vue";
+import TLoading from "../components/overlay/t-loading.vue";
+import TPool from "../components/main/t-pool.vue";
+import TPosition from "../components/main/t-position.vue";
+import TCalendar from "../components/main/t-calendar.vue";
 // store
 import { useHomeStore } from "../store/modules/home";
 import { useAppStore } from "../store/modules/app";

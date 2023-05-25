@@ -1,65 +1,63 @@
 <template>
-  <v-list class="pool-card">
-    <v-list-item>
-      <v-list-item-title style="color: #fec90b; margin-left: 10px; font-family: Genshin, serif">
-        <img src="../assets/icons/icon-wish.svg" alt="wish" class="pool-wish-icon">
-        限时祈愿
-      </v-list-item-title>
-      <div v-if="!loading" class="pool-grid">
-        <v-card
-          v-for="pool in poolCards"
-          :key="pool.post_id"
-          style="background: var(--content-bg-2); color: #546d8b; border-radius: 10px"
-        >
-          <v-list style="background: var(--content-bg-2); color: #546d8b">
-            <v-list-item :title="pool.title" :subtitle="pool.subtitle">
-              <template #prepend>
-                <v-img :src="pool.voice.icon" class="pool-sideIcon" />
-              </template>
-              <template v-if="pool.voice.url" #append>
-                <audio :src="pool.voice.url" controls />
-              </template>
-            </v-list-item>
-          </v-list>
-          <div class="pool-cover" @click="toPost(pool)">
-            <img :src="pool.cover" alt="cover">
+  <div class="pool-box">
+    <div class="pool-title">
+      <img src="../../assets/icons/icon-wish.svg" alt="wish" class="pool-title-icon">
+      限时祈愿
+    </div>
+    <div v-if="!loading" class="pool-grid">
+      <v-card
+        v-for="pool in poolCards"
+        :key="pool.post_id"
+        style="background: var(--content-bg-2); color: #546d8b; border-radius: 10px"
+      >
+        <v-list style="background: var(--content-bg-2); color: #546d8b">
+          <v-list-item :title="pool.title" :subtitle="pool.subtitle">
+            <template #prepend>
+              <v-img :src="pool.voice.icon" class="pool-sideIcon" />
+            </template>
+            <template v-if="pool.voice.url" #append>
+              <audio :src="pool.voice.url" controls />
+            </template>
+          </v-list-item>
+        </v-list>
+        <div class="pool-cover" @click="toPost(pool)">
+          <img :src="pool.cover" alt="cover">
+        </div>
+        <div class="pool-character">
+          <div v-for="character in pool.characters" :key="character.url" @click="toOuter(character.url, pool.title)">
+            <img :src="character.icon" class="pool-icon" alt="character">
           </div>
-          <div class="pool-character">
-            <div v-for="character in pool.characters" :key="character.url" @click="toOuter(character.url, pool.title)">
-              <img :src="character.icon" class="pool-icon" alt="character">
-            </div>
-            <div class="pool-clock">
-              <v-progress-circular :model-value="poolTimePass[pool.post_id]" size="100" width="10" :color="poolColor[pool.post_id]">
-                {{ poolTimeGet[pool.post_id] }}
-              </v-progress-circular>
-            </div>
+          <div class="pool-clock">
+            <v-progress-circular :model-value="poolTimePass[pool.post_id]" size="100" width="10" :color="poolColor[pool.post_id]">
+              {{ poolTimeGet[pool.post_id] }}
+            </v-progress-circular>
           </div>
-          <v-card-text>
-            <span style="width: 60%">
-              <v-icon>mdi-calendar-clock</v-icon>
-              {{ pool.time.start }}~{{ pool.time.end }}
-            </span>
-          </v-card-text>
-        </v-card>
-      </div>
-    </v-list-item>
+        </div>
+        <v-card-text>
+          <span style="width: 60%">
+            <v-icon>mdi-calendar-clock</v-icon>
+            {{ pool.time.start }}~{{ pool.time.end }}
+          </span>
+        </v-card-text>
+      </v-card>
+    </div>
     <v-snackbar v-model="showBar" :color="barColor" timeout="1000">
       {{ barText }}
     </v-snackbar>
-  </v-list>
+  </div>
 </template>
 <script lang="ts" setup>
 // vue
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 // store
-import { useHomeStore } from "../store/modules/home";
+import { useHomeStore } from "../../store/modules/home";
 // utils
-import { createTGWindow } from "../utils/TGWindow";
+import { createTGWindow } from "../../utils/TGWindow";
 // plugins
-import MysOper from "../plugins/Mys";
+import MysOper from "../../plugins/Mys";
 // interface
-import { GachaCard, GachaData } from "../plugins/Mys/interface/gacha";
+import { GachaCard, GachaData } from "../../plugins/Mys/interface/gacha";
 
 // vue
 const router = useRouter();
@@ -211,18 +209,29 @@ onUnmounted(() => {
 </script>
 
 <style lang="css" scoped>
-.pool-wish-icon {
-  width: 20px;
-  height: 20px;
-  display: inline-block;
+.pool-box {
+  margin-bottom: 10px;
+  padding: 10px;
+  font-family: Genshin, serif;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  border-radius: 5px;
 }
 
-.pool-card {
-  font-family: Genshin, serif;
-  width: 100%;
-  background: var(--content-bg-1);
-  border-radius: 10px;
-  margin-top: 10px;
+.pool-title {
+  color:rgba(255, 255, 255, 0.8);
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  font-size: 20px;
+  display: flex;
+}
+
+.pool-title-icon {
+  width: 25px;
+  height: 25px;
+  transform: translate(0, 2px);
+  margin-right: 10px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .pool-grid {
