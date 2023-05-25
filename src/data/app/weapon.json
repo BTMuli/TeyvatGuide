@@ -333,6 +333,15 @@
 		"icon": "/WIKI/weapon/icon/11501.webp"
 	},
 	{
+		"id": 15419,
+		"contentId": 6664,
+		"name": "鹮穿之喙",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"weaponIcon": "/icon/weapon/弓.webp",
+		"icon": "/WIKI/weapon/icon/15419.webp"
+	},
+	{
 		"id": 15418,
 		"contentId": 4437,
 		"name": "竭泽",
