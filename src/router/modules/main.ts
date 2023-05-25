@@ -2,7 +2,7 @@
  * @file router modules main.ts
  * @description 主路由模块
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.5
+ * @since Alpha v0.1.6
  */
 
 // 信息展示
@@ -13,7 +13,7 @@ import Achievements from "../../pages/Achievements.vue";
 // 应用配置相关
 import Config from "../../pages/Config.vue";
 // 测试页
-import Test from "../../pages/test.vue";
+import Test from "../../pages/Test.vue";
 
 const mainRoutes = [
   {
