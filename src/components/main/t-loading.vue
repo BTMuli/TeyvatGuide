@@ -54,7 +54,7 @@ watch(
   (v) => {
     if (v) {
       showOut.value = true;
-      showIn.value = false;
+      showIn.value = true;
     } else {
       setTimeout(() => {
         showIn.value = false;
