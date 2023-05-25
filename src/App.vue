@@ -77,8 +77,8 @@ async function createDataDir () {
 </script>
 <style lang="css">
 .app-container {
-    height: 100%;
-    overflow: auto;
-    background: var(--page-bg);
+  height: 100%;
+  overflow: auto;
+  background: var(--page-bg);
 }
 </style>

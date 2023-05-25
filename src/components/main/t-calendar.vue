@@ -216,8 +216,8 @@ function getContents (day: number) {
 .calendar-box {
   margin-bottom: 10px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  background: rgb(255 255 255 / 10%);
+  box-shadow: 0 0 10px rgb(0 0 0 / 40%);
   border-radius: 5px;
 }
 
@@ -225,14 +225,14 @@ function getContents (day: number) {
   height: 45px;
   font-size: 20px;
   display: flex;
-  color:rgba(255, 255, 255, 0.8);
+  color:rgb(255 255 255 / 80%);
 }
 
 .calendar-title-left {
   width: 20%;
   height: 45px;
   font-family: Genshin, serif;
-  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 0 10px rgb(0 0 0 / 80%);
   display: flex;
   align-items: center;
 }
@@ -256,7 +256,7 @@ function getContents (day: number) {
   width: 100%;
   height: 2px;
   border-radius: 2px;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgb(0 0 0 / 40%);
 }
 
 .calendar-sub {
@@ -264,7 +264,7 @@ function getContents (day: number) {
 }
 
 .calendar-sub-title {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgb(0 0 0 / 20%);
   display: flex;
   align-items: center;
   height: 30px;
@@ -272,8 +272,8 @@ function getContents (day: number) {
   margin: 5px 0;
   border-radius: 5px;
   font-family: Genshin-Light, serif;
-  color: rgba(255, 255, 255, 0.8);
-  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  color: rgb(255 255 255 / 80%);
+  text-shadow: 0 0 10px rgb(0 0 0 / 80%);
 }
 
 .calendar-sub-title img {

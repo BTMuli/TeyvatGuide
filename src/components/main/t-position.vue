@@ -142,14 +142,14 @@ onUnmounted(() => {
   margin-bottom: 10px;
   padding: 10px;
   font-family: Genshin, serif;
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  background: rgb(255 255 255 / 10%);
+  box-shadow: 0 0 10px rgb(0 0 0 / 40%);
   border-radius: 5px;
 }
 
 .position-title {
-  color:rgba(255, 255, 255, 0.8);
-  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  color:rgb(255 255 255 / 80%);
+  text-shadow: 0 0 10px rgb(0 0 0 / 80%);
   font-size: 20px;
   display: flex;
 }
