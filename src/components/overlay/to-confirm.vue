@@ -1,5 +1,5 @@
 <template>
-  <v-overlay v-model="visible">
+  <TOverlay v-model="visible" :to-click="onCancel">
     <div class="confirm-div">
       <div class="confirm-box">
         <div class="confirm-title">
@@ -27,14 +27,15 @@
         </div>
       </div>
     </div>
-  </v-overlay>
+  </TOverlay>
 </template>
 
 <script lang="ts" setup>
 // vue
 import { computed } from "vue";
+import TOverlay from "../main/t-overlay.vue";
 
-interface TConfirmProps {
+interface TOConfirmProps {
   title: string;
   subtitle?: string;
   isInput?: boolean;
@@ -45,16 +46,15 @@ interface TConfirmProps {
   modelInput: string;
 }
 
-interface TConfirmEmits {
-  (e: "update:show", v: boolean): void;
+interface TOConfirmEmits {
   (e: "update:modelValue", v: boolean): void;
   (e: "update:modelInput", v: string): void;
   (e: "confirm"): void;
   (e: "cancel"): void;
 }
 
-const emits = defineEmits<TConfirmEmits>();
-const props = withDefaults(defineProps<TConfirmProps>(), {
+const emits = defineEmits<TOConfirmEmits>();
+const props = withDefaults(defineProps<TOConfirmProps>(), {
   title: "确认",
   subtitle: "",
   isInput: false,
