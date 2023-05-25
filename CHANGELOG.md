@@ -2,14 +2,46 @@
 Author: 目棃
 Date: 2023-03-30
 Description: CHANGELOG
-Update: 2023-05-02
+Update: 2023-05-25
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-30 15:39:49`
 > 
-> 更新于 `2023-05-02 18:24:21`
+> 更新于 `2023-05-25 17:24:07`
 
 # CHANGELOG
+
+## [0.1.5](https://github.com/BTMuli/Tauri.Genshin/releases/v0.1.5) (2023-05-25)
+
+### Feat
+
+- 组件：`TConfirm` 组件支持 Input [`50f2305d`](https://github.com/BTMuli/Tauri.Genshin/commit/50f2305d)
+- 请求：完成部分涉及游戏数据的获取
+- 数据库：添加 `GameAccount` 表用于存储用户游戏账号数据 [`683500fe`](https://github.com/BTMuli/Tauri.Genshin/commit/683500fe)
+- 资源：添加素材相关图片 [`11322f14`](https://github.com/BTMuli/Tauri.Genshin/commit/11322f14)
+- 用户：支持用户信息获取&基本信息展示（昵称、UID、头像）
+- 数据库：数据备份时会将用户 Cookie 一同备份
+
+### Fix
+
+- 资源：补充上个版本遗漏的数据 [`91b7ed35`](https://github.com/BTMuli/Tauri.Genshin/commit/91b7ed35)
+- 设置：修复数据库不存在时无法重置数据库的问题
+- 资源：添加 3.7 版本资源 [#17](https://github.com/BTMuli/Tauri.Genshin/issues/17)
+- 首页：增加近期活动结束时间为 0 的处理 [#25](https://github.com/BTMuli/Tauri.Genshin/issues/25)
+- 样式：滚动条样式调整 [`3b47c5f2`](https://github.com/BTMuli/Tauri.Genshin/commit/3b47c5f2)
+- 应用：不再在生产环境提供调试模式的开关 [#26](https://github.com/BTMuli/Tauri.Genshin/issues/26)
+- 数据库：删除 IndexedDB 的删除操作 [`f23b73ec`](https://github.com/BTMuli/Tauri.Genshin/commit/f23b73ec)
+
+### Change
+
+- 应用：更新检测 Endpoints 变更 [`13ab6c83`](https://github.com/BTMuli/Tauri.Genshin/commit/13ab6c83)
+- Cookie：获取方式改为手动输入，不再通过 rocket 尝试自动获取 [`baff5a17`](https://github.com/BTMuli/Tauri.Genshin/commit/baff5a17)
+- 侧边栏：更换部分图标 [`e9e5c0a6`](https://github.com/BTMuli/Tauri.Genshin/commit/e9e5c0a6)
+- 素材日历：排布更改，添加 overlay 显示角色/武器 需要材料及来源 [`a27f6277`](https://github.com/BTMuli/Tauri.Genshin/commit/a27f6277)
+- 首页组件：背景改为半透明，整体表现优化
+- 数据库：关闭首页数据库完整性检测 [`cf1fb130`](https://github.com/BTMuli/Tauri.Genshin/commit/cf1fb130)
+
+FullCommits: [`v0.1.4 ~ v0.1.5`](https://github.com/BTMuli/Tauri.Genshin/compare/v0.1.4...v0.1.5)
 
 ## [0.1.4](https://github.com/BTMuli/Tauri.Genshin/releases/v0.1.4) (2023-05-02)
 

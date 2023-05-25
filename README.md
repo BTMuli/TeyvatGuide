@@ -2,14 +2,21 @@
 Author: 目棃
 Date: 2023-03-05
 Description: 说明文档
-Update: 2023-05-22
+Update: 2023-05-25
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-05 14:41:55`
 > 
-> 更新于 `2023-05-22 12:37:52`
+> 更新于 `2023-05-25 17:29:18`
 
-![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/v/release/BTMuli/Tauri.Genshin?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge)
+![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge) 
+
+<a href="https://gitmoji.dev">
+  <img
+    src="https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg?style=for-the-badge"
+    alt="Gitmoji"
+  />
+</a>
 
 # Tauri.Genshin
 
@@ -17,8 +24,7 @@ Tauri 练手项目，子模块：[TGAssistant](https://github.com/BTMuli/TGAssis
 
 ## Release
 
-- latest: 最新版本，[Github下载](https://github.com/BTMuli/Tauri.Genshin/releases/latest)
-- dev: 开发版本，[阿里云下载](https://www.aliyundrive.com/s/viGQKLAHU16)
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/BTMuli/Tauri.Genshin?include_prereleases&style=for-the-badge)](https://github.com/BTMuli/Tauri.Genshin/releases/latest)
 
 ## 技术栈
 
@@ -26,7 +32,7 @@ Tauri 练手项目，子模块：[TGAssistant](https://github.com/BTMuli/TGAssis
 - [Vue3](https://github.com/vuejs/core)
 - [Vite](https://github.com/vitejs/vite)
 - [TypeScript](https://github.com/microsoft/TypeScript)
-- [Vuetify](https://github.com/vuetifyjs/vuetify)`
+- [Vuetify](https://github.com/vuetifyjs/vuetify)
 
 ## 当前进度
 
