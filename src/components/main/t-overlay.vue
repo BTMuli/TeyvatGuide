@@ -1,6 +1,6 @@
 <template>
   <transition enter-from-class="tolo-enter-from" name="tolo">
-    <div v-show="showTolo" class="tolo-box">
+    <div v-show="showTolo" class="tolo-box" @click="toClick">
       <transition enter-from-class="toli-enter-from" name="toli">
         <slot v-if="showToli" />
       </transition>
@@ -13,6 +13,7 @@ import { ref, watch } from "vue";
 
 interface TolProps {
   modelValue: boolean;
+  toClick?: () => void;
 }
 
 const showTolo = ref(false);
