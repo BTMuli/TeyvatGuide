@@ -5,8 +5,6 @@
  * @since Alpha v0.2.0
  */
 
-// user test
-import test from "../../pages/User/test.vue";
 // user main
 import Abyss from "../../pages/User/Abyss.vue";
 import Characters from "../../pages/User/Characters.vue";
@@ -15,11 +13,6 @@ import Info from "../../pages/User/Info.vue";
 // user sub
 
 const userRoutes = [
-  {
-    path: "/user/test",
-    name: "测试",
-    component: test,
-  },
   {
     path: "/user/abyss",
     name: "深渊记录",

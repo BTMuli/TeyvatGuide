@@ -12,12 +12,19 @@ import Home from "../../pages/Home.vue";
 import Achievements from "../../pages/Achievements.vue";
 // 应用配置相关
 import Config from "../../pages/Config.vue";
+// 测试页
+import Test from "../../pages/test.vue";
 
 const mainRoutes = [
   {
     path: "/",
     name: "首页",
     component: Home,
+  },
+  {
+    path: "/test",
+    name: "测试页",
+    component: Test,
   },
   {
     path: "/achievements",

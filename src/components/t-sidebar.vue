@@ -40,7 +40,7 @@
         </template>
       </v-list-item>
       <v-divider />
-      <v-list-item v-show="appStore.devEnv" title="测试" value="test" link href="/user/test">
+      <v-list-item v-show="appStore.devEnv" title="测试" value="test" link href="/test">
         <template #prepend>
           <v-icon>mdi-test-tube</v-icon>
         </template>
