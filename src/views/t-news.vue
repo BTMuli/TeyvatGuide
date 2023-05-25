@@ -1,8 +1,6 @@
 <template>
-  <div v-show="loading">
-    <TLoading :title="loadingTitle" />
-  </div>
-  <div v-show="!loading">
+  <div>
+    <TLoading v-model="loading" :title="loadingTitle" />
     <v-tabs v-model="tab" align-tabs="start" class="news-tab">
       <v-tab value="notice">
         公告

@@ -1,10 +1,8 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <TSwitchTheme />
-  <div v-if="loading">
-    <TLoading :empty="loadingEmpty" :title="loadingTitle" />
-  </div>
-  <div v-else class="mys-post-body" v-html="postHtml" />
+  <TLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
+  <div class="mys-post-body" v-html="postHtml" />
 </template>
 <script lang="ts" setup>
 // vue

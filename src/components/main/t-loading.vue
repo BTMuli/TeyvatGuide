@@ -54,14 +54,14 @@ watch(
   (v) => {
     if (v) {
       showOut.value = true;
-      setTimeout(() => {
-        showIn.value = true;
-      }, 0);
-    } else {
       showIn.value = false;
+    } else {
+      setTimeout(() => {
+        showIn.value = false;
+      }, 100);
       setTimeout(() => {
         showOut.value = false;
-      }, 200);
+      }, 300);
     }
   },
 );

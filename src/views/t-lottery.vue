@@ -1,8 +1,6 @@
 <template>
   <TSwitchTheme />
-  <div v-if="loading">
-    <TLoading :empty="loadingEmpty" :title="loadingTitle" />
-  </div>
+  <TLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
   <div v-else>
     <div class="lottery-div">
       <div class="lottery-title">

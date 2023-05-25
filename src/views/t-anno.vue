@@ -1,10 +1,8 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <TSwitchTheme />
-  <div v-if="loading" class="loading">
-    <TLoading :title="loadingTitle" :empty="loadingEmpty" />
-  </div>
-  <div v-else class="anno-body">
+  <TLoading v-model="loading" :title="loadingTitle" :empty="loadingEmpty" />
+  <div class="anno-body">
     <div class="anno-title">
       {{ annoData.title }}
     </div>
@@ -47,6 +45,7 @@ onMounted(async () => {
   }
   // 获取数据
   loadingTitle.value = "正在获取数据...";
+  loading.value = true;
   try {
     annoData.value = await TGRequest.Anno.getContent(annoId);
     loadingTitle.value = "正在渲染数据...";
@@ -58,7 +57,7 @@ onMounted(async () => {
   }
   setTimeout(() => {
     loading.value = false;
-  }, 200);
+  }, 1200);
 });
 </script>
 <style lang="css" src="../assets/css/anno-parser.css" scoped />

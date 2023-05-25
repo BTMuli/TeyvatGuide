@@ -1,94 +1,90 @@
 <template>
-  <div v-if="loading">
-    <TLoading :title="loadingTitle" />
-  </div>
-  <div v-else>
-    <v-tabs v-model="tab" align-tabs="start" class="anno-tab">
-      <v-tab value="activity">
-        活动公告
-      </v-tab>
-      <v-tab value="game">
-        游戏公告
-      </v-tab>
-      <v-spacer />
-      <v-btn class="switch-btn" @click="switchNews">
-        <template #prepend>
-          <v-icon>mdi-bullhorn</v-icon>
-        </template>
-        切换米游社咨讯
-      </v-btn>
-    </v-tabs>
-    <v-window v-model="tab">
-      <v-window-item value="activity">
-        <div class="anno-grid">
-          <v-card v-for="item in annoCards.activity" :key="item.id" class="anno-card" width="340">
-            <div class="anno-cover" @click="toPost(item)">
-              <img :src="item.banner" alt="cover">
-            </div>
-            <v-card-title>
-              {{ item.title }}
-            </v-card-title>
-            <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
-            <v-card-actions>
-              <v-btn class="anno-btn" @click="toPost(item)">
-                <template #prepend>
-                  <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right">
-                </template>
-                查看
-              </v-btn>
-              <v-card-subtitle v-show="!appStore.devMode">
-                <v-icon>mdi-calendar</v-icon>
-                {{ item.startTime.split(" ")[0] }} -
-                {{ item.endTime.split(" ")[0] }}
-              </v-card-subtitle>
-              <v-card-subtitle v-show="appStore.devMode">
-                id: {{ item.id }}
-              </v-card-subtitle>
-              <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
-                <template #prepend>
-                  <img src="../assets/icons/arrow-right.svg" alt="right">
-                </template>
-                查看数据
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </div>
-      </v-window-item>
-      <v-window-item value="game">
-        <div class="anno-grid">
-          <v-card v-for="item in annoCards.game" :key="item.id" class="anno-card" width="340">
-            <div class="anno-cover" @click="toPost(item)">
-              <img :src="item.banner" alt="cover">
-            </div>
-            <v-card-title>{{ item.title }}</v-card-title>
-            <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
-            <v-card-actions>
-              <v-btn class="anno-btn" @click="toPost(item)">
-                <template #prepend>
-                  <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right">
-                </template>
-                查看
-              </v-btn>
-              <v-card-subtitle v-show="!appStore.devMode">
-                <v-icon>mdi-calendar</v-icon>
-                {{ item.startTime.split(" ")[0] }} -
-                {{ item.endTime.split(" ")[0] }}
-              </v-card-subtitle>
-              <v-card-subtitle v-show="appStore.devMode">
-                id: {{ item.id }}
-              </v-card-subtitle>
-              <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
-                <template #prepend>
-                  <img src="../assets/icons/arrow-right.svg" alt="right">
-                </template>
-                查看数据
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </div>
-      </v-window-item>
-    </v-window>
-  </div>
+  <TLoading v-model="loading" :title="loadingTitle" />
+  <v-tabs v-model="tab" align-tabs="start" class="anno-tab">
+    <v-tab value="activity">
+      活动公告
+    </v-tab>
+    <v-tab value="game">
+      游戏公告
+    </v-tab>
+    <v-spacer />
+    <v-btn class="switch-btn" @click="switchNews">
+      <template #prepend>
+        <v-icon>mdi-bullhorn</v-icon>
+      </template>
+      切换米游社咨讯
+    </v-btn>
+  </v-tabs>
+  <v-window v-model="tab">
+    <v-window-item value="activity">
+      <div class="anno-grid">
+        <v-card v-for="item in annoCards.activity" :key="item.id" class="anno-card" width="340">
+          <div class="anno-cover" @click="toPost(item)">
+            <img :src="item.banner" alt="cover">
+          </div>
+          <v-card-title>
+            {{ item.title }}
+          </v-card-title>
+          <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
+          <v-card-actions>
+            <v-btn class="anno-btn" @click="toPost(item)">
+              <template #prepend>
+                <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right">
+              </template>
+              查看
+            </v-btn>
+            <v-card-subtitle v-show="!appStore.devMode">
+              <v-icon>mdi-calendar</v-icon>
+              {{ item.startTime.split(" ")[0] }} -
+              {{ item.endTime.split(" ")[0] }}
+            </v-card-subtitle>
+            <v-card-subtitle v-show="appStore.devMode">
+              id: {{ item.id }}
+            </v-card-subtitle>
+            <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
+              <template #prepend>
+                <img src="../assets/icons/arrow-right.svg" alt="right">
+              </template>
+              查看数据
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </div>
+    </v-window-item>
+    <v-window-item value="game">
+      <div class="anno-grid">
+        <v-card v-for="item in annoCards.game" :key="item.id" class="anno-card" width="340">
+          <div class="anno-cover" @click="toPost(item)">
+            <img :src="item.banner" alt="cover">
+          </div>
+          <v-card-title>{{ item.title }}</v-card-title>
+          <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
+          <v-card-actions>
+            <v-btn class="anno-btn" @click="toPost(item)">
+              <template #prepend>
+                <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right">
+              </template>
+              查看
+            </v-btn>
+            <v-card-subtitle v-show="!appStore.devMode">
+              <v-icon>mdi-calendar</v-icon>
+              {{ item.startTime.split(" ")[0] }} -
+              {{ item.endTime.split(" ")[0] }}
+            </v-card-subtitle>
+            <v-card-subtitle v-show="appStore.devMode">
+              id: {{ item.id }}
+            </v-card-subtitle>
+            <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
+              <template #prepend>
+                <img src="../assets/icons/arrow-right.svg" alt="right">
+              </template>
+              查看数据
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </div>
+    </v-window-item>
+  </v-window>
 </template>
 
 <script lang="ts" setup>

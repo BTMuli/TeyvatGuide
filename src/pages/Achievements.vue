@@ -22,10 +22,8 @@
       </v-btn>
     </template>
   </v-app-bar>
-  <div v-show="loading">
-    <TLoading :title="loadingTitle" />
-  </div>
-  <div v-show="!loading" class="wrap">
+  <TLoading v-model="loading" :title="loadingTitle" />
+  <div class="wrap">
     <!-- 左侧菜单 -->
     <div class="left-wrap">
       <v-list v-for="series in seriesList" :key="series.id" class="card-left" @click="selectSeries(series.id)">

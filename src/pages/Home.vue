@@ -1,11 +1,11 @@
 <template>
-  <TLoading v-if="loading" :title="loadingTitle" :subtitle="loadingSubtitle" />
-  <component :is="item" v-for="item in components" v-show="!loading" :key="item" :ref="setItemRef" />
+  <TLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSubtitle" />
+  <component :is="item" v-for="item in components" :key="item" :ref="setItemRef" />
 </template>
 
 <script lang="ts" setup>
 // vue
-import { ref, markRaw, onMounted, onUnmounted, onUpdated } from "vue";
+import { markRaw, onMounted, onUnmounted, onUpdated, ref } from "vue";
 import TLoading from "../components/main/t-loading.vue";
 import TPool from "../components/main/t-pool.vue";
 import TPosition from "../components/main/t-position.vue";
@@ -45,6 +45,14 @@ function readLoading (): void {
 
 onMounted(async () => {
   loadingTitle.value = "正在加载首页";
+  loading.value = true;
+  // 获取当前环境
+  const timeGet = getBuildTime();
+  appStore.devEnv = timeGet.startsWith("dev");
+  if (!appStore.devEnv && appStore.devMode) {
+    appStore.devMode = false;
+  }
+  appStore.buildTime = getBuildTime();
   const showItems = homeStore.getShowValue();
   await Promise.allSettled(
     showItems.map((item) => {
@@ -61,13 +69,6 @@ onMounted(async () => {
     }),
   );
   timer.value = setInterval(readLoading, 100);
-  // 获取当前环境
-  const timeGet = getBuildTime();
-  appStore.devEnv = timeGet.startsWith("dev");
-  if (!appStore.devEnv && appStore.devMode) {
-    appStore.devMode = false;
-  }
-  appStore.buildTime = getBuildTime();
 });
 
 function setItemRef (item: any) {

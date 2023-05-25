@@ -1,9 +1,7 @@
 <template>
   <TSwitchTheme />
-  <div v-if="loading">
-    <TLoading :empty="loadingEmpty" :title="loadingTitle" />
-  </div>
-  <div v-else class="post-json">
+  <TLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
+  <div class="post-json">
     <div class="post-title">
       帖子返回内容 JSON
     </div>
