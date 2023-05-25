@@ -10,7 +10,7 @@ html.dark {
   --sidebar-bg: #1e1e1e;
   --sidebar-icon: #e1e1e1;
   --page-bg:#2a2a2a;
-  --scroll-bg: #ECE5D8;
+  --scroll-bg: rgba(0, 0, 0, 0.5);
   --calendar-btn-bg: #1e1e1e;
   --back-top-shadow: #000000;
   --theme-switch-icon: #e1e1e1;

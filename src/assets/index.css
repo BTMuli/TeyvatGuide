@@ -20,6 +20,7 @@ html {
 
 ::-webkit-scrollbar-track {
   background: var(--scroll-bg);
+  box-shadow: inset 0 0 5px var(--scroll-bg);
   border-radius: 5px;
 }
 

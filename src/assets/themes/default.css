@@ -10,7 +10,7 @@ html.default {
   --sidebar-bg: #485466;
   --sidebar-icon: #ece5d8;
   --page-bg:#ece5d8;
-  --scroll-bg: #2A2A2A;
+  --scroll-bg: rgba(0, 0, 0, 0.2);
   --calendar-btn-bg: #393b40;
   --back-top-shadow: #546d8b;
   --theme-switch-icon: #393b40;
