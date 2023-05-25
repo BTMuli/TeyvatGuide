@@ -1,52 +1,133 @@
 <template>
-  <div class="loading-div">
-    <div class="loading-content">
-      <div class="loading-title">
-        {{ title }}
-        <v-progress-circular v-show="!empty" indeterminate color="#f4d8a8" />
-      </div>
-      <div v-if="subtitle !== ''" class="loading-subtitle">
-        {{ subtitle }}
-      </div>
-      <div v-if="!empty" class="loading-img">
-        <img src="/source/UI/loading.webp" alt="loading">
-      </div>
-      <div v-else class="loading-img">
-        <img src="/source/UI/empty.webp" alt="empty">
-      </div>
-      <div v-if="content !== ''" class="loading-text">
-        {{ content }}
-      </div>
+  <transition enter-from-class="out-enter-from" name="out">
+    <div v-show="showOut" class="loading-box">
+      <transition enter-from-class="in-enter-from" name="in">
+        <div v-show="showIn" class="loading-div">
+          <div class="loading-content">
+            <div class="loading-title">
+              {{ title }}
+              <v-progress-circular v-show="!empty" indeterminate color="#f4d8a8" />
+            </div>
+            <div v-if="subtitle !== ''" class="loading-subtitle">
+              {{ subtitle }}
+            </div>
+            <div v-if="!empty" class="loading-img">
+              <img src="/source/UI/loading.webp" alt="loading">
+            </div>
+            <div v-else class="loading-img">
+              <img src="/source/UI/empty.webp" alt="empty">
+            </div>
+            <div v-if="content !== ''" class="loading-text">
+              {{ content }}
+            </div>
+          </div>
+        </div>
+      </transition>
     </div>
-  </div>
+  </transition>
 </template>
 <script lang="ts" setup>
+// vue
+import { ref, watch } from "vue";
+
 interface LoadingProps {
+  modelValue: boolean;
   title?: string;
   subtitle?: string;
   content?: string;
   empty?: boolean;
-  position?: string;
 }
 
-withDefaults(defineProps<LoadingProps>(), {
+const showOut = ref(false);
+const showIn = ref(false);
+
+const props = withDefaults(defineProps<LoadingProps>(), {
+  modelValue: false,
   title: "加载中",
   subtitle: "",
   content: "",
   empty: false,
-  position: "absolute",
 });
+
+watch(
+  () => props.modelValue,
+  (v) => {
+    if (v) {
+      showOut.value = true;
+      setTimeout(() => {
+        showIn.value = true;
+      }, 0);
+    } else {
+      showIn.value = false;
+      setTimeout(() => {
+        showOut.value = false;
+      }, 200);
+    }
+  },
+);
+
 </script>
 <style lang="css" scoped>
-.loading-div {
-  position: v-bind(position);
+.out-enter-active,
+.out-leave-active,
+.in-enter-active {
+  transition: all 0.3s;
+}
+
+.in-leave-active {
+  transition: all 0.5s ease-in-out;
+}
+
+.out-enter-from,
+.in-enter-from {
+  opacity: 0;
+  transform: scale(1.5);
+}
+
+.out-enter-to,
+.in-enter-to {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.out-leave-from {
+  opacity: 1;
+}
+
+.out-leave-to {
+  opacity: 0;
+}
+
+.in-leave-from {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.in-leave-to {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.loading-box {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
-  top: 25%;
-  left: 25%;
+  justify-content: center;
+  align-items: center;
+  background: rgb(0 0 0 / 50%);
+  backdrop-filter: blur(20px);
+  z-index: 100;
+}
+
+.loading-div {
+  display: flex;
   width: 50%;
   height: 50%;
-  background: rgb(57 59 64 / 50%);
-  backdrop-filter: blur(10px);
+  background: rgb(255 255 255 / 10%);
+  box-shadow: 0 0 10px rgb(0 0 0 / 40%);
   border-radius: 20px;
 }
 
