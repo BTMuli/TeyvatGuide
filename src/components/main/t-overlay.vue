@@ -1,6 +1,6 @@
 <template>
   <transition enter-from-class="tolo-enter-from" name="tolo">
-    <div v-show="showTolo" class="tolo-box" @click="toClick">
+    <div v-show="showTolo" class="tolo-box" @click.self.prevent="toClick">
       <transition enter-from-class="toli-enter-from" name="toli">
         <slot v-if="showToli" />
       </transition>
