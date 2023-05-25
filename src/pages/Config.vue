@@ -143,7 +143,6 @@
           </v-icon>
         </template>
       </v-list-item>
-      <v-list-item title="删除 IndexedDB" prepend-icon="mdi-delete" @click="tryConfirm('delDB')" />
       <v-list-item title="重置数据库" prepend-icon="mdi-delete" @click="tryConfirm('resetDB')" />
       <v-list-item title="检测 SQLite 数据库完整性" prepend-icon="mdi-database-check" @click="tryConfirm('checkDB')" />
       <v-list-subheader inset class="config-header">
@@ -297,12 +296,6 @@ function tryConfirm (oper: string) {
       confirmOper.value = "inputCookie";
       confirmShow.value = true;
       break;
-    case "delDB":
-      confirmText.value = "确认清除 IndexedDB 吗？";
-      confirmSub.value = "Alpha v0.1.4 后不再支持 IndexedDB";
-      confirmOper.value = "delDB";
-      confirmShow.value = true;
-      break;
     case "checkDB":
       confirmText.value = "将检测数据库表单完整性";
       confirmSub.value = "数据库版本与更新时间也会进行检测";
@@ -344,9 +337,6 @@ async function doConfirm (oper: string) {
       break;
     case "inputCookie":
       await inputCookie();
-      break;
-    case "delDB":
-      delDB();
       break;
     case "checkDB":
       await checkDB();
@@ -560,14 +550,6 @@ async function inputCookie () {
     snackbarColor.value = "error";
     snackbar.value = true;
   }
-}
-
-// 删除 IndexedDB
-function delDB () {
-  window.indexedDB.deleteDatabase("TGData");
-  snackbarText.value = "IndexedDB 已清除!若无法正常使用，请初始化配置。";
-  snackbarColor.value = "success";
-  snackbar.value = true;
 }
 
 // 检查 SQLite 数据库
