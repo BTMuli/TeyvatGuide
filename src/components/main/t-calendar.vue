@@ -56,62 +56,17 @@
         </div>
       </div>
     </div>
-    <v-snackbar v-model="snackbar" :timeout="1500" :color="snackbarColor">
-      {{ snackbarText }}
-    </v-snackbar>
-    <v-overlay v-model="showItem">
-      <div class="calendar-item-box">
-        <div class="calendar-item-top">
-          <div class="calendar-item-icon">
-            <TMiniAvatar v-if="selectedType=== 'character'" :model-value="selectedItem" size="100px" />
-            <TMiniWeapon v-if="selectedType=== 'weapon'" :model-value="selectedItem" size="100px" />
-          </div>
-          <div class="calendar-item-content">
-            <div v-for="item in selectedItem.materials" class="calendar-item-sub">
-              <TCalendarMaterial :item="item" />
-            </div>
-          </div>
-        </div>
-        <div class="calendar-item-line">
-          <img src="/source/UI/item-line.webp" alt="line">
-        </div>
-        <div class="calendar-item-bottom">
-          <div class="calendar-item-source">
-            <div class="calendar-source-text">
-              来源：
-            </div>
-            <img :src="`/icon/nation/${selectedItem.source.area}.webp`" alt="icon">
-            <div class="calendar-source-text">
-              {{ selectedItem.source.area }} - {{ selectedItem.source.name }}
-            </div>
-          </div>
-          <div class="detail-btn">
-            <v-btn @click="showDetail(selectedItem)">
-              <template #append>
-                <img src="../../assets/icons/arrow-right.svg" alt="right">
-              </template>
-              详情
-            </v-btn>
-          </div>
-        </div>
-      </div>
-      <div class="calendar-item-close" @click="showItem = false">
-        <v-icon>mdi-close</v-icon>
-      </div>
-    </v-overlay>
+    <ToCalendar v-model="showItem" :data-type="selectedType" :data-val="selectedItem" />
   </div>
 </template>
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
+import ToCalendar from "../overlay/to-calendar.vue";
 import TMiniAvatar from "../mini/t-mini-avatar.vue";
 import TMiniWeapon from "../mini/t-mini-weapon.vue";
-import TCalendarMaterial from "../mini/t-calendar-material.vue";
 // data
 import { AppCalendarData } from "../../data";
-// interface
-import { OBC_CONTENT_API } from "../../plugins/Mys/interface/utils";
-import { createTGWindow } from "../../utils/TGWindow";
 
 // loading
 const loading = ref(true as boolean);
@@ -131,11 +86,6 @@ const weaponCards = ref([] as TGApp.App.Calendar.Item[]);
 const showItem = ref(false as boolean);
 const selectedItem = ref({} as TGApp.App.Calendar.Item);
 const selectedType = ref("character");
-
-// snackbar
-const snackbar = ref(false as boolean);
-const snackbarText = ref("" as string);
-const snackbarColor = ref("success" as string);
 
 const btnText = [
   {
@@ -192,17 +142,6 @@ function selectContent (item: TGApp.App.Calendar.Item, type: string) {
   selectedItem.value = item;
   selectedType.value = type;
   showItem.value = true;
-}
-
-function showDetail (item: TGApp.App.Calendar.Item) {
-  if (item.contentId === 0) {
-    snackbarText.value = "暂无详情";
-    snackbarColor.value = "error";
-    snackbar.value = true;
-    return;
-  }
-  const url = OBC_CONTENT_API.replace("{content_id}", item.contentId.toString());
-  createTGWindow(url, "素材详情", item.name, 1200, 800, true);
 }
 
 function getContents (day: number) {
@@ -286,130 +225,5 @@ function getContents (day: number) {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     grid-gap: 8px;
-}
-
-/* overlay 盒子 */
-.calendar-item-box {
-    position: absolute;
-    width: 440px;
-    height: 200px;
-    color: #faf7e8;
-    top: calc(50vh - 100px);
-    left: calc(50vw - 220px);
-    background: var(--content-bg-2);
-    border-radius: 10px;
-    padding: 10px;
-    align-items: center;
-}
-
-.calendar-item-top {
-  height: 100px;
-  width: 100%;
-  display: flex;
-}
-
-.calendar-item-icon {
-    height: 100px;
-    width: 100px;
-}
-
-.calendar-item-content {
-    margin-left: 10px;
-    font-family: Genshin, serif;
-    color: var(--content-bg-1);
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    column-gap: 10px;
-		row-gap: 10px;
-}
-
-.calendar-item-sub {
-  width: 150px;
-  height: 45px;
-	border-radius: 10px;
-}
-
-.calendar-item-sub img {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-.calendar-item-line {
-    width: 420px;
-}
-
-.calendar-item-line img {
-    width: 100%;
-    height: auto;
-}
-
-.calendar-item-bottom {
-  background: rgb(0 0 0 / 30%);
-  padding: 3px 10px;
-  width: 420px;
-  height: 56px;
-  border-radius: 5px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.calendar-item-bottom img {
-  width: 50px;
-  height: 50px;
-}
-
-.calendar-item-source {
-  width: 300px;
-  height: 50px;
-  display: flex;
-  justify-content: left;
-  align-items: center;
-}
-
-.calendar-source-text {
-  height: 50px;
-  font-size: 20px;
-  font-family: Genshin-Light, serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.detail-btn {
-  font-family: Genshin, serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-  border-radius: 5px;
-  transition: all 0.3s linear;
-}
-
-.detail-btn button {
-  background: var(--btn-bg-1);
-  color: #faf7e8;
-}
-
-.detail-btn button img {
-  width: 18px;
-  height: 18px;
-}
-
-.calendar-item-close {
-    position: absolute;
-    top: calc(50vh + 120px);
-    left: calc(50vw - 15px);
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    background: var(--content-bg-2);
-    color: #546D8B;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 </style>
