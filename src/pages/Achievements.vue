@@ -321,27 +321,23 @@ async function exportJson () {
 /* 内容区域 */
 .wrap {
   display: flex;
-  flex-direction: row;
-  overflow: auto;
-  max-height: 90vh;
-  font-family: Genshin-Light, serif;
+  justify-content: space-between;
 }
 
 /* 左侧系列 */
 .left-wrap {
-  float: left;
-  width: 25%;
-  max-height: calc(100vh - 100px);
-  overflow: auto;
+  width: 400px;
+  height: calc(100vh - 100px);
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 /* 右侧成就 */
 .right-wrap {
-  position: relative;
-  float: right;
-  width: 75%;
-  max-height: calc(100vh - 100px);
-  overflow: auto;
+  width: calc(100% - 410px);
+  height: calc(100vh - 100px);
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .list-empty {
