@@ -54,7 +54,7 @@
 	{
 		"id": 11502,
 		"contentId": 215,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "天空之刃",
 		"itemType": "weapon",
 		"star": 5,
@@ -158,7 +158,7 @@
 	{
 		"id": 11504,
 		"contentId": 1356,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "斫峰之刃",
 		"itemType": "weapon",
 		"star": 5,
@@ -210,7 +210,7 @@
 	{
 		"id": 11505,
 		"contentId": 1497,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "磐岩结绿",
 		"itemType": "weapon",
 		"star": 5,
@@ -366,7 +366,7 @@
 	{
 		"id": 11511,
 		"contentId": 5018,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "圣显之钥",
 		"itemType": "weapon",
 		"star": 5,
@@ -418,7 +418,7 @@
 	{
 		"id": 11512,
 		"contentId": 5887,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "裁叶萃光",
 		"itemType": "weapon",
 		"star": 5,
@@ -470,7 +470,7 @@
 	{
 		"id": 12501,
 		"contentId": 291,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "天空之傲",
 		"itemType": "weapon",
 		"star": 5,
@@ -522,7 +522,7 @@
 	{
 		"id": 12502,
 		"contentId": 218,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "狼的末路",
 		"itemType": "weapon",
 		"star": 5,
@@ -626,7 +626,7 @@
 	{
 		"id": 12504,
 		"contentId": 1288,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "无工之剑",
 		"itemType": "weapon",
 		"star": 5,
@@ -730,7 +730,7 @@
 	{
 		"id": 12511,
 		"contentId": 6179,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "苇海信标",
 		"itemType": "weapon",
 		"star": 5,
@@ -782,7 +782,7 @@
 	{
 		"id": 13501,
 		"contentId": 1612,
-		"dropDays": [7, 3, 6],
+		"dropDays": [3, 6, 7],
 		"name": "护摩之杖",
 		"itemType": "weapon",
 		"star": 5,
@@ -826,7 +826,7 @@
 	{
 		"id": 13502,
 		"contentId": 1077,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "天空之脊",
 		"itemType": "weapon",
 		"star": 5,
@@ -922,7 +922,7 @@
 	{
 		"id": 13505,
 		"contentId": 296,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "和璞鸢",
 		"itemType": "weapon",
 		"star": 5,
@@ -1130,7 +1130,7 @@
 	{
 		"id": 14501,
 		"contentId": 227,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "天空之卷",
 		"itemType": "weapon",
 		"star": 5,
@@ -1182,7 +1182,7 @@
 	{
 		"id": 14502,
 		"contentId": 297,
-		"dropDays": [7, 3, 6],
+		"dropDays": [3, 6, 7],
 		"name": "四风原典",
 		"itemType": "weapon",
 		"star": 5,
@@ -1278,7 +1278,7 @@
 	{
 		"id": 14505,
 		"contentId": 6488,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "碧落之珑",
 		"itemType": "weapon",
 		"star": 5,
@@ -1330,7 +1330,7 @@
 	{
 		"id": 14506,
 		"contentId": 2807,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "不灭月华",
 		"itemType": "weapon",
 		"star": 5,
@@ -1434,7 +1434,7 @@
 	{
 		"id": 14511,
 		"contentId": 5110,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "千夜浮梦",
 		"itemType": "weapon",
 		"star": 5,
@@ -1538,7 +1538,7 @@
 	{
 		"id": 15501,
 		"contentId": 323,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "天空之翼",
 		"itemType": "weapon",
 		"star": 5,
@@ -1746,7 +1746,7 @@
 	{
 		"id": 15508,
 		"contentId": 4082,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "若水",
 		"itemType": "weapon",
 		"star": 5,
@@ -1798,7 +1798,7 @@
 	{
 		"id": 15509,
 		"contentId": 2555,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "飞雷之弦振",
 		"itemType": "weapon",
 		"star": 5,
@@ -1902,7 +1902,7 @@
 	{
 		"id": 10000002,
 		"contentId": 2123,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "神里绫华",
 		"itemType": "character",
 		"star": 5,
@@ -1946,7 +1946,7 @@
 	{
 		"id": 10000003,
 		"contentId": 59,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "琴",
 		"itemType": "character",
 		"star": 5,
@@ -1990,7 +1990,7 @@
 	{
 		"id": 10000016,
 		"contentId": 75,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "迪卢克",
 		"itemType": "character",
 		"star": 5,
@@ -2034,7 +2034,7 @@
 	{
 		"id": 10000022,
 		"contentId": 57,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "温迪",
 		"itemType": "character",
 		"star": 5,
@@ -2078,7 +2078,7 @@
 	{
 		"id": 10000026,
 		"contentId": 1498,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "魈",
 		"itemType": "character",
 		"star": 5,
@@ -2210,7 +2210,7 @@
 	{
 		"id": 10000033,
 		"contentId": 1220,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "达达利亚",
 		"itemType": "character",
 		"star": 5,
@@ -2342,7 +2342,7 @@
 	{
 		"id": 10000038,
 		"contentId": 1360,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "阿贝多",
 		"itemType": "character",
 		"star": 5,
@@ -2430,7 +2430,7 @@
 	{
 		"id": 10000042,
 		"contentId": 1058,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "刻晴",
 		"itemType": "character",
 		"star": 5,
@@ -2518,7 +2518,7 @@
 	{
 		"id": 10000047,
 		"contentId": 2142,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "枫原万叶",
 		"itemType": "character",
 		"star": 5,
@@ -2562,7 +2562,7 @@
 	{
 		"id": 10000049,
 		"contentId": 2124,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "宵宫",
 		"itemType": "character",
 		"star": 5,
@@ -2606,7 +2606,7 @@
 	{
 		"id": 10000051,
 		"contentId": 2040,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "优菈",
 		"itemType": "character",
 		"star": 5,
@@ -2694,7 +2694,7 @@
 	{
 		"id": 10000054,
 		"contentId": 2403,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "珊瑚宫心海",
 		"itemType": "character",
 		"star": 5,
@@ -2738,7 +2738,7 @@
 	{
 		"id": 10000057,
 		"contentId": 3276,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "荒泷一斗",
 		"itemType": "character",
 		"star": 5,
@@ -2782,7 +2782,7 @@
 	{
 		"id": 10000058,
 		"contentId": 3564,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "八重神子",
 		"itemType": "character",
 		"star": 5,
@@ -2870,7 +2870,7 @@
 	{
 		"id": 10000062,
 		"contentId": 2415,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "埃洛伊",
 		"itemType": "character",
 		"star": 5,
@@ -2914,7 +2914,7 @@
 	{
 		"id": 10000063,
 		"contentId": 3386,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "申鹤",
 		"itemType": "character",
 		"star": 5,
@@ -2958,7 +2958,7 @@
 	{
 		"id": 10000066,
 		"contentId": 3875,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "神里绫人",
 		"itemType": "character",
 		"star": 5,
@@ -3046,7 +3046,7 @@
 	{
 		"id": 10000070,
 		"contentId": 5020,
-		"dropDays": [7, 3, 6],
+		"dropDays": [3, 6, 7],
 		"name": "妮露",
 		"itemType": "character",
 		"star": 5,
@@ -3178,7 +3178,7 @@
 	{
 		"id": 10000075,
 		"contentId": 5494,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "流浪者",
 		"itemType": "character",
 		"star": 5,
@@ -3222,7 +3222,7 @@
 	{
 		"id": 10000078,
 		"contentId": 5865,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "艾尔海森",
 		"itemType": "character",
 		"star": 5,
@@ -3266,7 +3266,7 @@
 	{
 		"id": 10000079,
 		"contentId": 6180,
-		"dropDays": [7, 3, 6],
+		"dropDays": [3, 6, 7],
 		"name": "迪希雅",
 		"itemType": "character",
 		"star": 5,
@@ -3354,7 +3354,7 @@
 	{
 		"id": 11401,
 		"contentId": 208,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "西风剑",
 		"itemType": "weapon",
 		"star": 4,
@@ -3458,7 +3458,7 @@
 	{
 		"id": 11403,
 		"contentId": 239,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "祭礼剑",
 		"itemType": "weapon",
 		"star": 4,
@@ -3510,7 +3510,7 @@
 	{
 		"id": 11404,
 		"contentId": 199,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "宗室长剑",
 		"itemType": "weapon",
 		"star": 4,
@@ -3562,7 +3562,7 @@
 	{
 		"id": 11405,
 		"contentId": 141,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "匣里龙吟",
 		"itemType": "weapon",
 		"star": 4,
@@ -3666,7 +3666,7 @@
 	{
 		"id": 11407,
 		"contentId": 175,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "铁蜂刺",
 		"itemType": "weapon",
 		"star": 4,
@@ -3710,7 +3710,7 @@
 	{
 		"id": 11408,
 		"contentId": 289,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "黑岩长剑",
 		"itemType": "weapon",
 		"star": 4,
@@ -3762,7 +3762,7 @@
 	{
 		"id": 11409,
 		"contentId": 942,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "黑剑",
 		"itemType": "weapon",
 		"star": 4,
@@ -3866,7 +3866,7 @@
 	{
 		"id": 11413,
 		"contentId": 1361,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "腐殖之剑",
 		"itemType": "weapon",
 		"star": 4,
@@ -3918,7 +3918,7 @@
 	{
 		"id": 11414,
 		"contentId": 2307,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "天目影打刀",
 		"itemType": "weapon",
 		"star": 4,
@@ -3970,7 +3970,7 @@
 	{
 		"id": 11415,
 		"contentId": 3170,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "辰砂之纺锤",
 		"itemType": "weapon",
 		"star": 4,
@@ -4074,7 +4074,7 @@
 	{
 		"id": 11417,
 		"contentId": 4440,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "原木刀",
 		"itemType": "weapon",
 		"star": 4,
@@ -4126,7 +4126,7 @@
 	{
 		"id": 11418,
 		"contentId": 5019,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "西福斯的月光",
 		"itemType": "weapon",
 		"star": 4,
@@ -4230,7 +4230,7 @@
 	{
 		"id": 12401,
 		"contentId": 174,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "西风大剑",
 		"itemType": "weapon",
 		"star": 4,
@@ -4282,7 +4282,7 @@
 	{
 		"id": 12402,
 		"contentId": 214,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "钟剑",
 		"itemType": "weapon",
 		"star": 4,
@@ -4438,7 +4438,7 @@
 	{
 		"id": 12405,
 		"contentId": 180,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "雨裁",
 		"itemType": "weapon",
 		"star": 4,
@@ -4490,7 +4490,7 @@
 	{
 		"id": 12406,
 		"contentId": 144,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "试作古华",
 		"itemType": "weapon",
 		"star": 4,
@@ -4534,7 +4534,7 @@
 	{
 		"id": 12407,
 		"contentId": 290,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "白影剑",
 		"itemType": "weapon",
 		"star": 4,
@@ -4586,7 +4586,7 @@
 	{
 		"id": 12408,
 		"contentId": 704,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "黑岩斩刀",
 		"itemType": "weapon",
 		"star": 4,
@@ -4638,7 +4638,7 @@
 	{
 		"id": 12409,
 		"contentId": 995,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "螭骨剑",
 		"itemType": "weapon",
 		"star": 4,
@@ -4682,7 +4682,7 @@
 	{
 		"id": 12410,
 		"contentId": 1611,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "千岩古剑",
 		"itemType": "weapon",
 		"star": 4,
@@ -4734,7 +4734,7 @@
 	{
 		"id": 12411,
 		"contentId": 1362,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "雪葬的星银",
 		"itemType": "weapon",
 		"star": 4,
@@ -4786,7 +4786,7 @@
 	{
 		"id": 12414,
 		"contentId": 2302,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "桂木斩长正",
 		"itemType": "weapon",
 		"star": 4,
@@ -4890,7 +4890,7 @@
 	{
 		"id": 12416,
 		"contentId": 2904,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "恶王丸",
 		"itemType": "weapon",
 		"star": 4,
@@ -4994,7 +4994,7 @@
 	{
 		"id": 12418,
 		"contentId": 6234,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "饰铁之花",
 		"itemType": "weapon",
 		"star": 4,
@@ -5046,7 +5046,7 @@
 	{
 		"id": 13401,
 		"contentId": 171,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "匣里灭辰",
 		"itemType": "weapon",
 		"star": 4,
@@ -5098,7 +5098,7 @@
 	{
 		"id": 13402,
 		"contentId": 393,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "试作星镰",
 		"itemType": "weapon",
 		"star": 4,
@@ -5142,7 +5142,7 @@
 	{
 		"id": 13403,
 		"contentId": 321,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "流月针",
 		"itemType": "weapon",
 		"star": 4,
@@ -5394,7 +5394,7 @@
 	{
 		"id": 13408,
 		"contentId": 1287,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "宗室猎枪",
 		"itemType": "weapon",
 		"star": 4,
@@ -5446,7 +5446,7 @@
 	{
 		"id": 13409,
 		"contentId": 1363,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "龙脊长枪",
 		"itemType": "weapon",
 		"star": 4,
@@ -5550,7 +5550,7 @@
 	{
 		"id": 13415,
 		"contentId": 2604,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "「渔获」",
 		"itemType": "weapon",
 		"star": 4,
@@ -5810,7 +5810,7 @@
 	{
 		"id": 14402,
 		"contentId": 192,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "流浪乐章",
 		"itemType": "weapon",
 		"star": 4,
@@ -5862,7 +5862,7 @@
 	{
 		"id": 14403,
 		"contentId": 197,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "祭礼残章",
 		"itemType": "weapon",
 		"star": 4,
@@ -5914,7 +5914,7 @@
 	{
 		"id": 14404,
 		"contentId": 194,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "宗室秘法录",
 		"itemType": "weapon",
 		"star": 4,
@@ -5966,7 +5966,7 @@
 	{
 		"id": 14405,
 		"contentId": 217,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "匣里日月",
 		"itemType": "weapon",
 		"star": 4,
@@ -6018,7 +6018,7 @@
 	{
 		"id": 14406,
 		"contentId": 319,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "试作金珀",
 		"itemType": "weapon",
 		"star": 4,
@@ -6114,7 +6114,7 @@
 	{
 		"id": 14408,
 		"contentId": 193,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "黑岩绯玉",
 		"itemType": "weapon",
 		"star": 4,
@@ -6166,7 +6166,7 @@
 	{
 		"id": 14409,
 		"contentId": 690,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "昭心",
 		"itemType": "weapon",
 		"star": 4,
@@ -6218,7 +6218,7 @@
 	{
 		"id": 14410,
 		"contentId": 1685,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "暗巷的酒与诗",
 		"itemType": "weapon",
 		"star": 4,
@@ -6270,7 +6270,7 @@
 	{
 		"id": 14412,
 		"contentId": 1377,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "忍冬之果",
 		"itemType": "weapon",
 		"star": 4,
@@ -6322,7 +6322,7 @@
 	{
 		"id": 14413,
 		"contentId": 2141,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "嘟嘟可故事集",
 		"itemType": "weapon",
 		"star": 4,
@@ -6374,7 +6374,7 @@
 	{
 		"id": 14414,
 		"contentId": 2288,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "白辰之环",
 		"itemType": "weapon",
 		"star": 4,
@@ -6426,7 +6426,7 @@
 	{
 		"id": 14415,
 		"contentId": 3611,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "证誓之明瞳",
 		"itemType": "weapon",
 		"star": 4,
@@ -6478,7 +6478,7 @@
 	{
 		"id": 14416,
 		"contentId": 5017,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "流浪的晚星",
 		"itemType": "weapon",
 		"star": 4,
@@ -6530,7 +6530,7 @@
 	{
 		"id": 14417,
 		"contentId": 4444,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "盈满之实",
 		"itemType": "weapon",
 		"star": 4,
@@ -6634,7 +6634,7 @@
 	{
 		"id": 15402,
 		"contentId": 176,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "绝弦",
 		"itemType": "weapon",
 		"star": 4,
@@ -6686,7 +6686,7 @@
 	{
 		"id": 15403,
 		"contentId": 177,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "祭礼弓",
 		"itemType": "weapon",
 		"star": 4,
@@ -6790,7 +6790,7 @@
 	{
 		"id": 15405,
 		"contentId": 181,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "弓藏",
 		"itemType": "weapon",
 		"star": 4,
@@ -6842,7 +6842,7 @@
 	{
 		"id": 15406,
 		"contentId": 240,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "试作澹月",
 		"itemType": "weapon",
 		"star": 4,
@@ -6938,7 +6938,7 @@
 	{
 		"id": 15408,
 		"contentId": 694,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "黑岩战弓",
 		"itemType": "weapon",
 		"star": 4,
@@ -7138,7 +7138,7 @@
 	{
 		"id": 15412,
 		"contentId": 2127,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "幽夜华尔兹",
 		"itemType": "weapon",
 		"star": 4,
@@ -7242,7 +7242,7 @@
 	{
 		"id": 15414,
 		"contentId": 2287,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "破魔之弓",
 		"itemType": "weapon",
 		"star": 4,
@@ -7398,7 +7398,7 @@
 	{
 		"id": 15418,
 		"contentId": 4437,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "竭泽",
 		"itemType": "weapon",
 		"star": 4,
@@ -7450,7 +7450,7 @@
 	{
 		"id": 10000006,
 		"contentId": 92,
-		"dropDays": [7, 3, 6],
+		"dropDays": [3, 6, 7],
 		"name": "丽莎",
 		"itemType": "character",
 		"star": 4,
@@ -7494,7 +7494,7 @@
 	{
 		"id": 10000014,
 		"contentId": 61,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "芭芭拉",
 		"itemType": "character",
 		"star": 4,
@@ -7538,7 +7538,7 @@
 	{
 		"id": 10000015,
 		"contentId": 76,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "凯亚",
 		"itemType": "character",
 		"star": 4,
@@ -7582,7 +7582,7 @@
 	{
 		"id": 10000020,
 		"contentId": 56,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "雷泽",
 		"itemType": "character",
 		"star": 4,
@@ -7626,7 +7626,7 @@
 	{
 		"id": 10000021,
 		"contentId": 54,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "安柏",
 		"itemType": "character",
 		"star": 4,
@@ -7670,7 +7670,7 @@
 	{
 		"id": 10000023,
 		"contentId": 112,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "香菱",
 		"itemType": "character",
 		"star": 4,
@@ -7758,7 +7758,7 @@
 	{
 		"id": 10000025,
 		"contentId": 241,
-		"dropDays": [7, 3, 6],
+		"dropDays": [3, 6, 7],
 		"name": "行秋",
 		"itemType": "character",
 		"star": 4,
@@ -7846,7 +7846,7 @@
 	{
 		"id": 10000031,
 		"contentId": 382,
-		"dropDays": [7, 3, 6],
+		"dropDays": [3, 6, 7],
 		"name": "菲谢尔",
 		"itemType": "character",
 		"star": 4,
@@ -7890,7 +7890,7 @@
 	{
 		"id": 10000032,
 		"contentId": 105,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "班尼特",
 		"itemType": "character",
 		"star": 4,
@@ -8022,7 +8022,7 @@
 	{
 		"id": 10000039,
 		"contentId": 1221,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "迪奥娜",
 		"itemType": "character",
 		"star": 4,
@@ -8154,7 +8154,7 @@
 	{
 		"id": 10000045,
 		"contentId": 1744,
-		"dropDays": [7, 3, 6],
+		"dropDays": [3, 6, 7],
 		"name": "罗莎莉亚",
 		"itemType": "character",
 		"star": 4,
@@ -8374,7 +8374,7 @@
 	{
 		"id": 10000056,
 		"contentId": 2402,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "九条裟罗",
 		"itemType": "character",
 		"star": 4,
@@ -8418,7 +8418,7 @@
 	{
 		"id": 10000059,
 		"contentId": 4197,
-		"dropDays": [7, 1, 4],
+		"dropDays": [1, 4, 7],
 		"name": "鹿野院平藏",
 		"itemType": "character",
 		"star": 4,
@@ -8460,9 +8460,53 @@
 		}
 	},
 	{
+		"id": 10000061,
+		"contentId": 6594,
+		"dropDays": [1, 4, 7],
+		"name": "绮良良",
+		"itemType": "character",
+		"star": 4,
+		"bg": "/icon/bg/4-Star.webp",
+		"starIcon": "/icon/star/4.webp",
+		"elementIcon": "/icon/element/草元素.webp",
+		"weaponIcon": "/icon/weapon/单手剑.webp",
+		"icon": "/WIKI/character/icon/10000061.webp",
+		"materials": [
+			{
+				"id": 104322,
+				"name": "「浮世」的哲学",
+				"star": 4,
+				"starIcon": "/icon/star/4.webp",
+				"bg": "/icon/bg/4-Star.webp",
+				"icon": "/icon/material/104322.webp"
+			},
+			{
+				"id": 104321,
+				"name": "「浮世」的指引",
+				"star": 3,
+				"starIcon": "/icon/star/3.webp",
+				"bg": "/icon/bg/3-Star.webp",
+				"icon": "/icon/material/104321.webp"
+			},
+			{
+				"id": 104320,
+				"name": "「浮世」的教导",
+				"star": 2,
+				"starIcon": "/icon/star/2.webp",
+				"bg": "/icon/bg/2-Star.webp",
+				"icon": "/icon/material/104320.webp"
+			}
+		],
+		"source": {
+			"area": "稻妻",
+			"name": "菫色之庭",
+			"icon": "/icon/nation/稻妻.webp"
+		}
+	},
+	{
 		"id": 10000064,
 		"contentId": 3387,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "云堇",
 		"itemType": "character",
 		"star": 4,
@@ -8506,7 +8550,7 @@
 	{
 		"id": 10000065,
 		"contentId": 4148,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "久岐忍",
 		"itemType": "character",
 		"star": 4,
@@ -8550,7 +8594,7 @@
 	{
 		"id": 10000067,
 		"contentId": 4333,
-		"dropDays": [6, 7, 3],
+		"dropDays": [3, 6, 7],
 		"name": "柯莱",
 		"itemType": "character",
 		"star": 4,
@@ -8594,7 +8638,7 @@
 	{
 		"id": 10000068,
 		"contentId": 4736,
-		"dropDays": [7, 2, 5],
+		"dropDays": [2, 5, 7],
 		"name": "多莉",
 		"itemType": "character",
 		"star": 4,
@@ -8638,7 +8682,7 @@
 	{
 		"id": 10000072,
 		"contentId": 4781,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "坎蒂丝",
 		"itemType": "character",
 		"star": 4,
@@ -8682,7 +8726,7 @@
 	{
 		"id": 10000074,
 		"contentId": 5297,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "莱依拉",
 		"itemType": "character",
 		"star": 4,
@@ -8726,7 +8770,7 @@
 	{
 		"id": 10000076,
 		"contentId": 5493,
-		"dropDays": [4, 7, 1],
+		"dropDays": [1, 4, 7],
 		"name": "珐露珊",
 		"itemType": "character",
 		"star": 4,
@@ -8814,7 +8858,7 @@
 	{
 		"id": 10000080,
 		"contentId": 6285,
-		"dropDays": [6, 3],
+		"dropDays": [3, 6, 7],
 		"name": "米卡",
 		"itemType": "character",
 		"star": 4,
@@ -8858,7 +8902,7 @@
 	{
 		"id": 10000081,
 		"contentId": 6490,
-		"dropDays": [5, 7, 2],
+		"dropDays": [2, 5, 7],
 		"name": "卡维",
 		"itemType": "character",
 		"star": 4,
