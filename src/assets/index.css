@@ -3,13 +3,6 @@
 @import url("themes/dark.css");
 
 /*
- * @description 让滚动条在内侧显示
- * @since Alpha v0.1.0
- */
-html {
-  overflow: overlay;
-}
-/*
  * @description 侧边滚动条样式
  * @since Alpha v0.1.3
  */

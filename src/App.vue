@@ -1,20 +1,18 @@
 <template>
-  <v-layout>
-    <!-- 侧边栏菜单 -->
+  <v-app>
     <TSidebar v-if="isMain" />
-    <!-- 主体内容 -->
-    <v-main class="app-main">
-      <v-container fluid>
+    <v-main>
+      <v-container fluid class="app-container">
         <router-view />
       </v-container>
     </v-main>
-  </v-layout>
-  <TBackTop />
+    <TBackTop />
+  </v-app>
 </template>
 
 <script lang="ts" setup>
 // vue
-import { onMounted, ref } from "vue";
+import { onBeforeMount, onMounted, ref } from "vue";
 import TSidebar from "./components/main/t-sidebar.vue";
 import TBackTop from "./components/main/t-backTop.vue";
 // tauri
@@ -23,13 +21,10 @@ import { app, event, fs, window } from "@tauri-apps/api";
 import { useAppStore } from "./store/modules/app";
 
 const appStore = useAppStore();
-const isMain = ref(true as boolean);
+const isMain = ref(false as boolean);
 const theme = ref(appStore.theme as string);
 
-onMounted(async () => {
-  // 获取当前主题
-  document.documentElement.className = theme.value;
-  await listenOnTheme();
+onBeforeMount(async () => {
   // 获取当前窗口
   const win = window.getCurrent();
   isMain.value = win.label === "tauri-genshin";
@@ -38,6 +33,12 @@ onMounted(async () => {
     await win.setTitle(title);
     await checkLoad();
   }
+});
+
+onMounted(async () => {
+  // 获取当前主题
+  document.documentElement.className = theme.value;
+  await listenOnTheme();
 });
 
 // 监听主题变化
@@ -75,9 +76,10 @@ async function createDataDir () {
 }
 </script>
 <style lang="css">
-.app-main {
-    min-height: 100vh;
+.app-container {
+    padding: 0;
+    height: 100%;
+    overflow: auto;
     background: var(--page-bg);
-    backdrop-filter: blur(20px);
 }
 </style>
