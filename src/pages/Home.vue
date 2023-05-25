@@ -6,7 +6,7 @@
 <script lang="ts" setup>
 // vue
 import { ref, markRaw, onMounted, onUnmounted, onUpdated } from "vue";
-import TLoading from "../components/overlay/t-loading.vue";
+import TLoading from "../components/main/t-loading.vue";
 import TPool from "../components/main/t-pool.vue";
 import TPosition from "../components/main/t-position.vue";
 import TCalendar from "../components/main/t-calendar.vue";
