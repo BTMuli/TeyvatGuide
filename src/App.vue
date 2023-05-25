@@ -1,5 +1,6 @@
 <template>
-  <v-app>
+  <!-- glass-app{background: rgba(255, 255, 255, 0.1) !important;} -->
+  <v-app class="glass-app">
     <TSidebar v-if="isMain" />
     <v-main>
       <v-container fluid class="app-container">
