@@ -2,7 +2,7 @@
  * @file utils TGSqlite.ts
  * @description 数据库操作类
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.5
+ * @since Alpha v0.1.6
  */
 
 // tauri
@@ -261,6 +261,20 @@ class TGSqlite {
     const res: Array<{ total: number, fin: number }> = await db.select(sql);
     await db.close();
     return res[0];
+  }
+
+  /**
+   * @description 获取最新成就版本
+   * @since Alpha v0.1.6
+   * @memberOf TGSqlite
+   * @returns {Promise<string>}
+   */
+  public async getLatestAchievementVersion (): Promise<string> {
+    const db = await Database.load(this.dbPath);
+    const sql = "SELECT version FROM AchievementSeries ORDER BY version DESC LIMIT 1;";
+    const res: Array<{ version: string }> = await db.select(sql);
+    await db.close();
+    return res[0].version;
   }
 
   /**

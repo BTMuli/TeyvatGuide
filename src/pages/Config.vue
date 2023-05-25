@@ -177,7 +177,7 @@ import { computed, onMounted, ref } from "vue";
 import TLoading from "../components/overlay/t-loading.vue";
 import TConfirm from "../components/overlay/t-confirm.vue";
 // tauri
-import { fs, app, os } from "@tauri-apps/api";
+import { app, fs, os } from "@tauri-apps/api";
 // store
 import { useAppStore } from "../store/modules/app";
 import { useHomeStore } from "../store/modules/home";
@@ -606,6 +606,7 @@ async function updateDB () {
   loadingTitle.value = "正在更新数据库...";
   loading.value = true;
   await TGSqlite.update();
+  achievementsStore.lastVersion = await TGSqlite.getLatestAchievementVersion();
   loading.value = false;
   snackbarText.value = "数据库已是最新！";
   snackbarColor.value = "success";
