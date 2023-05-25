@@ -39,11 +39,7 @@ export function getPositionCard (positionData: PositionData[]): PositionCard[] {
     if (position.end_time === "0") {
       endStr = "";
     } else {
-      endStr = new Date(Number(position.end_time))
-        .toLocaleString("zh-CN", {
-          hour12: false,
-        })
-        .replace(/\//g, "-");
+      endStr = new Date(Number(position.end_time)).toLocaleDateString().replace(/\//g, "-");
     }
     return res.push({
       title: position.title,
@@ -51,7 +47,7 @@ export function getPositionCard (positionData: PositionData[]): PositionCard[] {
       icon: position.icon,
       abstract: position.abstract,
       time: {
-        start: position.create_time,
+        start: position.create_time.split(" ")[0].replace(/\//g, "-"),
         start_stamp: new Date(position.create_time).getTime(),
         end: endStr,
         end_stamp: Number(position.end_time),
