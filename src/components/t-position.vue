@@ -78,15 +78,12 @@ defineExpose({
 
 function positionLastInterval (postId: number) {
   const timeGet = positionTimeGet.value[postId];
-  console.log(timeGet, postId);
-  console.log(positionTimer.value);
   if (timeGet === "未知" || timeGet === "已结束") {
-    console.log("清除计时器");
     clearInterval(positionTimer.value[postId]);
     positionTimer.value[postId] = null;
     return;
   }
-  const timeLast = positionTimeEnd[postId] - Date.now();
+  const timeLast = positionTimeEnd.value[postId] - Date.now();
   if (timeLast <= 0) {
     positionTimeGet.value[postId] = "已结束";
   } else {
