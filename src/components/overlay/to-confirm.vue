@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" :to-click="onCancel">
+  <TOverlay v-model="visible" :to-click="onCancel" :blur-val="'3px'" hide>
     <div class="confirm-div">
       <div class="confirm-box">
         <div class="confirm-title">
@@ -32,8 +32,10 @@
 
 <script lang="ts" setup>
 // vue
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import TOverlay from "../main/t-overlay.vue";
+
+const test = inject("hide");
 
 interface TOConfirmProps {
   title: string;
@@ -55,6 +57,7 @@ interface TOConfirmEmits {
 
 const emits = defineEmits<TOConfirmEmits>();
 const props = withDefaults(defineProps<TOConfirmProps>(), {
+  modelValue: false,
   title: "确认",
   subtitle: "",
   isInput: false,

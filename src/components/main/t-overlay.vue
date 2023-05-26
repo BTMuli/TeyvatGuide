@@ -1,6 +1,6 @@
 <template>
   <transition enter-from-class="tolo-enter-from" name="tolo">
-    <div v-show="showTolo" class="tolo-box" @click.self.prevent="toClick">
+    <div v-if="showTolo" class="tolo-box" @click.self.prevent="toClick">
       <transition enter-from-class="toli-enter-from" name="toli">
         <slot v-if="showToli" />
       </transition>
@@ -9,38 +9,37 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { ref, watch } from "vue";
+import { onUpdated, ref, provide, watch, toRefs } from "vue";
 
 interface TolProps {
   modelValue: boolean;
   toClick?: () => void;
+  blurVal: string;
+  hide?: true;
 }
 
-const showTolo = ref(false);
-const showToli = ref(false);
+const showTolo = ref(!props.hide);
+const showToli = ref(!props.hide);
 
 const props = withDefaults(defineProps<TolProps>(), {
   modelValue: false,
+  blurVal: "20px",
 });
 
-watch(
-  () => props.modelValue,
-  (v) => {
-    console.log(v);
-    if (v) {
-      showTolo.value = true;
-      showToli.value = true;
-    } else {
-      setTimeout(() => {
-        showToli.value = false;
-      }, 100);
-      setTimeout(() => {
-        showTolo.value = false;
-      }, 300);
-    }
-  },
+watch(() => props.modelValue, () => {
+  if (props.modelValue) {
+    showTolo.value = true;
+    showToli.value = true;
+  } else {
+    setTimeout(() => {
+      showToli.value = false;
+    }, 100);
+    setTimeout(() => {
+      showTolo.value = false;
+    }, 300);
+  }
+},
 );
-
 </script>
 <style lang="css" scoped>
 .tolo-enter-active,
@@ -93,7 +92,7 @@ watch(
   justify-content: center;
   align-items: center;
   background: rgb(0 0 0 / 50%);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(v-bind(blurVal));
   z-index: 100;
 }
 </style>
