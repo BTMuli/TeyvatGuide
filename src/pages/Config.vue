@@ -1,181 +1,177 @@
 <template>
-  <div v-if="loading">
-    <TLoading :title="loadingTitle" />
-  </div>
-  <div v-else>
-    <v-list class="config-list">
-      <v-list-subheader inset class="config-header">
-        应用信息
-      </v-list-subheader>
-      <v-divider inset class="border-opacity-75" />
-      <v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
-        <template #prepend>
-          <img class="config-icon" src="/platforms/tauri.webp" alt="Tauri">
-        </template>
-        <template #append>
-          <v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
-        </template>
-      </v-list-item>
-      <v-list-item>
-        <template #prepend>
-          <img class="config-icon" src="/icon.webp" alt="App">
-        </template>
-        <v-list-item-title>
-          应用版本
-          <v-btn
-            class="card-btn" size="small"
-            @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/releases/latest')"
-          >
-            Alpha
-          </v-btn>
-        </v-list-item-title>
-        <template #append>
-          <v-list-item-subtitle>{{ versionApp }}.{{ buildTime }}</v-list-item-subtitle>
-        </template>
-      </v-list-item>
-      <v-list-item title="成就版本">
-        <template #prepend>
-          <img class="config-icon" src="../assets/icons/achievements.svg" alt="Achievements">
-        </template>
-        <template #append>
-          <v-list-item-subtitle>{{ achievementsStore.lastVersion }}</v-list-item-subtitle>
-        </template>
-      </v-list-item>
-      <v-list-item title="登录信息">
-        <v-list-item-subtitle v-show="userInfo.nickname!=='未登录'">
-          {{ userInfo.nickname }} uid:{{ userInfo.uid }}
-        </v-list-item-subtitle>
-        <v-list-item-subtitle v-show="userInfo.nickname==='未登录'">
-          未登录，请输入 Cookie 登录！
-        </v-list-item-subtitle>
-        <template #prepend>
-          <img class="config-icon" :src="userInfo.avatar" alt="Login">
-        </template>
-        <template #append>
-          <v-btn class="card-btn" @click="tryConfirm('refreshUser')">
-            <template #prepend>
-              <img src="../assets/icons/circle-check.svg" alt="check">
-              刷新数据
-            </template>
-          </v-btn>
-        </template>
-      </v-list-item>
-      <v-list-subheader inset class="config-header">
-        系统信息
-      </v-list-subheader>
-      <v-divider inset class="border-opacity-75" />
-      <v-list-item title="系统平台">
-        <template #prepend>
-          <v-icon>mdi-desktop-classic</v-icon>
-        </template>
-        <template #append>
-          <v-list-item-subtitle>{{ osPlatform }}</v-list-item-subtitle>
-        </template>
-      </v-list-item>
-      <v-list-item title="系统版本">
-        <template #prepend>
-          <v-icon>mdi-desktop-classic</v-icon>
-        </template>
-        <template #append>
-          <v-list-item-subtitle>{{ osVersion }}</v-list-item-subtitle>
-        </template>
-      </v-list-item>
-      <v-list-item title="数据库更新时间" prepend-icon="mdi-database">
-        <template #append>
-          <v-list-item-subtitle>{{ dbInfo.find(item => item.key === "dataUpdated")?.value }}</v-list-item-subtitle>
-        </template>
-        <v-list-item-subtitle>更新于 {{ dbInfo.find(item => item.key === "dataUpdated")?.updated }}</v-list-item-subtitle>
-      </v-list-item>
-      <v-list-item title="数据库版本" prepend-icon="mdi-database">
-        <template #append>
-          <v-list-item-subtitle>{{ dbInfo.find(item => item.key === "appVersion")?.value }}</v-list-item-subtitle>
-        </template>
-        <v-list-item-subtitle>更新于 {{ dbInfo.find(item => item.key === "appVersion")?.updated }}</v-list-item-subtitle>
-      </v-list-item>
-      <v-list-subheader inset class="config-header">
-        设置
-      </v-list-subheader>
-      <v-divider inset class="border-opacity-75" />
-      <v-list-item>
-        <template #prepend>
-          <v-icon>mdi-view-dashboard</v-icon>
-        </template>
-        <v-select v-model="showHome" :items="homeStore.getShowItems()" label="首页显示组件" multiple chips />
-        <template #append>
-          <v-btn class="card-btn" @click="submitHome">
-            <template #prepend>
-              <img src="../assets/icons/circle-check.svg" alt="check">
-              确定
-            </template>
-          </v-btn>
-        </template>
-      </v-list-item>
-      <v-list-item prepend-icon="mdi-content-save" title="数据备份" @click="tryConfirm('backup')" />
-      <v-list-item prepend-icon="mdi-content-save" title="数据恢复" @click="tryConfirm('restore')" />
-      <v-list-item prepend-icon="mdi-delete" title="清除用户缓存" @click="tryConfirm('delUser')" />
-      <v-list-item prepend-icon="mdi-delete" title="清除临时数据" @click="tryConfirm('delTemp')" />
-      <v-list-item prepend-icon="mdi-cog" title="恢复默认设置" @click="tryConfirm('delApp')" />
-      <v-list-subheader inset class="config-header">
-        调试
-      </v-list-subheader>
-      <v-divider inset class="border-opacity-75" />
-      <v-list-item v-if="appStore.devEnv" title="调试模式" subtitle="开启后将显示调试信息">
-        <template #prepend>
-          <v-icon>mdi-bug</v-icon>
-        </template>
-        <template #append>
-          <v-switch
-            v-model="appStore.devMode" :label="appStore.devMode ? '开启' : '关闭'" inset color="#FAC51E"
-            @click="submitDevMode"
-          />
-        </template>
-      </v-list-item>
-      <v-list-item>
-        <template #prepend>
-          <v-icon>mdi-cookie</v-icon>
-        </template>
-        <template #title>
-          <span style="cursor: pointer" @click="tryConfirm('inputCookie')">手动输入 Cookie</span>
-        </template>
-        <template #append>
-          <v-icon style="cursor: pointer" @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/issues/18')">
-            mdi-help-circle-outline
-          </v-icon>
-        </template>
-      </v-list-item>
-      <v-list-item title="重置数据库" prepend-icon="mdi-delete" @click="tryConfirm('resetDB')" />
-      <v-list-item title="检测 SQLite 数据库完整性" prepend-icon="mdi-database-check" @click="tryConfirm('checkDB')" />
-      <v-list-subheader inset class="config-header">
-        路径
-      </v-list-subheader>
-      <v-divider inset class="border-opacity-75" />
-      <v-list-item prepend-icon="mdi-database">
-        <v-list-item-title>本地数据库路径</v-list-item-title>
-        <v-list-item-subtitle>{{ appStore.dataPath.dbDataPath }}</v-list-item-subtitle>
-      </v-list-item>
-      <v-list-item prepend-icon="mdi-folder">
-        <v-list-item-title>本地临时数据路径</v-list-item-title>
-        <v-list-item-subtitle>{{ appStore.dataPath.tempDataDir }}</v-list-item-subtitle>
-      </v-list-item>
-      <v-list-item prepend-icon="mdi-folder">
-        <v-list-item-title>本地用户数据路径</v-list-item-title>
-        <v-list-item-subtitle>{{ appStore.dataPath.userDataDir }}</v-list-item-subtitle>
-      </v-list-item>
-    </v-list>
-    <!-- 弹窗提示条 -->
-    <v-snackbar v-model="snackbar" timeout="1500" :color="snackbarColor">
-      {{ snackbarText }}
-    </v-snackbar>
-    <!-- 确认弹窗 -->
-    <TConfirm v-model:model-value="confirmShow" v-model:model-input="confirmInput" :title="confirmText" :subtitle="confirmSub" :is-input="isConfirmInput" @confirm="doConfirm(confirmOper)" />
-  </div>
+  <TOLoading v-model="loading" :title="loadingTitle" />
+  <v-list class="config-list">
+    <v-list-subheader inset class="config-header">
+      应用信息
+    </v-list-subheader>
+    <v-divider inset class="border-opacity-75" />
+    <v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
+      <template #prepend>
+        <img class="config-icon" src="/platforms/tauri.webp" alt="Tauri">
+      </template>
+      <template #append>
+        <v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
+      </template>
+    </v-list-item>
+    <v-list-item>
+      <template #prepend>
+        <img class="config-icon" src="/icon.webp" alt="App">
+      </template>
+      <v-list-item-title>
+        应用版本
+        <v-btn
+          class="card-btn" size="small"
+          @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/releases/latest')"
+        >
+          Alpha
+        </v-btn>
+      </v-list-item-title>
+      <template #append>
+        <v-list-item-subtitle>{{ versionApp }}.{{ buildTime }}</v-list-item-subtitle>
+      </template>
+    </v-list-item>
+    <v-list-item title="成就版本">
+      <template #prepend>
+        <img class="config-icon" src="../assets/icons/achievements.svg" alt="Achievements">
+      </template>
+      <template #append>
+        <v-list-item-subtitle>{{ achievementsStore.lastVersion }}</v-list-item-subtitle>
+      </template>
+    </v-list-item>
+    <v-list-item title="登录信息">
+      <v-list-item-subtitle v-show="userInfo.nickname!=='未登录'">
+        {{ userInfo.nickname }} uid:{{ userInfo.uid }}
+      </v-list-item-subtitle>
+      <v-list-item-subtitle v-show="userInfo.nickname==='未登录'">
+        未登录，请输入 Cookie 登录！
+      </v-list-item-subtitle>
+      <template #prepend>
+        <img class="config-icon" :src="userInfo.avatar" alt="Login">
+      </template>
+      <template #append>
+        <v-btn class="card-btn" @click="tryConfirm('refreshUser')">
+          <template #prepend>
+            <img src="../assets/icons/circle-check.svg" alt="check">
+            刷新数据
+          </template>
+        </v-btn>
+      </template>
+    </v-list-item>
+    <v-list-subheader inset class="config-header">
+      系统信息
+    </v-list-subheader>
+    <v-divider inset class="border-opacity-75" />
+    <v-list-item title="系统平台">
+      <template #prepend>
+        <v-icon>mdi-desktop-classic</v-icon>
+      </template>
+      <template #append>
+        <v-list-item-subtitle>{{ osPlatform }}</v-list-item-subtitle>
+      </template>
+    </v-list-item>
+    <v-list-item title="系统版本">
+      <template #prepend>
+        <v-icon>mdi-desktop-classic</v-icon>
+      </template>
+      <template #append>
+        <v-list-item-subtitle>{{ osVersion }}</v-list-item-subtitle>
+      </template>
+    </v-list-item>
+    <v-list-item title="数据库更新时间" prepend-icon="mdi-database">
+      <template #append>
+        <v-list-item-subtitle>{{ dbInfo.find(item => item.key === "dataUpdated")?.value }}</v-list-item-subtitle>
+      </template>
+      <v-list-item-subtitle>更新于 {{ dbInfo.find(item => item.key === "dataUpdated")?.updated }}</v-list-item-subtitle>
+    </v-list-item>
+    <v-list-item title="数据库版本" prepend-icon="mdi-database">
+      <template #append>
+        <v-list-item-subtitle>{{ dbInfo.find(item => item.key === "appVersion")?.value }}</v-list-item-subtitle>
+      </template>
+      <v-list-item-subtitle>更新于 {{ dbInfo.find(item => item.key === "appVersion")?.updated }}</v-list-item-subtitle>
+    </v-list-item>
+    <v-list-subheader inset class="config-header">
+      设置
+    </v-list-subheader>
+    <v-divider inset class="border-opacity-75" />
+    <v-list-item>
+      <template #prepend>
+        <v-icon>mdi-view-dashboard</v-icon>
+      </template>
+      <v-select v-model="showHome" :items="homeStore.getShowItems()" label="首页显示组件" multiple chips />
+      <template #append>
+        <v-btn class="card-btn" @click="submitHome">
+          <template #prepend>
+            <img src="../assets/icons/circle-check.svg" alt="check">
+            确定
+          </template>
+        </v-btn>
+      </template>
+    </v-list-item>
+    <v-list-item prepend-icon="mdi-content-save" title="数据备份" @click="tryConfirm('backup')" />
+    <v-list-item prepend-icon="mdi-content-save" title="数据恢复" @click="tryConfirm('restore')" />
+    <v-list-item prepend-icon="mdi-delete" title="清除用户缓存" @click="tryConfirm('delUser')" />
+    <v-list-item prepend-icon="mdi-delete" title="清除临时数据" @click="tryConfirm('delTemp')" />
+    <v-list-item prepend-icon="mdi-cog" title="恢复默认设置" @click="tryConfirm('delApp')" />
+    <v-list-subheader inset class="config-header">
+      调试
+    </v-list-subheader>
+    <v-divider inset class="border-opacity-75" />
+    <v-list-item v-if="appStore.devEnv" title="调试模式" subtitle="开启后将显示调试信息">
+      <template #prepend>
+        <v-icon>mdi-bug</v-icon>
+      </template>
+      <template #append>
+        <v-switch
+          v-model="appStore.devMode" :label="appStore.devMode ? '开启' : '关闭'" inset color="#FAC51E"
+          @click="submitDevMode"
+        />
+      </template>
+    </v-list-item>
+    <v-list-item>
+      <template #prepend>
+        <v-icon>mdi-cookie</v-icon>
+      </template>
+      <template #title>
+        <span style="cursor: pointer" @click="tryConfirm('inputCookie')">手动输入 Cookie</span>
+      </template>
+      <template #append>
+        <v-icon style="cursor: pointer" @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/issues/18')">
+          mdi-help-circle-outline
+        </v-icon>
+      </template>
+    </v-list-item>
+    <v-list-item title="重置数据库" prepend-icon="mdi-delete" @click="tryConfirm('resetDB')" />
+    <v-list-item title="检测 SQLite 数据库完整性" prepend-icon="mdi-database-check" @click="tryConfirm('checkDB')" />
+    <v-list-subheader inset class="config-header">
+      路径
+    </v-list-subheader>
+    <v-divider inset class="border-opacity-75" />
+    <v-list-item prepend-icon="mdi-database">
+      <v-list-item-title>本地数据库路径</v-list-item-title>
+      <v-list-item-subtitle>{{ appStore.dataPath.dbDataPath }}</v-list-item-subtitle>
+    </v-list-item>
+    <v-list-item prepend-icon="mdi-folder">
+      <v-list-item-title>本地临时数据路径</v-list-item-title>
+      <v-list-item-subtitle>{{ appStore.dataPath.tempDataDir }}</v-list-item-subtitle>
+    </v-list-item>
+    <v-list-item prepend-icon="mdi-folder">
+      <v-list-item-title>本地用户数据路径</v-list-item-title>
+      <v-list-item-subtitle>{{ appStore.dataPath.userDataDir }}</v-list-item-subtitle>
+    </v-list-item>
+  </v-list>
+  <!-- 弹窗提示条 -->
+  <v-snackbar v-model="snackbar" timeout="1500" :color="snackbarColor">
+    {{ snackbarText }}
+  </v-snackbar>
+  <!-- 确认弹窗 -->
+  <TOConfirm v-model:model-value="confirmShow" v-model:model-input="confirmInput" :title="confirmText" :subtitle="confirmSub" :is-input="isConfirmInput" @confirm="doConfirm(confirmOper)" />
 </template>
 
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
-import TLoading from "../components/main/t-loading.vue";
-import TConfirm from "../components/overlay/to-confirm.vue";
+import TOLoading from "../components/overlay/to-loading.vue";
+import TOConfirm from "../components/overlay/to-confirm.vue";
 // tauri
 import { app, fs, os } from "@tauri-apps/api";
 // store
