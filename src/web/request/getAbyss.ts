@@ -10,7 +10,6 @@ import { http } from "@tauri-apps/api";
 // api
 import TGApi from "../api/TGApi";
 // utils
-import { getServerByUid } from "../utils/tools";
 import { getRequestHeader } from "../utils/getRequestHeader";
 
 /**
@@ -24,7 +23,7 @@ import { getRequestHeader } from "../utils/getRequestHeader";
 export async function getAbyss (cookie: Record<string, string>, schedule_type: string, account: TGApp.Sqlite.Account.Game): Promise<TGApp.Game.Abyss.FullData | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.getAbyss;
   const role_id = account.gameUid;
-  const params = { role_id, schedule_type, server: getServerByUid(role_id) };
+  const params = { role_id, schedule_type, server: account.region };
   const header = getRequestHeader(cookie, "GET", params, "common");
   return await http.fetch<TGApp.Game.Abyss.Response>(url, {
     method: "GET",
