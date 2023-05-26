@@ -9,7 +9,7 @@
 import Abyss from "../../pages/User/Abyss.vue";
 import Characters from "../../pages/User/Characters.vue";
 import Gacha from "../../pages/User/Gacha.vue";
-import Info from "../../pages/User/Info.vue";
+import Record from "../../pages/User/Record.vue";
 // user sub
 
 const userRoutes = [
@@ -29,9 +29,9 @@ const userRoutes = [
     component: Gacha,
   },
   {
-    path: "/user/info",
-    name: "基本信息",
-    component: Info,
+    path: "/user/record",
+    name: "原神战绩",
+    component: Record,
   },
 ];
 

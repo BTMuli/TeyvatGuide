@@ -41,7 +41,7 @@ async function getInfo1 () {
     account_id: account_id.value,
   };
   console.log(ck);
-  const res = await TGRequest.User.getCard(ck, user.value);
+  const res = await TGRequest.User.getRecord(ck, user.value);
   console.log(res);
 }
 
@@ -51,7 +51,7 @@ async function getInfo2 () {
     ltuid: ltuid.value,
   };
   console.log(ck);
-  const res = await TGRequest.User.getCard(ck, user.value);
+  const res = await TGRequest.User.getRecord(ck, user.value);
   console.log(res);
 }
 </script>

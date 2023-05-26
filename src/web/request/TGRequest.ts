@@ -2,7 +2,7 @@
  * @file web request TGRequest.ts
  * @description 应用用到的请求函数
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.5
+ * @since Alpha v0.1.6
  */
 
 import { getAbyss } from "./getAbyss";
@@ -10,6 +10,7 @@ import { getAnnoList, getAnnoContent } from "./getAnno";
 import { getCookieTokenBySToken } from "./getCookieToken";
 // import * from "./getEnkaData.ts";
 import { getGameAccountsBySToken, getGameAccountsByCookie } from "./getGameAccounts";
+import { getGameRecord } from "./getGameRecord";
 import { getLTokenBySToken } from "./getLToken";
 import { getGameRoleListByLToken } from "./getRoleList";
 // import * from "./getTickets.ts";
@@ -26,6 +27,7 @@ const TGRequest = {
   },
   User: {
     init: initCookie,
+    getRecord: getGameRecord,
     byLoginTicket: {
       getTokens: getTokensByLoginTicket,
     },
