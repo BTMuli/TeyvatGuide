@@ -1,222 +1,220 @@
 <template>
-  <div>
-    <TLoading v-model="loading" :title="loadingTitle" />
-    <v-tabs v-model="tab" align-tabs="start" class="news-tab">
-      <v-tab value="notice">
-        公告
-      </v-tab>
-      <v-tab value="activity" @click="firstLoad('activity')">
-        活动
-      </v-tab>
-      <v-tab v-if="showNews" value="news" @click="firstLoad('news')">
-        新闻
-      </v-tab>
-      <v-spacer />
-      <v-btn class="switch-btn" @click="switchAnno">
-        <template #prepend>
-          <v-icon>mdi-bullhorn</v-icon>
-        </template>
-        切换游戏内公告
-      </v-btn>
-      <v-btn class="switch-chan" @click="showList=true">
-        <v-icon>mdi-view-list</v-icon>
-      </v-btn>
-      <v-text-field
-        v-show="appStore.devMode"
-        v-model="search"
-        append-icon="mdi-magnify"
-        label="搜索"
-        single-line
-        hide-details
-        @click:append="searchPost"
-        @keyup.enter="searchPost"
-      />
-    </v-tabs>
-    <v-window v-model="tab">
-      <v-window-item value="notice">
-        <div class="news-grid">
-          <v-card v-for="item in postData.notice" :key="item.post_id" class="news-card" width="340">
-            <div class="news-cover" @click="toPost(item)">
-              <img :src="item.cover" alt="cover">
-            </div>
-            <v-card-title>{{ item.title }}</v-card-title>
-            <v-card-actions>
-              <v-btn class="card-btn" @click="toPost(item)">
-                <template #prepend>
-                  <img src="../assets/icons/circle-check.svg" alt="check">查看
-                </template>
-              </v-btn>
-              <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-              <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
-                <template #prepend>
-                  <img src="../assets/icons/arrow-right.svg" alt="right">
-                </template>
-                JSON
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </div>
-        <div class="load-news">
-          <v-btn :loading="loadingSub" @click="loadMore('notice')">
-            <template #append>
-              <img src="../assets/icons/arrow-left.svg" alt="right">
-            </template>
-            已加载：{{ rawData.notice.lastId }}，加载更多
-          </v-btn>
-        </div>
-      </v-window-item>
-      <v-window-item value="activity">
-        <div class="news-grid">
-          <v-card v-for="item in postData.activity" :key="item.post_id" class="news-card" width="340">
-            <div class="news-cover" @click="toPost(item)">
-              <img :src="item.cover" alt="cover">
-            </div>
-            <v-card-title>{{ item.title }}</v-card-title>
-            <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
-            <v-card-actions>
-              <v-btn class="card-btn" @click="toPost(item)">
-                <template #prepend>
-                  <img src="../assets/icons/circle-check.svg" alt="check">查看
-                </template>
-              </v-btn>
-              <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-              <div v-show="!appStore.devMode">
-                <v-btn
-                  :style="{
-                    background: item.status?.colorCss,
-                    color: '#faf7e8 !important',
-                  }"
-                >
-                  {{ item.status?.status }}
-                </v-btn>
-              </div>
-              <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
-                <template #prepend>
-                  <img src="../assets/icons/arrow-right.svg" alt="right">
-                </template>
-                JSON
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </div>
-        <div class="load-news">
-          <v-btn :loading="loadingSub" @click="loadMore('activity')">
-            <template #append>
-              <img src="../assets/icons/arrow-left.svg" alt="right">
-            </template>
-            已加载:{{ rawData.activity.lastId }}，加载更多
-          </v-btn>
-        </div>
-      </v-window-item>
-      <v-window-item v-if="showNews" value="news">
-        <div class="news-grid">
-          <v-card v-for="item in postData.news" :key="item.post_id" class="news-card" width="340">
-            <div class="news-cover" @click="toPost(item)">
-              <img :src="item.cover" alt="cover">
-            </div>
-            <v-card-title>{{ item.title }}</v-card-title>
-            <v-card-actions>
-              <v-btn class="card-btn" @click="toPost(item)">
-                <template #prepend>
-                  <img src="../assets/icons/circle-check.svg" alt="check">查看
-                </template>
-              </v-btn>
-              <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
-              <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
-                <template #prepend>
-                  <img src="../assets/icons/arrow-right.svg" alt="right">
-                </template>
-                JSON
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </div>
-        <div class="load-news">
-          <v-btn :loading="loadingSub" @click="loadMore('news')">
-            <template #append>
-              <img src="../assets/icons/arrow-left.svg" alt="right">
-            </template>
-            已加载：{{ rawData.news.lastId }}，加载更多
-          </v-btn>
-        </div>
-      </v-window-item>
-    </v-window>
-    <v-snackbar v-model="snackbar" timeout="1500" :color="snackbarColor">
-      {{ snackbarText }}
-    </v-snackbar>
-    <v-overlay v-model="showList">
-      <div class="choice-box">
-        <div class="choice-title">
-          请选择要跳转的频道
-        </div>
-        <div class="choice-list">
-          <div class="choice-item" @click="toChannel('/news/2')">
-            <div class="choice-icon">
-              <img src="/platforms/mhy/ys.webp" alt="ys">
-            </div>
-            <div class="choice-name">
-              原神
-            </div>
+  <TOLoading v-model="loading" :title="loadingTitle" />
+  <v-tabs v-model="tab" align-tabs="start" class="news-tab">
+    <v-tab value="notice">
+      公告
+    </v-tab>
+    <v-tab value="activity" @click="firstLoad('activity')">
+      活动
+    </v-tab>
+    <v-tab v-if="showNews" value="news" @click="firstLoad('news')">
+      新闻
+    </v-tab>
+    <v-spacer />
+    <v-btn class="switch-btn" @click="switchAnno">
+      <template #prepend>
+        <v-icon>mdi-bullhorn</v-icon>
+      </template>
+      切换游戏内公告
+    </v-btn>
+    <v-btn class="switch-chan" @click="showList=true">
+      <v-icon>mdi-view-list</v-icon>
+    </v-btn>
+    <v-text-field
+      v-show="appStore.devMode"
+      v-model="search"
+      append-icon="mdi-magnify"
+      label="搜索"
+      single-line
+      hide-details
+      @click:append="searchPost"
+      @keyup.enter="searchPost"
+    />
+  </v-tabs>
+  <v-window v-model="tab">
+    <v-window-item value="notice">
+      <div class="news-grid">
+        <v-card v-for="item in postData.notice" :key="item.post_id" class="news-card" width="340">
+          <div class="news-cover" @click="toPost(item)">
+            <img :src="item.cover" alt="cover">
           </div>
-          <div class="choice-item" @click="toChannel('/news/6')">
-            <div class="choice-icon">
-              <img src="/platforms/mhy/sr.webp" alt="sr">
-            </div>
-            <div class="choice-name">
-              崩坏：星穹铁道
-            </div>
+          <v-card-title>{{ item.title }}</v-card-title>
+          <v-card-actions>
+            <v-btn class="card-btn" @click="toPost(item)">
+              <template #prepend>
+                <img src="../assets/icons/circle-check.svg" alt="check">查看
+              </template>
+            </v-btn>
+            <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+            <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
+              <template #prepend>
+                <img src="../assets/icons/arrow-right.svg" alt="right">
+              </template>
+              JSON
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </div>
+      <div class="load-news">
+        <v-btn :loading="loadingSub" @click="loadMore('notice')">
+          <template #append>
+            <img src="../assets/icons/arrow-left.svg" alt="right">
+          </template>
+          已加载：{{ rawData.notice.lastId }}，加载更多
+        </v-btn>
+      </div>
+    </v-window-item>
+    <v-window-item value="activity">
+      <div class="news-grid">
+        <v-card v-for="item in postData.activity" :key="item.post_id" class="news-card" width="340">
+          <div class="news-cover" @click="toPost(item)">
+            <img :src="item.cover" alt="cover">
           </div>
-          <div class="choice-item" @click="toChannel('/news/1')">
-            <div class="choice-icon">
-              <img src="/platforms/mhy/bh3.webp" alt="bh3">
+          <v-card-title>{{ item.title }}</v-card-title>
+          <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
+          <v-card-actions>
+            <v-btn class="card-btn" @click="toPost(item)">
+              <template #prepend>
+                <img src="../assets/icons/circle-check.svg" alt="check">查看
+              </template>
+            </v-btn>
+            <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+            <div v-show="!appStore.devMode">
+              <v-btn
+                :style="{
+                  background: item.status?.colorCss,
+                  color: '#faf7e8 !important',
+                }"
+              >
+                {{ item.status?.status }}
+              </v-btn>
             </div>
-            <div class="choice-name">
-              崩坏3
-            </div>
+            <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
+              <template #prepend>
+                <img src="../assets/icons/arrow-right.svg" alt="right">
+              </template>
+              JSON
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </div>
+      <div class="load-news">
+        <v-btn :loading="loadingSub" @click="loadMore('activity')">
+          <template #append>
+            <img src="../assets/icons/arrow-left.svg" alt="right">
+          </template>
+          已加载:{{ rawData.activity.lastId }}，加载更多
+        </v-btn>
+      </div>
+    </v-window-item>
+    <v-window-item v-if="showNews" value="news">
+      <div class="news-grid">
+        <v-card v-for="item in postData.news" :key="item.post_id" class="news-card" width="340">
+          <div class="news-cover" @click="toPost(item)">
+            <img :src="item.cover" alt="cover">
           </div>
-          <div class="choice-item" @click="toChannel('/news/3')">
-            <div class="choice-icon">
-              <img src="/platforms/mhy/bh2.webp" alt="bh2">
-            </div>
-            <div class="choice-name">
-              崩坏2
-            </div>
+          <v-card-title>{{ item.title }}</v-card-title>
+          <v-card-actions>
+            <v-btn class="card-btn" @click="toPost(item)">
+              <template #prepend>
+                <img src="../assets/icons/circle-check.svg" alt="check">查看
+              </template>
+            </v-btn>
+            <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+            <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
+              <template #prepend>
+                <img src="../assets/icons/arrow-right.svg" alt="right">
+              </template>
+              JSON
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </div>
+      <div class="load-news">
+        <v-btn :loading="loadingSub" @click="loadMore('news')">
+          <template #append>
+            <img src="../assets/icons/arrow-left.svg" alt="right">
+          </template>
+          已加载：{{ rawData.news.lastId }}，加载更多
+        </v-btn>
+      </div>
+    </v-window-item>
+  </v-window>
+  <v-snackbar v-model="snackbar" timeout="1500" :color="snackbarColor">
+    {{ snackbarText }}
+  </v-snackbar>
+  <v-overlay v-model="showList">
+    <div class="choice-box">
+      <div class="choice-title">
+        请选择要跳转的频道
+      </div>
+      <div class="choice-list">
+        <div class="choice-item" @click="toChannel('/news/2')">
+          <div class="choice-icon">
+            <img src="/platforms/mhy/ys.webp" alt="ys">
           </div>
-          <div class="choice-item" @click="toChannel('/news/4')">
-            <div class="choice-icon">
-              <img src="/platforms/mhy/wd.webp" alt="wd">
-            </div>
-            <div class="choice-name">
-              未定事件簿
-            </div>
+          <div class="choice-name">
+            原神
           </div>
-          <div class="choice-item" @click="toChannel('/news/8')">
-            <div class="choice-icon">
-              <img src="/platforms/mhy/zzz.webp" alt="zzz">
-            </div>
-            <div class="choice-name">
-              绝区零
-            </div>
+        </div>
+        <div class="choice-item" @click="toChannel('/news/6')">
+          <div class="choice-icon">
+            <img src="/platforms/mhy/sr.webp" alt="sr">
           </div>
-          <div class="choice-item" @click="toChannel('/news/5')">
-            <div class="choice-icon">
-              <img src="/platforms/mhy/dby.webp" alt="sg">
-            </div>
-            <div class="choice-name">
-              大别野
-            </div>
+          <div class="choice-name">
+            崩坏：星穹铁道
+          </div>
+        </div>
+        <div class="choice-item" @click="toChannel('/news/1')">
+          <div class="choice-icon">
+            <img src="/platforms/mhy/bh3.webp" alt="bh3">
+          </div>
+          <div class="choice-name">
+            崩坏3
+          </div>
+        </div>
+        <div class="choice-item" @click="toChannel('/news/3')">
+          <div class="choice-icon">
+            <img src="/platforms/mhy/bh2.webp" alt="bh2">
+          </div>
+          <div class="choice-name">
+            崩坏2
+          </div>
+        </div>
+        <div class="choice-item" @click="toChannel('/news/4')">
+          <div class="choice-icon">
+            <img src="/platforms/mhy/wd.webp" alt="wd">
+          </div>
+          <div class="choice-name">
+            未定事件簿
+          </div>
+        </div>
+        <div class="choice-item" @click="toChannel('/news/8')">
+          <div class="choice-icon">
+            <img src="/platforms/mhy/zzz.webp" alt="zzz">
+          </div>
+          <div class="choice-name">
+            绝区零
+          </div>
+        </div>
+        <div class="choice-item" @click="toChannel('/news/5')">
+          <div class="choice-icon">
+            <img src="/platforms/mhy/dby.webp" alt="sg">
+          </div>
+          <div class="choice-name">
+            大别野
           </div>
         </div>
       </div>
-    </v-overlay>
-  </div>
+    </div>
+  </v-overlay>
 </template>
 
 <script lang="ts" setup>
 // vue
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import TLoading from "../components/main/t-loading.vue";
+import TOLoading from "../components/overlay/to-loading.vue";
 // store
 import { useAppStore } from "../store/modules/app";
 // plugin
@@ -257,14 +255,17 @@ const postData = ref({
 const rawData = ref({
   notice: {
     isLast: false,
+    name: "公告",
     lastId: 0,
   },
   activity: {
     isLast: false,
+    name: "活动",
     lastId: 0,
   },
   news: {
     isLast: false,
+    name: "咨讯",
     lastId: 0,
   },
 });
@@ -276,10 +277,12 @@ onMounted(async () => {
   rawData.value.notice.lastId = noticeData.list.length;
   postData.value.notice = MysOper.News.card.notice(noticeData);
   tab.value = "notice";
-  loading.value = false;
+  setTimeout(() => {
+    loading.value = false;
+  }, 1500);
 });
 
-async function firstLoad (data:string) {
+async function firstLoad (data: string) {
   if (rawData.value.activity.lastId !== 0 && rawData.value.news.lastId !== 0) {
     return;
   }
@@ -290,7 +293,6 @@ async function firstLoad (data:string) {
     rawData.value.activity.isLast = activityData.is_last;
     rawData.value.activity.lastId = activityData.list.length;
     postData.value.activity = MysOper.News.card.activity(activityData);
-    loading.value = false;
   }
   if (data === "news" && rawData.value.news.lastId === 0) {
     loadingTitle.value = "正在获取咨讯数据...";
@@ -299,15 +301,17 @@ async function firstLoad (data:string) {
     rawData.value.news.isLast = newsData.is_last;
     rawData.value.news.lastId = newsData.list.length;
     postData.value.news = MysOper.News.card.news(newsData);
-    loading.value = false;
   }
+  setTimeout(() => {
+    loading.value = false;
+  }, 1500);
 }
 
 async function switchAnno () {
   await router.push("/announcements");
 }
 
-async function toChannel (chan:string) {
+async function toChannel (chan: string) {
   showList.value = false;
   await router.push(chan);
   await window.location.reload();
@@ -316,57 +320,32 @@ async function toChannel (chan:string) {
 // 加载更多
 async function loadMore (data: string) {
   loadingSub.value = true;
-  let getData: NewsData;
-  let getCard: NewsCard[];
-  switch (data) {
-    case "notice":
-      if (rawData.value.notice.isLast) {
-        snackbarText.value = "已经是最后一页了";
-        snackbarColor.value = "#35acce";
-        snackbar.value = true;
-        loadingSub.value = false;
-        return;
-      }
-      getData = await MysOper.News.get.notice(gid, 20, rawData.value.notice.lastId);
-      rawData.value.notice.lastId = rawData.value.notice.lastId + getData.list.length;
-      rawData.value.notice.isLast = getData.is_last;
-      getCard = MysOper.News.card.notice(getData);
-      postData.value.notice = postData.value.notice.concat(getCard);
-      loadingSub.value = false;
-      break;
-    case "activity":
-      if (rawData.value.activity.isLast) {
-        snackbarText.value = "已经是最后一页了";
-        snackbarColor.value = "#35acce";
-        snackbar.value = true;
-        loadingSub.value = false;
-        return;
-      }
-      getData = await MysOper.News.get.activity(gid, 20, rawData.value.activity.lastId);
-      rawData.value.activity.lastId = rawData.value.activity.lastId + getData.list.length;
-      rawData.value.activity.isLast = getData.is_last;
-      getCard = MysOper.News.card.activity(getData);
-      postData.value.activity = postData.value.activity.concat(getCard);
-      loadingSub.value = false;
-      break;
-    case "news":
-      if (rawData.value.news.isLast) {
-        snackbarText.value = "已经是最后一页了";
-        snackbarColor.value = "#35acce";
-        snackbar.value = true;
-        loadingSub.value = false;
-        return;
-      }
-      getData = await MysOper.News.get.news(gid, 20, rawData.value.news.lastId);
-      rawData.value.news.lastId = rawData.value.news.lastId + getData.list.length;
-      rawData.value.news.isLast = getData.is_last;
-      getCard = MysOper.News.card.news(getData);
-      postData.value.news = postData.value.news.concat(getCard);
-      loadingSub.value = false;
-      break;
-    default:
-      break;
+  if (rawData.value[data].isLast) {
+    snackbarText.value = "已经是最后一页了";
+    snackbarColor.value = "#35acce";
+    snackbar.value = true;
+    loadingSub.value = false;
+    return;
   }
+  loadingTitle.value = `正在获取${rawData.value[data].name}数据...`;
+  loading.value = true;
+  const getData = await MysOper.News.get[data](gid, 20, rawData.value[data].lastId);
+  rawData.value[data].lastId = rawData.value[data].lastId + getData.list.length;
+  rawData.value[data].isLast = getData.is_last;
+  const getCard = MysOper.News.card[data](getData);
+  postData.value[data] = postData.value[data].concat(getCard);
+  if (rawData.value[data].isLast) {
+    snackbarText.value = "已经是最后一页了";
+    snackbarColor.value = "#35acce";
+    snackbar.value = true;
+    loadingSub.value = false;
+    loading.value = false;
+    return;
+  }
+  setTimeout(() => {
+    loading.value = false;
+    loadingSub.value = false;
+  }, 1500);
 }
 
 async function toPost (item: NewsCard | string) {
@@ -390,6 +369,7 @@ async function toPost (item: NewsCard | string) {
     createTGWindow(path, "帖子", item.title, 960, 720, false, false);
   }
 }
+
 async function toJson (item: NewsCard | string) {
   if (typeof item === "string") {
     const path = router.resolve({
