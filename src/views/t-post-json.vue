@@ -1,6 +1,6 @@
 <template>
   <TSwitchTheme />
-  <TLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
+  <TOLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
   <div class="post-json">
     <div class="post-title">
       帖子返回内容 JSON
@@ -13,7 +13,7 @@
 import { ref, onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import JsonViewer from "vue-json-viewer";
-import TLoading from "../components/main/t-loading.vue";
+import TOLoading from "../components/overlay/to-loading.vue";
 import TSwitchTheme from "../components/main/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
@@ -39,10 +39,13 @@ onMounted(async () => {
   }
   // 获取数据
   loadingTitle.value = "正在获取数据...";
-  jsonData = await MysOper.Post.get(postId);
-  setTimeout(() => {
+  try {
+    jsonData = await MysOper.Post.get(postId);
     loading.value = false;
-  }, 200);
+  } catch (e) {
+    loadingTitle.value = "帖子不存在或解析失败";
+    loadingEmpty.value = true;
+  }
 });
 </script>
 <style>

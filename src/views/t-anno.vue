@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <TSwitchTheme />
-  <TLoading v-model="loading" :title="loadingTitle" :empty="loadingEmpty" />
+  <TOLoading v-model="loading" :title="loadingTitle" :empty="loadingEmpty" />
   <div class="anno-body">
     <div class="anno-title">
       {{ annoData.title }}
@@ -17,7 +17,7 @@
 // vue
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import TLoading from "../components/main/t-loading.vue";
+import TOLoading from "../components/overlay/to-loading.vue";
 import TSwitchTheme from "../components/main/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
@@ -55,9 +55,7 @@ onMounted(async () => {
     loadingTitle.value = "公告不存在或解析失败";
     return;
   }
-  setTimeout(() => {
-    loading.value = false;
-  }, 1200);
+  loading.value = false;
 });
 </script>
 <style lang="css" src="../assets/css/anno-parser.css" scoped />

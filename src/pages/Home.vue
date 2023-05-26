@@ -1,12 +1,12 @@
 <template>
-  <TLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSubtitle" />
+  <TOLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSubtitle" />
   <component :is="item" v-for="item in components" :key="item" :ref="setItemRef" />
 </template>
 
 <script lang="ts" setup>
 // vue
 import { markRaw, onMounted, onUnmounted, onUpdated, ref } from "vue";
-import TLoading from "../components/main/t-loading.vue";
+import TOLoading from "../components/overlay/to-loading.vue";
 import TPool from "../components/main/t-pool.vue";
 import TPosition from "../components/main/t-position.vue";
 import TCalendar from "../components/main/t-calendar.vue";

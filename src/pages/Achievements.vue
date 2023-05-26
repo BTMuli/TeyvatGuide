@@ -22,7 +22,7 @@
       </v-btn>
     </template>
   </v-app-bar>
-  <TLoading v-model="loading" :title="loadingTitle" />
+  <TOLoading v-model="loading" :title="loadingTitle" />
   <div class="wrap">
     <!-- 左侧菜单 -->
     <div class="left-wrap">
@@ -108,7 +108,7 @@
 <script lang="ts" setup>
 // vue
 import { onMounted, ref, onBeforeMount, computed } from "vue";
-import TLoading from "../components/main/t-loading.vue";
+import TOLoading from "../components/overlay/to-loading.vue";
 // tauri
 import { dialog, fs } from "@tauri-apps/api";
 // Store

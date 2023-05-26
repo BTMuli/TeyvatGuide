@@ -1,14 +1,14 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <TSwitchTheme />
-  <TLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
+  <TOLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
   <div class="mys-post-body" v-html="postHtml" />
 </template>
 <script lang="ts" setup>
 // vue
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import TLoading from "../components/main/t-loading.vue";
+import TOLoading from "../components/overlay/to-loading.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
 // plugins

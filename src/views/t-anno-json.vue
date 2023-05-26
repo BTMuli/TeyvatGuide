@@ -1,6 +1,6 @@
 <template>
   <TSwitchTheme />
-  <TLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
+  <TOLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
   <div class="anno-json">
     <div class="anno-title">
       活动列表 JSON
@@ -17,7 +17,7 @@
 import { ref, onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import JsonViewer from "vue-json-viewer";
-import TLoading from "../components/main/t-loading.vue";
+import TOLoading from "../components/overlay/to-loading.vue";
 import TSwitchTheme from "../components/main/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
