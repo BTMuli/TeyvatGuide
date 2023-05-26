@@ -35,10 +35,10 @@ interface LoadingProps {
   empty?: boolean;
 }
 
-const show = ref(false);
+const show = ref(true);
 
 const props = withDefaults(defineProps<LoadingProps>(), {
-  modelValue: false,
+  modelValue: true,
   title: "加载中",
   subtitle: "",
   content: "",

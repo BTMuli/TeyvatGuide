@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible">
+  <TOverlay v-model="visible" hide>
     <div class="toc-box">
       <div class="box-div">
         <div class="toc-top">
