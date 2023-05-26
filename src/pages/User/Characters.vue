@@ -1,17 +1,22 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" />
   <div class="uc-top">
-    <div class="uc-top-title">我的角色</div>
-    <v-btn @click="refresh" variant="outlined">
+    <div class="uc-top-title">
+      我的角色
+    </div>
+    <v-btn variant="outlined" @click="refresh">
       更新数据
     </v-btn>
   </div>
-  {{ roleList }}
+  <div class="uc-grid">
+    <TUserAvatar v-for="avatar in roleList" :model-value="avatar" />
+  </div>
 </template>
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
+import TUserAvatar from "../../components/mini/t-user-avatar.vue";
 // tauri
 import { fs } from "@tauri-apps/api";
 // store
@@ -31,7 +36,7 @@ const loading = ref(false);
 const loadingTitle = ref("");
 
 // data
-const roleList = ref([]);
+const roleList = ref([] as TGApp.Game.Character.ListItem[]);
 const characterCookie = ref({} as TGApp.BBS.Constant.CookieGroup4);
 const user = ref({} as TGApp.Sqlite.Account.Game);
 const filePath = computed(() => `${appStore.dataPath.userDataDir}/roleList.json`);
@@ -70,7 +75,7 @@ async function refresh () {
 </script>
 <style lang="css" scoped>
 .uc-top {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgb(0 0 0 / 20%);
   width: 100%;
   height: 50px;
   border-radius: 5px;
@@ -84,5 +89,12 @@ async function refresh () {
 
 .uc-top-title {
   margin-right: 10px;
+}
+
+.uc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-gap: 10px;
+  margin-top: 10px;
 }
 </style>
