@@ -2,7 +2,7 @@
  * @file store modules home.ts
  * @description Home store module
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @since Alpha v0.1.6
  */
 
 // vue
@@ -24,7 +24,7 @@ export const useHomeStore = defineStore(
       show: true,
       order: 2,
     });
-    const hoemShow = ref({
+    const homeShow = ref({
       calendarShow,
       poolShow,
       positionShow,
@@ -113,7 +113,7 @@ export const useHomeStore = defineStore(
     }
 
     return {
-      hoemShow,
+      homeShow,
       poolCover,
       init,
       getShowItems,
