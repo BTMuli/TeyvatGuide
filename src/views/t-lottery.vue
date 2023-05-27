@@ -55,19 +55,21 @@
       </div>
     </div>
   </div>
-  <div class="lottery-json">
+  <div class="lottery-json" v-if="showJson">
     <JsonViewer :value="jsonData" copyable boxed />
   </div>
 </template>
 <script lang="ts" setup>
 // vue
-import { onMounted, onUpdated, reactive, ref } from "vue";
+import { computed, onMounted, onUpdated, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import JsonViewer from "vue-json-viewer";
 import TOLoading from "../components/overlay/to-loading.vue";
 import TSwitchTheme from "../components/main/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
+// store
+import { useAppStore } from "../store/modules/app";
 // plugins
 import MysOper from "../plugins/Mys";
 // interface
@@ -78,6 +80,9 @@ const loading = ref(true as boolean);
 const loadingTitle = ref("正在加载");
 const loadingEmpty = ref(false as boolean);
 
+// store
+const appStore = useAppStore();
+const showJson = computed(() => appStore.devMode);
 // 定时器
 const lotteryTimer = ref(null as any);
 // 参与方式
