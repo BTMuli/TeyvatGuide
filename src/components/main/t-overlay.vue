@@ -9,7 +9,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { onUpdated, ref, provide, watch, toRefs } from "vue";
+import { ref, watch } from "vue";
 
 interface TolProps {
   modelValue: boolean;

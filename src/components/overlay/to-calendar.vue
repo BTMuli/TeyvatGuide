@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide>
+  <TOverlay v-model="visible" hide :to-click="onCancel">
     <div class="toc-box">
       <div class="box-div">
         <div class="toc-top">
