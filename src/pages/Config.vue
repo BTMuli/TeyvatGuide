@@ -315,6 +315,7 @@ function tryConfirm (oper: string) {
 
 // transfer confirm oper
 async function doConfirm (oper: string) {
+  await new Promise((resolve) => setTimeout(resolve, 500));
   switch (oper) {
     case "backup":
       await backupData();
@@ -553,6 +554,7 @@ async function checkDB () {
   loadingTitle.value = "正在检查数据库表单完整性...";
   loading.value = true;
   const res = await TGSqlite.check();
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   if (!res) {
     confirmOper.value = "resetDB";
     confirmText.value = "数据库表单不完整，是否重置数据库？";
@@ -599,6 +601,7 @@ async function resetDB () {
 
 // 更新 SQLite 数据库
 async function updateDB () {
+  await new Promise((resolve) => setTimeout(resolve, 500));
   loadingTitle.value = "正在更新数据库...";
   loading.value = true;
   await TGSqlite.update();
