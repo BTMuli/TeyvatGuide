@@ -12,7 +12,7 @@
 import { onMounted, ref } from "vue";
 // store
 import { useUserStore } from "../../store/modules/user";
-// request
+// utils
 import TGRequest from "../../web/request/TGRequest";
 import TGSqlite from "../../utils/TGSqlite";
 

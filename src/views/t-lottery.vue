@@ -55,7 +55,7 @@
       </div>
     </div>
   </div>
-  <div class="lottery-json" v-if="showJson">
+  <div v-if="showJson" class="lottery-json">
     <JsonViewer :value="jsonData" copyable boxed />
   </div>
 </template>

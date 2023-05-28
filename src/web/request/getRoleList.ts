@@ -18,12 +18,12 @@ import TGUtils from "../utils/TGUtils";
  * @param {TGApp.Sqlite.Account.Game} account 游戏账号
  * @returns {Promise<TGApp.Game.Character.ListItem[]|TGApp.BBS.Response.Base>} 用户角色列表
  */
-export async function getGameRoleListByLToken(cookie: TGApp.BBS.Constant.CookieGroup4, account: TGApp.Sqlite.Account.Game): Promise<TGApp.Game.Character.ListItem[] | TGApp.BBS.Response.Base> {
+export async function getGameRoleListByLToken (cookie: TGApp.BBS.Constant.CookieGroup4, account: TGApp.Sqlite.Account.Game): Promise<TGApp.Game.Character.ListItem[] | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.byCookie.getCharacter;
   const uid = account.gameUid;
   // eslint-disable-next-line camelcase
   const data = { role_id: uid, server: TGUtils.Tools.getServerByUid(uid) };
-  const header = TGUtils.User.getHeader(cookie as unknown as Record<string,string>, "POST", JSON.stringify(data), "common");
+  const header = TGUtils.User.getHeader(cookie as unknown as Record<string, string>, "POST", JSON.stringify(data), "common");
   return await http.fetch<TGApp.Game.Character.ListResponse>(url, {
     method: "POST",
     headers: header,

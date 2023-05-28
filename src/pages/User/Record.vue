@@ -10,7 +10,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 // store
 import { useUserStore } from "../../store/modules/user";
 // utils
@@ -21,10 +21,6 @@ import TGSqlite from "../../utils/TGSqlite";
 const userStore = useUserStore();
 
 // data
-const cookie_token = computed(() => userStore.getCookieItem("cookie_token"));
-const account_id = computed(() => userStore.getCookieItem("account_id"));
-const ltoken = computed(() => userStore.getCookieItem("ltoken"));
-const ltuid = computed(() => userStore.getCookieItem("ltuid"));
 const user = ref({} as TGApp.Sqlite.Account.Game);
 
 onMounted(async () => {
@@ -36,23 +32,13 @@ onMounted(async () => {
 });
 
 async function getInfo1 () {
-  const ck = {
-    cookie_token: cookie_token.value,
-    account_id: account_id.value,
-  };
-  console.log(ck);
+  const ck = userStore.getCookieGroup2() as Record<string, string>;
   const res = await TGRequest.User.getRecord(ck, user.value);
-  console.log(res);
 }
 
 async function getInfo2 () {
-  const ck = {
-    ltoken: ltoken.value,
-    ltuid: ltuid.value,
-  };
-  console.log(ck);
+  const ck = userStore.getCookieGroup3() as Record<string, string>;
   const res = await TGRequest.User.getRecord(ck, user.value);
-  console.log(res);
 }
 </script>
 <style lang="css" scoped>
