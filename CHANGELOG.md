@@ -2,14 +2,32 @@
 Author: 目棃
 Date: 2023-03-30
 Description: CHANGELOG
-Update: 2023-05-25
+Update: 2023-05-28
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-30 15:39:49`
 > 
-> 更新于 `2023-05-25 17:24:07`
+> 更新于 `2023-05-28 16:11:30`
 
 # CHANGELOG
+
+## [0.1.6](https://github.com/BTMuli/Tauri.Genshin/releases/v0.1.6) (2023-05-28)
+
+### Feat
+
+- 用户：添加部分数据获取请求
+
+### Fix
+
+- 页面：修复间距显示异常 [`a428c86a`](https://github.com/BTMuli/Tauri.Genshin/commit/a428c86a)
+- 成就：数据库更新后成就版本自动更新 [`71f5c30f`](https://github.com/BTMuli/Tauri.Genshin/commit/71f5c30f)
+- 首页：修复首页卡素材日历的问题 [`5a14b90b`](https://github.com/BTMuli/Tauri.Genshin/commit/5a14b90b)
+
+### Change
+
+- 组件：部分组件实现方式更改
+
+FullCommits: [`v0.1.5 ~ v0.1.6`](https://github.com/BTMuli/Tauri.Genshin/compare/v0.1.5...v0.1.6)
 
 ## [0.1.5](https://github.com/BTMuli/Tauri.Genshin/releases/v0.1.5) (2023-05-25)
 
