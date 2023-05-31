@@ -12,7 +12,7 @@ import initDataSql from "./sql/initData";
 import initTableSql from "./sql/initTable";
 import { importUIAFData } from "./sql/updateData";
 import { getUiafStatus } from "../../utils/UIAF";
-import { insertAppData, insertGameAccountData } from "./sql/insertData";
+import { insertAbyssData, insertAppData, insertGameAccountData } from "./sql/insertData";
 
 class Sqlite {
   /**
@@ -81,7 +81,7 @@ class Sqlite {
    * @param {TGApp.User.Account.Game[]} accounts
    * @returns {Promise<void>}
    */
-  public async insertAccount (accounts: TGApp.User.Account.Game[]): Promise<void> {
+  public async saveAccount (accounts: TGApp.User.Account.Game[]): Promise<void> {
     const db = await Database.load(this.dbPath);
     for (const a of accounts) {
       const sql = insertGameAccountData(a);
@@ -296,6 +296,32 @@ class Sqlite {
       });
     }
     return achievements;
+  }
+
+  /**
+   * @description 保存深渊数据
+   * @since Alpha v0.2.0
+   * @param {TGApp.Game.Abyss.FullData} data 深渊数据
+   * @returns {Promise<void>}
+   */
+  public async saveAbyss (data: TGApp.Game.Abyss.FullData): Promise<void> {
+    const db = await Database.load(this.dbPath);
+    const sql = insertAbyssData(data);
+    await db.execute(sql);
+    await db.close();
+  }
+
+  /**
+   * @description 获取深渊数据
+   * @since Alpha v0.2.0
+   * @returns {Promise<TGApp.Game.Abyss.FullData>}
+   */
+  public async getAbyss (): Promise<TGApp.Sqlite.Abyss.SingleTable[]> {
+    const db = await Database.load(this.dbPath);
+    const sql = "SELECT * FROM SpiralAbyss";
+    const res: TGApp.Sqlite.Abyss.SingleTable[] = await db.select(sql);
+    await db.close();
+    return res;
   }
 }
 

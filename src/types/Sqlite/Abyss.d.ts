@@ -117,11 +117,14 @@ declare namespace TGApp.Sqlite.Abyss {
    * @description 数据库-深境螺旋表-角色数据
    * @since Alpha v0.2.0
    * @interface CharacterInfo
-   * @extends Character
+   * @property {number} id - 角色 ID
+   * @property {number} star - 星级
    * @property {number} level - 等级
    * @return CharacterInfo
    */
-  export interface CharacterInfo extends Character {
+  export interface CharacterInfo {
+    id: number
     level: number
+    star: number
   }
 }
