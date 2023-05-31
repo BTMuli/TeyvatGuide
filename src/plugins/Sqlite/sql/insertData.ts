@@ -95,9 +95,8 @@ export function insertNameCardData (data: TGApp.App.NameCard.Item): string {
   return `
       INSERT INTO NameCard (name, "desc", type, source, updated)
       VALUES ('${data.name}', '${data.desc}', '${data.type}', '${data.source}', datetime('now', 'localtime'))
-      ON CONFLICT(name) DO UPDATE
+      ON CONFLICT(name, type) DO UPDATE
           SET "desc"  = '${data.desc}',
-              type    = '${data.type}',
               source  = '${data.source}',
               updated = datetime('now', 'localtime');
   `;
