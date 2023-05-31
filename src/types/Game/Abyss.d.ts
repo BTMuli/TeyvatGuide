@@ -1,7 +1,6 @@
 /**
  * @file types Game Abyss.d.ts
  * @description 游戏深渊相关类型定义文件
- * @todo v0.1.5 不使用
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
