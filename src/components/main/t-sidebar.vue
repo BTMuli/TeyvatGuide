@@ -40,6 +40,27 @@
         </template>
       </v-list-item>
       <v-divider />
+      <v-list-item title="原神战绩" value="record" link href="/user/record">
+        <template #prepend>
+          <img src="/source/UI/userRecord.webp" alt="record" class="side-icon">
+        </template>
+      </v-list-item>
+      <v-list-item title="我的角色" value="character" link href="/user/characters">
+        <template #prepend>
+          <img src="/source/UI/userAvatar.webp" alt="characters" class="side-icon">
+        </template>
+      </v-list-item>
+      <v-list-item title="深渊记录" value="abyss" link href="/user/abyss">
+        <template #prepend>
+          <img src="/source/UI/userAbyss.webp" alt="abyss" class="side-icon">
+        </template>
+      </v-list-item>
+      <v-list-item title="祈愿记录" value="gacha" link href="/user/gacha">
+        <template #prepend>
+          <img src="../../assets/icons/icon-wish.svg" alt="gacha" class="side-icon">
+        </template>
+      </v-list-item>
+      <v-divider />
       <v-list-item v-show="appStore.devEnv" title="测试" value="test" link href="/test">
         <template #prepend>
           <v-icon>mdi-test-tube</v-icon>
