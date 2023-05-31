@@ -21,7 +21,6 @@ export function transCharacterData (data: TGApp.Game.Abyss.CharacterData[]): str
       star: item.rarity,
     };
   }) as TGApp.Sqlite.Abyss.Character[];
-  console.log(JSON.stringify(res));
   return JSON.stringify(res);
 }
 

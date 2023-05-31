@@ -16,7 +16,7 @@ import { getRequestHeader } from "../utils/getRequestHeader";
  * @description 获取深渊信息
  * @since Alpha v0.2.0
  * @param {Record<string, string>} cookie cookie
- * @param {string} schedule_type 0: 本期, 1: 上期
+ * @param {string} schedule_type 1: 本期, 2: 上期
  * @param {TGApp.Sqlite.Account.Game} account 游戏账号
  * @returns {Promise<TGApp.Game.Abyss.FullData|TGApp.App.Base.Response>}
  */
