@@ -1,9 +1,8 @@
 /**
  * @file types Plugins Hutao.d.ts
  * @description Hutao API
- * @see https://homa.snapgenshin.com/doc/index.html
- * @todo 待使用
- * @author BTMuli<bt-muli@outlook.com>
+ * @see HutaoRequest
+ * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
 
@@ -24,8 +23,7 @@ declare namespace TGApp.Plugins.Hutao {
   /**
    * @description 深渊记录上传数据
    * @since Alpha v0.2.0
-   * @see https://homa.snapgenshin.com/Record/Upload?returningRank=false
-   * @method POST
+   * @see HutaoRequest.Abyss.postData
    * @interface AbyssRecordUpload
    * @property {string} uid - UID
    * @property {string} identity - 身份标识
@@ -125,7 +123,7 @@ declare namespace TGApp.Plugins.Hutao {
   /**
    * @description 查询 uid 对应记录是否存在返回
    * @since Alpha v0.2.0
-   * @see https://homa.snapgenshin.com/Record/Check?Uid=500299765
+   * @see HutaoRequest.Abyss.user.checkExist
    * @interface AbyssRecordExistResponse
    * @extends HutaoResponse
    * @property {boolean} data - 是否存在
@@ -139,7 +137,7 @@ declare namespace TGApp.Plugins.Hutao {
    * @description 获取深渊记录返回
    * @todo 暂时缺乏数据
    * @since Alpha v0.2.0
-   * @see https://homa.snapgenshin.com/Record/Rank?Uid=156258765
+   * @see HutaoRequest.Abyss.user.getRecord
    * @interface AbyssRecordRankResponse
    * @extends HutaoResponse
    * @property {AbyssRecordRank} data - 深渊记录
@@ -163,8 +161,7 @@ declare namespace TGApp.Plugins.Hutao {
   /**
    * @description 获取深渊总览数据返回
    * @since Alpha v0.2.0
-   * @see https://homa.snapgenshin.com/Statistics/Overview
-   * @method GET
+   * @see HutaoRequest.Abyss.getOverview
    * @interface AbyssOverviewResponse
    * @extends HutaoResponse
    * @property {AbyssOverview} data - 深渊总览数据
@@ -206,7 +203,7 @@ declare namespace TGApp.Plugins.Hutao {
   /**
    * @description 获取角色深渊上场率返回
    * @since Alpha v0.2.0
-   * @see https://homa.snapgenshin.com/Statistics/Avatar/AttendanceRate
+   * @see HutaoRequest.Abyss.avatar.getUpRate
    * @method GET
    * @interface AbyssAvatarUpRateResponse
    * @extends HutaoResponse
@@ -237,8 +234,7 @@ declare namespace TGApp.Plugins.Hutao {
   /**
    * @description 获取角色深渊使用率返回
    * @since Alpha v0.2.0
-   * @see https://homa.snapgenshin.com/Statistics/Avatar/UtilizationRate
-   * @method GET
+   * @see HutaoRequest.Abyss.avatar.getUseRate
    * @interface AbyssAvatarUseRateResponse
    * @extends HutaoResponse
    * @property {AbyssAvatarUseRate[]} data - 角色深渊使用率
@@ -268,8 +264,7 @@ declare namespace TGApp.Plugins.Hutao {
   /**
    * @description 获取角色深渊持有率返回
    * @since Alpha v0.2.0
-   * @see https://homa.snapgenshin.com/Statistics/Avatar/HoldingRate
-   * @method GET
+   * @see HutaoRequest.Abyss.avatar.getHoldRate
    * @interface AbyssAvatarHoldRateResponse
    * @extends HutaoResponse
    * @property {AbyssAvatarHoldRate[]} data - 角色深渊持有率
@@ -301,8 +296,7 @@ declare namespace TGApp.Plugins.Hutao {
   /**
    * @description 获取角色的圣遗物、武器搭配
    * @since Alpha v0.2.0
-   * @see https://homa.snapgenshin.com/Statistics/Avatar/AvatarCollocation
-   * @method GET
+   * @see HutaoRequest.Abyss.avatar.getCollect
    * @interface AbyssAvatarCollocationResponse
    * @extends HutaoResponse
    * @property {AbyssAvatarCollocation[]} data - 角色搭配
@@ -344,8 +338,7 @@ declare namespace TGApp.Plugins.Hutao {
   /**
    * @description 获取武器搭配角色返回
    * @since Alpha v0.2.0
-   * @see https://homa.snapgenshin.com/Statistics/Weapon/WeaponCollocation
-   * @method GET
+   * @see HutaoRequest.Abyss.weapon.getCollect
    * @interface AbyssWeaponCollocationResponse
    * @extends HutaoResponse
    * @property {AbyssWeaponCollocation[]} data - 武器搭配角色
@@ -374,8 +367,7 @@ declare namespace TGApp.Plugins.Hutao {
   /**
    * @description 获取队伍搭配返回
    * @since Alpha v0.2.0
-   * @see https://homa.snapgenshin.com/Statistics/Team/Combination
-   * @method GET
+   * @see HutaoRequest.Abyss.getTeamCollect
    * @interface AbyssTeamCombinationResponse
    * @extends HutaoResponse
    * @property {AbyssTeamCombination[]} data - 队伍搭配
