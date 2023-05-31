@@ -32,6 +32,19 @@ create table if not exists AchievementSeries
     updated    text
 );
 
+-- @brief 创建角色数据表
+create table if not exists AppCharacters
+(
+    id            integer primary key,
+    name          text,
+    title         text,
+    birthday      text,
+    star          integer,
+    element       text,
+    weapon        text,
+    nameCard      text default '无'
+);
+
 -- @brief 创建应用数据表
 create table if not exists AppData
 (
