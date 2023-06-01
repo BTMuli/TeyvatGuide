@@ -36,7 +36,7 @@
           class="card-box"
           @click="selectContent(item, 'character')"
         >
-          <TMiniAvatar size="100px" :model-value="item" />
+          <TibCalendarAvatar size="100px" :model-value="item" />
         </div>
       </div>
     </div>
@@ -52,7 +52,7 @@
           class="card-box"
           @click="selectContent(item, 'weapon')"
         >
-          <TMiniWeapon size="100px" :model-value="item" />
+          <TibCalendarWeapon size="100px" :model-value="item" />
         </div>
       </div>
     </div>
@@ -63,8 +63,8 @@
 // vue
 import { computed, onMounted, ref } from "vue";
 import ToCalendar from "../overlay/to-calendar.vue";
-import TMiniAvatar from "../mini/t-mini-avatar.vue";
-import TMiniWeapon from "../mini/t-mini-weapon.vue";
+import TibCalendarAvatar from "../itembox/tib-calendar-avatar.vue";
+import TibCalendarWeapon from "../itembox/tib-calendar-weapon.vue";
 // data
 import { AppCalendarData } from "../../data";
 
