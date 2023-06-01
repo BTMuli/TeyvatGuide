@@ -4,8 +4,8 @@
       <div class="box-div">
         <div class="toc-top">
           <div class="toc-icon">
-            <TMiniAvatar v-if="itemType=== 'character'" v-model="itemVal" size="100px" />
-            <TMiniWeapon v-if="itemType=== 'weapon'" v-model="itemVal" size="100px" />
+            <TibCalendarAvatar v-if="itemType=== 'character'" v-model="itemVal" size="100px" />
+            <TibCalendarWeapon v-if="itemType=== 'weapon'" v-model="itemVal" size="100px" />
           </div>
           <div class="toc-material-grid">
             <TCalendarMaterial v-for="item in itemVal.materials" :item="item" />
@@ -46,8 +46,8 @@
 import { computed, ref } from "vue";
 import TOverlay from "../main/t-overlay.vue";
 import TCalendarMaterial from "../mini/t-calendar-material.vue";
-import TMiniAvatar from "../mini/t-mini-avatar.vue";
-import TMiniWeapon from "../mini/t-mini-weapon.vue";
+import TibCalendarWeapon from "../itembox/tib-calendar-weapon.vue";
+import TibCalendarAvatar from "../itembox/tib-calendar-avatar.vue";
 // utils
 import { OBC_CONTENT_API } from "../../plugins/Mys/interface/utils";
 import { createTGWindow } from "../../utils/TGWindow";

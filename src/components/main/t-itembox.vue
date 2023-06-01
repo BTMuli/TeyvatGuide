@@ -90,6 +90,21 @@ const card: ComputedRef<TItemBoxCard> = computed(() => {
       } as TItemBoxCard;
     case "wiki-avatar":
       cardData = props.data as TGApp.App.Character.WikiBriefInfo;
+      return {
+        bg: `/icon/bg/${cardData.star}-Star.webp`,
+        icon: `/WIKI/character/icon/${cardData.id}.webp`,
+        lt: `/icon/element/${cardData.element}元素.webp`,
+        innerIcon: `/icon/weapon/${cardData.weapon}.webp`,
+        innerText: cardData.name,
+      } as TItemBoxCard;
+    case "wiki-weapon":
+      cardData = props.data as TGApp.App.Weapon.WikiBriefInfo;
+      return {
+        bg: cardData.bg,
+        icon: cardData.icon,
+        lt: cardData.weaponIcon,
+        innerText: cardData.name,
+      } as TItemBoxCard;
   }
 });
 

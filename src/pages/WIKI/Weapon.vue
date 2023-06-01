@@ -1,7 +1,7 @@
 <template>
   <div class="cards-grid">
     <div v-for="item in cardsInfo" :key="item.id" class="card-box" @click="toOuter(item)">
-      <TMiniWeapon size="128px" :model-value="item" />
+      <TibWikiWeapon size="128px" :model-value="item" />
     </div>
     <v-snackbar v-model="snackbar" timeout="1500" color="error">
       该武器暂无详情
@@ -12,7 +12,7 @@
 <script lang="ts" setup>
 // vue
 import { ref, computed } from "vue";
-import TMiniWeapon from "../../components/mini/t-mini-weapon.vue";
+import TibWikiWeapon from "../../components/itembox/tib-wiki-weapon.vue";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
 import { AppWeaponData } from "../../data";

@@ -1,7 +1,7 @@
 <template>
   <div class="cards-grid">
     <div v-for="item in cardsInfo" :key="item.id" class="card-box" @click="toOuter(item)">
-      <TMiniAvatar size="128px" :model-value="item" />
+      <TibWikiAvatar size="128px" :model-value="item" />
     </div>
     <v-snackbar v-model="snackbar" timeout="1500" color="error">
       该角色暂无详情
@@ -12,7 +12,7 @@
 <script lang="ts" setup>
 // vue
 import { ref, computed } from "vue";
-import TMiniAvatar from "../../components/mini/t-mini-avatar.vue";
+import TibWikiAvatar from "../../components/itembox/tib-wiki-avatar.vue";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
 import { AppCharacterData } from "../../data";
