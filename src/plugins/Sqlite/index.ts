@@ -29,6 +29,7 @@ class Sqlite {
   private readonly tables: string[] = [
     "Achievements",
     "AchievementSeries",
+    "AppCharacters",
     "AppData",
     "GameAccount",
     "NameCard",
@@ -187,7 +188,9 @@ class Sqlite {
    */
   public async getNameCard (seriesId: number): Promise<TGApp.Sqlite.NameCard.Item> {
     const db = await Database.load(this.dbPath);
-    const sql = `SELECT * FROM NameCard WHERE name = (SELECT nameCard FROM AchievementSeries WHERE id = ${seriesId});`;
+    const sql = `SELECT *
+                 FROM NameCard
+                 WHERE name = (SELECT nameCard FROM AchievementSeries WHERE id = ${seriesId});`;
     const res: TGApp.Sqlite.NameCard.Item[] = await db.select(sql);
     await db.close();
     return res[0];
@@ -203,7 +206,10 @@ class Sqlite {
     const db = await Database.load(this.dbPath);
     let sql;
     if (seriesId) {
-      sql = `SELECT * FROM Achievements WHERE series=${seriesId} ORDER BY isCompleted, \`order\`;`;
+      sql = `SELECT *
+             FROM Achievements
+             WHERE series = ${seriesId}
+             ORDER BY isCompleted, \`order\`;`;
     } else {
       sql = "SELECT * FROM Achievements ORDER BY isCompleted, `order`;";
     }
@@ -249,9 +255,15 @@ class Sqlite {
     let sql;
     if (keyword.startsWith("v")) {
       const version = keyword.replace("v", "");
-      sql = `SELECT * FROM Achievements WHERE version LIKE '%${version}%' ORDER BY isCompleted, \`order\`;`;
+      sql = `SELECT *
+             FROM Achievements
+             WHERE version LIKE '%${version}%'
+             ORDER BY isCompleted, \`order\`;`;
     } else {
-      sql = `SELECT * FROM Achievements WHERE name LIKE '%${keyword}%' OR description LIKE '%${keyword}%'
+      sql = `SELECT *
+             FROM Achievements
+             WHERE name LIKE '%${keyword}%'
+                OR description LIKE '%${keyword}%'
              ORDER BY isCompleted, \`order\`;`;
     }
     const res: TGApp.Sqlite.Achievement.SingleTable[] = await db.select(sql);
@@ -318,10 +330,24 @@ class Sqlite {
    */
   public async getAbyss (): Promise<TGApp.Sqlite.Abyss.SingleTable[]> {
     const db = await Database.load(this.dbPath);
-    const sql = "SELECT * FROM SpiralAbyss";
+    const sql = "SELECT * FROM SpiralAbyss order by id desc";
     const res: TGApp.Sqlite.Abyss.SingleTable[] = await db.select(sql);
     await db.close();
     return res;
+  }
+
+  /**
+   * @description 获取角色数据
+   * @since Alpha v0.2.0
+   * @param {number} id 角色 ID
+   * @returns {Promise<TGApp.Sqlite.Character.AppData}> 角色数据
+   */
+  public async getAppCharacter (id: number): Promise<TGApp.Sqlite.Character.AppData> {
+    const db = await Database.load(this.dbPath);
+    const sql = `SELECT * FROM AppCharacters WHERE id = ${id}`;
+    const res: TGApp.Sqlite.Character.AppData[] = await db.select(sql);
+    await db.close();
+    return res[0];
   }
 }
 

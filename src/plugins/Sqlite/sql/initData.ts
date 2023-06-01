@@ -9,11 +9,17 @@
 import { app } from "@tauri-apps/api";
 // utils
 import { getBuildTime } from "../../../utils/TGBuild";
-import { insertAchievementData, insertAchievementSeriesData, insertNameCardData } from "./insertData";
+import {
+  insertAchievementData,
+  insertAchievementSeriesData,
+  insertNameCardData,
+  insertCharacterData,
+} from "./insertData";
 import {
   AppAchievementsData,
   AppAchievementSeriesData,
   AppNameCardsData,
+  AppCharacterData,
 } from "../../../data";
 
 /**
@@ -74,6 +80,15 @@ function initNameCardData (): string[] {
 }
 
 /**
+ * @description 初始化角色数据
+ * @since Alpha v0.2.0
+ * @returns {string[]} sql
+ */
+function initCharacterData (): string[] {
+  return AppCharacterData.map((item) => insertCharacterData(item));
+}
+
+/**
  * @description 初始化数据
  * @since Alpha v0.2.0
  * @returns {Promise<string[]>} sql
@@ -84,6 +99,7 @@ async function initDataSql (): Promise<string[]> {
   sqlRes.push(...initAchievementSeriesData());
   sqlRes.push(...initAchievementData());
   sqlRes.push(...initNameCardData());
+  sqlRes.push(...initCharacterData());
   return sqlRes;
 }
 

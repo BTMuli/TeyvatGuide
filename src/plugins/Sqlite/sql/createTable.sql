@@ -42,7 +42,8 @@ create table if not exists AppCharacters
     star          integer,
     element       text,
     weapon        text,
-    nameCard      text default '无'
+    nameCard      text,
+    updated       text
 );
 
 -- @brief 创建应用数据表
