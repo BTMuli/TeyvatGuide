@@ -18,6 +18,7 @@ declare namespace TGApp.Sqlite.Abyss {
    * @property {string} maxFloor - 最深抵达
    * @property {number} totalStar - 总星数
    * @property {boolean} isUnlock - 是否解锁
+   * @description 后面的几个数据在数据库中是存储的 JSON 字符串，需要在使用时进行 JSON.parse
    * @property {Character[]} revealRank - 出战次数
    * @property {Character[]} defeatRank - 最多击破数
    * @property {Character[]} damageRank - 最强一击
@@ -37,13 +38,13 @@ declare namespace TGApp.Sqlite.Abyss {
     maxFloor: string
     totalStar: number
     isUnlock: 0 | 1
-    revealRank: Character[]
-    defeatRank: Character[]
-    damageRank: Character[]
-    takeDamageRank: Character[]
-    normalSkillRank: Character[]
-    energySkillRank: Character[]
-    floors: Floor[]
+    revealRank: string // Character[]
+    defeatRank: string // Character[]
+    damageRank: string // Character[]
+    takeDamageRank: string // Character[]
+    normalSkillRank: string // Character[]
+    energySkillRank: string // Character[]
+    floors: string // Floor[]
     updated: string
   }
 
