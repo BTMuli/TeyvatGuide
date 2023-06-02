@@ -1,72 +1,60 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" />
-  <v-tabs v-model="abyssTab" align-tabs="start" class="abyss-tab">
-    <v-tab value="user">
-      深渊记录
-    </v-tab>
-    <v-tab value="record">
-      深渊统计
-    </v-tab>
-    <v-spacer />
-    <v-btn v-show="abyssTab==='user'" class="ua-btn" @click="getAbyssData">
-      <v-icon>mdi-refresh</v-icon>
-      <span>刷新</span>
-    </v-btn>
-    <v-btn v-show="abyssTab==='user'" class="ua-btn">
-      <v-icon>mdi-upload</v-icon>
-      <span>上传</span>
-    </v-btn>
-  </v-tabs>
-  <v-window v-model="abyssTab">
-    <v-window-item value="user" class="user-window">
-      <v-tabs v-model="userTab" direction="vertical" align-tabs="start" class="ua-tab">
-        <v-tab v-for="item in localAbyss" :key="item.id" :value="item.id" @click="toAbyss(item.id)">
-          第 {{ item.id }} 期
-        </v-tab>
-      </v-tabs>
-      <v-window v-model="userTab" class="ua-window">
-        <v-window-item v-for="item in localAbyss" :key="item.id" :value="item.id" class="ua-window-item">
-          <div class="uaw-title">
-            <span>挑战回顾</span>
-            <span>更新于 {{ item.updated }}</span>
-          </div>
-          <div class="uaw-sub-title">
-            <img src="/src/assets/icons/arrow-right.svg" alt="character">
-            <span>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</span>
-          </div>
-          <div class="uaw-o-box">
-            <TuaOverview title="战斗次数" :val-text="item.totalBattleTimes" />
-            <TuaOverview title="获得渊星" :val-text="item.totalStar" />
-            <TuaOverview title="最深抵达" :val-text="item.maxFloor" />
-          </div>
-          <div class="uaw-o-box">
-            <TuaOverview title="出战次数" :val-icons="item.revealRank" :icon-num="4" />
-            <TuaOverview title="最多击破" :val-icons="item.defeatRank" />
-            <TuaOverview title="最强一击" :val-icons="item.damageRank" />
-          </div>
-          <div class="uaw-o-box">
-            <TuaOverview title="最多承伤" :val-icons="item.takeDamageRank" />
-            <TuaOverview title="元素战技" :val-icons="item.normalSkillRank" />
-            <TuaOverview title="元素爆发" :val-icons="item.energySkillRank" />
-          </div>
-          <div class="uaw-sub-title">
-            <img src="/src/assets/icons/arrow-right.svg" alt="character">
-            <span>详情</span>
-          </div>
-          <div class="uaw-d-box">
-            <TuaDetail v-for="floor in JSON.parse(item.floors) as TGApp.Sqlite.Abyss.Floor[]" :model-value="floor" />
-          </div>
-        </v-window-item>
-      </v-window>
-      <div v-show="localAbyssID.length === 0" class="user-empty">
-        <img src="/source/UI/empty.webp" alt="empty">
-        <span>暂无数据，请尝试刷新</span>
+  <div class="ua-box">
+    <v-tabs v-model="userTab" direction="vertical" align-tabs="start" class="ua-tab">
+      <v-tab v-for="item in localAbyss" :key="item.id" :value="item.id" @click="toAbyss(item.id)">
+        第 {{ item.id }} 期
+      </v-tab>
+      <div class="ua-tab-bottom">
+        <v-btn class="ua-btn" @click="getAbyssData">
+          <v-icon>mdi-refresh</v-icon>
+          <span>刷新</span>
+        </v-btn>
+        <!--        <v-btn class="ua-btn" @click="uploadData">-->
+        <!--          <v-icon>mdi-upload</v-icon>-->
+        <!--          <span>上传</span>-->
+        <!--        </v-btn>-->
       </div>
-    </v-window-item>
-    <v-window-item value="record">
-      <h1>胡桃深渊数据统计</h1>
-    </v-window-item>
-  </v-window>
+    </v-tabs>
+    <v-window v-model="userTab" class="ua-window">
+      <v-window-item v-for="item in localAbyss" :key="item.id" :value="item.id" class="ua-window-item">
+        <div class="uaw-title">
+          <span>挑战回顾</span>
+          <span>更新于 {{ item.updated }}</span>
+        </div>
+        <div class="uaw-sub-title">
+          <img src="/src/assets/icons/arrow-right.svg" alt="character">
+          <span>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</span>
+        </div>
+        <div class="uaw-o-box">
+          <TuaOverview title="战斗次数" :val-text="item.totalBattleTimes" />
+          <TuaOverview title="获得渊星" :val-text="item.totalStar" />
+          <TuaOverview title="最深抵达" :val-text="item.maxFloor" />
+        </div>
+        <div class="uaw-o-box">
+          <TuaOverview title="最多击破" :val-icons="item.defeatRank" />
+          <TuaOverview title="最多承伤" :val-icons="item.takeDamageRank" />
+          <TuaOverview title="最强一击" :val-icons="item.damageRank" />
+        </div>
+        <div class="uaw-o-box">
+          <TuaOverview title="元素战技" :val-icons="item.normalSkillRank" />
+          <TuaOverview title="出战次数" :val-icons="item.revealRank" :icon-num="4" />
+          <TuaOverview title="元素爆发" :val-icons="item.energySkillRank" />
+        </div>
+        <div class="uaw-sub-title">
+          <img src="/src/assets/icons/arrow-right.svg" alt="character">
+          <span>详情</span>
+        </div>
+        <div class="uaw-d-box">
+          <TuaDetail v-for="floor in JSON.parse(item.floors) as TGApp.Sqlite.Abyss.Floor[]" :model-value="floor" />
+        </div>
+      </v-window-item>
+    </v-window>
+    <div v-show="localAbyssID.length === 0" class="user-empty">
+      <img src="/source/UI/empty.webp" alt="empty">
+      <span>暂无数据，请尝试刷新</span>
+    </div>
+  </div>
 </template>
 <script lang="ts" setup>
 // vue
@@ -87,7 +75,6 @@ const loading = ref(true);
 const loadingTitle = ref("");
 
 // data
-const abyssTab = ref("user");
 const userTab = ref(0);
 const abyssCookie = ref({
   cookie_token: "",
@@ -151,42 +138,32 @@ async function getAbyssData (): Promise<void> {
 function toAbyss (id: number): void {
   curAbyss.value = localAbyss.value.find((item) => item.id === id)!;
 }
+
+// async function uploadData(){
+//   const latestAbyss = localAbyss.value[0];
+//   const uploadData:TGApp.Plugins.Hutao.AbyssRecordUpload = transAbyssToHutao(latestAbyss, user.value);
+// }
+//
+// function transAbyssToHutao(abyss:TGApp.Sqlite.Abyss.SingleTable, user:TGApp.Sqlite.Account.Game): TGApp.Plugins.Hutao.AbyssRecordUpload {
+//   let res = {
+//     uid: user.gameUid,
+//     identity: "tauri-genshin",
+//     spiralAbyss: {} as TGApp.Plugins.Hutao.AbyssRecord,
+//     avatars: [] as TGApp.Plugins.Hutao.AbyssAvatar[],
+//     reservedUserName: user.nickname,
+//   } as TGApp.Plugins.Hutao.AbyssRecordUpload;
+//   const damageRank:TGApp.Sqlite.Abyss.Character = JSON.parse(abyss.damageRank)[0];
+//   const takeDamageRank:TGApp.Sqlite.Abyss.Character = JSON.parse(abyss.takeDamageRank)[0];
+//   const floors:TGApp.Sqlite.Abyss.Floor[] = JSON.parse(abyss.floors);
+// }
 </script>
 <style lang="css" scoped>
-.abyss-tab {
-  font-family: Genshin, serif;
-  margin-bottom: 20px;
-  color: var(--content-text-3);
-}
-
-.ua-btn {
-  margin-right: 5px;
-  background: #393b40;
-  color: #faf7e8;
-}
-
-.user-window {
+.ua-box {
   background: rgb(0 0 0 / 10%);
   display: flex;
   justify-content: left;
   align-items: center;
-  height: calc(100vh - 100px);
-}
-
-.user-empty {
-  position: absolute;
-  top: calc(50vh - 200px);
-  left: calc(50vw - 400px);
-  background: rgb(0 0 0 / 30%);
-  border-radius: 5px;
-  width: 800px;
-  height: 400px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 1.5rem;
-  color: #faf7e8;
-  font-family: Genshin, serif;
+  height: calc(100vh - 35px);
 }
 
 .ua-tab {
@@ -194,6 +171,19 @@ function toAbyss (id: number): void {
   color: var(--content-text-3);
   width: 100px;
   height: 100%;
+}
+
+.ua-tab-bottom {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 10px;
+}
+
+.ua-btn {
+  margin-top: 5px;
+  background: #393b40;
+  color: #faf7e8;
 }
 
 .ua-window {
@@ -250,5 +240,21 @@ function toAbyss (id: number): void {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-gap: 10px;
+}
+
+.user-empty {
+  position: absolute;
+  top: calc(50vh - 200px);
+  left: calc(50vw - 400px);
+  background: rgb(0 0 0 / 30%);
+  border-radius: 5px;
+  width: 800px;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1.5rem;
+  color: #faf7e8;
+  font-family: Genshin, serif;
 }
 </style>
