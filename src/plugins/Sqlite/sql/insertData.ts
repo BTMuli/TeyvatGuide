@@ -8,6 +8,7 @@
 // utils
 import { timeToSecond } from "../utils/transTime";
 import { transCharacterData, transFloorData } from "../utils/transAbyssData";
+import { transUserRecord } from "../utils/transUserRecord";
 
 /**
  * @description 插入成就数据
@@ -15,7 +16,7 @@ import { transCharacterData, transFloorData } from "../utils/transAbyssData";
  * @param {TGApp.App.Achievement.Item} data 成就数据
  * @returns {string} sql
  */
-export function insertAchievementData(data: TGApp.App.Achievement.Item): string {
+export function insertAchievementData (data: TGApp.App.Achievement.Item): string {
   return `
       INSERT INTO Achievements (id, series, "order", name, description, reward, completedTime, version, updated)
       VALUES (${data.id}, ${data.series}, ${data.order}, '${data.name}', '${data.description}', ${data.reward}, '',
@@ -37,7 +38,7 @@ export function insertAchievementData(data: TGApp.App.Achievement.Item): string 
  * @param {TGApp.App.Achievement.Series} data 成就系列数据
  * @returns {string} sql
  */
-export function insertAchievementSeriesData(data: TGApp.App.Achievement.Series): string {
+export function insertAchievementSeriesData (data: TGApp.App.Achievement.Series): string {
   return `
       INSERT INTO AchievementSeries (id, "order", name, version, nameCard, updated)
       VALUES (${data.id}, ${data.order}, '${data.name}', '${data.version}', '${data.card}',
@@ -58,7 +59,7 @@ export function insertAchievementSeriesData(data: TGApp.App.Achievement.Series):
  * @param {string} value 值
  * @returns {string} sql
  */
-export function insertAppData(key: string, value: string): string {
+export function insertAppData (key: string, value: string): string {
   return `
       INSERT INTO AppData (key, value, updated)
       VALUES ('${key}', '${value}', datetime('now', 'localtime'))
@@ -73,7 +74,7 @@ export function insertAppData(key: string, value: string): string {
  * @param {TGApp.User.Account.Game} data 游戏账号数据
  * @returns {string} sql
  */
-export function insertGameAccountData(data: TGApp.User.Account.Game): string {
+export function insertGameAccountData (data: TGApp.User.Account.Game): string {
   const isChosen = data.is_chosen ? 1 : 0;
   const isOfficial = data.is_official ? 1 : 0;
   return `
@@ -97,7 +98,7 @@ export function insertGameAccountData(data: TGApp.User.Account.Game): string {
  * @param {TGApp.App.NameCard.Item} data 名片数据
  * @returns {string} sql
  */
-export function insertNameCardData(data: TGApp.App.NameCard.Item): string {
+export function insertNameCardData (data: TGApp.App.NameCard.Item): string {
   return `
       INSERT INTO NameCard (name, "desc", type, source, updated)
       VALUES ('${data.name}', '${data.desc}', '${data.type}', '${data.source}', datetime('now', 'localtime'))
@@ -114,7 +115,7 @@ export function insertNameCardData(data: TGApp.App.NameCard.Item): string {
  * @param {TGApp.User.Character.Item} data 角色数据
  * @returns {string} sql
  */
-export function insertCharacterData(data: TGApp.App.Character.WikiBriefInfo): string {
+export function insertCharacterData (data: TGApp.App.Character.WikiBriefInfo): string {
   return `
       INSERT INTO AppCharacters (id, name, star, element, weapon, nameCard, birthday, updated)
       VALUES (${data.id}, '${data.name}', ${data.star}, '${data.element}', '${data.weapon}', 
@@ -135,7 +136,7 @@ export function insertCharacterData(data: TGApp.App.Character.WikiBriefInfo): st
  * @param {TGApp.User.Abyss} data 深渊数据
  * @returns {string} sql
  */
-export function insertAbyssData(data: TGApp.Game.Abyss.FullData): string {
+export function insertAbyssData (data: TGApp.Game.Abyss.FullData): string {
   const startTime = timeToSecond(data.start_time);
   const endTime = timeToSecond(data.end_time);
   const isUnlock = data.is_unlock ? 1 : 0;
@@ -170,5 +171,29 @@ export function insertAbyssData(data: TGApp.Game.Abyss.FullData): string {
               energySkillRank  = '${energySkillRank}',
               floors           = '${floors}',
               updated          = datetime('now', 'localtime');
+  `;
+}
+
+/**
+ * @description 插入原神战绩数据
+ * @since Alpha v0.2.0
+ * @param {TGApp.Game.Record.FullData} data 原神战绩数据
+ * @param {string} uid 用户 UID
+ * @returns {string} sql
+ */
+export function insertRecordData (data: TGApp.Game.Record.FullData, uid: string): string {
+  const transData = transUserRecord(data);
+  transData.uid = uid;
+  return `
+      INSERT INTO UserRecord(uid, role, avatars, stats, worldExplore, homes, updated) 
+      VALUES ('${transData.uid}', '${transData.role}', '${transData.avatars}', '${transData.stats}',
+              '${transData.worldExplore}', '${transData.homes}', datetime('now', 'localtime'))
+      ON CONFLICT(uid) DO UPDATE
+      SET role         = '${transData.role}',
+          avatars      = '${transData.avatars}',
+          stats        = '${transData.stats}',
+          worldExplore = '${transData.worldExplore}',
+          homes        = '${transData.homes}',
+          updated      = datetime('now', 'localtime');
   `;
 }

@@ -35,15 +35,15 @@ create table if not exists AchievementSeries
 -- @brief 创建角色数据表
 create table if not exists AppCharacters
 (
-    id            integer primary key,
-    name          text,
-    title         text,
-    birthday      text,
-    star          integer,
-    element       text,
-    weapon        text,
-    nameCard      text,
-    updated       text
+    id       integer primary key,
+    name     text,
+    title    text,
+    birthday text,
+    star     integer,
+    element  text,
+    weapon   text,
+    nameCard text,
+    updated  text
 );
 
 -- @brief 创建应用数据表
@@ -100,3 +100,15 @@ create table if not exists SpiralAbyss
     floors           text,
     updated          text
 );
+
+-- @brief 创建战绩数据表
+create table if not exists UserRecord
+(
+    uid          integer primary key,
+    role         text,
+    avatars      text,
+    stats        text,
+    worldExplore text,
+    homes        text,
+    updated      text
+)

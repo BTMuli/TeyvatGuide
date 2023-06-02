@@ -12,7 +12,12 @@ import initDataSql from "./sql/initData";
 import initTableSql from "./sql/initTable";
 import { importUIAFData } from "./sql/updateData";
 import { getUiafStatus } from "../../utils/UIAF";
-import { insertAbyssData, insertAppData, insertGameAccountData } from "./sql/insertData";
+import {
+  insertAbyssData,
+  insertAppData,
+  insertGameAccountData,
+  insertRecordData,
+} from "./sql/insertData";
 
 class Sqlite {
   /**
@@ -34,6 +39,7 @@ class Sqlite {
     "GameAccount",
     "NameCard",
     "SprialAbyss",
+    "UserRecord",
   ];
 
   /**
@@ -334,6 +340,35 @@ class Sqlite {
     const res: TGApp.Sqlite.Abyss.SingleTable[] = await db.select(sql);
     await db.close();
     return res;
+  }
+
+  /**
+   * @description 保存战绩数据
+   * @since Alpha v0.2.0
+   * @param {TGApp.Game.Record.FullData} data 战绩数据
+   * @param {string} uid 用户 uid
+   * @returns {Promise<void>}
+   */
+  public async saveUserRecord (data: TGApp.Game.Record.FullData, uid: string): Promise<void> {
+    const db = await Database.load(this.dbPath);
+    const sql = insertRecordData(data, uid);
+    await db.execute(sql);
+    await db.close();
+  }
+
+  /**
+   * @description 获取战绩数据
+   * @since Alpha v0.2.0
+   * @param {string} uid 用户 uid
+   * @returns {Promise<TGApp.Sqlite.Record.SingleTable|false>}
+   */
+  public async getUserRecord (uid: string): Promise<TGApp.Sqlite.Record.SingleTable | false> {
+    const db = await Database.load(this.dbPath);
+    const sql = `SELECT * FROM UserRecord WHERE uid = '${uid}'`;
+    const res: TGApp.Sqlite.Record.SingleTable[] = await db.select(sql);
+    await db.close();
+    if (res.length === 0) return false;
+    return res[0];
   }
 
   /**
