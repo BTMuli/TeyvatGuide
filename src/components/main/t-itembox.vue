@@ -39,6 +39,9 @@
 <script lang="ts" setup>
 // vue
 import { computed, ComputedRef } from "vue";
+// types
+import { TibAbyssOverviewAvatar } from "../itembox/tib-abyss-overview.vue";
+import { TibAbyssDetailAvatar } from "../itembox/tib-abyss-detail.vue";
 
 interface TItemBoxProps {
   modelValue: string
@@ -60,12 +63,8 @@ interface TItemBoxCard {
 
 const props = defineProps<TItemBoxProps>();
 
-const getSize = computed(() => {
-  return props.size === "100px" ? "30px" : "40px";
-});
-
 const getHeight = computed(() => {
-  return props.display === "inner" ? props.size : `${props.size.slice(0, -2) + 20}px`;
+  return props.display === "inner" ? props.size : `${Number(props.size.slice(0, -2)) + 20}px`;
 });
 
 const card: ComputedRef<TItemBoxCard> = computed(() => {
@@ -105,6 +104,22 @@ const card: ComputedRef<TItemBoxCard> = computed(() => {
         lt: cardData.weaponIcon,
         innerText: cardData.name,
       } as TItemBoxCard;
+    case "abyss-overview":
+      cardData = props.data as TibAbyssOverviewAvatar;
+      return {
+        bg: `/icon/bg/${cardData.star}-Star.webp`,
+        icon: `/WIKI/character/icon/${cardData.id}.webp`,
+        lt: `/icon/element/${cardData.element}元素.webp`,
+        innerText: cardData.value,
+      } as TItemBoxCard;
+    case "abyss-detail":
+      cardData = props.data as TibAbyssDetailAvatar;
+      return {
+        bg: `/icon/bg/${cardData.star}-Star.webp`,
+        icon: `/WIKI/character/icon/${cardData.id}.webp`,
+        lt: `/icon/element/${cardData.element}元素.webp`,
+        innerText: `Lv.${cardData.value}`,
+      } as TItemBoxCard;
   }
 });
 
@@ -128,8 +143,8 @@ const card: ComputedRef<TItemBoxCard> = computed(() => {
 }
 
 .tib-bg img {
-  width: 100%;
-  height: 100%;
+  width: v-bind(size);
+  height: v-bind(size);
   object-fit: cover;
 }
 
@@ -142,8 +157,8 @@ const card: ComputedRef<TItemBoxCard> = computed(() => {
 }
 
 .tib-icon img {
-  width: 100%;
-  height: 100%;
+  width: v-bind(size);
+  height: v-bind(size);
   object-fit: cover;
 }
 
@@ -164,16 +179,16 @@ const card: ComputedRef<TItemBoxCard> = computed(() => {
   position: absolute;
   top: 0;
   left: 0;
-  width: v-bind(getSize);
-  height: v-bind(getSize);
+  width: 30px;
+  height: 30px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .tib-lt img {
-  width: calc(v-bind(getSize) - 10px);
-  height: calc(v-bind(getSize) - 10px);
+  width: 20px;
+  height: 20px;
   object-fit: cover;
 }
 
@@ -182,7 +197,7 @@ const card: ComputedRef<TItemBoxCard> = computed(() => {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: v-bind(getSize);
+  height: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -190,14 +205,31 @@ const card: ComputedRef<TItemBoxCard> = computed(() => {
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   color: #fff;
-  font-size: calc(v-bind(getSize) / 3);
+  font-size: 8px;
   text-shadow: 0 0 5px #000;
   font-family: Genshin, serif;
 }
 
 .tib-inner img {
-  width: calc(v-bind(getSize) / 1.5);
-  height: calc(v-bind(getSize) / 1.5);
+  width: 20px;
+  height: 20px;
   margin-right: 5px;
+}
+
+.tib-outer {
+  position: absolute;
+  bottom: 0;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  width: 100%;
+  height: 20px;
+  background: rgb(0 0 0/ 20%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Genshin, serif;
+  color: #fff;
+  font-size: 8px;
+  text-shadow: 0 0 5px #000;
 }
 </style>
