@@ -138,6 +138,7 @@ function toAbyss (id: number): void {
   justify-content: left;
   align-items: center;
   height: calc(100vh - 35px);
+  border-radius: 5px;
 }
 
 .ua-tab {
