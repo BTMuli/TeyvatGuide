@@ -18,6 +18,7 @@ export const useUserStore = defineStore(
       uid: "",
       desc: "",
     } as TGApp.App.Account.BriefInfo);
+    const account = ref({} as TGApp.Sqlite.Account.Game);
     const cookie = ref({} as Record<string, string>);
 
     function setBriefInfo (info: TGApp.App.Account.BriefInfo): void {
@@ -26,6 +27,14 @@ export const useUserStore = defineStore(
 
     function getBriefInfo (): Record<string, string> {
       return briefInfo.value;
+    }
+
+    function setCurAccount (user: TGApp.Sqlite.Account.Game) {
+      account.value = user;
+    }
+
+    function getCurAccount (): TGApp.Sqlite.Account.Game {
+      return account.value;
     }
 
     function getCookieItem (key: string): string {
@@ -67,12 +76,16 @@ export const useUserStore = defineStore(
         cookie.value = ck;
       }
     }
+
     return {
       briefInfo,
       cookie,
+      account,
       getBriefInfo,
       setBriefInfo,
       getCookieItem,
+      setCurAccount,
+      getCurAccount,
       getCookieGroup1,
       getCookieGroup2,
       getCookieGroup3,
@@ -89,6 +102,10 @@ export const useUserStore = defineStore(
       key: "briefInfo",
       storage: window.localStorage,
       paths: ["briefInfo"],
+    }, {
+      key: "account",
+      storage: window.localStorage,
+      paths: ["account"],
     }],
   },
 );

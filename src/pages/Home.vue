@@ -5,7 +5,7 @@
 
 <script lang="ts" setup>
 // vue
-import { markRaw, onMounted, onUnmounted, onUpdated, ref } from "vue";
+import { markRaw, onBeforeMount, onMounted, onUnmounted, onUpdated, ref } from "vue";
 import TOLoading from "../components/overlay/to-loading.vue";
 import TPool from "../components/main/t-pool.vue";
 import TPosition from "../components/main/t-position.vue";
@@ -13,8 +13,10 @@ import TCalendar from "../components/main/t-calendar.vue";
 // store
 import { useHomeStore } from "../store/modules/home";
 import { useAppStore } from "../store/modules/app";
+import { useUserStore } from "../store/modules/user";
 // utils
 import { getBuildTime } from "../utils/TGBuild";
+import TGSqlite from "../plugins/Sqlite";
 
 // store
 const appStore = useAppStore();
@@ -42,6 +44,15 @@ function readLoading (): void {
     loading.value = false;
   }
 }
+
+onBeforeMount(async () => {
+  // 获取当前用户
+  const user = await TGSqlite.getCurAccount();
+  // 存储当前用户
+  if (user) {
+    useUserStore().setCurAccount(user);
+  }
+});
 
 onMounted(async () => {
   loadingTitle.value = "正在加载首页";

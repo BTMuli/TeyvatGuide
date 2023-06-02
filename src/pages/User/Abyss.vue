@@ -10,10 +10,6 @@
           <v-icon>mdi-refresh</v-icon>
           <span>刷新</span>
         </v-btn>
-        <!--        <v-btn class="ua-btn" @click="uploadData">-->
-        <!--          <v-icon>mdi-upload</v-icon>-->
-        <!--          <span>上传</span>-->
-        <!--        </v-btn>-->
       </div>
     </v-tabs>
     <v-window v-model="userTab" class="ua-window">
@@ -58,7 +54,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TuaOverview from "../../components/userabyss/tua-overview.vue";
 import TuaDetail from "../../components/userabyss/tua-detail.vue";
@@ -82,7 +78,7 @@ const abyssCookie = ref({
   ltoken: "",
   ltuid: "",
 });
-const user = ref({} as TGApp.Sqlite.Account.Game);
+const user = computed(() => userStore.getCurAccount());
 
 const localAbyss = ref([] as TGApp.Sqlite.Abyss.SingleTable[]);
 const localAbyssID = ref([] as number[]);
@@ -90,10 +86,6 @@ const curAbyss = ref({} as TGApp.Sqlite.Abyss.SingleTable);
 
 onMounted(async () => {
   loadingTitle.value = "正在加载深渊数据";
-  const curUser = await TGSqlite.getCurAccount();
-  if (curUser) {
-    user.value = curUser;
-  }
   abyssCookie.value = {
     cookie_token: userStore.getCookieItem("cookie_token"),
     account_id: userStore.getCookieItem("account_id"),
@@ -138,24 +130,6 @@ async function getAbyssData (): Promise<void> {
 function toAbyss (id: number): void {
   curAbyss.value = localAbyss.value.find((item) => item.id === id)!;
 }
-
-// async function uploadData(){
-//   const latestAbyss = localAbyss.value[0];
-//   const uploadData:TGApp.Plugins.Hutao.AbyssRecordUpload = transAbyssToHutao(latestAbyss, user.value);
-// }
-//
-// function transAbyssToHutao(abyss:TGApp.Sqlite.Abyss.SingleTable, user:TGApp.Sqlite.Account.Game): TGApp.Plugins.Hutao.AbyssRecordUpload {
-//   let res = {
-//     uid: user.gameUid,
-//     identity: "tauri-genshin",
-//     spiralAbyss: {} as TGApp.Plugins.Hutao.AbyssRecord,
-//     avatars: [] as TGApp.Plugins.Hutao.AbyssAvatar[],
-//     reservedUserName: user.nickname,
-//   } as TGApp.Plugins.Hutao.AbyssRecordUpload;
-//   const damageRank:TGApp.Sqlite.Abyss.Character = JSON.parse(abyss.damageRank)[0];
-//   const takeDamageRank:TGApp.Sqlite.Abyss.Character = JSON.parse(abyss.takeDamageRank)[0];
-//   const floors:TGApp.Sqlite.Abyss.Floor[] = JSON.parse(abyss.floors);
-// }
 </script>
 <style lang="css" scoped>
 .ua-box {

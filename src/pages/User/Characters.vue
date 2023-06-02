@@ -25,7 +25,7 @@ import { useUserStore } from "../../store/modules/user";
 // request
 import TGRequest from "../../web/request/TGRequest";
 // utils
-import TGSqlite from "../../utils/TGSqlite";
+import TGSqlite from "../../plugins/Sqlite";
 
 // store
 const appStore = useAppStore();
@@ -38,7 +38,7 @@ const loadingTitle = ref("");
 // data
 const roleList = ref([] as TGApp.Game.Character.ListItem[]);
 const characterCookie = ref({} as TGApp.BBS.Constant.CookieGroup4);
-const user = ref({} as TGApp.Sqlite.Account.Game);
+const user = computed(() => userStore.getCurAccount());
 const filePath = computed(() => `${appStore.dataPath.userDataDir}/roleList.json`);
 
 onMounted(async () => {
@@ -60,7 +60,6 @@ async function refresh () {
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
   const res = await TGRequest.User.byLToken.getRoleList(characterCookie.value, user.value);
-  console.log(res);
   if (Array.isArray(res)) {
     loadingTitle.value = "正在保存角色数据";
     await fs.writeTextFile({
