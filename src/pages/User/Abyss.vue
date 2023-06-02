@@ -56,8 +56,8 @@
 // vue
 import { computed, onMounted, ref } from "vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import TuaOverview from "../../components/userabyss/tua-overview.vue";
-import TuaDetail from "../../components/userabyss/tua-detail.vue";
+import TuaOverview from "../../components/userAbyss/tua-overview.vue";
+import TuaDetail from "../../components/userAbyss/tua-detail.vue";
 // store
 import { useUserStore } from "../../store/modules/user";
 // utils
@@ -72,12 +72,7 @@ const loadingTitle = ref("");
 
 // data
 const userTab = ref(0);
-const abyssCookie = ref({
-  cookie_token: "",
-  account_id: "",
-  ltoken: "",
-  ltuid: "",
-});
+const abyssCookie = ref(computed(() => userStore.getCookieGroup4()));
 const user = computed(() => userStore.getCurAccount());
 
 const localAbyss = ref([] as TGApp.Sqlite.Abyss.SingleTable[]);
@@ -86,12 +81,6 @@ const curAbyss = ref({} as TGApp.Sqlite.Abyss.SingleTable);
 
 onMounted(async () => {
   loadingTitle.value = "正在加载深渊数据";
-  abyssCookie.value = {
-    cookie_token: userStore.getCookieItem("cookie_token"),
-    account_id: userStore.getCookieItem("account_id"),
-    ltoken: userStore.getCookieItem("ltoken"),
-    ltuid: userStore.getCookieItem("ltuid"),
-  };
   await initAbyssData();
   loading.value = false;
 });
