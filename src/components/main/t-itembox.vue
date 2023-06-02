@@ -2,133 +2,87 @@
   <div class="tib-box">
     <div class="tib-bg">
       <slot name="bg">
-        <img :src="card.bg" alt="bg">
+        <img :src="modelValue.bg" alt="bg">
       </slot>
     </div>
     <div class="tib-icon">
       <slot name="icon">
-        <img :src="card.icon" alt="icon">
+        <img :src="modelValue.icon" alt="icon">
       </slot>
     </div>
     <div class="tib-cover">
       <div class="tib-lt">
-        <img :src="card.lt" alt="lt">
+        <img :src="modelValue.lt" alt="lt">
       </div>
-      <div v-show="card.rt" class="tib-rt">
-        {{ card.rt }}
+      <div v-show="modelValue.rt" class="tib-rt">
+        {{ modelValue.rt }}
       </div>
-      <div v-show="props.display==='inner'" class="tib-inner">
+      <div v-if="modelValue.display==='inner'" class="tib-inner">
         <slot name="inner-icon">
-          <img v-show="card.innerIcon" :src="card.innerIcon" alt="inner-icon">
+          <img v-show="modelValue.innerIcon" :src="modelValue.innerIcon" alt="inner-icon">
         </slot>
         <slot name="inner-text">
-          <span>{{ card.innerText }}</span>
+          <span>{{ modelValue.innerText }}</span>
         </slot>
       </div>
-      <div v-show="props.display==='outer'" class="tib-outer">
+      <div v-if="modelValue.display==='outer'" class="tib-outer">
         <slot name="outer-icon">
-          <img v-show="card.outerIcon" :src="card.outerIcon" alt="outer-icon">
+          <img v-show="modelValue.outerIcon" :src="modelValue.outerIcon" alt="outer-icon">
         </slot>
         <slot name="outer-text">
-          <span>{{ card.outerText }}</span>
+          <span>{{ modelValue.outerText }}</span>
         </slot>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-// vue
-import { computed, ComputedRef } from "vue";
-// types
-import { TibAbyssOverviewAvatar } from "../itembox/tib-abyss-overview.vue";
-import { TibAbyssDetailAvatar } from "../itembox/tib-abyss-detail.vue";
+import { computed } from "vue";
 
-interface TItemBoxProps {
-  modelValue: string
-  data: Record<string, string | number>,
-  display: "inner" | "outer",
-  size: string,
-}
-
-interface TItemBoxCard {
+export interface TItemBoxData {
   bg: string,
   icon: string,
+  size: string,
+  height: string,
+  display: "inner" | "outer",
   lt: string,
+  ltSize: string,
   rt?: string,
+  rtSize?: string,
+  innerHeight?: number,
   innerIcon?: string,
   innerText?: string,
+  outerHeight?: number,
   outerIcon?: string,
   outerText?: string,
 }
 
-const props = defineProps<TItemBoxProps>();
+interface TItemBoxProps {
+  modelValue: TItemBoxData,
+}
 
-const getHeight = computed(() => {
-  return props.display === "inner" ? props.size : `${Number(props.size.slice(0, -2)) + 20}px`;
+const props = withDefaults(defineProps<TItemBoxProps>(), {
+  modelValue: {
+    bg: "",
+    icon: "",
+    lt: "",
+    ltSize: "30px",
+    display: "inner",
+    size: "80px",
+    height: "80px",
+  },
 });
 
-const card: ComputedRef<TItemBoxCard> = computed(() => {
-  let cardData;
-  switch (props.modelValue) {
-    case "calendar-avatar":
-      cardData = props.data as TGApp.App.Calendar.Item;
-      return {
-        bg: cardData.bg,
-        icon: cardData.icon,
-        lt: cardData.elementIcon,
-        innerIcon: cardData.weaponIcon,
-        innerText: cardData.name,
-      } as TItemBoxCard;
-    case "calendar-weapon":
-      cardData = props.data as TGApp.App.Calendar.Item;
-      return {
-        bg: cardData.bg,
-        icon: cardData.icon,
-        lt: cardData.weaponIcon,
-        innerText: cardData.name,
-      } as TItemBoxCard;
-    case "wiki-avatar":
-      cardData = props.data as TGApp.App.Character.WikiBriefInfo;
-      return {
-        bg: `/icon/bg/${cardData.star}-Star.webp`,
-        icon: `/WIKI/character/icon/${cardData.id}.webp`,
-        lt: `/icon/element/${cardData.element}元素.webp`,
-        innerIcon: `/icon/weapon/${cardData.weapon}.webp`,
-        innerText: cardData.name,
-      } as TItemBoxCard;
-    case "wiki-weapon":
-      cardData = props.data as TGApp.App.Weapon.WikiBriefInfo;
-      return {
-        bg: cardData.bg,
-        icon: cardData.icon,
-        lt: cardData.weaponIcon,
-        innerText: cardData.name,
-      } as TItemBoxCard;
-    case "abyss-overview":
-      cardData = props.data as TibAbyssOverviewAvatar;
-      return {
-        bg: `/icon/bg/${cardData.star}-Star.webp`,
-        icon: `/WIKI/character/icon/${cardData.id}.webp`,
-        lt: `/icon/element/${cardData.element}元素.webp`,
-        innerText: cardData.value,
-      } as TItemBoxCard;
-    case "abyss-detail":
-      cardData = props.data as TibAbyssDetailAvatar;
-      return {
-        bg: `/icon/bg/${cardData.star}-Star.webp`,
-        icon: `/WIKI/character/icon/${cardData.id}.webp`,
-        lt: `/icon/element/${cardData.element}元素.webp`,
-        innerText: `Lv.${cardData.value}`,
-      } as TItemBoxCard;
-  }
-});
-
+const getInnerHeight = computed(() => `${props.modelValue.innerHeight}px`);
+const getInnerFont = computed(() => `${props.modelValue.innerHeight / 2}px`);
+const getOuterHeight = computed(() => `${props.modelValue.outerHeight}px`);
+const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
 </script>
 <style lang="css" scoped>
 .tib-box {
   position: relative;
-  width: v-bind(size);
-  height: v-bind(getHeight);
+  width: v-bind(props["modelValue"]["size"]);
+  height: v-bind(props["modelValue"]["height"]);
   cursor: pointer;
 }
 
@@ -136,29 +90,29 @@ const card: ComputedRef<TItemBoxCard> = computed(() => {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: v-bind(props["modelValue"]["size"]);
+  height: v-bind(props["modelValue"]["size"]);
   border-radius: 5px;
   overflow: hidden;
 }
 
 .tib-bg img {
-  width: v-bind(size);
-  height: v-bind(size);
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
 .tib-icon {
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: v-bind(props["modelValue"]["size"]);
+  height: v-bind(props["modelValue"]["size"]);
   overflow: hidden;
   border-radius: 5px;
 }
 
 .tib-icon img {
-  width: v-bind(size);
-  height: v-bind(size);
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -166,8 +120,8 @@ const card: ComputedRef<TItemBoxCard> = computed(() => {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: v-bind(props["modelValue"]["size"]);
+  height: v-bind(props["modelValue"]["size"]);
   border-radius: 5px;
   display: flex;
   justify-content: center;
@@ -179,16 +133,17 @@ const card: ComputedRef<TItemBoxCard> = computed(() => {
   position: absolute;
   top: 0;
   left: 0;
-  width: 30px;
-  height: 30px;
+  padding: 5px;
+  width: v-bind(props["modelValue"]["ltSize"]);
+  height: v-bind(props["modelValue"]["ltSize"]);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .tib-lt img {
-  width: 20px;
-  height: 20px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -197,7 +152,7 @@ const card: ComputedRef<TItemBoxCard> = computed(() => {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 20px;
+  height: v-bind(getInnerHeight);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -205,14 +160,14 @@ const card: ComputedRef<TItemBoxCard> = computed(() => {
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   color: #fff;
-  font-size: 8px;
+  font-size: v-bind(getInnerFont);
   text-shadow: 0 0 5px #000;
   font-family: Genshin, serif;
 }
 
 .tib-inner img {
-  width: 20px;
-  height: 20px;
+  width: v-bind(getInnerHeight);
+  height: v-bind(getInnerHeight);
   margin-right: 5px;
 }
 
@@ -222,14 +177,14 @@ const card: ComputedRef<TItemBoxCard> = computed(() => {
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   width: 100%;
-  height: 20px;
+  height: v-bind(getOuterHeight);
   background: rgb(0 0 0/ 20%);
   display: flex;
   justify-content: center;
   align-items: center;
   font-family: Genshin, serif;
   color: #fff;
-  font-size: 8px;
+  font-size: v-bind(getOuterFont);
   text-shadow: 0 0 5px #000;
 }
 </style>
