@@ -1,0 +1,43 @@
+<template>
+  <div class="tur-o-g-box">
+    <TurOverviewSub title="活跃天数" :text="data.activeDays" />
+    <TurOverviewSub title="成就达成数" :text="data.achievementNumber" />
+    <TurOverviewSub title="获得角色数" :text="data.avatarNumber" />
+    <TurOverviewSub title="解锁传送点" :text="data.wayPoints" />
+    <TurOverviewSub title="解锁秘境" :text="data.domainNumber" />
+  </div>
+  <div class="tur-o-g-box">
+    <TurOverviewSub title="风神瞳" :text="data.anemoCulus" />
+    <TurOverviewSub title="岩神瞳" :text="data.geoCulus" />
+    <TurOverviewSub title="深境螺旋" :text="data.sprialAbyss" />
+    <TurOverviewSub title="雷神瞳" :text="data.electroCulus" />
+    <TurOverviewSub title="草神瞳" :text="data.dendroCulus" />
+  </div>
+  <div class="tur-o-g-box">
+    <TurOverviewSub title="华丽宝箱数" :text="data.luxuriousChest" />
+    <TurOverviewSub title="珍贵宝箱数" :text="data.preciousChest" />
+    <TurOverviewSub title="精致宝箱数" :text="data.exquisiteChest" />
+    <TurOverviewSub title="普通宝箱数" :text="data.commonChest" />
+    <TurOverviewSub title="奇馈宝箱数" :text="data.magicChest" />
+  </div>
+</template>
+<script lang="ts" setup>
+// vue
+import { computed } from "vue";
+import TurOverviewSub from "./tur-overview-sub.vue";
+
+interface TurOverviewGridProps {
+  modelValue: string
+}
+
+const props = defineProps<TurOverviewGridProps>();
+const data = computed(() => JSON.parse(props.modelValue) as TGApp.Sqlite.Record.Stats);
+</script>
+<style lang="css" scoped>
+.tur-o-g-box {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-column-gap: 10px;
+  width: 100%;
+}
+</style>

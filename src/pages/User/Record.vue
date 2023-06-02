@@ -3,7 +3,9 @@
   <div class="ur-box">
     <div class="ur-top">
       <div class="ur-top-title">
-        原神战绩 更新于 {{ recordData.updated }}
+        <span v-if="recordData.role">{{ getTitle() }}</span>
+        <span v-else>原神战绩</span>
+        更新于 {{ recordData.updated }}
       </div>
       <v-btn variant="outlined" class="ur-top-btn" @click="refresh">
         更新数据
@@ -13,28 +15,39 @@
       <img src="/src/assets/icons/arrow-right.svg" alt="overview">
       <span>数据总览</span>
     </div>
-    <div class="ur-overview-grid">
-      <!--      <TurOverview title="活跃天数" :text="recordData.stats.active_day_number" />-->
+    <TurOverviewGrid v-if="recordData.stats" :model-value="recordData.stats" />
+    <div class="ur-sub-title">
+      <img src="/src/assets/icons/arrow-right.svg" alt="overview">
+      <span>我的角色</span>
     </div>
+    <div v-if="recordData.avatars" class="ur-avatar-grid">
+      <TibUrAvatar v-for="avatar in JSON.parse(recordData.avatars) as TGApp.Sqlite.Record.Avatar[]" :key="avatar.id" :model-value="avatar" />
+    </div>
+    <div class="ur-sub-title">
+      <img src="/src/assets/icons/arrow-right.svg" alt="overview">
+      <span>世界探索</span>
+    </div>
+    {{ recordData.worldExplore }}
+    <div class="ur-sub-title">
+      <img src="/src/assets/icons/arrow-right.svg" alt="overview">
+      <span>尘歌壶</span>
+    </div>
+    {{ recordData.homes }}
   </div>
-  {{ recordData }}
 </template>
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import TurOverview from "../../components/userRecord/tur-overview.vue";
-// tauri
-import { fs } from "@tauri-apps/api";
+import TurOverviewGrid from "../../components/userRecord/tur-overview-grid.vue";
+import TibUrAvatar from "../../components/itembox/tib-ur-avatar.vue";
 // store
-import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
 // utils
 import TGRequest from "../../web/request/TGRequest";
 import TGSqlite from "../../plugins/Sqlite";
 
 // store
-const appStore = useAppStore();
 const userStore = useUserStore();
 
 // loading
@@ -45,7 +58,6 @@ const loadingTitle = ref("");
 const recordData = ref({} as TGApp.Sqlite.Record.SingleTable);
 const recordCookie = computed(() => userStore.getCookieGroup2() as Record<string, string>);
 const user = computed(() => userStore.getCurAccount());
-const filePath = computed(() => `${appStore.dataPath.userDataDir}/recordData.json`);
 
 onMounted(async () => {
   loadingTitle.value = "正在加载战绩数据";
@@ -58,8 +70,6 @@ async function initUserRecordData () {
   const recordGet = await TGSqlite.getUserRecord(user.value.gameUid);
   if (recordGet !== false) {
     recordData.value = recordGet;
-  } else {
-    await refresh();
   }
 }
 
@@ -74,6 +84,11 @@ async function refresh () {
     await initUserRecordData();
   }
   loading.value = false;
+}
+
+function getTitle () {
+  const role = JSON.parse(recordData.value.role) as TGApp.Sqlite.Record.Role;
+  return `${role.nickname} [Lv.${role.level}] [${recordData.value.uid}]`;
 }
 </script>
 <style lang="css" scoped>
@@ -128,9 +143,9 @@ async function refresh () {
   margin-right: 5px;
 }
 
-.ur-overview-grid {
+.ur-avatar-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   grid-gap: 10px;
   margin-bottom: 10px;
 }

@@ -45,17 +45,33 @@ function transRole (data: TGApp.Game.Record.Role): string {
  * @returns {string} 转换后的角色列表
  */
 function transAvatar (data: TGApp.Game.Record.Avatar[]): string {
+  const elementMap: Record<string, string> = {
+    Anemo: "风",
+    Geo: "岩",
+    Electro: "雷",
+    Hydro: "水",
+    Pyro: "火",
+    Cryo: "冰",
+    Dendro: "草",
+  };
   const avatars: TGApp.Sqlite.Record.Avatar[] = data.map(item => {
     return {
       id: item.id,
       name: item.name,
-      element: item.element,
+      element: elementMap[item.element],
       fetter: item.fetter,
       level: item.level,
-      star: item.rarity,
+      star: item.rarity === 105 ? 5 : item.rarity,
       constellation: item.actived_constellation_num,
       isShow: item.is_chosen ? 1 : 0,
     } as TGApp.Sqlite.Record.Avatar;
+  }).sort((a, b) => {
+    // 先按星级降序
+    if (a.star !== b.star) {
+      return b.star - a.star;
+    }
+    // 再按 id 降序
+    return b.id - a.id;
   });
   return JSON.stringify(avatars);
 }
@@ -96,7 +112,6 @@ function transStat (data: TGApp.Game.Record.Stats): string {
 function transWorld (data: TGApp.Game.Record.WorldExplore[]): string {
   const worlds: TGApp.Sqlite.Record.WorldExplore[] = data.map(item => {
     let offerings;
-    console.log(item.Offerings);
     if (item.Offerings !== undefined) {
       offerings = item.Offerings.map(offering => {
         return {

@@ -25,14 +25,14 @@
           <span>{{ modelValue.innerText }}</span>
         </slot>
       </div>
-      <div v-if="modelValue.display==='outer'" class="tib-outer">
-        <slot name="outer-icon">
-          <img v-show="modelValue.outerIcon" :src="modelValue.outerIcon" alt="outer-icon">
-        </slot>
-        <slot name="outer-text">
-          <span>{{ modelValue.outerText }}</span>
-        </slot>
-      </div>
+    </div>
+    <div v-if="modelValue.display==='outer'" class="tib-outer">
+      <slot name="outer-icon">
+        <img v-show="modelValue.outerIcon" :src="modelValue.outerIcon" alt="outer-icon">
+      </slot>
+      <slot name="outer-text">
+        <span>{{ modelValue.outerText }}</span>
+      </slot>
     </div>
   </div>
 </template>
@@ -147,6 +147,22 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   object-fit: cover;
 }
 
+.tib-rt {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: v-bind(props["modelValue"]["rtSize"]);
+  height: v-bind(props["modelValue"]["rtSize"]);
+  background: rgb(0 0 0 / 50%);
+  border-top-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Genshin, serif;
+  color: #faf7e8;
+}
+
 .tib-inner {
   position: absolute;
   bottom: 0;
@@ -186,5 +202,11 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   color: #fff;
   font-size: v-bind(getOuterFont);
   text-shadow: 0 0 5px #000;
+}
+
+.tib-outer img {
+  width: v-bind(getOuterHeight);
+  height: v-bind(getOuterHeight);
+  margin-right: 5px;
 }
 </style>
