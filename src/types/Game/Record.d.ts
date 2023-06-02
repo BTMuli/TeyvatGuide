@@ -26,7 +26,7 @@ declare namespace TGApp.Game.Record {
    * @property {Avatar[]} avatars - 角色列表
    * @property {Stats} stats - 统计信息
    * @property {unknown[]} city_explorations - 城市探索信息
-   * @property {WorldExplore} world_explorations - 世界探索信息
+   * @property {WorldExplore[]} world_explorations - 世界探索信息
    * @property {Home[]} homes - 尘歌壶信息
    * @return FullData
    */
@@ -35,7 +35,7 @@ declare namespace TGApp.Game.Record {
     avatars: Avatar[]
     stats: Stats
     city_explorations: unknown[]
-    world_explorations: WorldExplore
+    world_explorations: WorldExplore[]
     homes: Home[]
   }
 
@@ -96,7 +96,7 @@ declare namespace TGApp.Game.Record {
    * @property {number} avatar_number - 角色数量
    * @property {number} way_point_number - 解锁传送点数量
    * @property {number} domain_number - 解锁秘境数量
-   * @property {number} spiral_abyss - 深境螺旋最深达到几层
+   * @property {string} spiral_abyss - 深境螺旋最深达到几层
    * @property {number} precious_chest_number - 珍贵宝箱数量
    * @property {number} luxurious_chest_number - 豪华宝箱数量
    * @property {number} exquisite_chest_number - 精致宝箱数量
@@ -114,7 +114,7 @@ declare namespace TGApp.Game.Record {
     avatar_number: number
     way_point_number: number
     domain_number: number
-    spiral_abyss: number
+    spiral_abyss: string
     precious_chest_number: number
     luxurious_chest_number: number
     exquisite_chest_number: number
