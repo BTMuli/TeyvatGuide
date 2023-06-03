@@ -32,7 +32,7 @@
         </div>
         <v-list-item>
           <template #prepend>
-            <v-img width="40px" style="margin-right: 10px" :src="series.icon" />
+            <v-img width="40px" style="margin-right: 10px" :src="`/source/achievement/${series.id}.webp`" />
           </template>
           <v-list-item-title>
             {{ series.name }}
@@ -46,7 +46,7 @@
       <v-list
         v-if="selectedSeries !== 0 && selectedSeries !== 17 && selectedSeries !== -1"
         :style="{
-          backgroundImage: 'url(' + getCardInfo.bg || null + ')',
+          backgroundImage: 'url(' + getCardImg.bg || null + ')',
           backgroundPosition: 'right',
           backgroundSize: 'auto 100%',
           backgroundRepeat: 'no-repeat',
@@ -61,7 +61,7 @@
       >
         <v-list-item :title="getCardInfo.name" :subtitle="getCardInfo.desc">
           <template #prepend>
-            <v-img width="80px" style="margin-right: 10px" :src="getCardInfo.icon" />
+            <v-img width="80px" style="margin-right: 10px" :src="getCardImg.icon" />
           </template>
         </v-list-item>
       </v-list>
@@ -116,7 +116,7 @@ import { useAchievementsStore } from "../store/modules/achievements";
 // Utils
 import { createTGWindow } from "../utils/TGWindow";
 import { getUiafHeader, readUiafData, verifyUiafData } from "../utils/UIAF";
-import TGSqlite from "../utils/TGSqlite";
+import TGSqlite from "../plugins/Sqlite";
 
 // Store
 const achievementsStore = useAchievementsStore();
@@ -127,7 +127,14 @@ const loadingTitle = ref("正在加载数据" as string);
 
 // data
 const title = ref(achievementsStore.title as string);
-const getCardInfo = ref({} as TGApp.Sqlite.NameCard.Item);
+const getCardInfo = ref({} as TGApp.Sqlite.NameCard.SingleTable);
+const getCardImg = computed(() => {
+  return {
+    profile: `/source/nameCard/profile/${getCardInfo.value.name}.webp`,
+    bg: `/source/nameCard/bg/${getCardInfo.value.name}.webp`,
+    icon: `/source/nameCard/icon/${getCardInfo.value.name}.webp`,
+  };
+});
 // series
 const seriesList = ref([] as TGApp.Sqlite.Achievement.SeriesTable[]);
 const selectedSeries = ref(-1 as number);
@@ -223,7 +230,7 @@ async function selectSeries (index: number) {
 
 // 打开图片
 function openImg () {
-  createTGWindow(getCardInfo.value.profile, "nameCard", getCardInfo.value.name, 840, 400, false);
+  createTGWindow(getCardImg.value.profile, "nameCard", getCardInfo.value.name, 840, 400, false);
 }
 
 async function searchCard () {
