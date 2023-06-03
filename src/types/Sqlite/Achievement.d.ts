@@ -3,7 +3,7 @@
  * @description 数据库成就相关类型定义文件
  * @todo https://github.com/BTMuli/Tauri.Genshin/issues/19
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.5
+ * @since Alpha v0.2.0
  */
 
 declare namespace TGApp.Sqlite.Achievement {
@@ -40,7 +40,7 @@ declare namespace TGApp.Sqlite.Achievement {
 
   /**
    * @description 数据库-成就系列表
-   * @since Alpha v0.1.5
+   * @since Alpha v0.2.0
    * @interface SeriesTable
    * @property {number} id - 成就系列 ID
    * @property {number} order - 成就系列排列顺序，用于展示全部成就系列
@@ -48,7 +48,6 @@ declare namespace TGApp.Sqlite.Achievement {
    * @property {string} version - 成就系列版本
    * @property {number} totalCount - 成就系列包含的成就数
    * @property {number} finCount - 成就系列已完成的成就数
-   * @property {string} icon - 成就系列图标
    * @property {string} nameCard - 成就系列对应名片
    * @property {string} updated - 数据库更新时间
    * @returns SeriesTable
@@ -60,7 +59,6 @@ declare namespace TGApp.Sqlite.Achievement {
     version: string
     totalCount: number
     finCount: number
-    icon: string
     nameCard: string
     updated: string
   }
