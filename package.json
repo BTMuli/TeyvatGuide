@@ -76,7 +76,7 @@
 		"stylelint-high-performance-animation": "^1.8.0",
 		"stylelint-order": "^6.0.3",
 		"typescript": "^5.0.4",
-		"vite": "^4.3.5",
+		"vite": "^4.3.9",
 		"vite-plugin-vuetify": "^1.0.2"
 	}
 }
