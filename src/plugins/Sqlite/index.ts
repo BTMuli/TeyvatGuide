@@ -192,12 +192,12 @@ class Sqlite {
    * @param {number} seriesId 系列 ID
    * @returns {Promise<TGApp.Sqlite.NameCard.Item>}
    */
-  public async getNameCard (seriesId: number): Promise<TGApp.Sqlite.NameCard.Item> {
+  public async getNameCard (seriesId: number): Promise<TGApp.Sqlite.NameCard.SingleTable> {
     const db = await Database.load(this.dbPath);
     const sql = `SELECT *
                  FROM NameCard
                  WHERE name = (SELECT nameCard FROM AchievementSeries WHERE id = ${seriesId});`;
-    const res: TGApp.Sqlite.NameCard.Item[] = await db.select(sql);
+    const res: TGApp.Sqlite.NameCard.SingleTable[] = await db.select(sql);
     await db.close();
     return res[0];
   }
@@ -319,12 +319,13 @@ class Sqlite {
   /**
    * @description 保存深渊数据
    * @since Alpha v0.2.0
+   * @param {string} uid 游戏 UID
    * @param {TGApp.Game.Abyss.FullData} data 深渊数据
    * @returns {Promise<void>}
    */
-  public async saveAbyss (data: TGApp.Game.Abyss.FullData): Promise<void> {
+  public async saveAbyss (uid: string, data: TGApp.Game.Abyss.FullData): Promise<void> {
     const db = await Database.load(this.dbPath);
-    const sql = insertAbyssData(data);
+    const sql = insertAbyssData(uid, data);
     await db.execute(sql);
     await db.close();
   }
@@ -332,11 +333,12 @@ class Sqlite {
   /**
    * @description 获取深渊数据
    * @since Alpha v0.2.0
+   * @param {string} uid 游戏 UID
    * @returns {Promise<TGApp.Game.Abyss.FullData>}
    */
-  public async getAbyss (): Promise<TGApp.Sqlite.Abyss.SingleTable[]> {
+  public async getAbyss (uid: string): Promise<TGApp.Sqlite.Abyss.SingleTable[]> {
     const db = await Database.load(this.dbPath);
-    const sql = "SELECT * FROM SpiralAbyss order by id desc";
+    const sql = `SELECT * FROM SpiralAbyss WHERE uid = '${uid}' order by id desc`;
     const res: TGApp.Sqlite.Abyss.SingleTable[] = await db.select(sql);
     await db.close();
     return res;

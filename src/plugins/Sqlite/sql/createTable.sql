@@ -83,7 +83,8 @@ create table if not exists NameCard
 -- @brief 创建深渊数据表
 create table if not exists SpiralAbyss
 (
-    id               integer primary key,
+    uid              text,
+    id               integer,
     startTime        text,
     endTime          text,
     totalBattleTimes integer,
@@ -98,7 +99,8 @@ create table if not exists SpiralAbyss
     normalSkillRank  text,
     energySkillRank  text,
     floors           text,
-    updated          text
+    updated          text,
+    primary key (uid, id)
 );
 
 -- @brief 创建战绩数据表

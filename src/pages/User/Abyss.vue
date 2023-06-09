@@ -15,7 +15,7 @@
     <v-window v-model="userTab" class="ua-window">
       <v-window-item v-for="item in localAbyss" :key="item.id" :value="item.id" class="ua-window-item">
         <div class="uaw-title">
-          <span>挑战回顾</span>
+          <span>挑战回顾【{{ user.gameUid }}】</span>
           <span>更新于 {{ item.updated }}</span>
         </div>
         <div class="uaw-sub-title">
@@ -72,7 +72,8 @@ const loadingTitle = ref("");
 
 // data
 const userTab = ref(0);
-const abyssCookie = ref(computed(() => userStore.getCookieGroup4()));
+const abyssCookie = ref(computed(
+  () => userStore.getCookieGroup4() as Record<string, string>));
 const user = computed(() => userStore.getCurAccount());
 
 const localAbyss = ref([] as TGApp.Sqlite.Abyss.SingleTable[]);
@@ -86,7 +87,7 @@ onMounted(async () => {
 });
 
 async function initAbyssData () {
-  localAbyss.value = await TGSqlite.getAbyss();
+  localAbyss.value = await TGSqlite.getAbyss(user.value.gameUid);
   localAbyss.value.forEach((item) => {
     localAbyssID.value.push(item.id);
   });
@@ -102,14 +103,14 @@ async function getAbyssData (): Promise<void> {
     const resP = await TGRequest.User.byCookie.getAbyss(abyssCookie.value, "2", user.value);
     if (!resP.hasOwnProperty("retcode")) {
       loadingTitle.value = "正在保存上期深渊数据";
-      await TGSqlite.saveAbyss(resP as TGApp.Game.Abyss.FullData);
+      await TGSqlite.saveAbyss(user.value.gameUid, resP as TGApp.Game.Abyss.FullData);
     }
   }
   loadingTitle.value = "正在获取本期深渊数据";
   const res = await TGRequest.User.byCookie.getAbyss(abyssCookie.value, "1", user.value);
   if (!res.hasOwnProperty("retcode")) {
     loadingTitle.value = "正在保存本期深渊数据";
-    await TGSqlite.saveAbyss(res as TGApp.Game.Abyss.FullData);
+    await TGSqlite.saveAbyss(user.value.gameUid, res as TGApp.Game.Abyss.FullData);
   }
   loadingTitle.value = "正在加载深渊数据";
   await initAbyssData();
@@ -122,7 +123,7 @@ function toAbyss (id: number): void {
 </script>
 <style lang="css" scoped>
 .ua-box {
-  background: rgb(0 0 0 / 10%);
+  box-shadow: 0 0 10px 0 rgb(0 0 0 / 10%);
   display: flex;
   justify-content: left;
   align-items: center;

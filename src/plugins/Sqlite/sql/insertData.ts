@@ -133,10 +133,11 @@ export function insertCharacterData (data: TGApp.App.Character.WikiBriefInfo): s
 /**
  * @description 插入深渊数据
  * @since Alpha v0.2.0
+ * @param {string} uid 用户 uid
  * @param {TGApp.User.Abyss} data 深渊数据
  * @returns {string} sql
  */
-export function insertAbyssData (data: TGApp.Game.Abyss.FullData): string {
+export function insertAbyssData (uid: string, data: TGApp.Game.Abyss.FullData): string {
   const startTime = timeToSecond(data.start_time);
   const endTime = timeToSecond(data.end_time);
   const isUnlock = data.is_unlock ? 1 : 0;
@@ -148,14 +149,14 @@ export function insertAbyssData (data: TGApp.Game.Abyss.FullData): string {
   const energySkillRank = transCharacterData(data.energy_skill_rank);
   const floors = transFloorData(data.floors);
   return `
-      INSERT INTO SpiralAbyss (id, startTime, endTime, totalBattleTimes, totalWinTimes, maxFloor, totalStar, isUnlock,
-                               revealRank, defeatRank, damageRank, takeDamageRank, normalSkillRank, energySkillRank,
-                               floors, updated)
-      VALUES (${data.schedule_id}, '${startTime}', '${endTime}', ${data.total_battle_times}, ${data.total_win_times},
-              '${data.max_floor}', ${data.total_star},
-              ${isUnlock}, '${revealRank}', '${defeatRank}', '${damageRank}', '${takeDamageRank}', '${normalSkillRank}',
-              '${energySkillRank}', '${floors}', datetime('now', 'localtime'))
-      ON CONFLICT(id) DO UPDATE
+      INSERT INTO SpiralAbyss (uid, id, startTime, endTime, totalBattleTimes, totalWinTimes,
+                               maxFloor, totalStar, isUnlock, revealRank, defeatRank, damageRank,
+                               takeDamageRank, normalSkillRank, energySkillRank, floors, updated)
+      VALUES ('${uid}', ${data.schedule_id}, '${startTime}', '${endTime}', ${data.total_battle_times},
+              ${data.total_win_times}, '${data.max_floor}', ${data.total_star},
+              ${isUnlock}, '${revealRank}', '${defeatRank}', '${damageRank}', '${takeDamageRank}',
+              '${normalSkillRank}', '${energySkillRank}', '${floors}', datetime('now', 'localtime'))
+      ON CONFLICT(uid, id) DO UPDATE
           SET startTime        = '${startTime}',
               endTime          = '${endTime}',
               totalBattleTimes = ${data.total_battle_times},
