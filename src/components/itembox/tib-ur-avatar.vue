@@ -12,6 +12,15 @@ interface TibUrAvatarProps {
 
 const props = defineProps<TibUrAvatarProps>();
 const box = ref({} as TItemBoxData);
+const getName = () => {
+  return (
+    props.modelValue.id === 10000005
+    ? "旅行者-空"
+    : props.modelValue.id === 10000007
+      ? "旅行者-荧"
+      : props.modelValue.name
+  );
+};
 
 onMounted(async () => {
   box.value = {
@@ -23,7 +32,7 @@ onMounted(async () => {
     lt: `/icon/element/${props.modelValue.element}元素.webp`,
     rt: props.modelValue.constellation.toString() || "0",
     rtSize: "20px",
-    innerText: `${props.modelValue.name}`,
+    innerText: `${getName()}`,
     innerHeight: 20,
     display: "inner",
   };
