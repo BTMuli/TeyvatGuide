@@ -1,0 +1,29 @@
+<template>
+  <div v-if="props.modelValue===undefined">
+    暂无数据
+  </div>
+  <div v-else class="tur-ag-box">
+    <TibUrAvatar v-for="avatar in data" :key="avatar.id" :model-value="avatar" />
+  </div>
+</template>
+
+<script lang="ts" setup>
+// vue
+import { computed } from "vue";
+import TibUrAvatar from "../itembox/tib-ur-avatar.vue";
+
+interface TurAvatarGridProps {
+  modelValue?: string;
+}
+
+const props = defineProps<TurAvatarGridProps>();
+const data = computed(() => JSON.parse(<string>props.modelValue) as TGApp.Sqlite.Record.Avatar[]);
+</script>
+<style lang="css" scoped>
+.tur-ag-box {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  grid-gap: 10px;
+  margin-bottom: 10px;
+}
+</style>

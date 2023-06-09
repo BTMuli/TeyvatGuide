@@ -1,11 +1,11 @@
 <template>
-  <div class="tur-box">
-    <div class="tur-title">
+  <div class="tur-os-box">
+    <div class="tur-os-title">
       <slot name="title">
         {{ title }}
       </slot>
     </div>
-    <div class="tur-text">
+    <div class="tur-os-text">
       <slot name="val-text">
         {{ text }}
       </slot>
@@ -21,11 +21,10 @@ interface TAOProps {
 defineProps<TAOProps>();
 </script>
 <style lang="css" scoped>
-.tur-box {
+.tur-os-box {
   width: 100%;
   height: auto;
-  padding: 10px;
-  margin-bottom: 10px;
+  padding: 5px;
   border-radius: 5px;
   background: rgb(0 0 0 / 10%);
   display: flex;
@@ -34,18 +33,16 @@ defineProps<TAOProps>();
   align-items: center;
 }
 
-.tur-title {
-  font-family: Genshin, serif;
+.tur-os-title {
+  font-family: Genshin-Light, serif;
   font-size: 20px;
   color: rgb(255 255 255 / 80%);
   text-shadow: 0 0 10px rgb(0 0 0 / 80%);
 }
 
-.tur-text {
-  font-family: Genshin-Light, serif;
+.tur-os-text {
+  font-family: Genshin, serif;
   font-size: 20px;
-  font-weight: bold;
-  margin-top: 10px;
   color: rgb(255 255 255 / 80%);
   text-shadow: #fec90b 0 0 5px;
 }
