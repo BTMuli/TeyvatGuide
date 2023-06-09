@@ -164,7 +164,10 @@
     {{ snackbarText }}
   </v-snackbar>
   <!-- 确认弹窗 -->
-  <TOConfirm v-model:model-value="confirmShow" v-model:model-input="confirmInput" :title="confirmText" :subtitle="confirmSub" :is-input="isConfirmInput" @confirm="doConfirm(confirmOper)" />
+  <TOConfirm
+    v-model="confirmShow" :model-input="confirmInput" :title="confirmText"
+    :subtitle="confirmSub" :is-input="isConfirmInput" @confirm="doConfirm(confirmOper)"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -183,7 +186,7 @@ import { useUserStore } from "../store/modules/user";
 import { backupUiafData, restoreUiafData } from "../utils/UIAF";
 import { backupCookieData } from "../web/utils/backupData";
 import { restoreCookieData } from "../web/utils/restoreData";
-import TGSqlite from "../utils/TGSqlite";
+import TGSqlite from "../plugins/Sqlite";
 import TGRequest from "../web/request/TGRequest";
 
 // Store
@@ -457,8 +460,19 @@ async function refreshUser () {
   if (typeof verifyLTokenRes === "string") {
     loadingTitle.value = "验证成功!正在刷新 cookie_token";
   } else {
-    loadingTitle.value = "验证失败!正在刷新 cookie_token";
-    failCount++;
+    console.error(verifyLTokenRes);
+    loadingTitle.value = "验证失败!正在重新获取 ltoken";
+    const ltokenRes = await TGRequest.User.bySToken.getLToken(ck.stuid, ck.stoken);
+    if (typeof ltokenRes === "string") {
+      ck.ltoken = ltokenRes;
+      await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
+      await userStore.initCookie(ck);
+      loadingTitle.value = "刷新成功!正在获取用户头像、昵称信息";
+    } else {
+      console.error(ltokenRes);
+      loadingTitle.value = "刷新失败!正在获取用户头像、昵称信息";
+      failCount++;
+    }
   }
   const cookieTokenRes = await TGRequest.User.bySToken.getCookieToken(ck.stuid, ck.stoken);
   if (typeof cookieTokenRes === "string") {
@@ -468,6 +482,7 @@ async function refreshUser () {
     console.log(JSON.stringify(ck));
     loadingTitle.value = "刷新成功!正在获取用户头像、昵称信息";
   } else {
+    console.error(cookieTokenRes);
     loadingTitle.value = "刷新失败!正在获取用户头像、昵称信息";
     failCount++;
   }
@@ -477,14 +492,16 @@ async function refreshUser () {
     userStore.setBriefInfo(info);
     loadingTitle.value = "获取成功!正在获取用户游戏账号信息";
   } else {
+    console.error(infoRes);
     loadingTitle.value = "获取失败!正在获取用户游戏账号信息";
     failCount++;
   }
   const accountRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);
   if (Array.isArray(accountRes)) {
     loadingTitle.value = "获取成功!正在保存到数据库!";
-    await TGSqlite.insertAccount(accountRes);
+    await TGSqlite.saveAccount(accountRes);
   } else {
+    console.error(accountRes);
     loadingTitle.value = "获取失败!";
     failCount++;
   }
@@ -535,7 +552,7 @@ async function inputCookie () {
     }
     const resAccounts = await TGRequest.User.byCookie.getAccounts(cookie_token, uid);
     if (Array.isArray(resAccounts)) {
-      await TGSqlite.insertAccount(resAccounts);
+      await TGSqlite.saveAccount(resAccounts);
     }
     loading.value = false;
     snackbarText.value = "Cookie 已保存!";
