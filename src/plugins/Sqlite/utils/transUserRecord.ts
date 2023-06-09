@@ -112,8 +112,8 @@ function transStat (data: TGApp.Game.Record.Stats): string {
 function transWorld (data: TGApp.Game.Record.WorldExplore[]): string {
   const worlds: TGApp.Sqlite.Record.WorldExplore[] = data.map(item => {
     let offerings;
-    if (item.Offerings !== undefined) {
-      offerings = item.Offerings.map(offering => {
+    if (item.offerings !== undefined) {
+      offerings = item.offerings.map(offering => {
         return {
           name: offering.name,
           icon: offering.icon,

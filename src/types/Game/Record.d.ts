@@ -133,7 +133,7 @@ declare namespace TGApp.Game.Record {
    * @property {string} icon - 图标
    * @property {string} name - 名称
    * @property {string} type - 类型 // Reputation: 声望,Offering: 奉献
-   * @property {WorldOffering[]} Offerings - 奉献物品
+   * @property {WorldOffering[]} offerings - 奉献物品
    * @property {number} id - ID
    * @property {number} parent_id - 父级 ID
    * @property {string} map_url - 地图 URL
@@ -149,7 +149,7 @@ declare namespace TGApp.Game.Record {
     icon: string
     name: string
     type: string
-    Offerings: WorldOffering[]
+    offerings: WorldOffering[]
     id: number
     parent_id: number
     map_url: string
