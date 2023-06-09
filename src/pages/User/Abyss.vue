@@ -6,6 +6,10 @@
         第 {{ item.id }} 期
       </v-tab>
       <div class="ua-tab-bottom">
+        <v-btn class="ua-btn" @click="shareAbyss">
+          <v-icon>mdi-share</v-icon>
+          <span>分享</span>
+        </v-btn>
         <v-btn class="ua-btn" @click="getAbyssData">
           <v-icon>mdi-refresh</v-icon>
           <span>刷新</span>
@@ -14,35 +18,37 @@
     </v-tabs>
     <v-window v-model="userTab" class="ua-window">
       <v-window-item v-for="item in localAbyss" :key="item.id" :value="item.id" class="ua-window-item">
-        <div class="uaw-title">
-          <span>挑战回顾【{{ user.gameUid }}】</span>
-          <span>更新于 {{ item.updated }}</span>
-        </div>
-        <div class="uaw-sub-title">
-          <img src="/src/assets/icons/arrow-right.svg" alt="character">
-          <span>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</span>
-        </div>
-        <div class="uaw-o-box">
-          <TuaOverview title="战斗次数" :val-text="item.totalBattleTimes" />
-          <TuaOverview title="获得渊星" :val-text="item.totalStar" />
-          <TuaOverview title="最深抵达" :val-text="item.maxFloor" />
-        </div>
-        <div class="uaw-o-box">
-          <TuaOverview title="最多击破" :val-icons="item.defeatRank" />
-          <TuaOverview title="最多承伤" :val-icons="item.takeDamageRank" />
-          <TuaOverview title="最强一击" :val-icons="item.damageRank" />
-        </div>
-        <div class="uaw-o-box">
-          <TuaOverview title="元素战技" :val-icons="item.normalSkillRank" />
-          <TuaOverview title="出战次数" :val-icons="item.revealRank" :icon-num="4" />
-          <TuaOverview title="元素爆发" :val-icons="item.energySkillRank" />
-        </div>
-        <div class="uaw-sub-title">
-          <img src="/src/assets/icons/arrow-right.svg" alt="character">
-          <span>详情</span>
-        </div>
-        <div class="uaw-d-box">
-          <TuaDetail v-for="floor in JSON.parse(item.floors) as TGApp.Sqlite.Abyss.Floor[]" :model-value="floor" />
+        <div :ref="getAbyssRef">
+          <div class="uaw-title">
+            <span>第 {{ item.id }} 期 挑战回顾【{{ user.gameUid }}】</span>
+            <span>更新于 {{ item.updated }}</span>
+          </div>
+          <div class="uaw-sub-title">
+            <img src="/src/assets/icons/arrow-right.svg" alt="character">
+            <span>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</span>
+          </div>
+          <div class="uaw-o-box">
+            <TuaOverview title="战斗次数" :val-text="item.totalBattleTimes" />
+            <TuaOverview title="获得渊星" :val-text="item.totalStar" />
+            <TuaOverview title="最深抵达" :val-text="item.maxFloor" />
+          </div>
+          <div class="uaw-o-box">
+            <TuaOverview title="最多击破" :val-icons="item.defeatRank" />
+            <TuaOverview title="最多承伤" :val-icons="item.takeDamageRank" />
+            <TuaOverview title="最强一击" :val-icons="item.damageRank" />
+          </div>
+          <div class="uaw-o-box">
+            <TuaOverview title="元素战技" :val-icons="item.normalSkillRank" />
+            <TuaOverview title="出战次数" :val-icons="item.revealRank" :icon-num="4" />
+            <TuaOverview title="元素爆发" :val-icons="item.energySkillRank" />
+          </div>
+          <div class="uaw-sub-title">
+            <img src="/src/assets/icons/arrow-right.svg" alt="character">
+            <span>详情</span>
+          </div>
+          <div class="uaw-d-box">
+            <TuaDetail v-for="floor in JSON.parse(item.floors) as TGApp.Sqlite.Abyss.Floor[]" :model-value="floor" />
+          </div>
         </div>
       </v-window-item>
     </v-window>
@@ -63,6 +69,8 @@ import { useUserStore } from "../../store/modules/user";
 // utils
 import TGRequest from "../../web/request/TGRequest";
 import TGSqlite from "../../plugins/Sqlite";
+import html2canvas from "html2canvas";
+import { saveCanvasImg } from "../../utils/saveImg";
 
 // store
 const userStore = useUserStore();
@@ -79,6 +87,7 @@ const user = computed(() => userStore.getCurAccount());
 const localAbyss = ref([] as TGApp.Sqlite.Abyss.SingleTable[]);
 const localAbyssID = ref([] as number[]);
 const curAbyss = ref({} as TGApp.Sqlite.Abyss.SingleTable);
+const abyssRef = ref(null as unknown as HTMLElement);
 
 onMounted(async () => {
   loadingTitle.value = "正在加载深渊数据";
@@ -119,6 +128,39 @@ async function getAbyssData (): Promise<void> {
 
 function toAbyss (id: number): void {
   curAbyss.value = localAbyss.value.find((item) => item.id === id)!;
+}
+
+function getAbyssRef (el: HTMLElement): void {
+  abyssRef.value = el;
+}
+
+async function shareAbyss (): Promise<void> {
+  const canvas = document.createElement("canvas");
+  // 获取 dom 宽高
+  const width = abyssRef.value.scrollWidth + 50;
+  const height = abyssRef.value.scrollHeight + 50;
+  // 设置 canvas 宽高
+  canvas.width = width * 1.2;
+  canvas.height = height * 1.2;
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+  // 图片压缩
+  canvas.getContext("2d")!.scale(1.2, 1.2);
+  // 设置 html2canvas 参数
+  const options = {
+    backgroundColor: "#ece5d8",
+    windowHeight: height,
+    width,
+    height,
+    useCORS: true,
+    canvas,
+    // 因为有放大，所以需要计算偏移量
+    x: -25,
+    y: -25,
+  };
+  const canvasData = await html2canvas(abyssRef.value, options);
+  const fileName = `深渊${curAbyss.value.id}-${user.value.gameUid}-${new Date().getTime()}.png`;
+  await saveCanvasImg(canvasData, fileName);
 }
 </script>
 <style lang="css" scoped>
