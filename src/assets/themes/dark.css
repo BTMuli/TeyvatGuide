@@ -1,12 +1,14 @@
 /**
  * @file assets themes light.css
  * @description 主题样式文件
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.5
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Alpha v0.2.0
  */
 
 /* 主题色 */
 html.dark {
+  --common-bg: rgb(255 255 255 / 10%);
+
   --sidebar-bg: #1e1e1e;
   --sidebar-icon: #e1e1e1;
   --page-bg:#2a2a2a;
