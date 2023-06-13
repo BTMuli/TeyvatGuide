@@ -113,32 +113,31 @@ function getTitle () {
 }
 
 .ur-top-title {
-  font-family: Genshin, sans-serif;
+  font-family: var(--font-title);
   font-size: 20px;
   margin-right: 10px;
-  color: rgb(255 255 255 / 80%);
-  text-shadow: 0 0 10px rgb(0 0 0 / 80%);
+  color: var(--common-color-white);
+  text-shadow: 0 0 10px rgb(0 0 0 / 60%);
 }
 
 .ur-top-btn {
-  font-family: Genshin-Light, serif;
+  font-family: var(--font-text);
   border-radius: 5px;
   background: #393b40;
-  color: #faf7e8;
+  color: var(--common-color-white);
   margin-left: auto;
 }
 
 .ur-sub-title {
-  background: rgb(0 0 0 / 20%);
+  background: var(--common-bg-2);
   display: flex;
   align-items: center;
   height: 30px;
   padding: 0 10px;
   margin: 5px 0;
   border-radius: 5px;
-  font-family: Genshin-Light, serif;
-  color: rgb(255 255 255 / 80%);
-  text-shadow: 0 0 10px rgb(0 0 0 / 80%);
+  font-family: var(--font-text);
+  color: var(--common-color-white);
 }
 
 .ur-sub-title img {

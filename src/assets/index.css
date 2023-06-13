@@ -13,6 +13,8 @@
     /* font */
     --font-text: "JetBrians mono", "Genshin-Light", sans-serif;
     --font-title: "JetBrians mono Bold", "Genshin", serif;
+    /* color */
+    --common-color-white: #faf7e8;
 }
 
 html {

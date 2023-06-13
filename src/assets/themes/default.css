@@ -8,6 +8,7 @@
 /* 主题色 */
 html.default {
   --common-bg: rgb(0 0 0 / 10%);
+  --common-bg-2: rgb(0 0 0 / 20%);
 
   --sidebar-bg: #485466;
   --sidebar-icon: #ece5d8;

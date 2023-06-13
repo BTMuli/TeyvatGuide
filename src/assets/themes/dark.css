@@ -8,6 +8,7 @@
 /* 主题色 */
 html.dark {
   --common-bg: rgb(255 255 255 / 10%);
+  --common-bg-2: rgb(255 255 255 / 20%);
 
   --sidebar-bg: #1e1e1e;
   --sidebar-icon: #e1e1e1;

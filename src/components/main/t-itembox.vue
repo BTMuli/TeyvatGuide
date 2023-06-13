@@ -159,8 +159,8 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: Genshin, serif;
-  color: #faf7e8;
+  font-family: var(--font-title);
+  color: var(--common-color-white);
 }
 
 .tib-inner {
@@ -175,10 +175,9 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   background: rgb(20 20 20 / 50%);
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
-  color: #fff;
+  color: var(--common-color-white);
   font-size: v-bind(getInnerFont);
-  text-shadow: 0 0 5px #000;
-  font-family: Genshin, serif;
+  font-family: var(--font-title);
 }
 
 .tib-inner img {
@@ -199,9 +198,8 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   justify-content: center;
   align-items: center;
   font-family: Genshin, serif;
-  color: #fff;
+  color: var(--common-color-white);
   font-size: v-bind(getOuterFont);
-  text-shadow: 0 0 5px #000;
 }
 
 .tib-outer img {

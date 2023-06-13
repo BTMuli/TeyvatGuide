@@ -26,7 +26,7 @@ defineProps<TAOProps>();
   height: auto;
   padding: 5px;
   border-radius: 5px;
-  background: rgb(0 0 0 / 10%);
+  background: var(--common-bg);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -34,16 +34,16 @@ defineProps<TAOProps>();
 }
 
 .tur-os-title {
-  font-family: Genshin-Light, serif;
+  font-family: var(--font-title);
   font-size: 20px;
-  color: rgb(255 255 255 / 80%);
-  text-shadow: 0 0 10px rgb(0 0 0 / 80%);
+  color: var(--common-color-white);
+  text-shadow: 0 0 10px rgb(0 0 0 / 40%);
 }
 
 .tur-os-text {
-  font-family: Genshin, serif;
+  font-family: var(--font-text);
   font-size: 20px;
-  color: rgb(255 255 255 / 80%);
+  color: var(--common-color-white);
   text-shadow: #fec90b 0 0 5px;
 }
 </style>
