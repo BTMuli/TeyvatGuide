@@ -9,6 +9,8 @@
 html.dark {
   --common-bg: rgb(255 255 255 / 10%);
   --common-bg-2: rgb(255 255 255 / 20%);
+  --common-bg-4: rgb(255 255 255 / 40%);
+  --common-bg-8: rgb(255 255 255 / 80%);
 
   --sidebar-bg: #1e1e1e;
   --sidebar-icon: #e1e1e1;

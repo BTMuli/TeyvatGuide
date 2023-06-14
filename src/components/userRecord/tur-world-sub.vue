@@ -34,6 +34,7 @@
 <script lang="ts" setup>
 // vue
 import { onMounted, ref } from "vue";
+// tauri
 import { event } from "@tauri-apps/api";
 
 interface TurWorldSubProps {
@@ -62,7 +63,7 @@ async function listenOnTheme () {
 </script>
 <style lang="css" scoped>
 .tur-ws-box {
-  padding: 5px;
+  padding: 10px;
   border-radius: 5px;
   display: flex;
   justify-content: center;
@@ -82,7 +83,7 @@ async function listenOnTheme () {
 }
 
 .tur-ws-content {
-  color: #faf7e8;
+  color: var(--common-color-white);
   text-shadow: 0 0 5px rgb(0 0 0 / 20%);
   width: calc(100% - 60px);
   height: 100%;
@@ -91,7 +92,7 @@ async function listenOnTheme () {
 .tur-ws-title {
   font-family: var(--font-title);
   font-size: 20px;
-  margin-bottom: 5px;
+  border-bottom: 1px inset var(--common-color-white);
 }
 
 .tur-ws-sub {

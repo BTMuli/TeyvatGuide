@@ -100,7 +100,7 @@ function getTitle () {
   width: 100%;
   border-radius: 5px;
   padding: 10px;
-  box-shadow: 0 0 10px rgb(0 0 0 / 40%);
+  box-shadow: 0 0 10px var(--common-bg-4);
 }
 
 .ur-top {
