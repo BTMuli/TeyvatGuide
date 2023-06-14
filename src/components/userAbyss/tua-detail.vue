@@ -22,7 +22,7 @@ const props = defineProps<TuaDetailProps>();
   width: 100%;
   margin-bottom: 10px;
   border-radius: 5px;
-  background: rgb(0 0 0 / 10%);
+  background: var(--common-bg);
   padding: 10px;
 }
 

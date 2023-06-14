@@ -28,7 +28,10 @@ const props = withDefaults(defineProps<TuaDetailTitleProps>(), {
 });
 
 const getFont: ComputedRef<string> = computed(() => {
-  return props.mode === "level" ? "Genshin-Light, serif" : "Genshin, serif";
+  return props.mode === "level" ? "var(--font-text)" : "var(--font-title)";
+});
+const getFontSize: ComputedRef<string> = computed(() => {
+  return props.mode === "level" ? "18px" : "20px";
 });
 </script>
 <style lang="css" scoped>
@@ -42,17 +45,17 @@ const getFont: ComputedRef<string> = computed(() => {
 }
 
 .tud-t-title {
-  font-size: 20px;
-  color: rgb(255 255 255 / 80%);
-  text-shadow: 0 0 10px rgb(0 0 0 / 80%);
+  font-size: v-bind(getFontSize);
+  color: var(--common-color-white);
+  text-shadow: 0 0 10px rgb(0 0 0 / 20%);
 }
 
 .tud-t-val {
   display: flex;
   align-items: center;
-  font-family: Genshin-Light, serif;
-  font-size: 20px;
-  color: rgb(255 255 255 / 80%);
+  font-family: var(--font-text);
+  font-size:  v-bind(getFontSize);
+  color: var(--common-color-white);
   text-shadow: #fec90b 0 0 5px;
 }
 

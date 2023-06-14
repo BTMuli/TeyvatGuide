@@ -19,7 +19,7 @@ const props = defineProps<TuaDetailLevelProps>();
 .tud-dl-divider {
   border-radius: 5px;
   width: 100%;
-  height: 2px;
-  background: rgb(255 255 255 / 50%);
+  height: 1px;
+  background: var(--common-color-white);
 }
 </style>

@@ -37,12 +37,11 @@ const props = withDefaults(defineProps<TAOProps>(), {
 </script>
 <style lang="css" scoped>
 .tuao-box {
-  width: 33%;
+  width: 100%;
   height: auto;
   padding: 10px;
-  margin-bottom: 10px;
   border-radius: 5px;
-  background: rgb(0 0 0 / 10%);
+  background: var(--common-bg);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -50,19 +49,17 @@ const props = withDefaults(defineProps<TAOProps>(), {
 }
 
 .tuao-title {
-  font-family: Genshin, serif;
+  font-family: var(--font-title);
   font-size: 20px;
-  color: rgb(255 255 255 / 80%);
-  text-shadow: 0 0 10px rgb(0 0 0 / 80%);
+  color: var(--common-color-white);
+  text-shadow: 0 0 10px rgb(0 0 0 / 20%);
 }
 
 .tuao-val-text {
-  font-family: Genshin-Light, serif;
+  font-family: var(--font-text);
   font-size: 20px;
-  font-weight: bold;
-  margin-top: 10px;
-  color: rgb(255 255 255 / 80%);
-  text-shadow: #fec90b 0 0 5px;
+  color: var(--common-color-white);
+  text-shadow: #fec90b 0 0 10px;
 }
 
 .tuao-val-icons {

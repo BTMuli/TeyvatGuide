@@ -3,14 +3,14 @@
   <div class="ua-box">
     <v-tabs v-model="userTab" direction="vertical" align-tabs="start" class="ua-tab">
       <v-tab v-for="item in localAbyss" :key="item.id" :value="item.id" @click="toAbyss(item.id)">
-        第 {{ item.id }} 期
+        第{{ item.id }}期
       </v-tab>
       <div class="ua-tab-bottom">
-        <v-btn class="ua-btn" @click="shareAbyss">
+        <v-btn class="ua-btn" variant="outlined" @click="shareAbyss">
           <v-icon>mdi-share</v-icon>
           <span>分享</span>
         </v-btn>
-        <v-btn class="ua-btn" @click="getAbyssData">
+        <v-btn class="ua-btn" variant="outlined" @click="getAbyssData">
           <v-icon>mdi-refresh</v-icon>
           <span>刷新</span>
         </v-btn>
@@ -20,8 +20,12 @@
       <v-window-item v-for="item in localAbyss" :key="item.id" :value="item.id" class="ua-window-item">
         <div :ref="getAbyssRef">
           <div class="uaw-title">
-            <span>第 {{ item.id }} 期 挑战回顾【{{ user.gameUid }}】</span>
-            <span>更新于 {{ item.updated }}</span>
+            <span>第</span>
+            <span>{{ item.id }}</span>
+            <span>期 UID</span>
+            <span>{{ user.gameUid }}</span>
+            <span>更新于</span>
+            <span>{{ item.updated }}</span>
           </div>
           <div class="uaw-sub-title">
             <img src="/src/assets/icons/arrow-right.svg" alt="character">
@@ -31,13 +35,9 @@
             <TuaOverview title="战斗次数" :val-text="item.totalBattleTimes" />
             <TuaOverview title="获得渊星" :val-text="item.totalStar" />
             <TuaOverview title="最深抵达" :val-text="item.maxFloor" />
-          </div>
-          <div class="uaw-o-box">
             <TuaOverview title="最多击破" :val-icons="item.defeatRank" />
             <TuaOverview title="最多承伤" :val-icons="item.takeDamageRank" />
             <TuaOverview title="最强一击" :val-icons="item.damageRank" />
-          </div>
-          <div class="uaw-o-box">
             <TuaOverview title="元素战技" :val-icons="item.normalSkillRank" />
             <TuaOverview title="出战次数" :val-icons="item.revealRank" :icon-num="4" />
             <TuaOverview title="元素爆发" :val-icons="item.energySkillRank" />
@@ -148,7 +148,7 @@ async function shareAbyss (): Promise<void> {
   canvas.getContext("2d")!.scale(1.2, 1.2);
   // 设置 html2canvas 参数
   const options = {
-    backgroundColor: "#ece5d8",
+    backgroundColor: getTheme() === "dark" ? "#2c2c2c" : "#ece5d8",
     windowHeight: height,
     width,
     height,
@@ -159,13 +159,21 @@ async function shareAbyss (): Promise<void> {
     y: -25,
   };
   const canvasData = await html2canvas(abyssRef.value, options);
-  const fileName = `深渊${curAbyss.value.id}-${user.value.gameUid}-${new Date().getTime()}.png`;
+  const fileName = `深渊${curAbyss.value.id}-${user.value.gameUid}-${Math.floor((new Date().getTime()) / 1000)}.png`;
   await saveCanvasImg(canvasData, fileName);
+}
+
+function getTheme () {
+  let theme = localStorage.getItem("theme");
+  if (theme) {
+    theme = JSON.parse(theme).theme;
+  }
+  return theme || "default";
 }
 </script>
 <style lang="css" scoped>
 .ua-box {
-  box-shadow: 0 0 10px 0 rgb(0 0 0 / 10%);
+  box-shadow: 0 0 10px 0 var(--common-bg);
   display: flex;
   justify-content: left;
   align-items: center;
@@ -174,7 +182,7 @@ async function shareAbyss (): Promise<void> {
 }
 
 .ua-tab {
-  font-family: Genshin-Light, serif;
+  font-family: var(--font-text);
   color: var(--content-text-3);
   width: 100px;
   height: 100%;
@@ -189,8 +197,8 @@ async function shareAbyss (): Promise<void> {
 
 .ua-btn {
   margin-top: 5px;
-  background: #393b40;
-  color: #faf7e8;
+  background: var(--common-bg-2);
+  color: var(--common-color-white);
 }
 
 .ua-window {
@@ -204,30 +212,34 @@ async function shareAbyss (): Promise<void> {
   padding: 10px;
   overflow-y: auto;
   border-radius: 5px;
-  box-shadow: 0 0 10px rgb(0 0 0 / 40%);
+  box-shadow: 0 0 10px var(--common-bg-4);
 }
 
 .uaw-title {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  color: rgb(255 255 255 / 80%);
-  text-shadow: 0 0 10px rgb(0 0 0 / 80%);
+  color: var(--common-color-white);
+  text-shadow: 0 0 10px rgb(0 0 0 / 40%);
   font-size: 20px;
-  font-family: Genshin, serif;
+  font-family: var(--font-title);
+}
+
+.uaw-title :nth-child(2n) {
+  text-shadow: #fec90b 0 0 10px;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 .uaw-sub-title {
-  background: rgb(0 0 0 / 20%);
+  background: var(--common-bg-2);
   display: flex;
   align-items: center;
   height: 30px;
   padding: 0 10px;
   margin: 5px 0;
   border-radius: 5px;
-  font-family: Genshin-Light, serif;
-  color: rgb(255 255 255 / 80%);
-  text-shadow: 0 0 10px rgb(0 0 0 / 80%);
+  font-family: var(--font-text);
+  color: var(--common-color-white);
 }
 
 .uaw-sub-title img {
@@ -237,9 +249,10 @@ async function shareAbyss (): Promise<void> {
 }
 
 .uaw-o-box {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 10px;
 }
 
 .uaw-d-box {
@@ -253,7 +266,7 @@ async function shareAbyss (): Promise<void> {
   position: absolute;
   top: calc(50vh - 200px);
   left: calc(50vw - 400px);
-  background: rgb(0 0 0 / 30%);
+  background: var(--common-bg-2);
   border-radius: 5px;
   width: 800px;
   height: 400px;
@@ -261,7 +274,7 @@ async function shareAbyss (): Promise<void> {
   flex-direction: column;
   align-items: center;
   font-size: 1.5rem;
-  color: #faf7e8;
-  font-family: Genshin, serif;
+  color: var(--common-color-white);
+  font-family: var(--font-title);
 }
 </style>
