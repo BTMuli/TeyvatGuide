@@ -10,6 +10,7 @@
       {{ data.name }}
     </div>
     <div class="tur-hs-title">
+      <!-- canvas -->
       <img :src="data.comfortIcon" alt="comfort">
       {{ data.comfortName }}
     </div>
@@ -39,7 +40,6 @@ interface TurHomeSubProps {
 }
 
 const props = defineProps<TurHomeSubProps>();
-console.log(props.data);
 </script>
 <style lang="css" scoped>
 .tur-hs-box {

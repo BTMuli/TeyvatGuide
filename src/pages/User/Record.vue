@@ -6,7 +6,10 @@
         <span v-if="!isEmpty">{{ getTitle() }} 更新于 {{ recordData.updated }}</span>
         <span v-else>原神战绩【暂无数据】【{{ user.gameUid }}】</span>
       </div>
-      <v-btn variant="outlined" class="ur-top-btn" @click="refresh">
+      <v-btn variant="outlined" class="ur-top-btn" @click="refresh()">
+        <template #prepend>
+          <v-icon>mdi-refresh</v-icon>
+        </template>
         更新数据
       </v-btn>
     </div>
@@ -124,8 +127,9 @@ function getTitle () {
 .ur-top-btn {
   font-family: var(--font-text);
   border-radius: 5px;
-  background: #393b40;
+  background: var(--common-bg-2);
   color: var(--common-color-white);
+  text-shadow: 0 0 10px rgb(0 0 0 / 40%);
   margin-left: auto;
 }
 

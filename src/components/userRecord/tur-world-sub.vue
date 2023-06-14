@@ -53,7 +53,7 @@ onMounted(async () => {
   await listenOnTheme();
 });
 
-async function listenOnTheme() {
+async function listenOnTheme () {
   await event.listen("readTheme", (e) => {
     const theme = e.payload as string;
     if (theme === "dark") {
