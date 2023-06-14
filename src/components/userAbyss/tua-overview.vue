@@ -51,15 +51,19 @@ const props = withDefaults(defineProps<TAOProps>(), {
 .tuao-title {
   font-family: var(--font-title);
   font-size: 20px;
-  color: var(--common-color-white);
-  text-shadow: 0 0 10px rgb(0 0 0 / 20%);
+  color: var(--common-text-2);
 }
 
 .tuao-val-text {
   font-family: var(--font-text);
   font-size: 20px;
   color: var(--common-color-white);
-  text-shadow: #fec90b 0 0 10px;
+  text-shadow: 0 0 10px var(--common-color-yellow);
+}
+
+.dark .tuao-val-text {
+  color: var(--common-color-yellow);
+  text-shadow: none;
 }
 
 .tuao-val-icons {

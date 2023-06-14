@@ -12,8 +12,9 @@ html.default {
   --common-bg-4: rgb(0 0 0 / 40%);
   --common-bg-8: rgb(0 0 0 / 80%);
 
-  --common-text:  var(--common-color-blue);
-  --common-text-2: var(--common-color-blue-2);
+  --common-text:  var(--common-color-blue); /* title */
+  --common-text-2: var(--common-color-blue-2); /* text */
+  --common-text-3: var(--common-color-blue-3); /* quote */
 
   --sidebar-bg: #485466;
   --sidebar-icon: #ece5d8;

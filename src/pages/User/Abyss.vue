@@ -159,7 +159,7 @@ async function shareAbyss (): Promise<void> {
     y: -25,
   };
   const canvasData = await html2canvas(abyssRef.value, options);
-  const fileName = `深渊${curAbyss.value.id}-${user.value.gameUid}-${Math.floor((new Date().getTime()) / 1000)}.png`;
+  const fileName = `深渊${curAbyss.value.id}-${user.value.gameUid}-${Math.floor(Date.now() / 1000)}.png`;
   await saveCanvasImg(canvasData, fileName);
 }
 
@@ -173,7 +173,7 @@ function getTheme () {
 </script>
 <style lang="css" scoped>
 .ua-box {
-  box-shadow: 0 0 10px 0 var(--common-bg);
+  box-shadow: 0 0 10px 0 var(--common-bg-4);
   display: flex;
   justify-content: left;
   align-items: center;
@@ -183,7 +183,7 @@ function getTheme () {
 
 .ua-tab {
   font-family: var(--font-text);
-  color: var(--content-text-3);
+  color: var(--common-text);
   width: 100px;
   height: 100%;
 }
@@ -196,7 +196,7 @@ function getTheme () {
 }
 
 .ua-btn {
-  margin-top: 5px;
+  margin-top: 15px;
   background: var(--common-bg-2);
   color: var(--common-color-white);
 }
@@ -212,22 +212,27 @@ function getTheme () {
   padding: 10px;
   overflow-y: auto;
   border-radius: 5px;
-  box-shadow: 0 0 10px var(--common-bg-4);
+  box-shadow: 0 0 10px var(--common-bg-2);
 }
 
 .uaw-title {
   display: flex;
   align-items: center;
-  color: var(--common-color-white);
-  text-shadow: 0 0 10px rgb(0 0 0 / 40%);
+  color: var(--common-text);
   font-size: 20px;
   font-family: var(--font-title);
 }
 
 .uaw-title :nth-child(2n) {
-  text-shadow: #fec90b 0 0 10px;
+  color: var(--common-color-white);
+  text-shadow: 0 0 10px var(--common-color-yellow);
   margin-left: 10px;
   margin-right: 10px;
+}
+
+.dark .uaw-title :nth-child(2n) {
+  color: var(--common-color-yellow);
+  text-shadow: none;
 }
 
 .uaw-sub-title {
@@ -274,7 +279,7 @@ function getTheme () {
   flex-direction: column;
   align-items: center;
   font-size: 1.5rem;
-  color: var(--common-color-white);
+  color: var(--common-text);
   font-family: var(--font-title);
 }
 </style>

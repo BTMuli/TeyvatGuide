@@ -46,8 +46,7 @@ const getFontSize: ComputedRef<string> = computed(() => {
 
 .tud-t-title {
   font-size: v-bind(getFontSize);
-  color: var(--common-color-white);
-  text-shadow: 0 0 10px rgb(0 0 0 / 20%);
+  color: var(--common-text-2);
 }
 
 .tud-t-val {
@@ -56,7 +55,12 @@ const getFontSize: ComputedRef<string> = computed(() => {
   font-family: var(--font-text);
   font-size:  v-bind(getFontSize);
   color: var(--common-color-white);
-  text-shadow: #fec90b 0 0 5px;
+  text-shadow: 0 0 10px var(--common-color-yellow);
+}
+
+.dark .tud-t-val {
+  color: var(--common-color-yellow);
+  text-shadow: none;
 }
 
 .tud-t-val img {

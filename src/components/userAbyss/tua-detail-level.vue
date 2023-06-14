@@ -20,6 +20,6 @@ const props = defineProps<TuaDetailLevelProps>();
   border-radius: 5px;
   width: 100%;
   height: 1px;
-  background: var(--common-color-white);
+  background: var(--common-text-2);
 }
 </style>

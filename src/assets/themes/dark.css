@@ -12,8 +12,9 @@ html.dark {
   --common-bg-4: rgb(255 255 255 / 40%);
   --common-bg-8: rgb(255 255 255 / 80%);
 
-  --common-text: var(--common-color-white);
-  --common-text-2: var(--common-color-white);
+  --common-text: var(--common-color-white); /* title */
+  --common-text-2: var(--common-color-white); /* text */
+  --common-text-3: var(--common-color-grey); /* quote */
 
   --sidebar-bg: #1e1e1e;
   --sidebar-icon: #e1e1e1;
