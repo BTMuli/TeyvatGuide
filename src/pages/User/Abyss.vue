@@ -155,7 +155,7 @@ async function shareAbyss (): Promise<void> {
     useCORS: true,
     canvas,
     // 因为有放大，所以需要计算偏移量
-    x: -25,
+    x: -20,
     y: -25,
   };
   const canvasData = await html2canvas(abyssRef.value, options);

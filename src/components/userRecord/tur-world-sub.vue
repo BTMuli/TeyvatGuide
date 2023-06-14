@@ -16,17 +16,20 @@
         {{ data.name }}
       </div>
       <div class="tur-ws-sub">
-        探索度：{{ data.exploration / 10 }}%
+        <span>探索度：</span>
+        <span>{{ data.exploration / 10 }}</span>
+        <span>%</span>
       </div>
       <div v-if="data.type==='Reputation'" class="tur-ws-sub">
-        声望等级: {{ data.level }}级
+        <span>声望等级：</span>
+        <span>{{ data.level }}</span>
+        <span>级</span>
       </div>
       <div v-if="data.offerings.length>0" class="tur-ws-sub">
         <img :src="data.offerings[0].icon" alt="offer">
-        <span>
-          {{ data.offerings[0].name }}等级:
-          <span class="tur-wss-level">{{ data.offerings[0].level }}级</span>
-        </span>
+        <span>{{ data.offerings[0].name }}等级：</span>
+        <span>{{ data.offerings[0].level }}</span>
+        <span>级</span>
       </div>
     </div>
   </div>
@@ -50,7 +53,7 @@ onMounted(async () => {
   await listenOnTheme();
 });
 
-async function listenOnTheme () {
+async function listenOnTheme() {
   await event.listen("readTheme", (e) => {
     const theme = e.payload as string;
     if (theme === "dark") {
@@ -107,5 +110,9 @@ async function listenOnTheme () {
   width: 20px;
   height: 20px;
   margin-right: 5px;
+}
+
+.tur-ws-sub :nth-last-child(2) {
+  text-shadow: #fec90b 0 0 5px;
 }
 </style>
