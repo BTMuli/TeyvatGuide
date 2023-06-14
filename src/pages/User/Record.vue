@@ -12,6 +12,12 @@
         </template>
         更新数据
       </v-btn>
+      <v-btn variant="outlined" class="ur-top-btn" @click="shareRecord()">
+        <template #prepend>
+          <v-icon>mdi-share</v-icon>
+        </template>
+        分享
+      </v-btn>
     </div>
     <div class="ur-sub-title">
       <img src="/src/assets/icons/arrow-right.svg" alt="overview">
@@ -48,6 +54,8 @@ import { useUserStore } from "../../store/modules/user";
 // utils
 import TGRequest from "../../web/request/TGRequest";
 import TGSqlite from "../../plugins/Sqlite";
+import html2canvas from "html2canvas";
+import { saveCanvasImg } from "../../utils/saveImg";
 
 // store
 const userStore = useUserStore();
@@ -98,6 +106,39 @@ function getTitle () {
   const role = JSON.parse(recordData.value.role) as TGApp.Sqlite.Record.Role;
   return `${role.nickname} Lv.${role.level}【${recordData.value.uid}】`;
 }
+
+async function shareRecord () {
+  const recordBox = document.querySelector(".ur-box") as HTMLElement;
+  const canvas = document.createElement("canvas");
+  const width = recordBox.clientWidth + 50;
+  const height = recordBox.offsetHeight + 50;
+  canvas.width = width * 1.2;
+  canvas.height = height * 1.2;
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+  canvas.getContext("2d")!.scale(1.2, 1.2);
+  const options = {
+    backgroundColor: getTheme() === "dark" ? "#2c2c2c" : "#ece5d8",
+    windowHeight: height,
+    width,
+    height,
+    useCORS: true,
+    canvas,
+    x: -10,
+    y: -10,
+  };
+  const fileName = `战绩-${user.value.gameUid}-${Math.floor(Date.now() / 1000)}`;
+  const canvasData = await html2canvas(recordBox, options);
+  await saveCanvasImg(canvasData, fileName);
+}
+
+function getTheme () {
+  let theme = localStorage.getItem("theme");
+  if (theme) {
+    theme = JSON.parse(theme).theme;
+  }
+  return theme || "default";
+}
 </script>
 <style lang="css" scoped>
 .ur-box {
@@ -130,7 +171,7 @@ function getTitle () {
   background: var(--common-bg-2);
   color: var(--common-color-white);
   text-shadow: 0 0 10px rgb(0 0 0 / 40%);
-  margin-left: auto;
+  margin-left: 15px;
 }
 
 .ur-sub-title {

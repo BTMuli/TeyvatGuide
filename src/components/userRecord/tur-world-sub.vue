@@ -2,14 +2,14 @@
   <div
     class="tur-ws-box"
     :style="{
-      backgroundImage: 'url(' + data.bg + ')',
+      backgroundImage: 'url(' + getUrl.bg + ')',
       backgroundPositionX: 'right',
       backgroundSize: 'auto 100%',
       backgroundRepeat: 'no-repeat'
     }"
   >
     <div class="tur-ws-icon">
-      <img :src="iconShow" alt="icon">
+      <img :src="getUrl.icon" alt="icon">
     </div>
     <div class="tur-ws-content">
       <div class="tur-ws-title">
@@ -26,7 +26,7 @@
         <span>级</span>
       </div>
       <div v-if="data.offerings.length>0" class="tur-ws-sub">
-        <img :src="data.offerings[0].icon" alt="offer">
+        <img :src="getUrl.offer" alt="offer">
         <span>{{ data.offerings[0].name }}等级：</span>
         <span>{{ data.offerings[0].level }}</span>
         <span>级</span>
@@ -39,6 +39,8 @@
 import { onMounted, ref } from "vue";
 // tauri
 import { event } from "@tauri-apps/api";
+// utils
+import { saveImgLocal } from "../../utils/saveImg";
 
 interface TurWorldSubProps {
   theme: "default" | "dark",
@@ -46,20 +48,34 @@ interface TurWorldSubProps {
 }
 
 const props = defineProps<TurWorldSubProps>();
-const iconShow = ref("");
+const getUrl = ref({
+  bg: "",
+  icon: "",
+  iconLight: "",
+  iconDark: "",
+  offer: "",
+});
 
 onMounted(async () => {
-  props.theme === "dark" ? iconShow.value = props.data.iconLight : iconShow.value = props.data.iconDark;
   await listenOnTheme();
+  getUrl.value.bg = await saveImgLocal(props.data.bg);
+  getUrl.value.iconLight = await saveImgLocal(props.data.iconLight);
+  getUrl.value.iconDark = await saveImgLocal(props.data.iconDark);
+  if (props.data.offerings.length > 0) {
+    getUrl.value.offer = await saveImgLocal(props.data.offerings[0].icon);
+  }
+  props.theme === "dark"
+    ? getUrl.value.icon = getUrl.value.iconLight
+    : getUrl.value.icon = getUrl.value.iconDark;
 });
 
 async function listenOnTheme () {
   await event.listen("readTheme", (e) => {
     const theme = e.payload as string;
     if (theme === "dark") {
-      iconShow.value = props.data.iconLight;
+      getUrl.value.icon = getUrl.value.iconLight;
     } else {
-      iconShow.value = props.data.iconDark;
+      getUrl.value.icon = getUrl.value.iconDark;
     }
   });
 }
