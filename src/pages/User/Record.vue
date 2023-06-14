@@ -29,7 +29,7 @@
       <img src="/src/assets/icons/arrow-right.svg" alt="overview">
       <span>尘歌壶</span>
     </div>
-    {{ recordData.homes }}
+    <TurHomeGrid v-model="recordData.homes" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -39,6 +39,7 @@ import ToLoading from "../../components/overlay/to-loading.vue";
 import TurOverviewGrid from "../../components/userRecord/tur-overview-grid.vue";
 import TurAvatarGrid from "../../components/userRecord/tur-avatar-grid.vue";
 import TurWorldGrid from "../../components/userRecord/tur-world-grid.vue";
+import TurHomeGrid from "../../components/userRecord/tur-home-grid.vue";
 // store
 import { useUserStore } from "../../store/modules/user";
 // utils
