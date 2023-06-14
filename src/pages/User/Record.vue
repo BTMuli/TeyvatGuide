@@ -161,8 +161,7 @@ function getTheme () {
   font-family: var(--font-title);
   font-size: 20px;
   margin-right: 10px;
-  color: var(--common-color-white);
-  text-shadow: 0 0 10px rgb(0 0 0 / 60%);
+  color: var(--common-text);
 }
 
 .ur-top-btn {
@@ -170,7 +169,6 @@ function getTheme () {
   border-radius: 5px;
   background: var(--common-bg-2);
   color: var(--common-color-white);
-  text-shadow: 0 0 10px rgb(0 0 0 / 40%);
   margin-left: 15px;
 }
 

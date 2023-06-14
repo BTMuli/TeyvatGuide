@@ -15,6 +15,11 @@
     --font-title: "JetBrians mono Bold", "Genshin", serif;
     /* color */
     --common-color-white: #faf7e8;
+    --common-color-black: #333333;
+    --common-color-blue: #485466;
+    --common-color-blue-2: #546d8b;
+    --common-color-blue-3: #5b738f;
+    --common-color-yellow: #fec90b;
 }
 
 html {

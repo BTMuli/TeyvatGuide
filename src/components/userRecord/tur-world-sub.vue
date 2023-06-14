@@ -2,9 +2,9 @@
   <div
     class="tur-ws-box"
     :style="{
-      backgroundImage: 'url(' + getUrl.bg + ')',
+      backgroundImage: `url('${getUrl.bg}')`,
       backgroundPositionX: 'right',
-      backgroundSize: 'auto 100%',
+      backgroundSize: 'cover',
       backgroundRepeat: 'no-repeat'
     }"
   >
@@ -35,6 +35,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+
 // vue
 import { onMounted, ref } from "vue";
 // tauri
@@ -102,8 +103,7 @@ async function listenOnTheme () {
 }
 
 .tur-ws-content {
-  color: var(--common-color-white);
-  text-shadow: 0 0 5px rgb(0 0 0 / 20%);
+  color: var(--common-text-2);
   width: calc(100% - 60px);
   height: 100%;
 }
@@ -111,7 +111,7 @@ async function listenOnTheme () {
 .tur-ws-title {
   font-family: var(--font-title);
   font-size: 20px;
-  border-bottom: 1px inset var(--common-color-white);
+  border-bottom: 1px inset var(--common-text-2);
 }
 
 .tur-ws-sub {
@@ -129,6 +129,12 @@ async function listenOnTheme () {
 }
 
 .tur-ws-sub :nth-last-child(2) {
-  text-shadow: #fec90b 0 0 5px;
+  color: var(--common-color-white);
+  text-shadow: 0 0 10px var(--common-color-yellow);
+}
+
+.dark .tur-ws-sub :nth-last-child(2) {
+  color: var(--common-color-yellow);
+  text-shadow: none;
 }
 </style>

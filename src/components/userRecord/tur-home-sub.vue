@@ -92,7 +92,7 @@ onMounted(async () => {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  background: rgb(0 0 0 / 20%);
+  background: rgb(0 0 0 / 40%);
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   text-align: center;
@@ -101,12 +101,11 @@ onMounted(async () => {
 
 .tur-hs-text :nth-child(1) {
   font-family: var(--font-text);
-  text-shadow: #fec90b 0 0 5px;
+  color: var(--common-color-yellow);
 }
 
 .tur-hs-text :nth-child(2) {
   font-family: var(--font-title);
   font-size: 16px;
-  text-shadow: 0 0 10px rgb(0 0 0 / 40%);
 }
 </style>

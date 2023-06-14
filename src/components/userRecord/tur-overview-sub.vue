@@ -36,14 +36,18 @@ defineProps<TAOProps>();
 .tur-os-title {
   font-family: var(--font-title);
   font-size: 20px;
-  color: var(--common-color-white);
-  text-shadow: 0 0 10px rgb(0 0 0 / 40%);
+  color: var(--common-text-2);
 }
 
 .tur-os-text {
   font-family: var(--font-text);
   font-size: 20px;
   color: var(--common-color-white);
-  text-shadow: #fec90b 0 0 5px;
+  text-shadow: 0 0 10px var(--common-color-yellow);
+}
+
+.dark .tur-os-text {
+  color: var(--common-color-yellow);
+  text-shadow: none;
 }
 </style>
