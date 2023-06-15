@@ -54,8 +54,7 @@ import { useUserStore } from "../../store/modules/user";
 // utils
 import TGRequest from "../../web/request/TGRequest";
 import TGSqlite from "../../plugins/Sqlite";
-import html2canvas from "html2canvas";
-import { saveCanvasImg } from "../../utils/saveImg";
+import { generateShareImg } from "../../utils/TGShare";
 
 // store
 const userStore = useUserStore();
@@ -74,7 +73,10 @@ onMounted(async () => {
   loadingTitle.value = "正在加载战绩数据";
   loading.value = true;
   await initUserRecordData();
-  loading.value = false;
+  // 保证图片加载完毕
+  setTimeout(() => {
+    loading.value = false;
+  }, 3000);
 });
 
 async function initUserRecordData () {
@@ -109,27 +111,8 @@ function getTitle () {
 
 async function shareRecord () {
   const recordBox = document.querySelector(".ur-box") as HTMLElement;
-  const canvas = document.createElement("canvas");
-  const width = recordBox.clientWidth + 50;
-  const height = recordBox.offsetHeight + 50;
-  canvas.width = width * 1.2;
-  canvas.height = height * 1.2;
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
-  canvas.getContext("2d")!.scale(1.2, 1.2);
-  const options = {
-    backgroundColor: getTheme() === "dark" ? "#2c2c2c" : "#ece5d8",
-    windowHeight: height,
-    width,
-    height,
-    useCORS: true,
-    canvas,
-    x: -10,
-    y: -10,
-  };
   const fileName = `战绩-${user.value.gameUid}-${Math.floor(Date.now() / 1000)}`;
-  const canvasData = await html2canvas(recordBox, options);
-  await saveCanvasImg(canvasData, fileName);
+  await generateShareImg(fileName, recordBox);
 }
 
 function getTheme () {

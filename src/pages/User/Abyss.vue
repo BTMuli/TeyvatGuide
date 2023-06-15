@@ -69,8 +69,7 @@ import { useUserStore } from "../../store/modules/user";
 // utils
 import TGRequest from "../../web/request/TGRequest";
 import TGSqlite from "../../plugins/Sqlite";
-import html2canvas from "html2canvas";
-import { saveCanvasImg } from "../../utils/saveImg";
+import { generateShareImg } from "../../utils/TGShare";
 
 // store
 const userStore = useUserStore();
@@ -135,40 +134,8 @@ function getAbyssRef (el: HTMLElement): void {
 }
 
 async function shareAbyss (): Promise<void> {
-  const canvas = document.createElement("canvas");
-  // 获取 dom 宽高
-  const width = abyssRef.value.scrollWidth + 50;
-  const height = abyssRef.value.scrollHeight + 50;
-  // 设置 canvas 宽高
-  canvas.width = width * 1.2;
-  canvas.height = height * 1.2;
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
-  // 图片压缩
-  canvas.getContext("2d")!.scale(1.2, 1.2);
-  // 设置 html2canvas 参数
-  const options = {
-    backgroundColor: getTheme() === "dark" ? "#2c2c2c" : "#ece5d8",
-    windowHeight: height,
-    width,
-    height,
-    useCORS: true,
-    canvas,
-    // 因为有放大，所以需要计算偏移量
-    x: -20,
-    y: -25,
-  };
-  const canvasData = await html2canvas(abyssRef.value, options);
   const fileName = `深渊${curAbyss.value.id}-${user.value.gameUid}-${Math.floor(Date.now() / 1000)}.png`;
-  await saveCanvasImg(canvasData, fileName);
-}
-
-function getTheme () {
-  let theme = localStorage.getItem("theme");
-  if (theme) {
-    theme = JSON.parse(theme).theme;
-  }
-  return theme || "default";
+  await generateShareImg(fileName, abyssRef.value);
 }
 </script>
 <style lang="css" scoped>
