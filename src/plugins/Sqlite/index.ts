@@ -38,7 +38,7 @@ class Sqlite {
     "AppData",
     "GameAccount",
     "NameCard",
-    "SprialAbyss",
+    "SpiralAbyss",
     "UserRecord",
   ];
 
