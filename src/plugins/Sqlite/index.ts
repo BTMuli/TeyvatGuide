@@ -17,6 +17,7 @@ import {
   insertAppData,
   insertGameAccountData,
   insertRecordData,
+  insertRoleData,
 } from "./sql/insertData";
 
 class Sqlite {
@@ -39,6 +40,7 @@ class Sqlite {
     "GameAccount",
     "NameCard",
     "SpiralAbyss",
+    "UserCharacters",
     "UserRecord",
   ];
 
@@ -385,6 +387,35 @@ class Sqlite {
     const res: TGApp.Sqlite.Character.AppData[] = await db.select(sql);
     await db.close();
     return res[0];
+  }
+
+  /**
+   * @description 保存用户角色数据
+   * @since Alpha v0.2.0
+   * @param {string} uid 用户 uid
+   * @param {TGApp.Game.Character.ListItem[]} data 角色数据
+   * @returns {Promise<void>}
+   */
+  public async saveUserCharacter (uid: string, data: TGApp.Game.Character.ListItem[]): Promise<void> {
+    const db = await Database.load(this.dbPath);
+    const sql = insertRoleData(uid, data);
+    await db.execute(sql);
+    await db.close();
+  }
+
+  /**
+   * @description 获取用户角色数据
+   * @since Alpha v0.2.0
+   * @param {string} uid 用户 uid
+   * @returns {Promise<TGApp.Sqlite.Character.UserRole[]|false>}
+   */
+  public async getUserCharacter (uid: string): Promise<TGApp.Sqlite.Character.UserRole[] | false> {
+    const db = await Database.load(this.dbPath);
+    const sql = `SELECT * FROM UserCharacters WHERE uid = '${uid}'`;
+    const res: TGApp.Sqlite.Character.UserRole[] = await db.select(sql);
+    await db.close();
+    if (res.length === 0) return false;
+    return res;
   }
 }
 

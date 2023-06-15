@@ -3,7 +3,7 @@
   <div class="uc-box">
     <div class="uc-top">
       <div class="uc-top-title">
-        {{ user.nickname }} UID：{{ user.gameUid }}
+        {{ user.nickname }} UID：{{ user.gameUid }} 更新于 {{ getUpdateTime() }}
       </div>
       <v-btn variant="outlined" class="uc-top-btn" @click="refresh()">
         <template #prepend>
@@ -18,27 +18,25 @@
         分享
       </v-btn>
     </div>
+    <!-- grid 布局，参考 Snap.Hutao -->
     <div class="uc-grid">
-      <TUserAvatar v-for="avatar in roleList" :model-value="avatar" />
+      <TucRoleBox v-for="role in roleList" :model-value="role" />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 // vue
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUpdated, ref } from "vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import TUserAvatar from "../../components/mini/t-user-avatar.vue";
-// tauri
-import { fs } from "@tauri-apps/api";
 // store
-import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
 // utils
+import TGSqlite from "../../plugins/Sqlite";
 import TGRequest from "../../web/request/TGRequest";
 import { generateShareImg } from "../../utils/TGShare";
+import TucRoleBox from "../../components/userCharacter/tuc-role-box.vue";
 
 // store
-const appStore = useAppStore();
 const userStore = useUserStore();
 
 // loading
@@ -46,35 +44,49 @@ const loading = ref(false);
 const loadingTitle = ref("");
 
 // data
-const roleList = ref([] as TGApp.Game.Character.ListItem[]);
-const characterCookie = computed(() => userStore.getCookieGroup4());
+const isEmpty = ref(true);
+const roleList = ref([] as TGApp.Sqlite.Character.UserRole[]);
+const roleCookie = computed(() => userStore.getCookieGroup4());
 const user = computed(() => userStore.getCurAccount());
-const filePath = computed(() => `${appStore.dataPath.userDataDir}/roleList.json`);
+
+// grid
+const gridGap = ref("10px");
+
+const resizeObserve = new ResizeObserver(() => {
+  getGridGap();
+});
 
 onMounted(async () => {
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
-  try {
-    const fileGet = await fs.readTextFile(filePath.value);
-    roleList.value = JSON.parse(fileGet);
-  } catch (error) {
-    console.log(error);
-  }
+  await loadRole();
+  resizeObserve.observe(document.querySelector(".uc-grid"));
   loading.value = false;
 });
+
+function getGridGap () {
+  const width = document.querySelector(".uc-grid")?.clientWidth - 20;
+  const count = Math.floor(width / 180);
+  gridGap.value = `${(width - count * 180) / (count - 1)}px`;
+}
+
+async function loadRole () {
+  const roleData = await TGSqlite.getUserCharacter(user.value.gameUid);
+  if (roleData !== false) {
+    roleList.value = roleData;
+    isEmpty.value = false;
+  }
+}
 
 async function refresh () {
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
-  const res = await TGRequest.User.byLToken.getRoleList(characterCookie.value, user.value);
+  const res = await TGRequest.User.byLToken.getRoleList(roleCookie.value, user.value);
   if (Array.isArray(res)) {
     loadingTitle.value = "正在保存角色数据";
-    await fs.writeTextFile({
-      path: filePath.value,
-      contents: JSON.stringify(res),
-    });
+    await TGSqlite.saveUserCharacter(user.value.gameUid, res);
     loadingTitle.value = "正在更新角色数据";
-    roleList.value = res;
+    await loadRole();
   }
   loading.value = false;
 }
@@ -84,13 +96,24 @@ async function shareRoles () {
   const fileName = `角色列表-${user.value.gameUid}-${Math.floor(Date.now())}.png`;
   await generateShareImg(fileName, rolesBox);
 }
+
+function getUpdateTime () {
+  let lastUpdateTime = 0;
+  roleList.value.forEach((role) => {
+    const updateTime = new Date(role.updated).getTime();
+    if (updateTime > lastUpdateTime) {
+      lastUpdateTime = updateTime;
+    }
+  });
+  return new Date(lastUpdateTime).toLocaleString().replace(/\//g, "-");
+}
 </script>
 <style lang="css" scoped>
 .uc-box {
   width: 100%;
   border-radius: 5px;
   padding: 10px;
-  box-shadow: 0 0 10px var(--common-bg-4);
+  box-shadow: 0 0 10px var(--common-bg);
 }
 
 .uc-top {
@@ -119,8 +142,8 @@ async function shareRoles () {
 
 .uc-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  grid-gap: 10px;
-  margin-top: 10px;
+  grid-template-columns: repeat(auto-fill, 180px);
+  grid-gap: 10px v-bind(gridGap);
+  padding: 10px;
 }
 </style>

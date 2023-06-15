@@ -113,4 +113,25 @@ create table if not exists UserRecord
     worldExplore text,
     homes        text,
     updated      text
-)
+);
+
+-- @brief 创建角色数据表
+create table if not exists UserCharacters
+(
+    uid                 integer,
+    cid                 integer,
+    img                 text,
+    name                text,
+    fetter              integer,
+    level               integer,
+    element             text,
+    star                integer,
+    weapon              text,
+    reliquary           text,
+    constellation       text,
+    activeConstellation integer,
+    costume             text,
+    talent              text, -- todo: 数据获取
+    updated             text,
+    primary key (uid, cid)
+);

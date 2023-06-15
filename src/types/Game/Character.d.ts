@@ -1,7 +1,6 @@
 /**
  * @file types Game Character.d.ts
  * @description 游戏角色相关类型定义文件
- * @todo v0.1.5 不使用
  * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
@@ -55,7 +54,7 @@ declare namespace TGApp.Game.Character {
     level: number
     rarity: number
     weapon: LIWeapon
-    reliquaries: LIReliquary[]
+    reliquaries: LIRelic[]
     constellations: LIConstellation[]
     actived_constellation_num: number
     costumes: LICostume[]

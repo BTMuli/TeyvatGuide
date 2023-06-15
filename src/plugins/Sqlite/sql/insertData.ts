@@ -8,6 +8,7 @@
 // utils
 import { timeToSecond } from "../utils/transTime";
 import { transCharacterData, transFloorData } from "../utils/transAbyssData";
+import { transUserRoles } from "../utils/transUserRoles";
 import { transUserRecord } from "../utils/transUserRecord";
 
 /**
@@ -118,7 +119,7 @@ export function insertNameCardData (data: TGApp.App.NameCard.Item): string {
 export function insertCharacterData (data: TGApp.App.Character.WikiBriefInfo): string {
   return `
       INSERT INTO AppCharacters (id, name, star, element, weapon, nameCard, birthday, updated)
-      VALUES (${data.id}, '${data.name}', ${data.star}, '${data.element}', '${data.weapon}', 
+      VALUES (${data.id}, '${data.name}', ${data.star}, '${data.element}', '${data.weapon}',
               '${data.nameCard}', '${data.birthday}', datetime('now', 'localtime'))
       ON CONFLICT(id) DO UPDATE
           SET name     = '${data.name}',
@@ -186,15 +187,51 @@ export function insertRecordData (data: TGApp.Game.Record.FullData, uid: string)
   const transData = transUserRecord(data);
   transData.uid = uid;
   return `
-      INSERT INTO UserRecord(uid, role, avatars, stats, worldExplore, homes, updated) 
+      INSERT INTO UserRecord(uid, role, avatars, stats, worldExplore, homes, updated)
       VALUES ('${transData.uid}', '${transData.role}', '${transData.avatars}', '${transData.stats}',
               '${transData.worldExplore}', '${transData.homes}', datetime('now', 'localtime'))
       ON CONFLICT(uid) DO UPDATE
-      SET role         = '${transData.role}',
-          avatars      = '${transData.avatars}',
-          stats        = '${transData.stats}',
-          worldExplore = '${transData.worldExplore}',
-          homes        = '${transData.homes}',
-          updated      = datetime('now', 'localtime');
+          SET role         = '${transData.role}',
+              avatars      = '${transData.avatars}',
+              stats        = '${transData.stats}',
+              worldExplore = '${transData.worldExplore}',
+              homes        = '${transData.homes}',
+              updated      = datetime('now', 'localtime');
   `;
+}
+
+/**
+ * @description 插入用户角色数据
+ * @since Alpha v0.2.0
+ * @param {string} uid 用户 UID
+ * @param {TGApp.User.Character.Item[]} data 角色数据
+ * @returns {string} sql
+ */
+export function insertRoleData (uid: string, data: TGApp.Game.Character.ListItem[]): string {
+  const sql = data.map(item => {
+    const role = transUserRoles(item);
+    return `
+        INSERT INTO UserCharacters (uid, cid, name, img, name, fetter, level, element, star, weapon, reliquary,
+                                    constellation, activeConstellation, costume, talent, updated)
+        VALUES (${uid}, ${role.cid}, '${role.name}', '${role.img}', '${role.name}', ${role.fetter}, ${role.level},
+                '${role.element}', ${role.star}, '${role.weapon}', '${role.reliquary}', '${role.constellation}',
+                ${role.activeConstellation}, '${role.costume}', '${role.talent}', datetime('now', 'localtime'))
+        ON CONFLICT(uid, cid) DO UPDATE
+            SET name                = '${role.name}',
+                img                 = '${role.img}',
+                name                = '${role.name}',
+                fetter              = ${role.fetter},
+                level               = ${role.level},
+                element             = '${role.element}',
+                star                = ${role.star},
+                weapon              = '${role.weapon}',
+                reliquary           = '${role.reliquary}',
+                constellation       = '${role.constellation}',
+                activeConstellation = ${role.activeConstellation},
+                costume             = '${role.costume}',
+                talent              = '${role.talent}',
+                updated             = datetime('now', 'localtime');
+    `;
+  });
+  return sql.join("");
 }
