@@ -46,7 +46,7 @@ onMounted(async () => {
     const postData = await MysOper.Post.get(postId);
     loadingTitle.value = "正在渲染数据...";
     postHtml.value = MysOper.Post.parser(postData);
-    postTitle.value = postData.post.subject;
+    postTitle.value = `【帖子】${postData.post.post_id}-${postData.post.subject}`;
     postRef.value = document.querySelector(".mys-post-body") as HTMLElement;
     await appWindow.setTitle(postData.post.subject);
   } catch (error) {

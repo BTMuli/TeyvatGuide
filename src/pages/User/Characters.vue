@@ -93,7 +93,7 @@ async function refresh () {
 
 async function shareRoles () {
   const rolesBox = document.querySelector(".uc-box") as HTMLElement;
-  const fileName = `角色列表-${user.value.gameUid}-${Math.floor(Date.now())}.png`;
+  const fileName = `【角色列表】-${user.value.gameUid}`;
   await generateShareImg(fileName, rolesBox);
 }
 

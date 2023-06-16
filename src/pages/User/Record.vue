@@ -111,7 +111,7 @@ function getTitle () {
 
 async function shareRecord () {
   const recordBox = document.querySelector(".ur-box") as HTMLElement;
-  const fileName = `战绩-${user.value.gameUid}-${Math.floor(Date.now() / 1000)}`;
+  const fileName = `【原神战绩】-${user.value.gameUid}`;
   await generateShareImg(fileName, recordBox);
 }
 

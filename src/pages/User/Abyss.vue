@@ -134,7 +134,7 @@ function getAbyssRef (el: HTMLElement): void {
 }
 
 async function shareAbyss (): Promise<void> {
-  const fileName = `深渊${curAbyss.value.id}-${user.value.gameUid}-${Math.floor(Date.now() / 1000)}.png`;
+  const fileName = `【深渊数据】${curAbyss.value.id}-${user.value.gameUid}`;
   await generateShareImg(fileName, abyssRef.value);
 }
 </script>

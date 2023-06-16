@@ -60,7 +60,7 @@ onMounted(async () => {
     annoHtml.value = await TGUtils.Anno.parseContent(annoData.value.content);
     annoBanner.value = await saveImgLocal(annoData.value.banner);
     console.log(annoBanner.value);
-    annoTitle.value = annoData.value.title;
+    annoTitle.value = `【公告】${annoData.value.ann_id}-${annoData.value.title}`;
     annoRef.value = document.querySelector(".anno-body") as HTMLElement;
   } catch (error) {
     console.error(error);
