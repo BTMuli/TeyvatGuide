@@ -14,7 +14,7 @@ import { saveImgLocal } from "../../utils/TGShare";
  * @param {string} data 游戏内公告数据
  * @returns {Promise<string>} 解析后的数据
  */
-export async function parseAnnoContent(data: string): Promise<string> {
+export async function parseAnnoContent (data: string): Promise<string> {
   const htmlBase = new DOMParser().parseFromString(data, "text/html");
   htmlBase.querySelectorAll("span").forEach((span) => {
     if (span.style.fontSize) {

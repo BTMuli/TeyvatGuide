@@ -1,9 +1,18 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <TSwitchTheme />
-  <TShareBtn v-show="!loadingEmpty" v-model="postRef" :title="postTitle" />
+  <TShareBtn v-show="!loadingEmpty" v-model="postRef" :title="shareTitle" />
   <TOLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
-  <div class="mys-post-body" v-html="postHtml" />
+  <div class="mys-post-body">
+    <div class="mys-post-title">
+      {{ postRender.title }}
+    </div>
+    <div class="mys-post-subtitle">
+      <span>创建时间：{{ postRender.created }}&emsp;</span>
+      <span>更新时间：{{ postRender.updated }}</span>
+    </div>
+    <div class="mys-post-content" v-html="postHtml" />
+  </div>
 </template>
 <script lang="ts" setup>
 // vue
@@ -24,12 +33,16 @@ const loadingEmpty = ref(false as boolean);
 
 // share
 const postRef = ref({} as HTMLElement);
-const postTitle = ref("");
+const shareTitle = ref("");
 
 // 数据
 const postId = Number(useRoute().params.post_id);
 const postHtml = ref("");
-
+const postRender = ref({
+  title: "",
+  created: "",
+  updated: "",
+});
 
 onMounted(async () => {
   await appWindow.show();
@@ -46,14 +59,19 @@ onMounted(async () => {
     const postData = await MysOper.Post.get(postId);
     loadingTitle.value = "正在渲染数据...";
     postHtml.value = MysOper.Post.parser(postData);
-    postTitle.value = `【帖子】${postData.post.post_id}-${postData.post.subject}`;
+    postRender.value = {
+      title: postData.post.subject,
+      created: new Date(postData.post.created_at * 1000).toLocaleString().replace(/\//g, "-"),
+      updated: new Date(postData.post.updated_at * 1000).toLocaleString().replace(/\//g, "-"),
+    };
+    shareTitle.value = `【帖子】${postId}-${postData.post.subject}`;
     postRef.value = document.querySelector(".mys-post-body") as HTMLElement;
-    await appWindow.setTitle(postData.post.subject);
+    await appWindow.setTitle(shareTitle.value);
   } catch (error) {
     console.error(error);
     loadingEmpty.value = true;
     loadingTitle.value = "帖子不存在或解析失败";
-    await appWindow.setTitle("帖子不存在或解析失败");
+    await appWindow.setTitle(`【帖子】${postId}-解析失败`);
     return;
   }
   setTimeout(() => {

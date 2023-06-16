@@ -12,17 +12,14 @@
 }
 
 .anno-title {
-  font-family: Genshin, serif;
-  color: #5b738f;
+  font-family: var(--font-title);
+  color: var(--common-text);
   font-size: 24px;
-  font-weight: 500;
-  margin-bottom: 8px;
 }
 
 .anno-subtitle {
   font-size: 16px;
-  color: #a1aeb6;
-  margin-bottom: 16px;
+  color: var(--common-text-3);
 }
 
 .anno-img {

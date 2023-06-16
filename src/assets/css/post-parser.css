@@ -12,6 +12,21 @@
   color: var(--post-default-text);
 }
 
+.mys-post-title {
+  font-family: var(--font-title);
+  color: var(--common-text);
+  font-size: 24px;
+}
+
+.mys-post-subtitle {
+  font-size: 16px;
+  color: var(--common-text-3);
+}
+
+.mys-post-content {
+  line-height: 2;
+}
+
 :deep(.mys-post-div) {
   margin: 20px auto;
 }
