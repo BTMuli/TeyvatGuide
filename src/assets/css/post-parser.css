@@ -1,12 +1,14 @@
 /*
+ * @file assets css post-parser.css
  * @description 米游社解析 css
- * @since Alpha v0.1.3
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Alpha v0.2.0
  */
 
 .mys-post-body {
-  margin: 20px auto;
+  margin: 0 auto;
   width: 800px;
-  font-family: "Genshin-Light", serif;
+  font-family: var(--font-text);
   color: var(--post-default-text);
 }
 

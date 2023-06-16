@@ -222,7 +222,7 @@ import MysOper from "../plugins/Mys";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
 // interface
-import { NewsCard, NewsData } from "../plugins/Mys/interface/news";
+import { NewsCard } from "../plugins/Mys/interface/news";
 
 // 路由
 const router = useRouter();

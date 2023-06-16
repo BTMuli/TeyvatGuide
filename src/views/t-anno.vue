@@ -1,6 +1,7 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <TSwitchTheme />
+  <TShareBtn v-show="!loadingEmpty" v-model="annoRef" :title="annoTitle" />
   <TOLoading v-model="loading" :title="loadingTitle" :empty="loadingEmpty" />
   <div class="anno-body">
     <div class="anno-title">
@@ -9,7 +10,7 @@
     <div class="anno-subtitle">
       {{ annoData.subtitle }}
     </div>
-    <img v-if="annoData.banner !== ''" :src="annoData.banner" alt="cover" class="anno-img">
+    <img v-if="annoData.banner !== ''" :src="annoBanner" alt="cover" class="anno-img">
     <div class="anno-content" v-html="annoHtml" />
   </div>
 </template>
@@ -19,21 +20,28 @@ import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import TOLoading from "../components/overlay/to-loading.vue";
 import TSwitchTheme from "../components/main/t-switchTheme.vue";
+import TShareBtn from "../components/main/t-shareBtn.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
 // plugins
 import TGRequest from "../web/request/TGRequest";
 import TGUtils from "../web/utils/TGUtils";
+import { saveImgLocal } from "../utils/TGShare";
 
 // loading
 const loading = ref(true as boolean);
 const loadingTitle = ref("正在加载");
 const loadingEmpty = ref(false as boolean);
 
+// share
+const annoRef = ref({} as HTMLElement);
+const annoTitle = ref("");
+
 // 数据
 const annoId = Number(useRoute().params.anno_id);
 const annoData = ref({} as TGApp.BBS.Announcement.ContentItem);
 const annoHtml = ref("");
+const annoBanner = ref("");
 
 onMounted(async () => {
   await appWindow.show();
@@ -49,8 +57,13 @@ onMounted(async () => {
   try {
     annoData.value = await TGRequest.Anno.getContent(annoId);
     loadingTitle.value = "正在渲染数据...";
-    annoHtml.value = TGUtils.Anno.parseContent(annoData.value.content);
+    annoHtml.value = await TGUtils.Anno.parseContent(annoData.value.content);
+    annoBanner.value = await saveImgLocal(annoData.value.banner);
+    console.log(annoBanner.value);
+    annoTitle.value = annoData.value.title;
+    annoRef.value = document.querySelector(".anno-body") as HTMLElement;
   } catch (error) {
+    console.error(error);
     loadingEmpty.value = true;
     loadingTitle.value = "公告不存在或解析失败";
     return;

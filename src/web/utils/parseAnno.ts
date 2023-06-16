@@ -1,19 +1,20 @@
 /**
  * @file web utils parseAnno.ts
  * @description 解析游戏内公告数据
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.5
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Alpha v0.2.0
  */
 
 import { decodeRegExp } from "./tools";
+import { saveImgLocal } from "../../utils/TGShare";
 
 /**
  * @description 解析游戏内公告数据
- * @since Alpha v0.1.5
+ * @since Alpha v0.2.0
  * @param {string} data 游戏内公告数据
- * @returns {string} 解析后的数据
+ * @returns {Promise<string>} 解析后的数据
  */
-export function parseAnnoContent (data: string): string {
+export async function parseAnnoContent(data: string): Promise<string> {
   const htmlBase = new DOMParser().parseFromString(data, "text/html");
   htmlBase.querySelectorAll("span").forEach((span) => {
     if (span.style.fontSize) {
@@ -40,11 +41,16 @@ export function parseAnnoContent (data: string): string {
       });
     }
   });
-  htmlBase.querySelectorAll("img").forEach((img) => {
+  const imgList = Array.from(htmlBase.querySelectorAll("img"));
+  for (const img of imgList) {
     img.style.maxWidth = "100%";
     img.style.borderRadius = "10px";
     img.style.margin = "10px 0";
-  });
+    const src = img.getAttribute("src");
+    if (src) {
+      img.setAttribute("src", await saveImgLocal(src));
+    }
+  }
   htmlBase.querySelectorAll("a").forEach((a) => {
     const span = htmlBase.createElement("i");
     span.classList.add("mdi", "mdi-link-variant", "anno-link-icon");
