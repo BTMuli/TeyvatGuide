@@ -1,6 +1,6 @@
 <template>
   <div class="switch-box">
-    <div class="switch-btn" @click="swithcTheme()">
+    <div class="switch-btn" @click="switchTheme()">
       <v-icon style="color:var(--theme-switch-icon)">
         {{ themeGet === 'default' ? 'mdi-weather-night' : 'mdi-weather-sunny' }}
       </v-icon>
@@ -31,7 +31,7 @@ onMounted(async () => {
   await listenOnTheme();
 });
 
-async function swithcTheme () {
+async function switchTheme () {
   appStore.changeTheme();
   await event.emit("readTheme", themeGet.value);
 }
