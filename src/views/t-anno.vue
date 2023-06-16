@@ -59,13 +59,14 @@ onMounted(async () => {
     loadingTitle.value = "正在渲染数据...";
     annoHtml.value = await TGUtils.Anno.parseContent(annoData.value.content);
     annoBanner.value = await saveImgLocal(annoData.value.banner);
-    console.log(annoBanner.value);
-    annoTitle.value = `【公告】${annoData.value.ann_id}-${annoData.value.title}`;
+    annoTitle.value = `【公告】${annoId}-${annoData.value.title}`;
+    await appWindow.setTitle(annoTitle.value);
     annoRef.value = document.querySelector(".anno-body") as HTMLElement;
   } catch (error) {
     console.error(error);
     loadingEmpty.value = true;
     loadingTitle.value = "公告不存在或解析失败";
+    await appWindow.setTitle(`【公告】${annoId}-公告不存在或解析失败`);
     return;
   }
   loading.value = false;
