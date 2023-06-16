@@ -1,19 +1,23 @@
 <template>
-  <div class="tuc-rb-box">
+  <div class="tuc-rb-box" @click="visible = true">
     <div class="tuc-rb-top">
-      <TItemBox v-model="avatarBox" @click="showAvatarData" />
-      <TItemBox v-model="weaponBox" @click="showWeaponData" />
+      <TItemBox v-model="avatarBox" />
+      <TItemBox v-model="weaponBox" />
     </div>
   </div>
+  <ToUcDetail v-model="visible" :data-val="props.modelValue" />
 </template>
 <script lang="ts" setup>
-import { computed } from "vue";
+// vue
+import { computed, ref } from "vue";
 import TItemBox from "../main/t-itembox.vue";
+import ToUcDetail from "./tuc-detail-overlay.vue";
 
 interface TucRoleBoxProps {
   modelValue: TGApp.Sqlite.Character.UserRole;
 }
 
+const visible = ref(false);
 const props = defineProps<TucRoleBoxProps>();
 const avatarBox = computed(() => {
   return {
@@ -55,15 +59,6 @@ function getAvatarName () {
         ? "旅行者-荧"
         : props.modelValue.name
   );
-}
-
-function showAvatarData () {
-  console.log(avatarBox.value);
-}
-
-function showWeaponData () {
-  const weapon = JSON.parse(props.modelValue.weapon) as TGApp.Sqlite.Character.RoleWeapon;
-  console.log(weapon);
 }
 </script>
 <style lang="css" scoped>
