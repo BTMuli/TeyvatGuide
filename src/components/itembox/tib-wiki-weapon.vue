@@ -1,5 +1,5 @@
 <template>
-  <TItemBox :model-value="box" />
+  <TItemBox :model-value="box" style="cursor: pointer;" />
 </template>
 <script lang="ts" setup>
 // vue

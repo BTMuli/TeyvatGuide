@@ -4,8 +4,8 @@
       <div class="box-div">
         <div class="toc-top">
           <div class="toc-icon">
-            <TibCalendarAvatar v-if="itemType=== 'character'" v-model="itemVal" size="100px" />
-            <TibCalendarWeapon v-if="itemType=== 'weapon'" v-model="itemVal" size="100px" />
+            <TibCalendarAvatar v-if="itemType=== 'character'" v-model="itemVal" size="100px" style="cursor: default" />
+            <TibCalendarWeapon v-if="itemType=== 'weapon'" v-model="itemVal" size="100px" style="cursor: default" />
           </div>
           <div class="toc-material-grid">
             <TCalendarMaterial v-for="item in itemVal.materials" :item="item" />

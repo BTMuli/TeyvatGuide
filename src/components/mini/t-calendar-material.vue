@@ -32,7 +32,6 @@ defineProps<TMiniWeaponProps>();
     position: relative;
     width: 150px;
     height: 45px;
-    cursor: pointer;
 		display: flex;
 		flex-direction: row;
 		border-radius: 5px;
