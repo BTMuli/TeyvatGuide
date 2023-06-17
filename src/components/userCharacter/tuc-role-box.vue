@@ -1,5 +1,5 @@
 <template>
-  <div class="tuc-rb-box" @click="visible = true">
+  <div class="tuc-rb-box" @click="showOverlay">
     <div class="tuc-rb-top">
       <TItemBox v-model="avatarBox" />
       <TItemBox v-model="weaponBox" />
@@ -26,7 +26,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { computed, ref, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import TItemBox from "../main/t-itembox.vue";
 import ToUcDetail from "./tuc-detail-overlay.vue";
 // utils
@@ -86,6 +86,10 @@ function getAvatarName () {
         ? "旅行者-荧"
         : props.modelValue.name
   );
+}
+
+function showOverlay () {
+  visible.value = true;
 }
 </script>
 <style lang="css" scoped>

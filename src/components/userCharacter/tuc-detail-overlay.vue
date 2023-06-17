@@ -5,13 +5,58 @@
         <img :src="props.dataVal.img" alt="role">
       </div>
       <div class="tuc-do-quote">
-        *所有数据以游戏内为准，此处仅供参考
+        * 所有数据以游戏内为准，此处仅供参考
       </div>
       <div v-if="data" class="tuc-do-show">
         <!-- 左侧武器跟圣遗物 -->
         <div class="tuc-do-left">
           <div class="tuc-dol-item" @click="showDetail(data.weapon,'武器')">
             <TucDetailItemBox v-model="weaponBox" />
+          </div>
+          <div
+            class="tuc-dol-item"
+            :style="{
+              cursor: data.reliquary[1] ? 'pointer' : 'default',
+            }"
+            @click="showDetail(data.reliquary[1],'圣遗物')"
+          >
+            <TucDetailRelic v-model="data.reliquary[1]" pos="1" />
+          </div>
+          <div
+            class="tuc-dol-item"
+            :style="{
+              cursor: data.reliquary[2] ? 'pointer' : 'default',
+            }"
+            @click="showDetail(data.reliquary[2],'圣遗物')"
+          >
+            <TucDetailRelic v-model="data.reliquary[2]" pos="2" />
+          </div>
+          <div
+            class="tuc-dol-item"
+            :style="{
+              cursor: data.reliquary[3] ? 'pointer' : 'default',
+            }"
+            @click="showDetail(data.reliquary[3],'圣遗物')"
+          >
+            <TucDetailRelic v-model="data.reliquary[3]" pos="3" />
+          </div>
+          <div
+            class="tuc-dol-item"
+            :style="{
+              cursor: data.reliquary[4] ? 'pointer' : 'default',
+            }"
+            @click="showDetail(data.reliquary[4],'圣遗物')"
+          >
+            <TucDetailRelic v-model="data.reliquary[4]" pos="4" />
+          </div>
+          <div
+            class="tuc-dol-item"
+            :style="{
+              cursor: data.reliquary[5] ? 'pointer' : 'default',
+            }"
+            @click="showDetail(data.reliquary[5],'圣遗物')"
+          >
+            <TucDetailRelic v-model="data.reliquary[5]" pos="5" />
           </div>
         </div>
         <!-- 右侧环状排列6个命座 -->
@@ -29,7 +74,7 @@
         <div class="tuc-do-bottom">
           <TucDetailDescWeapon v-if="selected.type === '武器'" v-model="selected.data" />
           <TucDetailDescConstellation v-else-if="selected.type === '命座'" v-model="selected.data" />
-<!--          <TucDetailDescRelic v-else-if="selected.type === '圣遗物'" v-model="selected.data" />-->
+          <TucDetailDescRelic v-else-if="selected.type === '圣遗物'" v-model="selected.data" />
         </div>
       </div>
     </div>
@@ -41,9 +86,10 @@ import { computed, onMounted, ref } from "vue";
 import TOverlay from "../main/t-overlay.vue";
 import TucDetailDescWeapon from "./tuc-detail-desc-weapon.vue";
 import TucDetailDescConstellation from "./tuc-detail-desc-constellation.vue";
-// import TucDetailDescRelic from "./tuc-detail-desc-relic.vue";
+import TucDetailDescRelic from "./tuc-detail-desc-relic.vue";
 import TucDetailItemBox from "./tuc-detail-itembox.vue";
 import TucDetailConstellation from "./tuc-detail-constellation.vue";
+import TucDetailRelic from "./tuc-detail-relic.vue";
 
 interface ToUcDetailProps {
   modelValue: boolean;
@@ -52,7 +98,6 @@ interface ToUcDetailProps {
 
 interface ToUcDetailEmits {
   (e: "update:modelValue", value: TGApp.Sqlite.Character.UserRole): void;
-
   (e: "cancel"): void;
 }
 
@@ -70,7 +115,13 @@ const visible = computed({
 const data = ref({
   weapon: {} as TGApp.Sqlite.Character.RoleWeapon,
   constellation: [] as TGApp.Sqlite.Character.RoleConstellation[],
-  reliquary: [] as TGApp.Sqlite.Character.RoleReliquary[],
+  reliquary: {
+    1: false as TGApp.Sqlite.Character.RoleReliquary | false,
+    2: false as TGApp.Sqlite.Character.RoleReliquary | false,
+    3: false as TGApp.Sqlite.Character.RoleReliquary | false,
+    4: false as TGApp.Sqlite.Character.RoleReliquary | false,
+    5: false as TGApp.Sqlite.Character.RoleReliquary | false,
+  },
 });
 const selected = ref({
   data: {} as TGApp.Sqlite.Character.RoleConstellation
@@ -80,13 +131,13 @@ const selected = ref({
 });
 
 onMounted(() => {
-  data.value = {
-    weapon: JSON.parse(props.dataVal.weapon) as TGApp.Sqlite.Character.RoleWeapon,
-    constellation: JSON.parse(props.dataVal.constellation) as TGApp.Sqlite.Character.RoleConstellation[],
-    reliquary: [],
-  };
-  if (props.dataVal.reliquary) {
-    data.value.reliquary = JSON.parse(props.dataVal.reliquary) as TGApp.Sqlite.Character.RoleReliquary[];
+  data.value.weapon = JSON.parse(props.dataVal.weapon) as TGApp.Sqlite.Character.RoleWeapon;
+  data.value.constellation = JSON.parse(props.dataVal.constellation) as TGApp.Sqlite.Character.RoleConstellation[];
+  if (props.dataVal.reliquary !== "") {
+    const relics = JSON.parse(props.dataVal.reliquary) as TGApp.Sqlite.Character.RoleReliquary[];
+    relics.map((item) => {
+      data.value.reliquary[item.pos] = item;
+    });
   }
   selected.value = {
     data: data.value.weapon,
@@ -107,7 +158,14 @@ const onCancel = () => {
   emits("cancel");
 };
 
-function showDetail (item: TGApp.Sqlite.Character.RoleConstellation | TGApp.Sqlite.Character.RoleWeapon | TGApp.Sqlite.Character.RoleReliquary, type: string) {
+function showDetail (
+  item:
+  TGApp.Sqlite.Character.RoleConstellation |
+  TGApp.Sqlite.Character.RoleWeapon |
+  TGApp.Sqlite.Character.RoleReliquary |
+  false,
+  type: string) {
+  if (!item) return;
   selected.value = {
     data: item,
     type,
@@ -142,10 +200,10 @@ function showDetail (item: TGApp.Sqlite.Character.RoleConstellation | TGApp.Sqli
 .tuc-do-quote {
   position: absolute;
   bottom: 5px;
-  right: 5px;
+  right: 10px;
   font-family: var(--font-text);
   font-size: 12px;
-  color: var(--common-color-yellow);
+  color: var(--common-color-grey-2);
 }
 
 .tuc-do-show {
@@ -160,7 +218,8 @@ function showDetail (item: TGApp.Sqlite.Character.RoleConstellation | TGApp.Sqli
 .tuc-do-left {
   width: 50%;
   height: 400px;
-  //background: rgb(255 255 255 / 30%);
+  position: relative;
+//background: rgb(255 255 255 / 30%);
 }
 
 .tuc-do-right {
@@ -176,12 +235,41 @@ function showDetail (item: TGApp.Sqlite.Character.RoleConstellation | TGApp.Sqli
 /* 左侧显示区域 */
 .tuc-dol-item {
   position: absolute;
+  cursor: pointer;
 }
 
+/* 排列武器跟5个圣遗物 */
 .tuc-dol-item:nth-child(1) {
-  top: 30px;
-  left: 20px;
+  top: 40px;
+  left: 10px;
 }
+
+.tuc-dol-item:nth-child(2) {
+  top: 90px;
+  left: 80px;
+}
+
+.tuc-dol-item:nth-child(3) {
+  top: 140px;
+  left: 10px;
+}
+
+.tuc-dol-item:nth-child(4) {
+  top: 190px;
+  left: 80px;
+}
+
+.tuc-dol-item:nth-child(5) {
+  top: 240px;
+  left: 10px;
+}
+
+.tuc-dol-item:nth-child(6) {
+  top: 290px;
+  left: 80px;
+}
+
+/* 右侧显示区域 */
 
 .tuc-dor-box {
   width: 100%;

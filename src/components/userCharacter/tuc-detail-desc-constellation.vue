@@ -34,13 +34,22 @@ interface TucDetailDescConstellationProps {
 const props = defineProps<TucDetailDescConstellationProps>();
 </script>
 <style lang="css" scoped>
+.tuc-ddc-content {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: space-around;
+  height: 100%;
+  margin-left: 5px;
+}
+
 .tuc-ddc-top {
-  margin-left: 15px;
   color: var(--common-color-blue-2);
+  height: 20px;
 }
 
 .tuc-ddc-bottom {
-  margin-left: 15px;
+  height: 20px;
 }
 
 .tuc-ddc-bottom :nth-child(1) {

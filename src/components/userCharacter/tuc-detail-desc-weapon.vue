@@ -45,13 +45,14 @@ const box = computed(() => {
 .tuc-ddw-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: start;
+  justify-content: space-around;
   height: 100%;
+  margin-left: 5px;
 }
 
 .tuc-ddwc-top {
-  margin-left: 10px;
+  height: 20px;
 }
 
 .tuc-ddwc-top span {
@@ -64,7 +65,7 @@ const box = computed(() => {
 }
 
 .tuc-ddwc-bottom {
-  margin-left: 15px;
+  height: 20px;
 }
 
 .tuc-ddwc-bottom img {
