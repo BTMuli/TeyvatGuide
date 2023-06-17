@@ -4,7 +4,7 @@
       <img :src="`/icon/relic/${props.pos}.webp`" alt="relic">
     </div>
     <div v-if="props.modelValue" class="tuc-dr-bg">
-      <img :src="`/icon/bg/${props.modelValue.star}-Star.webp`" alt="bg">`
+      <img :src="`/icon/bg/${props.modelValue.star}-Star.webp`" alt="bg">
     </div>
     <div v-if="props.modelValue" class="tuc-dr-icon">
       <img :src="props.modelValue.icon" alt="relic">
