@@ -17,7 +17,7 @@
       <div v-show="modelValue.rt" class="tib-rt">
         {{ modelValue.rt }}
       </div>
-      <div v-if="modelValue.display==='inner'" class="tib-inner">
+      <div class="tib-inner">
         <slot name="inner-icon">
           <img v-show="modelValue.innerIcon" :src="modelValue.innerIcon" alt="inner-icon">
         </slot>
@@ -27,9 +27,6 @@
       </div>
     </div>
     <div v-if="modelValue.display==='outer'" class="tib-outer">
-      <slot name="outer-icon">
-        <img v-show="modelValue.outerIcon" :src="modelValue.outerIcon" alt="outer-icon">
-      </slot>
       <slot name="outer-text">
         <span>{{ modelValue.outerText }}</span>
       </slot>
@@ -51,9 +48,8 @@ export interface TItemBoxData {
   rtSize?: string,
   innerHeight?: number,
   innerIcon?: string,
-  innerText?: string,
+  innerText: string,
   outerHeight?: number,
-  outerIcon?: string,
   outerText?: string,
 }
 
@@ -68,6 +64,7 @@ const props = withDefaults(defineProps<TItemBoxProps>(), {
     lt: "",
     ltSize: "30px",
     display: "inner",
+    innerText: "",
     size: "80px",
     height: "80px",
   },
@@ -83,7 +80,6 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   position: relative;
   width: v-bind(props["modelValue"]["size"]);
   height: v-bind(props["modelValue"]["height"]);
-  cursor: pointer;
 }
 
 .tib-bg {
@@ -153,7 +149,7 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   right: 0;
   width: v-bind(props["modelValue"]["rtSize"]);
   height: v-bind(props["modelValue"]["rtSize"]);
-  background: rgb(0 0 0 / 50%);
+  background: rgb(0 0 0 / 40%);
   border-top-right-radius: 5px;
   border-bottom-left-radius: 5px;
   display: flex;
@@ -172,7 +168,7 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgb(20 20 20 / 50%);
+  background: rgb(20 20 20 / 40%);
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   color: var(--common-color-white);
@@ -189,22 +185,10 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
 .tib-outer {
   position: absolute;
   bottom: 0;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
   width: 100%;
   height: v-bind(getOuterHeight);
-  background: rgb(0 0 0/ 20%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: Genshin, serif;
-  color: var(--common-color-white);
+  text-align: center;
+  color: var(--common-text);
   font-size: v-bind(getOuterFont);
-}
-
-.tib-outer img {
-  width: v-bind(getOuterHeight);
-  height: v-bind(getOuterHeight);
-  margin-right: 5px;
 }
 </style>
