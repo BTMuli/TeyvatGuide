@@ -18,7 +18,7 @@
       </div>
     </template>
     <template #desc>
-      <span>{{ props.modelValue.description }}</span>
+      <span v-html="parseDesc(props.modelValue.description)" />
     </template>
   </TucDetailDesc>
 </template>
@@ -32,6 +32,20 @@ interface TucDetailDescConstellationProps {
 }
 
 const props = defineProps<TucDetailDescConstellationProps>();
+
+// 解析描述
+function parseDesc (desc: string): string {
+  const reg = /<color=(.*?)>(.*?)<\/color>/g;
+  let match = reg.exec(desc);
+  while (match) {
+    const color = match[1];
+    const text = match[2];
+    desc = desc.replace(match[0], `<span style="color: ${color}">${text}</span>`);
+    match = reg.exec(desc);
+  }
+  desc = desc.replace(/\\n/g, "<br />");
+  return desc;
+}
 </script>
 <style lang="css" scoped>
 .tuc-ddc-content {

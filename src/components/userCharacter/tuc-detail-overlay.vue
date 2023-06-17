@@ -10,15 +10,22 @@
       <div v-if="data" class="tuc-do-show">
         <!-- 左侧武器跟圣遗物 -->
         <div class="tuc-do-left">
-          <div class="tuc-dol-item" @click="showDetail(data.weapon,'武器')">
+          <div
+            class="tuc-dol-item"
+            :style="{
+              border: selected.pos === 0 ? '2px solid var(--common-color-yellow)' : '',
+            }"
+            @click="showDetail(data.weapon,'武器',0)"
+          >
             <TucDetailItemBox v-model="weaponBox" />
           </div>
           <div
             class="tuc-dol-item"
             :style="{
               cursor: data.reliquary[1] ? 'pointer' : 'default',
+              border: selected.pos === 1 ? '2px solid var(--common-color-yellow)' : '',
             }"
-            @click="showDetail(data.reliquary[1],'圣遗物')"
+            @click="showDetail(data.reliquary[1],'圣遗物',1)"
           >
             <TucDetailRelic v-model="data.reliquary[1]" pos="1" />
           </div>
@@ -26,8 +33,9 @@
             class="tuc-dol-item"
             :style="{
               cursor: data.reliquary[2] ? 'pointer' : 'default',
+              border: selected.pos === 2 ? '2px solid var(--common-color-yellow)' : '',
             }"
-            @click="showDetail(data.reliquary[2],'圣遗物')"
+            @click="showDetail(data.reliquary[2],'圣遗物',2)"
           >
             <TucDetailRelic v-model="data.reliquary[2]" pos="2" />
           </div>
@@ -35,8 +43,9 @@
             class="tuc-dol-item"
             :style="{
               cursor: data.reliquary[3] ? 'pointer' : 'default',
+              border: selected.pos === 3 ? '2px solid var(--common-color-yellow)' : '',
             }"
-            @click="showDetail(data.reliquary[3],'圣遗物')"
+            @click="showDetail(data.reliquary[3],'圣遗物',3)"
           >
             <TucDetailRelic v-model="data.reliquary[3]" pos="3" />
           </div>
@@ -44,8 +53,9 @@
             class="tuc-dol-item"
             :style="{
               cursor: data.reliquary[4] ? 'pointer' : 'default',
+              border: selected.pos === 4 ? '2px solid var(--common-color-yellow)' : '',
             }"
-            @click="showDetail(data.reliquary[4],'圣遗物')"
+            @click="showDetail(data.reliquary[4],'圣遗物',4)"
           >
             <TucDetailRelic v-model="data.reliquary[4]" pos="4" />
           </div>
@@ -53,8 +63,9 @@
             class="tuc-dol-item"
             :style="{
               cursor: data.reliquary[5] ? 'pointer' : 'default',
+              border: selected.pos === 5 ? '2px solid var(--common-color-yellow)' : '',
             }"
-            @click="showDetail(data.reliquary[5],'圣遗物')"
+            @click="showDetail(data.reliquary[5],'圣遗物',5)"
           >
             <TucDetailRelic v-model="data.reliquary[5]" pos="5" />
           </div>
@@ -66,7 +77,10 @@
               v-for="item in data.constellation"
               class="tuc-dor-item"
               :model-value="item"
-              @click="showDetail(item, '命座')"
+              :style="{
+                border: selected.pos === item.pos+5 ? '2px solid var(--common-color-yellow)' : '',
+              }"
+              @click="showDetail(item, '命座', item.pos+5)"
             />
           </div>
         </div>
@@ -98,6 +112,7 @@ interface ToUcDetailProps {
 
 interface ToUcDetailEmits {
   (e: "update:modelValue", value: TGApp.Sqlite.Character.UserRole): void;
+
   (e: "cancel"): void;
 }
 
@@ -128,6 +143,7 @@ const selected = ref({
   | TGApp.Sqlite.Character.RoleWeapon
   | TGApp.Sqlite.Character.RoleReliquary,
   type: "武器" || "命之座" || "圣遗物",
+  pos: 0, // 用于标记选中的是哪个位置
 });
 
 onMounted(() => {
@@ -142,6 +158,7 @@ onMounted(() => {
   selected.value = {
     data: data.value.weapon,
     type: "武器",
+    pos: 0,
   };
 });
 
@@ -164,11 +181,14 @@ function showDetail (
   TGApp.Sqlite.Character.RoleWeapon |
   TGApp.Sqlite.Character.RoleReliquary |
   false,
-  type: string) {
+  type: string,
+  pos: number = 0,
+) {
   if (!item) return;
   selected.value = {
     data: item,
     type,
+    pos,
   };
 }
 </script>
@@ -219,7 +239,6 @@ function showDetail (
   width: 50%;
   height: 400px;
   position: relative;
-//background: rgb(255 255 255 / 30%);
 }
 
 .tuc-do-right {
@@ -236,6 +255,7 @@ function showDetail (
 .tuc-dol-item {
   position: absolute;
   cursor: pointer;
+  border-radius: 5px;
 }
 
 /* 排列武器跟5个圣遗物 */

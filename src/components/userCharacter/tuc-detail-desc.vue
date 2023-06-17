@@ -17,7 +17,7 @@
   padding: 10px;
   border-radius: 5px;
   border: 2px solid var(--common-color-grey-2);
-  background: rgb(255 255 255 / 40%);
+  background: rgb(255 255 255 / 20%);
   backdrop-filter: blur(20px);
 }
 
@@ -32,7 +32,7 @@
 .tuc-dd-divider {
   width: 100%;
   height: 2px;
-  background: var(--common-color-grey);
+  background: var(--common-color-grey-2);
   margin: 5px 0;
 }
 
