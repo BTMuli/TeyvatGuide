@@ -38,7 +38,7 @@
 // vue
 import { onMounted, ref } from "vue";
 // utils
-import { saveImgLocal } from "../../utils/saveImg";
+import { saveImgLocal } from "../../utils/TGShare";
 
 interface TurHomeSubProps {
   data: TGApp.Sqlite.Record.Home;

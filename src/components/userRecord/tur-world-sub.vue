@@ -41,7 +41,7 @@ import { onMounted, ref } from "vue";
 // tauri
 import { event } from "@tauri-apps/api";
 // utils
-import { saveImgLocal } from "../../utils/saveImg";
+import { saveImgLocal } from "../../utils/TGShare";
 
 interface TurWorldSubProps {
   theme: "default" | "dark",

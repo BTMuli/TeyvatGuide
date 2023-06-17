@@ -42,32 +42,36 @@ const props = defineProps<TucRoleBoxProps>();
 const avatarBox = computed(() => {
   return {
     size: "80px",
-    height: "80px",
+    height: "100px",
     ltSize: "30px",
     bg: `/icon/bg/${props.modelValue.star}-Star.webp`,
     icon: `/WIKI/character/icon/${props.modelValue.cid}.webp`,
     lt: `/icon/element/${props.modelValue.element}.webp`,
     rt: props.modelValue.activeConstellation.toString() || "0",
     rtSize: "20px",
-    innerText: `${getAvatarName()}`,
+    innerText: `Lv.${props.modelValue.level}`,
     innerHeight: 20,
-    display: "inner",
+    outerText: getAvatarName(),
+    outerHeight: 20,
+    display: "outer",
   };
 });
 const weaponBox = computed(() => {
   const weapon = JSON.parse(props.modelValue.weapon) as TGApp.Sqlite.Character.RoleWeapon;
   return {
     size: "80px",
-    height: "80px",
+    height: "100px",
     ltSize: "30px",
     bg: `/icon/bg/${weapon.star}-Star.webp`,
     icon: `/WIKI/weapon/icon/${weapon.id}.webp`,
     lt: `/icon/weapon/${weapon.type}.webp`,
     rt: weapon.affix.toString() || "0",
     rtSize: "20px",
-    innerText: `${weapon.name}`,
+    innerText: `Lv.${weapon.level}`,
     innerHeight: 20,
-    display: "inner",
+    outerText: weapon.name,
+    outerHeight: 20,
+    display: "outer",
   };
 });
 const nameCard = ref(false as string | false);
@@ -95,10 +99,15 @@ function showOverlay () {
 <style lang="css" scoped>
 .tuc-rb-box {
   padding: 5px;
-  box-shadow: 0 0 10px var(--common-bg-4);
   border: 1px inset var(--common-bg-4);
   border-radius: 5px;
   position: relative;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tuc-rb-box:hover {
+  box-shadow: 0 0 10px var(--common-color-yellow);
 }
 
 .tuc-rb-top {
