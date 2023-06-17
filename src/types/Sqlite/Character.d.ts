@@ -107,6 +107,7 @@ declare namespace TGApp.Sqlite.Character {
    * @property {string} posName - 圣遗物部位名称
    * @property {number} star - 圣遗物星级
    * @property {number} level - 圣遗物等级
+   * @property {string} icon - 圣遗物图标
    * @property {number} set.id - 圣遗物套装 ID
    * @property {string} set.name - 圣遗物套装名称
    * @property {number} set.effect[].active - 圣遗物套装效果激活数量
@@ -120,6 +121,7 @@ declare namespace TGApp.Sqlite.Character {
     posName: string
     star: number
     level: number
+    icon: string
     set: {
       id: number
       name: string

@@ -117,6 +117,7 @@ function transReliquary (data: TGApp.Game.Character.LIRelic[]): string {
       posName: item.pos_name,
       star: item.rarity,
       level: item.level,
+      icon: item.icon,
       set: {
         id: item.set.id,
         name: item.set.name,
