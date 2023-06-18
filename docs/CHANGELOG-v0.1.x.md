@@ -1,15 +1,17 @@
 ---
 Author: 目棃
 Date: 2023-03-30
-Description: CHANGELOG
-Update: 2023-05-28
+Description: CHANGELOG v0.1.x
+Update: 2023-06-18
 ---
 
-> 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于`2023-03-30 15:39:49`
+> 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-30 15:39:49`
 > 
-> 更新于 `2023-05-28 16:11:30`
+> 更新于 `2023-06-18 15:02:31`
 
-# CHANGELOG
+# CHANGELOG v0.1.x
+
+> 本文仅记录 v0.1.x 版本的更新内容
 
 ## [0.1.6](https://github.com/BTMuli/Tauri.Genshin/releases/v0.1.6) (2023-05-28)
 
