@@ -594,7 +594,7 @@ async function checkDB () {
       confirmShow.value = true;
       return;
     } else if (!buildTime.value.startsWith("dev")) {
-      if (!dbUpdatedTime || dbUpdatedTime < buildTime.value) {
+      if (!dbUpdatedTime || dbUpdatedTime.startsWith("dev") || dbUpdatedTime < buildTime.value) {
         confirmOper.value = "updateDB";
         confirmText.value = "数据库可能过时，是否更新数据库？";
         loading.value = false;
