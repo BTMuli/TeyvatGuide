@@ -184,8 +184,8 @@ import { useAchievementsStore } from "../store/modules/achievements";
 import { useUserStore } from "../store/modules/user";
 // utils
 import { backupUiafData, restoreUiafData } from "../utils/UIAF";
-import { backupCookieData } from "../web/utils/backupData";
-import { restoreCookieData } from "../web/utils/restoreData";
+import { backupAbyssData, backupCookieData } from "../web/utils/backupData";
+import { restoreAbyssData, restoreCookieData } from "../web/utils/restoreData";
 import TGSqlite from "../plugins/Sqlite";
 import TGRequest from "../web/request/TGRequest";
 
@@ -363,6 +363,8 @@ async function backupData () {
   await backupUiafData(achievements);
   const cookie = await TGSqlite.getCookie();
   await backupCookieData(cookie);
+  const abyss = await TGSqlite.getAbyss();
+  await backupAbyssData(abyss);
   loading.value = false;
   snackbarText.value = "数据已备份!";
   snackbarColor.value = "success";
@@ -380,6 +382,10 @@ async function restoreData () {
   res = await restoreCookieData();
   if (!res) {
     fail.push("Cookie");
+  }
+  res = await restoreAbyssData();
+  if (!res) {
+    fail.push("深渊数据");
   }
   if (fail.length > 0) {
     snackbarText.value = `${fail.join("、")} 恢复失败!`;

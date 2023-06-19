@@ -14,6 +14,7 @@ import { importUIAFData } from "./sql/updateData";
 import { getUiafStatus } from "../../utils/UIAF";
 import {
   insertAbyssData,
+  importAbyssData,
   insertAppData,
   insertGameAccountData,
   insertRecordData,
@@ -338,12 +339,32 @@ class Sqlite {
    * @param {string} uid 游戏 UID
    * @returns {Promise<TGApp.Game.Abyss.FullData>}
    */
-  public async getAbyss (uid: string): Promise<TGApp.Sqlite.Abyss.SingleTable[]> {
+  public async getAbyss (uid?: string): Promise<TGApp.Sqlite.Abyss.SingleTable[]> {
     const db = await Database.load(this.dbPath);
-    const sql = `SELECT * FROM SpiralAbyss WHERE uid = '${uid}' order by id desc`;
+    let sql;
+    if (uid) {
+      sql = `SELECT * FROM SpiralAbyss WHERE uid = '${uid}' order by id desc`;
+    } else {
+      sql = "SELECT * FROM SpiralAbyss order by uid, id desc";
+    }
     const res: TGApp.Sqlite.Abyss.SingleTable[] = await db.select(sql);
     await db.close();
     return res;
+  }
+
+  /**
+   * @description 恢复深渊数据
+   * @since Alpha v0.2.0
+   * @param {TGApp.Sqlite.Abyss.SingleTable[]} data 深渊数据
+   * @returns {Promise<void>}
+   */
+  public async restoreAbyss (data: TGApp.Sqlite.Abyss.SingleTable[]): Promise<void> {
+    const db = await Database.load(this.dbPath);
+    for (const item of data) {
+      const sql = importAbyssData(item);
+      await db.execute(sql);
+    }
+    await db.close();
   }
 
   /**

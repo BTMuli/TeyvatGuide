@@ -177,6 +177,41 @@ export function insertAbyssData (uid: string, data: TGApp.Game.Abyss.FullData): 
 }
 
 /**
+ * @description 恢复深渊数据
+ * @since Alpha v0.2.0
+ * @param {TGApp.Sqlite.Abyss.SingleTable} data 深渊数据
+ * @returns {string} sql
+ */
+export function importAbyssData (data: TGApp.Sqlite.Abyss.SingleTable): string {
+  return `
+      INSERT INTO SpiralAbyss (uid, id, startTime, endTime, totalBattleTimes, totalWinTimes,
+                               maxFloor, totalStar, isUnlock, revealRank, defeatRank, damageRank,
+                               takeDamageRank, normalSkillRank, energySkillRank, floors, updated)
+      VALUES ('${data.uid}', ${data.id}, '${data.startTime}', '${data.endTime}', ${data.totalBattleTimes},
+              ${data.totalWinTimes}, '${data.maxFloor}', ${data.totalStar},
+              ${data.isUnlock}, '${data.revealRank}', '${data.defeatRank}', '${data.damageRank}',
+              '${data.takeDamageRank}', '${data.normalSkillRank}', '${data.energySkillRank}', '${data.floors}',
+              datetime('now', 'localtime'))
+      ON CONFLICT(uid, id) DO UPDATE
+          SET startTime        = '${data.startTime}',
+              endTime          = '${data.endTime}',
+              totalBattleTimes = ${data.totalBattleTimes},
+              totalWinTimes    = ${data.totalWinTimes},
+              maxFloor         = '${data.maxFloor}',
+              totalStar        = ${data.totalStar},
+              isUnlock         = ${data.isUnlock},
+              revealRank       = '${data.revealRank}',
+              defeatRank       = '${data.defeatRank}',
+              damageRank       = '${data.damageRank}',
+              takeDamageRank   = '${data.takeDamageRank}',
+              normalSkillRank  = '${data.normalSkillRank}',
+              energySkillRank  = '${data.energySkillRank}',
+              floors           = '${data.floors}',
+              updated          = datetime('now', 'localtime');
+  `;
+}
+
+/**
  * @description 插入原神战绩数据
  * @since Alpha v0.2.0
  * @param {TGApp.Game.Record.FullData} data 原神战绩数据

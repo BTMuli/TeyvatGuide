@@ -18,3 +18,14 @@ export async function backupCookieData (cookie: Record<string, string>): Promise
   const savePath = `${await path.appLocalDataDir()}\\userData\\cookie.json`;
   await fs.writeTextFile(savePath, JSON.stringify(cookie, null, 2));
 }
+
+/**
+ * @description 备份深渊数据
+ * @since Alpha v0.2.0
+ * @param {TGApp.Sqlite.Abyss.SingleTable[]} abyssData 深渊数据
+ * @returns {Promise<void>}
+ */
+export async function backupAbyssData (abyssData: TGApp.Sqlite.Abyss.SingleTable[]): Promise<void> {
+  const savePath = `${await path.appLocalDataDir()}\\userData\\abyss.json`;
+  await fs.writeTextFile(savePath, JSON.stringify(abyssData, null, 2));
+}
