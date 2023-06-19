@@ -8,7 +8,7 @@
 // tauri
 import { app, fs, path } from "@tauri-apps/api";
 // utils
-import TGSqlite from "./TGSqlite";
+import TGSqlite from "../plugins/Sqlite";
 
 /**
  * @description 时间戳转换为日期

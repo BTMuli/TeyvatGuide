@@ -8,7 +8,7 @@
 import { getAnnoCard } from "./getAnnoCard";
 import { getRequestHeader, getRequestSignHeader } from "./getRequestHeader";
 import { parseAnnoContent } from "./parseAnno";
-import { transCookie, getServerByUid } from "./tools";
+import { getServerByUid } from "./tools";
 
 const TGUtils = {
   Anno: {
@@ -20,7 +20,6 @@ const TGUtils = {
     getSignHeader: getRequestSignHeader,
   },
   Tools: {
-    transCookie,
     getServerByUid,
   },
 };

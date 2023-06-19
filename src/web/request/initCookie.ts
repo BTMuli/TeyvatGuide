@@ -6,7 +6,7 @@
  */
 
 // utils
-import TGSqlite from "../../utils/TGSqlite";
+import TGSqlite from "../../plugins/Sqlite";
 // request
 import { getCookieTokenBySToken } from "./getCookieToken";
 import { getTokensByLoginTicket } from "./getTokens";

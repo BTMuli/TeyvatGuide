@@ -56,11 +56,11 @@
         </template>
       </v-list-item>
       <!-- todo -->
-<!--      <v-list-item title="祈愿记录" value="gacha" link href="/user/gacha">-->
-<!--        <template #prepend>-->
-<!--          <img src="../../assets/icons/icon-wish.svg" alt="gacha" class="side-icon">-->
-<!--        </template>-->
-<!--      </v-list-item>-->
+      <!--      <v-list-item title="祈愿记录" value="gacha" link href="/user/gacha">-->
+      <!--        <template #prepend>-->
+      <!--          <img src="../../assets/icons/icon-wish.svg" alt="gacha" class="side-icon">-->
+      <!--        </template>-->
+      <!--      </v-list-item>-->
       <v-divider />
       <v-list-item v-show="appStore.devEnv" title="测试" value="test" link href="/test">
         <template #prepend>
