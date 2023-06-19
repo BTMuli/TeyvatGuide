@@ -10,6 +10,7 @@ declare namespace TGApp.Sqlite.Abyss {
    * @description 数据库-深境螺旋表
    * @since Alpha v0.2.0
    * @interface SingleTable
+   * @property {string} uid - 用户 UID
    * @property {number} id - 深境螺旋 ID
    * @property {string} startTime - 开始时间
    * @property {string} endTime - 结束时间
@@ -30,6 +31,7 @@ declare namespace TGApp.Sqlite.Abyss {
    * @return SingleTable
    */
   export interface SingleTable {
+    uid: string
     id: number
     startTime: string
     endTime: string
