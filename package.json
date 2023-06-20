@@ -1,8 +1,8 @@
 {
 	"name": "tauri-genshin",
-	"description": "A Tauri App Demo",
+	"description": "A Genshin Tool build with Tauri",
 	"private": true,
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"author": "BTMuli <bt-muli@outlook.com>",
 	"packageManager": "npm@9.6.6",
 	"scripts": {
