@@ -19,25 +19,13 @@
         分享
       </v-btn>
     </div>
-    <div class="ur-sub-title">
-      <img src="/src/assets/icons/arrow-right.svg" alt="overview">
-      <span>数据总览</span>
-    </div>
+    <TSubLine>数据总览</TSubLine>
     <TurOverviewGrid v-model="recordData.stats" />
-    <div class="ur-sub-title">
-      <img src="/src/assets/icons/arrow-right.svg" alt="overview">
-      <span>我的角色</span>
-    </div>
+    <TSubLine>角色信息</TSubLine>
     <TurAvatarGrid v-model="recordData.avatars" />
-    <div class="ur-sub-title">
-      <img src="/src/assets/icons/arrow-right.svg" alt="overview">
-      <span>世界探索</span>
-    </div>
+    <TSubLine>世界探索</TSubLine>
     <TurWorldGrid v-model="recordData.worldExplore" />
-    <div class="ur-sub-title">
-      <img src="/src/assets/icons/arrow-right.svg" alt="overview">
-      <span>尘歌壶</span>
-    </div>
+    <TSubLine>尘歌壶</TSubLine>
     <TurHomeGrid v-model="recordData.homes" />
   </div>
 </template>
@@ -45,6 +33,7 @@
 // vue
 import { computed, onMounted, ref } from "vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
+import TSubLine from "../../components/main/t-subline.vue";
 import TurOverviewGrid from "../../components/userRecord/tur-overview-grid.vue";
 import TurAvatarGrid from "../../components/userRecord/tur-avatar-grid.vue";
 import TurWorldGrid from "../../components/userRecord/tur-world-grid.vue";
@@ -153,23 +142,5 @@ function getTheme () {
   background: var(--common-bg-2);
   color: var(--common-color-white);
   margin-left: 15px;
-}
-
-.ur-sub-title {
-  background: var(--common-bg-2);
-  display: flex;
-  align-items: center;
-  height: 30px;
-  padding: 0 10px;
-  margin: 5px 0;
-  border-radius: 5px;
-  font-family: var(--font-text);
-  color: var(--common-color-white);
-}
-
-.ur-sub-title img {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
 }
 </style>

@@ -25,10 +25,7 @@
     </div>
     <div class="calendar-divider" />
     <div class="calendar-sub">
-      <div class="calendar-sub-title">
-        <img src="/src/assets/icons/arrow-right.svg" alt="character">
-        <span>角色突破</span>
-      </div>
+      <TSubLine>角色突破</TSubLine>
       <div class="cards-grid">
         <div
           v-for="item in characterCards"
@@ -41,10 +38,7 @@
       </div>
     </div>
     <div class="calendar-sub">
-      <div class="calendar-sub-title">
-        <img src="/src/assets/icons/arrow-right.svg" alt="character">
-        <span>武器突破</span>
-      </div>
+      <TSubLine>武器突破</TSubLine>
       <div class="cards-grid">
         <div
           v-for="item in weaponCards"
@@ -62,6 +56,7 @@
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
+import TSubLine from "./t-subline.vue";
 import ToCalendar from "../overlay/to-calendar.vue";
 import TibCalendarAvatar from "../itembox/tib-calendar-avatar.vue";
 import TibCalendarWeapon from "../itembox/tib-calendar-weapon.vue";
@@ -200,25 +195,6 @@ function getContents (day: number) {
 
 .calendar-sub {
     margin: 5px;
-}
-
-.calendar-sub-title {
-  background: rgb(0 0 0 / 20%);
-  display: flex;
-  align-items: center;
-  height: 30px;
-  padding: 0 10px;
-  margin: 5px 0;
-  border-radius: 5px;
-  font-family: Genshin-Light, serif;
-  color: rgb(255 255 255 / 80%);
-  text-shadow: 0 0 10px rgb(0 0 0 / 80%);
-}
-
-.calendar-sub-title img {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
 }
 
 .cards-grid {

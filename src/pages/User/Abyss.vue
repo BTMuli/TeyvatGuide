@@ -27,10 +27,7 @@
             <span>更新于</span>
             <span>{{ item.updated }}</span>
           </div>
-          <div class="uaw-sub-title">
-            <img src="/src/assets/icons/arrow-right.svg" alt="character">
-            <span>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</span>
-          </div>
+          <TSubLine>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</TSubLine>
           <div class="uaw-o-box">
             <TuaOverview title="战斗次数" :val-text="item.totalBattleTimes" />
             <TuaOverview title="获得渊星" :val-text="item.totalStar" />
@@ -42,10 +39,7 @@
             <TuaOverview title="出战次数" :val-icons="item.revealRank" :icon-num="4" />
             <TuaOverview title="元素爆发" :val-icons="item.energySkillRank" />
           </div>
-          <div class="uaw-sub-title">
-            <img src="/src/assets/icons/arrow-right.svg" alt="character">
-            <span>详情</span>
-          </div>
+          <TSubLine>详情</TSubLine>
           <div class="uaw-d-box">
             <TuaDetail v-for="floor in JSON.parse(item.floors) as TGApp.Sqlite.Abyss.Floor[]" :model-value="floor" />
           </div>
@@ -62,6 +56,7 @@
 // vue
 import { computed, onMounted, ref } from "vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
+import TSubLine from "../../components/main/t-subline.vue";
 import TuaOverview from "../../components/userAbyss/tua-overview.vue";
 import TuaDetail from "../../components/userAbyss/tua-detail.vue";
 // store
@@ -200,24 +195,6 @@ async function shareAbyss (): Promise<void> {
 .dark .uaw-title :nth-child(2n) {
   color: var(--common-color-yellow);
   text-shadow: none;
-}
-
-.uaw-sub-title {
-  background: var(--common-bg-2);
-  display: flex;
-  align-items: center;
-  height: 30px;
-  padding: 0 10px;
-  margin: 5px 0;
-  border-radius: 5px;
-  font-family: var(--font-text);
-  color: var(--common-color-white);
-}
-
-.uaw-sub-title img {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
 }
 
 .uaw-o-box {
