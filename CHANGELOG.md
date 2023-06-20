@@ -2,16 +2,16 @@
 Author: 目棃
 Date: 2023-06-18
 Description: CHANGELOG
-Update: 2023-06-19
+Update: 2023-06-20
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-06-18 15:03:42 `
 > 
-> 更新于 `2023-06-19 14:30:30`
+> 更新于 `2023-06-20 08:53:56`
 
 # CHANGELOG
 
-## [0.2.0](https://github.com/BTMuli/Tauri.Genshin/releases/0.2.0) (2023-06-18)
+## [0.2.0](https://github.com/BTMuli/Tauri.Genshin/releases/0.2.0) (2023-06-19)
 
 ### Feat
 
