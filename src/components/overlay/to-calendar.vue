@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel">
+  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
     <div class="toc-box">
       <div class="box-div">
         <div class="toc-top">
@@ -8,7 +8,7 @@
             <TibCalendarWeapon v-if="itemType=== 'weapon'" v-model="itemVal" size="100px" style="cursor: default" />
           </div>
           <div class="toc-material-grid">
-            <TCalendarMaterial v-for="item in itemVal.materials" :item="item" />
+            <TibCalendarMaterial v-for="item in itemVal.materials" :item="item" />
           </div>
         </div>
         <img src="/source/UI/item-line.webp" alt="line" class="toc-line">
@@ -45,9 +45,9 @@
 // vue
 import { computed, ref } from "vue";
 import TOverlay from "../main/t-overlay.vue";
-import TCalendarMaterial from "../mini/t-calendar-material.vue";
 import TibCalendarWeapon from "../itembox/tib-calendar-weapon.vue";
 import TibCalendarAvatar from "../itembox/tib-calendar-avatar.vue";
+import TibCalendarMaterial from "../itembox/tib-calendar-material.vue";
 // utils
 import { OBC_CONTENT_API } from "../../plugins/Mys/interface/utils";
 import { createTGWindow } from "../../utils/TGWindow";
