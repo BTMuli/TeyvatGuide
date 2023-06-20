@@ -1,13 +1,20 @@
 <template>
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
     <div class="toc-box">
-      <div class="toc-title">
-        请选择要跳转的频道
+      <div class="toc-top">
+        <div class="toc-title">
+          请选择要跳转的频道
+        </div>
+        <div class="toc-list">
+          <div v-for="item in channelList" class="toc-list-item" @click="toChannel(item.link)">
+            <img :src="item.icon" alt="icon">
+            <span>{{ item.title }}</span>
+          </div>
+        </div>
       </div>
-      <div class="toc-list">
-        <div v-for="item in channelList" class="toc-list-item" @click="toChannel(item.link)">
-          <img :src="item.icon" alt="icon">
-          <span>{{ item.title }}</span>
+      <div class="toc-close" @click="onCancel">
+        <div class="toc-close-btn">
+          <v-icon>mdi-close</v-icon>
         </div>
       </div>
     </div>
@@ -84,7 +91,8 @@ const channelList: ToChannelItem[] = [
 function onCancel () {
   visible.value = false;
 }
-function toChannel (link:string) {
+
+function toChannel (link: string) {
   visible.value = false;
   router.push(link);
   setTimeout(() => {
@@ -94,8 +102,12 @@ function toChannel (link:string) {
 </script>
 <style lang="css" scoped>
 .toc-box {
-  background: rgb(255 255 255 / 30%);
+  padding: 10px;
+}
+
+.toc-top {
   border-radius: 5px;
+  background: rgb(255 255 255 / 30%);
   padding: 10px;
 }
 
@@ -106,6 +118,7 @@ function toChannel (link:string) {
 }
 
 .toc-list {
+  margin-top: 10px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-gap: 10px;
@@ -139,5 +152,25 @@ function toChannel (link:string) {
   font-family: var(--font-title);
   font-size: 16px;
   margin-right: 10px;
+}
+
+.toc-close {
+  height: 60px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.toc-close-btn {
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  background: rgb(255 255 255 / 30%);
+  color: #faf7e8;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
