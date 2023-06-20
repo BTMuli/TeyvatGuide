@@ -143,71 +143,7 @@
   <v-snackbar v-model="snackbar" timeout="1500" :color="snackbarColor">
     {{ snackbarText }}
   </v-snackbar>
-  <v-overlay v-model="showList">
-    <div class="choice-box">
-      <div class="choice-title">
-        请选择要跳转的频道
-      </div>
-      <div class="choice-list">
-        <div class="choice-item" @click="toChannel('/news/2')">
-          <div class="choice-icon">
-            <img src="/platforms/mhy/ys.webp" alt="ys">
-          </div>
-          <div class="choice-name">
-            原神
-          </div>
-        </div>
-        <div class="choice-item" @click="toChannel('/news/6')">
-          <div class="choice-icon">
-            <img src="/platforms/mhy/sr.webp" alt="sr">
-          </div>
-          <div class="choice-name">
-            崩坏：星穹铁道
-          </div>
-        </div>
-        <div class="choice-item" @click="toChannel('/news/1')">
-          <div class="choice-icon">
-            <img src="/platforms/mhy/bh3.webp" alt="bh3">
-          </div>
-          <div class="choice-name">
-            崩坏3
-          </div>
-        </div>
-        <div class="choice-item" @click="toChannel('/news/3')">
-          <div class="choice-icon">
-            <img src="/platforms/mhy/bh2.webp" alt="bh2">
-          </div>
-          <div class="choice-name">
-            崩坏2
-          </div>
-        </div>
-        <div class="choice-item" @click="toChannel('/news/4')">
-          <div class="choice-icon">
-            <img src="/platforms/mhy/wd.webp" alt="wd">
-          </div>
-          <div class="choice-name">
-            未定事件簿
-          </div>
-        </div>
-        <div class="choice-item" @click="toChannel('/news/8')">
-          <div class="choice-icon">
-            <img src="/platforms/mhy/zzz.webp" alt="zzz">
-          </div>
-          <div class="choice-name">
-            绝区零
-          </div>
-        </div>
-        <div class="choice-item" @click="toChannel('/news/5')">
-          <div class="choice-icon">
-            <img src="/platforms/mhy/dby.webp" alt="sg">
-          </div>
-          <div class="choice-name">
-            大别野
-          </div>
-        </div>
-      </div>
-    </div>
-  </v-overlay>
+  <ToChannel v-model="showList" />
 </template>
 
 <script lang="ts" setup>
@@ -215,6 +151,7 @@
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import TOLoading from "../components/overlay/to-loading.vue";
+import ToChannel from "../components/overlay/to-channel.vue";
 // store
 import { useAppStore } from "../store/modules/app";
 // plugin
@@ -309,12 +246,6 @@ async function firstLoad (data: string) {
 
 async function switchAnno () {
   await router.push("/announcements");
-}
-
-async function toChannel (chan: string) {
-  showList.value = false;
-  await router.push(chan);
-  await window.location.reload();
 }
 
 // 加载更多
@@ -487,76 +418,5 @@ async function searchPost () {
 .load-news button img {
   width: 18px;
   height: 18px;
-}
-
-/* chan choice */
-.choice-box {
-  position: absolute;
-  top: calc(50vh - 200px);
-  left: calc(50vw - 140px);
-  width: 400px;
-  height: 280px;
-  background: var(--content-bg-2);
-  border-radius: 10px;
-  padding: 10px;
-}
-
-.choice-title {
-  font-family: Genshin, serif;
-  font-size: 20px;
-  color: var(--content-text-3);
-  margin-bottom: 10px;
-}
-
-.choice-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-gap: 10px;
-}
-
-.choice-item {
-  cursor: pointer;
-  font-family: Genshin, serif;
-  background: rgb(0 0 0 / 30%);
-  color: var(--content-text-3);
-  height: 45px;
-  border-radius: 5px;
-  display: flex;
-  justify-content: space-around;
-  transition: all 0.3s linear;
-}
-
-.choice-item:hover {
-  border-radius: 5px;
-  background: rgb(0 0 0 / 50%);
-  transition: all 0.5s linear;
-}
-
-.choice-icon {
-  position: relative;
-  width: 45px;
-  height: 45px;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-}
-
-.choice-icon img {
-  width: 45px;
-  height: 45px;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-}
-
-.choice-name {
-  width: calc(100% - 50px);
-  height: 45px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-left: 5px;
-  position: relative;
-  color: #fff;
-  font-size: 12px;
-  font-family: Genshin-Light, serif;
 }
 </style>
