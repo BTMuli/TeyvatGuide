@@ -32,7 +32,7 @@ html {
 
 /*
  * @description 侧边滚动条样式
- * @since Alpha v0.1.3
+ * @since Alpha v0.2.1
  */
 ::-webkit-scrollbar {
     width: 8px;
@@ -40,18 +40,13 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--scroll-bg);
-    box-shadow: inset 0 0 5px var(--scroll-bg);
+    background: #847c74; /* 夜灰 */
     border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #96979A;
+    background: #c7d2d4; /* 鸥蓝 */
     border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #555;
 }
 
 /* card action 内的按钮 */

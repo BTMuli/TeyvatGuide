@@ -16,8 +16,6 @@ html.default {
   --common-text-2: var(--common-color-blue-2); /* text */
   --common-text-3: var(--common-color-blue-3); /* quote */
 
-  --page-bg:#ece5d8;
-  --scroll-bg: rgba(0, 0, 0, 0.2);
   --calendar-btn-bg: #393b40;
   --back-top-shadow: #546d8b;
   --theme-switch-icon: #393b40;
