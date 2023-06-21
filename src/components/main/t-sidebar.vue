@@ -1,6 +1,6 @@
 <template>
-  <v-navigation-drawer permanent :rail="rail" style="background: var(--sidebar-bg); color: #faf7e8">
-    <v-list v-model:opened="open" class="side-list" density="compact" nav>
+  <v-navigation-drawer :permanent="true" :rail="rail" class="tsb-box">
+    <v-list v-model:opened="open" class="side-list" density="compact" :nav="true">
       <!-- 负责收缩侧边栏 -->
       <v-list-item @click="collapse()">
         <template v-if="rail" #prepend>
@@ -19,38 +19,38 @@
         </template>
       </v-list-item>
       <!-- 菜单项 -->
-      <v-list-item value="home" title="首页" link href="/">
+      <v-list-item value="home" title="首页" :link="true" href="/">
         <template #prepend>
           <img src="/source/UI/paimon.webp" alt="homeIcon" class="side-icon">
         </template>
       </v-list-item>
-      <v-list-item title="公告" value="announcements" link href="/announcements">
+      <v-list-item title="公告" value="announcements" :link="true" href="/announcements">
         <template #prepend>
           <img src="../../assets/icons/board.svg" alt="annoIcon" class="side-icon">
         </template>
       </v-list-item>
-      <v-list-item title="咨讯" value="news" link href="/news/2">
+      <v-list-item title="咨讯" value="news" :link="true" href="/news/2">
         <template #prepend>
           <img src="/platforms/mhy/mys.webp" alt="mihoyo" class="side-icon">
         </template>
       </v-list-item>
-      <v-list-item title="成就" value="achievements" link href="/achievements">
+      <v-list-item title="成就" value="achievements" :link="true" href="/achievements">
         <template #prepend>
           <img src="../../assets/icons/achievements.svg" alt="achievementsIcon" class="side-icon">
         </template>
       </v-list-item>
       <v-divider />
-      <v-list-item title="原神战绩" value="record" link href="/user/record">
+      <v-list-item title="原神战绩" value="record" :link="true" href="/user/record">
         <template #prepend>
           <img src="/source/UI/userRecord.webp" alt="record" class="side-icon">
         </template>
       </v-list-item>
-      <v-list-item title="我的角色" value="character" link href="/user/characters">
+      <v-list-item title="我的角色" value="character" :link="true" href="/user/characters">
         <template #prepend>
           <img src="/source/UI/userAvatar.webp" alt="characters" class="side-icon">
         </template>
       </v-list-item>
-      <v-list-item title="深渊记录" value="abyss" link href="/user/abyss">
+      <v-list-item title="深渊记录" value="abyss" :link="true" href="/user/abyss">
         <template #prepend>
           <img src="/source/UI/userAbyss.webp" alt="abyss" class="side-icon">
         </template>
@@ -62,13 +62,13 @@
       <!--        </template>-->
       <!--      </v-list-item>-->
       <v-divider />
-      <v-list-item v-show="appStore.devEnv" title="测试" value="test" link href="/test">
+      <v-list-item v-show="appStore.devEnv" title="测试" value="test" :link="true" href="/test">
         <template #prepend>
           <v-icon>mdi-test-tube</v-icon>
         </template>
       </v-list-item>
       <v-divider v-show="appStore.devEnv" />
-      <v-list-group value="wiki" fluid>
+      <v-list-group value="wiki" :fluid="true">
         <template #activator="{ props }">
           <v-list-item title="图鉴" v-bind="props">
             <template #prepend>
@@ -76,17 +76,22 @@
             </template>
           </v-list-item>
         </template>
-        <v-list-item title="GCG" value="wiki-GCG" link href="/wiki/GCG">
+        <v-list-item title="深渊数据库" value="wiki-abyss" :link="true" href="/wiki/abyss">
+          <template #prepend>
+            <img src="../../../public/icon/star/Abyss.webp" alt="abyssIcon" class="side-icon">
+          </template>
+        </v-list-item>
+        <v-list-item title="GCG" value="wiki-GCG" :link="true" href="/wiki/GCG">
           <template #prepend>
             <img src="../../assets/icons/GCG.svg" alt="gcgIcon" class="side-icon">
           </template>
         </v-list-item>
-        <v-list-item title="角色图鉴" value="wiki-character" link href="/wiki/character">
+        <v-list-item title="角色图鉴" value="wiki-character" :link="true" href="/wiki/character">
           <template #prepend>
             <img src="/source/UI/avatarMini.webp" alt="characterIcon" class="side-icon-mini">
           </template>
         </v-list-item>
-        <v-list-item title="武器图鉴" value="wiki-weapon" link href="/wiki/weapon">
+        <v-list-item title="武器图鉴" value="wiki-weapon" :link="true" href="/wiki/weapon">
           <template #prepend>
             <img src="/source/UI/weaponMini.webp" alt="weaponIcon" class="side-icon-mini">
           </template>
@@ -110,7 +115,7 @@
             </v-icon>
           </template>
         </v-list-item>
-        <v-list-item title="设置" value="config" link href="/config">
+        <v-list-item title="设置" value="config" :link="true" href="/config">
           <template #prepend>
             <img src="../../assets/icons/setting.svg" alt="setting" class="side-icon">
           </template>
@@ -184,6 +189,15 @@ async function switchTheme () {
 </script>
 
 <style lang="css" scoped>
+.tsb-box {
+  background: #4e7ca1; /* 蝴蝶蓝 */
+  color: #e2e1e4; /* 芡食白 */
+}
+
+.dark .tsb-box {
+  background: #21373d; /* 灰蓝 */
+}
+
 .side-list {
   font-family: Genshin-Light, serif;
   height: 100vh;

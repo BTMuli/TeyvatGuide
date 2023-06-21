@@ -1,24 +1,25 @@
 /**
  * @file router modules wiki.ts
  * @description wiki 路由模块
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.3
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Alpha v0.2.1
  */
 
 // Wiki main
-import GCG from "../../pages/WIKI/GCG.vue";
+import Abyss from "../../pages/WIKI/Abyss.vue";
 import Character from "../../pages/WIKI/Character.vue";
+import GCG from "../../pages/WIKI/GCG.vue";
 import Weapon from "../../pages/WIKI/Weapon.vue";
 // Wiki sub
-import TGCG from "../../views/WIKI/t-gcg.vue";
 import TCharacter from "../../views/WIKI/t-character.vue";
+import TGCG from "../../views/WIKI/t-gcg.vue";
 import TWeapon from "../../views/WIKI/t-weapon.vue";
 
 const wikiRoutes = [
   {
-    path: "/wiki/GCG",
-    name: "卡牌图鉴",
-    component: GCG,
+    path: "/wiki/abyss",
+    name: "深渊数据库",
+    component: Abyss,
   },
   {
     path: "/wiki/character",
@@ -26,22 +27,27 @@ const wikiRoutes = [
     component: Character,
   },
   {
+    path: "/wiki/GCG",
+    name: "卡牌图鉴",
+    component: GCG,
+  },
+  {
     path: "/wiki/weapon",
     name: "武器图鉴",
     component: Weapon,
   },
   {
-    path: "/wiki/GCG_detail/:id",
-    name: "卡牌详情",
-    component: TGCG,
-  },
-  {
-    path: "/wiki/character_detail/:id",
+    path: "/wiki/detail/character/:id",
     name: "角色详情",
     component: TCharacter,
   },
   {
-    path: "/wiki/weapon_detail/:id",
+    path: "/wiki/detail/GCG/:id",
+    name: "卡牌详情",
+    component: TGCG,
+  },
+  {
+    path: "/wiki/detail/weapon/:id",
     name: "武器详情",
     component: TWeapon,
   },
