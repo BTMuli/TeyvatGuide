@@ -74,7 +74,7 @@
         </template>
         <v-list-item title="深渊数据库" value="wiki-abyss" :link="true" href="/wiki/abyss">
           <template #prepend>
-            <img src="../../../public/icon/star/Abyss.webp" alt="abyssIcon" class="side-icon">
+            <img src="/icon/star/Abyss.webp" alt="abyssIcon" class="side-icon">
           </template>
         </v-list-item>
         <v-list-item title="GCG" value="wiki-GCG" :link="true" href="/wiki/GCG">
