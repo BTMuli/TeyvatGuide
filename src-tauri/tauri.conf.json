@@ -31,7 +31,8 @@
 					"https://passport-api.mihoyo.com/*",
 					"https://passport-api-v4.mihoyo.com/*",
 					"https://act-webstatic.mihoyo.com/*",
-					"https://sdk-webstatic.mihoyo.com/*"
+					"https://sdk-webstatic.mihoyo.com/*",
+					"https://homa.snapgenshin.com/*"
 				]
 			},
 			"shell": {
