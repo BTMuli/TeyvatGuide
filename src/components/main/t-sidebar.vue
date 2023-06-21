@@ -5,16 +5,12 @@
       <v-list-item @click="collapse()">
         <template v-if="rail" #prepend>
           <v-list-item-action>
-            <v-icon style="color:var(--sidebar-icon)">
-              mdi-chevron-right
-            </v-icon>
+            <v-icon>mdi-chevron-right</v-icon>
           </v-list-item-action>
         </template>
         <template v-else #append>
           <v-list-item-action>
-            <v-icon style="color:var(--sidebar-icon)">
-              mdi-chevron-left
-            </v-icon>
+            <v-icon>mdi-chevron-left</v-icon>
           </v-list-item-action>
         </template>
       </v-list-item>
@@ -108,10 +104,10 @@
             </v-list-item-title>
           </template>
         </v-list-item>
-        <v-list-item :title="themeTitle" value="theme" @click="switchTheme()">
+        <v-list-item :title="themeTitle" @click="switchTheme()">
           <template #prepend>
-            <v-icon style="color:var(--sidebar-icon)">
-              {{ themeGet === 'default' ? 'mdi-weather-night' : 'mdi-weather-sunny' }}
+            <v-icon>
+              {{ themeGet === "default" ? "mdi-weather-night" : "mdi-weather-sunny" }}
             </v-icon>
           </template>
         </v-list-item>
@@ -127,7 +123,7 @@
 
 <script lang="ts" setup>
 // vue
-import { computed, ref, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 // tauri
 import { event } from "@tauri-apps/api";
 // store
@@ -155,7 +151,7 @@ const themeGet = computed({
   },
 });
 const themeTitle = computed(() => {
-  return themeGet.value === "default" ? "切换为夜间模式" : "切换为日间模式";
+  return themeGet.value === "default" ? "夜间模式" : "日间模式";
 });
 
 const open = computed({
@@ -199,8 +195,8 @@ async function switchTheme () {
 }
 
 .side-list {
-  font-family: Genshin-Light, serif;
-  height: 100vh;
+  font-family: var(--font-title);
+  height: 100%;
 }
 
 .bottom-menu {

@@ -2,7 +2,7 @@
  * @file assets themes dark.css
  * @description 主题样式文件
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.1
  */
 
 /* 主题色 */
@@ -16,8 +16,6 @@ html.default {
   --common-text-2: var(--common-color-blue-2); /* text */
   --common-text-3: var(--common-color-blue-3); /* quote */
 
-  --sidebar-bg: #485466;
-  --sidebar-icon: #ece5d8;
   --page-bg:#ece5d8;
   --scroll-bg: rgba(0, 0, 0, 0.2);
   --calendar-btn-bg: #393b40;
