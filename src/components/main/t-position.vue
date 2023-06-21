@@ -162,7 +162,7 @@ onUnmounted(() => {
 
 .position-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(calc(400px + 2rem), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(calc(400px + 2rem), 1fr));
   grid-gap: 20px;
   margin-top: 10px;
 }
