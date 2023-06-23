@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel">
+  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
     <div class="tuc-do-box">
       <div class="tuc-do-bg">
         <img :src="props.dataVal.img" alt="role">
@@ -20,54 +20,15 @@
             <TucDetailItemBox v-model="weaponBox" />
           </div>
           <div
+            v-for="(item, index) in data.reliquary"
             class="tuc-dol-item"
             :style="{
-              cursor: data.reliquary[1] ? 'pointer' : 'default',
-              border: selected.pos === 1 ? '2px solid var(--common-color-yellow)' : '',
+              cursor: item ? 'pointer' : 'default',
+              border: selected.pos === index + 1 ? '2px solid var(--common-color-yellow)' : '',
             }"
-            @click="showDetail(data.reliquary[1],'圣遗物',1)"
+            @click="showDetail(item,'圣遗物',index + 1)"
           >
-            <TucDetailRelic v-model="data.reliquary[1]" pos="1" />
-          </div>
-          <div
-            class="tuc-dol-item"
-            :style="{
-              cursor: data.reliquary[2] ? 'pointer' : 'default',
-              border: selected.pos === 2 ? '2px solid var(--common-color-yellow)' : '',
-            }"
-            @click="showDetail(data.reliquary[2],'圣遗物',2)"
-          >
-            <TucDetailRelic v-model="data.reliquary[2]" pos="2" />
-          </div>
-          <div
-            class="tuc-dol-item"
-            :style="{
-              cursor: data.reliquary[3] ? 'pointer' : 'default',
-              border: selected.pos === 3 ? '2px solid var(--common-color-yellow)' : '',
-            }"
-            @click="showDetail(data.reliquary[3],'圣遗物',3)"
-          >
-            <TucDetailRelic v-model="data.reliquary[3]" pos="3" />
-          </div>
-          <div
-            class="tuc-dol-item"
-            :style="{
-              cursor: data.reliquary[4] ? 'pointer' : 'default',
-              border: selected.pos === 4 ? '2px solid var(--common-color-yellow)' : '',
-            }"
-            @click="showDetail(data.reliquary[4],'圣遗物',4)"
-          >
-            <TucDetailRelic v-model="data.reliquary[4]" pos="4" />
-          </div>
-          <div
-            class="tuc-dol-item"
-            :style="{
-              cursor: data.reliquary[5] ? 'pointer' : 'default',
-              border: selected.pos === 5 ? '2px solid var(--common-color-yellow)' : '',
-            }"
-            @click="showDetail(data.reliquary[5],'圣遗物',5)"
-          >
-            <TucDetailRelic v-model="data.reliquary[5]" pos="5" />
+            <TucDetailRelic :model-value="item" :pos="index.toString()" />
           </div>
         </div>
         <!-- 右侧环状排列6个命座 -->
@@ -86,9 +47,18 @@
         </div>
         <!-- 底部说明 -->
         <div class="tuc-do-bottom">
-          <TucDetailDescWeapon v-if="selected.type === '武器'" v-model="selected.data" />
-          <TucDetailDescConstellation v-else-if="selected.type === '命座'" v-model="selected.data" />
-          <TucDetailDescRelic v-else-if="selected.type === '圣遗物'" v-model="selected.data" />
+          <TucDetailDescWeapon
+            v-if="selected.type === '武器'"
+            v-model="selected.data as TGApp.Sqlite.Character.RoleWeapon"
+          />
+          <TucDetailDescConstellation
+            v-else-if="selected.type === '命座'"
+            v-model="selected.data as TGApp.Sqlite.Character.RoleConstellation"
+          />
+          <TucDetailDescRelic
+            v-else-if="selected.type === '圣遗物'"
+            v-model="selected.data as TGApp.Sqlite.Character.RoleReliquary"
+          />
         </div>
       </div>
     </div>
@@ -96,7 +66,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUpdated, ref } from "vue";
 import TOverlay from "../main/t-overlay.vue";
 import TucDetailDescWeapon from "./tuc-detail-desc-weapon.vue";
 import TucDetailDescConstellation from "./tuc-detail-desc-constellation.vue";
@@ -137,6 +107,7 @@ const data = ref({
     4: false as TGApp.Sqlite.Character.RoleReliquary | false,
     5: false as TGApp.Sqlite.Character.RoleReliquary | false,
   },
+  costume: [] as TGApp.Sqlite.Character.RoleCostume[],
 });
 const selected = ref({
   data: {} as TGApp.Sqlite.Character.RoleConstellation
@@ -146,7 +117,9 @@ const selected = ref({
   pos: 0, // 用于标记选中的是哪个位置
 });
 
-onMounted(() => {
+// 加载数据
+function loadData () {
+  if (!props.modelValue) return;
   data.value.weapon = JSON.parse(props.dataVal.weapon) as TGApp.Sqlite.Character.RoleWeapon;
   data.value.constellation = JSON.parse(props.dataVal.constellation) as TGApp.Sqlite.Character.RoleConstellation[];
   if (props.dataVal.reliquary !== "") {
@@ -155,11 +128,21 @@ onMounted(() => {
       data.value.reliquary[item.pos] = item;
     });
   }
+  data.value.costume = JSON.parse(props.dataVal.costume) as TGApp.Sqlite.Character.RoleCostume[];
   selected.value = {
     data: data.value.weapon,
     type: "武器",
     pos: 0,
   };
+}
+
+onMounted(() => {
+  loadData();
+});
+
+// 监听外部数据变化
+onUpdated(() => {
+  loadData();
 });
 
 const weaponBox = computed(() => {

@@ -1,5 +1,5 @@
 <template>
-  <div class="tuc-rb-box" @click="showOverlay">
+  <div class="tuc-rb-box">
     <div class="tuc-rb-top">
       <TItemBox v-model="avatarBox" />
       <TItemBox v-model="weaponBox" />
@@ -22,13 +22,11 @@
       </div>
     </div>
   </div>
-  <ToUcDetail v-model="visible" :data-val="props.modelValue" />
 </template>
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
 import TItemBox from "../main/t-itembox.vue";
-import ToUcDetail from "./tuc-detail-overlay.vue";
 // utils
 import TGSqlite from "../../plugins/Sqlite";
 
@@ -36,7 +34,6 @@ interface TucRoleBoxProps {
   modelValue: TGApp.Sqlite.Character.UserRole;
 }
 
-const visible = ref(false);
 const props = defineProps<TucRoleBoxProps>();
 
 const avatarBox = computed(() => {
@@ -90,10 +87,6 @@ function getAvatarName () {
         ? "旅行者-荧"
         : props.modelValue.name
   );
-}
-
-function showOverlay () {
-  visible.value = true;
 }
 </script>
 <style lang="css" scoped>

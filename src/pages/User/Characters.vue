@@ -20,21 +20,23 @@
     </div>
     <!-- grid 布局，参考 Snap.Hutao -->
     <div class="uc-grid">
-      <TucRoleBox v-for="role in roleList" :model-value="role" />
+      <TucRoleBox v-for="role in roleList" :model-value="role" @click="selectRole(role)" />
     </div>
   </div>
+  <ToUcDetail v-model="visible" :data-val="dataVal" />
 </template>
 <script lang="ts" setup>
 // vue
-import { computed, onMounted, onUpdated, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
+import TucRoleBox from "../../components/userCharacter/tuc-role-box.vue";
+import ToUcDetail from "../../components/userCharacter/tuc-detail-overlay.vue";
 // store
 import { useUserStore } from "../../store/modules/user";
 // utils
 import TGSqlite from "../../plugins/Sqlite";
 import TGRequest from "../../web/request/TGRequest";
 import { generateShareImg } from "../../utils/TGShare";
-import TucRoleBox from "../../components/userCharacter/tuc-role-box.vue";
 
 // store
 const userStore = useUserStore();
@@ -48,6 +50,10 @@ const isEmpty = ref(true);
 const roleList = ref([] as TGApp.Sqlite.Character.UserRole[]);
 const roleCookie = computed(() => userStore.getCookieGroup4());
 const user = computed(() => userStore.getCurAccount());
+
+// overlay
+const visible = ref(false);
+const dataVal = ref({} as TGApp.Sqlite.Character.UserRole);
 
 // grid
 const gridGap = ref("10px");
@@ -106,6 +112,11 @@ function getUpdateTime () {
     }
   });
   return new Date(lastUpdateTime).toLocaleString().replace(/\//g, "-");
+}
+
+function selectRole (role: TGApp.Sqlite.Character.UserRole) {
+  dataVal.value = role;
+  visible.value = true;
 }
 </script>
 <style lang="css" scoped>
