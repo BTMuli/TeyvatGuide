@@ -19,6 +19,10 @@
       <div class="tuc-rbb-fetter">
         <img src="/icon/material/105.webp" alt="fetter">
         <span>{{ props.modelValue.fetter }}</span>
+        <!-- 衣装 icon -->
+        <span v-if="props.modelValue.costume!=='[]'">
+          <v-icon>mdi-tshirt-crew-outline</v-icon>
+        </span>
       </div>
     </div>
   </div>
@@ -50,7 +54,7 @@ const avatarBox = computed(() => {
     innerHeight: 20,
     outerText: getAvatarName(),
     outerHeight: 20,
-    display: "outer",
+    display: "outer" as "outer",
   };
 });
 const weaponBox = computed(() => {
@@ -68,7 +72,7 @@ const weaponBox = computed(() => {
     innerHeight: 20,
     outerText: weapon.name,
     outerHeight: 20,
-    display: "outer",
+    display: "outer" as "outer",
   };
 });
 const nameCard = ref(false as string | false);
@@ -163,6 +167,11 @@ function getAvatarName () {
 
 .tuc-rbb-fetter :nth-child(1) {
   margin: 0 5px;
+}
+
+.tuc-rbb-fetter :nth-child(3) {
+  margin-left: auto;
+  font-size: 12px;
 }
 
 .tuc-rbb-fetter img {

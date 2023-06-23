@@ -2,10 +2,21 @@
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
     <div class="tuc-do-box">
       <div class="tuc-do-bg">
-        <img :src="props.dataVal.img" alt="role">
+        <img :src="data.bg" alt="role">
       </div>
       <div class="tuc-do-quote">
         * 所有数据以游戏内为准，此处仅供参考
+      </div>
+      <!-- 衣装 -->
+      <div v-if="data.costume.length>0" class="tuc-do-costume">
+        <v-switch v-model="showCostumeSwitch" color="#faf7e8" @click="switchBg">
+          <template #label>
+            <v-icon>mdi-tshirt-crew-outline</v-icon>
+          </template>
+        </v-switch>
+      </div>
+      <div v-if="showCostumeSwitch" class="tuc-do-costume-name">
+        {{ data.costume[0].name }}
       </div>
       <div v-if="data" class="tuc-do-show">
         <!-- 左侧武器跟圣遗物 -->
@@ -95,6 +106,7 @@ const visible = computed({
   get: () => props.modelValue,
   set: (value) => emits("update:modelValue", value),
 });
+const showCostumeSwitch = ref(false);
 
 // data
 const data = ref({
@@ -108,6 +120,7 @@ const data = ref({
     5: false as TGApp.Sqlite.Character.RoleReliquary | false,
   },
   costume: [] as TGApp.Sqlite.Character.RoleCostume[],
+  bg: "" as string,
 });
 const selected = ref({
   data: {} as TGApp.Sqlite.Character.RoleConstellation
@@ -129,6 +142,8 @@ function loadData () {
     });
   }
   data.value.costume = JSON.parse(props.dataVal.costume) as TGApp.Sqlite.Character.RoleCostume[];
+  data.value.bg = props.dataVal.img;
+  showCostumeSwitch.value = false;
   selected.value = {
     data: data.value.weapon,
     type: "武器",
@@ -174,6 +189,14 @@ function showDetail (
     pos,
   };
 }
+
+function switchBg () {
+  if (data.value.bg === props.dataVal.img) {
+    data.value.bg = data.value.costume[0].icon;
+  } else {
+    data.value.bg = props.dataVal.img;
+  }
+}
 </script>
 <style lang="css" scoped>
 .tuc-do-box {
@@ -207,6 +230,25 @@ function showDetail (
   font-family: var(--font-text);
   font-size: 12px;
   color: var(--common-color-grey-2);
+}
+
+.tuc-do-costume {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  z-index: 1;
+}
+
+.tuc-do-costume-name {
+  position: absolute;
+  width: 100%;
+  top: 5px;
+  left: 0;
+  text-align: center;
+  font-family: var(--font-text);
+  font-size: 16px;
+  color: var(--common-color-white);
+  text-shadow: 0 0 10px var(--common-color-yellow);
 }
 
 .tuc-do-show {
