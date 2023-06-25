@@ -33,7 +33,7 @@ export function decodeRegExp(data: string): string {
  * @param {Record<string, string>} cookie cookie
  * @returns {string} 转换后的 cookie
  */
-export function transCookie(cookie: Record<string, string>) {
+export function transCookie(cookie: Record<string, string>): string {
   let res = "";
   for (const key of Object.keys(cookie).sort()) {
     res += `${key}=${cookie[key]};`;

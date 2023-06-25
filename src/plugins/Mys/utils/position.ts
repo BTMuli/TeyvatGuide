@@ -20,7 +20,7 @@ export function dfs(list: PositionObc[]): PositionData[] {
       res.push(...item.list);
     }
     if (item.children) {
-      res.push(...dfs(item.children as PositionObc[]));
+      res.push(...dfs(<PositionObc[]>item.children));
     }
   }
   return res;

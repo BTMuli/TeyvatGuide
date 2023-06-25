@@ -120,7 +120,7 @@ export async function restoreUiafData(): Promise<boolean> {
   if (!(await fs.exists(uiafPath))) {
     return false;
   }
-  const uiafData = JSON.parse(await fs.readTextFile(uiafPath)) as TGApp.Plugins.UIAF.Achievement[];
+  const uiafData: TGApp.Plugins.UIAF.Achievement[] = JSON.parse(await fs.readTextFile(uiafPath));
   await TGSqlite.mergeUIAF(uiafData);
   return true;
 }

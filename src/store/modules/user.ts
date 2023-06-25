@@ -13,14 +13,23 @@ import { defineStore } from "pinia";
 export const useUserStore = defineStore(
   "user",
   () => {
-    const briefInfo = ref({
+    const briefInfo = ref<TGApp.App.Account.BriefInfo>({
       nickname: "",
       avatar: "",
       uid: "",
       desc: "",
-    } as TGApp.App.Account.BriefInfo);
-    const account = ref({} as TGApp.Sqlite.Account.Game);
-    const cookie = ref({} as Record<string, string>);
+    });
+    const account = ref<TGApp.Sqlite.Account.Game>({
+      gameBiz: "",
+      gameUid: "",
+      isChosen: 0,
+      isOfficial: 0,
+      level: "",
+      nickname: "",
+      region: "",
+      regionName: "",
+    });
+    const cookie = ref<Record<string, string>>({});
 
     function setBriefInfo(info: TGApp.App.Account.BriefInfo): void {
       briefInfo.value = info;
@@ -30,7 +39,7 @@ export const useUserStore = defineStore(
       return briefInfo.value;
     }
 
-    function setCurAccount(user: TGApp.Sqlite.Account.Game) {
+    function setCurAccount(user: TGApp.Sqlite.Account.Game): void {
       account.value = user;
     }
 

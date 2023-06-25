@@ -41,7 +41,7 @@ export function transUserRoles(
     name: data.name,
     fetter: data.fetter,
     level: data.level,
-    element: transElement(data.element as EnumElementEn),
+    element: transElement(data.element),
     star: data.rarity === 105 ? 5 : data.rarity,
     weapon: transWeapon(data.weapon),
     reliquary: transReliquary(data.reliquaries),

@@ -15,14 +15,14 @@ import material from "./app/material.json";
 import nameCards from "./app/namecard.json";
 import weapon from "./app/weapon.json";
 
-export const AppAchievementsData = achievements as TGApp.App.Achievement.Item[];
-export const AppAchievementSeriesData = achievementSeries as TGApp.App.Achievement.Series[];
-export const AppCalendarData = calendar as TGApp.App.Calendar.Item[];
-export const AppCharacterData = character as TGApp.App.Character.WikiBriefInfo[];
-export const AppGCGData = GCG as TGApp.App.GCG.WikiBriefInfo[];
-export const AppMaterialData = material as TGApp.App.Calendar.Material[];
-export const AppNameCardsData = nameCards as TGApp.App.NameCard.Item[];
-export const AppWeaponData = weapon as TGApp.App.Weapon.WikiBriefInfo[];
+export const AppAchievementsData: TGApp.App.Achievement.Item[] = achievements;
+export const AppAchievementSeriesData: TGApp.App.Achievement.Series[] = achievementSeries;
+export const AppCalendarData: TGApp.App.Calendar.Item[] = calendar;
+export const AppCharacterData: TGApp.App.Character.WikiBriefInfo[] = character;
+export const AppGCGData: TGApp.App.GCG.WikiBriefInfo[] = GCG;
+export const AppMaterialData: TGApp.App.Calendar.Material[] = material;
+export const AppNameCardsData: TGApp.App.NameCard.Item[] = nameCards;
+export const AppWeaponData: TGApp.App.Weapon.WikiBriefInfo[] = weapon;
 
 const wikiFiles = import.meta.glob("./wiki/**/*.json");
 

@@ -26,12 +26,14 @@ export async function getGameRoleListByLToken(
   const uid = account.gameUid;
   // eslint-disable-next-line camelcase
   const data = { role_id: uid, server: TGUtils.Tools.getServerByUid(uid) };
-  const header = TGUtils.User.getHeader(
-    cookie as unknown as Record<string, string>,
-    "POST",
-    JSON.stringify(data),
-    "common",
-  );
+  // 格式转换 将 cookie 对象转换 record<string, string>
+  const ck: Record<string, string> = {
+    account_id: cookie.account_id,
+    cookie_token: cookie.cookie_token,
+    ltuid: cookie.ltuid,
+    ltoken: cookie.ltoken,
+  };
+  const header = TGUtils.User.getHeader(ck, "POST", JSON.stringify(data), "common");
   return await http
     .fetch<TGApp.Game.Character.ListResponse>(url, {
       method: "POST",

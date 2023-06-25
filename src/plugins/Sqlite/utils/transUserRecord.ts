@@ -64,8 +64,8 @@ function transAvatar(data: TGApp.Game.Record.Avatar[]): string {
         level: item.level,
         star: item.rarity === 105 ? 5 : item.rarity,
         constellation: item.actived_constellation_num,
-        isShow: item.is_chosen ? 1 : 0,
-      } as TGApp.Sqlite.Record.Avatar;
+        isShow: item.is_chosen ? <1>1 : <0>0,
+      };
     })
     .sort((a, b) => {
       // 先按星级降序
@@ -113,14 +113,14 @@ function transStat(data: TGApp.Game.Record.Stats): string {
  */
 function transWorld(data: TGApp.Game.Record.WorldExplore[]): string {
   const worlds: TGApp.Sqlite.Record.WorldExplore[] = data.map((item) => {
-    let offerings;
+    let offerings: TGApp.Sqlite.Record.WorldOffering[] = [];
     if (item.offerings !== undefined) {
       offerings = item.offerings.map((offering) => {
         return {
           name: offering.name,
           icon: offering.icon,
           level: offering.level,
-        } as TGApp.Sqlite.Record.WorldOffering;
+        };
       });
     }
     return {
@@ -133,7 +133,7 @@ function transWorld(data: TGApp.Game.Record.WorldExplore[]): string {
       offerings,
       bg: item.background_image,
       cover: item.cover,
-    } as TGApp.Sqlite.Record.WorldExplore;
+    };
   });
   return JSON.stringify(worlds);
 }
@@ -155,7 +155,7 @@ function transHome(data: TGApp.Game.Record.Home[]): string {
       furniture: item.item_num,
       visit: item.visit_num,
       bg: item.icon,
-    } as TGApp.Sqlite.Record.Home;
+    };
   });
   return JSON.stringify(homes);
 }

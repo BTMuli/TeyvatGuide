@@ -18,7 +18,7 @@ import { transCookie, transParams } from "./tools";
  * @param {string} saltType salt 类型
  * @returns {string} salt
  */
-function getSalt(saltType: string) {
+function getSalt(saltType: string): string {
   switch (saltType) {
     case "common":
       return TGConstant.Salt.Other.X4;

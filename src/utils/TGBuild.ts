@@ -34,7 +34,7 @@ export const getBuildTime = (): string => {
     console.warn("getBuildTime() should only be called in the browser");
     return "dev";
   }
-  const windowEnv = window as typeof window & { [buildTimeKey]?: string };
+  const windowEnv = <typeof window & { [buildTimeKey]?: string }>window;
   if (!windowEnv[buildTimeKey]) {
     console.info("当前环境为开发环境");
     return `dev.${Math.floor(Date.now() / 1000)}`;

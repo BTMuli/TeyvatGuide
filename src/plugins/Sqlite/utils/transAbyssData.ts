@@ -14,13 +14,13 @@ import { timeToSecond } from "./transTime";
  * @returns {string} 转换后的深渊数据
  */
 export function transCharacterData(data: TGApp.Game.Abyss.CharacterData[]): string {
-  const res = data.map((item) => {
+  const res: TGApp.Sqlite.Abyss.Character[] = data.map((item) => {
     return {
       id: item.avatar_id,
       value: item.value,
       star: item.rarity,
     };
-  }) as TGApp.Sqlite.Abyss.Character[];
+  });
   return JSON.stringify(res);
 }
 
@@ -31,7 +31,7 @@ export function transCharacterData(data: TGApp.Game.Abyss.CharacterData[]): stri
  * @returns {string} 转换后的深渊数据
  */
 export function transFloorData(data: TGApp.Game.Abyss.Floor[]): string {
-  const floor = data.map((item) => {
+  const floor: TGApp.Sqlite.Abyss.Floor[] = data.map((item) => {
     return {
       id: item.index,
       winStar: item.star,
@@ -43,15 +43,15 @@ export function transFloorData(data: TGApp.Game.Abyss.Floor[]): string {
           winStar: level.star,
           maxStar: level.max_star,
           upBattle: transBattleData(
-            level.battles.find((l) => l.index === 1) as TGApp.Game.Abyss.Battle,
+            <TGApp.Game.Abyss.Battle>level.battles.find((l) => l.index === 1),
           ),
           downBattle: transBattleData(
-            level.battles.find((l) => l.index === 2) as TGApp.Game.Abyss.Battle,
+            <TGApp.Game.Abyss.Battle>level.battles.find((l) => l.index === 2),
           ),
         };
       }),
     };
-  }) as TGApp.Sqlite.Abyss.Floor[];
+  });
   return JSON.stringify(floor);
 }
 
