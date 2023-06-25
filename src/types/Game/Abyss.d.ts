@@ -16,7 +16,7 @@ declare namespace TGApp.Game.Abyss {
    * @return Response
    */
   export interface Response extends TGApp.BBS.Response.Base {
-    data: FullData
+    data: FullData;
   }
 
   /**
@@ -41,21 +41,21 @@ declare namespace TGApp.Game.Abyss {
    * @return FullData
    */
   export interface FullData {
-    schedule_id: number
-    start_time: string
-    end_time: string
-    total_battle_times: number
-    total_win_times: number
-    max_floor: string
-    reveal_rank: CharacterData[]
-    defeat_rank: CharacterData[]
-    damage_rank: CharacterData[]
-    take_damage_rank: CharacterData[]
-    normal_skill_rank: CharacterData[]
-    energy_skill_rank: CharacterData[]
-    floors: Floor[]
-    total_star: number
-    is_unlock: boolean
+    schedule_id: number;
+    start_time: string;
+    end_time: string;
+    total_battle_times: number;
+    total_win_times: number;
+    max_floor: string;
+    reveal_rank: CharacterData[];
+    defeat_rank: CharacterData[];
+    damage_rank: CharacterData[];
+    take_damage_rank: CharacterData[];
+    normal_skill_rank: CharacterData[];
+    energy_skill_rank: CharacterData[];
+    floors: Floor[];
+    total_star: number;
+    is_unlock: boolean;
   }
 
   /**
@@ -69,10 +69,10 @@ declare namespace TGApp.Game.Abyss {
    * @return CharacterData
    */
   export interface CharacterData {
-    avatar_id: number
-    avatar_icon: string
-    value: number
-    rarity: number
+    avatar_id: number;
+    avatar_icon: string;
+    value: number;
+    rarity: number;
   }
 
   /**
@@ -89,13 +89,13 @@ declare namespace TGApp.Game.Abyss {
    * @return Floor
    */
   export interface Floor {
-    index: number
-    icon: string
-    is_unlock: boolean
-    settle_time: number
-    star: number
-    max_star: number
-    levels: Level[]
+    index: number;
+    icon: string;
+    is_unlock: boolean;
+    settle_time: number;
+    star: number;
+    max_star: number;
+    levels: Level[];
   }
 
   /**
@@ -109,10 +109,10 @@ declare namespace TGApp.Game.Abyss {
    * @return Level
    */
   export interface Level {
-    index: number
-    star: number
-    max_star: number
-    battles: Battle[]
+    index: number;
+    star: number;
+    max_star: number;
+    battles: Battle[];
   }
 
   /**
@@ -125,9 +125,9 @@ declare namespace TGApp.Game.Abyss {
    * @return Battle
    */
   export interface Battle {
-    index: number
-    timestamp: string
-    avatars: CharacterInfo[]
+    index: number;
+    timestamp: string;
+    avatars: CharacterInfo[];
   }
 
   /**
@@ -141,9 +141,9 @@ declare namespace TGApp.Game.Abyss {
    * @return CharacterInfo
    */
   export interface CharacterInfo {
-    id: number
-    icon: string
-    level: number
-    rarity: number
+    id: number;
+    icon: string;
+    level: number;
+    rarity: number;
   }
 }

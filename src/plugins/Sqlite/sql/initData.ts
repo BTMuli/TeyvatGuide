@@ -27,7 +27,7 @@ import {
  * @since Alpha v0.2.0
  * @returns {Promise<string[]>} sql
  */
-async function initAppData (): Promise<string[]> {
+async function initAppData(): Promise<string[]> {
   const sqlRes: string[] = [];
   const appVersion = await app.getVersion();
   const buildTime = getBuildTime();
@@ -35,20 +35,17 @@ async function initAppData (): Promise<string[]> {
   sqlRes.push(`
     INSERT INTO AppData (key, value, updated)
     VALUES ('appVersion', '${appVersion}', datetime('now', 'localtime'))
-    ON CONFLICT(key) DO UPDATE SET value = '${appVersion}', updated = datetime('now', 'localtime');`,
-  );
+    ON CONFLICT(key) DO UPDATE SET value = '${appVersion}', updated = datetime('now', 'localtime');`);
   // 初始化应用数据更新时间
   sqlRes.push(`
     INSERT INTO AppData (key, value, updated)
     VALUES ('dataUpdated', '${buildTime}', datetime('now', 'localtime'))
-    ON CONFLICT(key) DO UPDATE SET value = '${buildTime}', updated = datetime('now', 'localtime');`,
-  );
+    ON CONFLICT(key) DO UPDATE SET value = '${buildTime}', updated = datetime('now', 'localtime');`);
   // 初始化 cookie
   sqlRes.push(`
     INSERT INTO AppData (key, value, updated)
     VALUES ('cookie', '{}', datetime('now', 'localtime'))
-    ON CONFLICT(key) DO NOTHING;`,
-  );
+    ON CONFLICT(key) DO NOTHING;`);
   return sqlRes;
 }
 
@@ -57,7 +54,7 @@ async function initAppData (): Promise<string[]> {
  * @since Alpha v0.2.0
  * @returns {string[]} sql
  */
-function initAchievementSeriesData (): string[] {
+function initAchievementSeriesData(): string[] {
   return AppAchievementSeriesData.map((item) => insertAchievementSeriesData(item));
 }
 
@@ -66,7 +63,7 @@ function initAchievementSeriesData (): string[] {
  * @since Alpha v0.2.0
  * @returns {string[]} sql
  */
-function initAchievementData (): string[] {
+function initAchievementData(): string[] {
   return AppAchievementsData.map((item) => insertAchievementData(item));
 }
 
@@ -75,7 +72,7 @@ function initAchievementData (): string[] {
  * @since Alpha v0.2.0
  * @returns {string[]} sql
  */
-function initNameCardData (): string[] {
+function initNameCardData(): string[] {
   return AppNameCardsData.map((item) => insertNameCardData(item));
 }
 
@@ -84,7 +81,7 @@ function initNameCardData (): string[] {
  * @since Alpha v0.2.0
  * @returns {string[]} sql
  */
-function initCharacterData (): string[] {
+function initCharacterData(): string[] {
   return AppCharacterData.map((item) => insertCharacterData(item));
 }
 
@@ -93,9 +90,9 @@ function initCharacterData (): string[] {
  * @since Alpha v0.2.0
  * @returns {Promise<string[]>} sql
  */
-async function initDataSql (): Promise<string[]> {
+async function initDataSql(): Promise<string[]> {
   const sqlRes: string[] = [];
-  sqlRes.push(...await initAppData());
+  sqlRes.push(...(await initAppData()));
   sqlRes.push(...initAchievementSeriesData());
   sqlRes.push(...initAchievementData());
   sqlRes.push(...initNameCardData());

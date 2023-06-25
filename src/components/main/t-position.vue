@@ -1,15 +1,11 @@
 <template>
   <div class="position-box">
     <div class="position-title">
-      <img src="../../assets/icons/board.svg" alt="act">
+      <img src="../../assets/icons/board.svg" alt="act" />
       <span>近期活动</span>
     </div>
     <div v-if="!loading" class="position-grid">
-      <v-card
-        v-for="card in positionCards"
-        :key="card.post_id"
-        class="position-card"
-      >
+      <v-card v-for="card in positionCards" :key="card.post_id" class="position-card">
         <v-list class="position-list">
           <v-list-item :title="card.title" :subtitle="card.abstract">
             <template #prepend>
@@ -18,9 +14,7 @@
               </v-avatar>
             </template>
             <template #append>
-              <v-btn variant="outlined" @click="toPost(card)">
-                查看
-              </v-btn>
+              <v-btn variant="outlined" @click="toPost(card)"> 查看 </v-btn>
             </template>
           </v-list-item>
         </v-list>
@@ -38,7 +32,9 @@
               positionTimeGet[card.post_id]
             }}</span>
             <!-- 粉红 -->
-            <span v-if="positionTimeGet[card.post_id] === '已结束'" style="color: #f2b9b2">已结束</span>
+            <span v-if="positionTimeGet[card.post_id] === '已结束'" style="color: #f2b9b2"
+              >已结束</span
+            >
           </div>
         </v-card-text>
       </v-card>
@@ -74,7 +70,7 @@ defineExpose({
   loading,
 });
 
-function positionLastInterval (postId: number) {
+function positionLastInterval(postId: number) {
   const timeGet = positionTimeGet.value[postId];
   if (timeGet === "未知" || timeGet === "已结束") {
     clearInterval(positionTimer.value[postId]);
@@ -110,17 +106,17 @@ onMounted(async () => {
   loading.value = false;
 });
 
-function getLastPositionTime (time: number) {
+function getLastPositionTime(time: number) {
   const day = Math.floor(time / (24 * 3600 * 1000));
   const hour = Math.floor((time % (24 * 3600 * 1000)) / (3600 * 1000));
   const minute = Math.floor((time % (3600 * 1000)) / (60 * 1000));
   const second = Math.floor((time % (60 * 1000)) / 1000);
-  return `${day}天 ${hour.toFixed(0).padStart(2, "0")}:${minute.toFixed(0).padStart(2, "0")}:${second
+  return `${day}天 ${hour.toFixed(0).padStart(2, "0")}:${minute
     .toFixed(0)
-    .padStart(2, "0")}`;
+    .padStart(2, "0")}:${second.toFixed(0).padStart(2, "0")}`;
 }
 
-async function toPost (card: PositionCard) {
+async function toPost(card: PositionCard) {
   // 获取路由路径
   const path = router.resolve({
     name: "帖子详情",
@@ -173,7 +169,7 @@ onUnmounted(() => {
 .position-card {
   background: #45b787; /* 蛙绿 */
   color: #eef7f2; /* 月白 */
-  border-radius: 5px
+  border-radius: 5px;
 }
 
 .dark .position-card {

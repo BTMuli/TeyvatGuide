@@ -17,13 +17,15 @@ import HutaoApi from "../api";
  * @param {string} uid
  * @return {Promise<boolean>}
  */
-export async function checkUid (uid: string): Promise<boolean> {
+export async function checkUid(uid: string): Promise<boolean> {
   const url = HutaoApi.Abyss.user.check.replace("{uid}", uid);
-  return await http.fetch<TGApp.Plugins.Hutao.AbyssRecordExistResponse>(url, {
-    method: "GET",
-  }).then((res) => {
-    return res.data.data;
-  });
+  return await http
+    .fetch<TGApp.Plugins.Hutao.AbyssRecordExistResponse>(url, {
+      method: "GET",
+    })
+    .then((res) => {
+      return res.data.data;
+    });
 }
 
 /**
@@ -33,11 +35,13 @@ export async function checkUid (uid: string): Promise<boolean> {
  * @param {string} uid
  * @return {Promise<TGApp.Plugins.Hutao.AbyssRecordRank>}
  */
-export async function getUserData (uid: string): Promise<TGApp.Plugins.Hutao.AbyssRecordRank> {
+export async function getUserData(uid: string): Promise<TGApp.Plugins.Hutao.AbyssRecordRank> {
   const url = HutaoApi.Abyss.user.rank.replace("{uid}", uid);
-  return await http.fetch<TGApp.Plugins.Hutao.AbyssRecordRankResponse>(url, {
-    method: "GET",
-  }).then((res) => {
-    return res.data.data;
-  });
+  return await http
+    .fetch<TGApp.Plugins.Hutao.AbyssRecordRankResponse>(url, {
+      method: "GET",
+    })
+    .then((res) => {
+      return res.data.data;
+    });
 }

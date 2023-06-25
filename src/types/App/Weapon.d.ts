@@ -20,13 +20,13 @@ declare namespace TGApp.App.Weapon {
    * @return WikiBriefInfo
    */
   export interface WikiBriefInfo {
-    id: number
-    contentId: number
-    name: string
-    star: number
-    bg: string
-    weaponIcon: string
-    icon: string
+    id: number;
+    contentId: number;
+    name: string;
+    star: number;
+    bg: string;
+    weaponIcon: string;
+    icon: string;
   }
 }
 

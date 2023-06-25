@@ -1,7 +1,7 @@
 <template>
   <transition name="fade">
     <div v-show="canTop" class="back-top" @click="handleScrollTop">
-      <img src="../../assets/icons/arrow-top.svg" alt="back-icon">
+      <img src="../../assets/icons/arrow-top.svg" alt="back-icon" />
     </div>
   </transition>
 </template>
@@ -13,7 +13,7 @@ const scrollTop = ref(0); // 滚动条距离顶部的距离
 const canTop = ref(false); // 默认不显示
 
 // 监听滚动事件
-function handleScroll () {
+function handleScroll() {
   scrollTop.value = document.documentElement.scrollTop || document.body.scrollTop;
   // 超过500px显示回到顶部按钮
   canTop.value = scrollTop.value > 500;
@@ -26,10 +26,10 @@ function handleScroll () {
 }
 
 // 点击回到顶部
-function handleScrollTop () {
+function handleScrollTop() {
   let timer = 0;
   cancelAnimationFrame(timer);
-  timer = requestAnimationFrame(function fn () {
+  timer = requestAnimationFrame(function fn() {
     if (scrollTop.value > 0) {
       scrollTop.value -= 50;
       document.body.scrollTop = document.documentElement.scrollTop = scrollTop.value;

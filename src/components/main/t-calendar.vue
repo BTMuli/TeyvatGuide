@@ -2,9 +2,7 @@
   <div class="calendar-box">
     <div class="calendar-title">
       <div class="calendar-title-left">
-        <v-icon size="small">
-          mdi-calendar-clock
-        </v-icon>
+        <v-icon size="small"> mdi-calendar-clock </v-icon>
         <span>今日素材</span>
         <span>{{ dateNow }}</span>
       </div>
@@ -119,7 +117,7 @@ defineExpose({
 });
 
 onMounted(() => {
-  const dayNow = (new Date().getDay()) === 0 ? 7 : (new Date().getDay());
+  const dayNow = new Date().getDay() === 0 ? 7 : new Date().getDay();
   weekNow.value = dayNow;
   btnNow.value = dayNow;
   calendarNow.value = getCalendar(dayNow);
@@ -129,17 +127,17 @@ onMounted(() => {
 });
 
 // 获取当前日历
-function getCalendar (day: number) {
+function getCalendar(day: number) {
   return calendarData.value.filter((item) => item.dropDays.includes(day));
 }
 
-function selectContent (item: TGApp.App.Calendar.Item, type: string) {
+function selectContent(item: TGApp.App.Calendar.Item, type: string) {
   selectedItem.value = item;
   selectedType.value = type;
   showItem.value = true;
 }
 
-function getContents (day: number) {
+function getContents(day: number) {
   btnNow.value = day;
   calendarNow.value = getCalendar(day);
   characterCards.value = calendarNow.value.filter((item) => item.itemType === "character");
@@ -159,7 +157,7 @@ function getContents (day: number) {
   height: 45px;
   font-size: 20px;
   display: flex;
-  color:rgb(255 255 255 / 80%);
+  color: rgb(255 255 255 / 80%);
 }
 
 .calendar-title-left {
@@ -182,8 +180,8 @@ function getContents (day: number) {
 }
 
 .calendar-title-btn {
-    margin-left: 10px;
-    border-radius: 5px;
+  margin-left: 10px;
+  border-radius: 5px;
 }
 
 .calendar-divider {
@@ -194,12 +192,12 @@ function getContents (day: number) {
 }
 
 .calendar-sub {
-    margin: 5px;
+  margin: 5px;
 }
 
 .cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    grid-gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-gap: 8px;
 }
 </style>

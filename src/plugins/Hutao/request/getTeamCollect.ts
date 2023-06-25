@@ -15,13 +15,15 @@ import HutaoApi from "../api";
  * @since Alpha v0.2.0
  * @return {Promise<TGApp.Plugins.Hutao.AbyssTeamCombination[]>}
  */
-async function getTeamCollect (): Promise<TGApp.Plugins.Hutao.AbyssTeamCombination[]> {
+async function getTeamCollect(): Promise<TGApp.Plugins.Hutao.AbyssTeamCombination[]> {
   const url = HutaoApi.Abyss.team;
-  return await http.fetch<TGApp.Plugins.Hutao.AbyssTeamCombinationResponse>(url, {
-    method: "GET",
-  }).then((res) => {
-    return res.data.data;
-  });
+  return await http
+    .fetch<TGApp.Plugins.Hutao.AbyssTeamCombinationResponse>(url, {
+      method: "GET",
+    })
+    .then((res) => {
+      return res.data.data;
+    });
 }
 
 export default getTeamCollect;

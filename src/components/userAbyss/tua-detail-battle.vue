@@ -5,7 +5,8 @@
   <div class="tud-db-icons-grid">
     <TibAbyssDetail
       v-for="avatar in props.modelValue.characters"
-      :key="avatar.id" :model-value="avatar"
+      :key="avatar.id"
+      :model-value="avatar"
     />
   </div>
 </template>

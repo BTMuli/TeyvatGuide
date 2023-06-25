@@ -4,27 +4,33 @@
       <div class="box-div">
         <div class="toc-top">
           <div class="toc-icon">
-            <TibCalendarAvatar v-if="itemType=== 'character'" v-model="itemVal" size="100px" style="cursor: default" />
-            <TibCalendarWeapon v-if="itemType=== 'weapon'" v-model="itemVal" size="100px" style="cursor: default" />
+            <TibCalendarAvatar
+              v-if="itemType === 'character'"
+              v-model="itemVal"
+              size="100px"
+              style="cursor: default"
+            />
+            <TibCalendarWeapon
+              v-if="itemType === 'weapon'"
+              v-model="itemVal"
+              size="100px"
+              style="cursor: default"
+            />
           </div>
           <div class="toc-material-grid">
             <TibCalendarMaterial v-for="item in itemVal.materials" :item="item" />
           </div>
         </div>
-        <img src="/source/UI/item-line.webp" alt="line" class="toc-line">
+        <img src="/source/UI/item-line.webp" alt="line" class="toc-line" />
         <div class="toc-bottom">
           <div class="toc-src-box">
-            <div class="toc-src-text">
-              来源：
-            </div>
-            <img :src="`/icon/nation/${itemVal.source.area}.webp`" alt="icon">
-            <div class="toc-src-text">
-              {{ itemVal.source.area }} - {{ itemVal.source.name }}
-            </div>
+            <div class="toc-src-text">来源：</div>
+            <img :src="`/icon/nation/${itemVal.source.area}.webp`" alt="icon" />
+            <div class="toc-src-text">{{ itemVal.source.area }} - {{ itemVal.source.name }}</div>
           </div>
           <v-btn variant="outlined" @click="toDetail(itemVal)">
             <template #append>
-              <img src="../../assets/icons/arrow-right.svg" alt="right" class="toc-btn-img">
+              <img src="../../assets/icons/arrow-right.svg" alt="right" class="toc-btn-img" />
             </template>
             详情
           </v-btn>
@@ -83,7 +89,7 @@ const onCancel = () => {
   emits("cancel");
 };
 
-function toDetail (item: TGApp.App.Calendar.Item) {
+function toDetail(item: TGApp.App.Calendar.Item) {
   if (item.contentId === 0) {
     snackbar.value = true;
     return;

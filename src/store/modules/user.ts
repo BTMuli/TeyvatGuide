@@ -11,7 +11,8 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 
 export const useUserStore = defineStore(
-  "user", () => {
+  "user",
+  () => {
     const briefInfo = ref({
       nickname: "",
       avatar: "",
@@ -21,48 +22,48 @@ export const useUserStore = defineStore(
     const account = ref({} as TGApp.Sqlite.Account.Game);
     const cookie = ref({} as Record<string, string>);
 
-    function setBriefInfo (info: TGApp.App.Account.BriefInfo): void {
+    function setBriefInfo(info: TGApp.App.Account.BriefInfo): void {
       briefInfo.value = info;
     }
 
-    function getBriefInfo (): Record<string, string> {
+    function getBriefInfo(): Record<string, string> {
       return briefInfo.value;
     }
 
-    function setCurAccount (user: TGApp.Sqlite.Account.Game) {
+    function setCurAccount(user: TGApp.Sqlite.Account.Game) {
       account.value = user;
     }
 
-    function getCurAccount (): TGApp.Sqlite.Account.Game {
+    function getCurAccount(): TGApp.Sqlite.Account.Game {
       return account.value;
     }
 
-    function getCookieItem (key: string): string {
+    function getCookieItem(key: string): string {
       return cookie.value[key] || "";
     }
 
-    function getCookieGroup1 (): TGApp.BBS.Constant.CookieGroup1 {
+    function getCookieGroup1(): TGApp.BBS.Constant.CookieGroup1 {
       return {
         login_ticket: getCookieItem("login_ticket"),
         login_uid: getCookieItem("login_uid"),
       };
     }
 
-    function getCookieGroup2 (): TGApp.BBS.Constant.CookieGroup2 {
+    function getCookieGroup2(): TGApp.BBS.Constant.CookieGroup2 {
       return {
         account_id: getCookieItem("account_id"),
         cookie_token: getCookieItem("cookie_token"),
       };
     }
 
-    function getCookieGroup3 (): TGApp.BBS.Constant.CookieGroup3 {
+    function getCookieGroup3(): TGApp.BBS.Constant.CookieGroup3 {
       return {
         ltoken: getCookieItem("ltoken"),
         ltuid: getCookieItem("ltuid"),
       };
     }
 
-    function getCookieGroup4 (): TGApp.BBS.Constant.CookieGroup4 {
+    function getCookieGroup4(): TGApp.BBS.Constant.CookieGroup4 {
       return {
         account_id: getCookieItem("account_id"),
         cookie_token: getCookieItem("cookie_token"),
@@ -71,7 +72,7 @@ export const useUserStore = defineStore(
       };
     }
 
-    function initCookie (ck: Record<string, string>): void {
+    function initCookie(ck: Record<string, string>): void {
       if (cookie.value !== ck) {
         cookie.value = ck;
       }
@@ -94,18 +95,22 @@ export const useUserStore = defineStore(
     };
   },
   {
-    persist: [{
-      key: "cookie",
-      storage: window.localStorage,
-      paths: ["cookie"],
-    }, {
-      key: "briefInfo",
-      storage: window.localStorage,
-      paths: ["briefInfo"],
-    }, {
-      key: "account",
-      storage: window.localStorage,
-      paths: ["account"],
-    }],
+    persist: [
+      {
+        key: "cookie",
+        storage: window.localStorage,
+        paths: ["cookie"],
+      },
+      {
+        key: "briefInfo",
+        storage: window.localStorage,
+        paths: ["briefInfo"],
+      },
+      {
+        key: "account",
+        storage: window.localStorage,
+        paths: ["account"],
+      },
+    ],
   },
 );

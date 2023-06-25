@@ -15,7 +15,7 @@ import { type GachaCard, type GachaData } from "../interface/gacha";
  * @param {Map<string>} poolCover 卡池封面
  * @returns {Promise<GachaCard[]>}
  */
-export async function getGachaCard (
+export async function getGachaCard(
   gachaData: GachaData[],
   poolCover: Record<number, string> | undefined = undefined,
 ): Promise<GachaCard[]> {

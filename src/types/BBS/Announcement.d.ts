@@ -15,7 +15,7 @@ declare namespace TGApp.BBS.Announcement {
    * @return ListResponse
    */
   export interface ListResponse extends TGApp.BBS.Response.Base {
-    data: ListData
+    data: ListData;
   }
 
   /**
@@ -27,7 +27,7 @@ declare namespace TGApp.BBS.Announcement {
    * @return ContentResponse
    */
   export interface ContentResponse extends TGApp.BBS.Response.Base {
-    data: ContentData
+    data: ContentData;
   }
 
   /**
@@ -49,18 +49,18 @@ declare namespace TGApp.BBS.Announcement {
    * @return ListData
    */
   export interface ListData {
-    list: ListItem[]
-    total: number
-    type_list: ListType[]
-    alert: boolean
-    time_zone: number
-    t: string
-    pic_list: unknown[]
-    pic_total: number
-    pic_type_list: unknown[]
-    pic_alert: boolean
-    pic_alert_id: number
-    static_sign: unknown
+    list: ListItem[];
+    total: number;
+    type_list: ListType[];
+    alert: boolean;
+    time_zone: number;
+    t: string;
+    pic_list: unknown[];
+    pic_total: number;
+    pic_type_list: unknown[];
+    pic_alert: boolean;
+    pic_alert_id: number;
+    static_sign: unknown;
   }
 
   /**
@@ -74,10 +74,10 @@ declare namespace TGApp.BBS.Announcement {
    * @return ContentData
    */
   export interface ContentData {
-    list: ContentItem[]
-    total: number
-    pic_list: unknown[]
-    pic_total: number
+    list: ContentItem[];
+    total: number;
+    pic_list: unknown[];
+    pic_total: number;
   }
 
   /**
@@ -90,9 +90,9 @@ declare namespace TGApp.BBS.Announcement {
    * @return ListItem
    */
   export interface ListItem {
-    list: AnnoSingle[]
-    type_id: number
-    type_label: string
+    list: AnnoSingle[];
+    type_id: number;
+    type_label: string;
   }
 
   /**
@@ -122,26 +122,26 @@ declare namespace TGApp.BBS.Announcement {
    * @return AnnoSingle
    */
   export interface AnnoSingle {
-    ann_id: number
-    title: string
-    subtitle: string
-    banner: string
-    content: unknown
-    type_label: string
-    tag_label: string
-    tag_icon: string
-    login_alert: number
-    lang: string
-    start_time: string
-    end_time: string
-    type: number
-    remind: number
-    alert: number
-    tag_start_time: string
-    tag_end_time: string
-    remind_ver: number
-    has_content: boolean
-    extra_remind: boolean
+    ann_id: number;
+    title: string;
+    subtitle: string;
+    banner: string;
+    content: unknown;
+    type_label: string;
+    tag_label: string;
+    tag_icon: string;
+    login_alert: number;
+    lang: string;
+    start_time: string;
+    end_time: string;
+    type: number;
+    remind: number;
+    alert: number;
+    tag_start_time: string;
+    tag_end_time: string;
+    remind_ver: number;
+    has_content: boolean;
+    extra_remind: boolean;
   }
 
   /**
@@ -154,9 +154,9 @@ declare namespace TGApp.BBS.Announcement {
    * @return ListType
    */
   export interface ListType {
-    id: number
-    name: string
-    mi18n_name: string
+    id: number;
+    name: string;
+    mi18n_name: string;
   }
 
   /**
@@ -172,11 +172,11 @@ declare namespace TGApp.BBS.Announcement {
    * @return ContentItem
    */
   export interface ContentItem {
-    ann_id: number
-    title: string
-    subtitle: string
-    banner: string
-    content: string
-    lang: string
+    ann_id: number;
+    title: string;
+    subtitle: string;
+    banner: string;
+    content: string;
+    lang: string;
   }
 }

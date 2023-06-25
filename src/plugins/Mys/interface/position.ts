@@ -17,8 +17,8 @@ import { type MysObcResponse, type MysObc } from "./base";
  */
 export interface PositionResponse extends MysObcResponse {
   data: {
-    list: PositionObc[]
-  }
+    list: PositionObc[];
+  };
 }
 
 /**
@@ -30,7 +30,7 @@ export interface PositionResponse extends MysObcResponse {
  * @returns {PositionObc}
  */
 export interface PositionObc extends MysObc {
-  list: PositionData[]
+  list: PositionData[];
 }
 
 /**
@@ -53,19 +53,19 @@ export interface PositionObc extends MysObc {
  * @returns {PositionData}
  */
 export interface PositionData {
-  recommend_id: number
-  content_id: number
-  title: string
-  ext: string
-  type: number
-  url: string
-  icon: string
-  abstract: string
-  article_user_name: string
-  avatar_url: string
-  article_time: string
-  create_time: string
-  end_time: string
+  recommend_id: number;
+  content_id: number;
+  title: string;
+  ext: string;
+  type: number;
+  url: string;
+  icon: string;
+  abstract: string;
+  article_user_name: string;
+  avatar_url: string;
+  article_time: string;
+  create_time: string;
+  end_time: string;
 }
 
 /**
@@ -84,14 +84,14 @@ export interface PositionData {
  * @returns {PositionCard}
  */
 export interface PositionCard {
-  title: string
-  post_id: number
-  icon: string
-  abstract: string
+  title: string;
+  post_id: number;
+  icon: string;
+  abstract: string;
   time: {
-    start: string
-    start_stamp: number
-    end: string
-    end_stamp: number
-  }
+    start: string;
+    start_stamp: number;
+    end: string;
+    end_stamp: number;
+  };
 }

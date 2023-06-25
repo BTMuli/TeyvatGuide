@@ -10,65 +10,64 @@
 @import url("themes/dark.css");
 
 :root {
-    /* font */
-    --font-text: "JetBrians mono", "Genshin-Light", sans-serif;
-    --font-title: "JetBrians mono Bold", "Genshin", serif;
-    /* color */
-    --common-color-white: #faf7e8;
-    --common-color-black: #333333;
-    --common-color-blue: #485466;
-    --common-color-blue-2: #546d8b;
-    --common-color-blue-3: #5b738f;
-    --common-color-yellow: #fec90b;
-    --common-color-grey: #96979a;
-    --common-color-grey-2: #b3b3b3;
+  /* font */
+  --font-text: "JetBrians mono", "Genshin-Light", sans-serif;
+  --font-title: "JetBrians mono Bold", "Genshin", serif;
+  /* color */
+  --common-color-white: #faf7e8;
+  --common-color-black: #333333;
+  --common-color-blue: #485466;
+  --common-color-blue-2: #546d8b;
+  --common-color-blue-3: #5b738f;
+  --common-color-yellow: #fec90b;
+  --common-color-grey: #96979a;
+  --common-color-grey-2: #b3b3b3;
 }
 
 html {
-    font-family: var(--font-text);
-    font-size: 16px;
+  font-family: var(--font-text);
+  font-size: 16px;
 }
-
 
 /*
  * @description 侧边滚动条样式
  * @since Alpha v0.2.1
  */
 ::-webkit-scrollbar {
-    width: 8px;
-    border-radius: 5px;
+  width: 8px;
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #847c74; /* 夜灰 */
-    border-radius: 5px;
+  background: #847c74; /* 夜灰 */
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #c7d2d4; /* 鸥蓝 */
-    border-radius: 5px;
+  background: #c7d2d4; /* 鸥蓝 */
+  border-radius: 5px;
 }
 
 /* card action 内的按钮 */
 .card-btn {
-    background: #4a5366;
-    color: #ece5d8;
-    border-radius: 50px;
-    margin-left: 5px;
+  background: #4a5366;
+  color: #ece5d8;
+  border-radius: 50px;
+  margin-left: 5px;
 }
 
 .card-btn img {
-    width: 20px;
-    height: 20px;
-    margin: 5px;
+  width: 20px;
+  height: 20px;
+  margin: 5px;
 }
 
 .card-dev-btn {
-    background: #546d8b;
-    color: #faf7e8;
+  background: #546d8b;
+  color: #faf7e8;
 }
 
 .card-dev-btn img {
-    width: 18px;
-    height: 18px;
+  width: 18px;
+  height: 18px;
 }

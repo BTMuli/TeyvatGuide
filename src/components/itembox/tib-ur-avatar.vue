@@ -7,19 +7,17 @@ import { onMounted, ref } from "vue";
 import TItemBox, { TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibUrAvatarProps {
-  modelValue: TGApp.Sqlite.Record.Avatar
+  modelValue: TGApp.Sqlite.Record.Avatar;
 }
 
 const props = defineProps<TibUrAvatarProps>();
 const box = ref({} as TItemBoxData);
 const getName = () => {
-  return (
-    props.modelValue.id === 10000005
-      ? "旅行者-空"
-      : props.modelValue.id === 10000007
-        ? "旅行者-荧"
-        : props.modelValue.name
-  );
+  return props.modelValue.id === 10000005
+    ? "旅行者-空"
+    : props.modelValue.id === 10000007
+    ? "旅行者-荧"
+    : props.modelValue.name;
 };
 
 onMounted(async () => {
@@ -38,7 +36,7 @@ onMounted(async () => {
   };
 });
 
-function showData () {
+function showData() {
   // todo @click 应该出来的是一个弹窗，而不是 console
   console.log(props.modelValue);
 }

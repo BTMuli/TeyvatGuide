@@ -14,11 +14,8 @@ import createTrigger from "./createTrigger.sql?raw";
  * @since Alpha v0.2.0
  * @returns {string[]} sql
  */
-function initTableSql (): string[] {
-  return [
-    createTable,
-    createTrigger,
-  ];
+function initTableSql(): string[] {
+  return [createTable, createTrigger];
 }
 
 export default initTableSql;

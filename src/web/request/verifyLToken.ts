@@ -19,7 +19,10 @@ import TGUtils from "../utils/TGUtils";
  * @param {string} ltuid 登录用户 uid
  * @returns {Promise<string | TGApp.BBS.Response.Base>}
  */
-export async function verifyLToken (ltoken: string, ltuid: string): Promise<string | TGApp.BBS.Response.Base> {
+export async function verifyLToken(
+  ltoken: string,
+  ltuid: string,
+): Promise<string | TGApp.BBS.Response.Base> {
   const url = TGApi.GameTokens.verifyLToken;
   const cookie = {
     ltoken,
@@ -27,12 +30,14 @@ export async function verifyLToken (ltoken: string, ltuid: string): Promise<stri
   };
   const data = { ltoken };
   const header = TGUtils.User.getHeader(cookie, "POST", data, "common");
-  return await http.fetch<TGApp.BBS.Response.verifyUserInfoBySToken>(url, {
-    method: "POST",
-    headers: header,
-    body: http.Body.json(data),
-  }).then((res) => {
-    if (res.data.retcode !== 0) return res.data;
-    return res.data.data.user_info.mid;
-  });
+  return await http
+    .fetch<TGApp.BBS.Response.verifyUserInfoBySToken>(url, {
+      method: "POST",
+      headers: header,
+      body: http.Body.json(data),
+    })
+    .then((res) => {
+      if (res.data.retcode !== 0) return res.data;
+      return res.data.data.user_info.mid;
+    });
 }

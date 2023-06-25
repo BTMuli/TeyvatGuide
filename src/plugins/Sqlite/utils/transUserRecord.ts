@@ -11,7 +11,7 @@
  * @param {TGApp.Game.Record.FullData} data 用户战绩数据
  * @returns {TGApp.Sqlite.Record.SingleTable} 转换后的用户战绩数据
  */
-export function transUserRecord (data: TGApp.Game.Record.FullData): TGApp.Sqlite.Record.SingleTable {
+export function transUserRecord(data: TGApp.Game.Record.FullData): TGApp.Sqlite.Record.SingleTable {
   return {
     uid: "",
     role: transRole(data.role),
@@ -29,7 +29,7 @@ export function transUserRecord (data: TGApp.Game.Record.FullData): TGApp.Sqlite
  * @param {TGApp.Game.Record.Role} data 角色信息
  * @returns {string} 转换后的角色信息
  */
-function transRole (data: TGApp.Game.Record.Role): string {
+function transRole(data: TGApp.Game.Record.Role): string {
   const role: TGApp.Sqlite.Record.Role = {
     nickname: data.nickname,
     region: data.region,
@@ -44,7 +44,7 @@ function transRole (data: TGApp.Game.Record.Role): string {
  * @param {TGApp.Game.Record.Avatar[]} data 角色列表
  * @returns {string} 转换后的角色列表
  */
-function transAvatar (data: TGApp.Game.Record.Avatar[]): string {
+function transAvatar(data: TGApp.Game.Record.Avatar[]): string {
   const elementMap: Record<string, string> = {
     Anemo: "风",
     Geo: "岩",
@@ -54,25 +54,27 @@ function transAvatar (data: TGApp.Game.Record.Avatar[]): string {
     Cryo: "冰",
     Dendro: "草",
   };
-  const avatars: TGApp.Sqlite.Record.Avatar[] = data.map(item => {
-    return {
-      id: item.id,
-      name: item.name,
-      element: elementMap[item.element],
-      fetter: item.fetter,
-      level: item.level,
-      star: item.rarity === 105 ? 5 : item.rarity,
-      constellation: item.actived_constellation_num,
-      isShow: item.is_chosen ? 1 : 0,
-    } as TGApp.Sqlite.Record.Avatar;
-  }).sort((a, b) => {
-    // 先按星级降序
-    if (a.star !== b.star) {
-      return b.star - a.star;
-    }
-    // 再按 id 降序
-    return b.id - a.id;
-  });
+  const avatars: TGApp.Sqlite.Record.Avatar[] = data
+    .map((item) => {
+      return {
+        id: item.id,
+        name: item.name,
+        element: elementMap[item.element],
+        fetter: item.fetter,
+        level: item.level,
+        star: item.rarity === 105 ? 5 : item.rarity,
+        constellation: item.actived_constellation_num,
+        isShow: item.is_chosen ? 1 : 0,
+      } as TGApp.Sqlite.Record.Avatar;
+    })
+    .sort((a, b) => {
+      // 先按星级降序
+      if (a.star !== b.star) {
+        return b.star - a.star;
+      }
+      // 再按 id 降序
+      return b.id - a.id;
+    });
   return JSON.stringify(avatars);
 }
 
@@ -82,7 +84,7 @@ function transAvatar (data: TGApp.Game.Record.Avatar[]): string {
  * @param {TGApp.Game.Record.Stats} data 统计信息
  * @return {string} 转换后的统计信息
  */
-function transStat (data: TGApp.Game.Record.Stats): string {
+function transStat(data: TGApp.Game.Record.Stats): string {
   const stats: TGApp.Sqlite.Record.Stats = {
     activeDays: data.active_day_number,
     achievementNumber: data.achievement_number,
@@ -109,11 +111,11 @@ function transStat (data: TGApp.Game.Record.Stats): string {
  * @param {TGApp.Game.Record.WorldExplore[]} data 城市探索信息
  * @returns {string} 转换后的城市探索信息
  */
-function transWorld (data: TGApp.Game.Record.WorldExplore[]): string {
-  const worlds: TGApp.Sqlite.Record.WorldExplore[] = data.map(item => {
+function transWorld(data: TGApp.Game.Record.WorldExplore[]): string {
+  const worlds: TGApp.Sqlite.Record.WorldExplore[] = data.map((item) => {
     let offerings;
     if (item.offerings !== undefined) {
-      offerings = item.offerings.map(offering => {
+      offerings = item.offerings.map((offering) => {
         return {
           name: offering.name,
           icon: offering.icon,
@@ -142,8 +144,8 @@ function transWorld (data: TGApp.Game.Record.WorldExplore[]): string {
  * @param {TGApp.Game.Record.Home[]} data 住宅信息
  * @returns {string} 转换后的住宅信息
  */
-function transHome (data: TGApp.Game.Record.Home[]): string {
-  const homes: TGApp.Sqlite.Record.Home[] = data.map(item => {
+function transHome(data: TGApp.Game.Record.Home[]): string {
+  const homes: TGApp.Sqlite.Record.Home[] = data.map((item) => {
     return {
       comfortIcon: item.comfort_level_icon,
       comfortName: item.comfort_level_name,

@@ -6,9 +6,7 @@
  * @since Alpha v0.2.0
  */
 
-declare namespace TGApp.Plugins.Enka {
-
-}
+declare namespace TGApp.Plugins.Enka {}
 
 // /**
 //  * @description ENKA 数据

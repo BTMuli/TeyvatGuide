@@ -34,7 +34,7 @@ interface TucDetailDescConstellationProps {
 const props = defineProps<TucDetailDescConstellationProps>();
 
 // 解析描述
-function parseDesc (desc: string): string {
+function parseDesc(desc: string): string {
   const reg = /<color=(.*?)>(.*?)<\/color>/g;
   let match = reg.exec(desc);
   while (match) {

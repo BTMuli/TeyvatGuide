@@ -10,9 +10,12 @@ import { ENKA_API } from "./ENKA";
 import { Hk4eAnnoListApi, Hk4eAnnoContentApi, Hk4eAnnoQuery } from "./Hk4e";
 import { PassportTokenApi, PassportCookieTokenApi, PassportVerifyApi } from "./Passport";
 import {
-  TakumiTokensApi, TakumiRecordCardApi,
-  TakumiRecordCharactersApi, TakumiRecordIndexApi,
-  TakumiRecordAbyssApi, TakumiSTokenBindingRolesApi,
+  TakumiTokensApi,
+  TakumiRecordCardApi,
+  TakumiRecordCharactersApi,
+  TakumiRecordIndexApi,
+  TakumiRecordAbyssApi,
+  TakumiSTokenBindingRolesApi,
   TakumiCookieBindingRolesApi,
 } from "./Takumi";
 

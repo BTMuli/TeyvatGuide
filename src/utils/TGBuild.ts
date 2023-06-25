@@ -14,15 +14,17 @@ const buildTimePlugin = (modes: string[] = []): Plugin => {
   let _mode = "";
   return {
     name: "build-time",
-    config (uc, { mode }) {
+    config(uc, { mode }) {
       _mode = mode;
     },
-    transformIndexHtml () {
+    transformIndexHtml() {
       if (_mode !== "production" && !modes.includes(_mode)) return;
-      return [{
-        tag: "script",
-        children: `window.${buildTimeKey} = '${Math.floor(Date.now() / 1000)}'`,
-      }];
+      return [
+        {
+          tag: "script",
+          children: `window.${buildTimeKey} = '${Math.floor(Date.now() / 1000)}'`,
+        },
+      ];
     },
   };
 };

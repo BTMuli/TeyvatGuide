@@ -34,7 +34,7 @@ const itemRefs = ref([] as any[]);
 // 定时器
 const timer = ref(null as any);
 
-function readLoading (): void {
+function readLoading(): void {
   if (!loading.value) return;
   const loadingMap = itemRefs.value.map((item) => {
     return item.loading ? item.name : null;
@@ -82,7 +82,7 @@ onMounted(async () => {
   timer.value = setInterval(readLoading, 100);
 });
 
-function setItemRef (item: any) {
+function setItemRef(item: any) {
   if (itemRefs.value.includes(item)) return;
   itemRefs.value.push(item);
 }

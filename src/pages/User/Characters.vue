@@ -70,13 +70,13 @@ onMounted(async () => {
   loading.value = false;
 });
 
-function getGridGap () {
+function getGridGap() {
   const width = document.querySelector(".uc-grid")?.clientWidth - 20;
   const count = Math.floor(width / 180);
   gridGap.value = `${(width - count * 180) / (count - 1)}px`;
 }
 
-async function loadRole () {
+async function loadRole() {
   const roleData = await TGSqlite.getUserCharacter(user.value.gameUid);
   if (roleData !== false) {
     roleList.value = roleData;
@@ -84,7 +84,7 @@ async function loadRole () {
   }
 }
 
-async function refresh () {
+async function refresh() {
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
   const res = await TGRequest.User.byLToken.getRoleList(roleCookie.value, user.value);
@@ -97,13 +97,13 @@ async function refresh () {
   loading.value = false;
 }
 
-async function shareRoles () {
+async function shareRoles() {
   const rolesBox = document.querySelector(".uc-box") as HTMLElement;
   const fileName = `【角色列表】-${user.value.gameUid}`;
   await generateShareImg(fileName, rolesBox);
 }
 
-function getUpdateTime () {
+function getUpdateTime() {
   let lastUpdateTime = 0;
   roleList.value.forEach((role) => {
     const updateTime = new Date(role.updated).getTime();
@@ -114,7 +114,7 @@ function getUpdateTime () {
   return new Date(lastUpdateTime).toLocaleString().replace(/\//g, "-");
 }
 
-function selectRole (role: TGApp.Sqlite.Character.UserRole) {
+function selectRole(role: TGApp.Sqlite.Character.UserRole) {
   dataVal.value = role;
   visible.value = true;
 }

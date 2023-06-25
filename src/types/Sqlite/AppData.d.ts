@@ -16,8 +16,8 @@ declare namespace TGApp.Sqlite.AppData {
    * @return Item
    */
   export interface Item {
-    key: string
-    value: string
-    updated: string
+    key: string;
+    value: string;
+    updated: string;
   }
 }

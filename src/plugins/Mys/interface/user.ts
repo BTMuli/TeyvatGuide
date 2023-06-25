@@ -16,7 +16,7 @@ import { type MysResponse } from "./base";
  * @returns {UserResponse}
  */
 export interface UserResponse extends MysResponse {
-  data: UserInfoFull
+  data: UserInfoFull;
 }
 
 /**
@@ -41,23 +41,23 @@ export interface UserResponse extends MysResponse {
  * @returns {UserInfoFull}
  */
 export interface UserInfoFull {
-  user_info: UserInfo
-  follow_relation: unknown
-  auth_relations: unknown[]
-  is_in_blacklist: boolean
-  is_has_collection: boolean
-  is_creator: boolean
+  user_info: UserInfo;
+  follow_relation: unknown;
+  auth_relations: unknown[];
+  is_in_blacklist: boolean;
+  is_has_collection: boolean;
+  is_creator: boolean;
   custom_service: {
-    is_customer_service_staff: boolean
-    game_id: number
-  }
+    is_customer_service_staff: boolean;
+    game_id: number;
+  };
   audit_info: {
-    is_nickname_in_audit: boolean
-    nickname: string
-    is_introduce_in_audit: boolean
-    introduce: string
-    nickname_status: number
-  }
+    is_nickname_in_audit: boolean;
+    nickname: string;
+    is_introduce_in_audit: boolean;
+    introduce: string;
+    nickname_status: number;
+  };
 }
 
 /**
@@ -82,21 +82,21 @@ export interface UserInfoFull {
  * @returns {UserInfo}
  */
 export interface UserInfo {
-  uid: string
-  nickname: string
-  introduce: string
-  avatar: string
-  gender: number
-  certification: UserCertification
-  level_exps: UserLevelExp[]
-  archive: UserArchive
-  community_info: UserCommunityInfo
-  avatar_url: string
-  certifications: UserCertification[]
-  level_exp: UserLevelExp
-  pendant: string
-  is_logoff: boolean
-  ip_region: string
+  uid: string;
+  nickname: string;
+  introduce: string;
+  avatar: string;
+  gender: number;
+  certification: UserCertification;
+  level_exps: UserLevelExp[];
+  archive: UserArchive;
+  community_info: UserCommunityInfo;
+  avatar_url: string;
+  certifications: UserCertification[];
+  level_exp: UserLevelExp;
+  pendant: string;
+  is_logoff: boolean;
+  ip_region: string;
 }
 
 /**
@@ -108,8 +108,8 @@ export interface UserInfo {
  * @returns {UserCertification}
  */
 export interface UserCertification {
-  type: number
-  label: string
+  type: number;
+  label: string;
 }
 
 /**
@@ -123,9 +123,9 @@ export interface UserCertification {
  * @returns {UserLevelExp}
  */
 export interface UserLevelExp {
-  level: number
-  exp: number
-  game_id: number
+  level: number;
+  exp: number;
+  game_id: number;
 }
 
 /**
@@ -144,15 +144,15 @@ export interface UserLevelExp {
  * @returns {UserArchive}
  */
 export interface UserArchive {
-  like_num: string
-  post_num: string
-  replypost_num: string
-  follow_cnt: string
-  followed_cnt: string
-  topic_cnt: string
-  new_follower_num: string
-  good_post_num: string
-  follow_collection_cnt: string
+  like_num: string;
+  post_num: string;
+  replypost_num: string;
+  follow_cnt: string;
+  followed_cnt: string;
+  topic_cnt: string;
+  new_follower_num: string;
+  good_post_num: string;
+  follow_collection_cnt: string;
 }
 
 /**
@@ -189,36 +189,36 @@ export interface UserArchive {
  * @returns {UserCommunityInfo}
  */
 export interface UserCommunityInfo {
-  is_realname: boolean
-  agree_status: boolean
-  silent_end_time: number
-  forbid_end_time: number
-  info_upd_time: number
+  is_realname: boolean;
+  agree_status: boolean;
+  silent_end_time: number;
+  forbid_end_time: number;
+  info_upd_time: number;
   privacy_invisible: {
-    post: boolean
-    collect: boolean
-    watermark: boolean
-    reply: boolean
-    post_and_instant: boolean
-  }
+    post: boolean;
+    collect: boolean;
+    watermark: boolean;
+    reply: boolean;
+    post_and_instant: boolean;
+  };
   notify_disable: {
-    reply: boolean
-    upvote: boolean
-    follow: boolean
-    system: boolean
-    chat: boolean
-  }
-  has_initialized: boolean
+    reply: boolean;
+    upvote: boolean;
+    follow: boolean;
+    system: boolean;
+    chat: boolean;
+  };
+  has_initialized: boolean;
   user_func_status: {
-    enable_history_view: boolean
-    enable_recommend: boolean
-    enable_mention: boolean
-    user_center_view: number
-  }
-  forum_silent_info: unknown[]
-  last_login_ip: string
-  last_login_time: number
-  created_at: number
+    enable_history_view: boolean;
+    enable_recommend: boolean;
+    enable_mention: boolean;
+    user_center_view: number;
+  };
+  forum_silent_info: unknown[];
+  last_login_ip: string;
+  last_login_time: number;
+  created_at: number;
 }
 
 /**
@@ -241,20 +241,20 @@ export interface UserCommunityInfo {
  * @returns {UserInfoPost}
  */
 export interface UserInfoPost {
-  uid: string
-  nickname: string
-  introduce: string
-  avatar: string
-  gender: number
-  certification: UserCertification
+  uid: string;
+  nickname: string;
+  introduce: string;
+  avatar: string;
+  gender: number;
+  certification: UserCertification;
   level_exp: {
-    level: number
-    exp: number
-  }
-  is_following: boolean
-  is_follower: boolean
-  avatar_url: string
-  pendant: string
+    level: number;
+    exp: number;
+  };
+  is_following: boolean;
+  is_follower: boolean;
+  avatar_url: string;
+  pendant: string;
 }
 
 /**
@@ -266,6 +266,6 @@ export interface UserInfoPost {
  * @returns {SelfOperation}
  */
 export interface SelfOperation {
-  attitude: number
-  is_collected: boolean
+  attitude: number;
+  is_collected: boolean;
 }

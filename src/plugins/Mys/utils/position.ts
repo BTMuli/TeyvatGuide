@@ -13,7 +13,7 @@ import { type PositionObc, type PositionData, type PositionCard } from "../inter
  * @param {PositionObc[]} list 列表
  * @returns {PositionData[]} 返回列表
  */
-export function dfs (list: PositionObc[]): PositionData[] {
+export function dfs(list: PositionObc[]): PositionData[] {
   const res: PositionData[] = [];
   for (const item of list) {
     if (item.name === "近期活动") {
@@ -32,7 +32,7 @@ export function dfs (list: PositionObc[]): PositionData[] {
  * @param {PositionData[]} positionData 列表
  * @returns {PositionCard[]} 返回列表
  */
-export function getPositionCard (positionData: PositionData[]): PositionCard[] {
+export function getPositionCard(positionData: PositionData[]): PositionCard[] {
   const res: PositionCard[] = [];
   positionData.map((position) => {
     let endStr: string;

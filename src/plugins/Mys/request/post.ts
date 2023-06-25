@@ -18,15 +18,15 @@ const POST_REFERER = "https://bbs.mihoyo.com/";
  * @param {number} postId 帖子 ID
  * @return {Promise<PostData>}
  */
-export async function getPostData (postId: number): Promise<PostData> {
+export async function getPostData(postId: number): Promise<PostData> {
   return await http
     .fetch<PostResponse>(POST_API.replace("{post_id}", postId.toString()), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Referer: POST_REFERER,
-    },
-  })
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Referer: POST_REFERER,
+      },
+    })
     .then((res) => {
       return res.data.data.post;
     });

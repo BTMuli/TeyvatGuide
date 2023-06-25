@@ -15,11 +15,6 @@ import wikiRoutes from "./modules/wiki";
 import userRoutes from "./modules/user";
 
 // 合并路由
-const routes = [
-  ...mainRoutes,
-  ...subRoutes,
-  ...wikiRoutes,
-  ...userRoutes,
-];
+const routes = [...mainRoutes, ...subRoutes, ...wikiRoutes, ...userRoutes];
 
 export default routes;

@@ -6,10 +6,10 @@ Update: 2023-06-21
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
-> 
+>
 > 更新于 `2023-06-21 10:28:11`
 
-![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge) 
+![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge)
 
 # Tauri.Genshin
 
@@ -43,7 +43,7 @@ Tauri 练手项目，子模块：[TGAssistant](https://github.com/BTMuli/TGAssis
 - [x] 用户 Cookie 获取、备份、恢复、刷新
 - [x] 原神战绩数据获取、渲染、分享
 - [x] 角色列表数据获取、渲染、分享
-- [x] 深渊挑战数据获取、渲染、分享、备份、恢复 
+- [x] 深渊挑战数据获取、渲染、分享、备份、恢复
 
 ### 计划中
 
@@ -70,10 +70,10 @@ Tauri 练手项目，子模块：[TGAssistant](https://github.com/BTMuli/TGAssis
 
 ## 相关文档
 
-+ Changelog: [CHANGELOG](CHANGELOG.md)
-+ 资源来源：[项目资源说明](docs/项目资源说明.md)
-+ UIAF：[UIAF v1.1](docs/UIAF.md)
-+ UIGF：[UIGF v2.3](docs/UIGF.md)
+- Changelog: [CHANGELOG](CHANGELOG.md)
+- 资源来源：[项目资源说明](docs/项目资源说明.md)
+- UIAF：[UIAF v1.1](docs/UIAF.md)
+- UIGF：[UIGF v2.3](docs/UIGF.md)
 
 ## Contributors
 

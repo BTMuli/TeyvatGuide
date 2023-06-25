@@ -15,13 +15,15 @@ import HutaoApi from "../api";
  * @since Alpha v0.2.0
  * @returns {Promise<TGApp.Plugins.Hutao.AbyssAvatarHoldRate[]>}
  */
-async function getAvatarHoldRate (): Promise<TGApp.Plugins.Hutao.AbyssAvatarHoldRate[]> {
+async function getAvatarHoldRate(): Promise<TGApp.Plugins.Hutao.AbyssAvatarHoldRate[]> {
   const url = HutaoApi.Abyss.avatar.holdRate;
-  return await http.fetch<TGApp.Plugins.Hutao.AbyssAvatarHoldRateResponse>(url, {
-    method: "GET",
-  }).then((res) => {
-    return res.data.data;
-  });
+  return await http
+    .fetch<TGApp.Plugins.Hutao.AbyssAvatarHoldRateResponse>(url, {
+      method: "GET",
+    })
+    .then((res) => {
+      return res.data.data;
+    });
 }
 
 export default getAvatarHoldRate;

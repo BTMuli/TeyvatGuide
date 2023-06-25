@@ -16,7 +16,7 @@ import TGSqlite from "../plugins/Sqlite";
  * @param {number} timestamp - 时间戳
  * @returns {string} 日期 2021-01-01 00:00:00
  */
-export function timestampToDate (timestamp: number): string {
+export function timestampToDate(timestamp: number): string {
   return new Date(timestamp * 1000).toLocaleString("zh", {
     year: "numeric",
     month: "2-digit",
@@ -34,7 +34,7 @@ export function timestampToDate (timestamp: number): string {
  * @param {number} progress - 进度
  * @returns {number} status
  */
-export function getUiafStatus (completed: boolean, progress: number): number {
+export function getUiafStatus(completed: boolean, progress: number): number {
   if (progress !== 0 && !completed) {
     return 1;
   } else if (progress === 0 && completed) {
@@ -51,7 +51,7 @@ export function getUiafStatus (completed: boolean, progress: number): number {
  * @since Alpha v0.1.3
  * @returns {Promise<TGApp.Plugins.UIAF.Export>}
  */
-export async function getUiafHeader (): Promise<TGApp.Plugins.UIAF.Export> {
+export async function getUiafHeader(): Promise<TGApp.Plugins.UIAF.Export> {
   return {
     // eslint-disable-next-line camelcase
     export_app: "Tauri.Genshin",
@@ -71,7 +71,7 @@ export async function getUiafHeader (): Promise<TGApp.Plugins.UIAF.Export> {
  * @param {string} path - UIAF 数据路径
  * @returns {Promise<boolean>} 是否存在 UIAF 数据
  */
-export async function verifyUiafData (path: string): Promise<boolean> {
+export async function verifyUiafData(path: string): Promise<boolean> {
   const fileData: string = await fs.readTextFile(path);
   const UiafData: TGApp.Plugins.UIAF.Export = JSON.parse(fileData).info;
   return UiafData.uiaf_version !== undefined;
@@ -83,7 +83,7 @@ export async function verifyUiafData (path: string): Promise<boolean> {
  * @param {string} userPath - UIAF 数据路径
  * @returns {Promise<string|false>} UIAF 数据
  */
-export async function readUiafData (userPath: string): Promise<string | false> {
+export async function readUiafData(userPath: string): Promise<string | false> {
   if (await fs.exists(userPath)) {
     const fileData = await fs.readTextFile(userPath);
     if (fileData !== undefined && fileData !== null && fileData !== "" && fileData !== "{}") {
@@ -102,7 +102,9 @@ export async function readUiafData (userPath: string): Promise<string | false> {
  * @param {TGApp.Plugins.UIAF.Achievement[]} achievementData - 成就数据
  * @returns {Promise<void>}
  */
-export async function backupUiafData (achievementData: TGApp.Plugins.UIAF.Achievement[]): Promise<void> {
+export async function backupUiafData(
+  achievementData: TGApp.Plugins.UIAF.Achievement[],
+): Promise<void> {
   const savePath = `${await path.appLocalDataDir()}\\userData\\UIAF.json`;
   await fs.writeTextFile(savePath, JSON.stringify(achievementData, null, 2));
 }
@@ -112,10 +114,10 @@ export async function backupUiafData (achievementData: TGApp.Plugins.UIAF.Achiev
  * @since Alpha v0.1.4
  * @returns {Promise<boolean>} 恢复的成就数量
  */
-export async function restoreUiafData (): Promise<boolean> {
+export async function restoreUiafData(): Promise<boolean> {
   const uiafPath = `${await path.appLocalDataDir()}\\userData\\UIAF.json`;
   // 检测是否存在 UIAF 数据
-  if (!await fs.exists(uiafPath)) {
+  if (!(await fs.exists(uiafPath))) {
     return false;
   }
   const uiafData = JSON.parse(await fs.readTextFile(uiafPath)) as TGApp.Plugins.UIAF.Achievement[];

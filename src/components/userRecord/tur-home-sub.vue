@@ -11,7 +11,7 @@
     </div>
     <div class="tur-hs-title">
       <!-- canvas -->
-      <img :src="getUrl.icon" alt="comfort">
+      <img :src="getUrl.icon" alt="comfort" />
       {{ data.comfortName }}
     </div>
     <div class="tur-hs-text-grid">

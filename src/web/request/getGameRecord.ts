@@ -20,18 +20,23 @@ import TGUtils from "../utils/TGUtils";
  * @param {TGApp.Sqlite.Account.Game} user 用户的基本信息
  * @returns {Promise<TGApp.Game.Record.FullData|TGApp.BBS.Response.Base>} 用户基本信息
  */
-export async function getGameRecord (cookie: Record<string, string>, user: TGApp.Sqlite.Account.Game): Promise<TGApp.Game.Record.FullData | TGApp.BBS.Response.Base> {
+export async function getGameRecord(
+  cookie: Record<string, string>,
+  user: TGApp.Sqlite.Account.Game,
+): Promise<TGApp.Game.Record.FullData | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.getUserBase;
   const params = { role_id: user.gameUid, server: user.region };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
-  return await http.fetch<TGApp.Game.Record.Response>(url, {
-    method: "GET",
-    headers: header,
-    query: params,
-  }).then((res) => {
-    if (res.data.retcode !== 0) {
-      return res.data;
-    }
-    return res.data.data;
-  });
+  return await http
+    .fetch<TGApp.Game.Record.Response>(url, {
+      method: "GET",
+      headers: header,
+      query: params,
+    })
+    .then((res) => {
+      if (res.data.retcode !== 0) {
+        return res.data;
+      }
+      return res.data.data;
+    });
 }

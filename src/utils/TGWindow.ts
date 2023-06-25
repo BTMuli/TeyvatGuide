@@ -18,7 +18,7 @@ import { window as TauriWindow } from "@tauri-apps/api";
  * @param {boolean} visible 是否可见
  * @returns {void}
  */
-export function createTGWindow (
+export function createTGWindow(
   url: string,
   label: string,
   title: string,

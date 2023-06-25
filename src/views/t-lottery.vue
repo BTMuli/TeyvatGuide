@@ -4,7 +4,9 @@
   <div v-if="!loading" class="lottery-box">
     <div class="lottery-title">
       抽奖详情
-      <span style="color:#E06C63">{{ timeStatus === "已开奖" ? timeStatus : `待开奖 ${timeStatus}` }}</span>
+      <span style="color: #e06c63">{{
+        timeStatus === "已开奖" ? timeStatus : `待开奖 ${timeStatus}`
+      }}</span>
     </div>
     <div class="lottery-list">
       <v-list-item>
@@ -14,19 +16,13 @@
           </v-avatar>
         </template>
         <template #append>
-          <v-btn variant="outlined" @click="backPost()">
-            返回
-          </v-btn>
+          <v-btn variant="outlined" @click="backPost()"> 返回 </v-btn>
         </template>
         {{ lotteryCard.creator.nickname }}
         <v-list-item-subtitle>{{ lotteryCard.creator.introduce }}</v-list-item-subtitle>
       </v-list-item>
-      <div class="reward-title">
-        参与方式：{{ participationMethod }}
-      </div>
-      <div class="reward-title">
-        抽奖 ID：{{ lotteryCard.id }}
-      </div>
+      <div class="reward-title">参与方式：{{ participationMethod }}</div>
+      <div class="reward-title">抽奖 ID：{{ lotteryCard.id }}</div>
       <div class="reward-title">
         奖品详情
         <div v-for="reward in lotteryCard.rewards" :key="reward.rewardName" class="reward-subtitle">
@@ -36,9 +32,7 @@
     </div>
   </div>
   <div v-if="timeStatus === '已开奖'" class="lottery-box">
-    <div class="lottery-title">
-      中奖详情
-    </div>
+    <div class="lottery-title">中奖详情</div>
     <div v-for="reward in lotteryCard.rewards" :key="reward.rewardName" class="lottery-list">
       <div class="reward-title">
         {{ reward.rewardName }} {{ reward.scheduledWinnerNumber }}/{{ reward.winnerNumber }}
@@ -46,7 +40,7 @@
       <div class="lottery-grid">
         <div v-for="user in reward.users" :key="user.uid" class="lottery-sub-list">
           <div class="lottery-user-avatar">
-            <img :src="user.avatar_url" alt="avatar">
+            <img :src="user.avatar_url" alt="avatar" />
           </div>
           <div class="lottery-user-nickname">
             {{ user.nickname }}
@@ -88,7 +82,7 @@ const lotteryTimer = ref(null as any);
 // 参与方式
 const participationMethod = ref("未知" as string);
 
-function flushTimeStatus () {
+function flushTimeStatus() {
   const timeNow = new Date().getTime();
   const timeDiff = Number(jsonData.draw_time) * 1000 - timeNow;
   if (timeDiff <= 0) {
@@ -109,7 +103,7 @@ const lotteryCard = ref({} as LotteryCard);
 let jsonData = reactive({} as LotteryData);
 const timeStatus = ref("未知" as string);
 
-function backPost () {
+function backPost() {
   window.history.back();
 }
 
@@ -146,7 +140,7 @@ onMounted(async () => {
 });
 
 // 获取参与方式
-function getParticipationMethod (participantWay: string) {
+function getParticipationMethod(participantWay: string) {
   switch (participantWay) {
     case "Forward":
       return "转发";
@@ -161,7 +155,6 @@ onUpdated(() => {
     clearInterval(lotteryTimer);
   }
 });
-
 </script>
 <style lang="css">
 .lottery-box {

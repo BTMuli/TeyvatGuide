@@ -11,7 +11,7 @@
  * @param {string} sql - sql 语句
  * @return {string} minifiedSql - 减少体积后的 sql 语句
  */
-function minifySql (sql: string): string {
+function minifySql(sql: string): string {
   return sql.replace(/\n/g, " ").replace(/\s+/g, " ").trim();
 }
 

@@ -1,15 +1,9 @@
 <template>
   <TOLoading v-model="loading" :title="loadingTitle" />
   <v-tabs v-model="tab" align-tabs="start" class="news-tab">
-    <v-tab value="notice">
-      公告
-    </v-tab>
-    <v-tab value="activity" @click="firstLoad('activity')">
-      活动
-    </v-tab>
-    <v-tab v-if="showNews" value="news" @click="firstLoad('news')">
-      新闻
-    </v-tab>
+    <v-tab value="notice"> 公告 </v-tab>
+    <v-tab value="activity" @click="firstLoad('activity')"> 活动 </v-tab>
+    <v-tab v-if="showNews" value="news" @click="firstLoad('news')"> 新闻 </v-tab>
     <v-spacer />
     <v-btn class="switch-btn" @click="switchAnno">
       <template #prepend>
@@ -17,7 +11,7 @@
       </template>
       切换游戏内公告
     </v-btn>
-    <v-btn class="switch-chan" @click="showList=true">
+    <v-btn class="switch-chan" @click="showList = true">
       <v-icon>mdi-view-list</v-icon>
     </v-btn>
     <v-text-field
@@ -36,19 +30,19 @@
       <div class="news-grid">
         <v-card v-for="item in postData.notice" :key="item.post_id" class="news-card" width="340">
           <div class="news-cover" @click="toPost(item)">
-            <img :src="item.cover" alt="cover">
+            <img :src="item.cover" alt="cover" />
           </div>
           <v-card-title>{{ item.title }}</v-card-title>
           <v-card-actions>
             <v-btn class="card-btn" @click="toPost(item)">
               <template #prepend>
-                <img src="../assets/icons/circle-check.svg" alt="check">查看
+                <img src="../assets/icons/circle-check.svg" alt="check" />查看
               </template>
             </v-btn>
             <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
             <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
               <template #prepend>
-                <img src="../assets/icons/arrow-right.svg" alt="right">
+                <img src="../assets/icons/arrow-right.svg" alt="right" />
               </template>
               JSON
             </v-btn>
@@ -58,7 +52,7 @@
       <div class="load-news">
         <v-btn :loading="loadingSub" @click="loadMore('notice')">
           <template #append>
-            <img src="../assets/icons/arrow-left.svg" alt="right">
+            <img src="../assets/icons/arrow-left.svg" alt="right" />
           </template>
           已加载：{{ rawData.notice.lastId }}，加载更多
         </v-btn>
@@ -68,14 +62,14 @@
       <div class="news-grid">
         <v-card v-for="item in postData.activity" :key="item.post_id" class="news-card" width="340">
           <div class="news-cover" @click="toPost(item)">
-            <img :src="item.cover" alt="cover">
+            <img :src="item.cover" alt="cover" />
           </div>
           <v-card-title>{{ item.title }}</v-card-title>
           <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
           <v-card-actions>
             <v-btn class="card-btn" @click="toPost(item)">
               <template #prepend>
-                <img src="../assets/icons/circle-check.svg" alt="check">查看
+                <img src="../assets/icons/circle-check.svg" alt="check" />查看
               </template>
             </v-btn>
             <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
@@ -91,7 +85,7 @@
             </div>
             <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
               <template #prepend>
-                <img src="../assets/icons/arrow-right.svg" alt="right">
+                <img src="../assets/icons/arrow-right.svg" alt="right" />
               </template>
               JSON
             </v-btn>
@@ -101,7 +95,7 @@
       <div class="load-news">
         <v-btn :loading="loadingSub" @click="loadMore('activity')">
           <template #append>
-            <img src="../assets/icons/arrow-left.svg" alt="right">
+            <img src="../assets/icons/arrow-left.svg" alt="right" />
           </template>
           已加载:{{ rawData.activity.lastId }}，加载更多
         </v-btn>
@@ -111,19 +105,19 @@
       <div class="news-grid">
         <v-card v-for="item in postData.news" :key="item.post_id" class="news-card" width="340">
           <div class="news-cover" @click="toPost(item)">
-            <img :src="item.cover" alt="cover">
+            <img :src="item.cover" alt="cover" />
           </div>
           <v-card-title>{{ item.title }}</v-card-title>
           <v-card-actions>
             <v-btn class="card-btn" @click="toPost(item)">
               <template #prepend>
-                <img src="../assets/icons/circle-check.svg" alt="check">查看
+                <img src="../assets/icons/circle-check.svg" alt="check" />查看
               </template>
             </v-btn>
             <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
             <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
               <template #prepend>
-                <img src="../assets/icons/arrow-right.svg" alt="right">
+                <img src="../assets/icons/arrow-right.svg" alt="right" />
               </template>
               JSON
             </v-btn>
@@ -133,7 +127,7 @@
       <div class="load-news">
         <v-btn :loading="loadingSub" @click="loadMore('news')">
           <template #append>
-            <img src="../assets/icons/arrow-left.svg" alt="right">
+            <img src="../assets/icons/arrow-left.svg" alt="right" />
           </template>
           已加载：{{ rawData.news.lastId }}，加载更多
         </v-btn>
@@ -219,7 +213,7 @@ onMounted(async () => {
   }, 1500);
 });
 
-async function firstLoad (data: string) {
+async function firstLoad(data: string) {
   if (rawData.value.activity.lastId !== 0 && rawData.value.news.lastId !== 0) {
     return;
   }
@@ -244,12 +238,12 @@ async function firstLoad (data: string) {
   }, 1500);
 }
 
-async function switchAnno () {
+async function switchAnno() {
   await router.push("/announcements");
 }
 
 // 加载更多
-async function loadMore (data: string) {
+async function loadMore(data: string) {
   loadingSub.value = true;
   if (rawData.value[data].isLast) {
     snackbarText.value = "已经是最后一页了";
@@ -279,7 +273,7 @@ async function loadMore (data: string) {
   }, 1500);
 }
 
-async function toPost (item: NewsCard | string) {
+async function toPost(item: NewsCard | string) {
   if (typeof item === "string") {
     const path = router.resolve({
       name: "帖子详情",
@@ -301,7 +295,7 @@ async function toPost (item: NewsCard | string) {
   }
 }
 
-async function toJson (item: NewsCard | string) {
+async function toJson(item: NewsCard | string) {
   if (typeof item === "string") {
     const path = router.resolve({
       name: "帖子详情（JSON）",
@@ -323,7 +317,7 @@ async function toJson (item: NewsCard | string) {
   }
 }
 
-async function searchPost () {
+async function searchPost() {
   if (search.value === "") {
     snackbarText.value = "请输入搜索内容";
     snackbarColor.value = "error";

@@ -6,7 +6,7 @@
       </slot>
     </div>
     <div class="tud-t-val">
-      <img src="/icon/star/Abyss.webp" alt="Abyss">
+      <img src="/icon/star/Abyss.webp" alt="Abyss" />
       <slot name="val">
         <span>{{ props.val }}</span>
       </slot>
@@ -53,7 +53,7 @@ const getFontSize: ComputedRef<string> = computed(() => {
   display: flex;
   align-items: center;
   font-family: var(--font-text);
-  font-size:  v-bind(getFontSize);
+  font-size: v-bind(getFontSize);
   color: var(--common-color-white);
   text-shadow: 0 0 10px var(--common-color-yellow);
 }

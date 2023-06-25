@@ -21,13 +21,13 @@ declare namespace TGApp.Sqlite.Record {
    * @return SingleTable
    */
   export interface SingleTable {
-    uid: string
-    role: string // Role
-    avatars: string // Avatar[]
-    stats: string // Stats
-    worldExplore: string // WorldExplore
-    homes: string // Home[]
-    updated: string
+    uid: string;
+    role: string; // Role
+    avatars: string; // Avatar[]
+    stats: string; // Stats
+    worldExplore: string; // WorldExplore
+    homes: string; // Home[]
+    updated: string;
   }
 
   /**
@@ -40,9 +40,9 @@ declare namespace TGApp.Sqlite.Record {
    * @return Role
    */
   export interface Role {
-    nickname: string
-    region: string
-    level: number
+    nickname: string;
+    region: string;
+    level: number;
   }
 
   /**
@@ -60,14 +60,14 @@ declare namespace TGApp.Sqlite.Record {
    * @return Avatar
    */
   export interface Avatar {
-    id: number
-    name: string
-    element: string
-    fetter: number
-    level: number
-    star: number
-    constellation: number
-    isShow: 0 | 1
+    id: number;
+    name: string;
+    element: string;
+    fetter: number;
+    level: number;
+    star: number;
+    constellation: number;
+    isShow: 0 | 1;
   }
 
   /**
@@ -92,21 +92,21 @@ declare namespace TGApp.Sqlite.Record {
    * @return Stats
    */
   export interface Stats {
-    activeDays: number
-    achievementNumber: number
-    avatarNumber: number
-    wayPoints: number
-    domainNumber: number
-    anemoCulus: number
-    geoCulus: number
-    electroCulus: number
-    dendroCulus: number
-    sprialAbyss: string
-    luxuriousChest: number
-    preciousChest: number
-    exquisiteChest: number
-    commonChest: number
-    magicChest: number
+    activeDays: number;
+    achievementNumber: number;
+    avatarNumber: number;
+    wayPoints: number;
+    domainNumber: number;
+    anemoCulus: number;
+    geoCulus: number;
+    electroCulus: number;
+    dendroCulus: number;
+    sprialAbyss: string;
+    luxuriousChest: number;
+    preciousChest: number;
+    exquisiteChest: number;
+    commonChest: number;
+    magicChest: number;
   }
 
   /**
@@ -125,15 +125,15 @@ declare namespace TGApp.Sqlite.Record {
    * @return WorldExplore
    */
   export interface WorldExplore {
-    level: number
-    exploration: number
-    iconLight: string
-    iconDark: string
-    name: string
-    type: string
-    offerings: WorldOffering[]
-    bg: string
-    cover: string
+    level: number;
+    exploration: number;
+    iconLight: string;
+    iconDark: string;
+    name: string;
+    type: string;
+    offerings: WorldOffering[];
+    bg: string;
+    cover: string;
   }
 
   /**
@@ -146,9 +146,9 @@ declare namespace TGApp.Sqlite.Record {
    * @return WorldOffering
    */
   export interface WorldOffering {
-    name: string
-    level: number
-    icon: string
+    name: string;
+    level: number;
+    icon: string;
   }
 
   /**
@@ -166,13 +166,13 @@ declare namespace TGApp.Sqlite.Record {
    * @return Home
    */
   export interface Home {
-    comfortIcon: string
-    comfortName: string
-    name: string
-    level: number
-    comfort: number
-    furniture: number
-    visit: number
-    bg: string
+    comfortIcon: string;
+    comfortName: string;
+    name: string;
+    level: number;
+    comfort: number;
+    furniture: number;
+    visit: number;
+    bg: string;
   }
 }

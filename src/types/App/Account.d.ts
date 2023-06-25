@@ -17,9 +17,9 @@ declare namespace TGApp.App.Account {
    * @return BriefInfo
    */
   export interface BriefInfo {
-    nickname: string
-    uid: string
-    avatar: string
-    desc: string
+    nickname: string;
+    uid: string;
+    avatar: string;
+    desc: string;
   }
 }

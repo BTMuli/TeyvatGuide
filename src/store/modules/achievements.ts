@@ -11,7 +11,8 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 
 export const useAchievementsStore = defineStore(
-  "achievements", () => {
+  "achievements",
+  () => {
     // 成就数据
     const totalAchievements = ref(950);
     const finAchievements = ref(0);
@@ -19,21 +20,21 @@ export const useAchievementsStore = defineStore(
     const UIAFVersion = ref("v1.1");
     const title = ref("成就完成数：0/950 完成率：0%");
 
-    function init (): void {
+    function init(): void {
       totalAchievements.value = 950;
       finAchievements.value = 0;
       lastVersion.value = "v3.6";
       title.value = getTitle();
     }
 
-    function getTitle (): string {
+    function getTitle(): string {
       return `成就完成数：${finAchievements.value}/${totalAchievements.value} 完成率：${(
         (finAchievements.value / totalAchievements.value) *
         100
       ).toFixed(2)}%`;
     }
 
-    function flushData (total: number, fin: number): void {
+    function flushData(total: number, fin: number): void {
       totalAchievements.value = total;
       finAchievements.value = fin;
       title.value = getTitle();
@@ -52,4 +53,5 @@ export const useAchievementsStore = defineStore(
   },
   {
     persist: true,
-  });
+  },
+);

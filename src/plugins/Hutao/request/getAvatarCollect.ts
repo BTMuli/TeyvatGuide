@@ -15,13 +15,15 @@ import HutaoApi from "../api";
  * @since Alpha v0.2.0
  * @return {Promise<TGApp.Plugins.Hutao.AbyssAvatarCollocation[]>}
  */
-async function getAvatarCollect (): Promise<TGApp.Plugins.Hutao.AbyssAvatarCollocation[]> {
+async function getAvatarCollect(): Promise<TGApp.Plugins.Hutao.AbyssAvatarCollocation[]> {
   const url = HutaoApi.Abyss.avatar.collect;
-  return await http.fetch<TGApp.Plugins.Hutao.AbyssAvatarCollocationResponse>(url, {
-    method: "GET",
-  }).then((res) => {
-    return res.data.data;
-  });
+  return await http
+    .fetch<TGApp.Plugins.Hutao.AbyssAvatarCollocationResponse>(url, {
+      method: "GET",
+    })
+    .then((res) => {
+      return res.data.data;
+    });
 }
 
 export default getAvatarCollect;

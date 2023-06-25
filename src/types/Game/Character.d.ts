@@ -18,9 +18,9 @@ declare namespace TGApp.Game.Character {
    */
   export interface ListResponse extends TGApp.BBS.Response.Base {
     data: {
-      avatars: ListItem[]
-      role: ListRole
-    }
+      avatars: ListItem[];
+      role: ListRole;
+    };
   }
 
   /**
@@ -45,21 +45,21 @@ declare namespace TGApp.Game.Character {
    * @return ListItem
    */
   export interface ListItem {
-    id: number
-    image: string
-    icon: string
-    name: string
-    element: TGApp.Game.Constant.EnumElementEn
-    fetter: number
-    level: number
-    rarity: number
-    weapon: LIWeapon
-    reliquaries: LIRelic[]
-    constellations: LIConstellation[]
-    actived_constellation_num: number
-    costumes: LICostume[]
-    constellation_level: number
-    external: unknown
+    id: number;
+    image: string;
+    icon: string;
+    name: string;
+    element: TGApp.Game.Constant.EnumElementEn;
+    fetter: number;
+    level: number;
+    rarity: number;
+    weapon: LIWeapon;
+    reliquaries: LIRelic[];
+    constellations: LIConstellation[];
+    actived_constellation_num: number;
+    costumes: LICostume[];
+    constellation_level: number;
+    external: unknown;
   }
 
   /**
@@ -73,10 +73,10 @@ declare namespace TGApp.Game.Character {
    * @return ListRole
    */
   export interface ListRole {
-    AvatarUrl: string
-    nickname: string
-    region: string
-    level: number
+    AvatarUrl: string;
+    nickname: string;
+    region: string;
+    level: number;
   }
 
   /**
@@ -96,16 +96,16 @@ declare namespace TGApp.Game.Character {
    * @return LIWeapon
    */
   export interface LIWeapon {
-    id: number
-    name: string
-    icon: string
-    type: number
-    rarity: number
-    level: number
-    promote_level: number
-    type_name: string
-    desc: string
-    affix_level: number
+    id: number;
+    name: string;
+    icon: string;
+    type: number;
+    rarity: number;
+    level: number;
+    promote_level: number;
+    type_name: string;
+    desc: string;
+    affix_level: number;
   }
 
   /**
@@ -123,14 +123,14 @@ declare namespace TGApp.Game.Character {
    * @return LIRelic
    */
   export interface LIRelic {
-    id: number
-    name: string
-    icon: string
-    pos: number
-    rarity: number
-    level: number
-    set: RelicSet
-    pos_name: TGApp.Game.Constant.EnumRelic
+    id: number;
+    name: string;
+    icon: string;
+    pos: number;
+    rarity: number;
+    level: number;
+    set: RelicSet;
+    pos_name: TGApp.Game.Constant.EnumRelic;
   }
 
   /**
@@ -144,12 +144,12 @@ declare namespace TGApp.Game.Character {
    * @return RelicSet
    */
   export interface RelicSet {
-    id: number
-    name: string
+    id: number;
+    name: string;
     affixes: Array<{
-      activation_number: number
-      effect: string
-    }>
+      activation_number: number;
+      effect: string;
+    }>;
   }
 
   /**
@@ -165,12 +165,12 @@ declare namespace TGApp.Game.Character {
    * @return LIConstellation
    */
   export interface LIConstellation {
-    id: number
-    name: string
-    icon: string
-    effect: string
-    is_actived: boolean
-    pos: number
+    id: number;
+    name: string;
+    icon: string;
+    effect: string;
+    is_actived: boolean;
+    pos: number;
   }
 
   /**
@@ -183,8 +183,8 @@ declare namespace TGApp.Game.Character {
    * @return LICostume
    */
   export interface LICostume {
-    id: number
-    name: string
-    icon: string
+    id: number;
+    name: string;
+    icon: string;
   }
 }

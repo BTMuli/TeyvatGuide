@@ -25,17 +25,17 @@ declare namespace TGApp.Sqlite.Achievement {
    * @return SingleTable
    */
   export interface SingleTable {
-    id: number
-    series: number
-    order: number
-    name: string
-    description: string
-    reward: number
-    isCompleted: 0 | 1
-    completedTime: string
-    progress: number
-    version: string
-    updated: string
+    id: number;
+    series: number;
+    order: number;
+    name: string;
+    description: string;
+    reward: number;
+    isCompleted: 0 | 1;
+    completedTime: string;
+    progress: number;
+    version: string;
+    updated: string;
   }
 
   /**
@@ -53,13 +53,13 @@ declare namespace TGApp.Sqlite.Achievement {
    * @returns SeriesTable
    */
   export interface SeriesTable {
-    id: number
-    order: number
-    name: string
-    version: string
-    totalCount: number
-    finCount: number
-    nameCard: string
-    updated: string
+    id: number;
+    order: number;
+    name: string;
+    version: string;
+    totalCount: number;
+    finCount: number;
+    nameCard: string;
+    updated: string;
   }
 }

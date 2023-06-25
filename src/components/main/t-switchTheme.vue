@@ -1,8 +1,8 @@
 <template>
   <div class="switch-box">
     <div class="switch-btn" @click="switchTheme()">
-      <v-icon style="color:var(--theme-switch-icon)">
-        {{ themeGet === 'default' ? 'mdi-weather-night' : 'mdi-weather-sunny' }}
+      <v-icon style="color: var(--theme-switch-icon)">
+        {{ themeGet === "default" ? "mdi-weather-night" : "mdi-weather-sunny" }}
       </v-icon>
     </div>
   </div>
@@ -19,10 +19,10 @@ import { useAppStore } from "../../store/modules/app";
 const appStore = useAppStore();
 // theme
 const themeGet = computed({
-  get () {
+  get() {
     return appStore.theme;
   },
-  set (value: string) {
+  set(value: string) {
     appStore.theme = value;
   },
 });
@@ -31,12 +31,12 @@ onMounted(async () => {
   await listenOnTheme();
 });
 
-async function switchTheme () {
+async function switchTheme() {
   appStore.changeTheme();
   await event.emit("readTheme", themeGet.value);
 }
 
-async function listenOnTheme () {
+async function listenOnTheme() {
   await event.listen("readTheme", (e) => {
     const theme = e.payload as string;
     themeGet.value = theme === "default" ? "default" : "dark";

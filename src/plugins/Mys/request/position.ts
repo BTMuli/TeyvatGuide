@@ -10,21 +10,22 @@ import { type PositionResponse, type PositionData } from "../interface/position"
 import { dfs } from "../utils/position";
 
 // 热点追踪 API
-const POSITION_API = "https://api-static.mihoyo.com/common/blackboard/ys_obc/v1/home/position?app_sn=ys_obc";
+const POSITION_API =
+  "https://api-static.mihoyo.com/common/blackboard/ys_obc/v1/home/position?app_sn=ys_obc";
 
 /**
  * @description 获取热点追踪信息
  * @since Alpha v0.1.1
  * @return {Promise<PositionData[]>}
  */
-export async function getPositionData (): Promise<PositionData[]> {
+export async function getPositionData(): Promise<PositionData[]> {
   const res = await http
     .fetch<PositionResponse>(POSITION_API, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
     .then((res) => {
       return res.data.data.list;
     });

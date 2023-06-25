@@ -21,13 +21,13 @@ declare namespace TGApp.App.Announcement {
    * @return ListCard
    */
   export interface ListCard {
-    id: number
-    title: string
-    subtitle: string
-    banner: string
-    typeLabel: string
-    tagIcon: string
-    startTime: string
-    endTime: string
+    id: number;
+    title: string;
+    subtitle: string;
+    banner: string;
+    typeLabel: string;
+    tagIcon: string;
+    startTime: string;
+    endTime: string;
   }
 }

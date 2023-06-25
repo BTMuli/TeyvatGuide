@@ -31,23 +31,23 @@ declare namespace TGApp.Sqlite.Abyss {
    * @return SingleTable
    */
   export interface SingleTable {
-    uid: string
-    id: number
-    startTime: string
-    endTime: string
-    totalBattleTimes: number
-    totalWinTimes: number
-    maxFloor: string
-    totalStar: number
-    isUnlock: 0 | 1
-    revealRank: string // Character[]
-    defeatRank: string // Character[]
-    damageRank: string // Character[]
-    takeDamageRank: string // Character[]
-    normalSkillRank: string // Character[]
-    energySkillRank: string // Character[]
-    floors: string // Floor[]
-    updated: string
+    uid: string;
+    id: number;
+    startTime: string;
+    endTime: string;
+    totalBattleTimes: number;
+    totalWinTimes: number;
+    maxFloor: string;
+    totalStar: number;
+    isUnlock: 0 | 1;
+    revealRank: string; // Character[]
+    defeatRank: string; // Character[]
+    damageRank: string; // Character[]
+    takeDamageRank: string; // Character[]
+    normalSkillRank: string; // Character[]
+    energySkillRank: string; // Character[]
+    floors: string; // Floor[]
+    updated: string;
   }
 
   /**
@@ -60,9 +60,9 @@ declare namespace TGApp.Sqlite.Abyss {
    * @return Character
    */
   export interface Character {
-    id: number
-    value: number
-    star: number
+    id: number;
+    value: number;
+    star: number;
   }
 
   /**
@@ -77,11 +77,11 @@ declare namespace TGApp.Sqlite.Abyss {
    * @return Floor
    */
   export interface Floor {
-    id: number
-    winStar: number
-    maxStar: number
-    isUnlock: 0 | 1
-    levels: Level[]
+    id: number;
+    winStar: number;
+    maxStar: number;
+    isUnlock: 0 | 1;
+    levels: Level[];
   }
 
   /**
@@ -96,11 +96,11 @@ declare namespace TGApp.Sqlite.Abyss {
    * @return Level
    */
   export interface Level {
-    id: number
-    winStar: number
-    maxStar: number
-    upBattle: Battle
-    downBattle: Battle
+    id: number;
+    winStar: number;
+    maxStar: number;
+    upBattle: Battle;
+    downBattle: Battle;
   }
 
   /**
@@ -112,8 +112,8 @@ declare namespace TGApp.Sqlite.Abyss {
    * @return Battle
    */
   export interface Battle {
-    time: string
-    characters: CharacterInfo[]
+    time: string;
+    characters: CharacterInfo[];
   }
 
   /**
@@ -126,8 +126,8 @@ declare namespace TGApp.Sqlite.Abyss {
    * @return CharacterInfo
    */
   export interface CharacterInfo {
-    id: number
-    level: number
-    star: number
+    id: number;
+    level: number;
+    star: number;
   }
 }

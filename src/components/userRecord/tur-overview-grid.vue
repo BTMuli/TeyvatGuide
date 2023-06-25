@@ -1,7 +1,5 @@
 <template>
-  <div v-if="props.modelValue===undefined">
-    暂无数据
-  </div>
+  <div v-if="props.modelValue === undefined">暂无数据</div>
   <div v-else class="tur-og-box">
     <TurOverviewSub title="活跃天数" :text="data.activeDays" />
     <TurOverviewSub title="成就达成数" :text="data.achievementNumber" />
@@ -26,13 +24,11 @@ import { computed } from "vue";
 import TurOverviewSub from "./tur-overview-sub.vue";
 
 interface TurOverviewGridProps {
-  modelValue?: string
+  modelValue?: string;
 }
 
 const props = defineProps<TurOverviewGridProps>();
-const data = computed(() =>
-  JSON.parse(<string>props.modelValue) as TGApp.Sqlite.Record.Stats,
-);
+const data = computed(() => JSON.parse(<string>props.modelValue) as TGApp.Sqlite.Record.Stats);
 </script>
 <style lang="css" scoped>
 .tur-og-box {

@@ -21,13 +21,13 @@ declare namespace TGApp.App.Achievement {
    * @return Item
    */
   export interface Item {
-    id: number
-    series: number
-    order: number
-    name: string
-    description: string
-    reward: number
-    version: string
+    id: number;
+    series: number;
+    order: number;
+    name: string;
+    description: string;
+    reward: number;
+    version: string;
   }
   /**
    * @description 本应用的成就系列类型
@@ -42,11 +42,11 @@ declare namespace TGApp.App.Achievement {
    * @return Series
    */
   export interface Series {
-    id: number
-    order: number
-    name: string
-    version: string
-    card: string
-    icon: string
+    id: number;
+    order: number;
+    name: string;
+    version: string;
+    card: string;
+    icon: string;
   }
 }

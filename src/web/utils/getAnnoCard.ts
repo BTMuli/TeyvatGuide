@@ -14,7 +14,9 @@ const defaultCover = "/source/UI/defaultCover.webp";
  * @param {TGApp.BBS.Announcement.ListData[]} data 公告数据
  * @returns {TGApp.App.Announcement.ListCard[]} 渲染用的卡片
  */
-export function getAnnoCard (data: TGApp.BBS.Announcement.ListData): TGApp.App.Announcement.ListCard[] {
+export function getAnnoCard(
+  data: TGApp.BBS.Announcement.ListData,
+): TGApp.App.Announcement.ListCard[] {
   const cards: TGApp.App.Announcement.ListCard[] = [];
   data.list.map((annoList: TGApp.BBS.Announcement.ListItem) => {
     return annoList.list.map((anno: TGApp.BBS.Announcement.AnnoSingle) => {

@@ -17,7 +17,12 @@
       </div>
     </v-tabs>
     <v-window v-model="userTab" class="ua-window">
-      <v-window-item v-for="item in localAbyss" :key="item.id" :value="item.id" class="ua-window-item">
+      <v-window-item
+        v-for="item in localAbyss"
+        :key="item.id"
+        :value="item.id"
+        class="ua-window-item"
+      >
         <div :ref="getAbyssRef">
           <div class="uaw-title">
             <span>第</span>
@@ -41,13 +46,16 @@
           </div>
           <TSubLine>详情</TSubLine>
           <div class="uaw-d-box">
-            <TuaDetail v-for="floor in JSON.parse(item.floors) as TGApp.Sqlite.Abyss.Floor[]" :model-value="floor" />
+            <TuaDetail
+              v-for="floor in JSON.parse(item.floors) as TGApp.Sqlite.Abyss.Floor[]"
+              :model-value="floor"
+            />
           </div>
         </div>
       </v-window-item>
     </v-window>
     <div v-show="localAbyssID.length === 0" class="user-empty">
-      <img src="/source/UI/empty.webp" alt="empty">
+      <img src="/source/UI/empty.webp" alt="empty" />
       <span>暂无数据，请尝试刷新</span>
     </div>
   </div>
@@ -74,8 +82,7 @@ const loadingTitle = ref("");
 
 // data
 const userTab = ref(0);
-const abyssCookie = ref(computed(
-  () => userStore.getCookieGroup4() as Record<string, string>));
+const abyssCookie = ref(computed(() => userStore.getCookieGroup4() as Record<string, string>));
 const user = computed(() => userStore.getCurAccount());
 
 const localAbyss = ref([] as TGApp.Sqlite.Abyss.SingleTable[]);
@@ -89,7 +96,7 @@ onMounted(async () => {
   loading.value = false;
 });
 
-async function initAbyssData () {
+async function initAbyssData() {
   localAbyss.value = await TGSqlite.getAbyss(user.value.gameUid);
   localAbyss.value.forEach((item) => {
     localAbyssID.value.push(item.id);
@@ -98,7 +105,7 @@ async function initAbyssData () {
   userTab.value = localAbyssID.value[0];
 }
 
-async function getAbyssData (): Promise<void> {
+async function getAbyssData(): Promise<void> {
   loadingTitle.value = "正在获取深渊数据";
   loading.value = true;
   if (localAbyssID.value.length < 2) {
@@ -120,15 +127,15 @@ async function getAbyssData (): Promise<void> {
   loading.value = false;
 }
 
-function toAbyss (id: number): void {
+function toAbyss(id: number): void {
   curAbyss.value = localAbyss.value.find((item) => item.id === id)!;
 }
 
-function getAbyssRef (el: HTMLElement): void {
+function getAbyssRef(el: HTMLElement): void {
   abyssRef.value = el;
 }
 
-async function shareAbyss (): Promise<void> {
+async function shareAbyss(): Promise<void> {
   const fileName = `【深渊数据】${curAbyss.value.id}-${user.value.gameUid}`;
   await generateShareImg(fileName, abyssRef.value);
 }

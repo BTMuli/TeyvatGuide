@@ -21,7 +21,10 @@ import { type UserResponse } from "../../plugins/Mys/interface/user";
  * @param {string} account_id 用户 account_id
  * @returns {Promise<TGApp.App.Account.BriefInfo | TGApp.BBS.Response.Base>}
  */
-export async function getUserInfoByCookie (cookie_token: string, account_id: string): Promise<TGApp.App.Account.BriefInfo | TGApp.BBS.Response.Base> {
+export async function getUserInfoByCookie(
+  cookie_token: string,
+  account_id: string,
+): Promise<TGApp.App.Account.BriefInfo | TGApp.BBS.Response.Base> {
   const cookie = {
     cookie_token,
     account_id,
@@ -29,18 +32,20 @@ export async function getUserInfoByCookie (cookie_token: string, account_id: str
   const url = TGApi.GameData.byCookie.getUserInfo;
   const params = { gids: "2" };
   const header = TGUtils.User.getSignHeader(cookie, "GET", {}, "common");
-  return await http.fetch<UserResponse>(url, {
-    method: "GET",
-    headers: header,
-    query: params,
-  }).then((res) => {
-    if (res.data.retcode !== 0) return res.data;
-    const info = res.data.data.user_info;
-    return {
-      nickname: info.nickname,
-      uid: info.uid,
-      avatar: info.avatar_url,
-      desc: info.introduce,
-    };
-  });
+  return await http
+    .fetch<UserResponse>(url, {
+      method: "GET",
+      headers: header,
+      query: params,
+    })
+    .then((res) => {
+      if (res.data.retcode !== 0) return res.data;
+      const info = res.data.data.user_info;
+      return {
+        nickname: info.nickname,
+        uid: info.uid,
+        avatar: info.avatar_url,
+        desc: info.introduce,
+      };
+    });
 }

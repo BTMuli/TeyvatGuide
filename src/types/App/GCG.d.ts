@@ -18,11 +18,11 @@ declare namespace TGApp.App.GCG {
    * @return WikiBriefInfo
    */
   export interface WikiBriefInfo {
-    id: number
-    contentId: number
-    name: string
-    type: string
-    icon: string
+    id: number;
+    contentId: number;
+    name: string;
+    type: string;
+    icon: string;
   }
 }
 

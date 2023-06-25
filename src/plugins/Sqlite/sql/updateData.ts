@@ -11,14 +11,17 @@
  * @param {TGApp.Plugins.UIAF.Achievement[]} data
  * @returns {string[]} sql
  */
-export function importUIAFData (data: TGApp.Plugins.UIAF.Achievement[]): string[] {
+export function importUIAFData(data: TGApp.Plugins.UIAF.Achievement[]): string[] {
   const sqlRes: string[] = [];
   data.map((achievement) => {
     let sql;
     // 获取完成状态
     const isCompleted = achievement.status === 2 || achievement.status === 3;
     if (isCompleted) {
-      const completedTime = new Date(achievement.timestamp * 1000).toISOString().replace("T", " ").slice(0, 19);
+      const completedTime = new Date(achievement.timestamp * 1000)
+        .toISOString()
+        .replace("T", " ")
+        .slice(0, 19);
       sql = `
         UPDATE Achievements
         SET isCompleted = 1, completedTime = '${completedTime}', progress = ${achievement.current}, updated = datetime('now', 'localtime')

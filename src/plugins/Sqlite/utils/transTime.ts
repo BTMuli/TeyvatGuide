@@ -11,7 +11,7 @@
  * @param {string} timestamp 时间戳 (秒)
  * @returns {string} 时间字符串，格式为 YYYY-MM-DD HH:mm:ss
  */
-export function timeToSecond (timestamp: string): string {
+export function timeToSecond(timestamp: string): string {
   const date = new Date(Number(timestamp) * 1000);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");

@@ -20,8 +20,8 @@ import { type ImageData, type HelpSys } from "./utils";
  */
 export interface PostResponse extends MysResponse {
   data: {
-    post: PostData
-  }
+    post: PostData;
+  };
 }
 
 /**
@@ -52,27 +52,27 @@ export interface PostResponse extends MysResponse {
  * @returns {PostData}
  */
 export interface PostData {
-  post: Post
-  forum: Forum
-  topics: Topic[]
-  user: UserInfoPost
-  self_operation: SelfOperation
-  stat: PostStat
-  help_sys: HelpSys | null
-  cover: ImageData | null
-  image_list: ImageData[]
-  is_official_master: boolean
-  is_user_master: boolean
-  hot_reply_exist: boolean
-  vot_count: number
-  last_modify_time: number
-  recommend_type: string
-  collection: unknown | null
-  vod_list: unknown[]
-  is_block_on: boolean
-  forum_rank_info: unknown | null
-  link_card_list: unknown[]
-  news_meta: NewsMeta | null
+  post: Post;
+  forum: Forum;
+  topics: Topic[];
+  user: UserInfoPost;
+  self_operation: SelfOperation;
+  stat: PostStat;
+  help_sys: HelpSys | null;
+  cover: ImageData | null;
+  image_list: ImageData[];
+  is_official_master: boolean;
+  is_user_master: boolean;
+  hot_reply_exist: boolean;
+  vot_count: number;
+  last_modify_time: number;
+  recommend_type: string;
+  collection: unknown | null;
+  vod_list: unknown[];
+  is_block_on: boolean;
+  forum_rank_info: unknown | null;
+  link_card_list: unknown[];
+  news_meta: NewsMeta | null;
 }
 
 /**
@@ -121,46 +121,46 @@ export interface PostData {
  * @returns {Post}
  */
 export interface Post {
-  game_id: number
-  post_id: string
-  f_forum_id: number
-  uid: string
-  subject: string
-  content: string
-  cover: string
-  view_type: number
-  created_at: number
-  images: string[]
+  game_id: number;
+  post_id: string;
+  f_forum_id: number;
+  uid: string;
+  subject: string;
+  content: string;
+  cover: string;
+  view_type: number;
+  created_at: number;
+  images: string[];
   post_status: {
-    is_top: boolean
-    is_good: boolean
-    is_official: boolean
-  }
-  topic_ids: number[]
-  view_status: number
-  max_floor: number
-  is_original: number
-  republish_authorization: number
-  reply_time: string
-  is_deleted: number
-  is_interactive: boolean
-  structured_content: string
-  structured_content_rows: string[]
-  review_id: number
-  is_profit: boolean
-  is_in_profit: boolean
-  updated_at: number
-  deleted_at: number
-  pre_pub_status: number
-  cate_id: number
-  profit_post_status: number
-  audit_status: number
-  meta_content: string
-  is_missing: boolean
-  block_reply_img: number
-  is_showing_missing: boolean
-  block_latest_reply_time: number
-  selected_comment: number
+    is_top: boolean;
+    is_good: boolean;
+    is_official: boolean;
+  };
+  topic_ids: number[];
+  view_status: number;
+  max_floor: number;
+  is_original: number;
+  republish_authorization: number;
+  reply_time: string;
+  is_deleted: number;
+  is_interactive: boolean;
+  structured_content: string;
+  structured_content_rows: string[];
+  review_id: number;
+  is_profit: boolean;
+  is_in_profit: boolean;
+  updated_at: number;
+  deleted_at: number;
+  pre_pub_status: number;
+  cate_id: number;
+  profit_post_status: number;
+  audit_status: number;
+  meta_content: string;
+  is_missing: boolean;
+  block_reply_img: number;
+  is_showing_missing: boolean;
+  block_latest_reply_time: number;
+  selected_comment: number;
 }
 
 /**
@@ -175,11 +175,11 @@ export interface Post {
  * @returns {Forum}
  */
 export interface Forum {
-  id: number
-  name: string
-  icon: string
-  game_id: number
-  forum_cate: unknown | null
+  id: number;
+  name: string;
+  icon: string;
+  game_id: number;
+  forum_cate: unknown | null;
 }
 
 /**
@@ -197,14 +197,14 @@ export interface Forum {
  * @returns {Topic}
  */
 export interface Topic {
-  id: number
-  name: string
-  cover: string
-  is_top: boolean
-  is_good: boolean
-  is_interactive: boolean
-  game_id: number
-  content_type: number
+  id: number;
+  name: string;
+  cover: string;
+  is_top: boolean;
+  is_good: boolean;
+  is_interactive: boolean;
+  game_id: number;
+  content_type: number;
 }
 
 /**
@@ -219,11 +219,11 @@ export interface Topic {
  * @returns {PostStat}
  */
 export interface PostStat {
-  view_num: number
-  reply_num: number
-  like_num: number
-  bookmark_num: number
-  forward_num: number
+  view_num: number;
+  reply_num: number;
+  like_num: number;
+  bookmark_num: number;
+  forward_num: number;
 }
 
 /**
@@ -236,8 +236,8 @@ export interface PostStat {
  * @returns {PostContent}
  */
 export interface PostContent {
-  describe: string
-  imgs?: string[]
+  describe: string;
+  imgs?: string[];
 }
 
 /**
@@ -271,38 +271,37 @@ export interface PostContent {
  * @returns {PostStructuredContent}
  */
 export interface PostStructuredContent {
-
   insert:
-  | {
-    image?: string
-    video?: string
-    vod?: PostStructuredContentVod
-    backup_text?: string
-    lottery?: {
-      id: string
-      toast: string
-    }
-    fold?: {
-      title: string
-      content: string
-    }
-    link_card?: PostStructuredContentLinkCard
-    divider?: string
-    mention?: {
-      uid: string
-      nickname: string
-    }
-  }
-  | string
+    | {
+        image?: string;
+        video?: string;
+        vod?: PostStructuredContentVod;
+        backup_text?: string;
+        lottery?: {
+          id: string;
+          toast: string;
+        };
+        fold?: {
+          title: string;
+          content: string;
+        };
+        link_card?: PostStructuredContentLinkCard;
+        divider?: string;
+        mention?: {
+          uid: string;
+          nickname: string;
+        };
+      }
+    | string;
   attributes?: {
-    height?: number
-    width?: number
-    size?: number
-    ext?: string
-    bold?: boolean
-    color?: string
-    link?: string
-  }
+    height?: number;
+    width?: number;
+    size?: number;
+    ext?: string;
+    bold?: boolean;
+    color?: string;
+    link?: string;
+  };
 }
 
 /**
@@ -327,22 +326,22 @@ export interface PostStructuredContent {
  * @returns {PostStructuredContentVod}
  */
 export interface PostStructuredContentVod {
-  id: number
-  duration: number
-  cover: string
+  id: number;
+  duration: number;
+  cover: string;
   resolutions: Array<{
-    url: string
-    definition: string
-    height: number
-    width: number
-    bitrate: number
-    size: number
-    format: string
-    label: string
-  }>
-  view_num: number
-  transcoding_status: number
-  review_status: number
+    url: string;
+    definition: string;
+    height: number;
+    width: number;
+    bitrate: number;
+    size: number;
+    format: string;
+    label: string;
+  }>;
+  view_num: number;
+  transcoding_status: number;
+  review_status: number;
 }
 
 /**
@@ -363,15 +362,15 @@ export interface PostStructuredContentVod {
  * @returns {PostStructuredContentLinkCard}
  */
 export interface PostStructuredContentLinkCard {
-  link_type: number
-  origin_url: string
-  landing_url: string
-  cover: string
-  title: string
-  card_id: string
-  card_status: number
-  market_price: string
-  price: string
-  button_text: string
-  landing_url_type: number
+  link_type: number;
+  origin_url: string;
+  landing_url: string;
+  cover: string;
+  title: string;
+  card_id: string;
+  card_status: number;
+  market_price: string;
+  price: string;
+  button_text: string;
+  landing_url_type: number;
 }

@@ -1,76 +1,76 @@
 {
-	"build": {
-		"beforeDevCommand": "npm run vite:dev",
-		"beforeBuildCommand": "npm run vite:build",
-		"devPath": "http://localhost:3000",
-		"distDir": "../dist",
-		"withGlobalTauri": true
-	},
-	"package": {
-		"productName": "tauri-genshin",
-		"version": "0.2.1"
-	},
-	"tauri": {
-		"allowlist": {
-			"all": true,
-			"fs": {
-				"all": true,
-				"scope": ["**", "**/*"]
-			},
-			"http": {
-				"all": true,
-				"request": true,
-				"scope": [
-					"https://api-takumi.mihoyo.com/*",
-					"https://api-takumi-record.mihoyo.com/*",
-					"https://api-static.mihoyo.com/*",
-					"https://bbs-api.mihoyo.com/*",
-					"https://bbs-api.miyoushe.com/*",
-					"https://bbs.mihoyo.com/*",
-					"https://hk4e-api.mihoyo.com/*",
-					"https://passport-api.mihoyo.com/*",
-					"https://passport-api-v4.mihoyo.com/*",
-					"https://act-webstatic.mihoyo.com/*",
-					"https://sdk-webstatic.mihoyo.com/*",
-					"https://homa.snapgenshin.com/*"
-				]
-			},
-			"shell": {
-				"all": false,
-				"open": true
-			}
-		},
-		"bundle": {
-			"active": true,
-			"icon": ["icons/icon.png", "icons/icon.ico"],
-			"identifier": "tauri-genshin",
-			"targets": "all",
-			"windows": {
-				"wix": {
-					"language": "zh-CN"
-				}
-			}
-		},
-		"security": {
-			"csp": null
-		},
-		"updater": {
-			"active": true,
-			"dialog": true,
-			"endpoints": ["https://raw.fastgit.org/BTMuli/Tauri.Genshin/master/latest.json"],
-			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg2MkVGRjMxQzJDQzFBNTkKUldSWkdzekNNZjh1aHJGRXBEOGtwbUxLaU1wdWNVeUJaeGhoV2ZlZ3VlYmQ0b2tYZWQwODdnTHkK"
-		},
-		"windows": [
-			{
-				"fullscreen": false,
-				"resizable": true,
-				"title": "Tauri.Genshin",
-				"label": "tauri-genshin",
-				"width": 1600,
-				"height": 900,
-				"center": true,
-				"transparent": true
-			}
-		]
-	}
+  "build": {
+    "beforeDevCommand": "npm run vite:dev",
+    "beforeBuildCommand": "npm run vite:build",
+    "devPath": "http://localhost:3000",
+    "distDir": "../dist",
+    "withGlobalTauri": true
+  },
+  "package": {
+    "productName": "tauri-genshin",
+    "version": "0.2.1"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": true,
+      "fs": {
+        "all": true,
+        "scope": ["**", "**/*"]
+      },
+      "http": {
+        "all": true,
+        "request": true,
+        "scope": [
+          "https://api-takumi.mihoyo.com/*",
+          "https://api-takumi-record.mihoyo.com/*",
+          "https://api-static.mihoyo.com/*",
+          "https://bbs-api.mihoyo.com/*",
+          "https://bbs-api.miyoushe.com/*",
+          "https://bbs.mihoyo.com/*",
+          "https://hk4e-api.mihoyo.com/*",
+          "https://passport-api.mihoyo.com/*",
+          "https://passport-api-v4.mihoyo.com/*",
+          "https://act-webstatic.mihoyo.com/*",
+          "https://sdk-webstatic.mihoyo.com/*",
+          "https://homa.snapgenshin.com/*"
+        ]
+      },
+      "shell": {
+        "all": false,
+        "open": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "icon": ["icons/icon.png", "icons/icon.ico"],
+      "identifier": "tauri-genshin",
+      "targets": "all",
+      "windows": {
+        "wix": {
+          "language": "zh-CN"
+        }
+      }
+    },
+    "security": {
+      "csp": null
+    },
+    "updater": {
+      "active": true,
+      "dialog": true,
+      "endpoints": ["https://raw.fastgit.org/BTMuli/Tauri.Genshin/master/latest.json"],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg2MkVGRjMxQzJDQzFBNTkKUldSWkdzekNNZjh1aHJGRXBEOGtwbUxLaU1wdWNVeUJaeGhoV2ZlZ3VlYmQ0b2tYZWQwODdnTHkK"
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "resizable": true,
+        "title": "Tauri.Genshin",
+        "label": "tauri-genshin",
+        "width": 1600,
+        "height": 900,
+        "center": true,
+        "transparent": true
+      }
+    ]
+  }
 }

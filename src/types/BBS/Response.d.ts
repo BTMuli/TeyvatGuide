@@ -17,9 +17,9 @@ declare namespace TGApp.BBS.Response {
    * @return Base
    */
   export interface Base {
-    retcode: number
-    message: string
-    data: any
+    retcode: number;
+    message: string;
+    data: any;
   }
 
   /**
@@ -31,8 +31,8 @@ declare namespace TGApp.BBS.Response {
    * @return getTokensRes
    */
   export interface getTokensRes {
-    name: string
-    token: string
+    name: string;
+    token: string;
   }
 
   /**
@@ -46,8 +46,8 @@ declare namespace TGApp.BBS.Response {
    */
   export interface getTokens extends Base {
     data: {
-      list: getTokensRes[]
-    }
+      list: getTokensRes[];
+    };
   }
 
   /**
@@ -61,8 +61,8 @@ declare namespace TGApp.BBS.Response {
    */
   export interface getLTokenBySToken extends Base {
     data: {
-      ltoken: string
-    }
+      ltoken: string;
+    };
   }
 
   /**
@@ -77,9 +77,9 @@ declare namespace TGApp.BBS.Response {
    */
   export interface getCookieTokenBySToken extends Base {
     data: {
-      uid: string
-      cookie_token: string
-    }
+      uid: string;
+      cookie_token: string;
+    };
   }
 
   /**
@@ -95,9 +95,9 @@ declare namespace TGApp.BBS.Response {
    */
   export interface verifyUserInfoBySToken extends Base {
     data: {
-      user_info: TGApp.BBS.Account.VerifySTokenInfo
-      realname_info: unknown
-      need_realperson: boolean
-    }
+      user_info: TGApp.BBS.Account.VerifySTokenInfo;
+      realname_info: unknown;
+      need_realperson: boolean;
+    };
   }
 }

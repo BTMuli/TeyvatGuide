@@ -15,8 +15,8 @@
         </div>
         <div class="tol-img">
           <slot name="img">
-            <img v-if="!empty" src="/source/UI/loading.webp" alt="loading">
-            <img v-else src="/source/UI/empty.webp" alt="empty">
+            <img v-if="!empty" src="/source/UI/loading.webp" alt="loading" />
+            <img v-else src="/source/UI/empty.webp" alt="empty" />
           </slot>
         </div>
       </div>
@@ -43,9 +43,12 @@ const props = withDefaults(defineProps<LoadingProps>(), {
   empty: false,
 });
 
-watch(() => props.modelValue, (v) => {
-  show.value = v;
-});
+watch(
+  () => props.modelValue,
+  (v) => {
+    show.value = v;
+  },
+);
 </script>
 <style lang="css" scoped>
 .tol-div {

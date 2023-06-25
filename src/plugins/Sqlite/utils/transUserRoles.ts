@@ -31,7 +31,9 @@ enum EnumElement {
  * @param {TGApp.Game.Character.ListItem} data 用户角色数据
  * @returns {TGApp.Sqlite.Character.UserRole} 转换后的用户角色数据
  */
-export function transUserRoles (data: TGApp.Game.Character.ListItem): TGApp.Sqlite.Character.UserRole {
+export function transUserRoles(
+  data: TGApp.Game.Character.ListItem,
+): TGApp.Sqlite.Character.UserRole {
   return {
     uid: -1,
     cid: data.id,
@@ -57,7 +59,7 @@ export function transUserRoles (data: TGApp.Game.Character.ListItem): TGApp.Sqli
  * @param {EnumElementEn} data 角色元素
  * @returns {EnumElement} 转换后的角色元素
  */
-function transElement (data: EnumElementEn): EnumElement {
+function transElement(data: EnumElementEn): EnumElement {
   switch (data) {
     case EnumElementEn.pyro:
       return EnumElement.pyro;
@@ -84,7 +86,7 @@ function transElement (data: EnumElementEn): EnumElement {
  * @param {TGApp.Game.Character.LIWeapon} data 角色武器
  * @returns {string} 转换后的角色武器
  */
-function transWeapon (data: TGApp.Game.Character.LIWeapon): string {
+function transWeapon(data: TGApp.Game.Character.LIWeapon): string {
   const weapon: TGApp.Sqlite.Character.RoleWeapon = {
     id: data.id,
     name: data.name,
@@ -104,7 +106,7 @@ function transWeapon (data: TGApp.Game.Character.LIWeapon): string {
  * @param {TGApp.Game.Character.LIRelic[]} data 角色命座
  * @returns {string} 转换后的角色命座
  */
-function transReliquary (data: TGApp.Game.Character.LIRelic[]): string {
+function transReliquary(data: TGApp.Game.Character.LIRelic[]): string {
   if (data.length === 0) {
     return "";
   }
@@ -139,7 +141,7 @@ function transReliquary (data: TGApp.Game.Character.LIRelic[]): string {
  * @param {TGApp.Game.Character.LIConstellation[]} data 角色命座
  * @returns {string} 转换后的角色命座
  */
-function transConstellation (data: TGApp.Game.Character.LIConstellation[]): string {
+function transConstellation(data: TGApp.Game.Character.LIConstellation[]): string {
   const constellation: TGApp.Sqlite.Character.RoleConstellation[] = [];
   for (const item of data) {
     constellation.push({

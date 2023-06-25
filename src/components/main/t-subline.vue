@@ -1,6 +1,6 @@
 <template>
   <div class="tsl-box">
-    <img src="/src/assets/icons/arrow-right.svg" alt="right">
+    <img src="/src/assets/icons/arrow-right.svg" alt="right" />
     <slot>
       {{ title }}
     </slot>

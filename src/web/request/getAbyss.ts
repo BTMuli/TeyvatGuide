@@ -20,17 +20,23 @@ import { getRequestHeader } from "../utils/getRequestHeader";
  * @param {TGApp.Sqlite.Account.Game} account 游戏账号
  * @returns {Promise<TGApp.Game.Abyss.FullData|TGApp.App.Base.Response>}
  */
-export async function getAbyss (cookie: Record<string, string>, schedule_type: string, account: TGApp.Sqlite.Account.Game): Promise<TGApp.Game.Abyss.FullData | TGApp.BBS.Response.Base> {
+export async function getAbyss(
+  cookie: Record<string, string>,
+  schedule_type: string,
+  account: TGApp.Sqlite.Account.Game,
+): Promise<TGApp.Game.Abyss.FullData | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.getAbyss;
   const role_id = account.gameUid;
   const params = { role_id, schedule_type, server: account.region };
   const header = getRequestHeader(cookie, "GET", params, "common");
-  return await http.fetch<TGApp.Game.Abyss.Response>(url, {
-    method: "GET",
-    headers: header,
-    query: params,
-  }).then(res => {
-    if (res.data.retcode !== 0) return res.data;
-    return res.data.data;
-  });
+  return await http
+    .fetch<TGApp.Game.Abyss.Response>(url, {
+      method: "GET",
+      headers: header,
+      query: params,
+    })
+    .then((res) => {
+      if (res.data.retcode !== 0) return res.data;
+      return res.data.data;
+    });
 }

@@ -5,7 +5,12 @@
  * @since Alpha v0.1.2
  */
 
-import { type NewsData, type NewsItem, type NewsCard, type ActivityStatus } from "../interface/news";
+import {
+  type NewsData,
+  type NewsItem,
+  type NewsCard,
+  type ActivityStatus,
+} from "../interface/news";
 
 // 默认封面图
 const defaultCover = "/source/UI/defaultCover.webp";
@@ -44,7 +49,7 @@ const EnumStatus = {
  * @param {number} status 活动状态码
  * @returns {string}
  */
-export function getActivityStatus (status: number): ActivityStatus {
+export function getActivityStatus(status: number): ActivityStatus {
   switch (status) {
     case 1:
       return EnumStatus.STARTED;
@@ -63,7 +68,7 @@ export function getActivityStatus (status: number): ActivityStatus {
  * @param {NewsData} noticeData 公告数据
  * @returns {NewsCard[]}
  */
-export function getNoticeCard (noticeData: NewsData): NewsCard[] {
+export function getNoticeCard(noticeData: NewsData): NewsCard[] {
   const noticeCard: NewsCard[] = [];
   noticeData.list.map((item: NewsItem) => {
     return noticeCard.push({
@@ -82,7 +87,7 @@ export function getNoticeCard (noticeData: NewsData): NewsCard[] {
  * @param {NewsData} activityData 活动数据
  * @returns {NewsCard[]}
  */
-export function getActivityCard (activityData: NewsData): NewsCard[] {
+export function getActivityCard(activityData: NewsData): NewsCard[] {
   const activityCard: NewsCard[] = [];
   activityData.list.map((item: NewsItem) => {
     const startTime = new Date(Number(item.news_meta.start_at_sec) * 1000).toLocaleDateString();
@@ -105,7 +110,7 @@ export function getActivityCard (activityData: NewsData): NewsCard[] {
  * @param {NewsData} newsData 新闻数据
  * @returns {NewsCard[]}
  */
-export function getNewsCard (newsData: NewsData): NewsCard[] {
+export function getNewsCard(newsData: NewsData): NewsCard[] {
   const newsCard: NewsCard[] = [];
   newsData.list.map((item: NewsItem) => {
     return newsCard.push({

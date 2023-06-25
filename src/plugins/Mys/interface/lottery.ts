@@ -18,8 +18,8 @@ import { type UserInfoPost } from "./user";
  */
 export interface LotteryResponse extends MysResponse {
   data: {
-    show_lottery: LotteryData
-  }
+    show_lottery: LotteryData;
+  };
 }
 
 /**
@@ -44,21 +44,21 @@ export interface LotteryResponse extends MysResponse {
  * @returns {LotteryData}
  */
 export interface LotteryData {
-  id: string
-  creator: UserInfoPost
-  draw_time: string
-  participant_way: string
-  is_expect_unfocus_user: boolean
-  is_expect_non_real_name_user: boolean
-  user_rewards: LotteryReward[]
-  status: string
-  is_blocked: boolean
-  user_status: string
-  is_upload_address: boolean
-  lottery_entity_summary: string
-  entity_id: string
-  entity_type: string
-  now_time: string
+  id: string;
+  creator: UserInfoPost;
+  draw_time: string;
+  participant_way: string;
+  is_expect_unfocus_user: boolean;
+  is_expect_non_real_name_user: boolean;
+  user_rewards: LotteryReward[];
+  status: string;
+  is_blocked: boolean;
+  user_status: string;
+  is_upload_address: boolean;
+  lottery_entity_summary: string;
+  entity_id: string;
+  entity_type: string;
+  now_time: string;
 }
 
 /**
@@ -74,12 +74,12 @@ export interface LotteryData {
  * @returns {LotteryReward}
  */
 export interface LotteryReward {
-  reward_name: string
-  winner_number: number
-  scheduled_winner_number: number
-  is_send_by_post: boolean
-  users: UserInfoPost[]
-  id: string
+  reward_name: string;
+  winner_number: number;
+  scheduled_winner_number: number;
+  is_send_by_post: boolean;
+  users: UserInfoPost[];
+  id: string;
 }
 
 /**
@@ -95,12 +95,12 @@ export interface LotteryReward {
  * @returns {LotteryCard}
  */
 export interface LotteryCard {
-  id: string
-  participantWay: string
-  status: string
-  creator: UserInfoPost
-  drawTime: string
-  rewards: LotteryRewardCard[]
+  id: string;
+  participantWay: string;
+  status: string;
+  creator: UserInfoPost;
+  drawTime: string;
+  rewards: LotteryRewardCard[];
 }
 
 /**
@@ -114,8 +114,8 @@ export interface LotteryCard {
  * @returns {LotteryRewardCard}
  */
 export interface LotteryRewardCard {
-  rewardName: string
-  winnerNumber: number
-  scheduledWinnerNumber: number
-  users: UserInfoPost[]
+  rewardName: string;
+  winnerNumber: number;
+  scheduledWinnerNumber: number;
+  users: UserInfoPost[];
 }

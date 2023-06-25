@@ -20,7 +20,10 @@ import TGConstant from "../constant/TGConstant";
  * @param {string} stuid 登录用户 uid
  * @returns {Promise<TGApp.User.Game.Account[]|TGApp.BBS.Response.Base>}
  */
-export async function getGameAccountsBySToken (stoken: string, stuid: string): Promise<TGApp.User.Account.Game[] | TGApp.BBS.Response.Base> {
+export async function getGameAccountsBySToken(
+  stoken: string,
+  stuid: string,
+): Promise<TGApp.User.Account.Game[] | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.bySToken.getAccounts;
   const cookie = {
     stuid,
@@ -37,7 +40,10 @@ export async function getGameAccountsBySToken (stoken: string, stuid: string): P
  * @param {string} account_id 游戏账号 id
  * @returns {Promise<TGApp.User.Account.Game[]|TGApp.BBS.Response.Base>}
  */
-export async function getGameAccountsByCookie (cookie_token: string, account_id: string): Promise<TGApp.User.Account.Game[] | TGApp.BBS.Response.Base> {
+export async function getGameAccountsByCookie(
+  cookie_token: string,
+  account_id: string,
+): Promise<TGApp.User.Account.Game[] | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.byCookie.getAccounts;
   const cookie = {
     account_id,
@@ -55,14 +61,20 @@ export async function getGameAccountsByCookie (cookie_token: string, account_id:
  * @param {Record<string, string>} params 请求参数
  * @returns {Promise<TGApp.User.Account.Game[]|TGApp.BBS.Response.Base>}
  */
-async function getGameAccounts (url: string, cookie: Record<string, string>, params: Record<string, string>): Promise<TGApp.BBS.Response.Base | TGApp.User.Account.Game[]> {
+async function getGameAccounts(
+  url: string,
+  cookie: Record<string, string>,
+  params: Record<string, string>,
+): Promise<TGApp.BBS.Response.Base | TGApp.User.Account.Game[]> {
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
-  return await http.fetch<TGApp.User.Account.GameResponse>(url, {
-    method: "GET",
-    headers: header,
-    query: params,
-  }).then(res => {
-    if (res.data.retcode !== 0) return res.data;
-    return res.data.data.list;
-  });
+  return await http
+    .fetch<TGApp.User.Account.GameResponse>(url, {
+      method: "GET",
+      headers: header,
+      query: params,
+    })
+    .then((res) => {
+      if (res.data.retcode !== 0) return res.data;
+      return res.data.data.list;
+    });
 }

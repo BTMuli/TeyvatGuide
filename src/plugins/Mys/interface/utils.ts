@@ -41,23 +41,23 @@ export const OBC_CONTENT_API =
  * @returns {ImageData}
  */
 export interface ImageData {
-  url: string
-  height: number
-  width: number
-  format: string
-  size: string
+  url: string;
+  height: number;
+  width: number;
+  format: string;
+  size: string;
   crop: {
-    x: number
-    y: number
-    w: number
-    h: number
-    url: string
-  } | null
-  is_user_set_cover: boolean
-  image_id: string
-  entity_type: string
-  entity_id: string
-  is_deleted: boolean
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    url: string;
+  } | null;
+  is_user_set_cover: boolean;
+  image_id: string;
+  entity_type: string;
+  entity_id: string;
+  is_deleted: boolean;
 }
 
 /**
@@ -71,7 +71,7 @@ export interface ImageData {
  * @returns {HelpSys}
  */
 export interface HelpSys {
-  top_up: unknown | null
-  top_n: unknown[]
-  answer_num: number
+  top_up: unknown | null;
+  top_n: unknown[];
+  answer_num: number;
 }

@@ -34,16 +34,16 @@ declare namespace TGApp.BBS.Constant {
    * @return Cookie
    */
   export interface Cookie {
-    login_ticket: string
-    login_uid: string
-    account_id: string
-    cookie_token: string
-    ltoken: string
-    ltuid: string
-    mid: string
-    stoken: string
-    stuid: string
-    stoken_v2?: string
+    login_ticket: string;
+    login_uid: string;
+    account_id: string;
+    cookie_token: string;
+    ltoken: string;
+    ltuid: string;
+    mid: string;
+    stoken: string;
+    stuid: string;
+    stoken_v2?: string;
   }
 
   /**
@@ -55,8 +55,8 @@ declare namespace TGApp.BBS.Constant {
    * @return CookieGroup1
    */
   export interface CookieGroup1 {
-    login_ticket: string
-    login_uid: string
+    login_ticket: string;
+    login_uid: string;
   }
 
   /**
@@ -68,8 +68,8 @@ declare namespace TGApp.BBS.Constant {
    * @return CookieGroup2
    */
   export interface CookieGroup2 {
-    account_id: string
-    cookie_token: string
+    account_id: string;
+    cookie_token: string;
   }
 
   /**
@@ -81,8 +81,8 @@ declare namespace TGApp.BBS.Constant {
    * @return CookieGroup3
    */
   export interface CookieGroup3 {
-    ltoken: string
-    ltuid: string
+    ltoken: string;
+    ltuid: string;
   }
 
   /**
@@ -94,5 +94,4 @@ declare namespace TGApp.BBS.Constant {
    * @return CookieGroup4
    */
   export interface CookieGroup4 extends CookieGroup2, CookieGroup3 {}
-
 }

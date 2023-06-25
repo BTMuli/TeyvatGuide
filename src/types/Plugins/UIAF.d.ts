@@ -15,8 +15,8 @@ declare namespace TGApp.Plugins.UIAF {
    * @return Data
    */
   export interface Data {
-    info: Export
-    list: Achievement[]
+    info: Export;
+    list: Achievement[];
   }
 
   /**
@@ -30,10 +30,10 @@ declare namespace TGApp.Plugins.UIAF {
    * @return Export
    */
   export interface Export {
-    export_app: string
-    export_timestamp: number
-    export_app_version: string
-    uiaf_version: string
+    export_app: string;
+    export_timestamp: number;
+    export_app_version: string;
+    uiaf_version: string;
   }
 
   /**
@@ -47,9 +47,9 @@ declare namespace TGApp.Plugins.UIAF {
    * @return Achievement
    */
   export interface Achievement {
-    id: number
-    timestamp: number
-    current: number
-    status: number
+    id: number;
+    timestamp: number;
+    current: number;
+    status: number;
   }
 }

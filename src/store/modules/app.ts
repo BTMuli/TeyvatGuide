@@ -56,7 +56,7 @@ export const useAppStore = defineStore(
     });
 
     // 初始化
-    function init (): void {
+    function init(): void {
       loading.value = false;
       devMode.value = false;
       devEnv.value = false;
@@ -66,13 +66,13 @@ export const useAppStore = defineStore(
       theme.value = "default";
     }
 
-    function getSubmenu (): string[] {
+    function getSubmenu(): string[] {
       const open = [];
       if (sidebar.submenu.wiki) open.push("wiki");
       return open;
     }
 
-    function changeTheme (): void {
+    function changeTheme(): void {
       if (theme.value === "default") theme.value = "dark";
       else theme.value = "default";
     }

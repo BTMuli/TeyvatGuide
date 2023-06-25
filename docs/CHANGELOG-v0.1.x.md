@@ -6,7 +6,7 @@ Update: 2023-06-18
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-30 15:39:49`
-> 
+>
 > 更新于 `2023-06-18 15:02:31`
 
 # CHANGELOG v0.1.x
@@ -112,7 +112,6 @@ FullCommits: [`v0.1.2 ~ v0.1.3`](https://github.com/BTMuli/Tauri.Genshin/compare
 - 设置：添加系统信息、添加打包时间戳
 - 咨讯：支持多种游戏咨讯查看
 - 米游社解析：添加 `mention` 类型解析
-
 
 ### Fix
 

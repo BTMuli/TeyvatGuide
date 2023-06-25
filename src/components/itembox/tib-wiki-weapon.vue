@@ -1,5 +1,5 @@
 <template>
-  <TItemBox :model-value="box" style="cursor: pointer;" />
+  <TItemBox :model-value="box" style="cursor: pointer" />
 </template>
 <script lang="ts" setup>
 // vue
@@ -7,7 +7,7 @@ import { computed } from "vue";
 import TItemBox, { TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibCalendarWeaponProps {
-  modelValue: TGApp.App.Weapon.WikiBriefInfo
+  modelValue: TGApp.App.Weapon.WikiBriefInfo;
 }
 
 const props = defineProps<TibCalendarWeaponProps>();

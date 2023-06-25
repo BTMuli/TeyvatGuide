@@ -2,31 +2,31 @@
   <div class="tib-box">
     <div class="tib-bg">
       <slot name="bg">
-        <img :src="modelValue.bg" alt="bg">
+        <img :src="modelValue.bg" alt="bg" />
       </slot>
     </div>
     <div class="tib-icon">
       <slot name="icon">
-        <img :src="modelValue.icon" alt="icon">
+        <img :src="modelValue.icon" alt="icon" />
       </slot>
     </div>
     <div class="tib-cover">
       <div class="tib-lt">
-        <img :src="modelValue.lt" alt="lt">
+        <img :src="modelValue.lt" alt="lt" />
       </div>
       <div v-show="modelValue.rt" class="tib-rt">
         {{ modelValue.rt }}
       </div>
       <div class="tib-inner">
         <slot name="inner-icon">
-          <img v-show="modelValue.innerIcon" :src="modelValue.innerIcon" alt="inner-icon">
+          <img v-show="modelValue.innerIcon" :src="modelValue.innerIcon" alt="inner-icon" />
         </slot>
         <slot name="inner-text">
           <span>{{ modelValue.innerText }}</span>
         </slot>
       </div>
     </div>
-    <div v-if="modelValue.display==='outer'" class="tib-outer">
+    <div v-if="modelValue.display === 'outer'" class="tib-outer">
       <slot name="outer-text">
         <span>{{ modelValue.outerText }}</span>
       </slot>
@@ -37,24 +37,24 @@
 import { computed } from "vue";
 
 export interface TItemBoxData {
-  bg: string,
-  icon: string,
-  size: string,
-  height: string,
-  display: "inner" | "outer",
-  lt: string,
-  ltSize: string,
-  rt?: string,
-  rtSize?: string,
-  innerHeight?: number,
-  innerIcon?: string,
-  innerText: string,
-  outerHeight?: number,
-  outerText?: string,
+  bg: string;
+  icon: string;
+  size: string;
+  height: string;
+  display: "inner" | "outer";
+  lt: string;
+  ltSize: string;
+  rt?: string;
+  rtSize?: string;
+  innerHeight?: number;
+  innerIcon?: string;
+  innerText: string;
+  outerHeight?: number;
+  outerText?: string;
 }
 
 interface TItemBoxProps {
-  modelValue: TItemBoxData,
+  modelValue: TItemBoxData;
 }
 
 const props = withDefaults(defineProps<TItemBoxProps>(), {
@@ -78,16 +78,16 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
 <style lang="css" scoped>
 .tib-box {
   position: relative;
-  width: v-bind(props["modelValue"]["size"]);
-  height: v-bind(props["modelValue"]["height"]);
+  width: v-bind(props[ "modelValue"][ "size"]);
+  height: v-bind(props[ "modelValue"][ "height"]);
 }
 
 .tib-bg {
   position: absolute;
   top: 0;
   left: 0;
-  width: v-bind(props["modelValue"]["size"]);
-  height: v-bind(props["modelValue"]["size"]);
+  width: v-bind(props[ "modelValue"][ "size"]);
+  height: v-bind(props[ "modelValue"][ "size"]);
   border-radius: 5px;
   overflow: hidden;
 }
@@ -100,8 +100,8 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
 
 .tib-icon {
   position: relative;
-  width: v-bind(props["modelValue"]["size"]);
-  height: v-bind(props["modelValue"]["size"]);
+  width: v-bind(props[ "modelValue"][ "size"]);
+  height: v-bind(props[ "modelValue"][ "size"]);
   overflow: hidden;
   border-radius: 5px;
 }
@@ -116,8 +116,8 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   position: absolute;
   top: 0;
   left: 0;
-  width: v-bind(props["modelValue"]["size"]);
-  height: v-bind(props["modelValue"]["size"]);
+  width: v-bind(props[ "modelValue"][ "size"]);
+  height: v-bind(props[ "modelValue"][ "size"]);
   border-radius: 5px;
   display: flex;
   justify-content: center;
@@ -130,8 +130,8 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   top: 0;
   left: 0;
   padding: 5px;
-  width: v-bind(props["modelValue"]["ltSize"]);
-  height: v-bind(props["modelValue"]["ltSize"]);
+  width: v-bind(props[ "modelValue"][ "ltSize"]);
+  height: v-bind(props[ "modelValue"][ "ltSize"]);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -147,8 +147,8 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   position: absolute;
   top: 0;
   right: 0;
-  width: v-bind(props["modelValue"]["rtSize"]);
-  height: v-bind(props["modelValue"]["rtSize"]);
+  width: v-bind(props[ "modelValue"][ "rtSize"]);
+  height: v-bind(props[ "modelValue"][ "rtSize"]);
   background: rgb(0 0 0 / 40%);
   border-top-right-radius: 5px;
   border-bottom-left-radius: 5px;

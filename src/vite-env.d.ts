@@ -20,9 +20,9 @@ declare module "*.vue" {
 declare module "vue-json-viewer" {
   import type { DefineComponent } from "vue";
   const component: DefineComponent<{
-    value: any
-    copyable: boolean
-    boxed: boolean
+    value: any;
+    copyable: boolean;
+    boxed: boolean;
   }>;
   export default component;
 }

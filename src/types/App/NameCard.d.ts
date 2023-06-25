@@ -21,12 +21,12 @@ declare namespace TGApp.App.NameCard {
    * @return Item
    */
   export interface Item {
-    name: string
-    desc: string
-    icon: string
-    bg: string
-    profile: string
-    type: number
-    source: string
+    name: string;
+    desc: string;
+    icon: string;
+    bg: string;
+    profile: string;
+    type: number;
+    source: string;
   }
 }

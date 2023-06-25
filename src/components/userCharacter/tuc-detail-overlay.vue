@@ -2,13 +2,11 @@
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
     <div class="tuc-do-box">
       <div class="tuc-do-bg">
-        <img :src="data.bg" alt="role">
+        <img :src="data.bg" alt="role" />
       </div>
-      <div class="tuc-do-quote">
-        * 所有数据以游戏内为准，此处仅供参考
-      </div>
+      <div class="tuc-do-quote">* 所有数据以游戏内为准，此处仅供参考</div>
       <!-- 衣装 -->
-      <div v-if="data.costume.length>0" class="tuc-do-costume">
+      <div v-if="data.costume.length > 0" class="tuc-do-costume">
         <v-switch v-model="showCostumeSwitch" color="#faf7e8" @click="switchBg">
           <template #label>
             <v-icon>mdi-tshirt-crew-outline</v-icon>
@@ -26,7 +24,7 @@
             :style="{
               border: selected.pos === 0 ? '2px solid var(--common-color-yellow)' : '',
             }"
-            @click="showDetail(data.weapon,'武器',0)"
+            @click="showDetail(data.weapon, '武器', 0)"
           >
             <TucDetailItemBox v-model="weaponBox" />
           </div>
@@ -37,7 +35,7 @@
               cursor: item ? 'pointer' : 'default',
               border: selected.pos === index + 1 ? '2px solid var(--common-color-yellow)' : '',
             }"
-            @click="showDetail(item,'圣遗物',index + 1)"
+            @click="showDetail(item, '圣遗物', index + 1)"
           >
             <TucDetailRelic :model-value="item" :pos="index.toString()" />
           </div>
@@ -50,9 +48,9 @@
               class="tuc-dor-item"
               :model-value="item"
               :style="{
-                border: selected.pos === item.pos+5 ? '2px solid var(--common-color-yellow)' : '',
+                border: selected.pos === item.pos + 5 ? '2px solid var(--common-color-yellow)' : '',
               }"
-              @click="showDetail(item, '命座', item.pos+5)"
+              @click="showDetail(item, '命座', item.pos + 5)"
             />
           </div>
         </div>
@@ -123,18 +121,21 @@ const data = ref({
   bg: "" as string,
 });
 const selected = ref({
-  data: {} as TGApp.Sqlite.Character.RoleConstellation
-  | TGApp.Sqlite.Character.RoleWeapon
-  | TGApp.Sqlite.Character.RoleReliquary,
+  data: {} as
+    | TGApp.Sqlite.Character.RoleConstellation
+    | TGApp.Sqlite.Character.RoleWeapon
+    | TGApp.Sqlite.Character.RoleReliquary,
   type: "武器" || "命之座" || "圣遗物",
   pos: 0, // 用于标记选中的是哪个位置
 });
 
 // 加载数据
-function loadData () {
+function loadData() {
   if (!props.modelValue) return;
   data.value.weapon = JSON.parse(props.dataVal.weapon) as TGApp.Sqlite.Character.RoleWeapon;
-  data.value.constellation = JSON.parse(props.dataVal.constellation) as TGApp.Sqlite.Character.RoleConstellation[];
+  data.value.constellation = JSON.parse(
+    props.dataVal.constellation,
+  ) as TGApp.Sqlite.Character.RoleConstellation[];
   if (props.dataVal.reliquary !== "") {
     const relics = JSON.parse(props.dataVal.reliquary) as TGApp.Sqlite.Character.RoleReliquary[];
     relics.map((item) => {
@@ -173,12 +174,12 @@ const onCancel = () => {
   emits("cancel");
 };
 
-function showDetail (
+function showDetail(
   item:
-  TGApp.Sqlite.Character.RoleConstellation |
-  TGApp.Sqlite.Character.RoleWeapon |
-  TGApp.Sqlite.Character.RoleReliquary |
-  false,
+    | TGApp.Sqlite.Character.RoleConstellation
+    | TGApp.Sqlite.Character.RoleWeapon
+    | TGApp.Sqlite.Character.RoleReliquary
+    | false,
   type: string,
   pos: number = 0,
 ) {
@@ -190,7 +191,7 @@ function showDetail (
   };
 }
 
-function switchBg () {
+function switchBg() {
   if (data.value.bg === props.dataVal.img) {
     data.value.bg = data.value.costume[0].icon;
   } else {

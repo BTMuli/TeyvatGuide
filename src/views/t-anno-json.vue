@@ -2,13 +2,9 @@
   <TSwitchTheme />
   <TOLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
   <div class="anno-json">
-    <div class="anno-title">
-      活动列表 JSON
-    </div>
+    <div class="anno-title">活动列表 JSON</div>
     <JsonViewer :value="jsonList" copyable boxed class="anno-data" />
-    <div class="anno-title">
-      活动内容 JSON
-    </div>
+    <div class="anno-title">活动内容 JSON</div>
     <JsonViewer :value="jsonContent" copyable boxed class="anno-data" />
   </div>
 </template>

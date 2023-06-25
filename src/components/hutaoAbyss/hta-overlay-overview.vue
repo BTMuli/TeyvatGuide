@@ -29,7 +29,7 @@ const visible = computed({
   set: (value) => emits("update:modelValue", value),
 });
 
-function onCancel () {
+function onCancel() {
   visible.value = false;
 }
 </script>

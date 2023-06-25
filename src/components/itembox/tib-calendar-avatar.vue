@@ -7,7 +7,7 @@ import { computed } from "vue";
 import TItemBox, { TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibCalendarAvatarProps {
-  modelValue: TGApp.App.Calendar.Item
+  modelValue: TGApp.App.Calendar.Item;
 }
 
 const props = defineProps<TibCalendarAvatarProps>();

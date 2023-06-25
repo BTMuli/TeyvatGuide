@@ -17,8 +17,8 @@ import { type MysResponse } from "./base";
  */
 export interface GachaResponse extends MysResponse {
   data: {
-    list: GachaData[]
-  }
+    list: GachaData[];
+  };
 }
 
 /**
@@ -39,16 +39,16 @@ export interface GachaResponse extends MysResponse {
  * @returns {GachaData}
  */
 export interface GachaData {
-  id: string
-  title: string
-  activity_url: string
-  content_before_act: string
-  pool: GachaPool[]
-  voice_icon: string
-  voice_url: string
-  voice_status: string
-  start_time: string
-  end_time: string
+  id: string;
+  title: string;
+  activity_url: string;
+  content_before_act: string;
+  pool: GachaPool[];
+  voice_icon: string;
+  voice_url: string;
+  voice_status: string;
+  start_time: string;
+  end_time: string;
 }
 
 /**
@@ -60,8 +60,8 @@ export interface GachaData {
  * @returns {GachaPool}
  */
 export interface GachaPool {
-  icon: string
-  url: string
+  icon: string;
+  url: string;
 }
 
 /**
@@ -82,16 +82,16 @@ export interface GachaPool {
  * @returns {GachaCard}
  */
 export interface GachaCard {
-  title: string
-  subtitle: string
-  cover: string
-  post_id: number
-  characters: GachaPool[]
-  voice: GachaPool
+  title: string;
+  subtitle: string;
+  cover: string;
+  post_id: number;
+  characters: GachaPool[];
+  voice: GachaPool;
   time: {
-    start: string
-    start_stamp: number
-    end: string
-    end_stamp: number
-  }
+    start: string;
+    start_stamp: number;
+    end: string;
+    end_stamp: number;
+  };
 }

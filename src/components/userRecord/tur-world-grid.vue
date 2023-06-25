@@ -1,7 +1,5 @@
 <template>
-  <div v-if="props.modelValue===undefined">
-    暂无数据
-  </div>
+  <div v-if="props.modelValue === undefined">暂无数据</div>
   <div v-else class="tur-wg-box">
     <TurWorldSub v-for="area in getData()" :data="area" :theme="theme" />
   </div>
@@ -25,7 +23,7 @@ const theme = computed(() => {
   }
 });
 
-function getData () {
+function getData() {
   return JSON.parse(<string>props.modelValue) as TGApp.Sqlite.Record.WorldExplore[];
 }
 </script>

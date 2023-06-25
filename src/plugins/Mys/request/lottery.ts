@@ -9,7 +9,8 @@ import { http } from "@tauri-apps/api";
 import { type LotteryResponse, type LotteryData } from "../interface/lottery";
 
 // 抽奖 API
-const LOTTERY_API = "https://bbs-api.miyoushe.com/painter/wapi/lottery/user/show?gids=2&id={lottery_id}";
+const LOTTERY_API =
+  "https://bbs-api.miyoushe.com/painter/wapi/lottery/user/show?gids=2&id={lottery_id}";
 
 /**
  * @description 获取抽奖信息
@@ -17,14 +18,14 @@ const LOTTERY_API = "https://bbs-api.miyoushe.com/painter/wapi/lottery/user/show
  * @param {string} lotteryId 抽奖 ID
  * @return {Promise<LotteryData>}
  */
-export async function getLotteryData (lotteryId: string): Promise<LotteryData> {
+export async function getLotteryData(lotteryId: string): Promise<LotteryData> {
   return await http
     .fetch<LotteryResponse>(LOTTERY_API.replace("{lottery_id}", lotteryId), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
     .then((res) => {
       return res.data.data.show_lottery;
     });

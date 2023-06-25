@@ -19,7 +19,7 @@ import { type ImageData, type HelpSys } from "./utils";
  * @returns {NewsResponse}
  */
 export interface NewsResponse extends MysResponse {
-  data: NewsData
+  data: NewsData;
 }
 
 /**
@@ -32,9 +32,9 @@ export interface NewsResponse extends MysResponse {
  * @returns {NewsData}
  */
 export interface NewsData {
-  last_id: number
-  is_last: boolean
-  list: NewsItem[]
+  last_id: number;
+  is_last: boolean;
+  list: NewsItem[];
 }
 
 /**
@@ -65,27 +65,27 @@ export interface NewsData {
  * @returns {NewsItem}
  */
 export interface NewsItem {
-  post: Post
-  forum: Forum
-  topics: Topic[]
-  user: UserInfoPost
-  self_operation: SelfOperation
-  stat: PostStat
-  help_sys: HelpSys
-  cover: ImageData
-  image_list: ImageData[]
-  is_official_master: boolean
-  is_user_master: boolean
-  hot_reply_exist: boolean
-  vote_count: number
-  last_modify_time: number
-  recommend_type: string
-  collection: unknown
-  vod_list: unknown[]
-  is_block_on: boolean
-  forum_rank_info: unknown
-  link_card_list: unknown[]
-  news_meta: NewsMeta
+  post: Post;
+  forum: Forum;
+  topics: Topic[];
+  user: UserInfoPost;
+  self_operation: SelfOperation;
+  stat: PostStat;
+  help_sys: HelpSys;
+  cover: ImageData;
+  image_list: ImageData[];
+  is_official_master: boolean;
+  is_user_master: boolean;
+  hot_reply_exist: boolean;
+  vote_count: number;
+  last_modify_time: number;
+  recommend_type: string;
+  collection: unknown;
+  vod_list: unknown[];
+  is_block_on: boolean;
+  forum_rank_info: unknown;
+  link_card_list: unknown[];
+  news_meta: NewsMeta;
 }
 
 /**
@@ -98,9 +98,9 @@ export interface NewsItem {
  * @returns {NewsMeta}
  */
 export interface NewsMeta {
-  activity_status: number
-  start_at_sec: string
-  end_at_sec: string
+  activity_status: number;
+  start_at_sec: string;
+  end_at_sec: string;
 }
 
 /**
@@ -115,11 +115,11 @@ export interface NewsMeta {
  * @returns {NewsCard}
  */
 export interface NewsCard {
-  title: string
-  cover: string
-  post_id: number
-  subtitle: string
-  status?: ActivityStatus
+  title: string;
+  cover: string;
+  post_id: number;
+  subtitle: string;
+  status?: ActivityStatus;
 }
 
 /**
@@ -130,6 +130,6 @@ export interface NewsCard {
  * @returns {ActivityStatus}
  */
 export interface ActivityStatus {
-  status: string
-  colorCss: string
+  status: string;
+  colorCss: string;
 }

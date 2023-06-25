@@ -6,21 +6,19 @@
     </div>
     <div class="tuc-rb-bottom">
       <!-- bg 好感名片 -->
-      <div v-if="nameCard!==false" class="tuc-rbb-bg">
-        <img :src="nameCard" alt="nameCard">
+      <div v-if="nameCard !== false" class="tuc-rbb-bg">
+        <img :src="nameCard" alt="nameCard" />
       </div>
       <!-- 表面 lock -->
-      <div v-if="props.modelValue.fetter!==10" class="tuc-rbb-lock">
-        <v-icon size="20" color="var(--page-bg)">
-          mdi-lock
-        </v-icon>
+      <div v-if="props.modelValue.fetter !== 10" class="tuc-rbb-lock">
+        <v-icon size="20" color="var(--page-bg)"> mdi-lock </v-icon>
       </div>
       <!-- 左上角好感等级 -->
       <div class="tuc-rbb-fetter">
-        <img src="/icon/material/105.webp" alt="fetter">
+        <img src="/icon/material/105.webp" alt="fetter" />
         <span>{{ props.modelValue.fetter }}</span>
         <!-- 衣装 icon -->
-        <span v-if="props.modelValue.costume!=='[]'">
+        <span v-if="props.modelValue.costume !== '[]'">
           <v-icon>mdi-tshirt-crew-outline</v-icon>
         </span>
       </div>
@@ -83,14 +81,12 @@ onMounted(async () => {
   nameCard.value = `/source/nameCard/profile/${role.nameCard}.webp`;
 });
 
-function getAvatarName () {
-  return (
-    props.modelValue.cid === 10000005
-      ? "旅行者-空"
-      : props.modelValue.cid === 10000007
-        ? "旅行者-荧"
-        : props.modelValue.name
-  );
+function getAvatarName() {
+  return props.modelValue.cid === 10000005
+    ? "旅行者-空"
+    : props.modelValue.cid === 10000007
+    ? "旅行者-荧"
+    : props.modelValue.name;
 }
 </script>
 <style lang="css" scoped>

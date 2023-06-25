@@ -1,12 +1,8 @@
 <template>
   <TLoading v-model="loading" :title="loadingTitle" />
   <v-tabs v-model="tab" align-tabs="start" class="anno-tab">
-    <v-tab value="activity">
-      活动公告
-    </v-tab>
-    <v-tab value="game">
-      游戏公告
-    </v-tab>
+    <v-tab value="activity"> 活动公告 </v-tab>
+    <v-tab value="game"> 游戏公告 </v-tab>
     <v-spacer />
     <v-btn class="switch-btn" @click="switchNews">
       <template #prepend>
@@ -20,7 +16,7 @@
       <div class="anno-grid">
         <v-card v-for="item in annoCards.activity" :key="item.id" class="anno-card" width="340">
           <div class="anno-cover" @click="toPost(item)">
-            <img :src="item.banner" alt="cover">
+            <img :src="item.banner" alt="cover" />
           </div>
           <v-card-title>
             {{ item.title }}
@@ -29,7 +25,7 @@
           <v-card-actions>
             <v-btn class="anno-btn" @click="toPost(item)">
               <template #prepend>
-                <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right">
+                <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right" />
               </template>
               查看
             </v-btn>
@@ -38,12 +34,10 @@
               {{ item.startTime.split(" ")[0] }} -
               {{ item.endTime.split(" ")[0] }}
             </v-card-subtitle>
-            <v-card-subtitle v-show="appStore.devMode">
-              id: {{ item.id }}
-            </v-card-subtitle>
+            <v-card-subtitle v-show="appStore.devMode"> id: {{ item.id }} </v-card-subtitle>
             <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
               <template #prepend>
-                <img src="../assets/icons/arrow-right.svg" alt="right">
+                <img src="../assets/icons/arrow-right.svg" alt="right" />
               </template>
               查看数据
             </v-btn>
@@ -55,14 +49,14 @@
       <div class="anno-grid">
         <v-card v-for="item in annoCards.game" :key="item.id" class="anno-card" width="340">
           <div class="anno-cover" @click="toPost(item)">
-            <img :src="item.banner" alt="cover">
+            <img :src="item.banner" alt="cover" />
           </div>
           <v-card-title>{{ item.title }}</v-card-title>
           <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
           <v-card-actions>
             <v-btn class="anno-btn" @click="toPost(item)">
               <template #prepend>
-                <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right">
+                <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right" />
               </template>
               查看
             </v-btn>
@@ -71,12 +65,10 @@
               {{ item.startTime.split(" ")[0] }} -
               {{ item.endTime.split(" ")[0] }}
             </v-card-subtitle>
-            <v-card-subtitle v-show="appStore.devMode">
-              id: {{ item.id }}
-            </v-card-subtitle>
+            <v-card-subtitle v-show="appStore.devMode"> id: {{ item.id }} </v-card-subtitle>
             <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
               <template #prepend>
-                <img src="../assets/icons/arrow-right.svg" alt="right">
+                <img src="../assets/icons/arrow-right.svg" alt="right" />
               </template>
               查看数据
             </v-btn>
@@ -131,11 +123,11 @@ onMounted(async () => {
   loading.value = false;
 });
 
-async function switchNews () {
+async function switchNews() {
   await router.push("/news/2");
 }
 
-async function toPost (item: TGApp.App.Announcement.ListCard) {
+async function toPost(item: TGApp.App.Announcement.ListCard) {
   const path = router.resolve({
     name: "游戏内公告",
     params: {
@@ -146,7 +138,7 @@ async function toPost (item: TGApp.App.Announcement.ListCard) {
   createTGWindow(path, "游戏内公告", item.title, 960, 720, false, false);
 }
 
-async function toJson (item: TGApp.App.Announcement.ListCard) {
+async function toJson(item: TGApp.App.Announcement.ListCard) {
   const path = router.resolve({
     name: "游戏内公告（JSON）",
     params: {
@@ -162,7 +154,7 @@ async function toJson (item: TGApp.App.Announcement.ListCard) {
 .anno-tab {
   font-family: Genshin, serif;
   margin-bottom: 20px;
-  color: var(--content-text-3)
+  color: var(--content-text-3);
 }
 
 .anno-grid {

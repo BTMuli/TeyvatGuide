@@ -1,7 +1,5 @@
 <template>
-  <div v-if="props.modelValue===undefined">
-    暂无数据
-  </div>
+  <div v-if="props.modelValue === undefined">暂无数据</div>
   <div v-else class="tur-ag-box">
     <TibUrAvatar v-for="avatar in data" :key="avatar.id" :model-value="avatar" />
   </div>

@@ -2,12 +2,10 @@
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
     <div class="toc-box">
       <div class="toc-top">
-        <div class="toc-title">
-          请选择要跳转的频道
-        </div>
+        <div class="toc-title">请选择要跳转的频道</div>
         <div class="toc-list">
           <div v-for="item in channelList" class="toc-list-item" @click="toChannel(item.link)">
-            <img :src="item.icon" alt="icon">
+            <img :src="item.icon" alt="icon" />
             <span>{{ item.title }}</span>
           </div>
         </div>
@@ -86,13 +84,14 @@ const channelList: ToChannelItem[] = [
     title: "大别野",
     icon: "/platforms/mhy/dby.webp",
     link: "/news/5",
-  }];
+  },
+];
 
-function onCancel () {
+function onCancel() {
   visible.value = false;
 }
 
-function toChannel (link: string) {
+function toChannel(link: string) {
   visible.value = false;
   router.push(link);
   setTimeout(() => {

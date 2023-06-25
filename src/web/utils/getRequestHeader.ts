@@ -18,7 +18,7 @@ import { transCookie, transParams } from "./tools";
  * @param {string} saltType salt 类型
  * @returns {string} salt
  */
-function getSalt (saltType: string) {
+function getSalt(saltType: string) {
   switch (saltType) {
     case "common":
       return TGConstant.Salt.Other.X4;
@@ -36,7 +36,7 @@ function getSalt (saltType: string) {
  * @param {number} max 最大值
  * @returns {number} 随机数
  */
-function getRandomNumber (min: number, max: number): number {
+function getRandomNumber(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
@@ -46,7 +46,7 @@ function getRandomNumber (min: number, max: number): number {
  * @param {number} length 字符串长度
  * @returns {string} 随机字符串
  */
-export function getRandomString (length: number): string {
+export function getRandomString(length: number): string {
   const str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let res = "";
   for (let i = 0; i < length; i++) {
@@ -65,7 +65,7 @@ export function getRandomString (length: number): string {
  * @param {boolean} isSign 是否为签名
  * @returns {string} ds
  */
-function getDS (method: string, data: string, saltType: string, isSign: boolean = false): string {
+function getDS(method: string, data: string, saltType: string, isSign: boolean = false): string {
   const salt = getSalt(saltType);
   const time = Math.floor(Date.now() / 1000).toString();
   let random = getRandomNumber(100000, 200000).toString();
@@ -86,7 +86,12 @@ function getDS (method: string, data: string, saltType: string, isSign: boolean 
  * @param {string} saltType salt 类型
  * @returns {Record<string, string>} 请求头
  */
-export function getRequestHeader (cookie: Record<string, string>, method: string, data: Record<string, string | number> | string, saltType: string): Record<string, string> {
+export function getRequestHeader(
+  cookie: Record<string, string>,
+  method: string,
+  data: Record<string, string | number> | string,
+  saltType: string,
+): Record<string, string> {
   let ds;
   if (typeof data === "string") {
     ds = getDS(method, data, saltType);
@@ -113,7 +118,12 @@ export function getRequestHeader (cookie: Record<string, string>, method: string
  * @param {string} saltType salt 类型
  * @returns {Record<string, string>} 请求头
  */
-export function getRequestSignHeader (cookie: Record<string, string>, method: string, data: Record<string, string | number>, saltType: string): Record<string, string> {
+export function getRequestSignHeader(
+  cookie: Record<string, string>,
+  method: string,
+  data: Record<string, string | number>,
+  saltType: string,
+): Record<string, string> {
   return {
     "User-Agent": TGConstant.BBS.USER_AGENT,
     "x-rpc-app_version": TGConstant.BBS.VERSION,

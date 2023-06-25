@@ -16,8 +16,8 @@ declare namespace TGApp.User.Account {
    */
   export interface GameResponse extends TGApp.BBS.Response.Base {
     data: {
-      list: Game[]
-    }
+      list: Game[];
+    };
   }
 
   /**
@@ -35,14 +35,13 @@ declare namespace TGApp.User.Account {
    * @return Game
    */
   export interface Game {
-    game_biz: string
-    game_uid: string
-    is_chosen: boolean
-    is_official: boolean
-    level: string
-    nickname: string
-    region: string
-    region_name: string
+    game_biz: string;
+    game_uid: string;
+    is_chosen: boolean;
+    is_official: boolean;
+    level: string;
+    nickname: string;
+    region: string;
+    region_name: string;
   }
-
 }

@@ -1,9 +1,7 @@
 <template>
   <div class="share-box">
     <div class="share-btn" @click="shareContent()">
-      <v-icon style="color:var(--theme-switch-icon)">
-        mdi-share-variant
-      </v-icon>
+      <v-icon style="color: var(--theme-switch-icon)"> mdi-share-variant </v-icon>
     </div>
   </div>
 </template>
@@ -18,7 +16,7 @@ interface TShareBtnProps {
 
 const props = defineProps<TShareBtnProps>();
 
-async function shareContent () {
+async function shareContent() {
   await generateShareImg(props.title, props.modelValue);
 }
 </script>

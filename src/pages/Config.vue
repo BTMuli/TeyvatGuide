@@ -1,13 +1,11 @@
 <template>
   <TOLoading v-model="loading" :title="loadingTitle" />
   <v-list class="config-list">
-    <v-list-subheader inset class="config-header">
-      应用信息
-    </v-list-subheader>
+    <v-list-subheader inset class="config-header"> 应用信息 </v-list-subheader>
     <v-divider inset class="border-opacity-75" />
     <v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
       <template #prepend>
-        <img class="config-icon" src="/platforms/tauri.webp" alt="Tauri">
+        <img class="config-icon" src="/platforms/tauri.webp" alt="Tauri" />
       </template>
       <template #append>
         <v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
@@ -15,12 +13,13 @@
     </v-list-item>
     <v-list-item>
       <template #prepend>
-        <img class="config-icon" src="/icon.webp" alt="App">
+        <img class="config-icon" src="/icon.webp" alt="App" />
       </template>
       <v-list-item-title>
         应用版本
         <v-btn
-          class="card-btn" size="small"
+          class="card-btn"
+          size="small"
           @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/releases/latest')"
         >
           Alpha
@@ -32,34 +31,32 @@
     </v-list-item>
     <v-list-item title="成就版本">
       <template #prepend>
-        <img class="config-icon" src="../assets/icons/achievements.svg" alt="Achievements">
+        <img class="config-icon" src="../assets/icons/achievements.svg" alt="Achievements" />
       </template>
       <template #append>
         <v-list-item-subtitle>{{ achievementsStore.lastVersion }}</v-list-item-subtitle>
       </template>
     </v-list-item>
     <v-list-item title="登录信息">
-      <v-list-item-subtitle v-show="userInfo.nickname!=='未登录'">
+      <v-list-item-subtitle v-show="userInfo.nickname !== '未登录'">
         {{ userInfo.nickname }} uid:{{ userInfo.uid }}
       </v-list-item-subtitle>
-      <v-list-item-subtitle v-show="userInfo.nickname==='未登录'">
+      <v-list-item-subtitle v-show="userInfo.nickname === '未登录'">
         未登录，请输入 Cookie 登录！
       </v-list-item-subtitle>
       <template #prepend>
-        <img class="config-icon" :src="userInfo.avatar" alt="Login">
+        <img class="config-icon" :src="userInfo.avatar" alt="Login" />
       </template>
       <template #append>
         <v-btn class="card-btn" @click="tryConfirm('refreshUser')">
           <template #prepend>
-            <img src="../assets/icons/circle-check.svg" alt="check">
+            <img src="../assets/icons/circle-check.svg" alt="check" />
             刷新数据
           </template>
         </v-btn>
       </template>
     </v-list-item>
-    <v-list-subheader inset class="config-header">
-      系统信息
-    </v-list-subheader>
+    <v-list-subheader inset class="config-header"> 系统信息 </v-list-subheader>
     <v-divider inset class="border-opacity-75" />
     <v-list-item title="系统平台">
       <template #prepend>
@@ -79,29 +76,43 @@
     </v-list-item>
     <v-list-item title="数据库更新时间" prepend-icon="mdi-database">
       <template #append>
-        <v-list-item-subtitle>{{ dbInfo.find(item => item.key === "dataUpdated")?.value }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{
+          dbInfo.find((item) => item.key === "dataUpdated")?.value
+        }}</v-list-item-subtitle>
       </template>
-      <v-list-item-subtitle>更新于 {{ dbInfo.find(item => item.key === "dataUpdated")?.updated }}</v-list-item-subtitle>
+      <v-list-item-subtitle
+        >更新于
+        {{ dbInfo.find((item) => item.key === "dataUpdated")?.updated }}</v-list-item-subtitle
+      >
     </v-list-item>
     <v-list-item title="数据库版本" prepend-icon="mdi-database">
       <template #append>
-        <v-list-item-subtitle>{{ dbInfo.find(item => item.key === "appVersion")?.value }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{
+          dbInfo.find((item) => item.key === "appVersion")?.value
+        }}</v-list-item-subtitle>
       </template>
-      <v-list-item-subtitle>更新于 {{ dbInfo.find(item => item.key === "appVersion")?.updated }}</v-list-item-subtitle>
+      <v-list-item-subtitle
+        >更新于
+        {{ dbInfo.find((item) => item.key === "appVersion")?.updated }}</v-list-item-subtitle
+      >
     </v-list-item>
-    <v-list-subheader inset class="config-header">
-      设置
-    </v-list-subheader>
+    <v-list-subheader inset class="config-header"> 设置 </v-list-subheader>
     <v-divider inset class="border-opacity-75" />
     <v-list-item>
       <template #prepend>
         <v-icon>mdi-view-dashboard</v-icon>
       </template>
-      <v-select v-model="showHome" :items="homeStore.getShowItems()" label="首页显示组件" multiple chips />
+      <v-select
+        v-model="showHome"
+        :items="homeStore.getShowItems()"
+        label="首页显示组件"
+        multiple
+        chips
+      />
       <template #append>
         <v-btn class="card-btn" @click="submitHome">
           <template #prepend>
-            <img src="../assets/icons/circle-check.svg" alt="check">
+            <img src="../assets/icons/circle-check.svg" alt="check" />
             确定
           </template>
         </v-btn>
@@ -112,9 +123,7 @@
     <v-list-item prepend-icon="mdi-delete" title="清除用户缓存" @click="tryConfirm('delUser')" />
     <v-list-item prepend-icon="mdi-delete" title="清除临时数据" @click="tryConfirm('delTemp')" />
     <v-list-item prepend-icon="mdi-cog" title="恢复默认设置" @click="tryConfirm('delApp')" />
-    <v-list-subheader inset class="config-header">
-      调试
-    </v-list-subheader>
+    <v-list-subheader inset class="config-header"> 调试 </v-list-subheader>
     <v-divider inset class="border-opacity-75" />
     <v-list-item v-if="appStore.devEnv" title="调试模式" subtitle="开启后将显示调试信息">
       <template #prepend>
@@ -122,7 +131,10 @@
       </template>
       <template #append>
         <v-switch
-          v-model="appStore.devMode" :label="appStore.devMode ? '开启' : '关闭'" inset color="#FAC51E"
+          v-model="appStore.devMode"
+          :label="appStore.devMode ? '开启' : '关闭'"
+          inset
+          color="#FAC51E"
           @click="submitDevMode"
         />
       </template>
@@ -135,16 +147,21 @@
         <span style="cursor: pointer" @click="tryConfirm('inputCookie')">手动输入 Cookie</span>
       </template>
       <template #append>
-        <v-icon style="cursor: pointer" @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/issues/18')">
+        <v-icon
+          style="cursor: pointer"
+          @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/issues/18')"
+        >
           mdi-help-circle-outline
         </v-icon>
       </template>
     </v-list-item>
     <v-list-item title="重置数据库" prepend-icon="mdi-delete" @click="tryConfirm('resetDB')" />
-    <v-list-item title="检测 SQLite 数据库完整性" prepend-icon="mdi-database-check" @click="tryConfirm('checkDB')" />
-    <v-list-subheader inset class="config-header">
-      路径
-    </v-list-subheader>
+    <v-list-item
+      title="检测 SQLite 数据库完整性"
+      prepend-icon="mdi-database-check"
+      @click="tryConfirm('checkDB')"
+    />
+    <v-list-subheader inset class="config-header"> 路径 </v-list-subheader>
     <v-divider inset class="border-opacity-75" />
     <v-list-item prepend-icon="mdi-database">
       <v-list-item-title>本地数据库路径</v-list-item-title>
@@ -165,8 +182,12 @@
   </v-snackbar>
   <!-- 确认弹窗 -->
   <TOConfirm
-    v-model="confirmShow" :model-input="confirmInput" :title="confirmText"
-    :subtitle="confirmSub" :is-input="isConfirmInput" @confirm="doConfirm(confirmOper)"
+    v-model="confirmShow"
+    :model-input="confirmInput"
+    :title="confirmText"
+    :subtitle="confirmSub"
+    :is-input="isConfirmInput"
+    @confirm="doConfirm(confirmOper)"
   />
 </template>
 
@@ -203,7 +224,7 @@ const buildTime = computed(() => appStore.buildTime);
 // About OS
 const osPlatform = ref("" as string);
 const osVersion = ref("" as string);
-const dbInfo = ref([] as { key: string, value: string, updated: string }[]);
+const dbInfo = ref([] as { key: string; value: string; updated: string }[]);
 
 // loading
 const loading = ref(true as boolean);
@@ -251,12 +272,12 @@ onMounted(async () => {
 });
 
 // 打开外部链接
-function toOuter (url: string) {
+function toOuter(url: string) {
   window.open(url);
 }
 
 // open confirm
-function tryConfirm (oper: string) {
+function tryConfirm(oper: string) {
   confirmSub.value = "";
   isConfirmInput.value = false;
   switch (oper) {
@@ -317,7 +338,7 @@ function tryConfirm (oper: string) {
 }
 
 // transfer confirm oper
-async function doConfirm (oper: string) {
+async function doConfirm(oper: string) {
   await new Promise((resolve) => setTimeout(resolve, 500));
   switch (oper) {
     case "backup":
@@ -356,7 +377,7 @@ async function doConfirm (oper: string) {
 }
 
 // confirmOper
-async function backupData () {
+async function backupData() {
   loadingTitle.value = "正在备份数据...";
   loading.value = true;
   const achievements = await TGSqlite.getUIAF();
@@ -371,7 +392,7 @@ async function backupData () {
   snackbar.value = true;
 }
 
-async function restoreData () {
+async function restoreData() {
   loadingTitle.value = "正在恢复数据...";
   loading.value = true;
   const fail = [];
@@ -399,7 +420,7 @@ async function restoreData () {
   loading.value = false;
 }
 
-async function delTempData () {
+async function delTempData() {
   await fs.removeDir("tempData", {
     dir: fs.BaseDirectory.AppLocalData,
     recursive: true,
@@ -409,7 +430,7 @@ async function delTempData () {
   snackbar.value = true;
 }
 
-async function delUserData () {
+async function delUserData() {
   await fs.removeDir("userData", {
     dir: fs.BaseDirectory.AppLocalData,
     recursive: true,
@@ -421,7 +442,7 @@ async function delUserData () {
 }
 
 // 恢复默认配置
-function initAppData () {
+function initAppData() {
   appStore.init();
   homeStore.init();
   achievementsStore.init();
@@ -433,14 +454,16 @@ function initAppData () {
 }
 
 // 开启 dev 模式
-function submitDevMode () {
-  appStore.devMode ? (snackbarText.value = "已关闭 dev 模式!") : (snackbarText.value = "已开启 dev 模式!");
+function submitDevMode() {
+  appStore.devMode
+    ? (snackbarText.value = "已关闭 dev 模式!")
+    : (snackbarText.value = "已开启 dev 模式!");
   snackbarColor.value = "success";
   snackbar.value = true;
 }
 
 // 修改首页显示
-function submitHome () {
+function submitHome() {
   // 获取已选
   const show = showHome.value;
   if (show.length < 1) {
@@ -457,7 +480,7 @@ function submitHome () {
 }
 
 // 刷新用户数据
-async function refreshUser () {
+async function refreshUser() {
   const ck = userStore.cookie;
   let failCount = 0;
   loadingTitle.value = "正在验证 ltoken...";
@@ -524,7 +547,7 @@ async function refreshUser () {
 }
 
 // 输入 Cookie
-async function inputCookie () {
+async function inputCookie() {
   const cookie = confirmInput.value;
   if (cookie === "") {
     snackbarText.value = "Cookie 为空!";
@@ -533,7 +556,10 @@ async function inputCookie () {
     return;
   }
   loadingTitle.value = "正在获取 tokens...";
-  const cookieObj = cookie.trim().split(";").map((item) => item.trim().split("="));
+  const cookieObj = cookie
+    .trim()
+    .split(";")
+    .map((item) => item.trim().split("="));
   const ticket = cookieObj.find((item) => item[0] === "login_ticket")?.[1];
   const uid = cookieObj.find((item) => item[0] === "login_uid")?.[1];
   // 如果两者不存在
@@ -573,7 +599,7 @@ async function inputCookie () {
 }
 
 // 检查 SQLite 数据库
-async function checkDB () {
+async function checkDB() {
   loadingTitle.value = "正在检查数据库表单完整性...";
   loading.value = true;
   const res = await TGSqlite.check();
@@ -610,7 +636,7 @@ async function checkDB () {
 }
 
 // 重置 SQLite 数据库
-async function resetDB () {
+async function resetDB() {
   loadingTitle.value = "正在重置数据库...";
   loading.value = true;
   await TGSqlite.reset();
@@ -623,7 +649,7 @@ async function resetDB () {
 }
 
 // 更新 SQLite 数据库
-async function updateDB () {
+async function updateDB() {
   await new Promise((resolve) => setTimeout(resolve, 500));
   loadingTitle.value = "正在更新数据库...";
   loading.value = true;

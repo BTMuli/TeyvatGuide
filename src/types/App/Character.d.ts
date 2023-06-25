@@ -22,15 +22,15 @@ declare namespace TGApp.App.Character {
    * @return WikiBriefInfo
    */
   export interface WikiBriefInfo {
-    id: number
-    contentId: number
-    name: string
-    title: string
-    birthday: string
-    star: number
-    element: string
-    weapon: string
-    nameCard: string
+    id: number;
+    contentId: number;
+    name: string;
+    title: string;
+    birthday: string;
+    star: number;
+    element: string;
+    weapon: string;
+    nameCard: string;
   }
 }
 

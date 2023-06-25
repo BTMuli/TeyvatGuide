@@ -1,19 +1,15 @@
 <template>
   <div class="pool-box">
     <div class="pool-title">
-      <img src="../../assets/icons/icon-wish.svg" alt="wish">
+      <img src="../../assets/icons/icon-wish.svg" alt="wish" />
       限时祈愿
     </div>
     <div v-if="!loading" class="pool-grid">
-      <v-card
-        v-for="pool in poolCards"
-        :key="pool.post_id"
-        class="pool-card"
-      >
+      <v-card v-for="pool in poolCards" :key="pool.post_id" class="pool-card">
         <v-list class="pool-list">
           <v-list-item :title="pool.title" :subtitle="pool.subtitle">
             <template #prepend>
-              <img :src="pool.voice.icon" class="pool-sideIcon" alt="icon">
+              <img :src="pool.voice.icon" class="pool-sideIcon" alt="icon" />
             </template>
             <template v-if="pool.voice.url" #append>
               <audio :src="pool.voice.url" controls />
@@ -21,7 +17,7 @@
           </v-list-item>
         </v-list>
         <div class="pool-cover" @click="toPost(pool)">
-          <img :src="pool.cover" alt="cover">
+          <img :src="pool.cover" alt="cover" />
         </div>
         <div class="pool-character">
           <div class="pool-icon-grid">
@@ -31,11 +27,16 @@
               class="pool-icon"
               @click="toOuter(character.url, pool.title)"
             >
-              <img :src="character.icon" alt="character">
+              <img :src="character.icon" alt="character" />
             </div>
           </div>
           <div class="pool-clock">
-            <v-progress-circular :model-value="poolTimePass[pool.post_id]" size="100" width="10" :color="poolColor[pool.post_id]">
+            <v-progress-circular
+              :model-value="poolTimePass[pool.post_id]"
+              size="100"
+              width="10"
+              :color="poolColor[pool.post_id]"
+            >
               {{ poolTimeGet[pool.post_id] }}
             </v-progress-circular>
           </div>
@@ -92,7 +93,7 @@ defineExpose({
   loading,
 });
 
-function poolLastInterval (postId: number) {
+function poolLastInterval(postId: number) {
   const pool = poolCards.value.find((pool) => pool.post_id === postId);
   if (!pool) return;
   if (poolTimeGet.value[postId] === "未开始") {
@@ -105,7 +106,7 @@ function poolLastInterval (postId: number) {
     const isEnd = pool.time.end_stamp - Date.now();
     poolTimeGet.value[postId] = getLastPoolTime(isEnd);
     poolTimePass.value[postId] =
-        ((pool.time.end_stamp - Date.now()) / (pool.time.end_stamp - pool.time.start_stamp)) * 100;
+      ((pool.time.end_stamp - Date.now()) / (pool.time.end_stamp - pool.time.start_stamp)) * 100;
     if (isEnd >= 0) return;
     clearInterval(timer.value[postId]);
     timer.value[postId] = null;
@@ -156,7 +157,7 @@ onMounted(async () => {
 });
 
 // 检测是否有新的限时祈愿
-function checkCover (data: GachaData[]) {
+function checkCover(data: GachaData[]) {
   // 如果没有缓存
   if (!homeStore.poolCover || Object.keys(homeStore.poolCover).length === 0) {
     return false;
@@ -180,7 +181,7 @@ function checkCover (data: GachaData[]) {
   });
 }
 
-async function toOuter (url: string, title: string) {
+async function toOuter(url: string, title: string) {
   if (!url) {
     barText.value = "链接为空!";
     barColor.value = "error";
@@ -190,14 +191,14 @@ async function toOuter (url: string, title: string) {
   createTGWindow(url, "祈愿", title, 1200, 800, true, true);
 }
 
-function getLastPoolTime (time: number) {
+function getLastPoolTime(time: number) {
   const hour = Math.floor(time / 1000 / 60 / 60);
   const minute = Math.floor((time / 1000 / 60 / 60 - hour) * 60);
   const second = Math.floor(((time / 1000 / 60 / 60 - hour) * 60 - minute) * 60);
   return `${hour}:${minute.toFixed(0).padStart(2, "0")}:${second.toFixed(0).padStart(2, "0")}`;
 }
 
-function toPost (pool: GachaCard) {
+function toPost(pool: GachaCard) {
   const path = router.resolve({
     name: "帖子详情",
     params: {
@@ -225,7 +226,7 @@ onUnmounted(() => {
 
 .pool-title {
   color: var(--common-text);
-	font-family: var(--font-title);
+  font-family: var(--font-title);
   font-size: 20px;
   display: flex;
 }
@@ -235,7 +236,7 @@ onUnmounted(() => {
   height: 25px;
   transform: translate(0, 2px);
   margin-right: 10px;
-	border-radius: 50%;
+  border-radius: 50%;
   background: var(--common-bg-2);
 }
 
@@ -247,19 +248,19 @@ onUnmounted(() => {
 }
 
 .pool-card {
-	background: #45b787; /* 蛙绿 */
-	color: #eef7f2; /* 丹白 */
-	border-radius: 5px;
+  background: #45b787; /* 蛙绿 */
+  color: #eef7f2; /* 丹白 */
+  border-radius: 5px;
 }
 
 .dark .pool-card {
-	background: #1f2623; /* 苷蓝绿 */
+  background: #1f2623; /* 苷蓝绿 */
 }
 
 .pool-list {
-	font-family: var(--font-title);
-	background: inherit;
-	color: inherit;
+  font-family: var(--font-title);
+  background: inherit;
+  color: inherit;
 }
 
 .pool-sideIcon {
@@ -267,7 +268,7 @@ onUnmounted(() => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-	background: var(--common-bg-2);
+  background: var(--common-bg-2);
 }
 
 .pool-cover {
@@ -282,7 +283,7 @@ onUnmounted(() => {
 }
 
 .pool-cover img {
-	width: 100%;
+  width: 100%;
   transition: all 0.5s;
   border-radius: 10px;
 }
@@ -301,22 +302,22 @@ onUnmounted(() => {
 }
 
 .pool-icon-grid {
-	display: grid;
-	grid-template-columns: repeat(4,70px);
-	grid-column-gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, 70px);
+  grid-column-gap: 10px;
 }
 
 .pool-icon {
-	width: 70px;
-	height: 70px;
-	border-radius: 5px;
+  width: 70px;
+  height: 70px;
+  border-radius: 5px;
 }
 
 .pool-icon img {
-	width: 100%;
-	height: 100%;
-	border-radius: 5px;
-	cursor: pointer;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .pool-clock {

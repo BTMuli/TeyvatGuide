@@ -13,7 +13,7 @@ import { timeToSecond } from "./transTime";
  * @param {TGApp.Game.Abyss.CharacterData[]} data 深渊数据
  * @returns {string} 转换后的深渊数据
  */
-export function transCharacterData (data: TGApp.Game.Abyss.CharacterData[]): string {
+export function transCharacterData(data: TGApp.Game.Abyss.CharacterData[]): string {
   const res = data.map((item) => {
     return {
       id: item.avatar_id,
@@ -30,7 +30,7 @@ export function transCharacterData (data: TGApp.Game.Abyss.CharacterData[]): str
  * @param {TGApp.Game.Abyss.Floor} data 深渊数据
  * @returns {string} 转换后的深渊数据
  */
-export function transFloorData (data: TGApp.Game.Abyss.Floor[]): string {
+export function transFloorData(data: TGApp.Game.Abyss.Floor[]): string {
   const floor = data.map((item) => {
     return {
       id: item.index,
@@ -42,8 +42,12 @@ export function transFloorData (data: TGApp.Game.Abyss.Floor[]): string {
           id: level.index,
           winStar: level.star,
           maxStar: level.max_star,
-          upBattle: transBattleData(level.battles.find((l) => l.index === 1) as TGApp.Game.Abyss.Battle),
-          downBattle: transBattleData(level.battles.find((l) => l.index === 2) as TGApp.Game.Abyss.Battle),
+          upBattle: transBattleData(
+            level.battles.find((l) => l.index === 1) as TGApp.Game.Abyss.Battle,
+          ),
+          downBattle: transBattleData(
+            level.battles.find((l) => l.index === 2) as TGApp.Game.Abyss.Battle,
+          ),
         };
       }),
     };
@@ -57,7 +61,7 @@ export function transFloorData (data: TGApp.Game.Abyss.Floor[]): string {
  * @param {TGApp.Game.Abyss.Battle} data 深渊数据
  * @returns {TGApp.Sqlite.Abyss.Battle} 转换后的深渊数据
  */
-function transBattleData (data: TGApp.Game.Abyss.Battle): TGApp.Sqlite.Abyss.Battle {
+function transBattleData(data: TGApp.Game.Abyss.Battle): TGApp.Sqlite.Abyss.Battle {
   return {
     time: timeToSecond(data.timestamp),
     characters: data.avatars.map((item) => {

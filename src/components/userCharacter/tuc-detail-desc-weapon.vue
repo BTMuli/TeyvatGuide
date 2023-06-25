@@ -14,7 +14,7 @@
           <span>阶</span>
         </div>
         <div class="tuc-ddwc-bottom">
-          <img :src="`/icon/star/${props.modelValue.star}.webp`" alt="star">
+          <img :src="`/icon/star/${props.modelValue.star}.webp`" alt="star" />
         </div>
       </div>
     </template>

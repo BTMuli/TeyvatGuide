@@ -21,7 +21,7 @@ onMounted(async () => {
   overview.value = await HutaoRequest.Abyss.getOverview();
 });
 
-function getUpdated () {
+function getUpdated() {
   return new Date(overview.value.timestamp)
     .toLocaleString("zh-CN", { hour12: false })
     .replace(/\//g, "-");

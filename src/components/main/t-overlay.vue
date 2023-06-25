@@ -26,19 +26,21 @@ const props = withDefaults(defineProps<TolProps>(), {
   blurVal: "20px",
 });
 
-watch(() => props.modelValue, () => {
-  if (props.modelValue) {
-    showTolo.value = true;
-    showToli.value = true;
-  } else {
-    setTimeout(() => {
-      showToli.value = false;
-    }, 100);
-    setTimeout(() => {
-      showTolo.value = false;
-    }, 300);
-  }
-},
+watch(
+  () => props.modelValue,
+  () => {
+    if (props.modelValue) {
+      showTolo.value = true;
+      showToli.value = true;
+    } else {
+      setTimeout(() => {
+        showToli.value = false;
+      }, 100);
+      setTimeout(() => {
+        showTolo.value = false;
+      }, 300);
+    }
+  },
 );
 </script>
 <style lang="css" scoped>

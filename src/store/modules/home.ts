@@ -11,7 +11,8 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 
 export const useHomeStore = defineStore(
-  "home", () => {
+  "home",
+  () => {
     const calendarShow = ref({
       show: true,
       order: 3,
@@ -31,7 +32,7 @@ export const useHomeStore = defineStore(
     });
     const poolCover = ref({} satisfies Record<number, string>);
 
-    function init (): void {
+    function init(): void {
       calendarShow.value = {
         show: true,
         order: 3,
@@ -47,7 +48,7 @@ export const useHomeStore = defineStore(
       poolCover.value = {};
     }
 
-    function getShowItems (): string[] {
+    function getShowItems(): string[] {
       const defaultList = ["素材日历", "限时祈愿", "近期活动"];
       defaultList.sort((a, b) => {
         return getItemOrder(a) - getItemOrder(b);
@@ -55,7 +56,7 @@ export const useHomeStore = defineStore(
       return defaultList;
     }
 
-    function getShowValue (): string[] {
+    function getShowValue(): string[] {
       const showValue = [];
       if (calendarShow.value.show) showValue.push("素材日历");
       if (poolShow.value.show) showValue.push("限时祈愿");
@@ -66,14 +67,14 @@ export const useHomeStore = defineStore(
       return showValue;
     }
 
-    function getItemOrder (item: string): number {
+    function getItemOrder(item: string): number {
       if (item === "素材日历") return calendarShow.value.order;
       if (item === "限时祈愿") return poolShow.value.order;
       if (item === "近期活动") return positionShow.value.order;
       return 4;
     }
 
-    function setShowValue (value: string[]): void {
+    function setShowValue(value: string[]): void {
       let order = 1;
       // 遍历 value
       value.forEach((item) => {
@@ -120,8 +121,7 @@ export const useHomeStore = defineStore(
       getShowValue,
       setShowValue,
     };
-  }
-  ,
+  },
   {
     persist: true,
   },

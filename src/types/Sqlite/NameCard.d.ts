@@ -19,10 +19,10 @@ declare namespace TGApp.Sqlite.NameCard {
    * @return SingleTable
    */
   export interface SingleTable {
-    name: string
-    desc: string
-    type: number
-    source: string
-    updated: string
+    name: string;
+    desc: string;
+    type: number;
+    source: string;
+    updated: string;
   }
 }

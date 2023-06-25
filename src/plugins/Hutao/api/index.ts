@@ -11,9 +11,11 @@ import {
   AvatarUpRateApi,
   AvatarUseRateApi,
   DataUploadApi,
-  OverviewApi, TeamCombinationApi,
+  OverviewApi,
+  TeamCombinationApi,
   UidCheckApi,
-  UidRankApi, WeaponCollocationApi,
+  UidRankApi,
+  WeaponCollocationApi,
 } from "./abyss";
 
 const HutaoApi = {

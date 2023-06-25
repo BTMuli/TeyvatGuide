@@ -5,11 +5,11 @@
       backgroundImage: `url('${getUrl.bg}')`,
       backgroundPositionX: 'right',
       backgroundSize: 'cover',
-      backgroundRepeat: 'no-repeat'
+      backgroundRepeat: 'no-repeat',
     }"
   >
     <div class="tur-ws-icon">
-      <img :src="getUrl.icon" alt="icon">
+      <img :src="getUrl.icon" alt="icon" />
     </div>
     <div class="tur-ws-content">
       <div class="tur-ws-title">
@@ -20,13 +20,13 @@
         <span>{{ data.exploration / 10 }}</span>
         <span>%</span>
       </div>
-      <div v-if="data.type==='Reputation'" class="tur-ws-sub">
+      <div v-if="data.type === 'Reputation'" class="tur-ws-sub">
         <span>声望等级：</span>
         <span>{{ data.level }}</span>
         <span>级</span>
       </div>
-      <div v-if="data.offerings.length>0" class="tur-ws-sub">
-        <img :src="getUrl.offer" alt="offer">
+      <div v-if="data.offerings.length > 0" class="tur-ws-sub">
+        <img :src="getUrl.offer" alt="offer" />
         <span>{{ data.offerings[0].name }}等级：</span>
         <span>{{ data.offerings[0].level }}</span>
         <span>级</span>
@@ -35,7 +35,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-
 // vue
 import { onMounted, ref } from "vue";
 // tauri
@@ -44,8 +43,8 @@ import { event } from "@tauri-apps/api";
 import { saveImgLocal } from "../../utils/TGShare";
 
 interface TurWorldSubProps {
-  theme: "default" | "dark",
-  data: TGApp.Sqlite.Record.WorldExplore
+  theme: "default" | "dark";
+  data: TGApp.Sqlite.Record.WorldExplore;
 }
 
 const props = defineProps<TurWorldSubProps>();
@@ -66,11 +65,11 @@ onMounted(async () => {
     getUrl.value.offer = await saveImgLocal(props.data.offerings[0].icon);
   }
   props.theme === "dark"
-    ? getUrl.value.icon = getUrl.value.iconLight
-    : getUrl.value.icon = getUrl.value.iconDark;
+    ? (getUrl.value.icon = getUrl.value.iconLight)
+    : (getUrl.value.icon = getUrl.value.iconDark);
 });
 
-async function listenOnTheme () {
+async function listenOnTheme() {
   await event.listen("readTheme", (e) => {
     const theme = e.payload as string;
     if (theme === "dark") {

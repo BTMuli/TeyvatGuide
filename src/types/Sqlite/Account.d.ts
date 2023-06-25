@@ -21,13 +21,13 @@ declare namespace TGApp.Sqlite.Account {
    * @return Game
    */
   export interface Game {
-    gameBiz: string
-    gameUid: string
-    isChosen: 0 | 1
-    isOfficial: 0 | 1
-    level: string
-    nickname: string
-    region: string
-    regionName: string
+    gameBiz: string;
+    gameUid: string;
+    isChosen: 0 | 1;
+    isOfficial: 0 | 1;
+    level: string;
+    nickname: string;
+    region: string;
+    regionName: string;
   }
 }

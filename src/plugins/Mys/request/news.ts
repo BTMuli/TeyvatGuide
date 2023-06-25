@@ -37,7 +37,11 @@ enum NewsType {
  * @param {number} lastId 上一次请求的最后一条数据的 id
  * @return {Promise<NewsData>}
  */
-export async function getNoticeList (gid: string = "2", pageSize: number = 20, lastId: number = 0): Promise<NewsData> {
+export async function getNoticeList(
+  gid: string = "2",
+  pageSize: number = 20,
+  lastId: number = 0,
+): Promise<NewsData> {
   const url = NEWS_LIST_API.replace("{page_size}", pageSize.toString())
     .replace("{gid}", gid)
     .replace("{news_type}", NewsType.NOTICE)
@@ -53,7 +57,11 @@ export async function getNoticeList (gid: string = "2", pageSize: number = 20, l
  * @param {number} lastId 上一次请求的最后一条数据的 id
  * @return {Promise<NewsData>}
  */
-export async function getActivityList (gid: string = "2", pageSize: number = 20, lastId: number = 0): Promise<NewsData> {
+export async function getActivityList(
+  gid: string = "2",
+  pageSize: number = 20,
+  lastId: number = 0,
+): Promise<NewsData> {
   const url = NEWS_LIST_API.replace("{page_size}", pageSize.toString())
     .replace("{gid}", gid)
     .replace("{news_type}", NewsType.ACTIVITY)
@@ -69,7 +77,11 @@ export async function getActivityList (gid: string = "2", pageSize: number = 20,
  * @param {number} lastId 上一次请求的最后一条数据的 id
  * @return {Promise<NewsData>}
  */
-export async function getNewsList (gid: string = "2", pageSize: number = 20, lastId: number = 0): Promise<NewsData> {
+export async function getNewsList(
+  gid: string = "2",
+  pageSize: number = 20,
+  lastId: number = 0,
+): Promise<NewsData> {
   const url = NEWS_LIST_API.replace("{page_size}", pageSize.toString())
     .replace("{gid}", gid)
     .replace("{news_type}", NewsType.NEWS)

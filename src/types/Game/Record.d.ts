@@ -15,7 +15,7 @@ declare namespace TGApp.Game.Record {
    * @return Response
    */
   export interface Response extends TGApp.BBS.Response.Base {
-    data: FullData
+    data: FullData;
   }
 
   /**
@@ -31,12 +31,12 @@ declare namespace TGApp.Game.Record {
    * @return FullData
    */
   export interface FullData {
-    role: Role
-    avatars: Avatar[]
-    stats: Stats
-    city_explorations: unknown[]
-    world_explorations: WorldExplore[]
-    homes: Home[]
+    role: Role;
+    avatars: Avatar[];
+    stats: Stats;
+    city_explorations: unknown[];
+    world_explorations: WorldExplore[];
+    homes: Home[];
   }
 
   /**
@@ -50,10 +50,10 @@ declare namespace TGApp.Game.Record {
    * @return Role
    */
   export interface Role {
-    AvatarUrl: string
-    nickname: string
-    region: string
-    level: number
+    AvatarUrl: string;
+    nickname: string;
+    region: string;
+    level: number;
   }
 
   /**
@@ -73,16 +73,16 @@ declare namespace TGApp.Game.Record {
    * @return Avatar
    */
   export interface Avatar {
-    id: number
-    image: string
-    name: string
-    element: string
-    fetter: number
-    level: number
-    rarity: number
-    actived_constellation_num: number
-    card_image: number
-    is_chosen: boolean
+    id: number;
+    image: string;
+    name: string;
+    element: string;
+    fetter: number;
+    level: number;
+    rarity: number;
+    actived_constellation_num: number;
+    card_image: number;
+    is_chosen: boolean;
   }
 
   /**
@@ -107,21 +107,21 @@ declare namespace TGApp.Game.Record {
    * @return Stats
    */
   export interface Stats {
-    active_day_number: number
-    achievement_number: number
-    anemoculus_number: number
-    geoculus_number: number
-    avatar_number: number
-    way_point_number: number
-    domain_number: number
-    spiral_abyss: string
-    precious_chest_number: number
-    luxurious_chest_number: number
-    exquisite_chest_number: number
-    common_chest_number: number
-    electroculus_number: number
-    magic_chest_number: number
-    dendroculus_number: number
+    active_day_number: number;
+    achievement_number: number;
+    anemoculus_number: number;
+    geoculus_number: number;
+    avatar_number: number;
+    way_point_number: number;
+    domain_number: number;
+    spiral_abyss: string;
+    precious_chest_number: number;
+    luxurious_chest_number: number;
+    exquisite_chest_number: number;
+    common_chest_number: number;
+    electroculus_number: number;
+    magic_chest_number: number;
+    dendroculus_number: number;
   }
 
   /**
@@ -144,19 +144,19 @@ declare namespace TGApp.Game.Record {
    * @return WorldExplore
    */
   export interface WorldExplore {
-    level: number
-    exploration_percentage: number
-    icon: string
-    name: string
-    type: string
-    offerings: WorldOffering[]
-    id: number
-    parent_id: number
-    map_url: string
-    strategy_url: string
-    background_image: string
-    inner_icon: string
-    cover: string
+    level: number;
+    exploration_percentage: number;
+    icon: string;
+    name: string;
+    type: string;
+    offerings: WorldOffering[];
+    id: number;
+    parent_id: number;
+    map_url: string;
+    strategy_url: string;
+    background_image: string;
+    inner_icon: string;
+    cover: string;
   }
 
   /**
@@ -169,9 +169,9 @@ declare namespace TGApp.Game.Record {
    * @return WorldOffering
    */
   export interface WorldOffering {
-    name: string
-    level: number
-    icon: string
+    name: string;
+    level: number;
+    icon: string;
   }
 
   /**
@@ -189,13 +189,13 @@ declare namespace TGApp.Game.Record {
    * @return Home
    */
   export interface Home {
-    level: number
-    visit_num: number
-    comfort_num: number
-    item_num: number
-    name: string
-    icon: string
-    comfort_level_name: string
-    comfort_level_icon: string
+    level: number;
+    visit_num: number;
+    comfort_num: number;
+    item_num: number;
+    name: string;
+    icon: string;
+    comfort_level_name: string;
+    comfort_level_icon: string;
   }
 }

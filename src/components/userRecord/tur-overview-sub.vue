@@ -14,8 +14,8 @@
 </template>
 <script lang="ts" setup>
 interface TAOProps {
-  title: string,
-  text: string | number,
+  title: string;
+  text: string | number;
 }
 
 defineProps<TAOProps>();

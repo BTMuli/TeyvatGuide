@@ -2,9 +2,7 @@
   <TSwitchTheme />
   <TOLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
   <div class="post-json">
-    <div class="post-title">
-      帖子返回内容 JSON
-    </div>
+    <div class="post-title">帖子返回内容 JSON</div>
     <JsonViewer :value="jsonData" copyable boxed />
   </div>
 </template>

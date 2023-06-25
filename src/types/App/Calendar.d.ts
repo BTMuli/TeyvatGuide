@@ -26,19 +26,19 @@ declare namespace TGApp.App.Calendar {
    * @return Item
    */
   export interface Item {
-    id: number
-    contentId: number
-    dropDays: number[]
-    name: string
-    itemType: string
-    star: number
-    bg: string
-    icon: string
-    starIcon: string
-    weaponIcon: string
-    elementIcon: string
-    materials: Material[]
-    source: Source
+    id: number;
+    contentId: number;
+    dropDays: number[];
+    name: string;
+    itemType: string;
+    star: number;
+    bg: string;
+    icon: string;
+    starIcon: string;
+    weaponIcon: string;
+    elementIcon: string;
+    materials: Material[];
+    source: Source;
   }
 
   /**
@@ -54,12 +54,12 @@ declare namespace TGApp.App.Calendar {
    * @return Material
    */
   export interface Material {
-    id: number
-    name: string
-    star: number
-    starIcon: string
-    bg: string
-    icon: string
+    id: number;
+    name: string;
+    star: number;
+    starIcon: string;
+    bg: string;
+    icon: string;
   }
 
   /**
@@ -72,8 +72,8 @@ declare namespace TGApp.App.Calendar {
    * @return Source
    */
   export interface Source {
-    area: string
-    icon: string
-    name: string
+    area: string;
+    icon: string;
+    name: string;
   }
 }

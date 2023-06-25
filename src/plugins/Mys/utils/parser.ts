@@ -12,7 +12,7 @@ import { type PostData, type PostStructuredContent } from "../interface/post";
  * @param {string} hex 16进制颜色
  * @returns {object} RGB 颜色
  */
-function hexToRgb (hex: string): { r: number, g: number, b: number } {
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   if (result === null) {
     throw new Error("无法解析颜色");
@@ -31,16 +31,20 @@ function hexToRgb (hex: string): { r: number, g: number, b: number } {
  * @param {string} colorFg 前景颜色
  * @returns {boolean} 是否相近
  */
-function isColorSimilar (colorBg: string, colorFg: string): boolean {
+function isColorSimilar(colorBg: string, colorFg: string): boolean {
   const colorBgRGB = hexToRgb(colorBg);
   const colorFgRGB = hexToRgb(colorFg);
   const colorBgL = 0.2126 * colorBgRGB.r + 0.7152 * colorBgRGB.g + 0.0722 * colorBgRGB.b;
   const colorFgL = 0.2126 * colorFgRGB.r + 0.7152 * colorFgRGB.g + 0.0722 * colorFgRGB.b;
   const colorBgLum = colorBgL / 255;
   const colorFgLum = colorFgL / 255;
-  const colorBgLumFinal = colorBgLum <= 0.03928 ? colorBgLum / 12.92 : Math.pow((colorBgLum + 0.055) / 1.055, 2.4);
-  const colorFgLumFinal = colorFgLum <= 0.03928 ? colorFgLum / 12.92 : Math.pow((colorFgLum + 0.055) / 1.055, 2.4);
-  const contrast = (Math.max(colorBgLumFinal, colorFgLumFinal) + 0.05) / (Math.min(colorBgLumFinal, colorFgLumFinal) + 0.05);
+  const colorBgLumFinal =
+    colorBgLum <= 0.03928 ? colorBgLum / 12.92 : Math.pow((colorBgLum + 0.055) / 1.055, 2.4);
+  const colorFgLumFinal =
+    colorFgLum <= 0.03928 ? colorFgLum / 12.92 : Math.pow((colorFgLum + 0.055) / 1.055, 2.4);
+  const contrast =
+    (Math.max(colorBgLumFinal, colorFgLumFinal) + 0.05) /
+    (Math.min(colorBgLumFinal, colorFgLumFinal) + 0.05);
   return contrast <= 2.5;
 }
 
@@ -50,7 +54,7 @@ function isColorSimilar (colorBg: string, colorFg: string): boolean {
  * @param {string} url 链接
  * @returns {boolean} 是否是米游社帖子
  */
-export function IsMysPost (url: string): boolean {
+export function IsMysPost(url: string): boolean {
   const regBBS = /^https:\/\/bbs\.mihoyo\.com\/\w+\/article\/\d+$/;
   const regMYS = /^https:\/\/www\.miyoushe\.com\/\w+\/article\/\d+$/;
   return regBBS.test(url) || regMYS.test(url);
@@ -62,7 +66,7 @@ export function IsMysPost (url: string): boolean {
  * @param {string} url 链接
  * @returns {string} 帖子 id
  */
-export function getPostId (url: string): string {
+export function getPostId(url: string): string {
   const postId: string | undefined = url.split("/").pop();
   if (postId === undefined) {
     throw new Error("无法获取帖子 id");
@@ -77,7 +81,7 @@ export function getPostId (url: string): string {
  * @param {string} content 帖子内容
  * @returns {string} 解析后的内容
  */
-export function contentParser (content: string): string {
+export function contentParser(content: string): string {
   const data = JSON.parse(content);
   const result: PostStructuredContent[] = [];
   // 遍历 data 属性，值
@@ -114,7 +118,7 @@ export function contentParser (content: string): string {
  * @description 为了安全考虑，不会解析所有的属性，只会解析几个常用的属性
  * @returns {string} 解析后的HTML，可作为 v-html 使用
  */
-export function PostParser (post: PostData): string {
+export function PostParser(post: PostData): string {
   const postContent = post.post.content;
   let parserData;
   if (postContent.startsWith("<")) {
@@ -141,22 +145,22 @@ export function PostParser (post: PostData): string {
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLDivElement | HTMLSpanElement} 解析后的中转
  */
-function ParserTransfer (data: PostStructuredContent): HTMLDivElement | HTMLSpanElement {
+function ParserTransfer(data: PostStructuredContent): HTMLDivElement | HTMLSpanElement {
   if (typeof data.insert === "string") {
     return TextParser(data);
   } else if (data.insert.image) {
     return ImageParser(data);
-  } else if (data.insert.vod) {
+  } else if (data.insert.vod != null) {
     return VideoParser(data);
   } else if (data.insert.video) {
     return VideoParser(data);
   } else if (data.insert.backup_text) {
     return BackupTextParser(data);
-  } else if (data.insert.link_card) {
+  } else if (data.insert.link_card != null) {
     return LinkCardParser(data);
   } else if (data.insert.divider) {
     return DividerParser(data);
-  } else if (data.insert.mention) {
+  } else if (data.insert.mention != null) {
     return MentionParser(data);
   } else {
     return UnknownParser(data);
@@ -169,7 +173,7 @@ function ParserTransfer (data: PostStructuredContent): HTMLDivElement | HTMLSpan
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的未知数据
  */
-function UnknownParser (data: PostStructuredContent): HTMLDivElement {
+function UnknownParser(data: PostStructuredContent): HTMLDivElement {
   // 创建 div
   const div = document.createElement("div");
   div.classList.add("mys-post-unknown");
@@ -188,7 +192,7 @@ function UnknownParser (data: PostStructuredContent): HTMLDivElement {
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLSpanElement} 解析后的文本
  */
-function TextParser (data: PostStructuredContent): HTMLSpanElement {
+function TextParser(data: PostStructuredContent): HTMLSpanElement {
   // 检查数据
   if (typeof data.insert !== "string") {
     throw new Error("data.insert is not a string");
@@ -196,7 +200,7 @@ function TextParser (data: PostStructuredContent): HTMLSpanElement {
   // 创建文本
   const text = document.createElement("span");
   // 设置文本属性
-  if (data.attributes) {
+  if (data.attributes != null) {
     if (data.attributes.bold) text.style.fontWeight = "bold";
     if (data.attributes.color) {
       let colorGet = data.attributes.color;
@@ -224,12 +228,12 @@ function TextParser (data: PostStructuredContent): HTMLSpanElement {
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLSpanElement} 解析后的链接
  */
-function LinkTextParser (data: PostStructuredContent): HTMLSpanElement {
+function LinkTextParser(data: PostStructuredContent): HTMLSpanElement {
   // 检查数据
   if (typeof data.insert !== "string") {
     throw new Error("data.insert is not a string");
   }
-  if (!data.attributes) {
+  if (data.attributes == null) {
     throw new Error("data.attributes is not defined");
   }
   if (!data.attributes.link) {
@@ -263,7 +267,7 @@ function LinkTextParser (data: PostStructuredContent): HTMLSpanElement {
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的分割线
  */
-function DividerParser (data: PostStructuredContent): HTMLDivElement {
+function DividerParser(data: PostStructuredContent): HTMLDivElement {
   // 数据检查
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
@@ -286,7 +290,8 @@ function DividerParser (data: PostStructuredContent): HTMLDivElement {
     img.src =
       "https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/e7047588e912d60ff87a975e037c7606.png";
   } else if (data.insert.divider === "line_4") {
-    img.src = "https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2022/07/13/line_4.png";
+    img.src =
+      "https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2022/07/13/line_4.png";
   } else {
     console.error("Unknown divider type", data);
     return UnknownParser(data);
@@ -303,7 +308,7 @@ function DividerParser (data: PostStructuredContent): HTMLDivElement {
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的图片
  */
-function ImageParser (data: PostStructuredContent): HTMLDivElement {
+function ImageParser(data: PostStructuredContent): HTMLDivElement {
   // 检查数据
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
@@ -340,18 +345,18 @@ function ImageParser (data: PostStructuredContent): HTMLDivElement {
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的视频
  */
-function VideoParser (data: PostStructuredContent): HTMLDivElement {
+function VideoParser(data: PostStructuredContent): HTMLDivElement {
   // 检查数据
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
   }
-  if (!data.insert.vod && !data.insert.video) {
+  if (data.insert.vod == null && !data.insert.video) {
     throw new Error("data.insert.vod is not defined");
   }
   // 创建 div
   const div = document.createElement("div");
   div.classList.add("mys-post-div");
-  if (data.insert.vod) {
+  if (data.insert.vod != null) {
     // 创建视频
     const video = document.createElement("video");
     video.classList.add("mys-post-vod");
@@ -390,7 +395,7 @@ function VideoParser (data: PostStructuredContent): HTMLDivElement {
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的折叠内容
  */
-function BackupTextParser (data: PostStructuredContent): HTMLDivElement {
+function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
   // 检查数据
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
@@ -398,7 +403,7 @@ function BackupTextParser (data: PostStructuredContent): HTMLDivElement {
   if (data.insert.backup_text === "[抽奖]") {
     return LotteryParser(data);
   }
-  if (!data.insert.fold) {
+  if (data.insert.fold == null) {
     throw new Error("data.insert.fold is not defined");
   }
   // 转换
@@ -436,7 +441,7 @@ function BackupTextParser (data: PostStructuredContent): HTMLDivElement {
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的抽奖
  */
-function LotteryParser (data: PostStructuredContent): HTMLDivElement {
+function LotteryParser(data: PostStructuredContent): HTMLDivElement {
   // 检查数据
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
@@ -447,7 +452,7 @@ function LotteryParser (data: PostStructuredContent): HTMLDivElement {
   if (data.insert.backup_text !== "[抽奖]") {
     throw new Error("data.insert.backup_text is not [抽奖]");
   }
-  if (!data.insert.lottery) {
+  if (data.insert.lottery == null) {
     throw new Error("data.insert.lottery is not defined");
   }
   // 创建 div
@@ -474,12 +479,12 @@ function LotteryParser (data: PostStructuredContent): HTMLDivElement {
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的链接卡片
  */
-function LinkCardParser (data: PostStructuredContent): HTMLDivElement {
+function LinkCardParser(data: PostStructuredContent): HTMLDivElement {
   // 检查数据
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
   }
-  if (!data.insert.link_card) {
+  if (data.insert.link_card == null) {
     throw new Error("data.insert.link_card is not defined");
   }
   // 创建 div
@@ -537,12 +542,12 @@ function LinkCardParser (data: PostStructuredContent): HTMLDivElement {
  * @param {PostStructuredContent} data Mys数据
  * @returns {HTMLAnchorElement} 解析后的 Mention
  */
-function MentionParser (data: PostStructuredContent): HTMLAnchorElement {
+function MentionParser(data: PostStructuredContent): HTMLAnchorElement {
   // 检查数据
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
   }
-  if (!data.insert.mention) {
+  if (data.insert.mention == null) {
     throw new Error("data.insert.mention is not defined");
   }
   // 创建图标

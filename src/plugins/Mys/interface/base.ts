@@ -15,9 +15,9 @@
  * @returns {MysResponse}
  */
 export interface MysResponse {
-  retcode: number
-  message: string
-  data: any
+  retcode: number;
+  message: string;
+  data: any;
 }
 
 /**
@@ -30,8 +30,8 @@ export interface MysResponse {
  */
 export interface MysObcResponse extends MysResponse {
   data: {
-    list: MysObc[]
-  }
+    list: MysObc[];
+  };
 }
 
 /**
@@ -48,13 +48,13 @@ export interface MysObcResponse extends MysResponse {
  * @returns {MysObc}
  */
 export interface MysObc {
-  id: number
-  name: string
-  parent_id: number
-  depth: number
-  ch_ext: string
-  children: MysObc[]
-  list: unknown[]
+  id: number;
+  name: string;
+  parent_id: number;
+  depth: number;
+  ch_ext: string;
+  children: MysObc[];
+  list: unknown[];
 }
 
 /**

@@ -22,15 +22,15 @@ declare namespace TGApp.Sqlite.Character {
    * @return AppData
    */
   export interface AppData {
-    id: number
-    name: string
-    title: string
-    birthday: string
-    star: number
-    element: string
-    weapon: string
-    nameCard: string
-    updated: string
+    id: number;
+    name: string;
+    title: string;
+    birthday: string;
+    star: number;
+    element: string;
+    weapon: string;
+    nameCard: string;
+    updated: string;
   }
 
   /**
@@ -55,21 +55,21 @@ declare namespace TGApp.Sqlite.Character {
    * @return UserRole
    */
   export interface UserRole {
-    uid: number
-    cid: number
-    img: string
-    name: string
-    fetter: number
-    level: number
-    element: string
-    star: number
-    weapon: string
-    reliquary: string
-    constellation: string
-    activeConstellation: number
-    costume: string
-    talent: string
-    updated: string
+    uid: number;
+    cid: number;
+    img: string;
+    name: string;
+    fetter: number;
+    level: number;
+    element: string;
+    star: number;
+    weapon: string;
+    reliquary: string;
+    constellation: string;
+    activeConstellation: number;
+    costume: string;
+    talent: string;
+    updated: string;
   }
 
   /**
@@ -87,14 +87,14 @@ declare namespace TGApp.Sqlite.Character {
    * @return RoleWeapon
    */
   export interface RoleWeapon {
-    id: number
-    name: string
-    type: string
-    star: number
-    level: number
-    promote: number
-    description: string
-    affix: number
+    id: number;
+    name: string;
+    type: string;
+    star: number;
+    level: number;
+    promote: number;
+    description: string;
+    affix: number;
   }
 
   /**
@@ -115,21 +115,21 @@ declare namespace TGApp.Sqlite.Character {
    * @return RoleReliquary
    */
   export interface RoleReliquary {
-    id: number
-    name: string
-    pos: number
-    posName: string
-    star: number
-    level: number
-    icon: string
+    id: number;
+    name: string;
+    pos: number;
+    posName: string;
+    star: number;
+    level: number;
+    icon: string;
     set: {
-      id: number
-      name: string
+      id: number;
+      name: string;
       effect: Array<{
-        active: number
-        description: string
-      }>
-    }
+        active: number;
+        description: string;
+      }>;
+    };
   }
 
   /**
@@ -145,12 +145,12 @@ declare namespace TGApp.Sqlite.Character {
    * @return RoleConstellation
    */
   export interface RoleConstellation {
-    id: number
-    name: string
-    icon: string
-    description: string
-    active: boolean
-    pos: number
+    id: number;
+    name: string;
+    icon: string;
+    description: string;
+    active: boolean;
+    pos: number;
   }
 
   /**
@@ -163,8 +163,8 @@ declare namespace TGApp.Sqlite.Character {
    * @return RoleCostume
    */
   export interface RoleCostume {
-    id: number
-    name: string
-    icon: string
+    id: number;
+    name: string;
+    icon: string;
   }
 }

@@ -14,7 +14,8 @@
       <slot name="val-icons">
         <TibAbyssOverview
           v-for="avatar in JSON.parse(props.valIcons) as TGApp.Sqlite.Abyss.Character[]"
-          :key="avatar.id" :model-value="avatar"
+          :key="avatar.id"
+          :model-value="avatar"
         />
       </slot>
     </div>
@@ -25,10 +26,10 @@
 import TibAbyssOverview from "../itembox/tib-abyss-overview.vue";
 
 interface TAOProps {
-  title: string,
-  valText?: string | number,
-  valIcons?: string,
-  iconNum: number,
+  title: string;
+  valText?: string | number;
+  valIcons?: string;
+  iconNum: number;
 }
 
 const props = withDefaults(defineProps<TAOProps>(), {

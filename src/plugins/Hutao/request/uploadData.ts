@@ -17,12 +17,14 @@ import HutaoApi from "../api";
  * @param {TGApp.Plugins.Hutao.AbyssRecordUpload} data 用户数据
  * @returns {Promise<unknown>} 上传结果
  */
-async function uploadData (data: TGApp.Plugins.Hutao.AbyssRecordUpload): Promise<unknown> {
+async function uploadData(data: TGApp.Plugins.Hutao.AbyssRecordUpload): Promise<unknown> {
   const url = HutaoApi.Abyss.upload;
-  return await http.fetch(url, {
-    method: "POST",
-    body: http.Body.json(data),
-  }).then(res => res.data);
+  return await http
+    .fetch(url, {
+      method: "POST",
+      body: http.Body.json(data),
+    })
+    .then((res) => res.data);
 }
 
 export default uploadData;

@@ -27,18 +27,18 @@ declare namespace TGApp.BBS.Account {
    * @return VerifySTokenInfo
    */
   export interface VerifySTokenInfo {
-    aid: string
-    mid: string
-    account_name: string
-    email: string
-    is_email_verify: number
-    area_code: string
-    safe_mobile: string
-    realname: string
-    identity_code: string
-    rebind_area_code: string
-    rebind_mobile: string
-    rebind_mobile_time: string
-    links: unknown[]
+    aid: string;
+    mid: string;
+    account_name: string;
+    email: string;
+    is_email_verify: number;
+    area_code: string;
+    safe_mobile: string;
+    realname: string;
+    identity_code: string;
+    rebind_area_code: string;
+    rebind_mobile: string;
+    rebind_mobile_time: string;
+    links: unknown[];
   }
 }

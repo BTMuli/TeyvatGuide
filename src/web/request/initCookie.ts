@@ -19,7 +19,7 @@ import { verifyLToken } from "./verifyLToken";
  * @param {string} uid login_uid
  * @returns {Promise<void>}
  */
-async function initCookie (ticket: string, uid: string): Promise<void> {
+async function initCookie(ticket: string, uid: string): Promise<void> {
   const tokenRes = await getTokensByLoginTicket(ticket, uid);
   const cookie: TGApp.BBS.Constant.Cookie = {
     account_id: uid,
@@ -35,8 +35,8 @@ async function initCookie (ticket: string, uid: string): Promise<void> {
   if (Array.isArray(tokenRes)) {
     const lToken = tokenRes.find((item) => item.name === "ltoken");
     const sToken = tokenRes.find((item) => item.name === "stoken");
-    if (lToken) cookie.ltoken = lToken.token;
-    if (sToken) cookie.stoken = sToken.token;
+    if (lToken != null) cookie.ltoken = lToken.token;
+    if (sToken != null) cookie.stoken = sToken.token;
     const cookieToken = await getCookieTokenBySToken(uid, cookie.stoken);
     if (typeof cookieToken === "string") cookie.cookie_token = cookieToken;
     const mid = await verifyLToken(cookie.ltoken, cookie.ltuid);

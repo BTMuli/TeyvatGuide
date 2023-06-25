@@ -6,21 +6,21 @@
  */
 
 @font-face {
-    font-family: "Genshin";
-    src: url("./汉仪文黑-85W.ttf") format("truetype");
+  font-family: "Genshin";
+  src: url("./汉仪文黑-85W.ttf") format("truetype");
 }
 
 @font-face {
-    font-family: "Genshin-Light";
-    src: url("./汉仪文黑-55W.ttf") format("truetype");
+  font-family: "Genshin-Light";
+  src: url("./汉仪文黑-55W.ttf") format("truetype");
 }
 
 @font-face {
-    font-family: "JetBrians mono";
-    src: url("./JetBrainsMono-Regular.ttf") format("truetype");
+  font-family: "JetBrians mono";
+  src: url("./JetBrainsMono-Regular.ttf") format("truetype");
 }
 
 @font-face {
-    font-family: "JetBrians mono Bold";
-    src: url("./JetBrainsMono-Bold.ttf") format("truetype");
+  font-family: "JetBrians mono Bold";
+  src: url("./JetBrainsMono-Bold.ttf") format("truetype");
 }

@@ -16,18 +16,24 @@ import html2canvas from "html2canvas";
  * @param {string} filename - 文件名
  * @returns {Promise<void>} 无返回值
  */
-async function saveCanvasImg (canvas: HTMLCanvasElement, filename: string): Promise<void> {
-  const buffer = new Uint8Array(atob(canvas.toDataURL("image/png").split(",")[1]).split("").map((item) => item.charCodeAt(0)));
-  await dialog.save({
-    defaultPath: filename,
-    filters: [{ name: "图片", extensions: ["png"] }],
-  }).then(async (res) => {
-    if (res === null) return;
-    await fs.writeBinaryFile({
-      path: res,
-      contents: buffer,
+async function saveCanvasImg(canvas: HTMLCanvasElement, filename: string): Promise<void> {
+  const buffer = new Uint8Array(
+    atob(canvas.toDataURL("image/png").split(",")[1])
+      .split("")
+      .map((item) => item.charCodeAt(0)),
+  );
+  await dialog
+    .save({
+      defaultPath: filename,
+      filters: [{ name: "图片", extensions: ["png"] }],
+    })
+    .then(async (res) => {
+      if (res === null) return;
+      await fs.writeBinaryFile({
+        path: res,
+        contents: buffer,
+      });
     });
-  });
 }
 
 /**
@@ -36,15 +42,17 @@ async function saveCanvasImg (canvas: HTMLCanvasElement, filename: string): Prom
  * @param {string} url - 图片链接
  * @returns {Promise<string>} 图片元素
  */
-export async function saveImgLocal (url: string): Promise<string> {
-  return await http.fetch<ArrayBuffer>(url, {
-    method: "GET",
-    responseType: http.ResponseType.Binary,
-  }).then(async (res) => {
-    const buffer = new Uint8Array(res.data);
-    const blob = new Blob([buffer], { type: "image/png" });
-    return URL.createObjectURL(blob);
-  });
+export async function saveImgLocal(url: string): Promise<string> {
+  return await http
+    .fetch<ArrayBuffer>(url, {
+      method: "GET",
+      responseType: http.ResponseType.Binary,
+    })
+    .then(async (res) => {
+      const buffer = new Uint8Array(res.data);
+      const blob = new Blob([buffer], { type: "image/png" });
+      return URL.createObjectURL(blob);
+    });
 }
 
 /**
@@ -52,7 +60,7 @@ export async function saveImgLocal (url: string): Promise<string> {
  * @since Alpha v0.2.0
  * @returns {string} 背景色
  */
-function getShareImgBgColor (): string {
+function getShareImgBgColor(): string {
   let theme = localStorage.getItem("theme");
   if (theme) {
     theme = JSON.parse(theme).theme;
@@ -72,7 +80,11 @@ function getShareImgBgColor (): string {
  * @param {number} scale - 缩放比例
  * @returns {Promise<void>} 无返回值
  */
-export async function generateShareImg (fileName: string, element: HTMLElement, scale: number = 1.2): Promise<void> {
+export async function generateShareImg(
+  fileName: string,
+  element: HTMLElement,
+  scale: number = 1.2,
+): Promise<void> {
   const canvas = document.createElement("canvas");
   const width = element.clientWidth + 50;
   const height = element.clientHeight + 50;

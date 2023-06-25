@@ -33,6 +33,6 @@ const wikiFiles = import.meta.glob("./wiki/**/*.json");
  * @param {string} name 文件名
  * @returns {Promise<any>} 文件内容
  */
-export async function getWikiData (dir: string, name: string) {
+export async function getWikiData(dir: string, name: string): Promise<any> {
   return await wikiFiles[`./wiki/${dir}/${name}.json`]();
 }

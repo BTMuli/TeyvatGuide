@@ -5,21 +5,26 @@
         <div class="confirm-title">
           {{ title }}
         </div>
-        <div v-show="subtitle!=='' && !isInput" class="confirm-subtitle">
+        <div v-show="subtitle !== '' && !isInput" class="confirm-subtitle">
           {{ subtitle }}
         </div>
         <div v-show="isInput" class="confirm-input">
-          <v-text-field v-model="inputVal" :label="subtitle||''" hide-details="auto" @keyup.enter="onConfirm" />
+          <v-text-field
+            v-model="inputVal"
+            :label="subtitle || ''"
+            hide-details="auto"
+            @keyup.enter="onConfirm"
+          />
         </div>
         <div class="confirm-btn-box">
           <button class="confirm-btn" @click="onCancel">
-            <img class="btn-icon" src="../../assets/icons/circle-cancel.svg" alt="cancel">
+            <img class="btn-icon" src="../../assets/icons/circle-cancel.svg" alt="cancel" />
             <span class="btn-text">
               {{ cancel }}
             </span>
           </button>
           <button class="confirm-btn" @click="onConfirm">
-            <img class="btn-icon" src="../../assets/icons/circle-check.svg" alt="confirm">
+            <img class="btn-icon" src="../../assets/icons/circle-check.svg" alt="confirm" />
             <span class="btn-text">
               {{ confirm }}
             </span>

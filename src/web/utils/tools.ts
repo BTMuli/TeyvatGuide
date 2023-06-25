@@ -14,14 +14,14 @@ import TGConstant from "../constant/TGConstant";
  * @param {string} data 内容
  * @returns {string} 转义后的内容
  */
-export function decodeRegExp (data: string): string {
+export function decodeRegExp(data: string): string {
   let res = data;
   if (res.length === 0) return res;
   res = res.replace(/&lt;/g, "<");
   res = res.replace(/&gt;/g, ">");
   res = res.replace(/&nbsp;/g, " ");
   res = res.replace(/&#39;/g, "'");
-  res = res.replace(/&quot;/g, "\"");
+  res = res.replace(/&quot;/g, '"');
   res = res.replace(/&apos;/g, "'");
   res = res.replace(/&amp;/g, "&");
   return res;
@@ -33,7 +33,7 @@ export function decodeRegExp (data: string): string {
  * @param {Record<string, string>} cookie cookie
  * @returns {string} 转换后的 cookie
  */
-export function transCookie (cookie: Record<string, string>) {
+export function transCookie(cookie: Record<string, string>) {
   let res = "";
   for (const key of Object.keys(cookie).sort()) {
     res += `${key}=${cookie[key]};`;
@@ -47,7 +47,7 @@ export function transCookie (cookie: Record<string, string>) {
  * @param {Record<string, string|number>} obj object
  * @returns {string} query string
  */
-export function transParams (obj: Record<string, string | number>): string {
+export function transParams(obj: Record<string, string | number>): string {
   let res = "";
   const keys = Object.keys(obj).sort();
   for (const key of keys) {
@@ -62,7 +62,7 @@ export function transParams (obj: Record<string, string | number>): string {
  * @param {string} uid uid
  * @returns {string} server
  */
-export function getServerByUid (uid: string): string {
+export function getServerByUid(uid: string): string {
   // 获取第一个字符
   const first = uid[0];
   // 1-4 为国服-天空岛

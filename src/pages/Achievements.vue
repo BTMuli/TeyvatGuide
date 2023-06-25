@@ -14,30 +14,35 @@
       @keyup.enter="searchCard"
     />
     <template #append>
-      <v-btn prepend-icon="mdi-import" class="ms-2 top-btn" @click="importJson">
-        导入
-      </v-btn>
-      <v-btn prepend-icon="mdi-export" class="ms-2 top-btn" @click="exportJson">
-        导出
-      </v-btn>
+      <v-btn prepend-icon="mdi-import" class="ms-2 top-btn" @click="importJson"> 导入 </v-btn>
+      <v-btn prepend-icon="mdi-export" class="ms-2 top-btn" @click="exportJson"> 导出 </v-btn>
     </template>
   </v-app-bar>
   <TOLoading v-model="loading" :title="loadingTitle" />
   <div class="wrap">
     <!-- 左侧菜单 -->
     <div class="left-wrap">
-      <v-list v-for="series in seriesList" :key="series.id" class="card-left" @click="selectSeries(series.id)">
-        <div class="version-icon-series">
-          v{{ series.version }}
-        </div>
+      <v-list
+        v-for="series in seriesList"
+        :key="series.id"
+        class="card-left"
+        @click="selectSeries(series.id)"
+      >
+        <div class="version-icon-series">v{{ series.version }}</div>
         <v-list-item>
           <template #prepend>
-            <v-img width="40px" style="margin-right: 10px" :src="`/source/achievement/${series.id}.webp`" />
+            <v-img
+              width="40px"
+              style="margin-right: 10px"
+              :src="`/source/achievement/${series.id}.webp`"
+            />
           </template>
           <v-list-item-title>
             {{ series.name }}
           </v-list-item-title>
-          <v-list-item-subtitle> {{ series.finCount }} / {{ series.totalCount }} </v-list-item-subtitle>
+          <v-list-item-subtitle>
+            {{ series.finCount }} / {{ series.totalCount }}
+          </v-list-item-subtitle>
         </v-list-item>
       </v-list>
     </div>
@@ -65,11 +70,13 @@
           </template>
         </v-list-item>
       </v-list>
-      <div
-        class="list-empty"
-        :style="{height: `${emptyHeight}px`}"
-      >
-        <v-list v-for="achievement in renderAchievement" :key="achievement.id" class="card-right" :style="{Transform:`translateY(${translateY})`}">
+      <div class="list-empty" :style="{ height: `${emptyHeight}px` }">
+        <v-list
+          v-for="achievement in renderAchievement"
+          :key="achievement.id"
+          class="card-right"
+          :style="{ Transform: `translateY(${translateY})` }"
+        >
           <div v-if="achievement.progress !== 0" class="achievement-progress">
             {{ achievement.progress }}
           </div>
@@ -86,7 +93,9 @@
             </v-list-item-title>
             <v-list-item-subtitle>{{ achievement.description }}</v-list-item-subtitle>
             <template #append>
-              <span v-show="achievement.isCompleted" class="right-time">{{ achievement.completedTime }}</span>
+              <span v-show="achievement.isCompleted" class="right-time">{{
+                achievement.completedTime
+              }}</span>
               <v-card class="reward-card">
                 <v-img src="/icon/material/201.webp" sizes="32" />
                 <div class="reward-num">
@@ -172,9 +181,12 @@ onMounted(async () => {
   loading.value = false;
 });
 
-function handleScroll (e: Event) {
+function handleScroll(e: Event) {
   // 如果 scrollTop 到底部了
-  if ((e.target as HTMLElement).scrollTop + (e.target as HTMLElement).offsetHeight >= (e.target as HTMLElement).scrollHeight) {
+  if (
+    (e.target as HTMLElement).scrollTop + (e.target as HTMLElement).offsetHeight >=
+    (e.target as HTMLElement).scrollHeight
+  ) {
     // 如果 selectedAchievement 的长度小于 itemCount，不进行偏移
     if (selectedAchievement.value.length <= itemCount.value) {
       window.requestAnimationFrame(() => {
@@ -210,7 +222,7 @@ function handleScroll (e: Event) {
 }
 
 // 渲染选中的成就系列
-async function selectSeries (index: number) {
+async function selectSeries(index: number) {
   // 如果选中的是已经选中的系列，则不进行操作
   if (selectedSeries.value === index) {
     snackbarText.value = "已经选中该系列";
@@ -229,11 +241,11 @@ async function selectSeries (index: number) {
 }
 
 // 打开图片
-function openImg () {
+function openImg() {
   createTGWindow(getCardImg.value.profile, "nameCard", getCardInfo.value.name, 840, 400, false);
 }
 
-async function searchCard () {
+async function searchCard() {
   if (search.value === "") {
     snackbarColor.value = "#F5810A";
     snackbarText.value = "请输入搜索内容";
@@ -252,7 +264,7 @@ async function searchCard () {
   loading.value = false;
 }
 // 导入 UIAF 数据，进行数据合并、刷新
-async function importJson () {
+async function importJson() {
   const selectedFile = await dialog.open({
     multiple: false,
     filters: [
@@ -281,7 +293,7 @@ async function importJson () {
 }
 
 // 导出
-async function exportJson () {
+async function exportJson() {
   // 判断是否有数据
   if (achievementsStore.finAchievements === 0) {
     snackbarColor.value = "#F5810A";
@@ -398,7 +410,7 @@ async function exportJson () {
   top: 0;
   text-align: center;
   width: 65px;
-  background: #8BA5C5;
+  background: #8ba5c5;
   border-bottom-right-radius: 20px;
   border-bottom: #fff 2px solid;
   border-right: #fff 2px solid;

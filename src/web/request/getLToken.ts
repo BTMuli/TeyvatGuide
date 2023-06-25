@@ -19,7 +19,10 @@ import TGUtils from "../utils/TGUtils";
  * @param {string} stoken stoken
  * @returns {Promise<string|TGApp.BBS.Response.Base>}
  */
-export async function getLTokenBySToken (stuid: string, stoken: string): Promise<string | TGApp.BBS.Response.Base> {
+export async function getLTokenBySToken(
+  stuid: string,
+  stoken: string,
+): Promise<string | TGApp.BBS.Response.Base> {
   const url = TGApi.GameTokens.getLToken;
   const cookie = {
     stuid,
@@ -27,12 +30,14 @@ export async function getLTokenBySToken (stuid: string, stoken: string): Promise
   };
   const params = { stoken };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
-  return await http.fetch<TGApp.BBS.Response.getLTokenBySToken>(url, {
-    method: "GET",
-    headers: header,
-    query: params,
-  }).then((res) => {
-    if (res.data.retcode !== 0) return res.data;
-    return res.data.data.ltoken;
-  });
+  return await http
+    .fetch<TGApp.BBS.Response.getLTokenBySToken>(url, {
+      method: "GET",
+      headers: header,
+      query: params,
+    })
+    .then((res) => {
+      if (res.data.retcode !== 0) return res.data;
+      return res.data.data.ltoken;
+    });
 }

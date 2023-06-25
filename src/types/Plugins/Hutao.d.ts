@@ -16,9 +16,9 @@ declare namespace TGApp.Plugins.Hutao {
    * @property {any} data - 数据
    */
   export interface HutaoResponse {
-    retcode?: number
-    message?: string
-    data?: any
+    retcode?: number;
+    message?: string;
+    data?: any;
   }
   /**
    * @description 深渊记录上传数据
@@ -33,11 +33,11 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssRecordUpload
    */
   export interface AbyssRecordUpload {
-    uid: string
-    identity: string
-    spiralAbyss: AbyssRecord
-    avatars: AbyssAvatar[]
-    reservedUserName: string
+    uid: string;
+    identity: string;
+    spiralAbyss: AbyssRecord;
+    avatars: AbyssAvatar[];
+    reservedUserName: string;
   }
 
   /**
@@ -55,18 +55,18 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssRecord
    */
   export interface AbyssRecord {
-    scheduleId: number
-    totalBattleTimes: number
-    totalWinTimes: number
+    scheduleId: number;
+    totalBattleTimes: number;
+    totalWinTimes: number;
     damage: {
-      avatarId: number
-      value: number
-    }
+      avatarId: number;
+      value: number;
+    };
     takeDamage: {
-      avatarId: number
-      value: number
-    }
-    floors: AbyssFloor[]
+      avatarId: number;
+      value: number;
+    };
+    floors: AbyssFloor[];
   }
 
   /**
@@ -79,9 +79,9 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssFloor
    */
   export interface AbyssFloor {
-    index: number
-    star: number
-    levels: AbyssLevel[]
+    index: number;
+    star: number;
+    levels: AbyssLevel[];
   }
 
   /**
@@ -95,12 +95,12 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssLevel
    */
   export interface AbyssLevel {
-    index: number
-    star: number
+    index: number;
+    star: number;
     battles: Array<{
-      index: number
-      avatars: number[]
-    }>
+      index: number;
+      avatars: number[];
+    }>;
   }
 
   /**
@@ -114,10 +114,10 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssAvatar
    */
   export interface AbyssAvatar {
-    avatarId: number
-    weaponId: number
-    reliquarySetIds: string[]
-    activedConstellationNumber: number
+    avatarId: number;
+    weaponId: number;
+    reliquarySetIds: string[];
+    activedConstellationNumber: number;
   }
 
   /**
@@ -130,7 +130,7 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssRecordExistResponse
    */
   export interface AbyssRecordExistResponse extends HutaoResponse {
-    data: boolean
+    data: boolean;
   }
 
   /**
@@ -144,7 +144,7 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssRecordRankResponse
    */
   export interface AbyssRecordRankResponse extends HutaoResponse {
-    data: AbyssRecordRank
+    data: AbyssRecordRank;
   }
 
   /**
@@ -168,7 +168,7 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssOverviewResponse
    */
   export interface AbyssOverviewResponse extends HutaoResponse {
-    data: AbyssOverview
+    data: AbyssOverview;
   }
 
   /**
@@ -188,16 +188,16 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssOverview
    */
   export interface AbyssOverview {
-    scheduleId: number
-    recordTotal: number
-    spiralAbyssTotal: number
-    spiralAbyssFullStar: number
-    spiralAbyssPassed: number
-    spiralAbyssStarTotal: number
-    spiralAbyssBattleTotal: number
-    timestamp: number
-    timeTotal: number
-    timeAverage: number
+    scheduleId: number;
+    recordTotal: number;
+    spiralAbyssTotal: number;
+    spiralAbyssFullStar: number;
+    spiralAbyssPassed: number;
+    spiralAbyssStarTotal: number;
+    spiralAbyssBattleTotal: number;
+    timestamp: number;
+    timeTotal: number;
+    timeAverage: number;
   }
 
   /**
@@ -211,7 +211,7 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssAvatarUpRateResponse
    */
   export interface AbyssAvatarUpRateResponse extends HutaoResponse {
-    data: AbyssAvatarUpRate[]
+    data: AbyssAvatarUpRate[];
   }
 
   /**
@@ -224,11 +224,11 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssAvatarUpRate
    */
   export interface AbyssAvatarUpRate {
-    floor: number
+    floor: number;
     ranks: {
-      item: number
-      rate: number
-    }
+      item: number;
+      rate: number;
+    };
   }
 
   /**
@@ -241,7 +241,7 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssAvatarUseRateResponse
    */
   export interface AbyssAvatarUseRateResponse extends HutaoResponse {
-    data: AbyssAvatarUseRate[]
+    data: AbyssAvatarUseRate[];
   }
 
   /**
@@ -254,11 +254,11 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssAvatarUseRate
    */
   export interface AbyssAvatarUseRate {
-    floor: number
+    floor: number;
     ranks: Array<{
-      item: number
-      rate: number
-    }>
+      item: number;
+      rate: number;
+    }>;
   }
 
   /**
@@ -271,7 +271,7 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssAvatarHoldRateResponse
    */
   export interface AbyssAvatarHoldRateResponse extends HutaoResponse {
-    data: AbyssAvatarHoldRate[]
+    data: AbyssAvatarHoldRate[];
   }
 
   /**
@@ -285,12 +285,12 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssAvatarHoldRate
    */
   export interface AbyssAvatarHoldRate {
-    holdingRate: number
+    holdingRate: number;
     constellations: Array<{
-      item: number
-      rate: number
-    }>
-    avatarId: number
+      item: number;
+      rate: number;
+    }>;
+    avatarId: number;
   }
 
   /**
@@ -303,7 +303,7 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssAvatarCollocationResponse
    */
   export interface AbyssAvatarCollocationResponse extends HutaoResponse {
-    data: AbyssAvatarCollocation[]
+    data: AbyssAvatarCollocation[];
   }
 
   /**
@@ -320,19 +320,19 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssAvatarCollocation
    */
   export interface AbyssAvatarCollocation {
-    avatarId: number
+    avatarId: number;
     avatars: Array<{
-      item: number
-      rate: number
-    }>
+      item: number;
+      rate: number;
+    }>;
     reliquaries: Array<{
-      item: string
-      rate: number
-    }>
+      item: string;
+      rate: number;
+    }>;
     weapons: Array<{
-      item: number
-      rate: number
-    }>
+      item: number;
+      rate: number;
+    }>;
   }
 
   /**
@@ -344,7 +344,7 @@ declare namespace TGApp.Plugins.Hutao {
    * @property {AbyssWeaponCollocation[]} data - 武器搭配角色
    */
   export interface AbyssWeaponCollocationResponse extends HutaoResponse {
-    data: AbyssWeaponCollocation[]
+    data: AbyssWeaponCollocation[];
   }
 
   /**
@@ -357,11 +357,11 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssWeaponCollocation
    */
   export interface AbyssWeaponCollocation {
-    weaponId: number
+    weaponId: number;
     avatars: Array<{
-      item: number
-      rate: number
-    }>
+      item: number;
+      rate: number;
+    }>;
   }
 
   /**
@@ -374,7 +374,7 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssTeamCombinationResponse
    */
   export interface AbyssTeamCombinationResponse extends HutaoResponse {
-    data: AbyssTeamCombination[]
+    data: AbyssTeamCombination[];
   }
 
   /**
@@ -389,14 +389,14 @@ declare namespace TGApp.Plugins.Hutao {
    * @return AbyssTeamCombination
    */
   export interface AbyssTeamCombination {
-    floor: number
+    floor: number;
     up: Array<{
-      item: string
-      rate: number
-    }>
+      item: string;
+      rate: number;
+    }>;
     down: Array<{
-      item: string
-      rate: number
-    }>
+      item: string;
+      rate: number;
+    }>;
   }
 }

@@ -12,14 +12,12 @@
           <span>{{ props.modelValue.level }}</span>
         </div>
         <div class="tuc-ddrc-bottom">
-          <img :src="`/icon/star/${props.modelValue.star}.webp`" alt="star">
+          <img :src="`/icon/star/${props.modelValue.star}.webp`" alt="star" />
         </div>
       </div>
     </template>
     <template #desc>
-      <div class="tuc-ddrd-title">
-        {{ props.modelValue.set.name }}：
-      </div>
+      <div class="tuc-ddrd-title">{{ props.modelValue.set.name }}：</div>
       <div v-for="desc in props.modelValue.set.effect" class="tuc-ddrc-desc">
         <span>{{ desc.active }}件套：</span>
         <span>{{ desc.description }}</span>

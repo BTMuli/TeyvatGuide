@@ -6,9 +6,7 @@
  * @since Alpha v0.2.0
  */
 
-declare namespace TGApp.Plugins.UIGF {
-
-}
+declare namespace TGApp.Plugins.UIGF {}
 
 // /**
 //  * @description UIGF 数据

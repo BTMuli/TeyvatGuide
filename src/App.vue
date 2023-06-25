@@ -42,7 +42,7 @@ onMounted(async () => {
 });
 
 // 监听主题变化
-async function listenOnTheme () {
+async function listenOnTheme() {
   await event.listen("readTheme", (e) => {
     const themeGet = e.payload as string;
     if (theme.value !== themeGet) {
@@ -52,7 +52,7 @@ async function listenOnTheme () {
   });
 }
 
-async function checkLoad () {
+async function checkLoad() {
   if (appStore.loading) {
     console.info("数据已加载！");
     return;
@@ -63,13 +63,13 @@ async function checkLoad () {
 }
 
 // 创建数据文件夹
-async function createDataDir () {
+async function createDataDir() {
   console.info("开始创建数据文件夹...");
   // 如果不存在则创建
-  if (!await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData })) {
+  if (!(await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData }))) {
     await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
   }
-  if (!await fs.exists("tempData", { dir: fs.BaseDirectory.AppLocalData })) {
+  if (!(await fs.exists("tempData", { dir: fs.BaseDirectory.AppLocalData }))) {
     await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
   }
   console.info("数据文件夹创建完成！");

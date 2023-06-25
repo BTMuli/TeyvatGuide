@@ -15,13 +15,15 @@ import HutaoApi from "../api";
  * @since Alpha v0.2.0
  * @return {Promise<TGApp.Plugins.Hutao.AbyssOverview>}
  */
-async function getOverview (): Promise<TGApp.Plugins.Hutao.AbyssOverview> {
+async function getOverview(): Promise<TGApp.Plugins.Hutao.AbyssOverview> {
   const url = HutaoApi.Abyss.overview;
-  return await http.fetch<TGApp.Plugins.Hutao.AbyssOverviewResponse>(url, {
-    method: "GET",
-  }).then((res) => {
-    return res.data.data;
-  });
+  return await http
+    .fetch<TGApp.Plugins.Hutao.AbyssOverviewResponse>(url, {
+      method: "GET",
+    })
+    .then((res) => {
+      return res.data.data;
+    });
 }
 
 export default getOverview;
