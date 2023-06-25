@@ -1,19 +1,19 @@
 <template>
   <div class="pool-box">
     <div class="pool-title">
-      <img src="../../assets/icons/icon-wish.svg" alt="wish" class="pool-title-icon">
+      <img src="../../assets/icons/icon-wish.svg" alt="wish">
       限时祈愿
     </div>
     <div v-if="!loading" class="pool-grid">
       <v-card
         v-for="pool in poolCards"
         :key="pool.post_id"
-        style="background: var(--content-bg-2); color: #546d8b; border-radius: 10px"
+        class="pool-card"
       >
-        <v-list style="background: var(--content-bg-2); color: #546d8b">
+        <v-list class="pool-list">
           <v-list-item :title="pool.title" :subtitle="pool.subtitle">
             <template #prepend>
-              <v-img :src="pool.voice.icon" class="pool-sideIcon" />
+              <img :src="pool.voice.icon" class="pool-sideIcon" alt="icon">
             </template>
             <template v-if="pool.voice.url" #append>
               <audio :src="pool.voice.url" controls />
@@ -24,8 +24,15 @@
           <img :src="pool.cover" alt="cover">
         </div>
         <div class="pool-character">
-          <div v-for="character in pool.characters" :key="character.url" @click="toOuter(character.url, pool.title)">
-            <img :src="character.icon" class="pool-icon" alt="character">
+          <div class="pool-icon-grid">
+            <div
+              v-for="character in pool.characters"
+              :key="character.url"
+              class="pool-icon"
+              @click="toOuter(character.url, pool.title)"
+            >
+              <img :src="character.icon" alt="character">
+            </div>
           </div>
           <div class="pool-clock">
             <v-progress-circular :model-value="poolTimePass[pool.post_id]" size="100" width="10" :color="poolColor[pool.post_id]">
@@ -212,26 +219,24 @@ onUnmounted(() => {
 .pool-box {
   margin-bottom: 10px;
   padding: 10px;
-  font-family: Genshin, serif;
-  background: rgb(255 255 255 / 10%);
-  box-shadow: 0 0 10px rgb(0 0 0 / 40%);
+  box-shadow: 0 0 10px var(--common-bg-4);
   border-radius: 5px;
 }
 
 .pool-title {
-  color:rgb(255 255 255 / 80%);
-  text-shadow: 0 0 10px rgb(0 0 0 / 80%);
+  color: var(--common-text);
+	font-family: var(--font-title);
   font-size: 20px;
   display: flex;
 }
 
-.pool-title-icon {
+.pool-title img {
   width: 25px;
   height: 25px;
   transform: translate(0, 2px);
   margin-right: 10px;
-  border-radius: 50%;
-  background: rgb(0 0 0 / 30%);
+	border-radius: 50%;
+  background: var(--common-bg-2);
 }
 
 .pool-grid {
@@ -241,18 +246,28 @@ onUnmounted(() => {
   margin-top: 10px;
 }
 
+.pool-card {
+	background: #45b787; /* 蛙绿 */
+	color: #eef7f2; /* 丹白 */
+	border-radius: 5px;
+}
+
+.dark .pool-card {
+	background: #1f2623; /* 苷蓝绿 */
+}
+
+.pool-list {
+	font-family: var(--font-title);
+	background: inherit;
+	color: inherit;
+}
+
 .pool-sideIcon {
   margin-top: 10px;
-  transform: translate(0, -10px);
   width: 40px;
   height: 40px;
   border-radius: 50%;
-}
-
-.pool-sideIcon img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
+	background: var(--common-bg-2);
 }
 
 .pool-cover {
@@ -260,14 +275,14 @@ onUnmounted(() => {
   width: calc(100% - 40px);
   height: auto;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .pool-cover img {
-  max-width: 100%;
+	width: 100%;
   transition: all 0.5s;
   border-radius: 10px;
 }
@@ -281,29 +296,31 @@ onUnmounted(() => {
 .pool-character {
   margin: 0 20px;
   width: 100%;
-  height: 80px;
+  height: 70px;
   display: flex;
 }
 
-.pool-character img {
-  border-radius: 10px;
+.pool-icon-grid {
+	display: grid;
+	grid-template-columns: repeat(4,70px);
+	grid-column-gap: 10px;
 }
 
 .pool-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 10px;
+	width: 70px;
+	height: 70px;
+	border-radius: 5px;
 }
 
-.pool-character :hover .pool-icon {
-  cursor: pointer;
+.pool-icon img {
+	width: 100%;
+	height: 100%;
+	border-radius: 5px;
+	cursor: pointer;
 }
 
 .pool-clock {
-  width: auto;
-  margin-left: 40px;
-  float: right;
+  margin-left: 60px;
   font-size: small;
-  height: 80px;
 }
 </style>

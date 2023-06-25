@@ -1,8 +1,8 @@
 <template>
   <div class="position-box">
     <div class="position-title">
-      <img src="../../assets/icons/board.svg" alt="act" class="position-icon">
-      近期活动
+      <img src="../../assets/icons/board.svg" alt="act">
+      <span>近期活动</span>
     </div>
     <div v-if="!loading" class="position-grid">
       <v-card
@@ -157,7 +157,7 @@ onUnmounted(() => {
   justify-content: start;
 }
 
-.position-icon {
+.position-title img {
   width: 20px;
   height: 20px;
   margin: 0 10px;
