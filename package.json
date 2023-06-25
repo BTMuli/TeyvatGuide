@@ -1,83 +1,86 @@
 {
-	"name": "tauri-genshin",
-	"description": "A Genshin Tool build with Tauri",
-	"private": true,
-	"version": "0.2.1",
-	"author": "BTMuli <bt-muli@outlook.com>",
-	"packageManager": "npm@9.6.6",
-	"scripts": {
-		"build": "tauri build",
-		"debug": "tauri build --debug",
-		"dev": "concurrently -k \"tauri dev --exit-on-panic\" \"vue-devtools\"",
-		"lint": "concurrently \"npm:lint:*(!fix)\"",
-		"lint:code": "eslint \"./src/**/*.{vue,ts,tsx,js,jsx}\"",
-		"lint:code:fix": "npm run lint:code -- --fix",
-		"lint:fix": "concurrently \"npm:lint:*:fix\"",
-		"lint:style": "stylelint \"./src/**/*.{vue,css}\"",
-		"lint:style:fix": "npm run lint:style -- --fix",
-		"prettier": "prettier \"**/*.{json,yml,html}\" --write",
-		"tauri": "tauri",
-		"update:submodule": "git submodule update --remote --recursive",
-		"vite:dev": "vite dev",
-		"vite:build": "vite build"
-	},
-	"bugs": {
-		"url": "https://github.com/BTMuli/Tauri.Genshin/issues"
-	},
-	"directories": {
-		"doc": "docs"
-	},
-	"homepage": "https://github.com/BTMuli/Tauri.Genshin#readme",
-	"keywords": [
-		"Tauri",
-		"Node",
-		"Typescript",
-		"Vite",
-		"Genshin Impact",
-		"Vuetify"
-	],
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/BTMuli/Tauri.Genshin.git"
-	},
-	"dependencies": {
-		"@mdi/font": "7.2.96",
-		"@tauri-apps/api": "^1.4.0",
-		"clipboard": "^2.0.11",
-		"html2canvas": "^1.4.1",
-		"js-md5": "^0.7.3",
-		"pinia": "^2.1.4",
-		"pinia-plugin-persistedstate": "^3.1.0",
-		"tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql",
-		"vue": "^3.3.4",
-		"vue-json-viewer": "^3.0.4",
-		"vue-router": "^4.2.2",
-		"vuetify": "^3.3.3"
-	},
-	"devDependencies": {
-		"@tauri-apps/cli": "^1.4.0",
-		"@types/js-md5": "^0.7.0",
-		"@types/node": "^20.3.1",
-		"@typescript-eslint/eslint-plugin": "^5.60.0",
-		"@typescript-eslint/parser": "^5.60.0",
-		"@vitejs/plugin-vue": "^4.2.3",
-		"@vue/devtools": "^6.5.0",
-		"concurrently": "^8.2.0",
-		"eslint": "^8.43.0",
-		"eslint-config-standard-with-typescript": "^35.0.0",
-		"eslint-plugin-import": "^2.27.5",
-		"eslint-plugin-n": "^15.7.0",
-		"eslint-plugin-promise": "^6.1.1",
-		"eslint-plugin-vue": "^9.15.0",
-		"prettier": "2.8.8",
-		"stylelint": "^15.8.0",
-		"stylelint-config-standard-vue": "^1.0.0",
-		"stylelint-declaration-block-no-ignored-properties": "^2.7.0",
-		"stylelint-high-performance-animation": "^1.8.0",
-		"stylelint-order": "^6.0.3",
-		"typescript": "^5.1.3",
-		"vite": "^4.3.9",
-		"vite-plugin-vuetify": "^1.0.2"
-	}
+  "name": "tauri-genshin",
+  "description": "A Genshin Tool build with Tauri",
+  "private": true,
+  "version": "0.2.1",
+  "author": "BTMuli <bt-muli@outlook.com>",
+  "packageManager": "npm@9.6.6",
+  "scripts": {
+    "build": "tauri build",
+    "debug": "tauri build --debug",
+    "dev": "concurrently -k \"tauri dev --exit-on-panic\" \"vue-devtools\"",
+    "lint": "concurrently \"npm:lint:*(!fix)\"",
+    "lint:fix": "concurrently \"npm:lint:*:fix\"",
+    "lint:code": "eslint .",
+    "lint:code:fix": "eslint . --fix",
+    "lint:style": "stylelint \"src/**/*.{vue,css}\"",
+    "lint:style:fix": "npm run lint:style -- --fix",
+    "prettier": "prettier . --write",
+    "tauri": "tauri",
+    "update:submodule": "git submodule update --remote --recursive",
+    "vite:dev": "vite dev",
+    "vite:build": "vite build"
+  },
+  "bugs": {
+    "url": "https://github.com/BTMuli/Tauri.Genshin/issues"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "homepage": "https://github.com/BTMuli/Tauri.Genshin#readme",
+  "keywords": [
+    "Tauri",
+    "Node",
+    "Typescript",
+    "Vite",
+    "Genshin Impact",
+    "Vuetify"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BTMuli/Tauri.Genshin.git"
+  },
+  "dependencies": {
+    "@mdi/font": "7.2.96",
+    "@tauri-apps/api": "^1.4.0",
+    "clipboard": "^2.0.11",
+    "html2canvas": "^1.4.1",
+    "js-md5": "^0.7.3",
+    "pinia": "^2.1.4",
+    "pinia-plugin-persistedstate": "^3.1.0",
+    "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql",
+    "vue": "^3.3.4",
+    "vue-json-viewer": "^3.0.4",
+    "vue-router": "^4.2.2",
+    "vuetify": "^3.3.3"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.4.0",
+    "@types/js-md5": "^0.7.0",
+    "@types/node": "^20.3.1",
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
+    "@vitejs/plugin-vue": "^4.2.3",
+    "@vue/devtools": "^6.5.0",
+    "concurrently": "^8.2.0",
+    "eslint": "^8.43.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-config-standard-with-typescript": "^35.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.7.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-vue": "^9.15.0",
+    "prettier": "2.8.8",
+    "stylelint": "^15.8.0",
+    "stylelint-config-standard-vue": "^1.0.0",
+    "stylelint-declaration-block-no-ignored-properties": "^2.7.0",
+    "stylelint-high-performance-animation": "^1.8.0",
+    "stylelint-order": "^6.0.3",
+    "stylelint-prettier": "^3.0.0",
+    "typescript": "^5.1.3",
+    "vite": "^4.3.9",
+    "vite-plugin-vuetify": "^1.0.2"
+  }
 }

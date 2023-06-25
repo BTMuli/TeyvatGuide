@@ -1,7 +1,8 @@
-"semi": true
-"singleQuote": false
-"printWidth": 120
-"useTabs": true
-"proseWrap": "preserve"
-"bracketSpacing": true
-"endOfLine": "crlf"
+semi: true
+singleQuote: false
+printWidth: 100
+useTabs: false
+tabWidth: 2
+bracketSpacing: true
+endOfLine: "crlf"
+trailingComma: "all"

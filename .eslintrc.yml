@@ -5,86 +5,31 @@ env:
 extends:
   - plugin:vue/vue3-recommended
   - standard-with-typescript
-overrides: []
-parser: vue-eslint-parser
+  - prettier
+  - plugin:prettier/recommended
+parser: "@typescript-eslint/parser"
 parserOptions:
-  parser: "@typescript-eslint/parser"
-  ecmaVersion: latest
-  sourceType: module
-  extraFileExtensions:
-    - .vue
+  parser: vue-eslint-parser
   project:
-    - ./tsconfig.json
-    - ./tsconfig.node.json
+    - tsconfig.json
+    - tsconfig.node.json
 globals:
   TGApp: readonly
 plugins:
   - vue
+  - prettier
 rules:
-  # some rules that not normal disabled
-  semi: off
-  quotes: off
-  # rules of standard
-  no-tabs:
-    - warn
-    - allowIndentationTabs: false # 禁止使用 tab 缩进
-  comma-dangle:
-    - warn
-    - always-multiline # 多行时，尾随逗号必须存在
-  camelcase:
-    - warn
-    - properties: always # 对象属性名必须使用驼峰命名
-  array-callback-return:
-    - error
-    - allowImplicit: true
-  # rules of vue
-  vue/max-attributes-per-line:
-    - off
-  # vue/max-len: # 限制代码长度不得超过这个长度
-  #   - warn
-  #   - code: 80
-  vue/html-indent:
-    - warn
-    - 2 # Vue 标签缩进
-    - baseIndent: 1 # 最外面的template缩进
-  vue/component-name-in-template-casing:
-    - warn # 组件应使用PascalCase命名
-    - "PascalCase"
-  vue/multi-word-component-names:
-    - off # 组件名应该是由多个单词组成
-  # rules of typescript
+  # 严格布尔表达式
   "@typescript-eslint/strict-boolean-expressions":
-    - off
-  "@typescript-eslint/indent":
     - warn
-    - 2 # js/ts缩进
-  "@typescript-eslint/semi":
+  # 禁止使用 Object
+  "@typescript-eslint/consistent-type-assertions":
     - warn
-    - always # 语句末尾必须加分号
-  "@typescript-eslint/quotes":
+    - assertionStyle: angle-bracket # 使用尖括号
+  # 命名规范
+  "@typescript-eslint/naming-convention":
     - warn
-    - double # 引号使用双引号
-  "@typescript-eslint/comma-dangle":
-    - warn
-    - always-multiline
-  "@typescript-eslint/prefer-nullish-coalescing": off # on 会出现一些问题
-  "@typescript-eslint/space-before-function-paren":
-    - warn
-    - always # 函数名和括号之间必须有空格
-  "@typescript-eslint/ban-types":
-    - warn
-    - types:
-        Object: # 禁止使用 Object
-          message: "Use {} instead"
-          fixWith: "{}"
-        Boolean: # 禁止使用 Boolean
-          message: "Use boolean instead"
-        Number: # 禁止使用 Number
-          message: "Use number instead"
-        String: # 禁止使用 String
-          message: "Use string instead"
-        Symbol: # 禁止使用 Symbol
-          message: "Use symbol instead"
-  "@typescript-eslint/no-floating-promises":
-    - warn
-    - ignoreVoid: true # 忽略 void 类型
+    - selector: variableLike
+      format: ["camelCase", "UPPER_CASE", "PascalCase", "snake_case"]
+      leadingUnderscore: "allow"
+      trailingUnderscore: "allow"

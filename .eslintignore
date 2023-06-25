@@ -1,0 +1,5 @@
+# Build
+dist
+src-tauri/target
+# Submodules
+TGAssistant

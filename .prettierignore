@@ -2,15 +2,8 @@
 .idea
 # Visual Studio Code Setting
 .vscode
-# Node Modules
-node_modules
-package-lock.json
 # Tauri build
 dist
 src-tauri/target
 # submodules
 TGAssistant
-# Docs
-README.md
-LICENSE
-docs
