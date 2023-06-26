@@ -142,7 +142,7 @@ async function shareAbyss(): Promise<void> {
 </script>
 <style lang="css" scoped>
 .ua-box {
-  box-shadow: 0 0 10px 0 var(--common-bg-4);
+  box-shadow: 0 0 10px 0 var(--common-shadow-4);
   display: flex;
   justify-content: left;
   align-items: center;
@@ -152,7 +152,7 @@ async function shareAbyss(): Promise<void> {
 
 .ua-tab {
   font-family: var(--font-text);
-  color: var(--common-text);
+  color: var(--common-text-title);
   width: 100px;
   height: 100%;
 }
@@ -166,7 +166,7 @@ async function shareAbyss(): Promise<void> {
 
 .ua-btn {
   margin-top: 15px;
-  background: var(--common-bg-2);
+  background: var(--common-shadow-2);
   color: var(--common-color-white);
 }
 
@@ -181,13 +181,13 @@ async function shareAbyss(): Promise<void> {
   padding: 10px;
   overflow-y: auto;
   border-radius: 5px;
-  box-shadow: 0 0 10px var(--common-bg-2);
+  box-shadow: 0 0 10px var(--common-shadow-2);
 }
 
 .uaw-title {
   display: flex;
   align-items: center;
-  color: var(--common-text);
+  color: var(--common-text-title);
   font-size: 20px;
   font-family: var(--font-title);
 }
@@ -222,7 +222,7 @@ async function shareAbyss(): Promise<void> {
   position: absolute;
   top: calc(50vh - 200px);
   left: calc(50vw - 400px);
-  background: var(--common-bg-2);
+  background: var(--common-shadow-2);
   border-radius: 5px;
   width: 800px;
   height: 400px;
@@ -230,7 +230,7 @@ async function shareAbyss(): Promise<void> {
   flex-direction: column;
   align-items: center;
   font-size: 1.5rem;
-  color: var(--common-text);
+  color: var(--common-text-title);
   font-family: var(--font-title);
 }
 </style>

@@ -92,7 +92,7 @@ function getAvatarName() {
 <style lang="css" scoped>
 .tuc-rb-box {
   padding: 5px;
-  border: 1px inset var(--common-bg-4);
+  border: 1px inset var(--common-shadow-4);
   border-radius: 5px;
   position: relative;
   cursor: pointer;
@@ -139,7 +139,7 @@ function getAvatarName() {
   left: 0;
   width: 100%;
   height: 100%;
-  background: var(--common-bg-4);
+  background: var(--common-shadow-4);
   backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;

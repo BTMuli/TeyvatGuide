@@ -31,6 +31,6 @@ const props = defineProps<TuaDetailBattleProps>();
   width: 100%;
   text-align: left;
   font-size: 12px;
-  color: var(--common-text-3);
+  color: var(--common-text-quote);
 }
 </style>

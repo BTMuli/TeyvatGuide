@@ -7,14 +7,20 @@
 
 /* 主题色 */
 html.dark {
-  --common-bg: rgb(255 255 255 / 10%);
-  --common-bg-2: rgb(255 255 255 / 20%);
-  --common-bg-4: rgb(255 255 255 / 40%);
-  --common-bg-8: rgb(255 255 255 / 80%);
+  /* box-shadow */
+  --common-shadow-1: rgb(255 255 255 / 10%);
+  --common-shadow-2: rgb(255 255 255 / 20%);
+  --common-shadow-4: rgb(255 255 255 / 40%);
+  --common-shadow-8: rgb(255 255 255 / 80%);
 
-  --common-text: var(--common-color-white); /* title */
-  --common-text-2: var(--common-color-white); /* text */
-  --common-text-3: var(--common-color-grey); /* quote */
+  /* box bg */
+  --common-bg-1: #3d424b; /* 一级背景色 */
+  --common-bgt-1: #faf7e8; /* 一级背景色对应的文本色 */
+
+  /* text */
+  --common-text-title: var(--common-color-white); /* title */
+  --common-text-content: var(--common-color-white); /* text */
+  --common-text-quote: var(--common-color-grey); /* quote */
 
   --calendar-btn-bg: #1e1e1e;
   --back-top-shadow: #000000;

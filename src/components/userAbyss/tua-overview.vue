@@ -42,7 +42,7 @@ const props = withDefaults(defineProps<TAOProps>(), {
   height: auto;
   padding: 10px;
   border-radius: 5px;
-  background: var(--common-bg);
+  background: var(--common-shadow-1);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -52,7 +52,7 @@ const props = withDefaults(defineProps<TAOProps>(), {
 .tuao-title {
   font-family: var(--font-title);
   font-size: 20px;
-  color: var(--common-text-2);
+  color: var(--common-text-content);
 }
 
 .tuao-val-text {

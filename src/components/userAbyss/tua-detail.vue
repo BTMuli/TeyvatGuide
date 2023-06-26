@@ -29,7 +29,7 @@ const props = defineProps<TuaDetailProps>();
   width: 100%;
   margin-bottom: 10px;
   border-radius: 5px;
-  background: var(--common-bg);
+  background: var(--common-shadow-1);
   padding: 10px;
 }
 

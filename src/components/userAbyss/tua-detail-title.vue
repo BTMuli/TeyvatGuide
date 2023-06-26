@@ -46,7 +46,7 @@ const getFontSize: ComputedRef<string> = computed(() => {
 
 .tud-t-title {
   font-size: v-bind(getFontSize);
-  color: var(--common-text-2);
+  color: var(--common-text-content);
 }
 
 .tud-t-val {

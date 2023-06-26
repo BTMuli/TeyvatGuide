@@ -13,13 +13,13 @@
 
 .anno-title {
   font-family: var(--font-title);
-  color: var(--common-text);
+  color: var(--common-text-title);
   font-size: 24px;
 }
 
 .anno-subtitle {
   font-size: 16px;
-  color: var(--common-text-3);
+  color: var(--common-text-quote);
 }
 
 .anno-img {

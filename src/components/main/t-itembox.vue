@@ -188,7 +188,7 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   width: 100%;
   height: v-bind(getOuterHeight);
   text-align: center;
-  color: var(--common-text);
+  color: var(--common-text-title);
   font-size: v-bind(getOuterFont);
 }
 </style>

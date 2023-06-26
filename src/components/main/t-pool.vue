@@ -8,8 +8,9 @@
       <v-card v-for="pool in poolCards" :key="pool.post_id" class="pool-card">
         <v-list class="pool-list">
           <v-list-item :title="pool.title" :subtitle="pool.subtitle">
+            <!-- todo 点击播放语音 -->
             <template #prepend>
-              <img :src="pool.voice.icon" class="pool-sideIcon" alt="icon" />
+              <img :src="pool.voice.icon" class="pool-voice-icon" alt="icon" />
             </template>
             <template v-if="pool.voice.url" #append>
               <audio :src="pool.voice.url" controls />
@@ -156,7 +157,7 @@ onMounted(async () => {
   loading.value = false;
 });
 
-// 检测是否有新的限时祈愿
+// 检测新卡池
 function checkCover(data: GachaData[]) {
   // 如果没有缓存
   if (!homeStore.poolCover || Object.keys(homeStore.poolCover).length === 0) {
@@ -220,12 +221,12 @@ onUnmounted(() => {
 .pool-box {
   margin-bottom: 10px;
   padding: 10px;
-  box-shadow: 0 0 10px var(--common-bg-4);
+  box-shadow: 0 0 10px var(--common-shadow-4);
   border-radius: 5px;
 }
 
 .pool-title {
-  color: var(--common-text);
+  color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
   display: flex;
@@ -237,7 +238,7 @@ onUnmounted(() => {
   transform: translate(0, 2px);
   margin-right: 10px;
   border-radius: 50%;
-  background: var(--common-bg-2);
+  background: var(--common-shadow-2);
 }
 
 .pool-grid {
@@ -248,13 +249,9 @@ onUnmounted(() => {
 }
 
 .pool-card {
-  background: #45b787; /* 蛙绿 */
-  color: #eef7f2; /* 丹白 */
+  background: var(--common-bg-1);
+  color: var(--common-bgt-1);
   border-radius: 5px;
-}
-
-.dark .pool-card {
-  background: #1f2623; /* 苷蓝绿 */
 }
 
 .pool-list {
@@ -263,12 +260,10 @@ onUnmounted(() => {
   color: inherit;
 }
 
-.pool-sideIcon {
-  margin-top: 10px;
+.pool-voice-icon {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  background: var(--common-bg-2);
+  transform: translateY(-5px);
 }
 
 .pool-cover {

@@ -124,7 +124,7 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole) {
   width: 100%;
   border-radius: 5px;
   padding: 10px;
-  box-shadow: 0 0 10px var(--common-bg-4);
+  box-shadow: 0 0 10px var(--common-shadow-4);
 }
 
 .uc-top {
@@ -140,13 +140,13 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole) {
   font-family: var(--font-title);
   font-size: 20px;
   margin-right: 10px;
-  color: var(--common-text);
+  color: var(--common-text-title);
 }
 
 .uc-top-btn {
   font-family: var(--font-text);
   border-radius: 5px;
-  background: var(--common-bg-2);
+  background: var(--common-shadow-2);
   color: var(--common-color-white);
   margin-left: 15px;
 }

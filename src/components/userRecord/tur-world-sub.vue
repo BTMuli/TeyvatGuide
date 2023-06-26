@@ -87,7 +87,7 @@ async function listenOnTheme() {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: var(--common-bg);
+  background: var(--common-shadow-1);
 }
 
 .tur-ws-icon {
@@ -102,7 +102,7 @@ async function listenOnTheme() {
 }
 
 .tur-ws-content {
-  color: var(--common-text-2);
+  color: var(--common-text-content);
   width: calc(100% - 60px);
   height: 100%;
 }
@@ -110,7 +110,7 @@ async function listenOnTheme() {
 .tur-ws-title {
   font-family: var(--font-title);
   font-size: 20px;
-  border-bottom: 1px inset var(--common-text-2);
+  border-bottom: 1px inset var(--common-text-content);
 }
 
 .tur-ws-sub {

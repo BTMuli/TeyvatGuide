@@ -140,12 +140,12 @@ onUnmounted(() => {
 .position-box {
   margin-bottom: 10px;
   padding: 10px;
-  box-shadow: 0 0 10px var(--common-bg-4);
+  box-shadow: 0 0 10px var(--common-shadow-4);
   border-radius: 5px;
 }
 
 .position-title {
-  color: var(--common-text);
+  color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
   display: flex;
@@ -167,13 +167,9 @@ onUnmounted(() => {
 }
 
 .position-card {
-  background: #45b787; /* 蛙绿 */
-  color: #eef7f2; /* 月白 */
+  background: var(--common-bg-1);
+  color: var(--common-bgt-1);
   border-radius: 5px;
-}
-
-.dark .position-card {
-  background: #1f2623; /* 苷蓝绿 */
 }
 
 .position-list {

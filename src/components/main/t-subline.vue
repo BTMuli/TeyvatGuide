@@ -15,7 +15,7 @@ defineProps({
 </script>
 <style lang="css" scoped>
 .tsl-box {
-  background: var(--common-bg-2);
+  background: var(--common-shadow-2);
   display: flex;
   align-items: center;
   height: 30px;
