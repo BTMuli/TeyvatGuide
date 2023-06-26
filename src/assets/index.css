@@ -2,7 +2,7 @@
  * @file assets index.css
  * @description 全局样式文件
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.1
  */
 
 @import "fonts/index.css";
@@ -39,13 +39,26 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #847c74; /* 夜灰 */
+  background: #faf7e8;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c7d2d4; /* 鸥蓝 */
+  background: #686868;
   border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #606060;
+}
+
+/* dark mode */
+.dark ::-webkit-scrollbar-track {
+  background: #424242;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #7b7b7b;
 }
 
 /* card action 内的按钮 */
