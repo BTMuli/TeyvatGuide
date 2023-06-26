@@ -435,13 +435,20 @@ class Sqlite {
 
   /**
    * @description 获取用户角色数据
-   * @since Alpha v0.2.0
+   * @since Alpha v0.2.1
    * @param {string} uid 用户 uid
+   * @param {number} id 角色 ID
    * @returns {Promise<TGApp.Sqlite.Character.UserRole[]|false>}
    */
-  public async getUserCharacter(uid: string): Promise<TGApp.Sqlite.Character.UserRole[] | false> {
+  public async getUserCharacter(
+    uid: string,
+    id?: number,
+  ): Promise<TGApp.Sqlite.Character.UserRole[] | false> {
     const db = await Database.load(this.dbPath);
-    const sql = `SELECT * FROM UserCharacters WHERE uid = '${uid}'`;
+    let sql = `SELECT * FROM UserCharacters WHERE uid = '${uid}'`;
+    if (id) {
+      sql = `SELECT * FROM UserCharacters WHERE uid = '${uid}' AND cid = ${id}`;
+    }
     const res: TGApp.Sqlite.Character.UserRole[] = await db.select(sql);
     await db.close();
     if (res.length === 0) return false;

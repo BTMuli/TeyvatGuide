@@ -2,7 +2,7 @@
  * @file plugins Hutao index.ts
  * @description Hutao 插件入口
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.1
  */
 
 import getAvatarCollect from "./request/getAvatarCollect";
@@ -14,6 +14,7 @@ import getTeamCollect from "./request/getTeamCollect";
 import { checkUid, getUserData } from "./request/getUserData";
 import getWeaponCollect from "./request/getWeaponCollect";
 import uploadData from "./request/uploadData";
+import { transLocal } from "./utils/transLocal";
 
 const HutaoRequest = {
   Abyss: {
@@ -31,6 +32,9 @@ const HutaoRequest = {
     },
     getWeaponCollect,
     postData: uploadData,
+    utils: {
+      transData: transLocal,
+    },
   },
 };
 

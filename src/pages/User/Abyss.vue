@@ -14,6 +14,10 @@
           <v-icon>mdi-refresh</v-icon>
           <span>刷新</span>
         </v-btn>
+        <v-btn class="ua-btn" variant="outlined" @click="uploadAbyss">
+          <v-icon>mdi-cloud-upload</v-icon>
+          <span>上传</span>
+        </v-btn>
       </div>
     </v-tabs>
     <v-window v-model="userTab" class="ua-window">
@@ -73,6 +77,7 @@ import { useUserStore } from "../../store/modules/user";
 import TGRequest from "../../web/request/TGRequest";
 import TGSqlite from "../../plugins/Sqlite";
 import { generateShareImg } from "../../utils/TGShare";
+import HutaoRequest from "../../plugins/Hutao";
 
 // store
 const userStore = useUserStore();
@@ -138,6 +143,12 @@ function getAbyssRef(el: HTMLElement): void {
 async function shareAbyss(): Promise<void> {
   const fileName = `【深渊数据】${curAbyss.value.id}-${user.value.gameUid}`;
   await generateShareImg(fileName, abyssRef.value);
+}
+
+function uploadAbyss(): void {
+  const abyssData = curAbyss.value;
+  const transAbyss = HutaoRequest.Abyss.utils.transData(abyssData);
+  console.log(transAbyss);
 }
 </script>
 <style lang="css" scoped>
