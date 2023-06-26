@@ -26,12 +26,10 @@ html.dark {
   --back-top-shadow: #000000;
   --theme-switch-icon: #e1e1e1;
   --post-default-text: #faf7e8;
-  --calendar-item-btn: #faf7e8;
 
-  --content-bg-1: #1e1e1e;
   --content-bg-2: #393b40;
   --content-bg-3: #2a2a2a;
-  --content-text-1: #1e1e1e;
+
   --content-text-2: #faf7e8;
   --content-text-3: #e1e1e1;
 
@@ -39,6 +37,4 @@ html.dark {
   --btn-bg-2: #e1e1e1;
   --btn-bg-3: #1e1e1e;
   --btn-text-1: #393b40;
-
-  --card-text-1: #393b40;
 }

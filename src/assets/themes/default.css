@@ -25,12 +25,10 @@ html.default {
   --back-top-shadow: #546d8b;
   --theme-switch-icon: #393b40;
   --post-default-text: #1e1e1e;
-  --calendar-item-btn: #fec90b;
 
-  --content-bg-1: #546d8b;
   --content-bg-2: #faf7e8;
   --content-bg-3: #5b738f;
-  --content-text-1: #fec90b;
+
   --content-text-2: #393b40;
   --content-text-3: #546d8b;
 
@@ -38,6 +36,4 @@ html.default {
   --btn-bg-2: #4a5366;
   --btn-bg-3: #546d8b;
   --btn-text-1: #faf7e8;
-
-  --card-text-1: #485466;
 }
