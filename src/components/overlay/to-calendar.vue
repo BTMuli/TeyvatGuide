@@ -3,18 +3,11 @@
     <div class="toc-box">
       <div class="box-div">
         <div class="toc-top">
-          <div class="toc-icon">
-            <TibCalendarAvatar
-              v-if="itemType === 'character'"
-              v-model="itemVal"
-              size="100px"
-              style="cursor: default"
-            />
-            <TibCalendarWeapon
-              v-if="itemType === 'weapon'"
-              v-model="itemVal"
-              size="100px"
-              style="cursor: default"
+          <div class="toc-icon" style="cursor: default">
+            <TibCalendarItem
+              :model="itemType"
+              :data="<TGApp.App.Calendar.Item>itemVal"
+              :clickable="false"
             />
           </div>
           <div class="toc-material-grid">
@@ -51,37 +44,32 @@
 // vue
 import { computed, ref } from "vue";
 import TOverlay from "../main/t-overlay.vue";
-import TibCalendarWeapon from "../itembox/tib-calendar-weapon.vue";
-import TibCalendarAvatar from "../itembox/tib-calendar-avatar.vue";
+import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 import TibCalendarMaterial from "../itembox/tib-calendar-material.vue";
 // utils
 import { OBC_CONTENT_API } from "../../plugins/Mys/interface/utils";
 import { createTGWindow } from "../../utils/TGWindow";
 
-interface TOCalendarProps {
+interface ToCalendarProps {
   modelValue: boolean;
-  dataType: string;
+  dataType: "weapon" | "avatar";
   dataVal: TGApp.App.Calendar.Item;
 }
 
-interface TOCalendarEmits {
-  (e: "update:modelValue", value: TGApp.App.Calendar.Item): void;
+interface ToCalendarEmits {
+  (e: "update:modelValue", value: boolean): void;
   (e: "cancel"): void;
 }
 
-const emits = defineEmits<TOCalendarEmits>();
-const props = withDefaults(defineProps<TOCalendarProps>(), {
-  modelValue: false,
-  dataType: "",
-  dataVal: {} as TGApp.App.Calendar.Item,
-});
+const emits = defineEmits<ToCalendarEmits>();
+const props = defineProps<ToCalendarProps>();
 
 const visible = computed({
   get: () => props.modelValue,
   set: (value) => emits("update:modelValue", value),
 });
 const itemType = computed(() => props.dataType);
-const itemVal = computed(() => props.dataVal);
+const itemVal = computed<TGApp.App.Calendar.Item>(() => props.dataVal);
 const snackbar = ref(false);
 
 const onCancel = () => {

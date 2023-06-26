@@ -42,6 +42,7 @@ export interface TItemBoxData {
   size: string;
   height: string;
   display: "inner" | "outer";
+  clickable: boolean;
   lt: string;
   ltSize: string;
   rt?: string;
@@ -57,19 +58,9 @@ interface TItemBoxProps {
   modelValue: TItemBoxData;
 }
 
-const props = withDefaults(defineProps<TItemBoxProps>(), {
-  modelValue: {
-    bg: "",
-    icon: "",
-    lt: "",
-    ltSize: "30px",
-    display: "inner",
-    innerText: "",
-    size: "80px",
-    height: "80px",
-  },
-});
+const props = defineProps<TItemBoxProps>();
 
+const getCursor = computed(() => (props.modelValue.clickable ? "pointer" : "default"));
 const getInnerHeight = computed(() => `${props.modelValue.innerHeight}px`);
 const getInnerFont = computed(() => `${props.modelValue.innerHeight / 2}px`);
 const getOuterHeight = computed(() => `${props.modelValue.outerHeight}px`);
@@ -78,16 +69,17 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
 <style lang="css" scoped>
 .tib-box {
   position: relative;
-  width: v-bind(props[ "modelValue"][ "size"]);
-  height: v-bind(props[ "modelValue"][ "height"]);
+  width: v-bind(modelValue[ "size"]);
+  height: v-bind(modelValue[ "height"]);
+  cursor: v-bind(getCursor);
 }
 
 .tib-bg {
   position: absolute;
   top: 0;
   left: 0;
-  width: v-bind(props[ "modelValue"][ "size"]);
-  height: v-bind(props[ "modelValue"][ "size"]);
+  width: v-bind(modelValue[ "size"]);
+  height: v-bind(modelValue[ "size"]);
   border-radius: 5px;
   overflow: hidden;
 }
@@ -100,8 +92,8 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
 
 .tib-icon {
   position: relative;
-  width: v-bind(props[ "modelValue"][ "size"]);
-  height: v-bind(props[ "modelValue"][ "size"]);
+  width: v-bind(modelValue[ "size"]);
+  height: v-bind(modelValue[ "size"]);
   overflow: hidden;
   border-radius: 5px;
 }
@@ -116,8 +108,8 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   position: absolute;
   top: 0;
   left: 0;
-  width: v-bind(props[ "modelValue"][ "size"]);
-  height: v-bind(props[ "modelValue"][ "size"]);
+  width: v-bind(modelValue[ "size"]);
+  height: v-bind(modelValue[ "size"]);
   border-radius: 5px;
   display: flex;
   justify-content: center;
@@ -130,8 +122,8 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   top: 0;
   left: 0;
   padding: 5px;
-  width: v-bind(props[ "modelValue"][ "ltSize"]);
-  height: v-bind(props[ "modelValue"][ "ltSize"]);
+  width: v-bind(modelValue[ "ltSize"]);
+  height: v-bind(modelValue[ "ltSize"]);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -147,8 +139,8 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   position: absolute;
   top: 0;
   right: 0;
-  width: v-bind(props[ "modelValue"][ "rtSize"]);
-  height: v-bind(props[ "modelValue"][ "rtSize"]);
+  width: v-bind(modelValue[ "rtSize"]);
+  height: v-bind(modelValue[ "rtSize"]);
   background: rgb(0 0 0 / 40%);
   border-top-right-radius: 5px;
   border-bottom-left-radius: 5px;
