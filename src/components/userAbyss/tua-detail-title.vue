@@ -23,9 +23,7 @@ interface TuaDetailTitleProps {
   mode: "floor" | "level";
 }
 
-const props = withDefaults(defineProps<TuaDetailTitleProps>(), {
-  mode: "level",
-});
+const props = defineProps<TuaDetailTitleProps>();
 
 const getFont: ComputedRef<string> = computed(() => {
   return props.mode === "level" ? "var(--font-text)" : "var(--font-title)";

@@ -23,18 +23,18 @@
 </template>
 <script lang="ts" setup>
 // vue
+import { computed } from "vue";
 import TibAbyssOverview from "../itembox/tib-abyss-overview.vue";
 
 interface TAOProps {
   title: string;
   valText?: string | number;
   valIcons?: string;
-  iconNum: number;
+  multi4?: boolean;
 }
 
-const props = withDefaults(defineProps<TAOProps>(), {
-  iconNum: 1,
-});
+const props = defineProps<TAOProps>();
+const getIconNum = computed(() => (props.multi4 ? 4 : 1));
 </script>
 <style lang="css" scoped>
 .tuao-box {
@@ -70,6 +70,6 @@ const props = withDefaults(defineProps<TAOProps>(), {
 .tuao-val-icons {
   display: grid;
   column-gap: 10px;
-  grid-template-columns: repeat(v-bind(iconNum), 1fr);
+  grid-template-columns: repeat(v-bind(getIconNum), 1fr);
 }
 </style>

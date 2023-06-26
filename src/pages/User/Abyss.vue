@@ -41,7 +41,7 @@
             <TuaOverview title="最多承伤" :val-icons="item.takeDamageRank" />
             <TuaOverview title="最强一击" :val-icons="item.damageRank" />
             <TuaOverview title="元素战技" :val-icons="item.normalSkillRank" />
-            <TuaOverview title="出战次数" :val-icons="item.revealRank" :icon-num="4" />
+            <TuaOverview title="出战次数" :val-icons="item.revealRank" :multi4="true" />
             <TuaOverview title="元素爆发" :val-icons="item.energySkillRank" />
           </div>
           <TSubLine>详情</TSubLine>

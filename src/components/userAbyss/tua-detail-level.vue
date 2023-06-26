@@ -1,6 +1,10 @@
 <template>
   <div class="tud-dl-divider" />
-  <TuaDetailTitle :val="props.modelValue.winStar" :name="`第${props.modelValue.id}间`" />
+  <TuaDetailTitle
+    :val="props.modelValue.winStar"
+    :name="`第${props.modelValue.id}间`"
+    mode="level"
+  />
   <TuaDetailBattle :model-value="props.modelValue.upBattle" />
   <TuaDetailBattle :model-value="props.modelValue.downBattle" />
 </template>
