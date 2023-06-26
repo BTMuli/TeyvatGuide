@@ -3,7 +3,9 @@ extends:
   - stylelint-order
   - stylelint-declaration-block-no-ignored-properties
   - stylelint-config-standard-vue
+  - stylelint-config-idiomatic-order
 plugins:
   - stylelint-prettier
+  - stylelint-order
 rules:
   "prettier/prettier": true
