@@ -16,8 +16,12 @@ html.default {
   /* box bg */
   --common-bg-1: #faf7e8; /* 一级背景色 */
   --common-bgt-1: #3d424b; /* 一级背景色对应的文本色 */
-  --common-bg-2: #fec90b; /* button 背景色 */
-  --common-bgt-2: #5b738f; /* button 背景色对应的文本色 */
+
+  /* button */
+  --common-btn-bg-1: #fec90b; /* button 背景色 */
+  --common-btn-bgt-1: #5b738f; /* button 背景色对应的文本色 */
+  --common-btn-bg-2: #e1d8c6; /* button 背景色 */
+  --common-btn-bgt-2: #495366; /* button 背景色对应的文本色 */
 
   --common-text-title: #393b40; /* title */
   --common-text-content: var(--common-color-blue-2); /* text */

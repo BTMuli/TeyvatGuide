@@ -187,8 +187,8 @@ function getContents(day: number): void {
 
 .calendar-btn-selected {
   border-radius: 5px;
-  background: var(--common-bg-2);
-  color: var(--common-bgt-2);
+  background: var(--common-btn-bg-1);
+  color: var(--common-btn-bgt-1);
 }
 
 .calendar-grid {

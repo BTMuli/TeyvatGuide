@@ -1,10 +1,10 @@
 <template>
-  <TLoading v-model="loading" :title="loadingTitle" />
+  <ToLoading v-model="loading" :title="loadingTitle" />
   <v-tabs v-model="tab" align-tabs="start" class="anno-tab">
     <v-tab value="activity"> 活动公告 </v-tab>
     <v-tab value="game"> 游戏公告 </v-tab>
     <v-spacer />
-    <v-btn class="switch-btn" @click="switchNews">
+    <v-btn class="anno-switch-btn" @click="switchNews">
       <template #prepend>
         <v-icon>mdi-bullhorn</v-icon>
       </template>
@@ -14,20 +14,18 @@
   <v-window v-model="tab">
     <v-window-item value="activity">
       <div class="anno-grid">
-        <v-card v-for="item in annoCards.activity" :key="item.id" class="anno-card" width="340">
+        <v-card v-for="item in annoCards.activity" :key="item.id" class="anno-card">
           <div class="anno-cover" @click="toPost(item)">
             <img :src="item.banner" alt="cover" />
           </div>
-          <v-card-title>
+          <v-card-title class="anno-card-title">
             {{ item.title }}
           </v-card-title>
           <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
           <v-card-actions>
             <v-btn class="anno-btn" @click="toPost(item)">
-              <template #prepend>
-                <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right" />
-              </template>
-              查看
+              <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right" />
+              <span>查看</span>
             </v-btn>
             <v-card-subtitle v-show="!appStore.devMode">
               <v-icon>mdi-calendar</v-icon>
@@ -47,18 +45,16 @@
     </v-window-item>
     <v-window-item value="game">
       <div class="anno-grid">
-        <v-card v-for="item in annoCards.game" :key="item.id" class="anno-card" width="340">
+        <v-card v-for="item in annoCards.game" :key="item.id" class="anno-card">
           <div class="anno-cover" @click="toPost(item)">
             <img :src="item.banner" alt="cover" />
           </div>
-          <v-card-title>{{ item.title }}</v-card-title>
+          <v-card-title class="anno-card-title">{{ item.title }}</v-card-title>
           <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
           <v-card-actions>
             <v-btn class="anno-btn" @click="toPost(item)">
-              <template #prepend>
-                <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right" />
-              </template>
-              查看
+              <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right" />
+              <span>查看</span>
             </v-btn>
             <v-card-subtitle v-show="!appStore.devMode">
               <v-icon>mdi-calendar</v-icon>
@@ -83,7 +79,7 @@
 // vue
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import TLoading from "../components/overlay/to-loading.vue";
+import ToLoading from "../components/overlay/to-loading.vue";
 // store
 import { useAppStore } from "../store/modules/app";
 // utils
@@ -95,26 +91,30 @@ import { createTGWindow } from "../utils/TGWindow";
 const appStore = useAppStore();
 
 // loading
-const loading = ref(true);
-const loadingTitle = ref("正在加载");
+const loading = ref<boolean>(true);
+const loadingTitle = ref<string>("正在加载");
 // 路由
 const router = useRouter();
 
 // 数据
-const tab = ref("");
+const tab = ref<string>("");
 const annoCards = ref({
   activity: [] as TGApp.App.Announcement.ListCard[],
   game: [] as TGApp.App.Announcement.ListCard[],
 });
-const annoData = ref({} as TGApp.BBS.Announcement.ListData);
+const annoData = ref<TGApp.BBS.Announcement.ListData>({} as TGApp.BBS.Announcement.ListData);
 
 onMounted(async () => {
   loadingTitle.value = "正在获取公告数据";
   annoData.value = await TGRequest.Anno.getList();
   loadingTitle.value = "正在转换公告数据";
-  const listCards = TGUtils.Anno.getCard(annoData.value);
-  const activityCard = listCards.filter((item) => item.typeLabel === "活动公告");
-  const newsCard = listCards.filter((item) => item.typeLabel === "游戏公告");
+  const listCards: TGApp.App.Announcement.ListCard[] = TGUtils.Anno.getCard(annoData.value);
+  const activityCard: TGApp.App.Announcement.ListCard[] = listCards.filter(
+    (item) => item.typeLabel === "活动公告",
+  );
+  const newsCard: TGApp.App.Announcement.ListCard[] = listCards.filter(
+    (item) => item.typeLabel === "游戏公告",
+  );
   annoCards.value = {
     activity: activityCard,
     game: newsCard,
@@ -152,61 +152,87 @@ async function toJson(item: TGApp.App.Announcement.ListCard) {
 
 <style lang="css" scoped>
 .anno-tab {
-  font-family: Genshin, serif;
-  margin-bottom: 20px;
-  color: var(--content-text-3);
+  margin-bottom: 10px;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+}
+
+.anno-switch-btn {
+  height: 40px;
+  background: var(--common-btn-bg-1);
+  color: var(--common-btn-bgt-1);
+  font-family: var(--font-title);
 }
 
 .anno-grid {
-  font-family: Genshin, serif;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  grid-gap: 20px;
+  padding: 5px;
+  font-family: var(--font-title);
+  grid-gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 }
 
 .anno-card {
-  border-radius: 10px;
-  background: var(--content-bg-2);
-  color: var(--content-text-2);
-  border-bottom: #4b5366 1px solid;
+  border-radius: 5px;
+  background: var(--common-bg-1);
+  color: var(--common-bgt-1);
 }
 
 .anno-cover {
-  height: 130px;
+  position: relative;
+  display: flex;
   overflow: hidden;
-}
-
-.anno-cover :hover {
-  transform: scale(1.1);
-  transition: all 0.3s linear;
-  cursor: pointer;
+  width: 100%;
+  height: 120px;
+  align-items: center;
+  justify-content: center;
 }
 
 .anno-cover img {
+  min-width: 100%;
+  height: 100%;
   object-fit: cover;
-  width: 100%;
-  height: 130px;
+  object-position: center;
   transition: all 0.3s linear;
 }
 
+.anno-cover :hover {
+  cursor: pointer;
+  transform: scale(1.1);
+  transition: all 0.3s linear;
+}
+
+.anno-card-title {
+  position: relative;
+  height: 50px;
+  transition: padding-top 0.3s linear, padding-bottom 0.3s linear, background 0.3s linear,
+    font-size 0.3s linear, line-height 0.3s linear, white-space 0.3s linear;
+}
+
+.anno-card-title:hover {
+  display: flex;
+  height: 50px;
+  padding: 5px;
+  background: var(--common-shadow-2);
+  font-size: 16px;
+  line-height: normal;
+  white-space: normal;
+}
+
 .anno-btn {
-  margin-left: 5px;
-  background: var(--btn-bg-3);
-  color: #faf7e8;
+  display: flex;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  background: var(--common-btn-bg-2);
+  color: var(--common-btn-bgt-2);
 }
 
 .anno-btn img {
-  height: 30px;
-  width: 30px;
-}
-
-/* switch */
-.switch-btn {
-  font-family: Genshin, serif;
-  background: var(--btn-bg-1);
-  height: 40px;
-  margin-right: 10px;
-  margin-top: 5px;
-  color: var(--content-text-3);
+  width: 25px;
+  height: 25px;
+  margin-right: 5px;
+  object-fit: cover;
 }
 </style>
