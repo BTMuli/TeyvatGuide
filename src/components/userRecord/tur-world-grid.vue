@@ -30,8 +30,8 @@ function getData() {
 <style lang="css" scoped>
 .tur-wg-box {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-gap: 10px;
   width: 100%;
+  grid-gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
 }
 </style>

@@ -39,13 +39,13 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #faf7e8;
   border-radius: 5px;
+  background: #faf7e8;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #686868;
   border-radius: 5px;
+  background: #686868;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -63,10 +63,10 @@ html {
 
 /* card action 内的按钮 */
 .card-btn {
-  background: #4a5366;
-  color: #ece5d8;
   border-radius: 50px;
   margin-left: 5px;
+  background: #4a5366;
+  color: #ece5d8;
 }
 
 .card-btn img {

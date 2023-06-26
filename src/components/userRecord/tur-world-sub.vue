@@ -82,11 +82,11 @@ async function listenOnTheme() {
 </script>
 <style lang="css" scoped>
 .tur-ws-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 10px;
   border-radius: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   background: var(--common-shadow-1);
 }
 
@@ -102,23 +102,23 @@ async function listenOnTheme() {
 }
 
 .tur-ws-content {
-  color: var(--common-text-content);
   width: calc(100% - 60px);
   height: 100%;
+  color: var(--common-text-content);
 }
 
 .tur-ws-title {
+  border-bottom: 1px inset var(--common-text-content);
   font-family: var(--font-title);
   font-size: 20px;
-  border-bottom: 1px inset var(--common-text-content);
 }
 
 .tur-ws-sub {
   display: flex;
   align-items: center;
+  justify-content: start;
   font-family: var(--font-text);
   font-size: 14px;
-  justify-content: start;
 }
 
 .tur-ws-sub img {

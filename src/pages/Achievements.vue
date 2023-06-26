@@ -345,16 +345,16 @@ async function exportJson() {
 .left-wrap {
   width: 400px;
   height: calc(100vh - 100px);
-  overflow-y: scroll;
   overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 /* 右侧成就 */
 .right-wrap {
   width: calc(100% - 410px);
   height: calc(100vh - 100px);
-  overflow-y: scroll;
   overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .list-empty {
@@ -364,26 +364,26 @@ async function exportJson() {
 
 /* 版本信息 */
 .version-icon-series {
-  font-family: Genshin, serif;
   position: absolute;
   right: 0;
   bottom: 0;
-  text-align: center;
   width: 80px;
-  background: #546d8b;
   border-radius: 10px 0 0;
   border-top: #fff 2px solid;
   border-left: #fff 2px solid;
+  background: #546d8b;
   color: #fec90b;
+  font-family: Genshin, serif;
   font-size: 10px;
+  text-align: center;
 }
 
 .version-icon-single {
-  font-family: Genshin, serif;
   border-radius: 5px;
-  text-align: center;
   color: #ff6d6d;
+  font-family: Genshin, serif;
   font-size: 10px;
+  text-align: center;
 }
 
 .card-left {
@@ -404,25 +404,25 @@ async function exportJson() {
 
 /* 成就进度 */
 .achievement-progress {
-  font-family: Genshin, serif;
   position: absolute;
-  left: 0;
   top: 0;
-  text-align: center;
+  left: 0;
   width: 65px;
+  border-right: #fff 2px solid;
+  border-bottom: #fff 2px solid;
   background: #8ba5c5;
   border-bottom-right-radius: 20px;
-  border-bottom: #fff 2px solid;
-  border-right: #fff 2px solid;
   color: #485466;
+  font-family: Genshin, serif;
   font-size: 10px;
+  text-align: center;
 }
 
 /* 成就完成时间 */
 .right-time {
   margin-right: 10px;
-  font-size: small;
   color: #faf7e8;
+  font-size: small;
 }
 
 /* 成就奖励 */
@@ -439,13 +439,13 @@ async function exportJson() {
   position: absolute;
   bottom: 0;
   left: 0;
+  display: flex;
   width: 100%;
   height: 10px;
+  align-items: center;
+  justify-content: center;
   background: rgb(0 0 0 / 50%);
   color: #faf7e8;
-  display: flex;
   font-size: 8px;
-  justify-content: center;
-  align-items: center;
 }
 </style>

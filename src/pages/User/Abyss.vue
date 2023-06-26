@@ -142,19 +142,19 @@ async function shareAbyss(): Promise<void> {
 </script>
 <style lang="css" scoped>
 .ua-box {
-  box-shadow: 0 0 10px 0 var(--common-shadow-4);
   display: flex;
-  justify-content: left;
-  align-items: center;
   height: calc(100vh - 35px);
+  align-items: center;
+  justify-content: left;
   border-radius: 5px;
+  box-shadow: 0 0 10px 0 var(--common-shadow-4);
 }
 
 .ua-tab {
-  font-family: var(--font-text);
-  color: var(--common-text-title);
   width: 100px;
   height: 100%;
+  color: var(--common-text-title);
+  font-family: var(--font-text);
 }
 
 .ua-tab-bottom {
@@ -171,32 +171,32 @@ async function shareAbyss(): Promise<void> {
 }
 
 .ua-window {
-  padding: 10px;
   width: calc(100% - 100px);
   height: 100%;
+  padding: 10px;
 }
 
 .ua-window-item {
   height: 100%;
   padding: 10px;
-  overflow-y: auto;
   border-radius: 5px;
   box-shadow: 0 0 10px var(--common-shadow-2);
+  overflow-y: auto;
 }
 
 .uaw-title {
   display: flex;
   align-items: center;
   color: var(--common-text-title);
-  font-size: 20px;
   font-family: var(--font-title);
+  font-size: 20px;
 }
 
 .uaw-title :nth-child(2n) {
+  margin-right: 10px;
+  margin-left: 10px;
   color: var(--common-color-white);
   text-shadow: 0 0 10px var(--common-color-yellow);
-  margin-left: 10px;
-  margin-right: 10px;
 }
 
 .dark .uaw-title :nth-child(2n) {
@@ -205,32 +205,32 @@ async function shareAbyss(): Promise<void> {
 }
 
 .uaw-o-box {
-  width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
   grid-gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .uaw-d-box {
-  width: 100%;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  width: 100%;
   grid-gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .user-empty {
   position: absolute;
   top: calc(50vh - 200px);
   left: calc(50vw - 400px);
-  background: var(--common-shadow-2);
-  border-radius: 5px;
+  display: flex;
   width: 800px;
   height: 400px;
-  display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 1.5rem;
+  border-radius: 5px;
+  background: var(--common-shadow-2);
   color: var(--common-text-title);
   font-family: var(--font-title);
+  font-size: 1.5rem;
 }
 </style>

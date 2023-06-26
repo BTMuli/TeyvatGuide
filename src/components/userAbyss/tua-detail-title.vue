@@ -36,25 +36,25 @@ const getFontSize: ComputedRef<string> = computed(() => {
 </script>
 <style lang="css" scoped>
 .tud-t-box {
-  height: 30px;
-  width: 100%;
   display: flex;
+  width: 100%;
+  height: 30px;
   align-items: center;
   justify-content: space-between;
   font-family: v-bind(getFont);
 }
 
 .tud-t-title {
-  font-size: v-bind(getFontSize);
   color: var(--common-text-content);
+  font-size: v-bind(getFontSize);
 }
 
 .tud-t-val {
   display: flex;
   align-items: center;
+  color: var(--common-color-white);
   font-family: var(--font-text);
   font-size: v-bind(getFontSize);
-  color: var(--common-color-white);
   text-shadow: 0 0 10px var(--common-color-yellow);
 }
 
@@ -66,7 +66,7 @@ const getFontSize: ComputedRef<string> = computed(() => {
 .tud-t-val img {
   width: 20px;
   height: 20px;
-  object-fit: cover;
   margin-right: 5px;
+  object-fit: cover;
 }
 </style>

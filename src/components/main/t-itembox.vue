@@ -78,10 +78,10 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   position: absolute;
   top: 0;
   left: 0;
+  overflow: hidden;
   width: v-bind(modelValue[ "size"]);
   height: v-bind(modelValue[ "size"]);
   border-radius: 5px;
-  overflow: hidden;
 }
 
 .tib-bg img {
@@ -92,9 +92,9 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
 
 .tib-icon {
   position: relative;
+  overflow: hidden;
   width: v-bind(modelValue[ "size"]);
   height: v-bind(modelValue[ "size"]);
-  overflow: hidden;
   border-radius: 5px;
 }
 
@@ -108,25 +108,25 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   position: absolute;
   top: 0;
   left: 0;
+  display: flex;
   width: v-bind(modelValue[ "size"]);
   height: v-bind(modelValue[ "size"]);
-  border-radius: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
 }
 
 .tib-lt {
   position: absolute;
   top: 0;
   left: 0;
-  padding: 5px;
+  display: flex;
   width: v-bind(modelValue[ "ltSize"]);
   height: v-bind(modelValue[ "ltSize"]);
-  display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  padding: 5px;
 }
 
 .tib-lt img {
@@ -139,33 +139,33 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   position: absolute;
   top: 0;
   right: 0;
+  display: flex;
   width: v-bind(modelValue[ "rtSize"]);
   height: v-bind(modelValue[ "rtSize"]);
-  background: rgb(0 0 0 / 40%);
-  border-top-right-radius: 5px;
-  border-bottom-left-radius: 5px;
-  display: flex;
-  justify-content: center;
   align-items: center;
-  font-family: var(--font-title);
+  justify-content: center;
+  background: rgb(0 0 0 / 40%);
+  border-bottom-left-radius: 5px;
+  border-top-right-radius: 5px;
   color: var(--common-color-white);
+  font-family: var(--font-title);
 }
 
 .tib-inner {
   position: absolute;
   bottom: 0;
   left: 0;
+  display: flex;
   width: 100%;
   height: v-bind(getInnerHeight);
-  display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   background: rgb(20 20 20 / 40%);
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   color: var(--common-color-white);
-  font-size: v-bind(getInnerFont);
   font-family: var(--font-title);
+  font-size: v-bind(getInnerFont);
 }
 
 .tib-inner img {
@@ -179,8 +179,8 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   bottom: 0;
   width: 100%;
   height: v-bind(getOuterHeight);
-  text-align: center;
   color: var(--common-text-title);
   font-size: v-bind(getOuterFont);
+  text-align: center;
 }
 </style>

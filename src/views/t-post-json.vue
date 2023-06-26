@@ -54,11 +54,11 @@ onMounted(async () => {
 }
 
 .post-title {
-  font-size: 20px;
+  margin: 20px 0;
   color: #546d8b;
   font-family: Genshin-Light, serif;
+  font-size: 20px;
   font-weight: 600;
-  margin: 20px 0;
 }
 
 .jv-container {

@@ -666,27 +666,27 @@ async function updateDB() {
 
 <style lang="css" scoped>
 .config-list {
+  border-radius: 10px;
   margin: 10px;
-  font-family: Genshin-Light, serif;
   background: var(--content-bg-2);
   color: var(--content-text-3);
-  border-radius: 10px;
+  font-family: Genshin-Light, serif;
 }
 
 .config-header {
   margin-top: 10px;
-  font-family: Genshin, serif;
   background: var(--content-bg-2);
   color: #fec90b;
+  font-family: Genshin, serif;
   font-size: large;
 }
 
 .config-icon {
   width: 40px;
   height: 40px;
-  margin-right: 15px;
   padding: 5px;
-  background: var(--content-bg-3);
   border-radius: 10px;
+  margin-right: 15px;
+  background: var(--content-bg-3);
 }
 </style>

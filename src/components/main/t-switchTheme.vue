@@ -48,9 +48,9 @@ async function listenOnTheme() {
   position: absolute;
   top: 20px;
   left: 20px;
-  cursor: pointer;
-  border-radius: 50%;
   border: var(--theme-switch-icon) 2px solid;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 .switch-box:hover {
@@ -58,9 +58,9 @@ async function listenOnTheme() {
 }
 
 .switch-btn {
+  display: flex;
   width: 24px;
   height: 24px;
-  display: flex;
   align-items: center;
   justify-content: center;
   margin: 5px;

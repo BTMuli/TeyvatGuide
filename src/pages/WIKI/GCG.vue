@@ -175,18 +175,18 @@ async function searchCard() {
 </script>
 <style lang="css" scoped>
 .cards-tab {
-  font-family: Genshin, serif;
   margin-bottom: 20px;
   color: var(--content-text-3);
+  font-family: Genshin, serif;
 }
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  grid-gap: 10px;
+  overflow: hidden;
   padding: 10px;
   border-radius: 0 0 10px 10px;
-  overflow: hidden;
+  grid-gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
 }
 
 .cards-grid :hover {
@@ -195,21 +195,21 @@ async function searchCard() {
 
 .card-cls {
   position: relative;
+  overflow: hidden;
   width: 140px;
   height: 240px;
-  overflow: hidden;
-  transition: all 0.3s;
   border-radius: 10px;
+  transition: all 0.3s;
 }
 
 .card-cover {
   position: absolute;
-  transition: all 0.3s;
+  z-index: -1;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: -1;
+  transition: all 0.3s;
 }
 
 .card-cls:hover .card-cover {
@@ -219,10 +219,10 @@ async function searchCard() {
 
 .card-border {
   position: absolute;
-  border-radius: 10px;
   top: 0;
   left: 0;
   overflow: hidden;
+  border-radius: 10px;
 }
 
 .card-border img {
@@ -242,16 +242,16 @@ async function searchCard() {
   position: absolute;
   bottom: 0;
   left: 0;
+  display: flex;
+  overflow: hidden;
   width: 100%;
   height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 0 10px 10px;
   background: rgb(0 0 0 / 50%);
   color: white;
-  display: flex;
-  font-size: small;
-  overflow: hidden;
   font-family: Genshin, serif;
-  border-radius: 0 0 10px 10px;
-  justify-content: center;
-  align-items: center;
+  font-size: small;
 }
 </style>

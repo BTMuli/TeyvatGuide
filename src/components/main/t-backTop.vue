@@ -61,16 +61,16 @@ onMounted(() => {
 
 .back-top:hover {
   border-radius: 50%;
+  box-shadow: 0 0 10px 5px var(--back-top-shadow);
   cursor: pointer;
   transform: scale(0.9);
   transition: all 0.3s ease-in-out;
-  box-shadow: 0 0 10px 5px var(--back-top-shadow);
 }
 
 .back-top img {
-  transition: all 0.3s ease-in-out;
   width: 60px;
   height: 60px;
+  transition: all 0.3s ease-in-out;
 }
 
 /* 动画 */

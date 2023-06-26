@@ -15,46 +15,46 @@
 <style lang="css" scoped>
 .tuc-dd-box {
   padding: 10px;
-  border-radius: 5px;
   border: 2px solid var(--common-color-grey-2);
-  background: rgb(255 255 255 / 20%);
+  border-radius: 5px;
   backdrop-filter: blur(20px);
+  background: rgb(255 255 255 / 20%);
 }
 
 .tuc-dd-title {
+  width: 100%;
+  color: var(--common-color-blue);
   font-family: var(--font-title);
   font-size: 20px;
-  color: var(--common-color-blue);
-  width: 100%;
   text-align: left;
 }
 
 .tuc-dd-divider {
   width: 100%;
   height: 2px;
-  background: var(--common-color-grey-2);
   margin: 5px 0;
+  background: var(--common-color-grey-2);
 }
 
 .tuc-dd-content {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: start;
-  align-items: center;
   height: 60px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: start;
 }
 
 .tuc-dd-desc {
-  font-family: var(--font-text);
-  font-size: 14px;
+  overflow: hidden;
+  width: 100%;
+  max-height: 50px;
   margin-top: 5px;
   color: var(--common-color-black);
-  width: 100%;
+  font-family: var(--font-text);
+  font-size: 14px;
+  overflow-y: scroll;
   text-align: left;
   word-break: break-all;
-  max-height: 50px;
-  overflow: hidden;
-  overflow-y: scroll;
 
   &::-webkit-scrollbar {
     display: none;

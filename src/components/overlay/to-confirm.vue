@@ -97,83 +97,83 @@ const onConfirm = () => {
 <style scoped>
 .confirm-div {
   position: absolute;
-  width: 40vw;
-  height: 20vh;
   top: 40vh;
   left: 30vw;
-  background: var(--content-bg-2);
-  border-radius: 10px;
-  padding: 10px;
   display: flex;
+  width: 40vw;
+  height: 20vh;
   flex-direction: column;
   align-items: center;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--content-bg-2);
 }
 
 .confirm-box {
-  border-radius: 10px;
   width: 100%;
   height: 100%;
+  border-radius: 10px;
 }
 
 .confirm-title {
-  font-family: Genshin, serif;
-  text-align: center;
-  height: 20%;
   width: 100%;
-  color: var(--content-text-2);
+  height: 20%;
   margin: 10px;
+  color: var(--content-text-2);
+  font-family: Genshin, serif;
   font-size: 30px;
+  text-align: center;
 }
 
 .confirm-subtitle {
-  border-top: 1px solid var(--btn-bg-2);
-  font-family: Genshin-Light, serif;
-  text-align: center;
-  height: 20%;
   width: 100%;
+  height: 20%;
+  border-top: 1px solid var(--btn-bg-2);
   color: var(--content-text-2);
+  font-family: Genshin-Light, serif;
   font-size: 20px;
+  text-align: center;
 }
 
 .confirm-input {
-  font-family: Genshin-Light, serif;
-  text-align: center;
-  height: 20%;
   width: 100%;
+  height: 20%;
   color: var(--content-text-2);
+  font-family: Genshin-Light, serif;
   font-size: 20px;
+  text-align: center;
 }
 
 .confirm-btn-box {
   position: absolute;
-  height: 40%;
-  width: 100%;
   display: flex;
-  justify-content: space-around;
+  width: 100%;
+  height: 40%;
   align-items: flex-end;
+  justify-content: space-around;
 }
 
 .confirm-btn {
+  display: flex;
   width: 30%;
   min-width: 150px;
   min-height: 30px;
+  align-items: center;
+  border-radius: 50px;
   background: var(--btn-bg-2);
   color: var(--btn-text-1);
-  border-radius: 50px;
-  display: flex;
-  align-items: center;
 }
 
 .btn-icon {
-  margin: 5px;
   width: 25px;
   height: 25px;
+  margin: 5px;
 }
 
 .btn-text {
   width: calc(100% - 70px);
-  text-align: center;
   font-family: Genshin-Light, serif;
   font-size: 20px;
+  text-align: center;
 }
 </style>

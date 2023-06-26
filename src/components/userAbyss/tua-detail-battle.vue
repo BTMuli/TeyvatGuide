@@ -22,15 +22,15 @@ const props = defineProps<TuaDetailBattleProps>();
 <style lang="css" scoped>
 .tud-db-icons-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-gap: 10px;
   margin-bottom: 10px;
+  grid-gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .tud-db-time {
   width: 100%;
-  text-align: left;
-  font-size: 12px;
   color: var(--common-text-quote);
+  font-size: 12px;
+  text-align: left;
 }
 </style>

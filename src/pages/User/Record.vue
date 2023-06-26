@@ -115,32 +115,32 @@ function getTheme() {
 <style lang="css" scoped>
 .ur-box {
   width: 100%;
-  border-radius: 5px;
   padding: 10px;
+  border-radius: 5px;
   box-shadow: 0 0 10px var(--common-shadow-4);
 }
 
 .ur-top {
+  display: flex;
   width: 100%;
   height: 50px;
-  border-radius: 5px;
-  padding: 10px;
-  display: flex;
   align-items: center;
+  padding: 10px;
+  border-radius: 5px;
 }
 
 .ur-top-title {
-  font-family: var(--font-title);
-  font-size: 20px;
   margin-right: 10px;
   color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 20px;
 }
 
 .ur-top-btn {
-  font-family: var(--font-text);
   border-radius: 5px;
+  margin-left: 15px;
   background: var(--common-shadow-2);
   color: var(--common-color-white);
-  margin-left: 15px;
+  font-family: var(--font-text);
 }
 </style>

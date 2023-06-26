@@ -6,21 +6,21 @@
  */
 
 .mys-post-body {
-  margin: 0 auto;
   width: 800px;
-  font-family: var(--font-text);
+  margin: 0 auto;
   color: var(--post-default-text);
+  font-family: var(--font-text);
 }
 
 .mys-post-title {
-  font-family: var(--font-title);
   color: var(--common-text-title);
+  font-family: var(--font-title);
   font-size: 24px;
 }
 
 .mys-post-subtitle {
-  font-size: 16px;
   color: var(--common-text-quote);
+  font-size: 16px;
 }
 
 .mys-post-content {
@@ -41,8 +41,8 @@
 }
 
 :deep(.mys-post-details) {
-  border: #35acce 2px solid;
   padding: 10px;
+  border: #35acce 2px solid;
   border-radius: 10px;
 }
 
@@ -61,8 +61,8 @@
 }
 
 :deep(.mys-post-img) {
-  max-width: 100%;
   width: 800px;
+  max-width: 100%;
   height: auto;
   border-radius: 10px;
 }
@@ -74,31 +74,31 @@
 }
 
 :deep(.mys-post-iframe) {
+  overflow: hidden;
   width: 800px;
   height: 450px;
-  overflow: hidden;
   border: 0;
   border-radius: 10px;
 }
 
 :deep(.mys-post-link-card) {
+  display: flex;
   width: 800px;
   height: 200px;
   padding: 10px;
   border-radius: 10px;
-  display: flex;
   background: var(--content-bg-2);
 }
 
 :deep(.mys-post-unknown) {
   width: 800px;
+  padding: 10px;
+  border: 2px solid #485466;
+  border-radius: 10px;
+  margin: 10px auto;
   background: #5b738f;
   color: #faf7e8;
   font-family: Consolas, monospace;
-  border-radius: 10px;
-  padding: 10px;
-  margin: 10px auto;
-  border: 2px solid #485466;
 }
 
 :deep(.mys-post-link-card-cover) {
@@ -108,36 +108,36 @@
 }
 
 :deep(.mys-post-link-card-cover) img {
-  max-width: 400px;
   width: auto;
+  max-width: 400px;
   height: 180px;
   border-radius: 10px;
 }
 
 :deep(.mys-post-link-card-content) {
   width: 100%;
-  padding-left: 20px;
   height: 180px;
+  padding-left: 20px;
 }
 
 :deep(.mys-post-link-card-title) {
-  font-size: 20px;
-  font-family: Genshin, serif;
-  color: #546d8b;
   height: 150px;
+  color: #546d8b;
+  font-family: Genshin, serif;
+  font-size: 20px;
 }
 
 :deep(.mys-post-link-card-price) {
+  display: inline-block;
+  color: #ff6d6d;
   font-size: 20px;
   font-weight: bold;
-  color: #ff6d6d;
-  display: inline-block;
 }
 
 :deep(.mys-post-link-card-btn) {
   display: inline-block;
-  float: right;
-  color: #00c3ff;
   margin-right: 20px;
+  color: #00c3ff;
+  float: right;
   text-decoration: none;
 }

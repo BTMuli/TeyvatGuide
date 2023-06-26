@@ -148,21 +148,21 @@ function getContents(day: number): void {
 </script>
 <style lang="css" scoped>
 .calendar-box {
-  margin-bottom: 10px;
   padding: 10px;
-  box-shadow: 0 0 10px var(--common-shadow-4);
   border-radius: 5px;
+  margin-bottom: 10px;
+  box-shadow: 0 0 10px var(--common-shadow-4);
 }
 
 .calendar-title {
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: start;
-  column-gap: 2rem;
   padding-bottom: 5px;
+  color: var(--common-text-title);
+  column-gap: 2rem;
+  font-family: var(--font-title);
+  font-size: 20px;
 }
 
 .calendar-title-left {
@@ -180,20 +180,20 @@ function getContents(day: number): void {
 }
 
 .calendar-btn {
+  border-radius: 5px;
   background: var(--common-bg-1);
   color: var(--common-bgt-1);
-  border-radius: 5px;
 }
 
 .calendar-btn-selected {
+  border-radius: 5px;
   background: var(--common-bg-2);
   color: var(--common-bgt-2);
-  border-radius: 5px;
 }
 
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   grid-gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
 }
 </style>

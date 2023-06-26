@@ -138,19 +138,19 @@ onUnmounted(() => {
 
 <style lang="css" scoped>
 .position-box {
-  margin-bottom: 10px;
   padding: 10px;
-  box-shadow: 0 0 10px var(--common-shadow-4);
   border-radius: 5px;
+  margin-bottom: 10px;
+  box-shadow: 0 0 10px var(--common-shadow-4);
 }
 
 .position-title {
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: start;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 20px;
 }
 
 .position-title img {
@@ -161,27 +161,27 @@ onUnmounted(() => {
 
 .position-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(calc(400px + 2rem), 1fr));
-  grid-gap: 20px;
   margin-top: 10px;
+  grid-gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(calc(400px + 2rem), 1fr));
 }
 
 .position-card {
+  border-radius: 5px;
   background: var(--common-bg-1);
   color: var(--common-bgt-1);
-  border-radius: 5px;
 }
 
 .position-list {
-  font-family: var(--font-title);
   background: inherit;
   color: inherit;
+  font-family: var(--font-title);
 }
 
 .position-list :deep(img) {
-  border-radius: 5px;
   width: 100%;
   height: 100%;
+  border-radius: 5px;
   object-fit: contain;
   transition: all 0.3s;
 }
@@ -192,8 +192,8 @@ onUnmounted(() => {
 }
 
 .position-card-text {
-  min-width: 200px;
   display: inline-block;
+  min-width: 200px;
   align-items: center;
 }
 

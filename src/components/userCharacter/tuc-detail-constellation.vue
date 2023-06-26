@@ -17,31 +17,31 @@ defineProps<TucDetailConstellationProps>();
 </script>
 <style lang="css" scoped>
 .tuc-dc-box {
+  display: flex;
   width: 60px;
   height: 60px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  border-radius: 50%;
   cursor: pointer;
 }
 
 .tuc-dc-lock {
   position: absolute;
+  display: flex;
   width: 50px;
   height: 50px;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   background-color: rgb(0 0 0 / 50%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .tuc-dc-icon {
   width: 50px;
   height: 50px;
-  border-radius: 50%;
   padding: 5px;
+  border-radius: 50%;
   background: rgb(0 0 0/ 20%);
 }
 

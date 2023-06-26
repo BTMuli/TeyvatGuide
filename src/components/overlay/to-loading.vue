@@ -56,54 +56,54 @@ watch(
   min-width: 800px;
   min-height: 300px;
   padding: 15px;
+  border-radius: 15px;
   background: rgb(255 255 255 / 5%);
   box-shadow: 0 0 10px rgb(0 0 0 / 50%);
-  border-radius: 15px;
 }
 
 .tol-box {
-  width: 100%;
-  padding: 10px;
   display: flex;
+  width: 100%;
   box-sizing: content-box;
-  border: #f4d8a8 1px solid;
-  color: #f4d8a8;
-  border-radius: 5px;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: #f4d8a8 1px solid;
+  border-radius: 5px;
+  color: #f4d8a8;
 }
 
 .tol-title {
+  display: flex;
   width: 100%;
   height: 50px;
-  display: flex;
-  justify-content: center;
   align-items: center;
-  font-size: 2rem;
+  justify-content: center;
   font-family: Genshin, serif;
+  font-size: 2rem;
   font-weight: 600;
 }
 
 .tol-subtitle {
   width: 100%;
-  text-align: center;
-  font-size: 1rem;
   height: 25px;
   font-family: Genshin-Light, serif;
+  font-size: 1rem;
+  text-align: center;
 }
 
 .tol-img {
+  display: flex;
   width: 100%;
   height: 200px;
-  display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
 .tol-img:deep(img) {
-  max-height: 200px;
   max-width: 100%;
+  max-height: 200px;
   border-radius: 5px;
 }
 </style>

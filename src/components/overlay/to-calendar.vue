@@ -95,30 +95,30 @@ function toDetail(item: TGApp.App.Calendar.Item) {
 
 .box-div {
   height: 200px;
-  background: rgb(255 255 255 / 30%);
+  align-items: center;
   padding: 10px;
   border-radius: 5px;
+  background: rgb(255 255 255 / 30%);
   color: #faf7e8;
-  align-items: center;
 }
 
 .toc-top {
-  height: 100px;
-  width: 100%;
   display: flex;
+  width: 100%;
+  height: 100px;
 }
 
 .toc-icon {
-  height: 100px;
   width: 100px;
+  height: 100px;
 }
 
 .toc-material-grid {
+  display: grid;
   margin-left: 10px;
   font-family: Genshin, serif;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
   grid-gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .toc-line {
@@ -127,13 +127,13 @@ function toDetail(item: TGApp.App.Calendar.Item) {
 }
 
 .toc-bottom {
-  background: rgb(0 0 0 / 30%);
-  padding: 3px 10px;
-  width: 420px;
-  border-radius: 5px;
   display: flex;
-  justify-content: space-between;
+  width: 420px;
   align-items: center;
+  justify-content: space-between;
+  padding: 3px 10px;
+  border-radius: 5px;
+  background: rgb(0 0 0 / 30%);
 }
 
 .toc-bottom img {
@@ -142,20 +142,20 @@ function toDetail(item: TGApp.App.Calendar.Item) {
 }
 
 .toc-src-box {
+  display: flex;
   width: 300px;
   height: 50px;
-  display: flex;
-  justify-content: left;
   align-items: center;
+  justify-content: left;
 }
 
 .toc-src-text {
-  height: 50px;
-  font-size: 20px;
-  font-family: Genshin-Light, serif;
   display: flex;
-  justify-content: center;
+  height: 50px;
   align-items: center;
+  justify-content: center;
+  font-family: Genshin-Light, serif;
+  font-size: 20px;
 }
 
 .toc-btn-img {
@@ -164,22 +164,22 @@ function toDetail(item: TGApp.App.Calendar.Item) {
 }
 
 .close-div {
-  height: 60px;
-  width: 100%;
   display: flex;
-  justify-content: center;
+  width: 100%;
+  height: 60px;
   align-items: center;
+  justify-content: center;
 }
 
 .close-btn {
-  border-radius: 50%;
+  display: flex;
   width: 30px;
   height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
   background: rgb(255 255 255 / 30%);
   color: #faf7e8;
   cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 </style>

@@ -39,10 +39,10 @@ const props = defineProps<TucDetailDescRelicProps>();
 <style lang="css" scoped>
 .tuc-ddr-content {
   display: flex;
+  height: 100%;
   flex-direction: column;
   align-items: start;
   justify-content: space-around;
-  height: 100%;
   margin-left: 5px;
 }
 
@@ -63,8 +63,8 @@ const props = defineProps<TucDetailDescRelicProps>();
 }
 
 .tuc-ddrc-bottom img {
-  height: 100%;
   width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 

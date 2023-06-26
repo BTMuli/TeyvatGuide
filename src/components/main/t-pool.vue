@@ -219,45 +219,45 @@ onUnmounted(() => {
 
 <style lang="css" scoped>
 .pool-box {
-  margin-bottom: 10px;
   padding: 10px;
-  box-shadow: 0 0 10px var(--common-shadow-4);
   border-radius: 5px;
+  margin-bottom: 10px;
+  box-shadow: 0 0 10px var(--common-shadow-4);
 }
 
 .pool-title {
+  display: flex;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
-  display: flex;
 }
 
 .pool-title img {
   width: 25px;
   height: 25px;
-  transform: translate(0, 2px);
-  margin-right: 10px;
   border-radius: 50%;
+  margin-right: 10px;
   background: var(--common-shadow-2);
+  transform: translate(0, 2px);
 }
 
 .pool-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
-  grid-gap: 20px;
   margin-top: 10px;
+  grid-gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
 }
 
 .pool-card {
+  border-radius: 5px;
   background: var(--common-bg-1);
   color: var(--common-bgt-1);
-  border-radius: 5px;
 }
 
 .pool-list {
-  font-family: var(--font-title);
   background: inherit;
   color: inherit;
+  font-family: var(--font-title);
 }
 
 .pool-voice-icon {
@@ -267,20 +267,20 @@ onUnmounted(() => {
 }
 
 .pool-cover {
-  margin: 0 20px 10px;
+  display: flex;
+  overflow: hidden;
   width: calc(100% - 40px);
   height: auto;
-  overflow: hidden;
-  border-radius: 5px;
-  display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  margin: 0 20px 10px;
 }
 
 .pool-cover img {
   width: 100%;
-  transition: all 0.5s;
   border-radius: 10px;
+  transition: all 0.5s;
 }
 
 .pool-cover :hover {
@@ -290,16 +290,16 @@ onUnmounted(() => {
 }
 
 .pool-character {
-  margin: 0 20px;
+  display: flex;
   width: 100%;
   height: 70px;
-  display: flex;
+  margin: 0 20px;
 }
 
 .pool-icon-grid {
   display: grid;
-  grid-template-columns: repeat(4, 70px);
   grid-column-gap: 10px;
+  grid-template-columns: repeat(4, 70px);
 }
 
 .pool-icon {

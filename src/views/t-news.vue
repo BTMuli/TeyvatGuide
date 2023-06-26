@@ -337,16 +337,16 @@ async function searchPost() {
 
 <style lang="css" scoped>
 .news-tab {
-  font-family: Genshin, serif;
   margin-bottom: 20px;
   color: var(--content-text-3);
+  font-family: Genshin, serif;
 }
 
 .news-grid {
-  font-family: Genshin, serif;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  font-family: Genshin, serif;
   grid-gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 }
 
 .news-card {
@@ -356,51 +356,51 @@ async function searchPost() {
 }
 
 .news-cover {
-  height: 150px;
   overflow: hidden;
+  height: 150px;
 }
 
 .news-cover :hover {
+  cursor: pointer;
   transform: scale(1.1);
   transition: all 0.3s linear;
-  cursor: pointer;
 }
 
 .news-cover img {
-  object-fit: cover;
   width: 100%;
   height: 150px;
+  object-fit: cover;
   transition: all 0.3s linear;
 }
 
 /* switch */
 .switch-btn {
-  font-family: Genshin, serif;
-  background: var(--btn-bg-1);
   height: 40px;
-  margin-right: 10px;
   margin-top: 5px;
+  margin-right: 10px;
+  background: var(--btn-bg-1);
   color: var(--content-text-3);
+  font-family: Genshin, serif;
 }
 
 .switch-chan {
-  font-family: Genshin, serif;
-  background: var(--btn-bg-1);
   height: 40px;
-  margin-right: 10px;
   margin-top: 5px;
+  margin-right: 10px;
+  background: var(--btn-bg-1);
   color: var(--content-text-3);
+  font-family: Genshin, serif;
 }
 
 /* load more */
 .load-news {
-  font-family: Genshin, serif;
-  margin-top: 10px;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   padding: 10px;
   border-radius: 5px;
+  margin-top: 10px;
+  font-family: Genshin, serif;
   transition: all 0.3s linear;
 }
 

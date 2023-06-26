@@ -24,8 +24,8 @@ const homes = computed(() => {
 <style lang="css" scoped>
 .tur-hg-box {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-gap: 10px;
   width: 100%;
+  grid-gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
 }
 </style>

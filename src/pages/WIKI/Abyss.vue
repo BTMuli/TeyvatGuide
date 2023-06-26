@@ -29,17 +29,17 @@ function getUpdated() {
 </script>
 <style lang="css" scoped>
 .hta-title {
-  font-family: var(--font-title);
-  font-size: 20px;
   display: flex;
   align-items: end;
   justify-content: start;
+  font-family: var(--font-title);
+  font-size: 20px;
 }
 
 .hta-title :nth-child(2) {
   margin-left: 10px;
-  font-size: 12px;
   color: #5e7987; /* 淡蓝灰 */
+  font-size: 12px;
 }
 
 .hta-title :nth-child(2):hover {

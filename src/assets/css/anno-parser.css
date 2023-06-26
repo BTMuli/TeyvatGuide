@@ -6,25 +6,25 @@
  */
 
 .anno-body {
-  margin: 0 auto;
   width: 800px;
+  margin: 0 auto;
   font-family: var(--font-text);
 }
 
 .anno-title {
-  font-family: var(--font-title);
   color: var(--common-text-title);
+  font-family: var(--font-title);
   font-size: 24px;
 }
 
 .anno-subtitle {
-  font-size: 16px;
   color: var(--common-text-quote);
+  font-size: 16px;
 }
 
 .anno-img {
-  max-width: 100%;
   width: 800px;
+  max-width: 100%;
   height: auto;
   border-radius: 10px;
   margin-bottom: 10px;
@@ -46,13 +46,13 @@
 }
 
 .anno-content :deep(p) {
-  line-height: 2;
   color: #4b5366;
+  line-height: 2;
 }
 
 .anno-content :deep(details) {
-  border: #35acce 2px solid;
   padding: 10px;
+  border: #35acce 2px solid;
   border-radius: 10px;
   margin: 10px;
 }
@@ -71,6 +71,6 @@
 }
 
 .anno-content :deep(td) {
-  line-height: 2;
   padding-left: 10px;
+  line-height: 2;
 }

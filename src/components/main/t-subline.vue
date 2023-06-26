@@ -15,15 +15,15 @@ defineProps({
 </script>
 <style lang="css" scoped>
 .tsl-box {
-  background: var(--common-shadow-2);
   display: flex;
-  align-items: center;
   height: 30px;
+  align-items: center;
   padding: 0 10px;
-  margin: 5px 0;
   border-radius: 5px;
-  font-family: var(--font-text);
+  margin: 5px 0;
+  background: var(--common-shadow-2);
   color: var(--common-color-white);
+  font-family: var(--font-text);
 }
 
 .tsl-box img {

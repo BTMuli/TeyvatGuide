@@ -20,10 +20,10 @@ defineProps<TucDetailItemBoxProps>();
 </script>
 <style lang="css" scoped>
 .tuc-dib-box {
+  position: relative;
   width: 60px;
   height: 60px;
   border-radius: 5px;
-  position: relative;
 }
 
 .tuc-dib-bg {

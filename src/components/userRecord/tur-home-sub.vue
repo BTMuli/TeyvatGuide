@@ -57,27 +57,27 @@ onMounted(async () => {
 </script>
 <style lang="css" scoped>
 .tur-hs-box {
-  border-radius: 5px;
   position: relative;
+  border-radius: 5px;
 }
 
 .tur-hs-name {
   position: absolute;
   top: 10px;
   right: 10px;
+  color: var(--common-color-white);
   font-family: var(--font-text);
   font-size: 16px;
-  color: var(--common-color-white);
   text-shadow: 0 0 10px rgb(0 0 0 / 40%);
 }
 
 .tur-hs-title {
-  padding: 10px;
-  font-family: var(--font-title);
-  font-size: 20px;
   display: flex;
   align-items: center;
+  padding: 10px;
   color: var(--common-color-white);
+  font-family: var(--font-title);
+  font-size: 20px;
   text-shadow: 0 0 10px rgb(0 0 0 / 40%);
 }
 
@@ -88,20 +88,20 @@ onMounted(async () => {
 }
 
 .tur-hs-text-grid {
-  padding: 10px;
-  width: 100%;
   display: flex;
+  width: 100%;
   justify-content: space-between;
+  padding: 10px;
   background: rgb(0 0 0 / 40%);
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
-  text-align: center;
   color: var(--common-color-white);
+  text-align: center;
 }
 
 .tur-hs-text :nth-child(1) {
-  font-family: var(--font-text);
   color: var(--common-color-yellow);
+  font-family: var(--font-text);
 }
 
 .tur-hs-text :nth-child(2) {

@@ -20,8 +20,8 @@ const data = computed(() => JSON.parse(<string>props.modelValue) as TGApp.Sqlite
 <style lang="css" scoped>
 .tur-ag-box {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  grid-gap: 10px;
   margin-bottom: 10px;
+  grid-gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
 }
 </style>

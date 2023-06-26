@@ -38,27 +38,27 @@ const props = withDefaults(defineProps<TAOProps>(), {
 </script>
 <style lang="css" scoped>
 .tuao-box {
+  display: flex;
   width: 100%;
   height: auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 10px;
   border-radius: 5px;
   background: var(--common-shadow-1);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 
 .tuao-title {
+  color: var(--common-text-content);
   font-family: var(--font-title);
   font-size: 20px;
-  color: var(--common-text-content);
 }
 
 .tuao-val-text {
+  color: var(--common-color-white);
   font-family: var(--font-text);
   font-size: 20px;
-  color: var(--common-color-white);
   text-shadow: 0 0 10px var(--common-color-yellow);
 }
 
@@ -69,7 +69,7 @@ const props = withDefaults(defineProps<TAOProps>(), {
 
 .tuao-val-icons {
   display: grid;
-  grid-template-columns: repeat(v-bind(iconNum), 1fr);
   column-gap: 10px;
+  grid-template-columns: repeat(v-bind(iconNum), 1fr);
 }
 </style>

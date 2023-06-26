@@ -91,10 +91,10 @@ function getAvatarName() {
 </script>
 <style lang="css" scoped>
 .tuc-rb-box {
+  position: relative;
   padding: 5px;
   border: 1px inset var(--common-shadow-4);
   border-radius: 5px;
-  position: relative;
   cursor: pointer;
   transition: all 0.3s;
 }
@@ -105,18 +105,18 @@ function getAvatarName() {
 
 .tuc-rb-top {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   width: 100%;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .tuc-rb-bottom {
   position: relative;
-  align-items: center;
   width: 100%;
-  margin-top: 5px;
   height: 80px;
+  align-items: center;
   border-radius: 5px;
+  margin-top: 5px;
 }
 
 .tuc-rbb-bg {
@@ -129,36 +129,36 @@ function getAvatarName() {
 .tuc-rbb-bg img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
   border-radius: 5px;
+  object-fit: contain;
 }
 
 .tuc-rbb-lock {
   position: absolute;
   top: 0;
   left: 0;
+  display: flex;
   width: 100%;
   height: 100%;
-  background: var(--common-shadow-4);
-  backdrop-filter: blur(5px);
-  display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   border-radius: 5px;
+  backdrop-filter: blur(5px);
+  background: var(--common-shadow-4);
 }
 
 .tuc-rbb-fetter {
   position: absolute;
   top: 5px;
   left: 5px;
+  display: flex;
   width: calc(100% - 10px);
   height: 20px;
-  display: flex;
-  justify-content: start;
   align-items: center;
+  justify-content: start;
   border-radius: 5px;
-  color: var(--common-color-yellow);
   background: rgb(0 0 0 / 50%);
+  color: var(--common-color-yellow);
 }
 
 .tuc-rbb-fetter :nth-child(1) {

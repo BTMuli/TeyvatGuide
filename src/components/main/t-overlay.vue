@@ -86,15 +86,15 @@ watch(
 
 .tolo-box {
   position: fixed;
-  left: 0;
+  z-index: 100;
   top: 0;
+  left: 0;
+  display: flex;
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: center;
   align-items: center;
-  background: rgb(0 0 0 / 50%);
+  justify-content: center;
   backdrop-filter: blur(v-bind(blurVal));
-  z-index: 100;
+  background: rgb(0 0 0 / 50%);
 }
 </style>

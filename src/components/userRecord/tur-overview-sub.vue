@@ -22,27 +22,27 @@ defineProps<TAOProps>();
 </script>
 <style lang="css" scoped>
 .tur-os-box {
+  display: flex;
   width: 100%;
   height: auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 5px;
   border-radius: 5px;
   background: var(--common-shadow-1);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 
 .tur-os-title {
+  color: var(--common-text-content);
   font-family: var(--font-title);
   font-size: 20px;
-  color: var(--common-text-content);
 }
 
 .tur-os-text {
+  color: var(--common-color-white);
   font-family: var(--font-text);
   font-size: 20px;
-  color: var(--common-color-white);
   text-shadow: 0 0 10px var(--common-color-yellow);
 }
 

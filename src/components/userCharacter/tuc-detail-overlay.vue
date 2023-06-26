@@ -204,18 +204,18 @@ function switchBg() {
   position: relative;
   width: 500px;
   height: 620px;
-  background: rgb(255 255 255 / 30%);
-  border-radius: 5px;
   padding: 10px;
+  border-radius: 5px;
+  background: rgb(255 255 255 / 30%);
 }
 
 .tuc-do-bg {
   position: absolute;
   top: 0;
   left: 0;
-  margin: 0 auto;
   width: 100%;
   height: 100%;
+  margin: 0 auto;
 }
 
 .tuc-do-bg img {
@@ -226,45 +226,45 @@ function switchBg() {
 
 .tuc-do-quote {
   position: absolute;
-  bottom: 5px;
   right: 10px;
+  bottom: 5px;
+  color: var(--common-color-grey-2);
   font-family: var(--font-text);
   font-size: 12px;
-  color: var(--common-color-grey-2);
 }
 
 .tuc-do-costume {
   position: absolute;
+  z-index: 1;
   top: 5px;
   right: 10px;
-  z-index: 1;
 }
 
 .tuc-do-costume-name {
   position: absolute;
-  width: 100%;
   top: 5px;
   left: 0;
-  text-align: center;
+  width: 100%;
+  color: var(--common-color-white);
   font-family: var(--font-text);
   font-size: 16px;
-  color: var(--common-color-white);
+  text-align: center;
   text-shadow: 0 0 10px var(--common-color-yellow);
 }
 
 .tuc-do-show {
   position: absolute;
-  width: calc(100% - 20px);
   display: flex;
+  width: calc(100% - 20px);
   flex-wrap: wrap;
-  justify-content: space-around;
   align-items: start;
+  justify-content: space-around;
 }
 
 .tuc-do-left {
+  position: relative;
   width: 50%;
   height: 400px;
-  position: relative;
 }
 
 .tuc-do-right {
@@ -280,8 +280,8 @@ function switchBg() {
 /* 左侧显示区域 */
 .tuc-dol-item {
   position: absolute;
-  cursor: pointer;
   border-radius: 5px;
+  cursor: pointer;
 }
 
 /* 排列武器跟5个圣遗物 */
@@ -318,9 +318,9 @@ function switchBg() {
 /* 右侧显示区域 */
 
 .tuc-dor-box {
+  position: relative;
   width: 100%;
   height: 100%;
-  position: relative;
 }
 
 .tuc-dor-item {
@@ -344,17 +344,17 @@ function switchBg() {
 }
 
 .tuc-dor-item:nth-child(4) {
-  bottom: 130px;
   right: 10px;
+  bottom: 130px;
 }
 
 .tuc-dor-item:nth-child(5) {
-  bottom: 50px;
   right: 40px;
+  bottom: 50px;
 }
 
 .tuc-dor-item:nth-child(6) {
-  bottom: 0;
   right: 100px;
+  bottom: 0;
 }
 </style>

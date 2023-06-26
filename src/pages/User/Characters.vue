@@ -122,39 +122,39 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole) {
 <style lang="css" scoped>
 .uc-box {
   width: 100%;
-  border-radius: 5px;
   padding: 10px;
+  border-radius: 5px;
   box-shadow: 0 0 10px var(--common-shadow-4);
 }
 
 .uc-top {
+  display: flex;
   width: 100%;
   height: 50px;
-  border-radius: 5px;
-  padding: 10px;
-  display: flex;
   align-items: center;
+  padding: 10px;
+  border-radius: 5px;
 }
 
 .uc-top-title {
-  font-family: var(--font-title);
-  font-size: 20px;
   margin-right: 10px;
   color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 20px;
 }
 
 .uc-top-btn {
-  font-family: var(--font-text);
   border-radius: 5px;
+  margin-left: 15px;
   background: var(--common-shadow-2);
   color: var(--common-color-white);
-  margin-left: 15px;
+  font-family: var(--font-text);
 }
 
 .uc-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 180px);
-  grid-gap: 10px v-bind(gridGap);
   padding: 10px;
+  grid-gap: 10px v-bind(gridGap);
+  grid-template-columns: repeat(auto-fill, 180px);
 }
 </style>

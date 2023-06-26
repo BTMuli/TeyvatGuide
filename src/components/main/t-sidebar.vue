@@ -195,27 +195,27 @@ async function switchTheme() {
 }
 
 .side-list {
-  font-family: var(--font-title);
   height: 100%;
+  font-family: var(--font-title);
 }
 
 .bottom-menu {
   position: absolute;
-  width: 100%;
   bottom: 0;
+  width: 100%;
 }
 
 .side-icon {
   width: 24px;
   height: 24px;
-  margin-right: 32px;
   border-radius: 5px;
+  margin-right: 32px;
 }
 
 .side-icon-mini {
   width: 36px;
   height: 36px;
-  transform: translateX(-6px);
   margin-right: 20px;
+  transform: translateX(-6px);
 }
 </style>

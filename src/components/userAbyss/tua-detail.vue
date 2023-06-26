@@ -27,10 +27,10 @@ const props = defineProps<TuaDetailProps>();
 <style lang="css" scoped>
 .tuad-box {
   width: 100%;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  background: var(--common-shadow-1);
   padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  background: var(--common-shadow-1);
 }
 
 .tuad-index-box {

@@ -33,8 +33,8 @@ function toOuter(item: TGApp.App.Weapon.WikiBriefInfo) {
 <style scoped>
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
-  grid-gap: 15px;
   padding: 15px;
+  grid-gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
 }
 </style>

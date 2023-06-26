@@ -25,9 +25,9 @@ async function shareContent() {
   position: absolute;
   top: 20px;
   right: 20px;
-  cursor: pointer;
-  border-radius: 50%;
   border: var(--theme-switch-icon) 2px solid;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 .share-box:hover {
@@ -35,12 +35,12 @@ async function shareContent() {
 }
 
 .share-btn {
+  display: flex;
   width: 24px;
   height: 24px;
-  display: flex;
-  justify-content: center;
   align-items: center;
-  margin: 5px;
+  justify-content: center;
   padding-right: 2px;
+  margin: 5px;
 }
 </style>

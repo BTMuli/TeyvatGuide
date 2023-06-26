@@ -105,32 +105,32 @@ function toChannel(link: string) {
 }
 
 .toc-top {
+  padding: 10px;
   border-radius: 5px;
   background: rgb(255 255 255 / 30%);
-  padding: 10px;
 }
 
 .toc-title {
+  color: var(--common-color-blue);
   font-family: var(--font-title);
   font-size: 20px;
-  color: var(--common-color-blue);
 }
 
 .toc-list {
-  margin-top: 10px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  margin-top: 10px;
   grid-gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .toc-list-item {
-  cursor: pointer;
   display: flex;
-  background: rgb(0 0 0 / 20%);
-  border-radius: 5px;
   align-items: center;
   justify-content: start;
+  border-radius: 5px;
+  background: rgb(0 0 0 / 20%);
   color: var(--common-color-black);
+  cursor: pointer;
   transition: all 0.5s linear;
 }
 
@@ -142,34 +142,34 @@ function toChannel(link: string) {
 .toc-list-item img {
   width: 45px;
   height: 45px;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
   margin-right: 10px;
+  border-bottom-left-radius: 5px;
+  border-top-left-radius: 5px;
 }
 
 .toc-list-item span {
+  margin-right: 10px;
   font-family: var(--font-title);
   font-size: 16px;
-  margin-right: 10px;
 }
 
 .toc-close {
-  height: 60px;
-  width: 100%;
   display: flex;
-  justify-content: center;
+  width: 100%;
+  height: 60px;
   align-items: center;
+  justify-content: center;
 }
 
 .toc-close-btn {
-  border-radius: 50%;
+  display: flex;
   width: 30px;
   height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
   background: rgb(255 255 255 / 30%);
   color: #faf7e8;
   cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 </style>

@@ -158,34 +158,34 @@ onUpdated(() => {
 </script>
 <style lang="css">
 .lottery-box {
-  margin-bottom: 10px;
   padding: 10px;
+  border-radius: 25px 5px 5px;
+  margin-bottom: 10px;
   background: rgb(255 255 255 / 10%);
   box-shadow: 0 0 10px rgb(0 0 0 / 40%);
-  border-radius: 25px 5px 5px;
 }
 
 .lottery-title {
+  height: 40px;
+  margin-left: 40px;
+  color: var(--content-text-3);
   font-family: Genshin, serif;
   font-size: 20px;
-  height: 40px;
-  color: var(--content-text-3);
-  margin-left: 40px;
 }
 
 .lottery-list {
+  padding: 5px;
+  border-radius: 5px;
+  margin-bottom: 10px;
   background: rgb(0 0 0 / 40%);
   box-shadow: 0 0 10px rgb(255 255 255 / 10%);
-  border-radius: 5px;
-  padding: 5px;
-  margin-bottom: 10px;
   color: #faf7e8;
   font-family: Genshin-Light, serif;
 }
 
 .reward-title {
-  font-size: 16px;
   margin: 10px;
+  font-size: 16px;
 }
 
 .reward-subtitle {
@@ -194,27 +194,27 @@ onUpdated(() => {
 }
 
 .lottery-grid {
-  border-radius: 10px;
   display: grid;
+  border-radius: 10px;
   grid-template-columns: repeat(5, 1fr);
 }
 
 .lottery-sub-list {
-  background: var(--content-bg-2);
-  border-radius: 40px;
-  height: 40px;
-  margin: 5px;
-  font-family: Genshin-Light, serif;
-  align-items: center;
   display: flex;
+  height: 40px;
+  align-items: center;
+  border-radius: 40px;
+  margin: 5px;
+  background: var(--content-bg-2);
+  font-family: Genshin-Light, serif;
 }
 
 .lottery-user-avatar {
   display: inline-block;
+  overflow: hidden;
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  overflow: hidden;
   margin: 5px;
 }
 
@@ -226,24 +226,24 @@ onUpdated(() => {
 
 .lottery-user-nickname {
   display: inline-block;
-  font-size: 14px;
-  font-family: Genshin-Light, "仿宋", serif;
-  color: var(--content-text-3);
   overflow: hidden;
+  color: var(--content-text-3);
+  font-family: Genshin-Light, "仿宋", serif;
+  font-size: 14px;
 }
 
 .lottery-json {
+  border-radius: 25px 5px;
   margin-bottom: 10px;
   background: rgb(255 255 255 / 10%);
   box-shadow: 0 0 10px rgb(0 0 0 / 40%);
-  border-radius: 25px 5px;
-  font-family: Consolas, serif;
   color: #faf7e8;
+  font-family: Consolas, serif;
 }
 
 .jv-container {
-  background: rgb(0 0 0 / 60%) !important;
   border-radius: 25px 5px !important;
+  background: rgb(0 0 0 / 60%) !important;
   box-shadow: 0 0 10px rgb(0 0 0 / 40%) !important;
 }
 

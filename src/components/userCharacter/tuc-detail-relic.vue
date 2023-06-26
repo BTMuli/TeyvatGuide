@@ -21,19 +21,19 @@ const props = defineProps<TucDetailRelicProps>();
 </script>
 <style lang="css" scoped>
 .tuc-dr-box {
+  position: relative;
   width: 60px;
   height: 60px;
   border-radius: 5px;
   background: rgb(0 0 0 /20%);
-  position: relative;
 }
 
 .tuc-dr-bg {
-  width: 100%;
-  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .tuc-dr-bg:nth-child(1) {
@@ -47,11 +47,11 @@ const props = defineProps<TucDetailRelicProps>();
 }
 
 .tuc-dr-icon {
-  width: 100%;
-  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .tuc-dr-icon img {

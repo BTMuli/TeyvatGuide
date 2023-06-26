@@ -44,10 +44,10 @@ const box = computed(() => {
 <style lang="css" scoped>
 .tuc-ddw-content {
   display: flex;
+  height: 100%;
   flex-direction: column;
   align-items: start;
   justify-content: space-around;
-  height: 100%;
   margin-left: 5px;
 }
 

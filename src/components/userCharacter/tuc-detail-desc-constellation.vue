@@ -50,16 +50,16 @@ function parseDesc(desc: string): string {
 <style lang="css" scoped>
 .tuc-ddc-content {
   display: flex;
+  height: 100%;
   flex-direction: column;
   align-items: start;
   justify-content: space-around;
-  height: 100%;
   margin-left: 5px;
 }
 
 .tuc-ddc-top {
-  color: var(--common-color-blue-2);
   height: 20px;
+  color: var(--common-color-blue-2);
 }
 
 .tuc-ddc-bottom {

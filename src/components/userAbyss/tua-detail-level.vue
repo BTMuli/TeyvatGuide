@@ -17,9 +17,9 @@ const props = defineProps<TuaDetailLevelProps>();
 </script>
 <style lang="css" scoped>
 .tud-dl-divider {
-  border-radius: 5px;
   width: 100%;
   height: 1px;
+  border-radius: 5px;
   background: var(--common-text-content);
 }
 </style>
