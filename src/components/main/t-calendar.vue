@@ -10,10 +10,7 @@
         <v-btn
           v-for="text of btnText"
           :key="text.week"
-          class="calendar-title-btn"
-          :style="{
-            border: btnNow === text.week ? '2px solid var(--common-color-yellow)' : 'none',
-          }"
+          :class="btnNow === text.week ? 'calendar-btn-selected' : 'calendar-btn'"
           @click="getContents(text.week)"
         >
           {{ text.text }}
@@ -166,7 +163,6 @@ function getContents(day: number): void {
   justify-content: start;
   column-gap: 2rem;
   padding-bottom: 5px;
-  border-bottom: 2px solid var(--common-shadow-4);
 }
 
 .calendar-title-left {
@@ -183,9 +179,15 @@ function getContents(day: number): void {
   column-gap: 15px;
 }
 
-.calendar-title-btn {
+.calendar-btn {
   background: var(--common-bg-1);
   color: var(--common-bgt-1);
+  border-radius: 5px;
+}
+
+.calendar-btn-selected {
+  background: var(--common-bg-2);
+  color: var(--common-bgt-2);
   border-radius: 5px;
 }
 
