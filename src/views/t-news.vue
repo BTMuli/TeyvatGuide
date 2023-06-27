@@ -1,17 +1,17 @@
 <template>
-  <TOLoading v-model="loading" :title="loadingTitle" />
+  <ToLoading v-model="loading" :title="loadingTitle" />
   <v-tabs v-model="tab" align-tabs="start" class="news-tab">
     <v-tab value="notice"> 公告 </v-tab>
     <v-tab value="activity" @click="firstLoad('activity')"> 活动 </v-tab>
-    <v-tab v-if="showNews" value="news" @click="firstLoad('news')"> 新闻 </v-tab>
+    <v-tab v-if="showNews" value="news" @click="firstLoad('news')"> 咨讯 </v-tab>
     <v-spacer />
-    <v-btn class="switch-btn" @click="switchAnno">
+    <v-btn class="news-switch-btn" @click="switchAnno">
       <template #prepend>
         <v-icon>mdi-bullhorn</v-icon>
       </template>
       切换游戏内公告
     </v-btn>
-    <v-btn class="switch-chan" @click="showList = true">
+    <v-btn class="news-switch-btn" @click="showList = true">
       <v-icon>mdi-view-list</v-icon>
     </v-btn>
     <v-text-field
@@ -28,16 +28,15 @@
   <v-window v-model="tab">
     <v-window-item value="notice">
       <div class="news-grid">
-        <v-card v-for="item in postData.notice" :key="item.post_id" class="news-card" width="340">
+        <v-card v-for="item in postData.notice" :key="item.post_id" class="news-card">
           <div class="news-cover" @click="toPost(item)">
             <img :src="item.cover" alt="cover" />
           </div>
-          <v-card-title>{{ item.title }}</v-card-title>
+          <v-card-title class="news-card-title">{{ item.title }}</v-card-title>
           <v-card-actions>
-            <v-btn class="card-btn" @click="toPost(item)">
-              <template #prepend>
-                <img src="../assets/icons/circle-check.svg" alt="check" />查看
-              </template>
+            <v-btn class="news-btn" @click="toPost(item)">
+              <img src="../assets/icons/circle-check.svg" alt="check" />
+              <span>查看</span>
             </v-btn>
             <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
             <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
@@ -60,16 +59,17 @@
     </v-window-item>
     <v-window-item value="activity">
       <div class="news-grid">
-        <v-card v-for="item in postData.activity" :key="item.post_id" class="news-card" width="340">
+        <v-card v-for="item in postData.activity" :key="item.post_id" class="news-card">
           <div class="news-cover" @click="toPost(item)">
             <img :src="item.cover" alt="cover" />
           </div>
-          <v-card-title>{{ item.title }}</v-card-title>
+          <v-card-title class="news-card-title">{{ item.title }}</v-card-title>
           <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
           <v-card-actions>
-            <v-btn class="card-btn" @click="toPost(item)">
+            <v-btn class="news-btn" @click="toPost(item)">
               <template #prepend>
-                <img src="../assets/icons/circle-check.svg" alt="check" />查看
+                <img src="../assets/icons/circle-check.svg" alt="check" />
+                <span>查看</span>
               </template>
             </v-btn>
             <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
@@ -103,15 +103,16 @@
     </v-window-item>
     <v-window-item v-if="showNews" value="news">
       <div class="news-grid">
-        <v-card v-for="item in postData.news" :key="item.post_id" class="news-card" width="340">
+        <v-card v-for="item in postData.news" :key="item.post_id" class="news-card">
           <div class="news-cover" @click="toPost(item)">
             <img :src="item.cover" alt="cover" />
           </div>
-          <v-card-title>{{ item.title }}</v-card-title>
+          <v-card-title class="news-card-title">{{ item.title }}</v-card-title>
           <v-card-actions>
-            <v-btn class="card-btn" @click="toPost(item)">
+            <v-btn class="news-btn" @click="toPost(item)">
               <template #prepend>
-                <img src="../assets/icons/circle-check.svg" alt="check" />查看
+                <img src="../assets/icons/circle-check.svg" alt="check" />
+                <span>查看</span>
               </template>
             </v-btn>
             <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
@@ -144,7 +145,7 @@
 // vue
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import TOLoading from "../components/overlay/to-loading.vue";
+import ToLoading from "../components/overlay/to-loading.vue";
 import ToChannel from "../components/overlay/to-channel.vue";
 // store
 import { useAppStore } from "../store/modules/app";
@@ -274,25 +275,26 @@ async function loadMore(data: string) {
 }
 
 async function toPost(item: NewsCard | string) {
-  if (typeof item === "string") {
-    const path = router.resolve({
-      name: "帖子详情",
-      params: {
-        // eslint-disable-next-line camelcase
-        post_id: item,
-      },
-    }).href;
-    createTGWindow(path, "帖子-Dev", item, 960, 720, false, false);
-  } else {
-    const path = router.resolve({
-      name: "帖子详情",
-      params: {
-        // eslint-disable-next-line camelcase
-        post_id: item.post_id.toString(),
-      },
-    }).href;
-    createTGWindow(path, "帖子", item.title, 960, 720, false, false);
-  }
+  console.log(item);
+  // if (typeof item === "string") {
+  //   const path = router.resolve({
+  //     name: "帖子详情",
+  //     params: {
+  //       // eslint-disable-next-line camelcase
+  //       post_id: item,
+  //     },
+  //   }).href;
+  //   createTGWindow(path, "帖子-Dev", item, 960, 720, false, false);
+  // } else {
+  //   const path = router.resolve({
+  //     name: "帖子详情",
+  //     params: {
+  //       // eslint-disable-next-line camelcase
+  //       post_id: item.post_id.toString(),
+  //     },
+  //   }).href;
+  //   createTGWindow(path, "帖子", item.title, 960, 720, false, false);
+  // }
 }
 
 async function toJson(item: NewsCard | string) {
@@ -337,27 +339,49 @@ async function searchPost() {
 
 <style lang="css" scoped>
 .news-tab {
-  margin-bottom: 20px;
-  color: var(--content-text-3);
-  font-family: Genshin, serif;
+  margin-bottom: 10px;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+}
+
+.news-switch-btn {
+  height: 40px;
+  margin-left: 15px;
+  background: var(--common-btn-bg-1);
+  color: var(--common-btn-bgt-1);
+  font-family: var(--font-title);
 }
 
 .news-grid {
   display: grid;
-  font-family: Genshin, serif;
-  grid-gap: 20px;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  padding: 5px;
+  font-family: var(--font-title);
+  grid-gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 }
 
 .news-card {
-  border-radius: 10px;
-  background: var(--content-bg-2);
-  color: var(--content-text-2);
+  border-radius: 5px;
+  background: var(--common-bg-1);
+  color: var(--common-bgt-1);
 }
 
 .news-cover {
+  position: relative;
+  display: flex;
   overflow: hidden;
+  width: 100%;
   height: 150px;
+  align-items: center;
+  justify-content: center;
+}
+
+.news-cover img {
+  min-width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: all 0.3s linear;
 }
 
 .news-cover :hover {
@@ -366,30 +390,38 @@ async function searchPost() {
   transition: all 0.3s linear;
 }
 
-.news-cover img {
-  width: 100%;
-  height: 150px;
+.news-card-title {
+  position: relative;
+  height: 50px;
+  transition: padding-top 0.3s linear, padding-bottom 0.3s linear, background 0.3s linear,
+    font-size 0.3s linear, line-height 0.3s linear, white-space 0.3s linear;
+}
+
+.news-card-title:hover {
+  display: flex;
+  height: 50px;
+  padding: 5px;
+  background: var(--common-shadow-2);
+  font-size: 16px;
+  line-height: normal;
+  white-space: normal;
+}
+
+.news-btn {
+  display: flex;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  background: var(--common-btn-bg-2);
+  color: var(--common-btn-bgt-2);
+}
+
+.news-btn img {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
   object-fit: cover;
-  transition: all 0.3s linear;
-}
-
-/* switch */
-.switch-btn {
-  height: 40px;
-  margin-top: 5px;
-  margin-right: 10px;
-  background: var(--btn-bg-1);
-  color: var(--content-text-3);
-  font-family: Genshin, serif;
-}
-
-.switch-chan {
-  height: 40px;
-  margin-top: 5px;
-  margin-right: 10px;
-  background: var(--btn-bg-1);
-  color: var(--content-text-3);
-  font-family: Genshin, serif;
 }
 
 /* load more */
