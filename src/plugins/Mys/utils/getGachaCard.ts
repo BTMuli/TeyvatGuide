@@ -1,27 +1,26 @@
 /**
- * @file plugins Mys utils gacha.ts
+ * @file plugins Mys utils getGachaCard.ts
  * @description Mys 插件抽卡工具
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.4
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Alpha v0.2.1
  */
 
-import { getPostData } from "../request/post";
-import { type GachaCard, type GachaData } from "../interface/gacha";
+import getPostData from "../request/getPostData";
 
 /**
  * @description 根据卡池信息转为渲染用的卡池信息
- * @since Alpha v0.1.4
- * @param {GachaData[]} gachaData 卡池信息
- * @param {Map<string>} poolCover 卡池封面
- * @returns {Promise<GachaCard[]>}
+ * @since Alpha v0.2.1
+ * @param {TGApp.Plugins.Mys.Gacha.Data[]} gachaData 卡池信息
+ * @param {Record<number, string>} poolCover 卡池封面
+ * @returns {Promise<TGApp.Plugins.Mys.Gacha.RenderCard[]>}
  */
-export async function getGachaCard(
-  gachaData: GachaData[],
-  poolCover: Record<number, string> | undefined = undefined,
-): Promise<GachaCard[]> {
-  const gachaCard: GachaCard[] = [];
+async function getGachaCard(
+  gachaData: TGApp.Plugins.Mys.Gacha.Data[],
+  poolCover?: Record<number, string>,
+): Promise<TGApp.Plugins.Mys.Gacha.RenderCard[]> {
+  const gachaCard: TGApp.Plugins.Mys.Gacha.RenderCard[] = [];
   await Promise.allSettled(
-    gachaData.map(async (data: GachaData) => {
+    gachaData.map(async (data: TGApp.Plugins.Mys.Gacha.Data) => {
       let cover = "/source/UI/empty.webp";
       const postId: number | undefined = Number(data.activity_url.split("/").pop()) || undefined;
       if (postId === undefined || isNaN(postId)) {
@@ -42,8 +41,7 @@ export async function getGachaCard(
         title: data.title,
         subtitle: data.content_before_act,
         cover,
-        // eslint-disable-next-line camelcase
-        post_id: postId,
+        postId,
         characters: data.pool.map((character) => ({
           icon: character.icon,
           url: character.url,
@@ -54,14 +52,14 @@ export async function getGachaCard(
         },
         time: {
           start: data.start_time,
-          // eslint-disable-next-line camelcase
-          start_stamp: new Date(data.start_time).getTime(),
+          startStamp: new Date(data.start_time).getTime(),
           end: data.end_time,
-          // eslint-disable-next-line camelcase
-          end_stamp: new Date(data.end_time).getTime(),
+          endStamp: new Date(data.end_time).getTime(),
         },
       });
     }),
   );
   return gachaCard;
 }
+
+export default getGachaCard;

@@ -110,23 +110,23 @@ import TOLoading from "../../components/overlay/to-loading.vue";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
 import { AppGCGData } from "../../data";
-// interface
-import { OBC_CONTENT_API } from "../../plugins/Mys/interface/utils";
+// plugins
+import Mys from "../../plugins/Mys";
 
 // loading
-const loading = ref(true);
+const loading = ref<boolean>(true);
 const allCards = computed(() => AppGCGData);
 // snackbar
-const snackbar = ref(false);
+const snackbar = ref<boolean>(false);
 // search
-const doSearch = ref(false);
-const search = ref("");
+const doSearch = ref<boolean>(false);
+const search = ref<string>("");
 // data
-const tab = ref("character");
-const CardsInfoC = ref([] as TGApp.App.GCG.WikiBriefInfo[]);
-const CardsInfoA = ref([] as TGApp.App.GCG.WikiBriefInfo[]);
-const CardsInfoM = ref([] as TGApp.App.GCG.WikiBriefInfo[]);
-const CardsInfoS = ref([] as TGApp.App.GCG.WikiBriefInfo[]);
+const tab = ref<string>("character");
+const CardsInfoC = ref<TGApp.App.GCG.WikiBriefInfo[]>([]);
+const CardsInfoA = ref<TGApp.App.GCG.WikiBriefInfo[]>([]);
+const CardsInfoM = ref<TGApp.App.GCG.WikiBriefInfo[]>([]);
+const CardsInfoS = ref<TGApp.App.GCG.WikiBriefInfo[]>([]);
 
 onMounted(async () => {
   await loadData();
@@ -144,7 +144,7 @@ async function loadData() {
 }
 
 function toOuter(cardName: string, cardId: number) {
-  const url = OBC_CONTENT_API.replace("{content_id}", cardId.toString());
+  const url = Mys.Api.Obc.replace("{contentId}", cardId.toString());
   createTGWindow(url, "GCG", cardName, 1200, 800, true);
 }
 

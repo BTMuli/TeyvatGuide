@@ -5,7 +5,7 @@
       <span>近期活动</span>
     </div>
     <div v-if="!loading" class="position-grid">
-      <v-card v-for="card in positionCards" :key="card.post_id" class="position-card">
+      <v-card v-for="card in positionCards" :key="card.postId" class="position-card">
         <v-list class="position-list">
           <v-list-item :title="card.title" :subtitle="card.abstract">
             <template #prepend>
@@ -28,11 +28,11 @@
             <v-icon>mdi-clock-outline</v-icon>
             <span>剩余时间：</span>
             <!-- 玉鈫蓝 -->
-            <span v-if="positionTimeGet[card.post_id] !== '已结束'" style="color: #126e82">{{
-              positionTimeGet[card.post_id]
+            <span v-if="positionTimeGet[card.postId] !== '已结束'" style="color: #126e82">{{
+              positionTimeGet[card.postId]
             }}</span>
             <!-- 粉红 -->
-            <span v-if="positionTimeGet[card.post_id] === '已结束'" style="color: #f2b9b2"
+            <span v-if="positionTimeGet[card.postId] === '已结束'" style="color: #f2b9b2"
               >已结束</span
             >
           </div>
@@ -48,21 +48,19 @@ import { useRouter } from "vue-router";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
 // plugins
-import MysOper from "../../plugins/Mys";
-// interface
-import { PositionCard } from "../../plugins/Mys/interface/position";
+import Mys from "../../plugins/Mys";
 
 // vue
 const router = useRouter();
 
 // loading
-const loading = ref(true as boolean);
+const loading = ref<boolean>(true);
 
 // data
-const positionCards = ref([] as PositionCard[]);
-const positionTimeGet = ref({} as Record<number, string>); // 剩余时间/已结束/未知
-const positionTimeEnd = ref({} as Record<number, number>); // 结束时间戳
-const positionTimer = ref({} as Record<number, null>); // 定时器
+const positionCards = ref<TGApp.Plugins.Mys.Position.RenderCard[]>([]);
+const positionTimeGet = ref<Record<number, string>>({}); // 剩余时间/已结束/未知
+const positionTimeEnd = ref<Record<number, number>>({}); // 结束时间戳
+const positionTimer = ref<Record<number, any>>({}); // 定时器
 
 // expose
 defineExpose({
@@ -86,21 +84,21 @@ function positionLastInterval(postId: number) {
 }
 
 onMounted(async () => {
-  const positionData = await MysOper.Position.get();
+  const positionData = await Mys.Position.get();
   if (!positionData) {
     console.error("获取近期活动失败");
     return;
   }
-  positionCards.value = MysOper.Position.card(positionData);
+  positionCards.value = Mys.Position.card(positionData);
   positionCards.value.forEach((card) => {
-    if (card.time.end_stamp === 0) {
-      positionTimeGet.value[card.post_id] = "未知";
+    if (card.time.endStamp === 0) {
+      positionTimeGet.value[card.postId] = "未知";
     } else {
-      positionTimeGet.value[card.post_id] = getLastPositionTime(card.time.end_stamp - Date.now());
+      positionTimeGet.value[card.postId] = getLastPositionTime(card.time.endStamp - Date.now());
     }
-    positionTimeEnd.value[card.post_id] = card.time.end_stamp;
-    positionTimer.value[card.post_id] = setInterval(() => {
-      positionLastInterval(card.post_id);
+    positionTimeEnd.value[card.postId] = card.time.endStamp;
+    positionTimer.value[card.postId] = setInterval(() => {
+      positionLastInterval(card.postId);
     }, 1000);
   });
   loading.value = false;
@@ -116,13 +114,12 @@ function getLastPositionTime(time: number) {
     .padStart(2, "0")}:${second.toFixed(0).padStart(2, "0")}`;
 }
 
-async function toPost(card: PositionCard) {
+async function toPost(card: TGApp.Plugins.Mys.Position.RenderCard) {
   // 获取路由路径
   const path = router.resolve({
     name: "帖子详情",
     params: {
-      // eslint-disable-next-line camelcase
-      post_id: card.post_id,
+      post_id: card.postId,
     },
   }).href;
   // 打开新窗口

@@ -1,6 +1,6 @@
 <template>
   <TSwitchTheme />
-  <TOLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
+  <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
   <div class="post-json">
     <div class="post-title">帖子返回内容 JSON</div>
     <JsonViewer :value="jsonData" copyable boxed />
@@ -11,17 +11,17 @@
 import { ref, onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import JsonViewer from "vue-json-viewer";
-import TOLoading from "../components/overlay/to-loading.vue";
+import ToLoading from "../components/overlay/to-loading.vue";
 import TSwitchTheme from "../components/main/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
 // plugins
-import MysOper from "../plugins/Mys";
+import Mys from "../plugins/Mys";
 
 // loading
-const loading = ref(true as boolean);
-const loadingTitle = ref("正在加载");
-const loadingEmpty = ref(false as boolean);
+const loading = ref<boolean>(true);
+const loadingTitle = ref<string>("正在加载");
+const loadingEmpty = ref<boolean>(false);
 
 // 数据
 const postId = Number(useRoute().params.post_id);
@@ -38,7 +38,7 @@ onMounted(async () => {
   // 获取数据
   loadingTitle.value = "正在获取数据...";
   try {
-    jsonData = await MysOper.Post.get(postId);
+    jsonData = await Mys.Post.get(postId);
     loading.value = false;
   } catch (e) {
     loadingTitle.value = "帖子不存在或解析失败";

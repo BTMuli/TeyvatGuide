@@ -28,7 +28,7 @@
   <v-window v-model="tab">
     <v-window-item value="notice">
       <div class="news-grid">
-        <v-card v-for="item in postData.notice" :key="item.post_id" class="news-card">
+        <v-card v-for="item in postData.notice" :key="item.postId" class="news-card">
           <div class="news-cover" @click="toPost(item)">
             <img :src="item.cover" alt="cover" />
           </div>
@@ -38,7 +38,7 @@
               <img src="../assets/icons/circle-check.svg" alt="check" />
               <span>查看</span>
             </v-btn>
-            <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+            <v-card-subtitle>id:{{ item.postId }}</v-card-subtitle>
             <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
               <template #prepend>
                 <img src="../assets/icons/arrow-right.svg" alt="right" />
@@ -59,7 +59,7 @@
     </v-window-item>
     <v-window-item value="activity">
       <div class="news-grid">
-        <v-card v-for="item in postData.activity" :key="item.post_id" class="news-card">
+        <v-card v-for="item in postData.activity" :key="item.postId" class="news-card">
           <div class="news-cover" @click="toPost(item)">
             <img :src="item.cover" alt="cover" />
           </div>
@@ -72,7 +72,7 @@
                 <span>查看</span>
               </template>
             </v-btn>
-            <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+            <v-card-subtitle>id:{{ item.postId }}</v-card-subtitle>
             <div v-show="!appStore.devMode">
               <v-btn
                 :style="{
@@ -103,7 +103,7 @@
     </v-window-item>
     <v-window-item v-if="showNews" value="news">
       <div class="news-grid">
-        <v-card v-for="item in postData.news" :key="item.post_id" class="news-card">
+        <v-card v-for="item in postData.news" :key="item.postId" class="news-card">
           <div class="news-cover" @click="toPost(item)">
             <img :src="item.cover" alt="cover" />
           </div>
@@ -115,7 +115,7 @@
                 <span>查看</span>
               </template>
             </v-btn>
-            <v-card-subtitle>id:{{ item.post_id }}</v-card-subtitle>
+            <v-card-subtitle>id:{{ item.postId }}</v-card-subtitle>
             <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
               <template #prepend>
                 <img src="../assets/icons/arrow-right.svg" alt="right" />
@@ -150,39 +150,37 @@ import ToChannel from "../components/overlay/to-channel.vue";
 // store
 import { useAppStore } from "../store/modules/app";
 // plugin
-import MysOper from "../plugins/Mys";
+import Mys from "../plugins/Mys";
 // utils
 import { createTGWindow } from "../utils/TGWindow";
-// interface
-import { NewsCard } from "../plugins/Mys/interface/news";
 
 // 路由
 const router = useRouter();
-const gid = useRoute().params.gid as string;
-const showNews = ref((gid !== "5") as boolean);
+const gid = useRoute().params.gid;
+const showNews = ref<boolean>(gid !== "5");
 
 // Store
 const appStore = useAppStore();
 
 // loading
-const loading = ref(true as boolean);
-const loadingTitle = ref("正在加载" as string);
-const loadingSub = ref(false as boolean);
+const loading = ref<boolean>(true);
+const loadingTitle = ref<string>("正在加载");
+const loadingSub = ref<boolean>(false);
 // snackbar
-const snackbar = ref(false as boolean);
-const snackbarText = ref("" as string);
-const snackbarColor = ref("success" as string);
+const snackbar = ref<boolean>(false);
+const snackbarText = ref<string>("");
+const snackbarColor = ref<string>("success");
 
 // search
-const search = ref("" as string);
+const search = ref<string>("");
 
 // 数据
-const tab = ref("" as string);
-const showList = ref(false as boolean);
+const tab = ref<string>("");
+const showList = ref<boolean>(false);
 const postData = ref({
-  notice: [] as NewsCard[],
-  activity: [] as NewsCard[],
-  news: [] as NewsCard[],
+  notice: [] as TGApp.Plugins.Mys.News.RenderCard[],
+  activity: [] as TGApp.Plugins.Mys.News.RenderCard[],
+  news: [] as TGApp.Plugins.Mys.News.RenderCard[],
 });
 const rawData = ref({
   notice: {
@@ -204,10 +202,10 @@ const rawData = ref({
 
 onMounted(async () => {
   loadingTitle.value = "正在获取公告数据";
-  const noticeData = await MysOper.News.get.notice(gid);
+  const noticeData = await Mys.News.get(gid);
   rawData.value.notice.isLast = noticeData.is_last;
   rawData.value.notice.lastId = noticeData.list.length;
-  postData.value.notice = MysOper.News.card.notice(noticeData);
+  postData.value.notice = Mys.News.card.notice(noticeData);
   tab.value = "notice";
   setTimeout(() => {
     loading.value = false;
@@ -221,18 +219,18 @@ async function firstLoad(data: string) {
   if (data === "activity" && rawData.value.activity.lastId === 0) {
     loadingTitle.value = "正在获取活动数据...";
     loading.value = true;
-    const activityData = await MysOper.News.get.activity(gid);
+    const activityData = await Mys.News.get(gid, "2");
     rawData.value.activity.isLast = activityData.is_last;
     rawData.value.activity.lastId = activityData.list.length;
-    postData.value.activity = MysOper.News.card.activity(activityData);
+    postData.value.activity = Mys.News.card.activity(activityData);
   }
   if (data === "news" && rawData.value.news.lastId === 0) {
     loadingTitle.value = "正在获取咨讯数据...";
     loading.value = true;
-    const newsData = await MysOper.News.get.news(gid);
+    const newsData = await Mys.News.get(gid, "3");
     rawData.value.news.isLast = newsData.is_last;
     rawData.value.news.lastId = newsData.list.length;
-    postData.value.news = MysOper.News.card.news(newsData);
+    postData.value.news = Mys.News.card.news(newsData);
   }
   setTimeout(() => {
     loading.value = false;
@@ -244,7 +242,7 @@ async function switchAnno() {
 }
 
 // 加载更多
-async function loadMore(data: string) {
+async function loadMore(data: "notice" | "activity" | "news"): Promise<void> {
   loadingSub.value = true;
   if (rawData.value[data].isLast) {
     snackbarText.value = "已经是最后一页了";
@@ -255,10 +253,12 @@ async function loadMore(data: string) {
   }
   loadingTitle.value = `正在获取${rawData.value[data].name}数据...`;
   loading.value = true;
-  const getData = await MysOper.News.get[data](gid, 20, rawData.value[data].lastId);
+  const dataList = ["notice", "activity", "news"];
+  const dataIndex = (dataList.indexOf(data) + 1).toString();
+  const getData = await Mys.News.get(gid, dataIndex, 20, rawData.value[data].lastId);
   rawData.value[data].lastId = rawData.value[data].lastId + getData.list.length;
   rawData.value[data].isLast = getData.is_last;
-  const getCard = MysOper.News.card[data](getData);
+  const getCard = Mys.News.card[data](getData);
   postData.value[data] = postData.value[data].concat(getCard);
   if (rawData.value[data].isLast) {
     snackbarText.value = "已经是最后一页了";
@@ -274,30 +274,28 @@ async function loadMore(data: string) {
   }, 1500);
 }
 
-async function toPost(item: NewsCard | string) {
-  console.log(item);
-  // if (typeof item === "string") {
-  //   const path = router.resolve({
-  //     name: "帖子详情",
-  //     params: {
-  //       // eslint-disable-next-line camelcase
-  //       post_id: item,
-  //     },
-  //   }).href;
-  //   createTGWindow(path, "帖子-Dev", item, 960, 720, false, false);
-  // } else {
-  //   const path = router.resolve({
-  //     name: "帖子详情",
-  //     params: {
-  //       // eslint-disable-next-line camelcase
-  //       post_id: item.post_id.toString(),
-  //     },
-  //   }).href;
-  //   createTGWindow(path, "帖子", item.title, 960, 720, false, false);
-  // }
+async function toPost(item: TGApp.Plugins.Mys.News.RenderCard | string) {
+  if (typeof item === "string") {
+    const path = router.resolve({
+      name: "帖子详情",
+      params: {
+        // eslint-disable-next-line camelcase
+        post_id: item,
+      },
+    }).href;
+    createTGWindow(path, "帖子-Dev", item, 960, 720, false, false);
+  } else {
+    const path = router.resolve({
+      name: "帖子详情",
+      params: {
+        post_id: item.postId.toString(),
+      },
+    }).href;
+    createTGWindow(path, "帖子", item.title, 960, 720, false, false);
+  }
 }
 
-async function toJson(item: NewsCard | string) {
+async function toJson(item: TGApp.Plugins.Mys.News.RenderCard | string) {
   if (typeof item === "string") {
     const path = router.resolve({
       name: "帖子详情（JSON）",
@@ -311,8 +309,7 @@ async function toJson(item: NewsCard | string) {
     const path = router.resolve({
       name: "帖子详情（JSON）",
       params: {
-        // eslint-disable-next-line camelcase
-        post_id: item.post_id.toString(),
+        post_id: item.postId.toString(),
       },
     }).href;
     createTGWindow(path, "帖子-JSON", `${item.title}-JSON`, 960, 720, false, false);

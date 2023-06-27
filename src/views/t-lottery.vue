@@ -1,6 +1,6 @@
 <template>
   <TSwitchTheme />
-  <TOLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
+  <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
   <div v-if="!loading" class="lottery-box">
     <div class="lottery-title">
       抽奖详情
@@ -25,18 +25,16 @@
       <div class="reward-title">抽奖 ID：{{ lotteryCard.id }}</div>
       <div class="reward-title">
         奖品详情
-        <div v-for="reward in lotteryCard.rewards" :key="reward.rewardName" class="reward-subtitle">
-          {{ reward.rewardName }} {{ reward.scheduledWinnerNumber }}份
+        <div v-for="reward in lotteryCard.rewards" :key="reward.name" class="reward-subtitle">
+          {{ reward.name }} {{ reward.goal }}份
         </div>
       </div>
     </div>
   </div>
   <div v-if="timeStatus === '已开奖'" class="lottery-box">
     <div class="lottery-title">中奖详情</div>
-    <div v-for="reward in lotteryCard.rewards" :key="reward.rewardName" class="lottery-list">
-      <div class="reward-title">
-        {{ reward.rewardName }} {{ reward.scheduledWinnerNumber }}/{{ reward.winnerNumber }}
-      </div>
+    <div v-for="reward in lotteryCard.rewards" :key="reward.name" class="lottery-list">
+      <div class="reward-title">{{ reward.name }} {{ reward.win }}/{{ reward.goal }}</div>
       <div class="lottery-grid">
         <div v-for="user in reward.users" :key="user.uid" class="lottery-sub-list">
           <div class="lottery-user-avatar">
@@ -58,29 +56,27 @@
 import { computed, onMounted, onUpdated, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import JsonViewer from "vue-json-viewer";
-import TOLoading from "../components/overlay/to-loading.vue";
+import ToLoading from "../components/overlay/to-loading.vue";
 import TSwitchTheme from "../components/main/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
 // store
 import { useAppStore } from "../store/modules/app";
 // plugins
-import MysOper from "../plugins/Mys";
-// interface
-import { LotteryCard, LotteryData } from "../plugins/Mys/interface/lottery";
+import Mys from "../plugins/Mys";
 
 // loading
-const loading = ref(true as boolean);
-const loadingTitle = ref("正在加载");
-const loadingEmpty = ref(false as boolean);
+const loading = ref<boolean>(true);
+const loadingTitle = ref<string>("正在加载");
+const loadingEmpty = ref<boolean>(false);
 
 // store
 const appStore = useAppStore();
 const showJson = computed(() => appStore.devMode);
 // 定时器
-const lotteryTimer = ref(null as any);
+const lotteryTimer = ref<any>(null);
 // 参与方式
-const participationMethod = ref("未知" as string);
+const participationMethod = ref<string>("未知");
 
 function flushTimeStatus() {
   const timeNow = new Date().getTime();
@@ -99,9 +95,13 @@ function flushTimeStatus() {
 
 // 数据
 const lotteryId = useRoute().params.lottery_id as string;
-const lotteryCard = ref({} as LotteryCard);
-let jsonData = reactive({} as LotteryData);
-const timeStatus = ref("未知" as string);
+const lotteryCard = ref<TGApp.Plugins.Mys.Lottery.RenderCard>(
+  {} as TGApp.Plugins.Mys.Lottery.RenderCard,
+);
+let jsonData = reactive<TGApp.Plugins.Mys.Lottery.FullData>(
+  {} as TGApp.Plugins.Mys.Lottery.FullData,
+);
+const timeStatus = ref<string>("未知");
 
 function backPost() {
   window.history.back();
@@ -117,7 +117,7 @@ onMounted(async () => {
   }
   // 获取数据
   loadingTitle.value = "正在获取数据...";
-  jsonData = await MysOper.Lottery.get(lotteryId);
+  jsonData = await Mys.Lottery.get(lotteryId);
   if (!jsonData) {
     loadingEmpty.value = true;
     loadingTitle.value = "未找到数据";
@@ -125,7 +125,7 @@ onMounted(async () => {
   }
   await appWindow.setTitle("抽奖详情 " + jsonData.lottery_entity_summary);
   loadingTitle.value = "正在渲染数据...";
-  lotteryCard.value = MysOper.Lottery.card.lottery(jsonData);
+  lotteryCard.value = Mys.Lottery.card(jsonData);
   if (jsonData.status === "Settled") {
     timeStatus.value = "已开奖";
   } else {
@@ -133,19 +133,19 @@ onMounted(async () => {
       flushTimeStatus();
     }, 1000);
   }
-  participationMethod.value = getParticipationMethod(lotteryCard.value.participantWay);
+  participationMethod.value = getUpWay(lotteryCard.value.upWay);
   setTimeout(() => {
     loading.value = false;
   }, 1000);
 });
 
 // 获取参与方式
-function getParticipationMethod(participantWay: string) {
-  switch (participantWay) {
+function getUpWay(upWay: string) {
+  switch (upWay) {
     case "Forward":
       return "转发";
     default:
-      return participantWay;
+      return upWay;
   }
 }
 

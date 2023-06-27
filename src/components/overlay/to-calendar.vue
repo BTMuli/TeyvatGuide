@@ -47,8 +47,9 @@ import TOverlay from "../main/t-overlay.vue";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 import TibCalendarMaterial from "../itembox/tib-calendar-material.vue";
 // utils
-import { OBC_CONTENT_API } from "../../plugins/Mys/interface/utils";
 import { createTGWindow } from "../../utils/TGWindow";
+//plugins
+import Mys from "../../plugins/Mys";
 
 interface ToCalendarProps {
   modelValue: boolean;
@@ -70,7 +71,7 @@ const visible = computed({
 });
 const itemType = computed(() => props.dataType);
 const itemVal = computed<TGApp.App.Calendar.Item>(() => props.dataVal);
-const snackbar = ref(false);
+const snackbar = ref<boolean>(false);
 
 const onCancel = () => {
   visible.value = false;
@@ -82,7 +83,7 @@ function toDetail(item: TGApp.App.Calendar.Item) {
     snackbar.value = true;
     return;
   }
-  const url = OBC_CONTENT_API.replace("{content_id}", item.contentId.toString());
+  const url = Mys.Api.Obc.replace("{contentId}", item.contentId.toString());
   createTGWindow(url, "素材详情", item.name, 1200, 800, true);
 }
 </script>

@@ -5,7 +5,7 @@
       限时祈愿
     </div>
     <div v-if="!loading" class="pool-grid">
-      <v-card v-for="pool in poolCards" :key="pool.post_id" class="pool-card">
+      <v-card v-for="pool in poolCards" :key="pool.postId" class="pool-card">
         <v-list class="pool-list">
           <v-list-item :title="pool.title" :subtitle="pool.subtitle">
             <!-- todo 点击播放语音 -->
@@ -33,12 +33,12 @@
           </div>
           <div class="pool-clock">
             <v-progress-circular
-              :model-value="poolTimePass[pool.post_id]"
+              :model-value="poolTimePass[pool.postId]"
               size="100"
               width="10"
-              :color="poolColor[pool.post_id]"
+              :color="poolColor[pool.postId]"
             >
-              {{ poolTimeGet[pool.post_id] }}
+              {{ poolTimeGet[pool.postId] }}
             </v-progress-circular>
           </div>
         </div>
@@ -64,9 +64,7 @@ import { useHomeStore } from "../../store/modules/home";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
 // plugins
-import MysOper from "../../plugins/Mys";
-// interface
-import { GachaCard, GachaData } from "../../plugins/Mys/interface/gacha";
+import Mys from "../../plugins/Mys";
 
 // vue
 const router = useRouter();
@@ -75,18 +73,18 @@ const router = useRouter();
 const homeStore = useHomeStore();
 
 // loading
-const loading = ref(true as boolean);
+const loading = ref<boolean>(true);
 // snackbar
-const showBar = ref(false as boolean);
-const barText = ref("");
-const barColor = ref("error" as string);
+const showBar = ref<boolean>(false);
+const barText = ref<string>("");
+const barColor = ref<string>("error");
 
 // data
-const poolCards = ref([] as GachaCard[]);
-const poolTimeGet = ref({} as Record<number, string>);
-const poolTimePass = ref({} as Record<number, number>);
-const poolColor = ref({} as Record<number, string>);
-const timer = ref({} as Record<number, any>);
+const poolCards = ref<TGApp.Plugins.Mys.Gacha.RenderCard[]>([]);
+const poolTimeGet = ref<Record<number, string>>({});
+const poolTimePass = ref<Record<number, number>>({});
+const poolColor = ref<Record<number, string>>({});
+const timer = ref<Record<number, any>>({});
 
 // expose
 defineExpose({
@@ -95,19 +93,19 @@ defineExpose({
 });
 
 function poolLastInterval(postId: number) {
-  const pool = poolCards.value.find((pool) => pool.post_id === postId);
+  const pool = poolCards.value.find((pool) => pool.postId === postId);
   if (!pool) return;
   if (poolTimeGet.value[postId] === "未开始") {
-    const isStart = pool.time.start_stamp - Date.now();
+    const isStart = pool.time.startStamp - Date.now();
     if (isStart > 0) return;
-    poolTimeGet.value[postId] = getLastPoolTime(pool.time.end_stamp - Date.now());
-    poolTimePass.value[postId] = pool.time.end_stamp - Date.now();
+    poolTimeGet.value[postId] = getLastPoolTime(pool.time.endStamp - Date.now());
+    poolTimePass.value[postId] = pool.time.endStamp - Date.now();
     poolColor.value[postId] = "#90caf9";
   } else {
-    const isEnd = pool.time.end_stamp - Date.now();
+    const isEnd = pool.time.endStamp - Date.now();
     poolTimeGet.value[postId] = getLastPoolTime(isEnd);
     poolTimePass.value[postId] =
-      ((pool.time.end_stamp - Date.now()) / (pool.time.end_stamp - pool.time.start_stamp)) * 100;
+      ((pool.time.endStamp - Date.now()) / (pool.time.endStamp - pool.time.startStamp)) * 100;
     if (isEnd >= 0) return;
     clearInterval(timer.value[postId]);
     timer.value[postId] = null;
@@ -119,38 +117,38 @@ function poolLastInterval(postId: number) {
 }
 
 onMounted(async () => {
-  const gachaData = await MysOper.Gacha.get();
+  const gachaData = await Mys.Gacha.get();
   if (!gachaData) {
     console.error("获取限时祈愿数据失败");
     return;
   }
   if (!checkCover(gachaData)) {
-    poolCards.value = await MysOper.Gacha.card(gachaData);
+    poolCards.value = await Mys.Gacha.card(gachaData);
     const coverData: Record<number, string> = {};
     poolCards.value.map((pool) => {
-      coverData[pool.post_id] = pool.cover;
+      coverData[pool.postId] = pool.cover;
       return pool;
     });
     homeStore.poolCover = coverData;
   } else {
-    poolCards.value = await MysOper.Gacha.card(gachaData, homeStore.poolCover);
+    poolCards.value = await Mys.Gacha.card(gachaData, homeStore.poolCover);
   }
   poolCards.value.map((pool) => {
-    poolTimeGet.value[pool.post_id] = getLastPoolTime(pool.time.end_stamp - Date.now());
-    poolTimePass.value[pool.post_id] = pool.time.end_stamp - Date.now();
-    if (poolTimePass.value[pool.post_id] <= 0) {
-      poolTimeGet.value[pool.post_id] = "已结束";
-      poolTimePass.value[pool.post_id] = 100;
-      poolColor.value[pool.post_id] = "#f44336";
-    } else if (pool.time.start_stamp - Date.now() > 0) {
-      poolTimeGet.value[pool.post_id] = "未开始";
-      poolTimePass.value[pool.post_id] = 100;
-      poolColor.value[pool.post_id] = "#32A9CA";
+    poolTimeGet.value[pool.postId] = getLastPoolTime(pool.time.endStamp - Date.now());
+    poolTimePass.value[pool.postId] = pool.time.endStamp - Date.now();
+    if (poolTimePass.value[pool.postId] <= 0) {
+      poolTimeGet.value[pool.postId] = "已结束";
+      poolTimePass.value[pool.postId] = 100;
+      poolColor.value[pool.postId] = "#f44336";
+    } else if (pool.time.startStamp - Date.now() > 0) {
+      poolTimeGet.value[pool.postId] = "未开始";
+      poolTimePass.value[pool.postId] = 100;
+      poolColor.value[pool.postId] = "#32A9CA";
     } else {
-      poolColor.value[pool.post_id] = "#90caf9";
+      poolColor.value[pool.postId] = "#90caf9";
     }
-    timer.value[pool.post_id] = setInterval(() => {
-      poolLastInterval(pool.post_id);
+    timer.value[pool.postId] = setInterval(() => {
+      poolLastInterval(pool.postId);
     }, 1000);
     return pool;
   });
@@ -158,7 +156,7 @@ onMounted(async () => {
 });
 
 // 检测新卡池
-function checkCover(data: GachaData[]) {
+function checkCover(data: TGApp.Plugins.Mys.Gacha.Data[]) {
   // 如果没有缓存
   if (!homeStore.poolCover || Object.keys(homeStore.poolCover).length === 0) {
     return false;
@@ -199,12 +197,11 @@ function getLastPoolTime(time: number) {
   return `${hour}:${minute.toFixed(0).padStart(2, "0")}:${second.toFixed(0).padStart(2, "0")}`;
 }
 
-function toPost(pool: GachaCard) {
+function toPost(pool: TGApp.Plugins.Mys.Gacha.RenderCard) {
   const path = router.resolve({
     name: "帖子详情",
     params: {
-      // eslint-disable-next-line camelcase
-      post_id: pool.post_id.toString(),
+      post_id: pool.postId.toString(),
     },
   }).href;
   createTGWindow(path, "限时祈愿", pool.title, 960, 720, false, false);

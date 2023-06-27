@@ -1,28 +1,21 @@
 /**
  * @file plugins Mys utils news.ts
  * @description Mys 插件咨讯工具
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Alpha v0.2.1
  */
-
-import {
-  type NewsData,
-  type NewsItem,
-  type NewsCard,
-  type ActivityStatus,
-} from "../interface/news";
 
 // 默认封面图
 const defaultCover = "/source/UI/defaultCover.webp";
 
 /**
  * @description 活动状态
- * @since Alpha v0.1.1
- * @enum {ActivityStatus}
- * @property {ActivityStatus} STARTED 进行中
- * @property {ActivityStatus} FINISHED 已结束
- * @property {ActivityStatus} SELECTION 评选中
- * @returns {EnumStatus}
+ * @since Alpha v0.2.1
+ * @enum {TGApp.Plugins.Mys.News.RenderStatus}
+ * @property {TGApp.Plugins.Mys.News.RenderStatus} STARTED 进行中
+ * @property {TGApp.Plugins.Mys.News.RenderStatus} FINISHED 已结束
+ * @property {TGApp.Plugins.Mys.News.RenderStatus} SELECTION 评选中
+ * @return EnumStatus
  */
 const EnumStatus = {
   STARTED: {
@@ -49,7 +42,7 @@ const EnumStatus = {
  * @param {number} status 活动状态码
  * @returns {string}
  */
-export function getActivityStatus(status: number): ActivityStatus {
+export function getActivityStatus(status: number): TGApp.Plugins.Mys.News.RenderStatus {
   switch (status) {
     case 1:
       return EnumStatus.STARTED;
@@ -64,17 +57,19 @@ export function getActivityStatus(status: number): ActivityStatus {
 
 /**
  * @description 获取渲染用公告数据
- * @since Alpha v0.1.2
- * @param {NewsData} noticeData 公告数据
- * @returns {NewsCard[]}
+ * @since Alpha v0.2.1
+ * @param {TGApp.Plugins.Mys.News.FullData} noticeData 公告数据
+ * @returns {TGApp.Plugins.Mys.News.RenderCard[]}
  */
-export function getNoticeCard(noticeData: NewsData): NewsCard[] {
-  const noticeCard: NewsCard[] = [];
-  noticeData.list.map((item: NewsItem) => {
+export function getNoticeCard(
+  noticeData: TGApp.Plugins.Mys.News.FullData,
+): TGApp.Plugins.Mys.News.RenderCard[] {
+  const noticeCard: TGApp.Plugins.Mys.News.RenderCard[] = [];
+  noticeData.list.map((item: TGApp.Plugins.Mys.News.Item) => {
     return noticeCard.push({
       title: item.post.subject,
       cover: item.cover?.url || item.post.cover || item.post.images[0] || defaultCover,
-      post_id: Number(item.post.post_id),
+      postId: Number(item.post.post_id),
       subtitle: item.post.post_id,
     });
   });
@@ -83,20 +78,22 @@ export function getNoticeCard(noticeData: NewsData): NewsCard[] {
 
 /**
  * @description 获取渲染用活动数据
- * @since Alpha v0.1.2
- * @param {NewsData} activityData 活动数据
- * @returns {NewsCard[]}
+ * @since Alpha v0.2.1
+ * @param {TGApp.Plugins.Mys.News.FullData} activityData 活动数据
+ * @returns {TGApp.Plugins.Mys.News.RenderCard[]}
  */
-export function getActivityCard(activityData: NewsData): NewsCard[] {
-  const activityCard: NewsCard[] = [];
-  activityData.list.map((item: NewsItem) => {
+export function getActivityCard(
+  activityData: TGApp.Plugins.Mys.News.FullData,
+): TGApp.Plugins.Mys.News.RenderCard[] {
+  const activityCard: TGApp.Plugins.Mys.News.RenderCard[] = [];
+  activityData.list.map((item: TGApp.Plugins.Mys.News.Item) => {
     const startTime = new Date(Number(item.news_meta.start_at_sec) * 1000).toLocaleDateString();
     const endTime = new Date(Number(item.news_meta.end_at_sec) * 1000).toLocaleDateString();
     const statusInfo = getActivityStatus(item.news_meta.activity_status);
     return activityCard.push({
       title: item.post.subject,
       cover: item.cover?.url || item.post.cover || item.post.images[0] || defaultCover,
-      post_id: Number(item.post.post_id),
+      postId: Number(item.post.post_id),
       subtitle: `${startTime} - ${endTime}`,
       status: statusInfo,
     });
@@ -106,17 +103,19 @@ export function getActivityCard(activityData: NewsData): NewsCard[] {
 
 /**
  * @description 获取渲染用新闻数据
- * @since Alpha v0.1.2
- * @param {NewsData} newsData 新闻数据
- * @returns {NewsCard[]}
+ * @since Alpha v0.2.1
+ * @param {TGApp.Plugins.Mys.News.FullData} newsData 新闻数据
+ * @returns {TGApp.Plugins.Mys.News.RenderCard[]}
  */
-export function getNewsCard(newsData: NewsData): NewsCard[] {
-  const newsCard: NewsCard[] = [];
-  newsData.list.map((item: NewsItem) => {
+export function getNewsCard(
+  newsData: TGApp.Plugins.Mys.News.FullData,
+): TGApp.Plugins.Mys.News.RenderCard[] {
+  const newsCard: TGApp.Plugins.Mys.News.RenderCard[] = [];
+  newsData.list.map((item: TGApp.Plugins.Mys.News.Item) => {
     return newsCard.push({
       title: item.post.subject,
       cover: item.cover?.url || item.post.cover || item.post.images[0] || defaultCover,
-      post_id: Number(item.post.post_id),
+      postId: Number(item.post.post_id),
       subtitle: item.post.post_id,
     });
   });

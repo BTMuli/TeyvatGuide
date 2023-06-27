@@ -1,16 +1,15 @@
 /**
- * @file plugins Mys utils PostParser.ts
+ * @file plugins Mys utils parsePost.ts
  * @description 用于解析Mys数据的工具
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.3
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Alpha v0.2.1
  */
-import { type PostData, type PostStructuredContent } from "../interface/post";
 
 /**
  * @description 16进制颜色转 RGB
  * @since Alpha v0.1.3
  * @param {string} hex 16进制颜色
- * @returns {object} RGB 颜色
+ * @returns {{ r: number; g: number; b: number }} RGB颜色
  */
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -54,10 +53,10 @@ function isColorSimilar(colorBg: string, colorFg: string): boolean {
  * @param {string} url 链接
  * @returns {boolean} 是否是米游社帖子
  */
-export function IsMysPost(url: string): boolean {
+function isMysPost(url: string): boolean {
   const regBBS = /^https:\/\/bbs\.mihoyo\.com\/\w+\/article\/\d+$/;
-  const regMYS = /^https:\/\/www\.miyoushe\.com\/\w+\/article\/\d+$/;
-  return regBBS.test(url) || regMYS.test(url);
+  const regMys = /^https:\/\/www\.miyoushe\.com\/\w+\/article\/\d+$/;
+  return regBBS.test(url) || regMys.test(url);
 }
 
 /**
@@ -66,7 +65,7 @@ export function IsMysPost(url: string): boolean {
  * @param {string} url 链接
  * @returns {string} 帖子 id
  */
-export function getPostId(url: string): string {
+function getPostId(url: string): string {
   const postId: string | undefined = url.split("/").pop();
   if (postId === undefined) {
     throw new Error("无法获取帖子 id");
@@ -75,15 +74,15 @@ export function getPostId(url: string): string {
 }
 
 /**
- * @description 解析用户帖子，将其转换为 PostStructContent
+ * @description 解析用户帖子，将其转换为 StructContent
  * @since Alpha v0.1.2
  * @see PostContent
  * @param {string} content 帖子内容
  * @returns {string} 解析后的内容
  */
-export function contentParser(content: string): string {
+function parseContent(content: string): string {
   const data = JSON.parse(content);
-  const result: PostStructuredContent[] = [];
+  const result: TGApp.Plugins.Mys.Post.StructuredContent[] = [];
   // 遍历 data 属性，值
   Object.keys(data).forEach((key) => {
     switch (key) {
@@ -114,26 +113,26 @@ export function contentParser(content: string): string {
 /**
  * @description 解析Mys数据
  * @since Alpha v0.1.2
- * @param {PostData} post Mys数据
+ * @param {TGApp.Plugins.Mys.Post.FullData} post Mys数据
  * @description 为了安全考虑，不会解析所有的属性，只会解析几个常用的属性
  * @returns {string} 解析后的HTML，可作为 v-html 使用
  */
-export function PostParser(post: PostData): string {
+function parsePost(post: TGApp.Plugins.Mys.Post.FullData): string {
   const postContent = post.post.content;
   let parserData;
   if (postContent.startsWith("<")) {
     parserData = post.post.structured_content;
   } else {
     try {
-      parserData = contentParser(post.post.content);
+      parserData = parseContent(post.post.content);
     } catch (error) {
       parserData = post.post.structured_content;
     }
   }
-  const jsonData: PostStructuredContent[] = JSON.parse(parserData);
+  const jsonData: TGApp.Plugins.Mys.Post.StructuredContent[] = JSON.parse(parserData);
   const doc = document.createElement("div");
   jsonData.forEach((item: any) => {
-    const parsed = ParserTransfer(item);
+    const parsed = transferParser(item);
     doc.appendChild(parsed);
   });
   return doc.innerHTML;
@@ -142,38 +141,40 @@ export function PostParser(post: PostData): string {
 /**
  * @description 解析中转
  * @since Alpha v0.1.2
- * @param {PostStructuredContent} data Mys数据
+ * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLDivElement | HTMLSpanElement} 解析后的中转
  */
-function ParserTransfer(data: PostStructuredContent): HTMLDivElement | HTMLSpanElement {
+function transferParser(
+  data: TGApp.Plugins.Mys.Post.StructuredContent,
+): HTMLDivElement | HTMLSpanElement {
   if (typeof data.insert === "string") {
-    return TextParser(data);
+    return parseText(data);
   } else if (data.insert.image) {
-    return ImageParser(data);
+    return parseImage(data);
   } else if (data.insert.vod != null) {
-    return VideoParser(data);
+    return parseVideo(data);
   } else if (data.insert.video) {
-    return VideoParser(data);
+    return parseVideo(data);
   } else if (data.insert.backup_text) {
-    return BackupTextParser(data);
+    return parseBackup(data);
   } else if (data.insert.link_card != null) {
-    return LinkCardParser(data);
+    return parseLinkCard(data);
   } else if (data.insert.divider) {
-    return DividerParser(data);
+    return parseDivider(data);
   } else if (data.insert.mention != null) {
-    return MentionParser(data);
+    return parseMention(data);
   } else {
-    return UnknownParser(data);
+    return parseUnknown(data);
   }
 }
 
 /**
  * @description 解析未知数据
  * @since Alpha v0.1.1
- * @param {PostStructuredContent} data Mys数据
+ * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的未知数据
  */
-function UnknownParser(data: PostStructuredContent): HTMLDivElement {
+function parseUnknown(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
   // 创建 div
   const div = document.createElement("div");
   div.classList.add("mys-post-unknown");
@@ -189,10 +190,10 @@ function UnknownParser(data: PostStructuredContent): HTMLDivElement {
 /**
  * @description 解析文本
  * @since Alpha v0.1.3
- * @param {PostStructuredContent} data Mys数据
+ * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLSpanElement} 解析后的文本
  */
-function TextParser(data: PostStructuredContent): HTMLSpanElement {
+function parseText(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLSpanElement {
   // 检查数据
   if (typeof data.insert !== "string") {
     throw new Error("data.insert is not a string");
@@ -225,10 +226,10 @@ function TextParser(data: PostStructuredContent): HTMLSpanElement {
 /**
  * @description 解析链接
  * @since Alpha v0.1.2
- * @param {PostStructuredContent} data Mys数据
+ * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLSpanElement} 解析后的链接
  */
-function LinkTextParser(data: PostStructuredContent): HTMLSpanElement {
+function LinkTextParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLSpanElement {
   // 检查数据
   if (typeof data.insert !== "string") {
     throw new Error("data.insert is not a string");
@@ -246,7 +247,7 @@ function LinkTextParser(data: PostStructuredContent): HTMLSpanElement {
   const link = document.createElement("a");
   const linkUrl = data.attributes.link;
   link.classList.add("mys-post-link");
-  if (IsMysPost(linkUrl)) {
+  if (isMysPost(linkUrl)) {
     const postId = getPostId(linkUrl);
     link.href = `/post_detail/${postId}`;
     link.target = "_self";
@@ -264,10 +265,10 @@ function LinkTextParser(data: PostStructuredContent): HTMLSpanElement {
 /**
  * @description 解析分割线
  * @since Alpha v0.1.1
- * @param {PostStructuredContent} data Mys数据
+ * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的分割线
  */
-function DividerParser(data: PostStructuredContent): HTMLDivElement {
+function parseDivider(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
   // 数据检查
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
@@ -294,7 +295,7 @@ function DividerParser(data: PostStructuredContent): HTMLDivElement {
       "https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2022/07/13/line_4.png";
   } else {
     console.error("Unknown divider type", data);
-    return UnknownParser(data);
+    return parseUnknown(data);
   }
   // 插入 img
   div.appendChild(img);
@@ -305,10 +306,10 @@ function DividerParser(data: PostStructuredContent): HTMLDivElement {
 /**
  * @description 解析图片
  * @since Alpha v0.1.1
- * @param {PostStructuredContent} data Mys数据
+ * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的图片
  */
-function ImageParser(data: PostStructuredContent): HTMLDivElement {
+function parseImage(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
   // 检查数据
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
@@ -342,10 +343,10 @@ function ImageParser(data: PostStructuredContent): HTMLDivElement {
 /**
  * @description 解析视频
  * @since Alpha
- * @param {PostStructuredContent} data Mys数据
+ * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的视频
  */
-function VideoParser(data: PostStructuredContent): HTMLDivElement {
+function parseVideo(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
   // 检查数据
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
@@ -392,10 +393,10 @@ function VideoParser(data: PostStructuredContent): HTMLDivElement {
 /**
  * @description 解析折叠内容
  * @since Alpha v0.1.1
- * @param {PostStructuredContent} data Mys数据
+ * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的折叠内容
  */
-function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
+function parseBackup(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
   // 检查数据
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
@@ -407,8 +408,10 @@ function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
     throw new Error("data.insert.fold is not defined");
   }
   // 转换
-  const titleJson: PostStructuredContent[] = JSON.parse(data.insert.fold.title);
-  const contentJson: PostStructuredContent[] = JSON.parse(data.insert.fold.content);
+  const titleJson: TGApp.Plugins.Mys.Post.StructuredContent[] = JSON.parse(data.insert.fold.title);
+  const contentJson: TGApp.Plugins.Mys.Post.StructuredContent[] = JSON.parse(
+    data.insert.fold.content,
+  );
   // 创建 div
   const div = document.createElement("div");
   div.classList.add("mys-post-div");
@@ -419,13 +422,13 @@ function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
   const title = document.createElement("summary");
   // 解析标题
   titleJson.forEach((item) => {
-    const parsed = ParserTransfer(item);
+    const parsed = transferParser(item);
     title.appendChild(parsed);
   });
   // 创建内容
   const content = document.createElement("div");
   contentJson.forEach((item) => {
-    const parsed = ParserTransfer(item);
+    const parsed = transferParser(item);
     content.appendChild(parsed);
   });
   details.appendChild(title);
@@ -438,10 +441,10 @@ function BackupTextParser(data: PostStructuredContent): HTMLDivElement {
 /**
  * @description 解析抽奖
  * @since Alpha v0.1.1
- * @param {PostStructuredContent} data Mys数据
+ * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的抽奖
  */
-function LotteryParser(data: PostStructuredContent): HTMLDivElement {
+function LotteryParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
   // 检查数据
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
@@ -476,10 +479,10 @@ function LotteryParser(data: PostStructuredContent): HTMLDivElement {
 /**
  * @description 解析链接卡片
  * @since Alpha v0.1.2
- * @param {PostStructuredContent} data Mys数据
+ * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的链接卡片
  */
-function LinkCardParser(data: PostStructuredContent): HTMLDivElement {
+function parseLinkCard(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
   // 检查数据
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
@@ -519,7 +522,7 @@ function LinkCardParser(data: PostStructuredContent): HTMLDivElement {
   button.classList.add("mys-post-link-card-btn");
   button.innerHTML = (data.insert.link_card.button_text || "详情") + " >";
   const linkUrl = data.insert.link_card.origin_url;
-  if (IsMysPost(linkUrl)) {
+  if (isMysPost(linkUrl)) {
     const postId = getPostId(linkUrl);
     button.href = `/post_detail/${postId}`;
     button.target = "_self";
@@ -539,10 +542,10 @@ function LinkCardParser(data: PostStructuredContent): HTMLDivElement {
 /**
  * @description 解析 Mention
  * @since Alpha v0.1.2
- * @param {PostStructuredContent} data Mys数据
+ * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLAnchorElement} 解析后的 Mention
  */
-function MentionParser(data: PostStructuredContent): HTMLAnchorElement {
+function parseMention(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLAnchorElement {
   // 检查数据
   if (typeof data.insert === "string") {
     throw new Error("data.insert is a string");
@@ -563,3 +566,5 @@ function MentionParser(data: PostStructuredContent): HTMLAnchorElement {
   link.prepend(icon);
   return link;
 }
+
+export default parsePost;

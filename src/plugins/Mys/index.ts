@@ -1,30 +1,33 @@
 /**
  * @file plugins Mys index.ts
  * @description Mys plugin index
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Alpha v0.2.1
  */
 
+// Api
+import MysApi from "./api";
 // Post
-import { getPostData } from "./request/post";
-import { PostParser } from "./utils/parser";
+import getPostData from "./request/getPostData";
+import parsePost from "./utils/parsePost";
 // Gacha
-import { getGachaData } from "./request/gacha";
-import { getGachaCard } from "./utils/gacha";
+import getGachaData from "./request/getGachaData";
+import getGachaCard from "./utils/getGachaCard";
 // Position
-import { getPositionData } from "./request/position";
-import { getPositionCard } from "./utils/position";
+import getPositionData from "./request/getPositionData";
+import getPositionCard from "./utils/getPositionCard";
 // News
-import { getNoticeList, getActivityList, getNewsList } from "./request/news";
-import { getNoticeCard, getActivityCard, getNewsCard } from "./utils/news";
+import getNewsList from "./request/getNewsList";
+import { getNoticeCard, getActivityCard, getNewsCard } from "./utils/getNewsCard";
 // Lottery
-import { getLotteryData } from "./request/lottery";
-import { getLotteryCard, getLotteryRewardCard } from "./utils/lottery";
+import getLotteryData from "./request/getLotteryData";
+import getLotteryCard from "./utils/getLotteryCard";
 
-const MysOper = {
+const Mys = {
+  Api: MysApi,
   Post: {
     get: getPostData,
-    parser: PostParser,
+    parser: parsePost,
   },
   Gacha: {
     get: getGachaData,
@@ -35,11 +38,7 @@ const MysOper = {
     card: getPositionCard,
   },
   News: {
-    get: {
-      notice: getNoticeList,
-      activity: getActivityList,
-      news: getNewsList,
-    },
+    get: getNewsList,
     card: {
       notice: getNoticeCard,
       activity: getActivityCard,
@@ -48,11 +47,8 @@ const MysOper = {
   },
   Lottery: {
     get: getLotteryData,
-    card: {
-      lottery: getLotteryCard,
-      reward: getLotteryRewardCard,
-    },
+    card: getLotteryCard,
   },
 };
 
-export default MysOper;
+export default Mys;

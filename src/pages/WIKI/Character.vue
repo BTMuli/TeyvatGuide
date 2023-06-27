@@ -14,7 +14,8 @@ import TibWikiAvatar from "../../components/itembox/tib-wiki-avatar.vue";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
 import { AppCharacterData } from "../../data";
-import { OBC_CONTENT_API } from "../../plugins/Mys/interface/utils";
+// plugins
+import Mys from "../../plugins/Mys";
 
 // snackbar
 const snackbar = ref(false);
@@ -26,7 +27,7 @@ function toOuter(item: TGApp.App.Character.WikiBriefInfo) {
     snackbar.value = true;
     return;
   }
-  const url = OBC_CONTENT_API.replace("{content_id}", item.contentId.toString());
+  const url = Mys.Api.Obc.replace("{contentId}", item.contentId.toString());
   createTGWindow(url, "角色详情", item.name, 1200, 800, true);
 }
 </script>

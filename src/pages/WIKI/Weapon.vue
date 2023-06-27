@@ -14,10 +14,11 @@ import TibWikiWeapon from "../../components/itembox/tib-wiki-weapon.vue";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
 import { AppWeaponData } from "../../data";
-import { OBC_CONTENT_API } from "../../plugins/Mys/interface/utils";
+// plugins
+import Mys from "../../plugins/Mys";
 
 // snackbar
-const snackbar = ref(false);
+const snackbar = ref<boolean>(false);
 // data
 const cardsInfo = computed(() => AppWeaponData);
 
@@ -26,7 +27,7 @@ function toOuter(item: TGApp.App.Weapon.WikiBriefInfo) {
     snackbar.value = true;
     return;
   }
-  const url = OBC_CONTENT_API.replace("{content_id}", item.contentId.toString());
+  const url = Mys.Api.Obc.replace("{contentId}", item.contentId.toString());
   createTGWindow(url, "武器详情", item.name, 1200, 800, true);
 }
 </script>
