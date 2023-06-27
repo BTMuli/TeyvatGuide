@@ -14,7 +14,7 @@ import getTeamCollect from "./request/getTeamCollect";
 import { checkUid, getUserData } from "./request/getUserData";
 import getWeaponCollect from "./request/getWeaponCollect";
 import uploadData from "./request/uploadData";
-import { transLocal } from "./utils/transLocal";
+import { transAvatars, transLocal } from "./utils/transLocal";
 
 const HutaoRequest = {
   Abyss: {
@@ -34,6 +34,7 @@ const HutaoRequest = {
     postData: uploadData,
     utils: {
       transData: transLocal,
+      transAvatars,
     },
   },
 };

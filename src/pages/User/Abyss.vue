@@ -87,7 +87,6 @@ const loadingTitle = ref("");
 
 // data
 const userTab = ref(0);
-const abyssCookie = ref(computed(() => userStore.getCookieGroup4() as Record<string, string>));
 const user = computed(() => userStore.getCurAccount());
 
 const localAbyss = ref([] as TGApp.Sqlite.Abyss.SingleTable[]);
@@ -113,16 +112,23 @@ async function initAbyssData() {
 async function getAbyssData(): Promise<void> {
   loadingTitle.value = "正在获取深渊数据";
   loading.value = true;
+  const abyssCookie = userStore.getCookieGroup4();
+  const cookie: Record<string, string> = {
+    account_id: abyssCookie.account_id,
+    cookie_token: abyssCookie.cookie_token,
+    ltoken: abyssCookie.ltoken,
+    ltuid: abyssCookie.ltuid,
+  };
   if (localAbyssID.value.length < 2) {
     loadingTitle.value = "正在获取上期深渊数据";
-    const resP = await TGRequest.User.byCookie.getAbyss(abyssCookie.value, "2", user.value);
+    const resP = await TGRequest.User.byCookie.getAbyss(cookie, "2", user.value);
     if (!resP.hasOwnProperty("retcode")) {
       loadingTitle.value = "正在保存上期深渊数据";
       await TGSqlite.saveAbyss(user.value.gameUid, resP as TGApp.Game.Abyss.FullData);
     }
   }
   loadingTitle.value = "正在获取本期深渊数据";
-  const res = await TGRequest.User.byCookie.getAbyss(abyssCookie.value, "1", user.value);
+  const res = await TGRequest.User.byCookie.getAbyss(cookie, "1", user.value);
   if (!res.hasOwnProperty("retcode")) {
     loadingTitle.value = "正在保存本期深渊数据";
     await TGSqlite.saveAbyss(user.value.gameUid, res as TGApp.Game.Abyss.FullData);
@@ -145,10 +151,23 @@ async function shareAbyss(): Promise<void> {
   await generateShareImg(fileName, abyssRef.value);
 }
 
-function uploadAbyss(): void {
+async function uploadAbyss(): Promise<void> {
   const abyssData = curAbyss.value;
-  const transAbyss = HutaoRequest.Abyss.utils.transData(abyssData);
-  console.log(transAbyss);
+  loadingTitle.value = "正在转换深渊数据";
+  loading.value = true;
+  let transAbyss = HutaoRequest.Abyss.utils.transData(abyssData);
+  loadingTitle.value = "正在获取角色数据";
+  const roles = await TGSqlite.getUserCharacter(user.value.gameUid);
+  if (!roles) {
+    loading.value = false;
+    return;
+  }
+  loadingTitle.value = "正在转换角色数据";
+  transAbyss.avatars = HutaoRequest.Abyss.utils.transAvatars(roles);
+  loadingTitle.value = "正在上传深渊数据";
+  const res = await HutaoRequest.Abyss.postData(transAbyss);
+  console.log(res);
+  loading.value = false;
 }
 </script>
 <style lang="css" scoped>

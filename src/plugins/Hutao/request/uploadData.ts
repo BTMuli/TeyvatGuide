@@ -2,7 +2,7 @@
  * @file plugins Hutao request uploadData.ts
  * @description Hutao 数据上传请求函数集合
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.1
  */
 
 // tauri
@@ -12,15 +12,16 @@ import HutaoApi from "../api";
 
 /**
  * @description 上传用户数据
- * @since Alpha v0.2.0
- * @todo 上传用户数据
+ * @since Alpha v0.2.1
  * @param {TGApp.Plugins.Hutao.AbyssRecordUpload} data 用户数据
- * @returns {Promise<unknown>} 上传结果
+ * @returns {Promise<TGApp.Plugins.Hutao.HutaoResponse>} 上传结果
  */
-async function uploadData(data: TGApp.Plugins.Hutao.AbyssRecordUpload): Promise<unknown> {
+async function uploadData(
+  data: TGApp.Plugins.Hutao.AbyssRecordUpload,
+): Promise<TGApp.Plugins.Hutao.HutaoResponse> {
   const url = HutaoApi.Abyss.upload;
   return await http
-    .fetch(url, {
+    .fetch<TGApp.Plugins.Hutao.HutaoResponse>(url, {
       method: "POST",
       body: http.Body.json(data),
     })

@@ -5,26 +5,21 @@
  * @since Alpha v0.2.1
  */
 
-// utils
-import TGSqlite from "../../Sqlite";
-
 /**
  * @description 将本地数据转为上传用的数据
  * @since Alpha v0.2.1
  * @param {TGApp.Sqlite.Abyss.SingleTable} data 本地数据
- * @param {string} userName 用户名
  * @returns {TGApp.Plugins.Hutao.AbyssRecordUpload} 上传用的数据
  */
 export function transLocal(
   data: TGApp.Sqlite.Abyss.SingleTable,
-  userName?: string,
 ): TGApp.Plugins.Hutao.AbyssRecordUpload {
   return {
     uid: data.uid,
     identity: "Tauri.Genshin",
     spiralAbyss: transAbyss(data),
-    avatars: transAvatars(data),
-    reservedUserName: userName || "",
+    avatars: [],
+    reservedUserName: "",
   };
 }
 
@@ -93,36 +88,26 @@ function transLevel(data: TGApp.Sqlite.Abyss.Level): TGApp.Plugins.Hutao.AbyssLe
 /**
  * @description 转换角色数据
  * @since Alpha v0.2.1
- * @param {TGApp.Sqlite.Abyss.SingleTable} data 本地数据
+ * @param {TGApp.Sqlite.Character.UserRole[]} avatars 角色数据
  * @returns {TGApp.Plugins.Hutao.AbyssAvatar[]} 上传用的数据
  */
-function transAvatars(data: TGApp.Sqlite.Abyss.SingleTable): TGApp.Plugins.Hutao.AbyssAvatar[] {
-  const avatars: TGApp.Plugins.Hutao.AbyssAvatar[] = [];
-  const floors: TGApp.Sqlite.Abyss.Floor[] = JSON.parse(data.floors);
-  const avatarIdCollect = new Set<number>();
-  floors.map((floor) =>
-    floor.levels.map((level) => {
-      level.upBattle.characters.map((character) => avatarIdCollect.add(character.id));
-      level.downBattle.characters.map((character) => avatarIdCollect.add(character.id));
-    }),
-  );
-  Array.from(avatarIdCollect).map(async (avatarId) => {
-    const avatarGet: TGApp.Sqlite.Character.UserRole[] | false = await TGSqlite.getUserCharacter(
-      data.uid,
-      avatarId,
-    );
-    if (!avatarGet) return;
-    const avatar = avatarGet[0];
+export function transAvatars(
+  avatars: TGApp.Sqlite.Character.UserRole[],
+): TGApp.Plugins.Hutao.AbyssAvatar[] {
+  return avatars.map((avatar) => {
     const weapon: TGApp.Sqlite.Character.RoleWeapon = JSON.parse(avatar.weapon);
-    const relics: TGApp.Sqlite.Character.RoleReliquary[] = JSON.parse(avatar.reliquary);
-    const relicSetCollect = new Set<string>();
-    relics.map((relic) => relicSetCollect.add(relic.set.id.toString()));
-    avatars.push({
-      avatarId,
+    let relics: number[];
+    if (avatar.reliquary === "") {
+      relics = [];
+    } else {
+      const relicSet: TGApp.Sqlite.Character.RoleReliquary[] = JSON.parse(avatar.reliquary);
+      relics = relicSet.map((relic) => relic.set.id);
+    }
+    return {
+      avatarId: avatar.cid,
       weaponId: weapon.id,
-      reliquarySetIds: Array.from(relicSetCollect),
+      reliquarySetIds: relics,
       activedConstellationNumber: avatar.activeConstellation,
-    });
+    };
   });
-  return avatars;
 }
