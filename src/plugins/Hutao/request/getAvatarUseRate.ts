@@ -13,12 +13,12 @@ import HutaoApi from "../api";
 /**
  * @description 获取角色使用率
  * @since Alpha v0.2.0
- * @return {Promise<TGApp.Plugins.Hutao.AbyssAvatarUseRate[]>}
+ * @return {Promise<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>}
  */
-async function getAvatarUseRate(): Promise<TGApp.Plugins.Hutao.AbyssAvatarUseRate[]> {
+async function getAvatarUseRate(): Promise<TGApp.Plugins.Hutao.Abyss.AvatarUse[]> {
   const url = HutaoApi.Abyss.avatar.useRate;
   return await http
-    .fetch<TGApp.Plugins.Hutao.AbyssAvatarUseRateResponse>(url, {
+    .fetch<TGApp.Plugins.Hutao.Abyss.AvatarUseResponse>(url, {
       method: "GET",
     })
     .then((res) => {

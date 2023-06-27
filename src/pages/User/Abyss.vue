@@ -77,7 +77,7 @@ import { useUserStore } from "../../store/modules/user";
 import TGRequest from "../../web/request/TGRequest";
 import TGSqlite from "../../plugins/Sqlite";
 import { generateShareImg } from "../../utils/TGShare";
-import HutaoRequest from "../../plugins/Hutao";
+import Hutao from "../../plugins/Hutao";
 
 // store
 const userStore = useUserStore();
@@ -155,7 +155,7 @@ async function uploadAbyss(): Promise<void> {
   const abyssData = curAbyss.value;
   loadingTitle.value = "正在转换深渊数据";
   loading.value = true;
-  let transAbyss = HutaoRequest.Abyss.utils.transData(abyssData);
+  let transAbyss = Hutao.Abyss.utils.transData(abyssData);
   loadingTitle.value = "正在获取角色数据";
   const roles = await TGSqlite.getUserCharacter(user.value.gameUid);
   if (!roles) {
@@ -163,9 +163,9 @@ async function uploadAbyss(): Promise<void> {
     return;
   }
   loadingTitle.value = "正在转换角色数据";
-  transAbyss.avatars = HutaoRequest.Abyss.utils.transAvatars(roles);
+  transAbyss.avatars = Hutao.Abyss.utils.transAvatars(roles);
   loadingTitle.value = "正在上传深渊数据";
-  const res = await HutaoRequest.Abyss.postData(transAbyss);
+  const res = await Hutao.Abyss.postData(transAbyss);
   console.log(res);
   loading.value = false;
 }

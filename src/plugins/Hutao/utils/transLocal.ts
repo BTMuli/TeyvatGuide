@@ -9,11 +9,11 @@
  * @description 将本地数据转为上传用的数据
  * @since Alpha v0.2.1
  * @param {TGApp.Sqlite.Abyss.SingleTable} data 本地数据
- * @returns {TGApp.Plugins.Hutao.AbyssRecordUpload} 上传用的数据
+ * @returns {TGApp.Plugins.Hutao.Abyss.RecordUpload} 上传用的数据
  */
 export function transLocal(
   data: TGApp.Sqlite.Abyss.SingleTable,
-): TGApp.Plugins.Hutao.AbyssRecordUpload {
+): TGApp.Plugins.Hutao.Abyss.RecordUpload {
   return {
     uid: data.uid,
     identity: "Tauri.Genshin",
@@ -27,9 +27,9 @@ export function transLocal(
  * @description 转换深渊数据
  * @since Alpha v0.2.1
  * @param {TGApp.Sqlite.Abyss.SingleTable} data 本地数据
- * @returns {TGApp.Plugins.Hutao.AbyssRecord} 上传用的数据
+ * @returns {TGApp.Plugins.Hutao.Abyss.RecordData} 上传用的数据
  */
-function transAbyss(data: TGApp.Sqlite.Abyss.SingleTable): TGApp.Plugins.Hutao.AbyssRecord {
+function transAbyss(data: TGApp.Sqlite.Abyss.SingleTable): TGApp.Plugins.Hutao.Abyss.RecordData {
   const damage: TGApp.Sqlite.Abyss.Character = JSON.parse(data.damageRank)[0];
   const takeDamage: TGApp.Sqlite.Abyss.Character = JSON.parse(data.takeDamageRank)[0];
   return {
@@ -52,9 +52,9 @@ function transAbyss(data: TGApp.Sqlite.Abyss.SingleTable): TGApp.Plugins.Hutao.A
  * @description 转换层数数据
  * @since Alpha v0.2.1
  * @param {TGApp.Sqlite.Abyss.Floor} data 本地数据
- * @returns {TGApp.Plugins.Hutao.AbyssFloor} 上传用的数据
+ * @returns {TGApp.Plugins.Hutao.Abyss.Floor} 上传用的数据
  */
-function transFloor(data: TGApp.Sqlite.Abyss.Floor): TGApp.Plugins.Hutao.AbyssFloor {
+function transFloor(data: TGApp.Sqlite.Abyss.Floor): TGApp.Plugins.Hutao.Abyss.Floor {
   return {
     index: data.id,
     star: data.winStar,
@@ -66,9 +66,9 @@ function transFloor(data: TGApp.Sqlite.Abyss.Floor): TGApp.Plugins.Hutao.AbyssFl
  * @description 转换层-关卡数据
  * @since Alpha v0.2.1
  * @param {TGApp.Sqlite.Abyss.Level} data 本地数据
- * @returns {TGApp.Plugins.Hutao.AbyssLevel} 上传用的数据
+ * @returns {TGApp.Plugins.Hutao.Abyss.Level} 上传用的数据
  */
-function transLevel(data: TGApp.Sqlite.Abyss.Level): TGApp.Plugins.Hutao.AbyssLevel {
+function transLevel(data: TGApp.Sqlite.Abyss.Level): TGApp.Plugins.Hutao.Abyss.Level {
   const battles: Array<{ index: number; avatars: number[] }> = [];
   battles.push({
     index: 1,
@@ -89,11 +89,11 @@ function transLevel(data: TGApp.Sqlite.Abyss.Level): TGApp.Plugins.Hutao.AbyssLe
  * @description 转换角色数据
  * @since Alpha v0.2.1
  * @param {TGApp.Sqlite.Character.UserRole[]} avatars 角色数据
- * @returns {TGApp.Plugins.Hutao.AbyssAvatar[]} 上传用的数据
+ * @returns {TGApp.Plugins.Hutao.Abyss.Avatar[]} 上传用的数据
  */
 export function transAvatars(
   avatars: TGApp.Sqlite.Character.UserRole[],
-): TGApp.Plugins.Hutao.AbyssAvatar[] {
+): TGApp.Plugins.Hutao.Abyss.Avatar[] {
   return avatars.map((avatar) => {
     const weapon: TGApp.Sqlite.Character.RoleWeapon = JSON.parse(avatar.weapon);
     let relics: number[];

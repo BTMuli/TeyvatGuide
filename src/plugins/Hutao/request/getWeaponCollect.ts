@@ -13,12 +13,12 @@ import HutaoApi from "../api";
 /**
  * @description 获取武器搭配
  * @since Alpha v0.2.0
- * @return {Promise<TGApp.Plugins.Hutao.AbyssWeaponCollocation[]>}
+ * @return {Promise<TGApp.Plugins.Hutao.Abyss.WeaponCollocation[]>}
  */
-async function getWeaponCollect(): Promise<TGApp.Plugins.Hutao.AbyssWeaponCollocation[]> {
+async function getWeaponCollect(): Promise<TGApp.Plugins.Hutao.Abyss.WeaponCollocation[]> {
   const url = HutaoApi.Abyss.weapon;
   return await http
-    .fetch<TGApp.Plugins.Hutao.AbyssWeaponCollocationResponse>(url, {
+    .fetch<TGApp.Plugins.Hutao.Abyss.WeaponCollocationResponse>(url, {
       method: "GET",
     })
     .then((res) => {

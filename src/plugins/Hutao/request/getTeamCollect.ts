@@ -13,12 +13,12 @@ import HutaoApi from "../api";
 /**
  * @description 获取队伍搭配数据
  * @since Alpha v0.2.0
- * @return {Promise<TGApp.Plugins.Hutao.AbyssTeamCombination[]>}
+ * @return {Promise<TGApp.Plugins.Hutao.Abyss.TeamCombination[]>}
  */
-async function getTeamCollect(): Promise<TGApp.Plugins.Hutao.AbyssTeamCombination[]> {
+async function getTeamCollect(): Promise<TGApp.Plugins.Hutao.Abyss.TeamCombination[]> {
   const url = HutaoApi.Abyss.team;
   return await http
-    .fetch<TGApp.Plugins.Hutao.AbyssTeamCombinationResponse>(url, {
+    .fetch<TGApp.Plugins.Hutao.Abyss.TeamCombinationResponse>(url, {
       method: "GET",
     })
     .then((res) => {

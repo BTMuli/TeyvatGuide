@@ -13,12 +13,12 @@ import HutaoApi from "../api";
 /**
  * @description 获取角色持有率数据
  * @since Alpha v0.2.0
- * @returns {Promise<TGApp.Plugins.Hutao.AbyssAvatarHoldRate[]>}
+ * @returns {Promise<TGApp.Plugins.Hutao.Abyss.AvatarHold[]>}
  */
-async function getAvatarHoldRate(): Promise<TGApp.Plugins.Hutao.AbyssAvatarHoldRate[]> {
+async function getAvatarHoldRate(): Promise<TGApp.Plugins.Hutao.Abyss.AvatarHold[]> {
   const url = HutaoApi.Abyss.avatar.holdRate;
   return await http
-    .fetch<TGApp.Plugins.Hutao.AbyssAvatarHoldRateResponse>(url, {
+    .fetch<TGApp.Plugins.Hutao.Abyss.AvatarHoldResponse>(url, {
       method: "GET",
     })
     .then((res) => {

@@ -20,7 +20,7 @@ import HutaoApi from "../api";
 export async function checkUid(uid: string): Promise<boolean> {
   const url = HutaoApi.Abyss.user.check.replace("{uid}", uid);
   return await http
-    .fetch<TGApp.Plugins.Hutao.AbyssRecordExistResponse>(url, {
+    .fetch<TGApp.Plugins.Hutao.Abyss.ExistResponse>(url, {
       method: "GET",
     })
     .then((res) => {
@@ -33,12 +33,12 @@ export async function checkUid(uid: string): Promise<boolean> {
  * @since Alpha v0.2.0
  * @todo 未完成
  * @param {string} uid
- * @return {Promise<TGApp.Plugins.Hutao.AbyssRecordRank>}
+ * @return {Promise<TGApp.Plugins.Hutao.Abyss.RankData>}
  */
-export async function getUserData(uid: string): Promise<TGApp.Plugins.Hutao.AbyssRecordRank> {
+export async function getUserData(uid: string): Promise<TGApp.Plugins.Hutao.Abyss.RankData> {
   const url = HutaoApi.Abyss.user.rank.replace("{uid}", uid);
   return await http
-    .fetch<TGApp.Plugins.Hutao.AbyssRecordRankResponse>(url, {
+    .fetch<TGApp.Plugins.Hutao.Abyss.RecordRankResponse>(url, {
       method: "GET",
     })
     .then((res) => {

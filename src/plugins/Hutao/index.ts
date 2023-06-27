@@ -16,7 +16,7 @@ import getWeaponCollect from "./request/getWeaponCollect";
 import uploadData from "./request/uploadData";
 import { transAvatars, transLocal } from "./utils/transLocal";
 
-const HutaoRequest = {
+const Hutao = {
   Abyss: {
     avatar: {
       getCollect: getAvatarCollect,
@@ -39,4 +39,4 @@ const HutaoRequest = {
   },
 };
 
-export default HutaoRequest;
+export default Hutao;

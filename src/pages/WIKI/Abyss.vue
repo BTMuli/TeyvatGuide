@@ -9,7 +9,7 @@
 // vue
 import { onMounted, ref } from "vue";
 // utils
-import HutaoRequest from "../../plugins/Hutao";
+import Hutao from "../../plugins/Hutao";
 import HtaOverlayOverview from "../../components/hutaoAbyss/hta-overlay-overview.vue";
 
 const showDialog = ref(false);
@@ -18,7 +18,7 @@ const showDialog = ref(false);
 const overview = ref({} as TGApp.Plugins.Hutao.AbyssOverview);
 
 onMounted(async () => {
-  overview.value = await HutaoRequest.Abyss.getOverview();
+  overview.value = await Hutao.Abyss.getOverview();
 });
 
 function getUpdated() {

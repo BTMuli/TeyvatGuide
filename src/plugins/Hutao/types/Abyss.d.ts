@@ -1,49 +1,42 @@
 /**
- * @file types Plugins Hutao.d.ts
- * @description Hutao API
- * @see HutaoRequest
+ * @file src plugins Hutao types Abyss.d.ts
+ * @description Hutao 插件深渊类型定义文件
  * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.1
  */
 
-declare namespace TGApp.Plugins.Hutao {
-  /**
-   * @description Hutao API 响应数据
-   * @since Alpha v0.2.0
-   * @interface HutaoResponse
-   * @property {number} retcode - 状态码
-   * @property {string} message - 状态信息
-   * @property {any} data - 数据
-   */
-  export interface HutaoResponse {
-    retcode?: number;
-    message?: string;
-    data?: any;
-  }
+/**
+ * @description Hutao 深渊类型定义
+ * @since Alpha v0.2.1
+ * @namespace Abyss
+ * @exports TGApp.Plugins.Hutao.Abyss
+ * @return Abyss
+ */
+declare namespace TGApp.Plugins.Hutao.Abyss {
   /**
    * @description 深渊记录上传数据
-   * @since Alpha v0.2.0
+   * @since Alpha v0.2.1
    * @see HutaoRequest.Abyss.postData
-   * @interface AbyssRecordUpload
+   * @interface RecordUpload
    * @property {string} uid - UID
    * @property {string} identity - 身份标识
-   * @property {AbyssRecord} spiralAbyss - 深渊记录
-   * @property {AbyssAvatar[]} avatars - 角色信息
+   * @property {RecordData} spiralAbyss - 深渊记录
+   * @property {Avatar[]} avatars - 角色信息
    * @property {string} reservedUserName - 保留用户名
-   * @return AbyssRecordUpload
+   * @return RecordUpload
    */
-  export interface AbyssRecordUpload {
+  export interface RecordUpload {
     uid: string;
     identity: string;
-    spiralAbyss: AbyssRecord;
-    avatars: AbyssAvatar[];
+    spiralAbyss: RecordData;
+    avatars: Avatar[];
     reservedUserName: string;
   }
 
   /**
    * @description 深渊记录
    * @since Alpha v0.2.0
-   * @interface AbyssRecord
+   * @interface RecordData
    * @property {number} scheduleId - 深渊期数
    * @property {number} totalBattleTimes - 总战斗次数
    * @property {number} totalWinTimes - 总胜利次数
@@ -51,10 +44,10 @@ declare namespace TGApp.Plugins.Hutao {
    * @property {number} damage.value - 最大伤害
    * @property {number} takeDamage.avatarId - 最大承伤角色ID
    * @property {number} takeDamage.value - 最大承伤
-   * @property {AbyssFloor[]} floors - 楼层信息
-   * @return AbyssRecord
+   * @property {Floor[]} floors - 楼层信息
+   * @return RecordData
    */
-  export interface AbyssRecord {
+  export interface RecordData {
     scheduleId: number;
     totalBattleTimes: number;
     totalWinTimes: number;
@@ -66,35 +59,35 @@ declare namespace TGApp.Plugins.Hutao {
       avatarId: number;
       value: number;
     };
-    floors: AbyssFloor[];
+    floors: Floor[];
   }
 
   /**
    * @description 深渊楼层信息
    * @since Alpha v0.2.0
-   * @interface AbyssFloor
+   * @interface Floor
    * @property {number} index - 楼层索引
    * @property {number} star - 楼层星数
-   * @property {AbyssLevel[]} levels - 楼层关卡信息
-   * @return AbyssFloor
+   * @property {Level[]} levels - 楼层关卡信息
+   * @return Floor
    */
-  export interface AbyssFloor {
+  export interface Floor {
     index: number;
     star: number;
-    levels: AbyssLevel[];
+    levels: Level[];
   }
 
   /**
-   * @description 深渊关卡信息
+   * @description 深渊房间信息
    * @since Alpha v0.2.0
-   * @interface AbyssLevel
+   * @interface Level
    * @property {number} index - 关卡索引
    * @property {number} star - 关卡星数
    * @property {number} battles[].index - 战斗索引
    * @property {number[]} battles[].avatars - 战斗角色ID
-   * @return AbyssLevel
+   * @return Level
    */
-  export interface AbyssLevel {
+  export interface Level {
     index: number;
     star: number;
     battles: Array<{
@@ -106,14 +99,14 @@ declare namespace TGApp.Plugins.Hutao {
   /**
    * @description 角色信息
    * @since Alpha v0.2.1
-   * @interface AbyssAvatar
+   * @interface Avatar
    * @property {number} avatarId - 角色ID
    * @property {number} weaponId - 武器ID
    * @property {number[]} reliquarySetIds - 圣遗物套装ID
    * @property {number} activedConstellationNumber - 已激活命座数量
-   * @return AbyssAvatar
+   * @return Avatar
    */
-  export interface AbyssAvatar {
+  export interface Avatar {
     avatarId: number;
     weaponId: number;
     reliquarySetIds: number[];
@@ -121,40 +114,49 @@ declare namespace TGApp.Plugins.Hutao {
   }
 
   /**
-   * @description 查询 uid 对应记录是否存在返回
-   * @since Alpha v0.2.0
-   * @see HutaoRequest.Abyss.user.checkExist
-   * @interface AbyssRecordExistResponse
-   * @extends HutaoResponse
-   * @property {boolean} data - 是否存在
-   * @return AbyssRecordExistResponse
+   * @description 深渊记录上传返回
+   * @since Alpha v0.2.1
+   * @see HutaoRequest.Abyss.postData
+   * @interface UploadResponse
+   * @extends TGApp.Plugins.Hutao.Base.Response
+   * @return UploadResponse
    */
-  export interface AbyssRecordExistResponse extends HutaoResponse {
+  export interface UploadResponse extends TGApp.Plugins.Hutao.Base.Response {}
+
+  /**
+   * @description 是否存在深渊记录返回
+   * @since Alpha v0.2.1
+   * @see HutaoRequest.Abyss.user.checkExist
+   * @interface ExistResponse
+   * @extends TGApp.Plugins.Hutao.Base.Response
+   * @property {boolean} data - 是否存在深渊记录
+   * @return ExistResponse
+   */
+  export interface ExistResponse extends TGApp.Plugins.Hutao.Base.Response {
     data: boolean;
   }
 
   /**
    * @description 获取深渊记录返回
-   * @todo 暂时缺乏数据
-   * @since Alpha v0.2.0
+   * @since Alpha v0.2.1
    * @see HutaoRequest.Abyss.user.getRecord
-   * @interface AbyssRecordRankResponse
-   * @extends HutaoResponse
-   * @property {AbyssRecordRank} data - 深渊记录
-   * @return AbyssRecordRankResponse
+   * @interface RecordRankResponse
+   * @extends TGApp.Plugins.Hutao.Base.Response
+   * @property {RankData} data - 深渊记录
+   * @return RecordRankResponse
    */
-  export interface AbyssRecordRankResponse extends HutaoResponse {
-    data: AbyssRecordRank;
+  export interface RecordRankResponse extends TGApp.Plugins.Hutao.Base.Response {
+    data: RankData;
   }
 
   /**
    * @description 深渊记录
-   * @since Alpha v0.2.0
-   * @interface AbyssRecordRank
+   * @since Alpha v0.2.1
+   * @interface RankData
    * @todo 暂时缺乏数据
-   * @return AbyssRecordRank
+   * @return RankData
    */
-  export interface AbyssRecordRank {
+  export interface RankData {
     // todo
   }
 
@@ -162,19 +164,19 @@ declare namespace TGApp.Plugins.Hutao {
    * @description 获取深渊总览数据返回
    * @since Alpha v0.2.0
    * @see HutaoRequest.Abyss.getOverview
-   * @interface AbyssOverviewResponse
-   * @extends HutaoResponse
-   * @property {AbyssOverview} data - 深渊总览数据
-   * @return AbyssOverviewResponse
+   * @interface OverviewResponse
+   * @extends TGApp.Plugins.Hutao.Base.Response
+   * @property {OverviewData} data - 深渊总览数据
+   * @return OverviewResponse
    */
-  export interface AbyssOverviewResponse extends HutaoResponse {
-    data: AbyssOverview;
+  export interface OverviewResponse extends TGApp.Plugins.Hutao.Base.Response {
+    data: OverviewData;
   }
 
   /**
    * @description 深渊总览数据
    * @since Alpha v0.2.0
-   * @interface AbyssOverview
+   * @interface OverviewData
    * @property {number} scheduleId - 深渊期数
    * @property {number} recordTotal - 总记录数
    * @property {number} spiralAbyssTotal - 总计深渊记录
@@ -185,9 +187,9 @@ declare namespace TGApp.Plugins.Hutao {
    * @property {number} timestamp - 时间戳
    * @property {number} timeTotal - 总耗时
    * @property {number} timeAverage - 平均耗时
-   * @return AbyssOverview
+   * @return OverviewData
    */
-  export interface AbyssOverview {
+  export interface OverviewData {
     scheduleId: number;
     recordTotal: number;
     spiralAbyssTotal: number;
@@ -204,26 +206,25 @@ declare namespace TGApp.Plugins.Hutao {
    * @description 获取角色深渊上场率返回
    * @since Alpha v0.2.0
    * @see HutaoRequest.Abyss.avatar.getUpRate
-   * @method GET
-   * @interface AbyssAvatarUpRateResponse
-   * @extends HutaoResponse
-   * @property {AbyssAvatarUpRate[]} data - 角色深渊上场率
-   * @return AbyssAvatarUpRateResponse
+   * @interface AvatarUpResponse
+   * @extends TGApp.Plugins.Hutao.Base.Response
+   * @property {AvatarUp[]} data - 角色深渊上场率
+   * @return AvatarUpResponse
    */
-  export interface AbyssAvatarUpRateResponse extends HutaoResponse {
-    data: AbyssAvatarUpRate[];
+  export interface AvatarUpResponse extends TGApp.Plugins.Hutao.Base.Response {
+    data: AvatarUp[];
   }
 
   /**
    * @description 角色深渊上场率
    * @since Alpha v0.2.0
-   * @interface AbyssAvatarUpRate
+   * @interface AvatarUp
    * @property {number} floor - 楼层
    * @property {number} ranks[].item - 角色ID
    * @property {number} ranks[].rate - 上场率
-   * @return AbyssAvatarUpRate
+   * @return AvatarUp
    */
-  export interface AbyssAvatarUpRate {
+  export interface AvatarUp {
     floor: number;
     ranks: {
       item: number;
@@ -235,25 +236,25 @@ declare namespace TGApp.Plugins.Hutao {
    * @description 获取角色深渊使用率返回
    * @since Alpha v0.2.0
    * @see HutaoRequest.Abyss.avatar.getUseRate
-   * @interface AbyssAvatarUseRateResponse
-   * @extends HutaoResponse
-   * @property {AbyssAvatarUseRate[]} data - 角色深渊使用率
-   * @return AbyssAvatarUseRateResponse
+   * @interface AvatarUseResponse
+   * @extends TGApp.Plugins.Hutao.Base.Response
+   * @property {AvatarUse[]} data - 角色深渊使用率
+   * @return AvatarUseResponse
    */
-  export interface AbyssAvatarUseRateResponse extends HutaoResponse {
-    data: AbyssAvatarUseRate[];
+  export interface AvatarUseResponse extends TGApp.Plugins.Hutao.Base.Response {
+    data: AvatarUse[];
   }
 
   /**
    * @description 角色深渊使用率
    * @since Alpha v0.2.0
-   * @interface AbyssAvatarUseRate
+   * @interface AvatarUse
    * @property {number} floor - 楼层
    * @property {number} ranks[].item - 角色ID
    * @property {number} ranks[].rate - 使用率
-   * @return AbyssAvatarUseRate
+   * @return AvatarUse
    */
-  export interface AbyssAvatarUseRate {
+  export interface AvatarUse {
     floor: number;
     ranks: Array<{
       item: number;
@@ -265,26 +266,26 @@ declare namespace TGApp.Plugins.Hutao {
    * @description 获取角色深渊持有率返回
    * @since Alpha v0.2.0
    * @see HutaoRequest.Abyss.avatar.getHoldRate
-   * @interface AbyssAvatarHoldRateResponse
-   * @extends HutaoResponse
-   * @property {AbyssAvatarHoldRate[]} data - 角色深渊持有率
-   * @return AbyssAvatarHoldRateResponse
+   * @interface AvatarHoldResponse
+   * @extends TGApp.Plugins.Hutao.Base.Response
+   * @property {AvatarHold[]} data - 角色深渊持有率
+   * @return AvatarHoldResponse
    */
-  export interface AbyssAvatarHoldRateResponse extends HutaoResponse {
-    data: AbyssAvatarHoldRate[];
+  export interface AvatarHoldResponse extends TGApp.Plugins.Hutao.Base.Response {
+    data: AvatarHold[];
   }
 
   /**
    * @description 角色深渊持有率
    * @since Alpha v0.2.0
-   * @interface AbyssAvatarHoldRate
+   * @interface AvatarHold
    * @property {number} holdingRate - 持有率
    * @property {number} constellations[].item - 命座ID
    * @property {number} constellations[].rate - 持有率
    * @property {number} avatarId - 角色ID
-   * @return AbyssAvatarHoldRate
+   * @return AvatarHold
    */
-  export interface AbyssAvatarHoldRate {
+  export interface AvatarHold {
     holdingRate: number;
     constellations: Array<{
       item: number;
@@ -297,19 +298,19 @@ declare namespace TGApp.Plugins.Hutao {
    * @description 获取角色的圣遗物、武器搭配
    * @since Alpha v0.2.0
    * @see HutaoRequest.Abyss.avatar.getCollect
-   * @interface AbyssAvatarCollocationResponse
-   * @extends HutaoResponse
-   * @property {AbyssAvatarCollocation[]} data - 角色搭配
-   * @return AbyssAvatarCollocationResponse
+   * @interface AvatarCollocationResponse
+   * @extends TGApp.Plugins.Hutao.Base.Response
+   * @property {AvatarCollocation[]} data - 角色搭配
+   * @return AvatarCollocationResponse
    */
-  export interface AbyssAvatarCollocationResponse extends HutaoResponse {
-    data: AbyssAvatarCollocation[];
+  export interface AvatarCollocationResponse extends TGApp.Plugins.Hutao.Base.Response {
+    data: AvatarCollocation[];
   }
 
   /**
    * @description 角色搭配
    * @since Alpha v0.2.0
-   * @interface AbyssAvatarCollocation
+   * @interface AvatarCollocation
    * @property {number} avatarId - 角色ID
    * @property {number} avatars[].item - 角色ID
    * @property {number} avatars[].rate - 角色搭配率
@@ -317,9 +318,9 @@ declare namespace TGApp.Plugins.Hutao {
    * @property {number} reliquaries[].rate - 圣遗物套装搭配率
    * @property {number} weapons[].item - 武器ID
    * @property {number} weapons[].rate - 武器搭配率
-   * @return AbyssAvatarCollocation
+   * @return AvatarCollocation
    */
-  export interface AbyssAvatarCollocation {
+  export interface AvatarCollocation {
     avatarId: number;
     avatars: Array<{
       item: number;
@@ -339,24 +340,24 @@ declare namespace TGApp.Plugins.Hutao {
    * @description 获取武器搭配角色返回
    * @since Alpha v0.2.0
    * @see HutaoRequest.Abyss.weapon.getCollect
-   * @interface AbyssWeaponCollocationResponse
-   * @extends HutaoResponse
-   * @property {AbyssWeaponCollocation[]} data - 武器搭配角色
+   * @interface WeaponCollocationResponse
+   * @extends TGApp.Plugins.Hutao.Base.Response
+   * @property {WeaponCollocation[]} data - 武器搭配角色
    */
-  export interface AbyssWeaponCollocationResponse extends HutaoResponse {
-    data: AbyssWeaponCollocation[];
+  export interface WeaponCollocationResponse extends TGApp.Plugins.Hutao.Base.Response {
+    data: WeaponCollocation[];
   }
 
   /**
    * @description 武器搭配角色
    * @since Alpha v0.2.0
-   * @interface AbyssWeaponCollocation
+   * @interface WeaponCollocation
    * @property {number} weaponId - 武器ID
    * @property {number} avatars[].item - 角色ID
    * @property {number} avatars[].rate - 角色搭配率
-   * @return AbyssWeaponCollocation
+   * @return WeaponCollocation
    */
-  export interface AbyssWeaponCollocation {
+  export interface WeaponCollocation {
     weaponId: number;
     avatars: Array<{
       item: number;
@@ -368,27 +369,27 @@ declare namespace TGApp.Plugins.Hutao {
    * @description 获取队伍搭配返回
    * @since Alpha v0.2.0
    * @see HutaoRequest.Abyss.getTeamCollect
-   * @interface AbyssTeamCombinationResponse
-   * @extends HutaoResponse
-   * @property {AbyssTeamCombination[]} data - 队伍搭配
-   * @return AbyssTeamCombinationResponse
+   * @interface TeamCombinationResponse
+   * @extends TGApp.Plugins.Hutao.Base.Response
+   * @property {TeamCombination[]} data - 队伍搭配
+   * @return TeamCombinationResponse
    */
-  export interface AbyssTeamCombinationResponse extends HutaoResponse {
-    data: AbyssTeamCombination[];
+  export interface TeamCombinationResponse extends TGApp.Plugins.Hutao.Base.Response {
+    data: TeamCombination[];
   }
 
   /**
    * @description 队伍搭配
    * @since Alpha v0.2.0
-   * @interface AbyssTeamCombination
+   * @interface TeamCombination
    * @property {number} floor - 楼层
    * @property {string} up[].item - 角色ID // id,id,id,id
    * @property {number} up[].rate - 统计次数
    * @property {string} down[].item - 角色ID // id,id,id,id
    * @property {number} down[].rate - 统计次数
-   * @return AbyssTeamCombination
+   * @return TeamCombination
    */
-  export interface AbyssTeamCombination {
+  export interface TeamCombination {
     floor: number;
     up: Array<{
       item: string;
