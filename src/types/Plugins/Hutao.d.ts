@@ -3,7 +3,7 @@
  * @description Hutao API
  * @see HutaoRequest
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.1
  */
 
 declare namespace TGApp.Plugins.Hutao {
@@ -105,18 +105,18 @@ declare namespace TGApp.Plugins.Hutao {
 
   /**
    * @description 角色信息
-   * @since Alpha v0.2.0
+   * @since Alpha v0.2.1
    * @interface AbyssAvatar
    * @property {number} avatarId - 角色ID
    * @property {number} weaponId - 武器ID
-   * @property {string[]} reliquarySetIds - 圣遗物套装ID // id-pos
+   * @property {number[]} reliquarySetIds - 圣遗物套装ID
    * @property {number} activedConstellationNumber - 已激活命座数量
    * @return AbyssAvatar
    */
   export interface AbyssAvatar {
     avatarId: number;
     weaponId: number;
-    reliquarySetIds: string[];
+    reliquarySetIds: number[];
     activedConstellationNumber: number;
   }
 
