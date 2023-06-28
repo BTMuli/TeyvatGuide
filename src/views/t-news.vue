@@ -107,15 +107,6 @@
           <div class="news-cover" @click="toPost(item)">
             <img :src="item.cover" alt="cover" />
             <div class="news-card-act">
-              <!-- 底层过渡 -->
-              <div
-                class="nca-status-bg"
-                :style="{
-                  background: item.status?.colorCss,
-                }"
-              >
-                {{ item.status?.status }}
-              </div>
               <div
                 class="nca-status"
                 :style="{
@@ -703,24 +694,31 @@ async function searchPost() {
   font-size: 12px;
 }
 
-.nca-status-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
+.nca-status {
+  position: relative;
+  display: flex;
   align-items: center;
   justify-content: flex-start;
   padding: 5px 30px 5px 5px;
   clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
-  opacity: 0.6;
-}
-
-.nca-status {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 5px 20px 5px 5px;
-  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
   color: #faf7e8;
+
+  &::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(255 255 255/40%);
+    clip-path: polygon(
+      calc(100% - 25px) 0,
+      100% 0,
+      100% 100%,
+      calc(100% - 25px) 100%,
+      calc(100% - 10px) 50%
+    );
+    content: "";
+  }
 }
 
 .nca-time {
