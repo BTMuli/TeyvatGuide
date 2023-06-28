@@ -10,7 +10,7 @@
           <v-list-item :title="card.title" :subtitle="card.abstract">
             <template #prepend>
               <v-avatar rounded="0" @click="toPost(card)">
-                <v-img :src="card.icon" />
+                <v-img :src="card.icon" class="position-icon" />
               </v-avatar>
             </template>
             <template #append>
@@ -175,15 +175,22 @@ onUnmounted(() => {
   font-family: var(--font-title);
 }
 
-.position-list :deep(img) {
+.position-icon {
+  overflow: hidden;
   width: 100%;
   height: 100%;
   border-radius: 5px;
   object-fit: contain;
+}
+
+.position-icon :deep(img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: all 0.3s;
 }
 
-.position-list :deep(img):hover {
+.position-icon :hover {
   cursor: pointer;
   scale: 1.5;
 }
