@@ -56,6 +56,38 @@ export function getActivityStatus(status: number): TGApp.Plugins.Mys.News.Render
 }
 
 /**
+ * @description 获取公共属性
+ * @since Alpha v0.2.1
+ * @param {TGApp.Plugins.Mys.News.Item} item 咨讯列表项
+ * @returns {TGApp.Plugins.Mys.News.RenderCard} 渲染用咨讯列表项
+ */
+function getCommonCard(item: TGApp.Plugins.Mys.News.Item): TGApp.Plugins.Mys.News.RenderCard {
+  return {
+    title: item.post.subject,
+    cover: item.cover?.url || item.post.cover || item.post.images[0] || defaultCover,
+    postId: Number(item.post.post_id),
+    subtitle: item.post.post_id,
+    user: {
+      nickname: item.user.nickname,
+      pendant: item.user.pendant,
+      icon: item.user.avatar_url,
+      label: item.user.certification.label,
+    },
+    forum: {
+      name: item.forum.name,
+      icon: item.forum.icon,
+    },
+    data: {
+      mark: item.stat.bookmark_num,
+      forward: item.stat.forward_num,
+      like: item.stat.like_num,
+      reply: item.stat.reply_num,
+      view: item.stat.view_num,
+    },
+  };
+}
+
+/**
  * @description 获取渲染用公告数据
  * @since Alpha v0.2.1
  * @param {TGApp.Plugins.Mys.News.FullData} noticeData 公告数据
@@ -66,12 +98,7 @@ export function getNoticeCard(
 ): TGApp.Plugins.Mys.News.RenderCard[] {
   const noticeCard: TGApp.Plugins.Mys.News.RenderCard[] = [];
   noticeData.list.map((item: TGApp.Plugins.Mys.News.Item) => {
-    return noticeCard.push({
-      title: item.post.subject,
-      cover: item.cover?.url || item.post.cover || item.post.images[0] || defaultCover,
-      postId: Number(item.post.post_id),
-      subtitle: item.post.post_id,
-    });
+    return noticeCard.push(getCommonCard(item));
   });
   return noticeCard;
 }
@@ -90,13 +117,10 @@ export function getActivityCard(
     const startTime = new Date(Number(item.news_meta.start_at_sec) * 1000).toLocaleDateString();
     const endTime = new Date(Number(item.news_meta.end_at_sec) * 1000).toLocaleDateString();
     const statusInfo = getActivityStatus(item.news_meta.activity_status);
-    return activityCard.push({
-      title: item.post.subject,
-      cover: item.cover?.url || item.post.cover || item.post.images[0] || defaultCover,
-      postId: Number(item.post.post_id),
-      subtitle: `${startTime} - ${endTime}`,
-      status: statusInfo,
-    });
+    let commonCard = getCommonCard(item);
+    commonCard.subtitle = `${startTime} - ${endTime}`;
+    commonCard.status = statusInfo;
+    return activityCard.push(commonCard);
   });
   return activityCard;
 }
@@ -112,12 +136,7 @@ export function getNewsCard(
 ): TGApp.Plugins.Mys.News.RenderCard[] {
   const newsCard: TGApp.Plugins.Mys.News.RenderCard[] = [];
   newsData.list.map((item: TGApp.Plugins.Mys.News.Item) => {
-    return newsCard.push({
-      title: item.post.subject,
-      cover: item.cover?.url || item.post.cover || item.post.images[0] || defaultCover,
-      postId: Number(item.post.post_id),
-      subtitle: item.post.post_id,
-    });
+    return newsCard.push(getCommonCard(item));
   });
   return newsCard;
 }
