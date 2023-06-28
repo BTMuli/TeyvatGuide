@@ -43,8 +43,8 @@ async function getSyncAvatarDetail(
       query: params,
     })
     .then((res) => {
-      if (res.data.retcode !== 0) return res.data as TGApp.BBS.Response.Base;
-      return res.data.data as TGApp.Game.Calculate.AvatarDetail;
+      if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
+      return <TGApp.Game.Calculate.AvatarDetail>res.data.data;
     });
 }
 

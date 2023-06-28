@@ -43,8 +43,8 @@ async function getSyncAvatarList(
       headers: header,
     })
     .then((res) => {
-      if (res.data.retcode !== 0) return res.data as TGApp.BBS.Response.Base;
-      return res.data.data.list as TGApp.Game.Calculate.AvatarListItem[];
+      if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
+      return <TGApp.Game.Calculate.AvatarListItem[]>res.data.data.list;
     });
 }
 
