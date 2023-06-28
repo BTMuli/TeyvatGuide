@@ -60,11 +60,9 @@
               {{ item.endTime.split(" ")[0] }}
             </v-card-subtitle>
             <v-card-subtitle v-show="appStore.devMode"> id: {{ item.id }} </v-card-subtitle>
-            <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
-              <template #prepend>
-                <img src="../assets/icons/arrow-right.svg" alt="right" />
-              </template>
-              查看数据
+            <v-btn v-show="appStore.devMode" class="anno-dev-btn" @click="toJson(item)">
+              <img src="../assets/icons/arrow-right.svg" alt="right" />
+              <span>查看数据</span>
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -235,18 +233,18 @@ async function toJson(item: TGApp.App.Announcement.ListCard) {
 }
 
 .anno-dev-btn {
-  height: 40px;
-  padding: 5px;
-  background: var(--common-btn-bg-1);
-  box-shadow: 0 0 10px var(--common-shadow-4);
-  color: var(--common-btn-bgt-1);
+  background: var(--common-btn-bg-2);
+  color: var(--common-btn-bgt-2);
   font-family: var(--font-title);
 }
 
 .anno-dev-btn img {
   width: 20px;
   height: 20px;
+  padding: 2px;
+  border-radius: 50%;
   margin-right: 5px;
-  object-fit: contain;
+  background: var(--common-shadow-2);
+  object-fit: cover;
 }
 </style>
