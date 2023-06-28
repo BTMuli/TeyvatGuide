@@ -233,7 +233,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {string} uid 用户 ID
    * @property {string} nickname 用户昵称
    * @property {string} introduce 用户简介
-   * @property {string} avatar 用户头像 // TODO: 转换为图片链接
+   * @property {string} avatar 用户头像
    * @property {number} gender 用户性别 // TODO: 未知
    * @property {Certification} certification 用户认证信息
    * @property level_exp 用户等级经验
