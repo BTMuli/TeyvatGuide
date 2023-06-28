@@ -24,7 +24,7 @@ html.dark {
   --common-btn-bgt-2: #ece5d8; /* button 背景色对应的文本色 */
 
   /* text */
-  --common-text-title: var(--common-color-white); /* title */
+  --common-text-title: #f9e9cd; /* title，米色 */
   --common-text-content: var(--common-color-white); /* text */
   --common-text-quote: var(--common-color-grey); /* quote */
 

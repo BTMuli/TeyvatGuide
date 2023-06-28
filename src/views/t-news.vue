@@ -517,6 +517,7 @@ async function searchPost() {
 .news-card-title {
   position: relative;
   height: 50px;
+  color: var(--common-text-title);
   transition: padding-top 0.3s linear, padding-bottom 0.3s linear, background 0.3s linear,
     font-size 0.3s linear, line-height 0.3s linear, white-space 0.3s linear;
 }
@@ -546,6 +547,7 @@ async function searchPost() {
   max-width: 200px;
   height: 50px;
   align-items: center;
+  color: var(--common-text-content);
 }
 
 .ncu-left {
