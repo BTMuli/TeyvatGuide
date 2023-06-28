@@ -1,8 +1,8 @@
 /**
  * @file web request TGRequest.ts
  * @description 应用用到的请求函数
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.6
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Alpha v0.2.1
  */
 
 import { getAbyss } from "./getAbyss";
@@ -13,6 +13,8 @@ import { getGameAccountsBySToken, getGameAccountsByCookie } from "./getGameAccou
 import { getGameRecord } from "./getGameRecord";
 import { getLTokenBySToken } from "./getLToken";
 import { getGameRoleListByLToken } from "./getRoleList";
+import getSyncAvatarDetail from "./getSyncAvatarDetail";
+import getSyncAvatarListAll from "./getSyncAvatarListAll";
 // import * from "./getTickets.ts";
 import { getTokensByLoginTicket } from "./getTokens";
 import { getUserInfoByCookie } from "./getUserInfo";
@@ -44,6 +46,10 @@ const TGRequest = {
       getAccounts: getGameAccountsBySToken,
       getCookieToken: getCookieTokenBySToken,
       getLToken: getLTokenBySToken,
+    },
+    calculate: {
+      getSyncAvatarListAll,
+      getSyncAvatarDetail,
     },
   },
 };

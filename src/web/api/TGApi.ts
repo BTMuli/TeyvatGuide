@@ -1,8 +1,8 @@
 /**
  * @file web api TGApi.ts
  * @description 应用用到的 API
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Alpha v0.2.1
  */
 
 import { BBSUserInfoApi } from "./BBS";
@@ -17,6 +17,8 @@ import {
   TakumiRecordAbyssApi,
   TakumiSTokenBindingRolesApi,
   TakumiCookieBindingRolesApi,
+  TakumiCalculateSyncAvatarListApi,
+  TakumiCalculateSyncAvatarDetailApi,
 } from "./Takumi";
 
 // 应用 API
@@ -39,6 +41,10 @@ const TGApi = {
     },
     bySToken: {
       getAccounts: TakumiSTokenBindingRolesApi, // 获取绑定角色
+    },
+    calculate: {
+      getSyncAvatarList: TakumiCalculateSyncAvatarListApi, // 同步角色列表
+      getSyncAvatarDetail: TakumiCalculateSyncAvatarDetailApi, // 同步角色详情
     },
     getUserCard: TakumiRecordCardApi, // 获取用户卡片
     getUserBase: TakumiRecordIndexApi, // 获取用户基本信息
