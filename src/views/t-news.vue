@@ -15,6 +15,7 @@
       <v-icon>mdi-view-list</v-icon>
     </v-btn>
     <v-text-field
+      class="news-search"
       v-show="appStore.devMode"
       v-model="search"
       append-icon="mdi-magnify"
@@ -33,26 +34,58 @@
             <img :src="item.cover" alt="cover" />
           </div>
           <v-card-title class="news-card-title">{{ item.title }}</v-card-title>
-          <v-card-actions>
-            <v-btn class="news-btn" @click="toPost(item)">
-              <img src="../assets/icons/circle-check.svg" alt="check" />
-              <span>查看</span>
+          <div class="news-card-info">
+            <div class="news-card-user">
+              <div class="ncu-left">
+                <div class="ncu-icon">
+                  <img :src="item.user.icon" alt="userIcon" />
+                </div>
+                <div class="ncu-pendant" v-if="item.user.pendant !== ''">
+                  <img :src="item.user.pendant" alt="userPendant" />
+                </div>
+              </div>
+              <div class="ncu-right">
+                <span>{{ item.user.nickname }}</span>
+                <span>{{ item.user.label }}</span>
+              </div>
+            </div>
+            <v-btn class="news-card-btn" variant="outlined" @click="toPost(item)"> 查看详情 </v-btn>
+            <v-btn v-show="appStore.devMode" class="news-dev-btn" @click="toJson(item)">
+              <img src="../assets/icons/arrow-right.svg" alt="right" />
+              <span>JSON</span>
             </v-btn>
-            <v-card-subtitle>id:{{ item.postId }}</v-card-subtitle>
-            <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
-              <template #prepend>
-                <img src="../assets/icons/arrow-right.svg" alt="right" />
-              </template>
-              JSON
-            </v-btn>
-          </v-card-actions>
+            <div class="news-card-forum">
+              <img :src="item.forum.icon" alt="forumIcon" />
+              <span>{{ item.forum.name }}</span>
+            </div>
+            <div class="news-card-data">
+              <!-- grid 布局，展示收藏、评论、点赞、转发、浏览 数-->
+              <div class="ncd-item">
+                <v-icon>mdi-eye</v-icon>
+                <span>{{ item.data.view }}</span>
+              </div>
+              <div class="ncd-item">
+                <v-icon>mdi-star</v-icon>
+                <span>{{ item.data.mark }}</span>
+              </div>
+              <div class="ncd-item">
+                <v-icon>mdi-comment</v-icon>
+                <span>{{ item.data.reply }}</span>
+              </div>
+              <div class="ncd-item">
+                <v-icon>mdi-heart</v-icon>
+                <span>{{ item.data.like }}</span>
+              </div>
+              <div class="ncd-item">
+                <v-icon>mdi-share-variant</v-icon>
+                <span>{{ item.data.forward }}</span>
+              </div>
+            </div>
+          </div>
         </v-card>
       </div>
       <div class="load-news">
         <v-btn :loading="loadingSub" @click="loadMore('notice')">
-          <template #append>
-            <img src="../assets/icons/arrow-left.svg" alt="right" />
-          </template>
           已加载：{{ rawData.notice.lastId }}，加载更多
         </v-btn>
       </div>
@@ -62,41 +95,64 @@
         <v-card v-for="item in postData.activity" :key="item.postId" class="news-card">
           <div class="news-cover" @click="toPost(item)">
             <img :src="item.cover" alt="cover" />
+            <div class="news-act-process" :style="{ color: item.status?.colorCss }">
+              {{ item.status?.status }}
+            </div>
           </div>
           <v-card-title class="news-card-title">{{ item.title }}</v-card-title>
           <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
-          <v-card-actions>
-            <v-btn class="news-btn" @click="toPost(item)">
-              <template #prepend>
-                <img src="../assets/icons/circle-check.svg" alt="check" />
-                <span>查看</span>
-              </template>
-            </v-btn>
-            <v-card-subtitle>id:{{ item.postId }}</v-card-subtitle>
-            <div v-show="!appStore.devMode">
-              <v-btn
-                :style="{
-                  background: item.status?.colorCss,
-                  color: '#faf7e8 !important',
-                }"
-              >
-                {{ item.status?.status }}
-              </v-btn>
+          <div class="news-card-info">
+            <div class="news-card-user">
+              <div class="ncu-left">
+                <div class="ncu-icon">
+                  <img :src="item.user.icon" alt="userIcon" />
+                </div>
+                <div class="ncu-pendant" v-if="item.user.pendant !== ''">
+                  <img :src="item.user.pendant" alt="userPendant" />
+                </div>
+              </div>
+              <div class="ncu-right">
+                <span>{{ item.user.nickname }}</span>
+                <span>{{ item.user.label }}</span>
+              </div>
             </div>
-            <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
-              <template #prepend>
-                <img src="../assets/icons/arrow-right.svg" alt="right" />
-              </template>
-              JSON
+            <v-btn class="news-card-btn" variant="outlined" @click="toPost(item)"> 查看详情 </v-btn>
+            <v-btn v-show="appStore.devMode" class="news-dev-btn" @click="toJson(item)">
+              <img src="../assets/icons/arrow-right.svg" alt="right" />
+              <span>JSON</span>
             </v-btn>
-          </v-card-actions>
+            <div class="news-card-forum">
+              <img :src="item.forum.icon" alt="forumIcon" />
+              <span>{{ item.forum.name }}</span>
+            </div>
+            <div class="news-card-data">
+              <!-- grid 布局，展示收藏、评论、点赞、转发、浏览 数-->
+              <div class="ncd-item">
+                <v-icon>mdi-eye</v-icon>
+                <span>{{ item.data.view }}</span>
+              </div>
+              <div class="ncd-item">
+                <v-icon>mdi-star</v-icon>
+                <span>{{ item.data.mark }}</span>
+              </div>
+              <div class="ncd-item">
+                <v-icon>mdi-comment</v-icon>
+                <span>{{ item.data.reply }}</span>
+              </div>
+              <div class="ncd-item">
+                <v-icon>mdi-heart</v-icon>
+                <span>{{ item.data.like }}</span>
+              </div>
+              <div class="ncd-item">
+                <v-icon>mdi-share-variant</v-icon>
+                <span>{{ item.data.forward }}</span>
+              </div>
+            </div>
+          </div>
         </v-card>
       </div>
       <div class="load-news">
         <v-btn :loading="loadingSub" @click="loadMore('activity')">
-          <template #append>
-            <img src="../assets/icons/arrow-left.svg" alt="right" />
-          </template>
           已加载:{{ rawData.activity.lastId }}，加载更多
         </v-btn>
       </div>
@@ -108,28 +164,58 @@
             <img :src="item.cover" alt="cover" />
           </div>
           <v-card-title class="news-card-title">{{ item.title }}</v-card-title>
-          <v-card-actions>
-            <v-btn class="news-btn" @click="toPost(item)">
-              <template #prepend>
-                <img src="../assets/icons/circle-check.svg" alt="check" />
-                <span>查看</span>
-              </template>
+          <div class="news-card-info">
+            <div class="news-card-user">
+              <div class="ncu-left">
+                <div class="ncu-icon">
+                  <img :src="item.user.icon" alt="userIcon" />
+                </div>
+                <div class="ncu-pendant" v-if="item.user.pendant !== ''">
+                  <img :src="item.user.pendant" alt="userPendant" />
+                </div>
+              </div>
+              <div class="ncu-right">
+                <span>{{ item.user.nickname }}</span>
+                <span>{{ item.user.label }}</span>
+              </div>
+            </div>
+            <v-btn class="news-card-btn" variant="outlined" @click="toPost(item)"> 查看详情 </v-btn>
+            <v-btn v-show="appStore.devMode" class="news-dev-btn" @click="toJson(item)">
+              <img src="../assets/icons/arrow-right.svg" alt="right" />
+              <span>JSON</span>
             </v-btn>
-            <v-card-subtitle>id:{{ item.postId }}</v-card-subtitle>
-            <v-btn v-show="appStore.devMode" class="card-dev-btn" @click="toJson(item)">
-              <template #prepend>
-                <img src="../assets/icons/arrow-right.svg" alt="right" />
-              </template>
-              JSON
-            </v-btn>
-          </v-card-actions>
+            <div class="news-card-forum">
+              <img :src="item.forum.icon" alt="forumIcon" />
+              <span>{{ item.forum.name }}</span>
+            </div>
+            <div class="news-card-data">
+              <!-- grid 布局，展示收藏、评论、点赞、转发、浏览 数-->
+              <div class="ncd-item">
+                <v-icon>mdi-eye</v-icon>
+                <span>{{ item.data.view }}</span>
+              </div>
+              <div class="ncd-item">
+                <v-icon>mdi-star</v-icon>
+                <span>{{ item.data.mark }}</span>
+              </div>
+              <div class="ncd-item">
+                <v-icon>mdi-comment</v-icon>
+                <span>{{ item.data.reply }}</span>
+              </div>
+              <div class="ncd-item">
+                <v-icon>mdi-heart</v-icon>
+                <span>{{ item.data.like }}</span>
+              </div>
+              <div class="ncd-item">
+                <v-icon>mdi-share-variant</v-icon>
+                <span>{{ item.data.forward }}</span>
+              </div>
+            </div>
+          </div>
         </v-card>
       </div>
       <div class="load-news">
         <v-btn :loading="loadingSub" @click="loadMore('news')">
-          <template #append>
-            <img src="../assets/icons/arrow-left.svg" alt="right" />
-          </template>
           已加载：{{ rawData.news.lastId }}，加载更多
         </v-btn>
       </div>
@@ -156,7 +242,7 @@ import { createTGWindow } from "../utils/TGWindow";
 
 // 路由
 const router = useRouter();
-const gid = useRoute().params.gid;
+const gid = <string>useRoute().params.gid;
 const showNews = ref<boolean>(gid !== "5");
 
 // Store
@@ -275,24 +361,25 @@ async function loadMore(data: "notice" | "activity" | "news"): Promise<void> {
 }
 
 async function toPost(item: TGApp.Plugins.Mys.News.RenderCard | string) {
-  if (typeof item === "string") {
-    const path = router.resolve({
-      name: "帖子详情",
-      params: {
-        // eslint-disable-next-line camelcase
-        post_id: item,
-      },
-    }).href;
-    createTGWindow(path, "帖子-Dev", item, 960, 720, false, false);
-  } else {
-    const path = router.resolve({
-      name: "帖子详情",
-      params: {
-        post_id: item.postId.toString(),
-      },
-    }).href;
-    createTGWindow(path, "帖子", item.title, 960, 720, false, false);
-  }
+  console.log(item);
+  // if (typeof item === "string") {
+  //   const path = router.resolve({
+  //     name: "帖子详情",
+  //     params: {
+  //       // eslint-disable-next-line camelcase
+  //       post_id: item,
+  //     },
+  //   }).href;
+  //   createTGWindow(path, "帖子-Dev", item, 960, 720, false, false);
+  // } else {
+  //   const path = router.resolve({
+  //     name: "帖子详情",
+  //     params: {
+  //       post_id: item.postId.toString(),
+  //     },
+  //   }).href;
+  //   createTGWindow(path, "帖子", item.title, 960, 720, false, false);
+  // }
 }
 
 async function toJson(item: TGApp.Plugins.Mys.News.RenderCard | string) {
@@ -347,6 +434,10 @@ async function searchPost() {
   background: var(--common-btn-bg-1);
   color: var(--common-btn-bgt-1);
   font-family: var(--font-title);
+}
+
+.news-search {
+  margin-left: 10px;
 }
 
 .news-grid {
@@ -404,21 +495,165 @@ async function searchPost() {
   white-space: normal;
 }
 
-.news-btn {
+/* news item info */
+.news-card-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: start;
+  margin: 0 10px 10px;
+  gap: 10px;
+}
+
+.news-card-user {
+  display: flex;
+  max-width: 200px;
+  height: 50px;
+  align-items: center;
+}
+
+.ncu-left {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+.ncu-icon {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  overflow: hidden;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.ncu-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ncu-pendant {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.ncu-pendant img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ncu-right {
+  display: flex;
+  height: 50px;
+  flex-direction: column;
+  align-items: start;
+}
+
+.ncu-right :nth-child(1) {
   display: flex;
   height: 30px;
   align-items: center;
-  justify-content: center;
-  border-radius: 5px;
-  background: var(--common-btn-bg-2);
-  color: var(--common-btn-bgt-2);
+  justify-content: start;
+  font-size: 16px;
 }
 
-.news-btn img {
+.ncu-right :nth-child(2) {
+  display: flex;
+  height: 20px;
+  align-items: center;
+  justify-content: start;
+  border-top: 2px solid var(--common-shadow-2);
+  font-size: 8px;
+  opacity: 0.7;
+}
+
+.news-card-forum {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5px;
+  backdrop-filter: blur(20px);
+  background: rgb(0 0 0/20%);
+  border-bottom-left-radius: 5px;
+  border-top-right-radius: 5px;
+  box-shadow: 0 0 10px rgb(0 0 0);
+  color: #faf7e8;
+}
+
+.news-card-forum img {
   width: 20px;
   height: 20px;
   margin-right: 5px;
+}
+
+.news-card-btn {
+  border-radius: 5px;
+  margin-left: auto;
+}
+
+.news-dev-btn {
+  border-radius: 5px;
+  margin-left: auto;
+  background: var(--common-bg-1);
+  box-shadow: 0 0 10px var(--common-shadow-4);
+  color: var(--common-bgt-1);
+  font-family: var(--font-title);
+}
+
+.news-dev-btn img {
+  width: 20px;
+  height: 20px;
+  padding: 5px;
+  border-radius: 50%;
+  margin-right: 5px;
+  background: var(--common-shadow-2);
   object-fit: cover;
+}
+
+.news-card-data {
+  display: flex;
+  width: 100%;
+  height: 20px;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5px;
+  column-gap: 10px;
+}
+
+.ncd-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: var(--common-text-quote);
+  font-size: 12px;
+  gap: 5px;
+  opacity: 0.6;
+}
+
+/* 活动页 */
+.news-act-process {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  backdrop-filter: blur(20px);
+  background: rgb(0 0 0/20%);
+  border-top-right-radius: 5px;
+  box-shadow: 0 0 10px rgb(0 0 0);
 }
 
 /* load more */

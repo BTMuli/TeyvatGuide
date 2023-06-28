@@ -117,7 +117,7 @@ export function getActivityCard(
     const startTime = new Date(Number(item.news_meta.start_at_sec) * 1000).toLocaleDateString();
     const endTime = new Date(Number(item.news_meta.end_at_sec) * 1000).toLocaleDateString();
     const statusInfo = getActivityStatus(item.news_meta.activity_status);
-    let commonCard = getCommonCard(item);
+    const commonCard = getCommonCard(item);
     commonCard.subtitle = `${startTime} - ${endTime}`;
     commonCard.status = statusInfo;
     return activityCard.push(commonCard);
