@@ -20,19 +20,19 @@ const defaultCover = "/source/UI/defaultCover.webp";
 const EnumStatus = {
   STARTED: {
     status: "进行中",
-    colorCss: "#1EE2BA !important",
+    colorCss: "#1EE2BA",
   },
   FINISHED: {
     status: "已结束",
-    colorCss: "#C0C5C8 !important",
+    colorCss: "#C0C5C8",
   },
   SELECTION: {
     status: "评选中",
-    colorCss: "#FF983B !important",
+    colorCss: "#FF983B",
   },
   UNKNOWN: {
     status: "未知",
-    colorCss: "#3C3F41 !important",
+    colorCss: "#F03F24", // 胭脂红
   },
 };
 

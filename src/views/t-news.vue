@@ -49,8 +49,20 @@
                 <span>{{ item.user.label }}</span>
               </div>
             </div>
-            <v-btn class="news-card-btn" variant="outlined" @click="toPost(item)"> 查看详情 </v-btn>
-            <v-btn v-show="appStore.devMode" class="news-dev-btn" @click="toJson(item)">
+            <v-btn
+              v-show="!appStore.devMode"
+              class="news-card-btn"
+              variant="outlined"
+              @click="toPost(item)"
+            >
+              查看详情
+            </v-btn>
+            <v-btn
+              v-show="appStore.devMode"
+              class="news-dev-btn"
+              variant="outlined"
+              @click="toJson(item)"
+            >
               <img src="../assets/icons/arrow-right.svg" alt="right" />
               <span>JSON</span>
             </v-btn>
@@ -59,7 +71,6 @@
               <span>{{ item.forum.name }}</span>
             </div>
             <div class="news-card-data">
-              <!-- grid 布局，展示收藏、评论、点赞、转发、浏览 数-->
               <div class="ncd-item">
                 <v-icon>mdi-eye</v-icon>
                 <span>{{ item.data.view }}</span>
@@ -95,12 +106,31 @@
         <v-card v-for="item in postData.activity" :key="item.postId" class="news-card">
           <div class="news-cover" @click="toPost(item)">
             <img :src="item.cover" alt="cover" />
-            <div class="news-act-process" :style="{ color: item.status?.colorCss }">
-              {{ item.status?.status }}
+            <div class="news-card-act">
+              <!-- 底层过渡 -->
+              <div
+                class="nca-status-bg"
+                :style="{
+                  background: item.status?.colorCss,
+                }"
+              >
+                {{ item.status?.status }}
+              </div>
+              <div
+                class="nca-status"
+                :style="{
+                  background: item.status?.colorCss,
+                }"
+              >
+                {{ item.status?.status }}
+              </div>
+              <div class="nca-time">
+                <v-icon>mdi-clock-time-four-outline</v-icon>
+                <span>{{ item.subtitle }}</span>
+              </div>
             </div>
           </div>
           <v-card-title class="news-card-title">{{ item.title }}</v-card-title>
-          <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
           <div class="news-card-info">
             <div class="news-card-user">
               <div class="ncu-left">
@@ -116,8 +146,20 @@
                 <span>{{ item.user.label }}</span>
               </div>
             </div>
-            <v-btn class="news-card-btn" variant="outlined" @click="toPost(item)"> 查看详情 </v-btn>
-            <v-btn v-show="appStore.devMode" class="news-dev-btn" @click="toJson(item)">
+            <v-btn
+              v-show="!appStore.devMode"
+              class="news-card-btn"
+              variant="outlined"
+              @click="toPost(item)"
+            >
+              查看详情
+            </v-btn>
+            <v-btn
+              v-show="appStore.devMode"
+              class="news-dev-btn"
+              variant="outlined"
+              @click="toJson(item)"
+            >
               <img src="../assets/icons/arrow-right.svg" alt="right" />
               <span>JSON</span>
             </v-btn>
@@ -126,7 +168,6 @@
               <span>{{ item.forum.name }}</span>
             </div>
             <div class="news-card-data">
-              <!-- grid 布局，展示收藏、评论、点赞、转发、浏览 数-->
               <div class="ncd-item">
                 <v-icon>mdi-eye</v-icon>
                 <span>{{ item.data.view }}</span>
@@ -179,8 +220,20 @@
                 <span>{{ item.user.label }}</span>
               </div>
             </div>
-            <v-btn class="news-card-btn" variant="outlined" @click="toPost(item)"> 查看详情 </v-btn>
-            <v-btn v-show="appStore.devMode" class="news-dev-btn" @click="toJson(item)">
+            <v-btn
+              v-show="!appStore.devMode"
+              class="news-card-btn"
+              variant="outlined"
+              @click="toPost(item)"
+            >
+              查看详情
+            </v-btn>
+            <v-btn
+              v-show="appStore.devMode"
+              class="news-dev-btn"
+              variant="outlined"
+              @click="toJson(item)"
+            >
               <img src="../assets/icons/arrow-right.svg" alt="right" />
               <span>JSON</span>
             </v-btn>
@@ -189,7 +242,6 @@
               <span>{{ item.forum.name }}</span>
             </div>
             <div class="news-card-data">
-              <!-- grid 布局，展示收藏、评论、点赞、转发、浏览 数-->
               <div class="ncd-item">
                 <v-icon>mdi-eye</v-icon>
                 <span>{{ item.data.view }}</span>
@@ -361,25 +413,24 @@ async function loadMore(data: "notice" | "activity" | "news"): Promise<void> {
 }
 
 async function toPost(item: TGApp.Plugins.Mys.News.RenderCard | string) {
-  console.log(item);
-  // if (typeof item === "string") {
-  //   const path = router.resolve({
-  //     name: "帖子详情",
-  //     params: {
-  //       // eslint-disable-next-line camelcase
-  //       post_id: item,
-  //     },
-  //   }).href;
-  //   createTGWindow(path, "帖子-Dev", item, 960, 720, false, false);
-  // } else {
-  //   const path = router.resolve({
-  //     name: "帖子详情",
-  //     params: {
-  //       post_id: item.postId.toString(),
-  //     },
-  //   }).href;
-  //   createTGWindow(path, "帖子", item.title, 960, 720, false, false);
-  // }
+  if (typeof item === "string") {
+    const path = router.resolve({
+      name: "帖子详情",
+      params: {
+        // eslint-disable-next-line camelcase
+        post_id: item,
+      },
+    }).href;
+    createTGWindow(path, "帖子-Dev", item, 960, 720, false, false);
+  } else {
+    const path = router.resolve({
+      name: "帖子详情",
+      params: {
+        post_id: item.postId.toString(),
+      },
+    }).href;
+    createTGWindow(path, "帖子", item.title, 960, 720, false, false);
+  }
 }
 
 async function toJson(item: TGApp.Plugins.Mys.News.RenderCard | string) {
@@ -469,12 +520,6 @@ async function searchPost() {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transition: all 0.3s linear;
-}
-
-.news-cover :hover {
-  cursor: pointer;
-  transform: scale(1.1);
   transition: all 0.3s linear;
 }
 
@@ -605,9 +650,6 @@ async function searchPost() {
 .news-dev-btn {
   border-radius: 5px;
   margin-left: auto;
-  background: var(--common-bg-1);
-  box-shadow: 0 0 10px var(--common-shadow-4);
-  color: var(--common-bgt-1);
   font-family: var(--font-title);
 }
 
@@ -621,12 +663,18 @@ async function searchPost() {
   object-fit: cover;
 }
 
+.news-cover img:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+  transition: all 0.3s linear;
+}
+
 .news-card-data {
   display: flex;
   width: 100%;
   height: 20px;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-end;
   padding: 5px;
   column-gap: 10px;
 }
@@ -642,18 +690,47 @@ async function searchPost() {
 }
 
 /* 活动页 */
-.news-act-process {
+.news-card-act {
   position: absolute;
   bottom: 0;
   left: 0;
   display: flex;
+  width: 100%;
   align-items: center;
-  justify-content: center;
-  padding: 5px;
+  justify-content: space-between;
   backdrop-filter: blur(20px);
-  background: rgb(0 0 0/20%);
-  border-top-right-radius: 5px;
-  box-shadow: 0 0 10px rgb(0 0 0);
+  background: rgb(0 0 0/50%);
+  font-size: 12px;
+}
+
+.nca-status-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5px 30px 5px 5px;
+  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
+  opacity: 0.6;
+}
+
+.nca-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5px 20px 5px 5px;
+  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
+  color: #faf7e8;
+}
+
+.nca-time {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 5px;
+  color: #faf7e8;
+  gap: 5px;
+  opacity: 0.8;
 }
 
 /* load more */
@@ -661,20 +738,14 @@ async function searchPost() {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  border-radius: 5px;
-  margin-top: 10px;
-  font-family: Genshin, serif;
+  margin: 10px;
+  font-family: var(--font-title);
   transition: all 0.3s linear;
 }
 
 .load-news button {
-  background: var(--btn-bg-3);
-  color: #faf7e8;
-}
-
-.load-news button img {
-  width: 18px;
-  height: 18px;
+  border-radius: 5px;
+  background: var(--common-bg-1);
+  color: var(--common-bgt-1);
 }
 </style>
