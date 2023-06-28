@@ -46,7 +46,7 @@ onMounted(async () => {
   }
 });
 </script>
-<style>
+<style lang="css" scoped>
 .post-json {
   padding: 20px;
   border-radius: 20px;
