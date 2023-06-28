@@ -1,7 +1,7 @@
 <template>
   <transition name="fade">
     <div v-show="canTop" class="back-top" @click="handleScrollTop">
-      <img src="../../assets/icons/arrow-top.svg" alt="back-icon" />
+      <img src="../../assets/icons/back-top.svg" alt="back-icon" />
     </div>
   </transition>
 </template>

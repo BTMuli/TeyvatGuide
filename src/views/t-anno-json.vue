@@ -1,11 +1,11 @@
 <template>
   <TSwitchTheme />
-  <TOLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
+  <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
   <div class="anno-json">
     <div class="anno-title">活动列表 JSON</div>
-    <JsonViewer :value="jsonList" copyable boxed class="anno-data" />
+    <JsonViewer :value="jsonList" copyable boxed />
     <div class="anno-title">活动内容 JSON</div>
-    <JsonViewer :value="jsonContent" copyable boxed class="anno-data" />
+    <JsonViewer :value="jsonContent" copyable boxed />
   </div>
 </template>
 <script lang="ts" setup>
@@ -13,7 +13,7 @@
 import { ref, onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import JsonViewer from "vue-json-viewer";
-import TOLoading from "../components/overlay/to-loading.vue";
+import ToLoading from "../components/overlay/to-loading.vue";
 import TSwitchTheme from "../components/main/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
