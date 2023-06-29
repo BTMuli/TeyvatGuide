@@ -21,13 +21,13 @@
     <div class="tuc-rb-bottom">
       <div class="tuc-rbb-bg">
         <img
+          v-if="nameCard !== false && props.modelValue.fetter === 10"
           :src="nameCard"
           alt="nameCard"
-          v-if="nameCard !== false && props.modelValue.fetter === 10"
         />
       </div>
-      <div class="tuc-rbb-content" v-show="talents.length > 0">
-        <div v-for="talent in talents" class="tuc-rbb-talent">
+      <div v-show="talents.length > 0" class="tuc-rbb-content">
+        <div v-for="talent in talents" :key="talent.pos" class="tuc-rbb-talent">
           <img :src="talent.icon" alt="talent" />
           <span>Lv.{{ talent.level }}</span>
         </div>
@@ -64,12 +64,12 @@ const avatarBox = computed(() => {
     innerHeight: 20,
     outerText: getAvatarName(),
     outerHeight: 20,
-    display: "outer" as "outer",
+    display: <"outer">"outer",
     clickable: true,
   };
 });
 const weaponBox = computed(() => {
-  const weapon = JSON.parse(props.modelValue.weapon) as TGApp.Sqlite.Character.RoleWeapon;
+  const weapon = <TGApp.Sqlite.Character.RoleWeapon>JSON.parse(props.modelValue.weapon);
   return {
     size: "80px",
     height: "100px",
@@ -83,11 +83,11 @@ const weaponBox = computed(() => {
     innerHeight: 20,
     outerText: weapon.name,
     outerHeight: 20,
-    display: "outer" as "outer",
+    display: <"outer">"outer",
     clickable: true,
   };
 });
-const nameCard = ref(false as string | false);
+const nameCard = ref<string | false>(false);
 
 onMounted(async () => {
   if (props.modelValue.cid !== 10000005 && props.modelValue.cid !== 10000007) {
@@ -118,7 +118,7 @@ function getAvatarName() {
 // 销毁
 onUnmounted(() => {
   talents.value.map((talent) => {
-    URL.revokeObjectURL(talent.icon);
+    return URL.revokeObjectURL(talent.icon);
   });
 });
 </script>
