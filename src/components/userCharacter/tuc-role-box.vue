@@ -247,8 +247,9 @@ onUnmounted(() => {
   height: 30px;
   align-items: center;
   justify-content: center;
-  color: var(--common-shadow-8);
+  color: #faf7e8;
   font-family: var(--font-title);
   font-size: 12px;
+  text-shadow: 0 0 5px rgb(0 0 0 / 50%);
 }
 </style>
