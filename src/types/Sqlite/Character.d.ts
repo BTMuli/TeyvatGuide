@@ -35,7 +35,7 @@ declare namespace TGApp.Sqlite.Character {
 
   /**
    * @description 用户角色列表的角色类型
-   * @since Alpha v0.2.0
+   * @since Alpha v0.2.1
    * @interface UserRole
    * @property {number} uid- 用户 ID
    * @property {number} cid - 角色 ID
@@ -50,7 +50,7 @@ declare namespace TGApp.Sqlite.Character {
    * @property {RoleConstellation[]} constellation - 角色命座 // 数据库中以字符串形式存储
    * @property {number} activeConstellation - 角色激活命座
    * @property {RoleCostume} costume - 角色时装 // 数据库中以字符串形式存储
-   * @property {string} talent - 角色天赋 // TODO: 天赋数据缺失来源
+   * @property {RoleTalent[]} talent - 角色天赋 // 数据库中以字符串形式存储
    * @property {string} updated - 数据更新时间
    * @return UserRole
    */
@@ -166,5 +166,26 @@ declare namespace TGApp.Sqlite.Character {
     id: number;
     name: string;
     icon: string;
+  }
+
+  /**
+   * @description 角色列表的天赋数据类型
+   * @since Alpha v0.2.1
+   * @interface RoleTalent
+   * @property {number} id - 天赋 ID
+   * @property {number} pos - 天赋位置
+   * @property {string} name - 天赋名称
+   * @property {string} icon - 天赋图标
+   * @property {number} max - 天赋最大等级
+   * @property {number} level - 天赋等级
+   * @return RoleTalent
+   */
+  export interface RoleTalent {
+    id: number;
+    pos: number;
+    name: string;
+    icon: string;
+    max: number;
+    level: number;
   }
 }

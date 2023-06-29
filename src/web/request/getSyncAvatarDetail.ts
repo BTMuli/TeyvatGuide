@@ -15,26 +15,30 @@ import TGUtils from "../utils/TGUtils";
 /**
  * @description 获取同步角色详情
  * @since Alpha v0.2.1
- * @param {Record<string, string>} cookie cookie
+ * @param {TGApp.BBS.Constant.CookieGroup2} cookie cookie
  * @param {string} uid 用户 uid
- * @param {string} avatarId 角色 id
+ * @param {number} avatarId 角色 id
  * @returns {Promise<TGApp.Game.Calculate.AvatarDetail|TGApp.BBS.Response.Base>}
  */
 async function getSyncAvatarDetail(
-  cookie: Record<string, string>,
+  cookie: TGApp.BBS.Constant.CookieGroup2,
   uid: string,
-  avatarId: string,
+  avatarId: number,
 ): Promise<TGApp.Game.Calculate.AvatarDetail | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.calculate.getSyncAvatarDetail;
   const params = {
     uid,
     region: TGUtils.Tools.getServerByUid(uid),
-    avatar_id: avatarId,
+    avatar_id: avatarId.toString(),
+  };
+  const ck: Record<string, string> = {
+    account_id: cookie.account_id,
+    cookie_token: cookie.cookie_token,
   };
   const header = {
     "User-Agent": "Tauri.Genshin/0.2.1",
     Referer: "https://webstatic.mihoyo.com/",
-    Cookie: TGUtils.Tools.transCookie(cookie),
+    Cookie: TGUtils.Tools.transCookie(ck),
   };
   return await http
     .fetch<TGApp.Game.Calculate.SyncAvatarDetailResponse | TGApp.BBS.Response.Base>(url, {

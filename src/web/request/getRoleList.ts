@@ -14,7 +14,7 @@ import TGUtils from "../utils/TGUtils";
 /**
  * @description 通过 Cookie 获取用户角色列表
  * @since Alpha v0.2.0
- * @param {Record<string, string>} cookie Cookie
+ * @param {TGApp.BBS.Constant.CookieGroup4} cookie Cookie
  * @param {TGApp.Sqlite.Account.Game} account 游戏账号
  * @returns {Promise<TGApp.Game.Character.ListItem[]|TGApp.BBS.Response.Base>} 用户角色列表
  */

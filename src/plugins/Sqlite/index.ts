@@ -2,7 +2,7 @@
  * @file plugins Sqlite index.ts
  * @description Sqlite 数据库操作类
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.1
  */
 
 // tauri
@@ -429,6 +429,27 @@ class Sqlite {
   ): Promise<void> {
     const db = await Database.load(this.dbPath);
     const sql = insertRoleData(uid, data);
+    await db.execute(sql);
+    await db.close();
+  }
+
+  /**
+   * @description 保存用户角色天赋数据
+   * @since Alpha v0.2.1
+   * @param {string} uid 用户 uid
+   * @param {number} cid 角色 ID
+   * @param {TGApp.Sqlite.Character.RoleTalent[]} data 角色天赋数据
+   * @returns {Promise<void>}
+   */
+  public async saveUserCharacterTalent(
+    uid: string,
+    cid: number,
+    data: TGApp.Sqlite.Character.RoleTalent[],
+  ): Promise<void> {
+    const db = await Database.load(this.dbPath);
+    const sql = `UPDATE UserCharacters 
+    SET talent = '${JSON.stringify(data)}', updated = datetime('now', 'localtime')
+    WHERE uid = '${uid}' AND cid = ${cid}`;
     await db.execute(sql);
     await db.close();
   }

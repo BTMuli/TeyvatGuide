@@ -2,7 +2,7 @@
  * @file plugins Sqlite sql insertData.ts
  * @description Sqlite 插入数据 sql 语句
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.1
  */
 
 // utils
@@ -237,7 +237,7 @@ export function insertRecordData(data: TGApp.Game.Record.FullData, uid: string):
 
 /**
  * @description 插入用户角色数据
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.1
  * @param {string} uid 用户 UID
  * @param {TGApp.User.Character.Item[]} data 角色数据
  * @returns {string} sql
@@ -247,10 +247,10 @@ export function insertRoleData(uid: string, data: TGApp.Game.Character.ListItem[
     const role = transUserRoles(item);
     return `
         INSERT INTO UserCharacters (uid, cid, name, img, name, fetter, level, element, star, weapon, reliquary,
-                                    constellation, activeConstellation, costume, talent, updated)
+                                    constellation, activeConstellation, costume, updated)
         VALUES (${uid}, ${role.cid}, '${role.name}', '${role.img}', '${role.name}', ${role.fetter}, ${role.level},
                 '${role.element}', ${role.star}, '${role.weapon}', '${role.reliquary}', '${role.constellation}',
-                ${role.activeConstellation}, '${role.costume}', '${role.talent}', datetime('now', 'localtime'))
+                ${role.activeConstellation}, '${role.costume}', datetime('now', 'localtime'))
         ON CONFLICT(uid, cid) DO UPDATE
             SET name                = '${role.name}',
                 img                 = '${role.img}',
@@ -264,7 +264,6 @@ export function insertRoleData(uid: string, data: TGApp.Game.Character.ListItem[
                 constellation       = '${role.constellation}',
                 activeConstellation = ${role.activeConstellation},
                 costume             = '${role.costume}',
-                talent              = '${role.talent}',
                 updated             = datetime('now', 'localtime');
     `;
   });

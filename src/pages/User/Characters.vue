@@ -5,11 +5,17 @@
       <div class="uc-top-title">
         {{ user.nickname }} UID：{{ user.gameUid }} 更新于 {{ getUpdateTime() }}
       </div>
-      <v-btn variant="outlined" class="uc-top-btn" @click="refresh()">
+      <v-btn variant="outlined" class="uc-top-btn" @click="refreshRoles()">
         <template #prepend>
           <v-icon>mdi-refresh</v-icon>
         </template>
-        更新数据
+        更新角色数据
+      </v-btn>
+      <v-btn variant="outlined" class="uc-top-btn" @click="refreshTalent()">
+        <template #prepend>
+          <v-icon>mdi-refresh</v-icon>
+        </template>
+        更新天赋数据
       </v-btn>
       <v-btn variant="outlined" class="uc-top-btn" @click="shareRoles()">
         <template #prepend>
@@ -66,12 +72,12 @@ onMounted(async () => {
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
   await loadRole();
-  resizeObserve.observe(document.querySelector(".uc-grid"));
+  resizeObserve.observe(<Element>document.querySelector(".uc-grid"));
   loading.value = false;
 });
 
 function getGridGap() {
-  const width = document.querySelector(".uc-grid")?.clientWidth - 20;
+  const width = <number>document.querySelector(".uc-grid")?.clientWidth - 20;
   const count = Math.floor(width / 180);
   gridGap.value = `${(width - count * 180) / (count - 1)}px`;
 }
@@ -84,7 +90,7 @@ async function loadRole() {
   }
 }
 
-async function refresh() {
+async function refreshRoles() {
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
   const res = await TGRequest.User.byLToken.getRoleList(roleCookie.value, user.value);
@@ -94,6 +100,38 @@ async function refresh() {
     loadingTitle.value = "正在更新角色数据";
     await loadRole();
   }
+  loading.value = false;
+}
+
+async function refreshTalent() {
+  loadingTitle.value = "正在获取天赋数据";
+  loading.value = true;
+  await Promise.allSettled(
+    roleList.value.map(async (role) => {
+      const res = await TGRequest.User.calculate.getSyncAvatarDetail(
+        roleCookie.value,
+        user.value.gameUid,
+        role.cid,
+      );
+      if (!Object.hasOwnProperty("retcode")) {
+        const talent: TGApp.Sqlite.Character.RoleTalent[] = [];
+        const avatar = <TGApp.Game.Calculate.AvatarDetail>res;
+        avatar.skill_list.map((skill, index) => {
+          return talent.push({
+            id: skill.id,
+            pos: index,
+            level: skill.level_current,
+            max: skill.max_level,
+            name: skill.name,
+            icon: skill.icon,
+          });
+        });
+        return await TGSqlite.saveUserCharacterTalent(user.value.gameUid, role.cid, talent);
+      }
+    }),
+  );
+  loadingTitle.value = "正在更新天赋数据";
+  await loadRole();
   loading.value = false;
 }
 
@@ -116,6 +154,7 @@ function getUpdateTime() {
 
 function selectRole(role: TGApp.Sqlite.Character.UserRole) {
   dataVal.value = role;
+  console.log(dataVal.value);
   visible.value = true;
 }
 </script>
