@@ -4,39 +4,51 @@
       <TItemBox v-model="avatarBox" />
       <TItemBox v-model="weaponBox" />
     </div>
-    <div class="tuc-rb-bottom">
-      <!-- bg 好感名片 -->
-      <div v-if="nameCard !== false" class="tuc-rbb-bg">
-        <img :src="nameCard" alt="nameCard" />
-      </div>
-      <!-- 表面 lock -->
-      <div v-if="props.modelValue.fetter !== 10" class="tuc-rbb-lock">
-        <v-icon size="20" color="var(--page-bg)"> mdi-lock </v-icon>
-      </div>
-      <!-- 左上角好感等级 -->
-      <div class="tuc-rbb-fetter">
+    <div class="tuc-rb-middle">
+      <div class="tuc-rbm-fetter">
         <img src="/icon/material/105.webp" alt="fetter" />
         <span>{{ props.modelValue.fetter }}</span>
-        <!-- 衣装 icon -->
+      </div>
+      <div class="tuc-rbm-other">
+        <span v-if="props.modelValue.fetter !== 10">
+          <v-icon>mdi-lock-outline</v-icon>
+        </span>
         <span v-if="props.modelValue.costume !== '[]'">
           <v-icon>mdi-tshirt-crew-outline</v-icon>
         </span>
+      </div>
+    </div>
+    <div class="tuc-rb-bottom">
+      <div class="tuc-rbb-bg">
+        <img
+          :src="nameCard"
+          alt="nameCard"
+          v-if="nameCard !== false && props.modelValue.fetter === 10"
+        />
+      </div>
+      <div class="tuc-rbb-content" v-show="talents.length > 0">
+        <div v-for="talent in talents" class="tuc-rbb-talent">
+          <img :src="talent.icon" alt="talent" />
+          <span>Lv.{{ talent.level }}</span>
+        </div>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 // vue
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import TItemBox from "../main/t-itembox.vue";
 // utils
 import TGSqlite from "../../plugins/Sqlite";
+import { saveImgLocal } from "../../utils/TGShare";
 
 interface TucRoleBoxProps {
   modelValue: TGApp.Sqlite.Character.UserRole;
 }
 
 const props = defineProps<TucRoleBoxProps>();
+const talents = ref<TGApp.Sqlite.Character.RoleTalent[]>([]);
 
 const avatarBox = computed(() => {
   return {
@@ -53,6 +65,7 @@ const avatarBox = computed(() => {
     outerText: getAvatarName(),
     outerHeight: 20,
     display: "outer" as "outer",
+    clickable: true,
   };
 });
 const weaponBox = computed(() => {
@@ -71,14 +84,27 @@ const weaponBox = computed(() => {
     outerText: weapon.name,
     outerHeight: 20,
     display: "outer" as "outer",
+    clickable: true,
   };
 });
 const nameCard = ref(false as string | false);
 
 onMounted(async () => {
-  if (props.modelValue.cid === 10000005 || props.modelValue.cid === 10000007) return;
-  const role = await TGSqlite.getAppCharacter(props.modelValue.cid);
-  nameCard.value = `/source/nameCard/profile/${role.nameCard}.webp`;
+  if (props.modelValue.cid !== 10000005 && props.modelValue.cid !== 10000007) {
+    const role = await TGSqlite.getAppCharacter(props.modelValue.cid);
+    nameCard.value = `/source/nameCard/profile/${role.nameCard}.webp`;
+  }
+  if (props.modelValue.talent !== "" && props.modelValue.talent !== "[]") {
+    const talentsLocal: TGApp.Sqlite.Character.RoleTalent[] = JSON.parse(props.modelValue.talent);
+    talents.value = talentsLocal
+      .filter((talent) => talent.max === 10)
+      .sort((a, b) => a.pos - b.pos);
+    talents.value.map(async (talent) => {
+      talent.icon = await saveImgLocal(talent.icon);
+    });
+  } else {
+    console.error(props.modelValue.cid, props.modelValue.name, "天赋为空");
+  }
 });
 
 function getAvatarName() {
@@ -88,14 +114,24 @@ function getAvatarName() {
     ? "旅行者-荧"
     : props.modelValue.name;
 }
+
+// 销毁
+onUnmounted(() => {
+  talents.value.map((talent) => {
+    URL.revokeObjectURL(talent.icon);
+  });
+});
 </script>
 <style lang="css" scoped>
 .tuc-rb-box {
   position: relative;
+  display: flex;
+  flex-direction: column;
   padding: 5px;
   border: 1px inset var(--common-shadow-4);
   border-radius: 5px;
   cursor: pointer;
+  row-gap: 5px;
   transition: all 0.3s;
 }
 
@@ -110,30 +146,49 @@ function getAvatarName() {
   justify-content: space-between;
 }
 
+.tuc-rb-middle {
+  display: flex;
+  width: 100%;
+  height: 30px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px;
+  border-radius: 5px;
+  background: var(--common-shadow-2);
+  font-family: var(--font-title);
+  font-size: 12px;
+}
+
+.tuc-rbm-fetter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 5px;
+}
+
+.tuc-rbm-fetter img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.tuc-rbm-other {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  color: var(--common-shadow-8);
+  column-gap: 5px;
+}
+
 .tuc-rb-bottom {
   position: relative;
   width: 100%;
   height: 80px;
   align-items: center;
   border-radius: 5px;
-  margin-top: 5px;
 }
 
 .tuc-rbb-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-}
-
-.tuc-rbb-bg img {
-  width: 100%;
-  height: 100%;
-  border-radius: 5px;
-  object-fit: contain;
-}
-
-.tuc-rbb-lock {
   position: absolute;
   top: 0;
   left: 0;
@@ -147,32 +202,53 @@ function getAvatarName() {
   background: var(--common-shadow-4);
 }
 
-.tuc-rbb-fetter {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  display: flex;
-  width: calc(100% - 10px);
-  height: 20px;
-  align-items: center;
-  justify-content: start;
+.tuc-rbb-bg img {
+  width: 100%;
+  height: 100%;
   border-radius: 5px;
-  background: rgb(0 0 0 / 50%);
-  color: var(--common-color-yellow);
-}
-
-.tuc-rbb-fetter :nth-child(1) {
-  margin: 0 5px;
-}
-
-.tuc-rbb-fetter :nth-child(3) {
-  margin-left: auto;
-  font-size: 12px;
-}
-
-.tuc-rbb-fetter img {
-  width: 20px;
-  height: 20px;
   object-fit: contain;
+}
+
+.tuc-rbb-content {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px;
+  border-radius: 5px;
+  backdrop-filter: blur(5px);
+}
+
+.tuc-rbb-talent {
+  display: flex;
+  width: 50px;
+  height: 80px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.tuc-rbb-talent :nth-child(1) {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border-radius: 50%;
+  background: var(--common-shadow-4);
+}
+
+.tuc-rbb-talent :nth-child(2) {
+  display: flex;
+  width: 100%;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  color: var(--common-shadow-8);
+  font-family: var(--font-title);
+  font-size: 12px;
 }
 </style>

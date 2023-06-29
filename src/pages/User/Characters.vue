@@ -106,10 +106,11 @@ async function refreshRoles() {
 async function refreshTalent() {
   loadingTitle.value = "正在获取天赋数据";
   loading.value = true;
+  const talentCookie = userStore.getCookieGroup2();
   await Promise.allSettled(
     roleList.value.map(async (role) => {
       const res = await TGRequest.User.calculate.getSyncAvatarDetail(
-        roleCookie.value,
+        talentCookie,
         user.value.gameUid,
         role.cid,
       );
