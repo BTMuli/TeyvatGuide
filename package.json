@@ -19,7 +19,21 @@
     "tauri": "tauri",
     "update:submodule": "git submodule update --remote --recursive",
     "vite:dev": "vite dev",
-    "vite:build": "vite build"
+    "vite:build": "vite build",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.vue": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.css": "stylelint --fix",
+    "*.yml": "prettier --write",
+    "*.json": "prettier --write"
   },
   "bugs": {
     "url": "https://github.com/BTMuli/Tauri.Genshin/issues"
@@ -72,6 +86,8 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-vue": "^9.15.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.3",
     "prettier": "2.8.8",
     "stylelint": "^15.8.0",
     "stylelint-config-idiomatic-order": "^9.0.0",
