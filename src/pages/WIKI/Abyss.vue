@@ -14,10 +14,18 @@
       </div>
     </div>
     <v-window v-model="tab">
-      <v-window-item value="use"> 角色使用 </v-window-item>
-      <v-window-item value="up"> 角色出场 </v-window-item>
-      <v-window-item value="team"> 队伍出场 </v-window-item>
-      <v-window-item value="hold"> 角色持有 </v-window-item>
+      <v-window-item value="use">
+        <HtaTabUse v-model="avatarUse" :data="avatarData" />
+      </v-window-item>
+      <v-window-item value="up">
+        <HtaTabUp v-model="avatarUp" :data="avatarData" />
+      </v-window-item>
+      <v-window-item value="team">
+        <HtaTabTeam v-model="teamCombination" :data="avatarData" />
+      </v-window-item>
+      <v-window-item value="hold">
+        <HtaTabHold v-model="avatarHold" :data="avatarData" />
+      </v-window-item>
     </v-window>
   </div>
   <HtaOverlayOverview v-model="showDialog" :data="overview" />
@@ -25,10 +33,15 @@
 <script lang="ts" setup>
 // vue
 import { onMounted, ref } from "vue";
-import ToLoading from "../../components/overlay/to-loading.vue";
-// utils
-import Hutao from "../../plugins/Hutao";
 import HtaOverlayOverview from "../../components/hutaoAbyss/hta-overlay-overview.vue";
+import ToLoading from "../../components/overlay/to-loading.vue";
+import HtaTabUse from "../../components/hutaoAbyss/hta-tab-use.vue";
+import HtaTabUp from "../../components/hutaoAbyss/hta-tab-up.vue";
+import HtaTabTeam from "../../components/hutaoAbyss/hta-tab-team.vue";
+import HtaTabHold from "../../components/hutaoAbyss/hta-tab-hold.vue";
+// plugins
+import Hutao from "../../plugins/Hutao";
+import TGSqlite from "../../plugins/Sqlite";
 
 // loading
 const loading = ref<boolean>(false);
@@ -42,11 +55,27 @@ const overview = ref<TGApp.Plugins.Hutao.Abyss.OverviewData>(
   {} as TGApp.Plugins.Hutao.Abyss.OverviewData,
 );
 const tab = ref<string>("use");
+const avatarUse = ref<Array<TGApp.Plugins.Hutao.Abyss.AvatarUse>>([]);
+const avatarUp = ref<Array<TGApp.Plugins.Hutao.Abyss.AvatarUp>>([]);
+const teamCombination = ref<Array<TGApp.Plugins.Hutao.Abyss.TeamCombination>>([]);
+const avatarHold = ref<Array<TGApp.Plugins.Hutao.Abyss.AvatarHold>>([]);
+const avatarData = ref<Array<TGApp.Sqlite.Character.AppData>>([]);
 
 onMounted(async () => {
   loadingTitle.value = "正在获取深渊数据";
   loading.value = true;
+  loadingTitle.value = "正在获取深渊概览";
   overview.value = await Hutao.Abyss.getOverview();
+  loadingTitle.value = "正在获取深渊角色使用";
+  avatarUse.value = await Hutao.Abyss.avatar.getUseRate();
+  loadingTitle.value = "正在获取深渊角色出场";
+  avatarUp.value = await Hutao.Abyss.avatar.getUpRate();
+  loadingTitle.value = "正在获取深渊队伍出场";
+  teamCombination.value = await Hutao.Abyss.getTeamCollect();
+  loadingTitle.value = "正在获取深渊角色持有";
+  avatarHold.value = await Hutao.Abyss.avatar.getHoldRate();
+  loadingTitle.value = "正在获取角色数据";
+  avatarData.value = await TGSqlite.getAllAppCharacter();
   loading.value = false;
 });
 
