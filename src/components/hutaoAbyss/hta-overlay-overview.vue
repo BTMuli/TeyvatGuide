@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="0px">
+  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
     <div class="hta-oo-box">
       <div class="hta-oob-title">数据收集统计</div>
       <div class="hta-oob-item">
