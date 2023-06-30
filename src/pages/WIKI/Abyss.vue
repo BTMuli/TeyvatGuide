@@ -8,6 +8,10 @@
         <v-tab value="team">队伍出场</v-tab>
         <v-tab value="hold">角色持有</v-tab>
       </v-tabs>
+      <v-btn variant="outlined" class="hta-btn" @click="shareWiki">
+        <v-icon>mdi-share-variant</v-icon>
+        <span>分享</span>
+      </v-btn>
       <div class="hta-title">
         <span>胡桃数据库</span>
         <span @click="showDialog = true">更新于 {{ getUpdated() }}</span>
@@ -18,7 +22,7 @@
         <HtaTabUse v-if="avatarUse.length > 0" v-model="avatarUse" />
       </v-window-item>
       <v-window-item value="up">
-        <HtaTabUp v-model="avatarUp" />
+        <HtaTabUp v-if="avatarUp.length > 0" v-model="avatarUp" />
       </v-window-item>
       <v-window-item value="team">
         <HtaTabTeam v-model="teamCombination" />
@@ -41,6 +45,7 @@ import HtaTabTeam from "../../components/hutaoAbyss/hta-tab-team.vue";
 import HtaTabHold from "../../components/hutaoAbyss/hta-tab-hold.vue";
 // plugins
 import Hutao from "../../plugins/Hutao";
+import { generateShareImg } from "../../utils/TGShare";
 
 // loading
 const loading = ref<boolean>(false);
@@ -80,6 +85,26 @@ function getUpdated() {
     .toLocaleString("zh-CN", { hour12: false })
     .replace(/\//g, "-");
 }
+
+function getShareTitle() {
+  switch (tab.value) {
+    case "use":
+      return `【胡桃】${overview.value.scheduleId}-角色使用`;
+    case "up":
+      return `【胡桃】${overview.value.scheduleId}-角色出场`;
+    case "team":
+      return `【胡桃】${overview.value.scheduleId}-队伍出场`;
+    case "hold":
+      return `【胡桃】${overview.value.scheduleId}-角色持有`;
+  }
+  return `【胡桃】${overview.value.scheduleId}-深渊数据`;
+}
+
+async function shareWiki() {
+  const div = document.querySelector(".hta-box") as HTMLDivElement;
+  const title = getShareTitle();
+  await generateShareImg(title, div);
+}
 </script>
 <style lang="css" scoped>
 .hta-box {
@@ -95,7 +120,9 @@ function getUpdated() {
 .hta-top {
   display: flex;
   width: 100%;
-  justify-content: space-between;
+  justify-content: flex-start;
+  align-items: center;
+  column-gap: 10px;
   color: var(--common-text-title);
   font-family: var(--font-title);
 }
