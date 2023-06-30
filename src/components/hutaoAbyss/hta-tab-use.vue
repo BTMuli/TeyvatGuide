@@ -1,6 +1,6 @@
 <template>
   <div class="hta-tu-box">
-    <v-tabs v-model="tab" align-tabs="start" direction="vertical" class="hta-tu-tab">
+    <v-tabs v-model="tab" direction="vertical" class="hta-tu-tab">
       <v-tab value="9">第09层</v-tab>
       <v-tab value="10">第10层</v-tab>
       <v-tab value="11">第11层</v-tab>
@@ -57,6 +57,9 @@ watch(tab, () => {
 }
 
 .hta-tu-tab {
+  position: absolute;
+  top: 5px;
+  left: 5px;
   width: 100px;
   height: 100%;
   color: var(--common-text-title);
@@ -64,7 +67,8 @@ watch(tab, () => {
 }
 
 .hta-tu-window {
-  width: 100%;
+  margin-left: 100px;
+  width: calc(100% - 100px);
   height: 100%;
   overflow: auto;
 }

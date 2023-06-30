@@ -1,6 +1,6 @@
 <template>
   <div class="hta-tu-box">
-    <v-tabs v-model="tab" align-tabs="start" direction="vertical" class="hta-tu-tab">
+    <v-tabs v-model="tab" direction="vertical" class="hta-tu-tab">
       <v-tab value="9">第09层</v-tab>
       <v-tab value="10">第10层</v-tab>
       <v-tab value="11">第11层</v-tab>
@@ -9,7 +9,7 @@
     <v-window v-model="tab" class="hta-tu-window">
       <v-window-item :value="tab">
         <div v-if="select" class="hta-tu-grid">
-          <TibWikiAbyss v-for="item in select.ranks" :key="item" :model-value="item" />
+          <TibWikiAbyss v-for="item in select.ranks" :key="item.item" :model-value="item" />
         </div>
       </v-window-item>
     </v-window>
@@ -21,14 +21,14 @@ import { onMounted, ref, watch } from "vue";
 import TibWikiAbyss from "../itembox/tib-wiki-abyss.vue";
 
 interface HtaTabUseProps {
-  modelValue: TGApp.Plugins.Hutao.Abyss.AvatarUp[];
+  modelValue: TGApp.Plugins.Hutao.Abyss.AvatarUse[];
 }
 
 const props = defineProps<HtaTabUseProps>();
 
 // data
 const tab = ref<string>("9");
-const select = ref<TGApp.Plugins.Hutao.Abyss.AvatarUp>();
+const select = ref<TGApp.Plugins.Hutao.Abyss.AvatarUse>();
 
 function loadData() {
   select.value = props.modelValue.filter((item) => item.floor.toString() === tab.value)?.[0];
@@ -57,6 +57,9 @@ watch(tab, () => {
 }
 
 .hta-tu-tab {
+  position: absolute;
+  top: 5px;
+  left: 5px;
   width: 100px;
   height: 100%;
   color: var(--common-text-title);
@@ -64,7 +67,8 @@ watch(tab, () => {
 }
 
 .hta-tu-window {
-  width: 100%;
+  margin-left: 100px;
+  width: calc(100% - 100px);
   height: 100%;
   overflow: auto;
 }

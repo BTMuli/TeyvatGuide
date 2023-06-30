@@ -101,18 +101,21 @@ function getShareTitle() {
 }
 
 async function shareWiki() {
-  const div = document.querySelector(".hta-box") as HTMLDivElement;
+  const div = <HTMLDivElement>document.querySelector(".hta-tab-item");
   const title = getShareTitle();
+  loadingTitle.value = "正在生成分享图";
+  loading.value = true;
   await generateShareImg(title, div);
+  loading.value = false;
 }
 </script>
 <style lang="css" scoped>
 .hta-box {
   width: 100%;
-  height: 100%;
+  max-height: calc(100vh - 30px);
   padding: 10px;
-  box-sizing: border-box;
   overflow: auto;
+  box-sizing: border-box;
   border-radius: 5px;
   box-shadow: 0 0 10px var(--common-shadow-4);
 }
