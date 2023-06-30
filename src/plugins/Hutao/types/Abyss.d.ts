@@ -158,6 +158,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    */
   export interface RankData {
     // todo
+    data: any;
   }
 
   /**
@@ -217,7 +218,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
 
   /**
    * @description 角色深渊上场率
-   * @since Alpha v0.2.0
+   * @since Alpha v0.2.1
    * @interface AvatarUp
    * @property {number} floor - 楼层
    * @property {number} ranks[].item - 角色ID
@@ -226,10 +227,10 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    */
   export interface AvatarUp {
     floor: number;
-    ranks: {
+    ranks: Array<{
       item: number;
       rate: number;
-    };
+    }>;
   }
 
   /**
