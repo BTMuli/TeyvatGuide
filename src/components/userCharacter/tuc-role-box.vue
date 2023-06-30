@@ -154,7 +154,7 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 5px;
   border-radius: 5px;
-  background: var(--common-shadow-2);
+  border: 1px inset var(--common-bg-1);
   font-family: var(--font-title);
   font-size: 12px;
 }
@@ -218,7 +218,6 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 5px;
   border-radius: 5px;
-  backdrop-filter: blur(5px);
 }
 
 .tuc-rbb-talent {
@@ -238,7 +237,8 @@ onUnmounted(() => {
   justify-content: center;
   padding: 5px;
   border-radius: 50%;
-  background: var(--common-shadow-4);
+  background: rgb(0 0 0 /0.4);
+  box-shadow: 0 0 10px rgb(255 255 255/0.4);
 }
 
 .tuc-rbb-talent :nth-child(2) {

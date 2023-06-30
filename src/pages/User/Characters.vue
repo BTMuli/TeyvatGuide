@@ -26,7 +26,12 @@
     </div>
     <!-- grid 布局，参考 Snap.Hutao -->
     <div class="uc-grid">
-      <TucRoleBox v-for="role in roleList" :model-value="role" @click="selectRole(role)" />
+      <TucRoleBox
+        v-for="(role, index) in roleList"
+        :key="index"
+        :model-value="role"
+        @click="selectRole(role)"
+      />
     </div>
   </div>
   <ToUcDetail v-model="visible" :data-val="dataVal" />
@@ -53,13 +58,13 @@ const loadingTitle = ref("");
 
 // data
 const isEmpty = ref(true);
-const roleList = ref([] as TGApp.Sqlite.Character.UserRole[]);
+const roleList = ref<Array<TGApp.Sqlite.Character.UserRole>>([]);
 const roleCookie = computed(() => userStore.getCookieGroup4());
 const user = computed(() => userStore.getCurAccount());
 
 // overlay
 const visible = ref(false);
-const dataVal = ref({} as TGApp.Sqlite.Character.UserRole);
+const dataVal = ref<TGApp.Sqlite.Character.UserRole>(<TGApp.Sqlite.Character.UserRole>{});
 
 // grid
 const gridGap = ref("10px");
@@ -114,7 +119,7 @@ async function refreshTalent() {
         user.value.gameUid,
         role.cid,
       );
-      if (!Object.hasOwnProperty("retcode")) {
+      if ("skill_list" in res) {
         const talent: TGApp.Sqlite.Character.RoleTalent[] = [];
         const avatar = <TGApp.Game.Calculate.AvatarDetail>res;
         avatar.skill_list.map((skill, index) => {
@@ -137,7 +142,7 @@ async function refreshTalent() {
 }
 
 async function shareRoles() {
-  const rolesBox = document.querySelector(".uc-box") as HTMLElement;
+  const rolesBox = <HTMLElement>document.querySelector(".uc-box");
   const fileName = `【角色列表】-${user.value.gameUid}`;
   await generateShareImg(fileName, rolesBox);
 }
@@ -155,7 +160,6 @@ function getUpdateTime() {
 
 function selectRole(role: TGApp.Sqlite.Character.UserRole) {
   dataVal.value = role;
-  console.log(dataVal.value);
   visible.value = true;
 }
 </script>

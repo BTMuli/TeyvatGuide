@@ -30,6 +30,7 @@
           </div>
           <div
             v-for="(item, index) in data.reliquary"
+            :key="index"
             class="tuc-dol-item"
             :style="{
               cursor: item ? 'pointer' : 'default',
@@ -45,6 +46,7 @@
           <div class="tuc-dor-box">
             <TucDetailConstellation
               v-for="item in data.constellation"
+              :key="item.pos"
               class="tuc-dor-item"
               :model-value="item"
               :style="{
@@ -56,18 +58,12 @@
         </div>
         <!-- 底部说明 -->
         <div class="tuc-do-bottom">
-          <TucDetailDescWeapon
-            v-if="selected.type === '武器'"
-            v-model="selected.data as TGApp.Sqlite.Character.RoleWeapon"
-          />
+          <TucDetailDescWeapon v-if="selected.type === '武器'" v-model="selectWeapon" />
           <TucDetailDescConstellation
             v-else-if="selected.type === '命座'"
-            v-model="selected.data as TGApp.Sqlite.Character.RoleConstellation"
+            v-model="selectConstellation"
           />
-          <TucDetailDescRelic
-            v-else-if="selected.type === '圣遗物'"
-            v-model="selected.data as TGApp.Sqlite.Character.RoleReliquary"
-          />
+          <TucDetailDescRelic v-else-if="selected.type === '圣遗物'" v-model="selectRelic" />
         </div>
       </div>
     </div>
@@ -90,16 +86,26 @@ interface ToUcDetailProps {
 }
 
 interface ToUcDetailEmits {
-  (e: "update:modelValue", value: TGApp.Sqlite.Character.UserRole): void;
-
+  (e: "update:modelValue", value: boolean): void;
   (e: "cancel"): void;
 }
 
+interface ToUcDetailData {
+  weapon: TGApp.Sqlite.Character.RoleWeapon;
+  constellation: TGApp.Sqlite.Character.RoleConstellation[];
+  reliquary: {
+    1: TGApp.Sqlite.Character.RoleReliquary | false;
+    2: TGApp.Sqlite.Character.RoleReliquary | false;
+    3: TGApp.Sqlite.Character.RoleReliquary | false;
+    4: TGApp.Sqlite.Character.RoleReliquary | false;
+    5: TGApp.Sqlite.Character.RoleReliquary | false;
+  };
+  costume: TGApp.Sqlite.Character.RoleCostume[];
+  bg: string;
+}
+
 const emits = defineEmits<ToUcDetailEmits>();
-const props = withDefaults(defineProps<ToUcDetailProps>(), {
-  modelValue: false,
-  dataVal: {} as TGApp.Sqlite.Character.UserRole,
-});
+const props = defineProps<ToUcDetailProps>();
 const visible = computed({
   get: () => props.modelValue,
   set: (value) => emits("update:modelValue", value),
@@ -107,24 +113,27 @@ const visible = computed({
 const showCostumeSwitch = ref(false);
 
 // data
-const data = ref({
-  weapon: {} as TGApp.Sqlite.Character.RoleWeapon,
-  constellation: [] as TGApp.Sqlite.Character.RoleConstellation[],
+const data = ref<ToUcDetailData>({
+  weapon: <TGApp.Sqlite.Character.RoleWeapon>{},
+  constellation: [],
   reliquary: {
-    1: false as TGApp.Sqlite.Character.RoleReliquary | false,
-    2: false as TGApp.Sqlite.Character.RoleReliquary | false,
-    3: false as TGApp.Sqlite.Character.RoleReliquary | false,
-    4: false as TGApp.Sqlite.Character.RoleReliquary | false,
-    5: false as TGApp.Sqlite.Character.RoleReliquary | false,
+    1: false,
+    2: false,
+    3: false,
+    4: false,
+    5: false,
   },
-  costume: [] as TGApp.Sqlite.Character.RoleCostume[],
-  bg: "" as string,
+  costume: [],
+  bg: "",
 });
+const selectConstellation = ref<TGApp.Sqlite.Character.RoleConstellation>(
+  <TGApp.Sqlite.Character.RoleConstellation>{},
+);
+const selectWeapon = ref<TGApp.Sqlite.Character.RoleWeapon>(<TGApp.Sqlite.Character.RoleWeapon>{});
+const selectRelic = ref<TGApp.Sqlite.Character.RoleReliquary>(
+  <TGApp.Sqlite.Character.RoleReliquary>{},
+);
 const selected = ref({
-  data: {} as
-    | TGApp.Sqlite.Character.RoleConstellation
-    | TGApp.Sqlite.Character.RoleWeapon
-    | TGApp.Sqlite.Character.RoleReliquary,
   type: "武器" || "命之座" || "圣遗物",
   pos: 0, // 用于标记选中的是哪个位置
 });
@@ -132,21 +141,38 @@ const selected = ref({
 // 加载数据
 function loadData() {
   if (!props.modelValue) return;
-  data.value.weapon = JSON.parse(props.dataVal.weapon) as TGApp.Sqlite.Character.RoleWeapon;
-  data.value.constellation = JSON.parse(
-    props.dataVal.constellation,
-  ) as TGApp.Sqlite.Character.RoleConstellation[];
+  data.value.weapon = JSON.parse(props.dataVal.weapon);
+  data.value.constellation = JSON.parse(props.dataVal.constellation);
   if (props.dataVal.reliquary !== "") {
-    const relics = JSON.parse(props.dataVal.reliquary) as TGApp.Sqlite.Character.RoleReliquary[];
+    const relics = <Array<TGApp.Sqlite.Character.RoleReliquary>>JSON.parse(props.dataVal.reliquary);
     relics.map((item) => {
-      data.value.reliquary[item.pos] = item;
+      switch (item.pos) {
+        case 1:
+          data.value.reliquary["1"] = item;
+          break;
+        case 2:
+          data.value.reliquary["2"] = item;
+          break;
+        case 3:
+          data.value.reliquary["3"] = item;
+          break;
+        case 4:
+          data.value.reliquary["4"] = item;
+          break;
+        case 5:
+          data.value.reliquary["5"] = item;
+          break;
+        default:
+          break;
+      }
+      return item;
     });
   }
-  data.value.costume = JSON.parse(props.dataVal.costume) as TGApp.Sqlite.Character.RoleCostume[];
+  data.value.costume = JSON.parse(props.dataVal.costume);
   data.value.bg = props.dataVal.img;
   showCostumeSwitch.value = false;
+  selectWeapon.value = data.value.weapon;
   selected.value = {
-    data: data.value.weapon,
     type: "武器",
     pos: 0,
   };
@@ -180,12 +206,24 @@ function showDetail(
     | TGApp.Sqlite.Character.RoleWeapon
     | TGApp.Sqlite.Character.RoleReliquary
     | false,
-  type: string,
+  type: "命座" | "武器" | "圣遗物",
   pos: number = 0,
 ) {
   if (!item) return;
+  switch (type) {
+    case "命座":
+      selectConstellation.value = <TGApp.Sqlite.Character.RoleConstellation>item;
+      break;
+    case "武器":
+      selectWeapon.value = <TGApp.Sqlite.Character.RoleWeapon>item;
+      break;
+    case "圣遗物":
+      selectRelic.value = <TGApp.Sqlite.Character.RoleReliquary>item;
+      break;
+    default:
+      break;
+  }
   selected.value = {
-    data: item,
     type,
     pos,
   };
@@ -246,10 +284,10 @@ function switchBg() {
   left: 0;
   width: 100%;
   color: var(--common-color-white);
-  font-family: var(--font-text);
+  font-family: var(--font-title);
   font-size: 16px;
   text-align: center;
-  text-shadow: 0 0 10px var(--common-color-yellow);
+  text-shadow: 0 0 10px rgb(0 0 0 / 50%);
 }
 
 .tuc-do-show {
