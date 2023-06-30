@@ -1,5 +1,5 @@
 <template>
-  <TItemBox :model-value="box" style="cursor: pointer" />
+  <TItemBox :model-value="box" />
 </template>
 <script lang="ts" setup>
 // vue
@@ -11,7 +11,7 @@ interface TibCalendarAvatarProps {
 }
 
 const props = defineProps<TibCalendarAvatarProps>();
-const box = computed(() => {
+const box = computed<TItemBoxData>(() => {
   return {
     bg: `/icon/bg/${props.modelValue.star}-Star.webp`,
     icon: `/WIKI/character/icon/${props.modelValue.id}.webp`,
@@ -23,6 +23,7 @@ const box = computed(() => {
     innerHeight: 30,
     innerIcon: `/icon/weapon/${props.modelValue.weapon}.webp`,
     innerText: props.modelValue.name,
-  } as TItemBoxData;
+    clickable: true,
+  };
 });
 </script>

@@ -417,19 +417,6 @@ class Sqlite {
   }
 
   /**
-   * @description 获取所有角色数据
-   * @since Alpha v0.2.1
-   * @returns {Promise<TGApp.Sqlite.Character.AppData[]>} 角色数据
-   */
-  public async getAllAppCharacter(): Promise<TGApp.Sqlite.Character.AppData[]> {
-    const db = await Database.load(this.dbPath);
-    const sql = "SELECT * FROM AppCharacters";
-    const res: TGApp.Sqlite.Character.AppData[] = await db.select(sql);
-    await db.close();
-    return res;
-  }
-
-  /**
    * @description 保存用户角色数据
    * @since Alpha v0.2.0
    * @param {string} uid 用户 uid

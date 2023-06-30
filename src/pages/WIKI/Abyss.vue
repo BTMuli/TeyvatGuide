@@ -13,18 +13,18 @@
         <span @click="showDialog = true">更新于 {{ getUpdated() }}</span>
       </div>
     </div>
-    <v-window v-model="tab">
+    <v-window v-model="tab" class="hta-tab-item">
       <v-window-item value="use">
-        <HtaTabUse v-model="avatarUse" :data="avatarData" />
+        <HtaTabUse v-if="avatarUse.length > 0" v-model="avatarUse" />
       </v-window-item>
       <v-window-item value="up">
-        <HtaTabUp v-model="avatarUp" :data="avatarData" />
+        <HtaTabUp v-model="avatarUp" />
       </v-window-item>
       <v-window-item value="team">
-        <HtaTabTeam v-model="teamCombination" :data="avatarData" />
+        <HtaTabTeam v-model="teamCombination" />
       </v-window-item>
       <v-window-item value="hold">
-        <HtaTabHold v-model="avatarHold" :data="avatarData" />
+        <HtaTabHold v-model="avatarHold" />
       </v-window-item>
     </v-window>
   </div>
@@ -41,7 +41,6 @@ import HtaTabTeam from "../../components/hutaoAbyss/hta-tab-team.vue";
 import HtaTabHold from "../../components/hutaoAbyss/hta-tab-hold.vue";
 // plugins
 import Hutao from "../../plugins/Hutao";
-import TGSqlite from "../../plugins/Sqlite";
 
 // loading
 const loading = ref<boolean>(false);
@@ -52,14 +51,13 @@ const showDialog = ref<boolean>(false);
 
 // data
 const overview = ref<TGApp.Plugins.Hutao.Abyss.OverviewData>(
-  {} as TGApp.Plugins.Hutao.Abyss.OverviewData,
+  <TGApp.Plugins.Hutao.Abyss.OverviewData>{},
 );
 const tab = ref<string>("use");
 const avatarUse = ref<Array<TGApp.Plugins.Hutao.Abyss.AvatarUse>>([]);
 const avatarUp = ref<Array<TGApp.Plugins.Hutao.Abyss.AvatarUp>>([]);
 const teamCombination = ref<Array<TGApp.Plugins.Hutao.Abyss.TeamCombination>>([]);
 const avatarHold = ref<Array<TGApp.Plugins.Hutao.Abyss.AvatarHold>>([]);
-const avatarData = ref<Array<TGApp.Sqlite.Character.AppData>>([]);
 
 onMounted(async () => {
   loadingTitle.value = "正在获取深渊数据";
@@ -74,8 +72,6 @@ onMounted(async () => {
   teamCombination.value = await Hutao.Abyss.getTeamCollect();
   loadingTitle.value = "正在获取深渊角色持有";
   avatarHold.value = await Hutao.Abyss.avatar.getHoldRate();
-  loadingTitle.value = "正在获取角色数据";
-  avatarData.value = await TGSqlite.getAllAppCharacter();
   loading.value = false;
 });
 
@@ -106,6 +102,7 @@ function getUpdated() {
 
 .hta-tab {
   margin-bottom: 10px;
+  height: 50px;
 }
 
 .hta-title {
@@ -123,5 +120,10 @@ function getUpdated() {
 .hta-title :nth-child(2):hover {
   cursor: pointer;
   text-decoration: underline;
+}
+
+.hta-tab-item {
+  width: 100%;
+  height: calc(100% - 60px);
 }
 </style>
