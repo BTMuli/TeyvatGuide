@@ -1,5 +1,5 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" />
+  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="uc-box">
     <div class="uc-top">
       <div class="uc-top-title">
@@ -53,8 +53,9 @@ import { generateShareImg } from "../../utils/TGShare";
 const userStore = useUserStore();
 
 // loading
-const loading = ref(false);
-const loadingTitle = ref("");
+const loading = ref<boolean>(false);
+const loadingTitle = ref<string>();
+const loadingSub = ref<string>();
 
 // data
 const isEmpty = ref(true);
@@ -144,7 +145,12 @@ async function refreshTalent() {
 async function shareRoles() {
   const rolesBox = <HTMLElement>document.querySelector(".uc-box");
   const fileName = `【角色列表】-${user.value.gameUid}`;
+  loadingTitle.value = "正在生成图片";
+  loadingSub.value = `${fileName}.png`;
+  loading.value = true;
   await generateShareImg(fileName, rolesBox);
+  loadingSub.value = "";
+  loading.value = false;
 }
 
 function getUpdateTime() {

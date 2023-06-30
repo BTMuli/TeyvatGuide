@@ -1,5 +1,5 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" />
+  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="ur-box">
     <div class="ur-top">
       <div class="ur-top-title">
@@ -49,14 +49,15 @@ import { generateShareImg } from "../../utils/TGShare";
 const userStore = useUserStore();
 
 // loading
-const loading = ref(false);
-const loadingTitle = ref("");
+const loading = ref<boolean>(false);
+const loadingTitle = ref<string>();
+const loadingSub = ref<string>();
 
 // data
-const isEmpty = ref(true);
-const recordData = ref({} as TGApp.Sqlite.Record.SingleTable);
-const recordCookie = computed(() => userStore.getCookieGroup2() as Record<string, string>);
-const user = computed(() => userStore.getCurAccount());
+const isEmpty = ref<boolean>(true);
+const recordData = ref<TGApp.Sqlite.Record.SingleTable>(<TGApp.Sqlite.Record.SingleTable>{});
+const recordCookie = computed<TGApp.BBS.Constant.CookieGroup2>(() => userStore.getCookieGroup2());
+const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.getCurAccount());
 
 onMounted(async () => {
   loadingTitle.value = "正在加载战绩数据";
@@ -82,10 +83,9 @@ async function refresh() {
   loadingTitle.value = "正在获取战绩数据";
   loading.value = true;
   const res = await TGRequest.User.getRecord(recordCookie.value, user.value);
-  if (!res.hasOwnProperty("retcode")) {
-    const data = res as TGApp.Game.Record.FullData;
+  if (!("retcode" in res)) {
     loadingTitle.value = "正在保存战绩数据";
-    await TGSqlite.saveUserRecord(data, user.value.gameUid);
+    await TGSqlite.saveUserRecord(res, user.value.gameUid);
     await initUserRecordData();
   } else {
     console.error(res);
@@ -94,22 +94,19 @@ async function refresh() {
 }
 
 function getTitle() {
-  const role = JSON.parse(recordData.value.role) as TGApp.Sqlite.Record.Role;
+  const role = <TGApp.Sqlite.Record.Role>JSON.parse(recordData.value.role);
   return `${role.nickname} Lv.${role.level}【${recordData.value.uid}】`;
 }
 
 async function shareRecord() {
-  const recordBox = document.querySelector(".ur-box") as HTMLElement;
+  const recordBox = <HTMLElement>document.querySelector(".ur-box");
   const fileName = `【原神战绩】-${user.value.gameUid}`;
+  loadingTitle.value = "正在生成图片";
+  loadingSub.value = `${fileName}.png`;
+  loading.value = true;
   await generateShareImg(fileName, recordBox);
-}
-
-function getTheme() {
-  let theme = localStorage.getItem("theme");
-  if (theme) {
-    theme = JSON.parse(theme).theme;
-  }
-  return theme || "default";
+  loadingSub.value = "";
+  loading.value = false;
 }
 </script>
 <style lang="css" scoped>

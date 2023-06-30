@@ -1,5 +1,5 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" />
+  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="ua-box">
     <v-tabs v-model="userTab" direction="vertical" align-tabs="start" class="ua-tab">
       <v-tab v-for="item in localAbyss" :key="item.id" :value="item.id" @click="toAbyss(item.id)">
@@ -52,6 +52,7 @@
           <div class="uaw-d-box">
             <TuaDetail
               v-for="floor in JSON.parse(item.floors) as TGApp.Sqlite.Abyss.Floor[]"
+              :key="floor.id"
               :model-value="floor"
             />
           </div>
@@ -82,17 +83,18 @@ import Hutao from "../../plugins/Hutao";
 // store
 const userStore = useUserStore();
 // loading
-const loading = ref(true);
-const loadingTitle = ref("");
+const loading = ref<boolean>(true);
+const loadingTitle = ref<string>();
+const loadingSub = ref<string>();
 
 // data
-const userTab = ref(0);
-const user = computed(() => userStore.getCurAccount());
+const userTab = ref<number>(0);
+const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.getCurAccount());
 
-const localAbyss = ref([] as TGApp.Sqlite.Abyss.SingleTable[]);
-const localAbyssID = ref([] as number[]);
-const curAbyss = ref({} as TGApp.Sqlite.Abyss.SingleTable);
-const abyssRef = ref(null as unknown as HTMLElement);
+const localAbyss = ref<TGApp.Sqlite.Abyss.SingleTable[]>([]);
+const localAbyssID = ref<number[]>([]);
+const curAbyss = ref<TGApp.Sqlite.Abyss.SingleTable>(<TGApp.Sqlite.Abyss.SingleTable>{});
+const abyssRef = ref<HTMLElement>(<HTMLElement>{});
 
 onMounted(async () => {
   loadingTitle.value = "正在加载深渊数据";
@@ -122,16 +124,16 @@ async function getAbyssData(): Promise<void> {
   if (localAbyssID.value.length < 2) {
     loadingTitle.value = "正在获取上期深渊数据";
     const resP = await TGRequest.User.byCookie.getAbyss(cookie, "2", user.value);
-    if (!resP.hasOwnProperty("retcode")) {
+    if (!("retcode" in resP)) {
       loadingTitle.value = "正在保存上期深渊数据";
-      await TGSqlite.saveAbyss(user.value.gameUid, resP as TGApp.Game.Abyss.FullData);
+      await TGSqlite.saveAbyss(user.value.gameUid, resP);
     }
   }
   loadingTitle.value = "正在获取本期深渊数据";
   const res = await TGRequest.User.byCookie.getAbyss(cookie, "1", user.value);
-  if (!res.hasOwnProperty("retcode")) {
+  if (!("retcode" in res)) {
     loadingTitle.value = "正在保存本期深渊数据";
-    await TGSqlite.saveAbyss(user.value.gameUid, res as TGApp.Game.Abyss.FullData);
+    await TGSqlite.saveAbyss(user.value.gameUid, res);
   }
   loadingTitle.value = "正在加载深渊数据";
   await initAbyssData();
@@ -148,14 +150,19 @@ function getAbyssRef(el: HTMLElement): void {
 
 async function shareAbyss(): Promise<void> {
   const fileName = `【深渊数据】${curAbyss.value.id}-${user.value.gameUid}`;
+  loadingTitle.value = "正在生成图片";
+  loadingSub.value = `${fileName}.png`;
+  loading.value = true;
   await generateShareImg(fileName, abyssRef.value);
+  loadingSub.value = "";
+  loading.value = false;
 }
 
 async function uploadAbyss(): Promise<void> {
   const abyssData = curAbyss.value;
   loadingTitle.value = "正在转换深渊数据";
   loading.value = true;
-  let transAbyss = Hutao.Abyss.utils.transData(abyssData);
+  const transAbyss = Hutao.Abyss.utils.transData(abyssData);
   loadingTitle.value = "正在获取角色数据";
   const roles = await TGSqlite.getUserCharacter(user.value.gameUid);
   if (!roles) {

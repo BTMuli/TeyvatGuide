@@ -1,5 +1,5 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" />
+  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="hta-box">
     <div class="hta-top">
       <v-tabs v-model="tab" align-tabs="start" class="hta-tab">
@@ -50,6 +50,7 @@ import { generateShareImg } from "../../utils/TGShare";
 // loading
 const loading = ref<boolean>(false);
 const loadingTitle = ref<string>("");
+const loadingSub = ref<string>();
 
 // overview overlay
 const showDialog = ref<boolean>(false);
@@ -104,8 +105,10 @@ async function shareWiki() {
   const div = <HTMLDivElement>document.querySelector(".hta-tab-item");
   const title = getShareTitle();
   loadingTitle.value = "正在生成分享图";
+  loadingSub.value = `${title}.png`;
   loading.value = true;
   await generateShareImg(title, div);
+  loadingSub.value = "";
   loading.value = false;
 }
 </script>
