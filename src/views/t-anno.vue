@@ -1,8 +1,13 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <TSwitchTheme />
-  <TShareBtn v-show="!loadingEmpty" v-model="annoRef" :title="annoTitle" />
-  <TOLoading v-model="loading" :title="loadingTitle" :empty="loadingEmpty" />
+  <TShareBtn
+    v-show="!loadingEmpty"
+    v-model="annoRef"
+    v-model:loading="loadShare"
+    :title="annoTitle"
+  />
+  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" :empty="loadingEmpty" />
   <div class="anno-body">
     <div class="anno-title">
       {{ annoData.title }}
@@ -16,32 +21,34 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
-import TOLoading from "../components/overlay/to-loading.vue";
+import ToLoading from "../components/overlay/to-loading.vue";
 import TSwitchTheme from "../components/main/t-switchTheme.vue";
 import TShareBtn from "../components/main/t-shareBtn.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
-// plugins
+// utils
 import TGRequest from "../web/request/TGRequest";
 import TGUtils from "../web/utils/TGUtils";
 import { saveImgLocal } from "../utils/TGShare";
 
 // loading
-const loading = ref(true as boolean);
-const loadingTitle = ref("正在加载");
-const loadingEmpty = ref(false as boolean);
+const loading = ref<boolean>(true);
+const loadShare = ref<boolean>(false);
+const loadingTitle = ref<string>("正在加载");
+const loadingSub = ref<string>();
+const loadingEmpty = ref<boolean>(false);
 
 // share
-const annoRef = ref({} as HTMLElement);
-const annoTitle = ref("");
+const annoRef = ref<HTMLElement>(<HTMLElement>{});
+const annoTitle = ref<string>("");
 
 // 数据
 const annoId = Number(useRoute().params.anno_id);
-const annoData = ref({} as TGApp.BBS.Announcement.ContentItem);
-const annoHtml = ref("");
-const annoBanner = ref("");
+const annoData = ref<TGApp.BBS.Announcement.ContentItem>(<TGApp.BBS.Announcement.ContentItem>{});
+const annoHtml = ref<string>();
+const annoBanner = ref<string>();
 
 onMounted(async () => {
   await appWindow.show();
@@ -61,7 +68,7 @@ onMounted(async () => {
     annoBanner.value = await saveImgLocal(annoData.value.banner);
     annoTitle.value = `【公告】${annoId}-${annoData.value.title}`;
     await appWindow.setTitle(annoTitle.value);
-    annoRef.value = document.querySelector(".anno-body") as HTMLElement;
+    annoRef.value = <HTMLElement>document.querySelector(".anno-body");
   } catch (error) {
     console.error(error);
     loadingEmpty.value = true;
@@ -69,7 +76,20 @@ onMounted(async () => {
     await appWindow.setTitle(`【公告】${annoId}-公告不存在或解析失败`);
     return;
   }
-  loading.value = false;
+  setTimeout(() => {
+    loading.value = false;
+  }, 200);
+});
+
+watch(loadShare, (value) => {
+  if (value) {
+    loadingTitle.value = "正在生成分享图片";
+    loadingSub.value = `${annoTitle.value}.png`;
+    loading.value = true;
+  } else {
+    loadingSub.value = "";
+    loading.value = false;
+  }
 });
 </script>
-<style lang="css" src="../assets/css/anno-parser.css" scoped />
+<style lang="css" src="../assets/css/anno-parser.css" scoped></style>

@@ -1,5 +1,4 @@
 <template>
-  <ToLoading v-model="loading" title="正在生成分享图片" :subtitle="`${props.title}.png`" />
   <div class="share-box">
     <div class="share-btn" @click="shareContent()">
       <v-icon style="color: var(--theme-switch-icon)"> mdi-share-variant </v-icon>
@@ -7,28 +6,24 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
-import { ref, onMounted } from "vue";
-import ToLoading from "../overlay/to-loading.vue";
 // utils
 import { generateShareImg } from "../../utils/TGShare";
-
-// loading
-const loading = ref<boolean>();
 
 interface TShareBtnProps {
   modelValue: HTMLElement;
   title: string;
+  loading: boolean;
 }
 
+type TShareBtnEmits = (e: "update:loading", value: boolean) => void;
+
 const props = defineProps<TShareBtnProps>();
+const emit = defineEmits<TShareBtnEmits>();
 
-onMounted(() => (loading.value = false));
-
-async function shareContent() {
-  loading.value = true;
+async function shareContent(): Promise<void> {
+  emit("update:loading", true);
   await generateShareImg(props.title, props.modelValue);
-  loading.value = false;
+  emit("update:loading", false);
 }
 </script>
 <style lang="css" scoped>

@@ -1,8 +1,13 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <TSwitchTheme />
-  <TShareBtn v-show="!loadingEmpty" v-model="postRef" :title="shareTitle" />
-  <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
+  <TShareBtn
+    v-show="!loadingEmpty"
+    v-model="postRef"
+    v-model:loading="loadShare"
+    :title="shareTitle"
+  />
+  <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="mys-post-body">
     <div class="mys-post-title">
       {{ postRender.title }}
@@ -16,7 +21,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import ToLoading from "../components/overlay/to-loading.vue";
 import TSwitchTheme from "../components/main/t-switchTheme.vue";
@@ -28,11 +33,13 @@ import Mys from "../plugins/Mys";
 
 // loading
 const loading = ref<boolean>(true);
+const loadShare = ref<boolean>(false);
 const loadingTitle = ref<string>("正在加载");
+const loadingSub = ref<string>();
 const loadingEmpty = ref<boolean>(false);
 
 // share
-const postRef = ref<HTMLElement>({} as HTMLElement);
+const postRef = ref<HTMLElement>(<HTMLElement>{});
 const shareTitle = ref<string>("");
 
 // 数据
@@ -65,7 +72,7 @@ onMounted(async () => {
       updated: new Date(postData.post.updated_at * 1000).toLocaleString().replace(/\//g, "-"),
     };
     shareTitle.value = `【帖子】${postId}-${postData.post.subject}`;
-    postRef.value = document.querySelector(".mys-post-body") as HTMLElement;
+    postRef.value = <HTMLElement>document.querySelector(".mys-post-body");
     await appWindow.setTitle(shareTitle.value);
   } catch (error) {
     console.error(error);
@@ -77,6 +84,17 @@ onMounted(async () => {
   setTimeout(() => {
     loading.value = false;
   }, 200);
+});
+
+watch(loadShare, (value) => {
+  if (value) {
+    loadingTitle.value = "正在生成分享图片";
+    loadingSub.value = `${shareTitle.value}.png`;
+    loading.value = true;
+  } else {
+    loadingSub.value = "";
+    loading.value = false;
+  }
 });
 </script>
 <style lang="css" scoped src="../assets/css/post-parser.css"></style>
