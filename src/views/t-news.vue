@@ -15,9 +15,9 @@
       <v-icon>mdi-view-list</v-icon>
     </v-btn>
     <v-text-field
-      class="news-search"
       v-show="appStore.devMode"
       v-model="search"
+      class="news-search"
       append-icon="mdi-magnify"
       label="搜索"
       single-line
@@ -40,7 +40,7 @@
                 <div class="ncu-icon">
                   <img :src="item.user.icon" alt="userIcon" />
                 </div>
-                <div class="ncu-pendant" v-if="item.user.pendant !== ''">
+                <div v-if="item.user.pendant !== ''" class="ncu-pendant">
                   <img :src="item.user.pendant" alt="userPendant" />
                 </div>
               </div>
@@ -84,7 +84,7 @@
                 <span>{{ item.data.reply }}</span>
               </div>
               <div class="ncd-item">
-                <v-icon>mdi-heart</v-icon>
+                <v-icon>mdi-thumb-up</v-icon>
                 <span>{{ item.data.like }}</span>
               </div>
               <div class="ncd-item">
@@ -128,7 +128,7 @@
                 <div class="ncu-icon">
                   <img :src="item.user.icon" alt="userIcon" />
                 </div>
-                <div class="ncu-pendant" v-if="item.user.pendant !== ''">
+                <div v-if="item.user.pendant !== ''" class="ncu-pendant">
                   <img :src="item.user.pendant" alt="userPendant" />
                 </div>
               </div>
@@ -172,7 +172,7 @@
                 <span>{{ item.data.reply }}</span>
               </div>
               <div class="ncd-item">
-                <v-icon>mdi-heart</v-icon>
+                <v-icon>mdi-thumb-up</v-icon>
                 <span>{{ item.data.like }}</span>
               </div>
               <div class="ncd-item">
@@ -202,7 +202,7 @@
                 <div class="ncu-icon">
                   <img :src="item.user.icon" alt="userIcon" />
                 </div>
-                <div class="ncu-pendant" v-if="item.user.pendant !== ''">
+                <div v-if="item.user.pendant !== ''" class="ncu-pendant">
                   <img :src="item.user.pendant" alt="userPendant" />
                 </div>
               </div>
@@ -246,7 +246,7 @@
                 <span>{{ item.data.reply }}</span>
               </div>
               <div class="ncd-item">
-                <v-icon>mdi-heart</v-icon>
+                <v-icon>mdi-thumb-up</v-icon>
                 <span>{{ item.data.like }}</span>
               </div>
               <div class="ncd-item">
@@ -307,9 +307,9 @@ const search = ref<string>("");
 const tab = ref<string>("");
 const showList = ref<boolean>(false);
 const postData = ref({
-  notice: [] as TGApp.Plugins.Mys.News.RenderCard[],
-  activity: [] as TGApp.Plugins.Mys.News.RenderCard[],
-  news: [] as TGApp.Plugins.Mys.News.RenderCard[],
+  notice: <TGApp.Plugins.Mys.News.RenderCard[]>[],
+  activity: <TGApp.Plugins.Mys.News.RenderCard[]>[],
+  news: <TGApp.Plugins.Mys.News.RenderCard[]>[],
 });
 const rawData = ref({
   notice: {
@@ -341,7 +341,7 @@ onMounted(async () => {
   }, 1500);
 });
 
-async function firstLoad(data: string) {
+async function firstLoad(data: string): Promise<void> {
   if (rawData.value.activity.lastId !== 0 && rawData.value.news.lastId !== 0) {
     return;
   }
@@ -366,7 +366,7 @@ async function firstLoad(data: string) {
   }, 1500);
 }
 
-async function switchAnno() {
+async function switchAnno(): Promise<void> {
   await router.push("/announcements");
 }
 
@@ -403,7 +403,7 @@ async function loadMore(data: "notice" | "activity" | "news"): Promise<void> {
   }, 1500);
 }
 
-async function toPost(item: TGApp.Plugins.Mys.News.RenderCard | string) {
+async function toPost(item: TGApp.Plugins.Mys.News.RenderCard | string): Promise<void> {
   if (typeof item === "string") {
     const path = router.resolve({
       name: "帖子详情",
@@ -424,7 +424,7 @@ async function toPost(item: TGApp.Plugins.Mys.News.RenderCard | string) {
   }
 }
 
-async function toJson(item: TGApp.Plugins.Mys.News.RenderCard | string) {
+async function toJson(item: TGApp.Plugins.Mys.News.RenderCard | string): Promise<void> {
   if (typeof item === "string") {
     const path = router.resolve({
       name: "帖子详情（JSON）",
@@ -445,7 +445,7 @@ async function toJson(item: TGApp.Plugins.Mys.News.RenderCard | string) {
   }
 }
 
-async function searchPost() {
+async function searchPost(): Promise<void> {
   if (search.value === "") {
     snackbarText.value = "请输入搜索内容";
     snackbarColor.value = "error";
