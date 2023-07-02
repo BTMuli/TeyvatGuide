@@ -30,7 +30,7 @@ const props = defineProps<HtaTabUseProps>();
 const tab = ref<string>("9");
 const select = ref<TGApp.Plugins.Hutao.Abyss.AvatarUse>();
 
-function loadData() {
+function loadData(): void {
   select.value = props.modelValue.filter((item) => item.floor.toString() === tab.value)?.[0];
   select.value?.ranks.sort((a, b) => b.rate - a.rate);
 }
@@ -46,21 +46,15 @@ watch(tab, () => {
 </script>
 <style lang="css" scoped>
 .hta-tu-box {
-  display: flex;
   margin: 5px;
   width: calc(100% - 10px);
   height: 100%;
-  align-items: center;
-  justify-content: left;
   border: 1px inset var(--common-bg-1);
   border-radius: 5px;
 }
 
 .hta-tu-tab {
   position: absolute;
-  top: 5px;
-  left: 5px;
-  width: 100px;
   height: 100%;
   color: var(--common-text-title);
   font-family: var(--font-text);
@@ -70,7 +64,6 @@ watch(tab, () => {
   margin-left: 100px;
   width: calc(100% - 100px);
   height: 100%;
-  overflow: auto;
 }
 
 .hta-tu-grid {
