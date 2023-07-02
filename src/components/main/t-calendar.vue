@@ -5,6 +5,12 @@
         <v-icon size="small"> mdi-calendar-clock </v-icon>
         <span>今日素材</span>
         <span>{{ dateNow }}</span>
+        <v-btn variant="outlined" class="calendar-title-btn" @click="share">
+          <template #prepend>
+            <v-icon> mdi-share-variant </v-icon>
+          </template>
+          <span>分享</span>
+        </v-btn>
       </div>
       <div class="calendar-title-right">
         <v-btn
@@ -48,6 +54,8 @@ import ToCalendar from "../overlay/to-calendar.vue";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 // data
 import { AppCalendarData } from "../../data";
+// utils
+import { generateShareImg } from "../../utils/TGShare";
 
 // loading
 const loading = ref<boolean>(true);
@@ -65,7 +73,7 @@ const weaponCards = ref<TGApp.App.Calendar.Item[]>([]);
 
 // calendar item
 const showItem = ref<boolean>(false);
-const selectedItem = ref<TGApp.App.Calendar.Item>({} as TGApp.App.Calendar.Item);
+const selectedItem = ref<TGApp.App.Calendar.Item>(<TGApp.App.Calendar.Item>{});
 const selectedType = ref<"avatar" | "weapon">("avatar");
 
 const btnText = [
@@ -107,13 +115,15 @@ defineExpose({
 
 onMounted(() => {
   const dayNow = new Date().getDay() === 0 ? 7 : new Date().getDay();
-  dateNow.value = new Date()
-    .toLocaleDateString("zh-CN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    })
-    .replace(/\//g, "-");
+  const week = <{ week: number; text: string }>btnText.find((item) => item.week === dayNow);
+  dateNow.value =
+    new Date()
+      .toLocaleDateString("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+      .replace(/\//g, "-") + ` ${week.text}`;
   weekNow.value = dayNow;
   btnNow.value = dayNow;
   calendarNow.value = getCalendar(dayNow);
@@ -145,6 +155,13 @@ function getContents(day: number): void {
   characterCards.value = calendarNow.value.filter((item) => item.itemType === "character");
   weaponCards.value = calendarNow.value.filter((item) => item.itemType === "weapon");
 }
+
+async function share(): Promise<void> {
+  // todo 唤起外部 loading
+  const div = <HTMLElement>document.querySelector(".calendar-box");
+  const title = `【今日素材】${dateNow.value}-${btnNow.value}`;
+  await generateShareImg(title, div);
+}
 </script>
 <style lang="css" scoped>
 .calendar-box {
@@ -170,6 +187,12 @@ function getContents(day: number): void {
   align-items: center;
   justify-content: start;
   column-gap: 10px;
+}
+
+.calendar-title-btn {
+  border-radius: 5px;
+  color: var(--common-text-content);
+  cursor: pointer;
 }
 
 .calendar-title-right {
