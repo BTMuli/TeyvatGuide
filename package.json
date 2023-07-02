@@ -33,7 +33,8 @@
     ],
     "*.css": "stylelint --fix",
     "*.yml": "prettier --write",
-    "*.json": "prettier --write"
+    "*.json": "prettier --write",
+    ".md": "prettier --write"
   },
   "bugs": {
     "url": "https://github.com/BTMuli/Tauri.Genshin/issues"
