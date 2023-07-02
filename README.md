@@ -2,12 +2,12 @@
 Author: 目棃
 Date: 2023-03-05
 Description: 说明文档
-Update: 2023-06-21
+Update: 2023-07-02
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
->
-> 更新于 `2023-06-21 10:28:11`
+> 
+> 更新于 `2023-07-02 20:49:40`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge)
 
@@ -40,17 +40,17 @@ Tauri 练手项目，子模块：[TGAssistant](https://github.com/BTMuli/TGAssis
 - [x] Wiki 页面草创（包含 GCG、角色、武器等）
 - [x] 浅色/深色主题切换
 - [x] 应用更新检测
-- [x] 用户 Cookie 获取、备份、恢复、刷新
-- [x] 原神战绩数据获取、渲染、分享
-- [x] 角色列表数据获取、渲染、分享
-- [x] 深渊挑战数据获取、渲染、分享、备份、恢复
+- [x] 用户 Cookie 获取
+- [x] 原神战绩数据获取
+- [x] 角色列表数据获取
+- [x] 角色天赋数据获取
+- [x] 深渊挑战数据获取
+- [x] 深渊数据上传，统计数据获取
 
 ### 计划中
 
 - [ ] UIGF 祈愿数据导入导出&展示
-- [ ] 深渊数据上传
 - [ ] 实时便笺数据获取
-- [ ] 角色天赋数据获取
 
 ### 长期计划
 
