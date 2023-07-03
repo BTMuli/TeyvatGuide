@@ -9,12 +9,12 @@
     "build": "tauri build",
     "debug": "tauri build --debug",
     "dev": "concurrently -k \"tauri dev --exit-on-panic\" \"vue-devtools\"",
-    "lint": "concurrently \"npm:lint:*(!fix)\"",
-    "lint:fix": "concurrently \"npm:lint:*:fix\"",
+    "lint": "concurrently \"pnpm:lint:*(!fix)\"",
+    "lint:fix": "concurrently \"pnpm:lint:*:fix\"",
     "lint:code": "eslint .",
     "lint:code:fix": "eslint . --fix",
     "lint:style": "stylelint \"src/**/*.{vue,css}\"",
-    "lint:style:fix": "pnpm run lint:style -- --fix",
+    "lint:style:fix": "pnpm lint:style --fix",
     "prettier": "prettier . --write",
     "tauri": "tauri",
     "update:submodule": "git submodule update --remote --recursive",
@@ -23,18 +23,9 @@
     "prepare": "husky install"
   },
   "lint-staged": {
-    "*.ts": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.vue": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.css": "stylelint --fix",
-    "*.yml": "prettier --write",
-    "*.json": "prettier --write",
-    ".md": "prettier --write"
+    "*.{ts,vue}": "eslint --fix",
+    "*.{vue,css}": "stylelint --fix",
+    "*.{ts,vue,css,yml,json,md}": "prettier --write"
   },
   "bugs": {
     "url": "https://github.com/BTMuli/Tauri.Genshin/issues"
