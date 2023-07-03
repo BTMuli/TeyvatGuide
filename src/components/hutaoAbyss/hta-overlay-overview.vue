@@ -48,10 +48,12 @@ const emits = defineEmits<HtaOverlayOverviewEmits>();
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (value) => emits("update:modelValue", value),
+  set: (value) => {
+    emits("update:modelValue", value);
+  },
 });
 
-function onCancel() {
+function onCancel(): void {
   visible.value = false;
   emits("cancel");
 }
@@ -69,31 +71,31 @@ function onCancel() {
 }
 
 .hta-oob-title {
+  border-bottom: 1px solid #393b40;
+  color: #393b40;
   font-family: var(--font-title);
   font-size: 20px;
-  color: #393b40;
-  border-bottom: 1px solid #393b40;
 }
 
 .hta-oob-item {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-gap: 5px;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  grid-gap: 5px;
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .hta-oob-item :nth-child(2n-1) {
-  text-align: left;
-  font-family: var(--font-title);
   color: var(--common-color-blue);
+  font-family: var(--font-title);
   font-size: 16px;
+  text-align: left;
 }
 
 .hta-oob-item :nth-child(2n) {
-  text-align: right;
   color: var(--common-color-white);
-  text-shadow: 0 0 10px rgb(0 0 0/50%);
   font-size: 14px;
+  text-align: right;
+  text-shadow: 0 0 10px rgb(0 0 0/50%);
 }
 </style>

@@ -46,11 +46,11 @@ watch(tab, () => {
 </script>
 <style lang="css" scoped>
 .hta-tu-box {
-  margin: 5px;
   width: calc(100% - 10px);
   height: 100%;
   border: 1px inset var(--common-bg-1);
   border-radius: 5px;
+  margin: 5px;
 }
 
 .hta-tu-tab {
@@ -61,20 +61,20 @@ watch(tab, () => {
 }
 
 .hta-tu-window {
-  margin-left: 100px;
   width: calc(100% - 100px);
   height: 100%;
+  margin-left: 100px;
 }
 
 .hta-tu-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  grid-gap: 5px;
-  padding: 5px;
-  justify-content: center;
-  align-items: center;
+  overflow: auto;
   width: 100%;
   height: 100%;
-  overflow: auto;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  grid-gap: 5px;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
 }
 </style>

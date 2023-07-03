@@ -107,7 +107,7 @@ onMounted(async () => {
   }
 });
 
-function getAvatarName() {
+function getAvatarName(): string {
   return props.modelValue.cid === 10000005
     ? "旅行者-空"
     : props.modelValue.cid === 10000007
@@ -117,8 +117,8 @@ function getAvatarName() {
 
 // 销毁
 onUnmounted(() => {
-  talents.value.map((talent) => {
-    return URL.revokeObjectURL(talent.icon);
+  talents.value.forEach((talent) => {
+    URL.revokeObjectURL(talent.icon);
   });
 });
 </script>
@@ -153,8 +153,8 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 5px;
-  border-radius: 5px;
   border: 1px inset var(--common-bg-1);
+  border-radius: 5px;
   font-family: var(--font-title);
   font-size: 12px;
 }
@@ -237,8 +237,8 @@ onUnmounted(() => {
   justify-content: center;
   padding: 5px;
   border-radius: 50%;
-  background: rgb(0 0 0 /0.4);
-  box-shadow: 0 0 10px rgb(255 255 255/0.4);
+  background: rgb(0 0 0 /40%);
+  box-shadow: 0 0 10px rgb(255 255 255/40%);
 }
 
 .tuc-rbb-talent :nth-child(2) {

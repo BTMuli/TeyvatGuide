@@ -40,11 +40,11 @@ const props = defineProps<HtaTabHoldProps>();
 .hta-th-box {
   width: calc(100% - 10px);
   height: 100%;
+  max-height: calc(100vh - 120px);
+  padding: 10px;
   border: 1px inset var(--common-bg-1);
   border-radius: 5px;
-  max-height: calc(100vh - 120px);
   overflow-y: auto;
-  padding: 10px;
 }
 
 .hta-th-table {
@@ -59,11 +59,11 @@ const props = defineProps<HtaTabHoldProps>();
 }
 
 .hta-th-td {
+  display: flex;
   width: 100%;
   height: 100%;
-  padding: 10px;
-  display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  padding: 10px;
 }
 </style>

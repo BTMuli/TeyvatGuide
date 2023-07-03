@@ -72,11 +72,11 @@ watch(tab, () => {
 </script>
 <style lang="css" scoped>
 .hta-tt-box {
-  margin: 5px;
   width: calc(100% - 10px);
   height: 100%;
   border: 1px inset var(--common-bg-1);
   border-radius: 5px;
+  margin: 5px;
 }
 
 .hta-tt-tab {
@@ -87,67 +87,67 @@ watch(tab, () => {
 }
 
 .hta-tt-window {
-  margin-left: 100px;
+  overflow: auto;
   width: calc(100% - 100px);
   height: 100%;
   max-height: calc(100vh - 130px);
-  overflow: auto;
+  margin-left: 100px;
 }
 
 .hta-tt-flex {
   position: relative;
-  overflow: auto;
   display: flex;
+  overflow: auto;
   align-items: flex-start;
   justify-content: center;
-  column-gap: 10px;
   padding: 10px;
+  column-gap: 10px;
 }
 
 .hta-tuf-box {
+  display: flex;
   width: 100%;
   max-height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  row-gap: 10px;
   border-radius: 5px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  row-gap: 10px;
 }
 
 .hta-tuf-title {
+  width: 100%;
   font-family: var(--font-title);
   font-size: 18px;
   text-align: left;
-  width: 100%;
 }
 
 .hta-tuf-item {
-  width: 100%;
   display: flex;
+  width: 100%;
   height: 100px;
-  padding: 5px;
-  justify-content: flex-start;
-  background: var(--common-bg-1);
-  border-radius: 5px;
-  column-gap: 10px;
   align-items: center;
+  justify-content: flex-start;
+  padding: 5px;
+  border-radius: 5px;
+  background: var(--common-bg-1);
+  column-gap: 10px;
 }
 
 .hta-tuf-item-icons {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
   column-gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .hta-tuf-item-rate {
-  width: calc(100% - 360px);
   display: flex;
+  width: calc(100% - 360px);
+  height: 100%;
   align-items: center;
   justify-content: center;
-  height: 100%;
   font-family: var(--font-title);
 }
 </style>

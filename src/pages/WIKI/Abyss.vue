@@ -60,10 +60,10 @@ const overview = ref<TGApp.Plugins.Hutao.Abyss.OverviewData>(
   <TGApp.Plugins.Hutao.Abyss.OverviewData>{},
 );
 const tab = ref<string>("use");
-const avatarUse = ref<Array<TGApp.Plugins.Hutao.Abyss.AvatarUse>>([]);
-const avatarUp = ref<Array<TGApp.Plugins.Hutao.Abyss.AvatarUp>>([]);
-const teamCombination = ref<Array<TGApp.Plugins.Hutao.Abyss.TeamCombination>>([]);
-const avatarHold = ref<Array<TGApp.Plugins.Hutao.Abyss.AvatarHold>>([]);
+const avatarUse = ref<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>([]);
+const avatarUp = ref<TGApp.Plugins.Hutao.Abyss.AvatarUp[]>([]);
+const teamCombination = ref<TGApp.Plugins.Hutao.Abyss.TeamCombination[]>([]);
+const avatarHold = ref<TGApp.Plugins.Hutao.Abyss.AvatarHold[]>([]);
 
 onMounted(async () => {
   loadingTitle.value = "正在获取深渊数据";
@@ -81,13 +81,13 @@ onMounted(async () => {
   loading.value = false;
 });
 
-function getUpdated() {
+function getUpdated(): string {
   return new Date(overview.value.timestamp)
     .toLocaleString("zh-CN", { hour12: false })
     .replace(/\//g, "-");
 }
 
-function getShareTitle() {
+function getShareTitle(): string {
   switch (tab.value) {
     case "use":
       return `【胡桃】${overview.value.scheduleId}-角色使用`;
@@ -101,7 +101,7 @@ function getShareTitle() {
   return `【胡桃】${overview.value.scheduleId}-深渊数据`;
 }
 
-async function shareWiki() {
+async function shareWiki(): Promise<void> {
   const div = <HTMLDivElement>document.querySelector(".hta-tab-item");
   const title = getShareTitle();
   loadingTitle.value = "正在生成分享图";
@@ -114,11 +114,11 @@ async function shareWiki() {
 </script>
 <style lang="css" scoped>
 .hta-box {
+  overflow: auto;
   width: 100%;
   max-height: calc(100vh - 30px);
-  padding: 10px;
-  overflow: auto;
   box-sizing: border-box;
+  padding: 10px;
   border-radius: 5px;
   box-shadow: 0 0 10px var(--common-shadow-4);
 }
@@ -126,24 +126,24 @@ async function shareWiki() {
 .hta-top {
   display: flex;
   width: 100%;
-  justify-content: flex-start;
   align-items: center;
-  column-gap: 10px;
+  justify-content: flex-start;
   color: var(--common-text-title);
+  column-gap: 10px;
   font-family: var(--font-title);
 }
 
 .hta-tab {
-  margin-bottom: 10px;
   height: 50px;
+  margin-bottom: 10px;
 }
 
 .hta-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 20px;
   column-gap: 10px;
+  font-size: 20px;
 }
 
 .hta-title :nth-child(2) {
