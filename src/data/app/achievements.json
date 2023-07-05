@@ -7704,6 +7704,33 @@
     "version": "3.7"
   },
   {
+    "id": 84149,
+    "series": 17,
+    "order": 7700,
+    "name": "寻欢作乐",
+    "description": "完成「鬼话与甜酒」，解锁全部结局。",
+    "reward": 20,
+    "version": "3.8"
+  },
+  {
+    "id": 84150,
+    "series": 17,
+    "order": 7710,
+    "name": "幸运硬币",
+    "description": "参与凯亚设下的赌局。",
+    "reward": 5,
+    "version": "3.8"
+  },
+  {
+    "id": 84151,
+    "series": 17,
+    "order": 7711,
+    "name": "嘘…听！",
+    "description": "倾听禁闭室里传来的言语声。",
+    "reward": 5,
+    "version": "3.8"
+  },
+  {
     "id": 84501,
     "series": 10,
     "order": 4026,
