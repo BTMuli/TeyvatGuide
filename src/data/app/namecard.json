@@ -1287,6 +1287,15 @@
     "profile": "/source/nameCard/profile/纪行·意巧.webp"
   },
   {
+    "name": "纪行·溢彩",
+    "type": 3,
+    "desc": "名片纹饰。在透明玻璃的另一面才得以存在的幻梦之光，说不定也能稍稍照亮这面的世界。",
+    "source": "纪行系统奖励获取。",
+    "icon": "/source/nameCard/icon/纪行·溢彩.webp",
+    "bg": "/source/nameCard/bg/纪行·溢彩.webp",
+    "profile": "/source/nameCard/profile/纪行·溢彩.webp"
+  },
+  {
     "name": "纪行·蛰醒",
     "type": 3,
     "desc": "名片纹饰。三界震动，天地醒转。珊瑚王虫也从永眠中恢复了过来。",
