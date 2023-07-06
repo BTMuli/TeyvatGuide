@@ -9,7 +9,7 @@
     <v-window v-model="tab" class="hta-tu-window">
       <v-window-item :value="tab">
         <div v-if="select" class="hta-tu-grid">
-          <TibWikiAbyss v-for="item in select.ranks" :key="item.item" :model-value="item" />
+          <TibWikiAbyss v-for="item in select.Ranks" :key="item.Item" :model-value="item" />
         </div>
       </v-window-item>
     </v-window>
@@ -31,8 +31,8 @@ const tab = ref<string>("9");
 const select = ref<TGApp.Plugins.Hutao.Abyss.AvatarUse>();
 
 function loadData(): void {
-  select.value = props.modelValue.filter((item) => item.floor.toString() === tab.value)?.[0];
-  select.value?.ranks.sort((a, b) => b.rate - a.rate);
+  select.value = props.modelValue.filter((item) => item.Floor.toString() === tab.value)?.[0];
+  select.value?.Ranks.sort((a, b) => b.Rate - a.Rate);
 }
 
 onMounted(async () => {

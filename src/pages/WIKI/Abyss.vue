@@ -82,7 +82,7 @@ onMounted(async () => {
 });
 
 function getUpdated(): string {
-  return new Date(overview.value.timestamp)
+  return new Date(overview.value.Timestamp)
     .toLocaleString("zh-CN", { hour12: false })
     .replace(/\//g, "-");
 }
@@ -90,15 +90,15 @@ function getUpdated(): string {
 function getShareTitle(): string {
   switch (tab.value) {
     case "use":
-      return `【胡桃】${overview.value.scheduleId}-角色使用`;
+      return `【胡桃】${overview.value.ScheduleId}-角色使用`;
     case "up":
-      return `【胡桃】${overview.value.scheduleId}-角色出场`;
+      return `【胡桃】${overview.value.ScheduleId}-角色出场`;
     case "team":
-      return `【胡桃】${overview.value.scheduleId}-队伍出场`;
+      return `【胡桃】${overview.value.ScheduleId}-队伍出场`;
     case "hold":
-      return `【胡桃】${overview.value.scheduleId}-角色持有`;
+      return `【胡桃】${overview.value.ScheduleId}-角色持有`;
   }
-  return `【胡桃】${overview.value.scheduleId}-深渊数据`;
+  return `【胡桃】${overview.value.ScheduleId}-深渊数据`;
 }
 
 async function shareWiki(): Promise<void> {

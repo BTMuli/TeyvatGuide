@@ -11,28 +11,28 @@
         <div v-if="select" class="hta-tt-flex">
           <div class="hta-tuf-box">
             <div class="hta-tuf-title">上半</div>
-            <div v-for="items in select.up" :key="items.rate" class="hta-tuf-item">
+            <div v-for="items in select.Up" :key="items.Rate" class="hta-tuf-item">
               <div class="hta-tuf-item-icons">
                 <TibWikiAbyss2
-                  v-for="item in items.item.split(',')"
+                  v-for="item in items.Item.split(',')"
                   :key="item"
                   :model-value="item"
                 />
               </div>
-              <div class="hta-tuf-item-rate">上场{{ items.rate }}次</div>
+              <div class="hta-tuf-item-rate">上场{{ items.Rate }}次</div>
             </div>
           </div>
           <div class="hta-tuf-box">
             <div class="hta-tuf-title">下半</div>
-            <div v-for="items in select.down" :key="items.rate" class="hta-tuf-item">
+            <div v-for="items in select.Down" :key="items.Rate" class="hta-tuf-item">
               <div class="hta-tuf-item-icons">
                 <TibWikiAbyss2
-                  v-for="item in items.item.split(',')"
+                  v-for="item in items.Item.split(',')"
                   :key="item"
                   :model-value="item"
                 />
               </div>
-              <div class="hta-tuf-item-rate">上场{{ items.rate }}次</div>
+              <div class="hta-tuf-item-rate">上场{{ items.Rate }}次</div>
             </div>
           </div>
         </div>
@@ -56,9 +56,9 @@ const tab = ref<string>("9");
 const select = ref<TGApp.Plugins.Hutao.Abyss.TeamCombination>();
 
 function loadData(): void {
-  select.value = props.modelValue.filter((item) => item.floor.toString() === tab.value)?.[0];
-  select.value?.up.sort((a, b) => b.rate - a.rate);
-  select.value?.down.sort((a, b) => b.rate - a.rate);
+  select.value = props.modelValue.filter((item) => item.Floor.toString() === tab.value)?.[0];
+  select.value?.Up.sort((a, b) => b.Rate - a.Rate);
+  select.value?.Down.sort((a, b) => b.Rate - a.Rate);
 }
 
 onMounted(async () => {

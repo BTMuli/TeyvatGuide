@@ -4,25 +4,25 @@
       <div class="hta-oob-title">数据收集统计</div>
       <div class="hta-oob-item">
         <span>当期深渊ID</span>
-        <span>{{ props.data.scheduleId }}</span>
+        <span>{{ props.data.ScheduleId }}</span>
         <span>上传记录总数</span>
-        <span>{{ props.data.recordTotal }}</span>
+        <span>{{ props.data.RecordTotal }}</span>
       </div>
       <div class="hta-oob-title">深渊数据统计</div>
       <div class="hta-oob-item">
         <span>总计深渊记录</span>
-        <span>{{ props.data.spiralAbyssTotal }}</span>
+        <span>{{ props.data.SpiralAbyssTotal }}</span>
         <span>通关深渊记录</span>
-        <span>{{ props.data.spiralAbyssPassed }}</span>
+        <span>{{ props.data.SpiralAbyssPassed }}</span>
         <span>满星深渊记录</span>
-        <span>{{ props.data.spiralAbyssFullStar }}</span>
+        <span>{{ props.data.SpiralAbyssFullStar }}</span>
         <span>平均获取渊星</span>
         <span>{{
-          (props.data.spiralAbyssStarTotal / props.data.spiralAbyssTotal).toFixed(2)
+          (props.data.SpiralAbyssStarTotal / props.data.SpiralAbyssTotal).toFixed(2)
         }}</span>
         <span>平均战斗次数</span>
         <span>{{
-          (props.data.spiralAbyssBattleTotal / props.data.spiralAbyssTotal).toFixed(2)
+          (props.data.SpiralAbyssBattleTotal / props.data.SpiralAbyssTotal).toFixed(2)
         }}</span>
       </div>
     </div>

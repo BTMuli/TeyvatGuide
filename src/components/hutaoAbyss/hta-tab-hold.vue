@@ -14,13 +14,13 @@
         <th>6命</th>
       </tr>
       <!-- 表格 -->
-      <tr v-for="item in props.modelValue" :key="item.holdingRate" class="hta-th-tr">
+      <tr v-for="item in props.modelValue" :key="item.HoldingRate" class="hta-th-tr">
         <td class="hta-th-td">
-          <TibWikiAbyss2 v-model="item.avatarId" />
+          <TibWikiAbyss2 v-model="item.AvatarId" />
         </td>
-        <td>{{ (item.holdingRate * 100).toFixed(3) }}%</td>
-        <td v-for="rate in item.constellations" :key="rate.item">
-          {{ (rate.rate * 100).toFixed(3) }}%
+        <td>{{ (item.HoldingRate * 100).toFixed(3) }}%</td>
+        <td v-for="rate in item.Constellations" :key="rate.Item">
+          {{ (rate.Rate * 100).toFixed(3) }}%
         </td>
       </tr>
     </table>

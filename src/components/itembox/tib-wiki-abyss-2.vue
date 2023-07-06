@@ -16,7 +16,7 @@ const props = defineProps<TibWikiAbyssProps>();
 const defaultAvatar = <TGApp.Sqlite.Character.AppData>{
   birthday: "",
   element: "",
-  id: props.modelValue,
+  id: Number(props.modelValue),
   name: "旅行者",
   nameCard: "",
   star: 5,

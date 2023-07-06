@@ -15,11 +15,11 @@ export function transLocal(
   data: TGApp.Sqlite.Abyss.SingleTable,
 ): TGApp.Plugins.Hutao.Abyss.RecordUpload {
   return {
-    uid: data.uid,
-    identity: "Tauri.Genshin",
-    spiralAbyss: transAbyss(data),
-    avatars: [],
-    reservedUserName: "",
+    Uid: data.uid,
+    Identity: "Tauri.Genshin",
+    SpiralAbyss: transAbyss(data),
+    Avatars: [],
+    ReservedUserName: "",
   };
 }
 
@@ -33,18 +33,18 @@ function transAbyss(data: TGApp.Sqlite.Abyss.SingleTable): TGApp.Plugins.Hutao.A
   const damage: TGApp.Sqlite.Abyss.Character = JSON.parse(data.damageRank)[0];
   const takeDamage: TGApp.Sqlite.Abyss.Character = JSON.parse(data.takeDamageRank)[0];
   return {
-    scheduleId: data.id,
-    totalBattleTimes: data.totalBattleTimes,
-    totalWinTimes: data.totalWinTimes,
-    damage: {
-      avatarId: damage.id,
-      value: damage.value,
+    ScheduleId: data.id,
+    TotalBattleTimes: data.totalBattleTimes,
+    TotalWinTimes: data.totalWinTimes,
+    Damage: {
+      AvatarId: damage.id,
+      Value: damage.value,
     },
-    takeDamage: {
-      avatarId: takeDamage.id,
-      value: takeDamage.value,
+    TakeDamage: {
+      AvatarId: takeDamage.id,
+      Value: takeDamage.value,
     },
-    floors: JSON.parse(data.floors).map((floor: TGApp.Sqlite.Abyss.Floor) => transFloor(floor)),
+    Floors: JSON.parse(data.floors).map((floor: TGApp.Sqlite.Abyss.Floor) => transFloor(floor)),
   };
 }
 
@@ -56,9 +56,9 @@ function transAbyss(data: TGApp.Sqlite.Abyss.SingleTable): TGApp.Plugins.Hutao.A
  */
 function transFloor(data: TGApp.Sqlite.Abyss.Floor): TGApp.Plugins.Hutao.Abyss.Floor {
   return {
-    index: data.id,
-    star: data.winStar,
-    levels: data.levels.map((level) => transLevel(level)),
+    Index: data.id,
+    Star: data.winStar,
+    Levels: data.levels.map((level) => transLevel(level)),
   };
 }
 
@@ -69,19 +69,19 @@ function transFloor(data: TGApp.Sqlite.Abyss.Floor): TGApp.Plugins.Hutao.Abyss.F
  * @returns {TGApp.Plugins.Hutao.Abyss.Level} 上传用的数据
  */
 function transLevel(data: TGApp.Sqlite.Abyss.Level): TGApp.Plugins.Hutao.Abyss.Level {
-  const battles: Array<{ index: number; avatars: number[] }> = [];
+  const battles: Array<{ Index: number; Avatars: number[] }> = [];
   battles.push({
-    index: 1,
-    avatars: data.upBattle.characters.map((character) => character.id),
+    Index: 1,
+    Avatars: data.upBattle.characters.map((character) => character.id),
   });
   battles.push({
-    index: 2,
-    avatars: data.downBattle.characters.map((character) => character.id),
+    Index: 2,
+    Avatars: data.downBattle.characters.map((character) => character.id),
   });
   return {
-    index: data.id,
-    star: data.winStar,
-    battles,
+    Index: data.id,
+    Star: data.winStar,
+    Battles: battles,
   };
 }
 
@@ -104,10 +104,10 @@ export function transAvatars(
       relics = relicSet.map((relic) => relic.set.id);
     }
     return {
-      avatarId: avatar.cid,
-      weaponId: weapon.id,
-      reliquarySetIds: relics,
-      activedConstellationNumber: avatar.activeConstellation,
+      AvatarId: avatar.cid,
+      WeaponId: weapon.id,
+      ReliquarySetIds: relics,
+      ActivedConstellationNumber: avatar.activeConstellation,
     };
   });
 }
