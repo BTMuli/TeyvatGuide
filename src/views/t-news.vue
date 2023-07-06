@@ -545,7 +545,7 @@ async function searchPost(): Promise<void> {
 
 .news-card-user {
   display: flex;
-  max-width: 200px;
+  max-width: 235px;
   height: 50px;
   align-items: center;
   color: var(--common-text-content);
