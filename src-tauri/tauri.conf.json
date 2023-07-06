@@ -57,7 +57,10 @@
     "updater": {
       "active": true,
       "dialog": true,
-      "endpoints": ["https://raw.fastgit.org/BTMuli/Tauri.Genshin/master/latest.json"],
+      "endpoints": [
+        "https://raw.fastgit.org/BTMuli/Tauri.Genshin/master/latest.json",
+        "https://raw.kgithub.com/BTMuli/Tauri.Genshin/master/latest.json"
+      ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg2MkVGRjMxQzJDQzFBNTkKUldSWkdzekNNZjh1aHJGRXBEOGtwbUxLaU1wdWNVeUJaeGhoV2ZlZ3VlYmQ0b2tYZWQwODdnTHkK"
     },
     "windows": [
