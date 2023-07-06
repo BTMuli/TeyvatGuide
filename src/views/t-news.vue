@@ -4,6 +4,16 @@
     <v-tab value="notice"> 公告 </v-tab>
     <v-tab value="activity" @click="firstLoad('activity')"> 活动 </v-tab>
     <v-tab v-if="showNews" value="news" @click="firstLoad('news')"> 咨讯 </v-tab>
+    <v-text-field
+      v-model="search"
+      class="news-search"
+      append-icon="mdi-magnify"
+      label="请输入米游社帖子 ID"
+      single-line
+      hide-details
+      @click:append="searchPost"
+      @keyup.enter="searchPost"
+    />
     <v-spacer />
     <v-btn class="news-switch-btn" @click="switchAnno">
       <template #prepend>
@@ -14,17 +24,6 @@
     <v-btn class="news-switch-btn" @click="showList = true">
       <v-icon>mdi-view-list</v-icon>
     </v-btn>
-    <v-text-field
-      v-show="appStore.devMode"
-      v-model="search"
-      class="news-search"
-      append-icon="mdi-magnify"
-      label="搜索"
-      single-line
-      hide-details
-      @click:append="searchPost"
-      @keyup.enter="searchPost"
-    />
   </v-tabs>
   <v-window v-model="tab">
     <v-window-item value="notice">
@@ -454,7 +453,9 @@ async function searchPost(): Promise<void> {
   }
   if (!isNaN(Number(search.value))) {
     await toPost(search.value);
-    await toJson(search.value);
+    if (appStore.devMode) {
+      await toJson(search.value);
+    }
   } else {
     snackbarText.value = "请输入搜索内容";
     snackbarColor.value = "error";
