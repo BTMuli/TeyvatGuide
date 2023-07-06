@@ -64,6 +64,9 @@
       <span>暂无数据，请尝试刷新</span>
     </div>
   </div>
+  <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="1500">
+    {{ snackbarText }}
+  </v-snackbar>
 </template>
 <script lang="ts" setup>
 // vue
@@ -86,6 +89,10 @@ const userStore = useUserStore();
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>();
 const loadingSub = ref<string>();
+// snackbar
+const snackbar = ref<boolean>(false);
+const snackbarColor = ref<string>("success");
+const snackbarText = ref<string>();
 
 // data
 const userTab = ref<number>(0);
@@ -102,7 +109,7 @@ onMounted(async () => {
   loading.value = false;
 });
 
-async function initAbyssData() {
+async function initAbyssData(): Promise<void> {
   localAbyss.value = await TGSqlite.getAbyss(user.value.gameUid);
   localAbyss.value.forEach((item) => {
     localAbyssID.value.push(item.id);
@@ -141,7 +148,14 @@ async function getAbyssData(): Promise<void> {
 }
 
 function toAbyss(id: number): void {
-  curAbyss.value = localAbyss.value.find((item) => item.id === id)!;
+  const abyssFind = localAbyss.value.find((item) => item.id === id);
+  if (abyssFind) {
+    curAbyss.value = abyssFind;
+  } else {
+    snackbarColor.value = "error";
+    snackbarText.value = "未找到该深渊数据";
+    snackbar.value = true;
+  }
 }
 
 function getAbyssRef(el: HTMLElement): void {
@@ -173,8 +187,17 @@ async function uploadAbyss(): Promise<void> {
   transAbyss.avatars = Hutao.Abyss.utils.transAvatars(roles);
   loadingTitle.value = "正在上传深渊数据";
   const res = await Hutao.Abyss.postData(transAbyss);
-  console.log(res);
+  if (res.retcode === 0) {
+    snackbarColor.value = "success";
+    snackbarText.value = res.message;
+  } else {
+    snackbarColor.value = "error";
+    snackbarText.value = res.message;
+  }
   loading.value = false;
+  setTimeout(() => {
+    snackbar.value = true;
+  }, 200);
 }
 </script>
 <style lang="css" scoped>
