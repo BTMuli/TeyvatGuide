@@ -59,7 +59,7 @@ const loadingSub = ref<string>();
 
 // data
 const isEmpty = ref(true);
-const roleList = ref<Array<TGApp.Sqlite.Character.UserRole>>([]);
+const roleList = ref<TGApp.Sqlite.Character.UserRole[]>([]);
 const roleCookie = computed(() => userStore.getCookieGroup4());
 const user = computed(() => userStore.getCurAccount());
 
@@ -82,13 +82,13 @@ onMounted(async () => {
   loading.value = false;
 });
 
-function getGridGap() {
+function getGridGap(): void {
   const width = <number>document.querySelector(".uc-grid")?.clientWidth - 20;
   const count = Math.floor(width / 180);
   gridGap.value = `${(width - count * 180) / (count - 1)}px`;
 }
 
-async function loadRole() {
+async function loadRole(): Promise<void> {
   const roleData = await TGSqlite.getUserCharacter(user.value.gameUid);
   if (roleData !== false) {
     roleList.value = roleData;
@@ -96,7 +96,7 @@ async function loadRole() {
   }
 }
 
-async function refreshRoles() {
+async function refreshRoles(): Promise<void> {
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
   const res = await TGRequest.User.byLToken.getRoleList(roleCookie.value, user.value);
@@ -109,40 +109,44 @@ async function refreshRoles() {
   loading.value = false;
 }
 
-async function refreshTalent() {
+async function refreshTalent(): Promise<void> {
   loadingTitle.value = "正在获取天赋数据";
   loading.value = true;
   const talentCookie = userStore.getCookieGroup2();
-  await Promise.allSettled(
-    roleList.value.map(async (role) => {
-      const res = await TGRequest.User.calculate.getSyncAvatarDetail(
-        talentCookie,
-        user.value.gameUid,
-        role.cid,
-      );
-      if ("skill_list" in res) {
-        const talent: TGApp.Sqlite.Character.RoleTalent[] = [];
-        const avatar = <TGApp.Game.Calculate.AvatarDetail>res;
-        avatar.skill_list.map((skill, index) => {
-          return talent.push({
-            id: skill.id,
-            pos: index,
-            level: skill.level_current,
-            max: skill.max_level,
-            name: skill.name,
-            icon: skill.icon,
-          });
+  for (const role of roleList.value) {
+    loadingTitle.value = `正在获取${role.name}的天赋数据`;
+    loadingSub.value = `CID：${role.cid}`;
+    const res = await TGRequest.User.calculate.getSyncAvatarDetail(
+      talentCookie,
+      user.value.gameUid,
+      role.cid,
+    );
+    if ("skill_list" in res) {
+      const talent: TGApp.Sqlite.Character.RoleTalent[] = [];
+      res.skill_list.map((skill, index) => {
+        return talent.push({
+          id: skill.id,
+          pos: index,
+          level: skill.level_current,
+          max: skill.max_level,
+          name: skill.name,
+          icon: skill.icon,
         });
-        return await TGSqlite.saveUserCharacterTalent(user.value.gameUid, role.cid, talent);
-      }
-    }),
-  );
+      });
+      await TGSqlite.saveUserCharacterTalent(user.value.gameUid, role.cid, talent);
+    } else {
+      loadingTitle.value = `获取${role.name}的天赋数据失败`;
+      loadingSub.value = `[${res.retcode}] ${res.message}`;
+      setTimeout(() => {}, 1000);
+    }
+  }
   loadingTitle.value = "正在更新天赋数据";
+  loadingSub.value = "";
   await loadRole();
   loading.value = false;
 }
 
-async function shareRoles() {
+async function shareRoles(): Promise<void> {
   const rolesBox = <HTMLElement>document.querySelector(".uc-box");
   const fileName = `【角色列表】-${user.value.gameUid}`;
   loadingTitle.value = "正在生成图片";
@@ -153,7 +157,7 @@ async function shareRoles() {
   loading.value = false;
 }
 
-function getUpdateTime() {
+function getUpdateTime(): string {
   let lastUpdateTime = 0;
   roleList.value.forEach((role) => {
     const updateTime = new Date(role.updated).getTime();
@@ -164,7 +168,7 @@ function getUpdateTime() {
   return new Date(lastUpdateTime).toLocaleString().replace(/\//g, "-");
 }
 
-function selectRole(role: TGApp.Sqlite.Character.UserRole) {
+function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
   dataVal.value = role;
   visible.value = true;
 }
