@@ -91,6 +91,13 @@
     "icon": "/WIKI/GCG/normal/神里绫人.webp"
   },
   {
+    "id": 1207,
+    "contentId": 6804,
+    "name": "坎蒂丝",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/坎蒂丝.webp"
+  },
+  {
     "id": 1301,
     "contentId": 5369,
     "name": "迪卢克",
@@ -138,6 +145,13 @@
     "name": "胡桃",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/胡桃.webp"
+  },
+  {
+    "id": 1308,
+    "contentId": 6805,
+    "name": "烟绯",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/烟绯.webp"
   },
   {
     "id": 1401,
@@ -222,6 +236,13 @@
     "name": "魈",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/魈.webp"
+  },
+  {
+    "id": 1505,
+    "contentId": 6806,
+    "name": "枫原万叶",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/枫原万叶.webp"
   },
   {
     "id": 1601,
@@ -679,6 +700,13 @@
     "icon": "/WIKI/GCG/normal/镜华风姿.webp"
   },
   {
+    "id": 212071,
+    "contentId": 500021,
+    "name": "衍溢的汐潮",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/衍溢的汐潮.webp"
+  },
+  {
     "id": 213011,
     "contentId": 5445,
     "name": "流火焦灼",
@@ -726,6 +754,13 @@
     "name": "血之灶火",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/血之灶火.webp"
+  },
+  {
+    "id": 213081,
+    "contentId": 500019,
+    "name": "最终解释权",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/最终解释权.webp"
   },
   {
     "id": 214011,
@@ -810,6 +845,13 @@
     "name": "降魔·护法夜叉",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/降魔·护法夜叉.webp"
+  },
+  {
+    "id": 215051,
+    "contentId": 500020,
+    "name": "风物之诗咏",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/风物之诗咏.webp"
   },
   {
     "id": 216011,
@@ -950,6 +992,13 @@
     "name": "千夜浮梦",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/千夜浮梦.webp"
+  },
+  {
+    "id": 311105,
+    "contentId": 500022,
+    "name": "盈满之实",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/盈满之实.webp"
   },
   {
     "id": 311201,
@@ -1491,6 +1540,13 @@
     "icon": "/WIKI/GCG/normal/拉娜.webp"
   },
   {
+    "id": 322018,
+    "contentId": 500023,
+    "name": "老章",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/老章.webp"
+  },
+  {
     "id": 323001,
     "contentId": 5446,
     "name": "参量质变仪",
@@ -1517,6 +1573,20 @@
     "name": "寻宝仙灵",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/寻宝仙灵.webp"
+  },
+  {
+    "id": 330001,
+    "contentId": 500025,
+    "name": "旧时庭园",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/旧时庭园.webp"
+  },
+  {
+    "id": 330002,
+    "contentId": 500024,
+    "name": "磐岩盟契",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/磐岩盟契.webp"
   },
   {
     "id": 331101,
@@ -1783,6 +1853,13 @@
     "name": "永远的友谊",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/永远的友谊.webp"
+  },
+  {
+    "id": 332021,
+    "contentId": 500026,
+    "name": "大梦的曲调",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/大梦的曲调.webp"
   },
   {
     "id": 333001,
