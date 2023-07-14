@@ -17,7 +17,6 @@
     "lint:style:fix": "pnpm lint:style --fix",
     "prettier": "prettier . --write",
     "tauri": "tauri",
-    "update:submodule": "git submodule update --remote --recursive",
     "vite:dev": "vite dev",
     "vite:build": "vite build",
     "prepare": "husky install"
