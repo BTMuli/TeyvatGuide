@@ -2,12 +2,12 @@
 Author: 目棃
 Date: 2023-03-05
 Description: 说明文档
-Update: 2023-07-02
+Update: 2023-07-14
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
-> 
-> 更新于 `2023-07-02 20:49:40`
+>
+> 更新于 `2023-07-14 20:28:32`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge)
 
@@ -55,7 +55,7 @@ Tauri 练手项目，子模块：[TGAssistant](https://github.com/BTMuli/TGAssis
 ### 长期计划
 
 - [ ] Wiki 详情页
-- [ ] 游戏资源更新
+- [ ] 游戏资源更新：更新至 3.8 版本（0.2.1）
 
 ## 仓库概况
 

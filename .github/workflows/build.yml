@@ -20,6 +20,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+      - name: setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.5
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Restore Cargo dependencies
@@ -34,7 +38,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
       - name: Install frontend dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
       - uses: tauri-apps/tauri-action@dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

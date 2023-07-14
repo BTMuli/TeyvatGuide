@@ -2,14 +2,40 @@
 Author: 目棃
 Date: 2023-06-18
 Description: CHANGELOG
-Update: 2023-06-20
+Update: 2023-07-14
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-06-18 15:03:42 `
 >
-> 更新于 `2023-06-20 08:53:56`
+> 更新于 `2023-07-14 20:46:11`
 
 # CHANGELOG
+
+## [0.2.1](https://github.com/BTMuli/Tauri.Genshin/releases/0.2.1) (2023-07-14)
+
+### Feat
+
+- 深渊: 新增深渊数据库页面，角色深渊数据支持数据上传 [`#22`](https://github.com/BTMuli/Tauri.Genshin/issues/22)
+- 页面：角色详情新增角色衣装数据 [`26186f44`](https://github.com/BTMuli/Tauri.Genshin/commit/26186f44)
+- 页面：角色详情新增角色天赋数据
+- 功能：子页面：米游社帖子、游戏公告支持分享；首页素材日历支持分享
+- 资源：更新 3.8 版本资源 [`#30`](https://github.com/BTMuli/Tauri.Genshin/issues/30)
+- 功能：支持根据帖子 ID 跳转到帖子页面 [`04e08090`](https://github.com/BTMuli/Tauri.Genshin/commit/04e08090)
+
+### Fix
+
+- 样式：美化部分页面、组件样式
+- 组件：优化素材日历组件 [`0c923060`](https://github.com/BTMuli/Tauri.Genshin/commit/0c923060)
+- 样式：修复首页组件近期活动样式 [`20a2329e`](https://github.com/BTMuli/Tauri.Genshin/commit/20a2329e)
+- 样式：美化米游社咨讯页面样式，增加部分数据
+
+### Change
+
+- 依赖：各依赖更新至最新版本
+- 配置：优化 Eslint Prettier Stylelint Lint-Staged 等配置
+- 重构：重构 Mys 插件数据类型及 Hutao 插件数据类型
+
+Full Commits: [`0.2.0...0.2.1`](https://github.com/BTMuli/Tauri.Genshin/compare/0.2.0...0.2.1)
 
 ## [0.2.0](https://github.com/BTMuli/Tauri.Genshin/releases/0.2.0) (2023-06-19)
 
@@ -36,4 +62,4 @@ Update: 2023-06-20
 - 资源：成就系列图标目录变更
 - 资源：字体文件变更 [`2ee48566`](https://github.com/BTMuli/Tauri.Genshin/commit/2ee48566)
 
-FullCommits: [`v0.1.6...v0.2.0`](https://github.com/BTMuli/Tauri.Genshin/compare/v0.1.6...v0.2.0)
+Full Commits: [`v0.1.6...v0.2.0`](https://github.com/BTMuli/Tauri.Genshin/compare/v0.1.6...v0.2.0)
