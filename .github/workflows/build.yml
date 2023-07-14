@@ -23,7 +23,7 @@ jobs:
       - name: setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 8.6.5
+          version: 8.6.7
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Restore Cargo dependencies
