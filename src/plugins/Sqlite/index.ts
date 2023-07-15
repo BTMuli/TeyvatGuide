@@ -2,7 +2,7 @@
  * @file plugins Sqlite index.ts
  * @description Sqlite 数据库操作类
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Alpha v0.2.2
  */
 
 // tauri
@@ -245,12 +245,12 @@ class Sqlite {
 
   /**
    * @description 获取最新成就版本
-   * @since Alpha v0.2.0
+   * @since Alpha v0.2.2
    * @returns {Promise<string>}
    */
   public async getLatestAchievementVersion(): Promise<string> {
     const db = await Database.load(this.dbPath);
-    const sql = "SELECT version FROM AchievementSeries ORDER BY version DESC LIMIT 1;";
+    const sql = "SELECT version FROM Achievements ORDER BY version DESC LIMIT 1;";
     const res: Array<{ version: string }> = await db.select(sql);
     await db.close();
     return res[0].version;
