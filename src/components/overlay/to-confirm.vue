@@ -37,10 +37,8 @@
 
 <script lang="ts" setup>
 // vue
-import { computed, inject } from "vue";
+import { computed } from "vue";
 import TOverlay from "../main/t-overlay.vue";
-
-const test = inject("hide");
 
 interface TOConfirmProps {
   title: string;
@@ -72,26 +70,30 @@ const props = withDefaults(defineProps<TOConfirmProps>(), {
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
+  set: (v) => {
+    emits("update:modelValue", v);
+  },
 });
 
 const inputVal = computed({
   get: () => props.modelInput,
-  set: (v) => emits("update:modelInput", v),
+  set: (v) => {
+    emits("update:modelInput", v);
+  },
 });
 
-const onCancel = () => {
+function onCancel(): void {
   visible.value = false;
   emits("cancel");
-};
+}
 
-const onConfirm = () => {
+function onConfirm(): void {
   visible.value = false;
   emits("confirm");
   if (props.isInput) {
     inputVal.value = "";
   }
-};
+}
 </script>
 
 <style scoped>
