@@ -65,7 +65,7 @@ onMounted(async () => {
     annoData.value = await TGRequest.Anno.getContent(annoId);
     loadingTitle.value = "正在渲染数据...";
     annoHtml.value = await TGUtils.Anno.parseContent(annoData.value.content);
-    annoBanner.value = await saveImgLocal(annoData.value.banner);
+    if (annoData.value.banner !== "") annoBanner.value = await saveImgLocal(annoData.value.banner);
     annoTitle.value = `【公告】${annoId}-${annoData.value.title}`;
     await appWindow.setTitle(annoTitle.value);
     annoRef.value = <HTMLElement>document.querySelector(".anno-body");
