@@ -1,8 +1,8 @@
 <template>
-  <TOLoading v-model="loading" :title="loadingTitle" />
+  <ToLoading v-model="loading" :title="loadingTitle" />
   <v-list class="config-list">
-    <v-list-subheader inset class="config-header"> 应用信息 </v-list-subheader>
-    <v-divider inset class="border-opacity-75" />
+    <v-list-subheader :inset="true" class="config-header"> 应用信息 </v-list-subheader>
+    <v-divider :inset="true" class="border-opacity-75" />
     <v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
       <template #prepend>
         <img class="config-icon" src="/platforms/tauri.webp" alt="Tauri" />
@@ -56,8 +56,8 @@
         </v-btn>
       </template>
     </v-list-item>
-    <v-list-subheader inset class="config-header"> 系统信息 </v-list-subheader>
-    <v-divider inset class="border-opacity-75" />
+    <v-list-subheader :inset="true" class="config-header"> 系统信息 </v-list-subheader>
+    <v-divider :inset="true" class="border-opacity-75" />
     <v-list-item title="系统平台">
       <template #prepend>
         <v-icon>mdi-desktop-classic</v-icon>
@@ -96,8 +96,8 @@
         {{ dbInfo.find((item) => item.key === "appVersion")?.updated }}</v-list-item-subtitle
       >
     </v-list-item>
-    <v-list-subheader inset class="config-header"> 设置 </v-list-subheader>
-    <v-divider inset class="border-opacity-75" />
+    <v-list-subheader :inset="true" class="config-header"> 设置 </v-list-subheader>
+    <v-divider :inset="true" class="border-opacity-75" />
     <v-list-item>
       <template #prepend>
         <v-icon>mdi-view-dashboard</v-icon>
@@ -106,8 +106,8 @@
         v-model="showHome"
         :items="homeStore.getShowItems()"
         label="首页显示组件"
-        multiple
-        chips
+        :multiple="true"
+        :chips="true"
       />
       <template #append>
         <v-btn class="card-btn" @click="submitHome">
@@ -123,8 +123,8 @@
     <v-list-item prepend-icon="mdi-delete" title="清除用户缓存" @click="tryConfirm('delUser')" />
     <v-list-item prepend-icon="mdi-delete" title="清除临时数据" @click="tryConfirm('delTemp')" />
     <v-list-item prepend-icon="mdi-cog" title="恢复默认设置" @click="tryConfirm('delApp')" />
-    <v-list-subheader inset class="config-header"> 调试 </v-list-subheader>
-    <v-divider inset class="border-opacity-75" />
+    <v-list-subheader :inset="true" class="config-header"> 调试 </v-list-subheader>
+    <v-divider :inset="true" class="border-opacity-75" />
     <v-list-item v-if="appStore.devEnv" title="调试模式" subtitle="开启后将显示调试信息">
       <template #prepend>
         <v-icon>mdi-bug</v-icon>
@@ -133,7 +133,7 @@
         <v-switch
           v-model="appStore.devMode"
           :label="appStore.devMode ? '开启' : '关闭'"
-          inset
+          :inset="true"
           color="#FAC51E"
           @click="submitDevMode"
         />
@@ -161,8 +161,8 @@
       prepend-icon="mdi-database-check"
       @click="tryConfirm('checkDB')"
     />
-    <v-list-subheader inset class="config-header"> 路径 </v-list-subheader>
-    <v-divider inset class="border-opacity-75" />
+    <v-list-subheader :inset="true" class="config-header"> 路径 </v-list-subheader>
+    <v-divider :inset="true" class="border-opacity-75" />
     <v-list-item prepend-icon="mdi-database">
       <v-list-item-title>本地数据库路径</v-list-item-title>
       <v-list-item-subtitle>{{ appStore.dataPath.dbDataPath }}</v-list-item-subtitle>
@@ -181,7 +181,7 @@
     {{ snackbarText }}
   </v-snackbar>
   <!-- 确认弹窗 -->
-  <TOConfirm
+  <ToConfirm
     v-model="confirmShow"
     :model-input="confirmInput"
     :title="confirmText"
@@ -194,8 +194,8 @@
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
-import TOLoading from "../components/overlay/to-loading.vue";
-import TOConfirm from "../components/overlay/to-confirm.vue";
+import ToLoading from "../components/overlay/to-loading.vue";
+import ToConfirm from "../components/overlay/to-confirm.vue";
 // tauri
 import { app, fs, os } from "@tauri-apps/api";
 // store
@@ -217,21 +217,21 @@ const homeStore = useHomeStore();
 const achievementsStore = useAchievementsStore();
 
 // About App
-const versionApp = ref("" as string);
-const versionTauri = ref("" as string);
+const versionApp = ref<string>("");
+const versionTauri = ref<string>("");
 const buildTime = computed(() => appStore.buildTime);
 
 // About OS
-const osPlatform = ref("" as string);
-const osVersion = ref("" as string);
-const dbInfo = ref([] as { key: string; value: string; updated: string }[]);
+const osPlatform = ref<string>("");
+const osVersion = ref<string>("");
+const dbInfo = ref<Array<{ key: string; value: string; updated: string }>>([]);
 
 // loading
-const loading = ref(true as boolean);
-const loadingTitle = ref("正在加载..." as string);
+const loading = ref<boolean>(true);
+const loadingTitle = ref<string>("正在加载...");
 
 // data
-const showHome = ref(homeStore.getShowValue() as string[]);
+const showHome = ref<string[]>(homeStore.getShowValue());
 const userInfo = computed(() => {
   const info = userStore.getBriefInfo();
   return {
@@ -243,17 +243,17 @@ const userInfo = computed(() => {
 });
 
 // snackbar
-const snackbar = ref(false as boolean);
-const snackbarText = ref("" as string);
-const snackbarColor = ref("success" as string);
+const snackbar = ref<boolean>(false);
+const snackbarText = ref<string>("");
+const snackbarColor = ref<string>("success");
 
 // confirm
-const confirmText = ref("" as string);
-const isConfirmInput = ref(false as boolean);
-const confirmInput = ref("" as string);
-const confirmSub = ref("" as string);
-const confirmOper = ref("" as string);
-const confirmShow = ref(false as boolean);
+const confirmText = ref<string>("");
+const isConfirmInput = ref<boolean>(false);
+const confirmInput = ref<string>("");
+const confirmSub = ref<string>("");
+const confirmOper = ref<string>("");
+const confirmShow = ref<boolean>(false);
 
 // load version
 onMounted(async () => {
@@ -263,6 +263,10 @@ onMounted(async () => {
   osVersion.value = await os.version();
   try {
     dbInfo.value = await TGSqlite.getAppData();
+    const ck = dbInfo.value.find((v) => v.key === "cookie");
+    if (ck) {
+      userStore.cookie = JSON.parse(ck.value);
+    }
   } catch (e) {
     snackbarText.value = "读取数据库失败！";
     snackbarColor.value = "warn";
@@ -272,12 +276,12 @@ onMounted(async () => {
 });
 
 // 打开外部链接
-function toOuter(url: string) {
+function toOuter(url: string): void {
   window.open(url);
 }
 
 // open confirm
-function tryConfirm(oper: string) {
+function tryConfirm(oper: string): void {
   confirmSub.value = "";
   isConfirmInput.value = false;
   switch (oper) {
@@ -338,7 +342,7 @@ function tryConfirm(oper: string) {
 }
 
 // transfer confirm oper
-async function doConfirm(oper: string) {
+async function doConfirm(oper: string): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 500));
   switch (oper) {
     case "backup":
@@ -377,7 +381,7 @@ async function doConfirm(oper: string) {
 }
 
 // confirmOper
-async function backupData() {
+async function backupData(): Promise<void> {
   loadingTitle.value = "正在备份数据...";
   loading.value = true;
   const achievements = await TGSqlite.getUIAF();
@@ -392,7 +396,7 @@ async function backupData() {
   snackbar.value = true;
 }
 
-async function restoreData() {
+async function restoreData(): Promise<void> {
   loadingTitle.value = "正在恢复数据...";
   loading.value = true;
   const fail = [];
@@ -420,7 +424,7 @@ async function restoreData() {
   loading.value = false;
 }
 
-async function delTempData() {
+async function delTempData(): Promise<void> {
   await fs.removeDir("tempData", {
     dir: fs.BaseDirectory.AppLocalData,
     recursive: true,
@@ -430,7 +434,7 @@ async function delTempData() {
   snackbar.value = true;
 }
 
-async function delUserData() {
+async function delUserData(): Promise<void> {
   await fs.removeDir("userData", {
     dir: fs.BaseDirectory.AppLocalData,
     recursive: true,
@@ -442,7 +446,7 @@ async function delUserData() {
 }
 
 // 恢复默认配置
-function initAppData() {
+function initAppData(): void {
   appStore.init();
   homeStore.init();
   achievementsStore.init();
@@ -454,7 +458,7 @@ function initAppData() {
 }
 
 // 开启 dev 模式
-function submitDevMode() {
+function submitDevMode(): void {
   appStore.devMode
     ? (snackbarText.value = "已关闭 dev 模式!")
     : (snackbarText.value = "已开启 dev 模式!");
@@ -463,7 +467,7 @@ function submitDevMode() {
 }
 
 // 修改首页显示
-function submitHome() {
+function submitHome(): void {
   // 获取已选
   const show = showHome.value;
   if (show.length < 1) {
@@ -480,8 +484,15 @@ function submitHome() {
 }
 
 // 刷新用户数据
-async function refreshUser() {
+async function refreshUser(): Promise<void> {
   const ck = userStore.cookie;
+  // ck = {}
+  if (Object.keys(ck).length < 1) {
+    snackbarText.value = "请先输入 Cookie!";
+    snackbarColor.value = "error";
+    snackbar.value = true;
+    return;
+  }
   let failCount = 0;
   loadingTitle.value = "正在验证 ltoken...";
   loading.value = true;
@@ -495,7 +506,7 @@ async function refreshUser() {
     if (typeof ltokenRes === "string") {
       ck.ltoken = ltokenRes;
       await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
-      await userStore.initCookie(ck);
+      userStore.initCookie(ck);
       loadingTitle.value = "刷新成功!正在获取用户头像、昵称信息";
     } else {
       console.error(ltokenRes);
@@ -507,7 +518,7 @@ async function refreshUser() {
   if (typeof cookieTokenRes === "string") {
     ck.cookie_token = cookieTokenRes;
     await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
-    await userStore.initCookie(ck);
+    userStore.initCookie(ck);
     console.log(JSON.stringify(ck));
     loadingTitle.value = "刷新成功!正在获取用户头像、昵称信息";
   } else {
@@ -516,9 +527,8 @@ async function refreshUser() {
     failCount++;
   }
   const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
-  if (infoRes.hasOwnProperty("nickname")) {
-    const info = infoRes as TGApp.App.Account.BriefInfo;
-    userStore.setBriefInfo(info);
+  if ("nickname" in infoRes) {
+    userStore.setBriefInfo(infoRes);
     loadingTitle.value = "获取成功!正在获取用户游戏账号信息";
   } else {
     console.error(infoRes);
@@ -547,7 +557,7 @@ async function refreshUser() {
 }
 
 // 输入 Cookie
-async function inputCookie() {
+async function inputCookie(): Promise<void> {
   const cookie = confirmInput.value;
   if (cookie === "") {
     snackbarText.value = "Cookie 为空!";
@@ -572,14 +582,12 @@ async function inputCookie() {
   try {
     await TGRequest.User.init(ticket, uid);
     const ck = await TGSqlite.getCookie();
-    await userStore.initCookie(ck);
+    userStore.initCookie(ck);
     loadingTitle.value = "正在获取用户信息...";
     const cookie_token = userStore.getCookieItem("cookie_token");
     const resUser = await TGRequest.User.byCookie.getUserInfo(cookie_token, uid);
-    // . 判断返回是否为 BTMuli.User.Account.BriefInfo
-    if (resUser.hasOwnProperty("nickname")) {
-      const info = resUser as TGApp.App.Account.BriefInfo;
-      userStore.setBriefInfo(info);
+    if ("nickname" in resUser) {
+      userStore.setBriefInfo(resUser);
       appStore.isLogin = true;
     }
     const resAccounts = await TGRequest.User.byCookie.getAccounts(cookie_token, uid);
@@ -599,7 +607,7 @@ async function inputCookie() {
 }
 
 // 检查 SQLite 数据库
-async function checkDB() {
+async function checkDB(): Promise<void> {
   loadingTitle.value = "正在检查数据库表单完整性...";
   loading.value = true;
   const res = await TGSqlite.check();
@@ -636,7 +644,7 @@ async function checkDB() {
 }
 
 // 重置 SQLite 数据库
-async function resetDB() {
+async function resetDB(): Promise<void> {
   loadingTitle.value = "正在重置数据库...";
   loading.value = true;
   await TGSqlite.reset();
@@ -649,7 +657,7 @@ async function resetDB() {
 }
 
 // 更新 SQLite 数据库
-async function updateDB() {
+async function updateDB(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 500));
   loadingTitle.value = "正在更新数据库...";
   loading.value = true;
