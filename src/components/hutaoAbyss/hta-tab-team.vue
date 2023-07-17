@@ -7,11 +7,15 @@
       <v-tab value="12">第12层</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="hta-tt-window">
-      <v-window-item :value="tab">
+      <v-window-item
+        v-for="selectItem in select"
+        :key="selectItem.Floor"
+        :value="selectItem.Floor.toString()"
+      >
         <div v-if="select" class="hta-tt-flex">
           <div class="hta-tuf-box">
             <div class="hta-tuf-title">上半</div>
-            <div v-for="items in select.Up" :key="items.Rate" class="hta-tuf-item">
+            <div v-for="items in selectItem.Up" :key="items.Rate" class="hta-tuf-item">
               <div class="hta-tuf-item-icons">
                 <TibWikiAbyss2
                   v-for="item in items.Item.split(',')"
@@ -24,7 +28,7 @@
           </div>
           <div class="hta-tuf-box">
             <div class="hta-tuf-title">下半</div>
-            <div v-for="items in select.Down" :key="items.Rate" class="hta-tuf-item">
+            <div v-for="items in selectItem.Down" :key="items.Rate" class="hta-tuf-item">
               <div class="hta-tuf-item-icons">
                 <TibWikiAbyss2
                   v-for="item in items.Item.split(',')"
@@ -42,7 +46,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import TibWikiAbyss2 from "../itembox/tib-wiki-abyss-2.vue";
 
 interface HtaTabTeamProps {
@@ -53,21 +57,14 @@ const props = defineProps<HtaTabTeamProps>();
 
 // data
 const tab = ref<string>("9");
-const select = ref<TGApp.Plugins.Hutao.Abyss.TeamCombination>();
-
-function loadData(): void {
-  select.value = props.modelValue.filter((item) => item.Floor.toString() === tab.value)?.[0];
-  select.value?.Up.sort((a, b) => b.Rate - a.Rate);
-  select.value?.Down.sort((a, b) => b.Rate - a.Rate);
-}
+const select = ref<TGApp.Plugins.Hutao.Abyss.TeamCombination[]>([]);
 
 onMounted(async () => {
-  loadData();
-});
-
-// 监听 tab 变化
-watch(tab, () => {
-  loadData();
+  props.modelValue.forEach((item) => {
+    item.Up.sort((a, b) => b.Rate - a.Rate);
+    item.Down.sort((a, b) => b.Rate - a.Rate);
+    select.value.push(item);
+  });
 });
 </script>
 <style lang="css" scoped>
@@ -82,7 +79,7 @@ watch(tab, () => {
 .hta-tt-tab {
   position: absolute;
   height: 100%;
-  color: var(--common-text-content);
+  color: var(--common-text-title);
   font-family: var(--font-text);
 }
 
@@ -92,6 +89,7 @@ watch(tab, () => {
   height: 100%;
   max-height: calc(100vh - 130px);
   margin-left: 100px;
+  overflow-x: hidden;
 }
 
 .hta-tt-flex {

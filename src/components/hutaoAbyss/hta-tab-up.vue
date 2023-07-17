@@ -7,9 +7,13 @@
       <v-tab value="12">第12层</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="hta-tu-window">
-      <v-window-item :value="tab">
-        <div v-if="select" class="hta-tu-grid">
-          <TibWikiAbyss v-for="item in select.Ranks" :key="item.Item" :model-value="item" />
+      <v-window-item
+        v-for="selectItem in select"
+        :key="selectItem.Floor"
+        :value="selectItem.Floor.toString()"
+      >
+        <div class="hta-tu-grid">
+          <TibWikiAbyss v-for="item in selectItem.Ranks" :key="item.Item" :model-value="item" />
         </div>
       </v-window-item>
     </v-window>
@@ -17,31 +21,24 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import TibWikiAbyss from "../itembox/tib-wiki-abyss.vue";
 
 interface HtaTabUseProps {
-  modelValue: TGApp.Plugins.Hutao.Abyss.AvatarUse[];
+  modelValue: TGApp.Plugins.Hutao.Abyss.AvatarUp[];
 }
 
 const props = defineProps<HtaTabUseProps>();
 
 // data
 const tab = ref<string>("9");
-const select = ref<TGApp.Plugins.Hutao.Abyss.AvatarUse>();
-
-function loadData(): void {
-  select.value = props.modelValue.filter((item) => item.Floor.toString() === tab.value)?.[0];
-  select.value?.Ranks.sort((a, b) => b.Rate - a.Rate);
-}
+const select = ref<TGApp.Plugins.Hutao.Abyss.AvatarUp[]>([]);
 
 onMounted(async () => {
-  loadData();
-});
-
-// 监听 tab 变化
-watch(tab, () => {
-  loadData();
+  props.modelValue.forEach((item) => {
+    item.Ranks.sort((a, b) => b.Rate - a.Rate);
+    select.value.push(item);
+  });
 });
 </script>
 <style lang="css" scoped>
