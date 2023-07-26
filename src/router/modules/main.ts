@@ -2,18 +2,18 @@
  * @file router modules main.ts
  * @description 主路由模块
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.6
+ * @since Alpha v0.2.2
  */
 
 // 信息展示
-import Announcements from "../../pages/Announcements.vue";
-import Home from "../../pages/Home.vue";
+import Announcements from "../../pages/common/Announcements.vue";
+import Home from "../../pages/common/Home.vue";
 // 数据交互
-import Achievements from "../../pages/Achievements.vue";
+import Achievements from "../../pages/common/Achievements.vue";
 // 应用配置相关
-import Config from "../../pages/Config.vue";
+import Config from "../../pages/common/Config.vue";
 // 测试页
-import Test from "../../pages/Test.vue";
+import Test from "../../pages/common/Test.vue";
 
 const mainRoutes = [
   {

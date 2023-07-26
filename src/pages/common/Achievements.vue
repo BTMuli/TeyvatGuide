@@ -18,7 +18,7 @@
       <v-btn prepend-icon="mdi-export" class="ms-2 top-btn" @click="exportJson"> 导出 </v-btn>
     </template>
   </v-app-bar>
-  <TOLoading v-model="loading" :title="loadingTitle" />
+  <ToLoading v-model="loading" :title="loadingTitle" />
   <div class="wrap">
     <!-- 左侧菜单 -->
     <div class="left-wrap">
@@ -117,26 +117,26 @@
 <script lang="ts" setup>
 // vue
 import { onMounted, ref, onBeforeMount, computed } from "vue";
-import TOLoading from "../components/overlay/to-loading.vue";
+import ToLoading from "../../components/overlay/to-loading.vue";
 // tauri
 import { dialog, fs } from "@tauri-apps/api";
 // Store
-import { useAchievementsStore } from "../store/modules/achievements";
+import { useAchievementsStore } from "../../store/modules/achievements";
 // Utils
-import { createTGWindow } from "../utils/TGWindow";
-import { getUiafHeader, readUiafData, verifyUiafData } from "../utils/UIAF";
-import TGSqlite from "../plugins/Sqlite";
+import { createTGWindow } from "../../utils/TGWindow";
+import { getUiafHeader, readUiafData, verifyUiafData } from "../../utils/UIAF";
+import TGSqlite from "../../plugins/Sqlite";
 
 // Store
 const achievementsStore = useAchievementsStore();
 
 // loading
-const loading = ref(true as boolean);
-const loadingTitle = ref("正在加载数据" as string);
+const loading = ref<boolean>(true);
+const loadingTitle = ref<string>("正在加载数据");
 
 // data
-const title = ref(achievementsStore.title as string);
-const getCardInfo = ref({} as TGApp.Sqlite.NameCard.SingleTable);
+const title = ref(achievementsStore.title);
+const getCardInfo = ref<TGApp.Sqlite.NameCard.SingleTable>(<TGApp.Sqlite.NameCard.SingleTable>{});
 const getCardImg = computed(() => {
   return {
     profile: `/source/nameCard/profile/${getCardInfo.value.name}.webp`,
@@ -145,26 +145,26 @@ const getCardImg = computed(() => {
   };
 });
 // series
-const seriesList = ref([] as TGApp.Sqlite.Achievement.SeriesTable[]);
-const selectedSeries = ref(-1 as number);
-const selectedAchievement = ref([] as TGApp.Sqlite.Achievement.SingleTable[]);
+const seriesList = ref<TGApp.Sqlite.Achievement.SeriesTable[]>([]);
+const selectedSeries = ref<number>(-1);
+const selectedAchievement = ref<TGApp.Sqlite.Achievement.SingleTable[]>([]);
 const renderAchievement = computed(() => {
   return selectedAchievement.value.slice(start.value, start.value + itemCount.value + 1);
 });
 // virtual list
-const start = ref(0 as number);
+const start = ref<number>(0);
 const itemCount = computed(() => {
   return Math.ceil((window.innerHeight - 100) / 76);
 });
 const emptyHeight = computed(() => {
   return selectedAchievement.value.length * 76;
 });
-const translateY = ref("0px" as string);
+const translateY = ref<string>("0px");
 // render
-const search = ref("" as string);
-const snackbar = ref(false as boolean);
-const snackbarText = ref("" as string);
-const snackbarColor = ref("#F5810A" as string);
+const search = ref<string>("");
+const snackbar = ref<boolean>(false);
+const snackbarText = ref<string>("");
+const snackbarColor = ref<string>("#F5810A");
 
 onBeforeMount(async () => {
   const { total, fin } = await TGSqlite.getAchievementsOverview();
@@ -181,12 +181,10 @@ onMounted(async () => {
   loading.value = false;
 });
 
-function handleScroll(e: Event) {
+function handleScroll(e: Event): void {
+  const target: HTMLElement = <HTMLElement>e.target;
   // 如果 scrollTop 到底部了
-  if (
-    (e.target as HTMLElement).scrollTop + (e.target as HTMLElement).offsetHeight >=
-    (e.target as HTMLElement).scrollHeight
-  ) {
+  if (target.scrollTop + target.offsetHeight >= target.scrollHeight) {
     // 如果 selectedAchievement 的长度小于 itemCount，不进行偏移
     if (selectedAchievement.value.length <= itemCount.value) {
       window.requestAnimationFrame(() => {
@@ -201,9 +199,9 @@ function handleScroll(e: Event) {
     });
     return;
   }
+  const scrollTop = target.scrollTop;
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17 && selectedSeries.value !== -1) {
     window.requestAnimationFrame(() => {
-      const { scrollTop } = e.target as HTMLElement;
       if (scrollTop < 86.8) {
         start.value = 0;
         translateY.value = "0px";
@@ -214,7 +212,6 @@ function handleScroll(e: Event) {
     });
   } else {
     window.requestAnimationFrame(() => {
-      const { scrollTop } = e.target as HTMLElement;
       start.value = Math.floor(scrollTop / 76);
       translateY.value = `${scrollTop}px`;
     });
@@ -222,7 +219,7 @@ function handleScroll(e: Event) {
 }
 
 // 渲染选中的成就系列
-async function selectSeries(index: number) {
+async function selectSeries(index: number): Promise<void> {
   // 如果选中的是已经选中的系列，则不进行操作
   if (selectedSeries.value === index) {
     snackbarText.value = "已经选中该系列";
@@ -241,11 +238,11 @@ async function selectSeries(index: number) {
 }
 
 // 打开图片
-function openImg() {
+function openImg(): void {
   createTGWindow(getCardImg.value.profile, "nameCard", getCardInfo.value.name, 840, 400, false);
 }
 
-async function searchCard() {
+async function searchCard(): Promise<void> {
   if (search.value === "") {
     snackbarColor.value = "#F5810A";
     snackbarText.value = "请输入搜索内容";
@@ -264,7 +261,7 @@ async function searchCard() {
   loading.value = false;
 }
 // 导入 UIAF 数据，进行数据合并、刷新
-async function importJson() {
+async function importJson(): Promise<void> {
   const selectedFile = await dialog.open({
     multiple: false,
     filters: [
@@ -293,7 +290,7 @@ async function importJson() {
 }
 
 // 导出
-async function exportJson() {
+async function exportJson(): Promise<void> {
   // 判断是否有数据
   if (achievementsStore.finAchievements === 0) {
     snackbarColor.value = "#F5810A";

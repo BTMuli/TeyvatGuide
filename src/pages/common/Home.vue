@@ -6,33 +6,33 @@
 <script lang="ts" setup>
 // vue
 import { markRaw, onBeforeMount, onMounted, onUnmounted, onUpdated, ref } from "vue";
-import ToLoading from "../components/overlay/to-loading.vue";
-import TPool from "../components/main/t-pool.vue";
-import TPosition from "../components/main/t-position.vue";
-import TCalendar from "../components/main/t-calendar.vue";
+import ToLoading from "../../components/overlay/to-loading.vue";
+import TPool from "../../components/main/t-pool.vue";
+import TPosition from "../../components/main/t-position.vue";
+import TCalendar from "../../components/main/t-calendar.vue";
 // store
-import { useHomeStore } from "../store/modules/home";
-import { useAppStore } from "../store/modules/app";
-import { useUserStore } from "../store/modules/user";
+import { useHomeStore } from "../../store/modules/home";
+import { useAppStore } from "../../store/modules/app";
+import { useUserStore } from "../../store/modules/user";
 // utils
-import { getBuildTime } from "../utils/TGBuild";
-import TGSqlite from "../plugins/Sqlite";
+import { getBuildTime } from "../../utils/TGBuild";
+import TGSqlite from "../../plugins/Sqlite";
 
 // store
 const appStore = useAppStore();
 const homeStore = useHomeStore();
 
 // loading
-const loading = ref(true as boolean);
-const loadingTitle = ref("正在加载首页");
-const loadingSubtitle = ref("");
+const loading = ref<boolean>(true);
+const loadingTitle = ref<string>("正在加载首页");
+const loadingSubtitle = ref<string>("");
 
 // data
-const components = ref([] as any[]);
-const itemRefs = ref([] as any[]);
+const components = ref<any[]>([]);
+const itemRefs = ref<any[]>([]);
 
 // 定时器
-const timer = ref(null as any);
+const timer = ref<any>(null);
 
 function readLoading(): void {
   if (!loading.value) return;
@@ -82,7 +82,7 @@ onMounted(async () => {
   timer.value = setInterval(readLoading, 100);
 });
 
-function setItemRef(item: any) {
+function setItemRef(item: any): void {
   if (itemRefs.value.includes(item)) return;
   itemRefs.value.push(item);
 }

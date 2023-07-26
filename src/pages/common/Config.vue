@@ -31,7 +31,7 @@
     </v-list-item>
     <v-list-item title="成就版本">
       <template #prepend>
-        <img class="config-icon" src="../assets/icons/achievements.svg" alt="Achievements" />
+        <img class="config-icon" src="../../assets/icons/achievements.svg" alt="Achievements" />
       </template>
       <template #append>
         <v-list-item-subtitle>{{ achievementsStore.lastVersion }}</v-list-item-subtitle>
@@ -50,7 +50,7 @@
       <template #append>
         <v-btn class="card-btn" @click="tryConfirm('refreshUser')">
           <template #prepend>
-            <img src="../assets/icons/circle-check.svg" alt="check" />
+            <img src="../../assets/icons/circle-check.svg" alt="check" />
             刷新数据
           </template>
         </v-btn>
@@ -112,7 +112,7 @@
       <template #append>
         <v-btn class="card-btn" @click="submitHome">
           <template #prepend>
-            <img src="../assets/icons/circle-check.svg" alt="check" />
+            <img src="../../assets/icons/circle-check.svg" alt="check" />
             确定
           </template>
         </v-btn>
@@ -194,21 +194,21 @@
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
-import ToLoading from "../components/overlay/to-loading.vue";
-import ToConfirm from "../components/overlay/to-confirm.vue";
+import ToLoading from "../../components/overlay/to-loading.vue";
+import ToConfirm from "../../components/overlay/to-confirm.vue";
 // tauri
 import { app, fs, os } from "@tauri-apps/api";
 // store
-import { useAppStore } from "../store/modules/app";
-import { useHomeStore } from "../store/modules/home";
-import { useAchievementsStore } from "../store/modules/achievements";
-import { useUserStore } from "../store/modules/user";
+import { useAppStore } from "../../store/modules/app";
+import { useHomeStore } from "../../store/modules/home";
+import { useAchievementsStore } from "../../store/modules/achievements";
+import { useUserStore } from "../../store/modules/user";
 // utils
-import { backupUiafData, restoreUiafData } from "../utils/UIAF";
-import { backupAbyssData, backupCookieData } from "../web/utils/backupData";
-import { restoreAbyssData, restoreCookieData } from "../web/utils/restoreData";
-import TGSqlite from "../plugins/Sqlite";
-import TGRequest from "../web/request/TGRequest";
+import { backupUiafData, restoreUiafData } from "../../utils/UIAF";
+import { backupAbyssData, backupCookieData } from "../../web/utils/backupData";
+import { restoreAbyssData, restoreCookieData } from "../../web/utils/restoreData";
+import TGSqlite from "../../plugins/Sqlite";
+import TGRequest from "../../web/request/TGRequest";
 
 // Store
 const appStore = useAppStore();

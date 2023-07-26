@@ -34,7 +34,7 @@
             </v-card-subtitle>
             <v-card-subtitle v-show="appStore.devMode"> id: {{ item.id }} </v-card-subtitle>
             <v-btn v-show="appStore.devMode" class="anno-dev-btn" @click="toJson(item)">
-              <img src="../assets/icons/arrow-right.svg" alt="right" />
+              <img src="../../assets/icons/arrow-right.svg" alt="right" />
               <span>查看数据</span>
             </v-btn>
           </v-card-actions>
@@ -61,7 +61,7 @@
             </v-card-subtitle>
             <v-card-subtitle v-show="appStore.devMode"> id: {{ item.id }} </v-card-subtitle>
             <v-btn v-show="appStore.devMode" class="anno-dev-btn" @click="toJson(item)">
-              <img src="../assets/icons/arrow-right.svg" alt="right" />
+              <img src="../../assets/icons/arrow-right.svg" alt="right" />
               <span>查看数据</span>
             </v-btn>
           </v-card-actions>
@@ -75,13 +75,13 @@
 // vue
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import ToLoading from "../components/overlay/to-loading.vue";
+import ToLoading from "../../components/overlay/to-loading.vue";
 // store
-import { useAppStore } from "../store/modules/app";
+import { useAppStore } from "../../store/modules/app";
 // utils
-import TGRequest from "../web/request/TGRequest";
-import TGUtils from "../web/utils/TGUtils";
-import { createTGWindow } from "../utils/TGWindow";
+import TGRequest from "../../web/request/TGRequest";
+import TGUtils from "../../web/utils/TGUtils";
+import { createTGWindow } from "../../utils/TGWindow";
 
 // store
 const appStore = useAppStore();
@@ -95,10 +95,10 @@ const router = useRouter();
 // 数据
 const tab = ref<string>("");
 const annoCards = ref({
-  activity: [] as TGApp.App.Announcement.ListCard[],
-  game: [] as TGApp.App.Announcement.ListCard[],
+  activity: <TGApp.App.Announcement.ListCard[]>[],
+  game: <TGApp.App.Announcement.ListCard[]>[],
 });
-const annoData = ref<TGApp.BBS.Announcement.ListData>({} as TGApp.BBS.Announcement.ListData);
+const annoData = ref<TGApp.BBS.Announcement.ListData>(<TGApp.BBS.Announcement.ListData>{});
 
 onMounted(async () => {
   loadingTitle.value = "正在获取公告数据";
@@ -119,26 +119,24 @@ onMounted(async () => {
   loading.value = false;
 });
 
-async function switchNews() {
+async function switchNews(): Promise<void> {
   await router.push("/news/2");
 }
 
-async function toPost(item: TGApp.App.Announcement.ListCard) {
+async function toPost(item: TGApp.App.Announcement.ListCard): Promise<void> {
   const path = router.resolve({
     name: "游戏内公告",
     params: {
-      // eslint-disable-next-line camelcase
       anno_id: item.id,
     },
   }).href;
   createTGWindow(path, "游戏内公告", item.title, 960, 720, false, false);
 }
 
-async function toJson(item: TGApp.App.Announcement.ListCard) {
+async function toJson(item: TGApp.App.Announcement.ListCard): Promise<void> {
   const path = router.resolve({
     name: "游戏内公告（JSON）",
     params: {
-      // eslint-disable-next-line camelcase
       anno_id: item.id,
     },
   }).href;
