@@ -1,8 +1,8 @@
 /**
  * @file web api Takumi.ts
  * @description 定义 Takumi API
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Alpha v0.2.2
  */
 
 const TakumiApi = "https://api-takumi.mihoyo.com/"; // 基础 API
@@ -13,6 +13,7 @@ const TakumiRecordApi = "https://api-takumi-record.mihoyo.com/"; // 游戏记录
 const TakumiRecordGenshinApi = `${TakumiRecordApi}game_record/app/genshin/api/`; // 原神游戏记录 API
 
 export const TakumiTokensApi = `${TakumiAuthApi}getMultiTokenByLoginTicket`; // 登录票据 API
+export const TakumiRecordDailyNotesApi = `${TakumiRecordApi}game_record/app/genshin/api/dailyNote`; // 游戏记录便笺 API
 export const TakumiRecordCardApi = `${TakumiRecordApi}game_record/app/card/wapi/getGameRecordCard`; // 游戏记录卡片 API
 export const TakumiRecordIndexApi = `${TakumiRecordGenshinApi}index`; // 原神游戏记录索引 API
 export const TakumiRecordCharactersApi = `${TakumiRecordGenshinApi}character`; // 原神游戏记录角色 API

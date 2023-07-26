@@ -2,7 +2,7 @@
  * @file web api TGApi.ts
  * @description 应用用到的 API
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Alpha v0.2.2
  */
 
 import { BBSUserInfoApi } from "./BBS";
@@ -13,6 +13,7 @@ import {
   TakumiTokensApi,
   TakumiRecordCardApi,
   TakumiRecordCharactersApi,
+  TakumiRecordDailyNotesApi,
   TakumiRecordIndexApi,
   TakumiRecordAbyssApi,
   TakumiSTokenBindingRolesApi,
@@ -48,6 +49,7 @@ const TGApi = {
     },
     getUserCard: TakumiRecordCardApi, // 获取用户卡片
     getUserBase: TakumiRecordIndexApi, // 获取用户基本信息
+    getDailyNotes: TakumiRecordDailyNotesApi, // 获取实时便笺
     getAbyss: TakumiRecordAbyssApi, // 获取深境螺旋信息
   },
 };
