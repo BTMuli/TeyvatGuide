@@ -24,13 +24,13 @@ import {
 
 /**
  * @description 初始化应用表数据
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.2
  * @returns {Promise<string[]>} sql
  */
 async function initAppData(): Promise<string[]> {
   const sqlRes: string[] = [];
   const appVersion = await app.getVersion();
-  const buildTime = getBuildTime();
+  const buildTime: string = getBuildTime();
   // 初始化应用版本
   sqlRes.push(`
     INSERT INTO AppData (key, value, updated)

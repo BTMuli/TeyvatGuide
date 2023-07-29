@@ -90,9 +90,6 @@ function onCancel(): void {
 function onConfirm(): void {
   visible.value = false;
   emits("confirm");
-  if (props.isInput) {
-    inputVal.value = "";
-  }
 }
 </script>
 

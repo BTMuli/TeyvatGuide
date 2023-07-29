@@ -38,3 +38,60 @@ export async function getDailyNotes(
       return res.data.data;
     });
 }
+
+/**
+ * @description 获取极验验证码
+ * @since Alpha v0.2.2
+ * @param {Record<string, string>} cookie cookie
+ * @returns {Promise<TGApp.App.Base.Response|TGApp.BBS.Geetest.getData>}
+ */
+export async function getGeeTest(
+  cookie: Record<string, string>,
+): Promise<TGApp.BBS.Response.Base | TGApp.BBS.Geetest.getData> {
+  const url = "https://api-takumi-record.mihoyo.com/game_record/app/card/wapi/createVerification";
+  const params = { is_high: "true" };
+  const header = getRequestHeader(cookie, "GET", params, "common");
+  return await http
+    .fetch<TGApp.BBS.Geetest.getResponse>(url, {
+      method: "GET",
+      headers: header,
+      query: params,
+    })
+    .then((res) => {
+      if (res.data.retcode !== 0) return res.data;
+      return res.data.data;
+    });
+}
+
+/**
+ * @description 发送极验验证码
+ * @since Alpha v0.2.2
+ * @param {Record<string, string>} cookie cookie
+ * @param {TGApp.BBS.Geetest.postData} geetest 极验验证的请求数据
+ * @returns {Promise<TGApp.BBS.Response.Base>}
+ */
+export async function postGeeTest(
+  cookie: Record<string, string>,
+  geetest: TGApp.BBS.Geetest.postData,
+): Promise<TGApp.BBS.Response.Base> {
+  const url = "https://api-takumi-record.mihoyo.com/game_record/app/card/wapi/verifyVerification";
+  const data = {
+    geetest_challenge: geetest.challenge,
+    geetest_seccode: `${geetest.validate}|jordan`,
+    geetest_validate: geetest.validate,
+  };
+  const header = getRequestHeader(cookie, "POST", data, "common");
+  console.log(header);
+  console.log(cookie);
+  console.log(data);
+  return await http
+    .fetch<TGApp.BBS.Response.Base>(url, {
+      headers: header,
+      method: "POST",
+      body: http.Body.json(data),
+    })
+    .then((res) => {
+      if (res.data.retcode !== 0) return res.data;
+      return res.data.data;
+    });
+}

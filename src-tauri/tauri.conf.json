@@ -32,7 +32,8 @@
           "https://passport-api-v4.mihoyo.com/*",
           "https://act-webstatic.mihoyo.com/*",
           "https://sdk-webstatic.mihoyo.com/*",
-          "https://homa.snapgenshin.com/*"
+          "https://homa.snapgenshin.com/*",
+          "https://help.tencentbot.top/geetest2/*"
         ]
       },
       "shell": {
