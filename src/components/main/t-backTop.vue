@@ -13,7 +13,7 @@ const scrollTop = ref(0); // 滚动条距离顶部的距离
 const canTop = ref(false); // 默认不显示
 
 // 监听滚动事件
-function handleScroll() {
+function handleScroll(): void {
   scrollTop.value = document.documentElement.scrollTop || document.body.scrollTop;
   // 超过500px显示回到顶部按钮
   canTop.value = scrollTop.value > 500;
@@ -26,7 +26,7 @@ function handleScroll() {
 }
 
 // 点击回到顶部
-function handleScrollTop() {
+function handleScrollTop(): void {
   let timer = 0;
   cancelAnimationFrame(timer);
   timer = requestAnimationFrame(function fn() {
@@ -42,7 +42,6 @@ function handleScrollTop() {
 }
 
 // 监听滚动事件
-// @ts-ignore
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
 });

@@ -108,7 +108,9 @@ const emits = defineEmits<ToUcDetailEmits>();
 const props = defineProps<ToUcDetailProps>();
 const visible = computed({
   get: () => props.modelValue,
-  set: (value) => emits("update:modelValue", value),
+  set: (value) => {
+    emits("update:modelValue", value);
+  },
 });
 const showCostumeSwitch = ref(false);
 
@@ -139,12 +141,12 @@ const selected = ref({
 });
 
 // 加载数据
-function loadData() {
+function loadData(): void {
   if (!props.modelValue) return;
   data.value.weapon = JSON.parse(props.dataVal.weapon);
   data.value.constellation = JSON.parse(props.dataVal.constellation);
   if (props.dataVal.reliquary !== "") {
-    const relics = <Array<TGApp.Sqlite.Character.RoleReliquary>>JSON.parse(props.dataVal.reliquary);
+    const relics = <TGApp.Sqlite.Character.RoleReliquary[]>JSON.parse(props.dataVal.reliquary);
     relics.map((item) => {
       switch (item.pos) {
         case 1:
@@ -195,7 +197,7 @@ const weaponBox = computed(() => {
   };
 });
 
-const onCancel = () => {
+const onCancel = (): void => {
   visible.value = false;
   emits("cancel");
 };
@@ -208,7 +210,7 @@ function showDetail(
     | false,
   type: "命座" | "武器" | "圣遗物",
   pos: number = 0,
-) {
+): void {
   if (!item) return;
   switch (type) {
     case "命座":
@@ -229,7 +231,7 @@ function showDetail(
   };
 }
 
-function switchBg() {
+function switchBg(): void {
   if (data.value.bg === props.dataVal.img) {
     data.value.bg = data.value.costume[0].icon;
   } else {

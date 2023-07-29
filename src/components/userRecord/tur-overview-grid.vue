@@ -28,7 +28,7 @@ interface TurOverviewGridProps {
 }
 
 const props = defineProps<TurOverviewGridProps>();
-const data = computed(() => JSON.parse(<string>props.modelValue) as TGApp.Sqlite.Record.Stats);
+const data = computed<TGApp.Sqlite.Record.Stats>(() => JSON.parse(<string>props.modelValue));
 </script>
 <style lang="css" scoped>
 .tur-og-box {

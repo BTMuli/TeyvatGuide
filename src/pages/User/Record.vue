@@ -69,7 +69,7 @@ onMounted(async () => {
   }, 3000);
 });
 
-async function initUserRecordData() {
+async function initUserRecordData(): Promise<void> {
   const recordGet = await TGSqlite.getUserRecord(user.value.gameUid);
   if (recordGet !== false) {
     recordData.value = recordGet;
@@ -79,7 +79,7 @@ async function initUserRecordData() {
   }
 }
 
-async function refresh() {
+async function refresh(): Promise<void> {
   loadingTitle.value = "正在获取战绩数据";
   loading.value = true;
   const res = await TGRequest.User.getRecord(recordCookie.value, user.value);
@@ -93,12 +93,12 @@ async function refresh() {
   loading.value = false;
 }
 
-function getTitle() {
+function getTitle(): string {
   const role = <TGApp.Sqlite.Record.Role>JSON.parse(recordData.value.role);
   return `${role.nickname} Lv.${role.level}【${recordData.value.uid}】`;
 }
 
-async function shareRecord() {
+async function shareRecord(): Promise<void> {
   const recordBox = <HTMLElement>document.querySelector(".ur-box");
   const fileName = `【原神战绩】-${user.value.gameUid}`;
   loadingTitle.value = "正在生成图片";

@@ -15,7 +15,7 @@ interface TurAvatarGridProps {
 }
 
 const props = defineProps<TurAvatarGridProps>();
-const data = computed(() => JSON.parse(<string>props.modelValue) as TGApp.Sqlite.Record.Avatar[]);
+const data = computed<TGApp.Sqlite.Record.Avatar[]>(() => JSON.parse(<string>props.modelValue));
 </script>
 <style lang="css" scoped>
 .tur-ag-box {

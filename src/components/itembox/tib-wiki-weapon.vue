@@ -4,17 +4,20 @@
 <script lang="ts" setup>
 // vue
 import { computed } from "vue";
-import TItemBox, { TItemBoxData } from "../main/t-itembox.vue";
+import TItemBox from "../main/t-itembox.vue";
+// types
+import type { TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibCalendarWeaponProps {
   modelValue: TGApp.App.Weapon.WikiBriefInfo;
 }
 
 const props = defineProps<TibCalendarWeaponProps>();
-const box = computed(() => {
+const box = computed<TItemBoxData>(() => {
   return {
     bg: props.modelValue.bg,
     icon: props.modelValue.icon,
+    clickable: true,
     size: "128px",
     height: "128px",
     display: "inner",
@@ -22,6 +25,6 @@ const box = computed(() => {
     ltSize: "40px",
     innerText: props.modelValue.name,
     innerHeight: 30,
-  } as TItemBoxData;
+  };
 });
 </script>

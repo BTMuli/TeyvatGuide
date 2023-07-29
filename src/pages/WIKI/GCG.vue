@@ -128,27 +128,21 @@ const CardsInfoA = ref<TGApp.App.GCG.WikiBriefInfo[]>([]);
 const CardsInfoM = ref<TGApp.App.GCG.WikiBriefInfo[]>([]);
 const CardsInfoS = ref<TGApp.App.GCG.WikiBriefInfo[]>([]);
 
-onMounted(async () => {
-  await loadData();
+onMounted(() => {
+  for (const item of allCards.value) {
+    if (item.type === "角色牌") CardsInfoC.value.push(item);
+    if (item.type === "行动牌") CardsInfoA.value.push(item);
+    if (item.type === "魔物牌") CardsInfoM.value.push(item);
+  }
+  loading.value = false;
 });
 
-async function loadData() {
-  await Promise.allSettled(
-    allCards.value.map(async (item) => {
-      if (item.type === "角色牌") CardsInfoC.value.push(item);
-      if (item.type === "行动牌") CardsInfoA.value.push(item);
-      if (item.type === "魔物牌") CardsInfoM.value.push(item);
-    }),
-  );
-  loading.value = false;
-}
-
-function toOuter(cardName: string, cardId: number) {
+function toOuter(cardName: string, cardId: number): void {
   const url = Mys.Api.Obc.replace("{contentId}", cardId.toString());
   createTGWindow(url, "GCG", cardName, 1200, 800, true);
 }
 
-async function searchCard() {
+async function searchCard(): Promise<void> {
   loading.value = true;
   if (search.value === "") {
     setTimeout(() => {

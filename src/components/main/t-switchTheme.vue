@@ -31,14 +31,14 @@ onMounted(async () => {
   await listenOnTheme();
 });
 
-async function switchTheme() {
+async function switchTheme(): Promise<void> {
   appStore.changeTheme();
   await event.emit("readTheme", themeGet.value);
 }
 
-async function listenOnTheme() {
+async function listenOnTheme(): Promise<void> {
   await event.listen("readTheme", (e) => {
-    const theme = e.payload as string;
+    const theme = <string>e.payload;
     themeGet.value = theme === "default" ? "default" : "dark";
   });
 }

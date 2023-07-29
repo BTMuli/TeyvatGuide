@@ -78,7 +78,7 @@ const lotteryTimer = ref<any>(null);
 // 参与方式
 const participationMethod = ref<string>("未知");
 
-function flushTimeStatus() {
+function flushTimeStatus(): void {
   const timeNow = new Date().getTime();
   const timeDiff = Number(jsonData.draw_time) * 1000 - timeNow;
   if (timeDiff <= 0) {
@@ -94,16 +94,14 @@ function flushTimeStatus() {
 }
 
 // 数据
-const lotteryId = useRoute().params.lottery_id as string;
+const lotteryId = <string>useRoute().params.lottery_id;
 const lotteryCard = ref<TGApp.Plugins.Mys.Lottery.RenderCard>(
-  {} as TGApp.Plugins.Mys.Lottery.RenderCard,
+  <TGApp.Plugins.Mys.Lottery.RenderCard>{},
 );
-let jsonData = reactive<TGApp.Plugins.Mys.Lottery.FullData>(
-  {} as TGApp.Plugins.Mys.Lottery.FullData,
-);
+let jsonData = reactive<TGApp.Plugins.Mys.Lottery.FullData>(<TGApp.Plugins.Mys.Lottery.FullData>{});
 const timeStatus = ref<string>("未知");
 
-function backPost() {
+function backPost(): void {
   window.history.back();
 }
 
@@ -140,7 +138,7 @@ onMounted(async () => {
 });
 
 // 获取参与方式
-function getUpWay(upWay: string) {
+function getUpWay(upWay: string): string {
   switch (upWay) {
     case "Forward":
       return "转发";

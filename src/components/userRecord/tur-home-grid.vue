@@ -1,7 +1,7 @@
 <template>
   <div v-if="props.modelValue === undefined">暂无数据</div>
   <div v-else class="tur-hg-box">
-    <TurHomeSub v-for="home in homes" :data="home" />
+    <TurHomeSub v-for="(home, index) in homes" :key="index" :data="home" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -14,11 +14,12 @@ interface TurHomeGridProps {
 }
 
 const props = defineProps<TurHomeGridProps>();
-const homes = computed(() => {
-  const res = JSON.parse(props.modelValue || "[]") as TGApp.Sqlite.Record.Home[];
+const homes = computed<TGApp.Sqlite.Record.Home[]>(() => {
+  const res = JSON.parse(props.modelValue ?? "[]");
   if (res.length > 0) {
     return res;
   }
+  return [];
 });
 </script>
 <style lang="css" scoped>

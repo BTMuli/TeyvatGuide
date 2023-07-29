@@ -21,8 +21,8 @@ import { app, event, fs, window } from "@tauri-apps/api";
 import { useAppStore } from "./store/modules/app";
 
 const appStore = useAppStore();
-const isMain = ref(false as boolean);
-const theme = ref(appStore.theme as string);
+const isMain = ref<boolean>(false);
+const theme = ref<string>(appStore.theme);
 
 onBeforeMount(async () => {
   // 获取当前窗口
@@ -42,9 +42,9 @@ onMounted(async () => {
 });
 
 // 监听主题变化
-async function listenOnTheme() {
+async function listenOnTheme(): Promise<void> {
   await event.listen("readTheme", (e) => {
-    const themeGet = e.payload as string;
+    const themeGet = <string>e.payload;
     if (theme.value !== themeGet) {
       theme.value = themeGet;
       document.documentElement.className = theme.value;
@@ -52,7 +52,7 @@ async function listenOnTheme() {
   });
 }
 
-async function checkLoad() {
+async function checkLoad(): Promise<void> {
   if (appStore.loading) {
     console.info("数据已加载！");
     return;
@@ -63,7 +63,7 @@ async function checkLoad() {
 }
 
 // 创建数据文件夹
-async function createDataDir() {
+async function createDataDir(): Promise<void> {
   console.info("开始创建数据文件夹...");
   // 如果不存在则创建
   if (!(await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData }))) {

@@ -4,13 +4,15 @@
 <script lang="ts" setup>
 // vue
 import { computed } from "vue";
-import TItemBox2, { TItemBox2Data } from "../main/t-itembox-2.vue";
+import TItemBox2 from "../main/t-itembox-2.vue";
+// types
+import type { TItemBox2Data } from "../main/t-itembox-2.vue";
 
 interface TMiniWeaponProps {
   item: TGApp.App.Calendar.Material;
 }
 const props = defineProps<TMiniWeaponProps>();
-const box = computed(() => {
+const box = computed<TItemBox2Data>(() => {
   return {
     bg: props.item.bg,
     icon: props.item.icon,
@@ -18,6 +20,6 @@ const box = computed(() => {
     width: "150px",
     height: "45px",
     name: props.item.name,
-  } as TItemBox2Data;
+  };
 });
 </script>

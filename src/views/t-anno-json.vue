@@ -21,9 +21,9 @@ import { appWindow } from "@tauri-apps/api/window";
 import TGRequest from "../web/request/TGRequest";
 
 // loading
-const loading = ref(true as boolean);
-const loadingTitle = ref("正在加载");
-const loadingEmpty = ref(false as boolean);
+const loading = ref<boolean>(true);
+const loadingTitle = ref<string>("正在加载");
+const loadingEmpty = ref<boolean>(false);
 
 // 数据
 const annoId = Number(useRoute().params.anno_id);

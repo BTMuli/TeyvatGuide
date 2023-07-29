@@ -4,7 +4,9 @@
 <script lang="ts" setup>
 // vue
 import { computed } from "vue";
-import TItemBox, { TItemBoxData } from "../main/t-itembox.vue";
+import TItemBox from "../main/t-itembox.vue";
+// types
+import type { TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibCalendarItemProps {
   model: "avatar" | "weapon";

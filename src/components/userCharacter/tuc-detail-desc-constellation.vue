@@ -4,7 +4,7 @@
       <span>命之座</span>
     </template>
     <template #content>
-      <TucDetailConstellation v-model="props.modelValue" />
+      <TucDetailConstellation :model-value="props.modelValue" />
       <div class="tuc-ddc-content">
         <div class="tuc-ddc-top">
           {{ props.modelValue.name }}
@@ -18,7 +18,8 @@
       </div>
     </template>
     <template #desc>
-      <span v-html="parseDesc(props.modelValue.description)" />
+      <!-- eslint-disable-next-line vue/no-v-html -->
+      <span v-html="parseDesc(props.modelValue.description)"></span>
     </template>
   </TucDetailDesc>
 </template>

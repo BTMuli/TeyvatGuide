@@ -69,9 +69,9 @@ onMounted(async () => {
     : (getUrl.value.icon = getUrl.value.iconDark);
 });
 
-async function listenOnTheme() {
+async function listenOnTheme(): Promise<void> {
   await event.listen("readTheme", (e) => {
-    const theme = e.payload as string;
+    const theme = <string>e.payload;
     if (theme === "dark") {
       getUrl.value.icon = getUrl.value.iconLight;
     } else {

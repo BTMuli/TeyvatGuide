@@ -4,16 +4,18 @@
 <script lang="ts" setup>
 // vue
 import { onMounted, ref } from "vue";
-import TItemBox, { type TItemBoxData } from "../main/t-itembox.vue";
+import TItemBox from "../main/t-itembox.vue";
 // utils
 import TGSqlite from "../../plugins/Sqlite";
+// types
+import type { TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibAbyssDetailProps {
   modelValue: TGApp.Sqlite.Abyss.CharacterInfo;
 }
 
 const props = defineProps<TibAbyssDetailProps>();
-const box = ref({} as TItemBoxData);
+const box = ref<TItemBoxData>(<TItemBoxData>{});
 
 onMounted(async () => {
   const res = await TGSqlite.getAppCharacter(props.modelValue.id);

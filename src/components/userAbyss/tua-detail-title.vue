@@ -1,11 +1,26 @@
 <template>
-  <div class="tud-t-box">
-    <div class="tud-t-title">
+  <div
+    class="tud-t-box"
+    :style="{
+      fontFamily: props.mode === 'level' ? 'var(--font-text)' : 'var(--font-title)',
+    }"
+  >
+    <div
+      class="tud-t-title"
+      :style="{
+        fontSize: props.mode === 'level' ? '18px' : '20px',
+      }"
+    >
       <slot name="title">
         <span>{{ props.name }}</span>
       </slot>
     </div>
-    <div class="tud-t-val">
+    <div
+      class="tud-t-val"
+      :style="{
+        fontSize: props.mode === 'level' ? '18px' : '20px',
+      }"
+    >
       <img src="/icon/star/Abyss.webp" alt="Abyss" />
       <slot name="val">
         <span>{{ props.val }}</span>
@@ -14,9 +29,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
-import { computed, ComputedRef } from "vue";
-
 interface TuaDetailTitleProps {
   name: string;
   val: number;
@@ -24,13 +36,6 @@ interface TuaDetailTitleProps {
 }
 
 const props = defineProps<TuaDetailTitleProps>();
-
-const getFont: ComputedRef<string> = computed(() => {
-  return props.mode === "level" ? "var(--font-text)" : "var(--font-title)";
-});
-const getFontSize: ComputedRef<string> = computed(() => {
-  return props.mode === "level" ? "18px" : "20px";
-});
 </script>
 <style lang="css" scoped>
 .tud-t-box {
@@ -39,12 +44,10 @@ const getFontSize: ComputedRef<string> = computed(() => {
   height: 30px;
   align-items: center;
   justify-content: space-between;
-  font-family: v-bind(getFont);
 }
 
 .tud-t-title {
   color: var(--common-text-content);
-  font-size: v-bind(getFontSize);
 }
 
 .tud-t-val {
@@ -52,7 +55,6 @@ const getFontSize: ComputedRef<string> = computed(() => {
   align-items: center;
   color: var(--common-color-white);
   font-family: var(--font-text);
-  font-size: v-bind(getFontSize);
   text-shadow: 0 0 10px var(--common-color-yellow);
 }
 

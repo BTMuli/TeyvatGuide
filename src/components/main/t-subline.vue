@@ -2,16 +2,14 @@
   <div class="tsl-box">
     <img src="/src/assets/icons/arrow-right.svg" alt="right" />
     <slot>
-      {{ title }}
+      {{ props.title }}
     </slot>
   </div>
 </template>
 <script lang="ts" setup>
-defineProps({
-  title: {
-    type: String,
-  },
-});
+const props = defineProps<{
+  title: string;
+}>();
 </script>
 <style lang="css" scoped>
 .tsl-box {

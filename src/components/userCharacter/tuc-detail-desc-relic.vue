@@ -4,7 +4,7 @@
       <span>圣遗物</span>
     </template>
     <template #content>
-      <TucDetailRelic v-model="props.modelValue" pos="props.modelValue.pos" />
+      <TucDetailRelic :model-value="props.modelValue" pos="props.modelValue.pos" />
       <div class="tuc-ddr-content">
         <div class="tuc-ddrc-top">
           <span>{{ props.modelValue.name }}</span>
@@ -18,7 +18,7 @@
     </template>
     <template #desc>
       <div class="tuc-ddrd-title">{{ props.modelValue.set.name }}：</div>
-      <div v-for="desc in props.modelValue.set.effect" class="tuc-ddrc-desc">
+      <div v-for="(desc, index) in props.modelValue.set.effect" :key="index" class="tuc-ddrc-desc">
         <span>{{ desc.active }}件套：</span>
         <span>{{ desc.description }}</span>
       </div>

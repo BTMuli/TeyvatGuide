@@ -92,7 +92,7 @@ defineExpose({
   loading,
 });
 
-function poolLastInterval(postId: number) {
+function poolLastInterval(postId: number): void {
   const pool = poolCards.value.find((pool) => pool.postId === postId);
   if (!pool) return;
   if (poolTimeGet.value[postId] === "未开始") {
@@ -156,7 +156,7 @@ onMounted(async () => {
 });
 
 // 检测新卡池
-function checkCover(data: TGApp.Plugins.Mys.Gacha.Data[]) {
+function checkCover(data: TGApp.Plugins.Mys.Gacha.Data[]): boolean {
   // 如果没有缓存
   if (!homeStore.poolCover || Object.keys(homeStore.poolCover).length === 0) {
     return false;
@@ -180,7 +180,7 @@ function checkCover(data: TGApp.Plugins.Mys.Gacha.Data[]) {
   });
 }
 
-async function toOuter(url: string, title: string) {
+async function toOuter(url: string, title: string): Promise<void> {
   if (!url) {
     barText.value = "链接为空!";
     barColor.value = "error";
@@ -190,14 +190,14 @@ async function toOuter(url: string, title: string) {
   createTGWindow(url, "祈愿", title, 1200, 800, true, true);
 }
 
-function getLastPoolTime(time: number) {
+function getLastPoolTime(time: number): string {
   const hour = Math.floor(time / 1000 / 60 / 60);
   const minute = Math.floor((time / 1000 / 60 / 60 - hour) * 60);
   const second = Math.floor(((time / 1000 / 60 / 60 - hour) * 60 - minute) * 60);
   return `${hour}:${minute.toFixed(0).padStart(2, "0")}:${second.toFixed(0).padStart(2, "0")}`;
 }
 
-function toPost(pool: TGApp.Plugins.Mys.Gacha.RenderCard) {
+function toPost(pool: TGApp.Plugins.Mys.Gacha.RenderCard): void {
   const path = router.resolve({
     name: "帖子详情",
     params: {

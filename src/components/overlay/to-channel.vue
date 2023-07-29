@@ -4,7 +4,12 @@
       <div class="toc-top">
         <div class="toc-title">请选择要跳转的频道</div>
         <div class="toc-list">
-          <div v-for="item in channelList" class="toc-list-item" @click="toChannel(item.link)">
+          <div
+            v-for="(item, index) in channelList"
+            :key="index"
+            class="toc-list-item"
+            @click="toChannel(item.link)"
+          >
             <img :src="item.icon" alt="icon" />
             <span>{{ item.title }}</span>
           </div>
@@ -28,9 +33,7 @@ interface ToChannelProps {
   modelValue: boolean;
 }
 
-interface ToChannelEmits {
-  (e: "update:modelValue", value: boolean): void;
-}
+type ToChannelEmits = (e: "update:modelValue", value: boolean) => void;
 
 interface ToChannelItem {
   title: string;
@@ -45,7 +48,9 @@ const emits = defineEmits<ToChannelEmits>();
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (value) => emits("update:modelValue", value),
+  set: (value) => {
+    emits("update:modelValue", value);
+  },
 });
 const router = useRouter();
 
@@ -87,13 +92,15 @@ const channelList: ToChannelItem[] = [
   },
 ];
 
-function onCancel() {
+function onCancel(): void {
   visible.value = false;
 }
 
-function toChannel(link: string) {
+async function toChannel(link: string): Promise<void> {
   visible.value = false;
-  router.push(link);
+  await router.push(link).then(() => {
+    window.scrollTo(0, 0);
+  });
   setTimeout(() => {
     window.location.reload();
   }, 300);

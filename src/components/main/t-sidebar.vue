@@ -163,7 +163,7 @@ const open = computed({
   },
 });
 
-function collapse() {
+function collapse(): void {
   rail.value = !rail.value;
   appStore.sidebar.collapse = rail.value;
 }
@@ -172,14 +172,14 @@ onMounted(async () => {
   await listenOnTheme();
 });
 
-async function listenOnTheme() {
+async function listenOnTheme(): Promise<void> {
   await event.listen("readTheme", (e) => {
-    const theme = e.payload as string;
+    const theme = <string>e.payload;
     themeGet.value = theme === "default" ? "default" : "dark";
   });
 }
 
-async function switchTheme() {
+async function switchTheme(): Promise<void> {
   await event.emit("readTheme", themeGet.value === "default" ? "dark" : "default");
 }
 </script>

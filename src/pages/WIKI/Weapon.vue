@@ -22,7 +22,7 @@ const snackbar = ref<boolean>(false);
 // data
 const cardsInfo = computed(() => AppWeaponData);
 
-function toOuter(item: TGApp.App.Weapon.WikiBriefInfo) {
+function toOuter(item: TGApp.App.Weapon.WikiBriefInfo): void {
   if (item.contentId === 0) {
     snackbar.value = true;
     return;

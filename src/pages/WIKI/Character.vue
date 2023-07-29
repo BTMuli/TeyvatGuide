@@ -22,7 +22,7 @@ const snackbar = ref(false);
 // data
 const cardsInfo = computed(() => AppCharacterData);
 
-function toOuter(item: TGApp.App.Character.WikiBriefInfo) {
+function toOuter(item: TGApp.App.Character.WikiBriefInfo): void {
   if (item.contentId === 0) {
     snackbar.value = true;
     return;

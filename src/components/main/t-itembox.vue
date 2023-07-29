@@ -1,32 +1,91 @@
 <template>
-  <div class="tib-box">
-    <div class="tib-bg">
+  <div
+    class="tib-box"
+    :style="{
+      width: modelValue.size,
+      height: modelValue.height,
+      cursor: modelValue.clickable ? 'pointer' : 'default',
+    }"
+  >
+    <div
+      class="tib-bg"
+      :style="{
+        width: modelValue.size,
+        height: modelValue.size,
+      }"
+    >
       <slot name="bg">
         <img :src="modelValue.bg" alt="bg" />
       </slot>
     </div>
-    <div class="tib-icon">
+    <div
+      class="tib-icon"
+      :style="{
+        width: modelValue.size,
+        height: modelValue.size,
+      }"
+    >
       <slot name="icon">
         <img :src="modelValue.icon" alt="icon" />
       </slot>
     </div>
-    <div class="tib-cover">
-      <div class="tib-lt">
+    <div
+      class="tib-cover"
+      :style="{
+        width: modelValue.size,
+        height: modelValue.size,
+      }"
+    >
+      <div
+        class="tib-lt"
+        :style="{
+          width: modelValue.ltSize,
+          height: modelValue.ltSize,
+        }"
+      >
         <img :src="modelValue.lt" alt="lt" />
       </div>
-      <div v-show="modelValue.rt" class="tib-rt">
+      <div
+        v-show="modelValue.rt"
+        class="tib-rt"
+        :style="{
+          width: modelValue.rtSize,
+          height: modelValue.rtSize,
+        }"
+      >
         {{ modelValue.rt }}
       </div>
-      <div class="tib-inner">
+      <div
+        class="tib-inner"
+        :style="{
+          height: `${props.modelValue.innerHeight ?? 0}px`,
+          fontSize: `${props.modelValue.innerHeight ? props.modelValue.innerHeight / 2 : 0}px`,
+        }"
+      >
         <slot name="inner-icon">
-          <img v-show="modelValue.innerIcon" :src="modelValue.innerIcon" alt="inner-icon" />
+          <img
+            v-show="modelValue.innerIcon"
+            :src="modelValue.innerIcon"
+            alt="inner-icon"
+            :style="{
+              width: `${props.modelValue.innerHeight ?? 0}px`,
+              height: `${props.modelValue.innerHeight ?? 0}px`,
+            }"
+          />
         </slot>
         <slot name="inner-text">
           <span>{{ modelValue.innerText }}</span>
         </slot>
       </div>
     </div>
-    <div v-if="modelValue.display === 'outer'" class="tib-outer">
+    <div
+      v-if="modelValue.display === 'outer'"
+      class="tib-outer"
+      :style="{
+        height: `${props.modelValue.outerHeight ?? 0}px`,
+        fontSize: `${props.modelValue.outerHeight ? props.modelValue.outerHeight / 2 : 0}px`,
+      }"
+    >
       <slot name="outer-text">
         <span>{{ modelValue.outerText }}</span>
       </slot>
@@ -34,8 +93,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed } from "vue";
-
 export interface TItemBoxData {
   bg: string;
   icon: string;
@@ -59,19 +116,10 @@ interface TItemBoxProps {
 }
 
 const props = defineProps<TItemBoxProps>();
-
-const getCursor = computed(() => (props.modelValue.clickable ? "pointer" : "default"));
-const getInnerHeight = computed(() => `${props.modelValue.innerHeight}px`);
-const getInnerFont = computed(() => `${props.modelValue.innerHeight / 2}px`);
-const getOuterHeight = computed(() => `${props.modelValue.outerHeight}px`);
-const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
 </script>
 <style lang="css" scoped>
 .tib-box {
   position: relative;
-  width: v-bind(modelValue[ "size"]);
-  height: v-bind(modelValue[ "height"]);
-  cursor: v-bind(getCursor);
 }
 
 .tib-bg {
@@ -79,8 +127,6 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   top: 0;
   left: 0;
   overflow: hidden;
-  width: v-bind(modelValue[ "size"]);
-  height: v-bind(modelValue[ "size"]);
   border-radius: 5px;
 }
 
@@ -93,8 +139,6 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
 .tib-icon {
   position: relative;
   overflow: hidden;
-  width: v-bind(modelValue[ "size"]);
-  height: v-bind(modelValue[ "size"]);
   border-radius: 5px;
 }
 
@@ -109,8 +153,6 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   top: 0;
   left: 0;
   display: flex;
-  width: v-bind(modelValue[ "size"]);
-  height: v-bind(modelValue[ "size"]);
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -122,8 +164,6 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   top: 0;
   left: 0;
   display: flex;
-  width: v-bind(modelValue[ "ltSize"]);
-  height: v-bind(modelValue[ "ltSize"]);
   align-items: center;
   justify-content: center;
   padding: 5px;
@@ -140,8 +180,6 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   top: 0;
   right: 0;
   display: flex;
-  width: v-bind(modelValue[ "rtSize"]);
-  height: v-bind(modelValue[ "rtSize"]);
   align-items: center;
   justify-content: center;
   background: rgb(0 0 0 / 40%);
@@ -157,7 +195,6 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   left: 0;
   display: flex;
   width: 100%;
-  height: v-bind(getInnerHeight);
   align-items: center;
   justify-content: center;
   background: rgb(20 20 20 / 40%);
@@ -165,12 +202,9 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   border-bottom-right-radius: 5px;
   color: var(--common-color-white);
   font-family: var(--font-title);
-  font-size: v-bind(getInnerFont);
 }
 
 .tib-inner img {
-  width: v-bind(getInnerHeight);
-  height: v-bind(getInnerHeight);
   margin-right: 5px;
 }
 
@@ -178,9 +212,7 @@ const getOuterFont = computed(() => `${props.modelValue.outerHeight / 2}px`);
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: v-bind(getOuterHeight);
   color: var(--common-text-title);
-  font-size: v-bind(getOuterFont);
   text-align: center;
 }
 </style>

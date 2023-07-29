@@ -11,7 +11,11 @@
             />
           </div>
           <div class="toc-material-grid">
-            <TibCalendarMaterial v-for="item in itemVal.materials" :item="item" />
+            <TibCalendarMaterial
+              v-for="(item, index) in itemVal.materials"
+              :key="index"
+              :item="item"
+            />
           </div>
         </div>
         <img src="/source/UI/item-line.webp" alt="line" class="toc-line" />
@@ -48,7 +52,7 @@ import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 import TibCalendarMaterial from "../itembox/tib-calendar-material.vue";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
-//plugins
+// plugins
 import Mys from "../../plugins/Mys";
 
 interface ToCalendarProps {
@@ -67,18 +71,20 @@ const props = defineProps<ToCalendarProps>();
 
 const visible = computed({
   get: () => props.modelValue,
-  set: (value) => emits("update:modelValue", value),
+  set: (value) => {
+    emits("update:modelValue", value);
+  },
 });
 const itemType = computed(() => props.dataType);
 const itemVal = computed<TGApp.App.Calendar.Item>(() => props.dataVal);
 const snackbar = ref<boolean>(false);
 
-const onCancel = () => {
+const onCancel = (): void => {
   visible.value = false;
   emits("cancel");
 };
 
-function toDetail(item: TGApp.App.Calendar.Item) {
+function toDetail(item: TGApp.App.Calendar.Item): void {
   if (item.contentId === 0) {
     snackbar.value = true;
     return;

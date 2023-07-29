@@ -68,7 +68,7 @@ defineExpose({
   loading,
 });
 
-function positionLastInterval(postId: number) {
+function positionLastInterval(postId: number): void {
   const timeGet = positionTimeGet.value[postId];
   if (timeGet === "未知" || timeGet === "已结束") {
     clearInterval(positionTimer.value[postId]);
@@ -104,7 +104,7 @@ onMounted(async () => {
   loading.value = false;
 });
 
-function getLastPositionTime(time: number) {
+function getLastPositionTime(time: number): string {
   const day = Math.floor(time / (24 * 3600 * 1000));
   const hour = Math.floor((time % (24 * 3600 * 1000)) / (3600 * 1000));
   const minute = Math.floor((time % (3600 * 1000)) / (60 * 1000));
@@ -114,7 +114,7 @@ function getLastPositionTime(time: number) {
     .padStart(2, "0")}:${second.toFixed(0).padStart(2, "0")}`;
 }
 
-async function toPost(card: TGApp.Plugins.Mys.Position.RenderCard) {
+async function toPost(card: TGApp.Plugins.Mys.Position.RenderCard): Promise<void> {
   // 获取路由路径
   const path = router.resolve({
     name: "帖子详情",
