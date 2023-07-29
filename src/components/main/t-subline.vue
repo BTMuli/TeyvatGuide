@@ -8,7 +8,7 @@
 </template>
 <script lang="ts" setup>
 const props = defineProps<{
-  title: string;
+  title?: string;
 }>();
 </script>
 <style lang="css" scoped>
