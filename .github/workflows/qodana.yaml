@@ -1,32 +1,20 @@
-#-------------------------------------------------------------------------------#
-#               Qodana analysis is configured by qodana.yaml file               #
-#             https://www.jetbrains.com/help/qodana/qodana-yaml.html            #
-#-------------------------------------------------------------------------------#
-version: "1.0"
+name: Qodana
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
 
-#Specify inspection profile for code analysis
-profile:
-  name: qodana.starter
-
-#Enable inspections
-#include:
-#  - name: <SomeEnabledInspectionId>
-
-#Disable inspections
-#exclude:
-#  - name: <SomeDisabledInspectionId>
-#    paths:
-#      - <path/where/not/run/inspection>
-
-#The following options are only applied in CI/CD environment
-#These options are ignored during local run
-
-#Execute shell command before Qodana execution
-#bootstrap: sh ./prepare-qodana.sh
-
-#Install IDE plugins before Qodana execution
-#plugins:
-#  - id: <plugin.id> #(plugin id can be found at https://plugins.jetbrains.com)
-
-#Specify Qodana linter for analysis
-linter: jetbrains/qodana-js:latest
+version: 1.0
+jobs:
+  qodana:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: 'Qodana Scan'
+        uses: JetBrains/qodana-action@v2022.3.4
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
