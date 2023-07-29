@@ -4,5 +4,5 @@ printWidth: 100
 useTabs: false
 tabWidth: 2
 bracketSpacing: true
-endOfLine: "crlf"
+endOfLine: auto
 trailingComma: "all"
