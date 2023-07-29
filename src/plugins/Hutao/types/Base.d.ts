@@ -9,7 +9,6 @@
  * @description Hutao 插件基础类型
  * @since Alpha v0.2.1
  * @namespace Base
- * @exports TGApp.plugins.Hutao.Base
  * @return Base
  */
 declare namespace TGApp.Plugins.Hutao.Base {

@@ -9,7 +9,6 @@
  * @description Hutao 深渊类型定义
  * @since Alpha v0.2.1
  * @namespace Abyss
- * @exports TGApp.Plugins.Hutao.Abyss
  * @return Abyss
  */
 declare namespace TGApp.Plugins.Hutao.Abyss {
@@ -102,8 +101,8 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @interface Avatar
    * @property {number} AvatarId - 角色ID
    * @property {number} WeaponId - 武器ID
-   * @property {number[]} reliquarySetIds - 圣遗物套装ID
-   * @property {number} activedConstellationNumber - 已激活命座数量
+   * @property {number[]} ReliquarySetIds - 圣遗物套装ID
+   * @property {number} ActivedConstellationNumber - 已激活命座数量
    * @return Avatar
    */
   export interface Avatar {
