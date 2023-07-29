@@ -2,14 +2,13 @@
  * @file plugins Mys types user.ts
  * @description Mys 插件用户类型定义文件
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Alpha v0.2.2
  */
 
 /**
  * @description Mys 插件用户类型
- * @since Alpha v0.2.1
+ * @since Alpha v0.2.2
  * @namespace User
- * @exports TGApp.plugins.Mys.User
  * @return User
  */
 declare namespace TGApp.Plugins.Mys.User {

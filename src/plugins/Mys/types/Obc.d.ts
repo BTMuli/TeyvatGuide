@@ -9,7 +9,6 @@
  * @description Mys obc 类型
  * @since Alpha v0.2.1
  * @namespace Obc
- * @exports TGApp.plugins.Mys.Obc
  * @return Obc
  */
 declare namespace TGApp.Plugins.Mys.Obc {

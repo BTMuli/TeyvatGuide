@@ -9,7 +9,6 @@
  * @description Mys 插件热点追踪类型
  * @since Alpha v0.2.1
  * @namespace Position
- * @exports TGApp.plugins.Mys.Position
  * @return Position
  */
 declare namespace TGApp.Plugins.Mys.Position {

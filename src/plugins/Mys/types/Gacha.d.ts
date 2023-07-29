@@ -9,7 +9,6 @@
  * @description Mys 卡池类型定义
  * @since Alpha v0.2.1
  * @namespace Gacha
- * @exports TGAApp.Plugins.Mys.Gacha
  * @return Gacha
  */
 declare namespace TGApp.Plugins.Mys.Gacha {

@@ -9,7 +9,6 @@
  * @description Mys 插件抽奖类型
  * @since Alpha v0.2.1
  * @namespace Lottery
- * @exports TGApp.plugins.Mys.Lottery
  * @return Lottery
  */
 declare namespace TGApp.Plugins.Mys.Lottery {

@@ -2,14 +2,13 @@
  * @file plugins Mys types post.d.ts
  * @description Mys 插件帖子类型定义文件
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Alpha v0.2.2
  */
 
 /**
  * @description Mys 插件帖子类型
  * @since Alpha v0.2.1
  * @namespace Post
- * @exports TGApp.plugins.Mys.Post
  * @return Post
  */
 declare namespace TGApp.Plugins.Mys.Post {
@@ -367,7 +366,7 @@ declare namespace TGApp.Plugins.Mys.Post {
 
   /**
    * @description 帖子结构化内容-视频
-   * @since Alpha v0.2.1
+   * @since Alpha v0.2.2
    * @interface StructuredVod
    * @property {number} id 视频 ID
    * @property {number} duration 时长
@@ -401,7 +400,7 @@ declare namespace TGApp.Plugins.Mys.Post {
       label: string;
     }>;
     view_num: number;
-    transcoding_status: number;
+    transcode_status: number;
     review_status: number;
   }
 

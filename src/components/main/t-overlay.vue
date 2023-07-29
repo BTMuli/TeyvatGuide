@@ -18,13 +18,13 @@ interface TolProps {
   hide?: true;
 }
 
-const showTolo = ref(!props.hide);
-const showToli = ref(!props.hide);
-
 const props = withDefaults(defineProps<TolProps>(), {
   modelValue: false,
   blurVal: "20px",
 });
+
+const showTolo = ref(!props.hide);
+const showToli = ref(!props.hide);
 
 watch(
   () => props.modelValue,

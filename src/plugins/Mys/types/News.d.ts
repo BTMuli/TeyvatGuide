@@ -9,7 +9,6 @@
  * @description Mys 插件咨讯类型
  * @since Alpha v0.2.1
  * @namespace News
- * @exports TGApp.plugins.Mys.News
  * @return News
  */
 declare namespace TGApp.Plugins.Mys.News {

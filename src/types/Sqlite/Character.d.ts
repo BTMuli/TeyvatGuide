@@ -37,7 +37,7 @@ declare namespace TGApp.Sqlite.Character {
    * @description 用户角色列表的角色类型
    * @since Alpha v0.2.1
    * @interface UserRole
-   * @property {number} uid- 用户 ID
+   * @property {number} uid - 用户 ID
    * @property {number} cid - 角色 ID
    * @property {string} img - 全身像
    * @property {string} name - 角色名称
