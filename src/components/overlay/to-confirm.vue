@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" :to-click="onCancel" :blur-val="'3px'" hide>
+  <TOverlay v-model="visible" :to-click="onOuter" :blur-val="'3px'" hide>
     <div class="confirm-div">
       <div class="confirm-box">
         <div class="confirm-title">
@@ -44,6 +44,7 @@ interface TOConfirmProps {
   title: string;
   subtitle?: string;
   isInput?: boolean;
+  otcancel?: boolean;
   cancel?: string;
   confirm?: string;
   /** 此值为 true 时显示对话框 */
@@ -63,6 +64,7 @@ const props = withDefaults(defineProps<TOConfirmProps>(), {
   modelValue: false,
   title: "确认",
   subtitle: "",
+  otcancel: true,
   isInput: false,
   cancel: "取消",
   confirm: "确定",
@@ -81,6 +83,10 @@ const inputVal = computed({
     emits("update:modelInput", v);
   },
 });
+
+function onOuter(): void {
+  props.otcancel && onCancel();
+}
 
 function onCancel(): void {
   visible.value = false;
