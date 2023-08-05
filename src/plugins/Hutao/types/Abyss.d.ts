@@ -2,7 +2,7 @@
  * @file src plugins Hutao types Abyss.d.ts
  * @description Hutao 插件深渊类型定义文件
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Alpha v0.2.2
  */
 
 /**
@@ -34,13 +34,19 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
 
   /**
    * @description 深渊记录
-   * @since Alpha v0.2.1
+   * @since Alpha v0.2.2
    * @interface RecordData
    * @property {number} ScheduleId - 深渊期数
    * @property {number} TotalBattleTimes - 总战斗次数
    * @property {number} TotalWinTimes - 总胜利次数
    * @property {number} Damage.AvatarId - 最大伤害角色ID
    * @property {number} Damage.Value - 最大伤害
+   * @property {number} Defeat.AvatarId - 最多击败数角色ID
+   * @property {number} Defeat.Value - 最多击败数
+   * @property {number} EnergySkill.AvatarId - 最多元素爆发释放数角色ID
+   * @property {number} EnergySkill.Value - 最多元素爆发释放数
+   * @property {number} NormalSkill.AvatarId - 最多元素战技释放数角色ID
+   * @property {number} NormalSkill.Value - 最多元素战技释放数
    * @property {number} TakeDamage.AvatarId - 最大承伤角色ID
    * @property {number} TakeDamage.Value - 最大承伤
    * @property {Floor[]} Floors - 楼层信息
@@ -50,6 +56,18 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
     ScheduleId: number;
     TotalBattleTimes: number;
     TotalWinTimes: number;
+    Defeat: {
+      AvatarId: number;
+      Value: number;
+    };
+    EnergySkill: {
+      AvatarId: number;
+      Value: number;
+    };
+    NormalSkill: {
+      AvatarId: number;
+      Value: number;
+    };
     Damage: {
       AvatarId: number;
       Value: number;

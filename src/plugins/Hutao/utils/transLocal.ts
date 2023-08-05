@@ -2,7 +2,7 @@
  * @file plugins Hutao utils transLocal.ts
  * @description 将本地数据转为上传用的数据
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Alpha v0.2.2
  */
 
 /**
@@ -25,17 +25,32 @@ export function transLocal(
 
 /**
  * @description 转换深渊数据
- * @since Alpha v0.2.1
+ * @since Alpha v0.2.2
  * @param {TGApp.Sqlite.Abyss.SingleTable} data 本地数据
  * @returns {TGApp.Plugins.Hutao.Abyss.RecordData} 上传用的数据
  */
 function transAbyss(data: TGApp.Sqlite.Abyss.SingleTable): TGApp.Plugins.Hutao.Abyss.RecordData {
+  const defeat: TGApp.Sqlite.Abyss.Character = JSON.parse(data.defeatRank)[0];
+  const energySkill: TGApp.Sqlite.Abyss.Character = JSON.parse(data.energySkillRank)[0];
+  const normalSkill: TGApp.Sqlite.Abyss.Character = JSON.parse(data.normalSkillRank)[0];
   const damage: TGApp.Sqlite.Abyss.Character = JSON.parse(data.damageRank)[0];
   const takeDamage: TGApp.Sqlite.Abyss.Character = JSON.parse(data.takeDamageRank)[0];
   return {
     ScheduleId: data.id,
     TotalBattleTimes: data.totalBattleTimes,
     TotalWinTimes: data.totalWinTimes,
+    Defeat: {
+      AvatarId: defeat.id,
+      Value: defeat.value,
+    },
+    EnergySkill: {
+      AvatarId: energySkill.id,
+      Value: energySkill.value,
+    },
+    NormalSkill: {
+      AvatarId: normalSkill.id,
+      Value: normalSkill.value,
+    },
     Damage: {
       AvatarId: damage.id,
       Value: damage.value,
