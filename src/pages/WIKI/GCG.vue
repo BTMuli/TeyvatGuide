@@ -1,5 +1,5 @@
 <template>
-  <TOLoading v-model="loading" title="正在加载卡牌列表" />
+  <ToLoading v-model="loading" title="正在加载卡牌列表" />
   <v-tabs v-model="tab" align-tabs="start" class="cards-tab">
     <div v-show="!doSearch">
       <v-tab value="character"> 角色牌 </v-tab>
@@ -101,12 +101,12 @@
       </v-card>
     </div>
   </div>
-  <v-snackbar v-model="snackbar" timeout="1500" color="error"> 未找到相关卡牌 </v-snackbar>
+  <v-snackbar v-model="snackbar" timeout="1500" color="error"> {{ snackbarText }} </v-snackbar>
 </template>
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
-import TOLoading from "../../components/overlay/to-loading.vue";
+import ToLoading from "../../components/overlay/to-loading.vue";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
 import { AppGCGData } from "../../data";
@@ -118,6 +118,7 @@ const loading = ref<boolean>(true);
 const allCards = computed(() => AppGCGData);
 // snackbar
 const snackbar = ref<boolean>(false);
+const snackbarText = ref<string>("");
 // search
 const doSearch = ref<boolean>(false);
 const search = ref<string>("");
@@ -138,6 +139,13 @@ onMounted(() => {
 });
 
 function toOuter(cardName: string, cardId: number): void {
+  console.log(cardName, cardId);
+  // 若不存在 contentId
+  if (cardId === -1) {
+    snackbarText.value = "该卡牌暂无外部链接";
+    snackbar.value = true;
+    return;
+  }
   const url = Mys.Api.Obc.replace("{contentId}", cardId.toString());
   createTGWindow(url, "GCG", cardName, 1200, 800, true);
 }
@@ -160,6 +168,7 @@ async function searchCard(): Promise<void> {
   console.log(res);
   loading.value = false;
   if (res.length === 0) {
+    snackbarText.value = "未找到相关卡牌";
     snackbar.value = true;
     doSearch.value = false;
   } else {
