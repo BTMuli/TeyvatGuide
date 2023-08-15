@@ -1,5 +1,16 @@
 [
   {
+    "id": 10000084,
+    "contentId": 0,
+    "name": "林尼",
+    "title": "惑光幻戏",
+    "birthday": [2, 2],
+    "star": 5,
+    "element": "火",
+    "weapon": "弓",
+    "nameCard": "林尼·弄假"
+  },
+  {
     "id": 10000082,
     "contentId": 6489,
     "name": "白术",
@@ -383,6 +394,28 @@
     "element": "冰",
     "weapon": "单手剑",
     "nameCard": "神里绫华·扇子"
+  },
+  {
+    "id": 10000085,
+    "contentId": 0,
+    "name": "菲米尼",
+    "title": "潜怀遐梦",
+    "birthday": [9, 24],
+    "star": 4,
+    "element": "冰",
+    "weapon": "双手剑",
+    "nameCard": "菲米尼·行进"
+  },
+  {
+    "id": 10000083,
+    "contentId": 0,
+    "name": "琳妮特",
+    "title": "丽影绮行",
+    "birthday": [2, 2],
+    "star": 4,
+    "element": "风",
+    "weapon": "单手剑",
+    "nameCard": "琳妮特·成真"
   },
   {
     "id": 10000081,
