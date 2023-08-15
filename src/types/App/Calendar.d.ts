@@ -1,24 +1,23 @@
 /**
  * @file types App Calendar.d.ts
  * @description 应用素材日历相关类型定义文件
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.5
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Alpha v0.2.2
  */
 
 declare namespace TGApp.App.Calendar {
   /**
    * @description 素材日历类型
-   * @since Alpha v0.1.5
+   * @since Alpha v0.2.2
    * @interface Item
-   * @property {number} id - 日历项 ID
+   * @property {number} id - 角色ID/武器ID
    * @property {number} contentId - 观测枢的 content_id
    * @property {number[]} dropDays - 掉落日
-   * @property {string} name - 日历项名称
-   * @property {string} itemType - 日历项类型
-   * @property {number} star - 日历项星级
+   * @property {string} name - 角色/武器名称
+   * @property {string} itemType - 角色|武器
+   * @property {number} star - 角色/武器星级
    * @property {string} bg - 日历项背景
    * @property {string} icon - 日历项图标
-   * @property {string} starIcon - 星级图标
    * @property {string} weaponIcon - 武器类型图标
    * @property {string} elementIcon - 角色元素类型图标
    * @property {Material[]} materials - 日历项需要的素材
@@ -34,7 +33,6 @@ declare namespace TGApp.App.Calendar {
     star: number;
     bg: string;
     icon: string;
-    starIcon: string;
     weaponIcon: string;
     elementIcon: string;
     materials: Material[];
