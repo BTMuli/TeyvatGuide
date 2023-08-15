@@ -15,7 +15,7 @@
 <script lang="ts" setup>
 interface TAOProps {
   title: string;
-  text: string | number;
+  text: string | number | undefined;
 }
 
 defineProps<TAOProps>();

@@ -4,13 +4,14 @@
     <TurOverviewSub title="活跃天数" :text="data.activeDays" />
     <TurOverviewSub title="成就达成数" :text="data.achievementNumber" />
     <TurOverviewSub title="获得角色数" :text="data.avatarNumber" />
+    <TurOverviewSub title="深境螺旋" :text="data.sprialAbyss" />
     <TurOverviewSub title="解锁传送点" :text="data.wayPoints" />
     <TurOverviewSub title="解锁秘境" :text="data.domainNumber" />
     <TurOverviewSub title="风神瞳" :text="data.anemoCulus" />
     <TurOverviewSub title="岩神瞳" :text="data.geoCulus" />
-    <TurOverviewSub title="深境螺旋" :text="data.sprialAbyss" />
     <TurOverviewSub title="雷神瞳" :text="data.electroCulus" />
     <TurOverviewSub title="草神瞳" :text="data.dendroCulus" />
+    <TurOverviewSub title="水神瞳" :text="data.hydroCulus" />
     <TurOverviewSub title="华丽宝箱数" :text="data.luxuriousChest" />
     <TurOverviewSub title="珍贵宝箱数" :text="data.preciousChest" />
     <TurOverviewSub title="精致宝箱数" :text="data.exquisiteChest" />
@@ -35,6 +36,6 @@ const data = computed<TGApp.Sqlite.Record.Stats>(() => JSON.parse(<string>props.
   display: grid;
   width: 100%;
   grid-gap: 10px;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 }
 </style>

@@ -84,6 +84,7 @@ async function refresh(): Promise<void> {
   loading.value = true;
   const res = await TGRequest.User.getRecord(recordCookie.value, user.value);
   if (!("retcode" in res)) {
+    console.log(res);
     loadingTitle.value = "正在保存战绩数据";
     await TGSqlite.saveUserRecord(res, user.value.gameUid);
     await initUserRecordData();

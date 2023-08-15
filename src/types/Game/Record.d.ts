@@ -2,7 +2,7 @@
  * @file types Game Record.d.ts
  * @description 原神战绩相关类型定义文件
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.2
  */
 
 declare namespace TGApp.Game.Record {
@@ -88,7 +88,7 @@ declare namespace TGApp.Game.Record {
   /**
    * @description 统计信息类型
    * @interface Stats
-   * @since Alpha v0.2.0
+   * @since Alpha v0.2.2
    * @property {number} active_day_number - 活跃天数
    * @property {number} achievement_number - 成就数量
    * @property {number} anemoculus_number - 风神瞳数量
@@ -104,6 +104,7 @@ declare namespace TGApp.Game.Record {
    * @property {number} electroculus_number - 雷神瞳数量
    * @property {number} magic_chest_number - 奇馈宝箱数量
    * @property {number} dendroculus_number - 草神瞳数量
+   * @property {number} hydroculus_number - 水神瞳数量
    * @return Stats
    */
   export interface Stats {
@@ -122,6 +123,7 @@ declare namespace TGApp.Game.Record {
     electroculus_number: number;
     magic_chest_number: number;
     dendroculus_number: number;
+    hydroculus_number: number;
   }
 
   /**

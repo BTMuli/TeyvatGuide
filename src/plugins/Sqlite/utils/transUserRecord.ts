@@ -2,7 +2,7 @@
  * @file plugins Sqlite utils transUserRecord.ts
  * @description Sqlite 数据转换 用户战绩数据转换模块
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.2
  */
 
 /**
@@ -80,7 +80,7 @@ function transAvatar(data: TGApp.Game.Record.Avatar[]): string {
 
 /**
  * @description 将统计信息转换为数据库中的数据
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.2
  * @param {TGApp.Game.Record.Stats} data 统计信息
  * @return {string} 转换后的统计信息
  */
@@ -95,6 +95,7 @@ function transStat(data: TGApp.Game.Record.Stats): string {
     geoCulus: data.geoculus_number,
     electroCulus: data.electroculus_number,
     dendroCulus: data.dendroculus_number,
+    hydroCulus: data.hydroculus_number,
     sprialAbyss: data.spiral_abyss,
     luxuriousChest: data.luxurious_chest_number,
     preciousChest: data.precious_chest_number,

@@ -2,7 +2,7 @@
  * @file types Sqlite Record.d.ts
  * @description Sqlite 原神战绩相关类型定义文件
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.2
  */
 
 declare namespace TGApp.Sqlite.Record {
@@ -73,7 +73,7 @@ declare namespace TGApp.Sqlite.Record {
   /**
    * @description 统计信息类型
    * @interface Stats
-   * @since Alpha v0.2.0
+   * @since Alpha v0.2.2
    * @property {number} activeDays - 活跃天数
    * @property {number} achievementNumber - 成就达成数
    * @property {number} avatarNumber - 获得角色数
@@ -83,6 +83,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {number} geoCulus - 岩神瞳数
    * @property {number} electroCulus - 雷神瞳数
    * @property {number} dendroCulus - 草神瞳数
+   * @property {number} hydroCulus - 水神瞳数
    * @property {string} sprialAbyss - 深境螺旋信息
    * @property {number} luxuriousChest - 华丽宝箱数
    * @property {number} preciousChest - 珍贵宝箱数
@@ -101,6 +102,7 @@ declare namespace TGApp.Sqlite.Record {
     geoCulus: number;
     electroCulus: number;
     dendroCulus: number;
+    hydroCulus: number;
     sprialAbyss: string;
     luxuriousChest: number;
     preciousChest: number;
