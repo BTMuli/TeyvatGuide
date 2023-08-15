@@ -27,6 +27,24 @@
     "profile": "/source/nameCard/profile/稻妻·神樱.webp"
   },
   {
+    "name": "枫丹·奇械",
+    "type": 0,
+    "desc": "名片纹饰。枫丹发条机关通用能源模块的标志。关于要不要注册为商标曾经有过大讨论。总之呼吁大家不要随意使用。",
+    "source": "枫丹的声望等级达到4级时获取。",
+    "icon": "/source/nameCard/icon/枫丹·奇械.webp",
+    "bg": "/source/nameCard/bg/枫丹·奇械.webp",
+    "profile": "/source/nameCard/profile/枫丹·奇械.webp"
+  },
+  {
+    "name": "枫丹·新闻",
+    "type": 0,
+    "desc": "名片纹饰。蒸汽鸟报的商标。保留一切权利。一旦发现盗用，我们一定通过法律手段维护到底！",
+    "source": "枫丹的声望等级达到8级时获取。",
+    "icon": "/source/nameCard/icon/枫丹·新闻.webp",
+    "bg": "/source/nameCard/bg/枫丹·新闻.webp",
+    "profile": "/source/nameCard/profile/枫丹·新闻.webp"
+  },
+  {
     "name": "璃月·千帆",
     "type": 0,
     "desc": "名片纹饰。坐看日月行，细数千帆过。",
@@ -169,6 +187,15 @@
     "icon": "/source/nameCard/icon/成就·逢缘.webp",
     "bg": "/source/nameCard/bg/成就·逢缘.webp",
     "profile": "/source/nameCard/profile/成就·逢缘.webp"
+  },
+  {
+    "name": "成就·轨迹",
+    "type": 1,
+    "desc": "名片纹饰。「至高的王上啊，深秘院为你呈上预测的结果：双星早已被大地的引力捕获…经历了漫长的归回周期，如今它们的轨迹将要再度交错。」",
+    "source": "达成「异世相逢·第四辑」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/成就·轨迹.webp",
+    "bg": "/source/nameCard/bg/成就·轨迹.webp",
+    "profile": "/source/nameCard/profile/成就·轨迹.webp"
   },
   {
     "name": "成就·合扇",
@@ -405,6 +432,15 @@
     "profile": "/source/nameCard/profile/成就·游遍.webp"
   },
   {
+    "name": "成就·游涉",
+    "type": 1,
+    "desc": "名片纹饰。旅人曾用手触摸万千条水流，它们从世界的源头淌来，最终也将归于同一之海。",
+    "source": "达成「尘世巡游·第四辑」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/成就·游涉.webp",
+    "bg": "/source/nameCard/bg/成就·游涉.webp",
+    "profile": "/source/nameCard/profile/成就·游涉.webp"
+  },
+  {
     "name": "稻妻·常世",
     "type": 1,
     "desc": "名片纹饰。「啊，伟大的太阳啊！假若你不拥有你照耀的一切，你的光热有何意义？」",
@@ -439,6 +475,15 @@
     "icon": "/source/nameCard/icon/稻妻·珊瑚宫之纹.webp",
     "bg": "/source/nameCard/bg/稻妻·珊瑚宫之纹.webp",
     "profile": "/source/nameCard/profile/稻妻·珊瑚宫之纹.webp"
+  },
+  {
+    "name": "枫丹·审判",
+    "type": 1,
+    "desc": "名片纹饰。新任水之神的纹章。不需要法律声明，谅也没谁敢随意使用。",
+    "source": "达成「枫丹·白露澈明的泉舞·其之一」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/枫丹·审判.webp",
+    "bg": "/source/nameCard/bg/枫丹·审判.webp",
+    "profile": "/source/nameCard/profile/枫丹·审判.webp"
   },
   {
     "name": "璃月·岩寂",
@@ -1294,6 +1339,15 @@
     "icon": "/source/nameCard/icon/纪行·溢彩.webp",
     "bg": "/source/nameCard/bg/纪行·溢彩.webp",
     "profile": "/source/nameCard/profile/纪行·溢彩.webp"
+  },
+  {
+    "name": "纪行·源水",
+    "type": 3,
+    "desc": "名片纹饰。时计伴着安谧的岁月流转，鱼儿伴着皎澈的源水游旋。若是说万象终有枯竭之日，我的思念又为何澄浄如初？",
+    "source": "纪行系统奖励获取。",
+    "icon": "/source/nameCard/icon/纪行·源水.webp",
+    "bg": "/source/nameCard/bg/纪行·源水.webp",
+    "profile": "/source/nameCard/profile/纪行·源水.webp"
   },
   {
     "name": "纪行·蛰醒",
