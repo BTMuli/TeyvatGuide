@@ -120,6 +120,7 @@
     </v-list-item>
     <v-list-item prepend-icon="mdi-content-save" title="数据备份" @click="tryConfirm('backup')" />
     <v-list-item prepend-icon="mdi-content-save" title="数据恢复" @click="tryConfirm('restore')" />
+    <v-list-item prepend-icon="mdi-content-save" title="数据更新" @click="tryConfirm('update')" />
     <v-list-item prepend-icon="mdi-delete" title="清除用户缓存" @click="tryConfirm('delUser')" />
     <v-list-item prepend-icon="mdi-delete" title="清除临时数据" @click="tryConfirm('delTemp')" />
     <v-list-item prepend-icon="mdi-cog" title="恢复默认设置" @click="tryConfirm('delApp')" />
@@ -295,6 +296,12 @@ function tryConfirm(oper: string): void {
       confirmText.value = "确认恢复数据吗？";
       confirmSub.value = "请确保存在备份数据";
       confirmOper.value = "restore";
+      confirmShow.value = true;
+      break;
+    case "update":
+      confirmText.value = "确认更新数据吗？";
+      confirmSub.value = "请确保存在备份数据";
+      confirmOper.value = "updateDB";
       confirmShow.value = true;
       break;
     case "delTemp":

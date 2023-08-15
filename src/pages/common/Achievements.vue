@@ -31,11 +31,7 @@
         <div class="version-icon-series">v{{ series.version }}</div>
         <v-list-item>
           <template #prepend>
-            <v-img
-              width="40px"
-              style="margin-right: 10px"
-              :src="`/source/achievement/${series.id}.webp`"
-            />
+            <v-img width="40px" style="margin-right: 10px" :src="getIcon(series.id)" />
           </template>
           <v-list-item-title>
             {{ series.name }}
@@ -49,7 +45,7 @@
     <!-- 右侧内容-->
     <div class="right-wrap" @scroll="handleScroll">
       <v-list
-        v-if="selectedSeries !== 0 && selectedSeries !== 17 && selectedSeries !== -1"
+        v-if="selectedSeries !== 0 && selectedSeries !== 17 && selectedSeries !== -1 && !loading"
         :style="{
           backgroundImage: 'url(' + getCardImg.bg || null + ')',
           backgroundPosition: 'right',
@@ -126,6 +122,7 @@ import { useAchievementsStore } from "../../store/modules/achievements";
 import { createTGWindow } from "../../utils/TGWindow";
 import { getUiafHeader, readUiafData, verifyUiafData } from "../../utils/UIAF";
 import TGSqlite from "../../plugins/Sqlite";
+import { AppAchievementSeriesData } from "../../data";
 
 // Store
 const achievementsStore = useAchievementsStore();
@@ -322,6 +319,10 @@ async function exportJson(): Promise<void> {
     snackbarText.value = "导出已取消";
     snackbar.value = true;
   }
+}
+
+function getIcon(series: number): string {
+  return AppAchievementSeriesData.find((item) => item.id === series)?.icon;
 }
 </script>
 

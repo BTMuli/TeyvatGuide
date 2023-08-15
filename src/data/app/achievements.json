@@ -2160,6 +2160,186 @@
     "version": "3.6"
   },
   {
+    "id": 80252,
+    "series": 42,
+    "order": 232,
+    "name": "大地勘探·百泉谐律之地·其一",
+    "description": "点亮枫丹区域中，枫丹廷区、白露区、苍晶区的地图。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 80253,
+    "series": 42,
+    "order": 233,
+    "name": "行汲众水的泉源·其一",
+    "description": "解锁枫丹区域中，枫丹廷区、白露区、苍晶区所有传送锚点。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 80254,
+    "series": 42,
+    "order": 234,
+    "name": "圣龛巡礼·百泉谐律之地·其一",
+    "description": "解除枫丹区域中，枫丹廷区、白露区、苍晶区所有地灵龛的封印。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 80255,
+    "series": 42,
+    "order": 235,
+    "name": "如水澄湛",
+    "description": "将枫丹的七天神像供奉至满级。",
+    "reward": 20,
+    "version": "4.0"
+  },
+  {
+    "id": 80256,
+    "series": 42,
+    "order": 236,
+    "name": "露景的清歌",
+    "description": "将枫丹廷区的露景泉等级提升至满级。",
+    "reward": 20,
+    "version": "4.0"
+  },
+  {
+    "id": 80257,
+    "series": 42,
+    "order": 237,
+    "name": "汐海引路人·其一",
+    "description": "在枫丹廷区、白露区、苍晶区追随6个仙灵，并点亮仙灵之庭。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 80258,
+    "series": 42,
+    "order": 238,
+    "name": "汐海引路人·其一",
+    "description": "在枫丹廷区、白露区、苍晶区追随12个仙灵，并点亮仙灵之庭。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 80259,
+    "series": 42,
+    "order": 239,
+    "name": "汐海引路人·其一",
+    "description": "在枫丹廷区、白露区、苍晶区追随24个仙灵，并点亮仙灵之庭。",
+    "reward": 20,
+    "version": "4.0"
+  },
+  {
+    "id": 80260,
+    "series": 42,
+    "order": 240,
+    "name": "沧浪的寻宝者·其一",
+    "description": "在枫丹廷区、白露区、苍晶区开启60个宝箱。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 80261,
+    "series": 42,
+    "order": 241,
+    "name": "沧浪的寻宝者·其一",
+    "description": "在枫丹廷区、白露区、苍晶区开启120个宝箱。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 80262,
+    "series": 42,
+    "order": 242,
+    "name": "沧浪的寻宝者·其一",
+    "description": "在枫丹廷区、白露区、苍晶区开启240个宝箱。",
+    "reward": 20,
+    "version": "4.0"
+  },
+  {
+    "id": 80263,
+    "series": 42,
+    "order": 243,
+    "name": "沧浪的冒险家·其一",
+    "description": "在枫丹廷区、白露区、苍晶区完成3个大世界限时挑战。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 80264,
+    "series": 42,
+    "order": 244,
+    "name": "沧浪的冒险家·其一",
+    "description": "在枫丹廷区、白露区、苍晶区完成6个大世界限时挑战。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 80265,
+    "series": 42,
+    "order": 245,
+    "name": "沧浪的冒险家·其一",
+    "description": "在枫丹廷区、白露区、苍晶区完成12个大世界限时挑战。",
+    "reward": 20,
+    "version": "4.0"
+  },
+  {
+    "id": 80266,
+    "series": 42,
+    "order": 246,
+    "name": "不可思议之国的安",
+    "description": "完成了水仙十字冒险团的故事。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 80267,
+    "series": 42,
+    "order": 247,
+    "name": "画、梦境和机器狗",
+    "description": "知晓了厄里那斯中心的秘密。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 80268,
+    "series": 43,
+    "order": 175,
+    "name": "美泉之地",
+    "description": "掌握「水」的元素力。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 80269,
+    "series": 43,
+    "order": 176,
+    "name": "欺诈师列那",
+    "description": "集齐全套《枫丹动物寓言集》。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 80270,
+    "series": 43,
+    "order": 177,
+    "name": "怪盗与名侦探",
+    "description": "集齐全套《怪盗与名侦探：虹彩胸针之谜》。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 80271,
+    "series": 43,
+    "order": 178,
+    "name": "不幸的总集",
+    "description": "集齐全套《雷穆利亚衰亡史》。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
     "id": 81000,
     "series": 0,
     "order": 1000,
@@ -4941,6 +5121,303 @@
     "version": "3.6"
   },
   {
+    "id": 81340,
+    "series": 0,
+    "order": 1326,
+    "name": "抹消角度的人",
+    "description": "借助结晶体的力量，压制兽境裂隙。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81341,
+    "series": 0,
+    "order": 1327,
+    "name": "炉心冷却",
+    "description": "让翻腾的湖面重归平静。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81342,
+    "series": 0,
+    "order": 1328,
+    "name": "白船",
+    "description": "「她在梦海之上遨游…」",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81344,
+    "series": 0,
+    "order": 1330,
+    "name": "自然哲学百科全书",
+    "description": "靠一面玻璃幕墙和一本无法解读的书发现了过去的结社集会所。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81345,
+    "series": 0,
+    "order": 1331,
+    "name": "枫丹式的消息",
+    "description": "和维吉尔友好地聊了聊。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81346,
+    "series": 0,
+    "order": 1332,
+    "name": "不过是条猎犬…",
+    "description": "帮助玛梅赫修好了西摩尔。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81347,
+    "series": 0,
+    "order": 1333,
+    "name": "是鱼肉，我加了鱼肉",
+    "description": "与美露莘们一起品尝了奇妙的「生日蛋糕」。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81348,
+    "series": 0,
+    "order": 1334,
+    "name": "欢迎来到枫丹",
+    "description": "完成一次巡轨船的航行。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81349,
+    "series": 0,
+    "order": 1335,
+    "name": "飞行的梦想",
+    "description": "完成一次「安东·罗杰飞行器」的航程。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81350,
+    "series": 0,
+    "order": 1336,
+    "name": "现代钟表的诞生",
+    "description": "帮助芙佳找到矿石的「用处」。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81351,
+    "series": 0,
+    "order": 1337,
+    "name": "未来水世界",
+    "description": "见到「水面」之下的「水体」。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81352,
+    "series": 0,
+    "order": 1338,
+    "name": "丑的美学",
+    "description": "枫丹朝美的方向前进了两步。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81353,
+    "series": 0,
+    "order": 1339,
+    "name": "就像雨中的泪水",
+    "description": "揪出隐藏在猎刀鳐中的伪装者。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81355,
+    "series": 0,
+    "order": 1341,
+    "name": "这是我喜爱的事物中…",
+    "description": "…小小的一部分。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81356,
+    "series": 0,
+    "order": 1342,
+    "name": "还施彼身",
+    "description": "解决很烦人的子弹藤壶！",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81357,
+    "series": 0,
+    "order": 1343,
+    "name": "你是否相信极乐城？",
+    "description": "帮助缔造膨膨兽的乐园。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81358,
+    "series": 0,
+    "order": 1344,
+    "name": "历经艰险…",
+    "description": "「…为了取得击败魔王的圣剑，骑士闯入了魔法封印的古城…」",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81359,
+    "series": 0,
+    "order": 1345,
+    "name": "从此以后…",
+    "description": "「…骑士战胜了魔王，救出了被囚禁的公主。王国终于恢复了光明…」",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81360,
+    "series": 0,
+    "order": 1346,
+    "name": "黑字的研究",
+    "description": "发现了自然哲学学院研究的…比较特别的对象。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81361,
+    "series": 0,
+    "order": 1347,
+    "name": "两万里格的漫游",
+    "description": "随波逐流…",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81362,
+    "series": 0,
+    "order": 1329,
+    "name": "真是让人垂涎欲滴",
+    "description": "帮助恩里改变命运。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81363,
+    "series": 0,
+    "order": 1348,
+    "name": "旧日之歌",
+    "description": "聆听来自悠远年代的伟大乐章。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81364,
+    "series": 0,
+    "order": 1349,
+    "name": "「湖畔的尼尼安涅」",
+    "description": "战胜地方传奇·湖畔的尼尼安涅。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81365,
+    "series": 0,
+    "order": 1350,
+    "name": "「湖畔的维维安涅」",
+    "description": "战胜地方传奇·湖畔的维维安涅。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81366,
+    "series": 0,
+    "order": 1351,
+    "name": "恪尽其责的企盼",
+    "description": "物归原主…",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81367,
+    "series": 0,
+    "order": 1352,
+    "name": "追忆泉华的时光",
+    "description": "枫丹的声望等级达到10级。",
+    "reward": 20,
+    "version": "4.0"
+  },
+  {
+    "id": 81368,
+    "series": 0,
+    "order": 1340,
+    "name": "圆滚滚的创化论",
+    "description": "陪伴幼小的膨膨兽健康长大。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81369,
+    "series": 0,
+    "order": 1353,
+    "name": "「海原巡回法官」",
+    "description": "战胜地方传奇·海原巡回法官。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81370,
+    "series": 0,
+    "order": 1354,
+    "name": "「铁皮子爵」",
+    "description": "战胜地方传奇·铁皮子爵。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81371,
+    "series": 0,
+    "order": 1355,
+    "name": "「隐者王·多尔库」",
+    "description": "战胜地方传奇·隐者王·多尔库。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81372,
+    "series": 0,
+    "order": 1356,
+    "name": "「渐渐隐去的老兵」",
+    "description": "战胜地方传奇「渐渐隐去的老兵」。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81373,
+    "series": 0,
+    "order": 1357,
+    "name": "「深谷之剑」",
+    "description": "战胜地方传奇·深谷之剑。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 81374,
+    "series": 0,
+    "order": 1358,
+    "name": "「双生妖精骑士」",
+    "description": "战胜地方传奇·双生妖精骑士。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
@@ -6408,6 +6885,60 @@
     "version": "3.6"
   },
   {
+    "id": 82175,
+    "series": 0,
+    "order": 2175,
+    "name": "二河白道之卷",
+    "description": "惜败于与传奇猎刀鳐的决斗中…",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 82176,
+    "series": 0,
+    "order": 2176,
+    "name": "单元格碎片",
+    "description": "通过荒性或芒性的攻击，中断隙境原体的应激状态。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 82177,
+    "series": 0,
+    "order": 2177,
+    "name": "热腾腾！",
+    "description": "不断尝试冰冻浊水幻灵…",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 82178,
+    "series": 0,
+    "order": 2178,
+    "name": "送葬的风暴",
+    "description": "通过芒性的攻击，削弱歌裴莉娅演出高潮时的旋风。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 82179,
+    "series": 0,
+    "order": 2180,
+    "name": "吾王崩御，吾王万岁！",
+    "description": "中断铁甲熔火帝皇的「烈焰加冕」。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 82180,
+    "series": 0,
+    "order": 2179,
+    "name": "坚冰的赌咒",
+    "description": "通过荒性的攻击，移除科培琉司演出高潮时的护罩。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
     "id": 84000,
     "series": 0,
     "order": 4001,
@@ -7263,6 +7794,42 @@
     "version": "3.5"
   },
   {
+    "id": 84096,
+    "series": 0,
+    "order": 5075,
+    "name": "就像水消失在水中",
+    "description": "知晓在枫丹流传的「预言」。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 84097,
+    "series": 0,
+    "order": 5076,
+    "name": "行动派侦探出击",
+    "description": "作为林尼的「代理人」调查事件的真相。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 84098,
+    "series": 0,
+    "order": 5077,
+    "name": "逆转的大魔术",
+    "description": "「谕示裁定枢机」已作出无罪判决。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 84099,
+    "series": 0,
+    "order": 5078,
+    "name": "白露与黑潮的序诗",
+    "description": "完成「白露与黑潮的序诗」。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
     "id": 84100,
     "series": 17,
     "order": 6010,
@@ -7729,6 +8296,42 @@
     "description": "倾听禁闭室里传来的言语声。",
     "reward": 5,
     "version": "3.8"
+  },
+  {
+    "id": 84300,
+    "series": 0,
+    "order": 5079,
+    "name": "我愿是急流",
+    "description": "听见「纯水精灵」的呼唤并与其意识连接。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 84301,
+    "series": 0,
+    "order": 5080,
+    "name": "灰河往事",
+    "description": "在刺玫会的据点下榻并了解到娜维娅父亲的事。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 84302,
+    "series": 0,
+    "order": 5081,
+    "name": "悲剧的复写",
+    "description": "使「少女连环失踪案」真相大白。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 84303,
+    "series": 0,
+    "order": 5082,
+    "name": "仿若无因飘落的轻雨",
+    "description": "完成「仿若无因飘落的轻雨」。",
+    "reward": 10,
+    "version": "4.0"
   },
   {
     "id": 84501,
@@ -8289,6 +8892,51 @@
     "version": "3.3"
   },
   {
+    "id": 84566,
+    "series": 0,
+    "order": 4090,
+    "name": "大街上的办公室",
+    "description": "见证枫丹廷内的些许琐事。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 84567,
+    "series": 0,
+    "order": 4091,
+    "name": "优选风味",
+    "description": "调制出一杯特别的咖啡。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 84568,
+    "series": 0,
+    "order": 4092,
+    "name": "审美力批判",
+    "description": "聆听德皮耶里的「美学」理论。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 84569,
+    "series": 0,
+    "order": 4093,
+    "name": "在童年",
+    "description": "和孩子们一同玩耍，并且见证他们的故事。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
+    "id": 84570,
+    "series": 0,
+    "order": 4094,
+    "name": "一场风波",
+    "description": "见证艾尤恩的工作故事。",
+    "reward": 5,
+    "version": "4.0"
+  },
+  {
     "id": 85000,
     "series": 0,
     "order": 5000,
@@ -8602,5 +9250,86 @@
     "description": "与其他玩家一同战胜掣电树。",
     "reward": 10,
     "version": "3.0"
+  },
+  {
+    "id": 86030,
+    "series": 44,
+    "order": 9029,
+    "name": "永劫回还的终末",
+    "description": "与其他玩家一同战胜兆载永劫龙兽。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 86031,
+    "series": 44,
+    "order": 9030,
+    "name": "略逊半筹",
+    "description": "与其他玩家一同战胜半永恒统辖矩阵。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 86032,
+    "series": 44,
+    "order": 9031,
+    "name": "奇境异草",
+    "description": "与其他玩家一同战胜无相之草。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 86033,
+    "series": 44,
+    "order": 9032,
+    "name": "Dance Like You Want to Win!",
+    "description": "与其他玩家一同战胜「正机之神」。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 86034,
+    "series": 44,
+    "order": 9033,
+    "name": "沙漠之民的成人礼",
+    "description": "与其他玩家一同战胜风蚀沙虫。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 86035,
+    "series": 44,
+    "order": 9034,
+    "name": "有罪推定",
+    "description": "与其他玩家一同战胜深罪浸礼者。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 86036,
+    "series": 44,
+    "order": 9035,
+    "name": "苇海霸者之证",
+    "description": "与其他玩家一同战胜阿佩普的绿洲守望者。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 86037,
+    "series": 44,
+    "order": 9036,
+    "name": "科学的力量真伟大！",
+    "description": "与其他玩家一同完成「冰风组曲」的一项挑战。",
+    "reward": 10,
+    "version": "4.0"
+  },
+  {
+    "id": 86038,
+    "series": 44,
+    "order": 9037,
+    "name": "一次成功的狩猎",
+    "description": "与其他玩家一同战胜铁甲熔火帝皇。",
+    "reward": 10,
+    "version": "4.0"
   }
 ]
