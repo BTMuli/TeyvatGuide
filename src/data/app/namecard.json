@@ -657,6 +657,15 @@
     "profile": "/source/nameCard/profile/珐露珊·封秘.webp"
   },
   {
+    "name": "菲米尼·行进",
+    "type": 2,
+    "desc": "名片纹饰。明明发条在原地打转，玩偶们却在迈步向前。",
+    "source": "菲米尼的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/菲米尼·行进.webp",
+    "bg": "/source/nameCard/bg/菲米尼·行进.webp",
+    "profile": "/source/nameCard/profile/菲米尼·行进.webp"
+  },
+  {
     "name": "菲谢尔·夜鸦",
     "type": 2,
     "desc": "名片纹饰。持有遮日挡月之翼的漆黑夜鸦。「许可你拓画它的纹样！」",
@@ -808,6 +817,24 @@
     "icon": "/source/nameCard/icon/丽莎·沙漏.webp",
     "bg": "/source/nameCard/bg/丽莎·沙漏.webp",
     "profile": "/source/nameCard/profile/丽莎·沙漏.webp"
+  },
+  {
+    "name": "林尼·弄假",
+    "type": 2,
+    "desc": "名片纹饰。魔术有一大分类就是「凭空消失」。林尼的戏法有诸多欺瞒。作为共犯的你如果愿意睁只眼闭只眼，那一切问题都可以消失不见。",
+    "source": "林尼的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/林尼·弄假.webp",
+    "bg": "/source/nameCard/bg/林尼·弄假.webp",
+    "profile": "/source/nameCard/profile/林尼·弄假.webp"
+  },
+  {
+    "name": "琳妮特·成真",
+    "type": 2,
+    "desc": "名片纹饰。魔术有一大分类就是「突然出现」。琳妮特平常虽然都在节约能量，但是认真的一面也会像是魔术帽里的鸽子一样突然出现。",
+    "source": "琳妮特的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/琳妮特·成真.webp",
+    "bg": "/source/nameCard/bg/琳妮特·成真.webp",
+    "profile": "/source/nameCard/profile/琳妮特·成真.webp"
   },
   {
     "name": "流浪者·浮歌",
