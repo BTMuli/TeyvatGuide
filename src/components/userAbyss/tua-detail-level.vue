@@ -1,12 +1,13 @@
 <template>
-  <div class="tud-dl-divider" />
-  <TuaDetailTitle
-    :val="props.modelValue.winStar"
-    :name="`第${props.modelValue.id}间`"
-    mode="level"
-  />
-  <TuaDetailBattle :model-value="props.modelValue.upBattle" />
-  <TuaDetailBattle :model-value="props.modelValue.downBattle" />
+  <div class="tua-dl-box">
+    <TuaDetailTitle
+      :val="props.modelValue.winStar"
+      :name="`第${props.modelValue.id}间`"
+      mode="level"
+    />
+    <TuaDetailBattle :model-value="props.modelValue.upBattle" />
+    <TuaDetailBattle :model-value="props.modelValue.downBattle" />
+  </div>
 </template>
 <script lang="ts" setup>
 // vue
@@ -20,10 +21,13 @@ interface TuaDetailLevelProps {
 const props = defineProps<TuaDetailLevelProps>();
 </script>
 <style lang="css" scoped>
-.tud-dl-divider {
-  width: 100%;
-  height: 1px;
+.tua-dl-box {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
   border-radius: 5px;
-  background: var(--common-text-content);
+  margin-top: 10px;
+  background: var(--common-shadow-1);
+  gap: 10px;
 }
 </style>

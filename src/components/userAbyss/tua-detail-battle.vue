@@ -1,13 +1,15 @@
 <template>
-  <div class="tud-db-time">
-    {{ props.modelValue.time }}
-  </div>
-  <div class="tud-db-icons-grid">
-    <TibAbyssDetail
-      v-for="avatar in props.modelValue.characters"
-      :key="avatar.id"
-      :model-value="avatar"
-    />
+  <div class="tud-db-box">
+    <div class="tud-db-icons-grid">
+      <TibAbyssDetail
+        v-for="avatar in props.modelValue.characters"
+        :key="avatar.id"
+        :model-value="avatar"
+      />
+    </div>
+    <div class="tud-db-time">
+      {{ props.modelValue.time }}
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -20,17 +22,24 @@ interface TuaDetailBattleProps {
 const props = defineProps<TuaDetailBattleProps>();
 </script>
 <style lang="css" scoped>
+.tud-db-box {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .tud-db-icons-grid {
-  display: grid;
-  margin-bottom: 10px;
-  grid-gap: 10px;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 10px;
 }
 
 .tud-db-time {
-  width: 100%;
-  color: var(--common-text-quote);
+  color: var(--common-text-content);
   font-size: 12px;
-  text-align: left;
+  text-align: center;
 }
 </style>

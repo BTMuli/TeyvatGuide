@@ -2,7 +2,7 @@
  * @file assets themes light.css
  * @description 主题样式文件
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Alpha v0.2.3
  */
 
 /* 主题色 */
@@ -12,6 +12,12 @@ html.dark {
   --common-shadow-2: rgb(255 255 255 / 20%);
   --common-shadow-4: rgb(255 255 255 / 40%);
   --common-shadow-8: rgb(255 255 255 / 80%);
+
+  /* box-shadow-transparent */
+  --common-shadow-t-1: rgb(0 0 0 / 10%);
+  --common-shadow-t-2: rgb(0 0 0 / 20%);
+  --common-shadow-t-4: rgb(0 0 0 / 40%);
+  --common-shadow-t-8: rgb(0 0 0 / 80%);
 
   /* box bg */
   --common-bg-1: #3d424b; /* 一级背景色 */

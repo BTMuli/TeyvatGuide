@@ -5,6 +5,7 @@
       :name="`第${props.modelValue.id}层`"
       mode="floor"
     />
+    <div class="tuad-divider" />
     <div class="tuad-index-box">
       <TuaDetailLevel
         v-for="level in props.modelValue.levels"
@@ -25,15 +26,17 @@ interface TuaDetailProps {
 const props = defineProps<TuaDetailProps>();
 </script>
 <style lang="css" scoped>
-.tuad-box {
+.tuad-divider {
   width: 100%;
-  padding: 10px;
+  height: 1px;
   border-radius: 5px;
-  margin-bottom: 10px;
-  background: var(--common-shadow-1);
+  background: var(--common-text-content);
 }
 
 .tuad-index-box {
+  display: grid;
   width: 100%;
+  grid-gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
 }
 </style>

@@ -272,10 +272,9 @@ async function uploadAbyss(): Promise<void> {
 }
 
 .uaw-d-box {
-  display: grid;
-  width: 100%;
-  grid-gap: 10px;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .user-empty {

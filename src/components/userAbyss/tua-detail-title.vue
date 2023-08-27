@@ -40,7 +40,6 @@ const props = defineProps<TuaDetailTitleProps>();
 <style lang="css" scoped>
 .tud-t-box {
   display: flex;
-  width: 100%;
   height: 30px;
   align-items: center;
   justify-content: space-between;
@@ -66,7 +65,9 @@ const props = defineProps<TuaDetailTitleProps>();
 .tud-t-val img {
   width: 20px;
   height: 20px;
+  border-radius: 50%;
   margin-right: 5px;
+  background: var(--common-shadow-4);
   object-fit: cover;
 }
 </style>
