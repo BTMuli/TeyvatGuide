@@ -20,7 +20,7 @@ jobs:
         with:
           version: 8.6.7
       - name: Install frontend dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
       - name: "Qodana Scan"
         uses: JetBrains/qodana-action@v2022.3.4
         env:
