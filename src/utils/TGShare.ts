@@ -2,7 +2,7 @@
  * @file utils TGShare.ts
  * @description 生成分享截图并保存到本地
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.3
  */
 
 // tauri
@@ -57,7 +57,7 @@ export async function saveImgLocal(url: string): Promise<string> {
 
 /**
  * @description 获取分享截图背景色
- * @since Alpha v0.2.0
+ * @since Alpha v0.2.3
  * @returns {string} 背景色
  */
 function getShareImgBgColor(): string {
@@ -66,9 +66,9 @@ function getShareImgBgColor(): string {
     theme = JSON.parse(theme).theme;
   }
   if (theme === "dark") {
-    return "#2c2c2c";
+    return "#363433";
   } else {
-    return "#ece5d8";
+    return "#f9e9cd";
   }
 }
 
