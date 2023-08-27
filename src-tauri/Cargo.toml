@@ -19,7 +19,7 @@ serde_json = "1.0"
 
 [dependencies.tauri-plugin-sql]
 git = "https://github.com/tauri-apps/plugins-workspace"
-branch = "dev"
+branch = "v1"
 features = ["sqlite"]
 
 [features]
