@@ -27,7 +27,7 @@ dependencies:
     specifier: ^3.2.0
     version: 3.2.0(pinia@2.1.6)
   tauri-plugin-sql-api:
-    specifier: github:tauri-apps/tauri-plugin-sql
+    specifier: https://github.com/tauri-apps/tauri-plugin-sql
     version: github.com/tauri-apps/tauri-plugin-sql/b8fd19dac907cc8c3d78681cd4803a326b8b861e
   vue:
     specifier: ^3.3.4
@@ -3620,21 +3620,12 @@ packages:
     dependencies:
       htmlparser2: 8.0.2
       js-tokens: 8.0.1
-      postcss: 8.4.24
-      postcss-safe-parser: 6.0.0(postcss@8.4.24)
+      postcss: 8.4.28
+      postcss-safe-parser: 6.0.0(postcss@8.4.28)
     dev: true
 
   /postcss-resolve-nested-selector@0.1.1:
     resolution: {integrity: sha512-HvExULSwLqHLgUy1rl3ANIqCsvMS0WHss2UOsXhXnQaZ9VCc2oBvIpXrl00IUFT5ZDITME0o6oiXeiHr2SAIfw==}
-    dev: true
-
-  /postcss-safe-parser@6.0.0(postcss@8.4.24):
-    resolution: {integrity: sha512-FARHN8pwH+WiS2OPCxJI8FuRJpTVnn6ZNFiqAM2aeW2LwTHWWmWgIyKC6cUo0L8aeKiF/14MNvnpls6R2PBeMQ==}
-    engines: {node: '>=12.0'}
-    peerDependencies:
-      postcss: ^8.3.3
-    dependencies:
-      postcss: 8.4.24
     dev: true
 
   /postcss-safe-parser@6.0.0(postcss@8.4.28):
