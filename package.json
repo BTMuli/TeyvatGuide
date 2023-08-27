@@ -54,7 +54,7 @@
     "js-md5": "^0.7.3",
     "pinia": "^2.1.6",
     "pinia-plugin-persistedstate": "^3.2.0",
-    "tauri-plugin-sql-api": "https://github.com/tauri-apps/tauri-plugin-sql",
+    "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql",
     "vue": "^3.3.4",
     "vue-json-viewer": "^3.0.4",
     "vue-router": "^4.2.4",

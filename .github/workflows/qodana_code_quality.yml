@@ -8,7 +8,9 @@ on:
 
 jobs:
   qodana:
-    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
       - name: setup node
@@ -20,7 +22,7 @@ jobs:
         with:
           version: 8.6.7
       - name: Install frontend dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: "Qodana Scan"
         uses: JetBrains/qodana-action@v2022.3.4
         env:
