@@ -881,7 +881,7 @@
   },
   {
     "id": 10000084,
-    "contentId": 0,
+    "contentId": 6937,
     "dropDays": [1, 4, 7],
     "name": "林尼",
     "itemType": "character",
@@ -1757,50 +1757,6 @@
       "area": "须弥",
       "name": "妙语",
       "icon": "/icon/nation/须弥.webp"
-    }
-  },
-  {
-    "id": 10000085,
-    "contentId": 0,
-    "dropDays": [2, 5, 7],
-    "name": "菲米尼",
-    "itemType": "character",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/双手剑.webp",
-    "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000085.webp",
-    "materials": [
-      {
-        "id": 104341,
-        "name": "「正义」的教导",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/104341.webp"
-      },
-      {
-        "id": 104342,
-        "name": "「正义」的指引",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/104342.webp"
-      },
-      {
-        "id": 104343,
-        "name": "「正义」的哲学",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/104343.webp"
-      }
-    ],
-    "source": {
-      "index": 5,
-      "area": "枫丹",
-      "name": "箴铭",
-      "icon": "/icon/nation/枫丹.webp"
     }
   },
   {
@@ -3037,7 +2993,7 @@
   },
   {
     "id": 10000083,
-    "contentId": 0,
+    "contentId": 6938,
     "dropDays": [3, 6, 7],
     "name": "琳妮特",
     "itemType": "character",
@@ -4203,7 +4159,7 @@
   },
   {
     "id": 15512,
-    "contentId": 0,
+    "contentId": 6936,
     "dropDays": [1, 4, 7],
     "name": "最初的大魔术",
     "itemType": "weapon",
@@ -5172,7 +5128,7 @@
   },
   {
     "id": 11424,
-    "contentId": 0,
+    "contentId": 6970,
     "dropDays": [1, 4, 7],
     "name": "狼牙",
     "itemType": "weapon",
@@ -5988,7 +5944,7 @@
   },
   {
     "id": 11426,
-    "contentId": 0,
+    "contentId": 7046,
     "dropDays": [1, 4, 7],
     "name": "灰河渡手",
     "itemType": "weapon",
@@ -6039,7 +5995,7 @@
   },
   {
     "id": 11425,
-    "contentId": 0,
+    "contentId": 7042,
     "dropDays": [2, 5, 7],
     "name": "海渊终曲",
     "itemType": "weapon",
@@ -6906,7 +6862,7 @@
   },
   {
     "id": 12424,
-    "contentId": 0,
+    "contentId": 6967,
     "dropDays": [2, 5, 7],
     "name": "聊聊棒",
     "itemType": "weapon",
@@ -7008,7 +6964,7 @@
   },
   {
     "id": 12425,
-    "contentId": 0,
+    "contentId": 7043,
     "dropDays": [3, 6, 7],
     "name": "浪影阔剑",
     "itemType": "weapon",
@@ -7977,7 +7933,7 @@
   },
   {
     "id": 15424,
-    "contentId": 0,
+    "contentId": 6968,
     "dropDays": [3, 6, 7],
     "name": "烈阳之嗣",
     "itemType": "weapon",
@@ -8079,7 +8035,7 @@
   },
   {
     "id": 15425,
-    "contentId": 0,
+    "contentId": 7041,
     "dropDays": [1, 4, 7],
     "name": "静谧之曲",
     "itemType": "weapon",
@@ -8742,7 +8698,7 @@
   },
   {
     "id": 14424,
-    "contentId": 0,
+    "contentId": 6969,
     "dropDays": [1, 4, 7],
     "name": "遗祀玉珑",
     "itemType": "weapon",
@@ -8997,7 +8953,7 @@
   },
   {
     "id": 14425,
-    "contentId": 0,
+    "contentId": 7045,
     "dropDays": [2, 5, 7],
     "name": "纯水流华",
     "itemType": "weapon",
@@ -9762,7 +9718,7 @@
   },
   {
     "id": 13425,
-    "contentId": 0,
+    "contentId": 7044,
     "dropDays": [3, 6, 7],
     "name": "公义的酬报",
     "itemType": "weapon",
@@ -9813,7 +9769,7 @@
   },
   {
     "id": 13424,
-    "contentId": 0,
+    "contentId": 6966,
     "dropDays": [3, 6, 7],
     "name": "峡湾长歌",
     "itemType": "weapon",
