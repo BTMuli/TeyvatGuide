@@ -213,10 +213,13 @@ onUnmounted(() => {
 
 <style lang="css" scoped>
 .pool-box {
+  display: flex;
+  flex-direction: column;
   padding: 10px;
   border-radius: 5px;
   margin-bottom: 10px;
   box-shadow: 0 0 10px var(--common-shadow-4);
+  gap: 10px;
 }
 
 .pool-title {
@@ -236,15 +239,16 @@ onUnmounted(() => {
 }
 
 .pool-grid {
-  display: grid;
-  margin-top: 10px;
-  gap: 20px;
-  grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .pool-card {
   position: relative;
   overflow: hidden;
+  width: 50%;
   border-radius: 5px;
   background: var(--common-bg-1);
   color: var(--common-bgt-1);
