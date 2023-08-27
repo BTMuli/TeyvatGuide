@@ -2,12 +2,12 @@
 Author: 目棃
 Date: 2023-06-18
 Description: CHANGELOG
-Update: 2023-08-15
+Update: 2023-08-27
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-06-18 15:03:42 `
 >
-> 更新于 `2023-08-15 17:55:56`
+> 更新于 `2023-08-27 14:57:22`
 
 # CHANGELOG
 
@@ -27,7 +27,7 @@ Update: 2023-08-15
 - 深渊：适应 HutaoAPI 更新 [`00277f52`](https://github.com/BTMuli/Tauri.Genshin/commit/00277f52)
 - 素材日历：变更数据来源
 
-FullCommits: [`0.2.1...0.2.2`](https://github.com/BTMuli/Tauri.Genshin/compare/0.2.1...0.2.2)
+FullCommits: [`v0.2.1...v0.2.2`](https://github.com/BTMuli/Tauri.Genshin/compare/v0.2.1...v0.2.2)
 
 ## [0.2.1](https://github.com/BTMuli/Tauri.Genshin/releases/0.2.1) (2023-07-14)
 
@@ -53,7 +53,7 @@ FullCommits: [`0.2.1...0.2.2`](https://github.com/BTMuli/Tauri.Genshin/compare/0
 - 配置：优化 Eslint Prettier Stylelint Lint-Staged 等配置
 - 重构：重构 Mys 插件数据类型及 Hutao 插件数据类型
 
-Full Commits: [`0.2.0...0.2.1`](https://github.com/BTMuli/Tauri.Genshin/compare/0.2.0...0.2.1)
+Full Commits: [`v0.2.0...v0.2.1`](https://github.com/BTMuli/Tauri.Genshin/compare/v0.2.0...v0.2.1)
 
 ## [0.2.0](https://github.com/BTMuli/Tauri.Genshin/releases/0.2.0) (2023-06-19)
 
