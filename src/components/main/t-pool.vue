@@ -5,50 +5,45 @@
       限时祈愿
     </div>
     <div v-if="!loading" class="pool-grid">
-      <v-card v-for="pool in poolCards" :key="pool.postId" class="pool-card">
-        <v-list class="pool-list">
-          <v-list-item :title="pool.title" :subtitle="pool.subtitle">
-            <!-- todo 点击播放语音 -->
-            <template #prepend>
-              <img :src="pool.voice.icon" class="pool-voice-icon" alt="icon" />
-            </template>
-            <template v-if="pool.voice.url" #append>
-              <audio :src="pool.voice.url" controls />
-            </template>
-          </v-list-item>
-        </v-list>
+      <div v-for="pool in poolCards" :key="pool.postId" class="pool-card">
         <div class="pool-cover" @click="toPost(pool)">
           <img :src="pool.cover" alt="cover" />
         </div>
-        <div class="pool-character">
-          <div class="pool-icon-grid">
-            <div
-              v-for="character in pool.characters"
-              :key="character.url"
-              class="pool-icon"
-              @click="toOuter(character.url, pool.title)"
-            >
-              <img :src="character.icon" alt="character" />
+        <div class="pool-bottom">
+          <div class="pool-character">
+            <div class="pool-icon-grid">
+              <div
+                v-for="character in pool.characters"
+                :key="character.url"
+                class="pool-icon"
+                @click="toOuter(character.url, pool.title)"
+              >
+                <img :src="character.icon" alt="character" />
+              </div>
             </div>
           </div>
-          <div class="pool-clock">
-            <v-progress-circular
-              :model-value="poolTimePass[pool.postId]"
-              size="100"
-              width="10"
-              :color="poolColor[pool.postId]"
+          <div class="pool-time">
+            <div class="pool-time-dur">
+              <v-icon>mdi-calendar-clock</v-icon>
+              {{ pool.time.start }}~{{ pool.time.end }}
+            </div>
+            <v-progress-linear :model-value="poolTimePass[pool.postId]" :rounded="true">
+            </v-progress-linear>
+            <div
+              v-if="poolTimeGet[pool.postId] === '已结束'"
+              :style="{ color: poolColor[pool.postId] }"
             >
               {{ poolTimeGet[pool.postId] }}
-            </v-progress-circular>
+            </div>
+            <div v-else>
+              <span>剩余时间：</span>
+              <span :style="{ color: poolColor[pool.postId] }">
+                {{ poolTimeGet[pool.postId] }}
+              </span>
+            </div>
           </div>
         </div>
-        <v-card-text>
-          <span style="width: 60%">
-            <v-icon>mdi-calendar-clock</v-icon>
-            {{ pool.time.start }}~{{ pool.time.end }}
-          </span>
-        </v-card-text>
-      </v-card>
+      </div>
     </div>
     <v-snackbar v-model="showBar" :color="barColor" timeout="1000">
       {{ barText }}
@@ -92,7 +87,7 @@ defineExpose({
   loading,
 });
 
-function poolLastInterval(postId: number): void {
+function poolLastInterval(postId: number): TGApp.Plugins.Mys.Gacha.RenderCard | undefined {
   const pool = poolCards.value.find((pool) => pool.postId === postId);
   if (!pool) return;
   if (poolTimeGet.value[postId] === "未开始") {
@@ -122,6 +117,8 @@ onMounted(async () => {
     console.error("获取限时祈愿数据失败");
     return;
   }
+  console.log("获取限时祈愿数据成功");
+  console.info(gachaData);
   if (!checkCover(gachaData)) {
     poolCards.value = await Mys.Gacha.card(gachaData);
     const coverData: Record<number, string> = {};
@@ -241,42 +238,31 @@ onUnmounted(() => {
 .pool-grid {
   display: grid;
   margin-top: 10px;
-  grid-gap: 20px;
+  gap: 20px;
   grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
 }
 
 .pool-card {
+  position: relative;
+  overflow: hidden;
   border-radius: 5px;
   background: var(--common-bg-1);
   color: var(--common-bgt-1);
 }
 
-.pool-list {
-  background: inherit;
-  color: inherit;
-  font-family: var(--font-title);
-}
-
-.pool-voice-icon {
-  width: 40px;
-  height: 40px;
-  transform: translateY(-5px);
-}
-
 .pool-cover {
   display: flex;
   overflow: hidden;
-  width: calc(100% - 40px);
+  width: 100%;
   height: auto;
   align-items: center;
   justify-content: center;
   border-radius: 5px;
-  margin: 0 20px 10px;
 }
 
 .pool-cover img {
   width: 100%;
-  border-radius: 10px;
+  border-radius: 5px;
   transition: all 0.5s;
 }
 
@@ -286,23 +272,45 @@ onUnmounted(() => {
   transition: all 0.5s;
 }
 
-.pool-character {
+.pool-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
   display: flex;
   width: 100%;
-  height: 70px;
-  margin: 0 20px;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(20px);
+  background: rgb(0 0 0/20%);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.pool-character {
+  display: flex;
+  width: auto;
+  height: 60px;
+  margin: 10px;
 }
 
 .pool-icon-grid {
   display: grid;
   grid-column-gap: 10px;
-  grid-template-columns: repeat(4, 70px);
+  grid-template-columns: repeat(4, 60px);
 }
 
 .pool-icon {
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
+  border: 1px solid rgb(255 255 255 / 50%);
   border-radius: 5px;
+  box-shadow: 0 0 5px rgb(0 0 0/20%);
+  transition: all ease-in-out 0.3s;
+}
+
+.pool-icon:hover {
+  transform: scale(1.1);
+  transition: all ease-in-out 0.3s;
 }
 
 .pool-icon img {
@@ -312,8 +320,15 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.pool-clock {
-  margin-left: 60px;
-  font-size: small;
+.pool-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-right: 10px;
+  color: #faf7e8;
+  font-size: 12px;
+  gap: 10px;
+  text-align: left;
 }
 </style>
