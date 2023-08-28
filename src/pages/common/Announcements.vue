@@ -199,8 +199,13 @@ async function toJson(item: TGApp.App.Announcement.ListCard): Promise<void> {
 .anno-card-title {
   position: relative;
   height: 50px;
-  transition: padding-top 0.3s linear, padding-bottom 0.3s linear, background 0.3s linear,
-    font-size 0.3s linear, line-height 0.3s linear, white-space 0.3s linear;
+  transition:
+    padding-top 0.3s linear,
+    padding-bottom 0.3s linear,
+    background 0.3s linear,
+    font-size 0.3s linear,
+    line-height 0.3s linear,
+    white-space 0.3s linear;
 }
 
 .anno-card-title:hover {
