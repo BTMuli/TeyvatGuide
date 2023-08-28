@@ -64,13 +64,11 @@
       <span>暂无数据，请尝试刷新</span>
     </div>
   </div>
-  <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="1500">
-    {{ snackbarText }}
-  </v-snackbar>
 </template>
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
+import snackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TSubLine from "../../components/main/t-subline.vue";
 import TuaOverview from "../../components/userAbyss/tua-overview.vue";
@@ -89,10 +87,6 @@ const userStore = useUserStore();
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>();
 const loadingSub = ref<string>();
-// snackbar
-const snackbar = ref<boolean>(false);
-const snackbarColor = ref<string>("success");
-const snackbarText = ref<string>();
 
 // data
 const userTab = ref<number>(0);
@@ -152,9 +146,10 @@ function toAbyss(id: number): void {
   if (abyssFind) {
     curAbyss.value = abyssFind;
   } else {
-    snackbarColor.value = "error";
-    snackbarText.value = "未找到该深渊数据";
-    snackbar.value = true;
+    snackbar({
+      text: "未找到该深渊数据",
+      color: "error",
+    });
   }
 }
 
@@ -184,20 +179,18 @@ async function uploadAbyss(): Promise<void> {
     return;
   }
   loadingTitle.value = "正在转换角色数据";
-  transAbyss.avatars = Hutao.Abyss.utils.transAvatars(roles);
+  transAbyss.Avatars = Hutao.Abyss.utils.transAvatars(roles);
   loadingTitle.value = "正在上传深渊数据";
   const res = await Hutao.Abyss.postData(transAbyss);
-  if (res.retcode === 0) {
-    snackbarColor.value = "success";
-    snackbarText.value = res.message;
-  } else {
-    snackbarColor.value = "error";
-    snackbarText.value = res.message;
-  }
   loading.value = false;
-  setTimeout(() => {
-    snackbar.value = true;
-  }, 200);
+  if (res.retcode === 0) {
+    snackbar({ text: <string>res.message });
+  } else {
+    snackbar({
+      text: <string>res.message,
+      color: "error",
+    });
+  }
 }
 </script>
 <style lang="css" scoped>

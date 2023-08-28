@@ -263,9 +263,6 @@
       </div>
     </v-window-item>
   </v-window>
-  <v-snackbar v-model="snackbar" timeout="1500" :color="snackbarColor">
-    {{ snackbarText }}
-  </v-snackbar>
   <ToChannel v-model="showList" />
 </template>
 
@@ -273,6 +270,7 @@
 // vue
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import snackbar from "../components/func/snackbar";
 import ToLoading from "../components/overlay/to-loading.vue";
 import ToChannel from "../components/overlay/to-channel.vue";
 // store
@@ -294,10 +292,6 @@ const appStore = useAppStore();
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载");
 const loadingSub = ref<boolean>(false);
-// snackbar
-const snackbar = ref<boolean>(false);
-const snackbarText = ref<string>("");
-const snackbarColor = ref<string>("success");
 
 // search
 const search = ref<string>("");
@@ -373,9 +367,10 @@ async function switchAnno(): Promise<void> {
 async function loadMore(data: "notice" | "activity" | "news"): Promise<void> {
   loadingSub.value = true;
   if (rawData.value[data].isLast) {
-    snackbarText.value = "已经是最后一页了";
-    snackbarColor.value = "#35acce";
-    snackbar.value = true;
+    snackbar({
+      text: "已经是最后一页了",
+      color: "warn",
+    });
     loadingSub.value = false;
     return;
   }
@@ -389,9 +384,10 @@ async function loadMore(data: "notice" | "activity" | "news"): Promise<void> {
   const getCard = Mys.News.card[data](getData);
   postData.value[data] = postData.value[data].concat(getCard);
   if (rawData.value[data].isLast) {
-    snackbarText.value = "已经是最后一页了";
-    snackbarColor.value = "#35acce";
-    snackbar.value = true;
+    snackbar({
+      text: "已经是最后一页了",
+      color: "warn",
+    });
     loadingSub.value = false;
     loading.value = false;
     return;
@@ -407,7 +403,6 @@ async function toPost(item: TGApp.Plugins.Mys.News.RenderCard | string): Promise
     const path = router.resolve({
       name: "帖子详情",
       params: {
-        // eslint-disable-next-line camelcase
         post_id: item,
       },
     }).href;
@@ -428,7 +423,6 @@ async function toJson(item: TGApp.Plugins.Mys.News.RenderCard | string): Promise
     const path = router.resolve({
       name: "帖子详情（JSON）",
       params: {
-        // eslint-disable-next-line camelcase
         post_id: item,
       },
     }).href;
@@ -446,9 +440,10 @@ async function toJson(item: TGApp.Plugins.Mys.News.RenderCard | string): Promise
 
 async function searchPost(): Promise<void> {
   if (search.value === "") {
-    snackbarText.value = "请输入搜索内容";
-    snackbarColor.value = "error";
-    snackbar.value = true;
+    snackbar({
+      text: "请输入搜索内容",
+      color: "error",
+    });
     return;
   }
   if (!isNaN(Number(search.value))) {
@@ -457,9 +452,10 @@ async function searchPost(): Promise<void> {
       await toJson(search.value);
     }
   } else {
-    snackbarText.value = "请输入搜索内容";
-    snackbarColor.value = "error";
-    snackbar.value = true;
+    snackbar({
+      text: "请输入搜索内容",
+      color: "error",
+    });
   }
 }
 </script>
@@ -519,8 +515,13 @@ async function searchPost(): Promise<void> {
   position: relative;
   height: 50px;
   color: var(--common-text-title);
-  transition: padding-top 0.3s linear, padding-bottom 0.3s linear, background 0.3s linear,
-    font-size 0.3s linear, line-height 0.3s linear, white-space 0.3s linear;
+  transition:
+    padding-top 0.3s linear,
+    padding-bottom 0.3s linear,
+    background 0.3s linear,
+    font-size 0.3s linear,
+    line-height 0.3s linear,
+    white-space 0.3s linear;
 }
 
 .news-card-title:hover {

@@ -103,10 +103,6 @@
         </v-list>
       </div>
     </div>
-    <!-- 弹窗提示 -->
-    <v-snackbar v-model="snackbar" timeout="1500" :color="snackbarColor" top>
-      {{ snackbarText }}
-    </v-snackbar>
   </div>
 </template>
 
@@ -114,6 +110,7 @@
 // vue
 import { onMounted, ref, onBeforeMount, computed } from "vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
+import snackbar from "../../components/func/snackbar";
 // tauri
 import { dialog, fs } from "@tauri-apps/api";
 // Store
@@ -159,9 +156,6 @@ const emptyHeight = computed(() => {
 const translateY = ref<string>("0px");
 // render
 const search = ref<string>("");
-const snackbar = ref<boolean>(false);
-const snackbarText = ref<string>("");
-const snackbarColor = ref<string>("#F5810A");
 
 onBeforeMount(async () => {
   const { total, fin } = await TGSqlite.getAchievementsOverview();
@@ -219,8 +213,10 @@ function handleScroll(e: Event): void {
 async function selectSeries(index: number): Promise<void> {
   // 如果选中的是已经选中的系列，则不进行操作
   if (selectedSeries.value === index) {
-    snackbarText.value = "已经选中该系列";
-    snackbar.value = true;
+    snackbar({
+      color: "warn",
+      text: "已经选中该系列",
+    });
     return;
   }
   loading.value = true;
@@ -241,9 +237,10 @@ function openImg(): void {
 
 async function searchCard(): Promise<void> {
   if (search.value === "") {
-    snackbarColor.value = "#F5810A";
-    snackbarText.value = "请输入搜索内容";
-    snackbar.value = true;
+    snackbar({
+      color: "error",
+      text: "请输入搜索内容",
+    });
     return;
   }
   selectedSeries.value = -1;
@@ -251,9 +248,10 @@ async function searchCard(): Promise<void> {
   loading.value = true;
   selectedAchievement.value = await TGSqlite.searchAchievements(search.value);
   if (selectedAchievement.value.length === 0) {
-    snackbarColor.value = "#F5810A";
-    snackbarText.value = "没有找到对应的成就";
-    snackbar.value = true;
+    snackbar({
+      color: "error",
+      text: "没有找到对应的成就",
+    });
   }
   loading.value = false;
 }
@@ -271,8 +269,10 @@ async function importJson(): Promise<void> {
   if (selectedFile && (await verifyUiafData(<string>selectedFile))) {
     const remoteRaw: string | false = await readUiafData(<string>selectedFile);
     if (remoteRaw === false) {
-      snackbarText.value = "读取 UIAF 数据失败，请检查文件是否符合规范";
-      snackbar.value = true;
+      snackbar({
+        color: "error",
+        text: "读取 UIAF 数据失败，请检查文件是否符合规范",
+      });
       return;
     }
     loadingTitle.value = "正在解析数据";
@@ -290,9 +290,10 @@ async function importJson(): Promise<void> {
 async function exportJson(): Promise<void> {
   // 判断是否有数据
   if (achievementsStore.finAchievements === 0) {
-    snackbarColor.value = "#F5810A";
-    snackbarText.value = "没有可导出的数据";
-    snackbar.value = true;
+    snackbar({
+      color: "error",
+      text: "没有可导出的数据",
+    });
     return;
   }
   // 获取本地数据
@@ -311,17 +312,16 @@ async function exportJson(): Promise<void> {
   });
   if (isSave) {
     await fs.writeTextFile(isSave, JSON.stringify(UiafData));
-    snackbarColor.value = "#00BFA5";
-    snackbarText.value = "导出成功";
-    snackbar.value = true;
+    snackbar({ text: "导出成功" });
   } else {
-    snackbarColor.value = "#F5810A";
-    snackbarText.value = "导出已取消";
-    snackbar.value = true;
+    snackbar({
+      color: "warn",
+      text: "导出已取消",
+    });
   }
 }
 
-function getIcon(series: number): string {
+function getIcon(series: number): string | undefined {
   return AppAchievementSeriesData.find((item) => item.id === series)?.icon;
 }
 </script>

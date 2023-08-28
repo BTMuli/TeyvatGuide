@@ -101,11 +101,11 @@
       </v-card>
     </div>
   </div>
-  <v-snackbar v-model="snackbar" timeout="1500" color="error"> {{ snackbarText }} </v-snackbar>
 </template>
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
+import snackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
@@ -116,9 +116,6 @@ import Mys from "../../plugins/Mys";
 // loading
 const loading = ref<boolean>(true);
 const allCards = computed(() => AppGCGData);
-// snackbar
-const snackbar = ref<boolean>(false);
-const snackbarText = ref<string>("");
 // search
 const doSearch = ref<boolean>(false);
 const search = ref<string>("");
@@ -142,8 +139,10 @@ function toOuter(cardName: string, cardId: number): void {
   console.log(cardName, cardId);
   // 若不存在 contentId
   if (cardId === -1) {
-    snackbarText.value = "该卡牌暂无外部链接";
-    snackbar.value = true;
+    snackbar({
+      text: "该卡牌暂无外部链接",
+      color: "error",
+    });
     return;
   }
   const url = Mys.Api.Obc.replace("{contentId}", cardId.toString());
@@ -168,8 +167,10 @@ async function searchCard(): Promise<void> {
   console.log(res);
   loading.value = false;
   if (res.length === 0) {
-    snackbarText.value = "未找到相关卡牌";
-    snackbar.value = true;
+    snackbar({
+      text: "未找到相关卡牌",
+      color: "error",
+    });
     doSearch.value = false;
   } else {
     CardsInfoS.value = res;
