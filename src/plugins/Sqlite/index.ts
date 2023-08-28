@@ -2,7 +2,7 @@
  * @file plugins Sqlite index.ts
  * @description Sqlite 数据库操作类
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.2
+ * @since Alpha v0.2.3
  */
 
 // tauri
@@ -10,7 +10,7 @@ import Database from "tauri-plugin-sql-api";
 // utils
 import initDataSql from "./sql/initData";
 import initTableSql from "./sql/initTable";
-import { importUIAFData } from "./sql/updateData";
+import { importUIAFData, importUIGFData } from "./sql/updateData";
 import { getUiafStatus } from "../../utils/UIAF";
 import {
   insertAbyssData,
@@ -30,7 +30,7 @@ class Sqlite {
   private readonly dbPath: string = "sqlite:tauri-genshin.db";
   /**
    * @description 数据库包含的表
-   * @since Alpha v0.2.0
+   * @since Alpha v0.2.3
    * @private
    */
   private readonly tables: string[] = [
@@ -43,6 +43,7 @@ class Sqlite {
     "SpiralAbyss",
     "UserCharacters",
     "UserRecord",
+    "GachaRecords",
   ];
 
   /**
@@ -467,6 +468,37 @@ class Sqlite {
     await db.close();
     if (res.length === 0) return false;
     return res;
+  }
+
+  /**
+   * @description 获取指定 uid 的用户角色数据
+   * @since Alpha v0.2。3
+   * @param {string} uid 用户 uid
+   * @returns {Promise<TGApp.Sqlite.GachaRecords.SingleTable[]>}
+   */
+  public async getGachaRecords(uid: string): Promise<TGApp.Sqlite.GachaRecords.SingleTable[]> {
+    const db = await Database.load(this.dbPath);
+    const sql = `SELECT * FROM GachaRecords WHERE uid = '${uid}'`;
+    const res: TGApp.Sqlite.GachaRecords.SingleTable[] = await db.select(sql);
+    await db.close();
+    return res;
+  }
+
+  /**
+   * @description 合并祈愿数据
+   * @since Alpha v0.2.3
+   * @param {string} uid UID
+   * @param {string} data UIGF 数据
+   * @returns {Promise<void>}
+   */
+  public async mergeUIGF(uid: string, data: string): Promise<void> {
+    const db = await Database.load(this.dbPath);
+    const gachaList: TGApp.Plugins.UIGF.GachaItem[] = JSON.parse(data);
+    const sql = importUIGFData(uid, gachaList);
+    for (const item of sql) {
+      await db.execute(item);
+    }
+    await db.close();
   }
 }
 

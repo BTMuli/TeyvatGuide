@@ -5,9 +5,12 @@
  * @since Alpha v0.2.0
  */
 
+// utils
+import minifySql from "../../../utils/minifySql";
+
 /**
  * @description 导入UIAF数据
- * @since Alpha v0.1.5
+ * @since Alpha v0.2.3
  * @param {TGApp.Plugins.UIAF.Achievement[]} data
  * @returns {string[]} sql
  */
@@ -34,7 +37,43 @@ export function importUIAFData(data: TGApp.Plugins.UIAF.Achievement[]): string[]
         WHERE id = ${achievement.id} AND progress != ${achievement.current};
       `;
     }
-    return sqlRes.push(sql);
+    return sqlRes.push(minifySql(sql));
+  });
+  return sqlRes;
+}
+
+/**
+ * @description 导入UIGF数据
+ * @since Alpha v0.2.3
+ * @param {string} uid - UID
+ * @param {TGApp.Plugins.UIGF.GachaItem[]} data - UIGF数据
+ * @returns {string[]} sql
+ */
+export function importUIGFData(uid: string, data: TGApp.Plugins.UIGF.GachaItem[]): string[] {
+  const sqlRes: string[] = [];
+  data.forEach((gacha) => {
+    const sql = `
+      INSERT INTO GachaRecords (uid, gachaType, itemId, count, time, name, type, rank, id, uigfType, updated)
+      VALUES ('${uid}', '${gacha.gacha_type}', '${gacha.item_id ?? null}', '${
+        gacha.count ?? null
+      }', '${gacha.time}',
+              '${gacha.name}', '${gacha.item_type ?? null}', '${gacha.rank_type ?? null}', '${
+                gacha.id
+              }',
+              '${gacha.uigf_gacha_type}', datetime('now', 'localtime'))
+      ON CONFLICT (id) DO UPDATE SET
+        uid       = '${uid}',
+        gachaType = '${gacha.gacha_type}',
+        uigfType  = '${gacha.uigf_gacha_type}',
+        time      = '${gacha.time}',
+        itemId    = '${gacha.item_id ?? null}',
+        count     = '${gacha.count ?? null}',
+        name      = '${gacha.name}',
+        type  = '${gacha.item_type ?? null}',
+        rank  = '${gacha.rank_type ?? null}',
+        updated   = datetime('now', 'localtime'); 
+    `;
+    sqlRes.push(minifySql(sql));
   });
   return sqlRes;
 }

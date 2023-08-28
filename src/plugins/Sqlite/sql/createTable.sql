@@ -1,7 +1,7 @@
 -- @file plugins Sqlite sql createTable.sql
 -- @brief sqlite数据库创建表语句
 -- @author BTMuli <bt-muli@outlook.com>
--- @since Alpha v0.2.0
+-- @since Alpha v0.2.3
 
 -- @brief 创建成就数据表
 create table if not exists Achievements
@@ -131,7 +131,23 @@ create table if not exists UserCharacters
     constellation       text,
     activeConstellation integer,
     costume             text,
-    talent              text, -- todo: 数据获取
+    talent              text,
     updated             text,
     primary key (uid, cid)
+);
+
+-- @brief 创建祈愿数据表
+create table if not exists GachaRecords
+(
+    id        text primary key not null,
+    uid       text,
+    gachaType text,
+    uigfType  text,
+    time      text,
+    itemId    text,
+    name      text,
+    type      text,
+    rank      text,
+    count     text,
+    updated   text
 );

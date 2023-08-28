@@ -1,31 +1,14 @@
 /**
  * @file utils UIAF.ts
  * @description UIAF工具类
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.4
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Alpha v0.2.3
  */
 
 // tauri
 import { app, fs, path } from "@tauri-apps/api";
 // utils
 import TGSqlite from "../plugins/Sqlite";
-
-/**
- * @description 时间戳转换为日期
- * @since Alpha v0.1.4
- * @param {number} timestamp - 时间戳
- * @returns {string} 日期 2021-01-01 00:00:00
- */
-export function timestampToDate(timestamp: number): string {
-  return new Date(timestamp * 1000).toLocaleString("zh", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
 
 /**
  * @description 根据 completed 跟 progress 获取 status
@@ -53,13 +36,9 @@ export function getUiafStatus(completed: boolean, progress: number): number {
  */
 export async function getUiafHeader(): Promise<TGApp.Plugins.UIAF.Export> {
   return {
-    // eslint-disable-next-line camelcase
     export_app: "Tauri.Genshin",
-    // eslint-disable-next-line camelcase
     export_timestamp: Math.floor(Date.now() / 1000),
-    // eslint-disable-next-line camelcase
     export_app_version: await app.getVersion(),
-    // eslint-disable-next-line camelcase
     uiaf_version: "v1.1",
   };
 }
