@@ -110,7 +110,7 @@
 // vue
 import { onMounted, ref, onBeforeMount, computed } from "vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import snackbar from "../../components/func/snackbar";
+import showSnackbar from "../../components/func/snackbar";
 // tauri
 import { dialog, fs } from "@tauri-apps/api";
 // Store
@@ -213,7 +213,7 @@ function handleScroll(e: Event): void {
 async function selectSeries(index: number): Promise<void> {
   // 如果选中的是已经选中的系列，则不进行操作
   if (selectedSeries.value === index) {
-    snackbar({
+    showSnackbar({
       color: "warn",
       text: "已经选中该系列",
     });
@@ -237,7 +237,7 @@ function openImg(): void {
 
 async function searchCard(): Promise<void> {
   if (search.value === "") {
-    snackbar({
+    showSnackbar({
       color: "error",
       text: "请输入搜索内容",
     });
@@ -248,7 +248,7 @@ async function searchCard(): Promise<void> {
   loading.value = true;
   selectedAchievement.value = await TGSqlite.searchAchievements(search.value);
   if (selectedAchievement.value.length === 0) {
-    snackbar({
+    showSnackbar({
       color: "error",
       text: "没有找到对应的成就",
     });
@@ -269,7 +269,7 @@ async function importJson(): Promise<void> {
   if (selectedFile && (await verifyUiafData(<string>selectedFile))) {
     const remoteRaw: string | false = await readUiafData(<string>selectedFile);
     if (remoteRaw === false) {
-      snackbar({
+      showSnackbar({
         color: "error",
         text: "读取 UIAF 数据失败，请检查文件是否符合规范",
       });
@@ -290,7 +290,7 @@ async function importJson(): Promise<void> {
 async function exportJson(): Promise<void> {
   // 判断是否有数据
   if (achievementsStore.finAchievements === 0) {
-    snackbar({
+    showSnackbar({
       color: "error",
       text: "没有可导出的数据",
     });
@@ -312,9 +312,9 @@ async function exportJson(): Promise<void> {
   });
   if (isSave) {
     await fs.writeTextFile(isSave, JSON.stringify(UiafData));
-    snackbar({ text: "导出成功" });
+    showSnackbar({ text: "导出成功" });
   } else {
-    snackbar({
+    showSnackbar({
       color: "warn",
       text: "导出已取消",
     });

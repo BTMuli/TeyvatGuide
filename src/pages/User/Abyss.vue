@@ -68,7 +68,7 @@
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
-import snackbar from "../../components/func/snackbar";
+import showSnackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TSubLine from "../../components/main/t-subline.vue";
 import TuaOverview from "../../components/userAbyss/tua-overview.vue";
@@ -146,7 +146,7 @@ function toAbyss(id: number): void {
   if (abyssFind) {
     curAbyss.value = abyssFind;
   } else {
-    snackbar({
+    showSnackbar({
       text: "未找到该深渊数据",
       color: "error",
     });
@@ -184,9 +184,9 @@ async function uploadAbyss(): Promise<void> {
   const res = await Hutao.Abyss.postData(transAbyss);
   loading.value = false;
   if (res.retcode === 0) {
-    snackbar({ text: <string>res.message });
+    showSnackbar({ text: <string>res.message });
   } else {
-    snackbar({
+    showSnackbar({
       text: <string>res.message,
       color: "error",
     });

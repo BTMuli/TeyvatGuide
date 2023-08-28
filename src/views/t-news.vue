@@ -270,7 +270,7 @@
 // vue
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import snackbar from "../components/func/snackbar";
+import showSnackbar from "../components/func/snackbar";
 import ToLoading from "../components/overlay/to-loading.vue";
 import ToChannel from "../components/overlay/to-channel.vue";
 // store
@@ -367,7 +367,7 @@ async function switchAnno(): Promise<void> {
 async function loadMore(data: "notice" | "activity" | "news"): Promise<void> {
   loadingSub.value = true;
   if (rawData.value[data].isLast) {
-    snackbar({
+    showSnackbar({
       text: "已经是最后一页了",
       color: "warn",
     });
@@ -384,7 +384,7 @@ async function loadMore(data: "notice" | "activity" | "news"): Promise<void> {
   const getCard = Mys.News.card[data](getData);
   postData.value[data] = postData.value[data].concat(getCard);
   if (rawData.value[data].isLast) {
-    snackbar({
+    showSnackbar({
       text: "已经是最后一页了",
       color: "warn",
     });
@@ -440,7 +440,7 @@ async function toJson(item: TGApp.Plugins.Mys.News.RenderCard | string): Promise
 
 async function searchPost(): Promise<void> {
   if (search.value === "") {
-    snackbar({
+    showSnackbar({
       text: "请输入搜索内容",
       color: "error",
     });
@@ -452,7 +452,7 @@ async function searchPost(): Promise<void> {
       await toJson(search.value);
     }
   } else {
-    snackbar({
+    showSnackbar({
       text: "请输入搜索内容",
       color: "error",
     });

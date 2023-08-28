@@ -23,14 +23,14 @@ const renderBox = (props: TGApp.Component.Snackbar.Params): VNode => {
 
 let snackbarInstance: any;
 
-const snackbarBox = (props: TGApp.Component.Snackbar.Params): void => {
+const showSnackbar = (props: TGApp.Component.Snackbar.Params): void => {
   if (snackbarInstance) {
     const boxVue = snackbarInstance.component;
     boxVue.exposeProxy.displayBox(props);
   } else {
     snackbarInstance = renderBox(props);
-    snackbarBox(props);
+    showSnackbar(props);
   }
 };
 
-export default snackbarBox;
+export default showSnackbar;

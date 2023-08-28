@@ -191,7 +191,7 @@
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
-import snackbar from "../../components/func/snackbar";
+import showSnackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import ToConfirm from "../../components/overlay/to-confirm.vue";
 // tauri
@@ -261,7 +261,7 @@ onMounted(async () => {
       userStore.cookie = JSON.parse(ck.value);
     }
   } catch (e) {
-    snackbar({
+    showSnackbar({
       color: "error",
       text: "读取数据库失败！",
     });
@@ -391,7 +391,7 @@ async function backupData(): Promise<void> {
   const abyss = await TGSqlite.getAbyss();
   await backupAbyssData(abyss);
   loading.value = false;
-  snackbar({ text: "数据已备份!" });
+  showSnackbar({ text: "数据已备份!" });
 }
 
 async function restoreData(): Promise<void> {
@@ -410,8 +410,9 @@ async function restoreData(): Promise<void> {
   if (!res) {
     fail.push("深渊数据");
   }
-  if (fail.length > 0) snackbar({ text: `${fail.join("、")} 恢复失败!`, color: "error" });
-  else snackbar({ text: "数据已恢复!" });
+  fail.length > 0
+    ? showSnackbar({ text: `${fail.join("、")} 恢复失败!`, color: "error" })
+    : showSnackbar({ text: "数据已恢复!" });
   const cookie = await TGSqlite.getCookie();
   userStore.initCookie(cookie);
   loading.value = false;
@@ -423,7 +424,7 @@ async function delTempData(): Promise<void> {
     recursive: true,
   });
   await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
-  snackbar({ text: "临时数据已删除!" });
+  showSnackbar({ text: "临时数据已删除!" });
 }
 
 async function delUserData(): Promise<void> {
@@ -431,7 +432,7 @@ async function delUserData(): Promise<void> {
     dir: fs.BaseDirectory.AppLocalData,
     recursive: true,
   });
-  snackbar({ text: "用户数据已删除!" });
+  showSnackbar({ text: "用户数据已删除!" });
   achievementsStore.init();
   await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData });
 }
@@ -441,7 +442,7 @@ function initAppData(): void {
   appStore.init();
   homeStore.init();
   achievementsStore.init();
-  snackbar({ text: "已恢复默认配置!即将刷新页面..." });
+  showSnackbar({ text: "已恢复默认配置!即将刷新页面..." });
   setTimeout(() => {
     window.location.reload();
   }, 1500);
@@ -450,8 +451,8 @@ function initAppData(): void {
 // 开启 dev 模式
 function submitDevMode(): void {
   appStore.devMode
-    ? snackbar({ text: "已关闭 dev 模式!" })
-    : snackbar({ text: "已开启 dev 模式!" });
+    ? showSnackbar({ text: "已关闭 dev 模式!" })
+    : showSnackbar({ text: "已开启 dev 模式!" });
 }
 
 // 修改首页显示
@@ -459,7 +460,7 @@ function submitHome(): void {
   // 获取已选
   const show = showHome.value;
   if (show.length < 1) {
-    snackbar({
+    showSnackbar({
       color: "error",
       text: "请至少选择一个!",
     });
@@ -467,7 +468,7 @@ function submitHome(): void {
   }
   // 设置
   homeStore.setShowValue(show);
-  snackbar({ text: "已修改!" });
+  showSnackbar({ text: "已修改!" });
 }
 
 // 刷新用户数据
@@ -475,7 +476,7 @@ async function refreshUser(): Promise<void> {
   const ck = userStore.cookie;
   // ck = {}
   if (Object.keys(ck).length < 1) {
-    snackbar({
+    showSnackbar({
       color: "error",
       text: "请先输入 Cookie!",
     });
@@ -533,12 +534,12 @@ async function refreshUser(): Promise<void> {
     failCount++;
   }
   if (failCount > 0) {
-    snackbar({
+    showSnackbar({
       color: "error",
       text: "刷新失败!请重新输入 cookie!",
     });
   } else {
-    snackbar({ text: "刷新成功!" });
+    showSnackbar({ text: "刷新成功!" });
   }
   loading.value = false;
 }
@@ -547,7 +548,7 @@ async function refreshUser(): Promise<void> {
 async function inputCookie(): Promise<void> {
   const cookie = confirmInput.value;
   if (cookie === "") {
-    snackbar({
+    showSnackbar({
       color: "error",
       text: "Cookie 为空!",
     });
@@ -562,7 +563,7 @@ async function inputCookie(): Promise<void> {
   const uid = cookieObj.find((item) => item[0] === "login_uid")?.[1];
   // 如果两者不存在
   if (!ticket || !uid) {
-    snackbar({
+    showSnackbar({
       color: "error",
       text: "Cookie 无效!",
     });
@@ -584,12 +585,12 @@ async function inputCookie(): Promise<void> {
       await TGSqlite.saveAccount(resAccounts);
     }
     loading.value = false;
-    snackbar({
+    showSnackbar({
       text: "Cookie 已保存!",
     });
   } catch (err) {
     loading.value = false;
-    snackbar({
+    showSnackbar({
       color: "error",
       text: "Cookie 无效!",
     });
@@ -627,7 +628,7 @@ async function checkDB(): Promise<void> {
       }
     }
     loading.value = false;
-    snackbar({
+    showSnackbar({
       text: "数据库已是最新!",
     });
   }
@@ -639,7 +640,7 @@ async function resetDB(): Promise<void> {
   loading.value = true;
   await TGSqlite.reset();
   loading.value = false;
-  snackbar({
+  showSnackbar({
     text: "数据库已重置!请进行再次检查。",
   });
   // 刷新
@@ -654,7 +655,7 @@ async function updateDB(): Promise<void> {
   await TGSqlite.update();
   achievementsStore.lastVersion = await TGSqlite.getLatestAchievementVersion();
   loading.value = false;
-  snackbar({
+  showSnackbar({
     text: "数据库已更新!",
   });
   // 刷新
