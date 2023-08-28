@@ -2,12 +2,12 @@
 Author: 目棃
 Date: 2023-03-05
 Description: 说明文档
-Update: 2023-08-15
+Update: 2023-08-28
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2023-08-15 17:49:09`
+> 更新于 `2023-08-28 09:14:21`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge)
 
@@ -50,7 +50,6 @@ A Genshin Impact assistant app based on Tauri.
 ### 计划中
 
 - [ ] UIGF 祈愿数据导入导出&展示
-- [ ] 实时便笺数据获取
 
 ### 长期计划
 
