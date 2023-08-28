@@ -2,13 +2,12 @@
  * @file web request TGRequest.ts
  * @description 应用用到的请求函数
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.2
+ * @since Alpha v0.2.3
  */
 
 import { getAbyss } from "./getAbyss";
 import { getAnnoList, getAnnoContent } from "./getAnno";
 import { getCookieTokenBySToken } from "./getCookieToken";
-import { getDailyNotes, getGeeTest, postGeeTest } from "./getDailyNotes";
 // import * from "./getEnkaData.ts";
 import { getGameAccountsBySToken, getGameAccountsByCookie } from "./getGameAccounts";
 import { getGameRecord } from "./getGameRecord";
@@ -51,11 +50,6 @@ const TGRequest = {
     calculate: {
       getSyncAvatarListAll,
       getSyncAvatarDetail,
-    },
-    dailyNote: {
-      widget: getDailyNotes,
-      getTest: getGeeTest,
-      postRes: postGeeTest,
     },
   },
 };
