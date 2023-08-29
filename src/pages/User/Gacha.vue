@@ -1,8 +1,34 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" />
-  <h1>祈愿数据获取、展示、统计</h1>
-  <v-btn @click="handleImportBtn">导入</v-btn>
-  <v-btn @click="handleExportBtn">导出</v-btn>
+  <v-app-bar class="gacha-top-bar">
+    <template #prepend>
+      <v-app-bar-title v-if="isLogin()">{{ user.gameUid }}</v-app-bar-title>
+      <v-app-bar-title v-else>祈愿数据</v-app-bar-title>
+    </template>
+    <v-spacer />
+    <template #append>
+      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn"> 导入 </v-btn>
+      <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="handleExportBtn"> 导出 </v-btn>
+    </template>
+  </v-app-bar>
+  <v-tabs v-model="tab" align-tabs="start" class="gacha-tab">
+    <v-tab value="overview">概览</v-tab>
+    <v-tab value="character">角色</v-tab>
+    <v-tab value="weapon">武器</v-tab>
+  </v-tabs>
+  <v-window v-model="tab">
+    <v-window-item value="overview">
+      <gr-overview v-model="gachaListCur" />
+    </v-window-item>
+    <v-window-item value="character">
+      这里放角色
+      <!-- 组件 -->
+    </v-window-item>
+    <v-window-item value="weapon">
+      这里放武器
+      <!-- 组件 -->
+    </v-window-item>
+  </v-window>
 </template>
 <script lang="ts" setup>
 // vue
@@ -17,6 +43,9 @@ import { useUserStore } from "../../store/modules/user";
 // utils
 import { exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF";
 import TGSqlite from "../../plugins/Sqlite";
+import GrOverview from "../../components/gachaRecord/gr-overview.vue";
+
+// todo: 不读取用户数据，直接读取数据库，获取 uid 列表，然后根据 uid 获取祈愿数据
 
 // store
 const userStore = useUserStore();
@@ -27,10 +56,24 @@ const loadingTitle = ref<string>();
 
 // data
 const user = userStore.getCurAccount();
+const gachaListCur = ref<TGApp.Sqlite.GachaRecords.SingleTable[]>([]);
+const tab = ref<string>("");
 
-onMounted(() => {
+onMounted(async () => {
+  loadingTitle.value = `正在获取用户 ${user.gameUid} 的祈愿数据`;
+  gachaListCur.value = await TGSqlite.getGachaRecords(user.gameUid);
+  loadingTitle.value = `正在渲染数据`;
+  tab.value = "overview";
   loading.value = false;
+  showSnackbar({
+    text: `成功获取 ${gachaListCur.value.length} 条祈愿数据`,
+  });
 });
+
+// 判断用户是否登录
+function isLogin(): boolean {
+  return user?.gameUid !== undefined;
+}
 
 // 导入按钮点击事件
 async function handleImportBtn(): Promise<void> {
@@ -144,3 +187,22 @@ async function handleExportBtn(): Promise<void> {
   });
 }
 </script>
+<style lang="css" scoped>
+.gacha-top-bar {
+  background: rgb(0 0 0/50%);
+  color: #f4d8a8;
+  font-family: var(--font-title);
+}
+
+.gacha-top-btn {
+  margin: 0 10px;
+  background: #393b40;
+  color: #faf7e8 !important;
+}
+
+.gacha-tab {
+  margin-bottom: 10px;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+}
+</style>
