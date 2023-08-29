@@ -16,11 +16,11 @@
             <input v-model="inputVal" class="confirm-input-box" />
           </div>
           <div class="confirm-btn-box">
-            <button class="confirm-btn" @click="handleCancel">
+            <button class="confirm-btn" @click="handleClick(false)">
               <img class="btn-icon" src="../../assets/icons/circle-cancel.svg" alt="cancel" />
               <span class="btn-text"> 取消 </span>
             </button>
-            <button class="confirm-btn" @click="handleConfirm">
+            <button class="confirm-btn" @click="handleClick(true)">
               <img class="btn-icon" src="../../assets/icons/circle-check.svg" alt="confirm" />
               <span class="btn-text"> 确定 </span>
             </button>
@@ -33,27 +33,19 @@
 
 <script lang="ts" setup>
 // vue
-import { onMounted, reactive, ref, type UnwrapRef } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 
 interface ConfirmProps {
   title: string;
   text?: string;
   mode: "confirm" | "input";
   otcancel?: boolean;
-  onCancel?: () => void;
-  onConfirm: (val?: boolean | string) => void;
 }
 
 const props = withDefaults(defineProps<ConfirmProps>(), {
   title: "",
   text: "",
   mode: "confirm",
-  onConfirm: () => {
-    console.log("confirm");
-  },
-  onCancel: () => {
-    console.log("cancel");
-  },
 });
 
 // 组件参数
@@ -62,57 +54,50 @@ const data = reactive({
   text: "",
   mode: "confirm",
   otcancel: false,
-  onCancel: () => {},
-  onConfirm: (value?: UnwrapRef<boolean | string>) => {},
 });
 const show = ref<boolean>(false);
 const confirmVal = ref<boolean | string>(false);
 const inputVal = ref<string>("");
 
-onMounted(() => {
-  displayBox(props);
+onMounted(async () => {
+  await displayBox(props);
 });
 
-function displayBox(props: TGApp.Component.Confirm.Params): void {
+async function displayBox(props: TGApp.Component.Confirm.Params): Promise<string | boolean> {
   data.title = props.title;
   data.text = props.text ?? "";
   data.mode = props.mode ?? "confirm";
   data.otcancel = props.otcancel ?? true;
-  data.onCancel =
-    props.onCancel ??
-    (() => {
-      console.log("cancel");
-    });
-  data.onConfirm =
-    props.onConfirm ??
-    ((param?: boolean | string) => {
-      console.log("confirm");
-    });
   show.value = true;
+  // 等待确认框关闭，返回关闭后的confirmVal
+  return await new Promise<string | boolean>((resolve) => {
+    watch(show, () => {
+      resolve(confirmVal.value);
+    });
+  });
 }
 
 // 点击确认事件
-function handleConfirm(): void {
-  if (data.mode === "input") {
-    confirmVal.value = inputVal.value;
-    inputVal.value = "";
+function handleClick(status: boolean): void {
+  let res;
+  if (!status) {
+    res = false;
   } else {
-    confirmVal.value = true;
+    if (data.mode === "input") {
+      res = inputVal.value;
+      inputVal.value = "";
+    } else {
+      res = true;
+    }
   }
-  data.onConfirm(confirmVal.value);
   show.value = false;
-}
-
-// 点击取消事件
-function handleCancel(): void {
-  data.onCancel();
-  show.value = false;
+  confirmVal.value = res;
 }
 
 // 点击外部事件
 function handleOuter(): void {
   if (data.otcancel) {
-    handleCancel();
+    handleClick(false);
   }
 }
 
