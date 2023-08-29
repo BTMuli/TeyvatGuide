@@ -396,6 +396,17 @@
     "nameCard": "神里绫华·扇子"
   },
   {
+    "id": 10000085,
+    "contentId": 0,
+    "name": "菲米尼",
+    "title": "潜怀遐梦",
+    "birthday": [9, 24],
+    "star": 4,
+    "element": "冰",
+    "weapon": "双手剑",
+    "nameCard": "菲米尼·行进"
+  },
+  {
     "id": 10000083,
     "contentId": 6938,
     "name": "琳妮特",
