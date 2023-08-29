@@ -1,8 +1,8 @@
 <template>
   <transition name="func-confirm-outer">
-    <div v-show="show" class="confirm-overlay" @click.self.prevent="handleOuter">
+    <div v-show="show || showOuter" class="confirm-overlay" @click.self.prevent="handleOuter">
       <transition name="func-confirm-inner">
-        <div class="confirm-box">
+        <div v-show="showInner" class="confirm-box">
           <div class="confirm-title">
             {{ data.title ?? "" }}
           </div>
@@ -56,8 +56,29 @@ const data = reactive({
   otcancel: false,
 });
 const show = ref<boolean>(false);
+const showOuter = ref<boolean>(false);
+const showInner = ref<boolean>(false);
 const confirmVal = ref<boolean | string>(false);
 const inputVal = ref<string>("");
+
+watch(
+  () => show.value,
+  () => {
+    if (show.value) {
+      showOuter.value = true;
+      setTimeout(() => {
+        showInner.value = true;
+      }, 100);
+    } else {
+      setTimeout(() => {
+        showInner.value = false;
+      }, 100);
+      setTimeout(() => {
+        showOuter.value = false;
+      }, 300);
+    }
+  },
+);
 
 onMounted(async () => {
   await displayBox(props);
@@ -72,7 +93,10 @@ async function displayBox(props: TGApp.Component.Confirm.Params): Promise<string
   // 等待确认框关闭，返回关闭后的confirmVal
   return await new Promise<string | boolean>((resolve) => {
     watch(show, () => {
-      resolve(confirmVal.value);
+      // 等 0.5s 动画
+      setTimeout(() => {
+        resolve(confirmVal.value);
+      }, 500);
     });
   });
 }
@@ -107,6 +131,42 @@ defineExpose({
 </script>
 
 <style scoped>
+.func-confirm-outer-enter-active,
+.func-confirm-outer-leave-active,
+.func-confirm-inner-enter-active {
+  transition: all 0.3s;
+}
+
+.func-confirm-inner-leave-active {
+  transition: all 0.5s ease-in-out;
+}
+
+.func-confirm-inner-enter-from {
+  opacity: 0;
+  transform: scale(1.5);
+}
+
+.func-confirm-inner-enter-to,
+.func-confirm-inner-leave-from {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.func-confirm-outer-enter-to,
+.func-confirm-outer-leave-from {
+  opacity: 1;
+}
+
+.func-confirm-outer-enter-from,
+.func-confirm-outer-leave-to {
+  opacity: 0;
+}
+
+.func-confirm-inner-leave-to {
+  opacity: 0;
+  transform: scale(0);
+}
+
 .confirm-overlay {
   position: fixed;
   z-index: 100;
