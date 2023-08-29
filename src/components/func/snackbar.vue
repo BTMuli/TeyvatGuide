@@ -1,8 +1,8 @@
 <template>
   <transition name="func-snackbar">
-    <div v-show="show" class="func-snackbar" :style="{ backgroundColor: color }">
+    <div v-show="show" class="func-snackbar" :style="{ backgroundColor: data.color }">
       <slot name="text">
-        <span class="func-snackbar-text">{{ text }}</span>
+        <span class="func-snackbar-text">{{ data.text }}</span>
       </slot>
     </div>
   </transition>
@@ -26,8 +26,6 @@ const props = withDefaults(defineProps<SnackbarProps>(), {
 // 组件参数
 const data = reactive<TGApp.Component.Snackbar.Params>({
   text: "",
-  color: "success",
-  timeout: 1500,
 });
 const show = ref<boolean>(false);
 let timer: NodeJS.Timeout;

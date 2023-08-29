@@ -19,7 +19,7 @@ declare namespace TGApp.Component.Confirm {
   export interface Params {
     title: string;
     text?: string;
-    mode: "confirm" | "input";
+    mode?: "confirm" | "input";
     otcancel?: boolean;
   }
 }
