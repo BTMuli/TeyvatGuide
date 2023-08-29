@@ -8,15 +8,33 @@
   </transition>
 </template>
 <script lang="ts" setup>
-import { ref } from "vue";
+// vue
+import { ref, reactive, onMounted } from "vue";
 
-const text = ref<string>();
-const color = ref<string>();
-const timeout = ref<number>();
+interface SnackbarProps {
+  text: string;
+  color?: string;
+  timeout?: number;
+}
+
+const props = withDefaults(defineProps<SnackbarProps>(), {
+  text: "",
+  color: "success",
+  timeout: 1500,
+});
+
+// 组件参数
+const data = reactive<TGApp.Component.Snackbar.Params>({
+  text: "",
+  color: "success",
+  timeout: 1500,
+});
 const show = ref<boolean>(false);
-
-// 定时器，用于防止多次连续点击
 let timer: NodeJS.Timeout;
+
+onMounted(() => {
+  displayBox(props);
+});
 
 // 根据输入的颜色转换为 hex 格式
 function transColor(color: string): string {
@@ -37,15 +55,15 @@ function transColor(color: string): string {
   }
 }
 
-function displayBox(data: TGApp.Component.Snackbar.Params): void {
-  color.value = transColor(data.color ?? "success");
-  text.value = data.text ?? "";
-  timeout.value = data.timeout ?? 1500;
+function displayBox(params: TGApp.Component.Snackbar.Params): void {
+  data.text = params.text;
+  data.color = transColor(params.color ?? "success");
+  data.timeout = params.timeout ?? 1500;
   show.value = true;
   clearTimeout(timer);
   timer = setTimeout(() => {
     show.value = false;
-  }, timeout.value);
+  }, data.timeout);
 }
 
 defineExpose({
@@ -53,6 +71,23 @@ defineExpose({
 });
 </script>
 <style lang="css" scoped>
+.func-snackbar-enter-active,
+.func-snackbar-leave-active {
+  transition: all 0.3s;
+}
+
+.func-snackbar-enter-from,
+.func-snackbar-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(20px);
+}
+
+.func-snackbar-enter-to,
+.func-snackbar-leave-from {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 .func-snackbar {
   position: fixed;
   z-index: 999;
@@ -73,22 +108,5 @@ defineExpose({
   color: #fff;
   font-size: 16px;
   font-weight: 500;
-}
-
-.func-snackbar-enter-active,
-.func-snackbar-leave-active {
-  transition: all 0.3s;
-}
-
-.func-snackbar-enter-from,
-.func-snackbar-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(20px);
-}
-
-.func-snackbar-enter-to,
-.func-snackbar-leave-from {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
 }
 </style>

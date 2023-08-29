@@ -4,7 +4,7 @@
       <transition name="func-confirm-inner">
         <div v-show="showInner" class="confirm-box">
           <div class="confirm-title">
-            {{ data.title ?? "" }}
+            {{ data.title }}
           </div>
           <div v-if="data?.text !== '' && data.mode === 'confirm'" class="confirm-subtitle">
             {{ data.text }}
@@ -37,7 +37,7 @@ import { onMounted, reactive, ref, watch } from "vue";
 
 interface ConfirmProps {
   title: string;
-  text?: string;
+  text: string;
   mode: "confirm" | "input";
   otcancel?: boolean;
 }
@@ -49,11 +49,9 @@ const props = withDefaults(defineProps<ConfirmProps>(), {
 });
 
 // 组件参数
-const data = reactive({
+const data = reactive<TGApp.Component.Confirm.Params>({
   title: "",
-  text: "",
   mode: "confirm",
-  otcancel: false,
 });
 const show = ref<boolean>(false);
 const showOuter = ref<boolean>(false);
@@ -61,34 +59,31 @@ const showInner = ref<boolean>(false);
 const confirmVal = ref<boolean | string>(false);
 const inputVal = ref<string>("");
 
-watch(
-  () => show.value,
-  () => {
-    if (show.value) {
-      showOuter.value = true;
-      setTimeout(() => {
-        showInner.value = true;
-      }, 100);
-    } else {
-      setTimeout(() => {
-        showInner.value = false;
-      }, 100);
-      setTimeout(() => {
-        showOuter.value = false;
-      }, 300);
-    }
-  },
-);
+watch(show, () => {
+  if (show.value) {
+    showOuter.value = true;
+    setTimeout(() => {
+      showInner.value = true;
+    }, 100);
+  } else {
+    setTimeout(() => {
+      showInner.value = false;
+    }, 100);
+    setTimeout(() => {
+      showOuter.value = false;
+    }, 300);
+  }
+});
 
 onMounted(async () => {
   await displayBox(props);
 });
 
-async function displayBox(props: TGApp.Component.Confirm.Params): Promise<string | boolean> {
-  data.title = props.title;
-  data.text = props.text ?? "";
-  data.mode = props.mode ?? "confirm";
-  data.otcancel = props.otcancel ?? true;
+async function displayBox(params: TGApp.Component.Confirm.Params): Promise<string | boolean> {
+  data.title = params.title;
+  data.text = params.text ?? "";
+  data.mode = params.mode ?? "confirm";
+  data.otcancel = params.otcancel ?? true;
   show.value = true;
   // 等待确认框关闭，返回关闭后的confirmVal
   return await new Promise<string | boolean>((resolve) => {

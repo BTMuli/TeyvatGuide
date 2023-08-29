@@ -21,12 +21,12 @@ const renderBox = (props: TGApp.Component.Snackbar.Params): VNode => {
   return boxVNode;
 };
 
-let snackbarInstance: any;
+let snackbarInstance: VNode;
 
 const showSnackbar = (props: TGApp.Component.Snackbar.Params): void => {
   if (snackbarInstance) {
     const boxVue = snackbarInstance.component;
-    boxVue.exposeProxy.displayBox(props);
+    boxVue?.exposeProxy?.displayBox(props);
   } else {
     snackbarInstance = renderBox(props);
     showSnackbar(props);

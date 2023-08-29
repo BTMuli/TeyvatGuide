@@ -21,12 +21,12 @@ const renderBox = (props: TGApp.Component.Confirm.Params): VNode => {
   return boxVNode;
 };
 
-let confirmInstance: any;
+let confirmInstance: VNode;
 
 const showConfirm = async (props: TGApp.Component.Confirm.Params): Promise<string | boolean> => {
   if (confirmInstance) {
     const boxVue = confirmInstance.component;
-    return boxVue.exposeProxy.displayBox(props);
+    return boxVue?.exposeProxy?.displayBox(props);
   } else {
     confirmInstance = renderBox(props);
     return await showConfirm(props);
