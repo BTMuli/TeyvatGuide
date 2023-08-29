@@ -266,24 +266,29 @@ async function importJson(): Promise<void> {
       },
     ],
   });
-  if (selectedFile && (await verifyUiafData(<string>selectedFile))) {
-    const remoteRaw: string | false = await readUiafData(<string>selectedFile);
-    if (remoteRaw === false) {
-      showSnackbar({
-        color: "error",
-        text: "读取 UIAF 数据失败，请检查文件是否符合规范",
-      });
-      return;
-    }
-    loadingTitle.value = "正在解析数据";
-    loading.value = true;
-    loadingTitle.value = "正在合并成就数据";
-    await TGSqlite.mergeUIAF(JSON.parse(remoteRaw).list);
-    loadingTitle.value = "即将刷新页面";
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
+  if (!selectedFile) {
+    showSnackbar({
+      color: "grey",
+      text: "已取消文件选择",
+    });
+    return;
   }
+  if (!(await verifyUiafData(<string>selectedFile))) {
+    showSnackbar({
+      color: "error",
+      text: "读取 UIAF 数据失败，请检查文件是否符合规范",
+    });
+    return;
+  }
+  const remoteRaw = await readUiafData(<string>selectedFile);
+  loadingTitle.value = "正在解析数据";
+  loading.value = true;
+  loadingTitle.value = "正在合并成就数据";
+  await TGSqlite.mergeUIAF(remoteRaw.list);
+  loadingTitle.value = "即将刷新页面";
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
 }
 
 // 导出

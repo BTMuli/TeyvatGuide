@@ -488,13 +488,12 @@ class Sqlite {
    * @description 合并祈愿数据
    * @since Alpha v0.2.3
    * @param {string} uid UID
-   * @param {string} data UIGF 数据
+   * @param {TGApp.Plugins.UIGF.GachaItem[]} data UIGF 数据
    * @returns {Promise<void>}
    */
-  public async mergeUIGF(uid: string, data: string): Promise<void> {
+  public async mergeUIGF(uid: string, data: TGApp.Plugins.UIGF.GachaItem[]): Promise<void> {
     const db = await Database.load(this.dbPath);
-    const gachaList: TGApp.Plugins.UIGF.GachaItem[] = JSON.parse(data);
-    const sql = importUIGFData(uid, gachaList);
+    const sql = importUIGFData(uid, data);
     for (const item of sql) {
       await db.execute(item);
     }

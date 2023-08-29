@@ -46,55 +46,47 @@ export async function getUiafHeader(): Promise<TGApp.Plugins.UIAF.Export> {
 /**
  * @description 检测是否存在 UIAF 数据
  * @description 粗略检测，不保证数据完整性
- * @since Alpha v0.1.3
+ * @since Alpha v0.2.3
  * @param {string} path - UIAF 数据路径
  * @returns {Promise<boolean>} 是否存在 UIAF 数据
  */
 export async function verifyUiafData(path: string): Promise<boolean> {
   const fileData: string = await fs.readTextFile(path);
-  const UiafData: TGApp.Plugins.UIAF.Export = JSON.parse(fileData).info;
-  return UiafData.uiaf_version !== undefined;
+  const UiafData: TGApp.Plugins.UIAF.Export = JSON.parse(fileData)?.info;
+  return UiafData?.uiaf_version !== undefined;
 }
 
 /**
  * @description 读取 UIAF 数据
- * @since Alpha v0.1.3
+ * @since Alpha v0.2.3
  * @param {string} userPath - UIAF 数据路径
- * @returns {Promise<string|false>} UIAF 数据
+ * @returns {Promise<TGApp.Plugins.UIAF.Data>} UIAF 数据
  */
-export async function readUiafData(userPath: string): Promise<string | false> {
-  if (await fs.exists(userPath)) {
-    const fileData = await fs.readTextFile(userPath);
-    if (fileData !== undefined && fileData !== null && fileData !== "" && fileData !== "{}") {
-      return fileData;
-    } else {
-      return false;
-    }
-  } else {
-    return false;
-  }
+export async function readUiafData(userPath: string): Promise<TGApp.Plugins.UIAF.Data> {
+  const fileData = await fs.readTextFile(userPath);
+  return <TGApp.Plugins.UIAF.Data>JSON.parse(fileData);
 }
 
 /**
  * @description 根据成就数据导出 UIAF 数据
- * @since Alpha v0.1.4
+ * @since Alpha v0.2.3
  * @param {TGApp.Plugins.UIAF.Achievement[]} achievementData - 成就数据
  * @returns {Promise<void>}
  */
 export async function backupUiafData(
   achievementData: TGApp.Plugins.UIAF.Achievement[],
 ): Promise<void> {
-  const savePath = `${await path.appLocalDataDir()}\\userData\\UIAF.json`;
+  const savePath = `${await path.appLocalDataDir()}userData\\UIAF.json`;
   await fs.writeTextFile(savePath, JSON.stringify(achievementData, null, 2));
 }
 
 /**
  * @description 根据 UIAF 数据恢复成就数据
- * @since Alpha v0.1.4
+ * @since Alpha v0.2.3
  * @returns {Promise<boolean>} 恢复的成就数量
  */
 export async function restoreUiafData(): Promise<boolean> {
-  const uiafPath = `${await path.appLocalDataDir()}\\userData\\UIAF.json`;
+  const uiafPath = `${await path.appLocalDataDir()}userData\\UIAF.json`;
   // 检测是否存在 UIAF 数据
   if (!(await fs.exists(uiafPath))) {
     return false;
