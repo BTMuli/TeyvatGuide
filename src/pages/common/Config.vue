@@ -48,7 +48,7 @@
         <img class="config-icon" :src="userInfo.avatar" alt="Login" />
       </template>
       <template #append>
-        <v-btn class="card-btn" @click="tryConfirm('refreshUser')">
+        <v-btn class="card-btn" @click="confirmRefreshUser">
           <template #prepend>
             <img src="../../assets/icons/circle-check.svg" alt="check" />
             刷新数据
@@ -118,12 +118,12 @@
         </v-btn>
       </template>
     </v-list-item>
-    <v-list-item prepend-icon="mdi-content-save" title="数据备份" @click="tryConfirm('backup')" />
-    <v-list-item prepend-icon="mdi-content-save" title="数据恢复" @click="tryConfirm('restore')" />
-    <v-list-item prepend-icon="mdi-content-save" title="数据更新" @click="tryConfirm('update')" />
-    <v-list-item prepend-icon="mdi-delete" title="清除用户缓存" @click="tryConfirm('delUser')" />
-    <v-list-item prepend-icon="mdi-delete" title="清除临时数据" @click="tryConfirm('delTemp')" />
-    <v-list-item prepend-icon="mdi-cog" title="恢复默认设置" @click="tryConfirm('delApp')" />
+    <v-list-item prepend-icon="mdi-content-save" title="数据备份" @click="confirmBackup" />
+    <v-list-item prepend-icon="mdi-content-save" title="数据恢复" @click="confirmRestore" />
+    <v-list-item prepend-icon="mdi-content-save" title="数据更新" @click="confirmUpdate()" />
+    <v-list-item prepend-icon="mdi-delete" title="清除用户缓存" @click="confirmDelUC" />
+    <v-list-item prepend-icon="mdi-delete" title="清除临时数据" @click="confirmDelTemp" />
+    <v-list-item prepend-icon="mdi-cog" title="恢复默认设置" @click="confirmResetApp" />
     <v-list-subheader :inset="true" class="config-header"> 调试 </v-list-subheader>
     <v-divider :inset="true" class="border-opacity-75" />
     <v-list-item v-if="appStore.devEnv" title="调试模式" subtitle="开启后将显示调试信息">
@@ -145,7 +145,7 @@
         <v-icon>mdi-cookie</v-icon>
       </template>
       <template #title>
-        <span style="cursor: pointer" @click="tryConfirm('inputCookie')">手动输入 Cookie</span>
+        <span style="cursor: pointer" @click="confirmInputCK">手动输入 Cookie</span>
       </template>
       <template #append>
         <v-icon
@@ -156,11 +156,11 @@
         </v-icon>
       </template>
     </v-list-item>
-    <v-list-item title="重置数据库" prepend-icon="mdi-delete" @click="tryConfirm('resetDB')" />
+    <v-list-item title="重置数据库" prepend-icon="mdi-delete" @click="confirmResetDB()" />
     <v-list-item
       title="检测 SQLite 数据库完整性"
       prepend-icon="mdi-database-check"
-      @click="tryConfirm('checkDB')"
+      @click="confirmCheckDB"
     />
     <v-list-subheader :inset="true" class="config-header"> 路径 </v-list-subheader>
     <v-divider :inset="true" class="border-opacity-75" />
@@ -177,23 +177,14 @@
       <v-list-item-subtitle>{{ appStore.dataPath.userDataDir }}</v-list-item-subtitle>
     </v-list-item>
   </v-list>
-  <!-- 确认弹窗 -->
-  <ToConfirm
-    v-model="confirmShow"
-    :model-input="confirmInput"
-    :title="confirmText"
-    :subtitle="confirmSub"
-    :is-input="isConfirmInput"
-    @confirm="doConfirm(confirmOper)"
-  />
 </template>
 
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
 import showSnackbar from "../../components/func/snackbar";
+import showConfirm from "../../components/func/confirm";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import ToConfirm from "../../components/overlay/to-confirm.vue";
 // tauri
 import { app, fs, os } from "@tauri-apps/api";
 // store
@@ -240,14 +231,6 @@ const userInfo = computed(() => {
   };
 });
 
-// confirm
-const confirmText = ref<string>("");
-const isConfirmInput = ref<boolean>(false);
-const confirmInput = ref<string>("");
-const confirmSub = ref<string>("");
-const confirmOper = ref<string>("");
-const confirmShow = ref<boolean>(false);
-
 // load version
 onMounted(async () => {
   versionApp.value = await app.getVersion();
@@ -274,207 +257,20 @@ function toOuter(url: string): void {
   window.open(url);
 }
 
-// open confirm
-function tryConfirm(oper: string): void {
-  confirmSub.value = "";
-  isConfirmInput.value = false;
-  switch (oper) {
-    case "backup":
-      confirmText.value = "确认备份数据吗？";
-      confirmSub.value = "若已备份将会被覆盖";
-      confirmOper.value = "backup";
-      confirmShow.value = true;
-      break;
-    case "restore":
-      confirmText.value = "确认恢复数据吗？";
-      confirmSub.value = "请确保存在备份数据";
-      confirmOper.value = "restore";
-      confirmShow.value = true;
-      break;
-    case "update":
-      confirmText.value = "确认更新数据吗？";
-      confirmSub.value = "请确保存在备份数据";
-      confirmOper.value = "updateDB";
-      confirmShow.value = true;
-      break;
-    case "delTemp":
-      confirmText.value = "确认清除临时数据吗？";
-      confirmOper.value = "delTemp";
-      confirmShow.value = true;
-      break;
-    case "delUser":
-      confirmText.value = "确认清除用户缓存吗？";
-      confirmSub.value = "备份数据也将被清除";
-      confirmOper.value = "delUser";
-      confirmShow.value = true;
-      break;
-    case "delApp":
-      confirmText.value = "确认恢复默认设置吗？";
-      confirmOper.value = "delApp";
-      confirmShow.value = true;
-      break;
-    case "inputCookie":
-      isConfirmInput.value = true;
-      confirmText.value = "请输入 Cookie";
-      confirmSub.value = "Cookie 用于获取用户信息";
-      confirmOper.value = "inputCookie";
-      confirmShow.value = true;
-      break;
-    case "checkDB":
-      confirmText.value = "将检测数据库表单完整性";
-      confirmSub.value = "数据库版本与更新时间也会进行检测";
-      confirmOper.value = "checkDB";
-      confirmShow.value = true;
-      break;
-    case "resetDB":
-      confirmText.value = "确认重置数据库吗？";
-      confirmSub.value = "请确认已经备份关键数据";
-      confirmOper.value = "resetDB";
-      confirmShow.value = true;
-      break;
-    case "refreshUser":
-      confirmText.value = "确认刷新用户信息吗？";
-      confirmSub.value = "将会重新获取用户信息";
-      confirmOper.value = "refreshUser";
-      confirmShow.value = true;
-      break;
-  }
-}
-
-// transfer confirm oper
-async function doConfirm(oper: string): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  switch (oper) {
-    case "backup":
-      await backupData();
-      break;
-    case "restore":
-      await restoreData();
-      break;
-    case "delTemp":
-      await delTempData();
-      break;
-    case "delUser":
-      await delUserData();
-      break;
-    case "delApp":
-      initAppData();
-      break;
-    case "inputCookie":
-      await inputCookie();
-      break;
-    case "checkDB":
-      await checkDB();
-      break;
-    case "resetDB":
-      await resetDB();
-      break;
-    case "updateDB":
-      await updateDB();
-      break;
-    case "refreshUser":
-      await refreshUser();
-      break;
-    default:
-      break;
-  }
-}
-
-// confirmOper
-async function backupData(): Promise<void> {
-  loadingTitle.value = "正在备份数据...";
-  loading.value = true;
-  const achievements = await TGSqlite.getUIAF();
-  await backupUiafData(achievements);
-  const cookie = await TGSqlite.getCookie();
-  await backupCookieData(cookie);
-  const abyss = await TGSqlite.getAbyss();
-  await backupAbyssData(abyss);
-  loading.value = false;
-  showSnackbar({ text: "数据已备份!" });
-}
-
-async function restoreData(): Promise<void> {
-  loadingTitle.value = "正在恢复数据...";
-  loading.value = true;
-  const fail = [];
-  let res = await restoreUiafData();
-  if (!res) {
-    fail.push("成就数据");
-  }
-  res = await restoreCookieData();
-  if (!res) {
-    fail.push("Cookie");
-  }
-  res = await restoreAbyssData();
-  if (!res) {
-    fail.push("深渊数据");
-  }
-  fail.length > 0
-    ? showSnackbar({ text: `${fail.join("、")} 恢复失败!`, color: "error" })
-    : showSnackbar({ text: "数据已恢复!" });
-  const cookie = await TGSqlite.getCookie();
-  userStore.initCookie(cookie);
-  loading.value = false;
-}
-
-async function delTempData(): Promise<void> {
-  await fs.removeDir("tempData", {
-    dir: fs.BaseDirectory.AppLocalData,
-    recursive: true,
+// 刷新用户信息
+async function confirmRefreshUser(): Promise<void> {
+  const res = await showConfirm({
+    title: "确认刷新用户信息吗？",
+    text: "将会重新获取用户信息",
   });
-  await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
-  showSnackbar({ text: "临时数据已删除!" });
-}
-
-async function delUserData(): Promise<void> {
-  await fs.removeDir("userData", {
-    dir: fs.BaseDirectory.AppLocalData,
-    recursive: true,
-  });
-  showSnackbar({ text: "用户数据已删除!" });
-  achievementsStore.init();
-  await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData });
-}
-
-// 恢复默认配置
-function initAppData(): void {
-  appStore.init();
-  homeStore.init();
-  achievementsStore.init();
-  showSnackbar({ text: "已恢复默认配置!即将刷新页面..." });
-  setTimeout(() => {
-    window.location.reload();
-  }, 1500);
-}
-
-// 开启 dev 模式
-function submitDevMode(): void {
-  appStore.devMode
-    ? showSnackbar({ text: "已关闭 dev 模式!" })
-    : showSnackbar({ text: "已开启 dev 模式!" });
-}
-
-// 修改首页显示
-function submitHome(): void {
-  // 获取已选
-  const show = showHome.value;
-  if (show.length < 1) {
-    showSnackbar({
-      color: "error",
-      text: "请至少选择一个!",
+  if (!res) {
+    snackbar({
+      color: "grey",
+      text: "已取消刷新",
     });
     return;
   }
-  // 设置
-  homeStore.setShowValue(show);
-  showSnackbar({ text: "已修改!" });
-}
-
-// 刷新用户数据
-async function refreshUser(): Promise<void> {
   const ck = userStore.cookie;
-  // ck = {}
   if (Object.keys(ck).length < 1) {
     showSnackbar({
       color: "error",
@@ -533,6 +329,7 @@ async function refreshUser(): Promise<void> {
     loadingTitle.value = "获取失败!";
     failCount++;
   }
+  loading.value = false;
   if (failCount > 0) {
     showSnackbar({
       color: "error",
@@ -541,12 +338,177 @@ async function refreshUser(): Promise<void> {
   } else {
     showSnackbar({ text: "刷新成功!" });
   }
+}
+
+// 备份数据
+async function confirmBackup(): Promise<void> {
+  const res = await showConfirm({
+    title: "确认备份数据吗？",
+    text: "若已备份将会被覆盖",
+  });
+  if (!res) {
+    snackbar({
+      color: "grey",
+      text: "已取消备份",
+    });
+    return;
+  }
+  loadingTitle.value = "正在备份数据...";
+  loading.value = true;
+  const achievements = await TGSqlite.getUIAF();
+  await backupUiafData(achievements);
+  const cookie = await TGSqlite.getCookie();
+  await backupCookieData(cookie);
+  const abyss = await TGSqlite.getAbyss();
+  await backupAbyssData(abyss);
+  loading.value = false;
+  showSnackbar({ text: "数据已备份!" });
+}
+
+// 恢复数据
+async function confirmRestore(): Promise<void> {
+  const resConfirm = await showConfirm({
+    title: "确认恢复数据吗？",
+    text: "请确保存在备份数据",
+  });
+  if (!resConfirm) {
+    snackbar({
+      color: "grey",
+      text: "已取消恢复",
+    });
+    return;
+  }
+  loadingTitle.value = "正在恢复数据...";
+  loading.value = true;
+  const fail = [];
+  let res = await restoreUiafData();
+  if (!res) {
+    fail.push("成就数据");
+  }
+  res = await restoreCookieData();
+  if (!res) {
+    fail.push("Cookie");
+  }
+  res = await restoreAbyssData();
+  if (!res) {
+    fail.push("深渊数据");
+  }
+  fail.length > 0
+    ? showSnackbar({ text: `${fail.join("、")} 恢复失败!`, color: "error" })
+    : showSnackbar({ text: "数据已恢复!" });
+  const cookie = await TGSqlite.getCookie();
+  userStore.initCookie(cookie);
   loading.value = false;
 }
 
-// 输入 Cookie
-async function inputCookie(): Promise<void> {
-  const cookie = confirmInput.value;
+// 更新数据
+async function confirmUpdate(title?: string): Promise<void> {
+  const res = await showConfirm({
+    title: title ?? "确认更新数据吗？",
+    text: "请确保存在备份数据",
+  });
+  if (!res) {
+    snackbar({
+      color: "grey",
+      text: "已取消更新数据库",
+    });
+    return;
+  }
+  loadingTitle.value = "正在更新数据库...";
+  loading.value = true;
+  await TGSqlite.update();
+  achievementsStore.lastVersion = await TGSqlite.getLatestAchievementVersion();
+  loading.value = false;
+  showSnackbar({
+    text: "数据库已更新!",
+  });
+  // 刷新
+  window.location.reload();
+}
+
+// 清除用户缓存
+async function confirmDelUC(): Promise<void> {
+  const res = await showConfirm({
+    title: "确认清除用户缓存吗？",
+    text: "备份数据也将被清除",
+  });
+  if (!res) {
+    snackbar({
+      color: "grey",
+      text: "已取消清除",
+    });
+    return;
+  }
+  await fs.removeDir("userData", {
+    dir: fs.BaseDirectory.AppLocalData,
+    recursive: true,
+  });
+  showSnackbar({ text: "用户数据已删除!" });
+  achievementsStore.init();
+  await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData });
+}
+
+// 清除临时数据
+async function confirmDelTemp(): Promise<void> {
+  const res = await showConfirm({
+    title: "确认清除临时数据吗？",
+  });
+  if (!res) {
+    snackbar({
+      color: "grey",
+      text: "已取消清除",
+    });
+    return;
+  }
+  await fs.removeDir("tempData", {
+    dir: fs.BaseDirectory.AppLocalData,
+    recursive: true,
+  });
+  await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
+  showSnackbar({ text: "临时数据已删除!" });
+}
+
+// 恢复默认设置
+async function confirmResetApp(): Promise<void> {
+  const res = await showConfirm({
+    title: "确认恢复默认设置吗？",
+  });
+  if (!res) {
+    snackbar({
+      color: "grey",
+      text: "已取消恢复",
+    });
+    return;
+  }
+  appStore.init();
+  homeStore.init();
+  achievementsStore.init();
+  showSnackbar({ text: "已恢复默认配置!即将刷新页面..." });
+  setTimeout(() => {
+    window.location.reload();
+  }, 1500);
+}
+
+// 输入 cookie
+async function confirmInputCK(): Promise<void> {
+  const res = await showConfirm({
+    title: "确认手动输入 Cookie 吗？",
+  });
+  if (!res) {
+    snackbar({
+      color: "grey",
+      text: "已取消输入",
+    });
+    return;
+  }
+  if (typeof res !== "string") {
+    snackbar({
+      color: "error",
+      text: "参数错误！",
+    });
+    return;
+  }
+  const cookie = res;
   if (cookie === "") {
     showSnackbar({
       color: "error",
@@ -597,45 +559,19 @@ async function inputCookie(): Promise<void> {
   }
 }
 
-// 检查 SQLite 数据库
-async function checkDB(): Promise<void> {
-  loadingTitle.value = "正在检查数据库表单完整性...";
-  loading.value = true;
-  const res = await TGSqlite.check();
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+// 重置数据库
+async function confirmResetDB(title?: string): Promise<void> {
+  const res = await showConfirm({
+    title: title ?? "确认重置数据库吗？",
+    text: "请确认已经备份关键数据",
+  });
   if (!res) {
-    confirmOper.value = "resetDB";
-    confirmText.value = "数据库表单不完整，是否重置数据库？";
-    loading.value = false;
-    confirmShow.value = true;
-  } else {
-    const appVersion = await app.getVersion();
-    const dbVersion = dbInfo.value.find((item) => item.key === "appVersion")?.value;
-    const dbUpdatedTime = dbInfo.value.find((item) => item.key === "dataUpdated")?.value;
-    if (!dbVersion || dbVersion < appVersion) {
-      confirmOper.value = "updateDB";
-      confirmText.value = "数据库版本过低，是否更新数据库？";
-      loading.value = false;
-      confirmShow.value = true;
-      return;
-    } else if (!buildTime.value.startsWith("dev")) {
-      if (!dbUpdatedTime || dbUpdatedTime.startsWith("dev") || dbUpdatedTime < buildTime.value) {
-        confirmOper.value = "updateDB";
-        confirmText.value = "数据库可能过时，是否更新数据库？";
-        loading.value = false;
-        confirmShow.value = true;
-        return;
-      }
-    }
-    loading.value = false;
-    showSnackbar({
-      text: "数据库已是最新!",
+    snackbar({
+      color: "grey",
+      text: "已取消重置数据库",
     });
+    return;
   }
-}
-
-// 重置 SQLite 数据库
-async function resetDB(): Promise<void> {
   loadingTitle.value = "正在重置数据库...";
   loading.value = true;
   await TGSqlite.reset();
@@ -643,23 +579,71 @@ async function resetDB(): Promise<void> {
   showSnackbar({
     text: "数据库已重置!请进行再次检查。",
   });
-  // 刷新
-  window.location.reload();
+  setTimeout(() => {
+    window.location.reload();
+  }, 1500);
 }
 
-// 更新 SQLite 数据库
-async function updateDB(): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  loadingTitle.value = "正在更新数据库...";
-  loading.value = true;
-  await TGSqlite.update();
-  achievementsStore.lastVersion = await TGSqlite.getLatestAchievementVersion();
-  loading.value = false;
-  showSnackbar({
-    text: "数据库已更新!",
+// 检测数据库完整性
+async function confirmCheckDB(): Promise<void> {
+  const resConfirm = await showConfirm({
+    title: "确认检测数据库完整性吗？",
   });
-  // 刷新
-  window.location.reload();
+  if (!resConfirm) {
+    snackbar({
+      color: "grey",
+      text: "已取消检测",
+    });
+    return;
+  }
+  loadingTitle.value = "正在检查数据库表单完整性...";
+  loading.value = true;
+  const res = await TGSqlite.check();
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  if (!res) {
+    loading.value = false;
+    await confirmResetDB("数据库表单不完整，是否重置数据库？");
+  } else {
+    const appVersion = await app.getVersion();
+    const dbVersion = dbInfo.value.find((item) => item.key === "appVersion")?.value;
+    const dbUpdatedTime = dbInfo.value.find((item) => item.key === "dataUpdated")?.value;
+    loading.value = false;
+    if (!dbVersion || dbVersion < appVersion) {
+      await confirmUpdate("数据库版本过低，是否更新数据库？");
+      return;
+    } else if (!buildTime.value.startsWith("dev")) {
+      if (!dbUpdatedTime || dbUpdatedTime.startsWith("dev") || dbUpdatedTime < buildTime.value) {
+        await confirmUpdate("数据库可能过时，是否更新数据库？");
+        return;
+      }
+    }
+    showSnackbar({
+      text: "数据库已是最新!",
+    });
+  }
+}
+
+// 开启 dev 模式
+function submitDevMode(): void {
+  appStore.devMode
+    ? showSnackbar({ text: "已关闭 dev 模式!" })
+    : showSnackbar({ text: "已开启 dev 模式!" });
+}
+
+// 修改首页显示
+function submitHome(): void {
+  // 获取已选
+  const show = showHome.value;
+  if (show.length < 1) {
+    showSnackbar({
+      color: "error",
+      text: "请至少选择一个!",
+    });
+    return;
+  }
+  // 设置
+  homeStore.setShowValue(show);
+  showSnackbar({ text: "已修改!" });
 }
 </script>
 
