@@ -51,12 +51,11 @@
           <img src="/source/UI/userAbyss.webp" alt="abyss" class="side-icon" />
         </template>
       </v-list-item>
-      <!-- todo -->
-      <!--      <v-list-item title="祈愿记录" value="gacha" link href="/user/gacha">-->
-      <!--        <template #prepend>-->
-      <!--          <img src="../../assets/icons/icon-wish.svg" alt="gacha" class="side-icon">-->
-      <!--        </template>-->
-      <!--      </v-list-item>-->
+      <v-list-item title="祈愿记录" value="gacha" :link="true" href="/user/gacha">
+        <template #prepend>
+          <img src="/source/UI/userGacha.webp" alt="gacha" class="side-icon" />
+        </template>
+      </v-list-item>
       <v-divider />
       <v-list-item v-show="appStore.devEnv" title="测试" value="test" :link="true" href="/test">
         <template #prepend>
@@ -68,7 +67,7 @@
         <template #activator="{ props }">
           <v-list-item title="图鉴" v-bind="props">
             <template #prepend>
-              <img src="/source/UI/guideMini.webp" alt="wikiIcon" class="side-icon-mini" />
+              <img src="/source/UI/wikiIcon.webp" alt="wikiIcon" class="side-icon" />
             </template>
           </v-list-item>
         </template>
@@ -77,19 +76,19 @@
             <img src="/icon/star/Abyss.webp" alt="abyssIcon" class="side-icon" />
           </template>
         </v-list-item>
-        <v-list-item title="GCG" value="wiki-GCG" :link="true" href="/wiki/GCG">
-          <template #prepend>
-            <img src="../../assets/icons/GCG.svg" alt="gcgIcon" class="side-icon" />
-          </template>
-        </v-list-item>
         <v-list-item title="角色图鉴" value="wiki-character" :link="true" href="/wiki/character">
           <template #prepend>
-            <img src="/source/UI/avatarMini.webp" alt="characterIcon" class="side-icon-mini" />
+            <img src="/source/UI/wikiAvatar.webp" alt="characterIcon" class="side-icon" />
           </template>
         </v-list-item>
         <v-list-item title="武器图鉴" value="wiki-weapon" :link="true" href="/wiki/weapon">
           <template #prepend>
-            <img src="/source/UI/weaponMini.webp" alt="weaponIcon" class="side-icon-mini" />
+            <img src="/source/UI/wikiWeapon.webp" alt="weaponIcon" class="side-icon" />
+          </template>
+        </v-list-item>
+        <v-list-item title="GCG" value="wiki-GCG" :link="true" href="/wiki/GCG">
+          <template #prepend>
+            <img src="/source/UI/wikiGCG.webp" alt="gcgIcon" class="side-icon" />
           </template>
         </v-list-item>
       </v-list-group>

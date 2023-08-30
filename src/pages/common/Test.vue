@@ -1,4 +1,6 @@
 <template>
-  <h1>测试页</h1>
+  <div>
+    <h1>Test</h1>
+  </div>
 </template>
 <script lang="ts" setup></script>
