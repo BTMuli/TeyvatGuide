@@ -73,7 +73,7 @@
         </template>
         <v-list-item title="深渊数据库" value="wiki-abyss" :link="true" href="/wiki/abyss">
           <template #prepend>
-            <img src="/icon/star/Abyss.webp" alt="abyssIcon" class="side-icon" />
+            <img src="/source/UI/wikiAbyss.webp" alt="abyssIcon" class="side-icon" />
           </template>
         </v-list-item>
         <v-list-item title="角色图鉴" value="wiki-character" :link="true" href="/wiki/character">
