@@ -71,7 +71,7 @@
           v-for="achievement in renderAchievement"
           :key="achievement.id"
           class="card-right"
-          :style="{ Transform: `translateY(${translateY})` }"
+          :style="{ transform: `translateY(${translateY})` }"
         >
           <div v-if="achievement.progress !== 0" class="achievement-progress">
             {{ achievement.progress }}

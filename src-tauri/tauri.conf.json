@@ -33,7 +33,7 @@
           "https://act-webstatic.mihoyo.com/*",
           "https://sdk-webstatic.mihoyo.com/*",
           "https://homa.snapgenshin.com/*",
-          "https://help.tencentbot.top/geetest2/*"
+          "https://enka-api.hut.ao/*"
         ]
       },
       "shell": {

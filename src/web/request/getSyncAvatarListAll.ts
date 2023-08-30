@@ -2,11 +2,11 @@
  * @file web request getSyncAvatarListAll.ts
  * @description 获取同步角色列表请求
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Alpha v0.2.3
  */
 
 // tauri
-import { http } from "@tauri-apps/api";
+import { app, http } from "@tauri-apps/api";
 // api
 import TGApi from "../api/TGApi";
 // utils
@@ -14,7 +14,7 @@ import TGUtils from "../utils/TGUtils";
 
 /**
  * @description 获取同步角色列表请求
- * @since Alpha v0.2.1
+ * @since Alpha v0.2.3
  * @param {Record<string,string>} cookie cookie
  * @param {string} uid 用户 uid
  * @param {number} page 页码
@@ -31,8 +31,9 @@ async function getSyncAvatarList(
     region: TGUtils.Tools.getServerByUid(uid),
     page,
   };
+  const version = await app.getVersion();
   const header = {
-    "User-Agent": "Tauri.Genshin/0.2.1",
+    "User-Agent": `Tauri.Genshin/${version}`,
     Referer: "https://webstatic.mihoyo.com/",
     Cookie: TGUtils.Tools.transCookie(cookie),
   };
