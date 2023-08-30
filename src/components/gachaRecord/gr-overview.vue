@@ -7,10 +7,7 @@
 // vue
 import { onMounted, provide } from "vue";
 import VChart, { THEME_KEY } from "vue-echarts";
-// tauri
-import { event } from "@tauri-apps/api";
-// store
-import { useAppStore } from "../../store/modules/app";
+import showSnackbar from "../func/snackbar";
 // echarts
 import { use } from "echarts/core";
 import { LegendComponent, TitleComponent, TooltipComponent } from "echarts/components";
@@ -18,12 +15,10 @@ import { PieChart } from "echarts/charts";
 import { LabelLayout } from "echarts/features";
 import { CanvasRenderer } from "echarts/renderers";
 import { type EChartsOption } from "echarts";
-import showSnackbar from "../func/snackbar";
 
 use([TitleComponent, TooltipComponent, LegendComponent, PieChart, CanvasRenderer, LabelLayout]);
 // 获取当前主题
-const theme = useAppStore().theme;
-provide(THEME_KEY, theme === "dark" ? "dark" : "light");
+provide(THEME_KEY, "dark");
 
 interface GachaOverviewProps {
   modelValue: TGApp.Sqlite.GachaRecords.SingleTable[];
@@ -32,7 +27,10 @@ interface GachaOverviewProps {
 const props = defineProps<GachaOverviewProps>();
 
 onMounted(async () => {
-  await listenOnTheme();
+  const totalNum = props.modelValue.length;
+  showSnackbar({
+    text: `成功获取 ${totalNum} 条祈愿数据`,
+  });
 });
 
 // data
@@ -41,33 +39,39 @@ const overviewDefaultData = <EChartsOption>{
     {
       text: "数据概览",
       left: "center",
+      top: "5%",
     },
     {
       text: "卡池分布",
-      left: "14%",
+      left: "17%",
       top: "45%",
     },
     {
       text: "星级分布",
-      left: "14%",
-      top: "95%",
+      left: "17%",
+      top: "90%",
     },
     {
-      text: "武器分布",
-      left: "48%",
-      top: "20%",
+      text: "角色池分布",
+      left: "45%",
+      bottom: "10%",
     },
     {
-      text: "角色分布",
-      left: "80%",
-      top: "20%",
+      text: "武器池分布",
+      right: "5%",
+      bottom: "10%",
     },
   ],
   tooltip: {
     trigger: "item",
   },
-  // 标签
-  // legend:{},
+  legend: {
+    type: "scroll",
+    orient: "vertical",
+    left: 10,
+    top: 20,
+    bottom: 20,
+  },
   series: [
     {
       name: "卡池分布",
@@ -81,8 +85,7 @@ const overviewDefaultData = <EChartsOption>{
           shadowColor: "rgba(0, 0, 0, 0.5)",
         },
       },
-      left: 0,
-      right: "66.6667%",
+      right: "60%",
       top: 0,
       bottom: "50%",
     },
@@ -91,51 +94,34 @@ const overviewDefaultData = <EChartsOption>{
       type: "pie",
       radius: "50%",
       data: [],
-      left: 0,
-      right: "66.6667%",
+      right: "60%",
       top: "50%",
       bottom: "0",
     },
     {
-      name: "武器分布",
+      name: "角色池分布",
       type: "pie",
       radius: [40, 150],
       center: ["50%", "50%"],
       roseType: "area",
       itemStyle: {
-        borderRadius: 8,
+        borderRadius: 10,
       },
       data: [],
-      left: "33.3333%",
-      right: "33.3333%",
       datasetIndex: 3,
     },
     {
-      name: "角色分布",
+      name: "武器池分布",
       type: "pie",
-      radius: "50%",
+      radius: [30, 100],
+      itemStyle: {
+        borderRadius: [3, 10],
+      },
       data: [],
-      left: "66.6667%",
-      right: 0,
+      left: "70%",
     },
   ],
 };
-
-// 监听主题变化
-async function listenOnTheme(): Promise<void> {
-  await event.listen("readTheme", (e) => {
-    const themeGet = <string>e.payload;
-    if (theme !== themeGet) {
-      console.info(`主题已切换为 ${themeGet}，请刷新页面`);
-      showSnackbar({
-        text: `主题已切换为 ${themeGet}，即将刷新页面`,
-      });
-      setTimeout(() => {
-        window.location.reload();
-      }, 200);
-    }
-  });
-}
 
 // 获取卡池分布的数据
 function getPoolData(): EChartsOption {
@@ -159,8 +145,12 @@ function getPoolData(): EChartsOption {
   ];
   const tempSet = new Set<string>();
   const tempRecord = new Map<string, number>();
-  props.modelValue
-    .filter((item) => item.type === "武器")
+  // 角色池分析
+  let tempList = props.modelValue.filter((item) => item.uigfType === "301");
+  let star3 = tempList.filter((item) => item.rank === "3").length;
+  data.title[3].subtext = `共 ${tempList.length} 条数据, 其中三星武器 ${star3} 抽`;
+  tempList
+    .filter((item) => item.rank !== "3")
     .map((item) => {
       if (tempSet.has(item.name)) {
         tempRecord.set(item.name, tempRecord.get(item.name)! + 1);
@@ -177,8 +167,12 @@ function getPoolData(): EChartsOption {
   });
   tempSet.clear();
   tempRecord.clear();
-  props.modelValue
-    .filter((item) => item.type === "角色")
+  // 武器池分析
+  tempList = props.modelValue.filter((item) => item.uigfType === "302");
+  star3 = tempList.filter((item) => item.rank === "3").length;
+  data.title[4].subtext = `共 ${tempList.length} 条数据，其中三星武器 ${star3} 抽`;
+  tempList
+    .filter((item) => item.rank !== "3")
     .map((item) => {
       if (tempSet.has(item.name)) {
         tempRecord.set(item.name, tempRecord.get(item.name)! + 1);
