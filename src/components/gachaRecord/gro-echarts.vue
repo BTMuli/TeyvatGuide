@@ -1,7 +1,5 @@
 <template>
-  <div class="gro-container">
-    <v-chart :option="getPoolData()" autoresize class="gro-chart" />
-  </div>
+  <v-chart :option="getPoolData()" autoresize />
 </template>
 <script lang="ts" setup>
 // vue
@@ -10,21 +8,34 @@ import VChart, { THEME_KEY } from "vue-echarts";
 import showSnackbar from "../func/snackbar";
 // echarts
 import { use } from "echarts/core";
-import { LegendComponent, TitleComponent, TooltipComponent } from "echarts/components";
+import {
+  LegendComponent,
+  TitleComponent,
+  TooltipComponent,
+  ToolboxComponent,
+} from "echarts/components";
 import { PieChart } from "echarts/charts";
 import { LabelLayout } from "echarts/features";
 import { CanvasRenderer } from "echarts/renderers";
 import { type EChartsOption } from "echarts";
 
-use([TitleComponent, TooltipComponent, LegendComponent, PieChart, CanvasRenderer, LabelLayout]);
+use([
+  TitleComponent,
+  TooltipComponent,
+  ToolboxComponent,
+  LegendComponent,
+  PieChart,
+  CanvasRenderer,
+  LabelLayout,
+]);
 // 获取当前主题
 provide(THEME_KEY, "dark");
 
-interface GachaOverviewProps {
+interface GachaOverviewEchartsProps {
   modelValue: TGApp.Sqlite.GachaRecords.SingleTable[];
 }
 
-const props = defineProps<GachaOverviewProps>();
+const props = defineProps<GachaOverviewEchartsProps>();
 
 onMounted(async () => {
   const totalNum = props.modelValue.length;
@@ -34,7 +45,7 @@ onMounted(async () => {
 });
 
 // data
-const overviewDefaultData = <EChartsOption>{
+const defaultOptions = <EChartsOption>{
   title: [
     {
       text: "数据概览",
@@ -72,6 +83,13 @@ const overviewDefaultData = <EChartsOption>{
     top: 20,
     bottom: 20,
   },
+  toolbox: {
+    show: true,
+    feature: {
+      restore: {},
+      saveAsImage: {},
+    },
+  },
   series: [
     {
       name: "卡池分布",
@@ -101,11 +119,11 @@ const overviewDefaultData = <EChartsOption>{
     {
       name: "角色池分布",
       type: "pie",
-      radius: [40, 150],
+      radius: [30, 150],
       center: ["50%", "50%"],
       roseType: "area",
       itemStyle: {
-        borderRadius: 10,
+        borderRadius: [2, 10],
       },
       data: [],
       datasetIndex: 3,
@@ -125,9 +143,10 @@ const overviewDefaultData = <EChartsOption>{
 
 // 获取卡池分布的数据
 function getPoolData(): EChartsOption {
-  const data = JSON.parse(JSON.stringify(overviewDefaultData));
+  const data = JSON.parse(JSON.stringify(defaultOptions));
   data.title[0].subtext = `共 ${props.modelValue.length} 条数据`;
   data.series[0].data = [
+    { value: props.modelValue.filter((item) => item.uigfType === "100").length, name: "新手祈愿" },
     { value: props.modelValue.filter((item) => item.uigfType === "200").length, name: "常驻祈愿" },
     {
       value: props.modelValue.filter((item) => item.uigfType === "301").length,
@@ -151,9 +170,9 @@ function getPoolData(): EChartsOption {
   data.title[3].subtext = `共 ${tempList.length} 条数据, 其中三星武器 ${star3} 抽`;
   tempList
     .filter((item) => item.rank !== "3")
-    .map((item) => {
+    .forEach((item) => {
       if (tempSet.has(item.name)) {
-        tempRecord.set(item.name, tempRecord.get(item.name)! + 1);
+        tempRecord.set(item.name, (tempRecord.get(item.name) ?? 0) + 1);
       } else {
         tempSet.add(item.name);
         tempRecord.set(item.name, 1);
@@ -173,9 +192,9 @@ function getPoolData(): EChartsOption {
   data.title[4].subtext = `共 ${tempList.length} 条数据，其中三星武器 ${star3} 抽`;
   tempList
     .filter((item) => item.rank !== "3")
-    .map((item) => {
+    .forEach((item) => {
       if (tempSet.has(item.name)) {
-        tempRecord.set(item.name, tempRecord.get(item.name)! + 1);
+        tempRecord.set(item.name, (tempRecord.get(item.name) ?? 0) + 1);
       } else {
         tempSet.add(item.name);
         tempRecord.set(item.name, 1);
@@ -190,16 +209,3 @@ function getPoolData(): EChartsOption {
   return data;
 }
 </script>
-<style lang="css" scoped>
-.gro-container {
-  width: calc(100% - 20px);
-  padding: 10px;
-  border-radius: 5px;
-  margin: 10px;
-  box-shadow: 0 0 10px var(--common-shadow-4);
-}
-
-.gro-chart {
-  height: calc(100vh - 200px);
-}
-</style>
