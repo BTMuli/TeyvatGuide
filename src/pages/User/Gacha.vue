@@ -175,7 +175,7 @@ async function handleExportBtn(): Promise<void> {
   }
   loadingTitle.value = "正在导出祈愿数据";
   loading.value = true;
-  await exportUigfData(user.gameUid, gachaList);
+  await exportUigfData(user.gameUid, gachaList, file);
   loading.value = false;
   showSnackbar({
     text: `祈愿数据已成功导出`,
