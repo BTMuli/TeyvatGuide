@@ -1,11 +1,11 @@
 {
-  "version": "0.2.2",
-  "notes": "https://github.com/BTMuli/Tauri.Genshin/releases/tag/v0.2.2",
-  "pub_date": "2023-08-15T10:14:58.074Z",
+  "version": "0.2.3",
+  "notes": "https://github.com/BTMuli/Tauri.Genshin/releases/tag/v0.2.3",
+  "pub_date": "2023-08-31T03:45:54.050Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWkdzekNNZjh1aHR0bUFueFlVV0trZ1F6VzQvNk8vYjdpby95WWEyVXZ3U1pnazErVWRPVE5BcGNNOFRCdlVFb3FtRERZRkpITlhaSy9MYUNHakRzQlNVSXR6elJRL2c0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjkyMDk0NDc5CWZpbGU6dGF1cmktZ2Vuc2hpbl8wLjIuMl94NjRfemgtQ04ubXNpLnppcApoUi9QVlduMkxKTDFERnBYc3U5WTg1eEFDWERWanA1QUhNZUpSb1ZsVG1jMHlMQ1RCMExZZ3dtclRuUktmak5HNkFFSmEwdytHYWRZZGZKcnRHTGFEdz09Cg==",
-      "url": "https://github.com/BTMuli/Tauri.Genshin/releases/download/v0.2.2/tauri-genshin_0.2.2_x64_zh-CN.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWkdzekNNZjh1aGpiYTMxZkxtaU1HQzRRcFJQWngyaTdzZUpBMjZrak5QZ3JTbXBOV1JySG1FcmlQTDVlM2kwK08xeEZRYVZLZUdMWlRNaXFJdXVsSEloTm8rMjBxUUFnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjkzNDUzNTM4CWZpbGU6dGF1cmktZ2Vuc2hpbl8wLjIuM194NjRfemgtQ04ubXNpLnppcApZZzZMSDlRZDlMZ3VWd1BORUlOL2l3WXBKd2JSajFtVzVwR01Wd2NFUHJ1OUkwT2JVYi9NVFFTQ0x0NDlvUkxXejFhZTVZdUhuM0lSSXZkbGpaVExDdz09Cg==",
+      "url": "https://github.com/BTMuli/Tauri.Genshin/releases/download/v0.2.3/tauri-genshin_0.2.3_x64_zh-CN.msi.zip"
     }
   }
 }
