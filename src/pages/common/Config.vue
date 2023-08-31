@@ -22,7 +22,7 @@
           size="small"
           @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/releases/latest')"
         >
-          Alpha
+          BETA
         </v-btn>
       </v-list-item-title>
       <template #append>

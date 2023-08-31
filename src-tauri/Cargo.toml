@@ -1,6 +1,6 @@
 [package]
 name = "tauri-genshin"
-version = "0.2.3"
+version = "0.3.0"
 description = "A Genshin Tool build with Tauri"
 authors = ["BTMuli<bt-muli@outlook.com>"]
 license = "MIT"

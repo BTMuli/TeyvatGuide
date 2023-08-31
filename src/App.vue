@@ -29,7 +29,7 @@ onBeforeMount(async () => {
   const win = window.getCurrent();
   isMain.value = win.label === "tauri-genshin";
   if (isMain.value) {
-    const title = "Tauri.Genshin v" + (await app.getVersion()) + " Alpha";
+    const title = "Tauri.Genshin v" + (await app.getVersion()) + " Beta";
     await win.setTitle(title);
     await checkLoad();
   }
