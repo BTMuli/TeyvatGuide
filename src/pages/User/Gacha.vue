@@ -9,9 +9,6 @@
     </template>
     <v-spacer />
     <template #append>
-      <v-btn prepend-icon="mdi-share-variant" class="gacha-top-btn" @click="handleShareBtn">
-        分享
-      </v-btn>
       <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn"> 导入</v-btn>
       <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="handleExportBtn"> 导出</v-btn>
     </template>
@@ -75,14 +72,6 @@ onMounted(async () => {
 // 判断用户是否登录
 function isLogin(): boolean {
   return user?.gameUid !== undefined;
-}
-
-// 分享按钮点击事件
-async function handleShareBtn(): Promise<void> {
-  showSnackbar({
-    color: "grey",
-    text: `暂未开放`,
-  });
 }
 
 // 导入按钮点击事件

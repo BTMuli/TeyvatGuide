@@ -48,7 +48,7 @@ onMounted(async () => {
 const defaultOptions = <EChartsOption>{
   title: [
     {
-      text: "数据概览",
+      text: ">> 祈愿系统大数据分析 <<",
       left: "center",
       top: "5%",
     },
