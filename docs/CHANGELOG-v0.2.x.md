@@ -7,9 +7,11 @@ Update: 2023-08-31
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-06-18 15:03:42 `
 >
-> 更新于 `2023-08-31 11:23:03`
+> 更新于 `2023-08-31 15:32:53`
 
-# CHANGELOG
+# CHANGELOG v0.2.x
+
+> 本文仅记录 v0.2.x 版本的更新内容
 
 ## [0.2.3](https://github.com/BTMuli/Tauri.Genshin/releases/v0.2.3) (2023-08-31)
 
