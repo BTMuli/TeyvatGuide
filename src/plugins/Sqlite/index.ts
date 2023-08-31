@@ -471,6 +471,19 @@ class Sqlite {
   }
 
   /**
+   * @description 获取已有 uid 列表
+   * @since Alpha v0.2.0
+   * @returns {Promise<string[]>}
+   */
+  public async getUidList(): Promise<string[]> {
+    const db = await Database.load(this.dbPath);
+    const sql = "SELECT DISTINCT uid FROM GachaRecords";
+    const res: Array<{ uid: string }> = await db.select(sql);
+    await db.close();
+    return res.map((item) => item.uid);
+  }
+
+  /**
    * @description 获取指定 uid 的用户角色数据
    * @since Alpha v0.2。3
    * @param {string} uid 用户 uid

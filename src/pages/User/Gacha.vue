@@ -2,12 +2,17 @@
   <ToLoading v-model="loading" :title="loadingTitle" />
   <v-app-bar class="gacha-top-bar">
     <template #prepend>
-      <v-app-bar-title>
-        <span>祈愿记录</span>
-        <span v-if="isLogin()"> - {{ user.nickname }} UID：{{ user.gameUid }}</span>
-      </v-app-bar-title>
+      <v-app-bar-title> 祈愿记录 </v-app-bar-title>
     </template>
-    <v-spacer />
+    <template #default>
+      <v-select
+        v-model="uidCur"
+        class="gacha-top-select"
+        :items="selectItem"
+        variant="underlined"
+      />
+      <v-spacer />
+    </template>
     <template #append>
       <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn"> 导入</v-btn>
       <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="handleExportBtn"> 导出</v-btn>
@@ -30,7 +35,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import showSnackbar from "../../components/func/snackbar";
 import showConfirm from "../../components/func/confirm";
 import ToLoading from "../../components/overlay/to-loading.vue";
@@ -38,29 +43,34 @@ import GroEcharts from "../../components/gachaRecord/gro-echarts.vue";
 import GroOverview from "../../components/gachaRecord/gro-overview.vue";
 // tauri
 import { dialog } from "@tauri-apps/api";
-// store
-import { useUserStore } from "../../store/modules/user";
 // utils
 import { exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF";
 import TGSqlite from "../../plugins/Sqlite";
-
-// todo: 不读取用户数据，直接读取数据库，获取 uid 列表，然后根据 uid 获取祈愿数据
-
-// store
-const userStore = useUserStore();
 
 // loading
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>();
 
 // data
-const user = userStore.getCurAccount();
+const selectItem = ref<string[]>([]);
+const uidCur = ref<string>("");
 const gachaListCur = ref<TGApp.Sqlite.GachaRecords.SingleTable[]>([]);
 const tab = ref<string>("");
 
 onMounted(async () => {
-  loadingTitle.value = `正在获取用户 ${user.gameUid} 的祈愿数据`;
-  gachaListCur.value = await TGSqlite.getGachaRecords(user.gameUid);
+  loadingTitle.value = `正在获取祈愿 UID 列表`;
+  selectItem.value = await TGSqlite.getUidList();
+  if (selectItem.value.length === 0) {
+    showSnackbar({
+      color: "error",
+      text: `暂无祈愿数据，请先导入祈愿数据`,
+    });
+    loading.value = false;
+    return;
+  }
+  uidCur.value = selectItem.value[0];
+  loadingTitle.value = `正在获取祈愿数据，默认 UID：${uidCur.value}`;
+  gachaListCur.value = await TGSqlite.getGachaRecords(uidCur.value);
   loadingTitle.value = `正在渲染数据`;
   tab.value = "echarts";
   loading.value = false;
@@ -68,11 +78,6 @@ onMounted(async () => {
     text: `成功获取 ${gachaListCur.value.length} 条祈愿数据`,
   });
 });
-
-// 判断用户是否登录
-function isLogin(): boolean {
-  return user?.gameUid !== undefined;
-}
 
 // 导入按钮点击事件
 async function handleImportBtn(): Promise<void> {
@@ -95,38 +100,31 @@ async function handleImportBtn(): Promise<void> {
       return;
     }
     const remoteData = await readUigfData(<string>selectedFile);
-    if (remoteData.info.uid !== user.gameUid) {
-      await showConfirm({
-        title: "UID 不匹配，是否继续导入？",
-        text: `当前 UID：${user.gameUid}，导入 UID：${remoteData.info.uid}`,
+    const res = await showConfirm({
+      title: "是否导入祈愿数据？",
+      text: `UID：${remoteData.info.uid} 共 ${remoteData.list.length} 条数据`,
+    });
+    if (!res) {
+      showSnackbar({
+        color: "grey",
+        text: `已取消祈愿数据导入`,
+      });
+      return;
+    }
+    loadingTitle.value = "正在导入祈愿数据";
+    loading.value = true;
+    if (remoteData.list.length === 0) {
+      loading.value = false;
+      showSnackbar({
+        color: "error",
+        text: `导入的祈愿数据为空`,
       });
     } else {
-      const res = await showConfirm({
-        title: "是否导入祈愿数据？",
-        text: `UID：${remoteData.info.uid} 共 ${remoteData.list.length} 条数据`,
+      await TGSqlite.mergeUIGF(remoteData.info.uid, remoteData.list);
+      loading.value = false;
+      showSnackbar({
+        text: `成功导入 ${remoteData.list.length} 条祈愿数据`,
       });
-      if (!res) {
-        showSnackbar({
-          color: "grey",
-          text: `已取消祈愿数据导入`,
-        });
-        return;
-      }
-      loadingTitle.value = "正在导入祈愿数据";
-      loading.value = true;
-      if (remoteData.list.length === 0) {
-        loading.value = false;
-        showSnackbar({
-          color: "error",
-          text: `导入的祈愿数据为空`,
-        });
-      } else {
-        await TGSqlite.mergeUIGF(user.gameUid, remoteData.list);
-        loading.value = false;
-        showSnackbar({
-          text: `成功导入 ${remoteData.list.length} 条祈愿数据`,
-        });
-      }
     }
   } else {
     showSnackbar({
@@ -138,17 +136,17 @@ async function handleImportBtn(): Promise<void> {
 
 // 导出按钮点击事件
 async function handleExportBtn(): Promise<void> {
-  const gachaList = await TGSqlite.getGachaRecords(user.gameUid);
+  const gachaList = await TGSqlite.getGachaRecords(uidCur.value);
   if (gachaList.length === 0) {
     showSnackbar({
       color: "error",
-      text: `用户 ${user.gameUid} 暂无祈愿数据`,
+      text: `UID ${uidCur.value} 暂无祈愿数据`,
     });
     return;
   }
   const res = await showConfirm({
     title: `是否导出祈愿数据？`,
-    text: `UID：${user.gameUid}，共 ${gachaList.length} 条数据`,
+    text: `UID：${uidCur.value}，共 ${gachaList.length} 条数据`,
   });
   if (!res) {
     showSnackbar({
@@ -158,7 +156,7 @@ async function handleExportBtn(): Promise<void> {
     return;
   }
   const file = await dialog.save({
-    defaultPath: `UIGF_${user.gameUid}.json`,
+    defaultPath: `UIGF_${uidCur.value}.json`,
     filters: [
       {
         name: `UIGF`,
@@ -175,18 +173,34 @@ async function handleExportBtn(): Promise<void> {
   }
   loadingTitle.value = "正在导出祈愿数据";
   loading.value = true;
-  await exportUigfData(user.gameUid, gachaList, file);
+  await exportUigfData(uidCur.value, gachaList, file);
   loading.value = false;
   showSnackbar({
     text: `祈愿数据已成功导出`,
   });
 }
+
+// 监听 UID 变化
+watch(uidCur, async (newUid) => {
+  gachaListCur.value = await TGSqlite.getGachaRecords(newUid);
+  showSnackbar({
+    text: `成功获取 ${gachaListCur.value.length} 条祈愿数据`,
+  });
+});
 </script>
 <style lang="css" scoped>
 .gacha-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: rgb(0 0 0/50%);
   color: #f4d8a8;
   font-family: var(--font-title);
+}
+
+.gacha-top-select {
+  height: 60px;
+  margin-left: 20px;
 }
 
 .gacha-top-btn {

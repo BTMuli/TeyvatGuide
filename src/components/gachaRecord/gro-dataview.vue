@@ -1,10 +1,13 @@
 <template>
-  <div v-if="!loading" class="gro-dv-container">
+  <div class="gro-dv-container">
     <div class="gro-dvt-title">
       <span>{{ title }}</span>
       <span>{{ props.dataVal.length }}</span>
     </div>
-    <div class="gro-dvt-subtitle">{{ startDate }} ~ {{ endDate }}</div>
+    <div class="gro-dvt-subtitle">
+      <span v-show="props.dataVal.length === 0">暂无数据</span>
+      <span v-show="props.dataVal.length !== 0">{{ startDate }} ~ {{ endDate }}</span>
+    </div>
     <div class="gro-mid-list">
       <div class="gro-ml-item">
         <span>4☆已垫</span>
@@ -64,7 +67,7 @@
 </template>
 <script lang="ts" setup>
 // vue
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 interface GachaDataViewProps {
   dataType: "new" | "avatar" | "weapon" | "normal";
@@ -147,24 +150,27 @@ function getTitle(type: "top" | "5" | "4" | "3"): string {
     if (props.dataType === "normal") return "常驻祈愿";
     return "";
   } else if (type === "5") {
-    // 5星物品统计
-    return `${star5List.value.length} [${(star5List.value.length / props.dataVal.length).toFixed(
-      2,
-    )}%]`;
+    // 5星物品统计 00.00%
+    return `${star5List.value.length} [${((star5List.value.length * 100) / props.dataVal.length)
+      .toFixed(2)
+      .padStart(5, "0")}%]`;
   } else if (type === "4") {
     // 4星物品统计
-    return `${star4List.value.length} [${(star4List.value.length / props.dataVal.length).toFixed(
-      2,
-    )}%]`;
+    return `${star4List.value.length} [${((star4List.value.length * 100) / props.dataVal.length)
+      .toFixed(2)
+      .padStart(5, "0")}%]`;
   } else {
     // 3星物品统计
-    return `${star3count.value} [${(star3count.value / props.dataVal.length).toFixed(2)}%]`;
+    return `${star3count.value} [${((star3count.value * 100) / props.dataVal.length)
+      .toFixed(2)
+      .padStart(5, "0")}%]`;
   }
 }
 
 // 获取5星平均抽数
 function getStar5Avg(): string {
   const resetList = star5List.value.map((item) => item.gachaCount);
+  if (resetList.length === 0) return "0";
   const total = resetList.reduce((a, b) => a + b);
   return (total / star5List.value.length).toFixed(2);
 }
@@ -177,6 +183,23 @@ function getIcon(itemId: string, type: string): string {
     return "/WIKI/weapon/icon/" + itemId + ".webp";
   }
 }
+
+// 监听数据变化
+watch(
+  () => props.dataVal,
+  (newVal) => {
+    star5List.value = [];
+    star4List.value = [];
+    reset5count.value = 0;
+    reset4count.value = 0;
+    star3count.value = 0;
+    startDate.value = "";
+    endDate.value = "";
+    star5avg.value = "";
+    tab.value = "5";
+    loadData();
+  },
+);
 </script>
 <style lang="css" scoped>
 .gro-dv-container {
