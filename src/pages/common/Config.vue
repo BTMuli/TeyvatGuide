@@ -140,17 +140,19 @@
         />
       </template>
     </v-list-item>
-    <v-list-item>
+    <v-list-item @click="confirmInputCK">
       <template #prepend>
         <v-icon>mdi-cookie</v-icon>
       </template>
       <template #title>
-        <span style="cursor: pointer" @click="confirmInputCK">手动输入 Cookie</span>
+        <span style="cursor: pointer">手动输入 Cookie</span>
       </template>
       <template #append>
         <v-icon
           style="cursor: pointer"
+          title="如何获取 Cookie？"
           @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/issues/18')"
+          @click.prevent.stop
         >
           mdi-help-circle-outline
         </v-icon>
@@ -536,9 +538,11 @@ async function confirmResetApp(): Promise<void> {
 // 输入 cookie
 async function confirmInputCK(): Promise<void> {
   const res = await showConfirm({
-    title: "确认手动输入 Cookie 吗？",
+    title: "请输入 Cookie",
+    text: "Cookie：",
+    mode: "input",
   });
-  if (!res) {
+  if (res === false) {
     showSnackbar({
       color: "grey",
       text: "已取消输入Cookie",
