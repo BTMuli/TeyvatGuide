@@ -39,6 +39,7 @@
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
+import showSnackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TucRoleBox from "../../components/userCharacter/tuc-role-box.vue";
 import ToUcDetail from "../../components/userCharacter/tuc-detail-overlay.vue";
@@ -142,8 +143,13 @@ async function refreshTalent(): Promise<void> {
   }
   loadingTitle.value = "正在更新天赋数据";
   loadingSub.value = "";
-  await loadRole();
   loading.value = false;
+  showSnackbar({
+    text: "成功更新数据，即将刷新页面",
+  });
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
 }
 
 async function shareRoles(): Promise<void> {
