@@ -2,16 +2,40 @@
 Author: 目棃
 Date: 2023-06-18
 Description: CHANGELOG
-Update: 2023-08-27
+Update: 2023-08-31
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-06-18 15:03:42 `
 >
-> 更新于 `2023-08-27 14:57:22`
+> 更新于 `2023-08-31 11:23:03`
 
 # CHANGELOG
 
-## [0.2.2](https://github.com/BTMuli/Tauri.Genshin/releases/0.2.2) (2023-08-15)
+## [0.2.3](https://github.com/BTMuli/Tauri.Genshin/releases/v0.2.3) (2023-08-31)
+
+### Feat
+
+- 组件：实现并替换 `snackbar` `confirm` 组件，新组件采用函数式调用
+- 功能：完成 UIGF 数据导入、导出、渲染 [#27](https://github.com/BTMuli/Tauri.Genshin/issues/27)
+
+### Fix
+
+- 资源：补充部分缺漏 contentId
+- 分享：调整生成分享图的默认背景颜色
+- 页面：`我的角色` 页面更新天赋数据后自动刷新页面
+
+### Change
+
+- 组件：首页卡池组件样式调整
+- 依赖：更新 cargo 依赖
+- 页面：调整 `原神战绩` 页面样式
+- 页面：调整 `深渊记录` 页面样式，采用横版布局
+- 功能：不再考虑 `实时便笺` 功能实现
+- 图标：侧边栏部分图标变更
+
+FullCommits: [`v0.2.2...v0.2.3`](https://github.com/BTMuli/Tauri.Genshin/compare/v0.2.2...v0.2.3)
+
+## [0.2.2](https://github.com/BTMuli/Tauri.Genshin/releases/v0.2.2) (2023-08-15)
 
 ### Feat
 
@@ -29,7 +53,7 @@ Update: 2023-08-27
 
 FullCommits: [`v0.2.1...v0.2.2`](https://github.com/BTMuli/Tauri.Genshin/compare/v0.2.1...v0.2.2)
 
-## [0.2.1](https://github.com/BTMuli/Tauri.Genshin/releases/0.2.1) (2023-07-14)
+## [0.2.1](https://github.com/BTMuli/Tauri.Genshin/releases/v0.2.1) (2023-07-14)
 
 ### Feat
 
@@ -55,7 +79,7 @@ FullCommits: [`v0.2.1...v0.2.2`](https://github.com/BTMuli/Tauri.Genshin/compare
 
 Full Commits: [`v0.2.0...v0.2.1`](https://github.com/BTMuli/Tauri.Genshin/compare/v0.2.0...v0.2.1)
 
-## [0.2.0](https://github.com/BTMuli/Tauri.Genshin/releases/0.2.0) (2023-06-19)
+## [0.2.0](https://github.com/BTMuli/Tauri.Genshin/releases/v0.2.0) (2023-06-19)
 
 ### Feat
 
