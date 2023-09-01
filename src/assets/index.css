@@ -49,7 +49,8 @@
   --tgc-blue-3: #4b5466; /* Genshin icon bg */
   --tgc-green-1: #238636; /* Github web btn */
   --tgc-pink-1: #fb7299; /* Bilibili btn bg */
-  --tgc-yellow: #ffcd0c; /* Genshin btn bg */
+  --tgc-yellow-1: #ffcd0c; /* Genshin btn bg */
+  --tgc-yellow-2: #f4d8a8; /* Genshin confirm text */
 }
 
 html {

@@ -16,13 +16,15 @@
             <input v-model="inputVal" class="confirm-input-box" />
           </div>
           <div class="confirm-btn-box">
-            <button class="confirm-btn" @click="handleClick(false)">
-              <img class="btn-icon" src="../../assets/icons/circle-cancel.svg" alt="cancel" />
-              <span class="btn-text"> 取消 </span>
-            </button>
-            <button class="confirm-btn" @click="handleClick(true)">
-              <img class="btn-icon" src="../../assets/icons/circle-check.svg" alt="confirm" />
-              <span class="btn-text"> 确定 </span>
+            <button class="confirm-btn" @click="handleClick(false)">取消</button>
+            <button
+              class="confirm-btn"
+              :style="{
+                backgroundColor: 'var(--box-bg-t-4)',
+              }"
+              @click="handleClick(true)"
+            >
+              确定
             </button>
           </div>
         </div>
@@ -172,27 +174,27 @@ defineExpose({
   height: 100%;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(3px);
-  background: rgb(0 0 0 / 50%);
+  backdrop-filter: blur(10px);
+  background: var(--common-shadow-t-1);
 }
 
 .confirm-box {
   display: flex;
-  width: 40vw;
-  height: 20vh;
+  width: 520px;
+  height: 240px;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   padding: 10px;
-  border-radius: 10px;
-  background: var(--content-bg-2);
-  box-shadow: 0 0 10px var(--common-shadow-2);
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 5px;
+  background: var(--box-bg-4);
+  color: var(--box-text-1);
 }
 
 .confirm-title {
   width: 100%;
-  border-bottom: 1px solid var(--btn-bg-2);
-  color: var(--content-text-2);
+  border-bottom: 1px solid var(--common-shadow-4);
   font-family: var(--font-title);
   font-size: 30px;
   text-align: center;
@@ -211,9 +213,8 @@ defineExpose({
   width: 100%;
   align-items: center;
   justify-content: center;
-  color: var(--content-text-2);
-  font-family: Genshin-Light, serif;
-  font-size: 20px;
+  font-family: var(--font-text);
+  font-size: 16px;
   gap: 10px;
 }
 
@@ -221,9 +222,10 @@ defineExpose({
   width: 50%;
   height: 100%;
   padding: 5px;
+  border: 1px solid var(--common-shadow-4);
   border-radius: 5px;
-  background: var(--btn-bg-3);
-  color: var(--btn-text-1);
+  background: inherit;
+  color: var(--box-text-1);
 }
 
 .confirm-btn-box {
@@ -236,25 +238,15 @@ defineExpose({
 .confirm-btn {
   position: relative;
   display: flex;
-  width: 30%;
-  min-width: 150px;
-  min-height: 30px;
+  width: 180px;
+  height: 60px;
   align-items: center;
-  border-radius: 50px;
-  background: var(--btn-bg-2);
-  color: var(--btn-text-1);
-  font-family: var(--font-text);
-}
-
-.btn-icon {
-  width: 20px;
-  height: 20px;
-  margin: 5px;
-}
-
-.btn-text {
-  position: absolute;
-  width: 100%;
-  text-align: center;
+  justify-content: center;
+  border: 1px solid var(--common-shadow-4);
+  border-radius: 5px;
+  color: var(--box-text-5);
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 20px;
 }
 </style>

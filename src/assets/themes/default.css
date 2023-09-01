@@ -17,12 +17,17 @@ html.default {
   --box-bg-1: var(--tgc-white-3);
   --box-bg-2: var(--tgc-white-7);
   --box-bg-3: var(--tgc-white-9);
+  --box-bg-4: var(--tgc-white-1);
+
+  /* box bg transparent */
+  --box-bg-t-4: var(--tgc-dark-7);
 
   /* box text */
   --box-text-1: var(--tgc-dark-5);
   --box-text-2: var(--tgc-dark-2);
   --box-text-3: var(--tgc-blue-2);
   --box-text-4: var(--tgc-blue-3);
+  --box-text-5: var(--tgc-yellow-2);
 
   /* box-shadow */
   --common-shadow-1: rgb(0 0 0 / 10%);
