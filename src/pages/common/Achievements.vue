@@ -1,5 +1,5 @@
 <template>
-  <!-- 顶部操作栏 -->
+  <!-- 顶部操作栏 todo 样式调整 -->
   <v-app-bar style="background: rgb(0 0 0 / 50%); color: #f4d8a8; font-family: Genshin, serif">
     <template #prepend>
       <span style="font-size: 30px">{{ title }}</span>
@@ -14,8 +14,8 @@
       @keyup.enter="searchCard"
     />
     <template #append>
-      <v-btn prepend-icon="mdi-import" class="ms-2 top-btn" @click="importJson"> 导入 </v-btn>
-      <v-btn prepend-icon="mdi-export" class="ms-2 top-btn" @click="exportJson"> 导出 </v-btn>
+      <v-btn prepend-icon="mdi-import" class="top-btn" @click="importJson"> 导入 </v-btn>
+      <v-btn prepend-icon="mdi-export" class="top-btn" @click="exportJson"> 导出 </v-btn>
     </template>
   </v-app-bar>
   <ToLoading v-model="loading" :title="loadingTitle" />
@@ -53,8 +53,9 @@
           backgroundRepeat: 'no-repeat',
           margin: '10px',
           borderRadius: '10px 50px 50px 10px',
-          color: '#485466',
-          fontFamily: 'Genshin,serif',
+          border: '1px solid var(--common-shadow-2)',
+          color: 'var(--tgc-dark-6)',
+          fontFamily: 'var(--font-title)',
           cursor: 'pointer',
           position: 'relative',
         }"
@@ -78,7 +79,7 @@
           </div>
           <v-list-item>
             <template #prepend>
-              <v-icon :color="achievement.isCompleted ? '#fec90b' : '#485466'">
+              <v-icon :color="achievement.isCompleted ? 'var(--tgc-green-1)' : 'var(--tgc-blue-3)'">
                 <!-- todo 图标替换 -->
                 {{ achievement.isCompleted ? "mdi-check-circle" : "mdi-circle" }}
               </v-icon>
@@ -334,8 +335,10 @@ function getIcon(series: number): string | undefined {
 <style lang="css" scoped>
 /* 顶部按钮 */
 .top-btn {
-  background: #393b40;
-  color: #faf7e8 !important;
+  border-radius: 5px;
+  margin-left: 15px;
+  background: var(--box-bg-t-4);
+  color: var(--box-text-5);
 }
 
 /* 内容区域 */
@@ -349,7 +352,7 @@ function getIcon(series: number): string | undefined {
   width: 400px;
   height: calc(100vh - 100px);
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 /* 右侧成就 */
@@ -357,7 +360,7 @@ function getIcon(series: number): string | undefined {
   width: calc(100% - 410px);
   height: calc(100vh - 100px);
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .list-empty {
@@ -372,37 +375,39 @@ function getIcon(series: number): string | undefined {
   bottom: 0;
   width: 80px;
   border-radius: 10px 0 0;
-  border-top: #fff 2px solid;
-  border-left: #fff 2px solid;
-  background: #546d8b;
-  color: #fec90b;
-  font-family: Genshin, serif;
+  border-top: 1px inset var(--common-shadow-4);
+  border-left: 1px inset var(--common-shadow-4);
+  background: var(--box-bg-4);
+  color: var(--box-text-5);
+  font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
 }
 
 .version-icon-single {
   border-radius: 5px;
-  color: #ff6d6d;
-  font-family: Genshin, serif;
+  color: var(--tgc-pink-1);
+  font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
 }
 
 .card-left {
+  border: 1px solid var(--common-shadow-2);
   border-radius: 10px;
   margin: 10px;
-  background: #485466;
-  color: #fec90b;
+  background: var(--box-bg-1);
+  color: var(--box-text-1);
   cursor: pointer;
 }
 
 /* 成就卡片 */
 .card-right {
+  border: 1px solid var(--common-shadow-2);
   border-radius: 10px;
   margin: 10px;
-  background: #546d8b;
-  color: #faf7e8;
+  background: var(--box-bg-2);
+  color: var(--box-text-7);
 }
 
 /* 成就进度 */
@@ -411,12 +416,12 @@ function getIcon(series: number): string | undefined {
   top: 0;
   left: 0;
   width: 65px;
-  border-right: #fff 2px solid;
-  border-bottom: #fff 2px solid;
-  background: #8ba5c5;
+  border-right: 1px solid var(--common-shadow-4);
+  border-bottom: 1px solid var(--common-shadow-4);
+  background: var(--box-bg-1);
   border-bottom-right-radius: 20px;
-  color: #485466;
-  font-family: Genshin, serif;
+  color: var(--box-text-3);
+  font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
 }
@@ -424,7 +429,7 @@ function getIcon(series: number): string | undefined {
 /* 成就完成时间 */
 .right-time {
   margin-right: 10px;
-  color: #faf7e8;
+  color: var(--box-text-4);
   font-size: small;
 }
 
@@ -448,7 +453,7 @@ function getIcon(series: number): string | undefined {
   align-items: center;
   justify-content: center;
   background: rgb(0 0 0 / 50%);
-  color: #faf7e8;
+  color: var(--tgc-white-1);
   font-size: 8px;
 }
 </style>

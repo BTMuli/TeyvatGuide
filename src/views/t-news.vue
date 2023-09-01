@@ -32,7 +32,7 @@
           <div class="news-cover" @click="toPost(item)">
             <img :src="item.cover" alt="cover" />
           </div>
-          <v-card-title class="news-card-title">{{ item.title }}</v-card-title>
+          <v-card-title class="news-card-title" :title="item.title">{{ item.title }}</v-card-title>
           <div class="news-card-info">
             <div class="news-card-user">
               <div class="ncu-left">
@@ -120,7 +120,7 @@
               </div>
             </div>
           </div>
-          <v-card-title class="news-card-title">{{ item.title }}</v-card-title>
+          <v-card-title class="news-card-title" :title="item.title">{{ item.title }}</v-card-title>
           <div class="news-card-info">
             <div class="news-card-user">
               <div class="ncu-left">
@@ -194,7 +194,7 @@
           <div class="news-cover" @click="toPost(item)">
             <img :src="item.cover" alt="cover" />
           </div>
-          <v-card-title class="news-card-title">{{ item.title }}</v-card-title>
+          <v-card-title class="news-card-title" :title="item.title">{{ item.title }}</v-card-title>
           <div class="news-card-info">
             <div class="news-card-user">
               <div class="ncu-left">
@@ -463,15 +463,14 @@ async function searchPost(): Promise<void> {
 <style lang="css" scoped>
 .news-tab {
   margin-bottom: 10px;
-  color: var(--common-text-title);
   font-family: var(--font-title);
 }
 
 .news-switch-btn {
   height: 40px;
   margin-left: 15px;
-  background: var(--common-btn-bg-1);
-  color: var(--common-btn-bgt-1);
+  background: var(--box-bg-5);
+  color: var(--box-text-6);
   font-family: var(--font-title);
 }
 
@@ -489,8 +488,8 @@ async function searchPost(): Promise<void> {
 
 .news-card {
   border-radius: 5px;
-  background: var(--common-bg-1);
-  color: var(--common-bgt-1);
+  background: var(--box-bg-1);
+  color: var(--box-text-1);
 }
 
 .news-cover {
@@ -514,24 +513,6 @@ async function searchPost(): Promise<void> {
 .news-card-title {
   position: relative;
   height: 50px;
-  color: var(--common-text-title);
-  transition:
-    padding-top 0.3s linear,
-    padding-bottom 0.3s linear,
-    background 0.3s linear,
-    font-size 0.3s linear,
-    line-height 0.3s linear,
-    white-space 0.3s linear;
-}
-
-.news-card-title:hover {
-  display: flex;
-  height: 50px;
-  padding: 5px;
-  background: var(--common-shadow-2);
-  font-size: 16px;
-  line-height: normal;
-  white-space: normal;
 }
 
 /* news item info */
@@ -549,7 +530,7 @@ async function searchPost(): Promise<void> {
   max-width: 235px;
   height: 50px;
   align-items: center;
-  color: var(--common-text-content);
+  color: var(--box-text-4);
 }
 
 .ncu-left {
@@ -627,8 +608,8 @@ async function searchPost(): Promise<void> {
   background: rgb(0 0 0/20%);
   border-bottom-left-radius: 5px;
   border-top-right-radius: 5px;
-  box-shadow: 0 0 10px rgb(0 0 0);
-  color: #faf7e8;
+  box-shadow: 0 0 10px var(--tgc-dark-1);
+  color: var(--tgc-white-1);
 }
 
 .news-card-forum img {
@@ -643,6 +624,7 @@ async function searchPost(): Promise<void> {
 }
 
 .news-dev-btn {
+  border: 1px solid var(--common-shadow-4);
   border-radius: 5px;
   margin-left: auto;
   font-family: var(--font-title);
@@ -678,7 +660,7 @@ async function searchPost(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  color: var(--common-text-quote);
+  color: var(--box-text-7);
   font-size: 12px;
   gap: 5px;
   opacity: 0.6;
@@ -705,7 +687,7 @@ async function searchPost(): Promise<void> {
   justify-content: flex-start;
   padding: 5px 30px 5px 5px;
   clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
-  color: #faf7e8;
+  color: var(--tgc-white-1);
 
   &::after {
     position: absolute;
@@ -730,7 +712,7 @@ async function searchPost(): Promise<void> {
   align-items: center;
   justify-content: flex-start;
   margin: 5px;
-  color: #faf7e8;
+  color: var(--tgc-white-1);
   gap: 5px;
   opacity: 0.8;
 }
@@ -747,7 +729,7 @@ async function searchPost(): Promise<void> {
 
 .load-news button {
   border-radius: 5px;
-  background: var(--common-bg-1);
-  color: var(--common-bgt-1);
+  background: var(--box-bg-t-4);
+  color: var(--box-text-5);
 }
 </style>

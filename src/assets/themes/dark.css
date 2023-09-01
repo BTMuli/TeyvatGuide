@@ -18,8 +18,10 @@ html.dark {
   --box-bg-2: var(--tgc-dark-6);
   --box-bg-3: var(--tgc-dark-7);
   --box-bg-4: var(--tgc-dark-7);
+  --box-bg-5: var(--tgc-dark-5);
 
   /* box bg transparent */
+  --box-bg-t-1: var(--tgc-white-3);
   --box-bg-t-4: var(--tgc-white-1);
 
   /* text */
@@ -28,6 +30,8 @@ html.dark {
   --box-text-3: var(--tgc-blue-1);
   --box-text-4: var(--tgc-white-8);
   --box-text-5: var(--tgc-yellow-1);
+  --box-text-6: var(--tgc-yellow-1);
+  --box-text-7: var(--tgc-white-9);
 
   /* box-shadow */
   --common-shadow-1: rgb(255 255 255 / 10%);

@@ -202,7 +202,7 @@ defineExpose({
 
 .confirm-subtitle {
   width: 100%;
-  color: var(--content-text-2);
+  color: var(--box-text-4);
   font-family: var(--font-text);
   font-size: 20px;
   text-align: center;

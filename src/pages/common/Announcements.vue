@@ -18,19 +18,18 @@
           <div class="anno-cover" @click="toPost(item)">
             <img :src="item.banner" alt="cover" />
           </div>
-          <v-card-title class="anno-card-title">
+          <v-card-title class="anno-card-title" :title="item.title">
             {{ item.title }}
           </v-card-title>
           <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
           <v-card-actions>
-            <v-btn class="anno-btn" @click="toPost(item)">
+            <v-btn class="anno-btn" variant="outlined" @click="toPost(item)">
               <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right" />
               <span>查看</span>
             </v-btn>
             <v-card-subtitle v-show="!appStore.devMode">
               <v-icon>mdi-calendar</v-icon>
-              {{ item.startTime.split(" ")[0] }} -
-              {{ item.endTime.split(" ")[0] }}
+              {{ item.startTime.split(" ")[0] }}~{{ item.endTime.split(" ")[0] }}
             </v-card-subtitle>
             <v-card-subtitle v-show="appStore.devMode"> id: {{ item.id }} </v-card-subtitle>
             <v-btn v-show="appStore.devMode" class="anno-dev-btn" @click="toJson(item)">
@@ -47,17 +46,16 @@
           <div class="anno-cover" @click="toPost(item)">
             <img :src="item.banner" alt="cover" />
           </div>
-          <v-card-title class="anno-card-title">{{ item.title }}</v-card-title>
+          <v-card-title class="anno-card-title" :title="item.title">{{ item.title }}</v-card-title>
           <v-card-subtitle>{{ item.subtitle }}</v-card-subtitle>
           <v-card-actions>
-            <v-btn class="anno-btn" @click="toPost(item)">
+            <v-btn class="anno-btn" variant="outlined" @click="toPost(item)">
               <img :src="item.tagIcon || '../assets/icons/arrow-right.svg'" alt="right" />
               <span>查看</span>
             </v-btn>
             <v-card-subtitle v-show="!appStore.devMode">
               <v-icon>mdi-calendar</v-icon>
-              {{ item.startTime.split(" ")[0] }} -
-              {{ item.endTime.split(" ")[0] }}
+              {{ item.startTime.split(" ")[0] }}~{{ item.endTime.split(" ")[0] }}
             </v-card-subtitle>
             <v-card-subtitle v-show="appStore.devMode"> id: {{ item.id }} </v-card-subtitle>
             <v-btn v-show="appStore.devMode" class="anno-dev-btn" @click="toJson(item)">
@@ -147,14 +145,13 @@ async function toJson(item: TGApp.App.Announcement.ListCard): Promise<void> {
 <style lang="css" scoped>
 .anno-tab {
   margin-bottom: 10px;
-  color: var(--common-text-title);
   font-family: var(--font-title);
 }
 
 .anno-switch-btn {
   height: 40px;
-  background: var(--common-btn-bg-1);
-  color: var(--common-btn-bgt-1);
+  background: var(--box-bg-5);
+  color: var(--box-text-6);
   font-family: var(--font-title);
 }
 
@@ -168,8 +165,8 @@ async function toJson(item: TGApp.App.Announcement.ListCard): Promise<void> {
 
 .anno-card {
   border-radius: 5px;
-  background: var(--common-bg-1);
-  color: var(--common-bgt-1);
+  background: var(--box-bg-1);
+  color: var(--box-text-1);
 }
 
 .anno-cover {
@@ -199,23 +196,6 @@ async function toJson(item: TGApp.App.Announcement.ListCard): Promise<void> {
 .anno-card-title {
   position: relative;
   height: 50px;
-  transition:
-    padding-top 0.3s linear,
-    padding-bottom 0.3s linear,
-    background 0.3s linear,
-    font-size 0.3s linear,
-    line-height 0.3s linear,
-    white-space 0.3s linear;
-}
-
-.anno-card-title:hover {
-  display: flex;
-  height: 50px;
-  padding: 5px;
-  background: var(--common-shadow-2);
-  font-size: 16px;
-  line-height: normal;
-  white-space: normal;
 }
 
 .anno-btn {
@@ -223,9 +203,8 @@ async function toJson(item: TGApp.App.Announcement.ListCard): Promise<void> {
   height: 30px;
   align-items: center;
   justify-content: center;
+  border: 1px solid var(--common-shadow-4);
   border-radius: 5px;
-  background: var(--common-btn-bg-2);
-  color: var(--common-btn-bgt-2);
 }
 
 .anno-btn img {
@@ -236,8 +215,8 @@ async function toJson(item: TGApp.App.Announcement.ListCard): Promise<void> {
 }
 
 .anno-dev-btn {
-  background: var(--common-btn-bg-2);
-  color: var(--common-btn-bgt-2);
+  background: var(--box-bg-t-1);
+  color: var(--box-text-5);
   font-family: var(--font-title);
 }
 
@@ -247,7 +226,7 @@ async function toJson(item: TGApp.App.Announcement.ListCard): Promise<void> {
   padding: 2px;
   border-radius: 50%;
   margin-right: 5px;
-  background: var(--common-shadow-2);
+  background: var(--common-shadow-t-4);
   object-fit: cover;
 }
 </style>

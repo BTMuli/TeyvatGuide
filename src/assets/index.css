@@ -60,7 +60,7 @@ html {
 
 /*
  * @description 侧边滚动条样式
- * @since Alpha v0.2.1
+ * @since Beta v0.3.0
  */
 ::-webkit-scrollbar {
   width: 8px;
@@ -69,25 +69,16 @@ html {
 
 ::-webkit-scrollbar-track {
   border-radius: 5px;
-  background: #faf7e8;
+  background: var(--common-shadow-2);
 }
 
 ::-webkit-scrollbar-thumb {
   border-radius: 5px;
-  background: #686868;
+  background: var(--common-shadow-2);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #606060;
-}
-
-/* dark mode */
-.dark ::-webkit-scrollbar-track {
-  background: #424242;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #7b7b7b;
+  background: var(--common-shadow-4);
 }
 
 /* card action 内的按钮 */
