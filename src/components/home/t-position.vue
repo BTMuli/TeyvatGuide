@@ -47,6 +47,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
+import { stamp2LastTime } from "../../utils/toolFunc";
 // plugins
 import Mys from "../../plugins/Mys";
 
@@ -79,7 +80,7 @@ function positionLastInterval(postId: number): void {
   if (timeLast <= 0) {
     positionTimeGet.value[postId] = "已结束";
   } else {
-    positionTimeGet.value[postId] = getLastPositionTime(timeLast);
+    positionTimeGet.value[postId] = stamp2LastTime(timeLast);
   }
 }
 
@@ -94,7 +95,7 @@ onMounted(async () => {
     if (card.time.endStamp === 0) {
       positionTimeGet.value[card.postId] = "未知";
     } else {
-      positionTimeGet.value[card.postId] = getLastPositionTime(card.time.endStamp - Date.now());
+      positionTimeGet.value[card.postId] = stamp2LastTime(card.time.endStamp - Date.now());
     }
     positionTimeEnd.value[card.postId] = card.time.endStamp;
     positionTimer.value[card.postId] = setInterval(() => {
@@ -103,16 +104,6 @@ onMounted(async () => {
   });
   loading.value = false;
 });
-
-function getLastPositionTime(time: number): string {
-  const day = Math.floor(time / (24 * 3600 * 1000));
-  const hour = Math.floor((time % (24 * 3600 * 1000)) / (3600 * 1000));
-  const minute = Math.floor((time % (3600 * 1000)) / (60 * 1000));
-  const second = Math.floor((time % (60 * 1000)) / 1000);
-  return `${day}天 ${hour.toFixed(0).padStart(2, "0")}:${minute
-    .toFixed(0)
-    .padStart(2, "0")}:${second.toFixed(0).padStart(2, "0")}`;
-}
 
 async function toPost(card: TGApp.Plugins.Mys.Position.RenderCard): Promise<void> {
   // 获取路由路径
@@ -136,16 +127,14 @@ onUnmounted(() => {
 <style lang="css" scoped>
 .position-box {
   padding: 10px;
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  margin-bottom: 10px;
-  box-shadow: 0 0 10px var(--common-shadow-4);
 }
 
 .position-title {
   display: flex;
   align-items: center;
   justify-content: start;
-  color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
 }
@@ -165,7 +154,7 @@ onUnmounted(() => {
 
 .position-card {
   border-radius: 5px;
-  background: var(--common-bg-1);
+  background: var(--content-box-bg-1);
   color: var(--common-bgt-1);
 }
 

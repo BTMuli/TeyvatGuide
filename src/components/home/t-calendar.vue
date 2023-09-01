@@ -49,7 +49,7 @@
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
-import TSubLine from "./t-subline.vue";
+import TSubLine from "../main/t-subline.vue";
 import ToCalendar from "../overlay/to-calendar.vue";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 // data
@@ -166,9 +166,9 @@ async function share(): Promise<void> {
 <style lang="css" scoped>
 .calendar-box {
   padding: 10px;
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  margin-bottom: 10px;
-  box-shadow: 0 0 10px var(--common-shadow-4);
+  background: var(--common-shadow-t-2);
 }
 
 .calendar-title {

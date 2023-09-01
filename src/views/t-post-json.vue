@@ -12,7 +12,7 @@ import { ref, onMounted, reactive } from "vue";
 import { useRoute } from "vue-router";
 import JsonViewer from "vue-json-viewer";
 import ToLoading from "../components/overlay/to-loading.vue";
-import TSwitchTheme from "../components/main/t-switchTheme.vue";
+import TSwitchTheme from "../components/app/t-switchTheme.vue";
 // tauri
 import { appWindow } from "@tauri-apps/api/window";
 // plugins

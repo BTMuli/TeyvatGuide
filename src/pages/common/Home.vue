@@ -1,15 +1,17 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSubtitle" />
-  <component :is="item" v-for="item in components" :key="item" :ref="setItemRef" />
+  <div class="home-container">
+    <component :is="item" v-for="item in components" :key="item" :ref="setItemRef" />
+  </div>
 </template>
 
 <script lang="ts" setup>
 // vue
 import { markRaw, onBeforeMount, onMounted, onUnmounted, onUpdated, ref } from "vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import TPool from "../../components/main/t-pool.vue";
-import TPosition from "../../components/main/t-position.vue";
-import TCalendar from "../../components/main/t-calendar.vue";
+import TPool from "../../components/home/t-pool.vue";
+import TPosition from "../../components/home/t-position.vue";
+import TCalendar from "../../components/home/t-calendar.vue";
 // store
 import { useHomeStore } from "../../store/modules/home";
 import { useAppStore } from "../../store/modules/app";
@@ -96,3 +98,10 @@ onUnmounted(() => {
   itemRefs.value = [];
 });
 </script>
+<style lang="css" scoped>
+.home-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+</style>

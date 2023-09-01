@@ -13,8 +13,8 @@
 <script lang="ts" setup>
 // vue
 import { onBeforeMount, onMounted, ref } from "vue";
-import TSidebar from "./components/main/t-sidebar.vue";
-import TBackTop from "./components/main/t-backTop.vue";
+import TSidebar from "./components/app/t-sidebar.vue";
+import TBackTop from "./components/app/t-backTop.vue";
 // tauri
 import { app, event, fs, window } from "@tauri-apps/api";
 // store
@@ -69,6 +69,7 @@ async function createDataDir(): Promise<void> {
   if (!(await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData }))) {
     await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
   }
+  // todo 弃置 tempData dir
   if (!(await fs.exists("tempData", { dir: fs.BaseDirectory.AppLocalData }))) {
     await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
   }
@@ -78,12 +79,7 @@ async function createDataDir(): Promise<void> {
 <style lang="css">
 .app-container {
   height: 100%;
-  background: #f9e9cd; /* 米色 */
-  color: #132c33; /* 深灰蓝 */
-}
-
-.dark .app-container {
-  background: #363433; /* 长石灰 */
-  color: #f9e9cd; /* 米色 */
+  background: var(--app-page-bg);
+  color: var(--app-page-content);
 }
 </style>

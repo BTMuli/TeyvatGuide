@@ -1,12 +1,21 @@
 /**
- * @file assets themes dark.css
- * @description 主题样式文件
+ * @file assets themes default.css
+ * @description 主题样式文件-默认（浅色）主题
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.3
+ * @since Beta v0.3.0
  */
 
-/* 主题色 */
+/* default(light) theme */
 html.default {
+  /* app container */
+  --app-page-bg: var(--tgc-white-3);
+  --app-page-content: var(--tgc-dark-5); /* todo 这边直接反色，需要调整 */
+  --app-side-bg: var(--tgc-white-4);
+  --app-side-content: var(--tgc-dark-4);
+
+  /* content */
+  --content-box-bg-1: var(--tgc-white-4);
+
   /* box-shadow */
   --common-shadow-1: rgb(0 0 0 / 10%);
   --common-shadow-2: rgb(0 0 0 / 20%);

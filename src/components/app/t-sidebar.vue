@@ -185,12 +185,8 @@ async function switchTheme(): Promise<void> {
 
 <style lang="css" scoped>
 .tsb-box {
-  background: #4e7ca1; /* 蝴蝶蓝 */
-  color: #e2e1e4; /* 芡食白 */
-}
-
-.dark .tsb-box {
-  background: #21373d; /* 灰蓝 */
+  background: var(--app-side-bg);
+  color: var(--app-side-content);
 }
 
 .side-list {

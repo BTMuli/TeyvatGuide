@@ -23,21 +23,18 @@
             </div>
           </div>
           <div class="pool-time">
-            <div class="pool-time-dur">
+            <div>
               <v-icon>mdi-calendar-clock</v-icon>
               {{ pool.time.start }}~{{ pool.time.end }}
             </div>
             <v-progress-linear :model-value="poolTimePass[pool.postId]" :rounded="true">
             </v-progress-linear>
-            <div
-              v-if="poolTimeGet[pool.postId] === '已结束'"
-              :style="{ color: poolColor[pool.postId] }"
-            >
+            <div v-if="poolTimeGet[pool.postId] === '已结束'">
               {{ poolTimeGet[pool.postId] }}
             </div>
             <div v-else>
               <span>剩余时间：</span>
-              <span :style="{ color: poolColor[pool.postId] }">
+              <span>
                 {{ poolTimeGet[pool.postId] }}
               </span>
             </div>
@@ -58,6 +55,7 @@ import { useRouter } from "vue-router";
 import { useHomeStore } from "../../store/modules/home";
 // utils
 import { createTGWindow } from "../../utils/TGWindow";
+import { stamp2LastTime } from "../../utils/toolFunc";
 // plugins
 import Mys from "../../plugins/Mys";
 
@@ -78,7 +76,6 @@ const barColor = ref<string>("error");
 const poolCards = ref<TGApp.Plugins.Mys.Gacha.RenderCard[]>([]);
 const poolTimeGet = ref<Record<number, string>>({});
 const poolTimePass = ref<Record<number, number>>({});
-const poolColor = ref<Record<number, string>>({});
 const timer = ref<Record<number, any>>({});
 
 // expose
@@ -93,12 +90,11 @@ function poolLastInterval(postId: number): TGApp.Plugins.Mys.Gacha.RenderCard | 
   if (poolTimeGet.value[postId] === "未开始") {
     const isStart = pool.time.startStamp - Date.now();
     if (isStart > 0) return;
-    poolTimeGet.value[postId] = getLastPoolTime(pool.time.endStamp - Date.now());
+    poolTimeGet.value[postId] = stamp2LastTime(pool.time.endStamp - Date.now());
     poolTimePass.value[postId] = pool.time.endStamp - Date.now();
-    poolColor.value[postId] = "#90caf9";
   } else {
     const isEnd = pool.time.endStamp - Date.now();
-    poolTimeGet.value[postId] = getLastPoolTime(isEnd);
+    poolTimeGet.value[postId] = stamp2LastTime(isEnd);
     poolTimePass.value[postId] =
       ((pool.time.endStamp - Date.now()) / (pool.time.endStamp - pool.time.startStamp)) * 100;
     if (isEnd >= 0) return;
@@ -106,7 +102,6 @@ function poolLastInterval(postId: number): TGApp.Plugins.Mys.Gacha.RenderCard | 
     timer.value[postId] = null;
     poolTimePass.value[postId] = 100;
     poolTimeGet.value[postId] = "已结束";
-    poolColor.value[postId] = "#f44336";
   }
   return pool;
 }
@@ -131,18 +126,14 @@ onMounted(async () => {
     poolCards.value = await Mys.Gacha.card(gachaData, homeStore.poolCover);
   }
   poolCards.value.map((pool) => {
-    poolTimeGet.value[pool.postId] = getLastPoolTime(pool.time.endStamp - Date.now());
+    poolTimeGet.value[pool.postId] = stamp2LastTime(pool.time.endStamp - Date.now());
     poolTimePass.value[pool.postId] = pool.time.endStamp - Date.now();
     if (poolTimePass.value[pool.postId] <= 0) {
       poolTimeGet.value[pool.postId] = "已结束";
       poolTimePass.value[pool.postId] = 100;
-      poolColor.value[pool.postId] = "#f44336";
     } else if (pool.time.startStamp - Date.now() > 0) {
       poolTimeGet.value[pool.postId] = "未开始";
       poolTimePass.value[pool.postId] = 100;
-      poolColor.value[pool.postId] = "#32A9CA";
-    } else {
-      poolColor.value[pool.postId] = "#90caf9";
     }
     timer.value[pool.postId] = setInterval(() => {
       poolLastInterval(pool.postId);
@@ -187,13 +178,6 @@ async function toOuter(url: string, title: string): Promise<void> {
   createTGWindow(url, "祈愿", title, 1200, 800, true, true);
 }
 
-function getLastPoolTime(time: number): string {
-  const hour = Math.floor(time / 1000 / 60 / 60);
-  const minute = Math.floor((time / 1000 / 60 / 60 - hour) * 60);
-  const second = Math.floor(((time / 1000 / 60 / 60 - hour) * 60 - minute) * 60);
-  return `${hour}:${minute.toFixed(0).padStart(2, "0")}:${second.toFixed(0).padStart(2, "0")}`;
-}
-
 function toPost(pool: TGApp.Plugins.Mys.Gacha.RenderCard): void {
   const path = router.resolve({
     name: "帖子详情",
@@ -216,15 +200,13 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   padding: 10px;
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  margin-bottom: 10px;
-  box-shadow: 0 0 10px var(--common-shadow-4);
   gap: 10px;
 }
 
 .pool-title {
   display: flex;
-  color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
 }
@@ -234,7 +216,7 @@ onUnmounted(() => {
   height: 25px;
   border-radius: 50%;
   margin-right: 10px;
-  background: var(--common-shadow-2);
+  background: var(--common-shadow-4);
   transform: translate(0, 2px);
 }
 
@@ -250,8 +232,7 @@ onUnmounted(() => {
   overflow: hidden;
   width: 50%;
   border-radius: 5px;
-  background: var(--common-bg-1);
-  color: var(--common-bgt-1);
+  box-shadow: 0 0 5px var(--common-shadow-4);
 }
 
 .pool-cover {
@@ -285,7 +266,6 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   backdrop-filter: blur(20px);
-  background: rgb(0 0 0/20%);
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
 }
@@ -306,8 +286,8 @@ onUnmounted(() => {
 .pool-icon {
   width: 60px;
   height: 60px;
-  border: 1px solid rgb(255 255 255 / 50%);
-  border-radius: 5px;
+  border: 1px solid var(--tgc-white-1);
+  border-radius: 8px;
   box-shadow: 0 0 5px rgb(0 0 0/20%);
   transition: all ease-in-out 0.3s;
 }
@@ -320,7 +300,7 @@ onUnmounted(() => {
 .pool-icon img {
   width: 100%;
   height: 100%;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
@@ -330,7 +310,7 @@ onUnmounted(() => {
   align-items: flex-start;
   justify-content: flex-start;
   margin-right: 10px;
-  color: #faf7e8;
+  color: var(--tgc-text-1);
   font-size: 12px;
   gap: 10px;
   text-align: left;
