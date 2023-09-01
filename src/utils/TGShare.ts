@@ -2,16 +2,17 @@
  * @file utils TGShare.ts
  * @description 生成分享截图并保存到本地
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.3
+ * @since Beta v0.3.0
  */
 
-// tauri
-import { dialog, fs, http } from "@tauri-apps/api";
+// third party
 import html2canvas from "html2canvas";
+// tauri
+import { dialog, fs, http, path } from "@tauri-apps/api";
 
 /**
  * @description 保存图片-canvas
- * @since Alpha v0.2.0
+ * @since Beta v0.3.0
  * @param {HTMLCanvasElement} canvas - canvas元素
  * @param {string} filename - 文件名
  * @returns {Promise<void>} 无返回值
@@ -22,9 +23,10 @@ async function saveCanvasImg(canvas: HTMLCanvasElement, filename: string): Promi
       .split("")
       .map((item) => item.charCodeAt(0)),
   );
+  const saveDir = await path.downloadDir();
   await dialog
     .save({
-      defaultPath: filename,
+      defaultPath: `${saveDir}${filename}.png`,
       filters: [{ name: "图片", extensions: ["png"] }],
     })
     .then(async (res) => {
@@ -57,7 +59,7 @@ export async function saveImgLocal(url: string): Promise<string> {
 
 /**
  * @description 获取分享截图背景色
- * @since Alpha v0.2.3
+ * @since Beta v0.3.0
  * @returns {string} 背景色
  */
 function getShareImgBgColor(): string {
@@ -66,9 +68,9 @@ function getShareImgBgColor(): string {
     theme = JSON.parse(theme).theme;
   }
   if (theme === "dark") {
-    return "#363433";
+    return "#0d1117";
   } else {
-    return "#f9e9cd";
+    return "#ffffff";
   }
 }
 
