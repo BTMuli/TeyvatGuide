@@ -13,11 +13,11 @@
           :style="{
             border: text.week === weekNow ? '1px solid var(--box-text-2)' : 'none',
             borderRadius: '5px',
-            backgroundColor: text.week === btnNow ? 'var(--tgc-yellow)' : 'inherit',
+            backgroundColor: text.week === btnNow ? 'var(--tgc-yellow-1)' : 'inherit',
             color: text.week === btnNow ? 'var(--box-text-4)' : 'inherit',
           }"
-          @click="getContents(text.week)"
           variant="tonal"
+          @click="getContents(text.week)"
         >
           {{ text.text }}
         </v-btn>
@@ -39,7 +39,7 @@
       </div>
     </div>
     <v-divider class="calendar-divider" />
-    <div class="calendar-grid" v-show="switchType==='avatar'">
+    <div v-show="switchType === 'avatar'" class="calendar-grid">
       <div v-for="item in characterCards" :key="item.id" @click="selectAvatar(item)">
         <TibCalendarItem
           :data="<TGApp.App.Calendar.Item>item"
@@ -48,7 +48,7 @@
         />
       </div>
     </div>
-    <div class="calendar-grid" v-show="switchType!=='avatar'">
+    <div v-show="switchType !== 'avatar'" class="calendar-grid">
       <div v-for="item in weaponCards" :key="item.id" @click="selectWeapon(item)">
         <TibCalendarItem
           :data="<TGApp.App.Calendar.Item>item"
@@ -180,21 +180,21 @@ async function share(): Promise<void> {
 </script>
 <style lang="css" scoped>
 .calendar-box {
+  display: flex;
+  flex-direction: column;
   padding: 10px;
   border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   background: var(--box-bg-1);
-  display: flex;
-  flex-direction: column;
   gap: 5px;
 }
 
 .calendar-title {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   font-family: var(--font-title);
   font-size: 20px;
-  justify-content: space-between;
 }
 
 .calendar-title-left {
@@ -219,18 +219,18 @@ async function share(): Promise<void> {
 }
 
 .calendar-title-switch {
-  height: 36px;
   display: flex;
+  height: 36px;
   align-items: center;
   justify-content: center;
-  color: var(--box-text-3);
+  color: var(--box-text-1);
 }
 
 .calendar-title-btn {
+  border: 1px solid var(--common-shadow-4);
   border-radius: 5px;
-  color: var(--box-text-3);
-  border: 1px solid var(--box-text-3);
-  cursor: pointer;
+  background: var(--box-bg-t-4);
+  color: var(--box-text-5);
 }
 
 .calendar-divider {

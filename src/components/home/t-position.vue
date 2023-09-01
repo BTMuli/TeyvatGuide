@@ -6,7 +6,12 @@
     </div>
     <div v-if="!loading" class="position-grid">
       <!-- todo hover 效果优化 -->
-      <v-card v-for="card in positionCards" :key="card.postId" class="position-card" variant="outlined">
+      <v-card
+        v-for="card in positionCards"
+        :key="card.postId"
+        class="position-card"
+        variant="outlined"
+      >
         <v-list class="position-list">
           <v-list-item :title="card.title" :subtitle="card.abstract">
             <template #prepend>
@@ -15,7 +20,7 @@
               </v-avatar>
             </template>
             <template #append>
-              <v-btn variant="tonal" @click="toPost(card)" class="position-card-btn"> 查看 </v-btn>
+              <v-btn variant="tonal" class="position-card-btn" @click="toPost(card)"> 查看 </v-btn>
             </template>
           </v-list-item>
         </v-list>
@@ -125,8 +130,8 @@ onUnmounted(() => {
 .position-box {
   padding: 10px;
   border: 1px solid var(--common-shadow-2);
-  background: var(--box-bg-1);
   border-radius: 5px;
+  background: var(--box-bg-1);
 }
 
 .position-title {
@@ -151,9 +156,9 @@ onUnmounted(() => {
 }
 
 .position-card {
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   background: var(--box-bg-2);
-  border: 1px solid var(--common-shadow-2);
 }
 
 .position-list {
@@ -183,8 +188,10 @@ onUnmounted(() => {
 }
 
 .position-card-btn {
-  border-radius: 5px;
   border: 1px solid var(--common-shadow-4);
+  border-radius: 5px;
+  background: var(--box-bg-t-4);
+  color: var(--box-text-5);
 }
 
 .position-card-text {
