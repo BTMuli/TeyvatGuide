@@ -1,5 +1,6 @@
 <template>
   <div class="tud-db-box">
+    <div class="tud-db-time">{{ props.title }} {{ props.modelValue.time }}</div>
     <div class="tud-db-icons-grid">
       <TibAbyssDetail
         v-for="avatar in props.modelValue.characters"
@@ -7,15 +8,13 @@
         :model-value="avatar"
       />
     </div>
-    <div class="tud-db-time">
-      {{ props.modelValue.time }}
-    </div>
   </div>
 </template>
 <script lang="ts" setup>
 import TibAbyssDetail from "../itembox/tib-abyss-detail.vue";
 
 interface TuaDetailBattleProps {
+  title: string;
   modelValue: TGApp.Sqlite.Abyss.Battle;
 }
 
@@ -23,15 +22,13 @@ const props = defineProps<TuaDetailBattleProps>();
 </script>
 <style lang="css" scoped>
 .tud-db-box {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+  padding: 5px;
+  border-radius: 5px;
+  background: var(--common-shadow-t-1);
 }
 
 .tud-db-icons-grid {
   display: flex;
-  width: 100%;
   flex-direction: row;
   justify-content: flex-start;
   gap: 10px;
@@ -40,6 +37,6 @@ const props = defineProps<TuaDetailBattleProps>();
 .tud-db-time {
   color: var(--common-text-content);
   font-size: 12px;
-  text-align: center;
+  text-align: left;
 }
 </style>

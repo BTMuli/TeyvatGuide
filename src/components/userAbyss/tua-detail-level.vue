@@ -5,8 +5,8 @@
       :name="`第${props.modelValue.id}间`"
       mode="level"
     />
-    <TuaDetailBattle :model-value="props.modelValue.upBattle" />
-    <TuaDetailBattle :model-value="props.modelValue.downBattle" />
+    <TuaDetailBattle title="上半" :model-value="props.modelValue.upBattle" />
+    <TuaDetailBattle title="下半" :model-value="props.modelValue.downBattle" />
   </div>
 </template>
 <script lang="ts" setup>
