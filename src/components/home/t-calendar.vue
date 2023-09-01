@@ -2,29 +2,44 @@
   <div class="calendar-box">
     <div class="calendar-title">
       <div class="calendar-title-left">
-        <v-icon size="small"> mdi-calendar-clock </v-icon>
+        <v-icon size="small"> mdi-calendar-clock</v-icon>
         <span>今日素材</span>
         <span>{{ dateNow }}</span>
-        <v-btn variant="outlined" class="calendar-title-btn" @click="share">
-          <template #prepend>
-            <v-icon> mdi-share-variant </v-icon>
-          </template>
-          <span>分享</span>
-        </v-btn>
       </div>
-      <div class="calendar-title-right">
+      <div class="calendar-title-mid">
         <v-btn
           v-for="text of btnText"
           :key="text.week"
-          :class="btnNow === text.week ? 'calendar-btn-selected' : 'calendar-btn'"
+          :style="{
+            border: text.week === weekNow ? '1px solid var(--box-text-2)' : 'none',
+            borderRadius: '5px',
+            backgroundColor: text.week === btnNow ? 'var(--tgc-yellow)' : 'inherit',
+            color: text.week === btnNow ? 'var(--box-text-4)' : 'inherit',
+          }"
           @click="getContents(text.week)"
+          variant="tonal"
         >
           {{ text.text }}
         </v-btn>
       </div>
+      <div class="calendar-title-right">
+        <v-switch
+          class="calendar-title-switch"
+          color="grey"
+          variant="outline"
+          :label="switchType === 'avatar' ? '角色' : '武器'"
+          @change="switchType = switchType === 'avatar' ? 'weapon' : 'avatar'"
+        />
+        <v-btn variant="tonal" class="calendar-title-btn" @click="share">
+          <template #prepend>
+            <v-icon> mdi-share-variant</v-icon>
+          </template>
+          <span>分享</span>
+        </v-btn>
+      </div>
     </div>
-    <TSubLine>角色突破</TSubLine>
-    <div class="calendar-grid">
+    <v-divider class="calendar-divider" />
+    <div class="calendar-grid" v-show="switchType==='avatar'">
       <div v-for="item in characterCards" :key="item.id" @click="selectAvatar(item)">
         <TibCalendarItem
           :data="<TGApp.App.Calendar.Item>item"
@@ -33,8 +48,7 @@
         />
       </div>
     </div>
-    <TSubLine>武器突破</TSubLine>
-    <div class="calendar-grid">
+    <div class="calendar-grid" v-show="switchType!=='avatar'">
       <div v-for="item in weaponCards" :key="item.id" @click="selectWeapon(item)">
         <TibCalendarItem
           :data="<TGApp.App.Calendar.Item>item"
@@ -49,7 +63,6 @@
 <script lang="ts" setup>
 // vue
 import { computed, onMounted, ref } from "vue";
-import TSubLine from "../main/t-subline.vue";
 import ToCalendar from "../overlay/to-calendar.vue";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 // data
@@ -73,6 +86,7 @@ const weaponCards = ref<TGApp.App.Calendar.Item[]>([]);
 
 // calendar item
 const showItem = ref<boolean>(false);
+const switchType = ref<string>("avatar");
 const selectedItem = ref<TGApp.App.Calendar.Item>(<TGApp.App.Calendar.Item>{});
 const selectedType = ref<"avatar" | "weapon">("avatar");
 
@@ -159,7 +173,8 @@ function getContents(day: number): void {
 async function share(): Promise<void> {
   // todo 唤起外部 loading
   const div = <HTMLElement>document.querySelector(".calendar-box");
-  const title = `【今日素材】${dateNow.value}-${btnNow.value}`;
+  const showType = switchType.value === "avatar" ? "角色" : "武器";
+  const title = `【今日素材】${showType}${btnNow.value}`;
   await generateShareImg(title, div);
 }
 </script>
@@ -168,18 +183,18 @@ async function share(): Promise<void> {
   padding: 10px;
   border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  background: var(--common-shadow-t-2);
+  background: var(--box-bg-1);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .calendar-title {
   display: flex;
   align-items: center;
-  justify-content: start;
-  padding-bottom: 5px;
-  color: var(--common-text-title);
-  column-gap: 2rem;
   font-family: var(--font-title);
   font-size: 20px;
+  justify-content: space-between;
 }
 
 .calendar-title-left {
@@ -189,29 +204,38 @@ async function share(): Promise<void> {
   column-gap: 10px;
 }
 
-.calendar-title-btn {
-  border-radius: 5px;
-  color: var(--common-text-content);
-  cursor: pointer;
-}
-
-.calendar-title-right {
+.calendar-title-mid {
   display: flex;
   align-items: center;
   justify-content: start;
   column-gap: 15px;
 }
 
-.calendar-btn {
-  border-radius: 5px;
-  background: var(--common-bg-1);
-  color: var(--common-bgt-1);
+.calendar-title-right {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 15px;
 }
 
-.calendar-btn-selected {
+.calendar-title-switch {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--box-text-3);
+}
+
+.calendar-title-btn {
   border-radius: 5px;
-  background: var(--common-btn-bg-1);
-  color: var(--common-btn-bgt-1);
+  color: var(--box-text-3);
+  border: 1px solid var(--box-text-3);
+  cursor: pointer;
+}
+
+.calendar-divider {
+  margin: 10px 0;
+  opacity: 0.2;
 }
 
 .calendar-grid {

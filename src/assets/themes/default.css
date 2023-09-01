@@ -8,13 +8,21 @@
 /* default(light) theme */
 html.default {
   /* app container */
-  --app-page-bg: var(--tgc-white-3);
+  --app-page-bg: var(--tgc-white-1);
   --app-page-content: var(--tgc-dark-5); /* todo 这边直接反色，需要调整 */
-  --app-side-bg: var(--tgc-white-4);
+  --app-side-bg: var(--tgc-white-5);
   --app-side-content: var(--tgc-dark-4);
 
-  /* content */
-  --content-box-bg-1: var(--tgc-white-4);
+  /* box container */
+  --box-bg-1: var(--tgc-white-3);
+  --box-bg-2: var(--tgc-white-7);
+  --box-bg-3: var(--tgc-white-9);
+
+  /* box text */
+  --box-text-1: var(--tgc-dark-5);
+  --box-text-2: var(--tgc-dark-2);
+  --box-text-3: var(--tgc-blue-2);
+  --box-text-4: var(--tgc-blue-3);
 
   /* box-shadow */
   --common-shadow-1: rgb(0 0 0 / 10%);
@@ -27,10 +35,6 @@ html.default {
   --common-shadow-t-2: rgb(255 255 255 / 20%);
   --common-shadow-t-4: rgb(255 255 255 / 40%);
   --common-shadow-t-8: rgb(255 255 255 / 80%);
-
-  /* box bg */
-  --common-bg-1: #faf7e8; /* 一级背景色 */
-  --common-bgt-1: #3d424b; /* 一级背景色对应的文本色 */
 
   /* button */
   --common-btn-bg-1: #fec90b; /* button 背景色 */

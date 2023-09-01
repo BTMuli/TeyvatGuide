@@ -14,7 +14,15 @@ html.dark {
   --app-side-content: var(--tgc-white-4);
 
   /* content */
-  --content-box-bg-1: var(--tgc-dark-5);
+  --box-bg-1: var(--tgc-dark-5);
+  --box-bg-2: var(--tgc-dark-6);
+  --box-bg-3: var(--tgc-dark-7);
+
+  /* text */
+  --box-text-1: var(--tgc-white-1);
+  --box-text-2: var(--tgc-white-2);
+  --box-text-3: var(--tgc-blue-1);
+  --box-text-4: var(--tgc-white-8);
 
   /* box-shadow */
   --common-shadow-1: rgb(255 255 255 / 10%);

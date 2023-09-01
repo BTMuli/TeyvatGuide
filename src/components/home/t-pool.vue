@@ -201,6 +201,7 @@ onUnmounted(() => {
   flex-direction: column;
   padding: 10px;
   border: 1px solid var(--common-shadow-2);
+  background: var(--box-bg-1);
   border-radius: 5px;
   gap: 10px;
 }
@@ -232,7 +233,7 @@ onUnmounted(() => {
   overflow: hidden;
   width: 50%;
   border-radius: 5px;
-  box-shadow: 0 0 5px var(--common-shadow-4);
+  box-shadow: 0 5px 5px var(--common-shadow-4);
 }
 
 .pool-cover {
@@ -310,7 +311,7 @@ onUnmounted(() => {
   align-items: flex-start;
   justify-content: flex-start;
   margin-right: 10px;
-  color: var(--tgc-text-1);
+  color: var(--tgc-white-1);
   font-size: 12px;
   gap: 10px;
   text-align: left;
