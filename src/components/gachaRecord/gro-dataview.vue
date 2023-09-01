@@ -149,6 +149,8 @@ function getTitle(type: "top" | "5" | "4" | "3"): string {
     if (props.dataType === "weapon") return "武器祈愿";
     if (props.dataType === "normal") return "常驻祈愿";
     return "";
+  } else if (props.dataVal.length === 0) {
+    return "暂无数据";
   } else if (type === "5") {
     // 5星物品统计 00.00%
     return `${star5List.value.length} [${((star5List.value.length * 100) / props.dataVal.length)

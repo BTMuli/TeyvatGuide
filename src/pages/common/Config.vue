@@ -196,7 +196,6 @@ import { useAchievementsStore } from "../../store/modules/achievements";
 import { useUserStore } from "../../store/modules/user";
 // utils
 import { backupUiafData, restoreUiafData } from "../../utils/UIAF";
-import { backupUigfData, restoreUigfData } from "../../utils/UIGF";
 import { backupAbyssData, backupCookieData } from "../../web/utils/backupData";
 import { restoreAbyssData, restoreCookieData } from "../../web/utils/restoreData";
 import TGSqlite from "../../plugins/Sqlite";
@@ -354,7 +353,7 @@ async function confirmRefreshUser(): Promise<void> {
 async function confirmBackup(): Promise<void> {
   const res = await showConfirm({
     title: "确认备份数据吗？",
-    text: "若已备份将会被覆盖",
+    text: "若已备份将会被覆盖，祈愿数据备份请到对应页面执行",
   });
   if (!res) {
     showSnackbar({
@@ -377,15 +376,6 @@ async function confirmBackup(): Promise<void> {
   const abyss = await TGSqlite.getAbyss();
   loadingSub.value = "正在备份深渊数据";
   await backupAbyssData(abyss);
-  if (userInfo.value.uid === "-1") {
-    loadingSub.value = "用户未登录，跳过祈愿数据备份";
-  } else {
-    loadingSub.value = "正在获取祈愿数据";
-    const gameUid = userStore.getCurAccount().gameUid;
-    const gacha = await TGSqlite.getGachaRecords(gameUid);
-    loadingSub.value = "正在备份祈愿数据";
-    await backupUigfData(gameUid, gacha);
-  }
   loadingSub.value = "";
   loading.value = false;
   showSnackbar({ text: "数据已备份!" });
@@ -395,7 +385,7 @@ async function confirmBackup(): Promise<void> {
 async function confirmRestore(): Promise<void> {
   const resConfirm = await showConfirm({
     title: "确认恢复数据吗？",
-    text: "请确保存在备份数据",
+    text: "请确保存在备份数据，祈愿数据恢复请到对应页面执行",
   });
   if (!resConfirm) {
     showSnackbar({
@@ -422,22 +412,6 @@ async function confirmRestore(): Promise<void> {
   res = await restoreAbyssData();
   if (!res) {
     fail.push("深渊数据");
-  }
-  if (userInfo.value.uid === "-1") {
-    showSnackbar({
-      color: "grey",
-      text: "用户未登录，跳过祈愿数据恢复",
-    });
-    await new Promise(() => {
-      setTimeout(() => {}, 1500);
-    });
-  } else {
-    loadingSub.value = "正在恢复祈愿数据";
-    const gameUid = userStore.getCurAccount().gameUid;
-    res = await restoreUigfData(gameUid);
-    if (!res) {
-      fail.push("祈愿数据");
-    }
   }
   fail.length > 0
     ? showSnackbar({ text: `${fail.join("、")} 恢复失败!`, color: "error" })

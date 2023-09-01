@@ -2,7 +2,7 @@
  * @file plugins Sqlite index.ts
  * @description Sqlite 数据库操作类
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.3
+ * @since Beta v0.3.0
  */
 
 // tauri
@@ -495,6 +495,19 @@ class Sqlite {
     const res: TGApp.Sqlite.GachaRecords.SingleTable[] = await db.select(sql);
     await db.close();
     return res;
+  }
+
+  /**
+   * @description 删除指定 uid 的祈愿数据
+   * @since Beta v0.3.0
+   * @param {string} uid 用户 uid
+   * @returns {Promise<void>}
+   */
+  public async deleteGachaRecords(uid: string): Promise<void> {
+    const db = await Database.load(this.dbPath);
+    const sql = `DELETE FROM GachaRecords WHERE uid = '${uid}'`;
+    await db.execute(sql);
+    await db.close();
   }
 
   /**

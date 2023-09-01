@@ -2,7 +2,7 @@
   <ToLoading v-model="loading" :title="loadingTitle" />
   <v-app-bar class="gacha-top-bar">
     <template #prepend>
-      <v-app-bar-title> 祈愿记录 </v-app-bar-title>
+      <v-app-bar-title> 祈愿记录</v-app-bar-title>
     </template>
     <template #default>
       <v-select
@@ -14,7 +14,9 @@
       <v-spacer />
     </template>
     <template #append>
-      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn"> 导入</v-btn>
+      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn()">
+        导入
+      </v-btn>
       <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="handleExportBtn"> 导出</v-btn>
     </template>
   </v-app-bar>
@@ -22,6 +24,20 @@
     <v-tabs v-model="tab" align-tabs="start" class="gacha-tab" direction="vertical">
       <v-tab value="echarts">图表概览</v-tab>
       <v-tab value="overview">数据概览</v-tab>
+      <div class="gacha-tab-bottom">
+        <v-btn class="gacha-tab-btn" variant="outlined" @click="backupGacha">
+          <v-icon>mdi-cloud-download</v-icon>
+          <span>备份</span>
+        </v-btn>
+        <v-btn class="gacha-tab-btn" variant="outlined" @click="deleteGacha">
+          <v-icon>mdi-delete</v-icon>
+          <span>删除</span>
+        </v-btn>
+        <v-btn class="gacha-tab-btn" variant="outlined" @click="restoreGacha">
+          <v-icon>mdi-cloud-upload</v-icon>
+          <span>恢复</span>
+        </v-btn>
+      </div>
     </v-tabs>
     <v-window v-model="tab" class="gacha-window">
       <v-window-item value="echarts" class="gacha-window-item">
@@ -42,9 +58,9 @@ import ToLoading from "../../components/overlay/to-loading.vue";
 import GroEcharts from "../../components/gachaRecord/gro-echarts.vue";
 import GroOverview from "../../components/gachaRecord/gro-overview.vue";
 // tauri
-import { dialog } from "@tauri-apps/api";
+import { dialog, path } from "@tauri-apps/api";
 // utils
-import { exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF";
+import { backupUigfData, exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF";
 import TGSqlite from "../../plugins/Sqlite";
 
 // loading
@@ -80,16 +96,30 @@ onMounted(async () => {
 });
 
 // 导入按钮点击事件
-async function handleImportBtn(): Promise<void> {
-  const selectedFile = await dialog.open({
-    multiple: false,
-    filters: [
-      {
-        name: "UIGF",
-        extensions: ["json"],
-      },
-    ],
-  });
+async function handleImportBtn(savePath?: string): Promise<void> {
+  let selectedFile;
+  if (savePath) {
+    selectedFile = await dialog.open({
+      multiple: false,
+      filters: [
+        {
+          name: "UIGF",
+          extensions: ["json"],
+        },
+      ],
+      defaultPath: savePath,
+    });
+  } else {
+    selectedFile = await dialog.open({
+      multiple: false,
+      filters: [
+        {
+          name: "UIGF",
+          extensions: ["json"],
+        },
+      ],
+    });
+  }
   if (selectedFile) {
     const check = await verifyUigfData(<string>selectedFile);
     if (!check) {
@@ -125,6 +155,9 @@ async function handleImportBtn(): Promise<void> {
       showSnackbar({
         text: `成功导入 ${remoteData.list.length} 条祈愿数据`,
       });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     }
   } else {
     showSnackbar({
@@ -180,6 +213,88 @@ async function handleExportBtn(): Promise<void> {
   });
 }
 
+// 恢复UID祈愿数据，相当于导入祈愿数据，不过目录固定
+async function restoreGacha(): Promise<void> {
+  const backupPath = `${await path.appLocalDataDir()}userData`;
+  await handleImportBtn(backupPath);
+}
+
+// 备份当前 UID 的祈愿数据
+async function backupGacha(): Promise<void> {
+  if (gachaListCur.value.length === 0) {
+    showSnackbar({
+      color: "error",
+      text: `暂无祈愿数据`,
+    });
+    return;
+  }
+  const res = await showConfirm({
+    title: `是否备份祈愿数据？`,
+    text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
+  });
+  if (!res) {
+    showSnackbar({
+      color: "grey",
+      text: `已取消祈愿数据备份`,
+    });
+    return;
+  }
+  loadingTitle.value = "正在备份祈愿数据";
+  loading.value = true;
+  await backupUigfData(uidCur.value, gachaListCur.value);
+  loading.value = false;
+  showSnackbar({
+    text: `已成功备份 ${uidCur.value} 的祈愿数据`,
+  });
+}
+
+// 删除当前 UID 的祈愿数据
+async function deleteGacha(): Promise<void> {
+  if (gachaListCur.value.length === 0) {
+    showSnackbar({
+      color: "error",
+      text: `暂无祈愿数据`,
+    });
+    return;
+  }
+  const firstConfirm = await showConfirm({
+    title: `是否删除祈愿数据？`,
+    text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
+  });
+  if (!firstConfirm) {
+    showSnackbar({
+      color: "grey",
+      text: `已取消祈愿数据删除`,
+    });
+    return;
+  }
+  const uidList = await TGSqlite.getUidList();
+  let secondConfirm: string | boolean = "";
+  if (uidList.length <= 1) {
+    secondConfirm = await showConfirm({
+      title: "删除后数据库将为空，确定删除？",
+      text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
+    });
+  }
+  if (secondConfirm === false) {
+    showSnackbar({
+      color: "grey",
+      text: `已取消祈愿数据删除`,
+    });
+    return;
+  }
+  loadingTitle.value = `正在删除${uidCur.value}的祈愿数据`;
+  loading.value = true;
+  await TGSqlite.deleteGachaRecords(uidCur.value);
+  loading.value = false;
+  showSnackbar({
+    text: `已成功删除 ${uidCur.value} 的祈愿数据`,
+  });
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
+}
+
 // 监听 UID 变化
 watch(uidCur, async (newUid) => {
   gachaListCur.value = await TGSqlite.getGachaRecords(newUid);
@@ -223,6 +338,21 @@ watch(uidCur, async (newUid) => {
   height: 100%;
   color: var(--common-text-title);
   font-family: var(--font-title);
+}
+
+.gacha-tab-bottom {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  padding: 10px;
+  gap: 15px;
+}
+
+.gacha-tab-btn {
+  background: var(--common-shadow-t-2);
+  color: var(--common-text-content);
 }
 
 .gacha-window {
