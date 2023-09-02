@@ -8,16 +8,16 @@
 /* dark mode */
 html.dark {
   /* app container */
-  --app-page-bg: var(--tgc-dark-8);
-  --app-page-content: var(--tgc-white-3);
-  --app-side-bg: var(--tgc-dark-3);
-  --app-side-content: var(--tgc-white-4);
+  --app-page-bg: #000000; /* (0, 0, 0) */
+  --app-page-content: #d0d0d0;
+  --app-side-bg: #151c26;
+  --app-side-content: #dddddd;
 
-  /* content */
-  --box-bg-1: var(--tgc-dark-4);
-  --box-bg-2: var(--tgc-dark-6);
-  --box-bg-3: var(--tgc-dark-7);
-  --box-bg-4: var(--tgc-dark-7);
+  /* box container */
+  --box-bg-1: #21252b;
+  --box-bg-2: #323844;
+  --box-bg-3: #282c34;
+  --box-bg-4: #3d424b;
 
   /* box bg transparent */
   --box-bg-t-1: var(--tgc-white-3);

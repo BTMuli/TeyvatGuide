@@ -29,7 +29,6 @@ defineProps<TAOProps>();
   align-items: center;
   justify-content: center;
   padding: 5px;
-  border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   background: var(--box-bg-2);
 }

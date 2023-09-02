@@ -200,7 +200,6 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   padding: 10px;
-  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   background: var(--box-bg-1);
   gap: 10px;

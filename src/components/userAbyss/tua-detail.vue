@@ -27,7 +27,6 @@ const props = defineProps<TuaDetailProps>();
 <style lang="css" scoped>
 .tuad-box {
   padding: 10px;
-  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   background: var(--box-bg-1);
 }

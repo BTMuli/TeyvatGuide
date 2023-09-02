@@ -300,7 +300,6 @@ watch(uidCur, async (newUid) => {
   align-items: center;
   justify-content: space-between;
   padding: 10px;
-  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   margin-bottom: 10px;
   background: var(--box-bg-1);
@@ -333,7 +332,7 @@ watch(uidCur, async (newUid) => {
   height: calc(100vh - 130px);
   align-items: center;
   justify-content: left;
-  border: 1px solid var(--common-shadow-2);
+  border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   background: var(--box-bg-1);
 }

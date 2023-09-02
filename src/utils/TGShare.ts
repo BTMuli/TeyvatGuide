@@ -68,7 +68,7 @@ function getShareImgBgColor(): string {
     theme = JSON.parse(theme).theme;
   }
   if (theme === "dark") {
-    return "#0d1117";
+    return "#000000";
   } else {
     return "#ffffff";
   }

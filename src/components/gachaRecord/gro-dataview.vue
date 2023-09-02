@@ -189,7 +189,7 @@ function getIcon(itemId: string, type: string): string {
 // 监听数据变化
 watch(
   () => props.dataVal,
-  (newVal) => {
+  () => {
     star5List.value = [];
     star4List.value = [];
     reset5count.value = 0;
@@ -207,7 +207,6 @@ watch(
 .gro-dv-container {
   height: 100%;
   padding: 10px;
-  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   background: var(--box-bg-2);
 }

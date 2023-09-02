@@ -118,7 +118,6 @@ async function shareRecord(): Promise<void> {
   width: 100%;
   flex-direction: column;
   padding: 10px;
-  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   background: var(--box-bg-1);
   row-gap: 5px;

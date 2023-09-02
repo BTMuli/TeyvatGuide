@@ -45,9 +45,8 @@ const getIconNum = computed(() => (props.multi4 ? 4 : 1));
   align-items: center;
   justify-content: center;
   padding: 10px;
-  border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
-  background: var(--box-bg-2);
+  background: var(--box-bg-1);
 }
 
 .tuao-title {

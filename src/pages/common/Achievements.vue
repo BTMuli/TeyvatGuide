@@ -338,7 +338,6 @@ function getIcon(series: number): string | undefined {
   align-items: center;
   justify-content: space-between;
   padding: 10px;
-  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   margin-bottom: 10px;
   background: var(--box-bg-1);
@@ -394,10 +393,10 @@ function getIcon(series: number): string | undefined {
   right: 0;
   bottom: 0;
   width: 80px;
-  border-radius: 10px 0 0;
-  border-top: 1px inset var(--common-shadow-4);
-  border-left: 1px inset var(--common-shadow-4);
-  background: var(--box-bg-4);
+  border-top: 1px solid var(--common-shadow-1);
+  border-left: 1px solid var(--common-shadow-1);
+  background: var(--box-bg-2);
+  border-top-left-radius: 20px;
   color: var(--tgc-yellow-1);
   font-family: var(--font-title);
   font-size: 10px;
@@ -405,7 +404,6 @@ function getIcon(series: number): string | undefined {
 }
 
 .version-icon-single {
-  border-radius: 5px;
   color: var(--tgc-pink-1);
   font-family: var(--font-title);
   font-size: 10px;
@@ -413,7 +411,6 @@ function getIcon(series: number): string | undefined {
 }
 
 .card-left {
-  border: 1px solid var(--common-shadow-2);
   border-radius: 10px;
   margin-right: 10px;
   margin-bottom: 10px;
@@ -424,10 +421,9 @@ function getIcon(series: number): string | undefined {
 
 /* 成就卡片 */
 .card-right {
-  border: 1px solid var(--common-shadow-2);
   border-radius: 10px;
   margin: 10px;
-  background: var(--box-bg-2);
+  background: var(--box-bg-1);
   color: var(--box-text-7);
 }
 
@@ -437,9 +433,9 @@ function getIcon(series: number): string | undefined {
   top: 0;
   left: 0;
   width: 65px;
-  border-right: 1px solid var(--common-shadow-4);
-  border-bottom: 1px solid var(--common-shadow-4);
-  background: var(--box-bg-1);
+  border-right: 1px solid var(--common-shadow-1);
+  border-bottom: 1px solid var(--common-shadow-1);
+  background: var(--box-bg-2);
   border-bottom-right-radius: 20px;
   color: var(--box-text-3);
   font-family: var(--font-title);

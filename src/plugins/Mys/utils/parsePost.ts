@@ -2,7 +2,7 @@
  * @file plugins Mys utils parsePost.ts
  * @description 用于解析Mys数据的工具
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Beta v0.3.0
  */
 
 /**
@@ -189,7 +189,7 @@ function parseUnknown(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivEl
 
 /**
  * @description 解析文本
- * @since Alpha v0.1.3
+ * @since Beta v0.3.0
  * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLSpanElement} 解析后的文本
  */
@@ -206,7 +206,7 @@ function parseText(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLSpanElem
     if (data.attributes.color) {
       let colorGet = data.attributes.color;
       // 如果 colorGet 在 darkColorList 中，就设置为对应的颜色
-      if (isColorSimilar("#ece5d8", colorGet) || isColorSimilar("#2a2a2a", colorGet)) {
+      if (isColorSimilar("#ffffff", colorGet) || isColorSimilar("#000000", colorGet)) {
         colorGet = "var(--post-default-text)";
       }
       text.style.color = colorGet;

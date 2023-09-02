@@ -18,8 +18,8 @@
       <v-list-item-title>
         应用版本
         <v-btn
-          class="card-btn"
           size="small"
+          variant="outlined"
           @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/releases/latest')"
         >
           BETA
@@ -48,15 +48,10 @@
         <img class="config-icon" :src="userInfo.avatar" alt="Login" />
       </template>
       <template #append>
-        <v-btn class="card-btn" @click="confirmRefreshUser">
-          <template #prepend>
-            <img src="../../assets/icons/circle-check.svg" alt="check" />
-            刷新数据
-          </template>
-        </v-btn>
+        <v-btn class="config-btn" @click="confirmRefreshUser"> 刷新数据 </v-btn>
       </template>
     </v-list-item>
-    <v-list-subheader :inset="true" class="config-header"> 系统信息</v-list-subheader>
+    <v-list-subheader :inset="true" class="config-header">系统信息</v-list-subheader>
     <v-divider :inset="true" class="border-opacity-75" />
     <v-list-item title="系统平台">
       <template #prepend>
@@ -110,12 +105,7 @@
         :chips="true"
       />
       <template #append>
-        <v-btn class="card-btn" @click="submitHome">
-          <template #prepend>
-            <img src="../../assets/icons/circle-check.svg" alt="check" />
-            确定
-          </template>
-        </v-btn>
+        <v-btn class="config-btn" @click="submitHome"> 确定 </v-btn>
       </template>
     </v-list-item>
     <v-list-item prepend-icon="mdi-content-save" title="数据备份" @click="confirmBackup" />
@@ -673,15 +663,14 @@ function submitHome(): void {
 .config-list {
   border-radius: 10px;
   margin: 10px;
-  background: var(--content-bg-2);
-  color: var(--content-text-3);
-  font-family: Genshin-Light, serif;
+  background: var(--box-bg-1);
+  color: var(--box-text-4);
+  font-family: var(--font-text);
 }
 
 .config-header {
   margin-top: 10px;
-  background: var(--content-bg-2);
-  color: #fec90b;
+  color: var(--common-text-title);
   font-family: Genshin, serif;
   font-size: large;
 }
@@ -690,8 +679,16 @@ function submitHome(): void {
   width: 40px;
   height: 40px;
   padding: 5px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 10px;
   margin-right: 15px;
-  background: var(--content-bg-3);
+  background: var(--box-bg-2);
+}
+
+.config-btn {
+  width: 100px;
+  margin-left: 100px;
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
 }
 </style>

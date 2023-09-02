@@ -129,7 +129,6 @@ onUnmounted(() => {
 <style lang="css" scoped>
 .position-box {
   padding: 10px;
-  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   background: var(--box-bg-1);
 }

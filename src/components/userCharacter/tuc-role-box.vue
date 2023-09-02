@@ -128,7 +128,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   padding: 5px;
-  border: 1px inset var(--common-shadow-4);
+  border: 1px inset var(--common-shadow-2);
   border-radius: 5px;
   background: var(--box-bg-2);
   cursor: pointer;
@@ -150,8 +150,8 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 5px;
-  border: 1px solid var(--common-shadow-4);
   border-radius: 5px;
+  background: var(--box-bg-3);
   font-family: var(--font-title);
   font-size: 12px;
 }
@@ -236,7 +236,7 @@ onUnmounted(() => {
   border: 1px solid var(--tgc-white-8);
   border-radius: 50%;
   background: var(--tgc-dark-7);
-  opacity: 0.5;
+  opacity: 0.8;
 }
 
 .tuc-rbb-talent :nth-child(2) {
