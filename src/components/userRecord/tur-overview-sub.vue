@@ -29,21 +29,21 @@ defineProps<TAOProps>();
   align-items: center;
   justify-content: center;
   padding: 5px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
-  background: var(--common-shadow-1);
+  background: var(--box-bg-2);
 }
 
 .tur-os-title {
-  color: var(--common-text-content);
+  color: var(--box-text-4);
   font-family: var(--font-title);
   font-size: 20px;
 }
 
 .tur-os-text {
-  color: var(--common-color-white);
+  color: var(--tgc-yellow-1);
   font-family: var(--font-text);
   font-size: 20px;
-  text-shadow: 0 0 10px var(--common-color-yellow);
 }
 
 .dark .tur-os-text {

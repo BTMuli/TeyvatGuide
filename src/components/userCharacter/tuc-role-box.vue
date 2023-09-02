@@ -130,13 +130,10 @@ onUnmounted(() => {
   padding: 5px;
   border: 1px inset var(--common-shadow-4);
   border-radius: 5px;
+  background: var(--box-bg-2);
   cursor: pointer;
   row-gap: 5px;
   transition: all 0.3s;
-}
-
-.tuc-rb-box:hover {
-  box-shadow: 0 0 10px var(--common-color-yellow);
 }
 
 .tuc-rb-top {
@@ -153,7 +150,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 5px;
-  border: 1px inset var(--common-bg-1);
+  border: 1px solid var(--common-shadow-4);
   border-radius: 5px;
   font-family: var(--font-title);
   font-size: 12px;
@@ -176,7 +173,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  color: var(--common-shadow-8);
+  color: var(--box-text-4);
   column-gap: 5px;
 }
 
@@ -199,14 +196,14 @@ onUnmounted(() => {
   justify-content: center;
   border-radius: 5px;
   backdrop-filter: blur(5px);
-  background: var(--common-shadow-4);
+  background: var(--tgc-btn-1);
 }
 
 .tuc-rbb-bg img {
   width: 100%;
   height: 100%;
   border-radius: 5px;
-  object-fit: contain;
+  object-fit: fill;
 }
 
 .tuc-rbb-content {
@@ -236,9 +233,10 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   padding: 5px;
+  border: 1px solid var(--tgc-white-8);
   border-radius: 50%;
-  background: rgb(0 0 0 /40%);
-  box-shadow: 0 0 10px rgb(255 255 255/40%);
+  background: var(--tgc-dark-7);
+  opacity: 0.5;
 }
 
 .tuc-rbb-talent :nth-child(2) {
@@ -247,9 +245,9 @@ onUnmounted(() => {
   height: 30px;
   align-items: center;
   justify-content: center;
-  color: #faf7e8;
+  color: var(--tgc-white-8);
   font-family: var(--font-title);
   font-size: 12px;
-  text-shadow: 0 0 5px rgb(0 0 0 / 50%);
+  text-shadow: 0 0 10px var(--tgc-dark-7);
 }
 </style>

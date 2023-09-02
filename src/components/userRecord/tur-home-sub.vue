@@ -10,7 +10,6 @@
       {{ data.name }}
     </div>
     <div class="tur-hs-title">
-      <!-- canvas -->
       <img :src="getUrl.icon" alt="comfort" />
       {{ data.comfortName }}
     </div>
@@ -65,20 +64,18 @@ onMounted(async () => {
   position: absolute;
   top: 10px;
   right: 10px;
-  color: var(--common-color-white);
+  color: var(--tgc-white-1);
   font-family: var(--font-text);
   font-size: 16px;
-  text-shadow: 0 0 10px rgb(0 0 0 / 40%);
 }
 
 .tur-hs-title {
   display: flex;
   align-items: center;
   padding: 10px;
-  color: var(--common-color-white);
+  color: var(--tgc-white-1);
   font-family: var(--font-title);
   font-size: 20px;
-  text-shadow: 0 0 10px rgb(0 0 0 / 40%);
 }
 
 .tur-hs-title img {
@@ -92,15 +89,16 @@ onMounted(async () => {
   width: 100%;
   justify-content: space-between;
   padding: 10px;
+  backdrop-filter: blur(5px);
   background: rgb(0 0 0 / 40%);
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
-  color: var(--common-color-white);
+  color: var(--tgc-white-1);
   text-align: center;
 }
 
 .tur-hs-text :nth-child(1) {
-  color: var(--common-color-yellow);
+  color: var(--tgc-yellow-1);
   font-family: var(--font-text);
 }
 

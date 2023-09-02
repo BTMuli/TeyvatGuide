@@ -25,9 +25,10 @@ const props = defineProps<TuaDetailLevelProps>();
   display: flex;
   flex-direction: column;
   padding: 10px;
+  border: 1px inset var(--common-shadow-2);
   border-radius: 5px;
   margin-top: 10px;
-  background: var(--common-shadow-1);
+  background: var(--box-bg-2);
   gap: 10px;
 }
 </style>

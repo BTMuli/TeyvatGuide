@@ -21,12 +21,6 @@ interface TuaDetailBattleProps {
 const props = defineProps<TuaDetailBattleProps>();
 </script>
 <style lang="css" scoped>
-.tud-db-box {
-  padding: 5px;
-  border-radius: 5px;
-  background: var(--common-shadow-t-1);
-}
-
 .tud-db-icons-grid {
   display: flex;
   flex-direction: row;

@@ -6,15 +6,15 @@
         第{{ item.id }}期
       </v-tab>
       <div class="ua-tab-bottom">
-        <v-btn class="ua-btn" variant="outlined" @click="shareAbyss">
+        <v-btn class="ua-btn" @click="shareAbyss">
           <v-icon>mdi-share</v-icon>
           <span>分享</span>
         </v-btn>
-        <v-btn class="ua-btn" variant="outlined" @click="getAbyssData">
+        <v-btn class="ua-btn" @click="getAbyssData">
           <v-icon>mdi-refresh</v-icon>
           <span>刷新</span>
         </v-btn>
-        <v-btn class="ua-btn" variant="outlined" @click="uploadAbyss">
+        <v-btn class="ua-btn" @click="uploadAbyss">
           <v-icon>mdi-cloud-upload</v-icon>
           <span>上传</span>
         </v-btn>
@@ -27,7 +27,7 @@
         :value="item.id"
         class="ua-window-item"
       >
-        <div :ref="getAbyssRef">
+        <div :ref="getAbyssRef" class="uaw-i-ref">
           <div class="uaw-title">
             <span>第</span>
             <span>{{ item.id }}</span>
@@ -97,6 +97,7 @@ const localAbyssID = ref<number[]>([]);
 const curAbyss = ref<TGApp.Sqlite.Abyss.SingleTable>(<TGApp.Sqlite.Abyss.SingleTable>{});
 const abyssRef = ref<HTMLElement>(<HTMLElement>{});
 
+// todo 优化数据加载
 onMounted(async () => {
   loadingTitle.value = "正在加载深渊数据";
   await initAbyssData();
@@ -199,31 +200,36 @@ async function uploadAbyss(): Promise<void> {
   height: calc(100vh - 35px);
   align-items: center;
   justify-content: left;
+  border: 1px solid var(--common-shadow-4);
   border-radius: 5px;
-  box-shadow: 0 0 10px 0 var(--common-shadow-4);
 }
 
 .ua-tab {
   width: 100px;
   height: 100%;
-  color: var(--common-text-title);
+  color: var(--box-text-4);
   font-family: var(--font-text);
 }
 
 .ua-tab-bottom {
   position: absolute;
   bottom: 0;
+  display: flex;
   width: 100%;
+  flex-wrap: wrap;
   padding: 10px;
+  gap: 10px;
 }
 
 .ua-btn {
-  margin-top: 15px;
-  background: var(--common-shadow-2);
-  color: var(--common-color-white);
+  border-radius: 5px;
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
+  font-family: var(--font-text);
 }
 
 .ua-window {
+  overflow: hidden;
   width: calc(100% - 100px);
   height: 100%;
   padding: 10px;
@@ -233,8 +239,13 @@ async function uploadAbyss(): Promise<void> {
   height: 100%;
   padding: 10px;
   border-radius: 5px;
-  box-shadow: 0 0 10px var(--common-shadow-2);
   overflow-y: auto;
+}
+
+.uaw-i-ref {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .uaw-title {
@@ -248,13 +259,7 @@ async function uploadAbyss(): Promise<void> {
 .uaw-title :nth-child(2n) {
   margin-right: 10px;
   margin-left: 10px;
-  color: var(--common-color-white);
-  text-shadow: 0 0 10px var(--common-color-yellow);
-}
-
-.dark .uaw-title :nth-child(2n) {
-  color: var(--common-color-yellow);
-  text-shadow: none;
+  color: var(--tgc-yellow-1);
 }
 
 .uaw-o-box {

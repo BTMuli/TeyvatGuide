@@ -19,6 +19,7 @@
   <div class="wrap">
     <!-- 左侧菜单 -->
     <div class="left-wrap">
+      <!-- todo 简化 -->
       <v-list
         v-for="series in seriesList"
         :key="series.id"
@@ -30,7 +31,7 @@
           <template #prepend>
             <v-img width="40px" style="margin-right: 10px" :src="getIcon(series.id)" />
           </template>
-          <v-list-item-title>
+          <v-list-item-title :title="series.name">
             {{ series.name }}
           </v-list-item-title>
           <v-list-item-subtitle>
@@ -340,6 +341,7 @@ function getIcon(series: number): string | undefined {
   border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   margin-bottom: 10px;
+  background: var(--box-bg-1);
   column-gap: 50px;
   font-family: var(--font-title);
   font-size: 20px;
@@ -413,7 +415,8 @@ function getIcon(series: number): string | undefined {
 .card-left {
   border: 1px solid var(--common-shadow-2);
   border-radius: 10px;
-  margin: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
   background: var(--box-bg-1);
   color: var(--box-text-1);
   cursor: pointer;

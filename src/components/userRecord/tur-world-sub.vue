@@ -86,8 +86,9 @@ async function listenOnTheme(): Promise<void> {
   align-items: center;
   justify-content: center;
   padding: 10px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
-  background: var(--common-shadow-1);
+  background: var(--box-bg-2);
 }
 
 .tur-ws-icon {
@@ -104,11 +105,11 @@ async function listenOnTheme(): Promise<void> {
 .tur-ws-content {
   width: calc(100% - 60px);
   height: 100%;
-  color: var(--common-text-content);
+  color: var(--box-text-4);
 }
 
 .tur-ws-title {
-  border-bottom: 1px inset var(--common-text-content);
+  border-bottom: 1px inset var(--common-shadow-8);
   font-family: var(--font-title);
   font-size: 20px;
 }
@@ -128,12 +129,6 @@ async function listenOnTheme(): Promise<void> {
 }
 
 .tur-ws-sub :nth-last-child(2) {
-  color: var(--common-color-white);
-  text-shadow: 0 0 10px var(--common-color-yellow);
-}
-
-.dark .tur-ws-sub :nth-last-child(2) {
-  color: var(--common-color-yellow);
-  text-shadow: none;
+  color: var(--tgc-yellow-1);
 }
 </style>

@@ -1,39 +1,29 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" />
-  <v-app-bar class="gacha-top-bar">
-    <template #prepend>
-      <v-app-bar-title> 祈愿记录</v-app-bar-title>
-    </template>
-    <template #default>
-      <v-select
-        v-model="uidCur"
-        class="gacha-top-select"
-        :items="selectItem"
-        variant="underlined"
-      />
-      <v-spacer />
-    </template>
-    <template #append>
+  <div class="gacha-top-bar">
+    <div class="gacha-top-title">祈愿记录</div>
+    <v-select v-model="uidCur" class="gacha-top-select" :items="selectItem" variant="outlined" />
+    <div class="gacha-top-btns">
       <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn()">
         导入
       </v-btn>
       <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="handleExportBtn"> 导出</v-btn>
-    </template>
-  </v-app-bar>
+    </div>
+  </div>
   <div class="gacha-container">
     <v-tabs v-model="tab" align-tabs="start" class="gacha-tab" direction="vertical">
       <v-tab value="echarts">图表概览</v-tab>
       <v-tab value="overview">数据概览</v-tab>
       <div class="gacha-tab-bottom">
-        <v-btn class="gacha-tab-btn" variant="outlined" @click="backupGacha">
+        <v-btn class="gacha-tab-btn" @click="backupGacha">
           <v-icon>mdi-cloud-download</v-icon>
           <span>备份</span>
         </v-btn>
-        <v-btn class="gacha-tab-btn" variant="outlined" @click="deleteGacha">
+        <v-btn class="gacha-tab-btn" @click="deleteGacha">
           <v-icon>mdi-delete</v-icon>
           <span>删除</span>
         </v-btn>
-        <v-btn class="gacha-tab-btn" variant="outlined" @click="restoreGacha">
+        <v-btn class="gacha-tab-btn" @click="restoreGacha">
           <v-icon>mdi-cloud-upload</v-icon>
           <span>恢复</span>
         </v-btn>
@@ -306,37 +296,52 @@ watch(uidCur, async (newUid) => {
 <style lang="css" scoped>
 .gacha-top-bar {
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
-  background: rgb(0 0 0/50%);
-  color: #f4d8a8;
+  padding: 10px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 5px;
+  margin-bottom: 10px;
+  background: var(--box-bg-1);
+  column-gap: 50px;
   font-family: var(--font-title);
+  font-size: 20px;
+}
+
+.gacha-top-title {
+  color: var(--common-text-title);
 }
 
 .gacha-top-select {
   height: 60px;
-  margin-left: 20px;
+}
+
+.gacha-top-btns {
+  display: flex;
+  column-gap: 10px;
 }
 
 .gacha-top-btn {
-  margin: 0 10px;
-  background: #393b40;
-  color: #faf7e8 !important;
+  border-radius: 5px;
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
 }
 
 .gacha-container {
   display: flex;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 130px);
   align-items: center;
   justify-content: left;
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  box-shadow: 0 0 10px 0 var(--common-shadow-4);
+  background: var(--box-bg-1);
 }
 
 .gacha-tab {
   width: 100px;
   height: 100%;
-  color: var(--common-text-title);
+  color: var(--box-text-4);
   font-family: var(--font-title);
 }
 
@@ -347,12 +352,13 @@ watch(uidCur, async (newUid) => {
   width: 100%;
   flex-direction: column;
   padding: 10px;
-  gap: 15px;
+  gap: 10px;
 }
 
 .gacha-tab-btn {
-  background: var(--common-shadow-t-2);
-  color: var(--common-text-content);
+  border-radius: 5px;
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
 }
 
 .gacha-window {
@@ -363,8 +369,6 @@ watch(uidCur, async (newUid) => {
 
 .gacha-window-item {
   height: 100%;
-  padding: 5px;
-  border: 1px inset var(--common-shadow-8);
   border-radius: 5px;
   overflow-y: auto;
 }

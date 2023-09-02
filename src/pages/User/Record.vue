@@ -6,18 +6,20 @@
         <span v-if="!isEmpty">{{ getTitle() }} 更新于 {{ recordData.updated }}</span>
         <span v-else>原神战绩【暂无数据】【{{ user.gameUid }}】</span>
       </div>
-      <v-btn variant="outlined" class="ur-top-btn" @click="refresh()">
-        <template #prepend>
-          <v-icon>mdi-refresh</v-icon>
-        </template>
-        更新数据
-      </v-btn>
-      <v-btn variant="outlined" class="ur-top-btn" @click="shareRecord()">
-        <template #prepend>
-          <v-icon>mdi-share</v-icon>
-        </template>
-        分享
-      </v-btn>
+      <div class="ur-top-btns">
+        <v-btn class="ur-top-btn" @click="refresh()">
+          <template #prepend>
+            <v-icon>mdi-refresh</v-icon>
+          </template>
+          更新数据
+        </v-btn>
+        <v-btn class="ur-top-btn" @click="shareRecord()">
+          <template #prepend>
+            <v-icon>mdi-share</v-icon>
+          </template>
+          分享
+        </v-btn>
+      </div>
     </div>
     <TSubLine>数据总览</TSubLine>
     <TurOverviewGrid v-model="recordData.stats" />
@@ -112,10 +114,14 @@ async function shareRecord(): Promise<void> {
 </script>
 <style lang="css" scoped>
 .ur-box {
+  display: flex;
   width: 100%;
+  flex-direction: column;
   padding: 10px;
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  box-shadow: 0 0 10px var(--common-shadow-4);
+  background: var(--box-bg-1);
+  row-gap: 5px;
 }
 
 .ur-top {
@@ -123,22 +129,26 @@ async function shareRecord(): Promise<void> {
   width: 100%;
   height: 50px;
   align-items: center;
+  justify-content: space-between;
   padding: 10px;
-  border-radius: 5px;
+  border-bottom: 1px solid var(--common-shadow-2);
 }
 
 .ur-top-title {
-  margin-right: 10px;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
 }
 
+.ur-top-btns {
+  display: flex;
+  gap: 15px;
+}
+
 .ur-top-btn {
   border-radius: 5px;
-  margin-left: 15px;
-  background: var(--common-shadow-2);
-  color: var(--common-color-white);
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
   font-family: var(--font-text);
 }
 </style>

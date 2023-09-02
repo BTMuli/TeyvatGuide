@@ -20,7 +20,7 @@
             <button
               class="confirm-btn"
               :style="{
-                backgroundColor: 'var(--box-bg-t-4)',
+                backgroundColor: 'var(--tgc-dark-2)',
               }"
               @click="handleClick(true)"
             >

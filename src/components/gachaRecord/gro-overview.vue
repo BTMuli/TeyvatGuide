@@ -44,6 +44,5 @@ watch(
   width: 100%;
   height: 100%;
   grid-gap: 10px;
-  transition: all 0.3s ease-in-out;
 }
 </style>

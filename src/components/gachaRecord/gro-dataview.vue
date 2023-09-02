@@ -207,8 +207,9 @@ watch(
 .gro-dv-container {
   height: 100%;
   padding: 10px;
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  background: var(--common-shadow-2);
+  background: var(--box-bg-2);
 }
 
 .gro-dvt-title {
@@ -223,16 +224,16 @@ watch(
 
 .gro-dvt-subtitle {
   width: 100%;
-  color: var(--common-text-quote);
   font-family: var(--font-text);
   font-size: 12px;
+  opacity: 0.6;
 }
 
 .gro-mid-list {
   padding-top: 5px;
   padding-bottom: 5px;
   border-top: 1px solid var(--common-shadow-4);
-  color: var(--common-text-content);
+  color: var(--box-text-7);
 }
 
 .gro-ml-item {
@@ -250,7 +251,7 @@ watch(
 
 .gro-b-window-item {
   display: flex;
-  max-height: calc(100vh - 400px);
+  max-height: calc(100vh - 420px);
   flex-direction: column;
   margin-top: 10px;
   gap: 5px;
@@ -285,6 +286,6 @@ watch(
   justify-content: space-between;
   padding: 0 10px;
   border-radius: 5px;
-  background: var(--common-shadow-2);
+  background: var(--box-bg-3);
 }
 </style>

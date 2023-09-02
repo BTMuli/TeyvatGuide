@@ -1,6 +1,6 @@
 <template>
   <div class="tsl-box">
-    <img src="/src/assets/icons/arrow-right.svg" alt="right" />
+    <img src="/src/assets/icons/arrow-right.svg" alt="right" class="tsl-icon" />
     <slot>
       {{ props.title }}
     </slot>
@@ -14,19 +14,21 @@ const props = defineProps<{
 <style lang="css" scoped>
 .tsl-box {
   display: flex;
-  height: 30px;
   align-items: center;
-  padding: 0 10px;
+  padding: 5px;
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   margin: 5px 0;
-  background: var(--common-shadow-2);
-  color: var(--common-color-white);
-  font-family: var(--font-text);
+  color: var(--box-text-4);
+  font-family: var(--font-title);
+  gap: 5px;
 }
 
 .tsl-box img {
   width: 20px;
   height: 20px;
-  margin-right: 5px;
+  padding: 5px;
+  border-radius: 5px;
+  background: var(--common-shadow-4);
 }
 </style>

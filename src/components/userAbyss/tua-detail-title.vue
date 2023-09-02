@@ -43,31 +43,27 @@ const props = defineProps<TuaDetailTitleProps>();
   height: 30px;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 1px solid var(--common-shadow-4);
 }
 
 .tud-t-title {
-  color: var(--common-text-content);
+  color: var(--box-text-4);
 }
 
 .tud-t-val {
   display: flex;
   align-items: center;
-  color: var(--common-color-white);
-  font-family: var(--font-text);
-  text-shadow: 0 0 10px var(--common-color-yellow);
-}
-
-.dark .tud-t-val {
-  color: var(--common-color-yellow);
-  text-shadow: none;
+  color: var(--tgc-yellow-1);
+  font-family: var(--font-title);
+  gap: 5px;
 }
 
 .tud-t-val img {
   width: 20px;
   height: 20px;
+  padding: 1px;
   border-radius: 50%;
-  margin-right: 5px;
-  background: var(--common-shadow-4);
+  background: var(--tgc-btn-1);
   object-fit: cover;
 }
 </style>

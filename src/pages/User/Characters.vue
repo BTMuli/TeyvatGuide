@@ -3,26 +3,31 @@
   <div class="uc-box">
     <div class="uc-top">
       <div class="uc-top-title">
-        {{ user.nickname }} UID：{{ user.gameUid }} 更新于 {{ getUpdateTime() }}
+        <span v-if="user">
+          {{ user.nickname }} UID：{{ user.gameUid }} 更新于 {{ getUpdateTime() }}
+        </span>
+        <span v-else> 暂无数据 </span>
       </div>
-      <v-btn variant="outlined" class="uc-top-btn" @click="refreshRoles()">
-        <template #prepend>
-          <v-icon>mdi-refresh</v-icon>
-        </template>
-        更新角色数据
-      </v-btn>
-      <v-btn variant="outlined" class="uc-top-btn" @click="refreshTalent()">
-        <template #prepend>
-          <v-icon>mdi-refresh</v-icon>
-        </template>
-        更新天赋数据
-      </v-btn>
-      <v-btn variant="outlined" class="uc-top-btn" @click="shareRoles()">
-        <template #prepend>
-          <v-icon>mdi-share</v-icon>
-        </template>
-        分享
-      </v-btn>
+      <div class="uc-top-btns">
+        <v-btn class="uc-top-btn" @click="refreshRoles()">
+          <template #prepend>
+            <v-icon>mdi-refresh</v-icon>
+          </template>
+          更新角色数据
+        </v-btn>
+        <v-btn class="uc-top-btn" @click="refreshTalent()">
+          <template #prepend>
+            <v-icon>mdi-refresh</v-icon>
+          </template>
+          更新天赋数据
+        </v-btn>
+        <v-btn class="uc-top-btn" @click="shareRoles()">
+          <template #prepend>
+            <v-icon>mdi-share</v-icon>
+          </template>
+          分享
+        </v-btn>
+      </div>
     </div>
     <!-- grid 布局，参考 Snap.Hutao -->
     <div class="uc-grid">
@@ -181,10 +186,14 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
 </script>
 <style lang="css" scoped>
 .uc-box {
+  display: flex;
   width: 100%;
+  flex-direction: column;
   padding: 10px;
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  box-shadow: 0 0 10px var(--common-shadow-4);
+  background: var(--box-bg-1);
+  gap: 10px;
 }
 
 .uc-top {
@@ -192,29 +201,32 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
   width: 100%;
   height: 50px;
   align-items: center;
+  justify-content: space-between;
   padding: 10px;
-  border-radius: 5px;
+  border-bottom: 1px solid var(--common-shadow-2);
 }
 
 .uc-top-title {
-  margin-right: 10px;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
 }
 
+.uc-top-btns {
+  display: flex;
+  gap: 15px;
+}
+
 .uc-top-btn {
   border-radius: 5px;
-  margin-left: 15px;
-  background: var(--common-shadow-2);
-  color: var(--common-color-white);
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
   font-family: var(--font-text);
 }
 
 .uc-grid {
   display: grid;
-  padding: 10px;
-  grid-gap: 10px v-bind(gridGap);
-  grid-template-columns: repeat(auto-fill, 180px);
+  grid-gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 </style>
