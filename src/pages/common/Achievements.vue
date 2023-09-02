@@ -1,23 +1,20 @@
 <template>
-  <!-- 顶部操作栏 todo 样式调整 -->
-  <v-app-bar style="background: rgb(0 0 0 / 50%); color: #f4d8a8; font-family: Genshin, serif">
-    <template #prepend>
-      <span style="font-size: 30px">{{ title }}</span>
-    </template>
-    <v-spacer />
+  <div class="top-bar">
+    <div class="top-title">{{ title }}</div>
     <v-text-field
       v-model="search"
       append-icon="mdi-magnify"
       label="搜索"
       hide-details
+      variant="outlined"
       @click:append="searchCard"
       @keyup.enter="searchCard"
     />
-    <template #append>
+    <div class="top-btns">
       <v-btn prepend-icon="mdi-import" class="top-btn" @click="importJson"> 导入 </v-btn>
       <v-btn prepend-icon="mdi-export" class="top-btn" @click="exportJson"> 导出 </v-btn>
-    </template>
-  </v-app-bar>
+    </div>
+  </div>
   <ToLoading v-model="loading" :title="loadingTitle" />
   <div class="wrap">
     <!-- 左侧菜单 -->
@@ -333,33 +330,54 @@ function getIcon(series: number): string | undefined {
 </script>
 
 <style lang="css" scoped>
-/* 顶部按钮 */
+.top-bar {
+  display: flex;
+  width: 100%;
+  height: 80px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 5px;
+  margin-bottom: 10px;
+  column-gap: 50px;
+  font-family: var(--font-title);
+  font-size: 20px;
+}
+
+.top-title {
+  color: var(--common-text-title);
+}
+
+.top-btns {
+  display: flex;
+  column-gap: 10px;
+}
+
 .top-btn {
   border-radius: 5px;
-  margin-left: 15px;
-  background: var(--box-bg-t-4);
-  color: var(--box-text-5);
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
 }
 
 /* 内容区域 */
 .wrap {
   display: flex;
-  justify-content: space-between;
+  height: calc(100vh - 130px);
+  column-gap: 10px;
 }
 
 /* 左侧系列 */
 .left-wrap {
   width: 400px;
-  height: calc(100vh - 100px);
-  overflow-x: hidden;
+  height: 100%;
   overflow-y: auto;
 }
 
 /* 右侧成就 */
 .right-wrap {
-  width: calc(100% - 410px);
-  height: calc(100vh - 100px);
-  overflow-x: hidden;
+  width: 100%;
+  height: 100%;
   overflow-y: auto;
 }
 
@@ -378,7 +396,7 @@ function getIcon(series: number): string | undefined {
   border-top: 1px inset var(--common-shadow-4);
   border-left: 1px inset var(--common-shadow-4);
   background: var(--box-bg-4);
-  color: var(--box-text-5);
+  color: var(--tgc-yellow-1);
   font-family: var(--font-title);
   font-size: 10px;
   text-align: center;

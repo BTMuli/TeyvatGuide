@@ -9,29 +9,31 @@
 html.default {
   /* app container */
   --app-page-bg: var(--tgc-white-1);
-  --app-page-content: var(--tgc-dark-5);
+  --app-page-content: var(--tgc-dark-7);
   --app-side-bg: var(--tgc-white-5);
-  --app-side-content: var(--tgc-dark-4);
+  --app-side-content: var(--tgc-dark-8);
 
   /* box container */
+  /* page-bg > box-bg-1 > box-bg-2 */
   --box-bg-1: var(--tgc-white-3); /* with box-text-1 */
-  --box-bg-2: var(--tgc-white-7);
+  --box-bg-2: var(--tgc-white-4);
   --box-bg-3: var(--tgc-white-9);
   --box-bg-4: var(--tgc-white-1);
-  --box-bg-5: var(--tgc-yellow-1); /* with box-text-6 */
 
   /* box bg transparent */
   --box-bg-t-1: var(--tgc-dark-5);
-  --box-bg-t-4: var(--tgc-dark-7); /* with box-text-5 */
 
   /* box text */
   --box-text-1: var(--tgc-dark-5); /* with box-bg-1 */
   --box-text-2: var(--tgc-dark-2);
   --box-text-3: var(--tgc-blue-2);
   --box-text-4: var(--tgc-blue-3); /* subtitle */
-  --box-text-5: var(--tgc-yellow-2); /* with box-bg-t-4 */
-  --box-text-6: var(--tgc-blue-1); /* with box-bg-5 */
   --box-text-7: var(--tgc-dark-7); /* quote */
+
+  /* button */
+  --btn-text: var(--tgc-yellow-2); /* with tgc-btn-1 */
+  --btn-bg-1: var(--tgc-yellow-1);
+  --btn-text-1: var(--tgc-blue-1);
 
   /* box-shadow */
   --common-shadow-1: rgb(0 0 0 / 10%);
@@ -45,17 +47,11 @@ html.default {
   --common-shadow-t-4: rgb(255 255 255 / 40%);
   --common-shadow-t-8: rgb(255 255 255 / 80%);
 
-  /* button */
-  --common-btn-bg-1: #fec90b; /* button 背景色 */
-  --common-btn-bgt-1: #5b738f; /* button 背景色对应的文本色 */
-  --common-btn-bg-2: #e1d8c6; /* button 背景色 */
-  --common-btn-bgt-2: #495366; /* button 背景色对应的文本色 */
+  /* common text color */
+  --common-text-title: var(--tgc-dark-8); /* title */
+  --common-text-content: var(--common-color-blue-2); /* text todo */
+  --common-text-quote: var(--common-color-blue-3); /* quote todo */
 
-  --common-text-title: #393b40; /* title */
-  --common-text-content: var(--common-color-blue-2); /* text */
-  --common-text-quote: var(--common-color-blue-3); /* quote */
-
-  --calendar-btn-bg: #393b40;
   --back-top-shadow: #546d8b;
   --theme-switch-icon: #393b40;
   --post-default-text: #1e1e1e;
@@ -65,9 +61,4 @@ html.default {
 
   --content-text-2: #393b40;
   --content-text-3: #546d8b;
-
-  --btn-bg-1: #fec90b;
-  --btn-bg-2: #4a5366;
-  --btn-bg-3: #546d8b;
-  --btn-text-1: #faf7e8;
 }

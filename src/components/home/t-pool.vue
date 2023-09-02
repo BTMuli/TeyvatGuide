@@ -201,13 +201,14 @@ onUnmounted(() => {
   flex-direction: column;
   padding: 10px;
   border: 1px solid var(--common-shadow-2);
-  background: var(--box-bg-1);
   border-radius: 5px;
+  background: var(--box-bg-1);
   gap: 10px;
 }
 
 .pool-title {
   display: flex;
+  color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
 }

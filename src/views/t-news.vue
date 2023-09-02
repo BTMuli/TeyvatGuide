@@ -463,19 +463,21 @@ async function searchPost(): Promise<void> {
 <style lang="css" scoped>
 .news-tab {
   margin-bottom: 10px;
+  color: var(--common-text-title);
   font-family: var(--font-title);
 }
 
 .news-switch-btn {
   height: 40px;
   margin-left: 15px;
-  background: var(--box-bg-5);
-  color: var(--box-text-6);
+  background: var(--btn-bg-1);
+  color: var(--btn-text-1);
   font-family: var(--font-title);
 }
 
 .news-search {
   margin-left: 10px;
+  color: var(--box-text-1);
 }
 
 .news-grid {
@@ -729,7 +731,7 @@ async function searchPost(): Promise<void> {
 
 .load-news button {
   border-radius: 5px;
-  background: var(--box-bg-t-4);
-  color: var(--box-text-5);
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
 }
 </style>

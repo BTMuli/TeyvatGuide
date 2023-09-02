@@ -244,7 +244,7 @@ defineExpose({
   justify-content: center;
   border: 1px solid var(--common-shadow-4);
   border-radius: 5px;
-  color: var(--box-text-5);
+  color: var(--btn-text);
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 20px;

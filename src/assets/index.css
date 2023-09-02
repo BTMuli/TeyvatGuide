@@ -42,6 +42,7 @@
   --tgc-dark-5: #161b22; /* Github web list nav */
   --tgc-dark-6: #21262d; /* Github web btn bg */
   --tgc-dark-7: #393b40; /* Genshin btn bg */
+  --tgc-dark-8: #121212; /* Github web bg */
 
   /* color other */
   --tgc-blue-1: #3572a5; /* Github web lang bar */
@@ -51,6 +52,9 @@
   --tgc-pink-1: #fb7299; /* Bilibili btn bg */
   --tgc-yellow-1: #ffcd0c; /* Genshin btn bg */
   --tgc-yellow-2: #f4d8a8; /* Genshin confirm text */
+
+  /* some css same in dark and default theme */
+  --tgc-btn-1: var(--tgc-dark-7); /* button bg */
 }
 
 /*

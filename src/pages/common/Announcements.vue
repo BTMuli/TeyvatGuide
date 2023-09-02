@@ -145,13 +145,14 @@ async function toJson(item: TGApp.App.Announcement.ListCard): Promise<void> {
 <style lang="css" scoped>
 .anno-tab {
   margin-bottom: 10px;
+  color: var(--common-text-title);
   font-family: var(--font-title);
 }
 
 .anno-switch-btn {
   height: 40px;
-  background: var(--box-bg-5);
-  color: var(--box-text-6);
+  background: var(--btn-bg-1);
+  color: var(--btn-text-1);
   font-family: var(--font-title);
 }
 
@@ -216,7 +217,7 @@ async function toJson(item: TGApp.App.Announcement.ListCard): Promise<void> {
 
 .anno-dev-btn {
   background: var(--box-bg-t-1);
-  color: var(--box-text-5);
+  color: var(--btn-text);
   font-family: var(--font-title);
 }
 

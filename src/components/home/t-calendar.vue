@@ -30,7 +30,7 @@
           :label="switchType === 'avatar' ? '角色' : '武器'"
           @change="switchType = switchType === 'avatar' ? 'weapon' : 'avatar'"
         />
-        <v-btn variant="tonal" class="calendar-title-btn" @click="share">
+        <v-btn class="calendar-title-btn" @click="share">
           <template #prepend>
             <v-icon> mdi-share-variant</v-icon>
           </template>
@@ -201,6 +201,7 @@ async function share(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: start;
+  color: var(--common-text-title);
   column-gap: 10px;
 }
 
@@ -229,8 +230,8 @@ async function share(): Promise<void> {
 .calendar-title-btn {
   border: 1px solid var(--common-shadow-4);
   border-radius: 5px;
-  background: var(--box-bg-t-4);
-  color: var(--box-text-5);
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
 }
 
 .calendar-divider {

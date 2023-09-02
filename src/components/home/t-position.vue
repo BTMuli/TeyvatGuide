@@ -20,7 +20,7 @@
               </v-avatar>
             </template>
             <template #append>
-              <v-btn variant="tonal" class="position-card-btn" @click="toPost(card)"> 查看 </v-btn>
+              <v-btn class="position-card-btn" @click="toPost(card)"> 查看 </v-btn>
             </template>
           </v-list-item>
         </v-list>
@@ -138,6 +138,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: start;
+  color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
 }
@@ -190,8 +191,8 @@ onUnmounted(() => {
 .position-card-btn {
   border: 1px solid var(--common-shadow-4);
   border-radius: 5px;
-  background: var(--box-bg-t-4);
-  color: var(--box-text-5);
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
 }
 
 .position-card-text {
