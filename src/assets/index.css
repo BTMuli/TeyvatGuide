@@ -53,7 +53,13 @@
   --tgc-yellow-2: #f4d8a8; /* Genshin confirm text */
 }
 
+/*
+ * @description 根 html 样式
+ * @since Beta v0.3.0
+ */
 html {
+  overflow: auto;
+  background: var(--app-page-bg);
   font-family: var(--font-text);
   font-size: 16px;
 }
@@ -79,18 +85,4 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--common-shadow-4);
-}
-
-/* card action 内的按钮 */
-.card-btn {
-  border-radius: 50px;
-  margin-left: 5px;
-  background: #4a5366;
-  color: #ece5d8;
-}
-
-.card-btn img {
-  width: 20px;
-  height: 20px;
-  margin: 5px;
 }
