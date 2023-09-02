@@ -2,25 +2,24 @@
  * @file assets css post-parser.css
  * @description 米游社解析 css
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Beta v0.3.0
  */
 
 .mys-post-body {
   width: 800px;
   margin: 0 auto;
-  color: var(--post-default-text);
   font-family: var(--font-text);
 }
 
 .mys-post-title {
   color: var(--common-text-title);
   font-family: var(--font-title);
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .mys-post-subtitle {
-  color: var(--common-text-quote);
   font-size: 16px;
+  opacity: 0.6;
 }
 
 .mys-post-content {

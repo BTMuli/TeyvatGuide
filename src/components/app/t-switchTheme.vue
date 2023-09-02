@@ -1,7 +1,7 @@
 <template>
   <div class="switch-box">
     <div class="switch-btn" @click="switchTheme()">
-      <v-icon style="color: var(--theme-switch-icon)">
+      <v-icon>
         {{ themeGet === "default" ? "mdi-weather-night" : "mdi-weather-sunny" }}
       </v-icon>
     </div>
@@ -48,7 +48,7 @@ async function listenOnTheme(): Promise<void> {
   position: absolute;
   top: 20px;
   left: 20px;
-  border: var(--theme-switch-icon) 2px solid;
+  border: 2px solid var(--common-shadow-8);
   border-radius: 50%;
   cursor: pointer;
 }

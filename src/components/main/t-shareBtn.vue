@@ -1,7 +1,7 @@
 <template>
   <div class="share-box">
     <div class="share-btn" @click="shareContent()">
-      <v-icon style="color: var(--theme-switch-icon)"> mdi-share-variant </v-icon>
+      <v-icon> mdi-share-variant </v-icon>
     </div>
   </div>
 </template>
@@ -31,7 +31,7 @@ async function shareContent(): Promise<void> {
   position: absolute;
   top: 20px;
   right: 20px;
-  border: var(--theme-switch-icon) 2px solid;
+  border: 2px solid var(--common-shadow-8);
   border-radius: 50%;
   cursor: pointer;
 }

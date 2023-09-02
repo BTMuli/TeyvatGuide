@@ -25,7 +25,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 
 /**
  * @description 给定两个16进制颜色值，确认两者是否相近
- * @since Alpha v0.1.3
+ * @since Beta v0.3.0
  * @param {string} colorBg 背景颜色
  * @param {string} colorFg 前景颜色
  * @returns {boolean} 是否相近
@@ -44,7 +44,8 @@ function isColorSimilar(colorBg: string, colorFg: string): boolean {
   const contrast =
     (Math.max(colorBgLumFinal, colorFgLumFinal) + 0.05) /
     (Math.min(colorBgLumFinal, colorFgLumFinal) + 0.05);
-  return contrast <= 2.5;
+  // console.log(colorBg, colorFg, contrast);
+  return contrast > 1.5 && contrast < 4;
 }
 
 /**
@@ -206,8 +207,8 @@ function parseText(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLSpanElem
     if (data.attributes.color) {
       let colorGet = data.attributes.color;
       // 如果 colorGet 在 darkColorList 中，就设置为对应的颜色
-      if (isColorSimilar("#ffffff", colorGet) || isColorSimilar("#000000", colorGet)) {
-        colorGet = "var(--post-default-text)";
+      if (isColorSimilar("#000000", colorGet)) {
+        colorGet = "var(--app-page-content)";
       }
       text.style.color = colorGet;
     }

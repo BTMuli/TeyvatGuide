@@ -114,11 +114,11 @@ async function toChannel(link: string): Promise<void> {
 .toc-top {
   padding: 10px;
   border-radius: 5px;
-  background: rgb(255 255 255 / 30%);
+  background: var(--app-page-bg);
 }
 
 .toc-title {
-  color: var(--common-color-blue);
+  color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
 }
@@ -134,16 +134,12 @@ async function toChannel(link: string): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: start;
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  background: rgb(0 0 0 / 20%);
-  color: var(--common-color-black);
+  background: var(--box-bg-1);
+  color: var(--box-text-2);
   cursor: pointer;
   transition: all 0.5s linear;
-}
-
-.toc-list-item:hover {
-  background: rgb(0 0 0 / 50%);
-  color: var(--common-color-white);
 }
 
 .toc-list-item img {
@@ -175,8 +171,8 @@ async function toChannel(link: string): Promise<void> {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgb(255 255 255 / 30%);
-  color: #faf7e8;
+  background: var(--app-page-bg);
+  color: var(--app-page-content);
   cursor: pointer;
 }
 </style>
