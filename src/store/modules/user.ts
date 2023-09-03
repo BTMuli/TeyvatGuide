@@ -1,14 +1,16 @@
 /**
  * @file store modules user.ts
  * @description User store module
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @author BTMuli <bt-muli@outlook.com>
+ * @since Beta v0.3.0
  */
 
 // vue
 import { ref } from "vue";
 // pinia
 import { defineStore } from "pinia";
+// sqlite
+import TGSqlite from "../../plugins/Sqlite";
 
 export const useUserStore = defineStore(
   "user",
@@ -81,10 +83,9 @@ export const useUserStore = defineStore(
       };
     }
 
-    function initCookie(ck: Record<string, string>): void {
-      if (cookie.value !== ck) {
-        cookie.value = ck;
-      }
+    async function saveCookie(type: string, val: string): Promise<void> {
+      cookie.value[type] = val;
+      await TGSqlite.saveAppData("cookie", JSON.stringify(cookie.value));
     }
 
     return {
@@ -100,7 +101,7 @@ export const useUserStore = defineStore(
       getCookieGroup2,
       getCookieGroup3,
       getCookieGroup4,
-      initCookie,
+      saveCookie,
     };
   },
   {
