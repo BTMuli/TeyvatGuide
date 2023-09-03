@@ -20,15 +20,6 @@ const headers: Record<string, string> = {
   "User-Agent":
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
   "x-rpc-app_id": "bll8iq97cem8",
-  "x-rpc-client_type": "4",
-  "x-rpc-device_model": "Chrome 116.0.0.0",
-  "x-rpc-device_name": "Chrome",
-  "x-rpc-device_os": "Windows 10 64-bit",
-  "x-rpc-game_biz": "bbs_cn",
-  "x-rpc-mi_referrer":
-    "https://user.miyoushe.com/login-platform/index.html?app_id=bll8iq97cem8&app_version=2.58.0&theme=&token_type=4&game_biz=bbs_cn&message_origin=https%253A%252F%252Fwww.miyoushe.com&succ_back_type=message%253Alogin-platform%253Alogin-success&fail_back_type=message%253Alogin-platform%253Alogin-fail&sync_login_status=popup&ux_mode=popup&iframe_level=1&ap_mps=1#/login/qr",
-  "x-rpc-sdk_version": "2.17.0",
-  "X-Rpc-Device_fp": "",
   "X-Rpc-Device_id": uuid,
 };
 
