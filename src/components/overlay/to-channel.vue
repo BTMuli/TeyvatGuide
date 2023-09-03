@@ -114,7 +114,7 @@ async function toChannel(link: string): Promise<void> {
 .toc-top {
   padding: 10px;
   border-radius: 5px;
-  background: var(--app-page-bg);
+  background: var(--box-bg-1);
 }
 
 .toc-title {
@@ -136,7 +136,7 @@ async function toChannel(link: string): Promise<void> {
   justify-content: start;
   border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  background: var(--box-bg-1);
+  background: var(--box-bg-2);
   color: var(--box-text-2);
   cursor: pointer;
   transition: all 0.5s linear;
@@ -171,7 +171,7 @@ async function toChannel(link: string): Promise<void> {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: var(--app-page-bg);
+  background: var(--box-bg-1);
   color: var(--app-page-content);
   cursor: pointer;
 }

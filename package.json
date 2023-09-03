@@ -4,7 +4,7 @@
   "private": true,
   "version": "0.3.0",
   "author": "BTMuli <bt-muli@outlook.com>",
-  "packageManager": "pnpm@8.7.0",
+  "packageManager": "pnpm@8.7.1",
   "scripts": {
     "build": "tauri build",
     "debug": "tauri build --debug",
@@ -57,7 +57,6 @@
     "pinia-plugin-persistedstate": "^3.2.0",
     "qrcode.vue": "^3.4.1",
     "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#v1",
-    "uuid": "^9.0.0",
     "vue": "^3.3.4",
     "vue-echarts": "^6.6.1",
     "vue-json-viewer": "^3.0.4",
