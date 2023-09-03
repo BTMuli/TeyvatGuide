@@ -54,10 +54,10 @@ export async function getCookieTokenByGameToken(
   gameToken: string,
 ): Promise<string | TGApp.BBS.Response.Base> {
   const url = "https://api-takumi.mihoyo.com/auth/api/getCookieAccountInfoByGameToken";
-  const data = { account_id: accountId, game_token: gameToken };
+  const data = { account_id: Number(accountId), game_token: gameToken };
   return await http
     .fetch<TGApp.BBS.Response.getCookieTokenByGameToken>(url, {
-      method: "GET",
+      method: "POST",
       body: http.Body.json(data),
     })
     .then((res) => {

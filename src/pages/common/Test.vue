@@ -1,50 +1,34 @@
 <template>
   <div>
-    <h1>Test</h1>
+    <h1>测试米游社扫码登录</h1>
     <div class="btn-list">
-      <v-btn @click="renderQr">渲染二维码</v-btn>
-      <v-btn @click="getData">获取数据</v-btn>
+      <v-btn class="test-btn" @click="showScan">弹窗</v-btn>
     </div>
-    <div class="qr-container">
-      <qrcode-vue :value="content" :size="size" level="H" render-as="svg" />
+    <ToGameLogin v-model="visible" />
+    <h1>颜色测试</h1>
+    <div class="test-box">
+      <div class="test-1">
+        Box 1
+        <div class="test-2">
+          Box 2
+          <div class="test-3">
+            Box 3
+            <div class="test-4">Box 4</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 // vue
 import { ref } from "vue";
-import QrcodeVue from "qrcode.vue";
-import showSnackbar from "../../components/func/snackbar";
-// utils
-import { getLoginQr, getLoginStatus } from "../../plugins/Mys/utils/doWebLogin";
+import ToGameLogin from "../../components/overlay/to-gameLogin.vue";
 
-const content = ref<string>("qrcode");
-const size = ref<number>(300);
-const ticket = ref<string>("");
+const visible = ref<boolean>(false);
 
-async function renderQr(): Promise<void> {
-  const res = await getLoginQr();
-  if ("retcode" in res) {
-    showSnackbar({
-      text: `[${res.retcode}] ${res.message}`,
-      color: "error",
-    });
-    return;
-  }
-  ticket.value = res.ticket;
-  content.value = res.url;
-}
-
-async function getData(): Promise<void> {
-  const res = await getLoginStatus(ticket.value);
-  if ("retcode" in res) {
-    showSnackbar({
-      text: `[${res.retcode}] ${res.message}`,
-      color: "error",
-    });
-    return;
-  }
-  console.log(res);
+function showScan(): void {
+  visible.value = true;
 }
 </script>
 <style lang="css" scoped>
@@ -53,5 +37,43 @@ async function getData(): Promise<void> {
   justify-content: flex-start;
   margin-bottom: 20px;
   gap: 10px;
+}
+
+.test-btn {
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
+}
+
+.test-box {
+  display: flex;
+  border-radius: 5px;
+  gap: 10px;
+}
+
+.test-1,
+.test-2,
+.test-3,
+.test-4 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.test-1 {
+  background: var(--box-bg-1);
+}
+
+.test-2 {
+  background: var(--box-bg-2);
+}
+
+.test-3 {
+  background: var(--box-bg-3);
+}
+
+.test-4 {
+  background: var(--box-bg-4);
 }
 </style>

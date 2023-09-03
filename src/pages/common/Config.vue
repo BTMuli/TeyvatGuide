@@ -1,5 +1,6 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
+  <ToGameLogin v-model="scan" />
   <v-list class="config-list">
     <v-list-subheader :inset="true" class="config-header"> 应用信息</v-list-subheader>
     <v-divider :inset="true" class="border-opacity-75" />
@@ -48,7 +49,19 @@
         <img class="config-icon" :src="userInfo.avatar" alt="Login" />
       </template>
       <template #append>
-        <v-btn class="config-btn" @click="confirmRefreshUser"> 刷新数据 </v-btn>
+        <v-btn v-show="userInfo.nickname === '未登录'" class="config-btn" @click="confirmScanLogin">
+          扫码登录</v-btn
+        >
+        <v-btn v-show="userInfo.nickname === '未登录'" class="config-btn" @click="confirmInitUser">
+          刷新数据</v-btn
+        >
+        <v-btn
+          v-show="userInfo.nickname !== '未登录'"
+          class="config-btn"
+          @click="confirmRefreshUser"
+        >
+          刷新数据</v-btn
+        >
       </template>
     </v-list-item>
     <v-list-subheader :inset="true" class="config-header">系统信息</v-list-subheader>
@@ -105,7 +118,7 @@
         :chips="true"
       />
       <template #append>
-        <v-btn class="config-btn" @click="submitHome"> 确定 </v-btn>
+        <v-btn class="config-btn" @click="submitHome"> 确定</v-btn>
       </template>
     </v-list-item>
     <v-list-item prepend-icon="mdi-content-save" title="数据备份" @click="confirmBackup" />
@@ -130,12 +143,12 @@
         />
       </template>
     </v-list-item>
-    <v-list-item @click="confirmInputCK">
+    <v-list-item @click="confirmScan">
       <template #prepend>
         <v-icon>mdi-cookie</v-icon>
       </template>
       <template #title>
-        <span style="cursor: pointer">手动输入 Cookie</span>
+        <span style="cursor: pointer">重新扫码</span>
       </template>
       <template #append>
         <v-icon
@@ -177,6 +190,7 @@ import { computed, onMounted, ref } from "vue";
 import showSnackbar from "../../components/func/snackbar";
 import showConfirm from "../../components/func/confirm";
 import ToLoading from "../../components/overlay/to-loading.vue";
+import ToGameLogin from "../../components/overlay/to-gameLogin.vue";
 // tauri
 import { app, fs, os } from "@tauri-apps/api";
 // store
@@ -211,6 +225,7 @@ const dbInfo = ref<Array<{ key: string; value: string; updated: string }>>([]);
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载...");
 const loadingSub = ref<string>("");
+const scan = ref<boolean>(false);
 
 // data
 const showHome = ref<string[]>(homeStore.getShowValue());
@@ -256,6 +271,121 @@ function toOuter(url: string): void {
   window.open(url);
 }
 
+// 扫码登录
+async function confirmScanLogin(): Promise<void> {
+  const confirmRes = await showConfirm({
+    title: "请使用米游社 APP 执行操作",
+    text: "请在成功后刷新数据",
+  });
+  if (confirmRes) {
+    scan.value = true;
+  } else {
+    showSnackbar({
+      color: "grey",
+      text: "已取消扫码登录",
+    });
+  }
+}
+
+// 初次获取用户信息
+async function confirmInitUser(): Promise<void> {
+  const cookieTemp = {
+    account_id: userStore.getCookieItem("account_id"),
+    game_token: userStore.getCookieItem("game_token"),
+    ltuid: userStore.getCookieItem("ltuid"),
+    ltoken: "",
+    stoken: "",
+    cookie_token: "",
+    stuid: "",
+    mid: "",
+  };
+  loadingTitle.value = "正在获取 tokens";
+  loading.value = true;
+  loadingSub.value = "正在获取 stoken_v2";
+  const stokenRes = await TGRequest.User.bgGameToken.getStoken(
+    cookieTemp.account_id,
+    cookieTemp.game_token,
+  );
+  if ("retcode" in stokenRes) {
+    showSnackbar({
+      color: "error",
+      text: `[${stokenRes.retcode}] ${stokenRes.message}`,
+    });
+    console.error("获取 stoken_v2 失败", stokenRes);
+  } else {
+    const stoken = stokenRes.token.token;
+    const mid = stokenRes.user_info.mid;
+    await userStore.saveCookie("stoken", stoken);
+    await userStore.saveCookie("mid", mid);
+    cookieTemp.stoken = stoken;
+    cookieTemp.mid = mid;
+  }
+  loadingSub.value = "正在获取 cookie_token";
+  const cookieTokenRes = await TGRequest.User.bgGameToken.getCookieToken(
+    cookieTemp.account_id,
+    cookieTemp.game_token,
+  );
+  if (typeof cookieTokenRes !== "string") {
+    showSnackbar({
+      color: "error",
+      text: `[${cookieTokenRes.retcode}] ${cookieTokenRes.message}`,
+    });
+    loadingSub.value = "获取 cookie_token 失败";
+    console.error("获取 cookie_token 失败", cookieTokenRes);
+  } else {
+    await userStore.saveCookie("cookie_token", cookieTokenRes);
+    cookieTemp.cookie_token = cookieTokenRes;
+  }
+  loadingSub.value = "正在获取 ltoken";
+  const lTokenRes = await TGRequest.User.bySToken.getLToken(cookieTemp.mid, cookieTemp.stoken);
+  if (typeof lTokenRes === "string") {
+    await userStore.saveCookie("ltoken", lTokenRes);
+    cookieTemp.ltoken = lTokenRes;
+  } else {
+    showSnackbar({
+      color: "error",
+      text: `[${lTokenRes.retcode}] ${lTokenRes.message}`,
+    });
+    loadingSub.value = "获取 ltoken 失败";
+    console.error("获取 ltoken 失败", lTokenRes);
+  }
+  loadingTitle.value = "正在获取用户信息";
+  loadingSub.value = "正在获取 用户信息";
+  const infoRes = await TGRequest.User.byCookie.getUserInfo(
+    cookieTemp.cookie_token,
+    cookieTemp.account_id,
+  );
+  console.log(infoRes);
+  if ("nickname" in infoRes) {
+    userStore.setBriefInfo(infoRes);
+  } else {
+    showSnackbar({
+      color: "error",
+      text: `[${infoRes.retcode}] ${infoRes.message}`,
+    });
+    loadingSub.value = "获取用户信息失败";
+    console.error("获取用户信息失败", infoRes);
+  }
+  const accountRes = await TGRequest.User.byCookie.getAccounts(
+    cookieTemp.cookie_token,
+    cookieTemp.account_id,
+  );
+  console.log(accountRes);
+  if (Array.isArray(accountRes)) {
+    loadingTitle.value = "获取成功!正在保存到数据库!";
+    await TGSqlite.saveAccount(accountRes);
+  } else {
+    showSnackbar({
+      color: "error",
+      text: `[${accountRes.retcode}] ${accountRes.message}`,
+    });
+    loadingSub.value = "获取用户信息失败";
+    console.error("获取用户信息失败", accountRes);
+  }
+  loadingSub.value = "";
+  loading.value = false;
+}
+
 // 刷新用户信息
 async function confirmRefreshUser(): Promise<void> {
   const res = await showConfirm({
@@ -273,7 +403,7 @@ async function confirmRefreshUser(): Promise<void> {
   if (Object.keys(ck).length < 1) {
     showSnackbar({
       color: "error",
-      text: "请先输入 Cookie!",
+      text: "扫码登录后才能刷新用户信息!",
     });
     return;
   }
@@ -286,11 +416,10 @@ async function confirmRefreshUser(): Promise<void> {
   } else {
     console.error(verifyLTokenRes);
     loadingTitle.value = "验证失败!正在重新获取 ltoken";
-    const ltokenRes = await TGRequest.User.bySToken.getLToken(ck.stuid, ck.stoken);
+    const ltokenRes = await TGRequest.User.bySToken.getLToken(ck.mid, ck.stoken);
     if (typeof ltokenRes === "string") {
       ck.ltoken = ltokenRes;
       await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
-      userStore.initCookie(ck);
       loadingTitle.value = "刷新成功!正在获取用户头像、昵称信息";
     } else {
       console.error(ltokenRes);
@@ -298,11 +427,10 @@ async function confirmRefreshUser(): Promise<void> {
       failCount++;
     }
   }
-  const cookieTokenRes = await TGRequest.User.bySToken.getCookieToken(ck.stuid, ck.stoken);
+  const cookieTokenRes = await TGRequest.User.bySToken.getCookieToken(ck.mid, ck.stoken);
   if (typeof cookieTokenRes === "string") {
     ck.cookie_token = cookieTokenRes;
     await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
-    userStore.initCookie(ck);
     console.log(JSON.stringify(ck));
     loadingTitle.value = "刷新成功!正在获取用户头像、昵称信息";
   } else {
@@ -406,8 +534,6 @@ async function confirmRestore(): Promise<void> {
   fail.length > 0
     ? showSnackbar({ text: `${fail.join("、")} 恢复失败!`, color: "error" })
     : showSnackbar({ text: "数据已恢复!" });
-  const cookie = await TGSqlite.getCookie();
-  userStore.initCookie(cookie);
   loading.value = false;
 }
 
@@ -500,73 +626,17 @@ async function confirmResetApp(): Promise<void> {
 }
 
 // 输入 cookie
-async function confirmInputCK(): Promise<void> {
-  const res = await showConfirm({
-    title: "请输入 Cookie",
-    text: "Cookie：",
-    mode: "input",
+async function confirmScan(): Promise<void> {
+  await confirmScanLogin();
+  const confirmRes = await showConfirm({
+    title: "是否刷新数据?",
   });
-  if (res === false) {
+  if (confirmRes) {
+    await confirmInitUser();
+  } else {
     showSnackbar({
       color: "grey",
-      text: "已取消输入Cookie",
-    });
-    return;
-  }
-  if (typeof res !== "string") {
-    showSnackbar({
-      color: "error",
-      text: "Confirm组件类型错误！",
-    });
-    return;
-  }
-  const cookie = res;
-  if (cookie === "") {
-    showSnackbar({
-      color: "error",
-      text: "Cookie 为空!",
-    });
-    return;
-  }
-  loadingTitle.value = "正在获取 tokens...";
-  const cookieObj = cookie
-    .trim()
-    .split(";")
-    .map((item) => item.trim().split("="));
-  const ticket = cookieObj.find((item) => item[0] === "login_ticket")?.[1];
-  const uid = cookieObj.find((item) => item[0] === "login_uid")?.[1];
-  // 如果两者不存在
-  if (!ticket || !uid) {
-    showSnackbar({
-      color: "error",
-      text: "Cookie 无效!",
-    });
-    return;
-  }
-  try {
-    await TGRequest.User.init(ticket, uid);
-    const ck = await TGSqlite.getCookie();
-    userStore.initCookie(ck);
-    loadingTitle.value = "正在获取用户信息...";
-    const cookie_token = userStore.getCookieItem("cookie_token");
-    const resUser = await TGRequest.User.byCookie.getUserInfo(cookie_token, uid);
-    if ("nickname" in resUser) {
-      userStore.setBriefInfo(resUser);
-      appStore.isLogin = true;
-    }
-    const resAccounts = await TGRequest.User.byCookie.getAccounts(cookie_token, uid);
-    if (Array.isArray(resAccounts)) {
-      await TGSqlite.saveAccount(resAccounts);
-    }
-    loading.value = false;
-    showSnackbar({
-      text: "Cookie 已保存!",
-    });
-  } catch (err) {
-    loading.value = false;
-    showSnackbar({
-      color: "error",
-      text: "Cookie 无效!",
+      text: "已取消刷新数据",
     });
   }
 }
@@ -687,7 +757,7 @@ function submitHome(): void {
 
 .config-btn {
   width: 100px;
-  margin-left: 100px;
+  margin-left: 20px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
 }

@@ -15,19 +15,20 @@ import TGUtils from "../utils/TGUtils";
 /**
  * @description 根据 stoken 获取 ltoken
  * @since Alpha v0.1.5
- * @param {string} stuid 登录用户 uid
- * @param {string} stoken stoken
+ * @param {string} mid 登录用户 mid
+ * @param {string} stoken stoken_v2
  * @returns {Promise<string|TGApp.BBS.Response.Base>}
  */
 export async function getLTokenBySToken(
-  stuid: string,
+  mid: string,
   stoken: string,
 ): Promise<string | TGApp.BBS.Response.Base> {
   const url = TGApi.GameTokens.getLToken;
   const cookie = {
-    stuid,
+    mid,
     stoken,
   };
+  console.log(cookie);
   const params = { stoken };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http

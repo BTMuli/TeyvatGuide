@@ -18,7 +18,7 @@
 </template>
 <script setup lang="ts">
 // vue
-import { computed, onMounted, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import showSnackbar from "../func/snackbar";
 import TOverlay from "../main/t-overlay.vue";
 import QrcodeVue from "qrcode.vue";
@@ -50,8 +50,10 @@ const ticket = ref<string>("");
 
 const userStore = useUserStore();
 
-onMounted(async () => {
-  await freshQr();
+watch(visible, async (value) => {
+  if (value) {
+    await freshQr();
+  }
 });
 
 async function freshQr(): Promise<void> {
@@ -96,6 +98,8 @@ async function getData(): Promise<void> {
   } else {
     const data: TGApp.Plugins.Mys.GameLogin.StatusPayloadRaw = JSON.parse(res.payload.raw);
     await userStore.saveCookie("account_id", data.uid);
+    await userStore.saveCookie("ltuid", data.uid);
+    await userStore.saveCookie("stuid", data.uid);
     await userStore.saveCookie("game_token", data.token);
     showSnackbar({
       text: "登录成功",

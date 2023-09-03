@@ -22,7 +22,7 @@ export async function getStokenByGameToken(
   gameToken: string,
 ): Promise<TGApp.BBS.Response.getStokenByGameTokenData | TGApp.BBS.Response.Base> {
   const url = "https://api-takumi.mihoyo.com/account/ma-cn-session/app/getTokenByGameToken";
-  const data = { account_id: accountId, game_token: gameToken };
+  const data = { account_id: Number(accountId), game_token: gameToken };
   const header = {
     "x-rpc-app_id": TGConstant.BBS.APP_ID,
   };

@@ -4,7 +4,7 @@
     <div class="ur-top">
       <div class="ur-top-title">
         <span v-if="!isEmpty">{{ getTitle() }} 更新于 {{ recordData.updated }}</span>
-        <span v-else>原神战绩【暂无数据】【{{ user.gameUid }}】</span>
+        <span v-else>原神战绩【暂无数据】</span>
       </div>
       <div class="ur-top-btns">
         <v-btn class="ur-top-btn" @click="refresh()">
@@ -46,6 +46,7 @@ import { useUserStore } from "../../store/modules/user";
 import TGRequest from "../../web/request/TGRequest";
 import TGSqlite from "../../plugins/Sqlite";
 import { generateShareImg } from "../../utils/TGShare";
+import showSnackbar from "../../components/func/snackbar";
 
 // store
 const userStore = useUserStore();
@@ -91,7 +92,10 @@ async function refresh(): Promise<void> {
     await TGSqlite.saveUserRecord(res, user.value.gameUid);
     await initUserRecordData();
   } else {
-    console.error(res);
+    showSnackbar({
+      text: `[${res.retcode}] ${res.message}`,
+      color: "error",
+    });
   }
   loading.value = false;
 }

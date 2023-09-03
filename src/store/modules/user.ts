@@ -33,6 +33,27 @@ export const useUserStore = defineStore(
     });
     const cookie = ref<Record<string, string>>({});
 
+    // 判断当前用户是否已经登录
+    function isLogin(): boolean {
+      return cookie.value?.account_id !== "";
+    }
+
+    // 加载用户数据，用于应用启动时
+    async function loadUserData(): Promise<void> {
+      if (isLogin()) {
+        const accountDB = await TGSqlite.getCurAccount();
+        if (accountDB) {
+          setCurAccount(accountDB);
+        }
+      } else {
+        const cookieDB = await TGSqlite.getCookie();
+        if (Object.keys(cookieDB).length > 0) {
+          cookie.value = cookieDB;
+          await loadUserData();
+        }
+      }
+    }
+
     function setBriefInfo(info: TGApp.App.Account.BriefInfo): void {
       briefInfo.value = info;
     }
@@ -102,6 +123,8 @@ export const useUserStore = defineStore(
       getCookieGroup3,
       getCookieGroup4,
       saveCookie,
+      isLogin,
+      loadUserData,
     };
   },
   {
