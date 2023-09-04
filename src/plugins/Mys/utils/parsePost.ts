@@ -243,7 +243,7 @@ function LinkTextParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLSpa
 
 /**
  * @description 解析分割线
- * @since Alpha v0.1.1
+ * @since Beta v0.3.0
  * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的分割线
  */
@@ -261,17 +261,13 @@ function parseDivider(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivEl
   // 创建 img
   const img = document.createElement("img");
   if (data.insert.divider === "line_1") {
-    img.src =
-      "https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/40eb5281cb24042bf34a9f1bcc61eaf5.png";
+    img.src = "/source/post/divider_line_1.webp";
   } else if (data.insert.divider === "line_2") {
-    img.src =
-      "https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/477d4c535e965bec1791203aecdfa8e6.png";
+    img.src = "/source/post/divider_line_2.webp";
   } else if (data.insert.divider === "line_3") {
-    img.src =
-      "https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2021/01/05/e7047588e912d60ff87a975e037c7606.png";
+    img.src = "/source/post/divider_line_3.webp";
   } else if (data.insert.divider === "line_4") {
-    img.src =
-      "https://mihoyo-community-web.oss-cn-shanghai.aliyuncs.com/upload/2022/07/13/line_4.png";
+    img.src = "/source/post/divider_line_4.webp";
   } else {
     console.error("Unknown divider type", data);
     return parseUnknown(data);
