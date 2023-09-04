@@ -1,9 +1,10 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" />
+  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="gacha-top-bar">
     <div class="gacha-top-title">祈愿记录</div>
     <v-select v-model="uidCur" class="gacha-top-select" :items="selectItem" variant="outlined" />
     <div class="gacha-top-btns">
+      <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh">刷新</v-btn>
       <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn()">
         导入
       </v-btn>
@@ -49,13 +50,23 @@ import GroEcharts from "../../components/gachaRecord/gro-echarts.vue";
 import GroOverview from "../../components/gachaRecord/gro-overview.vue";
 // tauri
 import { dialog, path } from "@tauri-apps/api";
+// store
+import { useUserStore } from "../../store/modules/user";
 // utils
 import { backupUigfData, exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF";
 import TGSqlite from "../../plugins/Sqlite";
+import TGRequest from "../../web/request/TGRequest";
+import { AppCharacterData, AppWeaponData } from "../../data";
+
+// store
+const userStore = useUserStore();
+const account = userStore.getCurAccount();
+const authkey = ref<string>("");
 
 // loading
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>();
+const loadingSub = ref<string>();
 
 // data
 const selectItem = ref<string[]>([]);
@@ -84,6 +95,88 @@ onMounted(async () => {
     text: `成功获取 ${gachaListCur.value.length} 条祈愿数据`,
   });
 });
+
+// 刷新按钮点击事件
+async function confirmRefresh(): Promise<void> {
+  const confirmRes = await showConfirm({
+    title: "是否刷新祈愿数据？",
+    text: `将刷新 UID：${account.gameUid} 的祈愿数据`,
+  });
+  if (!confirmRes) {
+    showSnackbar({
+      color: "grey",
+      text: `已取消刷新祈愿数据`,
+    });
+    return;
+  }
+  loadingTitle.value = "正在获取 authkey";
+  loading.value = true;
+  const cookie = {
+    stoken: userStore.cookie.stoken,
+    mid: userStore.cookie.mid,
+  };
+  const gameUid = userStore.getCurAccount().gameUid;
+  const authkeyRes = await TGRequest.User.getAuthkey(cookie, gameUid);
+  if (typeof authkeyRes === "string") {
+    authkey.value = authkeyRes;
+  } else {
+    showSnackbar({
+      color: "error",
+      text: `获取 authkey 失败`,
+    });
+    return;
+  }
+  loadingTitle.value = "正在刷新新手祈愿数据";
+  await getGachaLogs("100");
+  loadingTitle.value = "正在刷新常驻祈愿数据";
+  await getGachaLogs("200");
+  loadingTitle.value = "正在刷新角色祈愿数据";
+  await getGachaLogs("301");
+  loadingTitle.value = "正在刷新角色祈愿2数据";
+  await getGachaLogs("400");
+  loadingTitle.value = "正在刷新武器祈愿数据";
+  await getGachaLogs("302");
+  loadingTitle.value = "数据获取完成，即将刷新页面";
+  loadingSub.value = "";
+  loading.value = false;
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
+}
+
+// 获取祈愿数据并写入数据库
+async function getGachaLogs(pool: string, endId: string = "0"): Promise<void> {
+  const gachaRes = await TGRequest.User.getGachaLog(authkey.value, pool, endId);
+  if (Array.isArray(gachaRes)) {
+    const uigfList: TGApp.Plugins.UIGF.GachaItem[] = [];
+    gachaRes.forEach((item) => {
+      loadingSub.value = `[${item.item_type}][${item.time}] ${item.name}`;
+      const tempItem: TGApp.Plugins.UIGF.GachaItem = {
+        gacha_type: item.gacha_type,
+        item_id: item.item_id,
+        count: item.count,
+        time: item.time,
+        name: item.name,
+        item_type: item.item_type,
+        rank_type: item.rank_type,
+        id: item.id,
+        uigf_gacha_type: item.gacha_type === "400" ? "301" : item.gacha_type,
+      };
+      if (item.item_type === "角色") {
+        const find = AppCharacterData.find((char) => char.name === item.name);
+        if (find) tempItem.item_id = find.id.toString();
+      } else if (item.item_type === "武器") {
+        const find = AppWeaponData.find((weapon) => weapon.name === item.name);
+        if (find) tempItem.item_id = find.id.toString();
+      }
+      uigfList.push(tempItem);
+    });
+    await TGSqlite.mergeUIGF(account.gameUid, uigfList);
+    if (gachaRes.length === 20) {
+      await getGachaLogs(pool, gachaRes[gachaRes.length - 1].id);
+    }
+  }
+}
 
 // 导入按钮点击事件
 async function handleImportBtn(savePath?: string): Promise<void> {

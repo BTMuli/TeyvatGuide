@@ -2,13 +2,12 @@
  * @file utils UIGF.ts
  * @description UIGF工具类
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.3
+ * @since Beta v0.3.0
  */
 
 // tauri
 import { app, fs, path } from "@tauri-apps/api";
 // utils
-import TGSqlite from "../plugins/Sqlite";
 import { timestampToDate } from "./t2D";
 
 /**
@@ -112,20 +111,4 @@ export async function backupUigfData(
 ): Promise<void> {
   const savePath = `${await path.appLocalDataDir()}userData\\UIGF_${uid}.json`;
   await exportUigfData(uid, gachaList, savePath);
-}
-
-/**
- * @description 恢复 UIGF 数据
- * @since Alpha v0.2.3
- * @param {string} uid - UID
- * @returns {Promise<boolean>} UIGF 数据
- */
-export async function restoreUigfData(uid: string): Promise<boolean> {
-  const uigfPath = `${await path.appLocalDataDir()}userData\\UIGF_${uid}.json`;
-  if (!(await fs.exists(uigfPath))) {
-    return false;
-  }
-  const uigfData = await readUigfData(uigfPath);
-  await TGSqlite.mergeUIGF(uid, uigfData.list);
-  return true;
 }

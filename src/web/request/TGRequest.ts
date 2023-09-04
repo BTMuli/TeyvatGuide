@@ -7,10 +7,11 @@
 
 import { genAuthkey } from "./genAuthkey";
 import { getAbyss } from "./getAbyss";
-import { getAnnoList, getAnnoContent } from "./getAnno";
+import { getAnnoContent, getAnnoList } from "./getAnno";
 import { getCookieTokenByGameToken, getCookieTokenBySToken } from "./getCookieToken";
 // import * from "./getEnkaData.ts";
-import { getGameAccountsBySToken, getGameAccountsByCookie } from "./getGameAccounts";
+import { getGachaLog } from "./getGachaLog";
+import { getGameAccountsByCookie, getGameAccountsBySToken } from "./getGameAccounts";
 import { getGameRecord } from "./getGameRecord";
 import { getLTokenBySToken } from "./getLToken";
 import { getGameRoleListByLToken } from "./getRoleList";
@@ -28,6 +29,7 @@ const TGRequest = {
   },
   User: {
     getAuthkey: genAuthkey,
+    getGachaLog,
     getRecord: getGameRecord,
     byLoginTicket: {
       getTokens: getTokensByLoginTicket,
