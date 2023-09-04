@@ -2,7 +2,7 @@
  * @file web request getLToken.ts
  * @description 获取 ltoken 的请求
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.5
+ * @since Beta v0.3.0
  */
 
 // tauri
@@ -13,23 +13,22 @@ import TGApi from "../api/TGApi";
 import TGUtils from "../utils/TGUtils";
 
 /**
- * @description 根据 stoken 获取 ltoken
- * @since Alpha v0.1.5
- * @param {string} mid 登录用户 mid
- * @param {string} stoken stoken_v2
+ * @description 根据 stoken_v2 获取 ltoken
+ * @since Beta v0.3.0
+ * @param {string} Mid 登录用户 mid
+ * @param {string} Stoken stoken_v2
  * @returns {Promise<string|TGApp.BBS.Response.Base>}
  */
 export async function getLTokenBySToken(
-  mid: string,
-  stoken: string,
+  Mid: string,
+  Stoken: string,
 ): Promise<string | TGApp.BBS.Response.Base> {
   const url = TGApi.GameTokens.getLToken;
   const cookie = {
-    mid,
-    stoken,
+    mid: Mid,
+    stoken: Stoken,
   };
-  console.log(cookie);
-  const params = { stoken };
+  const params = { stoken: Stoken };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http
     .fetch<TGApp.BBS.Response.getLTokenBySToken>(url, {

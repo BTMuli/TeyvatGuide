@@ -2,7 +2,7 @@
  * @file plugins Mys index.ts
  * @description Mys plugin index
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Beta v0.3.0
  */
 
 // Api
@@ -22,6 +22,8 @@ import { getNoticeCard, getActivityCard, getNewsCard } from "./utils/getNewsCard
 // Lottery
 import getLotteryData from "./request/getLotteryData";
 import getLotteryCard from "./utils/getLotteryCard";
+// User
+import { getLoginQr, getLoginStatus } from "./request/doGameLogin";
 
 const Mys = {
   Api: MysApi,
@@ -48,6 +50,10 @@ const Mys = {
   Lottery: {
     get: getLotteryData,
     card: getLotteryCard,
+  },
+  User: {
+    getQr: getLoginQr,
+    getData: getLoginStatus,
   },
 };
 

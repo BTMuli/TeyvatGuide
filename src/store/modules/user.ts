@@ -9,8 +9,6 @@
 import { ref } from "vue";
 // pinia
 import { defineStore } from "pinia";
-// sqlite
-import TGSqlite from "../../plugins/Sqlite";
 
 export const useUserStore = defineStore(
   "user",
@@ -32,27 +30,6 @@ export const useUserStore = defineStore(
       regionName: "",
     });
     const cookie = ref<Record<string, string>>({});
-
-    // 判断当前用户是否已经登录
-    function isLogin(): boolean {
-      return cookie.value?.account_id !== "";
-    }
-
-    // 加载用户数据，用于应用启动时
-    async function loadUserData(): Promise<void> {
-      if (isLogin()) {
-        const accountDB = await TGSqlite.getCurAccount();
-        if (accountDB) {
-          setCurAccount(accountDB);
-        }
-      } else {
-        const cookieDB = await TGSqlite.getCookie();
-        if (Object.keys(cookieDB).length > 0) {
-          cookie.value = cookieDB;
-          await loadUserData();
-        }
-      }
-    }
 
     function setBriefInfo(info: TGApp.App.Account.BriefInfo): void {
       briefInfo.value = info;
@@ -104,27 +81,18 @@ export const useUserStore = defineStore(
       };
     }
 
-    async function saveCookie(type: string, val: string): Promise<void> {
-      cookie.value[type] = val;
-      await TGSqlite.saveAppData("cookie", JSON.stringify(cookie.value));
-    }
-
     return {
       briefInfo,
       cookie,
       account,
       getBriefInfo,
       setBriefInfo,
-      getCookieItem,
       setCurAccount,
       getCurAccount,
       getCookieGroup1,
       getCookieGroup2,
       getCookieGroup3,
       getCookieGroup4,
-      saveCookie,
-      isLogin,
-      loadUserData,
     };
   },
   {

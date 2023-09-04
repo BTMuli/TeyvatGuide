@@ -14,21 +14,21 @@ import TGUtils from "../utils/TGUtils";
 
 /**
  * @description 根据 stoken 获取 cookie_token
- * @since Alpha v0.1.5
- * @param {string} stuid 登录用户 uid
- * @param {string} stoken stoken
+ * @since Beta v0.3.0
+ * @param {string} Mid 登录用户的 mid
+ * @param {string} Stoken stoken_v2
  * @returns {Promise<string|TGApp.BBS.Response.Base>}
  */
 export async function getCookieTokenBySToken(
-  stuid: string,
-  stoken: string,
+  Mid: string,
+  Stoken: string,
 ): Promise<string | TGApp.BBS.Response.Base> {
   const url = TGApi.GameTokens.getCookieToken;
   const cookie = {
-    stuid,
-    stoken,
+    mid: Mid,
+    stoken: Stoken,
   };
-  const params = { stoken };
+  const params = { stoken: Stoken };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http
     .fetch<TGApp.BBS.Response.getCookieTokenBySToken>(url, {

@@ -11,21 +11,23 @@
       <div class="tog-bottom">
         <v-btn class="tog-btn" @click="onCancel">取消</v-btn>
         <v-btn class="tog-btn" @click="freshQr">刷新</v-btn>
-        <v-btn class="tog-btn" @click="getData">已扫码</v-btn>
+        <v-btn class="tog-btn" :loading="loading" @click="getData">已扫码</v-btn>
       </div>
     </div>
   </TOverlay>
 </template>
 <script setup lang="ts">
 // vue
-import { computed, ref, watch } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import showSnackbar from "../func/snackbar";
 import TOverlay from "../main/t-overlay.vue";
 import QrcodeVue from "qrcode.vue";
 // store
 import { useUserStore } from "../../store/modules/user";
 // utils
-import { getLoginQr, getLoginStatus } from "../../plugins/Mys/utils/doGameLogin";
+import Mys from "../../plugins/Mys";
+import TGRequest from "../../web/request/TGRequest";
+import TGSqlite from "../../plugins/Sqlite";
 
 interface ToWebLoginProps {
   modelValue: boolean;
@@ -45,8 +47,19 @@ const visible = computed({
     emits("update:modelValue", value);
   },
 });
+const loading = ref<boolean>(false);
 const qrCode = ref<string>("");
 const ticket = ref<string>("");
+const cookie = reactive<Record<string, string>>({
+  account_id: "",
+  ltuid: "",
+  stuid: "",
+  mid: "",
+  game_token: "",
+  cookie_token: "",
+  stoken: "",
+  ltoken: "",
+});
 
 const userStore = useUserStore();
 
@@ -57,7 +70,7 @@ watch(visible, async (value) => {
 });
 
 async function freshQr(): Promise<void> {
-  const res = await getLoginQr();
+  const res = await Mys.User.getQr();
   if ("retcode" in res) {
     showSnackbar({
       text: `[${res.retcode}] ${res.message}`,
@@ -79,7 +92,8 @@ async function freshQr(): Promise<void> {
 }
 
 async function getData(): Promise<void> {
-  const res = await getLoginStatus(ticket.value);
+  loading.value = true;
+  const res = await Mys.User.getData(ticket.value);
   if ("retcode" in res) {
     showSnackbar({
       text: `[${res.retcode}] ${res.message}`,
@@ -97,10 +111,11 @@ async function getData(): Promise<void> {
     });
   } else {
     const data: TGApp.Plugins.Mys.GameLogin.StatusPayloadRaw = JSON.parse(res.payload.raw);
-    await userStore.saveCookie("account_id", data.uid);
-    await userStore.saveCookie("ltuid", data.uid);
-    await userStore.saveCookie("stuid", data.uid);
-    await userStore.saveCookie("game_token", data.token);
+    cookie.account_id = data.uid;
+    cookie.ltuid = data.uid;
+    cookie.stuid = data.uid;
+    cookie.game_token = data.token;
+    await getTokens();
     showSnackbar({
       text: "登录成功",
       color: "success",
@@ -111,6 +126,26 @@ async function getData(): Promise<void> {
 
 function onCancel(): void {
   visible.value = false;
+}
+
+async function getTokens(): Promise<void> {
+  const stokenRes = await TGRequest.User.bgGameToken.getStoken(
+    cookie.account_id,
+    cookie.game_token,
+  );
+  if (!("retcode" in stokenRes)) {
+    cookie.stoken = stokenRes.token.token;
+    cookie.mid = stokenRes.user_info.mid;
+  }
+  const cookieTokenRes = await TGRequest.User.bgGameToken.getCookieToken(
+    cookie.account_id,
+    cookie.game_token,
+  );
+  if (typeof cookieTokenRes === "string") cookie.cookie_token = cookieTokenRes;
+  const ltokenRes = await TGRequest.User.bySToken.getLToken(cookie.mid, cookie.stoken);
+  if (typeof ltokenRes === "string") cookie.ltoken = ltokenRes;
+  userStore.cookie = cookie;
+  await TGSqlite.saveAppData("cookie", JSON.stringify(cookie));
 }
 </script>
 <style lang="css" scoped>
