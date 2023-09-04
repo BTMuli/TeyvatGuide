@@ -14,8 +14,6 @@ import { path } from "@tauri-apps/api";
 
 // 用于存储用户数据的路径
 const userDataDir = `${await path.appLocalDataDir()}userData`;
-// 用于各种临时数据的路径
-const tempDataDir = `${await path.appLocalDataDir()}tempData`;
 // 用于存放数据库的路径
 const dbDataPath = `${await path.appConfigDir()}tauri-genshin.db`;
 
@@ -45,7 +43,6 @@ export const useAppStore = defineStore(
 
     const dataPath = reactive({
       userDataDir,
-      tempDataDir,
       dbDataPath,
     });
     // 用户数据路径

@@ -69,10 +69,6 @@ async function createDataDir(): Promise<void> {
   if (!(await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData }))) {
     await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
   }
-  // todo 弃置 tempData dir
-  if (!(await fs.exists("tempData", { dir: fs.BaseDirectory.AppLocalData }))) {
-    await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
-  }
   console.info("数据文件夹创建完成！");
 }
 </script>

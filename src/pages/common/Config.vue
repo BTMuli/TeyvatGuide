@@ -145,10 +145,6 @@
       <v-list-item-subtitle>{{ appStore.dataPath.dbDataPath }}</v-list-item-subtitle>
     </v-list-item>
     <v-list-item prepend-icon="mdi-folder">
-      <v-list-item-title>本地临时数据路径</v-list-item-title>
-      <v-list-item-subtitle>{{ appStore.dataPath.tempDataDir }}</v-list-item-subtitle>
-    </v-list-item>
-    <v-list-item prepend-icon="mdi-folder">
       <v-list-item-title>本地用户数据路径</v-list-item-title>
       <v-list-item-subtitle>{{ appStore.dataPath.userDataDir }}</v-list-item-subtitle>
     </v-list-item>
@@ -220,6 +216,8 @@ onMounted(async () => {
   osPlatform.value = `${await os.platform()}`;
   loadingSub.value = "正在获取系统版本";
   osVersion.value = await os.version();
+  loadingSub.value = "正在获取数据库信息";
+  dbInfo.value = await TGSqlite.getAppData();
   loadingSub.value = "";
   loading.value = false;
 });

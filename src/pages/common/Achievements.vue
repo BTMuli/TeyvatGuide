@@ -11,8 +11,8 @@
       @keyup.enter="searchCard"
     />
     <div class="top-btns">
-      <v-btn prepend-icon="mdi-import" class="top-btn" @click="importJson"> 导入 </v-btn>
-      <v-btn prepend-icon="mdi-export" class="top-btn" @click="exportJson"> 导出 </v-btn>
+      <v-btn prepend-icon="mdi-import" class="top-btn" @click="importJson"> 导入</v-btn>
+      <v-btn prepend-icon="mdi-export" class="top-btn" @click="exportJson"> 导出</v-btn>
     </div>
   </div>
   <ToLoading v-model="loading" :title="loadingTitle" />
@@ -107,7 +107,7 @@
 
 <script lang="ts" setup>
 // vue
-import { onMounted, ref, onBeforeMount, computed } from "vue";
+import { computed, onBeforeMount, onMounted, ref } from "vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import showSnackbar from "../../components/func/snackbar";
 // tauri
@@ -166,6 +166,9 @@ onMounted(async () => {
   loading.value = true;
   loadingTitle.value = "正在获取成就系列数据";
   seriesList.value = await TGSqlite.getAchievementSeries();
+  achievementsStore.lastVersion = seriesList.value.reduce((prev, curr) => {
+    return prev.version > curr.version ? prev : curr;
+  }).version;
   loadingTitle.value = "正在获取成就数据";
   selectedAchievement.value = await TGSqlite.getAchievements();
   loading.value = false;
@@ -254,6 +257,7 @@ async function searchCard(): Promise<void> {
   }
   loading.value = false;
 }
+
 // 导入 UIAF 数据，进行数据合并、刷新
 async function importJson(): Promise<void> {
   const selectedFile = await dialog.open({
