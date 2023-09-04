@@ -50,7 +50,7 @@
       </template>
       <template #append>
         <v-btn class="config-btn" @click="confirmScanLogin">扫码登录</v-btn>
-        <v-btn class="config-btn" @click="confirmRefreshUser"> 刷新数据 </v-btn>
+        <v-btn class="config-btn" @click="confirmRefreshUser"> 刷新数据</v-btn>
       </template>
     </v-list-item>
     <v-list-subheader :inset="true" class="config-header">系统信息</v-list-subheader>
@@ -186,7 +186,13 @@ const buildTime = computed(() => appStore.buildTime);
 // About OS
 const osPlatform = ref<string>("");
 const osVersion = ref<string>("");
-const dbInfo = ref<Array<{ key: string; value: string; updated: string }>>([]);
+const dbInfo = ref<
+  Array<{
+    key: string;
+    value: string;
+    updated: string;
+  }>
+>([]);
 
 // loading
 const loading = ref<boolean>(true);
@@ -295,13 +301,13 @@ async function confirmRefreshUser(): Promise<void> {
   }
   await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
   const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
-  if ("nickname" in infoRes) {
-    userStore.setBriefInfo(infoRes);
-    loadingTitle.value = "获取成功!正在获取用户游戏账号信息";
-  } else {
+  if ("retcode" in infoRes) {
     console.error(infoRes);
     loadingTitle.value = "获取失败!正在获取用户游戏账号信息";
     failCount++;
+  } else {
+    userStore.setBriefInfo(infoRes);
+    loadingTitle.value = "获取成功!正在获取用户游戏账号信息";
   }
   const accountRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);
   if (Array.isArray(accountRes)) {

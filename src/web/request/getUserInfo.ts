@@ -2,7 +2,7 @@
  * @file web request getUserInfo.ts
  * @description 获取用户信息请求
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.2
+ * @since Beta v0.3.0
  */
 
 // tauri
@@ -14,7 +14,7 @@ import TGUtils from "../utils/TGUtils";
 
 /**
  * @description 根据 cookie 获取用户信息
- * @since Alpha v0.2.2
+ * @since Beta v0.3.0
  * @param {string} cookie_token cookie token
  * @param {string} account_id 用户 account_id
  * @returns {Promise<TGApp.App.Account.BriefInfo | TGApp.BBS.Response.Base>}
@@ -29,7 +29,7 @@ export async function getUserInfoByCookie(
   };
   const url = TGApi.GameData.byCookie.getUserInfo;
   const params = { gids: "2" };
-  const header = TGUtils.User.getSignHeader(cookie, "GET", {}, "common");
+  const header = TGUtils.User.getHeader(cookie, "GET", {}, "common", true);
   return await http
     .fetch<TGApp.Plugins.Mys.User.HomeResponse>(url, {
       method: "GET",
