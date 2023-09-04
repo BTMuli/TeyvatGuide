@@ -5,23 +5,9 @@
  * @since Beta v0.3.0
  */
 
-/**
- * @description 16进制颜色转 RGB
- * @since Alpha v0.1.3
- * @param {string} hex 16进制颜色
- * @returns {{ r: number; g: number; b: number }} RGB颜色
- */
-function hexToRgb(hex: string): { r: number; g: number; b: number } {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (result === null) {
-    throw new Error("无法解析颜色");
-  }
-  return {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16),
-  };
-}
+// third party
+import { score } from "wcag-color";
+import * as colorConvert from "color-convert";
 
 /**
  * @description 给定两个16进制颜色值，确认两者是否相近
@@ -31,21 +17,13 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
  * @returns {boolean} 是否相近
  */
 function isColorSimilar(colorBg: string, colorFg: string): boolean {
-  const colorBgRGB = hexToRgb(colorBg);
-  const colorFgRGB = hexToRgb(colorFg);
-  const colorBgL = 0.2126 * colorBgRGB.r + 0.7152 * colorBgRGB.g + 0.0722 * colorBgRGB.b;
-  const colorFgL = 0.2126 * colorFgRGB.r + 0.7152 * colorFgRGB.g + 0.0722 * colorFgRGB.b;
-  const colorBgLum = colorBgL / 255;
-  const colorFgLum = colorFgL / 255;
-  const colorBgLumFinal =
-    colorBgLum <= 0.03928 ? colorBgLum / 12.92 : Math.pow((colorBgLum + 0.055) / 1.055, 2.4);
-  const colorFgLumFinal =
-    colorFgLum <= 0.03928 ? colorFgLum / 12.92 : Math.pow((colorFgLum + 0.055) / 1.055, 2.4);
-  const contrast =
-    (Math.max(colorBgLumFinal, colorFgLumFinal) + 0.05) /
-    (Math.min(colorBgLumFinal, colorFgLumFinal) + 0.05);
-  // console.log(colorBg, colorFg, contrast);
-  return contrast > 1.5 && contrast < 4;
+  let hexBg, hexFg;
+  if (colorBg.startsWith("#")) hexBg = colorBg;
+  else hexBg = colorConvert.keyword.hex(colorBg);
+  if (colorFg.startsWith("#")) hexFg = colorFg;
+  else hexFg = colorConvert.keyword.hex(colorFg);
+  const contrast = score(hexFg, hexBg);
+  return contrast === "Fail";
 }
 
 /**
