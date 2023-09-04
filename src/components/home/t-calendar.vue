@@ -5,6 +5,7 @@
         <v-icon size="small"> mdi-calendar-clock</v-icon>
         <span>今日素材</span>
         <span>{{ dateNow }}</span>
+        <!-- todo 添加剩余刷新时间 -->
       </div>
       <div class="calendar-title-mid">
         <v-btn

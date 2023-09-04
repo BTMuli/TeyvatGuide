@@ -1,5 +1,6 @@
 <template>
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+    <!-- todo 优化样式 -->
     <div class="tuc-do-box">
       <div class="tuc-do-bg">
         <img :src="data.bg" alt="role" />
