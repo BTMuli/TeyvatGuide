@@ -1,6 +1,7 @@
 /**
  * @file web utils parseAnno.ts
  * @description 解析游戏内公告数据
+ * @todo 需要完善
  * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */

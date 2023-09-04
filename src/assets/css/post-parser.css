@@ -1,6 +1,7 @@
 /*
  * @file assets css post-parser.css
  * @description 米游社解析 css
+ * @todo 需要完善
  * @author BTMuli <bt-muli@outlook.com>
  * @since Beta v0.3.0
  */
@@ -85,8 +86,9 @@
   width: 800px;
   height: 200px;
   padding: 10px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 10px;
-  background: var(--content-bg-2);
+  background: var(--box-bg-1);
 }
 
 :deep(.mys-post-unknown) {
@@ -121,8 +123,8 @@
 
 :deep(.mys-post-link-card-title) {
   height: 150px;
-  color: #546d8b;
-  font-family: Genshin, serif;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
   font-size: 20px;
 }
 
