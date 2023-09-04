@@ -51,13 +51,6 @@ export const useUserStore = defineStore(
       return cookie.value[key] || "";
     }
 
-    function getCookieGroup1(): TGApp.BBS.Constant.CookieGroup1 {
-      return {
-        login_ticket: getCookieItem("login_ticket"),
-        login_uid: getCookieItem("login_uid"),
-      };
-    }
-
     function getCookieGroup2(): TGApp.BBS.Constant.CookieGroup2 {
       return {
         account_id: getCookieItem("account_id"),
@@ -89,7 +82,6 @@ export const useUserStore = defineStore(
       setBriefInfo,
       setCurAccount,
       getCurAccount,
-      getCookieGroup1,
       getCookieGroup2,
       getCookieGroup3,
       getCookieGroup4,

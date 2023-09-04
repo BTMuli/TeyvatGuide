@@ -5,6 +5,7 @@
  * @since Beta v0.3.0
  */
 
+import { genAuthkey } from "./genAuthkey";
 import { getAbyss } from "./getAbyss";
 import { getAnnoList, getAnnoContent } from "./getAnno";
 import { getCookieTokenByGameToken, getCookieTokenBySToken } from "./getCookieToken";
@@ -26,6 +27,7 @@ const TGRequest = {
     getContent: getAnnoContent,
   },
   User: {
+    getAuthkey: genAuthkey,
     getRecord: getGameRecord,
     byLoginTicket: {
       getTokens: getTokensByLoginTicket,
