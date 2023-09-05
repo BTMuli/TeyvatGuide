@@ -4,7 +4,7 @@
       <span>圣遗物</span>
     </template>
     <template #content>
-      <TucDetailRelic :model-value="props.modelValue" pos="props.modelValue.pos" />
+      <TucDetailRelic :model-value="props.modelValue" :pos="`${props.modelValue.pos}`" />
       <div class="tuc-ddr-content">
         <div class="tuc-ddrc-top">
           <span>{{ props.modelValue.name }}</span>
@@ -48,6 +48,7 @@ const props = defineProps<TucDetailDescRelicProps>();
 
 .tuc-ddrc-top {
   height: 20px;
+  color: var(--tgc-dark-1);
 }
 
 .tuc-ddrc-top :nth-child(1) {
@@ -55,7 +56,7 @@ const props = defineProps<TucDetailDescRelicProps>();
 }
 
 .tuc-ddrc-top :nth-child(3) {
-  color: var(--common-color-yellow);
+  color: var(--tgc-yellow-1);
 }
 
 .tuc-ddrc-bottom {
@@ -69,6 +70,7 @@ const props = defineProps<TucDetailDescRelicProps>();
 }
 
 .tuc-ddrd-title {
+  color: var(--tgc-dark-1);
   font-family: var(--font-title);
   font-size: 16px;
 }

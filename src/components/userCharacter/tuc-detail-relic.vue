@@ -14,7 +14,7 @@
 <script lang="ts" setup>
 interface TucDetailRelicProps {
   modelValue: TGApp.Sqlite.Character.RoleReliquary | false;
-  pos: string;
+  pos: number;
 }
 
 const props = defineProps<TucDetailRelicProps>();
@@ -25,7 +25,7 @@ const props = defineProps<TucDetailRelicProps>();
   width: 60px;
   height: 60px;
   border-radius: 5px;
-  background: rgb(0 0 0 /20%);
+  background: rgb(50 56 68/50%);
 }
 
 .tuc-dr-bg {

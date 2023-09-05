@@ -49,6 +49,7 @@ const box = computed(() => {
   align-items: start;
   justify-content: space-around;
   margin-left: 5px;
+  color: var(--tgc-dark-1);
 }
 
 .tuc-ddwc-top {
@@ -61,7 +62,7 @@ const box = computed(() => {
 
 .tuc-ddwc-top :nth-child(2),
 .tuc-ddwc-top :nth-child(4) {
-  color: var(--common-color-yellow);
+  color: var(--tgc-yellow-1);
 }
 
 .tuc-ddwc-bottom {

@@ -15,15 +15,14 @@
 <style lang="css" scoped>
 .tuc-dd-box {
   padding: 10px;
-  border: 2px solid var(--common-color-grey-2);
+  border: 1px solid rgb(0 0 0 /40%);
   border-radius: 5px;
-  backdrop-filter: blur(20px);
-  background: rgb(255 255 255 / 20%);
+  background: var(--tgc-white-1);
 }
 
 .tuc-dd-title {
   width: 100%;
-  color: var(--common-color-blue);
+  color: var(--tgc-dark-1);
   font-family: var(--font-title);
   font-size: 20px;
   text-align: left;
@@ -31,9 +30,10 @@
 
 .tuc-dd-divider {
   width: 100%;
-  height: 2px;
+  height: 1px;
   margin: 5px 0;
-  background: var(--common-color-grey-2);
+  background: var(--tgc-dark-1);
+  opacity: 0.5;
 }
 
 .tuc-dd-content {
@@ -45,19 +45,15 @@
 }
 
 .tuc-dd-desc {
-  overflow: hidden;
   width: 100%;
   max-height: 50px;
   margin-top: 5px;
-  color: var(--common-color-black);
+  color: var(--tgc-dark-1);
   font-family: var(--font-text);
   font-size: 14px;
-  overflow-y: scroll;
+  overflow-x: hidden;
+  overflow-y: auto;
   text-align: left;
   word-break: break-all;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
 }
 </style>

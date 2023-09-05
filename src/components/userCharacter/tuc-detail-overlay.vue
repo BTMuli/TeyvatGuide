@@ -1,14 +1,19 @@
 <template>
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
-    <!-- todo 优化样式 -->
     <div class="tuc-do-box">
       <div class="tuc-do-bg">
-        <img :src="data.bg" alt="role" />
+        <img
+          :src="data.bg"
+          alt="role"
+          :style="{
+            objectFit: data.bgFit,
+          }"
+        />
       </div>
       <div class="tuc-do-quote">* 所有数据以游戏内为准，此处仅供参考</div>
       <!-- 衣装 -->
       <div v-if="data.costume.length > 0" class="tuc-do-costume">
-        <v-switch v-model="showCostumeSwitch" color="#faf7e8" @click="switchBg">
+        <v-switch v-model="showCostumeSwitch" color="#fb7299" @click="switchBg">
           <template #label>
             <v-icon>mdi-tshirt-crew-outline</v-icon>
           </template>
@@ -23,7 +28,7 @@
           <div
             class="tuc-dol-item"
             :style="{
-              border: selected.pos === 0 ? '2px solid var(--common-color-yellow)' : '',
+              opacity: selected.pos === 0 ? '1' : '0.5',
             }"
             @click="showDetail(data.weapon, '武器', 0)"
           >
@@ -35,11 +40,11 @@
             class="tuc-dol-item"
             :style="{
               cursor: item ? 'pointer' : 'default',
-              border: selected.pos === index + 1 ? '2px solid var(--common-color-yellow)' : '',
+              opacity: selected.pos === index + 1 ? '1' : item ? '0.5' : '1',
             }"
             @click="showDetail(item, '圣遗物', index + 1)"
           >
-            <TucDetailRelic :model-value="item" :pos="index.toString()" />
+            <TucDetailRelic :model-value="item" :pos="index + 1" />
           </div>
         </div>
         <!-- 右侧环状排列6个命座 -->
@@ -61,10 +66,10 @@
         <div class="tuc-do-bottom">
           <TucDetailDescWeapon v-if="selected.type === '武器'" v-model="selectWeapon" />
           <TucDetailDescConstellation
-            v-else-if="selected.type === '命座'"
+            v-if="selected.type === '命座'"
             v-model="selectConstellation"
           />
-          <TucDetailDescRelic v-else-if="selected.type === '圣遗物'" v-model="selectRelic" />
+          <TucDetailDescRelic v-if="selected.type === '圣遗物'" v-model="selectRelic" />
         </div>
       </div>
     </div>
@@ -88,21 +93,20 @@ interface ToUcDetailProps {
 
 interface ToUcDetailEmits {
   (e: "update:modelValue", value: boolean): void;
+
   (e: "cancel"): void;
 }
+
+type fixedLenArray<T, N extends number> = [T, ...T[]] & { length: N };
+type relicsInfo = fixedLenArray<TGApp.Sqlite.Character.RoleReliquary | false, 5>;
 
 interface ToUcDetailData {
   weapon: TGApp.Sqlite.Character.RoleWeapon;
   constellation: TGApp.Sqlite.Character.RoleConstellation[];
-  reliquary: {
-    1: TGApp.Sqlite.Character.RoleReliquary | false;
-    2: TGApp.Sqlite.Character.RoleReliquary | false;
-    3: TGApp.Sqlite.Character.RoleReliquary | false;
-    4: TGApp.Sqlite.Character.RoleReliquary | false;
-    5: TGApp.Sqlite.Character.RoleReliquary | false;
-  };
+  reliquary: relicsInfo;
   costume: TGApp.Sqlite.Character.RoleCostume[];
   bg: string;
+  bgFit: "contain" | "cover";
 }
 
 const emits = defineEmits<ToUcDetailEmits>();
@@ -119,15 +123,10 @@ const showCostumeSwitch = ref(false);
 const data = ref<ToUcDetailData>({
   weapon: <TGApp.Sqlite.Character.RoleWeapon>{},
   constellation: [],
-  reliquary: {
-    1: false,
-    2: false,
-    3: false,
-    4: false,
-    5: false,
-  },
+  reliquary: [false, false, false, false, false],
   costume: [],
   bg: "",
+  bgFit: "contain",
 });
 const selectConstellation = ref<TGApp.Sqlite.Character.RoleConstellation>(
   <TGApp.Sqlite.Character.RoleConstellation>{},
@@ -138,47 +137,62 @@ const selectRelic = ref<TGApp.Sqlite.Character.RoleReliquary>(
 );
 const selected = ref({
   type: "武器" || "命之座" || "圣遗物",
-  pos: 0, // 用于标记选中的是哪个位置
+  pos: 0,
 });
 
-// 加载数据
-function loadData(): void {
-  if (!props.modelValue) return;
-  data.value.weapon = JSON.parse(props.dataVal.weapon);
-  data.value.constellation = JSON.parse(props.dataVal.constellation);
-  if (props.dataVal.reliquary !== "") {
-    const relics = <TGApp.Sqlite.Character.RoleReliquary[]>JSON.parse(props.dataVal.reliquary);
-    relics.map((item) => {
-      switch (item.pos) {
-        case 1:
-          data.value.reliquary["1"] = item;
-          break;
-        case 2:
-          data.value.reliquary["2"] = item;
-          break;
-        case 3:
-          data.value.reliquary["3"] = item;
-          break;
-        case 4:
-          data.value.reliquary["4"] = item;
-          break;
-        case 5:
-          data.value.reliquary["5"] = item;
-          break;
-        default:
-          break;
-      }
-      return item;
-    });
-  }
-  data.value.costume = JSON.parse(props.dataVal.costume);
-  data.value.bg = props.dataVal.img;
-  showCostumeSwitch.value = false;
-  selectWeapon.value = data.value.weapon;
+// 重置数据
+function resetData(): void {
+  data.value = {
+    weapon: <TGApp.Sqlite.Character.RoleWeapon>{},
+    constellation: [],
+    reliquary: [false, false, false, false, false],
+    costume: [],
+    bg: "",
+    bgFit: "contain",
+  };
   selected.value = {
     type: "武器",
     pos: 0,
   };
+}
+
+// 加载数据
+function loadData(): void {
+  if (!props.modelValue) return;
+  resetData();
+  data.value.weapon = JSON.parse(props.dataVal.weapon);
+  data.value.constellation = JSON.parse(props.dataVal.constellation);
+  if (props.dataVal.reliquary !== "") {
+    const relics = <TGApp.Sqlite.Character.RoleReliquary[]>JSON.parse(props.dataVal.reliquary);
+    const relicTemp: relicsInfo = [false, false, false, false, false];
+    relics.forEach((item) => {
+      switch (item.pos) {
+        case 1:
+          relicTemp[0] = item;
+          break;
+        case 2:
+          relicTemp[1] = item;
+          break;
+        case 3:
+          relicTemp[2] = item;
+          break;
+        case 4:
+          relicTemp[3] = item;
+          break;
+        case 5:
+          relicTemp[4] = item;
+          break;
+        default:
+          break;
+      }
+    });
+    data.value.reliquary = relicTemp;
+  }
+  data.value.costume = JSON.parse(props.dataVal.costume);
+  data.value.bg = props.dataVal.img;
+  data.value.bgFit = "contain";
+  showCostumeSwitch.value = false;
+  selectWeapon.value = data.value.weapon;
 }
 
 onMounted(() => {
@@ -209,11 +223,11 @@ function showDetail(
     | TGApp.Sqlite.Character.RoleWeapon
     | TGApp.Sqlite.Character.RoleReliquary
     | false,
-  type: "命座" | "武器" | "圣遗物",
-  pos: number = 0,
+  selectType: "命座" | "武器" | "圣遗物",
+  selectPos: number,
 ): void {
   if (!item) return;
-  switch (type) {
+  switch (selectType) {
     case "命座":
       selectConstellation.value = <TGApp.Sqlite.Character.RoleConstellation>item;
       break;
@@ -227,16 +241,20 @@ function showDetail(
       break;
   }
   selected.value = {
-    type,
-    pos,
+    type: selectType,
+    pos: selectPos,
   };
 }
 
 function switchBg(): void {
-  if (data.value.bg === props.dataVal.img) {
+  if (!showCostumeSwitch.value) {
     data.value.bg = data.value.costume[0].icon;
+    data.value.bgFit = "cover";
+    showCostumeSwitch.value = true;
   } else {
     data.value.bg = props.dataVal.img;
+    data.value.bgFit = "contain";
+    showCostumeSwitch.value = false;
   }
 }
 </script>
@@ -247,7 +265,7 @@ function switchBg(): void {
   height: 620px;
   padding: 10px;
   border-radius: 5px;
-  background: rgb(255 255 255 / 30%);
+  background: var(--tgc-white-1);
 }
 
 .tuc-do-bg {
@@ -256,22 +274,27 @@ function switchBg(): void {
   left: 0;
   width: 100%;
   height: 100%;
+  border-radius: 5px;
   margin: 0 auto;
 }
 
 .tuc-do-bg img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  border-radius: 5px;
 }
 
 .tuc-do-quote {
   position: absolute;
-  right: 10px;
-  bottom: 5px;
-  color: var(--common-color-grey-2);
-  font-family: var(--font-text);
-  font-size: 12px;
+  right: 0;
+  bottom: 0;
+  padding: 2px 5px;
+  backdrop-filter: blur(10px);
+  background: rgb(0 0 0 /50%);
+  border-bottom-right-radius: 5px;
+  border-top-left-radius: 5px;
+  color: var(--tgc-white-1);
+  font-size: 14px;
 }
 
 .tuc-do-costume {
@@ -279,18 +302,22 @@ function switchBg(): void {
   z-index: 1;
   top: 5px;
   right: 10px;
+  color: var(--tgc-pink-1);
 }
 
 .tuc-do-costume-name {
   position: absolute;
-  top: 5px;
-  left: 0;
-  width: 100%;
-  color: var(--common-color-white);
-  font-family: var(--font-title);
+  top: 10px;
+  left: calc(50% - 80px);
+  width: 160px;
+  border-radius: 5px;
+  backdrop-filter: blur(5px);
+  background: var(--tgc-white-1);
+  color: var(--tgc-yellow-1);
+  font-family: var(--font-text);
   font-size: 16px;
+  opacity: 0.8;
   text-align: center;
-  text-shadow: 0 0 10px rgb(0 0 0 / 50%);
 }
 
 .tuc-do-show {
@@ -366,6 +393,7 @@ function switchBg(): void {
 
 .tuc-dor-item {
   position: absolute;
+  cursor: pointer;
 }
 
 /* 环状排列6个命座 */

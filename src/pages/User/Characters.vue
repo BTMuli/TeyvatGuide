@@ -29,7 +29,6 @@
         </v-btn>
       </div>
     </div>
-    <!-- grid 布局，参考 Snap.Hutao -->
     <div class="uc-grid">
       <TucRoleBox
         v-for="(role, index) in roleList"

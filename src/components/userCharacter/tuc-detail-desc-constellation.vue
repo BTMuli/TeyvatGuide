@@ -56,11 +56,12 @@ function parseDesc(desc: string): string {
   align-items: start;
   justify-content: space-around;
   margin-left: 5px;
+  color: var(--tgc-dark-1);
 }
 
 .tuc-ddc-top {
   height: 20px;
-  color: var(--common-color-blue-2);
+  color: var(--tgc-blue-1);
 }
 
 .tuc-ddc-bottom {
@@ -72,6 +73,6 @@ function parseDesc(desc: string): string {
 }
 
 .tuc-ddc-bottom :nth-child(3) {
-  color: var(--common-color-yellow);
+  color: var(--tgc-yellow-1);
 }
 </style>

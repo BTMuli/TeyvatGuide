@@ -23,26 +23,27 @@ defineProps<TucDetailConstellationProps>();
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  cursor: pointer;
 }
 
 .tuc-dc-lock {
   position: absolute;
   display: flex;
-  width: 50px;
-  height: 50px;
+  width: 54px;
+  height: 54px;
   align-items: center;
   justify-content: center;
+  padding: 3px;
   border-radius: 50%;
   background-color: rgb(0 0 0 / 50%);
 }
 
 .tuc-dc-icon {
-  width: 50px;
-  height: 50px;
-  padding: 5px;
+  width: 54px;
+  height: 54px;
+  padding: 3px;
+  border: 1px solid rgb(0 0 0/20%);
   border-radius: 50%;
-  background: rgb(0 0 0/ 20%);
+  background: rgb(50 56 68/50%);
 }
 
 .tuc-dc-icon img {
