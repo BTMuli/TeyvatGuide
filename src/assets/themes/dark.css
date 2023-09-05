@@ -8,7 +8,7 @@
 /* dark mode */
 html.dark {
   /* app container */
-  --app-page-bg: #000000; /* (0, 0, 0) */
+  --app-page-bg: #1e1e1e; /* (0, 0, 0) */
   --app-page-content: #d0d0d0;
   --app-side-bg: #151c26;
   --app-side-content: #dddddd;
