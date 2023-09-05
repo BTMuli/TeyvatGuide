@@ -303,6 +303,7 @@ declare namespace TGApp.Plugins.Mys.Post {
   /**
    * @description 帖子结构化内容
    * @since Alpha v0.2.1
+   * @todo 重构
    * @interface StructuredContent
    * @property {string|object} insert 插入内容
    * @property {string} insert.image 图片 URL
