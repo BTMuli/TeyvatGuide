@@ -40,13 +40,11 @@
       </div>
     </div>
   </TOverlay>
-  <v-snackbar v-model="snackbar" :timeout="1500" color="error">
-    该 {{ itemType === "weapon" ? "武器" : "角色" }} 暂无详情
-  </v-snackbar>
 </template>
 <script setup lang="ts">
 // vue
-import { computed, ref } from "vue";
+import { computed } from "vue";
+import showSnackbar from "../func/snackbar";
 import TOverlay from "../main/t-overlay.vue";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 import TibCalendarMaterial from "../itembox/tib-calendar-material.vue";
@@ -77,7 +75,6 @@ const visible = computed({
 });
 const itemType = computed(() => props.dataType);
 const itemVal = computed<TGApp.App.Calendar.Item>(() => props.dataVal);
-const snackbar = ref<boolean>(false);
 
 const onCancel = (): void => {
   visible.value = false;
@@ -86,7 +83,11 @@ const onCancel = (): void => {
 
 function toDetail(item: TGApp.App.Calendar.Item): void {
   if (item.contentId === 0) {
-    snackbar.value = true;
+    const itemType = item.itemType === "avatar" ? "角色" : "武器";
+    showSnackbar({
+      text: `[${itemType}] ${item.name} 暂无详情`,
+      color: "warn",
+    });
     return;
   }
   const url = Mys.Api.Obc.replace("{contentId}", item.contentId.toString());
