@@ -1,7 +1,7 @@
 <template>
   <div class="share-box">
     <div class="share-btn" @click="shareContent()">
-      <v-icon> mdi-share-variant </v-icon>
+      <v-icon> mdi-share-variant</v-icon>
     </div>
   </div>
 </template>
@@ -22,7 +22,21 @@ const emit = defineEmits<TShareBtnEmits>();
 
 async function shareContent(): Promise<void> {
   emit("update:loading", true);
+  props.modelValue.querySelectorAll("details").forEach((item) => {
+    if (item.open) {
+      item.setAttribute("details-open", "");
+    } else {
+      item.open = true;
+    }
+  });
   await generateShareImg(props.title, props.modelValue);
+  props.modelValue.querySelectorAll("details").forEach((item) => {
+    if (item.hasAttribute("details-open")) {
+      item.removeAttribute("details-open");
+    } else {
+      item.open = false;
+    }
+  });
   emit("update:loading", false);
 }
 </script>
