@@ -78,6 +78,7 @@ onMounted(async () => {
     console.error(error);
     loadingEmpty.value = true;
     loadingTitle.value = "帖子不存在或解析失败";
+    loadingSub.value = error instanceof Error ? error.message : <string>error;
     await appWindow.setTitle(`【帖子】${postId}-解析失败`);
     return;
   }

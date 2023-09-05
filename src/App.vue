@@ -19,6 +19,9 @@ import TBackTop from "./components/app/t-backTop.vue";
 import { app, event, fs, window } from "@tauri-apps/api";
 // store
 import { useAppStore } from "./store/modules/app";
+// utils
+import { getEmojis } from "./plugins/Mys/request/getEmojis";
+import showSnackbar from "./components/func/snackbar";
 
 const appStore = useAppStore();
 const isMain = ref<boolean>(false);
@@ -31,6 +34,7 @@ onBeforeMount(async () => {
   if (isMain.value) {
     const title = "Tauri.Genshin v" + (await app.getVersion()) + " Beta";
     await win.setTitle(title);
+    await emojiLoad();
     await checkLoad();
   }
 });
@@ -50,6 +54,20 @@ async function listenOnTheme(): Promise<void> {
       document.documentElement.className = theme.value;
     }
   });
+}
+
+async function emojiLoad(): Promise<void> {
+  const res = await getEmojis();
+  if ("retcode" in res) {
+    console.error(res);
+    showSnackbar({
+      text: "表情包加载失败！",
+      color: "error",
+      timeout: 3000,
+    });
+  } else {
+    localStorage.setItem("emojis", JSON.stringify(res));
+  }
 }
 
 async function checkLoad(): Promise<void> {

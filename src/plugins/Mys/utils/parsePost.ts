@@ -185,7 +185,7 @@ function parseText(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLSpanElem
     if (data.attributes.color) {
       let colorGet = data.attributes.color;
       // 如果 colorGet 在 darkColorList 中，就设置为对应的颜色
-      if (isColorSimilar("#000000", colorGet)) {
+      if (isColorSimilar("#1E1E1E", colorGet)) {
         colorGet = "var(--app-page-content)";
       }
       text.style.color = colorGet;
@@ -193,6 +193,10 @@ function parseText(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLSpanElem
     if (data.attributes.link) {
       return LinkTextParser(data);
     }
+  }
+  if (data.insert.startsWith("_")) {
+    console.log(data.insert);
+    return emojiParser(data);
   }
   // 添加 class
   text.classList.add("mys-post-span");
@@ -540,6 +544,35 @@ function parseMention(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLAncho
   // 插入图标
   link.prepend(icon);
   return link;
+}
+
+/**
+ * @description 解析 Emoji
+ * @since Beta v0.3.0
+ * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @returns {HTMLSpanElement} 解析后的 Emoji
+ */
+function emojiParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLImageElement {
+  // 检查数据
+  if (typeof data.insert !== "string") {
+    throw new Error("data.insert is not a string");
+  }
+  const emojis = localStorage.getItem("emojis");
+  if (!emojis) {
+    throw new Error("emojis is not defined");
+  }
+  const emojiList: Record<string, string> = JSON.parse(emojis);
+  const emojiName = data.insert.slice(2, -1);
+  const emoji = emojiList[emojiName];
+  if (!emoji) {
+    throw new Error("emoji is not defined");
+  }
+  // 创建图片
+  const img = document.createElement("img");
+  img.classList.add("mys-post-emoji");
+  img.src = emoji;
+  // 获取图片地址
+  return img;
 }
 
 export default parsePost;
