@@ -3,13 +3,11 @@
     <div class="toc-box">
       <div class="box-div">
         <div class="toc-top">
-          <div class="toc-icon" style="cursor: default">
-            <TibCalendarItem
-              :model="itemType"
-              :data="<TGApp.App.Calendar.Item>itemVal"
-              :clickable="false"
-            />
-          </div>
+          <TibCalendarItem
+            :model="itemType"
+            :data="<TGApp.App.Calendar.Item>itemVal"
+            :clickable="false"
+          />
           <div class="toc-material-grid">
             <TibCalendarMaterial
               v-for="(item, index) in itemVal.materials"
@@ -25,12 +23,7 @@
             <img :src="`/icon/nation/${itemVal.source.area}.webp`" alt="icon" />
             <div class="toc-src-text">{{ itemVal.source.area }} - {{ itemVal.source.name }}</div>
           </div>
-          <v-btn variant="outlined" @click="toDetail(itemVal)">
-            <template #append>
-              <img src="../../assets/icons/arrow-right.svg" alt="right" class="toc-btn-img" />
-            </template>
-            详情
-          </v-btn>
+          <v-btn variant="outlined" @click="toDetail(itemVal)">详情</v-btn>
         </div>
       </div>
       <div class="close-div">
@@ -97,34 +90,33 @@ function toDetail(item: TGApp.App.Calendar.Item): void {
 <style scoped>
 /* overlay 盒子 */
 .toc-box {
-  width: 440px;
-  height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
 }
 
 .box-div {
-  height: 200px;
-  align-items: center;
+  display: flex;
+  width: 500px;
+  flex-direction: column;
   padding: 10px;
   border-radius: 5px;
-  background: rgb(255 255 255 / 30%);
-  color: #faf7e8;
+  background-color: var(--app-page-bg);
+  gap: 10px;
 }
 
 .toc-top {
   display: flex;
-  width: 100%;
-  height: 100px;
-}
-
-.toc-icon {
-  width: 100px;
-  height: 100px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .toc-material-grid {
   display: grid;
-  margin-left: 10px;
-  font-family: Genshin, serif;
+  font-family: var(--font-title);
   grid-gap: 10px;
   grid-template-columns: repeat(2, 1fr);
 }
@@ -136,25 +128,27 @@ function toDetail(item: TGApp.App.Calendar.Item): void {
 
 .toc-bottom {
   display: flex;
-  width: 420px;
   align-items: center;
   justify-content: space-between;
-  padding: 3px 10px;
+  padding-right: 10px;
+  padding-left: 10px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
-  background: rgb(0 0 0 / 30%);
-}
-
-.toc-bottom img {
-  width: 50px;
-  height: 50px;
+  background: var(--box-bg-1);
 }
 
 .toc-src-box {
   display: flex;
-  width: 300px;
-  height: 50px;
   align-items: center;
-  justify-content: left;
+  justify-content: flex-start;
+}
+
+.toc-src-box :nth-child(2) {
+  height: 30px;
+  border-radius: 50%;
+  margin: 5px;
+  aspect-ratio: 1;
+  background: var(--common-shadow-4);
 }
 
 .toc-src-text {
@@ -162,13 +156,8 @@ function toDetail(item: TGApp.App.Calendar.Item): void {
   height: 50px;
   align-items: center;
   justify-content: center;
-  font-family: Genshin-Light, serif;
+  font-family: var(--font-title);
   font-size: 20px;
-}
-
-.toc-btn-img {
-  width: 18px !important;
-  height: 18px !important;
 }
 
 .close-div {
@@ -185,9 +174,10 @@ function toDetail(item: TGApp.App.Calendar.Item): void {
   height: 30px;
   align-items: center;
   justify-content: center;
+  border: 1px solid var(--common-shadow-2);
   border-radius: 50%;
-  background: rgb(255 255 255 / 30%);
-  color: #faf7e8;
+  background: var(--app-page-bg);
+  color: var(--tgc-yellow-1);
   cursor: pointer;
 }
 </style>
