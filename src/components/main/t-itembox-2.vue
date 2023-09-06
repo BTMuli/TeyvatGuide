@@ -87,7 +87,7 @@ const props = defineProps<TItemBox2Props>();
   align-items: center;
   justify-content: center;
   margin-left: 5px;
-  color: var(--common-color-white);
+  color: var(--tgc-white-1);
   font-size: calc(0.2 * v-bind(props[ "modelValue"][ "height"]));
 }
 </style>

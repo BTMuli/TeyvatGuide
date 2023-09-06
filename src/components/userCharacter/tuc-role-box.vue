@@ -233,7 +233,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   padding: 5px;
-  border: 1px solid var(--tgc-white-8);
+  border: 1px solid var(--tgc-white-4);
   border-radius: 50%;
   background: var(--tgc-dark-7);
   opacity: 0.8;
@@ -245,7 +245,7 @@ onUnmounted(() => {
   height: 30px;
   align-items: center;
   justify-content: center;
-  color: var(--tgc-white-8);
+  color: var(--tgc-white-4);
   font-family: var(--font-title);
   font-size: 12px;
   text-shadow: 0 0 10px var(--tgc-dark-7);

@@ -56,7 +56,7 @@
               class="tuc-dor-item"
               :model-value="item"
               :style="{
-                border: selected.pos === item.pos + 5 ? '2px solid var(--common-color-yellow)' : '',
+                border: selected.pos === item.pos + 5 ? '2px solid var(--tgc-yellow-1)' : '',
               }"
               @click="showDetail(item, '命座', item.pos + 5)"
             />

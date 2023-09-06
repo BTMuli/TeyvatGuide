@@ -29,7 +29,7 @@ const props = defineProps<TuaDetailBattleProps>();
 }
 
 .tud-db-time {
-  color: var(--common-text-content);
+  color: var(--box-text-1);
   font-size: 12px;
   opacity: 0.6;
   text-align: left;

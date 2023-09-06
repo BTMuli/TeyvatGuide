@@ -26,8 +26,8 @@ html.dark {
   --box-text-1: var(--tgc-white-1);
   --box-text-2: var(--tgc-white-2);
   --box-text-3: var(--tgc-blue-1);
-  --box-text-4: var(--tgc-white-8);
-  --box-text-7: var(--tgc-white-9);
+  --box-text-4: var(--tgc-white-4);
+  --box-text-7: var(--tgc-white-5);
 
   /* button */
   --btn-text: var(--tgc-yellow-1);
@@ -52,7 +52,7 @@ html.dark {
 
   /* text */
   --common-text-title: var(--tgc-yellow-2); /* title，米色 */
-  --common-text-content: var(--common-color-white); /* text */
+  --common-text-content: var(--tgc-white-1); /* text */
   --common-text-quote: var(--tgc-dark-7); /* quote */
 
   --back-top-shadow: #000000;

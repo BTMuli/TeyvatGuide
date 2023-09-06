@@ -13,34 +13,18 @@
   /* font */
   --font-text: "JetBrians mono", "Genshin-Light", sans-serif;
   --font-title: "JetBrians mono Bold", "Genshin", serif;
-  /* color */
-  --common-color-white: #faf7e8;
-  --common-color-black: #333333;
-  --common-color-blue: #485466;
-  --common-color-blue-2: #546d8b;
-  --common-color-blue-3: #5b738f;
-  --common-color-yellow: #fec90b;
-  --common-color-grey: #96979a;
-  --common-color-grey-2: #b3b3b3;
 
   /* color white */
   --tgc-white-1: #ffffff; /* normal white */
   --tgc-white-2: #f0f1f6; /* Github mobile bg */
   --tgc-white-3: #f6f8fa; /* Github web bg */
-  --tgc-white-4: #f4f6f7; /* Github web option */
-  --tgc-white-5: #eff3f6; /* Miyoushe side bar */
-  --tgc-white-6: #f8f8f8; /* Miyoushe bottom bar */
-  --tgc-white-7: #f0f1f5; /* Miyoushe tag */
-  --tgc-white-8: #faf7e8; /* Genshin text */
-  --tgc-white-9: #ece5d8; /* Genshin text */
+  --tgc-white-4: #faf7e8; /* Genshin text */
+  --tgc-white-5: #ece5d8; /* Genshin text */
 
   /* color dark */
   --tgc-dark-1: #000000; /* normal dark */
   --tgc-dark-2: #202020; /* Tauri app nav */
-  --tgc-dark-3: #010409; /* Github web nav */
-  --tgc-dark-4: #0d1117; /* Github web bg */
   --tgc-dark-5: #161b22; /* Github web list nav */
-  --tgc-dark-6: #21262d; /* Github web btn bg */
   --tgc-dark-7: #393b40; /* Genshin btn bg */
   --tgc-dark-8: #121212; /* Github web bg */
 
@@ -48,7 +32,6 @@
   --tgc-blue-1: #3572a5; /* Github web lang bar */
   --tgc-blue-2: #00aeec; /* Bilibili btn bg */
   --tgc-blue-3: #4b5466; /* Genshin icon bg */
-  --tgc-green-1: #238636; /* Github web btn */
   --tgc-pink-1: #fb7299; /* Bilibili btn bg */
   --tgc-yellow-1: #ffcd0c; /* Genshin btn bg */
   --tgc-yellow-2: #f4d8a8; /* Genshin confirm text */

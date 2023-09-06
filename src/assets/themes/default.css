@@ -48,8 +48,8 @@ html.default {
 
   /* common text color */
   --common-text-title: var(--tgc-dark-8); /* title */
-  --common-text-content: var(--common-color-blue-2); /* text todo */
-  --common-text-quote: var(--common-color-blue-3); /* quote todo */
+  --common-text-content: var(--tgc-blue-1); /* text todo */
+  --common-text-quote: var(--tgc-white-4); /* quote todo */
 
   --back-top-shadow: #546d8b;
   --post-default-text: #1e1e1e;

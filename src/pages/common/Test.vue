@@ -1,10 +1,5 @@
 <template>
   <div>
-    <h1>测试米游社扫码登录</h1>
-    <div class="btn-list">
-      <v-btn class="test-btn" @click="showScan">弹窗</v-btn>
-    </div>
-    <ToGameLogin v-model="visible" />
     <h1>颜色测试</h1>
     <div class="test-box">
       <div class="test-1">
@@ -20,17 +15,7 @@
     </div>
   </div>
 </template>
-<script lang="ts" setup>
-// vue
-import { ref } from "vue";
-import ToGameLogin from "../../components/overlay/to-gameLogin.vue";
-
-const visible = ref<boolean>(false);
-
-function showScan(): void {
-  visible.value = true;
-}
-</script>
+<script lang="ts" setup></script>
 <style lang="css" scoped>
 .btn-list {
   display: flex;

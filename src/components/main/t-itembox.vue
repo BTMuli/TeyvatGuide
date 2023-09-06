@@ -185,7 +185,7 @@ const props = defineProps<TItemBoxProps>();
   background: rgb(0 0 0 / 40%);
   border-bottom-left-radius: 5px;
   border-top-right-radius: 5px;
-  color: var(--common-color-white);
+  color: var(--tgc-white-1);
   font-family: var(--font-title);
 }
 
@@ -200,7 +200,7 @@ const props = defineProps<TItemBoxProps>();
   background: rgb(20 20 20 / 40%);
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
-  color: var(--common-color-white);
+  color: var(--tgc-white-1);
   font-family: var(--font-title);
 }
 

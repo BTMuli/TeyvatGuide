@@ -46,7 +46,7 @@ defineProps<TAOProps>();
 }
 
 .dark .tur-os-text {
-  color: var(--common-color-yellow);
+  color: var(--tgc-yellow-1);
   text-shadow: none;
 }
 </style>

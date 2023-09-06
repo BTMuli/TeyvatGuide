@@ -62,8 +62,9 @@ function onCancel(): void {
 .hta-oo-box {
   width: 300px;
   padding: 10px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
-  background: rgb(255 255 255/50%);
+  background: var(--box-bg-1);
 }
 
 .hta-oo-box:nth-child(3) {
@@ -71,8 +72,8 @@ function onCancel(): void {
 }
 
 .hta-oob-title {
-  border-bottom: 1px solid #393b40;
-  color: #393b40;
+  border-bottom: 1px solid var(--common-shadow-4);
+  color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
 }
@@ -86,16 +87,15 @@ function onCancel(): void {
 }
 
 .hta-oob-item :nth-child(2n-1) {
-  color: var(--common-color-blue);
+  color: var(--box-text-4);
   font-family: var(--font-title);
   font-size: 16px;
   text-align: left;
 }
 
 .hta-oob-item :nth-child(2n) {
-  color: var(--common-color-white);
+  color: var(--tgc-yellow-1);
   font-size: 14px;
   text-align: right;
-  text-shadow: 0 0 10px rgb(0 0 0/50%);
 }
 </style>
