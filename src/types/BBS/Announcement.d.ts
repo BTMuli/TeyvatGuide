@@ -40,12 +40,12 @@ declare namespace TGApp.BBS.Announcement {
    * @property {boolean} alert - 是否有紧急公告
    * @property {number} time_zone - 时区
    * @property {string} t - 时间戳，单位为秒
-   * @property {unknown[]} pic_list - 图片列表 todo: 未知类型
+   * @property {unknown[]} pic_list - 图片列表
    * @property {number} pic_total - 图片总数
-   * @property {unknown[]} pic_type_list - 图片类型列表 todo: 未知类型
+   * @property {unknown[]} pic_type_list - 图片类型列表
    * @property {boolean} pic_alert - 是否有紧急图片
    * @property {number} pic_alert_id - 紧急图片 ID
-   * @property {unknown} static_sign - 静态签名 todo: 未知类型
+   * @property {unknown} static_sign - 静态签名
    * @return ListData
    */
   export interface ListData {
@@ -69,7 +69,7 @@ declare namespace TGApp.BBS.Announcement {
    * @since Alpha v0.1.5
    * @property {ContentItem[]} list - 公告内容列表
    * @property {number} total - 公告内容总数
-   * @property {unknown[]} pic_list - 图片列表 todo: 未知类型
+   * @property {unknown[]} pic_list - 图片列表
    * @property {number} pic_total - 图片总数
    * @return ContentData
    */

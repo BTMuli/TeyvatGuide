@@ -2,7 +2,7 @@
  * @file plugins Hutao index.ts
  * @description Hutao 插件入口
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Beta v0.3.0
  */
 
 import getAvatarCollect from "./request/getAvatarCollect";
@@ -11,7 +11,6 @@ import getAvatarUpRate from "./request/getAvatarUpRate";
 import getAvatarUseRate from "./request/getAvatarUseRate";
 import getOverview from "./request/getOverview";
 import getTeamCollect from "./request/getTeamCollect";
-import { checkUid, getUserData } from "./request/getUserData";
 import getWeaponCollect from "./request/getWeaponCollect";
 import uploadData from "./request/uploadData";
 import { transAvatars, transLocal } from "./utils/transLocal";
@@ -26,10 +25,6 @@ const Hutao = {
     },
     getOverview,
     getTeamCollect,
-    user: {
-      checkExist: checkUid,
-      getRecord: getUserData,
-    },
     getWeaponCollect,
     postData: uploadData,
     utils: {

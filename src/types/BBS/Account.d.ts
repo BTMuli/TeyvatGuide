@@ -10,7 +10,6 @@ declare namespace TGApp.BBS.Account {
    * @description stoken 验证获取的用户信息
    * @interface VerifySTokenInfo
    * @since Alpha v0.1.5
-   * @todo 添加 request 索引
    * @property {string} aid 账号 id
    * @property {string} mid mid
    * @property {string} account_name 账号名称

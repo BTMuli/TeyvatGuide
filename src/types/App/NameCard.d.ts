@@ -15,7 +15,7 @@ declare namespace TGApp.App.NameCard {
    * @property {string} icon - 名片图标
    * @property {string} bg - 名片背景图
    * @property {string} profile - 名片 Profile 图
-   * @description 0: 其他，1: 成就，2：角色，3：纪行，4：活动 // todo: 后续用枚举替换
+   * @description 0: 其他，1: 成就，2：角色，3：纪行，4：活动
    * @property {number} type - 名片类型
    * @property {string} source - 名片来源
    * @return Item

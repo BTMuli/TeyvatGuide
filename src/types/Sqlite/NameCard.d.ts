@@ -12,7 +12,7 @@ declare namespace TGApp.Sqlite.NameCard {
    * @interface SingleTable
    * @property {string} name - 名片名称
    * @property {string} desc - 名片描述
-   * @description 0: 其他，1: 成就，2：角色，3：纪行，4：活动 // todo: 后续用枚举替换
+   * @description 0: 其他，1: 成就，2：角色，3：纪行，4：活动
    * @property {number} type - 名片类型
    * @property {string} source - 名片来源
    * @property {string} updated - 数据库更新时间

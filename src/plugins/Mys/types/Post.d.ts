@@ -45,11 +45,11 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {number} vot_count 投票数
    * @property {number} last_modify_time 最后修改时间
    * @property {string} recommend_type 推荐类型
-   * @property {unknown} collection 合集，可能为 null // TODO: 未知
-   * @property {unknown[]} vod_list 视频列表，可能为空 // TODO: 未知
+   * @property {unknown} collection 合集，可能为 null
+   * @property {unknown[]} vod_list 视频列表，可能为空
    * @property {boolean} is_block_on 是否被屏蔽
-   * @property {unknown} forum_rank_info 版块排行信息，可能为 null // TODO: 未知
-   * @property {unknown[]} link_card_list 链接卡片列表，可能为空 // TODO: 未知
+   * @property {unknown} forum_rank_info 版块排行信息，可能为 null
+   * @property {unknown[]} link_card_list 链接卡片列表，可能为空
    * @property {TGApp.Plugins.Mys.News.Meta} news_meta 咨讯元数据，可能为 null
    * @return FullData
    */
@@ -88,7 +88,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {string} subject 帖子标题
    * @property {string} content 帖子内容，为 html 格式
    * @property {string} cover 封面图 URL，可能为 ""
-   * @property {number} view_type 浏览类型 // TODO: 未知
+   * @property {number} view_type 浏览类型
    * @property {number} created_at 发帖时间
    * @property {string[]} images 图片列表，可能为空
    * @property post_status 帖子状态
@@ -112,14 +112,14 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {number} deleted_at 删除时间
    * @property {number} pre_pub_status 预发布状态
    * @property {number} cate_id 分类ID
-   * @property {number} profit_post_status 盈利帖子状态 // TODO: 未知
+   * @property {number} profit_post_status 盈利帖子状态
    * @property {number} audit_status 审核状态
-   * @property {string} meta_content 元内容，可能为 "" // TODO: 未知
-   * @property {boolean} is_missing 是否缺失 // TODO: 未知
-   * @property {number} block_reply_img 是否屏蔽回复图片 // TODO: 未知
-   * @property {boolean} is_showing_missing 是否显示缺失 // TODO: 未知
-   * @property {number} block_latest_reply_time 是否屏蔽最新回复时间 // TODO: 未知
-   * @property {number} selected_comment 是否选择评论 // TODO: 未知
+   * @property {string} meta_content 元内容，可能为 ""
+   * @property {boolean} is_missing 是否缺失
+   * @property {number} block_reply_img 是否屏蔽回复图片
+   * @property {boolean} is_showing_missing 是否显示缺失
+   * @property {number} block_latest_reply_time 是否屏蔽最新回复时间
+   * @property {number} selected_comment 是否选择评论
    * @return Post
    */
   export interface Post {
@@ -275,7 +275,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @since Alpha v0.2.1
    * @todo 用处未知
    * @interface HelpSys
-   * @property {unknown} top_up 置顶, 可能为 null // TODO: 未知
+   * @property {unknown} top_up 置顶, 可能为 null
    * @property {unknown[]} top_n 置顶, 可能为空
    * @property {number} answer_num 回答数
    * @return HelpSys
@@ -409,17 +409,17 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @description 帖子结构化内容-链接卡片
    * @since Alpha v0.2.1
    * @interface StructuredLinkCard
-   * @property {number} link_type 链接类型 // 1: 帖子，2：商品 TODO: 未知
+   * @property {number} link_type 链接类型 // 1: 帖子，2：商品
    * @property {string} origin_url 原始链接
    * @property {string} landing_url 落地页链接
    * @property {string} cover 封面图 URL
    * @property {string} title 标题
    * @property {string} card_id 卡片 ID
-   * @property {number} card_status 卡片状态 // TODO: 未知
+   * @property {number} card_status 卡片状态
    * @property {string} market_price 市场价
    * @property {string} price 价格
    * @property {string} button_text 按钮文本
-   * @property {number} landing_url_type 落地链接类型 // TODO: 未知
+   * @property {number} landing_url_type 落地链接类型
    * @return StructuredLinkCard
    */
   export interface StructuredLinkCard {

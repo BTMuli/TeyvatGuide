@@ -2,7 +2,7 @@
  * @file src plugins Hutao types Abyss.d.ts
  * @description Hutao 插件深渊类型定义文件
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.2
+ * @since Beta v0.3.0
  */
 
 /**
@@ -139,44 +139,6 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @return UploadResponse
    */
   export interface UploadResponse extends TGApp.Plugins.Hutao.Base.Response {}
-
-  /**
-   * @description 是否存在深渊记录返回
-   * @since Alpha v0.2.1
-   * @see HutaoRequest.Abyss.user.checkExist
-   * @interface ExistResponse
-   * @extends TGApp.Plugins.Hutao.Base.Response
-   * @property {boolean} data - 是否存在深渊记录
-   * @return ExistResponse
-   */
-  export interface ExistResponse extends TGApp.Plugins.Hutao.Base.Response {
-    data: boolean;
-  }
-
-  /**
-   * @description 获取深渊记录返回
-   * @since Alpha v0.2.1
-   * @see HutaoRequest.Abyss.user.getRecord
-   * @interface RecordRankResponse
-   * @extends TGApp.Plugins.Hutao.Base.Response
-   * @property {RankData} data - 深渊记录
-   * @return RecordRankResponse
-   */
-  export interface RecordRankResponse extends TGApp.Plugins.Hutao.Base.Response {
-    data: RankData;
-  }
-
-  /**
-   * @description 深渊记录
-   * @since Alpha v0.2.1
-   * @interface RankData
-   * @todo 暂时缺乏数据
-   * @return RankData
-   */
-  export interface RankData {
-    // todo
-    data: any;
-  }
 
   /**
    * @description 获取深渊总览数据返回

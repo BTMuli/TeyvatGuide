@@ -233,7 +233,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {string} nickname 用户昵称
    * @property {string} introduce 用户简介
    * @property {string} avatar 用户头像
-   * @property {number} gender 用户性别 // TODO: 未知
+   * @property {number} gender 用户性别
    * @property {Certification} certification 用户认证信息
    * @property level_exp 用户等级经验
    * @property {number} level_exp.level 用户等级
@@ -265,7 +265,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @description 用户操作
    * @since Alpha v0.2.1
    * @interface SelfOperation
-   * @property {number} attitude 操作类型 // TODO: 未知
+   * @property {number} attitude 操作类型
    * @property {boolean} is_collected 是否收藏
    * @returns {SelfOperation}
    */

@@ -58,11 +58,11 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {number} vote_count 投票数
    * @property {number} last_modify_time 最后修改时间
    * @property {string} recommend_type 推荐类型
-   * @property {unknown} collection 合集, 可能为 null // TODO: 未知
+   * @property {unknown} collection 合集, 可能为 null
    * @property {unknown[]} vod_list 视频列表
    * @property {boolean} is_block_on 是否屏蔽
-   * @property {unknown} forum_rank_info 版块排名信息，可能为 null // TODO: 未知
-   * @property {unknown[]} link_card_list 链接卡片列表，可能为 null // TODO: 未知
+   * @property {unknown} forum_rank_info 版块排名信息，可能为 null
+   * @property {unknown[]} link_card_list 链接卡片列表，可能为 null
    * @property {Meta} news_meta 元数据
    * @returns Item
    */

@@ -1,7 +1,6 @@
 /**
  * @file types BBS Tokens.d.ts
  * @description BBS 返回数据类型定义文件
- * @todo 视情况看看要不要拆分
  * @author BTMuli< bt-muli@outlook.com>
  * @since Beta v0.3.0
  */
@@ -39,7 +38,6 @@ declare namespace TGApp.BBS.Response {
    * @description 获取 ltoken 跟 stoken 的响应数据
    * @interface getTokens
    * @since Alpha v0.1.5
-   * @todo 添加 request 索引
    * @extends Base
    * @property {getTokensRes[]} data.list - token 列表
    * @return getTokens
@@ -54,7 +52,6 @@ declare namespace TGApp.BBS.Response {
    * @description 根据 stoken 获取 ltoken 的响应数据
    * @interface getLTokenBySToken
    * @since Alpha v0.1.5
-   * @todo 添加 request 索引
    * @extends Base
    * @property {string} data.ltoken - ltoken 值
    * @return getLTokenBySToken
@@ -69,7 +66,6 @@ declare namespace TGApp.BBS.Response {
    * @description 根据 stoken 获取 cookie_token 的响应数据
    * @interface getCookieTokenBySToken
    * @since Alpha v0.1.5
-   * @todo 添加 request 索引
    * @extends Base
    * @property {string} data.uid - 用户 uid
    * @property {string} data.cookie_token - cookie_token 值
@@ -86,7 +82,6 @@ declare namespace TGApp.BBS.Response {
    * @description 通过 stoken 验证用户信息的返回类型
    * @interface verifyUserInfoBySToken
    * @since Alpha v0.1.5
-   * @todo 添加 request 索引
    * @extends Base
    * @property {TGApp.BBS.Account.VerifySTokenInfo} data.user_info - 用户信息
    * @property {unknown} data.realname_info - 实名信息 // todo: 未知类型

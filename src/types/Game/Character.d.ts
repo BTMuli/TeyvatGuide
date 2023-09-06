@@ -10,7 +10,6 @@ declare namespace TGApp.Game.Character {
    * @description 角色列表数据返回类型
    * @interface ListResponse
    * @since Alpha v0.2.0
-   * @see todo 请求也得重构一下
    * @extends TGApp.BBS.Response.Base
    * @property {ListItem[]} data.avatars - 角色列表
    * @property {ListRole} data.role - 角色信息
@@ -41,7 +40,7 @@ declare namespace TGApp.Game.Character {
    * @property {number} actived_constellation_num - 角色已激活命座数量
    * @property {LICostume[]} costumes - 角色时装
    * @property {number} constellation_level - 角色命座等级
-   * @property {unknown} external - todo：未知
+   * @property {unknown} external
    * @return ListItem
    */
   export interface ListItem {
@@ -86,7 +85,7 @@ declare namespace TGApp.Game.Character {
    * @property {number} id - 武器 ID
    * @property {string} name - 武器名称
    * @property {string} icon - 武器图标
-   * @property {number} type - 武器类型 // todo: 不同的武器类型对应的数值
+   * @property {number} type - 武器类型
    * @property {number} rarity - 武器稀有度
    * @property {number} level - 武器等级
    * @property {number} promote_level - 武器等级对应的突破等级

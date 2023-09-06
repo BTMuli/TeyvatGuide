@@ -50,7 +50,7 @@ declare namespace TGApp.Game.Gacha {
    * @since Beta v0.3.0
    * @property {string} uid - 用户 uid
    * @property {string} gacha_type - 抽卡类型 // 100: 新手祈愿, 200: 常驻祈愿, 301: 角色活动祈愿, 302: 武器活动祈愿 400：角色活动祈愿2
-   * @property {string} item_id - 物品 id // todo：一般为 ""，需要自己添加
+   * @property {string} item_id - 物品 id // 一般为 ""，需要自己添加
    * @property {string} count - 数量
    * @property {string} time - 时间 // yyyy-MM-dd HH:mm:ss
    * @property {string} name - 物品名称

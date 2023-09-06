@@ -10,7 +10,6 @@ declare namespace TGApp.Game.Abyss {
    * @description 深渊数据返回类型
    * @interface Response
    * @since Alpha v0.2.0
-   * @see todo 请求也得重构一下
    * @extends TGApp.BBS.Response.Base
    * @property {FullData} data - 深渊数据
    * @return Response
@@ -27,7 +26,7 @@ declare namespace TGApp.Game.Abyss {
    * @property {string} start_time - 深渊开始时间，单位：秒
    * @property {string} end_time - 深渊结束时间，单位：秒
    * @property {number} total_battle_times - 总战斗次数
-   * @property {number} total_win_times - todo：未知
+   * @property {number} total_win_times - 总胜利次数
    * @property {string} max_floor - 最深抵达 // 12-3
    * @property {Character[]} reveal_rank - 出站次数 // 最多的 4 个角色
    * @property {Character[]} defeat_rank - 最多击破数
@@ -82,7 +81,7 @@ declare namespace TGApp.Game.Abyss {
    * @property {number} index - 层索引
    * @property {string} icon - 层图标
    * @property {boolean} is_unlock - 是否解锁
-   * @property {number} settle_time - todo: 未知
+   * @property {number} settle_time
    * @property {number} star - 获得星数
    * @property {number} max_star - 最大星数
    * @property {Level[]} levels - 层内关卡数据

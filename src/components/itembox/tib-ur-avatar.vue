@@ -27,6 +27,7 @@ onMounted(async () => {
     size: "80px",
     height: "80px",
     ltSize: "30px",
+    clickable: false,
     bg: `/icon/bg/${props.modelValue.star}-Star.webp`,
     icon: `/WIKI/character/icon/${props.modelValue.id}.webp`,
     lt: `/icon/element/${props.modelValue.element}元素.webp`,
