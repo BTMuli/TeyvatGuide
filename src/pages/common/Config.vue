@@ -2,7 +2,7 @@
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <ToGameLogin v-model="scan" />
   <v-list class="config-list">
-    <v-list-subheader :inset="true" class="config-header"> 应用信息</v-list-subheader>
+    <v-list-subheader :inset="true" class="config-header" title="应用信息" />
     <v-divider :inset="true" class="border-opacity-75" />
     <v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
       <template #prepend>
@@ -53,25 +53,19 @@
         <v-btn class="config-btn" @click="confirmRefreshUser"> 刷新数据</v-btn>
       </template>
     </v-list-item>
-    <v-list-subheader :inset="true" class="config-header">系统信息</v-list-subheader>
+    <v-list-subheader :inset="true" class="config-header" title="系统信息" />
     <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item title="系统平台">
-      <template #prepend>
-        <v-icon>mdi-desktop-classic</v-icon>
-      </template>
+    <v-list-item title="系统平台" prepend-icon="mdi-microsoft-windows">
       <template #append>
         <v-list-item-subtitle>{{ osPlatform }}</v-list-item-subtitle>
       </template>
     </v-list-item>
-    <v-list-item title="系统版本">
-      <template #prepend>
-        <v-icon>mdi-desktop-classic</v-icon>
-      </template>
+    <v-list-item title="系统版本" prepend-icon="mdi-monitor-dashboard">
       <template #append>
         <v-list-item-subtitle>{{ osVersion }}</v-list-item-subtitle>
       </template>
     </v-list-item>
-    <v-list-item title="数据库更新时间" prepend-icon="mdi-database">
+    <v-list-item title="数据库更新时间" prepend-icon="mdi-database-sync">
       <template #append>
         <v-list-item-subtitle
           >{{ dbInfo.find((item) => item.key === "dataUpdated")?.value }}
@@ -82,7 +76,7 @@
         {{ dbInfo.find((item) => item.key === "dataUpdated")?.updated }}
       </v-list-item-subtitle>
     </v-list-item>
-    <v-list-item title="数据库版本" prepend-icon="mdi-database">
+    <v-list-item title="数据库版本" prepend-icon="mdi-database-search">
       <template #append>
         <v-list-item-subtitle
           >{{ dbInfo.find((item) => item.key === "appVersion")?.value }}
@@ -93,12 +87,9 @@
         {{ dbInfo.find((item) => item.key === "appVersion")?.updated }}
       </v-list-item-subtitle>
     </v-list-item>
-    <v-list-subheader :inset="true" class="config-header"> 设置</v-list-subheader>
+    <v-list-subheader :inset="true" class="config-header" title="设置" />
     <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item>
-      <template #prepend>
-        <v-icon>mdi-view-dashboard</v-icon>
-      </template>
+    <v-list-item prepend-icon="mdi-camera-iris">
       <v-select
         v-model="showHome"
         :items="homeStore.getShowItems()"
@@ -110,18 +101,17 @@
         <v-btn class="config-btn" @click="submitHome"> 确定</v-btn>
       </template>
     </v-list-item>
-    <v-list-item prepend-icon="mdi-content-save" title="数据备份" @click="confirmBackup" />
-    <v-list-item prepend-icon="mdi-content-save" title="数据恢复" @click="confirmRestore" />
-    <v-list-item prepend-icon="mdi-content-save" title="数据更新" @click="confirmUpdate()" />
-    <v-list-item prepend-icon="mdi-delete" title="清除用户缓存" @click="confirmDelUC" />
-    <v-list-item prepend-icon="mdi-delete" title="清除临时数据" @click="confirmDelTemp" />
-    <v-list-item prepend-icon="mdi-cog" title="恢复默认设置" @click="confirmResetApp" />
-    <v-list-subheader :inset="true" class="config-header"> 调试</v-list-subheader>
+    <v-list-item prepend-icon="mdi-database-export" title="数据备份" @click="confirmBackup" />
+    <v-list-item prepend-icon="mdi-database-import" title="数据恢复" @click="confirmRestore" />
+    <v-list-item prepend-icon="mdi-database-arrow-up" title="数据更新" @click="confirmUpdate()" />
+    <v-list-subheader :inset="true" class="config-header" title="调试" />
     <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item v-if="appStore.devEnv" title="调试模式" subtitle="开启后将显示调试信息">
-      <template #prepend>
-        <v-icon>mdi-bug</v-icon>
-      </template>
+    <v-list-item
+      v-if="appStore.devEnv"
+      title="调试模式"
+      subtitle="开启后将显示调试信息"
+      prepend-icon="mdi-bug-play"
+    >
       <template #append>
         <v-switch
           v-model="appStore.devMode"
@@ -132,22 +122,30 @@
         />
       </template>
     </v-list-item>
-    <v-list-item title="重置数据库" prepend-icon="mdi-delete" @click="confirmResetDB()" />
+    <v-list-item prepend-icon="mdi-database-remove" title="清除用户缓存" @click="confirmDelUC" />
+    <v-list-item
+      title="重置数据库"
+      prepend-icon="mdi-database-settings"
+      @click="confirmResetDB()"
+    />
     <v-list-item
       title="检测 SQLite 数据库完整性"
       prepend-icon="mdi-database-check"
       @click="confirmCheckDB"
     />
-    <v-list-subheader :inset="true" class="config-header"> 路径</v-list-subheader>
+    <v-list-item prepend-icon="mdi-cog-sync" title="恢复默认设置" @click="confirmResetApp" />
+    <v-list-subheader :inset="true" class="config-header" title="路径" />
     <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item prepend-icon="mdi-database">
-      <v-list-item-title>本地数据库路径</v-list-item-title>
-      <v-list-item-subtitle>{{ appStore.dataPath.dbDataPath }}</v-list-item-subtitle>
-    </v-list-item>
-    <v-list-item prepend-icon="mdi-folder">
-      <v-list-item-title>本地用户数据路径</v-list-item-title>
-      <v-list-item-subtitle>{{ appStore.dataPath.userDataDir }}</v-list-item-subtitle>
-    </v-list-item>
+    <v-list-item
+      prepend-icon="mdi-folder-key"
+      title="本地数据库路径"
+      :subtitle="appStore.dataPath.dbDataPath"
+    />
+    <v-list-item
+      prepend-icon="mdi-folder-account"
+      title="本地用户数据路径"
+      :subtitle="appStore.dataPath.userDataDir"
+    />
   </v-list>
 </template>
 
@@ -444,26 +442,6 @@ async function confirmDelUC(): Promise<void> {
   showSnackbar({ text: "用户数据已删除!" });
   achievementsStore.init();
   await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData });
-}
-
-// 清除临时数据
-async function confirmDelTemp(): Promise<void> {
-  const res = await showConfirm({
-    title: "确认清除临时数据吗？",
-  });
-  if (!res) {
-    showSnackbar({
-      color: "grey",
-      text: "已取消清除临时数据",
-    });
-    return;
-  }
-  await fs.removeDir("tempData", {
-    dir: fs.BaseDirectory.AppLocalData,
-    recursive: true,
-  });
-  await fs.createDir("tempData", { dir: fs.BaseDirectory.AppLocalData });
-  showSnackbar({ text: "临时数据已删除!" });
 }
 
 // 恢复默认设置
