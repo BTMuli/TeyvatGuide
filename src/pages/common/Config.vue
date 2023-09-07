@@ -311,6 +311,8 @@ async function confirmRefreshUser(): Promise<void> {
   if (Array.isArray(accountRes)) {
     loadingTitle.value = "获取成功!正在保存到数据库!";
     await TGSqlite.saveAccount(accountRes);
+    const curAccount = await TGSqlite.getCurAccount();
+    if (curAccount) userStore.setCurAccount(curAccount);
   } else {
     console.error(accountRes);
     loadingTitle.value = "获取失败!";

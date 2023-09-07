@@ -56,6 +56,7 @@ import { generateShareImg } from "../../utils/TGShare";
 
 // store
 const userStore = useUserStore();
+const user = userStore.getCurAccount();
 
 // loading
 const loading = ref<boolean>(false);
@@ -66,7 +67,6 @@ const loadingSub = ref<string>();
 const isEmpty = ref(true);
 const roleList = ref<TGApp.Sqlite.Character.UserRole[]>([]);
 const roleCookie = computed(() => userStore.getCookieGroup4());
-const user = computed(() => userStore.getCurAccount());
 
 // overlay
 const visible = ref(false);
@@ -94,7 +94,7 @@ function getGridGap(): void {
 }
 
 async function loadRole(): Promise<void> {
-  const roleData = await TGSqlite.getUserCharacter(user.value.gameUid);
+  const roleData = await TGSqlite.getUserCharacter(user.gameUid);
   if (roleData !== false) {
     roleList.value = roleData;
     isEmpty.value = false;
@@ -104,10 +104,10 @@ async function loadRole(): Promise<void> {
 async function refreshRoles(): Promise<void> {
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
-  const res = await TGRequest.User.byLToken.getRoleList(roleCookie.value, user.value);
+  const res = await TGRequest.User.byLToken.getRoleList(roleCookie.value, user);
   if (Array.isArray(res)) {
     loadingTitle.value = "正在保存角色数据";
-    await TGSqlite.saveUserCharacter(user.value.gameUid, res);
+    await TGSqlite.saveUserCharacter(user.gameUid, res);
     loadingTitle.value = "正在更新角色数据";
     await loadRole();
   }
@@ -123,7 +123,7 @@ async function refreshTalent(): Promise<void> {
     loadingSub.value = `CID：${role.cid}`;
     const res = await TGRequest.User.calculate.getSyncAvatarDetail(
       talentCookie,
-      user.value.gameUid,
+      user.gameUid,
       role.cid,
     );
     if ("skill_list" in res) {
@@ -138,7 +138,7 @@ async function refreshTalent(): Promise<void> {
           icon: skill.icon,
         });
       });
-      await TGSqlite.saveUserCharacterTalent(user.value.gameUid, role.cid, talent);
+      await TGSqlite.saveUserCharacterTalent(user.gameUid, role.cid, talent);
     } else {
       loadingTitle.value = `获取${role.name}的天赋数据失败`;
       loadingSub.value = `[${res.retcode}] ${res.message}`;
@@ -158,7 +158,7 @@ async function refreshTalent(): Promise<void> {
 
 async function shareRoles(): Promise<void> {
   const rolesBox = <HTMLElement>document.querySelector(".uc-box");
-  const fileName = `【角色列表】-${user.value.gameUid}`;
+  const fileName = `【角色列表】-${user.gameUid}`;
   loadingTitle.value = "正在生成图片";
   loadingSub.value = `${fileName}.png`;
   loading.value = true;

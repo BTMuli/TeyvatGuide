@@ -50,6 +50,7 @@ import showSnackbar from "../../components/func/snackbar";
 
 // store
 const userStore = useUserStore();
+const user = userStore.getCurAccount();
 
 // loading
 const loading = ref<boolean>(false);
@@ -60,7 +61,6 @@ const loadingSub = ref<string>();
 const isEmpty = ref<boolean>(true);
 const recordData = ref<TGApp.Sqlite.Record.SingleTable>(<TGApp.Sqlite.Record.SingleTable>{});
 const recordCookie = computed<TGApp.BBS.Constant.CookieGroup2>(() => userStore.getCookieGroup2());
-const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.getCurAccount());
 
 onMounted(async () => {
   loadingTitle.value = "正在加载战绩数据";
@@ -73,7 +73,7 @@ onMounted(async () => {
 });
 
 async function initUserRecordData(): Promise<void> {
-  const recordGet = await TGSqlite.getUserRecord(user.value.gameUid);
+  const recordGet = await TGSqlite.getUserRecord(user.gameUid);
   if (recordGet !== false) {
     recordData.value = recordGet;
     isEmpty.value = false;
@@ -85,11 +85,11 @@ async function initUserRecordData(): Promise<void> {
 async function refresh(): Promise<void> {
   loadingTitle.value = "正在获取战绩数据";
   loading.value = true;
-  const res = await TGRequest.User.getRecord(recordCookie.value, user.value);
+  const res = await TGRequest.User.getRecord(recordCookie.value, user);
   if (!("retcode" in res)) {
     console.log(res);
     loadingTitle.value = "正在保存战绩数据";
-    await TGSqlite.saveUserRecord(res, user.value.gameUid);
+    await TGSqlite.saveUserRecord(res, user.gameUid);
     await initUserRecordData();
   } else {
     showSnackbar({
@@ -107,7 +107,7 @@ function getTitle(): string {
 
 async function shareRecord(): Promise<void> {
   const recordBox = <HTMLElement>document.querySelector(".ur-box");
-  const fileName = `【原神战绩】-${user.value.gameUid}`;
+  const fileName = `【原神战绩】-${user.gameUid}`;
   loadingTitle.value = "正在生成图片";
   loadingSub.value = `${fileName}.png`;
   loading.value = true;
