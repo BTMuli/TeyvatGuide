@@ -68,4 +68,9 @@ onMounted(async () => {
 .jv-container {
   background: var(--box-bg-2) !important;
 }
+
+.jv-key,
+.jv-array {
+  color: var(--box-text-4) !important;
+}
 </style>

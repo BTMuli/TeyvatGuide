@@ -16,7 +16,7 @@
           </v-avatar>
         </template>
         <template #append>
-          <v-btn variant="outlined" @click="backPost()"> 返回 </v-btn>
+          <v-btn variant="outlined" @click="backPost()"> 返回</v-btn>
         </template>
         {{ lotteryCard.creator.nickname }}
         <v-list-item-subtitle>{{ lotteryCard.creator.introduce }}</v-list-item-subtitle>
@@ -30,18 +30,18 @@
         </div>
       </div>
     </div>
-  </div>
-  <div v-if="timeStatus === '已开奖'" class="lottery-box">
-    <div class="lottery-title">中奖详情</div>
-    <div v-for="reward in lotteryCard.rewards" :key="reward.name" class="lottery-list">
-      <div class="reward-title">{{ reward.name }} {{ reward.win }}/{{ reward.goal }}</div>
-      <div class="lottery-grid">
-        <div v-for="user in reward.users" :key="user.uid" class="lottery-sub-list">
-          <div class="lottery-user-avatar">
-            <img :src="user.avatar_url" alt="avatar" />
-          </div>
-          <div class="lottery-user-nickname">
-            {{ user.nickname }}
+    <div v-if="timeStatus === '已开奖'">
+      <div class="lottery-title">中奖详情</div>
+      <div v-for="reward in lotteryCard.rewards" :key="reward.name" class="lottery-list">
+        <div class="reward-title">{{ reward.name }} {{ reward.win }}/{{ reward.goal }}</div>
+        <div class="lottery-grid">
+          <div v-for="user in reward.users" :key="user.uid" class="lottery-sub-list">
+            <div class="lottery-user-avatar">
+              <img :src="user.avatar_url" alt="avatar" />
+            </div>
+            <div class="lottery-user-nickname" :title="user.nickname">
+              {{ user.nickname }}
+            </div>
           </div>
         </div>
       </div>
@@ -157,28 +157,25 @@ onUpdated(() => {
 <style lang="css">
 .lottery-box {
   padding: 10px;
-  border-radius: 25px 5px 5px;
+  border-radius: 20px;
   margin-bottom: 10px;
-  background: rgb(255 255 255 / 10%);
-  box-shadow: 0 0 10px rgb(0 0 0 / 40%);
+  background: var(--box-bg-1);
 }
 
 .lottery-title {
   height: 40px;
   margin-left: 40px;
-  color: var(--content-text-3);
-  font-family: Genshin, serif;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
   font-size: 20px;
 }
 
 .lottery-list {
   padding: 5px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   margin-bottom: 10px;
-  background: rgb(0 0 0 / 40%);
-  box-shadow: 0 0 10px rgb(255 255 255 / 10%);
-  color: #faf7e8;
-  font-family: Genshin-Light, serif;
+  background: var(--box-bg-2);
 }
 
 .reward-title {
@@ -203,8 +200,7 @@ onUpdated(() => {
   align-items: center;
   border-radius: 40px;
   margin: 5px;
-  background: var(--content-bg-2);
-  font-family: Genshin-Light, serif;
+  background: var(--box-bg-3);
 }
 
 .lottery-user-avatar {
@@ -223,30 +219,27 @@ onUpdated(() => {
 }
 
 .lottery-user-nickname {
-  display: inline-block;
   overflow: hidden;
-  color: var(--content-text-3);
-  font-family: Genshin-Light, "仿宋", serif;
+  max-width: 120px;
+  color: var(--box-text-4);
   font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lottery-json {
-  border-radius: 25px 5px;
-  margin-bottom: 10px;
-  background: rgb(255 255 255 / 10%);
-  box-shadow: 0 0 10px rgb(0 0 0 / 40%);
-  color: #faf7e8;
-  font-family: Consolas, serif;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 10px;
+  background: var(--box-bg-1);
 }
 
 .jv-container {
-  border-radius: 25px 5px !important;
-  background: rgb(0 0 0 / 60%) !important;
-  box-shadow: 0 0 10px rgb(0 0 0 / 40%) !important;
+  border-radius: 10px;
+  background: var(--box-bg-2) !important;
 }
 
 .jv-key,
 .jv-array {
-  color: #f0c674 !important;
+  color: var(--box-text-4) !important;
 }
 </style>
