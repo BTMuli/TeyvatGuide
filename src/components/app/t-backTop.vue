@@ -31,7 +31,7 @@ function handleScrollTop(): void {
   cancelAnimationFrame(timer);
   timer = requestAnimationFrame(function fn() {
     if (scrollTop.value > 0) {
-      scrollTop.value -= 50;
+      scrollTop.value -= 100;
       document.body.scrollTop = document.documentElement.scrollTop = scrollTop.value;
       timer = requestAnimationFrame(fn);
     } else {
@@ -50,25 +50,23 @@ onMounted(() => {
 <style scoped>
 .back-top {
   position: fixed;
-  right: 20px;
-  bottom: 20px;
-  width: 60px;
-  height: 60px;
+  right: 10px;
+  bottom: 10px;
+  height: 40px;
   border-radius: 50%;
   transition: all 0.3s ease-in-out;
 }
 
 .back-top:hover {
   border-radius: 50%;
-  box-shadow: 0 0 10px 5px var(--back-top-shadow);
   cursor: pointer;
-  transform: scale(0.9);
+  transform: scale(1.2);
   transition: all 0.3s ease-in-out;
 }
 
 .back-top img {
-  width: 60px;
-  height: 60px;
+  width: 100%;
+  height: 100%;
   transition: all 0.3s ease-in-out;
 }
 
