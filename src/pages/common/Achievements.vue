@@ -19,7 +19,6 @@
   <div class="wrap">
     <!-- 左侧菜单 -->
     <div class="left-wrap">
-      <!-- todo 简化 -->
       <v-list
         v-for="series in seriesList"
         :key="series.id"
@@ -77,8 +76,7 @@
           </div>
           <v-list-item>
             <template #prepend>
-              <v-icon :color="achievement.isCompleted ? 'var(--tgc-green-1)' : 'var(--tgc-blue-3)'">
-                <!-- todo 图标替换 -->
+              <v-icon :color="achievement.isCompleted ? 'success' : 'var(--tgc-blue-3)'">
                 {{ achievement.isCompleted ? "mdi-check-circle" : "mdi-circle" }}
               </v-icon>
             </template>

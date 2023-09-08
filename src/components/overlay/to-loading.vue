@@ -40,6 +40,7 @@ const show = ref(true);
 const props = withDefaults(defineProps<LoadingProps>(), {
   modelValue: true,
   title: "加载中",
+  subtitle: "",
   empty: false,
 });
 
