@@ -48,13 +48,9 @@
       "active": true,
       "icon": ["icons/icon.png", "icons/icon.ico"],
       "identifier": "tauri-genshin",
-      "targets": "all",
       "windows": {
         "wix": {
           "language": "zh-CN"
-        },
-        "nsis": {
-          "languages": ["SimpChinese"]
         }
       }
     },
