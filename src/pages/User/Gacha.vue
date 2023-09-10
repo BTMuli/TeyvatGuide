@@ -139,14 +139,18 @@ async function confirmRefresh(): Promise<void> {
   loadingTitle.value = "数据获取完成，即将刷新页面";
   loadingSub.value = "";
   loading.value = false;
-  setTimeout(() => {
-    window.location.reload();
-  }, 1000);
+  await new Promise((resolve) => {
+    setTimeout(() => {
+      resolve("");
+    }, 1000);
+  });
+  window.location.reload();
 }
 
 // 获取祈愿数据并写入数据库
 async function getGachaLogs(pool: string, endId: string = "0"): Promise<void> {
   const gachaRes = await TGRequest.User.getGachaLog(authkey.value, pool, endId);
+  console.log(pool, endId, gachaRes);
   if (Array.isArray(gachaRes)) {
     const uigfList: TGApp.Plugins.UIGF.GachaItem[] = [];
     gachaRes.forEach((item) => {
@@ -173,8 +177,18 @@ async function getGachaLogs(pool: string, endId: string = "0"): Promise<void> {
     });
     await TGSqlite.mergeUIGF(account.gameUid, uigfList);
     if (gachaRes.length === 20) {
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve("");
+        }, 1000);
+      });
       await getGachaLogs(pool, gachaRes[gachaRes.length - 1].id);
     }
+  } else {
+    showSnackbar({
+      color: "error",
+      text: `[${pool}][${gachaRes.retcode}] ${gachaRes.message}`,
+    });
   }
 }
 
