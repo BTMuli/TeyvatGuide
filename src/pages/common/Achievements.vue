@@ -51,7 +51,6 @@
           margin: '10px',
           borderRadius: '10px 50px 50px 10px',
           border: '1px solid var(--common-shadow-2)',
-          color: 'var(--tgc-dark-6)',
           fontFamily: 'var(--font-title)',
           cursor: 'pointer',
           position: 'relative',
