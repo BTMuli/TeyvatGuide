@@ -46,7 +46,6 @@
     },
     "bundle": {
       "active": true,
-      "icon": ["icons/icon.png", "icons/icon.ico"],
       "identifier": "TeyvatGuide",
       "targets": ["msi"],
       "windows": {
