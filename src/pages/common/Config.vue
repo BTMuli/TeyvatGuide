@@ -21,7 +21,7 @@
         <v-btn
           size="small"
           variant="outlined"
-          @click="toOuter('https://github.com/BTMuli/Tauri.Genshin/releases/latest')"
+          @click="toOuter('https://github.com/BTMuli/TeyvatGuide/releases/latest')"
         >
           BETA
         </v-btn>

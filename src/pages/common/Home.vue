@@ -17,6 +17,7 @@ import { useHomeStore } from "../../store/modules/home";
 import { useAppStore } from "../../store/modules/app";
 // utils
 import { getBuildTime } from "../../utils/TGBuild";
+import showConfirm from "../../components/func/confirm";
 
 // store
 const appStore = useAppStore();
@@ -54,7 +55,6 @@ onMounted(async () => {
   if (!appStore.devEnv && appStore.devMode) {
     appStore.devMode = false;
   }
-  appStore.buildTime = getBuildTime();
   const showItems = homeStore.getShowValue();
   await Promise.allSettled(
     showItems.map((item) => {
@@ -71,6 +71,16 @@ onMounted(async () => {
     }),
   );
   timer.value = setInterval(readLoading, 100);
+  if (appStore.buildTime !== getBuildTime() && !appStore.devEnv) {
+    const confirm = await showConfirm({
+      title: "检测到版本更新",
+      text: "请到设置页手动更新版本，即将弹出更新说明子页面",
+    });
+    if (confirm) {
+      appStore.buildTime = getBuildTime();
+    }
+    window.open("https://app.btmuli.ink/docs/Changelogs.html");
+  }
 });
 
 function setItemRef(item: any): void {
