@@ -22,6 +22,7 @@ import { useAppStore } from "./store/modules/app";
 // utils
 import { getEmojis } from "./plugins/Mys/request/getEmojis";
 import showSnackbar from "./components/func/snackbar";
+import TGSqlite from "./plugins/Sqlite";
 
 const appStore = useAppStore();
 const isMain = ref<boolean>(false);
@@ -76,6 +77,7 @@ async function checkLoad(): Promise<void> {
     return;
   }
   await createDataDir();
+  await initData();
   appStore.loading = true;
   console.info("数据加载完成！");
 }
@@ -88,6 +90,14 @@ async function createDataDir(): Promise<void> {
     await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
   }
   console.info("数据文件夹创建完成！");
+}
+
+// 初始化数据库
+async function initData(): Promise<void> {
+  await TGSqlite.reset();
+  showSnackbar({
+    text: "已成功初始化数据库！",
+  });
 }
 </script>
 <style lang="css">

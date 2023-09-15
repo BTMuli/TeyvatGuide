@@ -221,7 +221,14 @@ onMounted(async () => {
   loadingSub.value = "正在获取系统版本";
   osVersion.value = await os.version();
   loadingSub.value = "正在获取数据库信息";
-  dbInfo.value = await TGSqlite.getAppData();
+  try {
+    dbInfo.value = await TGSqlite.getAppData();
+  } catch (e) {
+    showSnackbar({
+      text: "加载数据库错误，请重置数据库!",
+      color: "error",
+    });
+  }
   loadingSub.value = "";
   loading.value = false;
 });
@@ -385,6 +392,7 @@ async function confirmRestore(): Promise<void> {
   }
   loadingSub.value = "正在恢复祈愿数据";
   res = await restoreCookieData();
+  userStore.cookie = await TGSqlite.getCookie();
   if (!res) {
     fail.push("Cookie");
   }
