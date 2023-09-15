@@ -4,7 +4,7 @@
   "private": true,
   "version": "0.3.1",
   "author": "BTMuli <bt-muli@outlook.com>",
-  "packageManager": "pnpm@8.7.4",
+  "packageManager": "pnpm@8.7.5",
   "scripts": {
     "build": "tauri build",
     "debug": "tauri build --debug",
@@ -17,6 +17,7 @@
     "lint:style:fix": "pnpm lint:style --fix",
     "prettier": "prettier . --write",
     "tauri": "tauri",
+    "tauri:icon": "tauri icon ./public/icon.png",
     "vite:dev": "vite dev",
     "vite:build": "vite build",
     "prepare": "husky install"
