@@ -7,7 +7,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_sql::Builder::default().build())
         .setup(|_app| {
-            let _window = _app.get_window("tauri-genshin").unwrap();
+            let _window = _app.get_window("TeyvatGuide").unwrap();
             #[cfg(debug_assertions)] // only include this code on debug builds
                 _window.open_devtools(); // open the devtools on startup
             Ok(())

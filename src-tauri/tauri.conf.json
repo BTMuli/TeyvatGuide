@@ -7,7 +7,7 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "tauri-genshin",
+    "productName": "TeyvatGuide",
     "version": "0.3.1"
   },
   "tauri": {
@@ -47,7 +47,7 @@
     "bundle": {
       "active": true,
       "icon": ["icons/icon.png", "icons/icon.ico"],
-      "identifier": "tauri-genshin",
+      "identifier": "TeyvatGuide",
       "targets": ["msi", "updater"],
       "windows": {
         "wix": {
@@ -59,11 +59,11 @@
       "csp": null
     },
     "updater": {
-      "active": true,
+      "active": false,
       "dialog": true,
       "endpoints": [
-        "https://raw.fastgit.org/BTMuli/Tauri.Genshin/master/latest.json",
-        "https://raw.kgithub.com/BTMuli/Tauri.Genshin/master/latest.json"
+        "https://raw.fastgit.org/BTMuli/TeyvatGuide/master/latest.json",
+        "https://raw.kgithub.com/BTMuli/TeyvatGuide/master/latest.json"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg2MkVGRjMxQzJDQzFBNTkKUldSWkdzekNNZjh1aHJGRXBEOGtwbUxLaU1wdWNVeUJaeGhoV2ZlZ3VlYmQ0b2tYZWQwODdnTHkK"
     },
@@ -71,8 +71,8 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "Tauri.Genshin",
-        "label": "tauri-genshin",
+        "title": "Teyvat Guide",
+        "label": "TeyvatGuide",
         "width": 1600,
         "height": 900,
         "center": true,

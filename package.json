@@ -1,5 +1,5 @@
 {
-  "name": "tauri-genshin",
+  "name": "TeyvatGuide",
   "description": "A Genshin Tool build with Tauri",
   "private": true,
   "version": "0.3.1",
@@ -27,12 +27,12 @@
     "*.{ts,vue,css,yml,json,md}": "prettier --write"
   },
   "bugs": {
-    "url": "https://github.com/BTMuli/Tauri.Genshin/issues"
+    "url": "https://github.com/BTMuli/TeyvatGuide/issues"
   },
   "directories": {
     "doc": "docs"
   },
-  "homepage": "https://github.com/BTMuli/Tauri.Genshin#readme",
+  "homepage": "https://github.com/BTMuli/TeyvatGuide#readme",
   "keywords": [
     "Tauri",
     "Node",
@@ -44,7 +44,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/BTMuli/Tauri.Genshin.git"
+    "url": "https://github.com/BTMuli/TeyvatGuide.git"
   },
   "dependencies": {
     "@mdi/font": "7.2.96",

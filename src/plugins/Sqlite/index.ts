@@ -2,7 +2,7 @@
  * @file plugins Sqlite index.ts
  * @description Sqlite 数据库操作类
  * @author BTMuli<bt-muli@outlook.com>
- * @since Beta v0.3.0
+ * @since Beta v0.3.1
  */
 
 // tauri
@@ -27,7 +27,7 @@ class Sqlite {
    * @since Alpha v0.2.0
    * @private
    */
-  private readonly dbPath: string = "sqlite:tauri-genshin.db";
+  private readonly dbPath: string = "sqlite:TeyvatGuide.db";
   /**
    * @description 数据库包含的表
    * @since Alpha v0.2.3

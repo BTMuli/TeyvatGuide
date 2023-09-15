@@ -30,9 +30,9 @@ const theme = ref<string>(appStore.theme);
 onBeforeMount(async () => {
   // 获取当前窗口
   const win = window.getCurrent();
-  isMain.value = win.label === "tauri-genshin";
+  isMain.value = win.label === "TeyvatGuide";
   if (isMain.value) {
-    const title = "Tauri.Genshin v" + (await app.getVersion()) + " Beta";
+    const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
     await win.setTitle(title);
     await emojiLoad();
     await checkLoad();

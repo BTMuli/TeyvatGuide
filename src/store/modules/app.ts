@@ -2,7 +2,7 @@
  * @file store modules app.ts
  * @description App store module
  * @author BTMuli <bt-muli@outlook.com>
- * @since Beta v0.3.0
+ * @since Beta v0.3.1
  */
 
 // vue
@@ -15,7 +15,7 @@ import { path } from "@tauri-apps/api";
 // 用于存储用户数据的路径
 const userDataDir = `${await path.appLocalDataDir()}userData`;
 // 用于存放数据库的路径
-const dbDataPath = `${await path.appConfigDir()}tauri-genshin.db`;
+const dbDataPath = `${await path.appConfigDir()}TeyvatGuide.db`;
 
 export const useAppStore = defineStore(
   "app",

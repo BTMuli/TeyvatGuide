@@ -13,7 +13,7 @@ Update: 2023-09-15
 
 ![](https://img.shields.io/badge/UIAF-v1.1-orange?style=for-the-badge) ![](https://img.shields.io/badge/UIGF-v2.3-red?style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge)
 
-# Tauri.Genshin
+# Teyvat Guide
 
 基于 Tauri 的原神助手应用。
 
