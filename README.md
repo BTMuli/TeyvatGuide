@@ -7,11 +7,11 @@ Update: 2023-09-15
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2023-09-15 16:46:55`
+> 更新于 `2023-09-15 19:07:25`
 
-![](https://img.shields.io/github/last-commit/BTMuli/Tauri.Genshin?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/Tauri.Genshin/latest?include_prereleases&style=for-the-badge)
+![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
-![](https://img.shields.io/badge/UIAF-v1.1-orange?style=for-the-badge) ![](https://img.shields.io/badge/UIGF-v2.3-red?style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/Tauri.Genshin?style=for-the-badge)
+![](https://img.shields.io/badge/UIAF-v1.1-orange?style=for-the-badge) ![](https://img.shields.io/badge/UIGF-v2.3-red?style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/TeyvatGuide?style=for-the-badge)
 
 # Teyvat Guide
 
@@ -35,9 +35,15 @@ A Genshin Impact assistant app based on Tauri.
 
 ## 下载 / Download
 
+> 程序已经通过微软商店审核，可以直接在商店下载。
+
 <a href="https://apps.microsoft.com/store/detail/9NLBNNNBNSJN?launch=true&cid=BTMuli&mode=mini">
 	<img src="https://get.microsoft.com/images/zh-cn%20dark.svg" alt="download"/>
 </a>
+
+> 不推荐通过 GitHub Release 下载，但仍保留了该功能。
+
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/BTMuli/TeyvatGuide?include_prereleases&style=for-the-badge)](https://github.com/BTMuli/TeyvatGuide/releases/latest)
 
 ## 技术栈 / Tech Stack
 

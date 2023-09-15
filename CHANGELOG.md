@@ -2,12 +2,34 @@
 Author: 目棃
 Date: 2023-09-08
 Description: CHANGELOG
-Update: 2023-09-08
+Update: 2023-09-15
 ---
 
 > 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-09-08 09:45:17 `
 >
-> 更新于 `2023-09-08 09:45:17`
+> 更新于 `2023-09-15 19:43:50`
+
+## [0.3.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.1) (2023-09-15)
+
+### Feat
+
+- 正式上架微软商店 <a href="https://apps.microsoft.com/store/detail/9NLBNNNBNSJN?launch=true&cid=BTMuli&mode=mini">
+  <img src="https://get.microsoft.com/images/zh-cn%20dark.svg" alt="download"/>
+  </a>
+- 首页：检测到版本更新时，会弹出更新页面
+
+### Fix
+
+- 修复祈愿记录获取失败的问题 [`#38`](https://github.com/BTMuli/TeyvatGuide/issues/38)
+- 修复应用初始化加载数据库失败的问题 [`#40`](https://github.com/BTMuli/TeyvatGuide/issues/40)
+- 修复 Github action 构建失败的问题
+
+### Change
+
+- 应用：关闭 Tauri 自带的自动更新功能，依赖微软商店的更新机制
+- 应用：更改应用名称，`Tauri.Genshin` -> `Teyvat Guide`
+
+FullCommits: [`v0.3.0...v0.3.1`](https://github.com/BTMuli/TeyvatGuide/compare/v0.3.0...v0.3.1)
 
 ## [0.3.0](https://github.com/BTMuli/Tauri.Genshin/releases/v0.3.0) (2023-09-08)
 
