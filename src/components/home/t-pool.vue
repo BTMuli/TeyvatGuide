@@ -175,7 +175,7 @@ async function toOuter(url: string, title: string): Promise<void> {
     showBar.value = true;
     return;
   }
-  createTGWindow(url, "祈愿", title, 1200, 800, true, true);
+  createTGWindow(url, "Sub_window", `Pool_${title}`, 1200, 800, true, true);
 }
 
 function toPost(pool: TGApp.Plugins.Mys.Gacha.RenderCard): void {
@@ -185,7 +185,7 @@ function toPost(pool: TGApp.Plugins.Mys.Gacha.RenderCard): void {
       post_id: pool.postId.toString(),
     },
   }).href;
-  createTGWindow(path, "限时祈愿", pool.title, 960, 720, false, false);
+  createTGWindow(path, "Sub_window", `Post_${pool.postId} ${pool.title}`, 960, 720, false, false);
 }
 
 onUnmounted(() => {

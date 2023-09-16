@@ -231,7 +231,14 @@ async function selectSeries(index: number): Promise<void> {
 
 // 打开图片
 function openImg(): void {
-  createTGWindow(getCardImg.value.profile, "nameCard", getCardInfo.value.name, 840, 400, false);
+  createTGWindow(
+    getCardImg.value.profile,
+    "Sub_window",
+    `Namecard_${getCardInfo.value.name}`,
+    840,
+    400,
+    false,
+  );
 }
 
 async function searchCard(): Promise<void> {

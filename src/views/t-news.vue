@@ -406,7 +406,7 @@ async function toPost(item: TGApp.Plugins.Mys.News.RenderCard | string): Promise
         post_id: item,
       },
     }).href;
-    createTGWindow(path, "帖子-Dev", item, 960, 720, false, false);
+    createTGWindow(path, "Sub_window", `Post_${item}`, 960, 720, false, false);
   } else {
     const path = router.resolve({
       name: "帖子详情",
@@ -414,7 +414,7 @@ async function toPost(item: TGApp.Plugins.Mys.News.RenderCard | string): Promise
         post_id: item.postId.toString(),
       },
     }).href;
-    createTGWindow(path, "帖子", item.title, 960, 720, false, false);
+    createTGWindow(path, "Sub_window", `Post_${item.postId} ${item.title}`, 960, 720, false, false);
   }
 }
 
@@ -426,7 +426,7 @@ async function toJson(item: TGApp.Plugins.Mys.News.RenderCard | string): Promise
         post_id: item,
       },
     }).href;
-    createTGWindow(path, "帖子-JSON-Dev", `${item}-JSON`, 960, 720, false, false);
+    createTGWindow(path, "Dev_JSON", `Post_${item}_JSON`, 960, 720, false, false);
   } else {
     const path = router.resolve({
       name: "帖子详情（JSON）",
@@ -434,7 +434,15 @@ async function toJson(item: TGApp.Plugins.Mys.News.RenderCard | string): Promise
         post_id: item.postId.toString(),
       },
     }).href;
-    createTGWindow(path, "帖子-JSON", `${item.title}-JSON`, 960, 720, false, false);
+    createTGWindow(
+      path,
+      "Dev_JSON",
+      `Post_${item.postId}_JSON ${item.title}`,
+      960,
+      720,
+      false,
+      false,
+    );
   }
 }
 

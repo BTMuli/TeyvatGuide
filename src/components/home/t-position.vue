@@ -116,7 +116,7 @@ async function toPost(card: TGApp.Plugins.Mys.Position.RenderCard): Promise<void
     },
   }).href;
   // 打开新窗口
-  createTGWindow(path, "近期活动", card.title, 960, 720, false, false);
+  createTGWindow(path, "Sub_window", `Post_${card.postId} ${card.title}`, 960, 720, false, false);
 }
 
 onUnmounted(() => {

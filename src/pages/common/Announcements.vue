@@ -32,7 +32,12 @@
               {{ item.startTime.split(" ")[0] }}~{{ item.endTime.split(" ")[0] }}
             </v-card-subtitle>
             <v-card-subtitle v-show="appStore.devMode"> id: {{ item.id }} </v-card-subtitle>
-            <v-btn v-show="appStore.devMode" class="anno-dev-btn" @click="toJson(item)">
+            <v-btn
+              v-show="appStore.devMode"
+              variant="outlined"
+              class="anno-dev-btn"
+              @click="toJson(item)"
+            >
               <img src="../../assets/icons/arrow-right.svg" alt="right" />
               <span>查看数据</span>
             </v-btn>
@@ -58,7 +63,12 @@
               {{ item.startTime.split(" ")[0] }}~{{ item.endTime.split(" ")[0] }}
             </v-card-subtitle>
             <v-card-subtitle v-show="appStore.devMode"> id: {{ item.id }} </v-card-subtitle>
-            <v-btn v-show="appStore.devMode" class="anno-dev-btn" @click="toJson(item)">
+            <v-btn
+              v-show="appStore.devMode"
+              variant="outlined"
+              class="anno-dev-btn"
+              @click="toJson(item)"
+            >
               <img src="../../assets/icons/arrow-right.svg" alt="right" />
               <span>查看数据</span>
             </v-btn>
@@ -128,7 +138,7 @@ async function toPost(item: TGApp.App.Announcement.ListCard): Promise<void> {
       anno_id: item.id,
     },
   }).href;
-  createTGWindow(path, "游戏内公告", item.title, 960, 720, false, false);
+  createTGWindow(path, "Sub_window", `Anno_${item.id} ${item.title}`, 960, 720, false, false);
 }
 
 async function toJson(item: TGApp.App.Announcement.ListCard): Promise<void> {
@@ -138,7 +148,7 @@ async function toJson(item: TGApp.App.Announcement.ListCard): Promise<void> {
       anno_id: item.id,
     },
   }).href;
-  createTGWindow(path, "游戏内公告-JSON", item.title, 960, 720, false, false);
+  createTGWindow(path, "Dev_JSON", `Anno_${item.id}_JSON ${item.title}`, 960, 720, false, false);
 }
 </script>
 
@@ -216,18 +226,19 @@ async function toJson(item: TGApp.App.Announcement.ListCard): Promise<void> {
 }
 
 .anno-dev-btn {
-  background: var(--box-bg-t-1);
-  color: var(--btn-text);
+  border: 1px solid var(--common-shadow-4);
+  border-radius: 5px;
+  margin-left: auto;
   font-family: var(--font-title);
 }
 
 .anno-dev-btn img {
   width: 20px;
   height: 20px;
-  padding: 2px;
+  padding: 3px;
   border-radius: 50%;
   margin-right: 5px;
-  background: var(--common-shadow-t-4);
+  background: var(--common-shadow-4);
   object-fit: cover;
 }
 </style>

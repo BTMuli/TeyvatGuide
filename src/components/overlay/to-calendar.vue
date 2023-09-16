@@ -84,7 +84,7 @@ function toDetail(item: TGApp.App.Calendar.Item): void {
     return;
   }
   const url = Mys.Api.Obc.replace("{contentId}", item.contentId.toString());
-  createTGWindow(url, "素材详情", item.name, 1200, 800, true);
+  createTGWindow(url, "Sub_window", `Content_${item.contentId} ${item.name}`, 1200, 800, true);
 }
 </script>
 <style scoped>

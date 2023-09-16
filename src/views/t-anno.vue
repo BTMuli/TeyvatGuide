@@ -1,4 +1,5 @@
 <!-- eslint-disable vue/no-v-html -->
+<!-- todo 优化显示样式 -->
 <template>
   <TSwitchTheme />
   <TShareBtn
@@ -66,14 +67,14 @@ onMounted(async () => {
     loadingTitle.value = "正在渲染数据...";
     annoHtml.value = await TGUtils.Anno.parseContent(annoData.value.content);
     if (annoData.value.banner !== "") annoBanner.value = await saveImgLocal(annoData.value.banner);
-    annoTitle.value = `【公告】${annoId}-${annoData.value.title}`;
-    await appWindow.setTitle(annoTitle.value);
+    annoTitle.value = `Anno_${annoId}`;
+    await appWindow.setTitle(`Anno_${annoId} ${annoData.value.title}`);
     annoRef.value = <HTMLElement>document.querySelector(".anno-body");
   } catch (error) {
     console.error(error);
     loadingEmpty.value = true;
     loadingTitle.value = "公告不存在或解析失败";
-    await appWindow.setTitle(`【公告】${annoId}-公告不存在或解析失败`);
+    await appWindow.setTitle(`Anno_${annoId} Parsing Error`);
     return;
   }
   setTimeout(() => {

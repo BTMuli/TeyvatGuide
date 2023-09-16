@@ -146,7 +146,7 @@ function toOuter(cardName: string, cardId: number): void {
     return;
   }
   const url = Mys.Api.Obc.replace("{contentId}", cardId.toString());
-  createTGWindow(url, "GCG", cardName, 1200, 800, true);
+  createTGWindow(url, "Sub_window", `Content_${cardId} ${cardName}`, 1200, 800, true);
 }
 
 async function searchCard(): Promise<void> {

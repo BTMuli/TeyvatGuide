@@ -1,4 +1,5 @@
 <!-- eslint-disable vue/no-v-html -->
+<!-- todo 添加更多信息 -->
 <template>
   <TSwitchTheme />
   <TShareBtn
@@ -71,15 +72,15 @@ onMounted(async () => {
       created: new Date(postData.post.created_at * 1000).toLocaleString().replace(/\//g, "-"),
       updated: new Date(postData.post.updated_at * 1000).toLocaleString().replace(/\//g, "-"),
     };
-    shareTitle.value = `【帖子】${postId}-${postData.post.subject}`;
+    shareTitle.value = `Post_${postId}`;
     postRef.value = <HTMLElement>document.querySelector(".mys-post-body");
-    await appWindow.setTitle(shareTitle.value);
+    await appWindow.setTitle(`Post_${postId} ${postData.post.subject}`);
   } catch (error) {
     console.error(error);
     loadingEmpty.value = true;
     loadingTitle.value = "帖子不存在或解析失败";
     loadingSub.value = error instanceof Error ? error.message : <string>error;
-    await appWindow.setTitle(`【帖子】${postId}-解析失败`);
+    await appWindow.setTitle(`Post_${postId} Parsing Error`);
     return;
   }
   setTimeout(() => {
