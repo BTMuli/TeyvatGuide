@@ -2,7 +2,7 @@
  * @file plugins Mys utils parsePost.ts
  * @description 用于解析Mys数据的工具
  * @author BTMuli <bt-muli@outlook.com>
- * @since Beta v0.3.0
+ * @since Beta v0.3.2
  */
 
 // third party
@@ -194,7 +194,7 @@ function parseText(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLSpanElem
       return LinkTextParser(data);
     }
   }
-  if (data.insert.startsWith("_")) {
+  if (data.insert.startsWith("_(") && data.insert.endsWith(")")) {
     return emojiParser(data);
   }
   // 添加 class
@@ -538,7 +538,7 @@ function parseMention(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLAncho
 
 /**
  * @description 解析 Emoji
- * @since Beta v0.3.0
+ * @since Beta v0.3.2
  * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLSpanElement} 解析后的 Emoji
  */
@@ -561,6 +561,8 @@ function emojiParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLImageE
   const img = document.createElement("img");
   img.classList.add("mys-post-emoji");
   img.src = emoji;
+  img.alt = emojiName;
+  img.title = emojiName;
   // 获取图片地址
   return img;
 }
