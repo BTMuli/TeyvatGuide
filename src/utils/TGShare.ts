@@ -2,13 +2,15 @@
  * @file utils TGShare.ts
  * @description 生成分享截图并保存到本地
  * @author BTMuli <bt-muli@outlook.com>
- * @since Beta v0.3.0
+ * @since Beta v0.3.2
  */
 
 // third party
 import html2canvas from "html2canvas";
 // tauri
 import { dialog, fs, http, path } from "@tauri-apps/api";
+// utils
+import showSnackbar from "../components/func/snackbar";
 
 /**
  * @description 保存图片-canvas
@@ -106,5 +108,34 @@ export async function generateShareImg(
     y: -15,
   };
   const canvasData = await html2canvas(element, opts);
-  await saveCanvasImg(canvasData, fileName);
+  try {
+    await copyToClipboard(canvasData);
+    showSnackbar({
+      text: `已将 ${fileName} 复制到剪贴板`,
+    });
+  } catch (e) {
+    await saveCanvasImg(canvasData, fileName);
+  }
+}
+
+/**
+ * @description 复制到剪贴板
+ * @since Beta v0.3.2
+ * @param {HTMLCanvasElement} canvas - canvas元素
+ * @returns {Promise<void>} 无返回值
+ */
+async function copyToClipboard(canvas: HTMLCanvasElement): Promise<void> {
+  const buffer = new Uint8Array(
+    atob(canvas.toDataURL("image/png").split(",")[1])
+      .split("")
+      .map((item) => item.charCodeAt(0)),
+  );
+  const blob = new Blob([buffer], { type: "image/png" });
+  const url = URL.createObjectURL(blob);
+  await navigator.clipboard.write([
+    new ClipboardItem({
+      [blob.type]: blob,
+    }),
+  ]);
+  URL.revokeObjectURL(url);
 }
