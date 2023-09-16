@@ -84,8 +84,6 @@ async function checkLoad(): Promise<void> {
 
 // 创建数据文件夹
 async function createDataDir(): Promise<void> {
-  console.info("开始创建数据文件夹...");
-  // 如果不存在则创建
   if (!(await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData }))) {
     await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
   }
@@ -98,6 +96,7 @@ async function initData(): Promise<void> {
   showSnackbar({
     text: "已成功初始化数据库！",
   });
+  console.info("已成功初始化数据库！");
 }
 </script>
 <style lang="css">
