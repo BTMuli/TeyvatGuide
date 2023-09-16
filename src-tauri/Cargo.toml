@@ -1,6 +1,6 @@
 [package]
 name = "TeyvatGuide"
-version = "0.3.1"
+version = "0.3.2"
 description = "A Genshin Tool build with Tauri"
 authors = ["BTMuli<bt-muli@outlook.com>"]
 license = "MIT"
