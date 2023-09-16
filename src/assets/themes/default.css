@@ -2,19 +2,19 @@
  * @file assets themes default.css
  * @description 主题样式文件-默认（浅色）主题
  * @author BTMuli <bt-muli@outlook.com>
- * @since Beta v0.3.0
+ * @since Beta v0.3.2
  */
 
 /* default(light) theme */
 html.default {
   /* app container */
-  --app-page-bg: #ffffff;
+  --app-page-bg: #f9f6f2;
   --app-page-content: #2f2f2f;
   --app-side-bg: #f2f2f2;
   --app-side-content: #222222;
 
   /* box container */
-  --box-bg-1: #efefef;
+  --box-bg-1: #f2f9f6;
   --box-bg-2: #f6f8fa;
   --box-bg-3: #dee4e9;
   --box-bg-4: #f5f5f5;

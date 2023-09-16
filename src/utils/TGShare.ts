@@ -59,7 +59,7 @@ export async function saveImgLocal(url: string): Promise<string> {
 
 /**
  * @description 获取分享截图背景色
- * @since Beta v0.3.0
+ * @since Beta v0.3.2
  * @returns {string} 背景色
  */
 function getShareImgBgColor(): string {
@@ -68,9 +68,9 @@ function getShareImgBgColor(): string {
     theme = JSON.parse(theme).theme;
   }
   if (theme === "dark") {
-    return "#000000";
+    return "#1e1e1e";
   } else {
-    return "#ffffff";
+    return "#f9f6f2";
   }
 }
 
