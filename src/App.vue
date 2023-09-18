@@ -16,7 +16,7 @@ import { onBeforeMount, onMounted, ref } from "vue";
 import TSidebar from "./components/app/t-sidebar.vue";
 import TBackTop from "./components/app/t-backTop.vue";
 // tauri
-import { app, event, fs, window } from "@tauri-apps/api";
+import { app, event, fs, tauri, window } from "@tauri-apps/api";
 // store
 import { useAppStore } from "./store/modules/app";
 // utils
@@ -43,7 +43,10 @@ onBeforeMount(async () => {
 onMounted(async () => {
   // 获取当前主题
   document.documentElement.className = theme.value;
+  await tauri.invoke("register_deep_link");
+  console.info("已注册深度链接！");
   await listenOnTheme();
+  await getDeepLink();
 });
 
 // 监听主题变化
@@ -92,11 +95,23 @@ async function createDataDir(): Promise<void> {
 
 // 初始化数据库
 async function initData(): Promise<void> {
+  if (appStore.devEnv) {
+    console.info("开发环境，跳过数据库初始化！");
+    return;
+  }
   await TGSqlite.reset();
   showSnackbar({
     text: "已成功初始化数据库！",
   });
   console.info("已成功初始化数据库！");
+}
+
+async function getDeepLink(): Promise<void> {
+  console.info("正在监听深度链接！");
+  await event.listen("test_deep_link", (e) => {
+    console.log("深度链接已触发！");
+    console.log(e.payload);
+  });
 }
 </script>
 <style lang="css">
