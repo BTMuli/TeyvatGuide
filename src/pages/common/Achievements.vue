@@ -105,8 +105,10 @@
 <script lang="ts" setup>
 // vue
 import { computed, onBeforeMount, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import showSnackbar from "../../components/func/snackbar";
+import showConfirm from "../../components/func/confirm";
 // tauri
 import { dialog, fs } from "@tauri-apps/api";
 // Store
@@ -153,6 +155,10 @@ const translateY = ref<string>("0px");
 // render
 const search = ref<string>("");
 
+// route
+const route = useRoute();
+const router = useRouter();
+
 onBeforeMount(async () => {
   const { total, fin } = await TGSqlite.getAchievementsOverview();
   achievementsStore.flushData(total, fin);
@@ -169,6 +175,9 @@ onMounted(async () => {
   loadingTitle.value = "正在获取成就数据";
   selectedAchievement.value = await TGSqlite.getAchievements();
   loading.value = false;
+  if (route.query.app) {
+    await handleImportOuter(<string>route.query.app);
+  }
 });
 
 function handleScroll(e: Event): void {
@@ -335,6 +344,47 @@ async function exportJson(): Promise<void> {
 
 function getIcon(series: number): string | undefined {
   return AppAchievementSeriesData.find((item) => item.id === series)?.icon;
+}
+
+// 处理外部导入
+async function handleImportOuter(app: string): Promise<void> {
+  const confirm = await showConfirm({
+    title: "是否导入祈愿数据？",
+    text: `来源APP：${app}`,
+  });
+  if (confirm === true) {
+    // 读取 剪贴板
+    const clipboard = await window.navigator.clipboard.readText();
+    let data: TGApp.Plugins.UIAF.Achievement[];
+    // 里面是完整的 uiaf 数据
+    try {
+      data = JSON.parse(clipboard).list;
+      loadingTitle.value = "正在导入数据";
+      loading.value = true;
+      await TGSqlite.mergeUIAF(data);
+      loading.value = false;
+      showSnackbar({
+        color: "success",
+        text: "导入成功，即将刷新页面",
+      });
+    } catch (e) {
+      console.error(e);
+      showSnackbar({
+        color: "error",
+        text: "读取 UIAF 数据失败，请检查文件是否符合规范",
+      });
+    } finally {
+      setTimeout(async () => {
+        await router.push("/achievements");
+        window.location.reload();
+      }, 1500);
+    }
+  } else {
+    showSnackbar({
+      color: "warn",
+      text: "已取消导入",
+    });
+  }
 }
 </script>
 

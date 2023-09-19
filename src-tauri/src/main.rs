@@ -10,7 +10,7 @@ async fn register_deep_link(app_handle: tauri::AppHandle) {
         "teyvatguide",
         move |request| {
             dbg!(&request);
-            app_handle.emit_all("test_deep_link", request).unwrap();
+            app_handle.emit_all("active_deep_link", request).unwrap();
         },
     )
     .unwrap();
@@ -20,13 +20,13 @@ fn main() {
     tauri_plugin_deep_link::prepare("teyvatguide");
     tauri::Builder::default()
         .plugin(tauri_plugin_sql::Builder::default().build())
+        .invoke_handler(tauri::generate_handler![register_deep_link])
         .setup(|_app| {
             let _window = _app.get_window("TeyvatGuide").unwrap();
             #[cfg(debug_assertions)] // only include this code on debug builds
                 _window.open_devtools(); // open the devtools on startup
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![register_deep_link])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

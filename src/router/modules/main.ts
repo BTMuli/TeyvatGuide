@@ -2,7 +2,7 @@
  * @file router modules main.ts
  * @description 主路由模块
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.2
+ * @since Beta v0.3.2
  */
 
 // 信息展示
@@ -27,7 +27,7 @@ const mainRoutes = [
     component: Test,
   },
   {
-    path: "/achievements",
+    path: "/achievements/:app?",
     name: "成就",
     component: Achievements,
   },

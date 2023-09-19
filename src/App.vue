@@ -13,10 +13,11 @@
 <script lang="ts" setup>
 // vue
 import { onBeforeMount, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import TSidebar from "./components/app/t-sidebar.vue";
 import TBackTop from "./components/app/t-backTop.vue";
 // tauri
-import { app, event, fs, tauri, window } from "@tauri-apps/api";
+import { app, event, fs, tauri, window as TauriWindow } from "@tauri-apps/api";
 // store
 import { useAppStore } from "./store/modules/app";
 // utils
@@ -27,13 +28,16 @@ import TGSqlite from "./plugins/Sqlite";
 const appStore = useAppStore();
 const isMain = ref<boolean>(false);
 const theme = ref<string>(appStore.theme);
+const router = useRouter();
 
 onBeforeMount(async () => {
   // 获取当前窗口
-  const win = window.getCurrent();
+  const win = TauriWindow.getCurrent();
   isMain.value = win.label === "TeyvatGuide";
   if (isMain.value) {
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
+    await tauri.invoke("register_deep_link");
+    await getDeepLink();
     await win.setTitle(title);
     await emojiLoad();
     await checkLoad();
@@ -43,10 +47,7 @@ onBeforeMount(async () => {
 onMounted(async () => {
   // 获取当前主题
   document.documentElement.className = theme.value;
-  await tauri.invoke("register_deep_link");
-  console.info("已注册深度链接！");
   await listenOnTheme();
-  await getDeepLink();
 });
 
 // 监听主题变化
@@ -107,10 +108,35 @@ async function initData(): Promise<void> {
 }
 
 async function getDeepLink(): Promise<void> {
-  console.info("正在监听深度链接！");
-  await event.listen("test_deep_link", (e) => {
-    console.log("深度链接已触发！");
-    console.log(e.payload);
+  await event.listen("active_deep_link", (e) => {
+    new TauriWindow.WebviewWindow("TeyvatGuide")
+      .setFocus()
+      .then(async () => {
+        // 导入格式: teyvatgiude://import_uigf?app=appName
+        // 跳转格式: localhost:4000/achievements/?app=appName
+        if ((<string>e.payload).startsWith("teyvatguide://import_uigf")) {
+          const param = (<string>e.payload).split("teyvatguide://import_uigf/?")[1];
+          let appName = "";
+          if (param) {
+            appName = param.split("app=")[1];
+          }
+          if (appName === "") {
+            await router.push("/achievements");
+          } else {
+            await router.push("/achievements/?app=" + appName);
+          }
+          window.location.reload();
+        } else {
+          showSnackbar({
+            text: "无效的 deep link！",
+            color: "error",
+            timeout: 3000,
+          });
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   });
 }
 </script>
