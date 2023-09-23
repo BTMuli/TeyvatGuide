@@ -125,7 +125,6 @@ async function getDeepLink(): Promise<void> {
           } else {
             await router.push("/achievements/?app=" + appName);
           }
-          window.location.reload();
         } else {
           showSnackbar({
             text: "无效的 deep link！",

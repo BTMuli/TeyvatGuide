@@ -376,7 +376,6 @@ async function handleImportOuter(app: string): Promise<void> {
     } finally {
       setTimeout(async () => {
         await router.push("/achievements");
-        window.location.reload();
       }, 1500);
     }
   } else {
