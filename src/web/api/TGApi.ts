@@ -2,12 +2,11 @@
  * @file web api TGApi.ts
  * @description 应用用到的 API
  * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.2
+ * @since Beta v0.3.2
  */
 
 import { BBSUserInfoApi } from "./BBS";
 import { ENKA_API } from "./ENKA";
-import { Hk4eAnnoListApi, Hk4eAnnoContentApi, Hk4eAnnoQuery } from "./Hk4e";
 import { PassportTokenApi, PassportCookieTokenApi, PassportVerifyApi } from "./Passport";
 import {
   TakumiTokensApi,
@@ -24,9 +23,6 @@ import {
 
 // 应用 API
 const TGApi = {
-  GameAnnoList: Hk4eAnnoListApi, // 游戏公告 API
-  GameAnnoContent: Hk4eAnnoContentApi, // 游戏公告内容 API
-  GameAnnoQuery: Hk4eAnnoQuery, // 游戏公告 Query
   GameEnka: ENKA_API, // 游戏 ENKA API
   GameTokens: {
     getTokens: TakumiTokensApi, // 根据 login_ticket 获取游戏 Token
