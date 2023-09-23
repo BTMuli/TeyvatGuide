@@ -85,7 +85,7 @@
   },
   {
     "id": 1108,
-    "contentId": -1,
+    "contentId": 7019,
     "name": "七七",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/七七.webp",
@@ -276,6 +276,18 @@
     }
   },
   {
+    "id": 1309,
+    "contentId": -1,
+    "name": "迪希雅",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/迪希雅.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_PYRO": "火元素",
+      "GCG_TAG_WEAPON_CLAYMORE": "双手剑",
+      "GCG_TAG_NATION_SUMERU": "须弥"
+    }
+  },
+  {
     "id": 1401,
     "contentId": 5365,
     "name": "菲谢尔",
@@ -373,7 +385,7 @@
   },
   {
     "id": 1409,
-    "contentId": -1,
+    "contentId": 7018,
     "name": "丽莎",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/丽莎.webp",
@@ -444,6 +456,17 @@
     }
   },
   {
+    "id": 1506,
+    "contentId": -1,
+    "name": "流浪者",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/流浪者.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_ANEMO": "风元素",
+      "GCG_TAG_WEAPON_CATALYST": "法器"
+    }
+  },
+  {
     "id": 1601,
     "contentId": 5359,
     "name": "凝光",
@@ -481,7 +504,7 @@
   },
   {
     "id": 1604,
-    "contentId": -1,
+    "contentId": 7020,
     "name": "阿贝多",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/阿贝多.webp",
@@ -537,6 +560,18 @@
       "GCG_TAG_ELEMENT_DENDRO": "草元素",
       "GCG_TAG_WEAPON_CATALYST": "法器",
       "GCG_TAG_NATION_SUMERU": "须弥"
+    }
+  },
+  {
+    "id": 1704,
+    "contentId": -1,
+    "name": "瑶瑶",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/瑶瑶.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_DENDRO": "草元素",
+      "GCG_TAG_WEAPON_POLE": "长柄武器",
+      "GCG_TAG_NATION_LIYUE": "璃月"
     }
   },
   {
@@ -1014,7 +1049,7 @@
   },
   {
     "id": 211081,
-    "contentId": -1,
+    "contentId": 500042,
     "name": "起死回骸",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/起死回骸.webp",
@@ -1189,6 +1224,17 @@
     }
   },
   {
+    "id": 213091,
+    "contentId": -1,
+    "name": "崇诚之真",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/崇诚之真.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
     "id": 214011,
     "contentId": 5504,
     "name": "噬星魔鸦",
@@ -1278,7 +1324,7 @@
   },
   {
     "id": 214091,
-    "contentId": -1,
+    "contentId": 500047,
     "name": "脉冲的魔女",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/脉冲的魔女.webp",
@@ -1342,6 +1388,17 @@
     }
   },
   {
+    "id": 215061,
+    "contentId": -1,
+    "name": "梦迹一风",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/梦迹一风.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
     "id": 216011,
     "contentId": 5510,
     "name": "储之千日，用之一刻",
@@ -1376,7 +1433,7 @@
   },
   {
     "id": 216041,
-    "contentId": -1,
+    "contentId": 500041,
     "name": "神性之陨",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/神性之陨.webp",
@@ -1424,6 +1481,17 @@
     "name": "心识蕴藏之种",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/心识蕴藏之种.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
+    "id": 217041,
+    "contentId": -1,
+    "name": "慈惠仁心",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/慈惠仁心.webp",
     "tags": {
       "GCG_TAG_TALENT": "天赋",
       "GCG_TAG_SLOWLY": "战斗行动"
@@ -1639,7 +1707,7 @@
   },
   {
     "id": 311206,
-    "contentId": -1,
+    "contentId": 500045,
     "name": "王下近侍",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/王下近侍.webp",
@@ -1753,6 +1821,17 @@
     "name": "薙草之稻光",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/薙草之稻光.webp",
+    "tags": {
+      "GCG_TAG_WEAPON": "武器",
+      "GCG_TAG_WEAPON_POLE": "长柄武器"
+    }
+  },
+  {
+    "id": 311406,
+    "contentId": -1,
+    "name": "贯月矢",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/贯月矢.webp",
     "tags": {
       "GCG_TAG_WEAPON": "武器",
       "GCG_TAG_WEAPON_POLE": "长柄武器"
@@ -1949,6 +2028,16 @@
     "name": "追忆之注连",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/追忆之注连.webp",
+    "tags": {
+      "GCG_TAG_ARTIFACT": "圣遗物"
+    }
+  },
+  {
+    "id": 312015,
+    "contentId": -1,
+    "name": "海祇之冠",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/海祇之冠.webp",
     "tags": {
       "GCG_TAG_ARTIFACT": "圣遗物"
     }
@@ -2215,10 +2304,20 @@
   },
   {
     "id": 321013,
-    "contentId": -1,
+    "contentId": 500046,
     "name": "黄金屋",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/黄金屋.webp",
+    "tags": {
+      "GCG_TAG_PLACE": "场地"
+    }
+  },
+  {
+    "id": 321014,
+    "contentId": -1,
+    "name": "化城郭",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/化城郭.webp",
     "tags": {
       "GCG_TAG_PLACE": "场地"
     }
@@ -2405,10 +2504,20 @@
   },
   {
     "id": 322019,
-    "contentId": -1,
+    "contentId": 500068,
     "name": "塞塔蕾",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/塞塔蕾.webp",
+    "tags": {
+      "GCG_TAG_ALLY": "伙伴"
+    }
+  },
+  {
+    "id": 322020,
+    "contentId": -1,
+    "name": "弥生七月",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/弥生七月.webp",
     "tags": {
       "GCG_TAG_ALLY": "伙伴"
     }
@@ -2475,10 +2584,20 @@
   },
   {
     "id": 330003,
-    "contentId": -1,
+    "contentId": 500044,
     "name": "愉舞欢游",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/愉舞欢游.webp",
+    "tags": {
+      "GCG_TAG_LEGEND": "秘传"
+    }
+  },
+  {
+    "id": 330004,
+    "contentId": -1,
+    "name": "自由的新风",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/自由的新风.webp",
     "tags": {
       "GCG_TAG_LEGEND": "秘传"
     }
@@ -2827,10 +2946,18 @@
   },
   {
     "id": 332022,
-    "contentId": -1,
+    "contentId": 500043,
     "name": "藏锋何处",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/藏锋何处.webp",
+    "tags": null
+  },
+  {
+    "id": 332023,
+    "contentId": -1,
+    "name": "拳力斗技！",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/拳力斗技！.webp",
     "tags": null
   },
   {
