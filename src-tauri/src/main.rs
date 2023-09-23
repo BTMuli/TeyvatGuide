@@ -29,6 +29,24 @@ async fn register_deep_link(app_handle: tauri::AppHandle) {
 fn main() {
     tauri_plugin_deep_link::prepare("teyvatguide");
     tauri::Builder::default()
+        .on_window_event(|event| {
+            match event.event() {
+                tauri::WindowEvent::CloseRequested { api, .. } => {
+                    api.prevent_close();
+                    let window = event.window().clone();
+                    if window.label() == "TeyvatGuide" {
+                        // 子窗口 label 的数组
+                        const SUB_WINDOW_LABELS: [&str; 2] = ["Sub_window", "Dev_JSON"];
+                        for label in SUB_WINDOW_LABELS.iter() {
+                            let sub = window.get_window(label).unwrap();
+                            sub.close().unwrap();
+                        }
+                    }
+                    window.close().unwrap();
+                },
+                _ => {}
+            }
+        })
         .plugin(tauri_plugin_sql::Builder::default().build())
         .invoke_handler(tauri::generate_handler![register_deep_link])
         .setup(|_app| {
