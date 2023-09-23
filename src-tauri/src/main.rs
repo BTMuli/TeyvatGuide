@@ -3,9 +3,16 @@
 
 use tauri::Manager;
 
+// 放一个常数，用来判断是否注册deep link
+static mut DEEP_LINK_REGISTERED: bool = false;
+
 #[tauri::command]
-// todo 后续优化
 async fn register_deep_link(app_handle: tauri::AppHandle) {
+    unsafe {
+        if DEEP_LINK_REGISTERED {
+            return;
+        }
+    }
     tauri_plugin_deep_link::register(
         "teyvatguide",
         move |request| {
@@ -14,6 +21,9 @@ async fn register_deep_link(app_handle: tauri::AppHandle) {
         },
     )
     .unwrap();
+    unsafe {
+        DEEP_LINK_REGISTERED = true;
+    }
 }
 
 fn main() {

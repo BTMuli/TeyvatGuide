@@ -112,7 +112,7 @@ async function getDeepLink(): Promise<void> {
     new TauriWindow.WebviewWindow("TeyvatGuide")
       .setFocus()
       .then(async () => {
-        // 导入格式: teyvatgiude://import_uigf?app=appName
+        // 导入格式: teyvatguide://import_uigf?app=appName
         // 跳转格式: localhost:4000/achievements/?app=appName
         if ((<string>e.payload).startsWith("teyvatguide://import_uigf")) {
           const param = (<string>e.payload).split("teyvatguide://import_uigf/?")[1];
