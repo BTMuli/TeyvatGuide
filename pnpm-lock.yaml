@@ -36,8 +36,8 @@ dependencies:
     specifier: ^3.4.1
     version: 3.4.1(vue@3.3.4)
   tauri-plugin-sql-api:
-    specifier: https://github.com/tauri-apps/tauri-plugin-sql#v1
-    version: git@github.com+tauri-apps/tauri-plugin-sql/51e39b0b6ba542ffc6af1fa438933fdc1ae265a0
+    specifier: github:tauri-apps/tauri-plugin-sql#v1
+    version: github.com/tauri-apps/tauri-plugin-sql/51e39b0b6ba542ffc6af1fa438933fdc1ae265a0
   vue:
     specifier: ^3.3.4
     version: 3.3.4
@@ -5074,8 +5074,8 @@ packages:
       tslib: 2.3.0
     dev: false
 
-  git@github.com+tauri-apps/tauri-plugin-sql/51e39b0b6ba542ffc6af1fa438933fdc1ae265a0:
-    resolution: {commit: 51e39b0b6ba542ffc6af1fa438933fdc1ae265a0, repo: git@github.com:tauri-apps/tauri-plugin-sql.git, type: git}
+  github.com/tauri-apps/tauri-plugin-sql/51e39b0b6ba542ffc6af1fa438933fdc1ae265a0:
+    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-sql/tar.gz/51e39b0b6ba542ffc6af1fa438933fdc1ae265a0}
     name: tauri-plugin-sql-api
     version: 0.0.0
     dependencies:

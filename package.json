@@ -58,7 +58,7 @@
     "pinia": "^2.1.6",
     "pinia-plugin-persistedstate": "^3.2.0",
     "qrcode.vue": "^3.4.1",
-    "tauri-plugin-sql-api": "https://github.com/tauri-apps/tauri-plugin-sql#v1",
+    "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#v1",
     "vue": "^3.3.4",
     "vue-echarts": "^6.6.1",
     "vue-json-viewer": "^3.0.4",
