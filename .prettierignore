@@ -9,3 +9,5 @@ src-tauri/target
 TGAssistant
 # Pnpm
 pnpm-lock.yaml
+# Qodana
+qodana.yaml
