@@ -90,15 +90,6 @@
     "profile": "/source/nameCard/profile/蒙德·祝愿.webp"
   },
   {
-    "name": "庆典·倾耳",
-    "type": 0,
-    "desc": "名片纹饰。星海啊，山岩啊，请你们倾耳听我的曲调吧。",
-    "source": "「万籁协奏」礼包获取。",
-    "icon": "/source/nameCard/icon/庆典·倾耳.webp",
-    "bg": "/source/nameCard/bg/庆典·倾耳.webp",
-    "profile": "/source/nameCard/profile/庆典·倾耳.webp"
-  },
-  {
     "name": "忍冬·古树",
     "type": 0,
     "desc": "名片纹饰。我等必将复起，古木已发新枝。",
@@ -423,6 +414,15 @@
     "profile": "/source/nameCard/profile/成就·雪乡.webp"
   },
   {
+    "name": "成就·永续",
+    "type": 1,
+    "desc": "名片纹饰。「于螺丝与齿轮中断裂的梦已无人听取，唯有不知疲倦的机关舞者，仍用似轻羽般优雅落下的脚步，日以继夜叩问过往的回音。」",
+    "source": "达成「挑战者·第八辑」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/成就·永续.webp",
+    "bg": "/source/nameCard/bg/成就·永续.webp",
+    "profile": "/source/nameCard/profile/成就·永续.webp"
+  },
+  {
     "name": "成就·游遍",
     "type": 1,
     "desc": "名片纹饰。走遍了大陆所有的地方之后，还要记得最初的心哦。",
@@ -475,6 +475,15 @@
     "icon": "/source/nameCard/icon/稻妻·珊瑚宫之纹.webp",
     "bg": "/source/nameCard/bg/稻妻·珊瑚宫之纹.webp",
     "profile": "/source/nameCard/profile/稻妻·珊瑚宫之纹.webp"
+  },
+  {
+    "name": "枫丹·罚赎",
+    "type": 1,
+    "desc": "名片纹饰。梅洛彼得堡的官方标识。希望尊敬秩序且目标是安稳度过余生的各位，不用与此标识背后的机构产生任何关联。",
+    "source": "达成「枫丹·白露澈明的泉舞·其之二」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/枫丹·罚赎.webp",
+    "bg": "/source/nameCard/bg/枫丹·罚赎.webp",
+    "profile": "/source/nameCard/profile/枫丹·罚赎.webp"
   },
   {
     "name": "枫丹·审判",
@@ -1188,6 +1197,15 @@
     "profile": "/source/nameCard/profile/纪行·捕风.webp"
   },
   {
+    "name": "纪行·沉星",
+    "type": 3,
+    "desc": "名片纹饰。在掷出箭矢前轻轻许愿吧，如果能够将之投入壶中，那份心中的期冀也许亦可得以实现。",
+    "source": "纪行系统奖励获取。",
+    "icon": "/source/nameCard/icon/纪行·沉星.webp",
+    "bg": "/source/nameCard/bg/纪行·沉星.webp",
+    "profile": "/source/nameCard/profile/纪行·沉星.webp"
+  },
+  {
     "name": "纪行·风花",
     "type": 3,
     "desc": "名片纹饰。谁也没有见过风，更别说我和你了。谁也没有见过爱情，直到有花束抛向自己。",
@@ -1483,6 +1501,15 @@
     "icon": "/source/nameCard/icon/庆典·棋谭.webp",
     "bg": "/source/nameCard/bg/庆典·棋谭.webp",
     "profile": "/source/nameCard/profile/庆典·棋谭.webp"
+  },
+  {
+    "name": "庆典·倾耳",
+    "type": 4,
+    "desc": "名片纹饰。星海啊，山岩啊，请你们倾耳听我的曲调吧。",
+    "source": "「万籁协奏」礼包获取。",
+    "icon": "/source/nameCard/icon/庆典·倾耳.webp",
+    "bg": "/source/nameCard/bg/庆典·倾耳.webp",
+    "profile": "/source/nameCard/profile/庆典·倾耳.webp"
   },
   {
     "name": "庆典·盛宴",
