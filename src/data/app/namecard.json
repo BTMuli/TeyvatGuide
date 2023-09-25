@@ -792,6 +792,15 @@
     "profile": "/source/nameCard/profile/刻晴·雷楔.webp"
   },
   {
+    "name": "莱欧斯利·缄锁",
+    "type": 2,
+    "desc": "名片纹饰。维持梅洛彼得堡内部的平衡并不是简单的工作，为此，他需要一些灵活的手腕，适量严苛，和少许令人叹息的残酷。",
+    "source": "莱欧斯利的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/莱欧斯利·缄锁.webp",
+    "bg": "/source/nameCard/bg/莱欧斯利·缄锁.webp",
+    "profile": "/source/nameCard/profile/莱欧斯利·缄锁.webp"
+  },
+  {
     "name": "莱依拉·昼梦",
     "type": 2,
     "desc": "名片纹饰。「梦中的星空会将你的前路照亮，只是你那颗心中的水晶，也要映出澄净的辉光。」",
@@ -889,6 +898,15 @@
     "icon": "/source/nameCard/icon/莫娜·天星.webp",
     "bg": "/source/nameCard/bg/莫娜·天星.webp",
     "profile": "/source/nameCard/profile/莫娜·天星.webp"
+  },
+  {
+    "name": "那维莱特·流澜",
+    "type": 2,
+    "desc": "名片纹饰。水面之所以保持着如宝石般无瑕的平静，也许只是在等待泛起涟漪的时机。",
+    "source": "那维莱特的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/那维莱特·流澜.webp",
+    "bg": "/source/nameCard/bg/那维莱特·流澜.webp",
+    "profile": "/source/nameCard/profile/那维莱特·流澜.webp"
   },
   {
     "name": "纳西妲·仰月",
@@ -1546,5 +1564,14 @@
     "icon": "/source/nameCard/icon/庆典·一揆.webp",
     "bg": "/source/nameCard/bg/庆典·一揆.webp",
     "profile": "/source/nameCard/profile/庆典·一揆.webp"
+  },
+  {
+    "name": "庆典·奏雅",
+    "type": 4,
+    "desc": "名片纹饰。万壑松声山雨过。",
+    "source": "「原神交响音乐会」活动获取。",
+    "icon": "/source/nameCard/icon/庆典·奏雅.webp",
+    "bg": "/source/nameCard/bg/庆典·奏雅.webp",
+    "profile": "/source/nameCard/profile/庆典·奏雅.webp"
   }
 ]
