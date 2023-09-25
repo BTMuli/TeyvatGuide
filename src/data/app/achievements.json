@@ -2340,6 +2340,132 @@
     "version": "4.0"
   },
   {
+    "id": 80272,
+    "series": 45,
+    "order": 248,
+    "name": "大地勘探·百泉谐律之地·其二",
+    "description": "点亮枫丹区域中，黎翡区、枫丹动能工程科学研究院区的地图。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 80273,
+    "series": 45,
+    "order": 249,
+    "name": "行汲众水的泉源·其二",
+    "description": "解锁枫丹区域中，黎翡区、枫丹动能工程科学研究院区所有传送锚点。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 80274,
+    "series": 45,
+    "order": 250,
+    "name": "圣龛巡礼·百泉谐律之地·其二",
+    "description": "解除枫丹区域中，黎翡区、枫丹动能工程科学研究院区所有地灵龛的封印。",
+    "reward": 10,
+    "version": "4.1"
+  },
+  {
+    "id": 80275,
+    "series": 45,
+    "order": 251,
+    "name": "汐海引路人·其二",
+    "description": "在黎翡区、枫丹动能工程科学研究院区追随3个仙灵，并点亮仙灵之庭。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 80276,
+    "series": 45,
+    "order": 252,
+    "name": "汐海引路人·其二",
+    "description": "在黎翡区、枫丹动能工程科学研究院区追随6个仙灵，并点亮仙灵之庭。",
+    "reward": 10,
+    "version": "4.1"
+  },
+  {
+    "id": 80277,
+    "series": 45,
+    "order": 253,
+    "name": "汐海引路人·其二",
+    "description": "在黎翡区、枫丹动能工程科学研究院区追随9个仙灵，并点亮仙灵之庭。",
+    "reward": 20,
+    "version": "4.1"
+  },
+  {
+    "id": 80278,
+    "series": 45,
+    "order": 254,
+    "name": "沧浪的寻宝者·其二",
+    "description": "在黎翡区、枫丹动能工程科学研究院区开启60个宝箱。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 80279,
+    "series": 45,
+    "order": 255,
+    "name": "沧浪的寻宝者·其二",
+    "description": "在黎翡区、枫丹动能工程科学研究院区开启120个宝箱。",
+    "reward": 10,
+    "version": "4.1"
+  },
+  {
+    "id": 80280,
+    "series": 45,
+    "order": 256,
+    "name": "沧浪的寻宝者·其二",
+    "description": "在黎翡区、枫丹动能工程科学研究院区开启200个宝箱。",
+    "reward": 20,
+    "version": "4.1"
+  },
+  {
+    "id": 80281,
+    "series": 45,
+    "order": 257,
+    "name": "沧浪的冒险家·其二",
+    "description": "在黎翡区、枫丹动能工程科学研究院区完成3个大世界限时挑战。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 80282,
+    "series": 45,
+    "order": 258,
+    "name": "沧浪的冒险家·其二",
+    "description": "在黎翡区、枫丹动能工程科学研究院区完成6个大世界限时挑战。",
+    "reward": 10,
+    "version": "4.1"
+  },
+  {
+    "id": 80283,
+    "series": 45,
+    "order": 259,
+    "name": "沧浪的冒险家·其二",
+    "description": "在黎翡区、枫丹动能工程科学研究院区完成12个大世界限时挑战。",
+    "reward": 20,
+    "version": "4.1"
+  },
+  {
+    "id": 80284,
+    "series": 45,
+    "order": 260,
+    "name": "比海洋更宽广的是天空",
+    "description": "带莉诺尔离开了梅洛彼得堡。",
+    "reward": 10,
+    "version": "4.1"
+  },
+  {
+    "id": 80285,
+    "series": 45,
+    "order": 261,
+    "name": "到此为止",
+    "description": "见证了枫丹动能工程科学研究院的故事。",
+    "reward": 10,
+    "version": "4.1"
+  },
+  {
     "id": 81000,
     "series": 0,
     "order": 1000,
@@ -5418,6 +5544,267 @@
     "version": "4.0"
   },
   {
+    "id": 81375,
+    "series": 0,
+    "order": 1359,
+    "name": "消费社会",
+    "description": "在「破烂骨头商店」尽情消费。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81376,
+    "series": 0,
+    "order": 1360,
+    "name": "当午夜钟声敲响",
+    "description": "知晓了卡特皮拉的真实面目。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81377,
+    "series": 0,
+    "order": 1361,
+    "name": "非零和博弈",
+    "description": "完成了特许食堂内部满意度调研。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81378,
+    "series": 0,
+    "order": 1362,
+    "name": "零余者的自述",
+    "description": "听克兰茨讲述了一些往事。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81379,
+    "series": 0,
+    "order": 1363,
+    "name": "四水果击",
+    "description": "完成了「秩序水果团」与布兰奇的故事。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81380,
+    "series": 0,
+    "order": 1364,
+    "name": "彩虹的脚下是…？",
+    "description": "循着光线的引导抵达了终点。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81381,
+    "series": 0,
+    "order": 1365,
+    "name": "出来吧神秘矿！",
+    "description": "集齐了七块神秘的黄绿色矿石。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81382,
+    "series": 0,
+    "order": 1366,
+    "name": "并不怎么窄的门",
+    "description": "开启了通往某间藏书室的大门。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81383,
+    "series": 0,
+    "order": 1367,
+    "name": "长日留痕",
+    "description": "花费了许多时间培育审美。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81384,
+    "series": 0,
+    "order": 1368,
+    "name": "在未来多于过去的年岁",
+    "description": "我们都有光明的未来…",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81385,
+    "series": 0,
+    "order": 1369,
+    "name": "打破时间墙",
+    "description": "击破棘球孢囊，使该水域得到净化。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81386,
+    "series": 0,
+    "order": 1370,
+    "name": "被遗忘的纸带",
+    "description": "帮助布罗意回收并整理全部的「水文观测数据」。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81387,
+    "series": 0,
+    "order": 1371,
+    "name": "当机芯陷入沉眠…",
+    "description": "发现「奎瑟尔发条工坊」中隐藏的秘密。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81388,
+    "series": 0,
+    "order": 1372,
+    "name": "最凶！发条机关的八魔将",
+    "description": "获得了「不完美的」发条机关的遗产。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81389,
+    "series": 0,
+    "order": 1373,
+    "name": "「自律超算型场力发生装置」",
+    "description": "战胜地方传奇·自律超算型场力发生装置。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81390,
+    "series": 0,
+    "order": 1374,
+    "name": "冲击炸裂铁箱斗技",
+    "description": "指导格内薇芙和布瓦列特在娱乐赛中取胜。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81391,
+    "series": 0,
+    "order": 1375,
+    "name": "未记录的功能",
+    "description": "修复「二号初始能力样机」时触发了其隐藏特性。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81392,
+    "series": 0,
+    "order": 1376,
+    "name": "潜水钟与胖胖果",
+    "description": "完成了水下进阶训练。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81393,
+    "series": 0,
+    "order": 1377,
+    "name": "「极彩的露珂菈」",
+    "description": "战胜地方传奇·极彩的露珂菈。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81395,
+    "series": 0,
+    "order": 1379,
+    "name": "夹在章程里的人",
+    "description": "通过枫丹科学院的「最终审核」。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81396,
+    "series": 0,
+    "order": 1380,
+    "name": "孤独派报告",
+    "description": "获得克洛妮艾私自印制的「特别报告」。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81398,
+    "series": 0,
+    "order": 1382,
+    "name": "红恶棍的报复",
+    "description": "清除了「布拉维的锻压工坊」的红恶棍与小小恶棍。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81399,
+    "series": 0,
+    "order": 1383,
+    "name": "最终枫达海",
+    "description": "…畅饮世界！",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81400,
+    "series": 0,
+    "order": 1384,
+    "name": "「…什么新浪潮？」",
+    "description": "翻阅了全部时髦读物。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81401,
+    "series": 0,
+    "order": 1385,
+    "name": "美好的昨天",
+    "description": "昨日之日不可留…",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81402,
+    "series": 0,
+    "order": 1386,
+    "name": "多谢惠顾！",
+    "description": "抽到了两倍幸运的幸运签。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81403,
+    "series": 0,
+    "order": 1387,
+    "name": "最终枫达海",
+    "description": "…畅饮世界！",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81404,
+    "series": 0,
+    "order": 1388,
+    "name": "最终枫达海",
+    "description": "…畅饮世界！",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 81405,
+    "series": 0,
+    "order": 1389,
+    "name": "「以索忒」",
+    "description": "战胜地方传奇·以索忒。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
@@ -6939,6 +7326,60 @@
     "version": "4.0"
   },
   {
+    "id": 82181,
+    "series": 40,
+    "order": 2180,
+    "name": "月亮的距离",
+    "description": "在单个重力削减力场中，进行11次下落攻击，命中实验性场力发生装置。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 82182,
+    "series": 40,
+    "order": 2181,
+    "name": "重力阵线",
+    "description": "不被「引力涟漪」攻击命中的情况下，击败实验性场力发生装置。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 82183,
+    "series": 40,
+    "order": 2182,
+    "name": "给我套上枷锁，让我甘心毁灭",
+    "description": "在「冰风组曲·歌裴莉娅的葬送」的高潮阶段，借由科培琉司的攻击，使所有葬送的旋风都发生元素转化。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 82184,
+    "series": 40,
+    "order": 2183,
+    "name": "鲜蟹献于鲜蟹王座",
+    "description": "在铁甲熔火帝皇虚弱时将其击败。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 82185,
+    "series": 40,
+    "order": 2184,
+    "name": "砂砾收藏家",
+    "description": "在千年珍珠骏麟引导「原海古雷」时，在不破坏共鸣珊瑚珠的情况下直接破坏异海珍珠。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 82186,
+    "series": 40,
+    "order": 2185,
+    "name": "我击碎雷霆",
+    "description": "在千年珍珠骏麟尝试重新凝聚异海珍珠时将其击败。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
     "id": 84000,
     "series": 0,
     "order": 4001,
@@ -8334,6 +8775,78 @@
     "version": "4.0"
   },
   {
+    "id": 84304,
+    "series": 0,
+    "order": 5083,
+    "name": "水族馆的来访者",
+    "description": "在完成所有手续后，前往梅洛彼得堡。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 84305,
+    "series": 0,
+    "order": 5084,
+    "name": "梦寻幻景",
+    "description": "在梦境中经历「公子」经历过的「视角」。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 84306,
+    "series": 0,
+    "order": 5085,
+    "name": "角落社会的规则",
+    "description": "调查了监狱中的两种「隐秘规矩」。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 84307,
+    "series": 0,
+    "order": 5086,
+    "name": "向深水中的晨星",
+    "description": "完成「向深水中的晨星」。",
+    "reward": 10,
+    "version": "4.1"
+  },
+  {
+    "id": 84308,
+    "series": 0,
+    "order": 5087,
+    "name": "浪潮已至",
+    "description": "菲米尼回忆起了自己的遭遇…",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 84309,
+    "series": 0,
+    "order": 5088,
+    "name": "海底下的不可思议",
+    "description": "知晓梅洛彼得堡的历史与秘密。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 84310,
+    "series": 0,
+    "order": 5089,
+    "name": "万古的孑遗",
+    "description": "获知那维莱特的真实身份。",
+    "reward": 5,
+    "version": "4.1"
+  },
+  {
+    "id": 84311,
+    "series": 0,
+    "order": 5090,
+    "name": "谕示胎动的终焉之刻",
+    "description": "完成「谕示胎动的终焉之刻」。",
+    "reward": 10,
+    "version": "4.1"
+  },
+  {
     "id": 84501,
     "series": 10,
     "order": 4026,
@@ -8935,6 +9448,15 @@
     "description": "见证艾尤恩的工作故事。",
     "reward": 5,
     "version": "4.0"
+  },
+  {
+    "id": 84571,
+    "series": 0,
+    "order": 4095,
+    "name": "新灵感！新产品！",
+    "description": "帮助安里研制三种新型的枫达，并且品尝一次「实验饮品」。",
+    "reward": 5,
+    "version": "4.1"
   },
   {
     "id": 85000,
