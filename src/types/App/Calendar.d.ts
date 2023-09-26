@@ -34,7 +34,7 @@ declare namespace TGApp.App.Calendar {
     bg: string;
     icon: string;
     weaponIcon: string;
-    elementIcon: string;
+    elementIcon?: string;
     materials: Material[];
     source: Source;
   }

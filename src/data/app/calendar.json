@@ -264,6 +264,50 @@
     }
   },
   {
+    "id": 10000086,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "莱欧斯利",
+    "itemType": "character",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "elementIcon": "/icon/element/冰元素.webp",
+    "icon": "/WIKI/character/icon/10000086.webp",
+    "materials": [
+      {
+        "id": 104344,
+        "name": "「秩序」的教导",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/104344.webp"
+      },
+      {
+        "id": 104345,
+        "name": "「秩序」的指引",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/104345.webp"
+      },
+      {
+        "id": 104346,
+        "name": "「秩序」的哲学",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/104346.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "琅诵",
+      "icon": "/icon/nation/枫丹.webp"
+    }
+  },
+  {
     "id": 10000038,
     "contentId": 1360,
     "dropDays": [3, 6, 7],
@@ -657,6 +701,50 @@
       "area": "须弥",
       "name": "律藏",
       "icon": "/icon/nation/须弥.webp"
+    }
+  },
+  {
+    "id": 10000087,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "那维莱特",
+    "itemType": "character",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "elementIcon": "/icon/element/水元素.webp",
+    "icon": "/WIKI/character/icon/10000087.webp",
+    "materials": [
+      {
+        "id": 104338,
+        "name": "「公平」的教导",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/104338.webp"
+      },
+      {
+        "id": 104339,
+        "name": "「公平」的指引",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/104339.webp"
+      },
+      {
+        "id": 104340,
+        "name": "「公平」的哲学",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/104340.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "旋韵",
+      "icon": "/icon/nation/枫丹.webp"
     }
   },
   {
@@ -1761,7 +1849,7 @@
   },
   {
     "id": 10000085,
-    "contentId": 7256,
+    "contentId": 7257,
     "dropDays": [2, 5, 7],
     "name": "菲米尼",
     "itemType": "character",
@@ -3080,53 +3168,53 @@
     }
   },
   {
-    "id": 11503,
-    "contentId": 2129,
-    "dropDays": [3, 6, 7],
-    "name": "苍古自由之誓",
+    "id": 11501,
+    "contentId": 293,
+    "dropDays": [1, 4, 7],
+    "name": "风鹰剑",
     "itemType": "weapon",
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11503.webp",
+    "icon": "/WIKI/weapon/icon/11501.webp",
     "materials": [
       {
-        "id": 114009,
-        "name": "狮牙斗士的枷锁",
+        "id": 114001,
+        "name": "高塔孤王的破瓦",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114009.webp"
+        "icon": "/icon/material/114001.webp"
       },
       {
-        "id": 114010,
-        "name": "狮牙斗士的铁链",
+        "id": 114002,
+        "name": "高塔孤王的残垣",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114010.webp"
+        "icon": "/icon/material/114002.webp"
       },
       {
-        "id": 114011,
-        "name": "狮牙斗士的镣铐",
+        "id": 114003,
+        "name": "高塔孤王的断片",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114011.webp"
+        "icon": "/icon/material/114003.webp"
       },
       {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
+        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
       "index": 1,
       "area": "蒙德",
-      "name": "渴水的废都",
+      "name": "水光之城",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
@@ -3182,105 +3270,54 @@
     }
   },
   {
-    "id": 11501,
-    "contentId": 293,
-    "dropDays": [1, 4, 7],
-    "name": "风鹰剑",
+    "id": 11503,
+    "contentId": 2129,
+    "dropDays": [3, 6, 7],
+    "name": "苍古自由之誓",
     "itemType": "weapon",
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11501.webp",
+    "icon": "/WIKI/weapon/icon/11503.webp",
     "materials": [
       {
-        "id": 114001,
-        "name": "高塔孤王的破瓦",
+        "id": 114009,
+        "name": "狮牙斗士的枷锁",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114001.webp"
+        "icon": "/icon/material/114009.webp"
       },
       {
-        "id": 114002,
-        "name": "高塔孤王的残垣",
+        "id": 114010,
+        "name": "狮牙斗士的铁链",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114002.webp"
+        "icon": "/icon/material/114010.webp"
       },
       {
-        "id": 114003,
-        "name": "高塔孤王的断片",
+        "id": 114011,
+        "name": "狮牙斗士的镣铐",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
+        "icon": "/icon/material/114011.webp"
       },
       {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
+        "id": 114012,
+        "name": "狮牙斗士的理想",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
+        "icon": "/icon/material/114012.webp"
       }
     ],
     "source": {
       "index": 1,
       "area": "蒙德",
-      "name": "水光之城",
+      "name": "渴水的废都",
       "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 11505,
-    "contentId": 1497,
-    "dropDays": [2, 5, 7],
-    "name": "磐岩结绿",
-    "itemType": "weapon",
-    "star": 5,
-    "bg": "/icon/bg/5-Star.webp",
-    "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11505.webp",
-    "materials": [
-      {
-        "id": 114017,
-        "name": "雾海云间的铅丹",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114017.webp"
-      },
-      {
-        "id": 114018,
-        "name": "雾海云间的汞丹",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114018.webp"
-      },
-      {
-        "id": 114019,
-        "name": "雾海云间的金丹",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114019.webp"
-      },
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      }
-    ],
-    "source": {
-      "index": 2,
-      "area": "璃月",
-      "name": "鸣雷城墟",
-      "icon": "/icon/nation/璃月.webp"
     }
   },
   {
@@ -3335,54 +3372,54 @@
     }
   },
   {
-    "id": 11510,
-    "contentId": 3871,
+    "id": 11505,
+    "contentId": 1497,
     "dropDays": [2, 5, 7],
-    "name": "波乱月白经津",
+    "name": "磐岩结绿",
     "itemType": "weapon",
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11510.webp",
+    "icon": "/WIKI/weapon/icon/11505.webp",
     "materials": [
       {
-        "id": 114029,
-        "name": "鸣神御灵的明惠",
+        "id": 114017,
+        "name": "雾海云间的铅丹",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114029.webp"
+        "icon": "/icon/material/114017.webp"
       },
       {
-        "id": 114030,
-        "name": "鸣神御灵的欢喜",
+        "id": 114018,
+        "name": "雾海云间的汞丹",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114030.webp"
+        "icon": "/icon/material/114018.webp"
       },
       {
-        "id": 114031,
-        "name": "鸣神御灵的亲爱",
+        "id": 114019,
+        "name": "雾海云间的金丹",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114031.webp"
+        "icon": "/icon/material/114019.webp"
       },
       {
-        "id": 114032,
-        "name": "鸣神御灵的勇武",
+        "id": 114020,
+        "name": "雾海云间的转还",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114032.webp"
+        "icon": "/icon/material/114020.webp"
       }
     ],
     "source": {
-      "index": 3,
-      "area": "稻妻",
-      "name": "砂之祭场",
-      "icon": "/icon/nation/稻妻.webp"
+      "index": 2,
+      "area": "璃月",
+      "name": "鸣雷城墟",
+      "icon": "/icon/nation/璃月.webp"
     }
   },
   {
@@ -3433,6 +3470,57 @@
       "index": 3,
       "area": "稻妻",
       "name": "沉沙之渊",
+      "icon": "/icon/nation/稻妻.webp"
+    }
+  },
+  {
+    "id": 11510,
+    "contentId": 3871,
+    "dropDays": [2, 5, 7],
+    "name": "波乱月白经津",
+    "itemType": "weapon",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11510.webp",
+    "materials": [
+      {
+        "id": 114029,
+        "name": "鸣神御灵的明惠",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114029.webp"
+      },
+      {
+        "id": 114030,
+        "name": "鸣神御灵的欢喜",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114030.webp"
+      },
+      {
+        "id": 114031,
+        "name": "鸣神御灵的亲爱",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114031.webp"
+      },
+      {
+        "id": 114032,
+        "name": "鸣神御灵的勇武",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114032.webp"
+      }
+    ],
+    "source": {
+      "index": 3,
+      "area": "稻妻",
+      "name": "砂之祭场",
       "icon": "/icon/nation/稻妻.webp"
     }
   },
@@ -3539,53 +3627,53 @@
     }
   },
   {
-    "id": 12503,
-    "contentId": 2039,
-    "dropDays": [1, 4, 7],
-    "name": "松籁响起之时",
+    "id": 12501,
+    "contentId": 291,
+    "dropDays": [2, 5, 7],
+    "name": "天空之傲",
     "itemType": "weapon",
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12503.webp",
+    "icon": "/WIKI/weapon/icon/12501.webp",
     "materials": [
       {
-        "id": 114001,
-        "name": "高塔孤王的破瓦",
+        "id": 114005,
+        "name": "凛风奔狼的始龀",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114001.webp"
+        "icon": "/icon/material/114005.webp"
       },
       {
-        "id": 114002,
-        "name": "高塔孤王的残垣",
+        "id": 114006,
+        "name": "凛风奔狼的裂齿",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114002.webp"
+        "icon": "/icon/material/114006.webp"
       },
       {
-        "id": 114003,
-        "name": "高塔孤王的断片",
+        "id": 114007,
+        "name": "凛风奔狼的断牙",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
+        "icon": "/icon/material/114007.webp"
       },
       {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
+        "id": 114008,
+        "name": "凛风奔狼的怀乡",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
+        "icon": "/icon/material/114008.webp"
       }
     ],
     "source": {
       "index": 1,
       "area": "蒙德",
-      "name": "水光之城",
+      "name": "深没之谷",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
@@ -3641,53 +3729,53 @@
     }
   },
   {
-    "id": 12501,
-    "contentId": 291,
-    "dropDays": [2, 5, 7],
-    "name": "天空之傲",
+    "id": 12503,
+    "contentId": 2039,
+    "dropDays": [1, 4, 7],
+    "name": "松籁响起之时",
     "itemType": "weapon",
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12501.webp",
+    "icon": "/WIKI/weapon/icon/12503.webp",
     "materials": [
       {
-        "id": 114005,
-        "name": "凛风奔狼的始龀",
+        "id": 114001,
+        "name": "高塔孤王的破瓦",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114005.webp"
+        "icon": "/icon/material/114001.webp"
       },
       {
-        "id": 114006,
-        "name": "凛风奔狼的裂齿",
+        "id": 114002,
+        "name": "高塔孤王的残垣",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114006.webp"
+        "icon": "/icon/material/114002.webp"
       },
       {
-        "id": 114007,
-        "name": "凛风奔狼的断牙",
+        "id": 114003,
+        "name": "高塔孤王的断片",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114007.webp"
+        "icon": "/icon/material/114003.webp"
       },
       {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
+        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
       "index": 1,
       "area": "蒙德",
-      "name": "深没之谷",
+      "name": "水光之城",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
@@ -3896,57 +3984,6 @@
     }
   },
   {
-    "id": 15503,
-    "contentId": 1682,
-    "dropDays": [2, 5, 7],
-    "name": "终末嗟叹之诗",
-    "itemType": "weapon",
-    "star": 5,
-    "bg": "/icon/bg/5-Star.webp",
-    "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15503.webp",
-    "materials": [
-      {
-        "id": 114005,
-        "name": "凛风奔狼的始龀",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114005.webp"
-      },
-      {
-        "id": 114006,
-        "name": "凛风奔狼的裂齿",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114006.webp"
-      },
-      {
-        "id": 114007,
-        "name": "凛风奔狼的断牙",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114007.webp"
-      },
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "深没之谷",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
     "id": 15502,
     "contentId": 219,
     "dropDays": [3, 6, 7],
@@ -3994,6 +4031,57 @@
       "index": 1,
       "area": "蒙德",
       "name": "渴水的废都",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 15503,
+    "contentId": 1682,
+    "dropDays": [2, 5, 7],
+    "name": "终末嗟叹之诗",
+    "itemType": "weapon",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/icon/15503.webp",
+    "materials": [
+      {
+        "id": 114005,
+        "name": "凛风奔狼的始龀",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114005.webp"
+      },
+      {
+        "id": 114006,
+        "name": "凛风奔狼的裂齿",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114006.webp"
+      },
+      {
+        "id": 114007,
+        "name": "凛风奔狼的断牙",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114007.webp"
+      },
+      {
+        "id": 114008,
+        "name": "凛风奔狼的怀乡",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114008.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "深没之谷",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
@@ -4049,57 +4137,6 @@
     }
   },
   {
-    "id": 15509,
-    "contentId": 2555,
-    "dropDays": [2, 5, 7],
-    "name": "飞雷之弦振",
-    "itemType": "weapon",
-    "star": 5,
-    "bg": "/icon/bg/5-Star.webp",
-    "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15509.webp",
-    "materials": [
-      {
-        "id": 114029,
-        "name": "鸣神御灵的明惠",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114029.webp"
-      },
-      {
-        "id": 114030,
-        "name": "鸣神御灵的欢喜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114030.webp"
-      },
-      {
-        "id": 114031,
-        "name": "鸣神御灵的亲爱",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114031.webp"
-      },
-      {
-        "id": 114032,
-        "name": "鸣神御灵的勇武",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114032.webp"
-      }
-    ],
-    "source": {
-      "index": 3,
-      "area": "稻妻",
-      "name": "砂之祭场",
-      "icon": "/icon/nation/稻妻.webp"
-    }
-  },
-  {
     "id": 15507,
     "contentId": 2905,
     "dropDays": [3, 6, 7],
@@ -4147,6 +4184,57 @@
       "index": 3,
       "area": "稻妻",
       "name": "流沙之葬",
+      "icon": "/icon/nation/稻妻.webp"
+    }
+  },
+  {
+    "id": 15509,
+    "contentId": 2555,
+    "dropDays": [2, 5, 7],
+    "name": "飞雷之弦振",
+    "itemType": "weapon",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/icon/15509.webp",
+    "materials": [
+      {
+        "id": 114029,
+        "name": "鸣神御灵的明惠",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114029.webp"
+      },
+      {
+        "id": 114030,
+        "name": "鸣神御灵的欢喜",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114030.webp"
+      },
+      {
+        "id": 114031,
+        "name": "鸣神御灵的亲爱",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114031.webp"
+      },
+      {
+        "id": 114032,
+        "name": "鸣神御灵的勇武",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114032.webp"
+      }
+    ],
+    "source": {
+      "index": 3,
+      "area": "稻妻",
+      "name": "砂之祭场",
       "icon": "/icon/nation/稻妻.webp"
     }
   },
@@ -4355,57 +4443,6 @@
     }
   },
   {
-    "id": 14505,
-    "contentId": 6488,
-    "dropDays": [1, 4, 7],
-    "name": "碧落之珑",
-    "itemType": "weapon",
-    "star": 5,
-    "bg": "/icon/bg/5-Star.webp",
-    "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14505.webp",
-    "materials": [
-      {
-        "id": 114013,
-        "name": "孤云寒林的光砂",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114013.webp"
-      },
-      {
-        "id": 114014,
-        "name": "孤云寒林的辉岩",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114014.webp"
-      },
-      {
-        "id": 114015,
-        "name": "孤云寒林的圣骸",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114015.webp"
-      },
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      }
-    ],
-    "source": {
-      "index": 2,
-      "area": "璃月",
-      "name": "雷云祭坛",
-      "icon": "/icon/nation/璃月.webp"
-    }
-  },
-  {
     "id": 14504,
     "contentId": 1222,
     "dropDays": [3, 6, 7],
@@ -4457,54 +4494,54 @@
     }
   },
   {
-    "id": 14509,
-    "contentId": 3563,
-    "dropDays": [3, 6, 7],
-    "name": "神乐之真意",
+    "id": 14505,
+    "contentId": 6488,
+    "dropDays": [1, 4, 7],
+    "name": "碧落之珑",
     "itemType": "weapon",
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14509.webp",
+    "icon": "/WIKI/weapon/icon/14505.webp",
     "materials": [
       {
-        "id": 114033,
-        "name": "今昔剧画之恶尉",
+        "id": 114013,
+        "name": "孤云寒林的光砂",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114033.webp"
+        "icon": "/icon/material/114013.webp"
       },
       {
-        "id": 114034,
-        "name": "今昔剧画之虎啮",
+        "id": 114014,
+        "name": "孤云寒林的辉岩",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114034.webp"
+        "icon": "/icon/material/114014.webp"
       },
       {
-        "id": 114035,
-        "name": "今昔剧画之一角",
+        "id": 114015,
+        "name": "孤云寒林的圣骸",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114035.webp"
+        "icon": "/icon/material/114015.webp"
       },
       {
-        "id": 114036,
-        "name": "今昔剧画之鬼人",
+        "id": 114016,
+        "name": "孤云寒林的神体",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114036.webp"
+        "icon": "/icon/material/114016.webp"
       }
     ],
     "source": {
-      "index": 3,
-      "area": "稻妻",
-      "name": "流沙之葬",
-      "icon": "/icon/nation/稻妻.webp"
+      "index": 2,
+      "area": "璃月",
+      "name": "雷云祭坛",
+      "icon": "/icon/nation/璃月.webp"
     }
   },
   {
@@ -4559,54 +4596,54 @@
     }
   },
   {
-    "id": 14512,
-    "contentId": 5378,
+    "id": 14509,
+    "contentId": 3563,
     "dropDays": [3, 6, 7],
-    "name": "图莱杜拉的回忆",
+    "name": "神乐之真意",
     "itemType": "weapon",
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14512.webp",
+    "icon": "/WIKI/weapon/icon/14509.webp",
     "materials": [
       {
-        "id": 114045,
-        "name": "烈日威权的残响",
+        "id": 114033,
+        "name": "今昔剧画之恶尉",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114045.webp"
+        "icon": "/icon/material/114033.webp"
       },
       {
-        "id": 114046,
-        "name": "烈日威权的余光",
+        "id": 114034,
+        "name": "今昔剧画之虎啮",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114046.webp"
+        "icon": "/icon/material/114034.webp"
       },
       {
-        "id": 114047,
-        "name": "烈日威权的梦想",
+        "id": 114035,
+        "name": "今昔剧画之一角",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114047.webp"
+        "icon": "/icon/material/114035.webp"
       },
       {
-        "id": 114048,
-        "name": "烈日威权的旧日",
+        "id": 114036,
+        "name": "今昔剧画之鬼人",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114048.webp"
+        "icon": "/icon/material/114036.webp"
       }
     ],
     "source": {
-      "index": 4,
-      "area": "须弥",
-      "name": "引业",
-      "icon": "/icon/nation/须弥.webp"
+      "index": 3,
+      "area": "稻妻",
+      "name": "流沙之葬",
+      "icon": "/icon/nation/稻妻.webp"
     }
   },
   {
@@ -4661,6 +4698,159 @@
     }
   },
   {
+    "id": 14512,
+    "contentId": 5378,
+    "dropDays": [3, 6, 7],
+    "name": "图莱杜拉的回忆",
+    "itemType": "weapon",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/icon/14512.webp",
+    "materials": [
+      {
+        "id": 114045,
+        "name": "烈日威权的残响",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114045.webp"
+      },
+      {
+        "id": 114046,
+        "name": "烈日威权的余光",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114046.webp"
+      },
+      {
+        "id": 114047,
+        "name": "烈日威权的梦想",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114047.webp"
+      },
+      {
+        "id": 114048,
+        "name": "烈日威权的旧日",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114048.webp"
+      }
+    ],
+    "source": {
+      "index": 4,
+      "area": "须弥",
+      "name": "引业",
+      "icon": "/icon/nation/须弥.webp"
+    }
+  },
+  {
+    "id": 14513,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "金流监督",
+    "itemType": "weapon",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/icon/14513.webp",
+    "materials": [
+      {
+        "id": 114057,
+        "name": "无垢之海的苦盏",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114057.webp"
+      },
+      {
+        "id": 114058,
+        "name": "无垢之海的酒盏",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114058.webp"
+      },
+      {
+        "id": 114059,
+        "name": "无垢之海的银杯",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114059.webp"
+      },
+      {
+        "id": 114060,
+        "name": "无垢之海的金杯",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114060.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "奇械",
+      "icon": "/icon/nation/枫丹.webp"
+    }
+  },
+  {
+    "id": 14514,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "万世流涌大典",
+    "itemType": "weapon",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/icon/14514.webp",
+    "materials": [
+      {
+        "id": 114053,
+        "name": "纯圣露滴的滤渣",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114053.webp"
+      },
+      {
+        "id": 114054,
+        "name": "纯圣露滴的凝华",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114054.webp"
+      },
+      {
+        "id": 114055,
+        "name": "纯圣露滴的醴泉",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114055.webp"
+      },
+      {
+        "id": 114056,
+        "name": "纯圣露滴的真粹",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114056.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "匠理",
+      "icon": "/icon/nation/枫丹.webp"
+    }
+  },
+  {
     "id": 13502,
     "contentId": 1077,
     "dropDays": [3, 6, 7],
@@ -4712,104 +4902,53 @@
     }
   },
   {
-    "id": 13507,
-    "contentId": 3398,
-    "dropDays": [2, 5, 7],
-    "name": "息灾",
+    "id": 13501,
+    "contentId": 1612,
+    "dropDays": [3, 6, 7],
+    "name": "护摩之杖",
     "itemType": "weapon",
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13507.webp",
+    "icon": "/WIKI/weapon/icon/13501.webp",
     "materials": [
       {
-        "id": 114017,
-        "name": "雾海云间的铅丹",
+        "id": 114021,
+        "name": "漆黑陨铁的一粒",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114017.webp"
+        "icon": "/icon/material/114021.webp"
       },
       {
-        "id": 114018,
-        "name": "雾海云间的汞丹",
+        "id": 114022,
+        "name": "漆黑陨铁的一片",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114018.webp"
+        "icon": "/icon/material/114022.webp"
       },
       {
-        "id": 114019,
-        "name": "雾海云间的金丹",
+        "id": 114023,
+        "name": "漆黑陨铁的一角",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114019.webp"
+        "icon": "/icon/material/114023.webp"
       },
       {
-        "id": 114020,
-        "name": "雾海云间的转还",
+        "id": 114024,
+        "name": "漆黑陨铁的一块",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
+        "icon": "/icon/material/114024.webp"
       }
     ],
     "source": {
       "index": 2,
       "area": "璃月",
-      "name": "鸣雷城墟",
-      "icon": "/icon/nation/璃月.webp"
-    }
-  },
-  {
-    "id": 13505,
-    "contentId": 296,
-    "dropDays": [1, 4, 7],
-    "name": "和璞鸢",
-    "itemType": "weapon",
-    "star": 5,
-    "bg": "/icon/bg/5-Star.webp",
-    "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13505.webp",
-    "materials": [
-      {
-        "id": 114013,
-        "name": "孤云寒林的光砂",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114013.webp"
-      },
-      {
-        "id": 114014,
-        "name": "孤云寒林的辉岩",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114014.webp"
-      },
-      {
-        "id": 114015,
-        "name": "孤云寒林的圣骸",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114015.webp"
-      },
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      }
-    ],
-    "source": {
-      "index": 2,
-      "area": "璃月",
-      "name": "雷云祭坛",
+      "name": "古雷试炼场",
       "icon": "/icon/nation/璃月.webp"
     }
   },
@@ -4865,53 +5004,104 @@
     }
   },
   {
-    "id": 13501,
-    "contentId": 1612,
-    "dropDays": [3, 6, 7],
-    "name": "护摩之杖",
+    "id": 13505,
+    "contentId": 296,
+    "dropDays": [1, 4, 7],
+    "name": "和璞鸢",
     "itemType": "weapon",
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13501.webp",
+    "icon": "/WIKI/weapon/icon/13505.webp",
     "materials": [
       {
-        "id": 114021,
-        "name": "漆黑陨铁的一粒",
+        "id": 114013,
+        "name": "孤云寒林的光砂",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114021.webp"
+        "icon": "/icon/material/114013.webp"
       },
       {
-        "id": 114022,
-        "name": "漆黑陨铁的一片",
+        "id": 114014,
+        "name": "孤云寒林的辉岩",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114022.webp"
+        "icon": "/icon/material/114014.webp"
       },
       {
-        "id": 114023,
-        "name": "漆黑陨铁的一角",
+        "id": 114015,
+        "name": "孤云寒林的圣骸",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114023.webp"
+        "icon": "/icon/material/114015.webp"
       },
       {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
+        "id": 114016,
+        "name": "孤云寒林的神体",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
+        "icon": "/icon/material/114016.webp"
       }
     ],
     "source": {
       "index": 2,
       "area": "璃月",
-      "name": "古雷试炼场",
+      "name": "雷云祭坛",
+      "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
+    "id": 13507,
+    "contentId": 3398,
+    "dropDays": [2, 5, 7],
+    "name": "息灾",
+    "itemType": "weapon",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/长柄武器.webp",
+    "icon": "/WIKI/weapon/icon/13507.webp",
+    "materials": [
+      {
+        "id": 114017,
+        "name": "雾海云间的铅丹",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114017.webp"
+      },
+      {
+        "id": 114018,
+        "name": "雾海云间的汞丹",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114018.webp"
+      },
+      {
+        "id": 114019,
+        "name": "雾海云间的金丹",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114019.webp"
+      },
+      {
+        "id": 114020,
+        "name": "雾海云间的转还",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114020.webp"
+      }
+    ],
+    "source": {
+      "index": 2,
+      "area": "璃月",
+      "name": "鸣雷城墟",
       "icon": "/icon/nation/璃月.webp"
     }
   },
@@ -5018,15 +5208,168 @@
     }
   },
   {
-    "id": 11415,
-    "contentId": 3170,
+    "id": 11401,
+    "contentId": 208,
     "dropDays": [1, 4, 7],
-    "name": "辰砂之纺锤",
+    "name": "西风剑",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11415.webp",
+    "icon": "/WIKI/weapon/icon/11401.webp",
+    "materials": [
+      {
+        "id": 114001,
+        "name": "高塔孤王的破瓦",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114001.webp"
+      },
+      {
+        "id": 114002,
+        "name": "高塔孤王的残垣",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114002.webp"
+      },
+      {
+        "id": 114003,
+        "name": "高塔孤王的断片",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114003.webp"
+      },
+      {
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114004.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "水光之城",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 11402,
+    "contentId": 207,
+    "dropDays": [2, 5, 7],
+    "name": "笛剑",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11402.webp",
+    "materials": [
+      {
+        "id": 114005,
+        "name": "凛风奔狼的始龀",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114005.webp"
+      },
+      {
+        "id": 114006,
+        "name": "凛风奔狼的裂齿",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114006.webp"
+      },
+      {
+        "id": 114007,
+        "name": "凛风奔狼的断牙",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114007.webp"
+      },
+      {
+        "id": 114008,
+        "name": "凛风奔狼的怀乡",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114008.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "深没之谷",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 11403,
+    "contentId": 239,
+    "dropDays": [3, 6, 7],
+    "name": "祭礼剑",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11403.webp",
+    "materials": [
+      {
+        "id": 114009,
+        "name": "狮牙斗士的枷锁",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114009.webp"
+      },
+      {
+        "id": 114010,
+        "name": "狮牙斗士的铁链",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114010.webp"
+      },
+      {
+        "id": 114011,
+        "name": "狮牙斗士的镣铐",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114011.webp"
+      },
+      {
+        "id": 114012,
+        "name": "狮牙斗士的理想",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114012.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "渴水的废都",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 11404,
+    "contentId": 199,
+    "dropDays": [1, 4, 7],
+    "name": "宗室长剑",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11404.webp",
     "materials": [
       {
         "id": 114001,
@@ -5120,66 +5463,15 @@
     }
   },
   {
-    "id": 11401,
-    "contentId": 208,
+    "id": 11410,
+    "contentId": 1683,
     "dropDays": [1, 4, 7],
-    "name": "西风剑",
+    "name": "暗巷闪光",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11401.webp",
-    "materials": [
-      {
-        "id": 114001,
-        "name": "高塔孤王的破瓦",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114001.webp"
-      },
-      {
-        "id": 114002,
-        "name": "高塔孤王的残垣",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114002.webp"
-      },
-      {
-        "id": 114003,
-        "name": "高塔孤王的断片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "水光之城",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 11424,
-    "contentId": 6970,
-    "dropDays": [1, 4, 7],
-    "name": "狼牙",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11424.webp",
+    "icon": "/WIKI/weapon/icon/11410.webp",
     "materials": [
       {
         "id": 114001,
@@ -5273,210 +5565,6 @@
     }
   },
   {
-    "id": 11410,
-    "contentId": 1683,
-    "dropDays": [1, 4, 7],
-    "name": "暗巷闪光",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11410.webp",
-    "materials": [
-      {
-        "id": 114001,
-        "name": "高塔孤王的破瓦",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114001.webp"
-      },
-      {
-        "id": 114002,
-        "name": "高塔孤王的残垣",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114002.webp"
-      },
-      {
-        "id": 114003,
-        "name": "高塔孤王的断片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "水光之城",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 11404,
-    "contentId": 199,
-    "dropDays": [1, 4, 7],
-    "name": "宗室长剑",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11404.webp",
-    "materials": [
-      {
-        "id": 114001,
-        "name": "高塔孤王的破瓦",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114001.webp"
-      },
-      {
-        "id": 114002,
-        "name": "高塔孤王的残垣",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114002.webp"
-      },
-      {
-        "id": 114003,
-        "name": "高塔孤王的断片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "水光之城",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 11403,
-    "contentId": 239,
-    "dropDays": [3, 6, 7],
-    "name": "祭礼剑",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11403.webp",
-    "materials": [
-      {
-        "id": 114009,
-        "name": "狮牙斗士的枷锁",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114009.webp"
-      },
-      {
-        "id": 114010,
-        "name": "狮牙斗士的铁链",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114010.webp"
-      },
-      {
-        "id": 114011,
-        "name": "狮牙斗士的镣铐",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114011.webp"
-      },
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "渴水的废都",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 11402,
-    "contentId": 207,
-    "dropDays": [2, 5, 7],
-    "name": "笛剑",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11402.webp",
-    "materials": [
-      {
-        "id": 114005,
-        "name": "凛风奔狼的始龀",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114005.webp"
-      },
-      {
-        "id": 114006,
-        "name": "凛风奔狼的裂齿",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114006.webp"
-      },
-      {
-        "id": 114007,
-        "name": "凛风奔狼的断牙",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114007.webp"
-      },
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "深没之谷",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
     "id": 11413,
     "contentId": 1361,
     "dropDays": [3, 6, 7],
@@ -5528,15 +5616,117 @@
     }
   },
   {
-    "id": 11408,
-    "contentId": 289,
+    "id": 11415,
+    "contentId": 3170,
     "dropDays": [1, 4, 7],
-    "name": "黑岩长剑",
+    "name": "辰砂之纺锤",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11408.webp",
+    "icon": "/WIKI/weapon/icon/11415.webp",
+    "materials": [
+      {
+        "id": 114001,
+        "name": "高塔孤王的破瓦",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114001.webp"
+      },
+      {
+        "id": 114002,
+        "name": "高塔孤王的残垣",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114002.webp"
+      },
+      {
+        "id": 114003,
+        "name": "高塔孤王的断片",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114003.webp"
+      },
+      {
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114004.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "水光之城",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 11424,
+    "contentId": 6970,
+    "dropDays": [1, 4, 7],
+    "name": "狼牙",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11424.webp",
+    "materials": [
+      {
+        "id": 114001,
+        "name": "高塔孤王的破瓦",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114001.webp"
+      },
+      {
+        "id": 114002,
+        "name": "高塔孤王的残垣",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114002.webp"
+      },
+      {
+        "id": 114003,
+        "name": "高塔孤王的断片",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114003.webp"
+      },
+      {
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114004.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "水光之城",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 11405,
+    "contentId": 141,
+    "dropDays": [1, 4, 7],
+    "name": "匣里龙吟",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11405.webp",
     "materials": [
       {
         "id": 114013,
@@ -5575,57 +5765,6 @@
       "index": 2,
       "area": "璃月",
       "name": "雷云祭坛",
-      "icon": "/icon/nation/璃月.webp"
-    }
-  },
-  {
-    "id": 11407,
-    "contentId": 175,
-    "dropDays": [3, 6, 7],
-    "name": "铁蜂刺",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11407.webp",
-    "materials": [
-      {
-        "id": 114021,
-        "name": "漆黑陨铁的一粒",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114021.webp"
-      },
-      {
-        "id": 114022,
-        "name": "漆黑陨铁的一片",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114022.webp"
-      },
-      {
-        "id": 114023,
-        "name": "漆黑陨铁的一角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114023.webp"
-      },
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      }
-    ],
-    "source": {
-      "index": 2,
-      "area": "璃月",
-      "name": "古雷试炼场",
       "icon": "/icon/nation/璃月.webp"
     }
   },
@@ -5681,15 +5820,66 @@
     }
   },
   {
-    "id": 11405,
-    "contentId": 141,
-    "dropDays": [1, 4, 7],
-    "name": "匣里龙吟",
+    "id": 11407,
+    "contentId": 175,
+    "dropDays": [3, 6, 7],
+    "name": "铁蜂刺",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11405.webp",
+    "icon": "/WIKI/weapon/icon/11407.webp",
+    "materials": [
+      {
+        "id": 114021,
+        "name": "漆黑陨铁的一粒",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114021.webp"
+      },
+      {
+        "id": 114022,
+        "name": "漆黑陨铁的一片",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114022.webp"
+      },
+      {
+        "id": 114023,
+        "name": "漆黑陨铁的一角",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114023.webp"
+      },
+      {
+        "id": 114024,
+        "name": "漆黑陨铁的一块",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114024.webp"
+      }
+    ],
+    "source": {
+      "index": 2,
+      "area": "璃月",
+      "name": "古雷试炼场",
+      "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
+    "id": 11408,
+    "contentId": 289,
+    "dropDays": [1, 4, 7],
+    "name": "黑岩长剑",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11408.webp",
     "materials": [
       {
         "id": 114013,
@@ -5729,6 +5919,57 @@
       "area": "璃月",
       "name": "雷云祭坛",
       "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
+    "id": 11414,
+    "contentId": 2307,
+    "dropDays": [1, 4, 7],
+    "name": "天目影打刀",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11414.webp",
+    "materials": [
+      {
+        "id": 114025,
+        "name": "远海夷地的瑚枝",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114025.webp"
+      },
+      {
+        "id": 114026,
+        "name": "远海夷地的玉枝",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114026.webp"
+      },
+      {
+        "id": 114027,
+        "name": "远海夷地的琼枝",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114027.webp"
+      },
+      {
+        "id": 114028,
+        "name": "远海夷地的金枝",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114028.webp"
+      }
+    ],
+    "source": {
+      "index": 3,
+      "area": "稻妻",
+      "name": "沉沙之渊",
+      "icon": "/icon/nation/稻妻.webp"
     }
   },
   {
@@ -5834,54 +6075,54 @@
     }
   },
   {
-    "id": 11414,
-    "contentId": 2307,
+    "id": 11417,
+    "contentId": 4440,
     "dropDays": [1, 4, 7],
-    "name": "天目影打刀",
+    "name": "原木刀",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11414.webp",
+    "icon": "/WIKI/weapon/icon/11417.webp",
     "materials": [
       {
-        "id": 114025,
-        "name": "远海夷地的瑚枝",
+        "id": 114037,
+        "name": "谧林涓露的铜符",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114025.webp"
+        "icon": "/icon/material/114037.webp"
       },
       {
-        "id": 114026,
-        "name": "远海夷地的玉枝",
+        "id": 114038,
+        "name": "谧林涓露的铁符",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114026.webp"
+        "icon": "/icon/material/114038.webp"
       },
       {
-        "id": 114027,
-        "name": "远海夷地的琼枝",
+        "id": 114039,
+        "name": "谧林涓露的银符",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114027.webp"
+        "icon": "/icon/material/114039.webp"
       },
       {
-        "id": 114028,
-        "name": "远海夷地的金枝",
+        "id": 114040,
+        "name": "谧林涓露的金符",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114028.webp"
+        "icon": "/icon/material/114040.webp"
       }
     ],
     "source": {
-      "index": 3,
-      "area": "稻妻",
-      "name": "沉沙之渊",
-      "icon": "/icon/nation/稻妻.webp"
+      "index": 4,
+      "area": "须弥",
+      "name": "云垢",
+      "icon": "/icon/nation/须弥.webp"
     }
   },
   {
@@ -5936,54 +6177,54 @@
     }
   },
   {
-    "id": 11417,
-    "contentId": 4440,
-    "dropDays": [1, 4, 7],
-    "name": "原木刀",
+    "id": 11425,
+    "contentId": 7042,
+    "dropDays": [2, 5, 7],
+    "name": "海渊终曲",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11417.webp",
+    "icon": "/WIKI/weapon/icon/11425.webp",
     "materials": [
       {
-        "id": 114037,
-        "name": "谧林涓露的铜符",
+        "id": 114053,
+        "name": "纯圣露滴的滤渣",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114037.webp"
+        "icon": "/icon/material/114053.webp"
       },
       {
-        "id": 114038,
-        "name": "谧林涓露的铁符",
+        "id": 114054,
+        "name": "纯圣露滴的凝华",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114038.webp"
+        "icon": "/icon/material/114054.webp"
       },
       {
-        "id": 114039,
-        "name": "谧林涓露的银符",
+        "id": 114055,
+        "name": "纯圣露滴的醴泉",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114039.webp"
+        "icon": "/icon/material/114055.webp"
       },
       {
-        "id": 114040,
-        "name": "谧林涓露的金符",
+        "id": 114056,
+        "name": "纯圣露滴的真粹",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114040.webp"
+        "icon": "/icon/material/114056.webp"
       }
     ],
     "source": {
-      "index": 4,
-      "area": "须弥",
-      "name": "云垢",
-      "icon": "/icon/nation/须弥.webp"
+      "index": 5,
+      "area": "枫丹",
+      "name": "匠理",
+      "icon": "/icon/nation/枫丹.webp"
     }
   },
   {
@@ -6038,15 +6279,15 @@
     }
   },
   {
-    "id": 11425,
-    "contentId": 7042,
+    "id": 11427,
+    "contentId": 0,
     "dropDays": [2, 5, 7],
-    "name": "海渊终曲",
+    "name": "船坞长剑",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11425.webp",
+    "icon": "/WIKI/weapon/icon/11427.webp",
     "materials": [
       {
         "id": 114053,
@@ -6086,57 +6327,6 @@
       "area": "枫丹",
       "name": "匠理",
       "icon": "/icon/nation/枫丹.webp"
-    }
-  },
-  {
-    "id": 12411,
-    "contentId": 1362,
-    "dropDays": [1, 4, 7],
-    "name": "雪葬的星银",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12411.webp",
-    "materials": [
-      {
-        "id": 114001,
-        "name": "高塔孤王的破瓦",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114001.webp"
-      },
-      {
-        "id": 114002,
-        "name": "高塔孤王的残垣",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114002.webp"
-      },
-      {
-        "id": 114003,
-        "name": "高塔孤王的断片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "水光之城",
-      "icon": "/icon/nation/蒙德.webp"
     }
   },
   {
@@ -6187,108 +6377,6 @@
       "index": 1,
       "area": "蒙德",
       "name": "渴水的废都",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 12418,
-    "contentId": 6234,
-    "dropDays": [3, 6, 7],
-    "name": "饰铁之花",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12418.webp",
-    "materials": [
-      {
-        "id": 114009,
-        "name": "狮牙斗士的枷锁",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114009.webp"
-      },
-      {
-        "id": 114010,
-        "name": "狮牙斗士的铁链",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114010.webp"
-      },
-      {
-        "id": 114011,
-        "name": "狮牙斗士的镣铐",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114011.webp"
-      },
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "渴水的废都",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 12403,
-    "contentId": 418,
-    "dropDays": [2, 5, 7],
-    "name": "祭礼大剑",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12403.webp",
-    "materials": [
-      {
-        "id": 114005,
-        "name": "凛风奔狼的始龀",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114005.webp"
-      },
-      {
-        "id": 114006,
-        "name": "凛风奔狼的裂齿",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114006.webp"
-      },
-      {
-        "id": 114007,
-        "name": "凛风奔狼的断牙",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114007.webp"
-      },
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "深没之谷",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
@@ -6344,6 +6432,57 @@
     }
   },
   {
+    "id": 12403,
+    "contentId": 418,
+    "dropDays": [2, 5, 7],
+    "name": "祭礼大剑",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "icon": "/WIKI/weapon/icon/12403.webp",
+    "materials": [
+      {
+        "id": 114005,
+        "name": "凛风奔狼的始龀",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114005.webp"
+      },
+      {
+        "id": 114006,
+        "name": "凛风奔狼的裂齿",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114006.webp"
+      },
+      {
+        "id": 114007,
+        "name": "凛风奔狼的断牙",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114007.webp"
+      },
+      {
+        "id": 114008,
+        "name": "凛风奔狼的怀乡",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114008.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "深没之谷",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
     "id": 12404,
     "contentId": 206,
     "dropDays": [3, 6, 7],
@@ -6395,53 +6534,155 @@
     }
   },
   {
-    "id": 12412,
-    "contentId": 2603,
-    "dropDays": [3, 6, 7],
-    "name": "衔珠海皇",
+    "id": 12411,
+    "contentId": 1362,
+    "dropDays": [1, 4, 7],
+    "name": "雪葬的星银",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12412.webp",
+    "icon": "/WIKI/weapon/icon/12411.webp",
     "materials": [
       {
-        "id": 114021,
-        "name": "漆黑陨铁的一粒",
+        "id": 114001,
+        "name": "高塔孤王的破瓦",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114021.webp"
+        "icon": "/icon/material/114001.webp"
       },
       {
-        "id": 114022,
-        "name": "漆黑陨铁的一片",
+        "id": 114002,
+        "name": "高塔孤王的残垣",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114022.webp"
+        "icon": "/icon/material/114002.webp"
       },
       {
-        "id": 114023,
-        "name": "漆黑陨铁的一角",
+        "id": 114003,
+        "name": "高塔孤王的断片",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114023.webp"
+        "icon": "/icon/material/114003.webp"
       },
       {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
+        "icon": "/icon/material/114004.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "水光之城",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 12418,
+    "contentId": 6234,
+    "dropDays": [3, 6, 7],
+    "name": "饰铁之花",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "icon": "/WIKI/weapon/icon/12418.webp",
+    "materials": [
+      {
+        "id": 114009,
+        "name": "狮牙斗士的枷锁",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114009.webp"
+      },
+      {
+        "id": 114010,
+        "name": "狮牙斗士的铁链",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114010.webp"
+      },
+      {
+        "id": 114011,
+        "name": "狮牙斗士的镣铐",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114011.webp"
+      },
+      {
+        "id": 114012,
+        "name": "狮牙斗士的理想",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114012.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "渴水的废都",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 12405,
+    "contentId": 180,
+    "dropDays": [2, 5, 7],
+    "name": "雨裁",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "icon": "/WIKI/weapon/icon/12405.webp",
+    "materials": [
+      {
+        "id": 114017,
+        "name": "雾海云间的铅丹",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114017.webp"
+      },
+      {
+        "id": 114018,
+        "name": "雾海云间的汞丹",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114018.webp"
+      },
+      {
+        "id": 114019,
+        "name": "雾海云间的金丹",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114019.webp"
+      },
+      {
+        "id": 114020,
+        "name": "雾海云间的转还",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114020.webp"
       }
     ],
     "source": {
       "index": 2,
       "area": "璃月",
-      "name": "古雷试炼场",
+      "name": "鸣雷城墟",
       "icon": "/icon/nation/璃月.webp"
     }
   },
@@ -6497,53 +6738,53 @@
     }
   },
   {
-    "id": 12405,
-    "contentId": 180,
-    "dropDays": [2, 5, 7],
-    "name": "雨裁",
+    "id": 12407,
+    "contentId": 290,
+    "dropDays": [1, 4, 7],
+    "name": "白影剑",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12405.webp",
+    "icon": "/WIKI/weapon/icon/12407.webp",
     "materials": [
       {
-        "id": 114017,
-        "name": "雾海云间的铅丹",
+        "id": 114013,
+        "name": "孤云寒林的光砂",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114017.webp"
+        "icon": "/icon/material/114013.webp"
       },
       {
-        "id": 114018,
-        "name": "雾海云间的汞丹",
+        "id": 114014,
+        "name": "孤云寒林的辉岩",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114018.webp"
+        "icon": "/icon/material/114014.webp"
       },
       {
-        "id": 114019,
-        "name": "雾海云间的金丹",
+        "id": 114015,
+        "name": "孤云寒林的圣骸",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114019.webp"
+        "icon": "/icon/material/114015.webp"
       },
       {
-        "id": 114020,
-        "name": "雾海云间的转还",
+        "id": 114016,
+        "name": "孤云寒林的神体",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
+        "icon": "/icon/material/114016.webp"
       }
     ],
     "source": {
       "index": 2,
       "area": "璃月",
-      "name": "鸣雷城墟",
+      "name": "雷云祭坛",
       "icon": "/icon/nation/璃月.webp"
     }
   },
@@ -6599,53 +6840,53 @@
     }
   },
   {
-    "id": 12407,
-    "contentId": 290,
-    "dropDays": [1, 4, 7],
-    "name": "白影剑",
+    "id": 12409,
+    "contentId": 995,
+    "dropDays": [3, 6, 7],
+    "name": "螭骨剑",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12407.webp",
+    "icon": "/WIKI/weapon/icon/12409.webp",
     "materials": [
       {
-        "id": 114013,
-        "name": "孤云寒林的光砂",
+        "id": 114021,
+        "name": "漆黑陨铁的一粒",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114013.webp"
+        "icon": "/icon/material/114021.webp"
       },
       {
-        "id": 114014,
-        "name": "孤云寒林的辉岩",
+        "id": 114022,
+        "name": "漆黑陨铁的一片",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114014.webp"
+        "icon": "/icon/material/114022.webp"
       },
       {
-        "id": 114015,
-        "name": "孤云寒林的圣骸",
+        "id": 114023,
+        "name": "漆黑陨铁的一角",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114015.webp"
+        "icon": "/icon/material/114023.webp"
       },
       {
-        "id": 114016,
-        "name": "孤云寒林的神体",
+        "id": 114024,
+        "name": "漆黑陨铁的一块",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
+        "icon": "/icon/material/114024.webp"
       }
     ],
     "source": {
       "index": 2,
       "area": "璃月",
-      "name": "雷云祭坛",
+      "name": "古雷试炼场",
       "icon": "/icon/nation/璃月.webp"
     }
   },
@@ -6701,15 +6942,15 @@
     }
   },
   {
-    "id": 12409,
-    "contentId": 995,
+    "id": 12412,
+    "contentId": 2603,
     "dropDays": [3, 6, 7],
-    "name": "螭骨剑",
+    "name": "衔珠海皇",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12409.webp",
+    "icon": "/WIKI/weapon/icon/12412.webp",
     "materials": [
       {
         "id": 114021,
@@ -6749,57 +6990,6 @@
       "area": "璃月",
       "name": "古雷试炼场",
       "icon": "/icon/nation/璃月.webp"
-    }
-  },
-  {
-    "id": 12416,
-    "contentId": 2904,
-    "dropDays": [1, 4, 7],
-    "name": "恶王丸",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12416.webp",
-    "materials": [
-      {
-        "id": 114025,
-        "name": "远海夷地的瑚枝",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114025.webp"
-      },
-      {
-        "id": 114026,
-        "name": "远海夷地的玉枝",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114026.webp"
-      },
-      {
-        "id": 114027,
-        "name": "远海夷地的琼枝",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114027.webp"
-      },
-      {
-        "id": 114028,
-        "name": "远海夷地的金枝",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114028.webp"
-      }
-    ],
-    "source": {
-      "index": 3,
-      "area": "稻妻",
-      "name": "沉沙之渊",
-      "icon": "/icon/nation/稻妻.webp"
     }
   },
   {
@@ -6850,6 +7040,57 @@
       "index": 3,
       "area": "稻妻",
       "name": "砂之祭场",
+      "icon": "/icon/nation/稻妻.webp"
+    }
+  },
+  {
+    "id": 12416,
+    "contentId": 2904,
+    "dropDays": [1, 4, 7],
+    "name": "恶王丸",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "icon": "/WIKI/weapon/icon/12416.webp",
+    "materials": [
+      {
+        "id": 114025,
+        "name": "远海夷地的瑚枝",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114025.webp"
+      },
+      {
+        "id": 114026,
+        "name": "远海夷地的玉枝",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114026.webp"
+      },
+      {
+        "id": 114027,
+        "name": "远海夷地的琼枝",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114027.webp"
+      },
+      {
+        "id": 114028,
+        "name": "远海夷地的金枝",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114028.webp"
+      }
+    ],
+    "source": {
+      "index": 3,
+      "area": "稻妻",
+      "name": "沉沙之渊",
       "icon": "/icon/nation/稻妻.webp"
     }
   },
@@ -6905,57 +7146,6 @@
     }
   },
   {
-    "id": 12424,
-    "contentId": 6967,
-    "dropDays": [2, 5, 7],
-    "name": "聊聊棒",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12424.webp",
-    "materials": [
-      {
-        "id": 114041,
-        "name": "绿洲花园的追忆",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114041.webp"
-      },
-      {
-        "id": 114042,
-        "name": "绿洲花园的恩惠",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114042.webp"
-      },
-      {
-        "id": 114043,
-        "name": "绿洲花园的哀思",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114043.webp"
-      },
-      {
-        "id": 114044,
-        "name": "绿洲花园的真谛",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114044.webp"
-      }
-    ],
-    "source": {
-      "index": 4,
-      "area": "须弥",
-      "name": "思惑",
-      "icon": "/icon/nation/须弥.webp"
-    }
-  },
-  {
     "id": 12417,
     "contentId": 4445,
     "dropDays": [1, 4, 7],
@@ -7003,6 +7193,57 @@
       "index": 4,
       "area": "须弥",
       "name": "云垢",
+      "icon": "/icon/nation/须弥.webp"
+    }
+  },
+  {
+    "id": 12424,
+    "contentId": 6967,
+    "dropDays": [2, 5, 7],
+    "name": "聊聊棒",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "icon": "/WIKI/weapon/icon/12424.webp",
+    "materials": [
+      {
+        "id": 114041,
+        "name": "绿洲花园的追忆",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114041.webp"
+      },
+      {
+        "id": 114042,
+        "name": "绿洲花园的恩惠",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114042.webp"
+      },
+      {
+        "id": 114043,
+        "name": "绿洲花园的哀思",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114043.webp"
+      },
+      {
+        "id": 114044,
+        "name": "绿洲花园的真谛",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114044.webp"
+      }
+    ],
+    "source": {
+      "index": 4,
+      "area": "须弥",
+      "name": "思惑",
       "icon": "/icon/nation/须弥.webp"
     }
   },
@@ -7058,15 +7299,66 @@
     }
   },
   {
-    "id": 15413,
-    "contentId": 1705,
+    "id": 12427,
+    "contentId": 0,
     "dropDays": [3, 6, 7],
-    "name": "风花之颂",
+    "name": "便携动力锯",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "icon": "/WIKI/weapon/icon/12427.webp",
+    "materials": [
+      {
+        "id": 114057,
+        "name": "无垢之海的苦盏",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114057.webp"
+      },
+      {
+        "id": 114058,
+        "name": "无垢之海的酒盏",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114058.webp"
+      },
+      {
+        "id": 114059,
+        "name": "无垢之海的银杯",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114059.webp"
+      },
+      {
+        "id": 114060,
+        "name": "无垢之海的金杯",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114060.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "奇械",
+      "icon": "/icon/nation/枫丹.webp"
+    }
+  },
+  {
+    "id": 15401,
+    "contentId": 195,
+    "dropDays": [3, 6, 7],
+    "name": "西风猎弓",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15413.webp",
+    "icon": "/WIKI/weapon/icon/15401.webp",
     "materials": [
       {
         "id": 114009,
@@ -7105,159 +7397,6 @@
       "index": 1,
       "area": "蒙德",
       "name": "渴水的废都",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 15412,
-    "contentId": 2127,
-    "dropDays": [1, 4, 7],
-    "name": "幽夜华尔兹",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15412.webp",
-    "materials": [
-      {
-        "id": 114001,
-        "name": "高塔孤王的破瓦",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114001.webp"
-      },
-      {
-        "id": 114002,
-        "name": "高塔孤王的残垣",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114002.webp"
-      },
-      {
-        "id": 114003,
-        "name": "高塔孤王的断片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "水光之城",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 15404,
-    "contentId": 178,
-    "dropDays": [3, 6, 7],
-    "name": "宗室长弓",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15404.webp",
-    "materials": [
-      {
-        "id": 114009,
-        "name": "狮牙斗士的枷锁",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114009.webp"
-      },
-      {
-        "id": 114010,
-        "name": "狮牙斗士的铁链",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114010.webp"
-      },
-      {
-        "id": 114011,
-        "name": "狮牙斗士的镣铐",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114011.webp"
-      },
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "渴水的废都",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 15403,
-    "contentId": 177,
-    "dropDays": [2, 5, 7],
-    "name": "祭礼弓",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15403.webp",
-    "materials": [
-      {
-        "id": 114005,
-        "name": "凛风奔狼的始龀",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114005.webp"
-      },
-      {
-        "id": 114006,
-        "name": "凛风奔狼的裂齿",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114006.webp"
-      },
-      {
-        "id": 114007,
-        "name": "凛风奔狼的断牙",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114007.webp"
-      },
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "深没之谷",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
@@ -7313,66 +7452,66 @@
     }
   },
   {
-    "id": 15401,
-    "contentId": 195,
-    "dropDays": [3, 6, 7],
-    "name": "西风猎弓",
+    "id": 15403,
+    "contentId": 177,
+    "dropDays": [2, 5, 7],
+    "name": "祭礼弓",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15401.webp",
+    "icon": "/WIKI/weapon/icon/15403.webp",
     "materials": [
       {
-        "id": 114009,
-        "name": "狮牙斗士的枷锁",
+        "id": 114005,
+        "name": "凛风奔狼的始龀",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114009.webp"
+        "icon": "/icon/material/114005.webp"
       },
       {
-        "id": 114010,
-        "name": "狮牙斗士的铁链",
+        "id": 114006,
+        "name": "凛风奔狼的裂齿",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114010.webp"
+        "icon": "/icon/material/114006.webp"
       },
       {
-        "id": 114011,
-        "name": "狮牙斗士的镣铐",
+        "id": 114007,
+        "name": "凛风奔狼的断牙",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114011.webp"
+        "icon": "/icon/material/114007.webp"
       },
       {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
+        "id": 114008,
+        "name": "凛风奔狼的怀乡",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
+        "icon": "/icon/material/114008.webp"
       }
     ],
     "source": {
       "index": 1,
       "area": "蒙德",
-      "name": "渴水的废都",
+      "name": "深没之谷",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
   {
-    "id": 15410,
-    "contentId": 1684,
+    "id": 15404,
+    "contentId": 178,
     "dropDays": [3, 6, 7],
-    "name": "暗巷猎手",
+    "name": "宗室长弓",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15410.webp",
+    "icon": "/WIKI/weapon/icon/15404.webp",
     "materials": [
       {
         "id": 114009,
@@ -7466,53 +7605,206 @@
     }
   },
   {
-    "id": 15407,
-    "contentId": 391,
+    "id": 15410,
+    "contentId": 1684,
     "dropDays": [3, 6, 7],
-    "name": "钢轮弓",
+    "name": "暗巷猎手",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15407.webp",
+    "icon": "/WIKI/weapon/icon/15410.webp",
     "materials": [
       {
-        "id": 114021,
-        "name": "漆黑陨铁的一粒",
+        "id": 114009,
+        "name": "狮牙斗士的枷锁",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114021.webp"
+        "icon": "/icon/material/114009.webp"
       },
       {
-        "id": 114022,
-        "name": "漆黑陨铁的一片",
+        "id": 114010,
+        "name": "狮牙斗士的铁链",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114022.webp"
+        "icon": "/icon/material/114010.webp"
       },
       {
-        "id": 114023,
-        "name": "漆黑陨铁的一角",
+        "id": 114011,
+        "name": "狮牙斗士的镣铐",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114023.webp"
+        "icon": "/icon/material/114011.webp"
       },
       {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
+        "id": 114012,
+        "name": "狮牙斗士的理想",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
+        "icon": "/icon/material/114012.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "渴水的废都",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 15412,
+    "contentId": 2127,
+    "dropDays": [1, 4, 7],
+    "name": "幽夜华尔兹",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/icon/15412.webp",
+    "materials": [
+      {
+        "id": 114001,
+        "name": "高塔孤王的破瓦",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114001.webp"
+      },
+      {
+        "id": 114002,
+        "name": "高塔孤王的残垣",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114002.webp"
+      },
+      {
+        "id": 114003,
+        "name": "高塔孤王的断片",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114003.webp"
+      },
+      {
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114004.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "水光之城",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 15413,
+    "contentId": 1705,
+    "dropDays": [3, 6, 7],
+    "name": "风花之颂",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/icon/15413.webp",
+    "materials": [
+      {
+        "id": 114009,
+        "name": "狮牙斗士的枷锁",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114009.webp"
+      },
+      {
+        "id": 114010,
+        "name": "狮牙斗士的铁链",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114010.webp"
+      },
+      {
+        "id": 114011,
+        "name": "狮牙斗士的镣铐",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114011.webp"
+      },
+      {
+        "id": 114012,
+        "name": "狮牙斗士的理想",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114012.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "渴水的废都",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 15405,
+    "contentId": 181,
+    "dropDays": [1, 4, 7],
+    "name": "弓藏",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/icon/15405.webp",
+    "materials": [
+      {
+        "id": 114013,
+        "name": "孤云寒林的光砂",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114013.webp"
+      },
+      {
+        "id": 114014,
+        "name": "孤云寒林的辉岩",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114014.webp"
+      },
+      {
+        "id": 114015,
+        "name": "孤云寒林的圣骸",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114015.webp"
+      },
+      {
+        "id": 114016,
+        "name": "孤云寒林的神体",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114016.webp"
       }
     ],
     "source": {
       "index": 2,
       "area": "璃月",
-      "name": "古雷试炼场",
+      "name": "雷云祭坛",
       "icon": "/icon/nation/璃月.webp"
     }
   },
@@ -7568,53 +7860,53 @@
     }
   },
   {
-    "id": 15405,
-    "contentId": 181,
-    "dropDays": [1, 4, 7],
-    "name": "弓藏",
+    "id": 15407,
+    "contentId": 391,
+    "dropDays": [3, 6, 7],
+    "name": "钢轮弓",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15405.webp",
+    "icon": "/WIKI/weapon/icon/15407.webp",
     "materials": [
       {
-        "id": 114013,
-        "name": "孤云寒林的光砂",
+        "id": 114021,
+        "name": "漆黑陨铁的一粒",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114013.webp"
+        "icon": "/icon/material/114021.webp"
       },
       {
-        "id": 114014,
-        "name": "孤云寒林的辉岩",
+        "id": 114022,
+        "name": "漆黑陨铁的一片",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114014.webp"
+        "icon": "/icon/material/114022.webp"
       },
       {
-        "id": 114015,
-        "name": "孤云寒林的圣骸",
+        "id": 114023,
+        "name": "漆黑陨铁的一角",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114015.webp"
+        "icon": "/icon/material/114023.webp"
       },
       {
-        "id": 114016,
-        "name": "孤云寒林的神体",
+        "id": 114024,
+        "name": "漆黑陨铁的一块",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
+        "icon": "/icon/material/114024.webp"
       }
     ],
     "source": {
       "index": 2,
       "area": "璃月",
-      "name": "雷云祭坛",
+      "name": "古雷试炼场",
       "icon": "/icon/nation/璃月.webp"
     }
   },
@@ -7721,15 +8013,15 @@
     }
   },
   {
-    "id": 15416,
-    "contentId": 3076,
+    "id": 15414,
+    "contentId": 2287,
     "dropDays": [2, 5, 7],
-    "name": "曚云之月",
+    "name": "破魔之弓",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15416.webp",
+    "icon": "/WIKI/weapon/icon/15414.webp",
     "materials": [
       {
         "id": 114029,
@@ -7823,15 +8115,15 @@
     }
   },
   {
-    "id": 15414,
-    "contentId": 2287,
+    "id": 15416,
+    "contentId": 3076,
     "dropDays": [2, 5, 7],
-    "name": "破魔之弓",
+    "name": "曚云之月",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15414.webp",
+    "icon": "/WIKI/weapon/icon/15416.webp",
     "materials": [
       {
         "id": 114029,
@@ -7871,57 +8163,6 @@
       "area": "稻妻",
       "name": "砂之祭场",
       "icon": "/icon/nation/稻妻.webp"
-    }
-  },
-  {
-    "id": 15418,
-    "contentId": 4437,
-    "dropDays": [3, 6, 7],
-    "name": "竭泽",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15418.webp",
-    "materials": [
-      {
-        "id": 114045,
-        "name": "烈日威权的残响",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114045.webp"
-      },
-      {
-        "id": 114046,
-        "name": "烈日威权的余光",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114046.webp"
-      },
-      {
-        "id": 114047,
-        "name": "烈日威权的梦想",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114047.webp"
-      },
-      {
-        "id": 114048,
-        "name": "烈日威权的旧日",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114048.webp"
-      }
-    ],
-    "source": {
-      "index": 4,
-      "area": "须弥",
-      "name": "引业",
-      "icon": "/icon/nation/须弥.webp"
     }
   },
   {
@@ -7976,15 +8217,15 @@
     }
   },
   {
-    "id": 15424,
-    "contentId": 6968,
+    "id": 15418,
+    "contentId": 4437,
     "dropDays": [3, 6, 7],
-    "name": "烈阳之嗣",
+    "name": "竭泽",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15424.webp",
+    "icon": "/WIKI/weapon/icon/15418.webp",
     "materials": [
       {
         "id": 114045,
@@ -8078,6 +8319,57 @@
     }
   },
   {
+    "id": 15424,
+    "contentId": 6968,
+    "dropDays": [3, 6, 7],
+    "name": "烈阳之嗣",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/icon/15424.webp",
+    "materials": [
+      {
+        "id": 114045,
+        "name": "烈日威权的残响",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114045.webp"
+      },
+      {
+        "id": 114046,
+        "name": "烈日威权的余光",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114046.webp"
+      },
+      {
+        "id": 114047,
+        "name": "烈日威权的梦想",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114047.webp"
+      },
+      {
+        "id": 114048,
+        "name": "烈日威权的旧日",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114048.webp"
+      }
+    ],
+    "source": {
+      "index": 4,
+      "area": "须弥",
+      "name": "引业",
+      "icon": "/icon/nation/须弥.webp"
+    }
+  },
+  {
     "id": 15425,
     "contentId": 7041,
     "dropDays": [1, 4, 7],
@@ -8129,15 +8421,117 @@
     }
   },
   {
-    "id": 14410,
-    "contentId": 1685,
-    "dropDays": [2, 5, 7],
-    "name": "暗巷的酒与诗",
+    "id": 15427,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "测距规",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/icon/15427.webp",
+    "materials": [
+      {
+        "id": 114049,
+        "name": "悠古弦音的残章",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114049.webp"
+      },
+      {
+        "id": 114050,
+        "name": "悠古弦音的断章",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114050.webp"
+      },
+      {
+        "id": 114051,
+        "name": "悠古弦音的乐章",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114051.webp"
+      },
+      {
+        "id": 114052,
+        "name": "悠古弦音的回响",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114052.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "机思",
+      "icon": "/icon/nation/枫丹.webp"
+    }
+  },
+  {
+    "id": 14401,
+    "contentId": 185,
+    "dropDays": [1, 4, 7],
+    "name": "西风秘典",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14410.webp",
+    "icon": "/WIKI/weapon/icon/14401.webp",
+    "materials": [
+      {
+        "id": 114001,
+        "name": "高塔孤王的破瓦",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114001.webp"
+      },
+      {
+        "id": 114002,
+        "name": "高塔孤王的残垣",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114002.webp"
+      },
+      {
+        "id": 114003,
+        "name": "高塔孤王的断片",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114003.webp"
+      },
+      {
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114004.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "水光之城",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 14402,
+    "contentId": 192,
+    "dropDays": [2, 5, 7],
+    "name": "流浪乐章",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/icon/14402.webp",
     "materials": [
       {
         "id": 114005,
@@ -8231,108 +8625,6 @@
     }
   },
   {
-    "id": 14402,
-    "contentId": 192,
-    "dropDays": [2, 5, 7],
-    "name": "流浪乐章",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14402.webp",
-    "materials": [
-      {
-        "id": 114005,
-        "name": "凛风奔狼的始龀",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114005.webp"
-      },
-      {
-        "id": 114006,
-        "name": "凛风奔狼的裂齿",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114006.webp"
-      },
-      {
-        "id": 114007,
-        "name": "凛风奔狼的断牙",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114007.webp"
-      },
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "深没之谷",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 14401,
-    "contentId": 185,
-    "dropDays": [1, 4, 7],
-    "name": "西风秘典",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14401.webp",
-    "materials": [
-      {
-        "id": 114001,
-        "name": "高塔孤王的破瓦",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114001.webp"
-      },
-      {
-        "id": 114002,
-        "name": "高塔孤王的残垣",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114002.webp"
-      },
-      {
-        "id": 114003,
-        "name": "高塔孤王的断片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "水光之城",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
     "id": 14404,
     "contentId": 194,
     "dropDays": [1, 4, 7],
@@ -8380,6 +8672,57 @@
       "index": 1,
       "area": "蒙德",
       "name": "水光之城",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 14410,
+    "contentId": 1685,
+    "dropDays": [2, 5, 7],
+    "name": "暗巷的酒与诗",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/icon/14410.webp",
+    "materials": [
+      {
+        "id": 114005,
+        "name": "凛风奔狼的始龀",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114005.webp"
+      },
+      {
+        "id": 114006,
+        "name": "凛风奔狼的裂齿",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114006.webp"
+      },
+      {
+        "id": 114007,
+        "name": "凛风奔狼的断牙",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114007.webp"
+      },
+      {
+        "id": 114008,
+        "name": "凛风奔狼的怀乡",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114008.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "深没之谷",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
@@ -8486,66 +8829,66 @@
     }
   },
   {
-    "id": 14409,
-    "contentId": 690,
+    "id": 14426,
+    "contentId": 0,
     "dropDays": [2, 5, 7],
-    "name": "昭心",
+    "name": "无垠蔚蓝之歌",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14409.webp",
+    "icon": "/WIKI/weapon/icon/14426.webp",
     "materials": [
       {
-        "id": 114017,
-        "name": "雾海云间的铅丹",
+        "id": 114005,
+        "name": "凛风奔狼的始龀",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114017.webp"
+        "icon": "/icon/material/114005.webp"
       },
       {
-        "id": 114018,
-        "name": "雾海云间的汞丹",
+        "id": 114006,
+        "name": "凛风奔狼的裂齿",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114018.webp"
+        "icon": "/icon/material/114006.webp"
       },
       {
-        "id": 114019,
-        "name": "雾海云间的金丹",
+        "id": 114007,
+        "name": "凛风奔狼的断牙",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114019.webp"
+        "icon": "/icon/material/114007.webp"
       },
       {
-        "id": 114020,
-        "name": "雾海云间的转还",
+        "id": 114008,
+        "name": "凛风奔狼的怀乡",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
+        "icon": "/icon/material/114008.webp"
       }
     ],
     "source": {
-      "index": 2,
-      "area": "璃月",
-      "name": "鸣雷城墟",
-      "icon": "/icon/nation/璃月.webp"
+      "index": 1,
+      "area": "蒙德",
+      "name": "深没之谷",
+      "icon": "/icon/nation/蒙德.webp"
     }
   },
   {
-    "id": 14408,
-    "contentId": 193,
+    "id": 14405,
+    "contentId": 217,
     "dropDays": [1, 4, 7],
-    "name": "黑岩绯玉",
+    "name": "匣里日月",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14408.webp",
+    "icon": "/WIKI/weapon/icon/14405.webp",
     "materials": [
       {
         "id": 114013,
@@ -8584,57 +8927,6 @@
       "index": 2,
       "area": "璃月",
       "name": "雷云祭坛",
-      "icon": "/icon/nation/璃月.webp"
-    }
-  },
-  {
-    "id": 14407,
-    "contentId": 198,
-    "dropDays": [3, 6, 7],
-    "name": "万国诸海图谱",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14407.webp",
-    "materials": [
-      {
-        "id": 114021,
-        "name": "漆黑陨铁的一粒",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114021.webp"
-      },
-      {
-        "id": 114022,
-        "name": "漆黑陨铁的一片",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114022.webp"
-      },
-      {
-        "id": 114023,
-        "name": "漆黑陨铁的一角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114023.webp"
-      },
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      }
-    ],
-    "source": {
-      "index": 2,
-      "area": "璃月",
-      "name": "古雷试炼场",
       "icon": "/icon/nation/璃月.webp"
     }
   },
@@ -8690,15 +8982,66 @@
     }
   },
   {
-    "id": 14405,
-    "contentId": 217,
-    "dropDays": [1, 4, 7],
-    "name": "匣里日月",
+    "id": 14407,
+    "contentId": 198,
+    "dropDays": [3, 6, 7],
+    "name": "万国诸海图谱",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14405.webp",
+    "icon": "/WIKI/weapon/icon/14407.webp",
+    "materials": [
+      {
+        "id": 114021,
+        "name": "漆黑陨铁的一粒",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114021.webp"
+      },
+      {
+        "id": 114022,
+        "name": "漆黑陨铁的一片",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114022.webp"
+      },
+      {
+        "id": 114023,
+        "name": "漆黑陨铁的一角",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114023.webp"
+      },
+      {
+        "id": 114024,
+        "name": "漆黑陨铁的一块",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114024.webp"
+      }
+    ],
+    "source": {
+      "index": 2,
+      "area": "璃月",
+      "name": "古雷试炼场",
+      "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
+    "id": 14408,
+    "contentId": 193,
+    "dropDays": [1, 4, 7],
+    "name": "黑岩绯玉",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/icon/14408.webp",
     "materials": [
       {
         "id": 114013,
@@ -8737,6 +9080,57 @@
       "index": 2,
       "area": "璃月",
       "name": "雷云祭坛",
+      "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
+    "id": 14409,
+    "contentId": 690,
+    "dropDays": [2, 5, 7],
+    "name": "昭心",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/icon/14409.webp",
+    "materials": [
+      {
+        "id": 114017,
+        "name": "雾海云间的铅丹",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114017.webp"
+      },
+      {
+        "id": 114018,
+        "name": "雾海云间的汞丹",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114018.webp"
+      },
+      {
+        "id": 114019,
+        "name": "雾海云间的金丹",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114019.webp"
+      },
+      {
+        "id": 114020,
+        "name": "雾海云间的转还",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114020.webp"
+      }
+    ],
+    "source": {
+      "index": 2,
+      "area": "璃月",
+      "name": "鸣雷城墟",
       "icon": "/icon/nation/璃月.webp"
     }
   },
@@ -8792,57 +9186,6 @@
     }
   },
   {
-    "id": 14415,
-    "contentId": 3611,
-    "dropDays": [1, 4, 7],
-    "name": "证誓之明瞳",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14415.webp",
-    "materials": [
-      {
-        "id": 114025,
-        "name": "远海夷地的瑚枝",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114025.webp"
-      },
-      {
-        "id": 114026,
-        "name": "远海夷地的玉枝",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114026.webp"
-      },
-      {
-        "id": 114027,
-        "name": "远海夷地的琼枝",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114027.webp"
-      },
-      {
-        "id": 114028,
-        "name": "远海夷地的金枝",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114028.webp"
-      }
-    ],
-    "source": {
-      "index": 3,
-      "area": "稻妻",
-      "name": "沉沙之渊",
-      "icon": "/icon/nation/稻妻.webp"
-    }
-  },
-  {
     "id": 14414,
     "contentId": 2288,
     "dropDays": [1, 4, 7],
@@ -8894,15 +9237,66 @@
     }
   },
   {
-    "id": 14417,
-    "contentId": 4444,
-    "dropDays": [2, 5, 7],
-    "name": "盈满之实",
+    "id": 14415,
+    "contentId": 3611,
+    "dropDays": [1, 4, 7],
+    "name": "证誓之明瞳",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14417.webp",
+    "icon": "/WIKI/weapon/icon/14415.webp",
+    "materials": [
+      {
+        "id": 114025,
+        "name": "远海夷地的瑚枝",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114025.webp"
+      },
+      {
+        "id": 114026,
+        "name": "远海夷地的玉枝",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114026.webp"
+      },
+      {
+        "id": 114027,
+        "name": "远海夷地的琼枝",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114027.webp"
+      },
+      {
+        "id": 114028,
+        "name": "远海夷地的金枝",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114028.webp"
+      }
+    ],
+    "source": {
+      "index": 3,
+      "area": "稻妻",
+      "name": "沉沙之渊",
+      "icon": "/icon/nation/稻妻.webp"
+    }
+  },
+  {
+    "id": 14416,
+    "contentId": 5017,
+    "dropDays": [2, 5, 7],
+    "name": "流浪的晚星",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/icon/14416.webp",
     "materials": [
       {
         "id": 114041,
@@ -8945,15 +9339,15 @@
     }
   },
   {
-    "id": 14416,
-    "contentId": 5017,
+    "id": 14417,
+    "contentId": 4444,
     "dropDays": [2, 5, 7],
-    "name": "流浪的晚星",
+    "name": "盈满之实",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14416.webp",
+    "icon": "/WIKI/weapon/icon/14417.webp",
     "materials": [
       {
         "id": 114041,
@@ -9047,66 +9441,15 @@
     }
   },
   {
-    "id": 13419,
-    "contentId": 4855,
+    "id": 13405,
+    "contentId": 972,
     "dropDays": [2, 5, 7],
-    "name": "风信之锋",
+    "name": "决斗之枪",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13419.webp",
-    "materials": [
-      {
-        "id": 114005,
-        "name": "凛风奔狼的始龀",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114005.webp"
-      },
-      {
-        "id": 114006,
-        "name": "凛风奔狼的裂齿",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114006.webp"
-      },
-      {
-        "id": 114007,
-        "name": "凛风奔狼的断牙",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114007.webp"
-      },
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      }
-    ],
-    "source": {
-      "index": 1,
-      "area": "蒙德",
-      "name": "深没之谷",
-      "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 13409,
-    "contentId": 1363,
-    "dropDays": [2, 5, 7],
-    "name": "龙脊长枪",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13409.webp",
+    "icon": "/WIKI/weapon/icon/13405.webp",
     "materials": [
       {
         "id": 114005,
@@ -9200,15 +9543,15 @@
     }
   },
   {
-    "id": 13405,
-    "contentId": 972,
+    "id": 13409,
+    "contentId": 1363,
     "dropDays": [2, 5, 7],
-    "name": "决斗之枪",
+    "name": "龙脊长枪",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13405.webp",
+    "icon": "/WIKI/weapon/icon/13409.webp",
     "materials": [
       {
         "id": 114005,
@@ -9251,15 +9594,66 @@
     }
   },
   {
-    "id": 13404,
-    "contentId": 172,
+    "id": 13419,
+    "contentId": 4855,
     "dropDays": [2, 5, 7],
-    "name": "黑岩刺枪",
+    "name": "风信之锋",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13404.webp",
+    "icon": "/WIKI/weapon/icon/13419.webp",
+    "materials": [
+      {
+        "id": 114005,
+        "name": "凛风奔狼的始龀",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114005.webp"
+      },
+      {
+        "id": 114006,
+        "name": "凛风奔狼的裂齿",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114006.webp"
+      },
+      {
+        "id": 114007,
+        "name": "凛风奔狼的断牙",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114007.webp"
+      },
+      {
+        "id": 114008,
+        "name": "凛风奔狼的怀乡",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114008.webp"
+      }
+    ],
+    "source": {
+      "index": 1,
+      "area": "蒙德",
+      "name": "深没之谷",
+      "icon": "/icon/nation/蒙德.webp"
+    }
+  },
+  {
+    "id": 13401,
+    "contentId": 171,
+    "dropDays": [2, 5, 7],
+    "name": "匣里灭辰",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/长柄武器.webp",
+    "icon": "/WIKI/weapon/icon/13401.webp",
     "materials": [
       {
         "id": 114017,
@@ -9298,57 +9692,6 @@
       "index": 2,
       "area": "璃月",
       "name": "鸣雷城墟",
-      "icon": "/icon/nation/璃月.webp"
-    }
-  },
-  {
-    "id": 13403,
-    "contentId": 321,
-    "dropDays": [1, 4, 7],
-    "name": "流月针",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13403.webp",
-    "materials": [
-      {
-        "id": 114013,
-        "name": "孤云寒林的光砂",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114013.webp"
-      },
-      {
-        "id": 114014,
-        "name": "孤云寒林的辉岩",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114014.webp"
-      },
-      {
-        "id": 114015,
-        "name": "孤云寒林的圣骸",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114015.webp"
-      },
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      }
-    ],
-    "source": {
-      "index": 2,
-      "area": "璃月",
-      "name": "雷云祭坛",
       "icon": "/icon/nation/璃月.webp"
     }
   },
@@ -9404,66 +9747,66 @@
     }
   },
   {
-    "id": 13401,
-    "contentId": 171,
-    "dropDays": [2, 5, 7],
-    "name": "匣里灭辰",
+    "id": 13403,
+    "contentId": 321,
+    "dropDays": [1, 4, 7],
+    "name": "流月针",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13401.webp",
+    "icon": "/WIKI/weapon/icon/13403.webp",
     "materials": [
       {
-        "id": 114017,
-        "name": "雾海云间的铅丹",
+        "id": 114013,
+        "name": "孤云寒林的光砂",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114017.webp"
+        "icon": "/icon/material/114013.webp"
       },
       {
-        "id": 114018,
-        "name": "雾海云间的汞丹",
+        "id": 114014,
+        "name": "孤云寒林的辉岩",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114018.webp"
+        "icon": "/icon/material/114014.webp"
       },
       {
-        "id": 114019,
-        "name": "雾海云间的金丹",
+        "id": 114015,
+        "name": "孤云寒林的圣骸",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114019.webp"
+        "icon": "/icon/material/114015.webp"
       },
       {
-        "id": 114020,
-        "name": "雾海云间的转还",
+        "id": 114016,
+        "name": "孤云寒林的神体",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
+        "icon": "/icon/material/114016.webp"
       }
     ],
     "source": {
       "index": 2,
       "area": "璃月",
-      "name": "鸣雷城墟",
+      "name": "雷云祭坛",
       "icon": "/icon/nation/璃月.webp"
     }
   },
   {
-    "id": 13408,
-    "contentId": 1287,
+    "id": 13404,
+    "contentId": 172,
     "dropDays": [2, 5, 7],
-    "name": "宗室猎枪",
+    "name": "黑岩刺枪",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13408.webp",
+    "icon": "/WIKI/weapon/icon/13404.webp",
     "materials": [
       {
         "id": 114017,
@@ -9557,15 +9900,66 @@
     }
   },
   {
-    "id": 13416,
-    "contentId": 3077,
-    "dropDays": [3, 6, 7],
-    "name": "断浪长鳍",
+    "id": 13408,
+    "contentId": 1287,
+    "dropDays": [2, 5, 7],
+    "name": "宗室猎枪",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13416.webp",
+    "icon": "/WIKI/weapon/icon/13408.webp",
+    "materials": [
+      {
+        "id": 114017,
+        "name": "雾海云间的铅丹",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114017.webp"
+      },
+      {
+        "id": 114018,
+        "name": "雾海云间的汞丹",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114018.webp"
+      },
+      {
+        "id": 114019,
+        "name": "雾海云间的金丹",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114019.webp"
+      },
+      {
+        "id": 114020,
+        "name": "雾海云间的转还",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114020.webp"
+      }
+    ],
+    "source": {
+      "index": 2,
+      "area": "璃月",
+      "name": "鸣雷城墟",
+      "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
+    "id": 13414,
+    "contentId": 2310,
+    "dropDays": [3, 6, 7],
+    "name": "喜多院十文字",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/长柄武器.webp",
+    "icon": "/WIKI/weapon/icon/13414.webp",
     "materials": [
       {
         "id": 114033,
@@ -9659,15 +10053,15 @@
     }
   },
   {
-    "id": 13414,
-    "contentId": 2310,
+    "id": 13416,
+    "contentId": 3077,
     "dropDays": [3, 6, 7],
-    "name": "喜多院十文字",
+    "name": "断浪长鳍",
     "itemType": "weapon",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13414.webp",
+    "icon": "/WIKI/weapon/icon/13416.webp",
     "materials": [
       {
         "id": 114033,
@@ -9761,57 +10155,6 @@
     }
   },
   {
-    "id": 13425,
-    "contentId": 7044,
-    "dropDays": [3, 6, 7],
-    "name": "公义的酬报",
-    "itemType": "weapon",
-    "star": 4,
-    "bg": "/icon/bg/4-Star.webp",
-    "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13425.webp",
-    "materials": [
-      {
-        "id": 114057,
-        "name": "无垢之海的苦盏",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114057.webp"
-      },
-      {
-        "id": 114058,
-        "name": "无垢之海的酒盏",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114058.webp"
-      },
-      {
-        "id": 114059,
-        "name": "无垢之海的银杯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114059.webp"
-      },
-      {
-        "id": 114060,
-        "name": "无垢之海的金杯",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114060.webp"
-      }
-    ],
-    "source": {
-      "index": 5,
-      "area": "枫丹",
-      "name": "奇械",
-      "icon": "/icon/nation/枫丹.webp"
-    }
-  },
-  {
     "id": 13424,
     "contentId": 6966,
     "dropDays": [3, 6, 7],
@@ -9863,53 +10206,155 @@
     }
   },
   {
-    "id": 11303,
-    "contentId": 708,
+    "id": 13425,
+    "contentId": 7044,
     "dropDays": [3, 6, 7],
-    "name": "旅行剑",
+    "name": "公义的酬报",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/长柄武器.webp",
+    "icon": "/WIKI/weapon/icon/13425.webp",
+    "materials": [
+      {
+        "id": 114057,
+        "name": "无垢之海的苦盏",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114057.webp"
+      },
+      {
+        "id": 114058,
+        "name": "无垢之海的酒盏",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114058.webp"
+      },
+      {
+        "id": 114059,
+        "name": "无垢之海的银杯",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114059.webp"
+      },
+      {
+        "id": 114060,
+        "name": "无垢之海的金杯",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114060.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "奇械",
+      "icon": "/icon/nation/枫丹.webp"
+    }
+  },
+  {
+    "id": 13427,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "勘探钻机",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/长柄武器.webp",
+    "icon": "/WIKI/weapon/icon/13427.webp",
+    "materials": [
+      {
+        "id": 114049,
+        "name": "悠古弦音的残章",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114049.webp"
+      },
+      {
+        "id": 114050,
+        "name": "悠古弦音的断章",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114050.webp"
+      },
+      {
+        "id": 114051,
+        "name": "悠古弦音的乐章",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114051.webp"
+      },
+      {
+        "id": 114052,
+        "name": "悠古弦音的回响",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114052.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "机思",
+      "icon": "/icon/nation/枫丹.webp"
+    }
+  },
+  {
+    "id": 11301,
+    "contentId": 161,
+    "dropDays": [1, 4, 7],
+    "name": "冷刃",
     "itemType": "weapon",
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11303.webp",
+    "icon": "/WIKI/weapon/icon/11301.webp",
     "materials": [
       {
-        "id": 114009,
-        "name": "狮牙斗士的枷锁",
+        "id": 114001,
+        "name": "高塔孤王的破瓦",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114009.webp"
+        "icon": "/icon/material/114001.webp"
       },
       {
-        "id": 114010,
-        "name": "狮牙斗士的铁链",
+        "id": 114002,
+        "name": "高塔孤王的残垣",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114010.webp"
+        "icon": "/icon/material/114002.webp"
       },
       {
-        "id": 114011,
-        "name": "狮牙斗士的镣铐",
+        "id": 114003,
+        "name": "高塔孤王的断片",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114011.webp"
+        "icon": "/icon/material/114003.webp"
       },
       {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
+        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
       "index": 1,
       "area": "蒙德",
-      "name": "渴水的废都",
+      "name": "水光之城",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
@@ -9965,104 +10410,104 @@
     }
   },
   {
-    "id": 11301,
-    "contentId": 161,
-    "dropDays": [1, 4, 7],
-    "name": "冷刃",
+    "id": 11303,
+    "contentId": 708,
+    "dropDays": [3, 6, 7],
+    "name": "旅行剑",
     "itemType": "weapon",
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11301.webp",
+    "icon": "/WIKI/weapon/icon/11303.webp",
     "materials": [
       {
-        "id": 114001,
-        "name": "高塔孤王的破瓦",
+        "id": 114009,
+        "name": "狮牙斗士的枷锁",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114001.webp"
+        "icon": "/icon/material/114009.webp"
       },
       {
-        "id": 114002,
-        "name": "高塔孤王的残垣",
+        "id": 114010,
+        "name": "狮牙斗士的铁链",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114002.webp"
+        "icon": "/icon/material/114010.webp"
       },
       {
-        "id": 114003,
-        "name": "高塔孤王的断片",
+        "id": 114011,
+        "name": "狮牙斗士的镣铐",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
+        "icon": "/icon/material/114011.webp"
       },
       {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
+        "id": 114012,
+        "name": "狮牙斗士的理想",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
+        "icon": "/icon/material/114012.webp"
       }
     ],
     "source": {
       "index": 1,
       "area": "蒙德",
-      "name": "水光之城",
+      "name": "渴水的废都",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
   {
-    "id": 11306,
-    "contentId": 128,
-    "dropDays": [3, 6, 7],
-    "name": "飞天御剑",
+    "id": 11304,
+    "contentId": 165,
+    "dropDays": [1, 4, 7],
+    "name": "暗铁剑",
     "itemType": "weapon",
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11306.webp",
+    "icon": "/WIKI/weapon/icon/11304.webp",
     "materials": [
       {
-        "id": 114021,
-        "name": "漆黑陨铁的一粒",
+        "id": 114013,
+        "name": "孤云寒林的光砂",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114021.webp"
+        "icon": "/icon/material/114013.webp"
       },
       {
-        "id": 114022,
-        "name": "漆黑陨铁的一片",
+        "id": 114014,
+        "name": "孤云寒林的辉岩",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114022.webp"
+        "icon": "/icon/material/114014.webp"
       },
       {
-        "id": 114023,
-        "name": "漆黑陨铁的一角",
+        "id": 114015,
+        "name": "孤云寒林的圣骸",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114023.webp"
+        "icon": "/icon/material/114015.webp"
       },
       {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
+        "id": 114016,
+        "name": "孤云寒林的神体",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
+        "icon": "/icon/material/114016.webp"
       }
     ],
     "source": {
       "index": 2,
       "area": "璃月",
-      "name": "古雷试炼场",
+      "name": "雷云祭坛",
       "icon": "/icon/nation/璃月.webp"
     }
   },
@@ -10118,53 +10563,104 @@
     }
   },
   {
-    "id": 12303,
-    "contentId": 1076,
+    "id": 11306,
+    "contentId": 128,
     "dropDays": [3, 6, 7],
-    "name": "白铁大剑",
+    "name": "飞天御剑",
+    "itemType": "weapon",
+    "star": 3,
+    "bg": "/icon/bg/3-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11306.webp",
+    "materials": [
+      {
+        "id": 114021,
+        "name": "漆黑陨铁的一粒",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114021.webp"
+      },
+      {
+        "id": 114022,
+        "name": "漆黑陨铁的一片",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114022.webp"
+      },
+      {
+        "id": 114023,
+        "name": "漆黑陨铁的一角",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114023.webp"
+      },
+      {
+        "id": 114024,
+        "name": "漆黑陨铁的一块",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114024.webp"
+      }
+    ],
+    "source": {
+      "index": 2,
+      "area": "璃月",
+      "name": "古雷试炼场",
+      "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
+    "id": 12301,
+    "contentId": 129,
+    "dropDays": [1, 4, 7],
+    "name": "铁影阔剑",
     "itemType": "weapon",
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12303.webp",
+    "icon": "/WIKI/weapon/icon/12301.webp",
     "materials": [
       {
-        "id": 114009,
-        "name": "狮牙斗士的枷锁",
+        "id": 114001,
+        "name": "高塔孤王的破瓦",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114009.webp"
+        "icon": "/icon/material/114001.webp"
       },
       {
-        "id": 114010,
-        "name": "狮牙斗士的铁链",
+        "id": 114002,
+        "name": "高塔孤王的残垣",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114010.webp"
+        "icon": "/icon/material/114002.webp"
       },
       {
-        "id": 114011,
-        "name": "狮牙斗士的镣铐",
+        "id": 114003,
+        "name": "高塔孤王的断片",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114011.webp"
+        "icon": "/icon/material/114003.webp"
       },
       {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
+        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
       "index": 1,
       "area": "蒙德",
-      "name": "渴水的废都",
+      "name": "水光之城",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
@@ -10220,105 +10716,54 @@
     }
   },
   {
-    "id": 12301,
-    "contentId": 129,
-    "dropDays": [1, 4, 7],
-    "name": "铁影阔剑",
+    "id": 12303,
+    "contentId": 1076,
+    "dropDays": [3, 6, 7],
+    "name": "白铁大剑",
     "itemType": "weapon",
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12301.webp",
+    "icon": "/WIKI/weapon/icon/12303.webp",
     "materials": [
       {
-        "id": 114001,
-        "name": "高塔孤王的破瓦",
+        "id": 114009,
+        "name": "狮牙斗士的枷锁",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114001.webp"
+        "icon": "/icon/material/114009.webp"
       },
       {
-        "id": 114002,
-        "name": "高塔孤王的残垣",
+        "id": 114010,
+        "name": "狮牙斗士的铁链",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114002.webp"
+        "icon": "/icon/material/114010.webp"
       },
       {
-        "id": 114003,
-        "name": "高塔孤王的断片",
+        "id": 114011,
+        "name": "狮牙斗士的镣铐",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
+        "icon": "/icon/material/114011.webp"
       },
       {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
+        "id": 114012,
+        "name": "狮牙斗士的理想",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
+        "icon": "/icon/material/114012.webp"
       }
     ],
     "source": {
       "index": 1,
       "area": "蒙德",
-      "name": "水光之城",
+      "name": "渴水的废都",
       "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 12306,
-    "contentId": 220,
-    "dropDays": [3, 6, 7],
-    "name": "飞天大御剑",
-    "itemType": "weapon",
-    "star": 3,
-    "bg": "/icon/bg/3-Star.webp",
-    "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12306.webp",
-    "materials": [
-      {
-        "id": 114021,
-        "name": "漆黑陨铁的一粒",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114021.webp"
-      },
-      {
-        "id": 114022,
-        "name": "漆黑陨铁的一片",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114022.webp"
-      },
-      {
-        "id": 114023,
-        "name": "漆黑陨铁的一角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114023.webp"
-      },
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      }
-    ],
-    "source": {
-      "index": 2,
-      "area": "璃月",
-      "name": "古雷试炼场",
-      "icon": "/icon/nation/璃月.webp"
     }
   },
   {
@@ -10373,53 +10818,104 @@
     }
   },
   {
-    "id": 15303,
-    "contentId": 687,
+    "id": 12306,
+    "contentId": 220,
     "dropDays": [3, 6, 7],
-    "name": "反曲弓",
+    "name": "飞天大御剑",
+    "itemType": "weapon",
+    "star": 3,
+    "bg": "/icon/bg/3-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "icon": "/WIKI/weapon/icon/12306.webp",
+    "materials": [
+      {
+        "id": 114021,
+        "name": "漆黑陨铁的一粒",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114021.webp"
+      },
+      {
+        "id": 114022,
+        "name": "漆黑陨铁的一片",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114022.webp"
+      },
+      {
+        "id": 114023,
+        "name": "漆黑陨铁的一角",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114023.webp"
+      },
+      {
+        "id": 114024,
+        "name": "漆黑陨铁的一块",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114024.webp"
+      }
+    ],
+    "source": {
+      "index": 2,
+      "area": "璃月",
+      "name": "古雷试炼场",
+      "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
+    "id": 15301,
+    "contentId": 139,
+    "dropDays": [1, 4, 7],
+    "name": "鸦羽弓",
     "itemType": "weapon",
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15303.webp",
+    "icon": "/WIKI/weapon/icon/15301.webp",
     "materials": [
       {
-        "id": 114009,
-        "name": "狮牙斗士的枷锁",
+        "id": 114001,
+        "name": "高塔孤王的破瓦",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114009.webp"
+        "icon": "/icon/material/114001.webp"
       },
       {
-        "id": 114010,
-        "name": "狮牙斗士的铁链",
+        "id": 114002,
+        "name": "高塔孤王的残垣",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114010.webp"
+        "icon": "/icon/material/114002.webp"
       },
       {
-        "id": 114011,
-        "name": "狮牙斗士的镣铐",
+        "id": 114003,
+        "name": "高塔孤王的断片",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114011.webp"
+        "icon": "/icon/material/114003.webp"
       },
       {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
+        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
       "index": 1,
       "area": "蒙德",
-      "name": "渴水的废都",
+      "name": "水光之城",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
@@ -10475,105 +10971,54 @@
     }
   },
   {
-    "id": 15301,
-    "contentId": 139,
-    "dropDays": [1, 4, 7],
-    "name": "鸦羽弓",
+    "id": 15303,
+    "contentId": 687,
+    "dropDays": [3, 6, 7],
+    "name": "反曲弓",
     "itemType": "weapon",
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15301.webp",
+    "icon": "/WIKI/weapon/icon/15303.webp",
     "materials": [
       {
-        "id": 114001,
-        "name": "高塔孤王的破瓦",
+        "id": 114009,
+        "name": "狮牙斗士的枷锁",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114001.webp"
+        "icon": "/icon/material/114009.webp"
       },
       {
-        "id": 114002,
-        "name": "高塔孤王的残垣",
+        "id": 114010,
+        "name": "狮牙斗士的铁链",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114002.webp"
+        "icon": "/icon/material/114010.webp"
       },
       {
-        "id": 114003,
-        "name": "高塔孤王的断片",
+        "id": 114011,
+        "name": "狮牙斗士的镣铐",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
+        "icon": "/icon/material/114011.webp"
       },
       {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
+        "id": 114012,
+        "name": "狮牙斗士的理想",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
+        "icon": "/icon/material/114012.webp"
       }
     ],
     "source": {
       "index": 1,
       "area": "蒙德",
-      "name": "水光之城",
+      "name": "渴水的废都",
       "icon": "/icon/nation/蒙德.webp"
-    }
-  },
-  {
-    "id": 15305,
-    "contentId": 686,
-    "dropDays": [2, 5, 7],
-    "name": "信使",
-    "itemType": "weapon",
-    "star": 3,
-    "bg": "/icon/bg/3-Star.webp",
-    "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15305.webp",
-    "materials": [
-      {
-        "id": 114017,
-        "name": "雾海云间的铅丹",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114017.webp"
-      },
-      {
-        "id": 114018,
-        "name": "雾海云间的汞丹",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114018.webp"
-      },
-      {
-        "id": 114019,
-        "name": "雾海云间的金丹",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114019.webp"
-      },
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      }
-    ],
-    "source": {
-      "index": 2,
-      "area": "璃月",
-      "name": "鸣雷城墟",
-      "icon": "/icon/nation/璃月.webp"
     }
   },
   {
@@ -10628,53 +11073,104 @@
     }
   },
   {
-    "id": 14303,
-    "contentId": 685,
-    "dropDays": [3, 6, 7],
-    "name": "异世界行记",
+    "id": 15305,
+    "contentId": 686,
+    "dropDays": [2, 5, 7],
+    "name": "信使",
+    "itemType": "weapon",
+    "star": 3,
+    "bg": "/icon/bg/3-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/icon/15305.webp",
+    "materials": [
+      {
+        "id": 114017,
+        "name": "雾海云间的铅丹",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114017.webp"
+      },
+      {
+        "id": 114018,
+        "name": "雾海云间的汞丹",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114018.webp"
+      },
+      {
+        "id": 114019,
+        "name": "雾海云间的金丹",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114019.webp"
+      },
+      {
+        "id": 114020,
+        "name": "雾海云间的转还",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114020.webp"
+      }
+    ],
+    "source": {
+      "index": 2,
+      "area": "璃月",
+      "name": "鸣雷城墟",
+      "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
+    "id": 14301,
+    "contentId": 162,
+    "dropDays": [1, 4, 7],
+    "name": "魔导绪论",
     "itemType": "weapon",
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14303.webp",
+    "icon": "/WIKI/weapon/icon/14301.webp",
     "materials": [
       {
-        "id": 114009,
-        "name": "狮牙斗士的枷锁",
+        "id": 114001,
+        "name": "高塔孤王的破瓦",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114009.webp"
+        "icon": "/icon/material/114001.webp"
       },
       {
-        "id": 114010,
-        "name": "狮牙斗士的铁链",
+        "id": 114002,
+        "name": "高塔孤王的残垣",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114010.webp"
+        "icon": "/icon/material/114002.webp"
       },
       {
-        "id": 114011,
-        "name": "狮牙斗士的镣铐",
+        "id": 114003,
+        "name": "高塔孤王的断片",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114011.webp"
+        "icon": "/icon/material/114003.webp"
       },
       {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
+        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
       "index": 1,
       "area": "蒙德",
-      "name": "渴水的废都",
+      "name": "水光之城",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
@@ -10730,53 +11226,53 @@
     }
   },
   {
-    "id": 14301,
-    "contentId": 162,
-    "dropDays": [1, 4, 7],
-    "name": "魔导绪论",
+    "id": 14303,
+    "contentId": 685,
+    "dropDays": [3, 6, 7],
+    "name": "异世界行记",
     "itemType": "weapon",
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14301.webp",
+    "icon": "/WIKI/weapon/icon/14303.webp",
     "materials": [
       {
-        "id": 114001,
-        "name": "高塔孤王的破瓦",
+        "id": 114009,
+        "name": "狮牙斗士的枷锁",
         "star": 2,
         "starIcon": "/icon/star/2.webp",
         "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114001.webp"
+        "icon": "/icon/material/114009.webp"
       },
       {
-        "id": 114002,
-        "name": "高塔孤王的残垣",
+        "id": 114010,
+        "name": "狮牙斗士的铁链",
         "star": 3,
         "starIcon": "/icon/star/3.webp",
         "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114002.webp"
+        "icon": "/icon/material/114010.webp"
       },
       {
-        "id": 114003,
-        "name": "高塔孤王的断片",
+        "id": 114011,
+        "name": "狮牙斗士的镣铐",
         "star": 4,
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
+        "icon": "/icon/material/114011.webp"
       },
       {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
+        "id": 114012,
+        "name": "狮牙斗士的理想",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
+        "icon": "/icon/material/114012.webp"
       }
     ],
     "source": {
       "index": 1,
       "area": "蒙德",
-      "name": "水光之城",
+      "name": "渴水的废都",
       "icon": "/icon/nation/蒙德.webp"
     }
   },
@@ -10934,57 +11430,6 @@
     }
   },
   {
-    "id": 13303,
-    "contentId": 134,
-    "dropDays": [3, 6, 7],
-    "name": "黑缨枪",
-    "itemType": "weapon",
-    "star": 3,
-    "bg": "/icon/bg/3-Star.webp",
-    "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13303.webp",
-    "materials": [
-      {
-        "id": 114021,
-        "name": "漆黑陨铁的一粒",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/114021.webp"
-      },
-      {
-        "id": 114022,
-        "name": "漆黑陨铁的一片",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/114022.webp"
-      },
-      {
-        "id": 114023,
-        "name": "漆黑陨铁的一角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114023.webp"
-      },
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      }
-    ],
-    "source": {
-      "index": 2,
-      "area": "璃月",
-      "name": "古雷试炼场",
-      "icon": "/icon/nation/璃月.webp"
-    }
-  },
-  {
     "id": 13302,
     "contentId": 724,
     "dropDays": [2, 5, 7],
@@ -11036,6 +11481,57 @@
     }
   },
   {
+    "id": 13303,
+    "contentId": 134,
+    "dropDays": [3, 6, 7],
+    "name": "黑缨枪",
+    "itemType": "weapon",
+    "star": 3,
+    "bg": "/icon/bg/3-Star.webp",
+    "weaponIcon": "/icon/weapon/长柄武器.webp",
+    "icon": "/WIKI/weapon/icon/13303.webp",
+    "materials": [
+      {
+        "id": 114021,
+        "name": "漆黑陨铁的一粒",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114021.webp"
+      },
+      {
+        "id": 114022,
+        "name": "漆黑陨铁的一片",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114022.webp"
+      },
+      {
+        "id": 114023,
+        "name": "漆黑陨铁的一角",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114023.webp"
+      },
+      {
+        "id": 114024,
+        "name": "漆黑陨铁的一块",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114024.webp"
+      }
+    ],
+    "source": {
+      "index": 2,
+      "area": "璃月",
+      "name": "古雷试炼场",
+      "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
     "id": 11201,
     "contentId": 126,
     "dropDays": [1, 4, 7],
@@ -11069,14 +11565,6 @@
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
         "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
@@ -11122,12 +11610,12 @@
         "icon": "/icon/material/114007.webp"
       },
       {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
+        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
@@ -11173,12 +11661,12 @@
         "icon": "/icon/material/114007.webp"
       },
       {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
+        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
@@ -11222,14 +11710,6 @@
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
         "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
@@ -11275,12 +11755,12 @@
         "icon": "/icon/material/114011.webp"
       },
       {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
+        "id": 114008,
+        "name": "凛风奔狼的怀乡",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
+        "icon": "/icon/material/114008.webp"
       }
     ],
     "source": {
@@ -11324,14 +11804,6 @@
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
         "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
@@ -11377,12 +11849,12 @@
         "icon": "/icon/material/114007.webp"
       },
       {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
+        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
@@ -11428,12 +11900,12 @@
         "icon": "/icon/material/114007.webp"
       },
       {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
+        "id": 114004,
+        "name": "高塔孤王的碎梦",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
+        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
@@ -11477,14 +11949,6 @@
         "starIcon": "/icon/star/4.webp",
         "bg": "/icon/bg/4-Star.webp",
         "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
       }
     ],
     "source": {
@@ -11530,12 +11994,12 @@
         "icon": "/icon/material/114011.webp"
       },
       {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
+        "id": 114008,
+        "name": "凛风奔狼的怀乡",
         "star": 5,
         "starIcon": "/icon/star/5.webp",
         "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
+        "icon": "/icon/material/114008.webp"
       }
     ],
     "source": {
