@@ -72,6 +72,24 @@
     "icon": "/WIKI/weapon/icon/15501.webp"
   },
   {
+    "id": 14514,
+    "contentId": 0,
+    "name": "万世流涌大典",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/icon/14514.webp"
+  },
+  {
+    "id": 14513,
+    "contentId": 0,
+    "name": "金流监督",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/icon/14513.webp"
+  },
+  {
     "id": 14512,
     "contentId": 5378,
     "name": "图莱杜拉的回忆",
@@ -342,6 +360,15 @@
     "icon": "/WIKI/weapon/icon/11501.webp"
   },
   {
+    "id": 15427,
+    "contentId": 0,
+    "name": "测距规",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/icon/15427.webp"
+  },
+  {
     "id": 15425,
     "contentId": 7041,
     "name": "静谧之曲",
@@ -531,6 +558,15 @@
     "icon": "/WIKI/weapon/icon/15401.webp"
   },
   {
+    "id": 14426,
+    "contentId": 0,
+    "name": "无垠蔚蓝之歌",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/icon/14426.webp"
+  },
+  {
     "id": 14425,
     "contentId": 7045,
     "name": "纯水流华",
@@ -693,6 +729,15 @@
     "icon": "/WIKI/weapon/icon/14401.webp"
   },
   {
+    "id": 13427,
+    "contentId": 0,
+    "name": "勘探钻机",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/长柄武器.webp",
+    "icon": "/WIKI/weapon/icon/13427.webp"
+  },
+  {
     "id": 13425,
     "contentId": 7044,
     "name": "公义的酬报",
@@ -835,6 +880,15 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "icon": "/WIKI/weapon/icon/13401.webp"
+  },
+  {
+    "id": 12427,
+    "contentId": 0,
+    "name": "便携动力锯",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "icon": "/WIKI/weapon/icon/12427.webp"
   },
   {
     "id": 12425,
@@ -1006,6 +1060,15 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "icon": "/WIKI/weapon/icon/12401.webp"
+  },
+  {
+    "id": 11427,
+    "contentId": 0,
+    "name": "船坞长剑",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11427.webp"
   },
   {
     "id": 11426,
@@ -1375,6 +1438,15 @@
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "icon": "/WIKI/weapon/icon/11305.webp"
+  },
+  {
+    "id": 11304,
+    "contentId": 165,
+    "name": "暗铁剑",
+    "star": 3,
+    "bg": "/icon/bg/3-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11304.webp"
   },
   {
     "id": 11303,
