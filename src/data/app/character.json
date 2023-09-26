@@ -1,5 +1,27 @@
 [
   {
+    "id": 10000087,
+    "contentId": 0,
+    "name": "那维莱特",
+    "title": "谕告的潮音",
+    "birthday": [12, 18],
+    "star": 5,
+    "element": "水",
+    "weapon": "法器",
+    "nameCard": "那维莱特·流澜"
+  },
+  {
+    "id": 10000086,
+    "contentId": 0,
+    "name": "莱欧斯利",
+    "title": "寂罪的密使",
+    "birthday": [11, 23],
+    "star": 5,
+    "element": "冰",
+    "weapon": "法器",
+    "nameCard": "莱欧斯利·缄锁"
+  },
+  {
     "id": 10000084,
     "contentId": 6937,
     "name": "林尼",
@@ -354,7 +376,7 @@
   {
     "id": 10000007,
     "contentId": 4073,
-    "name": "旅行者-荧",
+    "name": "旅行者（荧）",
     "title": "",
     "birthday": [0, 0],
     "star": 5,
@@ -365,7 +387,7 @@
   {
     "id": 10000005,
     "contentId": 4074,
-    "name": "旅行者-空",
+    "name": "旅行者（空）",
     "title": "",
     "birthday": [0, 0],
     "star": 5,
@@ -397,7 +419,7 @@
   },
   {
     "id": 10000085,
-    "contentId": 7256,
+    "contentId": 7257,
     "name": "菲米尼",
     "title": "潜怀遐梦",
     "birthday": [9, 24],
