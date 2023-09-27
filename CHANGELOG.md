@@ -1,13 +1,34 @@
 ---
 Author: 目棃
-Date: 2023-09-08
 Description: CHANGELOG
-Update: 2023-09-15
+Date: 2023-09-08
+Update: 2023-09-27
 ---
 
-> 本文档 [`Front-matter`](https://github.com/BTMuli/Mucli#FrontMatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-09-08 09:45:17 `
+> 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-09-08 09:45:17 `
 >
-> 更新于 `2023-09-15 19:43:50`
+> 更新于 `2023-09-27 08:41:43`
+
+## [0.3.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.2) (2023-9-27)
+
+### Feat
+
+- 成就：支持 [`YaeAchievement`](https://github.com/HolographicHat/YaeAchievement) 直接导入 [`#42`](https://github.com/BTMuli/TeyvatGuide/issues/42)
+- 资源：更新至 4.1 版本 [`#41`](https://github.com/BTMuli/TeyvatGuide/issues/41)
+- 应用：退出主窗口自动关闭所有子窗口
+- 应用：完成单例模式，防止多次打开应用
+
+### Fix
+
+- 解析：修复表情解析概率报错
+- 路由：路由跳转优化
+
+### Change
+
+- UI: 配色变更
+- 分享：改为直接复制到剪贴板
+
+FullCommits: [`v0.3.1...v0.3.2`](https://BTMuli/TeyvatGuide/compare/v0.3.1...v0.3.2)
 
 ## [0.3.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.1) (2023-09-15)
 
