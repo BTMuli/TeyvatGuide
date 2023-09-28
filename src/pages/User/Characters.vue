@@ -110,6 +110,13 @@ async function refreshRoles(): Promise<void> {
     await TGSqlite.saveUserCharacter(user.gameUid, res);
     loadingTitle.value = "正在更新角色数据";
     await loadRole();
+  } else {
+    // todo 1034 极验处理
+    showSnackbar({
+      text: `[${res.retcode}] ${res.message}`,
+      color: "error",
+    });
+    console.error(res);
   }
   loading.value = false;
 }

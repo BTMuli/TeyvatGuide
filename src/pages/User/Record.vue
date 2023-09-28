@@ -92,10 +92,12 @@ async function refresh(): Promise<void> {
     await TGSqlite.saveUserRecord(res, user.gameUid);
     await initUserRecordData();
   } else {
+    // todo 1034 极验处理
     showSnackbar({
       text: `[${res.retcode}] ${res.message}`,
       color: "error",
     });
+    console.error(res);
   }
   loading.value = false;
 }
