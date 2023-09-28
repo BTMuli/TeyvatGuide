@@ -36,7 +36,8 @@
           "https://act-webstatic.mihoyo.com/*",
           "https://sdk-webstatic.mihoyo.com/*",
           "https://homa.snapgenshin.com/*",
-          "https://enka-api.hut.ao/*"
+          "https://enka-api.hut.ao/*",
+          "https://api.geetest.com/*"
         ]
       },
       "shell": {

@@ -17,6 +17,7 @@ parserOptions:
     - tsconfig.node.json
 globals:
   TGApp: readonly
+  window: readonly
 plugins:
   - vue
   - prettier
