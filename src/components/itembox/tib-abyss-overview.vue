@@ -1,5 +1,5 @@
 <template>
-  <TItemBox :model-value="box" />
+  <TItemBox v-model="box" />
 </template>
 <script lang="ts" setup>
 // vue
