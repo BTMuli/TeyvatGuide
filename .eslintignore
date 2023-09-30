@@ -3,5 +3,3 @@ dist
 src-tauri/target
 # Submodules
 TGAssistant
-# Public
-public/js

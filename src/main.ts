@@ -2,7 +2,7 @@
  * @file main.ts
  * @description Main entry
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @since Beta v0.3.3
  */
 
 // vue
@@ -17,8 +17,10 @@ import "vuetify/styles";
 import { createVuetify } from "vuetify";
 // 全局样式
 import "./assets/index.css";
+// gt.js
+import "https://static.geetest.com/static/js/gt.0.4.9.js";
 
-if (import.meta.env.MODE === "development") {
+if (import.meta?.env?.MODE === "development") {
   await import("@vue/devtools").then((i) => {
     i.default.connect(/* host, port */);
   });
