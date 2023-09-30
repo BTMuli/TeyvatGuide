@@ -41,44 +41,48 @@ export async function getVerification(
  * @description 将验证完的参数提交给米游社
  * @since Beta v0.3.3
  * @todo 待测试
+ * @param {string} urlOri 原始 url
  * @param {Record<string, string>} cookie cookie
  * @param {TGApp.BBS.Geetest.GeetestValidate} validate 验证码参数
- * @return {Promise<TGApp.BBS.Response.Base|unknown>} 提交结果
+ * @return {Promise<boolean>} 提交结果
  */
 export async function submitVerification(
+  urlOri: string,
   cookie: Record<string, string>,
   validate: TGApp.BBS.Geetest.GeetestValidate,
-): Promise<TGApp.BBS.Response.Base | unknown> {
+): Promise<boolean> {
   const url = "https://api-takumi-record.mihoyo.com/game_record/app/card/wapi/verifyVerification";
-  const data = {
+  const dataRaw = {
     geetest_challenge: validate.geetest_challenge,
     geetest_validate: validate.geetest_validate,
     geetest_seccode: validate.geetest_seccode,
   };
-  console.log(data);
-  const header = TGUtils.User.getHeader(cookie, "POST", data, "lk2", true);
+  const data = JSON.stringify(dataRaw);
+  const header = TGUtils.User.getHeader(cookie, "POST", data, "common", false);
   const reqHeader = {
     ...header,
     "x-rpc-challenge_game": "2",
-    "x-rpc-challenge_trace": validate.geetest_challenge,
+    "x-rpc-challenge": validate.geetest_challenge,
     "x-rpc-validate": validate.geetest_validate,
     "x-rpc-seccode": validate.geetest_seccode,
+    "x-rpc-challenge_path": urlOri,
   };
   console.log(reqHeader);
   return await http
     .fetch<TGApp.BBS.Response.Base>(url, {
       method: "POST",
       headers: reqHeader,
-      body: http.Body.json(data),
+      body: http.Body.json(dataRaw),
     })
     .then((res) => {
+      console.log(res.rawHeaders);
       if (res.data.retcode !== 0) {
         showSnackbar({
           text: `[${res.data.retcode}] ${res.data.message}`,
           color: "error",
         });
-        console.error(res.data);
+        return false;
       }
-      return res.data;
+      return true;
     });
 }

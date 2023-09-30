@@ -2,7 +2,7 @@
  * @file types BBS Geetest.d.ts
  * @description BBS 极验相关类型定义文件
  * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.2
+ * @since Beta v0.3.3
  */
 
 declare namespace TGApp.BBS.Geetest {
@@ -76,22 +76,19 @@ declare namespace TGApp.BBS.Geetest {
    * @since Beta v0.3.3
    * @todo 完善
    * @interface GeetestCaptcha
-   * @property {string} getValidate
-   * @property {Function} onReady
+   * @property {Function} appendTo
+   * @property {Function} getValidate
    * @property {Function} onRefresh
    * @property {Function} onSuccess
-   * @property {Function} onError
    * @property {Function} onClose
    * @return GeetestCaptcha
    */
   export interface GeetestCaptcha {
     appendTo: (selector: string) => void;
     getValidate: () => GeetestValidate;
-    onReady: (callback: () => void) => GeetestCaptcha;
     onRefresh: (callback: () => void) => GeetestCaptcha;
-    onSuccess: (callback: () => void) => GeetestCaptcha;
-    onError: (callback: () => void) => GeetestCaptcha;
-    onClose: (callback: () => void) => GeetestCaptcha;
+    onSuccess: (callback: () => void) => void;
+    onClose: (callback: () => void) => void;
   }
 
   /**

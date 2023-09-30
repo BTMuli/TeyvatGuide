@@ -1,6 +1,6 @@
 <template>
   <transition name="func-geetest-outer">
-    <div v-show="show || showOuter" class="geetest-overlay" @click.self.prevent="handleOuter">
+    <div v-show="show || showOuter" class="geetest-overlay" @click.self.prevent>
       <transition name="func-geetest-inner">
         <div v-show="showInner" class="geetest-box">
           <div class="geetest-top">
@@ -26,7 +26,11 @@ const showInner = ref<boolean>(false);
 
 const userStore = useUserStore();
 
-const geetestRef = ref<HTMLElement | null>(null);
+export interface GeetestParam {
+  urlOri: string;
+}
+
+const geetestRef = ref<HTMLElement>(<HTMLElement>document.getElementById("geetest"));
 
 watch(show, () => {
   if (show.value) {
@@ -44,7 +48,7 @@ watch(show, () => {
   }
 });
 
-async function displayBox(): Promise<void> {
+async function displayBox(urlOri: string): Promise<boolean> {
   const cookie = userStore.getCookieGroup3();
   const res = await TGRequest.User.verification.get(cookie.ltoken, cookie.ltuid);
   if ("retcode" in res) {
@@ -52,48 +56,35 @@ async function displayBox(): Promise<void> {
       text: `[${res.retcode}]${res.message}`,
       color: "error",
     });
-    return;
+    return false;
   }
   show.value = true;
-  // @ts-expect-error Cannot find name 'initGeetest'.
-  initGeetest(
-    {
-      gt: res.gt,
-      challenge: res.challenge,
-      offline: false,
-      new_captcha: true,
-      product: "custom",
-      area: "#verify",
-      width: "250px",
-    },
-    (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => {
-      geetestRef.value = document.getElementById("geetest");
-      if (geetestRef.value === null) throw new Error("Cannot find element with id 'geetest'.");
-      geetestRef.value.innerHTML = "";
-      captchaObj.appendTo("#geetest");
-      captchaObj
-        .onReady(() => {
-          console.log("ready");
-        })
-        .onSuccess(() => {
+  return await new Promise((resolve) => {
+    // @ts-expect-error Cannot find name 'initGeetest'.
+    initGeetest(
+      {
+        gt: res.gt,
+        challenge: res.challenge,
+        offline: false,
+        new_captcha: true,
+        product: "custom",
+        area: "#verify",
+        width: "250px",
+      },
+      (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => {
+        geetestRef.value.innerHTML = "";
+        captchaObj.appendTo("#geetest");
+        captchaObj.onSuccess(async () => {
           const validate = captchaObj.getValidate();
-          (async () => {
-            await TGRequest.User.verification.verify(userStore.cookie, validate);
-            show.value = false;
-          })().catch(() => {}); // 防止报错
-        })
-        .onError(() => {
-          console.log("error");
-        })
-        .onClose(() => {
-          console.log("close");
+          const res = TGRequest.User.verification.verify(urlOri, userStore.cookie, validate);
+          resolve(res);
         });
-    },
-  );
-}
-
-function handleOuter(): void {
-  show.value = false;
+        captchaObj.onClose(() => {
+          show.value = false;
+        });
+      },
+    );
+  });
 }
 
 defineExpose({

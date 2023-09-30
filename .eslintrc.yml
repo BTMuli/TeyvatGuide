@@ -36,5 +36,6 @@ rules:
       leadingUnderscore: "allow"
       trailingUnderscore: "allow"
   "@typescript-eslint/no-non-null-assertion": warn
+  "@typescript-eslint/no-misused-promises": warn
   # Vue
   "vue/multi-word-component-names": off

@@ -1,13 +1,10 @@
 /**
  * @file web utils getRequestHeader.ts
  * @description 获取请求头
- * @author BTMuli <bt-muli@outlook.com>
- * @since Beta v0.3.0
+ * @since Beta v0.3.3
  */
 
-// Node
-import md5 from "js-md5";
-// Tauri.Genshin
+import Md5 from "js-md5";
 import TGConstant from "../constant/TGConstant";
 import { transCookie, transParams } from "./tools";
 
@@ -59,7 +56,7 @@ export function getRandomString(length: number): string {
 
 /**
  * @description 获取 ds
- * @since Beta v0.3.0
+ * @since Beta v0.3.3
  * @version 2.50.1
  * @param {string} method 请求方法
  * @param {string} data 请求数据
@@ -76,7 +73,7 @@ function getDS(method: string, data: string, saltType: string, isSign: boolean):
   const query = method === "GET" ? data : "";
   let hashStr = `salt=${salt}&t=${time}&r=${random}&b=${body}&q=${query}`;
   if (isSign) hashStr = `salt=${salt}&t=${time}&r=${random}`;
-  const md5Str = md5.update(hashStr).hex();
+  const md5Str = Md5.md5.update(hashStr).hex();
   return `${time},${random},${md5Str}`;
 }
 

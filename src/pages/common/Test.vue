@@ -30,7 +30,8 @@ onMounted(async () => {
 });
 
 async function getGC(): Promise<void> {
-  await showGeetest();
+  const res = await showGeetest();
+  console.log(res);
 }
 </script>
 <style lang="css" scoped>
