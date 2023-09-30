@@ -20,7 +20,8 @@
     "tauri:icon": "tauri icon ./public/icon.png",
     "vite:dev": "vite dev",
     "vite:build": "vite build",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "fix:pnpm": "pnpm add https://github.com/tauri-apps/tauri-plugin-sql#v1"
   },
   "lint-staged": {
     "*.{ts,vue}": "eslint --fix",

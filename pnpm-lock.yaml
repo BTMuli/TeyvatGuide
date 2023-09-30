@@ -37,7 +37,7 @@ dependencies:
     version: 3.4.1(vue@3.3.4)
   tauri-plugin-sql-api:
     specifier: github:tauri-apps/tauri-plugin-sql#v1
-    version: git@github.com+tauri-apps/tauri-plugin-sql/533198dd3b6cfca36d876918d22efcdaac43065a
+    version: github.com/tauri-apps/tauri-plugin-sql/1c79471feb06366fe1c11cb1cb6c67bcdb80c215
   vue:
     specifier: ^3.3.4
     version: 3.3.4
@@ -546,6 +546,11 @@ packages:
 
   /@tauri-apps/api@1.4.0:
     resolution: {integrity: sha512-Jd6HPoTM1PZSFIzq7FB8VmMu3qSSyo/3lSwLpoapW+lQ41CL5Dow2KryLg+gyazA/58DRWI9vu/XpEeHK4uMdw==}
+    engines: {node: '>= 14.6.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
+    dev: false
+
+  /@tauri-apps/api@1.5.0:
+    resolution: {integrity: sha512-yQY9wpVNuiYhLLuyDlu1nBpqJELT1fGp7OctN4rW9I2W1T2p7A3tqPxsEzQprEwneQRBAlPM9vC8NsnMbct+pg==}
     engines: {node: '>= 14.6.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
     dev: false
 
@@ -5074,10 +5079,10 @@ packages:
       tslib: 2.3.0
     dev: false
 
-  git@github.com+tauri-apps/tauri-plugin-sql/533198dd3b6cfca36d876918d22efcdaac43065a:
-    resolution: {commit: 533198dd3b6cfca36d876918d22efcdaac43065a, repo: git@github.com:tauri-apps/tauri-plugin-sql.git, type: git}
+  github.com/tauri-apps/tauri-plugin-sql/1c79471feb06366fe1c11cb1cb6c67bcdb80c215:
+    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-sql/tar.gz/1c79471feb06366fe1c11cb1cb6c67bcdb80c215}
     name: tauri-plugin-sql-api
     version: 0.0.0
     dependencies:
-      '@tauri-apps/api': 1.4.0
+      '@tauri-apps/api': 1.5.0
     dev: false
