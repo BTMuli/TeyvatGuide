@@ -15,12 +15,13 @@ import { getGameAccountsByCookie, getGameAccountsBySToken } from "./getGameAccou
 import { getGameRecord } from "./getGameRecord";
 import { getLTokenBySToken } from "./getLToken";
 import { getGameRoleListByLToken } from "./getRoleList";
+import { getStokenByGameToken } from "./getStoken";
 import getSyncAvatarDetail from "./getSyncAvatarDetail";
 import getSyncAvatarListAll from "./getSyncAvatarListAll";
 import { getTokensByLoginTicket } from "./getTokens";
 import { getUserInfoByCookie } from "./getUserInfo";
+import { getVerification, submitVerification } from "./operVerification";
 import { verifyLToken } from "./verifyLToken";
-import { getStokenByGameToken } from "./getStoken";
 
 const TGRequest = {
   Anno: {
@@ -55,6 +56,10 @@ const TGRequest = {
     calculate: {
       getSyncAvatarListAll,
       getSyncAvatarDetail,
+    },
+    verification: {
+      get: getVerification,
+      verify: submitVerification,
     },
   },
 };

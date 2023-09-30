@@ -13,9 +13,27 @@
         </div>
       </div>
     </div>
+    <h1>极验测试</h1>
+    <div class="btn-list">
+      <v-btn class="test-btn" @click="getGC">获取极验</v-btn>
+    </div>
+    <to-geetest v-model="visible"></to-geetest>
   </div>
 </template>
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { onMounted, ref } from "vue";
+import ToGeetest from "../../components/overlay/to-geetest.vue";
+
+const visible = ref<boolean>(false);
+
+onMounted(async () => {
+  visible.value = false;
+});
+
+function getGC(): void {
+  visible.value = true;
+}
+</script>
 <style lang="css" scoped>
 .btn-list {
   display: flex;
