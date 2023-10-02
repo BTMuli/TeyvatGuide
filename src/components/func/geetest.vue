@@ -26,10 +26,6 @@ const showInner = ref<boolean>(false);
 
 const userStore = useUserStore();
 
-export interface GeetestParam {
-  urlOri: string;
-}
-
 const geetestRef = ref<HTMLElement>(<HTMLElement>document.getElementById("geetest"));
 
 watch(show, () => {
@@ -48,7 +44,7 @@ watch(show, () => {
   }
 });
 
-async function displayBox(urlOri: string): Promise<boolean> {
+async function displayBox(): Promise<boolean> {
   const cookie = userStore.getCookieGroup3();
   const res = await TGRequest.User.verification.get(cookie.ltoken, cookie.ltuid);
   if ("retcode" in res) {
@@ -76,7 +72,7 @@ async function displayBox(urlOri: string): Promise<boolean> {
         captchaObj.appendTo("#geetest");
         captchaObj.onSuccess(async () => {
           const validate = captchaObj.getValidate();
-          const res = TGRequest.User.verification.verify(urlOri, userStore.cookie, validate);
+          const res = TGRequest.User.verification.verify(userStore.cookie, validate);
           resolve(res);
         });
         captchaObj.onClose(() => {

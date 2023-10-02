@@ -5,7 +5,7 @@
  */
 
 import { h, render, type VNode } from "vue";
-import geetest, { type GeetestParam } from "./geetest.vue";
+import geetest from "./geetest.vue";
 
 const geetestId = "tg-func-geetest";
 
@@ -20,13 +20,13 @@ const renderBox = (): VNode => {
 
 let geetestInstance: VNode;
 
-const showGeetest = async (props: GeetestParam): Promise<string | boolean> => {
+const showGeetest = async (): Promise<boolean> => {
   if (geetestInstance) {
     const boxVue = geetestInstance.component;
     return boxVue?.exposeProxy?.displayBox();
   } else {
     geetestInstance = renderBox();
-    return await showGeetest(props);
+    return await showGeetest();
   }
 };
 

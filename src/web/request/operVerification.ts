@@ -7,6 +7,7 @@
 import TGUtils from "../utils/TGUtils";
 import { http } from "@tauri-apps/api";
 import showSnackbar from "../../components/func/snackbar";
+import TGConstant from "../constant/TGConstant";
 
 /**
  * @description 发起验证请求
@@ -41,13 +42,11 @@ export async function getVerification(
  * @description 将验证完的参数提交给米游社
  * @since Beta v0.3.3
  * @todo 待测试
- * @param {string} urlOri 原始 url
  * @param {Record<string, string>} cookie cookie
  * @param {TGApp.BBS.Geetest.GeetestValidate} validate 验证码参数
  * @return {Promise<boolean>} 提交结果
  */
 export async function submitVerification(
-  urlOri: string,
   cookie: Record<string, string>,
   validate: TGApp.BBS.Geetest.GeetestValidate,
 ): Promise<boolean> {
@@ -59,13 +58,16 @@ export async function submitVerification(
   };
   const data = JSON.stringify(dataRaw);
   const header = TGUtils.User.getHeader(cookie, "POST", data, "common", false);
+  header["x-rpc-client_type"] = "2";
   const reqHeader = {
     ...header,
-    "x-rpc-challenge_game": "2",
+    "x-rpc-app_id": TGConstant.BBS.APP_ID,
     "x-rpc-challenge": validate.geetest_challenge,
     "x-rpc-validate": validate.geetest_validate,
     "x-rpc-seccode": validate.geetest_seccode,
-    "x-rpc-challenge_path": urlOri,
+    "x-rpc-game_biz": "hk4e_cn",
+    "x-rpc-sdk_version": "1.3.1.2",
+    "x-rpc-device_id": "FA47BE878C143D2FE18785B660EF114A",
   };
   console.log(reqHeader);
   return await http
@@ -81,6 +83,7 @@ export async function submitVerification(
           text: `[${res.data.retcode}] ${res.data.message}`,
           color: "error",
         });
+        console.log(res.data);
         return false;
       }
       return true;
