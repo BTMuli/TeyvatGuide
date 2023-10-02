@@ -1,8 +1,7 @@
 /**
  * @file plugins Sqlite sql insertData.ts
  * @description Sqlite 插入数据 sql 语句
- * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Beta v0.3.3
  */
 
 // utils
@@ -112,7 +111,7 @@ export function insertNameCardData(data: TGApp.App.NameCard.Item): string {
 
 /**
  * @description 插入角色数据
- * @since Alpha v0.2.0
+ * @since Beta v0.3.3
  * @param {TGApp.User.Character.Item} data 角色数据
  * @returns {string} sql
  */
@@ -120,14 +119,14 @@ export function insertCharacterData(data: TGApp.App.Character.WikiBriefInfo): st
   return `
       INSERT INTO AppCharacters (id, name, star, element, weapon, nameCard, birthday, updated)
       VALUES (${data.id}, '${data.name}', ${data.star}, '${data.element}', '${data.weapon}',
-              '${data.nameCard}', '${data.birthday}', datetime('now', 'localtime'))
+              '${data.nameCard}', '${data.birthday.toString()}', datetime('now', 'localtime'))
       ON CONFLICT(id) DO UPDATE
           SET name     = '${data.name}',
               star     = ${data.star},
               element  = '${data.element}',
               weapon   = '${data.weapon}',
               nameCard = '${data.nameCard}',
-              birthday = '${data.birthday}';
+              birthday = '${data.birthday.toString()}';
   `;
 }
 
