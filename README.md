@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2023-09-27
+Update: 2023-10-04
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2023-09-27 08:43:41`
+> 更新于 `2023-10-04 21:23:48`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -122,3 +122,7 @@ A Genshin Impact assistant app based on Tauri.
 - [gs-helper](https://github.com/vikiboss/gs-helper)
 - [paimon-moe](https://github.com/MadeBaruna/paimon-moe)
 - [Adachi-BOT](https://github.com/Arondight/Adachi-BOT)
+
+感谢 JetBrains 提供的开源许可证。
+
+[![JetBrains](https://www.jetbrains.com/company/brand/img/jetbrains_logo.png)](https://www.jetbrains.com/?from=TeyvatGuide)
