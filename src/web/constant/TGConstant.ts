@@ -1,12 +1,10 @@
 /**
  * @file web constant TGConstant.ts
  * @description 常量
- * @author BTMuli <bt-muli@outlook.com>
- * @since Beta v0.3.0
+ * @since Beta v0.3.3
  */
 
-import { BBS_VERSION, BBS_HEADER_AGENT, BBS_APP_ID } from "./bbs";
-import SALT from "./salt";
+import { BBS_VERSION, BBS_HEADER_AGENT, BBS_APP_ID, BBS_SALT } from "./bbs";
 import SERVER from "./server";
 import { GAME_BIZ } from "./utils";
 
@@ -16,7 +14,7 @@ const TGConstant = {
     USER_AGENT: BBS_HEADER_AGENT,
     APP_ID: BBS_APP_ID,
   },
-  Salt: SALT,
+  Salt: BBS_SALT,
   Server: SERVER,
   Utils: {
     GAME_BIZ,

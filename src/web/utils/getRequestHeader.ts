@@ -10,21 +10,21 @@ import { transCookie, transParams } from "./tools";
 
 /**
  * @description 获取 salt
- * @since Beta v0.3.0
- * @version 2.50.1
+ * @since Beta v0.3.3
+ * @version 2.59.1
  * @param {string} saltType salt 类型
  * @returns {string} salt
  */
 function getSalt(saltType: string): string {
   switch (saltType) {
     case "common":
-      return TGConstant.Salt.Other.X4;
+      return TGConstant.Salt.X4;
     case "prod":
-      return TGConstant.Salt.Other.prod;
+      return TGConstant.Salt.PROD;
     case "lk2":
-      return TGConstant.Salt.BBS.LK2;
+      return TGConstant.Salt.LK2;
     default:
-      return TGConstant.Salt.Other.X4;
+      return TGConstant.Salt.X4;
   }
 }
 
