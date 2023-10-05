@@ -123,19 +123,31 @@ async function getAbyssData(): Promise<void> {
     ltoken: abyssCookie.ltoken,
     ltuid: abyssCookie.ltuid,
   };
-  if (localAbyssID.value.length < 2) {
-    loadingTitle.value = "正在获取上期深渊数据";
-    const resP = await TGRequest.User.byCookie.getAbyss(cookie, "2", user.value);
-    if (!("retcode" in resP)) {
-      loadingTitle.value = "正在保存上期深渊数据";
-      await TGSqlite.saveAbyss(user.value.gameUid, resP);
-    }
+  loadingTitle.value = "正在获取上期深渊数据";
+  const resP = await TGRequest.User.byCookie.getAbyss(cookie, "2", user.value);
+  if (!("retcode" in resP)) {
+    loadingTitle.value = "正在保存上期深渊数据";
+    await TGSqlite.saveAbyss(user.value.gameUid, resP);
+  } else {
+    showSnackbar({
+      text: `[${resP.retcode}]${resP.message}`,
+      color: "error",
+    });
+    loading.value = false;
+    return;
   }
   loadingTitle.value = "正在获取本期深渊数据";
   const res = await TGRequest.User.byCookie.getAbyss(cookie, "1", user.value);
   if (!("retcode" in res)) {
     loadingTitle.value = "正在保存本期深渊数据";
     await TGSqlite.saveAbyss(user.value.gameUid, res);
+  } else {
+    showSnackbar({
+      text: `[${res.retcode}]${res.message}`,
+      color: "error",
+    });
+    loading.value = false;
+    return;
   }
   loadingTitle.value = "正在加载深渊数据";
   await initAbyssData();
