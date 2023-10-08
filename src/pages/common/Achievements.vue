@@ -69,6 +69,7 @@
           :key="achievement.id"
           class="card-right"
           :style="{ transform: `translateY(${translateY})` }"
+          :title="seriesList.find((item) => item.id === achievement.series)?.name ?? ''"
         >
           <div v-if="achievement.progress !== 0" class="achievement-progress">
             {{ achievement.progress }}
