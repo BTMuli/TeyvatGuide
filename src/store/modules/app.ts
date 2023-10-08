@@ -2,7 +2,7 @@
  * @file store modules app.ts
  * @description App store module
  * @author BTMuli <bt-muli@outlook.com>
- * @since Beta v0.3.1
+ * @since Beta v0.3.3
  */
 
 // vue
@@ -36,8 +36,6 @@ export const useAppStore = defineStore(
     });
     // 开发者模式
     const devMode = ref(false);
-    // 环境检测
-    const devEnv = ref(false);
     // 应用主题
     const theme = ref("default");
 
@@ -54,7 +52,6 @@ export const useAppStore = defineStore(
     function init(): void {
       loading.value = false;
       devMode.value = false;
-      devEnv.value = false;
       sidebar.submenu = {
         wiki: false,
       };
@@ -78,7 +75,6 @@ export const useAppStore = defineStore(
       buildTime,
       sidebar,
       devMode,
-      devEnv,
       dataPath,
       userPath,
       init,
@@ -96,7 +92,7 @@ export const useAppStore = defineStore(
       {
         key: "app",
         storage: window.localStorage,
-        paths: ["devMode", "loading", "buildTime", "devEnv"],
+        paths: ["devMode", "loading", "buildTime"],
       },
       {
         key: "sidebar",

@@ -107,7 +107,7 @@
     <v-list-subheader :inset="true" class="config-header" title="调试" />
     <v-divider :inset="true" class="border-opacity-75" />
     <v-list-item
-      v-if="appStore.devEnv"
+      v-if="isDevEnv"
       title="调试模式"
       subtitle="开启后将显示调试信息"
       prepend-icon="mdi-bug-play"
@@ -175,6 +175,8 @@ const appStore = useAppStore();
 const userStore = useUserStore();
 const homeStore = useHomeStore();
 const achievementsStore = useAchievementsStore();
+
+const isDevEnv = ref<boolean>(!import.meta?.env?.PROD);
 
 // About App
 const versionApp = ref<string>("");

@@ -96,7 +96,7 @@ async function createDataDir(): Promise<void> {
 
 // 初始化数据库
 async function initData(): Promise<void> {
-  if (appStore.devEnv) {
+  if (!import.meta?.env?.PROD) {
     console.info("开发环境，跳过数据库初始化！");
     return;
   }

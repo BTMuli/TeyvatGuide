@@ -49,10 +49,9 @@ function readLoading(): void {
 onMounted(async () => {
   loadingTitle.value = "正在加载首页";
   loading.value = true;
+  const isProdEnv = import.meta?.env?.PROD;
   // 获取当前环境
-  const timeGet = getBuildTime();
-  appStore.devEnv = timeGet.startsWith("dev");
-  if (!appStore.devEnv && appStore.devMode) {
+  if (isProdEnv && appStore.devMode) {
     appStore.devMode = false;
   }
   const showItems = homeStore.getShowValue();
@@ -71,7 +70,7 @@ onMounted(async () => {
     }),
   );
   timer.value = setInterval(readLoading, 100);
-  if (appStore.buildTime !== getBuildTime() && !appStore.devEnv) {
+  if (appStore.buildTime !== getBuildTime() && isProdEnv) {
     const confirm = await showConfirm({
       title: "检测到版本更新",
       text: "请到设置页手动更新版本，即将弹出更新说明子页面",

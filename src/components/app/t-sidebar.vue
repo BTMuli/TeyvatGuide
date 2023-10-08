@@ -57,12 +57,12 @@
         </template>
       </v-list-item>
       <v-divider />
-      <v-list-item v-show="appStore.devEnv" title="测试" value="test" :link="true" href="/test">
+      <v-list-item v-show="isDevEnv" title="测试" value="test" :link="true" href="/test">
         <template #prepend>
           <v-icon>mdi-test-tube</v-icon>
         </template>
       </v-list-item>
-      <v-divider v-show="appStore.devEnv" />
+      <v-divider v-show="isDevEnv" />
       <v-list-group value="wiki" :fluid="true">
         <template #activator="{ props }">
           <v-list-item title="图鉴" v-bind="props">
@@ -131,6 +131,8 @@ import { useUserStore } from "../../store/modules/user";
 
 const appStore = useAppStore();
 const userStore = useUserStore();
+
+const isDevEnv = ref<boolean>(!import.meta?.env?.PROD);
 
 const userInfo = computed(() => {
   const info = userStore.getBriefInfo();
