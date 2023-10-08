@@ -20,7 +20,7 @@ import "./assets/index.css";
 // gt.js
 import "https://static.geetest.com/static/js/gt.0.4.9.js";
 
-if (import.meta?.env?.MODE === "development") {
+if (import.meta.env.MODE === "development") {
   await import("@vue/devtools").then((i) => {
     i.default.connect(/* host, port */);
   });

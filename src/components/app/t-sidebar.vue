@@ -132,7 +132,7 @@ import { useUserStore } from "../../store/modules/user";
 const appStore = useAppStore();
 const userStore = useUserStore();
 
-const isDevEnv = ref<boolean>(!import.meta?.env?.PROD);
+const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 
 const userInfo = computed(() => {
   const info = userStore.getBriefInfo();

@@ -49,7 +49,7 @@ function readLoading(): void {
 onMounted(async () => {
   loadingTitle.value = "正在加载首页";
   loading.value = true;
-  const isProdEnv = import.meta?.env?.PROD;
+  const isProdEnv = import.meta.env.MODE === "production";
   // 获取当前环境
   if (isProdEnv && appStore.devMode) {
     appStore.devMode = false;

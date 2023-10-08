@@ -176,7 +176,7 @@ const userStore = useUserStore();
 const homeStore = useHomeStore();
 const achievementsStore = useAchievementsStore();
 
-const isDevEnv = ref<boolean>(!import.meta?.env?.PROD);
+const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 
 // About App
 const versionApp = ref<string>("");
