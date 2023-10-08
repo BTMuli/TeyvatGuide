@@ -76,8 +76,11 @@
           </div>
           <v-list-item>
             <template #prepend>
-              <v-icon :color="achievement.isCompleted ? 'success' : 'var(--tgc-blue-3)'">
-                {{ achievement.isCompleted ? "mdi-check-circle" : "mdi-circle" }}
+              <v-icon v-if="!achievement.isCompleted" color="var(--tgc-blue-3)">
+                mdi-circle
+              </v-icon>
+              <v-icon v-else class="achievement-finish">
+                <img alt="finish" src="/source/UI/finish.webp" />
               </v-icon>
             </template>
             <v-list-item-title>
@@ -499,6 +502,11 @@ async function handleImportOuter(app: string): Promise<void> {
   font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
+}
+
+.achievement-finish img {
+  width: 30px;
+  height: 30px;
 }
 
 /* 成就完成时间 */
