@@ -14,15 +14,16 @@
 // vue
 import { onBeforeMount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import showSnackbar from "./components/func/snackbar";
 import TSidebar from "./components/app/t-sidebar.vue";
 import TBackTop from "./components/app/t-backTop.vue";
 // tauri
 import { app, event, fs, tauri, window as TauriWindow } from "@tauri-apps/api";
 // store
 import { useAppStore } from "./store/modules/app";
+import { useUserStore } from "./store/modules/user";
 // utils
 import { getEmojis } from "./plugins/Mys/request/getEmojis";
-import showSnackbar from "./components/func/snackbar";
 import TGSqlite from "./plugins/Sqlite";
 
 const appStore = useAppStore();
@@ -40,7 +41,8 @@ onBeforeMount(async () => {
     await getDeepLink();
     await win.setTitle(title);
     await emojiLoad();
-    await checkLoad();
+    await checkAppLoad();
+    await checkUserLoad();
   }
 });
 
@@ -75,7 +77,7 @@ async function emojiLoad(): Promise<void> {
   }
 }
 
-async function checkLoad(): Promise<void> {
+async function checkAppLoad(): Promise<void> {
   if (appStore.loading) {
     console.info("数据已加载！");
     return;
@@ -84,6 +86,41 @@ async function checkLoad(): Promise<void> {
   await initData();
   appStore.loading = true;
   console.info("数据加载完成！");
+}
+
+// 检测 ck,info 数据
+async function checkUserLoad(): Promise<void> {
+  const userStore = useUserStore();
+  const ckLocal = userStore.cookie;
+  const ckDB = await TGSqlite.getCookie();
+  if (JSON.stringify(ckLocal) !== JSON.stringify(ckDB)) {
+    userStore.cookie = ckDB;
+    console.info("cookie 数据已更新！");
+  } else if (JSON.stringify(ckLocal) === "{}") {
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        showSnackbar({
+          text: "请先登录！",
+          color: "error",
+          timeout: 3000,
+        });
+        resolve(true);
+      }, 3000);
+    });
+  } else {
+    console.info("cookie 数据已加载！");
+  }
+  const infoLocal = userStore.briefInfo;
+  const appData = await TGSqlite.getAppData();
+  const infoDB = appData.find((item) => item.key === "userInfo")?.value;
+  if (infoDB === undefined && JSON.stringify(infoLocal) !== "{}") {
+    await TGSqlite.saveAppData("userInfo", JSON.stringify(infoLocal));
+  } else if (infoDB !== undefined && infoLocal !== JSON.parse(infoDB)) {
+    userStore.setBriefInfo(JSON.parse(infoDB));
+    console.info("briefInfo 数据已更新！");
+  } else {
+    console.info("briefInfo 数据已加载！");
+  }
 }
 
 // 创建数据文件夹

@@ -270,7 +270,7 @@ async function confirmRefreshUser(): Promise<void> {
     return;
   }
   const ck = userStore.cookie;
-  if (Object.keys(ck).length < 1) {
+  if (JSON.stringify(ck) === "{}") {
     showSnackbar({
       color: "error",
       text: "扫码登录后才能刷新用户信息!",
@@ -314,6 +314,7 @@ async function confirmRefreshUser(): Promise<void> {
     failCount++;
   } else {
     userStore.setBriefInfo(infoRes);
+    await TGSqlite.saveAppData("userInfo", JSON.stringify(infoRes));
     loadingTitle.value = "获取成功!正在获取用户游戏账号信息";
   }
   const accountRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);
