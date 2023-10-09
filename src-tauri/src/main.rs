@@ -3,16 +3,24 @@
 
 use tauri::Manager;
 
-// 放一个常数，用来判断是否注册deep link
-static mut DEEP_LINK_REGISTERED: bool = false;
+// 放一个常数，用来判断应用是否初始化
+static mut APP_INITIALIZED: bool = false;
 
 #[tauri::command]
-async fn register_deep_link(app_handle: tauri::AppHandle) {
+async fn init_app(app_handle: tauri::AppHandle) {
     unsafe {
-        if DEEP_LINK_REGISTERED {
+        if APP_INITIALIZED {
             return;
         }
     }
+    app_handle.emit_all("initApp", ()).unwrap();
+    unsafe {
+        APP_INITIALIZED = true;
+    }
+}
+
+#[tauri::command]
+async fn register_deep_link(app_handle: tauri::AppHandle) {
     tauri_plugin_deep_link::register(
         "teyvatguide",
         move |request| {
@@ -21,9 +29,6 @@ async fn register_deep_link(app_handle: tauri::AppHandle) {
         },
     )
     .unwrap();
-    unsafe {
-        DEEP_LINK_REGISTERED = true;
-    }
 }
 
 fn main() {
@@ -48,7 +53,7 @@ fn main() {
             }
         })
         .plugin(tauri_plugin_sql::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![register_deep_link])
+        .invoke_handler(tauri::generate_handler![register_deep_link, init_app])
         .setup(|_app| {
             let _window = _app.get_window("TeyvatGuide").unwrap();
             #[cfg(debug_assertions)] // only include this code on debug builds

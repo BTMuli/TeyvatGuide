@@ -37,12 +37,9 @@ onBeforeMount(async () => {
   isMain.value = win.label === "TeyvatGuide";
   if (isMain.value) {
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
-    await tauri.invoke("register_deep_link");
-    await getDeepLink();
     await win.setTitle(title);
-    await emojiLoad();
-    await checkAppLoad();
-    await checkUserLoad();
+    await listenOnInit();
+    await tauri.invoke("init_app");
   }
 });
 
@@ -60,6 +57,17 @@ async function listenOnTheme(): Promise<void> {
       theme.value = themeGet;
       document.documentElement.className = theme.value;
     }
+  });
+}
+
+// 启动后只执行一次的监听
+async function listenOnInit(): Promise<void> {
+  await event.listen("initApp", async () => {
+    await tauri.invoke("register_deep_link");
+    await getDeepLink();
+    await emojiLoad();
+    await checkAppLoad();
+    await checkUserLoad();
   });
 }
 
