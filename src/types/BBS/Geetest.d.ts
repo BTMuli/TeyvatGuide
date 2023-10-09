@@ -1,7 +1,6 @@
 /**
  * @file types BBS Geetest.d.ts
  * @description BBS 极验相关类型定义文件
- * @author BTMuli<bt-muli@outlook.com>
  * @since Beta v0.3.3
  */
 
@@ -58,7 +57,7 @@ declare namespace TGApp.BBS.Geetest {
    * @property {boolean} new_captcha - 极验验证 new_captcha
    * @property {string} product - 极验验证 product
    * @property {string} width - 极验验证 width
-   * @property {boolean} https - 极验验证 https
+   * @property {string} area - 极验验证 area
    * @return InitGeetestParams
    */
   export interface InitGeetestParams {
@@ -68,17 +67,15 @@ declare namespace TGApp.BBS.Geetest {
     new_captcha: boolean;
     product: string;
     width: string;
-    https: boolean;
+    area: string;
   }
 
   /**
    * @description Geetest 插件 captchaObj
    * @since Beta v0.3.3
-   * @todo 完善
    * @interface GeetestCaptcha
    * @property {Function} appendTo
    * @property {Function} getValidate
-   * @property {Function} onRefresh
    * @property {Function} onSuccess
    * @property {Function} onClose
    * @return GeetestCaptcha
@@ -86,7 +83,6 @@ declare namespace TGApp.BBS.Geetest {
   export interface GeetestCaptcha {
     appendTo: (selector: string) => void;
     getValidate: () => GeetestValidate;
-    onRefresh: (callback: () => void) => GeetestCaptcha;
     onSuccess: (callback: () => void) => void;
     onClose: (callback: () => void) => void;
   }
@@ -106,3 +102,14 @@ declare namespace TGApp.BBS.Geetest {
     geetest_seccode: string;
   }
 }
+
+/**
+ * @description 设置全局 initGeetest 方法
+ * @param {TGApp.BBS.Geetest.InitGeetestParams} params 极验验证的请求方法-请求参数
+ * @param callback 极验验证的请求方法-回调函数
+ * @return {void}
+ */
+declare function initGeetest(
+  params: TGApp.BBS.Geetest.InitGeetestParams,
+  callback: (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => void,
+): void;

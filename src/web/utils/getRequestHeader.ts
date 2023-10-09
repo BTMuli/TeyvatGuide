@@ -101,12 +101,12 @@ export function getRequestHeader(
     ds = getDS(method, transParams(data), saltType, isSign);
   }
   return {
-    "User-Agent": TGConstant.BBS.USER_AGENT,
+    "user-agent": TGConstant.BBS.USER_AGENT,
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "5",
     "x-requested-with": "com.mihoyo.hyperion",
-    Referer: "https://webstatic.mihoyo.com",
-    DS: ds,
-    Cookie: transCookie(cookie),
+    referer: "https://webstatic.mihoyo.com",
+    ds,
+    cookie: transCookie(cookie),
   };
 }

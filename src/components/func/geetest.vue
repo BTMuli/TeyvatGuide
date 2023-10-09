@@ -44,43 +44,52 @@ watch(show, () => {
   }
 });
 
-async function displayBox(): Promise<boolean> {
-  const cookie = userStore.getCookieGroup3();
-  const res = await TGRequest.User.verification.get(cookie.ltoken, cookie.ltuid);
-  if ("retcode" in res) {
+async function displayBox(): Promise<void> {
+  const cookieGet = userStore.getCookieGroup3();
+  const resGet = await TGRequest.User.verification.get(cookieGet.ltoken, cookieGet.ltuid);
+  if ("retcode" in resGet) {
     showSnackbar({
-      text: `[${res.retcode}]${res.message}`,
+      text: `[${resGet.retcode}]${resGet.message}`,
       color: "error",
     });
-    return false;
+    return;
   }
   show.value = true;
-  return await new Promise((resolve) => {
-    // @ts-expect-error Cannot find name 'initGeetest'.
-    initGeetest(
-      {
-        gt: res.gt,
-        challenge: res.challenge,
-        offline: false,
-        new_captcha: true,
-        product: "custom",
-        area: "#verify",
-        width: "250px",
-      },
-      (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => {
-        geetestRef.value.innerHTML = "";
-        captchaObj.appendTo("#geetest");
-        captchaObj.onSuccess(async () => {
-          const validate = captchaObj.getValidate();
-          const res = TGRequest.User.verification.verify(userStore.cookie, validate);
-          resolve(res);
-        });
-        captchaObj.onClose(() => {
-          show.value = false;
-        });
-      },
-    );
-  });
+  initGeetest(
+    {
+      gt: resGet.gt,
+      challenge: resGet.challenge,
+      offline: false,
+      new_captcha: true,
+      product: "custom",
+      area: "#verify",
+      width: "250px",
+    },
+    (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => {
+      geetestRef.value.innerHTML = "";
+      captchaObj.appendTo("#geetest");
+      // @eslint-ignore-next-line @typescript-eslint/no-misused-promises
+      captchaObj.onSuccess(async () => {
+        const validate = captchaObj.getValidate();
+        const cookie = {
+          account_id: userStore.cookie.account_id,
+          cookie_token: userStore.cookie.cookie_token,
+          ltoken: userStore.cookie.ltoken,
+          ltuid: userStore.cookie.ltuid,
+        };
+        const resVerify = await TGRequest.User.verification.verify(cookie, validate);
+        if (resVerify.retcode !== 0) {
+          showSnackbar({
+            text: `[${resVerify.retcode}]${resVerify.message}`,
+            color: "error",
+          });
+        }
+      });
+      captchaObj.onClose(() => {
+        show.value = false;
+      });
+    },
+  );
 }
 
 defineExpose({

@@ -6,11 +6,24 @@
 
 import TGUtils from "../utils/TGUtils";
 import { http } from "@tauri-apps/api";
-import showSnackbar from "../../components/func/snackbar";
-import TGConstant from "../constant/TGConstant";
+import { v4 } from "uuid";
+
+/**
+ * @description 获取 deviceId
+ * @since Beta v0.3.3
+ * @return {string} deviceId
+ */
+function getDeviceId(): string {
+  const local = localStorage.getItem("deviceId");
+  if (local) return local;
+  const id = v4();
+  localStorage.setItem("deviceId", id);
+  return id;
+}
 
 /**
  * @description 发起验证请求
+ * @since Beta v0.3.3
  * @param {string} Ltoken ltoken
  * @param {string} Ltuid ltuid
  * @return {Promise<TGApp.Plugins.Geetest.getData|TGApp.BBS.Response.Base>} 验证码参数
@@ -44,48 +57,32 @@ export async function getVerification(
  * @todo 待测试
  * @param {Record<string, string>} cookie cookie
  * @param {TGApp.BBS.Geetest.GeetestValidate} validate 验证码参数
- * @return {Promise<boolean>} 提交结果
+ * @return {Promise<TGApp.BBS.Response.Base>} 提交结果
  */
 export async function submitVerification(
   cookie: Record<string, string>,
   validate: TGApp.BBS.Geetest.GeetestValidate,
-): Promise<boolean> {
+): Promise<TGApp.BBS.Response.Base> {
   const url = "https://api-takumi-record.mihoyo.com/game_record/app/card/wapi/verifyVerification";
-  const dataRaw = {
+  const data = {
     geetest_challenge: validate.geetest_challenge,
     geetest_validate: validate.geetest_validate,
     geetest_seccode: validate.geetest_seccode,
   };
-  const data = JSON.stringify(dataRaw);
-  const header = TGUtils.User.getHeader(cookie, "POST", data, "common", false);
-  header["x-rpc-client_type"] = "2";
+  const header = TGUtils.User.getHeader(cookie, "POST", data, "common");
   const reqHeader = {
     ...header,
-    "x-rpc-app_id": TGConstant.BBS.APP_ID,
-    "x-rpc-challenge": validate.geetest_challenge,
-    "x-rpc-validate": validate.geetest_validate,
-    "x-rpc-seccode": validate.geetest_seccode,
-    "x-rpc-game_biz": "hk4e_cn",
-    "x-rpc-sdk_version": "1.3.1.2",
-    "x-rpc-device_id": "FA47BE878C143D2FE18785B660EF114A",
+    "x-rpc-device_id": getDeviceId(),
+    "x-rpc-page": "3.1.3_#/ys",
   };
   console.log(reqHeader);
   return await http
     .fetch<TGApp.BBS.Response.Base>(url, {
       method: "POST",
       headers: reqHeader,
-      body: http.Body.json(dataRaw),
+      body: http.Body.json(data),
     })
     .then((res) => {
-      console.log(res.rawHeaders);
-      if (res.data.retcode !== 0) {
-        showSnackbar({
-          text: `[${res.data.retcode}] ${res.data.message}`,
-          color: "error",
-        });
-        console.log(res.data);
-        return false;
-      }
-      return true;
+      return res.data;
     });
 }
