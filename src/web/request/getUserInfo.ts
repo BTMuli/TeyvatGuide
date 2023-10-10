@@ -4,11 +4,9 @@
  * @since Beta v0.3.3
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
-// api
+
 import TGApi from "../api/TGApi";
-// utils
 import TGUtils from "../utils/TGUtils";
 
 /**

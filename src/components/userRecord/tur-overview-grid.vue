@@ -20,8 +20,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import { computed } from "vue";
+
 import TurOverviewSub from "./tur-overview-sub.vue";
 
 interface TurOverviewGridProps {

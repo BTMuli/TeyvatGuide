@@ -32,21 +32,19 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import { computed, onMounted, ref } from "vue";
-import ToLoading from "../../components/overlay/to-loading.vue";
-import TSubLine from "../../components/main/t-subline.vue";
-import TurOverviewGrid from "../../components/userRecord/tur-overview-grid.vue";
-import TurAvatarGrid from "../../components/userRecord/tur-avatar-grid.vue";
-import TurWorldGrid from "../../components/userRecord/tur-world-grid.vue";
-import TurHomeGrid from "../../components/userRecord/tur-home-grid.vue";
-// store
-import { useUserStore } from "../../store/modules/user";
-// utils
-import TGRequest from "../../web/request/TGRequest";
-import TGSqlite from "../../plugins/Sqlite";
-import { generateShareImg } from "../../utils/TGShare";
+
 import showSnackbar from "../../components/func/snackbar";
+import TSubLine from "../../components/main/t-subline.vue";
+import ToLoading from "../../components/overlay/to-loading.vue";
+import TurAvatarGrid from "../../components/userRecord/tur-avatar-grid.vue";
+import TurHomeGrid from "../../components/userRecord/tur-home-grid.vue";
+import TurOverviewGrid from "../../components/userRecord/tur-overview-grid.vue";
+import TurWorldGrid from "../../components/userRecord/tur-world-grid.vue";
+import TGSqlite from "../../plugins/Sqlite";
+import { useUserStore } from "../../store/modules/user";
+import { generateShareImg } from "../../utils/TGShare";
+import TGRequest from "../../web/request/TGRequest";
 
 // store
 const userStore = useUserStore();

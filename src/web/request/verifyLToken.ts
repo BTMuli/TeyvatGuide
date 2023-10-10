@@ -1,15 +1,12 @@
 /**
  * @file web request verifyLToken.ts
  * @description 验证 stoken 的请求函数
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.5
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
-// api
+
 import TGApi from "../api/TGApi";
-// utils
 import TGUtils from "../utils/TGUtils";
 
 /**

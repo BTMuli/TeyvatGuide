@@ -24,9 +24,8 @@
   </TucDetailDesc>
 </template>
 <script lang="ts" setup>
-// vue
-import TucDetailDesc from "./tuc-detail-desc.vue";
 import TucDetailConstellation from "./tuc-detail-constellation.vue";
+import TucDetailDesc from "./tuc-detail-desc.vue";
 
 interface TucDetailDescConstellationProps {
   modelValue: TGApp.Sqlite.Character.RoleConstellation;
@@ -38,7 +37,7 @@ const props = defineProps<TucDetailDescConstellationProps>();
 function parseDesc(desc: string): string {
   const reg = /<color=(.*?)>(.*?)<\/color>/g;
   let match = reg.exec(desc);
-  while (match) {
+  while (match !== null) {
     const color = match[1];
     const text = match[2];
     desc = desc.replace(match[0], `<span style="color: ${color}">${text}</span>`);

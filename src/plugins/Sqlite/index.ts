@@ -6,8 +6,6 @@
 
 import Database from "tauri-plugin-sql-api";
 
-import { getUiafStatus } from "../../utils/UIAF";
-
 import initDataSql from "./sql/initData";
 import initTableSql from "./sql/initTable";
 import {
@@ -19,6 +17,7 @@ import {
   insertRoleData,
 } from "./sql/insertData";
 import { importUIAFData, importUIGFData } from "./sql/updateData";
+import { getUiafStatus } from "../../utils/UIAF";
 
 class Sqlite {
   /**

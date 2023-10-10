@@ -21,15 +21,13 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
+import { appWindow } from "@tauri-apps/api/window";
 import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
-import ToLoading from "../components/overlay/to-loading.vue";
+
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import TShareBtn from "../components/main/t-shareBtn.vue";
-// tauri
-import { appWindow } from "@tauri-apps/api/window";
-// plugins
+import ToLoading from "../components/overlay/to-loading.vue";
 import Mys from "../plugins/Mys";
 
 // loading

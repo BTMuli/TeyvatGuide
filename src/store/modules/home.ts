@@ -1,14 +1,11 @@
 /**
  * @file store modules home.ts
  * @description Home store module
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.6
  */
 
-// vue
-import { ref } from "vue";
-// pinia
 import { defineStore } from "pinia";
+import { ref } from "vue";
 
 export const useHomeStore = defineStore(
   "home",

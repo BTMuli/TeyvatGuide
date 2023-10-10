@@ -35,16 +35,14 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
-// vue
 import { computed } from "vue";
+
+import Mys from "../../plugins/Mys";
+import { createTGWindow } from "../../utils/TGWindow";
 import showSnackbar from "../func/snackbar";
-import TOverlay from "../main/t-overlay.vue";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 import TibCalendarMaterial from "../itembox/tib-calendar-material.vue";
-// utils
-import { createTGWindow } from "../../utils/TGWindow";
-// plugins
-import Mys from "../../plugins/Mys";
+import TOverlay from "../main/t-overlay.vue";
 
 interface ToCalendarProps {
   modelValue: boolean;

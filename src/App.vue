@@ -11,20 +11,17 @@
 </template>
 
 <script lang="ts" setup>
-// vue
+import { app, event, fs, tauri, window as TauriWindow } from "@tauri-apps/api";
 import { onBeforeMount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import showSnackbar from "./components/func/snackbar";
-import TSidebar from "./components/app/t-sidebar.vue";
+
 import TBackTop from "./components/app/t-backTop.vue";
-// tauri
-import { app, event, fs, tauri, window as TauriWindow } from "@tauri-apps/api";
-// store
-import { useAppStore } from "./store/modules/app";
-import { useUserStore } from "./store/modules/user";
-// utils
+import TSidebar from "./components/app/t-sidebar.vue";
+import showSnackbar from "./components/func/snackbar";
 import { getEmojis } from "./plugins/Mys/request/getEmojis";
 import TGSqlite from "./plugins/Sqlite";
+import { useAppStore } from "./store/modules/app";
+import { useUserStore } from "./store/modules/user";
 
 const appStore = useAppStore();
 const isMain = ref<boolean>(false);
@@ -69,6 +66,7 @@ async function listenOnInit(): Promise<void> {
     await checkAppLoad();
     await checkUserLoad();
   });
+  return;
 }
 
 async function emojiLoad(): Promise<void> {
@@ -155,11 +153,19 @@ async function initData(): Promise<void> {
 async function getDeepLink(): Promise<void> {
   await event.listen("active_deep_link", (e) => {
     new TauriWindow.WebviewWindow("TeyvatGuide")
-      .show()
+      .center()
       .then(async () => {
+        if (typeof e.payload !== "string") {
+          showSnackbar({
+            text: "无效的 deep link！",
+            color: "error",
+            timeout: 3000,
+          });
+          return;
+        }
         // 导入格式: teyvatguide://import_uigf?app=appName
         // 跳转格式: localhost:4000/achievements/?app=appName
-        if ((<string>e.payload).startsWith("teyvatguide://import_uigf")) {
+        if (e.payload.startsWith("teyvatguide://import_uigf")) {
           const param = (<string>e.payload).split("teyvatguide://import_uigf/?")[1];
           let appName = "";
           if (param) {

@@ -1,19 +1,15 @@
 /**
  * @file router modules sub.ts
  * @description 子路由模块，用于二级窗口
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.2
  */
-// 游戏内公告
-import TAnno from "../../views/t-anno.vue";
+
 import TAnnoJson from "../../views/t-anno-json.vue";
-// 咨讯
-import TNews from "../../views/t-news.vue";
-// 帖子相关
-import TPost from "../../views/t-post.vue";
-import TPostJson from "../../views/t-post-json.vue";
-// 抽奖
+import TAnno from "../../views/t-anno.vue";
 import TLottery from "../../views/t-lottery.vue";
+import TNews from "../../views/t-news.vue";
+import TPostJson from "../../views/t-post-json.vue";
+import TPost from "../../views/t-post.vue";
 
 const subRoutes = [
   {

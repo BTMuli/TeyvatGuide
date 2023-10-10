@@ -1,17 +1,14 @@
 /**
  * @file web request getGameAccounts.ts
  * @description 获取游戏账号信息相关请求函数
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.5
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
-// api
+
 import TGApi from "../api/TGApi";
-// utils
-import TGUtils from "../utils/TGUtils";
 import TGConstant from "../constant/TGConstant";
+import TGUtils from "../utils/TGUtils";
 
 /**
  * @description 通过 stoken 获取游戏账号

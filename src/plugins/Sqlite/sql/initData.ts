@@ -1,14 +1,11 @@
 /**
  * @file plugins Sqlite sql initData.ts
  * @description Sqlite 初始化数据 sql 语句
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
 
-// tauri
 import { app } from "@tauri-apps/api";
-// utils
-import { getBuildTime } from "../../../utils/TGBuild";
+
 import {
   insertAchievementData,
   insertAchievementSeriesData,
@@ -21,6 +18,7 @@ import {
   AppNameCardsData,
   AppCharacterData,
 } from "../../../data";
+import { getBuildTime } from "../../../utils/TGBuild";
 
 /**
  * @description 初始化应用表数据

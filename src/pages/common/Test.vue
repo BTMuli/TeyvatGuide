@@ -21,6 +21,7 @@
 </template>
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
+
 import showGeetest from "../../components/func/geetest";
 
 const visible = ref<boolean>(false);

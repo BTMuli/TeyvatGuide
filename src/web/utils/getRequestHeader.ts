@@ -5,8 +5,9 @@
  */
 
 import Md5 from "js-md5";
-import TGConstant from "../constant/TGConstant";
+
 import { transCookie, transParams } from "./tools";
+import TGConstant from "../constant/TGConstant";
 
 /**
  * @description 获取 salt

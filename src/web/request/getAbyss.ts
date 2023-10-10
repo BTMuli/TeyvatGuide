@@ -1,15 +1,12 @@
 /**
  * @file web request getAbyss.ts
  * @description 获取深渊信息
- * @author BTMuli<bt-muli@outlook.com>
  * @since Beta v0.3.0
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
-// api
+
 import TGApi from "../api/TGApi";
-// utils
 import TGUtils from "../utils/TGUtils";
 
 /**

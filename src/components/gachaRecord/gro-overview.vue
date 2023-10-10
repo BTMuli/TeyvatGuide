@@ -12,8 +12,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import { watch } from "vue";
+
 import GroDataview from "./gro-dataview.vue";
 
 interface GachaOverviewProps {

@@ -21,18 +21,16 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
+import { appWindow } from "@tauri-apps/api/window";
 import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
-import ToLoading from "../components/overlay/to-loading.vue";
+
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import TShareBtn from "../components/main/t-shareBtn.vue";
-// tauri
-import { appWindow } from "@tauri-apps/api/window";
-// utils
+import ToLoading from "../components/overlay/to-loading.vue";
+import { saveImgLocal } from "../utils/TGShare";
 import TGRequest from "../web/request/TGRequest";
 import TGUtils from "../web/utils/TGUtils";
-import { saveImgLocal } from "../utils/TGShare";
 
 // loading
 const loading = ref<boolean>(true);

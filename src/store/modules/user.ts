@@ -1,14 +1,11 @@
 /**
  * @file store modules user.ts
  * @description User store module
- * @author BTMuli <bt-muli@outlook.com>
  * @since Beta v0.3.0
  */
 
-// vue
-import { ref } from "vue";
-// pinia
 import { defineStore } from "pinia";
+import { ref } from "vue";
 
 export const useUserStore = defineStore(
   "user",

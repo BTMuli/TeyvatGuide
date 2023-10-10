@@ -35,11 +35,9 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
-import { onMounted, ref } from "vue";
-// tauri
 import { event } from "@tauri-apps/api";
-// utils
+import { onMounted, ref } from "vue";
+
 import { saveImgLocal } from "../../utils/TGShare";
 
 interface TurWorldSubProps {

@@ -1,11 +1,11 @@
 /**
  * @file plugins Mys request getNewsList.ts
  * @description Mys 插件咨讯请求
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.1
  */
 
 import { http } from "@tauri-apps/api";
+
 import MysApi from "../api";
 
 /**

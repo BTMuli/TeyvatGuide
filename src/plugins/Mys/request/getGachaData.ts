@@ -1,11 +1,11 @@
 /**
  * @file plugins Mys request getGachaData.ts
  * @description Mys 抽卡请求
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.1
  */
 
 import { http } from "@tauri-apps/api";
+
 import MysApi from "../api";
 
 /**

@@ -267,17 +267,14 @@
 </template>
 
 <script lang="ts" setup>
-// vue
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+
 import showSnackbar from "../components/func/snackbar";
-import ToLoading from "../components/overlay/to-loading.vue";
 import ToChannel from "../components/overlay/to-channel.vue";
-// store
-import { useAppStore } from "../store/modules/app";
-// plugin
+import ToLoading from "../components/overlay/to-loading.vue";
 import Mys from "../plugins/Mys";
-// utils
+import { useAppStore } from "../store/modules/app";
 import { createTGWindow } from "../utils/TGWindow";
 
 // 路由

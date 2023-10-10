@@ -2,11 +2,10 @@
   <TItemBox :model-value="box" />
 </template>
 <script setup lang="ts">
-// vue
 import { ref, onMounted, computed } from "vue";
-import TItemBox, { type TItemBoxData } from "../main/t-itembox.vue";
-// plugins
+
 import TGSqlite from "../../plugins/Sqlite";
+import TItemBox, { type TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibWikiAbyssProps {
   modelValue: {

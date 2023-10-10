@@ -20,8 +20,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import { onMounted, ref } from "vue";
+
 import TibWikiAbyss from "../itembox/tib-wiki-abyss.vue";
 
 interface HtaTabUseProps {

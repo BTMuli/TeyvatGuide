@@ -1,13 +1,11 @@
 /**
  * @file utils UIGF.ts
  * @description UIGF工具类
- * @author BTMuli <bt-muli@outlook.com>
  * @since Beta v0.3.0
  */
 
-// tauri
 import { app, fs, path } from "@tauri-apps/api";
-// utils
+
 import { timestampToDate } from "./t2D";
 
 /**

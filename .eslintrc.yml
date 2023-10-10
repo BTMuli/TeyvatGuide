@@ -17,7 +17,8 @@ globals:
   TGApp: readonly
   window: readonly
 rules:
-  vue/multi-word-component-names: warn
+  vue/multi-word-component-names: off
+  vue/valid-template-root: off
 overrides:
   - files: ["*.ts"]
     extends: standard-with-typescript
@@ -34,9 +35,7 @@ overrides:
           alphabetize:
             order: asc
             caseInsensitive: true
-      "@typescript-eslint/indent":
-        - warn
-        - 2
+      "@typescript-eslint/indent": off
       "@typescript-eslint/quotes":
         - error
         - double
@@ -57,31 +56,23 @@ overrides:
             delimiter: semi
             requireLast: true
       "@typescript-eslint/no-import-type-side-effects": error
-      "@typescript-eslint/strict-boolean-expressions":
-        - warn
-        - allowString: false
-          allowNumber: false
-          allowNullableObject: false
-          allowNullableBoolean: false
-          allowNullableString: false
-          allowNullableNumber: false
-          allowAny: false
+      "@typescript-eslint/strict-boolean-expressions": off
       "@typescript-eslint/consistent-type-assertions":
         - warn
         - assertionStyle: angle-bracket # 使用尖括号
       "@typescript-eslint/naming-convention":
         - warn
         - selector: variableLike
-          format: ["camelCase", "UPPER_CASE", "PascalCase", "snake_case"]
-          leadingUnderscore: "allow"
-          trailingUnderscore: "allow"
+          format: [camelCase, UPPER_CASE, PascalCase, snake_case]
+          leadingUnderscore: allow
+          trailingUnderscore: allow
       "@typescript-eslint/no-non-null-assertion": warn
-      "@typescript-eslint/no-misused-promises": warn
+      "@typescript-eslint/no-misused-promises": off
   - files: ["*.vue"]
     parser: vue-eslint-parser
     parserOptions:
       parser: "@typescript-eslint/parser"
-      extraFileExtensions: [".vue"]
+      extraFileExtensions: [.vue]
     rules:
       import/order:
         - error
@@ -94,9 +85,7 @@ overrides:
           alphabetize:
             order: asc
             caseInsensitive: true
-      "@typescript-eslint/indent":
-        - warn
-        - 2
+      "@typescript-eslint/indent": off
       "@typescript-eslint/quotes":
         - error
         - double
@@ -117,27 +106,19 @@ overrides:
             delimiter: semi
             requireLast: true
       "@typescript-eslint/no-import-type-side-effects": error
-      "@typescript-eslint/strict-boolean-expressions":
-        - warn
-        - allowString: false
-          allowNumber: false
-          allowNullableObject: false
-          allowNullableBoolean: false
-          allowNullableString: false
-          allowNullableNumber: false
-          allowAny: false
+      "@typescript-eslint/strict-boolean-expressions": off
       "@typescript-eslint/consistent-type-assertions":
         - warn
         - assertionStyle: angle-bracket # 使用尖括号
       "@typescript-eslint/naming-convention":
         - warn
         - selector: variableLike
-          format: ["camelCase", "UPPER_CASE", "PascalCase", "snake_case"]
-          leadingUnderscore: "allow"
-          trailingUnderscore: "allow"
+          format: [camelCase, UPPER_CASE, PascalCase, snake_case]
+          leadingUnderscore: allow
+          trailingUnderscore: allow
       "@typescript-eslint/no-non-null-assertion": warn
-      "@typescript-eslint/no-misused-promises": warn
-  - files: ["*.json"]
+      "@typescript-eslint/no-misused-promises": off
+  - files: [package.json, tsconfig.json]
     parser: jsonc-eslint-parser
     rules:
       jsonc/sort-array-values:

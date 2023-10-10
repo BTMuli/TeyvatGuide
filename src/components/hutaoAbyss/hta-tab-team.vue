@@ -45,8 +45,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import { onMounted, ref } from "vue";
+
 import TibWikiAbyss2 from "../itembox/tib-wiki-abyss-2.vue";
 
 interface HtaTabTeamProps {

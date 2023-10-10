@@ -1,9 +1,8 @@
 {
   "name": "TeyvatGuide",
+  "version": "0.3.3",
   "description": "A Genshin Tool build with Tauri",
   "private": true,
-  "version": "0.3.3",
-  "author": "BTMuli <bt-muli@outlook.com>",
   "packageManager": "pnpm@8.9.0",
   "scripts": {
     "build": "tauri build",
@@ -28,25 +27,26 @@
     "*.{vue,css}": "stylelint --fix",
     "*.{ts,vue,css,yml,json,md}": "prettier --write"
   },
+  "keywords": [
+    "Genshin Impact",
+    "Node",
+    "Tauri",
+    "Typescript",
+    "Vite",
+    "Vuetify"
+  ],
+  "author": "BTMuli <bt-muli@outlook.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BTMuli/TeyvatGuide.git"
+  },
+  "homepage": "https://github.com/BTMuli/TeyvatGuide#readme",
   "bugs": {
     "url": "https://github.com/BTMuli/TeyvatGuide/issues"
   },
   "directories": {
     "doc": "docs"
-  },
-  "homepage": "https://github.com/BTMuli/TeyvatGuide#readme",
-  "keywords": [
-    "Tauri",
-    "Node",
-    "Typescript",
-    "Vite",
-    "Genshin Impact",
-    "Vuetify"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/BTMuli/TeyvatGuide.git"
   },
   "dependencies": {
     "@mdi/font": "7.2.96",

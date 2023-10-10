@@ -3,3 +3,5 @@ dist
 src-tauri/target
 # Submodules
 TGAssistant
+# Package files
+pnpm-lock.yaml

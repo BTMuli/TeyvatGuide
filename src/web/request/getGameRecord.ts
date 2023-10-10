@@ -1,13 +1,11 @@
 /**
  * @file core utils getGameRecord.ts
  * @description 获取游戏数据的函数
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.2.1
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
-// utils
+
 import TGApi from "../api/TGApi";
 import TGUtils from "../utils/TGUtils";
 

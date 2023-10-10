@@ -1,8 +1,12 @@
-import { defineConfig } from "vite";
+/**
+ * @file vite.config.ts
+ * @description vite 配置文件
+ * @since Beta v0.3.3
+ */
 import vue from "@vitejs/plugin-vue";
-// Vuetify
+import { defineConfig } from "vite";
 import vuetify from "vite-plugin-vuetify";
-// build time
+
 import buildTimePlugin from "./src/utils/TGBuild";
 
 // https://vitejs.dev/config/

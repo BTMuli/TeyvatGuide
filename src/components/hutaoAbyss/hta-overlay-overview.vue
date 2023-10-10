@@ -29,8 +29,8 @@
   </TOverlay>
 </template>
 <script lang="ts" setup>
-// vue
 import { computed } from "vue";
+
 import TOverlay from "../main/t-overlay.vue";
 
 interface HtaOverlayOverviewProps {

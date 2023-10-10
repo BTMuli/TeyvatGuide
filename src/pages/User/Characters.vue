@@ -41,18 +41,16 @@
   <ToUcDetail v-model="visible" :data-val="dataVal" />
 </template>
 <script lang="ts" setup>
-// vue
 import { computed, onMounted, ref } from "vue";
+
 import showSnackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import TucRoleBox from "../../components/userCharacter/tuc-role-box.vue";
 import ToUcDetail from "../../components/userCharacter/tuc-detail-overlay.vue";
-// store
-import { useUserStore } from "../../store/modules/user";
-// utils
+import TucRoleBox from "../../components/userCharacter/tuc-role-box.vue";
 import TGSqlite from "../../plugins/Sqlite";
-import TGRequest from "../../web/request/TGRequest";
+import { useUserStore } from "../../store/modules/user";
 import { generateShareImg } from "../../utils/TGShare";
+import TGRequest from "../../web/request/TGRequest";
 
 // store
 const userStore = useUserStore();

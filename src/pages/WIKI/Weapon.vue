@@ -8,14 +8,12 @@
 </template>
 
 <script lang="ts" setup>
-// vue
 import { ref, computed } from "vue";
+
 import TibWikiWeapon from "../../components/itembox/tib-wiki-weapon.vue";
-// utils
-import { createTGWindow } from "../../utils/TGWindow";
 import { AppWeaponData } from "../../data";
-// plugins
 import Mys from "../../plugins/Mys";
+import { createTGWindow } from "../../utils/TGWindow";
 
 // snackbar
 const snackbar = ref<boolean>(false);

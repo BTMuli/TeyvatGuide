@@ -5,6 +5,7 @@
  */
 
 import { h, render, type VNode } from "vue";
+
 import geetest from "./geetest.vue";
 
 const geetestId = "tg-func-geetest";
@@ -21,7 +22,7 @@ const renderBox = (): VNode => {
 let geetestInstance: VNode;
 
 const showGeetest = async (): Promise<boolean> => {
-  if (geetestInstance) {
+  if (geetestInstance !== undefined) {
     const boxVue = geetestInstance.component;
     return boxVue?.exposeProxy?.displayBox();
   } else {

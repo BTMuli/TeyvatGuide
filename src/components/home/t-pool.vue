@@ -48,16 +48,13 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
-// store
+
+import Mys from "../../plugins/Mys";
 import { useHomeStore } from "../../store/modules/home";
-// utils
 import { createTGWindow } from "../../utils/TGWindow";
 import { stamp2LastTime } from "../../utils/toolFunc";
-// plugins
-import Mys from "../../plugins/Mys";
 
 // vue
 const router = useRouter();

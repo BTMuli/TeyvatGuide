@@ -61,14 +61,12 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import { computed, onMounted, ref } from "vue";
-import ToCalendar from "../overlay/to-calendar.vue";
-import TibCalendarItem from "../itembox/tib-calendar-item.vue";
-// data
+
 import { AppCalendarData } from "../../data";
-// utils
 import { generateShareImg } from "../../utils/TGShare";
+import TibCalendarItem from "../itembox/tib-calendar-item.vue";
+import ToCalendar from "../overlay/to-calendar.vue";
 
 // loading
 const loading = ref<boolean>(true);

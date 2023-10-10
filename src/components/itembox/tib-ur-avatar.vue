@@ -2,10 +2,9 @@
   <TItemBox v-model="box" @click="showData" />
 </template>
 <script lang="ts" setup>
-// vue
 import { onMounted, ref } from "vue";
+
 import TItemBox from "../main/t-itembox.vue";
-// types
 import type { TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibUrAvatarProps {

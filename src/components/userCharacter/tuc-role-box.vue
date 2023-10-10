@@ -36,12 +36,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import TItemBox from "../main/t-itembox.vue";
-// utils
+
 import TGSqlite from "../../plugins/Sqlite";
 import { saveImgLocal } from "../../utils/TGShare";
+import TItemBox from "../main/t-itembox.vue";
 
 interface TucRoleBoxProps {
   modelValue: TGApp.Sqlite.Character.UserRole;

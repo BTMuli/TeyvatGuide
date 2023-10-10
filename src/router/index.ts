@@ -1,11 +1,11 @@
 /**
  * @file router index.ts
  * @description 路由入口
- * @author BTMuli<bt-muli@outlook.com>
  * @since Beta v0.3.2
  */
 
 import { createRouter, createWebHistory } from "vue-router";
+
 import routes from "./routes";
 
 const router = createRouter({

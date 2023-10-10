@@ -1,13 +1,11 @@
 /**
  * @file plugins Hutao request getAvatarHoldRate.ts
  * @description Hutao API 获取角色持有率数据请求方法
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
-// api
+
 import HutaoApi from "../api";
 
 /**

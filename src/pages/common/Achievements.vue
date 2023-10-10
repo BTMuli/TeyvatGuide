@@ -107,21 +107,18 @@
 </template>
 
 <script lang="ts" setup>
-// vue
+import { dialog, fs } from "@tauri-apps/api";
 import { computed, onBeforeMount, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import ToLoading from "../../components/overlay/to-loading.vue";
-import showSnackbar from "../../components/func/snackbar";
+
 import showConfirm from "../../components/func/confirm";
-// tauri
-import { dialog, fs } from "@tauri-apps/api";
-// Store
+import showSnackbar from "../../components/func/snackbar";
+import ToLoading from "../../components/overlay/to-loading.vue";
+import { AppAchievementSeriesData } from "../../data";
+import TGSqlite from "../../plugins/Sqlite";
 import { useAchievementsStore } from "../../store/modules/achievements";
-// Utils
 import { createTGWindow } from "../../utils/TGWindow";
 import { getUiafHeader, readUiafData, verifyUiafData } from "../../utils/UIAF";
-import TGSqlite from "../../plugins/Sqlite";
-import { AppAchievementSeriesData } from "../../data";
 
 // Store
 const achievementsStore = useAchievementsStore();

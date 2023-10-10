@@ -1,13 +1,11 @@
 /**
  * @file utils UIAF.ts
  * @description UIAF工具类
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.3
  */
 
-// tauri
 import { app, fs, path } from "@tauri-apps/api";
-// utils
+
 import TGSqlite from "../plugins/Sqlite";
 
 /**

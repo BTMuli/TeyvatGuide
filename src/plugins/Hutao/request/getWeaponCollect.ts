@@ -5,9 +5,8 @@
  * @since Alpha v0.2.0
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
-// api
+
 import HutaoApi from "../api";
 
 /**

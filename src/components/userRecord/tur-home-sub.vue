@@ -34,9 +34,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import { onMounted, ref } from "vue";
-// utils
+
 import { saveImgLocal } from "../../utils/TGShare";
 
 interface TurHomeSubProps {

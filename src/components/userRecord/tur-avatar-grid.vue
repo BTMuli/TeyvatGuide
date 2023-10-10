@@ -6,8 +6,8 @@
 </template>
 
 <script lang="ts" setup>
-// vue
 import { computed } from "vue";
+
 import TibUrAvatar from "../itembox/tib-ur-avatar.vue";
 
 interface TurAvatarGridProps {

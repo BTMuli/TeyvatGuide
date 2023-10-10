@@ -1,13 +1,11 @@
 /**
  * @file web request getStoken.ts
  * @description 获取 stoken
- * @author BTMuli <bt-muli@outlook.com>
  * @since Beta v0.3.0
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
-// constant
+
 import TGConstant from "../constant/TGConstant";
 
 /**

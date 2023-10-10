@@ -103,15 +103,13 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import { computed, onMounted, ref } from "vue";
+
 import showSnackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
-// utils
-import { createTGWindow } from "../../utils/TGWindow";
 import { AppGCGData } from "../../data";
-// plugins
 import Mys from "../../plugins/Mys";
+import { createTGWindow } from "../../utils/TGWindow";
 
 // loading
 const loading = ref<boolean>(true);

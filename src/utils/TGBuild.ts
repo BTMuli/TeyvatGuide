@@ -2,11 +2,10 @@
  * @file utils TGBuild.ts
  * @description 用于获取 vite 打包时间
  * @see https://gitee.com/lihanspace/vite-plugin-build-time
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.4
  */
 
-import { type Plugin } from "vite";
+import type { Plugin } from "vite";
 
 const buildTimeKey = "buildTime";
 

@@ -22,8 +22,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import { computed } from "vue";
+
 import TibAbyssOverview from "../itembox/tib-abyss-overview.vue";
 
 interface TAOProps {

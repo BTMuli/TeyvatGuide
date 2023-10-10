@@ -121,11 +121,9 @@
 </template>
 
 <script lang="ts" setup>
-// vue
-import { computed, onMounted, ref } from "vue";
-// tauri
 import { event } from "@tauri-apps/api";
-// store
+import { computed, onMounted, ref } from "vue";
+
 import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
 
@@ -137,8 +135,8 @@ const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 const userInfo = computed(() => {
   const info = userStore.getBriefInfo();
   return {
-    nickname: info.nickname || "未登录",
-    avatar: info.avatar || "/source/UI/defaultUser.webp",
+    nickname: info?.nickname ?? "未登录",
+    avatar: info?.avatar ?? "/source/UI/defaultUser.webp",
   };
 });
 const rail = ref(appStore.sidebar.collapse);

@@ -8,11 +8,9 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
-import { computed, onMounted } from "vue";
-// tauri
 import { event } from "@tauri-apps/api";
-// store
+import { computed, onMounted } from "vue";
+
 import { useAppStore } from "../../store/modules/app";
 
 // store

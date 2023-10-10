@@ -1,15 +1,12 @@
 /**
  * @file utils TGShare.ts
  * @description 生成分享截图并保存到本地
- * @author BTMuli <bt-muli@outlook.com>
  * @since Beta v0.3.2
  */
 
-// third party
-import html2canvas from "html2canvas";
-// tauri
 import { dialog, fs, http, path } from "@tauri-apps/api";
-// utils
+import html2canvas from "html2canvas";
+
 import showSnackbar from "../components/func/snackbar";
 
 /**

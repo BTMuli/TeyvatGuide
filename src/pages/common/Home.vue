@@ -6,18 +6,16 @@
 </template>
 
 <script lang="ts" setup>
-// vue
 import { markRaw, onMounted, onUnmounted, onUpdated, ref } from "vue";
-import ToLoading from "../../components/overlay/to-loading.vue";
+
+import showConfirm from "../../components/func/confirm";
+import TCalendar from "../../components/home/t-calendar.vue";
 import TPool from "../../components/home/t-pool.vue";
 import TPosition from "../../components/home/t-position.vue";
-import TCalendar from "../../components/home/t-calendar.vue";
-// store
-import { useHomeStore } from "../../store/modules/home";
+import ToLoading from "../../components/overlay/to-loading.vue";
 import { useAppStore } from "../../store/modules/app";
-// utils
+import { useHomeStore } from "../../store/modules/home";
 import { getBuildTime } from "../../utils/TGBuild";
-import showConfirm from "../../components/func/confirm";
 
 // store
 const appStore = useAppStore();

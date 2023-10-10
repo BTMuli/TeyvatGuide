@@ -76,15 +76,15 @@
   </TOverlay>
 </template>
 <script lang="ts" setup>
-// vue
 import { computed, onMounted, onUpdated, ref } from "vue";
-import TOverlay from "../main/t-overlay.vue";
-import TucDetailDescWeapon from "./tuc-detail-desc-weapon.vue";
+
+import TucDetailConstellation from "./tuc-detail-constellation.vue";
 import TucDetailDescConstellation from "./tuc-detail-desc-constellation.vue";
 import TucDetailDescRelic from "./tuc-detail-desc-relic.vue";
+import TucDetailDescWeapon from "./tuc-detail-desc-weapon.vue";
 import TucDetailItemBox from "./tuc-detail-itembox.vue";
-import TucDetailConstellation from "./tuc-detail-constellation.vue";
 import TucDetailRelic from "./tuc-detail-relic.vue";
+import TOverlay from "../main/t-overlay.vue";
 
 interface ToUcDetailProps {
   modelValue: boolean;

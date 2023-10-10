@@ -2,8 +2,8 @@
   <TItemBox :model-value="box" />
 </template>
 <script lang="ts" setup>
-// vue
 import { computed } from "vue";
+
 import TItemBox, { type TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibCalendarAvatarProps {

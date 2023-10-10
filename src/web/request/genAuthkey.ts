@@ -1,15 +1,13 @@
 /**
  * @file web request genAuthkey.ts
  * @description 生成 authkey
- * @author BTMuli <bt-muli@outlook.com>
  * @since Beta v0.3.0
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
-// utils
-import TGUtils from "../utils/TGUtils";
+
 import TGConstant from "../constant/TGConstant";
+import TGUtils from "../utils/TGUtils";
 
 /**
  * @description 生成 authkey

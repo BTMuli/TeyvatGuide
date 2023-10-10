@@ -41,22 +41,19 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
+import { dialog, path } from "@tauri-apps/api";
 import { onMounted, ref, watch } from "vue";
-import showSnackbar from "../../components/func/snackbar";
+
 import showConfirm from "../../components/func/confirm";
-import ToLoading from "../../components/overlay/to-loading.vue";
+import showSnackbar from "../../components/func/snackbar";
 import GroEcharts from "../../components/gachaRecord/gro-echarts.vue";
 import GroOverview from "../../components/gachaRecord/gro-overview.vue";
-// tauri
-import { dialog, path } from "@tauri-apps/api";
-// store
-import { useUserStore } from "../../store/modules/user";
-// utils
-import { backupUigfData, exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF";
-import TGSqlite from "../../plugins/Sqlite";
-import TGRequest from "../../web/request/TGRequest";
+import ToLoading from "../../components/overlay/to-loading.vue";
 import { AppCharacterData, AppWeaponData } from "../../data";
+import TGSqlite from "../../plugins/Sqlite";
+import { useUserStore } from "../../store/modules/user";
+import { backupUigfData, exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF";
+import TGRequest from "../../web/request/TGRequest";
 
 // store
 const userStore = useUserStore();
@@ -75,12 +72,12 @@ const gachaListCur = ref<TGApp.Sqlite.GachaRecords.SingleTable[]>([]);
 const tab = ref<string>("");
 
 onMounted(async () => {
-  loadingTitle.value = `正在获取祈愿 UID 列表`;
+  loadingTitle.value = "正在获取祈愿 UID 列表";
   selectItem.value = await TGSqlite.getUidList();
   if (selectItem.value.length === 0) {
     showSnackbar({
       color: "error",
-      text: `暂无祈愿数据，请先导入祈愿数据`,
+      text: "暂无祈愿数据，请先导入祈愿数据",
     });
     loading.value = false;
     return;
@@ -88,7 +85,7 @@ onMounted(async () => {
   uidCur.value = selectItem.value[0];
   loadingTitle.value = `正在获取祈愿数据，默认 UID：${uidCur.value}`;
   gachaListCur.value = await TGSqlite.getGachaRecords(uidCur.value);
-  loadingTitle.value = `正在渲染数据`;
+  loadingTitle.value = "正在渲染数据";
   tab.value = "echarts";
   loading.value = false;
   showSnackbar({
@@ -105,7 +102,7 @@ async function confirmRefresh(): Promise<void> {
   if (!confirmRes) {
     showSnackbar({
       color: "grey",
-      text: `已取消刷新祈愿数据`,
+      text: "已取消刷新祈愿数据",
     });
     return;
   }
@@ -122,7 +119,7 @@ async function confirmRefresh(): Promise<void> {
   } else {
     showSnackbar({
       color: "error",
-      text: `获取 authkey 失败`,
+      text: "获取 authkey 失败",
     });
     return;
   }
@@ -222,7 +219,7 @@ async function handleImportBtn(savePath?: string): Promise<void> {
     if (!check) {
       showSnackbar({
         color: "error",
-        text: `读取 UIGF 文件失败，请检查文件是否符合规范`,
+        text: "读取 UIGF 文件失败，请检查文件是否符合规范",
       });
       return;
     }
@@ -234,7 +231,7 @@ async function handleImportBtn(savePath?: string): Promise<void> {
     if (!res) {
       showSnackbar({
         color: "grey",
-        text: `已取消祈愿数据导入`,
+        text: "已取消祈愿数据导入",
       });
       return;
     }
@@ -244,7 +241,7 @@ async function handleImportBtn(savePath?: string): Promise<void> {
       loading.value = false;
       showSnackbar({
         color: "error",
-        text: `导入的祈愿数据为空`,
+        text: "导入的祈愿数据为空",
       });
     } else {
       await TGSqlite.mergeUIGF(remoteData.info.uid, remoteData.list);
@@ -259,7 +256,7 @@ async function handleImportBtn(savePath?: string): Promise<void> {
   } else {
     showSnackbar({
       color: "grey",
-      text: `已取消文件选择`,
+      text: "已取消文件选择",
     });
   }
 }
@@ -275,13 +272,13 @@ async function handleExportBtn(): Promise<void> {
     return;
   }
   const res = await showConfirm({
-    title: `是否导出祈愿数据？`,
+    title: "是否导出祈愿数据？",
     text: `UID：${uidCur.value}，共 ${gachaList.length} 条数据`,
   });
   if (!res) {
     showSnackbar({
       color: "grey",
-      text: `已取消祈愿数据导出`,
+      text: "已取消祈愿数据导出",
     });
     return;
   }
@@ -289,7 +286,7 @@ async function handleExportBtn(): Promise<void> {
     defaultPath: `UIGF_${uidCur.value}.json`,
     filters: [
       {
-        name: `UIGF`,
+        name: "UIGF",
         extensions: ["json"],
       },
     ],
@@ -297,7 +294,7 @@ async function handleExportBtn(): Promise<void> {
   if (!file) {
     showSnackbar({
       color: "grey",
-      text: `已取消文件保存`,
+      text: "已取消文件保存",
     });
     return;
   }
@@ -306,7 +303,7 @@ async function handleExportBtn(): Promise<void> {
   await exportUigfData(uidCur.value, gachaList, file);
   loading.value = false;
   showSnackbar({
-    text: `祈愿数据已成功导出`,
+    text: "祈愿数据已成功导出",
   });
 }
 
@@ -321,18 +318,18 @@ async function backupGacha(): Promise<void> {
   if (gachaListCur.value.length === 0) {
     showSnackbar({
       color: "error",
-      text: `暂无祈愿数据`,
+      text: "暂无祈愿数据",
     });
     return;
   }
   const res = await showConfirm({
-    title: `是否备份祈愿数据？`,
+    title: "是否备份祈愿数据？",
     text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
   });
   if (!res) {
     showSnackbar({
       color: "grey",
-      text: `已取消祈愿数据备份`,
+      text: "已取消祈愿数据备份",
     });
     return;
   }
@@ -350,18 +347,18 @@ async function deleteGacha(): Promise<void> {
   if (gachaListCur.value.length === 0) {
     showSnackbar({
       color: "error",
-      text: `暂无祈愿数据`,
+      text: "暂无祈愿数据",
     });
     return;
   }
   const firstConfirm = await showConfirm({
-    title: `是否删除祈愿数据？`,
+    title: "是否删除祈愿数据？",
     text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
   });
   if (!firstConfirm) {
     showSnackbar({
       color: "grey",
-      text: `已取消祈愿数据删除`,
+      text: "已取消祈愿数据删除",
     });
     return;
   }
@@ -376,7 +373,7 @@ async function deleteGacha(): Promise<void> {
   if (secondConfirm === false) {
     showSnackbar({
       color: "grey",
-      text: `已取消祈愿数据删除`,
+      text: "已取消祈愿数据删除",
     });
     return;
   }

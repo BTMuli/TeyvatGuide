@@ -80,16 +80,14 @@
 </template>
 
 <script lang="ts" setup>
-// vue
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+
 import ToLoading from "../../components/overlay/to-loading.vue";
-// store
 import { useAppStore } from "../../store/modules/app";
-// utils
+import { createTGWindow } from "../../utils/TGWindow";
 import TGRequest from "../../web/request/TGRequest";
 import TGUtils from "../../web/utils/TGUtils";
-import { createTGWindow } from "../../utils/TGWindow";
 
 // store
 const appStore = useAppStore();

@@ -24,8 +24,8 @@
   </TucDetailDesc>
 </template>
 <script lang="ts" setup>
-// vue
 import { computed } from "vue";
+
 import TucDetailDesc from "./tuc-detail-desc.vue";
 import TucDetailItemBox from "./tuc-detail-itembox.vue";
 

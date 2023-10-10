@@ -4,8 +4,8 @@
  * @since Beta v0.3.3
  */
 
-import { score } from "wcag-color";
 import * as colorConvert from "color-convert";
+import { score } from "wcag-color";
 
 /**
  * @description 给定两个16进制颜色值，确认两者是否相近
@@ -215,10 +215,10 @@ function LinkTextParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLSpa
     throw new Error(`[LinkTextParser] data.insert is not a string: ${JSON.stringify(data)}`);
   }
   if (data.attributes == null) {
-    throw new Error(`[LinkTextParser] data.attributes is not defined`);
+    throw new Error("[LinkTextParser] data.attributes is not defined");
   }
   if (!data.attributes.link) {
-    throw new Error(`[LinkTextParser] data.attributes.link is not defined`);
+    throw new Error("[LinkTextParser] data.attributes.link is not defined");
   }
   // 创建图标
   const icon = document.createElement("i");
@@ -254,7 +254,7 @@ function parseDivider(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivEl
     throw new Error(`[ParseDivider] data.insert is a string: ${data.insert}`);
   }
   if (!data.insert.divider) {
-    throw new Error(`[ParseDivider] data.insert.divider is not defined`);
+    throw new Error("[ParseDivider] data.insert.divider is not defined");
   }
   // 创建分割线
   const div = document.createElement("div");
@@ -291,7 +291,7 @@ function parseImage(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElem
     throw new Error(`[ParseImage] data.insert is a string: ${data.insert}`);
   }
   if (!data.insert.image) {
-    throw new Error(`[ParseImage] data.insert.image is not defined`);
+    throw new Error("[ParseImage] data.insert.image is not defined");
   }
   const div = document.createElement("div");
   // 创建图片
@@ -319,7 +319,7 @@ function parseVideo(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElem
     throw new Error(`[ParseVideo] data.insert is a string: ${data.insert}`);
   }
   if (data.insert.vod == null && !data.insert.video) {
-    throw new Error(`[ParseVideo] data.insert.vod and data.insert.video is not defined`);
+    throw new Error("[ParseVideo] data.insert.vod and data.insert.video is not defined");
   }
   // 创建 div
   const div = document.createElement("div");
@@ -383,7 +383,7 @@ function parseBackup(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivEle
     return LotteryParser(data);
   }
   if (data.insert.fold == null) {
-    throw new Error(`[ParseBackup] data.insert.fold is not defined`);
+    throw new Error("[ParseBackup] data.insert.fold is not defined");
   }
   // 转换
   const titleJson: TGApp.Plugins.Mys.Post.StructuredContent[] = JSON.parse(data.insert.fold.title);
@@ -428,13 +428,13 @@ function LotteryParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivE
     throw new Error(`[LotteryParser] data.insert is a string: ${data.insert}`);
   }
   if (!data.insert.backup_text) {
-    throw new Error(`[LotteryParser] data.insert.backup_text is not defined`);
+    throw new Error("[LotteryParser] data.insert.backup_text is not defined");
   }
   if (data.insert.backup_text !== "[抽奖]") {
-    throw new Error(`[LotteryParser] data.insert.backup_text is not [抽奖]`);
+    throw new Error("[LotteryParser] data.insert.backup_text is not [抽奖]");
   }
   if (data.insert.lottery == null) {
-    throw new Error(`[LotteryParser] data.insert.lottery is not defined`);
+    throw new Error("[LotteryParser] data.insert.lottery is not defined");
   }
   // 创建 div
   const div = document.createElement("div");
@@ -466,7 +466,7 @@ function parseLinkCard(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivE
     throw new Error(`[ParseLinkCard] data.insert is a string: ${data.insert}`);
   }
   if (data.insert.link_card == null) {
-    throw new Error(`[ParseLinkCard] data.insert.link_card is not defined`);
+    throw new Error("[ParseLinkCard] data.insert.link_card is not defined");
   }
   // 创建 div
   const div = document.createElement("div");
@@ -529,7 +529,7 @@ function parseMention(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLAncho
     throw new Error(`[ParseMention] data.insert is a string: ${data.insert}`);
   }
   if (data.insert.mention == null) {
-    throw new Error(`[ParseMention] data.insert.mention is not defined`);
+    throw new Error("[ParseMention] data.insert.mention is not defined");
   }
   // 创建图标
   const icon = document.createElement("i");
@@ -558,7 +558,7 @@ function emojiParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLImageE
   }
   const emojis = localStorage.getItem("emojis");
   if (!emojis) {
-    throw new Error(`[EmojiParser] emojis is not defined`);
+    throw new Error("[EmojiParser] emojis is not defined");
   }
   const emojiList: Record<string, string> = JSON.parse(emojis);
   const emojiName = data.insert.slice(2, -1);

@@ -150,25 +150,22 @@
 </template>
 
 <script lang="ts" setup>
-// vue
-import { computed, onMounted, ref } from "vue";
-import showSnackbar from "../../components/func/snackbar";
-import showConfirm from "../../components/func/confirm";
-import ToLoading from "../../components/overlay/to-loading.vue";
-import ToGameLogin from "../../components/overlay/to-gameLogin.vue";
-// tauri
 import { app, fs, os } from "@tauri-apps/api";
-// store
+import { computed, onMounted, ref } from "vue";
+
+import showConfirm from "../../components/func/confirm";
+import showSnackbar from "../../components/func/snackbar";
+import ToGameLogin from "../../components/overlay/to-gameLogin.vue";
+import ToLoading from "../../components/overlay/to-loading.vue";
+import TGSqlite from "../../plugins/Sqlite";
+import { useAchievementsStore } from "../../store/modules/achievements";
 import { useAppStore } from "../../store/modules/app";
 import { useHomeStore } from "../../store/modules/home";
-import { useAchievementsStore } from "../../store/modules/achievements";
 import { useUserStore } from "../../store/modules/user";
-// utils
 import { backupUiafData, restoreUiafData } from "../../utils/UIAF";
+import TGRequest from "../../web/request/TGRequest";
 import { backupAbyssData, backupCookieData } from "../../web/utils/backupData";
 import { restoreAbyssData, restoreCookieData } from "../../web/utils/restoreData";
-import TGSqlite from "../../plugins/Sqlite";
-import TGRequest from "../../web/request/TGRequest";
 
 // Store
 const appStore = useAppStore();

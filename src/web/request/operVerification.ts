@@ -4,9 +4,10 @@
  * @since Beta v0.3.3
  */
 
-import TGUtils from "../utils/TGUtils";
 import { http } from "@tauri-apps/api";
 import { v4 } from "uuid";
+
+import TGUtils from "../utils/TGUtils";
 
 /**
  * @description 获取 deviceId
@@ -69,9 +70,15 @@ export async function submitVerification(
     geetest_validate: validate.geetest_validate,
     geetest_seccode: validate.geetest_seccode,
   };
+  console.log(data);
   const header = TGUtils.User.getHeader(cookie, "POST", data, "common");
   const reqHeader = {
     ...header,
+    host: "api-takumi-record.mihoyo.com",
+    origin: "https://webstatic.mihoyo.com",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-site",
     "x-rpc-device_id": getDeviceId(),
     "x-rpc-page": "3.1.3_#/ys",
   };
@@ -83,6 +90,7 @@ export async function submitVerification(
       body: http.Body.json(data),
     })
     .then((res) => {
+      console.log(res.data);
       return res.data;
     });
 }

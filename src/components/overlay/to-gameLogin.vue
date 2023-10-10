@@ -17,17 +17,15 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
-// vue
+import QrcodeVue from "qrcode.vue";
 import { computed, reactive, ref, watch } from "vue";
+
+import Mys from "../../plugins/Mys";
+import TGSqlite from "../../plugins/Sqlite";
+import { useUserStore } from "../../store/modules/user";
+import TGRequest from "../../web/request/TGRequest";
 import showSnackbar from "../func/snackbar";
 import TOverlay from "../main/t-overlay.vue";
-import QrcodeVue from "qrcode.vue";
-// store
-import { useUserStore } from "../../store/modules/user";
-// utils
-import Mys from "../../plugins/Mys";
-import TGRequest from "../../web/request/TGRequest";
-import TGSqlite from "../../plugins/Sqlite";
 
 interface ToWebLoginProps {
   modelValue: boolean;

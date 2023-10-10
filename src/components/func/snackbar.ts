@@ -1,13 +1,11 @@
 /**
  * @file component func snackbar.ts
  * @description 封装 vuetify 的 snackbar 组件，通过函数调用的方式，简化 snackbar 的使用
- * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.3
+ * @since Beta v0.3.3
  */
 
-// vue
 import { h, render, type VNode } from "vue";
-// snackbar
+
 import snackbar from "./snackbar.vue";
 
 const snackbarId = "tg-func-snackbar";
@@ -24,7 +22,7 @@ const renderBox = (props: TGApp.Component.Snackbar.Params): VNode => {
 let snackbarInstance: VNode;
 
 const showSnackbar = (props: TGApp.Component.Snackbar.Params): void => {
-  if (snackbarInstance) {
+  if (snackbarInstance !== undefined) {
     const boxVue = snackbarInstance.component;
     boxVue?.exposeProxy?.displayBox(props);
   } else {

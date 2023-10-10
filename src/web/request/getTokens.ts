@@ -1,15 +1,12 @@
 /**
  * @file web request getTokens.ts
  * @description 获取游戏 Token
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.5
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
-// api
+
 import TGApi from "../api/TGApi";
-// utils
 import TGUtils from "../utils/TGUtils";
 
 /**

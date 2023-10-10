@@ -10,9 +10,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
-import TuaDetailTitle from "./tua-detail-title.vue";
 import TuaDetailBattle from "./tua-detail-battle.vue";
+import TuaDetailTitle from "./tua-detail-title.vue";
 
 interface TuaDetailLevelProps {
   modelValue: TGApp.Sqlite.Abyss.Level;

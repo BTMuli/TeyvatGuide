@@ -52,18 +52,15 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
-import { computed, onMounted, onUpdated, reactive, ref } from "vue";
-import { useRoute } from "vue-router";
-import JsonViewer from "vue-json-viewer";
-import ToLoading from "../components/overlay/to-loading.vue";
-import TSwitchTheme from "../components/app/t-switchTheme.vue";
-// tauri
 import { appWindow } from "@tauri-apps/api/window";
-// store
-import { useAppStore } from "../store/modules/app";
-// plugins
+import { computed, onMounted, onUpdated, reactive, ref } from "vue";
+import JsonViewer from "vue-json-viewer";
+import { useRoute } from "vue-router";
+
+import TSwitchTheme from "../components/app/t-switchTheme.vue";
+import ToLoading from "../components/overlay/to-loading.vue";
 import Mys from "../plugins/Mys";
+import { useAppStore } from "../store/modules/app";
 
 // loading
 const loading = ref<boolean>(true);

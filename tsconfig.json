@@ -10,19 +10,19 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
-    "lib": ["ESNext", "DOM"],
+    "lib": ["DOM", "ESNext"],
     "skipLibCheck": true,
     "types": ["vite/client"],
     "allowSyntheticDefaultImports": true,
     "composite": true
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "src/**/*.vue",
-    "vite.config.ts",
-    "tsconfig.json",
     ".yml",
-    "package.json"
+    "package.json",
+    "src/**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "tsconfig.json",
+    "vite.config.ts"
   ]
 }

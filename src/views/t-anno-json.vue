@@ -9,15 +9,13 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
-import { ref, onMounted, reactive } from "vue";
-import { useRoute } from "vue-router";
-import JsonViewer from "vue-json-viewer";
-import ToLoading from "../components/overlay/to-loading.vue";
-import TSwitchTheme from "../components/app/t-switchTheme.vue";
-// tauri
 import { appWindow } from "@tauri-apps/api/window";
-// utils
+import { ref, onMounted, reactive } from "vue";
+import JsonViewer from "vue-json-viewer";
+import { useRoute } from "vue-router";
+
+import TSwitchTheme from "../components/app/t-switchTheme.vue";
+import ToLoading from "../components/overlay/to-loading.vue";
 import TGRequest from "../web/request/TGRequest";
 
 // loading

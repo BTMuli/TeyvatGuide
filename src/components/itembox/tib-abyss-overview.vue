@@ -2,12 +2,10 @@
   <TItemBox v-model="box" />
 </template>
 <script lang="ts" setup>
-// vue
 import { onMounted, ref } from "vue";
-import TItemBox from "../main/t-itembox.vue";
-// utils
+
 import TGSqlite from "../../plugins/Sqlite";
-// types
+import TItemBox from "../main/t-itembox.vue";
 import type { TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibAbyssOverviewProps {

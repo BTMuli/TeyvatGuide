@@ -1,13 +1,11 @@
 /**
  * @file plugins Hutao request getAvatarUseRate.ts
  * @description 获取角色使用率
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
-// api
+
 import HutaoApi from "../api";
 
 /**

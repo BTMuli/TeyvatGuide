@@ -2,10 +2,9 @@
   <TItemBox :model-value="box" style="cursor: pointer" />
 </template>
 <script lang="ts" setup>
-// vue
 import { computed } from "vue";
+
 import TItemBox from "../main/t-itembox.vue";
-// types
 import type { TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibCalendarWeaponProps {

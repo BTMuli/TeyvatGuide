@@ -1,18 +1,13 @@
 /**
  * @file router modules main.ts
  * @description 主路由模块
- * @author BTMuli<bt-muli@outlook.com>
  * @since Beta v0.3.2
  */
 
-// 信息展示
-import Announcements from "../../pages/common/Announcements.vue";
-import Home from "../../pages/common/Home.vue";
-// 数据交互
 import Achievements from "../../pages/common/Achievements.vue";
-// 应用配置相关
+import Announcements from "../../pages/common/Announcements.vue";
 import Config from "../../pages/common/Config.vue";
-// 测试页
+import Home from "../../pages/common/Home.vue";
 import Test from "../../pages/common/Test.vue";
 
 const mainRoutes = [

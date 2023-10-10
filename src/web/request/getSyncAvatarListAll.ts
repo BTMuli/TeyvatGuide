@@ -1,15 +1,12 @@
 /**
  * @file web request getSyncAvatarListAll.ts
  * @description 获取同步角色列表请求
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.3
  */
 
-// tauri
 import { app, http } from "@tauri-apps/api";
-// api
+
 import TGApi from "../api/TGApi";
-// utils
 import TGUtils from "../utils/TGUtils";
 
 /**

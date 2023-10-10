@@ -1,14 +1,11 @@
 /**
  * @file store modules achievements.ts
  * @description Achievements store module
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.3
  */
 
-// vue
-import { ref } from "vue";
-// pinia
 import { defineStore } from "pinia";
+import { ref } from "vue";
 
 export const useAchievementsStore = defineStore(
   "achievements",

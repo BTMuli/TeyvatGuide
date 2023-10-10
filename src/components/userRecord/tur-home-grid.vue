@@ -5,8 +5,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import { computed } from "vue";
+
 import TurHomeSub from "./tur-home-sub.vue";
 
 interface TurHomeGridProps {

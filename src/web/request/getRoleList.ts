@@ -1,13 +1,11 @@
 /**
  * @file web request getRoleList.ts
  * @description 获取游戏角色列表的请求方法
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
-// utils
+
 import TGApi from "../api/TGApi";
 import TGUtils from "../utils/TGUtils";
 

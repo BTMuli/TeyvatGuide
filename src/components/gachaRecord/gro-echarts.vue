@@ -2,22 +2,22 @@
   <v-chart :option="getPoolData()" autoresize />
 </template>
 <script lang="ts" setup>
-// vue
-import { onMounted, provide } from "vue";
-import VChart, { THEME_KEY } from "vue-echarts";
-import showSnackbar from "../func/snackbar";
-// echarts
-import { use } from "echarts/core";
+import type { EChartsOption } from "echarts";
+import { PieChart } from "echarts/charts";
 import {
   LegendComponent,
   TitleComponent,
   TooltipComponent,
   ToolboxComponent,
 } from "echarts/components";
-import { PieChart } from "echarts/charts";
+import { use } from "echarts/core";
 import { LabelLayout } from "echarts/features";
 import { CanvasRenderer } from "echarts/renderers";
-import { type EChartsOption } from "echarts";
+import { onMounted, provide } from "vue";
+import VChart, { THEME_KEY } from "vue-echarts";
+
+import showSnackbar from "../func/snackbar";
+// echarts
 
 use([
   TitleComponent,

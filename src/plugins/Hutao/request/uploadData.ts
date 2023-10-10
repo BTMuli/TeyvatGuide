@@ -1,13 +1,11 @@
 /**
  * @file plugins Hutao request uploadData.ts
  * @description Hutao 数据上传请求函数集合
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.1
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
-// api
+
 import HutaoApi from "../api";
 
 /**

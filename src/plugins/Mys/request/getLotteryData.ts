@@ -1,11 +1,11 @@
 /**
  * @file plugins Mys interface getLotteryData.ts
  * @description Mys 插件抽奖接口
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.1
  */
 
 import { http } from "@tauri-apps/api";
+
 import MysApi from "../api";
 
 /**

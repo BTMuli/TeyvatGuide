@@ -1,13 +1,11 @@
 /**
  * @file web utils restoreData.ts
  * @description 数据恢复
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
 
-// tauri
 import { fs, path } from "@tauri-apps/api";
-// utils
+
 import TGSqlite from "../../plugins/Sqlite";
 
 /**

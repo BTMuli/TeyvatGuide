@@ -1,16 +1,12 @@
 /**
  * @file store modules app.ts
  * @description App store module
- * @author BTMuli <bt-muli@outlook.com>
  * @since Beta v0.3.3
  */
 
-// vue
-import { reactive, ref } from "vue";
-// pinia
-import { defineStore } from "pinia";
-// tauri
 import { path } from "@tauri-apps/api";
+import { defineStore } from "pinia";
+import { reactive, ref } from "vue";
 
 // 用于存储用户数据的路径
 const userDataDir = `${await path.appLocalDataDir()}userData`;

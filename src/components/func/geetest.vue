@@ -16,6 +16,7 @@
 </template>
 <script setup lang="ts">
 import { ref, watch } from "vue";
+
 import showSnackbar from "./snackbar";
 import { useUserStore } from "../../store/modules/user";
 import TGRequest from "../../web/request/TGRequest";
@@ -68,7 +69,6 @@ async function displayBox(): Promise<void> {
     (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => {
       geetestRef.value.innerHTML = "";
       captchaObj.appendTo("#geetest");
-      // @eslint-ignore-next-line @typescript-eslint/no-misused-promises
       captchaObj.onSuccess(async () => {
         const validate = captchaObj.getValidate();
         const cookie = {

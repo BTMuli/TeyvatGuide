@@ -4,11 +4,10 @@
  * @since Beta v0.3.3
  */
 
-// utils
-import { timeToSecond } from "../utils/transTime";
 import { transCharacterData, transFloorData } from "../utils/transAbyssData";
-import { transUserRoles } from "../utils/transUserRoles";
+import { timeToSecond } from "../utils/transTime";
 import { transUserRecord } from "../utils/transUserRecord";
+import { transUserRoles } from "../utils/transUserRoles";
 
 /**
  * @description 插入成就数据
