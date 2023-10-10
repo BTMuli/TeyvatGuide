@@ -4,7 +4,7 @@
   "private": true,
   "version": "0.3.3",
   "author": "BTMuli <bt-muli@outlook.com>",
-  "packageManager": "pnpm@8.8.0",
+  "packageManager": "pnpm@8.9.0",
   "scripts": {
     "build": "tauri build",
     "debug": "tauri build --debug",
@@ -81,13 +81,16 @@
     "concurrently": "^8.2.1",
     "eslint": "^8.50.0",
     "eslint-config-prettier": "^9.0.0",
-    "eslint-config-standard-with-typescript": "^39.1.0",
+    "eslint-config-standard-with-typescript": "^39.1.1",
     "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-jsonc": "^2.10.0",
     "eslint-plugin-n": "^16.1.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-vue": "^9.17.0",
+    "eslint-plugin-yml": "^1.10.0",
     "husky": "^8.0.3",
+    "jsonc-eslint-parser": "^2.3.0",
     "lint-staged": "^14.0.1",
     "prettier": "3.0.3",
     "stylelint": "^15.10.3",
@@ -99,6 +102,7 @@
     "stylelint-prettier": "^4.0.2",
     "typescript": "^5.2.2",
     "vite": "^4.4.9",
-    "vite-plugin-vuetify": "^1.0.2"
+    "vite-plugin-vuetify": "^1.0.2",
+    "yaml-eslint-parser": "^1.2.2"
   }
 }
