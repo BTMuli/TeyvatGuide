@@ -1,11 +1,9 @@
 /**
  * @file plugins Mys utils parsePost.ts
  * @description 用于解析Mys数据的工具
- * @author BTMuli <bt-muli@outlook.com>
- * @since Beta v0.3.2
+ * @since Beta v0.3.3
  */
 
-// third party
 import { score } from "wcag-color";
 import * as colorConvert from "color-convert";
 
@@ -311,7 +309,7 @@ function parseImage(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElem
 
 /**
  * @description 解析视频
- * @since Beta v0.3.0
+ * @since Beta v0.3.3
  * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的视频
  */
@@ -345,6 +343,17 @@ function parseVideo(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElem
     video.appendChild(source);
     // 插入 video
     div.appendChild(video);
+    // 创建视频封面图
+    const coverDiv = document.createElement("div");
+    const cover = document.createElement("img");
+    cover.classList.add("mys-post-vod-cover");
+    cover.src = video.poster;
+    coverDiv.appendChild(cover);
+    const playIcon = document.createElement("div");
+    playIcon.classList.add("mdi", "mdi-play-circle-outline", "mys-post-vod-icon");
+    coverDiv.appendChild(playIcon);
+    coverDiv.classList.add("mys-post-vod-cover-div");
+    div.appendChild(coverDiv);
   } else if (data.insert.video) {
     // 创建 iframe
     const video = document.createElement("iframe");

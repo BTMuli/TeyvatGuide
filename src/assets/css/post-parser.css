@@ -2,8 +2,7 @@
  * @file assets css post-parser.css
  * @description 米游社解析 css
  * @todo 需要完善
- * @author BTMuli <bt-muli@outlook.com>
- * @since Beta v0.3.0
+ * @since Beta v0.3.3
  */
 
 .mys-post-body {
@@ -28,6 +27,7 @@
 }
 
 :deep(.mys-post-div) {
+  position: relative;
   margin: 10px auto;
 }
 
@@ -71,6 +71,37 @@
   width: 800px;
   height: 450px;
   border-radius: 10px;
+}
+
+:deep(.mys-post-vod-cover-div) {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: 800px;
+  height: 450px;
+  border-radius: 10px;
+}
+
+:deep(.mys-post-vod-cover) {
+  width: 800px;
+  height: 450px;
+  border-radius: 10px;
+}
+
+:deep(.mys-post-vod-icon) {
+  position: absolute;
+  top: calc(50% - 40px);
+  left: calc(50% - 40px);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 50px;
+  line-height: 80px;
+  text-align: center;
 }
 
 :deep(.mys-post-iframe) {
