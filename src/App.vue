@@ -106,7 +106,7 @@ async function checkUserLoad(): Promise<void> {
     await new Promise((resolve) => {
       setTimeout(() => {
         showSnackbar({
-          text: "请先登录！",
+          text: "获取 Cookie 失败！请重新登录！",
           color: "error",
           timeout: 3000,
         });
@@ -126,6 +126,22 @@ async function checkUserLoad(): Promise<void> {
     console.info("briefInfo 数据已更新！");
   } else {
     console.info("briefInfo 数据已加载！");
+  }
+  const accountLocal = userStore.getCurAccount();
+  const accountDB = await TGSqlite.getCurAccount();
+  if (accountDB === false) {
+    showSnackbar({
+      text: "获取 GameAccount 失败！请尝试更新数据库！",
+      color: "error",
+      timeout: 3000,
+    });
+    return;
+  }
+  if (accountDB !== accountLocal) {
+    userStore.setCurAccount(accountDB);
+    console.info("curAccount 数据已更新！");
+  } else {
+    console.info("curAccount 数据已加载！");
   }
 }
 
@@ -152,6 +168,7 @@ async function initData(): Promise<void> {
 
 async function getDeepLink(): Promise<void> {
   await event.listen("active_deep_link", (e) => {
+    console.log(e.payload);
     new TauriWindow.WebviewWindow("TeyvatGuide")
       .center()
       .then(async () => {
