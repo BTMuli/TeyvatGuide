@@ -592,13 +592,15 @@ function parseVillaCard(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDiv
   div.classList.add("mys-post-div");
   const villaCard = document.createElement("div");
   villaCard.classList.add("mys-post-villa-card");
-  const bgBefore = document.createElement("div");
-  bgBefore.classList.add("mys-post-villa-card-bg-before");
-  villaCard.appendChild(bgBefore);
   const bgImg = document.createElement("img");
   bgImg.classList.add("mys-post-villa-card-bg");
   bgImg.src = data.insert.villa_card.villa_cover;
   villaCard.appendChild(bgImg);
+  const bgBefore = document.createElement("div");
+  bgBefore.classList.add("mys-post-villa-card-bg-before");
+  villaCard.appendChild(bgBefore);
+  const flexDiv = document.createElement("div");
+  flexDiv.classList.add("mys-post-villa-card-flex");
   const topDiv = document.createElement("div");
   topDiv.classList.add("mys-post-villa-card-top");
   const topIcon = document.createElement("img");
@@ -623,7 +625,7 @@ function parseVillaCard(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDiv
   topContent.appendChild(topDesc);
   topDiv.appendChild(topIcon);
   topDiv.appendChild(topContent);
-  villaCard.appendChild(topDiv);
+  flexDiv.appendChild(topDiv);
   const midDiv = document.createElement("div");
   midDiv.classList.add("mys-post-villa-card-mid");
   const numberDiv = document.createElement("div");
@@ -636,11 +638,12 @@ function parseVillaCard(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDiv
     tagDiv.innerText = tag;
     midDiv.appendChild(tagDiv);
   });
-  villaCard.appendChild(midDiv);
+  flexDiv.appendChild(midDiv);
   const bottomDiv = document.createElement("div");
   bottomDiv.classList.add("mys-post-villa-card-bottom");
   bottomDiv.innerText = data.insert.villa_card.villa_introduce;
-  villaCard.appendChild(bottomDiv);
+  flexDiv.appendChild(bottomDiv);
+  villaCard.appendChild(flexDiv);
   div.appendChild(villaCard);
   return div;
 }
