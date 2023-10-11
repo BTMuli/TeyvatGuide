@@ -117,7 +117,7 @@ function parsePost(post: TGApp.Plugins.Mys.Post.FullData): string {
 
 /**
  * @description 解析中转
- * @since Alpha v0.1.2
+ * @since Beta v0.3.3
  * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLDivElement | HTMLSpanElement} 解析后的中转
  */
@@ -140,6 +140,8 @@ function transferParser(
     return parseDivider(data);
   } else if (data.insert.mention != null) {
     return parseMention(data);
+  } else if (data.insert.villa_card != null) {
+    return parseVillaCard(data);
   } else {
     return parseUnknown(data);
   }
@@ -571,6 +573,76 @@ function emojiParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLImageE
   img.title = emojiName;
   // 获取图片地址
   return img;
+}
+
+/**
+ * @description 解析大别野房间卡片
+ * @since Beta v0.3.3
+ * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @returns {HTMLDivElement} 解析后的大别野房间卡片
+ */
+function parseVillaCard(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
+  if (typeof data.insert === "string") {
+    throw new Error(`[parseVillaCard] data.insert is a string: ${data.insert}`);
+  }
+  if (data.insert.villa_card == null) {
+    throw new Error("[parseVillaCard] data.insert.villa_card is not defined");
+  }
+  const div = document.createElement("div");
+  div.classList.add("mys-post-div");
+  const villaCard = document.createElement("div");
+  villaCard.classList.add("mys-post-villa-card");
+  const bgBefore = document.createElement("div");
+  bgBefore.classList.add("mys-post-villa-card-bg-before");
+  villaCard.appendChild(bgBefore);
+  const bgImg = document.createElement("img");
+  bgImg.classList.add("mys-post-villa-card-bg");
+  bgImg.src = data.insert.villa_card.villa_cover;
+  villaCard.appendChild(bgImg);
+  const topDiv = document.createElement("div");
+  topDiv.classList.add("mys-post-villa-card-top");
+  const topIcon = document.createElement("img");
+  topIcon.classList.add("mys-post-villa-card-icon");
+  topIcon.src = data.insert.villa_card.villa_avatar_url;
+  const topContent = document.createElement("div");
+  topContent.classList.add("mys-post-villa-card-content");
+  const topTitle = document.createElement("div");
+  topTitle.classList.add("mys-post-villa-card-title");
+  topTitle.innerText = data.insert.villa_card.villa_name;
+  topContent.appendChild(topTitle);
+  const topDesc = document.createElement("div");
+  topDesc.classList.add("mys-post-villa-card-desc");
+  const topDescIcon = document.createElement("img");
+  topDescIcon.src = data.insert.villa_card.owner_avatar_url;
+  topDescIcon.classList.add("mys-post-villa-card-desc-icon");
+  const topDescText = document.createElement("span");
+  topDescText.classList.add("mys-post-villa-card-desc-text");
+  topDescText.innerText = `${data.insert.villa_card.owner_nickname} 创建`;
+  topDesc.appendChild(topDescIcon);
+  topDesc.appendChild(topDescText);
+  topContent.appendChild(topDesc);
+  topDiv.appendChild(topIcon);
+  topDiv.appendChild(topContent);
+  villaCard.appendChild(topDiv);
+  const midDiv = document.createElement("div");
+  midDiv.classList.add("mys-post-villa-card-mid");
+  const numberDiv = document.createElement("div");
+  numberDiv.classList.add("mys-post-villa-card-tag");
+  numberDiv.innerText = `${data.insert.villa_card.villa_member_num}人在聊`;
+  midDiv.appendChild(numberDiv);
+  data.insert.villa_card.tag_list.forEach((tag) => {
+    const tagDiv = document.createElement("div");
+    tagDiv.classList.add("mys-post-villa-card-tag");
+    tagDiv.innerText = tag;
+    midDiv.appendChild(tagDiv);
+  });
+  villaCard.appendChild(midDiv);
+  const bottomDiv = document.createElement("div");
+  bottomDiv.classList.add("mys-post-villa-card-bottom");
+  bottomDiv.innerText = data.insert.villa_card.villa_introduce;
+  villaCard.appendChild(bottomDiv);
+  div.appendChild(villaCard);
+  return div;
 }
 
 export default parsePost;

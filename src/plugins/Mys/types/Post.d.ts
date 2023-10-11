@@ -1,8 +1,7 @@
 /**
  * @file plugins Mys types post.d.ts
  * @description Mys 插件帖子类型定义文件
- * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.2
+ * @since Beta v0.3.3
  */
 
 /**
@@ -302,7 +301,7 @@ declare namespace TGApp.Plugins.Mys.Post {
 
   /**
    * @description 帖子结构化内容
-   * @since Alpha v0.2.1
+   * @since Beta v0.3.3
    * @todo 重构
    * @interface StructuredContent
    * @property {string|object} insert 插入内容
@@ -321,6 +320,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {object} insert.mention 提及
    * @property {string} insert.mention.uid 用户 ID
    * @property {string} insert.mention.nickname 用户昵称
+   * @property {StructuredVillaCard} insert.villa_card 大别野卡片
    * @property {object} attributes 属性
    * @property {number} attributes.height 高度
    * @property {number} attributes.width 宽度
@@ -352,6 +352,7 @@ declare namespace TGApp.Plugins.Mys.Post {
             uid: string;
             nickname: string;
           };
+          villa_card?: StructuredVillaCard;
         }
       | string;
     attributes?: {
@@ -434,5 +435,35 @@ declare namespace TGApp.Plugins.Mys.Post {
     price: string;
     button_text: string;
     landing_url_type: number;
+  }
+
+  /**
+   * @description 帖子结构化内容-大别野卡片
+   * @since Beta v0.3.3
+   * @interface StructuredVillaCard
+   * @property {string} villa_id 大别野房间 ID
+   * @property {string} villa_name 大别野房间 名称
+   * @property {string} villa_avatar_url 大别野房间 头像图 URL
+   * @property {string} villa_cover 大别野房间 封面图 URL
+   * @property {string} owner_uid 大别野房间 房主 UID
+   * @property {string} owner_nickname 大别野房间 房主昵称
+   * @property {string} owner_avatar_url 大别野房间 房主头像图 URL
+   * @property {string} villa_introduce 大别野房间 介绍
+   * @property {string[]} tag_list 大别野房间 标签列表
+   * @property {string} villa_member_num 大别野房间 成员数
+   * @property {boolean} is_available 大别野房间 是否可用
+   * @return StructuredVillaCard
+   */
+  interface StructuredVillaCard {
+    villa_id: string;
+    villa_name: string;
+    villa_avatar_url: string;
+    villa_cover: string;
+    owner_uid: string;
+    owner_nickname: string;
+    owner_avatar_url: string;
+    villa_introduce: string;
+    tag_list: string[];
+    villa_member_num: string;
   }
 }

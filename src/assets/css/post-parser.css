@@ -172,10 +172,129 @@
   text-decoration: none;
 }
 
+/* 表情包 */
 :deep(.mys-post-emoji) {
   width: 45px;
   height: 45px;
   margin: 0 5px;
+}
+
+/* 大别野卡片 */
+:deep(.mys-post-villa-card) {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  width: 800px;
+  height: auto;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 20px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 10px;
+  gap: 10px;
+}
+
+:deep(.mys-post-villa-card-bg-before) {
+  position: absolute;
+  z-index: 2;
+  top: 120px;
+  right: 0;
+  width: 100%;
+  height: calc(100% - 120px);
+  background: linear-gradient(rgba(255, 255, 255, 0), #ffffff 80px, #ffffff);
+}
+
+:deep(.mys-post-villa-card-bg) {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  background-position-y: 10px;
+  object-fit: cover;
+}
+
+:deep(.mys-post-villa-card-top) {
+  z-index: 3;
+  display: flex;
+  width: 100%;
+  height: 100px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+:deep(.mys-post-villa-card-icon) {
+  width: 80px;
+  height: 80px;
+  border-radius: 5px;
+}
+
+:deep(.mys-post-villa-card-content) {
+  display: flex;
+  height: 100px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+:deep(.mys-post-villa-card-title) {
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 20px;
+}
+
+:deep(.mys-post-villa-card-desc) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+:deep(.mys-post-villa-card-desc-icon) {
+  width: 20px;
+  height: 20px;
+}
+
+:deep(.mys-post-villa-card-desc-text) {
+  color: var(--common-text-content);
+  font-size: 14px;
+}
+
+:deep(.mys-post-villa-card-mid) {
+  z-index: 3;
+  display: flex;
+  width: 100%;
+  height: 80px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+:deep(.mys-post-villa-card-tag) {
+  width: auto;
+  height: 40px;
+  padding: 5px;
+  border-radius: 5px;
+  margin: 5px;
+  background: #f4f4f4;
+  color: #999999;
+  font-family: var(--font-text);
+  font-size: 12px;
+}
+
+:deep(.mys-post-villa-card-bottom) {
+  z-index: 3;
+  width: 100%;
+  height: auto;
+  font-family: var(--font-title);
+  font-size: 16px;
+  text-align: left;
 }
 
 /* 未知类型 */
