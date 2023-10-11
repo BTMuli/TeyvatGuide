@@ -167,43 +167,41 @@ async function initData(): Promise<void> {
 }
 
 async function getDeepLink(): Promise<void> {
-  await event.listen("active_deep_link", (e) => {
-    new TauriWindow.WebviewWindow("TeyvatGuide")
-      .setFocus()
-      .then(async () => {
-        if (typeof e.payload !== "string") {
-          showSnackbar({
-            text: "无效的 deep link！",
-            color: "error",
-            timeout: 3000,
-          });
-          return;
-        }
-        if (e.payload === "") return;
-        // 导入格式: teyvatguide://import_uigf?app=appName
-        // 跳转格式: localhost:4000/achievements/?app=appName
-        if (e.payload.startsWith("teyvatguide://import_uigf")) {
-          const param = (<string>e.payload).split("teyvatguide://import_uigf/?")[1];
-          let appName = "";
-          if (param) {
-            appName = param.split("app=")[1];
-          }
-          if (appName === "") {
-            await router.push("/achievements");
-          } else {
-            await router.push("/achievements/?app=" + appName);
-          }
-        } else {
-          showSnackbar({
-            text: "无效的 deep link！",
-            color: "error",
-            timeout: 3000,
-          });
-        }
-      })
-      .catch((e) => {
-        console.log(e);
+  await event.listen("active_deep_link", async (e) => {
+    const windowGet = new TauriWindow.WebviewWindow("TeyvatGuide");
+    if (await windowGet.isMinimized()) {
+      await windowGet.unminimize();
+    }
+    await windowGet.setFocus();
+    if (typeof e.payload !== "string") {
+      showSnackbar({
+        text: "无效的 deep link！",
+        color: "error",
+        timeout: 3000,
       });
+      return;
+    }
+    if (e.payload === "") return;
+    // 导入格式: teyvatguide://import_uigf?app=appName
+    // 跳转格式: localhost:4000/achievements/?app=appName
+    if (e.payload.startsWith("teyvatguide://import_uigf")) {
+      const param = (<string>e.payload).split("teyvatguide://import_uigf/?")[1];
+      let appName = "";
+      if (param) {
+        appName = param.split("app=")[1];
+      }
+      if (appName === "") {
+        await router.push("/achievements");
+      } else {
+        await router.push("/achievements/?app=" + appName);
+      }
+    } else {
+      showSnackbar({
+        text: "无效的 deep link！",
+        color: "error",
+        timeout: 3000,
+      });
+    }
   });
 }
 </script>
