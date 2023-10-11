@@ -168,9 +168,8 @@ async function initData(): Promise<void> {
 
 async function getDeepLink(): Promise<void> {
   await event.listen("active_deep_link", (e) => {
-    console.log(e.payload);
     new TauriWindow.WebviewWindow("TeyvatGuide")
-      .center()
+      .setFocus()
       .then(async () => {
         if (typeof e.payload !== "string") {
           showSnackbar({
@@ -180,6 +179,7 @@ async function getDeepLink(): Promise<void> {
           });
           return;
         }
+        if (e.payload === "") return;
         // 导入格式: teyvatguide://import_uigf?app=appName
         // 跳转格式: localhost:4000/achievements/?app=appName
         if (e.payload.startsWith("teyvatguide://import_uigf")) {

@@ -5,11 +5,13 @@ use tauri::Manager;
 
 // 放一个常数，用来判断应用是否初始化
 static mut APP_INITIALIZED: bool = false;
+static mut DEEP_LINK_REGISTERED: bool = false;
 
 #[tauri::command]
 async fn init_app(app_handle: tauri::AppHandle) {
+    dbg!("init_app");
     unsafe {
-        if APP_INITIALIZED {
+        if APP_INITIALIZED == true && DEEP_LINK_REGISTERED == true {
             return;
         }
     }
@@ -21,6 +23,12 @@ async fn init_app(app_handle: tauri::AppHandle) {
 
 #[tauri::command]
 async fn register_deep_link(app_handle: tauri::AppHandle) {
+    dbg!("register_deep_link");
+    unsafe {
+        if DEEP_LINK_REGISTERED == true {
+            return;
+        }
+    }
     tauri_plugin_deep_link::register(
         "teyvatguide",
         move |request| {
@@ -29,6 +37,9 @@ async fn register_deep_link(app_handle: tauri::AppHandle) {
         },
     )
     .unwrap();
+    unsafe {
+        DEEP_LINK_REGISTERED = true;
+    }
 }
 
 fn main() {
