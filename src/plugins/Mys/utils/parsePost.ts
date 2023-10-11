@@ -147,20 +147,17 @@ function transferParser(
 
 /**
  * @description 解析未知数据
- * @since Alpha v0.1.1
+ * @since Beta v0.3.3
  * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
  * @returns {HTMLDivElement} 解析后的未知数据
  */
 function parseUnknown(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
-  // 创建 div
   const div = document.createElement("div");
   div.classList.add("mys-post-unknown");
-  // 创建 code，将数据放入 code
   const code = document.createElement("code");
-  code.innerText = JSON.stringify(data);
-  // 插入 code
+  code.innerText = JSON.stringify(data, null, 2);
+  code.classList.add("mys-post-unknown-code");
   div.appendChild(code);
-  // 返回 div
   return div;
 }
 
