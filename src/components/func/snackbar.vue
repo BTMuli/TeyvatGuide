@@ -8,16 +8,9 @@
   </transition>
 </template>
 <script lang="ts" setup>
-// vue
 import { ref, reactive, onMounted } from "vue";
 
-interface SnackbarProps {
-  text: string;
-  color?: string;
-  timeout?: number;
-}
-
-const props = withDefaults(defineProps<SnackbarProps>(), {
+const props = withDefaults(defineProps<TGApp.Component.Snackbar.Params>(), {
   text: "",
   color: "success",
   timeout: 1500,

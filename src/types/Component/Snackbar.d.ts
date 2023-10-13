@@ -1,8 +1,7 @@
 /**
  * @file types Component Snackbar.d.ts
  * @description Component Snackbar 类型声明文件
- * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.3
+ * @since Beta v0.3.3
  */
 
 declare namespace TGApp.Component.Snackbar {
@@ -16,9 +15,18 @@ declare namespace TGApp.Component.Snackbar {
    * @property {boolean} show 是否显示
    * @return Params
    */
-  export interface Params {
+  interface Params {
     text: string;
     color?: string;
     timeout?: number;
   }
+
+  /**
+   * @description Snackbar 方法 - displayBox
+   * @since Beta v0.3.3
+   * @function displayBox
+   * @param {Params} props
+   * @return void
+   */
+  function displayBox(props: Params): void;
 }

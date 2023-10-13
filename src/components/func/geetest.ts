@@ -4,11 +4,25 @@
  * @since Beta v0.3.3
  */
 
-import { h, render, type VNode } from "vue";
+import { h, render } from "vue";
+import type { ComponentInternalInstance, VNode } from "vue";
 
 import geetest from "./geetest.vue";
 
 const geetestId = "tg-func-geetest";
+
+/**
+ * @description 自定义 geetest 组件
+ * @since Beta v0.3.3
+ * @extends ComponentInternalInstance
+ * @property {Function} exposeProxy.displayBox 弹出 geetest 验证
+ * @return GeetestInstance
+ */
+interface GeetestInstance extends ComponentInternalInstance {
+  exposeProxy: {
+    displayBox: () => boolean;
+  };
+}
 
 const renderBox = (): VNode => {
   const container = document.createElement("div");
@@ -21,14 +35,14 @@ const renderBox = (): VNode => {
 
 let geetestInstance: VNode;
 
-const showGeetest = async (): Promise<boolean> => {
+async function showGeetest(): Promise<boolean> {
   if (geetestInstance !== undefined) {
-    const boxVue = geetestInstance.component;
-    return boxVue?.exposeProxy?.displayBox();
+    const boxVue = <GeetestInstance>geetestInstance.component;
+    return boxVue.exposeProxy.displayBox();
   } else {
     geetestInstance = renderBox();
     return await showGeetest();
   }
-};
+}
 
 export default showGeetest;
