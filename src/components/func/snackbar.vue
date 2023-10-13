@@ -10,7 +10,13 @@
 <script lang="ts" setup>
 import { ref, reactive, onMounted } from "vue";
 
-const props = withDefaults(defineProps<TGApp.Component.Snackbar.Params>(), {
+interface SnackbarProps {
+  text: string;
+  color?: string;
+  timeout?: number;
+}
+
+const props = withDefaults(defineProps<SnackbarProps>(), {
   text: "",
   color: "success",
   timeout: 1500,
@@ -41,6 +47,8 @@ function transColor(color: string): string {
       return "#faad14";
     case "info":
       return "#1890ff";
+    case "cancel":
+      return "#ABB2BF";
     default:
       return color;
   }
@@ -95,7 +103,7 @@ defineExpose({
   transform: translateX(-50%);
 }
 
-.func-snackbar .func-snackbar-text {
+.func-snackbar-text {
   color: #fff;
   font-size: 16px;
   font-weight: 500;
