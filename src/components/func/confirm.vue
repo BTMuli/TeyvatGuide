@@ -6,7 +6,11 @@
           <div class="confirm-title">
             {{ data.title }}
           </div>
-          <div v-if="data?.text !== '' && data.mode === 'confirm'" class="confirm-subtitle">
+          <div
+            v-if="data?.text !== '' && data.mode === 'confirm'"
+            class="confirm-subtitle"
+            :title="data.text"
+          >
             {{ data.text }}
           </div>
           <div v-if="data?.text !== '' && data.mode === 'input'" class="confirm-input">
@@ -200,11 +204,15 @@ defineExpose({
 }
 
 .confirm-subtitle {
+  overflow: hidden;
   width: 100%;
   color: var(--box-text-4);
   font-family: var(--font-text);
   font-size: 20px;
   text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: break-all;
 }
 
 .confirm-input {
