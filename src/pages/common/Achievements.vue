@@ -353,7 +353,7 @@ async function handleImportOuter(app: string): Promise<void> {
     title: "是否导入祈愿数据？",
     text: `来源APP：${app}`,
   });
-  if (confirm === true) {
+  if (confirm) {
     // 读取 剪贴板
     const clipboard = await window.navigator.clipboard.readText();
     let data: TGApp.Plugins.UIAF.Achievement[];

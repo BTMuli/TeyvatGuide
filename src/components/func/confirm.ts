@@ -4,11 +4,25 @@
  * @since Beta v0.3.3
  */
 
-import { h, render, type VNode } from "vue";
+import { h, render } from "vue";
+import type { ComponentInternalInstance, VNode } from "vue";
 
 import confirm from "./confirm.vue";
 
 const confirmId = "tg-func-confirm";
+
+/**
+ * @description 自定义 confirm 组件
+ * @since Beta v0.3.3
+ * @extends ComponentInternalInstance
+ * @property {Function} exposeProxy.displayBox 显示 confirm
+ * @return ConfirmInstance
+ */
+interface ConfirmInstance extends ComponentInternalInstance {
+  exposeProxy: {
+    displayBox: typeof TGApp.Component.Confirm.displayBox;
+  };
+}
 
 const renderBox = (props: TGApp.Component.Confirm.Params): VNode => {
   const container = document.createElement("div");
@@ -21,14 +35,17 @@ const renderBox = (props: TGApp.Component.Confirm.Params): VNode => {
 
 let confirmInstance: VNode;
 
-const showConfirm = async (props: TGApp.Component.Confirm.Params): Promise<string | boolean> => {
+async function showConfirm(props: TGApp.Component.Confirm.ParamsConfirm): Promise<boolean>;
+async function showConfirm(props: TGApp.Component.Confirm.ParamsInput): Promise<string>;
+async function showConfirm(props: TGApp.Component.Confirm.Params): Promise<string | boolean>;
+async function showConfirm(props: TGApp.Component.Confirm.Params): Promise<string | boolean> {
   if (confirmInstance !== undefined) {
-    const boxVue = confirmInstance.component;
-    return boxVue?.exposeProxy?.displayBox(props);
+    const boxVue = <ConfirmInstance>confirmInstance.component;
+    return boxVue.exposeProxy.displayBox(props);
   } else {
     confirmInstance = renderBox(props);
     return await showConfirm(props);
   }
-};
+}
 
 export default showConfirm;

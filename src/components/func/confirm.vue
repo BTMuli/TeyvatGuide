@@ -34,17 +34,9 @@
 </template>
 
 <script lang="ts" setup>
-// vue
 import { onMounted, reactive, ref, watch } from "vue";
 
-interface ConfirmProps {
-  title: string;
-  text?: string;
-  mode?: "confirm" | "input";
-  otcancel?: boolean;
-}
-
-const props = withDefaults(defineProps<ConfirmProps>(), {
+const props = withDefaults(defineProps<TGApp.Component.Confirm.Params>(), {
   title: "",
   text: "",
   mode: "confirm",

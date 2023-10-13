@@ -370,7 +370,7 @@ async function deleteGacha(): Promise<void> {
       text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
     });
   }
-  if (secondConfirm === false) {
+  if (!secondConfirm) {
     showSnackbar({
       color: "grey",
       text: "已取消祈愿数据删除",
