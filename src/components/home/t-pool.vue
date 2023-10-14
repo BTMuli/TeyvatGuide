@@ -6,7 +6,7 @@
     </div>
     <div v-if="!loading" class="pool-grid">
       <div v-for="pool in poolCards" :key="pool.postId" class="pool-card">
-        <div class="pool-cover" @click="toPost(pool)">
+        <div class="pool-cover" @click="createPost(pool.postId, pool.title)">
           <img :src="pool.cover" alt="cover" />
         </div>
         <div class="pool-bottom">
@@ -49,16 +49,11 @@
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
-import { useRouter } from "vue-router";
 
 import Mys from "../../plugins/Mys";
-import { useAppStore } from "../../store/modules/app";
 import { useHomeStore } from "../../store/modules/home";
 import { createPost, createTGWindow } from "../../utils/TGWindow";
 import { stamp2LastTime } from "../../utils/toolFunc";
-
-// vue
-const router = useRouter();
 
 // store
 const homeStore = useHomeStore();
@@ -174,11 +169,6 @@ async function toOuter(url: string, title: string): Promise<void> {
     return;
   }
   createTGWindow(url, "Sub_window", `Pool_${title}`, 1200, 800, true, true);
-}
-
-function toPost(pool: TGApp.Plugins.Mys.Gacha.RenderCard): void {
-  const isDev = useAppStore().devMode;
-  createPost(pool.postId.toString(), isDev);
 }
 
 onUnmounted(() => {

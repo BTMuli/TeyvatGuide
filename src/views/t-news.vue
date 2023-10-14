@@ -33,7 +33,7 @@
     <v-window-item v-for="(value, index) in tabValues" :key="index" :value="value">
       <div class="news-grid">
         <v-card v-for="item in postData[value]" :key="item.postId" class="news-card">
-          <div class="news-cover" @click="toPost(item)">
+          <div class="news-cover" @click="createPost(item)">
             <img :src="item.cover" alt="cover" />
             <div v-if="value === 'activity'" class="news-card-act">
               <div
@@ -66,7 +66,9 @@
                 <span>{{ item.user.label }}</span>
               </div>
             </div>
-            <v-btn class="news-card-btn" variant="outlined" @click="toPost(item)"> 查看详情 </v-btn>
+            <v-btn class="news-card-btn" variant="outlined" @click="createPost(item)">
+              查看详情
+            </v-btn>
             <div class="news-card-forum">
               <img :src="item.forum.icon" alt="forumIcon" />
               <span>{{ item.forum.name }}</span>
@@ -114,7 +116,6 @@ import showSnackbar from "../components/func/snackbar";
 import ToChannel from "../components/overlay/to-channel.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import Mys from "../plugins/Mys";
-import { useAppStore } from "../store/modules/app";
 import { createPost } from "../utils/TGWindow";
 
 // 类型定义
@@ -246,11 +247,6 @@ async function loadMore(key: NewsKey): Promise<void> {
   }, 1500);
 }
 
-function toPost(item: TGApp.Plugins.Mys.News.RenderCard | string): void {
-  const isDev = useAppStore().devMode;
-  createPost(item, isDev);
-}
-
 function searchPost(): void {
   if (search.value === "") {
     showSnackbar({
@@ -260,7 +256,7 @@ function searchPost(): void {
     return;
   }
   if (!isNaN(Number(search.value))) {
-    toPost(search.value);
+    createPost(search.value);
   } else {
     showSnackbar({
       text: "请输入搜索内容",

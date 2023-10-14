@@ -15,12 +15,14 @@
         <v-list class="position-list">
           <v-list-item :title="card.title" :subtitle="card.abstract">
             <template #prepend>
-              <v-avatar rounded="0" @click="toPost(card)">
+              <v-avatar rounded="0" @click="createPost(card.postId, card.title)">
                 <v-img :src="card.icon" class="position-icon" />
               </v-avatar>
             </template>
             <template #append>
-              <v-btn class="position-card-btn" @click="toPost(card)"> 查看 </v-btn>
+              <v-btn class="position-card-btn" @click="createPost(card.postId, card.title)">
+                查看
+              </v-btn>
             </template>
           </v-list-item>
         </v-list>
@@ -45,15 +47,10 @@
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
-import { useRouter } from "vue-router";
 
 import Mys from "../../plugins/Mys";
-import { useAppStore } from "../../store/modules/app";
 import { createPost } from "../../utils/TGWindow";
 import { stamp2LastTime } from "../../utils/toolFunc";
-
-// vue
-const router = useRouter();
 
 // loading
 const loading = ref<boolean>(true);
@@ -105,11 +102,6 @@ onMounted(async () => {
   });
   loading.value = false;
 });
-
-function toPost(card: TGApp.Plugins.Mys.Position.RenderCard): void {
-  const isDev = useAppStore().devMode;
-  createPost(card.postId.toString(), isDev);
-}
 
 onUnmounted(() => {
   Object.keys(positionTimer.value).forEach((key) => {

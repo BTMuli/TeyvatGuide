@@ -6,6 +6,8 @@
 
 import { window as TauriWindow } from "@tauri-apps/api";
 
+import { useAppStore } from "../store/modules/app";
+
 /**
  * @description 创建TG窗口
  * @since Alpha v0.1.2
@@ -58,19 +60,19 @@ export function createTGWindow(
 /**
  * @description 打开帖子
  * @since Beta v0.3.3
- * @param {TGApp.Plugins.Mys.News.RenderCard|string} item 帖子内容或ID
- * @param {boolean} isDev 是否为开发模式
+ * @param {TGApp.Plugins.Mys.News.RenderCard|string|number} item 帖子内容或ID
+ * @param {string} title 帖子标题
  * @returns {void}
  */
 export function createPost(
-  item: TGApp.Plugins.Mys.News.RenderCard | string,
-  isDev: boolean = false,
+  item: TGApp.Plugins.Mys.News.RenderCard | string | number,
+  title?: string,
 ): void {
   let postId, postTitle, jsonTitle;
-  if (typeof item === "string") {
-    postId = item;
-    postTitle = `Post_${postId}`;
-    jsonTitle = `Post_${postId}_JSON`;
+  if (typeof item === "string" || typeof item === "number") {
+    postId = item.toString();
+    postTitle = title ? `Post_${postId} ${title}` : `Post_${postId}`;
+    jsonTitle = title ? `Post_${postId}_JSON ${title}` : `Post_${postId}_JSON`;
   } else {
     postId = item.postId.toString();
     postTitle = `Post_${postId} ${item.title}`;
@@ -78,6 +80,7 @@ export function createPost(
   }
   const postPath = `/post_detail/${postId}`;
   const jsonPath = `/post_detail_json/${postId}`;
+  const isDev = useAppStore().devMode ?? false;
   if (isDev) {
     createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
   }
