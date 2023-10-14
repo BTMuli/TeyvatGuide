@@ -52,8 +52,9 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 
 import Mys from "../../plugins/Mys";
+import { useAppStore } from "../../store/modules/app";
 import { useHomeStore } from "../../store/modules/home";
-import { createTGWindow } from "../../utils/TGWindow";
+import { createPost, createTGWindow } from "../../utils/TGWindow";
 import { stamp2LastTime } from "../../utils/toolFunc";
 
 // vue
@@ -176,13 +177,8 @@ async function toOuter(url: string, title: string): Promise<void> {
 }
 
 function toPost(pool: TGApp.Plugins.Mys.Gacha.RenderCard): void {
-  const path = router.resolve({
-    name: "帖子详情",
-    params: {
-      post_id: pool.postId.toString(),
-    },
-  }).href;
-  createTGWindow(path, "Sub_window", `Post_${pool.postId} ${pool.title}`, 960, 720, false, false);
+  const isDev = useAppStore().devMode;
+  createPost(pool.postId.toString(), isDev);
 }
 
 onUnmounted(() => {

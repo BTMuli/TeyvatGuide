@@ -1,9 +1,13 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" />
   <v-tabs v-model="tab" align-tabs="start" class="news-tab">
-    <v-tab value="notice"> 公告 </v-tab>
-    <v-tab value="activity" @click="firstLoad('activity')"> 活动 </v-tab>
-    <v-tab v-if="showNews" value="news" @click="firstLoad('news')"> 咨讯 </v-tab>
+    <v-tab
+      v-for="(value, index) in tabValues"
+      :key="index"
+      :value="value"
+      @click="firstLoad(value)"
+      >{{ rawData[value].name }}</v-tab
+    >
     <v-text-field
       v-model="search"
       class="news-search"
@@ -26,86 +30,12 @@
     </v-btn>
   </v-tabs>
   <v-window v-model="tab">
-    <v-window-item value="notice">
+    <v-window-item v-for="(value, index) in tabValues" :key="index" :value="value">
       <div class="news-grid">
-        <v-card v-for="item in postData.notice" :key="item.postId" class="news-card">
+        <v-card v-for="item in postData[value]" :key="item.postId" class="news-card">
           <div class="news-cover" @click="toPost(item)">
             <img :src="item.cover" alt="cover" />
-          </div>
-          <v-card-title class="news-card-title" :title="item.title">{{ item.title }}</v-card-title>
-          <div class="news-card-info">
-            <div class="news-card-user">
-              <div class="ncu-left">
-                <div class="ncu-icon">
-                  <img :src="item.user.icon" alt="userIcon" />
-                </div>
-                <div v-if="item.user.pendant !== ''" class="ncu-pendant">
-                  <img :src="item.user.pendant" alt="userPendant" />
-                </div>
-              </div>
-              <div class="ncu-right">
-                <span>{{ item.user.nickname }}</span>
-                <span>{{ item.user.label }}</span>
-              </div>
-            </div>
-            <v-btn
-              v-show="!appStore.devMode"
-              class="news-card-btn"
-              variant="outlined"
-              @click="toPost(item)"
-            >
-              查看详情
-            </v-btn>
-            <v-btn
-              v-show="appStore.devMode"
-              class="news-dev-btn"
-              variant="outlined"
-              @click="toJson(item)"
-            >
-              <img src="../assets/icons/arrow-right.svg" alt="right" />
-              <span>JSON</span>
-            </v-btn>
-            <div class="news-card-forum">
-              <img :src="item.forum.icon" alt="forumIcon" />
-              <span>{{ item.forum.name }}</span>
-            </div>
-            <div class="news-card-data">
-              <div class="ncd-item">
-                <v-icon>mdi-eye</v-icon>
-                <span>{{ item.data.view }}</span>
-              </div>
-              <div class="ncd-item">
-                <v-icon>mdi-star</v-icon>
-                <span>{{ item.data.mark }}</span>
-              </div>
-              <div class="ncd-item">
-                <v-icon>mdi-comment</v-icon>
-                <span>{{ item.data.reply }}</span>
-              </div>
-              <div class="ncd-item">
-                <v-icon>mdi-thumb-up</v-icon>
-                <span>{{ item.data.like }}</span>
-              </div>
-              <div class="ncd-item">
-                <v-icon>mdi-share-variant</v-icon>
-                <span>{{ item.data.forward }}</span>
-              </div>
-            </div>
-          </div>
-        </v-card>
-      </div>
-      <div class="load-news">
-        <v-btn :loading="loadingSub" @click="loadMore('notice')">
-          已加载：{{ rawData.notice.lastId }}，加载更多
-        </v-btn>
-      </div>
-    </v-window-item>
-    <v-window-item value="activity">
-      <div class="news-grid">
-        <v-card v-for="item in postData.activity" :key="item.postId" class="news-card">
-          <div class="news-cover" @click="toPost(item)">
-            <img :src="item.cover" alt="cover" />
-            <div class="news-card-act">
+            <div v-if="value === 'activity'" class="news-card-act">
               <div
                 class="nca-status"
                 :style="{
@@ -136,23 +66,7 @@
                 <span>{{ item.user.label }}</span>
               </div>
             </div>
-            <v-btn
-              v-show="!appStore.devMode"
-              class="news-card-btn"
-              variant="outlined"
-              @click="toPost(item)"
-            >
-              查看详情
-            </v-btn>
-            <v-btn
-              v-show="appStore.devMode"
-              class="news-dev-btn"
-              variant="outlined"
-              @click="toJson(item)"
-            >
-              <img src="../assets/icons/arrow-right.svg" alt="right" />
-              <span>JSON</span>
-            </v-btn>
+            <v-btn class="news-card-btn" variant="outlined" @click="toPost(item)"> 查看详情 </v-btn>
             <div class="news-card-forum">
               <img :src="item.forum.icon" alt="forumIcon" />
               <span>{{ item.forum.name }}</span>
@@ -183,82 +97,8 @@
         </v-card>
       </div>
       <div class="load-news">
-        <v-btn :loading="loadingSub" @click="loadMore('activity')">
-          已加载:{{ rawData.activity.lastId }}，加载更多
-        </v-btn>
-      </div>
-    </v-window-item>
-    <v-window-item v-if="showNews" value="news">
-      <div class="news-grid">
-        <v-card v-for="item in postData.news" :key="item.postId" class="news-card">
-          <div class="news-cover" @click="toPost(item)">
-            <img :src="item.cover" alt="cover" />
-          </div>
-          <v-card-title class="news-card-title" :title="item.title">{{ item.title }}</v-card-title>
-          <div class="news-card-info">
-            <div class="news-card-user">
-              <div class="ncu-left">
-                <div class="ncu-icon">
-                  <img :src="item.user.icon" alt="userIcon" />
-                </div>
-                <div v-if="item.user.pendant !== ''" class="ncu-pendant">
-                  <img :src="item.user.pendant" alt="userPendant" />
-                </div>
-              </div>
-              <div class="ncu-right">
-                <span>{{ item.user.nickname }}</span>
-                <span>{{ item.user.label }}</span>
-              </div>
-            </div>
-            <v-btn
-              v-show="!appStore.devMode"
-              class="news-card-btn"
-              variant="outlined"
-              @click="toPost(item)"
-            >
-              查看详情
-            </v-btn>
-            <v-btn
-              v-show="appStore.devMode"
-              class="news-dev-btn"
-              variant="outlined"
-              @click="toJson(item)"
-            >
-              <img src="../assets/icons/arrow-right.svg" alt="right" />
-              <span>JSON</span>
-            </v-btn>
-            <div class="news-card-forum">
-              <img :src="item.forum.icon" alt="forumIcon" />
-              <span>{{ item.forum.name }}</span>
-            </div>
-            <div class="news-card-data">
-              <div class="ncd-item">
-                <v-icon>mdi-eye</v-icon>
-                <span>{{ item.data.view }}</span>
-              </div>
-              <div class="ncd-item">
-                <v-icon>mdi-star</v-icon>
-                <span>{{ item.data.mark }}</span>
-              </div>
-              <div class="ncd-item">
-                <v-icon>mdi-comment</v-icon>
-                <span>{{ item.data.reply }}</span>
-              </div>
-              <div class="ncd-item">
-                <v-icon>mdi-thumb-up</v-icon>
-                <span>{{ item.data.like }}</span>
-              </div>
-              <div class="ncd-item">
-                <v-icon>mdi-share-variant</v-icon>
-                <span>{{ item.data.forward }}</span>
-              </div>
-            </div>
-          </div>
-        </v-card>
-      </div>
-      <div class="load-news">
-        <v-btn :loading="loadingSub" @click="loadMore('news')">
-          已加载：{{ rawData.news.lastId }}，加载更多
+        <v-btn :loading="loadingSub" @click="loadMore(value)">
+          已加载：{{ rawData[value].lastId }}，加载更多
         </v-btn>
       </div>
     </v-window-item>
@@ -267,7 +107,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onBeforeMount, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import showSnackbar from "../components/func/snackbar";
@@ -275,33 +115,48 @@ import ToChannel from "../components/overlay/to-channel.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import Mys from "../plugins/Mys";
 import { useAppStore } from "../store/modules/app";
-import { createTGWindow } from "../utils/TGWindow";
+import { createPost } from "../utils/TGWindow";
+
+// 类型定义
+enum NewsType {
+  notice = "1",
+  activity = "2",
+  news = "3",
+}
+type NewsKey = keyof typeof NewsType;
+type PostData = {
+  [key in NewsKey]: TGApp.Plugins.Mys.News.RenderCard[];
+};
+type RawData = {
+  [key in NewsKey]: {
+    isLast: boolean;
+    name: string;
+    lastId: number;
+  };
+};
 
 // 路由
 const router = useRouter();
 const gid = <string>useRoute().params.gid;
-const showNews = ref<boolean>(gid !== "5");
-
-// Store
-const appStore = useAppStore();
 
 // loading
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载");
 const loadingSub = ref<boolean>(false);
 
-// search
-const search = ref<string>("");
-
-// 数据
+// UI 数据
 const tab = ref<string>("");
 const showList = ref<boolean>(false);
-const postData = ref({
-  notice: <TGApp.Plugins.Mys.News.RenderCard[]>[],
-  activity: <TGApp.Plugins.Mys.News.RenderCard[]>[],
-  news: <TGApp.Plugins.Mys.News.RenderCard[]>[],
+const tabValues = ref<Array<NewsKey>>(["notice", "activity", "news"]);
+
+// 渲染数据
+const search = ref<string>("");
+const postData = ref<PostData>({
+  notice: [],
+  activity: [],
+  news: [],
 });
-const rawData = ref({
+const rawData = ref<RawData>({
   notice: {
     isLast: false,
     name: "公告",
@@ -319,6 +174,12 @@ const rawData = ref({
   },
 });
 
+onBeforeMount(() => {
+  if (gid === "5") {
+    tabValues.value = ["notice", "activity"];
+  }
+});
+
 onMounted(async () => {
   loadingTitle.value = "正在获取公告数据";
   const noticeData = await Mys.News.get(gid);
@@ -331,25 +192,17 @@ onMounted(async () => {
   }, 1500);
 });
 
-async function firstLoad(data: string): Promise<void> {
-  if (rawData.value.activity.lastId !== 0 && rawData.value.news.lastId !== 0) {
+async function firstLoad(key: NewsKey): Promise<void> {
+  if (rawData.value[key].lastId !== 0) {
     return;
   }
-  if (data === "activity" && rawData.value.activity.lastId === 0) {
-    loadingTitle.value = "正在获取活动数据...";
+  if (rawData.value[key].lastId === 0) {
+    loadingTitle.value = `正在获取${rawData.value[key].name}数据...;`;
     loading.value = true;
-    const activityData = await Mys.News.get(gid, "2");
-    rawData.value.activity.isLast = activityData.is_last;
-    rawData.value.activity.lastId = activityData.list.length;
-    postData.value.activity = Mys.News.card.activity(activityData);
-  }
-  if (data === "news" && rawData.value.news.lastId === 0) {
-    loadingTitle.value = "正在获取咨讯数据...";
-    loading.value = true;
-    const newsData = await Mys.News.get(gid, "3");
-    rawData.value.news.isLast = newsData.is_last;
-    rawData.value.news.lastId = newsData.list.length;
-    postData.value.news = Mys.News.card.news(newsData);
+    const getData = await Mys.News.get(gid, NewsType[key]);
+    rawData.value[key].isLast = getData.is_last;
+    rawData.value[key].lastId = getData.list.length;
+    postData.value[key] = Mys.News.card[key](getData);
   }
   setTimeout(() => {
     loading.value = false;
@@ -361,9 +214,9 @@ async function switchAnno(): Promise<void> {
 }
 
 // 加载更多
-async function loadMore(data: "notice" | "activity" | "news"): Promise<void> {
+async function loadMore(key: NewsKey): Promise<void> {
   loadingSub.value = true;
-  if (rawData.value[data].isLast) {
+  if (rawData.value[key].isLast) {
     showSnackbar({
       text: "已经是最后一页了",
       color: "warn",
@@ -371,16 +224,14 @@ async function loadMore(data: "notice" | "activity" | "news"): Promise<void> {
     loadingSub.value = false;
     return;
   }
-  loadingTitle.value = `正在获取${rawData.value[data].name}数据...`;
+  loadingTitle.value = `正在获取${rawData.value[key].name}数据...`;
   loading.value = true;
-  const dataList = ["notice", "activity", "news"];
-  const dataIndex = (dataList.indexOf(data) + 1).toString();
-  const getData = await Mys.News.get(gid, dataIndex, 20, rawData.value[data].lastId);
-  rawData.value[data].lastId = rawData.value[data].lastId + getData.list.length;
-  rawData.value[data].isLast = getData.is_last;
-  const getCard = Mys.News.card[data](getData);
-  postData.value[data] = postData.value[data].concat(getCard);
-  if (rawData.value[data].isLast) {
+  const getData = await Mys.News.get(gid, NewsType[key], 20, rawData.value[key].lastId);
+  rawData.value[key].lastId = rawData.value[key].lastId + getData.list.length;
+  rawData.value[key].isLast = getData.is_last;
+  const getCard = Mys.News.card[key](getData);
+  postData.value[key] = postData.value[key].concat(getCard);
+  if (rawData.value[key].isLast) {
     showSnackbar({
       text: "已经是最后一页了",
       color: "warn",
@@ -395,55 +246,12 @@ async function loadMore(data: "notice" | "activity" | "news"): Promise<void> {
   }, 1500);
 }
 
-async function toPost(item: TGApp.Plugins.Mys.News.RenderCard | string): Promise<void> {
-  if (typeof item === "string") {
-    const path = router.resolve({
-      name: "帖子详情",
-      params: {
-        post_id: item,
-      },
-    }).href;
-    createTGWindow(path, "Sub_window", `Post_${item}`, 960, 720, false, false);
-  } else {
-    const path = router.resolve({
-      name: "帖子详情",
-      params: {
-        post_id: item.postId.toString(),
-      },
-    }).href;
-    createTGWindow(path, "Sub_window", `Post_${item.postId} ${item.title}`, 960, 720, false, false);
-  }
+function toPost(item: TGApp.Plugins.Mys.News.RenderCard | string): void {
+  const isDev = useAppStore().devMode;
+  createPost(item, isDev);
 }
 
-async function toJson(item: TGApp.Plugins.Mys.News.RenderCard | string): Promise<void> {
-  if (typeof item === "string") {
-    const path = router.resolve({
-      name: "帖子详情（JSON）",
-      params: {
-        post_id: item,
-      },
-    }).href;
-    createTGWindow(path, "Dev_JSON", `Post_${item}_JSON`, 960, 720, false, false);
-  } else {
-    const path = router.resolve({
-      name: "帖子详情（JSON）",
-      params: {
-        post_id: item.postId.toString(),
-      },
-    }).href;
-    createTGWindow(
-      path,
-      "Dev_JSON",
-      `Post_${item.postId}_JSON ${item.title}`,
-      960,
-      720,
-      false,
-      false,
-    );
-  }
-}
-
-async function searchPost(): Promise<void> {
+function searchPost(): void {
   if (search.value === "") {
     showSnackbar({
       text: "请输入搜索内容",
@@ -452,10 +260,7 @@ async function searchPost(): Promise<void> {
     return;
   }
   if (!isNaN(Number(search.value))) {
-    await toPost(search.value);
-    if (appStore.devMode) {
-      await toJson(search.value);
-    }
+    toPost(search.value);
   } else {
     showSnackbar({
       text: "请输入搜索内容",
@@ -628,13 +433,6 @@ async function searchPost(): Promise<void> {
 .news-card-btn {
   border-radius: 5px;
   margin-left: auto;
-}
-
-.news-dev-btn {
-  border: 1px solid var(--common-shadow-4);
-  border-radius: 5px;
-  margin-left: auto;
-  font-family: var(--font-title);
 }
 
 .news-dev-btn img {

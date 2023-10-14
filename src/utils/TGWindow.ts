@@ -1,11 +1,11 @@
 /**
  * @file utils TGWindow.ts
- * @description 用于创建TG窗口的工具
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.2
+ * @description 窗口创建相关工具函数
+ * @since Beta v0.3.3
  */
 
 import { window as TauriWindow } from "@tauri-apps/api";
+
 /**
  * @description 创建TG窗口
  * @since Alpha v0.1.2
@@ -53,4 +53,33 @@ export function createTGWindow(
       visible,
     });
   });
+}
+
+/**
+ * @description 打开帖子
+ * @since Beta v0.3.3
+ * @param {TGApp.Plugins.Mys.News.RenderCard|string} item 帖子内容或ID
+ * @param {boolean} isDev 是否为开发模式
+ * @returns {void}
+ */
+export function createPost(
+  item: TGApp.Plugins.Mys.News.RenderCard | string,
+  isDev: boolean = false,
+): void {
+  let postId, postTitle, jsonTitle;
+  if (typeof item === "string") {
+    postId = item;
+    postTitle = `Post_${postId}`;
+    jsonTitle = `Post_${postId}_JSON`;
+  } else {
+    postId = item.postId.toString();
+    postTitle = `Post_${postId} ${item.title}`;
+    jsonTitle = `Post_${postId}_JSON ${item.title}`;
+  }
+  const postPath = `/post_detail/${postId}`;
+  const jsonPath = `/post_detail_json/${postId}`;
+  if (isDev) {
+    createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
+  }
+  createTGWindow(postPath, "Sub_window", postTitle, 960, 720, false, false);
 }

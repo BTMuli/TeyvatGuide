@@ -48,7 +48,8 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 
 import Mys from "../../plugins/Mys";
-import { createTGWindow } from "../../utils/TGWindow";
+import { useAppStore } from "../../store/modules/app";
+import { createPost } from "../../utils/TGWindow";
 import { stamp2LastTime } from "../../utils/toolFunc";
 
 // vue
@@ -105,16 +106,9 @@ onMounted(async () => {
   loading.value = false;
 });
 
-async function toPost(card: TGApp.Plugins.Mys.Position.RenderCard): Promise<void> {
-  // 获取路由路径
-  const path = router.resolve({
-    name: "帖子详情",
-    params: {
-      post_id: card.postId,
-    },
-  }).href;
-  // 打开新窗口
-  createTGWindow(path, "Sub_window", `Post_${card.postId} ${card.title}`, 960, 720, false, false);
+function toPost(card: TGApp.Plugins.Mys.Position.RenderCard): void {
+  const isDev = useAppStore().devMode;
+  createPost(card.postId.toString(), isDev);
 }
 
 onUnmounted(() => {
