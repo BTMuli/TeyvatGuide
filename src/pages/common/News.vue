@@ -182,15 +182,8 @@ onBeforeMount(() => {
 });
 
 onMounted(async () => {
-  loadingTitle.value = "正在获取公告数据";
-  const noticeData = await Mys.News.get(gid);
-  rawData.value.notice.isLast = noticeData.is_last;
-  rawData.value.notice.lastId = noticeData.list.length;
-  postData.value.notice = Mys.News.card.notice(noticeData);
   tab.value = "notice";
-  setTimeout(() => {
-    loading.value = false;
-  }, 1500);
+  await firstLoad("notice");
 });
 
 async function firstLoad(key: NewsKey): Promise<void> {
@@ -198,7 +191,7 @@ async function firstLoad(key: NewsKey): Promise<void> {
     return;
   }
   if (rawData.value[key].lastId === 0) {
-    loadingTitle.value = `正在获取${rawData.value[key].name}数据...;`;
+    loadingTitle.value = `正在获取${rawData.value[key].name}数据...`;
     loading.value = true;
     const getData = await Mys.News.get(gid, NewsType[key]);
     rawData.value[key].isLast = getData.is_last;
