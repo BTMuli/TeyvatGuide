@@ -112,11 +112,11 @@
 import { onBeforeMount, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import showSnackbar from "../components/func/snackbar";
-import ToChannel from "../components/overlay/to-channel.vue";
-import ToLoading from "../components/overlay/to-loading.vue";
-import Mys from "../plugins/Mys";
-import { createPost } from "../utils/TGWindow";
+import showSnackbar from "../../components/func/snackbar";
+import ToChannel from "../../components/overlay/to-channel.vue";
+import ToLoading from "../../components/overlay/to-loading.vue";
+import Mys from "../../plugins/Mys";
+import { createPost } from "../../utils/TGWindow";
 
 // 类型定义
 enum NewsType {

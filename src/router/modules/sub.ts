@@ -1,13 +1,12 @@
 /**
  * @file router modules sub.ts
  * @description 子路由模块，用于二级窗口
- * @since Alpha v0.1.2
+ * @since Beta v0.3.3
  */
 
 import TAnnoJson from "../../views/t-anno-json.vue";
 import TAnno from "../../views/t-anno.vue";
 import TLottery from "../../views/t-lottery.vue";
-import TNews from "../../views/t-news.vue";
 import TPostJson from "../../views/t-post-json.vue";
 import TPost from "../../views/t-post.vue";
 
@@ -21,11 +20,6 @@ const subRoutes = [
     path: "/anno_detail_json/:anno_id",
     name: "游戏内公告（JSON）",
     component: TAnnoJson,
-  },
-  {
-    path: "/news/:gid",
-    name: "咨讯",
-    component: TNews,
   },
   {
     path: "/post_detail/:post_id",
