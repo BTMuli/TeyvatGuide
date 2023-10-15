@@ -108,7 +108,7 @@
 
 <script lang="ts" setup>
 import { dialog, fs } from "@tauri-apps/api";
-import { computed, onBeforeMount, onMounted, ref } from "vue";
+import { computed, nextTick, onBeforeMount, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import showConfirm from "../../components/func/confirm";
@@ -175,9 +175,11 @@ onMounted(async () => {
   }).version;
   loadingTitle.value = "正在获取成就数据";
   selectedAchievement.value = await TGSqlite.getAchievements();
-  loading.value = false;
-  if (route.query.app) {
-    await handleImportOuter(<string>route.query.app);
+  await nextTick(() => {
+    loading.value = false;
+  });
+  if (route.query.app && typeof route.query.app === "string") {
+    await handleImportOuter(route.query.app);
   }
 });
 
@@ -236,7 +238,9 @@ async function selectSeries(index: number): Promise<void> {
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
     getCardInfo.value = await TGSqlite.getNameCard(index);
   }
-  loading.value = false;
+  await nextTick(() => {
+    loading.value = false;
+  });
 }
 
 // 打开图片

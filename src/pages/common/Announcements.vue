@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { nextTick, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import ToLoading from "../../components/overlay/to-loading.vue";
@@ -77,14 +77,16 @@ onMounted(async () => {
   loadingTitle.value = "正在获取公告数据";
   loading.value = true;
   annoData.value = await TGRequest.Anno.getList();
-  loadingTitle.value = "正在转换公告数据";
   const listCards = TGUtils.Anno.getCard(annoData.value);
   tab.value = "activity";
   annoCards.value = {
     activity: listCards.filter((item) => item.typeLabel === AnnoType.activity),
     game: listCards.filter((item) => item.typeLabel === AnnoType.game),
   };
-  loading.value = false;
+  loadingTitle.value = "正在渲染公告数据";
+  await nextTick(() => {
+    loading.value = false;
+  });
 });
 
 async function switchNews(): Promise<void> {

@@ -109,7 +109,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onBeforeMount, onMounted, ref } from "vue";
+import { nextTick, onBeforeMount, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import showSnackbar from "../../components/func/snackbar";
@@ -146,7 +146,7 @@ const loadingTitle = ref<string>("正在加载");
 const loadingSub = ref<boolean>(false);
 
 // UI 数据
-const tab = ref<string>("");
+const tab = ref<NewsKey>("notice");
 const showList = ref<boolean>(false);
 const tabValues = ref<Array<NewsKey>>(["notice", "activity", "news"]);
 
@@ -190,17 +190,16 @@ async function firstLoad(key: NewsKey): Promise<void> {
   if (rawData.value[key].lastId !== 0) {
     return;
   }
-  if (rawData.value[key].lastId === 0) {
-    loadingTitle.value = `正在获取${rawData.value[key].name}数据...`;
-    loading.value = true;
-    const getData = await Mys.News.get(gid, NewsType[key]);
-    rawData.value[key].isLast = getData.is_last;
-    rawData.value[key].lastId = getData.list.length;
-    postData.value[key] = Mys.News.card[key](getData);
-  }
-  setTimeout(() => {
+  loadingTitle.value = `正在获取${rawData.value[key].name}数据...`;
+  loading.value = true;
+  const getData = await Mys.News.get(gid, NewsType[key]);
+  rawData.value[key].isLast = getData.is_last;
+  rawData.value[key].lastId = getData.list.length;
+  postData.value[key] = Mys.News.card[key](getData);
+  loadingTitle.value = `正在渲染${rawData.value[key].name}数据...`;
+  await nextTick(() => {
     loading.value = false;
-  }, 1500);
+  });
 }
 
 async function switchAnno(): Promise<void> {
@@ -234,10 +233,10 @@ async function loadMore(key: NewsKey): Promise<void> {
     loading.value = false;
     return;
   }
-  setTimeout(() => {
-    loading.value = false;
+  await nextTick(() => {
     loadingSub.value = false;
-  }, 1500);
+    loading.value = false;
+  });
 }
 
 function searchPost(): void {
