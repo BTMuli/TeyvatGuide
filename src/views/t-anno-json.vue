@@ -54,15 +54,17 @@ onMounted(async () => {
 .anno-json {
   padding: 20px;
   border-radius: 20px;
-  font-family: Consolas, serif;
+  font-family: var(--font-text);
 }
 
 .anno-title {
-  margin: 20px 0;
+  width: 100%;
+  margin: 10px 0;
   color: #546d8b;
-  font-family: Genshin-Light, serif;
+  font-family: var(--font-title);
   font-size: 20px;
   font-weight: 600;
+  text-align: right;
 }
 
 .jv-container {

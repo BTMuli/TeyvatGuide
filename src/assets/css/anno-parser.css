@@ -1,8 +1,7 @@
 /*
  * @file assets css post-parser.css
  * @description 游戏公告解析 css
- * @author BTMuli <bt-muli@outlook.com
- * @since Alpha v0.2.0
+ * @since Beta v0.3.3
  */
 
 .anno-body {
@@ -11,15 +10,19 @@
   font-family: var(--font-text);
 }
 
-.anno-title {
+.anno-title,
+.anno-subtitle {
   color: var(--common-text-title);
   font-family: var(--font-title);
+}
+
+.anno-title {
   font-size: 24px;
 }
 
 .anno-subtitle {
-  color: var(--common-text-quote);
-  font-size: 16px;
+  font-size: 18px;
+  opacity: 0.5;
 }
 
 .anno-img {
@@ -27,7 +30,7 @@
   max-width: 100%;
   height: auto;
   border-radius: 10px;
-  margin-bottom: 10px;
+  margin: 10px auto;
 }
 
 .anno-content {
