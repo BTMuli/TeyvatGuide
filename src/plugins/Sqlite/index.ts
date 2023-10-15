@@ -4,6 +4,7 @@
  * @since Beta v0.3.3
  */
 
+import { app } from "@tauri-apps/api";
 import Database from "tauri-plugin-sql-api";
 
 import initDataSql from "./sql/initData";
@@ -85,6 +86,19 @@ class Sqlite {
     const db = await this.getDB();
     const sql = "SELECT * FROM AppData;";
     return await db.select(sql);
+  }
+
+  /**
+   * @description 对比数据判断是否需要更新
+   * @since Beta v0.3.3
+   * @returns {Promise<boolean>}
+   */
+  public async checkUpdate(): Promise<boolean> {
+    const dbData = await this.getAppData();
+    const localVersion = await app.getVersion();
+    const dbVersion = dbData.find((item) => item.key === "appVersion")?.value;
+    if (dbVersion === undefined) return true;
+    return localVersion !== dbVersion;
   }
 
   /**
