@@ -1,14 +1,16 @@
 <template>
-  <transition name="func-snackbar">
-    <div v-show="show" class="func-snackbar" :style="{ backgroundColor: data.color }">
-      <slot name="text">
-        <span class="func-snackbar-text">{{ data.text }}</span>
-      </slot>
-    </div>
-  </transition>
+  <div class="func-snackbar-container">
+    <transition name="func-snackbar">
+      <div v-show="show" class="func-snackbar" :style="{ backgroundColor: data.color }">
+        <slot name="text">
+          <span class="func-snackbar-text">{{ data.text }}</span>
+        </slot>
+      </div>
+    </transition>
+  </div>
 </template>
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from "vue";
+import { onMounted, reactive, ref } from "vue";
 
 interface SnackbarProps {
   text: string;
@@ -40,15 +42,13 @@ function transColor(color: string): string {
   }
   switch (color) {
     case "success":
-      return "#41b883";
+      return "#7ebd21";
     case "error":
-      return "#ff4d4f";
+      return "#e63f5a";
     case "warn":
-      return "#faad14";
-    case "info":
-      return "#1890ff";
+      return "#ecb349";
     case "cancel":
-      return "#ABB2BF";
+      return "#cdcbc4";
     default:
       return color;
   }
@@ -78,20 +78,28 @@ defineExpose({
 .func-snackbar-enter-from,
 .func-snackbar-leave-to {
   opacity: 0;
-  transform: translateX(-50%) translateY(20px);
+  transform: translateY(20px);
 }
 
 .func-snackbar-enter-to,
 .func-snackbar-leave-from {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
+}
+
+.func-snackbar-container {
+  position: absolute;
+  z-index: 999;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: 80px;
+  align-items: center;
+  justify-content: center;
 }
 
 .func-snackbar {
-  position: fixed;
-  z-index: 999;
-  bottom: 20px;
-  left: 50%;
   display: flex;
   min-width: 200px;
   height: 40px;
@@ -99,8 +107,8 @@ defineExpose({
   justify-content: center;
   padding: 10px 20px;
   border-radius: 5px;
+  margin: 20px;
   box-shadow: 0 0 10px rgb(0 0 0 / 20%);
-  transform: translateX(-50%);
 }
 
 .func-snackbar-text {
