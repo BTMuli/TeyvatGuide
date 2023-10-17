@@ -50,8 +50,8 @@
               </div>
             </div>
           </div>
-          <v-card-title class="news-card-title" :title="item.title">{{ item.title }}</v-card-title>
-          <div class="news-card-info">
+          <div class="news-content">
+            <div class="news-card-title" :title="item.title">{{ item.title }}</div>
             <div class="news-card-user">
               <div class="ncu-left">
                 <div class="ncu-icon">
@@ -66,35 +66,32 @@
                 <span>{{ item.user.label }}</span>
               </div>
             </div>
-            <v-btn class="news-card-btn" variant="outlined" @click="createPost(item)">
-              查看详情
-            </v-btn>
-            <div class="news-card-forum">
-              <img :src="item.forum.icon" alt="forumIcon" />
-              <span>{{ item.forum.name }}</span>
-            </div>
             <div class="news-card-data">
-              <div class="ncd-item">
+              <div class="ncd-item" :title="`浏览数：${item.data.view}`">
                 <v-icon>mdi-eye</v-icon>
                 <span>{{ item.data.view }}</span>
               </div>
-              <div class="ncd-item">
+              <div class="ncd-item" :title="`收藏数：${item.data.mark}`">
                 <v-icon>mdi-star</v-icon>
                 <span>{{ item.data.mark }}</span>
               </div>
-              <div class="ncd-item">
+              <div class="ncd-item" :title="`回复数：${item.data.reply}`">
                 <v-icon>mdi-comment</v-icon>
                 <span>{{ item.data.reply }}</span>
               </div>
-              <div class="ncd-item">
+              <div class="ncd-item" :title="`点赞数：${item.data.like}`">
                 <v-icon>mdi-thumb-up</v-icon>
                 <span>{{ item.data.like }}</span>
               </div>
-              <div class="ncd-item">
+              <div class="ncd-item" :title="`转发数：${item.data.forward}`">
                 <v-icon>mdi-share-variant</v-icon>
                 <span>{{ item.data.forward }}</span>
               </div>
             </div>
+          </div>
+          <div class="news-card-forum" :title="`频道: ${item.forum.name}`">
+            <img :src="item.forum.icon" :alt="item.forum.name" />
+            <span>{{ item.forum.name }}</span>
           </div>
         </v-card>
       </div>
@@ -288,8 +285,13 @@ function searchPost(): void {
 
 .news-card {
   border-radius: 5px;
-  background: var(--box-bg-1);
+  background: var(--app-page-bg);
   color: var(--box-text-1);
+}
+
+/* 增加辨识度 */
+.dark .news-card {
+  border: 1px solid var(--common-shadow-2);
 }
 
 .news-cover {
@@ -297,9 +299,9 @@ function searchPost(): void {
   display: flex;
   overflow: hidden;
   width: 100%;
-  height: 150px;
   align-items: center;
   justify-content: center;
+  aspect-ratio: 36 / 13;
 }
 
 .news-cover img {
@@ -310,27 +312,26 @@ function searchPost(): void {
   transition: all 0.3s linear;
 }
 
-.news-card-title {
+/* news item info */
+.news-content {
   position: relative;
-  height: 50px;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  padding: 10px;
+  gap: 10px;
 }
 
-/* news item info */
-.news-card-info {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: start;
-  margin: 0 10px 10px;
-  gap: 10px;
+.news-card-title {
+  overflow: hidden;
+  width: 100%;
+  font-size: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .news-card-user {
   display: flex;
-  max-width: 235px;
-  height: 50px;
-  align-items: center;
-  color: var(--box-text-4);
 }
 
 .ncu-left {
@@ -372,10 +373,12 @@ function searchPost(): void {
 }
 
 .ncu-right {
+  position: relative;
   display: flex;
   height: 50px;
   flex-direction: column;
   align-items: start;
+  color: var(--box-text-4);
 }
 
 .ncu-right :nth-child(1) {
@@ -388,11 +391,12 @@ function searchPost(): void {
 
 .ncu-right :nth-child(2) {
   display: flex;
+  width: 100%;
   height: 20px;
   align-items: center;
   justify-content: start;
   border-top: 2px solid var(--common-shadow-2);
-  font-size: 8px;
+  font-size: 14px;
   opacity: 0.7;
 }
 
@@ -416,21 +420,6 @@ function searchPost(): void {
   width: 20px;
   height: 20px;
   margin-right: 5px;
-}
-
-.news-card-btn {
-  border-radius: 5px;
-  margin-left: auto;
-}
-
-.news-dev-btn img {
-  width: 20px;
-  height: 20px;
-  padding: 5px;
-  border-radius: 50%;
-  margin-right: 5px;
-  background: var(--common-shadow-2);
-  object-fit: cover;
 }
 
 .news-cover img:hover {

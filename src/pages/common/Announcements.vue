@@ -27,7 +27,7 @@
             </div>
           </div>
           <v-card-title class="anno-title" :title="item.title">{{ item.subtitle }}</v-card-title>
-          <div class="anno-label">
+          <div class="anno-label" :title="`标签：${item.tagLabel}`">
             <img :src="item.tagIcon" alt="tag" />
             <span>{{ item.tagLabel }}</span>
           </div>
@@ -117,10 +117,14 @@ async function switchNews(): Promise<void> {
 }
 
 .anno-card {
-  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  background: var(--box-bg-1);
+  background: var(--app-page-bg);
   color: var(--box-text-1);
+}
+
+/* 增加辨识度 */
+.dark .anno-card {
+  border: 1px solid var(--common-shadow-2);
 }
 
 .anno-cover {
@@ -128,10 +132,10 @@ async function switchNews(): Promise<void> {
   display: flex;
   overflow: hidden;
   width: 100%;
-  height: 130px;
   align-items: center;
   justify-content: center;
   border-bottom: 1px solid var(--common-shadow-2);
+  aspect-ratio: 36 / 13;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
 }
