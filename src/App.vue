@@ -34,6 +34,7 @@ onBeforeMount(async () => {
   isMain.value = win.label === "TeyvatGuide";
   if (isMain.value) {
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
+    if (!(await win.isVisible())) await win.show();
     await win.setTitle(title);
     await listenOnInit();
     await tauri.invoke("init_app");
