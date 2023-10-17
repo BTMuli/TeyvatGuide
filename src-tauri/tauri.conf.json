@@ -93,7 +93,6 @@
         "width": 1600,
         "height": 900,
         "center": true,
-        "visible": false,
         "transparent": true
       }
     ]

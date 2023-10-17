@@ -1,7 +1,7 @@
 /**
  * @file router index.ts
  * @description 路由入口
- * @since Beta v0.3.2
+ * @since Beta v0.3.3
  */
 
 import { createRouter, createWebHistory } from "vue-router";
@@ -15,7 +15,7 @@ const router = createRouter({
 
 // 解决路由重复问题
 router.afterEach((to, from) => {
-  if (from.name === to.name) {
+  if (from.name === to.name && from.fullPath !== to.fullPath) {
     console.log("路由重复");
     window.location.reload();
   }
