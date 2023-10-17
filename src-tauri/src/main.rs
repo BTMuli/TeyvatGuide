@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use tauri::Manager;
+mod client;
 
 // 放一个常数，用来判断应用是否初始化
 static mut APP_INITIALIZED: bool = false;
@@ -52,7 +53,7 @@ fn main() {
                     let window = event.window().clone();
                     if window.label() == "TeyvatGuide" {
                         // 子窗口 label 的数组
-                        const SUB_WINDOW_LABELS: [&str; 2] = ["Sub_window", "Dev_JSON"];
+                        const SUB_WINDOW_LABELS: [&str; 3] = ["Sub_window", "Dev_JSON", "mhy_client"];
                         for label in SUB_WINDOW_LABELS.iter() {
                             let sub = window.get_window(label).unwrap();
                             sub.close().unwrap();
@@ -64,7 +65,7 @@ fn main() {
             }
         })
         .plugin(tauri_plugin_sql::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![register_deep_link, init_app])
+        .invoke_handler(tauri::generate_handler![register_deep_link, init_app, client::operate_mhy])
         .setup(|_app| {
             let _window = _app.get_window("TeyvatGuide").unwrap();
             #[cfg(debug_assertions)] // only include this code on debug builds

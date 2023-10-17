@@ -17,9 +17,14 @@
     <div class="btn-list">
       <v-btn class="test-btn" @click="getGC">获取极验</v-btn>
     </div>
+    <h1>窗口建立测试</h1>
+    <div class="btn-list">
+      <v-btn class="test-btn" @click="tryNewWindow">创建新窗口</v-btn>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
+import { invoke, event } from "@tauri-apps/api";
 import { onMounted, ref } from "vue";
 
 import showGeetest from "../../components/func/geetest";
@@ -28,10 +33,18 @@ const visible = ref<boolean>(false);
 
 onMounted(async () => {
   visible.value = false;
+  await event.listen("post_mhy_client", (res) => {
+    console.log(res.payload);
+    console.log(res.windowLabel);
+  });
 });
 
 async function getGC(): Promise<void> {
   await showGeetest();
+}
+
+async function tryNewWindow(): Promise<void> {
+  await invoke("operate_mhy", { func: "test", arg: "test" });
 }
 </script>
 <style lang="css" scoped>

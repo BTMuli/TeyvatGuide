@@ -94,6 +94,17 @@
         "height": 900,
         "center": true,
         "transparent": true
+      },
+      {
+        "fullscreen": false,
+        "resizable": false,
+        "title": "米游社",
+        "label": "mhy_client",
+        "url": "https://bbs.mihoyo.com/",
+        "visible": false,
+        "width": 360,
+        "height": 780,
+        "center": true
       }
     ]
   }
