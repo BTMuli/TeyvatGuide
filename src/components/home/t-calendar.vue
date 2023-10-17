@@ -25,7 +25,7 @@
       <div class="calendar-title-right">
         <v-switch
           class="calendar-title-switch"
-          color="grey"
+          color="var(--common-shadow-4)"
           variant="outline"
           :label="switchType === 'avatar' ? '角色' : '武器'"
           @change="switchType = switchType === 'avatar' ? 'weapon' : 'avatar'"

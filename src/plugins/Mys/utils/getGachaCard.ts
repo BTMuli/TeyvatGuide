@@ -1,15 +1,14 @@
 /**
  * @file plugins Mys utils getGachaCard.ts
  * @description Mys 插件抽卡工具
- * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Beta v0.3.3
  */
 
 import getPostData from "../request/getPostData";
 
 /**
  * @description 根据卡池信息转为渲染用的卡池信息
- * @since Alpha v0.2.1
+ * @since Beta v0.3.3
  * @param {TGApp.Plugins.Mys.Gacha.Data[]} gachaData 卡池信息
  * @param {Record<number, string>} poolCover 卡池封面
  * @returns {Promise<TGApp.Plugins.Mys.Gacha.RenderCard[]>}
@@ -37,6 +36,7 @@ async function getGachaCard(
           console.error(error);
         }
       }
+      const timeStr = `${data.start_time} ~ ${data.end_time}`;
       return gachaCard.push({
         title: data.title,
         subtitle: data.content_before_act,
@@ -51,9 +51,8 @@ async function getGachaCard(
           url: data.voice_url,
         },
         time: {
-          start: data.start_time,
+          str: timeStr,
           startStamp: new Date(data.start_time).getTime(),
-          end: data.end_time,
           endStamp: new Date(data.end_time).getTime(),
         },
       });

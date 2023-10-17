@@ -1,11 +1,23 @@
 <template>
   <div class="pool-box">
     <div class="pool-title">
-      <img src="../../assets/icons/icon-wish.svg" alt="wish" />
-      限时祈愿
+      <div class="pool-title-left">
+        <img src="../../assets/icons/icon-wish.svg" alt="wish" />
+        <span>限时祈愿</span>
+      </div>
+      <div class="pool-title-right">
+        <v-switch
+          class="pool-switch"
+          color="var(--common-shadow-4)"
+          variant="outline"
+          :label="showNew ? '查看当前祈愿' : '查看后续祈愿'"
+          v-show="hasNew"
+          @change="switchPool"
+        />
+      </div>
     </div>
     <div v-if="!loading" class="pool-grid">
-      <div v-for="pool in poolCards" :key="pool.postId" class="pool-card">
+      <div v-for="pool in poolSelect" :key="pool.postId" class="pool-card">
         <div class="pool-cover" @click="createPost(pool.postId, pool.title)">
           <img :src="pool.cover" alt="cover" />
         </div>
@@ -25,7 +37,7 @@
           <div class="pool-time">
             <div>
               <v-icon>mdi-calendar-clock</v-icon>
-              {{ pool.time.start }}~{{ pool.time.end }}
+              {{ pool.time.str }}
             </div>
             <v-progress-linear :model-value="poolTimePass[pool.postId]" :rounded="true">
             </v-progress-linear>
@@ -65,8 +77,12 @@ const showBar = ref<boolean>(false);
 const barText = ref<string>("");
 const barColor = ref<string>("error");
 
+const hasNew = ref<boolean>(false);
+const showNew = ref<boolean>(false);
+
 // data
 const poolCards = ref<TGApp.Plugins.Mys.Gacha.RenderCard[]>([]);
+const poolSelect = ref<TGApp.Plugins.Mys.Gacha.RenderCard[]>([]);
 const poolTimeGet = ref<Record<number, string>>({});
 const poolTimePass = ref<Record<number, number>>({});
 const timer = ref<Record<number, any>>({});
@@ -124,6 +140,7 @@ onMounted(async () => {
     if (poolTimePass.value[pool.postId] <= 0) {
       poolTimeGet.value[pool.postId] = "已结束";
       poolTimePass.value[pool.postId] = 100;
+      showNew.value = false;
     } else if (pool.time.startStamp - Date.now() > 0) {
       poolTimeGet.value[pool.postId] = "未开始";
       poolTimePass.value[pool.postId] = 100;
@@ -133,6 +150,17 @@ onMounted(async () => {
     }, 1000);
     return pool;
   });
+  if (poolCards.value.length > 2) {
+    poolSelect.value = poolCards.value.filter(
+      (pool) =>
+        poolTimeGet.value[pool.postId] !== "未开始" && poolTimeGet.value[pool.postId] !== "已结束",
+    );
+    hasNew.value =
+      poolCards.value.filter((pool) => poolTimeGet.value[pool.postId] === "未开始").length > 0;
+  } else {
+    poolSelect.value = poolCards.value;
+    hasNew.value = false;
+  }
   loading.value = false;
 });
 
@@ -171,6 +199,21 @@ async function toOuter(url: string, title: string): Promise<void> {
   createTGWindow(url, "Sub_window", `Pool_${title}`, 1200, 800, true, true);
 }
 
+// 更换显示的卡池
+async function switchPool(): Promise<void> {
+  showNew.value = !showNew.value;
+  if (showNew.value) {
+    poolSelect.value = poolCards.value.filter(
+      (pool) => poolTimeGet.value[pool.postId] === "未开始",
+    );
+  } else {
+    poolSelect.value = poolCards.value.filter(
+      (pool) =>
+        poolTimeGet.value[pool.postId] !== "未开始" && poolTimeGet.value[pool.postId] !== "已结束",
+    );
+  }
+}
+
 onUnmounted(() => {
   Object.keys(timer.value).forEach((key) => {
     clearInterval(timer.value[Number(key)]);
@@ -190,32 +233,56 @@ onUnmounted(() => {
 
 .pool-title {
   display: flex;
-  color: var(--common-text-title);
+  align-items: center;
+  justify-content: space-between;
   font-family: var(--font-title);
   font-size: 20px;
 }
 
-.pool-title img {
+.pool-title-left {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  color: var(--common-text-title);
+  column-gap: 10px;
+}
+
+.pool-title-left img {
   width: 25px;
   height: 25px;
   border-radius: 50%;
-  margin-right: 10px;
   background: var(--common-shadow-4);
-  transform: translate(0, 2px);
+}
+
+.pool-title-right {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 15px;
+}
+
+.pool-switch {
+  display: flex;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  color: var(--box-text-1);
 }
 
 .pool-grid {
-  display: flex;
+  display: grid;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .pool-card {
   position: relative;
   overflow: hidden;
-  width: 50%;
+  width: 100%;
   border-radius: 5px;
+  aspect-ratio: 69 / 32;
   box-shadow: 0 5px 5px var(--common-shadow-4);
 }
 

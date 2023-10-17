@@ -1,13 +1,12 @@
 /**
  * @file plugins Mys types Gacha.d.ts
  * @description Mys 插件卡池类型定义文件
- * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Beta v0.3.3
  */
 
 /**
  * @description Mys 卡池类型定义
- * @since Alpha v0.2.1
+ * @since Beta v0.3.3
  * @namespace Gacha
  * @return Gacha
  */
@@ -20,7 +19,7 @@ declare namespace TGApp.Plugins.Mys.Gacha {
    * @property {Data[]} data.list 卡池数据
    * @return Response
    */
-  export interface Response extends TGApp.Plugins.Mys.Base.Response {
+  interface Response extends TGApp.Plugins.Mys.Base.Response {
     data: {
       list: Data[];
     };
@@ -43,7 +42,7 @@ declare namespace TGApp.Plugins.Mys.Gacha {
    * @property {string} end_time 卡池结束时间
    * @return Data
    */
-  export interface Data {
+  interface Data {
     id: string;
     title: string;
     activity_url: string;
@@ -64,14 +63,14 @@ declare namespace TGApp.Plugins.Mys.Gacha {
    * @property {string} url 链接
    * @return MiniItem
    */
-  export interface MiniItem {
+  interface MiniItem {
     icon: string;
     url: string;
   }
 
   /**
    * @description 用于渲染的卡池数据
-   * @since Alpha v0.2.1
+   * @since Beta v0.3.3
    * @interface RenderCard
    * @property {string} title 卡池标题
    * @property {string} subtitle 卡池副标题
@@ -79,13 +78,12 @@ declare namespace TGApp.Plugins.Mys.Gacha {
    * @property {number} postId 卡池对应帖子ID
    * @property {MiniItem[]} characters 卡池包含的角色
    * @property {MiniItem} voice 卡池角色语音
-   * @property {string} time.start 卡池开始时间
+   * @property {string} time.str 卡池时间字符串
    * @property {string} time.startStamp 卡池开始时间戳
-   * @property {string} time.end 卡池结束时间
    * @property {string} time.endStamp 卡池结束时间戳
    * @return RenderCard
    */
-  export interface RenderCard {
+  interface RenderCard {
     title: string;
     subtitle: string;
     cover: string;
@@ -93,9 +91,8 @@ declare namespace TGApp.Plugins.Mys.Gacha {
     characters: MiniItem[];
     voice: MiniItem;
     time: {
-      start: string;
+      str: string;
       startStamp: number;
-      end: string;
       endStamp: number;
     };
   }
