@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2023-10-04
+Update: 2023-10-17
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2023-10-04 21:23:48`
+> 更新于 `2023-10-17 13:39:07`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -83,7 +83,7 @@ A Genshin Impact assistant app based on Tauri.
 
 ## 仓库概况 / Repo Stats
 
-![Status](https://repobeats.axiom.co/api/embed/0edac184a5892f2520e83e3fe6519c4168db2e1b.svg "Repobeats analytics image")
+![Status](https://repobeats.axiom.co/api/embed/345d4bae5dc7e5184af4452b9dad01a671e220b3.svg "Repobeats analytics image")
 
 ## UI 参考 / UI Reference
 
