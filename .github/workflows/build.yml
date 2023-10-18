@@ -47,6 +47,11 @@ jobs:
         with:
           tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
           releaseName: v__VERSION__-beta
-          releaseBody: https://github.com/BTMuli/Tauri.Genshin/releases/tag/v__VERSION__
+          releaseBody: |
+            > 建议通过微软应用商店下载，此处仅作为备份
+
+            <a href="https://apps.microsoft.com/store/detail/9NLBNNNBNSJN?launch=true&cid=BTMuli&mode=mini">
+              <img src="https://get.microsoft.com/images/zh-cn%20dark.svg" alt="download"/>
+            </a>
           releaseDraft: true
           prerelease: false
