@@ -277,7 +277,7 @@
   },
   {
     "id": 1309,
-    "contentId": -1,
+    "contentId": 500194,
     "name": "迪希雅",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/迪希雅.webp",
@@ -457,7 +457,7 @@
   },
   {
     "id": 1506,
-    "contentId": -1,
+    "contentId": 500192,
     "name": "流浪者",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/流浪者.webp",
@@ -564,7 +564,7 @@
   },
   {
     "id": 1704,
-    "contentId": -1,
+    "contentId": 500195,
     "name": "瑶瑶",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/瑶瑶.webp",
@@ -689,7 +689,7 @@
     "name": "愚人众先遣队·冰铳重卫士",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/愚人众先遣队·冰铳重卫士.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -697,7 +697,7 @@
     "name": "愚人众先遣队·岩使游击兵",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/愚人众先遣队·岩使游击兵.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -705,7 +705,7 @@
     "name": "愚人众先遣队·火铳游击兵",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/愚人众先遣队·火铳游击兵.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -713,7 +713,7 @@
     "name": "愚人众先遣队·雷锤前锋军",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/愚人众先遣队·雷锤前锋军.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -721,7 +721,7 @@
     "name": "岩丘丘萨满",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/岩丘丘萨满.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -729,7 +729,7 @@
     "name": "嗜岩·兽境猎犬",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/嗜岩·兽境猎犬.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -737,7 +737,7 @@
     "name": "岩盾丘丘暴徒",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/岩盾丘丘暴徒.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -745,7 +745,7 @@
     "name": "木盾丘丘暴徒",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/木盾丘丘暴徒.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -753,7 +753,7 @@
     "name": "有翼冰本真蕈",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/有翼冰本真蕈.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -761,7 +761,7 @@
     "name": "陆行水本真蕈",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/陆行水本真蕈.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -769,7 +769,7 @@
     "name": "陆行岩本真蕈",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/陆行岩本真蕈.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -777,7 +777,7 @@
     "name": "雷深渊法师",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/雷深渊法师.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -785,7 +785,7 @@
     "name": "有翼草本真蕈",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/有翼草本真蕈.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -793,7 +793,7 @@
     "name": "冲锋丘丘人",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/冲锋丘丘人.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -801,7 +801,7 @@
     "name": "水史莱姆",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/水史莱姆.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -809,7 +809,7 @@
     "name": "雷史莱姆",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/雷史莱姆.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -817,7 +817,7 @@
     "name": "火深渊法师",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/火深渊法师.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -825,7 +825,7 @@
     "name": "水深渊法师",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/水深渊法师.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -833,7 +833,7 @@
     "name": "冰深渊法师",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/冰深渊法师.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -841,7 +841,7 @@
     "name": "愚人众先遣队·风拳前锋军",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/愚人众先遣队·风拳前锋军.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -849,7 +849,7 @@
     "name": "愚人众先遣队·水铳重卫士",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/愚人众先遣队·水铳重卫士.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -857,7 +857,7 @@
     "name": "野伏·阵刀番",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/野伏·阵刀番.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -865,7 +865,7 @@
     "name": "野伏·火付番",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/野伏·火付番.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -873,7 +873,7 @@
     "name": "野伏·机巧番",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/野伏·机巧番.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -881,7 +881,7 @@
     "name": "打手丘丘人",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/打手丘丘人.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -889,7 +889,7 @@
     "name": "射手丘丘人",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/射手丘丘人.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -897,7 +897,7 @@
     "name": "火斧丘丘暴徒",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/火斧丘丘暴徒.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -905,7 +905,7 @@
     "name": "冰箭丘丘人",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/冰箭丘丘人.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -913,7 +913,7 @@
     "name": "雷箭丘丘人",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/雷箭丘丘人.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -921,7 +921,7 @@
     "name": "雷斧丘丘暴徒",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/雷斧丘丘暴徒.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -929,7 +929,7 @@
     "name": "冰盾丘丘暴徒",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/冰盾丘丘暴徒.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -937,7 +937,7 @@
     "name": "风丘丘萨满",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/风丘丘萨满.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -945,7 +945,7 @@
     "name": "水丘丘萨满",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/水丘丘萨满.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -953,7 +953,7 @@
     "name": "草丘丘萨满",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/草丘丘萨满.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -961,7 +961,7 @@
     "name": "海乱鬼·雷腾",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/海乱鬼·雷腾.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 0,
@@ -969,7 +969,7 @@
     "name": "海乱鬼·炎威",
     "type": "魔物牌",
     "icon": "/WIKI/GCG/normal/海乱鬼·炎威.webp",
-    "tags": ""
+    "tags": {}
   },
   {
     "id": 211011,
@@ -1225,7 +1225,7 @@
   },
   {
     "id": 213091,
-    "contentId": -1,
+    "contentId": 500189,
     "name": "崇诚之真",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/崇诚之真.webp",
@@ -1389,7 +1389,7 @@
   },
   {
     "id": 215061,
-    "contentId": -1,
+    "contentId": 500190,
     "name": "梦迹一风",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/梦迹一风.webp",
@@ -1488,7 +1488,7 @@
   },
   {
     "id": 217041,
-    "contentId": -1,
+    "contentId": 500191,
     "name": "慈惠仁心",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/慈惠仁心.webp",
@@ -1828,7 +1828,7 @@
   },
   {
     "id": 311406,
-    "contentId": -1,
+    "contentId": 500196,
     "name": "贯月矢",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/贯月矢.webp",
@@ -2034,7 +2034,7 @@
   },
   {
     "id": 312015,
-    "contentId": -1,
+    "contentId": 500188,
     "name": "海祇之冠",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/海祇之冠.webp",
@@ -2314,7 +2314,7 @@
   },
   {
     "id": 321014,
-    "contentId": -1,
+    "contentId": 500197,
     "name": "化城郭",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/化城郭.webp",
@@ -2514,7 +2514,7 @@
   },
   {
     "id": 322020,
-    "contentId": -1,
+    "contentId": 500199,
     "name": "弥生七月",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/弥生七月.webp",
@@ -2594,7 +2594,7 @@
   },
   {
     "id": 330004,
-    "contentId": -1,
+    "contentId": 500198,
     "name": "自由的新风",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/自由的新风.webp",
@@ -2954,7 +2954,7 @@
   },
   {
     "id": 332023,
-    "contentId": -1,
+    "contentId": 500187,
     "name": "拳力斗技！",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/拳力斗技！.webp",

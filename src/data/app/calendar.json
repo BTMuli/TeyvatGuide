@@ -265,7 +265,7 @@
   },
   {
     "id": 10000086,
-    "contentId": 0,
+    "contentId": 500286,
     "dropDays": [3, 6, 7],
     "name": "莱欧斯利",
     "itemType": "character",
@@ -705,7 +705,7 @@
   },
   {
     "id": 10000087,
-    "contentId": 0,
+    "contentId": 500207,
     "dropDays": [1, 4, 7],
     "name": "那维莱特",
     "itemType": "character",
@@ -4750,7 +4750,7 @@
   },
   {
     "id": 14513,
-    "contentId": 0,
+    "contentId": 7408,
     "dropDays": [3, 6, 7],
     "name": "金流监督",
     "itemType": "weapon",
@@ -4801,7 +4801,7 @@
   },
   {
     "id": 14514,
-    "contentId": 0,
+    "contentId": 7304,
     "dropDays": [2, 5, 7],
     "name": "万世流涌大典",
     "itemType": "weapon",
@@ -6280,7 +6280,7 @@
   },
   {
     "id": 11427,
-    "contentId": 0,
+    "contentId": 7314,
     "dropDays": [2, 5, 7],
     "name": "船坞长剑",
     "itemType": "weapon",
@@ -7300,7 +7300,7 @@
   },
   {
     "id": 12427,
-    "contentId": 0,
+    "contentId": 7313,
     "dropDays": [3, 6, 7],
     "name": "便携动力锯",
     "itemType": "weapon",
@@ -8422,7 +8422,7 @@
   },
   {
     "id": 15427,
-    "contentId": 0,
+    "contentId": 7406,
     "dropDays": [1, 4, 7],
     "name": "测距规",
     "itemType": "weapon",
@@ -8830,7 +8830,7 @@
   },
   {
     "id": 14426,
-    "contentId": 0,
+    "contentId": 7381,
     "dropDays": [2, 5, 7],
     "name": "无垠蔚蓝之歌",
     "itemType": "weapon",
@@ -10258,7 +10258,7 @@
   },
   {
     "id": 13427,
-    "contentId": 0,
+    "contentId": 7407,
     "dropDays": [1, 4, 7],
     "name": "勘探钻机",
     "itemType": "weapon",

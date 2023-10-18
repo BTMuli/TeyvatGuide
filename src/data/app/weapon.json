@@ -73,7 +73,7 @@
   },
   {
     "id": 14514,
-    "contentId": 0,
+    "contentId": 7304,
     "name": "万世流涌大典",
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
@@ -82,7 +82,7 @@
   },
   {
     "id": 14513,
-    "contentId": 0,
+    "contentId": 7408,
     "name": "金流监督",
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
@@ -361,7 +361,7 @@
   },
   {
     "id": 15427,
-    "contentId": 0,
+    "contentId": 7406,
     "name": "测距规",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
@@ -559,7 +559,7 @@
   },
   {
     "id": 14426,
-    "contentId": 0,
+    "contentId": 7381,
     "name": "无垠蔚蓝之歌",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
@@ -730,7 +730,7 @@
   },
   {
     "id": 13427,
-    "contentId": 0,
+    "contentId": 7407,
     "name": "勘探钻机",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
@@ -883,7 +883,7 @@
   },
   {
     "id": 12427,
-    "contentId": 0,
+    "contentId": 7313,
     "name": "便携动力锯",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
@@ -1063,7 +1063,7 @@
   },
   {
     "id": 11427,
-    "contentId": 0,
+    "contentId": 7314,
     "name": "船坞长剑",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
