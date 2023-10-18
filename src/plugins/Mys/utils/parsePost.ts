@@ -51,6 +51,30 @@ function getPostId(url: string): string {
 }
 
 /**
+ * @description 获取视频时长
+ * @since Beta v0.3.3
+ * @param {number} duration 视频时长
+ * @returns {string} 视频时长
+ */
+function getVodTime(duration: number): string {
+  const secTotal = Math.floor(duration / 1000);
+  const seconds = secTotal % 60;
+  const minutes = Math.floor(secTotal / 60) % 60;
+  const hours = Math.floor(secTotal / 3600);
+  let result = "";
+  if (hours > 0) {
+    result += `${hours.toString().padStart(2, "0")}:`;
+  }
+  if (minutes > 0) {
+    result += `${minutes.toString().padStart(2, "0")}:`;
+  }
+  if (seconds > 0) {
+    result += `${seconds.toString().padStart(2, "0")}`;
+  }
+  return result;
+}
+
+/**
  * @description 解析用户帖子，将其转换为 StructContent
  * @since Alpha v0.1.2
  * @see PostContent
@@ -348,9 +372,14 @@ function parseVideo(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElem
     cover.classList.add("mys-post-vod-cover");
     cover.src = video.poster;
     coverDiv.appendChild(cover);
-    const playIcon = document.createElement("div");
-    playIcon.classList.add("mdi", "mdi-play-circle-outline", "mys-post-vod-icon");
+    const playIcon = document.createElement("img");
+    playIcon.classList.add("mys-post-vod-icon");
+    playIcon.src = "../src/assets/icons/video_play.svg";
     coverDiv.appendChild(playIcon);
+    const playTime = document.createElement("div");
+    playTime.classList.add("mys-post-vod-time");
+    playTime.innerText = getVodTime(data.insert.vod.duration);
+    coverDiv.appendChild(playTime);
     coverDiv.classList.add("mys-post-vod-cover-div");
     div.appendChild(coverDiv);
   } else if (data.insert.video) {
