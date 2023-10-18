@@ -20,6 +20,7 @@
     ".yml",
     "package.json",
     "src/**/*.d.ts",
+    "src/data/**/*.json",
     "src/**/*.ts",
     "src/**/*.vue",
     "tsconfig.json",
