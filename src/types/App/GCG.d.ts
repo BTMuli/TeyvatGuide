@@ -9,7 +9,7 @@ declare namespace TGApp.App.GCG {
   /**
    * @description Wiki页用到的简略信息
    * @interface WikiBriefInfo
-   * @since Alpha v0.2.2
+   * @since Beta v0.3.3
    * @property {number} id - 卡牌 ID
    * @property {number} contentId - 观测枢的 content_id
    * @property {string} name - 卡牌名称
@@ -24,7 +24,7 @@ declare namespace TGApp.App.GCG {
     name: string;
     type: string;
     icon: string;
-    tags: Partial<GCGTags>;
+    tags: Partial<GCGTags> | null;
   }
 
   /**
