@@ -116,11 +116,13 @@ export function insertNameCardData(data: TGApp.App.NameCard.Item): string {
  */
 export function insertCharacterData(data: TGApp.App.Character.WikiBriefInfo): string {
   return `
-      INSERT INTO AppCharacters (id, name, star, element, weapon, nameCard, birthday, updated)
-      VALUES (${data.id}, '${data.name}', ${data.star}, '${data.element}', '${data.weapon}',
-              '${data.nameCard}', '${data.birthday.toString()}', datetime('now', 'localtime'))
+      INSERT INTO AppCharacters (id, name, title, birthday, star, element, weapon, nameCard, updated)
+      VALUES (${data.id}, '${data.name}', '${data.title}', '${data.birthday.toString()}',
+              ${data.star}, '${data.element}', '${data.weapon}', '${data.nameCard}',
+              datetime('now', 'localtime'))
       ON CONFLICT(id) DO UPDATE
           SET name     = '${data.name}',
+              title    = '${data.title}',
               star     = ${data.star},
               element  = '${data.element}',
               weapon   = '${data.weapon}',
