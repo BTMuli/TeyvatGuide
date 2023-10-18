@@ -1,7 +1,7 @@
 /**
  * @file utils TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.3.2
+ * @since Beta v0.3.3
  */
 
 import { dialog, fs, http, path } from "@tauri-apps/api";
@@ -75,34 +75,35 @@ function getShareImgBgColor(): string {
 
 /**
  * @description 生成分享截图
- * @since Alpha v0.2.0
+ * @since Beta v0.3.3
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
+ * @param {number} offset - 偏移量
  * @returns {Promise<void>} 无返回值
  */
 export async function generateShareImg(
   fileName: string,
   element: HTMLElement,
-  scale: number = 1.2,
+  scale: number = 1.0,
+  offset: number = 30,
 ): Promise<void> {
   const canvas = document.createElement("canvas");
-  const width = element.clientWidth + 50;
-  const height = element.clientHeight + 50;
+  const width = element.clientWidth + offset;
+  const height = element.clientHeight + offset;
   canvas.width = width * scale;
   canvas.height = height * scale;
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
-  canvas.getContext("2d")?.scale(scale, scale);
   const opts = {
     backgroundColor: getShareImgBgColor(),
     windowHeight: height,
+    scale,
     width,
     height,
     useCORS: true,
     canvas,
-    x: -15,
-    y: -15,
+    x: (-offset / 2) * scale,
+    y: (-offset / 2) * scale,
+    dpi: window.devicePixelRatio > 1 ? 300 : 96,
   };
   const canvasData = await html2canvas(element, opts);
   try {
