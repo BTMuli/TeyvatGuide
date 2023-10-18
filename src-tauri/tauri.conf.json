@@ -67,7 +67,7 @@
           "enableTauriAPI": true
         }
       ],
-      "csp": "default-src 'self' *; img-src *; script-src *"
+      "csp": null
     },
     "updater": {
       "active": false,
