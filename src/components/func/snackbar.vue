@@ -1,13 +1,13 @@
 <template>
-  <div class="func-snackbar-container">
-    <transition name="func-snackbar">
-      <div v-show="show" class="func-snackbar" :style="{ backgroundColor: data.color }">
+  <transition name="func-snackbar">
+    <div class="func-snackbar-container" v-show="show">
+      <div class="func-snackbar" :style="{ backgroundColor: data.color }">
         <slot name="text">
           <span class="func-snackbar-text">{{ data.text }}</span>
         </slot>
       </div>
-    </transition>
-  </div>
+    </div>
+  </transition>
 </template>
 <script lang="ts" setup>
 import { onMounted, reactive, ref } from "vue";
@@ -88,8 +88,7 @@ defineExpose({
 }
 
 .func-snackbar-container {
-  position: absolute;
-  z-index: 999;
+  position: fixed;
   bottom: 0;
   left: 0;
   display: flex;
@@ -107,7 +106,6 @@ defineExpose({
   justify-content: center;
   padding: 10px 20px;
   border-radius: 5px;
-  margin: 20px;
   box-shadow: 0 0 10px rgb(0 0 0 / 20%);
 }
 
