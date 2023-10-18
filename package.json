@@ -3,7 +3,7 @@
   "version": "0.3.3",
   "description": "A Genshin Tool build with Tauri",
   "private": true,
-  "packageManager": "pnpm@8.9.0",
+  "packageManager": "pnpm@8.9.2",
   "scripts": {
     "build": "tauri build",
     "debug": "tauri build --debug",
