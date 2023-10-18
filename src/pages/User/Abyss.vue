@@ -209,16 +209,20 @@ async function uploadAbyss(): Promise<void> {
   display: flex;
   height: calc(100vh - 35px);
   align-items: center;
-  justify-content: left;
+  justify-content: center;
   border: 1px solid var(--common-shadow-4);
   border-radius: 5px;
 }
 
 .ua-tab {
   width: 100px;
-  height: 100%;
   color: var(--box-text-4);
   font-family: var(--font-text);
+}
+
+/* stylelint-disable selector-class-pattern */
+.ua-tab.v-tabs.v-slide-group--vertical {
+  height: 100%;
 }
 
 .ua-tab-bottom {
