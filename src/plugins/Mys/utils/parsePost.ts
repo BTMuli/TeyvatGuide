@@ -374,7 +374,7 @@ function parseVideo(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElem
     coverDiv.appendChild(cover);
     const playIcon = document.createElement("img");
     playIcon.classList.add("mys-post-vod-icon");
-    playIcon.src = "../src/assets/icons/video_play.svg";
+    playIcon.src = "/source/UI/video_play.svg";
     coverDiv.appendChild(playIcon);
     const playTime = document.createElement("div");
     playTime.classList.add("mys-post-vod-time");
