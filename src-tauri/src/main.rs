@@ -65,7 +65,7 @@ fn main() {
             }
         })
         .plugin(tauri_plugin_sql::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![register_deep_link, init_app, client::operate_mhy])
+        .invoke_handler(tauri::generate_handler![register_deep_link, init_app, client::create_mhy_client])
         .setup(|_app| {
             let _window = _app.get_window("TeyvatGuide").unwrap();
             #[cfg(debug_assertions)] // only include this code on debug builds

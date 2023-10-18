@@ -24,19 +24,16 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { invoke, event } from "@tauri-apps/api";
 import { onMounted, ref } from "vue";
 
 import showGeetest from "../../components/func/geetest";
+import mhyClient from "../../utils/TGClient";
 
 const visible = ref<boolean>(false);
 
 onMounted(async () => {
   visible.value = false;
-  await event.listen("post_mhy_client", (res) => {
-    console.log(res.payload);
-    console.log(res.windowLabel);
-  });
+  await mhyClient.run();
 });
 
 async function getGC(): Promise<void> {
@@ -44,7 +41,7 @@ async function getGC(): Promise<void> {
 }
 
 async function tryNewWindow(): Promise<void> {
-  await invoke("operate_mhy", { func: "test", arg: "test" });
+  await mhyClient.open("game_record", "test");
 }
 </script>
 <style lang="css" scoped>

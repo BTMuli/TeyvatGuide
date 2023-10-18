@@ -20,25 +20,7 @@
       "http": {
         "all": true,
         "request": true,
-        "scope": [
-          "https://act-webstatic.mihoyo.com/*",
-          "https://api-static.mihoyo.com/*",
-          "https://api-takumi-record.mihoyo.com/*",
-          "https://api-takumi.mihoyo.com/*",
-          "https://api.geetest.com/*",
-          "https://bbs-api-static.miyoushe.com/*",
-          "https://bbs-api.mihoyo.com/*",
-          "https://bbs-api.miyoushe.com/*",
-          "https://bbs.mihoyo.com/*",
-          "https://enka-api.hut.ao/*",
-          "https://hk4e-api.mihoyo.com/*",
-          "https://hk4e-sdk.mihoyo.com/*",
-          "https://homa.snapgenshin.com/*",
-          "https://passport-api-v4.mihoyo.com/*",
-          "https://passport-api.mihoyo.com/*",
-          "https://passport-api.miyoushe.com/*",
-          "https://sdk-webstatic.mihoyo.com/*"
-        ]
+        "scope": ["https://**"]
       },
       "shell": {
         "all": false,
@@ -73,7 +55,19 @@
       }
     },
     "security": {
-      "csp": null
+      "dangerousRemoteDomainIpcAccess": [
+        {
+          "domain": "api-static.mihoyo.com",
+          "windows": ["mhy_client"],
+          "enableTauriAPI": true
+        },
+        {
+          "domain": "webstatic.mihoyo.com",
+          "windows": ["mhy_client"],
+          "enableTauriAPI": true
+        }
+      ],
+      "csp": "default-src 'self' *; img-src *; script-src *"
     },
     "updater": {
       "active": false,
@@ -100,7 +94,8 @@
         "resizable": false,
         "title": "米游社",
         "label": "mhy_client",
-        "url": "https://bbs.mihoyo.com/",
+        "url": "https://api-static.mihoyo.com/",
+        "userAgent": "Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/2.60.1",
         "visible": false,
         "width": 360,
         "height": 780,
