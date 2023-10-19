@@ -7,7 +7,7 @@ Update: 2023-10-19
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2023-10-19 17:38:13`
+> 更新于 `2023-10-19 21:42:40`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -19,9 +19,9 @@ Update: 2023-10-19
 
 # Teyvat Guide
 
-基于 Tauri 的原神助手应用。
+基于 Tauri 的原神工具应用。
 
-A Genshin Impact assistant app based on Tauri.
+Game Tool for Genshin Impact player.
 
 ## 下载 / Download
 

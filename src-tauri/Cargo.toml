@@ -1,7 +1,7 @@
 [package]
 name = "TeyvatGuide"
-version = "0.3.3"
-description = "A Genshin Tool build with Tauri"
+version = "0.3.4"
+description = "Game Tool for Genshin Impact player"
 authors = ["BTMuli <bt-muli@outlook.com>"]
 license = "MIT"
 repository = "https://github.com/BTMuli/TeyvatGuide"
