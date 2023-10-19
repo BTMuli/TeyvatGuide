@@ -2,7 +2,7 @@
   "build": {
     "beforeDevCommand": "pnpm vite:dev",
     "beforeBuildCommand": "pnpm vite:build",
-    "devPath": "http://localhost:3000",
+    "devPath": "http://localhost:4000",
     "distDir": "../dist",
     "withGlobalTauri": true
   },
@@ -12,19 +12,47 @@
   },
   "tauri": {
     "allowlist": {
-      "all": true,
+      "all": false,
       "fs": {
-        "all": true,
+        "all": false,
+        "exists": true,
+        "readFile": true,
+        "writeFile": true,
+        "createDir": true,
+        "removeDir": true,
+        "removeFile": true,
         "scope": ["**", "**/*"]
       },
       "http": {
-        "all": true,
+        "all": false,
         "request": true,
         "scope": ["http://**", "https://**"]
       },
       "shell": {
         "all": false,
         "open": true
+      },
+      "dialog": {
+        "all": false,
+        "open": true,
+        "save": true
+      },
+      "clipboard": {
+        "all": true
+      },
+      "path": {
+        "all": true
+      },
+      "window": {
+        "all": false,
+        "setTitle": true,
+        "unminimize": true,
+        "show": true,
+        "close": true,
+        "setFocus": true
+      },
+      "os": {
+        "all": true
       }
     },
     "bundle": {
