@@ -2,36 +2,26 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2023-10-17
+Update: 2023-10-19
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2023-10-17 13:39:07`
+> 更新于 `2023-10-19 13:48:03`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
 ![](https://img.shields.io/badge/UIAF-v1.1-orange?style=for-the-badge) ![](https://img.shields.io/badge/UIGF-v2.3-red?style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/TeyvatGuide?style=for-the-badge)
+
+<div style="width: 100%; text-align: center; margin: 0 auto;">
+  <img alt="icon" src="public/icon.png" />
+</div>
 
 # Teyvat Guide
 
 基于 Tauri 的原神助手应用。
 
 A Genshin Impact assistant app based on Tauri.
-
-## 声明 / Declaration
-
-本项目仅供个人学习交流使用。请勿用于任何商业或违法违规用途。
-
-本项目涉及到的隐私数据，如 Cookie、Token 等，仅用于获取相关数据，不会被上传至任何服务器。
-
-深渊页面的上传功能，采用的是 [Hutao API](https://hut.ao/zh/development/platform.html) 提供的接口，仅上传如下数据：
-
-- 用户的游戏 UID
-- 用户的深境螺旋记录
-- 用户的角色信息及其装备的武器和圣遗物信息
-
-该功能为用户主动上传，不会在用户不知情的情况下上传数据。
 
 ## 下载 / Download
 
@@ -74,9 +64,9 @@ A Genshin Impact assistant app based on Tauri.
 - Wiki 功能：
 
   - [x] 深渊数据库（Hutao API）
-  - [x] 角色数据库（开发中）
-  - [x] 武器数据库（开发中）
-  - [x] 卡牌数据库（开发中）
+  - [ ] 角色数据库（开发中）
+  - [ ] 武器数据库（开发中）
+  - [ ] 卡牌数据库（开发中）
 
 - 应用功能：
   - [x] 浅色/深色主题切换
@@ -110,6 +100,8 @@ A Genshin Impact assistant app based on Tauri.
 项目基于 [MIT](LICENSE) 协议开源。
 
 应用版本号遵循 [Semantic Versioning 2.0.0](https://semver.org/lang/zh-CN/) 规范。
+
+隐私政策：[Privacy](https://app.btmuli.ink/docs/privacy.html)
 
 ## 鸣谢 / Thanks
 

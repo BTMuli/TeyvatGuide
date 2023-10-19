@@ -2,12 +2,46 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2023-09-08
-Update: 2023-09-27
+Update: 2023-10-19
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-09-08 09:45:17 `
 >
-> 更新于 `2023-09-27 08:41:43`
+> 更新于 `2023-10-19 13:49:53`
+
+## [0.3.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.3) (2023-10-19)
+
+### Feat
+
+- 应用：支持含视频帖子分享图生成 [`#44`](https://github.com/BTMuli/TeyvatGuide/issues/44)
+- 帖子：新增对于大别野卡片 `VillaCard` 的解析渲染
+- 应用：公告页样式美化
+- 应用：采取动态路由，提高加载速度
+- 角色：完善深色模式角色详情页样式
+
+### Fix
+
+- 深渊：默认刷新两期 [`#48`](https://github.com/BTMuli/TeyvatGuide/issues/48)
+- 成就：修复部分成就版本错误 [`DGP-Studio/Snap.Hutao#996`](https://github.com/BTMuli/TeyvatGuide/commit/fdfcc70b)
+- 应用：完善 DeepLink 处理
+- 应用：完善 Cookie,BriefInfo 数据获取
+- 应用：数据库链接保持开启，[`#46`](https://github.com/BTMuli/TeyvatGuide/issues/46)
+- 组件：修复 `showConfirm` 文字过长时溢出容器问题 [`358255d5`](https://github.com/BTMuli/TeyvatGuide/commit/358255d5)
+- 应用：更改弹窗弹出机制 [`#45`](https://github.com/BTMuli/TeyvatGuide/issues/45)
+- 数据：补充 4.1 版本缺漏数据
+
+### Change
+
+- 图像：未登录时的默认头像变更 [`2cbac71b`](https://github.com/BTMuli/TeyvatGuide/commit/2cbac71b)
+- 成就：添加 Finish Icon [`96ab38b9`](https://github.com/BTMuli/TeyvatGuide/commit/96ab38b9)
+- 应用：浅色主题样式调整
+- 帖子：未知结构化数据类型样式调整 [`adc96b76`](https://github.com/BTMuli/TeyvatGuide/commit/adc96b76)
+- 应用：重构创建帖子子窗口代码
+- 应用：咨讯页路由变更
+- 组件：`showSnackbar` 样式调整
+- 应用：重构咨讯页代码
+
+FullCommits: [`v0.3.2...v0.3.3`](https://BTMuli/TeyvatGuide/compare/v0.3.2...v0.3.3)
 
 ## [0.3.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.2) (2023-9-27)
 
