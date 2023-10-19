@@ -15,14 +15,14 @@
 <style lang="css" scoped>
 .tuc-dd-box {
   padding: 10px;
-  border: 1px solid rgb(0 0 0 /40%);
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  background: var(--tgc-white-1);
+  background: var(--box-bg-2);
 }
 
 .tuc-dd-title {
   width: 100%;
-  color: var(--tgc-dark-1);
+  color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
   text-align: left;
@@ -32,8 +32,7 @@
   width: 100%;
   height: 1px;
   margin: 5px 0;
-  background: var(--tgc-dark-1);
-  opacity: 0.5;
+  background: var(--common-shadow-2);
 }
 
 .tuc-dd-content {
@@ -48,7 +47,7 @@
   width: 100%;
   max-height: 50px;
   margin-top: 5px;
-  color: var(--tgc-dark-1);
+  color: var(--box-text-4);
   font-family: var(--font-text);
   font-size: 14px;
   overflow-x: hidden;

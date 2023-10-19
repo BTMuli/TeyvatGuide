@@ -40,7 +40,7 @@ function parseDesc(desc: string): string {
   while (match !== null) {
     const color = match[1];
     const text = match[2];
-    desc = desc.replace(match[0], `<span style="color: ${color}">${text}</span>`);
+    desc = desc.replace(match[0], `<span title="${text}" style="color: ${color};">${text}</span>`);
     match = reg.exec(desc);
   }
   desc = desc.replace(/\\n/g, "<br />");
@@ -60,11 +60,12 @@ function parseDesc(desc: string): string {
 
 .tuc-ddc-top {
   height: 20px;
-  color: var(--tgc-blue-1);
+  color: var(--box-text-3);
 }
 
 .tuc-ddc-bottom {
   height: 20px;
+  color: var(--box-text-1);
 }
 
 .tuc-ddc-bottom :nth-child(1) {

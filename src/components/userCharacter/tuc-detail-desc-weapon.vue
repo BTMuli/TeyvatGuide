@@ -49,7 +49,7 @@ const box = computed(() => {
   align-items: start;
   justify-content: space-around;
   margin-left: 5px;
-  color: var(--tgc-dark-1);
+  color: var(--box-text-1);
 }
 
 .tuc-ddwc-top {

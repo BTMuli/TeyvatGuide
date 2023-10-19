@@ -48,7 +48,7 @@ const props = defineProps<TucDetailDescRelicProps>();
 
 .tuc-ddrc-top {
   height: 20px;
-  color: var(--tgc-dark-1);
+  color: var(--box-text-1);
 }
 
 .tuc-ddrc-top :nth-child(1) {
@@ -70,7 +70,7 @@ const props = defineProps<TucDetailDescRelicProps>();
 }
 
 .tuc-ddrd-title {
-  color: var(--tgc-dark-1);
+  color: var(--box-text-3);
   font-family: var(--font-title);
   font-size: 16px;
 }

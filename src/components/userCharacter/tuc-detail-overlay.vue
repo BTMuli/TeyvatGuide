@@ -265,7 +265,7 @@ function switchBg(): void {
   height: 620px;
   padding: 10px;
   border-radius: 5px;
-  background: var(--tgc-white-1);
+  background: var(--box-bg-1);
 }
 
 .tuc-do-bg {
@@ -290,7 +290,7 @@ function switchBg(): void {
   bottom: 0;
   padding: 2px 5px;
   backdrop-filter: blur(10px);
-  background: rgb(0 0 0 /50%);
+  background: var(--common-shadow-2);
   border-bottom-right-radius: 5px;
   border-top-left-radius: 5px;
   color: var(--tgc-white-1);
