@@ -52,8 +52,12 @@
   font-family: var(--font-text);
   font-size: 14px;
   overflow-x: hidden;
-  overflow-y: auto;
   text-align: left;
   word-break: break-all;
+}
+
+/* 隐藏 desc 侧面滚动条 */
+.tuc-dd-desc::-webkit-scrollbar {
+  display: none;
 }
 </style>
