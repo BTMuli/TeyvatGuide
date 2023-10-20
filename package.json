@@ -24,9 +24,25 @@
     "fix:pnpm": "pnpm add https://github.com/tauri-apps/tauri-plugin-sql#v1"
   },
   "lint-staged": {
-    "*.{ts,vue}": "eslint --fix",
-    "*.{vue,css}": "stylelint --fix",
-    "*.{ts,vue,css,yml,json,md}": "prettier --write"
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.vue": [
+      "eslint --fix",
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.css": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.{yml,json,md}": [
+      "prettier --write"
+    ],
+    "*.rs": [
+      "rustfmt"
+    ]
   },
   "keywords": [
     "Genshin Impact",
