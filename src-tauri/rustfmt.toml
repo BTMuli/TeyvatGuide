@@ -1,0 +1,9 @@
+# File  rustfmt.toml
+# Desc  Rust 格式化配置文件
+# Since Beta v0.3.3
+
+max_width = 100
+tab_spaces = 2
+edition = "2018"
+use_small_heuristics = "Max"
+newline_style = "Auto"

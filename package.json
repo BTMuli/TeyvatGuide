@@ -14,6 +14,7 @@
     "lint:code:fix": "eslint . --fix",
     "lint:style": "stylelint \"src/**/*.{vue,css}\"",
     "lint:style:fix": "pnpm lint:style --fix",
+    "lint:rust:fix": "cd src-tauri && cargo fmt",
     "prettier": "prettier . --write",
     "tauri": "tauri",
     "tauri:icon": "tauri icon ./public/icon.png",
