@@ -127,7 +127,8 @@
         "visible": false,
         "width": 360,
         "height": 780,
-        "center": true
+        "center": true,
+        "decorations": false
       }
     ]
   }
