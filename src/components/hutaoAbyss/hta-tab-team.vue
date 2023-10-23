@@ -104,14 +104,13 @@ onMounted(async () => {
 
 .hta-tuf-box {
   display: flex;
+  overflow: hidden auto;
   width: 100%;
   max-height: 100%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   border-radius: 5px;
-  overflow-x: hidden;
-  overflow-y: auto;
   row-gap: 10px;
 }
 

@@ -20,9 +20,9 @@
     ".yml",
     "package.json",
     "src/**/*.d.ts",
-    "src/data/**/*.json",
     "src/**/*.ts",
     "src/**/*.vue",
+    "src/data/**/*.json",
     "tsconfig.json",
     "vite.config.ts"
   ]
