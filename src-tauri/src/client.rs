@@ -1,6 +1,6 @@
 //! @file src/client.rs
 //! @desc 客户端模块，负责操作米游社客户端
-//! @since Beta v0.3.3
+//! @since Beta v0.3.4
 
 use tauri::{AppHandle, Manager, WindowBuilder, WindowUrl};
 use url::Url;
@@ -25,6 +25,7 @@ pub async fn create_mhy_client(handle: AppHandle, func: String) {
   mhy_window_config.url = get_mhy_client_url(func.clone());
   let has_mhy_client = handle.get_window("mhy_client").is_some();
   if has_mhy_client {
+    dbg!("mhy_client exists");
     return;
   }
   let js_bridge = r#"

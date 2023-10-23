@@ -1,12 +1,12 @@
 /**
  * @file web request TGRequest.ts
  * @description 应用用到的请求函数
- * @author BTMuli <bt-muli@outlook.com>
- * @since Beta v0.3.0
+ * @since Beta v0.3.4
  */
 
 import { genAuthkey } from "./genAuthkey";
 import { getAbyss } from "./getAbyss";
+import { getActionTicketBySToken } from "./getActionTicket";
 import { getAnnoContent, getAnnoList } from "./getAnno";
 import { getCookieTokenByGameToken, getCookieTokenBySToken } from "./getCookieToken";
 // import * from "./getEnkaData.ts";
@@ -48,6 +48,7 @@ const TGRequest = {
       getAccounts: getGameAccountsBySToken,
       getCookieToken: getCookieTokenBySToken,
       getLToken: getLTokenBySToken,
+      getActionTicket: getActionTicketBySToken,
     },
     bgGameToken: {
       getCookieToken: getCookieTokenByGameToken,

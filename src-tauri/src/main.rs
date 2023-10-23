@@ -1,6 +1,6 @@
 //! @file src/main.rs
 //! @desc 主模块，用于启动应用
-//! @since Beta v0.3.3
+//! @since Beta v0.3.4
 
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
@@ -48,6 +48,7 @@ async fn register_deep_link(app_handle: tauri::AppHandle) {
 #[tauri::command]
 async fn execute_js(app_handle: tauri::AppHandle, label: String, js: String) {
   let window = app_handle.get_window(&label).unwrap();
+  dbg!(&js);
   window.eval(&js).ok().unwrap();
 }
 

@@ -41,7 +41,8 @@ async function getGC(): Promise<void> {
 }
 
 async function tryNewWindow(): Promise<void> {
-  await mhyClient.open("game_record");
+  await mhyClient.open("sign_in");
+  // await mhyClient.open("game_record");
 }
 </script>
 <style lang="css" scoped>

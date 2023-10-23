@@ -15,7 +15,7 @@ import TGUtils from "../utils/TGUtils";
  * @param {Record<string, string>} cookie cookie
  * @param {string} schedule_type 1: 本期, 2: 上期
  * @param {TGApp.Sqlite.Account.Game} account 游戏账号
- * @returns {Promise<TGApp.Game.Abyss.FullData|TGApp.App.Base.Response>}
+ * @returns {Promise<TGApp.Game.Abyss.FullData|TGApp.BBS.Response.Base>}
  */
 export async function getAbyss(
   cookie: Record<string, string>,
