@@ -9,6 +9,7 @@ import type { Event } from "@tauri-apps/api/event";
 import { WebviewWindow } from "@tauri-apps/api/window";
 import Md5 from "js-md5";
 
+import { getDeviceID } from "./toolFunc";
 import { useUserStore } from "../store/modules/user";
 import TGConstant from "../web/constant/TGConstant";
 import TGRequest from "../web/request/TGRequest";
@@ -84,7 +85,11 @@ class TGClient {
    */
   async hideSideBar(): Promise<void> {
     const executeJS =
-      "javascript:(function() {let st = document.createElement('style');st.innerHTML = '::-webkit-scrollbar{display:none}';document.querySelector('body').appendChild(st);})();";
+      "javascript:(function(){" +
+      "let st = document.createElement('style');" +
+      "st.innerHTML = '::-webkit-scrollbar{display:none}';" +
+      "document.querySelector('body').appendChild(st);" +
+      "})();";
     await invoke("execute_js", { label: "mhy_client", js: executeJS });
   }
 
@@ -102,7 +107,6 @@ class TGClient {
     await invoke<InvokeArg>("create_mhy_client", { func });
     this.window = WebviewWindow.getByLabel("mhy_client");
     await this.window?.show();
-    await this.hideSideBar();
   }
 
   /**
@@ -120,10 +124,11 @@ class TGClient {
         await this.getStatusBarHeight(callback);
         break;
       case "getCookieInfo":
-        await this.getCookieInfo(callback);
+        await this.getCookieInfo(payload, callback);
         break;
       case "getActionTicket":
         await this.getActionTicket(payload, callback);
+        await this.hideSideBar();
         break;
       case "getHTTPRequestHeaders":
         await this.getHTTPRequestHeaders(callback);
@@ -138,10 +143,11 @@ class TGClient {
         await this.getUserInfo(callback);
         break;
       case "configure_share":
-        await this.callback(callback ?? "");
         break;
+      // getNotificationSettings
       default:
         console.warn(`[${arg.windowLabel}] ${arg.payload}`);
+        await this.hideSideBar();
     }
   }
 
@@ -150,12 +156,17 @@ class TGClient {
    * @since Beta v0.3.4
    * @desc 回调函数
    * @param {string} callback - 回调函数名
-   * @param {string} payload - 回调函数参数
+   * @param {object} data - 回调数据
    * @returns {void} - 无返回值
    */
-  async callback(callback: string, payload?: string): Promise<void> {
-    const js = `javascript:mhyWebBridge("${callback}", ${payload ?? ""});`;
-    console.log(js);
+  async callback(callback: string, data: object): Promise<void> {
+    const response: TGApp.BBS.Response.Base = {
+      retcode: 0,
+      message: "success",
+      data: data ?? {},
+    };
+    const js = `javascript:mhyWebBridge("${callback}", ${JSON.stringify(response)});`;
+    console.info(`[callback] ${js}`);
     await invoke("create_mhy_client", { func: "execute_js" });
     await invoke("execute_js", { label: "mhy_client", js });
   }
@@ -171,29 +182,25 @@ class TGClient {
     const data = {
       statusBarHeight: 0,
     };
-    await this.callback(callback, JSON.stringify(data));
+    await this.callback(callback, data);
   }
 
   /**
    * @func getCookieInfo
-   * @since Beta v0.3.3
+   * @since Beta v0.3.4
    * @desc 获取米游社客户端的 cookie
+   * @param {unknown} payload - 请求参数
    * @param {string} callback - 回调函数名
    * @returns {void} - 无返回值
    */
-  async getCookieInfo(callback: string): Promise<void> {
+  async getCookieInfo(payload: unknown, callback: string): Promise<void> {
     const user = useUserStore();
-    // todo：这边还不清楚返回结构
-    const cookie = {
-      data: {
-        ltuid: user.cookie.ltuid,
-        ltoken: user.cookie.ltoken,
-        stuid: user.cookie.stuid,
-        stoken: user.cookie.stoken,
-        mid: user.cookie.mid,
-      },
+    const data = {
+      ltoken: user.cookie.ltoken,
+      ltuid: user.cookie.ltuid,
+      login_ticket: "",
     };
-    await this.callback(callback, JSON.stringify(cookie));
+    await this.callback(callback, data);
   }
 
   /**
@@ -210,13 +217,13 @@ class TGClient {
     const uid = user.getCurAccount().gameUid;
     const mid = user.cookie.mid;
     const stoken = user.cookie.stoken;
-    const actionTicket = await TGRequest.User.bySToken.getActionTicket(
+    const ActionTicket = await TGRequest.User.bySToken.getActionTicket(
       actionType,
       stoken,
       mid,
       uid,
     );
-    await this.callback(callback, JSON.stringify(actionTicket));
+    await this.callback(callback, ActionTicket.data);
   }
 
   /**
@@ -227,16 +234,12 @@ class TGClient {
    * @returns {void} - 无返回值
    */
   async getHTTPRequestHeaders(callback: string): Promise<void> {
-    console.log("getHTTPRequestHeaders");
-    const header = {
+    const data = {
       "x-rpc-client_type": "5",
-      "x-rpc-device_id": localStorage.getItem("device_id") ?? "",
+      "x-rpc-device_id": getDeviceID(),
       "x-rpc-app_version": TGConstant.BBS.VERSION,
     };
-    const data = {
-      headers: header,
-    };
-    await this.callback(callback, JSON.stringify(data));
+    await this.callback(callback, data);
   }
 
   /**
@@ -247,17 +250,14 @@ class TGClient {
    * @returns {void} - 无返回值
    */
   async getDS(callback: string): Promise<void> {
-    console.log("getDS");
     const salt = TGConstant.Salt.LK2;
     const time = Math.floor(Date.now() / 1000).toString();
     const random = TGUtils.Tools.getRandomString(6);
-    const ds = Md5.md5.update(`salt=${salt}&t=${time}&r=${random}`).hex();
+    const check = Md5.md5.update(`salt=${salt}&t=${time}&r=${random}`).hex();
     const data = {
-      data: {
-        DS: `${time},${random},${ds}`,
-      },
+      DS: `${time},${random},${check}`,
     };
-    await this.callback(callback, JSON.stringify(data));
+    await this.callback(callback, data);
   }
 
   /**
@@ -270,19 +270,16 @@ class TGClient {
    */
   async getDS2(payload: any, callback: string): Promise<void> {
     const { query, body } = payload;
-    const salt = TGConstant.Salt.LK2;
+    const salt = TGConstant.Salt.X4;
     const time = Math.floor(Date.now() / 1000).toString();
-    const random = TGUtils.Tools.getRandomNumber(100000, 200000).toString();
+    const random = TGUtils.Tools.getRandomNumber(100001, 200000).toString();
     const dataB = TGUtils.Tools.transParams(body);
     const dataQ = TGUtils.Tools.transParams(query);
-    const ds = Md5.md5.update(`salt=${salt}&t=${time}&r=${random}&b=${dataB}&q=${dataQ}`).hex();
+    const check = Md5.md5.update(`salt=${salt}&t=${time}&r=${random}&b=${dataB}&q=${dataQ}`).hex();
     const data = {
-      data: {
-        DS: `${time},${random},${ds}`,
-      },
+      DS: `${time},${random},${check}`,
     };
-    console.log(data);
-    await this.callback(callback, JSON.stringify(data));
+    await this.callback(callback, data);
   }
 
   /**
@@ -301,14 +298,14 @@ class TGClient {
       console.error(`[${callback}] ${userInfo.message}`);
       return;
     }
-    const data = {
-      id: userInfo.uid,
-      gender: userInfo.gender,
-      nickname: userInfo.nickname,
-      introduce: userInfo.introduce,
-      avatar_url: userInfo.avatar_url,
-    };
-    await this.callback(callback, JSON.stringify(data));
+    // const data = {
+    //   id: userInfo.uid,
+    //   gender: userInfo.gender,
+    //   nickname: userInfo.nickname,
+    //   introduce: userInfo.introduce,
+    //   avatar_url: userInfo.avatar_url,
+    // };
+    await this.callback(callback, userInfo);
   }
 }
 

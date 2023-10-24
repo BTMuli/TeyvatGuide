@@ -93,6 +93,11 @@
           "domain": "webstatic.mihoyo.com",
           "windows": ["mhy_client"],
           "enableTauriAPI": true
+        },
+        {
+          "domain": "api-takumi-record.mihoyo.com",
+          "windows": ["mhy_client"],
+          "enableTauriAPI": true
         }
       ],
       "csp": null

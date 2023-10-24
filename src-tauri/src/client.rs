@@ -13,7 +13,8 @@ fn get_mhy_client_url(func: String) -> WindowUrl {
       .parse()
       .unwrap();
   } else if func == "game_record" {
-    url_res = "https://webstatic.mihoyo.com/app/community-game-records/index.html".parse().unwrap();
+    url_res =
+      "https://webstatic.mihoyo.com/app/community-game-records/index.html?bbs_presentation_style=fullscreen".parse().unwrap();
   }
   return WindowUrl::External(url_res);
 }

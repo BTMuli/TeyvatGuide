@@ -1,9 +1,10 @@
 /**
  * @file utils toolFunc.ts
  * @description 一些工具函数
- * @author BTMuli <bt-muli@outlook.com>
- * @since Beta v0.3.0
+ * @since Beta v0.3.4
  */
+
+import { v4 } from "uuid";
 
 /**
  * @description 时间戳转换为时间字符串
@@ -18,4 +19,18 @@ export function stamp2LastTime(time: number): string {
   return `${day === 0 ? "" : `${day}天`} ${hour.toFixed(0).padStart(2, "0")}:${minute
     .toFixed(0)
     .padStart(2, "0")}:${second.toFixed(0).padStart(2, "0")}`;
+}
+
+/**
+ * @description 获取 deviceID
+ * @since Beta v0.3.4
+ * @returns {string} deviceID
+ */
+export function getDeviceID(): string {
+  let deviceID = localStorage.getItem("deviceID");
+  if (deviceID === null) {
+    deviceID = v4();
+    localStorage.setItem("deviceID", deviceID);
+  }
+  return deviceID;
 }
