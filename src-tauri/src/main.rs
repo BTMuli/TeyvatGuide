@@ -5,7 +5,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri::Manager;
+use tauri::{Manager, WindowBuilder};
+use tauri_utils::config::WindowConfig;
 mod client;
 
 // 放一个常数，用来判断应用是否初始化
@@ -52,6 +53,21 @@ async fn execute_js(app_handle: tauri::AppHandle, label: String, js: String) {
   window.eval(&js).ok().unwrap();
 }
 
+// 创建窗口
+#[tauri::command]
+async fn create_window(app_handle: tauri::AppHandle, label: String, mut option: WindowConfig) {
+  let window_old = app_handle.get_window(&label);
+  option.label = label.clone();
+  if window_old.is_some() {
+    dbg!("window exists");
+    window_old.unwrap().close().unwrap();
+    return;
+  }
+  let window_new =
+    Some(WindowBuilder::from_config(&app_handle, option).build().expect("failed to create window"));
+  window_new.unwrap();
+}
+
 fn main() {
   tauri_plugin_deep_link::prepare("teyvatguide");
   tauri::Builder::default()
@@ -78,6 +94,7 @@ fn main() {
       register_deep_link,
       init_app,
       execute_js,
+      create_window,
       client::create_mhy_client,
     ])
     .setup(|_app| {

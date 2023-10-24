@@ -1,16 +1,18 @@
 /**
  * @file utils TGWindow.ts
  * @description 窗口创建相关工具函数
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  */
 
-import { window as TauriWindow } from "@tauri-apps/api";
+import { invoke, window as TauriWindow } from "@tauri-apps/api";
+import type { WindowOptions } from "@tauri-apps/api/window";
 
 import { useAppStore } from "../store/modules/app";
 
 /**
  * @description 创建TG窗口
- * @since Alpha v0.1.2
+ * @since Beta v0.3.4
+ * @see https://github.com/tauri-apps/tauri/issues/5380
  * @param {string} url 窗口地址
  * @param {string} label 窗口标签
  * @param {string} title 窗口标题
@@ -32,29 +34,41 @@ export function createTGWindow(
   // 计算窗口位置
   const left = (window.screen.width - width) / 2;
   const top = (window.screen.height - height) / 2;
-  // https://github.com/tauri-apps/tauri/issues/5380
-  void new TauriWindow.WebviewWindow(label, {
+  const option: WindowOptions = {
     height,
     width,
-    x: left,
-    y: top,
     resizable,
     url,
     title,
     visible,
-  });
-  void new TauriWindow.WindowManager(label).close().then(() => {
-    void new TauriWindow.WebviewWindow(label, {
-      height,
-      width,
-      x: left,
-      y: top,
-      resizable,
-      url,
-      title,
-      visible,
-    });
-  });
+    x: left,
+    y: top,
+  };
+  const isGet = TauriWindow.WebviewWindow.getByLabel(label);
+  if (isGet === null) {
+    invoke("create_window", { label, option })
+      .then(() => {
+        createTGWindow(url, label, title, width, height, resizable, visible);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  } else {
+    isGet
+      .close()
+      .then(() => {
+        invoke("create_window", { label, option })
+          .then(() => {
+            console.log(`[createTGWindow][${label}] ${title} created.`);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
 }
 
 /**
