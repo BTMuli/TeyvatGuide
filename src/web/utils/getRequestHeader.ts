@@ -1,7 +1,7 @@
 /**
  * @file web utils getRequestHeader.ts
  * @description 获取请求头
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  */
 
 import Md5 from "js-md5";
@@ -36,7 +36,7 @@ function getSalt(saltType: string): string {
  * @param {number} max 最大值
  * @returns {number} 随机数
  */
-export function getRandomNumber(min: number, max: number): number {
+function getRandomNumber(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
@@ -46,7 +46,7 @@ export function getRandomNumber(min: number, max: number): number {
  * @param {number} length 字符串长度
  * @returns {string} 随机字符串
  */
-export function getRandomString(length: number): string {
+function getRandomString(length: number): string {
   const str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let res = "";
   for (let i = 0; i < length; i++) {
@@ -110,4 +110,50 @@ export function getRequestHeader(
     ds,
     cookie: transCookie(cookie),
   };
+}
+
+/**
+ * @description 获取 DS
+ * @since Beta v0.3.4
+ * @param {string} saltType salt 类型
+ * @param {number} dsType ds 类型
+ * @param {Record<string, string|number>|string} body
+ * @param {Record<string, string|number>|string} query
+ * @returns {string} DS
+ */
+export function getDS4JS(
+  saltType: string,
+  dsType: 1 | 2,
+  body: undefined,
+  query: undefined,
+): string;
+export function getDS4JS(
+  saltType: string,
+  dsType: 2,
+  body: Record<string, string | number> | string,
+  query: Record<string, string | number> | string,
+): string;
+export function getDS4JS(
+  saltType: string,
+  dsType: 1 | 2,
+  body?: Record<string, string | number> | string,
+  query?: Record<string, string | number> | string,
+): string {
+  const salt = getSalt(saltType);
+  const time = Math.floor(Date.now() / 1000).toString();
+  let random = getRandomNumber(100000, 200000).toString();
+  let hashStr = "";
+  let md5Str = "";
+  if (dsType === 1) {
+    random = getRandomString(6);
+    hashStr = `salt=${salt}&t=${time}&r=${random}`;
+  } else {
+    body = body ?? "";
+    query = query ?? "";
+    const bodyStr = typeof body === "string" ? body : transParams(body);
+    const queryStr = typeof query === "string" ? query : transParams(query);
+    hashStr = `salt=${salt}&t=${time}&r=${random}&b=${bodyStr}&q=${queryStr}`;
+  }
+  md5Str = Md5.md5.update(hashStr).hex();
+  return `${time},${random},${md5Str}`;
 }

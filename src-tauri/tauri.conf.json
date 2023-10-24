@@ -49,7 +49,8 @@
         "unminimize": true,
         "show": true,
         "close": true,
-        "setFocus": true
+        "setFocus": true,
+        "hide": true
       },
       "os": {
         "all": true
@@ -85,7 +86,7 @@
     "security": {
       "dangerousRemoteDomainIpcAccess": [
         {
-          "domain": "api-static.mihoyo.com",
+          "domain": "act.mihoyo.com",
           "windows": ["mhy_client"],
           "enableTauriAPI": true
         },
@@ -130,8 +131,8 @@
         "url": "https://api-static.mihoyo.com/",
         "userAgent": "Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/2.60.1",
         "visible": false,
-        "width": 360,
-        "height": 780,
+        "width": 400,
+        "height": 800,
         "center": true,
         "decorations": false
       }

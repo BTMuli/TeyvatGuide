@@ -5,9 +5,9 @@
  */
 
 import { getAnnoCard } from "./getAnnoCard";
-import { getRequestHeader, getRandomString, getRandomNumber } from "./getRequestHeader";
+import { getRequestHeader } from "./getRequestHeader";
 import { parseAnnoContent } from "./parseAnno";
-import { getServerByUid, transCookie, transParams } from "./tools";
+import { getServerByUid, transCookie } from "./tools";
 
 const TGUtils = {
   Anno: {
@@ -20,9 +20,6 @@ const TGUtils = {
   Tools: {
     getServerByUid,
     transCookie,
-    getRandomString,
-    getRandomNumber,
-    transParams,
   },
 };
 

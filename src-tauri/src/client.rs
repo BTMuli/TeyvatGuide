@@ -21,20 +21,25 @@ fn get_mhy_client_url(func: String) -> WindowUrl {
 
 // 操作米游社客户端
 #[tauri::command]
-pub async fn create_mhy_client(handle: AppHandle, func: String) {
+pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
   let mut mhy_window_config = handle.config().tauri.windows.get(1).unwrap().clone();
-  mhy_window_config.url = get_mhy_client_url(func.clone());
+  // 如果没有传入 url 参数，则使用默认的米游社客户端入口地址
+  if url != "" {
+    mhy_window_config.url = WindowUrl::External(url.parse().unwrap());
+  } else {
+    mhy_window_config.url = get_mhy_client_url(func.clone());
+  }
   let has_mhy_client = handle.get_window("mhy_client").is_some();
   if has_mhy_client {
     dbg!("mhy_client exists");
     return;
   }
+  let mhy_client = WindowBuilder::from_config(&handle, mhy_window_config).build().unwrap();
   let js_bridge = r#"
           window.MiHoYoJSInterface = {
             postMessage: function(arg) { window.__TAURI__.event.emit('post_mhy_client', arg) },
             closePage: function() { this.postMessage('{"method":"closePage"}') },
           };
       "#;
-  let mhy_client = WindowBuilder::from_config(&handle, mhy_window_config).build();
-  mhy_client.unwrap().eval(&js_bridge).ok().unwrap();
+  mhy_client.eval(&js_bridge).ok().unwrap();
 }

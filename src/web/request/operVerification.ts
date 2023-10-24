@@ -1,26 +1,13 @@
 /**
  * @file src web request operVerification.ts
  * @description 验证码操作请求函数
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  */
 
 import { http } from "@tauri-apps/api";
-import { v4 } from "uuid";
 
+import { getDeviceID } from "../../utils/toolFunc";
 import TGUtils from "../utils/TGUtils";
-
-/**
- * @description 获取 deviceId
- * @since Beta v0.3.3
- * @return {string} deviceId
- */
-function getDeviceId(): string {
-  const local = localStorage.getItem("deviceId");
-  if (local) return local;
-  const id = v4();
-  localStorage.setItem("deviceId", id);
-  return id;
-}
 
 /**
  * @description 发起验证请求
@@ -79,7 +66,7 @@ export async function submitVerification(
     "sec-fetch-dest": "empty",
     "sec-fetch-mode": "cors",
     "sec-fetch-site": "same-site",
-    "x-rpc-device_id": getDeviceId(),
+    "x-rpc-device_id": getDeviceID(),
     "x-rpc-page": "3.1.3_#/ys",
   };
   console.log(reqHeader);
