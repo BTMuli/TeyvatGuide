@@ -1,4 +1,4 @@
-name: Publish Release __VERSION__
+name: Publish Release
 on:
   push:
     tags:

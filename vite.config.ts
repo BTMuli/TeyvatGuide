@@ -1,8 +1,9 @@
 /**
  * @file vite.config.ts
  * @description vite 配置文件
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  */
+
 import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vite";
 import vuetify from "vite-plugin-vuetify";
@@ -26,7 +27,7 @@ export default defineConfig({
   envPrefix: ["VITE_", "TAURI_"],
   esbuild: {
     supported: {
-      'top-level-await': true
+      "top-level-await": true,
     },
   },
   build: {
