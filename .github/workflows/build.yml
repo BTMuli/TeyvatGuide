@@ -11,35 +11,30 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows-latest]
-
+        platform: [windows-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
       - name: setup node
         uses: actions/setup-node@v3
         with:
           node-version: 16
-      - name: setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8.6.7
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-      - name: Restore Cargo dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/src-tauri/.cargo/bin/
-            ~/src-tauri/.cargo/registry/index/
-            ~/src-tauri/.cargo/registry/cache/
-            ~/src-tauri/.cargo/git/db/
-            ~/src-tauri/target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
+          cache: "pnpm"
       - name: Install frontend dependencies
-        run: pnpm install --frozen-lockfile
-      - uses: tauri-apps/tauri-action@dev
+        run: pnpm install
+
+      - name: Build app
+        uses: tauri-apps/tauri-action@dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         #          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}

@@ -76,12 +76,13 @@
         "icons/icon.png"
       ],
       "identifier": "TeyvatGuide",
-      "targets": ["msi"],
+      "targets": ["msi", "app", "dmg"],
       "windows": {
         "wix": {
           "language": "zh-CN"
         }
-      }
+      },
+      "macOS": {}
     },
     "security": {
       "dangerousRemoteDomainIpcAccess": [
