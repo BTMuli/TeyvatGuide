@@ -116,7 +116,7 @@
               class="side-item-user"
               title="登录"
               @click="login"
-              v-show="userStore.cookie?.game_token !== ''"
+              v-show="userStore.cookie?.game_token === ''"
             >
               <template #prepend>
                 <img src="/source/UI/defaultUser.webp" class="side-icon-user" alt="login" />
