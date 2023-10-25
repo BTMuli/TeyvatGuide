@@ -207,6 +207,7 @@ async function switchTheme(): Promise<void> {
 }
 
 async function openClient(func: string): Promise<void> {
+  if (userStore.cookie.game_token === "") return login();
   await mhyClient.open(func);
 }
 
