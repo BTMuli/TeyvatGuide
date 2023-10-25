@@ -30,6 +30,10 @@ jobs:
         with:
           node-version: 16
           cache: "pnpm"
+      - name: setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.9.2
       - name: Install frontend dependencies
         run: pnpm install
 
