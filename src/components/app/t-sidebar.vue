@@ -93,16 +93,37 @@
         </v-list-item>
       </v-list-group>
       <div class="bottom-menu">
-        <v-list-item>
-          <template #prepend>
-            <img :src="userInfo.avatar" alt="userIcon" class="side-icon" />
+        <v-menu open-on-click location="end">
+          <template #activator="{ props }">
+            <v-list-item :title="userInfo.nickname" v-bind="props">
+              <template #prepend>
+                <img :src="userInfo.avatar" alt="userIcon" class="side-icon" />
+              </template>
+            </v-list-item>
           </template>
-          <template #default>
-            <v-list-item-title>
-              {{ userInfo.nickname }}
-            </v-list-item-title>
-          </template>
-        </v-list-item>
+          <v-list class="side-list-user" density="compact" :nav="true">
+            <v-list-item class="side-item-user" title="签到" @click="openClient('sign_in')">
+              <template #prepend>
+                <img src="/source/UI/userGacha.webp" class="side-icon-user" alt="sing_in" />
+              </template>
+            </v-list-item>
+            <v-list-item class="side-item-user" title="战绩" @click="openClient('game_record')">
+              <template #prepend>
+                <img src="/source/UI/userRecord.webp" class="side-icon-user" alt="game_record" />
+              </template>
+            </v-list-item>
+            <v-list-item
+              class="side-item-user"
+              title="登录"
+              @click="login"
+              v-show="userStore.cookie?.game_token !== ''"
+            >
+              <template #prepend>
+                <img src="/source/UI/defaultUser.webp" class="side-icon-user" alt="login" />
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-menu>
         <v-list-item :title="themeTitle" @click="switchTheme()">
           <template #prepend>
             <v-icon>
@@ -126,6 +147,8 @@ import { computed, onMounted, ref } from "vue";
 
 import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
+import mhyClient from "../../utils/TGClient";
+import showSnackbar from "../func/snackbar";
 
 const appStore = useAppStore();
 const userStore = useUserStore();
@@ -169,6 +192,7 @@ function collapse(): void {
 
 onMounted(async () => {
   await listenOnTheme();
+  await mhyClient.run();
 });
 
 async function listenOnTheme(): Promise<void> {
@@ -180,6 +204,16 @@ async function listenOnTheme(): Promise<void> {
 
 async function switchTheme(): Promise<void> {
   await event.emit("readTheme", themeGet.value === "default" ? "dark" : "default");
+}
+
+async function openClient(func: string): Promise<void> {
+  await mhyClient.open(func);
+}
+
+function login(): void {
+  showSnackbar({
+    text: "请前往设置页面扫码登录",
+  });
 }
 </script>
 
@@ -207,10 +241,20 @@ async function switchTheme(): Promise<void> {
   margin-right: 32px;
 }
 
-.side-icon-mini {
-  width: 36px;
-  height: 36px;
-  margin-right: 20px;
-  transform: translateX(-6px);
+.side-list-user {
+  background: var(--app-side-bg) !important;
+  color: var(--app-side-content) !important;
+  font-family: var(--font-title);
+}
+
+.side-item-user {
+  border: 1px solid var(--common-shadow-2);
+  background: var(--box-bg-1);
+}
+
+.side-icon-user {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
 }
 </style>

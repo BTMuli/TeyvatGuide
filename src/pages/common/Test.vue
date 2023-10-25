@@ -19,7 +19,8 @@
     </div>
     <h1>窗口建立测试</h1>
     <div class="btn-list">
-      <v-btn class="test-btn" @click="tryNewWindow">创建新窗口</v-btn>
+      <v-btn class="test-btn" @click="tryNewWindow('sign_in')">SignIn</v-btn>
+      <v-btn class="test-btn" @click="tryNewWindow('game_record')">GameRecord</v-btn>
     </div>
   </div>
 </template>
@@ -40,9 +41,8 @@ async function getGC(): Promise<void> {
   await showGeetest();
 }
 
-async function tryNewWindow(): Promise<void> {
-  await mhyClient.open("sign_in");
-  // await mhyClient.open("game_record");
+async function tryNewWindow(func: string): Promise<void> {
+  await mhyClient.open(func);
 }
 </script>
 <style lang="css" scoped>
