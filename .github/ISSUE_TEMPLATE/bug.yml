@@ -18,24 +18,24 @@ body:
   - type: checkboxes
     attributes:
       label: Issue重复性检查
-      description: 我确认没有查找过相关的 Issue
+      description: 我确认查找过相关的 Issue
       options:
-        - label: 我确认没有查找过相关的 Issue
-          required: false
+        - label: 我确认查找过相关的 Issue
+          required: true
   - type: checkboxes
     attributes:
       label: 问题必要性检查
-      description: 我确认这个问题是无用且不必要的
+      description: 我确认这个问题是影响使用的
       options:
-        - label: 我确认这个问题是无用且不必要的
-          required: false
+        - label: 我确认这个问题是影响使用的
+          required: true
   - type: checkboxes
     attributes:
       label: 提问的艺术
-      description: 我没有阅读过[提问的艺术](https://github.com/betaseeker/How-To-Ask-Questions)
+      description: 我阅读过[提问的艺术](https://github.com/betaseeker/How-To-Ask-Questions)
       options:
-        - label: 我没有阅读过[提问的艺术](https://github.com/betaseeker/How-To-Ask-Questions)
-          required: false
+        - label: 我阅读过[提问的艺术](https://github.com/betaseeker/How-To-Ask-Questions)
+          required: true
   - type: textarea
     id: description
     attributes:
@@ -49,7 +49,7 @@ body:
     attributes:
       label: 当前使用版本
       description: 请填写当前使用版本
-      placeholder: 如 Alpha v0.2.0
+      placeholder: 如 Beta v0.3.4
     validations:
       required: true
   - type: textarea
@@ -67,4 +67,4 @@ body:
       description: 请填写其他信息
       placeholder: 请填写其他信息
     validations:
-      required: true
+      required: false
