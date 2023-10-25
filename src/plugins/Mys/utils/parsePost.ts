@@ -65,12 +65,8 @@ function getVodTime(duration: number): string {
   if (hours > 0) {
     result += `${hours.toString().padStart(2, "0")}:`;
   }
-  if (minutes > 0) {
-    result += `${minutes.toString().padStart(2, "0")}:`;
-  }
-  if (seconds > 0) {
-    result += `${seconds.toString().padStart(2, "0")}`;
-  }
+  result += `${minutes.toString().padStart(2, "0")}:`;
+  result += `${seconds.toString().padStart(2, "0")}`;
   return result;
 }
 

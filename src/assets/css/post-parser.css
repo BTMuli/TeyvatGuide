@@ -81,12 +81,17 @@
   width: 800px;
   height: 450px;
   border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--common-shadow-2);
+  overflow: hidden;
 }
 
 :deep(.mys-post-vod-cover) {
-  width: 800px;
-  height: 450px;
-  border-radius: 10px;
+  max-width: 800px;
+  max-height: 450px;
+  object-fit: contain;
 }
 
 :deep(.mys-post-vod-icon) {
@@ -104,7 +109,7 @@
   position: absolute;
   right: 10px;
   bottom: 10px;
-  padding: 5px;
+  padding: 0 5px;
   border-radius: 5px;
   background: rgba(0, 0, 0, 0.5);
   color: #ffffff;
