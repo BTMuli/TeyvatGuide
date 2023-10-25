@@ -331,7 +331,7 @@ class TGClient {
   async getDS(dsType: 2, callback: string, payload: any): Promise<void>;
   async getDS(dsType: 1 | 2, callback: string, payload?: any): Promise<void> {
     const saltType = dsType === 1 ? "lk2" : "common";
-    let ds = "";
+    let ds: string;
     if (dsType === 2) {
       const { body, query } = payload;
       ds = getDS4JS(saltType, dsType, body, query);

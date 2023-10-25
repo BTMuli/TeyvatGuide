@@ -142,8 +142,7 @@ export function getDS4JS(
   const salt = getSalt(saltType);
   const time = Math.floor(Date.now() / 1000).toString();
   let random = getRandomNumber(100000, 200000).toString();
-  let hashStr = "";
-  let md5Str = "";
+  let hashStr: string;
   if (dsType === 1) {
     random = getRandomString(6);
     hashStr = `salt=${salt}&t=${time}&r=${random}`;
@@ -154,6 +153,6 @@ export function getDS4JS(
     const queryStr = typeof query === "string" ? query : transParams(query);
     hashStr = `salt=${salt}&t=${time}&r=${random}&b=${bodyStr}&q=${queryStr}`;
   }
-  md5Str = Md5.md5.update(hashStr).hex();
+  const md5Str = Md5.md5.update(hashStr).hex();
   return `${time},${random},${md5Str}`;
 }
