@@ -2,7 +2,6 @@ name: 开发目标（开发人员）
 description: 用于开发人员 Issue 的模板
 title: "[TODO] "
 labels:
-  - 计划中
   - 新特性
 assignees:
   - BTMuli
@@ -28,7 +27,7 @@ body:
     attributes:
       label: 预期版本
       description: 请填写预期版本
-      placeholder: 如 Alpha v0.2.0
+      placeholder: 如 Beta v0.3.x
     validations:
       required: true
   - type: input
@@ -36,7 +35,7 @@ body:
     attributes:
       label: 当前提交
       description: 请填写当前提交
-      placeholder: 如 0.2.0
+      placeholder: 如 Beta v0.3.4
     validations:
       required: true
   - type: textarea
