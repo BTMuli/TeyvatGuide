@@ -89,7 +89,7 @@ declare namespace TGApp.BBS.Response {
    * @since Alpha v0.1.5
    * @extends Base
    * @property {TGApp.BBS.Account.VerifySTokenInfo} data.user_info - 用户信息
-   * @property {unknown} data.realname_info - 实名信息 // todo: 未知类型
+   * @property {unknown} data.realname_info - 实名信息
    * @property {boolean} data.need_realperson - 是否需要实名认证
    * @return verifyUserInfoBySToken
    */
@@ -120,7 +120,7 @@ declare namespace TGApp.BBS.Response {
    * @property {number} token.token_type - token 类型
    * @property {string} token.token - token 值
    * @property {TGApp.BBS.Account.getStokenByGameTokenInfo} user_info - 用户信息
-   * @property {unknown} realname_info - 实名信息 // todo: 未知类型
+   * @property {unknown} realname_info - 实名信息
    * @property {boolean} need_realperson - 是否需要实名认证
    * @return getStokenByGameToken
    */

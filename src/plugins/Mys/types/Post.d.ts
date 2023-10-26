@@ -272,7 +272,6 @@ declare namespace TGApp.Plugins.Mys.Post {
   /**
    * @description help_sys 信息
    * @since Alpha v0.2.1
-   * @todo 用处未知
    * @interface HelpSys
    * @property {unknown} top_up 置顶, 可能为 null
    * @property {unknown[]} top_n 置顶, 可能为空

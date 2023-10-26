@@ -15,7 +15,6 @@ declare module "*.vue" {
  * @description vue-json-viewer
  * @package vue-json-viewer
  * @version 3.0.4
- * @todo 仅声明了用到的属性
  */
 declare module "vue-json-viewer" {
   import type { DefineComponent } from "vue";

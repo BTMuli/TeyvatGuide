@@ -36,7 +36,7 @@ declare namespace TGApp.Plugins.Mys.Obc {
    * @property {number} depth 深度
    * @property {string} ch_ext 结构化扩展信息
    * @property {Obc[]} children 子节点，可以递归
-   * @property {unknown[]} list 列表 // todo: 未知类型
+   * @property {unknown[]} list 列表
    * @return Data
    */
   export interface Data {
