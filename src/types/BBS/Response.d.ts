@@ -1,10 +1,15 @@
 /**
- * @file types BBS Tokens.d.ts
+ * @file types/BBS/Response.d.ts
  * @description BBS 返回数据类型定义文件
- * @author BTMuli< bt-muli@outlook.com>
- * @since Beta v0.3.0
+ * @since Beta v0.3.4
  */
 
+/**
+ * @description BBS 返回数据类型定义
+ * @since Beta v0.3.4
+ * @namespace TGApp.BBS.Response
+ * @memberof TGApp.BBS
+ */
 declare namespace TGApp.BBS.Response {
   /**
    * @description 基础返回类型，设计米游社接口请求都是这个类型
@@ -15,7 +20,7 @@ declare namespace TGApp.BBS.Response {
    * @property {any} data - 响应数据
    * @return Base
    */
-  export interface Base {
+  interface Base {
     retcode: number;
     message: string;
     data: any;
@@ -29,7 +34,7 @@ declare namespace TGApp.BBS.Response {
    * @property {string} token - token 值
    * @return getTokensRes
    */
-  export interface getTokensRes {
+  interface getTokensRes {
     name: string;
     token: string;
   }
@@ -42,7 +47,7 @@ declare namespace TGApp.BBS.Response {
    * @property {getTokensRes[]} data.list - token 列表
    * @return getTokens
    */
-  export interface getTokens extends Base {
+  interface getTokens extends Base {
     data: {
       list: getTokensRes[];
     };
@@ -56,7 +61,7 @@ declare namespace TGApp.BBS.Response {
    * @property {string} data.ltoken - ltoken 值
    * @return getLTokenBySToken
    */
-  export interface getLTokenBySToken extends Base {
+  interface getLTokenBySToken extends Base {
     data: {
       ltoken: string;
     };
@@ -71,7 +76,7 @@ declare namespace TGApp.BBS.Response {
    * @property {string} data.cookie_token - cookie_token 值
    * @return getCookieTokenBySToken
    */
-  export interface getCookieTokenBySToken extends Base {
+  interface getCookieTokenBySToken extends Base {
     data: {
       uid: string;
       cookie_token: string;
@@ -88,7 +93,7 @@ declare namespace TGApp.BBS.Response {
    * @property {boolean} data.need_realperson - 是否需要实名认证
    * @return verifyUserInfoBySToken
    */
-  export interface verifyUserInfoBySToken extends Base {
+  interface verifyUserInfoBySToken extends Base {
     data: {
       user_info: TGApp.BBS.Account.VerifySTokenInfo;
       realname_info: unknown;
@@ -104,7 +109,7 @@ declare namespace TGApp.BBS.Response {
    * @property {getStokenByGameTokenData} data - 返回数据
    * @return getStokenByGameToken
    */
-  export interface getStokenByGameToken extends Base {
+  interface getStokenByGameToken extends Base {
     data: getStokenByGameTokenData;
   }
 
@@ -119,7 +124,7 @@ declare namespace TGApp.BBS.Response {
    * @property {boolean} need_realperson - 是否需要实名认证
    * @return getStokenByGameToken
    */
-  export interface getStokenByGameTokenData {
+  interface getStokenByGameTokenData {
     token: {
       token_type: number;
       token: string;
@@ -138,10 +143,28 @@ declare namespace TGApp.BBS.Response {
    * @property {string} data.cookie_token - cookie_token 值
    * @return getCookieTokenByGameToken
    */
-  export interface getCookieTokenByGameToken extends Base {
+  interface getCookieTokenByGameToken extends Base {
     data: {
       uid: string;
       cookie_token: string;
+    };
+  }
+
+  /**
+   * @description 通过 sToken 获取 actionTicket 的返回类型
+   * @interface getActionTicketBySToken
+   * @since Beta v0.3.4
+   * @extends Base
+   * @property {string} data.ticket - actionTicket 值
+   * @property {boolean} data.is_verified - 是否验证
+   * @property {TGApp.BBS.Account.getActionTicketBySTokenInfo} data.account_info - 用户信息
+   * @return getActionTicketBySToken
+   */
+  interface getActionTicketBySToken extends Base {
+    data: {
+      ticket: string;
+      is_verified: boolean;
+      account_info: TGApp.BBS.Account.getActionTicketBySTokenInfo;
     };
   }
 }

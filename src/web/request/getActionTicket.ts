@@ -11,19 +11,18 @@ import TGUtils from "../utils/TGUtils";
 /**
  * @description 通过 stoken 获取 ActionTicket
  * @since Beta v0.3.4
- * @todo 类型完善
  * @param {string} ActionType 动作类型
  * @param {string} SToken stoken
  * @param {string} MID 用户 MID
  * @param {string} UID 用户 UID
- * @returns {Promise<TGApp.BBS.Response.Base>}
+ * @returns {Promise<TGApp.BBS.Response.getActionTicketBySToken>}
  */
 export async function getActionTicketBySToken(
   ActionType: string,
   SToken: string,
   MID: string,
   UID: string,
-): Promise<TGApp.BBS.Response.Base> {
+): Promise<TGApp.BBS.Response.getActionTicketBySToken> {
   const url = "https://api-takumi.mihoyo.com/auth/api/getActionTicketBySToken";
   const params = {
     action_type: ActionType,
@@ -36,7 +35,7 @@ export async function getActionTicketBySToken(
   };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "k2");
   return await http
-    .fetch<TGApp.BBS.Response.Base>(url, {
+    .fetch<TGApp.BBS.Response.getActionTicketBySToken>(url, {
       method: "GET",
       headers: header,
       query: params,
