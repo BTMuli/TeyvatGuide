@@ -169,7 +169,6 @@ function getContents(day: number): void {
 }
 
 async function share(): Promise<void> {
-  // todo 唤起外部 loading
   const div = <HTMLElement>document.querySelector(".calendar-box");
   const showType = switchType.value === "avatar" ? "角色" : "武器";
   const title = `【今日素材】${showType}${btnNow.value}`;
