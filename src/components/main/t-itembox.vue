@@ -211,7 +211,10 @@ const props = defineProps<TItemBoxProps>();
 .tib-outer {
   position: absolute;
   bottom: 0;
+  display: flex;
   width: 100%;
+  align-items: center;
+  justify-content: center;
   color: var(--common-text-title);
   text-align: center;
 }
