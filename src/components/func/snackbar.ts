@@ -1,7 +1,7 @@
 /**
  * @file component func snackbar.ts
  * @description 封装 vuetify 的 snackbar 组件，通过函数调用的方式，简化 snackbar 的使用
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  */
 
 import type { ComponentInternalInstance, VNode } from "vue";
@@ -20,7 +20,7 @@ const snackbarId = "tg-func-snackbar";
  */
 interface SnackbarInstance extends ComponentInternalInstance {
   exposeProxy: {
-    displayBox: typeof TGApp.Component.Snackbar.displayBox;
+    displayBox: (props: TGApp.Component.Snackbar.Params) => void;
   };
 }
 

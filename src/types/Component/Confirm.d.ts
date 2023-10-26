@@ -1,7 +1,7 @@
 /**
  * @file types Component Confirm.d.ts
  * @description Component Confirm 类型声明文件
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  */
 
 declare namespace TGApp.Component.Confirm {
@@ -53,13 +53,4 @@ declare namespace TGApp.Component.Confirm {
    * @return Params
    */
   type Params = ParamsConfirm | ParamsInput;
-
-  /**
-   * @description Confirm 方法 - displayBox
-   * @since Beta v0.3.3
-   * @function displayBox
-   * @param {Params} props
-   * @return string | boolean
-   */
-  function displayBox(props: Params): boolean | string;
 }

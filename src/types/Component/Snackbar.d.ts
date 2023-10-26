@@ -1,7 +1,7 @@
 /**
  * @file types Component Snackbar.d.ts
  * @description Component Snackbar 类型声明文件
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  */
 
 declare namespace TGApp.Component.Snackbar {
@@ -20,13 +20,4 @@ declare namespace TGApp.Component.Snackbar {
     color?: string;
     timeout?: number;
   }
-
-  /**
-   * @description Snackbar 方法 - displayBox
-   * @since Beta v0.3.3
-   * @function displayBox
-   * @param {Params} props
-   * @return void
-   */
-  function displayBox(props: Params): void;
 }

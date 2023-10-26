@@ -13,14 +13,14 @@ const confirmId = "tg-func-confirm";
 
 /**
  * @description 自定义 confirm 组件
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  * @extends ComponentInternalInstance
  * @property {Function} exposeProxy.displayBox 显示 confirm
  * @return ConfirmInstance
  */
 interface ConfirmInstance extends ComponentInternalInstance {
   exposeProxy: {
-    displayBox: typeof TGApp.Component.Confirm.displayBox;
+    displayBox: (props: TGApp.Component.Confirm.Params) => Promise<string | boolean>;
   };
 }
 
@@ -41,7 +41,7 @@ async function showConfirm(props: TGApp.Component.Confirm.Params): Promise<strin
 async function showConfirm(props: TGApp.Component.Confirm.Params): Promise<string | boolean> {
   if (confirmInstance !== undefined) {
     const boxVue = <ConfirmInstance>confirmInstance.component;
-    return boxVue.exposeProxy.displayBox(props);
+    return await boxVue.exposeProxy.displayBox(props);
   } else {
     confirmInstance = renderBox(props);
     return await showConfirm(props);
