@@ -355,7 +355,7 @@ class TGClient {
     const user = useUserStore();
     const cookieToken = user.cookie.cookie_token;
     const accountId = user.cookie.account_id;
-    const userInfo = await TGRequest.User.byCookie.getUserInfo(cookieToken, accountId, true);
+    const userInfo = await TGRequest.User.byCookie.getUserInfo(cookieToken, accountId);
     if ("retcode" in userInfo) {
       console.error(`[${callback}] ${userInfo.message}`);
       return;

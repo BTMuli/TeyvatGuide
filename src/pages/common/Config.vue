@@ -302,14 +302,20 @@ async function confirmRefreshUser(): Promise<void> {
     failCount++;
   }
   await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
-  const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id, false);
+  const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
   if ("retcode" in infoRes) {
     console.error(infoRes);
     loadingTitle.value = "获取失败!正在获取用户游戏账号信息";
     failCount++;
   } else {
-    userStore.setBriefInfo(infoRes);
-    await TGSqlite.saveAppData("userInfo", JSON.stringify(infoRes));
+    const briefInfo: TGApp.App.Account.BriefInfo = {
+      nickname: infoRes.nickname,
+      uid: infoRes.uid,
+      avatar: infoRes.avatar_url,
+      desc: infoRes.introduce,
+    };
+    userStore.setBriefInfo(briefInfo);
+    await TGSqlite.saveAppData("userInfo", JSON.stringify(briefInfo));
     loadingTitle.value = "获取成功!正在获取用户游戏账号信息";
   }
   const accountRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);
