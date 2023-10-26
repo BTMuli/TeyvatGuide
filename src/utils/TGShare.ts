@@ -75,7 +75,7 @@ function getShareImgBgColor(): string {
 
 /**
  * @description 生成分享截图
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
@@ -85,7 +85,7 @@ function getShareImgBgColor(): string {
 export async function generateShareImg(
   fileName: string,
   element: HTMLElement,
-  scale: number = 1.0,
+  scale: number = 0.98,
   offset: number = 30,
 ): Promise<void> {
   const canvas = document.createElement("canvas");
@@ -103,7 +103,7 @@ export async function generateShareImg(
     canvas,
     x: (-offset / 2) * scale,
     y: (-offset / 2) * scale,
-    dpi: window.devicePixelRatio > 1 ? 300 : 96,
+    dpi: 350,
   };
   const canvasData = await html2canvas(element, opts);
   try {
