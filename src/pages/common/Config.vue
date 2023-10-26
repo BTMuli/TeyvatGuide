@@ -104,7 +104,7 @@
     <v-list-item prepend-icon="mdi-database-export" title="数据备份" @click="confirmBackup" />
     <v-list-item prepend-icon="mdi-database-import" title="数据恢复" @click="confirmRestore" />
     <v-list-item prepend-icon="mdi-database-arrow-up" title="数据更新" @click="confirmUpdate()" />
-    <v-list-subheader :inset="true" class="config-header" title="调试" />
+    <v-list-subheader :inset="true" class="config-header" title="调试" @click="tryShowReset" />
     <v-divider :inset="true" class="border-opacity-75" />
     <v-list-item
       v-if="isDevEnv"
@@ -124,14 +124,10 @@
     </v-list-item>
     <v-list-item prepend-icon="mdi-database-remove" title="清除用户缓存" @click="confirmDelUC" />
     <v-list-item
+      v-show="showReset"
       title="重置数据库"
       prepend-icon="mdi-database-settings"
       @click="confirmResetDB()"
-    />
-    <v-list-item
-      title="检测 SQLite 数据库完整性"
-      prepend-icon="mdi-database-check"
-      @click="confirmCheckDB"
     />
     <v-list-item prepend-icon="mdi-cog-sync" title="恢复默认设置" @click="confirmResetApp" />
     <v-list-subheader :inset="true" class="config-header" title="路径" />
@@ -162,6 +158,7 @@ import { useAchievementsStore } from "../../store/modules/achievements";
 import { useAppStore } from "../../store/modules/app";
 import { useHomeStore } from "../../store/modules/home";
 import { useUserStore } from "../../store/modules/user";
+import { getBuildTime } from "../../utils/TGBuild";
 import { backupUiafData, restoreUiafData } from "../../utils/UIAF";
 import TGRequest from "../../web/request/TGRequest";
 import { backupAbyssData, backupCookieData } from "../../web/utils/backupData";
@@ -196,6 +193,7 @@ const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载...");
 const loadingSub = ref<string>("");
 const scan = ref<boolean>(false);
+const showReset = ref<boolean>(false);
 
 // data
 const showHome = ref<string[]>(homeStore.getShowValue());
@@ -304,7 +302,7 @@ async function confirmRefreshUser(): Promise<void> {
     failCount++;
   }
   await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
-  const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
+  const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id, false);
   if ("retcode" in infoRes) {
     console.error(infoRes);
     loadingTitle.value = "获取失败!正在获取用户游戏账号信息";
@@ -475,6 +473,28 @@ async function confirmResetApp(): Promise<void> {
   }, 1500);
 }
 
+// 前置
+async function tryShowReset(): Promise<void> {
+  const res = await showConfirm({
+    title: "请输入验证 Code",
+    text: "请联系开发者获取",
+    mode: "input",
+  });
+  const time = getBuildTime();
+  const code = time.startsWith("dev.") ? "dev" : time;
+  if (res === code) {
+    showReset.value = true;
+    showSnackbar({
+      text: "已开启重置数据库选项",
+    });
+  } else {
+    showSnackbar({
+      color: "error",
+      text: "验证失败",
+    });
+  }
+}
+
 // 重置数据库
 async function confirmResetDB(title?: string): Promise<void> {
   const res = await showConfirm({
@@ -498,45 +518,6 @@ async function confirmResetDB(title?: string): Promise<void> {
   setTimeout(() => {
     window.location.reload();
   }, 1500);
-}
-
-// 检测数据库完整性
-async function confirmCheckDB(): Promise<void> {
-  const resConfirm = await showConfirm({
-    title: "确认检测数据库完整性吗？",
-  });
-  if (!resConfirm) {
-    showSnackbar({
-      color: "grey",
-      text: "已取消检测",
-    });
-    return;
-  }
-  loadingTitle.value = "正在检查数据库表单完整性...";
-  loading.value = true;
-  const res = await TGSqlite.check();
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  if (!res) {
-    loading.value = false;
-    await confirmResetDB("数据库表单不完整，是否重置数据库？");
-  } else {
-    const appVersion = await app.getVersion();
-    const dbVersion = dbInfo.value.find((item) => item.key === "appVersion")?.value;
-    const dbUpdatedTime = dbInfo.value.find((item) => item.key === "dataUpdated")?.value;
-    loading.value = false;
-    if (!dbVersion || dbVersion < appVersion) {
-      await confirmUpdate("数据库版本过低，是否更新数据库？");
-      return;
-    } else if (!buildTime.value.startsWith("dev")) {
-      if (!dbUpdatedTime || dbUpdatedTime.startsWith("dev") || dbUpdatedTime < buildTime.value) {
-        await confirmUpdate("数据库可能过时，是否更新数据库？");
-        return;
-      }
-    }
-    showSnackbar({
-      text: "数据库已是最新!",
-    });
-  }
 }
 
 // 开启 dev 模式
