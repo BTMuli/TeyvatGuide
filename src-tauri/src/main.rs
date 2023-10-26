@@ -68,6 +68,22 @@ async fn create_window(app_handle: tauri::AppHandle, label: String, mut option: 
   window_new.unwrap();
 }
 
+// 读取目录大小
+#[tauri::command]
+async fn get_dir_size(path: String) -> u64 {
+  dbg!(&path);
+  let walk_dir = walkdir::WalkDir::new(path);
+  let mut size = 0;
+  for entry in walk_dir {
+    let entry = entry.unwrap();
+    let file_type = entry.file_type();
+    if file_type.is_file() {
+      size += entry.metadata().unwrap().len();
+    }
+  }
+  size
+}
+
 fn main() {
   tauri_plugin_deep_link::prepare("teyvatguide");
   tauri::Builder::default()
@@ -95,6 +111,7 @@ fn main() {
       init_app,
       execute_js,
       create_window,
+      get_dir_size,
       client::create_mhy_client,
     ])
     .setup(|_app| {

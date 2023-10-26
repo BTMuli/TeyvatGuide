@@ -17,6 +17,7 @@
         "all": false,
         "exists": true,
         "readFile": true,
+        "readDir": true,
         "writeFile": true,
         "createDir": true,
         "removeDir": true,
@@ -57,7 +58,7 @@
       },
       "process": {
         "all": false,
-        "relaunch": true
+        "exit": true
       }
     },
     "bundle": {

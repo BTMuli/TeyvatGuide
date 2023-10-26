@@ -146,8 +146,8 @@
 </template>
 
 <script lang="ts" setup>
-import { app, fs, os } from "@tauri-apps/api";
-import { relaunch } from "@tauri-apps/api/process";
+import { app, fs, invoke, os } from "@tauri-apps/api";
+import { exit } from "@tauri-apps/api/process";
 import { computed, onMounted, ref } from "vue";
 
 import showConfirm from "../../components/func/confirm";
@@ -160,6 +160,7 @@ import { useAppStore } from "../../store/modules/app";
 import { useHomeStore } from "../../store/modules/home";
 import { useUserStore } from "../../store/modules/user";
 import { getBuildTime } from "../../utils/TGBuild";
+import { bytesToSize, getCacheDir } from "../../utils/toolFunc";
 import { backupUiafData, restoreUiafData } from "../../utils/UIAF";
 import TGRequest from "../../web/request/TGRequest";
 import { backupAbyssData, backupCookieData } from "../../web/utils/backupData";
@@ -439,31 +440,54 @@ async function confirmUpdate(title?: string): Promise<void> {
 
 // 清除用户缓存
 async function confirmDelCache(): Promise<void> {
+  const CacheDir = await getCacheDir();
+  if (CacheDir === false) {
+    showSnackbar({
+      color: "error",
+      text: "不支持的平台!",
+    });
+    return;
+  }
+  let cacheBSize: number = 0;
+  loadingTitle.value = "正在检测缓存...";
+  loadingSub.value = "耗时较久，请稍作等候";
+  loading.value = true;
+  const timeStart = Date.now();
+  if (Array.isArray(CacheDir)) {
+    for (const dir of CacheDir) {
+      const size: number = await invoke("get_dir_size", { path: dir });
+      cacheBSize += size;
+    }
+  } else {
+    cacheBSize = await invoke("get_dir_size", { path: CacheDir });
+  }
+  let cacheSize = bytesToSize(cacheBSize);
+  loading.value = false;
+  const timeEnd = Date.now();
   const res = await showConfirm({
     title: "确认清除缓存吗？",
-    text: "只删除 Webview 缓存，不处理用户数据",
+    text: `当前缓存大小为 ${cacheSize}，耗时 ${timeEnd - timeStart} 毫秒`,
   });
-  if (!res) {
+  if (res === false) {
     showSnackbar({
       color: "grey",
       text: "已取消清除缓存",
     });
     return;
   }
-  await fs.removeDir("EBWebview\\Default\\Cache", {
-    dir: fs.BaseDirectory.AppLocalData,
-    recursive: true,
-  });
-  await fs.removeDir("EBWebview\\Default\\Code Cache", {
-    dir: fs.BaseDirectory.AppLocalData,
-    recursive: true,
-  });
+  if (Array.isArray(CacheDir)) {
+    for (const dir of CacheDir) {
+      await fs.removeDir(dir, { recursive: true });
+    }
+  } else {
+    await fs.removeDir(CacheDir, { recursive: true });
+  }
   showSnackbar({
-    text: "缓存已清除!即将重启应用...",
+    text: "缓存已清除!请重新启动应用！",
   });
   await new Promise(() => {
     setTimeout(async () => {
-      await relaunch();
+      await exit();
     }, 1500);
   });
 }
