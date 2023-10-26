@@ -1,7 +1,7 @@
 /**
- * @file utils UIAF.ts
+ * @file utils/UIAF.ts
  * @description UIAF工具类
- * @since Alpha v0.2.3
+ * @since Beta v0.3.4
  */
 
 import { app, fs, path } from "@tauri-apps/api";
@@ -29,12 +29,12 @@ export function getUiafStatus(completed: boolean, progress: number): number {
 
 /**
  * @description 获取 UIAF 头部信息
- * @since Alpha v0.1.3
+ * @since Beta v0.3.4
  * @returns {Promise<TGApp.Plugins.UIAF.Export>}
  */
 export async function getUiafHeader(): Promise<TGApp.Plugins.UIAF.Export> {
   return {
-    export_app: "Tauri.Genshin",
+    export_app: "TeyvatGuide",
     export_timestamp: Math.floor(Date.now() / 1000),
     export_app_version: await app.getVersion(),
     uiaf_version: "v1.1",

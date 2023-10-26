@@ -1,8 +1,7 @@
 /**
- * @file types App Achievement.d.ts
+ * @file types/App/Achievement.d.ts
  * @description 应用成就相关类型定义文件
- * @todo https://github.com/BTMuli/Tauri.Genshin/issues/19
- * @author BTMuli<bt-muli@outlook.com>
+ * @todo https://github.com/BTMuli/TeyvatGuide/issues/19
  * @since Alpha v0.1.5
  */
 
@@ -20,7 +19,7 @@ declare namespace TGApp.App.Achievement {
    * @property {string} version - 成就版本
    * @return Item
    */
-  export interface Item {
+  interface Item {
     id: number;
     series: number;
     order: number;
@@ -41,7 +40,7 @@ declare namespace TGApp.App.Achievement {
    * @property {string} icon - 成就系列图标
    * @return Series
    */
-  export interface Series {
+  interface Series {
     id: number;
     order: number;
     name: string;

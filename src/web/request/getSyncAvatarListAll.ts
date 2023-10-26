@@ -1,7 +1,7 @@
 /**
- * @file web request getSyncAvatarListAll.ts
+ * @file web/request/getSyncAvatarListAll.ts
  * @description 获取同步角色列表请求
- * @since Alpha v0.2.3
+ * @since Beta v0.3.4
  */
 
 import { app, http } from "@tauri-apps/api";
@@ -11,7 +11,7 @@ import TGUtils from "../utils/TGUtils";
 
 /**
  * @description 获取同步角色列表请求
- * @since Alpha v0.2.3
+ * @since Beta v0.3.4
  * @param {Record<string,string>} cookie cookie
  * @param {string} uid 用户 uid
  * @param {number} page 页码
@@ -30,7 +30,7 @@ async function getSyncAvatarList(
   };
   const version = await app.getVersion();
   const header = {
-    "User-Agent": `Tauri.Genshin/${version}`,
+    "User-Agent": `TeyvatGuide/${version}`,
     Referer: "https://webstatic.mihoyo.com/",
     Cookie: TGUtils.Tools.transCookie(cookie),
   };
@@ -41,8 +41,8 @@ async function getSyncAvatarList(
       headers: header,
     })
     .then((res) => {
-      if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
-      return <TGApp.Game.Calculate.AvatarListItem[]>res.data.data.list;
+      if (res.data.retcode !== 0) return res.data;
+      return res.data.data.list;
     });
 }
 

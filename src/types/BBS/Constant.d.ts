@@ -1,7 +1,6 @@
 /**
- * @file types BBS Constant.d.ts
+ * @file types/BBS/Constant.d.ts
  * @description BBS 常量相关类型定义文件
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.6
  */
 
@@ -28,12 +27,12 @@ declare namespace TGApp.BBS.Constant {
    * @property {string} stoken stoken
    * @property {string} stuid stoken 对应的 uid
    * @description stoken_v2 与 mid 一起使用，这是新版本的 token
-   * @see https://github.com/BTMuli/Tauri.Genshin/issues/18
+   * @see https://github.com/BTMuli/TeyvatGuide/issues/18
    * @property {string} stoken_v2 stoken_v2
    * @property {string} mid mid
    * @return Cookie
    */
-  export interface Cookie {
+  interface Cookie {
     login_ticket: string;
     login_uid: string;
     account_id: string;
@@ -54,7 +53,7 @@ declare namespace TGApp.BBS.Constant {
    * @property {string} login_uid 登录 uid
    * @return CookieGroup1
    */
-  export interface CookieGroup1 {
+  interface CookieGroup1 {
     login_ticket: string;
     login_uid: string;
   }
@@ -67,7 +66,7 @@ declare namespace TGApp.BBS.Constant {
    * @property {string} cookie_token cookie token
    * @return CookieGroup2
    */
-  export interface CookieGroup2 {
+  interface CookieGroup2 {
     account_id: string;
     cookie_token: string;
   }
@@ -80,7 +79,7 @@ declare namespace TGApp.BBS.Constant {
    * @property {string} ltuid ltoken 对应的 uid
    * @return CookieGroup3
    */
-  export interface CookieGroup3 {
+  interface CookieGroup3 {
     ltoken: string;
     ltuid: string;
   }
@@ -93,5 +92,5 @@ declare namespace TGApp.BBS.Constant {
    * @extends CookieGroup3
    * @return CookieGroup4
    */
-  export interface CookieGroup4 extends CookieGroup2, CookieGroup3 {}
+  interface CookieGroup4 extends CookieGroup2, CookieGroup3 {}
 }

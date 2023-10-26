@@ -1,7 +1,7 @@
 /**
- * @file utils UIGF.ts
+ * @file utils/UIGF.ts
  * @description UIGF工具类
- * @since Beta v0.3.0
+ * @since Beta v0.3.4
  */
 
 import { app, fs, path } from "@tauri-apps/api";
@@ -10,7 +10,7 @@ import { timestampToDate } from "./t2D";
 
 /**
  * @description 获取 UIGF 头部信息
- * @since Alpha v0.2.3
+ * @since Beta v0.3.4
  * @param {string} uid - UID
  * @returns {Promise<TGApp.Plugins.UIGF.Export>}
  */
@@ -22,7 +22,7 @@ export async function getUigfHeader(uid: string): Promise<TGApp.Plugins.UIGF.Exp
     uigf_version: "2.3.0",
     export_timestamp: Math.floor(stamp / 1000),
     export_time: timestampToDate(stamp),
-    export_app: "Tauri.Genshin",
+    export_app: "TeyvatGuide",
     export_app_version: await app.getVersion(),
   };
 }

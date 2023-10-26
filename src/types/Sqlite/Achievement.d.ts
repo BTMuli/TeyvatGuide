@@ -1,8 +1,7 @@
 /**
- * @file types Sqlite Achievement.d.ts
+ * @file types/Sqlite/Achievement.d.ts
  * @description 数据库成就相关类型定义文件
- * @todo https://github.com/BTMuli/Tauri.Genshin/issues/19
- * @author BTMuli<bt-muli@outlook.com>
+ * @todo https://github.com/BTMuli/TeyvatGuide/issues/19
  * @since Alpha v0.2.0
  */
 
@@ -24,7 +23,7 @@ declare namespace TGApp.Sqlite.Achievement {
    * @property {string} updated - 数据库更新时间
    * @return SingleTable
    */
-  export interface SingleTable {
+  interface SingleTable {
     id: number;
     series: number;
     order: number;
@@ -52,7 +51,7 @@ declare namespace TGApp.Sqlite.Achievement {
    * @property {string} updated - 数据库更新时间
    * @returns SeriesTable
    */
-  export interface SeriesTable {
+  interface SeriesTable {
     id: number;
     order: number;
     name: string;

@@ -1,13 +1,12 @@
 /**
- * @file plugins Hutao utils transLocal.ts
+ * @file plugins/Hutao/utils/transLocal.ts
  * @description 将本地数据转为上传用的数据
- * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.2
+ * @since Beta v0.3.4
  */
 
 /**
  * @description 将本地数据转为上传用的数据
- * @since Alpha v0.2.1
+ * @since Beta v0.3.4
  * @param {TGApp.Sqlite.Abyss.SingleTable} data 本地数据
  * @returns {TGApp.Plugins.Hutao.Abyss.RecordUpload} 上传用的数据
  */
@@ -16,7 +15,7 @@ export function transLocal(
 ): TGApp.Plugins.Hutao.Abyss.RecordUpload {
   return {
     Uid: data.uid,
-    Identity: "Tauri.Genshin",
+    Identity: "TeyvatGuide",
     SpiralAbyss: transAbyss(data),
     Avatars: [],
     ReservedUserName: "",
