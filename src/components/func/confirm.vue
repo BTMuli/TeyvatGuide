@@ -7,13 +7,13 @@
             {{ data.title }}
           </div>
           <div
-            v-if="data?.text !== '' && data.mode === 'confirm'"
+            v-show="data?.text !== '' && data.mode === 'confirm'"
             class="confirm-subtitle"
             :title="data.text"
           >
             {{ data.text }}
           </div>
-          <div v-if="data?.text !== '' && data.mode === 'input'" class="confirm-input">
+          <div v-show="data?.text !== '' && data.mode === 'input'" class="confirm-input">
             <div class="confirm-input-label">
               {{ data.text }}
             </div>
