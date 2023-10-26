@@ -1,10 +1,15 @@
 /**
- * @file types BBS Announcement.d.ts
+ * @file types/BBS/Announcement.d.ts
  * @description 从 BBS 获取到的游戏内公告类型定义文件
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.5
  */
 
+/**
+ * @description 游戏内公告类型定义
+ * @since Alpha v0.1.5
+ * @namespace TGApp.BBS.Announcement
+ * @memberof TGApp.BBS
+ */
 declare namespace TGApp.BBS.Announcement {
   /**
    * @description 公告列表返回响应类型
@@ -14,7 +19,8 @@ declare namespace TGApp.BBS.Announcement {
    * @property {ListData} data - 公告列表数据
    * @return ListResponse
    */
-  export interface ListResponse extends TGApp.BBS.Response.Base {
+  interface ListResponse extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: ListData;
   }
 
@@ -26,7 +32,8 @@ declare namespace TGApp.BBS.Announcement {
    * @property {ContentData} data - 公告内容数据
    * @return ContentResponse
    */
-  export interface ContentResponse extends TGApp.BBS.Response.Base {
+  interface ContentResponse extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: ContentData;
   }
 
@@ -48,7 +55,7 @@ declare namespace TGApp.BBS.Announcement {
    * @property {unknown} static_sign - 静态签名
    * @return ListData
    */
-  export interface ListData {
+  interface ListData {
     list: ListItem[];
     total: number;
     type_list: ListType[];
@@ -73,7 +80,7 @@ declare namespace TGApp.BBS.Announcement {
    * @property {number} pic_total - 图片总数
    * @return ContentData
    */
-  export interface ContentData {
+  interface ContentData {
     list: ContentItem[];
     total: number;
     pic_list: unknown[];
@@ -89,7 +96,7 @@ declare namespace TGApp.BBS.Announcement {
    * @property {string} type_label - 公告类型标签
    * @return ListItem
    */
-  export interface ListItem {
+  interface ListItem {
     list: AnnoSingle[];
     type_id: number;
     type_label: string;
@@ -121,7 +128,7 @@ declare namespace TGApp.BBS.Announcement {
    * @property {boolean} extra_remind 是否有额外提醒
    * @return AnnoSingle
    */
-  export interface AnnoSingle {
+  interface AnnoSingle {
     ann_id: number;
     title: string;
     subtitle: string;
@@ -153,7 +160,7 @@ declare namespace TGApp.BBS.Announcement {
    * @property {string} mi18n_name 公告类型国际化名称
    * @return ListType
    */
-  export interface ListType {
+  interface ListType {
     id: number;
     name: string;
     mi18n_name: string;
@@ -171,7 +178,7 @@ declare namespace TGApp.BBS.Announcement {
    * @property {string} lang 公告语言
    * @return ContentItem
    */
-  export interface ContentItem {
+  interface ContentItem {
     ann_id: number;
     title: string;
     subtitle: string;

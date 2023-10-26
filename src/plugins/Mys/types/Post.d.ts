@@ -1,5 +1,5 @@
 /**
- * @file plugins Mys types post.d.ts
+ * @file plugins/Mys/types/post.d.ts
  * @description Mys 插件帖子类型定义文件
  * @since Beta v0.3.3
  */
@@ -7,19 +7,20 @@
 /**
  * @description Mys 插件帖子类型
  * @since Alpha v0.2.1
- * @namespace Post
- * @return Post
+ * @namespace TGApp.Plugins.Mys.Post
+ * @memberof TGApp.Plugins.Mys
  */
 declare namespace TGApp.Plugins.Mys.Post {
   /**
    * @description 帖子返回数据
    * @since Alpha v0.2.1
    * @interface Response
-   * @extends TGApp.Plugins.Mys.Base.Response
+   * @extends TGApp.BBS.Response.Base
    * @property {FullData} data.post 帖子数据
    * @return Response
    */
-  export interface Response extends TGApp.Plugins.Mys.Base.Response {
+  interface Response extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: {
       post: FullData;
     };
@@ -52,7 +53,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {TGApp.Plugins.Mys.News.Meta} news_meta 咨讯元数据，可能为 null
    * @return FullData
    */
-  export interface FullData {
+  interface FullData {
     post: Post;
     forum: Forum;
     topics: Topic[];
@@ -121,7 +122,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {number} selected_comment 是否选择评论
    * @return Post
    */
-  export interface Post {
+  interface Post {
     game_id: number;
     post_id: string;
     f_forum_id: number;
@@ -175,7 +176,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {unknown} forum_cate 版块分类，可能为 null
    * @return Forum
    */
-  export interface Forum {
+  interface Forum {
     id: number;
     name: string;
     icon: string;
@@ -197,7 +198,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {number} content_type 内容类型
    * @return Topic
    */
-  export interface Topic {
+  interface Topic {
     id: number;
     name: string;
     cover: string;
@@ -219,7 +220,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {number} forward_num 转发数
    * @return Stat
    */
-  export interface Stat {
+  interface Stat {
     view_num: number;
     reply_num: number;
     like_num: number;
@@ -249,7 +250,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {boolean} is_deleted 是否已删除
    * @return Image
    */
-  export interface Image {
+  interface Image {
     url: string;
     height: number;
     width: number;
@@ -278,7 +279,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {number} answer_num 回答数
    * @return HelpSys
    */
-  export interface HelpSys {
+  interface HelpSys {
     top_up: unknown | null;
     top_n: unknown[];
     answer_num: number;
@@ -293,7 +294,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {string[]} images 图片 URL
    * @return Content
    */
-  export interface PostContent {
+  interface PostContent {
     describe: string;
     images?: string[];
   }
@@ -330,7 +331,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {string} attributes.link 链接
    * @return StructuredContent
    */
-  export interface StructuredContent {
+  interface StructuredContent {
     insert:
       | {
           image?: string;
@@ -386,7 +387,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {number} review_status 审核状态
    * @return StructuredVod
    */
-  export interface StructuredVod {
+  interface StructuredVod {
     id: number;
     duration: number;
     cover: string;
@@ -422,7 +423,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {number} landing_url_type 落地链接类型
    * @return StructuredLinkCard
    */
-  export interface StructuredLinkCard {
+  interface StructuredLinkCard {
     link_type: number;
     origin_url: string;
     landing_url: string;

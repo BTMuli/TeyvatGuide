@@ -1,10 +1,15 @@
 /**
- * @file types Game Record.d.ts
+ * @file types/Game/Record.d.ts
  * @description 原神战绩相关类型定义文件
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.2
  */
 
+/**
+ * @description 原神战绩相关类型定义命名空间
+ * @since Alpha v0.2.2
+ * @namespace TGApp.Game.Record
+ * @memberof TGApp.Game
+ */
 declare namespace TGApp.Game.Record {
   /**
    * @description 原神战绩数据返回类型
@@ -14,7 +19,8 @@ declare namespace TGApp.Game.Record {
    * @property {FullData} data - 原神战绩数据
    * @return Response
    */
-  export interface Response extends TGApp.BBS.Response.Base {
+  interface Response extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: FullData;
   }
 
@@ -30,7 +36,7 @@ declare namespace TGApp.Game.Record {
    * @property {Home[]} homes - 尘歌壶信息
    * @return FullData
    */
-  export interface FullData {
+  interface FullData {
     role: Role;
     avatars: Avatar[];
     stats: Stats;
@@ -49,7 +55,7 @@ declare namespace TGApp.Game.Record {
    * @property {number} level - 等级
    * @return Role
    */
-  export interface Role {
+  interface Role {
     AvatarUrl: string;
     nickname: string;
     region: string;
@@ -72,7 +78,7 @@ declare namespace TGApp.Game.Record {
    * @property {boolean} is_chosen - 角色是否展示
    * @return Avatar
    */
-  export interface Avatar {
+  interface Avatar {
     id: number;
     image: string;
     name: string;
@@ -107,7 +113,7 @@ declare namespace TGApp.Game.Record {
    * @property {number} hydroculus_number - 水神瞳数量
    * @return Stats
    */
-  export interface Stats {
+  interface Stats {
     active_day_number: number;
     achievement_number: number;
     anemoculus_number: number;
@@ -145,7 +151,7 @@ declare namespace TGApp.Game.Record {
    * @property {string} cover - 封面 URL
    * @return WorldExplore
    */
-  export interface WorldExplore {
+  interface WorldExplore {
     level: number;
     exploration_percentage: number;
     icon: string;
@@ -170,7 +176,7 @@ declare namespace TGApp.Game.Record {
    * @property {string} icon - 图标
    * @return WorldOffering
    */
-  export interface WorldOffering {
+  interface WorldOffering {
     name: string;
     level: number;
     icon: string;
@@ -190,7 +196,7 @@ declare namespace TGApp.Game.Record {
    * @property {string} comfort_level_icon - 洞天仙力等级图标
    * @return Home
    */
-  export interface Home {
+  interface Home {
     level: number;
     visit_num: number;
     comfort_num: number;

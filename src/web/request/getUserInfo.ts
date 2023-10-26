@@ -1,5 +1,5 @@
 /**
- * @file web request getUserInfo.ts
+ * @file web/request/getUserInfo.ts
  * @description 获取用户信息请求
  * @since Beta v0.3.4
  */
@@ -28,7 +28,7 @@ export async function getUserInfoByCookie(
   const params = { gids: "2" };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common", true);
   return await http
-    .fetch<TGApp.Plugins.Mys.User.HomeResponse>(url, {
+    .fetch<TGApp.Plugins.Mys.User.HomeResponse | TGApp.BBS.Response.Base>(url, {
       method: "GET",
       headers: header,
       query: params,

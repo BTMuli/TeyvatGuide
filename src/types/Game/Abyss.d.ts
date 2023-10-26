@@ -1,10 +1,15 @@
 /**
- * @file types Game Abyss.d.ts
+ * @file types/Game/Abyss.d.ts
  * @description 游戏深渊相关类型定义文件
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
 
+/**
+ * @description 深渊数据相关类型
+ * @since Alpha v0.2.0
+ * @namespace TGApp.Game.Abyss
+ * @memberof TGApp.Game
+ */
 declare namespace TGApp.Game.Abyss {
   /**
    * @description 深渊数据返回类型
@@ -14,7 +19,8 @@ declare namespace TGApp.Game.Abyss {
    * @property {FullData} data - 深渊数据
    * @return Response
    */
-  export interface Response extends TGApp.BBS.Response.Base {
+  interface Response extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: FullData;
   }
 
@@ -39,7 +45,7 @@ declare namespace TGApp.Game.Abyss {
    * @property {boolean} is_unlock - 是否解锁
    * @return FullData
    */
-  export interface FullData {
+  interface FullData {
     schedule_id: number;
     start_time: string;
     end_time: string;
@@ -67,7 +73,7 @@ declare namespace TGApp.Game.Abyss {
    * @property {number} rarity - 角色星级
    * @return CharacterData
    */
-  export interface CharacterData {
+  interface CharacterData {
     avatar_id: number;
     avatar_icon: string;
     value: number;
@@ -87,7 +93,7 @@ declare namespace TGApp.Game.Abyss {
    * @property {Level[]} levels - 层内关卡数据
    * @return Floor
    */
-  export interface Floor {
+  interface Floor {
     index: number;
     icon: string;
     is_unlock: boolean;
@@ -107,7 +113,7 @@ declare namespace TGApp.Game.Abyss {
    * @property {Battle[]} battles - 关卡内战斗数据
    * @return Level
    */
-  export interface Level {
+  interface Level {
     index: number;
     star: number;
     max_star: number;
@@ -123,7 +129,7 @@ declare namespace TGApp.Game.Abyss {
    * @property {CharacterInfo[]} avatars - 角色信息
    * @return Battle
    */
-  export interface Battle {
+  interface Battle {
     index: number;
     timestamp: string;
     avatars: CharacterInfo[];
@@ -139,7 +145,7 @@ declare namespace TGApp.Game.Abyss {
    * @property {number} rarity - 角色星级
    * @return CharacterInfo
    */
-  export interface CharacterInfo {
+  interface CharacterInfo {
     id: number;
     icon: string;
     level: number;

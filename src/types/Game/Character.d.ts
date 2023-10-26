@@ -1,10 +1,15 @@
 /**
- * @file types Game Character.d.ts
+ * @file types/Game/Character.d.ts
  * @description 游戏角色相关类型定义文件
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
 
+/**
+ * @description 游戏角色相关类型定义命名空间
+ * @since Alpha v0.2.0
+ * @namespace TGApp.Game.Character
+ * @memberof TGApp.Game
+ */
 declare namespace TGApp.Game.Character {
   /**
    * @description 角色列表数据返回类型
@@ -15,7 +20,8 @@ declare namespace TGApp.Game.Character {
    * @property {ListRole} data.role - 角色信息
    * @return ListResponse
    */
-  export interface ListResponse extends TGApp.BBS.Response.Base {
+  interface ListResponse extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: {
       avatars: ListItem[];
       role: ListRole;
@@ -43,7 +49,7 @@ declare namespace TGApp.Game.Character {
    * @property {unknown} external
    * @return ListItem
    */
-  export interface ListItem {
+  interface ListItem {
     id: number;
     image: string;
     icon: string;
@@ -71,7 +77,7 @@ declare namespace TGApp.Game.Character {
    * @property {number} level - 角色等级
    * @return ListRole
    */
-  export interface ListRole {
+  interface ListRole {
     AvatarUrl: string;
     nickname: string;
     region: string;
@@ -94,7 +100,7 @@ declare namespace TGApp.Game.Character {
    * @property {number} affix_level - 武器精炼等级
    * @return LIWeapon
    */
-  export interface LIWeapon {
+  interface LIWeapon {
     id: number;
     name: string;
     icon: string;
@@ -121,7 +127,7 @@ declare namespace TGApp.Game.Character {
    * @property {TGApp.Game.Constant.EnumRelic} pos_name - 圣遗物位置名称
    * @return LIRelic
    */
-  export interface LIRelic {
+  interface LIRelic {
     id: number;
     name: string;
     icon: string;
@@ -142,7 +148,7 @@ declare namespace TGApp.Game.Character {
    * @property {string} affixes[].effect - 圣遗物套装效果
    * @return RelicSet
    */
-  export interface RelicSet {
+  interface RelicSet {
     id: number;
     name: string;
     affixes: Array<{
@@ -163,7 +169,7 @@ declare namespace TGApp.Game.Character {
    * @property {number} pos - 命座位置
    * @return LIConstellation
    */
-  export interface LIConstellation {
+  interface LIConstellation {
     id: number;
     name: string;
     icon: string;
@@ -181,7 +187,7 @@ declare namespace TGApp.Game.Character {
    * @property {string} icon - 时装图标
    * @return LICostume
    */
-  export interface LICostume {
+  interface LICostume {
     id: number;
     name: string;
     icon: string;

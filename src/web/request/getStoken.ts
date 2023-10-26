@@ -1,5 +1,5 @@
 /**
- * @file web request getStoken.ts
+ * @file web/request/getStoken.ts
  * @description 获取 stoken
  * @since Beta v0.3.0
  */
@@ -25,7 +25,7 @@ export async function getStokenByGameToken(
     "x-rpc-app_id": TGConstant.BBS.APP_ID,
   };
   return await http
-    .fetch<TGApp.BBS.Response.getStokenByGameToken>(url, {
+    .fetch<TGApp.BBS.Response.getStokenByGameToken | TGApp.BBS.Response.Base>(url, {
       method: "POST",
       headers: header,
       body: http.Body.json(data),

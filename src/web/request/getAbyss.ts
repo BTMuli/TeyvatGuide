@@ -1,5 +1,5 @@
 /**
- * @file web request getAbyss.ts
+ * @file web/request/getAbyss.ts
  * @description 获取深渊信息
  * @since Beta v0.3.0
  */
@@ -27,7 +27,7 @@ export async function getAbyss(
   const params = { role_id, schedule_type, server: account.region };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http
-    .fetch<TGApp.Game.Abyss.Response>(url, {
+    .fetch<TGApp.Game.Abyss.Response | TGApp.BBS.Response.Base>(url, {
       method: "GET",
       headers: header,
       query: params,

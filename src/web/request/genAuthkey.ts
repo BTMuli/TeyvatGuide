@@ -1,5 +1,5 @@
 /**
- * @file web request genAuthkey.ts
+ * @file web/request/genAuthkey.ts
  * @description 生成 authkey
  * @since Beta v0.3.0
  */
@@ -29,7 +29,7 @@ export async function genAuthkey(
   };
   const header = TGUtils.User.getHeader(cookie, "POST", JSON.stringify(data), "lk2", true);
   return await http
-    .fetch<TGApp.Game.Gacha.AuthkeyResponse>(url, {
+    .fetch<TGApp.Game.Gacha.AuthkeyResponse | TGApp.BBS.Response.Base>(url, {
       method: "POST",
       headers: header,
       body: http.Body.json(data),

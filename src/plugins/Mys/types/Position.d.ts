@@ -1,26 +1,26 @@
 /**
- * @file plugins Mys types Position.d.ts
+ * @file plugins/Mys/types/Position.d.ts
  * @description Mys 插件热点追踪接口
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.1
  */
 
 /**
  * @description Mys 插件热点追踪类型
  * @since Alpha v0.2.1
- * @namespace Position
- * @return Position
+ * @namespace TGApp.Plugins.Mys.Position
+ * @memberof TGApp.Plugins.Mys
  */
 declare namespace TGApp.Plugins.Mys.Position {
   /**
    * @description 热点追踪信息的返回类型
    * @since Alpha v0.2.1
    * @interface Response
-   * @extends TGApp.Plugins.Mys.Base.Response
+   * @extends TGApp.BBS.Response.Base
    * @property {ObcItem[]} data.list obc 列表
    * @return Response
    */
-  export interface Response extends TGApp.Plugins.Mys.Obc.Response {
+  interface Response extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: {
       list: ObcItem[];
     };
@@ -34,7 +34,7 @@ declare namespace TGApp.Plugins.Mys.Position {
    * @property {Data[]} list 列表
    * @return ObcItem
    */
-  export interface ObcItem extends TGApp.Plugins.Mys.Obc.Data {
+  interface ObcItem extends TGApp.Plugins.Mys.Obc.Data {
     list: Data[];
   }
 
@@ -57,7 +57,7 @@ declare namespace TGApp.Plugins.Mys.Position {
    * @property {string} end_time 结束时间 // 1680465599000
    * @return Data
    */
-  export interface Data {
+  interface Data {
     recommend_id: number;
     content_id: number;
     title: string;
@@ -88,7 +88,7 @@ declare namespace TGApp.Plugins.Mys.Position {
    * @property {number} time.endStamp 结束时间戳
    * @return RenderCard
    */
-  export interface RenderCard {
+  interface RenderCard {
     title: string;
     postId: number;
     icon: string;

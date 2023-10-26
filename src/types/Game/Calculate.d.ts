@@ -1,10 +1,15 @@
 /**
- * @file types Game Calculate.d.ts
+ * @file types/Game/Calculate.d.ts
  * @description 养成计算器相关类型定义文件
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.1
  */
 
+/**
+ * @description 养成计算器相关类型定义命名空间
+ * @since Alpha v0.2.1
+ * @namespace TGApp.Game.Calculate
+ * @memberof TGApp.Game
+ */
 declare namespace TGApp.Game.Calculate {
   /**
    * @description 获取同步角色列表返回
@@ -15,7 +20,8 @@ declare namespace TGApp.Game.Calculate {
    * @property {Array<AvatarListItem>} data.list - 角色列表
    * @return SyncAvatarListResponse
    */
-  export interface SyncAvatarListResponse extends TGApp.BBS.Response.Base {
+  interface SyncAvatarListResponse extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: {
       list: AvatarListItem[];
     };
@@ -35,7 +41,7 @@ declare namespace TGApp.Game.Calculate {
    * @property {number} level_current - 角色当前等级
    * @return AvatarListItem
    */
-  export interface AvatarListItem {
+  interface AvatarListItem {
     id: number;
     name: string;
     icon: string;
@@ -55,7 +61,8 @@ declare namespace TGApp.Game.Calculate {
    * @property {AvatarDetail} data - 角色详情
    * @return SyncAvatarDetailResponse
    */
-  export interface SyncAvatarDetailResponse extends TGApp.BBS.Response.Base {
+  interface SyncAvatarDetailResponse extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: TGApp.Game.Calculate.AvatarDetail;
   }
 
@@ -68,7 +75,7 @@ declare namespace TGApp.Game.Calculate {
    * @property {AvatarDetailRelic[]} reliquary_list - 角色圣遗物列表
    * @return AvatarDetail
    */
-  export interface AvatarDetail {
+  interface AvatarDetail {
     skill_list: AvatarDetailSkill[];
     weapon: AvatarDetailWeapon;
     reliquary_list: AvatarDetailRelic[];
@@ -86,7 +93,7 @@ declare namespace TGApp.Game.Calculate {
    * @property {number} level_current - 技能当前等级
    * @return AvatarDetailSkill
    */
-  export interface AvatarDetailSkill {
+  interface AvatarDetailSkill {
     id: number;
     group_id: number;
     name: string;
@@ -108,7 +115,7 @@ declare namespace TGApp.Game.Calculate {
    * @property {number} level_current - 武器当前等级
    * @return AvatarDetailWeapon
    */
-  export interface AvatarDetailWeapon {
+  interface AvatarDetailWeapon {
     id: number;
     name: string;
     icon: string;
@@ -131,7 +138,7 @@ declare namespace TGApp.Game.Calculate {
    * @property {number} max_level - 圣遗物最大等级
    * @return AvatarDetailRelic
    */
-  export interface AvatarDetailRelic {
+  interface AvatarDetailRelic {
     id: number;
     name: string;
     icon: string;

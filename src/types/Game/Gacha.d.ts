@@ -1,10 +1,15 @@
 /**
- * @file types Game Gacha.d.ts
+ * @file types/Game/Gacha.d.ts
  * @description 游戏抽卡相关类型定义文件
- * @author BTMuli<bt-muli@outlook.com>
  * @since Beta v0.3.0
  */
 
+/**
+ * @description 游戏抽卡相关类型定义命名空间
+ * @since Beta v0.3.0
+ * @namespace TGApp.Game.Gacha
+ * @memberof TGApp.Game
+ */
 declare namespace TGApp.Game.Gacha {
   /**
    * @description 获取 authkey 返回类型
@@ -16,7 +21,8 @@ declare namespace TGApp.Game.Gacha {
    * @property {string} data.authkey - authkey
    * @return AuthkeyResponse
    */
-  export interface AuthkeyResponse extends TGApp.BBS.Response.Base {
+  interface AuthkeyResponse extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: {
       sign_type: number;
       authkey_ver: number;
@@ -35,7 +41,8 @@ declare namespace TGApp.Game.Gacha {
    * @property {GachaItem[]} data.list - 抽卡记录列表
    * @return GachaLogResponse
    */
-  export interface GachaLogResponse extends TGApp.BBS.Response.Base {
+  interface GachaLogResponse extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: {
       page: number;
       size: number;
@@ -60,7 +67,7 @@ declare namespace TGApp.Game.Gacha {
    * @property {string} id - 抽卡记录 id
    * @return GachaItem
    */
-  export interface GachaItem {
+  interface GachaItem {
     uid: string;
     gacha_type: string;
     item_id: string;

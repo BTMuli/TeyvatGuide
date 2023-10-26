@@ -21,9 +21,9 @@ declare namespace TGApp.BBS.Response {
    * @return Base
    */
   interface Base {
-    retcode: number;
+    retcode: Pick<number, 0>;
     message: string;
-    data: any;
+    data: never;
   }
 
   /**
@@ -48,6 +48,7 @@ declare namespace TGApp.BBS.Response {
    * @return getTokens
    */
   interface getTokens extends Base {
+    retcode: 0;
     data: {
       list: getTokensRes[];
     };
@@ -62,6 +63,7 @@ declare namespace TGApp.BBS.Response {
    * @return getLTokenBySToken
    */
   interface getLTokenBySToken extends Base {
+    retcode: 0;
     data: {
       ltoken: string;
     };
@@ -77,6 +79,7 @@ declare namespace TGApp.BBS.Response {
    * @return getCookieTokenBySToken
    */
   interface getCookieTokenBySToken extends Base {
+    retcode: 0;
     data: {
       uid: string;
       cookie_token: string;
@@ -94,6 +97,7 @@ declare namespace TGApp.BBS.Response {
    * @return verifyUserInfoBySToken
    */
   interface verifyUserInfoBySToken extends Base {
+    retcode: 0;
     data: {
       user_info: TGApp.BBS.Account.VerifySTokenInfo;
       realname_info: unknown;
@@ -110,6 +114,7 @@ declare namespace TGApp.BBS.Response {
    * @return getStokenByGameToken
    */
   interface getStokenByGameToken extends Base {
+    retcode: 0;
     data: getStokenByGameTokenData;
   }
 
@@ -144,6 +149,7 @@ declare namespace TGApp.BBS.Response {
    * @return getCookieTokenByGameToken
    */
   interface getCookieTokenByGameToken extends Base {
+    retcode: 0;
     data: {
       uid: string;
       cookie_token: string;
@@ -161,6 +167,7 @@ declare namespace TGApp.BBS.Response {
    * @return getActionTicketBySToken
    */
   interface getActionTicketBySToken extends Base {
+    retcode: 0;
     data: {
       ticket: string;
       is_verified: boolean;

@@ -1,5 +1,5 @@
 /**
- * @file core utils getGameRecord.ts
+ * @file core/utils/getGameRecord.ts
  * @description 获取游戏数据的函数
  * @since Alpha v0.2.1
  */
@@ -30,7 +30,7 @@ export async function getGameRecord(
   const params = { role_id: user.gameUid, server: user.region };
   const header = TGUtils.User.getHeader(ck, "GET", params, "common");
   return await http
-    .fetch<TGApp.Game.Record.Response>(url, {
+    .fetch<TGApp.Game.Record.Response | TGApp.BBS.Response.Base>(url, {
       method: "GET",
       headers: header,
       query: params,

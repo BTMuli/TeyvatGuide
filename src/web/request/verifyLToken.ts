@@ -1,5 +1,5 @@
 /**
- * @file web request verifyLToken.ts
+ * @file web/request/verifyLToken.ts
  * @description 验证 stoken 的请求函数
  * @since Alpha v0.1.5
  */
@@ -28,7 +28,7 @@ export async function verifyLToken(
   const data = { ltoken };
   const header = TGUtils.User.getHeader(cookie, "POST", data, "common");
   return await http
-    .fetch<TGApp.BBS.Response.verifyUserInfoBySToken>(url, {
+    .fetch<TGApp.BBS.Response.verifyUserInfoBySToken | TGApp.BBS.Response.Base>(url, {
       method: "POST",
       headers: header,
       body: http.Body.json(data),

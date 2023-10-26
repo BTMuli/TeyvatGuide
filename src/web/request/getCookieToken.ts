@@ -1,5 +1,5 @@
 /**
- * @file web request getCookieToken.ts
+ * @file web/request/getCookieToken.ts
  * @description 获取 Cookie Token 的请求函数
  * @since Beta v0.3.0
  */
@@ -28,7 +28,7 @@ export async function getCookieTokenBySToken(
   const params = { stoken: Stoken };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http
-    .fetch<TGApp.BBS.Response.getCookieTokenBySToken>(url, {
+    .fetch<TGApp.BBS.Response.getCookieTokenBySToken | TGApp.BBS.Response.Base>(url, {
       method: "GET",
       headers: header,
       query: params,
@@ -53,7 +53,7 @@ export async function getCookieTokenByGameToken(
   const url = "https://api-takumi.mihoyo.com/auth/api/getCookieAccountInfoByGameToken";
   const data = { account_id: Number(accountId), game_token: gameToken };
   return await http
-    .fetch<TGApp.BBS.Response.getCookieTokenByGameToken>(url, {
+    .fetch<TGApp.BBS.Response.getCookieTokenByGameToken | TGApp.BBS.Response.Base>(url, {
       method: "POST",
       body: http.Body.json(data),
     })

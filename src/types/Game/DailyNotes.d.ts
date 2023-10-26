@@ -1,10 +1,15 @@
 /**
- * @file types Game DailyNotes.d.ts
+ * @file types/Game/DailyNotes.d.ts
  * @description 获取实时便笺数据类型定义文件
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.2
  */
 
+/**
+ * @description 获取实时便笺数据
+ * @since Alpha v0.2.2
+ * @namespace TGApp.Game.DailyNotes
+ * @memberof TGApp.Game
+ */
 declare namespace TGApp.Game.DailyNotes {
   /**
    * @description 便笺数据返回
@@ -14,7 +19,8 @@ declare namespace TGApp.Game.DailyNotes {
    * @property {FullInfo} data - 便笺数据
    * @return Response
    */
-  export interface Response extends TGApp.BBS.Response.Base {
+  interface Response extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: FullInfo;
   }
 
@@ -40,7 +46,7 @@ declare namespace TGApp.Game.DailyNotes {
    * @property {Transform} transformer - 便笺数据转换器
    * @return FullInfo
    */
-  export interface FullInfo {
+  interface FullInfo {
     current_resin: number;
     max_resin: number;
     resin_recovery_time: string;
@@ -68,7 +74,7 @@ declare namespace TGApp.Game.DailyNotes {
    * @property {string} remained_time - 剩余时间（秒）
    * @return Expedition
    */
-  export interface Expedition {
+  interface Expedition {
     avatar_side_icon: string;
     status: string;
     remained_time: string;
@@ -85,7 +91,7 @@ declare namespace TGApp.Game.DailyNotes {
    * @property {string} last_job_id - 上次任务 ID
    * @return Transform
    */
-  export interface Transform {
+  interface Transform {
     obtained: boolean;
     recovery_time: TransformTime;
     wiki: string;
@@ -104,7 +110,7 @@ declare namespace TGApp.Game.DailyNotes {
    * @property {boolean} reached - 是否已达到恢复时间
    * @return TransformTime
    */
-  export interface TransformTime {
+  interface TransformTime {
     Day: number;
     Hour: number;
     Minute: number;

@@ -1,5 +1,5 @@
 /**
- * @file web request getGameAccounts.ts
+ * @file web/request/getGameAccounts.ts
  * @description 获取游戏账号信息相关请求函数
  * @since Alpha v0.1.5
  */
@@ -65,7 +65,7 @@ async function getGameAccounts(
 ): Promise<TGApp.BBS.Response.Base | TGApp.User.Account.Game[]> {
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http
-    .fetch<TGApp.User.Account.GameResponse>(url, {
+    .fetch<TGApp.User.Account.GameResponse | TGApp.BBS.Response.Base>(url, {
       method: "GET",
       headers: header,
       query: params,

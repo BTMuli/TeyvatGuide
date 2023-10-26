@@ -1,26 +1,26 @@
 /**
- * @file plugins Mys types Lottery.d.ts
+ * @file plugins/Mys/types/Lottery.d.ts
  * @description Mys 插件抽奖类型定义文件
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.1
  */
 
 /**
  * @description Mys 插件抽奖类型
  * @since Alpha v0.2.1
- * @namespace Lottery
- * @return Lottery
+ * @namespace TGApp.Plugins.Mys.Lottery
+ * @memberof TGApp.Plugins.Mys
  */
 declare namespace TGApp.Plugins.Mys.Lottery {
   /**
    * @description 抽奖返回数据
    * @since Alpha v0.2.1
    * @interface Response
-   * @extends TGApp.Plugins.Mys.Base.Response;
+   * @extends TGApp.BBS.Response.Base
    * @property {FullData} data.show_lottery 抽奖数据
    * @return Response
    */
-  export interface Response extends TGApp.Plugins.Mys.Base.Response {
+  interface Response extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: {
       show_lottery: FullData;
     };
@@ -47,7 +47,7 @@ declare namespace TGApp.Plugins.Mys.Lottery {
    * @property {string} now_time 当前时间
    * @return FullData
    */
-  export interface FullData {
+  interface FullData {
     id: string;
     creator: TGApp.Plugins.Mys.User.Post;
     draw_time: string;
@@ -77,7 +77,7 @@ declare namespace TGApp.Plugins.Mys.Lottery {
    * @property {string} id 奖励 ID
    * @return Reward
    */
-  export interface Reward {
+  interface Reward {
     reward_name: string;
     winner_number: number;
     scheduled_winner_number: number;
@@ -98,7 +98,7 @@ declare namespace TGApp.Plugins.Mys.Lottery {
    * @property {RenderReward[]} rewards 奖励列表
    * @return RenderCard
    */
-  export interface RenderCard {
+  interface RenderCard {
     id: string;
     upWay: string;
     status: string;
@@ -117,7 +117,7 @@ declare namespace TGApp.Plugins.Mys.Lottery {
    * @property {TGApp.Plugins.Mys.User.Post[]} users 用户列表
    * @return RenderReward
    */
-  export interface RenderReward {
+  interface RenderReward {
     name: string;
     win: number;
     goal: number;

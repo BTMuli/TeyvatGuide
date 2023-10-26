@@ -1,5 +1,5 @@
 /**
- * @file plugins Mys types Gacha.d.ts
+ * @file plugins/Mys/types/Gacha.d.ts
  * @description Mys 插件卡池类型定义文件
  * @since Beta v0.3.3
  */
@@ -7,19 +7,20 @@
 /**
  * @description Mys 卡池类型定义
  * @since Beta v0.3.3
- * @namespace Gacha
- * @return Gacha
+ * @namespace TGApp.Plugins.Mys.Gacha
+ * @memberof TGApp.Plugins.Mys
  */
 declare namespace TGApp.Plugins.Mys.Gacha {
   /**
    * @description 获取卡池信息返回
    * @since Alpha v0.2.1
    * @interface Response
-   * @extends TGApp.Plugins.Mys.Base.Response
+   * @extends TGApp.BBS.Response.Base
    * @property {Data[]} data.list 卡池数据
    * @return Response
    */
-  interface Response extends TGApp.Plugins.Mys.Base.Response {
+  interface Response extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: {
       list: Data[];
     };

@@ -1,11 +1,9 @@
 /**
- * @file web request getGachaLog.ts
+ * @file web/request/getGachaLog.ts
  * @description 获取抽卡记录请求函数
- * @author BTMuli <bt-muli@outlook.com>
  * @since Beta v0.3.0
  */
 
-// tauri
 import { http } from "@tauri-apps/api";
 
 /**
@@ -33,7 +31,7 @@ export async function getGachaLog(
     end_id: endId,
   };
   return await http
-    .fetch<TGApp.Game.Gacha.GachaLogResponse>(url, {
+    .fetch<TGApp.Game.Gacha.GachaLogResponse | TGApp.BBS.Response.Base>(url, {
       method: "GET",
       query: params,
     })

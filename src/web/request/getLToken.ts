@@ -1,7 +1,6 @@
 /**
- * @file web request getLToken.ts
+ * @file web/request/getLToken.ts
  * @description 获取 ltoken 的请求
-
  * @since Beta v0.3.0
  */
 
@@ -29,7 +28,7 @@ export async function getLTokenBySToken(
   const params = { stoken: Stoken };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http
-    .fetch<TGApp.BBS.Response.getLTokenBySToken>(url, {
+    .fetch<TGApp.BBS.Response.getLTokenBySToken | TGApp.BBS.Response.Base>(url, {
       method: "GET",
       headers: header,
       query: params,

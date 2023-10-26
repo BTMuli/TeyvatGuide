@@ -1,26 +1,26 @@
 /**
- * @file plugins Mys types news.d.ts
+ * @file plugins/Mys/types/news.d.ts
  * @description Mys 插件咨讯类型定义文件
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.1
  */
 
 /**
  * @description Mys 插件咨讯类型
  * @since Alpha v0.2.1
- * @namespace News
- * @return News
+ * @namespace TGApp.Plugins.Mys.News
+ * @memberof TGApp.Plugins.Mys
  */
 declare namespace TGApp.Plugins.Mys.News {
   /**
    * @description 咨讯返回数据
    * @since Alpha v0.2.1
    * @interface Response
-   * @extends TGApp.Plugins.Mys.Base.Response
+   * @extends TGApp.BBS.Response.Base
    * @property {FullData} data 咨讯数据
    * @return Response
    */
-  export interface Response extends TGApp.Plugins.Mys.Base.Response {
+  interface Response extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: FullData;
   }
 
@@ -33,7 +33,7 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {Item[]} list 咨讯列表
    * @return FullData
    */
-  export interface FullData {
+  interface FullData {
     last_id: number;
     is_last: boolean;
     list: Item[];
@@ -66,7 +66,7 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {Meta} news_meta 元数据
    * @returns Item
    */
-  export interface Item {
+  interface Item {
     post: TGApp.Plugins.Mys.Post.Post;
     forum: TGApp.Plugins.Mys.Post.Forum;
     topics: TGApp.Plugins.Mys.Post.Topic[];
@@ -99,7 +99,7 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {string} end_at_sec 活动结束时间戳，单位秒
    * @return Meta
    */
-  export interface Meta {
+  interface Meta {
     activity_status: number;
     start_at_sec: string;
     end_at_sec: string;
@@ -130,7 +130,7 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {number} data.view 帖子浏览数
    * @return RenderCard
    */
-  export interface RenderCard {
+  interface RenderCard {
     title: string;
     cover: string;
     postId: number;
@@ -162,7 +162,7 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {string} colorCss 活动状态按钮背景色
    * @returns RenderStatus
    */
-  export interface RenderStatus {
+  interface RenderStatus {
     status: string;
     colorCss: string;
   }

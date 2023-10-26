@@ -1,5 +1,5 @@
 /**
- * @file web request getRoleList.ts
+ * @file web/request/getRoleList.ts
  * @description 获取游戏角色列表的请求方法
  * @since Alpha v0.2.0
  */
@@ -33,7 +33,7 @@ export async function getGameRoleListByLToken(
   };
   const header = TGUtils.User.getHeader(ck, "POST", JSON.stringify(data), "common");
   return await http
-    .fetch<TGApp.Game.Character.ListResponse>(url, {
+    .fetch<TGApp.Game.Character.ListResponse | TGApp.BBS.Response.Base>(url, {
       method: "POST",
       headers: header,
       body: http.Body.json(data),

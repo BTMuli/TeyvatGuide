@@ -1,10 +1,15 @@
 /**
- * @file types User Account.d.ts
+ * @file types/User/Account.d.ts
  * @description 用户账号相关类型定义文件
- * @author BTMuli<bt-muli@outlook.com>
  * @since Alpha v0.1.5
  */
 
+/**
+ * @description 用户账号相关类型定义命名空间
+ * @since Alpha v0.1.5
+ * @namespace TGApp.User.Account
+ * @memberof TGApp.User
+ */
 declare namespace TGApp.User.Account {
   /**
    * @description 游戏账号返回类型
@@ -14,7 +19,8 @@ declare namespace TGApp.User.Account {
    * @property {Game[]} data.list 游戏账号列表
    * @return GameResponse
    */
-  export interface GameResponse extends TGApp.BBS.Response.Base {
+  interface GameResponse extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: {
       list: Game[];
     };
@@ -34,7 +40,7 @@ declare namespace TGApp.User.Account {
    * @property {string} region_name 游戏区域名称
    * @return Game
    */
-  export interface Game {
+  interface Game {
     game_biz: string;
     game_uid: string;
     is_chosen: boolean;

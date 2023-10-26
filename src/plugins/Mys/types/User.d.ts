@@ -1,26 +1,26 @@
 /**
- * @file plugins Mys types user.ts
+ * @file plugins/Mys/types/user.ts
  * @description Mys 插件用户类型定义文件
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.2
  */
 
 /**
  * @description Mys 插件用户类型
  * @since Alpha v0.2.2
- * @namespace User
- * @return User
+ * @namespace TGApp.Plugins.Mys.User
+ * @memberof TGApp.Plugins.Mys
  */
 declare namespace TGApp.Plugins.Mys.User {
   /**
    * @description 主页用户信息返回
    * @since Alpha v0.2.1
    * @interface HomeResponse
-   * @extends TGApp.Plugins.Mys.Base.Response
+   * @extends TGApp.BBS.Response.Base
    * @property {Home} data 用户信息
    * @return HomeResponse
    */
-  export interface HomeResponse extends TGApp.Plugins.Mys.Base.Response {
+  interface HomeResponse extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: Home;
   }
 
@@ -45,7 +45,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {number} audit_info.nickname_status 昵称审核状态
    * @return Home
    */
-  export interface Home {
+  interface Home {
     user_info: Info;
     follow_relation: unknown;
     auth_relations: unknown[];
@@ -86,7 +86,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {string} ip_region 用户 IP 地区
    * @return Info
    */
-  export interface Info {
+  interface Info {
     uid: string;
     nickname: string;
     introduce: string;
@@ -112,7 +112,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {string} label 认证标签
    * @return Certification
    */
-  export interface Certification {
+  interface Certification {
     type: number;
     label: string;
   }
@@ -126,7 +126,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {number} game_id 游戏 ID
    * @return LevelExp
    */
-  export interface LevelExp {
+  interface LevelExp {
     level: number;
     exp: number;
     game_id: number;
@@ -147,7 +147,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {string} follow_collection_cnt 收藏数
    * @return Archive
    */
-  export interface Archive {
+  interface Archive {
     like_num: string;
     post_num: string;
     replypost_num: string;
@@ -192,7 +192,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {number} created_at 创建时间
    * @return Community
    */
-  export interface Community {
+  interface Community {
     is_realname: boolean;
     agree_status: boolean;
     silent_end_time: number;
@@ -244,7 +244,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {string} pendant 用户挂件 URL，可能为 ""
    * @return Post
    */
-  export interface Post {
+  interface Post {
     uid: string;
     nickname: string;
     introduce: string;
@@ -269,7 +269,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {boolean} is_collected 是否收藏
    * @returns {SelfOperation}
    */
-  export interface SelfOperation {
+  interface SelfOperation {
     attitude: number;
     is_collected: boolean;
   }

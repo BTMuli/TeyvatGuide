@@ -1,26 +1,26 @@
 /**
- * @file plugins Mys types Obc.d.ts
+ * @file plugins/Mys/types/Obc.d.ts
  * @description Mys obc 类型定义文件
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.1
  */
 
 /**
  * @description Mys obc 类型
  * @since Alpha v0.2.1
- * @namespace Obc
- * @return Obc
+ * @namespace TGApp.Plugins.Mys.Obc
+ * @memberof TGApp.Plugins.Mys
  */
 declare namespace TGApp.Plugins.Mys.Obc {
   /**
    * @description Mys obc 返回数据
    * @since Alpha v0.2.1
    * @interface Response
-   * @extends TGApp.Plugins.Mys.Base.Response
+   * @extends TGApp.BBS.Response.Base
    * @property {Obc[]} data.list obc 列表
    * @return Response
    */
-  export interface Response extends TGApp.Plugins.Mys.Base.Response {
+  interface Response extends TGApp.BBS.Response.Base {
+    retcode: 0;
     data: {
       list: Obc[];
     };
@@ -39,7 +39,7 @@ declare namespace TGApp.Plugins.Mys.Obc {
    * @property {unknown[]} list 列表
    * @return Data
    */
-  export interface Data {
+  interface Data {
     id: number;
     name: string;
     parent_id: number;

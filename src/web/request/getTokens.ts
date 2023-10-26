@@ -1,5 +1,5 @@
 /**
- * @file web request getTokens.ts
+ * @file web/request/getTokens.ts
  * @description 获取游戏 Token
  * @since Alpha v0.1.5
  */
@@ -29,7 +29,7 @@ export async function getTokensByLoginTicket(
   const params = { login_ticket: ticket, token_types: 3, uid };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http
-    .fetch<TGApp.BBS.Response.getTokens>(url, {
+    .fetch<TGApp.BBS.Response.getTokens | TGApp.BBS.Response.Base>(url, {
       method: "GET",
       headers: header,
       query: params,
