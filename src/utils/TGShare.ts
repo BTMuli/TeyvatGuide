@@ -1,7 +1,7 @@
 /**
  * @file utils TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  */
 
 import { dialog, fs, http, path } from "@tauri-apps/api";
@@ -11,7 +11,7 @@ import showSnackbar from "../components/func/snackbar";
 
 /**
  * @description 保存图片-canvas
- * @since Beta v0.3.0
+ * @since Beta v0.3.4
  * @param {HTMLCanvasElement} canvas - canvas元素
  * @param {string} filename - 文件名
  * @returns {Promise<void>} 无返回值
@@ -22,11 +22,11 @@ async function saveCanvasImg(canvas: HTMLCanvasElement, filename: string): Promi
       .split("")
       .map((item) => item.charCodeAt(0)),
   );
-  const saveDir = await path.downloadDir();
   await dialog
     .save({
-      defaultPath: `${saveDir}${filename}.png`,
+      title: "保存图片",
       filters: [{ name: "图片", extensions: ["png"] }],
+      defaultPath: `${await path.downloadDir()}${path.sep}${filename}.png`,
     })
     .then(async (res) => {
       if (res === null) return;

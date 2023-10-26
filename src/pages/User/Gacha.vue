@@ -195,23 +195,28 @@ async function handleImportBtn(savePath?: string): Promise<void> {
   if (savePath) {
     selectedFile = await dialog.open({
       multiple: false,
+      title: "选择要导入的祈愿数据文件",
       filters: [
         {
-          name: "UIGF",
+          name: "UIGF JSON",
           extensions: ["json"],
         },
       ],
       defaultPath: savePath,
+      directory: false,
     });
   } else {
     selectedFile = await dialog.open({
       multiple: false,
+      title: "选择要导入的祈愿数据文件",
       filters: [
         {
-          name: "UIGF",
+          name: "UIGF JSON",
           extensions: ["json"],
         },
       ],
+      defaultPath: `${await path.downloadDir()}`,
+      directory: false,
     });
   }
   if (selectedFile) {
@@ -283,13 +288,14 @@ async function handleExportBtn(): Promise<void> {
     return;
   }
   const file = await dialog.save({
-    defaultPath: `UIGF_${uidCur.value}.json`,
+    title: "选择导出祈愿数据的文件路径",
     filters: [
       {
-        name: "UIGF",
+        name: "UIGF JSON",
         extensions: ["json"],
       },
     ],
+    defaultPath: `${await path.downloadDir()}${path.sep}UIGF${uidCur.value}.json`,
   });
   if (!file) {
     showSnackbar({

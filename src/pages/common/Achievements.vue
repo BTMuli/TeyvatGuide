@@ -279,13 +279,16 @@ async function searchCard(): Promise<void> {
 // 导入 UIAF 数据，进行数据合并、刷新
 async function importJson(): Promise<void> {
   const selectedFile = await dialog.open({
+    title: "选择 UIAF 数据文件",
     multiple: false,
     filters: [
       {
-        name: "JSON",
+        name: "UIAF JSON",
         extensions: ["json"],
       },
     ],
+    defaultPath: await path.downloadDir(),
+    directory: false,
   });
   if (!selectedFile) {
     showSnackbar({
