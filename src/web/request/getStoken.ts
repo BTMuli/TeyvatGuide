@@ -13,7 +13,7 @@ import TGConstant from "../constant/TGConstant";
  * @since Beta v0.3.0
  * @param {string} accountId 账户 ID
  * @param {string} gameToken 游戏 Token
- * @returns {Promise<string | TGApp.BBS.Response.Base>}
+ * @returns {Promise<TGApp.BBS.Response.getStokenByGameTokenData | TGApp.BBS.Response.Base>}
  */
 export async function getStokenByGameToken(
   accountId: string,
