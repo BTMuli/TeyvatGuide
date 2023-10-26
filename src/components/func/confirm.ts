@@ -1,7 +1,7 @@
 /**
  * @file component func confirm.ts
  * @description 封装自定义 confirm 组件，通过函数调用的方式，简化 confirm 的使用
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  */
 
 import { h, render } from "vue";
@@ -36,7 +36,7 @@ const renderBox = (props: TGApp.Component.Confirm.Params): VNode => {
 let confirmInstance: VNode;
 
 async function showConfirm(props: TGApp.Component.Confirm.ParamsConfirm): Promise<boolean>;
-async function showConfirm(props: TGApp.Component.Confirm.ParamsInput): Promise<string>;
+async function showConfirm(props: TGApp.Component.Confirm.ParamsInput): Promise<string | false>;
 async function showConfirm(props: TGApp.Component.Confirm.Params): Promise<string | boolean>;
 async function showConfirm(props: TGApp.Component.Confirm.Params): Promise<string | boolean> {
   if (confirmInstance !== undefined) {

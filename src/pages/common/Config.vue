@@ -480,6 +480,13 @@ async function tryShowReset(): Promise<void> {
     text: "请联系开发者获取",
     mode: "input",
   });
+  if (res === false) {
+    showSnackbar({
+      color: "grey",
+      text: "已取消",
+    });
+    return;
+  }
   const time = getBuildTime();
   const code = time.startsWith("dev.") ? "dev" : time;
   if (res === code) {
