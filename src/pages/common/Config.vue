@@ -122,7 +122,7 @@
         />
       </template>
     </v-list-item>
-    <v-list-item prepend-icon="mdi-database-remove" title="清除用户缓存" @click="confirmDelUC" />
+    <v-list-item prepend-icon="mdi-database-remove" title="清除缓存" @click="confirmDelCache" />
     <v-list-item
       v-show="showReset"
       title="重置数据库"
@@ -147,6 +147,7 @@
 
 <script lang="ts" setup>
 import { app, fs, os } from "@tauri-apps/api";
+import { relaunch } from "@tauri-apps/api/process";
 import { computed, onMounted, ref } from "vue";
 
 import showConfirm from "../../components/func/confirm";
@@ -437,25 +438,34 @@ async function confirmUpdate(title?: string): Promise<void> {
 }
 
 // 清除用户缓存
-async function confirmDelUC(): Promise<void> {
+async function confirmDelCache(): Promise<void> {
   const res = await showConfirm({
-    title: "确认清除用户缓存吗？",
-    text: "备份数据也将被清除",
+    title: "确认清除缓存吗？",
+    text: "只删除 Webview 缓存，不处理用户数据",
   });
   if (!res) {
     showSnackbar({
       color: "grey",
-      text: "已取消清除用户缓存",
+      text: "已取消清除缓存",
     });
     return;
   }
-  await fs.removeDir("userData", {
+  await fs.removeDir("EBWebview\\Default\\Cache", {
     dir: fs.BaseDirectory.AppLocalData,
     recursive: true,
   });
-  showSnackbar({ text: "用户数据已删除!" });
-  achievementsStore.init();
-  await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData });
+  await fs.removeDir("EBWebview\\Default\\Code Cache", {
+    dir: fs.BaseDirectory.AppLocalData,
+    recursive: true,
+  });
+  showSnackbar({
+    text: "缓存已清除!即将重启应用...",
+  });
+  await new Promise(() => {
+    setTimeout(async () => {
+      await relaunch();
+    }, 1500);
+  });
 }
 
 // 恢复默认设置

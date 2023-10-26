@@ -54,6 +54,10 @@
       },
       "os": {
         "all": true
+      },
+      "process": {
+        "all": false,
+        "relaunch": true
       }
     },
     "bundle": {
