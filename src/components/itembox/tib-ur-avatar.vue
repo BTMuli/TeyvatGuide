@@ -1,5 +1,5 @@
 <template>
-  <TItemBox v-model="box" @click="showData" />
+  <TItemBox v-model="box" :title="hoverTitle" />
 </template>
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
@@ -13,6 +13,7 @@ interface TibUrAvatarProps {
 
 const props = defineProps<TibUrAvatarProps>();
 const box = ref<TItemBoxData>(<TItemBoxData>{});
+const hoverTitle = ref<string>("点击查看详情");
 const getName = (): string => {
   return props.modelValue.id === 10000005
     ? "旅行者-空"
@@ -36,10 +37,6 @@ onMounted(async () => {
     innerHeight: 20,
     display: "inner",
   };
+  hoverTitle.value = `等级：${props.modelValue.level}\n好感：${props.modelValue.fetter}\n角色ID：${props.modelValue.id}`;
 });
-
-function showData(): void {
-  // todo @click 应该出来的是一个弹窗，而不是 console
-  console.log(props.modelValue);
-}
 </script>
