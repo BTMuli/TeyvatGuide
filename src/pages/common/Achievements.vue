@@ -107,7 +107,7 @@
 </template>
 
 <script lang="ts" setup>
-import { dialog, fs } from "@tauri-apps/api";
+import { dialog, fs, path } from "@tauri-apps/api";
 import { computed, nextTick, onBeforeMount, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -327,14 +327,16 @@ async function exportJson(): Promise<void> {
     info: await getUiafHeader(),
     list: await TGSqlite.getUIAF(),
   };
+  const fileName = `UIAF_${UiafData.info.export_app}_${UiafData.info.export_app_version}_${UiafData.info.export_timestamp}`;
   const isSave = await dialog.save({
-    // TODO: 设置保存文件名
+    title: "导出 UIAF 数据",
     filters: [
       {
-        name: "uiaf",
+        name: "UIAF JSON",
         extensions: ["json"],
       },
     ],
+    defaultPath: `${await path.downloadDir()}${path.sep}${fileName}.json`,
   });
   if (isSave) {
     await fs.writeTextFile(isSave, JSON.stringify(UiafData));
