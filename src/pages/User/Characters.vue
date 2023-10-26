@@ -70,30 +70,21 @@ const roleCookie = computed(() => userStore.getCookieGroup4());
 const visible = ref(false);
 const dataVal = ref<TGApp.Sqlite.Character.UserRole>(<TGApp.Sqlite.Character.UserRole>{});
 
-// grid
-const gridGap = ref("10px");
-
-const resizeObserve = new ResizeObserver(() => {
-  getGridGap();
-});
-
 onMounted(async () => {
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
   await loadRole();
-  resizeObserve.observe(<Element>document.querySelector(".uc-grid"));
   loading.value = false;
 });
-
-function getGridGap(): void {
-  const width = <number>document.querySelector(".uc-grid")?.clientWidth - 20;
-  const count = Math.floor(width / 180);
-  gridGap.value = `${(width - count * 180) / (count - 1)}px`;
-}
 
 async function loadRole(): Promise<void> {
   const roleData = await TGSqlite.getUserCharacter(user.gameUid);
   if (roleData !== false) {
+    roleData.sort((a, b) => {
+      if (a.star !== b.star) return b.star - a.star;
+      if (a.element !== b.element) return a.element.localeCompare(b.element);
+      return a.cid - b.cid;
+    });
     roleList.value = roleData;
     isEmpty.value = false;
   }
@@ -109,7 +100,6 @@ async function refreshRoles(): Promise<void> {
     loadingTitle.value = "正在更新角色数据";
     await loadRole();
   } else {
-    // todo 1034 极验处理
     showSnackbar({
       text: `[${res.retcode}] ${res.message}`,
       color: "error",
@@ -184,6 +174,7 @@ function getUpdateTime(): string {
 }
 
 function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
+  console.log(role);
   dataVal.value = role;
   visible.value = true;
 }
@@ -231,6 +222,6 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
 .uc-grid {
   display: grid;
   grid-gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 </style>
