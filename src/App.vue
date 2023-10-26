@@ -17,11 +17,13 @@ import { useRouter } from "vue-router";
 
 import TBackTop from "./components/app/t-backTop.vue";
 import TSidebar from "./components/app/t-sidebar.vue";
+import showConfirm from "./components/func/confirm";
 import showSnackbar from "./components/func/snackbar";
 import { getEmojis } from "./plugins/Mys/request/getEmojis";
 import TGSqlite from "./plugins/Sqlite";
 import { useAppStore } from "./store/modules/app";
 import { useUserStore } from "./store/modules/user";
+import { getBuildTime } from "./utils/TGBuild";
 
 const appStore = useAppStore();
 const isMain = ref<boolean>(false);
@@ -65,6 +67,7 @@ async function listenOnInit(): Promise<void> {
     await emojiLoad();
     await checkAppLoad();
     await checkUserLoad();
+    await checkUpdate();
   });
   return;
 }
@@ -203,6 +206,28 @@ async function getDeepLink(): Promise<void> {
       });
     }
   });
+}
+
+// 检测更新
+async function checkUpdate(): Promise<void> {
+  const isProdEnv = import.meta.env.MODE === "production";
+  const needUpdate = await TGSqlite.checkUpdate();
+  if (needUpdate && isProdEnv) {
+    const confirm = await showConfirm({
+      title: "检测到版本更新",
+      text: "请到设置页手动更新版本，即将弹出更新说明子页面",
+    });
+    if (confirm) {
+      appStore.buildTime = getBuildTime();
+      window.open("https://app.btmuli.ink/docs/Changelogs.html");
+    } else {
+      showSnackbar({
+        text: "请到设置页手动更新版本！",
+        color: "error",
+        timeout: 3000,
+      });
+    }
+  }
 }
 </script>
 <style lang="css">
