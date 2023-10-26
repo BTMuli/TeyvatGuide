@@ -20,7 +20,6 @@ import getSyncAvatarDetail from "./getSyncAvatarDetail";
 import getSyncAvatarListAll from "./getSyncAvatarListAll";
 import { getTokensByLoginTicket } from "./getTokens";
 import { getUserInfoByCookie } from "./getUserInfo";
-import { getVerification, submitVerification } from "./operVerification";
 import { verifyLToken } from "./verifyLToken";
 
 const TGRequest = {
@@ -57,10 +56,6 @@ const TGRequest = {
     calculate: {
       getSyncAvatarListAll,
       getSyncAvatarDetail,
-    },
-    verification: {
-      get: getVerification,
-      verify: submitVerification,
     },
   },
 };

@@ -13,10 +13,6 @@
         </div>
       </div>
     </div>
-    <h1>极验测试</h1>
-    <div class="btn-list">
-      <v-btn class="test-btn" @click="getGC">获取极验</v-btn>
-    </div>
     <h1>窗口建立测试</h1>
     <div class="btn-list">
       <v-btn class="test-btn" @click="tryNewWindow('sign_in')">SignIn</v-btn>
@@ -27,7 +23,6 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 
-import showGeetest from "../../components/func/geetest";
 import mhyClient from "../../utils/TGClient";
 
 const visible = ref<boolean>(false);
@@ -36,10 +31,6 @@ onMounted(async () => {
   visible.value = false;
   await mhyClient.run();
 });
-
-async function getGC(): Promise<void> {
-  await showGeetest();
-}
 
 async function tryNewWindow(func: string): Promise<void> {
   await mhyClient.open(func);
