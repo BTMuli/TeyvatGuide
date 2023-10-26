@@ -31,6 +31,13 @@ features = ["sqlite"]
 [dependencies.tauri-plugin-deep-link]
 version = "0.1.2"
 
+# 用于打包
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
 # DO NOT REMOVE!!
