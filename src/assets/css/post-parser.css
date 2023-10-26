@@ -78,14 +78,14 @@
   z-index: -1;
   top: 0;
   left: 0;
+  display: flex;
+  overflow: hidden;
   width: 800px;
   height: 450px;
-  border-radius: 10px;
-  display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--common-shadow-2);
-  overflow: hidden;
+  border-radius: 10px;
 }
 
 :deep(.mys-post-vod-cover) {

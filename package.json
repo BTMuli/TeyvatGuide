@@ -30,12 +30,12 @@
     ],
     "*.vue": [
       "eslint --fix",
-      "stylelint --fix",
-      "prettier --write"
+      "prettier --write",
+      "stylelint --fix"
     ],
     "*.css": [
-      "stylelint --fix",
-      "prettier --write"
+      "prettier --write",
+      "stylelint --fix"
     ],
     "*.{yml,json,md}": [
       "prettier --write"
