@@ -2,7 +2,13 @@
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="gacha-top-bar">
     <div class="gacha-top-title">祈愿记录</div>
-    <v-select v-model="uidCur" class="gacha-top-select" :items="selectItem" variant="outlined" />
+    <v-select
+      v-model="uidCur"
+      class="gacha-top-select"
+      :items="selectItem"
+      variant="outlined"
+      :theme="vuetifyTheme"
+    />
     <div class="gacha-top-btns">
       <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh">刷新</v-btn>
       <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn()">
@@ -42,7 +48,7 @@
 </template>
 <script lang="ts" setup>
 import { dialog, path } from "@tauri-apps/api";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
@@ -51,12 +57,14 @@ import GroOverview from "../../components/gachaRecord/gro-overview.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import { AppCharacterData, AppWeaponData } from "../../data";
 import TGSqlite from "../../plugins/Sqlite";
+import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
 import { backupUigfData, exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF";
 import TGRequest from "../../web/request/TGRequest";
 
 // store
 const userStore = useUserStore();
+const appStore = useAppStore();
 const account = userStore.getCurAccount();
 const authkey = ref<string>("");
 
@@ -70,6 +78,9 @@ const selectItem = ref<string[]>([]);
 const uidCur = ref<string>("");
 const gachaListCur = ref<TGApp.Sqlite.GachaRecords.SingleTable[]>([]);
 const tab = ref<string>("");
+const vuetifyTheme = computed(() => {
+  return appStore.theme === "dark" ? "dark" : "light";
+});
 
 onMounted(async () => {
   loadingTitle.value = "正在获取祈愿 UID 列表";
