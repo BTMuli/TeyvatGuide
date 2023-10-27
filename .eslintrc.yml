@@ -23,7 +23,7 @@ overrides:
   - files: ["*.ts"]
     extends: standard-with-typescript
     # 将此处规则 copy 到下面的 .vue 文件的 rules 中
-    rules:
+    rules: &typescript-rules
       import/order:
         - error
         - groups:
@@ -74,50 +74,7 @@ overrides:
       parser: "@typescript-eslint/parser"
       extraFileExtensions: [.vue]
     rules:
-      import/order:
-        - error
-        - groups:
-            - builtin
-            - external
-            - [internal, parent, sibling, index]
-            - unknown
-          newlines-between: always
-          alphabetize:
-            order: asc
-            caseInsensitive: true
-      "@typescript-eslint/indent": off
-      "@typescript-eslint/quotes":
-        - error
-        - double
-      "@typescript-eslint/semi":
-        - error
-        - always
-      "@typescript-eslint/comma-dangle":
-        - error
-        - always-multiline
-      "@typescript-eslint/space-before-function-paren":
-        - error
-        - anonymous: always
-          named: never
-          asyncArrow: always
-      "@typescript-eslint/member-delimiter-style":
-        - error
-        - multiline:
-            delimiter: semi
-            requireLast: true
-      "@typescript-eslint/no-import-type-side-effects": error
-      "@typescript-eslint/strict-boolean-expressions": off
-      "@typescript-eslint/consistent-type-assertions":
-        - warn
-        - assertionStyle: angle-bracket # 使用尖括号
-      "@typescript-eslint/naming-convention":
-        - warn
-        - selector: variableLike
-          format: [camelCase, UPPER_CASE, PascalCase, snake_case]
-          leadingUnderscore: allow
-          trailingUnderscore: allow
-      "@typescript-eslint/no-non-null-assertion": warn
-      "@typescript-eslint/no-misused-promises": off
+      <<: *typescript-rules
   - files: [package.json, tsconfig.json]
     parser: jsonc-eslint-parser
     rules:
