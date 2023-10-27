@@ -453,15 +453,11 @@ async function confirmDelCache(): Promise<void> {
   loadingSub.value = "耗时较久，请稍作等候";
   loading.value = true;
   const timeStart = Date.now();
-  if (Array.isArray(CacheDir)) {
-    for (const dir of CacheDir) {
-      const size: number = await invoke("get_dir_size", { path: dir });
-      cacheBSize += size;
-    }
-  } else {
-    cacheBSize = await invoke("get_dir_size", { path: CacheDir });
+  for (const dir of CacheDir) {
+    const size: number = await invoke("get_dir_size", { path: dir });
+    cacheBSize += size;
   }
-  let cacheSize = bytesToSize(cacheBSize);
+  const cacheSize = bytesToSize(cacheBSize);
   loading.value = false;
   const timeEnd = Date.now();
   const res = await showConfirm({
@@ -475,12 +471,8 @@ async function confirmDelCache(): Promise<void> {
     });
     return;
   }
-  if (Array.isArray(CacheDir)) {
-    for (const dir of CacheDir) {
-      await fs.removeDir(dir, { recursive: true });
-    }
-  } else {
-    await fs.removeDir(CacheDir, { recursive: true });
+  for (const dir of CacheDir) {
+    await fs.removeDir(dir, { recursive: true });
   }
   showSnackbar({
     text: "缓存已清除!请重新启动应用！",

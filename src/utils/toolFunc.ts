@@ -83,7 +83,7 @@ export async function getDirSize(
  * @since Beta v0.3.4
  * @returns {string|string[]} 缓存目录
  */
-export async function getCacheDir(): Promise<string | string[] | false> {
+export async function getCacheDir(): Promise<string[] | false> {
   const cacheDir = await path.appCacheDir();
   const osType = await os.type();
   if (osType === "Windows_NT") {
@@ -91,7 +91,7 @@ export async function getCacheDir(): Promise<string | string[] | false> {
     const codeCache = `${cacheDir}EBWebview${path.sep}Default${path.sep}Code Cache`;
     return [cache, codeCache];
   } else if (osType === "Darwin") {
-    return `${cacheDir}WebKit`;
+    return [`${cacheDir}WebKit`];
   }
   return false;
 }
