@@ -2,7 +2,7 @@
  * @file assets/css/post-parser.css
  * @description 米游社解析 css
  * @todo 需要完善
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  */
 
 :deep(.mys-post-div) {
@@ -126,12 +126,6 @@
   max-width: 400px;
   height: 180px;
   border-radius: 10px;
-  transition: all 0.5s;
-}
-
-:deep(.mys-post-link-card-cover):hover img {
-  transform: scale(1.05);
-  transition: all 0.5s;
 }
 
 :deep(.mys-post-link-card-content) {
@@ -144,9 +138,11 @@
 }
 
 :deep(.mys-post-link-card-title) {
+  width: 100%;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
+  text-align: left;
 }
 
 :deep(.mys-post-link-card-price) {
