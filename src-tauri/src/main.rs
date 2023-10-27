@@ -96,8 +96,10 @@ fn main() {
             // 子窗口 label 的数组
             const SUB_WINDOW_LABELS: [&str; 3] = ["Sub_window", "Dev_JSON", "mhy_client"];
             for label in SUB_WINDOW_LABELS.iter() {
-              let sub = window.get_window(label).unwrap();
-              sub.close().unwrap();
+              let sub = window.get_window(label);
+              if sub.is_some() {
+                sub.unwrap().close().unwrap();
+              }
             }
           }
           window.close().unwrap();
