@@ -1,5 +1,3 @@
-<!-- eslint-disable vue/no-v-html -->
-<!-- todo 添加更多信息 -->
 <template>
   <TSwitchTheme />
   <TShareBtn
@@ -10,25 +8,83 @@
   />
   <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="mys-post-body">
+    <div class="mys-post-info">
+      <div class="mys-post-meta">
+        <div class="mpm-forum" v-if="postRender.forum !== null">
+          <img :src="postRender.forum.icon" alt="forumIcon" />
+          <span>{{ postRender.forum?.name }}</span>
+        </div>
+        <div class="mpm-item" :title="`浏览数：${postRender.metadata.view_num}`">
+          <v-icon>mdi-eye</v-icon>
+          <span>{{ postRender.metadata.view_num }}</span>
+        </div>
+        <div class="mpm-item" :title="`收藏数：${postRender.metadata.bookmark_num}`">
+          <v-icon>mdi-star</v-icon>
+          <span>{{ postRender.metadata.bookmark_num }}</span>
+        </div>
+        <div class="mpm-item" :title="`回复数：${postRender.metadata.reply_num}`">
+          <v-icon>mdi-comment</v-icon>
+          <span>{{ postRender.metadata.reply_num }}</span>
+        </div>
+        <div class="mpm-item" :title="`点赞数：${postRender.metadata.like_num}`">
+          <v-icon>mdi-thumb-up</v-icon>
+          <span>{{ postRender.metadata.like_num }}</span>
+        </div>
+        <div class="mpm-item" :title="`转发数：${postRender.metadata.forward_num}`">
+          <v-icon>mdi-share-variant</v-icon>
+          <span>{{ postRender.metadata.forward_num }}</span>
+        </div>
+      </div>
+      <div class="mys-post-author">
+        <div class="mpa-left">
+          <span>{{ postRender.author.nickname }}</span>
+          <span>{{
+            postRender.author.certification?.label === ""
+              ? postRender.author.introduce
+              : postRender.author.certification?.label
+          }}</span>
+        </div>
+        <div class="mpa-right">
+          <div class="mpa-icon">
+            <img :src="postRender.author.avatar_url" alt="userIcon" />
+          </div>
+          <div v-if="postRender.author.pendant !== ''" class="mpa-pendant">
+            <img :src="postRender.author.pendant" alt="userPendant" />
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="mys-post-title">
-      {{ postRender.title }}
+      <span class="mpt-official" v-if="postRender.isOfficial">官</span>
+      <span>{{ postRender.title }}</span>
     </div>
     <div class="mys-post-subtitle">
       <span>创建时间：{{ postRender.created }}&emsp;</span>
       <span>更新时间：{{ postRender.updated }}</span>
     </div>
+    <!-- eslint-disable-nextline vue/no-v-html -->
     <div class="mys-post-content" v-html="postHtml" />
   </div>
 </template>
 <script lang="ts" setup>
 import { appWindow } from "@tauri-apps/api/window";
-import { ref, onMounted, watch } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import Mys from "../plugins/Mys";
+
+interface PostRender {
+  title: string;
+  isOfficial: boolean;
+  created: string;
+  updated: string;
+  author: Partial<TGApp.Plugins.Mys.User.Post>;
+  forum: TGApp.Plugins.Mys.Post.Forum | null;
+  metadata: TGApp.Plugins.Mys.Post.Stat;
+}
 
 // loading
 const loading = ref<boolean>(true);
@@ -44,10 +100,26 @@ const shareTitle = ref<string>("");
 // 数据
 const postId = Number(useRoute().params.post_id);
 const postHtml = ref<string>("");
-const postRender = ref({
+const postRender = ref<PostRender>({
   title: "",
+  isOfficial: false,
   created: "",
   updated: "",
+  author: {
+    nickname: "",
+    certification: {
+      type: 0,
+      label: "",
+    },
+  },
+  forum: null,
+  metadata: {
+    view_num: 0,
+    bookmark_num: 0,
+    reply_num: 0,
+    like_num: 0,
+    forward_num: 0,
+  },
 });
 
 onMounted(async () => {
@@ -67,8 +139,12 @@ onMounted(async () => {
     postHtml.value = Mys.Post.parser(postData);
     postRender.value = {
       title: postData.post.subject,
+      isOfficial: postData.post.post_status.is_official,
       created: new Date(postData.post.created_at * 1000).toLocaleString().replace(/\//g, "-"),
       updated: new Date(postData.post.updated_at * 1000).toLocaleString().replace(/\//g, "-"),
+      author: postData.user,
+      forum: postData.forum,
+      metadata: postData.stat,
     };
     shareTitle.value = `Post_${postId}`;
     postRef.value = <HTMLElement>document.querySelector(".mys-post-body");
@@ -81,9 +157,9 @@ onMounted(async () => {
     await appWindow.setTitle(`Post_${postId} Parsing Error`);
     return;
   }
-  setTimeout(() => {
+  await nextTick(() => {
     loading.value = false;
-  }, 200);
+  });
 });
 
 watch(loadShare, (value) => {
@@ -97,4 +173,154 @@ watch(loadShare, (value) => {
   }
 });
 </script>
-<style lang="css" scoped src="../assets/css/post-parser.css"></style>
+<style lang="css" scoped src="../assets/css/post-parser.css" />
+<style lang="css" scoped>
+.mys-post-body {
+  width: 800px;
+  margin: 0 auto;
+  font-family: var(--font-text);
+}
+
+/* title */
+.mys-post-title {
+  margin: 10px auto;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 20px;
+}
+
+.mpt-official {
+  display: inline-block;
+  width: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  margin-right: 2px;
+  background: var(--common-shadow-1);
+  color: var(--box-text-3);
+  text-align: center;
+}
+
+/* subtitle */
+.mys-post-subtitle {
+  font-size: 16px;
+  opacity: 0.6;
+}
+
+/* info */
+.mys-post-info {
+  display: flex;
+  width: 100%;
+  align-items: end;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--common-shadow-2);
+}
+
+/* author */
+.mys-post-author {
+  display: flex;
+}
+
+.mpa-left {
+  position: relative;
+  display: flex;
+  height: 50px;
+  flex-direction: column;
+  align-items: end;
+  color: var(--box-text-4);
+}
+
+.mpa-left :nth-child(1) {
+  display: flex;
+  height: 30px;
+  align-items: center;
+  justify-content: start;
+  font-size: 16px;
+}
+
+.mpa-left :nth-child(2) {
+  display: flex;
+  width: 100%;
+  height: 20px;
+  align-items: center;
+  justify-content: end;
+  border-top: 2px solid var(--common-shadow-2);
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.mpa-right {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+.mpa-icon {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  overflow: hidden;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.mpa-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mpa-pendant {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.mpa-pendant img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* meta */
+.mys-post-meta {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  color: var(--box-text-4);
+  column-gap: 10px;
+  font-size: 14px;
+}
+
+.mpm-forum {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mpm-forum img {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+}
+
+.mpm-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+  column-gap: 2px;
+  opacity: 0.8;
+}
+
+/* content */
+.mys-post-content {
+  line-height: 2;
+}
+</style>
