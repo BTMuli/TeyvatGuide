@@ -207,7 +207,7 @@ class TGClient {
    * @returns {void} - 无返回值
    */
   async callback(callback: string, data: object): Promise<void> {
-    const response: TGApp.BBS.Response.Base = {
+    const response = {
       retcode: 0,
       message: "success",
       data: data ?? {},
