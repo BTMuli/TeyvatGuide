@@ -112,6 +112,16 @@
                 <img src="/source/UI/userRecord.webp" class="side-icon-user" alt="game_record" />
               </template>
             </v-list-item>
+            <v-list-item class="side-item-user" title="酒馆" @click="openClient('tavern')">
+              <template #prepend>
+                <img src="/platforms/mhy/mys.webp" alt="酒馆" class="side-icon-user" />
+              </template>
+            </v-list-item>
+            <v-list-item class="side-item-user" title="生日" @click="openClient('birthday')">
+              <template #prepend>
+                <img src="/source/UI/paimon.webp" alt="生日" class="side-icon-user" />
+              </template>
+            </v-list-item>
             <v-list-item
               class="side-item-user"
               title="登录"
@@ -256,6 +266,7 @@ function login(): void {
 .side-icon-user {
   width: 20px;
   height: 20px;
+  border-radius: 5px;
   margin-right: 10px;
 }
 </style>

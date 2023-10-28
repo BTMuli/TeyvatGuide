@@ -29,6 +29,11 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
   } else {
     mhy_window_config.url = get_mhy_client_url(func.clone());
   }
+  if func == "birthday" {
+    mhy_window_config.width = 1280.0;
+    mhy_window_config.height = 720.0;
+    mhy_window_config.resizable = false;
+  }
   let has_mhy_client = handle.get_window("mhy_client").is_some();
   if has_mhy_client {
     dbg!("mhy_client exists");

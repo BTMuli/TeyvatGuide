@@ -36,7 +36,8 @@
       "dialog": {
         "all": false,
         "open": true,
-        "save": true
+        "save": true,
+        "message": true
       },
       "clipboard": {
         "all": true
@@ -97,6 +98,11 @@
           "enableTauriAPI": true
         },
         {
+          "domain": "m.miyoushe.com",
+          "windows": ["mhy_client"],
+          "enableTauriAPI": true
+        },
+        {
           "domain": "webstatic.mihoyo.com",
           "windows": ["mhy_client"],
           "enableTauriAPI": true
@@ -131,7 +137,7 @@
       },
       {
         "fullscreen": false,
-        "resizable": false,
+        "resizable": true,
         "title": "米游社",
         "label": "mhy_client",
         "url": "https://api-static.mihoyo.com/",
@@ -140,7 +146,8 @@
         "width": 400,
         "height": 800,
         "center": true,
-        "decorations": false
+        "decorations": true,
+        "closable": false
       }
     ]
   }

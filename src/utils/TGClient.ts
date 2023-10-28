@@ -4,7 +4,7 @@
  * @since Beta v0.3.4
  */
 
-import { event, invoke } from "@tauri-apps/api";
+import { event, invoke, path } from "@tauri-apps/api";
 import type { Event } from "@tauri-apps/api/event";
 import { WebviewWindow } from "@tauri-apps/api/window";
 
@@ -115,8 +115,14 @@ class TGClient {
         return "https://webstatic.mihoyo.com/bbs/event/signin-ys/index.html?act_id=e202009291139501";
       case "game_record":
         return "https://webstatic.mihoyo.com/app/community-game-records/index.html?bbs_presentation_style=fullscreen";
+      case "daily_note":
+        return "https://webstatic.mihoyo.com/app/community-game-records/index.html?bbs_presentation_style=fullscreen#/ys/daily/";
+      case "tavern":
+        return "https://m.miyoushe.com/ys/#/home/26";
+      case "birthday":
+        return "https://webstatic.mihoyo.com/ys/event/e20220303-birthday/index.html?game_biz=hk4e_cn&bbs_presentation_style=fullscreen&bbs_auth_required=true&bbs_landscape=true&activity_id=20220301153521&mhy_hide_status_bar=true&utm_source=bbs&utm_medium=mys&utm_campaign=arti";
       default:
-        return "";
+        return this.getUrl("daily_note");
     }
   }
 
@@ -190,6 +196,9 @@ class TGClient {
         break;
       case "login":
         await this.nullCallback(arg);
+        break;
+      case "onClickImg":
+        await this.onClickImg(payload);
         break;
       // getNotificationSettings
       default:
@@ -371,7 +380,12 @@ class TGClient {
    * @returns {void} - 无返回值
    */
   async pushPage(payload: any): Promise<void> {
-    const url = payload.page;
+    const url: string = payload.page;
+    if (url.startsWith("mihoyobbs://article/")) {
+      const urlBBS = url.replace("mihoyobbs://article/", "https://m.miyoushe.com/ys/#/article/");
+      await this.open("pushPage", urlBBS);
+      return;
+    }
     await this.open("pushPage", url);
   }
 
@@ -402,6 +416,37 @@ class TGClient {
     console.warn(`[${arg.windowLabel}] ${arg.payload}`);
     const { callback } = <NormalArg>JSON.parse(arg.payload);
     await this.callback(callback, {});
+  }
+
+  /**
+   * @func onClickImg
+   * @since Beta v0.3.4
+   * @desc 点击图片，下载到本地
+   * @param {unknown} payload - 请求参数
+   * @returns {void} - 无返回值
+   */
+  async onClickImg(payload: any): Promise<void> {
+    const url = payload.image_list[0].url;
+    const savePath = `${await path.downloadDir()}${path.sep}${Date.now().toString()}.png`;
+    const executeJS =
+      "javascript:(function(){" +
+      "  window.__TAURI__.dialog.save({" +
+      "    title: '保存图片'," +
+      "    filters: [{ name: '图片', extensions: ['png'] }]," +
+      `    defaultPath: '${savePath}',` +
+      "  }).then((res) => {" +
+      "    fetch('" +
+      url +
+      "')" +
+      "      .then((response) => response.blob())" +
+      "      .then((blob) => {" +
+      "        window.__TAURI__.fs.writeBinaryFile(res, blob).then(() => {" +
+      "          alert('保存成功');" +
+      "        });" +
+      "      });" +
+      "  });" +
+      "})();";
+    await invoke("execute_js", { label: "mhy_client", js: executeJS });
   }
 }
 
