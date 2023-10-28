@@ -1,15 +1,16 @@
 /**
  * @file plugins Mys utils parsePost.ts
  * @description 用于解析Mys数据的工具
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  */
 
 import * as colorConvert from "color-convert";
+import type { KEYWORD } from "color-convert/conversions";
 import { score } from "wcag-color";
 
 /**
  * @description 给定两个16进制颜色值，确认两者是否相近
- * @since Beta v0.3.0
+ * @since Beta v0.3.4
  * @param {string} colorBg 背景颜色
  * @param {string} colorFg 前景颜色
  * @returns {boolean} 是否相近
@@ -17,9 +18,9 @@ import { score } from "wcag-color";
 function isColorSimilar(colorBg: string, colorFg: string): boolean {
   let hexBg, hexFg;
   if (colorBg.startsWith("#")) hexBg = colorBg;
-  else hexBg = colorConvert.keyword.hex(colorBg);
+  else hexBg = colorConvert.keyword.hex(<KEYWORD>colorBg);
   if (colorFg.startsWith("#")) hexFg = colorFg;
-  else hexFg = colorConvert.keyword.hex(colorFg);
+  else hexFg = colorConvert.keyword.hex(<KEYWORD>colorFg);
   const contrast = score(hexFg, hexBg);
   return contrast === "Fail";
 }
@@ -72,16 +73,16 @@ function getVodTime(duration: number): string {
 
 /**
  * @description 解析用户帖子，将其转换为 StructContent
- * @since Alpha v0.1.2
+ * @since Beta v0.3.4
  * @see PostContent
  * @param {string} content 帖子内容
  * @returns {string} 解析后的内容
  */
 function parseContent(content: string): string {
-  const data = JSON.parse(content);
-  const result: TGApp.Plugins.Mys.Post.StructuredContent[] = [];
-  // 遍历 data 属性，值
-  Object.keys(data).forEach((key) => {
+  const data: TGApp.Plugins.Mys.SctPost.Other = JSON.parse(content);
+  const result: TGApp.Plugins.Mys.SctPost.Common[] = [];
+  const keys = Object.keys(data);
+  keys.forEach((key) => {
     switch (key) {
       case "describe":
         result.push({
@@ -89,19 +90,20 @@ function parseContent(content: string): string {
         });
         break;
       case "imgs":
-        for (const image of data.imgs) {
+        data.imgs.forEach((item) => {
           result.push({
             insert: {
-              image,
+              image: item,
             },
           });
-        }
+        });
         break;
       default:
-        // 如果是其他属性，就直接插入
+        console.warn(`[MysPostParser] Unknown key: ${key}`);
         result.push({
           insert: JSON.stringify(data[key]),
         });
+        break;
     }
   });
   return JSON.stringify(result);
@@ -126,7 +128,7 @@ function parsePost(post: TGApp.Plugins.Mys.Post.FullData): string {
       parserData = post.post.structured_content;
     }
   }
-  const jsonData: TGApp.Plugins.Mys.Post.StructuredContent[] = JSON.parse(parserData);
+  const jsonData: TGApp.Plugins.Mys.SctPost.Common[] = JSON.parse(parserData);
   const doc = document.createElement("div");
   jsonData.forEach((item: any) => {
     const parsed = transferParser(item);
@@ -138,42 +140,39 @@ function parsePost(post: TGApp.Plugins.Mys.Post.FullData): string {
 /**
  * @description 解析中转
  * @since Beta v0.3.3
- * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @param {TGApp.Plugins.Mys.SctPost.Common} data Mys数据
  * @returns {HTMLDivElement | HTMLSpanElement} 解析后的中转
  */
-function transferParser(
-  data: TGApp.Plugins.Mys.Post.StructuredContent,
-): HTMLDivElement | HTMLSpanElement {
+function transferParser(data: TGApp.Plugins.Mys.SctPost.Common): HTMLDivElement | HTMLSpanElement {
   if (typeof data.insert === "string") {
-    return parseText(data);
-  } else if (data.insert.image) {
-    return parseImage(data);
-  } else if (data.insert.vod != null) {
-    return parseVideo(data);
-  } else if (data.insert.video) {
-    return parseVideo(data);
-  } else if (data.insert.backup_text) {
-    return parseBackup(data);
-  } else if (data.insert.link_card != null) {
-    return parseLinkCard(data);
-  } else if (data.insert.divider) {
-    return parseDivider(data);
-  } else if (data.insert.mention != null) {
-    return parseMention(data);
-  } else if (data.insert.villa_card != null) {
-    return parseVillaCard(data);
-  } else {
-    return parseUnknown(data);
+    return parseText(<TGApp.Plugins.Mys.SctPost.Text | TGApp.Plugins.Mys.SctPost.Link>data);
+  } else if ("image" in data.insert) {
+    return parseImage(<TGApp.Plugins.Mys.SctPost.Image>data);
+  } else if ("vod" in data.insert) {
+    return parseVideo(<TGApp.Plugins.Mys.SctPost.Vod>data);
+  } else if ("video" in data.insert) {
+    return parseVideo(<TGApp.Plugins.Mys.SctPost.Video>data);
+  } else if ("backup_text" in data.insert) {
+    return parseBackup(<TGApp.Plugins.Mys.SctPost.Backup>data);
+  } else if ("link_card" in data.insert) {
+    return parseLinkCard(<TGApp.Plugins.Mys.SctPost.LinkCard>data);
+  } else if ("divider" in data.insert) {
+    return parseDivider(<TGApp.Plugins.Mys.SctPost.Divider>data);
+  } else if ("mention" in data.insert) {
+    return parseMention(<TGApp.Plugins.Mys.SctPost.Mention>data);
+  } else if ("villa_card" in data.insert) {
+    return parseVillaCard(<TGApp.Plugins.Mys.SctPost.VillaCard>data);
   }
+  return parseUnknown(<TGApp.Plugins.Mys.SctPost.Base>data);
 }
 
 /**
  * @description 解析未知数据
- * @since Beta v0.3.3
- * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @since Beta v0.3.4
+ * @param {TGApp.Plugins.Mys.SctPost.Base} data Mys数据
  * @returns {HTMLDivElement} 解析后的未知数据
  */
-function parseUnknown(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
+function parseUnknown(data: TGApp.Plugins.Mys.SctPost.Base): HTMLDivElement {
   const div = document.createElement("div");
   div.classList.add("mys-post-unknown");
   const code = document.createElement("code");
@@ -186,63 +185,43 @@ function parseUnknown(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivEl
 /**
  * @description 解析文本
  * @since Beta v0.3.0
- * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @param {TGApp.Plugins.Mys.SctPost.Text |TGApp.Plugins.Mys.SctPost.Link} data Mys数据
  * @returns {HTMLSpanElement} 解析后的文本
  */
-function parseText(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLSpanElement {
-  // 检查数据
-  if (typeof data.insert !== "string") {
-    throw new Error(`[ParseText] data.insert is not a string: ${JSON.stringify(data)}`);
+function parseText(
+  data: TGApp.Plugins.Mys.SctPost.Text | TGApp.Plugins.Mys.SctPost.Link,
+): HTMLSpanElement {
+  if (data.attributes && "link" in data.attributes) {
+    return LinkTextParser(<TGApp.Plugins.Mys.SctPost.Link>data);
   }
-  // 创建文本
   const text = document.createElement("span");
-  // 设置文本属性
-  if (data.attributes != null) {
+  if (data.attributes) {
     if (data.attributes.bold) text.style.fontWeight = "bold";
     if (data.attributes.color) {
       let colorGet = data.attributes.color;
-      // 如果 colorGet 在 darkColorList 中，就设置为对应的颜色
       if (isColorSimilar("#1E1E1E", colorGet)) {
         colorGet = "var(--app-page-content)";
       }
       text.style.color = colorGet;
     }
-    if (data.attributes.link) {
-      return LinkTextParser(data);
-    }
   }
   if (data.insert.startsWith("_(") && data.insert.endsWith(")")) {
-    return emojiParser(data);
+    return emojiParser(<TGApp.Plugins.Mys.SctPost.Text>data);
   }
-  // 添加 class
   text.classList.add("mys-post-span");
-  // 设置 span 内容
   text.innerText = data.insert;
-  // 返回文本
   return text;
 }
 
 /**
  * @description 解析链接
- * @since Beta v0.3.0
- * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @since Beta v0.3.4
+ * @param {TGApp.Plugins.Mys.SctPost.Link} data Mys数据
  * @returns {HTMLSpanElement} 解析后的链接
  */
-function LinkTextParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLSpanElement {
-  // 检查数据
-  if (typeof data.insert !== "string") {
-    throw new Error(`[LinkTextParser] data.insert is not a string: ${JSON.stringify(data)}`);
-  }
-  if (data.attributes == null) {
-    throw new Error("[LinkTextParser] data.attributes is not defined");
-  }
-  if (!data.attributes.link) {
-    throw new Error("[LinkTextParser] data.attributes.link is not defined");
-  }
-  // 创建图标
+function LinkTextParser(data: TGApp.Plugins.Mys.SctPost.Link): HTMLSpanElement {
   const icon = document.createElement("i");
   icon.classList.add("mdi", "mdi-link-variant");
-  // 创建链接
   const link = document.createElement("a");
   const linkUrl = data.attributes.link;
   link.classList.add("mys-post-link");
@@ -255,114 +234,72 @@ function LinkTextParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLSpa
     link.target = "view_window";
   }
   link.innerText = data.insert;
-  // 插入图标作为链接前缀
   link.prepend(icon);
-  // 返回链接
   return link;
 }
 
 /**
  * @description 解析分割线
- * @since Beta v0.3.0
- * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @since Beta v0.3.4
+ * @param {TGApp.Plugins.Mys.SctPost.Divider} data Mys数据
  * @returns {HTMLDivElement} 解析后的分割线
  */
-function parseDivider(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
-  // 数据检查
-  if (typeof data.insert === "string") {
-    throw new Error(`[ParseDivider] data.insert is a string: ${data.insert}`);
-  }
-  if (!data.insert.divider) {
-    throw new Error("[ParseDivider] data.insert.divider is not defined");
-  }
-  // 创建分割线
+function parseDivider(data: TGApp.Plugins.Mys.SctPost.Divider): HTMLDivElement {
   const div = document.createElement("div");
   div.classList.add("mys-post-divider");
-  // 创建 img
   const img = document.createElement("img");
-  if (data.insert.divider === "line_1") {
-    img.src = "/source/post/divider_line_1.webp";
-  } else if (data.insert.divider === "line_2") {
-    img.src = "/source/post/divider_line_2.webp";
-  } else if (data.insert.divider === "line_3") {
-    img.src = "/source/post/divider_line_3.webp";
-  } else if (data.insert.divider === "line_4") {
-    img.src = "/source/post/divider_line_4.webp";
-  } else {
+  const dividerList = ["line_1", "line_2", "line_3", "line_4"];
+  if (!dividerList.includes(data.insert.divider)) {
     console.error("Unknown divider type", data);
-    return parseUnknown(data);
+    return parseUnknown(<TGApp.Plugins.Mys.SctPost.Base>data);
   }
-  // 插入 img
+  img.src = `/source/post/divider_${data.insert.divider}.webp`;
   div.appendChild(img);
-  // 返回分割线
   return div;
 }
 
 /**
  * @description 解析图片
- * @since Beta v0.3.0
- * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @since Beta v0.3.4
+ * @param {TGApp.Plugins.Mys.SctPost.Image} data Mys数据
  * @returns {HTMLDivElement} 解析后的图片
  */
-function parseImage(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
-  // 检查数据
-  if (typeof data.insert === "string") {
-    throw new Error(`[ParseImage] data.insert is a string: ${data.insert}`);
-  }
-  if (!data.insert.image) {
-    throw new Error("[ParseImage] data.insert.image is not defined");
-  }
+function parseImage(data: TGApp.Plugins.Mys.SctPost.Image): HTMLDivElement {
   const div = document.createElement("div");
-  // 创建图片
   const img = document.createElement("img");
   img.src = data.insert.image;
-  // 添加 class
   img.classList.add("mys-post-img");
-  // 插入图片
   div.appendChild(img);
-  // 添加 class
   div.classList.add("mys-post-div");
-  // 返回 div
   return div;
 }
 
 /**
  * @description 解析视频
  * @since Beta v0.3.3
- * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @todo 分开解析 Vod 和 Video
+ * @param {TGApp.Plugins.Mys.SctPost.Vod|TGApp.Plugins.Mys.SctPost.Video} data Mys数据
  * @returns {HTMLDivElement} 解析后的视频
  */
-function parseVideo(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
-  // 检查数据
-  if (typeof data.insert === "string") {
-    throw new Error(`[ParseVideo] data.insert is a string: ${data.insert}`);
-  }
-  if (data.insert.vod == null && !data.insert.video) {
-    throw new Error("[ParseVideo] data.insert.vod and data.insert.video is not defined");
-  }
-  // 创建 div
+function parseVideo(
+  data: TGApp.Plugins.Mys.SctPost.Vod | TGApp.Plugins.Mys.SctPost.Video,
+): HTMLDivElement {
   const div = document.createElement("div");
   div.classList.add("mys-post-div");
-  if (data.insert.vod != null) {
-    // 创建视频
+  if ("vod" in data.insert) {
     const video = document.createElement("video");
     video.classList.add("mys-post-vod");
-    // 获取 resolutions中size最大的视频
     const resolution = data.insert.vod.resolutions.reduce((prev: any, curr: any) => {
       if (prev.size > curr.size) return prev;
       return curr;
     });
-    video.poster = data.insert.vod.cover; // 设置封面
-    video.controls = true; // 设置 controls
-    // 添加 source
+    video.poster = data.insert.vod.cover;
+    video.controls = true;
     const source = document.createElement("source");
     source.src = resolution.url;
     source.type = resolution.format === ".mp4" ? "video/mp4" : "video/webm";
-    // 插入 source
     video.appendChild(source);
-    // 插入 video
     div.appendChild(video);
-    // 创建视频封面图
     const coverDiv = document.createElement("div");
     const cover = document.createElement("img");
     cover.classList.add("mys-post-vod-cover");
@@ -378,15 +315,12 @@ function parseVideo(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElem
     coverDiv.appendChild(playTime);
     coverDiv.classList.add("mys-post-vod-cover-div");
     div.appendChild(coverDiv);
-  } else if (data.insert.video) {
-    // 创建 iframe
+  } else {
     const video = document.createElement("iframe");
     video.classList.add("mys-post-iframe");
-    // 设置 iframe 属性
     video.src = data.insert.video;
     video.allowFullscreen = true;
     video.sandbox.add("allow-top-navigation", "allow-same-origin", "allow-forms", "allow-scripts");
-    // 插入 video
     div.appendChild(video);
   }
   return div;
@@ -394,40 +328,27 @@ function parseVideo(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElem
 
 /**
  * @description 解析折叠内容
- * @since Beta v0.3.0
- * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @since Beta v0.3.4
+ * @param {TGApp.Plugins.Mys.SctPost.Backup} data Mys数据
  * @returns {HTMLDivElement} 解析后的折叠内容
  */
-function parseBackup(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
-  // 检查数据
-  if (typeof data.insert === "string") {
-    throw new Error(`[ParseBackup] data.insert is a string: ${data.insert}`);
+function parseBackup(
+  data: TGApp.Plugins.Mys.SctPost.Backup | TGApp.Plugins.Mys.SctPost.Lottery,
+): HTMLDivElement {
+  if ("lottery" in data.insert) {
+    return LotteryParser(<TGApp.Plugins.Mys.SctPost.Lottery>data);
   }
-  if (data.insert.backup_text === "[抽奖]") {
-    return LotteryParser(data);
-  }
-  if (data.insert.fold == null) {
-    throw new Error("[ParseBackup] data.insert.fold is not defined");
-  }
-  // 转换
-  const titleJson: TGApp.Plugins.Mys.Post.StructuredContent[] = JSON.parse(data.insert.fold.title);
-  const contentJson: TGApp.Plugins.Mys.Post.StructuredContent[] = JSON.parse(
-    data.insert.fold.content,
-  );
-  // 创建 div
+  const titleJson: TGApp.Plugins.Mys.SctPost.Base[] = JSON.parse(data.insert.fold.title);
+  const contentJson: TGApp.Plugins.Mys.SctPost.Base[] = JSON.parse(data.insert.fold.content);
   const div = document.createElement("div");
   div.classList.add("mys-post-div");
-  // 创建折叠内容
   const details = document.createElement("details");
   details.classList.add("mys-post-details");
-  // 创建标题
   const title = document.createElement("summary");
-  // 解析标题
   titleJson.forEach((item) => {
     const parsed = transferParser(item);
     title.appendChild(parsed);
   });
-  // 创建内容
   const content = document.createElement("div");
   contentJson.forEach((item) => {
     const parsed = transferParser(item);
@@ -436,82 +357,47 @@ function parseBackup(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivEle
   details.appendChild(title);
   details.appendChild(content);
   div.appendChild(details);
-  // 返回 div
   return div;
 }
 
 /**
  * @description 解析抽奖
- * @since Beta v0.3.0
- * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @since Beta v0.3.4
+ * @param {TGApp.Plugins.Mys.SctPost.Lottery} data Mys数据
  * @returns {HTMLDivElement} 解析后的抽奖
  */
-function LotteryParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
-  // 检查数据
-  if (typeof data.insert === "string") {
-    throw new Error(`[LotteryParser] data.insert is a string: ${data.insert}`);
-  }
-  if (!data.insert.backup_text) {
-    throw new Error("[LotteryParser] data.insert.backup_text is not defined");
-  }
-  if (data.insert.backup_text !== "[抽奖]") {
-    throw new Error("[LotteryParser] data.insert.backup_text is not [抽奖]");
-  }
-  if (data.insert.lottery == null) {
-    throw new Error("[LotteryParser] data.insert.lottery is not defined");
-  }
-  // 创建 div
+function LotteryParser(data: TGApp.Plugins.Mys.SctPost.Lottery): HTMLDivElement {
   const div = document.createElement("div");
-  // 创建图标
   const icon = document.createElement("i");
   icon.classList.add("mdi", "mdi-gift");
-  // 创建标题
   const title = document.createElement("a");
   title.classList.add("mys-post-link");
   title.href = `/lottery/${data.insert.lottery.id}`;
   title.innerText = data.insert.lottery.toast;
-  // 插入图标
   title.prepend(icon);
-  // 插入标题
   div.appendChild(title);
-  // 返回 div
   return div;
 }
 
 /**
  * @description 解析链接卡片
- * @since Beta v0.3.0
- * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @since Beta v0.3.4
+ * @param {TGApp.Plugins.Mys.SctPost.LinkCard} data Mys数据
  * @returns {HTMLDivElement} 解析后的链接卡片
  */
-function parseLinkCard(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
-  // 检查数据
-  if (typeof data.insert === "string") {
-    throw new Error(`[ParseLinkCard] data.insert is a string: ${data.insert}`);
-  }
-  if (data.insert.link_card == null) {
-    throw new Error("[ParseLinkCard] data.insert.link_card is not defined");
-  }
-  // 创建 div
+function parseLinkCard(data: TGApp.Plugins.Mys.SctPost.LinkCard): HTMLDivElement {
   const div = document.createElement("div");
-  // 创建 cover
   const cover = document.createElement("div");
   cover.classList.add("mys-post-link-card-cover");
-  // 创建 img
   const img = document.createElement("img");
   img.src = data.insert.link_card.cover;
-  // 插入 img
   cover.appendChild(img);
-  // 插入 cover
   div.appendChild(cover);
-  // 创建 content
   const content = document.createElement("div");
   content.classList.add("mys-post-link-card-content");
-  // 创建标题
   const title = document.createElement("div");
   title.classList.add("mys-post-link-card-title");
   title.innerHTML = data.insert.link_card.title;
-  // 插入 title
   content.appendChild(title);
   if (data.insert.link_card.price) {
     const price = document.createElement("div");
@@ -519,10 +405,9 @@ function parseLinkCard(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivE
     price.innerHTML = data.insert.link_card.price;
     content.appendChild(price);
   }
-  // 创建 button
   const button = document.createElement("a");
   button.classList.add("mys-post-link-card-btn");
-  button.innerHTML = (data.insert.link_card.button_text || "详情") + " >";
+  button.innerHTML = (data.insert.link_card.button_text ?? "详情") + " >";
   const linkUrl = data.insert.link_card.origin_url;
   if (isMysPost(linkUrl)) {
     const postId = getPostId(linkUrl);
@@ -532,54 +417,37 @@ function parseLinkCard(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivE
     button.href = linkUrl;
     button.target = "view_window";
   }
-  // 插入 button
   content.appendChild(button);
-  // 插入 content
   div.appendChild(content);
-  // 添加 class
   div.classList.add("mys-post-link-card");
   return div;
 }
 
 /**
  * @description 解析 Mention
- * @since Beta v0.3.0
- * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @since Beta v0.3.4
+ * @param {TGApp.Plugins.Mys.SctPost.Mention} data Mys数据
  * @returns {HTMLAnchorElement} 解析后的 Mention
  */
-function parseMention(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLAnchorElement {
-  // 检查数据
-  if (typeof data.insert === "string") {
-    throw new Error(`[ParseMention] data.insert is a string: ${data.insert}`);
-  }
-  if (data.insert.mention == null) {
-    throw new Error("[ParseMention] data.insert.mention is not defined");
-  }
-  // 创建图标
+function parseMention(data: TGApp.Plugins.Mys.SctPost.Mention): HTMLAnchorElement {
   const icon = document.createElement("i");
   icon.classList.add("mdi", "mdi-account-circle-outline");
-  // 创建链接
   const link = document.createElement("a");
   link.classList.add("mys-post-link");
   link.href = `https://www.miyoushe.com/ys/accountCenter/postList?id=${data.insert.mention.uid}`;
   link.target = "_blank";
   link.innerText = data.insert.mention.nickname;
-  // 插入图标
   link.prepend(icon);
   return link;
 }
 
 /**
  * @description 解析 Emoji
- * @since Beta v0.3.2
- * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
+ * @since Beta v0.3.4
+ * @param {TGApp.Plugins.Mys.SctPost.Text} data Mys数据
  * @returns {HTMLSpanElement} 解析后的 Emoji
  */
-function emojiParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLImageElement {
-  // 检查数据
-  if (typeof data.insert !== "string") {
-    throw new Error(`[EmojiParser] data.insert is not a string: ${JSON.stringify(data)}`);
-  }
+function emojiParser(data: TGApp.Plugins.Mys.SctPost.Text): HTMLImageElement {
   const emojis = localStorage.getItem("emojis");
   if (!emojis) {
     throw new Error("[EmojiParser] emojis is not defined");
@@ -590,29 +458,21 @@ function emojiParser(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLImageE
   if (!emoji) {
     throw new Error(`[EmojiParser] emoji is not defined: ${emojiName}`);
   }
-  // 创建图片
   const img = document.createElement("img");
   img.classList.add("mys-post-emoji");
   img.src = emoji;
   img.alt = emojiName;
   img.title = emojiName;
-  // 获取图片地址
   return img;
 }
 
 /**
- * @description 解析大别野房间卡片
- * @since Beta v0.3.3
- * @param {TGApp.Plugins.Mys.Post.StructuredContent} data Mys数据
- * @returns {HTMLDivElement} 解析后的大别野房间卡片
+ * @description 解析大别野房间的卡片
+ * @since Beta v0.3.4
+ * @param {TGApp.Plugins.Mys.SctPost.VillaCard} data Mys数据
+ * @returns {HTMLDivElement} 解析后的大别野房间的卡片
  */
-function parseVillaCard(data: TGApp.Plugins.Mys.Post.StructuredContent): HTMLDivElement {
-  if (typeof data.insert === "string") {
-    throw new Error(`[parseVillaCard] data.insert is a string: ${data.insert}`);
-  }
-  if (data.insert.villa_card == null) {
-    throw new Error("[parseVillaCard] data.insert.villa_card is not defined");
-  }
+function parseVillaCard(data: TGApp.Plugins.Mys.SctPost.VillaCard): HTMLDivElement {
   const div = document.createElement("div");
   div.classList.add("mys-post-div");
   const villaCard = document.createElement("div");

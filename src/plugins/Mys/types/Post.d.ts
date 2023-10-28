@@ -1,12 +1,12 @@
 /**
  * @file plugins/Mys/types/post.d.ts
  * @description Mys 插件帖子类型定义文件
- * @since Beta v0.3.3
+ * @since Beta v0.3.4
  */
 
 /**
  * @description Mys 插件帖子类型
- * @since Alpha v0.2.1
+ * @since Beta v0.3.4
  * @namespace TGApp.Plugins.Mys.Post
  * @memberof TGApp.Plugins.Mys
  */
@@ -103,7 +103,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {string} reply_time 最后回复时间 // "2023-03-05 20:26:54"
    * @property {number} is_deleted 是否删除
    * @property {boolean} is_interactive 是否互动
-   * @property {string} structured_content 结构化内容 // 反序列化后为 PostStructuredContent
+   * @property {string} structured_content 结构化内容 // 反序列化后为 TGApp.Plugins.Mys.SctPost.Common[]
    * @property {string[]} structured_content_rows 结构化内容原始数据
    * @property {number} review_id 审核ID
    * @property {boolean} is_profit 是否盈利
@@ -297,173 +297,5 @@ declare namespace TGApp.Plugins.Mys.Post {
   interface PostContent {
     describe: string;
     images?: string[];
-  }
-
-  /**
-   * @description 帖子结构化内容
-   * @since Beta v0.3.3
-   * @todo 重构
-   * @interface StructuredContent
-   * @property {string|object} insert 插入内容
-   * @property {string} insert.image 图片 URL
-   * @property {StructuredVod} insert.vod 视频信息
-   * @property {string} insert.video 外部视频 URL
-   * @property {string} insert.backup_text 折叠文本
-   * @property {object} insert.lottery 抽奖，当 backup_text 为 [抽奖]
-   * @property {string} insert.lottery.id 抽奖 ID
-   * @property {string} insert.lottery.toast 抽奖提示
-   * @property {object} insert.fold 折叠内容
-   * @property {string} insert.fold.title 折叠标题，反序列化后为 PostStructuredContent[]
-   * @property {string} insert.fold.content 折叠文本，反序列化后为 PostStructuredContent[]
-   * @property {StructuredLinkCard} insert.link_card 链接卡片
-   * @property {string} insert.divider 分割线
-   * @property {object} insert.mention 提及
-   * @property {string} insert.mention.uid 用户 ID
-   * @property {string} insert.mention.nickname 用户昵称
-   * @property {StructuredVillaCard} insert.villa_card 大别野卡片
-   * @property {object} attributes 属性
-   * @property {number} attributes.height 高度
-   * @property {number} attributes.width 宽度
-   * @property {number} attributes.size 大小
-   * @property {string} attributes.ext 扩展名
-   * @property {boolean} attributes.bold 是否加粗
-   * @property {string} attributes.color 颜色
-   * @property {string} attributes.link 链接
-   * @return StructuredContent
-   */
-  interface StructuredContent {
-    insert:
-      | {
-          image?: string;
-          video?: string;
-          vod?: StructuredVod;
-          backup_text?: string;
-          lottery?: {
-            id: string;
-            toast: string;
-          };
-          fold?: {
-            title: string;
-            content: string;
-          };
-          link_card?: StructuredLinkCard;
-          divider?: string;
-          mention?: {
-            uid: string;
-            nickname: string;
-          };
-          villa_card?: StructuredVillaCard;
-        }
-      | string;
-    attributes?: {
-      height?: number;
-      width?: number;
-      size?: number;
-      ext?: string;
-      bold?: boolean;
-      color?: string;
-      link?: string;
-    };
-  }
-
-  /**
-   * @description 帖子结构化内容-视频
-   * @since Alpha v0.2.2
-   * @interface StructuredVod
-   * @property {number} id 视频 ID
-   * @property {number} duration 时长
-   * @property {string} cover 封面图 URL
-   * @property {object[]} resolutions 分辨率
-   * @property {string} resolutions.url URL
-   * @property {string} resolutions.definition 清晰度
-   * @property {number} resolutions.height 高度
-   * @property {number} resolutions.width 宽度
-   * @property {number} resolutions.bitrate 比特率
-   * @property {number} resolutions.size 大小
-   * @property {string} resolutions.format 格式
-   * @property {string} resolutions.label 标签
-   * @property {number} view_num 浏览数
-   * @property {number} transcode_status 转码状态
-   * @property {number} review_status 审核状态
-   * @return StructuredVod
-   */
-  interface StructuredVod {
-    id: number;
-    duration: number;
-    cover: string;
-    resolutions: Array<{
-      url: string;
-      definition: string;
-      height: number;
-      width: number;
-      bitrate: number;
-      size: number;
-      format: string;
-      label: string;
-    }>;
-    view_num: number;
-    transcode_status: number;
-    review_status: number;
-  }
-
-  /**
-   * @description 帖子结构化内容-链接卡片
-   * @since Alpha v0.2.1
-   * @interface StructuredLinkCard
-   * @property {number} link_type 链接类型 // 1: 帖子，2：商品
-   * @property {string} origin_url 原始链接
-   * @property {string} landing_url 落地页链接
-   * @property {string} cover 封面图 URL
-   * @property {string} title 标题
-   * @property {string} card_id 卡片 ID
-   * @property {number} card_status 卡片状态
-   * @property {string} market_price 市场价
-   * @property {string} price 价格
-   * @property {string} button_text 按钮文本
-   * @property {number} landing_url_type 落地链接类型
-   * @return StructuredLinkCard
-   */
-  interface StructuredLinkCard {
-    link_type: number;
-    origin_url: string;
-    landing_url: string;
-    cover: string;
-    title: string;
-    card_id: string;
-    card_status: number;
-    market_price: string;
-    price: string;
-    button_text: string;
-    landing_url_type: number;
-  }
-
-  /**
-   * @description 帖子结构化内容-大别野卡片
-   * @since Beta v0.3.3
-   * @interface StructuredVillaCard
-   * @property {string} villa_id 大别野房间 ID
-   * @property {string} villa_name 大别野房间 名称
-   * @property {string} villa_avatar_url 大别野房间 头像图 URL
-   * @property {string} villa_cover 大别野房间 封面图 URL
-   * @property {string} owner_uid 大别野房间 房主 UID
-   * @property {string} owner_nickname 大别野房间 房主昵称
-   * @property {string} owner_avatar_url 大别野房间 房主头像图 URL
-   * @property {string} villa_introduce 大别野房间 介绍
-   * @property {string[]} tag_list 大别野房间 标签列表
-   * @property {string} villa_member_num 大别野房间 成员数
-   * @property {boolean} is_available 大别野房间 是否可用
-   * @return StructuredVillaCard
-   */
-  interface StructuredVillaCard {
-    villa_id: string;
-    villa_name: string;
-    villa_avatar_url: string;
-    villa_cover: string;
-    owner_uid: string;
-    owner_nickname: string;
-    owner_avatar_url: string;
-    villa_introduce: string;
-    tag_list: string[];
-    villa_member_num: string;
   }
 }
