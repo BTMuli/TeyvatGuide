@@ -4,8 +4,8 @@
   <div class="post-json">
     <div class="post-title">帖子返回内容 JSON</div>
     <JsonViewer :value="jsonData" copyable boxed />
-    <div class="post-title">结构化内容解析</div>
-    <JsonViewer :value="parseData" copyable boxed />
+    <div class="post-title" v-show="!isEmpty">结构化内容解析</div>
+    <JsonViewer v-if="!isEmpty" :value="parseData" copyable boxed />
   </div>
 </template>
 <script lang="ts" setup>
@@ -26,26 +26,30 @@ const loadingEmpty = ref<boolean>(false);
 // 数据
 const postId = Number(useRoute().params.post_id);
 let jsonData = reactive<TGApp.Plugins.Mys.Post.FullData>(<TGApp.Plugins.Mys.Post.FullData>{});
-let parseData = reactive<TGApp.Plugins.Mys.Post.StructuredContent[]>([]);
+let parseData = reactive<TGApp.Plugins.Mys.SctPost.Base[]>([]);
+const isEmpty = ref<boolean>(false);
 
 onMounted(async () => {
   await appWindow.show();
-  // 检查数据
   if (!postId) {
     loadingEmpty.value = true;
-    loadingTitle.value = "未找到数据";
+    loadingTitle.value = "错误的 POST ID！";
     return;
   }
-  // 获取数据
   loadingTitle.value = "正在获取数据...";
   try {
     jsonData = await Mys.Post.get(postId);
-    parseData = JSON.parse(jsonData.post.structured_content);
-    loading.value = false;
   } catch (e) {
-    loadingTitle.value = "帖子不存在或解析失败";
+    loadingTitle.value = "获取数据失败";
     loadingEmpty.value = true;
+    return;
   }
+  try {
+    parseData = JSON.parse(jsonData.post.structured_content);
+  } catch (e) {
+    isEmpty.value = true;
+  }
+  loading.value = false;
 });
 </script>
 <style lang="css" scoped>
