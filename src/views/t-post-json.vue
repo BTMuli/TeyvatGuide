@@ -10,7 +10,7 @@
 </template>
 <script lang="ts" setup>
 import { appWindow } from "@tauri-apps/api/window";
-import { ref, onMounted, reactive } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
 
@@ -45,9 +45,13 @@ onMounted(async () => {
     return;
   }
   try {
-    parseData = JSON.parse(jsonData.post.structured_content);
+    parseData = JSON.parse(jsonData.post.content);
   } catch (e) {
-    isEmpty.value = true;
+    try {
+      parseData = JSON.parse(jsonData.post.structured_content);
+    } catch (e) {
+      isEmpty.value = true;
+    }
   }
   loading.value = false;
 });
