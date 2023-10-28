@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2023-10-19
+Update: 2023-10-28
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2023-10-19 21:42:40`
+> 更新于 `2023-10-28 19:26:59`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -19,9 +19,9 @@ Update: 2023-10-19
 
 # Teyvat Guide
 
-基于 Tauri 的原神工具应用。
+基于 Tauri 的原神工具应用，支持 Windows 和 MacOS 平台。
 
-Game Tool for Genshin Impact player.
+Game Tool for Genshin Impact player, supports Windows and MacOS.
 
 ## 下载 / Download
 
@@ -31,18 +31,13 @@ Game Tool for Genshin Impact player.
 	<img src="https://get.microsoft.com/images/zh-cn%20dark.svg" alt="download"/>
 </a>
 
-> 不推荐通过 GitHub Release 下载，但仍保留了该功能。
+> MacOS 用户可以通过 Github Release 下载
 
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/BTMuli/TeyvatGuide?include_prereleases&style=for-the-badge)](https://github.com/BTMuli/TeyvatGuide/releases/latest)
 
-## 技术栈 / Tech Stack
+## 仓库概况 / Repo Stats
 
-- [Tauri](https://github.com/tauri-apps/tauri)
-- [Vue3](https://github.com/vuejs/core)
-- [Vite](https://github.com/vitejs/vite)
-- [TypeScript](https://github.com/microsoft/TypeScript)
-- [Vuetify](https://github.com/vuetifyjs/vuetify)
-- [Echarts](https://echarts.apache.org/zh/index.html)
+![Status](https://repobeats.axiom.co/api/embed/345d4bae5dc7e5184af4452b9dad01a671e220b3.svg "Repobeats analytics image")
 
 ## 功能 / Features
 
@@ -70,10 +65,14 @@ Game Tool for Genshin Impact player.
 
 - 应用功能：
   - [x] 浅色/深色主题切换
+  - [x] 米游社 JSBridge
 
-## 仓库概况 / Repo Stats
+## 贡献者 / Contributors
 
-![Status](https://repobeats.axiom.co/api/embed/345d4bae5dc7e5184af4452b9dad01a671e220b3.svg "Repobeats analytics image")
+- [BTMuli](https://github.com/BTMuli)
+- [舰队的偶像岛风酱！](https://github.com/frg2089)
+- [jerry765](https://github.com/jerry765)
+- [AuroraZiling](https://github.com/AuroraZiling)
 
 ## UI 参考 / UI Reference
 
@@ -89,11 +88,19 @@ Game Tool for Genshin Impact player.
 - UIAF：[UIAF v1.1](docs/UIAF.md)
 - UIGF：[UIGF v2.3](docs/UIGF.md)
 
-## 贡献者 / Contributors
+## 特定项目 / Special Project
 
-- [BTMuli](https://github.com/BTMuli)
-- [舰队的偶像岛风酱！](https://github.com/frg2089)
-- [jerry765](https://github.com/jerry765)
+- [MuCli](https://github.com/BTMuli/MuCli)：基于 NodeJS 的命令行工具，用于生成项目文档。
+- [TGAssistant](https://github.com/BTMuli/TGAssistant)：Teyvat Guide 的资源获取、解析、处理仓库。
+- [WhiteTea](https://github.com/BTMuli/WhiteTea)：Github Bot，（半）自动化处理 Teyvat Guide 的 Issue 和 Pull Request。
+
+## 技术栈 / Tech Stack
+
+- [Tauri](https://github.com/tauri-apps/tauri)
+- [Vue3](https://github.com/vuejs/core)
+- [Vite](https://github.com/vitejs/vite)
+- [Vuetify](https://github.com/vuetifyjs/vuetify)
+- [Echarts](https://echarts.apache.org/zh/index.html)
 
 ## 协议 / License
 

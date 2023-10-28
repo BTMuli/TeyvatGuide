@@ -2,12 +2,44 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2023-09-08
-Update: 2023-10-19
+Update: 2023-10-28
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-09-08 09:45:17 `
 >
-> 更新于 `2023-10-19 13:49:53`
+> 更新于 `2023-10-28 19:18:49`
+
+## [0.3.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.4) (2023-10-28)
+
+### Feat
+
+- 应用：Awesome Tauri，[`tauri-apps/awesome-tauri#226`](https://github.com/tauri-apps/awesome-tauri/pull/226)
+- 应用：支持 MacOS 平台 [`#53`](https://github.com/BTMuli/TeyvatGuide/pull/53)
+- 应用：实装米游社 JSBridge，支持战绩、签到、酒馆、留影叙佳期等功能 [`#47`](https://github.com/BTMuli/TeyvatGuide/issues/47)
+- 导出：设置默认导出文件名称
+- 应用：支持缓存检测&清理 [`#55`](https://github.com/BTMuli/TeyvatGuide/issues/55)
+- 帖子：展示更多相关信息 [`79fd18ea`](https://github.com/BTMuli/TeyvatGuide/commit/79fd18ea)
+
+### Fix
+
+- 应用：窗口创建逻辑重构 [`1914261e`](https://github.com/BTMuli/TeyvatGuide/commit/1914261e)
+- 分享：修复含视频分享图生成异常 [`#54`](https://github.com/BTMuli/TeyvatGuide/issues/54)
+- 应用：更新检测上移到应用初始化 [`#45`](https://github.com/BTMuli/TeyvatGuide/issues/45)
+- 应用：将部分未更正的 `Tauri.Genshin` 改为 `Teyvat Guide`
+- 应用：`v-select` 样式适应主题变更 [`3db8008f`](https://github.com/BTMuli/TeyvatGuide/commit/3db8008f)
+- 应用：修复关闭卡顿 [`d4295c7d`](https://github.com/BTMuli/TeyvatGuide/commit/d4295c7d)
+
+### Change
+
+- 角色：对获取到的数据进行排序 [`0d4fdecd`](https://github.com/BTMuli/TeyvatGuide/commit/0d4fdecd)
+- 组件：Confirm 组件渲染调整 `v-if` -> `v-show` [`9be40181`](https://github.com/BTMuli/TeyvatGuide/commit/9be40181)
+- 设置：删除数据库完整性检测，隐藏数据库重置 [`5992567d`](https://github.com/BTMuli/TeyvatGuide/commit/5992567d)
+- 极验：移除极验验证相关代码 [`84b98e4a`](https://github.com/BTMuli/TeyvatGuide/commit/84b98e4a)
+- 战绩：角色数据添加 `title` 属性，展示部分角色信息 [`043fda9e`](https://github.com/BTMuli/TeyvatGuide/commit/043fda9e)
+- 重构：对基本 `Response` 类型进行重构 [`9a221f9b`](https://github.com/BTMuli/TeyvatGuide/commit/9a221f9b)
+- 重构：对米游社帖子结构化类型进行重构 [`ecb0f1a7`](https://github.com/BTMuli/TeyvatGuide/commit/ecb0f1a7)
+
+FullCommits: [`v0.3.3...v0.3.4`](https://BTMuli/TeyvatGuide/compare/v0.3.3...v0.3.4)
 
 ## [0.3.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.3) (2023-10-19)
 
