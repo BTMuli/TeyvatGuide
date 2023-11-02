@@ -179,7 +179,6 @@ class TGClient {
         break;
       case "getActionTicket":
         await this.getActionTicket(payload, callback);
-        await this.hideSideBar();
         break;
       case "getHTTPRequestHeaders":
         await this.getHTTPRequestHeaders(callback);
@@ -206,6 +205,9 @@ class TGClient {
         break;
       case "onClickImg":
         await this.onClickImg(payload);
+        break;
+      case "share":
+        await this.share(payload, callback);
         break;
       // getNotificationSettings
       default:
@@ -399,6 +401,7 @@ class TGClient {
       return;
     }
     await this.open("pushPage", url);
+    await this.hideSideBar();
   }
 
   /**
@@ -462,6 +465,22 @@ class TGClient {
       }
     })();`;
     await invoke("execute_js", { label: "mhy_client", js: executeJS });
+  }
+
+  /**
+   * @func share
+   * @since Beta v0.3.5
+   * @desc 分享
+   * @todo 实现图片获取
+   * @param {unknown} payload - 请求参数
+   * @param {string} callback - 回调函数名
+   * @returns {void} - 无返回值
+   */
+  async share(payload: any, callback: string): Promise<void> {
+    // 延时 3s
+    setTimeout(async () => {
+      await this.callback(callback, {});
+    }, 3000);
   }
 }
 
