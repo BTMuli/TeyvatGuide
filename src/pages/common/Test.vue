@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="test-box">
     <h1>颜色测试</h1>
-    <div class="test-box">
+    <div class="test-item">
       <div class="test-1">
         Box 1
         <div class="test-2">
@@ -13,30 +13,46 @@
         </div>
       </div>
     </div>
-    <h1>窗口建立测试</h1>
-    <div class="btn-list">
-      <v-btn class="test-btn" @click="tryNewWindow('sign_in')">SignIn</v-btn>
-      <v-btn class="test-btn" @click="tryNewWindow('game_record')">GameRecord</v-btn>
+    <h1>角色详情（beta）</h1>
+    <div class="test-item">
+      <div class="role-box">
+        {{ JSON.stringify(roleItem, null, 2) }}
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 
-import mhyClient from "../../utils/TGClient";
+import TGSqlite from "../../plugins/Sqlite";
+import { useUserStore } from "../../store/modules/user";
 
 const visible = ref<boolean>(false);
+const userStore = useUserStore();
+
+const roleItem = ref<TGApp.Sqlite.Character.UserRole>();
 
 onMounted(async () => {
+  const user = userStore.getCurAccount();
+  const roleData = await TGSqlite.getUserCharacter(user.gameUid);
+  if (roleData !== false) {
+    roleItem.value = roleData[0];
+  }
   visible.value = false;
-  await mhyClient.run();
 });
-
-async function tryNewWindow(func: string): Promise<void> {
-  await mhyClient.open(func);
-}
 </script>
 <style lang="css" scoped>
+.test-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.test-item {
+  padding: 10px;
+  border-radius: 5px;
+}
+
 .btn-list {
   display: flex;
   justify-content: flex-start;
@@ -47,12 +63,6 @@ async function tryNewWindow(func: string): Promise<void> {
 .test-btn {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
-}
-
-.test-box {
-  display: flex;
-  border-radius: 5px;
-  gap: 10px;
 }
 
 .test-1,
@@ -80,5 +90,16 @@ async function tryNewWindow(func: string): Promise<void> {
 
 .test-4 {
   background: var(--box-bg-4);
+}
+
+.role-box {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border-radius: 5px;
+  background: var(--box-bg-1);
+  color: var(--box-text-1);
+  gap: 10px;
+  white-space: pre-wrap;
 }
 </style>
