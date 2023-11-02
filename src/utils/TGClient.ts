@@ -442,7 +442,8 @@ class TGClient {
    */
   async onClickImg(payload: any): Promise<void> {
     const url = payload.image_list[0].url;
-    const savePath = `${await path.downloadDir()}${path.sep}${Date.now().toString()}.png`;
+    const imageType = url.endsWith(".png") ? "png" : url.endsWith(".jpg") ? "jpg" : "png";
+    const savePath = `${await path.downloadDir()}${path.sep}${Date.now().toString()}.${imageType}`;
     const executeJS = `javascript:(async function() {
       const _t = window.__TAURI__;
       const savePath = await _t.dialog.save({
@@ -456,9 +457,8 @@ class TGClient {
           responseType: _t.http.ResponseType.Binary
         });
         const buffer = new Uint8Array(resBlob.data);
-        const blob = new Blob([buffer], { type: 'image/png' });
         await _t.fs.writeBinaryFile({
-          contents: blob,
+          contents: buffer,
           path: savePath,
         });
         alert('保存成功');
