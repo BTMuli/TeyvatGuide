@@ -88,17 +88,21 @@ class TGClient {
 
   /**
    * @func hideSideBar
-   * @since Beta v0.3.4
+   * @since Beta v0.3.5
    * @desc 隐藏侧边栏
    * @returns {void} - 无返回值
    */
   async hideSideBar(): Promise<void> {
-    const executeJS =
-      "javascript:(function(){" +
-      "let st = document.createElement('style');" +
-      "st.innerHTML = '::-webkit-scrollbar{display:none}';" +
-      "document.querySelector('body').appendChild(st);" +
-      "})();";
+    const executeJS = `javascript:(function(){
+      if (document.getElementById('teyvat_style')) {
+        return;
+      } else {
+        let style = document.createElement('style');
+        style.innerHTML = '::-webkit-scrollbar{display:none}';
+        style.id = 'teyvat_style';
+        document.querySelector('body').appendChild(style);
+      }
+    })();`;
     await invoke("execute_js", { label: "mhy_client", js: executeJS });
   }
 
@@ -154,13 +158,14 @@ class TGClient {
 
   /**
    * @func handleCallback
-   * @since Beta v0.3.4
+   * @since Beta v0.3.5
    * @desc 处理米游社客户端的 callback
    * @param {Event<string>} arg - 事件参数
    * @returns {any} - 返回值
    */
   async handleCallback(arg: Event<string>): Promise<any> {
     console.log(`[${arg.windowLabel}] ${arg.payload}`);
+    await this.hideSideBar();
     const { method, payload, callback } = <NormalArg>JSON.parse(arg.payload);
     switch (method) {
       case "getStatusBarHeight":
@@ -205,7 +210,6 @@ class TGClient {
       // getNotificationSettings
       default:
         console.warn(`[${arg.windowLabel}] ${arg.payload}`);
-        await this.hideSideBar();
     }
   }
 
