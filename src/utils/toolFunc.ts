@@ -1,11 +1,10 @@
 /**
  * @file utils toolFunc.ts
  * @description 一些工具函数
- * @since Beta v0.3.4
+ * @since Beta v0.3.5
  */
 
-import { fs, os, path } from "@tauri-apps/api";
-import type { FileEntry } from "@tauri-apps/api/fs";
+import { os, path } from "@tauri-apps/api";
 import { v4 } from "uuid";
 
 /**
@@ -66,33 +65,6 @@ export function bytesToSize(bytes: number): string {
   const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
-}
-
-/**
- * @description 获取文件夹大小
- * @since Beta v0.3.4
- * @param {FileEntry[]} cacheInfo - 文件夹信息
- * @param {boolean} isRoot - 是否是根目录
- * @returns {Promise<number>} 文件夹大小
- */
-export async function getDirSize(cacheInfo: FileEntry[], isRoot: false): Promise<number>;
-export async function getDirSize(cacheInfo: FileEntry[], isRoot?: true): Promise<string>;
-export async function getDirSize(
-  cacheInfo: FileEntry[],
-  isRoot?: boolean,
-): Promise<number | string> {
-  let size = 0;
-  for (const item of cacheInfo) {
-    if (item.children) {
-      const dir = await fs.readDir(item.path);
-      size += await getDirSize(dir, false);
-    } else {
-      const file = await fs.readBinaryFile(item.path);
-      size += file.byteLength;
-    }
-  }
-  if (isRoot === undefined || isRoot) return bytesToSize(size);
-  return size;
 }
 
 /**
