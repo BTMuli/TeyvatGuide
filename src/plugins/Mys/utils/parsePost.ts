@@ -1,7 +1,7 @@
 /**
  * @file plugins Mys utils parsePost.ts
  * @description 用于解析Mys数据的工具
- * @since Beta v0.3.4
+ * @since Beta v0.3.5
  */
 
 import * as colorConvert from "color-convert";
@@ -184,7 +184,7 @@ function parseUnknown(data: TGApp.Plugins.Mys.SctPost.Base): HTMLDivElement {
 
 /**
  * @description 解析文本
- * @since Beta v0.3.0
+ * @since Beta v0.3.5
  * @param {TGApp.Plugins.Mys.SctPost.Text |TGApp.Plugins.Mys.SctPost.Link} data Mys数据
  * @returns {HTMLSpanElement} 解析后的文本
  */
@@ -199,7 +199,7 @@ function parseText(
     if (data.attributes.bold) text.style.fontWeight = "bold";
     if (data.attributes.color) {
       let colorGet = data.attributes.color;
-      if (isColorSimilar("#1E1E1E", colorGet)) {
+      if (isColorSimilar("#000000", colorGet)) {
         colorGet = "var(--app-page-content)";
       }
       text.style.color = colorGet;
