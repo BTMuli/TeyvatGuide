@@ -1,7 +1,7 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.3.4
+ * @since Beta v0.3.5
  */
 
 import { event, invoke, path } from "@tauri-apps/api";
@@ -420,7 +420,7 @@ class TGClient {
 
   /**
    * @func onClickImg
-   * @since Beta v0.3.4
+   * @since Beta v0.3.5
    * @desc 点击图片，下载到本地
    * @param {unknown} payload - 请求参数
    * @returns {void} - 无返回值
@@ -428,24 +428,27 @@ class TGClient {
   async onClickImg(payload: any): Promise<void> {
     const url = payload.image_list[0].url;
     const savePath = `${await path.downloadDir()}${path.sep}${Date.now().toString()}.png`;
-    const executeJS =
-      "javascript:(function(){" +
-      "  window.__TAURI__.dialog.save({" +
-      "    title: '保存图片'," +
-      "    filters: [{ name: '图片', extensions: ['png'] }]," +
-      `    defaultPath: '${savePath}',` +
-      "  }).then((res) => {" +
-      "    fetch('" +
-      url +
-      "')" +
-      "      .then((response) => response.blob())" +
-      "      .then((blob) => {" +
-      "        window.__TAURI__.fs.writeBinaryFile(res, blob).then(() => {" +
-      "          alert('保存成功');" +
-      "        });" +
-      "      });" +
-      "  });" +
-      "})();";
+    const executeJS = `javascript:(async function() {
+      const _t = window.__TAURI__;
+      const savePath = await _t.dialog.save({
+        title: '保存图片',
+        filters: [{ name: '图片', extensions: ['png'] }],
+        defaultPath: '${savePath}',
+      });
+      if (savePath) {
+        const resBlob = await _t.http.fetch('${url}',{
+          method: 'GET',
+          responseType: _t.http.ResponseType.Binary
+        });
+        const buffer = new Uint8Array(resBlob.data);
+        const blob = new Blob([buffer], { type: 'image/png' });
+        await _t.fs.writeBinaryFile({
+          contents: blob,
+          path: savePath,
+        });
+        alert('保存成功');
+      }
+    })();`;
     await invoke("execute_js", { label: "mhy_client", js: executeJS });
   }
 }
