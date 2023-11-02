@@ -3,8 +3,6 @@ description: 用于开发人员 Issue 的模板
 title: "[TODO] "
 labels:
   - 新特性
-assignees:
-  - BTMuli
 body:
   - type: markdown
     attributes:

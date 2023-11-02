@@ -4,8 +4,6 @@ title: "[Bug] "
 labels:
   - BUG
   - Question
-assignees:
-  - BTMuli
 body:
   - type: markdown
     attributes:
@@ -16,25 +14,14 @@ body:
         - 复现流程
   - type: checkboxes
     attributes:
-      label: Issue重复性检查
-      description: 我确认查找过相关的 Issue
+      label: Issue Check
       options:
         - label: 我确认查找过相关的 Issue
-          required: true
-  - type: checkboxes
-    attributes:
-      label: 问题必要性检查
-      description: 我确认这个问题是影响使用的
-      options:
+          required: false
         - label: 我确认这个问题是影响使用的
-          required: true
-  - type: checkboxes
-    attributes:
-      label: 提问的艺术
-      description: 我阅读过[提问的艺术](https://github.com/betaseeker/How-To-Ask-Questions)
-      options:
+          required: false
         - label: 我阅读过[提问的艺术](https://github.com/betaseeker/How-To-Ask-Questions)
-          required: true
+          required: false
   - type: textarea
     id: description
     attributes:
