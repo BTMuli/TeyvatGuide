@@ -24,6 +24,23 @@ export function stamp2LastTime(time: number): string {
 }
 
 /**
+ * @description 时间戳转换为日期
+ * @since Alpha v0.2.3
+ * @param {number} timestamp - 时间戳（毫秒）
+ * @returns {string} 日期 2021-01-01 00:00:00
+ */
+export function timestampToDate(timestamp: number): string {
+  return new Date(timestamp).toLocaleString("zh", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+/**
  * @description 获取 deviceID
  * @since Beta v0.3.4
  * @returns {string} deviceID

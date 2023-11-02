@@ -6,7 +6,7 @@
 
 import { app, fs, path } from "@tauri-apps/api";
 
-import { timestampToDate } from "./t2D";
+import { timestampToDate } from "./toolFunc";
 
 /**
  * @description 获取 UIGF 头部信息
