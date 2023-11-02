@@ -117,9 +117,9 @@
                 <img src="/platforms/mhy/mys.webp" alt="酒馆" class="side-icon-user" />
               </template>
             </v-list-item>
-            <v-list-item class="side-item-user" title="生日" @click="openClient('birthday')">
+            <v-list-item class="side-item-user" title="工具箱" @click="openClient('toolbox')">
               <template #prepend>
-                <img src="/source/UI/paimon.webp" alt="生日" class="side-icon-user" />
+                <img src="/source/UI/toolbox.webp" alt="工具箱" class="side-icon-user" />
               </template>
             </v-list-item>
             <v-list-item

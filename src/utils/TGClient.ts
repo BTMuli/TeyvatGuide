@@ -104,7 +104,7 @@ class TGClient {
 
   /**
    * @func getUrl
-   * @since Beta v0.3.4
+   * @since Beta v0.3.5
    * @desc 获取 url
    * @param {string} func - 方法名
    * @returns {string} - url
@@ -121,6 +121,8 @@ class TGClient {
         return "https://m.miyoushe.com/ys/#/home/26";
       case "birthday":
         return "https://webstatic.mihoyo.com/ys/event/e20220303-birthday/index.html?game_biz=hk4e_cn&bbs_presentation_style=fullscreen&bbs_auth_required=true&bbs_landscape=true&activity_id=20220301153521&mhy_hide_status_bar=true&utm_source=bbs&utm_medium=mys&utm_campaign=arti";
+      case "toolbox":
+        return "https://webstatic.mihoyo.com/bbs/event/e20200511toolbox/index.html?game_biz=ys_cn";
       default:
         return this.getUrl("daily_note");
     }
@@ -384,6 +386,12 @@ class TGClient {
     if (url.startsWith("mihoyobbs://article/")) {
       const urlBBS = url.replace("mihoyobbs://article/", "https://m.miyoushe.com/ys/#/article/");
       await this.open("pushPage", urlBBS);
+      return;
+    } else if (url.startsWith("mihoyobbs://webview?link=")) {
+      const urlWv = url.replace("mihoyobbs://webview?link=", "");
+      // 解析经过编码作为参数的链接
+      const urlReal = decodeURIComponent(urlWv);
+      await this.open("pushPage", urlReal);
       return;
     }
     await this.open("pushPage", url);
