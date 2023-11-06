@@ -748,6 +748,50 @@
     }
   },
   {
+    "id": 10000089,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "芙宁娜",
+    "itemType": "character",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "elementIcon": "/icon/element/水元素.webp",
+    "icon": "/WIKI/character/icon/10000089.webp",
+    "materials": [
+      {
+        "id": 104341,
+        "name": "「正义」的教导",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/104341.webp"
+      },
+      {
+        "id": 104342,
+        "name": "「正义」的指引",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/104342.webp"
+      },
+      {
+        "id": 104343,
+        "name": "「正义」的哲学",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/104343.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "箴铭",
+      "icon": "/icon/nation/枫丹.webp"
+    }
+  },
+  {
     "id": 10000016,
     "contentId": 75,
     "dropDays": [2, 5, 7],
@@ -1858,6 +1902,50 @@
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/冰元素.webp",
     "icon": "/WIKI/character/icon/10000085.webp",
+    "materials": [
+      {
+        "id": 104341,
+        "name": "「正义」的教导",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/104341.webp"
+      },
+      {
+        "id": 104342,
+        "name": "「正义」的指引",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/104342.webp"
+      },
+      {
+        "id": 104343,
+        "name": "「正义」的哲学",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/104343.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "箴铭",
+      "icon": "/icon/nation/枫丹.webp"
+    }
+  },
+  {
+    "id": 10000088,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "夏洛蒂",
+    "itemType": "character",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "elementIcon": "/icon/element/冰元素.webp",
+    "icon": "/WIKI/character/icon/10000088.webp",
     "materials": [
       {
         "id": 104341,
@@ -3624,6 +3712,57 @@
       "area": "须弥",
       "name": "云垢",
       "icon": "/icon/nation/须弥.webp"
+    }
+  },
+  {
+    "id": 11513,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "静水流涌之辉",
+    "itemType": "weapon",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11513.webp",
+    "materials": [
+      {
+        "id": 114053,
+        "name": "纯圣露滴的滤渣",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114053.webp"
+      },
+      {
+        "id": 114054,
+        "name": "纯圣露滴的凝华",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114054.webp"
+      },
+      {
+        "id": 114055,
+        "name": "纯圣露滴的醴泉",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114055.webp"
+      },
+      {
+        "id": 114056,
+        "name": "纯圣露滴的真粹",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114056.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "匠理",
+      "icon": "/icon/nation/枫丹.webp"
     }
   },
   {
@@ -6326,6 +6465,57 @@
       "index": 5,
       "area": "枫丹",
       "name": "匠理",
+      "icon": "/icon/nation/枫丹.webp"
+    }
+  },
+  {
+    "id": 11428,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "水仙十字之剑",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11428.webp",
+    "materials": [
+      {
+        "id": 114049,
+        "name": "悠古弦音的残章",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114049.webp"
+      },
+      {
+        "id": 114050,
+        "name": "悠古弦音的断章",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114050.webp"
+      },
+      {
+        "id": 114051,
+        "name": "悠古弦音的乐章",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114051.webp"
+      },
+      {
+        "id": 114052,
+        "name": "悠古弦音的回响",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114052.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "机思",
       "icon": "/icon/nation/枫丹.webp"
     }
   },

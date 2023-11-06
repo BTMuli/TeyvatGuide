@@ -2466,6 +2466,132 @@
     "version": "4.1"
   },
   {
+    "id": 80286,
+    "series": 46,
+    "order": 262,
+    "name": "大地勘探·百泉谐律之地·其三",
+    "description": "点亮枫丹区域中，莫尔泰区、伊黎耶林区的地图。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 80287,
+    "series": 46,
+    "order": 263,
+    "name": "行汲众水的泉源·其三",
+    "description": "解锁枫丹区域中，莫尔泰区、伊黎耶林区所有传送锚点。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 80288,
+    "series": 46,
+    "order": 264,
+    "name": "圣龛巡礼·百泉谐律之地·其三",
+    "description": "解除枫丹区域中，莫尔泰区、伊黎耶林区所有地灵龛的封印。",
+    "reward": 10,
+    "version": "4.2"
+  },
+  {
+    "id": 80289,
+    "series": 46,
+    "order": 265,
+    "name": "汐海引路人·其三",
+    "description": "在莫尔泰区、伊黎耶林区追随3个仙灵，并点亮仙灵之庭。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 80290,
+    "series": 46,
+    "order": 266,
+    "name": "汐海引路人·其三",
+    "description": "在莫尔泰区、伊黎耶林区追随6个仙灵，并点亮仙灵之庭。",
+    "reward": 10,
+    "version": "4.2"
+  },
+  {
+    "id": 80291,
+    "series": 46,
+    "order": 267,
+    "name": "汐海引路人·其三",
+    "description": "在莫尔泰区、伊黎耶林区追随9个仙灵，并点亮仙灵之庭。",
+    "reward": 20,
+    "version": "4.2"
+  },
+  {
+    "id": 80292,
+    "series": 46,
+    "order": 268,
+    "name": "沧浪的寻宝者·其三",
+    "description": "在莫尔泰区、伊黎耶林区开启40个宝箱。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 80293,
+    "series": 46,
+    "order": 269,
+    "name": "沧浪的寻宝者·其三",
+    "description": "在莫尔泰区、伊黎耶林区开启80个宝箱。",
+    "reward": 10,
+    "version": "4.2"
+  },
+  {
+    "id": 80294,
+    "series": 46,
+    "order": 270,
+    "name": "沧浪的寻宝者·其三",
+    "description": "在莫尔泰区、伊黎耶林区开启160个宝箱。",
+    "reward": 20,
+    "version": "4.2"
+  },
+  {
+    "id": 80295,
+    "series": 46,
+    "order": 271,
+    "name": "沧浪的冒险家·其三",
+    "description": "在莫尔泰区、伊黎耶林区完成3个大世界限时挑战。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 80296,
+    "series": 46,
+    "order": 272,
+    "name": "沧浪的冒险家·其三",
+    "description": "在莫尔泰区、伊黎耶林区完成6个大世界限时挑战。",
+    "reward": 10,
+    "version": "4.2"
+  },
+  {
+    "id": 80297,
+    "series": 46,
+    "order": 273,
+    "name": "沧浪的冒险家·其三",
+    "description": "在莫尔泰区、伊黎耶林区完成9个大世界限时挑战。",
+    "reward": 20,
+    "version": "4.2"
+  },
+  {
+    "id": 80298,
+    "series": 46,
+    "order": 274,
+    "name": "无影的塞谟奈",
+    "description": "结识伊黎耶岛上的一位神秘精灵。",
+    "reward": 10,
+    "version": "4.2"
+  },
+  {
+    "id": 80299,
+    "series": 46,
+    "order": 275,
+    "name": "水仙十字题解",
+    "description": "何物徒留名字？何物遍开幽谷？何物映自身于镜水？何物象征拯救世界的孤独牺牲？",
+    "reward": 10,
+    "version": "4.2"
+  },
+  {
     "id": 81000,
     "series": 0,
     "order": 1000,
@@ -5805,6 +5931,204 @@
     "version": "4.1"
   },
   {
+    "id": 81406,
+    "series": 0,
+    "order": 1390,
+    "name": "明天交换明天",
+    "description": "教会珀西芙如何道别。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81407,
+    "series": 0,
+    "order": 1391,
+    "name": "水仙十字题解·迷宫篇",
+    "description": "「如何？为你描绘的这个世界？」",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81408,
+    "series": 0,
+    "order": 1392,
+    "name": "只缘身在其中",
+    "description": "知晓水仙十字结社位置的秘密，并击败雅各布。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81409,
+    "series": 0,
+    "order": 1393,
+    "name": "平俗宇宙的不灭帝皇",
+    "description": "击败纳齐森科鲁兹。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81411,
+    "series": 0,
+    "order": 1395,
+    "name": "再见，艾利法斯先生",
+    "description": "击败艾利法斯。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81414,
+    "series": 0,
+    "order": 1398,
+    "name": "饱和水力攻击",
+    "description": "从猛烈的舰炮攻击中取得宝物。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81415,
+    "series": 0,
+    "order": 1399,
+    "name": "太空军校生",
+    "description": "全部命中！",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81417,
+    "series": 0,
+    "order": 1401,
+    "name": "故事结束了，但是…",
+    "description": "「名为人生的冒险故事还在继续。」",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81419,
+    "series": 0,
+    "order": 1403,
+    "name": "我畏惧我在风中的怒火…",
+    "description": "…将为至真至美的花朵带来凋败。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81422,
+    "series": 0,
+    "order": 1406,
+    "name": "一个预计内的结局",
+    "description": "帮助枫丹科学院重回正轨…？",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81423,
+    "series": 0,
+    "order": 1407,
+    "name": "未祛魅的世界",
+    "description": "三次出让神秘的异色结晶石给「锈舵」掌舵人。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81424,
+    "series": 0,
+    "order": 1408,
+    "name": "为了众人的愿望",
+    "description": "获得虹彩蔷薇的承诺。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81425,
+    "series": 0,
+    "order": 1409,
+    "name": "乌鸦还是乌鸫？",
+    "description": "是鹈鹕啦！",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81427,
+    "series": 0,
+    "order": 1411,
+    "name": "我相信有仙子存在",
+    "description": "帮助佩妮解决她的心灵危机。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81428,
+    "series": 0,
+    "order": 1412,
+    "name": "柔灯铃的花语…？",
+    "description": "在无人留意的角落发现一朵无人留意的小花。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81430,
+    "series": 0,
+    "order": 1414,
+    "name": "希望是个好词",
+    "description": "见识到某处废墟的新生。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81431,
+    "series": 0,
+    "order": 1415,
+    "name": "凯撒来了也不卖",
+    "description": "获得这个世界上最伟大的艺术作品。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81432,
+    "series": 0,
+    "order": 1416,
+    "name": "「夏萨尼翁」",
+    "description": "战胜地方传奇·夏萨尼翁。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81433,
+    "series": 0,
+    "order": 1417,
+    "name": "「魔剑柯鲁日」",
+    "description": "战胜地方传奇·魔剑柯鲁日。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81434,
+    "series": 0,
+    "order": 1418,
+    "name": "「罗基·艾威尔森」",
+    "description": "战胜地方传奇·罗基·艾威尔森。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81435,
+    "series": 0,
+    "order": 1419,
+    "name": "「利亚姆」",
+    "description": "战胜地方传奇·利亚姆。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 81436,
+    "series": 0,
+    "order": 1420,
+    "name": "「雪奈茨芙娜的蝶安奈拉」",
+    "description": "战胜地方传奇·雪奈茨芙娜的蝶安奈拉。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
@@ -7380,6 +7704,24 @@
     "version": "4.1"
   },
   {
+    "id": 82187,
+    "series": 0,
+    "order": 2186,
+    "name": "我们是万众一体",
+    "description": "在一次挑战中，两次阻止水形幻人吸收半幻人。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 82188,
+    "series": 0,
+    "order": 2187,
+    "name": "银河搭便车指南",
+    "description": "在一次挑战中，两次进入巨鲸之腹。",
+    "reward": 10,
+    "version": "4.2"
+  },
+  {
     "id": 84000,
     "series": 0,
     "order": 4001,
@@ -8845,6 +9187,51 @@
     "description": "完成「谕示胎动的终焉之刻」。",
     "reward": 10,
     "version": "4.1"
+  },
+  {
+    "id": 84312,
+    "series": 0,
+    "order": 5091,
+    "name": "群鸥曾呜咽",
+    "description": "目睹白淞镇的灾难。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 84313,
+    "series": 0,
+    "order": 5092,
+    "name": "Love is Destructive",
+    "description": "娜维娅从胎海水中幸存。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 84314,
+    "series": 0,
+    "order": 5093,
+    "name": "命运的舞台",
+    "description": "与伙伴们共同计划搭建「审判神明」的「陷阱」。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 84315,
+    "series": 0,
+    "order": 5094,
+    "name": "为了美好的明天",
+    "description": "人们正在重建家园。",
+    "reward": 5,
+    "version": "4.2"
+  },
+  {
+    "id": 84316,
+    "series": 0,
+    "order": 5095,
+    "name": "罪人舞步旋",
+    "description": "完成「罪人舞步旋」。",
+    "reward": 10,
+    "version": "4.2"
   },
   {
     "id": 84501,

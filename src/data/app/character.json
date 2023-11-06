@@ -1,5 +1,16 @@
 [
   {
+    "id": 10000089,
+    "contentId": 0,
+    "name": "芙宁娜",
+    "title": "不休独舞",
+    "birthday": [10, 13],
+    "star": 5,
+    "element": "水",
+    "weapon": "单手剑",
+    "nameCard": "芙宁娜·欢宴"
+  },
+  {
     "id": 10000087,
     "contentId": 500207,
     "name": "那维莱特",
@@ -416,6 +427,17 @@
     "element": "冰",
     "weapon": "单手剑",
     "nameCard": "神里绫华·扇子"
+  },
+  {
+    "id": 10000088,
+    "contentId": 0,
+    "name": "夏洛蒂",
+    "title": "朗镜索真",
+    "birthday": [4, 10],
+    "star": 4,
+    "element": "冰",
+    "weapon": "法器",
+    "nameCard": "夏洛蒂·独家"
   },
   {
     "id": 10000085,

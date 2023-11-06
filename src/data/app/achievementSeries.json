@@ -3,7 +3,7 @@
     "id": 0,
     "order": 1,
     "name": "天地万象",
-    "version": "4.1",
+    "version": "4.2",
     "card": "",
     "icon": "/icon/achievement/UI_AchievementIcon_O001.webp"
   },
@@ -366,5 +366,13 @@
     "version": "4.1",
     "card": "枫丹·罚赎",
     "icon": "/icon/achievement/UI_AchievementIcon_A016_Part2.webp"
+  },
+  {
+    "id": 46,
+    "order": 47,
+    "name": "枫丹·白露澈明的泉舞·其之三",
+    "version": "4.2",
+    "card": "枫丹·浑然",
+    "icon": "/icon/achievement/UI_AchievementIcon_A016_Part3.webp"
   }
 ]

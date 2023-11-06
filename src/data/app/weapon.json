@@ -279,6 +279,15 @@
     "icon": "/WIKI/weapon/icon/12501.webp"
   },
   {
+    "id": 11513,
+    "contentId": 0,
+    "name": "静水流涌之辉",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11513.webp"
+  },
+  {
     "id": 11512,
     "contentId": 5887,
     "name": "裁叶萃光",
@@ -1060,6 +1069,15 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "icon": "/WIKI/weapon/icon/12401.webp"
+  },
+  {
+    "id": 11428,
+    "contentId": 0,
+    "name": "水仙十字之剑",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/icon/11428.webp"
   },
   {
     "id": 11427,

@@ -486,6 +486,15 @@
     "profile": "/source/nameCard/profile/枫丹·罚赎.webp"
   },
   {
+    "name": "枫丹·浑然",
+    "type": 1,
+    "desc": "名片纹饰。「晚云在暮天上散锦，溪水在残日里流金；我孤独的影子飘荡，像涧底寂寞的幽灵。」",
+    "source": "达成「枫丹·白露澈明的泉舞·其之三」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/枫丹·浑然.webp",
+    "bg": "/source/nameCard/bg/枫丹·浑然.webp",
+    "profile": "/source/nameCard/profile/枫丹·浑然.webp"
+  },
+  {
     "name": "枫丹·审判",
     "type": 1,
     "desc": "名片纹饰。新任水之神的纹章。不需要法律声明，谅也没谁敢随意使用。",
@@ -691,6 +700,15 @@
     "icon": "/source/nameCard/icon/枫原万叶·秋山椛狩.webp",
     "bg": "/source/nameCard/bg/枫原万叶·秋山椛狩.webp",
     "profile": "/source/nameCard/profile/枫原万叶·秋山椛狩.webp"
+  },
+  {
+    "name": "芙宁娜·欢宴",
+    "type": 2,
+    "desc": "名片纹饰。一个人能吃下所有的蛋糕吗？或者每天吃一个，这样差不多可以吃一周？但是蛋糕放不了这么多天啊。唔…不要担心，以后就有很多朋友一起来吃了吧。",
+    "source": "芙宁娜的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/芙宁娜·欢宴.webp",
+    "bg": "/source/nameCard/bg/芙宁娜·欢宴.webp",
+    "profile": "/source/nameCard/profile/芙宁娜·欢宴.webp"
   },
   {
     "name": "甘雨·麟迹",
@@ -1062,6 +1080,15 @@
     "profile": "/source/nameCard/profile/五郎·悠犬.webp"
   },
   {
+    "name": "夏洛蒂·独家",
+    "type": 2,
+    "desc": "名片纹饰。「一、写好了独家新闻报道，一定会很有话题度的！二、结果报社说事态逐步升级改发通稿…三、写通稿的那人明天要去欧庇克莱歌剧院坐被告席，又换成我的了！」",
+    "source": "夏洛蒂的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/夏洛蒂·独家.webp",
+    "bg": "/source/nameCard/bg/夏洛蒂·独家.webp",
+    "profile": "/source/nameCard/profile/夏洛蒂·独家.webp"
+  },
+  {
     "name": "香菱·出锅",
     "type": 2,
     "desc": "名片纹饰。快速而且准确地读出下面的话：「出锅锅巴！」、「锅巴出锅！」、「锅巴出击！」、「出击锅巴！」",
@@ -1375,6 +1402,15 @@
     "icon": "/source/nameCard/icon/纪行·熄星.webp",
     "bg": "/source/nameCard/bg/纪行·熄星.webp",
     "profile": "/source/nameCard/profile/纪行·熄星.webp"
+  },
+  {
+    "name": "纪行·旋舞",
+    "type": 3,
+    "desc": "名片纹饰。就算发条不再原地打转，就算玩偶不再迈步向前。回忆成为永恒化作珊瑚，也请不要忘记我们一起的冒险与时间。",
+    "source": "纪行系统奖励获取。",
+    "icon": "/source/nameCard/icon/纪行·旋舞.webp",
+    "bg": "/source/nameCard/bg/纪行·旋舞.webp",
+    "profile": "/source/nameCard/profile/纪行·旋舞.webp"
   },
   {
     "name": "纪行·蕈原",

@@ -180,6 +180,18 @@
     }
   },
   {
+    "id": 1208,
+    "contentId": 0,
+    "name": "妮露",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/妮露.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_HYDRO": "水元素",
+      "GCG_TAG_WEAPON_SWORD": "单手剑",
+      "GCG_TAG_NATION_SUMERU": "须弥"
+    }
+  },
+  {
     "id": 1301,
     "contentId": 5369,
     "name": "迪卢克",
@@ -396,6 +408,18 @@
     }
   },
   {
+    "id": 1410,
+    "contentId": 0,
+    "name": "多莉",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/多莉.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_ELECTRO": "雷元素",
+      "GCG_TAG_WEAPON_CLAYMORE": "双手剑",
+      "GCG_TAG_NATION_SUMERU": "须弥"
+    }
+  },
+  {
     "id": 1501,
     "contentId": 5361,
     "name": "砂糖",
@@ -571,6 +595,18 @@
     "tags": {
       "GCG_TAG_ELEMENT_DENDRO": "草元素",
       "GCG_TAG_WEAPON_POLE": "长柄武器",
+      "GCG_TAG_NATION_LIYUE": "璃月"
+    }
+  },
+  {
+    "id": 1705,
+    "contentId": 0,
+    "name": "白术",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/白术.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_DENDRO": "草元素",
+      "GCG_TAG_WEAPON_CATALYST": "法器",
       "GCG_TAG_NATION_LIYUE": "璃月"
     }
   },
@@ -1136,6 +1172,17 @@
     }
   },
   {
+    "id": 212081,
+    "contentId": 0,
+    "name": "星天的花雨",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/星天的花雨.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
     "id": 213011,
     "contentId": 5445,
     "name": "流火焦灼",
@@ -1333,6 +1380,17 @@
     }
   },
   {
+    "id": 214101,
+    "contentId": 0,
+    "name": "酌盈剂虚",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/酌盈剂虚.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
     "id": 215011,
     "contentId": 5507,
     "name": "混元熵增论",
@@ -1492,6 +1550,17 @@
     "name": "慈惠仁心",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/慈惠仁心.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
+    "id": 217051,
+    "contentId": 0,
+    "name": "在地为化",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/在地为化.webp",
     "tags": {
       "GCG_TAG_TALENT": "天赋",
       "GCG_TAG_SLOWLY": "战斗行动"
@@ -2043,6 +2112,26 @@
     }
   },
   {
+    "id": 312016,
+    "contentId": 0,
+    "name": "海染砗磲",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/海染砗磲.webp",
+    "tags": {
+      "GCG_TAG_ARTIFACT": "圣遗物"
+    }
+  },
+  {
+    "id": 312017,
+    "contentId": 0,
+    "name": "沙王的投影",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/沙王的投影.webp",
+    "tags": {
+      "GCG_TAG_ARTIFACT": "圣遗物"
+    }
+  },
+  {
     "id": 312101,
     "contentId": 5427,
     "name": "破冰踏雪的回音",
@@ -2323,6 +2412,16 @@
     }
   },
   {
+    "id": 321015,
+    "contentId": 0,
+    "name": "风龙废墟",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/风龙废墟.webp",
+    "tags": {
+      "GCG_TAG_PLACE": "场地"
+    }
+  },
+  {
     "id": 322001,
     "contentId": 5448,
     "name": "派蒙",
@@ -2598,6 +2697,16 @@
     "name": "自由的新风",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/自由的新风.webp",
+    "tags": {
+      "GCG_TAG_LEGEND": "秘传"
+    }
+  },
+  {
+    "id": 330005,
+    "contentId": 0,
+    "name": "万家灶火",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/万家灶火.webp",
     "tags": {
       "GCG_TAG_LEGEND": "秘传"
     }
@@ -2958,6 +3067,14 @@
     "name": "拳力斗技！",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/拳力斗技！.webp",
+    "tags": null
+  },
+  {
+    "id": 332024,
+    "contentId": 0,
+    "name": "琴音之诗",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/琴音之诗.webp",
     "tags": null
   },
   {
