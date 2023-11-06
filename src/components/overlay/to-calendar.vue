@@ -74,7 +74,7 @@ const onCancel = (): void => {
 
 function toDetail(item: TGApp.App.Calendar.Item): void {
   if (item.contentId === 0) {
-    const itemType = item.itemType === "avatar" ? "角色" : "武器";
+    const itemType = item.itemType === "character" ? "角色" : "武器";
     showSnackbar({
       text: `[${itemType}] ${item.name} 暂无详情`,
       color: "warn",

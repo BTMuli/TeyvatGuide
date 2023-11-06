@@ -1,14 +1,13 @@
 /**
- * @file types App Calendar.d.ts
+ * @file types/App/Calendar.d.ts
  * @description 应用素材日历相关类型定义文件
- * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.2
+ * @since Beta v0.3.5
  */
 
 declare namespace TGApp.App.Calendar {
   /**
    * @description 素材日历类型
-   * @since Alpha v0.2.2
+   * @since Beta v0.3.5
    * @interface Item
    * @property {number} id - 角色ID/武器ID
    * @property {number} contentId - 观测枢的 content_id
@@ -24,12 +23,12 @@ declare namespace TGApp.App.Calendar {
    * @property {Source} source - 日历项来源
    * @return Item
    */
-  export interface Item {
+  interface Item {
     id: number;
     contentId: number;
     dropDays: number[];
     name: string;
-    itemType: string;
+    itemType: "character" | "weapon";
     star: number;
     bg: string;
     icon: string;
@@ -51,7 +50,7 @@ declare namespace TGApp.App.Calendar {
    * @property {string} icon - 素材图标
    * @return Material
    */
-  export interface Material {
+  interface Material {
     id: number;
     name: string;
     star: number;
@@ -69,7 +68,7 @@ declare namespace TGApp.App.Calendar {
    * @property {string} name - 来源名称
    * @return Source
    */
-  export interface Source {
+  interface Source {
     area: string;
     icon: string;
     name: string;
