@@ -89,6 +89,7 @@ defineExpose({
 
 .func-snackbar-container {
   position: fixed;
+  z-index: 999;
   bottom: 0;
   left: 0;
   display: flex;
