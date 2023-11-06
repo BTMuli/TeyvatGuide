@@ -434,6 +434,7 @@ async function confirmUpdate(title?: string): Promise<void> {
   loading.value = true;
   await TGSqlite.update();
   achievementsStore.lastVersion = await TGSqlite.getLatestAchievementVersion();
+  appStore.buildTime = getBuildTime();
   loading.value = false;
   showSnackbar({
     text: "数据库已更新!",
