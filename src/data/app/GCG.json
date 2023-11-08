@@ -181,7 +181,7 @@
   },
   {
     "id": 1208,
-    "contentId": 0,
+    "contentId": 500305,
     "name": "妮露",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/妮露.webp",
@@ -409,7 +409,7 @@
   },
   {
     "id": 1410,
-    "contentId": 0,
+    "contentId": 500294,
     "name": "多莉",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/多莉.webp",
@@ -600,7 +600,7 @@
   },
   {
     "id": 1705,
-    "contentId": 0,
+    "contentId": 500293,
     "name": "白术",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/白术.webp",
@@ -1173,7 +1173,7 @@
   },
   {
     "id": 212081,
-    "contentId": 0,
+    "contentId": 500302,
     "name": "星天的花雨",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/星天的花雨.webp",
@@ -1381,7 +1381,7 @@
   },
   {
     "id": 214101,
-    "contentId": 0,
+    "contentId": 500301,
     "name": "酌盈剂虚",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/酌盈剂虚.webp",
@@ -1557,7 +1557,7 @@
   },
   {
     "id": 217051,
-    "contentId": 0,
+    "contentId": 500300,
     "name": "在地为化",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/在地为化.webp",
@@ -2113,7 +2113,7 @@
   },
   {
     "id": 312016,
-    "contentId": 0,
+    "contentId": 500295,
     "name": "海染砗磲",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/海染砗磲.webp",
@@ -2123,7 +2123,7 @@
   },
   {
     "id": 312017,
-    "contentId": 0,
+    "contentId": 500296,
     "name": "沙王的投影",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/沙王的投影.webp",
@@ -2413,7 +2413,7 @@
   },
   {
     "id": 321015,
-    "contentId": 0,
+    "contentId": 500297,
     "name": "风龙废墟",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/风龙废墟.webp",
@@ -2703,7 +2703,7 @@
   },
   {
     "id": 330005,
-    "contentId": 0,
+    "contentId": 500298,
     "name": "万家灶火",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/万家灶火.webp",
@@ -3071,7 +3071,7 @@
   },
   {
     "id": 332024,
-    "contentId": 0,
+    "contentId": 500299,
     "name": "琴音之诗",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/琴音之诗.webp",

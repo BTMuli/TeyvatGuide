@@ -749,7 +749,7 @@
   },
   {
     "id": 10000089,
-    "contentId": 0,
+    "contentId": 500291,
     "dropDays": [2, 5, 7],
     "name": "芙宁娜",
     "itemType": "character",
@@ -1937,7 +1937,7 @@
   },
   {
     "id": 10000088,
-    "contentId": 0,
+    "contentId": 500292,
     "dropDays": [2, 5, 7],
     "name": "夏洛蒂",
     "itemType": "character",
@@ -3716,7 +3716,7 @@
   },
   {
     "id": 11513,
-    "contentId": 0,
+    "contentId": 7509,
     "dropDays": [2, 5, 7],
     "name": "静水流涌之辉",
     "itemType": "weapon",
@@ -6470,7 +6470,7 @@
   },
   {
     "id": 11428,
-    "contentId": 0,
+    "contentId": 7525,
     "dropDays": [1, 4, 7],
     "name": "水仙十字之剑",
     "itemType": "weapon",
