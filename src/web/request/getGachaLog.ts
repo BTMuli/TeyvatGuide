@@ -1,14 +1,14 @@
 /**
  * @file web/request/getGachaLog.ts
  * @description 获取抽卡记录请求函数
- * @since Beta v0.3.0
+ * @since Beta v0.3.5
  */
 
 import { http } from "@tauri-apps/api";
 
 /**
  * @description 获取抽卡记录
- * @since Beta v0.3.0
+ * @since Beta v0.3.5
  * @param {string} authkey authkey
  * @param {string} gachaType 抽卡类型
  * @param {string} endId 结束 id，默认为 0
@@ -19,7 +19,7 @@ export async function getGachaLog(
   gachaType: string,
   endId: string = "0",
 ): Promise<TGApp.Game.Gacha.GachaItem[] | TGApp.BBS.Response.Base> {
-  const url = "https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog";
+  const url = "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog";
   const params = {
     lang: "zh-cn",
     auth_appid: "webview_gacha",
@@ -36,7 +36,7 @@ export async function getGachaLog(
       query: params,
     })
     .then((res) => {
-      if (res.data.retcode === 0) return res.data.data.list;
-      return res.data;
+      if (res.data.retcode !== 0) return res.data;
+      return res.data.data.list;
     });
 }
