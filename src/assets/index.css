@@ -1,8 +1,7 @@
 /*
- * @file assets index.css
+ * @file assets/index.css
  * @description 全局样式文件
- * @author BTMuli <bt-muli@outlook.com>
- * @since Beta v0.3.0
+ * @since Beta v0.3.5
  */
 
 @import "fonts/index.css";
@@ -36,6 +35,7 @@
   --tgc-red-1: #e06c63; /* Mys bbs color */
   --tgc-yellow-1: #ffcd0c; /* Genshin btn bg */
   --tgc-yellow-2: #f4d8a8; /* Genshin confirm text */
+  --tgc-yellow-3: #e0c06b; /* Genshin btn border */
 
   /* some css same in dark and default theme */
   --tgc-btn-1: var(--tgc-dark-7); /* button bg */

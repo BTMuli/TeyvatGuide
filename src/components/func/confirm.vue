@@ -3,9 +3,7 @@
     <div v-show="show || showOuter" class="confirm-overlay" @click.self.prevent="handleOuter">
       <transition name="func-confirm-inner">
         <div v-show="showInner" class="confirm-box">
-          <div class="confirm-title">
-            {{ data.title }}
-          </div>
+          <div class="confirm-title">{{ data.title }}</div>
           <div
             v-show="data?.text !== '' && data.mode === 'confirm'"
             class="confirm-subtitle"
@@ -14,22 +12,12 @@
             {{ data.text }}
           </div>
           <div v-show="data?.text !== '' && data.mode === 'input'" class="confirm-input">
-            <div class="confirm-input-label">
-              {{ data.text }}
-            </div>
+            <div class="confirm-input-label">{{ data.text }}</div>
             <input v-model="inputVal" class="confirm-input-box" />
           </div>
           <div class="confirm-btn-box">
-            <button class="confirm-btn" @click="handleClick(false)">取消</button>
-            <button
-              class="confirm-btn"
-              :style="{
-                backgroundColor: 'var(--tgc-dark-2)',
-              }"
-              @click="handleClick(true)"
-            >
-              确定
-            </button>
+            <button class="confirm-btn no-btn" @click="handleClick(false)">取消</button>
+            <button class="confirm-btn ok-btn" @click="handleClick(true)">确定</button>
           </div>
         </div>
       </transition>
@@ -178,7 +166,16 @@ defineExpose({
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(10px);
-  background: var(--common-shadow-t-1);
+
+  /* 颜色变量 */
+  --confirm-title: var(--tgc-dark-7);
+  --confirm-bg: var(--tgc-white-1);
+}
+
+/* 深色模式 */
+.dark .confirm-overlay {
+  --confirm-title: var(--tgc-white-1);
+  --confirm-bg: var(--tgc-dark-7);
 }
 
 .confirm-box {
@@ -190,14 +187,16 @@ defineExpose({
   justify-content: space-between;
   padding: 10px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
-  background: var(--box-bg-4);
-  color: var(--box-text-1);
+  border-radius: 15px;
+  background: var(--confirm-bg);
+  box-shadow: 0 0 10px var(--common-shadow-t-1);
+  color: var(--tgc-yellow-3);
 }
 
 .confirm-title {
   width: 100%;
-  border-bottom: 1px solid var(--common-shadow-4);
+  border-bottom: 1px solid var(--confirm-title);
+  color: var(--confirm-title);
   font-family: var(--font-title);
   font-size: 30px;
   text-align: center;
@@ -206,7 +205,6 @@ defineExpose({
 .confirm-subtitle {
   overflow: hidden;
   width: 100%;
-  color: var(--box-text-4);
   font-family: var(--font-text);
   font-size: 20px;
   text-align: center;
@@ -229,10 +227,10 @@ defineExpose({
   width: 50%;
   height: 100%;
   padding: 5px;
-  border: 1px solid var(--common-shadow-4);
+  border: 1px solid var(--confirm-title);
   border-radius: 5px;
   background: inherit;
-  color: var(--box-text-1);
+  color: var(--confirm-title);
 }
 
 .confirm-btn-box {
@@ -249,11 +247,17 @@ defineExpose({
   height: 60px;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--common-shadow-4);
-  border-radius: 5px;
-  color: var(--btn-text);
+  border-radius: 15px;
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 20px;
+}
+
+.no-btn {
+  border: 1px solid var(--tgc-yellow-1);
+}
+
+.ok-btn {
+  background: var(--confirm-title);
 }
 </style>
