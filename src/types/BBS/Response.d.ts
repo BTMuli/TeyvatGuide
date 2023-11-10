@@ -1,12 +1,12 @@
 /**
  * @file types/BBS/Response.d.ts
  * @description BBS 返回数据类型定义文件
- * @since Beta v0.3.4
+ * @since Beta v0.3.5
  */
 
 /**
  * @description BBS 返回数据类型定义
- * @since Beta v0.3.4
+ * @since Beta v0.3.5
  * @namespace TGApp.BBS.Response
  * @memberof TGApp.BBS
  */
@@ -14,14 +14,14 @@ declare namespace TGApp.BBS.Response {
   /**
    * @description 基础返回类型，设计米游社接口请求都是这个类型
    * @interface Base
-   * @since Alpha v0.1.5
+   * @since Beta v0.3.5
    * @property {number} retcode - 响应代码
    * @property {string} message - 响应消息
    * @property {any} data - 响应数据
    * @return Base
    */
   interface Base {
-    retcode: Pick<number, 0>;
+    retcode: never;
     message: string;
     data: never;
   }
