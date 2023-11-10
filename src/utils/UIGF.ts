@@ -1,7 +1,7 @@
 /**
  * @file utils/UIGF.ts
  * @description UIGF工具类
- * @since Beta v0.3.4
+ * @since Beta v0.3.5
  */
 
 import { app, fs, path } from "@tauri-apps/api";
@@ -9,8 +9,20 @@ import { app, fs, path } from "@tauri-apps/api";
 import { timestampToDate } from "./toolFunc";
 
 /**
+ * @description 获取 UIGF 时区
+ * @since Beta v0.3.5
+ * @param {string} uid - UID
+ * @returns {number} 时区
+ */
+function getUigfTimeZone(uid: string): number {
+  if (uid.startsWith("6")) return -5;
+  if (uid.startsWith("7")) return 1;
+  return 8;
+}
+
+/**
  * @description 获取 UIGF 头部信息
- * @since Beta v0.3.4
+ * @since Beta v0.3.5
  * @param {string} uid - UID
  * @returns {Promise<TGApp.Plugins.UIGF.Export>}
  */
@@ -19,11 +31,12 @@ export async function getUigfHeader(uid: string): Promise<TGApp.Plugins.UIGF.Exp
   return {
     uid,
     lang: "zh-cn",
-    uigf_version: "2.3.0",
+    uigf_version: "2.4.0",
     export_timestamp: Math.floor(stamp / 1000),
     export_time: timestampToDate(stamp),
     export_app: "TeyvatGuide",
     export_app_version: await app.getVersion(),
+    region_time_zone: getUigfTimeZone(uid),
   };
 }
 

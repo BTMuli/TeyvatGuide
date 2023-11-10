@@ -1,8 +1,8 @@
 /**
- * @file types Plugins UIGF.d.ts
+ * @file types/Plugins/UIGF.d.ts
  * @description UIGF 插件类型定义文件
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.2.3
+ * @since Beta v0.3.5
+ * @version UIGF v2.4
  */
 
 declare namespace TGApp.Plugins.UIGF {
@@ -21,7 +21,7 @@ declare namespace TGApp.Plugins.UIGF {
 
   /**
    * @description UIGF 头部信息
-   * @since Alpha v0.2.3
+   * @since Beta v0.3.5
    * @interface Export
    * @see docs\UIGF.md
    * @property {string} uid - UID
@@ -31,6 +31,7 @@ declare namespace TGApp.Plugins.UIGF {
    * @property {string} export_time - 导出时间 yyyy-MM-dd HH:mm:ss
    * @property {string} export_app - 导出应用
    * @property {string} export_app_version - 导出应用版本
+   * @property {number} region_time_zone - 时区
    * @return Export
    */
   interface Export {
@@ -41,6 +42,7 @@ declare namespace TGApp.Plugins.UIGF {
     export_time?: string;
     export_app?: string;
     export_app_version?: string;
+    region_time_zone?: number;
   }
 
   /**
