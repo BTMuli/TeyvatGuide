@@ -2,12 +2,33 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2023-09-08
-Update: 2023-10-28
+Update: 2023-11-11
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-09-08 09:45:17 `
 >
-> 更新于 `2023-10-28 19:18:49`
+> 更新于 `2023-11-11 12:12:58`
+
+## [0.3.5](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.5) (2023-11-11)
+
+### Feat
+
+- 资源：更新至 4.2 版本 [`#57`](https://github.com/BTMuli/TeyvatGuide/issues/57)
+- 祈愿：支持 UIGF v2.4 [`#59`](https://github.com/BTMuli/TeyvatGuide/issues/59)
+
+### Fix
+
+- JSBridge：修复图片保存失败 [`#56`](https://github.com/BTMuli/TeyvatGuide/issues/56)
+- JSBridge: 调整 hideSideBar 逻辑 [`a474b962`](https://github.com/BTMuli/TeyvatGuide/commit/a474b962)
+- 组件：修复 `snackbar` 组件被 `overlay` 遮挡问题 [`db36d18d`](https://github.com/BTMuli/TeyvatGuide/commit/db36d18d)
+- 数据库：更新数据库时同时更新 `buildTime` [`c1a7e844`](https://github.com/BTMuli/TeyvatGuide/commit/c1a7e844)
+
+### Change
+
+- JSBridge：留影叙佳期入口改为工具箱入口 [`149c7b3f`](https://github.com/BTMuli/TeyvatGuide/commit/149c7b3f)
+- Post：调整基准背景色 [`e6eaa2e2`](https://github.com/BTMuli/TeyvatGuide/commit/e6eaa2e2)
+- 组件：适应游戏 UI 变更 `confirm` 组件样式 [`7a060a71`](https://github.com/BTMuli/TeyvatGuide/commit/7a060a71)
+- API：更新祈愿记录获取 `endpoint` [`8037b635`](https://github.com/BTMuli/TeyvatGuide/commit/8037b635)
 
 ## [0.3.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.4) (2023-10-28)
 

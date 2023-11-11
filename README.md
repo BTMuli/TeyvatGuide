@@ -2,16 +2,16 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2023-10-28
+Update: 2023-11-11
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2023-10-28 19:26:59`
+> 更新于 `2023-11-11 12:14:39`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
-![](https://img.shields.io/badge/UIAF-v1.1-orange?style=for-the-badge) ![](https://img.shields.io/badge/UIGF-v2.3-red?style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/TeyvatGuide?style=for-the-badge)
+![](https://img.shields.io/badge/UIAF-v1.1-orange?style=for-the-badge) ![](https://img.shields.io/badge/UIGF-v2.4-red?style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/TeyvatGuide?style=for-the-badge)
 
 <div style="width: 100%; text-align: center; margin: 0 auto;">
   <img alt="icon" src="https://s2.loli.net/2023/10/19/Y5DpBQRy3usLHEb.png" />
@@ -86,7 +86,7 @@ Game Tool for Genshin Impact player, supports Windows and MacOS.
 - Changelog: [CHANGELOG](CHANGELOG.md)
 - 资源来源：[项目资源说明](docs/项目资源说明.md)
 - UIAF：[UIAF v1.1](docs/UIAF.md)
-- UIGF：[UIGF v2.3](docs/UIGF.md)
+- UIGF：~~[UIGF v2.3](docs/UIGF.md)~~ [UIGF v2.4](https://github.com/BTMuli/TeyvatGuide/issues/59)
 
 ## 特定项目 / Special Project
 
