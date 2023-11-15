@@ -5,3 +5,6 @@ src-tauri/target
 TGAssistant
 # Package files
 pnpm-lock.yaml
+# lint files
+!.prettierrc.yml
+!.stylelintrc.yml

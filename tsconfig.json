@@ -11,13 +11,12 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "lib": ["DOM", "ESNext"],
-    "skipLibCheck": true,
     "types": ["vite/client"],
     "allowSyntheticDefaultImports": true,
     "composite": true
   },
   "include": [
-    ".yml",
+    "*.yml",
     "package.json",
     "src/**/*.d.ts",
     "src/**/*.ts",
