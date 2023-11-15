@@ -110,8 +110,8 @@ function getAvatarName(): string {
   return props.modelValue.cid === 10000005
     ? "旅行者-空"
     : props.modelValue.cid === 10000007
-    ? "旅行者-荧"
-    : props.modelValue.name;
+      ? "旅行者-荧"
+      : props.modelValue.name;
 }
 
 // 销毁

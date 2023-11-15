@@ -18,8 +18,8 @@ const getName = (): string => {
   return props.modelValue.id === 10000005
     ? "旅行者-空"
     : props.modelValue.id === 10000007
-    ? "旅行者-荧"
-    : props.modelValue.name;
+      ? "旅行者-荧"
+      : props.modelValue.name;
 };
 
 onMounted(async () => {

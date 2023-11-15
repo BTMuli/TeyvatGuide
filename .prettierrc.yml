@@ -5,4 +5,4 @@ useTabs: false
 tabWidth: 2
 bracketSpacing: true
 endOfLine: auto
-trailingComma: "all"
+trailingComma: all

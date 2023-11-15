@@ -8,4 +8,4 @@ plugins:
   - stylelint-prettier
   - stylelint-order
 rules:
-  "prettier/prettier": true
+  prettier/prettier: true
