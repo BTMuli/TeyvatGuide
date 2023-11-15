@@ -21,8 +21,21 @@ declare namespace TGApp.Plugins.Mys.SctPost {
    * @return Base
    */
   interface Base {
+    insert: any;
+    attributes?: any;
+  }
+
+  /**
+   * @description 帖子结构化数据-空类型
+   * @since Beta v0.3.4
+   * @interface Empty
+   * @property {never} insert - 帖子内容
+   * @property {never} attributes - 帖子属性
+   * @return Empty
+   */
+  interface Empty {
     insert: never;
-    attributes: never;
+    attributes?: never;
   }
 
   /**
@@ -41,7 +54,8 @@ declare namespace TGApp.Plugins.Mys.SctPost {
     | Text
     | Video
     | VillaCard
-    | Vod;
+    | Vod
+    | Empty;
 
   /**
    * @description 帖子结构化数据-其他类型

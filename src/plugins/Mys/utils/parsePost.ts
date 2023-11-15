@@ -163,16 +163,16 @@ function transferParser(data: TGApp.Plugins.Mys.SctPost.Common): HTMLDivElement 
   } else if ("villa_card" in data.insert) {
     return parseVillaCard(<TGApp.Plugins.Mys.SctPost.VillaCard>data);
   }
-  return parseUnknown(<TGApp.Plugins.Mys.SctPost.Base>data);
+  return parseUnknown(<TGApp.Plugins.Mys.SctPost.Empty>data);
 }
 
 /**
  * @description 解析未知数据
  * @since Beta v0.3.4
- * @param {TGApp.Plugins.Mys.SctPost.Base} data Mys数据
+ * @param {TGApp.Plugins.Mys.SctPost.Empty} data Mys数据
  * @returns {HTMLDivElement} 解析后的未知数据
  */
-function parseUnknown(data: TGApp.Plugins.Mys.SctPost.Base): HTMLDivElement {
+function parseUnknown(data: TGApp.Plugins.Mys.SctPost.Empty): HTMLDivElement {
   const div = document.createElement("div");
   div.classList.add("mys-post-unknown");
   const code = document.createElement("code");
@@ -251,7 +251,7 @@ function parseDivider(data: TGApp.Plugins.Mys.SctPost.Divider): HTMLDivElement {
   const dividerList = ["line_1", "line_2", "line_3", "line_4"];
   if (!dividerList.includes(data.insert.divider)) {
     console.error("Unknown divider type", data);
-    return parseUnknown(<TGApp.Plugins.Mys.SctPost.Base>data);
+    return parseUnknown(<TGApp.Plugins.Mys.SctPost.Empty>data);
   }
   img.src = `/source/post/divider_${data.insert.divider}.webp`;
   div.appendChild(img);
