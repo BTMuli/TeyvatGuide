@@ -15,12 +15,11 @@ declare namespace TGApp.Game.DailyNotes {
    * @description 便笺数据返回
    * @since Alpha v0.2.2
    * @interface Response
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {FullInfo} data - 便笺数据
    * @return Response
    */
-  interface Response extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface Response extends TGApp.BBS.Response.BaseWithData {
     data: FullInfo;
   }
 

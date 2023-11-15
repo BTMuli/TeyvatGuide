@@ -15,12 +15,11 @@ declare namespace TGApp.Game.Record {
    * @description 原神战绩数据返回类型
    * @interface Response
    * @since Alpha v0.2.0
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {FullData} data - 原神战绩数据
    * @return Response
    */
-  interface Response extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface Response extends TGApp.BBS.Response.BaseWithData {
     data: FullData;
   }
 

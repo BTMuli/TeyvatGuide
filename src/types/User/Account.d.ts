@@ -15,12 +15,11 @@ declare namespace TGApp.User.Account {
    * @description 游戏账号返回类型
    * @interface GameResponse
    * @since Alpha v0.1.5
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {Game[]} data.list 游戏账号列表
    * @return GameResponse
    */
-  interface GameResponse extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface GameResponse extends TGApp.BBS.Response.BaseWithData {
     data: {
       list: Game[];
     };

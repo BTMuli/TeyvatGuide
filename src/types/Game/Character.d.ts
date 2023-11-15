@@ -15,13 +15,12 @@ declare namespace TGApp.Game.Character {
    * @description 角色列表数据返回类型
    * @interface ListResponse
    * @since Alpha v0.2.0
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {ListItem[]} data.avatars - 角色列表
    * @property {ListRole} data.role - 角色信息
    * @return ListResponse
    */
-  interface ListResponse extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface ListResponse extends TGApp.BBS.Response.BaseWithData {
     data: {
       avatars: ListItem[];
       role: ListRole;

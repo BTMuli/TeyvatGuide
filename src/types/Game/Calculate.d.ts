@@ -16,12 +16,11 @@ declare namespace TGApp.Game.Calculate {
    * @since Alpha v0.2.1
    * @see TGRequest.User.calculate.getSyncAvatarListAll
    * @interface SyncAvatarListResponse
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {Array<AvatarListItem>} data.list - 角色列表
    * @return SyncAvatarListResponse
    */
-  interface SyncAvatarListResponse extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface SyncAvatarListResponse extends TGApp.BBS.Response.BaseWithData {
     data: {
       list: AvatarListItem[];
     };
@@ -57,12 +56,11 @@ declare namespace TGApp.Game.Calculate {
    * @since Alpha v0.2.1
    * @see TGRequest.User.calculate.getSyncAvatarDetail
    * @interface SyncAvatarDetailResponse
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {AvatarDetail} data - 角色详情
    * @return SyncAvatarDetailResponse
    */
-  interface SyncAvatarDetailResponse extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface SyncAvatarDetailResponse extends TGApp.BBS.Response.BaseWithData {
     data: TGApp.Game.Calculate.AvatarDetail;
   }
 

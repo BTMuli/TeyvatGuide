@@ -15,12 +15,11 @@ declare namespace TGApp.BBS.Announcement {
    * @description 公告列表返回响应类型
    * @interface ListResponse
    * @since Alpha v0.1.5
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {ListData} data - 公告列表数据
    * @return ListResponse
    */
-  interface ListResponse extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface ListResponse extends TGApp.BBS.Response.BaseWithData {
     data: ListData;
   }
 
@@ -28,12 +27,11 @@ declare namespace TGApp.BBS.Announcement {
    * @description 公告内容返回响应类型
    * @interface ContentResponse
    * @since Alpha v0.1.5
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {ContentData} data - 公告内容数据
    * @return ContentResponse
    */
-  interface ContentResponse extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface ContentResponse extends TGApp.BBS.Response.BaseWithData {
     data: ContentData;
   }
 

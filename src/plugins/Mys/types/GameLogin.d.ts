@@ -15,12 +15,11 @@ declare namespace TGApp.Plugins.Mys.GameLogin {
    * @description 获取登录二维码返回数据
    * @since Beta v0.3.0
    * @interface GetLoginQrResponse
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {GetLoginQrData} data 数据
    * @return GetLoginQrResponse
    */
-  interface GetLoginQrResponse extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface GetLoginQrResponse extends TGApp.BBS.Response.BaseWithData {
     data: GetLoginQrData;
   }
 
@@ -39,12 +38,11 @@ declare namespace TGApp.Plugins.Mys.GameLogin {
    * @description 获取登录状态返回数据
    * @since Beta v0.3.0
    * @interface GetLoginStatusResponse
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {GetLoginStatusData} data 数据
    * @return GetLoginStatusResponse
    */
-  interface GetLoginStatusResponse extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface GetLoginStatusResponse extends TGApp.BBS.Response.BaseWithData {
     data: GetLoginStatusData;
   }
 

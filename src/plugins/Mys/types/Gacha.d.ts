@@ -15,12 +15,11 @@ declare namespace TGApp.Plugins.Mys.Gacha {
    * @description 获取卡池信息返回
    * @since Alpha v0.2.1
    * @interface Response
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {Data[]} data.list 卡池数据
    * @return Response
    */
-  interface Response extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface Response extends TGApp.BBS.Response.BaseWithData {
     data: {
       list: Data[];
     };

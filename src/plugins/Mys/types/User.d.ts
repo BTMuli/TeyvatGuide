@@ -15,12 +15,11 @@ declare namespace TGApp.Plugins.Mys.User {
    * @description 主页用户信息返回
    * @since Alpha v0.2.1
    * @interface HomeResponse
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {Home} data 用户信息
    * @return HomeResponse
    */
-  interface HomeResponse extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface HomeResponse extends TGApp.BBS.Response.BaseWithData {
     data: Home;
   }
 

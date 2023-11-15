@@ -15,12 +15,11 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @description 帖子返回数据
    * @since Alpha v0.2.1
    * @interface Response
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {FullData} data.post 帖子数据
    * @return Response
    */
-  interface Response extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface Response extends TGApp.BBS.Response.BaseWithData {
     data: {
       post: FullData;
     };

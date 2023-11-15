@@ -15,12 +15,11 @@ declare namespace TGApp.Plugins.Mys.Lottery {
    * @description 抽奖返回数据
    * @since Alpha v0.2.1
    * @interface Response
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {FullData} data.show_lottery 抽奖数据
    * @return Response
    */
-  interface Response extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface Response extends TGApp.BBS.Response.BaseWithData {
     data: {
       show_lottery: FullData;
     };

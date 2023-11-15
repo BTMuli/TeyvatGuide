@@ -13,16 +13,15 @@
 declare namespace TGApp.Plugins.Mys.Obc {
   /**
    * @description Mys obc 返回数据
-   * @since Alpha v0.2.1
+   * @since Beta v0.3.6
    * @interface Response
-   * @extends TGApp.BBS.Response.Base
-   * @property {Obc[]} data.list obc 列表
+   * @extends TGApp.BBS.Response.BaseWithData
+   * @property {Data[]} data.list obc 列表
    * @return Response
    */
-  interface Response extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface Response extends TGApp.BBS.Response.BaseWithData {
     data: {
-      list: Obc[];
+      list: Data[];
     };
   }
 

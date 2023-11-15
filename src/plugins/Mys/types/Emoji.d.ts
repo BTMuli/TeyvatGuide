@@ -15,13 +15,12 @@ declare namespace TGApp.Plugins.Mys.Emoji {
    * @description 获取表情包列表返回
    * @since Beta v0.3.0
    * @interface Response
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {Series[]} data.list 表情包列表
    * @property {unknown} data.recently_emoticon 最近使用的表情包
    * @return Response
    */
-  interface Response extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface Response extends TGApp.BBS.Response.BaseWithData {
     data: {
       list: Series[];
       recently_emoticon: unknown;

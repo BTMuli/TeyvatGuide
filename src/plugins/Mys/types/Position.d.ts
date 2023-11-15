@@ -15,12 +15,11 @@ declare namespace TGApp.Plugins.Mys.Position {
    * @description 热点追踪信息的返回类型
    * @since Alpha v0.2.1
    * @interface Response
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {ObcItem[]} data.list obc 列表
    * @return Response
    */
-  interface Response extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface Response extends TGApp.BBS.Response.BaseWithData {
     data: {
       list: ObcItem[];
     };

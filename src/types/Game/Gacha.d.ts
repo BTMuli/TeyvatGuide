@@ -15,14 +15,13 @@ declare namespace TGApp.Game.Gacha {
    * @description 获取 authkey 返回类型
    * @interface AuthkeyResponse
    * @since Beta v0.3.0
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {number} data.sign_type - 签名类型
    * @property {number} data.authkey_ver - authkey 版本
    * @property {string} data.authkey - authkey
    * @return AuthkeyResponse
    */
-  interface AuthkeyResponse extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface AuthkeyResponse extends TGApp.BBS.Response.BaseWithData {
     data: {
       sign_type: number;
       authkey_ver: number;
@@ -34,15 +33,14 @@ declare namespace TGApp.Game.Gacha {
    * @description 获取抽卡记录返回类型
    * @interface GachaLogResponse
    * @since Beta v0.3.0
-   * @extends TGApp.BBS.Response.Base
+   * @extends TGApp.BBS.Response.BaseWithData
    * @property {number} data.page - 页码
    * @property {number} data.size - 每页大小
    * @property {number} data.total - 总数
    * @property {GachaItem[]} data.list - 抽卡记录列表
    * @return GachaLogResponse
    */
-  interface GachaLogResponse extends TGApp.BBS.Response.Base {
-    retcode: 0;
+  interface GachaLogResponse extends TGApp.BBS.Response.BaseWithData {
     data: {
       page: number;
       size: number;
