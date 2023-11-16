@@ -164,6 +164,7 @@ import { useUserStore } from "../../store/modules/user";
 import { getBuildTime } from "../../utils/TGBuild";
 import { bytesToSize, getCacheDir, getDeviceInfo } from "../../utils/toolFunc";
 import { backupUiafData, restoreUiafData } from "../../utils/UIAF";
+import { getDeviceFp } from "../../web/request/getDeviceFp";
 import TGRequest from "../../web/request/TGRequest";
 import { backupAbyssData, backupCookieData } from "../../web/utils/backupData";
 import { restoreAbyssData, restoreCookieData } from "../../web/utils/restoreData";
@@ -278,6 +279,10 @@ async function confirmRefreshUser(): Promise<void> {
       text: "扫码登录后才能刷新用户信息!",
     });
     return;
+  }
+  const deviceInfo = appStore.deviceInfo;
+  if (deviceInfo.device_fp === "00000000000") {
+    appStore.deviceInfo = await getDeviceFp(appStore.deviceInfo);
   }
   let failCount = 0;
   loadingTitle.value = "正在验证 ltoken...";
