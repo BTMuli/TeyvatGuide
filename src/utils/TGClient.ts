@@ -429,8 +429,7 @@ class TGClient {
   async closePage(): Promise<void> {
     this.route.pop();
     if (this.route.length === 0) {
-      await this.open("");
-      await this.window?.hide();
+      await this.window?.close();
       return;
     }
     const url = this.route[this.route.length - 1];

@@ -147,7 +147,7 @@
         "height": 800,
         "center": true,
         "decorations": true,
-        "closable": false
+        "closable": true
       }
     ]
   }
