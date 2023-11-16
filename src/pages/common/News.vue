@@ -106,7 +106,7 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onBeforeMount, onMounted, ref } from "vue";
+import { nextTick, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import showSnackbar from "../../components/func/snackbar";
@@ -170,12 +170,6 @@ const rawData = ref<RawData>({
     name: "咨讯",
     lastId: 0,
   },
-});
-
-onBeforeMount(() => {
-  if (gid === "5") {
-    tabValues.value = ["notice", "activity"];
-  }
 });
 
 onMounted(async () => {
