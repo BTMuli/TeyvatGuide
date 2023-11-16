@@ -123,6 +123,7 @@
         />
       </template>
     </v-list-item>
+    <v-list-item prepend-icon="mdi-refresh" title="刷新设备信息" @click="confirmUpdateDevice" />
     <v-list-item prepend-icon="mdi-database-remove" title="清除缓存" @click="confirmDelCache" />
     <v-list-item
       v-show="showReset"
@@ -161,7 +162,7 @@ import { useAppStore } from "../../store/modules/app";
 import { useHomeStore } from "../../store/modules/home";
 import { useUserStore } from "../../store/modules/user";
 import { getBuildTime } from "../../utils/TGBuild";
-import { bytesToSize, getCacheDir } from "../../utils/toolFunc";
+import { bytesToSize, getCacheDir, getDeviceInfo } from "../../utils/toolFunc";
 import { backupUiafData, restoreUiafData } from "../../utils/UIAF";
 import TGRequest from "../../web/request/TGRequest";
 import { backupAbyssData, backupCookieData } from "../../web/utils/backupData";
@@ -441,6 +442,29 @@ async function confirmUpdate(title?: string): Promise<void> {
   });
   // 刷新
   window.location.reload();
+}
+
+// 更新设备信息
+async function confirmUpdateDevice(): Promise<void> {
+  const localFp = getDeviceInfo("device_fp");
+  if (localFp !== "0000000000000") {
+    const res = await showConfirm({
+      title: "确认更新设备信息吗？",
+      text: `DeviceFp:${localFp}`,
+    });
+    if (res === false) {
+      showSnackbar({
+        text: "已取消更新设备信息",
+        color: "cancel",
+      });
+      return;
+    }
+  }
+  await TGRequest.Device.getFp();
+  appStore.deviceInfo.device_fp = getDeviceInfo("device_fp");
+  showSnackbar({
+    text: "设备信息已更新! DeviceFp: " + getDeviceInfo("device_fp"),
+  });
 }
 
 // 清除用户缓存

@@ -1,7 +1,7 @@
 /**
- * @file utils toolFunc.ts
+ * @file utils/toolFunc.ts
  * @description 一些工具函数
- * @since Beta v0.3.5
+ * @since Beta v0.3.6
  */
 
 import { os, path } from "@tauri-apps/api";
@@ -40,17 +40,36 @@ export function timestampToDate(timestamp: number): string {
 }
 
 /**
- * @description 获取 deviceID
- * @since Beta v0.3.4
- * @returns {string} deviceID
+ * @description 获取设备信息（初始化时）
+ * @since Beta v0.3.6
+ * @returns {TGApp.App.Device.DeviceInfo} 设备信息
  */
-export function getDeviceID(): string {
-  let deviceID = localStorage.getItem("deviceID");
-  if (deviceID === null) {
-    deviceID = v4();
-    localStorage.setItem("deviceID", deviceID);
+export function getInitDeviceInfo(): TGApp.App.Device.DeviceInfo {
+  return {
+    device_id: v4(),
+    model: getRandomString(6),
+    seed_id: v4(),
+    seed_time: Date.now().toString(),
+    device_fp: "0000000000000",
+  };
+}
+
+/**
+ * @description 获取设备信息（登录时）
+ * @since Beta v0.3.6
+ * @param {string} key - 设备信息 key
+ * @returns {string} 设备信息
+ */
+export function getDeviceInfo(key: "device_id" | "device_fp"): string {
+  const localDevice = localStorage.getItem("deviceInfo");
+  let deviceInfo: TGApp.App.Device.DeviceInfo;
+  if (localDevice === null) {
+    deviceInfo = getInitDeviceInfo();
+    localStorage.setItem("deviceInfo", JSON.stringify({ deviceInfo }));
+  } else {
+    deviceInfo = JSON.parse(localDevice).deviceInfo;
   }
-  return deviceID;
+  return deviceInfo[key];
 }
 
 /**
@@ -83,4 +102,44 @@ export async function getCacheDir(): Promise<string[] | false> {
     return [`${cacheDir}WebKit`];
   }
   return false;
+}
+
+/**
+ * @description 获取随机字符串
+ * @since Beta v0.3.6
+ * @param {number} length 字符串长度
+ * @param {string} type
+ * @returns {string} 随机字符串
+ */
+export function getRandomString(length: number, type: string = "all"): string {
+  const char = "abcdefghijklmnopqrstuvwxyz";
+  const num = "0123456789";
+  let str = "";
+  switch (type) {
+    case "all":
+      str = char + char.toUpperCase() + num;
+      break;
+    case "number":
+      str = num;
+      break;
+    case "lower":
+      str = char;
+      break;
+    case "upper":
+      str = char.toUpperCase();
+      break;
+    case "letter":
+      str = char + char.toUpperCase();
+      break;
+    case "hex":
+      str = num + "abcdef";
+      break;
+    default:
+      str = char + char.toUpperCase() + num;
+  }
+  let res = "";
+  for (let i = 0; i < length; i++) {
+    res += str.charAt(Math.floor(Math.random() * str.length));
+  }
+  return res;
 }

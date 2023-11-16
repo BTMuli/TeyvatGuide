@@ -1,12 +1,13 @@
 /**
- * @file web utils getRequestHeader.ts
+ * @file web/utils/getRequestHeader.ts
  * @description 获取请求头
- * @since Beta v0.3.4
+ * @since Beta v0.3.6
  */
 
 import Md5 from "js-md5";
 
 import { transCookie, transParams } from "./tools";
+import { getDeviceInfo, getRandomString } from "../../utils/toolFunc";
 import TGConstant from "../constant/TGConstant";
 
 /**
@@ -41,21 +42,6 @@ function getRandomNumber(min: number, max: number): number {
 }
 
 /**
- * @description 获取随机字符串
- * @since Alpha v0.2.0
- * @param {number} length 字符串长度
- * @returns {string} 随机字符串
- */
-function getRandomString(length: number): string {
-  const str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let res = "";
-  for (let i = 0; i < length; i++) {
-    res += str.charAt(Math.floor(Math.random() * str.length));
-  }
-  return res;
-}
-
-/**
  * @description 获取 ds
  * @since Beta v0.3.3
  * @version 2.50.1
@@ -80,7 +66,7 @@ function getDS(method: string, data: string, saltType: string, isSign: boolean):
 
 /**
  * @description 获取请求头
- * @since Beta v0.3.0
+ * @since Beta v0.3.6
  * @param {Record<string, string>} cookie cookie
  * @param {string} method 请求方法
  * @param {Record<string, string|number>|string} data 请求数据
@@ -102,11 +88,13 @@ export function getRequestHeader(
     ds = getDS(method, transParams(data), saltType, isSign);
   }
   return {
-    "user-agent": TGConstant.BBS.USER_AGENT,
+    "user-agent": TGConstant.BBS.UA_PC,
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "5",
     "x-requested-with": "com.mihoyo.hyperion",
     referer: "https://webstatic.mihoyo.com",
+    "x-rpc-device_id": getDeviceInfo("device_id"),
+    "x-rpc-device_fp": getDeviceInfo("device_fp"),
     ds,
     cookie: transCookie(cookie),
   };

@@ -1,14 +1,14 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.3.5
+ * @since Beta v0.3.6
  */
 
 import { event, invoke, path } from "@tauri-apps/api";
 import type { Event } from "@tauri-apps/api/event";
 import { WebviewWindow } from "@tauri-apps/api/window";
 
-import { getDeviceID } from "./toolFunc";
+import { getDeviceInfo } from "./toolFunc";
 import { useUserStore } from "../store/modules/user";
 import TGConstant from "../web/constant/TGConstant";
 import TGRequest from "../web/request/TGRequest";
@@ -321,16 +321,20 @@ class TGClient {
 
   /**
    * @func getHTTPRequestHeaders
-   * @since Beta v0.3.4
+   * @since Beta v0.3.6
    * @desc 获取米游社客户端的 HTTP 请求头
    * @param {string} callback - 回调函数名
    * @returns {void} - 无返回值
    */
   async getHTTPRequestHeaders(callback: string): Promise<void> {
+    const localFp = getDeviceInfo("device_fp");
+    if (localFp === "0000000000000") await TGRequest.Device.getFp();
     const data = {
+      "user-agent": TGConstant.BBS.UA_MOBILE,
       "x-rpc-client_type": "5",
-      "x-rpc-device_id": getDeviceID(),
+      "x-rpc-device_id": getDeviceInfo("device_id"),
       "x-rpc-app_version": TGConstant.BBS.VERSION,
+      "x-rpc-device_fp": getDeviceInfo("device_fp"),
     };
     await this.callback(callback, data);
   }

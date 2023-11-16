@@ -1,7 +1,7 @@
 /**
- * @file web request TGRequest.ts
+ * @file web/request/TGRequest.ts
  * @description 应用用到的请求函数
- * @since Beta v0.3.4
+ * @since Beta v0.3.6
  */
 
 import { genAuthkey } from "./genAuthkey";
@@ -9,6 +9,7 @@ import { getAbyss } from "./getAbyss";
 import { getActionTicketBySToken } from "./getActionTicket";
 import { getAnnoContent, getAnnoList } from "./getAnno";
 import { getCookieTokenByGameToken, getCookieTokenBySToken } from "./getCookieToken";
+import { getDeviceFp } from "./getDeviceFp";
 // import * from "./getEnkaData.ts";
 import { getGachaLog } from "./getGachaLog";
 import { getGameAccountsByCookie, getGameAccountsBySToken } from "./getGameAccounts";
@@ -26,6 +27,9 @@ const TGRequest = {
   Anno: {
     getList: getAnnoList,
     getContent: getAnnoContent,
+  },
+  Device: {
+    getFp: getDeviceFp,
   },
   User: {
     getAuthkey: genAuthkey,

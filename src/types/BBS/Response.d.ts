@@ -182,4 +182,22 @@ declare namespace TGApp.BBS.Response {
       account_info: TGApp.BBS.Account.getActionTicketBySTokenInfo;
     };
   }
+
+  /**
+   * @description 获取 deviceFp 的返回类型
+   * @interface getDeviceFp
+   * @since Beta v0.3.6
+   * @extends BaseWithData
+   * @property {string} data.device_fp - deviceFp 值
+   * @property {number} data.code - code 值
+   * @property {string} data.msg - msg 值
+   * @return getDeviceFp
+   */
+  interface getDeviceFp extends BaseWithData {
+    data: {
+      device_fp: string;
+      code: number;
+      msg: string;
+    };
+  }
 }
