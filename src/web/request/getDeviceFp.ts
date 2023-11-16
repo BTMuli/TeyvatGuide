@@ -12,10 +12,13 @@ import TGConstant from "../constant/TGConstant";
 /**
  * @description 获取设备指纹
  * @since Beta v0.3.6
- * @returns {Promise<TGApp.BBS.Response.getDeviceFp>} 设备指纹
+ * @param {TGApp.App.Device.DeviceInfo} Info - 设备信息
+ * @returns {Promise<string>} 设备指纹
  */
-export async function getDeviceFp(): Promise<void> {
-  const info = getInitDeviceInfo();
+export async function getDeviceFp(
+  Info?: TGApp.App.Device.DeviceInfo,
+): Promise<TGApp.App.Device.DeviceInfo> {
+  const info = Info ?? getInitDeviceInfo();
   const deviceFPHeader = {
     cpuType: "arm64-v8a",
     romCapacity: "512",
@@ -78,5 +81,5 @@ export async function getDeviceFp(): Promise<void> {
       if (res.data.data.code === 200) return res.data.data.device_fp;
       return "0000000000000";
     });
-  localStorage.setItem("deviceInfo", JSON.stringify({ deviceInfo: info }));
+  return info;
 }

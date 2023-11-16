@@ -460,10 +460,9 @@ async function confirmUpdateDevice(): Promise<void> {
       return;
     }
   }
-  await TGRequest.Device.getFp();
-  appStore.deviceInfo.device_fp = getDeviceInfo("device_fp");
+  appStore.deviceInfo = await TGRequest.Device.getFp(appStore.deviceInfo);
   showSnackbar({
-    text: "设备信息已更新! DeviceFp: " + getDeviceInfo("device_fp"),
+    text: "设备信息已更新! DeviceFp: " + appStore.deviceInfo.device_fp,
   });
 }
 

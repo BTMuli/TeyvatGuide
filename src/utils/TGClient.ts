@@ -9,6 +9,7 @@ import type { Event } from "@tauri-apps/api/event";
 import { WebviewWindow } from "@tauri-apps/api/window";
 
 import { getDeviceInfo } from "./toolFunc";
+import { useAppStore } from "../store/modules/app";
 import { useUserStore } from "../store/modules/user";
 import TGConstant from "../web/constant/TGConstant";
 import TGRequest from "../web/request/TGRequest";
@@ -328,13 +329,16 @@ class TGClient {
    */
   async getHTTPRequestHeaders(callback: string): Promise<void> {
     const localFp = getDeviceInfo("device_fp");
-    if (localFp === "0000000000000") await TGRequest.Device.getFp();
+    let deviceInfo = useAppStore().deviceInfo;
+    if (localFp === "0000000000000") {
+      deviceInfo = await TGRequest.Device.getFp(deviceInfo);
+    }
     const data = {
       "user-agent": TGConstant.BBS.UA_MOBILE,
       "x-rpc-client_type": "5",
-      "x-rpc-device_id": getDeviceInfo("device_id"),
+      "x-rpc-device_id": deviceInfo.device_id,
       "x-rpc-app_version": TGConstant.BBS.VERSION,
-      "x-rpc-device_fp": getDeviceInfo("device_fp"),
+      "x-rpc-device_fp": deviceInfo.device_fp,
     };
     await this.callback(callback, data);
   }
