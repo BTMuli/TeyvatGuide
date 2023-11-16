@@ -125,7 +125,7 @@ class TGClient {
       case "tavern":
         return "https://m.miyoushe.com/ys/#/home/26";
       case "birthday":
-        return "https://webstatic.mihoyo.com/ys/event/e20220303-birthday/index.html?game_biz=hk4e_cn&bbs_presentation_style=fullscreen&bbs_auth_required=true&bbs_landscape=true&activity_id=20220301153521&mhy_hide_status_bar=true&utm_source=bbs&utm_medium=mys&utm_campaign=arti";
+        return "https://webstatic.mihoyo.com/ys/event/e20220303-birthday/index.html?activity_id=20220301153521";
       case "toolbox":
         return "https://webstatic.mihoyo.com/bbs/event/e20200511toolbox/index.html?game_biz=ys_cn";
       default:

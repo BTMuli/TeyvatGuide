@@ -1,6 +1,6 @@
 //! @file src/client.rs
 //! @desc 客户端模块，负责操作米游社客户端
-//! @since Beta v0.3.4
+//! @since Beta v0.3.6
 
 use tauri::{AppHandle, Manager, WindowBuilder, WindowUrl};
 use url::Url;
@@ -15,6 +15,10 @@ fn get_mhy_client_url(func: String) -> WindowUrl {
   } else if func == "game_record" {
     url_res =
       "https://webstatic.mihoyo.com/app/community-game-records/index.html?bbs_presentation_style=fullscreen".parse().unwrap();
+  } else if func == "birthday" {
+    url_res = "https://webstatic.mihoyo.com/ys/event/e20220303-birthday/index.html?activity_id=20220301153521"
+        .parse()
+        .unwrap();
   }
   return WindowUrl::External(url_res);
 }
@@ -29,10 +33,11 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
   } else {
     mhy_window_config.url = get_mhy_client_url(func.clone());
   }
-  if func == "birthday" {
+  if func == "birthday"
+    || url.starts_with("https://webstatic.mihoyo.com/ys/event/e20220303-birthday/index.html")
+  {
     mhy_window_config.width = 1280.0;
     mhy_window_config.height = 720.0;
-    mhy_window_config.resizable = false;
   }
   let has_mhy_client = handle.get_window("mhy_client").is_some();
   if has_mhy_client {

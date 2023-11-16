@@ -5,6 +5,17 @@
         <v-icon size="small"> mdi-calendar-clock</v-icon>
         <span>今日素材</span>
         <span>{{ dateNow }}</span>
+        <!-- 如果是某人生日，显示礼物图标 -->
+        <span
+          @click="toBirthday"
+          :style="{
+            color: birthInfo.active ? 'var(--tgc-red-1)' : 'inherit',
+            cursor: 'pointer',
+          }"
+          :title="birthInfo.text"
+        >
+          <v-icon size="small">mdi-gift</v-icon>
+        </span>
       </div>
       <div class="calendar-title-mid">
         <v-btn
@@ -64,6 +75,8 @@
 import { computed, onMounted, ref } from "vue";
 
 import { AppCalendarData } from "../../data";
+import TGSqlite from "../../plugins/Sqlite";
+import TGClient from "../../utils/TGClient";
 import { generateShareImg } from "../../utils/TGShare";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 import ToCalendar from "../overlay/to-calendar.vue";
@@ -87,6 +100,12 @@ const showItem = ref<boolean>(false);
 const switchType = ref<string>("avatar");
 const selectedItem = ref<TGApp.App.Calendar.Item>(<TGApp.App.Calendar.Item>{});
 const selectedType = ref<"avatar" | "weapon">("avatar");
+
+// birthday
+const birthInfo = ref({
+  active: false,
+  text: "点击前往留影叙佳期",
+});
 
 const btnText = [
   {
@@ -125,7 +144,14 @@ defineExpose({
   loading,
 });
 
-onMounted(() => {
+onMounted(async () => {
+  const birthRes = await TGSqlite.isBirthday();
+  if (birthRes !== false) {
+    birthInfo.value = {
+      active: true,
+      text: `今天是${birthRes}的生日，\n快去送上祝福吧！`,
+    };
+  }
   const dayNow = new Date().getDay() === 0 ? 7 : new Date().getDay();
   const week = <{ week: number; text: string }>btnText.find((item) => item.week === dayNow);
   dateNow.value =
@@ -173,6 +199,11 @@ async function share(): Promise<void> {
   const showType = switchType.value === "avatar" ? "角色" : "武器";
   const title = `【今日素材】${showType}${btnNow.value}`;
   await generateShareImg(title, div);
+}
+
+// 前往留影叙佳期
+async function toBirthday(): Promise<void> {
+  await TGClient.open("birthday");
 }
 </script>
 <style lang="css" scoped>

@@ -1,7 +1,7 @@
 /**
- * @file plugins Sqlite index.ts
+ * @file plugins/Sqlite/index.ts
  * @description Sqlite 数据库操作类
- * @since Beta v0.3.3
+ * @since Beta v0.3.6
  */
 
 import { app } from "@tauri-apps/api";
@@ -520,6 +520,21 @@ class Sqlite {
     for (const item of sql) {
       await db.execute(item);
     }
+  }
+
+  /**
+   * @description 判断今天是否是某个角色的生日
+   * @since Beta v0.3.6
+   * @returns {Promise<false|string>}
+   */
+  public async isBirthday(): Promise<false | string> {
+    const db = await this.getDB();
+    const dateNow = new Date();
+    const date = `${dateNow.getMonth() + 1},${dateNow.getDate()}`;
+    const sql = `SELECT name FROM AppCharacters WHERE birthday = '${date}';`;
+    const res: Array<{ name: string }> = await db.select(sql);
+    if (res.length === 0) return false;
+    return res.map((item) => item.name).join("、");
   }
 }
 
