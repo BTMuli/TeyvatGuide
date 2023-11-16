@@ -4,7 +4,7 @@
  * @since Beta v0.3.6
  */
 
-import { event, invoke, path } from "@tauri-apps/api";
+import { event, invoke } from "@tauri-apps/api";
 import type { Event } from "@tauri-apps/api/event";
 import { WebviewWindow } from "@tauri-apps/api/window";
 
@@ -109,7 +109,7 @@ class TGClient {
 
   /**
    * @func getUrl
-   * @since Beta v0.3.5
+   * @since Beta v0.3.6
    * @desc 获取 url
    * @param {string} func - 方法名
    * @returns {string} - url
@@ -129,13 +129,13 @@ class TGClient {
       case "toolbox":
         return "https://webstatic.mihoyo.com/bbs/event/e20200511toolbox/index.html?game_biz=ys_cn";
       default:
-        return this.getUrl("daily_note");
+        return "https://api-static.mihoyo.com/";
     }
   }
 
   /**
    * @func open
-   * @since Beta v0.3.4
+   * @since Beta v0.3.6
    * @desc 打开米游社客户端
    * @param {string} func - 方法名
    * @param {string} url - url
@@ -143,7 +143,15 @@ class TGClient {
    */
   async open(func: string, url?: string): Promise<void> {
     if (this.window !== null) {
-      await this.window.close();
+      try {
+        await this.window.close();
+      } catch (e) {
+        await invoke<InvokeArg>("create_mhy_client", {
+          func: "default",
+          url: "https://api-static.mihoyo.com/",
+        });
+        await this.open(func, url);
+      }
     }
     if (url === undefined) {
       url = this.getUrl(func);
@@ -414,13 +422,14 @@ class TGClient {
 
   /**
    * @func closePage
-   * @since Beta v0.3.4
+   * @since Beta v0.3.6
    * @desc 关闭米游社客户端的页面
    * @returns {void} - 无返回值
    */
   async closePage(): Promise<void> {
     this.route.pop();
     if (this.route.length === 0) {
+      await this.open("");
       await this.window?.hide();
       return;
     }
@@ -443,24 +452,23 @@ class TGClient {
 
   /**
    * @func onClickImg
-   * @since Beta v0.3.5
+   * @since Beta v0.3.6
    * @desc 点击图片，下载到本地
    * @param {unknown} payload - 请求参数
    * @returns {void} - 无返回值
    */
   async onClickImg(payload: any): Promise<void> {
-    const url = payload.image_list[0].url;
-    const imageType = url.endsWith(".png") ? "png" : url.endsWith(".jpg") ? "jpg" : "png";
-    const savePath = `${await path.downloadDir()}${path.sep}${Date.now().toString()}.${imageType}`;
+    const image = payload.image_list[0];
     const executeJS = `javascript:(async function() {
       const _t = window.__TAURI__;
+      const defaultPath = await _t.path.downloadDir() + Date.now() + '.${image.format}';
       const savePath = await _t.dialog.save({
         title: '保存图片',
         filters: [{ name: '图片', extensions: ['png'] }],
-        defaultPath: '${savePath}',
+        defaultPath: defaultPath,
       });
       if (savePath) {
-        const resBlob = await _t.http.fetch('${url}',{
+        const resBlob = await _t.http.fetch('${image.url}',{
           method: 'GET',
           responseType: _t.http.ResponseType.Binary
         });
