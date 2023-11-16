@@ -141,7 +141,7 @@
         "title": "米游社",
         "label": "mhy_client",
         "url": "https://api-static.mihoyo.com/",
-        "userAgent": "Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/2.59.1",
+        "userAgent": "Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/2.63.1",
         "visible": false,
         "width": 400,
         "height": 800,
