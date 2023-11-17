@@ -6,7 +6,7 @@
         <span v-if="!isEmpty">{{ getTitle() }} 更新于 {{ recordData.updated }}</span>
         <span v-else>原神战绩【暂无数据】</span>
       </div>
-      <div class="ur-top-btns">
+      <div class="ur-top-btns" data-html2canvas-ignore>
         <v-btn class="ur-top-btn" @click="refresh()">
           <template #prepend>
             <v-icon>mdi-refresh</v-icon>
@@ -118,7 +118,6 @@ async function shareRecord(): Promise<void> {
 <style lang="css" scoped>
 .ur-box {
   display: flex;
-  width: 100%;
   flex-direction: column;
   padding: 10px;
   border-radius: 5px;

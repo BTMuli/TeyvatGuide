@@ -8,7 +8,7 @@
         </span>
         <span v-else> 暂无数据 </span>
       </div>
-      <div class="uc-top-btns">
+      <div class="uc-top-btns" data-html2canvas-ignore>
         <v-btn class="uc-top-btn" @click="refreshRoles()">
           <template #prepend>
             <v-icon>mdi-refresh</v-icon>
@@ -182,7 +182,6 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
 <style lang="css" scoped>
 .uc-box {
   display: flex;
-  width: 100%;
   flex-direction: column;
   padding: 10px;
   border: 1px solid var(--common-shadow-2);

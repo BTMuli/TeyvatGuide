@@ -79,18 +79,16 @@ function getShareImgBgColor(): string {
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
- * @param {number} offset - 偏移量
  * @returns {Promise<void>} 无返回值
  */
 export async function generateShareImg(
   fileName: string,
   element: HTMLElement,
   scale: number = 1.2,
-  offset: number = 30,
 ): Promise<void> {
   const canvas = document.createElement("canvas");
-  const width = element.clientWidth + offset;
-  const height = element.clientHeight + offset;
+  const width = element.clientWidth + 30;
+  const height = element.clientHeight + 30;
   canvas.width = width * scale;
   canvas.height = height * scale;
   const opts = {
@@ -101,8 +99,8 @@ export async function generateShareImg(
     height,
     useCORS: true,
     canvas,
-    x: (-offset / 2) * scale,
-    y: (-offset / 2) * scale,
+    x: -10,
+    y: -15,
     dpi: 350,
   };
   const canvasData = await html2canvas(element, opts);

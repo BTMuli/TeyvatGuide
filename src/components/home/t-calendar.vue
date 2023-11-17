@@ -41,7 +41,7 @@
           :label="switchType === 'avatar' ? '角色' : '武器'"
           @change="switchType = switchType === 'avatar' ? 'weapon' : 'avatar'"
         />
-        <v-btn class="calendar-title-btn" @click="share">
+        <v-btn class="calendar-title-btn" @click="share" data-html2canvas-ignore>
           <template #prepend>
             <v-icon>mdi-share-variant</v-icon>
           </template>
