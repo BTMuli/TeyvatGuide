@@ -13,7 +13,12 @@
           </div>
           <div v-show="data?.text !== '' && data.mode === 'input'" class="confirm-input">
             <div class="confirm-input-label">{{ data.text }}</div>
-            <input v-model="inputVal" class="confirm-input-box" />
+            <input
+              v-model="inputVal"
+              class="confirm-input-box"
+              ref="inputRef"
+              @keydown.enter="handleClick(true)"
+            />
           </div>
           <div class="confirm-btn-box">
             <button class="confirm-btn no-btn" @click="handleClick(false)">取消</button>
@@ -26,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive, ref, watch } from "vue";
+import { nextTick, onMounted, reactive, ref, watch } from "vue";
 
 interface ConfirmProps {
   title: string;
@@ -51,6 +56,7 @@ const showOuter = ref<boolean>(false);
 const showInner = ref<boolean>(false);
 const confirmVal = ref<boolean | string>(false);
 const inputVal = ref<string>("");
+const inputRef = ref<HTMLInputElement>();
 
 watch(show, () => {
   if (show.value) {
@@ -80,6 +86,14 @@ async function displayBox(params: TGApp.Component.Confirm.Params): Promise<strin
   show.value = true;
   // 等待确认框关闭，返回关闭后的confirmVal
   return await new Promise<string | boolean>((resolve) => {
+    nextTick(() => {
+      if (data.mode === "input") {
+        // 等待确认框打开，聚焦输入框
+        setTimeout(() => {
+          inputRef.value?.focus();
+        }, 100);
+      }
+    });
     watch(show, () => {
       // 等 0.5s 动画
       setTimeout(() => {
