@@ -513,6 +513,7 @@ async function handleImportOuter(app: string): Promise<void> {
 .achievement-finish img {
   width: 30px;
   height: 30px;
+  filter: invert(51%) sepia(100%) saturate(353%) hue-rotate(42deg) brightness(107%) contrast(91%);
 }
 
 /* 成就完成时间 */
