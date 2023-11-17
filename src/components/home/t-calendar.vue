@@ -2,15 +2,15 @@
   <div class="calendar-box">
     <div class="calendar-title">
       <div class="calendar-title-left">
-        <v-icon size="small"> mdi-calendar-clock</v-icon>
+        <v-icon size="small">mdi-calendar-clock</v-icon>
         <span>今日素材</span>
         <span>{{ dateNow }}</span>
-        <!-- 如果是某人生日，显示礼物图标 -->
+        <!-- 如果是某人生日，礼物图标颜色为红色 -->
         <span
           @click="toBirthday"
+          class="calendar-title-gift"
           :style="{
             color: birthInfo.active ? 'var(--tgc-red-1)' : 'inherit',
-            cursor: 'pointer',
           }"
           :title="birthInfo.text"
         >
@@ -43,7 +43,7 @@
         />
         <v-btn class="calendar-title-btn" @click="share">
           <template #prepend>
-            <v-icon> mdi-share-variant</v-icon>
+            <v-icon>mdi-share-variant</v-icon>
           </template>
           <span>分享</span>
         </v-btn>
@@ -230,6 +230,13 @@ async function toBirthday(): Promise<void> {
   justify-content: start;
   color: var(--common-text-title);
   column-gap: 10px;
+}
+
+.calendar-title-gift {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
 .calendar-title-mid {
