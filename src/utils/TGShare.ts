@@ -1,7 +1,7 @@
 /**
  * @file utils TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.3.4
+ * @since Beta v0.3.6
  */
 
 import { dialog, fs, http, path } from "@tauri-apps/api";
@@ -75,7 +75,7 @@ function getShareImgBgColor(): string {
 
 /**
  * @description 生成分享截图
- * @since Beta v0.3.4
+ * @since Beta v0.3.6
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
@@ -85,7 +85,7 @@ function getShareImgBgColor(): string {
 export async function generateShareImg(
   fileName: string,
   element: HTMLElement,
-  scale: number = 0.98,
+  scale: number = 1.2,
   offset: number = 30,
 ): Promise<void> {
   const canvas = document.createElement("canvas");
