@@ -143,10 +143,13 @@ function toDetail(item: TGApp.App.Calendar.Item): void {
 
 .toc-src-box :nth-child(2) {
   height: 30px;
-  border-radius: 50%;
   margin: 5px;
   aspect-ratio: 1;
-  background: var(--common-shadow-4);
+  filter: invert(87%) sepia(14%) saturate(216%) hue-rotate(180deg) brightness(81%) contrast(87%);
+}
+
+.dark .toc-src-box :nth-child(2) {
+  filter: none;
 }
 
 .toc-src-text {

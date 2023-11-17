@@ -250,8 +250,7 @@ onUnmounted(() => {
 .pool-title-left img {
   width: 25px;
   height: 25px;
-  border-radius: 50%;
-  background: var(--common-shadow-4);
+  filter: brightness(0.8);
 }
 
 .pool-title-right {

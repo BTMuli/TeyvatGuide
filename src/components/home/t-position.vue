@@ -34,7 +34,6 @@
           </div>
           <div class="position-card-text">
             <v-icon>mdi-clock-outline</v-icon>
-            <span>剩余时间：</span>
             <span v-if="positionTimeGet[card.postId] !== '已结束'">{{
               positionTimeGet[card.postId]
             }}</span>
@@ -130,6 +129,7 @@ onUnmounted(() => {
   width: 20px;
   height: 20px;
   margin: 0 10px;
+  filter: brightness(0.9);
 }
 
 .position-grid {
@@ -182,5 +182,11 @@ onUnmounted(() => {
   display: inline-block;
   min-width: 200px;
   align-items: flex-start;
+  margin-right: 5px;
+}
+
+.position-card-text :nth-child(1) {
+  color: var(--btn-text);
+  filter: brightness(0.8);
 }
 </style>

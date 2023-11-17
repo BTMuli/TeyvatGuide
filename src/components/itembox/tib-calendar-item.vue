@@ -2,7 +2,7 @@
   <TItemBox :model-value="box" />
 </template>
 <script lang="ts" setup>
-import { computed } from "vue";
+import { onMounted, ref } from "vue";
 
 import TItemBox from "../main/t-itembox.vue";
 import type { TItemBoxData } from "../main/t-itembox.vue";
@@ -14,33 +14,48 @@ interface TibCalendarItemProps {
 }
 
 const props = defineProps<TibCalendarItemProps>();
-const box = computed<TItemBoxData>(() => {
+const box = ref<TItemBoxData>({
+  bg: "",
+  icon: "",
+  size: "100px",
+  height: "100px",
+  display: "inner",
+  clickable: false,
+  lt: "",
+  ltSize: "30px",
+  innerHeight: 25,
+  innerIcon: "",
+  innerText: "",
+});
+
+onMounted(() => {
   if (props.model === "avatar") {
-    return {
+    box.value = {
       bg: props.data.bg,
       icon: props.data.icon,
       size: "100px",
       height: "100px",
       display: "inner",
       clickable: props.clickable,
-      lt: props.data.elementIcon,
+      lt: props.data.elementIcon ?? "",
       ltSize: "30px",
       innerHeight: 25,
       innerIcon: props.data.weaponIcon,
       innerText: props.data.name,
     };
+  } else {
+    box.value = {
+      bg: props.data.bg,
+      icon: props.data.icon,
+      size: "100px",
+      height: "100px",
+      display: "inner",
+      clickable: props.clickable,
+      lt: props.data.weaponIcon,
+      ltSize: "30px",
+      innerHeight: 25,
+      innerText: props.data.name,
+    };
   }
-  return {
-    bg: props.data.bg,
-    icon: props.data.icon,
-    size: "100px",
-    height: "100px",
-    display: "inner",
-    clickable: props.clickable,
-    lt: props.data.weaponIcon,
-    ltSize: "30px",
-    innerHeight: 25,
-    innerText: props.data.name,
-  };
 });
 </script>

@@ -28,7 +28,7 @@
         <div class="version-icon-series">v{{ series.version }}</div>
         <v-list-item>
           <template #prepend>
-            <v-img width="40px" style="margin-right: 10px" :src="getIcon(series.id)" />
+            <v-img class="series-icon" :src="getIcon(series.id)" />
           </template>
           <v-list-item-title :title="series.name">
             {{ series.name }}
@@ -556,6 +556,18 @@ async function getAchievements(
   font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
+}
+
+.series-icon {
+  width: 40px;
+  height: 40px;
+  padding: 5px;
+  border-radius: 5px;
+  margin-right: 10px;
+  background:
+    linear-gradient(to bottom, rgb(255 255 255 / 15%) 0%, rgb(0 0 0 / 15%) 100%),
+    radial-gradient(at top center, rgb(255 255 255 / 40%) 0%, rgb(0 0 0 / 40%) 120%) #989898;
+  background-blend-mode: multiply, multiply;
 }
 
 .version-icon-single {

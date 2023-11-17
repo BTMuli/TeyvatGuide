@@ -2,7 +2,7 @@
   <div class="calendar-box">
     <div class="calendar-title">
       <div class="calendar-title-left">
-        <v-icon size="small">mdi-calendar-clock</v-icon>
+        <v-icon size="small" style="opacity: 0.8">mdi-calendar-clock</v-icon>
         <span>今日素材</span>
         <span>{{ dateNow }}</span>
         <!-- 如果是某人生日，礼物图标颜色为红色 -->
