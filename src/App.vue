@@ -92,7 +92,6 @@ async function checkAppLoad(): Promise<void> {
     return;
   }
   await createDataDir();
-  await initData();
   appStore.loading = true;
   console.info("数据加载完成！");
 }
@@ -154,19 +153,6 @@ async function createDataDir(): Promise<void> {
     await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
   }
   console.info("数据文件夹创建完成！");
-}
-
-// 初始化数据库
-async function initData(): Promise<void> {
-  if (import.meta.env.MODE === "development") {
-    console.info("开发环境，跳过数据库初始化！");
-    return;
-  }
-  await TGSqlite.reset();
-  showSnackbar({
-    text: "已成功初始化数据库！",
-  });
-  console.info("已成功初始化数据库！");
 }
 
 async function getDeepLink(): Promise<void> {
