@@ -199,17 +199,6 @@ class Sqlite {
   }
 
   /**
-   * @description 获取成就系列列表
-   * @since Beta v0.3.3
-   * @returns {Promise<TGApp.Sqlite.Achievement.SeriesTable[]>}
-   */
-  public async getAchievementSeries(): Promise<TGApp.Sqlite.Achievement.SeriesTable[]> {
-    const db = await this.getDB();
-    const sql = "SELECT * FROM AchievementSeries ORDER BY `order`;";
-    return await db.select(sql);
-  }
-
-  /**
    * @description 获取成就系列对应的名片
    * @since Beta v0.3.3
    * @param {number} seriesId 系列 ID
@@ -225,41 +214,6 @@ class Sqlite {
   }
 
   /**
-   * @description 获取成就列表
-   * @since Beta v0.3.3
-   * @param {number} [seriesId] 系列 ID
-   * @returns {Promise<TGApp.Sqlite.Achievement.SingleTable[]>}
-   */
-  public async getAchievements(seriesId?: number): Promise<TGApp.Sqlite.Achievement.SingleTable[]> {
-    const db = await this.getDB();
-    let sql;
-    if (seriesId) {
-      sql = `SELECT *
-             FROM Achievements
-             WHERE series = ${seriesId}
-             ORDER BY isCompleted, \`order\`;`;
-    } else {
-      sql = "SELECT * FROM Achievements ORDER BY isCompleted, `order`;";
-    }
-    return await db.select(sql);
-  }
-
-  /**
-   * @description 获取成就概况
-   * @since Beta v0.3.3
-   * @returns {Promise<{total:number,fin:number}>}
-   */
-  public async getAchievementsOverview(): Promise<{
-    total: number;
-    fin: number;
-  }> {
-    const db = await this.getDB();
-    const sql = "SELECT SUM(totalCount) AS total, SUM(finCount) AS fin FROM AchievementSeries;";
-    const res: Array<{ total: number; fin: number }> = await db.select(sql);
-    return res[0];
-  }
-
-  /**
    * @description 获取最新成就版本
    * @since Beta v0.3.3
    * @returns {Promise<string>}
@@ -269,33 +223,6 @@ class Sqlite {
     const sql = "SELECT version FROM Achievements ORDER BY version DESC LIMIT 1;";
     const res: Array<{ version: string }> = await db.select(sql);
     return res[0].version;
-  }
-
-  /**
-   * @description 查询成就
-   * @since Beta v0.3.3
-   * @param {string} keyword 关键词
-   * @returns {Promise<TGApp.Sqlite.Achievement.SingleTable[]>}
-   */
-  public async searchAchievements(
-    keyword: string,
-  ): Promise<TGApp.Sqlite.Achievement.SingleTable[]> {
-    const db = await this.getDB();
-    let sql;
-    if (keyword.startsWith("v")) {
-      const version = keyword.replace("v", "");
-      sql = `SELECT *
-             FROM Achievements
-             WHERE version LIKE '%${version}%'
-             ORDER BY isCompleted, \`order\`;`;
-    } else {
-      sql = `SELECT *
-             FROM Achievements
-             WHERE name LIKE '%${keyword}%'
-                OR description LIKE '%${keyword}%'
-             ORDER BY isCompleted, \`order\`;`;
-    }
-    return await db.select(sql);
   }
 
   /**

@@ -20,7 +20,7 @@
     <!-- 左侧菜单 -->
     <div class="left-wrap">
       <v-list
-        v-for="series in seriesList"
+        v-for="series in allSeriesData"
         :key="series.id"
         class="card-left"
         @click="selectSeries(series.id)"
@@ -69,7 +69,7 @@
           :key="achievement.id"
           class="card-right"
           :style="{ transform: `translateY(${translateY})` }"
-          :title="seriesList.find((item) => item.id === achievement.series)?.name ?? ''"
+          :title="allSeriesData.find((item) => item.id === achievement.series)?.name ?? ''"
         >
           <div v-if="achievement.progress !== 0" class="achievement-progress">
             {{ achievement.progress }}
@@ -138,7 +138,7 @@ const getCardImg = computed(() => {
   };
 });
 // series
-const seriesList = ref<TGApp.Sqlite.Achievement.SeriesTable[]>([]);
+const allSeriesData = ref<TGApp.Sqlite.Achievement.SeriesTable[]>([]);
 const selectedSeries = ref<number>(-1);
 const selectedAchievement = ref<TGApp.Sqlite.Achievement.SingleTable[]>([]);
 const renderAchievement = computed(() => {
@@ -161,7 +161,7 @@ const route = useRoute();
 const router = useRouter();
 
 onBeforeMount(async () => {
-  const { total, fin } = await TGSqlite.getAchievementsOverview();
+  const { total, fin } = await getAchievementsOverview();
   achievementsStore.flushData(total, fin);
   title.value = achievementsStore.title;
 });
@@ -169,15 +169,11 @@ onBeforeMount(async () => {
 onMounted(async () => {
   loading.value = true;
   loadingTitle.value = "正在获取成就系列数据";
-  seriesList.value = await TGSqlite.getAchievementSeries();
-  achievementsStore.lastVersion = seriesList.value.reduce((prev, curr) => {
-    return prev.version > curr.version ? prev : curr;
-  }).version;
+  allSeriesData.value = await getAchievementSeries();
+  achievementsStore.lastVersion = await TGSqlite.getLatestAchievementVersion();
   loadingTitle.value = "正在获取成就数据";
-  selectedAchievement.value = await TGSqlite.getAchievements();
-  await nextTick(() => {
-    loading.value = false;
-  });
+  selectedAchievement.value = await getAchievements("all");
+  loading.value = false;
   if (route.query.app && typeof route.query.app === "string") {
     await handleImportOuter(route.query.app);
   }
@@ -224,16 +220,50 @@ function handleScroll(e: Event): void {
 async function selectSeries(index: number): Promise<void> {
   // 如果选中的是已经选中的系列，则不进行操作
   if (selectedSeries.value === index) {
-    showSnackbar({
-      color: "warn",
-      text: "已经选中该系列",
+    let res, res2;
+    res = await showConfirm({
+      title: "请输入要执行的批量操作",
+      text: "全部完成（1）/全部未完成（2）",
+      mode: "input",
     });
+    if (res !== false) {
+      if (res === "1") {
+        res2 = await showConfirm({
+          title: "是否确认全部完成？",
+          text: "此操作不可逆",
+        });
+      } else if (res === "2") {
+        res2 = await showConfirm({
+          title: "是否确认全部未完成？",
+          text: "此操作不可逆",
+        });
+      } else {
+        showSnackbar({
+          text: "请输入数字 1 或 2",
+          color: "error",
+        });
+        return;
+      }
+    }
+    if (!(res && res2)) {
+      showSnackbar({
+        text: "已取消操作",
+        color: "cancel",
+      });
+    } else {
+      // todo
+      // await setAchievements("series", index, res === "1" ? true : false);
+      showSnackbar({
+        text: "操作成功",
+        color: "success",
+      });
+    }
     return;
   }
   loading.value = true;
   loadingTitle.value = "正在获取对应的成就数据";
   selectedSeries.value = index;
-  selectedAchievement.value = await TGSqlite.getAchievements(index);
+  selectedAchievement.value = await getAchievements("series", index.toString());
   loadingTitle.value = "正在查找对应的成就名片";
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
     getCardInfo.value = await TGSqlite.getNameCard(index);
@@ -266,7 +296,7 @@ async function searchCard(): Promise<void> {
   selectedSeries.value = -1;
   loadingTitle.value = "正在搜索";
   loading.value = true;
-  selectedAchievement.value = await TGSqlite.searchAchievements(search.value);
+  selectedAchievement.value = await getAchievements("search", search.value);
   if (selectedAchievement.value.length === 0) {
     showSnackbar({
       color: "error",
@@ -394,6 +424,64 @@ async function handleImportOuter(app: string): Promise<void> {
       text: "已取消导入",
     });
   }
+}
+
+/* 以下为数据库操作 */
+// 获取成就概况
+async function getAchievementsOverview(): Promise<{
+  total: number;
+  fin: number;
+}> {
+  const db = await TGSqlite.getDB();
+  const sql = "SELECT SUM(totalCount) AS total, SUM(finCount) AS fin FROM AchievementSeries;";
+  const res: Array<{ total: number; fin: number }> = await db.select(sql);
+  return res[0];
+}
+
+// 获取成就系列
+async function getAchievementSeries(): Promise<TGApp.Sqlite.Achievement.SeriesTable[]> {
+  const db = await TGSqlite.getDB();
+  const sql = "SELECT * FROM AchievementSeries ORDER BY `order`;";
+  return await db.select(sql);
+}
+
+// 获取成就（某个系列）
+async function getAchievements(
+  type: "all" | "series" | "search",
+  value?: string,
+): Promise<TGApp.Sqlite.Achievement.SingleTable[]> {
+  const db = await TGSqlite.getDB();
+  let sql = "";
+  if (type === "all" || (type == "series" && value === undefined)) {
+    sql = "SELECT * FROM Achievements ORDER BY isCompleted, `order`;";
+  } else if (type === "series") {
+    sql = `SELECT *
+           FROM Achievements
+           WHERE series = ${value}
+           ORDER BY isCompleted, \`order\`;`;
+  } else if (type === "search") {
+    if (value === undefined) {
+      showSnackbar({
+        color: "error",
+        text: "搜索内容不能为空",
+      });
+      return [];
+    }
+    if (value.startsWith("v")) {
+      const version = value.replace("v", "");
+      sql = `SELECT *
+             FROM Achievements
+             WHERE version LIKE '%${version}%'
+             ORDER BY isCompleted, \`order\`;`;
+    } else {
+      sql = `SELECT *
+             FROM Achievements
+             WHERE name LIKE '%${value}%'
+                OR description LIKE '%${value}%'
+             ORDER BY isCompleted, \`order\`;`;
+    }
+  }
+  return await db.select(sql);
 }
 </script>
 
