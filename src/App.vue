@@ -91,6 +91,15 @@ async function checkAppLoad(): Promise<void> {
     console.info("数据已加载！");
     return;
   }
+  const checkDB = await TGSqlite.check();
+  if (!checkDB) {
+    await TGSqlite.reset();
+    showSnackbar({
+      text: "检测到数据库不完整！已重置数据库！",
+      color: "error",
+      timeout: 3000,
+    });
+  }
   await createDataDir();
   appStore.loading = true;
   console.info("数据加载完成！");
