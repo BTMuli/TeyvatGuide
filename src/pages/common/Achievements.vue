@@ -76,10 +76,20 @@
           </div>
           <v-list-item>
             <template #prepend>
-              <v-icon v-if="!achievement.isCompleted" color="var(--tgc-blue-3)">
+              <v-icon
+                v-if="!achievement.isCompleted"
+                color="var(--tgc-blue-3)"
+                @click="setAchi(achievement, true)"
+                style="cursor: pointer"
+              >
                 mdi-circle
               </v-icon>
-              <v-icon v-else class="achievement-finish">
+              <v-icon
+                v-else
+                class="achievement-finish"
+                style="cursor: pointer"
+                @click="setAchi(achievement, false)"
+              >
                 <img alt="finish" src="/source/UI/finish.webp" />
               </v-icon>
             </template>
@@ -118,6 +128,7 @@ import { AppAchievementSeriesData } from "../../data";
 import TGSqlite from "../../plugins/Sqlite";
 import { useAchievementsStore } from "../../store/modules/achievements";
 import { createTGWindow } from "../../utils/TGWindow";
+import { getNowStr } from "../../utils/toolFunc";
 import { getUiafHeader, readUiafData, verifyUiafData } from "../../utils/UIAF";
 
 // Store
@@ -161,18 +172,23 @@ const route = useRoute();
 const router = useRouter();
 
 onBeforeMount(async () => {
-  const { total, fin } = await getAchievementsOverview();
+  await flushOverview();
+});
+
+// 刷新概况
+async function flushOverview(): Promise<void> {
+  const { total, fin } = await getAchiOverview();
   achievementsStore.flushData(total, fin);
   title.value = achievementsStore.title;
-});
+}
 
 onMounted(async () => {
   loading.value = true;
   loadingTitle.value = "正在获取成就系列数据";
-  allSeriesData.value = await getAchievementSeries();
+  allSeriesData.value = await getSeriesData();
   achievementsStore.lastVersion = await TGSqlite.getLatestAchievementVersion();
   loadingTitle.value = "正在获取成就数据";
-  selectedAchievement.value = await getAchievements("all");
+  selectedAchievement.value = await getAchiData("all");
   loading.value = false;
   if (route.query.app && typeof route.query.app === "string") {
     await handleImportOuter(route.query.app);
@@ -220,50 +236,16 @@ function handleScroll(e: Event): void {
 async function selectSeries(index: number): Promise<void> {
   // 如果选中的是已经选中的系列，则不进行操作
   if (selectedSeries.value === index) {
-    let res, res2;
-    res = await showConfirm({
-      title: "请输入要执行的批量操作",
-      text: "全部完成（1）/全部未完成（2）",
-      mode: "input",
+    showSnackbar({
+      color: "warn",
+      text: "已经选中该系列",
     });
-    if (res !== false) {
-      if (res === "1") {
-        res2 = await showConfirm({
-          title: "是否确认全部完成？",
-          text: "此操作不可逆",
-        });
-      } else if (res === "2") {
-        res2 = await showConfirm({
-          title: "是否确认全部未完成？",
-          text: "此操作不可逆",
-        });
-      } else {
-        showSnackbar({
-          text: "请输入数字 1 或 2",
-          color: "error",
-        });
-        return;
-      }
-    }
-    if (!(res && res2)) {
-      showSnackbar({
-        text: "已取消操作",
-        color: "cancel",
-      });
-    } else {
-      // todo
-      // await setAchievements("series", index, res === "1" ? true : false);
-      showSnackbar({
-        text: "操作成功",
-        color: "success",
-      });
-    }
     return;
   }
   loading.value = true;
   loadingTitle.value = "正在获取对应的成就数据";
   selectedSeries.value = index;
-  selectedAchievement.value = await getAchievements("series", index.toString());
+  selectedAchievement.value = await getAchiData("series", index.toString());
   loadingTitle.value = "正在查找对应的成就名片";
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
     getCardInfo.value = await TGSqlite.getNameCard(index);
@@ -296,7 +278,7 @@ async function searchCard(): Promise<void> {
   selectedSeries.value = -1;
   loadingTitle.value = "正在搜索";
   loading.value = true;
-  selectedAchievement.value = await getAchievements("search", search.value);
+  selectedAchievement.value = await getAchiData("search", search.value);
   if (selectedAchievement.value.length === 0) {
     showSnackbar({
       color: "error",
@@ -426,9 +408,31 @@ async function handleImportOuter(app: string): Promise<void> {
   }
 }
 
+// 改变成就状态
+async function setAchi(
+  achievement: TGApp.Sqlite.Achievement.SingleTable,
+  target: boolean,
+): Promise<void> {
+  const newAchievement = achievement;
+  if (target) {
+    // 取消已完成
+    newAchievement.isCompleted = 1;
+    newAchievement.completedTime = getNowStr();
+  } else {
+    newAchievement.isCompleted = 0;
+    newAchievement.completedTime = "";
+  }
+  renderAchievement.value[renderAchievement.value.findIndex((item) => item.id === achievement.id)] =
+    newAchievement;
+  await setAchiDB(newAchievement);
+  await flushOverview();
+  allSeriesData.value[allSeriesData.value.findIndex((item) => item.id === newAchievement.series)] =
+    (await getSeriesData(newAchievement.series))[0];
+}
+
 /* 以下为数据库操作 */
 // 获取成就概况
-async function getAchievementsOverview(): Promise<{
+async function getAchiOverview(): Promise<{
   total: number;
   fin: number;
 }> {
@@ -439,14 +443,19 @@ async function getAchievementsOverview(): Promise<{
 }
 
 // 获取成就系列
-async function getAchievementSeries(): Promise<TGApp.Sqlite.Achievement.SeriesTable[]> {
+async function getSeriesData(series?: number): Promise<TGApp.Sqlite.Achievement.SeriesTable[]> {
   const db = await TGSqlite.getDB();
-  const sql = "SELECT * FROM AchievementSeries ORDER BY `order`;";
+  let sql = "SELECT * FROM AchievementSeries ORDER BY `order`;";
+  if (series) {
+    sql = `SELECT *
+           FROM AchievementSeries
+           WHERE id = ${series};`;
+  }
   return await db.select(sql);
 }
 
 // 获取成就（某个系列）
-async function getAchievements(
+async function getAchiData(
   type: "all" | "series" | "search",
   value?: string,
 ): Promise<TGApp.Sqlite.Achievement.SingleTable[]> {
@@ -482,6 +491,16 @@ async function getAchievements(
     }
   }
   return await db.select(sql);
+}
+
+// 更新成就数据
+async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Promise<void> {
+  const db = await TGSqlite.getDB();
+  const sql = `UPDATE Achievements
+               SET isCompleted   = ${achievement.isCompleted},
+                   completedTime = '${achievement.completedTime}'
+               WHERE id = ${achievement.id};`;
+  await db.execute(sql);
 }
 </script>
 
