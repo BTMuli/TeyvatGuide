@@ -1,6 +1,6 @@
 <template>
   <div class="top-bar">
-    <div class="top-title">{{ title }}</div>
+    <div class="top-title" @click="switchHideFin">{{ title }}</div>
     <v-text-field
       v-model="search"
       append-icon="mdi-magnify"
@@ -152,8 +152,14 @@ const getCardImg = computed(() => {
 const allSeriesData = ref<TGApp.Sqlite.Achievement.SeriesTable[]>([]);
 const selectedSeries = ref<number>(-1);
 const selectedAchievement = ref<TGApp.Sqlite.Achievement.SingleTable[]>([]);
+const renderSelect = computed(() => {
+  if (hideFin.value) {
+    return selectedAchievement.value.filter((item) => item.isCompleted === 0);
+  }
+  return selectedAchievement.value;
+});
 const renderAchievement = computed(() => {
-  return selectedAchievement.value.slice(start.value, start.value + itemCount.value + 1);
+  return renderSelect.value.slice(start.value, start.value + itemCount.value + 1);
 });
 // virtual list
 const start = ref<number>(0);
@@ -161,11 +167,12 @@ const itemCount = computed(() => {
   return Math.ceil((window.innerHeight - 100) / 76);
 });
 const emptyHeight = computed(() => {
-  return selectedAchievement.value.length * 76;
+  return renderSelect.value.length * 76;
 });
 const translateY = ref<string>("0px");
 // render
 const search = ref<string>("");
+const hideFin = ref<boolean>(false);
 
 // route
 const route = useRoute();
@@ -174,6 +181,23 @@ const router = useRouter();
 onBeforeMount(async () => {
   await flushOverview();
 });
+
+// 更改是否隐藏已完成
+async function switchHideFin() {
+  const text = hideFin.value ? "显示已完成" : "隐藏已完成";
+  const res = await showConfirm({
+    title: "是否切换显示已完成？",
+    text,
+  });
+  if (res === false) {
+    showSnackbar({
+      color: "warn",
+      text: "已取消切换",
+    });
+    return;
+  }
+  hideFin.value = !hideFin.value;
+}
 
 // 刷新概况
 async function flushOverview(): Promise<void> {
@@ -200,7 +224,7 @@ function handleScroll(e: Event): void {
   // 如果 scrollTop 到底部了
   if (target.scrollTop + target.offsetHeight >= target.scrollHeight) {
     // 如果 selectedAchievement 的长度小于 itemCount，不进行偏移
-    if (selectedAchievement.value.length <= itemCount.value) {
+    if (renderSelect.value.length <= itemCount.value) {
       window.requestAnimationFrame(() => {
         start.value = 0;
         translateY.value = "0px";
@@ -208,8 +232,8 @@ function handleScroll(e: Event): void {
       return;
     }
     window.requestAnimationFrame(() => {
-      start.value = selectedAchievement.value.length - itemCount.value;
-      translateY.value = `${(selectedAchievement.value.length - itemCount.value) * 76}px`;
+      start.value = renderSelect.value.length - itemCount.value;
+      translateY.value = `${(renderSelect.value.length - itemCount.value) * 76}px`;
     });
     return;
   }
@@ -522,6 +546,7 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
 
 .top-title {
   color: var(--common-text-title);
+  cursor: pointer;
 }
 
 .top-btns {
