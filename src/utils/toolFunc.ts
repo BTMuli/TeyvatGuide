@@ -114,7 +114,7 @@ export async function getCacheDir(): Promise<string[] | false> {
 export function getRandomString(length: number, type: string = "all"): string {
   const char = "abcdefghijklmnopqrstuvwxyz";
   const num = "0123456789";
-  let str = "";
+  let str: string;
   switch (type) {
     case "all":
       str = char + char.toUpperCase() + num;
