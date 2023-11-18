@@ -197,6 +197,9 @@ async function switchHideFin() {
     return;
   }
   hideFin.value = !hideFin.value;
+  showSnackbar({
+    text: `已${text}`,
+  });
 }
 
 // 刷新概况
@@ -216,6 +219,13 @@ onMounted(async () => {
   loading.value = false;
   if (route.query.app && typeof route.query.app === "string") {
     await handleImportOuter(route.query.app);
+  } else {
+    // 等 500ms 动画
+    setTimeout(() => {
+      showSnackbar({
+        text: `已获取 ${renderSelect.value.length} 条成就数据`,
+      });
+    }, 500);
   }
 });
 
@@ -276,6 +286,12 @@ async function selectSeries(index: number): Promise<void> {
   }
   await nextTick(() => {
     loading.value = false;
+    // 等 500ms 动画
+    setTimeout(() => {
+      showSnackbar({
+        text: `已获取 ${renderSelect.value.length} 条成就数据`,
+      });
+    }, 500);
   });
 }
 
@@ -303,13 +319,22 @@ async function searchCard(): Promise<void> {
   loadingTitle.value = "正在搜索";
   loading.value = true;
   selectedAchievement.value = await getAchiData("search", search.value);
-  if (selectedAchievement.value.length === 0) {
-    showSnackbar({
-      color: "error",
-      text: "没有找到对应的成就",
-    });
-  }
-  loading.value = false;
+  await nextTick(() => {
+    loading.value = false;
+    // 等 500ms 动画
+    setTimeout(() => {
+      if (renderSelect.value.length === 0) {
+        showSnackbar({
+          color: "error",
+          text: "没有搜索到相关成就",
+        });
+        return;
+      }
+      showSnackbar({
+        text: `已获取 ${renderSelect.value.length} 条成就数据`,
+      });
+    }, 500);
+  });
 }
 
 // 导入 UIAF 数据，进行数据合并、刷新
@@ -452,6 +477,11 @@ async function setAchi(
   await flushOverview();
   allSeriesData.value[allSeriesData.value.findIndex((item) => item.id === newAchievement.series)] =
     (await getSeriesData(newAchievement.series))[0];
+  showSnackbar({
+    text: `已将成就 ${newAchievement.name}[${newAchievement.id}] 标记为 ${
+      target ? "已完成" : "未完成"
+    }`,
+  });
 }
 
 /* 以下为数据库操作 */
