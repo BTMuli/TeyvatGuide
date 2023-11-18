@@ -639,7 +639,10 @@ function submitHome(): void {
   border: 1px solid var(--common-shadow-1);
   border-radius: 10px;
   margin-right: 15px;
-  background: var(--box-bg-2);
+  background:
+    linear-gradient(to bottom, rgb(255 255 255 / 15%) 0%, rgb(0 0 0 / 15%) 100%),
+    radial-gradient(at top center, rgb(255 255 255 / 40%) 0%, rgb(0 0 0 / 40%) 120%) #989898;
+  background-blend-mode: multiply, multiply;
 }
 
 .config-btn {
