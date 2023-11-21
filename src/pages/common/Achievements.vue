@@ -19,41 +19,29 @@
   <div class="wrap">
     <!-- 左侧菜单 -->
     <div class="left-wrap">
-      <v-list
+      <div
         v-for="series in allSeriesData"
         :key="series.id"
-        class="card-left"
+        class="card-series"
         @click="selectSeries(series.id)"
       >
-        <div class="version-icon-series">v{{ series.version }}</div>
-        <v-list-item>
-          <template #prepend>
-            <v-img class="series-icon" :src="getIcon(series.id)" />
-          </template>
-          <v-list-item-title :title="series.name">
+        <div class="series-version">v{{ series.version }}</div>
+        <img alt="icon" class="series-icon" :src="getIcon(series.id)" />
+        <div class="series-content">
+          <span :title="series.name">
             {{ series.name }}
-          </v-list-item-title>
-          <v-list-item-subtitle>
-            {{ series.finCount }} / {{ series.totalCount }}
-          </v-list-item-subtitle>
-        </v-list-item>
-      </v-list>
+          </span>
+          <span> {{ series.finCount }} / {{ series.totalCount }} </span>
+        </div>
+      </div>
     </div>
     <!-- 右侧内容-->
-    <div class="right-wrap" @scroll="handleScroll">
+    <div class="right-wrap">
       <v-list
         v-if="selectedSeries !== 0 && selectedSeries !== 17 && selectedSeries !== -1 && !loading"
+        class="achi-series"
         :style="{
-          backgroundImage: 'url(' + getCardImg.bg || null + ')',
-          backgroundPosition: 'right',
-          backgroundSize: 'auto 100%',
-          backgroundRepeat: 'no-repeat',
-          margin: '10px',
-          borderRadius: '10px 50px 50px 10px',
-          border: '1px solid var(--common-shadow-2)',
-          fontFamily: 'var(--font-title)',
-          cursor: 'pointer',
-          position: 'relative',
+          backgroundImage: 'url(' + getCardImg.bg + ')',
         }"
         @click="openImg()"
       >
@@ -63,54 +51,51 @@
           </template>
         </v-list-item>
       </v-list>
-      <div class="list-empty" :style="{ height: `${emptyHeight}px` }">
-        <v-list
-          v-for="achievement in renderAchievement"
-          :key="achievement.id"
-          class="card-right"
-          :style="{ transform: `translateY(${translateY})` }"
-          :title="allSeriesData.find((item) => item.id === achievement.series)?.name ?? ''"
-        >
-          <div v-if="achievement.progress !== 0" class="achievement-progress">
-            {{ achievement.progress }}
+      <div
+        v-for="achievement in renderSelect"
+        :key="achievement.id"
+        class="card-achi"
+        :title="allSeriesData.find((item) => item.id === achievement.series)?.name ?? ''"
+      >
+        <div v-if="achievement.progress !== 0" class="achi-progress">
+          {{ achievement.progress }}
+        </div>
+        <div class="achi-pre">
+          <div class="achi-pre-icon">
+            <v-icon
+              v-if="!achievement.isCompleted"
+              color="var(--tgc-blue-3)"
+              @click="setAchi(achievement, true)"
+              style="cursor: pointer"
+            >
+              mdi-circle
+            </v-icon>
+            <v-icon
+              v-else
+              class="achievement-finish"
+              style="cursor: pointer"
+              @click="setAchi(achievement, false)"
+            >
+              <img alt="finish" src="/source/UI/finish.webp" />
+            </v-icon>
           </div>
-          <v-list-item>
-            <template #prepend>
-              <v-icon
-                v-if="!achievement.isCompleted"
-                color="var(--tgc-blue-3)"
-                @click="setAchi(achievement, true)"
-                style="cursor: pointer"
-              >
-                mdi-circle
-              </v-icon>
-              <v-icon
-                v-else
-                class="achievement-finish"
-                style="cursor: pointer"
-                @click="setAchi(achievement, false)"
-              >
-                <img alt="finish" src="/source/UI/finish.webp" />
-              </v-icon>
-            </template>
-            <v-list-item-title>
-              {{ achievement.name }}
-              <span class="version-icon-single">v{{ achievement.version }}</span>
-            </v-list-item-title>
-            <v-list-item-subtitle>{{ achievement.description }}</v-list-item-subtitle>
-            <template #append>
-              <span v-show="achievement.isCompleted" class="right-time">{{
-                achievement.completedTime
-              }}</span>
-              <v-card class="reward-card">
-                <v-img src="/icon/material/201.webp" sizes="32" />
-                <div class="reward-num">
-                  <span>{{ achievement.reward }}</span>
-                </div>
-              </v-card>
-            </template>
-          </v-list-item>
-        </v-list>
+          <div class="achi-pre-info">
+            <span
+              >{{ achievement.name }}
+              <span>v{{ achievement.version }}</span>
+            </span>
+            <span>{{ achievement.description }}</span>
+          </div>
+        </div>
+        <div class="achi-append">
+          <span v-show="achievement.isCompleted">
+            {{ achievement.completedTime }}
+          </span>
+          <div class="achi-append-icon">
+            <img alt="icon" src="/icon/material/201.webp" />
+            <span>{{ achievement.reward }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -158,18 +143,6 @@ const renderSelect = computed(() => {
   }
   return selectedAchievement.value;
 });
-const renderAchievement = computed(() => {
-  return renderSelect.value.slice(start.value, start.value + itemCount.value + 1);
-});
-// virtual list
-const start = ref<number>(0);
-const itemCount = computed(() => {
-  return Math.ceil((window.innerHeight - 100) / 76);
-});
-const emptyHeight = computed(() => {
-  return renderSelect.value.length * 76;
-});
-const translateY = ref<string>("0px");
 // render
 const search = ref<string>("");
 const hideFin = ref<boolean>(false);
@@ -228,43 +201,6 @@ onMounted(async () => {
     }, 500);
   }
 });
-
-function handleScroll(e: Event): void {
-  const target: HTMLElement = <HTMLElement>e.target;
-  // 如果 scrollTop 到底部了
-  if (target.scrollTop + target.offsetHeight >= target.scrollHeight) {
-    // 如果 selectedAchievement 的长度小于 itemCount，不进行偏移
-    if (renderSelect.value.length <= itemCount.value) {
-      window.requestAnimationFrame(() => {
-        start.value = 0;
-        translateY.value = "0px";
-      });
-      return;
-    }
-    window.requestAnimationFrame(() => {
-      start.value = renderSelect.value.length - itemCount.value;
-      translateY.value = `${(renderSelect.value.length - itemCount.value) * 76}px`;
-    });
-    return;
-  }
-  const scrollTop = target.scrollTop;
-  if (selectedSeries.value !== 0 && selectedSeries.value !== 17 && selectedSeries.value !== -1) {
-    window.requestAnimationFrame(() => {
-      if (scrollTop < 86.8) {
-        start.value = 0;
-        translateY.value = "0px";
-      } else {
-        start.value = Math.floor((scrollTop - 86.8) / 76);
-        translateY.value = `${scrollTop - 86.8}px`;
-      }
-    });
-  } else {
-    window.requestAnimationFrame(() => {
-      start.value = Math.floor(scrollTop / 76);
-      translateY.value = `${scrollTop}px`;
-    });
-  }
-}
 
 // 渲染选中的成就系列
 async function selectSeries(index: number): Promise<void> {
@@ -471,7 +407,7 @@ async function setAchi(
     newAchievement.isCompleted = 0;
     newAchievement.completedTime = "";
   }
-  renderAchievement.value[renderAchievement.value.findIndex((item) => item.id === achievement.id)] =
+  renderSelect.value[renderSelect.value.findIndex((item) => item.id === achievement.id)] =
     newAchievement;
   await setAchiDB(newAchievement);
   await flushOverview();
@@ -503,7 +439,8 @@ async function getSeriesData(series?: number): Promise<TGApp.Sqlite.Achievement.
   if (series) {
     sql = `SELECT *
            FROM AchievementSeries
-           WHERE id = ${series};`;
+           WHERE id = ${series}
+           ORDER BY \`order\`;`;
   }
   return await db.select(sql);
 }
@@ -557,7 +494,7 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
   await db.execute(sql);
 }
 </script>
-
+<!-- 顶部栏跟 wrap 大概布局 -->
 <style lang="css" scoped>
 .top-bar {
   display: flex;
@@ -599,25 +536,43 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
 
 /* 左侧系列 */
 .left-wrap {
+  display: flex;
   width: 400px;
   height: 100%;
+  flex-direction: column;
+  padding-right: 10px;
   overflow-y: auto;
+  row-gap: 10px;
 }
 
 /* 右侧成就 */
 .right-wrap {
+  display: flex;
   width: 100%;
   height: 100%;
+  flex-direction: column;
+  padding-right: 10px;
   overflow-y: auto;
+  row-gap: 10px;
 }
-
-.list-empty {
+</style>
+<!-- 左侧成就系列 wrap -->
+<style lang="css" scoped>
+.card-series {
   position: relative;
-  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--box-bg-1);
+  color: var(--box-text-1);
+  column-gap: 10px;
+  cursor: pointer;
 }
 
 /* 版本信息 */
-.version-icon-series {
+.series-version {
   position: absolute;
   right: 0;
   bottom: 0;
@@ -637,43 +592,63 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
   height: 40px;
   padding: 5px;
   border-radius: 5px;
-  margin-right: 10px;
   background:
     linear-gradient(to bottom, rgb(255 255 255 / 15%) 0%, rgb(0 0 0 / 15%) 100%),
     radial-gradient(at top center, rgb(255 255 255 / 40%) 0%, rgb(0 0 0 / 40%) 120%) #989898;
   background-blend-mode: multiply, multiply;
 }
 
-.version-icon-single {
-  color: var(--tgc-pink-1);
-  font-family: var(--font-title);
-  font-size: 10px;
-  text-align: center;
+.series-content {
+  display: flex;
+  width: 100%;
+  flex-flow: column wrap;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
 }
 
-.card-left {
-  border-radius: 10px;
-  margin-right: 10px;
-  margin-bottom: 10px;
-  background: var(--box-bg-1);
-  color: var(--box-text-1);
-  cursor: pointer;
+.series-content :nth-child(1) {
+  font-size: 14px;
+  font-weight: bold;
 }
 
+.series-content :nth-child(2) {
+  font-size: 12px;
+  opacity: 0.8;
+}
+</style>
+<!-- 右侧成就 -->
+<style lang="css" scoped>
 /* 成就卡片 */
-.card-right {
+.achi-series {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 10px 50px 50px 10px;
+  background-position: right;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  font-family: var(--font-title);
+}
+
+.card-achi {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
   border-radius: 10px;
-  margin: 10px;
   background: var(--box-bg-1);
   color: var(--box-text-7);
 }
 
 /* 成就进度 */
-.achievement-progress {
+.achi-progress {
   position: absolute;
   top: 0;
   left: 0;
-  width: 65px;
+  width: 50px;
   border-right: 1px solid var(--common-shadow-1);
   border-bottom: 1px solid var(--common-shadow-1);
   background: var(--box-bg-2);
@@ -684,30 +659,42 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
   text-align: center;
 }
 
+.achi-pre {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 10px;
+}
+
+.achi-pre-icon {
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+}
+
 .achievement-finish img {
   width: 30px;
   height: 30px;
   filter: invert(51%) sepia(100%) saturate(353%) hue-rotate(42deg) brightness(107%) contrast(91%);
 }
 
-/* 成就完成时间 */
-.right-time {
-  margin-right: 10px;
-  color: var(--box-text-4);
-  font-size: small;
+.achi-pre-info {
+  display: flex;
+  width: 100%;
+  flex-flow: column wrap;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
 }
 
-/* 成就奖励 */
-.reward-card {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  border-radius: 5px;
-  background-image: url("/icon/bg/5-Star.webp");
-  background-size: cover;
+.achi-pre-info :nth-child(1) {
+  font-family: var(--font-title);
+  font-size: 14px;
 }
 
-.reward-num {
+.achi-append-icon span {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -719,5 +706,42 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
   background: rgb(0 0 0 / 50%);
   color: var(--tgc-white-1);
   font-size: 8px;
+}
+
+.achi-pre-info :nth-child(1) span {
+  color: var(--tgc-pink-1);
+  font-size: 12px;
+}
+
+.achi-pre-info :nth-child(2) {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.achi-append {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  column-gap: 10px;
+}
+
+.achi-append :nth-last-child(2) {
+  margin-right: 10px;
+  color: var(--box-text-4);
+  font-size: small;
+}
+
+.achi-append-icon {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  background-image: url("/icon/bg/5-Star.webp");
+  background-size: cover;
+}
+
+.achi-append-icon img {
+  width: 40px;
+  height: 40px;
 }
 </style>
