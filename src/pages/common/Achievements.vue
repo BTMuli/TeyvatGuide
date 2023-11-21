@@ -37,20 +37,21 @@
     </div>
     <!-- 右侧内容-->
     <div class="right-wrap">
-      <v-list
+      <div
         v-if="selectedSeries !== 0 && selectedSeries !== 17 && selectedSeries !== -1 && !loading"
-        class="achi-series"
-        :style="{
-          backgroundImage: 'url(' + getCardImg.bg + ')',
-        }"
-        @click="openImg()"
       >
-        <v-list-item :title="getCardInfo.name" :subtitle="getCardInfo.desc">
-          <template #prepend>
-            <v-img width="80px" style="margin-right: 10px" :src="getCardImg.icon" />
-          </template>
-        </v-list-item>
-      </v-list>
+        <v-list
+          class="achi-series"
+          :style="{ backgroundImage: `url(${curCard.bg})` }"
+          @click="openImg()"
+        >
+          <v-list-item :title="curCard.name" :subtitle="curCard.desc">
+            <template #prepend>
+              <v-img width="80px" style="margin-right: 10px" :src="curCard.icon" />
+            </template>
+          </v-list-item>
+        </v-list>
+      </div>
       <div
         v-for="achievement in renderSelect"
         :key="achievement.id"
@@ -103,7 +104,7 @@
 
 <script lang="ts" setup>
 import { dialog, fs, path } from "@tauri-apps/api";
-import { computed, nextTick, onBeforeMount, onMounted, ref } from "vue";
+import { computed, nextTick, onBeforeMount, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import showConfirm from "../../components/func/confirm";
@@ -122,17 +123,11 @@ const achievementsStore = useAchievementsStore();
 // loading
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载数据");
-
+const search = ref<string>("");
+const hideFin = ref<boolean>(false);
 // data
 const title = ref(achievementsStore.title);
-const getCardInfo = ref<TGApp.Sqlite.NameCard.SingleTable>(<TGApp.Sqlite.NameCard.SingleTable>{});
-const getCardImg = computed(() => {
-  return {
-    profile: `/source/nameCard/profile/${getCardInfo.value.name}.webp`,
-    bg: `/source/nameCard/bg/${getCardInfo.value.name}.webp`,
-    icon: `/source/nameCard/icon/${getCardInfo.value.name}.webp`,
-  };
-});
+let curCard = reactive({ profile: "", bg: "", icon: "", name: "", desc: "" });
 // series
 const allSeriesData = ref<TGApp.Sqlite.Achievement.SeriesTable[]>([]);
 const selectedSeries = ref<number>(-1);
@@ -143,9 +138,6 @@ const renderSelect = computed(() => {
   }
   return selectedAchievement.value;
 });
-// render
-const search = ref<string>("");
-const hideFin = ref<boolean>(false);
 
 // route
 const route = useRoute();
@@ -218,7 +210,19 @@ async function selectSeries(index: number): Promise<void> {
   selectedAchievement.value = await getAchiData("series", index.toString());
   loadingTitle.value = "正在查找对应的成就名片";
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
-    getCardInfo.value = await TGSqlite.getNameCard(index);
+    const cardGet = await TGSqlite.getNameCard(index);
+    curCard = {
+      profile: `/source/nameCard/profile/${cardGet.name}.webp`,
+      bg: `/source/nameCard/bg/${cardGet.name}.webp`,
+      icon: `/source/nameCard/icon/${cardGet.name}.webp`,
+      name: cardGet.name,
+      desc: cardGet.desc,
+    };
+  }
+  // 右侧滚动到顶部
+  const rightWrap = document.querySelector(".right-wrap");
+  if (rightWrap) {
+    rightWrap.scrollTop = 0;
   }
   await nextTick(() => {
     loading.value = false;
@@ -233,14 +237,7 @@ async function selectSeries(index: number): Promise<void> {
 
 // 打开图片
 function openImg(): void {
-  createTGWindow(
-    getCardImg.value.profile,
-    "Sub_window",
-    `Namecard_${getCardInfo.value.name}`,
-    840,
-    400,
-    false,
-  );
+  createTGWindow(curCard.profile, "Sub_window", `Namecard_${curCard.name}`, 840, 400, false);
 }
 
 async function searchCard(): Promise<void> {
@@ -552,7 +549,7 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
   height: 100%;
   flex-direction: column;
   padding-right: 10px;
-  overflow-y: auto;
+  overflow-y: scroll;
   row-gap: 10px;
 }
 </style>
@@ -608,8 +605,8 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
 }
 
 .series-content :nth-child(1) {
+  font-family: var(--font-title);
   font-size: 14px;
-  font-weight: bold;
 }
 
 .series-content :nth-child(2) {
