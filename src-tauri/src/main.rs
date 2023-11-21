@@ -118,6 +118,10 @@ fn main() {
     ])
     .setup(|_app| {
       let _window = _app.get_window("TeyvatGuide").unwrap();
+      let _mhy = _app.get_window("mhy_client");
+      if _mhy.is_some() {
+        _mhy.unwrap().close().unwrap();
+      }
       #[cfg(debug_assertions)] // only include this code on debug builds
       _window.open_devtools(); // open the devtools on startup
       Ok(())
