@@ -58,9 +58,7 @@
         class="card-achi"
         :title="allSeriesData.find((item) => item.id === achievement.series)?.name ?? ''"
       >
-        <div v-if="achievement.progress !== 0" class="achi-progress">
-          {{ achievement.progress }}
-        </div>
+        <div class="achi-version">v{{ achievement.version }}</div>
         <div class="achi-pre">
           <div class="achi-pre-icon">
             <v-icon
@@ -81,9 +79,11 @@
             </v-icon>
           </div>
           <div class="achi-pre-info">
-            <span
-              >{{ achievement.name }}
-              <span>v{{ achievement.version }}</span>
+            <span>
+              <span>{{ achievement.name }}</span>
+              <span v-if="achievement.progress !== 0">
+                {{ achievement.progress }}
+              </span>
             </span>
             <span>{{ achievement.description }}</span>
           </div>
@@ -577,6 +577,7 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
   border-top: 1px solid var(--common-shadow-1);
   border-left: 1px solid var(--common-shadow-1);
   background: var(--box-bg-2);
+  border-bottom-right-radius: 10px;
   border-top-left-radius: 20px;
   color: var(--tgc-yellow-1);
   font-family: var(--font-title);
@@ -601,6 +602,7 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
   flex-flow: column wrap;
   align-items: flex-start;
   justify-content: center;
+  color: var(--box-text-1);
   text-align: left;
 }
 
@@ -641,7 +643,7 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
 }
 
 /* 成就进度 */
-.achi-progress {
+.achi-version {
   position: absolute;
   top: 0;
   left: 0;
@@ -650,7 +652,8 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
   border-bottom: 1px solid var(--common-shadow-1);
   background: var(--box-bg-2);
   border-bottom-right-radius: 20px;
-  color: var(--box-text-3);
+  border-top-left-radius: 10px;
+  color: var(--tgc-pink-1);
   font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
@@ -687,8 +690,21 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
 }
 
 .achi-pre-info :nth-child(1) {
+  display: flex;
+  align-items: flex-end;
+  column-gap: 5px;
   font-family: var(--font-title);
   font-size: 14px;
+}
+
+.achi-pre-info :nth-child(1) :nth-child(2) {
+  color: var(--tgc-blue-2);
+  font-size: 12px;
+}
+
+.achi-pre-info :nth-child(2) {
+  font-size: 12px;
+  opacity: 0.8;
 }
 
 .achi-append-icon span {
@@ -701,18 +717,10 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
   align-items: center;
   justify-content: center;
   background: rgb(0 0 0 / 50%);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
   color: var(--tgc-white-1);
   font-size: 8px;
-}
-
-.achi-pre-info :nth-child(1) span {
-  color: var(--tgc-pink-1);
-  font-size: 12px;
-}
-
-.achi-pre-info :nth-child(2) {
-  font-size: 12px;
-  opacity: 0.8;
 }
 
 .achi-append {
