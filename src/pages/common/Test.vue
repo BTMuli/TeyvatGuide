@@ -13,34 +13,9 @@
         </div>
       </div>
     </div>
-    <h1>角色详情（beta）</h1>
-    <div class="test-item">
-      <div class="role-box">
-        {{ JSON.stringify(roleItem, null, 2) }}
-      </div>
-    </div>
   </div>
 </template>
-<script lang="ts" setup>
-import { onMounted, ref } from "vue";
-
-import TGSqlite from "../../plugins/Sqlite";
-import { useUserStore } from "../../store/modules/user";
-
-const visible = ref<boolean>(false);
-const userStore = useUserStore();
-
-const roleItem = ref<TGApp.Sqlite.Character.UserRole>();
-
-onMounted(async () => {
-  const user = userStore.getCurAccount();
-  const roleData = await TGSqlite.getUserCharacter(user.gameUid);
-  if (roleData !== false) {
-    roleItem.value = roleData[0];
-  }
-  visible.value = false;
-});
-</script>
+<script lang="ts" setup></script>
 <style lang="css" scoped>
 .test-box {
   display: flex;
@@ -90,16 +65,5 @@ onMounted(async () => {
 
 .test-4 {
   background: var(--box-bg-4);
-}
-
-.role-box {
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  border-radius: 5px;
-  background: var(--box-bg-1);
-  color: var(--box-text-1);
-  gap: 10px;
-  white-space: pre-wrap;
 }
 </style>

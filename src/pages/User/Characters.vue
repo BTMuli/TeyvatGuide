@@ -38,14 +38,20 @@
       />
     </div>
   </div>
-  <ToUcDetail v-model="visible" :data-val="dataVal" />
+  <!--  <ToUcDetail v-model="visible" :data-val="dataVal" />-->
+  <DucDetailOverlay
+    v-model="visible"
+    @clickL="clickOverlay('left')"
+    @clickR="clickOverlay('right')"
+    :data-val="dataVal"
+  />
 </template>
 <script lang="ts" setup>
 import { computed, onMounted, ref } from "vue";
 
+import DucDetailOverlay from "../../components/devCharacter/duc-detail-overlay.vue";
 import showSnackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import ToUcDetail from "../../components/userCharacter/tuc-detail-overlay.vue";
 import TucRoleBox from "../../components/userCharacter/tuc-role-box.vue";
 import TGSqlite from "../../plugins/Sqlite";
 import { useUserStore } from "../../store/modules/user";
@@ -69,6 +75,24 @@ const roleCookie = computed(() => userStore.getCookieGroup4());
 // overlay
 const visible = ref(false);
 const dataVal = ref<TGApp.Sqlite.Character.UserRole>(<TGApp.Sqlite.Character.UserRole>{});
+const selectIndex = ref(0);
+
+function clickOverlay(pos: "left" | "right") {
+  if (pos === "left") {
+    if (selectIndex.value === 0) {
+      selectIndex.value = roleList.value.length - 1;
+    } else {
+      selectIndex.value -= 1;
+    }
+  } else {
+    if (selectIndex.value === roleList.value.length - 1) {
+      selectIndex.value = 0;
+    } else {
+      selectIndex.value += 1;
+    }
+  }
+  dataVal.value = roleList.value[selectIndex.value];
+}
 
 onMounted(async () => {
   loadingTitle.value = "正在获取角色数据";
@@ -86,6 +110,7 @@ async function loadRole(): Promise<void> {
       return a.cid - b.cid;
     });
     roleList.value = roleData;
+    dataVal.value = roleData[selectIndex.value];
     isEmpty.value = false;
   }
 }
@@ -174,8 +199,8 @@ function getUpdateTime(): string {
 }
 
 function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
-  console.log(role);
   dataVal.value = role;
+  selectIndex.value = roleList.value.indexOf(role);
   visible.value = true;
 }
 </script>
