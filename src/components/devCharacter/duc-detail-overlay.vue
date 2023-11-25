@@ -20,7 +20,7 @@
         </div>
         <!-- 左下命座 -->
         <div class="duc-doc-lb">
-          <DucDetailOlb :data="JSON.parse(props.dataVal.constellation)" />
+          <DucDetailOlb :model-value="JSON.parse(props.dataVal.constellation)" />
         </div>
       </div>
       <!-- 右侧箭头 -->
@@ -163,15 +163,13 @@ async function loadData(): Promise<void> {
   position: absolute;
   top: 10px;
   right: 10px;
-  padding: 10px;
+  padding: 5px;
 }
 
 .duc-doc-lb {
   position: absolute;
-  bottom: 20px;
-  left: 20px;
-  width: 300px;
-  height: 80px;
-  background: var(--common-shadow-2);
+  bottom: 10px;
+  left: 10px;
+  padding: 5px;
 }
 </style>
