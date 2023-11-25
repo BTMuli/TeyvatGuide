@@ -13,6 +13,17 @@
         <div class="duc-doc-lt">
           <DucDetailOlt :data="props.dataVal" mode="avatar" />
           <DucDetailOlt :data="JSON.parse(props.dataVal.weapon)" mode="weapon" />
+          <!-- todo cors -->
+          <v-btn
+            class="duc-doc-btn"
+            @click="share"
+            variant="outlined"
+            :loading="loading"
+            data-html2canvas-ignore
+          >
+            <v-icon>mdi-share-variant</v-icon>
+            <span>分享</span>
+          </v-btn>
         </div>
         <!-- 右侧天赋 -->
         <div class="duc-doc-rt">
@@ -37,6 +48,8 @@ import DucDetailOlb from "./duc-detail-olb.vue";
 import DucDetailOlt from "./duc-detail-olt.vue";
 import DucDetailOrt from "./duc-detail-ort.vue";
 import TGSqlite from "../../plugins/Sqlite";
+import { generateShareImg } from "../../utils/TGShare";
+import showSnackbar from "../func/snackbar";
 import TOverlay from "../main/t-overlay.vue";
 
 interface DucDetailOverlayProps {
@@ -61,6 +74,8 @@ const visible = computed({
 
 // 渲染数据
 const nameCard = ref<string | false>(false);
+// 加载
+const loading = ref<boolean>(false);
 
 function onOverlayCancel() {
   visible.value = false;
@@ -84,7 +99,14 @@ async function loadData(): Promise<void> {
     const role = await TGSqlite.getAppCharacter(props.dataVal.cid);
     nameCard.value = `/source/nameCard/profile/${role.nameCard}.webp`;
   }
-  // resetData();
+}
+
+async function share(): Promise<void> {
+  const detailBox = <HTMLElement>document.querySelector(".duc-do-container");
+  const fileName = `【角色详情】-${props.dataVal.name}`;
+  loading.value = true;
+  await generateShareImg(fileName, detailBox);
+  loading.value = false;
 }
 </script>
 <style lang="css" scoped>

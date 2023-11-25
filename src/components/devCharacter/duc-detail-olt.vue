@@ -41,7 +41,7 @@ const getTitle = computed(() => {
     }, "");
   }
 });
-const boxData = computed<TItemBoxData>(() => {
+const boxData = computed(() => {
   if (props.mode === "avatar") {
     return {
       bg: `/icon/bg/${props.data.star}-Star.webp`,
