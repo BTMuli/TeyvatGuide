@@ -1,76 +1,87 @@
 <template>
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
-    <div class="tuc-do-box">
-      <div class="tuc-do-bg">
-        <img
-          :src="data.bg"
-          alt="role"
-          :style="{
-            objectFit: data.bgFit,
-          }"
-        />
+    <div class="tuc-do-div">
+      <!-- 左侧箭头 -->
+      <div class="tuc-arrow-left" @click="handleClick('left')">
+        <img src="../../assets/icons/arrow-right.svg" alt="left" />
       </div>
-      <div class="tuc-do-quote">* 所有数据以游戏内为准，此处仅供参考</div>
-      <!-- 衣装 -->
-      <div v-if="data.costume.length > 0" class="tuc-do-costume">
-        <v-switch v-model="showCostumeSwitch" color="#fb7299" @click="switchBg">
-          <template #label>
-            <v-icon>mdi-tshirt-crew-outline</v-icon>
-          </template>
-        </v-switch>
-      </div>
-      <div v-if="showCostumeSwitch" class="tuc-do-costume-name">
-        {{ data.costume[0].name }}
-      </div>
-      <div v-if="data" class="tuc-do-show">
-        <!-- 左侧武器跟圣遗物 -->
-        <div class="tuc-do-left">
-          <div
-            class="tuc-dol-item"
+      <!-- 中间内容 -->
+      <div class="tuc-do-box">
+        <div class="tuc-do-bg">
+          <img
+            :src="data.bg"
+            alt="role"
             :style="{
-              opacity: selected.pos === 0 ? '1' : '0.5',
+              objectFit: data.bgFit,
             }"
-            @click="showDetail(data.weapon, '武器', 0)"
-          >
-            <TucDetailItemBox v-model="weaponBox" />
-          </div>
-          <div
-            v-for="(item, index) in data.reliquary"
-            :key="index"
-            class="tuc-dol-item"
-            :style="{
-              cursor: item ? 'pointer' : 'default',
-              opacity: selected.pos === index + 1 ? '1' : item ? '0.5' : '1',
-            }"
-            @click="showDetail(item, '圣遗物', index + 1)"
-          >
-            <TucDetailRelic :model-value="item" :pos="index + 1" />
-          </div>
-        </div>
-        <!-- 右侧环状排列6个命座 -->
-        <div class="tuc-do-right">
-          <div class="tuc-dor-box">
-            <TucDetailConstellation
-              v-for="item in data.constellation"
-              :key="item.pos"
-              class="tuc-dor-item"
-              :model-value="item"
-              :style="{
-                border: selected.pos === item.pos + 5 ? '2px solid var(--tgc-yellow-1)' : '',
-              }"
-              @click="showDetail(item, '命座', item.pos + 5)"
-            />
-          </div>
-        </div>
-        <!-- 底部说明 -->
-        <div class="tuc-do-bottom">
-          <TucDetailDescWeapon v-if="selected.type === '武器'" v-model="selectWeapon" />
-          <TucDetailDescConstellation
-            v-if="selected.type === '命座'"
-            v-model="selectConstellation"
           />
-          <TucDetailDescRelic v-if="selected.type === '圣遗物'" v-model="selectRelic" />
         </div>
+        <div class="tuc-do-quote">* 所有数据以游戏内为准，此处仅供参考</div>
+        <!-- 衣装 -->
+        <div v-if="data.costume.length > 0" class="tuc-do-costume">
+          <v-switch v-model="showCostumeSwitch" color="#fb7299" @click="switchBg">
+            <template #label>
+              <v-icon>mdi-tshirt-crew-outline</v-icon>
+            </template>
+          </v-switch>
+        </div>
+        <div v-if="showCostumeSwitch" class="tuc-do-costume-name">
+          {{ data.costume[0].name }}
+        </div>
+        <div v-if="data" class="tuc-do-show">
+          <!-- 左侧武器跟圣遗物 -->
+          <div class="tuc-do-left">
+            <div
+              class="tuc-dol-item"
+              :style="{
+                opacity: selected.pos === 0 ? '1' : '0.5',
+              }"
+              @click="showDetail(data.weapon, '武器', 0)"
+            >
+              <TucDetailItemBox v-model="weaponBox" />
+            </div>
+            <div
+              v-for="(item, index) in data.reliquary"
+              :key="index"
+              class="tuc-dol-item"
+              :style="{
+                cursor: item ? 'pointer' : 'default',
+                opacity: selected.pos === index + 1 ? '1' : item ? '0.5' : '1',
+              }"
+              @click="showDetail(item, '圣遗物', index + 1)"
+            >
+              <TucDetailRelic :model-value="item" :pos="index + 1" />
+            </div>
+          </div>
+          <!-- 右侧环状排列6个命座 -->
+          <div class="tuc-do-right">
+            <div class="tuc-dor-box">
+              <TucDetailConstellation
+                v-for="item in data.constellation"
+                :key="item.pos"
+                class="tuc-dor-item"
+                :model-value="item"
+                :style="{
+                  border: selected.pos === item.pos + 5 ? '2px solid var(--tgc-yellow-1)' : '',
+                }"
+                @click="showDetail(item, '命座', item.pos + 5)"
+              />
+            </div>
+          </div>
+          <!-- 底部说明 -->
+          <div class="tuc-do-bottom">
+            <TucDetailDescWeapon v-if="selected.type === '武器'" v-model="selectWeapon" />
+            <TucDetailDescConstellation
+              v-if="selected.type === '命座'"
+              v-model="selectConstellation"
+            />
+            <TucDetailDescRelic v-if="selected.type === '圣遗物'" v-model="selectRelic" />
+          </div>
+        </div>
+      </div>
+      <!-- 右侧箭头 -->
+      <div class="tuc-arrow-right" @click="handleClick('right')">
+        <img src="../../assets/icons/arrow-right.svg" alt="right" />
       </div>
     </div>
   </TOverlay>
@@ -94,7 +105,9 @@ interface ToUcDetailProps {
 interface ToUcDetailEmits {
   (e: "update:modelValue", value: boolean): void;
 
-  (e: "cancel"): void;
+  (e: "clickL"): void;
+
+  (e: "clickR"): void;
 }
 
 type fixedLenArray<T, N extends number> = [T, ...T[]] & { length: N };
@@ -214,8 +227,12 @@ const weaponBox = computed(() => {
 
 const onCancel = (): void => {
   visible.value = false;
-  emits("cancel");
+  emits("update:modelValue", false);
 };
+
+function handleClick(pos: "left" | "right") {
+  pos === "left" ? emits("clickL") : emits("clickR");
+}
 
 function showDetail(
   item:
@@ -259,6 +276,40 @@ function switchBg(): void {
 }
 </script>
 <style lang="css" scoped>
+.tuc-do-div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 10px;
+}
+
+.tuc-arrow-left,
+.tuc-arrow-right {
+  position: relative;
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dark .tuc-arrow-left,
+.dark .tuc-arrow-right {
+  filter: invert(11%) sepia(73%) saturate(11%) hue-rotate(139deg) brightness(97%) contrast(81%);
+}
+
+.tuc-arrow-left img {
+  width: 100%;
+  height: 100%;
+  transform: rotate(180deg);
+}
+
+.tuc-arrow-right img {
+  width: 100%;
+  height: 100%;
+}
+
 .tuc-do-box {
   position: relative;
   width: 500px;

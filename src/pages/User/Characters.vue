@@ -2,7 +2,7 @@
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="uc-box">
     <div class="uc-top">
-      <div class="uc-top-title">
+      <div class="uc-top-title" @click="switchOld">
         <span v-if="user">
           {{ user.nickname }} UID：{{ user.gameUid }} 更新于 {{ getUpdateTime() }}
         </span>
@@ -38,8 +38,15 @@
       />
     </div>
   </div>
-  <!--  <ToUcDetail v-model="visible" :data-val="dataVal" />-->
+  <TucDetailOverlay
+    v-if="!detailDev"
+    v-model="visible"
+    @clickL="clickOverlay('left')"
+    @clickR="clickOverlay('right')"
+    :data-val="dataVal"
+  />
   <DucDetailOverlay
+    v-if="detailDev"
     v-model="visible"
     @clickL="clickOverlay('left')"
     @clickR="clickOverlay('right')"
@@ -52,6 +59,7 @@ import { computed, onMounted, ref } from "vue";
 import DucDetailOverlay from "../../components/devCharacter/duc-detail-overlay.vue";
 import showSnackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
+import TucDetailOverlay from "../../components/userCharacter/tuc-detail-overlay.vue";
 import TucRoleBox from "../../components/userCharacter/tuc-role-box.vue";
 import TGSqlite from "../../plugins/Sqlite";
 import { useUserStore } from "../../store/modules/user";
@@ -76,6 +84,7 @@ const roleCookie = computed(() => userStore.getCookieGroup4());
 const visible = ref(false);
 const dataVal = ref<TGApp.Sqlite.Character.UserRole>(<TGApp.Sqlite.Character.UserRole>{});
 const selectIndex = ref(0);
+const detailDev = ref(true);
 
 function clickOverlay(pos: "left" | "right") {
   if (pos === "left") {
@@ -100,6 +109,13 @@ onMounted(async () => {
   await loadRole();
   loading.value = false;
 });
+
+function switchOld(): void {
+  detailDev.value = !detailDev.value;
+  showSnackbar({
+    text: `已切换到${detailDev.value ? "新" : "旧"}版角色详情页面`,
+  });
+}
 
 async function loadRole(): Promise<void> {
   const roleData = await TGSqlite.getUserCharacter(user.gameUid);
@@ -233,6 +249,7 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
 
 .uc-top-btns {
   display: flex;
+  align-items: center;
   gap: 15px;
 }
 
