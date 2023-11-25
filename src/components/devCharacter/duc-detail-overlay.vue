@@ -14,9 +14,9 @@
           <DucDetailOlt :data="props.dataVal" mode="avatar" />
           <DucDetailOlt :data="JSON.parse(props.dataVal.weapon)" mode="weapon" />
         </div>
-        <!-- 右下天赋 -->
-        <div class="duc-doc-rb">
-          <DucDetailOrt :data="JSON.parse(props.dataVal.talent)" />
+        <!-- 右侧天赋 -->
+        <div class="duc-doc-rt">
+          <DucDetailOrt :model-value="JSON.parse(props.dataVal.talent)" />
         </div>
         <!-- 左下命座 -->
         <div class="duc-doc-lb">
@@ -125,7 +125,7 @@ async function loadData(): Promise<void> {
 .duc-do-container {
   position: relative;
   overflow: hidden;
-  width: 50vw;
+  width: 800px;
   border-radius: 5px;
   aspect-ratio: 21 / 10;
   background: var(--box-bg-1);
@@ -159,13 +159,11 @@ async function loadData(): Promise<void> {
   row-gap: 10px;
 }
 
-.duc-doc-rb {
+.duc-doc-rt {
   position: absolute;
-  right: 20px;
-  bottom: 20px;
-  width: 100px;
-  height: 300px;
-  background: var(--common-shadow-2);
+  top: 10px;
+  right: 10px;
+  padding: 10px;
 }
 
 .duc-doc-lb {
