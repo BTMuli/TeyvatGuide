@@ -30,7 +30,6 @@ const getTitle = computed(() => {
   if (props.mode === "avatar") {
     return `${props.data.name}`;
   } else {
-    // 按照长度折行，一行最多显示 10 个字
     const descriptionList = props.data.description.split("");
     return descriptionList.reduce((prev: string, cur: string, index: number) => {
       if (index % 10 === 0) {
@@ -41,7 +40,7 @@ const getTitle = computed(() => {
     }, "");
   }
 });
-const boxData = computed(() => {
+const boxData = computed<TItemBoxData>(() => {
   if (props.mode === "avatar") {
     return {
       bg: `/icon/bg/${props.data.star}-Star.webp`,
@@ -51,6 +50,7 @@ const boxData = computed(() => {
       display: "inner",
       innerHeight: 0,
       innerText: "",
+      clickable: false,
       lt: `/icon/element/${props.data.element}.webp`,
       ltSize: "30px",
     };
@@ -63,6 +63,7 @@ const boxData = computed(() => {
       display: "inner",
       innerHeight: 0,
       innerText: "",
+      clickable: false,
       lt: `/icon/weapon/${props.data.type}.webp`,
       ltSize: "30px",
     };

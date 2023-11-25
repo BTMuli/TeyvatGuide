@@ -14,7 +14,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, onUpdated, reactive } from "vue";
+import { onMounted, onUpdated, ref } from "vue";
 
 import { saveImgLocal } from "../../utils/TGShare";
 
@@ -23,21 +23,23 @@ interface DucDetailOlbProps {
 }
 
 const props = defineProps<DucDetailOlbProps>();
-let constellations = reactive<TGApp.Sqlite.Character.RoleConstellation[]>([]);
+const constellations = ref<TGApp.Sqlite.Character.RoleConstellation[]>([]);
 
-function loadData() {
-  constellations = props.modelValue;
-  constellations.map(
-    async (constellation) => (constellation.icon = await saveImgLocal(constellation.icon)),
-  );
+async function loadData() {
+  const tempConstellations = props.modelValue;
+  for (const constellation of tempConstellations) {
+    if (constellation.icon.startsWith("blob:")) return;
+    constellation.icon = await saveImgLocal(constellation.icon);
+  }
+  constellations.value = tempConstellations;
 }
 
-onMounted(() => {
-  loadData();
+onMounted(async () => {
+  await loadData();
 });
 
-onUpdated(() => {
-  loadData();
+onUpdated(async () => {
+  await loadData();
 });
 </script>
 <style>

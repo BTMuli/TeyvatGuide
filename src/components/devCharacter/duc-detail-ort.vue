@@ -8,7 +8,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, onUpdated, reactive } from "vue";
+import { onMounted, onUpdated, ref } from "vue";
 
 import { saveImgLocal } from "../../utils/TGShare";
 
@@ -17,13 +17,15 @@ interface DucDetailOrtProps {
 }
 
 const props = defineProps<DucDetailOrtProps>();
-let talents = reactive<TGApp.Sqlite.Character.RoleTalent[]>([]);
+const talents = ref<TGApp.Sqlite.Character.RoleTalent[]>([]);
 
 async function loadData(): Promise<void> {
-  talents = props.modelValue;
-  for (const talent of talents) {
+  const tempTalent = props.modelValue;
+  for (const talent of tempTalent) {
+    if (talent.icon.startsWith("blob:")) return;
     talent.icon = await saveImgLocal(talent.icon);
   }
+  talents.value = tempTalent;
 }
 
 onMounted(async () => {
@@ -60,6 +62,7 @@ onUpdated(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--tgc-white-1);
   font-family: var(--font-title);
   font-size: 16px;
   text-shadow: 0 0 5px rgba(0 0 0/40%);

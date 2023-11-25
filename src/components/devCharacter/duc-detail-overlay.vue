@@ -13,7 +13,6 @@
         <div class="duc-doc-lt">
           <DucDetailOlt :data="props.dataVal" mode="avatar" />
           <DucDetailOlt :data="JSON.parse(props.dataVal.weapon)" mode="weapon" />
-          <!-- todo cors -->
           <v-btn
             class="duc-doc-btn"
             @click="share"
@@ -49,7 +48,6 @@ import DucDetailOlt from "./duc-detail-olt.vue";
 import DucDetailOrt from "./duc-detail-ort.vue";
 import TGSqlite from "../../plugins/Sqlite";
 import { generateShareImg } from "../../utils/TGShare";
-import showSnackbar from "../func/snackbar";
 import TOverlay from "../main/t-overlay.vue";
 
 interface DucDetailOverlayProps {
@@ -72,10 +70,10 @@ const visible = computed({
   },
 });
 
+// share
+const loading = ref<boolean>(false);
 // 渲染数据
 const nameCard = ref<string | false>(false);
-// 加载
-const loading = ref<boolean>(false);
 
 function onOverlayCancel() {
   visible.value = false;
@@ -179,6 +177,10 @@ async function share(): Promise<void> {
   justify-content: space-between;
   padding: 5px;
   row-gap: 10px;
+}
+
+.duc-doc-btn {
+  color: var(--tgc-white-1);
 }
 
 .duc-doc-rt {
