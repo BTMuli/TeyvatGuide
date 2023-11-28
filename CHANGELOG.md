@@ -2,12 +2,42 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2023-09-08
-Update: 2023-11-11
+Update: 2023-11-28
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-09-08 09:45:17 `
 >
-> 更新于 `2023-11-11 12:12:58`
+> 更新于 `2023-11-28 15:18:27`
+
+## [0.3.6](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.6) (2023-11-25)
+
+### Feat
+
+- 应用：实装 `device_fp`，有效降低 `1034` 错误 [`#58`](https://github.com/BTMuli/TeyvatGuide/issues/58)
+- 首页：今日素材组件添加留影叙佳期入口，角色生日时颜色变更 [`#61`](https://github.com/BTMuli/TeyvatGuide/issues/61)
+- 组件：优化 showConfirm 组件 input 模式下的体验
+- 成就：支持单个成就完成状态修改 [`#60`](https://github.com/BTMuli/TeyvatGuide/issues/60)
+- 成就：支持隐藏已完成成就 [`#19`](https://github.com/BTMuli/TeyvatGuide/issues/19)
+- 角色：角色详情页 UI 迭代，支持角色卡片分享 [`#20`](https://github.com/BTMuli/TeyvatGuide/issues/20)
+
+### Fix
+
+- JSBridge：修复窗口关闭后无法再次创建的问题
+- JSBridge：修复保存图片默认路径错误
+- JSBridge：调整 closePage 逻辑
+- 应用：在生成分享图时忽略某些元素
+- 应用：完善数据库检测机制 [`#62`](https://github.com/BTMuli/TeyvatGuide/issues/62)
+- JSBridge：应用启动时关闭隐藏的子窗口
+- 应用：完善登录态检测机制
+
+### Change
+
+- 应用：米游社 salt 版本更新到 2.63.1
+- 咨讯：大别野版块不再忽略咨讯区
+- 分享：提高生成分享图的清晰度
+- 成就：调整完成 icon 的颜色
+- 组件：增加素材日历组件 overlay 国家 icon 清晰度
+- 成就：重构成就页面代码，优化性能
 
 ## [0.3.5](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.5) (2023-11-11)
 
