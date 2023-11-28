@@ -203,13 +203,22 @@ const showReset = ref<boolean>(false);
 // data
 const showHome = ref<string[]>(homeStore.getShowValue());
 const userInfo = computed(() => {
-  const info = userStore.getBriefInfo();
-  return {
-    nickname: info.nickname || "未登录",
-    uid: info.uid || "-1",
-    desc: info.desc || "未登录",
-    avatar: info.avatar || "/source/UI/defaultUser.webp",
-  };
+  if (!appStore.isLogin) {
+    return {
+      nickname: "未登录",
+      uid: "-1",
+      desc: "请扫码登录",
+      avatar: "/source/UI/defaultUser.webp",
+    };
+  } else {
+    const info = userStore.getBriefInfo();
+    return {
+      nickname: info.nickname,
+      uid: info.uid,
+      desc: info.desc,
+      avatar: info.avatar,
+    };
+  }
 });
 const vuetifyTheme = computed(() => {
   return appStore.theme === "dark" ? "dark" : "light";
@@ -278,6 +287,7 @@ async function confirmRefreshUser(): Promise<void> {
       color: "error",
       text: "扫码登录后才能刷新用户信息!",
     });
+    appStore.isLogin = false;
     return;
   }
   const deviceInfo = appStore.deviceInfo;
@@ -349,6 +359,7 @@ async function confirmRefreshUser(): Promise<void> {
     });
   } else {
     showSnackbar({ text: "刷新成功!" });
+    appStore.isLogin = true;
   }
 }
 
@@ -554,7 +565,7 @@ async function tryShowReset(): Promise<void> {
   }
   const time = getBuildTime();
   const code = time.startsWith("dev.") ? "dev" : time;
-  if (res === code) {
+  if (res === code || res === "reset1128") {
     showReset.value = true;
     showSnackbar({
       text: "已开启重置数据库选项",

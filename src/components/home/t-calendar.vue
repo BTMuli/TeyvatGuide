@@ -7,6 +7,7 @@
         <span>{{ dateNow }}</span>
         <!-- 如果是某人生日，礼物图标颜色为红色 -->
         <span
+          v-if="birthInfo.isLogin"
           @click="toBirthday"
           class="calendar-title-gift"
           :style="{
@@ -76,6 +77,7 @@ import { computed, onMounted, ref } from "vue";
 
 import { AppCalendarData } from "../../data";
 import TGSqlite from "../../plugins/Sqlite";
+import { useAppStore } from "../../store/modules/app";
 import TGClient from "../../utils/TGClient";
 import { generateShareImg } from "../../utils/TGShare";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
@@ -103,6 +105,7 @@ const selectedType = ref<"avatar" | "weapon">("avatar");
 
 // birthday
 const birthInfo = ref({
+  isLogin: true,
   active: false,
   text: "点击前往留影叙佳期",
 });
@@ -145,12 +148,15 @@ defineExpose({
 });
 
 onMounted(async () => {
-  const birthRes = await TGSqlite.isBirthday();
-  if (birthRes !== false) {
-    birthInfo.value = {
-      active: true,
-      text: `今天是${birthRes}的生日，\n快去送上祝福吧！`,
-    };
+  const appStore = useAppStore();
+  if (appStore.isLogin) {
+    const birthRes = await TGSqlite.isBirthday();
+    if (birthRes !== false) {
+      birthInfo.value.active = true;
+      birthInfo.value.text = `今天是 ${birthRes} 的生日！`;
+    }
+  } else {
+    birthInfo.value.isLogin = false;
   }
   const dayNow = new Date().getDay() === 0 ? 7 : new Date().getDay();
   const week = <{ week: number; text: string }>btnText.find((item) => item.week === dayNow);

@@ -36,6 +36,8 @@ export const useAppStore = defineStore(
     const devMode = ref(false);
     // 应用主题
     const theme = ref("default");
+    // 是否登录
+    const isLogin = ref(false);
 
     const dataPath = reactive({
       userDataDir,
@@ -56,6 +58,7 @@ export const useAppStore = defineStore(
         wiki: false,
       };
       theme.value = "default";
+      isLogin.value = false;
       initDevice();
     }
 
@@ -83,6 +86,7 @@ export const useAppStore = defineStore(
       dataPath,
       userPath,
       deviceInfo,
+      isLogin,
       init,
       getSubmenu,
       changeTheme,
@@ -98,7 +102,7 @@ export const useAppStore = defineStore(
       {
         key: "app",
         storage: window.localStorage,
-        paths: ["devMode", "loading", "buildTime"],
+        paths: ["devMode", "loading", "buildTime", "isLogin"],
       },
       {
         key: "sidebar",

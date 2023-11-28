@@ -166,11 +166,18 @@ const userStore = useUserStore();
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 
 const userInfo = computed(() => {
-  const info = userStore.getBriefInfo();
-  return {
-    nickname: info?.nickname ?? "未登录",
-    avatar: info?.avatar ?? "/source/UI/defaultUser.webp",
-  };
+  if (appStore.isLogin) {
+    const info = userStore.getBriefInfo();
+    return {
+      nickname: info.nickname,
+      avatar: info.avatar,
+    };
+  } else {
+    return {
+      nickname: "未登录",
+      avatar: "/source/UI/defaultUser.webp",
+    };
+  }
 });
 const rail = ref(appStore.sidebar.collapse);
 // theme
@@ -217,8 +224,11 @@ async function switchTheme(): Promise<void> {
 }
 
 async function openClient(func: string): Promise<void> {
-  if (userStore.cookie.game_token === "") return login();
-  await mhyClient.open(func);
+  if (appStore.isLogin) {
+    await mhyClient.open(func);
+  } else {
+    login();
+  }
 }
 
 function login(): void {

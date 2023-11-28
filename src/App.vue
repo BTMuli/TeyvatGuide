@@ -99,14 +99,19 @@ async function checkAppLoad(): Promise<void> {
       color: "error",
       timeout: 3000,
     });
+    await createDataDir();
+  } else {
+    appStore.loading = true;
+    console.info("数据库已加载！");
   }
-  await createDataDir();
-  appStore.loading = true;
-  console.info("数据加载完成！");
 }
 
 // 检测 ck,info 数据
 async function checkUserLoad(): Promise<void> {
+  if (!appStore.isLogin) {
+    console.info("未登录！");
+    return;
+  }
   const userStore = useUserStore();
   const ckLocal = userStore.cookie;
   const ckDB = await TGSqlite.getCookie();
@@ -205,6 +210,7 @@ async function getDeepLink(): Promise<void> {
 
 // 检测更新
 async function checkUpdate(): Promise<void> {
+  if (!appStore.loading) return;
   const isProdEnv = import.meta.env.MODE === "production";
   const needUpdate = await TGSqlite.checkUpdate();
   if (needUpdate && isProdEnv) {
