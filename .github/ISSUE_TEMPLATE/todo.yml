@@ -33,7 +33,7 @@ body:
     attributes:
       label: 当前提交
       description: 请填写当前提交
-      placeholder: 如 Beta v0.3.4
+      placeholder: 如 Beta v0.3.6
     validations:
       required: true
   - type: textarea
