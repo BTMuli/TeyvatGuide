@@ -2,7 +2,7 @@
  * @file plugins/Mys/types/SctPost.d.ts
  * @description Mys 插件 结构化帖子类型声明文件
  * @todo 完善类型
- * @since Beta v0.3.4
+ * @since Beta v0.3.7
  */
 
 /**
@@ -254,7 +254,7 @@ declare namespace TGApp.Plugins.Mys.SctPost {
 
   /**
    * @description 帖子结构化数据-大别野卡片
-   * @since Beta v0.3.4
+   * @since Beta v0.3.7
    * @interface VillaCard
    * @extends Base
    * @property {string} insert.villa_card.villa_id - 别墅ID
@@ -267,6 +267,10 @@ declare namespace TGApp.Plugins.Mys.SctPost {
    * @property {string} insert.villa_card.villa_introduce - 别墅介绍
    * @property {string[]} insert.villa_card.tag_list - 别墅标签
    * @property {string} insert.villa_card.villa_member_num - 别墅成员数量
+   * @property {boolean} insert.villa_card.is_official - 是否官方别墅
+   * @property {boolean} insert.villa_card.is_available - 是否可加入
+   * @property {string[]} insert.villa_card.hot_member_avatar - 热门成员头像
+   * @property {VillaRoom} insert.villa_card.hot_room - 热门房间
    * @return VillaCard
    */
   interface VillaCard extends Base {
@@ -280,10 +284,31 @@ declare namespace TGApp.Plugins.Mys.SctPost {
         owner_nickname: string;
         owner_avatar_url: string;
         villa_introduce: string;
-        tag_list: string[];
+        tag_list?: string[];
         villa_member_num: string;
+        is_official: boolean;
+        is_available: boolean;
+        hot_member_avatar: string[];
+        hot_room: VillaRoom;
       };
     };
+  }
+
+  /**
+   * @description 帖子结构化数据-大别野卡片-热门房间
+   * @since Beta v0.3.7
+   * @interface VillaRoom
+   * @property {string} room_id - 房间ID
+   * @property {string} room_name - 房间名称
+   * @property {string[]} sender_avatar_list - 发送者头像
+   * @property {string} sender_num - 发送者数量
+   * @return VillaRoom
+   */
+  interface VillaRoom {
+    room_id: string;
+    room_name: string;
+    sender_avatar_list: string[];
+    sender_num: string;
   }
 
   /**
