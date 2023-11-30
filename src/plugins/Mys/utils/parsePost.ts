@@ -1,7 +1,7 @@
 /**
  * @file plugins Mys utils parsePost.ts
  * @description 用于解析Mys数据的工具
- * @since Beta v0.3.5
+ * @since Beta v0.3.7
  */
 
 import * as colorConvert from "color-convert";
@@ -468,7 +468,7 @@ function emojiParser(data: TGApp.Plugins.Mys.SctPost.Text): HTMLImageElement {
 
 /**
  * @description 解析大别野房间的卡片
- * @since Beta v0.3.4
+ * @since Beta v0.3.7
  * @param {TGApp.Plugins.Mys.SctPost.VillaCard} data Mys数据
  * @returns {HTMLDivElement} 解析后的大别野房间的卡片
  */
@@ -517,12 +517,14 @@ function parseVillaCard(data: TGApp.Plugins.Mys.SctPost.VillaCard): HTMLDivEleme
   numberDiv.classList.add("mys-post-villa-card-tag");
   numberDiv.innerText = `${data.insert.villa_card.villa_member_num}人在聊`;
   midDiv.appendChild(numberDiv);
-  data.insert.villa_card.tag_list.forEach((tag) => {
-    const tagDiv = document.createElement("div");
-    tagDiv.classList.add("mys-post-villa-card-tag");
-    tagDiv.innerText = tag;
-    midDiv.appendChild(tagDiv);
-  });
+  if (data.insert.villa_card.tag_list !== undefined) {
+    data.insert.villa_card.tag_list.forEach((tag) => {
+      const tagDiv = document.createElement("div");
+      tagDiv.classList.add("mys-post-villa-card-tag");
+      tagDiv.innerText = tag;
+      midDiv.appendChild(tagDiv);
+    });
+  }
   flexDiv.appendChild(midDiv);
   const bottomDiv = document.createElement("div");
   bottomDiv.classList.add("mys-post-villa-card-bottom");
