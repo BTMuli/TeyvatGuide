@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="mys-post-link-card">
     <div class="mys-post-link-card-cover">
       <img :src="props.data.insert.link_card.cover" alt="cover" />
     </div>

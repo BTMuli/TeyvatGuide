@@ -161,6 +161,7 @@
   display: inline-block;
   margin-left: auto;
   color: #00c3ff;
+  cursor: pointer;
   text-align: right;
   text-decoration: none;
 }
