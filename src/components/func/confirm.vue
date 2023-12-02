@@ -223,7 +223,7 @@ defineExpose({
   font-size: 20px;
   text-align: center;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
   word-break: break-all;
 }
 
