@@ -15,7 +15,7 @@ import { score } from "wcag-color";
  * @param {string} colorFg 前景颜色
  * @returns {boolean} 是否相近
  */
-function isColorSimilar(colorBg: string, colorFg: string): boolean {
+export function isColorSimilar(colorBg: string, colorFg: string): boolean {
   let hexBg, hexFg;
   if (colorBg.startsWith("#")) hexBg = colorBg;
   else hexBg = colorConvert.keyword.hex(<KEYWORD>colorBg);
@@ -31,7 +31,7 @@ function isColorSimilar(colorBg: string, colorFg: string): boolean {
  * @param {string} url 链接
  * @returns {boolean} 是否是米游社帖子
  */
-function isMysPost(url: string): boolean {
+export function isMysPost(url: string): boolean {
   const regBBS = /^https:\/\/bbs\.mihoyo\.com\/\w+\/article\/\d+$/;
   const regMys = /^https:\/\/www\.miyoushe\.com\/\w+\/article\/\d+$/;
   return regBBS.test(url) || regMys.test(url);
@@ -78,7 +78,7 @@ function getVodTime(duration: number): string {
  * @param {string} content 帖子内容
  * @returns {string} 解析后的内容
  */
-function parseContent(content: string): string {
+export function parseContent(content: string): string {
   const data: TGApp.Plugins.Mys.SctPost.Other = JSON.parse(content);
   const result: TGApp.Plugins.Mys.SctPost.Common[] = [];
   const keys = Object.keys(data);

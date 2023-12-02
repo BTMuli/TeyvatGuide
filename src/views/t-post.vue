@@ -54,7 +54,7 @@
         </div>
       </div>
     </div>
-    <div class="mys-post-title">
+    <div class="mys-post-title" @click="switchRender()" style="cursor: pointer">
       <span class="mpt-official" v-if="postRender.isOfficial">官</span>
       <span>{{ postRender.title }}</span>
     </div>
@@ -63,7 +63,8 @@
       <span>更新时间：{{ postRender.updated }}</span>
     </div>
     <!-- eslint-disable-nextline vue/no-v-html -->
-    <div class="mys-post-content" v-html="postHtml" />
+    <div class="mys-post-content" v-html="postHtml" v-if="!devRender" />
+    <TpParser v-else v-model:data="renderPost" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -72,9 +73,12 @@ import { nextTick, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
+import showSnackbar from "../components/func/snackbar";
 import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
+import TpParser from "../components/post/tp-parser.vue";
 import Mys from "../plugins/Mys";
+import { parseContent } from "../plugins/Mys/utils/parsePost";
 
 interface PostRender {
   title: string;
@@ -100,6 +104,8 @@ const shareTitle = ref<string>("");
 // 数据
 const postId = Number(useRoute().params.post_id);
 const postHtml = ref<string>("");
+const devRender = ref<boolean>(false);
+const renderPost = ref<TGApp.Plugins.Mys.SctPost.Base[]>([]);
 const postRender = ref<PostRender>({
   title: "",
   isOfficial: false,
@@ -136,6 +142,7 @@ onMounted(async () => {
   try {
     const postData = await Mys.Post.get(postId);
     loadingTitle.value = "正在渲染数据...";
+    renderPost.value = getRenderPost(postData);
     postHtml.value = Mys.Post.parser(postData);
     postRender.value = {
       title: postData.post.subject,
@@ -172,6 +179,31 @@ watch(loadShare, (value) => {
     loading.value = false;
   }
 });
+
+function getRenderPost(data: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.SctPost.Base[] {
+  let parseData: TGApp.Plugins.Mys.SctPost.Base[] = [];
+  const postContent = data.post.content;
+  let jsonParse: string;
+  if (postContent.startsWith("<")) {
+    jsonParse = data.post.structured_content;
+  } else {
+    try {
+      jsonParse = parseContent(data.post.content);
+    } catch (e) {
+      jsonParse = data.post.structured_content;
+    }
+  }
+  parseData = JSON.parse(jsonParse);
+  return parseData;
+}
+
+function switchRender() {
+  devRender.value = !devRender.value;
+  showSnackbar({
+    text: devRender.value ? "已切换到测试渲染引擎" : "已切换到正常渲染引擎",
+    color: "success",
+  });
+}
 </script>
 <style lang="css" scoped src="../assets/css/post-parser.css" />
 <style lang="css" scoped>
