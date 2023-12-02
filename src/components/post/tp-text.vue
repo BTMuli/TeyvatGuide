@@ -1,5 +1,5 @@
 <template>
-  <span v-if="mode == 'link'" class="mys-post-link" @click="toLink()" style="cursor: pointer">
+  <span v-if="mode == 'link'" class="mys-post-link" @click="toLink()">
     <v-icon size="small">mdi-link-variant</v-icon>{{ props.data.insert }}
   </span>
   <img

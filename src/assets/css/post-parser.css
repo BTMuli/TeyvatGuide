@@ -2,7 +2,7 @@
  * @file assets/css/post-parser.css
  * @description 米游社解析 css
  * @todo 需要完善
- * @since Beta v0.3.4
+ * @since Beta v0.3.7
  */
 
 :deep(.mys-post-div) {
@@ -15,7 +15,12 @@
 }
 
 :deep(.mys-post-link) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: #00c3ff;
+  column-gap: 5px;
+  cursor: pointer;
   text-decoration: none;
 }
 
