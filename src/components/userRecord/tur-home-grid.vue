@@ -1,5 +1,5 @@
 <template>
-  <div v-if="props.modelValue === undefined">暂无数据</div>
+  <div v-if="!props.modelValue">暂无数据</div>
   <div v-else class="tur-hg-box">
     <TurHomeSub v-for="(home, index) in homes" :key="index" :data="home" />
   </div>

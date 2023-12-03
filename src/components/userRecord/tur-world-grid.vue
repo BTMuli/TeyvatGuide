@@ -1,5 +1,5 @@
 <template>
-  <div v-if="props.modelValue === undefined">暂无数据</div>
+  <div v-if="!props.modelValue">暂无数据</div>
   <div v-else class="tur-wg-box">
     <TurWorldSub v-for="(area, index) in getData()" :key="index" :data="area" :theme="theme" />
   </div>

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="props.modelValue === undefined">暂无数据</div>
+  <div v-if="!props.modelValue">暂无数据</div>
   <div v-else class="tur-og-box">
     <TurOverviewSub title="活跃天数" :text="data.activeDays" />
     <TurOverviewSub title="成就达成数" :text="data.achievementNumber" />

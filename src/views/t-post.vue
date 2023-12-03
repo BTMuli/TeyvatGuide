@@ -181,7 +181,6 @@ watch(loadShare, (value) => {
 });
 
 function getRenderPost(data: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.SctPost.Base[] {
-  let parseData: TGApp.Plugins.Mys.SctPost.Base[] = [];
   const postContent = data.post.content;
   let jsonParse: string;
   if (postContent.startsWith("<")) {
@@ -193,8 +192,7 @@ function getRenderPost(data: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys
       jsonParse = data.post.structured_content;
     }
   }
-  parseData = JSON.parse(jsonParse);
-  return parseData;
+  return JSON.parse(jsonParse);
 }
 
 function switchRender() {
