@@ -88,10 +88,7 @@ async function toLink() {
         post_id: link.split("/").pop(),
       },
     });
-  } else if (
-    link.startsWith("https://webstatic.mihoyo.com/ys/event/e20220303-birthday/") ||
-    link.startsWith("https://act.mihoyo.com")
-  ) {
+  } else if (isMysAct(link)) {
     const resOpen = await showConfirm({
       title: "采用内置 JSBridge？",
       text: "取消则使用外部浏览器打开",
@@ -112,6 +109,15 @@ async function toLink() {
   } else {
     window.open(props.data.attributes.link);
   }
+}
+
+function isMysAct(url: string): boolean {
+  // link.startsWith("https://webstatic.mihoyo.com/ys/event/e20220303-birthday/")
+  if (url.startsWith("https://act.mihoyo.com")) return true;
+  if (url.startsWith("https://webstatic.mihoyo.com")) {
+    return url.includes("event");
+  }
+  return false;
 }
 
 // 解析表情链接
