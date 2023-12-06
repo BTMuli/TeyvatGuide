@@ -64,6 +64,15 @@ onMounted(async () => {
     },
     lang: "zh-cn",
     airplay: true,
+    controls: [
+      {
+        name: "subtitle",
+        index: 100,
+        position: "left",
+        html: `<i class="mdi mdi-eye"></i><span style="padding-left: 5px">${props.data.insert.vod.view_num}</span>`,
+        tooltip: `播放数：${props.data.insert.vod.view_num}`,
+      },
+    ],
   };
   const resolutions = props.data.insert.vod.resolutions;
   resolutions.forEach((resolution) => {
