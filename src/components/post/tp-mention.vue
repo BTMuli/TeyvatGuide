@@ -1,10 +1,15 @@
 <template>
-  <span class="mys-post-link" @click="toLink()">
+  <span class="tp-mention-box" @click="toLink()">
     <v-icon size="small">mdi-account-circle-outline</v-icon>
     <span>{{ props.data.insert.mention.nickname }}</span>
   </span>
 </template>
 <script lang="ts" setup>
+import { toRaw } from "vue";
+
+import TGClient from "../../utils/TGClient";
+import showConfirm from "../func/confirm";
+
 interface TpMention {
   insert: {
     mention: {
@@ -20,8 +25,34 @@ interface TpMentionProps {
 
 const props = defineProps<TpMentionProps>();
 
-function toLink() {
-  const prefix = "https://www.miyoushe.com/ys/accountCenter/postList?id=";
-  window.open(prefix + props.data.insert.mention.uid);
+console.log("tpMention", props.data.insert.mention.uid, toRaw(props.data).insert.mention);
+
+async function toLink(): Promise<void> {
+  const uid = props.data.insert.mention.uid;
+  const confirm = await showConfirm({
+    title: "跳转提示",
+    text: "是否采用内置 JSBridge 跳转？",
+  });
+  if (confirm) {
+    const prefix = "https://m.miyoushe.com/ys/#/accountCenter/0?id=";
+    await TGClient.open("mention", `${prefix}${uid}`);
+  } else {
+    const prefix = "https://www.miyoushe.com/ys/accountCenter/postList?id=";
+    window.open(`${prefix}${uid}`);
+  }
 }
 </script>
+<style lang="css" scoped>
+.tp-mention-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 5px;
+  margin: 0 2px;
+  color: #00c3ff;
+  cursor: pointer;
+  transform: translateY(2px);
+}
+</style>

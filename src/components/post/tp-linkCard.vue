@@ -71,6 +71,7 @@ async function toLink() {
 }
 
 .tp-link-card-box img {
+  max-width: 50%;
   max-height: 180px;
   border-radius: 10px;
   cursor: pointer;

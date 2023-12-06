@@ -1,5 +1,10 @@
 <template>
-  <span v-if="mode == 'link'" class="tp-text-link" @click="toLink()">
+  <span
+    v-if="mode == 'link'"
+    class="tp-text-link"
+    @click="toLink()"
+    :title="props.data.attributes?.link"
+  >
     <v-icon size="small">mdi-link-variant</v-icon>{{ props.data.insert }}
   </span>
   <span v-else-if="mode == 'emoji'" class="tp-text-emoji">
@@ -112,8 +117,11 @@ async function toLink() {
 }
 
 function isMysAct(url: string): boolean {
+  const prefix = ["https://act.mihoyo.com/", "https://mhyurl.cn"];
   // link.startsWith("https://webstatic.mihoyo.com/ys/event/e20220303-birthday/")
-  if (url.startsWith("https://act.mihoyo.com")) return true;
+  for (const pre of prefix) {
+    if (url.startsWith(pre)) return true;
+  }
   if (url.startsWith("https://webstatic.mihoyo.com")) {
     return url.includes("event");
   }
@@ -154,6 +162,7 @@ function getEmojiName() {
   justify-content: center;
   color: #00c3ff;
   cursor: pointer;
+  transform: translateY(2px);
 }
 
 .tp-text-emoji {
