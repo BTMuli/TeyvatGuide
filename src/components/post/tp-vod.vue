@@ -1,6 +1,6 @@
 <template>
   <div class="tp-vod-box">
-    <div class="tp-vod-container" data-html2canvas-ignore />
+    <div class="tp-vod-container" data-html2canvas-ignore></div>
     <div class="tp-vod-cover">
       <img alt="cover" :src="props.data.insert.vod.cover" />
       <img src="/source/UI/video_play.svg" alt="icon" />
@@ -9,6 +9,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { window as TauriWindow } from "@tauri-apps/api";
 import Artplayer from "artplayer";
 import type { Option } from "artplayer/types/option";
 import { onMounted, ref, toRaw } from "vue";
@@ -51,13 +52,13 @@ onMounted(async () => {
     url: "",
     poster: props.data.insert.vod.cover,
     type: "",
-    autoSize: true,
     playbackRate: true,
     aspectRatio: true,
     setting: true,
     hotkey: true,
     pip: true,
     quality: [],
+    fullscreen: true,
     icons: {
       // eslint-disable-next-line @typescript-eslint/quotes
       state: `<img src="/source/UI/video_play.svg" alt="icon" />`,
@@ -75,10 +76,18 @@ onMounted(async () => {
     ],
   };
   const resolutions = props.data.insert.vod.resolutions;
-  resolutions.forEach((resolution) => {
+  let size = 0,
+    label = "";
+  for (const resolution of resolutions) {
     if (option.url === "") {
       option.url = resolution.url;
       option.type = resolution.format;
+      size = resolution.size;
+      label = resolution.label;
+    }
+    if (resolution.size > size) {
+      size = resolution.size;
+      label = resolution.label;
     }
     const quality = {
       default: false,
@@ -86,8 +95,16 @@ onMounted(async () => {
       url: resolution.url,
     };
     option.quality?.push(quality);
+  }
+  option?.quality?.map((item) => {
+    if (item.html == label) {
+      item.default = true;
+    }
   });
   container.value = new Artplayer(option);
+  container.value?.on("fullscreen", async (state) => {
+    await TauriWindow.getCurrent().setFullscreen(state);
+  });
 });
 
 function getVodTime(): string {
@@ -114,8 +131,8 @@ function getVodTime(): string {
 .tp-vod-container {
   overflow: hidden;
   max-width: 100%;
+  height: 450px;
   border-radius: 10px;
-  aspect-ratio: 16 / 9;
 }
 
 .tp-vod-cover {

@@ -47,11 +47,12 @@
       },
       "window": {
         "all": false,
+        "setFocus": true,
         "setTitle": true,
+        "setFullscreen": true,
         "unminimize": true,
         "show": true,
         "close": true,
-        "setFocus": true,
         "hide": true
       },
       "os": {
