@@ -1,12 +1,14 @@
 /**
- * @file utils TGShare.ts
+ * @file utils/TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.3.6
+ * @since Beta v0.3.7
  */
 
 import { dialog, fs, http, path } from "@tauri-apps/api";
 import html2canvas from "html2canvas";
 
+import { bytesToSize } from "./toolFunc";
+import showConfirm from "../components/func/confirm";
 import showSnackbar from "../components/func/snackbar";
 
 /**
@@ -75,7 +77,7 @@ function getShareImgBgColor(): string {
 
 /**
  * @description 生成分享截图
- * @since Beta v0.3.6
+ * @since Beta v0.3.7
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
@@ -104,10 +106,36 @@ export async function generateShareImg(
     dpi: 350,
   };
   const canvasData = await html2canvas(element, opts);
+  const size = canvasData.width * canvasData.height * 4;
+  const sizeStr = bytesToSize(size);
+  if (size > 80000000) {
+    showSnackbar({
+      text: `图像大小为 ${sizeStr}，过大，无法保存`,
+      color: "warn",
+      timeout: 3000,
+    });
+    return;
+  }
+  if (size > 20000000) {
+    const sizeStr = bytesToSize(size);
+    const saveFile = await showConfirm({
+      title: "图像过大",
+      text: `图像大小为 ${sizeStr}，是否保存到文件？`,
+    });
+    if (!saveFile) {
+      showSnackbar({
+        color: "cancel",
+        text: "已取消",
+      });
+    } else {
+      await saveCanvasImg(canvasData, fileName);
+    }
+    return;
+  }
   try {
     await copyToClipboard(canvasData);
     showSnackbar({
-      text: `已将 ${fileName} 复制到剪贴板`,
+      text: `已将 ${fileName} 复制到剪贴板，大小为 ${sizeStr}`,
     });
   } catch (e) {
     await saveCanvasImg(canvasData, fileName);
@@ -116,7 +144,7 @@ export async function generateShareImg(
 
 /**
  * @description 复制到剪贴板
- * @since Beta v0.3.2
+ * @since Beta v0.3.7
  * @param {HTMLCanvasElement} canvas - canvas元素
  * @returns {Promise<void>} 无返回值
  */
