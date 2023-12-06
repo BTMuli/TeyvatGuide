@@ -1,7 +1,7 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.3.6
+ * @since Beta v0.3.7
  */
 
 import { event, invoke } from "@tauri-apps/api";
@@ -108,6 +108,22 @@ class TGClient {
   }
 
   /**
+   * @func hideOverlay
+   * @since Beta v0.3.7
+   * @desc 隐藏遮罩
+   * @returns {void}
+   */
+  async hideOverlay(): Promise<void> {
+    const executeJS = `javascript:(function(){
+      if (document.getElementById('mihoyo_landscape') !== null) {
+        let box = document.getElementById('mihoyo_landscape');
+        box.remove();
+      }
+    })();`;
+    await invoke("execute_js", { label: "mhy_client", js: executeJS });
+  }
+
+  /**
    * @func getUrl
    * @since Beta v0.3.6
    * @desc 获取 url
@@ -135,7 +151,7 @@ class TGClient {
 
   /**
    * @func open
-   * @since Beta v0.3.6
+   * @since Beta v0.3.7
    * @desc 打开米游社客户端
    * @param {string} func - 方法名
    * @param {string} url - url
@@ -146,6 +162,7 @@ class TGClient {
       try {
         await this.window.close();
       } catch (e) {
+        console.error(e);
         await invoke<InvokeArg>("create_mhy_client", {
           func: "default",
           url: "https://api-static.mihoyo.com/",
@@ -156,6 +173,8 @@ class TGClient {
     if (url === undefined) {
       url = this.getUrl(func);
       this.route = [url];
+    } else if (func.startsWith("web_act")) {
+      this.route = [url];
     } else if (func !== "closePage") {
       this.route.push(url);
     }
@@ -163,11 +182,12 @@ class TGClient {
     await invoke<InvokeArg>("create_mhy_client", { func, url });
     this.window = WebviewWindow.getByLabel("mhy_client");
     await this.window?.show();
+    await this.window?.setFocus();
   }
 
   /**
    * @func handleCallback
-   * @since Beta v0.3.5
+   * @since Beta v0.3.7
    * @desc 处理米游社客户端的 callback
    * @param {Event<string>} arg - 事件参数
    * @returns {any} - 返回值
@@ -175,6 +195,7 @@ class TGClient {
   async handleCallback(arg: Event<string>): Promise<any> {
     console.log(`[${arg.windowLabel}] ${arg.payload}`);
     await this.hideSideBar();
+    await this.hideOverlay();
     const { method, payload, callback } = <NormalArg>JSON.parse(arg.payload);
     switch (method) {
       case "getStatusBarHeight":
@@ -398,7 +419,7 @@ class TGClient {
 
   /**
    * @func pushPage
-   * @since Beta v0.3.4
+   * @since Beta v0.3.7
    * @desc 打开米游社客户端的页面
    * @param {unknown} payload - 请求参数
    * @returns {void} - 无返回值
@@ -418,6 +439,7 @@ class TGClient {
     }
     await this.open("pushPage", url);
     await this.hideSideBar();
+    await this.hideOverlay();
   }
 
   /**
