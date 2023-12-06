@@ -68,6 +68,7 @@
   "dependencies": {
     "@mdi/font": "7.3.67",
     "@tauri-apps/api": "^1.5.1",
+    "artplayer": "^5.0.9",
     "clipboard": "^2.0.11",
     "color-convert": "^2.0.1",
     "echarts": "^5.4.3",
