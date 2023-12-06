@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/types/user.ts
  * @description Mys 插件用户类型定义文件
- * @since Alpha v0.2.2
+ * @since Beta v0.3.7
  */
 
 /**
@@ -262,14 +262,16 @@ declare namespace TGApp.Plugins.Mys.User {
 
   /**
    * @description 用户操作
-   * @since Alpha v0.2.1
+   * @since Beta v0.3.7
    * @interface SelfOperation
    * @property {number} attitude 操作类型
    * @property {boolean} is_collected 是否收藏
+   * @property {number} upvote_type 互动类型
    * @returns {SelfOperation}
    */
   interface SelfOperation {
     attitude: number;
     is_collected: boolean;
+    upvote_type: number;
   }
 }

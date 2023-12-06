@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/types/post.d.ts
  * @description Mys 插件帖子类型定义文件
- * @since Beta v0.3.4
+ * @since Beta v0.3.7
  */
 
 /**
@@ -210,13 +210,16 @@ declare namespace TGApp.Plugins.Mys.Post {
 
   /**
    * @description 帖子状态
-   * @since Alpha v0.2.1
+   * @since Beta v0.3.7
    * @interface Stat
    * @property {number} view_num 浏览数
    * @property {number} reply_num 回复数
    * @property {number} like_num 点赞数
    * @property {number} bookmark_num 收藏数
    * @property {number} forward_num 转发数
+   * @property post_upvote_stat 互动
+   * @property {number} post_upvote_stat[].upvote_type 互动类型
+   * @property {number} post_upvote_stat[].upvote_cnt 互动数量
    * @return Stat
    */
   interface Stat {
@@ -225,6 +228,11 @@ declare namespace TGApp.Plugins.Mys.Post {
     like_num: number;
     bookmark_num: number;
     forward_num: number;
+    original_like_num: number;
+    post_upvote_stat: Array<{
+      upvote_type: number;
+      upvote_cnt: number;
+    }>;
   }
 
   /**
