@@ -473,23 +473,36 @@ class TGClient {
 
   /**
    * @func onClickImg
-   * @since Beta v0.3.6
+   * @since Beta v0.3.7
    * @desc 点击图片，下载到本地
    * @param {unknown} payload - 请求参数
    * @returns {void} - 无返回值
    */
   async onClickImg(payload: any): Promise<void> {
     const image = payload.image_list[0];
-    const executeJS = `javascript:(async function() {
+    const executeJS = this.getSaveImgJS(image.url, image.format);
+    await invoke("execute_js", { label: "mhy_client", js: executeJS });
+  }
+
+  /**
+   * @func getSaveImgJS
+   * @since Beta v0.3.7
+   * @desc 获取保存图片的 JS
+   * @param {string} url - 图片链接
+   * @param {string} format - 图片格式
+   * @returns {string} - JS
+   */
+  getSaveImgJS(url: string, format: string): string {
+    return `javascript:(async function() {
       const _t = window.__TAURI__;
-      const defaultPath = await _t.path.downloadDir() + Date.now() + '.${image.format}';
+      const defaultPath = await _t.path.downloadDir() + Date.now() + '.${format}';
       const savePath = await _t.dialog.save({
         title: '保存图片',
         filters: [{ name: '图片', extensions: ['png'] }],
         defaultPath: defaultPath,
       });
       if (savePath) {
-        const resBlob = await _t.http.fetch('${image.url}',{
+        const resBlob = await _t.http.fetch('${url}',{
           method: 'GET',
           responseType: _t.http.ResponseType.Binary
         });
@@ -501,19 +514,26 @@ class TGClient {
         alert('保存成功');
       }
     })();`;
-    await invoke("execute_js", { label: "mhy_client", js: executeJS });
   }
 
   /**
    * @func share
-   * @since Beta v0.3.5
+   * @since Beta v0.3.7
    * @desc 分享
-   * @todo 实现图片获取
    * @param {unknown} payload - 请求参数
    * @param {string} callback - 回调函数名
    * @returns {void} - 无返回值
    */
   async share(payload: any, callback: string): Promise<void> {
+    // 如果有数据
+    if (payload?.content.image_url !== undefined) {
+      const image = payload.content.image_url;
+      const format = image.split(".").pop();
+      const executeJS = this.getSaveImgJS(image, format);
+      await invoke("execute_js", { label: "mhy_client", js: executeJS });
+      await this.callback(callback, {});
+      return;
+    }
     // 延时 3s
     setTimeout(async () => {
       await this.callback(callback, {});
