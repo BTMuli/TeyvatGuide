@@ -34,6 +34,7 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
     mhy_window_config.url = get_mhy_client_url(func.clone());
   }
   if func == "birthday"
+    || func == "web_act"
     || url.starts_with("https://webstatic.mihoyo.com/ys/event/e20220303-birthday/index.html")
   {
     mhy_window_config.width = 1280.0;

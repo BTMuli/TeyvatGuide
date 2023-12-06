@@ -1,29 +1,20 @@
 <template>
-  <span v-if="mode == 'link'" class="mys-post-link" @click="toLink()">
+  <span v-if="mode == 'link'" class="tp-text-link" @click="toLink()">
     <v-icon size="small">mdi-link-variant</v-icon>{{ props.data.insert }}
   </span>
-  <img
-    v-else-if="mode == 'emoji'"
-    class="mys-post-emoji"
-    :src="getEmojiUrl()"
-    :alt="getEmojiName()"
-    :title="getEmojiName()"
-  />
-  <span v-else :style="getTextStyle()">
-    <span
-      v-if="props.data.insert.includes('\n')"
-      v-html="props.data.insert.replace(/\n/g, '<br />')"
-    />
-    <span v-else>{{ props.data.insert }}</span>
+  <span v-else-if="mode == 'emoji'" class="tp-text-emoji">
+    <img :src="getEmojiUrl()" :alt="getEmojiName()" :title="getEmojiName()" />
+  </span>
+  <span v-else :style="getTextStyle()" class="tp-text-span">
+    {{ props.data.insert }}
   </span>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, StyleValue, toRaw } from "vue";
 import { useRouter } from "vue-router";
 
 import { getEmojis } from "../../plugins/Mys/request/getEmojis";
 import { isColorSimilar, isMysPost } from "../../plugins/Mys/utils/parsePost";
-import { useAppStore } from "../../store/modules/app";
 import TGClient from "../../utils/TGClient";
 import showConfirm from "../func/confirm";
 import showSnackbar from "../func/snackbar";
@@ -46,6 +37,8 @@ const props = defineProps<TpTextProps>();
 const mode = ref<string>("text");
 const router = useRouter();
 
+console.log("tpText", JSON.stringify(props.data.insert), toRaw(props.data)?.attributes);
+
 onMounted(() => {
   if (props.data.attributes && "link" in props.data.attributes) {
     mode.value = "link";
@@ -57,30 +50,30 @@ onMounted(() => {
 });
 
 // 解析文本样式
-function getTextStyle(): string {
-  const style: CSSStyleDeclaration = <CSSStyleDeclaration>{};
+function getTextStyle(): StyleValue {
+  const style = <Array<StyleValue>>[];
   const data: TpText = <TpText>props.data;
   if (data.attributes) {
     if (data.attributes.bold) {
-      style.fontWeight = "bold";
+      const ruleBold: StyleValue = "fontFamily: var(--font-title)";
+      style.push(ruleBold);
     }
     if (data.attributes.color) {
       let colorGet = data.attributes.color;
       if (isColorSimilar("#000000", data.attributes.color)) {
-        colorGet = "var(--app-page-content);";
+        colorGet = "var(--app-page-content)";
       }
-      style.color = colorGet;
+      const ruleColor: StyleValue = `color: ${colorGet}`;
+      style.push(ruleColor);
     }
+    // todo 这边效果不是很好
+    // refer: 45245869
     if (data.attributes.align) {
-      style.textAlign = data.attributes.align;
-    }
-    if (props.data.insert.includes("\n")) {
-      style.whiteSpace = "pre-wrap";
+      const ruleAlign: StyleValue = `textAlign: ${data.attributes.align}`;
+      style.push(ruleAlign);
     }
   }
-  return Object.keys(style)
-    .map((key) => `${key}: ${style[key]}`)
-    .join(";");
+  return style;
 }
 
 // 解析链接目标
@@ -95,19 +88,26 @@ async function toLink() {
         post_id: link.split("/").pop(),
       },
     });
-  } else if (link.startsWith("https://webstatic.mihoyo.com/ys/event/e20220303-birthday/")) {
-    if (useAppStore().isLogin) {
-      await TGClient.open("birthday");
-    } else {
-      const res = await showConfirm({
-        title: "跳转确认",
-        text: "未登录，是否采用内置 JSBridge 打开？（取消则使用浏览器打开）",
+  } else if (
+    link.startsWith("https://webstatic.mihoyo.com/ys/event/e20220303-birthday/") ||
+    link.startsWith("https://act.mihoyo.com")
+  ) {
+    const resOpen = await showConfirm({
+      title: "采用内置 JSBridge？",
+      text: "取消则使用外部浏览器打开",
+    });
+    if (resOpen) {
+      const resType = await showConfirm({
+        title: "采用宽屏模式？",
+        text: "取消则使用默认竖屏",
       });
-      if (res) {
-        await TGClient.open("birthday");
+      if (resType) {
+        await TGClient.open("web_act", link);
       } else {
-        window.open(link);
+        await TGClient.open("web_act_thin", link);
       }
+    } else {
+      window.open(link);
     }
   } else {
     window.open(props.data.attributes.link);
@@ -134,10 +134,36 @@ function getEmojiUrl(): string {
     });
   }
   const emojiName = getEmojiName();
-  return JSON.parse(emojis)[emojiName];
+  return JSON.parse(<string>emojis)[emojiName];
 }
 
 function getEmojiName() {
   return props.data.insert.slice(2, -1);
 }
 </script>
+<style lang="css" scoped>
+.tp-text-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #00c3ff;
+  cursor: pointer;
+}
+
+.tp-text-emoji {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform: translateY(5px);
+}
+
+.tp-text-emoji img {
+  width: 45px;
+  height: 45px;
+  margin: 0 5px;
+}
+
+.tp-text-span {
+  white-space: pre-wrap;
+}
+</style>

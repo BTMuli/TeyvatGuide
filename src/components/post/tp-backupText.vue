@@ -1,19 +1,25 @@
 <template>
-  <div v-if="props.data.insert.lottery" @click="toLottery()" class="mys-post-link">
+  <div
+    v-if="props.data.insert.lottery"
+    @click="toLottery()"
+    class="tp-backup-lottery"
+    :title="`ID: ${props.data.insert.lottery.id}`"
+  >
     <v-icon size="small">mdi-gift</v-icon>
     <span>{{ props.data.insert.lottery.toast }}</span>
   </div>
-  <div v-else-if="props.data.insert.fold" class="mys-post-div">
-    <details class="mys-post-details">
-      <summary>
-        <TpParser :data="JSON.parse(props.data.insert.fold.title)" />
-      </summary>
+  <details v-else-if="props.data.insert.fold" class="tp-backup-fold">
+    <summary class="tp-backup-summary">
+      <TpParser :data="JSON.parse(props.data.insert.fold.title)" />
+    </summary>
+    <div class="tp-backup-details">
       <TpParser :data="JSON.parse(props.data.insert.fold.content)" />
-    </details>
-  </div>
+    </div>
+  </details>
   <TpUnknown v-else :data="<TGApp.Plugins.Mys.SctPost.Empty>props.data" />
 </template>
 <script lang="ts" setup>
+import { toRaw } from "vue";
 import { useRouter } from "vue-router";
 
 import TpParser from "./tp-parser.vue";
@@ -40,6 +46,8 @@ interface TpBackupTextProps {
 const props = defineProps<TpBackupTextProps>();
 const router = useRouter();
 
+console.log("tpBackupText", props.data.insert.backup_text, toRaw(props.data));
+
 async function toLottery() {
   if (!props.data.insert.lottery) return;
   await router.push({
@@ -50,3 +58,34 @@ async function toLottery() {
   });
 }
 </script>
+<style lang="css" scoped>
+.tp-backup-lottery {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #00c3ff;
+  column-gap: 5px;
+  cursor: pointer;
+}
+
+.tp-backup-fold {
+  padding: 10px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 10px;
+  margin: 10px auto;
+}
+
+.tp-backup-fold ::marker {
+  color: var(--common-shadow-4);
+  content: "";
+}
+
+.tp-backup-summary {
+  margin-left: 5px;
+  font-family: var(--font-title);
+}
+
+.tp-backup-details {
+  padding-left: 20px;
+}
+</style>
