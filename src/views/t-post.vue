@@ -104,7 +104,7 @@ const shareTitle = ref<string>("");
 // 数据
 const postId = Number(useRoute().params.post_id);
 const postHtml = ref<string>("");
-const devRender = ref<boolean>(false);
+const devRender = ref<boolean>(true);
 const renderPost = ref<TGApp.Plugins.Mys.SctPost.Base[]>([]);
 const postRender = ref<PostRender>({
   title: "",
