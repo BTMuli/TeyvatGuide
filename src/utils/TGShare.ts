@@ -13,17 +13,12 @@ import showSnackbar from "../components/func/snackbar";
 
 /**
  * @description 保存图片-canvas
- * @since Beta v0.3.4
- * @param {HTMLCanvasElement} canvas - canvas元素
+ * @since Beta v0.3.7
+ * @param {Uint8Array} buffer - 图片数据
  * @param {string} filename - 文件名
  * @returns {Promise<void>} 无返回值
  */
-async function saveCanvasImg(canvas: HTMLCanvasElement, filename: string): Promise<void> {
-  const buffer = new Uint8Array(
-    atob(canvas.toDataURL("image/png").split(",")[1])
-      .split("")
-      .map((item) => item.charCodeAt(0)),
-  );
+async function saveCanvasImg(buffer: Uint8Array, filename: string): Promise<void> {
   await dialog
     .save({
       title: "保存图片",
@@ -106,7 +101,12 @@ export async function generateShareImg(
     dpi: 350,
   };
   const canvasData = await html2canvas(element, opts);
-  const size = canvasData.width * canvasData.height * 4;
+  const buffer = new Uint8Array(
+    atob(canvasData.toDataURL("image/png").split(",")[1])
+      .split("")
+      .map((item) => item.charCodeAt(0)),
+  );
+  const size = buffer.length;
   const sizeStr = bytesToSize(size);
   if (size > 80000000) {
     showSnackbar({
@@ -128,32 +128,27 @@ export async function generateShareImg(
         text: "已取消",
       });
     } else {
-      await saveCanvasImg(canvasData, fileName);
+      await saveCanvasImg(buffer, fileName);
     }
     return;
   }
   try {
-    await copyToClipboard(canvasData);
+    await copyToClipboard(buffer);
     showSnackbar({
       text: `已将 ${fileName} 复制到剪贴板，大小为 ${sizeStr}`,
     });
   } catch (e) {
-    await saveCanvasImg(canvasData, fileName);
+    await saveCanvasImg(buffer, fileName);
   }
 }
 
 /**
  * @description 复制到剪贴板
  * @since Beta v0.3.7
- * @param {HTMLCanvasElement} canvas - canvas元素
+ * @param {Uint8Array} buffer - 图片数据
  * @returns {Promise<void>} 无返回值
  */
-async function copyToClipboard(canvas: HTMLCanvasElement): Promise<void> {
-  const buffer = new Uint8Array(
-    atob(canvas.toDataURL("image/png").split(",")[1])
-      .split("")
-      .map((item) => item.charCodeAt(0)),
-  );
+async function copyToClipboard(buffer: Uint8Array): Promise<void> {
   const blob = new Blob([buffer], { type: "image/png" });
   const url = URL.createObjectURL(blob);
   await navigator.clipboard.write([
