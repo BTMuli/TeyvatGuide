@@ -9,6 +9,9 @@
   <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="mys-post-body">
     <div class="mys-post-info">
+      <div class="tp-post-version">
+        PostID：{{ postId }} | Render by TeyvatGuide v{{ appVersion }}
+      </div>
       <div class="mys-post-meta">
         <div class="mpm-forum" v-if="postRender.forum !== null">
           <img :src="postRender.forum.icon" alt="forumIcon" />
@@ -68,6 +71,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { app } from "@tauri-apps/api";
 import { appWindow } from "@tauri-apps/api/window";
 import { nextTick, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
@@ -102,6 +106,7 @@ const postRef = ref<HTMLElement>(<HTMLElement>{});
 const shareTitle = ref<string>("");
 
 // 数据
+const appVersion = ref<string>();
 const postId = Number(useRoute().params.post_id);
 const postHtml = ref<string>("");
 const devRender = ref<boolean>(true);
@@ -125,11 +130,14 @@ const postRender = ref<PostRender>({
     reply_num: 0,
     like_num: 0,
     forward_num: 0,
+    original_like_num: 0,
+    post_upvote_stat: [],
   },
 });
 
 onMounted(async () => {
   await appWindow.show();
+  appVersion.value = await app.getVersion();
   // 检查数据
   if (!postId) {
     loadingEmpty.value = true;
@@ -239,12 +247,22 @@ function switchRender() {
 
 /* info */
 .mys-post-info {
+  position: relative;
   display: flex;
   width: 100%;
   align-items: end;
   justify-content: space-between;
   padding-bottom: 10px;
   border-bottom: 1px dashed var(--common-shadow-2);
+}
+
+.tp-post-version {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--box-text-3);
+  font-family: var(--font-title);
+  font-size: 14px;
 }
 
 /* author */
