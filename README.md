@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2023-11-15
+Update: 2023-12-07
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2023-11-15 21:01:51`
+> 更新于 `2023-12-07 15:25:05`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -100,7 +100,11 @@ Game Tool for Genshin Impact player, supports Windows and MacOS.
 - [Vue3](https://github.com/vuejs/core)
 - [Vite](https://github.com/vitejs/vite)
 - [Vuetify](https://github.com/vuetifyjs/vuetify)
-- [Echarts](https://echarts.apache.org/zh/index.html)
+
+## 第三方组件 / Plugins
+
+- [Echarts](https://echarts.apache.org/zh/index.html)：用于祈愿概览图生成
+- [Artplayer](https://artplayer.org/)：用于米游社帖子视频播放解析
 
 ## 协议 / License
 
