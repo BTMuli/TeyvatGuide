@@ -1,6 +1,10 @@
 <template>
   <div class="tp-vod-box">
-    <div class="tp-vod-container" data-html2canvas-ignore></div>
+    <div
+      class="tp-vod-container"
+      data-html2canvas-ignore
+      :id="`tp-vod-${props.data.insert.vod.id}`"
+    ></div>
     <div class="tp-vod-cover">
       <img alt="cover" :src="props.data.insert.vod.cover" />
       <img src="/source/UI/video_play.svg" alt="icon" />
@@ -48,7 +52,8 @@ console.log("tpVod", props.data.insert.vod.id, toRaw(props.data).insert.vod);
 
 onMounted(async () => {
   const option: Option = {
-    container: ".tp-vod-container",
+    id: props.data.insert.vod.id.toString(),
+    container: `#tp-vod-${props.data.insert.vod.id}`,
     url: "",
     poster: props.data.insert.vod.cover,
     type: "",
@@ -125,14 +130,16 @@ function getVodTime(): string {
 <style lang="css" scoped>
 .tp-vod-box {
   position: relative;
+  max-width: 100%;
   margin: 10px auto;
+  aspect-ratio: 16 / 9;
 }
 
 .tp-vod-container {
   overflow: hidden;
   max-width: 100%;
-  height: 450px;
   border-radius: 10px;
+  aspect-ratio: 16 / 9;
 }
 
 .tp-vod-cover {
