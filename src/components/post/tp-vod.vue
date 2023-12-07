@@ -21,7 +21,7 @@ import { onMounted, ref, toRaw } from "vue";
 interface TpVod {
   insert: {
     vod: {
-      id: number;
+      id: string;
       duration: number;
       cover: string;
       resolutions: Array<{
@@ -52,7 +52,7 @@ console.log("tpVod", props.data.insert.vod.id, toRaw(props.data).insert.vod);
 
 onMounted(async () => {
   const option: Option = {
-    id: props.data.insert.vod.id.toString(),
+    id: props.data.insert.vod.id,
     container: `#tp-vod-${props.data.insert.vod.id}`,
     url: "",
     poster: props.data.insert.vod.cover,
