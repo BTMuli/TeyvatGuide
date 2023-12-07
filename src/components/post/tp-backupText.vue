@@ -10,6 +10,7 @@
   </div>
   <details v-else-if="props.data.insert.fold" class="tp-backup-fold">
     <summary class="tp-backup-summary">
+      <img alt="marker" src="/source/post/fold_marker.webp" class="tp-backup-marker" />
       <TpParser :data="JSON.parse(props.data.insert.fold.title)" />
     </summary>
     <div class="tp-backup-details">
@@ -69,10 +70,15 @@ async function toLottery() {
 }
 
 .tp-backup-fold {
+  position: relative;
   padding: 10px;
   border: 1px solid var(--common-shadow-2);
   border-radius: 10px;
   margin: 10px auto;
+}
+
+.tp-backup-fold summary {
+  list-style: none;
 }
 
 .tp-backup-fold ::marker {
@@ -81,8 +87,16 @@ async function toLottery() {
 }
 
 .tp-backup-summary {
+  display: flex;
   margin-left: 5px;
   font-family: var(--font-title);
+}
+
+.tp-backup-marker {
+  position: relative;
+  display: inline;
+  width: 20px;
+  height: 20px;
 }
 
 .tp-backup-details {
