@@ -11,3 +11,7 @@ TGAssistant
 pnpm-lock.yaml
 # Qodana
 qodana.yaml
+# sourse
+*.webp
+*.png
+*.svg
