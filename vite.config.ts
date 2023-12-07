@@ -1,7 +1,7 @@
 /**
  * @file vite.config.ts
  * @description vite 配置文件
- * @since Beta v0.3.4
+ * @since Beta v0.3.7
  */
 
 import vue from "@vitejs/plugin-vue";
@@ -42,8 +42,10 @@ export default defineConfig({
       // chunking
       output: {
         manualChunks(id) {
+          // pnpm 依赖包路径格式为 本地路径/node_modules/.pnpm/包名@版本号/node_modules/依赖包名/文件路径
           if (id.includes("node_modules")) {
-            return id.toString().split("node_modules/")[1].split("/")[0].toString();
+            const arr = id.split("node_modules/");
+            return arr[1].split("/")[1];
           }
         },
       },
