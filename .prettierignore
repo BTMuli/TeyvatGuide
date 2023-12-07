@@ -5,8 +5,6 @@
 # Tauri build
 dist
 src-tauri/target
-# submodules
-TGAssistant
 # Pnpm
 pnpm-lock.yaml
 # Qodana
