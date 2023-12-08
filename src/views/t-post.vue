@@ -219,7 +219,7 @@ function parseContent(content: string): string {
       default:
         console.warn(`[MysPostParser] Unknown key: ${key}`);
         result.push({
-          insert: JSON.stringify(data[key]),
+          insert: data[key],
         });
         break;
     }
