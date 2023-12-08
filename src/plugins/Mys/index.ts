@@ -1,7 +1,7 @@
 /**
- * @file plugins Mys index.ts
+ * @file plugins/Mys/index.ts
  * @description Mys plugin index
- * @since Beta v0.3.0
+ * @since Beta v0.3.7
  */
 
 import MysApi from "./api";
@@ -13,15 +13,13 @@ import getPositionData from "./request/getPositionData";
 import getPostData from "./request/getPostData";
 import getGachaCard from "./utils/getGachaCard";
 import getLotteryCard from "./utils/getLotteryCard";
-import { getNoticeCard, getActivityCard, getNewsCard } from "./utils/getNewsCard";
+import { getActivityCard, getNewsCard, getNoticeCard } from "./utils/getNewsCard";
 import getPositionCard from "./utils/getPositionCard";
-import parsePost from "./utils/parsePost";
 
 const Mys = {
   Api: MysApi,
   Post: {
     get: getPostData,
-    parser: parsePost,
   },
   Gacha: {
     get: getGachaData,

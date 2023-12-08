@@ -57,7 +57,7 @@
         </div>
       </div>
     </div>
-    <div class="mys-post-title" @click="switchRender()" style="cursor: pointer">
+    <div class="mys-post-title">
       <span class="mpt-official" v-if="postRender.isOfficial">官</span>
       <span>{{ postRender.title }}</span>
     </div>
@@ -65,9 +65,7 @@
       <span>创建时间：{{ postRender.created }}&emsp;</span>
       <span>更新时间：{{ postRender.updated }}</span>
     </div>
-    <!-- eslint-disable-nextline vue/no-v-html -->
-    <div class="mys-post-content" v-html="postHtml" v-if="!devRender" />
-    <TpParser v-else v-model:data="renderPost" />
+    <TpParser v-model:data="renderPost" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -77,12 +75,10 @@ import { nextTick, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
-import showSnackbar from "../components/func/snackbar";
 import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import TpParser from "../components/post/tp-parser.vue";
 import Mys from "../plugins/Mys";
-import { parseContent } from "../plugins/Mys/utils/parsePost";
 
 interface PostRender {
   title: string;
@@ -108,8 +104,6 @@ const shareTitle = ref<string>("");
 // 数据
 const appVersion = ref<string>();
 const postId = Number(useRoute().params.post_id);
-const postHtml = ref<string>("");
-const devRender = ref<boolean>(true);
 const renderPost = ref<TGApp.Plugins.Mys.SctPost.Base[]>([]);
 const postRender = ref<PostRender>({
   title: "",
@@ -151,7 +145,6 @@ onMounted(async () => {
     const postData = await Mys.Post.get(postId);
     loadingTitle.value = "正在渲染数据...";
     renderPost.value = getRenderPost(postData);
-    postHtml.value = Mys.Post.parser(postData);
     postRender.value = {
       title: postData.post.subject,
       isOfficial: postData.post.post_status.is_official,
@@ -203,12 +196,35 @@ function getRenderPost(data: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys
   return JSON.parse(jsonParse);
 }
 
-function switchRender() {
-  devRender.value = !devRender.value;
-  showSnackbar({
-    text: devRender.value ? "已切换到测试渲染引擎" : "已切换到正常渲染引擎",
-    color: "success",
+function parseContent(content: string): string {
+  const data: TGApp.Plugins.Mys.SctPost.Other = JSON.parse(content);
+  const result: TGApp.Plugins.Mys.SctPost.Common[] = [];
+  const keys = Object.keys(data);
+  keys.forEach((key) => {
+    switch (key) {
+      case "describe":
+        result.push({
+          insert: data.describe,
+        });
+        break;
+      case "imgs":
+        data.imgs.forEach((item) => {
+          result.push({
+            insert: {
+              image: item,
+            },
+          });
+        });
+        break;
+      default:
+        console.warn(`[MysPostParser] Unknown key: ${key}`);
+        result.push({
+          insert: JSON.stringify(data[key]),
+        });
+        break;
+    }
   });
+  return JSON.stringify(result);
 }
 </script>
 <style lang="css" scoped src="../assets/css/post-parser.css" />
@@ -365,10 +381,5 @@ function switchRender() {
   margin-left: 10px;
   column-gap: 2px;
   opacity: 0.8;
-}
-
-/* content */
-.mys-post-content {
-  line-height: 2;
 }
 </style>

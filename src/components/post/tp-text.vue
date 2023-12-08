@@ -19,8 +19,8 @@ import { onMounted, ref, StyleValue, toRaw } from "vue";
 import { useRouter } from "vue-router";
 
 import { getEmojis } from "../../plugins/Mys/request/getEmojis";
-import { isColorSimilar, isMysPost } from "../../plugins/Mys/utils/parsePost";
 import TGClient from "../../utils/TGClient";
+import { isColorSimilar, isMysPost } from "../../utils/toolFunc";
 import showConfirm from "../func/confirm";
 import showSnackbar from "../func/snackbar";
 

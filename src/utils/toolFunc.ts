@@ -5,7 +5,10 @@
  */
 
 import { os, path } from "@tauri-apps/api";
+import colorConvert from "color-convert";
+import type { KEYWORD } from "color-convert/conversions";
 import { v4 } from "uuid";
+import { score } from "wcag-color";
 
 /**
  * @description 时间戳转换为时间字符串
@@ -158,4 +161,31 @@ export function getRandomString(length: number, type: string = "all"): string {
     res += str.charAt(Math.floor(Math.random() * str.length));
   }
   return res;
+}
+
+/**
+ * @description 判断颜色是否相似
+ * @since Beta v0.3.7
+ * @param {string} colorBg - 背景颜色
+ * @param {string} colorText - 文本颜色
+ * @returns {boolean} 是否相似
+ */
+export function isColorSimilar(colorBg: string, colorText: string): boolean {
+  const hexBg = colorBg.startsWith("#") ? colorBg : colorConvert.keyword.hex(<KEYWORD>colorBg);
+  const hexText = colorText.startsWith("#")
+    ? colorText
+    : colorConvert.keyword.hex(<KEYWORD>colorText);
+  return score(hexText, hexBg) === "Fail";
+}
+
+/**
+ * @description 判断是否为 Mys 帖子
+ * @since Beta v0.3.7
+ * @param {string} url - 网址
+ * @returns {boolean} 是否为 Mys 帖子
+ */
+export function isMysPost(url: string): boolean {
+  const regBBS = /^https:\/\/bbs\.mihoyo\.com\/\w+\/article\/\d+$/;
+  const regMys = /^https:\/\/www\.miyoushe\.com\/\w+\/article\/\d+$/;
+  return regBBS.test(url) || regMys.test(url);
 }

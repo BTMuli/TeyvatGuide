@@ -16,7 +16,7 @@
 import { toRaw } from "vue";
 import { useRouter } from "vue-router";
 
-import { isMysPost } from "../../plugins/Mys/utils/parsePost";
+import { isMysPost } from "../../utils/toolFunc";
 
 interface TpLinkCard {
   insert: {
