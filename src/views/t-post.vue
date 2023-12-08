@@ -7,12 +7,12 @@
     :title="shareTitle"
   />
   <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" :subtitle="loadingSub" />
-  <div class="mys-post-body">
-    <div class="mys-post-info">
+  <div class="tp-post-body">
+    <div class="tp-post-info">
       <div class="tp-post-version">
         PostID：{{ postId }} | Render by TeyvatGuide v{{ appVersion }}
       </div>
-      <div class="mys-post-meta">
+      <div class="tp-post-meta">
         <div class="mpm-forum" v-if="postRender.forum !== null">
           <img :src="postRender.forum.icon" alt="forumIcon" />
           <span>{{ postRender.forum?.name }}</span>
@@ -38,7 +38,7 @@
           <span>{{ postRender.metadata.forward_num }}</span>
         </div>
       </div>
-      <div class="mys-post-author">
+      <div class="tp-post-author">
         <div class="mpa-left">
           <span>{{ postRender.author.nickname }}</span>
           <span>{{
@@ -57,11 +57,11 @@
         </div>
       </div>
     </div>
-    <div class="mys-post-title">
+    <div class="tp-post-title">
       <span class="mpt-official" v-if="postRender.isOfficial">官</span>
       <span>{{ postRender.title }}</span>
     </div>
-    <div class="mys-post-subtitle">
+    <div class="tp-post-subtitle">
       <span>创建时间：{{ postRender.created }}&emsp;</span>
       <span>更新时间：{{ postRender.updated }}</span>
     </div>
@@ -155,7 +155,7 @@ onMounted(async () => {
       metadata: postData.stat,
     };
     shareTitle.value = `Post_${postId}`;
-    postRef.value = <HTMLElement>document.querySelector(".mys-post-body");
+    postRef.value = <HTMLElement>document.querySelector(".tp-post-body");
     await appWindow.setTitle(`Post_${postId} ${postData.post.subject}`);
   } catch (error) {
     console.error(error);
@@ -229,14 +229,14 @@ function parseContent(content: string): string {
 </script>
 <style lang="css" scoped src="../assets/css/post-parser.css" />
 <style lang="css" scoped>
-.mys-post-body {
+.tp-post-body {
   width: 800px;
   margin: 0 auto;
   font-family: var(--font-text);
 }
 
 /* title */
-.mys-post-title {
+.tp-post-title {
   margin: 10px auto;
   color: var(--common-text-title);
   font-family: var(--font-title);
@@ -256,13 +256,13 @@ function parseContent(content: string): string {
 }
 
 /* subtitle */
-.mys-post-subtitle {
+.tp-post-subtitle {
   font-size: 16px;
   opacity: 0.6;
 }
 
 /* info */
-.mys-post-info {
+.tp-post-info {
   position: relative;
   display: flex;
   width: 100%;
@@ -276,13 +276,14 @@ function parseContent(content: string): string {
   position: absolute;
   top: 0;
   left: 0;
-  color: var(--box-text-3);
+  color: var(--box-text-4);
   font-family: var(--font-title);
   font-size: 14px;
+  opacity: 0.6;
 }
 
 /* author */
-.mys-post-author {
+.tp-post-author {
   display: flex;
 }
 
@@ -353,7 +354,7 @@ function parseContent(content: string): string {
 }
 
 /* meta */
-.mys-post-meta {
+.tp-post-meta {
   display: flex;
   align-items: center;
   justify-content: start;
