@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/types/news.d.ts
  * @description Mys 插件咨讯类型定义文件
- * @since Alpha v0.2.1
+ * @since Beta v0.3.7
  */
 
 /**
@@ -40,7 +40,7 @@ declare namespace TGApp.Plugins.Mys.News {
 
   /**
    * @description 咨讯列表项
-   * @since Alpha v0.2.1
+   * @since Beta v0.3.7
    * @interface Item
    * @property {TGApp.Plugins.Mys.Post.Post} post 帖子
    * @property {TGApp.Plugins.Mys.Post.Forum} forum 版块
@@ -58,11 +58,19 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {number} last_modify_time 最后修改时间
    * @property {string} recommend_type 推荐类型
    * @property {unknown} collection 合集, 可能为 null
-   * @property {unknown[]} vod_list 视频列表
+   * @property {TGApp.Plugins.Mys.Post.Vod[]} vod_list 视频列表
    * @property {boolean} is_block_on 是否屏蔽
    * @property {unknown} forum_rank_info 版块排名信息，可能为 null
    * @property {unknown[]} link_card_list 链接卡片列表，可能为 null
    * @property {Meta} news_meta 元数据
+   * @property {TGApp.Plugins.Mys.Post.RecommendReason|null} recommend_reason 推荐理由，可能为 null
+   * @property {unknown} villa_card 别墅卡片，可能为 null
+   * @property {boolean} is_mentor 是否为导师
+   * @property {unknown} villa_room_card 别墅房间卡片，可能为 null
+   * @property {unknown} reply_avatar_action_info 回复头像动作信息，可能为 null
+   * @property {TGApp.Plugins.Mys.Post.Challenge} challenge 挑战信息，可能为 null
+   * @property {unknown[]} hot_reply_list 热门回复列表
+   * @property {unknown[]} villa_msg_image_list 别墅消息图片列表
    * @returns Item
    */
   interface Item {
@@ -82,11 +90,19 @@ declare namespace TGApp.Plugins.Mys.News {
     last_modify_time: number;
     recommend_type: string;
     collection: unknown;
-    vod_list: unknown[];
+    vod_list: TGApp.Plugins.Mys.Post.Vod[];
     is_block_on: boolean;
     forum_rank_info: unknown;
     link_card_list: unknown[];
     news_meta: Meta;
+    recommend_reason: TGApp.Plugins.Mys.Post.RecommendReason | null;
+    villa_card: unknown | null;
+    is_mentor: boolean;
+    villa_room_card: unknown | null;
+    reply_avatar_action_info: unknown | null;
+    challenge: TGApp.Plugins.Mys.Post.Challenge | null;
+    hot_reply_list: unknown[];
+    villa_msg_image_list: unknown[];
   }
 
   /**

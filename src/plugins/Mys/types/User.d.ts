@@ -6,7 +6,7 @@
 
 /**
  * @description Mys 插件用户类型
- * @since Alpha v0.2.2
+ * @since Beta v0.3.7
  * @namespace TGApp.Plugins.Mys.User
  * @memberof TGApp.Plugins.Mys
  */
@@ -226,7 +226,7 @@ declare namespace TGApp.Plugins.Mys.User {
 
   /**
    * @description post中的用户信息
-   * @since Alpha v0.2.1
+   * @since Beta v0.3.7
    * @interface Post
    * @property {string} uid 用户 ID
    * @property {string} nickname 用户昵称
@@ -238,9 +238,11 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {number} level_exp.level 用户等级
    * @property {number} level_exp.exp 用户经验
    * @property {boolean} is_following 是否关注
-   * @property {boolean} is_follower 是否被关注
+   * @property {boolean} is_followed 是否被关注
    * @property {string} avatar_url 用户头像链接
    * @property {string} pendant 用户挂件 URL，可能为 ""
+   * @property {boolean} is_creator 是否是创作者
+   * @property {AvatarExt} avatar_ext 用户头像扩展信息
    * @return Post
    */
   interface Post {
@@ -255,9 +257,11 @@ declare namespace TGApp.Plugins.Mys.User {
       exp: number;
     };
     is_following: boolean;
-    is_follower: boolean;
+    is_followed: boolean;
     avatar_url: string;
     pendant: string;
+    is_creator: boolean;
+    avatar_ext: AvatarExt;
   }
 
   /**
@@ -273,5 +277,37 @@ declare namespace TGApp.Plugins.Mys.User {
     attitude: number;
     is_collected: boolean;
     upvote_type: number;
+  }
+
+  /**
+   * @description 用户头像扩展信息
+   * @since Beta v0.3.7
+   * @interface AvatarExt
+   * @property {number} avatar_type 头像类型
+   * @property {string} avatar_assets_id 头像资源 ID
+   * @property {unknown[]} resources 资源
+   * @property {unknown[]} hd_resources 高清资源
+   * @return AvatarExt
+   */
+  interface AvatarExt {
+    avatar_type: number;
+    avatar_assets_id: string;
+    resources: unknown[];
+    hd_resources: unknown[];
+  }
+
+  /**
+   * @description post.challenge 用户挑战信息
+   * @since Beta v0.3.7
+   * @interface Challenge
+   * @property {string} uid 用户 ID
+   * @property {string} nickname 用户昵称
+   * @property {string} avatar_url 用户头像链接
+   * @return Challenge
+   */
+  interface Challenge {
+    uid: string;
+    nickname: string;
+    avatar_url: string;
   }
 }

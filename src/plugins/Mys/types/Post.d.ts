@@ -69,16 +69,24 @@ declare namespace TGApp.Plugins.Mys.Post {
     last_modify_time: number;
     recommend_type: string;
     collection: unknown | null;
-    vod_list: unknown[];
+    vod_list: Vod[];
     is_block_on: boolean;
     forum_rank_info: unknown | null;
     link_card_list: unknown[];
     news_meta: TGApp.Plugins.Mys.News.Meta | null;
+    recommend_reason: unknown | null;
+    villa_card: unknown | null;
+    is_mentor: boolean;
+    villa_room_card: unknown | null;
+    reply_avatar_action_info: unknown | null;
+    challenge: unknown | null;
+    hot_reply_list: unknown[];
+    villa_msg_image_list: unknown[];
   }
 
   /**
    * @description 帖子信息
-   * @since Alpha v0.2.1
+   * @since Beta v0.3.7
    * @interface Post
    * @property {number} game_id 游戏 ID // 2 为原神
    * @property {string} post_id 帖子 ID
@@ -94,6 +102,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {boolean} post_status.is_top 是否置顶
    * @property {boolean} post_status.is_good 是否加精
    * @property {boolean} post_status.is_official 是否官方
+   * @property {number} post_status.post_status 帖子状态
    * @property {number[]} topic_ids 所属话题 ID 列表
    * @property {number} view_status 浏览状态
    * @property {number} max_floor 最大楼层
@@ -119,6 +128,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {boolean} is_showing_missing 是否显示缺失
    * @property {number} block_latest_reply_time 是否屏蔽最新回复时间
    * @property {number} selected_comment 是否选择评论
+   * @property {boolean} is_mentor 是否为导师
    * @return Post
    */
   interface Post {
@@ -136,6 +146,7 @@ declare namespace TGApp.Plugins.Mys.Post {
       is_top: boolean;
       is_good: boolean;
       is_official: boolean;
+      post_status: number;
     };
     topic_ids: number[];
     view_status: number;
@@ -162,6 +173,7 @@ declare namespace TGApp.Plugins.Mys.Post {
     is_showing_missing: boolean;
     block_latest_reply_time: number;
     selected_comment: number;
+    is_mentor: boolean;
   }
 
   /**
@@ -290,5 +302,84 @@ declare namespace TGApp.Plugins.Mys.Post {
     top_up: unknown | null;
     top_n: unknown[];
     answer_num: number;
+  }
+
+  /**
+   * @description 视频信息
+   * @since Beta v0.3.7
+   * @interface Vod
+   * @property {string} id 视频 ID
+   * @property {number} duration 视频时长
+   * @property {string} cover 视频封面图 URL
+   * @property {string} resolutions[].url 视频 URL
+   * @property {string} resolutions[].definition 视频清晰度
+   * @property {number} resolutions[].width 视频宽度
+   * @property {number} resolutions[].height 视频高度
+   * @property {number} resolutions[].bitrate 视频码率
+   * @property {string} resolutions[].size 视频大小
+   * @property {string} resolutions[].format 视频格式
+   * @property {string} resolutions[].label 视频标签
+   * @property {number} view_num 观看数
+   * @property {number} transcoding_status 转码状态
+   * @property {number} review_status 审核状态
+   * @property {string} brief_info 视频简介
+   * @return Vod
+   */
+  interface Vod {
+    id: string;
+    duration: number;
+    cover: string;
+    resolutions: Array<{
+      url: string;
+      definition: string;
+      width: number;
+      height: number;
+      bitrate: number;
+      size: string;
+      format: string;
+      label: string;
+    }>;
+    view_num: number;
+    transcoding_status: number;
+    review_status: number;
+    brief_info: string;
+  }
+
+  /**
+   * @description 推荐理由
+   * @since Beta v0.3.7
+   * @interface RecommendReason
+   * @property {string[]} tags 标签
+   * @property {boolean} is_mentor_rec_block 是否为导师推荐
+   * @return RecommendReason
+   */
+  interface RecommendReason {
+    tags: string[];
+    is_mentor_rec_block: boolean;
+  }
+
+  /**
+   * @description 挑战
+   * @since Beta v0.3.7
+   * @interface Challenge
+   * @property {string} id 挑战 ID
+   * @property {string} title 挑战标题
+   * @property {number} participant_amount 参与人数
+   * @property {TGApp.Plugins.Mys.User.Challenge} sponsor 发起人
+   * @property {TGApp.Plugins.Mys.User.Challenge[]} participants 参与人
+   * @property {boolean} is_sandbox 是否为沙盒
+   * @property {string} header_url 头像 URL
+   * @property {string} post_id 帖子 ID
+   * @return Challenge
+   */
+  interface Challenge {
+    id: string;
+    title: string;
+    participant_amount: number;
+    sponsor: TGApp.Plugins.Mys.User.Challenge;
+    participants: TGApp.Plugins.Mys.User.Challenge[];
+    is_sandbox: boolean;
+    header_url: string;
+    post_id: string;
   }
 }
