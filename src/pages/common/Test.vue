@@ -14,8 +14,18 @@
       </div>
     </div>
   </div>
+  <TpVideo :data="mock" />
 </template>
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import TpVideo from "../../components/post/tp-video.vue";
+
+const mock = {
+  insert: {
+    // todo：数据也可能是 BV1qb4y1L7mD，缺乏数据来源
+    video: "https://www.bilibili.com/video/BV1qb4y1L7mD",
+  },
+};
+</script>
 <style lang="css" scoped>
 .test-box {
   display: flex;

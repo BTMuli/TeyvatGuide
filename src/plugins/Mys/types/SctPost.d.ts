@@ -47,20 +47,7 @@ declare namespace TGApp.Plugins.Mys.SctPost {
   interface Other {
     describe: string;
     imgs: string[];
-    [key: string]: unknown;
-  }
 
-  /**
-   * @description 帖子结构化数据-视频类型-站外视频
-   * @since Beta v0.3.4
-   * @interface Video
-   * @extends Base
-   * @property {string} insert.video - 视频链接
-   * @return Video
-   */
-  interface Video extends Base {
-    insert: {
-      video: string;
-    };
+    [key: string]: unknown;
   }
 }
