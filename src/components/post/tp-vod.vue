@@ -144,6 +144,7 @@ function getVodTime(): string {
   align-items: center;
   justify-content: center;
   border-radius: 10px;
+  aspect-ratio: v-bind(vodAspectRatio);
 }
 
 .tp-vod-cover :nth-child(1) {
