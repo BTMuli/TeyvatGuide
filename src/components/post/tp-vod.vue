@@ -47,22 +47,40 @@ interface TpVodProps {
 
 const props = defineProps<TpVodProps>();
 const container = ref<Artplayer | null>(null);
+const vodAspectRatio = ref<number>(16 / 9);
 
 console.log("tpVod", props.data.insert.vod.id, toRaw(props.data).insert.vod);
 
 onMounted(async () => {
+  const resolutions = props.data.insert.vod.resolutions;
+  const highestResolution = resolutions.reduce((prev, curr) => {
+    return prev.size > curr.size ? prev : curr;
+  });
+  const width = highestResolution.width;
+  const height = highestResolution.height;
+  if (width && height) {
+    width > height
+      ? (vodAspectRatio.value = width / height)
+      : (vodAspectRatio.value = height / width);
+  }
   const option: Option = {
     id: props.data.insert.vod.id,
     container: `#tp-vod-${props.data.insert.vod.id}`,
-    url: "",
+    url: highestResolution.url,
     poster: props.data.insert.vod.cover,
-    type: "",
+    type: highestResolution.format,
     playbackRate: true,
     aspectRatio: true,
     setting: true,
     hotkey: true,
     pip: true,
-    quality: [],
+    quality: resolutions.map((resolution) => {
+      return {
+        default: resolution.label == highestResolution.label,
+        html: resolution.label,
+        url: resolution.url,
+      };
+    }),
     fullscreen: true,
     icons: {
       // eslint-disable-next-line @typescript-eslint/quotes
@@ -80,32 +98,6 @@ onMounted(async () => {
       },
     ],
   };
-  const resolutions = props.data.insert.vod.resolutions;
-  let size = 0,
-    label = "";
-  for (const resolution of resolutions) {
-    if (option.url === "") {
-      option.url = resolution.url;
-      option.type = resolution.format;
-      size = resolution.size;
-      label = resolution.label;
-    }
-    if (resolution.size > size) {
-      size = resolution.size;
-      label = resolution.label;
-    }
-    const quality = {
-      default: false,
-      html: resolution.label,
-      url: resolution.url,
-    };
-    option.quality?.push(quality);
-  }
-  option?.quality?.map((item) => {
-    if (item.html == label) {
-      item.default = true;
-    }
-  });
   container.value = new Artplayer(option);
   container.value?.on("fullscreen", async (state) => {
     await TauriWindow.getCurrent().setFullscreen(state);
@@ -132,14 +124,14 @@ function getVodTime(): string {
   position: relative;
   max-width: 100%;
   margin: 10px auto;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: v-bind(vodAspectRatio);
 }
 
 .tp-vod-container {
   overflow: hidden;
   max-width: 100%;
   border-radius: 10px;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: v-bind(vodAspectRatio);
 }
 
 .tp-vod-cover {
