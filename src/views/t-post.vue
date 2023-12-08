@@ -198,7 +198,7 @@ function getRenderPost(data: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys
 
 function parseContent(content: string): string {
   const data: TGApp.Plugins.Mys.SctPost.Other = JSON.parse(content);
-  const result: TGApp.Plugins.Mys.SctPost.Common[] = [];
+  const result: TGApp.Plugins.Mys.SctPost.Base[] = [];
   const keys = Object.keys(data);
   keys.forEach((key) => {
     switch (key) {

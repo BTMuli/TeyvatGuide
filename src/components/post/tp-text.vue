@@ -27,7 +27,7 @@ import showSnackbar from "../func/snackbar";
 interface TpText {
   insert: string;
   attributes?: {
-    link: string;
+    link?: string;
     bold?: boolean;
     color?: string;
     align?: string;
