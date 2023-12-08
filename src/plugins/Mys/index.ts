@@ -6,6 +6,7 @@
 
 import MysApi from "./api";
 import { getLoginQr, getLoginStatus } from "./request/doGameLogin";
+import getForumList from "./request/getForumList";
 import getGachaData from "./request/getGachaData";
 import getLotteryData from "./request/getLotteryData";
 import getNewsList from "./request/getNewsList";
@@ -20,6 +21,7 @@ const Mys = {
   Api: MysApi,
   Post: {
     get: getPostData,
+    forum: getForumList,
   },
   Gacha: {
     get: getGachaData,

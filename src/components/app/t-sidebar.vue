@@ -30,6 +30,11 @@
           <img src="/platforms/mhy/mys.webp" alt="mihoyo" class="side-icon" />
         </template>
       </v-list-item>
+      <v-list-item title="酒馆" value="posts" :link="true" href="/posts">
+        <template #prepend>
+          <img src="/source/UI/posts.png" alt="posts" class="side-icon" />
+        </template>
+      </v-list-item>
       <v-list-item title="成就" value="achievements" :link="true" href="/achievements">
         <template #prepend>
           <img src="../../assets/icons/achievements.svg" alt="achievementsIcon" class="side-icon" />
