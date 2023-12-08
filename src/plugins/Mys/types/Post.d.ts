@@ -291,18 +291,4 @@ declare namespace TGApp.Plugins.Mys.Post {
     top_n: unknown[];
     answer_num: number;
   }
-
-  /**
-   * @description 帖子内容-结构化
-   * @description 当用户发帖时，解析内容用这个，为 post.content 的反序列化
-   * @since Alpha v0.2.1
-   * @interface Content
-   * @property {string} describe 描述
-   * @property {string[]} images 图片 URL
-   * @return Content
-   */
-  interface PostContent {
-    describe: string;
-    images?: string[];
-  }
 }

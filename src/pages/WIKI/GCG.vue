@@ -11,7 +11,7 @@
       v-model="search"
       append-icon="mdi-magnify"
       label="搜索"
-      single-line
+      :single-line="true"
       hide-details
       @click:append="searchCard"
       @keyup.enter="searchCard"

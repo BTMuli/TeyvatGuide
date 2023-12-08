@@ -93,7 +93,7 @@
         </v-list-item>
       </v-list-group>
       <div class="bottom-menu">
-        <v-menu open-on-click location="end">
+        <v-menu :open-on-click="true" location="end">
           <template #activator="{ props }">
             <v-list-item :title="userInfo.nickname" v-bind="props">
               <template #prepend>

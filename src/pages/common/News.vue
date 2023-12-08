@@ -13,7 +13,7 @@
       class="news-search"
       append-icon="mdi-magnify"
       label="请输入米游社帖子 ID"
-      single-line
+      :single-line="true"
       hide-details
       @click:append="searchPost"
       @keyup.enter="searchPost"

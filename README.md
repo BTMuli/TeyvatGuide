@@ -21,7 +21,7 @@ Update: 2023-12-07
 
 基于 Tauri 的原神工具应用，支持 Windows 和 MacOS 平台。
 
-Game Tool for Genshin Impact player, supports Windows and MacOS.
+Game Tool for Genshin Impact player, supports Windows and macOS.
 
 ## 下载 / Download
 
