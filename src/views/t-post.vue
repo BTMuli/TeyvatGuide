@@ -229,7 +229,6 @@ function parseContent(content: string): string {
   return JSON.stringify(result);
 }
 </script>
-<style lang="css" scoped src="../assets/css/post-parser.css" />
 <style lang="css" scoped>
 .tp-post-body {
   width: 800px;
