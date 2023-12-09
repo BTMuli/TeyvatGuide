@@ -15,6 +15,8 @@ jobs:
         settings:
           - platform: macos-latest
             args: "--target universal-apple-darwin"
+          - platform: windows-latest
+            args: "--verbose"
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -49,6 +51,7 @@ jobs:
         #          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
         #          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
+          args: ${{ matrix.settings.args }}
           tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
           releaseName: v__VERSION__-beta
           releaseBody: |
