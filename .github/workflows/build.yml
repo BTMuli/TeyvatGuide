@@ -14,17 +14,20 @@ jobs:
         settings:
           - platform: windows-latest
             args: "--verbose"
+            target: "windows"
           - platform: macos-latest
             args: "--target x86_64-apple-darwin"
+            target: "macos x64"
           - platform: macos-latest
             args: "--target aarch64-apple-darwin"
+            target: "macos arm"
     runs-on: ${{ matrix.settings.platform }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Add Rust targets(macOS)
-        if: matrix.settings.platform == 'macos-latest'
+        if: matrix.settings.target == "macos arm"
         run: rustup target add aarch64-apple-darwin
 
       - name: Rust setup
