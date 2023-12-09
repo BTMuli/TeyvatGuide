@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2023-12-07
+Update: 2023-12-09
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2023-12-07 15:25:05`
+> 更新于 `2023-12-09 12:40:21`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -19,7 +19,7 @@ Update: 2023-12-07
 
 # Teyvat Guide
 
-基于 Tauri 的原神工具应用，支持 Windows 和 MacOS 平台。
+基于 Tauri 的原神工具应用，支持 Windows 和 macOS 平台。
 
 Game Tool for Genshin Impact player, supports Windows and macOS.
 
@@ -31,7 +31,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 	<img src="https://get.microsoft.com/images/zh-cn%20dark.svg" alt="download"/>
 </a>
 
-> MacOS 用户可以通过 Github Release 下载
+> macOS 用户可以通过 Github Release 下载
 
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/BTMuli/TeyvatGuide?include_prereleases&style=for-the-badge)](https://github.com/BTMuli/TeyvatGuide/releases/latest)
 

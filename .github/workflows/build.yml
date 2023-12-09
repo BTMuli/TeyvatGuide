@@ -52,7 +52,7 @@ jobs:
           tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
           releaseName: v__VERSION__-beta
           releaseBody: |
-            > Windows 平台用户建议通过微软应用商店下载，MacOS 平台仅在此发布，Linux 平台暂不支持。
+            > Windows 平台用户建议通过微软应用商店下载，macOS 平台仅在此发布，Linux 平台暂不支持。
 
             <a href="https://apps.microsoft.com/store/detail/9NLBNNNBNSJN?launch=true&cid=BTMuli&mode=mini">
               <img src="https://get.microsoft.com/images/zh-cn%20dark.svg" alt="download"/>
