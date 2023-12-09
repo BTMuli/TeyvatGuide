@@ -1,76 +1,336 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" />
-  <div class="posts-grid">
-    <v-card v-for="post in posts" :key="post.postId" class="post-card">
-      <div class="post-cover" @click="createPost(post)">
-        <img :src="post.cover" alt="cover" />
+  <div class="posts-box">
+    <div class="posts-switch">
+      <v-select
+        v-model="curGameLabel"
+        class="post-switch-item"
+        :items="gameItem"
+        :theme="vuetifyTheme"
+        variant="outlined"
+        label="游戏"
+      />
+      <v-select
+        v-model="curForumLabel"
+        class="post-switch-item"
+        :items="forumItem"
+        :theme="vuetifyTheme"
+        variant="outlined"
+        label="频道"
+      />
+      <v-select
+        v-model="curSortLabel"
+        class="post-switch-item"
+        :items="sortItem"
+        :theme="vuetifyTheme"
+        variant="outlined"
+        label="排序"
+      />
+      <v-btn class="post-fresh-btn" @click="freshPostData">
+        <v-icon>mdi-refresh</v-icon>
+        <span>刷新</span>
+      </v-btn>
+    </div>
+    <!-- todo: hover效果，本来是只有 icon，hover之后显示 title   -->
+    <div class="posts-nav">
+      <div
+        v-for="navItem in nav"
+        :key="navItem.id"
+        class="post-nav"
+        @click="toNav(navItem.app_path)"
+      >
+        <img alt="navIcon" :src="navItem.icon" />
+        <span>{{ navItem.name }}</span>
       </div>
-      <div class="post-content">
-        <div class="post-card-title" :title="post.title">{{ post.title }}</div>
-        <div class="post-card-user">
-          <div class="pcu-left">
-            <div class="pcu-icon">
-              <img :src="post.user.icon" alt="userIcon" />
+    </div>
+    <!-- todo 无限加载 -->
+    <div class="posts-grid">
+      <v-card v-for="post in posts" :key="post.postId" class="post-card">
+        <div class="post-cover" @click="createPost(post)">
+          <img :src="post.cover" alt="cover" />
+        </div>
+        <div class="post-content">
+          <div class="post-card-title" :title="post.title">{{ post.title }}</div>
+          <div class="post-card-user">
+            <div class="pcu-left">
+              <div class="pcu-icon">
+                <img :src="post.user.icon" alt="userIcon" />
+              </div>
+              <div v-if="post.user.pendant !== ''" class="pcu-pendent">
+                <img :src="post.user.pendant" alt="userPendant" />
+              </div>
             </div>
-            <div v-if="post.user.pendant !== ''" class="pcu-pendent">
-              <img :src="post.user.pendant" alt="userPendant" />
+            <div class="pcu-right">
+              <span>{{ post.user.nickname }}</span>
+              <span>{{ post.user.label }}</span>
             </div>
           </div>
-          <div class="pcu-right">
-            <span>{{ post.user.nickname }}</span>
-            <span>{{ post.user.label }}</span>
+          <div class="post-card-data">
+            <div class="pcd-item" :title="`浏览数：${post.data.view}`">
+              <v-icon>mdi-eye</v-icon>
+              <span>{{ post.data.view }}</span>
+            </div>
+            <div class="pcd-item" :title="`收藏数：${post.data.mark}`">
+              <v-icon>mdi-star</v-icon>
+              <span>{{ post.data.mark }}</span>
+            </div>
+            <div class="pcd-item" :title="`回复数：${post.data.reply}`">
+              <v-icon>mdi-comment</v-icon>
+              <span>{{ post.data.reply }}</span>
+            </div>
+            <div class="pcd-item" :title="`点赞数：${post.data.like}`">
+              <v-icon>mdi-thumb-up</v-icon>
+              <span>{{ post.data.like }}</span>
+            </div>
+            <div class="pcd-item" :title="`转发数：${post.data.forward}`">
+              <v-icon>mdi-share-variant</v-icon>
+              <span>{{ post.data.forward }}</span>
+            </div>
           </div>
         </div>
-        <div class="post-card-data">
-          <div class="pcd-item" :title="`浏览数：${post.data.view}`">
-            <v-icon>mdi-eye</v-icon>
-            <span>{{ post.data.view }}</span>
-          </div>
-          <div class="pcd-item" :title="`收藏数：${post.data.mark}`">
-            <v-icon>mdi-star</v-icon>
-            <span>{{ post.data.mark }}</span>
-          </div>
-          <div class="pcd-item" :title="`回复数：${post.data.reply}`">
-            <v-icon>mdi-comment</v-icon>
-            <span>{{ post.data.reply }}</span>
-          </div>
-          <div class="pcd-item" :title="`点赞数：${post.data.like}`">
-            <v-icon>mdi-thumb-up</v-icon>
-            <span>{{ post.data.like }}</span>
-          </div>
-          <div class="pcd-item" :title="`转发数：${post.data.forward}`">
-            <v-icon>mdi-share-variant</v-icon>
-            <span>{{ post.data.forward }}</span>
-          </div>
+        <div class="post-card-forum" :title="`频道: ${post.forum.name}`">
+          <img :src="post.forum.icon" :alt="post.forum.name" />
+          <span>{{ post.forum.name }}</span>
         </div>
-      </div>
-      <div class="post-card-forum" :title="`频道: ${post.forum.name}`">
-        <img :src="post.forum.icon" :alt="post.forum.name" />
-        <span>{{ post.forum.name }}</span>
-      </div>
-    </v-card>
+      </v-card>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 
+import showConfirm from "../../components/func/confirm";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import Mys from "../../plugins/Mys";
+import { useAppStore } from "../../store/modules/app";
+import TGClient from "../../utils/TGClient";
 import { createPost } from "../../utils/TGWindow";
 
 const loading = ref<boolean>(true);
-const loadingTitle = ref<string>("正在加载中...");
+const loadingTitle = ref<string>("正在加载数据");
+const appStore = useAppStore();
 
+// 常量
+const sortList = {
+  默认排序: 0,
+  最新回复: 1,
+  最新发布: 2,
+};
+const forumGenshin = {
+  酒馆: 26,
+  攻略: 43,
+  同人图: 29,
+  COS: 49,
+  硬核: 50,
+};
+const forumSr = {
+  候车室: 52,
+  攻略: 61,
+  同人图: 56,
+  COS: 62,
+};
+const forumBh3 = {
+  甲板: 1,
+  攻略: 14,
+  同人图: 4,
+  同人文: 41,
+};
+const forumBh2 = {
+  学园: 30,
+  攻略: 51,
+  同人图: 40,
+};
+const forumWd = {
+  律所: 37,
+  攻略: 60,
+  同人文: 42,
+  同人图: 38,
+};
+const forumZzz = {
+  咖啡馆: 57,
+  同人图: 59,
+};
+const forumDby = {
+  校园: 54,
+  ACG: 35,
+  生活: 34,
+  同人图: 39,
+  COS: 47,
+  脑洞: 48,
+  科技: 55,
+  公告: 36,
+};
+const forumList = {
+  原神: forumGenshin,
+  "崩坏：星穹铁道": forumSr,
+  崩坏3: forumBh3,
+  崩坏2: forumBh2,
+  未定事件簿: forumWd,
+  绝区零: forumZzz,
+  大别野: forumDby,
+};
+const gameList = {
+  原神: 2,
+  "崩坏：星穹铁道": 6,
+  崩坏3: 1,
+  崩坏2: 3,
+  未定事件簿: 4,
+  绝区零: 8,
+  大别野: 5,
+};
+
+// 主题
+const vuetifyTheme = computed(() => {
+  return appStore.theme === "dark" ? "dark" : "light";
+});
+
+// 渲染参数
+const curForumLabel = ref<string>("酒馆");
+const forumItem = ref<string[]>(["酒馆", "攻略", "同人图", "COS", "硬核"]);
+const curForum = ref<number>(26);
+
+// 游戏相关
+const curGameLabel = ref<keyof typeof gameList>("原神");
+const gameItem = ref<string[]>([
+  "原神",
+  "崩坏：星穹铁道",
+  "崩坏3",
+  "崩坏2",
+  "未定事件簿",
+  "绝区零",
+  "大别野",
+]);
+const curGid = ref<number>(2);
+
+// 排序相关
+const curSortLabel = ref<keyof typeof sortList>("默认排序");
+const sortItem = ref<string[]>(["默认排序", "最新回复", "最新发布"]);
+const curSortType = ref<number>(0);
+
+// 渲染数据
 const posts = ref<TGApp.Plugins.Mys.Forum.RenderCard[]>([]);
+const nav = ref<TGApp.BBS.Navigator.Navigator[]>([]);
 
 onMounted(async () => {
   loading.value = true;
-  const getData = await Mys.Posts.get(26, 2, 1);
-  posts.value = Mys.Posts.card(getData);
+  await freshNavData();
+  await freshPostData();
   loading.value = false;
 });
+
+// 监听游戏变化
+watch(curGameLabel, async (newVal) => {
+  curGid.value = gameList[newVal];
+  forumItem.value = Object.keys(forumList[newVal]);
+  curForumLabel.value = forumItem.value[0];
+  freshCurForum(forumItem.value[0]);
+  await freshNavData();
+});
+
+// 监听论坛变化
+watch(curForumLabel, async (newVal) => {
+  freshCurForum(newVal);
+  await freshPostData();
+});
+
+// 监听排序变化
+watch(curSortLabel, async (newVal) => {
+  curSortType.value = sortList[newVal];
+  await freshPostData();
+});
+
+async function toNav(path: string): Promise<void> {
+  // todo 记忆宽屏竖屏
+  const modeConfirm = await showConfirm({
+    title: "是否采用宽屏模式打开？",
+    text: "取消则采用竖屏模式打开",
+  });
+  if (modeConfirm) await TGClient.open("web_act", path);
+  else await TGClient.open("web_act_thin", path);
+}
+
+async function freshNavData(): Promise<void> {
+  nav.value = await Mys.Posts.nav(curGid.value);
+}
+
+async function freshPostData(): Promise<void> {
+  loading.value = true;
+  loadingTitle.value = `正在加载 ${curGameLabel.value}-${curForumLabel.value}-${curSortLabel.value} 的数据`;
+  const postsGet = await Mys.Posts.get(curForum.value, curGid.value, curSortType.value);
+  posts.value = Mys.Posts.card(postsGet);
+  await nextTick();
+  loading.value = false;
+}
+
+function freshCurForum(newVal: string): void {
+  const forum = forumList[curGameLabel.value];
+  // @ts-ignore
+  curForum.value = forum[newVal];
+}
 </script>
 <style lang="css" scoped>
+.posts-box {
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+}
+
+.posts-nav {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px;
+  gap: 10px 10px;
+}
+
+.post-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border-radius: 5px;
+  backdrop-filter: blur(20px);
+  background: var(--common-shadow-t-4);
+  box-shadow: 0 0 5px var(--common-shadow-4);
+  color: var(--tgc-white-1);
+  cursor: pointer;
+}
+
+.post-nav img {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}
+
+.posts-nav span {
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 16px;
+}
+
+.posts-switch {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 5px;
+  column-gap: 10px;
+}
+
+.post-switch-item {
+  max-width: 200px;
+  height: 50px;
+}
+
+.post-fresh-btn {
+  height: 40px;
+  background: var(--btn-bg-1);
+  color: var(--btn-text-1);
+  font-family: var(--font-title);
+}
+
+.dark .post-fresh-btn {
+  border: 1px solid var(--common-shadow-2);
+}
+
 .posts-grid {
   display: grid;
   padding: 5px;

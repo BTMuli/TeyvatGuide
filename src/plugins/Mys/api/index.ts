@@ -10,7 +10,8 @@ const MysApi = {
   Lottery: "https://bbs-api.miyoushe.com/painter/wapi/lottery/user/show?id={lotteryId}",
   News: "https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids={gid}&page_size={pageSize}&type={newsType}&last_id={lastId}",
   Forum:
-    "https://bbs-api.miyoushe.com/post/wapi/getForumPostList?forum_id={forum}&gids={gid}&sort_type={type}",
+    "https://bbs-api.miyoushe.com/post/wapi/getForumPostList?forum_id={forum}&gids={gid}&sort_type={type}&page_size=20",
+  Navigator: "https://bbs-api.miyoushe.com/apihub/api/home/new?gids={gid}",
   Position: "https://api-static.mihoyo.com/common/blackboard/ys_obc/v1/home/position?app_sn=ys_obc",
   Post: {
     Api: "https://bbs-api.mihoyo.com/post/wapi/getPostFull?post_id={postId}",
