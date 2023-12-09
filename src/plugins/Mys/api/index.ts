@@ -11,6 +11,7 @@ const MysApi = {
   News: "https://bbs-api.mihoyo.com/post/wapi/getNewsList?gids={gid}&page_size={pageSize}&type={newsType}&last_id={lastId}",
   Forum:
     "https://bbs-api.miyoushe.com/post/wapi/getForumPostList?forum_id={forum}&gids={gid}&sort_type={type}&page_size=20",
+  Feed: "https://bbs-api.miyoushe.com/post/api/feeds/posts?gids={gid}",
   Navigator: "https://bbs-api.miyoushe.com/apihub/api/home/new?gids={gid}",
   Position: "https://api-static.mihoyo.com/common/blackboard/ys_obc/v1/home/position?app_sn=ys_obc",
   Post: {
