@@ -264,6 +264,10 @@ function searchPost(): void {
   font-family: var(--font-title);
 }
 
+.dark .news-switch-btn {
+  border: 1px solid var(--common-shadow-2);
+}
+
 .news-search {
   margin-left: 10px;
   color: var(--box-text-1);
