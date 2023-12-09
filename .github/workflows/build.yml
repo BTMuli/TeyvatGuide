@@ -12,11 +12,17 @@ jobs:
       fail-fast: false
       matrix:
         platform: [windows-latest, macos-latest]
+        settings:
+          - platform: macos-latest
+            args: "--target universal-apple-darwin"
     runs-on: ${{ matrix.platform }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Add Rust targets
+        if: matrix.platform == 'macos-latest'
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
 
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
