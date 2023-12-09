@@ -12,19 +12,14 @@ jobs:
       fail-fast: false
       matrix:
         platform: [windows-latest, macos-latest]
-        settings:
-          - platform: macos-latest
-            args: "--target universal-apple-darwin"
-          - platform: windows-latest
-            args: "--verbose"
     runs-on: ${{ matrix.platform }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Add Rust targets
+      - name: Add Rust targets(macOS)
         if: matrix.platform == 'macos-latest'
-        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+        run: rustup target add aarch64-apple-darwin
 
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
@@ -51,7 +46,6 @@ jobs:
         #          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
         #          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
-          args: ${{ matrix.settings.args }}
           tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
           releaseName: v__VERSION__-beta
           releaseBody: |
