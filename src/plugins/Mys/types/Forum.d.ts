@@ -43,4 +43,11 @@ declare namespace TGApp.Plugins.Mys.Forum {
     databox: unknown;
     list: TGApp.Plugins.Mys.News.Item[];
   }
+
+  /**
+   * @description 渲染数据
+   * @since Beta v0.3.7
+   * @interface RenderCard
+   */
+  type RenderCard = TGApp.Plugins.Mys.News.RenderCard;
 }

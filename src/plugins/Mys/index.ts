@@ -21,7 +21,10 @@ const Mys = {
   Api: MysApi,
   Post: {
     get: getPostData,
-    forum: getForumList,
+  },
+  Posts: {
+    get: getForumList,
+    card: getNewsCard,
   },
   Gacha: {
     get: getGachaData,

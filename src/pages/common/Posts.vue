@@ -61,12 +61,12 @@ import { createPost } from "../../utils/TGWindow";
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载中...");
 
-const posts = ref<TGApp.Plugins.Mys.News.RenderCard[]>([]);
+const posts = ref<TGApp.Plugins.Mys.Forum.RenderCard[]>([]);
 
 onMounted(async () => {
   loading.value = true;
-  const getData = await Mys.Post.forum(26);
-  posts.value = Mys.News.card.news(getData);
+  const getData = await Mys.Posts.get(26, 2, 1);
+  posts.value = Mys.Posts.card(getData);
   loading.value = false;
 });
 </script>
