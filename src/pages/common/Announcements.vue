@@ -26,7 +26,9 @@
               </div>
             </div>
           </div>
-          <v-card-title class="anno-title" :title="item.title">{{ item.subtitle }}</v-card-title>
+          <v-card-title class="anno-title" :title="item.title">{{
+            parseTitle(item.title)
+          }}</v-card-title>
           <div class="anno-label" :title="`标签：${item.tagLabel}`">
             <img :src="item.tagIcon" alt="tag" />
             <span>{{ item.tagLabel }}</span>
@@ -88,6 +90,12 @@ onMounted(async () => {
     loading.value = false;
   });
 });
+
+function parseTitle(title: string): string {
+  const div = document.createElement("div");
+  div.innerHTML = title;
+  return div.innerText;
+}
 
 async function switchNews(): Promise<void> {
   await router.push("/news/2");
