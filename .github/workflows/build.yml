@@ -17,7 +17,7 @@ jobs:
             target: "windows"
           - platform: macos-latest
             args: "--target x86_64-apple-darwin"
-            target: "macos x64"
+            target: "macos intel"
           - platform: macos-latest
             args: "--target aarch64-apple-darwin"
             target: "macos arm"
