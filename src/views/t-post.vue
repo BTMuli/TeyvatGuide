@@ -41,11 +41,7 @@
       <div class="tp-post-author">
         <div class="mpa-left">
           <span>{{ postRender.author.nickname }}</span>
-          <span>{{
-            postRender.author.certification?.label === ""
-              ? postRender.author.introduce
-              : postRender.author.certification?.label
-          }}</span>
+          <span :title="getMpaLeftDesc()">{{ getMpaLeftDesc() }}</span>
         </div>
         <div class="mpa-right">
           <div class="mpa-icon">
@@ -181,6 +177,12 @@ watch(loadShare, (value) => {
   }
 });
 
+function getMpaLeftDesc(): string {
+  return postRender.value.author.certification?.label === ""
+    ? postRender.value.author.introduce ?? ""
+    : postRender.value.author.certification?.label ?? "";
+}
+
 function getRenderPost(data: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.SctPost.Base[] {
   const postContent = data.post.content;
   let jsonParse: string;
@@ -265,7 +267,6 @@ function parseContent(content: string): string {
 .tp-post-info {
   position: relative;
   display: flex;
-  width: 100%;
   align-items: end;
   justify-content: space-between;
   padding-bottom: 10px;
@@ -297,22 +298,18 @@ function parseContent(content: string): string {
 }
 
 .mpa-left :nth-child(1) {
-  display: flex;
-  height: 30px;
-  align-items: center;
-  justify-content: start;
   font-size: 16px;
 }
 
 .mpa-left :nth-child(2) {
-  display: flex;
-  width: 100%;
+  overflow: hidden;
   height: 20px;
   align-items: center;
-  justify-content: end;
   border-top: 2px solid var(--common-shadow-2);
   font-size: 14px;
   opacity: 0.7;
+  text-align: right;
+  text-overflow: ellipsis;
 }
 
 .mpa-right {
@@ -373,6 +370,12 @@ function parseContent(content: string): string {
   width: 30px;
   height: 30px;
   object-fit: cover;
+}
+
+.mpm-forum span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mpm-item {

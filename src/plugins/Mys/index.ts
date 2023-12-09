@@ -17,6 +17,7 @@ import getGachaCard from "./utils/getGachaCard";
 import getLotteryCard from "./utils/getLotteryCard";
 import { getActivityCard, getNewsCard, getNoticeCard } from "./utils/getNewsCard";
 import getPositionCard from "./utils/getPositionCard";
+import { getPostsCard } from "./utils/getPostsCard";
 
 const Mys = {
   Api: MysApi,
@@ -25,7 +26,7 @@ const Mys = {
   },
   Posts: {
     get: getForumList,
-    card: getNewsCard,
+    card: getPostsCard,
     nav: getHomeNavigator,
   },
   Gacha: {

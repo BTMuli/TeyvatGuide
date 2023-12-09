@@ -62,7 +62,7 @@
             </div>
             <div class="pcu-right">
               <span>{{ post.user.nickname }}</span>
-              <span>{{ post.user.label }}</span>
+              <span :title="post.user.label">{{ post.user.label }}</span>
             </div>
           </div>
           <div class="post-card-data">
@@ -429,6 +429,7 @@ function freshCurForum(newVal: string): void {
 .pcu-right {
   position: relative;
   display: flex;
+  max-width: calc(100% - 50px);
   height: 50px;
   flex-direction: column;
   align-items: start;
@@ -444,14 +445,14 @@ function freshCurForum(newVal: string): void {
 }
 
 .pcu-right :nth-child(2) {
-  display: flex;
+  overflow: hidden;
   width: 100%;
   height: 20px;
-  align-items: center;
-  justify-content: start;
   border-top: 2px solid var(--common-shadow-2);
   font-size: 14px;
   opacity: 0.7;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .post-card-forum {
