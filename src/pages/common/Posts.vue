@@ -368,15 +368,19 @@ function searchPost(): void {
 }
 
 .post-nav img {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
+  width: 25px;
+  height: 25px;
 }
 
 .posts-nav span {
+  display: none;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 16px;
+}
+
+.post-nav:hover span {
+  display: block;
 }
 
 .posts-switch {
