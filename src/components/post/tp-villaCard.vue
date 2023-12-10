@@ -16,21 +16,19 @@
       </div>
     </div>
     <div class="tp-villa-card-tags">
-      <div class="tp-villa-card-desc">
-        {{ props.data.insert.villa_card.villa_introduce }}
-      </div>
       <div class="tp-villa-card-tag">
         {{ props.data.insert.villa_card.villa_member_num }} 人在聊
       </div>
-      <div v-if="props.data.insert.villa_card.tag_list">
-        <div
-          v-for="(tag, index) in props.data.insert.villa_card.tag_list"
-          :key="index"
-          class="tp-villa-card-tag"
-        >
-          {{ tag }}
-        </div>
+      <div
+        v-for="(tag, index) in props.data.insert.villa_card?.tag_list"
+        :key="index"
+        class="tp-villa-card-tag"
+      >
+        {{ tag }}
       </div>
+    </div>
+    <div class="tp-villa-card-desc">
+      {{ props.data.insert.villa_card.villa_introduce }}
     </div>
   </div>
 </template>
@@ -116,10 +114,14 @@ console.log(
 }
 
 .tp-villa-card-name {
-  color: var(--tgc-white-4);
+  padding: 0 5px;
+  border-radius: 5px;
+  backdrop-filter: blur(20px);
+  background: var(--common-shadow-t-2);
+  box-shadow: 0 0 5px var(--common-shadow-8);
+  color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
-  text-shadow: 0 0 5px var(--common-shadow-2);
 }
 
 .tp-villa-card-owner {
@@ -127,9 +129,10 @@ console.log(
   align-items: center;
   padding: 5px;
   border-radius: 20px 5px 5px 20px;
-  backdrop-filter: blur(5px);
-  background: rgb(0 0 0/30%);
-  color: var(--tgc-white-1);
+  backdrop-filter: blur(20px);
+  background: var(--common-shadow-t-2);
+  box-shadow: 0 0 5px var(--common-shadow-8);
+  color: var(--common-text-title);
   column-gap: 5px;
 }
 
@@ -146,6 +149,26 @@ console.log(
   font-family: var(--font-title);
 }
 
+.tp-villa-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 10px;
+}
+
+.tp-villa-card-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 5px;
+  backdrop-filter: blur(20px);
+  background: var(--common-shadow-t-2);
+  box-shadow: 0 0 5px var(--common-shadow-8);
+  color: var(--tgc-pink-1);
+  font-family: var(--font-title);
+  font-size: 12px;
+}
+
 .tp-villa-card-desc {
   display: flex;
   align-items: center;
@@ -153,24 +176,9 @@ console.log(
   padding: 0 10px;
   border-radius: 5px;
   margin-right: auto;
-  backdrop-filter: blur(5px);
-  background: rgb(0 0 0/30%);
-  color: var(--tgc-white-1);
-}
-
-.tp-villa-card-tags {
-  display: flex;
-  width: 100%;
-  column-gap: 5px;
-}
-
-.tp-villa-card-tag {
-  padding: 5px 10px;
-  border-radius: 5px;
-  backdrop-filter: blur(5px);
-  background: rgb(0 0 0/30%);
-  color: var(--tgc-white-1);
-  font-family: var(--font-title);
-  font-size: 12px;
+  backdrop-filter: blur(20px);
+  background: var(--common-shadow-t-2);
+  box-shadow: 0 0 5px var(--common-shadow-8);
+  color: var(--box-text-1);
 }
 </style>
