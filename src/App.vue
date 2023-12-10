@@ -19,7 +19,6 @@ import TBackTop from "./components/app/t-backTop.vue";
 import TSidebar from "./components/app/t-sidebar.vue";
 import showConfirm from "./components/func/confirm";
 import showSnackbar from "./components/func/snackbar";
-import { getEmojis } from "./plugins/Mys/request/getEmojis";
 import TGSqlite from "./plugins/Sqlite";
 import { useAppStore } from "./store/modules/app";
 import { useUserStore } from "./store/modules/user";
@@ -64,26 +63,11 @@ async function listenOnInit(): Promise<void> {
   await event.listen("initApp", async () => {
     await tauri.invoke("register_deep_link");
     await getDeepLink();
-    await emojiLoad();
     await checkAppLoad();
     await checkUserLoad();
     await checkUpdate();
   });
   return;
-}
-
-async function emojiLoad(): Promise<void> {
-  const res = await getEmojis();
-  if ("retcode" in res) {
-    console.error(res);
-    showSnackbar({
-      text: "表情包加载失败！",
-      color: "error",
-      timeout: 3000,
-    });
-  } else {
-    localStorage.setItem("emojis", JSON.stringify(res));
-  }
 }
 
 async function checkAppLoad(): Promise<void> {
