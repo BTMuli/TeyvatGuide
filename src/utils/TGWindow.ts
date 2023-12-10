@@ -1,7 +1,7 @@
 /**
- * @file utils TGWindow.ts
+ * @file utils/TGWindow.ts
  * @description 窗口创建相关工具函数
- * @since Beta v0.3.4
+ * @since Beta v0.3.7
  */
 
 import { invoke, window as TauriWindow } from "@tauri-apps/api";
@@ -73,13 +73,13 @@ export function createTGWindow(
 
 /**
  * @description 打开帖子
- * @since Beta v0.3.3
- * @param {TGApp.Plugins.Mys.News.RenderCard|string|number} item 帖子内容或ID
+ * @since Beta v0.3.7
+ * @param {TGApp.Plugins.Mys.News.RenderCard | string | number | TGApp.Plugins.Mys.Forum.RenderCard} item 帖子内容或ID
  * @param {string} title 帖子标题
  * @returns {void}
  */
 export function createPost(
-  item: TGApp.Plugins.Mys.News.RenderCard | string | number,
+  item: TGApp.Plugins.Mys.News.RenderCard | string | number | TGApp.Plugins.Mys.Forum.RenderCard,
   title?: string,
 ): void {
   let postId, postTitle, jsonTitle;

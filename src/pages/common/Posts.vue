@@ -37,7 +37,7 @@
         @click:append="searchPost"
         @keyup.enter="searchPost"
       />
-      <v-btn class="post-fresh-btn" @click="freshPostData">
+      <v-btn class="post-fresh-btn" @click="freshPostData(false)">
         <v-icon>mdi-refresh</v-icon>
         <span>刷新</span>
       </v-btn>
@@ -104,6 +104,11 @@
           <span>{{ post.forum.name }}</span>
         </div>
       </v-card>
+    </div>
+    <div class="load-more">
+      <v-btn :loading="loading" @click="freshPostData(true)">
+        第{{ rawData.page }}页，已加载：{{ posts.length }}，加载更多
+      </v-btn>
     </div>
   </div>
 </template>
@@ -200,6 +205,7 @@ const vuetifyTheme = computed(() => {
 const curForumLabel = ref<string>("酒馆");
 const forumItem = ref<string[]>(["酒馆", "攻略", "同人图", "COS", "硬核"]);
 const curForum = ref<number>(26);
+const rawData = ref({ page: 1, is_last: false });
 
 // 游戏相关
 const curGameLabel = ref<keyof typeof gameList>("原神");
@@ -227,7 +233,7 @@ const search = ref<string>();
 onMounted(async () => {
   loading.value = true;
   await freshNavData();
-  await freshPostData();
+  await freshPostData(false);
   loading.value = false;
 });
 
@@ -243,13 +249,13 @@ watch(curGameLabel, async (newVal) => {
 // 监听论坛变化
 watch(curForumLabel, async (newVal) => {
   freshCurForum(newVal);
-  await freshPostData();
+  await freshPostData(false);
 });
 
 // 监听排序变化
 watch(curSortLabel, async (newVal) => {
   curSortType.value = sortList[newVal];
-  await freshPostData();
+  await freshPostData(false);
 });
 
 async function toNav(path: string): Promise<void> {
@@ -266,11 +272,33 @@ async function freshNavData(): Promise<void> {
   nav.value = await Mys.Posts.nav(curGid.value);
 }
 
-async function freshPostData(): Promise<void> {
+async function freshPostData(more: boolean = false): Promise<void> {
   loading.value = true;
   loadingTitle.value = `正在加载 ${curGameLabel.value}-${curForumLabel.value}-${curSortLabel.value} 的数据`;
-  const postsGet = await Mys.Posts.get(curForum.value, curGid.value, curSortType.value);
-  posts.value = Mys.Posts.card(postsGet);
+  if (more) {
+    const postsGet = await Mys.Posts.get(
+      curForum.value,
+      curGid.value,
+      curSortType.value,
+      rawData.value.page,
+    );
+    if (rawData.value.is_last) {
+      showSnackbar({
+        text: "已经是最后一页了",
+        color: "warn",
+      });
+      loading.value = false;
+      return;
+    }
+    posts.value = posts.value.concat(Mys.Posts.card(postsGet));
+    rawData.value.is_last = postsGet.is_last;
+    rawData.value.page = postsGet.page;
+  } else {
+    const postsGet = await Mys.Posts.get(curForum.value, curGid.value, curSortType.value);
+    posts.value = Mys.Posts.card(postsGet);
+    rawData.value.is_last = false;
+    rawData.value.page = 1;
+  }
   await nextTick();
   loading.value = false;
 }
@@ -533,5 +561,20 @@ function searchPost(): void {
   font-size: 12px;
   gap: 5px;
   opacity: 0.6;
+}
+
+.load-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px;
+  font-family: var(--font-title);
+  transition: all 0.3s linear;
+}
+
+.load-more button {
+  border-radius: 5px;
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
 }
 </style>

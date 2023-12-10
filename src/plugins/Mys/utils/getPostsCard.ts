@@ -18,7 +18,7 @@ function getPostCard(post: TGApp.Plugins.Mys.News.Item): TGApp.Plugins.Mys.Forum
   return {
     title: post.post.subject,
     cover: postCover,
-    postId: Number(post.post.post_id),
+    postId: post.post.post_id,
     subtitle: post.post.post_id,
     user: {
       nickname: post.user.nickname,
