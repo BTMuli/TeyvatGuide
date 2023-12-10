@@ -62,7 +62,7 @@ onMounted(async () => {
     mode.value = "emoji";
   } else if (count > 1) {
     mode.value = "emojis";
-    emojis.value = await parseEmojis(props.data);
+    emojis.value = parseEmojis(props.data);
   } else {
     mode.value = "text";
   }
@@ -79,29 +79,15 @@ function countEmoji(text: string): number {
 }
 
 // 解析表情
-async function parseEmojis(text: TpText): Promise<TpText[]> {
-  if (localEmojis.value == null) {
-    localEmojis.value = JSON.stringify(await getEmojis());
-    localStorage.setItem("emojis", localEmojis.value);
-  }
-  const parseEmojis = JSON.parse(localEmojis.value);
-  const res: TpText[] = [];
-  const reg = /_\((.*?)\)/g;
-  const resSplit = text.insert.split(reg);
-  for (let i = 0; i < resSplit.length; i++) {
-    const item = resSplit[i];
-    if (parseEmojis[item]) {
-      res.push({
-        insert: `_(${item})`,
-      });
-    } else {
-      res.push({
-        insert: item,
-        attributes: text.attributes,
-      });
-    }
-  }
-  return res;
+function parseEmojis(text: TpText): TpText[] {
+  // thanks, @Lightczx & webstorm
+  const reg = /(?<=\n|.+?|^)(_\(.+?\)(?=\n|.+?|$))/g;
+  return text.insert.split(reg).map((item) => {
+    return {
+      insert: item,
+      attributes: text.attributes,
+    };
+  });
 }
 
 // 解析文本样式
