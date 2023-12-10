@@ -10,6 +10,12 @@
   <span v-else-if="mode == 'emoji'" class="tp-text-emoji">
     <img :src="getEmojiUrl()" :alt="getEmojiName()" :title="getEmojiName()" />
   </span>
+  <TpText
+    v-else-if="mode == 'emojis'"
+    v-for="(emoji, index) in emojis"
+    :data="emoji"
+    :key="index"
+  />
   <span v-else :style="getTextStyle()" class="tp-text-span">
     {{ props.data.insert }}
   </span>
@@ -41,18 +47,62 @@ interface TpTextProps {
 const props = defineProps<TpTextProps>();
 const mode = ref<string>("text");
 const router = useRouter();
+const localEmojis = ref(localStorage.getItem("emojis"));
+const emojis = ref<TpText[]>([]);
 
 console.log("tpText", JSON.stringify(props.data.insert), toRaw(props.data)?.attributes);
 
-onMounted(() => {
+onMounted(async () => {
   if (props.data.attributes && "link" in props.data.attributes) {
     mode.value = "link";
-  } else if (props.data.insert.startsWith("_(") && props.data.insert.endsWith(")")) {
+    return;
+  }
+  const count = countEmoji(props.data.insert);
+  if (count == 1) {
     mode.value = "emoji";
+  } else if (count > 1) {
+    mode.value = "emojis";
+    emojis.value = await parseEmojis(props.data);
   } else {
     mode.value = "text";
   }
 });
+
+// 获取可能的 emoji 数量
+function countEmoji(text: string): number {
+  const reg = /_\((.*?)\)/g;
+  const res = text.match(reg);
+  if (res) {
+    return res.length;
+  }
+  return 0;
+}
+
+// 解析表情
+async function parseEmojis(text: TpText): Promise<TpText[]> {
+  if (localEmojis.value == null) {
+    localEmojis.value = JSON.stringify(await getEmojis());
+    localStorage.setItem("emojis", localEmojis.value);
+  }
+  const parseEmojis = JSON.parse(localEmojis.value);
+  const res: TpText[] = [];
+  const reg = /_\((.*?)\)/g;
+  const resSplit = text.insert.split(reg);
+  for (let i = 0; i < resSplit.length; i++) {
+    const item = resSplit[i];
+    if (parseEmojis[item]) {
+      res.push({
+        insert: `_(${item})`,
+      });
+    } else {
+      res.push({
+        insert: item,
+        attributes: text.attributes,
+      });
+    }
+  }
+  return res;
+}
 
 // 解析文本样式
 function getTextStyle(): StyleValue {
@@ -130,8 +180,8 @@ function isMysAct(url: string): boolean {
 
 // 解析表情链接
 function getEmojiUrl(): string {
-  let emojis = localStorage.getItem("emojis");
-  if (!emojis) {
+  if (localEmojis.value == null || !JSON.parse(localEmojis.value)[getEmojiName()]) {
+    console.warn("tpEmoji unknown", getEmojiName());
     getEmojis().then((res) => {
       if ("retcode" in res) {
         console.error(res);
@@ -142,13 +192,13 @@ function getEmojiUrl(): string {
         mode.value = "text";
         return "";
       } else {
-        emojis = JSON.stringify(res);
-        localStorage.setItem("emojis", emojis);
+        localEmojis.value = JSON.stringify(res);
+        localStorage.setItem("emojis", localEmojis.value);
       }
     });
   }
   const emojiName = getEmojiName();
-  return JSON.parse(<string>emojis)[emojiName];
+  return JSON.parse(<string>localEmojis.value)[emojiName];
 }
 
 function getEmojiName() {
