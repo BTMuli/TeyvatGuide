@@ -167,13 +167,13 @@ async function toLink() {
 }
 
 function isMysAct(url: string): boolean {
-  const prefix = ["https://act.mihoyo.com/", "https://mhyurl.cn"];
-  // link.startsWith("https://webstatic.mihoyo.com/ys/event/e20220303-birthday/")
-  for (const pre of prefix) {
-    if (url.startsWith(pre)) return true;
-  }
-  if (url.startsWith("https://webstatic.mihoyo.com")) {
-    return url.includes("event");
+  const link = new URL(url);
+  const prefix = ["https://act.mihoyo.com/", "https://mhyurl.cn", "https://webstatic.mihoyo.com"];
+  if (prefix.includes(link.origin)) {
+    if (link.origin == "https://webstatic.mihoyo.com") {
+      return link.pathname.includes("event");
+    }
+    return true;
   }
   return false;
 }
