@@ -127,7 +127,6 @@ import { computed, onMounted, ref } from "vue";
 import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
 import mhyClient from "../../utils/TGClient";
-import showSnackbar from "../func/snackbar";
 
 const appStore = useAppStore();
 const userStore = useUserStore();
