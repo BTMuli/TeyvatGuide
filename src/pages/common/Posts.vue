@@ -259,6 +259,18 @@ watch(curSortLabel, async (newVal) => {
 });
 
 async function toNav(path: string): Promise<void> {
+  const link = new URL(path);
+  const mysList = [
+    "https://act.mihoyo.com",
+    "https://webstatic.mihoyo.com",
+    "https://bbs.mihoyo.com",
+    "https://qaa.miyoushe.com",
+  ];
+  // 如果不在上面的域名里面，就直接打开
+  if (!mysList.includes(link.origin)) {
+    window.open(path);
+    return;
+  }
   // todo 记忆宽屏竖屏
   const modeConfirm = await showConfirm({
     title: "是否采用宽屏模式打开？",

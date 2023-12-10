@@ -104,7 +104,17 @@
           "enableTauriAPI": true
         },
         {
+          "domain": "qaa.miyoushe.com",
+          "windows": ["mhy_client"],
+          "enableTauriAPI": true
+        },
+        {
           "domain": "webstatic.mihoyo.com",
+          "windows": ["mhy_client"],
+          "enableTauriAPI": true
+        },
+        {
+          "domain": "bbs.mihoyo.com",
           "windows": ["mhy_client"],
           "enableTauriAPI": true
         },
