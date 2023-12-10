@@ -26,6 +26,17 @@
         variant="outlined"
         label="排序"
       />
+      <v-text-field
+        v-model="search"
+        class="post-switch-item"
+        append-inner-icon="mdi-magnify"
+        label="请输入帖子 ID"
+        variant="outlined"
+        :single-line="true"
+        hide-details
+        @click:append="searchPost"
+        @keyup.enter="searchPost"
+      />
       <v-btn class="post-fresh-btn" @click="freshPostData">
         <v-icon>mdi-refresh</v-icon>
         <span>刷新</span>
@@ -100,6 +111,7 @@
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 
 import showConfirm from "../../components/func/confirm";
+import showSnackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import Mys from "../../plugins/Mys";
 import { useAppStore } from "../../store/modules/app";
@@ -210,6 +222,7 @@ const curSortType = ref<number>(0);
 // 渲染数据
 const posts = ref<TGApp.Plugins.Mys.Forum.RenderCard[]>([]);
 const nav = ref<TGApp.BBS.Navigator.Navigator[]>([]);
+const search = ref<string>();
 
 onMounted(async () => {
   loading.value = true;
@@ -266,6 +279,25 @@ function freshCurForum(newVal: string): void {
   const forum = forumList[curGameLabel.value];
   // @ts-ignore
   curForum.value = forum[newVal];
+}
+
+// 查询帖子
+function searchPost(): void {
+  if (search.value === undefined || search.value === "") {
+    showSnackbar({
+      text: "请输入搜索内容",
+      color: "error",
+    });
+    return;
+  }
+  if (!isNaN(Number(search.value))) {
+    createPost(search.value);
+  } else {
+    showSnackbar({
+      text: "请输入搜索内容",
+      color: "error",
+    });
+  }
 }
 </script>
 <style lang="css" scoped>
