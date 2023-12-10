@@ -154,9 +154,9 @@ async function toLink() {
 
 function isMysAct(url: string): boolean {
   const link = new URL(url);
-  const prefix = ["https://act.mihoyo.com/", "https://mhyurl.cn", "https://webstatic.mihoyo.com"];
-  if (prefix.includes(link.origin)) {
-    if (link.origin == "https://webstatic.mihoyo.com") {
+  const prefix = ["act.mihoyo.com", "mhyurl.cn", "webstatic.mihoyo.com", "qaa.miyoushe.com"];
+  if (prefix.includes(link.hostname)) {
+    if (link.hostname == "webstatic.mihoyo.com") {
       return link.pathname.includes("event");
     }
     return true;
