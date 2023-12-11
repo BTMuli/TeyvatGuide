@@ -211,6 +211,9 @@ class TGClient {
       case "getStatusBarHeight":
         await this.getStatusBarHeight(callback);
         break;
+      case "genAuthKey":
+        await this.genAuthKey(payload, callback);
+        break;
       case "getCookieInfo":
         await this.getCookieInfo(payload, callback);
         break;
@@ -248,6 +251,13 @@ class TGClient {
         break;
       case "share":
         await this.share(payload, callback);
+        break;
+      case "share2":
+        await this.nullCallback(arg);
+        break;
+      // 监听滚动事件？ payload:{direction: 0|1} 0:向上滚动 1:向下滚动
+      case "onBeginDragging":
+        await this.nullCallback(arg);
         break;
       // getNotificationSettings
       default:
@@ -287,6 +297,24 @@ class TGClient {
       statusBarHeight: 0,
     };
     await this.callback(callback, data);
+  }
+
+  /**
+   * @func genAuthKey
+   * @since Beta v0.3.7
+   * @desc 获取米游社客户端的 authkey
+   * @param {Record<string, string>} payload - 请求参数
+   * @param {string} callback - 回调函数名
+   * @returns {void} - 无返回值
+   */
+  async genAuthKey(payload: Record<string, string>, callback: string): Promise<void> {
+    const userStore = useUserStore();
+    const cookie = {
+      mid: userStore.cookie.mid,
+      stoken: userStore.cookie.stoken,
+    };
+    const res = await TGRequest.User.getAuthkey2(cookie, payload);
+    await this.callback(callback, res.data);
   }
 
   /**
