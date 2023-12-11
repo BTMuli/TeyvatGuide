@@ -29,7 +29,7 @@ interface InvokeArg {
 
 /**
  * @class TGClient
- * @since Beta v0.3.4
+ * @since Beta v0.3.7
  * @description 米游社客户端
  */
 class TGClient {
@@ -85,6 +85,22 @@ class TGClient {
         await this.handleCallback(arg);
       });
     }
+  }
+
+  /**
+   * @func loadJSBridge
+   * @since Beta v0.3.7
+   * @desc 加载 JSBridge
+   * @returns {void} - 无返回值
+   */
+  async loadJSBridge(): Promise<void> {
+    const executeJS = `javascript:(function(){
+      window.MiHoYoJSInterface = {
+        postMessage: function(arg) { window.__TAURI__.event.emit('post_mhy_client', arg) },
+        closePage: function() { this.postMessage('{"method":"closePage"}') },
+      };
+    })();`;
+    await invoke("execute_js", { label: "mhy_client", js: executeJS });
   }
 
   /**
@@ -170,14 +186,8 @@ class TGClient {
         await this.open(func, url);
       }
     }
-    if (url === undefined) {
-      url = this.getUrl(func);
-      this.route = [url];
-    } else if (func.startsWith("web_act")) {
-      this.route = [url];
-    } else if (func !== "closePage") {
-      this.route.push(url);
-    }
+    if (url === undefined) url = this.getUrl(func);
+    this.route = [url];
     console.log(`[open] ${url}`);
     await invoke<InvokeArg>("create_mhy_client", { func, url });
     this.window = WebviewWindow.getByLabel("mhy_client");
@@ -428,23 +438,29 @@ class TGClient {
     const url: string = payload.page;
     if (url.startsWith("mihoyobbs://article/")) {
       const urlBBS = url.replace("mihoyobbs://article/", "https://m.miyoushe.com/ys/#/article/");
-      await this.open("pushPage", urlBBS);
+      await this.pushPage({ page: urlBBS });
       return;
     } else if (url.startsWith("mihoyobbs://webview?link=")) {
       const urlWv = url.replace("mihoyobbs://webview?link=", "");
       // 解析经过编码作为参数的链接
       const urlReal = decodeURIComponent(urlWv);
-      await this.open("pushPage", urlReal);
+      await this.pushPage({ page: urlReal });
       return;
     }
-    await this.open("pushPage", url);
+    this.route.push(url);
+    console.log(`[pushPage] ${url}`);
+    const executeJS = `javascript:(function(){
+      window.location.href = '${url}';
+    })();`;
+    await invoke("execute_js", { label: "mhy_client", js: executeJS });
+    await this.loadJSBridge();
     await this.hideSideBar();
     await this.hideOverlay();
   }
 
   /**
    * @func closePage
-   * @since Beta v0.3.6
+   * @since Beta v0.3.7
    * @desc 关闭米游社客户端的页面
    * @returns {void} - 无返回值
    */
@@ -455,7 +471,11 @@ class TGClient {
       return;
     }
     const url = this.route[this.route.length - 1];
-    await this.open("closePage", url);
+    const executeJS = `javascript:(function(){
+      window.location.href = '${url}';
+    })();`;
+    await invoke("execute_js", { label: "mhy_client", js: executeJS });
+    await this.loadJSBridge();
   }
 
   /**
