@@ -266,6 +266,10 @@ async function toNav(path: string): Promise<void> {
     "https://bbs.mihoyo.com",
     "https://qaa.miyoushe.com",
   ];
+  if (link.protocol != "https:") {
+    toBBS(link);
+    return;
+  }
   // 如果不在上面的域名里面，就直接打开
   if (!mysList.includes(link.origin)) {
     window.open(path);
@@ -278,6 +282,27 @@ async function toNav(path: string): Promise<void> {
   });
   if (modeConfirm) await TGClient.open("web_act", path);
   else await TGClient.open("web_act_thin", path);
+}
+
+// 处理 protocol
+function toBBS(link: URL): void {
+  if (link.protocol == "mihoyobbs:") {
+    if (link.pathname.startsWith("//article")) {
+      const postId = link.pathname.split("/").pop();
+      createPost(<string>postId);
+      return;
+    }
+    if (link.pathname.startsWith("//forum")) {
+      const forumId = link.pathname.split("/").pop();
+      const url = `https://www.miyoushe.com/ys/home/${forumId}`;
+      window.open(url);
+      return;
+    }
+  }
+  showSnackbar({
+    text: `不支持的链接：${link.href}`,
+    color: "warn",
+  });
 }
 
 async function freshNavData(): Promise<void> {
