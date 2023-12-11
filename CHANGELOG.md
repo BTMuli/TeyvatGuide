@@ -2,12 +2,35 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2023-09-08
-Update: 2023-11-28
+Update: 2023-12-11
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-09-08 09:45:17 `
 >
-> 更新于 `2023-11-28 15:18:27`
+> 更新于 `2023-12-11 19:01:09`
+
+## [0.3.7](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.7) (2023-12-11)
+
+### Feat
+
+- 帖子：渲染方式迭代，由 `v-html` 改为组件渲染 [`#64`](https://github.com/BTMuli/TeyvatGuide/issues/64)
+- 帖子：分享图增加应用标识
+- 应用：新增帖子页面，支持浏览各游戏分区各版块按不同排序方式的帖子 [`#67`](https://github.com/BTMuli/TeyvatGuide/issues/67)
+- 应用：macOS 新增 arm64 架构支持 [`#68`](https://github.com/BTMuli/TeyvatGuide/issues/68)
+- JSBridge: 部分原先存在遮罩的页面将去除遮罩
+- JSBridge: 新增部分回调的处理
+
+### Fix
+
+- 帖子：修复大别野卡片渲染错误 [`#63`](https://github.com/BTMuli/TeyvatGuide/issues/63)
+- 公告：修复标题错误显示 `<br>` 的问题
+- 帖子：修复表情包渲染错误，移除首页表情包下载
+
+### Change
+
+- 帖子：分享图大小超过 80M 时不予保存，超过 20M 时可选保存至文件
+- 应用：移除侧边栏点击菜单，可以通过帖子页面触发各功能入口
+- JSBridge：重构 `pushPage`、`closePage` 逻辑
 
 ## [0.3.6](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.6) (2023-11-25)
 

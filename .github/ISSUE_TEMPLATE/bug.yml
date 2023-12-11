@@ -35,7 +35,7 @@ body:
     attributes:
       label: 当前使用版本
       description: 请填写当前使用版本
-      placeholder: 如 Beta v0.3.6
+      placeholder: 如 Beta v0.3.7
     validations:
       required: true
   - type: textarea
