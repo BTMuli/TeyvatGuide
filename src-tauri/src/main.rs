@@ -120,7 +120,11 @@ fn main() {
       let _window = _app.get_window("TeyvatGuide").unwrap();
       let _mhy = _app.get_window("mhy_client");
       if _mhy.is_some() {
-        _mhy.unwrap().close().unwrap();
+        std::thread::spawn(move || {
+          std::thread::sleep(std::time::Duration::from_secs(2));
+          dbg!("close mhy_client");
+          _mhy.unwrap().close().unwrap();
+        });
       }
       #[cfg(debug_assertions)] // only include this code on debug builds
       _window.open_devtools(); // open the devtools on startup
