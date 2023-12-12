@@ -148,8 +148,7 @@
 </template>
 
 <script lang="ts" setup>
-import { app, fs, invoke, os } from "@tauri-apps/api";
-import { relaunch } from "@tauri-apps/api/types/process";
+import { app, fs, invoke, os, process as TauriProcess } from "@tauri-apps/api";
 import { computed, onMounted, ref } from "vue";
 
 import showConfirm from "../../components/func/confirm";
@@ -534,7 +533,7 @@ async function confirmDelCache(): Promise<void> {
   });
   await new Promise(() => {
     setTimeout(async () => {
-      await relaunch();
+      await TauriProcess.exit();
     }, 1500);
   });
 }
