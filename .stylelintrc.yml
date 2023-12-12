@@ -9,3 +9,6 @@ plugins:
   - stylelint-order
 rules:
   prettier/prettier: true
+  property-no-vendor-prefix:
+    - true
+    - ignoreProperties: ["backdrop-filter"]
