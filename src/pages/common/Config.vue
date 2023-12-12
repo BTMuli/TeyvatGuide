@@ -149,7 +149,7 @@
 
 <script lang="ts" setup>
 import { app, fs, invoke, os } from "@tauri-apps/api";
-import { exit } from "@tauri-apps/api/process";
+import { relaunch } from "@tauri-apps/api/types/process";
 import { computed, onMounted, ref } from "vue";
 
 import showConfirm from "../../components/func/confirm";
@@ -378,6 +378,10 @@ async function confirmBackup(): Promise<void> {
   }
   loadingTitle.value = "正在备份数据...";
   loading.value = true;
+  if (!(await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData }))) {
+    await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
+  }
+  console.info("数据文件夹创建完成！");
   loadingSub.value = "正在获取成就数据";
   const achievements = await TGSqlite.getUIAF();
   loadingSub.value = "正在备份成就数据";
@@ -410,6 +414,13 @@ async function confirmRestore(): Promise<void> {
   }
   loadingTitle.value = "正在恢复数据...";
   loading.value = true;
+  if (!(await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData }))) {
+    showSnackbar({
+      color: "error",
+      text: "数据文件夹不存在！",
+    });
+    return;
+  }
   const fail: string[] = [];
   let res: boolean;
   loadingSub.value = "正在恢复成就数据";
@@ -523,7 +534,7 @@ async function confirmDelCache(): Promise<void> {
   });
   await new Promise(() => {
     setTimeout(async () => {
-      await exit();
+      await relaunch();
     }, 1500);
   });
 }

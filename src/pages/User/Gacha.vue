@@ -47,7 +47,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { dialog, path } from "@tauri-apps/api";
+import { dialog, fs, path } from "@tauri-apps/api";
 import { computed, onMounted, ref, watch } from "vue";
 
 import showConfirm from "../../components/func/confirm";
@@ -352,6 +352,9 @@ async function backupGacha(): Promise<void> {
   }
   loadingTitle.value = "正在备份祈愿数据";
   loading.value = true;
+  if (!(await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData }))) {
+    await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
+  }
   await backupUigfData(uidCur.value, gachaListCur.value);
   loading.value = false;
   showSnackbar({
