@@ -88,6 +88,7 @@ onMounted(async () => {
   width: 100%;
   justify-content: space-between;
   padding: 10px;
+  -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   background: rgb(0 0 0 / 40%);
   border-bottom-left-radius: 5px;

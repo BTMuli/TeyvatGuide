@@ -54,6 +54,7 @@ onUpdated(async () => {
   height: 40px;
   padding: 5px;
   border-radius: 50%;
+  -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   background: rgba(0 0 0 /40%);
 }

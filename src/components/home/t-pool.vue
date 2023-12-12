@@ -315,6 +315,7 @@ onUnmounted(() => {
   width: 100%;
   align-items: center;
   justify-content: space-between;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;

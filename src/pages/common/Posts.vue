@@ -385,6 +385,7 @@ function searchPost(): void {
   justify-content: center;
   padding: 5px;
   border-radius: 5px;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   background: var(--common-shadow-t-4);
   box-shadow: 0 0 5px var(--common-shadow-4);
@@ -564,6 +565,7 @@ function searchPost(): void {
   align-items: center;
   justify-content: flex-start;
   padding: 5px;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   background: rgb(0 0 0/20%);
   border-bottom-left-radius: 5px;

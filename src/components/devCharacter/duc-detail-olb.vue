@@ -58,6 +58,7 @@ onUpdated(async () => {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   background: rgb(0 0 0/40%);
 }
@@ -71,6 +72,7 @@ onUpdated(async () => {
   justify-content: center;
   padding: 3px;
   border-radius: 50%;
+  -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   background-color: rgb(0 0 0 / 40%);
 }

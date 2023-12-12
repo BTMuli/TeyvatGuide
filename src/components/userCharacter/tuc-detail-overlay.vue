@@ -340,6 +340,7 @@ function switchBg(): void {
   right: 0;
   bottom: 0;
   padding: 2px 5px;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   background: var(--common-shadow-2);
   border-bottom-right-radius: 5px;
@@ -362,6 +363,7 @@ function switchBg(): void {
   left: calc(50% - 80px);
   width: 160px;
   border-radius: 5px;
+  -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   background: var(--tgc-white-1);
   color: var(--tgc-yellow-1);

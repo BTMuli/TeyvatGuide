@@ -94,6 +94,7 @@ watch(
   height: 100%;
   align-items: center;
   justify-content: center;
+  -webkit-backdrop-filter: blur(v-bind(blurVal));
   backdrop-filter: blur(v-bind(blurVal));
   background: rgb(0 0 0 / 50%);
 }

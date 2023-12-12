@@ -170,6 +170,7 @@ async function switchNews(): Promise<void> {
   width: 100%;
   align-items: center;
   justify-content: space-between;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   background: rgb(0 0 0/50%);
   font-size: 12px;
@@ -221,6 +222,7 @@ async function switchNews(): Promise<void> {
   align-items: center;
   justify-content: flex-start;
   padding: 5px;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   background: rgb(0 0 0/20%);
   border-bottom-left-radius: 5px;

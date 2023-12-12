@@ -194,6 +194,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   border-radius: 5px;
+  -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   background: var(--tgc-btn-1);
 }

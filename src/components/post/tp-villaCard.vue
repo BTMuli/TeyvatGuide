@@ -116,6 +116,7 @@ console.log(
 .tp-villa-card-name {
   padding: 0 5px;
   border-radius: 5px;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   background: var(--common-shadow-t-2);
   box-shadow: 0 0 5px var(--common-shadow-8);
@@ -129,6 +130,7 @@ console.log(
   align-items: center;
   padding: 5px;
   border-radius: 20px 5px 5px 20px;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   background: var(--common-shadow-t-2);
   box-shadow: 0 0 5px var(--common-shadow-8);
@@ -161,6 +163,7 @@ console.log(
   justify-content: center;
   padding: 5px 10px;
   border-radius: 5px;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   background: var(--common-shadow-t-2);
   box-shadow: 0 0 5px var(--common-shadow-8);
@@ -176,6 +179,7 @@ console.log(
   padding: 0 10px;
   border-radius: 5px;
   margin-right: auto;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   background: var(--common-shadow-t-2);
   box-shadow: 0 0 5px var(--common-shadow-8);
