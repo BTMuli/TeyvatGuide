@@ -64,7 +64,11 @@ async function listenOnInit(): Promise<void> {
     await tauri.invoke("register_deep_link");
     await getDeepLink();
     await checkAppLoad();
-    await checkUserLoad();
+    try {
+      await checkUserLoad();
+    } catch (error) {
+      console.error(error);
+    }
     await checkUpdate();
   });
   return;
@@ -92,17 +96,8 @@ async function checkAppLoad(): Promise<void> {
 
 // 检测 ck,info 数据
 async function checkUserLoad(): Promise<void> {
-  if (!appStore.isLogin) {
-    console.info("未登录！");
-    return;
-  }
-  const userStore = useUserStore();
-  const ckLocal = userStore.cookie;
   const ckDB = await TGSqlite.getCookie();
-  if (JSON.stringify(ckLocal) !== JSON.stringify(ckDB)) {
-    userStore.cookie = ckDB;
-    console.info("cookie 数据已更新！");
-  } else if (JSON.stringify(ckLocal) === "{}") {
+  if (JSON.stringify(ckDB) === "{}" && appStore.isLogin) {
     await new Promise((resolve) => {
       setTimeout(() => {
         showSnackbar({
@@ -113,6 +108,17 @@ async function checkUserLoad(): Promise<void> {
         resolve(true);
       }, 3000);
     });
+    appStore.isLogin = false;
+    return;
+  }
+  if (JSON.stringify(ckDB) !== "{}" && !appStore.isLogin) {
+    appStore.isLogin = true;
+  }
+  const userStore = useUserStore();
+  const ckLocal = userStore.cookie;
+  if (JSON.stringify(ckLocal) !== JSON.stringify(ckDB)) {
+    userStore.cookie = ckDB;
+    console.info("cookie 数据已更新！");
   } else {
     console.info("cookie 数据已加载！");
   }
