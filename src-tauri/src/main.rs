@@ -21,6 +21,11 @@ async fn init_app(app_handle: tauri::AppHandle) {
       return;
     }
   }
+  let _mhy = app_handle.get_window("mhy_client");
+  if _mhy.is_some() {
+    std::thread::sleep(std::time::Duration::from_millis(1000));
+    _mhy.unwrap().close().unwrap();
+  }
   app_handle.emit_all("initApp", ()).unwrap();
   unsafe {
     APP_INITIALIZED = true;
@@ -118,14 +123,6 @@ fn main() {
     ])
     .setup(|_app| {
       let _window = _app.get_window("TeyvatGuide").unwrap();
-      let _mhy = _app.get_window("mhy_client");
-      if _mhy.is_some() {
-        std::thread::spawn(move || {
-          std::thread::sleep(std::time::Duration::from_secs(2));
-          dbg!("close mhy_client");
-          _mhy.unwrap().close().unwrap();
-        });
-      }
       #[cfg(debug_assertions)] // only include this code on debug builds
       _window.open_devtools(); // open the devtools on startup
       Ok(())
