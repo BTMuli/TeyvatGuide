@@ -215,6 +215,7 @@ function getEmojiName() {
 }
 
 .tp-text-span {
+  overflow-wrap: break-word;
   white-space: pre-wrap;
 }
 </style>
