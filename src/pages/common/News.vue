@@ -361,7 +361,6 @@ function searchPost(): void {
   overflow: hidden;
   width: 50px;
   height: 50px;
-  border-radius: 50%;
 }
 
 .ncu-pendant img {

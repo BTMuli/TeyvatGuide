@@ -340,7 +340,6 @@ function parseContent(content: string): string {
   overflow: hidden;
   width: 50px;
   height: 50px;
-  border-radius: 50%;
 }
 
 .mpa-pendant img {
