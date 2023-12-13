@@ -29,10 +29,6 @@
         "request": true,
         "scope": ["http://**", "https://**"]
       },
-      "shell": {
-        "all": false,
-        "open": true
-      },
       "dialog": {
         "all": false,
         "open": true,
