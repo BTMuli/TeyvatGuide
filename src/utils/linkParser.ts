@@ -10,6 +10,7 @@ import showConfirm from "../components/func/confirm";
 
 /**
  * @function parseLink
+ * @since Beta v0.3.8
  * @description 处理链接
  * @param {string} link - 链接
  * @param {boolean} useInner - 是否采用内置 JSBridge 打开
@@ -19,9 +20,8 @@ export async function parseLink(
   link: string,
   useInner: boolean = false,
 ): Promise<boolean | string> {
-  console.warn("parseLink", link);
   const url = new URL(link);
-  if (url.protocol !== "https:") {
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
     if (url.protocol === "mihoyobbs:") {
       if (url.pathname.startsWith("//article/")) {
         const postId = url.pathname.split("/").pop();
