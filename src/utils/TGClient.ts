@@ -199,7 +199,7 @@ class TGClient {
 
   /**
    * @func handleCallback
-   * @since Beta v0.3.7
+   * @since Beta v0.3.8
    * @desc 处理米游社客户端的 callback
    * @param {Event<string>} arg - 事件参数
    * @returns {any} - 返回值
@@ -210,6 +210,11 @@ class TGClient {
     await this.hideOverlay();
     const { method, payload, callback } = <NormalArg>JSON.parse(arg.payload);
     switch (method) {
+      case "closePage":
+        await this.closePage();
+        break;
+      case "configure_share":
+        break;
       case "getStatusBarHeight":
         await this.getStatusBarHeight(callback);
         break;
@@ -237,19 +242,17 @@ class TGClient {
       case "getUserInfo":
         await this.getUserInfo(callback);
         break;
-      case "configure_share":
-        break;
-      case "pushPage":
-        await this.pushPage(payload);
-        break;
-      case "closePage":
-        await this.closePage();
-        break;
       case "login":
+        await this.nullCallback(arg);
+        break;
+      case "onBeginDragging":
         await this.nullCallback(arg);
         break;
       case "onClickImg":
         await this.onClickImg(payload);
+        break;
+      case "pushPage":
+        await this.pushPage(payload);
         break;
       case "share":
         await this.share(payload, callback);
@@ -257,11 +260,6 @@ class TGClient {
       case "share2":
         await this.nullCallback(arg);
         break;
-      // 监听滚动事件？ payload:{direction: 0|1} 0:向上滚动 1:向下滚动
-      case "onBeginDragging":
-        await this.nullCallback(arg);
-        break;
-      // getNotificationSettings
       default:
         console.warn(`[${arg.windowLabel}] ${arg.payload}`);
     }
