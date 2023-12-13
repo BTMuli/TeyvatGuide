@@ -30,7 +30,7 @@
           <img src="/platforms/mhy/mys.webp" alt="mihoyo" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item title="帖子" value="posts" :link="true" href="/posts">
+      <v-list-item title="酒馆" value="posts" :link="true" href="/posts">
         <template #prepend>
           <img src="/source/UI/posts.png" alt="posts" class="side-icon" />
         </template>
@@ -98,11 +98,42 @@
         </v-list-item>
       </v-list-group>
       <div class="bottom-menu">
-        <v-list-item :title="userInfo.nickname">
-          <template #prepend>
-            <img :src="userInfo.avatar" alt="userIcon" class="side-icon" />
+        <v-menu :open-on-click="true" location="end">
+          <template #activator="{ props }">
+            <v-list-item :title="userInfo.nickname" v-bind="props">
+              <template #prepend>
+                <img :src="userInfo.avatar" alt="userIcon" class="side-icon" />
+              </template>
+            </v-list-item>
           </template>
-        </v-list-item>
+          <v-list class="side-list-user" density="compact" :nav="true">
+            <v-list-item class="side-item-user" title="签到" @click="openClient('sign_in')">
+              <template #prepend>
+                <img src="/source/UI/userGacha.webp" class="side-icon-user" alt="sing_in" />
+              </template>
+            </v-list-item>
+            <v-list-item class="side-item-user" title="战绩" @click="openClient('game_record')">
+              <template #prepend>
+                <img src="/source/UI/userRecord.webp" class="side-icon-user" alt="game_record" />
+              </template>
+            </v-list-item>
+            <v-list-item class="side-item-user" title="酒馆" @click="openClient('tavern')">
+              <template #prepend>
+                <img src="/platforms/mhy/mys.webp" alt="酒馆" class="side-icon-user" />
+              </template>
+            </v-list-item>
+            <v-list-item
+              class="side-item-user"
+              title="登录"
+              @click="login"
+              v-show="userStore.cookie?.game_token === ''"
+            >
+              <template #prepend>
+                <img src="/source/UI/defaultUser.webp" class="side-icon-user" alt="login" />
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-menu>
         <v-list-item :title="themeTitle" @click="switchTheme()">
           <template #prepend>
             <v-icon>
@@ -127,6 +158,7 @@ import { computed, onMounted, ref } from "vue";
 import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
 import mhyClient from "../../utils/TGClient";
+import showSnackbar from "../func/snackbar";
 
 const appStore = useAppStore();
 const userStore = useUserStore();
@@ -190,6 +222,20 @@ async function listenOnTheme(): Promise<void> {
 async function switchTheme(): Promise<void> {
   await event.emit("readTheme", themeGet.value === "default" ? "dark" : "default");
 }
+
+async function openClient(func: string): Promise<void> {
+  if (appStore.isLogin) {
+    await mhyClient.open(func);
+  } else {
+    login();
+  }
+}
+
+function login(): void {
+  showSnackbar({
+    text: "请前往设置页面扫码登录",
+  });
+}
 </script>
 
 <style lang="css" scoped>
@@ -214,5 +260,23 @@ async function switchTheme(): Promise<void> {
   height: 24px;
   border-radius: 5px;
   margin-right: 32px;
+}
+
+.side-list-user {
+  background: var(--app-side-bg) !important;
+  color: var(--app-side-content) !important;
+  font-family: var(--font-title);
+}
+
+.side-item-user {
+  border: 1px solid var(--common-shadow-2);
+  background: var(--box-bg-1);
+}
+
+.side-icon-user {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  margin-right: 10px;
 }
 </style>
