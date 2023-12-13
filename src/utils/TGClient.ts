@@ -91,12 +91,13 @@ class TGClient {
 
   /**
    * @func loadJSBridge
-   * @since Beta v0.3.7
+   * @since Beta v0.3.8
    * @desc 加载 JSBridge
    * @returns {void} - 无返回值
    */
   async loadJSBridge(): Promise<void> {
-    const executeJS = `javascript:(function(){
+    const executeJS = `javascript:(function() {
+      if(window.MiHoYoJSBridge) return;
       window.MiHoYoJSInterface = {
         postMessage: function(arg) { window.__TAURI__.event.emit('post_mhy_client', arg) },
         closePage: function() { this.postMessage('{"method":"closePage"}') },
@@ -214,6 +215,9 @@ class TGClient {
         await this.closePage();
         break;
       case "configure_share":
+        break;
+      case "eventTrack":
+        await this.eventTrack(payload);
         break;
       case "getStatusBarHeight":
         await this.getStatusBarHeight(callback);
@@ -521,7 +525,6 @@ class TGClient {
    * @returns {void} - 无返回值
    */
   async nullCallback(arg: Event<string>): Promise<void> {
-    console.warn(`[${arg.windowLabel}] ${arg.payload}`);
     const { callback } = <NormalArg>JSON.parse(arg.payload);
     await this.callback(callback, {});
   }
@@ -593,6 +596,18 @@ class TGClient {
     setTimeout(async () => {
       await this.callback(callback, {});
     }, 3000);
+  }
+
+  /**
+   * @func eventTrack
+   * @since Beta v0.3.8
+   * @desc 事件跟踪
+   * @param {unknown} payload - 请求参数
+   * @returns {void} - 无返回值
+   */
+  async eventTrack(payload: unknown): Promise<void> {
+    console.log(`[eventTrack] ${JSON.stringify(payload)}`);
+    await this.loadJSBridge();
   }
 }
 
