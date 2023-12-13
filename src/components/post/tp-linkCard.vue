@@ -14,9 +14,9 @@
 </template>
 <script lang="ts" setup>
 import { toRaw } from "vue";
-import { useRouter } from "vue-router";
 
-import { isMysPost } from "../../utils/toolFunc";
+import { parseLink } from "../../utils/linkParser";
+import showSnackbar from "../func/snackbar";
 
 interface TpLinkCard {
   insert: {
@@ -41,22 +41,22 @@ interface TpLinkCardProps {
 }
 
 const props = defineProps<TpLinkCardProps>();
-const router = useRouter();
 
 console.log("tpLinkCard", props.data.insert.link_card.card_id, toRaw(props.data).insert.link_card);
 
 async function toLink() {
   const link = props.data.insert.link_card.landing_url;
-  if (isMysPost(link)) {
-    await router.push({
-      name: "帖子详情",
-      params: {
-        post_id: link.split("/").pop(),
-      },
+  const res = await parseLink(link);
+  if (res === true) return;
+  if (res === false) {
+    showSnackbar({
+      text: `未知链接:${link}`,
+      color: "error",
+      timeout: 3000,
     });
-  } else {
-    window.open(link);
+    return;
   }
+  window.open(res);
 }
 </script>
 <style lang="css" scoped>

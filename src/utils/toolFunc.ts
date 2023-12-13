@@ -1,7 +1,7 @@
 /**
  * @file utils/toolFunc.ts
  * @description 一些工具函数
- * @since Beta v0.3.6
+ * @since Beta v0.3.8
  */
 
 import { os, path } from "@tauri-apps/api";
@@ -176,16 +176,4 @@ export function isColorSimilar(colorBg: string, colorText: string): boolean {
     ? colorText
     : colorConvert.keyword.hex(<KEYWORD>colorText);
   return score(hexText, hexBg) === "Fail";
-}
-
-/**
- * @description 判断是否为 Mys 帖子
- * @since Beta v0.3.7
- * @param {string} url - 网址
- * @returns {boolean} 是否为 Mys 帖子
- */
-export function isMysPost(url: string): boolean {
-  const regBBS = /^https:\/\/bbs\.mihoyo\.com\/\w+\/article\/\d+$/;
-  const regMys = /^https:\/\/www\.miyoushe\.com\/\w+\/article\/\d+$/;
-  return regBBS.test(url) || regMys.test(url);
 }

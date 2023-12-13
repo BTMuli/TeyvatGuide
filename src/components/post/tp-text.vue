@@ -22,12 +22,10 @@
 </template>
 <script lang="ts" setup>
 import { onMounted, ref, StyleValue, toRaw } from "vue";
-import { useRouter } from "vue-router";
 
 import { getEmojis } from "../../plugins/Mys/request/getEmojis";
-import TGClient from "../../utils/TGClient";
-import { isColorSimilar, isMysPost } from "../../utils/toolFunc";
-import showConfirm from "../func/confirm";
+import { parseLink } from "../../utils/linkParser";
+import { isColorSimilar } from "../../utils/toolFunc";
 import showSnackbar from "../func/snackbar";
 
 interface TpText {
@@ -46,7 +44,6 @@ interface TpTextProps {
 
 const props = defineProps<TpTextProps>();
 const mode = ref<string>("text");
-const router = useRouter();
 const localEmojis = ref(localStorage.getItem("emojis"));
 const emojis = ref<TpText[]>([]);
 
@@ -122,46 +119,17 @@ async function toLink() {
   if (!props.data.attributes) return;
   if (!props.data.attributes.link) return;
   const link = props.data.attributes.link;
-  if (isMysPost(link)) {
-    await router.push({
-      name: "帖子详情",
-      params: {
-        post_id: link.split("/").pop(),
-      },
+  const res = await parseLink(link);
+  if (res === true) return;
+  if (res === false) {
+    showSnackbar({
+      text: `未知链接:${link}`,
+      color: "error",
+      timeout: 3000,
     });
-  } else if (isMysAct(link)) {
-    const resOpen = await showConfirm({
-      title: "采用内置 JSBridge？",
-      text: "取消则使用外部浏览器打开",
-    });
-    if (resOpen) {
-      const resType = await showConfirm({
-        title: "采用宽屏模式？",
-        text: "取消则使用默认竖屏",
-      });
-      if (resType) {
-        await TGClient.open("web_act", link);
-      } else {
-        await TGClient.open("web_act_thin", link);
-      }
-    } else {
-      window.open(link);
-    }
-  } else {
-    window.open(props.data.attributes.link);
+    return;
   }
-}
-
-function isMysAct(url: string): boolean {
-  const link = new URL(url);
-  const prefix = ["act.mihoyo.com", "mhyurl.cn", "webstatic.mihoyo.com", "qaa.miyoushe.com"];
-  if (prefix.includes(link.hostname)) {
-    if (link.hostname == "webstatic.mihoyo.com") {
-      return link.pathname.includes("event");
-    }
-    return true;
-  }
-  return false;
+  window.open(res);
 }
 
 // 解析表情链接

@@ -1,14 +1,16 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.3.7
+ * @since Beta v0.3.8
  */
 
 import { event, invoke } from "@tauri-apps/api";
 import type { Event } from "@tauri-apps/api/event";
-import { WebviewWindow } from "@tauri-apps/api/window";
+import { appWindow, WebviewWindow } from "@tauri-apps/api/window";
 
+import { parseLink } from "./linkParser";
 import { getDeviceInfo } from "./toolFunc";
+import showSnackbar from "../components/func/snackbar";
 import { useAppStore } from "../store/modules/app";
 import { useUserStore } from "../store/modules/user";
 import TGConstant from "../web/constant/TGConstant";
@@ -29,7 +31,7 @@ interface InvokeArg {
 
 /**
  * @class TGClient
- * @since Beta v0.3.7
+ * @since Beta v0.3.8
  * @description 米游社客户端
  */
 class TGClient {
@@ -457,33 +459,40 @@ class TGClient {
 
   /**
    * @func pushPage
-   * @since Beta v0.3.7
+   * @since Beta v0.3.8
    * @desc 打开米游社客户端的页面
    * @param {unknown} payload - 请求参数
    * @returns {void} - 无返回值
    */
   async pushPage(payload: any): Promise<void> {
-    const url: string = payload.page;
-    if (url.startsWith("mihoyobbs://article/")) {
-      const urlBBS = url.replace("mihoyobbs://article/", "https://m.miyoushe.com/ys/#/article/");
-      await this.pushPage({ page: urlBBS });
-      return;
-    } else if (url.startsWith("mihoyobbs://webview?link=")) {
-      const urlWv = url.replace("mihoyobbs://webview?link=", "");
-      // 解析经过编码作为参数的链接
-      const urlReal = decodeURIComponent(urlWv);
-      await this.pushPage({ page: urlReal });
+    const url = payload.page;
+    const res = await parseLink(url, true);
+    if (!res) {
+      await appWindow.setFocus();
+      showSnackbar({
+        text: `未知链接:${url}`,
+        color: "error",
+        timeout: 3000,
+      });
+      await new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 3000);
+      });
+      await this.window?.setFocus();
       return;
     }
-    this.route.push(url);
-    console.log(`[pushPage] ${url}`);
+    if (typeof res !== "string") return;
+    this.route.push(res);
+    console.log(`[pushPage] ${res}`);
     const executeJS = `javascript:(function(){
-      window.location.href = '${url}';
+      window.location.href = '${res}';
     })();`;
     await invoke("execute_js", { label: "mhy_client", js: executeJS });
     await this.loadJSBridge();
     await this.hideSideBar();
     await this.hideOverlay();
+    await this.window?.setFocus();
   }
 
   /**
