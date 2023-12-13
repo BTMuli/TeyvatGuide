@@ -619,12 +619,19 @@ class TGClient {
             }
           });
         }
-        // 用 dom2img 生成图片
-        var shareDom = document.querySelector('.share');
-        var scale = 2;
-        var img = await domtoimage.toPng(shareDom, { 
-          width: shareDom.offsetWidth * scale,
-          height: shareDom.offsetHeight * scale,
+        var shareDom;
+        if(${JSON.stringify(payload?.content)} === '{}') {
+          shareDom = document.querySelector('.share');
+        } else if (${payload?.content?.preview} === true) {
+          shareDom = document.querySelector('#root');
+        }
+        if(shareDom === undefined || shareDom === null) {
+          shareDom = document.body;
+        }
+        var scale = 1.5;
+        var img = await domtoimage.toPng(shareDom, {
+          height: shareDom.scrollHeight * scale,
+          width: shareDom.scrollWidth * scale,
           style: {
             transform: 'scale(' + scale + ')',
             transformOrigin: 'top left'
@@ -636,25 +643,53 @@ class TGClient {
         }));
         var _t = window.__TAURI__;
         var savePath = await _t.path.downloadDir() + Date.now() + '.png';
-        await _t.dialog.save({
+        var save = await _t.dialog.save({
           title: '保存图片',
           filters: [{ name: '图片', extensions: ['png'] }],
           defaultPath: savePath,
-        }).then(async function(savePath) {
-          if (savePath) {
-            await _t.fs.writeBinaryFile({
-              contents: buffer,
-              path: savePath,
-            });
-            alert('保存成功');
-            // 处理回调
-            mhyWebBridge('${callback}', {});
-          }
         });
+        if (save) {
+          await _t.fs.writeBinaryFile({
+            contents: buffer,
+            path: save,
+          });
+          alert('保存成功');
+        }
+        mhyWebBridge('${callback}', {});
       })();`;
       await invoke("execute_js", { label: "mhy_client", js: executeJS });
       return;
     }
+    if (payload?.type === "image") {
+      if (payload?.content.image_base64 !== undefined) {
+        let image = payload.content.image_base64;
+        image = `data:image/png;base64,${image}`;
+        const executeJS = `javascript:(async function() {
+          // 转换成 blob
+          var buffer = new Uint8Array(atob('${image}'.split(',')[1]).split('').map(function(item) {
+            return item.charCodeAt(0);
+          }));
+          var _t = window.__TAURI__;
+          var savePath = await _t.path.downloadDir() + Date.now() + '.png';
+          var save = await _t.dialog.save({
+            title: '保存图片',
+            filters: [{ name: '图片', extensions: ['png'] }],
+            defaultPath: savePath,
+          });
+          if (save) {
+            await _t.fs.writeBinaryFile({
+              contents: buffer,
+              path: save,
+            });
+            alert('保存成功');
+          }
+          mhyWebBridge('${callback}', {});
+        })();`;
+        await invoke("execute_js", { label: "mhy_client", js: executeJS });
+        return;
+      }
+    }
+    console.warn("[share]", payload);
     // 延时 3s
     setTimeout(async () => {
       await this.callback(callback, {});
