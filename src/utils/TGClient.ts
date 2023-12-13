@@ -255,6 +255,9 @@ class TGClient {
       case "onClickImg":
         await this.onClickImg(payload);
         break;
+      case "openApplication":
+        await this.openApplication(payload);
+        break;
       case "pushPage":
         await this.pushPage(payload);
         break;
@@ -576,7 +579,7 @@ class TGClient {
 
   /**
    * @func share
-   * @since Beta v0.3.7
+   * @since Beta v0.3.8
    * @desc 分享
    * @param {unknown} payload - 请求参数
    * @param {string} callback - 回调函数名
@@ -592,10 +595,70 @@ class TGClient {
       await this.callback(callback, {});
       return;
     }
+    if (payload?.type === "screenshot") {
+      const executeJS = `javascript:(async function() {
+        // 查找 id 为 dom2img 的 script
+        var hasDom2img = false;
+        var scripts = document.querySelectorAll('script');
+        for (var i = 0; i < scripts.length; i++) {
+          if (scripts[i].src === 'https://cdn.bootcdn.net/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js') {
+            hasDom2img = true;
+            break;
+          }
+        }
+        // 如果没有 dom2img 的 js
+        if (!hasDom2img) {
+          // 添加 dom2img 的 js
+          var script = document.createElement('script');
+          script.src = 'https://cdn.bootcdn.net/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js';
+          document.body.appendChild(script);
+          // 等待 dom2img 加载完成
+          await new Promise((resolve) => {
+            script.onload = function() {
+              resolve();
+            }
+          });
+        }
+        // 用 dom2img 生成图片
+        var shareDom = document.querySelector('.share');
+        var scale = 2;
+        var img = await domtoimage.toPng(shareDom, { 
+          width: shareDom.offsetWidth * scale,
+          height: shareDom.offsetHeight * scale,
+          style: {
+            transform: 'scale(' + scale + ')',
+            transformOrigin: 'top left'
+          }
+        });
+        // 转换成 blob
+        var buffer = new Uint8Array(atob(img.split(',')[1]).split('').map(function(item) {
+          return item.charCodeAt(0);
+        }));
+        var _t = window.__TAURI__;
+        var savePath = await _t.path.downloadDir() + Date.now() + '.png';
+        await _t.dialog.save({
+          title: '保存图片',
+          filters: [{ name: '图片', extensions: ['png'] }],
+          defaultPath: savePath,
+        }).then(async function(savePath) {
+          if (savePath) {
+            await _t.fs.writeBinaryFile({
+              contents: buffer,
+              path: savePath,
+            });
+            alert('保存成功');
+            // 处理回调
+            mhyWebBridge('${callback}', {});
+          }
+        });
+      })();`;
+      await invoke("execute_js", { label: "mhy_client", js: executeJS });
+      return;
+    }
     // 延时 3s
     setTimeout(async () => {
       await this.callback(callback, {});
-    }, 3000);
+    }, 10000);
   }
 
   /**
@@ -608,6 +671,28 @@ class TGClient {
   async eventTrack(payload: unknown): Promise<void> {
     console.log(`[eventTrack] ${JSON.stringify(payload)}`);
     await this.loadJSBridge();
+  }
+
+  /**
+   * @func openApplication
+   * @since Beta v0.3.8
+   * @desc 打开应用
+   * @param {unknown} payload - 请求参数
+   * @returns {void} - 无返回值
+   */
+  async openApplication(payload: unknown): Promise<void> {
+    console.log(`[openApplication] ${JSON.stringify(payload)}`);
+    await appWindow.setFocus();
+    showSnackbar({
+      text: `不支持的操作：OpenApplication(${JSON.stringify(payload)})`,
+      color: "error",
+    });
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1500);
+    });
+    await this.window?.setFocus();
   }
 }
 
