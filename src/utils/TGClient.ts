@@ -144,7 +144,7 @@ class TGClient {
 
   /**
    * @func getUrl
-   * @since Beta v0.3.6
+   * @since Beta v0.3.8
    * @desc 获取 url
    * @param {string} func - 方法名
    * @returns {string} - url
@@ -152,7 +152,7 @@ class TGClient {
   getUrl(func: string): string {
     switch (func) {
       case "sign_in":
-        return "https://webstatic.mihoyo.com/bbs/event/signin-ys/index.html?act_id=e202009291139501";
+        return "https://act.mihoyo.com/bbs/event/signin/hk4e/index.html?act_id=e202311201442471&bbs_auth_required=true&bbs_presentation_style=fullscreen&mhy_presentation_style=fullscreen&utm_source=bbs&utm_medium=ys&utm_campaign=icon";
       case "game_record":
         return "https://webstatic.mihoyo.com/app/community-game-records/index.html?bbs_presentation_style=fullscreen";
       case "daily_note":

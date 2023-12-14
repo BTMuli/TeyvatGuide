@@ -3,7 +3,7 @@
     <div :title="talent.name" v-for="talent in talents" :key="talent.pos" class="duc-dort-item">
       <span>{{ talent.name }}</span>
       <img :src="talent.icon" alt="talent" />
-      <span>Lv.{{ talent.level }}</span>
+      <span>Lv.{{ talent.level === 0 ? 1 : talent.level }}</span>
     </div>
   </div>
 </template>
