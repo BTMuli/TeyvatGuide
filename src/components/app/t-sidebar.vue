@@ -117,6 +117,11 @@
                 <img src="/source/UI/userRecord.webp" class="side-icon-user" alt="game_record" />
               </template>
             </v-list-item>
+            <v-list-item class="side-item-user" title="便笺" @click="openClient('daily_note')">
+              <template #prepend>
+                <img src="/icon/material/210.webp" class="side-icon-user" alt="daily_note" />
+              </template>
+            </v-list-item>
             <v-list-item class="side-item-user" title="酒馆" @click="openClient('tavern')">
               <template #prepend>
                 <img src="/platforms/mhy/mys.webp" alt="酒馆" class="side-icon-user" />
