@@ -490,6 +490,7 @@ async function confirmUpdateDevice(): Promise<void> {
   showSnackbar({
     text: "设备信息已更新! DeviceFp: " + appStore.deviceInfo.device_fp,
   });
+  await TGSqlite.saveAppData("deviceInfo", JSON.stringify(appStore.deviceInfo));
 }
 
 // 清除用户缓存

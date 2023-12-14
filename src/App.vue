@@ -23,6 +23,7 @@ import TGSqlite from "./plugins/Sqlite";
 import { useAppStore } from "./store/modules/app";
 import { useUserStore } from "./store/modules/user";
 import { getBuildTime } from "./utils/TGBuild";
+import TGRequest from "./web/request/TGRequest";
 
 const appStore = useAppStore();
 const isMain = ref<boolean>(false);
@@ -64,6 +65,7 @@ async function listenOnInit(): Promise<void> {
     await tauri.invoke("register_deep_link");
     await getDeepLink();
     await checkAppLoad();
+    await checkDeviceFp();
     try {
       await checkUserLoad();
     } catch (error) {
@@ -91,6 +93,27 @@ async function checkAppLoad(): Promise<void> {
   } else {
     appStore.loading = true;
     console.info("数据库已加载！");
+  }
+}
+
+// 检测 deviceFp
+async function checkDeviceFp(): Promise<void> {
+  const appData = await TGSqlite.getAppData();
+  const deviceInfo = appData.find((item) => item.key === "deviceInfo")?.value;
+  const deviceLocal = appStore.deviceInfo;
+  if (deviceInfo === undefined) {
+    if (deviceLocal.device_fp === "0000000000000") {
+      // 获取 deviceFp
+      appStore.deviceInfo = await TGRequest.Device.getFp(appStore.deviceInfo);
+      console.info("deviceInfo 已重新获取！");
+    }
+    await TGSqlite.saveAppData("deviceInfo", JSON.stringify(deviceLocal));
+    console.info("deviceInfo 数据已插入！");
+  } else if (JSON.parse(deviceInfo) !== deviceLocal) {
+    appStore.deviceInfo = JSON.parse(deviceInfo);
+    console.info("deviceInfo 数据已加载！");
+  } else {
+    console.info("deviceInfo 数据已同步！");
   }
 }
 
