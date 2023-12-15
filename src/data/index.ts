@@ -33,6 +33,10 @@ export async function getWikiData(
   dir: "Character",
   name: string,
 ): Promise<{ default: TGApp.App.Character.WikiItem } | undefined>;
+export async function getWikiData(
+  dir: "Weapon",
+  name: string,
+): Promise<{ default: TGApp.App.Weapon.WikiItem } | undefined>;
 export async function getWikiData(dir: string, name: string): Promise<any> {
   return await wikiFiles[`./wiki/${dir}/${name}.json`]();
 }

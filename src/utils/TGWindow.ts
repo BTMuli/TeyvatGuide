@@ -127,7 +127,6 @@ export function createAnno(item: TGApp.App.Announcement.ListCard): void {
  * @returns {void}
  */
 export function createWiki(dir: string, name: string): void {
-  // if(dir !== "Character") return;
   const dirName = dir === "GCG" ? dir : dir.toLowerCase();
   const wikiPath = `/wiki/detail/${dirName}/${name}`;
   createTGWindow(wikiPath, "Sub_window", `Wiki_${dirName}_${name}`, 960, 720, false, false);
