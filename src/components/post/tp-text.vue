@@ -54,38 +54,20 @@ onMounted(async () => {
     mode.value = "link";
     return;
   }
-  const count = countEmoji(props.data.insert);
-  if (count == 1) {
-    mode.value = "emoji";
-  } else if (count > 1) {
-    mode.value = "emojis";
-    emojis.value = parseEmojis(props.data);
-  } else {
-    mode.value = "text";
-  }
-});
-
-// 获取可能的 emoji 数量
-function countEmoji(text: string): number {
-  const reg = /_\((.*?)\)/g;
-  const res = text.match(reg);
-  if (res) {
-    return res.length;
-  }
-  return 0;
-}
-
-// 解析表情
-function parseEmojis(text: TpText): TpText[] {
   // thanks, @Lightczx & webstorm
   const reg = /(?<=\n|.+?|^)(_\(.+?\)(?=\n|.+?|$))/g;
-  return text.insert.split(reg).map((item) => {
-    return {
-      insert: item,
-      attributes: text.attributes,
-    };
-  });
-}
+  const res = props.data.insert.split(reg);
+  if (res.length > 2) {
+    if (res.length === 3 && res[0] === "" && res[2] === "") {
+      mode.value = "emoji";
+      return;
+    }
+    mode.value = "emojis";
+    emojis.value = res.map((i) => ({ insert: i, attributes: props.data.attributes }));
+    return;
+  }
+  mode.value = "text";
+});
 
 // 解析文本样式
 function getTextStyle(): StyleValue {
