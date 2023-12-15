@@ -1,7 +1,7 @@
 /**
  * @file utils/TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.3.7
+ * @since Beta v0.3.8
  */
 
 import { dialog, fs, http, path } from "@tauri-apps/api";
@@ -72,7 +72,7 @@ function getShareImgBgColor(): string {
 
 /**
  * @description 生成分享截图
- * @since Beta v0.3.7
+ * @since Beta v0.3.8
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
@@ -124,13 +124,13 @@ export async function generateShareImg(
     });
     if (!saveFile) {
       showSnackbar({
-        color: "cancel",
-        text: "已取消",
+        color: "warn",
+        text: "将尝试报存到剪贴板",
       });
     } else {
       await saveCanvasImg(buffer, fileName);
+      return;
     }
-    return;
   }
   try {
     await copyToClipboard(buffer);
