@@ -32,6 +32,9 @@ export async function parseLink(
       if (url.pathname === "//webview" && url.search.startsWith("?link=")) {
         return decodeURIComponent(url.search.replace("?link=", ""));
       }
+      if (url.pathname === "//openURL" && url.search.startsWith("?link=")) {
+        return decodeURIComponent(url.search.replace("?link=", ""));
+      }
     }
     return false;
   }
