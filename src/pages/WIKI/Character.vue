@@ -13,16 +13,23 @@ import { ref, computed } from "vue";
 import TibWikiAvatar from "../../components/itembox/tib-wiki-avatar.vue";
 import { AppCharacterData } from "../../data";
 import Mys from "../../plugins/Mys";
-import { createTGWindow } from "../../utils/TGWindow";
+import { useAppStore } from "../../store/modules/app";
+import { createTGWindow, createWiki } from "../../utils/TGWindow";
 
 // snackbar
 const snackbar = ref(false);
 // data
 const cardsInfo = computed(() => AppCharacterData);
+const appStore = useAppStore();
 
 function toOuter(item: TGApp.App.Character.WikiBriefInfo): void {
   if (item.contentId === 0) {
     snackbar.value = true;
+    return;
+  }
+  // 如果是调试环境，打开 wiki 页面
+  if (appStore.devMode) {
+    createWiki("Character", item.id.toString());
     return;
   }
   const url = Mys.Api.Obc.replace("{contentId}", item.contentId.toString());

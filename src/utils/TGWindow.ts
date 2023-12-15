@@ -1,7 +1,7 @@
 /**
  * @file utils/TGWindow.ts
  * @description 窗口创建相关工具函数
- * @since Beta v0.3.7
+ * @since Beta v0.3.8
  */
 
 import { invoke, window as TauriWindow } from "@tauri-apps/api";
@@ -117,4 +117,18 @@ export function createAnno(item: TGApp.App.Announcement.ListCard): void {
     createTGWindow(annoJsonPath, "Dev_JSON", annoJsonTitle, 960, 720, false, false);
   }
   createTGWindow(annoPath, "Sub_window", annoTitle, 960, 720, false, false);
+}
+
+/**
+ * @description 打开 Wiki
+ * @since Beta v0.3.8
+ * @param {string} dir 目录
+ * @param {string} name 文件名
+ * @returns {void}
+ */
+export function createWiki(dir: string, name: string): void {
+  // if(dir !== "Character") return;
+  const dirName = dir === "GCG" ? dir : dir.toLowerCase();
+  const wikiPath = `/wiki/detail/${dirName}/${name}`;
+  createTGWindow(wikiPath, "Sub_window", `Wiki_${dirName}_${name}`, 960, 720, false, false);
 }
