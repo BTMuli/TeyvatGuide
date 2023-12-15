@@ -125,7 +125,7 @@ export async function generateShareImg(
     if (!saveFile) {
       showSnackbar({
         color: "warn",
-        text: "将尝试报存到剪贴板",
+        text: "将尝试保存到剪贴板",
       });
     } else {
       await saveCanvasImg(buffer, fileName);
