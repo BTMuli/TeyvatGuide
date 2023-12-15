@@ -30,10 +30,13 @@ export async function parseLink(
         return true;
       }
       if (url.pathname === "//webview" && url.search.startsWith("?link=")) {
-        return decodeURIComponent(url.search.replace("?link=", ""));
+        const urlTransform = decodeURIComponent(url.search.replace("?link=", ""));
+        return await parseLink(urlTransform, useInner);
       }
+      // todo 不保证转换后的链接可用
       if (url.pathname === "//openURL" && url.search.startsWith("?url=")) {
-        return decodeURIComponent(url.search.replace("?url=", ""));
+        const urlTransform = decodeURIComponent(url.search.replace("?url=", ""));
+        return await parseLink(urlTransform, useInner);
       }
     }
     return false;
@@ -44,6 +47,12 @@ export async function parseLink(
       if (typeof postId !== "string") return false;
       createPost(postId);
       return true;
+    }
+  }
+  if (url.hostname === "webstatic.mihoyo.com") {
+    // 临时打的补丁
+    if (url.pathname === "/bbs/event/signin/hkrpg/index.html") {
+      return "https://act.mihoyo.com/bbs/event/signin/hkrpg/e202304121516551.html?bbs_auth_required=true&act_id=e202304121516551&bbs_presentation_style=fullscreen&utm_source=bbs&utm_medium=mys&utm_campaign=icon";
     }
   }
   const prefix = [
