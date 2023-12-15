@@ -18,7 +18,7 @@ declare namespace TGApp.App.Weapon {
    * @property {string} icon - 武器图标
    * @return WikiBriefInfo
    */
-  export interface WikiBriefInfo {
+  interface WikiBriefInfo {
     id: number;
     contentId: number;
     name: string;
@@ -39,8 +39,8 @@ declare namespace TGApp.App.Weapon {
    * @property {number} star 武器星级
    * @property {string} weapon 武器类型
    * @property {TGApp.App.Calendar.Material[]} materials 武器培养材料
-   * @property {TGACore.Components.Weapon.RhiAffix} affix 精炼描述
-   * @property {string} story 武器故事
+   * @property {TGApp.Plugins.Hutao.Weapon.RhiAffix} affix 精炼描述
+   * @property {string|string[]} story 武器故事
    * @return WikiItem
    */
   interface WikiItem {
@@ -50,7 +50,7 @@ declare namespace TGApp.App.Weapon {
     star: number;
     weapon: string;
     materials: TGApp.App.Calendar.Material[];
-    affix: TGACore.Components.Weapon.RhiAffix;
-    story: string;
+    affix: TGApp.Plugins.Hutao.Weapon.RhiAffix;
+    story: string | string[];
   }
 }
