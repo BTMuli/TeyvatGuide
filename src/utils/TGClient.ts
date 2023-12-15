@@ -97,7 +97,7 @@ class TGClient {
    */
   async loadJSBridge(): Promise<void> {
     const executeJS = `javascript:(function() {
-      if(window.MiHoYoJSBridge) return;
+      if(window.MiHoYoJSInterface) return;
       window.MiHoYoJSInterface = {
         postMessage: function(arg) { window.__TAURI__.event.emit('post_mhy_client', arg) },
         closePage: function() { this.postMessage('{"method":"closePage"}') },
