@@ -1,11 +1,9 @@
 /**
- * @file data index
- * @description data index
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.5
+ * @file src/data/index.ts
+ * @description 数据文件入口
+ * @since Beta v0.3.8
  */
 
-// Data
 import achievements from "./app/achievements.json";
 import achievementSeries from "./app/achievementSeries.json";
 import calendar from "./app/calendar.json";
@@ -26,11 +24,15 @@ const wikiFiles = import.meta.glob("./wiki/**/*.json");
 
 /**
  * @description 动态读取wiki文件
- * @since Alpha v0.1.5
+ * @since Beta v0.3.8
  * @param {string} dir 目录
  * @param {string} name 文件名
  * @returns {Promise<any>} 文件内容
  */
+export async function getWikiData(
+  dir: "Character",
+  name: string,
+): Promise<{ default: TGApp.App.Character.WikiItem } | undefined>;
 export async function getWikiData(dir: string, name: string): Promise<any> {
   return await wikiFiles[`./wiki/${dir}/${name}.json`]();
 }
