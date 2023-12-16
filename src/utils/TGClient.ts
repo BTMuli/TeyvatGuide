@@ -12,9 +12,11 @@ import { parseLink } from "./linkParser";
 import { createPost } from "./TGWindow";
 import { getDeviceInfo } from "./toolFunc";
 import showSnackbar from "../components/func/snackbar";
+import TGSqlite from "../plugins/Sqlite";
 import { useAppStore } from "../store/modules/app";
 import { useUserStore } from "../store/modules/user";
 import TGConstant from "../web/constant/TGConstant";
+import { getCookieTokenBySToken } from "../web/request/getCookieToken";
 import TGRequest from "../web/request/TGRequest";
 import { getDS4JS } from "../web/utils/getRequestHeader";
 
@@ -253,7 +255,7 @@ class TGClient {
         await this.getCookieInfo(payload, callback);
         break;
       case "getCookieToken":
-        await this.getCookieToken(callback);
+        await this.getCookieToken(payload, callback);
         break;
       case "getActionTicket":
         await this.getActionTicket(payload, callback);
@@ -368,27 +370,33 @@ class TGClient {
 
   /**
    * @func getCookieToken
-   * @since Beta v0.3.4
-   * @todo 待完善
+   * @since Beta v0.3.8
    * @desc 获取米游社客户端的 cookie_token
+   * @param {getCookieTokenPayload} payload - 请求参数
    * @param {string} callback - 回调函数名
    * @returns {void} - 无返回值
    */
-  async getCookieToken(callback: string): Promise<void> {
+  async getCookieToken(payload: unknown, callback: string): Promise<void> {
+    interface getCookieTokenPayload {
+      forceRefresh: boolean;
+    }
+    const ckPayload = <getCookieTokenPayload>payload;
     const user = useUserStore();
-    const executeJS =
-      "javascript:(function(){" +
-      `document.cookie = "account_id=${user.cookie.account_id};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";` +
-      `document.cookie = "cookie_token=${user.cookie.cookie_token};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";` +
-      `document.cookie = "ltoken=${user.cookie.ltoken};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";` +
-      `document.cookie = "ltuid=${user.cookie.ltuid};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";` +
-      `document.cookie = "stuid=${user.cookie.stuid};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";` +
-      `document.cookie = "stoken=${user.cookie.stoken};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";` +
-      `document.cookie = "mid=${user.cookie.mid};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";` +
-      "})();";
+    if (ckPayload.forceRefresh) {
+      const res = await getCookieTokenBySToken(user.cookie.mid, user.cookie.stoken);
+      if (typeof res !== "string") {
+        return;
+      }
+      user.cookie.cookie_token = res;
+      await TGSqlite.saveAppData("cookie", JSON.stringify(user.cookie));
+    }
+    const executeJS = `javascript:(function(){
+      var domain = window.location.host;
+      document.cookie = "cookie_token=${user.cookie.cookie_token};domain=." + domain + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;
+      document.cookie = "ltoken=${user.cookie.ltoken};domain=." + domain + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;
+    })();`;
     console.info(`[getCookieToken] ${executeJS}`);
     await invoke("execute_js", { label: "mhy_client", js: executeJS });
-    // callback
     const data = {
       cookie_token: user.cookie.cookie_token,
     };
