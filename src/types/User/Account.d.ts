@@ -1,12 +1,12 @@
 /**
  * @file types/User/Account.d.ts
  * @description 用户账号相关类型定义文件
- * @since Alpha v0.1.5
+ * @since Beta v0.3.8
  */
 
 /**
  * @description 用户账号相关类型定义命名空间
- * @since Alpha v0.1.5
+ * @since Beta v0.3.8
  * @namespace TGApp.User.Account
  * @memberof TGApp.User
  */
@@ -48,5 +48,30 @@ declare namespace TGApp.User.Account {
     nickname: string;
     region: string;
     region_name: string;
+  }
+
+  /**
+   * @description 用户 Cookie 类型
+   * @since Beta v0.3.8
+   * @interface Cookie
+   * @memberof TGApp.User.Account
+   * @property {string} account_id 账号 ID
+   * @property {string} cookie_token Cookie Token
+   * @property {string} game_token 游戏 Token
+   * @property {string} ltoken LToken
+   * @property {string} ltuid LTUID
+   * @property {string} mid MID
+   * @property {string} stoken SToken_v2
+   * @return Cookie
+   */
+  interface Cookie {
+    account_id: string;
+    cookie_token: string;
+    game_token: string;
+    ltoken: string;
+    ltuid: string;
+    mid: string;
+    stoken: string;
+    stuid: string;
   }
 }

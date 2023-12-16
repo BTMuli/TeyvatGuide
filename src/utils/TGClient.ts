@@ -334,7 +334,7 @@ class TGClient {
 
   /**
    * @func genAuthKey
-   * @since Beta v0.3.7
+   * @since Beta v0.3.8
    * @desc 获取米游社客户端的 authkey
    * @param {Record<string, string>} payload - 请求参数
    * @param {string} callback - 回调函数名
@@ -342,6 +342,7 @@ class TGClient {
    */
   async genAuthKey(payload: Record<string, string>, callback: string): Promise<void> {
     const userStore = useUserStore();
+    if (!userStore.cookie) return;
     const cookie = {
       mid: userStore.cookie.mid,
       stoken: userStore.cookie.stoken,
@@ -352,7 +353,7 @@ class TGClient {
 
   /**
    * @func getCookieInfo
-   * @since Beta v0.3.4
+   * @since Beta v0.3.8
    * @desc 获取米游社客户端的 cookie
    * @param {unknown} payload - 请求参数
    * @param {string} callback - 回调函数名
@@ -360,6 +361,7 @@ class TGClient {
    */
   async getCookieInfo(payload: unknown, callback: string): Promise<void> {
     const user = useUserStore();
+    if (!user.cookie) return;
     const data = {
       ltoken: user.cookie.ltoken,
       ltuid: user.cookie.ltuid,
@@ -382,6 +384,7 @@ class TGClient {
     }
     const ckPayload = <getCookieTokenPayload>payload;
     const user = useUserStore();
+    if (!user.cookie) return;
     if (ckPayload.forceRefresh) {
       const res = await getCookieTokenBySToken(user.cookie.mid, user.cookie.stoken);
       if (typeof res !== "string") {
@@ -405,7 +408,7 @@ class TGClient {
 
   /**
    * @func getActionTicket
-   * @since Beta v0.3.4
+   * @since Beta v0.3.8
    * @desc 获取米游社客户端的 action_ticket\
    * @param {unknown} payload - 请求参数
    * @param {string} callback - 回调函数名
@@ -414,6 +417,7 @@ class TGClient {
   async getActionTicket(payload: any, callback: string): Promise<void> {
     const actionType = payload.action_type;
     const user = useUserStore();
+    if (!user.cookie) return;
     const uid = user.getCurAccount().gameUid;
     const mid = user.cookie.mid;
     const stoken = user.cookie.stoken;
@@ -477,13 +481,14 @@ class TGClient {
 
   /**
    * @func getUserInfo
-   * @since Beta v0.3.4
+   * @since Beta v0.3.8
    * @desc 获取米游社客户端的用户信息
    * @param {string} callback - 回调函数名
    * @returns {void} - 无返回值
    */
   async getUserInfo(callback: string): Promise<void> {
     const user = useUserStore();
+    if (!user.cookie) return;
     const cookieToken = user.cookie.cookie_token;
     const accountId = user.cookie.account_id;
     const userInfo = await TGRequest.User.byCookie.getUserInfo(cookieToken, accountId);

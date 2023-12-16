@@ -119,6 +119,14 @@ async function confirmRefresh(): Promise<void> {
   }
   loadingTitle.value = "正在获取 authkey";
   loading.value = true;
+  if (!userStore.cookie) {
+    showSnackbar({
+      color: "error",
+      text: "请先登录",
+    });
+    loading.value = false;
+    return;
+  }
   const cookie = {
     stoken: userStore.cookie.stoken,
     mid: userStore.cookie.mid,

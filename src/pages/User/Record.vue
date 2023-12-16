@@ -32,7 +32,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 
 import showSnackbar from "../../components/func/snackbar";
 import TSubLine from "../../components/main/t-subline.vue";
@@ -58,7 +58,6 @@ const loadingSub = ref<string>();
 // data
 const isEmpty = ref<boolean>(true);
 const recordData = ref<TGApp.Sqlite.Record.SingleTable>(<TGApp.Sqlite.Record.SingleTable>{});
-const recordCookie = computed<TGApp.BBS.Constant.CookieGroup2>(() => userStore.getCookieGroup2());
 
 onMounted(async () => {
   loadingTitle.value = "正在加载战绩数据";
@@ -83,7 +82,19 @@ async function initUserRecordData(): Promise<void> {
 async function refresh(): Promise<void> {
   loadingTitle.value = "正在获取战绩数据";
   loading.value = true;
-  const res = await TGRequest.User.getRecord(recordCookie.value, user);
+  if (!userStore.cookie) {
+    showSnackbar({
+      text: "请先登录",
+      color: "error",
+    });
+    loading.value = false;
+    return;
+  }
+  const cookie = {
+    account_id: userStore.cookie.account_id,
+    cookie_token: userStore.cookie.cookie_token,
+  };
+  const res = await TGRequest.User.getRecord(cookie, user);
   if (!("retcode" in res)) {
     console.log(res);
     loadingTitle.value = "正在保存战绩数据";

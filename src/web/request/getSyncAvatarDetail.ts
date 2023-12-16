@@ -1,7 +1,7 @@
 /**
  * @file web/request/getSyncAvatarDetail.ts
  * @description 获取同步角色详情相关请求函数
- * @since Beta v0.3.4
+ * @since Beta v0.3.8
  */
 
 import { app, http } from "@tauri-apps/api";
@@ -11,14 +11,16 @@ import TGUtils from "../utils/TGUtils";
 
 /**
  * @description 获取同步角色详情
- * @since Beta v0.3.4
- * @param {TGApp.BBS.Constant.CookieGroup2} cookie cookie
+ * @since Beta v0.3.8
+ * @param {string} accountId 账号 id
+ * @param {string} cookieToken cookie token
  * @param {string} uid 用户 uid
  * @param {number} avatarId 角色 id
  * @returns {Promise<TGApp.Game.Calculate.AvatarDetail|TGApp.BBS.Response.Base>}
  */
 async function getSyncAvatarDetail(
-  cookie: TGApp.BBS.Constant.CookieGroup2,
+  accountId: string,
+  cookieToken: string,
   uid: string,
   avatarId: number,
 ): Promise<TGApp.Game.Calculate.AvatarDetail | TGApp.BBS.Response.Base> {
@@ -28,15 +30,11 @@ async function getSyncAvatarDetail(
     region: TGUtils.Tools.getServerByUid(uid),
     avatar_id: avatarId.toString(),
   };
-  const ck: Record<string, string> = {
-    account_id: cookie.account_id,
-    cookie_token: cookie.cookie_token,
-  };
   const version = await app.getVersion();
   const header = {
     "User-Agent": `TeyvatGuide/${version}`,
     Referer: "https://webstatic.mihoyo.com/",
-    Cookie: TGUtils.Tools.transCookie(ck),
+    Cookie: TGUtils.Tools.transCookie({ account_id: accountId, cookie_token: cookieToken }),
   };
   return await http
     .fetch<TGApp.Game.Calculate.SyncAvatarDetailResponse | TGApp.BBS.Response.Base>(url, {

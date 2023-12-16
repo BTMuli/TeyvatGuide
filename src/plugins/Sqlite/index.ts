@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/index.ts
  * @description Sqlite 数据库操作类
- * @since Beta v0.3.6
+ * @since Beta v0.3.8
  */
 
 import { app } from "@tauri-apps/api";
@@ -103,10 +103,10 @@ class Sqlite {
 
   /**
    * @description 获取 cookie
-   * @since Beta v0.3.3
-   * @returns {Promise<Record<string, string>>}
+   * @since Beta v0.3.8
+   * @returns {Promise<TGApp.User.Account.Cookie>}
    */
-  public async getCookie(): Promise<Record<string, string>> {
+  public async getCookie(): Promise<TGApp.User.Account.Cookie> {
     const db = await this.getDB();
     const sql = "SELECT value FROM AppData WHERE key='cookie';";
     const res: Array<{ value: string }> = await db.select(sql);

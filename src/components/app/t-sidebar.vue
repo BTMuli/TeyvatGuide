@@ -171,18 +171,12 @@ const userStore = useUserStore();
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 
 const userInfo = computed(() => {
-  if (appStore.isLogin) {
-    const info = userStore.getBriefInfo();
-    return {
-      nickname: info.nickname,
-      avatar: info.avatar,
-    };
-  } else {
-    return {
-      nickname: "未登录",
-      avatar: "/source/UI/defaultUser.webp",
-    };
-  }
+  const info = userStore.getBriefInfo();
+  if (info && info.nickname) return info;
+  return {
+    nickname: "未登录",
+    avatar: "/source/UI/defaultUser.webp",
+  };
 });
 const rail = ref(appStore.sidebar.collapse);
 // theme

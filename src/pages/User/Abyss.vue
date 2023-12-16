@@ -88,7 +88,7 @@ const loadingSub = ref<string>();
 
 // data
 const userTab = ref<number>(0);
-const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.getCurAccount());
+const user = ref<TGApp.Sqlite.Account.Game>(userStore.getCurAccount());
 
 const localAbyss = ref<TGApp.Sqlite.Abyss.SingleTable[]>([]);
 const localAbyssID = ref<number[]>([]);
@@ -114,12 +114,19 @@ async function initAbyssData(): Promise<void> {
 async function getAbyssData(): Promise<void> {
   loadingTitle.value = "正在获取深渊数据";
   loading.value = true;
-  const abyssCookie = userStore.getCookieGroup4();
-  const cookie: Record<string, string> = {
-    account_id: abyssCookie.account_id,
-    cookie_token: abyssCookie.cookie_token,
-    ltoken: abyssCookie.ltoken,
-    ltuid: abyssCookie.ltuid,
+  if (!userStore.cookie) {
+    showSnackbar({
+      text: "未登录",
+      color: "error",
+    });
+    loading.value = false;
+    return;
+  }
+  const cookie = {
+    account_id: userStore.cookie.account_id,
+    cookie_token: userStore.cookie.cookie_token,
+    ltoken: userStore.cookie.ltoken,
+    ltuid: userStore.cookie.ltuid,
   };
   loadingTitle.value = "正在获取上期深渊数据";
   const resP = await TGRequest.User.byCookie.getAbyss(cookie, "2", user.value);

@@ -54,7 +54,7 @@
   />
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 
 import DucDetailOverlay from "../../components/devCharacter/duc-detail-overlay.vue";
 import showSnackbar from "../../components/func/snackbar";
@@ -78,7 +78,6 @@ const loadingSub = ref<string>();
 // data
 const isEmpty = ref(true);
 const roleList = ref<TGApp.Sqlite.Character.UserRole[]>([]);
-const roleCookie = computed(() => userStore.getCookieGroup4());
 
 // overlay
 const visible = ref(false);
@@ -134,7 +133,21 @@ async function loadRole(): Promise<void> {
 async function refreshRoles(): Promise<void> {
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
-  const res = await TGRequest.User.byLToken.getRoleList(roleCookie.value, user);
+  if (!userStore.cookie) {
+    showSnackbar({
+      text: "请先登录",
+      color: "error",
+    });
+    loading.value = false;
+    return;
+  }
+  const cookie = {
+    account_id: userStore.cookie.account_id,
+    cookie_token: userStore.cookie.cookie_token,
+    ltoken: userStore.cookie.ltoken,
+    ltuid: userStore.cookie.ltuid,
+  };
+  const res = await TGRequest.User.byLToken.getRoleList(cookie, user);
   if (Array.isArray(res)) {
     loadingTitle.value = "正在保存角色数据";
     await TGSqlite.saveUserCharacter(user.gameUid, res);
@@ -153,12 +166,20 @@ async function refreshRoles(): Promise<void> {
 async function refreshTalent(): Promise<void> {
   loadingTitle.value = "正在获取天赋数据";
   loading.value = true;
-  const talentCookie = userStore.getCookieGroup2();
+  if (!userStore.cookie) {
+    showSnackbar({
+      text: "请先登录",
+      color: "error",
+    });
+    loading.value = false;
+    return;
+  }
   for (const role of roleList.value) {
     loadingTitle.value = `正在获取${role.name}的天赋数据`;
     loadingSub.value = `CID：${role.cid}`;
     const res = await TGRequest.User.calculate.getSyncAvatarDetail(
-      talentCookie,
+      userStore.cookie.account_id,
+      userStore.cookie.cookie_token,
       user.gameUid,
       role.cid,
     );

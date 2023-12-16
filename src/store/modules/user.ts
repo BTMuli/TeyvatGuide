@@ -1,87 +1,153 @@
 /**
- * @file store modules user.ts
- * @description User store module
- * @since Beta v0.3.0
+ * @file store/modules/user.ts
+ * @description 用户信息模块
+ * @since Beta v0.3.8
  */
 
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
+import TGSqlite from "../../plugins/Sqlite";
+
 export const useUserStore = defineStore(
   "user",
   () => {
-    const briefInfo = ref<TGApp.App.Account.BriefInfo>({
-      nickname: "",
-      avatar: "",
-      uid: "",
-      desc: "",
-    });
-    const account = ref<TGApp.Sqlite.Account.Game>({
-      gameBiz: "",
-      gameUid: "",
-      isChosen: 0,
-      isOfficial: 0,
-      level: "",
-      nickname: "",
-      region: "",
-      regionName: "",
-    });
-    const cookie = ref<Record<string, string>>({});
+    const briefInfo = ref<TGApp.App.Account.BriefInfo>(loadBriefInfo());
+    const account = ref<TGApp.Sqlite.Account.Game>(loadAccount());
+    const cookie = ref<TGApp.User.Account.Cookie>();
 
-    function setBriefInfo(info: TGApp.App.Account.BriefInfo): void {
-      briefInfo.value = info;
+    /**
+     * @description 从本地加载用户信息
+     * @since Beta v0.3.8
+     * @function loadBriefInfo
+     * @memberof useUserStore
+     * @returns {TGApp.App.Account.BriefInfo}
+     */
+    function loadBriefInfo(): TGApp.App.Account.BriefInfo {
+      const info = window.localStorage.getItem("briefInfo");
+      if (info !== null && info !== undefined) {
+        console.log(JSON.parse(info).briefInfo);
+        return JSON.parse(info).briefInfo;
+      }
+      return {
+        nickname: "",
+        avatar: "",
+        uid: "",
+        desc: "",
+      };
     }
 
-    function getBriefInfo(): Record<string, string> {
+    /**
+     * @description 从本地加载当前用户信息
+     * @since Beta v0.3.8
+     * @function loadAccount
+     * @memberof useUserStore
+     * @returns {TGApp.Sqlite.Account.Game}
+     */
+    function loadAccount(): TGApp.Sqlite.Account.Game {
+      const info = window.localStorage.getItem("account");
+      if (info !== null && info !== undefined) {
+        console.log(JSON.parse(info).account);
+        return JSON.parse(info).account;
+      }
+      return {
+        gameBiz: "",
+        gameUid: "",
+        isChosen: 0,
+        isOfficial: 0,
+        level: "",
+        nickname: "",
+        region: "",
+        regionName: "",
+      };
+    }
+
+    /**
+     * @description 获取用户信息
+     * @since Beta v0.3.8
+     * @function getBriefInfo
+     * @memberof useUserStore
+     * @returns {TGApp.App.Account.BriefInfo}
+     */
+    function getBriefInfo(): TGApp.App.Account.BriefInfo {
       return briefInfo.value;
     }
 
-    function setCurAccount(user: TGApp.Sqlite.Account.Game): void {
-      account.value = user;
-    }
-
+    /**
+     * @description 获取当前用户信息
+     * @since Beta v0.3.8
+     * @function getCurAccount
+     * @memberof useUserStore
+     * @returns {TGApp.Sqlite.Account.Game}
+     */
     function getCurAccount(): TGApp.Sqlite.Account.Game {
       return account.value;
     }
 
-    function getCookieItem(key: string): string {
-      return cookie.value[key] || "";
+    /**
+     * @description 设置用户信息
+     * @param info
+     * @since Beta v0.3.8
+     * @function setBriefInfo
+     * @memberof useUserStore
+     * @param {TGApp.App.Account.BriefInfo} info - 用户信息
+     * @returns {void}
+     */
+    function setBriefInfo(info: TGApp.App.Account.BriefInfo): void {
+      briefInfo.value = info;
     }
 
-    function getCookieGroup2(): TGApp.BBS.Constant.CookieGroup2 {
-      return {
-        account_id: getCookieItem("account_id"),
-        cookie_token: getCookieItem("cookie_token"),
-      };
+    /**
+     * @description 设置当前用户信息
+     * @since Beta v0.3.8
+     * @function setCurAccount
+     * @memberof useUserStore
+     * @param {TGApp.Sqlite.Account.Game} user - 用户信息
+     * @returns {void}
+     */
+    function setCurAccount(user: TGApp.Sqlite.Account.Game): void {
+      account.value = user;
     }
 
-    function getCookieGroup3(): TGApp.BBS.Constant.CookieGroup3 {
-      return {
-        ltoken: getCookieItem("ltoken"),
-        ltuid: getCookieItem("ltuid"),
-      };
+    /**
+     * @description 保存cookie到本地
+     * @since Beta v0.3.8
+     * @function saveCookie
+     * @memberof useUserStore
+     * @param {TGApp.User.Account.Cookie} ck - cookie对象
+     * @returns {Promise<void>}
+     */
+    async function saveCookie(ck?: TGApp.User.Account.Cookie): Promise<void> {
+      if (ck) {
+        cookie.value = ck;
+      }
+      await TGSqlite.saveAppData("cookie", JSON.stringify(cookie.value));
     }
 
-    function getCookieGroup4(): TGApp.BBS.Constant.CookieGroup4 {
-      return {
-        account_id: getCookieItem("account_id"),
-        cookie_token: getCookieItem("cookie_token"),
-        ltoken: getCookieItem("ltoken"),
-        ltuid: getCookieItem("ltuid"),
-      };
+    /**
+     * @description 保存用户信息到本地
+     * @since Beta v0.3.8
+     * @function saveBriefInfo
+     * @memberof useUserStore
+     * @param {TGApp.App.Account.BriefInfo} info - 用户信息
+     * @returns {Promise<void>}
+     */
+    async function saveBriefInfo(info?: TGApp.App.Account.BriefInfo): Promise<void> {
+      if (info) {
+        setBriefInfo(info);
+        localStorage.setItem("briefInfo", JSON.stringify({ briefInfo: info }));
+      }
+      await TGSqlite.saveAppData("userInfo", JSON.stringify(briefInfo.value));
     }
 
     return {
-      briefInfo,
       cookie,
-      account,
       getBriefInfo,
       setBriefInfo,
       setCurAccount,
       getCurAccount,
-      getCookieGroup2,
-      getCookieGroup3,
-      getCookieGroup4,
+      saveCookie,
+      saveBriefInfo,
     };
   },
   {

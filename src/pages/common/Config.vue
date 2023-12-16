@@ -39,14 +39,14 @@
       </template>
     </v-list-item>
     <v-list-item title="登录信息">
-      <v-list-item-subtitle v-show="userInfo.nickname !== '未登录'">
-        {{ userInfo.nickname }} uid:{{ userInfo.uid }}
+      <v-list-item-subtitle v-show="userInfo?.nickname !== '未登录'">
+        {{ userInfo?.nickname }} uid:{{ userInfo?.uid }}
       </v-list-item-subtitle>
-      <v-list-item-subtitle v-show="userInfo.nickname === '未登录'">
+      <v-list-item-subtitle v-show="userInfo?.nickname === '未登录'">
         未登录，请扫码登录！
       </v-list-item-subtitle>
       <template #prepend>
-        <img class="config-icon" :src="userInfo.avatar" alt="Login" />
+        <img class="config-icon" :src="userInfo?.avatar" alt="Login" />
       </template>
       <template #append>
         <v-btn class="config-btn" @click="confirmScanLogin">扫码登录</v-btn>
@@ -202,15 +202,8 @@ const showReset = ref<boolean>(false);
 // data
 const showHome = ref<string[]>(homeStore.getShowValue());
 const userInfo = computed(() => {
-  if (!appStore.isLogin) {
-    return {
-      nickname: "未登录",
-      uid: "-1",
-      desc: "请扫码登录",
-      avatar: "/source/UI/defaultUser.webp",
-    };
-  } else {
-    const info = userStore.getBriefInfo();
+  const info = userStore.getBriefInfo();
+  if (info && info.nickname) {
     return {
       nickname: info.nickname,
       uid: info.uid,
@@ -218,6 +211,12 @@ const userInfo = computed(() => {
       avatar: info.avatar,
     };
   }
+  return {
+    nickname: "未登录",
+    uid: "-1",
+    desc: "请扫码登录",
+    avatar: "/source/UI/defaultUser.webp",
+  };
 });
 const vuetifyTheme = computed(() => {
   return appStore.theme === "dark" ? "dark" : "light";
@@ -280,6 +279,13 @@ async function confirmRefreshUser(): Promise<void> {
     });
     return;
   }
+  if (!userStore.cookie) {
+    showSnackbar({
+      color: "error",
+      text: "请先登录",
+    });
+    return;
+  }
   const ck = userStore.cookie;
   if (JSON.stringify(ck) === "{}") {
     showSnackbar({
@@ -322,7 +328,7 @@ async function confirmRefreshUser(): Promise<void> {
     loadingTitle.value = "刷新失败!正在获取用户头像、昵称信息";
     failCount++;
   }
-  await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
+  await userStore.saveCookie(ck);
   const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
   if ("retcode" in infoRes) {
     console.error(infoRes);
@@ -335,8 +341,7 @@ async function confirmRefreshUser(): Promise<void> {
       avatar: infoRes.avatar_url,
       desc: infoRes.introduce,
     };
-    userStore.setBriefInfo(briefInfo);
-    await TGSqlite.saveAppData("userInfo", JSON.stringify(briefInfo));
+    await userStore.saveBriefInfo(briefInfo);
     loadingTitle.value = "获取成功!正在获取用户游戏账号信息";
   }
   const accountRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);

@@ -21,7 +21,6 @@ import QrcodeVue from "qrcode.vue";
 import { computed, reactive, ref, watch } from "vue";
 
 import Mys from "../../plugins/Mys";
-import TGSqlite from "../../plugins/Sqlite";
 import { useUserStore } from "../../store/modules/user";
 import TGRequest from "../../web/request/TGRequest";
 import showSnackbar from "../func/snackbar";
@@ -48,7 +47,7 @@ const visible = computed({
 const loading = ref<boolean>(false);
 const qrCode = ref<string>("");
 const ticket = ref<string>("");
-const cookie = reactive<Record<string, string>>({
+const cookie = reactive<TGApp.User.Account.Cookie>({
   account_id: "",
   ltuid: "",
   stuid: "",
@@ -142,8 +141,7 @@ async function getTokens(): Promise<void> {
   if (typeof cookieTokenRes === "string") cookie.cookie_token = cookieTokenRes;
   const ltokenRes = await TGRequest.User.bySToken.getLToken(cookie.mid, cookie.stoken);
   if (typeof ltokenRes === "string") cookie.ltoken = ltokenRes;
-  userStore.cookie = cookie;
-  await TGSqlite.saveAppData("cookie", JSON.stringify(cookie));
+  await userStore.saveCookie(cookie);
 }
 </script>
 <style lang="css" scoped>

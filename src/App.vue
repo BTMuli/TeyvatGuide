@@ -145,11 +145,11 @@ async function checkUserLoad(): Promise<void> {
   } else {
     console.info("cookie 数据已加载！");
   }
-  const infoLocal = userStore.briefInfo;
+  const infoLocal = userStore.getBriefInfo();
   const appData = await TGSqlite.getAppData();
   const infoDB = appData.find((item) => item.key === "userInfo")?.value;
   if (infoDB === undefined && JSON.stringify(infoLocal) !== "{}") {
-    await TGSqlite.saveAppData("userInfo", JSON.stringify(infoLocal));
+    await userStore.saveBriefInfo();
   } else if (infoDB !== undefined && infoLocal !== JSON.parse(infoDB)) {
     userStore.setBriefInfo(JSON.parse(infoDB));
     console.info("briefInfo 数据已更新！");
