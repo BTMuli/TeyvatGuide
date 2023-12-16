@@ -54,6 +54,12 @@ export async function parseLink(
     if (url.pathname === "/bbs/event/signin/hkrpg/index.html") {
       return "https://act.mihoyo.com/bbs/event/signin/hkrpg/e202304121516551.html?bbs_auth_required=true&act_id=e202304121516551&bbs_presentation_style=fullscreen&utm_source=bbs&utm_medium=mys&utm_campaign=icon";
     }
+    if (url.pathname === "/bbs/event/signin-ys/index.html") {
+      return "https://act.mihoyo.com/bbs/event/signin/hk4e/index.html?act_id=e202311201442471&bbs_auth_required=true&bbs_presentation_style=fullscreen&mhy_presentation_style=fullscreen&utm_source=bbs&utm_medium=ys&utm_campaign=icon";
+    }
+    if (url.pathname === "bh3/event/e20200511toolBox/index.html") {
+      return "https://webstatic.mihoyo.com/bbs/event/e20200511toolbox/index.html?game_biz=ys_cn&bbs_show_back=true&bbs_auth_required=true";
+    }
   }
   const prefix = [
     "m.miyoushe.com",
