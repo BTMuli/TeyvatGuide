@@ -9,6 +9,7 @@ import type { Event } from "@tauri-apps/api/event";
 import { appWindow, WebviewWindow } from "@tauri-apps/api/window";
 
 import { parseLink } from "./linkParser";
+import { createPost } from "./TGWindow";
 import { getDeviceInfo } from "./toolFunc";
 import showSnackbar from "../components/func/snackbar";
 import { useAppStore } from "../store/modules/app";
@@ -196,6 +197,25 @@ class TGClient {
     this.window = WebviewWindow.getByLabel("mhy_client");
     await this.window?.show();
     await this.window?.setFocus();
+    await this.loadJSBridge();
+  }
+
+  /**
+   * @func handleCustomCallback
+   * @since Beta v0.3.8
+   * @desc 处理自定义的 callback
+   * @param {Event<string>} arg - 事件参数
+   * @returns {any} - 返回值
+   */
+  async handleCustomCallback(arg: Event<string>): Promise<any> {
+    const { method, payload } = <NormalArg>JSON.parse(arg.payload);
+    switch (method) {
+      case "teyvat_open":
+        createPost(payload);
+        break;
+      default:
+        console.warn(`[${arg.windowLabel}] ${arg.payload}`);
+    }
   }
 
   /**
@@ -206,10 +226,14 @@ class TGClient {
    * @returns {any} - 返回值
    */
   async handleCallback(arg: Event<string>): Promise<any> {
+    const { method, payload, callback } = <NormalArg>JSON.parse(arg.payload);
+    if (method.startsWith("teyvat")) {
+      await this.handleCustomCallback(arg);
+      return;
+    }
     console.log(`[${arg.windowLabel}] ${arg.payload}`);
     await this.hideSideBar();
     await this.hideOverlay();
-    const { method, payload, callback } = <NormalArg>JSON.parse(arg.payload);
     switch (method) {
       case "closePage":
         await this.closePage();

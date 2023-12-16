@@ -69,10 +69,33 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
       "open_post" => {
         let window = handle.get_window("mhy_client").unwrap();
         let execute_js = r#"javascript:(async function(){
-          let url = window.location.href;
-          let arg = {
-           method: 'teyvat_open',
-           payload: url,
+          let url = new URL(window.location.href);
+          const whiteList = [
+            "bbs.mihoyo.com",
+            "www.miyoushe.com",
+            "m.miyoushe.com",
+          ];
+          if(!whiteList.includes(url.hostname)){
+            alert(`当前页面不是米游社帖子页面\n${window.location.href}`);
+            return;
+          }
+          if(!url.pathname.includes("/article/") && !url.hash.includes("/article/")){
+            alert(`当前页面不是米游社帖子页面\n${window.location.href}`);
+            return;
+          }
+          let postId;
+          if(url.pathname.includes("/article/")){
+            postId = url.pathname.split("/").pop();
+          }else{
+            postId = url.hash.split("/").pop();
+          }
+          if(typeof postId !== "string"){
+            alert("帖子 ID 无效");
+            return;
+          }
+          const arg = {
+            method: 'teyvat_open',
+            payload: postId,
           }
           await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
         })()"#;
