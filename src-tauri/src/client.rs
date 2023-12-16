@@ -1,9 +1,17 @@
 //! @file src/client.rs
 //! @desc 客户端模块，负责操作米游社客户端
-//! @since Beta v0.3.6
+//! @since Beta v0.3.8
 
-use tauri::{AppHandle, Manager, WindowBuilder, WindowUrl};
+use tauri::{AppHandle, CustomMenuItem, Manager, Menu, WindowBuilder, WindowUrl};
 use url::Url;
+
+// 创建米游社客户端菜单
+fn create_mhy_menu() -> Menu {
+  let top = CustomMenuItem::new("top".to_string(), "置顶");
+  let cancel_top = CustomMenuItem::new("cancel_top".to_string(), "取消置顶");
+  let open_post = CustomMenuItem::new("open_post".to_string(), "打开帖子");
+  return Menu::new().add_item(top).add_item(cancel_top).add_item(open_post);
+}
 
 // 获取米游社客户端入口地址
 fn get_mhy_client_url(func: String) -> WindowUrl {
@@ -45,12 +53,33 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
     dbg!("mhy_client exists");
     return;
   }
-  let mhy_client = WindowBuilder::from_config(&handle, mhy_window_config).build().unwrap();
-  let js_bridge = r#"
-          window.MiHoYoJSInterface = {
-            postMessage: function(arg) { window.__TAURI__.event.emit('post_mhy_client', arg) },
-            closePage: function() { this.postMessage('{"method":"closePage"}') },
-          };
-      "#;
-  mhy_client.eval(&js_bridge).ok().unwrap();
+  WindowBuilder::from_config(&handle, mhy_window_config)
+    .menu(create_mhy_menu())
+    .build()
+    .expect("failed to create mhy_client")
+    .on_menu_event(move |event| match event.menu_item_id() {
+      "top" => {
+        let window = handle.get_window("mhy_client").unwrap();
+        window.set_always_on_top(true).unwrap();
+      }
+      "cancel_top" => {
+        let window = handle.get_window("mhy_client").unwrap();
+        window.set_always_on_top(false).unwrap();
+      }
+      "open_post" => {
+        let window = handle.get_window("mhy_client").unwrap();
+        let execute_js = r#"
+          let url = window.location.href;
+          let arg = {
+           method: 'teyvat_open',
+           payload: {
+             url: url
+           }
+          }
+          window.__TAURI__.emit('post_mhy_client',JSON.stringify(arg));
+        "#;
+        window.eval(&execute_js).ok().unwrap();
+      }
+      _ => {}
+    });
 }
