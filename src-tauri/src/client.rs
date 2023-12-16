@@ -68,16 +68,14 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
       }
       "open_post" => {
         let window = handle.get_window("mhy_client").unwrap();
-        let execute_js = r#"
+        let execute_js = r#"javascript:(async function(){
           let url = window.location.href;
           let arg = {
            method: 'teyvat_open',
-           payload: {
-             url: url
-           }
+           payload: url,
           }
-          window.__TAURI__.emit('post_mhy_client',JSON.stringify(arg));
-        "#;
+          await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
+        })()"#;
         window.eval(&execute_js).ok().unwrap();
       }
       _ => {}
