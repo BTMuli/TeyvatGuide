@@ -157,7 +157,7 @@
 </template>
 
 <script lang="ts" setup>
-import { event } from "@tauri-apps/api";
+import { event, window as TauriWindow } from "@tauri-apps/api";
 import { computed, onMounted, ref } from "vue";
 
 import { useAppStore } from "../../store/modules/app";
@@ -214,7 +214,9 @@ function collapse(): void {
 
 onMounted(async () => {
   await listenOnTheme();
-  await mhyClient.run();
+  if (TauriWindow.getCurrent().label === "TeyvatGuide") {
+    await mhyClient.run();
+  }
 });
 
 async function listenOnTheme(): Promise<void> {
