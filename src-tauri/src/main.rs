@@ -15,12 +15,12 @@ static mut DEEP_LINK_REGISTERED: bool = false;
 
 #[tauri::command]
 async fn init_app(app_handle: tauri::AppHandle) {
-  dbg!("init_app");
   unsafe {
     if APP_INITIALIZED == true && DEEP_LINK_REGISTERED == true {
       return;
     }
   }
+  dbg!("init_app");
   let _mhy = app_handle.get_window("mhy_client");
   if _mhy.is_some() {
     std::thread::sleep(std::time::Duration::from_millis(1000));
@@ -34,12 +34,12 @@ async fn init_app(app_handle: tauri::AppHandle) {
 
 #[tauri::command]
 async fn register_deep_link(app_handle: tauri::AppHandle) {
-  dbg!("register_deep_link");
   unsafe {
     if DEEP_LINK_REGISTERED == true {
       return;
     }
   }
+  dbg!("register_deep_link");
   tauri_plugin_deep_link::register("teyvatguide", move |request| {
     dbg!(&request);
     app_handle.emit_all("active_deep_link", request).unwrap();
@@ -54,7 +54,6 @@ async fn register_deep_link(app_handle: tauri::AppHandle) {
 #[tauri::command]
 async fn execute_js(app_handle: tauri::AppHandle, label: String, js: String) {
   let window = app_handle.get_window(&label).unwrap();
-  dbg!(&js);
   window.eval(&js).ok().unwrap();
 }
 
@@ -76,7 +75,6 @@ async fn create_window(app_handle: tauri::AppHandle, label: String, mut option: 
 // 读取目录大小
 #[tauri::command]
 async fn get_dir_size(path: String) -> u64 {
-  dbg!(&path);
   let walk_dir = walkdir::WalkDir::new(path);
   let mut size = 0;
   for entry in walk_dir {
