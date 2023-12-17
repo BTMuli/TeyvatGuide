@@ -9,9 +9,9 @@ import { appWindow } from "@tauri-apps/api/window";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
-import showSnackbar from "../../components/func/snackbar";
-import ToLoading from "../../components/overlay/to-loading.vue";
-import { getWikiData } from "../../data";
+import showSnackbar from "../components/func/snackbar";
+import ToLoading from "../components/overlay/to-loading.vue";
+import { getWikiData } from "../data";
 
 // 路由数据
 const id = <string>useRoute().params.id;
