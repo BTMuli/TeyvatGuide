@@ -1,15 +1,78 @@
 <template>
+  <TSwitchTheme />
   <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" :subtitle="loadingSub" />
-  <div class="wc-box">
-    {{ data }}
+  <div class="twc-box" v-if="data !== undefined">
+    <div class="twc-brief">
+      <TItembox :model-value="box" />
+      <div class="twc-brief-info">
+        <div class="twc-bi-top">
+          <span>{{ data.name }} {{ data.title }}</span>
+          <span>{{ data.description }}</span>
+        </div>
+        <div class="twc-bi-grid">
+          <div class="twc-bim-item">
+            <span>所属</span>
+            <span>{{ data.brief.camp }}</span>
+          </div>
+          <div class="twc-bim-item">
+            <span>命之座</span>
+            <span>{{ data.brief.constellation }}</span>
+          </div>
+          <div class="twc-bim-item">
+            <span>生日</span>
+            <span>{{ data.brief.birth }}</span>
+          </div>
+        </div>
+        <div class="twc-bi-grid">
+          <div class="twc-bib-item">
+            <span>汉语CV</span>
+            <span>{{ data.brief.cv.cn }}</span>
+          </div>
+          <div class="twc-bib-item">
+            <span>日语CV</span>
+            <span>{{ data.brief.cv.jp }}</span>
+          </div>
+          <div class="twc-bib-item">
+            <span>英语CV</span>
+            <span>{{ data.brief.cv.en }}</span>
+          </div>
+          <div class="twc-bib-item">
+            <span>韩语CV</span>
+            <span>{{ data.brief.cv.kr }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="twc-material-grid">
+      <!-- todo 换个组件或者组件样式优化 -->
+      <TibCalendarMaterial v-for="(item, index) in data.materials" :key="index" :item="item" />
+    </div>
+    <!-- todo 等级，天赋，命座 -->
+    <div class="twc-text">
+      <div class="twc-text-title">资料</div>
+      <div class="twc-text-item" v-for="(item, index) in data?.talks" :key="index">
+        <div class="twc-text-item-title">{{ item.Title }}</div>
+        <div class="twc-text-item-content">{{ item.Context }}</div>
+      </div>
+    </div>
+    <div class="twc-text">
+      <div class="twc-text-title">故事</div>
+      <div class="twc-text-item" v-for="(item, index) in data.stories" :key="index">
+        <div class="twc-text-item-title">{{ item.Title }}</div>
+        <div class="twc-text-item-content">{{ item.Context }}</div>
+      </div>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
 import { appWindow } from "@tauri-apps/api/window";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
+import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import showSnackbar from "../components/func/snackbar";
+import TibCalendarMaterial from "../components/itembox/tib-calendar-material.vue";
+import TItembox from "../components/main/t-itembox.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import { getWikiData } from "../data";
 
@@ -23,14 +86,30 @@ const loadingSub = ref<string>();
 
 // 数据
 const data = ref<TGApp.App.Character.WikiItem>();
+const box = computed(() => {
+  return {
+    bg: `/icon/bg/${data.value?.star}-Star.webp`,
+    icon: `/WIKI/character/icon/${data.value?.id}.webp`,
+    size: "128px",
+    height: "128px",
+    display: "inner",
+    lt: `/icon/element/${data.value?.element}元素.webp`,
+    ltSize: "40px",
+    innerHeight: 30,
+    innerIcon: `/icon/weapon/${data.value?.weapon}.webp`,
+    innerText: data.value?.name,
+    clickable: false,
+  };
+});
 
 onMounted(async () => {
   await appWindow.show();
   try {
     const res = await getWikiData("Character", id);
-    if (res !== undefined) {
-      data.value = res.default;
-    }
+    if (res === undefined) return;
+    data.value = res.default;
+    await appWindow.setTitle(`Wiki_Character - ${data.value.name}`);
+    await appWindow.setAlwaysOnTop(true);
     loading.value = false;
   } catch (error) {
     loadingEmpty.value = true;
@@ -51,3 +130,102 @@ onMounted(async () => {
   }
 });
 </script>
+<style lang="css" scoped>
+.twc-box {
+  display: flex;
+  width: 800px;
+  flex-direction: column;
+  margin: 0 auto;
+  row-gap: 10px;
+}
+
+.twc-brief {
+  display: flex;
+  column-gap: 10px;
+}
+
+.twc-brief-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.twc-bi-top {
+  display: flex;
+  flex-direction: column;
+}
+
+.twc-bi-top :nth-child(1) {
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 20px;
+}
+
+.twc-bi-top :nth-child(2) {
+  display: flex;
+  align-items: flex-end;
+  opacity: 0.8;
+}
+
+.twc-bi-grid {
+  display: grid;
+  column-gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.twc-bim-item {
+  display: flex;
+  column-gap: 5px;
+}
+
+.twc-bim-item :nth-child(1) {
+  font-weight: bold;
+}
+
+.twc-bib-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.twc-bib-item :nth-child(1) {
+  font-weight: bold;
+}
+
+.twc-material-grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 5px;
+}
+
+.twc-text {
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+}
+
+.twc-text-title {
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 18px;
+}
+
+.twc-text-item {
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 5px;
+  row-gap: 5px;
+}
+
+.twc-text-item-title {
+  font-weight: bold;
+}
+
+.twc-text-item-content {
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+</style>
