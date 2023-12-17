@@ -7,7 +7,7 @@
       <div class="tcm-icon">
         <img :src="props.item.icon" alt="icon" />
       </div>
-      <div class="tcm-star">
+      <div class="tcm-star" v-if="props.item.star !== 0">
         <img :src="props.item.starIcon" alt="element" />
       </div>
     </div>
