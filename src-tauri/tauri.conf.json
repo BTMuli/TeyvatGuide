@@ -43,13 +43,14 @@
       },
       "window": {
         "all": false,
-        "setFocus": true,
-        "setTitle": true,
-        "setFullscreen": true,
-        "unminimize": true,
-        "show": true,
         "close": true,
-        "hide": true
+        "hide": true,
+        "setAlwaysOnTop": true,
+        "setFocus": true,
+        "setFullscreen": true,
+        "setTitle": true,
+        "show": true,
+        "unminimize": true
       },
       "os": {
         "all": true
