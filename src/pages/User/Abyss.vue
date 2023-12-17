@@ -66,7 +66,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 
 import showSnackbar from "../../components/func/snackbar";
 import TSubLine from "../../components/main/t-subline.vue";
