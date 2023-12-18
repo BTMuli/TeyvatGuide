@@ -22,9 +22,10 @@
 </template>
 <script lang="ts" setup>
 import { onMounted, ref, StyleValue, toRaw } from "vue";
+import { useRouter } from "vue-router";
 
 import { getEmojis } from "../../plugins/Mys/request/getEmojis";
-import { parseLink } from "../../utils/linkParser";
+import { parseLink, parsePost } from "../../utils/linkParser";
 import { isColorSimilar } from "../../utils/toolFunc";
 import showSnackbar from "../func/snackbar";
 
@@ -46,6 +47,7 @@ const props = defineProps<TpTextProps>();
 const mode = ref<string>("text");
 const localEmojis = ref(localStorage.getItem("emojis"));
 const emojis = ref<TpText[]>([]);
+const router = useRouter();
 
 console.log("tpText", JSON.stringify(props.data.insert), toRaw(props.data)?.attributes);
 
@@ -101,6 +103,16 @@ async function toLink() {
   if (!props.data.attributes) return;
   if (!props.data.attributes.link) return;
   const link = props.data.attributes.link;
+  const isPost = await parsePost(link);
+  if (isPost !== false) {
+    await router.push({
+      name: "帖子详情",
+      params: {
+        post_id: isPost,
+      },
+    });
+    return;
+  }
   const res = await parseLink(link);
   if (res === true) return;
   if (res === false) {

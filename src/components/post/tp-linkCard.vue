@@ -14,8 +14,9 @@
 </template>
 <script lang="ts" setup>
 import { toRaw } from "vue";
+import { useRouter } from "vue-router";
 
-import { parseLink } from "../../utils/linkParser";
+import { parseLink, parsePost } from "../../utils/linkParser";
 import showSnackbar from "../func/snackbar";
 
 interface TpLinkCard {
@@ -41,11 +42,22 @@ interface TpLinkCardProps {
 }
 
 const props = defineProps<TpLinkCardProps>();
+const router = useRouter();
 
 console.log("tpLinkCard", props.data.insert.link_card.card_id, toRaw(props.data).insert.link_card);
 
 async function toLink() {
   const link = props.data.insert.link_card.landing_url;
+  const isPost = await parsePost(link);
+  if (isPost !== false) {
+    await router.push({
+      name: "帖子详情",
+      params: {
+        post_id: isPost,
+      },
+    });
+    return;
+  }
   const res = await parseLink(link);
   if (res === true) return;
   if (res === false) {

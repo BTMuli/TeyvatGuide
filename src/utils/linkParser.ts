@@ -9,6 +9,44 @@ import { createPost } from "./TGWindow";
 import showConfirm from "../components/func/confirm";
 
 /**
+ * @function parsePost
+ * @since Beta v0.3.8
+ * @description 处理帖子
+ * @param {string} link
+ * @returns {Promise<false|string>} - 处理情况，或者转换后的链接
+ */
+export async function parsePost(link: string): Promise<false | string> {
+  const url = new URL(link);
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
+    if (url.protocol === "mihoyobbs:") {
+      if (url.pathname.startsWith("//article/")) {
+        const postId = url.pathname.split("/").pop();
+        if (!postId) return false;
+        return postId;
+      }
+      if (url.pathname === "//webview" && url.search.startsWith("?link=")) {
+        const urlTransform = decodeURIComponent(url.search.replace("?link=", ""));
+        return await parsePost(urlTransform);
+      }
+      // todo 不保证转换后的链接可用
+      if (url.pathname === "//openURL" && url.search.startsWith("?url=")) {
+        const urlTransform = decodeURIComponent(url.search.replace("?url=", ""));
+        return await parsePost(urlTransform);
+      }
+    }
+    return false;
+  }
+  if (url.hostname === "bbs.mihoyo.com" || url.hostname === "www.miyoushe.com") {
+    if (url.pathname.includes("/article/")) {
+      const postId = url.pathname.split("/").pop();
+      if (typeof postId !== "string") return false;
+      return postId;
+    }
+  }
+  return false;
+}
+
+/**
  * @function parseLink
  * @since Beta v0.3.8
  * @description 处理链接
@@ -45,6 +83,9 @@ export async function parseLink(
     if (url.pathname.includes("/article/")) {
       const postId = url.pathname.split("/").pop();
       if (typeof postId !== "string") return false;
+      if (!useInner) {
+        return "post";
+      }
       createPost(postId);
       return true;
     }
