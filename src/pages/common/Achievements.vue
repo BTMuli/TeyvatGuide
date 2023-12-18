@@ -100,6 +100,7 @@
       </div>
     </div>
   </div>
+  <ToNamecard v-model="showNameCard" :data="curCard" />
 </template>
 
 <script lang="ts" setup>
@@ -110,10 +111,10 @@ import { useRoute, useRouter } from "vue-router";
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
+import ToNamecard from "../../components/overlay/to-namecard.vue";
 import { AppAchievementSeriesData } from "../../data";
 import TGSqlite from "../../plugins/Sqlite";
 import { useAchievementsStore } from "../../store/modules/achievements";
-import { createTGWindow } from "../../utils/TGWindow";
 import { getNowStr } from "../../utils/toolFunc";
 import { getUiafHeader, readUiafData, verifyUiafData } from "../../utils/UIAF";
 
@@ -125,6 +126,7 @@ const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载数据");
 const search = ref<string>("");
 const hideFin = ref<boolean>(false);
+const showNameCard = ref<boolean>(false);
 // data
 const title = ref(achievementsStore.title);
 let curCard = reactive({ profile: "", bg: "", icon: "", name: "", desc: "" });
@@ -237,7 +239,7 @@ async function selectSeries(index: number): Promise<void> {
 
 // 打开图片
 function openImg(): void {
-  createTGWindow(curCard.profile, "Sub_window", `Namecard_${curCard.name}`, 840, 400, false);
+  showNameCard.value = true;
 }
 
 async function searchCard(): Promise<void> {
