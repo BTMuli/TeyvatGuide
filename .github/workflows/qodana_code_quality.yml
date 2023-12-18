@@ -1,26 +1,27 @@
 name: Qodana
 on:
-  workflow_dispatch:
-  pull_request:
   push:
     branches:
       - master
+
 jobs:
   qodana:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 18.16.0
+          node-version: 21.4.0
       - name: setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 8.11.0
-      - name: Install frontend dependencies
+          version: 8.12.1
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: "Qodana Scan"
-        uses: JetBrains/qodana-action@v2022.3.4
+        uses: JetBrains/qodana-action@v2023.3
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
