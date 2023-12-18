@@ -6129,6 +6129,15 @@
     "version": "4.2"
   },
   {
+    "id": 81437,
+    "series": 0,
+    "order": 1421,
+    "name": "人间剧",
+    "description": "见证勒鲁瓦一家的故事。",
+    "reward": 5,
+    "version": "4.3"
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
