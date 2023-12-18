@@ -73,7 +73,7 @@ export function createTGWindow(
 
 /**
  * @description 打开帖子
- * @since Beta v0.3.7
+ * @since Beta v0.3.8
  * @param {TGApp.Plugins.Mys.News.RenderCard | string | number | TGApp.Plugins.Mys.Forum.RenderCard} item 帖子内容或ID
  * @param {string} title 帖子标题
  * @returns {void}
@@ -82,22 +82,15 @@ export function createPost(
   item: TGApp.Plugins.Mys.News.RenderCard | string | number | TGApp.Plugins.Mys.Forum.RenderCard,
   title?: string,
 ): void {
-  let postId, postTitle, jsonTitle;
+  let postId, postTitle;
   if (typeof item === "string" || typeof item === "number") {
     postId = item.toString();
     postTitle = title ? `Post_${postId} ${title}` : `Post_${postId}`;
-    jsonTitle = title ? `Post_${postId}_JSON ${title}` : `Post_${postId}_JSON`;
   } else {
     postId = item.postId.toString();
     postTitle = `Post_${postId} ${item.title}`;
-    jsonTitle = `Post_${postId}_JSON ${item.title}`;
   }
   const postPath = `/post_detail/${postId}`;
-  const jsonPath = `/post_detail_json/${postId}`;
-  const isDev = useAppStore().devMode ?? false;
-  if (isDev) {
-    createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
-  }
   createTGWindow(postPath, "Sub_window", postTitle, 960, 720, false, false);
 }
 

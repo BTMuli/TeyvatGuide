@@ -75,6 +75,8 @@ import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import TpParser from "../components/post/tp-parser.vue";
 import Mys from "../plugins/Mys";
+import { useAppStore } from "../store/modules/app";
+import { createTGWindow } from "../utils/TGWindow";
 
 interface PostRender {
   title: string;
@@ -161,6 +163,11 @@ onMounted(async () => {
     await appWindow.setTitle(`Post_${postId} Parsing Error`);
     return;
   }
+  // 打开 json
+  const isDev = useAppStore().devMode ?? false;
+  if (isDev) {
+    createPostJson(postId.toString());
+  }
   await nextTick(() => {
     loading.value = false;
   });
@@ -227,6 +234,12 @@ function parseContent(content: string): string {
     }
   });
   return JSON.stringify(result);
+}
+
+function createPostJson(postId: string): void {
+  const jsonPath = `/post_detail_json/${postId}`;
+  const jsonTitle = `Post_${postId}_JSON`;
+  createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
 }
 </script>
 <style lang="css" scoped>
