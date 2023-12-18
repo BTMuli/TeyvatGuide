@@ -136,7 +136,7 @@ onMounted(() => {
 function toOuter(cardName: string, cardId: number): void {
   console.log(cardName, cardId);
   // 若不存在 contentId
-  if (cardId === -1) {
+  if (cardId === 0) {
     showSnackbar({
       text: "该卡牌暂无外部链接",
       color: "error",
