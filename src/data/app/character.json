@@ -1,5 +1,16 @@
 [
   {
+    "id": 10000091,
+    "contentId": 0,
+    "name": "娜维娅",
+    "title": "明花蔓舵",
+    "birthday": [8, 16],
+    "star": 5,
+    "element": "岩",
+    "weapon": "双手剑",
+    "nameCard": "娜维娅·刺玫"
+  },
+  {
     "id": 10000089,
     "contentId": 500291,
     "name": "芙宁娜",
@@ -427,6 +438,17 @@
     "element": "冰",
     "weapon": "单手剑",
     "nameCard": "神里绫华·扇子"
+  },
+  {
+    "id": 10000090,
+    "contentId": 0,
+    "name": "夏沃蕾",
+    "title": "明律决罚",
+    "birthday": [1, 10],
+    "star": 4,
+    "element": "火",
+    "weapon": "长柄武器",
+    "nameCard": "夏沃蕾·贰型"
   },
   {
     "id": 10000088,

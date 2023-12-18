@@ -225,6 +225,15 @@
     "icon": "/WIKI/weapon/13501.webp"
   },
   {
+    "id": 12512,
+    "contentId": 0,
+    "name": "裁断",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "icon": "/WIKI/weapon/12512.webp"
+  },
+  {
     "id": 12511,
     "contentId": 6179,
     "name": "苇海信标",
@@ -898,6 +907,15 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "icon": "/WIKI/weapon/12427.webp"
+  },
+  {
+    "id": 12426,
+    "contentId": 0,
+    "name": "「究极霸王超级魔剑」",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "icon": "/WIKI/weapon/12426.webp"
   },
   {
     "id": 12425,
