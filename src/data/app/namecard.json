@@ -936,6 +936,15 @@
     "profile": "/source/nameCard/profile/纳西妲·仰月.webp"
   },
   {
+    "name": "娜维娅·刺玫",
+    "type": 2,
+    "desc": "名片纹饰。玫瑰会绽放，娜维娅小姐的伞可以打开。但是要小心，因为玫瑰带刺，娜维娅小姐的伞可以发射强力伞弹。",
+    "source": "娜维娅的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/娜维娅·刺玫.webp",
+    "bg": "/source/nameCard/bg/娜维娅·刺玫.webp",
+    "profile": "/source/nameCard/profile/娜维娅·刺玫.webp"
+  },
+  {
     "name": "妮露·莲舞",
     "type": 2,
     "desc": "名片纹饰。绽于净水的莲华，不过是她足尖下的一刹流光。",
@@ -1087,6 +1096,15 @@
     "icon": "/source/nameCard/icon/夏洛蒂·独家.webp",
     "bg": "/source/nameCard/bg/夏洛蒂·独家.webp",
     "profile": "/source/nameCard/profile/夏洛蒂·独家.webp"
+  },
+  {
+    "name": "夏沃蕾·贰型",
+    "type": 2,
+    "desc": "名片纹饰。特巡队配枪全名叫「特巡队贰型制式铳枪」。夏沃蕾则把自己那把取名叫「贰型」。就像世上有无数的花，但是你珍惜的那一朵就算被命名为朴实无华的「花」，也同样与众不同。",
+    "source": "夏沃蕾的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/夏沃蕾·贰型.webp",
+    "bg": "/source/nameCard/bg/夏沃蕾·贰型.webp",
+    "profile": "/source/nameCard/profile/夏沃蕾·贰型.webp"
   },
   {
     "name": "香菱·出锅",
@@ -1384,6 +1402,15 @@
     "icon": "/source/nameCard/icon/纪行·盛夏.webp",
     "bg": "/source/nameCard/bg/纪行·盛夏.webp",
     "profile": "/source/nameCard/profile/纪行·盛夏.webp"
+  },
+  {
+    "name": "纪行·时雕",
+    "type": 3,
+    "desc": "名片纹饰。不知道还需要多久提瓦特的映影艺术才能重新发明「雕刻时光」。不过这幕剧，确实凝固了罪恶的过往。",
+    "source": "纪行系统奖励获取。",
+    "icon": "/source/nameCard/icon/纪行·时雕.webp",
+    "bg": "/source/nameCard/bg/纪行·时雕.webp",
+    "profile": "/source/nameCard/profile/纪行·时雕.webp"
   },
   {
     "name": "纪行·天命",
