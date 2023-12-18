@@ -15,7 +15,7 @@ const box = computed<TItemBoxData>(() => {
   if (props.modelValue.id === 10000005 || props.modelValue.id === 10000007) {
     return {
       bg: `/icon/bg/${props.modelValue.star}-Star.webp`,
-      icon: `/WIKI/character/icon/${props.modelValue.id}.webp`,
+      icon: `/WIKI/character/${props.modelValue.id}.webp`,
       size: "128px",
       height: "128px",
       display: "inner",
@@ -28,7 +28,7 @@ const box = computed<TItemBoxData>(() => {
   }
   return {
     bg: `/icon/bg/${props.modelValue.star}-Star.webp`,
-    icon: `/WIKI/character/icon/${props.modelValue.id}.webp`,
+    icon: `/WIKI/character/${props.modelValue.id}.webp`,
     size: "128px",
     height: "128px",
     display: "inner",

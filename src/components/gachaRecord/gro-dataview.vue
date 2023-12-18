@@ -180,9 +180,9 @@ function getStar5Avg(): string {
 // 获取物品图标
 function getIcon(itemId: string, type: string): string {
   if (type === "角色") {
-    return "/WIKI/character/icon/" + itemId + ".webp";
+    return "/WIKI/character/" + itemId + ".webp";
   } else {
-    return "/WIKI/weapon/icon/" + itemId + ".webp";
+    return "/WIKI/weapon/" + itemId + ".webp";
   }
 }
 

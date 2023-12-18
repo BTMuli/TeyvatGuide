@@ -32,7 +32,7 @@ const box = computed<TItemBoxData>(() => {
     clickable: false,
     display: "outer",
     height: "80px",
-    icon: `/WIKI/character/icon/${avatar.value?.id}.webp`,
+    icon: `/WIKI/character/${avatar.value?.id}.webp`,
     innerHeight: 20,
     innerText: avatar.value.name,
     lt:

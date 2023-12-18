@@ -34,7 +34,7 @@ const box = computed<TItemBoxData>(() => {
     clickable: false,
     display: "outer",
     height: "100px",
-    icon: `/WIKI/character/icon/${avatar.value?.id}.webp`,
+    icon: `/WIKI/character/${avatar.value?.id}.webp`,
     innerHeight: 20,
     // 0.24688451 => 24.688%
     innerText: (props.modelValue.Rate * 100).toFixed(3) + "%",

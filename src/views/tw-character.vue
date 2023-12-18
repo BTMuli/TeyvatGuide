@@ -89,7 +89,7 @@ const data = ref<TGApp.App.Character.WikiItem>();
 const box = computed(() => {
   return {
     bg: `/icon/bg/${data.value?.star}-Star.webp`,
-    icon: `/WIKI/character/icon/${data.value?.id}.webp`,
+    icon: `/WIKI/character/${data.value?.id}.webp`,
     size: "128px",
     height: "128px",
     display: "inner",

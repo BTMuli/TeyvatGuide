@@ -220,7 +220,7 @@ onUpdated(() => {
 const weaponBox = computed(() => {
   const weapon = data.value.weapon;
   return {
-    icon: `/WIKI/weapon/icon/${weapon.id}.webp`,
+    icon: `/WIKI/weapon/${weapon.id}.webp`,
     bg: `/icon/bg/${weapon.star}-Star.webp`,
   };
 });

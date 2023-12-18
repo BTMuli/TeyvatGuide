@@ -44,7 +44,7 @@ const boxData = computed<TItemBoxData>(() => {
   if (props.mode === "avatar") {
     return {
       bg: `/icon/bg/${props.data.star}-Star.webp`,
-      icon: `/WIKI/character/icon/${props.data.cid}.webp`,
+      icon: `/WIKI/character/${props.data.cid}.webp`,
       size: "100px",
       height: "100px",
       display: "inner",
@@ -57,7 +57,7 @@ const boxData = computed<TItemBoxData>(() => {
   } else {
     return {
       bg: `/icon/bg/${props.data.star}-Star.webp`,
-      icon: `/WIKI/weapon/icon/${props.data.id}.webp`,
+      icon: `/WIKI/weapon/${props.data.id}.webp`,
       size: "100px",
       height: "100px",
       display: "inner",

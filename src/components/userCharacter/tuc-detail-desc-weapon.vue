@@ -37,7 +37,7 @@ const props = defineProps<TucDetailDescWeaponProps>();
 const box = computed(() => {
   return {
     bg: `/icon/bg/${props.modelValue.star}-Star.webp`,
-    icon: `/WIKI/weapon/icon/${props.modelValue.id}.webp`,
+    icon: `/WIKI/weapon/${props.modelValue.id}.webp`,
   };
 });
 </script>

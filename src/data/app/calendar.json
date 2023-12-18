@@ -9,7 +9,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000051.webp",
+    "icon": "/WIKI/character/10000051.webp",
     "materials": [
       {
         "id": 104304,
@@ -53,7 +53,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000062.webp",
+    "icon": "/WIKI/character/10000062.webp",
     "materials": [
       {
         "id": 104301,
@@ -97,7 +97,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000035.webp",
+    "icon": "/WIKI/character/10000035.webp",
     "materials": [
       {
         "id": 104310,
@@ -141,7 +141,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000037.webp",
+    "icon": "/WIKI/character/10000037.webp",
     "materials": [
       {
         "id": 104313,
@@ -185,7 +185,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000063.webp",
+    "icon": "/WIKI/character/10000063.webp",
     "materials": [
       {
         "id": 104310,
@@ -229,7 +229,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000002.webp",
+    "icon": "/WIKI/character/10000002.webp",
     "materials": [
       {
         "id": 104323,
@@ -273,7 +273,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000086.webp",
+    "icon": "/WIKI/character/10000086.webp",
     "materials": [
       {
         "id": 104344,
@@ -317,7 +317,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/岩元素.webp",
-    "icon": "/WIKI/character/icon/10000038.webp",
+    "icon": "/WIKI/character/10000038.webp",
     "materials": [
       {
         "id": 104307,
@@ -361,7 +361,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "elementIcon": "/icon/element/岩元素.webp",
-    "icon": "/WIKI/character/icon/10000030.webp",
+    "icon": "/WIKI/character/10000030.webp",
     "materials": [
       {
         "id": 104316,
@@ -405,7 +405,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/岩元素.webp",
-    "icon": "/WIKI/character/icon/10000057.webp",
+    "icon": "/WIKI/character/10000057.webp",
     "materials": [
       {
         "id": 104323,
@@ -449,7 +449,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/水元素.webp",
-    "icon": "/WIKI/character/icon/10000033.webp",
+    "icon": "/WIKI/character/10000033.webp",
     "materials": [
       {
         "id": 104301,
@@ -493,7 +493,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/水元素.webp",
-    "icon": "/WIKI/character/icon/10000041.webp",
+    "icon": "/WIKI/character/10000041.webp",
     "materials": [
       {
         "id": 104304,
@@ -537,7 +537,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/水元素.webp",
-    "icon": "/WIKI/character/icon/10000060.webp",
+    "icon": "/WIKI/character/10000060.webp",
     "materials": [
       {
         "id": 104310,
@@ -581,7 +581,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/水元素.webp",
-    "icon": "/WIKI/character/icon/10000054.webp",
+    "icon": "/WIKI/character/10000054.webp",
     "materials": [
       {
         "id": 104320,
@@ -625,7 +625,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/水元素.webp",
-    "icon": "/WIKI/character/icon/10000066.webp",
+    "icon": "/WIKI/character/10000066.webp",
     "materials": [
       {
         "id": 104323,
@@ -669,7 +669,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/水元素.webp",
-    "icon": "/WIKI/character/icon/10000070.webp",
+    "icon": "/WIKI/character/10000070.webp",
     "materials": [
       {
         "id": 104335,
@@ -713,7 +713,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/水元素.webp",
-    "icon": "/WIKI/character/icon/10000087.webp",
+    "icon": "/WIKI/character/10000087.webp",
     "materials": [
       {
         "id": 104338,
@@ -757,7 +757,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/水元素.webp",
-    "icon": "/WIKI/character/icon/10000089.webp",
+    "icon": "/WIKI/character/10000089.webp",
     "materials": [
       {
         "id": 104341,
@@ -801,7 +801,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/火元素.webp",
-    "icon": "/WIKI/character/icon/10000016.webp",
+    "icon": "/WIKI/character/10000016.webp",
     "materials": [
       {
         "id": 104304,
@@ -845,7 +845,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/火元素.webp",
-    "icon": "/WIKI/character/icon/10000029.webp",
+    "icon": "/WIKI/character/10000029.webp",
     "materials": [
       {
         "id": 104301,
@@ -889,7 +889,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "elementIcon": "/icon/element/火元素.webp",
-    "icon": "/WIKI/character/icon/10000046.webp",
+    "icon": "/WIKI/character/10000046.webp",
     "materials": [
       {
         "id": 104313,
@@ -933,7 +933,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/火元素.webp",
-    "icon": "/WIKI/character/icon/10000049.webp",
+    "icon": "/WIKI/character/10000049.webp",
     "materials": [
       {
         "id": 104320,
@@ -977,7 +977,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/火元素.webp",
-    "icon": "/WIKI/character/icon/10000079.webp",
+    "icon": "/WIKI/character/10000079.webp",
     "materials": [
       {
         "id": 104335,
@@ -1021,7 +1021,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/火元素.webp",
-    "icon": "/WIKI/character/icon/10000084.webp",
+    "icon": "/WIKI/character/10000084.webp",
     "materials": [
       {
         "id": 104338,
@@ -1065,7 +1065,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/草元素.webp",
-    "icon": "/WIKI/character/icon/10000082.webp",
+    "icon": "/WIKI/character/10000082.webp",
     "materials": [
       {
         "id": 104316,
@@ -1109,7 +1109,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/草元素.webp",
-    "icon": "/WIKI/character/icon/10000069.webp",
+    "icon": "/WIKI/character/10000069.webp",
     "materials": [
       {
         "id": 104329,
@@ -1153,7 +1153,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/草元素.webp",
-    "icon": "/WIKI/character/icon/10000073.webp",
+    "icon": "/WIKI/character/10000073.webp",
     "materials": [
       {
         "id": 104332,
@@ -1197,7 +1197,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/草元素.webp",
-    "icon": "/WIKI/character/icon/10000078.webp",
+    "icon": "/WIKI/character/10000078.webp",
     "materials": [
       {
         "id": 104332,
@@ -1241,7 +1241,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/雷元素.webp",
-    "icon": "/WIKI/character/icon/10000042.webp",
+    "icon": "/WIKI/character/10000042.webp",
     "materials": [
       {
         "id": 104310,
@@ -1285,7 +1285,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "elementIcon": "/icon/element/雷元素.webp",
-    "icon": "/WIKI/character/icon/10000052.webp",
+    "icon": "/WIKI/character/10000052.webp",
     "materials": [
       {
         "id": 104326,
@@ -1329,7 +1329,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/雷元素.webp",
-    "icon": "/WIKI/character/icon/10000058.webp",
+    "icon": "/WIKI/character/10000058.webp",
     "materials": [
       {
         "id": 104326,
@@ -1373,7 +1373,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "elementIcon": "/icon/element/雷元素.webp",
-    "icon": "/WIKI/character/icon/10000071.webp",
+    "icon": "/WIKI/character/10000071.webp",
     "materials": [
       {
         "id": 104329,
@@ -1417,7 +1417,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/风元素.webp",
-    "icon": "/WIKI/character/icon/10000003.webp",
+    "icon": "/WIKI/character/10000003.webp",
     "materials": [
       {
         "id": 104304,
@@ -1461,7 +1461,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/风元素.webp",
-    "icon": "/WIKI/character/icon/10000022.webp",
+    "icon": "/WIKI/character/10000022.webp",
     "materials": [
       {
         "id": 104307,
@@ -1505,7 +1505,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "elementIcon": "/icon/element/风元素.webp",
-    "icon": "/WIKI/character/icon/10000026.webp",
+    "icon": "/WIKI/character/10000026.webp",
     "materials": [
       {
         "id": 104310,
@@ -1549,7 +1549,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/风元素.webp",
-    "icon": "/WIKI/character/icon/10000047.webp",
+    "icon": "/WIKI/character/10000047.webp",
     "materials": [
       {
         "id": 104313,
@@ -1593,7 +1593,7 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/风元素.webp",
-    "icon": "/WIKI/character/icon/10000075.webp",
+    "icon": "/WIKI/character/10000075.webp",
     "materials": [
       {
         "id": 104335,
@@ -1637,7 +1637,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000015.webp",
+    "icon": "/WIKI/character/10000015.webp",
     "materials": [
       {
         "id": 104307,
@@ -1681,7 +1681,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000039.webp",
+    "icon": "/WIKI/character/10000039.webp",
     "materials": [
       {
         "id": 104301,
@@ -1725,7 +1725,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000045.webp",
+    "icon": "/WIKI/character/10000045.webp",
     "materials": [
       {
         "id": 104307,
@@ -1769,7 +1769,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000080.webp",
+    "icon": "/WIKI/character/10000080.webp",
     "materials": [
       {
         "id": 104307,
@@ -1813,7 +1813,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000036.webp",
+    "icon": "/WIKI/character/10000036.webp",
     "materials": [
       {
         "id": 104313,
@@ -1857,7 +1857,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000074.webp",
+    "icon": "/WIKI/character/10000074.webp",
     "materials": [
       {
         "id": 104332,
@@ -1901,7 +1901,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000085.webp",
+    "icon": "/WIKI/character/10000085.webp",
     "materials": [
       {
         "id": 104341,
@@ -1945,7 +1945,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/冰元素.webp",
-    "icon": "/WIKI/character/icon/10000088.webp",
+    "icon": "/WIKI/character/10000088.webp",
     "materials": [
       {
         "id": 104341,
@@ -1989,7 +1989,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/岩元素.webp",
-    "icon": "/WIKI/character/icon/10000034.webp",
+    "icon": "/WIKI/character/10000034.webp",
     "materials": [
       {
         "id": 104304,
@@ -2033,7 +2033,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/岩元素.webp",
-    "icon": "/WIKI/character/icon/10000027.webp",
+    "icon": "/WIKI/character/10000027.webp",
     "materials": [
       {
         "id": 104310,
@@ -2077,7 +2077,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "elementIcon": "/icon/element/岩元素.webp",
-    "icon": "/WIKI/character/icon/10000064.webp",
+    "icon": "/WIKI/character/10000064.webp",
     "materials": [
       {
         "id": 104313,
@@ -2121,7 +2121,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/岩元素.webp",
-    "icon": "/WIKI/character/icon/10000055.webp",
+    "icon": "/WIKI/character/10000055.webp",
     "materials": [
       {
         "id": 104326,
@@ -2165,7 +2165,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/水元素.webp",
-    "icon": "/WIKI/character/icon/10000014.webp",
+    "icon": "/WIKI/character/10000014.webp",
     "materials": [
       {
         "id": 104301,
@@ -2209,7 +2209,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/水元素.webp",
-    "icon": "/WIKI/character/icon/10000025.webp",
+    "icon": "/WIKI/character/10000025.webp",
     "materials": [
       {
         "id": 104316,
@@ -2253,7 +2253,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "elementIcon": "/icon/element/水元素.webp",
-    "icon": "/WIKI/character/icon/10000072.webp",
+    "icon": "/WIKI/character/10000072.webp",
     "materials": [
       {
         "id": 104329,
@@ -2297,7 +2297,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/火元素.webp",
-    "icon": "/WIKI/character/icon/10000021.webp",
+    "icon": "/WIKI/character/10000021.webp",
     "materials": [
       {
         "id": 104301,
@@ -2341,7 +2341,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/火元素.webp",
-    "icon": "/WIKI/character/icon/10000032.webp",
+    "icon": "/WIKI/character/10000032.webp",
     "materials": [
       {
         "id": 104304,
@@ -2385,7 +2385,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "elementIcon": "/icon/element/火元素.webp",
-    "icon": "/WIKI/character/icon/10000023.webp",
+    "icon": "/WIKI/character/10000023.webp",
     "materials": [
       {
         "id": 104313,
@@ -2429,7 +2429,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/火元素.webp",
-    "icon": "/WIKI/character/icon/10000044.webp",
+    "icon": "/WIKI/character/10000044.webp",
     "materials": [
       {
         "id": 104316,
@@ -2473,7 +2473,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/火元素.webp",
-    "icon": "/WIKI/character/icon/10000048.webp",
+    "icon": "/WIKI/character/10000048.webp",
     "materials": [
       {
         "id": 104316,
@@ -2517,7 +2517,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "elementIcon": "/icon/element/火元素.webp",
-    "icon": "/WIKI/character/icon/10000050.webp",
+    "icon": "/WIKI/character/10000050.webp",
     "materials": [
       {
         "id": 104320,
@@ -2561,7 +2561,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "elementIcon": "/icon/element/草元素.webp",
-    "icon": "/WIKI/character/icon/10000077.webp",
+    "icon": "/WIKI/character/10000077.webp",
     "materials": [
       {
         "id": 104313,
@@ -2605,7 +2605,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/草元素.webp",
-    "icon": "/WIKI/character/icon/10000061.webp",
+    "icon": "/WIKI/character/10000061.webp",
     "materials": [
       {
         "id": 104320,
@@ -2649,7 +2649,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/草元素.webp",
-    "icon": "/WIKI/character/icon/10000067.webp",
+    "icon": "/WIKI/character/10000067.webp",
     "materials": [
       {
         "id": 104335,
@@ -2693,7 +2693,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/草元素.webp",
-    "icon": "/WIKI/character/icon/10000081.webp",
+    "icon": "/WIKI/character/10000081.webp",
     "materials": [
       {
         "id": 104332,
@@ -2737,7 +2737,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/雷元素.webp",
-    "icon": "/WIKI/character/icon/10000006.webp",
+    "icon": "/WIKI/character/10000006.webp",
     "materials": [
       {
         "id": 104307,
@@ -2781,7 +2781,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/雷元素.webp",
-    "icon": "/WIKI/character/icon/10000020.webp",
+    "icon": "/WIKI/character/10000020.webp",
     "materials": [
       {
         "id": 104304,
@@ -2825,7 +2825,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/雷元素.webp",
-    "icon": "/WIKI/character/icon/10000031.webp",
+    "icon": "/WIKI/character/10000031.webp",
     "materials": [
       {
         "id": 104307,
@@ -2869,7 +2869,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/雷元素.webp",
-    "icon": "/WIKI/character/icon/10000024.webp",
+    "icon": "/WIKI/character/10000024.webp",
     "materials": [
       {
         "id": 104316,
@@ -2913,7 +2913,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/雷元素.webp",
-    "icon": "/WIKI/character/icon/10000056.webp",
+    "icon": "/WIKI/character/10000056.webp",
     "materials": [
       {
         "id": 104323,
@@ -2957,7 +2957,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/雷元素.webp",
-    "icon": "/WIKI/character/icon/10000065.webp",
+    "icon": "/WIKI/character/10000065.webp",
     "materials": [
       {
         "id": 104323,
@@ -3001,7 +3001,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/雷元素.webp",
-    "icon": "/WIKI/character/icon/10000068.webp",
+    "icon": "/WIKI/character/10000068.webp",
     "materials": [
       {
         "id": 104332,
@@ -3045,7 +3045,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/风元素.webp",
-    "icon": "/WIKI/character/icon/10000043.webp",
+    "icon": "/WIKI/character/10000043.webp",
     "materials": [
       {
         "id": 104301,
@@ -3089,7 +3089,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "elementIcon": "/icon/element/风元素.webp",
-    "icon": "/WIKI/character/icon/10000053.webp",
+    "icon": "/WIKI/character/10000053.webp",
     "materials": [
       {
         "id": 104326,
@@ -3133,7 +3133,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "elementIcon": "/icon/element/风元素.webp",
-    "icon": "/WIKI/character/icon/10000059.webp",
+    "icon": "/WIKI/character/10000059.webp",
     "materials": [
       {
         "id": 104320,
@@ -3177,7 +3177,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "elementIcon": "/icon/element/风元素.webp",
-    "icon": "/WIKI/character/icon/10000076.webp",
+    "icon": "/WIKI/character/10000076.webp",
     "materials": [
       {
         "id": 104329,
@@ -3221,7 +3221,7 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "elementIcon": "/icon/element/风元素.webp",
-    "icon": "/WIKI/character/icon/10000083.webp",
+    "icon": "/WIKI/character/10000083.webp",
     "materials": [
       {
         "id": 104344,
@@ -3264,7 +3264,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11501.webp",
+    "icon": "/WIKI/weapon/11501.webp",
     "materials": [
       {
         "id": 114001,
@@ -3315,7 +3315,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11502.webp",
+    "icon": "/WIKI/weapon/11502.webp",
     "materials": [
       {
         "id": 114005,
@@ -3366,7 +3366,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11503.webp",
+    "icon": "/WIKI/weapon/11503.webp",
     "materials": [
       {
         "id": 114009,
@@ -3417,7 +3417,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11504.webp",
+    "icon": "/WIKI/weapon/11504.webp",
     "materials": [
       {
         "id": 114013,
@@ -3468,7 +3468,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11505.webp",
+    "icon": "/WIKI/weapon/11505.webp",
     "materials": [
       {
         "id": 114017,
@@ -3519,7 +3519,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11509.webp",
+    "icon": "/WIKI/weapon/11509.webp",
     "materials": [
       {
         "id": 114025,
@@ -3570,7 +3570,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11510.webp",
+    "icon": "/WIKI/weapon/11510.webp",
     "materials": [
       {
         "id": 114029,
@@ -3621,7 +3621,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11511.webp",
+    "icon": "/WIKI/weapon/11511.webp",
     "materials": [
       {
         "id": 114037,
@@ -3672,7 +3672,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11512.webp",
+    "icon": "/WIKI/weapon/11512.webp",
     "materials": [
       {
         "id": 114037,
@@ -3723,7 +3723,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11513.webp",
+    "icon": "/WIKI/weapon/11513.webp",
     "materials": [
       {
         "id": 114053,
@@ -3774,7 +3774,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12501.webp",
+    "icon": "/WIKI/weapon/12501.webp",
     "materials": [
       {
         "id": 114005,
@@ -3825,7 +3825,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12502.webp",
+    "icon": "/WIKI/weapon/12502.webp",
     "materials": [
       {
         "id": 114009,
@@ -3876,7 +3876,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12503.webp",
+    "icon": "/WIKI/weapon/12503.webp",
     "materials": [
       {
         "id": 114001,
@@ -3927,7 +3927,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12504.webp",
+    "icon": "/WIKI/weapon/12504.webp",
     "materials": [
       {
         "id": 114017,
@@ -3978,7 +3978,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12510.webp",
+    "icon": "/WIKI/weapon/12510.webp",
     "materials": [
       {
         "id": 114029,
@@ -4029,7 +4029,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12511.webp",
+    "icon": "/WIKI/weapon/12511.webp",
     "materials": [
       {
         "id": 114045,
@@ -4080,7 +4080,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15501.webp",
+    "icon": "/WIKI/weapon/15501.webp",
     "materials": [
       {
         "id": 114005,
@@ -4131,7 +4131,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15502.webp",
+    "icon": "/WIKI/weapon/15502.webp",
     "materials": [
       {
         "id": 114009,
@@ -4182,7 +4182,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15503.webp",
+    "icon": "/WIKI/weapon/15503.webp",
     "materials": [
       {
         "id": 114005,
@@ -4233,7 +4233,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15508.webp",
+    "icon": "/WIKI/weapon/15508.webp",
     "materials": [
       {
         "id": 114013,
@@ -4284,7 +4284,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15507.webp",
+    "icon": "/WIKI/weapon/15507.webp",
     "materials": [
       {
         "id": 114033,
@@ -4335,7 +4335,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15509.webp",
+    "icon": "/WIKI/weapon/15509.webp",
     "materials": [
       {
         "id": 114029,
@@ -4386,7 +4386,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15511.webp",
+    "icon": "/WIKI/weapon/15511.webp",
     "materials": [
       {
         "id": 114045,
@@ -4437,7 +4437,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15512.webp",
+    "icon": "/WIKI/weapon/15512.webp",
     "materials": [
       {
         "id": 114049,
@@ -4488,7 +4488,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14501.webp",
+    "icon": "/WIKI/weapon/14501.webp",
     "materials": [
       {
         "id": 114005,
@@ -4539,7 +4539,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14502.webp",
+    "icon": "/WIKI/weapon/14502.webp",
     "materials": [
       {
         "id": 114009,
@@ -4590,7 +4590,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14504.webp",
+    "icon": "/WIKI/weapon/14504.webp",
     "materials": [
       {
         "id": 114021,
@@ -4641,7 +4641,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14505.webp",
+    "icon": "/WIKI/weapon/14505.webp",
     "materials": [
       {
         "id": 114013,
@@ -4692,7 +4692,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14506.webp",
+    "icon": "/WIKI/weapon/14506.webp",
     "materials": [
       {
         "id": 114025,
@@ -4743,7 +4743,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14509.webp",
+    "icon": "/WIKI/weapon/14509.webp",
     "materials": [
       {
         "id": 114033,
@@ -4794,7 +4794,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14511.webp",
+    "icon": "/WIKI/weapon/14511.webp",
     "materials": [
       {
         "id": 114041,
@@ -4845,7 +4845,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14512.webp",
+    "icon": "/WIKI/weapon/14512.webp",
     "materials": [
       {
         "id": 114045,
@@ -4896,7 +4896,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14513.webp",
+    "icon": "/WIKI/weapon/14513.webp",
     "materials": [
       {
         "id": 114057,
@@ -4947,7 +4947,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14514.webp",
+    "icon": "/WIKI/weapon/14514.webp",
     "materials": [
       {
         "id": 114053,
@@ -4998,7 +4998,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13502.webp",
+    "icon": "/WIKI/weapon/13502.webp",
     "materials": [
       {
         "id": 114009,
@@ -5049,7 +5049,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13501.webp",
+    "icon": "/WIKI/weapon/13501.webp",
     "materials": [
       {
         "id": 114021,
@@ -5100,7 +5100,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13504.webp",
+    "icon": "/WIKI/weapon/13504.webp",
     "materials": [
       {
         "id": 114021,
@@ -5151,7 +5151,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13505.webp",
+    "icon": "/WIKI/weapon/13505.webp",
     "materials": [
       {
         "id": 114013,
@@ -5202,7 +5202,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13507.webp",
+    "icon": "/WIKI/weapon/13507.webp",
     "materials": [
       {
         "id": 114017,
@@ -5253,7 +5253,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13509.webp",
+    "icon": "/WIKI/weapon/13509.webp",
     "materials": [
       {
         "id": 114033,
@@ -5304,7 +5304,7 @@
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13511.webp",
+    "icon": "/WIKI/weapon/13511.webp",
     "materials": [
       {
         "id": 114041,
@@ -5355,7 +5355,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11401.webp",
+    "icon": "/WIKI/weapon/11401.webp",
     "materials": [
       {
         "id": 114001,
@@ -5406,7 +5406,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11402.webp",
+    "icon": "/WIKI/weapon/11402.webp",
     "materials": [
       {
         "id": 114005,
@@ -5457,7 +5457,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11403.webp",
+    "icon": "/WIKI/weapon/11403.webp",
     "materials": [
       {
         "id": 114009,
@@ -5508,7 +5508,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11404.webp",
+    "icon": "/WIKI/weapon/11404.webp",
     "materials": [
       {
         "id": 114001,
@@ -5559,7 +5559,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11409.webp",
+    "icon": "/WIKI/weapon/11409.webp",
     "materials": [
       {
         "id": 114005,
@@ -5610,7 +5610,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11410.webp",
+    "icon": "/WIKI/weapon/11410.webp",
     "materials": [
       {
         "id": 114001,
@@ -5661,7 +5661,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11412.webp",
+    "icon": "/WIKI/weapon/11412.webp",
     "materials": [
       {
         "id": 114005,
@@ -5712,7 +5712,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11413.webp",
+    "icon": "/WIKI/weapon/11413.webp",
     "materials": [
       {
         "id": 114009,
@@ -5763,7 +5763,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11415.webp",
+    "icon": "/WIKI/weapon/11415.webp",
     "materials": [
       {
         "id": 114001,
@@ -5814,7 +5814,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11424.webp",
+    "icon": "/WIKI/weapon/11424.webp",
     "materials": [
       {
         "id": 114001,
@@ -5865,7 +5865,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11405.webp",
+    "icon": "/WIKI/weapon/11405.webp",
     "materials": [
       {
         "id": 114013,
@@ -5916,7 +5916,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11406.webp",
+    "icon": "/WIKI/weapon/11406.webp",
     "materials": [
       {
         "id": 114017,
@@ -5967,7 +5967,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11407.webp",
+    "icon": "/WIKI/weapon/11407.webp",
     "materials": [
       {
         "id": 114021,
@@ -6018,7 +6018,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11408.webp",
+    "icon": "/WIKI/weapon/11408.webp",
     "materials": [
       {
         "id": 114013,
@@ -6069,7 +6069,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11414.webp",
+    "icon": "/WIKI/weapon/11414.webp",
     "materials": [
       {
         "id": 114025,
@@ -6120,7 +6120,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11416.webp",
+    "icon": "/WIKI/weapon/11416.webp",
     "materials": [
       {
         "id": 114033,
@@ -6171,7 +6171,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11422.webp",
+    "icon": "/WIKI/weapon/11422.webp",
     "materials": [
       {
         "id": 114029,
@@ -6222,7 +6222,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11417.webp",
+    "icon": "/WIKI/weapon/11417.webp",
     "materials": [
       {
         "id": 114037,
@@ -6273,7 +6273,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11418.webp",
+    "icon": "/WIKI/weapon/11418.webp",
     "materials": [
       {
         "id": 114037,
@@ -6324,7 +6324,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11425.webp",
+    "icon": "/WIKI/weapon/11425.webp",
     "materials": [
       {
         "id": 114053,
@@ -6375,7 +6375,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11426.webp",
+    "icon": "/WIKI/weapon/11426.webp",
     "materials": [
       {
         "id": 114049,
@@ -6426,7 +6426,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11427.webp",
+    "icon": "/WIKI/weapon/11427.webp",
     "materials": [
       {
         "id": 114053,
@@ -6477,7 +6477,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11428.webp",
+    "icon": "/WIKI/weapon/11428.webp",
     "materials": [
       {
         "id": 114049,
@@ -6528,7 +6528,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12401.webp",
+    "icon": "/WIKI/weapon/12401.webp",
     "materials": [
       {
         "id": 114009,
@@ -6579,7 +6579,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12402.webp",
+    "icon": "/WIKI/weapon/12402.webp",
     "materials": [
       {
         "id": 114001,
@@ -6630,7 +6630,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12403.webp",
+    "icon": "/WIKI/weapon/12403.webp",
     "materials": [
       {
         "id": 114005,
@@ -6681,7 +6681,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12404.webp",
+    "icon": "/WIKI/weapon/12404.webp",
     "materials": [
       {
         "id": 114009,
@@ -6732,7 +6732,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12411.webp",
+    "icon": "/WIKI/weapon/12411.webp",
     "materials": [
       {
         "id": 114001,
@@ -6783,7 +6783,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12418.webp",
+    "icon": "/WIKI/weapon/12418.webp",
     "materials": [
       {
         "id": 114009,
@@ -6834,7 +6834,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12405.webp",
+    "icon": "/WIKI/weapon/12405.webp",
     "materials": [
       {
         "id": 114017,
@@ -6885,7 +6885,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12406.webp",
+    "icon": "/WIKI/weapon/12406.webp",
     "materials": [
       {
         "id": 114021,
@@ -6936,7 +6936,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12407.webp",
+    "icon": "/WIKI/weapon/12407.webp",
     "materials": [
       {
         "id": 114013,
@@ -6987,7 +6987,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12408.webp",
+    "icon": "/WIKI/weapon/12408.webp",
     "materials": [
       {
         "id": 114017,
@@ -7038,7 +7038,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12409.webp",
+    "icon": "/WIKI/weapon/12409.webp",
     "materials": [
       {
         "id": 114021,
@@ -7089,7 +7089,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12410.webp",
+    "icon": "/WIKI/weapon/12410.webp",
     "materials": [
       {
         "id": 114013,
@@ -7140,7 +7140,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12412.webp",
+    "icon": "/WIKI/weapon/12412.webp",
     "materials": [
       {
         "id": 114021,
@@ -7191,7 +7191,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12414.webp",
+    "icon": "/WIKI/weapon/12414.webp",
     "materials": [
       {
         "id": 114029,
@@ -7242,7 +7242,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12416.webp",
+    "icon": "/WIKI/weapon/12416.webp",
     "materials": [
       {
         "id": 114025,
@@ -7293,7 +7293,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12415.webp",
+    "icon": "/WIKI/weapon/12415.webp",
     "materials": [
       {
         "id": 114045,
@@ -7344,7 +7344,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12417.webp",
+    "icon": "/WIKI/weapon/12417.webp",
     "materials": [
       {
         "id": 114037,
@@ -7395,7 +7395,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12424.webp",
+    "icon": "/WIKI/weapon/12424.webp",
     "materials": [
       {
         "id": 114041,
@@ -7446,7 +7446,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12425.webp",
+    "icon": "/WIKI/weapon/12425.webp",
     "materials": [
       {
         "id": 114057,
@@ -7497,7 +7497,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12427.webp",
+    "icon": "/WIKI/weapon/12427.webp",
     "materials": [
       {
         "id": 114057,
@@ -7548,7 +7548,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15401.webp",
+    "icon": "/WIKI/weapon/15401.webp",
     "materials": [
       {
         "id": 114009,
@@ -7599,7 +7599,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15402.webp",
+    "icon": "/WIKI/weapon/15402.webp",
     "materials": [
       {
         "id": 114001,
@@ -7650,7 +7650,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15403.webp",
+    "icon": "/WIKI/weapon/15403.webp",
     "materials": [
       {
         "id": 114005,
@@ -7701,7 +7701,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15404.webp",
+    "icon": "/WIKI/weapon/15404.webp",
     "materials": [
       {
         "id": 114009,
@@ -7752,7 +7752,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15409.webp",
+    "icon": "/WIKI/weapon/15409.webp",
     "materials": [
       {
         "id": 114001,
@@ -7803,7 +7803,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15410.webp",
+    "icon": "/WIKI/weapon/15410.webp",
     "materials": [
       {
         "id": 114009,
@@ -7854,7 +7854,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15412.webp",
+    "icon": "/WIKI/weapon/15412.webp",
     "materials": [
       {
         "id": 114001,
@@ -7905,7 +7905,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15413.webp",
+    "icon": "/WIKI/weapon/15413.webp",
     "materials": [
       {
         "id": 114009,
@@ -7956,7 +7956,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15405.webp",
+    "icon": "/WIKI/weapon/15405.webp",
     "materials": [
       {
         "id": 114013,
@@ -8007,7 +8007,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15406.webp",
+    "icon": "/WIKI/weapon/15406.webp",
     "materials": [
       {
         "id": 114017,
@@ -8058,7 +8058,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15407.webp",
+    "icon": "/WIKI/weapon/15407.webp",
     "materials": [
       {
         "id": 114021,
@@ -8109,7 +8109,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15408.webp",
+    "icon": "/WIKI/weapon/15408.webp",
     "materials": [
       {
         "id": 114013,
@@ -8160,7 +8160,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15411.webp",
+    "icon": "/WIKI/weapon/15411.webp",
     "materials": [
       {
         "id": 114021,
@@ -8211,7 +8211,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15414.webp",
+    "icon": "/WIKI/weapon/15414.webp",
     "materials": [
       {
         "id": 114029,
@@ -8262,7 +8262,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15415.webp",
+    "icon": "/WIKI/weapon/15415.webp",
     "materials": [
       {
         "id": 114029,
@@ -8313,7 +8313,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15416.webp",
+    "icon": "/WIKI/weapon/15416.webp",
     "materials": [
       {
         "id": 114029,
@@ -8364,7 +8364,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15417.webp",
+    "icon": "/WIKI/weapon/15417.webp",
     "materials": [
       {
         "id": 114045,
@@ -8415,7 +8415,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15418.webp",
+    "icon": "/WIKI/weapon/15418.webp",
     "materials": [
       {
         "id": 114045,
@@ -8466,7 +8466,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15419.webp",
+    "icon": "/WIKI/weapon/15419.webp",
     "materials": [
       {
         "id": 114037,
@@ -8517,7 +8517,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15424.webp",
+    "icon": "/WIKI/weapon/15424.webp",
     "materials": [
       {
         "id": 114045,
@@ -8568,7 +8568,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15425.webp",
+    "icon": "/WIKI/weapon/15425.webp",
     "materials": [
       {
         "id": 114049,
@@ -8619,7 +8619,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15427.webp",
+    "icon": "/WIKI/weapon/15427.webp",
     "materials": [
       {
         "id": 114049,
@@ -8670,7 +8670,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14401.webp",
+    "icon": "/WIKI/weapon/14401.webp",
     "materials": [
       {
         "id": 114001,
@@ -8721,7 +8721,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14402.webp",
+    "icon": "/WIKI/weapon/14402.webp",
     "materials": [
       {
         "id": 114005,
@@ -8772,7 +8772,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14403.webp",
+    "icon": "/WIKI/weapon/14403.webp",
     "materials": [
       {
         "id": 114009,
@@ -8823,7 +8823,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14404.webp",
+    "icon": "/WIKI/weapon/14404.webp",
     "materials": [
       {
         "id": 114001,
@@ -8874,7 +8874,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14410.webp",
+    "icon": "/WIKI/weapon/14410.webp",
     "materials": [
       {
         "id": 114005,
@@ -8925,7 +8925,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14412.webp",
+    "icon": "/WIKI/weapon/14412.webp",
     "materials": [
       {
         "id": 114009,
@@ -8976,7 +8976,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14413.webp",
+    "icon": "/WIKI/weapon/14413.webp",
     "materials": [
       {
         "id": 114005,
@@ -9027,7 +9027,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14426.webp",
+    "icon": "/WIKI/weapon/14426.webp",
     "materials": [
       {
         "id": 114005,
@@ -9078,7 +9078,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14405.webp",
+    "icon": "/WIKI/weapon/14405.webp",
     "materials": [
       {
         "id": 114013,
@@ -9129,7 +9129,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14406.webp",
+    "icon": "/WIKI/weapon/14406.webp",
     "materials": [
       {
         "id": 114017,
@@ -9180,7 +9180,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14407.webp",
+    "icon": "/WIKI/weapon/14407.webp",
     "materials": [
       {
         "id": 114021,
@@ -9231,7 +9231,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14408.webp",
+    "icon": "/WIKI/weapon/14408.webp",
     "materials": [
       {
         "id": 114013,
@@ -9282,7 +9282,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14409.webp",
+    "icon": "/WIKI/weapon/14409.webp",
     "materials": [
       {
         "id": 114017,
@@ -9333,7 +9333,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14424.webp",
+    "icon": "/WIKI/weapon/14424.webp",
     "materials": [
       {
         "id": 114013,
@@ -9384,7 +9384,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14414.webp",
+    "icon": "/WIKI/weapon/14414.webp",
     "materials": [
       {
         "id": 114025,
@@ -9435,7 +9435,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14415.webp",
+    "icon": "/WIKI/weapon/14415.webp",
     "materials": [
       {
         "id": 114025,
@@ -9486,7 +9486,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14416.webp",
+    "icon": "/WIKI/weapon/14416.webp",
     "materials": [
       {
         "id": 114041,
@@ -9537,7 +9537,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14417.webp",
+    "icon": "/WIKI/weapon/14417.webp",
     "materials": [
       {
         "id": 114041,
@@ -9588,7 +9588,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14425.webp",
+    "icon": "/WIKI/weapon/14425.webp",
     "materials": [
       {
         "id": 114053,
@@ -9639,7 +9639,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13405.webp",
+    "icon": "/WIKI/weapon/13405.webp",
     "materials": [
       {
         "id": 114005,
@@ -9690,7 +9690,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13407.webp",
+    "icon": "/WIKI/weapon/13407.webp",
     "materials": [
       {
         "id": 114009,
@@ -9741,7 +9741,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13409.webp",
+    "icon": "/WIKI/weapon/13409.webp",
     "materials": [
       {
         "id": 114005,
@@ -9792,7 +9792,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13419.webp",
+    "icon": "/WIKI/weapon/13419.webp",
     "materials": [
       {
         "id": 114005,
@@ -9843,7 +9843,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13401.webp",
+    "icon": "/WIKI/weapon/13401.webp",
     "materials": [
       {
         "id": 114017,
@@ -9894,7 +9894,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13402.webp",
+    "icon": "/WIKI/weapon/13402.webp",
     "materials": [
       {
         "id": 114021,
@@ -9945,7 +9945,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13403.webp",
+    "icon": "/WIKI/weapon/13403.webp",
     "materials": [
       {
         "id": 114013,
@@ -9996,7 +9996,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13404.webp",
+    "icon": "/WIKI/weapon/13404.webp",
     "materials": [
       {
         "id": 114017,
@@ -10047,7 +10047,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13406.webp",
+    "icon": "/WIKI/weapon/13406.webp",
     "materials": [
       {
         "id": 114021,
@@ -10098,7 +10098,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13408.webp",
+    "icon": "/WIKI/weapon/13408.webp",
     "materials": [
       {
         "id": 114017,
@@ -10149,7 +10149,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13414.webp",
+    "icon": "/WIKI/weapon/13414.webp",
     "materials": [
       {
         "id": 114033,
@@ -10200,7 +10200,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13415.webp",
+    "icon": "/WIKI/weapon/13415.webp",
     "materials": [
       {
         "id": 114033,
@@ -10251,7 +10251,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13416.webp",
+    "icon": "/WIKI/weapon/13416.webp",
     "materials": [
       {
         "id": 114033,
@@ -10302,7 +10302,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13417.webp",
+    "icon": "/WIKI/weapon/13417.webp",
     "materials": [
       {
         "id": 114041,
@@ -10353,7 +10353,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13424.webp",
+    "icon": "/WIKI/weapon/13424.webp",
     "materials": [
       {
         "id": 114057,
@@ -10404,7 +10404,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13425.webp",
+    "icon": "/WIKI/weapon/13425.webp",
     "materials": [
       {
         "id": 114057,
@@ -10455,7 +10455,7 @@
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13427.webp",
+    "icon": "/WIKI/weapon/13427.webp",
     "materials": [
       {
         "id": 114049,
@@ -10506,7 +10506,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11301.webp",
+    "icon": "/WIKI/weapon/11301.webp",
     "materials": [
       {
         "id": 114001,
@@ -10557,7 +10557,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11302.webp",
+    "icon": "/WIKI/weapon/11302.webp",
     "materials": [
       {
         "id": 114005,
@@ -10608,7 +10608,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11303.webp",
+    "icon": "/WIKI/weapon/11303.webp",
     "materials": [
       {
         "id": 114009,
@@ -10659,7 +10659,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11304.webp",
+    "icon": "/WIKI/weapon/11304.webp",
     "materials": [
       {
         "id": 114013,
@@ -10710,7 +10710,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11305.webp",
+    "icon": "/WIKI/weapon/11305.webp",
     "materials": [
       {
         "id": 114017,
@@ -10761,7 +10761,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11306.webp",
+    "icon": "/WIKI/weapon/11306.webp",
     "materials": [
       {
         "id": 114021,
@@ -10812,7 +10812,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12301.webp",
+    "icon": "/WIKI/weapon/12301.webp",
     "materials": [
       {
         "id": 114001,
@@ -10863,7 +10863,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12302.webp",
+    "icon": "/WIKI/weapon/12302.webp",
     "materials": [
       {
         "id": 114005,
@@ -10914,7 +10914,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12303.webp",
+    "icon": "/WIKI/weapon/12303.webp",
     "materials": [
       {
         "id": 114009,
@@ -10965,7 +10965,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12305.webp",
+    "icon": "/WIKI/weapon/12305.webp",
     "materials": [
       {
         "id": 114017,
@@ -11016,7 +11016,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12306.webp",
+    "icon": "/WIKI/weapon/12306.webp",
     "materials": [
       {
         "id": 114021,
@@ -11067,7 +11067,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15301.webp",
+    "icon": "/WIKI/weapon/15301.webp",
     "materials": [
       {
         "id": 114001,
@@ -11118,7 +11118,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15302.webp",
+    "icon": "/WIKI/weapon/15302.webp",
     "materials": [
       {
         "id": 114005,
@@ -11169,7 +11169,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15303.webp",
+    "icon": "/WIKI/weapon/15303.webp",
     "materials": [
       {
         "id": 114009,
@@ -11220,7 +11220,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15304.webp",
+    "icon": "/WIKI/weapon/15304.webp",
     "materials": [
       {
         "id": 114013,
@@ -11271,7 +11271,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15305.webp",
+    "icon": "/WIKI/weapon/15305.webp",
     "materials": [
       {
         "id": 114017,
@@ -11322,7 +11322,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14301.webp",
+    "icon": "/WIKI/weapon/14301.webp",
     "materials": [
       {
         "id": 114001,
@@ -11373,7 +11373,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14302.webp",
+    "icon": "/WIKI/weapon/14302.webp",
     "materials": [
       {
         "id": 114005,
@@ -11424,7 +11424,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14303.webp",
+    "icon": "/WIKI/weapon/14303.webp",
     "materials": [
       {
         "id": 114009,
@@ -11475,7 +11475,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14304.webp",
+    "icon": "/WIKI/weapon/14304.webp",
     "materials": [
       {
         "id": 114013,
@@ -11526,7 +11526,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14305.webp",
+    "icon": "/WIKI/weapon/14305.webp",
     "materials": [
       {
         "id": 114017,
@@ -11577,7 +11577,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13301.webp",
+    "icon": "/WIKI/weapon/13301.webp",
     "materials": [
       {
         "id": 114013,
@@ -11628,7 +11628,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13302.webp",
+    "icon": "/WIKI/weapon/13302.webp",
     "materials": [
       {
         "id": 114017,
@@ -11679,7 +11679,7 @@
     "star": 3,
     "bg": "/icon/bg/3-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13303.webp",
+    "icon": "/WIKI/weapon/13303.webp",
     "materials": [
       {
         "id": 114021,
@@ -11730,7 +11730,7 @@
     "star": 2,
     "bg": "/icon/bg/2-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11201.webp",
+    "icon": "/WIKI/weapon/11201.webp",
     "materials": [
       {
         "id": 114001,
@@ -11773,7 +11773,7 @@
     "star": 2,
     "bg": "/icon/bg/2-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12201.webp",
+    "icon": "/WIKI/weapon/12201.webp",
     "materials": [
       {
         "id": 114005,
@@ -11824,7 +11824,7 @@
     "star": 2,
     "bg": "/icon/bg/2-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15201.webp",
+    "icon": "/WIKI/weapon/15201.webp",
     "materials": [
       {
         "id": 114005,
@@ -11875,7 +11875,7 @@
     "star": 2,
     "bg": "/icon/bg/2-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14201.webp",
+    "icon": "/WIKI/weapon/14201.webp",
     "materials": [
       {
         "id": 114001,
@@ -11918,7 +11918,7 @@
     "star": 2,
     "bg": "/icon/bg/2-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13201.webp",
+    "icon": "/WIKI/weapon/13201.webp",
     "materials": [
       {
         "id": 114009,
@@ -11969,7 +11969,7 @@
     "star": 1,
     "bg": "/icon/bg/1-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
-    "icon": "/WIKI/weapon/icon/11101.webp",
+    "icon": "/WIKI/weapon/11101.webp",
     "materials": [
       {
         "id": 114001,
@@ -12012,7 +12012,7 @@
     "star": 1,
     "bg": "/icon/bg/1-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
-    "icon": "/WIKI/weapon/icon/12101.webp",
+    "icon": "/WIKI/weapon/12101.webp",
     "materials": [
       {
         "id": 114005,
@@ -12063,7 +12063,7 @@
     "star": 1,
     "bg": "/icon/bg/1-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
-    "icon": "/WIKI/weapon/icon/15101.webp",
+    "icon": "/WIKI/weapon/15101.webp",
     "materials": [
       {
         "id": 114005,
@@ -12114,7 +12114,7 @@
     "star": 1,
     "bg": "/icon/bg/1-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
-    "icon": "/WIKI/weapon/icon/14101.webp",
+    "icon": "/WIKI/weapon/14101.webp",
     "materials": [
       {
         "id": 114001,
@@ -12157,7 +12157,7 @@
     "star": 1,
     "bg": "/icon/bg/1-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
-    "icon": "/WIKI/weapon/icon/13101.webp",
+    "icon": "/WIKI/weapon/13101.webp",
     "materials": [
       {
         "id": 114009,
