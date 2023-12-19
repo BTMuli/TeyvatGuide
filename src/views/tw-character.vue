@@ -46,20 +46,46 @@
     <TwcMaterials :data="data.materials" />
     <TwcSkills :data="data.skills" />
     <TwcConstellations :data="data.constellation" />
-    <div class="twc-text">
-      <div class="twc-text-title">资料</div>
-      <div class="twc-text-item" v-for="(item, index) in data?.talks" :key="index">
-        <div class="twc-text-item-title">{{ item.Title }}</div>
-        <div class="twc-text-item-content">{{ item.Context }}</div>
-      </div>
-    </div>
-    <div class="twc-text">
-      <div class="twc-text-title">故事</div>
-      <div class="twc-text-item" v-for="(item, index) in data.stories" :key="index">
-        <div class="twc-text-item-title">{{ item.Title }}</div>
-        <div class="twc-text-item-content">{{ item.Context }}</div>
-      </div>
-    </div>
+    <v-expansion-panels :theme="vuetifyTheme" class="twc-text-item">
+      <v-expansion-panel>
+        <template #title><span class="twc-text-title">资料</span></template>
+        <template #text>
+          <v-expansion-panels variant="popout">
+            <v-expansion-panel
+              expand-icon="mdi-menu-down"
+              v-for="(item, index) in data?.talks"
+              :key="index"
+            >
+              <template #title
+                ><span class="twc-text-item-title">{{ item.Title }}</span></template
+              >
+              <template #text
+                ><span class="twc-text-item-content">{{ item.Context }}</span></template
+              >
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </template>
+      </v-expansion-panel>
+      <v-expansion-panel>
+        <template #title><span class="twc-text-title">故事</span></template>
+        <template #text>
+          <v-expansion-panels variant="popout">
+            <v-expansion-panel
+              expand-icon="mdi-menu-down"
+              v-for="(item, index) in data.stories"
+              :key="index"
+            >
+              <template #title
+                ><span class="twc-text-item-title">{{ item.Title }}</span></template
+              >
+              <template #text
+                ><span class="twc-text-item-content">{{ item.Context }}</span></template
+              >
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </template>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </div>
 </template>
 <script lang="ts" setup>
@@ -75,6 +101,7 @@ import TwcConstellations from "../components/wiki/twc-constellations.vue";
 import TwcMaterials from "../components/wiki/twc-materials.vue";
 import TwcSkills from "../components/wiki/twc-skills.vue";
 import { getWikiData } from "../data";
+import { useAppStore } from "../store/modules/app";
 
 // 路由数据
 const id = <string>useRoute().params.id;
@@ -83,6 +110,12 @@ const loading = ref<boolean>(true);
 const loadingEmpty = ref<boolean>(false);
 const loadingTitle = ref<string>("正在加载");
 const loadingSub = ref<string>();
+
+// 主题
+const appStore = useAppStore();
+const vuetifyTheme = computed(() => {
+  return appStore.theme === "dark" ? "dark" : "light";
+});
 
 // 数据
 const data = ref<TGApp.App.Character.WikiItem>();
@@ -141,6 +174,7 @@ onMounted(async () => {
 
 .twc-brief {
   display: flex;
+  align-items: flex-end;
   column-gap: 10px;
 }
 
@@ -164,6 +198,7 @@ onMounted(async () => {
 .twc-bi-top :nth-child(2) {
   display: flex;
   align-items: flex-end;
+  font-size: 14px;
   opacity: 0.8;
 }
 
@@ -206,9 +241,6 @@ onMounted(async () => {
 .twc-text-item {
   display: flex;
   flex-direction: column;
-  padding: 5px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
   row-gap: 5px;
 }
 

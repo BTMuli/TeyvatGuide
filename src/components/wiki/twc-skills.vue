@@ -5,10 +5,13 @@
         v-for="(item, index) in tabValues"
         :key="index"
         :value="item.name"
+        :title="item.name"
         class="twc-skill-tab"
+        density="compact"
       >
         <!-- todo 换成本地资源 -->
         <img :src="`https://api.ambr.top/assets/UI/${item.icon}.png`" alt="icon" />
+        <span v-if="tab === item.name">{{ item.name }}</span>
       </v-tab>
     </v-tabs>
     <v-window v-model="tab">
@@ -41,14 +44,13 @@ onMounted(() => {
   padding: 5px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
-  row-gap: 10px;
 }
 
 .twc-skill-tab {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  row-gap: 5px;
+  justify-content: center;
+  font-weight: bold;
 }
 
 .twc-skill-tab img {

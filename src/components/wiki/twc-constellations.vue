@@ -1,23 +1,40 @@
 <template>
   <div class="twc-constellations-box">
-    <div class="twc-constellations-title">命座</div>
-    <div class="twc-constellation" v-for="item in props.data" :key="item.Id">
-      <div class="twc-constellation-top">
+    <v-tabs v-model="tab">
+      <v-tab
+        v-for="item in props.data"
+        :key="item.Id"
+        :value="item.Name"
+        :title="item.Name"
+        class="twc-constellation-tab"
+        density="compact"
+      >
         <!-- todo 换成本地资源 -->
         <img :src="`https://api.ambr.top/assets/UI/${item.Icon}.png`" alt="icon" />
-        <span>{{ item.Name }}</span>
-      </div>
-      <div class="twc-constellation-bottom">
+        <span v-if="tab === item.Name">{{ item.Name }}</span>
+      </v-tab>
+    </v-tabs>
+    <v-window v-model="tab">
+      <v-window-item
+        :value="item.Name"
+        v-for="item in props.data"
+        :key="item.Id"
+        class="twc-constellation-desc"
+      >
         <span v-html="parseDesc(item.Description)"></span>
-      </div>
-    </div>
+      </v-window-item>
+    </v-window>
   </div>
 </template>
 <script setup lang="ts">
+import { ref } from "vue";
+
 interface TwcConstellationProps {
   data: TGApp.Plugins.Hutao.Character.RhisdTalent[];
 }
+
 const props = defineProps<TwcConstellationProps>();
+const tab = ref<string>();
 
 function parseDesc(desc: string): string {
   const reg = /<color=(.*?)>(.*?)<\/color>/g;
@@ -39,47 +56,30 @@ function parseDesc(desc: string): string {
 .twc-constellations-box {
   display: flex;
   flex-direction: column;
-  row-gap: 10px;
-}
-
-.twc-constellations-title {
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 18px;
-}
-
-.twc-constellation {
-  display: flex;
-  flex-direction: column;
   padding: 5px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
-  row-gap: 5px;
 }
 
-.twc-constellation-top {
+.twc-constellation-tab {
   display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
-  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 }
 
-.twc-constellation-top img {
+.twc-constellation-tab img {
   width: 30px;
   height: 30px;
   filter: brightness(0.25);
 }
 
-.dark .twc-constellation-top img {
+.dark .twc-constellation-tab img {
   filter: brightness(0.75);
 }
 
-.twc-constellation-top span {
-  border-bottom: 1px solid var(--common-shadow-4);
-  font-weight: bold;
-}
-
-.twc-constellation-bottom {
+.twc-constellation-desc {
+  padding-left: 10px;
   white-space: pre-wrap;
 }
 </style>
