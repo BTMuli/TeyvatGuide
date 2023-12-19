@@ -114,6 +114,7 @@ function toDetail(item: TGApp.App.Calendar.Item): void {
 
 .toc-material-grid {
   display: grid;
+  width: 100%;
   font-family: var(--font-title);
   grid-gap: 10px;
   grid-template-columns: repeat(2, 1fr);

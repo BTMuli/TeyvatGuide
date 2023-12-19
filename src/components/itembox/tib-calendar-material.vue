@@ -27,7 +27,6 @@ const props = defineProps<TMiniWeaponProps>();
 .tcm-box {
   position: relative;
   display: flex;
-  width: 180px;
   height: 45px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
