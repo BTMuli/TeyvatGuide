@@ -44,7 +44,7 @@ import { nextTick, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import ToLoading from "../../components/overlay/to-loading.vue";
-import { createAnno } from "../../utils/TGWindow";
+import { createTGWindow } from "../../utils/TGWindow";
 import TGRequest from "../../web/request/TGRequest";
 import TGUtils from "../../web/utils/TGUtils";
 
@@ -99,6 +99,12 @@ function parseTitle(title: string): string {
 
 async function switchNews(): Promise<void> {
   await router.push("/news/2");
+}
+
+function createAnno(item: TGApp.App.Announcement.ListCard): void {
+  const annoPath = `/anno_detail/${item.id}`;
+  const annoTitle = `Anno_${item.id} ${item.title}`;
+  createTGWindow(annoPath, "Sub_window", annoTitle, 960, 720, false, false);
 }
 </script>
 

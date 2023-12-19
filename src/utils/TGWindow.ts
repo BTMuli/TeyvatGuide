@@ -5,9 +5,7 @@
  */
 
 import { invoke, window as TauriWindow } from "@tauri-apps/api";
-import type { WindowOptions } from "@tauri-apps/api/window";
-
-import { useAppStore } from "../store/modules/app";
+import type { WindowOptions } from "@tauri-apps/api/types/window";
 
 /**
  * @description 创建TG窗口
@@ -92,24 +90,6 @@ export function createPost(
   }
   const postPath = `/post_detail/${postId}`;
   createTGWindow(postPath, "Sub_window", postTitle, 960, 720, false, false);
-}
-
-/**
- * @description 打开公告
- * @since Beta v0.3.3
- * @param {TGApp.App.Announcement.ListCard} item 公告内容或ID
- * @returns {void}
- */
-export function createAnno(item: TGApp.App.Announcement.ListCard): void {
-  const annoPath = `/anno_detail/${item.id}`;
-  const annoJsonPath = `/anno_detail_json/${item.id}`;
-  const annoTitle = `Anno_${item.id} ${item.title}`;
-  const annoJsonTitle = `Anno_${item.id}_JSON ${item.title}`;
-  const isDev = useAppStore().devMode ?? false;
-  if (isDev) {
-    createTGWindow(annoJsonPath, "Dev_JSON", annoJsonTitle, 960, 720, false, false);
-  }
-  createTGWindow(annoPath, "Sub_window", annoTitle, 960, 720, false, false);
 }
 
 /**

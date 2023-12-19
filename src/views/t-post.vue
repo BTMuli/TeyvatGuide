@@ -166,7 +166,7 @@ onMounted(async () => {
   // 打开 json
   const isDev = useAppStore().devMode ?? false;
   if (isDev) {
-    createPostJson(postId.toString());
+    createPostJson(postId);
   }
   await nextTick(() => {
     loading.value = false;
@@ -236,7 +236,7 @@ function parseContent(content: string): string {
   return JSON.stringify(result);
 }
 
-function createPostJson(postId: string): void {
+function createPostJson(postId: number): void {
   const jsonPath = `/post_detail_json/${postId}`;
   const jsonTitle = `Post_${postId}_JSON`;
   createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);

@@ -28,7 +28,9 @@ import { useRoute } from "vue-router";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
+import { useAppStore } from "../store/modules/app";
 import { saveImgLocal } from "../utils/TGShare";
+import { createTGWindow } from "../utils/TGWindow";
 import TGRequest from "../web/request/TGRequest";
 import TGUtils from "../web/utils/TGUtils";
 
@@ -59,7 +61,6 @@ onMounted(async () => {
   }
   // 获取数据
   loadingTitle.value = "正在获取数据...";
-  loading.value = true;
   try {
     annoData.value = await TGRequest.Anno.getContent(annoId);
     loadingTitle.value = "正在渲染数据...";
@@ -74,6 +75,11 @@ onMounted(async () => {
     loadingTitle.value = "公告不存在或解析失败";
     await appWindow.setTitle(`Anno_${annoId} Parsing Error`);
     return;
+  }
+  // 打开 json
+  const isDev = useAppStore().devMode ?? false;
+  if (isDev) {
+    createAnnoJson(annoId);
   }
   setTimeout(() => {
     loading.value = false;
@@ -90,5 +96,11 @@ watch(loadShare, (value) => {
     loading.value = false;
   }
 });
+
+function createAnnoJson(annoId: number) {
+  const jsonPath = `/anno_detail/${annoId}`;
+  const jsonTitle = `Anno_${annoId}_JSON`;
+  createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
+}
 </script>
 <style lang="css" src="../assets/css/anno-parser.css" scoped></style>
