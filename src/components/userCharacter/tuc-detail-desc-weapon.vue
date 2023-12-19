@@ -19,7 +19,10 @@
       </div>
     </template>
     <template #desc>
-      <span>{{ props.modelValue.description }}</span>
+      <span
+        v-if="props.modelValue.description"
+        v-html="parseHtmlText(props.modelValue.description)"
+      ></span>
     </template>
   </TucDetailDesc>
 </template>
@@ -28,6 +31,7 @@ import { computed } from "vue";
 
 import TucDetailDesc from "./tuc-detail-desc.vue";
 import TucDetailItemBox from "./tuc-detail-itembox.vue";
+import { parseHtmlText } from "../../utils/toolFunc";
 
 interface TucDetailDescWeaponProps {
   modelValue: TGApp.Sqlite.Character.RoleWeapon;

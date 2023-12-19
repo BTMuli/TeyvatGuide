@@ -4,7 +4,7 @@
       <span>圣遗物</span>
     </template>
     <template #content>
-      <TucDetailRelic :model-value="props.modelValue" :pos="`${props.modelValue.pos}`" />
+      <TucDetailRelic :model-value="props.modelValue" :pos="props.modelValue.pos" />
       <div class="tuc-ddr-content">
         <div class="tuc-ddrc-top">
           <span>{{ props.modelValue.name }}</span>
