@@ -23,13 +23,13 @@ const cardsInfo = computed(() => AppCharacterData);
 const appStore = useAppStore();
 
 function toOuter(item: TGApp.App.Character.WikiBriefInfo): void {
-  if (item.contentId === 0) {
-    snackbar.value = true;
-    return;
-  }
   // 如果是调试环境，打开 wiki 页面
   if (appStore.devMode) {
     createWiki("Character", item.id.toString());
+    return;
+  }
+  if (item.contentId === 0) {
+    snackbar.value = true;
     return;
   }
   const url = Mys.Api.Obc.replace("{contentId}", item.contentId.toString());

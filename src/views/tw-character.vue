@@ -43,11 +43,10 @@
         </div>
       </div>
     </div>
-    <div class="twc-material-grid">
-      <!-- todo 换个组件或者组件样式优化 -->
-      <TibCalendarMaterial v-for="(item, index) in data.materials" :key="index" :item="item" />
-    </div>
+    <TwcMaterials :data="data.materials" />
+    <!--    <div class="twc-text-item">{{data?.skills}}</div>-->
     <!-- todo 等级，天赋，命座 -->
+    <TwcConstellations :data="data.constellation" />
     <div class="twc-text">
       <div class="twc-text-title">资料</div>
       <div class="twc-text-item" v-for="(item, index) in data?.talks" :key="index">
@@ -71,9 +70,10 @@ import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import showSnackbar from "../components/func/snackbar";
-import TibCalendarMaterial from "../components/itembox/tib-calendar-material.vue";
 import TItembox from "../components/main/t-itembox.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
+import TwcConstellations from "../components/wiki/twc-constellations.vue";
+import TwcMaterials from "../components/wiki/twc-materials.vue";
 import { getWikiData } from "../data";
 
 // 路由数据
@@ -189,13 +189,6 @@ onMounted(async () => {
 
 .twc-bib-item :nth-child(1) {
   font-weight: bold;
-}
-
-.twc-material-grid {
-  display: grid;
-  width: 100%;
-  grid-template-columns: repeat(3, 1fr);
-  row-gap: 5px;
 }
 
 .twc-text {
