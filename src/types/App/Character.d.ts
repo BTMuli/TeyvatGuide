@@ -20,7 +20,7 @@ declare namespace TGApp.App.Character {
    * @property {string} nameCard - 角色名片
    * @return WikiBriefInfo
    */
-  export interface WikiBriefInfo {
+  interface WikiBriefInfo {
     id: number;
     contentId: number;
     name: string;
@@ -30,6 +30,25 @@ declare namespace TGApp.App.Character {
     element: string;
     weapon: string;
     nameCard: string;
+  }
+
+  /**
+   * @description Wiki 页详细信息-角色技能
+   * @since Beta v0.3.8
+   * @interface WikiSkill
+   * @memberof TGApp.Plugins.Hutao.Character
+   * @property {number} GroupId 技能组编号
+   * @property {number} Id 技能编号
+   * @property {string} Name 技能名称
+   * @property {string} Description 技能描述
+   * @property {string} Icon 技能图标
+   */
+  interface WikiSkill {
+    GroupId: number;
+    Id: number;
+    Name: string;
+    Description: string;
+    Icon: string;
   }
 
   /**
@@ -80,7 +99,7 @@ declare namespace TGApp.App.Character {
     element: string;
     weapon: TGApp.Plugins.Hutao.Base.WeaponType;
     materials: TGApp.App.Calendar.Material[];
-    skills: TGApp.Plugins.Hutao.Character.RhisdSkill[];
+    skills: WikiSkill[];
     constellation: TGApp.Plugins.Hutao.Character.RhisdTalent[];
     talks: TGApp.Plugins.Hutao.Character.RhiFetter[];
     stories: TGApp.Plugins.Hutao.Character.RhiFetter[];

@@ -16,7 +16,9 @@
     </v-tabs>
     <v-window v-model="tab">
       <v-window-item :value="item.name" v-for="(item, index) in tabValues" :key="index">
-        {{ data[index] }}
+        <div class="twc-skill-special">
+          <span v-html="parseHtmlText(data[index].Description)"></span>
+        </div>
       </v-window-item>
     </v-window>
   </div>
@@ -24,8 +26,10 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 
+import { parseHtmlText } from "../../utils/toolFunc";
+
 interface TwcSkillsProps {
-  data: TGApp.Plugins.Hutao.Character.RhisdSkill[];
+  data: TGApp.App.Character.WikiSkill[];
 }
 
 const props = defineProps<TwcSkillsProps>();
@@ -61,5 +65,14 @@ onMounted(() => {
 
 .dark .twc-skill-tab img {
   filter: brightness(0.75);
+}
+
+.twc-skill-normal {
+  display: flex;
+}
+
+.twc-skill-special {
+  padding-left: 10px;
+  white-space: pre-wrap;
 }
 </style>

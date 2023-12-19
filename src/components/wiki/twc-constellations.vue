@@ -21,7 +21,7 @@
         :key="item.Id"
         class="twc-constellation-desc"
       >
-        <span v-html="parseDesc(item.Description)"></span>
+        <span v-html="parseHtmlText(item.Description)"></span>
       </v-window-item>
     </v-window>
   </div>
@@ -29,28 +29,14 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
+import { parseHtmlText } from "../../utils/toolFunc";
+
 interface TwcConstellationProps {
   data: TGApp.Plugins.Hutao.Character.RhisdTalent[];
 }
 
 const props = defineProps<TwcConstellationProps>();
 const tab = ref<string>();
-
-function parseDesc(desc: string): string {
-  const reg = /<color=(.*?)>(.*?)<\/color>/g;
-  let match = reg.exec(desc);
-  while (match !== null) {
-    const color = match[1];
-    const text = match[2];
-    desc = desc.replace(
-      match[0],
-      `<span title="${text}" style="color: ${color};font-weight: bold;">${text}</span>`,
-    );
-    match = reg.exec(desc);
-  }
-  desc = desc.replace(/\\n/g, "<br />");
-  return desc;
-}
 </script>
 <style lang="css" scoped>
 .twc-constellations-box {

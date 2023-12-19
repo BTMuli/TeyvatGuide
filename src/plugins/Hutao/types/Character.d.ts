@@ -111,7 +111,7 @@ declare namespace TGApp.Plugins.Hutao.Character {
    * @memberof TGApp.Plugins.Hutao.Character
    * @description RawHutaoItem.SkillDepot.Skill => RhisdSkill
    * @property {number} GroupId 技能组编号
-   * @property {string[]} Proud.Description 技能描述
+   * @property {string[]} Proud.Descriptions 技能描述
    * @property {RhiParameter[]} Proud.Parameters 技能参数
    * @property {number} Id 技能编号
    * @property {string} Name 技能名称
@@ -122,7 +122,7 @@ declare namespace TGApp.Plugins.Hutao.Character {
   interface RhisdSkill {
     GroupId: number;
     Proud: {
-      Description: string[];
+      Descriptions: string[];
       Parameters: RhiParameter[];
     };
     Id: number;

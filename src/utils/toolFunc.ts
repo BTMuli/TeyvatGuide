@@ -177,3 +177,22 @@ export function isColorSimilar(colorBg: string, colorText: string): boolean {
     : colorConvert.keyword.hex(<KEYWORD>colorText);
   return score(hexText, hexBg) === "Fail";
 }
+
+/**
+ * @description 解析带样式的文本
+ * @since Beta v0.3.8
+ * @param {string} desc - 带样式的文本
+ * @returns {string} 解析后的文本
+ */
+export function parseHtmlText(desc: string): string {
+  const reg = /<color=(.*?)>(.*?)<\/color>/g;
+  let match = reg.exec(desc);
+  while (match !== null) {
+    const color = match[1];
+    const text = match[2];
+    desc = desc.replace(match[0], `<span title="${text}" style="color: ${color}">${text}</span>`);
+    match = reg.exec(desc);
+  }
+  desc = desc.replace(/\\n/g, "<br />");
+  return desc;
+}

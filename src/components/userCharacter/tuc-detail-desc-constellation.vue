@@ -19,33 +19,20 @@
     </template>
     <template #desc>
       <!-- eslint-disable-next-line vue/no-v-html -->
-      <span v-html="parseDesc(props.modelValue.description)"></span>
+      <span v-html="parseHtmlText(props.modelValue.description)"></span>
     </template>
   </TucDetailDesc>
 </template>
 <script lang="ts" setup>
 import TucDetailConstellation from "./tuc-detail-constellation.vue";
 import TucDetailDesc from "./tuc-detail-desc.vue";
+import { parseHtmlText } from "../../utils/toolFunc";
 
 interface TucDetailDescConstellationProps {
   modelValue: TGApp.Sqlite.Character.RoleConstellation;
 }
 
 const props = defineProps<TucDetailDescConstellationProps>();
-
-// 解析描述
-function parseDesc(desc: string): string {
-  const reg = /<color=(.*?)>(.*?)<\/color>/g;
-  let match = reg.exec(desc);
-  while (match !== null) {
-    const color = match[1];
-    const text = match[2];
-    desc = desc.replace(match[0], `<span title="${text}" style="color: ${color};">${text}</span>`);
-    match = reg.exec(desc);
-  }
-  desc = desc.replace(/\\n/g, "<br />");
-  return desc;
-}
 </script>
 <style lang="css" scoped>
 .tuc-ddc-content {
