@@ -39,7 +39,7 @@ function parseDesc(desc: string): string {
 .twc-constellations-box {
   display: flex;
   flex-direction: column;
-  row-gap: 5px;
+  row-gap: 10px;
 }
 
 .twc-constellations-title {
@@ -67,9 +67,11 @@ function parseDesc(desc: string): string {
 .twc-constellation-top img {
   width: 30px;
   height: 30px;
-  padding: 2px;
-  border-radius: 5px;
-  background: var(--common-shadow-4);
+  filter: brightness(0.25);
+}
+
+.dark .twc-constellation-top img {
+  filter: brightness(0.75);
 }
 
 .twc-constellation-top span {

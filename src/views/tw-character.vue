@@ -44,8 +44,7 @@
       </div>
     </div>
     <TwcMaterials :data="data.materials" />
-    <!--    <div class="twc-text-item">{{data?.skills}}</div>-->
-    <!-- todo 等级，天赋，命座 -->
+    <TwcSkills :data="data.skills" />
     <TwcConstellations :data="data.constellation" />
     <div class="twc-text">
       <div class="twc-text-title">资料</div>
@@ -74,6 +73,7 @@ import TItembox from "../components/main/t-itembox.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import TwcConstellations from "../components/wiki/twc-constellations.vue";
 import TwcMaterials from "../components/wiki/twc-materials.vue";
+import TwcSkills from "../components/wiki/twc-skills.vue";
 import { getWikiData } from "../data";
 
 // 路由数据
