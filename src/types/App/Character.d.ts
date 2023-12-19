@@ -36,20 +36,10 @@ declare namespace TGApp.App.Character {
    * @description Wiki 页详细信息-角色技能
    * @since Beta v0.3.8
    * @interface WikiSkill
-   * @memberof TGApp.Plugins.Hutao.Character
-   * @property {number} GroupId 技能组编号
-   * @property {number} Id 技能编号
-   * @property {string} Name 技能名称
-   * @property {string} Description 技能描述
-   * @property {string} Icon 技能图标
+   * @memberof TGApp.App.Character
+   * @return WikiSkill
    */
-  interface WikiSkill {
-    GroupId: number;
-    Id: number;
-    Name: string;
-    Description: string;
-    Icon: string;
-  }
+  type WikiSkill = Omit<TGApp.Plugins.Hutao.Character.RhisdSkill, "Proud">;
 
   /**
    * @description Wiki 详细数据
