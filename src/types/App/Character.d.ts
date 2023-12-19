@@ -54,9 +54,7 @@ declare namespace TGApp.App.Character {
    * @property {string} element 角色元素类型
    * @property {TGApp.Plugins.Hutao.Base.WeaponType} weapon 角色武器类型
    * @property {TGApp.App.Calendar.Material[]} materials 角色培养材料
-   * @property {object} skills 角色技能
-   * @property {TGApp.Plugins.Hutao.Character.RhisdSkill[]} skills.normal 正常技能-普攻、战技、元素爆发
-   * @property {TGApp.Plugins.Hutao.Character.RhisdSkill[]} skills.special 特殊技能
+   * @property {TGApp.Plugins.Hutao.Character.RhisdSkill[]} skills 角色技能
    * @property {TGApp.Plugins.Hutao.Character.RhisdTalent[]} constellation 角色命座
    * @property {TGApp.Plugins.Hutao.Character.RhiFetter[]} talks 闲聊
    * @property {TGApp.Plugins.Hutao.Character.RhiFetter[]} stories 故事
@@ -82,10 +80,7 @@ declare namespace TGApp.App.Character {
     element: string;
     weapon: TGApp.Plugins.Hutao.Base.WeaponType;
     materials: TGApp.App.Calendar.Material[];
-    skills: {
-      normal: TGApp.Plugins.Hutao.Character.RhisdSkill[];
-      special: TGApp.Plugins.Hutao.Character.RhisdSkill[];
-    };
+    skills: TGApp.Plugins.Hutao.Character.RhisdSkill[];
     constellation: TGApp.Plugins.Hutao.Character.RhisdTalent[];
     talks: TGApp.Plugins.Hutao.Character.RhiFetter[];
     stories: TGApp.Plugins.Hutao.Character.RhiFetter[];

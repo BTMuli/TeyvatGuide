@@ -69,7 +69,7 @@ import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import showSnackbar from "../components/func/snackbar";
-import TItembox from "../components/main/t-itembox.vue";
+import TItembox, { TItemBoxData } from "../components/main/t-itembox.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import TwcConstellations from "../components/wiki/twc-constellations.vue";
 import TwcMaterials from "../components/wiki/twc-materials.vue";
@@ -87,7 +87,7 @@ const loadingSub = ref<string>();
 // 数据
 const data = ref<TGApp.App.Character.WikiItem>();
 const box = computed(() => {
-  return {
+  return <TItemBoxData>{
     bg: `/icon/bg/${data.value?.star}-Star.webp`,
     icon: `/WIKI/character/${data.value?.id}.webp`,
     size: "128px",

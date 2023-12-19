@@ -13,7 +13,7 @@
     </v-tabs>
     <v-window v-model="tab">
       <v-window-item :value="item.name" v-for="(item, index) in tabValues" :key="index">
-        {{ dataList[index] }}
+        {{ data[index] }}
       </v-window-item>
     </v-window>
   </div>
@@ -22,21 +22,15 @@
 import { onMounted, ref } from "vue";
 
 interface TwcSkillsProps {
-  data: {
-    normal: TGApp.Plugins.Hutao.Character.RhisdSkill[];
-    special: TGApp.Plugins.Hutao.Character.RhisdSkill[];
-  };
+  data: TGApp.Plugins.Hutao.Character.RhisdSkill[];
 }
 
 const props = defineProps<TwcSkillsProps>();
 const tab = ref<string>();
 const tabValues = ref<Array<{ name: string; icon: string }>>([]);
-const dataList = ref<TGApp.Plugins.Hutao.Character.RhisdSkill[]>([]);
 
 onMounted(() => {
-  props.data.normal.map((i) => tabValues.value.push({ name: i.Name, icon: i.Icon }));
-  props.data.special.map((i) => tabValues.value.push({ name: i.Name, icon: i.Icon }));
-  dataList.value = [...props.data.normal, ...props.data.special];
+  props.data.map((i) => tabValues.value.push({ name: i.Name, icon: i.Icon }));
   tab.value = tabValues.value[0].name;
 });
 </script>
