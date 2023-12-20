@@ -54,6 +54,7 @@
   />
 </template>
 <script lang="ts" setup>
+import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 
 import DucDetailOverlay from "../../components/devCharacter/duc-detail-overlay.vue";
@@ -67,8 +68,8 @@ import { generateShareImg } from "../../utils/TGShare";
 import TGRequest from "../../web/request/TGRequest";
 
 // store
-const userStore = useUserStore();
-const user = userStore.getCurAccount();
+const userStore = storeToRefs(useUserStore());
+const user = userStore.account.value;
 
 // loading
 const loading = ref<boolean>(false);
@@ -133,7 +134,7 @@ async function loadRole(): Promise<void> {
 async function refreshRoles(): Promise<void> {
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
-  if (!userStore.cookie) {
+  if (!userStore.cookie.value) {
     showSnackbar({
       text: "请先登录",
       color: "error",
@@ -142,10 +143,10 @@ async function refreshRoles(): Promise<void> {
     return;
   }
   const cookie = {
-    account_id: userStore.cookie.account_id,
-    cookie_token: userStore.cookie.cookie_token,
-    ltoken: userStore.cookie.ltoken,
-    ltuid: userStore.cookie.ltuid,
+    account_id: userStore.cookie.value.account_id,
+    cookie_token: userStore.cookie.value.cookie_token,
+    ltoken: userStore.cookie.value.ltoken,
+    ltuid: userStore.cookie.value.ltuid,
   };
   const res = await TGRequest.User.byLToken.getRoleList(cookie, user);
   if (Array.isArray(res)) {
@@ -166,7 +167,7 @@ async function refreshRoles(): Promise<void> {
 async function refreshTalent(): Promise<void> {
   loadingTitle.value = "正在获取天赋数据";
   loading.value = true;
-  if (!userStore.cookie) {
+  if (!userStore.cookie.value) {
     showSnackbar({
       text: "请先登录",
       color: "error",
@@ -178,8 +179,8 @@ async function refreshTalent(): Promise<void> {
     loadingTitle.value = `正在获取${role.name}的天赋数据`;
     loadingSub.value = `CID：${role.cid}`;
     const res = await TGRequest.User.calculate.getSyncAvatarDetail(
-      userStore.cookie.account_id,
-      userStore.cookie.cookie_token,
+      userStore.cookie.value.account_id,
+      userStore.cookie.value.cookie_token,
       user.gameUid,
       role.cid,
     );

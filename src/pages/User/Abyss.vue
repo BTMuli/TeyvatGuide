@@ -66,6 +66,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 
 import showSnackbar from "../../components/func/snackbar";
@@ -80,7 +81,7 @@ import { generateShareImg } from "../../utils/TGShare";
 import TGRequest from "../../web/request/TGRequest";
 
 // store
-const userStore = useUserStore();
+const userStore = storeToRefs(useUserStore());
 // loading
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>();
@@ -88,7 +89,7 @@ const loadingSub = ref<string>();
 
 // data
 const userTab = ref<number>(0);
-const user = ref<TGApp.Sqlite.Account.Game>(userStore.getCurAccount());
+const user = ref<TGApp.Sqlite.Account.Game>(userStore.account.value);
 
 const localAbyss = ref<TGApp.Sqlite.Abyss.SingleTable[]>([]);
 const localAbyssID = ref<number[]>([]);
@@ -114,7 +115,7 @@ async function initAbyssData(): Promise<void> {
 async function getAbyssData(): Promise<void> {
   loadingTitle.value = "正在获取深渊数据";
   loading.value = true;
-  if (!userStore.cookie) {
+  if (!userStore.cookie.value) {
     showSnackbar({
       text: "未登录",
       color: "error",
@@ -123,10 +124,10 @@ async function getAbyssData(): Promise<void> {
     return;
   }
   const cookie = {
-    account_id: userStore.cookie.account_id,
-    cookie_token: userStore.cookie.cookie_token,
-    ltoken: userStore.cookie.ltoken,
-    ltuid: userStore.cookie.ltuid,
+    account_id: userStore.cookie.value.account_id,
+    cookie_token: userStore.cookie.value.cookie_token,
+    ltoken: userStore.cookie.value.ltoken,
+    ltuid: userStore.cookie.value.ltuid,
   };
   loadingTitle.value = "正在获取上期深渊数据";
   const resP = await TGRequest.User.byCookie.getAbyss(cookie, "2", user.value);

@@ -12,6 +12,7 @@
 
 <script lang="ts" setup>
 import { app, event, fs, tauri, window as TauriWindow } from "@tauri-apps/api";
+import { storeToRefs } from "pinia";
 import { onBeforeMount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
@@ -26,6 +27,7 @@ import { getBuildTime } from "./utils/TGBuild";
 import TGRequest from "./web/request/TGRequest";
 
 const appStore = useAppStore();
+const userStore = storeToRefs(useUserStore());
 const isMain = ref<boolean>(false);
 const theme = ref<string>(appStore.theme);
 const router = useRouter();
@@ -137,26 +139,26 @@ async function checkUserLoad(): Promise<void> {
   if (JSON.stringify(ckDB) !== "{}" && !appStore.isLogin) {
     appStore.isLogin = true;
   }
-  const userStore = useUserStore();
+
   const ckLocal = userStore.cookie;
   if (JSON.stringify(ckLocal) !== JSON.stringify(ckDB)) {
-    userStore.cookie = ckDB;
+    userStore.cookie.value = ckDB;
     console.info("cookie 数据已更新！");
   } else {
     console.info("cookie 数据已加载！");
   }
-  const infoLocal = userStore.getBriefInfo();
+  const infoLocal = userStore.briefInfo.value;
   const appData = await TGSqlite.getAppData();
   const infoDB = appData.find((item) => item.key === "userInfo")?.value;
   if (infoDB === undefined && JSON.stringify(infoLocal) !== "{}") {
-    await userStore.saveBriefInfo();
+    await TGSqlite.saveAppData("userInfo", JSON.stringify(infoLocal));
   } else if (infoDB !== undefined && infoLocal !== JSON.parse(infoDB)) {
-    userStore.setBriefInfo(JSON.parse(infoDB));
+    userStore.briefInfo.value = JSON.parse(infoDB);
     console.info("briefInfo 数据已更新！");
   } else {
     console.info("briefInfo 数据已加载！");
   }
-  const accountLocal = userStore.getCurAccount();
+  const accountLocal = userStore.account.value;
   const accountDB = await TGSqlite.getCurAccount();
   if (accountDB === false) {
     showSnackbar({
@@ -167,7 +169,7 @@ async function checkUserLoad(): Promise<void> {
     return;
   }
   if (accountDB !== accountLocal) {
-    userStore.setCurAccount(accountDB);
+    userStore.account.value = accountDB;
     console.info("curAccount 数据已更新！");
   } else {
     console.info("curAccount 数据已加载！");

@@ -32,6 +32,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 
 import showSnackbar from "../../components/func/snackbar";
@@ -47,8 +48,8 @@ import { generateShareImg } from "../../utils/TGShare";
 import TGRequest from "../../web/request/TGRequest";
 
 // store
-const userStore = useUserStore();
-const user = userStore.getCurAccount();
+const userStore = storeToRefs(useUserStore());
+const user = userStore.account.value;
 
 // loading
 const loading = ref<boolean>(false);
@@ -82,7 +83,7 @@ async function initUserRecordData(): Promise<void> {
 async function refresh(): Promise<void> {
   loadingTitle.value = "正在获取战绩数据";
   loading.value = true;
-  if (!userStore.cookie) {
+  if (!userStore.cookie.value) {
     showSnackbar({
       text: "请先登录",
       color: "error",
@@ -91,8 +92,8 @@ async function refresh(): Promise<void> {
     return;
   }
   const cookie = {
-    account_id: userStore.cookie.account_id,
-    cookie_token: userStore.cookie.cookie_token,
+    account_id: userStore.cookie.value.account_id,
+    cookie_token: userStore.cookie.value.cookie_token,
   };
   const res = await TGRequest.User.getRecord(cookie, user);
   if (!("retcode" in res)) {

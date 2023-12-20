@@ -131,7 +131,7 @@
               class="side-item-user"
               title="登录"
               @click="login"
-              v-show="userStore.cookie?.game_token === ''"
+              v-show="userStore.cookie.value?.game_token === ''"
             >
               <template #prepend>
                 <img src="/source/UI/defaultUser.webp" class="side-icon-user" alt="login" />
@@ -158,6 +158,7 @@
 
 <script lang="ts" setup>
 import { event, window as TauriWindow } from "@tauri-apps/api";
+import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
 
 import { useAppStore } from "../../store/modules/app";
@@ -166,12 +167,12 @@ import mhyClient from "../../utils/TGClient";
 import showSnackbar from "../func/snackbar";
 
 const appStore = useAppStore();
-const userStore = useUserStore();
+const userStore = storeToRefs(useUserStore());
 
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 
 const userInfo = computed(() => {
-  const info = userStore.getBriefInfo();
+  const info = userStore.briefInfo.value;
   if (info && info.nickname) return info;
   return {
     nickname: "未登录",

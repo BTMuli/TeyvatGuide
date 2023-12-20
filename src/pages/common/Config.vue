@@ -149,6 +149,7 @@
 
 <script lang="ts" setup>
 import { app, fs, invoke, os, process as TauriProcess } from "@tauri-apps/api";
+import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
 
 import showConfirm from "../../components/func/confirm";
@@ -170,7 +171,7 @@ import { restoreAbyssData, restoreCookieData } from "../../web/utils/restoreData
 
 // Store
 const appStore = useAppStore();
-const userStore = useUserStore();
+const userStore = storeToRefs(useUserStore());
 const homeStore = useHomeStore();
 const achievementsStore = useAchievementsStore();
 
@@ -202,13 +203,13 @@ const showReset = ref<boolean>(false);
 // data
 const showHome = ref<string[]>(homeStore.getShowValue());
 const userInfo = computed(() => {
-  const info = userStore.getBriefInfo();
-  if (info && info.nickname) {
+  const info = userStore.briefInfo;
+  if (info.value && info.value.nickname) {
     return {
-      nickname: info.nickname,
-      uid: info.uid,
-      desc: info.desc,
-      avatar: info.avatar,
+      nickname: info.value.nickname,
+      uid: info.value.uid,
+      desc: info.value.desc,
+      avatar: info.value.avatar,
     };
   }
   return {
@@ -286,8 +287,8 @@ async function confirmRefreshUser(): Promise<void> {
     });
     return;
   }
-  const ck = userStore.cookie;
-  if (JSON.stringify(ck) === "{}") {
+  const ck = userStore.cookie.value;
+  if (ck === undefined || JSON.stringify(ck) === "{}") {
     showSnackbar({
       color: "error",
       text: "扫码登录后才能刷新用户信息!",
@@ -328,7 +329,8 @@ async function confirmRefreshUser(): Promise<void> {
     loadingTitle.value = "刷新失败!正在获取用户头像、昵称信息";
     failCount++;
   }
-  await userStore.saveCookie(ck);
+  userStore.cookie.value = ck;
+  await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
   const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
   if ("retcode" in infoRes) {
     console.error(infoRes);
@@ -341,7 +343,8 @@ async function confirmRefreshUser(): Promise<void> {
       avatar: infoRes.avatar_url,
       desc: infoRes.introduce,
     };
-    await userStore.saveBriefInfo(briefInfo);
+    userStore.briefInfo.value = briefInfo;
+    await TGSqlite.saveAppData("userInfo", JSON.stringify(briefInfo));
     loadingTitle.value = "获取成功!正在获取用户游戏账号信息";
   }
   const accountRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);
@@ -349,7 +352,7 @@ async function confirmRefreshUser(): Promise<void> {
     loadingTitle.value = "获取成功!正在保存到数据库!";
     await TGSqlite.saveAccount(accountRes);
     const curAccount = await TGSqlite.getCurAccount();
-    if (curAccount) userStore.setCurAccount(curAccount);
+    if (curAccount) userStore.account.value = curAccount;
   } else {
     console.error(accountRes);
     loadingTitle.value = "获取失败!";
@@ -434,7 +437,7 @@ async function confirmRestore(): Promise<void> {
   }
   loadingSub.value = "正在恢复祈愿数据";
   res = await restoreCookieData();
-  userStore.cookie = await TGSqlite.getCookie();
+  userStore.cookie.value = await TGSqlite.getCookie();
   if (!res) {
     fail.push("Cookie");
   }

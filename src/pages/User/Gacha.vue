@@ -48,6 +48,7 @@
 </template>
 <script lang="ts" setup>
 import { dialog, fs, path } from "@tauri-apps/api";
+import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
 
 import showConfirm from "../../components/func/confirm";
@@ -63,9 +64,9 @@ import { backupUigfData, exportUigfData, readUigfData, verifyUigfData } from "..
 import TGRequest from "../../web/request/TGRequest";
 
 // store
-const userStore = useUserStore();
+const userStore = storeToRefs(useUserStore());
 const appStore = useAppStore();
-const account = userStore.getCurAccount();
+const account = userStore.account.value;
 const authkey = ref<string>("");
 
 // loading
@@ -119,7 +120,7 @@ async function confirmRefresh(): Promise<void> {
   }
   loadingTitle.value = "正在获取 authkey";
   loading.value = true;
-  if (!userStore.cookie) {
+  if (!userStore.cookie.value) {
     showSnackbar({
       color: "error",
       text: "请先登录",
@@ -128,10 +129,10 @@ async function confirmRefresh(): Promise<void> {
     return;
   }
   const cookie = {
-    stoken: userStore.cookie.stoken,
-    mid: userStore.cookie.mid,
+    stoken: userStore.cookie.value.stoken,
+    mid: userStore.cookie.value.mid,
   };
-  const gameUid = userStore.getCurAccount().gameUid;
+  const gameUid = account.gameUid;
   const authkeyRes = await TGRequest.User.getAuthkey(cookie, gameUid);
   if (typeof authkeyRes === "string") {
     authkey.value = authkeyRes;
