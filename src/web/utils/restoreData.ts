@@ -1,7 +1,7 @@
 /**
- * @file web utils restoreData.ts
+ * @file web/utils/restoreData.ts
  * @description 数据恢复
- * @since Alpha v0.2.0
+ * @since Beta v0.3.9
  */
 
 import { fs, path } from "@tauri-apps/api";
@@ -23,13 +23,15 @@ export async function restoreCookieData(): Promise<boolean> {
 
 /**
  * @description 恢复深渊数据
- * @since Alpha v0.2.0
+ * @since Beta v0.3.9
  * @returns {Promise<boolean>}
  */
 export async function restoreAbyssData(): Promise<boolean> {
   const abyssPath = `${await path.appLocalDataDir()}\\userData\\abyss.json`;
   if (!(await fs.exists(abyssPath))) return false;
   const abyssData = await fs.readTextFile(abyssPath);
-  await TGSqlite.restoreAbyss(JSON.parse(abyssData));
+  const parseData = JSON.parse(abyssData);
+  if (!parseData || !Array.isArray(parseData)) return false;
+  await TGSqlite.restoreAbyss(<TGApp.Sqlite.Abyss.SingleTable[]>parseData);
   return true;
 }

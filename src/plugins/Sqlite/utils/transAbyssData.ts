@@ -1,8 +1,7 @@
 /**
- * @file plugins Sqlite utils transCharacter.ts
+ * @file plugins/Sqlite/utils/transCharacter.ts
  * @description Sqlite 数据转换
- * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Beta v0.3.9
  */
 
 import { timeToSecond } from "./transTime";
@@ -26,7 +25,7 @@ export function transCharacterData(data: TGApp.Game.Abyss.CharacterData[]): stri
 
 /**
  * @description 将通过 api 获取到的深渊数据转换为数据库中的数据
- * @since Alpha v0.2.0
+ * @since Beta v0.3.9
  * @param {TGApp.Game.Abyss.Floor} data 深渊数据
  * @returns {string} 转换后的深渊数据
  */
@@ -37,22 +36,32 @@ export function transFloorData(data: TGApp.Game.Abyss.Floor[]): string {
       winStar: item.star,
       maxStar: item.max_star,
       isUnlock: item.is_unlock ? 1 : 0,
-      levels: item.levels.map((level) => {
-        return {
-          id: level.index,
-          winStar: level.star,
-          maxStar: level.max_star,
-          upBattle: transBattleData(
-            <TGApp.Game.Abyss.Battle>level.battles.find((l) => l.index === 1),
-          ),
-          downBattle: transBattleData(
-            <TGApp.Game.Abyss.Battle>level.battles.find((l) => l.index === 2),
-          ),
-        };
-      }),
+      levels: item.levels.map((level) => transLevelData(level)),
     };
   });
   return JSON.stringify(floor);
+}
+
+/**
+ * @description 将通过 api 获取到的深渊数据转换为数据库中的数据
+ * @since Beta v0.3.9
+ * @param {TGApp.Game.Abyss.Level} data 深渊数据
+ * @returns {TGApp.Sqlite.Abyss.Level} 转换后的深渊数据
+ */
+function transLevelData(data: TGApp.Game.Abyss.Level): TGApp.Sqlite.Abyss.Level {
+  const res: TGApp.Sqlite.Abyss.Level = {
+    id: data.index,
+    winStar: data.star,
+    maxStar: data.max_star,
+  };
+  for (const battle of data.battles) {
+    if (battle.index === 1) {
+      res.upBattle = transBattleData(battle);
+    } else {
+      res.downBattle = transBattleData(battle);
+    }
+  }
+  return res;
 }
 
 /**
