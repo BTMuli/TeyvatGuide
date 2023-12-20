@@ -186,6 +186,9 @@ class TGClient {
         await this.closePage(<TGApp.Plugins.JSBridge.NullArg>argParse);
         break;
       case "configure_share":
+        await this.configShare(
+          <TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.ConfigSharePayload>>argParse,
+        );
         break;
       case "eventTrack":
         await this.eventTrack(
@@ -246,6 +249,11 @@ class TGClient {
       case "pushPage":
         await this.pushPage(
           <TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.PushPagePayload>>argParse,
+        );
+        break;
+      case "setPresentationStyle":
+        await this.setPresentationStyle(
+          <TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.SetPresentationStylePayload>>argParse,
         );
         break;
       case "share":
@@ -395,17 +403,33 @@ class TGClient {
   }
 
   /**
+   * @func configShare
+   * @since Beta v0.3.9
+   * @desc 配置分享
+   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.ConfigSharePayload>} arg - 请求参数
+   * @returns {Promise<void>} - 无返回值
+   */
+  async configShare(
+    arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.ConfigSharePayload>,
+  ): Promise<void> {
+    console.log(`[configShare] ${JSON.stringify(arg.payload)}`);
+    await this.loadJSBridge();
+    await this.nullCallback({ method: arg.method, payload: null, callback: arg.callback });
+  }
+
+  /**
    * @func eventTrack
    * @since Beta v0.3.9
    * @desc 事件跟踪
    * @param {TGApp.Plugins.Arg<TGApp.Plugins.JSBridge.EventTrackPayload>} arg - 请求参数
-   * @returns {void} - 无返回值
+   * @returns {Promise<void>} - 无返回值
    */
   async eventTrack(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.EventTrackPayload>,
   ): Promise<void> {
     console.log(`[eventTrack] ${JSON.stringify(arg.payload)}`);
     await this.loadJSBridge();
+    await this.nullCallback({ method: arg.method, payload: null, callback: arg.callback });
   }
 
   /**
@@ -635,7 +659,7 @@ class TGClient {
    * @since Beta v0.3.9
    * @desc 打开米游社客户端的页面
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.PushPagePayload>} arg - 方法参数
-   * @returns {void} - 无返回值
+   * @returns {Promise<void>} - 无返回值
    */
   async pushPage(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.PushPagePayload>,
@@ -670,11 +694,26 @@ class TGClient {
   }
 
   /**
+   * @func setPresentationStyle
+   * @since Beta v0.3.9
+   * @desc 设置米游社客户端的展示方式
+   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.SetPresentationStylePayload>} arg - 方法参数
+   * @returns {Promise<void>} - 无返回值
+   */
+  async setPresentationStyle(
+    arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.SetPresentationStylePayload>,
+  ): Promise<void> {
+    console.log(`[setPresentationStyle] ${JSON.stringify(arg.payload)}`);
+    await this.loadJSBridge();
+    await this.nullCallback({ method: arg.method, payload: null, callback: arg.callback });
+  }
+
+  /**
    * @func share
    * @since Beta v0.3.9
    * @desc 分享
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.SharePayload>} arg - 方法参数
-   * @returns {void} - 无返回值
+   * @returns {Promise<void>} - 无返回值
    */
   async share(arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.SharePayload>): Promise<void> {
     // 如果有数据

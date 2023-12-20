@@ -44,6 +44,17 @@ declare namespace TGApp.Plugins.JSBridge {
   type UnknownArg = Arg<unknown>;
 
   /**
+   * @description configShare 方法参数
+   * @since Beta v0.3.9
+   * @interface ConfigSharePayload
+   * @property {boolean} enable - 是否启用分享
+   * @return ConfigSharePayload
+   */
+  interface ConfigSharePayload {
+    enable: boolean;
+  }
+
+  /**
    * @description eventTrack 方法参数
    * @since Beta v0.3.9
    * @interface EventTrackPayload
