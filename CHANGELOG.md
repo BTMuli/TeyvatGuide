@@ -9,6 +9,34 @@ Update: 2023-12-11
 >
 > 更新于 `2023-12-11 19:01:09`
 
+## [0.3.8](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.8) (2023-12-20)
+
+### Feat
+
+- JSBridge：新增部分回调的处理
+- JSBridge：完善 `share` 回调处理，目前已经能够支持大部分分享图的生成
+- 应用：角色图鉴开始动工
+- JSBridge：添加菜单项，支持 `置顶`、`取消置顶`、`打开帖子`
+- 成就：名片子弹窗改为 `overlay` 模式
+- 应用：添加 4.3 版本相关资源 [`#66`](https://github.com/BTMuli/TeyvatGuide/issues/66)
+
+### Fix
+
+- 应用：备份时进行目录存在性检测
+- 应用：修复 macOS 启动闪退 [`#69`](https://github.com/BTMuli/TeyvatGuide/issues/69)
+- 帖子：修复文本过长导致渲染溢出
+- 应用：修复 UIGF 导出格式错误 [`#71`](https://github.com/BTMuli/TeyvatGuide/issues/71)
+- 应用：分享图保存逻辑调整，超过20M未到80M时取消保存文件仍会保存至剪贴板
+- 帖子：修复部分帖子表情包渲染错误
+
+### Change
+
+- 组件：移除对于头像的裁剪
+- 应用：侧边栏必要快捷入口保留
+- 应用：重构链接识别处理
+- 应用：用于获取 `deviceFp` 的设备信息将保存到数据库中
+- 应用：重构 `userStore` 及 `cookie` 相关类型
+
 ## [0.3.7](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.7) (2023-12-11)
 
 ### Feat
