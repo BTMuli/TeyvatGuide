@@ -36,14 +36,6 @@ declare namespace TGApp.Plugins.JSBridge {
   type NullArg = Arg<null>;
 
   /**
-   * @description 通用 arg 参数-未知参数
-   * @since Beta v0.3.9
-   * @interface UnknownArg
-   * @return UnknownArg
-   */
-  type UnknownArg = Arg<unknown>;
-
-  /**
    * @description configShare 方法参数
    * @since Beta v0.3.9
    * @interface ConfigSharePayload

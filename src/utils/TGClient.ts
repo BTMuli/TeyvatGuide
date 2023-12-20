@@ -173,7 +173,7 @@ class TGClient {
    * @returns {Promise<void>} - 返回值
    */
   async handleCallback(arg: Event<string>): Promise<void> {
-    const argParse: TGApp.Plugins.JSBridge.UnknownArg = JSON.parse(<string>arg.payload);
+    const argParse: TGApp.Plugins.JSBridge.Arg<any> = JSON.parse(<string>arg.payload);
     if (argParse.method.startsWith("teyvat")) {
       await this.handleCustomCallback(argParse);
       return;
@@ -271,16 +271,16 @@ class TGClient {
    * @func handleCustomCallback
    * @since Beta v0.3.9
    * @desc 处理自定义的 callback
-   * @param {TGApp.Plugins.JSBridge.UnknownArg} arg - 事件参数
+   * @param {TGApp.Plugins.JSBridge.Arg<any>} arg - 事件参数
    * @returns {Promise<void>} - 返回值
    */
-  async handleCustomCallback(arg: TGApp.Plugins.JSBridge.UnknownArg): Promise<void> {
+  async handleCustomCallback(arg: TGApp.Plugins.JSBridge.Arg<any>): Promise<void> {
     switch (arg.method) {
       case "teyvat_open":
         createPost(<string>arg.payload);
         break;
       default:
-        console.warn(`[customCallback] ${arg.payload}`);
+        console.warn(`[customCallback] ${arg.method}`);
     }
   }
 
