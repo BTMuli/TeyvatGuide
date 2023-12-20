@@ -68,6 +68,7 @@ overrides:
           trailingUnderscore: allow
       "@typescript-eslint/no-non-null-assertion": warn
       "@typescript-eslint/no-misused-promises": off
+      "@typescript-eslint/restrict-template-expressions": warn
   - files: ["*.vue"]
     parser: vue-eslint-parser
     parserOptions:
