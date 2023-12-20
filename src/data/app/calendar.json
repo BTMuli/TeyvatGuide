@@ -441,7 +441,7 @@
   },
   {
     "id": 10000091,
-    "contentId": 0,
+    "contentId": 500419,
     "dropDays": [1, 4, 7],
     "name": "娜维娅",
     "itemType": "character",
@@ -4161,7 +4161,7 @@
   },
   {
     "id": 12512,
-    "contentId": 0,
+    "contentId": 500420,
     "dropDays": [1, 4, 7],
     "name": "裁断",
     "itemType": "weapon",

@@ -97,7 +97,7 @@
   },
   {
     "id": 1109,
-    "contentId": 0,
+    "contentId": 500457,
     "name": "莱依拉",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/莱依拉.webp",
@@ -205,7 +205,7 @@
   },
   {
     "id": 1209,
-    "contentId": 0,
+    "contentId": 500463,
     "name": "夜兰",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/夜兰.webp",
@@ -320,12 +320,13 @@
     "tags": {
       "GCG_TAG_ELEMENT_PYRO": "火元素",
       "GCG_TAG_WEAPON_CLAYMORE": "双手剑",
-      "GCG_TAG_NATION_SUMERU": "须弥"
+      "GCG_TAG_NATION_SUMERU": "须弥",
+      "GCG_TAG_CAMP_EREMITE": "镀金旅团"
     }
   },
   {
     "id": 1310,
-    "contentId": 0,
+    "contentId": 500430,
     "name": "林尼",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/林尼.webp",
@@ -530,7 +531,7 @@
   },
   {
     "id": 1508,
-    "contentId": 0,
+    "contentId": 500431,
     "name": "琳妮特",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/琳妮特.webp",
@@ -604,7 +605,7 @@
   },
   {
     "id": 1606,
-    "contentId": 0,
+    "contentId": 500429,
     "name": "五郎",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/五郎.webp",
@@ -676,7 +677,7 @@
   },
   {
     "id": 1706,
-    "contentId": 0,
+    "contentId": 500460,
     "name": "艾尔海森",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/艾尔海森.webp",
@@ -700,7 +701,7 @@
   },
   {
     "id": 2102,
-    "contentId": 0,
+    "contentId": 500432,
     "name": "「女士」",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/「女士」.webp",
@@ -760,7 +761,7 @@
   },
   {
     "id": 2303,
-    "contentId": 0,
+    "contentId": 500425,
     "name": "镀金旅团·炽沙叙事人",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/镀金旅团·炽沙叙事人.webp",
@@ -784,7 +785,7 @@
   },
   {
     "id": 2402,
-    "contentId": 0,
+    "contentId": 500462,
     "name": "雷音权现",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/雷音权现.webp",
@@ -808,7 +809,7 @@
   },
   {
     "id": 2502,
-    "contentId": 0,
+    "contentId": 500426,
     "name": "特瓦林",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/特瓦林.webp",
@@ -833,7 +834,7 @@
   },
   {
     "id": 2602,
-    "contentId": 0,
+    "contentId": 500428,
     "name": "若陀龙王",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/若陀龙王.webp",
@@ -1232,7 +1233,7 @@
   },
   {
     "id": 211091,
-    "contentId": 0,
+    "contentId": 500455,
     "name": "归芒携信",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/归芒携信.webp",
@@ -1331,7 +1332,7 @@
   },
   {
     "id": 212091,
-    "contentId": 0,
+    "contentId": 500464,
     "name": "猜先有方",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/猜先有方.webp",
@@ -1441,7 +1442,7 @@
   },
   {
     "id": 213101,
-    "contentId": 0,
+    "contentId": 500442,
     "name": "完场喝彩",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/完场喝彩.webp",
@@ -1627,7 +1628,7 @@
   },
   {
     "id": 215081,
-    "contentId": 0,
+    "contentId": 500443,
     "name": "如影流露的冷刃",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/如影流露的冷刃.webp",
@@ -1693,7 +1694,7 @@
   },
   {
     "id": 216061,
-    "contentId": 0,
+    "contentId": 500441,
     "name": "犬奔·疾如风",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/犬奔·疾如风.webp",
@@ -1759,7 +1760,7 @@
   },
   {
     "id": 217061,
-    "contentId": 0,
+    "contentId": 500440,
     "name": "正理",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/正理.webp",
@@ -1781,7 +1782,7 @@
   },
   {
     "id": 221021,
-    "contentId": 0,
+    "contentId": 500438,
     "name": "苦痛奉还",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/苦痛奉还.webp",
@@ -1834,7 +1835,7 @@
   },
   {
     "id": 223031,
-    "contentId": 0,
+    "contentId": 500456,
     "name": "魔蝎烈祸",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/魔蝎烈祸.webp",
@@ -1877,7 +1878,7 @@
   },
   {
     "id": 225021,
-    "contentId": 0,
+    "contentId": 500439,
     "name": "毁裂风涡",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/毁裂风涡.webp",
@@ -1899,7 +1900,7 @@
   },
   {
     "id": 226022,
-    "contentId": 0,
+    "contentId": 500437,
     "name": "晦朔千引",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/晦朔千引.webp",
@@ -1976,7 +1977,7 @@
   },
   {
     "id": 311106,
-    "contentId": 0,
+    "contentId": 500424,
     "name": "四风原典",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/四风原典.webp",
@@ -1987,7 +1988,7 @@
   },
   {
     "id": 311107,
-    "contentId": 0,
+    "contentId": 500423,
     "name": "图莱杜拉的回忆",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/图莱杜拉的回忆.webp",
@@ -2119,7 +2120,7 @@
   },
   {
     "id": 311306,
-    "contentId": 0,
+    "contentId": 500436,
     "name": "苇海信标",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/苇海信标.webp",
@@ -2196,7 +2197,7 @@
   },
   {
     "id": 311407,
-    "contentId": 0,
+    "contentId": 500459,
     "name": "和璞鸢",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/和璞鸢.webp",
@@ -2262,7 +2263,7 @@
   },
   {
     "id": 311506,
-    "contentId": 0,
+    "contentId": 500465,
     "name": "裁叶萃光",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/裁叶萃光.webp",
@@ -2443,7 +2444,7 @@
   },
   {
     "id": 312018,
-    "contentId": 0,
+    "contentId": 500453,
     "name": "饰金之梦",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/饰金之梦.webp",
@@ -2453,7 +2454,7 @@
   },
   {
     "id": 312019,
-    "contentId": 0,
+    "contentId": 500454,
     "name": "浮溯之珏",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/浮溯之珏.webp",
@@ -2463,7 +2464,7 @@
   },
   {
     "id": 312020,
-    "contentId": 0,
+    "contentId": 500451,
     "name": "来歆余响",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/来歆余响.webp",
@@ -2473,7 +2474,7 @@
   },
   {
     "id": 312021,
-    "contentId": 0,
+    "contentId": 500434,
     "name": "灵光明烁之心",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/灵光明烁之心.webp",
@@ -2483,7 +2484,7 @@
   },
   {
     "id": 312022,
-    "contentId": 0,
+    "contentId": 500435,
     "name": "花海甘露之光",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/花海甘露之光.webp",
@@ -2783,7 +2784,7 @@
   },
   {
     "id": 321016,
-    "contentId": 0,
+    "contentId": 500427,
     "name": "湖中垂柳",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/湖中垂柳.webp",
@@ -2793,7 +2794,7 @@
   },
   {
     "id": 321017,
-    "contentId": 0,
+    "contentId": 500450,
     "name": "欧庇克莱歌剧院",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/欧庇克莱歌剧院.webp",
@@ -3003,7 +3004,7 @@
   },
   {
     "id": 322021,
-    "contentId": 0,
+    "contentId": 500449,
     "name": "玛梅赫",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/玛梅赫.webp",
@@ -3053,7 +3054,7 @@
   },
   {
     "id": 323005,
-    "contentId": 0,
+    "contentId": 500444,
     "name": "化种匣",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/化种匣.webp",
@@ -3063,7 +3064,7 @@
   },
   {
     "id": 323006,
-    "contentId": 0,
+    "contentId": 500452,
     "name": "留念镜",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/留念镜.webp",
@@ -3123,7 +3124,7 @@
   },
   {
     "id": 330006,
-    "contentId": 0,
+    "contentId": 500458,
     "name": "裁定之时",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/裁定之时.webp",
@@ -3499,7 +3500,7 @@
   },
   {
     "id": 332025,
-    "contentId": 0,
+    "contentId": 500447,
     "name": "野猪公主",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/野猪公主.webp",
@@ -3507,7 +3508,7 @@
   },
   {
     "id": 332026,
-    "contentId": 0,
+    "contentId": 500448,
     "name": "坍陷与契机",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/坍陷与契机.webp",
@@ -3515,7 +3516,7 @@
   },
   {
     "id": 332027,
-    "contentId": 0,
+    "contentId": 500446,
     "name": "浮烁的四叶印",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/浮烁的四叶印.webp",
@@ -3643,7 +3644,7 @@
   },
   {
     "id": 333013,
-    "contentId": 0,
+    "contentId": 500445,
     "name": "炸鱼薯条",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/炸鱼薯条.webp",
