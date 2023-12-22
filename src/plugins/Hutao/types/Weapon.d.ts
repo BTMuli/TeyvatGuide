@@ -1,7 +1,7 @@
 /**
  * @file plugins/Hutao/types/Weapon.d.ts
  * @description 武器组件类型定义
- * @since Beta v0.3.8
+ * @since Beta v0.3.9
  */
 
 /**
@@ -51,7 +51,7 @@ declare namespace TGApp.Plugins.Hutao.Weapon {
 
   /**
    * @description 精炼描述
-   * @since Beta v0.3.8
+   * @since Beta v0.3.9
    * @memberof TGApp.Plugins.Hutao.Weapon
    * @interface RhiAffix
    * @property {string} Name 精炼名称
@@ -60,7 +60,7 @@ declare namespace TGApp.Plugins.Hutao.Weapon {
    */
   interface RhiAffix {
     Name: string;
-    Description: Array<{
+    Descriptions: Array<{
       Level: number;
       Description: string;
     }>;
