@@ -142,7 +142,6 @@ onMounted(async () => {
     if (res === undefined) return;
     data.value = res.default;
     await appWindow.setTitle(`Wiki_Character - ${data.value.name}`);
-    await appWindow.setAlwaysOnTop(true);
     loading.value = false;
   } catch (error) {
     loadingEmpty.value = true;
@@ -224,12 +223,6 @@ onMounted(async () => {
 
 .twc-bib-item :nth-child(1) {
   font-weight: bold;
-}
-
-.twc-text {
-  display: flex;
-  flex-direction: column;
-  row-gap: 10px;
 }
 
 .twc-text-title {
