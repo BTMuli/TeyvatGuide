@@ -9,34 +9,34 @@
           <span>{{ data.name }} {{ data.title }}</span>
           <span>{{ data.description }}</span>
         </div>
-        <div class="twc-bi-grid">
-          <div class="twc-bim-item">
+        <div class="twc-bi-grid1">
+          <div class="twc-big-item">
             <span>所属</span>
             <span>{{ data.brief.camp }}</span>
           </div>
-          <div class="twc-bim-item">
+          <div class="twc-big-item">
             <span>命之座</span>
             <span>{{ data.brief.constellation }}</span>
           </div>
-          <div class="twc-bim-item">
+          <div class="twc-big-item">
             <span>生日</span>
             <span>{{ data.brief.birth }}</span>
           </div>
         </div>
-        <div class="twc-bi-grid">
-          <div class="twc-bib-item">
+        <div class="twc-bi-grid2">
+          <div class="twc-big-item">
             <span>汉语CV</span>
             <span>{{ data.brief.cv.cn }}</span>
           </div>
-          <div class="twc-bib-item">
+          <div class="twc-big-item">
             <span>日语CV</span>
             <span>{{ data.brief.cv.jp }}</span>
           </div>
-          <div class="twc-bib-item">
+          <div class="twc-big-item">
             <span>英语CV</span>
             <span>{{ data.brief.cv.en }}</span>
           </div>
-          <div class="twc-bib-item">
+          <div class="twc-big-item">
             <span>韩语CV</span>
             <span>{{ data.brief.cv.kr }}</span>
           </div>
@@ -173,7 +173,7 @@ onMounted(async () => {
 
 .twc-brief {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   column-gap: 10px;
 }
 
@@ -201,27 +201,24 @@ onMounted(async () => {
   opacity: 0.8;
 }
 
-.twc-bi-grid {
+.twc-bi-grid1 {
   display: grid;
   column-gap: 10px;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
 }
 
-.twc-bim-item {
+.twc-bi-grid2 {
+  display: grid;
+  column-gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.twc-big-item {
   display: flex;
   column-gap: 5px;
 }
 
-.twc-bim-item :nth-child(1) {
-  font-weight: bold;
-}
-
-.twc-bib-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.twc-bib-item :nth-child(1) {
+.twc-big-item :nth-child(1) {
   font-weight: bold;
 }
 
