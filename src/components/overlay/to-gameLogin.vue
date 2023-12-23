@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide blur-val="20px">
+  <TOverlay v-model="visible" hide blur-val="20px" :to-click="onCancel">
     <div class="tog-box">
       <div class="tog-top">
         <div class="tog-title">请使用米游社APP进行扫码操作</div>
@@ -8,17 +8,13 @@
       <div class="tog-mid">
         <qrcode-vue class="tog-qr" :value="qrCode" render-as="svg" />
       </div>
-      <div class="tog-bottom">
-        <v-btn class="tog-btn" @click="onCancel">取消</v-btn>
-        <v-btn class="tog-btn" @click="freshQr">刷新</v-btn>
-        <v-btn class="tog-btn" :loading="loading" @click="getData">已扫码</v-btn>
-      </div>
     </div>
   </TOverlay>
 </template>
 <script setup lang="ts">
+import { storeToRefs } from "pinia";
 import QrcodeVue from "qrcode.vue";
-import { computed, reactive, ref, watch } from "vue";
+import { computed, onUnmounted, reactive, ref, watch } from "vue";
 
 import Mys from "../../plugins/Mys";
 import { useUserStore } from "../../store/modules/user";
@@ -44,7 +40,9 @@ const visible = computed({
     emits("update:modelValue", value);
   },
 });
-const loading = ref<boolean>(false);
+const isCycle = ref<boolean>(false);
+let cycleTimer: NodeJS.Timeout | null = null;
+
 const qrCode = ref<string>("");
 const ticket = ref<string>("");
 const cookie = reactive<TGApp.User.Account.Cookie>({
@@ -58,13 +56,23 @@ const cookie = reactive<TGApp.User.Account.Cookie>({
   ltoken: "",
 });
 
-const userStore = useUserStore();
+const userStore = storeToRefs(useUserStore());
 
 watch(visible, async (value) => {
   if (value) {
     await freshQr();
+    isCycle.value = true;
+    cycleTimer = setInterval(cycleGetData, 1000);
   }
 });
+
+function onCancel(): void {
+  visible.value = false;
+  showSnackbar({
+    text: "已取消登录",
+    color: "cancel",
+  });
+}
 
 async function freshQr(): Promise<void> {
   const res = await Mys.User.getQr();
@@ -88,25 +96,36 @@ async function freshQr(): Promise<void> {
   }
 }
 
-async function getData(): Promise<void> {
-  loading.value = true;
+async function cycleGetData() {
+  if (!isCycle.value) {
+    if (cycleTimer) clearInterval(cycleTimer);
+    return;
+  }
   const res = await Mys.User.getData(ticket.value);
+  console.log(res);
   if ("retcode" in res) {
     showSnackbar({
       text: `[${res.retcode}] ${res.message}`,
       color: "error",
     });
-  } else if (res.stat === "Init") {
-    showSnackbar({
-      text: "请先扫码",
-      color: "error",
-    });
-  } else if (res.stat === "Scanned") {
-    showSnackbar({
-      text: "请在米游社APP上确认登录",
-      color: "error",
-    });
-  } else {
+    if (res.retcode === -106) {
+      // 二维码过期
+      await freshQr();
+    } else {
+      // 取消轮询
+      isCycle.value = false;
+      if (cycleTimer) clearInterval(cycleTimer);
+      visible.value = false;
+    }
+    return;
+  }
+  if (res.stat === "Init" || res.stat === "Scanned") {
+    return;
+  }
+  if (res.stat === "Confirmed") {
+    // 取消轮询
+    isCycle.value = false;
+    if (cycleTimer) clearInterval(cycleTimer);
     const data: TGApp.Plugins.Mys.GameLogin.StatusPayloadRaw = JSON.parse(res.payload.raw);
     cookie.account_id = data.uid;
     cookie.ltuid = data.uid;
@@ -119,10 +138,6 @@ async function getData(): Promise<void> {
     });
     visible.value = false;
   }
-}
-
-function onCancel(): void {
-  visible.value = false;
 }
 
 async function getTokens(): Promise<void> {
@@ -141,8 +156,13 @@ async function getTokens(): Promise<void> {
   if (typeof cookieTokenRes === "string") cookie.cookie_token = cookieTokenRes;
   const ltokenRes = await TGRequest.User.bySToken.getLToken(cookie.mid, cookie.stoken);
   if (typeof ltokenRes === "string") cookie.ltoken = ltokenRes;
-  await userStore.saveCookie(cookie);
+  userStore.cookie.value = cookie;
 }
+
+onUnmounted(() => {
+  isCycle.value = false;
+  if (cycleTimer) clearInterval(cycleTimer);
+});
 </script>
 <style lang="css" scoped>
 .tog-box {

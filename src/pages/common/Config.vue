@@ -253,18 +253,7 @@ function toOuter(url: string): void {
 
 // 扫码登录
 async function confirmScanLogin(): Promise<void> {
-  const confirmRes = await showConfirm({
-    title: "请使用米游社 APP 执行操作",
-    text: "请在成功后刷新数据",
-  });
-  if (confirmRes) {
-    scan.value = true;
-  } else {
-    showSnackbar({
-      color: "grey",
-      text: "已取消扫码登录",
-    });
-  }
+  scan.value = true;
 }
 
 // 刷新用户信息
