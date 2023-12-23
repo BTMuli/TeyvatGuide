@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.3.6
+ * @since Beta v0.3.9
  */
 
 import { path } from "@tauri-apps/api";
@@ -26,11 +26,6 @@ export const useAppStore = defineStore(
     const sidebar = reactive({
       // 是否折叠
       collapse: true,
-      // 是否显示
-      submenu: {
-        // 数据库
-        wiki: false,
-      },
     });
     // 开发者模式
     const devMode = ref(false);
@@ -54,18 +49,9 @@ export const useAppStore = defineStore(
     function init(): void {
       loading.value = false;
       devMode.value = false;
-      sidebar.submenu = {
-        wiki: false,
-      };
       theme.value = "default";
       isLogin.value = false;
       initDevice();
-    }
-
-    function getSubmenu(): string[] {
-      const open = [];
-      if (sidebar.submenu.wiki) open.push("wiki");
-      return open;
     }
 
     function changeTheme(): void {
@@ -88,7 +74,6 @@ export const useAppStore = defineStore(
       deviceInfo,
       isLogin,
       init,
-      getSubmenu,
       changeTheme,
     };
   },

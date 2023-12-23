@@ -1,6 +1,6 @@
 <template>
   <v-navigation-drawer :permanent="true" :rail="rail" class="tsb-box">
-    <v-list v-model:opened="open" class="side-list" density="compact" :nav="true">
+    <v-list class="side-list" density="compact" :nav="true">
       <!-- 负责收缩侧边栏 -->
       <v-list-item @click="collapse()">
         <template v-if="rail" #prepend>
@@ -68,7 +68,7 @@
         </template>
       </v-list-item>
       <v-divider v-show="isDevEnv" />
-      <v-list-group value="wiki" :fluid="true">
+      <v-menu :open-on-click="true" location="end">
         <template #activator="{ props }">
           <v-list-item title="图鉴" v-bind="props">
             <template #prepend>
@@ -76,27 +76,53 @@
             </template>
           </v-list-item>
         </template>
-        <v-list-item title="深渊数据库" value="wiki-abyss" :link="true" href="/wiki/abyss">
-          <template #prepend>
-            <img src="/source/UI/wikiAbyss.webp" alt="abyssIcon" class="side-icon" />
-          </template>
-        </v-list-item>
-        <v-list-item title="角色图鉴" value="wiki-character" :link="true" href="/wiki/character">
-          <template #prepend>
-            <img src="/source/UI/wikiAvatar.webp" alt="characterIcon" class="side-icon" />
-          </template>
-        </v-list-item>
-        <v-list-item title="武器图鉴" value="wiki-weapon" :link="true" href="/wiki/weapon">
-          <template #prepend>
-            <img src="/source/UI/wikiWeapon.webp" alt="weaponIcon" class="side-icon" />
-          </template>
-        </v-list-item>
-        <v-list-item title="GCG" value="wiki-GCG" :link="true" href="/wiki/GCG">
-          <template #prepend>
-            <img src="/source/UI/wikiGCG.webp" alt="gcgIcon" class="side-icon" />
-          </template>
-        </v-list-item>
-      </v-list-group>
+        <v-list class="side-list-menu wiki" density="compact" :nav="true">
+          <v-list-item
+            class="side-item-menu"
+            title="深渊数据库"
+            value="wiki-abyss"
+            :link="true"
+            href="/wiki/abyss"
+          >
+            <template #prepend>
+              <img src="/source/UI/wikiAbyss.webp" alt="abyssIcon" class="side-icon-menu" />
+            </template>
+          </v-list-item>
+          <v-list-item
+            class="side-item-menu"
+            title="角色图鉴"
+            value="wiki-character"
+            :link="true"
+            href="/wiki/character"
+          >
+            <template #prepend>
+              <img src="/source/UI/wikiAvatar.webp" alt="characterIcon" class="side-icon-menu" />
+            </template>
+          </v-list-item>
+          <v-list-item
+            class="side-item-menu"
+            title="武器图鉴"
+            value="wiki-weapon"
+            :link="true"
+            href="/wiki/weapon"
+          >
+            <template #prepend>
+              <img src="/source/UI/wikiWeapon.webp" alt="weaponIcon" class="side-icon-menu" />
+            </template>
+          </v-list-item>
+          <v-list-item
+            class="side-item-menu"
+            title="GCG"
+            value="wiki-GCG"
+            :link="true"
+            href="/wiki/GCG"
+          >
+            <template #prepend>
+              <img src="/source/UI/wikiGCG.webp" alt="gcgIcon" class="side-icon-menu" />
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-menu>
       <div class="bottom-menu">
         <v-menu :open-on-click="true" location="end">
           <template #activator="{ props }">
@@ -106,35 +132,35 @@
               </template>
             </v-list-item>
           </template>
-          <v-list class="side-list-user" density="compact" :nav="true">
-            <v-list-item class="side-item-user" title="签到" @click="openClient('sign_in')">
+          <v-list class="side-list-menu" density="compact" :nav="true">
+            <v-list-item class="side-item-menu" title="签到" @click="openClient('sign_in')">
               <template #prepend>
-                <img src="/source/UI/userGacha.webp" class="side-icon-user" alt="sing_in" />
+                <img src="/source/UI/userGacha.webp" class="side-icon-menu" alt="sing_in" />
               </template>
             </v-list-item>
-            <v-list-item class="side-item-user" title="战绩" @click="openClient('game_record')">
+            <v-list-item class="side-item-menu" title="战绩" @click="openClient('game_record')">
               <template #prepend>
-                <img src="/source/UI/userRecord.webp" class="side-icon-user" alt="game_record" />
+                <img src="/source/UI/userRecord.webp" class="side-icon-menu" alt="game_record" />
               </template>
             </v-list-item>
-            <v-list-item class="side-item-user" title="便笺" @click="openClient('daily_note')">
+            <v-list-item class="side-item-menu" title="便笺" @click="openClient('daily_note')">
               <template #prepend>
-                <img src="/icon/material/210.webp" class="side-icon-user" alt="daily_note" />
+                <img src="/icon/material/210.webp" class="side-icon-menu" alt="daily_note" />
               </template>
             </v-list-item>
-            <v-list-item class="side-item-user" title="酒馆" @click="openClient('tavern')">
+            <v-list-item class="side-item-menu" title="酒馆" @click="openClient('tavern')">
               <template #prepend>
-                <img src="/platforms/mhy/mys.webp" alt="酒馆" class="side-icon-user" />
+                <img src="/platforms/mhy/mys.webp" alt="酒馆" class="side-icon-menu" />
               </template>
             </v-list-item>
             <v-list-item
-              class="side-item-user"
+              class="side-item-menu"
               title="登录"
               @click="login"
               v-show="userStore.cookie.value?.game_token === ''"
             >
               <template #prepend>
-                <img src="/source/UI/defaultUser.webp" class="side-icon-user" alt="login" />
+                <img src="/source/UI/defaultUser.webp" class="side-icon-menu" alt="login" />
               </template>
             </v-list-item>
           </v-list>
@@ -191,15 +217,6 @@ const themeGet = computed({
 });
 const themeTitle = computed(() => {
   return themeGet.value === "default" ? "夜间模式" : "日间模式";
-});
-
-const open = computed({
-  get() {
-    return appStore.getSubmenu();
-  },
-  set(value: string[]) {
-    appStore.sidebar.submenu.wiki = value.includes("wiki");
-  },
 });
 
 function collapse(): void {
@@ -264,18 +281,22 @@ function login(): void {
   margin-right: 32px;
 }
 
-.side-list-user {
+.side-list-menu {
   background: var(--app-side-bg) !important;
   color: var(--app-side-content) !important;
   font-family: var(--font-title);
 }
 
-.side-item-user {
+.side-list-menu.wiki {
+  margin-left: 10px;
+}
+
+.side-item-menu {
   border: 1px solid var(--common-shadow-2);
   background: var(--box-bg-1);
 }
 
-.side-icon-user {
+.side-icon-menu {
   width: 20px;
   height: 20px;
   border-radius: 5px;
