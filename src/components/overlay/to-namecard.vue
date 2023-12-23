@@ -6,6 +6,7 @@
       <div class="ton-content">
         <span>{{ props.data.name }}</span>
         <span>{{ props.data.desc }}</span>
+        <span>获取途径：{{ props.data.source }}</span>
       </div>
     </div>
   </TOverlay>
@@ -17,13 +18,7 @@ import TOverlay from "../main/t-overlay.vue";
 
 interface ToNamecardProps {
   modelValue: boolean;
-  data?: {
-    profile: string;
-    name: string;
-    bg: string;
-    icon: string;
-    desc: string;
-  };
+  data?: TGApp.App.NameCard.Item;
 }
 
 type ToNamecardEmits = (e: "update:modelValue", value: boolean) => void;
@@ -80,7 +75,7 @@ function onCancel() {
   font-size: 20px;
 }
 
-.ton-content :nth-child(2) {
+.ton-content :not(:nth-child(1)) {
   opacity: 0.8;
 }
 </style>
