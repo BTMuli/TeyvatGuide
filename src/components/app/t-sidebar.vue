@@ -121,6 +121,30 @@
               <img src="/source/UI/wikiGCG.webp" alt="gcgIcon" class="side-icon-menu" />
             </template>
           </v-list-item>
+          <v-list-item
+            class="side-item-menu"
+            title="名片图鉴"
+            value="wiki-namecard"
+            :link="true"
+            href="/wiki/namecard"
+            v-if="isDevEnv"
+          >
+            <template #prepend>
+              <img src="/source/UI/wikiGCG.webp" alt="gcgIcon" class="side-icon-menu" />
+            </template>
+          </v-list-item>
+          <v-list-item
+            class="side-item-menu"
+            title="材料图鉴"
+            value="wiki-material"
+            :link="true"
+            href="/wiki/material"
+            v-if="isDevEnv"
+          >
+            <template #prepend>
+              <img src="/source/UI/wikiGCG.webp" alt="gcgIcon" class="side-icon-menu" />
+            </template>
+          </v-list-item>
         </v-list>
       </v-menu>
       <div class="bottom-menu">
