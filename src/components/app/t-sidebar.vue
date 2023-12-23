@@ -130,7 +130,7 @@
             v-if="isDevEnv"
           >
             <template #prepend>
-              <img src="/source/UI/wikiGCG.webp" alt="gcgIcon" class="side-icon-menu" />
+              <img src="/source/UI/userRecord.webp" alt="gcgIcon" class="side-icon-menu" />
             </template>
           </v-list-item>
           <v-list-item
