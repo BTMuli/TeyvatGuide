@@ -15,7 +15,18 @@
         </v-list>
       </template>
     </v-virtual-scroll>
-    <ToNamecard v-model="visible" :data="curNameCard" />
+    <ToNamecard v-model="visible" :data="curNameCard">
+      <template #left>
+        <div class="card-arrow left" @click="switchCard(false)">
+          <img src="../../assets/icons/arrow-right.svg" alt="right" />
+        </div>
+      </template>
+      <template #right>
+        <div class="card-arrow" @click="switchCard(true)">
+          <img src="../../assets/icons/arrow-right.svg" alt="right" />
+        </div>
+      </template>
+    </ToNamecard>
   </div>
 </template>
 <script lang="ts" setup>
@@ -35,6 +46,24 @@ function toNameCard(item: TGApp.App.NameCard.Item) {
   curNameCard.value = item;
   visible.value = true;
 }
+
+function switchCard(isNext: boolean) {
+  const index = AppNameCardsData.findIndex((item) => item.name === curNameCard.value?.name);
+  if (index === -1) return;
+  if (isNext) {
+    if (index === AppNameCardsData.length - 1) {
+      curNameCard.value = AppNameCardsData[0];
+    } else {
+      curNameCard.value = AppNameCardsData[index + 1];
+    }
+  } else {
+    if (index === 0) {
+      curNameCard.value = AppNameCardsData[AppNameCardsData.length - 1];
+    } else {
+      curNameCard.value = AppNameCardsData[index - 1];
+    }
+  }
+}
 </script>
 <style lang="css" scoped>
 .tw-nc-box {
@@ -53,5 +82,28 @@ function toNameCard(item: TGApp.App.NameCard.Item) {
   background-repeat: no-repeat;
   cursor: pointer;
   font-family: var(--font-title);
+}
+
+.card-arrow {
+  position: relative;
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dark .card-arrow {
+  filter: invert(11%) sepia(73%) saturate(11%) hue-rotate(139deg) brightness(97%) contrast(81%);
+}
+
+.card-arrow img {
+  width: 100%;
+  height: 100%;
+}
+
+.card-arrow.left img {
+  transform: rotate(180deg);
 }
 </style>

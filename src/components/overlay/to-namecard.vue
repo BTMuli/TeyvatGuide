@@ -1,13 +1,17 @@
 <template>
   <!-- todo 支持 share -->
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
-    <div class="ton-box" v-if="props.data">
-      <img alt="bg" class="ton-bg" v-if="props.data" :src="props.data.profile" />
-      <div class="ton-content">
-        <span>{{ props.data.name }}</span>
-        <span>{{ props.data.desc }}</span>
-        <span>获取途径：{{ props.data.source }}</span>
+    <div v-if="props.data" class="ton-container">
+      <slot name="left"></slot>
+      <div class="ton-box">
+        <img alt="bg" class="ton-bg" v-if="props.data" :src="props.data.profile" />
+        <div class="ton-content">
+          <span>{{ props.data.name }}</span>
+          <span>{{ props.data.desc }}</span>
+          <span>获取途径：{{ props.data.source }}</span>
+        </div>
       </div>
+      <slot name="right"></slot>
     </div>
   </TOverlay>
 </template>
@@ -39,6 +43,13 @@ function onCancel() {
 }
 </script>
 <style lang="css" scoped>
+.ton-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 10px;
+}
+
 .ton-box {
   position: relative;
   overflow: hidden;
@@ -75,7 +86,12 @@ function onCancel() {
   font-size: 20px;
 }
 
-.ton-content :not(:nth-child(1)) {
+.ton-content :nth-child(2) {
+  opacity: 0.8;
+}
+
+.ton-content :nth-child(3) {
+  border-top: 1px dotted var(--tgc-white-1);
   opacity: 0.8;
 }
 </style>
