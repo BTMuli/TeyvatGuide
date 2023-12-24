@@ -41,6 +41,7 @@
         v-if="selectedSeries !== 0 && selectedSeries !== 17 && selectedSeries !== -1 && !loading"
       >
         <v-list
+          v-if="curCard"
           class="achi-series"
           :style="{ backgroundImage: `url(${curCard.bg})` }"
           @click="openImg()"
@@ -129,7 +130,7 @@ const hideFin = ref<boolean>(false);
 const showNameCard = ref<boolean>(false);
 // data
 const title = ref(achievementsStore.title);
-let curCard = reactive({ profile: "", bg: "", icon: "", name: "", desc: "" });
+let curCard = ref<TGApp.App.NameCard.Item>();
 // series
 const allSeriesData = ref<TGApp.Sqlite.Achievement.SeriesTable[]>([]);
 const selectedSeries = ref<number>(-1);
@@ -213,12 +214,14 @@ async function selectSeries(index: number): Promise<void> {
   loadingTitle.value = "正在查找对应的成就名片";
   if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
     const cardGet = await TGSqlite.getNameCard(index);
-    curCard = {
-      profile: `/source/nameCard/profile/${cardGet.name}.webp`,
-      bg: `/source/nameCard/bg/${cardGet.name}.webp`,
-      icon: `/source/nameCard/icon/${cardGet.name}.webp`,
+    curCard.value = {
       name: cardGet.name,
       desc: cardGet.desc,
+      icon: `/source/nameCard/icon/${cardGet.name}.webp`,
+      bg: `/source/nameCard/bg/${cardGet.name}.webp`,
+      profile: `/source/nameCard/profile/${cardGet.name}.webp`,
+      type: cardGet.type,
+      source: cardGet.source,
     };
   }
   // 右侧滚动到顶部
