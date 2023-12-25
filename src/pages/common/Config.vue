@@ -1,150 +1,147 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <ToGameLogin v-model="scan" />
-  <v-list class="config-list">
-    <v-list-subheader :inset="true" class="config-header" title="应用信息" />
-    <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
-      <template #prepend>
-        <img class="config-icon" src="/platforms/tauri.webp" alt="Tauri" />
-      </template>
-      <template #append>
-        <v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
-      </template>
-    </v-list-item>
-    <v-list-item>
-      <template #prepend>
-        <img class="config-icon" src="/icon.webp" alt="App" />
-      </template>
-      <v-list-item-title>
-        应用版本
-        <v-btn
-          size="small"
-          variant="outlined"
-          @click="toOuter('https://github.com/BTMuli/TeyvatGuide/releases/latest')"
-        >
-          BETA
-        </v-btn>
-      </v-list-item-title>
-      <template #append>
-        <v-list-item-subtitle>{{ versionApp }}.{{ buildTime }}</v-list-item-subtitle>
-      </template>
-    </v-list-item>
-    <v-list-item title="成就版本">
-      <template #prepend>
-        <img class="config-icon" src="../../assets/icons/achievements.svg" alt="Achievements" />
-      </template>
-      <template #append>
-        <v-list-item-subtitle>{{ achievementsStore.lastVersion }}</v-list-item-subtitle>
-      </template>
-    </v-list-item>
-    <v-list-item title="登录信息">
-      <v-list-item-subtitle v-show="userInfo?.nickname !== '未登录'">
-        {{ userInfo?.nickname }} uid:{{ userInfo?.uid }}
-      </v-list-item-subtitle>
-      <v-list-item-subtitle v-show="userInfo?.nickname === '未登录'">
-        未登录，请扫码登录！
-      </v-list-item-subtitle>
-      <template #prepend>
-        <img class="config-icon" :src="userInfo?.avatar" alt="Login" />
-      </template>
-      <template #append>
-        <v-btn class="config-btn" @click="confirmScanLogin">扫码登录</v-btn>
-        <v-btn class="config-btn" @click="confirmRefreshUser"> 刷新数据</v-btn>
-      </template>
-    </v-list-item>
-    <v-list-subheader :inset="true" class="config-header" title="系统信息" />
-    <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item title="系统平台" prepend-icon="mdi-microsoft-windows">
-      <template #append>
-        <v-list-item-subtitle>{{ osPlatform }}</v-list-item-subtitle>
-      </template>
-    </v-list-item>
-    <v-list-item title="系统版本" prepend-icon="mdi-monitor-dashboard">
-      <template #append>
-        <v-list-item-subtitle>{{ osVersion }}</v-list-item-subtitle>
-      </template>
-    </v-list-item>
-    <v-list-item title="数据库更新时间" prepend-icon="mdi-database-sync">
-      <template #append>
-        <v-list-item-subtitle
-          >{{ dbInfo.find((item) => item.key === "dataUpdated")?.value }}
+  <div class="config-box">
+    <v-list class="config-list">
+      <v-list-subheader :inset="true" class="config-header" title="应用信息" />
+      <v-divider :inset="true" class="border-opacity-75" />
+      <v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
+        <template #prepend>
+          <img class="config-icon" src="/platforms/tauri.webp" alt="Tauri" />
+        </template>
+        <template #append>
+          <v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
+        </template>
+      </v-list-item>
+      <v-list-item title="成就版本">
+        <template #prepend>
+          <img class="config-icon" src="../../assets/icons/achievements.svg" alt="Achievements" />
+        </template>
+        <template #append>
+          <v-list-item-subtitle>{{ achievementsStore.lastVersion }}</v-list-item-subtitle>
+        </template>
+      </v-list-item>
+      <v-list-item title="登录信息">
+        <v-list-item-subtitle v-show="userInfo?.nickname !== '未登录'">
+          {{ userInfo?.nickname }} uid:{{ userInfo?.uid }}
         </v-list-item-subtitle>
-      </template>
-      <v-list-item-subtitle
-        >更新于
-        {{ dbInfo.find((item) => item.key === "dataUpdated")?.updated }}
-      </v-list-item-subtitle>
-    </v-list-item>
-    <v-list-item title="数据库版本" prepend-icon="mdi-database-search">
-      <template #append>
-        <v-list-item-subtitle
-          >{{ dbInfo.find((item) => item.key === "appVersion")?.value }}
+        <v-list-item-subtitle v-show="userInfo?.nickname === '未登录'">
+          未登录，请扫码登录！
         </v-list-item-subtitle>
-      </template>
-      <v-list-item-subtitle
-        >更新于
-        {{ dbInfo.find((item) => item.key === "appVersion")?.updated }}
-      </v-list-item-subtitle>
-    </v-list-item>
-    <v-list-subheader :inset="true" class="config-header" title="设置" />
-    <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item prepend-icon="mdi-camera-iris">
-      <v-select
-        v-model="showHome"
-        :items="homeStore.getShowItems()"
-        label="首页显示组件"
-        :multiple="true"
-        :chips="true"
-        :theme="vuetifyTheme"
-      />
-      <template #append>
-        <v-btn class="config-btn" @click="submitHome"> 确定</v-btn>
-      </template>
-    </v-list-item>
-    <v-list-item prepend-icon="mdi-database-export" title="数据备份" @click="confirmBackup" />
-    <v-list-item prepend-icon="mdi-database-import" title="数据恢复" @click="confirmRestore" />
-    <v-list-item prepend-icon="mdi-database-arrow-up" title="数据更新" @click="confirmUpdate()" />
-    <v-list-subheader :inset="true" class="config-header" title="调试" @click="tryShowReset" />
-    <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item
-      v-if="isDevEnv"
-      title="调试模式"
-      subtitle="开启后将显示调试信息"
-      prepend-icon="mdi-bug-play"
-    >
-      <template #append>
-        <v-switch
-          v-model="appStore.devMode"
-          :label="appStore.devMode ? '开启' : '关闭'"
-          :inset="true"
-          color="#FAC51E"
-          @click="submitDevMode"
+        <template #prepend>
+          <img class="config-icon" :src="userInfo?.avatar" alt="Login" />
+        </template>
+        <template #append>
+          <v-btn class="config-btn" @click="confirmScanLogin">扫码登录</v-btn>
+          <v-btn class="config-btn" @click="confirmRefreshUser"> 刷新数据</v-btn>
+        </template>
+      </v-list-item>
+      <v-list-subheader :inset="true" class="config-header" title="系统信息" />
+      <v-divider :inset="true" class="border-opacity-75" />
+      <v-list-item title="系统平台" prepend-icon="mdi-microsoft-windows">
+        <template #append>
+          <v-list-item-subtitle>{{ osPlatform }}</v-list-item-subtitle>
+        </template>
+      </v-list-item>
+      <v-list-item title="系统版本" prepend-icon="mdi-monitor-dashboard">
+        <template #append>
+          <v-list-item-subtitle>{{ osVersion }}</v-list-item-subtitle>
+        </template>
+      </v-list-item>
+      <v-list-item title="数据库更新时间" prepend-icon="mdi-database-sync">
+        <template #append>
+          <v-list-item-subtitle
+            >{{ dbInfo.find((item) => item.key === "dataUpdated")?.value }}
+          </v-list-item-subtitle>
+        </template>
+        <v-list-item-subtitle
+          >更新于
+          {{ dbInfo.find((item) => item.key === "dataUpdated")?.updated }}
+        </v-list-item-subtitle>
+      </v-list-item>
+      <v-list-item title="数据库版本" prepend-icon="mdi-database-search">
+        <template #append>
+          <v-list-item-subtitle
+            >{{ dbInfo.find((item) => item.key === "appVersion")?.value }}
+          </v-list-item-subtitle>
+        </template>
+        <v-list-item-subtitle
+          >更新于
+          {{ dbInfo.find((item) => item.key === "appVersion")?.updated }}
+        </v-list-item-subtitle>
+      </v-list-item>
+      <v-list-subheader :inset="true" class="config-header" title="设置" />
+      <v-divider :inset="true" class="border-opacity-75" />
+      <v-list-item prepend-icon="mdi-camera-iris">
+        <v-select
+          v-model="showHome"
+          :items="homeStore.getShowItems()"
+          label="首页显示组件"
+          :multiple="true"
+          :chips="true"
+          :theme="vuetifyTheme"
         />
-      </template>
-    </v-list-item>
-    <v-list-item prepend-icon="mdi-refresh" title="刷新设备信息" @click="confirmUpdateDevice" />
-    <v-list-item prepend-icon="mdi-database-remove" title="清除缓存" @click="confirmDelCache" />
-    <v-list-item
-      v-show="showReset"
-      title="重置数据库"
-      prepend-icon="mdi-database-settings"
-      @click="confirmResetDB()"
-    />
-    <v-list-item prepend-icon="mdi-cog-sync" title="恢复默认设置" @click="confirmResetApp" />
-    <v-list-subheader :inset="true" class="config-header" title="路径" />
-    <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item
-      prepend-icon="mdi-folder-key"
-      title="本地数据库路径"
-      :subtitle="appStore.dataPath.dbDataPath"
-    />
-    <v-list-item
-      prepend-icon="mdi-folder-account"
-      title="本地用户数据路径"
-      :subtitle="appStore.dataPath.userDataDir"
-    />
-  </v-list>
+        <template #append>
+          <v-btn class="config-btn" @click="submitHome"> 确定</v-btn>
+        </template>
+      </v-list-item>
+      <v-list-item prepend-icon="mdi-database-export" title="数据备份" @click="confirmBackup" />
+      <v-list-item prepend-icon="mdi-database-import" title="数据恢复" @click="confirmRestore" />
+      <v-list-item prepend-icon="mdi-database-arrow-up" title="数据更新" @click="confirmUpdate()" />
+      <v-list-subheader :inset="true" class="config-header" title="调试" @click="tryShowReset" />
+      <v-divider :inset="true" class="border-opacity-75" />
+      <v-list-item
+        v-if="isDevEnv"
+        title="调试模式"
+        subtitle="开启后将显示调试信息"
+        prepend-icon="mdi-bug-play"
+      >
+        <template #append>
+          <v-switch
+            v-model="appStore.devMode"
+            :label="appStore.devMode ? '开启' : '关闭'"
+            :inset="true"
+            color="#FAC51E"
+            @click="submitDevMode"
+          />
+        </template>
+      </v-list-item>
+      <v-list-item prepend-icon="mdi-refresh" title="刷新设备信息" @click="confirmUpdateDevice" />
+      <v-list-item prepend-icon="mdi-database-remove" title="清除缓存" @click="confirmDelCache" />
+      <v-list-item
+        v-show="showReset"
+        title="重置数据库"
+        prepend-icon="mdi-database-settings"
+        @click="confirmResetDB()"
+      />
+      <v-list-item prepend-icon="mdi-cog-sync" title="恢复默认设置" @click="confirmResetApp" />
+      <v-list-subheader :inset="true" class="config-header" title="路径" />
+      <v-divider :inset="true" class="border-opacity-75" />
+      <v-list-item
+        prepend-icon="mdi-folder-key"
+        title="本地数据库路径"
+        :subtitle="appStore.dataPath.dbDataPath"
+      />
+      <v-list-item
+        prepend-icon="mdi-folder-account"
+        title="本地用户数据路径"
+        :subtitle="appStore.dataPath.userDataDir"
+      />
+    </v-list>
+    <div class="config-app">
+      <img class="config-app-icon" src="/icon.webp" alt="App" />
+      <div
+        class="config-app-info click"
+        title="点击前往 Github Release"
+        @click="toOuter('https://github.com/BTMuli/TeyvatGuide/releases/latest')"
+      >
+        TeyvatGuide Beta
+      </div>
+      <div class="config-app-info">
+        v{{ versionApp }}.{{ buildTime === "" ? "Dev" : buildTime }}
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -636,9 +633,14 @@ function submitHome(): void {
 </script>
 
 <style lang="css" scoped>
+.config-box {
+  position: relative;
+  display: compact;
+}
+
 .config-list {
   border-radius: 10px;
-  margin: 10px;
+  margin-right: 220px;
   background: var(--box-bg-1);
   color: var(--box-text-4);
   font-family: var(--font-text);
@@ -669,5 +671,37 @@ function submitHome(): void {
   margin-left: 20px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
+}
+
+.config-app {
+  position: fixed;
+  top: 16px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 10px;
+  background-image: linear-gradient(to top, #fbc2eb 0%, #a6c1ee 100%);
+  box-shadow: 0 0 5px var(--common-shadow-4);
+}
+
+.config-app-icon {
+  width: 200px;
+  aspect-ratio: 1 / 1;
+}
+
+.config-app-info {
+  color: var(--tgc-white-1);
+  font-family: var(--font-title);
+  font-size: 14px;
+  text-align: center;
+  text-shadow: 0 0 5px var(--common-shadow-4);
+}
+
+.config-app-info.click {
+  border-bottom: 1px inset var(--tgc-white-4);
+  cursor: pointer;
 }
 </style>
