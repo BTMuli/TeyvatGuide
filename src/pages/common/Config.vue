@@ -656,7 +656,7 @@ function submitHome(): void {
   margin-right: 15px;
   backdrop-filter: blur(20px);
   background: var(--app-side-bg);
-  box-shadow: 0 0 5px var(--common-shadow-t-4);
+  box-shadow: 0 0 5px var(--common-shadow-1);
 }
 
 .config-btn {
@@ -690,11 +690,14 @@ function submitHome(): void {
   font-family: var(--font-title);
   font-size: 14px;
   text-align: center;
-  text-shadow: 0 0 5px var(--common-shadow-4);
 }
 
 .config-app-info.click {
-  border-bottom: 1px inset var(--tgc-white-4);
+  padding: 0 5px;
+  border-radius: 5px;
+  background: linear-gradient(to left, #fb7299, #00aeec);
+  background-clip: text;
   cursor: pointer;
+  -webkit-text-fill-color: transparent;
 }
 </style>
