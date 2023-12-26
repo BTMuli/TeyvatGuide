@@ -15,54 +15,70 @@
         </template>
       </v-list-item>
       <!-- 菜单项 -->
-      <v-list-item value="home" title="首页" :link="true" href="/">
+      <v-list-item value="home" :link="true" href="/" :title.attr="'首页'">
+        <template #title>首页</template>
         <template #prepend>
           <img src="/source/UI/paimon.webp" alt="homeIcon" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item title="公告" value="announcements" :link="true" href="/announcements">
+      <v-list-item :title.attr="'公告'" value="announcements" :link="true" href="/announcements">
+        <template #title>公告</template>
         <template #prepend>
           <img src="../../assets/icons/board.svg" alt="annoIcon" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item title="咨讯" value="news" :link="true" href="/news/2">
+      <v-list-item :title.attr="'咨讯'" value="news" :link="true" href="/news/2">
+        <template #title>咨讯</template>
         <template #prepend>
           <img src="/platforms/mhy/mys.webp" alt="mihoyo" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item title="帖子" value="posts" :link="true" href="/posts">
+      <v-list-item :title.attr="'帖子'" value="posts" :link="true" href="/posts">
+        <template #title>帖子</template>
         <template #prepend>
           <img src="/source/UI/posts.png" alt="posts" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item title="成就" value="achievements" :link="true" href="/achievements">
+      <v-list-item :title.attr="'成就'" value="achievements" :link="true" href="/achievements">
+        <template #title>成就</template>
         <template #prepend>
           <img src="../../assets/icons/achievements.svg" alt="achievementsIcon" class="side-icon" />
         </template>
       </v-list-item>
       <v-divider />
-      <v-list-item title="原神战绩" value="record" :link="true" href="/user/record">
+      <v-list-item :title.attr="'原神战绩'" value="record" :link="true" href="/user/record">
+        <template #title>原神战绩</template>
         <template #prepend>
           <img src="/source/UI/userRecord.webp" alt="record" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item title="我的角色" value="character" :link="true" href="/user/characters">
+      <v-list-item :title.attr="'我的角色'" value="character" :link="true" href="/user/characters">
+        <template #title>我的角色</template>
         <template #prepend>
           <img src="/source/UI/userAvatar.webp" alt="characters" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item title="深渊记录" value="abyss" :link="true" href="/user/abyss">
+      <v-list-item :title.attr="'深渊记录'" value="abyss" :link="true" href="/user/abyss">
+        <template #title>深渊记录</template>
         <template #prepend>
           <img src="/source/UI/userAbyss.webp" alt="abyss" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item title="祈愿记录" value="gacha" :link="true" href="/user/gacha">
+      <v-list-item :title.attr="'祈愿记录'" value="gacha" :link="true" href="/user/gacha">
+        <template #title>祈愿记录</template>
         <template #prepend>
           <img src="/source/UI/userGacha.webp" alt="gacha" class="side-icon" />
         </template>
       </v-list-item>
       <v-divider />
-      <v-list-item v-show="isDevEnv" title="测试" value="test" :link="true" href="/test">
+      <v-list-item
+        v-show="isDevEnv"
+        :title.attr="'测试页面'"
+        value="test"
+        :link="true"
+        href="/test"
+      >
+        <template #title>测试页面</template>
         <template #prepend>
           <v-icon>mdi-test-tube</v-icon>
         </template>
@@ -70,7 +86,8 @@
       <v-divider v-show="isDevEnv" />
       <v-menu :open-on-click="true" location="end">
         <template #activator="{ props }">
-          <v-list-item title="图鉴" v-bind="props">
+          <v-list-item :title.attr="'图鉴'" v-bind="props">
+            <template #title>图鉴</template>
             <template #prepend>
               <img src="/source/UI/wikiIcon.webp" alt="wikiIcon" class="side-icon" />
             </template>
@@ -150,7 +167,8 @@
       <div class="bottom-menu">
         <v-menu :open-on-click="true" location="end">
           <template #activator="{ props }">
-            <v-list-item :title="userInfo.nickname" v-bind="props">
+            <v-list-item :title.attr="userInfo.nickname" v-bind="props">
+              <template #title>{{ userInfo.nickname }}</template>
               <template #prepend>
                 <img :src="userInfo.avatar" alt="userIcon" class="side-icon" />
               </template>
@@ -189,14 +207,16 @@
             </v-list-item>
           </v-list>
         </v-menu>
-        <v-list-item :title="themeTitle" @click="switchTheme()">
+        <v-list-item :title.attr="themeTitle" @click="switchTheme()">
+          <template #title>{{ themeTitle }}</template>
           <template #prepend>
             <v-icon>
               {{ themeGet === "default" ? "mdi-weather-night" : "mdi-weather-sunny" }}
             </v-icon>
           </template>
         </v-list-item>
-        <v-list-item title="设置" value="config" :link="true" href="/config">
+        <v-list-item :title.attr="'设置'" value="config" :link="true" href="/config">
+          <template #title>设置</template>
           <template #prepend>
             <img src="../../assets/icons/setting.svg" alt="setting" class="side-icon" />
           </template>
