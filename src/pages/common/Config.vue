@@ -182,13 +182,7 @@ const buildTime = computed(() => appStore.buildTime);
 // About OS
 const osPlatform = ref<string>("");
 const osVersion = ref<string>("");
-const dbInfo = ref<
-  Array<{
-    key: string;
-    value: string;
-    updated: string;
-  }>
->([]);
+const dbInfo = ref<Array<TGApp.Sqlite.AppData.Item>>([]);
 
 // loading
 const loading = ref<boolean>(true);
@@ -658,12 +652,11 @@ function submitHome(): void {
   height: 40px;
   padding: 5px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 10px;
+  border-radius: 5px;
   margin-right: 15px;
-  background:
-    linear-gradient(to bottom, rgb(255 255 255 / 15%) 0%, rgb(0 0 0 / 15%) 100%),
-    radial-gradient(at top center, rgb(255 255 255 / 40%) 0%, rgb(0 0 0 / 40%) 120%) #989898;
-  background-blend-mode: multiply, multiply;
+  backdrop-filter: blur(20px);
+  background: var(--app-side-bg);
+  box-shadow: 0 0 5px var(--common-shadow-t-4);
 }
 
 .config-btn {
@@ -684,7 +677,7 @@ function submitHome(): void {
   padding: 10px;
   border-radius: 10px;
   background-image: linear-gradient(to top, #fbc2eb 0%, #a6c1ee 100%);
-  box-shadow: 0 0 5px var(--common-shadow-4);
+  box-shadow: 0 0 10px var(--common-shadow-2);
 }
 
 .config-app-icon {

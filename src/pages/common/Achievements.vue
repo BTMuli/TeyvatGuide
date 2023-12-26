@@ -106,7 +106,7 @@
 
 <script lang="ts" setup>
 import { dialog, fs, path } from "@tauri-apps/api";
-import { computed, nextTick, onBeforeMount, onMounted, reactive, ref } from "vue";
+import { computed, nextTick, onBeforeMount, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import showConfirm from "../../components/func/confirm";
@@ -595,10 +595,11 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
   height: 40px;
   padding: 5px;
   border-radius: 5px;
-  background:
-    linear-gradient(to bottom, rgb(255 255 255 / 15%) 0%, rgb(0 0 0 / 15%) 100%),
-    radial-gradient(at top center, rgb(255 255 255 / 40%) 0%, rgb(0 0 0 / 40%) 120%) #989898;
-  background-blend-mode: multiply, multiply;
+  filter: invert(60%) brightness(100%);
+}
+
+.dark .series-icon {
+  filter: none;
 }
 
 .series-content {

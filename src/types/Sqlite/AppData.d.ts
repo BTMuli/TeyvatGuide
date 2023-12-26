@@ -33,7 +33,7 @@ declare namespace TGApp.Sqlite.AppData {
    * @property {string} updated - 数据库更新时间
    * @return Item
    */
-  export interface Item {
+  interface Item {
     key: DBKey;
     value: string;
     updated: string;
