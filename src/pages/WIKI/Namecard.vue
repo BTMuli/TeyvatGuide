@@ -1,5 +1,6 @@
 <template>
   <div class="tw-nc-box">
+    <!-- todo search -->
     <v-virtual-scroll :items="AppNameCardsData" :item-height="80" class="cards-list">
       <template #default="{ item }">
         <v-list
