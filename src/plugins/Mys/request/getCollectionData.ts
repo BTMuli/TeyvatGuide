@@ -37,11 +37,11 @@ export async function getCollectionData(
 /**
  * @description 获取合集帖子
  * @since Beta v0.3.9
- * @param {number} collectionId 合集 ID
+ * @param {string} collectionId 合集 ID
  * @returns {Promise<TGApp.Plugins.Mys.Post.FullData[]>}
  */
 export async function getCollectionPosts(
-  collectionId: number,
+  collectionId: string,
 ): Promise<TGApp.Plugins.Mys.Collection.Data[]> {
   const url = `https://bbs-api.miyoushe.com/post/wapi/getPostFullInCollection?collection_id=${collectionId}`;
   return await http

@@ -7,62 +7,85 @@
     :title="shareTitle"
   />
   <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" :subtitle="loadingSub" />
-  <div class="tp-post-body">
+  <div class="tp-post-body" v-if="postData">
     <div class="tp-post-info">
       <div class="tp-post-version">
         PostID：{{ postId }} | Render by TeyvatGuide v{{ appVersion }}
       </div>
       <div class="tp-post-meta">
-        <div class="mpm-forum" v-if="postRender.forum !== null">
-          <img :src="postRender.forum.icon" alt="forumIcon" />
-          <span>{{ postRender.forum?.name }}</span>
+        <div class="mpm-forum" v-if="postData.forum">
+          <img :src="postData.forum.icon" alt="forumIcon" />
+          <span>{{ postData.forum.name }}</span>
         </div>
-        <div class="mpm-item" :title="`浏览数：${postRender.metadata.view_num}`">
+        <div class="mpm-item" :title="`浏览数：${postData.stat.view_num}`">
           <v-icon>mdi-eye</v-icon>
-          <span>{{ postRender.metadata.view_num }}</span>
+          <span>{{ postData.stat.view_num }}</span>
         </div>
-        <div class="mpm-item" :title="`收藏数：${postRender.metadata.bookmark_num}`">
+        <div class="mpm-item" :title="`收藏数：${postData.stat.bookmark_num}`">
           <v-icon>mdi-star</v-icon>
-          <span>{{ postRender.metadata.bookmark_num }}</span>
+          <span>{{ postData.stat.bookmark_num }}</span>
         </div>
-        <div class="mpm-item" :title="`回复数：${postRender.metadata.reply_num}`">
+        <div class="mpm-item" :title="`回复数：${postData.stat.reply_num}`">
           <v-icon>mdi-comment</v-icon>
-          <span>{{ postRender.metadata.reply_num }}</span>
+          <span>{{ postData.stat.reply_num }}</span>
         </div>
-        <div class="mpm-item" :title="`点赞数：${postRender.metadata.like_num}`">
+        <div class="mpm-item" :title="`点赞数：${postData.stat.like_num}`">
           <v-icon>mdi-thumb-up</v-icon>
-          <span>{{ postRender.metadata.like_num }}</span>
+          <span>{{ postData.stat.like_num }}</span>
         </div>
-        <div class="mpm-item" :title="`转发数：${postRender.metadata.forward_num}`">
+        <div class="mpm-item" :title="`转发数：${postData.stat.forward_num}`">
           <v-icon>mdi-share-variant</v-icon>
-          <span>{{ postRender.metadata.forward_num }}</span>
+          <span>{{ postData.stat.forward_num }}</span>
         </div>
       </div>
       <div class="tp-post-author">
         <div class="mpa-left">
-          <span>{{ postRender.author.nickname }}</span>
+          <span>{{ postData.user.nickname }}</span>
           <span :title="getMpaLeftDesc()">{{ getMpaLeftDesc() }}</span>
         </div>
         <div class="mpa-right">
           <div class="mpa-icon">
-            <img :src="postRender.author.avatar_url" alt="userIcon" />
+            <img :src="postData.user.avatar_url" alt="userIcon" />
           </div>
-          <div v-if="postRender.author.pendant !== ''" class="mpa-pendant">
-            <img :src="postRender.author.pendant" alt="userPendant" />
+          <div v-if="postData.user.pendant !== ''" class="mpa-pendant">
+            <img :src="postData.user.pendant" alt="userPendant" />
           </div>
         </div>
       </div>
     </div>
     <div class="tp-post-title">
-      <span class="mpt-official" v-if="postRender.isOfficial">官</span>
-      <span>{{ postRender.title }}</span>
+      <span class="mpt-official" v-if="postData.post.post_status.is_official">官</span>
+      <span>{{ postData.post.subject }}</span>
+    </div>
+    <!-- 一些附加信息，比如 topic、collection 等 -->
+    <div class="tp-post-extra">
+      <div
+        class="tp-post-collection"
+        :title="`合集ID：${postData.collection.collection_id}`"
+        v-if="postData.collection"
+        @click="
+          () => {
+            showCollection = !showCollection;
+          }
+        "
+      >
+        <v-icon size="12">mdi-widgets</v-icon>
+        <span>{{ postData.collection.collection_title }}</span>
+        <span>{{ postData.collection.cur }}/{{ postData.collection.total }}</span>
+      </div>
+      <!-- todo topic -->
     </div>
     <div class="tp-post-subtitle">
-      <span>创建时间：{{ postRender.created }}&emsp;</span>
-      <span>更新时间：{{ postRender.updated }}</span>
+      <span>创建时间：{{ getDate(postData.post.created_at) }}&emsp;</span>
+      <span>更新时间：{{ getDate(postData.post.updated_at) }}</span>
     </div>
     <TpParser v-model:data="renderPost" />
   </div>
+  <TpoCollection
+    v-model="showCollection"
+    :collection="postData.collection"
+    v-if="postData?.collection"
+  />
 </template>
 <script lang="ts" setup>
 import { app } from "@tauri-apps/api";
@@ -74,19 +97,10 @@ import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import TpParser from "../components/post/tp-parser.vue";
+import TpoCollection from "../components/post/tpo-collection.vue";
 import Mys from "../plugins/Mys";
 import { useAppStore } from "../store/modules/app";
 import { createTGWindow } from "../utils/TGWindow";
-
-interface PostRender {
-  title: string;
-  isOfficial: boolean;
-  created: string;
-  updated: string;
-  author: Partial<TGApp.Plugins.Mys.User.Post>;
-  forum: TGApp.Plugins.Mys.Post.Forum | null;
-  metadata: TGApp.Plugins.Mys.Post.Stat;
-}
 
 // loading
 const loading = ref<boolean>(true);
@@ -103,29 +117,10 @@ const shareTitle = ref<string>("");
 const appVersion = ref<string>();
 const postId = Number(useRoute().params.post_id);
 const renderPost = ref<TGApp.Plugins.Mys.SctPost.Base[]>([]);
-const postRender = ref<PostRender>({
-  title: "",
-  isOfficial: false,
-  created: "",
-  updated: "",
-  author: {
-    nickname: "",
-    certification: {
-      type: 0,
-      label: "",
-    },
-  },
-  forum: null,
-  metadata: {
-    view_num: 0,
-    bookmark_num: 0,
-    reply_num: 0,
-    like_num: 0,
-    forward_num: 0,
-    original_like_num: 0,
-    post_upvote_stat: [],
-  },
-});
+const postData = ref<TGApp.Plugins.Mys.Post.FullData>();
+
+// 合集
+const showCollection = ref<boolean>(false);
 
 onMounted(async () => {
   await appWindow.show();
@@ -140,21 +135,12 @@ onMounted(async () => {
   // 获取数据
   loadingTitle.value = "正在获取数据...";
   try {
-    const postData = await Mys.Post.get(postId);
+    postData.value = await Mys.Post.get(postId);
     loadingTitle.value = "正在渲染数据...";
-    renderPost.value = getRenderPost(postData);
-    postRender.value = {
-      title: postData.post.subject,
-      isOfficial: postData.post.post_status.is_official,
-      created: new Date(postData.post.created_at * 1000).toLocaleString().replace(/\//g, "-"),
-      updated: new Date(postData.post.updated_at * 1000).toLocaleString().replace(/\//g, "-"),
-      author: postData.user,
-      forum: postData.forum,
-      metadata: postData.stat,
-    };
+    renderPost.value = getRenderPost(postData.value);
     shareTitle.value = `Post_${postId}`;
     postRef.value = <HTMLElement>document.querySelector(".tp-post-body");
-    await appWindow.setTitle(`Post_${postId} ${postData.post.subject}`);
+    await appWindow.setTitle(`Post_${postId} ${postData.value.post.subject}`);
   } catch (error) {
     console.error(error);
     loadingEmpty.value = true;
@@ -185,9 +171,13 @@ watch(loadShare, (value) => {
 });
 
 function getMpaLeftDesc(): string {
-  return postRender.value.author.certification?.label === ""
-    ? postRender.value.author.introduce ?? ""
-    : postRender.value.author.certification?.label ?? "";
+  return postData.value?.user.certification?.label === ""
+    ? postData.value?.user.introduce ?? ""
+    : postData.value?.user.certification?.label ?? "";
+}
+
+function getDate(date: number): string {
+  return new Date(date * 1000).toLocaleString().replace(/\//g, "-");
 }
 
 function getRenderPost(data: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.SctPost.Base[] {
@@ -251,7 +241,6 @@ function createPostJson(postId: number): void {
 
 /* title */
 .tp-post-title {
-  margin: 10px auto;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
@@ -283,6 +272,7 @@ function createPostJson(postId: number): void {
   justify-content: space-between;
   padding-bottom: 10px;
   border-bottom: 1px dashed var(--common-shadow-2);
+  margin-bottom: 10px;
 }
 
 .tp-post-version {
@@ -396,5 +386,28 @@ function createPostJson(postId: number): void {
   margin-left: 10px;
   column-gap: 2px;
   opacity: 0.8;
+}
+
+/* extra */
+.tp-post-extra {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  column-gap: 10px;
+}
+
+/* collection */
+.tp-post-collection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 5px;
+  color: var(--box-text-3);
+  column-gap: 5px;
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 12px;
 }
 </style>
