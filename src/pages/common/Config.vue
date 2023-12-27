@@ -29,7 +29,7 @@
           未登录，请扫码登录！
         </v-list-item-subtitle>
         <template #prepend>
-          <img class="config-icon" :src="userInfo?.avatar" alt="Login" />
+          <img class="config-icon user" :src="userInfo?.avatar" alt="Login" />
         </template>
         <template #append>
           <v-btn class="config-btn" @click="confirmScanLogin">扫码登录</v-btn>
@@ -207,7 +207,7 @@ const userInfo = computed(() => {
     nickname: "未登录",
     uid: "-1",
     desc: "请扫码登录",
-    avatar: "/source/UI/defaultUser.webp",
+    avatar: "/source/UI/lumine.webp",
   };
 });
 const vuetifyTheme = computed(() => {
@@ -657,6 +657,11 @@ function submitHome(): void {
   backdrop-filter: blur(20px);
   background: var(--app-side-bg);
   box-shadow: 0 0 5px var(--common-shadow-1);
+}
+
+.config-icon.user {
+  padding: 2px;
+  border-radius: 50%;
 }
 
 .config-btn {

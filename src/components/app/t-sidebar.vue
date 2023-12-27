@@ -18,7 +18,7 @@
       <v-list-item value="home" :link="true" href="/" :title.attr="'首页'">
         <template #title>首页</template>
         <template #prepend>
-          <img src="/source/UI/paimon.webp" alt="homeIcon" class="side-icon" />
+          <img src="/source/UI/paimon.webp" alt="homeIcon" class="side-icon paimon" />
         </template>
       </v-list-item>
       <v-list-item :title.attr="'公告'" value="announcements" :link="true" href="/announcements">
@@ -170,7 +170,7 @@
             <v-list-item :title.attr="userInfo.nickname" v-bind="props">
               <template #title>{{ userInfo.nickname }}</template>
               <template #prepend>
-                <img :src="userInfo.avatar" alt="userIcon" class="side-icon" />
+                <img :src="userInfo.avatar" alt="userIcon" class="side-icon paimon" />
               </template>
             </v-list-item>
           </template>
@@ -202,7 +202,7 @@
               v-show="userStore.cookie.value?.game_token === ''"
             >
               <template #prepend>
-                <img src="/source/UI/defaultUser.webp" class="side-icon-menu" alt="login" />
+                <img src="/source/UI/lumine.webp" class="side-icon-menu" alt="login" />
               </template>
             </v-list-item>
           </v-list>
@@ -246,7 +246,7 @@ const userInfo = computed(() => {
   if (info && info.nickname) return info;
   return {
     nickname: "未登录",
-    avatar: "/source/UI/defaultUser.webp",
+    avatar: "/source/UI/lumine.webp",
   };
 });
 const rail = ref(appStore.sidebar.collapse);
@@ -323,6 +323,13 @@ function login(): void {
   height: 24px;
   border-radius: 5px;
   margin-right: 32px;
+}
+
+.side-icon.paimon {
+  width: 32px;
+  height: 32px;
+  margin-right: 24px;
+  transform: translateX(-4px);
 }
 
 .side-list-menu {

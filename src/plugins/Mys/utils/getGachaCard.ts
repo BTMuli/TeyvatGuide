@@ -1,14 +1,14 @@
 /**
- * @file plugins Mys utils getGachaCard.ts
+ * @file plugins/Mys/utils/getGachaCard.ts
  * @description Mys 插件抽卡工具
- * @since Beta v0.3.3
+ * @since Beta v0.3.9
  */
 
 import getPostData from "../request/getPostData";
 
 /**
  * @description 根据卡池信息转为渲染用的卡池信息
- * @since Beta v0.3.3
+ * @since Beta v0.3.9
  * @param {TGApp.Plugins.Mys.Gacha.Data[]} gachaData 卡池信息
  * @param {Record<number, string>} poolCover 卡池封面
  * @returns {Promise<TGApp.Plugins.Mys.Gacha.RenderCard[]>}
@@ -47,7 +47,7 @@ async function getGachaCard(
           url: character.url,
         })),
         voice: {
-          icon: data.voice_icon || "/source/UI/defaultUser.webp",
+          icon: data.voice_icon || "/source/UI/lumine.webp",
           url: data.voice_url,
         },
         time: {
