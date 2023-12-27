@@ -43,7 +43,7 @@
           <span>{{ postData.user.nickname }}</span>
           <span :title="getMpaLeftDesc()">{{ getMpaLeftDesc() }}</span>
         </div>
-        <div class="mpa-right">
+        <div class="mpa-right" @click="toAuthor()">
           <div class="mpa-icon">
             <img :src="postData.user.avatar_url" alt="userIcon" />
           </div>
@@ -63,11 +63,7 @@
         class="tp-post-collection"
         :title="`合集ID：${postData.collection.collection_id}`"
         v-if="postData.collection"
-        @click="
-          () => {
-            showCollection = !showCollection;
-          }
-        "
+        @click="showOverlayC()"
       >
         <v-icon size="12">mdi-widgets</v-icon>
         <span>{{ postData.collection.collection_title }}</span>
@@ -100,6 +96,7 @@ import TpParser from "../components/post/tp-parser.vue";
 import TpoCollection from "../components/post/tpo-collection.vue";
 import Mys from "../plugins/Mys";
 import { useAppStore } from "../store/modules/app";
+import TGClient from "../utils/TGClient";
 import { createTGWindow } from "../utils/TGWindow";
 
 // loading
@@ -170,6 +167,10 @@ watch(loadShare, (value) => {
   }
 });
 
+function showOverlayC() {
+  showCollection.value = true;
+}
+
 function getMpaLeftDesc(): string {
   return postData.value?.user.certification?.label === ""
     ? postData.value?.user.introduce ?? ""
@@ -230,6 +231,11 @@ function createPostJson(postId: number): void {
   const jsonPath = `/post_detail_json/${postId}`;
   const jsonTitle = `Post_${postId}_JSON`;
   createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
+}
+
+async function toAuthor(): Promise<void> {
+  const url = `https://m.miyoushe.com/ys/#/accountCenter/0?id=${postData.value?.user.uid}`;
+  await TGClient.open("web_thin", url);
 }
 </script>
 <style lang="css" scoped>
@@ -318,6 +324,7 @@ function createPostJson(postId: number): void {
   position: relative;
   width: 50px;
   height: 50px;
+  cursor: pointer;
 }
 
 .mpa-icon {
