@@ -1,7 +1,7 @@
 /**
  * @file web/utils/getRequestHeader.ts
  * @description 获取请求头
- * @since Beta v0.3.6
+ * @since Beta v0.3.9
  */
 
 import Md5 from "js-md5";
@@ -102,19 +102,14 @@ export function getRequestHeader(
 
 /**
  * @description 获取 DS
- * @since Beta v0.3.4
+ * @since Beta v0.3.9
  * @param {string} saltType salt 类型
  * @param {number} dsType ds 类型
  * @param {Record<string, string|number>|string} body
  * @param {Record<string, string|number>|string} query
  * @returns {string} DS
  */
-export function getDS4JS(
-  saltType: string,
-  dsType: 1 | 2,
-  body: undefined,
-  query: undefined,
-): string;
+export function getDS4JS(saltType: string, dsType: 1, body: undefined, query: undefined): string;
 export function getDS4JS(
   saltType: string,
   dsType: 2,
