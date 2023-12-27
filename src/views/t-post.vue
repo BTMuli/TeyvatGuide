@@ -136,7 +136,6 @@ onMounted(async () => {
     loadingTitle.value = "正在渲染数据...";
     renderPost.value = getRenderPost(postData.value);
     shareTitle.value = `Post_${postId}`;
-    postRef.value = <HTMLElement>document.querySelector(".tp-post-body");
     await appWindow.setTitle(`Post_${postId} ${postData.value.post.subject}`);
   } catch (error) {
     console.error(error);
@@ -153,6 +152,7 @@ onMounted(async () => {
   }
   await nextTick(() => {
     loading.value = false;
+    postRef.value = <HTMLElement>document.querySelector(".tp-post-body");
   });
 });
 
