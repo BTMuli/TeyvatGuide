@@ -14,6 +14,7 @@ import getLotteryData from "./request/getLotteryData";
 import getNewsList from "./request/getNewsList";
 import getPositionData from "./request/getPositionData";
 import getPostData from "./request/getPostData";
+import { getVoteInfo, getVoteResult } from "./request/getVoteData";
 import getGachaCard from "./utils/getGachaCard";
 import getLotteryCard from "./utils/getLotteryCard";
 import { getActivityCard, getNewsCard, getNoticeCard } from "./utils/getNewsCard";
@@ -57,6 +58,10 @@ const Mys = {
   User: {
     getQr: getLoginQr,
     getData: getLoginStatus,
+  },
+  Vote: {
+    get: getVoteInfo,
+    result: getVoteResult,
   },
 };
 

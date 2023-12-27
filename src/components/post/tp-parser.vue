@@ -11,6 +11,7 @@ import TpText from "./tp-text.vue";
 import TpUnknown from "./tp-unknown.vue";
 import TpVillaCard from "./tp-villaCard.vue";
 import TpVod from "./tp-vod.vue";
+import TpVote from "./tp-vote.vue";
 
 interface TpParserProps {
   data: TGApp.Plugins.Mys.SctPost.Base[];
@@ -37,6 +38,8 @@ function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base) {
     return TpMention;
   } else if ("villa_card" in tp.insert) {
     return TpVillaCard;
+  } else if ("vote" in tp.insert) {
+    return TpVote;
   }
   return TpUnknown;
 }
