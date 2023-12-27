@@ -1,12 +1,12 @@
 /**
  * @file plugins/Mys/types/post.d.ts
  * @description Mys 插件帖子类型定义文件
- * @since Beta v0.3.7
+ * @since Beta v0.3.9
  */
 
 /**
  * @description Mys 插件帖子类型
- * @since Beta v0.3.4
+ * @since Beta v0.3.9
  * @namespace TGApp.Plugins.Mys.Post
  * @memberof TGApp.Plugins.Mys
  */
@@ -27,7 +27,7 @@ declare namespace TGApp.Plugins.Mys.Post {
 
   /**
    * @description 帖子数据
-   * @since Alpha v0.2.1
+   * @since Beta v0.3.9
    * @interface FullData
    * @property {Post} post  帖子信息
    * @property {Forum} forum  所属版块
@@ -44,7 +44,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {number} vot_count 投票数
    * @property {number} last_modify_time 最后修改时间
    * @property {string} recommend_type 推荐类型
-   * @property {unknown} collection 合集，可能为 null
+   * @property {Collection} collection 合集，可能为 null
    * @property {unknown[]} vod_list 视频列表，可能为空
    * @property {boolean} is_block_on 是否被屏蔽
    * @property {unknown} forum_rank_info 版块排行信息，可能为 null
@@ -68,7 +68,7 @@ declare namespace TGApp.Plugins.Mys.Post {
     vot_count: number;
     last_modify_time: number;
     recommend_type: string;
-    collection: unknown | null;
+    collection: Collection | null;
     vod_list: Vod[];
     is_block_on: boolean;
     forum_rank_info: unknown | null;
@@ -302,6 +302,35 @@ declare namespace TGApp.Plugins.Mys.Post {
     top_up: unknown | null;
     top_n: unknown[];
     answer_num: number;
+  }
+
+  /**
+   * @description 合集信息
+   * @since Beta v0.3.9
+   * @interface Collection
+   * @property {string} prev_post_id 上一篇帖子 ID，为 0 说明没有上一篇
+   * @property {string} next_post_id 下一篇帖子 ID，为 0 说明没有下一篇
+   * @property {string} collection_id 合集 ID
+   * @property {number} cur 第几篇
+   * @property {number} total 总篇数
+   * @property {string} collection_title 合集标题
+   * @property {number} prev_post_game_id 上一篇帖子游戏 ID
+   * @property {number} next_post_game_id 下一篇帖子游戏 ID
+   * @property {number} prev_post_view_type 上一篇帖子浏览类型
+   * @property {number} next_post_view_type 下一篇帖子浏览类型
+   * @return Collection
+   */
+  interface Collection {
+    prev_post_id: string;
+    next_post_id: string;
+    collection_id: string;
+    cur: number;
+    total: number;
+    collection_title: string;
+    prev_post_game_id: number;
+    next_post_game_id: number;
+    prev_post_view_type: number;
+    next_post_view_type: number;
   }
 
   /**

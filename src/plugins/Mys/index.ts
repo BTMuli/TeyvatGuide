@@ -1,11 +1,12 @@
 /**
  * @file plugins/Mys/index.ts
  * @description Mys plugin index
- * @since Beta v0.3.7
+ * @since Beta v0.3.9
  */
 
 import MysApi from "./api";
 import { getLoginQr, getLoginStatus } from "./request/doGameLogin";
+import { getCollectionData, getCollectionPosts } from "./request/getCollectionData";
 import getForumList from "./request/getForumList";
 import getGachaData from "./request/getGachaData";
 import getHomeNavigator from "./request/getHomeNavigator";
@@ -23,6 +24,10 @@ const Mys = {
   Api: MysApi,
   Post: {
     get: getPostData,
+  },
+  Collection: {
+    info: getCollectionData,
+    data: getCollectionPosts,
   },
   Posts: {
     get: getForumList,
