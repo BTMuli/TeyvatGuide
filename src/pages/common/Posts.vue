@@ -102,6 +102,7 @@
         </div>
       </v-card>
     </div>
+    <!-- todo 完善 loadmore   -->
     <div class="load-more">
       <v-btn :loading="loading" @click="freshPostData(true)">
         第{{ rawData.page }}页，已加载：{{ posts.length }}，加载更多
@@ -110,19 +111,17 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import Mys from "../../plugins/Mys";
-import { useAppStore } from "../../store/modules/app";
 import TGClient from "../../utils/TGClient";
 import { createPost } from "../../utils/TGWindow";
 
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载数据");
-const appStore = useAppStore();
 
 // 常量
 const sortList = {
@@ -233,8 +232,13 @@ onMounted(async () => {
 watch(curGameLabel, async (newVal) => {
   curGid.value = gameList[newVal];
   forumItem.value = Object.keys(forumList[newVal]);
-  curForumLabel.value = forumItem.value[0];
-  freshCurForum(forumItem.value[0]);
+  if (!forumItem.value.includes(curForumLabel.value)) {
+    curForumLabel.value = forumItem.value[0];
+    freshCurForum(forumItem.value[0]);
+  } else {
+    freshCurForum(curForumLabel.value);
+    await freshPostData(false);
+  }
   await freshNavData();
 });
 
