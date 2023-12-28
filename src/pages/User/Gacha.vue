@@ -2,13 +2,7 @@
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="gacha-top-bar">
     <div class="gacha-top-title">祈愿记录</div>
-    <v-select
-      v-model="uidCur"
-      class="gacha-top-select"
-      :items="selectItem"
-      variant="outlined"
-      :theme="vuetifyTheme"
-    />
+    <v-select v-model="uidCur" class="gacha-top-select" :items="selectItem" variant="outlined" />
     <div class="gacha-top-btns">
       <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh">刷新</v-btn>
       <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn()">
@@ -79,9 +73,6 @@ const selectItem = ref<string[]>([]);
 const uidCur = ref<string>("");
 const gachaListCur = ref<TGApp.Sqlite.GachaRecords.SingleTable[]>([]);
 const tab = ref<string>("");
-const vuetifyTheme = computed(() => {
-  return appStore.theme === "dark" ? "dark" : "light";
-});
 
 onMounted(async () => {
   loadingTitle.value = "正在获取祈愿 UID 列表";

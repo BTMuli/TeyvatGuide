@@ -88,7 +88,7 @@ watch(
   () => props.data,
   () => {
     if (props.data) {
-      console.log(JSON.stringify(props.data.desc));
+      console.log(JSON.stringify(props.data));
     }
   },
 );

@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app :theme="vuetifyTheme">
     <TSidebar v-if="isMain" />
     <v-main>
       <v-container :fluid="true" class="app-container">
@@ -13,7 +13,7 @@
 <script lang="ts" setup>
 import { app, event, fs, tauri, window as TauriWindow } from "@tauri-apps/api";
 import { storeToRefs } from "pinia";
-import { onBeforeMount, onMounted, ref } from "vue";
+import { computed, onBeforeMount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import TBackTop from "./components/app/t-backTop.vue";
@@ -31,6 +31,9 @@ const userStore = storeToRefs(useUserStore());
 const isMain = ref<boolean>(false);
 const theme = ref<string>(appStore.theme);
 const router = useRouter();
+const vuetifyTheme = computed(() => {
+  return appStore.theme === "dark" ? "dark" : "light";
+});
 
 onBeforeMount(async () => {
   // 获取当前窗口

@@ -46,7 +46,7 @@
     <TwcMaterials :data="data.materials" />
     <TwcSkills :data="data.skills" />
     <TwcConstellations :data="data.constellation" />
-    <v-expansion-panels :theme="vuetifyTheme" class="twc-text-item">
+    <v-expansion-panels class="twc-text-item">
       <v-expansion-panel>
         <template #title><span class="twc-text-title">资料</span></template>
         <template #text>
@@ -101,7 +101,6 @@ import TwcConstellations from "../components/wiki/twc-constellations.vue";
 import TwcMaterials from "../components/wiki/twc-materials.vue";
 import TwcSkills from "../components/wiki/twc-skills.vue";
 import { getWikiData } from "../data";
-import { useAppStore } from "../store/modules/app";
 
 // 路由数据
 const id = <string>useRoute().params.id;
@@ -110,12 +109,6 @@ const loading = ref<boolean>(true);
 const loadingEmpty = ref<boolean>(false);
 const loadingTitle = ref<string>("正在加载");
 const loadingSub = ref<string>();
-
-// 主题
-const appStore = useAppStore();
-const vuetifyTheme = computed(() => {
-  return appStore.theme === "dark" ? "dark" : "light";
-});
 
 // 数据
 const data = ref<TGApp.App.Character.WikiItem>();

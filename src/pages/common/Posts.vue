@@ -6,7 +6,6 @@
         v-model="curGameLabel"
         class="post-switch-item"
         :items="gameItem"
-        :theme="vuetifyTheme"
         variant="outlined"
         label="游戏"
       />
@@ -14,7 +13,6 @@
         v-model="curForumLabel"
         class="post-switch-item"
         :items="forumItem"
-        :theme="vuetifyTheme"
         variant="outlined"
         label="频道"
       />
@@ -22,7 +20,6 @@
         v-model="curSortLabel"
         class="post-switch-item"
         :items="sortItem"
-        :theme="vuetifyTheme"
         variant="outlined"
         label="排序"
       />
@@ -195,11 +192,6 @@ const gameList = {
   绝区零: 8,
   大别野: 5,
 };
-
-// 主题
-const vuetifyTheme = computed(() => {
-  return appStore.theme === "dark" ? "dark" : "light";
-});
 
 // 渲染参数
 const curForumLabel = ref<string>("酒馆");

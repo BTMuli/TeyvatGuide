@@ -79,7 +79,6 @@
           label="首页显示组件"
           :multiple="true"
           :chips="true"
-          :theme="vuetifyTheme"
         />
         <template #append>
           <v-btn class="config-btn" @click="submitHome"> 确定</v-btn>
@@ -209,9 +208,6 @@ const userInfo = computed(() => {
     desc: "请扫码登录",
     avatar: "/source/UI/lumine.webp",
   };
-});
-const vuetifyTheme = computed(() => {
-  return appStore.theme === "dark" ? "dark" : "light";
 });
 
 // load version

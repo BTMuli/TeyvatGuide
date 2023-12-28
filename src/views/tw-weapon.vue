@@ -17,7 +17,7 @@
       </div>
     </div>
     <TwcMaterials :data="data.materials" />
-    <v-expansion-panels :theme="vuetifyTheme" class="tww-affix">
+    <v-expansion-panels class="tww-affix">
       <v-expansion-panel expand-icon="mdi-menu-down">
         <template #title>
           <span class="tww-text-title">{{ data.affix.Name }}-精炼 {{ select }}</span>
@@ -30,7 +30,7 @@
         </template>
       </v-expansion-panel>
     </v-expansion-panels>
-    <v-expansion-panels :theme="vuetifyTheme" class="tww-story">
+    <v-expansion-panels class="tww-story">
       <v-expansion-panel
         expand-icon="mdi-menu-down"
         v-for="(story, index) in data.story"
@@ -59,7 +59,6 @@ import TItembox, { TItemBoxData } from "../components/main/t-itembox.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import TwcMaterials from "../components/wiki/twc-materials.vue";
 import { getWikiData } from "../data";
-import { useAppStore } from "../store/modules/app";
 import { parseHtmlText } from "../utils/toolFunc";
 
 // 路由数据
@@ -69,12 +68,6 @@ const loading = ref<boolean>(true);
 const loadingEmpty = ref<boolean>(false);
 const loadingTitle = ref<string>("正在加载");
 const loadingSub = ref<string>();
-
-// 主题
-const appStore = useAppStore();
-const vuetifyTheme = computed(() => {
-  return appStore.theme === "dark" ? "dark" : "light";
-});
 
 // 数据
 const data = ref<TGApp.App.Weapon.WikiItem>();
