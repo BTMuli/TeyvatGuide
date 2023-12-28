@@ -1,16 +1,22 @@
 /**
- * @file types App NameCard.d.ts
+ * @file types/App/NameCard.d.ts
  * @description 本应用的名片类型定义
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.5
+ * @since Beta v0.3.9
  */
 
+/**
+ * @description 名片数据
+ * @since Beta v0.3.9
+ * @namespace TGApp.App.NameCard
+ * @memberof TGApp.App
+ */
 declare namespace TGApp.App.NameCard {
   /**
    * @description 名片数据
-   * @since Alpha v0.1.5
+   * @since Beta v0.3.9
    * @interface Item
    * @property {string} name - 名片名称
+   * @property {number} index - 名片索引
    * @property {string} desc - 名片描述
    * @property {string} icon - 名片图标
    * @property {string} bg - 名片背景图
@@ -20,8 +26,9 @@ declare namespace TGApp.App.NameCard {
    * @property {string} source - 名片来源
    * @return Item
    */
-  export interface Item {
+  interface Item {
     name: string;
+    index: number;
     desc: string;
     icon: string;
     bg: string;
