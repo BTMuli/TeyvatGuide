@@ -681,7 +681,7 @@ function submitHome(): void {
   justify-content: center;
   padding: 10px;
   border-radius: 10px;
-  background-image: linear-gradient(to top, #fbc2eb 0%, #a6c1ee 100%);
+  background-image: linear-gradient(to bottom, rgb(19 84 122 / 80%), rgb(128 208 199 / 80%));
   box-shadow: 0 0 10px var(--common-shadow-2);
 }
 
@@ -695,14 +695,11 @@ function submitHome(): void {
   font-family: var(--font-title);
   font-size: 14px;
   text-align: center;
+  text-shadow: 0 0 2px rgb(19 84 122 / 80%);
 }
 
 .config-app-info.click {
-  padding: 0 5px;
-  border-radius: 5px;
-  background: linear-gradient(to left, #fb7299, #00aeec);
-  background-clip: text;
+  color: var(--tgc-yellow-1);
   cursor: pointer;
-  -webkit-text-fill-color: transparent;
 }
 </style>
