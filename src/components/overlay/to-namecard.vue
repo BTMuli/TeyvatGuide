@@ -57,22 +57,22 @@ const typeMap: ToNamecardTypeMap = {
     background: "var(--tgc-black-1)",
   },
   [ToNamecardTypeEnum.role]: {
-    text: "角色名片",
+    text: "角色",
     color: "var(--tgc-white-1)",
     background: "var(--tgc-black-1)",
   },
   [ToNamecardTypeEnum.record]: {
-    text: "纪行名片",
+    text: "纪行",
     color: "var(--tgc-white-1)",
     background: "var(--tgc-black-1)",
   },
   [ToNamecardTypeEnum.activity]: {
-    text: "活动名片",
+    text: "活动",
     color: "var(--tgc-white-1)",
     background: "var(--tgc-black-1)",
   },
   [ToNamecardTypeEnum.unknown]: {
-    text: "未知名片",
+    text: "未知",
     color: "var(--tgc-white-1)",
     background: "var(--tgc-black-1)",
   },
