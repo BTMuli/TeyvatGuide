@@ -141,14 +141,16 @@ function getVodTime(): string {
   left: 0;
   display: flex;
   overflow: hidden;
+  width: 100%;
   align-items: center;
   justify-content: center;
   border-radius: 10px;
   aspect-ratio: v-bind(vodAspectRatio);
 }
 
-.tp-vod-cover :nth-child(1) {
-  max-width: 100%;
+.tp-vod-cover :first-child {
+  width: 100%;
+  object-fit: cover;
 }
 
 .tp-vod-cover :nth-child(2) {
