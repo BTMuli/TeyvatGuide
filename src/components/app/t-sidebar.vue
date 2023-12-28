@@ -140,14 +140,14 @@
           </v-list-item>
           <v-list-item
             class="side-item-menu"
-            title="名片图鉴"
             value="wiki-namecard"
             :link="true"
             href="/wiki/namecard"
             v-if="isDevEnv"
           >
-            <template #prepend>
-              <img src="/source/UI/userRecord.webp" alt="gcgIcon" class="side-icon-menu" />
+            <template #default>
+              <v-icon size="20" color="var(--tgc-yellow-2)">mdi-credit-card-outline</v-icon>
+              <span style="margin-left: 10px; font-size: 0.8125rem">名片图鉴</span>
             </template>
           </v-list-item>
           <v-list-item
