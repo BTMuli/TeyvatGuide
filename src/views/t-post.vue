@@ -69,7 +69,10 @@
         <span>{{ postData.collection.collection_title }}</span>
         <span>{{ postData.collection.cur }}/{{ postData.collection.total }}</span>
       </div>
-      <!-- todo topic -->
+      <div v-for="topic in postData.topics" :key="topic.id" class="tp-post-topic">
+        <v-icon size="12">mdi-tag</v-icon>
+        <span>{{ topic.name }}</span>
+      </div>
     </div>
     <div class="tp-post-subtitle">
       <span>创建时间：{{ getDate(postData.post.created_at) }}&emsp;</span>
@@ -247,6 +250,9 @@ async function toAuthor(): Promise<void> {
 
 /* title */
 .tp-post-title {
+  display: flex;
+  align-items: center;
+  justify-content: start;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
@@ -254,13 +260,14 @@ async function toAuthor(): Promise<void> {
 
 .mpt-official {
   display: inline-block;
-  width: 30px;
+  width: 24px;
   align-items: center;
   justify-content: center;
   border-radius: 5px;
   margin-right: 2px;
   background: var(--common-shadow-1);
-  color: var(--box-text-3);
+  color: var(--box-text-5);
+  font-size: 16px;
   text-align: center;
 }
 
@@ -414,6 +421,16 @@ async function toAuthor(): Promise<void> {
   color: var(--box-text-3);
   column-gap: 5px;
   cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 12px;
+}
+
+/* topic */
+.tp-post-topic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--box-text-5);
   font-family: var(--font-title);
   font-size: 12px;
 }

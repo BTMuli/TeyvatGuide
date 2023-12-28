@@ -1,8 +1,7 @@
 /**
- * @file assets themes dark.css
+ * @file assets/themes/dark.css
  * @description 主题样式文件-深色主题
- * @author BTMuli <bt-muli@outlook.com>
- * @since Beta v0.3.0
+ * @since Beta v0.3.9
  */
 
 /* dark mode */
@@ -27,6 +26,7 @@ html.dark {
   --box-text-2: var(--tgc-white-2);
   --box-text-3: var(--tgc-blue-1);
   --box-text-4: var(--tgc-white-4);
+  --box-text-5: var(--tgc-red-1);
   --box-text-7: var(--tgc-white-5);
 
   /* button */
