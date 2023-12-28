@@ -37,9 +37,7 @@
     </div>
     <!-- 右侧内容-->
     <div class="right-wrap">
-      <div
-        v-if="selectedSeries !== 0 && selectedSeries !== 17 && selectedSeries !== -1 && !loading"
-      >
+      <div v-if="curCardName !== '' && selectedSeries !== -1 && !loading">
         <v-list
           v-if="curCard"
           class="achi-series"
@@ -113,7 +111,7 @@ import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import ToNamecard from "../../components/overlay/to-namecard.vue";
-import { AppAchievementSeriesData } from "../../data";
+import { AppAchievementSeriesData, AppNameCardsData } from "../../data";
 import TGSqlite from "../../plugins/Sqlite";
 import { useAchievementsStore } from "../../store/modules/achievements";
 import { getNowStr } from "../../utils/toolFunc";
@@ -130,6 +128,7 @@ const hideFin = ref<boolean>(false);
 const showNameCard = ref<boolean>(false);
 // data
 const title = ref(achievementsStore.title);
+const curCardName = ref<string>("");
 let curCard = ref<TGApp.App.NameCard.Item>();
 // series
 const allSeriesData = ref<TGApp.Sqlite.Achievement.SeriesTable[]>([]);
@@ -212,17 +211,9 @@ async function selectSeries(index: number): Promise<void> {
   selectedSeries.value = index;
   selectedAchievement.value = await getAchiData("series", index.toString());
   loadingTitle.value = "正在查找对应的成就名片";
-  if (selectedSeries.value !== 0 && selectedSeries.value !== 17) {
-    const cardGet = await TGSqlite.getNameCard(index);
-    curCard.value = {
-      name: cardGet.name,
-      desc: cardGet.desc,
-      icon: `/source/nameCard/icon/${cardGet.name}.webp`,
-      bg: `/source/nameCard/bg/${cardGet.name}.webp`,
-      profile: `/source/nameCard/profile/${cardGet.name}.webp`,
-      type: cardGet.type,
-      source: cardGet.source,
-    };
+  curCardName.value = await getNameCardName(index);
+  if (curCardName.value !== "") {
+    curCard.value = AppNameCardsData.find((item) => item.name === curCardName.value);
   }
   // 右侧滚动到顶部
   const rightWrap = document.querySelector(".right-wrap");
@@ -484,6 +475,16 @@ async function getAchiData(
     }
   }
   return await db.select(sql);
+}
+
+// 获取成就名片
+async function getNameCardName(series: number): Promise<string> {
+  const db = await TGSqlite.getDB();
+  const sql = `SELECT nameCard
+               FROM AchievementSeries
+               WHERE id = ${series};`;
+  const res: Array<{ nameCard: string }> = await db.select(sql);
+  return res[0].nameCard;
 }
 
 // 更新成就数据

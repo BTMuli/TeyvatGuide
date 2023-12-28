@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/index.ts
  * @description Sqlite 数据库操作类
- * @since Beta v0.3.8
+ * @since Beta v0.3.9
  */
 
 import { app } from "@tauri-apps/api";
@@ -199,21 +199,6 @@ class Sqlite {
   }
 
   /**
-   * @description 获取成就系列对应的名片
-   * @since Beta v0.3.3
-   * @param {number} seriesId 系列 ID
-   * @returns {Promise<TGApp.Sqlite.NameCard.Item>}
-   */
-  public async getNameCard(seriesId: number): Promise<TGApp.Sqlite.NameCard.SingleTable> {
-    const db = await this.getDB();
-    const sql = `SELECT *
-                 FROM NameCard
-                 WHERE name = (SELECT nameCard FROM AchievementSeries WHERE id = ${seriesId});`;
-    const res: TGApp.Sqlite.NameCard.SingleTable[] = await db.select(sql);
-    return res[0];
-  }
-
-  /**
    * @description 获取最新成就版本
    * @since Beta v0.3.3
    * @returns {Promise<string>}
@@ -287,7 +272,10 @@ class Sqlite {
     const db = await this.getDB();
     let sql;
     if (uid) {
-      sql = `SELECT * FROM SpiralAbyss WHERE uid = '${uid}' order by id desc`;
+      sql = `SELECT *
+             FROM SpiralAbyss
+             WHERE uid = '${uid}'
+             order by id desc`;
     } else {
       sql = "SELECT * FROM SpiralAbyss order by uid, id desc";
     }
@@ -329,7 +317,9 @@ class Sqlite {
    */
   public async getUserRecord(uid: string): Promise<TGApp.Sqlite.Record.SingleTable | false> {
     const db = await this.getDB();
-    const sql = `SELECT * FROM UserRecord WHERE uid = '${uid}'`;
+    const sql = `SELECT *
+                 FROM UserRecord
+                 WHERE uid = '${uid}'`;
     const res: TGApp.Sqlite.Record.SingleTable[] = await db.select(sql);
     if (res.length === 0) return false;
     return res[0];
@@ -343,7 +333,9 @@ class Sqlite {
    */
   public async getAppCharacter(id: number): Promise<TGApp.Sqlite.Character.AppData> {
     const db = await this.getDB();
-    const sql = `SELECT * FROM AppCharacters WHERE id = ${id}`;
+    const sql = `SELECT *
+                 FROM AppCharacters
+                 WHERE id = ${id}`;
     const res: TGApp.Sqlite.Character.AppData[] = await db.select(sql);
     return res[0];
   }
@@ -378,9 +370,11 @@ class Sqlite {
     data: TGApp.Sqlite.Character.RoleTalent[],
   ): Promise<void> {
     const db = await this.getDB();
-    const sql = `UPDATE UserCharacters 
-    SET talent = '${JSON.stringify(data)}', updated = datetime('now', 'localtime')
-    WHERE uid = '${uid}' AND cid = ${cid}`;
+    const sql = `UPDATE UserCharacters
+                 SET talent  = '${JSON.stringify(data)}',
+                     updated = datetime('now', 'localtime')
+                 WHERE uid = '${uid}'
+                   AND cid = ${cid}`;
     await db.execute(sql);
   }
 
@@ -392,7 +386,9 @@ class Sqlite {
    */
   public async getUserCharacter(uid: string): Promise<TGApp.Sqlite.Character.UserRole[] | false> {
     const db = await this.getDB();
-    const sql = `SELECT * FROM UserCharacters WHERE uid = '${uid}'`;
+    const sql = `SELECT *
+                 FROM UserCharacters
+                 WHERE uid = '${uid}'`;
     const res: TGApp.Sqlite.Character.UserRole[] = await db.select(sql);
     if (res.length === 0) return false;
     return res;
@@ -418,7 +414,9 @@ class Sqlite {
    */
   public async getGachaRecords(uid: string): Promise<TGApp.Sqlite.GachaRecords.SingleTable[]> {
     const db = await this.getDB();
-    const sql = `SELECT * FROM GachaRecords WHERE uid = '${uid}'`;
+    const sql = `SELECT *
+                 FROM GachaRecords
+                 WHERE uid = '${uid}'`;
     return await db.select(sql);
   }
 
@@ -430,7 +428,9 @@ class Sqlite {
    */
   public async deleteGachaRecords(uid: string): Promise<void> {
     const db = await this.getDB();
-    const sql = `DELETE FROM GachaRecords WHERE uid = '${uid}'`;
+    const sql = `DELETE
+                 FROM GachaRecords
+                 WHERE uid = '${uid}'`;
     await db.execute(sql);
   }
 
@@ -458,7 +458,9 @@ class Sqlite {
     const db = await this.getDB();
     const dateNow = new Date();
     const date = `${dateNow.getMonth() + 1},${dateNow.getDate()}`;
-    const sql = `SELECT name FROM AppCharacters WHERE birthday = '${date}';`;
+    const sql = `SELECT name
+                 FROM AppCharacters
+                 WHERE birthday = '${date}';`;
     const res: Array<{ name: string }> = await db.select(sql);
     if (res.length === 0) return false;
     return res.map((item) => item.name).join("、");
