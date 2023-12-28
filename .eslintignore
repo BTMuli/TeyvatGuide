@@ -3,6 +3,8 @@ dist
 src-tauri/target
 # Package files
 pnpm-lock.yaml
+# data
+src/data/**/*.json
 # lint files
 !.prettierrc.yml
 !.stylelintrc.yml

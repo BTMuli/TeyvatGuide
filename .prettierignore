@@ -13,3 +13,5 @@ qodana.yaml
 *.webp
 *.png
 *.svg
+# data
+!src/data/**/*.json
