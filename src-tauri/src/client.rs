@@ -1,6 +1,6 @@
 //! @file src/client.rs
 //! @desc 客户端模块，负责操作米游社客户端
-//! @since Beta v0.3.8
+//! @since Beta v0.3.9
 
 use tauri::{AppHandle, CustomMenuItem, Manager, Menu, WindowBuilder, WindowUrl};
 use url::Url;
@@ -10,7 +10,8 @@ fn create_mhy_menu() -> Menu {
   let top = CustomMenuItem::new("top".to_string(), "置顶");
   let cancel_top = CustomMenuItem::new("cancel_top".to_string(), "取消置顶");
   let open_post = CustomMenuItem::new("open_post".to_string(), "打开帖子");
-  return Menu::new().add_item(top).add_item(cancel_top).add_item(open_post);
+  let retry_bridge = CustomMenuItem::new("retry".to_string(), "重试");
+  return Menu::new().add_item(top).add_item(cancel_top).add_item(open_post).add_item(retry_bridge);
 }
 
 // 获取米游社客户端入口地址
@@ -99,6 +100,16 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
           }
           await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
         })()"#;
+        window.eval(&execute_js).ok().unwrap();
+      }
+      "retry" => {
+        let window = handle.get_window("mhy_client").unwrap();
+        let execute_js = r#"javascript:(async function(){
+            const arg = {
+                method: 'teyvat_retry',
+            }
+            await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
+            })()"#;
         window.eval(&execute_js).ok().unwrap();
       }
       _ => {}

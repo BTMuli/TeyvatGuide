@@ -279,6 +279,14 @@ class TGClient {
       case "teyvat_open":
         createPost(<string>arg.payload);
         break;
+      case "teyvat_retry": {
+        const executeJS = `javascript:(function(){
+          window.location.reload();
+        })();`;
+        await invoke("execute_js", { label: "mhy_client", js: executeJS });
+        await this.loadJSBridge();
+        break;
+      }
       default:
         console.warn(`[customCallback] ${arg.method}`);
     }
