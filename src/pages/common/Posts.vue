@@ -274,6 +274,13 @@ async function toNav(path: string): Promise<void> {
     title: "是否采用宽屏模式打开？",
     text: "取消则采用竖屏模式打开",
   });
+  if (modeConfirm === undefined) {
+    showSnackbar({
+      text: "已取消打开",
+      color: "cancel",
+    });
+    return;
+  }
   if (modeConfirm) await TGClient.open("web_act", path);
   else await TGClient.open("web_act_thin", path);
 }

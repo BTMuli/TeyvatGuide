@@ -236,16 +236,16 @@ async function checkUpdate(): Promise<void> {
       title: "检测到版本更新",
       text: "请到设置页手动更新版本，即将弹出更新说明子页面",
     });
-    if (confirm) {
-      appStore.buildTime = getBuildTime();
-      window.open("https://app.btmuli.ink/docs/Changelogs.html");
-    } else {
+    if (!confirm) {
       showSnackbar({
         text: "请到设置页手动更新版本！",
         color: "error",
         timeout: 3000,
       });
+      return;
     }
+    appStore.buildTime = getBuildTime();
+    window.open("https://app.btmuli.ink/docs/Changelogs.html");
   }
 }
 </script>

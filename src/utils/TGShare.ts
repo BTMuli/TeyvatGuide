@@ -1,7 +1,7 @@
 /**
  * @file utils/TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.3.8
+ * @since Beta v0.3.9
  */
 
 import { dialog, fs, http, path } from "@tauri-apps/api";
@@ -72,7 +72,7 @@ function getShareImgBgColor(): string {
 
 /**
  * @description 生成分享截图
- * @since Beta v0.3.8
+ * @since Beta v0.3.9
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
@@ -122,15 +122,14 @@ export async function generateShareImg(
       title: "图像过大",
       text: `图像大小为 ${sizeStr}，是否保存到文件？`,
     });
-    if (!saveFile) {
-      showSnackbar({
-        color: "warn",
-        text: "将尝试保存到剪贴板",
-      });
-    } else {
+    if (saveFile === true) {
       await saveCanvasImg(buffer, fileName);
       return;
     }
+    showSnackbar({
+      color: "warn",
+      text: "将尝试保存到剪贴板",
+    });
   }
   try {
     await copyToClipboard(buffer);

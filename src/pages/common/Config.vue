@@ -467,7 +467,7 @@ async function confirmUpdateDevice(): Promise<void> {
       title: "确认更新设备信息吗？",
       text: `DeviceFp:${localFp}`,
     });
-    if (res === false) {
+    if (!res) {
       showSnackbar({
         text: "已取消更新设备信息",
         color: "cancel",
@@ -508,7 +508,7 @@ async function confirmDelCache(): Promise<void> {
     title: "确认清除缓存吗？",
     text: `当前缓存大小为 ${cacheSize}，耗时 ${timeEnd - timeStart} 毫秒`,
   });
-  if (res === false) {
+  if (!res) {
     showSnackbar({
       color: "grey",
       text: "已取消清除缓存",
@@ -556,7 +556,7 @@ async function tryShowReset(): Promise<void> {
     text: "请联系开发者获取",
     mode: "input",
   });
-  if (res === false) {
+  if (!res) {
     showSnackbar({
       color: "grey",
       text: "已取消",

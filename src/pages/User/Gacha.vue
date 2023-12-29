@@ -383,7 +383,7 @@ async function deleteGacha(): Promise<void> {
     return;
   }
   const uidList = await TGSqlite.getUidList();
-  let secondConfirm: string | boolean = "";
+  let secondConfirm: string | boolean | undefined;
   if (uidList.length <= 1) {
     secondConfirm = await showConfirm({
       title: "删除后数据库将为空，确定删除？",

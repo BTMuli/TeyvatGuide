@@ -7,6 +7,7 @@
 import TGClient from "./TGClient";
 import { createPost } from "./TGWindow";
 import showConfirm from "../components/func/confirm";
+import showSnackbar from "../components/func/snackbar";
 
 /**
  * @function parsePost
@@ -115,16 +116,20 @@ export async function parseLink(
       title: "采用内置 JSBridge？",
       text: "取消则使用外部浏览器打开",
     });
+    if (openCheck === undefined) {
+      showSnackbar({
+        text: "已取消打开",
+        color: "warn",
+      });
+      return true;
+    }
     if (!openCheck) return url.href;
     const typeCheck = await showConfirm({
       title: "采用宽屏模式？",
       text: "取消则使用默认竖屏",
     });
-    if (typeCheck) {
-      await TGClient.open("web_act", link);
-    } else {
-      await TGClient.open("web_act_thin", link);
-    }
+    if (!typeCheck) await TGClient.open("web_act_thin", link);
+    else await TGClient.open("web_act", link);
     return true;
   }
   return url.href.toString();

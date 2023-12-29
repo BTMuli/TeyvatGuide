@@ -156,7 +156,7 @@ async function switchHideFin() {
     title: "是否切换显示已完成？",
     text,
   });
-  if (res === false) {
+  if (!res) {
     showSnackbar({
       color: "warn",
       text: "已取消切换",
@@ -352,37 +352,37 @@ async function handleImportOuter(app: string): Promise<void> {
     title: "是否导入祈愿数据？",
     text: `来源APP：${app}`,
   });
-  if (confirm) {
-    // 读取 剪贴板
-    const clipboard = await window.navigator.clipboard.readText();
-    let data: TGApp.Plugins.UIAF.Achievement[];
-    // 里面是完整的 uiaf 数据
-    try {
-      data = JSON.parse(clipboard).list;
-      loadingTitle.value = "正在导入数据";
-      loading.value = true;
-      await TGSqlite.mergeUIAF(data);
-      loading.value = false;
-      showSnackbar({
-        color: "success",
-        text: "导入成功，即将刷新页面",
-      });
-    } catch (e) {
-      console.error(e);
-      showSnackbar({
-        color: "error",
-        text: "读取 UIAF 数据失败，请检查文件是否符合规范",
-      });
-    } finally {
-      setTimeout(async () => {
-        await router.push("/achievements");
-      }, 1500);
-    }
-  } else {
+  if (!confirm) {
     showSnackbar({
       color: "warn",
       text: "已取消导入",
     });
+    return;
+  }
+  // 读取 剪贴板
+  const clipboard = await window.navigator.clipboard.readText();
+  let data: TGApp.Plugins.UIAF.Achievement[];
+  // 里面是完整的 uiaf 数据
+  try {
+    data = JSON.parse(clipboard).list;
+    loadingTitle.value = "正在导入数据";
+    loading.value = true;
+    await TGSqlite.mergeUIAF(data);
+    loading.value = false;
+    showSnackbar({
+      color: "success",
+      text: "导入成功，即将刷新页面",
+    });
+  } catch (e) {
+    console.error(e);
+    showSnackbar({
+      color: "error",
+      text: "读取 UIAF 数据失败，请检查文件是否符合规范",
+    });
+  } finally {
+    setTimeout(async () => {
+      await router.push("/achievements");
+    }, 1500);
   }
 }
 
