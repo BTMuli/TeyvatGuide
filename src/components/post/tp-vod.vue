@@ -34,7 +34,7 @@ interface TpVod {
         format: "MP4"; // 待补充
         label: "480P" | "720P" | "1080P" | "2K"; // 待补充
       }>;
-      view_num: number;
+      view_num?: number;
       transcode_status: number;
       review_status: number;
     };
@@ -93,8 +93,10 @@ onMounted(async () => {
         name: "subtitle",
         index: 100,
         position: "left",
-        html: `<i class="mdi mdi-eye"></i><span style="padding-left: 5px">${props.data.insert.vod.view_num}</span>`,
-        tooltip: `播放数：${props.data.insert.vod.view_num}`,
+        html: `<i class="mdi mdi-eye"></i><span style="padding-left: 5px">${
+          props.data.insert.vod?.view_num ?? 0
+        }</span>`,
+        tooltip: `播放数：${props.data.insert.vod?.view_num ?? 0}`,
       },
     ],
   };
