@@ -9,7 +9,7 @@
           <span>{{ parseNamecard(props.data.desc) }}</span>
           <span>获取途径：{{ props.data.source }}</span>
         </div>
-        <div class="ton-type">{{ getType.text }}</div>
+        <div class="ton-type">{{ getType }}</div>
         <v-btn
           class="ton-share"
           @click="shareNamecard"
@@ -26,7 +26,7 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 
 import { generateShareImg } from "../../utils/TGShare";
 import TOverlay from "../main/t-overlay.vue";
@@ -34,12 +34,6 @@ import TOverlay from "../main/t-overlay.vue";
 interface ToNamecardProps {
   modelValue: boolean;
   data?: TGApp.App.NameCard.Item;
-}
-
-interface ToNamecardType {
-  text: string;
-  color: string;
-  background: string;
 }
 
 enum ToNamecardTypeEnum {
@@ -52,40 +46,16 @@ enum ToNamecardTypeEnum {
 }
 
 type ToNamecardTypeMap = {
-  [key in ToNamecardTypeEnum]: ToNamecardType;
+  [key in ToNamecardTypeEnum]: string;
 };
 
 const typeMap: ToNamecardTypeMap = {
-  [ToNamecardTypeEnum.other]: {
-    text: "其他",
-    color: "var(--tgc-white-1)",
-    background: "var(--tgc-black-1)",
-  },
-  [ToNamecardTypeEnum.achievement]: {
-    text: "成就",
-    color: "var(--tgc-white-1)",
-    background: "var(--tgc-black-1)",
-  },
-  [ToNamecardTypeEnum.role]: {
-    text: "角色",
-    color: "var(--tgc-white-1)",
-    background: "var(--tgc-black-1)",
-  },
-  [ToNamecardTypeEnum.record]: {
-    text: "纪行",
-    color: "var(--tgc-white-1)",
-    background: "var(--tgc-black-1)",
-  },
-  [ToNamecardTypeEnum.activity]: {
-    text: "活动",
-    color: "var(--tgc-white-1)",
-    background: "var(--tgc-black-1)",
-  },
-  [ToNamecardTypeEnum.unknown]: {
-    text: "未知",
-    color: "var(--tgc-white-1)",
-    background: "var(--tgc-black-1)",
-  },
+  [ToNamecardTypeEnum.other]: "其他",
+  [ToNamecardTypeEnum.achievement]: "成就",
+  [ToNamecardTypeEnum.role]: "角色",
+  [ToNamecardTypeEnum.record]: "纪行",
+  [ToNamecardTypeEnum.activity]: "活动",
+  [ToNamecardTypeEnum.unknown]: "未知",
 };
 
 type ToNamecardEmits = (e: "update:modelValue", value: boolean) => void;
@@ -95,15 +65,6 @@ const props = defineProps<ToNamecardProps>();
 const emits = defineEmits<ToNamecardEmits>();
 
 const loading = ref<boolean>(false);
-
-watch(
-  () => props.data,
-  () => {
-    if (props.data) {
-      console.log(JSON.stringify(props.data));
-    }
-  },
-);
 
 const getType = computed(() => {
   if (!props.data) return typeMap[ToNamecardTypeEnum.unknown];
@@ -144,8 +105,9 @@ function parseNamecard(desc: string): string {
           array.push(item);
         } else {
           array.push("「");
-          array.push(...parseDesc(item.slice(1, -1)));
-          array.push("」");
+          array.push(...parseDesc(item.slice(1, -1), true));
+          const maxLength = Math.max(...array.map((item) => item.length));
+          array.push("  ".repeat(maxLength - 4) + "」");
         }
       }
     }
@@ -163,7 +125,7 @@ function parseNamecard(desc: string): string {
   return res;
 }
 
-function parseDesc(desc: string): string[] {
+function parseDesc(desc: string, inQuote: boolean = false): string[] {
   let res = desc.replace(/。/g, "。\n");
   res = res.replace(/；/g, "；\n");
   res = res.replace(/：/g, "：\n");
@@ -173,7 +135,7 @@ function parseDesc(desc: string): string[] {
   }
   res = res.replace(/…/g, "…\n");
   const match = res.split("\n");
-  const array: string[] = [];
+  let array: string[] = [];
   for (const item of match) {
     if (item.length > 0 && item.length <= 32) {
       array.push(item);
@@ -184,12 +146,13 @@ function parseDesc(desc: string): string[] {
       }
     }
   }
+  if (inQuote) array = array.map((item) => `  ${item}`);
   return array;
 }
 
 async function shareNamecard(): Promise<void> {
   const namecardBox = <HTMLElement>document.querySelector(".ton-box");
-  const fileName = `【${getType.value.text}名片】-${props.data?.name}`;
+  const fileName = `【${getType.value}名片】-${props.data?.name}`;
   loading.value = true;
   await generateShareImg(fileName, namecardBox);
   loading.value = false;
@@ -209,7 +172,6 @@ async function shareNamecard(): Promise<void> {
   width: 800px;
   height: 400px;
   border-radius: 10px;
-  box-shadow: 0 0 5px var(--common-shadow-2);
 }
 
 .ton-bg {
@@ -225,9 +187,8 @@ async function shareNamecard(): Promise<void> {
   padding: 0 5px;
   border: 1px solid var(--tgc-white-1);
   border-radius: 5px;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(20px);
   color: var(--tgc-white-1);
-  text-shadow: 0 0 5px rgb(0 0 0/80%);
 }
 
 .ton-content {
@@ -241,24 +202,25 @@ async function shareNamecard(): Promise<void> {
   align-items: flex-start;
   justify-content: flex-end;
   padding: 10px;
-  background: rgb(0 0 0 / 20%);
+  background: var(--common-shadow-t-1);
   color: var(--tgc-white-1);
+}
+
+.ton-content :first-child {
+  font-family: var(--font-title);
+  font-size: 20px;
   text-shadow: 0 0 5px rgb(0 0 0/80%);
 }
 
-.ton-content :nth-child(1) {
-  font-family: var(--font-title);
-  font-size: 20px;
-}
-
 .ton-content :nth-child(2) {
-  opacity: 0.8;
+  border-bottom: 1px dotted var(--tgc-white-1);
+  text-shadow: 0 0 2px rgb(0 0 0/80%);
   white-space: pre-wrap;
 }
 
-.ton-content :nth-child(3) {
-  border-top: 1px dotted var(--tgc-white-1);
+.ton-content :last-child {
   opacity: 0.8;
+  text-shadow: 0 0 2px black;
 }
 
 .ton-share {
