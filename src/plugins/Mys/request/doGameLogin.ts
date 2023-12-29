@@ -1,6 +1,5 @@
 /**
  * @file plugins/Mys/utils/doGameLogin
- * @todo 完善
  * @description 获取 gameToken，曲线获取 stoken
  * @since Beta v0.3.0
  */
@@ -29,7 +28,7 @@ export async function getLoginQr(): Promise<
     })
     .then((res) => {
       if (res.data.retcode === 0) return res.data.data;
-      return res.data;
+      return <TGApp.BBS.Response.Base>res.data;
     });
 }
 
@@ -44,7 +43,6 @@ export async function getLoginStatus(
 ): Promise<TGApp.Plugins.Mys.GameLogin.GetLoginStatusData | TGApp.BBS.Response.Base> {
   const url = "https://hk4e-sdk.mihoyo.com/hk4e_cn/combo/panda/qrcode/query";
   const data = { app_id: "4", device, ticket };
-  console.log(data);
   return await http
     .fetch<TGApp.Plugins.Mys.GameLogin.GetLoginStatusResponse | TGApp.BBS.Response.Base>(url, {
       method: "POST",
@@ -52,6 +50,6 @@ export async function getLoginStatus(
     })
     .then((res) => {
       if (res.data.retcode === 0) return res.data.data;
-      return res.data;
+      return <TGApp.BBS.Response.Base>res.data;
     });
 }

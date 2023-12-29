@@ -1,7 +1,6 @@
 /**
  * @file types/App/Achievement.d.ts
  * @description 应用成就相关类型定义文件
- * @todo https://github.com/BTMuli/TeyvatGuide/issues/19
  * @since Alpha v0.1.5
  */
 

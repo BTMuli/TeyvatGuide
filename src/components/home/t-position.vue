@@ -5,7 +5,6 @@
       <span>近期活动</span>
     </div>
     <div v-if="!loading" class="position-grid">
-      <!-- todo hover 效果优化 -->
       <v-card
         v-for="card in positionCards"
         :key="card.postId"

@@ -1,7 +1,6 @@
 /**
  * @file types/Sqlite/Achievement.d.ts
  * @description 数据库成就相关类型定义文件
- * @todo https://github.com/BTMuli/TeyvatGuide/issues/19
  * @since Alpha v0.2.0
  */
 

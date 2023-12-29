@@ -39,7 +39,6 @@
         <span>刷新</span>
       </v-btn>
     </div>
-    <!-- todo: hover效果，本来是只有 icon，hover之后显示 title   -->
     <div class="posts-nav">
       <div
         v-for="navItem in nav"
@@ -271,7 +270,6 @@ async function toNav(path: string): Promise<void> {
     window.open(path);
     return;
   }
-  // todo 记忆宽屏竖屏
   const modeConfirm = await showConfirm({
     title: "是否采用宽屏模式打开？",
     text: "取消则采用竖屏模式打开",
