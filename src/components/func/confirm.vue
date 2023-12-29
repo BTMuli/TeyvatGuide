@@ -17,12 +17,12 @@
               v-model="inputVal"
               class="confirm-input-box"
               ref="inputRef"
-              @keydown.enter="handleClick(true)"
+              @keydown.enter="handleConfirm"
             />
           </div>
           <div class="confirm-btn-box">
-            <button class="confirm-btn no-btn" @click="handleClick(false)">取消</button>
-            <button class="confirm-btn ok-btn" @click="handleClick(true)">确定</button>
+            <button class="confirm-btn no-btn" @click="handleCancel">取消</button>
+            <button class="confirm-btn ok-btn" @click="handleConfirm">确定</button>
           </div>
         </div>
       </transition>
@@ -54,7 +54,7 @@ const data = reactive<TGApp.Component.Confirm.Params>({
 const show = ref<boolean>(false);
 const showOuter = ref<boolean>(false);
 const showInner = ref<boolean>(false);
-const confirmVal = ref<boolean | string>(false);
+const confirmVal = ref<boolean | string | undefined>();
 const inputVal = ref<string>("");
 const inputRef = ref<HTMLInputElement>();
 
@@ -78,14 +78,16 @@ onMounted(async () => {
   await displayBox(props);
 });
 
-async function displayBox(params: TGApp.Component.Confirm.Params): Promise<string | boolean> {
+async function displayBox(
+  params: TGApp.Component.Confirm.Params,
+): Promise<string | boolean | undefined> {
   data.title = params.title;
   data.text = params.text ?? "";
   data.mode = params.mode ?? "confirm";
   data.otcancel = params.otcancel ?? true;
   show.value = true;
   // 等待确认框关闭，返回关闭后的confirmVal
-  return await new Promise<string | boolean>((resolve) => {
+  return await new Promise<string | boolean | undefined>((resolve) => {
     nextTick(() => {
       if (data.mode === "input") {
         // 等待确认框打开，聚焦输入框
@@ -103,27 +105,28 @@ async function displayBox(params: TGApp.Component.Confirm.Params): Promise<strin
   });
 }
 
-// 点击确认事件
-function handleClick(status: boolean): void {
-  let res;
-  if (!status) {
-    res = false;
+// 确认
+function handleConfirm(): void {
+  if (data.mode === "input") {
+    confirmVal.value = inputVal.value;
+    inputVal.value = "";
   } else {
-    if (data.mode === "input") {
-      res = inputVal.value;
-      inputVal.value = "";
-    } else {
-      res = true;
-    }
+    confirmVal.value = true;
   }
   show.value = false;
-  confirmVal.value = res;
+}
+
+// 取消
+function handleCancel(): void {
+  confirmVal.value = false;
+  show.value = false;
 }
 
 // 点击外部事件
 function handleOuter(): void {
   if (data.otcancel) {
-    handleClick(false);
+    confirmVal.value = undefined;
+    show.value = false;
   }
 }
 
