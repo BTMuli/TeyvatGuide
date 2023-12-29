@@ -1,6 +1,6 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
-  <ToGameLogin v-model="scan" />
+  <ToGameLogin v-model="scan" @success="refreshUser" />
   <div class="config-box">
     <v-list class="config-list">
       <v-list-subheader :inset="true" class="config-header" title="应用信息" />
@@ -263,6 +263,11 @@ async function confirmRefreshUser(): Promise<void> {
     });
     return;
   }
+  await refreshUser();
+}
+
+// 刷新用户信息
+async function refreshUser(): Promise<void> {
   const ck = userStore.cookie.value;
   if (ck === undefined || JSON.stringify(ck) === "{}") {
     showSnackbar({

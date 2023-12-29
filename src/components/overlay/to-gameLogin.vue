@@ -6,7 +6,13 @@
         <div class="tog-subtitle">所需米游社版本 >= 2.57.1</div>
       </div>
       <div class="tog-mid">
-        <qrcode-vue class="tog-qr" :value="qrCode" render-as="svg" />
+        <qrcode-vue
+          class="tog-qr"
+          :value="qrCode"
+          render-as="svg"
+          :background="'var(--box-bg-1)'"
+          foreground="var(--box-text-1)"
+        />
       </div>
     </div>
   </TOverlay>
@@ -26,7 +32,10 @@ interface ToWebLoginProps {
   modelValue: boolean;
 }
 
-type ToWebLoginEmits = (e: "update:modelValue", value: boolean) => void;
+type ToWebLoginEmits = {
+  (e: "update:modelValue", value: boolean): void;
+  (e: "success"): void;
+};
 
 const props = withDefaults(defineProps<ToWebLoginProps>(), {
   modelValue: false,
@@ -40,7 +49,6 @@ const visible = computed({
     emits("update:modelValue", value);
   },
 });
-const isCycle = ref<boolean>(false);
 let cycleTimer: NodeJS.Timeout | null = null;
 
 const qrCode = ref<string>("");
@@ -61,7 +69,6 @@ const userStore = storeToRefs(useUserStore());
 watch(visible, async (value) => {
   if (value) {
     await freshQr();
-    isCycle.value = true;
     cycleTimer = setInterval(cycleGetData, 1000);
   }
 });
@@ -97,10 +104,7 @@ async function freshQr(): Promise<void> {
 }
 
 async function cycleGetData() {
-  if (!isCycle.value) {
-    if (cycleTimer) clearInterval(cycleTimer);
-    return;
-  }
+  if (cycleTimer === null) return;
   const res = await Mys.User.getData(ticket.value);
   console.log(res);
   if ("retcode" in res) {
@@ -113,7 +117,6 @@ async function cycleGetData() {
       await freshQr();
     } else {
       // 取消轮询
-      isCycle.value = false;
       if (cycleTimer) clearInterval(cycleTimer);
       visible.value = false;
     }
@@ -124,7 +127,6 @@ async function cycleGetData() {
   }
   if (res.stat === "Confirmed") {
     // 取消轮询
-    isCycle.value = false;
     if (cycleTimer) clearInterval(cycleTimer);
     const data: TGApp.Plugins.Mys.GameLogin.StatusPayloadRaw = JSON.parse(res.payload.raw);
     cookie.account_id = data.uid;
@@ -137,6 +139,9 @@ async function cycleGetData() {
       color: "success",
     });
     visible.value = false;
+    setTimeout(() => {
+      emits("success");
+    }, 1000);
   }
 }
 
@@ -160,7 +165,6 @@ async function getTokens(): Promise<void> {
 }
 
 onUnmounted(() => {
-  isCycle.value = false;
   if (cycleTimer) clearInterval(cycleTimer);
 });
 </script>
@@ -206,16 +210,5 @@ onUnmounted(() => {
 .tog-qr {
   width: 256px;
   height: 256px;
-}
-
-.tog-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.tog-btn {
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
 }
 </style>
