@@ -1,7 +1,7 @@
 /**
  * @file src/utils/linkParser.ts
  * @description 处理链接
- * @since Beta v0.3.8
+ * @since Beta v0.3.9
  */
 
 import TGClient from "./TGClient";
@@ -48,7 +48,7 @@ export async function parsePost(link: string): Promise<false | string> {
 
 /**
  * @function parseLink
- * @since Beta v0.3.8
+ * @since Beta v0.3.9
  * @description 处理链接
  * @param {string} link - 链接
  * @param {boolean} useInner - 是否采用内置 JSBridge 打开
@@ -110,24 +110,22 @@ export async function parseLink(
     "bbs.mihoyo.com",
     "qaa.miyoushe.com",
   ];
-  if (prefix.includes(url.hostname)) {
-    if (!useInner) {
-      const openCheck = await showConfirm({
-        title: "采用内置 JSBridge？",
-        text: "取消则使用外部浏览器打开",
-      });
-      if (!openCheck) return url.href;
-      const typeCheck = await showConfirm({
-        title: "采用宽屏模式？",
-        text: "取消则使用默认竖屏",
-      });
-      if (typeCheck) {
-        await TGClient.open("web_act", link);
-      } else {
-        await TGClient.open("web_act_thin", link);
-      }
-      return true;
+  if (prefix.includes(url.hostname) && !useInner) {
+    const openCheck = await showConfirm({
+      title: "采用内置 JSBridge？",
+      text: "取消则使用外部浏览器打开",
+    });
+    if (!openCheck) return url.href;
+    const typeCheck = await showConfirm({
+      title: "采用宽屏模式？",
+      text: "取消则使用默认竖屏",
+    });
+    if (typeCheck) {
+      await TGClient.open("web_act", link);
+    } else {
+      await TGClient.open("web_act_thin", link);
     }
+    return true;
   }
   return url.href.toString();
 }
