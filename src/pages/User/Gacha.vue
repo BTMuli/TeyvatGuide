@@ -43,7 +43,7 @@
 <script lang="ts" setup>
 import { dialog, fs, path } from "@tauri-apps/api";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
@@ -52,14 +52,12 @@ import GroOverview from "../../components/gachaRecord/gro-overview.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import { AppCharacterData, AppWeaponData } from "../../data";
 import TGSqlite from "../../plugins/Sqlite";
-import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
 import { backupUigfData, exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF";
 import TGRequest from "../../web/request/TGRequest";
 
 // store
 const userStore = storeToRefs(useUserStore());
-const appStore = useAppStore();
 const account = userStore.account.value;
 const authkey = ref<string>("");
 
