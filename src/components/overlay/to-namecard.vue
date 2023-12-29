@@ -1,5 +1,4 @@
 <template>
-  <!-- todo 支持 share -->
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
     <div v-if="props.data" class="ton-container">
       <slot name="left"></slot>
@@ -11,14 +10,25 @@
           <span>获取途径：{{ props.data.source }}</span>
         </div>
         <div class="ton-type">{{ getType.text }}</div>
+        <v-btn
+          class="ton-share"
+          @click="shareNamecard"
+          variant="outlined"
+          :loading="loading"
+          data-html2canvas-ignore
+        >
+          <v-icon>mdi-share-variant</v-icon>
+          <span>分享</span>
+        </v-btn>
       </div>
       <slot name="right"></slot>
     </div>
   </TOverlay>
 </template>
 <script setup lang="ts">
-import { computed, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
+import { generateShareImg } from "../../utils/TGShare";
 import TOverlay from "../main/t-overlay.vue";
 
 interface ToNamecardProps {
@@ -83,6 +93,8 @@ type ToNamecardEmits = (e: "update:modelValue", value: boolean) => void;
 const props = defineProps<ToNamecardProps>();
 
 const emits = defineEmits<ToNamecardEmits>();
+
+const loading = ref<boolean>(false);
 
 watch(
   () => props.data,
@@ -174,6 +186,14 @@ function parseDesc(desc: string): string[] {
   }
   return array;
 }
+
+async function shareNamecard(): Promise<void> {
+  const namecardBox = <HTMLElement>document.querySelector(".ton-box");
+  const fileName = `【${getType.value.text}名片】-${props.data?.name}`;
+  loading.value = true;
+  await generateShareImg(fileName, namecardBox);
+  loading.value = false;
+}
 </script>
 <style lang="css" scoped>
 .ton-container {
@@ -239,5 +259,15 @@ function parseDesc(desc: string): string[] {
 .ton-content :nth-child(3) {
   border-top: 1px dotted var(--tgc-white-1);
   opacity: 0.8;
+}
+
+.ton-share {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  border: 1px solid var(--tgc-white-1);
+  border-radius: 5px;
+  backdrop-filter: blur(5px);
+  color: var(--tgc-white-1);
 }
 </style>
