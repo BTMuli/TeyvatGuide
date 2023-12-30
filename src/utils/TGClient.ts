@@ -287,6 +287,87 @@ class TGClient {
         await this.loadJSBridge();
         break;
       }
+      case "teyvat_touch": {
+        const executeJS = `javascript:(() => {
+          // 鼠标移动监听
+          const mouseMoveListener = (e) => {
+            console.log("mouseMoveListener");
+            const touch = new Touch({
+              identifier: Date.now(),
+              target: e.target,
+              clientX: e.clientX,
+              clientY: e.clientY,
+              screenX: e.screenX,
+              screenY: e.screenY,
+              pageX: e.pageX,
+              pageY: e.pageY
+            });
+            const touchEvent = new TouchEvent("touchmove", {
+              cancelable: true,
+              bubbles: true,
+              touches: [touch],
+              targetTouches: [touch],
+              changedTouches: [touch]
+            });
+            console.log(touchEvent);
+            e.target.dispatchEvent(touchEvent);
+          };
+          // 鼠标抬起监听
+          const mouseUpListener = (e) => {
+            console.log("mouseUpListener");
+            const touch = new Touch({
+              identifier: Date.now(),
+              target: e.target,
+              clientX: e.clientX,
+              clientY: e.clientY,
+              screenX: e.screenX,
+              screenY: e.screenY,
+              pageX: e.pageX,
+              pageY: e.pageY
+            });
+            const touchEvent = new TouchEvent("touchend", {
+              cancelable: true,
+              bubbles: true,
+              touches: [touch],
+              targetTouches: [touch],
+              changedTouches: [touch]
+            });
+            console.log(touchEvent);
+            e.target.dispatchEvent(touchEvent);
+            // 鼠标抬起后，移除对于鼠标移动和鼠标抬起的监听
+            document.removeEventListener("mousemove", mouseMoveListener);
+            document.removeEventListener("mouseup", mouseUpListener);
+          };
+          const mouseDownListener = (e) => {
+            console.log("mouseDownListener");
+            const touch = new Touch({
+              identifier: Date.now(),
+              target: e.target,
+              clientX: e.clientX,
+              clientY: e.clientY,
+              screenX: e.screenX,
+              screenY: e.screenY,
+              pageX: e.pageX,
+              pageY: e.pageY
+            });
+            const touchEvent = new TouchEvent("touchstart", {
+              cancelable: true,
+              bubbles: true,
+              touches: [touch],
+              targetTouches: [touch],
+              changedTouches: [touch]
+            });
+            console.log(touchEvent);
+            e.target.dispatchEvent(touchEvent);
+            // 鼠标按下后，监听鼠标移动和鼠标抬起事件
+            document.addEventListener("mousemove", mouseMoveListener);
+            document.addEventListener("mouseup", mouseUpListener);
+          };
+          document.addEventListener("mousedown", mouseDownListener);
+        })()`;
+        await invoke("execute_js", { label: "mhy_client", js: executeJS });
+        break;
+      }
       default:
         console.warn(`[customCallback] ${arg.method}`);
     }
@@ -524,8 +605,8 @@ class TGClient {
     }
     const executeJS = `javascript:(function(){
       var domain = window.location.host;
-      document.cookie = "cookie_token=${user.cookie.cookie_token};domain=." + domain + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;
-      document.cookie = "ltoken=${user.cookie.ltoken};domain=." + domain + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;
+      document.cookie = "cookie_token=${user.cookie.cookie_token};domain=" + domain + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;
+      document.cookie = "ltoken=${user.cookie.ltoken};domain=" + domain + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;
     })();`;
     console.info(`[getCookieToken] ${executeJS}`);
     await invoke("execute_js", { label: "mhy_client", js: executeJS });

@@ -2,16 +2,27 @@
 //! @desc 客户端模块，负责操作米游社客户端
 //! @since Beta v0.3.9
 
-use tauri::{AppHandle, CustomMenuItem, Manager, Menu, WindowBuilder, WindowUrl};
+use tauri::{AppHandle, CustomMenuItem, Manager, Menu, Submenu, WindowBuilder, WindowUrl};
 use url::Url;
+
+// 创建子菜单-工具
+fn create_utils_menu() -> Menu {
+  let retry_bridge = CustomMenuItem::new("retry".to_string(), "重试桥接");
+  let mock_touch = CustomMenuItem::new("mock_touch".to_string(), "模拟触摸");
+  return Menu::new().add_item(retry_bridge).add_item(mock_touch);
+}
 
 // 创建米游社客户端菜单
 fn create_mhy_menu() -> Menu {
   let top = CustomMenuItem::new("top".to_string(), "置顶");
   let cancel_top = CustomMenuItem::new("cancel_top".to_string(), "取消置顶");
   let open_post = CustomMenuItem::new("open_post".to_string(), "打开帖子");
-  let retry_bridge = CustomMenuItem::new("retry".to_string(), "重试");
-  return Menu::new().add_item(top).add_item(cancel_top).add_item(open_post).add_item(retry_bridge);
+  let utils_menu = Submenu::new("工具".to_string(), create_utils_menu());
+  return Menu::new()
+    .add_item(top)
+    .add_item(cancel_top)
+    .add_item(open_post)
+    .add_submenu(utils_menu);
 }
 
 // 获取米游社客户端入口地址
@@ -110,6 +121,16 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
             }
             await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
             })()"#;
+        window.eval(&execute_js).ok().unwrap();
+      }
+      "mock_touch" => {
+        let window = handle.get_window("mhy_client").unwrap();
+        let execute_js = r#"javascript:(async function(){
+                const arg = {
+                    method: 'teyvat_touch',
+                }
+                await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
+                })()"#;
         window.eval(&execute_js).ok().unwrap();
       }
       _ => {}
