@@ -6,7 +6,9 @@ node_modules
 dist
 # Secrets
 .env.sh
-# wiki-json(dev)
+# wiki(Dev)
 src/data/WIKI/Character/
 src/data/WIKI/Weapon/
 src/data/WIKI/GCG/
+public/icon/talents/
+public/icon/constellations/

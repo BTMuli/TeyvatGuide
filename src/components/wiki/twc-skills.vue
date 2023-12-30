@@ -9,8 +9,7 @@
         class="twc-skill-tab"
         density="compact"
       >
-        <!-- todo 换成本地资源 -->
-        <img :src="`https://api.ambr.top/assets/UI/${item.icon}.png`" alt="icon" />
+        <img :src="`/icon/talents/${item.icon}.webp`" alt="icon" />
         <span v-if="tab === item.name">{{ item.name }}</span>
       </v-tab>
     </v-tabs>

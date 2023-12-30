@@ -9,8 +9,7 @@
         class="twc-constellation-tab"
         density="compact"
       >
-        <!-- todo 换成本地资源 -->
-        <img :src="`https://api.ambr.top/assets/UI/${item.Icon}.png`" alt="icon" />
+        <img :src="`/icon/constellations/${item.Icon}.webp`" alt="icon" />
         <span v-if="tab === item.Name">{{ item.Name }}</span>
       </v-tab>
     </v-tabs>
