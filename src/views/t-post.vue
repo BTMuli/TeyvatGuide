@@ -53,7 +53,7 @@
         </div>
       </div>
     </div>
-    <div class="tp-post-title">
+    <div class="tp-post-title" @click="toPost()" title="点击查看评论">
       <span class="mpt-official" v-if="postData.post.post_status.is_official">官</span>
       <span>{{ postData.post.subject }}</span>
     </div>
@@ -240,6 +240,11 @@ async function toAuthor(): Promise<void> {
   const url = `https://m.miyoushe.com/ys/#/accountCenter/0?id=${postData.value?.user.uid}`;
   await TGClient.open("web_thin", url);
 }
+
+async function toPost(): Promise<void> {
+  const url = `https://m.miyoushe.com/ys/#/article/${postId}`;
+  await TGClient.open("web_thin", url);
+}
 </script>
 <style lang="css" scoped>
 .tp-post-body {
@@ -254,6 +259,7 @@ async function toAuthor(): Promise<void> {
   align-items: center;
   justify-content: start;
   color: var(--common-text-title);
+  cursor: pointer;
   font-family: var(--font-title);
   font-size: 20px;
 }
