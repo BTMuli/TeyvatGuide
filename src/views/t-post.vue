@@ -75,8 +75,10 @@
       </div>
     </div>
     <div class="tp-post-subtitle">
-      <span>创建时间：{{ getDate(postData.post.created_at) }}&emsp;</span>
-      <span>更新时间：{{ getDate(postData.post.updated_at) }}</span>
+      <span :title="`更新时间: ${getDate(postData.post.updated_at)}`">
+        创建时间：{{ getDate(postData.post.created_at) }}
+      </span>
+      <span>分享时间：{{ getDate(shareTime) }}</span>
     </div>
     <TpParser v-model:data="renderPost" />
   </div>
@@ -89,7 +91,7 @@
 <script lang="ts" setup>
 import { app } from "@tauri-apps/api";
 import { appWindow } from "@tauri-apps/api/window";
-import { nextTick, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
@@ -118,7 +120,10 @@ const appVersion = ref<string>();
 const postId = Number(useRoute().params.post_id);
 const renderPost = ref<TGApp.Plugins.Mys.SctPost.Base[]>([]);
 const postData = ref<TGApp.Plugins.Mys.Post.FullData>();
-
+// 当前时间，秒级时间戳
+const shareTime = ref<number>(Math.floor(Date.now() / 1000));
+// 时间更新定时器
+const shareTimeTimer = ref<any>();
 // 合集
 const showCollection = ref<boolean>(false);
 
@@ -154,6 +159,9 @@ onMounted(async () => {
     createPostJson(postId);
   }
   await nextTick(() => {
+    shareTimeTimer.value = setInterval(() => {
+      shareTime.value = Math.floor(Date.now() / 1000);
+    }, 1000);
     loading.value = false;
     postRef.value = <HTMLElement>document.querySelector(".tp-post-body");
   });
@@ -161,6 +169,7 @@ onMounted(async () => {
 
 watch(loadShare, (value) => {
   if (value) {
+    shareTime.value = Math.floor(Date.now() / 1000);
     loadingTitle.value = "正在生成分享图片";
     loadingSub.value = `${shareTitle.value}.png`;
     loading.value = true;
@@ -245,6 +254,10 @@ async function toPost(): Promise<void> {
   const url = `https://m.miyoushe.com/ys/#/article/${postId}`;
   await TGClient.open("web_thin", url);
 }
+
+onUnmounted(() => {
+  clearInterval(shareTimeTimer.value);
+});
 </script>
 <style lang="css" scoped>
 .tp-post-body {
@@ -280,6 +293,10 @@ async function toPost(): Promise<void> {
 
 /* subtitle */
 .tp-post-subtitle {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 10px;
   font-size: 16px;
   opacity: 0.6;
 }
