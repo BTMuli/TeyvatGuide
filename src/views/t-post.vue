@@ -91,7 +91,7 @@
 <script lang="ts" setup>
 import { app } from "@tauri-apps/api";
 import { appWindow } from "@tauri-apps/api/window";
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
