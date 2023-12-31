@@ -43,7 +43,7 @@
           <span>{{ postData.user.nickname }}</span>
           <span :title="getMpaLeftDesc()">{{ getMpaLeftDesc() }}</span>
         </div>
-        <div class="mpa-right" @click="toAuthor()">
+        <div class="mpa-right" @click="toAuthor()" title="点击前往用户主页">
           <div class="mpa-icon">
             <img :src="postData.user.avatar_url" alt="userIcon" />
           </div>
@@ -256,6 +256,7 @@ async function toPost(): Promise<void> {
 /* title */
 .tp-post-title {
   display: flex;
+  width: fit-content;
   align-items: center;
   justify-content: start;
   color: var(--common-text-title);
