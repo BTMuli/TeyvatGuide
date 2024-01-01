@@ -98,7 +98,6 @@ const localAbyssID = ref<number[]>([]);
 const curAbyss = ref<TGApp.Sqlite.Abyss.SingleTable>(<TGApp.Sqlite.Abyss.SingleTable>{});
 const abyssRef = ref<HTMLElement>(<HTMLElement>{});
 
-// todo 优化数据加载
 onMounted(async () => {
   loadingTitle.value = "正在加载深渊数据";
   await initAbyssData();
@@ -106,7 +105,9 @@ onMounted(async () => {
 });
 
 async function initAbyssData(): Promise<void> {
-  localAbyss.value = await TGSqlite.getAbyss(user.value.gameUid);
+  const abyssGet = await TGSqlite.getAbyss(user.value.gameUid);
+  if (abyssGet.length === 0) return;
+  localAbyss.value = abyssGet;
   localAbyss.value.forEach((item) => {
     localAbyssID.value.push(item.id);
   });
@@ -315,7 +316,8 @@ async function uploadAbyss(): Promise<void> {
   flex-direction: column;
   align-items: center;
   border-radius: 5px;
-  background: var(--common-shadow-2);
+  background: var(--common-shadow-t-2);
+  box-shadow: 0 0 5px var(--common-shadow-2);
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 1.5rem;
