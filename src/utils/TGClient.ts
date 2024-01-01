@@ -279,6 +279,9 @@ class TGClient {
       case "teyvat_open":
         createPost(<string>arg.payload);
         break;
+      case "teyvat_remove":
+        await this.hideOverlay();
+        break;
       case "teyvat_retry": {
         const executeJS = `javascript:(function(){
           window.location.reload();

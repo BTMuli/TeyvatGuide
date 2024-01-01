@@ -9,7 +9,8 @@ use url::Url;
 fn create_utils_menu() -> Menu {
   let retry_bridge = CustomMenuItem::new("retry".to_string(), "重试桥接");
   let mock_touch = CustomMenuItem::new("mock_touch".to_string(), "模拟触摸");
-  return Menu::new().add_item(retry_bridge).add_item(mock_touch);
+  let remove_overlay = CustomMenuItem::new("remove_overlay".to_string(), "移除遮罩");
+  return Menu::new().add_item(retry_bridge).add_item(mock_touch).add_item(remove_overlay);
 }
 
 // 创建米游社客户端菜单
@@ -131,6 +132,16 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
                 }
                 await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
                 })()"#;
+        window.eval(&execute_js).ok().unwrap();
+      }
+      "remove_overlay" => {
+        let window = handle.get_window("mhy_client").unwrap();
+        let execute_js = r#"javascript:(async function(){
+                        const arg = {
+                            method: 'teyvat_remove',
+                        }
+                        await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
+                        })()"#;
         window.eval(&execute_js).ok().unwrap();
       }
       _ => {}
