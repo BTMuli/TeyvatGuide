@@ -127,19 +127,7 @@
         :subtitle="appStore.dataPath.userDataDir"
       />
     </v-list>
-    <div class="config-app">
-      <img class="config-app-icon" src="/icon.webp" alt="App" />
-      <div
-        class="config-app-info click"
-        title="点击前往 Github Release"
-        @click="toOuter('https://github.com/BTMuli/TeyvatGuide/releases/latest')"
-      >
-        TeyvatGuide Beta
-      </div>
-      <div class="config-app-info">
-        v{{ versionApp }}.{{ buildTime === "" ? "Dev" : buildTime }}
-      </div>
-    </div>
+    <TAppBadge />
   </div>
 </template>
 
@@ -148,6 +136,7 @@ import { app, fs, invoke, os, process as TauriProcess } from "@tauri-apps/api";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
 
+import TAppBadge from "../../components/app/t-appBadge.vue";
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
 import ToGameLogin from "../../components/overlay/to-gameLogin.vue";
@@ -176,7 +165,6 @@ const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 // About App
 const versionApp = ref<string>("");
 const versionTauri = ref<string>("");
-const buildTime = computed(() => appStore.buildTime);
 
 // About OS
 const osPlatform = ref<string>("");
@@ -670,37 +658,5 @@ function submitHome(): void {
   margin-left: 20px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
-}
-
-.config-app {
-  position: fixed;
-  top: 16px;
-  right: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  border-radius: 10px;
-  background-image: linear-gradient(to bottom, rgb(19 84 122 / 80%), rgb(128 208 199 / 80%));
-  box-shadow: 0 0 10px var(--common-shadow-2);
-}
-
-.config-app-icon {
-  width: 200px;
-  aspect-ratio: 1 / 1;
-}
-
-.config-app-info {
-  color: var(--tgc-white-1);
-  font-family: var(--font-title);
-  font-size: 14px;
-  text-align: center;
-  text-shadow: 0 0 2px rgb(19 84 122 / 80%);
-}
-
-.config-app-info.click {
-  color: var(--tgc-yellow-1);
-  cursor: pointer;
 }
 </style>
