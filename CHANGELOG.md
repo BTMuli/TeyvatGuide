@@ -2,12 +2,44 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2023-09-08
-Update: 2023-12-11
+Update: 2024-01-02
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-09-08 09:45:17 `
 >
-> 更新于 `2023-12-11 19:01:09`
+> 更新于 `2024-01-02 01:50:28`
+
+## [0.3.9](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.9) (2024-01-02)
+
+### Feat
+
+- 应用：创建用户反馈QQ群 [`657618889`](https://h5.qun.qq.com/s/3cgX0hJ4GA)
+- 应用：扫码逻辑调整，自动获取结果&刷新
+- 名片：添加索引数据，显示获取途径，支持分享
+- 应用：侧边栏添加 `hover` 时的提示
+- 帖子：添加帖子合集数据渲染&处理
+- 帖子：添加用户、帖子的 JSBridge 跳转
+- 帖子：添加 `TpVote` 类型解析&渲染
+- 帖子：添加 `topic` 数据渲染
+- JSBridge：添加 `工具` 子菜单，包括 `重试桥接` `模拟触摸` `移除遮罩` 等选项 [`#73`](https://github.com/BTMuli/TeyvatGuide/issues/73)
+
+### Fix
+
+- 帖子：修复部分帖子颜色解析错误
+- 帖子：完善 Unknown 样式&处理
+- 帖子：修复部分帖子分享图渲染错误
+- 帖子：修复部分帖子视频播放量为 `undefined`
+- 应用：修复用户深渊页面渲染错误 [`#75`](https://github.com/BTMuli/TeyvatGuide/issues/75)
+
+### Change
+
+- 应用：重构 userStore 用法
+- JSBridge: 重构 JSBridge，完善类型提示
+- 应用：侧边栏首页及默认用户 Icon 变更
+- 应用：设置页样式变更
+- 应用：主题判断上移
+- 帖子：隐藏更新时间，添加分享时间
+- 应用：移除帖子页面的 `loadmore` 功能
 
 ## [0.3.8](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.8) (2023-12-20)
 
