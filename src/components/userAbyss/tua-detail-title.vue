@@ -62,8 +62,11 @@ const props = defineProps<TuaDetailTitleProps>();
   width: 20px;
   height: 20px;
   padding: 1px;
-  border-radius: 50%;
-  background: var(--tgc-btn-1);
+  filter: invert(22%) sepia(7%) saturate(1241%) hue-rotate(182deg) brightness(95%) contrast(99%);
   object-fit: cover;
+}
+
+.dark .tud-t-val img {
+  filter: none;
 }
 </style>

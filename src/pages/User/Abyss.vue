@@ -2,9 +2,11 @@
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="ua-box">
     <v-tabs v-model="userTab" direction="vertical" align-tabs="start" class="ua-tab">
-      <v-tab v-for="item in localAbyss" :key="item.id" :value="item.id" @click="toAbyss(item.id)">
-        第{{ item.id }}期
-      </v-tab>
+      <div class="ua-tabs">
+        <v-tab v-for="item in localAbyss" :key="item.id" :value="item.id" @click="toAbyss(item.id)">
+          第{{ item.id }}期
+        </v-tab>
+      </div>
       <div class="ua-tab-bottom">
         <v-btn class="ua-btn" @click="shareAbyss">
           <v-icon>mdi-share</v-icon>
@@ -226,6 +228,12 @@ async function uploadAbyss(): Promise<void> {
   width: 100px;
   color: var(--box-text-4);
   font-family: var(--font-text);
+}
+
+.ua-tabs {
+  max-height: calc(100% - 150px);
+  margin-top: 5px;
+  overflow-y: auto;
 }
 
 /* stylelint-disable selector-class-pattern */
