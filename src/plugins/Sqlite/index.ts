@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/index.ts
  * @description Sqlite 数据库操作类
- * @since Beta v0.3.9
+ * @since Beta v0.4.0
  */
 
 import { app } from "@tauri-apps/api";
@@ -186,15 +186,17 @@ class Sqlite {
 
   /**
    * @description 重置数据库
-   * @since Beta v0.3.3
+   * @since Beta v0.4.0
    * @returns {Promise<void>}
    */
   public async reset(): Promise<void> {
     const db = await this.getDB();
-    this.tables.map(async (item) => {
-      const sql = `DROP TABLE IF EXISTS ${item};`;
-      await db.execute(sql);
-    });
+    await Promise.all(
+      this.tables.map(async (item) => {
+        const sql = `DROP TABLE IF EXISTS ${item};`;
+        await db.execute(sql);
+      }),
+    );
     await this.initDB();
   }
 

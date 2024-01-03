@@ -173,7 +173,7 @@ class TGClient {
    * @returns {Promise<void>} - 返回值
    */
   async handleCallback(arg: Event<string>): Promise<void> {
-    const argParse: TGApp.Plugins.JSBridge.Arg<any> = JSON.parse(<string>arg.payload);
+    const argParse: TGApp.Plugins.JSBridge.Arg<any> = JSON.parse(arg.payload);
     if (argParse.method.startsWith("teyvat")) {
       await this.handleCustomCallback(argParse);
       return;
