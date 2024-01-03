@@ -1,8 +1,10 @@
 //! @file src/client.rs
 //! @desc 客户端模块，负责操作米游社客户端
-//! @since Beta v0.3.9
+//! @since Beta v0.4.0
 
-use tauri::{AppHandle, CustomMenuItem, Manager, Menu, Submenu, WindowBuilder, WindowUrl};
+use tauri::{
+  AppHandle, CustomMenuItem, LogicalSize, Manager, Menu, Size, Submenu, WindowBuilder, WindowUrl,
+};
 use url::Url;
 
 // 创建子菜单-工具
@@ -10,7 +12,13 @@ fn create_utils_menu() -> Menu {
   let retry_bridge = CustomMenuItem::new("retry".to_string(), "重试桥接");
   let mock_touch = CustomMenuItem::new("mock_touch".to_string(), "模拟触摸");
   let remove_overlay = CustomMenuItem::new("remove_overlay".to_string(), "移除遮罩");
-  return Menu::new().add_item(retry_bridge).add_item(mock_touch).add_item(remove_overlay);
+  // 旋转窗口/切换横屏或者竖屏
+  let rotate_window = CustomMenuItem::new("rotate_window".to_string(), "旋转窗口");
+  return Menu::new()
+    .add_item(retry_bridge)
+    .add_item(mock_touch)
+    .add_item(remove_overlay)
+    .add_item(rotate_window);
 }
 
 // 创建米游社客户端菜单
@@ -143,6 +151,18 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
                         await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
                         })()"#;
         window.eval(&execute_js).ok().unwrap();
+      }
+      "rotate_window" => {
+        let window = handle.get_window("mhy_client").unwrap();
+        // 获取窗口宽高比
+        let cur_size = window.inner_size().ok().unwrap();
+        if cur_size.width > cur_size.height {
+          window.set_size(Size::Logical(LogicalSize { width: 400.0, height: 800.0 })).unwrap();
+        } else {
+          window.set_size(Size::Logical(LogicalSize { width: 1280.0, height: 720.0 })).unwrap();
+        }
+        window.center().unwrap();
+        window.set_focus().unwrap();
       }
       _ => {}
     });
