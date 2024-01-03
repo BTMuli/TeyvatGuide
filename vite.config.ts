@@ -1,18 +1,19 @@
 /**
  * @file vite.config.ts
  * @description vite 配置文件
- * @since Beta v0.3.7
+ * @since Beta v0.4.0
  */
 
 import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vite";
+import VueDevtools from "vite-plugin-vue-devtools";
 import vuetify from "vite-plugin-vuetify";
 
 import buildTimePlugin from "./src/utils/TGBuild";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), vuetify(), buildTimePlugin()],
+  plugins: [vue(), vuetify(), buildTimePlugin(), VueDevtools()],
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   // prevent vite from obscuring rust errors

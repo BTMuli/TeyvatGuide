@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tauri build",
     "debug": "tauri build --debug",
-    "dev": "concurrently -k \"tauri dev --exit-on-panic\" \"vue-devtools\"",
+    "dev": "tauri dev --exit-on-panic",
     "lint": "concurrently \"pnpm:lint:*(!fix)\"",
     "lint:fix": "concurrently \"pnpm:lint:*:fix\"",
     "lint:code": "eslint .",
@@ -95,7 +95,6 @@
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^6.17.0",
     "@vitejs/plugin-vue": "^5.0.2",
-    "@vue/devtools": "^6.5.1",
     "concurrently": "^8.2.2",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
@@ -120,6 +119,7 @@
     "stylelint-prettier": "^5.0.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.10",
+    "vite-plugin-vue-devtools": "^7.0.3",
     "vite-plugin-vuetify": "^2.0.1",
     "yaml-eslint-parser": "^1.2.2"
   }

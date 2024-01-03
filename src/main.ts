@@ -1,7 +1,7 @@
 /**
  * @file main.ts
- * @description Main entry
- * @since Beta v0.3.4
+ * @description 应用入口
+ * @since Beta v0.4.0
  */
 
 import { createApp } from "vue";
@@ -14,11 +14,5 @@ import store from "./store";
 import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";
 import "./assets/index.css";
-
-if (import.meta.env.MODE === "development") {
-  await import("@vue/devtools").then((i) => {
-    i.default.connect(/* host, port */);
-  });
-}
 
 createApp(App).use(router).use(store).use(createVuetify()).mount("#app");
