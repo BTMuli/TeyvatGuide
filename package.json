@@ -3,7 +3,7 @@
   "version": "0.3.9",
   "description": "Game Tool for Genshin Impact player",
   "private": true,
-  "packageManager": "pnpm@8.12.1",
+  "packageManager": "pnpm@8.14.0",
   "scripts": {
     "build": "tauri build",
     "debug": "tauri build --debug",
@@ -20,8 +20,7 @@
     "tauri:icon": "tauri icon ./public/icon.png",
     "vite:dev": "vite dev",
     "vite:build": "vite build",
-    "prepare": "husky install",
-    "fix:pnpm": "pnpm add https://github.com/tauri-apps/tauri-plugin-sql#v1"
+    "prepare": "husky install"
   },
   "lint-staged": {
     "*.ts": [
@@ -79,7 +78,7 @@
     "qrcode.vue": "^3.4.1",
     "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#v1",
     "uuid": "^9.0.1",
-    "vue": "^3.4.3",
+    "vue": "^3.4.5",
     "vue-echarts": "^6.6.8",
     "vue-json-viewer": "^3.0.4",
     "vue-router": "^4.2.5",
@@ -119,7 +118,7 @@
     "stylelint-prettier": "^5.0.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.10",
-    "vite-plugin-vue-devtools": "^7.0.3",
+    "vite-plugin-vue-devtools": "^7.0.5",
     "vite-plugin-vuetify": "^2.0.1",
     "yaml-eslint-parser": "^1.2.2"
   }

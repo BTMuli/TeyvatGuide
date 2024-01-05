@@ -143,7 +143,6 @@
             value="wiki-namecard"
             :link="true"
             href="/wiki/namecard"
-            v-if="isDevEnv"
           >
             <template #default>
               <v-icon size="20" color="var(--tgc-yellow-2)">mdi-credit-card-outline</v-icon>
