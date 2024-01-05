@@ -1,0 +1,61 @@
+{
+  "id": 13409,
+  "name": "龙脊长枪",
+  "description": "利用龙之牙制成的长枪。有着奇异的温暖触感。",
+  "star": 4,
+  "weapon": "长柄武器",
+  "materials": [
+    {
+      "id": 114008,
+      "name": "凛风奔狼的怀乡",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114008.webp"
+    },
+    {
+      "id": 112028,
+      "name": "雾虚灯芯",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112028.webp"
+    },
+    {
+      "id": 112034,
+      "name": "尉官的徽记",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112034.webp"
+    }
+  ],
+  "affix": {
+    "Name": "霜葬",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "普通攻击与重击命中敌人时，有<color=#99FFFFFF>60%</color>概率在敌人上方生成恒冰晶核并坠落，造成<color=#99FFFFFF>80%</color>攻击力的范围伤害。若敌人处于冰元素影响下，则造成<color=#99FFFFFF>200%</color>攻击力的伤害。该效果每10秒至多触发一次。"
+      },
+      {
+        "Level": 1,
+        "Description": "普通攻击与重击命中敌人时，有<color=#99FFFFFF>70%</color>概率在敌人上方生成恒冰晶核并坠落，造成<color=#99FFFFFF>95%</color>攻击力的范围伤害。若敌人处于冰元素影响下，则造成<color=#99FFFFFF>240%</color>攻击力的伤害。该效果每10秒至多触发一次。"
+      },
+      {
+        "Level": 2,
+        "Description": "普通攻击与重击命中敌人时，有<color=#99FFFFFF>80%</color>概率在敌人上方生成恒冰晶核并坠落，造成<color=#99FFFFFF>110%</color>攻击力的范围伤害。若敌人处于冰元素影响下，则造成<color=#99FFFFFF>280%</color>攻击力的伤害。该效果每10秒至多触发一次。"
+      },
+      {
+        "Level": 3,
+        "Description": "普通攻击与重击命中敌人时，有<color=#99FFFFFF>90%</color>概率在敌人上方生成恒冰晶核并坠落，造成<color=#99FFFFFF>125%</color>攻击力的范围伤害。若敌人处于冰元素影响下，则造成<color=#99FFFFFF>320%</color>攻击力的伤害。该效果每10秒至多触发一次。"
+      },
+      {
+        "Level": 4,
+        "Description": "普通攻击与重击命中敌人时，有<color=#99FFFFFF>100%</color>概率在敌人上方生成恒冰晶核并坠落，造成<color=#99FFFFFF>140%</color>攻击力的范围伤害。若敌人处于冰元素影响下，则造成<color=#99FFFFFF>360%</color>攻击力的伤害。该效果每10秒至多触发一次。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n他做了一个很长、很长的梦…\r\n\r\n梦见他与大家走了很远、很远的路，\r\n来到了歌声飘舞，绿草芬芳的土地。\r\n梦见他与这里善良的人们一同欢歌，\r\n与宝石一般美丽的巨龙在空中舞蹈。\r\n\r\n睁开眼时，是风雪嘶吼的山岳上空。\r\n翠绿恬静的大地已经被火与血染红，\r\n而苍色诗人的琴声几乎被咆哮淹没。\r\n而那宝石般美丽的巨龙如同爱人般，\r\n将利齿没入他的脖颈。\r\n\r\n「再见了，妈妈，我的旅途结束了」\r\n「沉睡在白银般闪耀的雪中也不错」\r\n「再见了，美丽的诗人、美丽的龙」\r\n「如果我们能在不同的时间、地点」\r\n「相遇、欢唱、共舞，那该有多好」\r\n垂死的他由衷地想。\r\n\r\n「在我的血管当中鼓动的深刻祝福」\r\n「我所诞生的漆黑宇宙的美丽图景」\r\n「就由你们继承吧」\r\n"
+  ]
+}

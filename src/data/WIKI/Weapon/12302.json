@@ -1,0 +1,61 @@
+{
+  "id": 12302,
+  "name": "沐浴龙血的剑",
+  "description": "据说是北方英雄浸过龙血的钢铁大剑，有刀枪不入的神力…这种护佑并不会延伸到挥舞它的人身上。",
+  "star": 3,
+  "weapon": "双手剑",
+  "materials": [
+    {
+      "id": 114008,
+      "name": "凛风奔狼的怀乡",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114008.webp"
+    },
+    {
+      "id": 112022,
+      "name": "地脉的新芽",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112022.webp"
+    },
+    {
+      "id": 112013,
+      "name": "历战的箭簇",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112013.webp"
+    }
+  ],
+  "affix": {
+    "Name": "踏火息雷",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "对处于火元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>12%</color>。"
+      },
+      {
+        "Level": 1,
+        "Description": "对处于火元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>15%</color>。"
+      },
+      {
+        "Level": 2,
+        "Description": "对处于火元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>18%</color>。"
+      },
+      {
+        "Level": 3,
+        "Description": "对处于火元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>21%</color>。"
+      },
+      {
+        "Level": 4,
+        "Description": "对处于火元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>24%</color>。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n传说，著名的英雄在斩杀毒龙之后，\r\n以猎获的龙血沐浴，以期刀枪不入。\r\n龙血确有此奇效：受其洗刷的躯体，\r\n卷了无数刀剑的刃，折了无数枪矛的尖，\r\n漫天飞来的箭，在他的笑声中纷纷弹开。\r\n最终，他的敌人们发现：\r\n他是背着钟爱的大剑沐浴龙血的，\r\n背上有一整块大剑尺寸的弱点哩。\r\n"
+  ]
+}

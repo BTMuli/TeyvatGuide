@@ -1,0 +1,61 @@
+{
+  "id": 15305,
+  "name": "信使",
+  "description": "造型简单的木制弓。传说它曾被人用作远程通讯的道具。",
+  "star": 3,
+  "weapon": "弓",
+  "materials": [
+    {
+      "id": 114020,
+      "name": "雾海云间的转还",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114020.webp"
+    },
+    {
+      "id": 112028,
+      "name": "雾虚灯芯",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112028.webp"
+    },
+    {
+      "id": 112037,
+      "name": "攫金鸦印",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112037.webp"
+    }
+  ],
+  "affix": {
+    "Name": "飞矢传书",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "重击若命中要害，则额外造成<color=#99FFFFFF>100%</color>攻击力的伤害，该伤害必定暴击。此效果每10秒只能触发一次。"
+      },
+      {
+        "Level": 1,
+        "Description": "重击若命中要害，则额外造成<color=#99FFFFFF>125%</color>攻击力的伤害，该伤害必定暴击。此效果每10秒只能触发一次。"
+      },
+      {
+        "Level": 2,
+        "Description": "重击若命中要害，则额外造成<color=#99FFFFFF>150%</color>攻击力的伤害，该伤害必定暴击。此效果每10秒只能触发一次。"
+      },
+      {
+        "Level": 3,
+        "Description": "重击若命中要害，则额外造成<color=#99FFFFFF>175%</color>攻击力的伤害，该伤害必定暴击。此效果每10秒只能触发一次。"
+      },
+      {
+        "Level": 4,
+        "Description": "重击若命中要害，则额外造成<color=#99FFFFFF>200%</color>攻击力的伤害，该伤害必定暴击。此效果每10秒只能触发一次。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n据说，在很久以前的某段时期，\r\n璃月港的人们，好以飞箭传书。\r\n「可是，那样不会射伤路人吗」\r\n「正因如此，这弓才成了古董」\r\n古董店店主摸摸下巴，微笑道。\r\n"
+  ]
+}

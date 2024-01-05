@@ -1,0 +1,61 @@
+{
+  "id": 11401,
+  "name": "西风剑",
+  "description": "西风骑士团的制式长剑。轻快锐利之余，也能轻易导出元素力量。",
+  "star": 4,
+  "weapon": "单手剑",
+  "materials": [
+    {
+      "id": 114004,
+      "name": "高塔孤王的碎梦",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114004.webp"
+    },
+    {
+      "id": 112016,
+      "name": "黑晶号角",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112016.webp"
+    },
+    {
+      "id": 112013,
+      "name": "历战的箭簇",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112013.webp"
+    }
+  ],
+  "affix": {
+    "Name": "顺风而行",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "攻击造成暴击时，有<color=#99FFFFFF>60%</color>的几率产生少量元素微粒，能为角色恢复6点元素能量。该效果每<color=#99FFFFFF>12</color>秒只能触发一次。"
+      },
+      {
+        "Level": 1,
+        "Description": "攻击造成暴击时，有<color=#99FFFFFF>70%</color>的几率产生少量元素微粒，能为角色恢复6点元素能量。该效果每<color=#99FFFFFF>10.5</color>秒只能触发一次。"
+      },
+      {
+        "Level": 2,
+        "Description": "攻击造成暴击时，有<color=#99FFFFFF>80%</color>的几率产生少量元素微粒，能为角色恢复6点元素能量。该效果每<color=#99FFFFFF>9</color>秒只能触发一次。"
+      },
+      {
+        "Level": 3,
+        "Description": "攻击造成暴击时，有<color=#99FFFFFF>90%</color>的几率产生少量元素微粒，能为角色恢复6点元素能量。该效果每<color=#99FFFFFF>7.5</color>秒只能触发一次。"
+      },
+      {
+        "Level": 4,
+        "Description": "攻击造成暴击时，有<color=#99FFFFFF>100%</color>的几率产生少量元素微粒，能为角色恢复6点元素能量。该效果每<color=#99FFFFFF>6</color>秒只能触发一次。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n西风骑士团的制式长剑，通常需要经过团长和教会的双重通过才能获批配发。\r\n通过研究维持蒙德的神风，蒙德的工匠学者在元素亲和的道路上取得了成果。\r\n这把轻快的剑因此不但是西风骑士的殊荣，也是蒙德卫士勤奋和技术的结晶。\r\n通过它能轻易导出元素力量。谨记，此剑的锋利是为了守护，而非杀伤。\r\n\r\n传承至今的西风剑术来自光之狮艾伦德林的影子，被称为幼狼的鲁斯坦。\r\n传说他能将落下的雨水一一斩落，舞剑产生的风能切断蔷薇，熄灭火把。\r\n这或多或少体现了西风剑术的性格：轻、快、精准，以此守护蒙德和平。\r\n\r\n二十七岁时，鲁斯坦获授「幼狼」之名。\r\n依照西风骑士团的传统，被授予狮子或狼之名的骑士，\r\n将有一日成为引领众多骑士，竭力守护蒙德的大团长。\r\n但永远恪守职责，一切为了蒙德的他没能活到那一天。\r\n\r\n鲁斯坦创造的剑术，没有人能达到他过去曾有的高度。\r\n但他的热诚与守护之心，却实实在在地传承到了今天。\r\n"
+  ]
+}

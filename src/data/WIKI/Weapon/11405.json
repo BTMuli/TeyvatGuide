@@ -1,0 +1,61 @@
+{
+  "id": 11405,
+  "name": "匣里龙吟",
+  "description": "雕饰浮华的利刃，却丝毫不损它的柔韧与锋锐。破空之声有如龙吟。",
+  "star": 4,
+  "weapon": "单手剑",
+  "materials": [
+    {
+      "id": 114016,
+      "name": "孤云寒林的神体",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114016.webp"
+    },
+    {
+      "id": 112031,
+      "name": "督察长祭刀",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112031.webp"
+    },
+    {
+      "id": 112037,
+      "name": "攫金鸦印",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112037.webp"
+    }
+  ],
+  "affix": {
+    "Name": "踏火息雷",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "对处于火元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>20%</color>。"
+      },
+      {
+        "Level": 1,
+        "Description": "对处于火元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>24%</color>。"
+      },
+      {
+        "Level": 2,
+        "Description": "对处于火元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>28%</color>。"
+      },
+      {
+        "Level": 3,
+        "Description": "对处于火元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>32%</color>。"
+      },
+      {
+        "Level": 4,
+        "Description": "对处于火元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>36%</color>。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n在璃月坊间流传的宝刀。\r\n据说它的刀鞘以沉香为基，饰以云母，雕有战争传说的图景。\r\n价值连城的刀鞘已经遗失了。\r\n对于这把刀来说，刀鞘是禁锢它，不让它做应做之事的枷锁。\r\n锐利无比，据说被刺中的人要过一个时辰才会发现自己已死。\r\n\r\n传说昆吾仅花了一日一夜，便打成了这柄锐利的宝刀。\r\n但年迈的师父眼见高徒之作，却扼腕兴嗟，以杖击地。\r\n「惜哉，唯此物最欠慈悲」\r\n老人喟然长叹，蹒跚离去。\r\n\r\n于是，昆吾沉思三日，其间不触碰任何刀剑。\r\n又用一年的时光，精心雕琢出一个沉香木匣。\r\n\r\n年轻的昆吾自以为，这华丽的刀鞘定能约束不羁的宝刀。\r\n但后来，宝刀失入民间。锋刃犹在，刀鞘却化作了传说。\r\n锋利的刀永远渴求连天的血光。再好的匣也无法拘束它。\r\n"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "id": 15303,
+  "name": "反曲弓",
+  "description": "据说能射下苍鹰的猎弓，但能不能做到主要还得看弓手的技术。",
+  "star": 3,
+  "weapon": "弓",
+  "materials": [
+    {
+      "id": 114012,
+      "name": "狮牙斗士的理想",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114012.webp"
+    },
+    {
+      "id": 112025,
+      "name": "混沌炉心",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112025.webp"
+    },
+    {
+      "id": 112010,
+      "name": "禁咒绘卷",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112010.webp"
+    }
+  ],
+  "affix": {
+    "Name": "收割",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "击败敌人时，恢复<color=#99FFFFFF>8%</color>生命值。"
+      },
+      {
+        "Level": 1,
+        "Description": "击败敌人时，恢复<color=#99FFFFFF>10%</color>生命值。"
+      },
+      {
+        "Level": 2,
+        "Description": "击败敌人时，恢复<color=#99FFFFFF>12%</color>生命值。"
+      },
+      {
+        "Level": 3,
+        "Description": "击败敌人时，恢复<color=#99FFFFFF>14%</color>生命值。"
+      },
+      {
+        "Level": 4,
+        "Description": "击败敌人时，恢复<color=#99FFFFFF>16%</color>生命值。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n由木材、骨头与动物筋腱组合，精心打造出的反曲弓。\r\n在射术高超的猎人手中，能够射下高天上飞翔的鸢鹰。\r\n这是猎人的骄傲，也是精湛弓术的证明。\r\n只是可怜了无端受害的苍鹰。"
+  ]
+}

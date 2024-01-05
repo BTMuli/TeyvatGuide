@@ -1,0 +1,61 @@
+{
+  "id": 13401,
+  "name": "匣里灭辰",
+  "description": "金龙缠绕的长枪，轻快锐利无比。大抵真能轻易屠龙。",
+  "star": 4,
+  "weapon": "长柄武器",
+  "materials": [
+    {
+      "id": 114020,
+      "name": "雾海云间的转还",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114020.webp"
+    },
+    {
+      "id": 112028,
+      "name": "雾虚灯芯",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112028.webp"
+    },
+    {
+      "id": 112010,
+      "name": "禁咒绘卷",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112010.webp"
+    }
+  ],
+  "affix": {
+    "Name": "踏火止水",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "对处于水元素或火元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>20%</color>。"
+      },
+      {
+        "Level": 1,
+        "Description": "对处于水元素或火元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>24%</color>。"
+      },
+      {
+        "Level": 2,
+        "Description": "对处于水元素或火元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>28%</color>。"
+      },
+      {
+        "Level": 3,
+        "Description": "对处于水元素或火元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>32%</color>。"
+      },
+      {
+        "Level": 4,
+        "Description": "对处于水元素或火元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>36%</color>。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n在璃月坊间流传的长枪。\r\n自枪柄盘旋而上的龙雕饰盘旋在枪穗处。\r\n据说原本有收纳枪尖的龙形木匣。如此，长枪出鞘便以龙灭龙。\r\n如今无匣，它的锋芒再也不必收敛。\r\n无论什么灾厄横在它前方，都能以流星之势穿透。\r\n\r\n传说昆吾在打制这柄长枪时，曾经以龙脊为骨，龙爪为锋。\r\n故而枪体坚韧不折，枪首锋锐无比，寒光中带着龙的戾气。\r\n\r\n曾有屠龙之士勇壮非凡，秉此枪叱咤大洋，鏖战海中魔物。\r\n多年以后，屠龙英雄无踪可觅，海上徒然回荡着龙吟之声。\r\n\r\n英雄已然成为了街巷间的传说，灭龙的长枪也随着传说失落，\r\n一朝内失去了来自过去的束缚，便如龙归大海一般尽显锋芒。"
+  ]
+}

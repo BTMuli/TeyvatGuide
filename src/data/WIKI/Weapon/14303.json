@@ -1,0 +1,61 @@
+{
+  "id": 14303,
+  "name": "异世界行记",
+  "description": "廉价的幻想小说，不具备参考价值。作为法器的力量当然也来自幻想。",
+  "star": 3,
+  "weapon": "法器",
+  "materials": [
+    {
+      "id": 114012,
+      "name": "狮牙斗士的理想",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114012.webp"
+    },
+    {
+      "id": 112025,
+      "name": "混沌炉心",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112025.webp"
+    },
+    {
+      "id": 112007,
+      "name": "不祥的面具",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112007.webp"
+    }
+  ],
+  "affix": {
+    "Name": "能量沐浴",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "获得元素微粒或元素晶球时，恢复<color=#99FFFFFF>1%</color>生命值。"
+      },
+      {
+        "Level": 1,
+        "Description": "获得元素微粒或元素晶球时，恢复<color=#99FFFFFF>1.25%</color>生命值。"
+      },
+      {
+        "Level": 2,
+        "Description": "获得元素微粒或元素晶球时，恢复<color=#99FFFFFF>1.5%</color>生命值。"
+      },
+      {
+        "Level": 3,
+        "Description": "获得元素微粒或元素晶球时，恢复<color=#99FFFFFF>1.75%</color>生命值。"
+      },
+      {
+        "Level": 4,
+        "Description": "获得元素微粒或元素晶球时，恢复<color=#99FFFFFF>2%</color>生命值。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n廉价的幻想小说，说了一名普通人死后发现自己来到了另一个世界的故事：\r\n那个世界危机四伏。潜伏地底、长若星河的钢铁怪兽将数以千计的人吞没；\r\n力量伟大者，弹指间让室内冬暖夏凉，夜明如昼。是毫无现实意义的故事。\r\n只有一点，与现实相通：绝大多数的贵金属为少数人所有，藏匿在宝库里。\r\n"
+  ]
+}

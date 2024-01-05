@@ -1,0 +1,36 @@
+{
+  "id": 12201,
+  "name": "佣兵重剑",
+  "description": "沉重坚实的古旧大剑，饱经战火与岁月的洗练。",
+  "star": 2,
+  "weapon": "双手剑",
+  "materials": [
+    {
+      "id": 114007,
+      "name": "凛风奔狼的断牙",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/114007.webp"
+    },
+    {
+      "id": 112021,
+      "name": "地脉的枯叶",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112021.webp"
+    },
+    {
+      "id": 112003,
+      "name": "史莱姆清",
+      "star": 2,
+      "starIcon": "/icon/star/2.webp",
+      "bg": "/icon/bg/2-Star.webp",
+      "icon": "/icon/material/112003.webp"
+    }
+  ],
+  "story": [
+    "\r\n他总会提起自己年轻时的冒险经历，\r\n都是令人生厌的老掉牙的夸张故事。\r\n但这把老旧的大剑似乎在无声地说，\r\n「是有点夸张没错。但当时我也在」"
+  ]
+}

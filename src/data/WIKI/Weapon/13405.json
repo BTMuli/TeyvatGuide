@@ -1,0 +1,61 @@
+{
+  "id": 13405,
+  "name": "决斗之枪",
+  "description": "血红色的锋利长枪，过去是某位角斗士无比珍视的宝物。枪芒上曾沾染了无数野兽与人的鲜血。",
+  "star": 4,
+  "weapon": "长柄武器",
+  "materials": [
+    {
+      "id": 114008,
+      "name": "凛风奔狼的怀乡",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114008.webp"
+    },
+    {
+      "id": 112022,
+      "name": "地脉的新芽",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112022.webp"
+    },
+    {
+      "id": 112040,
+      "name": "原素花蜜",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112040.webp"
+    }
+  ],
+  "affix": {
+    "Name": "角斗士",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "身边至少有2个敌人时，获得<color=#99FFFFFF>16%</color>攻击力提升与<color=#99FFFFFF>16%</color>防御力提升；身边的敌人少于2个时，获得<color=#99FFFFFF>24%</color>攻击力提升。"
+      },
+      {
+        "Level": 1,
+        "Description": "身边至少有2个敌人时，获得<color=#99FFFFFF>20%</color>攻击力提升与<color=#99FFFFFF>20%</color>防御力提升；身边的敌人少于2个时，获得<color=#99FFFFFF>30%</color>攻击力提升。"
+      },
+      {
+        "Level": 2,
+        "Description": "身边至少有2个敌人时，获得<color=#99FFFFFF>24%</color>攻击力提升与<color=#99FFFFFF>24%</color>防御力提升；身边的敌人少于2个时，获得<color=#99FFFFFF>36%</color>攻击力提升。"
+      },
+      {
+        "Level": 3,
+        "Description": "身边至少有2个敌人时，获得<color=#99FFFFFF>28%</color>攻击力提升与<color=#99FFFFFF>28%</color>防御力提升；身边的敌人少于2个时，获得<color=#99FFFFFF>42%</color>攻击力提升。"
+      },
+      {
+        "Level": 4,
+        "Description": "身边至少有2个敌人时，获得<color=#99FFFFFF>32%</color>攻击力提升与<color=#99FFFFFF>32%</color>防御力提升；身边的敌人少于2个时，获得<color=#99FFFFFF>48%</color>攻击力提升。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n历经百战的赤红长枪，是某位角斗士勇武的见证者。\r\n冰冷的枪芒常常涂满对手的血，迎接雷鸣般的喝彩。\r\n染血是角斗者的宿命，可望不可即的自由常悬枪尖。\r\n赤红钢铁穿透身躯的闷响，往往宣告着战斗的结束。\r\n\r\n在角斗奴的最后一场演出结束后，在撼动大地的喝彩声中，主人说：\r\n「约定的数量已经达成。你做得非常好，是配得上伟大荣誉的斗士」\r\n「这柄长枪是我个人给你的饯别礼。不过不如考虑一下继续战斗吧」\r\n「以自由之身，为自己的荣耀、为我的荣耀继续表演。你意下如何」\r\n许多年过去了，倒在枪下的战士与猛兽的数量早已不可知。\r\n常胜之名属于赤红的决斗之枪，战士的心仍属于他的少爷。\r\n\r\n在角斗士的最后一场演出结束时，在撼动大地的喝彩声中，\r\n长枪落入血尘，红发少女的炙热剑刃贯穿了老战士的心脏。\r\n怃然倒下时，他望向敬爱的主人，宠爱着自己的尊贵大人…\r\n「厄伯哈特，厄伯哈特少爷…最终的表演，您是否满意呢」\r\n但主子的座位空空如也，只有怫然离去时翻倒的酒杯银盘。\r\n\r\n「起初只是为了自己而战。为了自由沸腾战意与鲜血」\r\n「不知从何时开始，变成了为那位大人的荣誉而厮杀」\r\n「为了他人，才能毫无挂念地像愚钝的猛兽那样战斗」\r\n「为了族人，而不是为自己而战的你，一定也明白吧」\r\n"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "id": 12301,
+  "name": "铁影阔剑",
+  "description": "这把剑是著名的光之狮艾伦德林的佩剑的仿品。握紧它，感受传说中大英雄的力量吧！注意：幻想请适度。",
+  "star": 3,
+  "weapon": "双手剑",
+  "materials": [
+    {
+      "id": 114004,
+      "name": "高塔孤王的碎梦",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114004.webp"
+    },
+    {
+      "id": 112016,
+      "name": "黑晶号角",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112016.webp"
+    },
+    {
+      "id": 112040,
+      "name": "原素花蜜",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112040.webp"
+    }
+  ],
+  "affix": {
+    "Name": "不屈",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "生命值低于<color=#99FFFFFF>70%</color>时，重击不会轻易被打断，并提高<color=#99FFFFFF>30%</color>重击伤害。"
+      },
+      {
+        "Level": 1,
+        "Description": "生命值低于<color=#99FFFFFF>75%</color>时，重击不会轻易被打断，并提高<color=#99FFFFFF>35%</color>重击伤害。"
+      },
+      {
+        "Level": 2,
+        "Description": "生命值低于<color=#99FFFFFF>80%</color>时，重击不会轻易被打断，并提高<color=#99FFFFFF>40%</color>重击伤害。"
+      },
+      {
+        "Level": 3,
+        "Description": "生命值低于<color=#99FFFFFF>85%</color>时，重击不会轻易被打断，并提高<color=#99FFFFFF>45%</color>重击伤害。"
+      },
+      {
+        "Level": 4,
+        "Description": "生命值低于<color=#99FFFFFF>90%</color>时，重击不会轻易被打断，并提高<color=#99FFFFFF>50%</color>重击伤害。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n当幼小的艾伦德林手持北风骑士瑞文伍德大剑的仿品，向着童年幻想中的蒙德旧贵族冲锋时，他未曾想到自己日后将成为威名远扬的「西风的光之狮」。更不知道幼时与他交战的那位鲁斯坦会成为他的得力副手，并在服务蒙德人民二十三年后因公殉职。\r\n如今，「光之狮」所持大剑的仿品又落在了另一双年轻的手中。\r\n这伟大神秘的宿命传承，又将以何种方式继续？\r\n"
+  ]
+}

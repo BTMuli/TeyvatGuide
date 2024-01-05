@@ -1,0 +1,61 @@
+{
+  "id": 13302,
+  "name": "钺矛",
+  "description": "在矛上增加斧刃的兵器，有不俗的破坏力。是千岩军军官青睐的武器。",
+  "star": 3,
+  "weapon": "长柄武器",
+  "materials": [
+    {
+      "id": 114020,
+      "name": "雾海云间的转还",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114020.webp"
+    },
+    {
+      "id": 112028,
+      "name": "雾虚灯芯",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112028.webp"
+    },
+    {
+      "id": 112040,
+      "name": "原素花蜜",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112040.webp"
+    }
+  ],
+  "affix": {
+    "Name": "沉重",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "对普通攻击命中的敌人造成<color=#99FFFFFF>160%</color>攻击力的额外伤害。该效果每10秒只能触发一次。"
+      },
+      {
+        "Level": 1,
+        "Description": "对普通攻击命中的敌人造成<color=#99FFFFFF>200%</color>攻击力的额外伤害。该效果每10秒只能触发一次。"
+      },
+      {
+        "Level": 2,
+        "Description": "对普通攻击命中的敌人造成<color=#99FFFFFF>240%</color>攻击力的额外伤害。该效果每10秒只能触发一次。"
+      },
+      {
+        "Level": 3,
+        "Description": "对普通攻击命中的敌人造成<color=#99FFFFFF>280%</color>攻击力的额外伤害。该效果每10秒只能触发一次。"
+      },
+      {
+        "Level": 4,
+        "Description": "对普通攻击命中的敌人造成<color=#99FFFFFF>320%</color>攻击力的额外伤害。该效果每10秒只能触发一次。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n长矛在任何武人手里皆有相当的威力，这是因为「一寸长，一寸强」的道理。\r\n在长矛上增加斧刃，尽管笨重，但也增添了劈砍的功用，更加适宜复杂环境。\r\n这种长兵多为擅长武艺的力士所青睐，也正是千岩军军官荣誉和勇武的象征。\r\n虽说璃月港的今日天下太平，但在大街小巷，依然可见手持钺矛的勇士身影。\r\n\r\n千岩军的领队总是勇往直前，在队伍中充当险地的前锋与盾牌。\r\n护卫他们的不仅有忠诚的战友，更有多年演习不辍的精熟武艺。\r\n对于任何敢于靠近的敌人，第一线挥舞着钺矛的军官格外致命，\r\n而在坚如磐岩的士兵阵列中间，他们正是千岩之阵的真正核心。\r\n"
+  ]
+}

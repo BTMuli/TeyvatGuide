@@ -1,0 +1,61 @@
+{
+  "id": 15304,
+  "name": "弹弓",
+  "description": "其实就是一把弓。在无数的改进和实验中，发明出究极弹弓的人发现自己做了一把弓。",
+  "star": 3,
+  "weapon": "弓",
+  "materials": [
+    {
+      "id": 114016,
+      "name": "孤云寒林的神体",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114016.webp"
+    },
+    {
+      "id": 112031,
+      "name": "督察长祭刀",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112031.webp"
+    },
+    {
+      "id": 112007,
+      "name": "不祥的面具",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112007.webp"
+    }
+  ],
+  "affix": {
+    "Name": "弹弓",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "普通攻击与重击的箭矢若在发射后的0.3秒内击中敌人，则造成的伤害增加<color=#99FFFFFF>36%</color>；否则，造成的伤害下降10%。"
+      },
+      {
+        "Level": 1,
+        "Description": "普通攻击与重击的箭矢若在发射后的0.3秒内击中敌人，则造成的伤害增加<color=#99FFFFFF>42%</color>；否则，造成的伤害下降10%。"
+      },
+      {
+        "Level": 2,
+        "Description": "普通攻击与重击的箭矢若在发射后的0.3秒内击中敌人，则造成的伤害增加<color=#99FFFFFF>48%</color>；否则，造成的伤害下降10%。"
+      },
+      {
+        "Level": 3,
+        "Description": "普通攻击与重击的箭矢若在发射后的0.3秒内击中敌人，则造成的伤害增加<color=#99FFFFFF>54%</color>；否则，造成的伤害下降10%。"
+      },
+      {
+        "Level": 4,
+        "Description": "普通攻击与重击的箭矢若在发射后的0.3秒内击中敌人，则造成的伤害增加<color=#99FFFFFF>60%</color>；否则，造成的伤害下降10%。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n从前有一个想要改进弹弓射程和精准度的人。他发现：\r\n如果提高弹弓的力道以提升射程，那弹道就会偏离。\r\n于是他将弹弓的弹子改成木制的长杆，后面加上适应气流的鸟羽。\r\n为了新的弹子又将弹弓的把手去除，将弓弭加长反曲以加强拉力。\r\n最后他发现自己做了一把弓。\r\n"
+  ]
+}

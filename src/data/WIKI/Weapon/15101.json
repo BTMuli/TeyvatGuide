@@ -1,0 +1,36 @@
+{
+  "id": 15101,
+  "name": "猎弓",
+  "description": "猎手演奏的音乐由两种音色组成。弓弦颤动的声音，和羽箭破空的低啸。",
+  "star": 1,
+  "weapon": "弓",
+  "materials": [
+    {
+      "id": 114007,
+      "name": "凛风奔狼的断牙",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/114007.webp"
+    },
+    {
+      "id": 112021,
+      "name": "地脉的枯叶",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112021.webp"
+    },
+    {
+      "id": 112036,
+      "name": "藏银鸦印",
+      "star": 2,
+      "starIcon": "/icon/star/2.webp",
+      "bg": "/icon/bg/2-Star.webp",
+      "icon": "/icon/material/112036.webp"
+    }
+  ],
+  "story": [
+    "\r\n传说过去在蒙德，曾经有利用弓弦奏乐，\r\n或者说利用乐器的琴弦放箭的流浪乐手。\r\n但那只不过是遥远古代的民间传说罢了。"
+  ]
+}

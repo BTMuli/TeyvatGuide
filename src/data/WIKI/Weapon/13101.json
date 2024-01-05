@@ -1,0 +1,36 @@
+{
+  "id": 13101,
+  "name": "新手长枪",
+  "description": "笔直得像旗杆一般的长枪，挥舞起来颇具气势。足以应付大多数情况。",
+  "star": 1,
+  "weapon": "长柄武器",
+  "materials": [
+    {
+      "id": 114011,
+      "name": "狮牙斗士的镣铐",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/114011.webp"
+    },
+    {
+      "id": 112024,
+      "name": "混沌回路",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112024.webp"
+    },
+    {
+      "id": 112009,
+      "name": "封魔绘卷",
+      "star": 2,
+      "starIcon": "/icon/star/2.webp",
+      "bg": "/icon/bg/2-Star.webp",
+      "icon": "/icon/material/112009.webp"
+    }
+  ],
+  "story": [
+    "\r\n在过去的蒙德，长枪是被贵族禁止的兵器。\r\n表面上说，剑术才是高尚之人的武术修为，\r\n据说实际是因为长枪可以填补训练的差距，\r\n让缺乏兵器与练习的平民拥有抗争的武装。"
+  ]
+}

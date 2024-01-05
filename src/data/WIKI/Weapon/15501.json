@@ -1,0 +1,61 @@
+{
+  "id": 15501,
+  "name": "天空之翼",
+  "description": "象征风龙身为风之神眷属的大弓。释弦时的鸣声是风之神的偏爱，蕴含苍空与长风的力量。",
+  "star": 5,
+  "weapon": "弓",
+  "materials": [
+    {
+      "id": 114008,
+      "name": "凛风奔狼的怀乡",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114008.webp"
+    },
+    {
+      "id": 112022,
+      "name": "地脉的新芽",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112022.webp"
+    },
+    {
+      "id": 112013,
+      "name": "历战的箭簇",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112013.webp"
+    }
+  ],
+  "affix": {
+    "Name": "回响长天的诗歌",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "暴击伤害提高<color=#99FFFFFF>20%</color>；攻击命中时有<color=#99FFFFFF>60%</color>概率造成125%攻击力的小范围物理伤害，该效果每<color=#99FFFFFF>4</color>秒只能触发一次。"
+      },
+      {
+        "Level": 1,
+        "Description": "暴击伤害提高<color=#99FFFFFF>25%</color>；攻击命中时有<color=#99FFFFFF>70%</color>概率造成125%攻击力的小范围物理伤害，该效果每<color=#99FFFFFF>3.5</color>秒只能触发一次。"
+      },
+      {
+        "Level": 2,
+        "Description": "暴击伤害提高<color=#99FFFFFF>30%</color>；攻击命中时有<color=#99FFFFFF>80%</color>概率造成125%攻击力的小范围物理伤害，该效果每<color=#99FFFFFF>3</color>秒只能触发一次。"
+      },
+      {
+        "Level": 3,
+        "Description": "暴击伤害提高<color=#99FFFFFF>35%</color>；攻击命中时有<color=#99FFFFFF>90%</color>概率造成125%攻击力的小范围物理伤害，该效果每<color=#99FFFFFF>2.5</color>秒只能触发一次。"
+      },
+      {
+        "Level": 4,
+        "Description": "暴击伤害提高<color=#99FFFFFF>40%</color>；攻击命中时有<color=#99FFFFFF>100%</color>概率造成125%攻击力的小范围物理伤害，该效果每<color=#99FFFFFF>2</color>秒只能触发一次。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n通透高天之琴。\r\n据说，如今的风与人们的心中，仍回响着无比清澈的琴声。\r\n传说深邃古国的魔龙来到风之国，是因为憧憬这样的乐声。\r\n\r\n在古时，风之神巴巴托斯轻抚竖琴，唤来纯净的千风与歌。\r\n为不羁的风与歌所沉醉，巨龙特瓦林降落大地，向他效忠。\r\n巴巴托斯为结交新的伙伴而喜悦，便委托他守护蒙德众生。\r\n于是，流浪的风神与风之龙，在友谊中成就了蒙德的黎明。\r\n\r\n在过去，在战斗的最后，是颤动的琴声让魔龙停止了攻击，\r\n高天的风之龙因此得到了一瞬的机会，终结了魔龙的流毒。\r\n\r\n千风流转的恶战后，高天之龙终从漫长的长眠醒转。\r\n眼前不见往日眷主，耳中却灌满了深渊传道者的毒。\r\n那是视而不见的痛苦，是听而不闻的摧残。\r\n毁灭一切的悲伤，压垮了身染剧毒的风龙。\r\n\r\n风龙向自己曾经守护的一切发泄苦痛，\r\n也对曾效忠的风之神发出恶毒的控诉：\r\n控诉他对苦难的漠然，控诉他的无心，\r\n诅咒他身为神主，却无情背叛了眷属。\r\n\r\n但悲愤的眷属并不明了，风神依旧为拯救他而奔走。\r\n仇怨压倒了怀念之情，象征主神的竖琴却仍在思慕。\r\n百年的误会终将消除。\r\n它终重又听见他的歌。\r\n"
+  ]
+}

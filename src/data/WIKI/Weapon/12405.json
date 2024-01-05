@@ -1,0 +1,61 @@
+{
+  "id": 12405,
+  "name": "雨裁",
+  "description": "散发着黯淡荧光的无锋大剑，纯粹以气势和力量碾碎敌人。",
+  "star": 4,
+  "weapon": "双手剑",
+  "materials": [
+    {
+      "id": 114020,
+      "name": "雾海云间的转还",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114020.webp"
+    },
+    {
+      "id": 112028,
+      "name": "雾虚灯芯",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112028.webp"
+    },
+    {
+      "id": 112010,
+      "name": "禁咒绘卷",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112010.webp"
+    }
+  ],
+  "affix": {
+    "Name": "止水息雷",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "对处于水元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>20%</color>。"
+      },
+      {
+        "Level": 1,
+        "Description": "对处于水元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>24%</color>。"
+      },
+      {
+        "Level": 2,
+        "Description": "对处于水元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>28%</color>。"
+      },
+      {
+        "Level": 3,
+        "Description": "对处于水元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>32%</color>。"
+      },
+      {
+        "Level": 4,
+        "Description": "对处于水元素或雷元素影响下的敌人，造成的伤害提高<color=#99FFFFFF>36%</color>。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n散发着黯淡荧光的无锋重剑。在许多年前，\r\n它的幽光被山野贼匪称为「幽冥的信标」。\r\n只要瞥见这样的光辉就绝对无法踏上归途。\r\n只要瞥见这样的光辉就要做好殒命的觉悟。\r\n\r\n「游离物外无重量，裁雨者雨，刺明者明」\r\n「动如龙蛇捉不住，青眼为剑，侧目为枪」\r\n\r\n雨裁原本无名，名字是敬仰其主的人为它取的。\r\n无名剑的最初与最后主人，是名唤古华的游侠。\r\n\r\n传说他是仙人。在古华的时代，贼匪不敢妄动，郊野太平如市。\r\n据称，在古华行侠之旅的最末，在华光紫气当中，他化作星宿。\r\n\r\n曾蒙古华之恩的人以其之名创立了门派。但派阀最终总会没落。\r\n"
+  ]
+}

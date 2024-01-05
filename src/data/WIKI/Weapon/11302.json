@@ -1,0 +1,61 @@
+{
+  "id": 11302,
+  "name": "黎明神剑",
+  "description": "一把曾经耀若朝阳的宝剑，掌握它的人会获得「自我感觉良好」的力量加持。剑身上的发光材料已经褪去。",
+  "star": 3,
+  "weapon": "单手剑",
+  "materials": [
+    {
+      "id": 114008,
+      "name": "凛风奔狼的怀乡",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114008.webp"
+    },
+    {
+      "id": 112022,
+      "name": "地脉的新芽",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112022.webp"
+    },
+    {
+      "id": 112004,
+      "name": "史莱姆原浆",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112004.webp"
+    }
+  ],
+  "affix": {
+    "Name": "激励",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "生命值高于90%时，暴击率提升<color=#99FFFFFF>14%</color>。"
+      },
+      {
+        "Level": 1,
+        "Description": "生命值高于90%时，暴击率提升<color=#99FFFFFF>17.5%</color>。"
+      },
+      {
+        "Level": 2,
+        "Description": "生命值高于90%时，暴击率提升<color=#99FFFFFF>21%</color>。"
+      },
+      {
+        "Level": 3,
+        "Description": "生命值高于90%时，暴击率提升<color=#99FFFFFF>24.5%</color>。"
+      },
+      {
+        "Level": 4,
+        "Description": "生命值高于90%时，暴击率提升<color=#99FFFFFF>28%</color>。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n这把剑拥有一个更响亮的全名：\r\n「斩开黎明指向胜利的拂晓神剑」。\r\n但在战场上，仅有一人因它倒下：\r\n是夜，他拔出宝剑高喊胜利之名，\r\n刹时漆黑的夜幕被映得明如白昼。\r\n因为闪亮，此公成了显眼的目标，\r\n如金属引雷般招来了如雨的箭矢。\r\n"
+  ]
+}

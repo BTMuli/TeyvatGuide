@@ -1,0 +1,36 @@
+{
+  "id": 11201,
+  "name": "银剑",
+  "description": "能退魔的银剑。大家都知道，其实用料是银合金而不是纯银。",
+  "star": 2,
+  "weapon": "单手剑",
+  "materials": [
+    {
+      "id": 114003,
+      "name": "高塔孤王的断片",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/114003.webp"
+    },
+    {
+      "id": 112015,
+      "name": "黑铜号角",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112015.webp"
+    },
+    {
+      "id": 112012,
+      "name": "锐利的箭簇",
+      "star": 2,
+      "starIcon": "/icon/star/2.webp",
+      "bg": "/icon/bg/2-Star.webp",
+      "icon": "/icon/material/112012.webp"
+    }
+  ],
+  "story": [
+    "\r\n与民间信仰相悖，银其实不具有退魔的功效。\r\n心无杂念的执剑旅人，才是斩妖除魔的关键。"
+  ]
+}

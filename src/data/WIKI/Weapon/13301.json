@@ -1,0 +1,61 @@
+{
+  "id": 13301,
+  "name": "白缨枪",
+  "description": "千岩军士兵的制式装备，枪身牢靠，枪尖锋锐，是无比可靠的武器。",
+  "star": 3,
+  "weapon": "长柄武器",
+  "materials": [
+    {
+      "id": 114016,
+      "name": "孤云寒林的神体",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114016.webp"
+    },
+    {
+      "id": 112031,
+      "name": "督察长祭刀",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112031.webp"
+    },
+    {
+      "id": 112034,
+      "name": "尉官的徽记",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112034.webp"
+    }
+  ],
+  "affix": {
+    "Name": "锐利",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>24%</color>。"
+      },
+      {
+        "Level": 1,
+        "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>30%</color>。"
+      },
+      {
+        "Level": 2,
+        "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>36%</color>。"
+      },
+      {
+        "Level": 3,
+        "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>42%</color>。"
+      },
+      {
+        "Level": 4,
+        "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>48%</color>。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n千岩军士兵素以擅使长兵闻名天下，\r\n其所持白缨长枪由黑岩厂批量生产，\r\n这武器历经了千百年来无数战火的考验，\r\n白缨纵使在硝烟中污损，仍旧傲然飘扬。\r\n\r\n传说军中曾经有枪法精绝的高手，\r\n能在千军之中刺上将而不沾白缨。\r\n「但那故事属于持枪的豪侠」\r\n「他的兵器本身却并不出奇」\r\n老铁匠在学徒脑袋上拍了一掌，\r\n要他给新打造的长枪配上白缨。\r\n"
+  ]
+}

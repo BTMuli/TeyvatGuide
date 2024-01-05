@@ -1,0 +1,61 @@
+{
+  "id": 13415,
+  "name": "「渔获」",
+  "description": "在久远的过去，曾经闻名稻妻的大盗爱用的枪。",
+  "star": 4,
+  "weapon": "长柄武器",
+  "materials": [
+    {
+      "id": 114036,
+      "name": "今昔剧画之鬼人",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114036.webp"
+    },
+    {
+      "id": 112049,
+      "name": "混沌真眼",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112049.webp"
+    },
+    {
+      "id": 112055,
+      "name": "浮游晶化核",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112055.webp"
+    }
+  ],
+  "affix": {
+    "Name": "船歌",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "元素爆发造成的伤害提升<color=#99FFFFFF>16%</color>，元素爆发的暴击率提升<color=#99FFFFFF>6%</color>。"
+      },
+      {
+        "Level": 1,
+        "Description": "元素爆发造成的伤害提升<color=#99FFFFFF>20%</color>，元素爆发的暴击率提升<color=#99FFFFFF>7.5%</color>。"
+      },
+      {
+        "Level": 2,
+        "Description": "元素爆发造成的伤害提升<color=#99FFFFFF>24%</color>，元素爆发的暴击率提升<color=#99FFFFFF>9%</color>。"
+      },
+      {
+        "Level": 3,
+        "Description": "元素爆发造成的伤害提升<color=#99FFFFFF>28%</color>，元素爆发的暴击率提升<color=#99FFFFFF>10.5%</color>。"
+      },
+      {
+        "Level": 4,
+        "Description": "元素爆发造成的伤害提升<color=#99FFFFFF>32%</color>，元素爆发的暴击率提升<color=#99FFFFFF>12%</color>。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n过去稻妻有名的大盗，爱用的倒钩刺枪。\r\n本是猎鱼的铦枪，但在战斗中也很趁手。\r\n据说连执剑的魔偶，都曾被他刺穿带走。\r\n\r\n「哈哈，以前的我曾是这『清籁丸』的主人。」\r\n「领舰十数艘，以清籁的不死之鬼之名驰骋。」\r\n「如今的我，就像漂流在海上的树叶一般哪。」\r\n「如果不是多亏了蛇目和那些海岛上的弃民，」\r\n「就连再次起帆，踏上故乡的土地都做不到。」\r\n「但如今，我的清籁竟然变成了这番模样哪。」\r\n「稻妻列岛中，也没有我所能容身的地方了。」\r\n「连神社那个爱瞎操心的老巫女，都不见了…」\r\n\r\n曾被称为赤穗百目鬼的贼人感慨道。接着他说…\r\n「蛇目老弟！我现在是世界上最自由的人了！」\r\n「巫女阿姨！你原本不是说想去看看世界吗？」\r\n「像你念叨的惟神和昆布丸，去过什么地方，」\r\n「就由我赤穗百目鬼左卫门，替你去看看吧！」\r\n「世界尽头究竟长什么样子，就让我去见识！」\r\n\r\n「在所有航道的终点，我们一定会再见面的！」\r\n「到时候，就轮到我对你唠叨远国的故事啦！」"
+  ]
+}

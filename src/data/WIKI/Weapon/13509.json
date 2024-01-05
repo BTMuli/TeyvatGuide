@@ -1,0 +1,61 @@
+{
+  "id": 13509,
+  "name": "薙草之稻光",
+  "description": "用于「斩草」的薙刀。对向此物之军势，也会如苇草般倒下吧…",
+  "star": 5,
+  "weapon": "长柄武器",
+  "materials": [
+    {
+      "id": 114036,
+      "name": "今昔剧画之鬼人",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114036.webp"
+    },
+    {
+      "id": 112049,
+      "name": "混沌真眼",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112049.webp"
+    },
+    {
+      "id": 112046,
+      "name": "名刀镡",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112046.webp"
+    }
+  ],
+  "affix": {
+    "Name": "非时之梦·常世灶食",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "攻击力获得提升，提升程度相当于元素充能效率超出100%部分的<color=#99FFFFFF>28%</color>，至多通过这种方式提升<color=#99FFFFFF>80%</color>。施放元素爆发后的12秒内，元素充能效率提升<color=#99FFFFFF>30%</color>。"
+      },
+      {
+        "Level": 1,
+        "Description": "攻击力获得提升，提升程度相当于元素充能效率超出100%部分的<color=#99FFFFFF>35%</color>，至多通过这种方式提升<color=#99FFFFFF>90%</color>。施放元素爆发后的12秒内，元素充能效率提升<color=#99FFFFFF>35%</color>。"
+      },
+      {
+        "Level": 2,
+        "Description": "攻击力获得提升，提升程度相当于元素充能效率超出100%部分的<color=#99FFFFFF>42%</color>，至多通过这种方式提升<color=#99FFFFFF>100%</color>。施放元素爆发后的12秒内，元素充能效率提升<color=#99FFFFFF>40%</color>。"
+      },
+      {
+        "Level": 3,
+        "Description": "攻击力获得提升，提升程度相当于元素充能效率超出100%部分的<color=#99FFFFFF>49%</color>，至多通过这种方式提升<color=#99FFFFFF>110%</color>。施放元素爆发后的12秒内，元素充能效率提升<color=#99FFFFFF>45%</color>。"
+      },
+      {
+        "Level": 4,
+        "Description": "攻击力获得提升，提升程度相当于元素充能效率超出100%部分的<color=#99FFFFFF>56%</color>，至多通过这种方式提升<color=#99FFFFFF>120%</color>。施放元素爆发后的12秒内，元素充能效率提升<color=#99FFFFFF>50%</color>。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n所谓薙刀，乃是斩除芜杂之利器。\r\n秉薙刀之人，意在守护恒常之道。\r\n\r\n当高踞雷云之上者俯视她所倾心的凡世，\r\n所见无不浅薄的争端，闪灭的执欲泡影…\r\n争夺源于无谓爱执与狂欲，乃恒世之敌。\r\n搅扰不变恒世的杂草，将交由雷光殛灭。\r\n\r\n「那么——在███的瞳仁里，又会映出怎样的永恒呢？」\r\n依然清晰静滞的回想中，樱树下把酒对饮的那位神人问道，\r\n\r\n真是无谓的问题啊。\r\n虽然彼时给出的答案因为酒已经不记得了，\r\n但如今孤孑者在无数次追忆中得到了答案。\r\n甘美之实需要疏果，绀染之物需要末摘花。\r\n在永恒的常寂光土，任何芜杂都不应容赦。\r\n\r\n「尽管如此呀，尽管如此…」\r\n「以威权刃光薙除蔓生的执妄，消灭梦想从容生灭的可能…」\r\n「如此不容争端、无所得失的寂静之世，将是失忆的迷途。」\r\n在永恒的心脏之中，昔日友人如是丁宁，绯樱气息恍如今日。\r\n\r\n但我永远不会忘记你。正如我不会忘记千百年来逝去的一切。\r\n毕竟哪…\r\n\r\n毕竟目睹了深黑的湮灭将珍重之人淹没的景象，\r\n又如何不视理不尽的生灭、无解的羁缘为死仇。\r\n既然谁人都无法逆转现世之无常、绪绝的独乐，\r\n那就将心中的常世净土带到她所珍爱的国度吧。"
+  ]
+}

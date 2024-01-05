@@ -1,0 +1,61 @@
+{
+  "id": 11406,
+  "name": "试作斩岩",
+  "description": "黑岩厂中秘藏的古老长剑。可挥砍断岩而刃不卷。",
+  "star": 4,
+  "weapon": "单手剑",
+  "materials": [
+    {
+      "id": 114020,
+      "name": "雾海云间的转还",
+      "star": 5,
+      "starIcon": "/icon/star/5.webp",
+      "bg": "/icon/bg/5-Star.webp",
+      "icon": "/icon/material/114020.webp"
+    },
+    {
+      "id": 112028,
+      "name": "雾虚灯芯",
+      "star": 4,
+      "starIcon": "/icon/star/4.webp",
+      "bg": "/icon/bg/4-Star.webp",
+      "icon": "/icon/material/112028.webp"
+    },
+    {
+      "id": 112034,
+      "name": "尉官的徽记",
+      "star": 3,
+      "starIcon": "/icon/star/3.webp",
+      "bg": "/icon/bg/3-Star.webp",
+      "icon": "/icon/material/112034.webp"
+    }
+  ],
+  "affix": {
+    "Name": "碎石",
+    "Descriptions": [
+      {
+        "Level": 0,
+        "Description": "普通攻击或重击命中时，攻击力和防御力提高<color=#99FFFFFF>4%</color>，持续6秒，最多叠加4层。该效果每0.3秒只能触发一次。"
+      },
+      {
+        "Level": 1,
+        "Description": "普通攻击或重击命中时，攻击力和防御力提高<color=#99FFFFFF>5%</color>，持续6秒，最多叠加4层。该效果每0.3秒只能触发一次。"
+      },
+      {
+        "Level": 2,
+        "Description": "普通攻击或重击命中时，攻击力和防御力提高<color=#99FFFFFF>6%</color>，持续6秒，最多叠加4层。该效果每0.3秒只能触发一次。"
+      },
+      {
+        "Level": 3,
+        "Description": "普通攻击或重击命中时，攻击力和防御力提高<color=#99FFFFFF>7%</color>，持续6秒，最多叠加4层。该效果每0.3秒只能触发一次。"
+      },
+      {
+        "Level": 4,
+        "Description": "普通攻击或重击命中时，攻击力和防御力提高<color=#99FFFFFF>8%</color>，持续6秒，最多叠加4层。该效果每0.3秒只能触发一次。"
+      }
+    ]
+  },
+  "story": [
+    "\r\n产自璃月兵工厂的古老剑坯。批号不明，相关典籍上也未记录它的成品时间。\r\n古旧剑身以阴刻的流云纹为装饰，舞动时，剑中隐有金光析出。\r\n\r\n相传，因技艺一度遭遇瓶颈，工人们不得不研究新的制作思路。\r\n锻造世家云氏的大掌柜云辉便与名匠寒武协商，汇聚万匠之巧能，绘制出一套名唤「试作」的图谱。\r\n依照图谱制作的第一把单手剑，甫一成型已有隆隆剑吟。\r\n\r\n于天衡山试剑时，寒武不慎将之落在地上。\r\n剑气顺应而出，如滚滚飓风，把磐石断开一条长逾半尺的裂缝。\r\n寒武深以为天意，为这柄剑取名「斩岩」。\r\n\r\n一剑动山河，万锋藏于刃。\r\n斩岩如断水的它，是日后璃月刀剑的原本。\r\n"
+  ]
+}
