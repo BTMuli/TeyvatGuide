@@ -1,39 +1,72 @@
 <template>
+  <!-- todo 排布优化  -->
   <div class="cards-grid">
     <div v-for="item in cardsInfo" :key="item.id" class="card-box" @click="toOuter(item)">
-      <TibWikiAvatar size="128px" :model-value="item" />
+      <TItemBox :model-value="getBox(item)" />
     </div>
-    <v-snackbar v-model="snackbar" timeout="1500" color="error"> 该角色暂无详情 </v-snackbar>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from "vue";
+import { computed } from "vue";
 
-import TibWikiAvatar from "../../components/itembox/tib-wiki-avatar.vue";
+import showConfirm from "../../components/func/confirm";
+import showSnackbar from "../../components/func/snackbar";
+import TItemBox, { TItemBoxData } from "../../components/main/t-itembox.vue";
 import { AppCharacterData } from "../../data";
 import Mys from "../../plugins/Mys";
-import { useAppStore } from "../../store/modules/app";
 import { createTGWindow, createWiki } from "../../utils/TGWindow";
 
-// snackbar
-const snackbar = ref(false);
-// data
 const cardsInfo = computed(() => AppCharacterData);
-const appStore = useAppStore();
 
-function toOuter(item: TGApp.App.Character.WikiBriefInfo): void {
-  // 如果是调试环境，打开 wiki 页面
-  if (appStore.devMode) {
+async function toOuter(item: TGApp.App.Character.WikiBriefInfo): Promise<void> {
+  const confirm = await showConfirm({
+    title: "是否打开 Wiki 页面？",
+    text: "取消则跳转至观测枢",
+  });
+  if (confirm === undefined) {
+    showSnackbar({
+      text: "已取消",
+      color: "cancel",
+    });
+    return;
+  }
+  if (confirm) {
     createWiki("Character", item.id.toString());
     return;
   }
   if (item.contentId === 0) {
-    snackbar.value = true;
+    showSnackbar({
+      text: "该角色暂无观测枢页面，将跳转至 Wiki 页面",
+      color: "warn",
+    });
+    setTimeout(() => {
+      createWiki("Character", item.id.toString());
+    }, 1000);
     return;
   }
   const url = Mys.Api.Obc.replace("{contentId}", item.contentId.toString());
   createTGWindow(url, "Sub_window", `Content_${item.contentId} ${item.name}`, 1200, 800, true);
+}
+
+function getBox(item: TGApp.App.Character.WikiBriefInfo): TItemBoxData {
+  let res: TItemBoxData = {
+    bg: `/icon/bg/${item.star}-Star.webp`,
+    icon: `/WIKI/character/${item.id}.webp`,
+    size: "128px",
+    height: "128px",
+    display: "inner",
+    lt: `/icon/weapon/${item.weapon}.webp`,
+    ltSize: "40px",
+    innerHeight: 30,
+    innerText: item.name,
+    clickable: true,
+  };
+  if (item.id !== 10000005 && item.id !== 10000007) {
+    res.lt = `/icon/element/${item.element}元素.webp`;
+    res.innerIcon = `/icon/weapon/${item.weapon}.webp`;
+  }
+  return res;
 }
 </script>
 <style scoped>
