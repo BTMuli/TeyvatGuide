@@ -48,7 +48,7 @@ function transColor(color: string): string {
     case "warn":
       return "#ecb349";
     case "cancel":
-      return "#cdcbc4";
+      return "#2C313C";
     default:
       return color;
   }
