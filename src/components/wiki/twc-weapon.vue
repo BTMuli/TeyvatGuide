@@ -59,9 +59,9 @@ interface TwcWeaponProps {
   item: TGApp.App.Weapon.WikiBriefInfo;
 }
 
-interface TwcWeaponEmits {
-  error: (err: Error) => void;
-}
+type TwcWeaponEmits = {
+  (e: "error"): void;
+};
 
 const props = defineProps<TwcWeaponProps>();
 const emits = defineEmits<TwcWeaponEmits>();
@@ -85,7 +85,7 @@ const selectItems = ref<number[]>([]);
 
 async function loadData(): Promise<void> {
   try {
-    const res = await getWikiData("Weapon", props.item.id);
+    const res = await getWikiData("Weapon", props.item.id.toString());
     if (res === undefined) return;
     data.value = res.default;
     selectItems.value = data.value?.affix.Descriptions.map((item) => item.Level) ?? [];
@@ -94,20 +94,16 @@ async function loadData(): Promise<void> {
       text: `未获取到武器 ${props.item.name} 的 Wiki 数据`,
       color: "error",
     });
-    emits("error", error);
+    emits("error");
   }
 }
 
 watch(
   () => props.item,
-  async () => {
-    await loadData();
-  },
+  async () => await loadData(),
 );
 
-onMounted(async () => {
-  await loadData();
-});
+onMounted(async () => await loadData());
 </script>
 <style lang="css" scoped>
 .tww-box {
