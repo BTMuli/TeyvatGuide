@@ -26,7 +26,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onBeforeMount, onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 import { parseHtmlText } from "../../utils/toolFunc";
 

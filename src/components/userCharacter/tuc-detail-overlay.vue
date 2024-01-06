@@ -122,6 +122,11 @@ interface ToUcDetailData {
   bgFit: "contain" | "cover";
 }
 
+interface ToUcDetailSelect {
+  type: "命座" | "武器" | "圣遗物";
+  pos: number;
+}
+
 const emits = defineEmits<ToUcDetailEmits>();
 const props = defineProps<ToUcDetailProps>();
 const visible = computed({
@@ -148,8 +153,8 @@ const selectWeapon = ref<TGApp.Sqlite.Character.RoleWeapon>(<TGApp.Sqlite.Charac
 const selectRelic = ref<TGApp.Sqlite.Character.RoleReliquary>(
   <TGApp.Sqlite.Character.RoleReliquary>{},
 );
-const selected = ref({
-  type: "武器" || "命之座" || "圣遗物",
+const selected = ref<ToUcDetailSelect>({
+  type: "武器",
   pos: 0,
 });
 
