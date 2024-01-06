@@ -23,7 +23,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 import { parseHtmlText } from "../../utils/toolFunc";
 
@@ -35,10 +35,15 @@ const props = defineProps<TwcSkillsProps>();
 const tab = ref<string>();
 const tabValues = ref<Array<{ name: string; icon: string }>>([]);
 
-onMounted(() => {
+function loadData(): void {
+  tabValues.value = [];
   props.data.map((i) => tabValues.value.push({ name: i.Name, icon: i.Icon }));
   tab.value = tabValues.value[0].name;
-});
+}
+
+onMounted(loadData);
+
+watch(() => props.data, loadData);
 </script>
 <style lang="css" scoped>
 .twc-skills-box {

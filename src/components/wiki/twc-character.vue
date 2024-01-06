@@ -100,9 +100,10 @@ interface TwcCharacterProps {
   item: TGApp.App.Character.WikiBriefInfo;
 }
 
-interface TwcCharacterEmits {
-  error: (err: Error) => void;
-}
+type TwcCharacterEmits = {
+  (e: "update:modelValue", value: TGApp.App.Character.WikiBriefInfo): void;
+  (e: "error"): void;
+};
 
 const props = defineProps<TwcCharacterProps>();
 const emits = defineEmits<TwcCharacterEmits>();
@@ -126,7 +127,7 @@ const box = computed(() => {
 
 async function loadData(): Promise<void> {
   try {
-    const res = await getWikiData("Character", props.item.id);
+    const res = await getWikiData("Character", props.item.id.toString());
     if (res === undefined) return;
     data.value = res.default;
     showSnackbar({
@@ -139,7 +140,7 @@ async function loadData(): Promise<void> {
       color: "error",
     });
     console.error(error);
-    emits("error", error);
+    emits("error");
   }
 }
 

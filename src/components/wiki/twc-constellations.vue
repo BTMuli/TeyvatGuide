@@ -2,8 +2,8 @@
   <div class="twc-constellations-box">
     <v-tabs v-model="tab">
       <v-tab
-        v-for="item in props.data"
-        :key="item.Id"
+        v-for="(item, index) in props.data"
+        :key="index"
         :value="item.Name"
         :title="item.Name"
         class="twc-constellation-tab"
@@ -16,8 +16,8 @@
     <v-window v-model="tab">
       <v-window-item
         :value="item.Name"
-        v-for="item in props.data"
-        :key="item.Id"
+        v-for="(item, index) in props.data"
+        :key="index"
         class="twc-constellation-desc"
       >
         <span v-html="parseHtmlText(item.Description)"></span>
@@ -26,7 +26,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { onBeforeMount, onMounted, ref, watch } from "vue";
 
 import { parseHtmlText } from "../../utils/toolFunc";
 
@@ -36,6 +36,14 @@ interface TwcConstellationProps {
 
 const props = defineProps<TwcConstellationProps>();
 const tab = ref<string>();
+
+function loadData(): void {
+  tab.value = props.data[0].Name;
+}
+
+onMounted(loadData);
+
+watch(() => props.data, loadData);
 </script>
 <style lang="css" scoped>
 .twc-constellations-box {
