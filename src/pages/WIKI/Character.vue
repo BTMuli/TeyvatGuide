@@ -1,79 +1,94 @@
 <template>
-  <!-- todo 排布优化  -->
-  <div class="cards-grid">
-    <div v-for="item in cardsInfo" :key="item.id" class="card-box" @click="toOuter(item)">
-      <TItemBox :model-value="getBox(item)" />
+  <div class="wc-box">
+    <div class="wc-list">
+      <TwcListItem
+        v-for="item in cardsInfo"
+        v-model:cur-item="curItem"
+        :key="item.id"
+        :data="item"
+        @click="switchC(item)"
+        mode="character"
+      />
+    </div>
+    <div class="wc-detail">
+      <TwcCharacter :item="curItem" @error="toOuter(curItem)" />
     </div>
   </div>
 </template>
-
 <script lang="ts" setup>
-import { computed } from "vue";
+import { onBeforeMount, ref } from "vue";
 
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
-import TItemBox, { TItemBoxData } from "../../components/main/t-itembox.vue";
+import TwcCharacter from "../../components/wiki/twc-character.vue";
+import TwcListItem from "../../components/wiki/twc-list-item.vue";
 import { AppCharacterData } from "../../data";
 import Mys from "../../plugins/Mys";
-import { createTGWindow, createWiki } from "../../utils/TGWindow";
+import { createTGWindow } from "../../utils/TGWindow";
 
-const cardsInfo = computed(() => AppCharacterData);
+const cardsInfo = AppCharacterData;
+const curItem = ref<TGApp.App.Character.WikiBriefInfo>();
 
-async function toOuter(item: TGApp.App.Character.WikiBriefInfo): Promise<void> {
+onBeforeMount(() => {
+  curItem.value = cardsInfo[0];
+});
+
+async function switchC(item: TGApp.App.Character.WikiBriefInfo): Promise<void> {
+  if (item.id === 10000005 || item.id === 10000007) {
+    await toOuter(item);
+    return;
+  }
+  curItem.value = item;
+}
+
+async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> {
+  if (!item) return;
+  if (item.contentId === 0) {
+    showSnackbar({
+      text: `角色 ${item.name} 暂无观测枢页面`,
+      color: "warn",
+    });
+    return;
+  }
   const confirm = await showConfirm({
-    title: "是否打开 Wiki 页面？",
-    text: "取消则跳转至观测枢",
+    title: `角色 ${item.name} 暂无数据`,
+    text: "是否打开观测枢页面？",
   });
-  if (confirm === undefined) {
+  if (!confirm) {
     showSnackbar({
       text: "已取消",
       color: "cancel",
     });
     return;
   }
-  if (confirm) {
-    createWiki("Character", item.id.toString());
-    return;
-  }
-  if (item.contentId === 0) {
-    showSnackbar({
-      text: "该角色暂无观测枢页面，将跳转至 Wiki 页面",
-      color: "warn",
-    });
-    setTimeout(() => {
-      createWiki("Character", item.id.toString());
-    }, 1000);
-    return;
-  }
   const url = Mys.Api.Obc.replace("{contentId}", item.contentId.toString());
   createTGWindow(url, "Sub_window", `Content_${item.contentId} ${item.name}`, 1200, 800, true);
 }
-
-function getBox(item: TGApp.App.Character.WikiBriefInfo): TItemBoxData {
-  let res: TItemBoxData = {
-    bg: `/icon/bg/${item.star}-Star.webp`,
-    icon: `/WIKI/character/${item.id}.webp`,
-    size: "128px",
-    height: "128px",
-    display: "inner",
-    lt: `/icon/weapon/${item.weapon}.webp`,
-    ltSize: "40px",
-    innerHeight: 30,
-    innerText: item.name,
-    clickable: true,
-  };
-  if (item.id !== 10000005 && item.id !== 10000007) {
-    res.lt = `/icon/element/${item.element}元素.webp`;
-    res.innerIcon = `/icon/weapon/${item.weapon}.webp`;
-  }
-  return res;
-}
 </script>
 <style scoped>
-.cards-grid {
+.wc-box {
+  position: relative;
+  display: flex;
+  max-height: calc(100vh - 40px);
+  column-gap: 10px;
+}
+
+.wc-list {
   display: grid;
-  padding: 20px;
-  grid-gap: 20px;
-  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  width: 500px;
+  max-height: 100%;
+  padding-right: 10px;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(100px, 1fr));
+  overflow-y: auto;
+}
+
+.wc-detail {
+  max-height: 100%;
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px var(--common-shadow-2);
+  overflow-y: auto;
 }
 </style>

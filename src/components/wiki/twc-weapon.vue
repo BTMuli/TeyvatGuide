@@ -1,0 +1,163 @@
+<template>
+  <div class="tww-box" v-if="data !== undefined">
+    <div class="tww-brief">
+      <TItembox :model-value="box" />
+      <div class="tww-brief-info">
+        <div class="tww-brief-title">{{ data.name }}</div>
+        <v-rating
+          class="tww-brief-rating"
+          v-model="select"
+          :length="selectItems.length"
+          :size="24"
+          dense
+        />
+        <div class="tww-brief-desc">{{ data.description }}</div>
+      </div>
+    </div>
+    <TwcMaterials :data="data.materials" />
+    <v-expansion-panels class="tww-affix">
+      <v-expansion-panel expand-icon="mdi-menu-down">
+        <template #title>
+          <span class="tww-text-title">{{ data.affix.Name }}-精炼 {{ select }}</span>
+        </template>
+        <template #text>
+          <span
+            class="tww-text-content"
+            v-html="parseHtmlText(data.affix.Descriptions[select - 1].Description)"
+          />
+        </template>
+      </v-expansion-panel>
+    </v-expansion-panels>
+    <v-expansion-panels class="tww-story">
+      <v-expansion-panel
+        expand-icon="mdi-menu-down"
+        v-for="(story, index) in data.story"
+        :key="index"
+      >
+        <template #title>
+          <span class="tww-text-title">
+            {{ data.story.length > 1 ? `故事 ${index + 1}` : "故事" }}
+          </span>
+        </template>
+        <template #text>
+          <span class="tww-text-content">{{ parseHtmlText(story) }}</span>
+        </template>
+      </v-expansion-panel>
+    </v-expansion-panels>
+  </div>
+</template>
+<script lang="ts" setup>
+import { computed, onMounted, ref, watch } from "vue";
+
+import TwcMaterials from "./twc-materials.vue";
+import { getWikiData } from "../../data";
+import { parseHtmlText } from "../../utils/toolFunc";
+import showSnackbar from "../func/snackbar";
+import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
+
+interface TwcWeaponProps {
+  item: TGApp.App.Weapon.WikiBriefInfo;
+}
+
+interface TwcWeaponEmits {
+  error: (err: Error) => void;
+}
+
+const props = defineProps<TwcWeaponProps>();
+const emits = defineEmits<TwcWeaponEmits>();
+
+const data = ref<TGApp.App.Weapon.WikiItem>();
+const box = computed(() => {
+  return <TItemBoxData>{
+    bg: `/icon/bg/${data.value?.star}-Star.webp`,
+    icon: `/WIKI/weapon/${data.value?.id}.webp`,
+    size: "128px",
+    height: "128px",
+    display: "inner",
+    lt: `/icon/weapon/${data.value?.weapon}.webp`,
+    ltSize: "40px",
+    innerHeight: 0,
+    clickable: false,
+  };
+});
+const select = ref<number>(1);
+const selectItems = ref<number[]>([]);
+
+async function loadData(): Promise<void> {
+  try {
+    const res = await getWikiData("Weapon", props.item.id);
+    if (res === undefined) return;
+    data.value = res.default;
+    selectItems.value = data.value?.affix.Descriptions.map((item) => item.Level) ?? [];
+  } catch (error) {
+    showSnackbar({
+      text: `未获取到武器 ${props.item.name} 的 Wiki 数据`,
+      color: "error",
+    });
+    emits("error", error);
+  }
+}
+
+watch(
+  () => props.item,
+  async () => {
+    await loadData();
+  },
+);
+
+onMounted(async () => {
+  await loadData();
+});
+</script>
+<style lang="css" scoped>
+.tww-box {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  row-gap: 10px;
+}
+
+.tww-brief {
+  display: flex;
+  align-items: flex-start;
+  column-gap: 10px;
+}
+
+.tww-brief-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.tww-brief-title {
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 20px;
+}
+
+.tww-brief-rating {
+  color: var(--common-text-title);
+}
+
+.tww-brief-desc {
+  display: flex;
+  align-items: flex-end;
+  opacity: 0.8;
+}
+
+.tww-story {
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+}
+
+.tww-text-title {
+  font-weight: bold;
+}
+
+.tww-text-content {
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+</style>
