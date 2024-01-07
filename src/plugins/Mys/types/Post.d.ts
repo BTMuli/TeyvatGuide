@@ -1,12 +1,12 @@
 /**
  * @file plugins/Mys/types/post.d.ts
  * @description Mys 插件帖子类型定义文件
- * @since Beta v0.3.9
+ * @since Beta v0.4.0
  */
 
 /**
  * @description Mys 插件帖子类型
- * @since Beta v0.3.9
+ * @since Beta v0.4.0
  * @namespace TGApp.Plugins.Mys.Post
  * @memberof TGApp.Plugins.Mys
  */
@@ -27,7 +27,7 @@ declare namespace TGApp.Plugins.Mys.Post {
 
   /**
    * @description 帖子数据
-   * @since Beta v0.3.9
+   * @since Beta v0.4.0
    * @interface FullData
    * @property {Post} post  帖子信息
    * @property {Forum} forum  所属版块
@@ -41,7 +41,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {boolean} is_official_master 是否为官方帖
    * @property {boolean} is_user_master 是否为用户帖
    * @property {boolean} hot_reply_exist 是否存在热门回复
-   * @property {number} vot_count 投票数
+   * @property {number} vote_count 投票数
    * @property {number} last_modify_time 最后修改时间
    * @property {string} recommend_type 推荐类型
    * @property {Collection} collection 合集，可能为 null
@@ -65,7 +65,7 @@ declare namespace TGApp.Plugins.Mys.Post {
     is_official_master: boolean;
     is_user_master: boolean;
     hot_reply_exist: boolean;
-    vot_count: number;
+    vote_count: number;
     last_modify_time: number;
     recommend_type: string;
     collection: Collection | null;
