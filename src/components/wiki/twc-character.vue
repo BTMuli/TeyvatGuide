@@ -4,8 +4,12 @@
       <TItembox :model-value="box" />
       <div class="twc-brief-info">
         <div class="twc-bi-top">
-          <span>{{ data.name }} {{ data.title }}</span>
-          <span>{{ data.description }}</span>
+          <div class="twc-bi-title">
+            <span>{{ data.name }}</span>
+            <span>{{ data.title }}</span>
+            <span @click="toWiki()"><v-icon>mdi-link</v-icon></span>
+          </div>
+          <div class="twc-bi-desc">{{ data.description }}</div>
         </div>
         <div class="twc-bi-grid1">
           <div class="twc-big-item">
@@ -93,6 +97,8 @@ import TwcConstellations from "./twc-constellations.vue";
 import TwcMaterials from "./twc-materials.vue";
 import TwcSkills from "./twc-skills.vue";
 import { getWikiData } from "../../data";
+import Mys from "../../plugins/Mys";
+import { createTGWindow } from "../../utils/TGWindow";
 import showSnackbar from "../func/snackbar";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
 
@@ -154,6 +160,25 @@ watch(
 onMounted(async () => {
   await loadData();
 });
+
+async function toWiki(): Promise<void> {
+  if (props.item.contentId === 0) {
+    showSnackbar({
+      text: `角色 ${props.item.name} 暂无详情`,
+      color: "warn",
+    });
+    return;
+  }
+  const url = Mys.Api.Obc.replace("{contentId}", props.item.contentId.toString());
+  createTGWindow(
+    url,
+    "Sub_window",
+    `Content_${props.item.contentId} ${props.item.name}`,
+    1200,
+    800,
+    true,
+  );
+}
 </script>
 <style lang="css" scoped>
 .twc-box {
@@ -180,13 +205,20 @@ onMounted(async () => {
   flex-direction: column;
 }
 
-.twc-bi-top :nth-child(1) {
+.twc-bi-title {
+  display: flex;
+  align-items: center;
   color: var(--common-text-title);
+  column-gap: 10px;
   font-family: var(--font-title);
   font-size: 20px;
 }
 
-.twc-bi-top :nth-child(2) {
+.twc-bi-title :last-child {
+  cursor: pointer;
+}
+
+.twc-bi-desc {
   display: flex;
   align-items: flex-end;
   font-size: 14px;

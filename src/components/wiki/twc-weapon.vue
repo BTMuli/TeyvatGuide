@@ -3,7 +3,10 @@
     <div class="tww-brief">
       <TItembox :model-value="box" />
       <div class="tww-brief-info">
-        <div class="tww-brief-title">{{ data.name }}</div>
+        <div class="tww-brief-title">
+          <span>{{ data.name }}</span>
+          <span @click="toWiki()"><v-icon>mdi-link</v-icon></span>
+        </div>
         <v-rating
           class="tww-brief-rating"
           v-model="select"
@@ -51,6 +54,8 @@ import { computed, onMounted, ref, watch } from "vue";
 
 import TwcMaterials from "./twc-materials.vue";
 import { getWikiData } from "../../data";
+import Mys from "../../plugins/Mys";
+import { createTGWindow } from "../../utils/TGWindow";
 import { parseHtmlText } from "../../utils/toolFunc";
 import showSnackbar from "../func/snackbar";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
@@ -104,6 +109,25 @@ watch(
 );
 
 onMounted(async () => await loadData());
+
+async function toWiki(): Promise<void> {
+  if (props.item.contentId === 0) {
+    showSnackbar({
+      text: `武器 ${props.item.name} 暂无详情`,
+      color: "warn",
+    });
+    return;
+  }
+  const url = Mys.Api.Obc.replace("{contentId}", props.item.contentId.toString());
+  createTGWindow(
+    url,
+    "Sub_window",
+    `Content_${props.item.contentId} ${props.item.name}`,
+    1200,
+    800,
+    true,
+  );
+}
 </script>
 <style lang="css" scoped>
 .tww-box {
@@ -126,9 +150,16 @@ onMounted(async () => await loadData());
 }
 
 .tww-brief-title {
+  display: flex;
+  align-items: center;
   color: var(--common-text-title);
+  column-gap: 10px;
   font-family: var(--font-title);
   font-size: 20px;
+}
+
+.tww-brief-info :last-child {
+  cursor: pointer;
 }
 
 .tww-brief-rating {
