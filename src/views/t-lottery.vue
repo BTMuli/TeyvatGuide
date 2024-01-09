@@ -48,17 +48,15 @@
     </div>
   </div>
   <div v-if="showJson" class="lottery-json">
-    <TJson :data="jsonData" />
-    <!--    <JsonViewer :value="jsonData" copyable boxed />-->
+    <JsonViewer :value="jsonData" copyable boxed />
   </div>
 </template>
 <script lang="ts" setup>
 import { appWindow } from "@tauri-apps/api/window";
 import { computed, onMounted, onUpdated, reactive, ref } from "vue";
-// import JsonViewer from "vue-json-viewer";
+import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
 
-import TJson from "../components/app/t-json.vue";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import Mys from "../plugins/Mys";

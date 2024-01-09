@@ -3,20 +3,17 @@
   <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
   <div class="anno-json">
     <div class="anno-title">活动列表 JSON</div>
-    <TJson :data="jsonList" />
-    <!--    <JsonViewer :value="jsonList" copyable boxed />-->
+    <JsonViewer :value="jsonList" copyable boxed />
     <div class="anno-title">活动内容 JSON</div>
-    <TJson :data="jsonContent" />
-    <!--    <JsonViewer :value="jsonContent" copyable boxed />-->
+    <JsonViewer :value="jsonContent" copyable boxed />
   </div>
 </template>
 <script lang="ts" setup>
 import { appWindow } from "@tauri-apps/api/window";
 import { ref, onMounted, reactive } from "vue";
-// import JsonViewer from "vue-json-viewer";
+import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
 
-import TJson from "../components/app/t-json.vue";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import TGRequest from "../web/request/TGRequest";

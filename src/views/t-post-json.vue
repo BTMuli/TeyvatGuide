@@ -3,20 +3,17 @@
   <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
   <div class="post-json">
     <div class="post-title">帖子返回内容 JSON</div>
-    <!--    <JsonViewer :value="jsonData" copyable boxed />-->
-    <TJson :data="jsonData" />
+    <JsonViewer :value="jsonData" copyable boxed />
     <div class="post-title" v-show="!isEmpty">结构化内容解析</div>
-    <TJson :data="parseData" v-show="!isEmpty" />
-    <!--    <JsonViewer v-if="!isEmpty" :value="parseData" copyable boxed />-->
+    <JsonViewer v-if="!isEmpty" :value="parseData" copyable boxed />
   </div>
 </template>
 <script lang="ts" setup>
 import { appWindow } from "@tauri-apps/api/window";
 import { onMounted, reactive, ref } from "vue";
-// import JsonViewer from "vue-json-viewer";
+import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
 
-import TJson from "../components/app/t-json.vue";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import Mys from "../plugins/Mys";
