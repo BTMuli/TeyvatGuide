@@ -2,7 +2,7 @@
   <div class="tp-image-box">
     <img
       :style="getImageStyle()"
-      :src="props.data.insert.image"
+      :src="getImageUrl()"
       :alt="props.data.insert.image"
       :title="getImageTitle()"
     />
@@ -57,6 +57,12 @@ function getImageTitle(): string {
     res.push(`格式：${props.data.attributes.ext}`);
   }
   return res.join("\n");
+}
+
+function getImageUrl(): string {
+  const img = props.data.insert.image;
+  const append = "?x-oss-process=image/format,webp";
+  return img + append;
 }
 </script>
 <style lang="css" scoped>

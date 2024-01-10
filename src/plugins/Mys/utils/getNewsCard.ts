@@ -1,12 +1,8 @@
 /**
- * @file plugins Mys utils news.ts
+ * @file plugins/Mys/utils/news.ts
  * @description Mys 插件咨讯工具
- * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.1
+ * @since Beta v0.4.0
  */
-
-// 默认封面图
-const defaultCover = "/source/UI/defaultCover.webp";
 
 /**
  * @description 活动状态
@@ -56,6 +52,31 @@ export function getActivityStatus(status: number): TGApp.Plugins.Mys.News.Render
 }
 
 /**
+ * @description 获取封面图
+ * @since Beta v0.4.0
+ * @param {TGApp.Plugins.Mys.News.Item} item 咨讯列表项
+ * @returns {string} 封面图链接
+ */
+export function getPostCover(item: TGApp.Plugins.Mys.News.Item): string {
+  // 默认封面图
+  const defaultCover = "/source/UI/defaultCover.webp";
+  let cover;
+  if (item.cover) {
+    cover = item.cover.url;
+  } else if (item.post.cover) {
+    cover = item.post.cover;
+  } else if (item.post.images.length > 0) {
+    cover = item.post.images[0];
+  }
+  if (cover === undefined) {
+    cover = defaultCover;
+  } else {
+    cover = `${cover}?x-oss-process=image/format,webp`;
+  }
+  return cover;
+}
+
+/**
  * @description 获取公共属性
  * @since Alpha v0.2.1
  * @param {TGApp.Plugins.Mys.News.Item} item 咨讯列表项
@@ -64,7 +85,7 @@ export function getActivityStatus(status: number): TGApp.Plugins.Mys.News.Render
 function getCommonCard(item: TGApp.Plugins.Mys.News.Item): TGApp.Plugins.Mys.News.RenderCard {
   return {
     title: item.post.subject,
-    cover: item.cover?.url || item.post.cover || item.post.images[0] || defaultCover,
+    cover: getPostCover(item),
     postId: Number(item.post.post_id),
     subtitle: item.post.post_id,
     user: {
