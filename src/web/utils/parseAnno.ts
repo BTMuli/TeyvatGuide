@@ -1,17 +1,17 @@
 /**
- * @file web utils parseAnno.ts
+ * @file web/utils/parseAnno.ts
  * @description 解析游戏内公告数据
- * @todo 需要完善
- * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.0
+ * @since Beta v0.4.0
  */
 
 import { decodeRegExp } from "./tools";
 import { saveImgLocal } from "../../utils/TGShare";
+import { isColorSimilar } from "../../utils/toolFunc";
 
 /**
  * @description 解析游戏内公告数据
- * @since Alpha v0.2.0
+ * @since Beta v0.4.0
+ * @todo 需要完善
  * @param {string} data 游戏内公告数据
  * @returns {Promise<string>} 解析后的数据
  */
@@ -20,6 +20,12 @@ export async function parseAnnoContent(data: string): Promise<string> {
   htmlBase.querySelectorAll("span").forEach((span) => {
     if (span.style.fontSize) {
       span.style.fontSize = "";
+    }
+    // 获取color
+    if (span.style.color) {
+      if (isColorSimilar("#000000", span.style.color)) {
+        span.style.color = "var(--app-page-content)";
+      }
     }
     if (span.children.length === 0) {
       return (span.innerHTML = decodeRegExp(span.innerHTML));
@@ -65,7 +71,10 @@ export async function parseAnnoContent(data: string): Promise<string> {
     }
   });
   htmlBase.querySelectorAll("table").forEach((table) => {
-    table.style.borderColor = "#546d8b";
+    table.style.borderColor = "var(--common-shadow-2)";
+    table.querySelectorAll("td").forEach((td) => {
+      if (td.style.backgroundColor) td.style.backgroundColor = "var(--box-bg-1)";
+    });
   });
   return htmlBase.body.innerHTML;
 }

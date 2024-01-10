@@ -98,7 +98,7 @@ watch(loadShare, (value) => {
 });
 
 function createAnnoJson(annoId: number) {
-  const jsonPath = `/anno_detail/${annoId}`;
+  const jsonPath = `/anno_detail_json/${annoId}`;
   const jsonTitle = `Anno_${annoId}_JSON`;
   createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
 }
