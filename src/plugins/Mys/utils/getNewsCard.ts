@@ -71,7 +71,7 @@ export function getPostCover(item: TGApp.Plugins.Mys.News.Item): string {
   if (cover === undefined) {
     cover = defaultCover;
   } else {
-    cover = `${cover}?x-oss-process=image/format,webp`;
+    cover = `${cover}?x-oss-process=image/format,png`;
   }
   return cover;
 }

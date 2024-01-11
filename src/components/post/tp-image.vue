@@ -61,7 +61,7 @@ function getImageTitle(): string {
 
 function getImageUrl(): string {
   const img = props.data.insert.image;
-  const append = "?x-oss-process=image/format,webp";
+  const append = "?x-oss-process=image/format,png";
   return img + append;
 }
 </script>
