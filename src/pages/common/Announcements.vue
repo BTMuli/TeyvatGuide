@@ -26,9 +26,7 @@
               </div>
             </div>
           </div>
-          <v-card-title class="anno-title" :title="item.title">{{
-            parseTitle(item.title)
-          }}</v-card-title>
+          <div class="anno-title" :title="item.title">{{ parseTitle(item.subtitle) }}</div>
           <div class="anno-label" :title="`标签：${item.tagLabel}`">
             <img :src="item.tagIcon" alt="tag" />
             <span>{{ item.tagLabel }}</span>
@@ -164,8 +162,13 @@ function createAnno(item: TGApp.App.Announcement.ListCard): void {
 
 .anno-title {
   position: relative;
-  height: 50px;
+  overflow: hidden;
+  width: 100%;
+  padding: 5px;
+  font-size: 18px;
   text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .anno-info {
@@ -228,6 +231,8 @@ function createAnno(item: TGApp.App.Announcement.ListCard): void {
   align-items: center;
   justify-content: flex-start;
   padding: 5px;
+  border-bottom: 1px dotted var(--tgc-white-4);
+  border-left: 1px dotted var(--tgc-white-4);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   background: rgb(0 0 0/20%);
