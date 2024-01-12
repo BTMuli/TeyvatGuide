@@ -57,20 +57,7 @@
         </div>
         <div class="post-content">
           <div class="post-card-title" :title="post.title">{{ post.title }}</div>
-          <div class="post-card-user">
-            <div class="pcu-left">
-              <div class="pcu-icon">
-                <img :src="post.user.icon" alt="userIcon" />
-              </div>
-              <div v-if="post.user.pendant !== ''" class="pcu-pendent">
-                <img :src="post.user.pendant" alt="userPendant" />
-              </div>
-            </div>
-            <div class="pcu-right">
-              <span>{{ post.user.nickname }}</span>
-              <span :title="post.user.label">{{ post.user.label }}</span>
-            </div>
-          </div>
+          <TpAvatar :data="post.user" position="left" />
           <div class="post-card-data">
             <div class="pcd-item" :title="`浏览数：${post.data.view}`">
               <v-icon>mdi-eye</v-icon>
@@ -108,6 +95,7 @@ import { nextTick, onMounted, ref, watch } from "vue";
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
+import TpAvatar from "../../components/post/tp-avatar.vue";
 import Mys from "../../plugins/Mys";
 import TGClient from "../../utils/TGClient";
 import { createPost } from "../../utils/TGWindow";
@@ -453,76 +441,6 @@ function searchPost(): void {
   overflow: hidden;
   width: 100%;
   font-size: 18px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.post-card-user {
-  display: flex;
-}
-
-.pcu-left {
-  position: relative;
-  width: 50px;
-  height: 50px;
-}
-
-.pcu-icon {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  overflow: hidden;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-}
-
-.pcu-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.pcu-pendent {
-  position: absolute;
-  top: 0;
-  left: 0;
-  overflow: hidden;
-  width: 50px;
-  height: 50px;
-}
-
-.pcu-pendent img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.pcu-right {
-  position: relative;
-  display: flex;
-  max-width: calc(100% - 50px);
-  height: 50px;
-  flex-direction: column;
-  align-items: start;
-  color: var(--box-text-4);
-}
-
-.pcu-right :nth-child(1) {
-  display: flex;
-  height: 30px;
-  align-items: center;
-  justify-content: start;
-  font-size: 16px;
-}
-
-.pcu-right :nth-child(2) {
-  overflow: hidden;
-  width: 100%;
-  height: 20px;
-  border-top: 2px solid var(--common-shadow-2);
-  font-size: 14px;
-  opacity: 0.7;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

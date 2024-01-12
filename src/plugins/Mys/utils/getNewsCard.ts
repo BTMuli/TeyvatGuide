@@ -78,7 +78,7 @@ export function getPostCover(item: TGApp.Plugins.Mys.News.Item): string {
 
 /**
  * @description 获取公共属性
- * @since Alpha v0.2.1
+ * @since Beta v0.4.0
  * @param {TGApp.Plugins.Mys.News.Item} item 咨讯列表项
  * @returns {TGApp.Plugins.Mys.News.RenderCard} 渲染用咨讯列表项
  */
@@ -88,12 +88,7 @@ function getCommonCard(item: TGApp.Plugins.Mys.News.Item): TGApp.Plugins.Mys.New
     cover: getPostCover(item),
     postId: Number(item.post.post_id),
     subtitle: item.post.post_id,
-    user: {
-      nickname: item.user.nickname,
-      pendant: item.user.pendant,
-      icon: item.user.avatar_url,
-      label: item.user.certification.label,
-    },
+    user: item.user,
     forum: {
       name: item.forum.name,
       icon: item.forum.icon,

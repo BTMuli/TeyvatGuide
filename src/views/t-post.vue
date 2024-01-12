@@ -38,20 +38,7 @@
           <span>{{ postData.stat.forward_num }}</span>
         </div>
       </div>
-      <div class="tp-post-author">
-        <div class="mpa-left">
-          <span>{{ postData.user.nickname }}</span>
-          <span :title="getMpaLeftDesc()">{{ getMpaLeftDesc() }}</span>
-        </div>
-        <div class="mpa-right" @click="toAuthor()" title="点击前往用户主页">
-          <div class="mpa-icon">
-            <img :src="postData.user.avatar_url" alt="userIcon" />
-          </div>
-          <div v-if="postData.user.pendant !== ''" class="mpa-pendant">
-            <img :src="postData.user.pendant" alt="userPendant" />
-          </div>
-        </div>
-      </div>
+      <TpAvatar :data="postData.user" position="right" />
     </div>
     <div class="tp-post-title" @click="toPost()" title="点击查看评论">
       <span class="mpt-official" v-if="postData.post.post_status.is_official">官</span>
@@ -97,6 +84,7 @@ import { useRoute } from "vue-router";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
+import TpAvatar from "../components/post/tp-avatar.vue";
 import TpParser from "../components/post/tp-parser.vue";
 import TpoCollection from "../components/post/tpo-collection.vue";
 import Mys from "../plugins/Mys";
@@ -183,12 +171,6 @@ function showOverlayC() {
   showCollection.value = true;
 }
 
-function getMpaLeftDesc(): string {
-  return postData.value?.user.certification?.label === ""
-    ? postData.value?.user.introduce ?? ""
-    : postData.value?.user.certification?.label ?? "";
-}
-
 function getDate(date: number): string {
   return new Date(date * 1000).toLocaleString().replace(/\//g, "-");
 }
@@ -243,11 +225,6 @@ function createPostJson(postId: number): void {
   const jsonPath = `/post_detail_json/${postId}`;
   const jsonTitle = `Post_${postId}_JSON`;
   createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
-}
-
-async function toAuthor(): Promise<void> {
-  const url = `https://m.miyoushe.com/ys/#/accountCenter/0?id=${postData.value?.user.uid}`;
-  await TGClient.open("web_thin", url);
 }
 
 async function toPost(): Promise<void> {
@@ -320,73 +297,6 @@ onUnmounted(() => {
   font-family: var(--font-title);
   font-size: 14px;
   opacity: 0.6;
-}
-
-/* author */
-.tp-post-author {
-  display: flex;
-}
-
-.mpa-left {
-  position: relative;
-  display: flex;
-  height: 50px;
-  flex-direction: column;
-  align-items: end;
-  color: var(--box-text-4);
-}
-
-.mpa-left :nth-child(1) {
-  font-size: 16px;
-}
-
-.mpa-left :nth-child(2) {
-  overflow: hidden;
-  height: 20px;
-  align-items: center;
-  border-top: 2px solid var(--common-shadow-2);
-  font-size: 14px;
-  opacity: 0.7;
-  text-align: right;
-  text-overflow: ellipsis;
-}
-
-.mpa-right {
-  position: relative;
-  width: 50px;
-  height: 50px;
-  cursor: pointer;
-}
-
-.mpa-icon {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  overflow: hidden;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-}
-
-.mpa-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.mpa-pendant {
-  position: absolute;
-  top: 0;
-  left: 0;
-  overflow: hidden;
-  width: 50px;
-  height: 50px;
-}
-
-.mpa-pendant img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 /* meta */

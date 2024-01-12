@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/types/news.d.ts
  * @description Mys 插件咨讯类型定义文件
- * @since Beta v0.3.7
+ * @since Beta v0.4.0
  */
 
 /**
@@ -122,17 +122,13 @@ declare namespace TGApp.Plugins.Mys.News {
 
   /**
    * @description 用于渲染的咨讯卡片
-   * @since Alpha v0.2.1
+   * @since Beta v0.4.0
    * @interface RenderCard
    * @property {string} title 标题
    * @property {string} cover 封面图片 URL
    * @property {number} postId 帖子 ID
    * @property {string} subtitle 副标题
-   * @property user 发帖用户
-   * @property {string} user.nickname 用户昵称
-   * @property {string} user.pendant 用户头像挂件
-   * @property {string} user.icon 用户头像
-   * @property {string} user.label 用户标签
+   * @property {TGApp.Plugins.Mys.User.Post} user 发帖用户
    * @property forum 版块
    * @property {string} forum.name 版块名称
    * @property {string} forum.icon 版块图标
@@ -150,12 +146,7 @@ declare namespace TGApp.Plugins.Mys.News {
     cover: string;
     postId: number;
     subtitle: string;
-    user: {
-      nickname: string;
-      pendant: string;
-      icon: string;
-      label: string;
-    };
+    user: TGApp.Plugins.Mys.User.Post;
     forum: {
       name: string;
       icon: string;

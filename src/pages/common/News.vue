@@ -1,13 +1,9 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" />
   <v-tabs v-model="tab" align-tabs="start" class="news-tab">
-    <v-tab
-      v-for="(value, index) in tabValues"
-      :key="index"
-      :value="value"
-      @click="firstLoad(value)"
-      >{{ rawData[value].name }}</v-tab
-    >
+    <v-tab v-for="(value, index) in tabValues" :key="index" :value="value" @click="firstLoad(value)"
+      >{{ rawData[value].name }}
+    </v-tab>
     <v-text-field
       v-model="search"
       class="news-search"
@@ -52,20 +48,7 @@
           </div>
           <div class="news-content">
             <div class="news-card-title" :title="item.title">{{ item.title }}</div>
-            <div class="news-card-user">
-              <div class="ncu-left">
-                <div class="ncu-icon">
-                  <img :src="item.user.icon" alt="userIcon" />
-                </div>
-                <div v-if="item.user.pendant !== ''" class="ncu-pendant">
-                  <img :src="item.user.pendant" alt="userPendant" />
-                </div>
-              </div>
-              <div class="ncu-right">
-                <span>{{ item.user.nickname }}</span>
-                <span>{{ item.user.label }}</span>
-              </div>
-            </div>
+            <TpAvatar :data="item.user" position="left" />
             <div class="news-card-data">
               <div class="ncd-item" :title="`浏览数：${item.data.view}`">
                 <v-icon>mdi-eye</v-icon>
@@ -112,6 +95,7 @@ import { useRoute, useRouter } from "vue-router";
 import showSnackbar from "../../components/func/snackbar";
 import ToChannel from "../../components/overlay/to-channel.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
+import TpAvatar from "../../components/post/tp-avatar.vue";
 import Mys from "../../plugins/Mys";
 import { createPost } from "../../utils/TGWindow";
 
@@ -121,6 +105,7 @@ enum NewsType {
   activity = "2",
   news = "3",
 }
+
 type NewsKey = keyof typeof NewsType;
 type PostData = {
   [key in NewsKey]: TGApp.Plugins.Mys.News.RenderCard[];
@@ -326,75 +311,6 @@ function searchPost(): void {
   font-size: 18px;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.news-card-user {
-  display: flex;
-}
-
-.ncu-left {
-  position: relative;
-  width: 50px;
-  height: 50px;
-}
-
-.ncu-icon {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  overflow: hidden;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-}
-
-.ncu-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.ncu-pendant {
-  position: absolute;
-  top: 0;
-  left: 0;
-  overflow: hidden;
-  width: 50px;
-  height: 50px;
-}
-
-.ncu-pendant img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.ncu-right {
-  position: relative;
-  display: flex;
-  height: 50px;
-  flex-direction: column;
-  align-items: start;
-  color: var(--box-text-4);
-}
-
-.ncu-right :nth-child(1) {
-  display: flex;
-  height: 30px;
-  align-items: center;
-  justify-content: start;
-  font-size: 16px;
-}
-
-.ncu-right :nth-child(2) {
-  display: flex;
-  width: 100%;
-  height: 20px;
-  align-items: center;
-  justify-content: start;
-  border-top: 2px solid var(--common-shadow-2);
-  font-size: 14px;
-  opacity: 0.7;
 }
 
 .news-card-forum {

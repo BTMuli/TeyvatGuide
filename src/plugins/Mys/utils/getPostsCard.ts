@@ -13,18 +13,12 @@ import { getPostCover } from "./getNewsCard";
  * @returns {TGApp.Plugins.Mys.Forum.RenderCard} 渲染用帖子
  */
 function getPostCard(post: TGApp.Plugins.Mys.News.Item): TGApp.Plugins.Mys.Forum.RenderCard {
-  const userLabel = getUserLabel(post);
   return {
     title: post.post.subject,
     cover: getPostCover(post),
     postId: post.post.post_id,
     subtitle: post.post.post_id,
-    user: {
-      nickname: post.user.nickname,
-      pendant: post.user.pendant,
-      icon: post.user.avatar_url,
-      label: userLabel,
-    },
+    user: post.user,
     forum: {
       name: post.forum.name,
       icon: post.forum.icon,
@@ -37,19 +31,6 @@ function getPostCard(post: TGApp.Plugins.Mys.News.Item): TGApp.Plugins.Mys.Forum
       view: post.stat.view_num,
     },
   };
-}
-
-/**
- * @description 获取用户描述
- * @since Beta v0.3.7
- * @param {TGApp.Plugins.Mys.News.Item} post 帖子
- * @returns {string} 描述
- */
-function getUserLabel(post: TGApp.Plugins.Mys.News.Item): string {
-  if (post.user.certification.label !== "") {
-    return post.user.certification.label;
-  }
-  return post.user.introduce;
 }
 
 /**
