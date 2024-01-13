@@ -47,6 +47,9 @@ const textAlign = props.position;
 <style lang="css" scoped>
 .tp-avatar-box {
   display: flex;
+  overflow: hidden;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .tpa-text {
