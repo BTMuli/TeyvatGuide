@@ -10,7 +10,7 @@
         <span>{{ props.modelValue.fetter }}</span>
       </div>
       <div class="tuc-rbm-other">
-        <span v-if="props.modelValue.fetter !== 10">
+        <span v-if="!showNameCard">
           <v-icon>mdi-lock-outline</v-icon>
         </span>
         <span v-if="props.modelValue.costume !== '[]'">
@@ -20,11 +20,7 @@
     </div>
     <div class="tuc-rb-bottom">
       <div class="tuc-rbb-bg">
-        <img
-          v-if="nameCard !== false && props.modelValue.fetter === 10"
-          :src="nameCard"
-          alt="nameCard"
-        />
+        <img v-if="nameCard !== false && showNameCard" :src="nameCard" alt="nameCard" />
       </div>
       <div v-show="talents.length > 0" class="tuc-rbb-content">
         <div v-for="talent in talents" :key="talent.pos" class="tuc-rbb-talent">
@@ -48,6 +44,13 @@ interface TucRoleBoxProps {
 
 const props = defineProps<TucRoleBoxProps>();
 const talents = ref<TGApp.Sqlite.Character.RoleTalent[]>([]);
+const showNameCard = computed(() => {
+  if (props.modelValue.cid === 10000005 || props.modelValue.cid === 10000007) {
+    return true;
+  } else {
+    return props.modelValue.fetter === 10;
+  }
+});
 
 const avatarBox = computed(() => {
   return {
@@ -92,6 +95,8 @@ onMounted(async () => {
   if (props.modelValue.cid !== 10000005 && props.modelValue.cid !== 10000007) {
     const role = await TGSqlite.getAppCharacter(props.modelValue.cid);
     nameCard.value = `/source/nameCard/profile/${role.nameCard}.webp`;
+  } else {
+    nameCard.value = "/source/nameCard/profile/原神·印象.webp";
   }
   if (props.modelValue.talent !== "" && props.modelValue.talent !== "[]") {
     const talentsLocal: TGApp.Sqlite.Character.RoleTalent[] = JSON.parse(props.modelValue.talent);

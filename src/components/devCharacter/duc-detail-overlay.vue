@@ -96,6 +96,8 @@ async function loadData(): Promise<void> {
   if (props.dataVal.cid !== 10000005 && props.dataVal.cid !== 10000007) {
     const role = await TGSqlite.getAppCharacter(props.dataVal.cid);
     nameCard.value = `/source/nameCard/profile/${role.nameCard}.webp`;
+  } else {
+    nameCard.value = "/source/nameCard/profile/原神·印象.webp";
   }
 }
 
