@@ -1,7 +1,7 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.3.9
+ * @since Beta v0.4.0
  */
 
 import { event, invoke } from "@tauri-apps/api";
@@ -588,7 +588,7 @@ class TGClient {
 
   /**
    * @func getCookieToken
-   * @since Beta v0.3.9
+   * @since Beta v0.4.0
    * @desc 获取米游社客户端的 cookie_token
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetCookieTokenPayload>} arg - 请求参数
    * @returns {void} - 无返回值
@@ -606,10 +606,16 @@ class TGClient {
       user.cookie.cookie_token = res;
       await TGSqlite.saveAppData("cookie", JSON.stringify(user.cookie));
     }
+    // todo 优化代码
     const executeJS = `javascript:(function(){
-      var domain = window.location.host;
-      document.cookie = "cookie_token=${user.cookie.cookie_token};domain=" + domain + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;
-      document.cookie = "ltoken=${user.cookie.ltoken};domain=" + domain + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;
+      document.cookie = "account_id_v2=${user.cookie.account_id};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "cookie_token=${user.cookie.cookie_token};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "ltuid_v2=${user.cookie.ltuid};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "ltoken=${user.cookie.ltoken};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "account_id=${user.cookie.account_id};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "account_mid_v2=${user.cookie.mid};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "ltuid_v2=${user.cookie.ltuid};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "ltmid_v2=${user.cookie.mid};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
     })();`;
     console.info(`[getCookieToken] ${executeJS}`);
     await invoke("execute_js", { label: "mhy_client", js: executeJS });
