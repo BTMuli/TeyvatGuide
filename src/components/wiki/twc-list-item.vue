@@ -51,6 +51,7 @@ function getIcon(): string {
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   background: v-bind(bgColor);
+  cursor: pointer;
   gap: 10px;
 }
 

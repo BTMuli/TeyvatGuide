@@ -27,7 +27,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import TibWikiAbyss2 from "../itembox/tib-wiki-abyss-2.vue";
 
 interface HtaTabHoldProps {
@@ -38,23 +37,23 @@ const props = defineProps<HtaTabHoldProps>();
 </script>
 <style lang="css" scoped>
 .hta-th-box {
-  width: calc(100% - 10px);
   height: 100%;
   max-height: calc(100vh - 120px);
-  padding: 10px;
-  border: 1px inset var(--common-bg-1);
+  padding-right: 5px;
   border-radius: 5px;
   overflow-y: auto;
 }
 
 .hta-th-table {
   width: 100%;
+  border-radius: 5px;
+  background: var(--box-bg-1);
   text-align: center;
 }
 
 .hta-th-tr {
   border-radius: 5px;
-  background: var(--common-bg-1);
+  background: var(--box-bg-2);
   border-collapse: collapse;
 }
 

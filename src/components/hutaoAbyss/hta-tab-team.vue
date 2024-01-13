@@ -71,16 +71,12 @@ onMounted(async () => {
 .hta-tt-box {
   width: calc(100% - 10px);
   height: 100%;
-  border: 1px inset var(--common-bg-1);
-  border-radius: 5px;
-  margin: 5px;
 }
 
 .hta-tt-tab {
   position: absolute;
   height: 100%;
-  color: var(--common-text-title);
-  font-family: var(--font-text);
+  color: var(--box-text-4);
 }
 
 .hta-tt-window {
@@ -129,7 +125,7 @@ onMounted(async () => {
   justify-content: flex-start;
   padding: 5px;
   border-radius: 5px;
-  background: var(--common-bg-1);
+  background: var(--box-bg-1);
   column-gap: 10px;
 }
 

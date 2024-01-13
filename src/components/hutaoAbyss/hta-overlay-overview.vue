@@ -97,5 +97,6 @@ function onCancel(): void {
   color: var(--tgc-yellow-1);
   font-size: 14px;
   text-align: right;
+  text-shadow: 0 0 5px var(--tgc-dark-7);
 }
 </style>
