@@ -94,6 +94,7 @@ declare namespace TGApp.Plugins.Bili.Video {
     videos: number;
     tid: number;
     tname: string;
+    copyright: number;
     pic: string;
     title: string;
     pubdate: string;
@@ -155,4 +156,18 @@ declare namespace TGApp.Plugins.Bili.Video {
     disable_show_up_info: boolean;
     is_story_play: boolean;
   }
+
+  /**
+   * @description Bili 视频链接返回
+   * @since Beta v0.4.0
+   * @interface UrlResponse
+   * @extends {TGApp.Plugins.Bili.Base.Response}
+   * @property {UrlData} data 视频链接
+   * @return UrlResponse
+   */
+  interface UrlResponse extends TGApp.Plugins.Bili.Base.Response {
+    data: UrlData;
+  }
+
+  type UrlData = unknown;
 }
