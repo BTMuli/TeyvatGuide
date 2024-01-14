@@ -9,6 +9,7 @@ import TpLinkCard from "./tp-linkCard.vue";
 import TpMention from "./tp-mention.vue";
 import TpText from "./tp-text.vue";
 import TpUnknown from "./tp-unknown.vue";
+import TpVideo from "./tp-video.vue";
 import TpVillaCard from "./tp-villaCard.vue";
 import TpVod from "./tp-vod.vue";
 import TpVote from "./tp-vote.vue";
@@ -26,8 +27,8 @@ function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base) {
     return TpImage;
   } else if ("vod" in tp.insert) {
     return TpVod;
-    // } else if ("video" in tp.insert) {
-    //   return TpVideo;
+  } else if ("video" in tp.insert) {
+    return TpVideo;
   } else if ("backup_text" in tp.insert) {
     return TpBackupText;
   } else if ("link_card" in tp.insert) {
