@@ -48,7 +48,6 @@ onBeforeMount(async () => {
 });
 
 onMounted(async () => {
-  // 获取当前主题
   document.documentElement.className = theme.value;
   await listenOnTheme();
 });
@@ -82,12 +81,9 @@ async function listenOnInit(): Promise<void> {
 }
 
 async function checkAppLoad(): Promise<void> {
-  if (appStore.loading) {
-    console.info("数据已加载！");
-    return;
-  }
   const checkDB = await TGSqlite.check();
   if (!checkDB) {
+    appStore.loading = false;
     await TGSqlite.reset();
     showSnackbar({
       text: "检测到数据库不完整！已重置数据库！",
@@ -95,6 +91,7 @@ async function checkAppLoad(): Promise<void> {
       timeout: 3000,
     });
     await createDataDir();
+    router.go(0);
   } else {
     appStore.loading = true;
     console.info("数据库已加载！");

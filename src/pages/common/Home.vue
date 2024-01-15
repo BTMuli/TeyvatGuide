@@ -33,9 +33,10 @@ const timer = ref<any>(null);
 
 function readLoading(): void {
   if (!loading.value) return;
-  const loadingMap = itemRefs.value.map((item) => {
+  let loadingMap = itemRefs.value.map((item) => {
     return item.loading ? item.name : null;
   });
+  if (!appStore.loading) loadingMap.push("数据库");
   loadingSubtitle.value = "正在加载 " + loadingMap.filter((item) => item)?.join("、");
   if (loadingMap.every((item) => !item)) {
     loading.value = false;

@@ -7,7 +7,7 @@
       :src="props.data.insert.video"
       :allowfullscreen="false"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      sandbox="allow-forms allow-same-origin allow-popups allow-presentation"
+      sandbox="allow-forms allow-same-origin allow-popups allow-presentation allow-scripts"
     >
     </iframe>
     <!-- todo 优化 -->
