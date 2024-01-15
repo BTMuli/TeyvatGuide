@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2023-12-10
+Update: 2024-01-15
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2023-12-10 16:38:32`
+> 更新于 `2024-01-15 17:32:59`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -60,9 +60,10 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - Wiki 功能：
 
   - [x] 深渊数据库（Hutao API）
-  - [ ] 角色数据库（开发中）
-  - [ ] 武器数据库（开发中）
-  - [ ] 卡牌数据库（开发中）
+  - [x] 角色图鉴
+  - [x] 武器图鉴
+  - [x] 名片图鉴
+  - [x] 卡牌图鉴
 
 - 应用功能：
   - [x] 浅色/深色主题切换
