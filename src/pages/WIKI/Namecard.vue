@@ -112,7 +112,11 @@ function searchNamecard() {
     }
   } else {
     const searchResult = AppNameCardsData.filter((item) => {
-      return item.name.includes(search.value) || item.desc.includes(search.value);
+      return (
+        item.name.includes(search.value) ||
+        item.desc.includes(search.value) ||
+        item.source.includes(search.value)
+      );
     });
     sortData(searchResult);
   }
