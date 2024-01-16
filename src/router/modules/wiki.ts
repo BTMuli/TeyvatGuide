@@ -1,7 +1,7 @@
 /**
  * @file router/modules/wiki.ts
  * @description wiki 路由模块
- * @since Beta v0.3.9
+ * @since Beta v0.4.1
  */
 
 const wikiRoutes = [
@@ -11,7 +11,7 @@ const wikiRoutes = [
     component: async () => await import("../../pages/WIKI/Abyss.vue"),
   },
   {
-    path: "/wiki/character",
+    path: "/wiki/character/:id",
     name: "角色图鉴",
     component: async () => await import("../../pages/WIKI/Character.vue"),
   },
@@ -31,24 +31,14 @@ const wikiRoutes = [
     component: async () => await import("../../pages/WIKI/Material.vue"),
   },
   {
-    path: "/wiki/weapon",
+    path: "/wiki/weapon/:id",
     name: "武器图鉴",
     component: async () => await import("../../pages/WIKI/Weapon.vue"),
-  },
-  {
-    path: "/wiki/detail/character/:id",
-    name: "角色详情",
-    component: async () => await import("../../views/tw-character.vue"),
   },
   {
     path: "/wiki/detail/GCG/:id",
     name: "卡牌详情",
     component: async () => await import("../../views/tw-gcg.vue"),
-  },
-  {
-    path: "/wiki/detail/weapon/:id",
-    name: "武器详情",
-    component: async () => await import("../../views/tw-weapon.vue"),
   },
 ];
 

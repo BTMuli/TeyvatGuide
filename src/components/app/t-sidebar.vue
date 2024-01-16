@@ -110,7 +110,7 @@
             title="角色图鉴"
             value="wiki-character"
             :link="true"
-            href="/wiki/character"
+            href="/wiki/character/0"
           >
             <template #prepend>
               <img src="/source/UI/wikiAvatar.webp" alt="characterIcon" class="side-icon-menu" />
@@ -121,7 +121,7 @@
             title="武器图鉴"
             value="wiki-weapon"
             :link="true"
-            href="/wiki/weapon"
+            href="/wiki/weapon/0"
           >
             <template #prepend>
               <img src="/source/UI/wikiWeapon.webp" alt="weaponIcon" class="side-icon-menu" />

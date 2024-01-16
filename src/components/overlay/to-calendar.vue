@@ -26,20 +26,13 @@
           <v-btn variant="outlined" @click="toDetail(itemVal)">详情</v-btn>
         </div>
       </div>
-      <div class="close-div">
-        <div class="close-btn" @click="onCancel">
-          <v-icon>mdi-close</v-icon>
-        </div>
-      </div>
     </div>
   </TOverlay>
 </template>
 <script setup lang="ts">
 import { computed } from "vue";
+import { useRouter } from "vue-router";
 
-import Mys from "../../plugins/Mys";
-import { createTGWindow } from "../../utils/TGWindow";
-import showSnackbar from "../func/snackbar";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 import TibCalendarMaterial from "../itembox/tib-calendar-material.vue";
 import TOverlay from "../main/t-overlay.vue";
@@ -52,11 +45,14 @@ interface ToCalendarProps {
 
 interface ToCalendarEmits {
   (e: "update:modelValue", value: boolean): void;
+
   (e: "cancel"): void;
 }
 
 const emits = defineEmits<ToCalendarEmits>();
 const props = defineProps<ToCalendarProps>();
+
+const router = useRouter();
 
 const visible = computed({
   get: () => props.modelValue,
@@ -72,17 +68,12 @@ const onCancel = (): void => {
   emits("cancel");
 };
 
-function toDetail(item: TGApp.App.Calendar.Item): void {
-  if (item.contentId === 0) {
-    const itemType = item.itemType === "character" ? "角色" : "武器";
-    showSnackbar({
-      text: `[${itemType}] ${item.name} 暂无详情`,
-      color: "warn",
-    });
-    return;
+async function toDetail(item: TGApp.App.Calendar.Item): Promise<void> {
+  if (item.itemType === "character") {
+    await router.push(`/wiki/character/${item.id}`);
+  } else {
+    await router.push(`/wiki/weapon/${item.id}`);
   }
-  const url = Mys.Api.Obc.replace("{contentId}", item.contentId.toString());
-  createTGWindow(url, "Sub_window", `Content_${item.contentId} ${item.name}`, 1200, 800, true);
 }
 </script>
 <style scoped>
@@ -160,26 +151,5 @@ function toDetail(item: TGApp.App.Calendar.Item): void {
   justify-content: center;
   font-family: var(--font-title);
   font-size: 20px;
-}
-
-.close-div {
-  display: flex;
-  width: 100%;
-  height: 60px;
-  align-items: center;
-  justify-content: center;
-}
-
-.close-btn {
-  display: flex;
-  width: 30px;
-  height: 30px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 50%;
-  background: var(--app-page-bg);
-  color: var(--tgc-yellow-1);
-  cursor: pointer;
 }
 </style>

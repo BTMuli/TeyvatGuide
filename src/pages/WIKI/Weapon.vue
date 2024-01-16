@@ -18,6 +18,7 @@
 
 <script lang="ts" setup>
 import { onBeforeMount, ref } from "vue";
+import { useRoute } from "vue-router";
 
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
@@ -27,15 +28,37 @@ import { AppWeaponData } from "../../data";
 import Mys from "../../plugins/Mys";
 import { createTGWindow } from "../../utils/TGWindow";
 
+const id = useRoute().params.id.toString() ?? "0";
 const cardsInfo = AppWeaponData;
 const curItem = ref<TGApp.App.Weapon.WikiBriefInfo>();
 
 onBeforeMount(() => {
-  curItem.value = cardsInfo[0];
+  if (id === "0") {
+    curItem.value = cardsInfo[0];
+  } else {
+    const item = cardsInfo.find((item) => item.id.toString() === id);
+    if (item) {
+      curItem.value = item;
+      showSnackbar({
+        text: `成功获取武器 ${item.name} 的数据`,
+        color: "success",
+      });
+    } else {
+      showSnackbar({
+        text: `武器 ${id} 不存在`,
+        color: "warn",
+      });
+      curItem.value = cardsInfo[0];
+    }
+  }
 });
 
 async function switchW(item: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
   curItem.value = item;
+  showSnackbar({
+    text: `成功获取武器 ${item.name} 的数据`,
+    color: "success",
+  });
 }
 
 async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
