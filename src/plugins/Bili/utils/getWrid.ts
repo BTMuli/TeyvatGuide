@@ -1,7 +1,7 @@
 /**
  * @file plugins/Bili/utils/getWrid.ts
  * @description Bili 插件获取 wrid 工具函数
- * @since Beta v0.4.0
+ * @since Beta v0.4.1
  */
 
 import md5 from "js-md5";
@@ -46,7 +46,7 @@ async function getMixinKey(): Promise<string> {
 
 /**
  * @description 获取 wrid
- * @since Beta v0.4.0
+ * @since Beta v0.4.1
  * @param {Record<string,string|number>} params 请求参数
  * @param {number} nts 时间戳（秒）
  * @returns {Promise<string>} wrid
@@ -62,7 +62,7 @@ async function getWrid(
   } else {
     wts = nts;
   }
-  const obj: Record<string, unknown> = {
+  const obj: Record<string, string | number> = {
     ...params,
     wts,
   };
