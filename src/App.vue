@@ -81,10 +81,6 @@ async function listenOnInit(): Promise<void> {
 }
 
 async function checkAppLoad(): Promise<void> {
-  if (!appStore.loading) {
-    await resetDB();
-    return;
-  }
   let checkDB = false;
   try {
     checkDB = await TGSqlite.check();
@@ -116,7 +112,6 @@ async function checkDeviceFp(): Promise<void> {
   const deviceLocal = appStore.deviceInfo;
   if (deviceInfo === undefined) {
     if (deviceLocal.device_fp === "0000000000000") {
-      // 获取 deviceFp
       appStore.deviceInfo = await TGRequest.Device.getFp(appStore.deviceInfo);
       console.info("deviceInfo 已重新获取！");
     }
