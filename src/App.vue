@@ -81,21 +81,32 @@ async function listenOnInit(): Promise<void> {
 }
 
 async function checkAppLoad(): Promise<void> {
-  const checkDB = await TGSqlite.check();
+  if (!appStore.loading) {
+    await resetDB();
+    return;
+  }
+  let checkDB = false;
+  try {
+    checkDB = await TGSqlite.check();
+  } catch (error) {
+    console.error(error);
+  }
   if (!checkDB) {
-    appStore.loading = false;
-    await TGSqlite.reset();
-    showSnackbar({
-      text: "检测到数据库不完整！已重置数据库！",
-      color: "error",
-      timeout: 3000,
-    });
-    await createDataDir();
-    router.go(0);
+    await resetDB();
   } else {
-    appStore.loading = true;
     console.info("数据库已加载！");
   }
+}
+
+async function resetDB(): Promise<void> {
+  await TGSqlite.reset();
+  showSnackbar({
+    text: "检测到数据库不完整！已重置数据库！",
+    color: "error",
+    timeout: 3000,
+  });
+  await createDataDir();
+  appStore.loading = true;
 }
 
 // 检测 deviceFp
@@ -161,11 +172,13 @@ async function checkUserLoad(): Promise<void> {
   const accountLocal = userStore.account.value;
   const accountDB = await TGSqlite.getCurAccount();
   if (accountDB === false) {
-    showSnackbar({
-      text: "获取 GameAccount 失败！请尝试更新数据库！",
-      color: "error",
-      timeout: 3000,
-    });
+    if (appStore.isLogin) {
+      showSnackbar({
+        text: "获取 GameAccount 失败！请尝试更新数据库！",
+        color: "error",
+        timeout: 3000,
+      });
+    }
     return;
   }
   if (accountDB !== accountLocal) {

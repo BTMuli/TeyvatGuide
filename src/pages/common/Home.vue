@@ -36,7 +36,6 @@ function readLoading(): void {
   let loadingMap = itemRefs.value.map((item) => {
     return item.loading ? item.name : null;
   });
-  if (!appStore.loading) loadingMap.push("数据库");
   loadingSubtitle.value = "正在加载 " + loadingMap.filter((item) => item)?.join("、");
   if (loadingMap.every((item) => !item)) {
     loading.value = false;
@@ -45,7 +44,6 @@ function readLoading(): void {
 
 onMounted(async () => {
   loadingTitle.value = "正在加载首页";
-  loading.value = true;
   const isProdEnv = import.meta.env.MODE === "production";
   // 获取当前环境
   if (isProdEnv && appStore.devMode) {
