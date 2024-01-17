@@ -93,6 +93,10 @@ async function loadData(): Promise<void> {
     const res = await getWikiData("Weapon", props.item.id.toString());
     if (res === undefined) return;
     data.value = res.default;
+    showSnackbar({
+      text: `成功获取武器 ${props.item.name} 的 Wiki 数据`,
+      color: "success",
+    });
     selectItems.value = data.value?.affix.Descriptions.map((item) => item.Level) ?? [];
   } catch (error) {
     showSnackbar({

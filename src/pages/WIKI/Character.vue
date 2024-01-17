@@ -38,10 +38,6 @@ onBeforeMount(() => {
     const item = cardsInfo.find((item) => item.id.toString() === id);
     if (item) {
       curItem.value = item;
-      showSnackbar({
-        text: `成功获取角色 ${item.name} 的数据`,
-        color: "success",
-      });
     } else {
       showSnackbar({
         text: `角色 ${id} 不存在`,
@@ -58,10 +54,6 @@ async function switchC(item: TGApp.App.Character.WikiBriefInfo): Promise<void> {
     return;
   }
   curItem.value = item;
-  showSnackbar({
-    text: `成功获取角色 ${item.name} 的数据`,
-    color: "success",
-  });
 }
 
 async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> {

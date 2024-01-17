@@ -39,10 +39,6 @@ onBeforeMount(() => {
     const item = cardsInfo.find((item) => item.id.toString() === id);
     if (item) {
       curItem.value = item;
-      showSnackbar({
-        text: `成功获取武器 ${item.name} 的数据`,
-        color: "success",
-      });
     } else {
       showSnackbar({
         text: `武器 ${id} 不存在`,
@@ -55,10 +51,6 @@ onBeforeMount(() => {
 
 async function switchW(item: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
   curItem.value = item;
-  showSnackbar({
-    text: `成功获取武器 ${item.name} 的数据`,
-    color: "success",
-  });
 }
 
 async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {

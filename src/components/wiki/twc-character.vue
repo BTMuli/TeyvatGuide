@@ -157,9 +157,7 @@ watch(
   },
 );
 
-onMounted(async () => {
-  await loadData();
-});
+onMounted(async () => await loadData());
 
 async function toWiki(): Promise<void> {
   if (props.item.contentId === 0) {
