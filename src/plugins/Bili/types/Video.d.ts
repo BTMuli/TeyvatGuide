@@ -1,12 +1,12 @@
 /**
  * @file plugins/Bili/types/Video.d.ts
  * @description Bili 插件视频类型定义文件
- * @since Beta v0.4.0
+ * @since Beta v0.4.1
  */
 
 /**
  * @description Bili 插件视频类型
- * @since Beta v0.4.0
+ * @since Beta v0.4.1
  * @namespace Video
  * @memberof TGApp.Plugins.Bili
  */
@@ -169,5 +169,90 @@ declare namespace TGApp.Plugins.Bili.Video {
     data: UrlData;
   }
 
-  type UrlData = unknown;
+  /**
+   * @description Bili 视频播放地址返回数据
+   * @since Beta v0.4.1
+   * @interface UrlData
+   * @property {string} from 视频来源
+   * @property {string} result 视频播放地址
+   * @property {string} message 视频播放地址
+   * @property {number} quality 视频清晰度
+   * @property {string} format 视频格式
+   * @property {number} timelength 视频时长 (ms)
+   * @property {string} accept_format 视频支持格式
+   * @property {string[]} accept_description 视频支持格式描述
+   * @property {number[]} accept_quality 视频支持清晰度
+   * @property {number} video_codecid 视频编码ID
+   * @property {string} seek_param 视频跳转参数
+   * @property {string} seek_type 视频跳转类型
+   * @property {UrlDurl[]} durl 视频播放地址
+   * @property {UrlFormats} support_formats 视频支持格式
+   * @property {unknown} high_format 视频高清格式
+   * @property {number} last_play_time 视频上次播放时间
+   * @property {number} last_play_cid 视频上次播放分P号
+   * @return UrlData
+   */
+  interface UrlData {
+    from: string;
+    result: string;
+    message: string;
+    quality: number;
+    format: string;
+    timelength: number;
+    accept_format: string;
+    accept_description: string[];
+    accept_quality: number[];
+    video_codecid: number;
+    seek_param: string;
+    seek_type: string;
+    durl: UrlDurl[];
+    support_formats: UrlFormats;
+    high_format: unknown;
+    last_play_time: number;
+    last_play_cid: number;
+  }
+
+  /**
+   * @description Bili 视频播放地址
+   * @since Beta v0.4.1
+   * @interface UrlDurl
+   * @property {number} order 视频播放地址序号
+   * @property {number} length 视频播放地址长度
+   * @property {number} size 视频播放地址大小
+   * @property {string} ahead 视频播放地址
+   * @property {string} vhead 视频播放地址
+   * @property {string} url 视频播放地址
+   * @property {unknown} backup_url 视频备用播放地址
+   * @return UrlDurl
+   */
+  interface UrlDurl {
+    order: number;
+    length: number;
+    size: number;
+    ahead: string;
+    vhead: string;
+    url: string;
+    backup_url: unknown;
+  }
+
+  /**
+   * @description Bili 视频支持格式
+   * @since Beta v0.4.1
+   * @interface UrlFormats
+   * @property {number} quality 视频清晰度
+   * @property {string} format 视频格式
+   * @property {string} new_description 视频格式描述
+   * @property {string} display_desc 视频格式描述
+   * @property {string} superscript 视频格式描述
+   * @property {unknown} codecs 视频编码
+   * @return UrlFormats
+   */
+  interface UrlFormats {
+    quality: number;
+    format: string;
+    new_description: string;
+    display_desc: string;
+    superscript: string;
+    codecs: unknown;
+  }
 }

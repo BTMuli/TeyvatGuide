@@ -20,7 +20,7 @@ function getKeyVal(key: string): string {
 
 /**
  * @description 获取 mixin_key
- * @since Beta v0.4.0
+ * @since Beta v0.4.1
  * @return {Promise<string>} mixin_key
  */
 async function getMixinKey(): Promise<string> {
@@ -35,12 +35,8 @@ async function getMixinKey(): Promise<string> {
   ];
   const res = [];
   for (const i of MIXIN_KEY_ENC_TAB) {
-    if (key.length < i) {
-      continue;
-    }
     res.push(key[i]);
   }
-  // 截取 res 的前 32 位
   return res.join("").slice(0, 32);
 }
 
@@ -48,33 +44,27 @@ async function getMixinKey(): Promise<string> {
  * @description 获取 wrid
  * @since Beta v0.4.1
  * @param {Record<string,string|number>} params 请求参数
- * @param {number} nts 时间戳（秒）
- * @returns {Promise<string>} wrid
+ * @returns {Promise<[string|string]>} wrid
  */
-async function getWrid(
-  params: Record<string, string | number>,
-  nts?: number,
-): Promise<[number, string]> {
+async function getWrid(params: Record<string, string | number>): Promise<[string, string]> {
   const mixin_key = await getMixinKey();
-  let wts: number;
-  if (!nts) {
-    wts = Math.floor(Date.now() / 1000);
-  } else {
-    wts = nts;
-  }
+  const wts = Math.floor(Date.now() / 1000);
   const obj: Record<string, string | number> = {
     ...params,
     wts,
   };
   const keys = Object.keys(obj).sort();
   let md5Str = "";
-  for (const key of keys) {
-    md5Str += `${key}=${obj[key]}&`;
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    if (i === keys.length - 1) {
+      md5Str += `${key}=${obj[key]}`;
+    } else {
+      md5Str += `${key}=${obj[key]}&`;
+    }
   }
-  md5Str = md5Str.slice(0, -1);
-  md5Str += mixin_key;
-  const wrid = md5.md5(md5Str);
-  return [wts, wrid];
+  const wrid = md5.md5(`${md5Str}${mixin_key}`);
+  return [wts.toString(), wrid];
 }
 
 export default getWrid;

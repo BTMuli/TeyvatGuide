@@ -14,31 +14,8 @@
       </div>
     </div>
   </div>
-  <!--  <TpVideo :data="mock" />-->
 </template>
-<script lang="ts" setup>
-import { onMounted } from "vue";
-
-import Bili from "../../plugins/Bili";
-// import TpVideo from "../../components/post/TpVideo.vue";
-
-const mock = {
-  insert: {
-    video: "https://player.bilibili.com/player.html?aid=540893019&autoplay=false&bvid=BV1ri4y1s7sY",
-  },
-};
-
-onMounted(async () => {
-  const url = new URL(mock.insert.video);
-  const aid = url.searchParams.get("aid") ?? undefined;
-  const bvid = url.searchParams.get("bvid") ?? undefined;
-  const baseData = await Bili.video.view(aid, bvid);
-  console.log("baseData", baseData);
-  const cid = baseData.cid;
-  const urlData = await Bili.video.url(cid, undefined, bvid);
-  console.log("urlData", urlData);
-});
-</script>
+<script lang="ts" setup></script>
 <style lang="css" scoped>
 .test-box {
   display: flex;
