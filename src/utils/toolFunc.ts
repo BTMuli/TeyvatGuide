@@ -1,7 +1,7 @@
 /**
  * @file utils/toolFunc.ts
  * @description 一些工具函数
- * @since Beta v0.3.9
+ * @since Beta v0.4.1
  */
 
 import { os, path } from "@tauri-apps/api";
@@ -60,13 +60,14 @@ export function getNowStr(): string {
 
 /**
  * @description 获取设备信息（初始化时）
- * @since Beta v0.3.6
+ * @since Beta v0.4.1
  * @returns {TGApp.App.Device.DeviceInfo} 设备信息
  */
 export function getInitDeviceInfo(): TGApp.App.Device.DeviceInfo {
   return {
     device_id: v4(),
-    model: getRandomString(6),
+    product: getRandomString(6, "upperNumber"),
+    device_name: getRandomString(12, "upperNumber"),
     seed_id: v4(),
     seed_time: Date.now().toString(),
     device_fp: "0000000000000",
@@ -125,7 +126,7 @@ export async function getCacheDir(): Promise<string[] | false> {
 
 /**
  * @description 获取随机字符串
- * @since Beta v0.3.6
+ * @since Beta v0.4.1
  * @param {number} length 字符串长度
  * @param {string} type
  * @returns {string} 随机字符串
@@ -146,6 +147,9 @@ export function getRandomString(length: number, type: string = "all"): string {
       break;
     case "upper":
       str = char.toUpperCase();
+      break;
+    case "upperNumber":
+      str = char.toUpperCase() + num;
       break;
     case "letter":
       str = char + char.toUpperCase();

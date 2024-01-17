@@ -105,7 +105,12 @@
           />
         </template>
       </v-list-item>
-      <v-list-item prepend-icon="mdi-refresh" title="刷新设备信息" @click="confirmUpdateDevice" />
+      <v-list-item prepend-icon="mdi-refresh">
+        <v-list-item-title @click="confirmUpdateDevice()">刷新设备信息</v-list-item-title>
+        <template #append>
+          <v-icon @click="confirmUpdateDevice(true)">mdi-bug</v-icon>
+        </template>
+      </v-list-item>
       <v-list-item prepend-icon="mdi-database-remove" title="清除缓存" @click="confirmDelCache" />
       <v-list-item
         v-show="showReset"
@@ -120,12 +125,20 @@
         prepend-icon="mdi-folder-key"
         title="本地数据库路径"
         :subtitle="appStore.dataPath.dbDataPath"
-      />
+      >
+        <template #append>
+          <v-icon @click="copyPath('db')">mdi-content-copy</v-icon>
+        </template>
+      </v-list-item>
       <v-list-item
         prepend-icon="mdi-folder-account"
         title="本地用户数据路径"
         :subtitle="appStore.dataPath.userDataDir"
-      />
+      >
+        <template #append>
+          <v-icon @click="copyPath('user')">mdi-content-copy</v-icon>
+        </template>
+      </v-list-item>
     </v-list>
     <TAppBadge />
   </div>
@@ -147,7 +160,7 @@ import { useAppStore } from "../../store/modules/app";
 import { useHomeStore } from "../../store/modules/home";
 import { useUserStore } from "../../store/modules/user";
 import { getBuildTime } from "../../utils/TGBuild";
-import { bytesToSize, getCacheDir, getDeviceInfo } from "../../utils/toolFunc";
+import { bytesToSize, getCacheDir, getDeviceInfo, getRandomString } from "../../utils/toolFunc";
 import { backupUiafData, restoreUiafData } from "../../utils/UIAF";
 import { getDeviceFp } from "../../web/request/getDeviceFp";
 import TGRequest from "../../web/request/TGRequest";
@@ -448,7 +461,33 @@ async function confirmUpdate(title?: string): Promise<void> {
 }
 
 // 更新设备信息
-async function confirmUpdateDevice(): Promise<void> {
+async function confirmUpdateDevice(force?: boolean): Promise<void> {
+  if (force !== undefined && force) {
+    const resF = await showConfirm({
+      title: "确认强制更新设备信息吗？",
+      text: `DeviceFp:${appStore.deviceInfo.device_fp}`,
+    });
+    if (!resF) {
+      showSnackbar({
+        text: "已取消强制更新设备信息",
+        color: "cancel",
+      });
+      return;
+    }
+    appStore.deviceInfo = await TGRequest.Device.getFp();
+    if (appStore.deviceInfo.device_fp === "0000000000000") {
+      appStore.deviceInfo.device_fp = getRandomString(13, "hex");
+      showSnackbar({
+        text: `设备信息获取失败!已使用随机值 ${appStore.deviceInfo.device_fp} 代替`,
+        color: "warn",
+      });
+    } else {
+      showSnackbar({
+        text: "设备信息已更新! DeviceFp: " + appStore.deviceInfo.device_fp,
+      });
+    }
+    return;
+  }
   const localFp = getDeviceInfo("device_fp");
   if (localFp !== "0000000000000") {
     const res = await showConfirm({
@@ -463,7 +502,16 @@ async function confirmUpdateDevice(): Promise<void> {
       return;
     }
   }
+  console.log(appStore.deviceInfo);
   appStore.deviceInfo = await TGRequest.Device.getFp(appStore.deviceInfo);
+  console.log(appStore.deviceInfo);
+  if (appStore.deviceInfo.device_fp === "0000000000000") {
+    appStore.deviceInfo.device_fp = getRandomString(13, "hex");
+    showSnackbar({
+      text: "设备信息获取失败!已使用随机值代替",
+    });
+    return;
+  }
   showSnackbar({
     text: "设备信息已更新! DeviceFp: " + appStore.deviceInfo.device_fp,
   });
@@ -612,6 +660,15 @@ function submitHome(): void {
   // 设置
   homeStore.setShowValue(show);
   showSnackbar({ text: "已修改!" });
+}
+
+function copyPath(type: "db" | "user"): void {
+  const path = type === "db" ? appStore.dataPath.dbDataPath : appStore.dataPath.userDataDir;
+  navigator.clipboard.writeText(path);
+  const content = type === "db" ? "数据库" : "用户数据";
+  showSnackbar({
+    text: `${content}路径已复制!`,
+  });
 }
 </script>
 
