@@ -2,10 +2,11 @@
   <div class="tp-video-box">
     <!-- todo https://socialsisteryi.github.io/bilibili-API-collect/docs/video/videostream_url.html#%E8%A7%86%E9%A2%91%E4%BC%B4%E9%9F%B3%E9%9F%B3%E8%B4%A8%E4%BB%A3%E7%A0%81 -->
     <iframe
+      ref="videoRef"
       class="tp-video-container"
       data-html2canvas-ignore
       :src="props.data.insert.video"
-      :allowfullscreen="false"
+      :allowfullscreen="true"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       sandbox="allow-forms allow-same-origin allow-popups allow-presentation allow-scripts"
     >
@@ -19,8 +20,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import md5 from "js-md5";
-import { onMounted, ref } from "vue";
+import { window as TauriWindow } from "@tauri-apps/api";
+import { onBeforeMount, onMounted, ref } from "vue";
 
 import Bili from "../../plugins/Bili";
 import { saveImgLocal } from "../../utils/TGShare";
@@ -38,20 +39,15 @@ interface TpVideoProps {
 const props = defineProps<TpVideoProps>();
 const videoAspectRatio = ref<number>(16 / 9);
 const videoData = ref<TGApp.Plugins.Bili.Video.ViewData>();
+const videoRef = ref<HTMLIFrameElement | null>(null);
 
 console.log("tpVideo", props.data.insert.video);
 
-onMounted(async () => {
+onBeforeMount(async () => {
   const url = new URL(props.data.insert.video);
   const aid = url.searchParams.get("aid") ?? undefined;
   const bvid = url.searchParams.get("bvid") ?? undefined;
   videoData.value = await Bili.video.view(aid, bvid);
-  if (!videoData.value) {
-    return;
-  }
-  if (!videoData.value?.pic.startsWith("blob")) {
-    videoData.value.pic = await saveImgLocal(videoData.value?.pic);
-  }
   const meta = videoData.value.dimension;
   if (meta.width > meta.height) {
     videoAspectRatio.value = meta.width / meta.height;
@@ -60,9 +56,21 @@ onMounted(async () => {
   }
 });
 
+onMounted(async () => {
+  if (videoData.value && videoData.value.pic && !videoData.value.pic.startsWith("blob:")) {
+    videoData.value.pic = await saveImgLocal(videoData.value.pic);
+  }
+  videoRef.value?.addEventListener("fullscreenchange", async () => {
+    if (document.fullscreenElement) {
+      await TauriWindow.getCurrent().setFullscreen(true);
+    } else {
+      await TauriWindow.getCurrent().setFullscreen(false);
+    }
+  });
+});
+
 function getVideoTime(): string {
   const duration = videoData.value?.duration ?? 0;
-  console.log("duration", duration);
   const seconds = duration % 60;
   const minutes = Math.floor(duration / 60) % 60;
   const hours = Math.floor(duration / 3600);
@@ -73,11 +81,6 @@ function getVideoTime(): string {
   result += `${minutes.toString().padStart(2, "0")}:`;
   result += `${seconds.toString().padStart(2, "0")}`;
   return result;
-}
-
-// 计算 md5
-function getVideoHash(): string {
-  return md5.md5(props.data.insert.video);
 }
 </script>
 <style lang="css" scoped>
