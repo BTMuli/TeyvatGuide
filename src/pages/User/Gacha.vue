@@ -102,7 +102,7 @@ async function confirmRefresh(): Promise<void> {
   });
   if (!confirmRes) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消刷新祈愿数据",
     });
     return;
@@ -244,7 +244,7 @@ async function handleImportBtn(savePath?: string): Promise<void> {
     });
     if (!res) {
       showSnackbar({
-        color: "grey",
+        color: "cancel",
         text: "已取消祈愿数据导入",
       });
       return;
@@ -269,7 +269,7 @@ async function handleImportBtn(savePath?: string): Promise<void> {
     }
   } else {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消文件选择",
     });
   }
@@ -291,7 +291,7 @@ async function handleExportBtn(): Promise<void> {
   });
   if (!res) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消祈愿数据导出",
     });
     return;
@@ -308,7 +308,7 @@ async function handleExportBtn(): Promise<void> {
   });
   if (!file) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消文件保存",
     });
     return;
@@ -343,7 +343,7 @@ async function backupGacha(): Promise<void> {
   });
   if (!res) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消祈愿数据备份",
     });
     return;
@@ -375,7 +375,7 @@ async function deleteGacha(): Promise<void> {
   });
   if (!firstConfirm) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消祈愿数据删除",
     });
     return;
@@ -390,7 +390,7 @@ async function deleteGacha(): Promise<void> {
   }
   if (!secondConfirm) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消祈愿数据删除",
     });
     return;

@@ -282,7 +282,7 @@ async function importJson(): Promise<void> {
   });
   if (!selectedFile) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消文件选择",
     });
     return;

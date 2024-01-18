@@ -252,7 +252,7 @@ async function confirmRefreshUser(): Promise<void> {
   });
   if (!res) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消刷新",
     });
     return;
@@ -360,13 +360,14 @@ async function confirmBackup(): Promise<void> {
   });
   if (!res) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消备份",
     });
     return;
   }
   loadingTitle.value = "正在备份数据...";
   loading.value = true;
+  // todo 这边采用自定义路径
   if (!(await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData }))) {
     await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
   }
@@ -374,15 +375,19 @@ async function confirmBackup(): Promise<void> {
   loadingSub.value = "正在获取成就数据";
   const achievements = await TGSqlite.getUIAF();
   loadingSub.value = "正在备份成就数据";
+  // todo 自定义路径
   await backupUiafData(achievements);
   loadingSub.value = "正在获取 Cookie";
   const cookie = await TGSqlite.getCookie();
   loadingSub.value = "正在备份 Cookie";
+  // todo 自定义路径
   await backupCookieData(cookie);
   loadingSub.value = "正在获取深渊数据";
   const abyss = await TGSqlite.getAbyss();
   loadingSub.value = "正在备份深渊数据";
+  // todo 自定义路径
   await backupAbyssData(abyss);
+  // todo 其他数据备份？
   loadingSub.value = "";
   loading.value = false;
   showSnackbar({ text: "数据已备份!" });
@@ -396,11 +401,12 @@ async function confirmRestore(): Promise<void> {
   });
   if (!resConfirm) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消恢复",
     });
     return;
   }
+  // todo 自定义路径
   loadingTitle.value = "正在恢复数据...";
   loading.value = true;
   if (!(await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData }))) {
@@ -413,17 +419,20 @@ async function confirmRestore(): Promise<void> {
   const fail: string[] = [];
   let res: boolean;
   loadingSub.value = "正在恢复成就数据";
+  // todo 自定义路径
   res = await restoreUiafData();
   if (!res) {
     fail.push("成就数据");
   }
   loadingSub.value = "正在恢复祈愿数据";
+  // todo 自定义路径
   res = await restoreCookieData();
   userStore.cookie.value = await TGSqlite.getCookie();
   if (!res) {
     fail.push("Cookie");
   }
   loadingSub.value = "正在恢复深渊数据";
+  // todo 自定义路径
   res = await restoreAbyssData();
   if (!res) {
     fail.push("深渊数据");
@@ -434,6 +443,9 @@ async function confirmRestore(): Promise<void> {
   loading.value = false;
 }
 
+// todo 设置自定义数据保存路径并进行数据迁移
+// todo macOS 需要测试
+
 // 更新数据
 async function confirmUpdate(title?: string): Promise<void> {
   const res = await showConfirm({
@@ -442,7 +454,7 @@ async function confirmUpdate(title?: string): Promise<void> {
   });
   if (!res) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消更新数据库",
     });
     return;
@@ -546,7 +558,7 @@ async function confirmDelCache(): Promise<void> {
   });
   if (!res) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消清除缓存",
     });
     return;
@@ -571,7 +583,7 @@ async function confirmResetApp(): Promise<void> {
   });
   if (!res) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消恢复默认设置",
     });
     return;
@@ -594,7 +606,7 @@ async function tryShowReset(): Promise<void> {
   });
   if (!res) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消",
     });
     return;
@@ -622,7 +634,7 @@ async function confirmResetDB(title?: string): Promise<void> {
   });
   if (!res) {
     showSnackbar({
-      color: "grey",
+      color: "cancel",
       text: "已取消重置数据库",
     });
     return;
