@@ -20,6 +20,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+// todo https://artplayer.org/?libs=https://cdnjs.cloudflare.com/ajax/libs/dashjs/4.5.2/dash.all.min.js&example=dash
 import { window as TauriWindow } from "@tauri-apps/api";
 import { onBeforeMount, onMounted, ref } from "vue";
 

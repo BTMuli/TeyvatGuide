@@ -185,6 +185,7 @@ declare namespace TGApp.Plugins.Bili.Video {
    * @property {number} video_codecid 视频编码ID
    * @property {string} seek_param 视频跳转参数
    * @property {string} seek_type 视频跳转类型
+   * @property {UrlDash} dash 视频播放地址
    * @property {UrlDurl[]} durl 视频播放地址
    * @property {UrlFormats} support_formats 视频支持格式
    * @property {unknown} high_format 视频高清格式
@@ -205,11 +206,94 @@ declare namespace TGApp.Plugins.Bili.Video {
     video_codecid: number;
     seek_param: string;
     seek_type: string;
-    durl: UrlDurl[];
+    dash: UrlDash; // dash 返回
+    durl: UrlDurl[]; // mp4 返回
     support_formats: UrlFormats;
     high_format: unknown;
     last_play_time: number;
     last_play_cid: number;
+  }
+
+  /**
+   * @description Bili 视频播放地址
+   * @since Beta v0.4.1
+   * @interface UrlDash
+   * @property {number} duration 视频播放地址时长
+   * @property {number} minBufferTime 视频播放地址缓冲时间
+   * @property {number} min_buffer_time 视频播放地址缓冲时间
+   * @property {UrlDashData[]} video 视频播放地址
+   * @property {UrlDashData[]} audio 视频播放地址
+   * @property {number} dolby.type 杜比音频类型
+   * @property {number} dolby.audio 杜比音频
+   * @property {unknown} flac flac音频
+   * @return UrlDash
+   */
+  interface UrlDash {
+    duration: number;
+    minBufferTime: number;
+    min_buffer_time: number;
+    video: UrlDashData[];
+    audio: UrlDashData[];
+    dolby: {
+      type: number;
+      audio: number;
+    };
+    flac: unknown;
+  }
+
+  /**
+   * @description Bili 视频dash返回视频数据
+   * @since Beta v0.4.1
+   * @interface UrlDashData
+   * @property {number} id 视频播放地址ID
+   * @property {string} baseUrl 视频播放地址
+   * @property {string} base_url 视频播放地址
+   * @property {string[]} backupUrl 视频备用播放地址
+   * @property {string[]} backup_url 视频备用播放地址
+   * @property {number} bandwidth 视频播放地址带宽
+   * @property {string} mimeType 视频播放地址类型
+   * @property {string} mime_type 视频播放地址类型
+   * @property {string} codecs 视频播放地址编码
+   * @property {number} width 视频播放地址宽度
+   * @property {number} height 视频播放地址高度
+   * @property {string} frameRate 视频播放地址帧率
+   * @property {string} frame_rate 视频播放地址帧率
+   * @property {string} sar 视频播放地址比例
+   * @property {number} startWithSap 是否从SAP开始
+   * @property {number} start_with_sap  是否从SAP开始
+   * @property {string} segmentBase.Initialization 初始化
+   * @property {string} segmentBase.indexRange 索引范围
+   * @property {string} segment_base.initialization 初始化
+   * @property {string} segment_base.index_range 索引范围
+   * @property {number} codecid 视频播放地址编码ID
+   * @return UrlDashData
+   */
+  interface UrlDashData {
+    id: number;
+    baseUrl: string;
+    base_url: string;
+    backupUrl: string[];
+    backup_url: string[];
+    bandwidth: number;
+    mimeType: string;
+    mime_type: string;
+    codecs: string;
+    width: number;
+    height: number;
+    frameRate: string;
+    frame_rate: string;
+    sar: string;
+    startWithSap: number;
+    start_with_sap: number;
+    segmentBase: {
+      Initialization: string;
+      indexRange: string;
+    };
+    segment_base: {
+      initialization: string;
+      index_range: string;
+    };
+    codecid: number;
   }
 
   /**
