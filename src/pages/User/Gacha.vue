@@ -41,7 +41,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { dialog, fs, path } from "@tauri-apps/api";
+import { dialog, path } from "@tauri-apps/api";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, watch } from "vue";
 
