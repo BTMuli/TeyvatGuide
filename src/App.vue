@@ -182,6 +182,16 @@ async function checkUserLoad(): Promise<void> {
   } else {
     console.info("curAccount 数据已加载！");
   }
+
+  const userDir = appData.find((item) => item.key === "userDir")?.value;
+  if (userDir === undefined) {
+    await TGSqlite.saveAppData("userDir", appStore.userDir);
+  } else if (userDir !== appStore.userDir) {
+    appStore.userDir = userDir;
+    console.info("userDir 数据已更新！");
+  } else {
+    console.info("userDir 数据已加载！");
+  }
 }
 
 // 创建数据文件夹

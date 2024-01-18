@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.3.9
+ * @since Beta v0.4.1
  */
 
 import { path } from "@tauri-apps/api";
@@ -33,15 +33,10 @@ export const useAppStore = defineStore(
     const theme = ref("default");
     // 是否登录
     const isLogin = ref(false);
-
-    const dataPath = reactive({
-      userDataDir,
-      dbDataPath,
-    });
-    // 用户数据路径
-    const userPath = ref({
-      UIAF: `${dataPath.userDataDir}/UIAF.json`,
-    });
+    // 用户数据目录
+    const userDir = ref(userDataDir);
+    // 数据库路径
+    const dbPath = ref(dbDataPath);
     // 设备信息
     const deviceInfo = ref<TGApp.App.Device.DeviceInfo>(getInitDeviceInfo());
 
@@ -69,10 +64,10 @@ export const useAppStore = defineStore(
       buildTime,
       sidebar,
       devMode,
-      dataPath,
-      userPath,
       deviceInfo,
       isLogin,
+      userDir,
+      dbPath,
       init,
       changeTheme,
     };
@@ -82,7 +77,7 @@ export const useAppStore = defineStore(
       {
         key: "appPath",
         storage: window.localStorage,
-        paths: ["dataPath", "userPath"],
+        paths: ["userDir", "dbPath"],
       },
       {
         key: "app",

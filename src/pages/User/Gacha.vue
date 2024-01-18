@@ -52,11 +52,13 @@ import GroOverview from "../../components/gachaRecord/gro-overview.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import { AppCharacterData, AppWeaponData } from "../../data";
 import TGSqlite from "../../plugins/Sqlite";
+import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
 import { backupUigfData, exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF";
 import TGRequest from "../../web/request/TGRequest";
 
 // store
+const appStore = useAppStore();
 const userStore = storeToRefs(useUserStore());
 const account = userStore.account.value;
 const authkey = ref<string>("");
@@ -324,8 +326,7 @@ async function handleExportBtn(): Promise<void> {
 
 // 恢复UID祈愿数据，相当于导入祈愿数据，不过目录固定
 async function restoreGacha(): Promise<void> {
-  const backupPath = `${await path.appLocalDataDir()}userData`;
-  await handleImportBtn(backupPath);
+  await handleImportBtn(appStore.userDir);
 }
 
 // 备份当前 UID 的祈愿数据
@@ -350,10 +351,7 @@ async function backupGacha(): Promise<void> {
   }
   loadingTitle.value = "正在备份祈愿数据";
   loading.value = true;
-  if (!(await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData }))) {
-    await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
-  }
-  await backupUigfData(uidCur.value, gachaListCur.value);
+  await backupUigfData(appStore.userDir, uidCur.value, gachaListCur.value);
   loading.value = false;
   showSnackbar({
     text: `已成功备份 ${uidCur.value} 的祈愿数据`,

@@ -121,11 +121,11 @@
       <v-list-item prepend-icon="mdi-cog-sync" title="恢复默认设置" @click="confirmResetApp" />
       <v-list-subheader :inset="true" class="config-header" title="路径" />
       <v-divider :inset="true" class="border-opacity-75" />
-      <v-list-item
-        prepend-icon="mdi-folder-key"
-        title="本地数据库路径"
-        :subtitle="appStore.dataPath.dbDataPath"
-      >
+      <v-list-item prepend-icon="mdi-folder-key">
+        <v-list-item-title style="cursor: pointer" @click="confirmCUD"
+          >本地数据库路径</v-list-item-title
+        >
+        <v-list-item-subtitle>{{ appStore.userDir }}</v-list-item-subtitle>
         <template #append>
           <v-icon @click="copyPath('db')">mdi-content-copy</v-icon>
         </template>
@@ -133,7 +133,7 @@
       <v-list-item
         prepend-icon="mdi-folder-account"
         title="本地用户数据路径"
-        :subtitle="appStore.dataPath.userDataDir"
+        :subtitle="appStore.dbPath"
       >
         <template #append>
           <v-icon @click="copyPath('user')">mdi-content-copy</v-icon>
@@ -145,7 +145,7 @@
 </template>
 
 <script lang="ts" setup>
-import { app, fs, invoke, os, process as TauriProcess } from "@tauri-apps/api";
+import { app, dialog, fs, invoke, os, process as TauriProcess } from "@tauri-apps/api";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
 
@@ -159,13 +159,11 @@ import { useAchievementsStore } from "../../store/modules/achievements";
 import { useAppStore } from "../../store/modules/app";
 import { useHomeStore } from "../../store/modules/home";
 import { useUserStore } from "../../store/modules/user";
+import { backUpUserData, restoreUserData } from "../../utils/dataBS";
 import { getBuildTime } from "../../utils/TGBuild";
 import { bytesToSize, getCacheDir, getDeviceInfo, getRandomString } from "../../utils/toolFunc";
-import { backupUiafData, restoreUiafData } from "../../utils/UIAF";
 import { getDeviceFp } from "../../web/request/getDeviceFp";
 import TGRequest from "../../web/request/TGRequest";
-import { backupAbyssData, backupCookieData } from "../../web/utils/backupData";
-import { restoreAbyssData, restoreCookieData } from "../../web/utils/restoreData";
 
 // Store
 const appStore = useAppStore();
@@ -367,28 +365,9 @@ async function confirmBackup(): Promise<void> {
   }
   loadingTitle.value = "正在备份数据...";
   loading.value = true;
-  // todo 这边采用自定义路径
-  if (!(await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData }))) {
-    await fs.createDir("userData", { dir: fs.BaseDirectory.AppLocalData, recursive: true });
-  }
-  console.info("数据文件夹创建完成！");
-  loadingSub.value = "正在获取成就数据";
-  const achievements = await TGSqlite.getUIAF();
-  loadingSub.value = "正在备份成就数据";
-  // todo 自定义路径
-  await backupUiafData(achievements);
-  loadingSub.value = "正在获取 Cookie";
-  const cookie = await TGSqlite.getCookie();
-  loadingSub.value = "正在备份 Cookie";
-  // todo 自定义路径
-  await backupCookieData(cookie);
-  loadingSub.value = "正在获取深渊数据";
-  const abyss = await TGSqlite.getAbyss();
-  loadingSub.value = "正在备份深渊数据";
-  // todo 自定义路径
-  await backupAbyssData(abyss);
-  // todo 其他数据备份？
-  loadingSub.value = "";
+  const saveDir = appStore.userDir;
+  loadingSub.value = "祈愿数据需单独备份";
+  await backUpUserData(saveDir);
   loading.value = false;
   showSnackbar({ text: "数据已备份!" });
 }
@@ -409,37 +388,9 @@ async function confirmRestore(): Promise<void> {
   // todo 自定义路径
   loadingTitle.value = "正在恢复数据...";
   loading.value = true;
-  if (!(await fs.exists("userData", { dir: fs.BaseDirectory.AppLocalData }))) {
-    showSnackbar({
-      color: "error",
-      text: "数据文件夹不存在！",
-    });
-    return;
-  }
-  const fail: string[] = [];
-  let res: boolean;
-  loadingSub.value = "正在恢复成就数据";
-  // todo 自定义路径
-  res = await restoreUiafData();
-  if (!res) {
-    fail.push("成就数据");
-  }
-  loadingSub.value = "正在恢复祈愿数据";
-  // todo 自定义路径
-  res = await restoreCookieData();
-  userStore.cookie.value = await TGSqlite.getCookie();
-  if (!res) {
-    fail.push("Cookie");
-  }
-  loadingSub.value = "正在恢复深渊数据";
-  // todo 自定义路径
-  res = await restoreAbyssData();
-  if (!res) {
-    fail.push("深渊数据");
-  }
-  fail.length > 0
-    ? showSnackbar({ text: `${fail.join("、")} 恢复失败!`, color: "error" })
-    : showSnackbar({ text: "数据已恢复!" });
+  loadingSub.value = "祈愿数据需单独恢复";
+  const saveDir = appStore.userDir;
+  await restoreUserData(saveDir);
   loading.value = false;
 }
 
@@ -675,12 +626,64 @@ function submitHome(): void {
 }
 
 function copyPath(type: "db" | "user"): void {
-  const path = type === "db" ? appStore.dataPath.dbDataPath : appStore.dataPath.userDataDir;
+  const path = type === "db" ? appStore.dbPath : appStore.userDir;
   navigator.clipboard.writeText(path);
   const content = type === "db" ? "数据库" : "用户数据";
   showSnackbar({
     text: `${content}路径已复制!`,
   });
+}
+
+async function confirmCUD(): Promise<void> {
+  const oriDir = appStore.userDir;
+  const check = await showConfirm({
+    title: "确认修改用户数据路径吗？",
+    text: "祈愿数据需修改后重新手动备份！",
+  });
+  if (!check) {
+    showSnackbar({
+      color: "cancel",
+      text: "已取消修改",
+    });
+    return;
+  }
+  const dir = await dialog.open({
+    directory: true,
+    defaultPath: oriDir,
+    multiple: false,
+  });
+  if (dir === null) {
+    showSnackbar({
+      color: "error",
+      text: "路径不能为空!",
+    });
+    return;
+  }
+  if (typeof dir !== "string") {
+    showSnackbar({
+      color: "error",
+      text: "路径错误!",
+    });
+    return;
+  }
+  if (dir === oriDir) {
+    showSnackbar({
+      color: "warn",
+      text: "路径未修改!",
+    });
+    return;
+  }
+  appStore.userDir = dir;
+  await TGSqlite.saveAppData("userDir", dir);
+  await backUpUserData(dir);
+  await fs.removeDir(oriDir, { recursive: true });
+  showSnackbar({
+    text: "已重新备份数据!即将刷新页面！",
+    timeout: 3000,
+  });
+  setTimeout(() => {
+    window.location.reload();
+  }, 4000);
 }
 </script>
 

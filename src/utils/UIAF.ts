@@ -1,12 +1,10 @@
 /**
  * @file utils/UIAF.ts
  * @description UIAF工具类
- * @since Beta v0.3.4
+ * @since Beta v0.4.1
  */
 
-import { app, fs, path } from "@tauri-apps/api";
-
-import TGSqlite from "../plugins/Sqlite";
+import { app, fs } from "@tauri-apps/api";
 
 /**
  * @description 根据 completed 跟 progress 获取 status
@@ -63,33 +61,4 @@ export async function verifyUiafData(path: string): Promise<boolean> {
 export async function readUiafData(userPath: string): Promise<TGApp.Plugins.UIAF.Data> {
   const fileData = await fs.readTextFile(userPath);
   return <TGApp.Plugins.UIAF.Data>JSON.parse(fileData);
-}
-
-/**
- * @description 根据成就数据导出 UIAF 数据
- * @since Alpha v0.2.3
- * @param {TGApp.Plugins.UIAF.Achievement[]} achievementData - 成就数据
- * @returns {Promise<void>}
- */
-export async function backupUiafData(
-  achievementData: TGApp.Plugins.UIAF.Achievement[],
-): Promise<void> {
-  const savePath = `${await path.appLocalDataDir()}userData\\UIAF.json`;
-  await fs.writeTextFile(savePath, JSON.stringify(achievementData, null, 2));
-}
-
-/**
- * @description 根据 UIAF 数据恢复成就数据
- * @since Alpha v0.2.3
- * @returns {Promise<boolean>} 恢复的成就数量
- */
-export async function restoreUiafData(): Promise<boolean> {
-  const uiafPath = `${await path.appLocalDataDir()}userData\\UIAF.json`;
-  // 检测是否存在 UIAF 数据
-  if (!(await fs.exists(uiafPath))) {
-    return false;
-  }
-  const uiafData: TGApp.Plugins.UIAF.Achievement[] = JSON.parse(await fs.readTextFile(uiafPath));
-  await TGSqlite.mergeUIAF(uiafData);
-  return true;
 }
