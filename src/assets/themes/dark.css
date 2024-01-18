@@ -1,7 +1,7 @@
 /**
  * @file assets/themes/dark.css
  * @description 主题样式文件-深色主题
- * @since Beta v0.3.9
+ * @since Beta v0.4.1
  */
 
 /* dark mode */
@@ -46,21 +46,6 @@ html.dark {
   --common-shadow-t-4: rgb(0 0 0 / 40%);
   --common-shadow-t-8: rgb(0 0 0 / 80%);
 
-  /* box bg */
-  --common-bg-1: #3d424b; /* 一级背景色 */
-  --common-bgt-1: #faf7e8; /* 一级背景色对应的文本色 */
-
   /* text */
   --common-text-title: var(--tgc-yellow-2); /* title，米色 */
-  --common-text-content: var(--tgc-white-1); /* text */
-  --common-text-quote: var(--tgc-dark-7); /* quote */
-
-  --back-top-shadow: #000000;
-  --post-default-text: #faf7e8;
-
-  --content-bg-2: #393b40;
-  --content-bg-3: #2a2a2a;
-
-  --content-text-2: #faf7e8;
-  --content-text-3: #e1e1e1;
 }

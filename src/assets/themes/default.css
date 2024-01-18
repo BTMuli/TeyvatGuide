@@ -1,7 +1,7 @@
 /**
  * @file assets/themes/default.css
  * @description 主题样式文件-默认（浅色）主题
- * @since Beta v0.3.9
+ * @since Beta v0.4.1
  */
 
 /* default(light) theme */
@@ -48,15 +48,4 @@ html.default {
 
   /* common text color */
   --common-text-title: var(--tgc-dark-8); /* title */
-  --common-text-content: var(--tgc-blue-1); /* text todo */
-  --common-text-quote: var(--tgc-white-4); /* quote todo */
-
-  --back-top-shadow: #546d8b;
-  --post-default-text: #1e1e1e;
-
-  --content-bg-2: #faf7e8;
-  --content-bg-3: #5b738f;
-
-  --content-text-2: #393b40;
-  --content-text-3: #546d8b;
 }

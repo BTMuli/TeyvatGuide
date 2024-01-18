@@ -68,7 +68,7 @@ onMounted(async () => {
 }
 
 .jv-container {
-  background: var(--content-bg-2) !important;
+  background: var(--box-bg-2) !important;
 }
 
 .jv-key,
