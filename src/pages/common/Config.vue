@@ -123,20 +123,20 @@
       <v-divider :inset="true" class="border-opacity-75" />
       <v-list-item prepend-icon="mdi-folder-key">
         <v-list-item-title style="cursor: pointer" @click="confirmCUD"
-          >本地数据库路径</v-list-item-title
+          >用户数据目录</v-list-item-title
         >
         <v-list-item-subtitle>{{ appStore.userDir }}</v-list-item-subtitle>
         <template #append>
-          <v-icon @click="copyPath('db')">mdi-content-copy</v-icon>
+          <v-icon @click="copyPath('user')">mdi-content-copy</v-icon>
         </template>
       </v-list-item>
       <v-list-item
         prepend-icon="mdi-folder-account"
-        title="本地用户数据路径"
+        title="应用数据库路径"
         :subtitle="appStore.dbPath"
       >
         <template #append>
-          <v-icon @click="copyPath('user')">mdi-content-copy</v-icon>
+          <v-icon @click="copyPath('db')">mdi-content-copy</v-icon>
         </template>
       </v-list-item>
     </v-list>
