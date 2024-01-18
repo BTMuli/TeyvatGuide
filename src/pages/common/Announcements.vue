@@ -16,8 +16,8 @@
     <v-window-item v-for="(value, index) in tabValues" :key="index" :value="value">
       <div class="anno-grid">
         <v-card v-for="item in annoCards[value]" :key="item.id" class="anno-card">
-          <div class="anno-cover" @click="createAnno(item)" :title="item.title">
-            <img :src="item.banner" alt="cover" />
+          <div class="anno-cover" :title="item.title">
+            <img :src="item.banner" alt="cover" @click="createAnno(item)" />
             <div class="anno-info">
               <div class="anno-id">ID:{{ item.id }}</div>
               <div class="anno-time">

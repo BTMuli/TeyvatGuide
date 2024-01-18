@@ -29,8 +29,8 @@
     <v-window-item v-for="(value, index) in tabValues" :key="index" :value="value">
       <div class="news-grid">
         <v-card v-for="item in postData[value]" :key="item.postId" class="news-card">
-          <div class="news-cover" @click="createPost(item)">
-            <img :src="item.cover" alt="cover" />
+          <div class="news-cover">
+            <img :src="item.cover" alt="cover" @click="createPost(item)" />
             <div v-if="value === 'activity'" class="news-card-act">
               <div
                 class="nca-status"

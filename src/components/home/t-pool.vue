@@ -54,9 +54,6 @@
         </div>
       </div>
     </div>
-    <v-snackbar v-model="showBar" :color="barColor" timeout="1000">
-      {{ barText }}
-    </v-snackbar>
   </div>
 </template>
 <script lang="ts" setup>
@@ -66,16 +63,13 @@ import Mys from "../../plugins/Mys";
 import { useHomeStore } from "../../store/modules/home";
 import { createPost, createTGWindow } from "../../utils/TGWindow";
 import { stamp2LastTime } from "../../utils/toolFunc";
+import showSnackbar from "../func/snackbar";
 
 // store
 const homeStore = useHomeStore();
 
 // loading
 const loading = ref<boolean>(true);
-// snackbar
-const showBar = ref<boolean>(false);
-const barText = ref<string>("");
-const barColor = ref<string>("error");
 
 const hasNew = ref<boolean>(false);
 const showNew = ref<boolean>(false);
@@ -88,10 +82,7 @@ const poolTimePass = ref<Record<number, number>>({});
 const timer = ref<Record<number, any>>({});
 
 // expose
-defineExpose({
-  name: "限时祈愿",
-  loading,
-});
+defineExpose({ name: "限时祈愿", loading });
 
 function poolLastInterval(postId: number): TGApp.Plugins.Mys.Gacha.RenderCard | undefined {
   const pool = poolCards.value.find((pool) => pool.postId === postId);
@@ -191,9 +182,10 @@ function checkCover(data: TGApp.Plugins.Mys.Gacha.Data[]): boolean {
 
 async function toOuter(url: string, title: string): Promise<void> {
   if (!url) {
-    barText.value = "链接为空!";
-    barColor.value = "error";
-    showBar.value = true;
+    showSnackbar({
+      text: "链接为空!",
+      color: "error",
+    });
     return;
   }
   createTGWindow(url, "Sub_window", `Pool_${title}`, 1200, 800, true, true);
