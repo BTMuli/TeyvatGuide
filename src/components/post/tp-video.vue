@@ -21,6 +21,9 @@
 </template>
 <script lang="ts" setup>
 // todo https://artplayer.org/?libs=https://cdnjs.cloudflare.com/ajax/libs/dashjs/4.5.2/dash.all.min.js&example=dash
+// todo flv
+// https://artplayer.org/document/library/flv.html
+//  https://api.bilibili.com/x/player/playurl?avid=666064953&cid=1400018762&qn=64&otype=json
 import { window as TauriWindow } from "@tauri-apps/api";
 import { onBeforeMount, onMounted, ref } from "vue";
 
