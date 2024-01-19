@@ -9,6 +9,27 @@ Update: 2024-01-15
 >
 > 更新于 `2024-01-15 17:29:15`
 
+## [0.4.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.1) (2024-01-19)
+
+### Feat
+
+- 组件：首页素材日历添加 wiki 页面跳转
+- 应用：完善 fp 获取，添加强制更新入口
+- 图鉴：名片图鉴搜索支持搜索来源
+- 应用：支持修改数据目录 [`#78`](https://github.com/BTMuli/TeyvatGuide/issues/78)
+
+### Fix
+
+- 应用：修复首页启动卡数据加载 [`#79`](https://github.com/BTMuli/TeyvatGuide/issues/79)
+- 应用：修复 macOS 启动崩溃 [`#82`](https://github.com/BTMuli/TeyvatGuide/issues/82)
+- 图鉴：完善切换时的底部 hint
+
+### Change
+
+- 图鉴：卡牌图鉴样式重构
+- 组件：统一底部弹窗样式
+- 应用：调整部分点击跳转逻辑
+
 ## [0.4.0](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.0) (2024-01-15)
 
 ### Feat
