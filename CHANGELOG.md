@@ -2,12 +2,12 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-01-15
-Update: 2024-01-15
+Update: 2024-01-19
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-01-15 17:29:15`
 >
-> 更新于 `2024-01-15 17:29:15`
+> 更新于 `2024-01-19 10:25:54`
 
 ## [0.4.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.1) (2024-01-19)
 
