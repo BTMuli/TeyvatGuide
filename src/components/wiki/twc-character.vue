@@ -96,7 +96,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import TwcConstellations from "./twc-constellations.vue";
 import TwcMaterials from "./twc-materials.vue";
 import TwcSkills from "./twc-skills.vue";
-import { getWikiData } from "../../data";
+import { WikiCharacterData } from "../../data";
 import Mys from "../../plugins/Mys";
 import { createTGWindow } from "../../utils/TGWindow";
 import showSnackbar from "../func/snackbar";
@@ -106,13 +106,7 @@ interface TwcCharacterProps {
   item: TGApp.App.Character.WikiBriefInfo;
 }
 
-type TwcCharacterEmits = {
-  (e: "update:modelValue", value: TGApp.App.Character.WikiBriefInfo): void;
-  (e: "error"): void;
-};
-
 const props = defineProps<TwcCharacterProps>();
-const emits = defineEmits<TwcCharacterEmits>();
 
 const data = ref<TGApp.App.Character.WikiItem>();
 const box = computed(() => {
@@ -132,22 +126,19 @@ const box = computed(() => {
 });
 
 async function loadData(): Promise<void> {
-  try {
-    const res = await getWikiData("Character", props.item.id.toString());
-    if (res === undefined) return;
-    data.value = res.default;
-    showSnackbar({
-      text: `成功获取角色 ${props.item.name} 的 Wiki 数据`,
-      color: "success",
-    });
-  } catch (error) {
+  const res = WikiCharacterData.find((item) => item.id === props.item.id);
+  if (res === undefined) {
     showSnackbar({
       text: `未获取到角色 ${props.item.name} 的 Wiki 数据`,
       color: "error",
     });
-    console.error(error);
-    emits("error");
+    return;
   }
+  data.value = res;
+  showSnackbar({
+    text: `成功获取角色 ${props.item.name} 的 Wiki 数据`,
+    color: "success",
+  });
 }
 
 watch(

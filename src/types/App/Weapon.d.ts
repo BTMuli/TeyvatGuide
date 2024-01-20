@@ -1,7 +1,7 @@
 /**
  * @file types/App/Weapon.d.ts
  * @description 本应用的武器类型定义文件
- * @since Beta v0.3.9
+ * @since Beta v0.4.1
  */
 
 declare namespace TGApp.App.Weapon {
@@ -30,7 +30,7 @@ declare namespace TGApp.App.Weapon {
 
   /**
    * @description 转换后的武器数据
-   * @since Beta v0.3.9
+   * @since Beta v0.4.1
    * @interface WikiItem
    * @memberof TGApp.App.Weapon
    * @property {number} id 武器 id
@@ -50,7 +50,7 @@ declare namespace TGApp.App.Weapon {
     star: number;
     weapon: string;
     materials: TGApp.App.Calendar.Material[];
-    affix: TGApp.Plugins.Hutao.Weapon.RhiAffix;
+    affix?: TGApp.Plugins.Hutao.Weapon.RhiAffix;
     story: string[];
   }
 }

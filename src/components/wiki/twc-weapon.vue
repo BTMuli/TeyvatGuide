@@ -8,6 +8,7 @@
           <span @click="toWiki()"><v-icon>mdi-link</v-icon></span>
         </div>
         <v-rating
+          v-if="data.affix"
           class="tww-brief-rating"
           v-model="select"
           :length="selectItems.length"
@@ -18,7 +19,7 @@
       </div>
     </div>
     <TwcMaterials :data="data.materials" />
-    <v-expansion-panels class="tww-affix">
+    <v-expansion-panels class="tww-affix" v-if="data.affix">
       <v-expansion-panel expand-icon="mdi-menu-down">
         <template #title>
           <span class="tww-text-title">{{ data.affix.Name }}-精炼 {{ select }}</span>
@@ -53,7 +54,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 
 import TwcMaterials from "./twc-materials.vue";
-import { getWikiData } from "../../data";
+import { WikiWeaponData } from "../../data";
 import Mys from "../../plugins/Mys";
 import { createTGWindow } from "../../utils/TGWindow";
 import { parseHtmlText } from "../../utils/toolFunc";
@@ -64,12 +65,7 @@ interface TwcWeaponProps {
   item: TGApp.App.Weapon.WikiBriefInfo;
 }
 
-type TwcWeaponEmits = {
-  (e: "error"): void;
-};
-
 const props = defineProps<TwcWeaponProps>();
-const emits = defineEmits<TwcWeaponEmits>();
 
 const data = ref<TGApp.App.Weapon.WikiItem>();
 const box = computed(() => {
@@ -89,22 +85,21 @@ const select = ref<number>(1);
 const selectItems = ref<number[]>([]);
 
 async function loadData(): Promise<void> {
-  try {
-    const res = await getWikiData("Weapon", props.item.id.toString());
-    if (res === undefined) return;
-    data.value = res.default;
-    showSnackbar({
-      text: `成功获取武器 ${props.item.name} 的 Wiki 数据`,
-      color: "success",
-    });
-    selectItems.value = data.value?.affix.Descriptions.map((item) => item.Level) ?? [];
-  } catch (error) {
+  const res = WikiWeaponData.find((item) => item.id === props.item.id);
+  if (res === undefined) {
     showSnackbar({
       text: `未获取到武器 ${props.item.name} 的 Wiki 数据`,
       color: "error",
     });
-    emits("error");
+    return;
   }
+  data.value = res;
+  showSnackbar({
+    text: `成功获取武器 ${props.item.name} 的 Wiki 数据`,
+    color: "success",
+  });
+  if (data.value?.affix === undefined) return;
+  selectItems.value = data.value?.affix.Descriptions.map((item) => item.Level) ?? [];
 }
 
 watch(

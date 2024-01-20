@@ -1,7 +1,7 @@
 /**
  * @file types/App/Character.d.ts
  * @description 角色相关类型定义文件
- * @since Beta v0.3.8
+ * @since Beta v0.4.1
  */
 
 declare namespace TGApp.App.Character {
@@ -43,7 +43,7 @@ declare namespace TGApp.App.Character {
 
   /**
    * @description Wiki 详细数据
-   * @since Beta v0.3.8
+   * @since Beta v0.4.1
    * @interface WikiItem
    * @memberof TGApp.Plugins.Hutao.Character
    * @property {number} id 角色编号
@@ -87,7 +87,7 @@ declare namespace TGApp.App.Character {
     };
     star: number;
     element: string;
-    weapon: TGApp.Plugins.Hutao.Base.WeaponType;
+    weapon: string;
     materials: TGApp.App.Calendar.Material[];
     skills: WikiSkill[];
     constellation: TGApp.Plugins.Hutao.Character.RhisdTalent[];

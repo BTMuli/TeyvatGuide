@@ -1,19 +1,19 @@
 /**
  * @file plugins/Hutao/types/Weapon.d.ts
  * @description 武器组件类型定义
- * @since Beta v0.3.9
+ * @since Beta v0.4.1
  */
 
 /**
  * @description 武器类型 namespace
- * @since Beta v0.3.8
+ * @since Beta v0.4.1
  * @namespace TGApp.Plugins.Hutao.Weapon
  * @memberof TGApp.Plugins.Hutao
  */
 declare namespace TGApp.Plugins.Hutao.Weapon {
   /**
    * @description 元数据-胡桃
-   * @since Beta v0.3.8
+   * @since Beta v0.4.1
    * @memberof TGApp.Plugins.Hutao.Weapon
    * @description RawHutaoItem => Rhi
    * @property {number} Id 角色编号
@@ -45,7 +45,7 @@ declare namespace TGApp.Plugins.Hutao.Weapon {
       Type: number;
       Value: number;
     };
-    Affix: RhiAffix;
+    Affix?: RhiAffix;
     CultivationItems: number[];
   }
 

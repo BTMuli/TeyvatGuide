@@ -1,7 +1,7 @@
 /**
  * @file src/data/index.ts
  * @description 数据文件入口
- * @since Beta v0.3.8
+ * @since Beta v0.4.2
  */
 
 import achievements from "./app/achievements.json";
@@ -11,6 +11,8 @@ import character from "./app/character.json";
 import GCG from "./app/GCG.json";
 import nameCards from "./app/namecard.json";
 import weapon from "./app/weapon.json";
+import wikiCharacter from "./WIKI/character.json";
+import wikiWeapon from "./WIKI/weapon.json";
 
 export const AppAchievementsData: TGApp.App.Achievement.Item[] = achievements;
 export const AppAchievementSeriesData: TGApp.App.Achievement.Series[] = achievementSeries;
@@ -19,24 +21,5 @@ export const AppCharacterData: TGApp.App.Character.WikiBriefInfo[] = character;
 export const AppGCGData: TGApp.App.GCG.WikiBriefInfo[] = GCG;
 export const AppNameCardsData: TGApp.App.NameCard.Item[] = nameCards;
 export const AppWeaponData: TGApp.App.Weapon.WikiBriefInfo[] = weapon;
-
-const wikiFiles = import.meta.glob("./wiki/**/*.json");
-
-/**
- * @description 动态读取wiki文件
- * @since Beta v0.3.8
- * @param {string} dir 目录
- * @param {string} name 文件名
- * @returns {Promise<any>} 文件内容
- */
-export async function getWikiData(
-  dir: "Character",
-  name: string,
-): Promise<{ default: TGApp.App.Character.WikiItem } | undefined>;
-export async function getWikiData(
-  dir: "Weapon",
-  name: string,
-): Promise<{ default: TGApp.App.Weapon.WikiItem } | undefined>;
-export async function getWikiData(dir: string, name: string): Promise<any> {
-  return await wikiFiles[`./wiki/${dir}/${name}.json`]();
-}
+export const WikiCharacterData: TGApp.App.Character.WikiItem[] = wikiCharacter;
+export const WikiWeaponData: TGApp.App.Weapon.WikiItem[] = wikiWeapon;
