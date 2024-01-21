@@ -29,7 +29,7 @@
         :value="item.id"
         class="ua-window-item"
       >
-        <div :ref="getAbyssRef" class="uaw-i-ref">
+        <div :id="`user-abyss-${item.id}`" class="uaw-i-ref">
           <div class="uaw-title">
             <span>第</span>
             <span>{{ item.id }}</span>
@@ -175,22 +175,43 @@ function toAbyss(id: number): void {
   }
 }
 
-function getAbyssRef(el: HTMLElement): void {
-  abyssRef.value = el;
-}
-
 async function shareAbyss(): Promise<void> {
+  if (localAbyssID.value.length === 0) {
+    showSnackbar({
+      text: "暂无数据",
+      color: "error",
+    });
+    return;
+  }
   const fileName = `【深渊数据】${curAbyss.value.id}-${user.value.gameUid}`;
   loadingTitle.value = "正在生成图片";
   loadingSub.value = `${fileName}.png`;
   loading.value = true;
+  abyssRef.value = <HTMLElement>document.getElementById(`user-abyss-${curAbyss.value.id}`);
   await generateShareImg(fileName, abyssRef.value);
   loadingSub.value = "";
   loading.value = false;
 }
 
 async function uploadAbyss(): Promise<void> {
-  const abyssData = curAbyss.value;
+  const abyssData = localAbyss.value.find((item) => item.id === Math.max(...localAbyssID.value));
+  if (!abyssData) {
+    showSnackbar({
+      text: "未找到深渊数据",
+      color: "error",
+    });
+    return;
+  }
+  const startTime = new Date(abyssData.startTime).getTime();
+  const endTime = new Date(abyssData.endTime).getTime();
+  const nowTime = new Date().getTime();
+  if (nowTime < startTime || nowTime > endTime) {
+    showSnackbar({
+      text: "非最新深渊数据，请刷新深渊数据后重试！",
+      color: "error",
+    });
+    return;
+  }
   loadingTitle.value = "正在转换深渊数据";
   loading.value = true;
   const transAbyss = Hutao.Abyss.utils.transData(abyssData);
