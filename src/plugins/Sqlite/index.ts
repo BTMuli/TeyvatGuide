@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/index.ts
  * @description Sqlite 数据库操作类
- * @since Beta v0.4.0
+ * @since Beta v0.4.1
  */
 
 import { app } from "@tauri-apps/api";
@@ -115,12 +115,15 @@ class Sqlite {
 
   /**
    * @description 插入 Account 数据
-   * @since Beta v0.3.3
+   * @since Beta v0.4.1
    * @param {TGApp.User.Account.Game[]} accounts
    * @returns {Promise<void>}
    */
   public async saveAccount(accounts: TGApp.User.Account.Game[]): Promise<void> {
     const db = await this.getDB();
+    // 为了防止多账号的情况，先清空数据表
+    const clear = "DELETE FROM GameAccount WHERE 1=1;";
+    await db.execute(clear);
     for (const a of accounts) {
       const sql = insertGameAccountData(a);
       await db.execute(sql);
@@ -129,13 +132,16 @@ class Sqlite {
 
   /**
    * @description 获取当前选择的游戏账号
-   * @since Beta v0.3.3
+   * @since Beta v0.4.1
    * @returns {Promise<TGApp.Sqlite.Account.Game|false>}
    */
   public async getCurAccount(): Promise<TGApp.Sqlite.Account.Game | false> {
     const db = await this.getDB();
-    const sql = "SELECT * FROM GameAccount WHERE isChosen=1;";
-    const res: TGApp.Sqlite.Account.Game[] = await db.select(sql);
+    const check = "SELECT * FROM GameAccount";
+    const checkRes: TGApp.Sqlite.Account.Game[] = await db.select(check);
+    if (checkRes.length === 0) return false;
+    if (checkRes.length === 1) return checkRes[0];
+    const res = checkRes.filter((item) => item.isChosen === 1);
     return res.length === 0 ? false : res[0];
   }
 
