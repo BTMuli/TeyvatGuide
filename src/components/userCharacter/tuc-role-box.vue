@@ -201,7 +201,7 @@ onUnmounted(() => {
   border-radius: 5px;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
-  background: var(--tgc-btn-1);
+  background: var(--box-bg-3);
 }
 
 .tuc-rbb-bg img {
@@ -225,34 +225,36 @@ onUnmounted(() => {
 .tuc-rbb-talent {
   display: flex;
   width: 50px;
-  height: 80px;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
+  row-gap: 5px;
 }
 
-.tuc-rbb-talent :nth-child(1) {
+.tuc-rbb-talent :first-child {
+  position: relative;
   display: flex;
   width: 40px;
   height: 40px;
   align-items: center;
   justify-content: center;
   padding: 5px;
-  border: 1px solid var(--tgc-white-4);
+  border: 1px solid var(--box-bg-4);
   border-radius: 50%;
   background: var(--tgc-dark-7);
   opacity: 0.8;
 }
 
-.tuc-rbb-talent :nth-child(2) {
+.tuc-rbb-talent :last-child {
   display: flex;
-  width: 100%;
-  height: 30px;
   align-items: center;
   justify-content: center;
-  color: var(--tgc-white-4);
+  padding-right: 5px;
+  padding-left: 5px;
+  border-radius: 5px;
+  background: var(--box-bg-4);
+  color: var(--box-text-4);
   font-family: var(--font-title);
   font-size: 12px;
-  text-shadow: 0 0 10px var(--tgc-dark-7);
 }
 </style>
