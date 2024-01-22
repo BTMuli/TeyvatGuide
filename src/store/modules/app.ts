@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.4.1
+ * @since Beta v0.4.2
  */
 
 import { path } from "@tauri-apps/api";
@@ -14,6 +14,8 @@ import { getInitDeviceInfo } from "../../utils/toolFunc";
 const userDataDir = `${await path.appLocalDataDir()}userData`;
 // 用于存放数据库的路径
 const dbDataPath = `${await path.appConfigDir()}TeyvatGuide.db`;
+// 用于存放日志的路径
+const logDataDir = `${await path.appConfigDir()}logs`;
 
 export const useAppStore = defineStore(
   "app",
@@ -37,6 +39,8 @@ export const useAppStore = defineStore(
     const userDir = ref(userDataDir);
     // 数据库路径
     const dbPath = ref(dbDataPath);
+    // 日志目录
+    const logDir = ref(logDataDir);
     // 设备信息
     const deviceInfo = ref<TGApp.App.Device.DeviceInfo>(getInitDeviceInfo());
 
@@ -68,6 +72,7 @@ export const useAppStore = defineStore(
       isLogin,
       userDir,
       dbPath,
+      logDir,
       init,
       changeTheme,
     };
@@ -77,7 +82,7 @@ export const useAppStore = defineStore(
       {
         key: "appPath",
         storage: window.localStorage,
-        paths: ["userDir", "dbPath"],
+        paths: ["userDir", "dbPath", "logDir"],
       },
       {
         key: "app",

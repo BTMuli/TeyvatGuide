@@ -7,7 +7,7 @@
 
 use log::LevelFilter;
 use tauri::{Manager, WindowBuilder};
-use tauri_plugin_log::LogTarget;
+use tauri_plugin_log::{LogTarget, TimezoneStrategy};
 use tauri_utils::config::WindowConfig;
 mod client;
 mod utils;
@@ -117,6 +117,7 @@ fn main() {
     .plugin(
       tauri_plugin_log::Builder::default()
         .targets([LogTarget::LogDir, LogTarget::Stdout])
+        .timezone_strategy(TimezoneStrategy::UseLocal)
         .level(LevelFilter::Info)
         .log_name(utils::get_current_date())
         .build(),

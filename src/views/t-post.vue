@@ -90,6 +90,7 @@ import TpoCollection from "../components/post/tpo-collection.vue";
 import Mys from "../plugins/Mys";
 import { useAppStore } from "../store/modules/app";
 import TGClient from "../utils/TGClient";
+import TGLogger from "../utils/TGLogger";
 import { createTGWindow } from "../utils/TGWindow";
 
 // loading
@@ -123,6 +124,7 @@ onMounted(async () => {
     loadingEmpty.value = true;
     loadingTitle.value = "未找到数据";
     await appWindow.setTitle("未找到数据");
+    await TGLogger.Error("[t-post.vue] PostID 不存在");
     return;
   }
   // 获取数据
@@ -134,18 +136,22 @@ onMounted(async () => {
     shareTitle.value = `Post_${postId}`;
     await appWindow.setTitle(`Post_${postId} ${postData.value.post.subject}`);
   } catch (error) {
-    console.error(error);
+    if (error instanceof Error) {
+      await TGLogger.Error(`[t-post.vue] ${error.name}: ${error.message}`);
+      loadingTitle.value = error.name;
+      loadingSub.value = error.message;
+    } else {
+      console.error(error);
+      loadingTitle.value = "帖子不存在或解析失败";
+      loadingSub.value = "请检查帖子是否存在或者是否为合法的帖子";
+    }
     loadingEmpty.value = true;
-    loadingTitle.value = "帖子不存在或解析失败";
-    loadingSub.value = error instanceof Error ? error.message : <string>error;
     await appWindow.setTitle(`Post_${postId} Parsing Error`);
     return;
   }
   // 打开 json
   const isDev = useAppStore().devMode ?? false;
-  if (isDev) {
-    createPostJson(postId);
-  }
+  if (isDev) createPostJson(postId);
   await nextTick(() => {
     shareTimeTimer.value = setInterval(() => {
       shareTime.value = Math.floor(Date.now() / 1000);
@@ -184,6 +190,10 @@ function getRenderPost(data: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys
     try {
       jsonParse = parseContent(data.post.content);
     } catch (e) {
+      if (e instanceof SyntaxError) {
+        console.error(e);
+        TGLogger.Warn(`[t-post.vue] ${e.name}: ${e.message}`);
+      }
       jsonParse = data.post.structured_content;
     }
   }

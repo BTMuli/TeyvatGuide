@@ -50,16 +50,13 @@ function toStore() {
 </script>
 <style lang="css" scoped>
 .tab-box {
-  position: fixed;
-  top: 16px;
-  right: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 10px;
   border-radius: 10px;
-  background-image: linear-gradient(to bottom, rgb(19 84 122 / 80%), rgb(128 208 199 / 80%));
+  background-image: linear-gradient(to right, #f78ca0 0%, #f9748f 19%, #fd868c 60%, #fe9a8b 100%);
   box-shadow: 0 0 10px var(--common-shadow-2);
 }
 

@@ -61,6 +61,7 @@ import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import Mys from "../plugins/Mys";
 import { useAppStore } from "../store/modules/app";
+import TGLogger from "../utils/TGLogger";
 
 // loading
 const loading = ref<boolean>(true);
@@ -80,7 +81,7 @@ function flushTimeStatus(): void {
   const timeDiff = Number(jsonData.draw_time) * 1000 - timeNow;
   if (timeDiff <= 0) {
     timeStatus.value = "已开奖";
-    clearInterval(lotteryTimer);
+    clearInterval(lotteryTimer.value);
   } else {
     const day = Math.floor(timeDiff / (24 * 3600 * 1000));
     const hour = Math.floor((timeDiff % (24 * 3600 * 1000)) / (3600 * 1000));
@@ -108,6 +109,7 @@ onMounted(async () => {
   if (!lotteryId) {
     loadingEmpty.value = true;
     loadingTitle.value = "未找到数据";
+    await TGLogger.Error("[t-lottery.vue] 未找到 lottery_id");
     return;
   }
   // 获取数据
@@ -116,6 +118,7 @@ onMounted(async () => {
   if (!jsonData) {
     loadingEmpty.value = true;
     loadingTitle.value = "未找到数据";
+    await TGLogger.Error("[t-lottery.vue] 未找到数据");
     return;
   }
   await appWindow.setTitle("抽奖详情 " + jsonData.lottery_entity_summary);
@@ -147,7 +150,7 @@ function getUpWay(upWay: string): string {
 // 监听 timeStatus
 onUpdated(() => {
   if (timeStatus.value === "已开奖") {
-    clearInterval(lotteryTimer);
+    clearInterval(lotteryTimer.value);
   }
 });
 </script>

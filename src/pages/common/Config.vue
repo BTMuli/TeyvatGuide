@@ -1,89 +1,11 @@
 <template>
+  <!-- todo ui 优化 -->
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
-  <ToGameLogin v-model="scan" @success="refreshUser" />
   <div class="config-box">
+    <TcInfo />
     <v-list class="config-list">
-      <v-list-subheader :inset="true" class="config-header" title="应用信息" />
-      <v-divider :inset="true" class="border-opacity-75" />
-      <v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
-        <template #prepend>
-          <img class="config-icon" src="/platforms/tauri.webp" alt="Tauri" />
-        </template>
-        <template #append>
-          <v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
-        </template>
-      </v-list-item>
-      <v-list-item title="成就版本">
-        <template #prepend>
-          <img class="config-icon" src="../../assets/icons/achievements.svg" alt="Achievements" />
-        </template>
-        <template #append>
-          <v-list-item-subtitle>{{ achievementsStore.lastVersion }}</v-list-item-subtitle>
-        </template>
-      </v-list-item>
-      <v-list-item title="登录信息">
-        <v-list-item-subtitle v-show="userInfo?.nickname !== '未登录'">
-          {{ userInfo?.nickname }} uid:{{ userInfo?.uid }}
-        </v-list-item-subtitle>
-        <v-list-item-subtitle v-show="userInfo?.nickname === '未登录'">
-          未登录，请扫码登录！
-        </v-list-item-subtitle>
-        <template #prepend>
-          <img class="config-icon user" :src="userInfo?.avatar" alt="Login" />
-        </template>
-        <template #append>
-          <v-btn class="config-btn" @click="confirmScanLogin">扫码登录</v-btn>
-          <v-btn class="config-btn" @click="confirmRefreshUser"> 刷新数据</v-btn>
-        </template>
-      </v-list-item>
-      <v-list-subheader :inset="true" class="config-header" title="系统信息" />
-      <v-divider :inset="true" class="border-opacity-75" />
-      <v-list-item title="系统平台" prepend-icon="mdi-microsoft-windows">
-        <template #append>
-          <v-list-item-subtitle>{{ osPlatform }}</v-list-item-subtitle>
-        </template>
-      </v-list-item>
-      <v-list-item title="系统版本" prepend-icon="mdi-monitor-dashboard">
-        <template #append>
-          <v-list-item-subtitle>{{ osVersion }}</v-list-item-subtitle>
-        </template>
-      </v-list-item>
-      <v-list-item title="数据库更新时间" prepend-icon="mdi-database-sync">
-        <template #append>
-          <v-list-item-subtitle
-            >{{ dbInfo.find((item) => item.key === "dataUpdated")?.value }}
-          </v-list-item-subtitle>
-        </template>
-        <v-list-item-subtitle
-          >更新于
-          {{ dbInfo.find((item) => item.key === "dataUpdated")?.updated }}
-        </v-list-item-subtitle>
-      </v-list-item>
-      <v-list-item title="数据库版本" prepend-icon="mdi-database-search">
-        <template #append>
-          <v-list-item-subtitle
-            >{{ dbInfo.find((item) => item.key === "appVersion")?.value }}
-          </v-list-item-subtitle>
-        </template>
-        <v-list-item-subtitle
-          >更新于
-          {{ dbInfo.find((item) => item.key === "appVersion")?.updated }}
-        </v-list-item-subtitle>
-      </v-list-item>
       <v-list-subheader :inset="true" class="config-header" title="设置" />
       <v-divider :inset="true" class="border-opacity-75" />
-      <v-list-item prepend-icon="mdi-camera-iris">
-        <v-select
-          v-model="showHome"
-          :items="homeStore.getShowItems()"
-          label="首页显示组件"
-          :multiple="true"
-          :chips="true"
-        />
-        <template #append>
-          <v-btn class="config-btn" @click="submitHome"> 确定</v-btn>
-        </template>
-      </v-list-item>
       <v-list-item prepend-icon="mdi-database-export" title="数据备份" @click="confirmBackup" />
       <v-list-item prepend-icon="mdi-database-import" title="数据恢复" @click="confirmRestore" />
       <v-list-item prepend-icon="mdi-database-arrow-up" title="数据更新" @click="confirmUpdate()" />
@@ -119,253 +41,88 @@
         @click="confirmResetDB()"
       />
       <v-list-item prepend-icon="mdi-cog-sync" title="恢复默认设置" @click="confirmResetApp" />
-      <v-list-subheader :inset="true" class="config-header" title="路径" />
-      <v-divider :inset="true" class="border-opacity-75" />
-      <v-list-item prepend-icon="mdi-folder-key">
-        <v-list-item-title style="cursor: pointer" @click="confirmCUD"
-          >用户数据目录</v-list-item-title
-        >
-        <v-list-item-subtitle>{{ appStore.userDir }}</v-list-item-subtitle>
-        <template #append>
-          <v-icon @click="copyPath('user')">mdi-content-copy</v-icon>
-        </template>
-      </v-list-item>
-      <v-list-item
-        prepend-icon="mdi-folder-account"
-        title="应用数据库路径"
-        :subtitle="appStore.dbPath"
-      >
-        <template #append>
-          <v-icon @click="copyPath('db')">mdi-content-copy</v-icon>
-        </template>
-      </v-list-item>
     </v-list>
-    <TAppBadge />
+    <TcDataDir />
+  </div>
+  <div class="config-right">
+    <TcAppBadge />
+    <TcUserBadge />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { app, dialog, fs, invoke, os, process as TauriProcess } from "@tauri-apps/api";
-import { storeToRefs } from "pinia";
-import { computed, onMounted, ref } from "vue";
+import { dialog, fs, invoke, process as TauriProcess } from "@tauri-apps/api";
+import { onMounted, ref } from "vue";
 
-import TAppBadge from "../../components/app/t-appBadge.vue";
+import TcAppBadge from "../../components/config/tc-appBadge.vue";
+import TcDataDir from "../../components/config/tc-dataDir.vue";
+import TcInfo from "../../components/config/tc-info.vue";
+import TcUserBadge from "../../components/config/tc-userBadge.vue";
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
-import ToGameLogin from "../../components/overlay/to-gameLogin.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TGSqlite from "../../plugins/Sqlite";
 import { useAchievementsStore } from "../../store/modules/achievements";
 import { useAppStore } from "../../store/modules/app";
 import { useHomeStore } from "../../store/modules/home";
-import { useUserStore } from "../../store/modules/user";
 import { backUpUserData, restoreUserData } from "../../utils/dataBS";
 import { getBuildTime } from "../../utils/TGBuild";
 import { bytesToSize, getCacheDir, getDeviceInfo, getRandomString } from "../../utils/toolFunc";
-import { getDeviceFp } from "../../web/request/getDeviceFp";
 import TGRequest from "../../web/request/TGRequest";
 
 // Store
 const appStore = useAppStore();
-const userStore = storeToRefs(useUserStore());
 const homeStore = useHomeStore();
 const achievementsStore = useAchievementsStore();
 
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 
-// About App
-const versionApp = ref<string>("");
-const versionTauri = ref<string>("");
-
-// About OS
-const osPlatform = ref<string>("");
-const osVersion = ref<string>("");
-const dbInfo = ref<Array<TGApp.Sqlite.AppData.Item>>([]);
-
 // loading
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载...");
 const loadingSub = ref<string>("");
-const scan = ref<boolean>(false);
 const showReset = ref<boolean>(false);
 
-// data
-const showHome = ref<string[]>(homeStore.getShowValue());
-const userInfo = computed(() => {
-  const info = userStore.briefInfo;
-  if (info.value && info.value.nickname) {
-    return {
-      nickname: info.value.nickname,
-      uid: info.value.uid,
-      desc: info.value.desc,
-      avatar: info.value.avatar,
-    };
-  }
-  return {
-    nickname: "未登录",
-    uid: "-1",
-    desc: "请扫码登录",
-    avatar: "/source/UI/lumine.webp",
-  };
-});
-
-// load version
-onMounted(async () => {
-  loadingSub.value = "正在获取应用版本";
-  versionApp.value = await app.getVersion();
-  loadingSub.value = "正在获取 Tauri 版本";
-  versionTauri.value = await app.getTauriVersion();
-  loadingSub.value = "正在获取系统信息";
-  osPlatform.value = `${await os.platform()}`;
-  loadingSub.value = "正在获取系统版本";
-  osVersion.value = await os.version();
-  loadingSub.value = "正在获取数据库信息";
-  try {
-    dbInfo.value = await TGSqlite.getAppData();
-  } catch (e) {
-    showSnackbar({
-      text: "加载数据库错误，请重置数据库!",
-      color: "error",
-    });
-  }
-  loadingSub.value = "";
-  loading.value = false;
-});
-
-// 打开外部链接
-function toOuter(url: string): void {
-  window.open(url);
-}
-
-// 扫码登录
-async function confirmScanLogin(): Promise<void> {
-  scan.value = true;
-}
-
-// 刷新用户信息
-async function confirmRefreshUser(): Promise<void> {
-  const res = await showConfirm({
-    title: "确认刷新用户信息吗？",
-    text: "将会重新获取用户信息",
-  });
-  if (!res) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消刷新",
-    });
-    return;
-  }
-  if (!userStore.cookie) {
-    showSnackbar({
-      color: "error",
-      text: "请先登录",
-    });
-    return;
-  }
-  await refreshUser();
-}
-
-// 刷新用户信息
-async function refreshUser(): Promise<void> {
-  const ck = userStore.cookie.value;
-  if (ck === undefined || JSON.stringify(ck) === "{}") {
-    showSnackbar({
-      color: "error",
-      text: "扫码登录后才能刷新用户信息!",
-    });
-    appStore.isLogin = false;
-    return;
-  }
-  const deviceInfo = appStore.deviceInfo;
-  if (deviceInfo.device_fp === "00000000000") {
-    appStore.deviceInfo = await getDeviceFp(appStore.deviceInfo);
-  }
-  let failCount = 0;
-  loadingTitle.value = "正在验证 ltoken...";
-  loading.value = true;
-  const verifyLTokenRes = await TGRequest.User.byLToken.verify(ck.ltoken, ck.ltuid);
-  if (typeof verifyLTokenRes === "string") {
-    loadingTitle.value = "验证成功!正在刷新 cookie_token";
-  } else {
-    console.error(verifyLTokenRes);
-    loadingTitle.value = "验证失败!正在重新获取 ltoken";
-    const ltokenRes = await TGRequest.User.bySToken.getLToken(ck.mid, ck.stoken);
-    if (typeof ltokenRes === "string") {
-      ck.ltoken = ltokenRes;
-      loadingTitle.value = "刷新成功!正在获取用户头像、昵称信息";
-    } else {
-      console.error(ltokenRes);
-      loadingTitle.value = "刷新失败!正在获取用户头像、昵称信息";
-      failCount++;
-    }
-  }
-  const cookieTokenRes = await TGRequest.User.bySToken.getCookieToken(ck.mid, ck.stoken);
-  if (typeof cookieTokenRes === "string") {
-    ck.cookie_token = cookieTokenRes;
-    console.log(JSON.stringify(ck));
-    loadingTitle.value = "刷新成功!正在获取用户头像、昵称信息";
-  } else {
-    console.error(cookieTokenRes);
-    loadingTitle.value = "刷新失败!正在获取用户头像、昵称信息";
-    failCount++;
-  }
-  userStore.cookie.value = ck;
-  await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
-  const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
-  if ("retcode" in infoRes) {
-    console.error(infoRes);
-    loadingTitle.value = "获取失败!正在获取用户游戏账号信息";
-    failCount++;
-  } else {
-    const briefInfo: TGApp.App.Account.BriefInfo = {
-      nickname: infoRes.nickname,
-      uid: infoRes.uid,
-      avatar: infoRes.avatar_url,
-      desc: infoRes.introduce,
-    };
-    userStore.briefInfo.value = briefInfo;
-    await TGSqlite.saveAppData("userInfo", JSON.stringify(briefInfo));
-    loadingTitle.value = "获取成功!正在获取用户游戏账号信息";
-  }
-  const accountRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);
-  if (Array.isArray(accountRes)) {
-    loadingTitle.value = "获取成功!正在保存到数据库!";
-    await TGSqlite.saveAccount(accountRes);
-    const curAccount = await TGSqlite.getCurAccount();
-    if (curAccount) userStore.account.value = curAccount;
-  } else {
-    console.error(accountRes);
-    loadingTitle.value = "获取失败!";
-    failCount++;
-  }
-  loading.value = false;
-  if (failCount > 0) {
-    showSnackbar({
-      color: "error",
-      text: "刷新失败!重试或者重新扫码登录！",
-    });
-  } else {
-    showSnackbar({ text: "刷新成功!" });
-    appStore.isLogin = true;
-  }
-}
+onMounted(() => (loading.value = false));
 
 // 备份数据
 async function confirmBackup(): Promise<void> {
   const res = await showConfirm({
-    title: "确认备份数据吗？",
-    text: "若已备份将会被覆盖，祈愿数据备份请到对应页面执行",
+    title: "是否备份到默认路径",
+    text: "取消则自选路径，点击外部不做处理",
   });
-  if (!res) {
+  if (res === undefined) {
     showSnackbar({
       color: "cancel",
       text: "已取消备份",
     });
     return;
   }
+  let saveDir = appStore.userDir;
+  if (res === false) {
+    const dir = await dialog.open({
+      directory: true,
+      defaultPath: saveDir,
+      multiple: false,
+    });
+    if (dir === null) {
+      showSnackbar({
+        color: "error",
+        text: "路径不能为空!",
+      });
+      return;
+    }
+    if (typeof dir !== "string") {
+      showSnackbar({
+        color: "error",
+        text: "路径错误!",
+      });
+      return;
+    }
+    saveDir = dir;
+  }
   loadingTitle.value = "正在备份数据...";
   loading.value = true;
-  const saveDir = appStore.userDir;
   loadingSub.value = "祈愿数据需单独备份";
   await backUpUserData(saveDir);
   loading.value = false;
@@ -375,27 +132,45 @@ async function confirmBackup(): Promise<void> {
 // 恢复数据
 async function confirmRestore(): Promise<void> {
   const resConfirm = await showConfirm({
-    title: "确认恢复数据吗？",
-    text: "请确保存在备份数据，祈愿数据恢复请到对应页面执行",
+    title: "是否从默认路径恢复",
+    text: "取消则自选路径，点击外部不做处理",
   });
-  if (!resConfirm) {
+  if (resConfirm === undefined) {
     showSnackbar({
       color: "cancel",
       text: "已取消恢复",
     });
     return;
   }
-  // todo 自定义路径
+  let saveDir = appStore.userDir;
+  if (resConfirm === false) {
+    const dir = await dialog.open({
+      directory: true,
+      defaultPath: saveDir,
+      multiple: false,
+    });
+    if (dir === null) {
+      showSnackbar({
+        color: "error",
+        text: "路径不能为空!",
+      });
+      return;
+    }
+    if (typeof dir !== "string") {
+      showSnackbar({
+        color: "error",
+        text: "路径错误!",
+      });
+      return;
+    }
+    saveDir = dir;
+  }
   loadingTitle.value = "正在恢复数据...";
   loading.value = true;
   loadingSub.value = "祈愿数据需单独恢复";
-  const saveDir = appStore.userDir;
   await restoreUserData(saveDir);
   loading.value = false;
 }
-
-// todo 设置自定义数据保存路径并进行数据迁移
-// todo macOS 需要测试
 
 // 更新数据
 async function confirmUpdate(title?: string): Promise<void> {
@@ -608,94 +383,18 @@ function submitDevMode(): void {
     ? showSnackbar({ text: "已关闭 dev 模式!" })
     : showSnackbar({ text: "已开启 dev 模式!" });
 }
-
-// 修改首页显示
-function submitHome(): void {
-  // 获取已选
-  const show = showHome.value;
-  if (show.length < 1) {
-    showSnackbar({
-      color: "error",
-      text: "请至少选择一个!",
-    });
-    return;
-  }
-  // 设置
-  homeStore.setShowValue(show);
-  showSnackbar({ text: "已修改!" });
-}
-
-function copyPath(type: "db" | "user"): void {
-  const path = type === "db" ? appStore.dbPath : appStore.userDir;
-  navigator.clipboard.writeText(path);
-  const content = type === "db" ? "数据库" : "用户数据";
-  showSnackbar({
-    text: `${content}路径已复制!`,
-  });
-}
-
-async function confirmCUD(): Promise<void> {
-  const oriDir = appStore.userDir;
-  const check = await showConfirm({
-    title: "确认修改用户数据路径吗？",
-    text: "祈愿数据需修改后重新手动备份！",
-  });
-  if (!check) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消修改",
-    });
-    return;
-  }
-  const dir = await dialog.open({
-    directory: true,
-    defaultPath: oriDir,
-    multiple: false,
-  });
-  if (dir === null) {
-    showSnackbar({
-      color: "error",
-      text: "路径不能为空!",
-    });
-    return;
-  }
-  if (typeof dir !== "string") {
-    showSnackbar({
-      color: "error",
-      text: "路径错误!",
-    });
-    return;
-  }
-  if (dir === oriDir) {
-    showSnackbar({
-      color: "warn",
-      text: "路径未修改!",
-    });
-    return;
-  }
-  appStore.userDir = dir;
-  await TGSqlite.saveAppData("userDir", dir);
-  await backUpUserData(dir);
-  await fs.removeDir(oriDir, { recursive: true });
-  showSnackbar({
-    text: "已重新备份数据!即将刷新页面！",
-    timeout: 3000,
-  });
-  setTimeout(() => {
-    window.location.reload();
-  }, 4000);
-}
 </script>
-
 <style lang="css" scoped>
 .config-box {
   position: relative;
-  display: compact;
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
 }
 
 .config-list {
   border-radius: 10px;
-  margin-right: 220px;
+  margin-right: 260px;
   background: var(--box-bg-1);
   color: var(--box-text-4);
   font-family: var(--font-text);
@@ -708,27 +407,13 @@ async function confirmCUD(): Promise<void> {
   font-size: large;
 }
 
-.config-icon {
-  width: 40px;
-  height: 40px;
-  padding: 5px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
-  margin-right: 15px;
-  backdrop-filter: blur(20px);
-  background: var(--app-side-bg);
-  box-shadow: 0 0 5px var(--common-shadow-1);
-}
-
-.config-icon.user {
-  padding: 2px;
-  border-radius: 50%;
-}
-
-.config-btn {
-  width: 100px;
-  margin-left: 20px;
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
+.config-right {
+  position: fixed;
+  top: 16px;
+  right: 10px;
+  display: flex;
+  width: 256px;
+  flex-direction: column;
+  row-gap: 15px;
 }
 </style>

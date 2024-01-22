@@ -29,6 +29,7 @@ import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import { useAppStore } from "../store/modules/app";
+import TGLogger from "../utils/TGLogger";
 import { saveImgLocal } from "../utils/TGShare";
 import { createTGWindow } from "../utils/TGWindow";
 import TGRequest from "../web/request/TGRequest";
@@ -57,6 +58,7 @@ onMounted(async () => {
   if (!annoId) {
     loadingEmpty.value = true;
     loadingTitle.value = "未找到数据";
+    await TGLogger.Error("[t-anno.vue] 未找到数据");
     return;
   }
   // 获取数据
@@ -70,7 +72,9 @@ onMounted(async () => {
     await appWindow.setTitle(`Anno_${annoId} ${annoData.value.title}`);
     annoRef.value = <HTMLElement>document.querySelector(".anno-body");
   } catch (error) {
-    console.error(error);
+    if (error instanceof Error)
+      await TGLogger.Error(`[t-anno.vue][${annoId}] ${error.name}：${error.message}`);
+    else console.error(error);
     loadingEmpty.value = true;
     loadingTitle.value = "公告不存在或解析失败";
     await appWindow.setTitle(`Anno_${annoId} Parsing Error`);
@@ -78,9 +82,7 @@ onMounted(async () => {
   }
   // 打开 json
   const isDev = useAppStore().devMode ?? false;
-  if (isDev) {
-    createAnnoJson(annoId);
-  }
+  if (isDev) createAnnoJson(annoId);
   setTimeout(() => {
     loading.value = false;
   }, 200);
