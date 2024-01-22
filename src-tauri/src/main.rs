@@ -1,13 +1,16 @@
 //! @file src/main.rs
 //! @desc 主模块，用于启动应用
-//! @since Beta v0.3.4
+//! @since Beta v0.4.2
 
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use log::LevelFilter;
 use tauri::{Manager, WindowBuilder};
+use tauri_plugin_log::LogTarget;
 use tauri_utils::config::WindowConfig;
 mod client;
+mod utils;
 
 // 放一个常数，用来判断应用是否初始化
 static mut APP_INITIALIZED: bool = false;
@@ -111,6 +114,13 @@ fn main() {
       }
     })
     .plugin(tauri_plugin_sql::Builder::default().build())
+    .plugin(
+      tauri_plugin_log::Builder::default()
+        .targets([LogTarget::LogDir, LogTarget::Stdout])
+        .level(LevelFilter::Info)
+        .log_name(utils::get_current_date())
+        .build(),
+    )
     .invoke_handler(tauri::generate_handler![
       register_deep_link,
       init_app,

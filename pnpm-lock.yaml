@@ -38,6 +38,9 @@ dependencies:
   qrcode.vue:
     specifier: ^3.4.1
     version: 3.4.1(vue@3.4.15)
+  tauri-plugin-log-api:
+    specifier: github:tauri-apps/tauri-plugin-log#v1
+    version: git/github.com+tauri-apps/tauri-plugin-log/19f5dcc0425e9127d2c591780e5047b83e77a7c2
   tauri-plugin-sql-api:
     specifier: github:tauri-apps/tauri-plugin-sql#v1
     version: github.com/tauri-apps/tauri-plugin-sql/cf80d013a6ea34ee3ca74e4968a1632e87ba0de2
@@ -5037,6 +5040,14 @@ packages:
     resolution: {integrity: sha512-0VxCNJ7AGOMCWeHVyTrGzUgrK4asT4ml9PEkeGirAkKNYXYzoPJCLvmyfdoOXcjTHPs10OZVMfD1Rwg16AZyYw==}
     dependencies:
       tslib: 2.3.0
+    dev: false
+
+  git/github.com+tauri-apps/tauri-plugin-log/19f5dcc0425e9127d2c591780e5047b83e77a7c2:
+    resolution: {commit: 19f5dcc0425e9127d2c591780e5047b83e77a7c2, repo: git@github.com:tauri-apps/tauri-plugin-log.git, type: git}
+    name: tauri-plugin-log-api
+    version: 0.0.0
+    dependencies:
+      '@tauri-apps/api': 1.5.3
     dev: false
 
   github.com/tauri-apps/tauri-plugin-sql/cf80d013a6ea34ee3ca74e4968a1632e87ba0de2:

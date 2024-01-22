@@ -76,6 +76,7 @@
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
     "qrcode.vue": "^3.4.1",
+    "tauri-plugin-log-api": "github:tauri-apps/tauri-plugin-log#v1",
     "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#v1",
     "uuid": "^9.0.1",
     "vue": "^3.4.15",
