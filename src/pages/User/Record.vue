@@ -44,6 +44,7 @@ import TurOverviewGrid from "../../components/userRecord/tur-overview-grid.vue";
 import TurWorldGrid from "../../components/userRecord/tur-world-grid.vue";
 import TGSqlite from "../../plugins/Sqlite";
 import { useUserStore } from "../../store/modules/user";
+import TGLogger from "../../utils/TGLogger";
 import { generateShareImg } from "../../utils/TGShare";
 import TGRequest from "../../web/request/TGRequest";
 
@@ -61,6 +62,7 @@ const isEmpty = ref<boolean>(true);
 const recordData = ref<TGApp.Sqlite.Record.SingleTable>(<TGApp.Sqlite.Record.SingleTable>{});
 
 onMounted(async () => {
+  await TGLogger.Info("[UserRecord][onMounted] 打开角色战绩页面");
   loadingTitle.value = "正在加载战绩数据";
   loading.value = true;
   await initUserRecordData();
@@ -73,14 +75,17 @@ onMounted(async () => {
 async function initUserRecordData(): Promise<void> {
   const recordGet = await TGSqlite.getUserRecord(user.gameUid);
   if (recordGet !== false) {
+    await TGLogger.Info(`[UserRecord][initUserRecordData][${user.gameUid}] 成功加载战绩数据`);
     recordData.value = recordGet;
     isEmpty.value = false;
   } else {
+    await TGLogger.Info(`[UserRecord][initUserRecordData][${user.gameUid}] 未找到战绩数据`);
     isEmpty.value = true;
   }
 }
 
 async function refresh(): Promise<void> {
+  await TGLogger.Info(`[UserRecord][refresh][${user.gameUid}] 刷新战绩数据`);
   loadingTitle.value = "正在获取战绩数据";
   loading.value = true;
   if (!userStore.cookie.value) {
@@ -89,6 +94,7 @@ async function refresh(): Promise<void> {
       color: "error",
     });
     loading.value = false;
+    await TGLogger.Warn(`[UserRecord][refresh][${user.gameUid}] 未登录`);
     return;
   }
   const cookie = {
@@ -97,7 +103,8 @@ async function refresh(): Promise<void> {
   };
   const res = await TGRequest.User.getRecord(cookie, user);
   if (!("retcode" in res)) {
-    console.log(res);
+    await TGLogger.Info(`[UserRecord][refresh][${user.gameUid}] 获取战绩数据成功`);
+    await TGLogger.Info(`[UserRecord][refresh][${user.gameUid}] ${JSON.stringify(res)}`, false);
     loadingTitle.value = "正在保存战绩数据";
     await TGSqlite.saveUserRecord(res, user.gameUid);
     await initUserRecordData();
@@ -106,7 +113,8 @@ async function refresh(): Promise<void> {
       text: `[${res.retcode}] ${res.message}`,
       color: "error",
     });
-    console.error(res);
+    await TGLogger.Error(`[UserRecord][refresh][${user.gameUid}] 获取战绩数据失败`);
+    await TGLogger.Error(`[UserRecord][refresh][${user.gameUid}] ${res.retcode} ${res.message}`);
   }
   loading.value = false;
 }
@@ -117,6 +125,7 @@ function getTitle(): string {
 }
 
 async function shareRecord(): Promise<void> {
+  await TGLogger.Info(`[UserRecord][shareRecord][${user.gameUid}] 生成分享图片`);
   const recordBox = <HTMLElement>document.querySelector(".ur-box");
   const fileName = `【原神战绩】-${user.gameUid}`;
   loadingTitle.value = "正在生成图片";
@@ -125,6 +134,7 @@ async function shareRecord(): Promise<void> {
   await generateShareImg(fileName, recordBox);
   loadingSub.value = "";
   loading.value = false;
+  await TGLogger.Info(`[UserRecord][shareRecord][${user.gameUid}] 生成分享图片成功`);
 }
 </script>
 <style lang="css" scoped>

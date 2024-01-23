@@ -62,8 +62,6 @@ function readLoading(): void {
 }
 
 onMounted(async () => {
-  const items = showHome.value.join("、");
-  await TGLogger.Info(`[Home][onMounted] 打开首页，当前显示：${items}`);
   loadingTitle.value = "正在加载首页";
   const isProdEnv = import.meta.env.MODE === "production";
   // 获取当前环境
@@ -85,6 +83,8 @@ onMounted(async () => {
     }),
   );
   timer.value = setInterval(readLoading, 100);
+  const items = showHome.value.join("、");
+  await TGLogger.Info(`[Home][onMounted] 打开首页，当前显示：${items}`);
 });
 
 async function submitHome(): Promise<void> {
@@ -109,9 +109,8 @@ async function submitHome(): Promise<void> {
 }
 
 // 监听定时器
-onUpdated(() => {
+onUpdated(async () => {
   if (!loading.value && timer.value !== null) {
-    TGLogger.Info("[Home][onMounted] 首页加载完成");
     clearInterval(timer.value);
     timer.value = null;
   }
@@ -119,6 +118,9 @@ onUpdated(() => {
 
 onUnmounted(() => {
   itemRefs.value = [];
+  components.value = [];
+  clearInterval(timer.value);
+  timer.value = null;
 });
 </script>
 <style lang="css" scoped>

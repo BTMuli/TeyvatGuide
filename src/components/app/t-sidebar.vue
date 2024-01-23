@@ -264,7 +264,8 @@ const themeTitle = computed(() => {
 });
 
 watch(themeTitle, async (val) => {
-  await TGLogger.Info(`[App][theme] 已切换到${val}`);
+  const themeNow = val === "夜间模式" ? "浅色模式" : "深色模式";
+  await TGLogger.Info(`[App][theme] 已切换到${themeNow}`);
 });
 
 function collapse(): void {

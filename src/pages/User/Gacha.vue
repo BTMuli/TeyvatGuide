@@ -54,6 +54,7 @@ import { AppCharacterData, AppWeaponData } from "../../data";
 import TGSqlite from "../../plugins/Sqlite";
 import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
+import TGLogger from "../../utils/TGLogger";
 import { backupUigfData, exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF";
 import TGRequest from "../../web/request/TGRequest";
 
@@ -75,6 +76,7 @@ const gachaListCur = ref<TGApp.Sqlite.GachaRecords.SingleTable[]>([]);
 const tab = ref<string>("");
 
 onMounted(async () => {
+  await TGLogger.Info("[UserGacha][onMounted] 进入角色祈愿页面");
   loadingTitle.value = "正在获取祈愿 UID 列表";
   selectItem.value = await TGSqlite.getUidList();
   if (selectItem.value.length === 0) {
@@ -83,11 +85,15 @@ onMounted(async () => {
       text: "暂无祈愿数据，请先导入祈愿数据",
     });
     loading.value = false;
+    await TGLogger.Warn("[UserGacha][onMounted] 暂无祈愿数据，请先导入祈愿数据");
     return;
   }
   uidCur.value = selectItem.value[0];
   loadingTitle.value = `正在获取祈愿数据，默认 UID：${uidCur.value}`;
   gachaListCur.value = await TGSqlite.getGachaRecords(uidCur.value);
+  await TGLogger.Info(
+    `[UserGacha][onMounted] 获取到 ${uidCur.value} 的 ${gachaListCur.value.length} 条祈愿数据`,
+  );
   loadingTitle.value = "正在渲染数据";
   tab.value = "echarts";
   loading.value = false;
@@ -98,6 +104,7 @@ onMounted(async () => {
 
 // 刷新按钮点击事件
 async function confirmRefresh(): Promise<void> {
+  await TGLogger.Info(`[UserGacha][${account.gameUid}][confirmRefresh] 刷新祈愿数据`);
   const confirmRes = await showConfirm({
     title: "是否刷新祈愿数据？",
     text: `将刷新 UID：${account.gameUid} 的祈愿数据`,
@@ -107,6 +114,7 @@ async function confirmRefresh(): Promise<void> {
       color: "cancel",
       text: "已取消刷新祈愿数据",
     });
+    await TGLogger.Warn("[UserGacha][${account.gameUid}][confirmRefresh] 已取消刷新祈愿数据");
     return;
   }
   loadingTitle.value = "正在获取 authkey";
@@ -117,6 +125,7 @@ async function confirmRefresh(): Promise<void> {
       text: "请先登录",
     });
     loading.value = false;
+    await TGLogger.Warn("[UserGacha][${account.gameUid}][confirmRefresh] 未检测到 cookie");
     return;
   }
   const cookie = {
@@ -127,11 +136,16 @@ async function confirmRefresh(): Promise<void> {
   const authkeyRes = await TGRequest.User.getAuthkey(cookie, gameUid);
   if (typeof authkeyRes === "string") {
     authkey.value = authkeyRes;
+    await TGLogger.Info(`[UserGacha][${account.gameUid}][confirmRefresh] 成功获取 authkey`);
   } else {
     showSnackbar({
       color: "error",
       text: "获取 authkey 失败",
     });
+    await TGLogger.Error(`[UserGacha][${account.gameUid}][confirmRefresh] 获取 authkey 失败`);
+    await TGLogger.Error(
+      `[UserGacha][${account.gameUid}][confirmRefresh] ${authkeyRes.retcode} ${authkeyRes.message}`,
+    );
     return;
   }
   loadingTitle.value = "正在刷新新手祈愿数据";
@@ -152,14 +166,21 @@ async function confirmRefresh(): Promise<void> {
       resolve("");
     }, 1000);
   });
+  await TGLogger.Info(`[UserGacha][${account.gameUid}][confirmRefresh] 刷新祈愿数据完成`);
   window.location.reload();
 }
 
 // 获取祈愿数据并写入数据库
 async function getGachaLogs(pool: string, endId: string = "0"): Promise<void> {
+  await TGLogger.Info(
+    `[UserGacha][${account.gameUid}][getGachaLogs] 获取祈愿数据，pool：${pool}，endId：${endId}`,
+  );
   const gachaRes = await TGRequest.User.getGachaLog(authkey.value, pool, endId);
   console.log(pool, endId, gachaRes);
   if (Array.isArray(gachaRes)) {
+    await TGLogger.Info(
+      `[UserGacha][${account.gameUid}][getGachaLogs] 成功获取到 ${gachaRes.length} 条祈愿数据`,
+    );
     const uigfList: TGApp.Plugins.UIGF.GachaItem[] = [];
     gachaRes.forEach((item) => {
       loadingSub.value = `[${item.item_type}][${item.time}] ${item.name}`;
@@ -197,11 +218,16 @@ async function getGachaLogs(pool: string, endId: string = "0"): Promise<void> {
       color: "error",
       text: `[${pool}][${gachaRes.retcode}] ${gachaRes.message}`,
     });
+    await TGLogger.Error(`[UserGacha][${account.gameUid}][getGachaLogs] 获取祈愿数据失败`);
+    await TGLogger.Error(
+      `[UserGacha][${account.gameUid}][getGachaLogs] ${gachaRes.retcode} ${gachaRes.message}`,
+    );
   }
 }
 
 // 导入按钮点击事件
 async function handleImportBtn(savePath?: string): Promise<void> {
+  await TGLogger.Info("[UserGacha][handleImportBtn] 导入祈愿数据");
   let selectedFile;
   if (savePath) {
     selectedFile = await dialog.open({
@@ -230,51 +256,55 @@ async function handleImportBtn(savePath?: string): Promise<void> {
       directory: false,
     });
   }
-  if (selectedFile) {
-    const check = await verifyUigfData(<string>selectedFile);
-    if (!check) {
-      showSnackbar({
-        color: "error",
-        text: "读取 UIGF 文件失败，请检查文件是否符合规范",
-      });
-      return;
-    }
-    const remoteData = await readUigfData(<string>selectedFile);
-    const res = await showConfirm({
-      title: "是否导入祈愿数据？",
-      text: `UID：${remoteData.info.uid} 共 ${remoteData.list.length} 条数据`,
-    });
-    if (!res) {
-      showSnackbar({
-        color: "cancel",
-        text: "已取消祈愿数据导入",
-      });
-      return;
-    }
-    loadingTitle.value = "正在导入祈愿数据";
-    loading.value = true;
-    if (remoteData.list.length === 0) {
-      loading.value = false;
-      showSnackbar({
-        color: "error",
-        text: "导入的祈愿数据为空",
-      });
-    } else {
-      await TGSqlite.mergeUIGF(remoteData.info.uid, remoteData.list);
-      loading.value = false;
-      showSnackbar({
-        text: `成功导入 ${remoteData.list.length} 条祈愿数据`,
-      });
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    }
-  } else {
+  if (!selectedFile) {
     showSnackbar({
       color: "cancel",
       text: "已取消文件选择",
     });
+    return;
   }
+  const check = await verifyUigfData(<string>selectedFile);
+  if (!check) {
+    showSnackbar({
+      color: "error",
+      text: "读取 UIGF 文件失败，请检查文件是否符合规范",
+    });
+    return;
+  }
+  const remoteData = await readUigfData(<string>selectedFile);
+  const res = await showConfirm({
+    title: "是否导入祈愿数据？",
+    text: `UID：${remoteData.info.uid} 共 ${remoteData.list.length} 条数据`,
+  });
+  await TGLogger.Info(`[UserGacha][${account.gameUid}][handleImportBtn] 确认导入祈愿数据`);
+  if (!res) {
+    showSnackbar({
+      color: "cancel",
+      text: "已取消祈愿数据导入",
+    });
+    return;
+  }
+  loadingTitle.value = "正在导入祈愿数据";
+  loading.value = true;
+  if (remoteData.list.length === 0) {
+    loading.value = false;
+    showSnackbar({
+      color: "error",
+      text: "导入的祈愿数据为空",
+    });
+    return;
+  }
+  await TGSqlite.mergeUIGF(remoteData.info.uid, remoteData.list);
+  loading.value = false;
+  showSnackbar({
+    text: `成功导入 ${remoteData.list.length} 条祈愿数据`,
+  });
+  await TGLogger.Info(
+    `[UserGacha][handleImportBtn] 成功导入 ${remoteData.info.uid} 的 ${remoteData.list.length} 条祈愿数据`,
+  );
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
 }
 
 // 导出按钮点击事件
@@ -291,6 +321,7 @@ async function handleExportBtn(): Promise<void> {
     title: "是否导出祈愿数据？",
     text: `UID：${uidCur.value}，共 ${gachaList.length} 条数据`,
   });
+  await TGLogger.Info(`[UserGacha][${account.gameUid}][handleExportBtn] 导出祈愿数据`);
   if (!res) {
     showSnackbar({
       color: "cancel",
@@ -315,6 +346,9 @@ async function handleExportBtn(): Promise<void> {
     });
     return;
   }
+  await TGLogger.Info(
+    `[UserGacha][${account.gameUid}][handleExportBtn] 导出${gachaList.length} 条祈愿数据到 ${file}`,
+  );
   loadingTitle.value = "正在导出祈愿数据";
   loading.value = true;
   await exportUigfData(uidCur.value, gachaList, file);
@@ -322,6 +356,7 @@ async function handleExportBtn(): Promise<void> {
   showSnackbar({
     text: "祈愿数据已成功导出",
   });
+  await TGLogger.Info(`[UserGacha][${account.gameUid}][handleExportBtn] 导出祈愿数据完成`);
 }
 
 // 恢复UID祈愿数据，相当于导入祈愿数据，不过目录固定
@@ -338,6 +373,7 @@ async function backupGacha(): Promise<void> {
     });
     return;
   }
+  await TGLogger.Info(`[UserGacha][${uidCur.value}][backupGacha] 备份祈愿数据`);
   const res = await showConfirm({
     title: "是否备份祈愿数据？",
     text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
@@ -347,6 +383,7 @@ async function backupGacha(): Promise<void> {
       color: "cancel",
       text: "已取消祈愿数据备份",
     });
+    await TGLogger.Warn(`[UserGacha][${uidCur.value}][backupGacha] 已取消祈愿数据备份`);
     return;
   }
   loadingTitle.value = "正在备份祈愿数据";
@@ -356,6 +393,9 @@ async function backupGacha(): Promise<void> {
   showSnackbar({
     text: `已成功备份 ${uidCur.value} 的祈愿数据`,
   });
+  await TGLogger.Info(
+    `[UserGacha][${uidCur.value}][backupGacha] 成功备份 ${gachaListCur.value.length} 条祈愿数据`,
+  );
 }
 
 // 删除当前 UID 的祈愿数据
@@ -367,6 +407,7 @@ async function deleteGacha(): Promise<void> {
     });
     return;
   }
+  await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 删除祈愿数据`);
   const firstConfirm = await showConfirm({
     title: "是否删除祈愿数据？",
     text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
@@ -376,6 +417,7 @@ async function deleteGacha(): Promise<void> {
       color: "cancel",
       text: "已取消祈愿数据删除",
     });
+    await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 已取消祈愿数据删除`);
     return;
   }
   const uidList = await TGSqlite.getUidList();
@@ -391,6 +433,7 @@ async function deleteGacha(): Promise<void> {
       color: "cancel",
       text: "已取消祈愿数据删除",
     });
+    await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 已取消祈愿数据删除`);
     return;
   }
   loadingTitle.value = `正在删除${uidCur.value}的祈愿数据`;
@@ -400,6 +443,9 @@ async function deleteGacha(): Promise<void> {
   showSnackbar({
     text: `已成功删除 ${uidCur.value} 的祈愿数据`,
   });
+  await TGLogger.Info(
+    `[UserGacha][${uidCur.value}][deleteGacha] 成功删除 ${gachaListCur.value.length} 条祈愿数据`,
+  );
   setTimeout(() => {
     window.location.reload();
   }, 1000);
@@ -411,6 +457,9 @@ watch(uidCur, async (newUid) => {
   showSnackbar({
     text: `成功获取 ${gachaListCur.value.length} 条祈愿数据`,
   });
+  await TGLogger.Info(
+    `[UserGacha][${newUid}][watch] 成功获取 ${gachaListCur.value.length} 条祈愿数据`,
+  );
 });
 </script>
 <style lang="css" scoped>

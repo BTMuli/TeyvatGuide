@@ -79,6 +79,7 @@ import TuaOverview from "../../components/userAbyss/tua-overview.vue";
 import Hutao from "../../plugins/Hutao";
 import TGSqlite from "../../plugins/Sqlite";
 import { useUserStore } from "../../store/modules/user";
+import TGLogger from "../../utils/TGLogger";
 import { generateShareImg } from "../../utils/TGShare";
 import TGRequest from "../../web/request/TGRequest";
 
@@ -99,6 +100,7 @@ const curAbyss = ref<TGApp.Sqlite.Abyss.SingleTable>(<TGApp.Sqlite.Abyss.SingleT
 const abyssRef = ref<HTMLElement>(<HTMLElement>{});
 
 onMounted(async () => {
+  await TGLogger.Info("[UserAbyss][onMounted] 打开角色深渊页面");
   loadingTitle.value = "正在加载深渊数据";
   await initAbyssData();
   loading.value = false;
@@ -106,16 +108,21 @@ onMounted(async () => {
 
 async function initAbyssData(): Promise<void> {
   const abyssGet = await TGSqlite.getAbyss(user.value.gameUid);
-  if (abyssGet.length === 0) return;
+  if (abyssGet.length === 0) {
+    await TGLogger.Warn("[UserAbyss][initAbyssData] 未找到深渊数据");
+    return;
+  }
   localAbyss.value = abyssGet;
   localAbyss.value.forEach((item) => {
     localAbyssID.value.push(item.id);
   });
   curAbyss.value = localAbyss.value[0];
   userTab.value = localAbyssID.value[0];
+  await TGLogger.Info(`[UserAbyss][initAbyssData] 成功获取  ${abyssGet.length}  条深渊数据`);
 }
 
 async function getAbyssData(): Promise<void> {
+  await TGLogger.Info("[UserAbyss][getAbyssData] 更新深渊数据");
   loadingTitle.value = "正在获取深渊数据";
   loading.value = true;
   if (!userStore.cookie.value) {
@@ -124,6 +131,7 @@ async function getAbyssData(): Promise<void> {
       color: "error",
     });
     loading.value = false;
+    await TGLogger.Warn("[UserAbyss][getAbyssData] 未登录");
     return;
   }
   const cookie = {
@@ -135,6 +143,7 @@ async function getAbyssData(): Promise<void> {
   loadingTitle.value = "正在获取上期深渊数据";
   const resP = await TGRequest.User.byCookie.getAbyss(cookie, "2", user.value);
   if (!("retcode" in resP)) {
+    await TGLogger.Info("[UserAbyss][getAbyssData] 成功获取上期深渊数据");
     loadingTitle.value = "正在保存上期深渊数据";
     await TGSqlite.saveAbyss(user.value.gameUid, resP);
   } else {
@@ -143,6 +152,8 @@ async function getAbyssData(): Promise<void> {
       color: "error",
     });
     loading.value = false;
+    await TGLogger.Error("[UserAbyss][getAbyssData] 获取上期深渊数据失败");
+    await TGLogger.Error(`[UserAbyss][getAbyssData] ${resP.retcode} ${resP.message}`);
     return;
   }
   loadingTitle.value = "正在获取本期深渊数据";
@@ -150,12 +161,15 @@ async function getAbyssData(): Promise<void> {
   if (!("retcode" in res)) {
     loadingTitle.value = "正在保存本期深渊数据";
     await TGSqlite.saveAbyss(user.value.gameUid, res);
+    await TGLogger.Info("[UserAbyss][getAbyssData] 成功获取本期深渊数据");
   } else {
     showSnackbar({
       text: `[${res.retcode}]${res.message}`,
       color: "error",
     });
     loading.value = false;
+    await TGLogger.Error("[UserAbyss][getAbyssData] 获取本期深渊数据失败");
+    await TGLogger.Error(`[UserAbyss][getAbyssData] ${res.retcode} ${res.message}`);
     return;
   }
   loadingTitle.value = "正在加载深渊数据";
@@ -183,6 +197,7 @@ async function shareAbyss(): Promise<void> {
     });
     return;
   }
+  await TGLogger.Info(`[UserAbyss][shareAbyss][${curAbyss.value.id}] 生成深渊数据分享图片`);
   const fileName = `【深渊数据】${curAbyss.value.id}-${user.value.gameUid}`;
   loadingTitle.value = "正在生成图片";
   loadingSub.value = `${fileName}.png`;
@@ -191,15 +206,18 @@ async function shareAbyss(): Promise<void> {
   await generateShareImg(fileName, abyssRef.value);
   loadingSub.value = "";
   loading.value = false;
+  await TGLogger.Info(`[UserAbyss][shareAbyss][${curAbyss.value.id}] 生成深渊数据分享图片成功`);
 }
 
 async function uploadAbyss(): Promise<void> {
+  await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据");
   const abyssData = localAbyss.value.find((item) => item.id === Math.max(...localAbyssID.value));
   if (!abyssData) {
     showSnackbar({
       text: "未找到深渊数据",
       color: "error",
     });
+    await TGLogger.Warn("[UserAbyss][uploadAbyss] 未找到深渊数据");
     return;
   }
   const startTime = new Date(abyssData.startTime).getTime();
@@ -210,6 +228,7 @@ async function uploadAbyss(): Promise<void> {
       text: "非最新深渊数据，请刷新深渊数据后重试！",
       color: "error",
     });
+    await TGLogger.Warn("[UserAbyss][uploadAbyss] 非最新深渊数据");
     return;
   }
   loadingTitle.value = "正在转换深渊数据";
@@ -227,12 +246,15 @@ async function uploadAbyss(): Promise<void> {
   const res = await Hutao.Abyss.postData(transAbyss);
   loading.value = false;
   if (res.retcode === 0) {
-    showSnackbar({ text: <string>res.message });
+    showSnackbar({ text: res.message ?? "上传深渊数据成功" });
+    await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据成功");
   } else {
     showSnackbar({
-      text: <string>res.message,
+      text: `[${res.retcode}]${res.message}`,
       color: "error",
     });
+    await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
+    await TGLogger.Error(`[UserAbyss][uploadAbyss] ${res.retcode} ${res.message}`);
   }
 }
 </script>

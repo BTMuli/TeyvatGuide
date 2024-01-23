@@ -104,7 +104,7 @@
 
 <script lang="ts" setup>
 import { dialog, fs, path } from "@tauri-apps/api";
-import { computed, nextTick, onBeforeMount, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import showConfirm from "../../components/func/confirm";
