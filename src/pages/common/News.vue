@@ -97,6 +97,7 @@ import ToChannel from "../../components/overlay/to-channel.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TpAvatar from "../../components/post/tp-avatar.vue";
 import Mys from "../../plugins/Mys";
+import TGLogger from "../../utils/TGLogger";
 import { createPost } from "../../utils/TGWindow";
 
 // 类型定义
@@ -158,6 +159,7 @@ const rawData = ref<RawData>({
 });
 
 onMounted(async () => {
+  await TGLogger.Info(`[News][${gid}][onMounted] 打开咨讯页面`);
   tab.value = "notice";
   await firstLoad("notice");
 });
@@ -176,9 +178,11 @@ async function firstLoad(key: NewsKey): Promise<void> {
   await nextTick(() => {
     loading.value = false;
   });
+  await TGLogger.Info(`[News][${gid}][firstLoad] 获取${rawData.value[key].name}数据成功`);
 }
 
 async function switchAnno(): Promise<void> {
+  await TGLogger.Info(`[News][${gid}][switchAnno] 切换公告`);
   await router.push("/announcements");
 }
 

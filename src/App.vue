@@ -13,7 +13,7 @@
 <script lang="ts" setup>
 import { app, event, fs, tauri, window as TauriWindow } from "@tauri-apps/api";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount, onMounted, ref } from "vue";
+import { computed, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import TBackTop from "./components/app/t-backTop.vue";
@@ -36,6 +36,8 @@ const vuetifyTheme = computed(() => {
   return appStore.theme === "dark" ? "dark" : "light";
 });
 
+let themeListener: () => void;
+
 onBeforeMount(async () => {
   const win = TauriWindow.getCurrent();
   isMain.value = win.label === "TeyvatGuide";
@@ -49,19 +51,14 @@ onBeforeMount(async () => {
 
 onMounted(async () => {
   document.documentElement.className = theme.value;
-  await listenOnTheme();
-});
-
-// 监听主题变化
-async function listenOnTheme(): Promise<void> {
-  await event.listen("readTheme", async (e) => {
+  themeListener = await event.listen("readTheme", async (e) => {
     const themeGet = <string>e.payload;
     if (theme.value !== themeGet) {
       theme.value = themeGet;
       document.documentElement.className = theme.value;
     }
   });
-}
+});
 
 // 启动后只执行一次的监听
 async function listenOnInit(): Promise<void> {
@@ -230,6 +227,10 @@ async function checkUpdate(): Promise<void> {
     window.open("https://app.btmuli.ink/docs/Changelogs.html");
   }
 }
+
+onUnmounted(() => {
+  themeListener();
+});
 </script>
 <style lang="css">
 .app-container {

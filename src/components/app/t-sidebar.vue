@@ -228,11 +228,12 @@
 <script lang="ts" setup>
 import { event, window as TauriWindow } from "@tauri-apps/api";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
 import mhyClient from "../../utils/TGClient";
+import TGLogger from "../../utils/TGLogger";
 import showSnackbar from "../func/snackbar";
 
 const appStore = useAppStore();
@@ -260,6 +261,10 @@ const themeGet = computed({
 });
 const themeTitle = computed(() => {
   return themeGet.value === "default" ? "夜间模式" : "日间模式";
+});
+
+watch(themeTitle, async (val) => {
+  await TGLogger.Info(`[App][theme] 已切换到${val}`);
 });
 
 function collapse(): void {

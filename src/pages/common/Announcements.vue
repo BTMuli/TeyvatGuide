@@ -42,6 +42,7 @@ import { nextTick, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import ToLoading from "../../components/overlay/to-loading.vue";
+import TGLogger from "../../utils/TGLogger";
 import { createTGWindow } from "../../utils/TGWindow";
 import TGRequest from "../../web/request/TGRequest";
 import TGUtils from "../../web/utils/TGUtils";
@@ -74,6 +75,7 @@ const annoCards = ref<AnnoCard>({
 const annoData = ref<TGApp.BBS.Announcement.ListData>(<TGApp.BBS.Announcement.ListData>{});
 
 onMounted(async () => {
+  await TGLogger.Info("[Announcements][onMounted] 打开公告页面");
   loadingTitle.value = "正在获取公告数据";
   loading.value = true;
   annoData.value = await TGRequest.Anno.getList();
@@ -84,7 +86,7 @@ onMounted(async () => {
     game: listCards.filter((item) => item.typeLabel === AnnoType.game),
   };
   loadingTitle.value = "正在渲染公告数据";
-  await nextTick(() => {
+  await nextTick(async () => {
     loading.value = false;
   });
 });
@@ -96,13 +98,16 @@ function parseTitle(title: string): string {
 }
 
 async function switchNews(): Promise<void> {
+  await TGLogger.Info("[Announcements][switchNews] 切换米游社咨讯");
   await router.push("/news/2");
 }
 
 function createAnno(item: TGApp.App.Announcement.ListCard): void {
   const annoPath = `/anno_detail/${item.id}`;
   const annoTitle = `Anno_${item.id} ${item.title}`;
-  createTGWindow(annoPath, "Sub_window", annoTitle, 960, 720, false, false);
+  TGLogger.Info(`[Announcements][createAnno][${item.id}] 打开公告窗口`).then(() =>
+    createTGWindow(annoPath, "Sub_window", annoTitle, 960, 720, false, false),
+  );
 }
 </script>
 

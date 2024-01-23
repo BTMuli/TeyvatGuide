@@ -162,7 +162,7 @@ async function openPath(type: "db" | "user" | "log"): Promise<void> {
       break;
   }
   await dialog.open({
-    directory: type !== "db",
+    directory: false,
     defaultPath: targetPath,
     multiple: false,
   });

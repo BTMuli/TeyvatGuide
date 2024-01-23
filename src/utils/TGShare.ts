@@ -1,19 +1,20 @@
 /**
  * @file utils/TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.3.9
+ * @since Beta v0.4.2
  */
 
 import { dialog, fs, http, path } from "@tauri-apps/api";
 import html2canvas from "html2canvas";
 
+import TGLogger from "./TGLogger";
 import { bytesToSize } from "./toolFunc";
 import showConfirm from "../components/func/confirm";
 import showSnackbar from "../components/func/snackbar";
 
 /**
  * @description 保存图片-canvas
- * @since Beta v0.3.7
+ * @since Beta v0.4.2
  * @param {Uint8Array} buffer - 图片数据
  * @param {string} filename - 文件名
  * @returns {Promise<void>} 无返回值
@@ -32,6 +33,7 @@ async function saveCanvasImg(buffer: Uint8Array, filename: string): Promise<void
         contents: buffer,
       });
     });
+  await TGLogger.Info(`[saveCanvasImg][${filename}] 已将图像保存到本地`);
 }
 
 /**
@@ -72,7 +74,7 @@ function getShareImgBgColor(): string {
 
 /**
  * @description 生成分享截图
- * @since Beta v0.3.9
+ * @since Beta v0.4.2
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
@@ -108,6 +110,7 @@ export async function generateShareImg(
   );
   const size = buffer.length;
   const sizeStr = bytesToSize(size);
+  await TGLogger.Info(`[generateShareImg][${fileName}] 图像大小为 ${sizeStr}`);
   if (size > 80000000) {
     showSnackbar({
       text: `图像大小为 ${sizeStr}，过大，无法保存`,
@@ -136,6 +139,7 @@ export async function generateShareImg(
     showSnackbar({
       text: `已将 ${fileName} 复制到剪贴板，大小为 ${sizeStr}`,
     });
+    await TGLogger.Info(`[generateShareImg][${fileName}] 已将图像复制到剪贴板`);
   } catch (e) {
     await saveCanvasImg(buffer, fileName);
   }

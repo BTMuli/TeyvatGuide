@@ -1,7 +1,7 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.4.0
+ * @since Beta v0.4.2
  */
 
 import { event, invoke } from "@tauri-apps/api";
@@ -9,6 +9,7 @@ import type { Event } from "@tauri-apps/api/event";
 import { appWindow, WebviewWindow } from "@tauri-apps/api/window";
 
 import { parseLink } from "./linkParser";
+import TGLogger from "./TGLogger";
 import { createPost } from "./TGWindow";
 import { getDeviceInfo } from "./toolFunc";
 import showSnackbar from "../components/func/snackbar";
@@ -89,7 +90,7 @@ class TGClient {
 
   /**
    * @func callback
-   * @since Beta v0.3.4
+   * @since Beta v0.4.2
    * @desc 回调函数
    * @param {string} callback - 回调函数名
    * @param {object} data - 回调数据
@@ -103,7 +104,6 @@ class TGClient {
     };
     const js = `javascript:mhyWebBridge("${callback}", ${JSON.stringify(response)});`;
     console.info(`[callback] ${js}`);
-    await invoke("create_mhy_client", { func: "execute_js", url: "" });
     await invoke("execute_js", { label: "mhy_client", js });
   }
 
@@ -167,7 +167,7 @@ class TGClient {
 
   /**
    * @func handleCallback
-   * @since Beta v0.3.9
+   * @since Beta v0.4.2
    * @desc 处理米游社客户端的 callback
    * @param {Event<string>} arg - 事件参数
    * @returns {Promise<void>} - 返回值
@@ -178,7 +178,10 @@ class TGClient {
       await this.handleCustomCallback(argParse);
       return;
     }
-    console.warn(`[${argParse.method}] ${JSON.stringify(argParse.payload)}`);
+    await TGLogger.Warn(`[TGClient][handleCallback] ${JSON.stringify(argParse)}`, false);
+    await TGLogger.Info(
+      `[TGClient][handleCallback] 处理回调 ${argParse.method}：${argParse.callback}`,
+    );
     await this.hideSideBar();
     await this.hideOverlay();
     switch (argParse.method) {
@@ -275,6 +278,7 @@ class TGClient {
    * @returns {Promise<void>} - 返回值
    */
   async handleCustomCallback(arg: TGApp.Plugins.JSBridge.Arg<any>): Promise<void> {
+    await TGLogger.Info(`[TGClient][handleCustomCallback] ${JSON.stringify(arg)}`);
     switch (arg.method) {
       case "teyvat_open":
         createPost(<string>arg.payload);
@@ -454,16 +458,13 @@ class TGClient {
         await this.window.close();
       } catch (e) {
         console.error(e);
-        await invoke<InvokeArg>("create_mhy_client", {
-          func: "default",
-          url: "https://api-static.mihoyo.com/",
-        });
+        await invoke<InvokeArg>("create_mhy_client", { func: "default", url: "" });
         await this.open(func, url);
       }
     }
     if (url === undefined) url = this.getUrl(func);
     this.route = [url];
-    console.log(`[open] ${url}`);
+    await TGLogger.Info(`[TGClient][open][${func}] ${url}`);
     await invoke<InvokeArg>("create_mhy_client", { func, url });
     this.window = WebviewWindow.getByLabel("mhy_client");
     await this.window?.show();

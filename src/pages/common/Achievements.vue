@@ -114,6 +114,7 @@ import ToNamecard from "../../components/overlay/to-namecard.vue";
 import { AppAchievementSeriesData, AppNameCardsData } from "../../data";
 import TGSqlite from "../../plugins/Sqlite";
 import { useAchievementsStore } from "../../store/modules/achievements";
+import TGLogger from "../../utils/TGLogger";
 import { getNowStr } from "../../utils/toolFunc";
 import { getUiafHeader, readUiafData, verifyUiafData } from "../../utils/UIAF";
 
@@ -145,10 +146,6 @@ const renderSelect = computed(() => {
 const route = useRoute();
 const router = useRouter();
 
-onBeforeMount(async () => {
-  await flushOverview();
-});
-
 // 更改是否隐藏已完成
 async function switchHideFin() {
   const text = hideFin.value ? "显示已完成" : "隐藏已完成";
@@ -177,8 +174,12 @@ async function flushOverview(): Promise<void> {
 }
 
 onMounted(async () => {
+  await TGLogger.Info("[Achievements][onMounted] 打开成就页面");
+  await TGLogger.Info(`[Achievements][onMounted] 当前版本：${achievementsStore.lastVersion}`);
   loading.value = true;
   loadingTitle.value = "正在获取成就系列数据";
+  await flushOverview();
+  await TGLogger.Info(`[Achievements][onMounted] ${title.value}`);
   allSeriesData.value = await getSeriesData();
   achievementsStore.lastVersion = await TGSqlite.getLatestAchievementVersion();
   loadingTitle.value = "正在获取成就数据";
@@ -247,10 +248,10 @@ async function searchCard(): Promise<void> {
   selectedSeries.value = -1;
   loadingTitle.value = "正在搜索";
   loading.value = true;
+  await TGLogger.Info(`[Achievements][searchCard] 搜索内容：${search.value}`);
   selectedAchievement.value = await getAchiData("search", search.value);
   await nextTick(() => {
     loading.value = false;
-    // 等 500ms 动画
     setTimeout(() => {
       if (renderSelect.value.length === 0) {
         showSnackbar({
@@ -264,10 +265,12 @@ async function searchCard(): Promise<void> {
       });
     }, 500);
   });
+  await TGLogger.Info(`[Achievements][searchCard] 搜索到 ${renderSelect.value.length} 条成就数据`);
 }
 
 // 导入 UIAF 数据，进行数据合并、刷新
 async function importJson(): Promise<void> {
+  await TGLogger.Info("[Achievements][importJson] 导入 UIAF 数据");
   const selectedFile = await dialog.open({
     title: "选择 UIAF 数据文件",
     multiple: false,
@@ -285,6 +288,7 @@ async function importJson(): Promise<void> {
       color: "cancel",
       text: "已取消文件选择",
     });
+    await TGLogger.Info("[Achievements][importJson] 已取消文件选择");
     return;
   }
   if (!(await verifyUiafData(<string>selectedFile))) {
@@ -292,9 +296,15 @@ async function importJson(): Promise<void> {
       color: "error",
       text: "读取 UIAF 数据失败，请检查文件是否符合规范",
     });
+    await TGLogger.Error("[Achievements][importJson] 读取 UIAF 数据失败，请检查文件是否符合规范");
     return;
   }
   const remoteRaw = await readUiafData(<string>selectedFile);
+  await TGLogger.Info("[Achievements][importJson] 读取 UIAF 数据成功");
+  await TGLogger.Info(`[Achievements][importJson] 导入来源：${remoteRaw.info.export_app}`);
+  await TGLogger.Info(`[Achievements][importJson] 导入版本：${remoteRaw.info.export_app_version}`);
+  await TGLogger.Info(`[Achievements][importJson] 导入时间：${remoteRaw.info.export_timestamp}`);
+  await TGLogger.Info(`[Achievements][importJson] 导入数据：${remoteRaw.list.length} 条`);
   loadingTitle.value = "正在解析数据";
   loading.value = true;
   loadingTitle.value = "正在合并成就数据";
@@ -307,12 +317,14 @@ async function importJson(): Promise<void> {
 
 // 导出
 async function exportJson(): Promise<void> {
+  await TGLogger.Info("[Achievements][exportJson] 导出 UIAF 数据");
   // 判断是否有数据
   if (achievementsStore.finAchievements === 0) {
     showSnackbar({
       color: "error",
       text: "没有可导出的数据",
     });
+    await TGLogger.Warn("[Achievements][exportJson] 没有可导出的数据");
     return;
   }
   // 获取本地数据
@@ -331,15 +343,18 @@ async function exportJson(): Promise<void> {
     ],
     defaultPath: `${await path.downloadDir()}${path.sep}${fileName}.json`,
   });
-  if (isSave) {
-    await fs.writeTextFile(isSave, JSON.stringify(UiafData));
-    showSnackbar({ text: "导出成功" });
-  } else {
+  if (isSave === null) {
     showSnackbar({
       color: "warn",
-      text: "导出已取消",
+      text: "已取消导出",
     });
+    await TGLogger.Info("[Achievements][exportJson] 已取消导出");
+    return;
   }
+  await fs.writeTextFile(isSave, JSON.stringify(UiafData));
+  showSnackbar({ text: "导出成功" });
+  await TGLogger.Info("[Achievements][exportJson] 导出成功");
+  await TGLogger.Info(`[Achievements][exportJson] 导出路径：${isSave}`);
 }
 
 function getIcon(series: number): string | undefined {
@@ -348,6 +363,7 @@ function getIcon(series: number): string | undefined {
 
 // 处理外部导入
 async function handleImportOuter(app: string): Promise<void> {
+  await TGLogger.Info(`[Achievements][handleImportOuter] 导入来源：${app}`);
   const confirm = await showConfirm({
     title: "是否导入祈愿数据？",
     text: `来源APP：${app}`,
@@ -357,6 +373,7 @@ async function handleImportOuter(app: string): Promise<void> {
       color: "warn",
       text: "已取消导入",
     });
+    await TGLogger.Info("[Achievements][handleImportOuter] 已取消导入");
     return;
   }
   // 读取 剪贴板
@@ -373,8 +390,11 @@ async function handleImportOuter(app: string): Promise<void> {
       color: "success",
       text: "导入成功，即将刷新页面",
     });
+    await TGLogger.Info("[Achievements][handleImportOuter] 导入成功");
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error)
+      await TGLogger.Error(`[Achievements][handleImportOuter] 导入失败 ${e.name}: ${e.message}`);
+    else console.error(e);
     showSnackbar({
       color: "error",
       text: "读取 UIAF 数据失败，请检查文件是否符合规范",
@@ -411,6 +431,11 @@ async function setAchi(
       target ? "已完成" : "未完成"
     }`,
   });
+  await TGLogger.Info(
+    `[Achievements][setAchi] 已将成就 ${newAchievement.name}[${newAchievement.id}] 标记为 ${
+      target ? "已完成" : "未完成"
+    }`,
+  );
 }
 
 /* 以下为数据库操作 */

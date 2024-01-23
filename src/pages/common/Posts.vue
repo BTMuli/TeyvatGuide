@@ -98,6 +98,7 @@ import ToLoading from "../../components/overlay/to-loading.vue";
 import TpAvatar from "../../components/post/tp-avatar.vue";
 import Mys from "../../plugins/Mys";
 import TGClient from "../../utils/TGClient";
+import TGLogger from "../../utils/TGLogger";
 import { createPost } from "../../utils/TGWindow";
 
 const loading = ref<boolean>(true);
@@ -201,6 +202,9 @@ const nav = ref<TGApp.BBS.Navigator.Navigator[]>([]);
 const search = ref<string>();
 
 onMounted(async () => {
+  await TGLogger.Info(
+    `[Posts][${curGameLabel.value}][onMounted][${curForumLabel.value}] 打开帖子列表`,
+  );
   loading.value = true;
   await freshNavData();
   await freshPostData();
@@ -287,10 +291,14 @@ function toBBS(link: URL): void {
 }
 
 async function freshNavData(): Promise<void> {
+  await TGLogger.Info(`[Posts][${curGameLabel.value}][freshNavData] 获取网页活动`);
   nav.value = await Mys.Posts.nav(curGid.value);
 }
 
 async function freshPostData(): Promise<void> {
+  await TGLogger.Info(
+    `[Posts][${curGameLabel.value}][freshPostData][${curForumLabel.value}] 刷新帖子列表`,
+  );
   loading.value = true;
   loadingTitle.value = `正在加载 ${curGameLabel.value}-${curForumLabel.value}-${curSortLabel.value} 的数据`;
   const postsGet = await Mys.Posts.get(curForum.value, curSortType.value);

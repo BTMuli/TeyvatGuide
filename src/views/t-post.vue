@@ -124,7 +124,7 @@ onMounted(async () => {
     loadingEmpty.value = true;
     loadingTitle.value = "未找到数据";
     await appWindow.setTitle("未找到数据");
-    await TGLogger.Error("[t-post.vue] PostID 不存在");
+    await TGLogger.Error("[t-post][onMounted] PostID 不存在");
     return;
   }
   // 获取数据
@@ -137,7 +137,7 @@ onMounted(async () => {
     await appWindow.setTitle(`Post_${postId} ${postData.value.post.subject}`);
   } catch (error) {
     if (error instanceof Error) {
-      await TGLogger.Error(`[t-post.vue] ${error.name}: ${error.message}`);
+      await TGLogger.Error(`[t-post][${postId}] ${error.name}: ${error.message}`);
       loadingTitle.value = error.name;
       loadingSub.value = error.message;
     } else {
@@ -149,9 +149,13 @@ onMounted(async () => {
     await appWindow.setTitle(`Post_${postId} Parsing Error`);
     return;
   }
+  await TGLogger.Info(`[t-post][${postId}][onMounted] ${postData.value.post.subject}`);
   // 打开 json
   const isDev = useAppStore().devMode ?? false;
-  if (isDev) createPostJson(postId);
+  if (isDev) {
+    await TGLogger.Info(`[t-post][${postId}][onMounted] 打开 JSON 窗口`);
+    createPostJson(postId);
+  }
   await nextTick(() => {
     shareTimeTimer.value = setInterval(() => {
       shareTime.value = Math.floor(Date.now() / 1000);
@@ -161,15 +165,17 @@ onMounted(async () => {
   });
 });
 
-watch(loadShare, (value) => {
+watch(loadShare, async (value) => {
   if (value) {
     shareTime.value = Math.floor(Date.now() / 1000);
     loadingTitle.value = "正在生成分享图片";
     loadingSub.value = `${shareTitle.value}.png`;
     loading.value = true;
+    await TGLogger.Info(`[t-post.vue][${postId}][share] 生成分享图片：${shareTitle.value}.png`);
   } else {
     loadingSub.value = "";
     loading.value = false;
+    await TGLogger.Info(`[t-post.vue][${postId}][share] 生成分享图片完成：${shareTitle.value}.png`);
   }
 });
 
@@ -191,8 +197,7 @@ function getRenderPost(data: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys
       jsonParse = parseContent(data.post.content);
     } catch (e) {
       if (e instanceof SyntaxError) {
-        console.error(e);
-        TGLogger.Warn(`[t-post.vue] ${e.name}: ${e.message}`);
+        TGLogger.Warn(`[t-post][${postId}] ${e.name}: ${e.message}`);
       }
       jsonParse = data.post.structured_content;
     }
@@ -221,7 +226,7 @@ function parseContent(content: string): string {
         });
         break;
       default:
-        console.warn(`[MysPostParser] Unknown key: ${key}`);
+        TGLogger.Warn(`[t-post][${postId}][parseContent] Unknown key: ${key}`);
         result.push({
           insert: data[key],
         });

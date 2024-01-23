@@ -7,6 +7,7 @@
 </template>
 <script lang="ts" setup>
 // utils
+import TGLogger from "../../utils/TGLogger";
 import { generateShareImg } from "../../utils/TGShare";
 
 interface TShareBtnProps {
@@ -21,6 +22,7 @@ const props = defineProps<TShareBtnProps>();
 const emit = defineEmits<TShareBtnEmits>();
 
 async function shareContent(): Promise<void> {
+  await TGLogger.Info("[TShareBtn][shareContent] 开始生成分享图片");
   emit("update:loading", true);
   props.modelValue.querySelectorAll("details").forEach((item) => {
     if (item.open) {
@@ -38,6 +40,7 @@ async function shareContent(): Promise<void> {
     }
   });
   emit("update:loading", false);
+  await TGLogger.Info("[TShareBtn][shareContent] 生成分享图片完成");
 }
 </script>
 <style lang="css" scoped>

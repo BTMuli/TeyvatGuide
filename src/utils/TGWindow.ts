@@ -1,11 +1,13 @@
 /**
  * @file utils/TGWindow.ts
  * @description 窗口创建相关工具函数
- * @since Beta v0.3.8
+ * @since Beta v0.4.2
  */
 
 import { invoke, window as TauriWindow } from "@tauri-apps/api";
 import type { WindowOptions } from "@tauri-apps/api/types/window";
+
+import TGLogger from "./TGLogger";
 
 /**
  * @description 创建TG窗口
@@ -71,7 +73,7 @@ export function createTGWindow(
 
 /**
  * @description 打开帖子
- * @since Beta v0.3.8
+ * @since Beta v0.4.2
  * @param {TGApp.Plugins.Mys.News.RenderCard | string | number | TGApp.Plugins.Mys.Forum.RenderCard} item 帖子内容或ID
  * @param {string} title 帖子标题
  * @returns {void}
@@ -80,7 +82,7 @@ export function createPost(
   item: TGApp.Plugins.Mys.News.RenderCard | string | number | TGApp.Plugins.Mys.Forum.RenderCard,
   title?: string,
 ): void {
-  let postId, postTitle;
+  let postId: string, postTitle: string;
   if (typeof item === "string" || typeof item === "number") {
     postId = item.toString();
     postTitle = title ? `Post_${postId} ${title}` : `Post_${postId}`;
@@ -90,17 +92,7 @@ export function createPost(
   }
   const postPath = `/post_detail/${postId}`;
   createTGWindow(postPath, "Sub_window", postTitle, 960, 720, false, false);
-}
-
-/**
- * @description 打开 Wiki
- * @since Beta v0.3.8
- * @param {string} dir 目录
- * @param {string} name 文件名
- * @returns {void}
- */
-export function createWiki(dir: string, name: string): void {
-  const dirName = dir === "GCG" ? dir : dir.toLowerCase();
-  const wikiPath = `/wiki/detail/${dirName}/${name}`;
-  createTGWindow(wikiPath, "Sub_window", `Wiki_${dirName}_${name}`, 960, 720, false, false);
+  TGLogger.Info(`[createPost][${postId}] 打开帖子`).catch((err) => {
+    console.error(err);
+  });
 }

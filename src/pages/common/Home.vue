@@ -17,16 +17,16 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, markRaw, onMounted, onUnmounted, onUpdated, ref, watch } from "vue";
+import { markRaw, onMounted, onUnmounted, onUpdated, ref } from "vue";
 
 import showSnackbar from "../../components/func/snackbar";
 import TCalendar from "../../components/home/t-calendar.vue";
 import TPool from "../../components/home/t-pool.vue";
 import TPosition from "../../components/home/t-position.vue";
-import TUserBadge from "../../components/home/t-userBadge.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import { useAppStore } from "../../store/modules/app";
 import { useHomeStore } from "../../store/modules/home";
+import TGLogger from "../../utils/TGLogger";
 
 // store
 const appStore = useAppStore();
@@ -62,6 +62,8 @@ function readLoading(): void {
 }
 
 onMounted(async () => {
+  const items = showHome.value.join("、");
+  await TGLogger.Info(`[Home][onMounted] 打开首页，当前显示：${items}`);
   loadingTitle.value = "正在加载首页";
   const isProdEnv = import.meta.env.MODE === "production";
   // 获取当前环境
@@ -85,7 +87,7 @@ onMounted(async () => {
   timer.value = setInterval(readLoading, 100);
 });
 
-function submitHome(): void {
+async function submitHome(): Promise<void> {
   // 获取已选
   const show = showHome.value;
   if (show.length < 1) {
@@ -100,6 +102,7 @@ function submitHome(): void {
     color: "success",
     text: "设置成功!",
   });
+  await TGLogger.Info("[Home][submitHome] 首页设置成功，当前显示：" + show.join("、"));
   setTimeout(() => {
     window.location.reload();
   }, 1000);
@@ -107,7 +110,11 @@ function submitHome(): void {
 
 // 监听定时器
 onUpdated(() => {
-  if (!loading.value) clearInterval(timer.value);
+  if (!loading.value && timer.value !== null) {
+    TGLogger.Info("[Home][onMounted] 首页加载完成");
+    clearInterval(timer.value);
+    timer.value = null;
+  }
 });
 
 onUnmounted(() => {

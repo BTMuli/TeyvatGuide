@@ -4,7 +4,9 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { toRaw } from "vue";
+import { onMounted, toRaw } from "vue";
+
+import TGLogger from "../../utils/TGLogger";
 
 interface TpUnknownProps {
   data: TGApp.Plugins.Mys.SctPost.Empty;
@@ -13,6 +15,12 @@ interface TpUnknownProps {
 const props = defineProps<TpUnknownProps>();
 
 console.warn("tpUnknown", toRaw(props.data.insert));
+
+onMounted(async () => {
+  await TGLogger.Warn(
+    `[tpUnknown][onMounted] 未知的插件数据 ${JSON.stringify(toRaw(props.data))}}`,
+  );
+});
 </script>
 <style lang="css" scoped>
 .tp-unknown-box {
