@@ -1,7 +1,11 @@
 <template>
-  <!-- todo 点击展开 overlay -->
   <div class="twc-materials-grid">
-    <div class="twc-material-box" v-for="(item, index) in props.data" :key="index">
+    <div
+      class="twc-material-box"
+      v-for="(item, index) in props.data"
+      :key="index"
+      @click="checkData(item)"
+    >
       <div class="twc-material-left">
         <div class="twc-material-bg">
           <img :src="item.bg" alt="bg" />
@@ -15,13 +19,35 @@
       </div>
     </div>
   </div>
+  <TwoMaterial :data="curData" v-model="showOverlay" />
 </template>
 <script lang="ts" setup>
+import { ref } from "vue";
+
+import TwoMaterial from "./two-material.vue";
+import { WikiMaterialData } from "../../data";
+import showSnackbar from "../func/snackbar";
+
 interface TwcMaterialsProp {
   data: TGApp.App.Calendar.Material[];
 }
 
 const props = defineProps<TwcMaterialsProp>();
+const showOverlay = ref(false);
+const curData = ref<TGApp.App.Material.WikiItem>();
+
+function checkData(item: TGApp.App.Calendar.Material) {
+  const material = WikiMaterialData.find((m) => m.id === item.id);
+  if (material) {
+    curData.value = material;
+    showOverlay.value = true;
+  } else {
+    showSnackbar({
+      text: `材料 ${item.name} 暂无详细信息`,
+      color: "warn",
+    });
+  }
+}
 </script>
 <style lang="css" scoped>
 .twc-materials-grid {
@@ -38,6 +64,7 @@ const props = defineProps<TwcMaterialsProp>();
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   background: var(--box-bg-1);
+  cursor: pointer;
   gap: 10px;
 }
 
