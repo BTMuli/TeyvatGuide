@@ -12,12 +12,12 @@
       />
       <v-btn class="select-btn" @click="submitHome">确定</v-btn>
     </div>
-    <component :is="item" v-for="item in components" :key="item" :ref="setItemRef" />
+    <component :is="item" v-for="item in components" :key="item" @success="loadEnd(item)" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { markRaw, onMounted, onUnmounted, onUpdated, ref } from "vue";
+import { onMounted, onUnmounted, ref, shallowRef } from "vue";
 
 import showSnackbar from "../../components/func/snackbar";
 import TCalendar from "../../components/home/t-calendar.vue";
@@ -38,28 +38,9 @@ const loadingTitle = ref<string>("正在加载首页");
 const loadingSubtitle = ref<string>("");
 
 // data
-const components = ref<any[]>([]);
-const itemRefs = ref<any[]>([]);
+const endNum = ref<number>(0);
+const components = shallowRef<any[]>([]);
 const showHome = ref<string[]>(homeStore.getShowValue());
-
-// 定时器
-const timer = ref<any>(null);
-
-function setItemRef(item: any): void {
-  if (itemRefs.value.includes(item)) return;
-  itemRefs.value.push(item);
-}
-
-function readLoading(): void {
-  if (!loading.value) return;
-  let loadingMap = itemRefs.value.map((item) => {
-    return item.loading ? item.name : null;
-  });
-  loadingSubtitle.value = "正在加载 " + loadingMap.filter((item) => item)?.join("、");
-  if (loadingMap.every((item) => !item)) {
-    loading.value = false;
-  }
-}
 
 onMounted(async () => {
   loadingTitle.value = "正在加载首页";
@@ -68,27 +49,29 @@ onMounted(async () => {
   if (isProdEnv && appStore.devMode) {
     appStore.devMode = false;
   }
-  await Promise.allSettled(
-    showHome.value.map((item) => {
-      switch (item) {
-        case "限时祈愿":
-          return components.value.push(markRaw(TPool));
-        case "近期活动":
-          return components.value.push(markRaw(TPosition));
-        case "素材日历":
-          return components.value.push(markRaw(TCalendar));
-        default:
-          return null;
-      }
-    }),
-  );
-  timer.value = setInterval(readLoading, 100);
+  const temp = [];
+  for (const item of showHome.value) {
+    switch (item) {
+      case "限时祈愿":
+        temp.push(TPool);
+        break;
+      case "近期活动":
+        temp.push(TPosition);
+        break;
+      case "素材日历":
+        temp.push(TCalendar);
+        break;
+      default:
+        break;
+    }
+  }
   const items = showHome.value.join("、");
+  loadingSubtitle.value = `正在加载：${items}`;
+  components.value = temp;
   await TGLogger.Info(`[Home][onMounted] 打开首页，当前显示：${items}`);
 });
 
 async function submitHome(): Promise<void> {
-  // 获取已选
   const show = showHome.value;
   if (show.length < 1) {
     showSnackbar({
@@ -108,19 +91,17 @@ async function submitHome(): Promise<void> {
   }, 1000);
 }
 
-// 监听定时器
-onUpdated(async () => {
-  if (!loading.value && timer.value !== null) {
-    clearInterval(timer.value);
-    timer.value = null;
+// 组件加载完成
+async function loadEnd(item: any): Promise<void> {
+  await TGLogger.Info(`[Home][loadEnd] ${item.__name} 加载完成`);
+  endNum.value++;
+  if (endNum.value === components.value.length) {
+    loading.value = false;
   }
-});
+}
 
 onUnmounted(() => {
-  itemRefs.value = [];
   components.value = [];
-  clearInterval(timer.value);
-  timer.value = null;
 });
 </script>
 <style lang="css" scoped>

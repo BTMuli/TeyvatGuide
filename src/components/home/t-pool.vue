@@ -16,7 +16,7 @@
         />
       </div>
     </div>
-    <div v-if="!loading" class="pool-grid">
+    <div class="pool-grid">
       <div v-for="pool in poolSelect" :key="pool.postId" class="pool-card">
         <div class="pool-cover" @click="createPost(pool.postId, pool.title)">
           <img :src="pool.cover" alt="cover" />
@@ -68,9 +68,6 @@ import showSnackbar from "../func/snackbar";
 // store
 const homeStore = useHomeStore();
 
-// loading
-const loading = ref<boolean>(true);
-
 const hasNew = ref<boolean>(false);
 const showNew = ref<boolean>(false);
 
@@ -81,8 +78,11 @@ const poolTimeGet = ref<Record<number, string>>({});
 const poolTimePass = ref<Record<number, number>>({});
 const timer = ref<Record<number, any>>({});
 
-// expose
-defineExpose({ name: "限时祈愿", loading });
+interface TPoolEmits {
+  (e: "success"): void;
+}
+
+const emits = defineEmits<TPoolEmits>();
 
 function poolLastInterval(postId: number): TGApp.Plugins.Mys.Gacha.RenderCard | undefined {
   const pool = poolCards.value.find((pool) => pool.postId === postId);
@@ -152,7 +152,7 @@ onMounted(async () => {
     poolSelect.value = poolCards.value;
     hasNew.value = false;
   }
-  loading.value = false;
+  emits("success");
 });
 
 // 检测新卡池

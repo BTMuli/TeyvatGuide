@@ -4,7 +4,7 @@
       <img src="../../assets/icons/board.svg" alt="act" />
       <span>近期活动</span>
     </div>
-    <div v-if="!loading" class="position-grid">
+    <div class="position-grid">
       <v-card
         v-for="card in positionCards"
         :key="card.postId"
@@ -50,20 +50,17 @@ import Mys from "../../plugins/Mys";
 import { createPost } from "../../utils/TGWindow";
 import { stamp2LastTime } from "../../utils/toolFunc";
 
-// loading
-const loading = ref<boolean>(true);
-
 // data
 const positionCards = ref<TGApp.Plugins.Mys.Position.RenderCard[]>([]);
 const positionTimeGet = ref<Record<number, string>>({}); // 剩余时间/已结束/未知
 const positionTimeEnd = ref<Record<number, number>>({}); // 结束时间戳
 const positionTimer = ref<Record<number, any>>({}); // 定时器
 
-// expose
-defineExpose({
-  name: "近期活动",
-  loading,
-});
+interface TPositionEmits {
+  (e: "success"): void;
+}
+
+const emits = defineEmits<TPositionEmits>();
 
 function positionLastInterval(postId: number): void {
   const timeGet = positionTimeGet.value[postId];
@@ -98,7 +95,7 @@ onMounted(async () => {
       positionLastInterval(card.postId);
     }, 1000);
   });
-  loading.value = false;
+  emits("success");
 });
 
 onUnmounted(() => {

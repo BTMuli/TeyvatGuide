@@ -83,9 +83,6 @@ import { generateShareImg } from "../../utils/TGShare";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 import ToCalendar from "../overlay/to-calendar.vue";
 
-// loading
-const loading = ref<boolean>(true);
-
 // data
 const calendarData = computed<TGApp.App.Calendar.Item[]>(() => AppCalendarData);
 const weekNow = ref<number>(0);
@@ -141,11 +138,11 @@ const btnText = [
   },
 ];
 
-// expose
-defineExpose({
-  name: "素材日历",
-  loading,
-});
+interface TCalendarEmits {
+  (e: "success"): void;
+}
+
+const emits = defineEmits<TCalendarEmits>();
 
 onMounted(async () => {
   const appStore = useAppStore();
@@ -173,7 +170,7 @@ onMounted(async () => {
   calendarNow.value = getCalendar(dayNow);
   characterCards.value = calendarNow.value.filter((item) => item.itemType === "character");
   weaponCards.value = calendarNow.value.filter((item) => item.itemType === "weapon");
-  loading.value = false;
+  emits("success");
 });
 
 // 获取当前日历
