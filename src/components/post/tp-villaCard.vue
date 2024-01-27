@@ -1,5 +1,4 @@
 <template>
-  <!-- todo 样式优化 47041934-->
   <div
     class="tp-villa-card-box"
     :style="{
@@ -12,25 +11,25 @@
         <span class="tp-villa-card-name">{{ props.data.insert.villa_card.villa_name }}</span>
         <span class="tp-villa-card-owner">
           <img alt="topIcon" :src="props.data.insert.villa_card.owner_avatar_url" />
-          <span>{{ props.data.insert.villa_card.owner_nickname }} 创建</span>
+          <span>{{ props.data.insert.villa_card.owner_nickname }}</span>
         </span>
       </div>
     </div>
     <div class="tp-villa-card-tags">
       <div class="tp-villa-card-tag">
-        {{ props.data.insert.villa_card.villa_member_num }} 人在聊
+        <v-icon>mdi-account-group</v-icon>
+        <span>{{ props.data.insert.villa_card.villa_member_num }}</span>
       </div>
       <div
         v-for="(tag, index) in props.data.insert.villa_card?.tag_list"
         :key="index"
         class="tp-villa-card-tag"
       >
-        {{ tag }}
+        <v-icon>mdi-tag</v-icon>
+        <span>{{ tag }}</span>
       </div>
     </div>
-    <div class="tp-villa-card-desc">
-      {{ props.data.insert.villa_card.villa_introduce }}
-    </div>
+    <div class="tp-villa-card-desc">{{ props.data.insert.villa_card.villa_introduce }}</div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -102,6 +101,7 @@ console.log(
 .tp-villa-card-content img {
   width: 80px;
   height: 80px;
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
 }
 
@@ -117,10 +117,7 @@ console.log(
 .tp-villa-card-name {
   padding: 0 5px;
   border-radius: 5px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: var(--common-shadow-t-2);
-  box-shadow: 0 0 5px var(--common-shadow-8);
+  background: var(--box-bg-1);
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
@@ -131,10 +128,7 @@ console.log(
   align-items: center;
   padding: 5px;
   border-radius: 20px 5px 5px 20px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: var(--common-shadow-t-2);
-  box-shadow: 0 0 5px var(--common-shadow-8);
+  background: var(--box-bg-1);
   color: var(--common-text-title);
   column-gap: 5px;
 }
@@ -162,13 +156,11 @@ console.log(
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px 10px;
+  padding: 0 5px;
   border-radius: 5px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: var(--common-shadow-t-2);
-  box-shadow: 0 0 5px var(--common-shadow-8);
+  background: var(--box-bg-2);
   color: var(--tgc-pink-1);
+  column-gap: 2px;
   font-family: var(--font-title);
   font-size: 12px;
 }
@@ -177,13 +169,10 @@ console.log(
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 10px;
+  padding: 0 5px;
   border-radius: 5px;
   margin-right: auto;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: var(--common-shadow-t-2);
-  box-shadow: 0 0 5px var(--common-shadow-8);
+  background: var(--box-bg-2);
   color: var(--box-text-1);
 }
 </style>

@@ -6,12 +6,17 @@
         <span>合集ID：{{ props.collection.collection_id }}</span>
       </div>
       <div class="tpoc-list">
-        <!-- todo 加上封面 -->
         <div
           class="tpoc-item"
           v-for="(item, index) in posts"
           :key="index"
-          @click="toPost(item.postId)"
+          @click="toPost(item.postId, index)"
+          :style="{
+            backgroundColor:
+              index === props.collection.cur - 1 ? 'var(--box-bg-2)' : 'var(--box-bg-1)',
+            color: index === props.collection.cur - 1 ? 'var(--box-text-2)' : 'var(--box-text-1)',
+            cursor: index === props.collection.cur - 1 ? 'default' : 'pointer',
+          }"
         >
           <div class="tpoc-item-title" :title="item.title">{{ item.title }}</div>
           <div class="tpoc-item-info">
@@ -103,15 +108,15 @@ function getDate(date: number): string {
   return new Date(date * 1000).toLocaleString().replace(/\//g, "-").split(" ")[0];
 }
 
-function toPost(postId: string) {
-  if (router.currentRoute.value.params.post_id === postId) {
+async function toPost(postId: string, index: number): Promise<void> {
+  if (index === props.collection.cur - 1) {
     showSnackbar({
       text: "已经在当前帖子",
       color: "warn",
     });
     return;
   }
-  router.push({
+  await router.push({
     name: "帖子详情",
     params: {
       post_id: postId,
@@ -162,8 +167,6 @@ function toPost(postId: string) {
   padding: 10px;
   border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  background: var(--box-bg-2);
-  color: var(--box-text-2);
   cursor: pointer;
 }
 
