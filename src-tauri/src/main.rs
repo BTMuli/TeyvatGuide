@@ -56,8 +56,11 @@ async fn register_deep_link(app_handle: tauri::AppHandle) {
 // 执行 js
 #[tauri::command]
 async fn execute_js(app_handle: tauri::AppHandle, label: String, js: String) {
-  let window = app_handle.get_window(&label).unwrap();
-  window.eval(&js).ok().unwrap();
+  let window = app_handle.get_window(&label);
+  if window.is_none() {
+    return;
+  }
+  window.unwrap().eval(&js).ok().unwrap();
 }
 
 // 创建窗口
