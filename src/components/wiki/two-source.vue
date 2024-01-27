@@ -1,0 +1,31 @@
+<template>
+  <div class="twos-box">
+    <v-icon>mdi-map-marker</v-icon>
+    <span>{{ props.data.name }}</span>
+  </div>
+</template>
+<script lang="ts" setup>
+import { computed } from "vue";
+
+interface TwoConvertProps {
+  data: TGApp.App.Material.Source;
+}
+
+const props = defineProps<TwoConvertProps>();
+
+const textColor = computed(() => {
+  if (!props.data || !props.data.days) return "var(--tgc-blue-2)";
+  const day = new Date().getDay();
+  if (props.data.days.includes(day)) return "var(--tgc-pink-1)";
+  return "var(--tgc-blue-2)";
+});
+</script>
+<style lang="css" scoped>
+.twos-box {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  color: v-bind(textColor);
+  column-gap: 5px;
+}
+</style>

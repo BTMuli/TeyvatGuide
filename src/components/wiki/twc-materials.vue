@@ -37,6 +37,7 @@ const showOverlay = ref(false);
 const curData = ref<TGApp.App.Material.WikiItem>();
 
 function checkData(item: TGApp.App.Calendar.Material) {
+  if (showOverlay.value) showOverlay.value = false;
   const material = WikiMaterialData.find((m) => m.id === item.id);
   if (material) {
     curData.value = material;
