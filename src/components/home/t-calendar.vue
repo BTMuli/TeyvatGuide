@@ -140,6 +140,8 @@ const btnText = [
 
 interface TCalendarEmits {
   (e: "success"): void;
+
+  (e: "loadOuter", v: TGApp.Component.Loading.EmitParams): void;
 }
 
 const emits = defineEmits<TCalendarEmits>();
@@ -198,10 +200,12 @@ function getContents(day: number): void {
 }
 
 async function share(): Promise<void> {
+  emits("loadOuter", { show: true, text: "正在生成图片..." });
   const div = <HTMLElement>document.querySelector(".calendar-box");
   const showType = switchType.value === "avatar" ? "角色" : "武器";
   const title = `【今日素材】${showType}${btnNow.value}`;
   await generateShareImg(title, div);
+  emits("loadOuter", { show: false });
 }
 
 // 前往留影叙佳期

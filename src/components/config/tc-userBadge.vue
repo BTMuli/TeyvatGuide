@@ -21,11 +21,18 @@ import { onMounted, ref } from "vue";
 import TGSqlite from "../../plugins/Sqlite";
 import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
+import TGLogger from "../../utils/TGLogger";
 import { getDeviceFp } from "../../web/request/getDeviceFp";
 import TGRequest from "../../web/request/TGRequest";
 import showConfirm from "../func/confirm";
 import showSnackbar from "../func/snackbar";
 import ToGameLogin from "../overlay/to-gameLogin.vue";
+
+interface TcUserBadgeEmits {
+  (e: "loadOuter", v: TGApp.Component.Loading.EmitParams): void;
+}
+
+const emits = defineEmits<TcUserBadgeEmits>();
 
 const appStore = useAppStore();
 const userStore = storeToRefs(useUserStore());
@@ -45,10 +52,10 @@ onMounted(() => {
   }
 });
 
-// todo 完善 log
 async function refreshUser() {
   const ck = userStore.cookie.value;
   if (ck === undefined || JSON.stringify(ck) === "{}") {
+    await TGLogger.Error("[tc-userBadge][refreshUser] cookie 不存在");
     showSnackbar({
       color: "error",
       text: "扫码登录后才能刷新用户信息!",
@@ -57,61 +64,75 @@ async function refreshUser() {
     return;
   }
   loading.value = true;
+  emits("loadOuter", { show: true, title: "正在刷新用户信息" });
   const deviceInfo = appStore.deviceInfo;
   if (deviceInfo.device_fp === "00000000000") {
     appStore.deviceInfo = await getDeviceFp(appStore.deviceInfo);
+    await TGLogger.Warn("[tc-userBadge][refreshUser] 刷新设备信息");
   }
   let failCount = 0;
+  emits("loadOuter", { show: true, title: "正在验证 LToken" });
   const verifyLTokenRes = await TGRequest.User.byLToken.verify(ck.ltoken, ck.ltuid);
   if (typeof verifyLTokenRes === "string") {
-    showSnackbar({
-      color: "success",
-      text: "验证 LToken 成功!",
-    });
+    emits("loadOuter", { show: true, title: "正在验证 LToken", text: "验证 LToken 成功!" });
+    await TGLogger.Info("[tc-userBadge][refreshUser] 验证 LToken 成功");
   } else {
-    showSnackbar({
-      color: "warn",
-      text: "验证 LToken 失败!即将重新获取 LToken",
+    emits("loadOuter", {
+      show: true,
+      title: "正在验证 LToken",
+      text: "验证 LToken 失败!即将重新获取",
     });
+    await TGLogger.Warn("[tc-userBadge][refreshUser] 验证 LToken 失败");
+    await TGLogger.Warn(
+      `[tc-userBadge][refreshUser] ${verifyLTokenRes.retcode}: ${verifyLTokenRes.message}`,
+    );
     const ltokenRes = await TGRequest.User.bySToken.getLToken(ck.mid, ck.stoken);
     if (typeof ltokenRes === "string") {
       ck.ltoken = ltokenRes;
-      showSnackbar({
-        color: "success",
-        text: "获取 LToken 成功!",
-      });
+      emits("loadOuter", { show: true, title: "正在验证 LToken", text: "获取 LToken 成功!" });
+      await TGLogger.Info("[tc-userBadge][refreshUser] 获取 LToken 成功");
     } else {
-      showSnackbar({
-        color: "error",
-        text: "获取 LToken 失败!",
-      });
+      emits("loadOuter", { show: true, title: "正在验证 LToken", text: "获取 LToken 失败!" });
+      await TGLogger.Error("[tc-userBadge][refreshUser] 获取 LToken 失败");
+      await TGLogger.Error(
+        `[tc-userBadge][refreshUser] ${ltokenRes.retcode}: ${ltokenRes.message}`,
+      );
       failCount++;
     }
   }
+  emits("loadOuter", { show: true, title: "正在获取 CookieToken" });
   const cookieTokenRes = await TGRequest.User.bySToken.getCookieToken(ck.mid, ck.stoken);
   if (typeof cookieTokenRes === "string") {
     ck.cookie_token = cookieTokenRes;
-    showSnackbar({
-      color: "success",
+    emits("loadOuter", {
+      show: true,
+      title: "正在获取 CookieToken",
       text: "获取 CookieToken 成功!",
     });
+    await TGLogger.Info("[tc-userBadge][refreshUser] 获取 CookieToken 成功");
   } else {
-    showSnackbar({
-      color: "error",
+    emits("loadOuter", {
+      show: true,
+      title: "正在获取 CookieToken",
       text: "获取 CookieToken 失败!",
     });
+    await TGLogger.Error("[tc-userBadge][refreshUser] 获取 CookieToken 失败");
+    await TGLogger.Error(
+      `[tc-userBadge][refreshUser] ${cookieTokenRes.retcode}: ${cookieTokenRes.message}`,
+    );
     failCount++;
   }
   userStore.cookie.value = ck;
   await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
+  emits("loadOuter", { show: true, title: "正在获取用户信息" });
   const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
   if ("retcode" in infoRes) {
-    showSnackbar({
-      color: "error",
-      text: "获取用户信息失败!",
-    });
+    emits("loadOuter", { show: true, title: "正在获取用户信息", text: "获取用户信息失败!" });
+    await TGLogger.Error("[tc-userBadge][refreshUser] 获取用户信息失败");
+    await TGLogger.Error(`[tc-userBadge][refreshUser] ${infoRes.retcode}: ${infoRes.message}`);
     failCount++;
   } else {
+    emits("loadOuter", { show: true, title: "正在获取用户信息", text: "获取用户信息成功!" });
     const briefInfo: TGApp.App.Account.BriefInfo = {
       nickname: infoRes.nickname,
       uid: infoRes.uid,
@@ -120,25 +141,22 @@ async function refreshUser() {
     };
     userStore.briefInfo.value = briefInfo;
     await TGSqlite.saveAppData("userInfo", JSON.stringify(briefInfo));
-    showSnackbar({
-      color: "success",
-      text: "获取用户信息成功!",
-    });
+    await TGLogger.Info("[tc-userBadge][refreshUser] 获取用户信息成功");
   }
+  emits("loadOuter", { show: true, title: "正在获取账号信息" });
   const accountRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);
   if (Array.isArray(accountRes)) {
-    showSnackbar({
-      color: "success",
-      text: "获取账号信息成功!",
-    });
+    emits("loadOuter", { show: true, title: "正在获取账号信息", text: "获取账号信息成功!" });
+    await TGLogger.Info("[tc-userBadge][refreshUser] 获取账号信息成功");
     await TGSqlite.saveAccount(accountRes);
     const curAccount = await TGSqlite.getCurAccount();
     if (curAccount) userStore.account.value = curAccount;
   } else {
-    showSnackbar({
-      color: "error",
-      text: "获取账号信息失败!",
-    });
+    emits("loadOuter", { show: true, title: "正在获取账号信息", text: "获取账号信息失败!" });
+    await TGLogger.Error("[tc-userBadge][refreshUser] 获取账号信息失败");
+    await TGLogger.Error(
+      `[tc-userBadge][refreshUser] ${accountRes.retcode}: ${accountRes.message}`,
+    );
     failCount++;
   }
   loading.value = false;
@@ -152,6 +170,7 @@ async function refreshUser() {
     appStore.isLogin = true;
   }
   loading.value = false;
+  emits("loadOuter", { show: false });
 }
 
 async function confirmRefreshUser(): Promise<void> {

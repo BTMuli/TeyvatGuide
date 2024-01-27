@@ -46,7 +46,7 @@
   </div>
   <div class="config-right">
     <TcAppBadge />
-    <TcUserBadge />
+    <TcUserBadge @loadOuter="loadHandle" />
   </div>
 </template>
 
@@ -411,6 +411,17 @@ function submitDevMode(): void {
   appStore.devMode
     ? showSnackbar({ text: "已关闭 dev 模式!" })
     : showSnackbar({ text: "已开启 dev 模式!" });
+}
+
+// 通过子组件的事件来控制 loading
+function loadHandle(params: TGApp.Component.Loading.EmitParams): void {
+  loading.value = params.show;
+  if (params.title) {
+    loadingTitle.value = params.title;
+  }
+  if (params.text) {
+    loadingSub.value = params.text;
+  }
 }
 </script>
 <style lang="css" scoped>

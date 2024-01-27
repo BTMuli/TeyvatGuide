@@ -12,7 +12,13 @@
       />
       <v-btn class="select-btn" @click="submitHome">确定</v-btn>
     </div>
-    <component :is="item" v-for="item in components" :key="item" @success="loadEnd(item)" />
+    <component
+      :is="item"
+      v-for="item in components"
+      :key="item"
+      @success="loadEnd(item)"
+      @loadOuter="handleLoad"
+    />
   </div>
 </template>
 
@@ -97,6 +103,18 @@ async function loadEnd(item: any): Promise<void> {
   endNum.value++;
   if (endNum.value === components.value.length) {
     loading.value = false;
+  }
+}
+
+function handleLoad(params: TGApp.Component.Loading.EmitParams): void {
+  loading.value = params.show;
+  if (params.title) {
+    loadingTitle.value = params.title;
+  }
+  if (params.text) {
+    loadingSubtitle.value = params.text;
+  } else {
+    loadingSubtitle.value = "";
   }
 }
 
