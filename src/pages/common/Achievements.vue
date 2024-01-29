@@ -52,10 +52,11 @@
         </v-list>
       </div>
       <div
-        v-for="achievement in renderSelect"
+        v-for="(achievement, index) in renderSelect"
         :key="achievement.id"
         class="card-achi"
         :title="allSeriesData.find((item) => item.id === achievement.series)?.name ?? ''"
+        @click="toAchiInfo(achievement, index)"
       >
         <div class="achi-version">v{{ achievement.version }}</div>
         <div class="achi-pre">
@@ -100,6 +101,18 @@
     </div>
   </div>
   <ToNamecard v-model="showNameCard" :data="curCard" />
+  <ToAchiInfo v-model="showAchi" :data="showAchiData" @select-s="selectSeries">
+    <template #left>
+      <div class="card-arrow left" @click="switchAchiInfo(false)">
+        <img src="../../assets/icons/arrow-right.svg" alt="right" />
+      </div>
+    </template>
+    <template #right>
+      <div class="card-arrow" @click="switchAchiInfo(true)">
+        <img src="../../assets/icons/arrow-right.svg" alt="right" />
+      </div>
+    </template>
+  </ToAchiInfo>
 </template>
 
 <script lang="ts" setup>
@@ -109,6 +122,7 @@ import { useRoute, useRouter } from "vue-router";
 
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
+import ToAchiInfo from "../../components/overlay/to-achiInfo.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import ToNamecard from "../../components/overlay/to-namecard.vue";
 import { AppAchievementSeriesData, AppNameCardsData } from "../../data";
@@ -127,6 +141,7 @@ const loadingTitle = ref<string>("正在加载数据");
 const search = ref<string>("");
 const hideFin = ref<boolean>(false);
 const showNameCard = ref<boolean>(false);
+const showAchi = ref<boolean>(false);
 // data
 const title = ref(achievementsStore.title);
 const curCardName = ref<string>("");
@@ -135,6 +150,8 @@ let curCard = ref<TGApp.App.NameCard.Item>();
 const allSeriesData = ref<TGApp.Sqlite.Achievement.SeriesTable[]>([]);
 const selectedSeries = ref<number>(-1);
 const selectedAchievement = ref<TGApp.Sqlite.Achievement.SingleTable[]>([]);
+const showAchiData = ref<TGApp.Sqlite.Achievement.SingleTable>();
+const curAchiDataIndex = ref<number>(0);
 const renderSelect = computed(() => {
   if (hideFin.value) {
     return selectedAchievement.value.filter((item) => item.isCompleted === 0);
@@ -221,6 +238,10 @@ async function selectSeries(index: number): Promise<void> {
   if (rightWrap) {
     rightWrap.scrollTop = 0;
   }
+  // 刷新overlay数据
+  curAchiDataIndex.value = selectedAchievement.value.findIndex(
+    (i) => i.id === showAchiData.value?.id,
+  );
   await nextTick(() => {
     loading.value = false;
     // 等 500ms 动画
@@ -235,6 +256,37 @@ async function selectSeries(index: number): Promise<void> {
 // 打开图片
 function openImg(): void {
   showNameCard.value = true;
+}
+
+// 打开成就详情
+function toAchiInfo(item: TGApp.Sqlite.Achievement.SingleTable, index: number): void {
+  showAchiData.value = item;
+  showAchi.value = true;
+  curAchiDataIndex.value = index;
+}
+
+// 切换成就详情
+function switchAchiInfo(next: boolean) {
+  if (next) {
+    if (curAchiDataIndex.value === renderSelect.value.length - 1) {
+      showSnackbar({
+        color: "warn",
+        text: "已经是最后一个了",
+      });
+      return;
+    }
+    curAchiDataIndex.value++;
+  } else {
+    if (curAchiDataIndex.value === 0) {
+      showSnackbar({
+        color: "warn",
+        text: "已经是第一个了",
+      });
+      return;
+    }
+    curAchiDataIndex.value--;
+  }
+  showAchiData.value = renderSelect.value[curAchiDataIndex.value];
 }
 
 async function searchCard(): Promise<void> {
@@ -673,6 +725,7 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
   border-radius: 10px;
   background: var(--box-bg-1);
   color: var(--box-text-7);
+  cursor: pointer;
 }
 
 /* 成就进度 */
@@ -781,5 +834,28 @@ async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Pro
 .achi-append-icon img {
   width: 40px;
   height: 40px;
+}
+
+.card-arrow {
+  position: relative;
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dark .card-arrow {
+  filter: invert(11%) sepia(73%) saturate(11%) hue-rotate(139deg) brightness(97%) contrast(81%);
+}
+
+.card-arrow img {
+  width: 100%;
+  height: 100%;
+}
+
+.card-arrow.left img {
+  transform: rotate(180deg);
 }
 </style>
