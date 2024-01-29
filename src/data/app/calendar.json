@@ -2597,7 +2597,7 @@
   },
   {
     "id": 10000090,
-    "contentId": 0,
+    "contentId": 500605,
     "dropDays": [3, 6, 7],
     "name": "夏沃蕾",
     "itemType": "character",
@@ -7629,7 +7629,7 @@
   },
   {
     "id": 12426,
-    "contentId": 0,
+    "contentId": 500507,
     "dropDays": [3, 6, 7],
     "name": "「究极霸王超级魔剑」",
     "itemType": "weapon",

@@ -160,6 +160,16 @@
     "profile": "/source/nameCard/profile/枫丹·新闻.webp"
   },
   {
+    "name": "沉玉·投珑",
+    "index": 190,
+    "type": 0,
+    "desc": "名片纹饰。海晏川河固，星朗珠玉明。山民共鸟兽，率舞感升平。",
+    "source": "祀珑典仪等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/沉玉·投珑.webp",
+    "bg": "/source/nameCard/bg/沉玉·投珑.webp",
+    "profile": "/source/nameCard/profile/沉玉·投珑.webp"
+  },
+  {
     "name": "成就·游遍",
     "index": 21,
     "type": 1,
@@ -608,6 +618,16 @@
     "icon": "/source/nameCard/icon/枫丹·浑然.webp",
     "bg": "/source/nameCard/bg/枫丹·浑然.webp",
     "profile": "/source/nameCard/profile/枫丹·浑然.webp"
+  },
+  {
+    "name": "成就·仙谷",
+    "index": 189,
+    "type": 1,
+    "desc": "名片纹饰。…后来鱼沉入湖底，蛇断为几节，留下的野兽等着山与河与月，等着它们无言的回答。",
+    "source": "达成「沉玉成辉」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/成就·仙谷.webp",
+    "bg": "/source/nameCard/bg/成就·仙谷.webp",
+    "profile": "/source/nameCard/profile/成就·仙谷.webp"
   },
   {
     "name": "安柏·兔兔",
@@ -1370,6 +1390,26 @@
     "profile": "/source/nameCard/profile/夏沃蕾·贰型.webp"
   },
   {
+    "name": "闲云·鹤云",
+    "index": 187,
+    "type": 2,
+    "desc": "名片纹饰。坦白从宽。当留云问你：「难道在你眼中，本仙只是个大一点的鸟？」的时候，你是不是还想着：「对，还会说话，还会摆弄奇怪的机关。」",
+    "source": "闲云的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/闲云·鹤云.webp",
+    "bg": "/source/nameCard/bg/闲云·鹤云.webp",
+    "profile": "/source/nameCard/profile/闲云·鹤云.webp"
+  },
+  {
+    "name": "嘉明·文仔",
+    "index": 188,
+    "type": 2,
+    "desc": "名片纹饰。「文仔，要相信。有朝一日龙穿凤，不用日日裤穿窿。」",
+    "source": "嘉明的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/嘉明·文仔.webp",
+    "bg": "/source/nameCard/bg/嘉明·文仔.webp",
+    "profile": "/source/nameCard/profile/嘉明·文仔.webp"
+  },
+  {
     "name": "纪行·捕风",
     "index": 2,
     "type": 3,
@@ -1658,6 +1698,16 @@
     "icon": "/source/nameCard/icon/纪行·时雕.webp",
     "bg": "/source/nameCard/bg/纪行·时雕.webp",
     "profile": "/source/nameCard/profile/纪行·时雕.webp"
+  },
+  {
+    "name": "纪行·彩鹞",
+    "index": 191,
+    "type": 3,
+    "desc": "名片纹饰。鹞腾鹤驻春来早，借我风筝五丈风。",
+    "source": "纪行系统奖励获取。",
+    "icon": "/source/nameCard/icon/纪行·彩鹞.webp",
+    "bg": "/source/nameCard/bg/纪行·彩鹞.webp",
+    "profile": "/source/nameCard/profile/纪行·彩鹞.webp"
   },
   {
     "name": "庆典·无相",
