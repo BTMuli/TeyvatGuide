@@ -319,10 +319,12 @@ async function confirmDelCache(): Promise<void> {
     await fs.removeDir(dir, { recursive: true });
   }
   showSnackbar({
-    text: "缓存已清除!请重新启动应用！",
+    text: "缓存已清除!即将退出应用！",
   });
   await TGLogger.Info("[Config][confirmDelCache] 缓存清除完成");
-  await TauriProcess.exit();
+  setTimeout(async () => {
+    await TauriProcess.exit();
+  }, 3000);
 }
 
 // 恢复默认设置
