@@ -4,14 +4,6 @@ title: "[TODO] "
 labels:
   - 新特性
 body:
-  - type: markdown
-    attributes:
-      value: |
-        在此填写开发目标的详细信息，包括但不限于：
-        - 任务名称
-        - 任务描述
-        - 预期版本
-        - 当前提交
   - type: textarea
     id: description
     attributes:
