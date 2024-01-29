@@ -520,7 +520,7 @@
     "series": 5,
     "order": 44,
     "name": "尽览群岩",
-    "description": "解锁璃月的所有传送锚点（层岩巨渊另外计算）。",
+    "description": "解锁璃月的所有传送锚点（层岩巨渊与沉玉谷另外计算 ）。",
     "reward": 5,
     "version": "1.0",
     "trigger": {
@@ -556,7 +556,7 @@
     "series": 5,
     "order": 47,
     "name": "岩间引路人",
-    "description": "在璃月追随20个仙灵，并点亮仙灵之庭（层岩巨渊另外计算）。",
+    "description": "在璃月追随20个仙灵，并点亮仙灵之庭（层岩巨渊与沉玉谷另外计算 ）。",
     "reward": 5,
     "version": "1.0",
     "trigger": {
@@ -568,7 +568,7 @@
     "series": 5,
     "order": 48,
     "name": "岩间引路人",
-    "description": "在璃月追随40个仙灵，并点亮仙灵之庭（层岩巨渊另外计算）。",
+    "description": "在璃月追随40个仙灵，并点亮仙灵之庭（层岩巨渊与沉玉谷另外计算 ）。",
     "reward": 10,
     "version": "1.0",
     "trigger": {
@@ -580,7 +580,7 @@
     "series": 5,
     "order": 49,
     "name": "岩间引路人",
-    "description": "在璃月追随60个仙灵，并点亮仙灵之庭（层岩巨渊另外计算）。",
+    "description": "在璃月追随60个仙灵，并点亮仙灵之庭（层岩巨渊与沉玉谷另外计算 ）。",
     "reward": 20,
     "version": "1.0",
     "trigger": {
@@ -592,7 +592,7 @@
     "series": 5,
     "order": 50,
     "name": "磐岩的寻宝者",
-    "description": "在璃月开启200个宝箱（层岩巨渊另外计算）。",
+    "description": "在璃月开启200个宝箱（层岩巨渊与沉玉谷另外计算）。",
     "reward": 5,
     "version": "1.0",
     "trigger": {
@@ -604,7 +604,7 @@
     "series": 5,
     "order": 51,
     "name": "磐岩的寻宝者",
-    "description": "在璃月开启400个宝箱（层岩巨渊另外计算）。",
+    "description": "在璃月开启400个宝箱（层岩巨渊与沉玉谷另外计算）。",
     "reward": 10,
     "version": "1.0",
     "trigger": {
@@ -616,7 +616,7 @@
     "series": 5,
     "order": 52,
     "name": "磐岩的寻宝者",
-    "description": "在璃月开启800个宝箱（层岩巨渊另外计算）。",
+    "description": "在璃月开启800个宝箱（层岩巨渊与沉玉谷另外计算）。",
     "reward": 20,
     "version": "1.0",
     "trigger": {
@@ -628,7 +628,7 @@
     "series": 5,
     "order": 53,
     "name": "磐岩的冒险家",
-    "description": "在璃月，完成10个大世界机关限时挑战（层岩巨渊另外计算）。",
+    "description": "在璃月，完成10个大世界机关限时挑战（层岩巨渊与沉玉谷另外计算）。",
     "reward": 5,
     "version": "1.0",
     "trigger": {
@@ -640,7 +640,7 @@
     "series": 5,
     "order": 54,
     "name": "磐岩的冒险家",
-    "description": "在璃月，完成20个大世界机关限时挑战（层岩巨渊另外计算）。",
+    "description": "在璃月，完成20个大世界机关限时挑战（层岩巨渊与沉玉谷另外计算）。",
     "reward": 10,
     "version": "1.0",
     "trigger": {
@@ -652,7 +652,7 @@
     "series": 5,
     "order": 55,
     "name": "磐岩的冒险家",
-    "description": "在璃月，完成40个大世界机关限时挑战（层岩巨渊另外计算）。",
+    "description": "在璃月，完成40个大世界机关限时挑战（层岩巨渊与沉玉谷另外计算）。",
     "reward": 20,
     "version": "1.0",
     "trigger": {
@@ -803,7 +803,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 70141,
           "name": "山中之物",
           "type": "世界任务"
@@ -823,7 +822,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 70102,
           "name": "腐殖之牙",
           "type": "世界任务"
@@ -1068,7 +1066,14 @@
     "reward": 10,
     "version": "2.0",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 72105,
+          "name": "影向祓行",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -1080,7 +1085,14 @@
     "reward": 10,
     "version": "2.0",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 72122,
+          "name": "踏鞴物语·终幕",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -1092,7 +1104,14 @@
     "reward": 10,
     "version": "2.0",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 72132,
+          "name": "远吕羽氏遗事·其五",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -1284,7 +1303,14 @@
     "reward": 10,
     "version": "2.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 72158,
+          "name": "清籁逐雷记·其四",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -1296,7 +1322,14 @@
     "reward": 10,
     "version": "2.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 72149,
+          "name": "「海祇之心」",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -1476,7 +1509,14 @@
     "reward": 10,
     "version": "2.2",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 72173,
+          "name": "日轮与菅名山",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -1527,7 +1567,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 72238,
           "name": "窥见白夜",
           "type": "世界任务"
@@ -1667,7 +1706,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 72177,
           "name": "龙蛇洞宫试炼记",
           "type": "世界任务"
@@ -1735,7 +1773,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 71045,
           "name": "灵石何故堕此间",
           "type": "世界任务"
@@ -1887,7 +1924,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 71044,
           "name": "巧瞒七星解磐键",
           "type": "世界任务"
@@ -1907,7 +1943,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 71045,
           "name": "灵石何故堕此间",
           "type": "世界任务"
@@ -2095,7 +2130,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73038,
           "name": "「你好」、「谢谢」；最后是「再见」",
           "type": "世界任务"
@@ -2304,7 +2338,14 @@
     "reward": 10,
     "version": "3.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 73055,
+          "name": "热砂之梦",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -2316,7 +2357,14 @@
     "reward": 5,
     "version": "3.3",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 70665,
+          "name": "来试试「七圣召唤」吧！",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -2328,7 +2376,14 @@
     "reward": 10,
     "version": "3.3",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 70669,
+          "name": "牌手等级突破·四",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -2664,7 +2719,14 @@
     "reward": 10,
     "version": "3.4",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 73220,
+          "name": "永恒的葱茏之梦",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -2928,7 +2990,14 @@
     "reward": 10,
     "version": "3.6",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 73232,
+          "name": "蒂尔·亚什特的赞歌",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -3123,7 +3192,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74004,
           "name": "玛丽安的故事",
           "type": "世界任务"
@@ -3143,7 +3211,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74007,
           "name": "画、梦境和机器狗",
           "type": "世界任务"
@@ -3352,7 +3419,14 @@
     "reward": 10,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74026,
+          "name": "一报还一报",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -3364,7 +3438,14 @@
     "reward": 10,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74053,
+          "name": "枫丹科学院，停滞于一片废墟上",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -3532,7 +3613,177 @@
     "reward": 10,
     "version": "4.2",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74078,
+          "name": "溪舟的尾波",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 80300,
+    "series": 47,
+    "order": 276,
+    "name": "大地勘探·碧水萦纡之乡",
+    "description": "点亮璃月区域中，沉玉谷的地图。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "UNLOCK_AREA"
+    }
+  },
+  {
+    "id": 80301,
+    "series": 47,
+    "order": 277,
+    "name": "凌沉玉以径度",
+    "description": "解锁璃月区域中，沉玉谷所有传送锚点。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "UNLOCK_TRANS_POINT"
+    }
+  },
+  {
+    "id": 80302,
+    "series": 47,
+    "order": 278,
+    "name": "瑶庭引路人",
+    "description": "在沉玉谷追随4个仙灵，并点亮仙灵之庭。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80303,
+    "series": 47,
+    "order": 279,
+    "name": "瑶庭引路人",
+    "description": "在沉玉谷追随8个仙灵，并点亮仙灵之庭。",
+    "reward": 10,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80304,
+    "series": 47,
+    "order": 280,
+    "name": "瑶庭引路人",
+    "description": "在沉玉谷追随16个仙灵，并点亮仙灵之庭。",
+    "reward": 20,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80305,
+    "series": 47,
+    "order": 281,
+    "name": "翠陵的寻宝者",
+    "description": "在沉玉谷开启60个宝箱。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "OPEN_WORLD_CHEST"
+    }
+  },
+  {
+    "id": 80306,
+    "series": 47,
+    "order": 282,
+    "name": "翠陵的寻宝者",
+    "description": "在沉玉谷开启120个宝箱。",
+    "reward": 10,
+    "version": "4.4",
+    "trigger": {
+      "type": "OPEN_WORLD_CHEST"
+    }
+  },
+  {
+    "id": 80307,
+    "series": 47,
+    "order": 283,
+    "name": "翠陵的寻宝者",
+    "description": "在沉玉谷开启240个宝箱。",
+    "reward": 20,
+    "version": "4.4",
+    "trigger": {
+      "type": "OPEN_WORLD_CHEST"
+    }
+  },
+  {
+    "id": 80308,
+    "series": 47,
+    "order": 284,
+    "name": "翠陵的冒险家",
+    "description": "在沉玉谷完成12个大世界限时挑战。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80309,
+    "series": 47,
+    "order": 285,
+    "name": "翠陵的冒险家",
+    "description": "在沉玉谷完成24个大世界限时挑战。",
+    "reward": 10,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80310,
+    "series": 47,
+    "order": 286,
+    "name": "翠陵的冒险家",
+    "description": "在沉玉谷完成48个大世界限时挑战。",
+    "reward": 20,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80311,
+    "series": 47,
+    "order": 287,
+    "name": "奉璋定极",
+    "description": "将锦落庭的祀珑等级供奉至满级。",
+    "reward": 20,
+    "version": "4.4",
+    "trigger": {
+      "type": "OFFERING_LEVEL"
+    }
+  },
+  {
+    "id": 80312,
+    "series": 47,
+    "order": 288,
+    "name": "沉玉祝珑",
+    "description": "完成「沉玉祝珑」。",
+    "reward": 10,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 71100,
+          "name": "祀珑在昔，灵锦歆诚",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -3895,7 +4146,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 70121,
           "name": "覆雪之国",
           "type": "世界任务"
@@ -4687,7 +4937,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72199,
           "name": "农民的宝藏",
           "type": "世界任务"
@@ -4717,7 +4966,8 @@
     "reward": 5,
     "version": "2.0",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": []
     }
   },
   {
@@ -4744,7 +4994,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72144,
           "name": "广海的守望",
           "type": "世界任务"
@@ -4761,7 +5010,8 @@
     "reward": 5,
     "version": "2.0",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": []
     }
   },
   {
@@ -4773,7 +5023,14 @@
     "reward": 5,
     "version": "2.0",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": [
+        {
+          "questId": 72196,
+          "name": "武者的宿命",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -4785,7 +5042,14 @@
     "reward": 5,
     "version": "2.0",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": [
+        {
+          "questId": 72141,
+          "name": "险恶的教喻",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -4797,7 +5061,8 @@
     "reward": 5,
     "version": "2.0",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": []
     }
   },
   {
@@ -4812,7 +5077,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72197,
           "name": "执望三千里",
           "type": "世界任务"
@@ -4845,7 +5109,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72114,
           "name": "踏鞴物语",
           "type": "世界任务"
@@ -4865,7 +5128,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72123,
           "name": "医樱",
           "type": "世界任务"
@@ -4885,7 +5147,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72124,
           "name": "刀剑成梦",
           "type": "世界任务"
@@ -5156,7 +5417,8 @@
     "reward": 5,
     "version": "2.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": []
     }
   },
   {
@@ -5168,7 +5430,14 @@
     "reward": 5,
     "version": "2.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": [
+        {
+          "questId": 72151,
+          "name": "孤独的海兽",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -5180,7 +5449,8 @@
     "reward": 5,
     "version": "2.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": []
     }
   },
   {
@@ -5243,7 +5513,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72155,
           "name": "清籁逐雷记·其一",
           "type": "世界任务"
@@ -5260,7 +5529,14 @@
     "reward": 5,
     "version": "2.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": [
+        {
+          "questId": 72216,
+          "name": "寝子是只猫·迟来的「好事」",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -5284,7 +5560,14 @@
     "reward": 5,
     "version": "2.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": [
+        {
+          "questId": 72162,
+          "name": "清籁旧宝",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -5296,7 +5579,14 @@
     "reward": 5,
     "version": "2.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": [
+        {
+          "questId": 72163,
+          "name": "清籁旧忆",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -5359,7 +5649,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72167,
           "name": "要求特别多的作家",
           "type": "世界任务"
@@ -5379,7 +5668,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72166,
           "name": "倾听木簧笛的八音曲",
           "type": "世界任务"
@@ -5409,7 +5697,8 @@
     "reward": 5,
     "version": "2.2",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": []
     }
   },
   {
@@ -5433,7 +5722,14 @@
     "reward": 5,
     "version": "2.2",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": [
+        {
+          "questId": 72175,
+          "name": "健忘大王历险记",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -5445,7 +5741,8 @@
     "reward": 5,
     "version": "2.2",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": []
     }
   },
   {
@@ -5460,7 +5757,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72167,
           "name": "要求特别多的作家",
           "type": "世界任务"
@@ -5528,7 +5824,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72173,
           "name": "日轮与菅名山",
           "type": "世界任务"
@@ -5569,7 +5864,14 @@
     "reward": 5,
     "version": "2.4",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": [
+        {
+          "questId": 72233,
+          "name": "止水之潘",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -5584,7 +5886,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72242,
           "name": "常世入口",
           "type": "世界任务"
@@ -5604,7 +5905,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72177,
           "name": "龙蛇洞宫试炼记",
           "type": "世界任务"
@@ -5624,7 +5924,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72268,
           "name": "八衢彦之试炼",
           "type": "世界任务"
@@ -5644,7 +5943,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72269,
           "name": "八衢姬之试炼",
           "type": "世界任务"
@@ -5664,7 +5962,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72270,
           "name": "歧之试炼",
           "type": "世界任务"
@@ -5693,7 +5990,14 @@
     "reward": 5,
     "version": "2.4",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": [
+        {
+          "questId": 72235,
+          "name": "龙蛇藏归辑录",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -5718,7 +6022,8 @@
     "reward": 5,
     "version": "2.4",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": []
     }
   },
   {
@@ -5791,7 +6096,8 @@
     "reward": 5,
     "version": "2.6",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": []
     }
   },
   {
@@ -5864,7 +6170,8 @@
     "reward": 5,
     "version": "2.6",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": []
     }
   },
   {
@@ -5876,7 +6183,8 @@
     "reward": 5,
     "version": "2.6",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": []
     }
   },
   {
@@ -5891,7 +6199,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 71042,
           "name": "九霄之石悬残片",
           "type": "世界任务"
@@ -5911,7 +6218,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 71043,
           "name": "黑翳渐浓隐凶险",
           "type": "世界任务"
@@ -5931,7 +6237,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 71041,
           "name": "踏破矿贼结新缘",
           "type": "世界任务"
@@ -5964,7 +6269,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 71057,
           "name": "失踪的矿工",
           "type": "世界任务"
@@ -5981,7 +6285,14 @@
     "reward": 5,
     "version": "2.6",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_OR"
+      "type": "FINISH_PARENT_QUEST_OR",
+      "task": [
+        {
+          "questId": 71061,
+          "name": "黯淡蘑菇的求救",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -5996,7 +6307,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 71064,
           "name": "千年千岩",
           "type": "世界任务"
@@ -6016,7 +6326,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 71063,
           "name": "岩巅大侠往事",
           "type": "世界任务"
@@ -6036,7 +6345,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 71054,
           "name": "潜身敌营无人知",
           "type": "世界任务"
@@ -6141,7 +6449,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73025,
           "name": "「兰那罗的世界」",
           "type": "世界任务"
@@ -6161,7 +6468,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73025,
           "name": "「兰那罗的世界」",
           "type": "世界任务"
@@ -6181,37 +6487,31 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73069,
           "name": "通往黯道的曲调",
           "type": "世界任务"
         },
         {
-          "taskId": 0,
           "questId": 73070,
           "name": "新芽迸发的曲调",
           "type": "世界任务"
         },
         {
-          "taskId": 0,
           "questId": 73074,
           "name": "揭示兽径的曲调",
           "type": "世界任务"
         },
         {
-          "taskId": 0,
           "questId": 73073,
           "name": "吉祥具书·罗因贾篇",
           "type": "世界任务"
         },
         {
-          "taskId": 0,
           "questId": 73018,
           "name": "膏腴土地下的唤雨之曲",
           "type": "世界任务"
         },
         {
-          "taskId": 0,
           "questId": 73061,
           "name": "星夜之章",
           "type": "世界任务"
@@ -6231,7 +6531,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73099,
           "name": "静态风景·后篇",
           "type": "世界任务"
@@ -6251,7 +6550,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73032,
           "name": "无忧节",
           "type": "世界任务"
@@ -6283,7 +6581,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73035,
           "name": "为了「果实」、「种子」，还有「树」",
           "type": "世界任务"
@@ -6303,7 +6600,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73037,
           "name": "为了一切向往生命的孩子们",
           "type": "世界任务"
@@ -6348,7 +6644,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73013,
           "name": "为那菈献上珍馐",
           "type": "世界任务"
@@ -6368,7 +6663,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73049,
           "name": "愚人者人愚之",
           "type": "世界任务"
@@ -6388,7 +6682,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73099,
           "name": "静态风景·后篇",
           "type": "世界任务"
@@ -6445,7 +6738,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73062,
           "name": "直到「桓那」痊愈",
           "type": "世界任务"
@@ -6465,7 +6757,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73027,
           "name": "吉祥具书·降迪弗篇",
           "type": "世界任务"
@@ -6485,7 +6776,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73077,
           "name": "石锁机关秘话",
           "type": "世界任务"
@@ -6502,7 +6792,8 @@
     "reward": 5,
     "version": "3.0",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -6517,7 +6808,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73071,
           "name": "予人以花",
           "type": "世界任务"
@@ -6560,7 +6850,14 @@
     "reward": 5,
     "version": "3.0",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 73023,
+          "name": "与珍稀之鸟的短暂邂逅",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -6572,7 +6869,14 @@
     "reward": 5,
     "version": "3.0",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 73067,
+          "name": "勇气戴于心上",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -6611,7 +6915,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73066,
           "name": "终章",
           "type": "世界任务"
@@ -6668,7 +6971,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73018,
           "name": "膏腴土地下的唤雨之曲",
           "type": "世界任务"
@@ -6774,7 +7076,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73052,
           "name": "沙海迷踪",
           "type": "世界任务"
@@ -6791,7 +7092,14 @@
     "reward": 5,
     "version": "3.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 73052,
+          "name": "沙海迷踪",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -6803,7 +7111,14 @@
     "reward": 5,
     "version": "3.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 73053,
+          "name": "室内派考古入门",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -6818,7 +7133,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73055,
           "name": "热砂之梦",
           "type": "世界任务"
@@ -6838,7 +7152,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73054,
           "name": "阿赫玛尔的秘密",
           "type": "世界任务"
@@ -6855,7 +7168,14 @@
     "reward": 5,
     "version": "3.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 73054,
+          "name": "阿赫玛尔的秘密",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -6870,7 +7190,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73083,
           "name": "二重证据",
           "type": "世界任务"
@@ -6890,7 +7209,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73083,
           "name": "二重证据",
           "type": "世界任务"
@@ -6910,7 +7228,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73083,
           "name": "二重证据",
           "type": "世界任务"
@@ -6939,7 +7256,14 @@
     "reward": 10,
     "version": "3.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 73084,
+          "name": "阿弗拉图之惑",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -7002,7 +7326,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73189,
           "name": "无形壁障",
           "type": "世界任务"
@@ -7034,7 +7357,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73209,
           "name": "献给某人的蔷薇·曾有人战胜消逝",
           "type": "世界任务"
@@ -7051,7 +7373,8 @@
     "reward": 5,
     "version": "3.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -7099,7 +7422,8 @@
     "reward": 5,
     "version": "3.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -7111,7 +7435,8 @@
     "reward": 5,
     "version": "3.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -7138,7 +7463,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73305,
           "name": "居尔城的记忆",
           "type": "世界任务"
@@ -7158,7 +7482,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73219,
           "name": "流沙如泪的神殿",
           "type": "世界任务"
@@ -7199,7 +7522,14 @@
     "reward": 5,
     "version": "3.4",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 73225,
+          "name": "因为她的罪恶滔天…",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -7259,7 +7589,14 @@
     "reward": 5,
     "version": "3.4",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 73244,
+          "name": "失而复得者一同欢喜",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -7271,7 +7608,14 @@
     "reward": 5,
     "version": "3.4",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 73282,
+          "name": "折翼的猎鹰",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -7334,7 +7678,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73219,
           "name": "流沙如泪的神殿",
           "type": "世界任务"
@@ -7354,7 +7697,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73219,
           "name": "流沙如泪的神殿",
           "type": "世界任务"
@@ -7386,7 +7728,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73103,
           "name": "埋葬丰饶的沙丘·下",
           "type": "世界任务"
@@ -7403,7 +7744,8 @@
     "reward": 5,
     "version": "3.4",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -7430,7 +7772,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73238,
           "name": "彼时漫天异彩",
           "type": "世界任务"
@@ -7450,7 +7791,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73231,
           "name": "锋刃林游增记",
           "type": "世界任务"
@@ -7470,7 +7810,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73235,
           "name": "觉醒的正声",
           "type": "世界任务"
@@ -7526,7 +7865,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73256,
           "name": "如是灵光悉示现·灭",
           "type": "世界任务"
@@ -7558,7 +7896,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73251,
           "name": "如是灵光悉示现",
           "type": "世界任务"
@@ -7578,7 +7915,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73251,
           "name": "如是灵光悉示现",
           "type": "世界任务"
@@ -7598,7 +7934,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73257,
           "name": "蒂尔·亚什特的赞歌",
           "type": "世界任务"
@@ -7618,7 +7953,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73232,
           "name": "蒂尔·亚什特的赞歌",
           "type": "世界任务"
@@ -7638,7 +7972,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73232,
           "name": "蒂尔·亚什特的赞歌",
           "type": "世界任务"
@@ -7658,7 +7991,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73296,
           "name": "画家漂流记",
           "type": "世界任务"
@@ -7678,7 +8010,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73285,
           "name": "碑铭的研究",
           "type": "世界任务"
@@ -7698,7 +8029,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73307,
           "name": "微暗之火",
           "type": "世界任务"
@@ -7718,7 +8048,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73319,
           "name": "浮光鸣召",
           "type": "世界任务"
@@ -7859,7 +8188,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74040,
           "name": "孤帆幽影",
           "type": "世界任务"
@@ -7892,7 +8220,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74009,
           "name": "一条枫丹信息",
           "type": "世界任务"
@@ -7912,7 +8239,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74006,
           "name": "细雨将至",
           "type": "世界任务"
@@ -7969,7 +8295,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74059,
           "name": "奇石历险记",
           "type": "世界任务"
@@ -8001,7 +8326,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74023,
           "name": "好东西，坏品味·续",
           "type": "世界任务"
@@ -8069,7 +8393,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74002,
           "name": "「公主」与「冒险团」的故事",
           "type": "世界任务"
@@ -8089,7 +8412,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74003,
           "name": "安的故事",
           "type": "世界任务"
@@ -8146,7 +8468,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74038,
           "name": "旧世遗音",
           "type": "世界任务"
@@ -8295,7 +8616,8 @@
     "reward": 5,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -8310,7 +8632,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74026,
           "name": "一报还一报",
           "type": "世界任务"
@@ -8327,7 +8648,14 @@
     "reward": 5,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74066,
+          "name": "梅洛彼得生活场景·交涉的艺术",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -8339,7 +8667,14 @@
     "reward": 5,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74067,
+          "name": "梅洛彼得生活场景·一段回忆",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -8351,7 +8686,14 @@
     "reward": 5,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74018,
+          "name": "坏蛋们",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -8363,7 +8705,14 @@
     "reward": 5,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74081,
+          "name": "海渊封缠的乖离光",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -8375,7 +8724,8 @@
     "reward": 5,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -8435,7 +8785,14 @@
     "reward": 5,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74041,
+          "name": "往事追迹",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -8447,7 +8804,14 @@
     "reward": 5,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74104,
+          "name": "通往奇点之路",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -8483,7 +8847,14 @@
     "reward": 5,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74060,
+          "name": "智勇双拳",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -8534,7 +8905,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74053,
           "name": "枫丹科学院，停滞于一片废墟上",
           "type": "世界任务"
@@ -8551,7 +8921,8 @@
     "reward": 5,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -8587,7 +8958,8 @@
     "reward": 5,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -8612,7 +8984,8 @@
     "reward": 5,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -8660,7 +9033,8 @@
     "reward": 5,
     "version": "4.2",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -8688,7 +9062,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74072,
           "name": "藻海的寻踪",
           "type": "世界任务"
@@ -8705,7 +9078,14 @@
     "reward": 5,
     "version": "4.2",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74165,
+          "name": "大梦的醒转",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -8717,7 +9097,8 @@
     "reward": 5,
     "version": "4.2",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -8756,7 +9137,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74143,
           "name": "生日快乐",
           "type": "世界任务"
@@ -8788,7 +9168,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 74136,
           "name": "一场预期内的谎言",
           "type": "世界任务"
@@ -8818,7 +9197,8 @@
     "reward": 5,
     "version": "4.2",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -8830,7 +9210,14 @@
     "reward": 5,
     "version": "4.2",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74116,
+          "name": "问题与答案",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -8842,7 +9229,14 @@
     "reward": 5,
     "version": "4.2",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74144,
+          "name": "无格律自由诗",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -8951,7 +9345,469 @@
     "reward": 5,
     "version": "4.3",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74157,
+          "name": "勒鲁瓦·漂亮朋友",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81438,
+    "series": 0,
+    "order": 1422,
+    "name": "「赤璋巡岳府君」",
+    "description": "战胜地方传奇·赤璋巡岳府君。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81439,
+    "series": 0,
+    "order": 1423,
+    "name": "至上的秘笈",
+    "description": "找到古华遗留的宝藏。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 71109,
+          "name": "秘谷侠隐",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81440,
+    "series": 0,
+    "order": 1424,
+    "name": "真·枪剑双绝",
+    "description": "通过王山厅内的全部试炼。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81441,
+    "series": 0,
+    "order": 1425,
+    "name": "废墟的故事",
+    "description": "解开先民尘封的秘密。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": []
+    }
+  },
+  {
+    "id": 81442,
+    "series": 0,
+    "order": 1426,
+    "name": "整旧如新",
+    "description": "完成六处遗迹景观的修复与重建。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81443,
+    "series": 0,
+    "order": 1427,
+    "name": "破尽无明",
+    "description": "破除七处氲气的根源。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81444,
+    "series": 0,
+    "order": 1428,
+    "name": "触及苍穹的容颜",
+    "description": "运用仙力，短暂摆脱大地的束缚。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 81445,
+    "series": 0,
+    "order": 1429,
+    "name": "不过是块石头而已…",
+    "description": "…所以记得要小心轻放。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 81446,
+    "series": 0,
+    "order": 1430,
+    "name": "我乃茶，釜中之茶",
+    "description": "帮罗叔修好了翘英庄的茶釜。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 71106,
+          "name": "攸望三叠",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81447,
+    "series": 0,
+    "order": 1431,
+    "name": "何岁为春，何岁为秋",
+    "description": "见证古树重焕新生。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 71115,
+          "name": "彩蝶翩然过谷中",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81448,
+    "series": 0,
+    "order": 1432,
+    "name": "「肉脯沉…什么出？」",
+    "description": "发现玉璜古龟的栖息地。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
+    }
+  },
+  {
+    "id": 81449,
+    "series": 0,
+    "order": 1433,
+    "name": "壶中景迥日月长",
+    "description": "在沉玉谷的山川间，斟满所有的古茶杯。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81450,
+    "series": 0,
+    "order": 1434,
+    "name": "锦落云开",
+    "description": "与灵渊一同进入尘封已久的锦落庭。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 71127,
+          "name": "赤望所居，锦落云程",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81452,
+    "series": 0,
+    "order": 1436,
+    "name": "五剑归王山",
+    "description": "找到全部五把「古华遗剑」。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81454,
+    "series": 0,
+    "order": 1438,
+    "name": "「想学啊？我教你！」",
+    "description": "战胜身份特殊的古华派非正式弟子三次。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81455,
+    "series": 0,
+    "order": 1439,
+    "name": "壁绘的面纱",
+    "description": "见证四处壁画。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81457,
+    "series": 0,
+    "order": 1441,
+    "name": "铁石为开",
+    "description": "帮助千岩军查获了「铁盐帮」的非法贸易。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 71116,
+          "name": "契约之砂",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81458,
+    "series": 0,
+    "order": 1442,
+    "name": "沉玉谷四景",
+    "description": "获得了限量版的「沉玉之旅」留影纪念册。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 71110,
+          "name": "沉玉之旅",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81459,
+    "series": 0,
+    "order": 1443,
+    "name": "香莙梦",
+    "description": "了解魂香花的秘密。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 71105,
+          "name": "仙人游庄",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81460,
+    "series": 0,
+    "order": 1444,
+    "name": "从善如流",
+    "description": "提升了养育驮兽的心得…真的有用吗？",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 71111,
+          "name": "云云椒椒",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81461,
+    "series": 0,
+    "order": 1445,
+    "name": "后备非隐藏能源",
+    "description": "重新启动沉玉谷的遗迹机关。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": []
+    }
+  },
+  {
+    "id": 81462,
+    "series": 0,
+    "order": 1446,
+    "name": "万里城垣建造时",
+    "description": "找到千岩军留下的物资。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81463,
+    "series": 0,
+    "order": 1447,
+    "name": "碧水从游",
+    "description": "在船歌声中观览碧水河的美景。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81465,
+    "series": 0,
+    "order": 1449,
+    "name": "鲤跃天门开",
+    "description": "见证金鲤飞跃空谷。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81466,
+    "series": 0,
+    "order": 1450,
+    "name": "灵何惟兮水中",
+    "description": "发现宝玦口隐藏的秘密。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 71103,
+          "name": "采撷掇拾，沉玉浮琼",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81467,
+    "series": 0,
+    "order": 1451,
+    "name": "「玉璧玉璧，随我心意…」",
+    "description": "回收最后的祀珑。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 71103,
+          "name": "采撷掇拾，沉玉浮琼",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81468,
+    "series": 0,
+    "order": 1452,
+    "name": "时仿佛以遥见",
+    "description": "畴昔梦以登天。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 71100,
+          "name": "祀珑在昔，灵锦歆诚",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81469,
+    "series": 0,
+    "order": 1453,
+    "name": "悠古的巫觋歌",
+    "description": "见证浮锦完成投珑仪式。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 71100,
+          "name": "祀珑在昔，灵锦歆诚",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81470,
+    "series": 0,
+    "order": 1454,
+    "name": "历玄冥以幽径",
+    "description": "再度回到锦落庭。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 71127,
+          "name": "赤望所居，锦落云程",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81471,
+    "series": 0,
+    "order": 1455,
+    "name": "秘密的奇迹",
+    "description": "发现来歆山玉石的秘密。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -11079,6 +11935,18 @@
     }
   },
   {
+    "id": 82189,
+    "series": 0,
+    "order": 2188,
+    "name": "冰与风的鼓动",
+    "description": "探寻隐山猊兽与冰元素之间的关系。",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
     "id": 84000,
     "series": 0,
     "order": 4001,
@@ -11198,7 +12066,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1018,
           "name": "返尘",
           "type": "魔神任务"
@@ -11218,7 +12085,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1016,
           "name": "邀约",
           "type": "魔神任务"
@@ -11238,7 +12104,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1000,
           "name": "请仙",
           "type": "魔神任务"
@@ -11258,7 +12123,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1003,
           "name": "望舒",
           "type": "魔神任务"
@@ -11278,7 +12142,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1012,
           "name": "传香",
           "type": "魔神任务"
@@ -11298,7 +12161,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1014,
           "name": "壶天",
           "type": "魔神任务"
@@ -11318,7 +12180,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1013,
           "name": "市井",
           "type": "魔神任务"
@@ -11338,7 +12199,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1015,
           "name": "归终",
           "type": "魔神任务"
@@ -11358,7 +12218,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1015,
           "name": "归终",
           "type": "魔神任务"
@@ -11378,7 +12237,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1021,
           "name": "玑衡",
           "type": "魔神任务"
@@ -11398,7 +12256,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1021,
           "name": "玑衡",
           "type": "魔神任务"
@@ -11418,7 +12275,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1022,
           "name": "孤芳",
           "type": "魔神任务"
@@ -11438,7 +12294,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1023,
           "name": "离心",
           "type": "魔神任务"
@@ -11458,7 +12313,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1025,
           "name": "送仙",
           "type": "魔神任务"
@@ -11478,7 +12332,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1025,
           "name": "送仙",
           "type": "魔神任务"
@@ -11498,7 +12351,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1025,
           "name": "送仙",
           "type": "魔神任务"
@@ -11518,7 +12370,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 18000,
           "name": "拾枝者·戴因斯雷布",
           "type": "世界任务"
@@ -11562,7 +12413,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 8000,
           "name": "非自愿的祭献",
           "type": "魔神任务"
@@ -11582,7 +12432,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 8000,
           "name": "非自愿的祭献",
           "type": "魔神任务"
@@ -11602,7 +12451,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 8001,
           "name": "无信者的使徒",
           "type": "魔神任务"
@@ -11622,7 +12470,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 8003,
           "name": "有隔阂的魂灵",
           "type": "魔神任务"
@@ -11642,7 +12489,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 8003,
           "name": "有隔阂的魂灵",
           "type": "魔神任务"
@@ -11662,7 +12508,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2000,
           "name": "冲破雷暴之法",
           "type": "魔神任务"
@@ -11682,7 +12527,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2001,
           "name": "南十字武斗会",
           "type": "魔神任务"
@@ -11702,7 +12546,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2002,
           "name": "一路随风",
           "type": "魔神任务"
@@ -11722,7 +12565,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2011,
           "name": "起航之日",
           "type": "魔神任务"
@@ -11742,7 +12584,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2013,
           "name": "离岛逃离计划",
           "type": "魔神任务"
@@ -11762,7 +12603,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2003,
           "name": "三个心愿",
           "type": "魔神任务"
@@ -11782,7 +12622,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2003,
           "name": "三个心愿",
           "type": "魔神任务"
@@ -11802,7 +12641,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2007,
           "name": "于狱中绽放之花",
           "type": "魔神任务"
@@ -11822,7 +12660,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2007,
           "name": "于狱中绽放之花",
           "type": "魔神任务"
@@ -11842,7 +12679,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2008,
           "name": "在审判的雷鸣声中",
           "type": "魔神任务"
@@ -11862,7 +12698,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2009,
           "name": "以反抗之人的名义",
           "type": "魔神任务"
@@ -11882,7 +12717,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2007,
           "name": "于狱中绽放之花",
           "type": "魔神任务"
@@ -11902,7 +12736,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2009,
           "name": "以反抗之人的名义",
           "type": "魔神任务"
@@ -11922,7 +12755,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2010,
           "name": "剑与鱼与反抗者",
           "type": "魔神任务"
@@ -11942,7 +12774,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2016,
           "name": "眷属的践行",
           "type": "魔神任务"
@@ -11962,7 +12793,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2017,
           "name": "定罪公文",
           "type": "魔神任务"
@@ -11982,7 +12812,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2019,
           "name": "御前决斗",
           "type": "魔神任务"
@@ -12002,7 +12831,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2020,
           "name": "千手百眼",
           "type": "魔神任务"
@@ -12022,7 +12850,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 2021,
           "name": "愿望",
           "type": "魔神任务"
@@ -12042,7 +12869,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 71831,
           "name": "身后事·归于山中",
           "type": "世界任务"
@@ -12062,7 +12888,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 20033,
           "name": "冒险家，安娜！",
           "type": "每日委托"
@@ -12082,13 +12907,11 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 21027,
           "name": "小海盗，要出海！",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 21027,
           "name": "小海盗，要出海！",
           "type": "每日委托"
@@ -12108,7 +12931,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 11015,
           "name": "此心安处",
           "type": "魔神任务"
@@ -12128,7 +12950,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 11015,
           "name": "此心安处",
           "type": "魔神任务"
@@ -12148,7 +12969,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 11014,
           "name": "往事如尘",
           "type": "魔神任务"
@@ -12168,7 +12988,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 11015,
           "name": "此心安处",
           "type": "魔神任务"
@@ -12188,13 +13007,11 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 8004,
           "name": "渊底不期的再会",
           "type": "魔神任务"
         },
         {
-          "taskId": 0,
           "questId": 8004,
           "name": "渊底不期的再会",
           "type": "魔神任务"
@@ -12214,13 +13031,11 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 8005,
           "name": "被守护者的灵柩",
           "type": "魔神任务"
         },
         {
-          "taskId": 0,
           "questId": 8005,
           "name": "被守护者的灵柩",
           "type": "魔神任务"
@@ -12240,7 +13055,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 8006,
           "name": "因提瓦特的记忆",
           "type": "魔神任务"
@@ -12260,7 +13074,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 8007,
           "name": "黑蛇骑士的荣光",
           "type": "魔神任务"
@@ -12280,7 +13093,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1029,
           "name": "危机四伏",
           "type": "魔神任务"
@@ -12300,7 +13112,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1031,
           "name": "绝处逢生",
           "type": "魔神任务"
@@ -12320,7 +13131,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 1031,
           "name": "绝处逢生",
           "type": "魔神任务"
@@ -12340,7 +13150,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3004,
           "name": "智慧之神的踪影",
           "type": "魔神任务"
@@ -12360,7 +13169,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3005,
           "name": "失物匿于繁华",
           "type": "魔神任务"
@@ -12380,7 +13188,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3006,
           "name": "近在咫尺的目标",
           "type": "魔神任务"
@@ -12400,7 +13207,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3006,
           "name": "近在咫尺的目标",
           "type": "魔神任务"
@@ -12420,7 +13226,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3008,
           "name": "已然来临的花神诞祭",
           "type": "魔神任务"
@@ -12440,7 +13245,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3008,
           "name": "已然来临的花神诞祭",
           "type": "魔神任务"
@@ -12460,7 +13264,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3012,
           "name": "终将结束的花神诞祭",
           "type": "魔神任务"
@@ -12480,7 +13283,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3012,
           "name": "终将结束的花神诞祭",
           "type": "魔神任务"
@@ -12500,7 +13302,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3016,
           "name": "如凯旋的英雄一般",
           "type": "魔神任务"
@@ -12520,7 +13321,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3016,
           "name": "如凯旋的英雄一般",
           "type": "魔神任务"
@@ -12540,7 +13340,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3017,
           "name": "来自某位「神明」的凝视",
           "type": "魔神任务"
@@ -12560,7 +13359,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3018,
           "name": "剑拔弩张四人众",
           "type": "魔神任务"
@@ -12580,7 +13378,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3021,
           "name": "热沙中的秘密",
           "type": "魔神任务"
@@ -12600,7 +13397,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3021,
           "name": "热沙中的秘密",
           "type": "魔神任务"
@@ -12620,7 +13416,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3021,
           "name": "热沙中的秘密",
           "type": "魔神任务"
@@ -12640,7 +13435,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3024,
           "name": "行于黎明前夜幕里",
           "type": "魔神任务"
@@ -12660,7 +13454,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3025,
           "name": "如临神之畔",
           "type": "魔神任务"
@@ -12680,7 +13473,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3022,
           "name": "识藏日",
           "type": "魔神任务"
@@ -12700,7 +13492,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3028,
           "name": "意识之舟所至之处",
           "type": "魔神任务"
@@ -12720,7 +13511,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3026,
           "name": "请饮下祝胜之酒",
           "type": "魔神任务"
@@ -12740,7 +13530,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3029,
           "name": "夜中飞鸟坠于三段",
           "type": "魔神任务"
@@ -12760,7 +13549,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3030,
           "name": "乱世轮舞",
           "type": "魔神任务"
@@ -12780,7 +13568,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3031,
           "name": "幕切——倾奇之末",
           "type": "魔神任务"
@@ -12800,7 +13587,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3031,
           "name": "幕切——倾奇之末",
           "type": "魔神任务"
@@ -12820,7 +13606,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 3032,
           "name": "如朝露一般",
           "type": "魔神任务"
@@ -12840,7 +13625,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 8009,
           "name": "如命运般的相逢",
           "type": "魔神任务"
@@ -12860,7 +13644,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 8010,
           "name": "嘲弄命运的资格",
           "type": "魔神任务"
@@ -12880,7 +13663,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 8011,
           "name": "命运尽头的垂泪者",
           "type": "魔神任务"
@@ -12900,7 +13682,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 8012,
           "name": "既已写下的命运",
           "type": "魔神任务"
@@ -12920,7 +13701,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4004,
           "name": "独舞者的序幕",
           "type": "魔神任务"
@@ -12940,7 +13720,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4006,
           "name": "聚光灯下谎言成影",
           "type": "魔神任务"
@@ -12960,7 +13739,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4006,
           "name": "聚光灯下谎言成影",
           "type": "魔神任务"
@@ -12980,7 +13758,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4006,
           "name": "聚光灯下谎言成影",
           "type": "魔神任务"
@@ -13012,7 +13789,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 19045,
           "name": "埃伊亚遗迹冒险",
           "type": "角色邀约/传说任务"
@@ -13153,7 +13929,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 19087,
           "name": "冒险家的入门考试",
           "type": "角色邀约/传说任务"
@@ -13221,7 +13996,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 19115,
           "name": "小范围的改变",
           "type": "角色邀约/传说任务"
@@ -13265,7 +14039,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 19015,
           "name": "替身计划",
           "type": "角色邀约/传说任务"
@@ -13381,7 +14154,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 19136,
           "name": "从零开始",
           "type": "角色邀约/传说任务"
@@ -13437,7 +14209,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 19047,
           "name": "初窥戏中意",
           "type": "角色邀约/传说任务"
@@ -13481,7 +14252,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 19144,
           "name": "重大决定",
           "type": "角色邀约/传说任务"
@@ -13513,19 +14283,16 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 19060,
           "name": "尘封的疑云",
           "type": "角色邀约/传说任务"
         },
         {
-          "taskId": 0,
           "questId": 19060,
           "name": "尘封的疑云",
           "type": "角色邀约/传说任务"
         },
         {
-          "taskId": 0,
           "questId": 19060,
           "name": "尘封的疑云",
           "type": "角色邀约/传说任务"
@@ -13545,7 +14312,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 19055,
           "name": "失落之物",
           "type": "角色邀约/传说任务"
@@ -13577,13 +14343,11 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 19173,
           "name": "孤影徘徊",
           "type": "角色邀约/传说任务"
         },
         {
-          "taskId": 0,
           "questId": 19173,
           "name": "孤影徘徊",
           "type": "角色邀约/传说任务"
@@ -13603,7 +14367,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 19172,
           "name": "早教机关",
           "type": "角色邀约/传说任务"
@@ -13647,7 +14410,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 19155,
           "name": "最后一站",
           "type": "角色邀约/传说任务"
@@ -13679,7 +14441,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 19076,
           "name": "最初的理想",
           "type": "角色邀约/传说任务"
@@ -13699,7 +14460,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 19076,
           "name": "最初的理想",
           "type": "角色邀约/传说任务"
@@ -13743,7 +14503,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 19095,
           "name": "骑士团的普通一天",
           "type": "角色邀约/传说任务"
@@ -13763,7 +14522,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4000,
           "name": "如同昔日的微茫月明",
           "type": "魔神任务"
@@ -13783,7 +14541,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4000,
           "name": "如同昔日的微茫月明",
           "type": "魔神任务"
@@ -13803,7 +14560,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4002,
           "name": "当一切回归于水",
           "type": "魔神任务"
@@ -13823,7 +14579,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4002,
           "name": "当一切回归于水",
           "type": "魔神任务"
@@ -13843,7 +14598,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4012,
           "name": "梅洛彼得堡",
           "type": "魔神任务"
@@ -13863,7 +14617,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4015,
           "name": "匿于日常之禁忌",
           "type": "魔神任务"
@@ -13883,7 +14636,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4018,
           "name": "深海的迷路者",
           "type": "魔神任务"
@@ -13903,7 +14655,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4007,
           "name": "探入水底迷雾",
           "type": "魔神任务"
@@ -13923,7 +14674,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4008,
           "name": "真相隐于影中",
           "type": "魔神任务"
@@ -13943,7 +14693,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4009,
           "name": "守秘者与禁区",
           "type": "魔神任务"
@@ -13963,7 +14712,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4010,
           "name": "灾厄的脚步",
           "type": "魔神任务"
@@ -13983,7 +14731,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4019,
           "name": "片刻安宁",
           "type": "魔神任务"
@@ -14003,7 +14750,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4023,
           "name": "怒涛之灾",
           "type": "魔神任务"
@@ -14023,7 +14769,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4020,
           "name": "相见亦是离别",
           "type": "魔神任务"
@@ -14043,7 +14788,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4021,
           "name": "狩猎者，预见者",
           "type": "魔神任务"
@@ -14063,7 +14807,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4025,
           "name": "终幕礼",
           "type": "魔神任务"
@@ -14083,7 +14826,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 4025,
           "name": "终幕礼",
           "type": "魔神任务"
@@ -14103,19 +14845,16 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 20009,
           "name": "语言交流",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 20010,
           "name": "语言交流",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 20015,
           "name": "语言交流",
           "type": "每日委托"
@@ -14135,7 +14874,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 20103,
           "name": "诗歌交流",
           "type": "每日委托"
@@ -14155,19 +14893,16 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 20700,
           "name": "说到做到！",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 20700,
           "name": "说到做到！",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 20700,
           "name": "说到做到！",
           "type": "每日委托"
@@ -14187,19 +14922,16 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 20600,
           "name": "来自冬天的故事",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 20600,
           "name": "来自冬天的故事",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 20600,
           "name": "来自冬天的故事",
           "type": "每日委托"
@@ -14219,13 +14951,11 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22300,
           "name": "岩游记",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22300,
           "name": "岩游记",
           "type": "每日委托"
@@ -14257,7 +14987,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22301,
           "name": "且听下回分解",
           "type": "每日委托"
@@ -14277,19 +15006,16 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22000,
           "name": "璃月港，有海盗！",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22001,
           "name": "璃月港，有海盗！",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22002,
           "name": "璃月港，有海盗！",
           "type": "每日委托"
@@ -14309,13 +15035,11 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22003,
           "name": "勿言勿笑",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22004,
           "name": "独钓江雪",
           "type": "每日委托"
@@ -14335,31 +15059,26 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22107,
           "name": "好兆头",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22107,
           "name": "好兆头",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22107,
           "name": "好兆头",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22107,
           "name": "好兆头",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22107,
           "name": "好兆头",
           "type": "每日委托"
@@ -14379,7 +15098,6 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 20036,
           "name": "愿风带走思念",
           "type": "每日委托"
@@ -14399,7 +15117,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22113,
           "name": "望舒须筑阶",
           "type": "每日委托"
@@ -14419,7 +15136,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22305,
           "name": "点石成…什么",
           "type": "每日委托"
@@ -14439,7 +15155,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 20068,
           "name": "提米，对不起！",
           "type": "每日委托"
@@ -14459,7 +15174,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 20062,
           "name": "「冒险家」的能力极限",
           "type": "每日委托"
@@ -14479,7 +15193,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 20102,
           "name": "一个男孩的去信",
           "type": "每日委托"
@@ -14511,7 +15224,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 20517,
           "name": "惊喜大礼",
           "type": "每日委托"
@@ -14531,13 +15243,11 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22006,
           "name": "「遗落」的文物",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22009,
           "name": "「夺宝」小行动",
           "type": "每日委托"
@@ -14557,7 +15267,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22114,
           "name": "所谓「工作」",
           "type": "每日委托"
@@ -14577,7 +15286,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22115,
           "name": "久久望故人",
           "type": "每日委托"
@@ -14597,7 +15305,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22302,
           "name": "这本小说真厉害",
           "type": "每日委托"
@@ -14617,25 +15324,21 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22107,
           "name": "好兆头",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22107,
           "name": "好兆头",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22107,
           "name": "好兆头",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22107,
           "name": "好兆头",
           "type": "每日委托"
@@ -14667,7 +15370,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22019,
           "name": "万端珊瑚事件簿·结案时刻",
           "type": "每日委托"
@@ -14687,7 +15389,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22020,
           "name": "万端珊瑚事件簿·收尾工作",
           "type": "每日委托"
@@ -14707,19 +15408,16 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 22025,
           "name": "绝对独特的美食",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22025,
           "name": "绝对独特的美食",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22025,
           "name": "绝对独特的美食",
           "type": "每日委托"
@@ -14751,13 +15449,11 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22021,
           "name": "全能美食队·烹饪对决",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22021,
           "name": "全能美食队·烹饪对决",
           "type": "每日委托"
@@ -14777,7 +15473,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22022,
           "name": "全能美食队·美食小问答",
           "type": "每日委托"
@@ -14797,13 +15492,11 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22030,
           "name": "全能美食队·厨道的极意",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22030,
           "name": "全能美食队·厨道的极意",
           "type": "每日委托"
@@ -14823,7 +15516,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22037,
           "name": "售后服务",
           "type": "每日委托"
@@ -14843,7 +15535,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22016,
           "name": "全能美食队·吃饱的重要性",
           "type": "世界任务"
@@ -14863,13 +15554,11 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 72809,
           "name": "离岛之路",
           "type": "世界任务"
         },
         {
-          "taskId": 0,
           "questId": 72809,
           "name": "离岛之路",
           "type": "世界任务"
@@ -14889,13 +15578,11 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22017,
           "name": "这本小说…好像看过？",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 22013,
           "name": "这本小说…有问题？",
           "type": "每日委托"
@@ -14927,7 +15614,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 72806,
           "name": "「八重堂」的邀约",
           "type": "世界任务"
@@ -14947,7 +15633,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 72812,
           "name": "故事构思法",
           "type": "世界任务"
@@ -14967,7 +15652,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 22050,
           "name": "鸣神寻踪",
           "type": "世界任务"
@@ -15023,19 +15707,16 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 23012,
           "name": "喵…喵喵？喵！喵。",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 23012,
           "name": "喵…喵喵？喵！喵。",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 23012,
           "name": "喵…喵喵？喵！喵。",
           "type": "每日委托"
@@ -15067,7 +15748,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 23002,
           "name": "御用在他乡",
           "type": "每日委托"
@@ -15087,19 +15767,16 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 23018,
           "name": "谨遵医嘱",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 23018,
           "name": "谨遵医嘱",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 23018,
           "name": "谨遵医嘱",
           "type": "每日委托"
@@ -15143,7 +15820,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73800,
           "name": "全能美食队·职责之内",
           "type": "世界任务"
@@ -15163,19 +15839,16 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 23025,
           "name": "衡量世界之人！",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 23025,
           "name": "衡量世界之人！",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 23025,
           "name": "衡量世界之人！",
           "type": "每日委托"
@@ -15195,7 +15868,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73105,
           "name": "求学漫漫路",
           "type": "世界任务"
@@ -15228,7 +15900,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 73109,
           "name": "趁梦想气息逗留",
           "type": "世界任务"
@@ -15248,19 +15919,16 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 23004,
           "name": "宝贝计划",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 23004,
           "name": "宝贝计划",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 23004,
           "name": "宝贝计划",
           "type": "每日委托"
@@ -15280,7 +15948,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 23021,
           "name": "问题的转化·负载问题",
           "type": "每日委托"
@@ -15300,19 +15967,16 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 23010,
           "name": "食与学",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 23010,
           "name": "食与学",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 23010,
           "name": "食与学",
           "type": "每日委托"
@@ -15332,7 +15996,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 23026,
           "name": "教令院，小问题",
           "type": "每日委托"
@@ -15352,7 +16015,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 23039,
           "name": "跑，希尔米，跑",
           "type": "每日委托"
@@ -15384,7 +16046,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 23042,
           "name": "沙上花·余香",
           "type": "每日委托"
@@ -15404,7 +16065,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 21033,
           "name": "试问，藏锋何处？",
           "type": "每日委托"
@@ -15424,7 +16084,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 21038,
           "name": "剑去之日",
           "type": "每日委托"
@@ -15444,19 +16103,16 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 24000,
           "name": "枫丹廷，二三事",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 24001,
           "name": "枫丹廷，二三事",
           "type": "每日委托"
         },
         {
-          "taskId": 0,
           "questId": 24002,
           "name": "枫丹廷，二三事",
           "type": "每日委托"
@@ -15476,7 +16132,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 24012,
           "name": "总得喝一杯",
           "type": "每日委托"
@@ -15493,7 +16148,14 @@
     "reward": 5,
     "version": "4.0",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 24015,
+          "name": "审美力批判·自我批判",
+          "type": "每日委托"
+        }
+      ]
     }
   },
   {
@@ -15508,7 +16170,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 24005,
           "name": "他们的童年·游城记",
           "type": "每日委托"
@@ -15537,7 +16198,52 @@
     "reward": 5,
     "version": "4.1",
     "trigger": {
-      "type": "FINISH_PARENT_QUEST_AND"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 24023,
+          "name": "饮品时间",
+          "type": "每日委托"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84572,
+    "series": 0,
+    "order": 4096,
+    "name": "谁来说出真相？",
+    "description": "帮助吉雅罗寻找到了新的灵感…？",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 70050,
+          "name": "故事繁多的翘英庄",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84573,
+    "series": 0,
+    "order": 4097,
+    "name": "同流者",
+    "description": "见证某件与水文和光影有关的故事…",
+    "reward": 5,
+    "version": "4.4",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 71114,
+          "name": "水土暂服",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -15552,7 +16258,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 71012,
           "name": "时与风",
           "type": "世界任务"
@@ -15572,7 +16277,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 21004,
           "name": "宝藏归离",
           "type": "世界任务"
@@ -15592,13 +16296,11 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 21021,
           "name": "古云有「螭」",
           "type": "世界任务"
         },
         {
-          "taskId": 0,
           "questId": 21021,
           "name": "古云有「螭」",
           "type": "世界任务"
@@ -15618,13 +16320,11 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         {
-          "taskId": 0,
           "questId": 71005,
           "name": "靖世九柱",
           "type": "世界任务"
         },
         {
-          "taskId": 0,
           "questId": 71005,
           "name": "靖世九柱",
           "type": "世界任务"
@@ -15657,7 +16357,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 71008,
           "name": "游戏一场",
           "type": "世界任务"
@@ -15677,7 +16376,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         {
-          "taskId": 0,
           "questId": 21007,
           "name": "孤木孑立，无林可依",
           "type": "世界任务"

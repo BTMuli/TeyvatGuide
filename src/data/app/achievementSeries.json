@@ -3,7 +3,7 @@
     "id": 0,
     "order": 1,
     "name": "天地万象",
-    "version": "4.3",
+    "version": "4.4",
     "card": "",
     "icon": "/icon/achievement/UI_AchievementIcon_O001.webp"
   },
@@ -374,5 +374,13 @@
     "version": "4.2",
     "card": "枫丹·浑然",
     "icon": "/icon/achievement/UI_AchievementIcon_A016_Part3.webp"
+  },
+  {
+    "id": 47,
+    "order": 48,
+    "name": "沉玉成辉",
+    "version": "4.4",
+    "card": "成就·仙谷",
+    "icon": "/icon/achievement/UI_AchievementIcon_A017.webp"
   }
 ]

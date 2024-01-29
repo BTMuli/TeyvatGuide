@@ -72,6 +72,15 @@
     "icon": "/WIKI/weapon/15501.webp"
   },
   {
+    "id": 14515,
+    "contentId": 0,
+    "name": "鹤鸣余音",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/14515.webp"
+  },
+  {
     "id": 14514,
     "contentId": 7304,
     "name": "万世流涌大典",

@@ -1,5 +1,16 @@
 [
   {
+    "id": 10000093,
+    "contentId": 0,
+    "name": "闲云",
+    "title": "鸾音鹤信",
+    "birthday": [4, 11],
+    "star": 5,
+    "element": "风",
+    "weapon": "法器",
+    "nameCard": "闲云·鹤云"
+  },
+  {
     "id": 10000091,
     "contentId": 500419,
     "name": "娜维娅",
@@ -438,6 +449,17 @@
     "element": "冰",
     "weapon": "单手剑",
     "nameCard": "神里绫华·扇子"
+  },
+  {
+    "id": 10000092,
+    "contentId": 0,
+    "name": "嘉明",
+    "title": "骏猊頕首",
+    "birthday": [12, 22],
+    "star": 4,
+    "element": "火",
+    "weapon": "双手剑",
+    "nameCard": "嘉明·文仔"
   },
   {
     "id": 10000090,

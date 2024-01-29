@@ -1,7 +1,7 @@
 /**
  * @file types/App/Character.d.ts
  * @description 角色相关类型定义文件
- * @since Beta v0.4.1
+ * @since Beta v0.4.2
  */
 
 declare namespace TGApp.App.Character {
@@ -43,13 +43,14 @@ declare namespace TGApp.App.Character {
 
   /**
    * @description Wiki 详细数据
-   * @since Beta v0.4.1
+   * @since Beta v0.4.2
    * @interface WikiItem
    * @memberof TGApp.Plugins.Hutao.Character
    * @property {number} id 角色编号
    * @property {string} name 角色名称
    * @property {string} title 角色称号
    * @property {string} description 角色简介
+   * @property {string} area 角色地区 // 蒙德、璃月、稻妻、须弥、枫丹、愚人众、其他
    * @property {object} brief 角色简介
    * @property {string} brief.camp 角色地区
    * @property {string} brief.constellation 角色星座
@@ -74,6 +75,7 @@ declare namespace TGApp.App.Character {
     name: string;
     title: string;
     description: string;
+    area: string;
     brief: {
       camp: string;
       constellation: string;

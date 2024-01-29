@@ -1628,6 +1628,50 @@
     }
   },
   {
+    "id": 10000093,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "闲云",
+    "itemType": "character",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "elementIcon": "/icon/element/风元素.webp",
+    "icon": "/WIKI/character/10000093.webp",
+    "materials": [
+      {
+        "id": 104316,
+        "name": "「黄金」的教导",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/104316.webp"
+      },
+      {
+        "id": 104317,
+        "name": "「黄金」的指引",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/104317.webp"
+      },
+      {
+        "id": 104318,
+        "name": "「黄金」的哲学",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/104318.webp"
+      }
+    ],
+    "source": {
+      "index": 2,
+      "area": "璃月",
+      "name": "焚尽之环",
+      "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
     "id": 10000075,
     "contentId": 5494,
     "dropDays": [3, 6, 7],
@@ -2548,6 +2592,50 @@
       "index": 2,
       "area": "璃月",
       "name": "焚尽之环",
+      "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
+    "id": 10000092,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "嘉明",
+    "itemType": "character",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "elementIcon": "/icon/element/火元素.webp",
+    "icon": "/WIKI/character/10000092.webp",
+    "materials": [
+      {
+        "id": 104310,
+        "name": "「繁荣」的教导",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/104310.webp"
+      },
+      {
+        "id": 104311,
+        "name": "「繁荣」的指引",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/104311.webp"
+      },
+      {
+        "id": 104312,
+        "name": "「繁荣」的哲学",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/104312.webp"
+      }
+    ],
+    "source": {
+      "index": 2,
+      "area": "璃月",
+      "name": "炽炎祭场",
       "icon": "/icon/nation/璃月.webp"
     }
   },
@@ -4819,6 +4907,57 @@
       "index": 2,
       "area": "璃月",
       "name": "雷云祭坛",
+      "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
+    "id": 14515,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "鹤鸣余音",
+    "itemType": "weapon",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/14515.webp",
+    "materials": [
+      {
+        "id": 114017,
+        "name": "雾海云间的铅丹",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114017.webp"
+      },
+      {
+        "id": 114018,
+        "name": "雾海云间的汞丹",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114018.webp"
+      },
+      {
+        "id": 114019,
+        "name": "雾海云间的金丹",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114019.webp"
+      },
+      {
+        "id": 114020,
+        "name": "雾海云间的转还",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114020.webp"
+      }
+    ],
+    "source": {
+      "index": 2,
+      "area": "璃月",
+      "name": "鸣雷城墟",
       "icon": "/icon/nation/璃月.webp"
     }
   },
