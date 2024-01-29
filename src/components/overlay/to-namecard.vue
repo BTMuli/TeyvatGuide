@@ -128,8 +128,14 @@ function parseNamecard(desc: string): string {
 function parseDesc(desc: string, inQuote: boolean = false): string[] {
   let res = desc.replace(/。/g, "。\n");
   res = res.replace(/；/g, "；\n");
-  res = res.replace(/：/g, "：\n");
-  res = res.replace(/？/g, "？\n");
+  // todo 正则优化
+  if (props?.data?.index !== 187) {
+    res = res.replace(/：/g, "：\n");
+    res = res.replace(/？/g, "？\n");
+  } else {
+    res = res.replace("时候，", "时候，\n");
+    res = res.replace("。\n」", "。」");
+  }
   if (!desc.includes("！」")) {
     res = res.replace(/！/g, "！\n");
   }
@@ -187,7 +193,6 @@ async function shareNamecard(): Promise<void> {
   padding: 0 5px;
   border: 1px solid var(--tgc-white-1);
   border-radius: 5px;
-  backdrop-filter: blur(20px);
   color: var(--tgc-white-1);
 }
 
@@ -202,8 +207,13 @@ async function shareNamecard(): Promise<void> {
   align-items: flex-start;
   justify-content: flex-end;
   padding: 10px;
-  background: var(--common-shadow-t-1);
+  backdrop-filter: blur(5px);
+  background: rgb(0 0 0 / 25%);
   color: var(--tgc-white-1);
+}
+
+.dark .ton-content {
+  background: rgb(0 0 0/ 50%);
 }
 
 .ton-content :first-child {
@@ -229,7 +239,6 @@ async function shareNamecard(): Promise<void> {
   bottom: 10px;
   border: 1px solid var(--tgc-white-1);
   border-radius: 5px;
-  backdrop-filter: blur(5px);
   color: var(--tgc-white-1);
 }
 </style>
