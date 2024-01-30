@@ -339,6 +339,18 @@
     }
   },
   {
+    "id": 1311,
+    "contentId": 0,
+    "name": "托马",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/托马.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_PYRO": "火元素",
+      "GCG_TAG_WEAPON_POLE": "长柄武器",
+      "GCG_TAG_NATION_INAZUMA": "稻妻"
+    }
+  },
+  {
     "id": 1401,
     "contentId": 5365,
     "name": "菲谢尔",
@@ -530,6 +542,18 @@
     }
   },
   {
+    "id": 1507,
+    "contentId": 0,
+    "name": "早柚",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/早柚.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_ANEMO": "风元素",
+      "GCG_TAG_WEAPON_CLAYMORE": "双手剑",
+      "GCG_TAG_NATION_INAZUMA": "稻妻"
+    }
+  },
+  {
     "id": 1508,
     "contentId": 500431,
     "name": "琳妮特",
@@ -712,6 +736,18 @@
     }
   },
   {
+    "id": 2103,
+    "contentId": 0,
+    "name": "无相之冰",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/无相之冰.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_CRYO": "冰元素",
+      "GCG_TAG_WEAPON_NONE": "其他武器",
+      "GCG_TAG_CAMP_MONSTER": "魔物"
+    }
+  },
+  {
     "id": 2201,
     "contentId": 5528,
     "name": "纯水精灵·洛蒂娅",
@@ -796,6 +832,18 @@
     }
   },
   {
+    "id": 2403,
+    "contentId": 0,
+    "name": "千年珍珠骏麟",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/千年珍珠骏麟.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_ELECTRO": "雷元素",
+      "GCG_TAG_WEAPON_NONE": "其他武器",
+      "GCG_TAG_CAMP_MONSTER": "魔物"
+    }
+  },
+  {
     "id": 2501,
     "contentId": 5525,
     "name": "魔偶剑鬼",
@@ -809,7 +857,7 @@
   },
   {
     "id": 2502,
-    "contentId": 500426,
+    "contentId": 500545,
     "name": "特瓦林",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/特瓦林.webp",
@@ -855,6 +903,78 @@
       "GCG_TAG_WEAPON_NONE": "其他武器",
       "GCG_TAG_CAMP_MONSTER": "魔物"
     }
+  },
+  {
+    "id": 0,
+    "contentId": 500596,
+    "name": "镀金旅团·魔岩役使",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/镀金旅团·魔岩役使.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 500595,
+    "name": "镀金旅团·沙中净水",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/镀金旅团·沙中净水.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 500594,
+    "name": "镀金旅团·炽阳凝冰",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/镀金旅团·炽阳凝冰.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 500551,
+    "name": "遗迹守卫",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/遗迹守卫.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 500550,
+    "name": "遗迹龙兽·地巡",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/遗迹龙兽·地巡.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 500549,
+    "name": "攻坚特化型机关·荒",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/攻坚特化型机关·荒.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 500548,
+    "name": "攻坚特化型机关·芒",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/攻坚特化型机关·芒.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 500547,
+    "name": "压制特化型机关·荒",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/压制特化型机关·荒.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 500546,
+    "name": "压制特化型机关·芒",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/压制特化型机关·芒.webp",
+    "tags": {}
   },
   {
     "id": 0,
@@ -1452,6 +1572,17 @@
     }
   },
   {
+    "id": 213111,
+    "contentId": 0,
+    "name": "僚佐的才巧",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/僚佐的才巧.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
     "id": 214011,
     "contentId": 5504,
     "name": "噬星魔鸦",
@@ -1627,6 +1758,17 @@
     }
   },
   {
+    "id": 215071,
+    "contentId": 0,
+    "name": "偷懒的新方法",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/偷懒的新方法.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
     "id": 215081,
     "contentId": 500443,
     "name": "如影流露的冷刃",
@@ -1791,6 +1933,16 @@
     }
   },
   {
+    "id": 221031,
+    "contentId": 0,
+    "name": "严霜棱晶",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/严霜棱晶.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋"
+    }
+  },
+  {
     "id": 222011,
     "contentId": 5509,
     "name": "百川奔流",
@@ -1857,10 +2009,20 @@
   },
   {
     "id": 224021,
-    "contentId": 0,
+    "contentId": 500461,
     "name": "悲号回唱",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/悲号回唱.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋"
+    }
+  },
+  {
+    "id": 224031,
+    "contentId": 0,
+    "name": "明珠固化",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/明珠固化.webp",
     "tags": {
       "GCG_TAG_TALENT": "天赋"
     }
@@ -2273,6 +2435,17 @@
     }
   },
   {
+    "id": 311507,
+    "contentId": 0,
+    "name": "原木刀",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/原木刀.webp",
+    "tags": {
+      "GCG_TAG_WEAPON": "武器",
+      "GCG_TAG_WEAPON_SWORD": "单手剑"
+    }
+  },
+  {
     "id": 312001,
     "contentId": 5421,
     "name": "冒险家头带",
@@ -2488,6 +2661,16 @@
     "name": "花海甘露之光",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/花海甘露之光.webp",
+    "tags": {
+      "GCG_TAG_ARTIFACT": "圣遗物"
+    }
+  },
+  {
+    "id": 312023,
+    "contentId": 0,
+    "name": "老兵的容颜",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/老兵的容颜.webp",
     "tags": {
       "GCG_TAG_ARTIFACT": "圣遗物"
     }
@@ -3013,6 +3196,26 @@
     }
   },
   {
+    "id": 322022,
+    "contentId": 0,
+    "name": "婕德",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/婕德.webp",
+    "tags": {
+      "GCG_TAG_ALLY": "伙伴"
+    }
+  },
+  {
+    "id": 322023,
+    "contentId": 0,
+    "name": "西尔弗和迈勒斯",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/西尔弗和迈勒斯.webp",
+    "tags": {
+      "GCG_TAG_ALLY": "伙伴"
+    }
+  },
+  {
     "id": 323001,
     "contentId": 5446,
     "name": "参量质变仪",
@@ -3523,6 +3726,22 @@
     "tags": null
   },
   {
+    "id": 332028,
+    "contentId": 0,
+    "name": "机关铸成之链",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/机关铸成之链.webp",
+    "tags": null
+  },
+  {
+    "id": 332029,
+    "contentId": 0,
+    "name": "净觉花",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/净觉花.webp",
+    "tags": null
+  },
+  {
     "id": 333001,
     "contentId": 5479,
     "name": "绝云锅巴",
@@ -3648,6 +3867,16 @@
     "name": "炸鱼薯条",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/炸鱼薯条.webp",
+    "tags": {
+      "GCG_TAG_FOOD": "料理"
+    }
+  },
+  {
+    "id": 333014,
+    "contentId": 0,
+    "name": "松茸酿肉卷",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/松茸酿肉卷.webp",
     "tags": {
       "GCG_TAG_FOOD": "料理"
     }
