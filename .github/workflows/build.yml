@@ -46,7 +46,7 @@ jobs:
         with:
           version: 8.14.1
       - name: remove lockfile
-        run: rm -f pnpm-lock.yaml
+        run: rm pnpm-lock.yaml
       - name: Install frontend dependencies
         run: pnpm install
 

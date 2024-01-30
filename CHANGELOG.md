@@ -2,12 +2,35 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-01-15
-Update: 2024-01-19
+Update: 2024-01-30
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-01-15 17:29:15`
 >
-> 更新于 `2024-01-19 10:25:54`
+> 更新于 `2024-01-30 13:33:39`
+
+## [0.4.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.2) (2024-01-30)
+
+### Feat
+
+- 应用：支持日志记录 [`#83`](https://github.com/BTMuli/TeyvatGuide/issues/83)
+- 图鉴：角色/武器图鉴支持查看材料详细信息
+- 资源：游戏资源更新至 4.4 版本 [`#86`](https://github.com/BTMuli/TeyvatGuide/issues/86)
+- 成就：支持查看成就详细信息，数据来源于 [`amos-data`](https://github.com/yuehaiteam/amos-data)
+- 首页：祈愿卡池 Up 角色支持直接跳转到对应图鉴界面
+
+### Fix
+
+- 应用：完善用户账号数据返回，修复部分用户数据获取失败
+- 应用：修复深渊页面分享图生成错误，完善分享&上传判断
+- 首页：采用 `emit` 替代 `interval`，提升性能
+- JSBridge：修复特定情况下的 `panic`
+
+### Change
+
+- 应用：设置页面重构
+- 应用：首页组件配置移至首页
+- 帖子：调整别野卡片、合集 overlay 样式
 
 ## [0.4.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.1) (2024-01-19)
 
