@@ -58,7 +58,9 @@
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
 
+import { AppCharacterData } from "../../data";
 import Mys from "../../plugins/Mys";
 import { useHomeStore } from "../../store/modules/home";
 import { createPost, createTGWindow } from "../../utils/TGWindow";
@@ -68,6 +70,7 @@ import showSnackbar from "../func/snackbar";
 // store
 const homeStore = useHomeStore();
 
+const router = useRouter();
 const hasNew = ref<boolean>(false);
 const showNew = ref<boolean>(false);
 
@@ -188,6 +191,20 @@ async function toOuter(url: string, title: string): Promise<void> {
     });
     return;
   }
+  // https://bbs.mihoyo.com/ys/obc/content/{content_id}/detail?bbs_presentation_style=no_header
+  const contentId = url.match(/(?<=content\/)\d+/)?.[0];
+  if (contentId) {
+    const character = AppCharacterData.find((item) => item.contentId.toString() === contentId);
+    if (character) {
+      await router.push({
+        name: "角色图鉴",
+        params: {
+          id: character.id,
+        },
+      });
+      return;
+    }
+  }
   createTGWindow(url, "Sub_window", `Pool_${title}`, 1200, 800, true, true);
 }
 
@@ -210,6 +227,7 @@ onUnmounted(() => {
   Object.keys(timer.value).forEach((key) => {
     clearInterval(timer.value[Number(key)]);
   });
+  timer.value = {};
 });
 </script>
 
