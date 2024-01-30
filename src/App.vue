@@ -207,10 +207,10 @@ async function getDeepLink(): Promise<void> {
 
 // 检测更新
 async function checkUpdate(): Promise<void> {
-  if (!appStore.loading) return;
   const isProdEnv = import.meta.env.MODE === "production";
   const needUpdate = await TGSqlite.checkUpdate();
   if (needUpdate && isProdEnv) {
+    await TGLogger.Info("[App][checkUpdate] 检测到版本更新！");
     const confirm = await showConfirm({
       title: "检测到版本更新",
       text: "请到设置页手动更新版本，即将弹出更新说明子页面",

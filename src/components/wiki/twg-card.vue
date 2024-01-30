@@ -19,8 +19,7 @@ interface TwgCardProps {
 const props = defineProps<TwgCardProps>();
 
 function toWiki(): void {
-  if (!props.data.contentId) return;
-  if (props.data.contentId === 0) {
+  if (!props.data.contentId || props.data.contentId === 0) {
     showSnackbar({
       text: `卡牌 ${props.data.name} 暂无外部链接`,
       color: "error",
