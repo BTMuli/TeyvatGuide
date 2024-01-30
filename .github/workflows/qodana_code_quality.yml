@@ -22,7 +22,7 @@ jobs:
       - name: remove lockfile
         run: rm -f pnpm-lock.yaml
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
       - name: "Qodana Scan"
         uses: JetBrains/qodana-action@v2023.3
         env:
