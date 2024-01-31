@@ -1,7 +1,7 @@
 /**
  * @file web utils tools.ts
  * @description 应用用到的工具函数
- * @since Beta v0.3.3
+ * @since Beta v0.4.3
  */
 
 import TGConstant from "../constant/TGConstant";
@@ -57,11 +57,13 @@ export function transParams(obj: Record<string, string | number>): string {
 
 /**
  * @description 根据 uid 获取 server
- * @since Alpha v0.2.0
+ * @since Beta v0.4.3
  * @param {string} uid uid
  * @returns {string} server
  */
 export function getServerByUid(uid: string): string {
+  // 若长度为 10，则为国际服亚服
+  if (uid.length === 10) return TGConstant.Server.OS_ASIA;
   // 获取第一个字符
   const first = uid[0];
   // 1-4 为国服-天空岛
