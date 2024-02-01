@@ -83,7 +83,7 @@ declare namespace TGApp.Plugins.Mys.GameLogin {
    * @return StatusPayloadRaw
    */
   interface StatusPayloadRaw {
-    uid: string;
+    open_id: string;
     open_token: string;
   }
 }

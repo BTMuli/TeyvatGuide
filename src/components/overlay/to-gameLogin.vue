@@ -137,9 +137,9 @@ async function cycleGetData() {
       return;
     }
     const data: TGApp.Plugins.Mys.GameLogin.StatusPayloadRaw = JSON.parse(res.payload.raw);
-    cookie.account_id = data.uid;
-    cookie.ltuid = data.uid;
-    cookie.stuid = data.uid;
+    cookie.account_id = data.open_id;
+    cookie.ltuid = data.open_id;
+    cookie.stuid = data.open_id;
     await getTokens(data.open_token);
     showSnackbar({
       text: "登录成功",
