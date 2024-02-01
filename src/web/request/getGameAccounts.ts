@@ -1,7 +1,7 @@
 /**
  * @file web/request/getGameAccounts.ts
  * @description 获取游戏账号信息相关请求函数
- * @since Alpha v0.1.5
+ * @since Beta v0.4.3
  */
 
 import { http } from "@tauri-apps/api";
@@ -26,7 +26,7 @@ export async function getGameAccountsBySToken(
     stuid,
     stoken,
   };
-  const params = { stoke: stoken, game_biz: TGConstant.Utils.GAME_BIZ };
+  const params = { stoken, stuid, game_biz: TGConstant.Utils.GAME_BIZ };
   return await getGameAccounts(url, cookie, params);
 }
 
@@ -71,7 +71,7 @@ async function getGameAccounts(
       query: params,
     })
     .then((res) => {
-      if (res.data.retcode !== 0) return res.data;
+      if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
       return res.data.data.list;
     });
 }

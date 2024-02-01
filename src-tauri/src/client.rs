@@ -1,6 +1,6 @@
 //! @file src/client.rs
 //! @desc 客户端模块，负责操作米游社客户端
-//! @since Beta v0.4.0
+//! @since Beta v0.4.3
 
 use tauri::{
   AppHandle, CustomMenuItem, LogicalSize, Manager, Menu, Size, Submenu, WindowBuilder, WindowUrl,
@@ -22,11 +22,16 @@ fn create_utils_menu() -> Menu {
 }
 
 // 创建米游社客户端菜单
-fn create_mhy_menu() -> Menu {
+fn create_mhy_menu(func: String) -> Menu {
   let top = CustomMenuItem::new("top".to_string(), "置顶");
   let cancel_top = CustomMenuItem::new("cancel_top".to_string(), "取消置顶");
+  let sign_in = CustomMenuItem::new("sign_in".to_string(), "用户登录");
   let open_post = CustomMenuItem::new("open_post".to_string(), "打开帖子");
   let utils_menu = Submenu::new("工具".to_string(), create_utils_menu());
+  // 如果是登录
+  if func == "config_sign_in" {
+    return Menu::new().add_item(sign_in);
+  }
   return Menu::new()
     .add_item(top)
     .add_item(cancel_top)
@@ -75,7 +80,7 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
     return;
   }
   WindowBuilder::from_config(&handle, mhy_window_config)
-    .menu(create_mhy_menu())
+    .menu(create_mhy_menu(func))
     .build()
     .expect("failed to create mhy_client")
     .on_menu_event(move |event| match event.menu_item_id() {
@@ -163,6 +168,24 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
         }
         window.center().unwrap();
         window.set_focus().unwrap();
+      }
+      "sign_in" => {
+        let window = handle.get_window("mhy_client").unwrap();
+        let execute_js = r#"javascript:(async function(){
+                        // 首先检测是不是 user.mihoyo.com
+                        const url = new URL(window.location.href);
+                        if(url.hostname !== "user.mihoyo.com"){
+                            alert("当前页面不是米游社登录页面");
+                            return;
+                        }
+                        const ck = document.cookie;
+                        const arg = {
+                            method: 'teyvat_sign_in',
+                            payload: ck,
+                        }
+                        await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
+                        })()"#;
+        window.eval(&execute_js).ok().unwrap();
       }
       _ => {}
     });

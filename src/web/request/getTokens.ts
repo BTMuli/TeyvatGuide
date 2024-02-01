@@ -1,7 +1,7 @@
 /**
  * @file web/request/getTokens.ts
  * @description 获取游戏 Token
- * @since Alpha v0.1.5
+ * @since Beta v0.4.3
  */
 
 import { http } from "@tauri-apps/api";
@@ -11,7 +11,7 @@ import TGUtils from "../utils/TGUtils";
 
 /**
  * @description 根据 login_ticket 获取游戏 Token，包括 stoken 和 ltoken
- * @since Alpha v0.1.5
+ * @since Beta v0.4.3
  * @param {string} ticket 登录票证
  * @param {string} uid 登录用户 uid
  * @returns {Promise<TGApp.BBS.Response.getTokensRes[] | TGApp.BBS.Response.Base>}
@@ -26,7 +26,7 @@ export async function getTokensByLoginTicket(
   };
   const url = TGApi.GameTokens.getTokens;
   // eslint-disable-next-line camelcase
-  const params = { login_ticket: ticket, token_types: 3, uid };
+  const params = { login_ticket: ticket, token_types: "3", uid };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http
     .fetch<TGApp.BBS.Response.getTokens | TGApp.BBS.Response.Base>(url, {

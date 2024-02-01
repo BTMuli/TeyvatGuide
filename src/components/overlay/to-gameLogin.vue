@@ -2,8 +2,8 @@
   <TOverlay v-model="visible" hide blur-val="20px" :to-click="onCancel">
     <div class="tog-box">
       <div class="tog-top">
-        <div class="tog-title">请使用米游社APP进行扫码操作</div>
-        <div class="tog-subtitle">所需米游社版本 >= 2.57.1</div>
+        <div class="tog-title">请使用原神进行扫码操作</div>
+        <div class="tog-subtitle">仅支持官服，渠道服请使用网页登录</div>
       </div>
       <div class="tog-mid">
         <qrcode-vue
@@ -24,6 +24,7 @@ import { computed, onUnmounted, reactive, ref, watch } from "vue";
 
 import Mys from "../../plugins/Mys";
 import { useUserStore } from "../../store/modules/user";
+import TGLogger from "../../utils/TGLogger";
 import TGRequest from "../../web/request/TGRequest";
 import showSnackbar from "../func/snackbar";
 import TOverlay from "../main/t-overlay.vue";
@@ -58,7 +59,6 @@ const cookie = reactive<TGApp.User.Account.Cookie>({
   ltuid: "",
   stuid: "",
   mid: "",
-  game_token: "",
   cookie_token: "",
   stoken: "",
   ltoken: "",
@@ -113,11 +113,10 @@ async function cycleGetData() {
       color: "error",
     });
     if (res.retcode === -106) {
-      // 二维码过期
       await freshQr();
     } else {
-      // 取消轮询
-      if (cycleTimer) clearInterval(cycleTimer);
+      clearInterval(cycleTimer);
+      cycleTimer = null;
       visible.value = false;
     }
     return;
@@ -126,14 +125,22 @@ async function cycleGetData() {
     return;
   }
   if (res.stat === "Confirmed") {
-    // 取消轮询
-    if (cycleTimer) clearInterval(cycleTimer);
+    clearInterval(cycleTimer);
+    cycleTimer = null;
+    if (res.payload.proto !== "OpenToken") {
+      await TGLogger.Warn(`[to-gameLogin] 检测到非Combo协议：${res.payload.proto}`);
+      showSnackbar({
+        text: "请使用原神进行扫码操作",
+        color: "error",
+      });
+      visible.value = false;
+      return;
+    }
     const data: TGApp.Plugins.Mys.GameLogin.StatusPayloadRaw = JSON.parse(res.payload.raw);
     cookie.account_id = data.uid;
     cookie.ltuid = data.uid;
     cookie.stuid = data.uid;
-    cookie.game_token = data.token;
-    await getTokens();
+    await getTokens(data.open_token);
     showSnackbar({
       text: "登录成功",
       color: "success",
@@ -145,27 +152,29 @@ async function cycleGetData() {
   }
 }
 
-async function getTokens(): Promise<void> {
-  const stokenRes = await TGRequest.User.bgGameToken.getStoken(
-    cookie.account_id,
-    cookie.game_token,
-  );
+async function getTokens(game_token: string): Promise<void> {
+  const stokenRes = await TGRequest.User.bgGameToken.getStoken(cookie.account_id, game_token);
   if (!("retcode" in stokenRes)) {
     cookie.stoken = stokenRes.token.token;
     cookie.mid = stokenRes.user_info.mid;
+  } else {
+    await TGLogger.Error("[to-gameLogin] 获取stoken失败");
   }
   const cookieTokenRes = await TGRequest.User.bgGameToken.getCookieToken(
     cookie.account_id,
-    cookie.game_token,
+    game_token,
   );
   if (typeof cookieTokenRes === "string") cookie.cookie_token = cookieTokenRes;
+  else await TGLogger.Error("[to-gameLogin] 获取cookieToken失败");
   const ltokenRes = await TGRequest.User.bySToken.getLToken(cookie.mid, cookie.stoken);
   if (typeof ltokenRes === "string") cookie.ltoken = ltokenRes;
+  else await TGLogger.Error("[to-gameLogin] 获取ltoken失败");
   userStore.cookie.value = cookie;
 }
 
 onUnmounted(() => {
-  if (cycleTimer) clearInterval(cycleTimer);
+  if (cycleTimer !== null) clearInterval(cycleTimer);
+  cycleTimer = null;
 });
 </script>
 <style lang="css" scoped>

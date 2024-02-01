@@ -10,17 +10,21 @@
     <template #actions>
       <v-spacer />
       <v-btn variant="outlined" @click="scan = true" icon="mdi-qrcode-scan" />
+      <v-btn variant="outlined" @click="toWebLogin" icon="mdi-web" />
       <v-btn variant="outlined" @click="confirmRefreshUser" icon="mdi-refresh" :loading="loading" />
     </template>
   </v-card>
 </template>
 <script lang="ts" setup>
+import { event, window as windowTauri } from "@tauri-apps/api";
+import type { UnlistenFn } from "@tauri-apps/api/helpers/event";
 import { storeToRefs } from "pinia";
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 
 import TGSqlite from "../../plugins/Sqlite";
 import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
+import TGClient from "../../utils/TGClient";
 import TGLogger from "../../utils/TGLogger";
 import { getDeviceFp } from "../../web/request/getDeviceFp";
 import TGRequest from "../../web/request/TGRequest";
@@ -46,11 +50,174 @@ const userInfo = ref<TGApp.App.Account.BriefInfo>({
   avatar: "/source/UI/lumine.webp",
 });
 
+let signListener: UnlistenFn;
+
 onMounted(() => {
   if (userStore.briefInfo.value && userStore.briefInfo.value.nickname) {
     userInfo.value = userStore.briefInfo.value;
   }
 });
+
+async function toWebLogin(): Promise<void> {
+  const confirm = await showConfirm({
+    title: "请在子窗口中完成登录操作",
+    text: "请操作完成后点击子窗口的“用户登录”菜单",
+  });
+  if (!confirm) {
+    showSnackbar({
+      color: "cancel",
+      text: "已取消登录",
+    });
+    return;
+  }
+  await TGClient.open("config_sign_in", "https://user.mihoyo.com");
+  signListener = await event.listen("config_user_sign", async (e) => {
+    if (typeof e.payload !== "string") {
+      showSnackbar({
+        color: "error",
+        text: "登录失败!",
+      });
+      return;
+    }
+    await getTokenWeb(e.payload);
+  });
+}
+
+async function getTokenWeb(cookie: string): Promise<void> {
+  await windowTauri.appWindow.setFocus();
+  emits("loadOuter", { show: true, title: "正在解析 cookie" });
+  const ck = cookie.split(";").reduce(
+    (prev, curr) => {
+      const [key, value] = curr.split("=");
+      prev[key.trim()] = value.trim();
+      return prev;
+    },
+    {} as Record<string, string>,
+  );
+  if (!("login_ticket" in ck) || !("login_uid" in ck)) {
+    emits("loadOuter", { show: false });
+    showSnackbar({
+      text: "未检测到 login_ticket, 请确认是否登录成功!",
+      color: "error",
+    });
+    try {
+      setTimeout(() => {
+        windowTauri.WebviewWindow.getByLabel("mhy_client")?.setFocus();
+      }, 2000);
+    } catch (e) {
+      await TGLogger.Error("[tc-userBadge][getTokenWeb] 无法获取子窗口");
+      await TGClient.open("config_sign_in", "https://user.mihoyo.com/");
+    }
+    return;
+  }
+  emits("loadOuter", { show: true, title: "正在获取 token" });
+  let cookieUser: TGApp.User.Account.Cookie = {
+    account_id: "",
+    ltuid: "",
+    stuid: "",
+    mid: "",
+    cookie_token: "",
+    stoken: "",
+    ltoken: "",
+  };
+  cookieUser.account_id = ck["login_uid"];
+  cookieUser.ltuid = ck["login_uid"];
+  cookieUser.stuid = ck["login_uid"];
+  const tokenRes = await TGRequest.User.byLoginTicket.getTokens(
+    ck["login_ticket"],
+    ck["login_uid"],
+  );
+  if ("retcode" in tokenRes) {
+    emits("loadOuter", { show: false });
+    showSnackbar({
+      text: "获取 token 失败!",
+      color: "error",
+    });
+    await TGLogger.Error("[tc-userBadge][getTokenWeb] 获取 token 失败");
+    await TGLogger.Error(`[tc-userBadge][getTokenWeb] ${tokenRes.retcode}: ${tokenRes.message}`);
+    return;
+  }
+  tokenRes.map((i) => {
+    if (i.name === "ltoken") return (cookieUser.ltoken = i.token);
+    if (i.name === "stoken") return (cookieUser.stoken = i.token);
+  });
+  if (cookieUser.ltoken === "" || cookieUser.stoken === "") {
+    emits("loadOuter", { show: false });
+    showSnackbar({
+      text: "获取 ltoken 或者 stoken 失败!",
+      color: "error",
+    });
+    await TGLogger.Error("[tc-userBadge][getTokenWeb] 获取 ltoken 或者 stoken 失败");
+    return;
+  }
+  const ltokenRes = await TGRequest.User.byLToken.verify(cookieUser.ltoken, cookieUser.ltuid);
+  if (typeof ltokenRes !== "string") {
+    showSnackbar({
+      text: "ltoken 验证失败!",
+      color: "error",
+    });
+  } else {
+    cookieUser.mid = ltokenRes;
+  }
+  if (!cookieUser.stoken.startsWith("v2")) {
+    const stokenRes = await TGRequest.User.bySToken.update(cookieUser.stoken, cookieUser.stuid);
+    if ("retcode" in stokenRes) {
+      showSnackbar({
+        text: "stoken 更新失败!",
+        color: "error",
+      });
+      await TGLogger.Error("[tc-userBadge][getTokenWeb] stoken 更新失败");
+      await TGLogger.Error(
+        `[tc-userBadge][getTokenWeb] ${stokenRes.retcode}: ${stokenRes.message}`,
+      );
+    } else {
+      cookieUser.stoken = stokenRes.token.token;
+      if (cookieUser.mid === "" && stokenRes.user_info.mid !== "")
+        cookieUser.mid = stokenRes.user_info.mid;
+    }
+  }
+  const cookieTokenRes = await TGRequest.User.bySToken.getCookieToken(
+    cookieUser.mid,
+    cookieUser.stoken,
+  );
+  if (typeof cookieTokenRes !== "string") {
+    showSnackbar({
+      text: "cookie_token 获取失败!",
+      color: "error",
+    });
+    await TGLogger.Error("[tc-userBadge][getTokenWeb] cookie_token 获取失败");
+    await TGLogger.Error(
+      `[tc-userBadge][getTokenWeb] ${cookieTokenRes.retcode}: ${cookieTokenRes.message}`,
+    );
+  } else {
+    cookieUser.cookie_token = cookieTokenRes;
+  }
+  userStore.cookie.value = cookieUser;
+  try {
+    await windowTauri.WebviewWindow.getByLabel("mhy_client")?.close();
+  } catch (e) {
+    await TGLogger.Error("[tc-userBadge][getTokenWeb] 无法获取子窗口");
+    showSnackbar({
+      text: "请手动关闭子窗口!",
+      color: "error",
+    });
+  }
+  signListener();
+  emits("loadOuter", { show: false });
+  // 检测cookie是否每项都有
+  if (Object.values(cookieUser).some((i) => i === "")) {
+    showSnackbar({
+      text: "获取 cookie 失败!部分项为空!",
+      color: "error",
+    });
+    await TGLogger.Error("[tc-userBadge][getTokenWeb] 获取 cookie 失败");
+    return;
+  }
+  showSnackbar({
+    text: "登录成功!",
+    color: "success",
+  });
+}
 
 async function refreshUser() {
   const ck = userStore.cookie.value;
@@ -194,6 +361,10 @@ async function confirmRefreshUser(): Promise<void> {
   }
   await refreshUser();
 }
+
+onUnmounted(() => {
+  if (signListener) signListener();
+});
 </script>
 <style lang="css" scoped>
 .tcu-box {

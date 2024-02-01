@@ -1,12 +1,12 @@
 /**
  * @file types/BBS/Response.d.ts
  * @description BBS 返回数据类型定义文件
- * @since Beta v0.3.9
+ * @since Beta v0.4.3
  */
 
 /**
  * @description BBS 返回数据类型定义
- * @since Beta v0.3.6
+ * @since Beta v0.4.3
  * @namespace TGApp.BBS.Response
  * @memberof TGApp.BBS
  */
@@ -147,6 +147,42 @@ declare namespace TGApp.BBS.Response {
     user_info: TGApp.BBS.Account.getStokenByGameTokenInfo;
     realname_info: unknown;
     need_realperson: boolean;
+  }
+
+  /**
+   * @description 通过 stoken v1 获取 stoken v2 的返回类型
+   * @interface getTokenBySToken
+   * @since Beta v0.4.3
+   * @extends BaseWithData
+   * @property {getStokenByGameTokenData} data - 返回数据
+   * @return getTokenBySToken
+   */
+  interface getTokenBySToken extends BaseWithData {
+    data: getStokenByGameTokenData;
+  }
+
+  /**
+   * @description 通过 stoken v1 获取 stoken v2 的返回类型数据
+   * @interface getTokenBySTokenData
+   * @since Beta v0.4.3
+   * @property {unknown} need_realperson - 是否需要实名认证
+   * @property {string} token.token - token 值
+   * @property {number} token.token_type - token 类型
+   * @description user_info 只写了用到的字段
+   * @property {string} user_info.aid - 用户 aid
+   * @property {string} user_info.mid - 用户 mid
+   * @returns getTokenBySTokenData
+   */
+  interface getTokenBySTokenData {
+    need_realperson: boolean;
+    token: {
+      token: string;
+      token_type: number;
+    };
+    user_info: {
+      aid: string;
+      mid: string;
+    };
   }
 
   /**

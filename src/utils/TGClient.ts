@@ -1,7 +1,7 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.4.2
+ * @since Beta v0.4.3
  */
 
 import { event, invoke } from "@tauri-apps/api";
@@ -28,7 +28,7 @@ interface InvokeArg {
 
 /**
  * @class TGClient
- * @since Beta v0.3.9
+ * @since Beta v0.4.3
  * @description 米游社客户端
  */
 class TGClient {
@@ -272,7 +272,7 @@ class TGClient {
 
   /**
    * @func handleCustomCallback
-   * @since Beta v0.3.9
+   * @since Beta v0.4.3
    * @desc 处理自定义的 callback
    * @param {TGApp.Plugins.JSBridge.Arg<any>} arg - 事件参数
    * @returns {Promise<void>} - 返回值
@@ -292,6 +292,10 @@ class TGClient {
         })();`;
         await invoke("execute_js", { label: "mhy_client", js: executeJS });
         await this.loadJSBridge();
+        break;
+      }
+      case "teyvat_sign_in": {
+        await event.emit("config_user_sign", arg.payload);
         break;
       }
       case "teyvat_touch": {
