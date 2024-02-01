@@ -146,6 +146,7 @@ async function confirmRefresh(): Promise<void> {
     await TGLogger.Error(
       `[UserGacha][${account.gameUid}][confirmRefresh] ${authkeyRes.retcode} ${authkeyRes.message}`,
     );
+    loading.value = false;
     return;
   }
   loadingTitle.value = "正在刷新新手祈愿数据";
