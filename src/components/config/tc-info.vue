@@ -18,7 +18,10 @@
         <v-list-item-subtitle>{{ achievementsStore.lastVersion }}</v-list-item-subtitle>
       </template>
     </v-list-item>
-    <v-list-item title="系统平台" prepend-icon="mdi-microsoft-windows">
+    <v-list-item title="系统平台">
+      <template #prepend>
+        <v-icon>{{ iconPlatform }}</v-icon>
+      </template>
       <template #append>
         <v-list-item-subtitle>{{ osPlatform }}</v-list-item-subtitle>
       </template>
@@ -65,6 +68,7 @@ const achievementsStore = useAchievementsStore();
 const versionApp = ref<string>("");
 const versionTauri = ref<string>("");
 const osPlatform = ref<string>("");
+const iconPlatform = ref<string>("mdi-microsoft-windows");
 const osVersion = ref<string>("");
 const dbInfo = ref<Array<TGApp.Sqlite.AppData.Item>>([]);
 
@@ -72,6 +76,23 @@ onMounted(async () => {
   versionApp.value = await app.getVersion();
   versionTauri.value = await app.getTauriVersion();
   osPlatform.value = `${await os.platform()}`;
+  switch (osPlatform.value) {
+    case "linux":
+      iconPlatform.value = "mdi-linux";
+      break;
+    case "darwin":
+      iconPlatform.value = "mdi-apple";
+      break;
+    case "ios":
+      iconPlatform.value = "mdi-apple-ios";
+      break;
+    case "win32":
+      iconPlatform.value = "mdi-microsoft-windows";
+      break;
+    default:
+      iconPlatform.value = "mdi-desktop-classic";
+      break;
+  }
   osVersion.value = await os.version();
   try {
     dbInfo.value = await TGSqlite.getAppData();
