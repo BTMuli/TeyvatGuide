@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.4.2
+ * @since Beta v0.4.3
  */
 
 import { path } from "@tauri-apps/api";
@@ -9,6 +9,7 @@ import { defineStore } from "pinia";
 import { reactive, ref } from "vue";
 
 import { getInitDeviceInfo } from "../../utils/toolFunc";
+import { SERVER } from "../../web/request/getAnno";
 
 // 用于存储用户数据的路径
 const userDataDir = `${await path.appLocalDataDir()}userData`;
@@ -43,6 +44,10 @@ export const useAppStore = defineStore(
     const logDir = ref(logDataDir);
     // 设备信息
     const deviceInfo = ref<TGApp.App.Device.DeviceInfo>(getInitDeviceInfo());
+    // 服务器
+    const server = ref<SERVER>(SERVER.CN_ISLAND);
+    // 语言
+    const lang = ref<string>("zh-cn");
 
     // 初始化
     function init(): void {
@@ -50,6 +55,9 @@ export const useAppStore = defineStore(
       devMode.value = false;
       theme.value = "default";
       isLogin.value = false;
+      sidebar.collapse = true;
+      server.value = SERVER.CN_ISLAND;
+      lang.value = "zh-cn";
       initDevice();
     }
 
@@ -73,6 +81,8 @@ export const useAppStore = defineStore(
       userDir,
       dbPath,
       logDir,
+      server,
+      lang,
       init,
       changeTheme,
     };
@@ -97,7 +107,7 @@ export const useAppStore = defineStore(
       {
         key: "theme",
         storage: window.localStorage,
-        paths: ["theme"],
+        paths: ["theme", "server", "lang"],
       },
       {
         key: "deviceInfo",

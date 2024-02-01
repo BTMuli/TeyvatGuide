@@ -9,7 +9,7 @@ const defaultCover = "/source/UI/defaultCover.webp";
 
 /**
  * @description 将获取到的数据转为渲染用的卡片
- * @since Beta v0.3.3
+ * @since Beta v0.4.3
  * @param {TGApp.BBS.Announcement.ListData[]} data 公告数据
  * @returns {TGApp.App.Announcement.ListCard[]} 渲染用的卡片
  */
@@ -27,7 +27,7 @@ export function getAnnoCard(
         title: anno.title,
         subtitle: anno.subtitle,
         banner: anno.banner || defaultCover,
-        typeLabel: anno.type_label,
+        typeLabel: anno.type === 2 ? "游戏公告" : "活动公告",
         tagIcon: anno.tag_icon,
         tagLabel: anno.tag_label,
         timeStr: time,

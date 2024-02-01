@@ -1,16 +1,41 @@
 /**
  * @file types/BBS/Announcement.d.ts
  * @description 从 BBS 获取到的游戏内公告类型定义文件
- * @since Alpha v0.1.5
+ * @since Beta v0.4.3
  */
 
 /**
  * @description 游戏内公告类型定义
- * @since Alpha v0.1.5
+ * @since Beta v0.4.3
  * @namespace TGApp.BBS.Announcement
  * @memberof TGApp.BBS
  */
 declare namespace TGApp.BBS.Announcement {
+  /**
+   * @description 需要的参数
+   * @interface Params
+   * @since Beta v0.4.3
+   * @property {string} game - 游戏名称
+   * @property {string} game_biz - 游戏业务名称
+   * @property {string} lang - 语言
+   * @property {string} bundle_id - 包 ID
+   * @property {string} platform - 平台
+   * @property {string} region - 区域
+   * @property {string} level - 等级
+   * @property {string} uid - 用户 ID
+   * @returns Params
+   */
+  interface Params {
+    game: string;
+    game_biz: string;
+    lang: string;
+    bundle_id: string;
+    platform: string;
+    region: string;
+    level: string;
+    uid: string;
+  }
+
   /**
    * @description 公告列表返回响应类型
    * @interface ListResponse

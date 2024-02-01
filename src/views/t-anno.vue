@@ -32,6 +32,7 @@ import { useAppStore } from "../store/modules/app";
 import TGLogger from "../utils/TGLogger";
 import { saveImgLocal } from "../utils/TGShare";
 import { createTGWindow } from "../utils/TGWindow";
+import { SERVER } from "../web/request/getAnno";
 import TGRequest from "../web/request/TGRequest";
 import TGUtils from "../web/utils/TGUtils";
 
@@ -48,6 +49,8 @@ const annoTitle = ref<string>("");
 
 // 数据
 const annoId = Number(useRoute().params.anno_id);
+const region = <SERVER>useRoute().params.region;
+const lang = ref<string>(<string>useRoute().params.lang);
 const annoData = ref<TGApp.BBS.Announcement.ContentItem>(<TGApp.BBS.Announcement.ContentItem>{});
 const annoHtml = ref<string>();
 const annoBanner = ref<string>();
@@ -55,7 +58,7 @@ const annoBanner = ref<string>();
 onMounted(async () => {
   await appWindow.show();
   // 检查数据
-  if (!annoId) {
+  if (!annoId || !region) {
     loadingEmpty.value = true;
     loadingTitle.value = "未找到数据";
     await TGLogger.Error("[t-anno.vue] 未找到数据");
@@ -64,7 +67,7 @@ onMounted(async () => {
   // 获取数据
   loadingTitle.value = "正在获取数据...";
   try {
-    annoData.value = await TGRequest.Anno.getContent(annoId);
+    annoData.value = await TGRequest.Anno.getContent(annoId, region, lang.value);
     loadingTitle.value = "正在渲染数据...";
     annoHtml.value = await TGUtils.Anno.parseContent(annoData.value.content);
     if (annoData.value.banner !== "") annoBanner.value = await saveImgLocal(annoData.value.banner);

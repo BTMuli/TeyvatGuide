@@ -4,6 +4,22 @@
     <v-tab v-for="(value, index) in tabValues" :key="index" :value="value">
       {{ AnnoType[value] }}
     </v-tab>
+    <v-select
+      class="anno-select"
+      :items="annoServerList"
+      v-model="curRegionName"
+      label="服务器"
+      dense
+      outlined
+    />
+    <v-select
+      class="anno-select"
+      :items="langList"
+      v-model="curLangName"
+      label="语言"
+      dense
+      outlined
+    />
     <v-spacer />
     <v-btn class="anno-switch-btn" @click="switchNews">
       <template #prepend>
@@ -38,14 +54,47 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, ref } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import ToLoading from "../../components/overlay/to-loading.vue";
+import { useAppStore } from "../../store/modules/app";
 import TGLogger from "../../utils/TGLogger";
 import { createTGWindow } from "../../utils/TGWindow";
+import { SERVER } from "../../web/request/getAnno";
 import TGRequest from "../../web/request/TGRequest";
 import TGUtils from "../../web/utils/TGUtils";
+
+// 服务器名称-服务器对应
+type AnnoServerMap = {
+  [key: string]: SERVER;
+};
+
+const annoServerList: string[] = [
+  "国服-官方服",
+  "国服-渠道服",
+  "国际服-亚服",
+  "国际服-欧服",
+  "国际服-美服",
+  "国际服-港澳台服",
+];
+const langList: string[] = ["简体中文", "繁体中文", "English", "日本語"];
+
+// 服务器列表
+const annoServerMap: AnnoServerMap = {
+  "国服-官方服": SERVER.CN_ISLAND,
+  "国服-渠道服": SERVER.CN_TREE,
+  "国际服-亚服": SERVER.OS_ASIA,
+  "国际服-欧服": SERVER.OS_EURO,
+  "国际服-美服": SERVER.OS_USA,
+  "国际服-港澳台服": SERVER.OS_CHT,
+};
+const langMap: Record<string, string> = {
+  简体中文: "zh-cn",
+  繁体中文: "zh-tw",
+  English: "en",
+  日本語: "ja",
+};
 
 // 类型定义
 enum AnnoType {
@@ -62,8 +111,14 @@ type AnnoCard = {
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载");
 
+const appStore = useAppStore();
+
 // 路由
 const router = useRouter();
+const curRegion = ref<SERVER>(appStore.server);
+const curRegionName = ref<string>(annoServerList[0]);
+const curLang = ref<string>(appStore.lang);
+const curLangName = ref<string>(langList[0]);
 
 // 数据
 const tab = ref<AnnoKey>("activity");
@@ -74,13 +129,44 @@ const annoCards = ref<AnnoCard>({
 });
 const annoData = ref<TGApp.BBS.Announcement.ListData>(<TGApp.BBS.Announcement.ListData>{});
 
+watch(curRegionName, async (value) => {
+  appStore.server = annoServerMap[value] || SERVER.CN_ISLAND;
+  curRegion.value = annoServerMap[value] || SERVER.CN_ISLAND;
+  await TGLogger.Info(`[Announcements][watch][curRegionName] 切换服务器：${value}`);
+  await loadData();
+});
+
+watch(curLangName, async (value) => {
+  appStore.lang = langMap[value] || "zh-cn";
+  curLang.value = langMap[value] || "zh-cn";
+  await TGLogger.Info(`[Announcements][watch][curLang] 切换语言：${value}`);
+  await loadData();
+});
+
 onMounted(async () => {
   await TGLogger.Info("[Announcements][onMounted] 打开公告页面");
+  // 根据curRegion找到对应的curRegionName
+  for (const key in annoServerMap) {
+    if (annoServerMap[key] === curRegion.value) {
+      curRegionName.value = key;
+      break;
+    }
+  }
+  // 根据curLang找到对应的curLangName
+  for (const key in langMap) {
+    if (langMap[key] === curLang.value) {
+      curLangName.value = key;
+      break;
+    }
+  }
+  await loadData();
+});
+
+async function loadData(): Promise<void> {
   loadingTitle.value = "正在获取公告数据";
   loading.value = true;
-  annoData.value = await TGRequest.Anno.getList();
+  annoData.value = await TGRequest.Anno.getList(curRegion.value, curLang.value);
   const listCards = TGUtils.Anno.getCard(annoData.value);
-  tab.value = "activity";
   annoCards.value = {
     activity: listCards.filter((item) => item.typeLabel === AnnoType.activity),
     game: listCards.filter((item) => item.typeLabel === AnnoType.game),
@@ -89,7 +175,7 @@ onMounted(async () => {
   await nextTick(async () => {
     loading.value = false;
   });
-});
+}
 
 function parseTitle(title: string): string {
   const div = document.createElement("div");
@@ -103,7 +189,7 @@ async function switchNews(): Promise<void> {
 }
 
 function createAnno(item: TGApp.App.Announcement.ListCard): void {
-  const annoPath = `/anno_detail/${item.id}`;
+  const annoPath = `/anno_detail/${curRegion.value}/${item.id}/${curLang.value}`;
   const annoTitle = `Anno_${item.id} ${item.title}`;
   TGLogger.Info(`[Announcements][createAnno][${item.id}] 打开公告窗口`).then(() =>
     createTGWindow(annoPath, "Sub_window", annoTitle, 960, 720, false, false),
@@ -114,6 +200,13 @@ function createAnno(item: TGApp.App.Announcement.ListCard): void {
 <style lang="css" scoped>
 .anno-tab {
   margin-bottom: 10px;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+}
+
+.anno-select {
+  width: 150px;
+  margin-left: 10px;
   color: var(--common-text-title);
   font-family: var(--font-title);
 }
