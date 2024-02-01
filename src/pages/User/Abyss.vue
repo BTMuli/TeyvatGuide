@@ -1,27 +1,27 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="ua-box">
-    <v-tabs v-model="userTab" direction="vertical" align-tabs="start" class="ua-tab">
-      <div class="ua-tabs">
+    <div class="ua-left-box">
+      <v-tabs v-model="userTab" direction="vertical" class="ua-tabs-box">
         <v-tab v-for="item in localAbyss" :key="item.id" :value="item.id" @click="toAbyss(item.id)">
           第{{ item.id }}期
         </v-tab>
-      </div>
+      </v-tabs>
       <div class="ua-tab-bottom">
-        <v-btn class="ua-btn" @click="shareAbyss">
+        <v-btn class="ua-btn" @click="shareAbyss" rounded>
           <v-icon>mdi-share</v-icon>
           <span>分享</span>
         </v-btn>
-        <v-btn class="ua-btn" @click="getAbyssData">
+        <v-btn class="ua-btn" @click="getAbyssData" rounded>
           <v-icon>mdi-refresh</v-icon>
           <span>刷新</span>
         </v-btn>
-        <v-btn class="ua-btn" @click="uploadAbyss">
+        <v-btn class="ua-btn" @click="uploadAbyss" rounded>
           <v-icon>mdi-cloud-upload</v-icon>
           <span>上传</span>
         </v-btn>
       </div>
-    </v-tabs>
+    </div>
     <v-window v-model="userTab" class="ua-window">
       <v-window-item
         v-for="item in localAbyss"
@@ -118,7 +118,7 @@ async function initAbyssData(): Promise<void> {
   });
   curAbyss.value = localAbyss.value[0];
   userTab.value = localAbyssID.value[0];
-  await TGLogger.Info(`[UserAbyss][initAbyssData] 成功获取  ${abyssGet.length}  条深渊数据`);
+  await TGLogger.Info(`[UserAbyss][initAbyssData] 成功获取 ${abyssGet.length} 条深渊数据`);
 }
 
 async function getAbyssData(): Promise<void> {
@@ -231,31 +231,43 @@ async function uploadAbyss(): Promise<void> {
     await TGLogger.Warn("[UserAbyss][uploadAbyss] 非最新深渊数据");
     return;
   }
-  loadingTitle.value = "正在转换深渊数据";
-  loading.value = true;
-  const transAbyss = Hutao.Abyss.utils.transData(abyssData);
-  loadingTitle.value = "正在获取角色数据";
-  const roles = await TGSqlite.getUserCharacter(user.value.gameUid);
-  if (!roles) {
+  try {
+    loadingTitle.value = "正在转换深渊数据";
+    loading.value = true;
+    const transAbyss = Hutao.Abyss.utils.transData(abyssData);
+    loadingTitle.value = "正在获取角色数据";
+    const roles = await TGSqlite.getUserCharacter(user.value.gameUid);
+    if (!roles) {
+      loading.value = false;
+      return;
+    }
+    loadingTitle.value = "正在转换角色数据";
+    transAbyss.Avatars = Hutao.Abyss.utils.transAvatars(roles);
+    loadingTitle.value = "正在上传深渊数据";
+    const res = await Hutao.Abyss.postData(transAbyss);
     loading.value = false;
-    return;
+    if (res.retcode === 0) {
+      showSnackbar({ text: res.message ?? "上传深渊数据成功" });
+      await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据成功");
+    } else {
+      showSnackbar({
+        text: `[${res.retcode}]${res.message}`,
+        color: "error",
+      });
+      await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
+      await TGLogger.Error(`[UserAbyss][uploadAbyss] ${res.retcode} ${res.message}`);
+    }
+  } catch (e) {
+    if (e instanceof Error) {
+      showSnackbar({
+        text: e.message,
+        color: "error",
+      });
+      await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
+      await TGLogger.Error(`[UserAbyss][uploadAbyss] ${e.message}`);
+    }
   }
-  loadingTitle.value = "正在转换角色数据";
-  transAbyss.Avatars = Hutao.Abyss.utils.transAvatars(roles);
-  loadingTitle.value = "正在上传深渊数据";
-  const res = await Hutao.Abyss.postData(transAbyss);
-  loading.value = false;
-  if (res.retcode === 0) {
-    showSnackbar({ text: res.message ?? "上传深渊数据成功" });
-    await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据成功");
-  } else {
-    showSnackbar({
-      text: `[${res.retcode}]${res.message}`,
-      color: "error",
-    });
-    await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
-    await TGLogger.Error(`[UserAbyss][uploadAbyss] ${res.retcode} ${res.message}`);
-  }
+  if (loading.value) loading.value = false;
 }
 </script>
 <style lang="css" scoped>
@@ -268,35 +280,32 @@ async function uploadAbyss(): Promise<void> {
   border-radius: 5px;
 }
 
-.ua-tab {
+.ua-left-box {
+  position: relative;
+  display: flex;
   width: 100px;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  border-right: 1px solid var(--common-shadow-2);
   color: var(--box-text-4);
-  font-family: var(--font-text);
 }
 
-.ua-tabs {
+.ua-tabs-box {
   max-height: calc(100% - 150px);
-  margin-top: 5px;
   overflow-y: auto;
 }
 
-/* stylelint-disable selector-class-pattern */
-.ua-tab.v-tabs.v-slide-group--vertical {
-  height: 100%;
-}
-
 .ua-tab-bottom {
-  position: absolute;
-  bottom: 0;
   display: flex;
   width: 100%;
-  flex-wrap: wrap;
+  flex-direction: column;
   padding: 10px;
   gap: 10px;
 }
 
 .ua-btn {
-  border-radius: 5px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-text);
