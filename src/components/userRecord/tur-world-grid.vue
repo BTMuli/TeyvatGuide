@@ -1,13 +1,14 @@
 <template>
   <div v-if="!props.modelValue">暂无数据</div>
   <div v-else class="tur-wg-box">
-    <TurWorldSub v-for="(area, index) in getData()" :key="index" :data="area" :theme="theme" />
+    <TurWorldSub v-for="area in getData()" :key="area.id" :data="area" :theme="theme" />
   </div>
 </template>
 <script lang="ts" setup>
 import { computed } from "vue";
 
 import TurWorldSub from "./tur-world-sub.vue";
+import showSnackbar from "../func/snackbar";
 
 interface TurWorldGridProps {
   modelValue?: string;
@@ -24,7 +25,19 @@ const theme = computed(() => {
 });
 
 function getData(): TGApp.Sqlite.Record.WorldExplore[] {
-  return JSON.parse(<string>props.modelValue);
+  let res: TGApp.Sqlite.Record.WorldExplore[] = JSON.parse(<string>props.modelValue);
+  try {
+    if (res[0].children) {
+      console.log("检测到children字段");
+    }
+  } catch (e) {
+    showSnackbar({
+      text: "数据解析错误，建议刷新页面",
+      color: "error",
+    });
+    res = [];
+  }
+  return res;
 }
 </script>
 <style lang="css" scoped>

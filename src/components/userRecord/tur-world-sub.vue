@@ -1,34 +1,38 @@
 <template>
-  <div
-    class="tur-ws-box"
-    :style="{
-      backgroundImage: `url('${getUrl.bg}')`,
-      backgroundPositionX: 'right',
-      backgroundSize: 'cover',
-      backgroundRepeat: 'no-repeat',
-    }"
-  >
+  <div class="tur-ws-box">
     <div class="tur-ws-icon">
-      <img :src="getUrl.icon" alt="icon" />
+      <img :src="icon" alt="icon" />
     </div>
     <div class="tur-ws-content">
       <div class="tur-ws-title">
-        {{ data.name }}
+        <span>{{ data.name }}</span>
+        <span v-if="data.offering" class="tur-ws-sub">
+          <img :src="offer" alt="offer" />
+          <span>{{ data.offering.name }}等级：</span>
+          <span>{{ data.offering.level }}</span>
+          <span>级</span>
+        </span>
       </div>
-      <div class="tur-ws-sub">
+      <div class="tur-ws-sub" v-if="data.children.length === 0">
         <span>探索度：</span>
         <span>{{ data.exploration / 10 }}</span>
         <span>%</span>
       </div>
-      <div v-if="data.type === 'Reputation'" class="tur-ws-sub">
-        <span>声望等级：</span>
-        <span>{{ data.level }}</span>
-        <span>级</span>
+      <div v-else>
+        <div class="tur-ws-sub" v-if="data.exploration !== 0">
+          <span>{{ data.name }}探索度：</span>
+          <span>{{ data.exploration / 10 }}</span>
+          <span>%</span>
+        </div>
+        <div class="tur-ws-sub" v-for="item in data.children" :key="item.id">
+          <span>{{ item.name }}探索度：</span>
+          <span>{{ item.exploration / 10 }}</span>
+          <span>%</span>
+        </div>
       </div>
-      <div v-if="data.offerings.length > 0" class="tur-ws-sub">
-        <img :src="getUrl.offer" alt="offer" />
-        <span>{{ data.offerings[0].name }}等级：</span>
-        <span>{{ data.offerings[0].level }}</span>
+      <div v-if="data.reputation" class="tur-ws-sub">
+        <span>声望等级：</span>
+        <span>{{ data.reputation }}</span>
         <span>级</span>
       </div>
     </div>
@@ -36,7 +40,8 @@
 </template>
 <script lang="ts" setup>
 import { event } from "@tauri-apps/api";
-import { onMounted, ref } from "vue";
+import { UnlistenFn } from "@tauri-apps/api/helpers/event";
+import { onMounted, onUnmounted, ref } from "vue";
 
 import { saveImgLocal } from "../../utils/TGShare";
 
@@ -46,37 +51,48 @@ interface TurWorldSubProps {
 }
 
 const props = defineProps<TurWorldSubProps>();
-const getUrl = ref({
-  bg: "",
-  icon: "",
-  iconLight: "",
-  iconDark: "",
-  offer: "",
-});
+let themeListener: UnlistenFn;
+const bg = ref<string>();
+const icon = ref<string>();
+const iconLight = ref<string>();
+const iconDark = ref<string>();
+const offer = ref<string>();
 
 onMounted(async () => {
-  await listenOnTheme();
-  getUrl.value.bg = await saveImgLocal(props.data.bg);
-  getUrl.value.iconLight = await saveImgLocal(props.data.iconLight);
-  getUrl.value.iconDark = await saveImgLocal(props.data.iconDark);
-  if (props.data.offerings.length > 0) {
-    getUrl.value.offer = await saveImgLocal(props.data.offerings[0].icon);
-  }
-  props.theme === "dark"
-    ? (getUrl.value.icon = getUrl.value.iconLight)
-    : (getUrl.value.icon = getUrl.value.iconDark);
-});
-
-async function listenOnTheme(): Promise<void> {
-  await event.listen("readTheme", (e) => {
+  themeListener = await event.listen("readTheme", (e) => {
     const theme = <string>e.payload;
     if (theme === "dark") {
-      getUrl.value.icon = getUrl.value.iconLight;
+      icon.value = iconLight.value;
     } else {
-      getUrl.value.icon = getUrl.value.iconDark;
+      icon.value = iconDark.value;
     }
   });
-}
+  bg.value = `url('${await saveImgLocal(props.data.bg)}')`;
+  iconLight.value = await saveImgLocal(props.data.iconLight);
+  iconDark.value = await saveImgLocal(props.data.iconDark);
+  if (props.data.offering) {
+    offer.value = await saveImgLocal(props.data.offering.icon);
+  }
+  props.theme === "dark" ? (icon.value = iconLight.value) : (icon.value = iconDark.value);
+});
+
+onUnmounted(() => {
+  if (themeListener) {
+    themeListener();
+  }
+  const urlList = [iconLight.value, iconDark.value, offer.value];
+  urlList.forEach((url) => {
+    URL.revokeObjectURL(typeof url === "string" ? url : "");
+  });
+  const reg = /url\(['"]?([^'"]*)['"]?\)/;
+  if (bg.value) {
+    const bgOri = bg.value?.replace("url('", "").replace("')", "");
+    const bgUrl = bgOri.match(reg);
+    if (bgUrl) {
+      URL.revokeObjectURL(bgUrl[1]);
+    }
+  }
+});
 </script>
 <style lang="css" scoped>
 .tur-ws-box {
@@ -86,6 +102,10 @@ async function listenOnTheme(): Promise<void> {
   padding: 10px;
   border-radius: 5px;
   background: var(--box-bg-2);
+  background-image: v-bind(bg);
+  background-position-x: right;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .tur-ws-icon {
@@ -106,6 +126,9 @@ async function listenOnTheme(): Promise<void> {
 }
 
 .tur-ws-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   border-bottom: 1px inset var(--common-shadow-8);
   font-family: var(--font-title);
   font-size: 20px;

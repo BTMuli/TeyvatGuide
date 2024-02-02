@@ -33,7 +33,7 @@ export async function getGameRecord(
     })
     .then((res) => {
       if (res.data.retcode !== 0) {
-        return res.data;
+        return <TGApp.BBS.Response.Base>res.data;
       }
       return res.data.data;
     });

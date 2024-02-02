@@ -1,10 +1,15 @@
 /**
- * @file types Sqlite Record.d.ts
+ * @file types/Sqlite/Record.d.ts
  * @description Sqlite 原神战绩相关类型定义文件
- * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.2
+ * @since Beta v0.4.3
  */
 
+/**
+ * @description Sqlite 原神战绩相关类型定义命名空间
+ * @since Beta v0.4.3
+ * @namespace Record
+ * @memberof TGApp.Sqlite
+ */
 declare namespace TGApp.Sqlite.Record {
   /**
    * @description 原神战绩数据表
@@ -20,7 +25,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {string} updated - 更新时间
    * @return SingleTable
    */
-  export interface SingleTable {
+  interface SingleTable {
     uid: string;
     role: string; // Role
     avatars: string; // Avatar[]
@@ -39,7 +44,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {number} level - 等级
    * @return Role
    */
-  export interface Role {
+  interface Role {
     nickname: string;
     region: string;
     level: number;
@@ -59,7 +64,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {boolean} isShow - 角色是否展示
    * @return Avatar
    */
-  export interface Avatar {
+  interface Avatar {
     id: number;
     name: string;
     element: string;
@@ -92,7 +97,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {number} magicChest - 奇馈宝箱数
    * @return Stats
    */
-  export interface Stats {
+  interface Stats {
     activeDays: number;
     achievementNumber: number;
     avatarNumber: number;
@@ -114,28 +119,30 @@ declare namespace TGApp.Sqlite.Record {
   /**
    * @description 世界探索信息类型
    * @interface WorldExplore
-   * @since Alpha v0.2.0
-   * @property {number} level - 等级
-   * @property {number} exploration - 探索度 // 千分比
-   * @property {string} iconLight - 图标（浅色）
-   * @property {string} iconDark - 图标（深色）
-   * @property {string} name - 名称
-   * @property {string} type - 类型
-   * @property {WorldOffering[]} offerings - 祭祀物
+   * @since Beta v0.4.3
+   * @property {number} id - 地区 ID
+   * @property {string} name - 地区名称
+   * @property {string} iconLight - 地区图标（亮）
+   * @property {string} iconDark - 地区图标（暗）
    * @property {string} bg - 背景
    * @property {string} cover - 封面
+   * @property {number} reputation - 地区声望等级
+   * @property {WorldOffering} offering - 地区供奉信息
+   * @property {number} exploration - 地区探索进度
+   * @property {WorldChild[]} children - 子地区
    * @return WorldExplore
    */
-  export interface WorldExplore {
-    level: number;
-    exploration: number;
+  interface WorldExplore {
+    id: number;
+    name: string;
     iconLight: string;
     iconDark: string;
-    name: string;
-    type: string;
-    offerings: WorldOffering[];
     bg: string;
     cover: string;
+    reputation?: number;
+    offering?: WorldOffering;
+    exploration: number;
+    children: WorldChild[];
   }
 
   /**
@@ -147,10 +154,25 @@ declare namespace TGApp.Sqlite.Record {
    * @property {string} icon - 图标
    * @return WorldOffering
    */
-  export interface WorldOffering {
+  interface WorldOffering {
     name: string;
     level: number;
     icon: string;
+  }
+
+  /**
+   * @description 子地区类型
+   * @interface WorldChild
+   * @since Beta v0.4.3
+   * @property {number} id - 子地区 ID
+   * @property {string} name - 子地区名称
+   * @property {number} exploration - 子地区探索进度
+   * @return WorldChild
+   */
+  interface WorldChild {
+    id: number;
+    name: string;
+    exploration: number;
   }
 
   /**
@@ -167,7 +189,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {string} bg - 背景
    * @return Home
    */
-  export interface Home {
+  interface Home {
     comfortIcon: string;
     comfortName: string;
     name: string;

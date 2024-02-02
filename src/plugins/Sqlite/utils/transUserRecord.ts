@@ -1,13 +1,12 @@
 /**
- * @file plugins Sqlite utils transUserRecord.ts
+ * @file plugins/Sqlite/utils/transUserRecord.ts
  * @description Sqlite 数据转换 用户战绩数据转换模块
- * @author BTMuli <bt-muli@outlook.com>
- * @since Alpha v0.2.2
+ * @since Beta v0.4.3
  */
 
 /**
  * @description 将通过 api 获取到的用户战绩数据转换为数据库中的数据
- * @since Alpha v0.2.0
+ * @since Beta v0.4.3
  * @param {TGApp.Game.Record.FullData} data 用户战绩数据
  * @returns {TGApp.Sqlite.Record.SingleTable} 转换后的用户战绩数据
  */
@@ -17,7 +16,7 @@ export function transUserRecord(data: TGApp.Game.Record.FullData): TGApp.Sqlite.
     role: transRole(data.role),
     avatars: transAvatar(data.avatars),
     stats: transStat(data.stats),
-    worldExplore: transWorld(data.world_explorations),
+    worldExplore: JSON.stringify(transWorld(data.world_explorations)),
     homes: transHome(data.homes),
     updated: "",
   };
@@ -108,35 +107,47 @@ function transStat(data: TGApp.Game.Record.Stats): string {
 
 /**
  * @description 将探索信息转换为数据库中的数据
- * @since Alpha v0.2.0
+ * @since Beta v0.4.3
  * @param {TGApp.Game.Record.WorldExplore[]} data 城市探索信息
- * @returns {string} 转换后的城市探索信息
+ * @returns {TGApp.Sqlite.Record.WorldExplore[]} 转换后的城市探索信息
  */
-function transWorld(data: TGApp.Game.Record.WorldExplore[]): string {
-  const worlds: TGApp.Sqlite.Record.WorldExplore[] = data.map((item) => {
-    let offerings: TGApp.Sqlite.Record.WorldOffering[] = [];
-    if (item.offerings !== undefined) {
-      offerings = item.offerings.map((offering) => {
-        return {
-          name: offering.name,
-          icon: offering.icon,
-          level: offering.level,
-        };
-      });
-    }
-    return {
-      level: item.level,
-      exploration: item.exploration_percentage,
-      iconLight: item.icon,
-      iconDark: item.inner_icon,
-      name: item.name,
-      type: item.type,
-      offerings,
-      bg: item.background_image,
-      cover: item.cover,
+function transWorld(data: TGApp.Game.Record.WorldExplore[]): TGApp.Sqlite.Record.WorldExplore[] {
+  const areaParent = data.filter((i) => i.parent_id === 0);
+  const areaChild = data.filter((i) => i.parent_id !== 0);
+  const worlds: TGApp.Sqlite.Record.WorldExplore[] = [];
+  // 先处理父级城市
+  for (const area of areaParent) {
+    const world: TGApp.Sqlite.Record.WorldExplore = {
+      id: area.id,
+      name: area.name,
+      iconLight: area.icon,
+      iconDark: area.inner_icon,
+      bg: area.background_image,
+      cover: area.cover,
+      exploration: area.exploration_percentage,
+      children: [],
     };
-  });
-  return JSON.stringify(worlds);
+    if (area.type === "Reputation") {
+      world.reputation = area.level;
+    }
+    if (area.offerings !== undefined && area.offerings.length > 0) {
+      world.offering = {
+        name: area.offerings[0].name,
+        level: area.offerings[0].level,
+        icon: area.offerings[0].icon,
+      };
+    }
+    const children = areaChild.filter((i) => i.parent_id === area.id);
+    children.map((child) => {
+      return world.children.push({
+        id: child.id,
+        name: child.name,
+        exploration: child.exploration_percentage,
+      });
+    });
+    worlds.push(world);
+  }
+  return worlds;
 }
 
 /**
