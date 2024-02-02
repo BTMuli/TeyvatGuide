@@ -61,9 +61,9 @@
               <template #title
                 ><span class="twc-text-item-title">{{ item.Title }}</span></template
               >
-              <template #text
-                ><span class="twc-text-item-content">{{ item.Context }}</span></template
-              >
+              <template #text>
+                <span class="twc-text-item-content" v-html="parseHtmlText(item.Context)" />
+              </template>
             </v-expansion-panel>
           </v-expansion-panels>
         </template>
@@ -99,6 +99,7 @@ import TwcSkills from "./twc-skills.vue";
 import { WikiCharacterData } from "../../data";
 import Mys from "../../plugins/Mys";
 import { createTGWindow } from "../../utils/TGWindow";
+import { parseHtmlText } from "../../utils/toolFunc";
 import showSnackbar from "../func/snackbar";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
 
