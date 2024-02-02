@@ -12,6 +12,7 @@
 
 <script lang="ts" setup>
 import { app, event, fs, tauri, window as TauriWindow } from "@tauri-apps/api";
+import { UnlistenFn } from "@tauri-apps/api/helpers/event";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -36,7 +37,8 @@ const vuetifyTheme = computed(() => {
   return appStore.theme === "dark" ? "dark" : "light";
 });
 
-let themeListener: () => void;
+let themeListener: UnlistenFn;
+let urlListener: UnlistenFn;
 
 onBeforeMount(async () => {
   const win = TauriWindow.getCurrent();
@@ -46,6 +48,7 @@ onBeforeMount(async () => {
     await win.setTitle(title);
     await listenOnInit();
     await tauri.invoke("init_app");
+    urlListener = await getDeepLink();
   }
 });
 
@@ -64,7 +67,6 @@ onMounted(async () => {
 async function listenOnInit(): Promise<void> {
   await event.listen("initApp", async () => {
     await tauri.invoke("register_deep_link");
-    await getDeepLink();
     await checkAppLoad();
     await checkDeviceFp();
     try {
@@ -164,8 +166,8 @@ async function checkUserLoad(): Promise<void> {
   await fs.createDir(appStore.userDir, { recursive: true });
 }
 
-async function getDeepLink(): Promise<void> {
-  await event.listen("active_deep_link", async (e) => {
+async function getDeepLink(): Promise<UnlistenFn> {
+  return await event.listen("active_deep_link", async (e) => {
     const windowGet = new TauriWindow.WebviewWindow("TeyvatGuide");
     if (await windowGet.isMinimized()) {
       await windowGet.unminimize();
@@ -229,7 +231,8 @@ async function checkUpdate(): Promise<void> {
 }
 
 onUnmounted(() => {
-  themeListener();
+  if (themeListener) themeListener();
+  if (urlListener) urlListener();
 });
 </script>
 <style lang="css">

@@ -172,7 +172,7 @@ async function switchHideFin() {
   });
   if (!res) {
     showSnackbar({
-      color: "warn",
+      color: "cancel",
       text: "已取消切换",
     });
     return;
