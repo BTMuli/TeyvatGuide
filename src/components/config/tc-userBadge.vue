@@ -92,7 +92,7 @@ async function getTokenWeb(cookie: string): Promise<void> {
       prev[key.trim()] = value.trim();
       return prev;
     },
-    {} as Record<string, string>,
+    <Record<string, string>>{},
   );
   if (!("login_ticket" in ck) || !("login_uid" in ck)) {
     emits("loadOuter", { show: false });
