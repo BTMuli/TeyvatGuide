@@ -340,7 +340,7 @@
   },
   {
     "id": 1311,
-    "contentId": 0,
+    "contentId": 500686,
     "name": "托马",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/托马.webp",
@@ -543,7 +543,7 @@
   },
   {
     "id": 1507,
-    "contentId": 0,
+    "contentId": 500687,
     "name": "早柚",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/早柚.webp",
@@ -737,7 +737,7 @@
   },
   {
     "id": 2103,
-    "contentId": 0,
+    "contentId": 500677,
     "name": "无相之冰",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/无相之冰.webp",
@@ -833,7 +833,7 @@
   },
   {
     "id": 2403,
-    "contentId": 0,
+    "contentId": 500684,
     "name": "千年珍珠骏麟",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/千年珍珠骏麟.webp",
@@ -1573,7 +1573,7 @@
   },
   {
     "id": 213111,
-    "contentId": 0,
+    "contentId": 500675,
     "name": "僚佐的才巧",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/僚佐的才巧.webp",
@@ -1759,7 +1759,7 @@
   },
   {
     "id": 215071,
-    "contentId": 0,
+    "contentId": 500676,
     "name": "偷懒的新方法",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/偷懒的新方法.webp",
@@ -1934,7 +1934,7 @@
   },
   {
     "id": 221031,
-    "contentId": 0,
+    "contentId": 500678,
     "name": "严霜棱晶",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/严霜棱晶.webp",
@@ -2019,7 +2019,7 @@
   },
   {
     "id": 224031,
-    "contentId": 0,
+    "contentId": 500685,
     "name": "明珠固化",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/明珠固化.webp",
@@ -2436,7 +2436,7 @@
   },
   {
     "id": 311507,
-    "contentId": 0,
+    "contentId": 500679,
     "name": "原木刀",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/原木刀.webp",
@@ -2667,7 +2667,7 @@
   },
   {
     "id": 312023,
-    "contentId": 0,
+    "contentId": 500682,
     "name": "老兵的容颜",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/老兵的容颜.webp",
@@ -3197,7 +3197,7 @@
   },
   {
     "id": 322022,
-    "contentId": 0,
+    "contentId": 500680,
     "name": "婕德",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/婕德.webp",
@@ -3207,7 +3207,7 @@
   },
   {
     "id": 322023,
-    "contentId": 0,
+    "contentId": 500683,
     "name": "西尔弗和迈勒斯",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/西尔弗和迈勒斯.webp",
@@ -3727,7 +3727,7 @@
   },
   {
     "id": 332028,
-    "contentId": 0,
+    "contentId": 500681,
     "name": "机关铸成之链",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/机关铸成之链.webp",
@@ -3735,7 +3735,7 @@
   },
   {
     "id": 332029,
-    "contentId": 0,
+    "contentId": 500668,
     "name": "净觉花",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/净觉花.webp",
@@ -3873,7 +3873,7 @@
   },
   {
     "id": 333014,
-    "contentId": 0,
+    "contentId": 500669,
     "name": "松茸酿肉卷",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/松茸酿肉卷.webp",

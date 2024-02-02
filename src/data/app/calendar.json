@@ -1629,7 +1629,7 @@
   },
   {
     "id": 10000093,
-    "contentId": 0,
+    "contentId": 500673,
     "dropDays": [3, 6, 7],
     "name": "闲云",
     "itemType": "character",
@@ -2597,7 +2597,7 @@
   },
   {
     "id": 10000092,
-    "contentId": 0,
+    "contentId": 500672,
     "dropDays": [1, 4, 7],
     "name": "嘉明",
     "itemType": "character",
@@ -4912,7 +4912,7 @@
   },
   {
     "id": 14515,
-    "contentId": 0,
+    "contentId": 500674,
     "dropDays": [2, 5, 7],
     "name": "鹤鸣余音",
     "itemType": "weapon",
