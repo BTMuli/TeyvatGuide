@@ -450,22 +450,13 @@ class TGClient {
 
   /**
    * @func open
-   * @since Beta v0.3.7
+   * @since Beta v0.4.3
    * @desc 打开米游社客户端
    * @param {string} func - 方法名
    * @param {string} url - url
    * @returns {void} - 无返回值
    */
   async open(func: string, url?: string): Promise<void> {
-    if (this.window !== null) {
-      try {
-        await this.window.close();
-      } catch (e) {
-        console.error(e);
-        await invoke<InvokeArg>("create_mhy_client", { func: "default", url: "" });
-        await this.open(func, url);
-      }
-    }
     if (url === undefined) url = this.getUrl(func);
     this.route = [url];
     await TGLogger.Info(`[TGClient][open][${func}] ${url}`);

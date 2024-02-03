@@ -58,6 +58,10 @@
       "process": {
         "all": false,
         "exit": true
+      },
+      "shell": {
+        "all": false,
+        "open": true
       }
     },
     "bundle": {
