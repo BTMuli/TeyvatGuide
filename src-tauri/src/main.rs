@@ -39,6 +39,14 @@ fn main() {
     .on_window_event(|event| window_event_handler(event))
     .plugin(plugins::build_sql_plugin())
     .plugin(plugins::build_log_plugin())
+    .setup(|_app| {
+      let _window = _app.get_window("TeyvatGuide");
+      #[cfg(debug_assertions)]
+      if _window.is_some() {
+        _window.unwrap().open_devtools();
+      }
+      Ok(())
+    })
     .invoke_handler(tauri::generate_handler![
       commands::init_app,
       commands::register_deep_link,
@@ -47,14 +55,6 @@ fn main() {
       commands::get_dir_size,
       client::create_mhy_client,
     ])
-    .setup(|_app| {
-      #[cfg(debug_assertions)]
-      let _window = _app.get_window("TeyvatGuide");
-      if _window.is_some() {
-        _window.unwrap().open_devtools();
-      }
-      Ok(())
-    })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
