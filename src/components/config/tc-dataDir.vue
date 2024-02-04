@@ -4,8 +4,8 @@
     <v-divider :inset="true" class="border-opacity-75" />
     <v-list-item prepend-icon="mdi-folder-key">
       <v-list-item-title style="cursor: pointer" @click="confirmCUD"
-        >用户数据目录</v-list-item-title
-      >
+        >用户数据目录
+      </v-list-item-title>
       <v-list-item-subtitle @click="openPath('user')">{{ appStore.userDir }}</v-list-item-subtitle>
       <template #append>
         <v-icon @click="copyPath('user')">mdi-content-copy</v-icon>
@@ -19,7 +19,7 @@
     </v-list-item>
     <v-list-item prepend-icon="mdi-folder-multiple">
       <v-list-item-title style="cursor: pointer" @click="confirmCLD">日志目录</v-list-item-title>
-      <v-list-item-subtitle @click="openPath('log')">{{ appStore.logDir }} </v-list-item-subtitle>
+      <v-list-item-subtitle @click="openPath('log')">{{ appStore.logDir }}</v-list-item-subtitle>
       <template #append>
         <v-icon @click="copyPath('log')">mdi-content-copy</v-icon>
       </template>
@@ -27,7 +27,7 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-import { dialog, fs, path } from "@tauri-apps/api";
+import { dialog, fs } from "@tauri-apps/api";
 
 import TGSqlite from "../../plugins/Sqlite";
 import { useAppStore } from "../../store/modules/app";
@@ -89,6 +89,15 @@ async function confirmCUD(): Promise<void> {
   }, 4000);
 }
 
+// 获取当天日期数字，如 20240204
+function getNowDate(): number {
+  const now = new Date();
+  const year = now.getFullYear().toString(); // 4位年份
+  const month = (now.getMonth() + 1).toString().padStart(2, "0"); // 月份
+  const day = now.getDate().toString().padStart(2, "0"); // 日期
+  return parseInt(year + month + day);
+}
+
 async function confirmCLD(): Promise<void> {
   const check = await showConfirm({
     title: "确认清理日志文件吗？",
@@ -101,15 +110,17 @@ async function confirmCLD(): Promise<void> {
     });
     return;
   }
-  const now = new Date();
-  const nowDate = `${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`;
   const logDir = appStore.logDir;
   const files = await fs.readDir(logDir);
   const delFiles = files.filter((file) => {
-    const fileName = file.path.split(path.sep).pop()?.replace(".log", "");
-    if (fileName === undefined) return false;
-    const fileDate = parseInt(fileName.replace(/-/g, ""));
-    return fileDate < parseInt(nowDate) - 7;
+    // yyyy-mm-dd.log
+    const reg = /(\d{4}-\d{2}-\d{2}\.log)/;
+    const match = file.path.match(reg);
+    if (match === null) {
+      return false;
+    }
+    const date = match[1].replace(".log", "");
+    return getNowDate() - parseInt(date.replace(/-/g, "")) > 7;
   });
   if (delFiles.length < 1) {
     showSnackbar({
