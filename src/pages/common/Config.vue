@@ -6,17 +6,35 @@
     <v-list class="config-list">
       <v-list-subheader :inset="true" class="config-header" title="设置" />
       <v-divider :inset="true" class="border-opacity-75" />
-      <v-list-item prepend-icon="mdi-database-export" title="数据备份" @click="confirmBackup" />
-      <v-list-item prepend-icon="mdi-database-import" title="数据恢复" @click="confirmRestore" />
-      <v-list-item prepend-icon="mdi-database-arrow-up" title="数据更新" @click="confirmUpdate()" />
+      <v-list-item title="数据备份" @click="confirmBackup">
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-database-export</v-icon>
+          </div>
+        </template>
+      </v-list-item>
+      <v-list-item title="数据恢复" @click="confirmRestore">
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-database-import</v-icon>
+          </div>
+        </template>
+      </v-list-item>
+      <v-list-item title="数据更新" @click="confirmUpdate()">
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-database-arrow-up</v-icon>
+          </div>
+        </template>
+      </v-list-item>
       <v-list-subheader :inset="true" class="config-header" title="调试" @click="tryShowReset" />
       <v-divider :inset="true" class="border-opacity-75" />
-      <v-list-item
-        v-if="isDevEnv"
-        title="调试模式"
-        subtitle="开启后将显示调试信息"
-        prepend-icon="mdi-bug-play"
-      >
+      <v-list-item v-if="isDevEnv" title="调试模式" subtitle="开启后将显示调试信息">
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-bug-play</v-icon>
+          </div>
+        </template>
         <template #append>
           <v-switch
             v-model="appStore.devMode"
@@ -27,20 +45,38 @@
           />
         </template>
       </v-list-item>
-      <v-list-item prepend-icon="mdi-refresh">
+      <v-list-item>
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-refresh</v-icon>
+          </div>
+        </template>
         <v-list-item-title @click="confirmUpdateDevice()">刷新设备信息</v-list-item-title>
         <template #append>
           <v-icon @click="confirmUpdateDevice(true)">mdi-bug</v-icon>
         </template>
       </v-list-item>
-      <v-list-item prepend-icon="mdi-database-remove" title="清除缓存" @click="confirmDelCache" />
-      <v-list-item
-        v-show="showReset"
-        title="重置数据库"
-        prepend-icon="mdi-database-settings"
-        @click="confirmResetDB()"
-      />
-      <v-list-item prepend-icon="mdi-cog-sync" title="恢复默认设置" @click="confirmResetApp" />
+      <v-list-item title="清除缓存" @click="confirmDelCache">
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-database-remove</v-icon>
+          </div>
+        </template>
+      </v-list-item>
+      <v-list-item v-show="showReset" title="重置数据库" @click="confirmResetDB()">
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-database-settings</v-icon>
+          </div>
+        </template>
+      </v-list-item>
+      <v-list-item title="恢复默认设置" @click="confirmResetApp">
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-cog-sync</v-icon>
+          </div>
+        </template>
+      </v-list-item>
     </v-list>
     <TcDataDir />
   </div>
@@ -445,8 +481,22 @@ function loadHandle(params: TGApp.Component.Loading.EmitParams): void {
 .config-header {
   margin-top: 10px;
   color: var(--common-text-title);
-  font-family: Genshin, serif;
+  font-family: var(--font-title);
   font-size: large;
+}
+
+.config-icon {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 5px;
+  margin-right: 15px;
+  background: var(--box-bg-2);
+  color: var(--box-text-2);
 }
 
 .config-right {

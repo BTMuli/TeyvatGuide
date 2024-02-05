@@ -20,18 +20,30 @@
     </v-list-item>
     <v-list-item title="系统平台">
       <template #prepend>
-        <v-icon>{{ iconPlatform }}</v-icon>
+        <div class="config-icon">
+          <v-icon>{{ iconPlatform }}</v-icon>
+        </div>
       </template>
       <template #append>
         <v-list-item-subtitle>{{ osPlatform }}</v-list-item-subtitle>
       </template>
     </v-list-item>
-    <v-list-item title="系统版本" prepend-icon="mdi-monitor-dashboard">
+    <v-list-item title="系统版本">
+      <template #prepend>
+        <div class="config-icon">
+          <v-icon>mdi-monitor-dashboard</v-icon>
+        </div>
+      </template>
       <template #append>
         <v-list-item-subtitle>{{ osVersion }}</v-list-item-subtitle>
       </template>
     </v-list-item>
-    <v-list-item title="数据库更新时间" prepend-icon="mdi-database-sync">
+    <v-list-item title="数据库更新时间">
+      <template #prepend>
+        <div class="config-icon">
+          <v-icon>mdi-database-sync</v-icon>
+        </div>
+      </template>
       <template #append>
         <v-list-item-subtitle
           >{{ dbInfo.find((item) => item.key === "dataUpdated")?.value }}
@@ -42,7 +54,12 @@
         {{ dbInfo.find((item) => item.key === "dataUpdated")?.updated }}
       </v-list-item-subtitle>
     </v-list-item>
-    <v-list-item title="数据库版本" prepend-icon="mdi-database-search">
+    <v-list-item title="数据库版本">
+      <template #prepend>
+        <div class="config-icon">
+          <v-icon>mdi-database-search</v-icon>
+        </div>
+      </template>
       <template #append>
         <v-list-item-subtitle
           >{{ dbInfo.find((item) => item.key === "appVersion")?.value }}
@@ -117,14 +134,16 @@ function toOuter(url: string) {
 }
 
 .config-icon {
+  display: flex;
   width: 40px;
   height: 40px;
+  align-items: center;
+  justify-content: center;
   padding: 5px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   margin-right: 15px;
-  backdrop-filter: blur(20px);
-  background: var(--app-side-bg);
-  box-shadow: 0 0 5px var(--common-shadow-1);
+  background: var(--box-bg-2);
+  color: var(--box-text-2);
 }
 </style>
