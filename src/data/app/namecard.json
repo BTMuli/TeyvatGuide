@@ -170,6 +170,16 @@
     "profile": "/source/nameCard/profile/沉玉·投珑.webp"
   },
   {
+    "name": "专辑·闪耀的群星",
+    "index": 192,
+    "type": 0,
+    "desc": "名片纹饰。我们在一段旋律里暂别，又在另一段旋律重新相遇。",
+    "source": "",
+    "icon": "/source/nameCard/icon/专辑·闪耀的群星.webp",
+    "bg": "/source/nameCard/bg/专辑·闪耀的群星.webp",
+    "profile": "/source/nameCard/profile/专辑·闪耀的群星.webp"
+  },
+  {
     "name": "成就·游遍",
     "index": 21,
     "type": 1,

@@ -906,6 +906,22 @@
   },
   {
     "id": 0,
+    "contentId": 500830,
+    "name": "攻坚特化型机关",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/攻坚特化型机关.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 500829,
+    "name": "压制特化型机关",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/压制特化型机关.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
     "contentId": 500596,
     "name": "镀金旅团·魔岩役使",
     "type": "魔物牌",
@@ -2014,7 +2030,8 @@
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/悲号回唱.webp",
     "tags": {
-      "GCG_TAG_TALENT": "天赋"
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
     }
   },
   {
