@@ -40,12 +40,7 @@
       </v-btn>
     </div>
     <div class="posts-nav">
-      <div
-        v-for="navItem in nav"
-        :key="navItem.id"
-        class="post-nav"
-        @click="toNav(navItem.app_path)"
-      >
+      <div v-for="navItem in nav" :key="navItem.id" class="post-nav" @click="toNav(navItem)">
         <img alt="navIcon" :src="navItem.icon" />
         <span>{{ navItem.name }}</span>
       </div>
@@ -237,8 +232,10 @@ watch(curSortLabel, async (newVal) => {
   await freshPostData();
 });
 
-async function toNav(path: string): Promise<void> {
-  const link = new URL(path);
+async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
+  await TGLogger.Info(`[Posts][${curGameLabel.value}][toNav] 打开网页活动 ${item.name}`);
+  await TGLogger.Info(`[Posts][${curGameLabel.value}][toNav] ${item.app_path}`);
+  const link = new URL(item.app_path);
   const mysList = [
     "https://act.mihoyo.com",
     "https://webstatic.mihoyo.com",
@@ -251,7 +248,7 @@ async function toNav(path: string): Promise<void> {
   }
   // 如果不在上面的域名里面，就直接打开
   if (!mysList.includes(link.origin)) {
-    window.open(path);
+    window.open(item.app_path);
     return;
   }
   const modeConfirm = await showConfirm({
@@ -265,8 +262,8 @@ async function toNav(path: string): Promise<void> {
     });
     return;
   }
-  if (modeConfirm) await TGClient.open("web_act", path);
-  else await TGClient.open("web_act_thin", path);
+  if (modeConfirm) await TGClient.open("web_act", item.app_path);
+  else await TGClient.open("web_act_thin", item.app_path);
 }
 
 // 处理 protocol

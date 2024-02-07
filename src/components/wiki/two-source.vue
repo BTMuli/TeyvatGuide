@@ -16,7 +16,7 @@ const props = defineProps<TwoConvertProps>();
 const textColor = computed(() => {
   if (!props.data || !props.data.days) return "var(--tgc-blue-2)";
   const day = new Date().getDay();
-  if (props.data.days.includes(day)) return "var(--tgc-pink-1)";
+  if (props.data.days.includes(day.toString())) return "var(--tgc-pink-1)";
   return "var(--tgc-blue-2)";
 });
 </script>

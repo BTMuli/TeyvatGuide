@@ -101,10 +101,8 @@ onUnmounted(() => {
   justify-content: center;
   padding: 10px;
   border-radius: 5px;
-  background: var(--box-bg-2);
-  background-image: v-bind(bg);
+  background: var(--common-shadow-t-4) v-bind(bg) no-repeat;
   background-position-x: right;
-  background-repeat: no-repeat;
   background-size: cover;
 }
 
@@ -150,5 +148,6 @@ onUnmounted(() => {
 
 .tur-ws-sub :nth-last-child(2) {
   color: var(--tgc-yellow-1);
+  font-family: var(--font-title);
 }
 </style>

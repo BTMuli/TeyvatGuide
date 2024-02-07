@@ -213,6 +213,7 @@ async function getTokenWeb(cookie: string): Promise<void> {
     await TGLogger.Error("[tc-userBadge][getTokenWeb] 获取 cookie 失败");
     return;
   }
+  await TGSqlite.saveAppData("cookie", JSON.stringify(cookieUser));
   showSnackbar({
     text: "登录成功!",
     color: "success",

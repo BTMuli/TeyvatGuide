@@ -74,7 +74,7 @@
           />
         </slot>
         <slot name="inner-text">
-          <span>{{ modelValue.innerText }}</span>
+          <span :title="modelValue.innerText">{{ modelValue.innerText }}</span>
         </slot>
       </div>
     </div>
@@ -206,6 +206,13 @@ const props = defineProps<TItemBoxProps>();
 
 .tib-inner img {
   margin-right: 5px;
+}
+
+.tib-inner span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: break-all;
 }
 
 .tib-outer {
