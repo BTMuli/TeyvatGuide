@@ -1,18 +1,25 @@
 /**
  * @file types/App/Character.d.ts
  * @description 角色相关类型定义文件
- * @since Beta v0.4.2
+ * @since Beta v0.4.3
  */
 
+/**
+ * @description 应用内角色命名空间
+ * @since Beta v0.4.3
+ * @namespace Character
+ * @memberof TGApp.App
+ */
 declare namespace TGApp.App.Character {
   /**
    * @description Wiki 页简略信息
-   * @since Alpha v0.2.2
+   * @since Beta v0.4.3
    * @interface WikiBriefInfo
    * @property {number} id - 角色 ID
    * @property {number} contentId - 观测枢的 content_id
    * @property {string} name - 角色名称
    * @property {string} title - 角色称号
+   * @property {string} area - 角色地区
    * @property {number[]} birthday - 角色生日 [月, 日]
    * @property {number} star - 角色星级
    * @property {string} element - 角色元素类型图标
@@ -25,6 +32,7 @@ declare namespace TGApp.App.Character {
     contentId: number;
     name: string;
     title: string;
+    area: string;
     birthday: number[];
     star: number;
     element: string;
