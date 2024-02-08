@@ -9,6 +9,7 @@ use tauri::{AppHandle, Manager, WindowBuilder, WindowEvent, WindowUrl};
 #[tauri::command]
 pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
   let mut mhy_window_config = handle.config().tauri.windows.get(1).unwrap().clone();
+  mhy_window_config.visible = true;
   if url != "" {
     mhy_window_config.url = WindowUrl::External(url.parse().unwrap());
   } else {
