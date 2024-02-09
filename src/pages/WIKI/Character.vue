@@ -9,9 +9,9 @@
       </div>
       <div class="wc-list">
         <TwcListItem
-          v-for="item in cardsInfo"
+          v-for="(item, index) in cardsInfo"
           v-model:cur-item="curItem"
-          :key="item.id"
+          :key="index"
           :data="item"
           @click="switchC(item)"
           mode="character"
@@ -25,7 +25,7 @@
   <TwoSelectC v-model="showSelect" @select-c="handleSelect" v-model:reset="resetSelect" />
 </template>
 <script lang="ts" setup>
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import showConfirm from "../../components/func/confirm";
@@ -60,6 +60,10 @@ onBeforeMount(() => {
   }
 });
 
+watch(resetSelect, (val) => {
+  if (val) cardsInfo.value = AppCharacterData;
+});
+
 function handleSelect(val: SelectedCValue) {
   showSelect.value = false;
   const filterC = AppCharacterData.filter((item) => {
@@ -70,16 +74,15 @@ function handleSelect(val: SelectedCValue) {
   });
   if (filterC.length === 0) {
     showSnackbar({
-      text: "未找到符合条件的角色，已重置筛选条件",
+      text: "未找到符合条件的角色",
       color: "warn",
     });
-    resetSelect.value = true;
     return;
   }
+  showSnackbar({
+    text: `筛选出符合条件的角色 ${filterC.length} 个`,
+  });
   cardsInfo.value = filterC;
-  if (!filterC.find((item) => item.id === curItem.value?.id)) {
-    curItem.value = filterC[0];
-  }
 }
 
 async function switchC(item: TGApp.App.Character.WikiBriefInfo): Promise<void> {

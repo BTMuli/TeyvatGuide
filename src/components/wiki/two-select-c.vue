@@ -20,7 +20,7 @@
           <div v-for="(item, index) in selectWeaponList" :key="index">
             <v-item v-slot="{ isSelected, toggle }" :value="item">
               <v-btn @click="toggle" :color="isSelected ? 'primary' : ''">
-                <img :alt="`${item}元素`" :src="`/icon/weapon/${item}.webp`" class="two-sci-icon" />
+                <img :alt="`${item}`" :src="`/icon/weapon/${item}.webp`" class="two-sci-icon" />
                 <span>{{ item }}</span>
               </v-btn>
             </v-item>
@@ -88,12 +88,12 @@ export interface SelectedCValue {
   area: string[];
 }
 
-interface TwoSelectProps {
+interface TwoSelectCProps {
   modelValue: boolean;
   reset: boolean;
 }
 
-interface TwoSelectEmits {
+interface TwoSelectCEmits {
   (e: "update:modelValue", value: boolean): void;
 
   (e: "update:reset", value: boolean): void;
@@ -101,8 +101,8 @@ interface TwoSelectEmits {
   (e: "select-c", value: SelectedCValue): void;
 }
 
-const props = defineProps<TwoSelectProps>();
-const emits = defineEmits<TwoSelectEmits>();
+const props = defineProps<TwoSelectCProps>();
+const emits = defineEmits<TwoSelectCEmits>();
 
 const visible = computed({
   get() {
@@ -130,13 +130,11 @@ watch(
       selectedElements.value = selectElementList;
       selectedArea.value = selectAreaList;
       reset.value = false;
-      confirmSelect();
     }
   },
 );
 
 function onCancel() {
-  console.log(selectedElements.value);
   visible.value = false;
 }
 
