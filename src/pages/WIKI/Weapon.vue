@@ -1,19 +1,28 @@
 <template>
   <div class="ww-box">
-    <div class="ww-list">
-      <TwcListItem
-        v-for="item in cardsInfo"
-        v-model:cur-item="curItem"
-        :key="item.id"
-        :data="item"
-        @click="switchW(item)"
-        mode="weapon"
-      />
+    <div class="ww-left">
+      <div class="ww-select">
+        <v-btn @click="showSelect = true">
+          <span>筛选武器</span>
+        </v-btn>
+        <v-btn @click="resetSelect = true">重置筛选</v-btn>
+      </div>
+      <div class="ww-list">
+        <TwcListItem
+          v-for="(item, index) in cardsInfo"
+          v-model:cur-item="curItem"
+          :key="index"
+          :data="item"
+          @click="switchW(item)"
+          mode="weapon"
+        />
+      </div>
     </div>
     <div class="ww-detail">
       <TwcWeapon :item="curItem" @error="toOuter(curItem)" />
     </div>
   </div>
+  <TwoSelectW v-model="showSelect" @select-w="handleSelectW" v-model:reset="resetSelect" />
 </template>
 
 <script lang="ts" setup>
@@ -24,19 +33,22 @@ import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
 import TwcListItem from "../../components/wiki/twc-list-item.vue";
 import TwcWeapon from "../../components/wiki/twc-weapon.vue";
+import TwoSelectW, { SelectedWValue } from "../../components/wiki/two-select-w.vue";
 import { AppWeaponData } from "../../data";
 import Mys from "../../plugins/Mys";
 import { createTGWindow } from "../../utils/TGWindow";
 
 const id = useRoute().params.id.toString() ?? "0";
-const cardsInfo = AppWeaponData;
+const showSelect = ref(false);
+const resetSelect = ref(false);
+const cardsInfo = ref(AppWeaponData);
 const curItem = ref<TGApp.App.Weapon.WikiBriefInfo>();
 
 onBeforeMount(() => {
   if (id === "0") {
-    curItem.value = cardsInfo[0];
+    curItem.value = cardsInfo.value[0];
   } else {
-    const item = cardsInfo.find((item) => item.id.toString() === id);
+    const item = cardsInfo.value.find((item) => item.id.toString() === id);
     if (item) {
       curItem.value = item;
     } else {
@@ -44,10 +56,30 @@ onBeforeMount(() => {
         text: `武器 ${id} 不存在`,
         color: "warn",
       });
-      curItem.value = cardsInfo[0];
+      curItem.value = cardsInfo.value[0];
     }
   }
 });
+
+function handleSelectW(val: SelectedWValue) {
+  showSelect.value = true;
+  const reg = /\/icon\/weapon\/(.+?)\.webp/;
+  const filterW = AppWeaponData.filter((item) => {
+    if (!val.star.includes(item.star)) return false;
+    return val.weapon.includes(item.weaponIcon.match(reg)![1]);
+  });
+  if (filterW.length === 0) {
+    showSnackbar({
+      text: "未找到符合条件的武器",
+      color: "warn",
+    });
+    return;
+  }
+  showSnackbar({
+    text: `找到 ${filterW.length} 件符合条件的武器`,
+  });
+  cardsInfo.value = filterW;
+}
 
 async function switchW(item: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
   curItem.value = item;
@@ -85,12 +117,29 @@ async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
   column-gap: 10px;
 }
 
+.ww-left {
+  display: flex;
+  width: 500px;
+  height: 100%;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ww-select {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
 .ww-list {
+  position: relative;
   display: grid;
   width: 500px;
-  max-height: 100%;
+  height: calc(100% - 40px);
   padding-right: 10px;
   gap: 10px;
+  grid-auto-rows: 45px;
   grid-template-columns: repeat(3, minmax(100px, 1fr));
   overflow-y: auto;
 }
