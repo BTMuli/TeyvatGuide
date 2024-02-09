@@ -2,12 +2,35 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-01-15
-Update: 2024-01-30
+Update: 2024-02-09
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-01-15 17:29:15`
 >
-> 更新于 `2024-01-30 13:33:39`
+> 更新于 `2024-02-09 20:30:26`
+
+## [0.4.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.3) (2024-02-09)
+
+### Feat
+
+- 公告：支持服务器&语言的切换 [`#81`](https://github.com/BTMuli/TeyvatGuide/issues/81)
+- 战绩：世界探索部分数据结构调整，合并同类数据（如沉玉谷）[`#91`](https://github.com/BTMuli/TeyvatGuide/issues/91)
+- 图鉴：角色/武器图鉴支持条件筛选（武器类型、星级等） [`#87`](https://github.com/BTMuli/TeyvatGuide/issues/87)
+
+### Fix
+
+- 应用：完善 UID 与服务器的对应关系 [`#81`](https://github.com/BTMuli/TeyvatGuide/issues/81)
+- 应用：修正扫码登录，增加网页登录 [`#89`](https://github.com/BTMuli/TeyvatGuide/issues/89)
+- 祈愿：修复 `authkey` 获取失败后无限加载的问题
+- 图鉴：修复部分文本错误，增加遗漏数据
+- 应用：修复外部唤起失效，**不保证*应用商店版本*的唤起可用性**
+- 日志：修复过时日志检测逻辑错误
+
+### Change
+
+- 设置：平台图标跟随平台变更，调整图标样式 [`88`](https://github.com/BTMuli/TeyvatGuide/issues/88)
+- 深渊：调整深渊样式，完善上传错误处理
+- 应用：后端代码重构，修复窗口创建时的 `error` 问题
 
 ## [0.4.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.2) (2024-01-30)
 
