@@ -104,13 +104,12 @@ async function confirmCUD(): Promise<void> {
   }, 4000);
 }
 
-// 获取当天日期数字，如 20240204
-function getNowDate(): number {
-  const now = new Date();
-  const year = now.getFullYear().toString(); // 4位年份
-  const month = (now.getMonth() + 1).toString().padStart(2, "0"); // 月份
-  const day = now.getDate().toString().padStart(2, "0"); // 日期
-  return parseInt(year + month + day);
+// 判断是否超过一周
+function isOverWeek(date: string): boolean {
+  const nowTs = Date.now();
+  const checkTs = new Date(date).getTime();
+  const weekTs = 7 * 24 * 60 * 60 * 1000;
+  return nowTs - checkTs >= weekTs;
 }
 
 async function confirmCLD(): Promise<void> {
@@ -131,11 +130,9 @@ async function confirmCLD(): Promise<void> {
     // yyyy-mm-dd.log
     const reg = /(\d{4}-\d{2}-\d{2}\.log)/;
     const match = file.path.match(reg);
-    if (match === null) {
-      return false;
-    }
+    if (!Array.isArray(match) || match.length < 1) return false;
     const date = match[1].replace(".log", "");
-    return getNowDate() - parseInt(date.replace(/-/g, "")) > 7;
+    return isOverWeek(date);
   });
   if (delFiles.length < 1) {
     showSnackbar({
