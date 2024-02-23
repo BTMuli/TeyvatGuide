@@ -120,7 +120,6 @@ async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
 .ww-left {
   display: flex;
   width: 500px;
-  height: 100%;
   flex-direction: column;
   gap: 10px;
 }
