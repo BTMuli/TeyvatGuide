@@ -85,11 +85,11 @@
       </div>
     </v-window-item>
   </v-window>
-  <ToChannel v-model="showList" />
+  <ToChannel v-model="showList" :gid="gid" />
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, ref } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import showSnackbar from "../../components/func/snackbar";
@@ -97,6 +97,7 @@ import ToChannel from "../../components/overlay/to-channel.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TpAvatar from "../../components/post/tp-avatar.vue";
 import Mys from "../../plugins/Mys";
+import { useAppStore } from "../../store/modules/app";
 import TGLogger from "../../utils/TGLogger";
 import { createPost } from "../../utils/TGWindow";
 
@@ -129,6 +130,7 @@ const loadingTitle = ref<string>("正在加载");
 const loadingSub = ref<boolean>(false);
 
 // UI 数据
+const appStore = useAppStore();
 const tab = ref<NewsKey>("notice");
 const showList = ref<boolean>(false);
 const tabValues = ref<Array<NewsKey>>(["notice", "activity", "news"]);
@@ -160,8 +162,19 @@ const rawData = ref<RawData>({
 
 onMounted(async () => {
   await TGLogger.Info(`[News][${gid}][onMounted] 打开咨讯页面`);
-  tab.value = "notice";
-  await firstLoad("notice");
+  const typeList = ["notice", "activity", "news"];
+  const curType = appStore.recentNewsType;
+  if (typeList.includes(curType)) {
+    tab.value = <NewsKey>curType;
+  } else {
+    tab.value = "notice";
+    appStore.recentNewsType = "notice";
+  }
+  await firstLoad(tab.value);
+});
+
+watch(tab, (val) => {
+  appStore.recentNewsType = val;
 });
 
 async function firstLoad(key: NewsKey): Promise<void> {

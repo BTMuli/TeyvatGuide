@@ -1,7 +1,7 @@
 /**
  * @file router/modules/main.ts
  * @description 主路由模块
- * @since Beta v0.3.7
+ * @since Beta v0.4.4
  */
 
 const mainRoutes = [
@@ -16,7 +16,7 @@ const mainRoutes = [
     component: async () => await import("../../pages/common/Announcements.vue"),
   },
   {
-    path: "/news/:gid",
+    path: "/news/:gid/:type?",
     name: "咨讯",
     component: async () => await import("../../pages/common/News.vue"),
   },

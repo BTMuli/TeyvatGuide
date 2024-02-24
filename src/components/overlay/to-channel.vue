@@ -2,13 +2,15 @@
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
     <div class="toc-box">
       <div class="toc-top">
-        <div class="toc-title">请选择要跳转的频道</div>
+        <div class="toc-title">
+          <span>请选择要跳转的频道</span>
+        </div>
         <div class="toc-list">
           <div
             v-for="(item, index) in channelList"
             :key="index"
-            class="toc-list-item"
-            @click="toChannel(item.link)"
+            :class="props.gid === item.gid ? 'toc-list-item active' : 'toc-list-item'"
+            @click="toChannel(item)"
           >
             <img :src="item.icon" alt="icon" />
             <span>{{ item.title }}</span>
@@ -27,9 +29,13 @@
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 
+import { useAppStore } from "../../store/modules/app";
+import showSnackbar from "../func/snackbar";
 import TOverlay from "../main/t-overlay.vue";
 
 interface ToChannelProps {
+  gid?: string;
+  curType?: string;
   modelValue: boolean;
 }
 
@@ -38,7 +44,7 @@ type ToChannelEmits = (e: "update:modelValue", value: boolean) => void;
 interface ToChannelItem {
   title: string;
   icon: string;
-  link: string;
+  gid: string;
 }
 
 const props = withDefaults(defineProps<ToChannelProps>(), {
@@ -53,42 +59,43 @@ const visible = computed({
   },
 });
 const router = useRouter();
+const appStore = useAppStore();
 
 const channelList: ToChannelItem[] = [
   {
     title: "原神",
     icon: "/platforms/mhy/ys.webp",
-    link: "/news/2",
+    gid: "2",
   },
   {
     title: "崩坏：星穹铁道",
     icon: "/platforms/mhy/sr.webp",
-    link: "/news/6",
+    gid: "6",
   },
   {
     title: "崩坏3",
     icon: "/platforms/mhy/bh3.webp",
-    link: "/news/1",
+    gid: "1",
   },
   {
     title: "崩坏2",
     icon: "/platforms/mhy/bh2.webp",
-    link: "/news/3",
+    gid: "3",
   },
   {
     title: "未定事件簿",
     icon: "/platforms/mhy/wd.webp",
-    link: "/news/4",
+    gid: "4",
   },
   {
     title: "绝区零",
     icon: "/platforms/mhy/zzz.webp",
-    link: "/news/8",
+    gid: "8",
   },
   {
     title: "大别野",
     icon: "/platforms/mhy/dby.webp",
-    link: "/news/5",
+    gid: "5",
   },
 ];
 
@@ -96,14 +103,24 @@ function onCancel(): void {
   visible.value = false;
 }
 
-async function toChannel(link: string): Promise<void> {
+async function toChannel(item: ToChannelItem): Promise<void> {
+  if (props.gid === item.gid) {
+    showSnackbar({
+      text: "当前已经在该频道",
+      color: "warn",
+    });
+    return;
+  }
   visible.value = false;
-  await router.push(link).then(() => {
-    window.scrollTo(0, 0);
-  });
-  setTimeout(() => {
-    window.location.reload();
-  }, 300);
+  let link = `/news/${item.gid}/{type}`;
+  const typeList = ["notice", "news", "activity"];
+  if (typeList.includes(appStore.recentNewsType)) {
+    link = link.replace("{type}", appStore.recentNewsType);
+  } else {
+    link = link.replace("{type}", "notice");
+    appStore.recentNewsType = "notice";
+  }
+  await router.push(link);
 }
 </script>
 <style lang="css" scoped>
@@ -114,7 +131,7 @@ async function toChannel(link: string): Promise<void> {
 .toc-top {
   padding: 10px;
   border-radius: 5px;
-  background: var(--box-bg-1);
+  background: var(--app-page-bg);
 }
 
 .toc-title {
@@ -134,12 +151,18 @@ async function toChannel(link: string): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: start;
-  border: 1px solid var(--common-shadow-2);
+  border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
-  background: var(--box-bg-2);
-  color: var(--box-text-2);
+  background: var(--box-bg-1);
+  color: var(--box-text-1);
   cursor: pointer;
   transition: all 0.5s linear;
+}
+
+.toc-list-item.active {
+  border: 1px solid var(--common-shadow-1);
+  background: var(--box-bg-2);
+  color: var(--box-text-2);
 }
 
 .toc-list-item img {

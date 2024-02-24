@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.4.3
+ * @since Beta v0.4.4
  */
 
 import { path } from "@tauri-apps/api";
@@ -48,6 +48,8 @@ export const useAppStore = defineStore(
     const server = ref<SERVER>(SERVER.CN_ISLAND);
     // 语言
     const lang = ref<string>("zh-cn");
+    // 最近的咨讯类型
+    const recentNewsType = ref("notice");
 
     // 初始化
     function init(): void {
@@ -58,6 +60,7 @@ export const useAppStore = defineStore(
       sidebar.collapse = true;
       server.value = SERVER.CN_ISLAND;
       lang.value = "zh-cn";
+      recentNewsType.value = "notice";
       initDevice();
     }
 
@@ -83,6 +86,7 @@ export const useAppStore = defineStore(
       logDir,
       server,
       lang,
+      recentNewsType,
       init,
       changeTheme,
     };
@@ -107,7 +111,7 @@ export const useAppStore = defineStore(
       {
         key: "theme",
         storage: window.localStorage,
-        paths: ["theme", "server", "lang"],
+        paths: ["theme", "server", "lang", "recentNewsType"],
       },
       {
         key: "deviceInfo",
