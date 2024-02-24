@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/utils/news.ts
  * @description Mys 插件咨讯工具
- * @since Beta v0.4.0
+ * @since Beta v0.4.4
  */
 
 /**
@@ -53,7 +53,7 @@ export function getActivityStatus(status: number): TGApp.Plugins.Mys.News.Render
 
 /**
  * @description 获取封面图
- * @since Beta v0.4.0
+ * @since Beta v0.4.4
  * @param {TGApp.Plugins.Mys.News.Item} item 咨讯列表项
  * @returns {string} 封面图链接
  */
@@ -68,12 +68,9 @@ export function getPostCover(item: TGApp.Plugins.Mys.News.Item): string {
   } else if (item.post.images.length > 0) {
     cover = item.post.images[0];
   }
-  if (cover === undefined) {
-    cover = defaultCover;
-  } else {
-    cover = `${cover}?x-oss-process=image/format,png`;
-  }
-  return cover;
+  if (cover === undefined) return defaultCover;
+  if (cover.endsWith(".gif")) return cover;
+  return `${cover}?x-oss-process=image/format,png`;
 }
 
 /**

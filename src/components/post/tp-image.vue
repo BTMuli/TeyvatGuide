@@ -62,6 +62,7 @@ function getImageTitle(): string {
 function getImageUrl(): string {
   const img = props.data.insert.image;
   const append = "?x-oss-process=image/format,png";
+  if (img.endsWith(".gif")) return img;
   return img + append;
 }
 </script>
