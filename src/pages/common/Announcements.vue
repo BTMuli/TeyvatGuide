@@ -79,7 +79,7 @@ const annoServerList: string[] = [
   "国际服-港澳台服",
 ];
 const langList: string[] = ["简体中文", "繁体中文", "English", "日本語"];
-
+export type AnnoLang = "zh-cn" | "zh-tw" | "en" | "ja";
 // 服务器列表
 const annoServerMap: AnnoServerMap = {
   "国服-官方服": SERVER.CN_ISLAND,
@@ -89,7 +89,7 @@ const annoServerMap: AnnoServerMap = {
   "国际服-美服": SERVER.OS_USA,
   "国际服-港澳台服": SERVER.OS_CHT,
 };
-const langMap: Record<string, string> = {
+const langMap: Record<string, AnnoLang> = {
   简体中文: "zh-cn",
   繁体中文: "zh-tw",
   English: "en",
@@ -117,7 +117,7 @@ const appStore = useAppStore();
 const router = useRouter();
 const curRegion = ref<SERVER>(appStore.server);
 const curRegionName = ref<string>(annoServerList[0]);
-const curLang = ref<string>(appStore.lang);
+const curLang = ref<AnnoLang>(appStore.lang);
 const curLangName = ref<string>(langList[0]);
 
 // 数据
@@ -145,14 +145,12 @@ watch(curLangName, async (value) => {
 
 onMounted(async () => {
   await TGLogger.Info("[Announcements][onMounted] 打开公告页面");
-  // 根据curRegion找到对应的curRegionName
   for (const key in annoServerMap) {
     if (annoServerMap[key] === curRegion.value) {
       curRegionName.value = key;
       break;
     }
   }
-  // 根据curLang找到对应的curLangName
   for (const key in langMap) {
     if (langMap[key] === curLang.value) {
       curLangName.value = key;
@@ -167,6 +165,13 @@ async function loadData(): Promise<void> {
   loading.value = true;
   annoData.value = await TGRequest.Anno.getList(curRegion.value, curLang.value);
   const listCards = TGUtils.Anno.getCard(annoData.value);
+  await Promise.all(
+    listCards.map(async (item) => {
+      // if (item.typeLabel === AnnoType.game) return;
+      const detail = await TGRequest.Anno.getContent(item.id, curRegion.value, "zh-cn");
+      item.timeStr = getAnnoTime(detail.content);
+    }),
+  );
   annoCards.value = {
     activity: listCards.filter((item) => item.typeLabel === AnnoType.activity),
     game: listCards.filter((item) => item.typeLabel === AnnoType.game),
@@ -175,6 +180,44 @@ async function loadData(): Promise<void> {
   await nextTick(async () => {
     loading.value = false;
   });
+}
+
+interface AnnoTimeRegex {
+  actPermanent: RegExp;
+  actPersistent: RegExp;
+  actTransient: RegExp;
+  verUpdateTime: RegExp;
+}
+
+const regexMap: AnnoTimeRegex = {
+  actPermanent: /(?:〓活动时间〓|〓任务开放时间〓).*?\d\.\d版本更新(?:完成|)后永久开放/,
+  actPersistent: /〓活动时间〓.*?\d\.\d版本期间持续开放/,
+  // (?:〓活动时间〓|祈愿时间|【上架时间】).*?(\d\.\d版本更新后).*?~.*?&amp;lt;t class="t_(?:gl|lc)".*?&amp;gt;(.*?)&amp;lt;/t&amp;gt;
+  actTransient:
+    /(?:〓活动时间〓|祈愿时间|【上架时间】).*?(\d\.\d版本更新后).*?~.*?<t class="t_(?:gl|lc)".*?>(.*?)<\/t>/,
+  // 〓更新时间〓.+?&amp;lt;t class=\"t_(?:gl|lc)\".*?&amp;gt;(.*?)&amp;lt;/t&amp;gt;
+  verUpdateTime: /〓更新时间〓.+?<t class="t_(?:gl|lc)".*?>(.*?)<\/t>gt;/,
+};
+
+function getAnnoTime(content: string): string {
+  if (content.match(regexMap.actPermanent)) {
+    console.log("actPermanent");
+    return "永久开放";
+  }
+  if (content.match(regexMap.actPersistent)) {
+    const res = content.match(regexMap.actPersistent);
+    console.log("actPersistent", res?.[0]);
+    return res?.[0].replace(/.*?(\d\.\d版本期间持续开放)/, "$1") ?? "持续开放";
+  }
+  if (content.match(regexMap.actTransient)) {
+    console.log("actTransient");
+    return "临时开放";
+  }
+  if (content.match(regexMap.verUpdateTime)) {
+    console.log("verUpdateTime");
+    return "版本更新";
+  }
+  return "未知时间";
 }
 
 function parseTitle(title: string): string {

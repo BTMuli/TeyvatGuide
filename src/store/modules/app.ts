@@ -8,6 +8,7 @@ import { path } from "@tauri-apps/api";
 import { defineStore } from "pinia";
 import { reactive, ref } from "vue";
 
+import type { AnnoLang } from "../../pages/common/Announcements.vue";
 import { getInitDeviceInfo } from "../../utils/toolFunc";
 import { SERVER } from "../../web/request/getAnno";
 
@@ -47,7 +48,7 @@ export const useAppStore = defineStore(
     // 服务器
     const server = ref<SERVER>(SERVER.CN_ISLAND);
     // 语言
-    const lang = ref<string>("zh-cn");
+    const lang = ref<AnnoLang>("zh-cn");
     // 最近的咨讯类型
     const recentNewsType = ref("notice");
 

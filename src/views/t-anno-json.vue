@@ -16,6 +16,8 @@ import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
+import { AnnoLang } from "../pages/common/Announcements.vue";
+import { SERVER } from "../web/request/getAnno";
 import TGRequest from "../web/request/TGRequest";
 
 // loading
@@ -24,7 +26,10 @@ const loadingTitle = ref<string>("正在加载");
 const loadingEmpty = ref<boolean>(false);
 
 // 数据
-const annoId = Number(useRoute().params.anno_id);
+const route = useRoute();
+const annoId = Number(route.params.anno_id);
+const region = <SERVER>route.params.region;
+const lang = <AnnoLang>route.params.lang;
 let jsonList = reactive({});
 let jsonContent = reactive({});
 
@@ -44,7 +49,7 @@ onMounted(async () => {
       return single.ann_id === annoId ? (jsonList = single) : null;
     });
   });
-  jsonContent = await TGRequest.Anno.getContent(annoId);
+  jsonContent = await TGRequest.Anno.getContent(annoId, region, lang);
   setTimeout(() => {
     loading.value = false;
   }, 200);

@@ -28,6 +28,7 @@ import { useRoute } from "vue-router";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
+import { AnnoLang } from "../pages/common/Announcements.vue";
 import { useAppStore } from "../store/modules/app";
 import TGLogger from "../utils/TGLogger";
 import { saveImgLocal } from "../utils/TGShare";
@@ -48,9 +49,10 @@ const annoRef = ref<HTMLElement>(<HTMLElement>{});
 const annoTitle = ref<string>("");
 
 // 数据
-const annoId = Number(useRoute().params.anno_id);
-const region = <SERVER>useRoute().params.region;
-const lang = ref<string>(<string>useRoute().params.lang);
+const route = useRoute();
+const annoId = Number(route.params.anno_id);
+const region = <SERVER>route.params.region;
+const lang = <AnnoLang>route.params.lang;
 const annoData = ref<TGApp.BBS.Announcement.ContentItem>(<TGApp.BBS.Announcement.ContentItem>{});
 const annoHtml = ref<string>();
 const annoBanner = ref<string>();
@@ -67,7 +69,7 @@ onMounted(async () => {
   // 获取数据
   loadingTitle.value = "正在获取数据...";
   try {
-    annoData.value = await TGRequest.Anno.getContent(annoId, region, lang.value);
+    annoData.value = await TGRequest.Anno.getContent(annoId, region, lang);
     loadingTitle.value = "正在渲染数据...";
     annoHtml.value = await TGUtils.Anno.parseContent(annoData.value.content);
     if (annoData.value.banner !== "") annoBanner.value = await saveImgLocal(annoData.value.banner);
@@ -85,7 +87,7 @@ onMounted(async () => {
   }
   // 打开 json
   const isDev = useAppStore().devMode ?? false;
-  if (isDev) createAnnoJson(annoId);
+  if (isDev) createAnnoJson(annoId, region, lang);
   setTimeout(() => {
     loading.value = false;
   }, 200);
@@ -102,9 +104,9 @@ watch(loadShare, (value) => {
   }
 });
 
-function createAnnoJson(annoId: number) {
-  const jsonPath = `/anno_detail_json/${annoId}`;
-  const jsonTitle = `Anno_${annoId}_JSON`;
+function createAnnoJson(annoId: number, region: SERVER, lang: AnnoLang) {
+  const jsonPath = `/anno_detail_json/${region}/${annoId}/${lang}`;
+  const jsonTitle = `Anno_${region}_${annoId}_${lang}_JSON`;
   createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
 }
 </script>
