@@ -28,12 +28,11 @@ import { useRoute } from "vue-router";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
-import { AnnoLang } from "../pages/common/Announcements.vue";
 import { useAppStore } from "../store/modules/app";
 import TGLogger from "../utils/TGLogger";
 import { saveImgLocal } from "../utils/TGShare";
 import { createTGWindow } from "../utils/TGWindow";
-import { SERVER } from "../web/request/getAnno";
+import { AnnoLang, AnnoServer } from "../web/request/getAnno";
 import TGRequest from "../web/request/TGRequest";
 import TGUtils from "../web/utils/TGUtils";
 
@@ -51,7 +50,7 @@ const annoTitle = ref<string>("");
 // 数据
 const route = useRoute();
 const annoId = Number(route.params.anno_id);
-const region = <SERVER>route.params.region;
+const region = <AnnoServer>route.params.region;
 const lang = <AnnoLang>route.params.lang;
 const annoData = ref<TGApp.BBS.Announcement.ContentItem>(<TGApp.BBS.Announcement.ContentItem>{});
 const annoHtml = ref<string>();
@@ -104,7 +103,7 @@ watch(loadShare, (value) => {
   }
 });
 
-function createAnnoJson(annoId: number, region: SERVER, lang: AnnoLang) {
+function createAnnoJson(annoId: number, region: AnnoServer, lang: AnnoLang) {
   const jsonPath = `/anno_detail_json/${region}/${annoId}/${lang}`;
   const jsonTitle = `Anno_${region}_${annoId}_${lang}_JSON`;
   createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);

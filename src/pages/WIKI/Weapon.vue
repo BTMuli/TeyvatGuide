@@ -66,7 +66,9 @@ function handleSelectW(val: SelectedWValue) {
   const reg = /\/icon\/weapon\/(.+?)\.webp/;
   const filterW = AppWeaponData.filter((item) => {
     if (!val.star.includes(item.star)) return false;
-    return val.weapon.includes(item.weaponIcon.match(reg)![1]);
+    const match = item.weaponIcon.match(reg);
+    if (match === null) return false;
+    return val.weapon.includes(match[1]);
   });
   if (filterW.length === 0) {
     showSnackbar({

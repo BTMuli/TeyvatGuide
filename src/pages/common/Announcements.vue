@@ -61,13 +61,13 @@ import ToLoading from "../../components/overlay/to-loading.vue";
 import { useAppStore } from "../../store/modules/app";
 import TGLogger from "../../utils/TGLogger";
 import { createTGWindow } from "../../utils/TGWindow";
-import { SERVER } from "../../web/request/getAnno";
+import { AnnoLang, AnnoServer } from "../../web/request/getAnno";
 import TGRequest from "../../web/request/TGRequest";
 import TGUtils from "../../web/utils/TGUtils";
 
 // 服务器名称-服务器对应
 type AnnoServerMap = {
-  [key: string]: SERVER;
+  [key: string]: AnnoServer;
 };
 
 const annoServerList: string[] = [
@@ -79,15 +79,15 @@ const annoServerList: string[] = [
   "国际服-港澳台服",
 ];
 const langList: string[] = ["简体中文", "繁体中文", "English", "日本語"];
-export type AnnoLang = "zh-cn" | "zh-tw" | "en" | "ja";
+
 // 服务器列表
 const annoServerMap: AnnoServerMap = {
-  "国服-官方服": SERVER.CN_ISLAND,
-  "国服-渠道服": SERVER.CN_TREE,
-  "国际服-亚服": SERVER.OS_ASIA,
-  "国际服-欧服": SERVER.OS_EURO,
-  "国际服-美服": SERVER.OS_USA,
-  "国际服-港澳台服": SERVER.OS_CHT,
+  "国服-官方服": AnnoServer.CN_ISLAND,
+  "国服-渠道服": AnnoServer.CN_TREE,
+  "国际服-亚服": AnnoServer.OS_ASIA,
+  "国际服-欧服": AnnoServer.OS_EURO,
+  "国际服-美服": AnnoServer.OS_USA,
+  "国际服-港澳台服": AnnoServer.OS_CHT,
 };
 const langMap: Record<string, AnnoLang> = {
   简体中文: "zh-cn",
@@ -115,7 +115,7 @@ const appStore = useAppStore();
 
 // 路由
 const router = useRouter();
-const curRegion = ref<SERVER>(appStore.server);
+const curRegion = ref<AnnoServer>(appStore.server);
 const curRegionName = ref<string>(annoServerList[0]);
 const curLang = ref<AnnoLang>(appStore.lang);
 const curLangName = ref<string>(langList[0]);
@@ -127,11 +127,10 @@ const annoCards = ref<AnnoCard>({
   activity: [],
   game: [],
 });
-const annoData = ref<TGApp.BBS.Announcement.ListData>(<TGApp.BBS.Announcement.ListData>{});
 
 watch(curRegionName, async (value) => {
-  appStore.server = annoServerMap[value] || SERVER.CN_ISLAND;
-  curRegion.value = annoServerMap[value] || SERVER.CN_ISLAND;
+  appStore.server = annoServerMap[value] || AnnoServer.CN_ISLAND;
+  curRegion.value = annoServerMap[value] || AnnoServer.CN_ISLAND;
   await TGLogger.Info(`[Announcements][watch][curRegionName] 切换服务器：${value}`);
   await loadData();
 });
@@ -163,13 +162,14 @@ onMounted(async () => {
 async function loadData(): Promise<void> {
   loadingTitle.value = "正在获取公告数据";
   loading.value = true;
-  annoData.value = await TGRequest.Anno.getList(curRegion.value, curLang.value);
-  const listCards = TGUtils.Anno.getCard(annoData.value);
+  const annoData = await TGRequest.Anno.getList(curRegion.value, curLang.value);
+  const listCards = TGUtils.Anno.getCard(annoData);
   await Promise.all(
     listCards.map(async (item) => {
-      // if (item.typeLabel === AnnoType.game) return;
+      if (item.typeLabel === AnnoType.game) return;
       const detail = await TGRequest.Anno.getContent(item.id, curRegion.value, "zh-cn");
-      item.timeStr = getAnnoTime(detail.content);
+      const timeStr = getAnnoTime(detail.content);
+      if (timeStr !== false) item.timeStr = timeStr;
     }),
   );
   annoCards.value = {
@@ -182,42 +182,46 @@ async function loadData(): Promise<void> {
   });
 }
 
-interface AnnoTimeRegex {
-  actPermanent: RegExp;
-  actPersistent: RegExp;
-  actTransient: RegExp;
-  verUpdateTime: RegExp;
-}
-
-const regexMap: AnnoTimeRegex = {
-  actPermanent: /(?:〓活动时间〓|〓任务开放时间〓).*?\d\.\d版本更新(?:完成|)后永久开放/,
-  actPersistent: /〓活动时间〓.*?\d\.\d版本期间持续开放/,
-  // (?:〓活动时间〓|祈愿时间|【上架时间】).*?(\d\.\d版本更新后).*?~.*?&amp;lt;t class="t_(?:gl|lc)".*?&amp;gt;(.*?)&amp;lt;/t&amp;gt;
-  actTransient:
-    /(?:〓活动时间〓|祈愿时间|【上架时间】).*?(\d\.\d版本更新后).*?~.*?<t class="t_(?:gl|lc)".*?>(.*?)<\/t>/,
-  // 〓更新时间〓.+?&amp;lt;t class=\"t_(?:gl|lc)\".*?&amp;gt;(.*?)&amp;lt;/t&amp;gt;
-  verUpdateTime: /〓更新时间〓.+?<t class="t_(?:gl|lc)".*?>(.*?)<\/t>gt;/,
-};
-
-function getAnnoTime(content: string): string {
-  if (content.match(regexMap.actPermanent)) {
-    console.log("actPermanent");
-    return "永久开放";
+function getAnnoTime(content: string): string | false {
+  const regexes = [
+    /〓活动时间〓.*?\d\.\d版本期间持续开放/,
+    /(?:〓活动时间〓|〓任务开放时间〓).*?\d\.\d版本更新(?:完成|)后永久开放/,
+    /(?:〓(?:活动|折扣)时间〓|祈愿时间|【上架时间】).*?(\d\.\d版本更新后).*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/,
+    /(?:〓(?:活动|折扣)时间〓|祈愿时间|【上架时间】).*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/,
+    /〓活动时间〓.*?(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}).*?(\d\.\d版本结束)/,
+    /〓更新时间〓.+?&lt;t class=\"t_(?:gl|lc)\".*?&gt;(.*?)&;lt;\/t&gt;/,
+  ];
+  if (content.match(regexes[0])) {
+    const res = content.match(regexes[0]);
+    return res?.[0].replace(/.*?(\d\.\d版本期间持续开放)/, "$1") ?? false;
   }
-  if (content.match(regexMap.actPersistent)) {
-    const res = content.match(regexMap.actPersistent);
-    console.log("actPersistent", res?.[0]);
-    return res?.[0].replace(/.*?(\d\.\d版本期间持续开放)/, "$1") ?? "持续开放";
+  if (content.match(regexes[1])) {
+    console.log("actPermanently");
+    // todo 待处理
+    return false;
   }
-  if (content.match(regexMap.actTransient)) {
-    console.log("actTransient");
-    return "临时开放";
+  if (content.match(regexes[2])) {
+    const res = content.match(regexes[2]);
+    return `${res?.[1]} ~ ${res?.[2]}`;
   }
-  if (content.match(regexMap.verUpdateTime)) {
+  if (content.match(regexes[3])) {
+    const res = content.match(regexes[3]);
+    return `${res?.[1].split(" ")[0]} ~ ${res?.[2].split(" ")[0]}`;
+  }
+  if (content.match(regexes[4])) {
+    const res = content.match(regexes[4]);
+    if (res != null) {
+      const cnt = res[0].match(/〓/g);
+      if (cnt && cnt.length > 2) return false;
+    }
+    return `${res?.[1]} ~ ${res?.[2]}`;
+  }
+  if (content.match(regexes[5])) {
     console.log("verUpdateTime");
-    return "版本更新";
+    // todo 待处理
+    return false;
   }
-  return "未知时间";
+  return false;
 }
 
 function parseTitle(title: string): string {

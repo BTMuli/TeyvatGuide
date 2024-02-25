@@ -8,9 +8,8 @@ import { path } from "@tauri-apps/api";
 import { defineStore } from "pinia";
 import { reactive, ref } from "vue";
 
-import type { AnnoLang } from "../../pages/common/Announcements.vue";
 import { getInitDeviceInfo } from "../../utils/toolFunc";
-import { SERVER } from "../../web/request/getAnno";
+import { type AnnoLang, AnnoServer } from "../../web/request/getAnno";
 
 // 用于存储用户数据的路径
 const userDataDir = `${await path.appLocalDataDir()}userData`;
@@ -46,7 +45,7 @@ export const useAppStore = defineStore(
     // 设备信息
     const deviceInfo = ref<TGApp.App.Device.DeviceInfo>(getInitDeviceInfo());
     // 服务器
-    const server = ref<SERVER>(SERVER.CN_ISLAND);
+    const server = ref<AnnoServer>(AnnoServer.CN_ISLAND);
     // 语言
     const lang = ref<AnnoLang>("zh-cn");
     // 最近的咨讯类型
@@ -59,7 +58,7 @@ export const useAppStore = defineStore(
       theme.value = "default";
       isLogin.value = false;
       sidebar.collapse = true;
-      server.value = SERVER.CN_ISLAND;
+      server.value = AnnoServer.CN_ISLAND;
       lang.value = "zh-cn";
       recentNewsType.value = "notice";
       initDevice();

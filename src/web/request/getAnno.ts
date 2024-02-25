@@ -5,9 +5,7 @@
  */
 import { http } from "@tauri-apps/api";
 
-import type { AnnoLang } from "../../pages/common/Announcements.vue";
-
-export enum SERVER {
+export enum AnnoServer {
   CN_ISLAND = "cn_gf01",
   CN_TREE = "cn_qd01",
   OS_USA = "os_usa",
@@ -16,14 +14,19 @@ export enum SERVER {
   OS_CHT = "os_cht",
 }
 
+export type AnnoLang = "zh-cn" | "zh-tw" | "en" | "ja";
+
 /**
  * @description 获取游戏内公告参数
  * @since Beta v0.4.4
- * @param {SERVER} region 服务器
+ * @param {AnnoServer} region 服务器
  * @param {string} lang 语言
  * @returns {TGApp.BBS.Announcement.Params}
  */
-function getAnnoParams(region: SERVER, lang: AnnoLang = "zh-cn"): TGApp.BBS.Announcement.Params {
+function getAnnoParams(
+  region: AnnoServer = AnnoServer.CN_ISLAND,
+  lang: AnnoLang = "zh-cn",
+): TGApp.BBS.Announcement.Params {
   const params: TGApp.BBS.Announcement.Params = {
     game: "hk4e",
     game_biz: "hk4e_cn",
@@ -34,7 +37,7 @@ function getAnnoParams(region: SERVER, lang: AnnoLang = "zh-cn"): TGApp.BBS.Anno
     level: "55",
     uid: "100000000",
   };
-  if (region === SERVER.CN_ISLAND || region === SERVER.CN_TREE) {
+  if (region === AnnoServer.CN_ISLAND || region === AnnoServer.CN_TREE) {
     return params;
   }
   params.game_biz = "hk4e_global";
@@ -50,12 +53,12 @@ function getAnnoParams(region: SERVER, lang: AnnoLang = "zh-cn"): TGApp.BBS.Anno
  * @returns {Promise<TGApp.BBS.Announcement.ListData>}
  */
 export async function getAnnoList(
-  region: SERVER = SERVER.CN_ISLAND,
+  region: AnnoServer = AnnoServer.CN_ISLAND,
   lang: AnnoLang = "zh-cn",
 ): Promise<TGApp.BBS.Announcement.ListData> {
   const params: TGApp.BBS.Announcement.Params = getAnnoParams(region, lang);
   let url = "https://hk4e-api.mihoyo.com/common/hk4e_cn/announcement/api/getAnnList";
-  if (region !== SERVER.CN_ISLAND && region !== SERVER.CN_TREE) {
+  if (region !== AnnoServer.CN_ISLAND && region !== AnnoServer.CN_TREE) {
     url = "https://hk4e-api-os.hoyoverse.com/common/hk4e_global/announcement/api/getAnnList";
   }
   return await http
@@ -70,18 +73,18 @@ export async function getAnnoList(
  * @description 获取游戏内公告内容
  * @since Beta v0.4.3
  * @param {number} annId 公告 ID
- * @param {SERVER} region 服务器
+ * @param {AnnoServer} region 服务器
  * @param {AnnoLang} lang 语言
  * @returns {Promise<TGApp.BBS.Announcement.ContentItem>}
  */
 export async function getAnnoContent(
   annId: number,
-  region: SERVER,
+  region: AnnoServer = AnnoServer.CN_ISLAND,
   lang: AnnoLang = "zh-cn",
 ): Promise<TGApp.BBS.Announcement.ContentItem> {
   const params: TGApp.BBS.Announcement.Params = getAnnoParams(region, lang);
   let url = "https://hk4e-api.mihoyo.com/common/hk4e_cn/announcement/api/getAnnContent";
-  if (region !== SERVER.CN_ISLAND && region !== SERVER.CN_TREE) {
+  if (region !== AnnoServer.CN_ISLAND && region !== AnnoServer.CN_TREE) {
     url = "https://hk4e-api-os.hoyoverse.com/common/hk4e_global/announcement/api/getAnnContent";
   }
   const annoContents: TGApp.BBS.Announcement.ContentItem[] = await http

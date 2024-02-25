@@ -16,8 +16,7 @@ import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
-import { AnnoLang } from "../pages/common/Announcements.vue";
-import { SERVER } from "../web/request/getAnno";
+import { AnnoLang, AnnoServer } from "../web/request/getAnno";
 import TGRequest from "../web/request/TGRequest";
 
 // loading
@@ -28,7 +27,7 @@ const loadingEmpty = ref<boolean>(false);
 // 数据
 const route = useRoute();
 const annoId = Number(route.params.anno_id);
-const region = <SERVER>route.params.region;
+const region = <AnnoServer>route.params.region;
 const lang = <AnnoLang>route.params.lang;
 let jsonList = reactive({});
 let jsonContent = reactive({});
