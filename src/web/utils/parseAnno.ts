@@ -1,7 +1,7 @@
 /**
  * @file web/utils/parseAnno.ts
  * @description 解析游戏内公告数据
- * @since Beta v0.4.0
+ * @since Beta v0.4.4
  */
 
 import { decodeRegExp } from "./tools";
@@ -9,45 +9,97 @@ import { saveImgLocal } from "../../utils/TGShare";
 import { isColorSimilar } from "../../utils/toolFunc";
 
 /**
+ * @description 解析 a
+ * @since Beta v0.4.4
+ * @param {HTMLAnchorElement} a a 元素
+ * @returns {HTMLAnchorElement} 解析后的 a 元素
+ */
+function parseAnnoA(a: HTMLAnchorElement): HTMLAnchorElement {
+  const span = document.createElement("i");
+  span.classList.add("mdi", "mdi-link-variant", "anno-link-icon");
+  a.prepend(span);
+  const regex = /javascript:miHoYoGameJSSDK.openIn(Browser|Webview)\('(.+)'\);/;
+  if (regex.test(a.getAttribute("href") ?? "")) {
+    const href = a.getAttribute("href")?.match(regex);
+    if (href) {
+      a.setAttribute("href", href[2]);
+      a.target = "_blank";
+      a.title = href[2];
+    }
+  }
+  return a;
+}
+
+/**
+ * @description 解析 p
+ * @since Beta v0.4.4
+ * @param {HTMLParagraphElement} p p 元素
+ * @returns {HTMLParagraphElement} 解析后的 p 元素
+ */
+function parseAnnoP(p: HTMLParagraphElement): HTMLParagraphElement {
+  if (p.children.length === 0) {
+    p.innerHTML = decodeRegExp(p.innerHTML);
+  } else {
+    p.querySelectorAll("*").forEach((child) => {
+      if (child.children.length === 0) {
+        child.innerHTML = decodeRegExp(child.innerHTML);
+      }
+    });
+  }
+  return p;
+}
+
+/**
+ * @description 解析 span
+ * @since Beta v0.4.4
+ * @param {HTMLSpanElement} span span 元素
+ * @returns {HTMLSpanElement} 解析后的 span 元素
+ */
+function parseAnnoSpan(span: HTMLSpanElement): HTMLSpanElement {
+  if (span.style.fontSize) {
+    span.style.fontSize = "";
+  }
+  if (span.style.color) {
+    if (isColorSimilar("#000000", span.style.color)) {
+      span.style.color = "var(--app-page-content)";
+    }
+  }
+  if (span.children.length === 0) {
+    span.innerHTML = decodeRegExp(span.innerHTML);
+  } else {
+    span.querySelectorAll("*").forEach((child) => {
+      if (child.children.length === 0) {
+        child.innerHTML = decodeRegExp(child.innerHTML);
+      }
+    });
+  }
+  return span;
+}
+
+/**
+ * @description 解析 table
+ * @since Beta v0.4.4
+ * @param {HTMLTableElement} table table 元素
+ * @returns {HTMLTableElement} 解析后的 table 元素
+ */
+function parseAnnoTable(table: HTMLTableElement): HTMLTableElement {
+  table.style.borderColor = "var(--common-shadow-2)";
+  table.querySelectorAll("td").forEach((td) => {
+    if (td.style.backgroundColor) td.style.backgroundColor = "var(--box-bg-1)";
+  });
+  return table;
+}
+
+/**
  * @description 解析游戏内公告数据
- * @since Beta v0.4.0
+ * @since Beta v0.4.4
  * @todo 需要完善
  * @param {string} data 游戏内公告数据
  * @returns {Promise<string>} 解析后的数据
  */
 export async function parseAnnoContent(data: string): Promise<string> {
   const htmlBase = new DOMParser().parseFromString(data, "text/html");
-  htmlBase.querySelectorAll("span").forEach((span) => {
-    if (span.style.fontSize) {
-      span.style.fontSize = "";
-    }
-    // 获取color
-    if (span.style.color) {
-      if (isColorSimilar("#000000", span.style.color)) {
-        span.style.color = "var(--app-page-content)";
-      }
-    }
-    if (span.children.length === 0) {
-      return (span.innerHTML = decodeRegExp(span.innerHTML));
-    } else {
-      span.querySelectorAll("*").forEach((child) => {
-        if (child.children.length === 0) {
-          return (child.innerHTML = decodeRegExp(child.innerHTML));
-        }
-      });
-    }
-  });
-  htmlBase.querySelectorAll("p").forEach((p) => {
-    if (p.children.length === 0) {
-      return (p.innerHTML = decodeRegExp(p.innerHTML));
-    } else {
-      p.querySelectorAll("*").forEach((child) => {
-        if (child.children.length === 0) {
-          return (child.innerHTML = decodeRegExp(child.innerHTML));
-        }
-      });
-    }
-  });
+  htmlBase.querySelectorAll("a").forEach((a) => parseAnnoA(a));
   const imgList = Array.from(htmlBase.querySelectorAll("img"));
   for (const img of imgList) {
     img.style.maxWidth = "100%";
@@ -58,23 +110,8 @@ export async function parseAnnoContent(data: string): Promise<string> {
       img.setAttribute("src", await saveImgLocal(src));
     }
   }
-  htmlBase.querySelectorAll("a").forEach((a) => {
-    const span = htmlBase.createElement("i");
-    span.classList.add("mdi", "mdi-link-variant", "anno-link-icon");
-    a.prepend(span);
-    if (a.href.startsWith("javascript:miHoYoGameJSSDK.openInBrowser")) {
-      a.href = a.href.replace("javascript:miHoYoGameJSSDK.openInBrowser('", "").replace("');", "");
-      a.target = "_blank";
-    } else if (a.href.startsWith("javascript:miHoYoGameJSSDK.openInWebview")) {
-      a.href = a.href.replace("javascript:miHoYoGameJSSDK.openInWebview('", "").replace("');", "");
-      a.target = "_blank";
-    }
-  });
-  htmlBase.querySelectorAll("table").forEach((table) => {
-    table.style.borderColor = "var(--common-shadow-2)";
-    table.querySelectorAll("td").forEach((td) => {
-      if (td.style.backgroundColor) td.style.backgroundColor = "var(--box-bg-1)";
-    });
-  });
+  htmlBase.querySelectorAll("p").forEach((p) => parseAnnoP(p));
+  htmlBase.querySelectorAll("span").forEach((span) => parseAnnoSpan(span));
+  htmlBase.querySelectorAll("table").forEach((table) => parseAnnoTable(table));
   return htmlBase.body.innerHTML;
 }

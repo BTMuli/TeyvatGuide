@@ -376,8 +376,6 @@ function createAnno(item: TGApp.App.Announcement.ListCard): void {
   align-items: center;
   justify-content: flex-start;
   padding: 5px;
-  border-bottom: 1px dotted var(--tgc-white-4);
-  border-left: 1px dotted var(--tgc-white-4);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   background: rgb(0 0 0/20%);

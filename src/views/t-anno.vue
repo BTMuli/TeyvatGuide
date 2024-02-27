@@ -10,19 +10,21 @@
   />
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" :empty="loadingEmpty" />
   <div class="anno-body">
+    <div class="anno-info">AnnoID: {{ annoId }} | Render by TeyvatGuide v{{ appVersion }}</div>
     <div class="anno-title">
       {{ annoData.title }}
     </div>
     <div class="anno-subtitle">
-      {{ annoData.subtitle }}
+      {{ parseText(annoData.subtitle) }}
     </div>
     <img v-if="annoData.banner !== ''" :src="annoBanner" alt="cover" class="anno-img" />
     <div class="anno-content" v-html="annoHtml" />
   </div>
 </template>
 <script lang="ts" setup>
+import { app } from "@tauri-apps/api";
 import { appWindow } from "@tauri-apps/api/window";
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
@@ -44,7 +46,7 @@ const loadingSub = ref<string>();
 const loadingEmpty = ref<boolean>(false);
 
 // share
-const annoRef = ref<HTMLElement>(<HTMLElement>{});
+const annoRef = ref<HTMLElement | null | undefined>();
 const annoTitle = ref<string>("");
 
 // 数据
@@ -52,12 +54,14 @@ const route = useRoute();
 const annoId = Number(route.params.anno_id);
 const region = <AnnoServer>route.params.region;
 const lang = <AnnoLang>route.params.lang;
+const appVersion = ref<string>();
 const annoData = ref<TGApp.BBS.Announcement.ContentItem>(<TGApp.BBS.Announcement.ContentItem>{});
 const annoHtml = ref<string>();
 const annoBanner = ref<string>();
 
 onMounted(async () => {
   await appWindow.show();
+  appVersion.value = await app.getVersion();
   // 检查数据
   if (!annoId || !region) {
     loadingEmpty.value = true;
@@ -103,10 +107,38 @@ watch(loadShare, (value) => {
   }
 });
 
+function parseText(title: string): string {
+  const div = document.createElement("div");
+  div.innerHTML = title;
+  return div.innerText;
+}
+
 function createAnnoJson(annoId: number, region: AnnoServer, lang: AnnoLang) {
   const jsonPath = `/anno_detail_json/${region}/${annoId}/${lang}`;
   const jsonTitle = `Anno_${region}_${annoId}_${lang}_JSON`;
   createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
 }
+
+onUnmounted(() => {
+  document
+    .querySelector(".anno-body")
+    ?.querySelectorAll("img")
+    .forEach((img) => {
+      if (img.src.startsWith("blob:")) URL.revokeObjectURL(img.src);
+    });
+});
 </script>
+<style lang="css" scoped>
+.anno-info {
+  position: relative;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  border-bottom: 1px dashed var(--common-shadow-2);
+  margin-bottom: 10px;
+  color: var(--box-text-4);
+  font-family: var(--font-title);
+  font-size: 14px;
+}
+</style>
 <style lang="css" src="../assets/css/anno-parser.css" scoped></style>

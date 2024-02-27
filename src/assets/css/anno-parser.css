@@ -1,7 +1,7 @@
 /*
  * @file assets/css/post-parser.css
  * @description 游戏公告解析 css
- * @since Beta v0.4.0
+ * @since Beta v0.4.4
  */
 
 .anno-body {
@@ -17,12 +17,12 @@
 }
 
 .anno-title {
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .anno-subtitle {
-  font-size: 18px;
-  opacity: 0.5;
+  font-size: 16px;
+  opacity: 0.6;
 }
 
 .anno-img {
