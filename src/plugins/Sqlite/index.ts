@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/index.ts
  * @description Sqlite 数据库操作类
- * @since Beta v0.4.1
+ * @since Beta v0.4.4
  */
 
 import { app } from "@tauri-apps/api";
@@ -173,19 +173,17 @@ class Sqlite {
 
   /**
    * @description 检测数据库完整性
-   * @since Beta v0.3.3
+   * @since Beta v0.4.4
    * @returns {Promise<boolean>}
    */
   public async check(): Promise<boolean> {
     const db = await this.getDB();
     let isVerified = false;
-    // 检测数据表是否都存在
     const sqlT = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
     const res: Array<{ name: string }> = await db.select(sqlT);
-    if (res.length === this.tables.length) {
-      if (this.tables.every((item) => res.map((i) => i.name).includes(item))) {
-        isVerified = true;
-      }
+    // 只检测已有的表是否具备，不检测总表数目
+    if (this.tables.every((item) => res.map((i) => i.name).includes(item))) {
+      isVerified = true;
     }
     return isVerified;
   }
