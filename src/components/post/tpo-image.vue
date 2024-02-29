@@ -1,7 +1,9 @@
 <template>
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="10px">
     <div class="tpoi-box">
-      <img :src="props.image.insert.image" alt="图片" />
+      <div :class="isOriSize ? 'tpoi-top ori-size' : 'tpoi-top'">
+        <img :src="props.image.insert.image" alt="图片" @click="resizeImg" />
+      </div>
       <div class="tpoi-bottom">
         <div class="tpoi-info" v-if="props.image.attributes">
           <p v-if="props.image.attributes.size">
@@ -42,6 +44,7 @@ const props = defineProps<TpoImageProps>();
 const emits = defineEmits<TpoImageEmits>();
 const buffer = ref<Uint8Array | null>(null);
 const bgMode = ref(0); // 0: transparent, 1: black, 2: white
+const isOriSize = ref(false);
 
 const visible = computed({
   get: () => props.modelValue,
@@ -64,6 +67,10 @@ const format = computed(() => {
 
 function onCancel() {
   visible.value = false;
+}
+
+function resizeImg() {
+  isOriSize.value = !isOriSize.value;
 }
 
 function setBlackBg() {
@@ -118,12 +125,36 @@ onUnmounted(() => {
   align-items: center;
   justify-content: flex-start;
   row-gap: 20px;
+  transition: all 0.5s;
 }
 
-.tpoi-box img {
+.tpoi-top {
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  max-height: 70vh;
+  align-items: flex-start;
+  justify-content: center;
+  border-radius: 10px;
+  background-color: var(--common-shadow-2);
+}
+
+.tpoi-top.ori-size {
+  overflow-y: auto;
+}
+
+.tpoi-top img {
   max-width: 90vw;
   max-height: 70vh;
   background-color: v-bind(bg);
+  cursor: zoom-in;
+  object-fit: contain;
+}
+
+.tpoi-top.ori-size img {
+  max-width: 100%;
+  max-height: none;
+  cursor: zoom-out;
   object-fit: contain;
 }
 
