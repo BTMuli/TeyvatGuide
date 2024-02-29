@@ -61,7 +61,20 @@
       },
       "shell": {
         "all": false,
-        "open": true
+        "open": true,
+        "execute": true,
+        "scope": [
+          {
+            "name": "win_open",
+            "cmd": "explorer",
+            "args": true
+          },
+          {
+            "name": "mac_open",
+            "cmd": "open",
+            "args": true
+          }
+        ]
       }
     },
     "bundle": {

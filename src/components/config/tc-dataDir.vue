@@ -42,11 +42,12 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-import { dialog, fs } from "@tauri-apps/api";
+import { dialog, fs, path } from "@tauri-apps/api";
 
 import TGSqlite from "../../plugins/Sqlite";
 import { useAppStore } from "../../store/modules/app";
 import { backUpUserData } from "../../utils/dataBS";
+import TGShell from "../../utils/TGShell";
 import showConfirm from "../func/confirm";
 import showSnackbar from "../func/snackbar";
 
@@ -175,7 +176,7 @@ async function openPath(type: "db" | "user" | "log"): Promise<void> {
   let targetPath: string;
   switch (type) {
     case "db":
-      targetPath = appStore.dbPath;
+      targetPath = await path.appConfigDir();
       break;
     case "user":
       targetPath = appStore.userDir;
@@ -184,11 +185,7 @@ async function openPath(type: "db" | "user" | "log"): Promise<void> {
       targetPath = appStore.logDir;
       break;
   }
-  await dialog.open({
-    directory: false,
-    defaultPath: targetPath,
-    multiple: false,
-  });
+  await TGShell.openPath(targetPath);
 }
 </script>
 <style lang="css" scoped>
