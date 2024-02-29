@@ -66,6 +66,10 @@
         创建时间：{{ getDate(postData.post.created_at) }}
       </span>
       <span>分享时间：{{ getDate(shareTime) }}</span>
+      <span v-if="postData.post.republish_authorization !== 0" class="tp-post-copyright">
+        <v-icon size="20">mdi-copyright</v-icon>
+        <span>{{ getRepublishAuthorization(postData.post.republish_authorization) }}</span>
+      </span>
     </div>
     <TpParser v-model:data="renderPost" />
   </div>
@@ -187,6 +191,17 @@ function getDate(date: number): string {
   return new Date(date * 1000).toLocaleString().replace(/\//g, "-");
 }
 
+function getRepublishAuthorization(type: number): string {
+  switch (type) {
+    case 1:
+      return "已开启创作声明，禁止转载或摘编";
+    case 2:
+      return "已开启创作声明，允许规范转载";
+    default:
+      return "未知";
+  }
+}
+
 function getRenderPost(data: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.SctPost.Base[] {
   const postContent = data.post.content;
   let jsonParse: string;
@@ -291,6 +306,11 @@ onUnmounted(() => {
   column-gap: 10px;
   font-size: 16px;
   opacity: 0.6;
+}
+
+.tp-post-copyright {
+  color: var(--common-text-title);
+  font-family: var(--font-title);
 }
 
 /* info */
