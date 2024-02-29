@@ -1,5 +1,5 @@
 <template>
-  <div class="tp-image-box">
+  <div class="tp-image-box" @click="showOverlay = true">
     <img
       :style="getImageStyle()"
       :src="getImageUrl()"
@@ -7,13 +7,15 @@
       :title="getImageTitle()"
     />
   </div>
+  <TpoImage :image="props.data" v-model="showOverlay" />
 </template>
 <script lang="ts" setup>
-import { StyleValue, toRaw } from "vue";
+import { StyleValue, ref } from "vue";
 
+import TpoImage from "./tpo-image.vue";
 import { bytesToSize } from "../../utils/toolFunc";
 
-interface TpImage {
+export interface TpImage {
   insert: {
     image: string;
   };
@@ -31,11 +33,13 @@ interface TpImageProps {
 }
 
 const props = defineProps<TpImageProps>();
+const showOverlay = ref(false);
 
-console.log("tp-image", props.data.insert.image, toRaw(props.data).attributes);
+console.log("tp-image", props.data.insert.image, props.data.attributes);
 
 function getImageStyle(): StyleValue {
   let style: StyleValue = <Array<StyleValue>>[];
+  style.push("cursor: pointer");
   if (props.data.attributes == undefined) return style;
   if (props.data.attributes.width < 800) {
     const widthFullRule: StyleValue = "width: 100%";
