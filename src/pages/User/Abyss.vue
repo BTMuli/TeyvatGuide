@@ -220,6 +220,15 @@ async function uploadAbyss(): Promise<void> {
     await TGLogger.Warn("[UserAbyss][uploadAbyss] 未找到深渊数据");
     return;
   }
+  const maxFloor = abyssData.maxFloor.split("-")[0];
+  if (maxFloor <= "8") {
+    showSnackbar({
+      text: "尚未完成深渊，请完成深渊后重试！",
+      color: "error",
+    });
+    await TGLogger.Warn(`[UserAbyss][uploadAbyss] 尚未完成深渊 ${abyssData.maxFloor}`);
+    return;
+  }
   const startTime = new Date(abyssData.startTime).getTime();
   const endTime = new Date(abyssData.endTime).getTime();
   const nowTime = new Date().getTime();
