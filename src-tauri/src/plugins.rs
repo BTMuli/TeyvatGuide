@@ -1,6 +1,6 @@
 //! @file src/plugins.rs
 //! @desc 插件模块，用于注册插件
-//! @since Beta v0.4.3
+//! @since Beta v0.4.4
 
 use super::utils;
 use log::LevelFilter;
@@ -16,10 +16,17 @@ pub fn build_sql_plugin<R: Runtime>() -> TauriPlugin<R, Option<PluginConfig>> {
 
 // 日志插件
 pub fn build_log_plugin<R: Runtime>() -> TauriPlugin<R> {
-  tauri_plugin_log::Builder::default()
+  if cfg!(debug_assertions) {
+    return tauri_plugin_log::Builder::default()
+      .targets([LogTarget::Stdout])
+      .timezone_strategy(TimezoneStrategy::UseLocal)
+      .level(LevelFilter::Debug)
+      .build();
+  }
+  return tauri_plugin_log::Builder::default()
     .targets([LogTarget::LogDir, LogTarget::Stdout])
     .timezone_strategy(TimezoneStrategy::UseLocal)
     .level(LevelFilter::Info)
     .log_name(utils::get_current_date())
-    .build()
+    .build();
 }

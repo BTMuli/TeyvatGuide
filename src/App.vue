@@ -186,6 +186,7 @@ async function getDeepLink(): Promise<UnlistenFn> {
     if (e.payload === "") return;
     // 导入格式: teyvatguide://import_uigf?app=appName
     // 跳转格式: localhost:4000/achievements/?app=appName
+    // todo 后续更改路径&参数名称
     if (e.payload.startsWith("teyvatguide://import_uigf")) {
       const param = (<string>e.payload).split("teyvatguide://import_uigf/?")[1];
       let appName = "";
