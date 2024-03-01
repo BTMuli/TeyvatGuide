@@ -5,30 +5,22 @@
     <v-select v-model="uidCur" class="gacha-top-select" :items="selectItem" variant="outlined" />
     <div class="gacha-top-btns">
       <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh">刷新</v-btn>
-      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn()">
-        导入
+      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn()">导入</v-btn>
+      <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="handleExportBtn">导出</v-btn>
+      <v-btn prepend-icon="mdi-cloud-download" class="gacha-top-btn" @click="backupGacha">
+        备份
       </v-btn>
-      <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="handleExportBtn"> 导出</v-btn>
+      <v-btn prepend-icon="mdi-delete" class="gacha-top-btn" @click="deleteGacha">删除</v-btn>
+      <v-btn prepend-icon="mdi-cloud-upload" class="gacha-top-btn" @click="restoreGacha">
+        恢复
+      </v-btn>
     </div>
   </div>
   <div class="gacha-container">
-    <v-tabs v-model="tab" align-tabs="start" class="gacha-tab" direction="vertical">
+    <v-tabs v-model="tab" align-tabs="start" class="gacha-tab">
       <v-tab value="echarts">图表概览</v-tab>
       <v-tab value="overview">数据概览</v-tab>
-      <div class="gacha-tab-bottom">
-        <v-btn class="gacha-tab-btn" @click="backupGacha">
-          <v-icon>mdi-cloud-download</v-icon>
-          <span>备份</span>
-        </v-btn>
-        <v-btn class="gacha-tab-btn" @click="deleteGacha">
-          <v-icon>mdi-delete</v-icon>
-          <span>删除</span>
-        </v-btn>
-        <v-btn class="gacha-tab-btn" @click="restoreGacha">
-          <v-icon>mdi-cloud-upload</v-icon>
-          <span>恢复</span>
-        </v-btn>
-      </div>
+      <v-tab value="history">过往祈愿</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="gacha-window">
       <v-window-item value="echarts" class="gacha-window-item">
@@ -36,6 +28,9 @@
       </v-window-item>
       <v-window-item value="overview" class="gacha-window-item">
         <gro-overview v-model="gachaListCur" />
+      </v-window-item>
+      <v-window-item value="history" class="gacha-window-item">
+        <gro-history />
       </v-window-item>
     </v-window>
   </div>
@@ -48,6 +43,7 @@ import { onMounted, ref, watch } from "vue";
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
 import GroEcharts from "../../components/gachaRecord/gro-echarts.vue";
+import GroHistory from "../../components/gachaRecord/gro-history.vue";
 import GroOverview from "../../components/gachaRecord/gro-overview.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import { AppCharacterData, AppWeaponData } from "../../data";
@@ -500,34 +496,18 @@ watch(uidCur, async (newUid) => {
 .gacha-container {
   display: flex;
   height: calc(100vh - 130px);
-  align-items: center;
-  justify-content: left;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   background: var(--box-bg-1);
 }
 
 .gacha-tab {
-  width: 100px;
-  height: 100%;
+  height: 50px;
   color: var(--box-text-4);
   font-family: var(--font-title);
-}
-
-.gacha-tab-bottom {
-  position: absolute;
-  bottom: 0;
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  padding: 10px;
-  gap: 10px;
-}
-
-.gacha-tab-btn {
-  border-radius: 5px;
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
 }
 
 .gacha-window {
@@ -539,6 +519,5 @@ watch(uidCur, async (newUid) => {
 .gacha-window-item {
   height: 100%;
   border-radius: 5px;
-  overflow-y: auto;
 }
 </style>
