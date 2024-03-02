@@ -220,8 +220,8 @@ async function uploadAbyss(): Promise<void> {
     await TGLogger.Warn("[UserAbyss][uploadAbyss] 未找到深渊数据");
     return;
   }
-  const maxFloor = abyssData.maxFloor.split("-")[0];
-  if (maxFloor <= "8") {
+  const maxFloor = Number(abyssData.maxFloor.split("-")[0]);
+  if (isNaN(maxFloor) || maxFloor <= 9) {
     showSnackbar({
       text: "尚未完成深渊，请完成深渊后重试！",
       color: "error",
