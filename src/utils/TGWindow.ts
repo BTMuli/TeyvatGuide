@@ -5,7 +5,7 @@
  */
 
 import { invoke, window as TauriWindow } from "@tauri-apps/api";
-import type { WindowOptions } from "@tauri-apps/api/types/window";
+import type { WindowOptions } from "@tauri-apps/api/window";
 
 import TGLogger from "./TGLogger";
 

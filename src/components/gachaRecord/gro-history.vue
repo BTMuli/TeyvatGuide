@@ -13,8 +13,12 @@
         class="gro-pools"
       >
         <div v-for="pool in item.value" :key="pool.order" class="gro-pool">
-          <!-- todo hover 效果 -->
-          <img :src="pool.banner" alt="banner" />
+          <img
+            :src="pool.banner"
+            class="gro-banner"
+            alt="banner"
+            @click="createPost(pool.postId)"
+          />
           <div class="gro-pool-info">
             <div class="gro-pi-title">
               <span>{{ pool.name }}</span>
@@ -51,6 +55,7 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import { AppGachaData, AppCharacterData, AppWeaponData } from "../../data";
+import { createPost } from "../../utils/TGWindow";
 import { timestampToDate } from "../../utils/toolFunc";
 import showConfirm from "../func/confirm";
 import showSnackbar from "../func/snackbar";
@@ -227,9 +232,17 @@ function getBox(id: number): TItemBoxData {
   column-gap: 10px;
 }
 
-.gro-pool img {
+.gro-banner {
   width: 50vw;
   border-radius: 10px;
+  cursor: pointer;
+  transition: 0.5s ease-in-out;
+}
+
+.gro-banner:hover {
+  box-shadow: 0 0 10px 5px var(--box-bg-2);
+  scale: 0.95;
+  transition: 0.5s ease-in-out;
 }
 
 .gro-pool-info {

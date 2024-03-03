@@ -42,6 +42,7 @@ declare namespace TGApp.App.Gacha {
    * @property {string} from 卡池开始时间 yyyy-MM-ddTHH:mm:ss+08:00
    * @property {string} to 卡池结束时间 yyyy-MM-ddTHH:mm:ss+08:00
    * @property {WishType} type 卡池类型
+   * @property {string} postId 卡池帖子ID
    * @property {number[]} up5List up五星
    * @property {number[]} up4List up四星
    * @return PoolItem
@@ -54,6 +55,7 @@ declare namespace TGApp.App.Gacha {
     from: string;
     to: string;
     type: WishType;
+    postId: string;
     up5List: number[];
     up4List: number[];
   }
