@@ -10,7 +10,6 @@ import TpMention from "./tp-mention.vue";
 import TpText from "./tp-text.vue";
 import TpUnknown from "./tp-unknown.vue";
 import TpVideo from "./tp-video.vue";
-import TpVillaCard from "./tp-villaCard.vue";
 import TpVod from "./tp-vod.vue";
 import TpVote from "./tp-vote.vue";
 
@@ -37,8 +36,6 @@ function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base) {
     return TpDivider;
   } else if ("mention" in tp.insert) {
     return TpMention;
-  } else if ("villa_card" in tp.insert) {
-    return TpVillaCard;
   } else if ("vote" in tp.insert) {
     return TpVote;
   }
