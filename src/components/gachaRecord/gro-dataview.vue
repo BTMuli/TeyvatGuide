@@ -70,7 +70,7 @@
 import { onMounted, ref, watch } from "vue";
 
 interface GachaDataViewProps {
-  dataType: "new" | "avatar" | "weapon" | "normal";
+  dataType: "new" | "avatar" | "weapon" | "normal" | "mix";
   dataVal: TGApp.Sqlite.GachaRecords.SingleTable[];
 }
 
@@ -148,6 +148,7 @@ function getTitle(type: "top" | "5" | "4" | "3"): string {
     if (props.dataType === "avatar") return "角色祈愿";
     if (props.dataType === "weapon") return "武器祈愿";
     if (props.dataType === "normal") return "常驻祈愿";
+    if (props.dataType === "mix") return "集录祈愿";
     return "";
   } else if (props.dataVal.length === 0) {
     return "暂无数据";

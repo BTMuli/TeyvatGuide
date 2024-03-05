@@ -155,6 +155,8 @@ async function confirmRefresh(): Promise<void> {
   await getGachaLogs("400");
   loadingTitle.value = "正在刷新武器祈愿数据";
   await getGachaLogs("302");
+  loadingTitle.value = "正在刷新集录祈愿数据";
+  await getGachaLogs("500");
   loadingTitle.value = "数据获取完成，即将刷新页面";
   loadingSub.value = "";
   loading.value = false;

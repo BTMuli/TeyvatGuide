@@ -1,7 +1,7 @@
 /**
  * @file utils/UIGF.ts
  * @description UIGF工具类
- * @since Beta v0.4.1
+ * @since Beta v0.4.4
  */
 
 import { app, fs, path } from "@tauri-apps/api";
@@ -22,7 +22,7 @@ function getUigfTimeZone(uid: string): number {
 
 /**
  * @description 获取 UIGF 头部信息
- * @since Beta v0.3.8
+ * @since Beta v0.4.4
  * @param {string} uid - UID
  * @returns {Promise<TGApp.Plugins.UIGF.Export>}
  */
@@ -31,7 +31,7 @@ export async function getUigfHeader(uid: string): Promise<TGApp.Plugins.UIGF.Exp
   return {
     uid,
     lang: "zh-cn",
-    uigf_version: "v2.4",
+    uigf_version: "v3.0",
     export_timestamp: Math.floor(stamp / 1000),
     export_time: timestampToDate(stamp),
     export_app: "TeyvatGuide",
