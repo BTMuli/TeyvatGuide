@@ -8,10 +8,6 @@
         <v-tab value="team">队伍出场</v-tab>
         <v-tab value="hold">角色持有</v-tab>
       </v-tabs>
-      <v-btn variant="outlined" class="hta-btn" @click="shareWiki">
-        <v-icon>mdi-share-variant</v-icon>
-        <span>分享</span>
-      </v-btn>
       <div class="hta-title">
         <span>胡桃数据库</span>
         <span @click="showDialog = true">更新于 {{ getUpdated() }}</span>
@@ -44,9 +40,7 @@ import HtaTabTeam from "../../components/hutaoAbyss/hta-tab-team.vue";
 import HtaTabUp from "../../components/hutaoAbyss/hta-tab-up.vue";
 import HtaTabUse from "../../components/hutaoAbyss/hta-tab-use.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
-// plugins
 import Hutao from "../../plugins/Hutao";
-import { generateShareImg } from "../../utils/TGShare";
 
 // loading
 const loading = ref<boolean>(false);
@@ -87,31 +81,6 @@ function getUpdated(): string {
     .toLocaleString("zh-CN", { hour12: false })
     .replace(/\//g, "-");
 }
-
-function getShareTitle(): string {
-  switch (tab.value) {
-    case "use":
-      return `【胡桃】${overview.value.ScheduleId}-角色使用`;
-    case "up":
-      return `【胡桃】${overview.value.ScheduleId}-角色出场`;
-    case "team":
-      return `【胡桃】${overview.value.ScheduleId}-队伍出场`;
-    case "hold":
-      return `【胡桃】${overview.value.ScheduleId}-角色持有`;
-  }
-  return `【胡桃】${overview.value.ScheduleId}-深渊数据`;
-}
-
-async function shareWiki(): Promise<void> {
-  const div = <HTMLDivElement>document.querySelector(".hta-tab-item");
-  const title = getShareTitle();
-  loadingTitle.value = "正在生成分享图";
-  loadingSub.value = `${title}.png`;
-  loading.value = true;
-  await generateShareImg(title, div);
-  loadingSub.value = "";
-  loading.value = false;
-}
 </script>
 <style lang="css" scoped>
 .hta-box {
@@ -143,15 +112,16 @@ async function shareWiki(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-left: auto;
   column-gap: 10px;
   font-size: 20px;
 }
 
-.hta-title :nth-child(2) {
+.hta-title :last-child {
   font-family: var(--font-text);
 }
 
-.hta-title :nth-child(2):hover {
+.hta-title :last-child:hover {
   cursor: pointer;
   text-decoration: underline;
 }

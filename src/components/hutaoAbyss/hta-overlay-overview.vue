@@ -40,6 +40,7 @@ interface HtaOverlayOverviewProps {
 
 interface HtaOverlayOverviewEmits {
   (e: "update:modelValue", value: boolean): void;
+
   (e: "cancel"): void;
 }
 
@@ -87,16 +88,12 @@ function onCancel(): void {
 }
 
 .hta-oob-item :nth-child(2n-1) {
-  color: var(--box-text-4);
-  font-family: var(--font-title);
-  font-size: 16px;
+  color: var(--box-text-2);
   text-align: left;
 }
 
 .hta-oob-item :nth-child(2n) {
-  color: var(--tgc-yellow-1);
-  font-size: 14px;
+  color: var(--box-text-3);
   text-align: right;
-  text-shadow: 0 0 5px var(--tgc-dark-7);
 }
 </style>

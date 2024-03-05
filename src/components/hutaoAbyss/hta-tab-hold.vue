@@ -1,29 +1,18 @@
 <template>
   <div class="hta-th-box">
-    <table class="hta-th-table">
-      <!-- 表头 -->
-      <tr>
-        <th>角色</th>
-        <th>持有</th>
-        <th>0命</th>
-        <th>1命</th>
-        <th>2命</th>
-        <th>3命</th>
-        <th>4命</th>
-        <th>5命</th>
-        <th>6命</th>
-      </tr>
-      <!-- 表格 -->
-      <tr v-for="item in props.modelValue" :key="item.HoldingRate" class="hta-th-tr">
-        <td class="hta-th-td">
-          <TibWikiAbyss2 v-model="item.AvatarId" />
-        </td>
-        <td>{{ (item.HoldingRate * 100).toFixed(3) }}%</td>
-        <td v-for="rate in item.Constellations" :key="rate.Item">
-          {{ (rate.Rate * 100).toFixed(3) }}%
-        </td>
-      </tr>
-    </table>
+    <v-data-table :headers="headers" :items="props.modelValue">
+      <template v-slot:item="{ item }">
+        <tr class="hta-th-tr">
+          <td class="hta-th-icon">
+            <TibWikiAbyss2 v-model="item.AvatarId" />
+          </td>
+          <td>{{ (item.HoldingRate * 100).toFixed(3) }}%</td>
+          <td v-for="rate in item.Constellations" :key="rate.Item">
+            {{ (rate.Rate * 100).toFixed(3) }}%
+          </td>
+        </tr>
+      </template>
+    </v-data-table>
   </div>
 </template>
 <script lang="ts" setup>
@@ -34,6 +23,18 @@ interface HtaTabHoldProps {
 }
 
 const props = defineProps<HtaTabHoldProps>();
+
+const headers = [
+  { title: "角色", align: "center", key: "AvatarId" },
+  { title: "持有", align: "center", key: "HoldingRate" },
+  { title: "0命", align: "center", key: "Constellations[0].Rate" },
+  { title: "1命", align: "center", key: "Constellations[1].Rate" },
+  { title: "2命", align: "center", key: "Constellations[2].Rate" },
+  { title: "3命", align: "center", key: "Constellations[3].Rate" },
+  { title: "4命", align: "center", key: "Constellations[4].Rate" },
+  { title: "5命", align: "center", key: "Constellations[5].Rate" },
+  { title: "6命", align: "center", key: "Constellations[6].Rate" },
+];
 </script>
 <style lang="css" scoped>
 .hta-th-box {
@@ -44,25 +45,12 @@ const props = defineProps<HtaTabHoldProps>();
   overflow-y: auto;
 }
 
-.hta-th-table {
-  width: 100%;
-  border-radius: 5px;
-  background: var(--box-bg-1);
+.hta-th-tr {
+  height: 100px;
   text-align: center;
 }
 
-.hta-th-tr {
-  border-radius: 5px;
-  background: var(--box-bg-2);
-  border-collapse: collapse;
-}
-
-.hta-th-td {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
+.hta-th-icon {
+  width: 100px;
 }
 </style>
