@@ -6,6 +6,7 @@
 
 import { event, invoke } from "@tauri-apps/api";
 import type { Event } from "@tauri-apps/api/event";
+import type { UnlistenFn } from "@tauri-apps/api/helpers/event";
 import { appWindow, WebviewWindow } from "@tauri-apps/api/window";
 
 import { parseLink } from "./linkParser";
@@ -38,7 +39,7 @@ class TGClient {
    * @type {EventEmitter}
    * @memberof TGClient
    */
-  private listener: any;
+  private listener: UnlistenFn | undefined;
 
   /**
    * @private 窗口实例
@@ -83,6 +84,8 @@ class TGClient {
       this.listener = await event.listen("post_mhy_client", async (arg: Event<string>) => {
         await this.handleCallback(arg);
       });
+    } else {
+      console.warn("[TGClient][run] 监听器已存在");
     }
   }
 

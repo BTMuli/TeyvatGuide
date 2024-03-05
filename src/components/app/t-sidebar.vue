@@ -198,7 +198,7 @@
               class="side-item-menu"
               title="登录"
               @click="login"
-              v-show="userStore.cookie.value?.game_token === ''"
+              v-show="userStore.cookie.value?.stoken === ''"
             >
               <template #prepend>
                 <img src="/source/UI/lumine.webp" class="side-icon-menu" alt="login" />
@@ -227,8 +227,9 @@
 
 <script lang="ts" setup>
 import { event, window as TauriWindow } from "@tauri-apps/api";
+import { UnlistenFn } from "@tauri-apps/api/helpers/event";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
@@ -273,19 +274,17 @@ function collapse(): void {
   appStore.sidebar.collapse = rail.value;
 }
 
+let themeListener: UnlistenFn;
+
 onMounted(async () => {
-  await listenOnTheme();
+  themeListener = await event.listen("readTheme", (e) => {
+    const theme = <string>e.payload;
+    themeGet.value = theme === "default" ? "default" : "dark";
+  });
   if (TauriWindow.getCurrent().label === "TeyvatGuide") {
     await mhyClient.run();
   }
 });
-
-async function listenOnTheme(): Promise<void> {
-  await event.listen("readTheme", (e) => {
-    const theme = <string>e.payload;
-    themeGet.value = theme === "default" ? "default" : "dark";
-  });
-}
 
 async function switchTheme(): Promise<void> {
   await event.emit("readTheme", themeGet.value === "default" ? "dark" : "default");
@@ -304,6 +303,14 @@ function login(): void {
     text: "请前往设置页面扫码登录",
   });
 }
+
+async function codeScan(detectedCodes): Promise<void> {
+  console.log("codeScan", detectedCodes);
+}
+
+onUnmounted(() => {
+  themeListener();
+});
 </script>
 
 <style lang="css" scoped>
