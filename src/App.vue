@@ -216,18 +216,24 @@ async function checkUpdate(): Promise<void> {
     await TGLogger.Info("[App][checkUpdate] 检测到版本更新！");
     const confirm = await showConfirm({
       title: "检测到版本更新",
-      text: "请到设置页手动更新版本，即将弹出更新说明子页面",
+      text: "是否更新数据库数据？",
     });
     if (!confirm) {
       showSnackbar({
-        text: "请到设置页手动更新版本！",
+        text: "请到设置页手动更新数据库！",
         color: "error",
         timeout: 3000,
       });
+      window.open("https://app.btmuli.ink/docs/Changelogs.html");
       return;
     }
     appStore.buildTime = getBuildTime();
-    window.open("https://app.btmuli.ink/docs/Changelogs.html");
+    await TGSqlite.update();
+    showSnackbar({
+      text: "数据库已更新！",
+      color: "success",
+      timeout: 3000,
+    });
   }
 }
 
