@@ -852,6 +852,7 @@ class TGClient {
         var scale = 1.5;
         var option = {
           debug: true,
+          backgroundColor: "white",
           height: shareDom.scrollHeight * scale,
           width: shareDom.scrollWidth * scale,
           style: {
@@ -859,13 +860,19 @@ class TGClient {
             transformOrigin: "top left"
           }
         };
-        var pictures = shareDom.querySelectorAll("picture","div picture");
-        pictures.forEach(picture => {
-          var img = picture.querySelector("img");
-          if (img !== null) {
-            picture.replaceWith(img);
-          }
+        // 等待3s，让图片充分加载
+        await new Promise((resolve) => {
+          setTimeout(resolve, 3000);
         });
+        var pictures = shareDom.querySelectorAll("picture");
+        if(pictures !== null && pictures.length > 0) {
+          pictures.forEach(picture => {
+            var img = picture.querySelector("img");
+            if(img !== null) {
+              picture.parentNode.replaceChild(img, picture);
+            }
+          });
+        }
         var img = await modernScreenshot.domToPng(shareDom, option);
         var buffer = new Uint8Array(atob(img.split(",")[1]).split("").map(function(item) {
           return item.charCodeAt(0);
@@ -884,7 +891,7 @@ class TGClient {
           });
           alert("保存成功");
         }
-        mhyWebBridge('${arg.callback}', {});
+        mhyWebBridge("${arg.callback}", {});
       })();`;
       await invoke("execute_js", { label: "mhy_client", js: executeJS });
       return;
