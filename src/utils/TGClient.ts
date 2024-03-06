@@ -1,7 +1,7 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.4.3
+ * @since Beta v0.4.4
  */
 
 import { event, invoke } from "@tauri-apps/api";
@@ -29,7 +29,7 @@ interface InvokeArg {
 
 /**
  * @class TGClient
- * @since Beta v0.4.3
+ * @since Beta v0.4.4
  * @description 米游社客户端
  */
 class TGClient {
@@ -807,7 +807,7 @@ class TGClient {
 
   /**
    * @func share
-   * @since Beta v0.3.9
+   * @since Beta v0.4.4
    * @desc 分享
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.SharePayload>} arg - 方法参数
    * @returns {Promise<void>} - 无返回值
@@ -824,63 +824,65 @@ class TGClient {
     }
     if (arg.payload.type === "screenshot") {
       const executeJS = `javascript:(async function() {
-        // 查找 id 为 dom2img 的 script
-        var hasDom2img = false;
-        var scripts = document.querySelectorAll('script');
-        for (var i = 0; i < scripts.length; i++) {
-          if (scripts[i].src === 'https://cdn.bootcdn.net/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js') {
-            hasDom2img = true;
+        var checkLib = false;
+        var scripts = document.querySelectorAll("script");
+        for(var script of scripts) {
+          if(script.src.includes("modern-screenshot")) {
+            checkLib = true;
             break;
           }
         }
-        // 如果没有 dom2img 的 js
-        if (!hasDom2img) {
-          // 添加 dom2img 的 js
-          var script = document.createElement('script');
-          script.src = 'https://cdn.bootcdn.net/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js';
+        if (!checkLib) {
+          var script = document.createElement("script");
+          script.src = "https://cdn.jsdelivr.net/npm/modern-screenshot";
           document.body.appendChild(script);
-          // 等待 dom2img 加载完成
           await new Promise((resolve) => {
-            script.onload = function() {
-              resolve();
-            }
+            script.onload = resolve;
           });
         }
         var shareDom;
-        if(${JSON.stringify(arg.payload.content)} === '{}') {
-          shareDom = document.querySelector('.share');
+        if(${JSON.stringify(arg.payload.content)} === "{}") {
+          shareDom = document.querySelector(".share");
         } else if (${arg.payload.content?.preview} === true) {
-          shareDom = document.querySelector('#root');
+          shareDom = document.querySelector("#root");
         }
         if(shareDom === undefined || shareDom === null) {
           shareDom = document.body;
         }
         var scale = 1.5;
-        var img = await domtoimage.toPng(shareDom, {
+        var option = {
+          debug: true,
           height: shareDom.scrollHeight * scale,
           width: shareDom.scrollWidth * scale,
           style: {
-            transform: 'scale(' + scale + ')',
-            transformOrigin: 'top left'
+            transform: "scale(" + scale + ")",
+            transformOrigin: "top left"
+          }
+        };
+        var pictures = shareDom.querySelectorAll("picture","div picture");
+        pictures.forEach(picture => {
+          var img = picture.querySelector("img");
+          if (img !== null) {
+            picture.replaceWith(img);
           }
         });
-        // 转换成 blob
-        var buffer = new Uint8Array(atob(img.split(',')[1]).split('').map(function(item) {
+        var img = await modernScreenshot.domToPng(shareDom, option);
+        var buffer = new Uint8Array(atob(img.split(",")[1]).split("").map(function(item) {
           return item.charCodeAt(0);
         }));
         var _t = window.__TAURI__;
-        var savePath = await _t.path.downloadDir() + Date.now() + '.png';
+        var savePath = await _t.path.downloadDir() + Date.now() + ".png";
         var save = await _t.dialog.save({
-          title: '保存图片',
-          filters: [{ name: '图片', extensions: ['png'] }],
-          defaultPath: savePath,
+          title: "保存图片",
+          filters: [{ name: "图片", extensions: ["png"] }],
+          defaultPath: savePath
         });
         if (save) {
           await _t.fs.writeBinaryFile({
             contents: buffer,
-            path: save,
+            path: save
           });
-          alert('保存成功');
+          alert("保存成功");
         }
         mhyWebBridge('${arg.callback}', {});
       })();`;
