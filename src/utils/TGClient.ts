@@ -827,7 +827,7 @@ class TGClient {
         var checkLib = false;
         var scripts = document.querySelectorAll("script");
         for(var script of scripts) {
-          if(script.src.includes("modern-screenshot")) {
+          if(script.src.includes("https://cdn.jsdelivr.net/npm/modern-screenshot")) {
             checkLib = true;
             break;
           }
