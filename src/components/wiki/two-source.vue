@@ -17,7 +17,7 @@ const textColor = computed(() => {
   if (!props.data || !props.data.days) return "var(--tgc-blue-2)";
   const days = props.data.days;
   const day = new Date().getDay();
-  if (day === 0 || days.includes(day.toString())) return "var(--tgc-pink-1)";
+  if (day === 0 || days.includes(day)) return "var(--tgc-pink-1)";
   return "var(--tgc-blue-2)";
 });
 </script>

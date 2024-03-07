@@ -30,17 +30,17 @@ declare namespace TGApp.App.Material {
 
   /**
    * @description 材料来源
-   * @since Beta v0.4.2
+   * @since Beta v0.4.4
    * @interface Source
    * @property {string} name - 来源名称
    * @property {string} type - 来源类型
-   * @property {string[]} days - 来源日
+   * @property {number[]} days - 来源日
    * @return Source
    */
   interface Source {
     name: string;
     type: string;
-    days?: string[];
+    days?: number[];
   }
 
   /**

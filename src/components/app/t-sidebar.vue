@@ -15,7 +15,7 @@
         </template>
       </v-list-item>
       <!-- 菜单项 -->
-      <v-list-item value="home" :link="true" href="/" :title.attr="'首页'">
+      <v-list-item :title.attr="'首页'" value="home" :link="true" href="/">
         <template #title>首页</template>
         <template #prepend>
           <img src="/source/UI/paimon.webp" alt="homeIcon" class="side-icon paimon" />
@@ -163,6 +163,17 @@
           </v-list-item>
         </v-list>
       </v-menu>
+      <v-list-item
+        :title.attr="'留影叙佳期'"
+        value="archive-birthday"
+        :link="true"
+        href="/archive/birthday"
+      >
+        <template #title>留影叙佳期</template>
+        <template #prepend>
+          <img src="/source/UI/act_birthday.png" alt="archive_birthday_icon" class="side-icon" />
+        </template>
+      </v-list-item>
       <div class="bottom-menu">
         <v-menu :open-on-click="true" location="end">
           <template #activator="{ props }">
@@ -302,10 +313,6 @@ function login(): void {
   showSnackbar({
     text: "请前往设置页面扫码登录",
   });
-}
-
-async function codeScan(detectedCodes): Promise<void> {
-  console.log("codeScan", detectedCodes);
 }
 
 onUnmounted(() => {

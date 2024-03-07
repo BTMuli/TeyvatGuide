@@ -65,7 +65,6 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 
-import { AppCharacterData } from "../../data";
 import Mys from "../../plugins/Mys";
 import { useHomeStore } from "../../store/modules/home";
 import { createPost, createTGWindow } from "../../utils/TGWindow";
