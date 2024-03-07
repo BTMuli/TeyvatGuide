@@ -10,7 +10,7 @@
         :multiple="true"
         :chips="true"
       />
-      <v-btn class="select-btn" @click="submitHome">确定</v-btn>
+      <v-btn class="select-btn" @click="submitHome" rounded>确定</v-btn>
     </div>
     <component
       :is="item"
@@ -125,7 +125,7 @@ onUnmounted(() => {
 <style lang="css" scoped>
 .home-select {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
 }
@@ -133,8 +133,6 @@ onUnmounted(() => {
 .select-btn {
   width: 100px;
   height: 40px;
-  border-radius: 10px;
-  margin-top: 8px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
 }

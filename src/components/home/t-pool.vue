@@ -28,9 +28,14 @@
                 v-for="character in pool.characters"
                 :key="character.url"
                 class="pool-icon"
-                @click="toOuter(character.url, pool.title)"
+                @click="toOuter(character, pool.title)"
               >
-                <img :src="character.icon" alt="character" />
+                <TItembox
+                  :title="character.info.name"
+                  v-if="character.info"
+                  :model-value="getCBox(character.info)"
+                />
+                <img v-else :src="character.icon" alt="character" />
               </div>
             </div>
           </div>
@@ -66,6 +71,7 @@ import { useHomeStore } from "../../store/modules/home";
 import { createPost, createTGWindow } from "../../utils/TGWindow";
 import { stamp2LastTime } from "../../utils/toolFunc";
 import showSnackbar from "../func/snackbar";
+import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
 
 // store
 const homeStore = useHomeStore();
@@ -119,9 +125,9 @@ onMounted(async () => {
   console.info(gachaData);
   if (!checkCover(gachaData)) {
     poolCards.value = await Mys.Gacha.card(gachaData);
-    const coverData: Record<number, string> = {};
+    const coverData: Record<string, string> = {};
     poolCards.value.map((pool) => {
-      coverData[pool.postId] = pool.cover;
+      coverData[pool.id] = pool.cover;
       return pool;
     });
     homeStore.poolCover = coverData;
@@ -160,52 +166,59 @@ onMounted(async () => {
 
 // 检测新卡池
 function checkCover(data: TGApp.Plugins.Mys.Gacha.Data[]): boolean {
-  // 如果没有缓存
   if (!homeStore.poolCover || Object.keys(homeStore.poolCover).length === 0) {
     return false;
   }
-  // 获取缓存
-  const cover = homeStore.poolCover satisfies Record<number, string>;
-  if (cover === undefined) {
-    return false;
-  }
-  return data.every((item) => {
-    const postId = item.activity_url.split("/").pop();
-    if (!postId || isNaN(Number(postId))) {
-      return false;
-    }
-    if (!Object.keys(cover).includes(postId)) {
-      return false;
-    } else {
-      const coverUrl = Object.keys(cover).find((key) => key === postId);
-      return coverUrl !== "/source/UI/empty.webp";
+  const cover = homeStore.poolCover;
+  if (cover === undefined) return false;
+  let checkList = data.length;
+  Object.entries(cover).forEach(([key, value]) => {
+    const pool = data.find((item) => item.id.toString() === key);
+    if (pool && value !== "/source/UI/empty.webp") {
+      checkList--;
     }
   });
+  return checkList === 0;
 }
 
-async function toOuter(url: string, title: string): Promise<void> {
-  if (!url) {
+async function toOuter(
+  character: TGApp.Plugins.Mys.Gacha.RenderItem,
+  title: string,
+): Promise<void> {
+  if (character.info !== undefined) {
+    await router.push({
+      name: "角色图鉴",
+      params: {
+        id: character.info.id,
+      },
+    });
+    return;
+  }
+  const url = character.url;
+  if (url === "") {
     showSnackbar({
       text: "链接为空!",
       color: "error",
     });
     return;
   }
-  // https://bbs.mihoyo.com/ys/obc/content/{content_id}/detail?bbs_presentation_style=no_header
-  const contentId = url.match(/(?<=content\/)\d+/)?.[0];
-  if (contentId) {
-    const character = AppCharacterData.find((item) => item.contentId.toString() === contentId);
-    if (character) {
-      await router.push({
-        name: "角色图鉴",
-        params: {
-          id: character.id,
-        },
-      });
-      return;
-    }
-  }
   createTGWindow(url, "Sub_window", `Pool_${title}`, 1200, 800, true, true);
+}
+
+function getCBox(info: TGApp.App.Character.WikiBriefInfo): TItemBoxData {
+  return {
+    bg: `/icon/bg/${info.star}-Star.webp`,
+    icon: `/WIKI/character/${info.id}.webp`,
+    size: "60px",
+    height: "60px",
+    display: "inner",
+    clickable: true,
+    lt: `/icon/element/${info.element}元素.webp`,
+    ltSize: "25px",
+    innerHeight: 20,
+    innerIcon: `/icon/weapon/${info.weapon}.webp`,
+    innerText: info.name,
+  };
 }
 
 // 更换显示的卡池
@@ -345,11 +358,8 @@ onUnmounted(() => {
 }
 
 .pool-icon {
-  width: 60px;
-  height: 60px;
-  border: 1px solid var(--tgc-white-1);
-  border-radius: 8px;
-  box-shadow: 0 0 5px rgb(0 0 0/20%);
+  max-width: 60px;
+  max-height: 60px;
   transition: all ease-in-out 0.3s;
 }
 

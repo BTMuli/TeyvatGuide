@@ -5,18 +5,6 @@
         <v-icon size="small" style="opacity: 0.8">mdi-calendar-clock</v-icon>
         <span>今日素材</span>
         <span>{{ dateNow }}</span>
-        <!-- 如果是某人生日，礼物图标颜色为红色 -->
-        <span
-          v-if="birthInfo.isLogin"
-          @click="toBirthday"
-          class="calendar-title-gift"
-          :style="{
-            color: birthInfo.active ? 'var(--tgc-red-1)' : 'inherit',
-          }"
-          :title="birthInfo.text"
-        >
-          <v-icon size="small">mdi-gift</v-icon>
-        </span>
       </div>
       <div class="calendar-title-mid">
         <v-btn
@@ -76,9 +64,6 @@
 import { computed, onMounted, ref } from "vue";
 
 import { AppCalendarData } from "../../data";
-import TGSqlite from "../../plugins/Sqlite";
-import { useAppStore } from "../../store/modules/app";
-import TGClient from "../../utils/TGClient";
 import { generateShareImg } from "../../utils/TGShare";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 import ToCalendar from "../overlay/to-calendar.vue";
@@ -99,13 +84,6 @@ const showItem = ref<boolean>(false);
 const switchType = ref<string>("avatar");
 const selectedItem = ref<TGApp.App.Calendar.Item>(<TGApp.App.Calendar.Item>{});
 const selectedType = ref<"avatar" | "weapon">("avatar");
-
-// birthday
-const birthInfo = ref({
-  isLogin: true,
-  active: false,
-  text: "点击前往留影叙佳期",
-});
 
 const btnText = [
   {
@@ -147,16 +125,6 @@ interface TCalendarEmits {
 const emits = defineEmits<TCalendarEmits>();
 
 onMounted(async () => {
-  const appStore = useAppStore();
-  if (appStore.isLogin) {
-    const birthRes = await TGSqlite.isBirthday();
-    if (birthRes !== false) {
-      birthInfo.value.active = true;
-      birthInfo.value.text = `今天是 ${birthRes} 的生日！`;
-    }
-  } else {
-    birthInfo.value.isLogin = false;
-  }
   const dayNow = new Date().getDay() === 0 ? 7 : new Date().getDay();
   const week = <{ week: number; text: string }>btnText.find((item) => item.week === dayNow);
   dateNow.value =
@@ -206,11 +174,6 @@ async function share(): Promise<void> {
   const title = `【今日素材】${showType}${btnNow.value}`;
   await generateShareImg(title, div);
   emits("loadOuter", { show: false });
-}
-
-// 前往留影叙佳期
-async function toBirthday(): Promise<void> {
-  await TGClient.open("birthday");
 }
 </script>
 <style lang="css" scoped>

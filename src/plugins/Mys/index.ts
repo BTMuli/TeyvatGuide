@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/index.ts
  * @description Mys plugin index
- * @since Beta v0.3.9
+ * @since Beta v0.4.4
  */
 
 import MysApi from "./api";
@@ -15,7 +15,7 @@ import getNewsList from "./request/getNewsList";
 import getPositionData from "./request/getPositionData";
 import getPostData from "./request/getPostData";
 import { getVoteInfo, getVoteResult } from "./request/getVoteData";
-import getGachaCard from "./utils/getGachaCard";
+import { getGachaCard } from "./utils/getGachaCard";
 import getLotteryCard from "./utils/getLotteryCard";
 import { getActivityCard, getNewsCard, getNoticeCard } from "./utils/getNewsCard";
 import getPositionCard from "./utils/getPositionCard";
