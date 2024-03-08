@@ -43,6 +43,7 @@ interface TpVod {
 
 interface TpVodProps {
   data: TpVod;
+  next: unknown;
 }
 
 const props = defineProps<TpVodProps>();

@@ -21,6 +21,7 @@ interface TpDivider {
 
 interface TpDividerProps {
   data: TpDivider;
+  next: unknown;
 }
 
 const props = defineProps<TpDividerProps>();

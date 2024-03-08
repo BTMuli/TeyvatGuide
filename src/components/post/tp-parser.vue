@@ -1,5 +1,11 @@
 <template>
-  <component v-for="(tp, index) in props.data" :key="index" :is="getTpName(tp)" :data="tp" />
+  <component
+    v-for="(tp, index) in props.data"
+    :key="index"
+    :is="getTpName(tp, index)"
+    :data="tp"
+    :next="getTpNext(index)"
+  />
 </template>
 <script lang="ts" setup>
 import TpBackupText from "./tp-backupText.vue";
@@ -19,7 +25,7 @@ interface TpParserProps {
 
 const props = defineProps<TpParserProps>();
 
-function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base) {
+function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base, index: number) {
   if (typeof tp.insert === "string") {
     return TpText;
   } else if ("image" in tp.insert) {
@@ -40,5 +46,12 @@ function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base) {
     return TpVote;
   }
   return TpUnknown;
+}
+
+function getTpNext(index: number) {
+  if (index + 1 >= props.data.length) {
+    return undefined;
+  }
+  return props.data[index + 1];
 }
 </script>

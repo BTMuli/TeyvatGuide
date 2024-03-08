@@ -36,6 +36,7 @@ interface TpVote {
 
 interface TpVoteProps {
   data: TpVote;
+  next: unknown;
 }
 
 interface TpVoteInfo {

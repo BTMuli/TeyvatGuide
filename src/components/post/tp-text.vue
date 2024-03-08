@@ -12,13 +12,21 @@
   </span>
   <TpText
     v-else-if="mode == 'emojis'"
-    v-for="(emoji, index) in emojis"
+    v-for="(emoji, indexE) in emojis"
     :data="emoji"
-    :key="index"
+    :key="indexE"
+    :next="indexE === emojis.length - 1 ? undefined : next"
   />
-  <span v-else :style="getTextStyle()" class="tp-text-span">
+  <TpText
+    v-else-if="mode == 'texts'"
+    v-for="(text, indexT) in texts"
+    :data="text"
+    :key="indexT"
+    :next="indexT === texts.length - 1 ? next : undefined"
+  />
+  <div v-else :style="getTextStyle()" class="tp-text-span">
     {{ props.data.insert }}
-  </span>
+  </div>
 </template>
 <script lang="ts" setup>
 import { onMounted, ref, StyleValue, toRaw } from "vue";
@@ -32,6 +40,7 @@ import showSnackbar from "../func/snackbar";
 interface TpText {
   insert: string;
   attributes?: {
+    header?: number;
     link?: string;
     bold?: boolean;
     color?: string;
@@ -41,12 +50,14 @@ interface TpText {
 
 interface TpTextProps {
   data: TpText;
+  next: TGApp.Plugins.Mys.SctPost.Base | undefined;
 }
 
 const props = defineProps<TpTextProps>();
 const mode = ref<string>("text");
 const localEmojis = ref(localStorage.getItem("emojis"));
 const emojis = ref<TpText[]>([]);
+const texts = ref<TpText[]>([]);
 const router = useRouter();
 
 console.log("tpText", JSON.stringify(props.data.insert), toRaw(props.data)?.attributes);
@@ -68,16 +79,47 @@ onMounted(async () => {
     emojis.value = res.map((i) => ({ insert: i, attributes: props.data.attributes }));
     return;
   }
+  if (props.data.insert.includes("\n") && props.data.insert !== "\n") {
+    mode.value = "texts";
+    const splits = props.data.insert.split("\n");
+    const temp = [];
+    for (let i = 0; i < splits.length; i++) {
+      if (splits[i] !== "") {
+        temp.push({ insert: splits[i], attributes: props.data.attributes });
+      }
+      if (i !== splits.length - 1) {
+        temp.push({ insert: "\n", attributes: props.data.attributes });
+      }
+    }
+    texts.value = temp;
+    return;
+  }
   mode.value = "text";
 });
 
 // 解析文本样式
 function getTextStyle(): StyleValue {
   const style = <Array<StyleValue>>[];
-  const data: TpText = <TpText>props.data;
+  let data: TpText;
+  if (props.data.insert === "\n") {
+    style.push("display: inline");
+    return style;
+  }
+  if (props.next?.insert === "\n") {
+    data = {
+      insert: props.data.insert,
+      attributes: {
+        ...props.data.attributes,
+        ...props.next.attributes,
+      },
+    };
+  } else {
+    data = props.data;
+  }
   if (data.attributes) {
+    const ruleBold: StyleValue = "fontFamily: var(--font-title)";
+    const headerFontSizes = ["2rem", "1.75rem", "1.5rem", "1.25rem", "1rem", "0.75rem"];
     if (data.attributes.bold) {
-      const ruleBold: StyleValue = "fontFamily: var(--font-title)";
       style.push(ruleBold);
     }
     if (data.attributes.color) {
@@ -88,12 +130,20 @@ function getTextStyle(): StyleValue {
       const ruleColor: StyleValue = `color: ${colorGet}`;
       style.push(ruleColor);
     }
-    // todo 这边效果不是很好
-    // refer: 45245869
     if (data.attributes.align) {
       const ruleAlign: StyleValue = `textAlign: ${data.attributes.align}`;
       style.push(ruleAlign);
     }
+    if (data.attributes.header) {
+      const ruleHeader: StyleValue = `fontSize: ${headerFontSizes[data.attributes.header - 1]}`;
+      style.push(ruleHeader);
+      style.push(ruleBold);
+    }
+    if (!data.attributes.align && !data.attributes.header) {
+      style.push("display: inline");
+    }
+  } else {
+    style.push("display: inline");
   }
   return style;
 }
@@ -179,5 +229,6 @@ function getEmojiName() {
 .tp-text-span {
   overflow-wrap: break-word;
   white-space: pre-wrap;
+  word-break: break-all;
 }
 </style>

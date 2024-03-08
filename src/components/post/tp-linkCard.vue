@@ -39,6 +39,7 @@ interface TpLinkCard {
 
 interface TpLinkCardProps {
   data: TpLinkCard;
+  next: unknown;
 }
 
 const props = defineProps<TpLinkCardProps>();

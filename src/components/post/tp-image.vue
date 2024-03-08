@@ -27,9 +27,9 @@ export interface TpImage {
     align?: "center"; // 待补充
   };
 }
-
 interface TpImageProps {
   data: TpImage;
+  next: unknown;
 }
 
 const props = defineProps<TpImageProps>();
