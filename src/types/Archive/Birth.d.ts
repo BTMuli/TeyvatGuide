@@ -42,37 +42,29 @@ declare namespace TGApp.Archive.Birth {
    * @description 卡片数据条目
    * @since Beta v0.4.4
    * @interface DrawItem
-   * @property {string} draw_status - 画片状态
-   * @property {string} take_picture - 画片地址
-   * @property {string} unread_picture - 未读画片地址
    * @property {string} word_text - 留言
    * @property {number} year - 年份
    * @property {string} birthday - 生日 m/d
-   * @property {boolean} is_new - 是否新画片
    * @property {number} role_id - 角色 id
+   * @property {string} role_name - 角色名
+   * @property {string[]} take_picture - 画片地址 [荧，空]
+   * @property {string[]} unread_picture - 未读画片地址 [荧，空]
    * @property {string} gal_xml - 画片 xml
    * @property {string} gal_resource - 画片资源
-   * @property {boolean} is_collected - 是否收藏
    * @property {number} op_id - 操作 id
-   * @property {boolean} is_compensate - 是否补偿
-   * @property {string} role_name - 角色名
    * @returns DrawItem
    */
   interface DrawItem {
-    draw_status: string;
-    take_picture: string;
-    unread_picture: string;
     word_text: string;
     year: number;
     birthday: string;
-    is_new: boolean;
     role_id: number;
+    role_name: string;
+    take_picture: string[];
+    unread_picture: string[];
     gal_xml: string;
     gal_resource: string;
-    is_collected: boolean;
     op_id: number;
-    is_compensate: boolean;
-    role_name: string;
   }
 
   /**

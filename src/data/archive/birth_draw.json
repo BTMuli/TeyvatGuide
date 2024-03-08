@@ -1,2018 +1,2270 @@
 [
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/62db5aa20ce01626dc008f3ae56d8e57_1567417568917500342.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/f2027ea5f466c1ac4a5149d96cb2072d_4591795545705826027.jpg",
-    "word_text": "「啊⋯凉凉的，喜欢。谢谢你，派蒙。」",
     "year": 2022,
-    "birthday": "3/3",
-    "is_new": false,
     "role_id": 10000035,
+    "role_name": "七七",
+    "birthday": "3/3",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/62db5aa20ce01626dc008f3ae56d8e57_1567417568917500342.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/8c71b16b9960ed4952071097e1ee80a8_7625900396370127383.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/f2027ea5f466c1ac4a5149d96cb2072d_4591795545705826027.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/264957c5ef79f5cf1b862482f1f73919_267319137307868473.jpg"
+    ],
+    "word_text": "「啊⋯凉凉的，喜欢。谢谢你，派蒙。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/a304a243357a66c71863a7209f6e7ddf6eef748f.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 19,
-    "is_compensate": false,
-    "role_name": "七七"
+    "op_id": 19
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/00f8329e7c975bad99fa57ec85757abc_8860623545540867332.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/3c221f3aba017f4440ec5ea5e4a86ae1_2615681011635416719.jpg",
-    "word_text": "「听说在璃月部分人家中有生日吃面这种习俗。」",
     "year": 2022,
-    "birthday": "3/10",
-    "is_new": false,
     "role_id": 10000063,
+    "role_name": "申鹤",
+    "birthday": "3/10",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/00f8329e7c975bad99fa57ec85757abc_8860623545540867332.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/85d1f53a9355b28af2f76a9e2e219cd8_3273544564419139636.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/3c221f3aba017f4440ec5ea5e4a86ae1_2615681011635416719.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/803ce91f6bae1de376ba0def0381a900_4559833907772963635.jpg"
+    ],
+    "word_text": "「听说在璃月部分人家中有生日吃面这种习俗。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/6e6ab867b717efa6837655f191ae06e86d6c563f.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 18,
-    "is_compensate": false,
-    "role_name": "申鹤"
+    "op_id": 18
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/1d764763524e9f5c16dbfad589243e56_6551434272095141858.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/7fe0c4dd74bcafaf5ca08fda3a81522b_7378239713308197977.jpg",
-    "word_text": "「三，二，一——锵锵，生日快乐！」",
     "year": 2022,
-    "birthday": "3/14",
-    "is_new": false,
     "role_id": 10000003,
+    "role_name": "琴",
+    "birthday": "3/14",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/1d764763524e9f5c16dbfad589243e56_6551434272095141858.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/43d4d9c2d290ad846c1e0a91139d1205_5326579223042052869.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/7fe0c4dd74bcafaf5ca08fda3a81522b_7378239713308197977.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/127193e41c6f4bba98bf9f0bd0897763_4488313610640936913.jpg"
+    ],
+    "word_text": "「三，二，一——锵锵，生日快乐！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/3c3d826686bb0f0c636d250cc8b99cd20037b426.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 20,
-    "is_compensate": false,
-    "role_name": "琴"
+    "op_id": 20
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/02/28/23ff54ef3b8ab91b47113c5575dc088a_122932054082096773.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/02/28/ccc2cc06aef6bb448cfd77649fbe1615_5208277725953028591.jpg",
-    "word_text": "「咦，旅行者，你在干什么？」",
     "year": 2022,
-    "birthday": "3/21",
-    "is_new": false,
     "role_id": 10000034,
+    "role_name": "诺艾尔",
+    "birthday": "3/21",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/28/23ff54ef3b8ab91b47113c5575dc088a_122932054082096773.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/28/a864d967c9cb5b2024eee8d910995907_9030386398399191096.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/28/ccc2cc06aef6bb448cfd77649fbe1615_5208277725953028591.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/02/28/3c8f67fa952d90cd1c52c746876402e6_2804498557682664243.jpg"
+    ],
+    "word_text": "「咦，旅行者，你在干什么？」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/308a5d951e8e5fb4e777981bdf5c6b0d926cdc02.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 21,
-    "is_compensate": false,
-    "role_name": "诺艾尔"
+    "op_id": 21
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/23/7245ce1e289493802498616ef19a0026_7745152109530692136.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/04/13/64ce598c80b5b8e352e7297e31bb2c11_8155886835152094126.jpg",
-    "word_text": "「这曲调，让我想起一些往事。」",
     "year": 2022,
-    "birthday": "4/17",
-    "is_new": true,
     "role_id": 10000026,
+    "role_name": "魈",
+    "birthday": "4/17",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/23/7245ce1e289493802498616ef19a0026_7745152109530692136.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/04/13/f241347c0dd89e84fceec558f69d966d_39934504044137158.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/04/13/64ce598c80b5b8e352e7297e31bb2c11_8155886835152094126.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/04/13/ab177cee5771b8bf7d9d4d028c793dfc_9113757019070578932.jpg"
+    ],
+    "word_text": "「这曲调，让我想起一些往事。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/ea2b6e393d1a3211fa7963e64626e349ae577c02.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 30,
-    "is_compensate": false,
-    "role_name": "魈"
+    "op_id": 30
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/04/13/500a866a9fe959747047e515fd86d4df_137634423310706891.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/04/13/ae68d59baff18b513f46ae29b5ccd038_5490173121063259113.jpg",
-    "word_text": "「埃泽已经开始筹备今晚的宴会了，我先回去。晚上见。」",
     "year": 2022,
-    "birthday": "4/30",
-    "is_new": true,
     "role_id": 10000016,
+    "role_name": "迪卢克",
+    "birthday": "4/30",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/04/13/500a866a9fe959747047e515fd86d4df_137634423310706891.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/04/13/a5506231d722274893277d78b1fc7ecd_6598019243748397054.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/04/13/ae68d59baff18b513f46ae29b5ccd038_5490173121063259113.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/04/13/a155abe66766ecf57fee04faf8feaf1a_2815297486505105779.jpg"
+    ],
+    "word_text": "「埃泽已经开始筹备今晚的宴会了，我先回去。晚上见。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/03efbc4e954e1b25ea532106d94f3de821d40b3c.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 31,
-    "is_compensate": false,
-    "role_name": "迪卢克"
+    "op_id": 31
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/07/dcfe5d89683f60b0940661e419aa4f64_7341861678946860285.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/07/522774c571330e95abb2375699e0384f_264634925200220184.jpg",
-    "word_text": "「一起向着顶峰全力前进吧！」",
     "year": 2022,
-    "birthday": "5/18",
-    "is_new": true,
     "role_id": 10000055,
+    "role_name": "五郎",
+    "birthday": "5/18",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/07/dcfe5d89683f60b0940661e419aa4f64_7341861678946860285.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/17/296e02f28d7b6da5e6682cfbc0c7fbc7_345759881215585323.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/07/522774c571330e95abb2375699e0384f_264634925200220184.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/17/973d9c7b6577c1443d1a00e5f507bf43_3590156862701271819.jpg"
+    ],
+    "word_text": "「一起向着顶峰全力前进吧！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/2a8544bce9cc04fa3ea719ceb85f5125f072e1f0.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 32,
-    "is_compensate": false,
-    "role_name": "五郎"
+    "op_id": 32
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/05/20/e33294e5b1994f8ebd355ddfb989650d_8750161445511379061.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/05/20/656c3d9ecbff2054e4232998e26693de_3201679655876451252.jpg",
-    "word_text": "「这是以你为原型的故事。想现在唱给你听，可以吗？」",
     "year": 2022,
-    "birthday": "5/21",
-    "is_new": true,
     "role_id": 10000064,
+    "role_name": "云堇",
+    "birthday": "5/21",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/20/e33294e5b1994f8ebd355ddfb989650d_8750161445511379061.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/20/485d9e9d77d98e3e8d89794ecf480c98_1897185449604240629.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/20/656c3d9ecbff2054e4232998e26693de_3201679655876451252.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/20/07e75680a93f23fb65771352b02eeeca_7682410259864513755.jpg"
+    ],
+    "word_text": "「这是以你为原型的故事。想现在唱给你听，可以吗？」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/fd8bfc7a50f2062cebb906f43af940eaaad003e1.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 33,
-    "is_compensate": false,
-    "role_name": "云堇"
+    "op_id": 33
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/05/26/e9ba1905eb2f93da51a7002e98fc68d9_2808107292145539526.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/05/26/877bd3d1994aaee099469aa72c6f4dd9_7224650332160902695.jpg",
-    "word_text": "「在这幽星闪烁之日，本皇女恩许你们，随我一同见证这世间万象的因果与命运！」",
     "year": 2022,
-    "birthday": "5/27",
-    "is_new": true,
     "role_id": 10000031,
+    "role_name": "菲谢尔",
+    "birthday": "5/27",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/26/e9ba1905eb2f93da51a7002e98fc68d9_2808107292145539526.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/26/df31836411c5d3f8b2b86fb02d1dd5a3_5856028788040021574.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/26/877bd3d1994aaee099469aa72c6f4dd9_7224650332160902695.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/26/4754eecd26cadf7526406c5bd6e389fe_6952448946742260261.jpg"
+    ],
+    "word_text": "「在这幽星闪烁之日，本皇女恩许你们，随我一同见证这世间万象的因果与命运！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/0f5d44d0147592ac0935d539191fe92829b7a741.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 34,
-    "is_compensate": false,
-    "role_name": "菲谢尔"
+    "op_id": 34
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/05/30/4a03a0835a4f7f11ec65293646e1de38_2630179767413836401.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/05/30/67eb08079ed789459891cc66612a52a8_3116926620061025030.jpg",
-    "word_text": "「这已经是和你一起度过的第二个生日了呢！」",
     "year": 2022,
-    "birthday": "6/1",
-    "is_new": false,
     "role_id": -1,
+    "role_name": "派蒙",
+    "birthday": "6/1",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/30/4a03a0835a4f7f11ec65293646e1de38_2630179767413836401.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/30/b2a6ab7c977a26692fd5a653e32bdb16_6016813736556945624.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/30/67eb08079ed789459891cc66612a52a8_3116926620061025030.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/30/01428eedf0fa6306bbba940c7f652f23_8051483235981499146.jpg"
+    ],
+    "word_text": "「这已经是和你一起度过的第二个生日了呢！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/3d9af322519cda4eaa0511065b890adae0dc9835.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 17,
-    "is_compensate": false,
-    "role_name": "派蒙"
+    "op_id": 17
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/05/30/d0b746de702a76605ceaf47edac7969b_2135336777525991291.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/05/30/368474e064a0914e888570cc3a487e12_7787597608423138477.jpg",
-    "word_text": "欢迎来到「荒泷天下独尊一斗的生日豪歌会」！",
     "year": 2022,
-    "birthday": "6/1",
-    "is_new": true,
     "role_id": 10000057,
+    "role_name": "荒泷一斗",
+    "birthday": "6/1",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/30/d0b746de702a76605ceaf47edac7969b_2135336777525991291.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/30/c60dfcec8e03c8ea67bcade84b081f8e_8586284187750459143.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/30/368474e064a0914e888570cc3a487e12_7787597608423138477.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/05/30/3dc65c9b3b07bca3d58be4e867ef9e82_8122052366888369626.jpg"
+    ],
+    "word_text": "欢迎来到「荒泷天下独尊一斗的生日豪歌会」！",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/87800f332a769139dddc909274e494a8e78fa13a.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 35,
-    "is_compensate": false,
-    "role_name": "荒泷一斗"
+    "op_id": 35
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/06/08/172274ac6873089ed7223e650cd730af_1241961765532975106.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/06/08/dfc3e521b4547d5298a79dc4c83219c6_6984120902365602141.jpg",
-    "word_text": "「现在时间还早，不如坐下来喝杯茶，陪姐姐聊聊天吧？」",
     "year": 2022,
-    "birthday": "6/9",
-    "is_new": true,
     "role_id": 10000006,
+    "role_name": "丽莎",
+    "birthday": "6/9",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/08/172274ac6873089ed7223e650cd730af_1241961765532975106.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/08/d155475a517af3ac07b572d1267f0cd1_2005857137059589746.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/08/dfc3e521b4547d5298a79dc4c83219c6_6984120902365602141.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/08/e72ee1a73d88cc546593e12ebe90ed71_2870805597469640533.jpg"
+    ],
+    "word_text": "「现在时间还早，不如坐下来喝杯茶，陪姐姐聊聊天吧？」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/366527f72ccdbe549b39c851bc800e9fbedf1eab.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 36,
-    "is_compensate": false,
-    "role_name": "丽莎"
+    "op_id": 36
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/06/08/bdb4ae3f7814030452cfa718c9027130_6069330197060599425.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/06/08/bec258d5ecb17256217c9fc8cc46e98a_2797082578941954728.jpg",
-    "word_text": "「那种『噼咔』的感觉，不是来自于做了什么事情，而是来自于陪伴在身边的人。对吧，旅行者？」",
     "year": 2022,
-    "birthday": "6/16",
-    "is_new": true,
     "role_id": 10000022,
+    "role_name": "温迪",
+    "birthday": "6/16",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/08/bdb4ae3f7814030452cfa718c9027130_6069330197060599425.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/08/783c77d054e1299064795f6189e0e7a1_4264560378575837477.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/08/bec258d5ecb17256217c9fc8cc46e98a_2797082578941954728.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/08/0233a22d13d6f553dcc1a101641f59a3_844279156674167989.jpg"
+    ],
+    "word_text": "「那种『噼咔』的感觉，不是来自于做了什么事情，而是来自于陪伴在身边的人。对吧，旅行者？」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/49157f479457221fe505710dcdc22b0374f0ab79.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 37,
-    "is_compensate": false,
-    "role_name": "温迪"
+    "op_id": 37
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/cc11bf1d337ed52cd86bc94a4ea8741c_785062498036943191.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/6f8057e49e1e4b87972c1861dbcd1f02_4514484576545629766.jpg",
-    "word_text": "「宵宫，今天是你的生日！我们想对你说——」",
     "year": 2022,
-    "birthday": "6/21",
-    "is_new": true,
     "role_id": 10000049,
+    "role_name": "宵宫",
+    "birthday": "6/21",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/cc11bf1d337ed52cd86bc94a4ea8741c_785062498036943191.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/e443f0bd11de7e798e9f0644225e4e5c_163921574457226039.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/6f8057e49e1e4b87972c1861dbcd1f02_4514484576545629766.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/2050d151751ef3a1686ec3a55bd4a7c6_1935350406087468626.jpg"
+    ],
+    "word_text": "「宵宫，今天是你的生日！我们想对你说——」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/1a9d30601820831e1a8c72875a7dfca5c50126ac.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 38,
-    "is_compensate": false,
-    "role_name": "宵宫"
+    "op_id": 38
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/328aed532d30b42577e8d85854aa3953_4921820929391989453.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/462c33ad9360fa88e753448160e172fd_4462922348986381120.jpg",
-    "word_text": "「怎么样？读了这本《转生成为雷电将军，然后天下无敌》，你有什么感想吗？」\n",
     "year": 2022,
-    "birthday": "6/26",
-    "is_new": false,
     "role_id": 10000052,
+    "role_name": "雷电将军",
+    "birthday": "6/26",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/328aed532d30b42577e8d85854aa3953_4921820929391989453.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/10c695e4ff99248f82f9ceb93a3e0d1c_1637530056111049386.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/462c33ad9360fa88e753448160e172fd_4462922348986381120.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/38c4981b4166dc16518187560669da42_786892768593060278.jpg"
+    ],
+    "word_text": "「怎么样？读了这本《转生成为雷电将军，然后天下无敌》，你有什么感想吗？」\n",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/f78fd9a289c653d42f146f0e52fac1a788ce2a8e.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 39,
-    "is_compensate": true,
-    "role_name": "雷电将军"
+    "op_id": 39
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/06/28/a350423f34d0d4d61a3b987c01150587_8608740134588832122.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/c1bb34ce8ed9ddbaf8c96a267722c55c_8758881766275654977.jpg",
-    "word_text": "「那就点一份牛奶团子来庆祝吧。」",
     "year": 2022,
-    "birthday": "6/27",
-    "is_new": true,
     "role_id": 10000058,
+    "role_name": "八重神子",
+    "birthday": "6/27",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/28/a350423f34d0d4d61a3b987c01150587_8608740134588832122.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/28/eeae9300d7af709778804cc25db29f2c_7466857553560640366.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/c1bb34ce8ed9ddbaf8c96a267722c55c_8758881766275654977.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/10/aedced82a9c6c17e8b523a1ddc1ec1a6_5263772837152592546.jpg"
+    ],
+    "word_text": "「那就点一份牛奶团子来庆祝吧。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/9f94e7f3aa1aebe46f726293d73d126ad37549d1.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 40,
-    "is_compensate": false,
-    "role_name": "八重神子"
+    "op_id": 40
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/06/27/887e0b5cca10aedbe3277e287a7887a3_6414189402377533320.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/06/27/9c377727c0e7c01a55a0f280e7e3f5d3_6314382378521536631.jpg",
-    "word_text": "「今晚的演出，我一定会好好加油的！」",
     "year": 2022,
-    "birthday": "7/5",
-    "is_new": true,
     "role_id": 10000014,
+    "role_name": "芭芭拉",
+    "birthday": "7/5",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/27/887e0b5cca10aedbe3277e287a7887a3_6414189402377533320.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/27/ee22d15e626ce1dcd6148bfe3bcb91bd_2929056217136662350.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/27/9c377727c0e7c01a55a0f280e7e3f5d3_6314382378521536631.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/06/27/ff716a381344f0a8de40e28befdfc1f8_8814957719918487659.jpg"
+    ],
+    "word_text": "「今晚的演出，我一定会好好加油的！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/dd7bced4f6457a02e4599355673796cd0ff91541.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 41,
-    "is_compensate": false,
-    "role_name": "芭芭拉"
+    "op_id": 41
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/916b8536e555762737e8fea9bc21c26b_261233525574989711.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/1c886d23381c5abe93f48ed5af9272e5_8479869588357686795.jpg",
-    "word_text": "「这次的『御建鸣神主尊大御所大人像』只限现场抢购，可惜我有公务在身，未能到场。没想到竟能…」",
     "year": 2022,
-    "birthday": "7/14",
-    "is_new": false,
     "role_id": 10000056,
+    "role_name": "九条裟罗",
+    "birthday": "7/14",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/916b8536e555762737e8fea9bc21c26b_261233525574989711.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/5a5785e985efc26be8b2cf418ceaeb7a_8479869588357686795.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/1c886d23381c5abe93f48ed5af9272e5_8479869588357686795.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/ea69931e8067f73073b57f7f6fa2bcd6_6512010380800921547.jpg"
+    ],
+    "word_text": "「这次的『御建鸣神主尊大御所大人像』只限现场抢购，可惜我有公务在身，未能到场。没想到竟能…」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/f8bff82028db5eb04ce954378d88288363ba3b8b.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 42,
-    "is_compensate": true,
-    "role_name": "九条裟罗"
+    "op_id": 42
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/5978e9e4826e953e80b525c691cc3679_5762867481969793733.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/9853a39e35f8b8283477598195481fc9_2504057222597501181.jpg",
-    "word_text": "「欸欸，我有这么吓人吗？别跑呀！」",
     "year": 2022,
-    "birthday": "7/15",
-    "is_new": true,
     "role_id": 10000046,
+    "role_name": "胡桃",
+    "birthday": "7/15",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/5978e9e4826e953e80b525c691cc3679_5762867481969793733.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/73f95fef67793ff6088b4202b15c17ed_434272923332000807.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/9853a39e35f8b8283477598195481fc9_2504057222597501181.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/56e55fd30509a8e4f4b34373fd57040e_4390926147572449435.jpg"
+    ],
+    "word_text": "「欸欸，我有这么吓人吗？别跑呀！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/e1fc68d7c491d62fc6bb8d4068372e9c9f99dc88.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 43,
-    "is_compensate": false,
-    "role_name": "胡桃"
+    "op_id": 43
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/07/584b12397b4a9418ef93c03061908be4_4053047172808739096.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/2748609156737fe6a082cf55a6697844_696156438618905307.jpg",
-    "word_text": "「大雪之后最适合冰钓，今天一定能钓到大鱼。」",
     "year": 2022,
-    "birthday": "7/20",
-    "is_new": true,
     "role_id": 10000033,
+    "role_name": "达达利亚",
+    "birthday": "7/20",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/07/584b12397b4a9418ef93c03061908be4_4053047172808739096.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/07/3a8b3e8791c0b99219610268ba0de8ea_4355889814219833666.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/2748609156737fe6a082cf55a6697844_696156438618905307.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/be8e018ec4241f827581c03a76d6da52_2795995771585889095.jpg"
+    ],
+    "word_text": "「大雪之后最适合冰钓，今天一定能钓到大鱼。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/3d16c77cb50e90656e3aea3133fdf106dc9a7ec8.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 44,
-    "is_compensate": false,
-    "role_name": "达达利亚"
+    "op_id": 44
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/07/13/238be9e9740ac72f920923516183789e_3818674750510732951.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/07/13/90057e0b761ce18aa41b5f4b54163820_9219924060027896919.jpg",
-    "word_text": "「趁它凉掉之前，我们快找个地方坐下来，一起享用吧。」",
     "year": 2022,
-    "birthday": "7/24",
-    "is_new": true,
     "role_id": 10000059,
+    "role_name": "鹿野院平藏",
+    "birthday": "7/24",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/13/238be9e9740ac72f920923516183789e_3818674750510732951.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/13/a26a6e24f666c8af197dd74d83c26261_2179559554193104967.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/13/90057e0b761ce18aa41b5f4b54163820_9219924060027896919.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/13/bfd1cd8f4a1133f60b46a7356b7d84ad_4071869510498922121.jpg"
+    ],
+    "word_text": "「趁它凉掉之前，我们快找个地方坐下来，一起享用吧。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/21a63f328093c58a3330650ed118915b6d12019a.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 48,
-    "is_compensate": false,
-    "role_name": "鹿野院平藏"
+    "op_id": 48
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/3a4387d5e3a9451d1e0487caf91ffb57_8224144806285367063.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/787d046714075503073c03f8792aa0c9_5076349558295962410.jpg",
-    "word_text": "「好耶，是蹦蹦蛋糕！」",
     "year": 2022,
-    "birthday": "7/27",
-    "is_new": true,
     "role_id": 10000029,
+    "role_name": "可莉",
+    "birthday": "7/27",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/3a4387d5e3a9451d1e0487caf91ffb57_8224144806285367063.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/0a4eed7928e30f13a1587cd3f1631f9a_522715968699285574.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/787d046714075503073c03f8792aa0c9_5076349558295962410.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/95be57bb805e71a1f1ef1d59a1b07179_8224144806285367063.jpg"
+    ],
+    "word_text": "「好耶，是蹦蹦蛋糕！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/98a05a352bc5b32948b1ac4f475d5cfc9f085674.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 45,
-    "is_compensate": false,
-    "role_name": "可莉"
+    "op_id": 45
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/bb3553e40779db19f6317fab978b53bd_144782024787793864.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/cc6e1ec6d610d58fb1b65c13d5f68e1e_183199211683774624.jpg",
-    "word_text": "「…你们有没有听到什么声音？」",
     "year": 2022,
-    "birthday": "7/27",
-    "is_new": true,
     "role_id": 10000065,
+    "role_name": "久岐忍",
+    "birthday": "7/27",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/bb3553e40779db19f6317fab978b53bd_144782024787793864.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/2a8f51afffe670424c15cc89059de7ef_3798534111835404824.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/cc6e1ec6d610d58fb1b65c13d5f68e1e_183199211683774624.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/11/465c6401260d584ff0101c41290ff609_1700549182228447087.jpg"
+    ],
+    "word_text": "「…你们有没有听到什么声音？」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/99a66de283120245cb6dba5091b9eabe3c28cf4d.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 46,
-    "is_compensate": false,
-    "role_name": "久岐忍"
+    "op_id": 46
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/07/25/747c8640df578c08bf3c409c8af86a75_3290202629445311986.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/07/25/d6aeba8464ab8f1b5a82cff5e356fd55_8571592154350975097.jpg",
-    "word_text": "「这顿饭完美符合『豆腐律法』，我给它一百分！」",
     "year": 2022,
-    "birthday": "7/28",
-    "is_new": true,
     "role_id": 10000048,
+    "role_name": "烟绯",
+    "birthday": "7/28",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/25/747c8640df578c08bf3c409c8af86a75_3290202629445311986.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/25/0b90ce8798335daef0a51e0d4a98d5a9_6667695009772245904.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/07/25/d6aeba8464ab8f1b5a82cff5e356fd55_8571592154350975097.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/02/26f04d17af550d3087c6b185272fde7c_6002900845935567476.jpg"
+    ],
+    "word_text": "「这顿饭完美符合『豆腐律法』，我给它一百分！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/b3eafe2b9f38ae2b832df6f622721d12.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 47,
-    "is_compensate": false,
-    "role_name": "烟绯"
+    "op_id": 47
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/08/09/914b339ad1deb18a3fb1355c10ff7e10_2478693766054524233.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/08/09/769ac76434cd1f9661bedc54b82edfa9_6150851262940894210.jpg",
-    "word_text": "「生日快乐！今年的礼物是——月亮派和免费清洗兔兔伯爵服务~」",
     "year": 2022,
-    "birthday": "8/10",
-    "is_new": true,
     "role_id": 10000021,
+    "role_name": "安柏",
+    "birthday": "8/10",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/08/09/914b339ad1deb18a3fb1355c10ff7e10_2478693766054524233.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/08/09/e92a414142e54894c1f2daf158e819aa_8371442600387219777.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/08/09/769ac76434cd1f9661bedc54b82edfa9_6150851262940894210.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/08/09/77ffe2a62b6e04cc3724cb6fc4477b0b_6982492627939298869.jpg"
+    ],
+    "word_text": "「生日快乐！今年的礼物是——月亮派和免费清洗兔兔伯爵服务~」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/89ddc459b59a6d75f182b289ecfe433fcf104adc.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 49,
-    "is_compensate": false,
-    "role_name": "安柏"
+    "op_id": 49
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/08/25/462328df2b9a013ff4696e503d6171b3_5936494275130493914.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/08/25/8889b0afafab334cb3d4e439dc7fae54_9163924317254239690.jpg",
-    "word_text": "「就像浪潮褪去后留在沙滩上的贝壳一样，那段日子在我心中留下了宝贵的回忆。」",
     "year": 2022,
-    "birthday": "8/26",
-    "is_new": true,
     "role_id": 10000027,
+    "role_name": "凝光",
+    "birthday": "8/26",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/08/25/462328df2b9a013ff4696e503d6171b3_5936494275130493914.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/08/25/4e40b5625c7675588bcb6d5c001f5700_2157015328098954412.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/08/25/8889b0afafab334cb3d4e439dc7fae54_9163924317254239690.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/08/25/a0e2fd3514e45b23c92501e2151493de_6119389129826712152.jpg"
+    ],
+    "word_text": "「就像浪潮褪去后留在沙滩上的贝壳一样，那段日子在我心中留下了宝贵的回忆。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/315d41f1dba8c30c041075d7e384fd6fa4d5d37f.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 50,
-    "is_compensate": false,
-    "role_name": "凝光"
+    "op_id": 50
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/08/29/68e8f193fea094316e3eaca255914090_247056041076802784.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/08/29/f759ba60abb22107cb4e36ddc9a3b866_1244343367117743118.jpg",
-    "word_text": "「欸，今天已经是我的生日了？」",
     "year": 2022,
-    "birthday": "8/31",
-    "is_new": true,
     "role_id": 10000041,
+    "role_name": "莫娜",
+    "birthday": "8/31",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/08/29/68e8f193fea094316e3eaca255914090_247056041076802784.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/08/29/2c31825a5e27951684880f517f137cac_4988702365762804244.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/08/29/f759ba60abb22107cb4e36ddc9a3b866_1244343367117743118.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/08/29/08ab9322c09ff0b290a3967ea7309e4a_2918915608254528936.jpg"
+    ],
+    "word_text": "「欸，今天已经是我的生日了？」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/2dd5713121015185135474de282c3e9cfa2e1343.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 51,
-    "is_compensate": false,
-    "role_name": "莫娜"
+    "op_id": 51
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/36fa4cb22814e453d8bb4afc62e6ad91_7481487497208067843.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/d81643da46eac35475dbdec987de48cb_1918053267246961157.jpg",
-    "word_text": "「此行路途遥远，需做好万全准备…」",
     "year": 2022,
-    "birthday": "9/7",
-    "is_new": true,
     "role_id": 10000036,
+    "role_name": "重云",
+    "birthday": "9/7",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/36fa4cb22814e453d8bb4afc62e6ad91_7481487497208067843.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/cfae43d5a1f49f524422a9e66a1d5cbd_5765286952675281207.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/d81643da46eac35475dbdec987de48cb_1918053267246961157.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/74c94e16eac3145bf374c3cc13c6d143_2579357273846588842.jpg"
+    ],
+    "word_text": "「此行路途遥远，需做好万全准备…」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/3459e24435c1735d9d4bd34a83a499f2dcd09e09.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 61,
-    "is_compensate": false,
-    "role_name": "重云"
+    "op_id": 61
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/8ed88bd7bbb4074e24a06675317bd158_1123808786437106717.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/6e5a852e0f3adde0d0ebe0cee1a5a7e9_7375354155435620786.jpg",
-    "word_text": "「狩猎，不能急，我教你。」",
     "year": 2022,
-    "birthday": "9/9",
-    "is_new": true,
     "role_id": 10000020,
+    "role_name": "雷泽",
+    "birthday": "9/9",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/8ed88bd7bbb4074e24a06675317bd158_1123808786437106717.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/c420ce8772d4ec1acbb706f740c8fd9e_4539930055284936722.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/6e5a852e0f3adde0d0ebe0cee1a5a7e9_7375354155435620786.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/dbc4a9f54dc4dd9edd6122674889277b_2557457102464094941.jpg"
+    ],
+    "word_text": "「狩猎，不能急，我教你。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/59739ead2fffe700086c3854d202da90204d5b37.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 62,
-    "is_compensate": false,
-    "role_name": "雷泽"
+    "op_id": 62
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/1c1ccc218f7be3522750be9ce38803ac_4956767190838649357.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/6799ac2ac619ee0663654980b8a2c6cc_8544622308664127251.jpg",
-    "word_text": "「阿贝多会不会喜欢我们送的礼物呢？」",
     "year": 2022,
-    "birthday": "9/13",
-    "is_new": true,
     "role_id": 10000038,
+    "role_name": "阿贝多",
+    "birthday": "9/13",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/1c1ccc218f7be3522750be9ce38803ac_4956767190838649357.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/2e95a27ddcd82053736bf741bf249589_5806931165920702143.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/6799ac2ac619ee0663654980b8a2c6cc_8544622308664127251.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/4b108087cd6f4c092e9c253b04ba84c0_169159448004765780.jpg"
+    ],
+    "word_text": "「阿贝多会不会喜欢我们送的礼物呢？」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/91c12f0ffc86fad712be23f4c93f4d1fcef72653.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 63,
-    "is_compensate": false,
-    "role_name": "阿贝多"
+    "op_id": 63
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/cbad61708b9db52dbb634666bc77da86_7909437952469488846.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/c2340a7e90c5922f953be6c0e5a047ce_6662866207211971043.jpg",
-    "word_text": "「所求之事心想则成。」",
     "year": 2022,
-    "birthday": "9/28",
-    "is_new": true,
     "role_id": 10000002,
+    "role_name": "神里绫华",
+    "birthday": "9/28",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/cbad61708b9db52dbb634666bc77da86_7909437952469488846.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/1bf86481e1f7bf928cf2e2b06972eaf4_286472063652028111.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/c2340a7e90c5922f953be6c0e5a047ce_6662866207211971043.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/06/856a55057414aa999d944d88ae299477_2281479684963115222.jpg"
+    ],
+    "word_text": "「所求之事心想则成。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/53a6feb179b9e37cfa2b3eaced12f24426746f22.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 64,
-    "is_compensate": false,
-    "role_name": "神里绫华"
+    "op_id": 64
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/09/30/bd7ee344238b79624c42de34d201d42b_2165729369940503644.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/09/30/efe5ba7726b239c911a4514a6d055004_5927242073101891240.jpg",
-    "word_text": "「他挺剑疾刺，那贼人招架不住，连退数步…」",
     "year": 2022,
-    "birthday": "10/9",
-    "is_new": false,
     "role_id": 10000025,
+    "role_name": "行秋",
+    "birthday": "10/9",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/30/bd7ee344238b79624c42de34d201d42b_2165729369940503644.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/30/2d4953813be83d31ffb0fc3a82d0d747_4674420984188158358.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/30/efe5ba7726b239c911a4514a6d055004_5927242073101891240.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/09/30/a12613b9809f82747f901a4d784b330e_2386541590371306569.jpg"
+    ],
+    "word_text": "「他挺剑疾刺，那贼人招架不住，连退数步…」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/4a087b1de64ab1453e558228a952ea00e50a0002.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 65,
-    "is_compensate": true,
-    "role_name": "行秋"
+    "op_id": 65
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/10/14/d4510c1ea0b0c78e0b8f4d398ead843a_68042343570169059.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/10/14/7b5e39dee045601d18d9331a318f328c_5298670511045818377.jpg",
-    "word_text": "「如果给它涂上绝云椒椒的汁液，说不定会让演奏更加火热呢！」",
     "year": 2022,
-    "birthday": "10/16",
-    "is_new": true,
     "role_id": 10000044,
+    "role_name": "辛焱",
+    "birthday": "10/16",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/14/d4510c1ea0b0c78e0b8f4d398ead843a_68042343570169059.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/14/fb82d587f90859dce3085db06e1ae70a_7345738244126567440.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/14/7b5e39dee045601d18d9331a318f328c_5298670511045818377.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/14/95d3aed7d56c640a6bd85652572cd231_1796802840088387195.jpg"
+    ],
+    "word_text": "「如果给它涂上绝云椒椒的汁液，说不定会让演奏更加火热呢！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/2b74697804d997904e3e913d2f917f39aee0e1d3.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 66,
-    "is_compensate": false,
-    "role_name": "辛焱"
+    "op_id": 66
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/10/18/72f6adcf5f4d623d817619399135ea8f_4587563355069091361.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/10/18/e4a6332e9686621e553ab71ae6a82cd2_731704057106611247.jpg",
-    "word_text": "「饭团能提供很多能量，吃完又可以安心睡觉了…谢谢你们为我准备这些…呼——」",
     "year": 2022,
-    "birthday": "10/19",
-    "is_new": true,
     "role_id": 10000053,
+    "role_name": "早柚",
+    "birthday": "10/19",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/18/72f6adcf5f4d623d817619399135ea8f_4587563355069091361.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/18/562d03491fd3016a685b56508a2c41c3_4346807857686126664.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/18/e4a6332e9686621e553ab71ae6a82cd2_731704057106611247.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/18/a6da90c7f00894bc9ac26f2163dec6a2_7281707666825946027.jpg"
+    ],
+    "word_text": "「饭团能提供很多能量，吃完又可以安心睡觉了…谢谢你们为我准备这些…呼——」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/0eba21d76c58980feda2552083aeffcf8e6d8d9d.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 67,
-    "is_compensate": false,
-    "role_name": "早柚"
+    "op_id": 67
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/10/24/740159fb6fd17963a01e8ecec4c31b1c_5703215409869202037.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/10/24/2138a0b19aeb0c971267797dba637bdf_1562265260139247184.jpg",
-    "word_text": "「快点擦干头发再喝口热汤，你如果感冒了，我还怎么报仇啊？」\n",
     "year": 2022,
-    "birthday": "10/25",
-    "is_new": false,
     "role_id": 10000051,
+    "role_name": "优菈",
+    "birthday": "10/25",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/24/740159fb6fd17963a01e8ecec4c31b1c_5703215409869202037.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/24/1d8e771c6ceba4be144bb51ec88e90e9_5230221574746733417.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/24/2138a0b19aeb0c971267797dba637bdf_1562265260139247184.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/24/63f39dcf191847a00684d32e85bd8cba_1216214546337521249.jpg"
+    ],
+    "word_text": "「快点擦干头发再喝口热汤，你如果感冒了，我还怎么报仇啊？」\n",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/33210a6360b3da99d5eea662a879db332805fee4.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 68,
-    "is_compensate": false,
-    "role_name": "优菈"
+    "op_id": 68
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/10/28/c5aace2d53138483509100687d0ed971_7949818237533451737.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/10/28/71faf44fe7c4ca87ac21cfcd66122ef8_3671123140395564905.jpg",
-    "word_text": "「抬头见月，侧耳听风…真是一番美景。」",
     "year": 2022,
-    "birthday": "10/29",
-    "is_new": true,
     "role_id": 10000047,
+    "role_name": "枫原万叶",
+    "birthday": "10/29",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/28/c5aace2d53138483509100687d0ed971_7949818237533451737.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/28/ca1a8978602d5720ebd2eb7bd6906b26_1255385112096501442.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/28/71faf44fe7c4ca87ac21cfcd66122ef8_3671123140395564905.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/10/28/02d102505adb055c9857344a2cf27d2a_7855767696567631094.jpg"
+    ],
+    "word_text": "「抬头见月，侧耳听风…真是一番美景。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/ce7a2debb72576edca4dc3f1bcffbc58e7b72f10.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 69,
-    "is_compensate": false,
-    "role_name": "枫原万叶"
+    "op_id": 69
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/11/01/e1b4aebb391b62516f75f06bc5bfc9ed_6188266083696149865.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/11/01/81ba5924ad4550697938e82523c10158_2274610402183517673.png",
-    "word_text": "「…让我看看，这次能开发出怎样的新菜品呢？」",
     "year": 2022,
-    "birthday": "11/2",
-    "is_new": true,
     "role_id": 10000023,
+    "role_name": "香菱",
+    "birthday": "11/2",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/01/e1b4aebb391b62516f75f06bc5bfc9ed_6188266083696149865.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/01/f7c534ec13d93ab3e01fd40fe6c74aa7_2613306939164981517.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/01/81ba5924ad4550697938e82523c10158_2274610402183517673.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/01/a49962557dc3f8a86e5ff7b725cfeae6_3463328628949296726.png"
+    ],
+    "word_text": "「…让我看看，这次能开发出怎样的新菜品呢？」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/9d553483c336fb4f807ca119ded6b13326590dcf.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 70,
-    "is_compensate": false,
-    "role_name": "香菱"
+    "op_id": 70
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/11/18/1c8639120ec3f5b3f105aea6a91d82e2_4259331542367680100.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/11/18/6dc6d6526d5774c7e1a2c0e8f3d37643_5696865793114783435.png",
-    "word_text": "「难得你今天休假，我们走吧。」",
     "year": 2022,
-    "birthday": "11/20",
-    "is_new": true,
     "role_id": 10000042,
+    "role_name": "刻晴",
+    "birthday": "11/20",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/18/1c8639120ec3f5b3f105aea6a91d82e2_4259331542367680100.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/18/76d50c6c6c298c32fe2e55df971d1175_9198953169167610511.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/18/6dc6d6526d5774c7e1a2c0e8f3d37643_5696865793114783435.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/18/304e90ac2e7a58fc12ea1e5379f163d4_3423859633193413184.png"
+    ],
+    "word_text": "「难得你今天休假，我们走吧。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/2b73c52c87590d5bde84b981f439a7165bd21db9.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 71,
-    "is_compensate": false,
-    "role_name": "刻晴"
+    "op_id": 71
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/11/25/b894424ca98c0e36477d827c00c94515_2499573635859541470.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/11/25/7b3f16be5ed4e374d5fb04ee500ac8a4_3819800172470061608.png",
-    "word_text": "「有了这些墩墩桃和香辛果，我可以开始新的研究了…」",
     "year": 2022,
-    "birthday": "11/26",
-    "is_new": true,
     "role_id": 10000043,
+    "role_name": "砂糖",
+    "birthday": "11/26",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/25/b894424ca98c0e36477d827c00c94515_2499573635859541470.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/25/92cfd8604f0fe7c6c4db66c663e159d4_4701228157477816829.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/25/7b3f16be5ed4e374d5fb04ee500ac8a4_3819800172470061608.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/25/6f96d772bbd5ce97ee6babd6f3f66d63_459706186367251916.png"
+    ],
+    "word_text": "「有了这些墩墩桃和香辛果，我可以开始新的研究了…」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/d365d92912bef0daf6ab4529540170c428dced92.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 72,
-    "is_compensate": false,
-    "role_name": "砂糖"
+    "op_id": 72
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/11/29/b650247b0dd4718fa49895bc161d9d6f_8949460688252451786.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/11/29/d5cd6a959800a0d1c9b23d21a8262542_8213897119202781695.png",
-    "word_text": "「好了，该去找某酒庄收佣金了。帮他们找回了重要的货物，收取多少谢礼才合适呢？」",
     "year": 2022,
-    "birthday": "11/30",
-    "is_new": true,
     "role_id": 10000015,
+    "role_name": "凯亚",
+    "birthday": "11/30",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/29/b650247b0dd4718fa49895bc161d9d6f_8949460688252451786.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/29/4bc3cfa6be5735e485929834cdde4547_216483087868813684.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/29/d5cd6a959800a0d1c9b23d21a8262542_8213897119202781695.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/11/29/4051a798c4f21d8d0fa302b6b4a54017_2179957136871261038.png"
+    ],
+    "word_text": "「好了，该去找某酒庄收佣金了。帮他们找回了重要的货物，收取多少谢礼才合适呢？」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/85236393c0d131094ca3433aa6dbcb77e5ff562f.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 73,
-    "is_compensate": false,
-    "role_name": "凯亚"
+    "op_id": 73
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/01/da4bb2f28de31a79db4e8fe715a59210_2485624060076762400.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/01/f7dca7883e464fa72d4a4b5b3ff76629_1099083110444409766.jpg",
-    "word_text": "「今天就别管工作了！还有还有——生日快乐。」\n",
     "year": 2022,
-    "birthday": "12/2",
-    "is_new": false,
     "role_id": 10000037,
+    "role_name": "甘雨",
+    "birthday": "12/2",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/01/da4bb2f28de31a79db4e8fe715a59210_2485624060076762400.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/01/eeee15c9f0bc16bc1e3cad485ef320cc_4902890699960807402.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/01/f7dca7883e464fa72d4a4b5b3ff76629_1099083110444409766.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/01/8a28a350f5bf4569d63c53911b46f8b3_7328089169311567726.jpg"
+    ],
+    "word_text": "「今天就别管工作了！还有还有——生日快乐。」\n",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/d1d6e776be1238ddb52a39c109e97a1f65c6676d.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 74,
-    "is_compensate": false,
-    "role_name": "甘雨"
+    "op_id": 74
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/02/14571d0cc42ea7488ddf4ad6ce978ae1_1190572472348805400.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/02/90665ebc63f4e1d7530ba67331122999_3204475476486910575.jpg",
-    "word_text": "「你的舞蹈是独属于你自己的『语言』。试试看！我会认真去理解的。」\n",
     "year": 2022,
-    "birthday": "12/3",
-    "is_new": true,
     "role_id": 10000070,
+    "role_name": "妮露",
+    "birthday": "12/3",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/02/14571d0cc42ea7488ddf4ad6ce978ae1_1190572472348805400.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/02/cd9667bc4dac5eb37baa4e397524af5b_1467722985300338266.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/02/90665ebc63f4e1d7530ba67331122999_3204475476486910575.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/02/72c880c006e5b9c594545c6ef3cf917e_3379296334842618860.jpg"
+    ],
+    "word_text": "「你的舞蹈是独属于你自己的『语言』。试试看！我会认真去理解的。」\n",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/1468b08c974909ed453ac5a09f0a9746c07a8d87.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 75,
-    "is_compensate": false,
-    "role_name": "妮露"
+    "op_id": 75
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/16/e4b7a5c8c2cd18483a79b3340225c877_6453309287396004358.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/16/b8e63e360e1770d327e465c89d30a783_4693349093250884973.jpg",
-    "word_text": "「有你陪在我身边，就连论文都写得很顺利呢…」",
     "year": 2022,
-    "birthday": "12/19",
-    "is_new": true,
     "role_id": 10000074,
+    "role_name": "莱依拉",
+    "birthday": "12/19",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/16/e4b7a5c8c2cd18483a79b3340225c877_6453309287396004358.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/16/882d1a3bc0430472bbd9894061d039f5_8930263427885324223.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/16/b8e63e360e1770d327e465c89d30a783_4693349093250884973.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/16/f69e1779dacfc312fd03290886902fce_2745753425619286870.jpg"
+    ],
+    "word_text": "「有你陪在我身边，就连论文都写得很顺利呢…」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/63a6331cf84207344631547648f2d44ffb15a0af.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 76,
-    "is_compensate": false,
-    "role_name": "莱依拉"
+    "op_id": 76
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/20/fabbde70886086f2ef07276c9f64a80b_4504055081021759712.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/20/3989e8aaa3ad63af00216b4a890b50b3_3490995909921085933.jpg",
-    "word_text": "「嘿嘿，发现新商机！」",
     "year": 2022,
-    "birthday": "12/21",
-    "is_new": true,
     "role_id": 10000068,
+    "role_name": "多莉",
+    "birthday": "12/21",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/20/fabbde70886086f2ef07276c9f64a80b_4504055081021759712.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/20/93b8b4c756c91ef987da0a72dc601e45_1442067997038312167.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/20/3989e8aaa3ad63af00216b4a890b50b3_3490995909921085933.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/20/6663a57c3c3774cdad83f5285d8cf4ec_4143903016581005036.jpg"
+    ],
+    "word_text": "「嘿嘿，发现新商机！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/eea27fb027c73216eed735c752a5e44c50998924.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 77,
-    "is_compensate": false,
-    "role_name": "多莉"
+    "op_id": 77
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/28/fb6bbd6bc71b42769489d0ba6b997273_99787559749821446.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/28/17f369f9c01f7e8e4f70fdece7ef2cf2_7240143035484735399.jpg",
-    "word_text": "「这是什么？软软的，毛茸茸的…」",
     "year": 2022,
-    "birthday": "12/29",
-    "is_new": false,
     "role_id": 10000069,
+    "role_name": "提纳里",
+    "birthday": "12/29",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/28/fb6bbd6bc71b42769489d0ba6b997273_99787559749821446.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/28/19d8892717d4c8cf15d4156109b987e5_9121096675596423772.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/28/17f369f9c01f7e8e4f70fdece7ef2cf2_7240143035484735399.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/28/3089f17168706f36c5c9740ebbd05938_4561575902397873832.jpg"
+    ],
+    "word_text": "「这是什么？软软的，毛茸茸的…」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/8ac461c0676a59f1ca7c5a09ed408e86061c5c36.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 78,
-    "is_compensate": true,
-    "role_name": "提纳里"
+    "op_id": 78
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/01/03/7db8b8a41051cc1c3b398dbc273bb974_7394307990449567353.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/30/d288a1c813f8a5738275486928c40620_1980711988575670918.png",
-    "word_text": "「我认识一家餐馆的厨师，正擅长处理这样优质的食材。」",
     "year": 2022,
-    "birthday": "12/31",
-    "is_new": true,
     "role_id": 10000030,
+    "role_name": "钟离",
+    "birthday": "12/31",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/03/7db8b8a41051cc1c3b398dbc273bb974_7394307990449567353.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/03/d73d79374663b83a6db63ccf56a6269e_2710960147293449568.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/30/d288a1c813f8a5738275486928c40620_1980711988575670918.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/30/a1aba45b8c17ea8714e124a7c756ad4c_2522560542944542641.png"
+    ],
+    "word_text": "「我认识一家餐馆的厨师，正擅长处理这样优质的食材。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/176ca51498709c16b6880a70994ec43651b28be6.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 79,
-    "is_compensate": false,
-    "role_name": "钟离"
+    "op_id": 79
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/30/821c065d074d15cee38e8c3e44ffdd32_2116917615130481756.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/30/7bdada72db83830aad0b7ecd9fe9b586_887192194841163272.jpg",
-    "word_text": "「无所谓，不用给我加糖。」",
     "year": 2023,
-    "birthday": "1/3",
-    "is_new": true,
     "role_id": 10000075,
+    "role_name": "流浪者",
+    "birthday": "1/3",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/30/821c065d074d15cee38e8c3e44ffdd32_2116917615130481756.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/30/ab6e3c86c43913c6fcd855db5d8713eb_6867646240706769234.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/30/7bdada72db83830aad0b7ecd9fe9b586_887192194841163272.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2022/12/30/330db30f621f079bd452f960fc1d38d9_1523846564235009046.jpg"
+    ],
+    "word_text": "「无所谓，不用给我加糖。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/be7256ab89664a8c16d7b25a979bad5d79e51ec1.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 80,
-    "is_compensate": false,
-    "role_name": "流浪者"
+    "op_id": 80
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/01/06/4124572d2b80b0cc4929fd069eb3b704_7124236919819402696.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/01/06/df183b55c94855a390a6d6bd8762d9cb_3256582730730007043.png",
-    "word_text": "「毛衣就留给太郎丸吧，它一定会喜欢的！」",
     "year": 2023,
-    "birthday": "1/9",
-    "is_new": true,
     "role_id": 10000050,
+    "role_name": "托马",
+    "birthday": "1/9",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/06/4124572d2b80b0cc4929fd069eb3b704_7124236919819402696.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/06/ab8dd3b3f8f8537d6524bc8e5848739c_2443539753210178835.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/06/df183b55c94855a390a6d6bd8762d9cb_3256582730730007043.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/06/b546fd15691a85d1b0b1e61002b5447e_6639154009290234693.png"
+    ],
+    "word_text": "「毛衣就留给太郎丸吧，它一定会喜欢的！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/16cad9c0c27b770c64602af25fbb10eb7245a490.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 81,
-    "is_compensate": false,
-    "role_name": "托马"
+    "op_id": 81
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/01/17/677d7eef9108ad2c144189280d370d64_5440524715519613730.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/01/17/fec87c6025100591bbea85e68dfcae7b_644121858148378919.jpg",
-    "word_text": "「哼哼~胜负已定。这就是『贪杯』的下场。」",
     "year": 2023,
-    "birthday": "1/18",
-    "is_new": true,
     "role_id": 10000039,
+    "role_name": "迪奥娜",
+    "birthday": "1/18",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/17/677d7eef9108ad2c144189280d370d64_5440524715519613730.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/17/115c4fd497d57e4969b2591b1cdd5935_1094409601394886692.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/17/fec87c6025100591bbea85e68dfcae7b_644121858148378919.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/17/d060c1e219bf20d725f1d4654b116f4d_5600598270508177255.jpg"
+    ],
+    "word_text": "「哼哼~胜负已定。这就是『贪杯』的下场。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/5f067ebe01b14f585d32101493ccdfccb560acdd.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 82,
-    "is_compensate": false,
-    "role_name": "迪奥娜"
+    "op_id": 82
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/01/18/5d00635e2158c0355cfaa8b0b4965621_963003184765796462.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/01/18/2ad3c7aa14e8ec9810dd2258ea682ab2_4187632050304145768.jpg",
-    "word_text": "「想喝点什么？我请客。」",
     "year": 2023,
-    "birthday": "1/24",
-    "is_new": true,
     "role_id": 10000045,
+    "role_name": "罗莎莉亚",
+    "birthday": "1/24",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/18/5d00635e2158c0355cfaa8b0b4965621_963003184765796462.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/18/0ae6fb8f960691726b8703e8d58022d1_3570096164564115801.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/18/2ad3c7aa14e8ec9810dd2258ea682ab2_4187632050304145768.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/01/18/946a33c6534be3c1b8f27e3dd850ec2c_4263218186757366336.jpg"
+    ],
+    "word_text": "「想喝点什么？我请客。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/4b49f883f5a24ec3e54b493fb7db3cbebfc87b6d.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 83,
-    "is_compensate": false,
-    "role_name": "罗莎莉亚"
+    "op_id": 83
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/02/09/fb8a6495e3683a58349f3a65392bf91c_1546809355799157069.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/02/09/29c73cbfd32a4a9c2042f3df6457ca1d_7706822473316586766.jpg",
-    "word_text": "「嗯…的确是一本有趣的书，各种意义上。」",
     "year": 2023,
-    "birthday": "2/11",
-    "is_new": true,
     "role_id": 10000078,
+    "role_name": "艾尔海森",
+    "birthday": "2/11",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/09/fb8a6495e3683a58349f3a65392bf91c_1546809355799157069.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/09/6acd4baf307b07fd7b74f5bc4699450d_5442202176705947462.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/09/29c73cbfd32a4a9c2042f3df6457ca1d_7706822473316586766.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/09/5abdcfeb7574230e68b87e805c5b818f_3318620723004855101.jpg"
+    ],
+    "word_text": "「嗯…的确是一本有趣的书，各种意义上。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/eda29e5da9fb6e85e0bb901a2f72292a38308f4a.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 84,
-    "is_compensate": false,
-    "role_name": "艾尔海森"
+    "op_id": 84
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/02/13/dc6ce0b4142afbe994875f626673118e_1711873921534188714.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/02/13/6799a262844016441e625b328b568f66_7554115636265878308.jpg",
-    "word_text": "「这次出航收获颇多，给大家准备了不少礼物，千万别客气！」",
     "year": 2023,
-    "birthday": "2/14",
-    "is_new": true,
     "role_id": 10000024,
+    "role_name": "北斗",
+    "birthday": "2/14",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/13/dc6ce0b4142afbe994875f626673118e_1711873921534188714.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/13/870b2db73a7dde86c0fdec1b24d52f37_3233433040376092797.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/13/6799a262844016441e625b328b568f66_7554115636265878308.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/13/2070733cb5be4f10b19219bff4abe5e8_2055926653526817196.jpg"
+    ],
+    "word_text": "「这次出航收获颇多，给大家准备了不少礼物，千万别客气！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/74279b8a865528fa38c84bad73a3e501f67cb8c7.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 85,
-    "is_compensate": false,
-    "role_name": "北斗"
+    "op_id": 85
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/02/20/87b665a2155dc976801f5d03352bd069_7821101022119830793.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/02/20/bb3a5e05b71a3514d7cce0043852d377_7261865226756293505.jpg",
-    "word_text": "「可以和我说说那些故事吗？」",
     "year": 2023,
-    "birthday": "2/22",
-    "is_new": true,
     "role_id": 10000054,
+    "role_name": "珊瑚宫心海",
+    "birthday": "2/22",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/20/87b665a2155dc976801f5d03352bd069_7821101022119830793.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/20/35e25afe2336239a4b93e0f51414df3a_3185126309057580897.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/20/bb3a5e05b71a3514d7cce0043852d377_7261865226756293505.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/20/256f77914a6856694a12135708388cb4_1058388514665934080.jpg"
+    ],
+    "word_text": "「可以和我说说那些故事吗？」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/dd155b6ba97a881e411da30ec00c272ddababdd3.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 86,
-    "is_compensate": false,
-    "role_name": "珊瑚宫心海"
+    "op_id": 86
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/02/27/0d672a64fcb0d120d95bd3317e499ee2_3581806586324190299.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/02/27/935b09dca3826da36783e6277e27e0dc_7208397704301386135.jpg",
-    "word_text": "「快看，是宝藏！我们真的找到了宝藏！」",
     "year": 2023,
-    "birthday": "2/28",
-    "is_new": true,
     "role_id": 10000032,
+    "role_name": "班尼特",
+    "birthday": "2/28",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/27/0d672a64fcb0d120d95bd3317e499ee2_3581806586324190299.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/27/6055f07349d84cfe6801a5b6ba0861e9_7225550721409710658.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/27/935b09dca3826da36783e6277e27e0dc_7208397704301386135.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/02/27/b3c25fddc188a3024ee7b644a5a83be5_332674854293480630.jpg"
+    ],
+    "word_text": "「快看，是宝藏！我们真的找到了宝藏！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/acedae5cb33a5bfed9d16219369a7ff30cc9c959.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 87,
-    "is_compensate": false,
-    "role_name": "班尼特"
+    "op_id": 87
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/02/79efc75eda150eb91d4694670ff8a217_1608690279423113225.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/02/9acc2ad50b8c624be30caaaffb5fc688_1015503706318408002.jpg",
-    "word_text": "「敕令解除！」",
     "year": 2023,
-    "birthday": "3/3",
-    "is_new": true,
     "role_id": 10000035,
+    "role_name": "七七",
+    "birthday": "3/3",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/02/79efc75eda150eb91d4694670ff8a217_1608690279423113225.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/02/0d95ef23bb6a43c9c5cae905c7e21fed_5563266634132200885.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/02/9acc2ad50b8c624be30caaaffb5fc688_1015503706318408002.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/02/306b47316867ad3ab5db1fbb535894f4_2793262206845992526.jpg"
+    ],
+    "word_text": "「敕令解除！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/2ece1bfef1560ef9b6fab7dbc1e44265c2148c56.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 88,
-    "is_compensate": false,
-    "role_name": "七七"
+    "op_id": 88
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/03/717bb21167335b32bf6a07563c36f824_7222372525583468932.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/03/32e4186d02c467036b2dc305912228c8_5621509598425961265.jpg",
-    "word_text": "「瑶瑶一直都是七七的朋友哦。」",
     "year": 2023,
-    "birthday": "3/6",
-    "is_new": true,
     "role_id": 10000077,
+    "role_name": "瑶瑶",
+    "birthday": "3/6",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/03/717bb21167335b32bf6a07563c36f824_7222372525583468932.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/08/d481dabdf2c85519915fbd2b4bfcb9ba_8233976046825942384.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/03/32e4186d02c467036b2dc305912228c8_5621509598425961265.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/03/7e343b82ecaf5c9cecc8f195c8c0cdff_7504288008038527562.jpg"
+    ],
+    "word_text": "「瑶瑶一直都是七七的朋友哦。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/f3f26d5febd85a3a0a604a001784bbc219d1828a.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 89,
-    "is_compensate": false,
-    "role_name": "瑶瑶"
+    "op_id": 89
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/09/f1b918852be7a141c00849bf0a8b8646_5845667066440253268.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/09/abfc27e90a9e6917008aa3a92797cb87_4232924517249133520.jpg",
-    "word_text": "「看来我们几个的口味关系很好，都碰撞出火花了呢！」",
     "year": 2023,
-    "birthday": "3/10",
-    "is_new": false,
     "role_id": 10000063,
+    "role_name": "申鹤",
+    "birthday": "3/10",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/09/f1b918852be7a141c00849bf0a8b8646_5845667066440253268.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/09/9ba39c202ab7403c524295ce2dcd2c40_7094780461679676369.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/09/abfc27e90a9e6917008aa3a92797cb87_4232924517249133520.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/09/216b503fd6531de98239bc752334f6f7_885954538032055388.jpg"
+    ],
+    "word_text": "「看来我们几个的口味关系很好，都碰撞出火花了呢！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/3d194fdb9e0f55b7127648413359d7130714bc34.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 90,
-    "is_compensate": false,
-    "role_name": "申鹤"
+    "op_id": 90
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/09/e1bdad7a4bf15ec235dac89c388da753_3060669573465762523.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/09/acb01a2ffd2eebee3a2c5d4184150861_4459931710627143482.jpg",
-    "word_text": "「嘘！派蒙，让她们再单独多待一会儿吧。」\n",
     "year": 2023,
-    "birthday": "3/14",
-    "is_new": true,
     "role_id": 10000003,
+    "role_name": "琴",
+    "birthday": "3/14",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/09/e1bdad7a4bf15ec235dac89c388da753_3060669573465762523.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/14/4161b295e3f34efa9d09b2799b7cd940_5363335737731053713.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/09/acb01a2ffd2eebee3a2c5d4184150861_4459931710627143482.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/09/e089f2542003011e37dc1f86e854be3e_5238934259140780841.jpg"
+    ],
+    "word_text": "「嘘！派蒙，让她们再单独多待一会儿吧。」\n",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/9e91e1c565bd523932935554853c0b25a75d3aeb.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 91,
-    "is_compensate": false,
-    "role_name": "琴"
+    "op_id": 91
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/20/e5fba616b873cffccdaf33be37ce0a22_7942465109955096477.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/20/024d93e5e23d7a24768ec621e213e8ae_3167943472866758973.jpg",
-    "word_text": "「看来营地就在那边了，我们快点过去吧~等回去给你们重新准备下午茶，只需一小会就好！」",
     "year": 2023,
-    "birthday": "3/21",
-    "is_new": true,
     "role_id": 10000034,
+    "role_name": "诺艾尔",
+    "birthday": "3/21",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/20/e5fba616b873cffccdaf33be37ce0a22_7942465109955096477.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/20/0e4549957da6c20eb211f390ee3a887f_7507811288715523106.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/20/024d93e5e23d7a24768ec621e213e8ae_3167943472866758973.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/20/6879411ce1caf93f458e2767a08fcd1a_3136154438093449293.jpg"
+    ],
+    "word_text": "「看来营地就在那边了，我们快点过去吧~等回去给你们重新准备下午茶，只需一小会就好！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/e2e9df5d96e611abbf334a766ff625b69d54f6be.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 92,
-    "is_compensate": false,
-    "role_name": "诺艾尔"
+    "op_id": 92
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/24/a80073d652d77cd612af6474eba250c7_3698877397924300372.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/24/62646e2c89adff079c8e5d578ddd34a3_349857416899981927.jpg",
-    "word_text": "「旅行者，要打两局吗？如果你赢了，我就把这套卡牌赠与你。」",
     "year": 2023,
-    "birthday": "3/26",
-    "is_new": true,
     "role_id": 10000066,
+    "role_name": "神里绫人",
+    "birthday": "3/26",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/24/a80073d652d77cd612af6474eba250c7_3698877397924300372.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/24/eae74451b40949e3a000a45c20cad969_8614589511315921743.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/24/62646e2c89adff079c8e5d578ddd34a3_349857416899981927.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/03/24/d8cec7aefa01f15f336ebd2f08216f02_1218786957862423713.jpg"
+    ],
+    "word_text": "「旅行者，要打两局吗？如果你赢了，我就把这套卡牌赠与你。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/e989dcf57c74299ae80066268536d09e4cc836c4.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 93,
-    "is_compensate": false,
-    "role_name": "神里绫人"
+    "op_id": 93
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/04/06/587626c7cceac59be25bc6c3bef6ef8e_2574554922138124425.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/04/06/73061fca4b76f033c6f548fb2ad6b6ae_4076770910542843328.png",
-    "word_text": "「能像今天这样和朋友一起庆祝的生日，于我而言来之不易。所以，谢谢你们今天过来陪我。」",
     "year": 2023,
-    "birthday": "4/7",
-    "is_new": true,
     "role_id": 10000079,
+    "role_name": "迪希雅",
+    "birthday": "4/7",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/06/587626c7cceac59be25bc6c3bef6ef8e_2574554922138124425.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/06/d50e5ca01fcfffff4b7136c9a118da5f_1532065908608649350.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/06/73061fca4b76f033c6f548fb2ad6b6ae_4076770910542843328.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/06/21784d7ec8d7030cae87ecbdf124177b_1435949936353655751.png"
+    ],
+    "word_text": "「能像今天这样和朋友一起庆祝的生日，于我而言来之不易。所以，谢谢你们今天过来陪我。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/6d39a5b163f49457af393883846f39de5d923304.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 94,
-    "is_compensate": false,
-    "role_name": "迪希雅"
+    "op_id": 94
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/04/17/566b77161cb60d95ea2dc4d3165330bc_5522622277323148006.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/04/14/996420831a9cf7c476b9b09793419747_4381527535080400269.jpg",
-    "word_text": "「嘘——要在魈面前保密哦。」",
     "year": 2023,
-    "birthday": "4/17",
-    "is_new": true,
     "role_id": 10000026,
+    "role_name": "魈",
+    "birthday": "4/17",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/17/566b77161cb60d95ea2dc4d3165330bc_5522622277323148006.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/17/b95b2d6fc87dc350f08bdb920d417893_8863412604096567696.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/14/996420831a9cf7c476b9b09793419747_4381527535080400269.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/14/5301a03737fde8952040c105202b9d0b_1421071611736407176.jpg"
+    ],
+    "word_text": "「嘘——要在魈面前保密哦。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/59fde216910119ab17c99fea880b39641cd61ef5.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 95,
-    "is_compensate": false,
-    "role_name": "魈"
+    "op_id": 95
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/04/19/896007c97d98af2fd043f826338a847f_6818156219209301555.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/04/19/2fef61b881dd2b71996f2d13d8a5bf4a_3450148365686527964.png",
-    "word_text": "「那么现在就等好戏开场了。」",
     "year": 2023,
-    "birthday": "4/20",
-    "is_new": true,
     "role_id": 10000060,
+    "role_name": "夜兰",
+    "birthday": "4/20",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/19/896007c97d98af2fd043f826338a847f_6818156219209301555.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/19/82102c55102297fbf267c27a231fdc26_7557021750183812796.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/19/2fef61b881dd2b71996f2d13d8a5bf4a_3450148365686527964.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/19/e672a2fbfb0624551782eb9d1051c8d3_9056902440144080361.png"
+    ],
+    "word_text": "「那么现在就等好戏开场了。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/74d4d541b401f6ed59d3fddf37b0d2efb8a8e095.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 96,
-    "is_compensate": false,
-    "role_name": "夜兰"
+    "op_id": 96
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/04/27/31bb0a1c50035f1594ec3ddc508b462a_7232338903959019982.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/04/27/9fbc05475a05c7c135178c2e1b5f3114_4029223135580630586.jpg",
-    "word_text": "「期待你这次的成果，我会好好品尝的。」",
     "year": 2023,
-    "birthday": "4/30",
-    "is_new": true,
     "role_id": 10000016,
+    "role_name": "迪卢克",
+    "birthday": "4/30",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/27/31bb0a1c50035f1594ec3ddc508b462a_7232338903959019982.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/27/2f008cf77e23017529cb89b6f26eadce_3271278202944069025.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/27/9fbc05475a05c7c135178c2e1b5f3114_4029223135580630586.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/27/e4e6e05a381f5374090160491b2592fa_3730060096971149308.jpg"
+    ],
+    "word_text": "「期待你这次的成果，我会好好品尝的。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/fb2df1b02f87a49885d66d460feea45bf29b5245.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 131,
-    "is_compensate": false,
-    "role_name": "迪卢克"
+    "op_id": 131
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/04/28/f2afb1a8f596474e0312e2eeea2f056e_5700138906571590523.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/04/28/0c65ef840f133587f4f484032fa46677_1406687904430481792.jpg",
-    "word_text": "「嗯，果然没有看错，它们和你很相称。」",
     "year": 2023,
-    "birthday": "5/3",
-    "is_new": true,
     "role_id": 10000072,
+    "role_name": "坎蒂丝",
+    "birthday": "5/3",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/28/f2afb1a8f596474e0312e2eeea2f056e_5700138906571590523.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/28/50e59185b28573a32dbad4cc804ef78f_3096153127587923975.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/28/0c65ef840f133587f4f484032fa46677_1406687904430481792.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/04/28/34cfe18fd69fd4d2049665e40b7564fa_6323320998437025124.jpg"
+    ],
+    "word_text": "「嗯，果然没有看错，它们和你很相称。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/285c782435d57239290f5780b284f8a539308456.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 132,
-    "is_compensate": false,
-    "role_name": "坎蒂丝"
+    "op_id": 132
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/06/bc768fb5f5df107718f4ef2b9da3a288_7845462003568689743.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/06/c81d0a5e65cec699125ee592e9f48989_7228221242298373398.png",
-    "word_text": "「谢谢你们特意来看我。」",
     "year": 2023,
-    "birthday": "5/8",
-    "is_new": true,
     "role_id": 10000067,
+    "role_name": "柯莱",
+    "birthday": "5/8",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/06/bc768fb5f5df107718f4ef2b9da3a288_7845462003568689743.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/06/d90f6cce1d6655b49430021d011522f0_1687874237145044369.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/06/c81d0a5e65cec699125ee592e9f48989_7228221242298373398.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/06/2082dd40e2bdb9653f79de58e09df133_4534217313718111722.png"
+    ],
+    "word_text": "「谢谢你们特意来看我。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/c42240669ed7842fd8974b991a742363a2f85665.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 133,
-    "is_compensate": false,
-    "role_name": "柯莱"
+    "op_id": 133
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/17/581f08305c25aeda300d668ed5c01421_4016680167082262576.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/17/f31e4415049c11eea5ceb6fe048600eb_4138454422905171378.png",
-    "word_text": "「噗哈哈哈，原来是他们！」",
     "year": 2023,
-    "birthday": "5/18",
-    "is_new": true,
     "role_id": 10000055,
+    "role_name": "五郎",
+    "birthday": "5/18",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/17/581f08305c25aeda300d668ed5c01421_4016680167082262576.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/17/e3d8d8fae2eecd2c5c653598c2569779_7960626451796891889.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/17/f31e4415049c11eea5ceb6fe048600eb_4138454422905171378.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/17/766850177a5a5e339c5f13af1f8d681d_4478421957188998255.png"
+    ],
+    "word_text": "「噗哈哈哈，原来是他们！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/d3d7e609b618a01589a6551791eb1562b3ab7cac.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 134,
-    "is_compensate": false,
-    "role_name": "五郎"
+    "op_id": 134
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/19/10f79388178f2552f122ca7198ece1fb_6272076599186861223.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/19/4851195f8851d04de2d15c02bc516bbc_8299168289632773937.png",
-    "word_text": "「等到演出结束后，一起去品茶吧。」",
     "year": 2023,
-    "birthday": "5/21",
-    "is_new": true,
     "role_id": 10000064,
+    "role_name": "云堇",
+    "birthday": "5/21",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/19/10f79388178f2552f122ca7198ece1fb_6272076599186861223.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/19/7e4c8c154b40b22a4ff511f80f9e2fe3_6276347952380862649.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/19/4851195f8851d04de2d15c02bc516bbc_8299168289632773937.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/19/5aec682868f0586231be70ec1e3e61ae_1853026134770432569.png"
+    ],
+    "word_text": "「等到演出结束后，一起去品茶吧。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/dddee158da363f129985d07ba42ad42697fca9d6.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 135,
-    "is_compensate": false,
-    "role_name": "云堇"
+    "op_id": 135
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/7839e4e0809bacc3a1720f3d169ce95a_4091449829002170165.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/ededc2d807689d0cd7516380255bdc4d_8630919419587012890.png",
-    "word_text": "「此即幽夜净土之圣诏！本皇女最信任的扈从啊，你的贡献将被永远铭记。」",
     "year": 2023,
-    "birthday": "5/27",
-    "is_new": true,
     "role_id": 10000031,
+    "role_name": "菲谢尔",
+    "birthday": "5/27",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/7839e4e0809bacc3a1720f3d169ce95a_4091449829002170165.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/da586119ea742dc5c33c0c83cc1b7dd0_8197491001064365964.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/ededc2d807689d0cd7516380255bdc4d_8630919419587012890.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/70c898dd51e297ae290144d583d9f197_3224969577979514007.png"
+    ],
+    "word_text": "「此即幽夜净土之圣诏！本皇女最信任的扈从啊，你的贡献将被永远铭记。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/d8bc6b9d88d274429a98e0b38c7ec5ca873f4804.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 136,
-    "is_compensate": false,
-    "role_name": "菲谢尔"
+    "op_id": 136
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/84ececce17d0b62a5a300c29ffd138a7_1331297479396126691.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/7e73c04252caa82e457b1804e72a5fb5_6612197687465839634.png",
-    "word_text": "「派蒙，生日快乐！」",
     "year": 2023,
-    "birthday": "6/1",
-    "is_new": true,
     "role_id": -1,
+    "role_name": "派蒙",
+    "birthday": "6/1",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/84ececce17d0b62a5a300c29ffd138a7_1331297479396126691.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/d9d8be1c40c1e24ae56aa8c76aa2056f_6322055097099206834.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/7e73c04252caa82e457b1804e72a5fb5_6612197687465839634.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/60c58fef40c5cf4adc089b2fd1ff347f_7417203239022050514.png"
+    ],
+    "word_text": "「派蒙，生日快乐！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/a74cdf4dfc2c52bcaf1f6596303e45bd0d78a511.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 137,
-    "is_compensate": false,
-    "role_name": "派蒙"
+    "op_id": 137
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/30/e3614d6cce358d797de3b7ce304c5e5b_8183634748031826595.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/30/32ddae6584641d6f123f9470435571c8_2654116474796243752.png",
-    "word_text": "这可是「荒泷美食大师一斗」定制的生日特别版「热血强者之道」！",
     "year": 2023,
-    "birthday": "6/1",
-    "is_new": true,
     "role_id": 10000057,
+    "role_name": "荒泷一斗",
+    "birthday": "6/1",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/30/e3614d6cce358d797de3b7ce304c5e5b_8183634748031826595.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/30/87b8ed85ad78cc5a3c19817fd1e3a189_4582295154684091855.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/30/32ddae6584641d6f123f9470435571c8_2654116474796243752.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/05/30/2ffbdcc8fa3286f67b4d730341dab01d_9019336628236868783.png"
+    ],
+    "word_text": "这可是「荒泷美食大师一斗」定制的生日特别版「热血强者之道」！",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/d5a6e1a9a31711763ad2a9db61280c69ef90d6de.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 138,
-    "is_compensate": false,
-    "role_name": "荒泷一斗"
+    "op_id": 138
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/06/08/d2a15563cde85a5053fbdc02227e8118_2178771000773209928.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/06/08/317ae2be069ab8835301371347ae39d0_5381652457684112018.png",
-    "word_text": "「如果是小可爱和小派蒙，可以为你们量身定制『特训』，包教包会哦~」",
     "year": 2023,
-    "birthday": "6/9",
-    "is_new": true,
     "role_id": 10000006,
+    "role_name": "丽莎",
+    "birthday": "6/9",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/08/d2a15563cde85a5053fbdc02227e8118_2178771000773209928.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/08/b3c3e21f5a9f5c61cb0ccb29cbb7c3fa_6458451372660984316.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/08/317ae2be069ab8835301371347ae39d0_5381652457684112018.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/08/c56f7dc18831d81b4ea7686f3197d8b6_4007179552289595719.png"
+    ],
+    "word_text": "「如果是小可爱和小派蒙，可以为你们量身定制『特训』，包教包会哦~」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/05e68af9055b8fbd1bef29cd5d1a66c8cdc5a769.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 176,
-    "is_compensate": false,
-    "role_name": "丽莎"
+    "op_id": 176
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/06/15/bcdba1a0d4c46d8f83ad3de8b41515cb_6741590680859519801.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/06/15/01169f57b1be0a24571e45152ccbd819_735084242139287484.png",
-    "word_text": "「那么，世上最好的吟游诗人，给你们带来特别演出吧。」",
     "year": 2023,
-    "birthday": "6/16",
-    "is_new": true,
     "role_id": 10000022,
+    "role_name": "温迪",
+    "birthday": "6/16",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/15/bcdba1a0d4c46d8f83ad3de8b41515cb_6741590680859519801.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/15/25101887882e4fcc77f9776c9f8b0e56_2679847738183026690.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/15/01169f57b1be0a24571e45152ccbd819_735084242139287484.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/15/523fdf65843321b912b52fc9029c486a_1716035114312194784.png"
+    ],
+    "word_text": "「那么，世上最好的吟游诗人，给你们带来特别演出吧。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/d52e5c1d7e9ce7109f193955f43c3f22f37ece34.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 177,
-    "is_compensate": false,
-    "role_name": "温迪"
+    "op_id": 177
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/06/19/683ad42280678e9ce74f58fcebfb4d26_8509795488764083490.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/06/19/6214c9d1e25bdfda2bd559700fe2cab1_6918231179230794059.png",
-    "word_text": "「既然来了，就和大家一起玩吧！」",
     "year": 2023,
-    "birthday": "6/21",
-    "is_new": true,
     "role_id": 10000049,
+    "role_name": "宵宫",
+    "birthday": "6/21",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/19/683ad42280678e9ce74f58fcebfb4d26_8509795488764083490.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/19/b8421ce41673b2e6d0aee872cdf2e6b5_2463553094393264478.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/19/6214c9d1e25bdfda2bd559700fe2cab1_6918231179230794059.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/19/4ae17170ced5b69f54579240fc987a53_7163894756989326651.png"
+    ],
+    "word_text": "「既然来了，就和大家一起玩吧！」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/3aa5fb1e7ef587989a3b460a4d5a257ec74f5974.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 178,
-    "is_compensate": false,
-    "role_name": "宵宫"
+    "op_id": 178
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/06/20/4a793dfd39834c165a65bf8c76b951a2_5405218477688617296.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/06/20/c1a746e410c4e5308e53ccbcd8b5d9e3_2954826789995700029.png",
-    "word_text": "「你们正好也有三个人，按照规则，应该切换到派蒙出牌才是。」",
     "year": 2023,
-    "birthday": "6/23",
-    "is_new": true,
     "role_id": 10000071,
+    "role_name": "赛诺",
+    "birthday": "6/23",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/20/4a793dfd39834c165a65bf8c76b951a2_5405218477688617296.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/20/5bb7d35a404acbee4fe84eb49af1b2d9_2891258435074544339.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/20/c1a746e410c4e5308e53ccbcd8b5d9e3_2954826789995700029.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/20/3c32f8df886d41b0d202b315bb874365_7501475704521036621.png"
+    ],
+    "word_text": "「你们正好也有三个人，按照规则，应该切换到派蒙出牌才是。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/a851a6a5620571fdcf2fd4c0274661d15d1f3761.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 179,
-    "is_compensate": false,
-    "role_name": "赛诺"
+    "op_id": 179
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/06/25/1d3ee1b76b367879a2a44c2bd0b8e894_6489364691103346946.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/06/25/8232107e62127881335e174fb13bc05e_8094810454792314379.png",
-    "word_text": "「无须拘泥于形式和造型，各位的心意就是最好的礼物了。」",
     "year": 2023,
-    "birthday": "6/26",
-    "is_new": true,
     "role_id": 10000052,
+    "role_name": "雷电将军",
+    "birthday": "6/26",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/25/1d3ee1b76b367879a2a44c2bd0b8e894_6489364691103346946.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/25/63c884047e2b4b252fb76e8e92c25821_358809928272588234.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/25/8232107e62127881335e174fb13bc05e_8094810454792314379.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/25/26f03dfd30bee1369ea4399ff6347648_4167356184722784112.png"
+    ],
+    "word_text": "「无须拘泥于形式和造型，各位的心意就是最好的礼物了。」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/f6a459b01a519d1fbf4d79ab71844c65468edc0c.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 180,
-    "is_compensate": false,
-    "role_name": "雷电将军"
+    "op_id": 180
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/06/25/e1e1c550301f5e5c378ff1a0d400a939_3770029970499835308.jpg",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/06/25/889b00da27573443ed366c9592cd7f6f_5612464768343968081.png",
-    "word_text": "「来，戴上这个，再比个喵的姿势看看吧~」",
     "year": 2023,
-    "birthday": "6/27",
-    "is_new": true,
     "role_id": 10000058,
+    "role_name": "八重神子",
+    "birthday": "6/27",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/25/e1e1c550301f5e5c378ff1a0d400a939_3770029970499835308.jpg",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/25/793f0c1e7a68403db1d14ed7750a9868_3420529116951442936.jpg"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/25/889b00da27573443ed366c9592cd7f6f_5612464768343968081.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/06/25/77555115ad6fe11bc3b208f10e319c61_7443327162802389476.png"
+    ],
+    "word_text": "「来，戴上这个，再比个喵的姿势看看吧~」",
     "gal_xml": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/chapters/8a922d138516500f2dbf231bcd163dcedcef1e46.xml",
     "gal_resource": "https://uploadstatic.mihoyo.com/galgame_event_cn/hk4e_cn/novel/1bc8993bb65bebdf96bf621bea9ec23294959607/resources.xml",
-    "is_collected": false,
-    "op_id": 181,
-    "is_compensate": false,
-    "role_name": "八重神子"
+    "op_id": 181
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/07/03/3b2d426cf82b17363762904e9c06b306_4435781833087208611.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/07/03/f4baff0323874631461f01093d69daf5_4951997765709074629.png",
-    "word_text": "「唔…微甜的面饼搭配辛辣的酱料，好特别的体验！」",
     "year": 2023,
-    "birthday": "7/5",
-    "is_new": true,
     "role_id": 10000014,
+    "role_name": "芭芭拉",
+    "birthday": "7/5",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/07/03/3b2d426cf82b17363762904e9c06b306_4435781833087208611.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/07/03/bbe6127a0749140147b04d3708525823_5521095792650781802.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/07/03/f4baff0323874631461f01093d69daf5_4951997765709074629.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/07/03/ea4f943b85d5d8347cb23494ea088f78_4667134732265600850.png"
+    ],
+    "word_text": "「唔…微甜的面饼搭配辛辣的酱料，好特别的体验！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/5b491e5ca6c7f24879565b834314320d.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 182,
-    "is_compensate": false,
-    "role_name": "芭芭拉"
+    "op_id": 182
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/07/07/ca12b54dbd03138fd08f46c90686c014_2980257514105595805.png",
-    "unread_picture": "https://webstatic.mihoyo.com/upload/static-resource/2023/07/07/21377d3059a76561007c80d865823424_6161078729499345758.png",
-    "word_text": "「你们不会是看在我生日的份上，让我体验一次过稿才故意这么说的吧？」",
     "year": 2023,
-    "birthday": "7/9",
-    "is_new": true,
     "role_id": 10000081,
+    "role_name": "卡维",
+    "birthday": "7/9",
+    "take_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/07/07/ca12b54dbd03138fd08f46c90686c014_2980257514105595805.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/07/07/f9ca2a0d170fba98c17416aff2e88382_5707924512202033609.png"
+    ],
+    "unread_picture": [
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/07/07/21377d3059a76561007c80d865823424_6161078729499345758.png",
+      "https://webstatic.mihoyo.com/upload/static-resource/2023/07/07/7fcca4077b4f0e2f6675fc3cf5e7e8bb_110099516893623737.png"
+    ],
+    "word_text": "「你们不会是看在我生日的份上，让我体验一次过稿才故意这么说的吧？」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/86e3a31670d69041388cfcef5b0d747f.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 183,
-    "is_compensate": false,
-    "role_name": "卡维"
+    "op_id": 183
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/13/04f1b735a0195c2aece7b42f8fe93a93_4752988517675094028.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/13/c757ebcd390d394970e6941d7c8e7d26_4566604490728488868.png",
-    "word_text": "「训练是每天都要做的，找理由懈怠的话，有了一次就会有第二次。」",
     "year": 2023,
-    "birthday": "7/14",
-    "is_new": true,
     "role_id": 10000056,
+    "role_name": "九条裟罗",
+    "birthday": "7/14",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/13/04f1b735a0195c2aece7b42f8fe93a93_4752988517675094028.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/13/31f3d2850e83210587a40d138aaadffe_3922731293132292749.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/13/c757ebcd390d394970e6941d7c8e7d26_4566604490728488868.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/13/920d83dc7e4a297f1753b803360c88c4_6345838369922149489.png"
+    ],
+    "word_text": "「训练是每天都要做的，找理由懈怠的话，有了一次就会有第二次。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/ea4248c90cbc6eb6579dd5521b049652.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 184,
-    "is_compensate": false,
-    "role_name": "九条裟罗"
+    "op_id": 184
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/14/8d2b215970c01bcfb59e1028a97536a8_5985101325321019403.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/14/66da7c3b35dfaf8d71ecb89954ab7f64_2482966141691030106.png",
-    "word_text": "「没错！就叫它『胖胖』吧！」",
     "year": 2023,
-    "birthday": "7/15",
-    "is_new": true,
     "role_id": 10000046,
+    "role_name": "胡桃",
+    "birthday": "7/15",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/14/8d2b215970c01bcfb59e1028a97536a8_5985101325321019403.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/14/3d353e4196001a8585a2d19698a997e2_3939264134590888705.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/14/66da7c3b35dfaf8d71ecb89954ab7f64_2482966141691030106.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/14/de1c4314f86cccbc922d90045ce0f1e3_6869155848224369981.png"
+    ],
+    "word_text": "「没错！就叫它『胖胖』吧！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/b174e65db1f6edf8425d0a8747bf9d9e.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 185,
-    "is_compensate": false,
-    "role_name": "胡桃"
+    "op_id": 185
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/19/a719a503ac9c8862b9e4f99684c7779a_8006764377716281566.jpg",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/19/38cb85408d70e5a049f554807a298f32_554968022310981917.jpg",
-    "word_text": "「这是什么，决战的邀请函？终于要和我一决胜负了吗！」",
     "year": 2023,
-    "birthday": "7/20",
-    "is_new": true,
     "role_id": 10000033,
+    "role_name": "达达利亚",
+    "birthday": "7/20",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/19/a719a503ac9c8862b9e4f99684c7779a_8006764377716281566.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/19/74454a7492bafc57df006e3b8566f461_2565884938863315801.jpg"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/19/38cb85408d70e5a049f554807a298f32_554968022310981917.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/19/ae808b9b900f4b33512995e02a3a1b84_8333858481033293103.png"
+    ],
+    "word_text": "「这是什么，决战的邀请函？终于要和我一决胜负了吗！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/6df309d29f74f68dac28a10f29de5552.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 186,
-    "is_compensate": false,
-    "role_name": "达达利亚"
+    "op_id": 186
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/21/5fbe16c7ec1b00b10aa20573cf2222ad_657819567339567673.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/21/db7e081027c92e1d9e8070a1d3d5c9d9_2203314120426385904.png",
-    "word_text": "「哎呀呀，和你搭档果然是正确的选择！」",
     "year": 2023,
-    "birthday": "7/24",
-    "is_new": false,
     "role_id": 10000059,
+    "role_name": "鹿野院平藏",
+    "birthday": "7/24",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/21/5fbe16c7ec1b00b10aa20573cf2222ad_657819567339567673.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/21/9c0079341b6d87ad33e6982fb158226d_5305581384739258237.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/21/db7e081027c92e1d9e8070a1d3d5c9d9_2203314120426385904.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/21/0c27809fe84c692c6a2574af6a56b9a8_4578136858893717870.jpg"
+    ],
+    "word_text": "「哎呀呀，和你搭档果然是正确的选择！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/9fd984babe4153a6693b0945cf37614b.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 187,
-    "is_compensate": false,
-    "role_name": "鹿野院平藏"
+    "op_id": 187
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/26/940249afdbe1b27a01212ca65f739bca_712088011914714059.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/26/b8b0d21207840629486e582d120cdfdb_8859321980196632557.png",
-    "word_text": "「可莉希望懒懒蹦蹦可以陪在大家身边，让大家多一个朋友哦。」",
     "year": 2023,
-    "birthday": "7/27",
-    "is_new": true,
     "role_id": 10000029,
+    "role_name": "可莉",
+    "birthday": "7/27",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/26/940249afdbe1b27a01212ca65f739bca_712088011914714059.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/26/fb5fe0a9090c09314c62dee30d8c7ac8_2347183984014967586.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/26/b8b0d21207840629486e582d120cdfdb_8859321980196632557.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/26/16df365b97b081d603710cca0c7c74f2_7210850579172259923.png"
+    ],
+    "word_text": "「可莉希望懒懒蹦蹦可以陪在大家身边，让大家多一个朋友哦。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/e8b0be63be25b8f5de4025fe4fbb8871.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 188,
-    "is_compensate": false,
-    "role_name": "可莉"
+    "op_id": 188
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/26/688556e6170c22a47733d48c836ed212_2796509512791593387.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/26/ad514928e63f3edce229a730eb5cd1f2_1834010044978154208.png",
-    "word_text": "「你们是经验丰富的冒险家，感兴趣的话要不要看看都考些什么？」",
     "year": 2023,
-    "birthday": "7/27",
-    "is_new": true,
     "role_id": 10000065,
+    "role_name": "久岐忍",
+    "birthday": "7/27",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/26/688556e6170c22a47733d48c836ed212_2796509512791593387.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/26/db4858a37e4fb2608951bb58e4af4392_3198712750447204712.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/26/ad514928e63f3edce229a730eb5cd1f2_1834010044978154208.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/26/6065b17dbfa0a1078efa0f5adda3e1e1_1584818200822323591.png"
+    ],
+    "word_text": "「你们是经验丰富的冒险家，感兴趣的话要不要看看都考些什么？」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/9ecda9ed967823585ce6e743a2659e06.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 189,
-    "is_compensate": false,
-    "role_name": "久岐忍"
+    "op_id": 189
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/27/1b0a77306871c7e6adfc2f55d887e40b_407931784139322048.jpg",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/27/fe3b0f1926385e67b0ef67ca44cfa5dd_8529324198749427646.png",
-    "word_text": "「难怪称量得出的结果是这样…旅行者、派蒙，谢谢你们啦！」",
     "year": 2023,
-    "birthday": "7/28",
-    "is_new": true,
     "role_id": 10000048,
+    "role_name": "烟绯",
+    "birthday": "7/28",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/27/1b0a77306871c7e6adfc2f55d887e40b_407931784139322048.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/27/a25b8cf17ab8ccd6276a0acd17862b4e_4336250249201021520.jpg"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/27/fe3b0f1926385e67b0ef67ca44cfa5dd_8529324198749427646.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/07/27/ba80715cab105d789aa4e36814f20d27_6334433951235668203.png"
+    ],
+    "word_text": "「难怪称量得出的结果是这样…旅行者、派蒙，谢谢你们啦！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/f7ec9bdee8992009c38cf941e29a0598.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 190,
-    "is_compensate": false,
-    "role_name": "烟绯"
+    "op_id": 190
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/09/0894262508ed89f9cece6a2f5f7c3331_5900976165383799902.jpg",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/09/03a39084a107af2420e8d7c2bc798b53_1574859480879568022.png",
-    "word_text": "「好，就这么定了！派蒙，你猜谁会赢？」",
     "year": 2023,
-    "birthday": "8/10",
-    "is_new": true,
     "role_id": 10000021,
+    "role_name": "安柏",
+    "birthday": "8/10",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/09/0894262508ed89f9cece6a2f5f7c3331_5900976165383799902.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/09/142f8a1f8f4b3d41a97d2e5580d265f1_1451601410344035952.jpg"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/09/03a39084a107af2420e8d7c2bc798b53_1574859480879568022.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/09/dfd0cf5123f06f3758dd5d113f82787d_2620396796599492012.png"
+    ],
+    "word_text": "「好，就这么定了！派蒙，你猜谁会赢？」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/52a93aebefbb65f18bb0e7ce773262d5.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 191,
-    "is_compensate": false,
-    "role_name": "安柏"
+    "op_id": 191
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/10/b927b1427a1460e0138148b070894800_2258400866900903418.jpg",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/10/be173baaf993a7b55c0075c919d6ae4e_3990859774076052713.png",
-    "word_text": "「超级强者的笔记，这实在是太珍贵了，谢谢你们！」",
     "year": 2023,
-    "birthday": "8/11",
-    "is_new": true,
     "role_id": 10000080,
+    "role_name": "米卡",
+    "birthday": "8/11",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/10/b927b1427a1460e0138148b070894800_2258400866900903418.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/10/caef6bf7ea9c6ee4c08f37bceffebf21_5748923528705225467.jpg"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/10/be173baaf993a7b55c0075c919d6ae4e_3990859774076052713.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/10/a0d0f12c0f44e101d453fc626feeac80_8541700299211957511.png"
+    ],
+    "word_text": "「超级强者的笔记，这实在是太珍贵了，谢谢你们！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/1772b7f8d37c70e86aa1622df4362e82.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 192,
-    "is_compensate": false,
-    "role_name": "米卡"
+    "op_id": 192
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/18/1c383a7cacf29d3caf11bf156ed8a349_3005354136598885860.jpg",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/18/879cf23a97b2f4857decc23017a55e02_8107704527892173618.png",
-    "word_text": "「一百年后有人为我庆生，感觉还不错嘛！」",
     "year": 2023,
-    "birthday": "8/20",
-    "is_new": true,
     "role_id": 10000076,
+    "role_name": "珐露珊",
+    "birthday": "8/20",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/18/1c383a7cacf29d3caf11bf156ed8a349_3005354136598885860.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/18/eb4f1a76bc609372c6b0696b8b2831a1_7174860166860083945.jpg"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/18/879cf23a97b2f4857decc23017a55e02_8107704527892173618.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/18/2d7d8f72bff4f24873076365465e499c_8080799118350984094.png"
+    ],
+    "word_text": "「一百年后有人为我庆生，感觉还不错嘛！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/54b83f2bb9a3d1c98c7cce3291be3edd.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 193,
-    "is_compensate": false,
-    "role_name": "珐露珊"
+    "op_id": 193
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/24/9a71611a572b55373373142c4cfc819e_7045643275923759874.jpg",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/24/1f119a153594da80eed8874b7923092d_660015921155122830.png",
-    "word_text": "「今夜的景色很美呢。谢谢二位为我准备了这些，我很喜欢。」",
     "year": 2023,
-    "birthday": "8/26",
-    "is_new": true,
     "role_id": 10000027,
+    "role_name": "凝光",
+    "birthday": "8/26",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/24/9a71611a572b55373373142c4cfc819e_7045643275923759874.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/24/9e30e43fec1ec7bec071a8f30db7a22e_4453527991396287320.jpg"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/24/1f119a153594da80eed8874b7923092d_660015921155122830.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/24/019e89f007842d33217728e3855fdcf4_1360335131590760413.png"
+    ],
+    "word_text": "「今夜的景色很美呢。谢谢二位为我准备了这些，我很喜欢。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/0cf09d86144258878dcedbc25f95037c.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 194,
-    "is_compensate": false,
-    "role_name": "凝光"
+    "op_id": 194
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/29/312c1273a5863bee935b1b9045dd2d2c_8081463837171047098.jpg",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/29/f61a0b10bf33b349f0992edc3fcadffc_3120958469134213574.jpg",
-    "word_text": "「我的稿子还需要最后占卜一次就完成了！先进来喝杯茶吧，很快就好。」",
     "year": 2023,
-    "birthday": "8/31",
-    "is_new": true,
     "role_id": 10000041,
+    "role_name": "莫娜",
+    "birthday": "8/31",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/29/312c1273a5863bee935b1b9045dd2d2c_8081463837171047098.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/29/04ca499d4a4b21f288ece915e8fc3fba_6943768088351400153.jpg"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/29/f61a0b10bf33b349f0992edc3fcadffc_3120958469134213574.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/29/382eb011102b5d41bb361b83d0e86ea0_239015167289525550.jpg"
+    ],
+    "word_text": "「我的稿子还需要最后占卜一次就完成了！先进来喝杯茶吧，很快就好。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/678c9ec0294906aeb199289d8e16ff45.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 195,
-    "is_compensate": false,
-    "role_name": "莫娜"
+    "op_id": 195
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/05/257bd181514403f4e7d22d58fca8bc19_7779813530336800907.jpg",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/05/e21728c0eb93b3dc53655c99acdc9303_7242021427987594378.png",
-    "word_text": "「以防其中有妖邪作祟，旅行者小心些…唔！」",
     "year": 2023,
-    "birthday": "9/7",
-    "is_new": true,
     "role_id": 10000036,
+    "role_name": "重云",
+    "birthday": "9/7",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/05/257bd181514403f4e7d22d58fca8bc19_7779813530336800907.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/05/3f7d8885e8fb64331bfd2761823c0420_2155298791692809497.jpg"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/05/e21728c0eb93b3dc53655c99acdc9303_7242021427987594378.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/05/d693b48d58f3b174b6a1d277d4571c88_601547875645906168.png"
+    ],
+    "word_text": "「以防其中有妖邪作祟，旅行者小心些…唔！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/51803dd7edcdee8dec88676d4698d4c1.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 196,
-    "is_compensate": false,
-    "role_name": "重云"
+    "op_id": 196
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/08/1170e5470e5b241c5b55a92b7fa7f227_1029334393823565749.jpg",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/08/8cb677546fd74e4afe34a71ab1b8dd9a_7883411586045392373.png",
-    "word_text": "「也有诗歌说，是星星落到地上，才有了湖泽。」",
     "year": 2023,
-    "birthday": "9/9",
-    "is_new": true,
     "role_id": 10000020,
+    "role_name": "雷泽",
+    "birthday": "9/9",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/08/1170e5470e5b241c5b55a92b7fa7f227_1029334393823565749.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/08/99869503ddc2906c9c4966f9249cb8f1_8794133743182305233.jpg"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/08/8cb677546fd74e4afe34a71ab1b8dd9a_7883411586045392373.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/08/59183e58e6aa0c94ff525a105ef5ae8b_8274208686762023453.png"
+    ],
+    "word_text": "「也有诗歌说，是星星落到地上，才有了湖泽。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/46ccf1c33faeebb2a7c88d012eb89c82.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 198,
-    "is_compensate": false,
-    "role_name": "雷泽"
+    "op_id": 198
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/12/eeaedc376db4838fa4bf7cab98662c1b_9163664422245727481.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/12/5d413c2203736b2d1aaa07e5f0839585_6303027703962960279.png",
-    "word_text": "「等画作完成的时候，我们一起看看吧。」",
     "year": 2023,
-    "birthday": "9/13",
-    "is_new": true,
     "role_id": 10000038,
+    "role_name": "阿贝多",
+    "birthday": "9/13",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/12/eeaedc376db4838fa4bf7cab98662c1b_9163664422245727481.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/12/3d2b242e11deccb4ff2190c65ee8ce1e_3361313950116778681.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/12/5d413c2203736b2d1aaa07e5f0839585_6303027703962960279.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/12/20380733efbacf162f5e8756ca8f5c43_4855275607194623618.png"
+    ],
+    "word_text": "「等画作完成的时候，我们一起看看吧。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/2dddcf05bd253512739323e7db8371df.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 199,
-    "is_compensate": false,
-    "role_name": "阿贝多"
+    "op_id": 199
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/22/ba867977b5694ab32e4aa9406b2bb3f0_7076174146051077829.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/22/e1b1bb8cf92571f5c3e7c458605cb967_7157689738579644763.png",
-    "word_text": "「欸，不，不是，我只想走近看看那些橱窗里的发条工艺品，谢谢你们陪我…」",
     "year": 2023,
-    "birthday": "9/24",
-    "is_new": true,
     "role_id": 10000085,
+    "role_name": "菲米尼",
+    "birthday": "9/24",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/22/ba867977b5694ab32e4aa9406b2bb3f0_7076174146051077829.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/22/feca75d91cab9ed98c725ea63d7ed41a_1551545812496079717.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/22/e1b1bb8cf92571f5c3e7c458605cb967_7157689738579644763.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/22/aa63f530ccc08ac687831edf74edd6ec_7088004569188885817.png"
+    ],
+    "word_text": "「欸，不，不是，我只想走近看看那些橱窗里的发条工艺品，谢谢你们陪我…」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/512619bba4c5ce1753d420384247912a.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 201,
-    "is_compensate": false,
-    "role_name": "菲米尼"
+    "op_id": 201
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/26/a0277f34b66a5026313732851e9ddf4c_7747254523248154108.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/26/021ccc2ae1924f0d4ea966fe09eaf1f9_1659825009481206738.png",
-    "word_text": "「反而是我要谢谢你愿意陪我，我很开心。」",
     "year": 2023,
-    "birthday": "9/28",
-    "is_new": true,
     "role_id": 10000002,
+    "role_name": "神里绫华",
+    "birthday": "9/28",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/26/a0277f34b66a5026313732851e9ddf4c_7747254523248154108.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/26/48f8af52d278bfa9f7d8c87dbd1d0bf5_9071356525446094671.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/26/021ccc2ae1924f0d4ea966fe09eaf1f9_1659825009481206738.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/09/26/78f8f663459ab7d49f29d759a155f72f_7609427191112583033.png"
+    ],
+    "word_text": "「反而是我要谢谢你愿意陪我，我很开心。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/4af528f881ed99f0e07c5ae400792e07.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 202,
-    "is_compensate": false,
-    "role_name": "神里绫华"
+    "op_id": 202
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/08/42516a9ec39015d3503772b2e1a5f809_5776351682807896648.jpg",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/08/d5cea670d3d162f806ef3fe1f1735f92_3449966574659495567.png",
-    "word_text": "「这…旅行者你可要帮我，如果新菜里有『刺客』——」",
     "year": 2023,
-    "birthday": "10/9",
-    "is_new": true,
     "role_id": 10000025,
+    "role_name": "行秋",
+    "birthday": "10/9",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/08/42516a9ec39015d3503772b2e1a5f809_5776351682807896648.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/08/90f5bc3e2eab04ab930e11d4b36606de_2719910417594024968.jpg"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/08/d5cea670d3d162f806ef3fe1f1735f92_3449966574659495567.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/08/2c1fadb888bd8867e411a7eaddcb47ba_5104301549353309095.png"
+    ],
+    "word_text": "「这…旅行者你可要帮我，如果新菜里有『刺客』——」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/205aef3b4291837869f93ae5274679b1.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 203,
-    "is_compensate": false,
-    "role_name": "行秋"
+    "op_id": 203
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/13/9fc08e07fca18908ff5d3d8d5d715d42_4237021248078333000.jpg",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/13/fd4173116c16873fc391ffaa50ca7e09_1591056123660600124.jpg",
-    "word_text": "「正好听听我新写的曲子。来，动起来吧，摇滚时间到！」",
     "year": 2023,
-    "birthday": "10/16",
-    "is_new": true,
     "role_id": 10000044,
+    "role_name": "辛焱",
+    "birthday": "10/16",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/13/9fc08e07fca18908ff5d3d8d5d715d42_4237021248078333000.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/13/e4b2b40b57e840cc76ae701a04ed917d_2523091232577482231.jpg"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/13/fd4173116c16873fc391ffaa50ca7e09_1591056123660600124.jpg",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/13/be63d726fb09ccb5bcc0a32431a374bc_6595922725398755944.jpg"
+    ],
+    "word_text": "「正好听听我新写的曲子。来，动起来吧，摇滚时间到！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/0785d138df78f993acaa6d7ca6c2222c.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 204,
-    "is_compensate": false,
-    "role_name": "辛焱"
+    "op_id": 204
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/18/3ecc96311af59aa12276664abfae934e_570060679211887008.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/18/a5213dd1f718f1153753458dc2a03d4a_3661196436163156825.png",
-    "word_text": "「早柚要长高……」",
     "year": 2023,
-    "birthday": "10/19",
-    "is_new": true,
     "role_id": 10000053,
+    "role_name": "早柚",
+    "birthday": "10/19",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/18/3ecc96311af59aa12276664abfae934e_570060679211887008.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/18/a07f61ccf7e82b8ef8e37ca70582865e_435086060039425837.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/18/a5213dd1f718f1153753458dc2a03d4a_3661196436163156825.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/18/7e3ee3bc8cd926c4d9234bb479ed00b2_3847352755042432124.png"
+    ],
+    "word_text": "「早柚要长高……」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/123c87879550f63ecad75b8a28a0729b.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 205,
-    "is_compensate": false,
-    "role_name": "早柚"
+    "op_id": 205
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/24/0c3a271813cf74a33e1c516979b7f678_5739109329059176952.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/24/93929ba0f2fbc8944caf60d26e008166_5494455355039195412.png",
-    "word_text": "「那来学一段怎么样？手抬起来…对，就是这样。」",
     "year": 2023,
-    "birthday": "10/25",
-    "is_new": true,
     "role_id": 10000051,
+    "role_name": "优菈",
+    "birthday": "10/25",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/24/0c3a271813cf74a33e1c516979b7f678_5739109329059176952.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/24/058c0030cd16e43b6408d7d2b4770f5f_5790811216532267522.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/24/93929ba0f2fbc8944caf60d26e008166_5494455355039195412.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/24/8e553e5d97985f1492d508287a9948ac_5908915835402848230.png"
+    ],
+    "word_text": "「那来学一段怎么样？手抬起来…对，就是这样。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/a76194cb9028dc23606152247e93a814.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 206,
-    "is_compensate": false,
-    "role_name": "优菈"
+    "op_id": 206
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/26/941f0b05b8812e6aac8f1d5e1f0a7aa7_6670316821975894697.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/26/8b5fb930b91ada38717c1ef38c5e7c59_5865190012593011661.png",
-    "word_text": "「快来这里坐下，还有很多故事要分享呢。」",
     "year": 2023,
-    "birthday": "10/27",
-    "is_new": false,
     "role_id": 10000073,
+    "role_name": "纳西妲",
+    "birthday": "10/27",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/26/941f0b05b8812e6aac8f1d5e1f0a7aa7_6670316821975894697.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/26/778fd25f6a6b98557756739e84f9e595_322023766082380038.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/26/8b5fb930b91ada38717c1ef38c5e7c59_5865190012593011661.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/26/09310ca370da9b90e78a34420993bcb3_3052018631072279606.png"
+    ],
+    "word_text": "「快来这里坐下，还有很多故事要分享呢。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/4aa414f049f6f9e73521c07623a8a5d4.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 208,
-    "is_compensate": false,
-    "role_name": "纳西妲"
+    "op_id": 208
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/27/c655279785c24e122a0208936e01d001_8730665927128830420.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/27/6d5bceb9718d7f309404605e24668656_2899436995228573210.png",
-    "word_text": "「巧遇旧友，言谈甚欢，堂上尽抒诗兴。」",
     "year": 2023,
-    "birthday": "10/29",
-    "is_new": false,
     "role_id": 10000047,
+    "role_name": "枫原万叶",
+    "birthday": "10/29",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/27/c655279785c24e122a0208936e01d001_8730665927128830420.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/27/003e5047988ceb6e03bf4a4a87582dde_8311384720898067713.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/27/6d5bceb9718d7f309404605e24668656_2899436995228573210.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/27/0331e1ef28f55ab0092e46f4f21db207_6506095900093596656.png"
+    ],
+    "word_text": "「巧遇旧友，言谈甚欢，堂上尽抒诗兴。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/36c7efe2a927bbd9bed3652f7e62c971.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 209,
-    "is_compensate": false,
-    "role_name": "枫原万叶"
+    "op_id": 209
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/30/58a89fcdf07be56ddfc37be87764feed_3702503508387940468.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/30/0deb9917062cf0a671ef1786a0eb55fe_6315496432760318362.png",
-    "word_text": "「这可是我苦心研制、加了泡泡桔的新菜品——待会请务必多尝两口~」",
     "year": 2023,
-    "birthday": "11/2",
-    "is_new": false,
     "role_id": 10000023,
+    "role_name": "香菱",
+    "birthday": "11/2",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/30/58a89fcdf07be56ddfc37be87764feed_3702503508387940468.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/30/a868bf24b65171529ee949924260276c_2531632206496086376.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/30/0deb9917062cf0a671ef1786a0eb55fe_6315496432760318362.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/30/7f248edbacbd429f0c562540ac277cb8_8849632647335948009.png"
+    ],
+    "word_text": "「这可是我苦心研制、加了泡泡桔的新菜品——待会请务必多尝两口~」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/fd90413abb4a20777da63e121e847519.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 210,
-    "is_compensate": false,
-    "role_name": "香菱"
+    "op_id": 210
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/17/518815dca620fa2500d43b04f56ebfaa_1232045573889048164.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/17/c017db8f487ccc67d6a1a35463b7ddcf_2202589762010706528.png",
-    "word_text": "「今日事今日毕是我的行事准则，工作要今天完成，和你的约定也一样重要。」",
     "year": 2023,
-    "birthday": "11/20",
-    "is_new": true,
     "role_id": 10000042,
+    "role_name": "刻晴",
+    "birthday": "11/20",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/17/518815dca620fa2500d43b04f56ebfaa_1232045573889048164.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/17/4814ea4b0795b8fe90def515b1448b06_2601381167273552594.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/17/c017db8f487ccc67d6a1a35463b7ddcf_2202589762010706528.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/17/50bf40d01c221aebbbe7b4a835a9b8cf_382863608847386156.png"
+    ],
+    "word_text": "「今日事今日毕是我的行事准则，工作要今天完成，和你的约定也一样重要。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/fe5e0461fcb7bca5cccdebd1c2b758f6.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 211,
-    "is_compensate": false,
-    "role_name": "刻晴"
+    "op_id": 211
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/22/a48a17dc1a0970de3ebde05656237359_8754788377734458729.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/22/81a1703d38a934ec3af853cdbae068a9_8601369726673544667.png",
-    "word_text": "「等巡视结束一起去吃饭，我已经给韦尔赛打招呼了，备了豪华福利餐。」",
     "year": 2023,
-    "birthday": "11/23",
-    "is_new": false,
     "role_id": 10000086,
+    "role_name": "莱欧斯利",
+    "birthday": "11/23",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/22/a48a17dc1a0970de3ebde05656237359_8754788377734458729.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/22/7dc17cd673cf01460e5ee20e3d0b840b_168745365413264332.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/22/81a1703d38a934ec3af853cdbae068a9_8601369726673544667.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/22/4a5717601be1652102210a5b72b42620_7188794889606237715.png"
+    ],
+    "word_text": "「等巡视结束一起去吃饭，我已经给韦尔赛打招呼了，备了豪华福利餐。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/790cb23f317ee904bea520896f8dacfb.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 212,
-    "is_compensate": false,
-    "role_name": "莱欧斯利"
+    "op_id": 212
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/24/4f4804dd72db31b542c03437632730f7_2685486634875433833.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/24/cd3434e797324ab7d9ffcca664303dc5_6365267453920197346.png",
-    "word_text": "「哇，都是从未见过的生物，真是太神奇了！」",
     "year": 2023,
-    "birthday": "11/26",
-    "is_new": true,
     "role_id": 10000043,
+    "role_name": "砂糖",
+    "birthday": "11/26",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/24/4f4804dd72db31b542c03437632730f7_2685486634875433833.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/24/ab637044d3c9e5818469832083053768_336392759125705877.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/24/cd3434e797324ab7d9ffcca664303dc5_6365267453920197346.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/24/c4d020ef213d851cc4072df7bd43f927_809033607682545439.png"
+    ],
+    "word_text": "「哇，都是从未见过的生物，真是太神奇了！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/703e749130d4fd29c02edd4e9f5b25e6.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/event-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 220,
-    "is_compensate": false,
-    "role_name": "砂糖"
+    "op_id": 220
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/29/8613d833669b303801036755356185c4_8150365146844328609.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/29/b0a6e881d841bcb9949a21af285068bb_4128836881088117361.png",
-    "word_text": "「到时候新酿好的饮品，可以给你们先尝尝。」",
     "year": 2023,
-    "birthday": "11/30",
-    "is_new": true,
     "role_id": 10000015,
+    "role_name": "凯亚",
+    "birthday": "11/30",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/29/8613d833669b303801036755356185c4_8150365146844328609.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/29/e2633e8ef33b824ad417fcb88004558f_5453516269102098959.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/29/b0a6e881d841bcb9949a21af285068bb_4128836881088117361.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/29/a72cc5dcc778a16601add810ef0217dd_6323504037602305102.png"
+    ],
+    "word_text": "「到时候新酿好的饮品，可以给你们先尝尝。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/55f317d4cad79ef99d5d16e5b204e211.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 221,
-    "is_compensate": false,
-    "role_name": "凯亚"
+    "op_id": 221
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/01/534cb4d8d44a98697d3b8b299bab22ab_1355936415505039021.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/01/a279ef2d4f59eaa4e5a60b355f3c5e6c_6802242993366756956.png",
-    "word_text": "「之前瑶瑶给我送过，旅行者和派蒙多拿一些吧。」",
     "year": 2023,
-    "birthday": "12/2",
-    "is_new": true,
     "role_id": 10000037,
+    "role_name": "甘雨",
+    "birthday": "12/2",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/01/534cb4d8d44a98697d3b8b299bab22ab_1355936415505039021.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/01/5c14bba90c8fb9568c3bbc62747b4c09_8665977197075884589.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/01/a279ef2d4f59eaa4e5a60b355f3c5e6c_6802242993366756956.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/01/668c64c7b78e8ef19211fe50914f8b13_4677230047789102024.png"
+    ],
+    "word_text": "「之前瑶瑶给我送过，旅行者和派蒙多拿一些吧。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/69daf6b425778752ab6740ca4e306126.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 222,
-    "is_compensate": false,
-    "role_name": "甘雨"
+    "op_id": 222
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/01/d4c14fc0a1112cb662cf4bb6779c73e9_418940002675193930.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/01/c8786a9cbfad74e5f460bba27398e4e2_1607302961142220654.png",
-    "word_text": "「如果有时间的话，可以陪我一起看看吗？」",
     "year": 2023,
-    "birthday": "12/3",
-    "is_new": false,
     "role_id": 10000070,
+    "role_name": "妮露",
+    "birthday": "12/3",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/01/d4c14fc0a1112cb662cf4bb6779c73e9_418940002675193930.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/01/101af23040e92f91280c3d0bd8f681a2_4725607769680249663.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/01/c8786a9cbfad74e5f460bba27398e4e2_1607302961142220654.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/01/f0e95535d5e95600946aaee44f5ad86a_5344690545242717532.png"
+    ],
+    "word_text": "「如果有时间的话，可以陪我一起看看吗？」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/d9dc52aef1d83dd5d2aaee512ac4fdd3.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 223,
-    "is_compensate": false,
-    "role_name": "妮露"
+    "op_id": 223
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/15/4bcb875cc28cf58138960fc5d7bd45c8_3378140650206943433.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/15/3e5d0e033e4c129c88e87e4dc9656679_6600742230483100568.png",
-    "word_text": "「唔，口感很好，味道也很丰富。」",
     "year": 2023,
-    "birthday": "12/18",
-    "is_new": true,
     "role_id": 10000087,
+    "role_name": "那维莱特",
+    "birthday": "12/18",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/15/4bcb875cc28cf58138960fc5d7bd45c8_3378140650206943433.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/15/ecc83917884d5be435dbecbcd80b2ea5_6723658284771308979.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/15/3e5d0e033e4c129c88e87e4dc9656679_6600742230483100568.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/15/9dc6c242a7bd49a34eb359c4605c65ae_1484510420490110056.png"
+    ],
+    "word_text": "「唔，口感很好，味道也很丰富。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/01b13f9762963f36a5f394804228b64c.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 224,
-    "is_compensate": false,
-    "role_name": "那维莱特"
+    "op_id": 224
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/18/c846e906d41a275f879f5ab016717800_2619268480220300583.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/18/f340653b41acefd5469432525f624f04_3427552290326230863.png",
-    "word_text": "「多多观察的话，总能找到一些规律。」",
     "year": 2023,
-    "birthday": "12/19",
-    "is_new": true,
     "role_id": 10000074,
+    "role_name": "莱依拉",
+    "birthday": "12/19",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/18/c846e906d41a275f879f5ab016717800_2619268480220300583.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/18/34e1360e57785cc47b49a7631fb0ca6b_4160405401416153895.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/18/f340653b41acefd5469432525f624f04_3427552290326230863.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/18/72d4de817ab1cea50d86236816a58f6f_9170482158364850068.png"
+    ],
+    "word_text": "「多多观察的话，总能找到一些规律。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/cbd0a6b7c7b51295cea61fa31867f3cc.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml?ts=1702962608744",
-    "is_collected": true,
-    "op_id": 225,
-    "is_compensate": false,
-    "role_name": "莱依拉"
+    "op_id": 225
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/20/a0499793e19a28db6a72d2e3747e6a28_4902224605942911147.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/20/42d5b275b8b505538f94385a2f97c247_2874455220486017381.png",
-    "word_text": "「这些合同，都是刚才谈下来的哦。」",
     "year": 2023,
-    "birthday": "12/21",
-    "is_new": true,
     "role_id": 10000068,
+    "role_name": "多莉",
+    "birthday": "12/21",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/20/a0499793e19a28db6a72d2e3747e6a28_4902224605942911147.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/20/24d6ea5923fbea95acc63cd3df38b4ed_1407658253051882312.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/20/42d5b275b8b505538f94385a2f97c247_2874455220486017381.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/20/c83cdf9e782ffbc917ae84cc3637b74a_7921096052485468264.png"
+    ],
+    "word_text": "「这些合同，都是刚才谈下来的哦。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/4bf4357780ea57b650cdeea2a5177103.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml?ts=1703054988276",
-    "is_collected": false,
-    "op_id": 226,
-    "is_compensate": false,
-    "role_name": "多莉"
+    "op_id": 226
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/28/2c2bd200a2c6e437f93b57f202ab899a_3246622338158715687.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/28/699862a477b6592f075b5e69e1aa8665_2933100526632453290.png",
-    "word_text": "「水之国生长的植物果然与雨林中的差异甚大，谢谢你们带来如此珍贵的礼物。」",
     "year": 2023,
-    "birthday": "12/29",
-    "is_new": true,
     "role_id": 10000069,
+    "role_name": "提纳里",
+    "birthday": "12/29",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/28/2c2bd200a2c6e437f93b57f202ab899a_3246622338158715687.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/28/2c9fba5905c597f95941af677e512d40_5439971064136625002.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/28/699862a477b6592f075b5e69e1aa8665_2933100526632453290.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/28/bf685e63711f684135e46aa669201058_6014764161223096679.png"
+    ],
+    "word_text": "「水之国生长的植物果然与雨林中的差异甚大，谢谢你们带来如此珍贵的礼物。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/40c01a79308906169fd785904f338c10.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml?ts=1703753696455",
-    "is_collected": false,
-    "op_id": 227,
-    "is_compensate": false,
-    "role_name": "提纳里"
+    "op_id": 227
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/29/a7c0c1c64889ce98b0d00cc03d8f8f41_3893862726557360287.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/29/f15c62396353bc38a8f9cbc5f103bd7d_6970297316169761653.png",
-    "word_text": "「如此细致的要求，看来是要在十分讲究的场合使用。」",
     "year": 2023,
-    "birthday": "12/31",
-    "is_new": false,
     "role_id": 10000030,
+    "role_name": "钟离",
+    "birthday": "12/31",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/29/a7c0c1c64889ce98b0d00cc03d8f8f41_3893862726557360287.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/29/3cfa090d2cb8c77636f28c985c271f03_4454842883609405691.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/29/f15c62396353bc38a8f9cbc5f103bd7d_6970297316169761653.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2023/12/29/2b721adae33fbef1695fa4af59438e0c_5167621520251595946.png"
+    ],
+    "word_text": "「如此细致的要求，看来是要在十分讲究的场合使用。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/c3f6c18acbd812abe3191b9d8e403f0a.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml?ts=1703839110245",
-    "is_collected": false,
-    "op_id": 228,
-    "is_compensate": false,
-    "role_name": "钟离"
+    "op_id": 228
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/02/148b29c3923294143aebc8960ee99f1f_4334810441980669030.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/02/242eb24d1c67263d13a01687d98bb027_163313960990051636.png",
-    "word_text": "「这里没人烦我，清净点也不错。」",
     "year": 2024,
-    "birthday": "1/3",
-    "is_new": false,
     "role_id": 10000075,
+    "role_name": "流浪者",
+    "birthday": "1/3",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/02/148b29c3923294143aebc8960ee99f1f_4334810441980669030.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/02/553d4323ae1071362683471be8d9d204_979749206979904614.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/02/242eb24d1c67263d13a01687d98bb027_163313960990051636.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/02/9385435b7b62d27fbd8f154978313cf5_3106968455813294765.png"
+    ],
+    "word_text": "「这里没人烦我，清净点也不错。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/d39caeb1bb1bdcd507e949fa4f1eabf2.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml?ts=1704195268152",
-    "is_collected": false,
-    "op_id": 233,
-    "is_compensate": false,
-    "role_name": "流浪者"
+    "op_id": 233
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/08/2a5e21645c19d57b8a67a402976304ce_416696360231779884.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/08/bbb35fc6efda1988a749d20b881ee6c2_1425841470421819933.png",
-    "word_text": "「如果有人能理解我的心情，大概就只有你们了吧。」",
     "year": 2024,
-    "birthday": "1/9",
-    "is_new": false,
     "role_id": 10000050,
+    "role_name": "托马",
+    "birthday": "1/9",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/08/2a5e21645c19d57b8a67a402976304ce_416696360231779884.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/08/ff83e83f65f914ef76b0a93e5db0a5a8_8647195908792530456.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/08/bbb35fc6efda1988a749d20b881ee6c2_1425841470421819933.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/08/749323839f8aad723e76625d9057872a_2265945015664058018.png"
+    ],
+    "word_text": "「如果有人能理解我的心情，大概就只有你们了吧。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/bcdd7e5042187c4eab02256bd6a1fd96.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml?ts=1704710169496",
-    "is_collected": false,
-    "op_id": 234,
-    "is_compensate": false,
-    "role_name": "托马"
+    "op_id": 234
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/09/85d934c77baa161a90783818b5e484da_8448560905910777211.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/09/dfb0c38f1f8fd300c0b22e40bb3e5890_3608686220893181877.png",
-    "word_text": "「果然糖分和油脂能让人开心，就是容易忍不住吃太多。」",
     "year": 2024,
-    "birthday": "1/10",
-    "is_new": false,
     "role_id": 10000090,
+    "role_name": "夏沃蕾",
+    "birthday": "1/10",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/09/85d934c77baa161a90783818b5e484da_8448560905910777211.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/09/e9441013252a34625c8bc00833862fe3_2255683923986666658.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/09/dfb0c38f1f8fd300c0b22e40bb3e5890_3608686220893181877.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/09/3477deb308aca7c870b634f59302e48a_5302299920358556748.png"
+    ],
+    "word_text": "「果然糖分和油脂能让人开心，就是容易忍不住吃太多。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/a059c0f7cb8ad6cf4b46750b67c9ccdf.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml?ts=1704792260724",
-    "is_collected": false,
-    "op_id": 235,
-    "is_compensate": false,
-    "role_name": "夏沃蕾"
+    "op_id": 235
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/16/3a0e8bc6d0df3fd96421bd61f380e8fd_8238755559295451022.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/16/1d5e6964f55a2e096f9a7a5c9189ca98_6143041937658482590.png",
-    "word_text": "「哼哼，蒙德酒业的末日就在今天！」",
     "year": 2024,
-    "birthday": "1/18",
-    "is_new": false,
     "role_id": 10000039,
+    "role_name": "迪奥娜",
+    "birthday": "1/18",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/16/3a0e8bc6d0df3fd96421bd61f380e8fd_8238755559295451022.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/16/e111f532c097c7500ce2a9b5d91719fc_4437322976032387200.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/16/1d5e6964f55a2e096f9a7a5c9189ca98_6143041937658482590.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/16/03e221be27fed9386ba381c136345395_8018205356650058584.png"
+    ],
+    "word_text": "「哼哼，蒙德酒业的末日就在今天！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/19fb8d3ea4d2bcafff3b9ece9748fce6.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 236,
-    "is_compensate": false,
-    "role_name": "迪奥娜"
+    "op_id": 236
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/18/fec9ea8294790fe18be46e8da543b2fb_6387408145429887231.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/18/e0919ea722248fc4d3b859b703e6b3b4_2901183277889362999.png",
-    "word_text": "「没有什么快递是我送不到的！」",
     "year": 2024,
-    "birthday": "1/22",
-    "is_new": false,
     "role_id": 10000061,
+    "role_name": "绮良良",
+    "birthday": "1/22",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/18/fec9ea8294790fe18be46e8da543b2fb_6387408145429887231.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/18/af03d91320e4ada1632eb113354762c3_5165340854893843581.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/18/e0919ea722248fc4d3b859b703e6b3b4_2901183277889362999.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/18/e52b811bf0bf31416e6d78cc334d5573_8569031314350529654.png"
+    ],
+    "word_text": "「没有什么快递是我送不到的！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/cf6ba26c3bfb3dbfeb65ed4bee072a09.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 237,
-    "is_compensate": false,
-    "role_name": "绮良良"
+    "op_id": 237
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/23/a44f86310d889ffac44d2a349946470e_2605833606582667749.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/23/7d53d4e7121e485a0f31a470025c8e76_5238883963861210724.png",
-    "word_text": "「速战速决，快到下班时间了。」",
     "year": 2024,
-    "birthday": "1/24",
-    "is_new": false,
     "role_id": 10000045,
+    "role_name": "罗莎莉亚",
+    "birthday": "1/24",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/23/a44f86310d889ffac44d2a349946470e_2605833606582667749.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/23/b8ff7fd2e5332f409b9597c463ab83bb_6900574664135198826.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/23/7d53d4e7121e485a0f31a470025c8e76_5238883963861210724.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/23/27a980f714492ac25a9a2e5bf5bb1643_8876825211475249167.png"
+    ],
+    "word_text": "「速战速决，快到下班时间了。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/8b145b278407a7844c3d1c65cbd542e5.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 238,
-    "is_compensate": false,
-    "role_name": "罗莎莉亚"
+    "op_id": 238
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/01/46323d143cbd7dc98a2ef141e54e854f_7185611319555503479.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/01/68e8bd6516ffb87487e662f28abd4c3a_2511231940973070575.png",
-    "word_text": "「这是秘密，不告诉哥哥。」",
     "year": 2024,
-    "birthday": "2/2",
-    "is_new": false,
     "role_id": 10000083,
+    "role_name": "琳妮特",
+    "birthday": "2/2",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/01/46323d143cbd7dc98a2ef141e54e854f_7185611319555503479.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/01/9f90aaad53164068e4c0878c965777da_2356917839627108903.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/01/68e8bd6516ffb87487e662f28abd4c3a_2511231940973070575.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/01/68e8bd6516ffb87487e662f28abd4c3a_8392123412912288278.png"
+    ],
+    "word_text": "「这是秘密，不告诉哥哥。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/efbbf86e2cbad64a27d4423dcfc606a2.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml?ts=1706845269803",
-    "is_collected": false,
-    "op_id": 240,
-    "is_compensate": false,
-    "role_name": "琳妮特"
+    "op_id": 240
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/31/769f527b98b6cb62ca68445c725f72be_6516488068983329839.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/31/f08facb033de21a5de3e2f5c44dfc64a_1435592523614153678.png",
-    "word_text": "「作为魔术师，就为你们表演一场专属魔术吧！」",
     "year": 2024,
-    "birthday": "2/2",
-    "is_new": false,
     "role_id": 10000084,
+    "role_name": "林尼",
+    "birthday": "2/2",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/31/769f527b98b6cb62ca68445c725f72be_6516488068983329839.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/31/a71c7a3a7253871e72f834c6cf791328_272030820285668493.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/31/f08facb033de21a5de3e2f5c44dfc64a_1435592523614153678.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/31/73545d405f383207513da8bfd2d769a8_3019001713721544807.png"
+    ],
+    "word_text": "「作为魔术师，就为你们表演一场专属魔术吧！」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/4d4295077ef0f890cdc4402f3c58637f.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml?ts=1706845269803",
-    "is_collected": false,
-    "op_id": 239,
-    "is_compensate": false,
-    "role_name": "林尼"
+    "op_id": 239
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/08/779a644042c7a6b8d2ba07068910ec13_3697243822341479960.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/08/720ccc94569bc5653ab5c3d971cb512e_161856837796438804.png",
-    "word_text": "「只是午休时间出来坐坐。」",
     "year": 2024,
-    "birthday": "2/11",
-    "is_new": false,
     "role_id": 10000078,
+    "role_name": "艾尔海森",
+    "birthday": "2/11",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/08/779a644042c7a6b8d2ba07068910ec13_3697243822341479960.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/08/88558ca4aa717e01a37605dfbbf4bf60_8750570747150715283.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/08/720ccc94569bc5653ab5c3d971cb512e_161856837796438804.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/08/848d02309c404cfba9d579a9aebca3e8_3575575653675798249.png"
+    ],
+    "word_text": "「只是午休时间出来坐坐。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/9a5e11e6cc84b315d1f648c0aa717ba3.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 242,
-    "is_compensate": false,
-    "role_name": "艾尔海森"
+    "op_id": 242
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/08/f5ce2f5a26223402a566a9ca57a9b409_824354342116553209.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/08/42a3a88fc041df21c18bb8c4dec5bebf_7596751734715009129.png",
-    "word_text": "「那就要问问我手里的剑同不同意了。」",
     "year": 2024,
-    "birthday": "2/14",
-    "is_new": false,
     "role_id": 10000024,
+    "role_name": "北斗",
+    "birthday": "2/14",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/08/f5ce2f5a26223402a566a9ca57a9b409_824354342116553209.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/08/c9bbc4baed189897ce9b1ff229b5ef40_4522174037639312413.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/08/42a3a88fc041df21c18bb8c4dec5bebf_7596751734715009129.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/08/b9486005b72ae2084178b0e4084cc759_4254807775430372170.png"
+    ],
+    "word_text": "「那就要问问我手里的剑同不同意了。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/c8c27581868240f8f1c242ea14e165be.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 241,
-    "is_compensate": false,
-    "role_name": "北斗"
+    "op_id": 241
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/21/a757921bb48c648b23951dcad602c80b_3841509463234418771.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/21/5fb36802d11a078ff01c559b05563bd0_4655693411792578941.png",
-    "word_text": "「大海总能给我带来不同的心境。」",
     "year": 2024,
-    "birthday": "2/22",
-    "is_new": false,
     "role_id": 10000054,
+    "role_name": "珊瑚宫心海",
+    "birthday": "2/22",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/21/a757921bb48c648b23951dcad602c80b_3841509463234418771.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/21/c73a85c0b352a71c56c06c8938acec92_373934211340553712.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/21/5fb36802d11a078ff01c559b05563bd0_4655693411792578941.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/21/c7ccafdaae82bb09108e28e317a304dc_5419756849581852714.png"
+    ],
+    "word_text": "「大海总能给我带来不同的心境。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/54bcacf527984924f41246c8c7986af9.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 243,
-    "is_compensate": false,
-    "role_name": "珊瑚宫心海"
+    "op_id": 243
   },
   {
-    "draw_status": "normal",
-    "take_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/28/408ba94a94f8a0580b548ecaa026e893_6434133799213761510.png",
-    "unread_picture": "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/28/ff6ecf19adc81d596a8353d0fd332f8f_9050631886141487276.png",
-    "word_text": "「太幸福了，我也有运气好的时候嘛。」",
     "year": 2024,
-    "birthday": "2/29",
-    "is_new": false,
     "role_id": 10000032,
+    "role_name": "班尼特",
+    "birthday": "2/29",
+    "take_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/28/408ba94a94f8a0580b548ecaa026e893_6434133799213761510.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/28/c6e0b30b8f07afa8d81345ab3b51968d_1950345739559907159.png"
+    ],
+    "unread_picture": [
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/28/ff6ecf19adc81d596a8353d0fd332f8f_9050631886141487276.png",
+      "https://fastcdn.mihoyo.com/static-resource-v2/2024/02/28/d3c9da7affc0c18d4e296316067ec91a_1520038797288815222.png"
+    ],
+    "word_text": "「太幸福了，我也有运气好的时候嘛。」",
     "gal_xml": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/chapters/820c5df8a8a9c64b2dccd7c474706d4c.xml",
     "gal_resource": "https://act-webstatic.mihoyo.com/upload-static-galgame/event/hk4e_cn/novel/b512d9873c76a575f904b9be05f0cd2d/resources.xml",
-    "is_collected": false,
-    "op_id": 244,
-    "is_compensate": false,
-    "role_name": "班尼特"
+    "op_id": 244
   }
 ]
