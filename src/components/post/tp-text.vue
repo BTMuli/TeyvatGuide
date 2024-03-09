@@ -102,8 +102,10 @@ function getTextStyle(): StyleValue {
   const style = <Array<StyleValue>>[];
   let data: TpText;
   if (props.data.insert === "\n") {
-    style.push("display: inline");
-    return style;
+    if (props.data.attributes?.align || props.data.attributes?.header) {
+      return "display: none";
+    }
+    return "display: inline";
   }
   if (props.next?.insert === "\n") {
     data = {

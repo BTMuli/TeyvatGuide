@@ -2,7 +2,7 @@
   <component
     v-for="(tp, index) in props.data"
     :key="index"
-    :is="getTpName(tp, index)"
+    :is="getTpName(tp)"
     :data="tp"
     :next="getTpNext(index)"
   />
@@ -25,7 +25,7 @@ interface TpParserProps {
 
 const props = defineProps<TpParserProps>();
 
-function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base, index: number) {
+function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base) {
   if (typeof tp.insert === "string") {
     return TpText;
   } else if ("image" in tp.insert) {
