@@ -196,9 +196,11 @@ function getAnnoTime(content: string): string | false {
     return res?.[0].replace(/.*?(\d\.\d版本期间持续开放)/, "$1") ?? false;
   }
   if (content.match(regexes[1])) {
-    console.log("actPermanently");
-    // todo 待处理
-    return false;
+    const res = content.match(regexes[1]);
+    if (res === null) return false;
+    const regex2 = /\d\.\d版本更新(?:完成|)后永久开放/;
+    const res2 = res[0].match(regex2);
+    return res2 === null ? false : res2[0];
   }
   if (content.match(regexes[2])) {
     const res = content.match(regexes[2]);
