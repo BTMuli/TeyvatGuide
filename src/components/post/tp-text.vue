@@ -198,6 +198,10 @@ function getEmojiUrl(): string {
     });
   }
   const emojiName = getEmojiName();
+  const emojiMap: Record<string, string> = JSON.parse(<string>localEmojis.value);
+  if (!Object.keys(emojiMap).includes(emojiName)) {
+    mode.value = "text";
+  }
   return JSON.parse(<string>localEmojis.value)[emojiName];
 }
 
