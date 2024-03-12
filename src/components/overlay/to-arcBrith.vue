@@ -115,6 +115,13 @@ async function loadText(): Promise<void> {
     return;
   }
   const resSource: any = await parseXml(props.data.gal_resource);
+  if (resSource === false) {
+    showSnackbar({
+      text: "对白数据加载失败",
+      color: "error",
+    });
+    return;
+  }
   const keyMap: XmlKeyMap[] = resSource["elements"][0]["elements"][0]["elements"]
     .map((item: any) => {
       if (item["name"] === "chara")
@@ -158,11 +165,16 @@ async function loadText(): Promise<void> {
 }
 
 async function parseXml(link: string) {
-  const res = await http.fetch<string>(link, {
-    method: "GET",
-    responseType: ResponseType.Text,
-  });
-  return JSON.parse(xml2json(res.data));
+  try {
+    const res = await http.fetch<string>(link, {
+      method: "GET",
+      responseType: ResponseType.Text,
+    });
+    return JSON.parse(xml2json(res.data));
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
 }
 
 function onCancel() {
@@ -187,9 +199,11 @@ function onCancel() {
 }
 
 .toab-img img {
+  overflow: hidden;
   width: 100%;
   max-width: 100%;
   height: auto;
+  border-radius: 10px;
 }
 
 .toab-top-tools {
@@ -200,7 +214,10 @@ function onCancel() {
   align-items: center;
   justify-content: center;
   padding: 5px;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
   background-color: var(--common-shadow-t-2);
+  border-bottom-right-radius: 10px;
 }
 
 .toab-dialog {
@@ -214,6 +231,7 @@ function onCancel() {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  border-radius: 10px;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   background: var(--common-shadow-t-2);

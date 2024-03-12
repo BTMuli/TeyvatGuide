@@ -1,16 +1,22 @@
 <template>
   <div class="ab-container">
     <div class="ab-draw-top">
-      <v-switch v-model="isAether" :label="isAether ? '空' : '荧'" />
+      <div @click="toAct" class="ab-draw-act" title="前往网页活动">
+        <img src="/source/UI/act_birthday.png" alt="archive_birthday_icon" class="side-icon" />
+      </div>
+      <v-switch
+        class="ab-draw-switch"
+        v-model="isAether"
+        center-affix
+        :label="isAether ? '空' : '荧'"
+      />
     </div>
     <div class="ab-draw-grid">
       <div v-for="item in selectedItem" :key="item.op_id" class="ab-draw">
         <div class="ab-draw-cover" @click="showImg(item)">
-          <img
-            :src="item.take_picture[Number(isAether)]"
-            :data-src="item.unread_picture[Number(isAether)]"
-            :alt="item.word_text"
-          />
+          <img :src="item.unread_picture[Number(isAether)]" :alt="item.word_text" />
+          <div class="ab-draw-hide" />
+          <v-icon class="ab-draw-icon">mdi-magnify</v-icon>
         </div>
         <div class="ab-di-info">{{ item.year }} {{ item.birthday }} {{ item.role_name }}</div>
         <div class="ab-di-text" :title="item.word_text">{{ item.word_text }}</div>
@@ -25,6 +31,7 @@ import { onMounted, ref, watch, watchEffect } from "vue";
 
 import ToArcBrith from "../../components/overlay/to-arcBrith.vue";
 import { ArcBirDraw } from "../../data";
+import TGClient from "../../utils/TGClient";
 
 const page = ref(1);
 const length = ref(0);
@@ -51,6 +58,10 @@ function showImg(item: TGApp.Archive.Birth.DrawItem) {
   current.value = item;
   showOverlay.value = true;
 }
+
+async function toAct(): Promise<void> {
+  await TGClient.open("birthday");
+}
 </script>
 <style lang="css" scoped>
 .ab-container {
@@ -63,8 +74,27 @@ function showImg(item: TGApp.Archive.Birth.DrawItem) {
 
 .ab-draw-top {
   display: flex;
+  width: 100%;
+  height: 60px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  column-gap: 10px;
+}
+
+.ab-draw-act {
+  cursor: pointer;
+}
+
+.ab-draw-act img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  object-position: center;
+  transition: all 0.3s ease-in-out;
+}
+
+.ab-draw-switch {
+  display: flex;
 }
 
 .ab-draw-grid {
@@ -78,17 +108,42 @@ function showImg(item: TGApp.Archive.Birth.DrawItem) {
 
 .ab-draw {
   display: flex;
+  height: fit-content;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  transition: all 0.3s ease-in-out;
 }
 
 .ab-draw-cover {
+  position: relative;
   overflow: hidden;
   width: 100%;
   max-width: 100%;
   border-radius: 5px;
   aspect-ratio: 125 / 54;
+}
+
+.ab-draw-hide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  background: var(--common-shadow-t-2);
+}
+
+.ab-draw-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  color: var(--common-shadow-8);
+  font-size: 30px;
+  transform: translate(-50%, -50%);
+  transition: all 0.5s ease-in-out;
 }
 
 .ab-draw-cover img {
@@ -99,11 +154,31 @@ function showImg(item: TGApp.Archive.Birth.DrawItem) {
   transition: all 0.3s ease-in-out;
 }
 
-.ab-draw-cover img:hover {
+.ab-draw-act img:hover {
+  transform: scale(1.1);
+  transition: all 0.3s ease-in-out;
+}
+
+.ab-draw:hover img {
   overflow: hidden;
   cursor: pointer;
   transform: scale(1.1);
   transition: all 0.3s ease-in-out;
+}
+
+.ab-draw:hover .ab-draw-hide {
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+  background: var(--common-shadow-2);
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.ab-draw:hover .ab-draw-icon {
+  color: var(--common-shadow-t-4);
+  cursor: pointer;
+  scale: 2;
+  transition: all 0.5s ease-in-out;
 }
 
 .ab-di-info {
