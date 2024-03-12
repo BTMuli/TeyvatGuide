@@ -2,8 +2,8 @@
   <TOverlay v-model="visible" hide blur-val="20px" :to-click="onCancel">
     <div class="tog-box">
       <div class="tog-top">
-        <div class="tog-title">请使用原神进行扫码操作</div>
-        <div class="tog-subtitle">仅支持官服，渠道服请使用网页登录</div>
+        <div class="tog-title">请使用米游社或原神进行操作</div>
+        <div class="tog-subtitle">所需米游社版本 >= 2.57.1</div>
       </div>
       <div class="tog-mid">
         <qrcode-vue
@@ -127,20 +127,28 @@ async function cycleGetData() {
   if (res.stat === "Confirmed") {
     clearInterval(cycleTimer);
     cycleTimer = null;
-    if (res.payload.proto !== "OpenToken") {
-      await TGLogger.Warn(`[to-gameLogin] 检测到非Combo协议：${res.payload.proto}`);
+    if (res.payload.proto !== "OpenToken" && res.payload.proto !== "Account") {
+      await TGLogger.Warn(`[to-gameLogin] 检测到意外协议：${res.payload.proto}`);
       showSnackbar({
-        text: "请使用原神进行扫码操作",
+        text: "请使用米游社或原神进行扫码操作",
         color: "error",
       });
       visible.value = false;
       return;
     }
-    const data: TGApp.Plugins.Mys.GameLogin.StatusPayloadRaw = JSON.parse(res.payload.raw);
-    cookie.account_id = data.open_id;
-    cookie.ltuid = data.open_id;
-    cookie.stuid = data.open_id;
-    await getTokens(data.open_token);
+    if (res.payload.proto === "OpenToken") {
+      const data: TGApp.Plugins.Mys.GameLogin.StatusPayloadRawOpen = JSON.parse(res.payload.raw);
+      cookie.account_id = data.open_id;
+      cookie.ltuid = data.open_id;
+      cookie.stuid = data.open_id;
+      await getTokens(data.open_token);
+    } else {
+      const data: TGApp.Plugins.Mys.GameLogin.StatusPayloadRawAccount = JSON.parse(res.payload.raw);
+      cookie.account_id = data.uid;
+      cookie.ltuid = data.uid;
+      cookie.stuid = data.uid;
+      await getTokens(data.token, true);
+    }
     showSnackbar({
       text: "登录成功",
       color: "success",
@@ -152,8 +160,8 @@ async function cycleGetData() {
   }
 }
 
-async function getTokens(game_token: string): Promise<void> {
-  const stokenRes = await TGRequest.User.bgGameToken.getStoken(cookie.account_id, game_token);
+async function getTokens(game_token: string, isGT: boolean = false): Promise<void> {
+  const stokenRes = await TGRequest.User.bgGameToken.getStoken(cookie.account_id, game_token, isGT);
   if (!("retcode" in stokenRes)) {
     cookie.stoken = stokenRes.token.token;
     cookie.mid = stokenRes.user_info.mid;

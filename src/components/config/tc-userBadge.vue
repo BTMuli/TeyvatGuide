@@ -209,8 +209,6 @@ async function getTokenWeb(cookie: string): Promise<void> {
     });
   }
   signListener();
-  emits("loadOuter", { show: false });
-  // 检测cookie是否每项都有
   if (Object.values(cookieUser).some((i) => i === "")) {
     showSnackbar({
       text: "获取 cookie 失败!部分项为空!",
@@ -220,10 +218,21 @@ async function getTokenWeb(cookie: string): Promise<void> {
     return;
   }
   await TGSqlite.saveAppData("cookie", JSON.stringify(cookieUser));
-  showSnackbar({
-    text: "登录成功!",
-    color: "success",
-  });
+  const failCount = await refreshUserInfo();
+  if (failCount > 0) {
+    showSnackbar({
+      color: "error",
+      text: "获取用户信息失败！",
+    });
+  } else {
+    showSnackbar({
+      text: "登录成功!",
+      color: "success",
+    });
+    appStore.isLogin = true;
+  }
+  loading.value = false;
+  emits("loadOuter", { show: false });
 }
 
 async function refreshUser() {
@@ -298,42 +307,7 @@ async function refreshUser() {
   }
   userStore.cookie.value = ck;
   await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
-  emits("loadOuter", { show: true, title: "正在获取用户信息" });
-  const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
-  if ("retcode" in infoRes) {
-    emits("loadOuter", { show: true, title: "正在获取用户信息", text: "获取用户信息失败!" });
-    await TGLogger.Error("[tc-userBadge][refreshUser] 获取用户信息失败");
-    await TGLogger.Error(`[tc-userBadge][refreshUser] ${infoRes.retcode}: ${infoRes.message}`);
-    failCount++;
-  } else {
-    emits("loadOuter", { show: true, title: "正在获取用户信息", text: "获取用户信息成功!" });
-    const briefInfo: TGApp.App.Account.BriefInfo = {
-      nickname: infoRes.nickname,
-      uid: infoRes.uid,
-      avatar: infoRes.avatar_url,
-      desc: infoRes.introduce,
-    };
-    userStore.briefInfo.value = briefInfo;
-    await TGSqlite.saveAppData("userInfo", JSON.stringify(briefInfo));
-    await TGLogger.Info("[tc-userBadge][refreshUser] 获取用户信息成功");
-  }
-  emits("loadOuter", { show: true, title: "正在获取账号信息" });
-  const accountRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);
-  if (Array.isArray(accountRes)) {
-    emits("loadOuter", { show: true, title: "正在获取账号信息", text: "获取账号信息成功!" });
-    await TGLogger.Info("[tc-userBadge][refreshUser] 获取账号信息成功");
-    await TGSqlite.saveAccount(accountRes);
-    const curAccount = await TGSqlite.getCurAccount();
-    if (curAccount) userStore.account.value = curAccount;
-  } else {
-    emits("loadOuter", { show: true, title: "正在获取账号信息", text: "获取账号信息失败!" });
-    await TGLogger.Error("[tc-userBadge][refreshUser] 获取账号信息失败");
-    await TGLogger.Error(
-      `[tc-userBadge][refreshUser] ${accountRes.retcode}: ${accountRes.message}`,
-    );
-    failCount++;
-  }
-  loading.value = false;
+  failCount = await refreshUserInfo();
   if (failCount > 0) {
     showSnackbar({
       color: "error",
@@ -345,6 +319,55 @@ async function refreshUser() {
   }
   loading.value = false;
   emits("loadOuter", { show: false });
+}
+
+async function refreshUserInfo(cnt: number = 0): Promise<number> {
+  let failCount = cnt;
+  const ck = userStore.cookie.value;
+  if (ck === undefined) {
+    showSnackbar({
+      text: "未获取到用户 ck!",
+      color: "error",
+    });
+    await TGLogger.Error("[tc-userBadge][refreshUserInfo] 未获取到用户 ck");
+    return 0;
+  }
+  emits("loadOuter", { show: true, title: "正在获取用户信息" });
+  const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
+  if ("retcode" in infoRes) {
+    emits("loadOuter", { show: true, title: "正在获取用户信息", text: "获取用户信息失败!" });
+    await TGLogger.Error("[tc-userBadge][refreshUserInfo] 获取用户信息失败");
+    await TGLogger.Error(`[tc-userBadge][refreshUserInfo] ${infoRes.retcode}: ${infoRes.message}`);
+    failCount++;
+  } else {
+    emits("loadOuter", { show: true, title: "正在获取用户信息", text: "获取用户信息成功!" });
+    const briefInfo: TGApp.App.Account.BriefInfo = {
+      nickname: infoRes.nickname,
+      uid: infoRes.uid,
+      avatar: infoRes.avatar_url,
+      desc: infoRes.introduce,
+    };
+    userStore.briefInfo.value = briefInfo;
+    await TGSqlite.saveAppData("userInfo", JSON.stringify(briefInfo));
+    await TGLogger.Info("[tc-userBadge][refreshUserInfo] 获取用户信息成功");
+  }
+  emits("loadOuter", { show: true, title: "正在获取账号信息" });
+  const accountRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);
+  if (Array.isArray(accountRes)) {
+    emits("loadOuter", { show: true, title: "正在获取账号信息", text: "获取账号信息成功!" });
+    await TGLogger.Info("[tc-userBadge][refreshUserInfo] 获取账号信息成功");
+    await TGSqlite.saveAccount(accountRes);
+    const curAccount = await TGSqlite.getCurAccount();
+    if (curAccount) userStore.account.value = curAccount;
+  } else {
+    emits("loadOuter", { show: true, title: "正在获取账号信息", text: "获取账号信息失败!" });
+    await TGLogger.Error("[tc-userBadge][refreshUserInfo] 获取账号信息失败");
+    await TGLogger.Error(
+      `[tc-userBadge][refreshUserInfo] ${accountRes.retcode}: ${accountRes.message}`,
+    );
+    failCount++;
+  }
+  return failCount;
 }
 
 async function confirmRefreshUser(): Promise<void> {

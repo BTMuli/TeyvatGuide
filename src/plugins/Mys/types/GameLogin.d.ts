@@ -1,12 +1,12 @@
 /**
  * @file plugins/Mys/types/GameLogin.d.ts
  * @description Mys 插件 Game 登录类型定义文件
- * @since Beta v0.4.3
+ * @since Beta v0.4.4
  */
 
 /**
  * @description Mys 插件 Game 登录类型
- * @since Beta v0.4.3
+ * @since Beta v0.4.4
  * @namespace TGApp.Plugins.Mys.GameLogin
  * @memberof TGApp.Plugins.Mys
  */
@@ -76,14 +76,27 @@ declare namespace TGApp.Plugins.Mys.GameLogin {
 
   /**
    * @description 反序列化后的登录状态数据
-   * @since Beta v0.4.3
-   * @interface StatusPayloadRaw
+   * @since Beta v0.4.4
+   * @interface StatusPayloadRawOpen
    * @property {string} uid 用户 UID
    * @property {string} token 用户 token
-   * @return StatusPayloadRaw
+   * @return StatusPayloadRawOpen
    */
-  interface StatusPayloadRaw {
+  interface StatusPayloadRawOpen {
     open_id: string;
     open_token: string;
+  }
+
+  /**
+   * @description 反序列化后的登录状态数据
+   * @since Beta v0.4.4
+   * @interface StatusPayloadRawAccount
+   * @property {string} uid 用户 UID
+   * @property {string} token 用户 token
+   * @return StatusPayloadRawOpen
+   */
+  interface StatusPayloadRawAccount {
+    uid: string;
+    token: string;
   }
 }

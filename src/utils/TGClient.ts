@@ -458,6 +458,9 @@ class TGClient {
           }
           await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
           isLogin = true;
+        } else {
+          // 等待 500 ms
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
       }
     })();`;
