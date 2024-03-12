@@ -218,6 +218,7 @@ async function getTokenWeb(cookie: string): Promise<void> {
     text: "登录成功!",
     color: "success",
   });
+  console.log("cookieUser", cookieUser);
 }
 
 async function refreshUser() {

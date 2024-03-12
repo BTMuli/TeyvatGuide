@@ -441,6 +441,30 @@ class TGClient {
   }
 
   /**
+   * @func loadSignIn
+   * @since Beta v0.4.4
+   * @desc 自动检测登录ck
+   * @returns {Promise<void>}
+   */
+  async loadSignIn(): Promise<void> {
+    const executeJS = `javascript:(async function() {
+      let isLogin = false;
+      while(!isLogin) {
+        var ck = document.cookie;
+        if(ck.includes("login_ticket")) {
+          const arg = {
+            method: 'teyvat_sign_in',
+            payload: ck,
+          }
+          await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
+          isLogin = true;
+        }
+      }
+    })();`;
+    await invoke("execute_js", { label: "mhy_client", js: executeJS });
+  }
+
+  /**
    * @func nullCallback
    * @since Beta v0.3.9
    * @desc 空回调函数
@@ -453,7 +477,7 @@ class TGClient {
 
   /**
    * @func open
-   * @since Beta v0.4.3
+   * @since Beta v0.4.4
    * @desc 打开米游社客户端
    * @param {string} func - 方法名
    * @param {string} url - url
@@ -468,6 +492,9 @@ class TGClient {
     await this.window?.show();
     await this.window?.setFocus();
     await this.loadJSBridge();
+    if (func === "config_sign_in") {
+      await this.loadSignIn();
+    }
   }
 
   /* JSBridge 回调处理 */
@@ -669,7 +696,7 @@ class TGClient {
     }
     const data = {
       "user-agent": TGConstant.BBS.UA_MOBILE,
-      "x-rpc-client_type": "5",
+      "x-rpc-client_type": "2",
       "x-rpc-device_id": deviceInfo.device_id,
       "x-rpc-app_version": TGConstant.BBS.VERSION,
       "x-rpc-device_fp": deviceInfo.device_fp,
