@@ -253,14 +253,19 @@ const userStore = storeToRefs(useUserStore());
 
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 
-const userInfo = computed(() => {
-  const info = userStore.briefInfo.value;
-  if (info && info.nickname) return info;
-  return {
-    nickname: "未登录",
-    avatar: "/source/UI/lumine.webp",
-  };
+const userInfo = ref({
+  nickname: "未登录",
+  uid: "-1",
+  desc: "请扫码登录",
+  avatar: "/source/UI/lumine.webp",
 });
+
+watch(userStore.briefInfo, (val) => {
+  if (val && val.nickname) {
+    userInfo.value = val;
+  }
+});
+
 const rail = ref(appStore.sidebar.collapse);
 // theme
 const themeGet = computed({
@@ -295,6 +300,9 @@ onMounted(async () => {
   if (TauriWindow.getCurrent().label === "TeyvatGuide") {
     await mhyClient.run();
   }
+  if (userStore.briefInfo.value && userStore.briefInfo.value.nickname) {
+    userInfo.value = userStore.briefInfo.value;
+  }
 });
 
 async function switchTheme(): Promise<void> {
@@ -311,7 +319,8 @@ async function openClient(func: string): Promise<void> {
 
 function login(): void {
   showSnackbar({
-    text: "请前往设置页面扫码登录",
+    text: "请前往设置页面登录！",
+    color: "warn",
   });
 }
 

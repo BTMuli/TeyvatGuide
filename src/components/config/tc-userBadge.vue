@@ -19,7 +19,7 @@
 import { event, window as windowTauri } from "@tauri-apps/api";
 import type { UnlistenFn } from "@tauri-apps/api/helpers/event";
 import { storeToRefs } from "pinia";
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 
 import TGSqlite from "../../plugins/Sqlite";
 import { useAppStore } from "../../store/modules/app";
@@ -55,6 +55,12 @@ let signListener: UnlistenFn;
 onMounted(() => {
   if (userStore.briefInfo.value && userStore.briefInfo.value.nickname) {
     userInfo.value = userStore.briefInfo.value;
+  }
+});
+
+watch(userStore.briefInfo, (v) => {
+  if (v && v.nickname) {
+    userInfo.value = v;
   }
 });
 
@@ -218,7 +224,6 @@ async function getTokenWeb(cookie: string): Promise<void> {
     text: "登录成功!",
     color: "success",
   });
-  console.log("cookieUser", cookieUser);
 }
 
 async function refreshUser() {
