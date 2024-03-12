@@ -297,6 +297,15 @@
     "icon": "/WIKI/weapon/12501.webp"
   },
   {
+    "id": 11514,
+    "contentId": 0,
+    "name": "有乐御簾切",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/11514.webp"
+  },
+  {
     "id": 11513,
     "contentId": 7509,
     "name": "静水流涌之辉",
@@ -763,6 +772,15 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "icon": "/WIKI/weapon/13427.webp"
+  },
+  {
+    "id": 13426,
+    "contentId": 0,
+    "name": "沙中伟贤的对答",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/长柄武器.webp",
+    "icon": "/WIKI/weapon/13426.webp"
   },
   {
     "id": 13425,

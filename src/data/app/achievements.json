@@ -14511,6 +14511,49 @@
     }
   },
   {
+    "id": 84152,
+    "series": 17,
+    "order": 7800,
+    "name": "命运的示数",
+    "description": "完成「猫与随机数」，解锁全部结局。",
+    "reward": 20,
+    "version": "4.5",
+    "trigger": {
+      "type": "MAIN_COOP_SAVE_POINT_AND"
+    }
+  },
+  {
+    "id": 84153,
+    "series": 17,
+    "order": 7810,
+    "name": "SPEEDRUN",
+    "description": "说服琳妮特与你共度悠闲而平静的一天。",
+    "reward": 5,
+    "version": "4.5",
+    "trigger": {
+      "type": "MAIN_COOP_SAVE_POINT_AND"
+    }
+  },
+  {
+    "id": 84154,
+    "series": 17,
+    "order": 7811,
+    "name": "DECKS & DETECTIVES",
+    "description": "侦破走私案后，与琳妮特享受宁静的茶会时光。",
+    "reward": 5,
+    "version": "4.5",
+    "trigger": {
+      "type": "FINISH_QUEST_OR",
+      "task": [
+        {
+          "questId": 19187,
+          "name": "落定",
+          "type": "角色邀约/传说任务"
+        }
+      ]
+    }
+  },
+  {
     "id": 84300,
     "series": 0,
     "order": 5079,

@@ -1420,6 +1420,16 @@
     "profile": "/source/nameCard/profile/嘉明·文仔.webp"
   },
   {
+    "name": "千织·展袖",
+    "index": 193,
+    "type": 2,
+    "desc": "名片纹饰。被叫做「阿袖」的娃娃是千织最早的作品，也是最省裁剪与布料的模特。",
+    "source": "千织的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/千织·展袖.webp",
+    "bg": "/source/nameCard/bg/千织·展袖.webp",
+    "profile": "/source/nameCard/profile/千织·展袖.webp"
+  },
+  {
     "name": "纪行·捕风",
     "index": 2,
     "type": 3,
@@ -1718,6 +1728,16 @@
     "icon": "/source/nameCard/icon/纪行·彩鹞.webp",
     "bg": "/source/nameCard/bg/纪行·彩鹞.webp",
     "profile": "/source/nameCard/profile/纪行·彩鹞.webp"
+  },
+  {
+    "name": "纪行·魔萃",
+    "index": 194,
+    "type": 3,
+    "desc": "名片纹饰。炼金术是研究物质互相转化的学科，但是用炼金术制作药剂质量却会少一截。可能是变成大家快乐的心情了吧，我不知道。",
+    "source": "纪行系统奖励获取。",
+    "icon": "/source/nameCard/icon/纪行·魔萃.webp",
+    "bg": "/source/nameCard/bg/纪行·魔萃.webp",
+    "profile": "/source/nameCard/profile/纪行·魔萃.webp"
   },
   {
     "name": "庆典·无相",

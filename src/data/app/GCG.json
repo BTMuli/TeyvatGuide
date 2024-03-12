@@ -108,6 +108,19 @@
     }
   },
   {
+    "id": 1110,
+    "contentId": 0,
+    "name": "夏洛蒂",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/夏洛蒂.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_CRYO": "冰元素",
+      "GCG_TAG_WEAPON_CATALYST": "法器",
+      "GCG_TAG_NATION_FONTAINE": "枫丹",
+      "GCG_TAG_FACTION_PNEUMA": "始基力：芒性"
+    }
+  },
+  {
     "id": 1201,
     "contentId": 5372,
     "name": "芭芭拉",
@@ -213,6 +226,19 @@
       "GCG_TAG_ELEMENT_HYDRO": "水元素",
       "GCG_TAG_WEAPON_BOW": "弓",
       "GCG_TAG_NATION_LIYUE": "璃月"
+    }
+  },
+  {
+    "id": 1210,
+    "contentId": 0,
+    "name": "那维莱特",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/那维莱特.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_HYDRO": "水元素",
+      "GCG_TAG_WEAPON_CATALYST": "法器",
+      "GCG_TAG_NATION_FONTAINE": "枫丹",
+      "GCG_TAG_FACTION_PNEUMA": "始基力：芒性"
     }
   },
   {
@@ -712,6 +738,18 @@
     }
   },
   {
+    "id": 1707,
+    "contentId": 0,
+    "name": "绮良良",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/绮良良.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_DENDRO": "草元素",
+      "GCG_TAG_WEAPON_SWORD": "单手剑",
+      "GCG_TAG_NATION_INAZUMA": "稻妻"
+    }
+  },
+  {
     "id": 2101,
     "contentId": 6565,
     "name": "愚人众·冰萤术士",
@@ -841,6 +879,18 @@
       "GCG_TAG_ELEMENT_ELECTRO": "雷元素",
       "GCG_TAG_WEAPON_NONE": "其他武器",
       "GCG_TAG_CAMP_MONSTER": "魔物"
+    }
+  },
+  {
+    "id": 2404,
+    "contentId": 0,
+    "name": "愚人众·雷萤术士",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/愚人众·雷萤术士.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_ELECTRO": "雷元素",
+      "GCG_TAG_WEAPON_NONE": "其他武器",
+      "GCG_TAG_CAMP_FATUI": "愚人众"
     }
   },
   {
@@ -1379,6 +1429,17 @@
     }
   },
   {
+    "id": 211101,
+    "contentId": 0,
+    "name": "以有趣相关为要义",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/以有趣相关为要义.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
     "id": 212011,
     "contentId": 5496,
     "name": "光辉的季节",
@@ -1472,6 +1533,17 @@
     "name": "猜先有方",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/猜先有方.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
+    "id": 212101,
+    "contentId": 0,
+    "name": "古海孑遗的权柄",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/古海孑遗的权柄.webp",
     "tags": {
       "GCG_TAG_TALENT": "天赋",
       "GCG_TAG_SLOWLY": "战斗行动"
@@ -1928,6 +2000,17 @@
     }
   },
   {
+    "id": 217071,
+    "contentId": 0,
+    "name": "沿途百景会心",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/沿途百景会心.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
     "id": 221011,
     "contentId": 6622,
     "name": "冰萤寒光",
@@ -2042,6 +2125,17 @@
     "icon": "/WIKI/GCG/normal/明珠固化.webp",
     "tags": {
       "GCG_TAG_TALENT": "天赋"
+    }
+  },
+  {
+    "id": 224041,
+    "contentId": 0,
+    "name": "雷萤浮闪",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/雷萤浮闪.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
     }
   },
   {
@@ -2171,6 +2265,17 @@
     "name": "图莱杜拉的回忆",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/图莱杜拉的回忆.webp",
+    "tags": {
+      "GCG_TAG_WEAPON": "武器",
+      "GCG_TAG_WEAPON_CATALYST": "法器"
+    }
+  },
+  {
+    "id": 311108,
+    "contentId": 0,
+    "name": "万世流涌大典",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/万世流涌大典.webp",
     "tags": {
       "GCG_TAG_WEAPON": "武器",
       "GCG_TAG_WEAPON_CATALYST": "法器"
@@ -2693,6 +2798,16 @@
     }
   },
   {
+    "id": 312025,
+    "contentId": 0,
+    "name": "黄金剧团的奖赏",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/黄金剧团的奖赏.webp",
+    "tags": {
+      "GCG_TAG_ARTIFACT": "圣遗物"
+    }
+  },
+  {
     "id": 312101,
     "contentId": 5427,
     "name": "破冰踏雪的回音",
@@ -3003,6 +3118,16 @@
     }
   },
   {
+    "id": 321018,
+    "contentId": 0,
+    "name": "梅洛彼得堡",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/梅洛彼得堡.webp",
+    "tags": {
+      "GCG_TAG_PLACE": "场地"
+    }
+  },
+  {
     "id": 322001,
     "contentId": 5448,
     "name": "派蒙",
@@ -3293,6 +3418,16 @@
     }
   },
   {
+    "id": 323007,
+    "contentId": 0,
+    "name": "流明石触媒",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/流明石触媒.webp",
+    "tags": {
+      "GCG_TAG_ITEM": "道具"
+    }
+  },
+  {
     "id": 330001,
     "contentId": 500025,
     "name": "旧时庭园",
@@ -3348,6 +3483,16 @@
     "name": "裁定之时",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/裁定之时.webp",
+    "tags": {
+      "GCG_TAG_LEGEND": "秘传"
+    }
+  },
+  {
+    "id": 330007,
+    "contentId": 0,
+    "name": "抗争之日·碎梦之时",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/抗争之日·碎梦之时.webp",
     "tags": {
       "GCG_TAG_LEGEND": "秘传"
     }
@@ -3756,6 +3901,14 @@
     "name": "净觉花",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/净觉花.webp",
+    "tags": null
+  },
+  {
+    "id": 332030,
+    "contentId": 0,
+    "name": "可控性去危害化式定向爆破",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/可控性去危害化式定向爆破.webp",
     "tags": null
   },
   {

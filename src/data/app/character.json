@@ -1,5 +1,17 @@
 [
   {
+    "id": 10000094,
+    "contentId": 0,
+    "name": "千织",
+    "title": "鸣雷的裁锦师",
+    "area": "稻妻",
+    "birthday": [8, 17],
+    "star": 5,
+    "element": "岩",
+    "weapon": "单手剑",
+    "nameCard": "千织·展袖"
+  },
+  {
     "id": 10000093,
     "contentId": 500673,
     "name": "闲云",

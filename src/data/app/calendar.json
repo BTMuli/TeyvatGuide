@@ -440,6 +440,50 @@
     }
   },
   {
+    "id": 10000094,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "千织",
+    "itemType": "character",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "elementIcon": "/icon/element/岩元素.webp",
+    "icon": "/WIKI/character/10000094.webp",
+    "materials": [
+      {
+        "id": 104326,
+        "name": "「天光」的教导",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/104326.webp"
+      },
+      {
+        "id": 104327,
+        "name": "「天光」的指引",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/104327.webp"
+      },
+      {
+        "id": 104328,
+        "name": "「天光」的哲学",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/104328.webp"
+      }
+    ],
+    "source": {
+      "index": 3,
+      "area": "稻妻",
+      "name": "真葛废都",
+      "icon": "/icon/nation/稻妻.webp"
+    }
+  },
+  {
     "id": 10000091,
     "contentId": 500419,
     "dropDays": [1, 4, 7],
@@ -3785,6 +3829,57 @@
       "index": 3,
       "area": "稻妻",
       "name": "砂之祭场",
+      "icon": "/icon/nation/稻妻.webp"
+    }
+  },
+  {
+    "id": 11514,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "有乐御簾切",
+    "itemType": "weapon",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/11514.webp",
+    "materials": [
+      {
+        "id": 114025,
+        "name": "远海夷地的瑚枝",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114025.webp"
+      },
+      {
+        "id": 114026,
+        "name": "远海夷地的玉枝",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114026.webp"
+      },
+      {
+        "id": 114027,
+        "name": "远海夷地的琼枝",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114027.webp"
+      },
+      {
+        "id": 114028,
+        "name": "远海夷地的金枝",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114028.webp"
+      }
+    ],
+    "source": {
+      "index": 3,
+      "area": "稻妻",
+      "name": "沉沙之渊",
       "icon": "/icon/nation/稻妻.webp"
     }
   },
@@ -10670,6 +10765,57 @@
       "index": 4,
       "area": "须弥",
       "name": "思惑",
+      "icon": "/icon/nation/须弥.webp"
+    }
+  },
+  {
+    "id": 13426,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "沙中伟贤的对答",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/长柄武器.webp",
+    "icon": "/WIKI/weapon/13426.webp",
+    "materials": [
+      {
+        "id": 114037,
+        "name": "谧林涓露的铜符",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114037.webp"
+      },
+      {
+        "id": 114038,
+        "name": "谧林涓露的铁符",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114038.webp"
+      },
+      {
+        "id": 114039,
+        "name": "谧林涓露的银符",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114039.webp"
+      },
+      {
+        "id": 114040,
+        "name": "谧林涓露的金符",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114040.webp"
+      }
+    ],
+    "source": {
+      "index": 4,
+      "area": "须弥",
+      "name": "云垢",
       "icon": "/icon/nation/须弥.webp"
     }
   },
