@@ -27,7 +27,7 @@
             </div>
             <div class="gro-pi-time">{{ getTimeStr(pool) }}</div>
             <div class="gro-pi-sub">Up 五星</div>
-            <div class="gro-pool-up">
+            <div class="gro-pool-up lv5">
               <TItembox
                 v-for="i in pool.up5List"
                 :key="i"
@@ -36,7 +36,7 @@
               />
             </div>
             <div class="gro-pi-sub">Up 四星</div>
-            <div class="gro-pool-up">
+            <div class="gro-pool-up lv4">
               <TItembox
                 v-for="i in pool.up4List"
                 :key="i"
@@ -150,13 +150,13 @@ function getBox(id: number): TItemBoxData {
     return {
       bg: `/icon/bg/${cFind.star}-Star.webp`,
       icon: `/WIKI/character/${cFind.id}.webp`,
-      size: "100px",
-      height: "100px",
+      size: "80px",
+      height: "80px",
       display: "inner",
       clickable: true,
       lt: `/icon/element/${cFind.element}元素.webp`,
       ltSize: "30px",
-      innerHeight: 25,
+      innerHeight: 20,
       innerIcon: `/icon/weapon/${cFind.weapon}.webp`,
       innerText: cFind.name,
     };
@@ -164,13 +164,13 @@ function getBox(id: number): TItemBoxData {
     return {
       bg: `/icon/bg/${wFind.star}-Star.webp`,
       icon: `/WIKI/weapon/${wFind.id}.webp`,
-      size: "100px",
-      height: "100px",
+      size: "80px",
+      height: "80px",
       display: "inner",
       clickable: true,
       lt: wFind.weaponIcon,
       ltSize: "30px",
-      innerHeight: 25,
+      innerHeight: 20,
       innerText: wFind.name,
     };
   } else {
@@ -224,7 +224,7 @@ function getBox(id: number): TItemBoxData {
   position: relative;
   display: flex;
   width: 100%;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
   padding: 10px;
   border-radius: 10px;
@@ -251,7 +251,6 @@ function getBox(id: number): TItemBoxData {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  row-gap: 10px;
 }
 
 .gro-pi-title {
@@ -287,5 +286,14 @@ function getBox(id: number): TItemBoxData {
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
+  overflow-y: auto;
+}
+
+.gro-pool-up.lv5 {
+  max-height: 80px;
+}
+
+.gro-pool-up.lv4 {
+  max-height: 170px;
 }
 </style>
