@@ -109,7 +109,7 @@
   },
   {
     "id": 1110,
-    "contentId": 0,
+    "contentId": 500990,
     "name": "夏洛蒂",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/夏洛蒂.webp",
@@ -230,7 +230,7 @@
   },
   {
     "id": 1210,
-    "contentId": 0,
+    "contentId": 500991,
     "name": "那维莱特",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/那维莱特.webp",
@@ -739,7 +739,7 @@
   },
   {
     "id": 1707,
-    "contentId": 0,
+    "contentId": 500992,
     "name": "绮良良",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/绮良良.webp",
@@ -883,7 +883,7 @@
   },
   {
     "id": 2404,
-    "contentId": 0,
+    "contentId": 500994,
     "name": "愚人众·雷萤术士",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/愚人众·雷萤术士.webp",
@@ -1430,7 +1430,7 @@
   },
   {
     "id": 211101,
-    "contentId": 0,
+    "contentId": 500993,
     "name": "以有趣相关为要义",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/以有趣相关为要义.webp",
@@ -1540,7 +1540,7 @@
   },
   {
     "id": 212101,
-    "contentId": 0,
+    "contentId": 500998,
     "name": "古海孑遗的权柄",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/古海孑遗的权柄.webp",
@@ -2001,7 +2001,7 @@
   },
   {
     "id": 217071,
-    "contentId": 0,
+    "contentId": 501003,
     "name": "沿途百景会心",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/沿途百景会心.webp",
@@ -2129,7 +2129,7 @@
   },
   {
     "id": 224041,
-    "contentId": 0,
+    "contentId": 500995,
     "name": "雷萤浮闪",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/雷萤浮闪.webp",
@@ -2272,7 +2272,7 @@
   },
   {
     "id": 311108,
-    "contentId": 0,
+    "contentId": 501002,
     "name": "万世流涌大典",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/万世流涌大典.webp",
@@ -2799,7 +2799,7 @@
   },
   {
     "id": 312025,
-    "contentId": 0,
+    "contentId": 501004,
     "name": "黄金剧团的奖赏",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/黄金剧团的奖赏.webp",
@@ -3419,7 +3419,7 @@
   },
   {
     "id": 323007,
-    "contentId": 0,
+    "contentId": 501000,
     "name": "流明石触媒",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/流明石触媒.webp",
@@ -3489,7 +3489,7 @@
   },
   {
     "id": 330007,
-    "contentId": 0,
+    "contentId": 500999,
     "name": "抗争之日·碎梦之时",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/抗争之日·碎梦之时.webp",
@@ -3905,7 +3905,7 @@
   },
   {
     "id": 332030,
-    "contentId": 0,
+    "contentId": 501005,
     "name": "可控性去危害化式定向爆破",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/可控性去危害化式定向爆破.webp",

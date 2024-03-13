@@ -441,7 +441,7 @@
   },
   {
     "id": 10000094,
-    "contentId": 0,
+    "contentId": 500987,
     "dropDays": [3, 6, 7],
     "name": "千织",
     "itemType": "character",
@@ -3834,7 +3834,7 @@
   },
   {
     "id": 11514,
-    "contentId": 0,
+    "contentId": 500996,
     "dropDays": [1, 4, 7],
     "name": "有乐御簾切",
     "itemType": "weapon",
