@@ -471,6 +471,26 @@ class Sqlite {
     if (res.length === 0) return false;
     return res.map((item) => item.name).join("、");
   }
+
+  /**
+   * @description 用于检测祈愿增量更新的 gacha id
+   * @since Beta v0.4.4
+   * @param {string} uid 用户 uid
+   * @param {string} type 卡池类型
+   * @returns {Promise<string|undefined>}
+   */
+  async getGachaCheck(uid: string, type: string): Promise<string | undefined> {
+    const db = await this.getDB();
+    const sql = `SELECT id
+                 FROM GachaRecords
+                 WHERE uid = '${uid}'
+                   AND gachaType = '${type}'
+                 ORDER BY id DESC
+                 LIMIT 1;`;
+    const res: Array<{ id: string }> = await db.select(sql);
+    if (res.length === 0) return undefined;
+    return res[0].id;
+  }
 }
 
 const TGSqlite = new Sqlite();
