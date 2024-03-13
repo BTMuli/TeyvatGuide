@@ -5,9 +5,45 @@ Date: 2024-01-15
 Update: 2024-02-09
 ---
 
-> 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-01-15 17:29:15`
+> 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli)
+> 自动生成于 `2024-01-15 17:29:15`
 >
 > 更新于 `2024-02-09 20:30:26`
+
+## [0.4.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.4) (2024-03-13)
+
+### Feat
+
+- 咨讯：优化咨讯版块切换&页面跳转体验
+- 公告：在可能的情况下根据公告内容获取对应时间 [`#94`](https://github.com/BTMuli/TeyvatGuide/issues/94)
+- 帖子：添加转载声明，支持图片浮窗
+- 祈愿：添加 `祈愿历史` 页面，支持查看历史祈愿记录及对应信息
+- 祈愿：添加集录祈愿支持，更新 UIGF 版本至 3.0 [`#96`](https://github.com/BTMuli/TeyvatGuide/issues/96)
+- 应用：版本更新弹窗确认后将直接更新数据库
+- 应用：添加 `留影叙佳期` 页面，汇聚三年间的相关信息
+- 应用：再次支持米游社扫码登录，网页登录自动检测数据并刷新 [`#99`](https://github.com/BTMuli/TeyvatGuide/issues/99)
+- 应用：添加 4.5 版本的游戏资源 [`#95`](https://github.com/BTMuli/TeyvatGuide/issues/95)
+- 祈愿：支持增量更新祈愿数据
+
+### Fix
+
+- 图鉴：修复武器图鉴左侧列表高度异常
+- 日志：修正过期日志判断逻辑
+- 帖子：修复动图渲染异常
+- 深渊：当期不存在9层及以上的数据时进行提示
+- JSBridge: 修复特定页面的分享图渲染错误
+- 帖子：完善文本样式解析，修复特定情况下文本异常渲染为图片
+- 应用：修复侧边栏及设置页面用户信息响应式异常
+
+### Change
+
+- 公告：调整样式，顶部添加相关信息
+- 设置：数据路径采用系统命令而非文件选择器打开
+- 日志：调试模式下不将日志写入文件
+- 帖子：移除大别野组件
+- 首页：素材日历移除留影叙佳期入口及生日提醒
+- 深渊：胡桃数据库角色持有页面重构
+- 首页：卡池组件样式重构
 
 ## [0.4.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.3) (2024-02-09)
 
@@ -19,7 +55,7 @@ Update: 2024-02-09
 
 ### Fix
 
-- 应用：完善 UID 与服务器的对应关系 [`#81`](https://github.com/BTMuli/TeyvatGuide/issues/81)
+- 应用：完善 UID 与服务器的对应关系 [`#90`](https://github.com/BTMuli/TeyvatGuide/issues/81)
 - 应用：修正扫码登录，增加网页登录 [`#89`](https://github.com/BTMuli/TeyvatGuide/issues/89)
 - 祈愿：修复 `authkey` 获取失败后无限加载的问题
 - 图鉴：修复部分文本错误，增加遗漏数据
@@ -28,7 +64,7 @@ Update: 2024-02-09
 
 ### Change
 
-- 设置：平台图标跟随平台变更，调整图标样式 [`88`](https://github.com/BTMuli/TeyvatGuide/issues/88)
+- 设置：平台图标跟随平台变更，调整图标样式 [`#88`](https://github.com/BTMuli/TeyvatGuide/issues/88)
 - 深渊：调整深渊样式，完善上传错误处理
 - 应用：后端代码重构，修复窗口创建时的 `error` 问题
 
