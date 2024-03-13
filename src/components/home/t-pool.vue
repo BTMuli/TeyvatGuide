@@ -23,7 +23,7 @@
         </div>
         <div class="pool-bottom">
           <div class="pool-character">
-            <div class="pool-icon-grid">
+            <div class="pool-icons">
               <div
                 v-for="character in pool.characters"
                 :key="character.url"
@@ -346,14 +346,24 @@ onUnmounted(() => {
 .pool-character {
   display: flex;
   width: auto;
+  max-width: 280px;
   height: 60px;
   margin: 10px;
+  overflow: hidden auto;
 }
 
-.pool-icon-grid {
-  display: grid;
-  grid-column-gap: 10px;
-  grid-template-columns: repeat(4, 60px);
+.pool-character::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: var(--common-shadow-t-4);
+}
+
+.pool-icons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+  gap: 10px;
 }
 
 .pool-icon {
@@ -363,7 +373,7 @@ onUnmounted(() => {
 }
 
 .pool-icon:hover {
-  transform: scale(1.1);
+  transform: scale(0.95);
   transition: all ease-in-out 0.3s;
 }
 
