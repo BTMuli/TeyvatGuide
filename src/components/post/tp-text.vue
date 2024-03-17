@@ -1,12 +1,14 @@
 <template>
-  <span
+  <div
     v-if="mode == 'link'"
     class="tp-text-link"
     @click="toLink()"
     :title="props.data.attributes?.link"
+    :style="getTextStyle()"
   >
-    <v-icon size="small">mdi-link-variant</v-icon>{{ props.data.insert }}
-  </span>
+    <v-icon size="small">mdi-link-variant</v-icon>
+    <span>{{ props.data.insert }}</span>
+  </div>
   <span v-else-if="mode == 'emoji'" class="tp-text-emoji">
     <img :src="getEmojiUrl()" :alt="getEmojiName()" :title="getEmojiName()" />
   </span>
@@ -102,12 +104,9 @@ function getTextStyle(): StyleValue {
   const style = <Array<StyleValue>>[];
   let data: TpText;
   if (props.data.insert === "\n") {
-    if (props.data.attributes?.align || props.data.attributes?.header) {
-      return "display: none";
-    }
     return "display: inline";
   }
-  if (props.next?.insert === "\n") {
+  if (typeof props.next?.insert === "string" && props.next.insert.includes("\n")) {
     data = {
       insert: props.data.insert,
       attributes: {
@@ -134,7 +133,8 @@ function getTextStyle(): StyleValue {
     }
     if (data.attributes.align) {
       const ruleAlign: StyleValue = `textAlign: ${data.attributes.align}`;
-      style.push(ruleAlign);
+      if (data.attributes.align !== "center") style.push("display: inline");
+      else style.push(ruleAlign);
     }
     if (data.attributes.header) {
       const ruleHeader: StyleValue = `fontSize: ${headerFontSizes[data.attributes.header - 1]}`;
@@ -211,7 +211,7 @@ function getEmojiName() {
 </script>
 <style lang="css" scoped>
 .tp-text-link {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   color: #00c3ff;

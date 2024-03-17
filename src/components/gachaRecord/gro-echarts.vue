@@ -156,6 +156,10 @@ function getPoolData(): EChartsOption {
       value: props.modelValue.filter((item) => item.uigfType === "302").length,
       name: "武器活动祈愿",
     },
+    {
+      value: props.modelValue.filter((item) => item.uigfType === "500").length,
+      name: "集录祈愿",
+    },
   ];
   data.series[1].data = [
     { value: props.modelValue.filter((item) => item.rank === "3").length, name: "3星" },

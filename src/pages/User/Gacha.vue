@@ -187,7 +187,7 @@ async function confirmRefresh(force: boolean = false): Promise<void> {
     }, 1000);
   });
   await TGLogger.Info(`[UserGacha][${account.gameUid}][confirmRefresh] 刷新祈愿数据完成`);
-  // window.location.reload();
+  window.location.reload();
 }
 
 // 获取祈愿数据并写入数据库
