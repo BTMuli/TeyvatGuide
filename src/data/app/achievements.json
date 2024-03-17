@@ -4021,7 +4021,7 @@
     "name": "QUEST CLEAR",
     "description": "完成10次「讨伐悬赏」。",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.1",
     "trigger": {
       "type": "HUNTING_FINISH_NUM"
     }
@@ -4033,7 +4033,7 @@
     "name": "QUEST CLEAR",
     "description": "完成20次「讨伐悬赏」。",
     "reward": 10,
-    "version": "1.0",
+    "version": "1.1",
     "trigger": {
       "type": "HUNTING_FINISH_NUM"
     }
@@ -4045,7 +4045,7 @@
     "name": "QUEST CLEAR",
     "description": "完成30次「讨伐悬赏」。",
     "reward": 20,
-    "version": "1.0",
+    "version": "1.1",
     "trigger": {
       "type": "HUNTING_FINISH_NUM"
     }
@@ -4057,7 +4057,7 @@
     "name": "见习勇者",
     "description": "完成10次「居民请求」。",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.1",
     "trigger": {
       "type": "CITY_REPUTATION_FINISH_REQUEST"
     }
@@ -4069,7 +4069,7 @@
     "name": "见习勇者",
     "description": "完成20次「居民请求」。",
     "reward": 10,
-    "version": "1.0",
+    "version": "1.1",
     "trigger": {
       "type": "CITY_REPUTATION_FINISH_REQUEST"
     }
@@ -4081,7 +4081,7 @@
     "name": "见习勇者",
     "description": "完成30次「居民请求」。",
     "reward": 20,
-    "version": "1.0",
+    "version": "1.1",
     "trigger": {
       "type": "CITY_REPUTATION_FINISH_REQUEST"
     }
@@ -4093,7 +4093,7 @@
     "name": "QUEST FAILED",
     "description": "跟丢了悬赏目标…",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.1",
     "trigger": {
       "type": "HUNTING_FAIL_NUM"
     }
@@ -4105,7 +4105,7 @@
     "name": "多冷的隆冬",
     "description": "因为严寒而倒下…",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.2",
     "trigger": {
       "type": "KILLED_BY_SPECIFIC_ABILITY"
     }
@@ -4117,7 +4117,7 @@
     "name": "祭司、公主与记事者",
     "description": "获得雪葬之都的宝物。",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.2",
     "trigger": {
       "type": "GROUP_NOTIFY"
     }
@@ -4141,7 +4141,7 @@
     "name": "千年雪藏的事",
     "description": "了解过去一支雪山考察队的结局。",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
       "task": [
@@ -4172,7 +4172,7 @@
     "name": "无果的远征",
     "description": "发现很多遗迹机器的遗骸…",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.2",
     "trigger": {
       "type": "GROUP_NOTIFY"
     }
@@ -4184,7 +4184,7 @@
     "name": "没能讲出的故事",
     "description": "在意想不到之处，结识了意想不到的朋友。",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.2",
     "trigger": {
       "type": "GROUP_NOTIFY"
     }
@@ -4196,7 +4196,7 @@
     "name": "一览众山小",
     "description": "抵达龙脊雪山的最高峰。",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.2",
     "trigger": {
       "type": "GROUP_NOTIFY"
     }
@@ -4220,7 +4220,7 @@
     "name": "猎人变成了猎物",
     "description": "被大雪猪王击败。",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.2",
     "trigger": {
       "type": "KILLED_BY_CERTAIN_MONSTER"
     }
@@ -4232,7 +4232,7 @@
     "name": "冷静点！",
     "description": "击败处于狂暴状态下的大雪猪王。",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.2",
     "trigger": {
       "type": "COMBAT_CONFIG_COMMON"
     }
@@ -4244,7 +4244,7 @@
     "name": "「一口吃掉了几十万摩拉！」",
     "description": "掌握「稠汁蔬菜炖肉」的制作方法。",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.2",
     "trigger": {
       "type": "UNLOCK_SPECIFIC_RECIPE_OR"
     }
@@ -4256,7 +4256,7 @@
     "name": "天雷圣裁",
     "description": "被落雷击中。",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.2",
     "trigger": {
       "type": "CUR_AVATAR_HURT_BY_SPECIFIC_ABILITY"
     }
@@ -4268,7 +4268,7 @@
     "name": "接近天空的地方…",
     "description": "登上复原后的寒天之钉。",
     "reward": 5,
-    "version": "1.0",
+    "version": "1.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
       "task": []
@@ -4951,7 +4951,7 @@
     "name": "SYUUMATSU GAIDEN",
     "description": "被卷入终末番与愚人众的战斗中…",
     "reward": 5,
-    "version": "2.0",
+    "version": "2.4",
     "trigger": {
       "type": "FINISH_QUEST_OR",
       "task": []
@@ -10525,7 +10525,7 @@
     "name": "「什么嘛，还不如冰雾花」",
     "description": "不击破花冠弱点的情况下，击败急冻树。",
     "reward": 10,
-    "version": "1.0",
+    "version": "1.1",
     "trigger": {
       "type": "COMBAT_CONFIG_COMMON"
     }
@@ -10537,7 +10537,7 @@
     "name": "「总有比火更灼热的火」",
     "description": "不击破花冠弱点的情况下，击败爆炎树。",
     "reward": 10,
-    "version": "1.0",
+    "version": "1.1",
     "trigger": {
       "type": "COMBAT_CONFIG_COMMON"
     }
@@ -10549,7 +10549,7 @@
     "name": "异邦人与异邦人",
     "description": "队伍中所有角色都不被「公子」标记的后续攻击命中的情况下，击败「公子」。",
     "reward": 10,
-    "version": "1.0",
+    "version": "1.1",
     "trigger": {
       "type": "COMBAT_CONFIG_COMMON"
     }
@@ -10669,7 +10669,7 @@
     "name": "力场侵蚀",
     "description": "粉碎无相之雷的结界。",
     "reward": 5,
-    "version": "1.3",
+    "version": "1.4",
     "trigger": {
       "type": "COMBAT_CONFIG_COMMON"
     }
@@ -12693,7 +12693,7 @@
     "name": "异人一揆",
     "description": "顺利融入反抗军中。",
     "reward": 5,
-    "version": "2.1",
+    "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
       "task": [
@@ -12712,7 +12712,7 @@
     "name": "不动鸣神，恒常乐土",
     "description": "完成「不动鸣神，恒常乐土」。",
     "reward": 10,
-    "version": "2.1",
+    "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
       "task": [
@@ -12731,7 +12731,7 @@
     "name": "无念无想，泡影断灭",
     "description": "完成「无念无想，泡影断灭」。",
     "reward": 10,
-    "version": "2.1",
+    "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
       "task": [
@@ -16661,7 +16661,7 @@
     "name": "邪眼的性能不是战力差距的决定因素",
     "description": "与其他玩家一同战胜「公子」。",
     "reward": 10,
-    "version": "2.1",
+    "version": "2.0",
     "trigger": {
       "type": "MP_KILL_MONSTER_ID_NUM"
     }
