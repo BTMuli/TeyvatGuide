@@ -1,18 +1,20 @@
 /**
  * @file plugins/Mys/utils/getPostsCard.ts
  * @description Mys 插件帖子渲染
- * @since Beta v0.4.0
+ * @since Beta v0.4.5
  */
 
 import { getPostCover } from "./getNewsCard";
 
 /**
  * @description 解析单个帖子
- * @since Beta v0.4.0
- * @param {TGApp.Plugins.Mys.News.Item} post 帖子
+ * @since Beta v0.4.5
+ * @param {TGApp.Plugins.Mys.Post.FullData} post 帖子
  * @returns {TGApp.Plugins.Mys.Forum.RenderCard} 渲染用帖子
  */
-function getPostCard(post: TGApp.Plugins.Mys.News.Item): TGApp.Plugins.Mys.Forum.RenderCard {
+export function getPostCard(
+  post: TGApp.Plugins.Mys.Post.FullData,
+): TGApp.Plugins.Mys.Forum.RenderCard {
   return {
     title: post.post.subject,
     cover: getPostCover(post),

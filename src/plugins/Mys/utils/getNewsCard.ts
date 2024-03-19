@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/utils/news.ts
  * @description Mys 插件咨讯工具
- * @since Beta v0.4.4
+ * @since Beta v0.4.5
  */
 
 /**
@@ -53,11 +53,11 @@ export function getActivityStatus(status: number): TGApp.Plugins.Mys.News.Render
 
 /**
  * @description 获取封面图
- * @since Beta v0.4.4
- * @param {TGApp.Plugins.Mys.News.Item} item 咨讯列表项
+ * @since Beta v0.4.5
+ * @param {TGApp.Plugins.Mys.Post.FullData} item 咨讯列表项
  * @returns {string} 封面图链接
  */
-export function getPostCover(item: TGApp.Plugins.Mys.News.Item): string {
+export function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
   // 默认封面图
   const defaultCover = "/source/UI/defaultCover.webp";
   let cover;
@@ -75,11 +75,11 @@ export function getPostCover(item: TGApp.Plugins.Mys.News.Item): string {
 
 /**
  * @description 获取公共属性
- * @since Beta v0.4.0
- * @param {TGApp.Plugins.Mys.News.Item} item 咨讯列表项
+ * @since Beta v0.4.5
+ * @param {TGApp.Plugins.Mys.Post.FullData} item 咨讯列表项
  * @returns {TGApp.Plugins.Mys.News.RenderCard} 渲染用咨讯列表项
  */
-function getCommonCard(item: TGApp.Plugins.Mys.News.Item): TGApp.Plugins.Mys.News.RenderCard {
+function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.News.RenderCard {
   return {
     title: item.post.subject,
     cover: getPostCover(item),
@@ -102,7 +102,7 @@ function getCommonCard(item: TGApp.Plugins.Mys.News.Item): TGApp.Plugins.Mys.New
 
 /**
  * @description 获取渲染用公告数据
- * @since Alpha v0.2.1
+ * @since Beta v0.4.5
  * @param {TGApp.Plugins.Mys.News.FullData} noticeData 公告数据
  * @returns {TGApp.Plugins.Mys.News.RenderCard[]}
  */
@@ -110,15 +110,13 @@ export function getNoticeCard(
   noticeData: TGApp.Plugins.Mys.News.FullData,
 ): TGApp.Plugins.Mys.News.RenderCard[] {
   const noticeCard: TGApp.Plugins.Mys.News.RenderCard[] = [];
-  noticeData.list.map((item: TGApp.Plugins.Mys.News.Item) => {
-    return noticeCard.push(getCommonCard(item));
-  });
+  noticeData.list.map((item) => noticeCard.push(getCommonCard(item)));
   return noticeCard;
 }
 
 /**
  * @description 获取渲染用活动数据
- * @since Alpha v0.2.1
+ * @since Beta v0.4.5
  * @param {TGApp.Plugins.Mys.News.FullData} activityData 活动数据
  * @returns {TGApp.Plugins.Mys.News.RenderCard[]}
  */
@@ -126,10 +124,10 @@ export function getActivityCard(
   activityData: TGApp.Plugins.Mys.News.FullData,
 ): TGApp.Plugins.Mys.News.RenderCard[] {
   const activityCard: TGApp.Plugins.Mys.News.RenderCard[] = [];
-  activityData.list.map((item: TGApp.Plugins.Mys.News.Item) => {
-    const startTime = new Date(Number(item.news_meta.start_at_sec) * 1000).toLocaleDateString();
-    const endTime = new Date(Number(item.news_meta.end_at_sec) * 1000).toLocaleDateString();
-    const statusInfo = getActivityStatus(item.news_meta.activity_status);
+  activityData.list.map((item) => {
+    const startTime = new Date(Number(item.news_meta!.start_at_sec) * 1000).toLocaleDateString();
+    const endTime = new Date(Number(item.news_meta!.end_at_sec) * 1000).toLocaleDateString();
+    const statusInfo = getActivityStatus(item.news_meta!.activity_status);
     const commonCard = getCommonCard(item);
     commonCard.subtitle = `${startTime} - ${endTime}`;
     commonCard.status = statusInfo;
@@ -140,7 +138,7 @@ export function getActivityCard(
 
 /**
  * @description 获取渲染用新闻数据
- * @since Alpha v0.2.1
+ * @since Beta v0.4.5
  * @param {TGApp.Plugins.Mys.News.FullData} newsData 新闻数据
  * @returns {TGApp.Plugins.Mys.News.RenderCard[]}
  */
@@ -148,8 +146,6 @@ export function getNewsCard(
   newsData: TGApp.Plugins.Mys.News.FullData,
 ): TGApp.Plugins.Mys.News.RenderCard[] {
   const newsCard: TGApp.Plugins.Mys.News.RenderCard[] = [];
-  newsData.list.map((item: TGApp.Plugins.Mys.News.Item) => {
-    return newsCard.push(getCommonCard(item));
-  });
+  newsData.list.map((item) => newsCard.push(getCommonCard(item)));
   return newsCard;
 }
