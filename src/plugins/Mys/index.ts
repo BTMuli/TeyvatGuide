@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/index.ts
  * @description Mys plugin index
- * @since Beta v0.4.4
+ * @since Beta v0.4.5
  */
 
 import MysApi from "./api";
@@ -17,9 +17,7 @@ import getPostData from "./request/getPostData";
 import { getVoteInfo, getVoteResult } from "./request/getVoteData";
 import { getGachaCard } from "./utils/getGachaCard";
 import getLotteryCard from "./utils/getLotteryCard";
-import { getActivityCard, getNewsCard, getNoticeCard } from "./utils/getNewsCard";
 import getPositionCard from "./utils/getPositionCard";
-import { getPostsCard } from "./utils/getPostsCard";
 
 const Mys = {
   Api: MysApi,
@@ -32,7 +30,6 @@ const Mys = {
   },
   Posts: {
     get: getForumList,
-    card: getPostsCard,
     nav: getHomeNavigator,
   },
   Gacha: {
@@ -43,14 +40,7 @@ const Mys = {
     get: getPositionData,
     card: getPositionCard,
   },
-  News: {
-    get: getNewsList,
-    card: {
-      notice: getNoticeCard,
-      activity: getActivityCard,
-      news: getNewsCard,
-    },
-  },
+  News: getNewsList,
   Lottery: {
     get: getLotteryData,
     card: getLotteryCard,

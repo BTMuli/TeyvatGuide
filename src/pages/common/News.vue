@@ -137,7 +137,7 @@ async function firstLoad(key: NewsKey): Promise<void> {
   }
   loadingTitle.value = `正在获取${rawData.value[key].name}数据...`;
   loading.value = true;
-  const getData = await Mys.News.get(gid, NewsType[key]);
+  const getData = await Mys.News(gid, NewsType[key]);
   rawData.value[key].isLast = getData.is_last;
   rawData.value[key].lastId = getData.list.length;
   postData.value[key] = getData.list;
@@ -166,7 +166,7 @@ async function loadMore(key: NewsKey): Promise<void> {
   }
   loadingTitle.value = `正在获取${rawData.value[key].name}数据...`;
   loading.value = true;
-  const getData = await Mys.News.get(gid, NewsType[key], 20, rawData.value[key].lastId);
+  const getData = await Mys.News(gid, NewsType[key], 20, rawData.value[key].lastId);
   rawData.value[key].lastId = rawData.value[key].lastId + getData.list.length;
   rawData.value[key].isLast = getData.is_last;
   postData.value[key] = postData.value[key].concat(getData.list);
