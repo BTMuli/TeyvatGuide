@@ -269,3 +269,28 @@ export function insertRoleData(uid: string, data: TGApp.Game.Character.ListItem[
   });
   return sql.join("");
 }
+
+/**
+ * @description 插入帖子收藏数据
+ * @since Beta v0.4.5
+ * @param {TGApp.Plugins.Mys.Post.FullData} data 帖子数据
+ * @param {Array<string>} collect 合集
+ * @param {string} uid 用户 UID
+ * @returns {string} sql
+ */
+export function insertPostCollectData(
+  data: TGApp.Plugins.Mys.Post.FullData,
+  collect: string[],
+  uid?: string,
+): string {
+  return `
+      INSERT INTO UserCollection (postId, title, content, collect, uid, updated)
+      VALUES (${data.post.post_id}, '${data.post.subject}', '${JSON.stringify(data)}',
+              '${JSON.stringify(collect)}', '${uid}', datetime('now', 'localtime'))
+      ON CONFLICT DO UPDATE
+          SET title   = '${data.post.subject}',
+              content = '${JSON.stringify(data)}',
+              collect = '${JSON.stringify(collect)}',
+              updated = datetime('now', 'localtime');
+  `;
+}

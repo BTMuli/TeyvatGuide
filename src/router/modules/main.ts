@@ -1,7 +1,7 @@
 /**
  * @file router/modules/main.ts
  * @description 主路由模块
- * @since Beta v0.4.4
+ * @since Beta v0.4.5
  */
 
 const mainRoutes = [
@@ -29,6 +29,11 @@ const mainRoutes = [
     path: "/achievements/:app?",
     name: "成就",
     component: async () => await import("../../pages/common/Achievements.vue"),
+  },
+  {
+    path: "/collection",
+    name: "收藏",
+    component: async () => await import("../../pages/common/PostCollect.vue"),
   },
   {
     path: "/test",

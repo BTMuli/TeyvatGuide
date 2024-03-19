@@ -1,19 +1,19 @@
 /**
  * @file plugins/Sqlite/index.ts
  * @description Sqlite 数据库操作类
- * @since Beta v0.4.4
+ * @since Beta v0.4.5
  */
 
 import { app } from "@tauri-apps/api";
 import Database from "tauri-plugin-sql-api";
 
 import initDataSql from "./sql/initData";
-import initTableSql from "./sql/initTable";
 import {
   importAbyssData,
   insertAbyssData,
   insertAppData,
   insertGameAccountData,
+  insertPostCollectData,
   insertRecordData,
   insertRoleData,
 } from "./sql/insertData";
@@ -66,12 +66,12 @@ class Sqlite {
 
   /**
    * @description 初始化数据库
-   * @since Beta v0.3.3
+   * @since Beta v0.4.5
    * @returns {Promise<void>}
    */
   public async initDB(): Promise<void> {
     const db = await this.getDB();
-    const sql = [...initTableSql(), ...(await initDataSql())];
+    const sql = await initDataSql();
     for (const item of sql) {
       await db.execute(item);
     }
@@ -181,7 +181,6 @@ class Sqlite {
     let isVerified = false;
     const sqlT = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
     const res: Array<{ name: string }> = await db.select(sqlT);
-    // 只检测已有的表是否具备，不检测总表数目
     if (this.tables.every((item) => res.map((i) => i.name).includes(item))) {
       isVerified = true;
     }
@@ -490,6 +489,70 @@ class Sqlite {
     const res: Array<{ id: string }> = await db.select(sql);
     if (res.length === 0) return undefined;
     return res[0].id;
+  }
+
+  /**
+   * @description 检测特定表是否存在
+   * @since Beta v0.4.5
+   * @param {string} table 表名
+   * @returns {Promise<boolean>}
+   */
+  async checkTableExist(table: string): Promise<boolean> {
+    const db = await this.getDB();
+    const sql = `SELECT name
+                 FROM sqlite_master
+                 WHERE type='table'
+                   AND name='${table}';`;
+    const res: Array<{ name: string }> = await db.select(sql);
+    return res.length > 0;
+  }
+
+  /**
+   * @description 检测帖子是否已收藏
+   * @since Beta v0.4.5
+   * @param {string} postId 帖子 id
+   * @returns {Promise<false|string>} 当该帖子被归到多个分类时，返回分类数量
+   */
+  async checkPostCollect(postId: string): Promise<false | string> {
+    const db = await this.getDB();
+    const sql = `SELECT collect
+                 FROM UserCollection
+                 WHERE postId = '${postId}';`;
+    const res: Array<{ collect: string }> = await db.select(sql);
+    if (res.length === 0) return false;
+    return res[0].collect;
+  }
+
+  /**
+   * @description 收藏单个帖子
+   * @since Beta v0.4.5
+   * @param {TGApp.Plugins.Mys.Post.FullData} post 帖子
+   * @param {Array<string>} collect 分类
+   * @param {string} uid 用户 uid
+   * @returns {Promise<void>}
+   */
+  async collectPost(
+    post: TGApp.Plugins.Mys.Post.FullData,
+    collect: string[],
+    uid?: string,
+  ): Promise<void> {
+    const db = await this.getDB();
+    const sql = insertPostCollectData(post, collect, uid);
+    await db.execute(sql);
+  }
+
+  /**
+   * @description 取消收藏
+   * @since Beta v0.4.5
+   * @param {string} postId 帖子 id
+   * @returns {Promise<void>}
+   */
+  async cancelCollect(postId: string): Promise<void> {
+    const db = await this.getDB();
+    const sql = `DELETE
+                 FROM UserCollection
+                 WHERE postId = '${postId}';`;
+    await db.execute(sql);
   }
 }
 

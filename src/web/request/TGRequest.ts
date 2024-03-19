@@ -1,7 +1,7 @@
 /**
  * @file web/request/TGRequest.ts
  * @description 应用用到的请求函数
- * @since Beta v0.4.3
+ * @since Beta v0.4.5
  */
 
 import { genAuthkey, genAuthkey2 } from "./genAuthkey";
@@ -20,6 +20,7 @@ import { getStokenByGameToken, getTokenBySToken } from "./getStoken";
 import getSyncAvatarDetail from "./getSyncAvatarDetail";
 import getSyncAvatarListAll from "./getSyncAvatarListAll";
 import { getTokensByLoginTicket } from "./getTokens";
+import { getUserCollect } from "./getUserCollect";
 import { getUserInfoByCookie } from "./getUserInfo";
 import { verifyLToken } from "./verifyLToken";
 
@@ -43,6 +44,7 @@ const TGRequest = {
       getAbyss,
       getAccounts: getGameAccountsByCookie,
       getUserInfo: getUserInfoByCookie,
+      getCollect: getUserCollect,
     },
     byLToken: {
       verify: verifyLToken,

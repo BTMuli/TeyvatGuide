@@ -205,6 +205,11 @@
                 <img src="/platforms/mhy/mys.webp" alt="酒馆" class="side-icon-menu" />
               </template>
             </v-list-item>
+            <v-list-item class="side-item-menu" title="收藏" :link="true" href="/collection">
+              <template #prepend>
+                <img src="/source/UI/posts.png" alt="collect" class="side-icon-menu" />
+              </template>
+            </v-list-item>
             <v-list-item
               class="side-item-menu"
               title="登录"
