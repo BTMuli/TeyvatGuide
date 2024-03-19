@@ -13,7 +13,6 @@ import {
   insertAbyssData,
   insertAppData,
   insertGameAccountData,
-  insertPostCollectData,
   insertRecordData,
   insertRoleData,
 } from "./sql/insertData";
@@ -501,58 +500,10 @@ class Sqlite {
     const db = await this.getDB();
     const sql = `SELECT name
                  FROM sqlite_master
-                 WHERE type='table'
-                   AND name='${table}';`;
+                 WHERE type = 'table'
+                   AND name = '${table}';`;
     const res: Array<{ name: string }> = await db.select(sql);
     return res.length > 0;
-  }
-
-  /**
-   * @description 检测帖子是否已收藏
-   * @since Beta v0.4.5
-   * @param {string} postId 帖子 id
-   * @returns {Promise<false|string>} 当该帖子被归到多个分类时，返回分类数量
-   */
-  async checkPostCollect(postId: string): Promise<false | string> {
-    const db = await this.getDB();
-    const sql = `SELECT collect
-                 FROM UserCollection
-                 WHERE postId = '${postId}';`;
-    const res: Array<{ collect: string }> = await db.select(sql);
-    if (res.length === 0) return false;
-    return res[0].collect;
-  }
-
-  /**
-   * @description 收藏单个帖子
-   * @since Beta v0.4.5
-   * @param {TGApp.Plugins.Mys.Post.FullData} post 帖子
-   * @param {Array<string>} collect 分类
-   * @param {string} uid 用户 uid
-   * @returns {Promise<void>}
-   */
-  async collectPost(
-    post: TGApp.Plugins.Mys.Post.FullData,
-    collect: string[],
-    uid?: string,
-  ): Promise<void> {
-    const db = await this.getDB();
-    const sql = insertPostCollectData(post, collect, uid);
-    await db.execute(sql);
-  }
-
-  /**
-   * @description 取消收藏
-   * @since Beta v0.4.5
-   * @param {string} postId 帖子 id
-   * @returns {Promise<void>}
-   */
-  async cancelCollect(postId: string): Promise<void> {
-    const db = await this.getDB();
-    const sql = `DELETE
-                 FROM UserCollection
-                 WHERE postId = '${postId}';`;
-    await db.execute(sql);
   }
 }
 

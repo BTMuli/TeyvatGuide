@@ -1,7 +1,6 @@
 -- @file plugins Sqlite sql createTable.sql
 -- @brief sqlite数据库创建表语句
--- @author BTMuli <bt-muli@outlook.com>
--- @since Alpha v0.2.3
+-- @since Beta v0.4.5
 
 -- @brief 创建成就数据表
 create table if not exists Achievements
@@ -150,4 +149,36 @@ create table if not exists GachaRecords
     rank      text,
     count     text,
     updated   text
+);
+
+-- @brief 创建用户帖子收藏
+create table if not exists UFPost
+(
+    id      text not null, -- 帖子ID
+    title   text not null, -- 帖子标题
+    content text,          -- 帖子内容
+    updated text not null, -- 收藏时间
+    primary key (id)
+);
+
+-- @brief 创建用户帖子合集
+create table if not exists UFCollection
+(
+
+    id      integer primary key autoincrement,-- 自增合集ID
+    title   text not null,                    -- 合集标题
+    desc    text,                             -- 合集描述
+    updated text not null                     -- 创建时间
+);
+
+-- @brief 创建用户帖子收藏-合集对照表
+create table if not exists UFMap
+(
+    postId       text    not null, -- 帖子ID
+    collectionId integer not null, -- 合集ID
+    post         text    not null, -- 帖子标题
+    collection   text    not null, -- 合集标题
+    desc         text,             -- 合集描述
+    updated      text    not null, -- 收藏时间
+    primary key (postId, collectionId)
 );

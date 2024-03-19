@@ -5,12 +5,16 @@
       <v-select
         v-model="curSelect"
         class="pc-select"
-        :items="Array.from(selects)"
+        :items="collections.map((i) => i.title)"
+        :clearable="curSelect !== '未分类'"
         variant="outlined"
         label="合集"
       />
-      <v-btn rounded class="pc-btn" prepend-icon="mdi-refresh" @click="freshUser"
+      <v-btn rounded class="pc-btn" prepend-icon="mdi-refresh" @click="freshUser()"
         >获取用户收藏</v-btn
+      >
+      <v-btn rounded class="pc-btn" prepend-icon="mdi-import" @click="freshOther"
+        >导入其他用户收藏</v-btn
       >
       <!-- todo 编辑收藏 -->
       <v-pagination class="pc-page" v-model="page" :length="length" />
@@ -24,13 +28,15 @@
 </template>
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
-import { onMounted, ref, watch } from "vue";
+import Database from "tauri-plugin-sql-api";
+import { computed, onBeforeMount, onMounted, ref, watch } from "vue";
 
+import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
 import TPostCard from "../../components/main/t-postcard.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TGSqlite from "../../plugins/Sqlite";
-import { insertPostCollectData } from "../../plugins/Sqlite/sql/insertData";
+import TSUserCollection from "../../plugins/Sqlite/modules/userCollect";
 import { useUserStore } from "../../store/modules/user";
 import TGLogger from "../../utils/TGLogger";
 import TGRequest from "../../web/request/TGRequest";
@@ -39,55 +45,71 @@ const loading = ref(false);
 const loadingTitle = ref("加载中...");
 const loadingSub = ref("");
 const userStore = storeToRefs(useUserStore());
+const db = ref<Database | undefined>(undefined);
 
-const collections = ref<TGApp.Sqlite.UserCollection.SingleTable[]>([]);
-const selected = ref<TGApp.Sqlite.UserCollection.SingleTable[]>([]);
-const selects = ref<Set<string>>(new Set());
-const curSelect = ref<string>("default");
+const collections = ref<TGApp.Sqlite.UserCollection.UFCollection[]>([]);
+const selected = ref<TGApp.Sqlite.UserCollection.UFPost[]>([]);
+const curSelect = ref<string>("未分类");
 const page = ref(1);
-const length = ref(5);
+const length = computed(() => Math.ceil(selected.value.length / 12));
+
+onBeforeMount(async () => {
+  if (!(await TGSqlite.checkTableExist("UFPost"))) {
+    await TGSqlite.update();
+    showSnackbar({
+      text: "数据库已更新",
+      color: "success",
+    });
+  }
+});
 
 onMounted(async () => {
-  loadingTitle.value = "检测 UserCollection 表...";
-  loading.value = true;
-  const check = await TGSqlite.checkTableExist("UserCollection");
-  if (!check) {
-    loadingTitle.value = "创建 UserCollection 表...";
-    await createCollectTable();
-  }
   loadingTitle.value = "获取收藏帖子...";
-  await getCollect();
-  filterBySelect();
+  loading.value = true;
+  db.value = await TGSqlite.getDB();
+  if (!db.value) {
+    showSnackbar({
+      text: "数据库未初始化",
+      color: "error",
+    });
+    loading.value = false;
+    return;
+  }
+  loadingTitle.value = "获取收藏合集...";
+  collections.value = await TSUserCollection.getCollectList(db.value);
+  loadingTitle.value = "获取未分类帖子...";
+  const postUnCollect = await TSUserCollection.getUnCollectPostList(db.value);
+  if (postUnCollect.length > 0) {
+    selected.value = postUnCollect;
+  } else {
+    selected.value = await TSUserCollection.getCollectPostList(
+      db.value,
+      collections.value[0].title,
+    );
+  }
   loading.value = false;
 });
 
-async function createCollectTable(): Promise<void> {
-  const db = await TGSqlite.getDB();
-  const sql = `
-    create table if not exists UserCollection
-    (
-      postId  text not null, -- 帖子ID
-      title   text not null, -- 帖子标题
-      content text,          -- 帖子内容
-      collect text,          -- 合集标题
-      uid     text,          -- 用户ID
-      updated text not null, -- 收藏时间
-      primary key (postId)
-    );
-  `;
-  await db.execute(sql);
-  showSnackbar({
-    text: "创建 UserCollection 表成功",
-    color: "success",
-  });
-}
-
 // 根据合集筛选
-function filterBySelect(): void {
-  selected.value = collections.value.filter((item) => item.collect.includes(curSelect.value));
-  length.value = Math.ceil(selected.value.length / 12);
+async function freshPost(select: string | null): Promise<void> {
+  if (!db.value) {
+    showSnackbar({
+      text: "数据库未初始化",
+      color: "error",
+    });
+    return;
+  }
+  loadingTitle.value = `获取合集 ${select}...`;
+  loading.value = true;
+  if (select === null || select === "未分类") {
+    curSelect.value = "未分类";
+    selected.value = await TSUserCollection.getUnCollectPostList(db.value);
+  } else {
+    selected.value = await TSUserCollection.getCollectPostList(db.value, select);
+  }
+  loading.value = false;
   showSnackbar({
-    text: `筛选合集 ${curSelect.value} 成功，共 ${selected.value.length} 条数据`,
+    text: `切换合集 ${select}，共 ${selected.value.length} 条帖子`,
     color: "success",
   });
 }
@@ -107,28 +129,34 @@ function getPageItems(): TGApp.Plugins.Mys.Post.FullData[] {
   return card;
 }
 
-watch(curSelect, () => {
-  filterBySelect();
+watch(curSelect, async () => {
+  await freshPost(curSelect.value);
 });
 
-async function getCollect(): Promise<void> {
-  const db = await TGSqlite.getDB();
-  const sql = "SELECT * FROM UserCollection";
-  collections.value = await db.select(sql);
-  for (const item of collections.value) {
-    try {
-      const parse: string[] = JSON.parse(item.collect);
-      for (const p of parse) {
-        selects.value.add(p);
-      }
-    } catch (e) {
-      await TGLogger.Error("[PostCollect] getCollect");
-      await TGLogger.Error(<string>e);
+async function freshOther(): Promise<void> {
+  const input = await showConfirm({
+    mode: "input",
+    title: "导入其他用户收藏",
+    text: "请输入用户米游社UID",
+  });
+  if (typeof input === "string") {
+    if (isNaN(Number(input))) {
+      showSnackbar({
+        text: "UID 格式错误，请输入数字",
+        color: "error",
+      });
+      return;
     }
+    await freshUser(input);
+    return;
   }
+  showSnackbar({
+    text: "取消导入",
+    color: "cancel",
+  });
 }
 
-async function freshUser(): Promise<void> {
+async function freshUser(uid?: string): Promise<void> {
   if (!userStore.cookie.value) {
     showSnackbar({
       text: "请先登录",
@@ -142,25 +170,37 @@ async function freshUser(): Promise<void> {
   };
   loadingTitle.value = "获取用户收藏...";
   loading.value = true;
-  let res = await TGRequest.User.byCookie.getCollect(cookie);
+  let res = await TGRequest.User.getCollect(cookie, uid || userStore.briefInfo.value.uid);
   let is_last = false;
   while (!is_last) {
     if ("retcode" in res) {
-      showSnackbar({
-        text: `[${res.retcode}] ${res.message}`,
-        color: "error",
-      });
+      if (res.retcode === 1001) {
+        showSnackbar({
+          text: "用户收藏已设为私密，无法获取",
+          color: "error",
+        });
+      } else {
+        showSnackbar({
+          text: `[${res.retcode}] ${res.message}`,
+          color: "error",
+        });
+      }
+      loading.value = false;
       return;
     }
     let posts = res.list;
     loadingTitle.value = `合并收藏帖子 [offset]${res.next_offset}...`;
-    await mergePosts(posts);
+    await mergePosts(posts, uid || userStore.briefInfo.value.uid);
     if (res.is_last) {
       is_last = true;
     } else {
       loadingTitle.value = "获取用户收藏...";
       loadingSub.value = `[offset]${res.next_offset} [is_last]${res.is_last}`;
-      res = await TGRequest.User.byCookie.getCollect(cookie, res.next_offset);
+      res = await TGRequest.User.getCollect(
+        cookie,
+        uid || userStore.briefInfo.value.uid,
+        res.next_offset,
+      );
     }
   }
   loading.value = false;
@@ -172,32 +212,19 @@ async function freshUser(): Promise<void> {
 }
 
 // 合并收藏帖子
-async function mergePosts(posts: TGApp.Plugins.Mys.Post.FullData[]): Promise<void> {
-  const db = await TGSqlite.getDB();
-  const collectTitle = `${userStore.briefInfo.value.nickname} 的收藏`;
+async function mergePosts(
+  posts: TGApp.Plugins.Mys.Post.FullData[],
+  collect: string,
+): Promise<void> {
+  if (!db.value) return;
+  const title = `用户收藏-${collect}`;
   for (const post of posts) {
-    loadingSub.value = `合并帖子 ${post.post.post_id} ${post.post.subject}`;
-    const postId = post.post.post_id;
-    const collect = await TGSqlite.checkPostCollect(postId.toString());
-    let collects = new Set<string>();
-    if (collect !== false) {
-      try {
-        const parse: string[] = JSON.parse(collect);
-        for (const item of parse) {
-          collects.add(item);
-        }
-      } catch (e) {
-        collects.add("default");
-        showSnackbar({
-          text: `收藏数据解析失败: ${collect}`,
-          color: "error",
-        });
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-      collects.add(collectTitle);
+    loadingTitle.value = `收藏帖子 [${post.post.post_id}]...`;
+    loadingSub.value = `[POST]${post.post.subject} [collection]${title}`;
+    const res = await TSUserCollection.addCollect(db.value, post.post.post_id, post, title, true);
+    if (!res) {
+      await TGLogger.Error(`[PostCollect] mergePosts [${post.post.post_id}]`);
     }
-    const sql = insertPostCollectData(post, Array.from(collects), userStore.briefInfo.value.uid);
-    await db.execute(sql);
   }
 }
 </script>

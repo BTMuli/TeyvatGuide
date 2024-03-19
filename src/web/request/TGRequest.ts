@@ -35,6 +35,7 @@ const TGRequest = {
   User: {
     getAuthkey: genAuthkey,
     getAuthkey2: genAuthkey2,
+    getCollect: getUserCollect,
     getGachaLog,
     getRecord: getGameRecord,
     byLoginTicket: {
@@ -44,7 +45,6 @@ const TGRequest = {
       getAbyss,
       getAccounts: getGameAccountsByCookie,
       getUserInfo: getUserInfoByCookie,
-      getCollect: getUserCollect,
     },
     byLToken: {
       verify: verifyLToken,

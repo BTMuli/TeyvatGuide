@@ -1,4 +1,5 @@
 <template>
+  <!-- todo 编辑收藏合集的 overlay -->
   <div class="collect-box" data-html2canvas-ignore>
     <div class="collect-btn" @click="switchCollect()" :title="isCollected ? '取消收藏' : '收藏'">
       <v-icon :color="isCollected ? 'yellow' : 'white'">
@@ -8,14 +9,17 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import DataBase from "tauri-plugin-sql-api";
+import { onBeforeMount, ref } from "vue";
 
 import TGSqlite from "../../plugins/Sqlite";
+import TSUserCollection from "../../plugins/Sqlite/modules/userCollect";
 import showConfirm from "../func/confirm";
 import showSnackbar from "../func/snackbar";
 
 const isCollected = ref(false);
-const collect = ref<Array<string>>([]);
+const collect = ref<Array<TGApp.Sqlite.UserCollection.UFMap>>([]);
+const db = ref<DataBase | undefined>(undefined);
 
 interface TSetCollectProps {
   modelValue: number;
@@ -24,35 +28,34 @@ interface TSetCollectProps {
 
 const props = defineProps<TSetCollectProps>();
 
-onMounted(async () => await getCollect());
-
-async function getCollect(): Promise<void> {
-  const res = await TGSqlite.checkPostCollect(props.modelValue.toString());
-  if (res !== false) {
-    isCollected.value = true;
-    try {
-      collect.value = JSON.parse(res);
-      console.warn(collect.value);
-    } catch (e) {
-      showSnackbar({
-        text: `收藏数据解析失败: ${res}`,
-        color: "error",
-      });
-    }
+onBeforeMount(async () => {
+  db.value = await TGSqlite.getDB();
+  const check = await TSUserCollection.getCollectPost(db.value, props.modelValue.toString());
+  if (typeof check === "boolean") {
+    isCollected.value = check;
+    return;
   }
-}
+  isCollected.value = true;
+  collect.value = check;
+});
 
 async function switchCollect(): Promise<void> {
+  if (db.value === undefined) {
+    showSnackbar({
+      text: "未获取到数据库",
+      color: "error",
+    });
+    return;
+  }
   if (isCollected.value === false) {
-    collect.value = ["default"];
     if (props.data === undefined) {
       showSnackbar({
-        text: "获取帖子数据失败",
+        text: "未获取到帖子信息",
         color: "error",
       });
       return;
     }
-    await TGSqlite.collectPost(props.data, collect.value);
+    await TSUserCollection.addCollect(db.value, props.modelValue.toString(), props.data);
     isCollected.value = true;
     showSnackbar({
       text: "收藏成功",
@@ -69,7 +72,7 @@ async function switchCollect(): Promise<void> {
       return;
     }
   }
-  await TGSqlite.cancelCollect(props.modelValue.toString());
+  await TSUserCollection.deletePostCollect(db.value, props.modelValue.toString(), true);
   isCollected.value = false;
   showSnackbar({
     text: "取消收藏成功",

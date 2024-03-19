@@ -12,30 +12,58 @@
  */
 declare namespace TGApp.Sqlite.UserCollection {
   /**
-   * @description 数据库-用户收藏表
+   * @description 数据库-用户收藏帖子表
    * @since Beta v0.4.5
-   * @interface SingleTable
-   * @property {string} postId - 帖子 ID
+   * @interface UFPost
+   * @property {string} id - 帖子 ID
    * @property {string} title - 标题
+   * @description 反序列化后是 TGApp.Plugins.Mys.Post.FullData
    * @property {string} content - 内容
-   * @property {string} collect - 合集
-   * @property {string} uid - 用户 UID
    * @property {string} updated - 更新时间
-   * @return SingleTable
+   * @return UFPost
    */
-  interface SingleTable {
-    postId: string;
+  interface UFPost {
+    id: string;
     title: string;
     content: string;
-    collect: string;
-    uid: string;
     updated: string;
   }
 
   /**
-   * @description 渲染卡片
+   * @description 数据库-用户收藏合集表
    * @since Beta v0.4.5
-   * @interface RenderCard
+   * @interface UFCollection
+   * @property {string} id - 合集 ID
+   * @property {string} title - 标题
+   * @property {string} desc - 描述
+   * @property {string} updated - 更新时间
+   * @return UFCollection
    */
-  type RenderCard = TGApp.Plugins.Mys.Forum.RenderCard;
+  interface UFCollection {
+    id: string;
+    title: string;
+    desc: string;
+    updated: string;
+  }
+
+  /**
+   * @description 数据库-用户收藏帖子合集关联表
+   * @since Beta v0.4.5
+   * @interface UFMap
+   * @property {string} postId - 帖子 ID
+   * @property {string} collectionId - 合集 ID
+   * @property {string} post - 帖子标题
+   * @property {string} collection - 合集标题
+   * @property {string} desc - 合集描述
+   * @property {string} updated - 更新时间
+   * @return UFMap
+   */
+  interface UFMap {
+    postId: string;
+    collectionId: string;
+    post: string;
+    collection: string;
+    desc: string;
+    updated: string;
+  }
 }

@@ -45,7 +45,7 @@
   </v-card>
 </template>
 <script lang="ts" setup>
-import { computed, nextTick, onBeforeMount, onMounted, ref, toRaw, watch } from "vue";
+import { onBeforeMount, ref } from "vue";
 
 import { createPost } from "../../utils/TGWindow";
 import TpAvatar from "../post/tp-avatar.vue";

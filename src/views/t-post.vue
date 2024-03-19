@@ -1,6 +1,6 @@
 <template>
   <TSwitchTheme />
-  <TSetCollect v-if="collectExist" :model-value="postId" :data="postData" />
+  <TSetCollect :model-value="postId" :data="postData" />
   <TShareBtn
     v-show="!loadingEmpty"
     v-model="postRef"
@@ -122,7 +122,6 @@ const shareTime = ref<number>(Math.floor(Date.now() / 1000));
 const shareTimeTimer = ref<any>();
 // 合集
 const showCollection = ref<boolean>(false);
-const collectExist = ref<boolean>(false);
 
 onMounted(async () => {
   await appWindow.show();
@@ -164,7 +163,6 @@ onMounted(async () => {
     await TGLogger.Info(`[t-post][${postId}][onMounted] 打开 JSON 窗口`);
     createPostJson(postId);
   }
-  collectExist.value = await TGSqlite.checkTableExist("UserCollection");
   await nextTick(() => {
     shareTimeTimer.value = setInterval(() => {
       shareTime.value = Math.floor(Date.now() / 1000);

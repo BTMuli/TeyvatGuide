@@ -171,8 +171,8 @@ function checkCover(data: TGApp.Plugins.Mys.Gacha.Data[]): boolean {
   const cover = homeStore.poolCover;
   if (cover === undefined) return false;
   let checkList = data.length;
-  Object.entries(cover).forEach(([key, value]) => {
-    const pool = data.find((item) => item.id.toString() === key);
+  Object.entries(cover).forEach(([key, value]: [string, unknown]) => {
+    const pool = data.find((item: TGApp.Plugins.Mys.Gacha.Data) => item.id.toString() === key);
     if (pool && value !== "/source/UI/empty.webp") {
       checkList--;
     }
@@ -345,11 +345,11 @@ onUnmounted(() => {
 
 .pool-character {
   display: flex;
+  overflow: hidden auto;
   width: auto;
   max-width: 280px;
   height: 60px;
   margin: 10px;
-  overflow: hidden auto;
 }
 
 .pool-character::-webkit-scrollbar-thumb {
