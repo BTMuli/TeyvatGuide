@@ -28,58 +28,12 @@
   <v-window v-model="tab">
     <v-window-item v-for="(value, index) in tabValues" :key="index" :value="value">
       <div class="news-grid">
-        <v-card v-for="item in postData[value]" :key="item.postId" class="news-card">
-          <div class="news-cover">
-            <img :src="item.cover" alt="cover" @click="createPost(item)" />
-            <div v-if="value === 'activity'" class="news-card-act">
-              <div
-                class="nca-status"
-                :style="{
-                  background: item.status?.colorCss,
-                }"
-              >
-                {{ item.status?.status }}
-              </div>
-              <div class="nca-time">
-                <v-icon>mdi-clock-time-four-outline</v-icon>
-                <span>{{ item.subtitle }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="news-content">
-            <div class="news-card-title" :title="item.title">{{ item.title }}</div>
-            <TpAvatar :data="item.user" position="left" />
-            <div class="news-card-data">
-              <div class="ncd-item" :title="`浏览数：${item.data.view}`">
-                <v-icon>mdi-eye</v-icon>
-                <span>{{ item.data.view }}</span>
-              </div>
-              <div class="ncd-item" :title="`收藏数：${item.data.mark}`">
-                <v-icon>mdi-star</v-icon>
-                <span>{{ item.data.mark }}</span>
-              </div>
-              <div class="ncd-item" :title="`回复数：${item.data.reply}`">
-                <v-icon>mdi-comment</v-icon>
-                <span>{{ item.data.reply }}</span>
-              </div>
-              <div class="ncd-item" :title="`点赞数：${item.data.like}`">
-                <v-icon>mdi-thumb-up</v-icon>
-                <span>{{ item.data.like }}</span>
-              </div>
-              <div class="ncd-item" :title="`转发数：${item.data.forward}`">
-                <v-icon>mdi-share-variant</v-icon>
-                <span>{{ item.data.forward }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="news-card-forum" :title="`频道: ${item.forum.name}`">
-            <img :src="item.forum.icon" :alt="item.forum.name" />
-            <span>{{ item.forum.name }}</span>
-          </div>
-        </v-card>
+        <div v-for="item in postData[value]" :key="item.post.post_id">
+          <TPostCard :model-value="item" />
+        </div>
       </div>
       <div class="load-news">
-        <v-btn :loading="loadingSub" @click="loadMore(value)">
+        <v-btn class="news-switch-btn" rounded :loading="loadingSub" @click="loadMore(value)">
           已加载：{{ rawData[value].lastId }}，加载更多
         </v-btn>
       </div>
@@ -93,9 +47,9 @@ import { nextTick, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import showSnackbar from "../../components/func/snackbar";
+import TPostCard from "../../components/main/t-postcard.vue";
 import ToChannel from "../../components/overlay/to-channel.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import TpAvatar from "../../components/post/tp-avatar.vue";
 import Mys from "../../plugins/Mys";
 import { useAppStore } from "../../store/modules/app";
 import TGLogger from "../../utils/TGLogger";
@@ -110,7 +64,7 @@ enum NewsType {
 
 type NewsKey = keyof typeof NewsType;
 type PostData = {
-  [key in NewsKey]: TGApp.Plugins.Mys.News.RenderCard[];
+  [key in NewsKey]: TGApp.Plugins.Mys.Post.FullData[];
 };
 type RawData = {
   [key in NewsKey]: {
@@ -186,7 +140,7 @@ async function firstLoad(key: NewsKey): Promise<void> {
   const getData = await Mys.News.get(gid, NewsType[key]);
   rawData.value[key].isLast = getData.is_last;
   rawData.value[key].lastId = getData.list.length;
-  postData.value[key] = Mys.News.card[key](getData);
+  postData.value[key] = getData.list;
   loadingTitle.value = `正在渲染${rawData.value[key].name}数据...`;
   await nextTick(() => {
     loading.value = false;
@@ -215,8 +169,7 @@ async function loadMore(key: NewsKey): Promise<void> {
   const getData = await Mys.News.get(gid, NewsType[key], 20, rawData.value[key].lastId);
   rawData.value[key].lastId = rawData.value[key].lastId + getData.list.length;
   rawData.value[key].isLast = getData.is_last;
-  const getCard = Mys.News.card[key](getData);
-  postData.value[key] = postData.value[key].concat(getCard);
+  postData.value[key] = postData.value[key].concat(getData.list);
   if (rawData.value[key].isLast) {
     showSnackbar({
       text: "已经是最后一页了",
@@ -283,154 +236,6 @@ function searchPost(): void {
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 }
 
-.news-card {
-  border-radius: 5px;
-  background: var(--app-page-bg);
-  color: var(--box-text-1);
-}
-
-/* 增加辨识度 */
-.dark .news-card {
-  border: 1px solid var(--common-shadow-2);
-}
-
-.news-cover {
-  position: relative;
-  display: flex;
-  overflow: hidden;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 36 / 13;
-}
-
-.news-cover img {
-  min-width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  transition: all 0.3s linear;
-}
-
-/* news item info */
-.news-content {
-  position: relative;
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  padding: 10px;
-  gap: 10px;
-}
-
-.news-card-title {
-  overflow: hidden;
-  width: 100%;
-  font-size: 18px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.news-card-forum {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 5px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: rgb(0 0 0/20%);
-  border-bottom-left-radius: 5px;
-  border-top-right-radius: 5px;
-  box-shadow: 0 0 10px var(--tgc-dark-1);
-  color: var(--tgc-white-1);
-}
-
-.news-card-forum img {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
-}
-
-.news-cover img:hover {
-  cursor: pointer;
-  transform: scale(1.1);
-  transition: all 0.3s linear;
-}
-
-.news-card-data {
-  display: flex;
-  width: 100%;
-  height: 20px;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 5px;
-  column-gap: 10px;
-}
-
-.ncd-item {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  color: var(--box-text-7);
-  font-size: 12px;
-  gap: 5px;
-  opacity: 0.6;
-}
-
-/* 活动页 */
-.news-card-act {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: rgb(0 0 0/50%);
-  font-size: 12px;
-}
-
-.nca-status {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 5px 30px 5px 5px;
-  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
-  color: var(--tgc-white-1);
-
-  &::after {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgb(255 255 255/40%);
-    clip-path: polygon(
-      calc(100% - 25px) 0,
-      100% 0,
-      100% 100%,
-      calc(100% - 25px) 100%,
-      calc(100% - 10px) 50%
-    );
-    content: "";
-  }
-}
-
-.nca-time {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  margin: 5px;
-  color: var(--tgc-white-1);
-  gap: 5px;
-  opacity: 0.8;
-}
-
 /* load more */
 .load-news {
   display: flex;
@@ -439,11 +244,5 @@ function searchPost(): void {
   margin: 10px;
   font-family: var(--font-title);
   transition: all 0.3s linear;
-}
-
-.load-news button {
-  border-radius: 5px;
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
 }
 </style>

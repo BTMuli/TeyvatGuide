@@ -34,7 +34,7 @@
         @click:append="searchPost"
         @keyup.enter="searchPost"
       />
-      <v-btn class="post-fresh-btn" @click="freshPostData()">
+      <v-btn rounded class="post-fresh-btn" @click="freshPostData()">
         <v-icon>mdi-refresh</v-icon>
         <span>刷新</span>
       </v-btn>
@@ -46,41 +46,9 @@
       </div>
     </div>
     <div class="posts-grid">
-      <v-card v-for="post in posts" :key="post.postId" class="post-card">
-        <div class="post-cover" @click="createPost(post)">
-          <img :src="post.cover" alt="cover" />
-        </div>
-        <div class="post-content">
-          <div class="post-card-title" :title="post.title">{{ post.title }}</div>
-          <TpAvatar :data="post.user" position="left" />
-          <div class="post-card-data">
-            <div class="pcd-item" :title="`浏览数：${post.data.view}`">
-              <v-icon>mdi-eye</v-icon>
-              <span>{{ post.data.view }}</span>
-            </div>
-            <div class="pcd-item" :title="`收藏数：${post.data.mark}`">
-              <v-icon>mdi-star</v-icon>
-              <span>{{ post.data.mark }}</span>
-            </div>
-            <div class="pcd-item" :title="`回复数：${post.data.reply}`">
-              <v-icon>mdi-comment</v-icon>
-              <span>{{ post.data.reply }}</span>
-            </div>
-            <div class="pcd-item" :title="`点赞数：${post.data.like}`">
-              <v-icon>mdi-thumb-up</v-icon>
-              <span>{{ post.data.like }}</span>
-            </div>
-            <div class="pcd-item" :title="`转发数：${post.data.forward}`">
-              <v-icon>mdi-share-variant</v-icon>
-              <span>{{ post.data.forward }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="post-card-forum" :title="`频道: ${post.forum.name}`">
-          <img :src="post.forum.icon" :alt="post.forum.name" />
-          <span>{{ post.forum.name }}</span>
-        </div>
-      </v-card>
+      <div v-for="post in posts" :key="post.post.post_id">
+        <TPostCard :model-value="post" v-if="post" />
+      </div>
     </div>
   </div>
 </template>
@@ -89,8 +57,8 @@ import { nextTick, onMounted, ref, watch } from "vue";
 
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
+import TPostCard from "../../components/main/t-postcard.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import TpAvatar from "../../components/post/tp-avatar.vue";
 import Mys from "../../plugins/Mys";
 import TGClient from "../../utils/TGClient";
 import TGLogger from "../../utils/TGLogger";
@@ -178,10 +146,10 @@ const curGameLabel = ref<keyof typeof gameList>("原神");
 const gameItem = ref<string[]>([
   "原神",
   "崩坏：星穹铁道",
+  "绝区零",
   "崩坏3",
   "崩坏2",
   "未定事件簿",
-  "绝区零",
   "大别野",
 ]);
 const curGid = ref<number>(2);
@@ -192,7 +160,7 @@ const sortItem = ref<string[]>(["默认排序", "最新回复", "最新发布"])
 const curSortType = ref<number>(0);
 
 // 渲染数据
-const posts = ref<TGApp.Plugins.Mys.Forum.RenderCard[]>([]);
+const posts = ref<TGApp.Plugins.Mys.Post.FullData[]>([]);
 const nav = ref<TGApp.BBS.Navigator.Navigator[]>([]);
 const search = ref<string>();
 
@@ -241,6 +209,7 @@ async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
     "https://webstatic.mihoyo.com",
     "https://bbs.mihoyo.com",
     "https://qaa.miyoushe.com",
+    "https://mhyurl.cn",
   ];
   if (link.protocol != "https:") {
     toBBS(link);
@@ -299,7 +268,7 @@ async function freshPostData(): Promise<void> {
   loading.value = true;
   loadingTitle.value = `正在加载 ${curGameLabel.value}-${curForumLabel.value}-${curSortLabel.value} 的数据`;
   const postsGet = await Mys.Posts.get(curForum.value, curSortType.value);
-  posts.value = Mys.Posts.card(postsGet);
+  posts.value = postsGet.list;
   await nextTick();
   loading.value = false;
 }
@@ -403,99 +372,5 @@ function searchPost(): void {
   font-family: var(--font-title);
   grid-gap: 10px;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-}
-
-.post-card {
-  border-radius: 5px;
-  background: var(--app-page-bg);
-  color: var(--box-text-1);
-}
-
-.dark .post-card {
-  border: 1px solid var(--common-shadow-2);
-}
-
-.post-cover {
-  position: relative;
-  display: flex;
-  overflow: hidden;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 36 / 13;
-}
-
-.post-cover img {
-  min-width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  transition: all 0.3s linear;
-}
-
-.post-content {
-  position: relative;
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  padding: 10px;
-  gap: 10px;
-}
-
-.post-card-title {
-  overflow: hidden;
-  width: 100%;
-  font-size: 18px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.post-card-forum {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 5px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: rgb(0 0 0/20%);
-  border-bottom-left-radius: 5px;
-  border-top-right-radius: 5px;
-  box-shadow: 0 0 10px var(--tgc-dark-1);
-  color: var(--tgc-white-1);
-}
-
-.post-card-forum img {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
-}
-
-.post-cover img:hover {
-  cursor: pointer;
-  transform: scale(1.1);
-  transition: all 0.3s linear;
-}
-
-.post-card-data {
-  display: flex;
-  width: 100%;
-  height: 20px;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 5px;
-  column-gap: 10px;
-}
-
-.pcd-item {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  color: var(--box-text-7);
-  font-size: 12px;
-  gap: 5px;
-  opacity: 0.6;
 }
 </style>
