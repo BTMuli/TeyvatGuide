@@ -1,6 +1,6 @@
 <template>
   <TSwitchTheme />
-  <TSetCollect :model-value="postId" :data="postData" />
+  <TbCollect :model-value="postId" :data="postData" />
   <TShareBtn
     v-show="!loadingEmpty"
     v-model="postRef"
@@ -86,15 +86,14 @@ import { appWindow } from "@tauri-apps/api/window";
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import TSetCollect from "../components/app/t-setCollect.vue";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
+import TbCollect from "../components/post/tb-collect.vue";
 import TpAvatar from "../components/post/tp-avatar.vue";
 import TpParser from "../components/post/tp-parser.vue";
 import TpoCollection from "../components/post/tpo-collection.vue";
 import Mys from "../plugins/Mys";
-import TGSqlite from "../plugins/Sqlite";
 import { useAppStore } from "../store/modules/app";
 import TGClient from "../utils/TGClient";
 import TGLogger from "../utils/TGLogger";

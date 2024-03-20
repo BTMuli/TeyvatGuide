@@ -222,6 +222,34 @@ async function deleteCollectPost(
 }
 
 /**
+ * @description 更新帖子信息
+ * @since Beta v0.4.5
+ * @param {DataBase} db 数据库
+ * @param {string} postId 文章 id
+ * @param {TGApp.Plugins.Mys.Post.FullData} post 文章信息
+ * @return {Promise<boolean>} 返回是否更新成功
+ */
+async function updatePostInfo(
+  db: DataBase,
+  postId: string,
+  post: TGApp.Plugins.Mys.Post.FullData,
+): Promise<boolean> {
+  const sql = "SELECT id FROM UFPost WHERE id = ?";
+  const res: Array<{ id: number }> = await db.select(sql, [postId]);
+  if (res.length === 0) {
+    return false;
+  }
+  const updateSql = "UPDATE UFPost SET title = ?, content = ?, updated = ? WHERE id = ?";
+  await db.execute(updateSql, [
+    post.post.subject,
+    JSON.stringify(post),
+    new Date().getTime(),
+    postId,
+  ]);
+  return true;
+}
+
+/**
  * @description 删除某个帖子的收藏，可选是否强制删除
  * @since Beta v0.4.5
  * @param {DataBase} db 数据库
@@ -261,7 +289,7 @@ async function deletePostCollect(
  * @param {string[]} collections 收藏合集标题
  * @return {Promise<boolean>} 返回是否修改成功
  */
-async function updateCollectPost(
+async function updatePostCollect(
   db: DataBase,
   postId: string,
   collections: string[],
@@ -305,7 +333,7 @@ async function updateCollectPost(
  * @param {string} oldCollection 旧的收藏合集标题
  * @return {Promise<boolean>} 返回是否修改成功
  */
-async function updateCollectPosts(
+async function updatePostsCollect(
   db: DataBase,
   postIds: string[],
   collection: string,
@@ -372,10 +400,11 @@ const TSUserCollection = {
   deleteCollect,
   updateCollect,
   addCollect,
+  updatePostInfo,
   deleteCollectPost,
   deletePostCollect,
-  updateCollectPost,
-  updateCollectPosts,
+  updatePostCollect,
+  updatePostsCollect,
 };
 
 export default TSUserCollection;

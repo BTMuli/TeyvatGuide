@@ -1,7 +1,7 @@
 <template>
   <!-- todo 编辑收藏合集的 overlay -->
-  <div class="collect-box" data-html2canvas-ignore>
-    <div class="collect-btn" @click="switchCollect()" :title="isCollected ? '取消收藏' : '收藏'">
+  <div class="tbc-box" data-html2canvas-ignore>
+    <div class="tbc-btn" @click="switchCollect()" :title="isCollected ? '取消收藏' : '收藏'">
       <v-icon :color="isCollected ? 'yellow' : 'white'">
         {{ isCollected ? "mdi-star" : "mdi-star-outline" }}
       </v-icon>
@@ -10,10 +10,11 @@
 </template>
 <script lang="ts" setup>
 import DataBase from "tauri-plugin-sql-api";
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, watch } from "vue";
 
 import TGSqlite from "../../plugins/Sqlite";
 import TSUserCollection from "../../plugins/Sqlite/modules/userCollect";
+import TGLogger from "../../utils/TGLogger";
 import showConfirm from "../func/confirm";
 import showSnackbar from "../func/snackbar";
 
@@ -21,12 +22,12 @@ const isCollected = ref(false);
 const collect = ref<Array<TGApp.Sqlite.UserCollection.UFMap>>([]);
 const db = ref<DataBase | undefined>(undefined);
 
-interface TSetCollectProps {
+interface TbCollectProps {
   modelValue: number;
   data: TGApp.Plugins.Mys.Post.FullData | undefined;
 }
 
-const props = defineProps<TSetCollectProps>();
+const props = defineProps<TbCollectProps>();
 
 onBeforeMount(async () => {
   db.value = await TGSqlite.getDB();
@@ -38,6 +39,28 @@ onBeforeMount(async () => {
   isCollected.value = true;
   collect.value = check;
 });
+
+watch(
+  () => props.data,
+  async (val) => {
+    if (val === undefined) return;
+    if (isCollected.value === false) return;
+    if (db.value === undefined) return;
+    const res = await TSUserCollection.updatePostInfo(db.value, props.modelValue.toString(), val);
+    if (!res) {
+      showSnackbar({
+        text: "更新帖子信息失败，数据库中不存在帖子信息！",
+        color: "error",
+      });
+      return;
+    }
+    showSnackbar({
+      text: "已更新帖子信息",
+      color: "success",
+    });
+    await TGLogger.Info(`[TbCollect] 更新帖子信息：${props.modelValue.toString()}`);
+  },
+);
 
 async function switchCollect(): Promise<void> {
   if (db.value === undefined) {
@@ -81,7 +104,7 @@ async function switchCollect(): Promise<void> {
 }
 </script>
 <style lang="css" scoped>
-.collect-box {
+.tbc-box {
   position: absolute;
   top: 80px;
   right: 20px;
@@ -90,11 +113,11 @@ async function switchCollect(): Promise<void> {
   cursor: pointer;
 }
 
-.collect-box:hover {
+.tbc-box:hover {
   opacity: 0.8;
 }
 
-.collect-btn {
+.tbc-btn {
   display: flex;
   width: 24px;
   height: 24px;
