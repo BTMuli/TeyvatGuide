@@ -4,19 +4,18 @@
  * @since Beta v0.4.5
  */
 
-import type DataBase from "tauri-plugin-sql-api";
+import TGSqlite from "../index";
 
 /**
  * @description 获取单个帖子的收藏信息
  * @since Beta v0.4.5
- * @param {DataBase} db 数据库
  * @param {string} postId 文章 id
  * @return {Promise<TGApp.Sqlite.UserCollection.UFMap[]|boolean>} 返回收藏信息
  */
-async function getCollectPost(
-  db: DataBase,
+async function getPostCollect(
   postId: string,
 ): Promise<TGApp.Sqlite.UserCollection.UFMap[] | boolean> {
+  const db = await TGSqlite.getDB();
   const sql = "SELECT * FROM UFMap WHERE postId = ?";
   const res: TGApp.Sqlite.UserCollection.UFMap[] = await db.select(sql, [postId]);
   if (res.length > 0) {
@@ -32,10 +31,10 @@ async function getCollectPost(
 /**
  * @description 获取收藏合集列表
  * @since Beta v0.4.5
- * @param {DataBase} db 数据库
  * @return {Promise<TGApp.Sqlite.UserCollection.UFCollection[]>} 返回收藏合集列表
  */
-async function getCollectList(db: DataBase): Promise<TGApp.Sqlite.UserCollection.UFCollection[]> {
+async function getCollectList(): Promise<TGApp.Sqlite.UserCollection.UFCollection[]> {
+  const db = await TGSqlite.getDB();
   const sql = "SELECT * FROM UFCollection";
   return await db.select(sql);
 }
@@ -43,14 +42,13 @@ async function getCollectList(db: DataBase): Promise<TGApp.Sqlite.UserCollection
 /**
  * @description 获取收藏合集中的帖子列表
  * @since Beta v0.4.5
- * @param {DataBase} db 数据库
  * @param {string} collection 收藏合集标题
  * @return {Promise<TGApp.Sqlite.UserCollection.UFPost[]>} 返回收藏合集中的帖子列表
  */
 async function getCollectPostList(
-  db: DataBase,
   collection: string,
 ): Promise<TGApp.Sqlite.UserCollection.UFPost[]> {
+  const db = await TGSqlite.getDB();
   const sql = "SELECT * FROM UFMap WHERE collection = ?";
   const res: TGApp.Sqlite.UserCollection.UFMap[] = await db.select(sql, [collection]);
   const postList: TGApp.Sqlite.UserCollection.UFPost[] = [];
@@ -65,10 +63,10 @@ async function getCollectPostList(
 /**
  * @description 获取未分类的收藏帖子列表
  * @since Beta v0.4.5
- * @param {DataBase} db 数据库
  * @return {Promise<TGApp.Sqlite.UserCollection.UFPost[]>} 返回未分类的收藏帖子列表
  */
-async function getUnCollectPostList(db: DataBase): Promise<TGApp.Sqlite.UserCollection.UFPost[]> {
+async function getUnCollectPostList(): Promise<TGApp.Sqlite.UserCollection.UFPost[]> {
+  const db = await TGSqlite.getDB();
   const sql = "SELECT * FROM UFPost WHERE id NOT IN (SELECT postId FROM UFMap)";
   return await db.select(sql);
 }
@@ -76,13 +74,13 @@ async function getUnCollectPostList(db: DataBase): Promise<TGApp.Sqlite.UserColl
 /**
  * @description 新建收藏合集
  * @since Beta v0.4.5
- * @param {DataBase} db 数据库
  * @param {string} title 收藏合集标题
  * @param {string} desc 收藏合集描述
  * @return {Promise<boolean>} 返回收藏合集 id
  */
-async function createCollect(db: DataBase, title: string, desc: string): Promise<boolean> {
+async function createCollect(title: string, desc: string): Promise<boolean> {
   if (title === "未分类" || title === "") return false;
+  const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFCollection WHERE title = ?";
   const res: Array<{ id: number }> = await db.select(sql, [title]);
   if (res.length > 0) {
@@ -96,11 +94,11 @@ async function createCollect(db: DataBase, title: string, desc: string): Promise
 /**
  * @description 删除收藏合集
  * @since Beta v0.4.5
- * @param {DataBase} db 数据库
  * @param {string} title 收藏合集标题
  * @return {Promise<boolean>} 返回是否删除成功
  */
-async function deleteCollect(db: DataBase, title: string): Promise<boolean> {
+async function deleteCollect(title: string): Promise<boolean> {
+  const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFCollection WHERE title = ?";
   const res: Array<{ id: number }> = await db.select(sql, [title]);
   if (res.length === 0) {
@@ -116,18 +114,13 @@ async function deleteCollect(db: DataBase, title: string): Promise<boolean> {
 /**
  * @description 更新收藏合集信息，标题/描述
  * @since Beta v0.4.5
- * @param {DataBase} db 数据库
  * @param {string} title 收藏合集标题
  * @param {string} newTitle 新标题
  * @param {string} newDesc 新描述
  * @return {Promise<boolean>} 返回是否更新成功
  */
-async function updateCollect(
-  db: DataBase,
-  title: string,
-  newTitle: string,
-  newDesc: string,
-): Promise<boolean> {
+async function updateCollect(title: string, newTitle: string, newDesc: string): Promise<boolean> {
+  const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFCollection WHERE title = ?";
   const res: Array<{ id: number }> = await db.select(sql, [title]);
   if (res.length === 0) {
@@ -143,7 +136,6 @@ async function updateCollect(
 /**
  * @description 添加收藏
  * @since Beta v0.4.5
- * @param {DataBase} db 数据库
  * @param {string} postId 文章 id
  * @param {TGApp.Plugins.Mys.Post.FullData} post 文章信息
  * @param {string} collection 收藏合集标题，可能为 undefined
@@ -151,24 +143,25 @@ async function updateCollect(
  * @return {Promise<boolean>} 返回是否添加成功
  */
 async function addCollect(
-  db: DataBase,
   postId: string,
   post: TGApp.Plugins.Mys.Post.FullData,
   collection: string | undefined = undefined,
   recursive: boolean = false,
 ): Promise<boolean> {
+  const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFPost WHERE id = ?";
   const res: Array<{ id: number }> = await db.select(sql, [postId]);
   if (res.length > 0) {
-    return false;
+    await updatePostInfo(postId, post);
+  } else {
+    const insertSql = "INSERT INTO UFPost (id, title, content, updated) VALUES (?, ?, ?, ?)";
+    await db.execute(insertSql, [
+      postId,
+      post.post.subject,
+      JSON.stringify(post),
+      new Date().getTime(),
+    ]);
   }
-  const insertSql = "INSERT INTO UFPost (id, title, content, updated) VALUES (?, ?, ?, ?)";
-  await db.execute(insertSql, [
-    postId,
-    post.post.subject,
-    JSON.stringify(post),
-    new Date().getTime(),
-  ]);
   if (collection !== undefined) {
     const collectionSql = "SELECT * FROM UFCollection WHERE title = ?";
     let collectionRes: TGApp.Sqlite.UserCollection.UFCollection[] = await db.select(collectionSql, [
@@ -178,7 +171,7 @@ async function addCollect(
       if (!recursive) {
         return false;
       }
-      const createCollectionRes = await createCollect(db, collection, collection);
+      const createCollectionRes = await createCollect(collection, collection);
       if (!createCollectionRes) {
         return false;
       }
@@ -201,16 +194,12 @@ async function addCollect(
 /**
  * @description 删除合集中的收藏
  * @since Beta v0.4.5
- * @param {DataBase} db 数据库
  * @param {string} postId 文章 id
  * @param {string} collection 收藏合集标题
  * @return {Promise<boolean>} 返回是否删除成功
  */
-async function deleteCollectPost(
-  db: DataBase,
-  postId: string,
-  collection: string,
-): Promise<boolean> {
+async function deleteCollectPost(postId: string, collection: string): Promise<boolean> {
+  const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFCollection WHERE title = ?";
   const res: Array<{ id: number }> = await db.select(sql, [collection]);
   if (res.length === 0) {
@@ -224,16 +213,15 @@ async function deleteCollectPost(
 /**
  * @description 更新帖子信息
  * @since Beta v0.4.5
- * @param {DataBase} db 数据库
  * @param {string} postId 文章 id
  * @param {TGApp.Plugins.Mys.Post.FullData} post 文章信息
  * @return {Promise<boolean>} 返回是否更新成功
  */
 async function updatePostInfo(
-  db: DataBase,
   postId: string,
   post: TGApp.Plugins.Mys.Post.FullData,
 ): Promise<boolean> {
+  const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFPost WHERE id = ?";
   const res: Array<{ id: number }> = await db.select(sql, [postId]);
   if (res.length === 0) {
@@ -252,16 +240,12 @@ async function updatePostInfo(
 /**
  * @description 删除某个帖子的收藏，可选是否强制删除
  * @since Beta v0.4.5
- * @param {DataBase} db 数据库
  * @param {string} postId 文章 id
  * @param {boolean} force 是否强制删除
  * @return {Promise<boolean>} 返回是否删除成功
  */
-async function deletePostCollect(
-  db: DataBase,
-  postId: string,
-  force: boolean = false,
-): Promise<boolean> {
+async function deletePostCollect(postId: string, force: boolean = false): Promise<boolean> {
+  const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFPost WHERE id = ?";
   const res: Array<{ id: number }> = await db.select(sql, [postId]);
   if (res.length === 0) {
@@ -284,16 +268,12 @@ async function deletePostCollect(
 /**
  * @description 修改单个帖子的收藏合集
  * @since Beta v0.4.5
- * @param {DataBase} db 数据库
  * @param {string} postId 文章 id
  * @param {string[]} collections 收藏合集标题
  * @return {Promise<boolean>} 返回是否修改成功
  */
-async function updatePostCollect(
-  db: DataBase,
-  postId: string,
-  collections: string[],
-): Promise<boolean> {
+async function updatePostCollect(postId: string, collections: string[]): Promise<boolean> {
+  const db = await TGSqlite.getDB();
   const sql = "SELECT id,title FROM UFPost WHERE id = ?";
   const res: Array<{ id: number; title: string }> = await db.select(sql, [postId]);
   if (res.length === 0) {
@@ -327,18 +307,17 @@ async function updatePostCollect(
 /**
  * @description 批量修改帖子的收藏合集
  * @since Beta v0.4.5
- * @param {DataBase} db 数据库
  * @param {string[]} postIds 文章 id
  * @param {string} collection 收藏合集标题
  * @param {string} oldCollection 旧的收藏合集标题
  * @return {Promise<boolean>} 返回是否修改成功
  */
 async function updatePostsCollect(
-  db: DataBase,
   postIds: string[],
   collection: string,
   oldCollection: string | undefined,
 ): Promise<boolean> {
+  const db = await TGSqlite.getDB();
   const collectionSql = "SELECT * FROM UFCollection WHERE title = ?";
   const collectionRes: TGApp.Sqlite.UserCollection.UFCollection[] = await db.select(collectionSql, [
     collection,
@@ -392,7 +371,7 @@ async function updatePostsCollect(
 }
 
 const TSUserCollection = {
-  getCollectPost,
+  getPostCollect,
   getCollectList,
   getCollectPostList,
   getUnCollectPostList,

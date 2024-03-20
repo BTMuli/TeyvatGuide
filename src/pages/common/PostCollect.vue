@@ -11,13 +11,14 @@
         label="合集"
       />
       <v-btn rounded class="pc-btn" prepend-icon="mdi-refresh" @click="freshUser()"
-        >获取用户收藏</v-btn
-      >
+        >获取用户收藏
+      </v-btn>
       <v-btn rounded class="pc-btn" prepend-icon="mdi-import" @click="freshOther"
-        >导入其他用户收藏</v-btn
-      >
+        >导入其他用户收藏
+      </v-btn>
+      <v-btn rounded class="pc-btn" prepend-icon="mdi-pencil" @click="toEdit()"> 编辑收藏 </v-btn>
       <!-- todo 编辑收藏 -->
-      <v-pagination class="pc-page" v-model="page" :length="length" />
+      <v-pagination class="pc-page" v-model="page" :total-visible="view" :length="length" />
     </div>
     <div class="pc-posts">
       <div v-for="item in getPageItems()" :key="item.post.post_id">
@@ -52,6 +53,10 @@ const selected = ref<TGApp.Sqlite.UserCollection.UFPost[]>([]);
 const curSelect = ref<string>("未分类");
 const page = ref(1);
 const length = computed(() => Math.ceil(selected.value.length / 12));
+const view = computed(() => {
+  if (length.value === 1) return 0;
+  return length.value > 5 ? 5 : length.value;
+});
 
 onBeforeMount(async () => {
   if (!(await TGSqlite.checkTableExist("UFPost"))) {
@@ -76,22 +81,31 @@ onMounted(async () => {
     return;
   }
   loadingTitle.value = "获取收藏合集...";
-  collections.value = await TSUserCollection.getCollectList(db.value);
+  collections.value = await TSUserCollection.getCollectList();
   loadingTitle.value = "获取未分类帖子...";
-  const postUnCollect = await TSUserCollection.getUnCollectPostList(db.value);
+  const postUnCollect = await TSUserCollection.getUnCollectPostList();
   if (postUnCollect.length > 0) {
     selected.value = postUnCollect;
   } else {
-    selected.value = await TSUserCollection.getCollectPostList(
-      db.value,
-      collections.value[0].title,
-    );
+    selected.value = await TSUserCollection.getCollectPostList(collections.value[0].title);
   }
+  page.value = 1;
   loading.value = false;
 });
 
+function toEdit() {
+  showSnackbar({
+    text: "功能开发中",
+    color: "info",
+  });
+}
+
 // 根据合集筛选
 async function freshPost(select: string | null): Promise<void> {
+  if (select === null) {
+    curSelect.value = "未分类";
+    return;
+  }
   if (!db.value) {
     showSnackbar({
       text: "数据库未初始化",
@@ -101,12 +115,13 @@ async function freshPost(select: string | null): Promise<void> {
   }
   loadingTitle.value = `获取合集 ${select}...`;
   loading.value = true;
-  if (select === null || select === "未分类") {
+  if (select === "未分类") {
     curSelect.value = "未分类";
-    selected.value = await TSUserCollection.getUnCollectPostList(db.value);
+    selected.value = await TSUserCollection.getUnCollectPostList();
   } else {
-    selected.value = await TSUserCollection.getCollectPostList(db.value, select);
+    selected.value = await TSUserCollection.getCollectPostList(select);
   }
+  page.value = 1;
   loading.value = false;
   showSnackbar({
     text: `切换合集 ${select}，共 ${selected.value.length} 条帖子`,
@@ -221,7 +236,7 @@ async function mergePosts(
   for (const post of posts) {
     loadingTitle.value = `收藏帖子 [${post.post.post_id}]...`;
     loadingSub.value = `[POST]${post.post.subject} [collection]${title}`;
-    const res = await TSUserCollection.addCollect(db.value, post.post.post_id, post, title, true);
+    const res = await TSUserCollection.addCollect(post.post.post_id, post, title, true);
     if (!res) {
       await TGLogger.Error(`[PostCollect] mergePosts [${post.post.post_id}]`);
     }

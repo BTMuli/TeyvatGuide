@@ -1,26 +1,28 @@
 <template>
-  <!-- todo 编辑收藏合集的 overlay -->
   <div class="tbc-box" data-html2canvas-ignore>
     <div class="tbc-btn" @click="switchCollect()" :title="isCollected ? '取消收藏' : '收藏'">
       <v-icon :color="isCollected ? 'yellow' : 'white'">
         {{ isCollected ? "mdi-star" : "mdi-star-outline" }}
       </v-icon>
     </div>
+    <div class="tbc-edit" title="编辑收藏" v-if="isCollected" @click="editCollect()">
+      <v-icon size="small">mdi-pencil</v-icon>
+    </div>
   </div>
+  <ToPostCollect v-model="showEdit" :post="props.data" @submit="refresh()" />
 </template>
 <script lang="ts" setup>
-import DataBase from "tauri-plugin-sql-api";
 import { onBeforeMount, ref, watch } from "vue";
 
-import TGSqlite from "../../plugins/Sqlite";
 import TSUserCollection from "../../plugins/Sqlite/modules/userCollect";
 import TGLogger from "../../utils/TGLogger";
 import showConfirm from "../func/confirm";
 import showSnackbar from "../func/snackbar";
+import ToPostCollect from "../overlay/to-postCollect.vue";
 
 const isCollected = ref(false);
 const collect = ref<Array<TGApp.Sqlite.UserCollection.UFMap>>([]);
-const db = ref<DataBase | undefined>(undefined);
+const showEdit = ref(false);
 
 interface TbCollectProps {
   modelValue: number;
@@ -29,24 +31,32 @@ interface TbCollectProps {
 
 const props = defineProps<TbCollectProps>();
 
-onBeforeMount(async () => {
-  db.value = await TGSqlite.getDB();
-  const check = await TSUserCollection.getCollectPost(db.value, props.modelValue.toString());
+onBeforeMount(async () => await refresh());
+
+async function refresh(): Promise<void> {
+  const check = await TSUserCollection.getPostCollect(props.modelValue.toString());
   if (typeof check === "boolean") {
     isCollected.value = check;
+    collect.value = [];
     return;
   }
   isCollected.value = true;
   collect.value = check;
-});
+}
+
+function editCollect(): void {
+  if (showEdit.value) {
+    showEdit.value = false;
+  }
+  showEdit.value = true;
+}
 
 watch(
   () => props.data,
   async (val) => {
     if (val === undefined) return;
     if (isCollected.value === false) return;
-    if (db.value === undefined) return;
-    const res = await TSUserCollection.updatePostInfo(db.value, props.modelValue.toString(), val);
+    const res = await TSUserCollection.updatePostInfo(props.modelValue.toString(), val);
     if (!res) {
       showSnackbar({
         text: "更新帖子信息失败，数据库中不存在帖子信息！",
@@ -63,13 +73,6 @@ watch(
 );
 
 async function switchCollect(): Promise<void> {
-  if (db.value === undefined) {
-    showSnackbar({
-      text: "未获取到数据库",
-      color: "error",
-    });
-    return;
-  }
   if (isCollected.value === false) {
     if (props.data === undefined) {
       showSnackbar({
@@ -78,7 +81,7 @@ async function switchCollect(): Promise<void> {
       });
       return;
     }
-    await TSUserCollection.addCollect(db.value, props.modelValue.toString(), props.data);
+    await TSUserCollection.addCollect(props.modelValue.toString(), props.data);
     isCollected.value = true;
     showSnackbar({
       text: "收藏成功",
@@ -95,7 +98,7 @@ async function switchCollect(): Promise<void> {
       return;
     }
   }
-  await TSUserCollection.deletePostCollect(db.value, props.modelValue.toString(), true);
+  await TSUserCollection.deletePostCollect(props.modelValue.toString(), true);
   isCollected.value = false;
   showSnackbar({
     text: "取消收藏成功",
@@ -125,5 +128,17 @@ async function switchCollect(): Promise<void> {
   justify-content: center;
   padding-right: 2px;
   margin: 5px;
+}
+
+.tbc-edit {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  display: flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 </style>
