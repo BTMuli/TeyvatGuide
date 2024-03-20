@@ -79,6 +79,7 @@ async function toLink() {
   padding: 10px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 10px;
+  margin-bottom: 10px;
   background: var(--app-side-bg);
   column-gap: 10px;
 }
