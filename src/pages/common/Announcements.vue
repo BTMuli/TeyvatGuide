@@ -31,11 +31,10 @@
   <v-window v-model="tab">
     <v-window-item v-for="(value, index) in tabValues" :key="index" :value="value">
       <div class="anno-grid">
-        <v-card v-for="item in annoCards[value]" :key="item.id" class="anno-card">
+        <v-card rounded v-for="item in annoCards[value]" :key="item.id">
           <div class="anno-cover" :title="item.title">
             <img :src="item.banner" alt="cover" @click="createAnno(item)" />
             <div class="anno-info">
-              <div class="anno-id">ID:{{ item.id }}</div>
               <div class="anno-time">
                 <v-icon>mdi-clock-time-four-outline</v-icon>
                 <span>{{ item.timeStr }}</span>
@@ -208,7 +207,7 @@ function getAnnoTime(content: string): string | false {
   }
   if (content.match(regexes[3])) {
     const res = content.match(regexes[3]);
-    return `${res?.[1].split(" ")[0]} ~ ${res?.[2].split(" ")[0]}`;
+    return `${res?.[1]} ~ ${res?.[2]}`;
   }
   if (content.match(regexes[4])) {
     const res = content.match(regexes[4]);
@@ -267,23 +266,16 @@ function createAnno(item: TGApp.App.Announcement.ListCard): void {
   font-family: var(--font-title);
 }
 
+.dark .anno-switch-btn {
+  border: 1px solid var(--common-shadow-2);
+}
+
 .anno-grid {
   display: grid;
   padding: 5px;
   font-family: var(--font-title);
   grid-gap: 10px;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-}
-
-.anno-card {
-  border-radius: 5px;
-  background: var(--app-page-bg);
-  color: var(--box-text-1);
-}
-
-/* 增加辨识度 */
-.dark .anno-card {
-  border: 1px solid var(--common-shadow-2);
 }
 
 .anno-cover {
@@ -293,10 +285,7 @@ function createAnno(item: TGApp.App.Announcement.ListCard): void {
   width: 100%;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid var(--common-shadow-2);
   aspect-ratio: 36 / 13;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
 }
 
 .anno-cover img {
@@ -332,34 +321,6 @@ function createAnno(item: TGApp.App.Announcement.ListCard): void {
   font-size: 12px;
 }
 
-.anno-id {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 5px 30px 5px 5px;
-  background: var(--app-page-bg);
-  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
-  color: var(--app-page-content);
-
-  &::after {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--common-shadow-2);
-    clip-path: polygon(
-      calc(100% - 25px) 0,
-      100% 0,
-      100% 100%,
-      calc(100% - 25px) 100%,
-      calc(100% - 10px) 50%
-    );
-    content: "";
-  }
-}
-
 .anno-time {
   display: flex;
   align-items: center;
@@ -367,7 +328,6 @@ function createAnno(item: TGApp.App.Announcement.ListCard): void {
   margin: 5px;
   color: var(--tgc-white-1);
   gap: 5px;
-  opacity: 0.8;
 }
 
 .anno-label {
@@ -380,9 +340,8 @@ function createAnno(item: TGApp.App.Announcement.ListCard): void {
   padding: 5px;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  background: rgb(0 0 0/20%);
+  background: var(--common-shadow-2);
   border-bottom-left-radius: 5px;
-  border-top-right-radius: 5px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
 }

@@ -1,7 +1,7 @@
 /*
  * @file assets/css/post-parser.css
  * @description 游戏公告解析 css
- * @since Beta v0.4.4
+ * @since Beta v0.4.5
  */
 
 .anno-body {
@@ -54,7 +54,7 @@
 
 .anno-content :deep(details) {
   padding: 10px;
-  border: #35acce 2px solid;
+  border: 1px var(--common-shadow-2) solid;
   border-radius: 10px;
   margin: 10px;
 }
@@ -64,7 +64,7 @@
 }
 
 .anno-content :deep(details) ::marker {
-  color: #35acce;
+  color: var(--tgc-pink-1);
   content: "✧";
 }
 

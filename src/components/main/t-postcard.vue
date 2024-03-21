@@ -1,5 +1,5 @@
 <template>
-  <v-card class="tpc-card" v-if="card">
+  <v-card rounded v-if="card">
     <div class="tpc-cover">
       <img :src="card.cover" alt="cover" @click="createPost(card)" />
       <div v-if="isAct" class="tpc-act">
@@ -172,16 +172,6 @@ function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.N
 }
 </script>
 <style lang="css" scoped>
-.tpc-card {
-  border-radius: 5px;
-  background: var(--app-page-bg);
-  color: var(--box-text-1);
-}
-
-.dark .tpc-card {
-  border: 1px solid var(--common-shadow-2);
-}
-
 .tpc-cover {
   position: relative;
   display: flex;
@@ -212,6 +202,7 @@ function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.N
 .tpc-title {
   overflow: hidden;
   width: 100%;
+  font-family: var(--font-title);
   font-size: 18px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -227,9 +218,8 @@ function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.N
   padding: 5px;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  background: rgb(0 0 0/20%);
+  background: var(--common-shadow-2);
   border-bottom-left-radius: 5px;
-  border-top-right-radius: 5px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
 }
