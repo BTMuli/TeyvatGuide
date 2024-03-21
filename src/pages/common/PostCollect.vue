@@ -5,19 +5,38 @@
       <v-select
         v-model="curSelect"
         class="pc-select"
-        :items="collections.map((i) => i.title)"
+        :items="collections"
         :clearable="curSelect !== '未分类'"
         variant="outlined"
         label="合集"
+      >
+        <template v-slot:item="{ props, item }">
+          <v-list-item v-bind="props" :title="item.raw.title" :subtitle="item.raw.desc" />
+        </template>
+      </v-select>
+      <v-btn
+        size="small"
+        class="pc-btn"
+        icon="mdi-refresh"
+        title="获取用户收藏"
+        @click="freshUser()"
       />
-      <v-btn rounded class="pc-btn" prepend-icon="mdi-refresh" @click="freshUser()"
-        >获取用户收藏
-      </v-btn>
-      <v-btn rounded class="pc-btn" prepend-icon="mdi-import" @click="freshOther"
-        >导入其他用户收藏
-      </v-btn>
-      <v-btn rounded class="pc-btn" prepend-icon="mdi-pencil" @click="toEdit()"> 编辑收藏 </v-btn>
-      <!-- todo 编辑收藏 -->
+      <v-btn
+        size="small"
+        class="pc-btn"
+        icon="mdi-import"
+        @click="freshOther"
+        title="导入其他用户收藏"
+      />
+      <v-btn size="small" class="pc-btn" icon="mdi-pencil" @click="toEdit()" title="编辑收藏" />
+      <v-btn
+        size="small"
+        v-if="curSelect !== '未分类'"
+        class="pc-btn"
+        icon="mdi-delete"
+        @click="deleteCollect()"
+        title="删除合集"
+      />
       <v-pagination class="pc-page" v-model="page" :total-visible="view" :length="length" />
     </div>
     <div class="pc-posts">
@@ -98,6 +117,33 @@ function toEdit() {
     text: "功能开发中",
     color: "info",
   });
+}
+
+async function deleteCollect(): Promise<void> {
+  const res = await showConfirm({
+    title: "确定删除分类?",
+    text: selected.value.length > 0 ? `该分类下 ${selected.value.length} 条帖子将变为未分类` : "",
+  });
+  if (!res) {
+    showSnackbar({
+      text: "取消删除",
+      color: "cancel",
+    });
+    return;
+  }
+  const resD = await TSUserCollection.deleteCollect(curSelect.value);
+  if (resD) {
+    showSnackbar({
+      text: "删除成功",
+      color: "success",
+    });
+    window.location.reload();
+  } else {
+    showSnackbar({
+      text: "删除失败",
+      color: "error",
+    });
+  }
 }
 
 // 根据合集筛选

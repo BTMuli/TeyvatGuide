@@ -167,7 +167,7 @@ async function addCollect(
     let collectionRes: TGApp.Sqlite.UserCollection.UFCollection[] = await db.select(collectionSql, [
       collection,
     ]);
-    if (collectionRes.length === 0 || collectionRes.length > 1) {
+    if (collectionRes.length === 0) {
       if (!recursive) {
         return false;
       }
@@ -177,16 +177,35 @@ async function addCollect(
       }
       collectionRes = await db.select(collectionSql, [collection]);
     }
-    const insertMapSql =
-      "INSERT INTO UFMap (postId, collectionId,post, collection, desc, updated) VALUES (?, ?, ?, ?, ?, ?)";
-    await db.execute(insertMapSql, [
+    // 查找是否已经有了数据
+    const mapSql = "SELECT * FROM UFMap WHERE postId = ? AND collectionId = ?";
+    const mapRes: TGApp.Sqlite.UserCollection.UFMap[] = await db.select(mapSql, [
       postId,
       collectionRes[0].id,
-      post.post.subject,
-      collection,
-      collectionRes[0].desc,
-      new Date().getTime(),
     ]);
+    if (mapRes.length > 0) {
+      const updateMapSql =
+        "UPDATE UFMap SET post = ?, collection = ?, desc = ?, updated = ? WHERE postId = ? AND collectionId = ?";
+      await db.execute(updateMapSql, [
+        post.post.subject,
+        collection,
+        collectionRes[0].desc,
+        new Date().getTime(),
+        postId,
+        collectionRes[0].id,
+      ]);
+    } else {
+      const insertMapSql =
+        "INSERT INTO UFMap (postId, collectionId,post, collection, desc, updated) VALUES (?, ?, ?, ?, ?, ?)";
+      await db.execute(insertMapSql, [
+        postId,
+        collectionRes[0].id,
+        post.post.subject,
+        collection,
+        collectionRes[0].desc,
+        new Date().getTime(),
+      ]);
+    }
   }
   return true;
 }
