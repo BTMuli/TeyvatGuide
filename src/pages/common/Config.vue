@@ -351,9 +351,12 @@ async function confirmDelCache(): Promise<void> {
     await TGLogger.Info("[Config][confirmDelCache] 取消清除缓存");
     return;
   }
+  loadingTitle.value = "正在清除缓存...";
+  loading.value = true;
   for (const dir of CacheDir) {
     await fs.removeDir(dir, { recursive: true });
   }
+  loading.value = false;
   showSnackbar({
     text: "缓存已清除!即将退出应用！",
   });

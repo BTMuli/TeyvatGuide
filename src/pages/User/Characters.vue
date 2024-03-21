@@ -55,7 +55,7 @@
 </template>
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
-import { onMounted, ref } from "vue";
+import { onBeforeMount, onMounted, ref } from "vue";
 
 import DucDetailOverlay from "../../components/devCharacter/duc-detail-overlay.vue";
 import showSnackbar from "../../components/func/snackbar";
@@ -70,7 +70,7 @@ import TGRequest from "../../web/request/TGRequest";
 
 // store
 const userStore = storeToRefs(useUserStore());
-const user = userStore.account.value;
+const user = ref<TGApp.Sqlite.Account.Game>();
 
 // loading
 const loading = ref<boolean>(false);
@@ -104,6 +104,12 @@ function clickOverlay(pos: "left" | "right") {
   dataVal.value = roleList.value[selectIndex.value];
 }
 
+onBeforeMount(() => {
+  if (userStore.account.value) {
+    user.value = userStore.account.value;
+  }
+});
+
 onMounted(async () => {
   await TGLogger.Info("[Character][onMounted] 进入角色页面");
   loadingTitle.value = "正在获取角色数据";
@@ -120,7 +126,8 @@ function switchOld(): void {
 }
 
 async function loadRole(): Promise<void> {
-  const roleData = await TGSqlite.getUserCharacter(user.gameUid);
+  if (!user.value) return;
+  const roleData = await TGSqlite.getUserCharacter(user.value.gameUid);
   if (roleData !== false) {
     roleData.sort((a, b) => {
       if (a.star !== b.star) return b.star - a.star;
@@ -130,15 +137,18 @@ async function loadRole(): Promise<void> {
     roleList.value = roleData;
     dataVal.value = roleData[selectIndex.value];
     isEmpty.value = false;
-    await TGLogger.Info(`[Character][loadRole][${user.gameUid}] 成功加载角色数据`);
-    await TGLogger.Info(`[Character][loadRole][${user.gameUid}] 共获取到${roleData.length}个角色`);
+    await TGLogger.Info(`[Character][loadRole][${user.value.gameUid}] 成功加载角色数据`);
+    await TGLogger.Info(
+      `[Character][loadRole][${user.value.gameUid}] 共获取到${roleData.length}个角色`,
+    );
   } else {
-    await TGLogger.Warn(`[Character][loadRole][${user.gameUid}] 未获取到角色数据`);
+    await TGLogger.Warn(`[Character][loadRole][${user.value.gameUid}] 未获取到角色数据`);
   }
 }
 
 async function refreshRoles(): Promise<void> {
-  await TGLogger.Info(`[Character][refreshRoles][${user.gameUid}] 正在更新角色数据`);
+  if (!user.value) return;
+  await TGLogger.Info(`[Character][refreshRoles][${user.value.gameUid}] 正在更新角色数据`);
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
   if (!userStore.cookie.value) {
@@ -155,12 +165,14 @@ async function refreshRoles(): Promise<void> {
     ltoken: userStore.cookie.value.ltoken,
     ltuid: userStore.cookie.value.ltuid,
   };
-  const res = await TGRequest.User.byLToken.getRoleList(cookie, user);
+  const res = await TGRequest.User.byLToken.getRoleList(cookie, user.value);
   if (Array.isArray(res)) {
-    await TGLogger.Info(`[Character][refreshRoles][${user.gameUid}] 获取角色数据成功`);
-    await TGLogger.Info(`[Character][refreshRoles][${user.gameUid}] 共获取到${res.length}个角色`);
+    await TGLogger.Info(`[Character][refreshRoles][${user.value.gameUid}] 获取角色数据成功`);
+    await TGLogger.Info(
+      `[Character][refreshRoles][${user.value.gameUid}] 共获取到${res.length}个角色`,
+    );
     loadingTitle.value = "正在保存角色数据";
-    await TGSqlite.saveUserCharacter(user.gameUid, res);
+    await TGSqlite.saveUserCharacter(user.value.gameUid, res);
     loadingTitle.value = "正在更新角色数据";
     await loadRole();
   } else {
@@ -168,15 +180,16 @@ async function refreshRoles(): Promise<void> {
       text: `[${res.retcode}] ${res.message}`,
       color: "error",
     });
-    await TGLogger.Error(`[Character][refreshRoles][${user.gameUid}] 更新角色数据失败`);
+    await TGLogger.Error(`[Character][refreshRoles][${user.value.gameUid}] 更新角色数据失败`);
     await TGLogger.Error(
-      `[Character][refreshRoles][${user.gameUid}] ${res.retcode} ${res.message}`,
+      `[Character][refreshRoles][${user.value.gameUid}] ${res.retcode} ${res.message}`,
     );
   }
   loading.value = false;
 }
 
 async function refreshTalent(): Promise<void> {
+  if (!user.value) return;
   loadingTitle.value = "正在获取天赋数据";
   loading.value = true;
   if (!userStore.cookie.value) {
@@ -193,7 +206,7 @@ async function refreshTalent(): Promise<void> {
     const res = await TGRequest.User.calculate.getSyncAvatarDetail(
       userStore.cookie.value.account_id,
       userStore.cookie.value.cookie_token,
-      user.gameUid,
+      user.value.gameUid,
       role.cid,
     );
     if ("skill_list" in res) {
@@ -210,17 +223,17 @@ async function refreshTalent(): Promise<void> {
       });
       const skillStr = talent.map((i) => `${i.id}:${i.level}`).join(",");
       await TGLogger.Info(
-        `[Character][refreshTalent][${user.gameUid}] 成功获取到${role.name}的天赋数据 ${skillStr}`,
+        `[Character][refreshTalent][${user.value.gameUid}] 成功获取到${role.name}的天赋数据 ${skillStr}`,
       );
-      await TGSqlite.saveUserCharacterTalent(user.gameUid, role.cid, talent);
+      await TGSqlite.saveUserCharacterTalent(user.value.gameUid, role.cid, talent);
     } else {
       loadingTitle.value = `获取${role.name}的天赋数据失败`;
       loadingSub.value = `[${res.retcode}] ${res.message}`;
       await TGLogger.Error(
-        `[Character][refreshTalent][${user.gameUid}] 获取 ${role.name} 的天赋数据失败`,
+        `[Character][refreshTalent][${user.value.gameUid}] 获取 ${role.name} 的天赋数据失败`,
       );
       await TGLogger.Error(
-        `[Character][refreshTalent][${user.gameUid}] ${res.retcode} ${res.message}`,
+        `[Character][refreshTalent][${user.value.gameUid}] ${res.retcode} ${res.message}`,
       );
       setTimeout(() => {}, 1000);
     }
@@ -237,16 +250,17 @@ async function refreshTalent(): Promise<void> {
 }
 
 async function shareRoles(): Promise<void> {
-  await TGLogger.Info(`[Character][shareRoles][${user.gameUid}] 正在生成分享图片`);
+  if (!user.value) return;
+  await TGLogger.Info(`[Character][shareRoles][${user.value.gameUid}] 正在生成分享图片`);
   const rolesBox = <HTMLElement>document.querySelector(".uc-box");
-  const fileName = `【角色列表】-${user.gameUid}`;
+  const fileName = `【角色列表】-${user.value.gameUid}`;
   loadingTitle.value = "正在生成图片";
   loadingSub.value = `${fileName}.png`;
   loading.value = true;
   await generateShareImg(fileName, rolesBox);
   loadingSub.value = "";
   loading.value = false;
-  await TGLogger.Info(`[Character][shareRoles][${user.gameUid}] 生成分享图片成功`);
+  await TGLogger.Info(`[Character][shareRoles][${user.value.gameUid}] 生成分享图片成功`);
 }
 
 function getUpdateTime(): string {
