@@ -528,6 +528,12 @@ async function mergePosts(
   justify-content: flex-end;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
+.v-btn--disabled.pc-btn {
+  background: var(--tgc-dark-1);
+  color: var(--tgc-white-1);
+}
+
 .pc-btn {
   height: 40px;
   background: var(--btn-bg-1);
