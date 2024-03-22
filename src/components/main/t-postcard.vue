@@ -42,21 +42,30 @@
       <img :src="card.forum.icon" :alt="card.forum.name" />
       <span>{{ card.forum.name }}</span>
     </div>
+    <!-- todo 需要测试 -->
+    <div v-if="props.selectMode" class="tpc-select">
+      <v-checkbox-btn v-model="selectedList" :value="props.modelValue.post.post_id" />
+    </div>
   </v-card>
 </template>
 <script lang="ts" setup>
-import { onBeforeMount, ref } from "vue";
+import { computed, onBeforeMount, ref } from "vue";
 
 import { createPost } from "../../utils/TGWindow";
 import TpAvatar from "../post/tp-avatar.vue";
 
 interface TPostCardProps {
   modelValue: TGApp.Plugins.Mys.Post.FullData;
+  selectMode?: boolean;
+  selected?: string[];
 }
 
-const props = defineProps<TPostCardProps>();
+const props = withDefaults(defineProps<TPostCardProps>(), {
+  selectMode: false,
+});
 const isAct = ref<boolean>(false);
 const card = ref<TGApp.Plugins.Mys.News.RenderCard>();
+const selectedList = computed(() => props.selected);
 
 onBeforeMount(() => {
   card.value = getPostCard(props.modelValue);
@@ -222,6 +231,15 @@ function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.N
   border-bottom-left-radius: 5px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
+}
+
+.tpc-select {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tpc-forum img {

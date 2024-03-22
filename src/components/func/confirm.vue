@@ -85,6 +85,9 @@ async function displayBox(
   data.text = params.text ?? "";
   data.mode = params.mode ?? "confirm";
   data.otcancel = params.otcancel ?? true;
+  if (params.mode === "input" && params.input) {
+    inputVal.value = params.input;
+  }
   show.value = true;
   // 等待确认框关闭，返回关闭后的confirmVal
   return await new Promise<string | boolean | undefined>((resolve) => {

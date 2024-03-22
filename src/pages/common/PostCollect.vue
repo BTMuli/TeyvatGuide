@@ -15,6 +15,7 @@
         </template>
       </v-select>
       <v-btn
+        :disabled="selectedMode"
         size="small"
         class="pc-btn"
         icon="mdi-refresh"
@@ -22,14 +23,25 @@
         @click="freshUser()"
       />
       <v-btn
+        :disabled="selectedMode"
         size="small"
         class="pc-btn"
         icon="mdi-import"
         @click="freshOther"
         title="导入其他用户收藏"
       />
-      <v-btn size="small" class="pc-btn" icon="mdi-pencil" @click="toEdit()" title="编辑收藏" />
+      <v-btn size="small" class="pc-btn" icon="mdi-pencil" @click="toSelect()" title="编辑收藏" />
       <v-btn
+        :disabled="selectedMode"
+        size="small"
+        v-if="curSelect !== '未分类'"
+        class="pc-btn"
+        icon="mdi-info"
+        @click="toEdit()"
+        title="编辑分类"
+      />
+      <v-btn
+        :disabled="selectedMode"
         size="small"
         v-if="curSelect !== '未分类'"
         class="pc-btn"
@@ -41,14 +53,13 @@
     </div>
     <div class="pc-posts">
       <div v-for="item in getPageItems()" :key="item.post.post_id">
-        <TPostCard :model-value="item" />
+        <TPostCard :model-value="item" :selected="selectedPost" :select-mode="selectedMode" />
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
-import Database from "tauri-plugin-sql-api";
 import { computed, onBeforeMount, onMounted, ref, watch } from "vue";
 
 import showConfirm from "../../components/func/confirm";
@@ -65,7 +76,6 @@ const loading = ref(false);
 const loadingTitle = ref("加载中...");
 const loadingSub = ref("");
 const userStore = storeToRefs(useUserStore());
-const db = ref<Database | undefined>(undefined);
 
 const collections = ref<TGApp.Sqlite.UserCollection.UFCollection[]>([]);
 const selected = ref<TGApp.Sqlite.UserCollection.UFPost[]>([]);
@@ -77,6 +87,9 @@ const view = computed(() => {
   return length.value > 5 ? 5 : length.value;
 });
 
+const selectedMode = ref<boolean>(false);
+const selectedPost = ref<Array<string>>([]);
+
 onBeforeMount(async () => {
   if (!(await TGSqlite.checkTableExist("UFPost"))) {
     await TGSqlite.update();
@@ -87,36 +100,98 @@ onBeforeMount(async () => {
   }
 });
 
-onMounted(async () => {
+onMounted(async () => await load());
+
+async function load(): Promise<void> {
   loadingTitle.value = "获取收藏帖子...";
   loading.value = true;
-  db.value = await TGSqlite.getDB();
-  if (!db.value) {
-    showSnackbar({
-      text: "数据库未初始化",
-      color: "error",
-    });
-    loading.value = false;
-    return;
-  }
   loadingTitle.value = "获取收藏合集...";
   collections.value = await TSUserCollection.getCollectList();
   loadingTitle.value = "获取未分类帖子...";
   const postUnCollect = await TSUserCollection.getUnCollectPostList();
   if (postUnCollect.length > 0) {
     selected.value = postUnCollect;
+    curSelect.value = "未分类";
   } else {
     selected.value = await TSUserCollection.getCollectPostList(collections.value[0].title);
+    curSelect.value = collections.value[0].title;
   }
   page.value = 1;
   loading.value = false;
-});
+}
 
-function toEdit() {
-  showSnackbar({
-    text: "功能开发中",
-    color: "info",
+function toSelect() {
+  if (!selectedMode.value) {
+    selectedMode.value = true;
+  } else {
+    // todo
+    console.log(selectedPost.value);
+  }
+}
+
+async function toEdit(): Promise<void> {
+  const collect = collections.value.find((c) => c.title === curSelect.value);
+  if (collect === undefined) {
+    showSnackbar({
+      text: "未找到合集信息！",
+      color: "error",
+    });
+    return;
+  }
+  let cTc = await showConfirm({
+    title: "修改分类标题",
+    mode: "input",
+    text: "请输入分类标题",
+    input: collect.title,
   });
+  if (typeof cTc !== "string") cTc = collect.title;
+  if (cTc === "未分类") {
+    showSnackbar({
+      text: "该名称为保留名称，不可用于作为分类名！",
+      color: "error",
+    });
+    return;
+  }
+  if (cTc !== collect.title && collections.value.find((c) => c.title === cTc)) {
+    showSnackbar({
+      text: "分类名称重复！",
+      color: "error",
+    });
+    return;
+  }
+  let cTd = await showConfirm({
+    title: "修改分类描述",
+    mode: "input",
+    text: "请输入分类描述",
+    input: collect.desc,
+  });
+  if (typeof cTd !== "string") cTd = collect.desc;
+  const cc = await showConfirm({
+    title: "确定修改？",
+    text: `[${cTc}] ${cTd}`,
+  });
+  if (!cc) {
+    showSnackbar({
+      text: "取消修改分类信息",
+      color: "cancel",
+    });
+    return;
+  }
+  loadingTitle.value = "正在修改分类信息...";
+  loading.value = true;
+  const check = await TSUserCollection.updateCollect(collect.title, cTc, cTd);
+  loading.value = false;
+  if (!check) {
+    showSnackbar({
+      text: "修改分类信息失败!",
+      color: "error",
+    });
+    return;
+  }
+  showSnackbar({
+    text: "成功修改分类信息！",
+  });
+  await load();
 }
 
 async function deleteCollect(): Promise<void> {
@@ -137,7 +212,7 @@ async function deleteCollect(): Promise<void> {
       text: "删除成功",
       color: "success",
     });
-    window.location.reload();
+    await load();
   } else {
     showSnackbar({
       text: "删除失败",
@@ -150,13 +225,6 @@ async function deleteCollect(): Promise<void> {
 async function freshPost(select: string | null): Promise<void> {
   if (select === null) {
     curSelect.value = "未分类";
-    return;
-  }
-  if (!db.value) {
-    showSnackbar({
-      text: "数据库未初始化",
-      color: "error",
-    });
     return;
   }
   loadingTitle.value = `获取合集 ${select}...`;
@@ -277,7 +345,6 @@ async function mergePosts(
   posts: TGApp.Plugins.Mys.Post.FullData[],
   collect: string,
 ): Promise<void> {
-  if (!db.value) return;
   const title = `用户收藏-${collect}`;
   for (const post of posts) {
     loadingTitle.value = `收藏帖子 [${post.post.post_id}]...`;

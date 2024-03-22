@@ -37,13 +37,15 @@ declare namespace TGApp.Component.Confirm {
   /**
    * @description Confirm 参数 - input mode
    * @interface ParamsInput
-   * @since Beta v0.3.3
+   * @since Beta v0.4.5
    * @extends ParamsBase
    * @property {"input"} mode
+   * @property {string} input 可选的配置默认输入值
    * @return ParamsInput
    */
   interface ParamsInput extends ParamsBase {
     mode: "input";
+    input?: string;
   }
 
   /**
