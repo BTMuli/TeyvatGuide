@@ -95,17 +95,20 @@ async function createCollect(title: string, desc: string): Promise<boolean> {
  * @description 删除收藏合集
  * @since Beta v0.4.5
  * @param {string} title 收藏合集标题
+ * @param {boolean} force 是否强制删除
  * @return {Promise<boolean>} 返回是否删除成功
  */
-async function deleteCollect(title: string): Promise<boolean> {
+async function deleteCollect(title: string, force: boolean): Promise<boolean> {
   const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFCollection WHERE title = ?";
   const res: Array<{ id: number }> = await db.select(sql, [title]);
   if (res.length === 0) {
     return false;
   }
-  const deleteSql = "DELETE FROM UFCollection WHERE title = ?";
-  await db.execute(deleteSql, [title]);
+  if (force) {
+    const deleteSql = "DELETE FROM UFCollection WHERE title = ?";
+    await db.execute(deleteSql, [title]);
+  }
   const deleteRefSql = "DELETE FROM UFMap WHERE collectionId = ?";
   await db.execute(deleteRefSql, [res[0].id]);
   return true;
@@ -211,25 +214,6 @@ async function addCollect(
 }
 
 /**
- * @description 删除合集中的收藏
- * @since Beta v0.4.5
- * @param {string} postId 文章 id
- * @param {string} collection 收藏合集标题
- * @return {Promise<boolean>} 返回是否删除成功
- */
-async function deleteCollectPost(postId: string, collection: string): Promise<boolean> {
-  const db = await TGSqlite.getDB();
-  const sql = "SELECT id FROM UFCollection WHERE title = ?";
-  const res: Array<{ id: number }> = await db.select(sql, [collection]);
-  if (res.length === 0) {
-    return false;
-  }
-  const deleteSql = "DELETE FROM UFMap WHERE postId = ? AND collectionId = ?";
-  await db.execute(deleteSql, [postId, res[0].id]);
-  return true;
-}
-
-/**
  * @description 更新帖子信息
  * @since Beta v0.4.5
  * @param {string} postId 文章 id
@@ -275,12 +259,12 @@ async function deletePostCollect(postId: string, force: boolean = false): Promis
   if (selectRes.length === 0 && !force) {
     return false;
   }
-  const deleteSql = "DELETE FROM UFMap WHERE postId = ?";
-  await db.execute(deleteSql, [postId]);
   if (force) {
     const deletePostSql = "DELETE FROM UFPost WHERE id = ?";
     await db.execute(deletePostSql, [postId]);
   }
+  const deleteSql = "DELETE FROM UFMap WHERE postId = ?";
+  await db.execute(deleteSql, [postId]);
   return true;
 }
 
@@ -328,13 +312,13 @@ async function updatePostCollect(postId: string, collections: string[]): Promise
  * @since Beta v0.4.5
  * @param {string[]} postIds 文章 id
  * @param {string} collection 收藏合集标题
- * @param {string} oldCollection 旧的收藏合集标题
+ * @param {boolean} force 是否修改的同时移除其他收藏
  * @return {Promise<boolean>} 返回是否修改成功
  */
 async function updatePostsCollect(
   postIds: string[],
   collection: string,
-  oldCollection: string | undefined,
+  force: boolean = false,
 ): Promise<boolean> {
   const db = await TGSqlite.getDB();
   const collectionSql = "SELECT * FROM UFCollection WHERE title = ?";
@@ -344,37 +328,22 @@ async function updatePostsCollect(
   if (collectionRes.length === 0) {
     return false;
   }
-  let oldCollectionInfo: TGApp.Sqlite.UserCollection.UFCollection | undefined;
-  if (oldCollection !== undefined) {
-    const oldCollectionRes: TGApp.Sqlite.UserCollection.UFCollection[] = await db.select(
-      collectionSql,
-      [oldCollection],
-    );
-    if (oldCollectionRes.length === 0) {
-      return false;
-    }
-    oldCollectionInfo = oldCollectionRes[0];
-  }
   for (let i = 0; i < postIds.length; i++) {
     const postSql = "SELECT id,title FROM UFPost WHERE id = ?";
     const postRes: Array<{ id: number; title: string }> = await db.select(postSql, [postIds[i]]);
     if (postRes.length === 0) {
       return false;
     }
-    if (oldCollectionInfo !== undefined) {
-      const updateSql =
-        "UPDATE UFMap SET collectionId = ?,post=?,collection=?,desc=?,updated=? WHERE postId = ? AND collectionId = ?";
-      await db.execute(updateSql, [
-        collectionRes[0].id,
-        postRes[0].title,
-        collection,
-        collectionRes[0].desc,
-        new Date().getTime(),
-        postIds[i],
-        oldCollectionInfo.id,
-      ]);
-      continue;
+    if (force) {
+      const deleteCheck = await deletePostCollect(postIds[i]);
+      if (!deleteCheck) return false;
     }
+    const mapSql = "SELECT * FROM UFMap WHERE postId = ? AND collectionId = ?";
+    const mapRes: TGApp.Sqlite.UserCollection.UFMap[] = await db.select(mapSql, [
+      postIds[i],
+      collectionRes[0].id,
+    ]);
+    if (mapRes.length > 0) continue;
     const insertSql =
       "INSERT INTO UFMap (postId, collectionId,post, collection, desc, updated) VALUES (?, ?, ?, ?, ?, ?)";
     await db.execute(insertSql, [
@@ -399,7 +368,6 @@ const TSUserCollection = {
   updateCollect,
   addCollect,
   updatePostInfo,
-  deleteCollectPost,
   deletePostCollect,
   updatePostCollect,
   updatePostsCollect,

@@ -9,7 +9,7 @@
         当前所属分类：{{ postCollect.map((i) => i.collection).join(",") }}
       </div>
       <div v-else class="topc-cur-collect">当前所属分类：未分类</div>
-      <div class="tpoc-collect-list">
+      <div class="topc-collect-list">
         <v-list-item v-for="item in collectList" :key="item.id">
           <template #prepend>
             <v-list-item-action start>
@@ -208,8 +208,8 @@ function onCancel() {
 }
 
 .topc-post-info {
+  font-family: var(--font-title);
   font-size: 18px;
-  font-weight: bold;
 }
 
 .topc-cur-collect {
@@ -218,7 +218,7 @@ function onCancel() {
   word-break: break-all;
 }
 
-.tpoc-collect-list {
+.topc-collect-list {
   display: flex;
   width: 100%;
   max-height: 300px;

@@ -1,6 +1,6 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="pc-container">
+    <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
     <div class="pc-top">
       <v-select
         v-model="curSelect"
@@ -30,31 +30,56 @@
         @click="freshOther"
         title="导入其他用户收藏"
       />
-      <v-btn size="small" class="pc-btn" icon="mdi-pencil" @click="toSelect()" title="编辑收藏" />
       <v-btn
-        :disabled="selectedMode"
         size="small"
-        v-if="curSelect !== '未分类'"
         class="pc-btn"
-        icon="mdi-info"
-        @click="toEdit()"
-        title="编辑分类"
+        :icon="selectedMode ? 'mdi-folder-move' : 'mdi-pencil'"
+        @click="toSelect()"
+        title="编辑收藏"
       />
       <v-btn
         :disabled="selectedMode"
         size="small"
-        v-if="curSelect !== '未分类'"
+        class="pc-btn"
+        icon="mdi-plus"
+        @click="addCollect"
+        title="新建分类"
+      />
+      <v-btn
+        :disabled="selectedMode || curSelect === '未分类'"
+        size="small"
+        class="pc-btn"
+        icon="mdi-information"
+        @click="toEdit()"
+        title="编辑分类"
+      />
+      <v-btn
+        size="small"
+        :disabled="curSelect === '未分类'"
         class="pc-btn"
         icon="mdi-delete"
-        @click="deleteCollect()"
-        title="删除合集"
+        @click="deleteOper(false)"
+        :title="selectedMode ? '删除帖子分类' : '清空合集'"
+      />
+      <v-btn
+        size="small"
+        class="pc-btn"
+        icon="mdi-delete-forever"
+        @click="deleteOper(true)"
+        :title="selectedMode ? '删除帖子' : '删除合集'"
       />
       <v-pagination class="pc-page" v-model="page" :total-visible="view" :length="length" />
     </div>
     <div class="pc-posts">
       <div v-for="item in getPageItems()" :key="item.post.post_id">
-        <TPostCard :model-value="item" :selected="selectedPost" :select-mode="selectedMode" />
+        <TPostCard
+          @update:selected="updateSelected"
+          :model-value="item"
+          :selected="selectedPost"
+          :select-mode="selectedMode"
+        />
       </div>
+      <ToCollectPost @submit="load" :post="selectedPost" v-model="showOverlay" />
     </div>
   </div>
 </template>
@@ -65,6 +90,7 @@ import { computed, onBeforeMount, onMounted, ref, watch } from "vue";
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
 import TPostCard from "../../components/main/t-postcard.vue";
+import ToCollectPost from "../../components/overlay/to-collectPost.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TGSqlite from "../../plugins/Sqlite";
 import TSUserCollection from "../../plugins/Sqlite/modules/userCollect";
@@ -89,6 +115,7 @@ const view = computed(() => {
 
 const selectedMode = ref<boolean>(false);
 const selectedPost = ref<Array<string>>([]);
+const showOverlay = ref(false);
 
 onBeforeMount(async () => {
   if (!(await TGSqlite.checkTableExist("UFPost"))) {
@@ -101,6 +128,10 @@ onBeforeMount(async () => {
 });
 
 onMounted(async () => await load());
+
+function updateSelected(v: string[]) {
+  selectedPost.value = v;
+}
 
 async function load(): Promise<void> {
   loadingTitle.value = "获取收藏帖子...";
@@ -116,16 +147,66 @@ async function load(): Promise<void> {
     selected.value = await TSUserCollection.getCollectPostList(collections.value[0].title);
     curSelect.value = collections.value[0].title;
   }
+  selectedMode.value = false;
+  selectedPost.value = [];
   page.value = 1;
   loading.value = false;
 }
 
 function toSelect() {
   if (!selectedMode.value) {
+    selectedPost.value = [];
     selectedMode.value = true;
   } else {
-    // todo
-    console.log(selectedPost.value);
+    selectedMode.value = false;
+    if (selectedPost.value.length === 0) return;
+    showOverlay.value = true;
+  }
+}
+
+async function addCollect(): Promise<void> {
+  let title, desc;
+  const titleC = await showConfirm({
+    mode: "input",
+    title: "新建分类",
+    text: "请输入分类名称",
+  });
+  if (titleC === undefined || titleC === false) return;
+  if (titleC === "未分类") {
+    showSnackbar({
+      text: "分类名不可为未分类",
+      color: "error",
+    });
+    return;
+  }
+  if (collections.value.find((i) => i.title === titleC)) {
+    showSnackbar({
+      text: "分类已存在",
+      color: "error",
+    });
+    return;
+  }
+  title = titleC;
+  const descC = await showConfirm({
+    mode: "input",
+    title: "新建分类",
+    text: "请输入分类描述",
+  });
+  if (descC === false) return;
+  if (descC === undefined) desc = title;
+  else desc = descC;
+  const res = await TSUserCollection.createCollect(title, desc);
+  if (res) {
+    showSnackbar({
+      text: "新建成功",
+      color: "success",
+    });
+    await load();
+  } else {
+    showSnackbar({
+      text: "新建失败",
+      color: "error",
+    });
   }
 }
 
@@ -144,6 +225,13 @@ async function toEdit(): Promise<void> {
     text: "请输入分类标题",
     input: collect.title,
   });
+  if (cTc === false) {
+    showSnackbar({
+      text: "取消修改分类信息",
+      color: "cancel",
+    });
+    return;
+  }
   if (typeof cTc !== "string") cTc = collect.title;
   if (cTc === "未分类") {
     showSnackbar({
@@ -194,11 +282,60 @@ async function toEdit(): Promise<void> {
   await load();
 }
 
-async function deleteCollect(): Promise<void> {
+async function deleteOper(forever: boolean): Promise<void> {
+  if (selectedMode.value) {
+    await deletePost(forever);
+  } else {
+    await deleteCollect(forever);
+  }
+}
+
+async function deletePost(force: boolean = false): Promise<void> {
+  if (selectedPost.value.length === 0) {
+    showSnackbar({
+      text: "未选择帖子",
+      color: "error",
+    });
+    return;
+  }
+  const title = force ? "删除帖子" : "移除帖子分类";
   const res = await showConfirm({
-    title: "确定删除分类?",
-    text: selected.value.length > 0 ? `该分类下 ${selected.value.length} 条帖子将变为未分类` : "",
+    title: `确定${title}?`,
+    text: `共 ${selectedPost.value.length} 条帖子`,
   });
+  if (!res) {
+    showSnackbar({
+      text: "取消操作",
+      color: "cancel",
+    });
+    return;
+  }
+  loadingTitle.value = `正在${title}...`;
+  loading.value = true;
+  let success = 0;
+  for (const post of selectedPost.value) {
+    const check = await TSUserCollection.deletePostCollect(post, force);
+    if (!check) {
+      showSnackbar({
+        text: `帖子 ${post} 操作失败`,
+        color: "error",
+      });
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    } else {
+      success++;
+    }
+  }
+  loading.value = false;
+  showSnackbar({
+    text: `成功${title} ${success} 条`,
+    color: "success",
+  });
+  await load();
+}
+
+async function deleteCollect(force: boolean): Promise<void> {
+  const title = force ? "删除分类" : "清空分类";
+  const res = await showConfirm({ title: `确定${title}?` });
   if (!res) {
     showSnackbar({
       text: "取消删除",
@@ -206,16 +343,16 @@ async function deleteCollect(): Promise<void> {
     });
     return;
   }
-  const resD = await TSUserCollection.deleteCollect(curSelect.value);
+  const resD = await TSUserCollection.deleteCollect(curSelect.value, force);
   if (resD) {
     showSnackbar({
-      text: "删除成功",
+      text: `成功 ${title}`,
       color: "success",
     });
     await load();
   } else {
     showSnackbar({
-      text: "删除失败",
+      text: `${title} 失败`,
       color: "error",
     });
   }

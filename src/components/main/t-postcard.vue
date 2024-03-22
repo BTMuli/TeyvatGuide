@@ -42,7 +42,6 @@
       <img :src="card.forum.icon" :alt="card.forum.name" />
       <span>{{ card.forum.name }}</span>
     </div>
-    <!-- todo 需要测试 -->
     <div v-if="props.selectMode" class="tpc-select">
       <v-checkbox-btn v-model="selectedList" :value="props.modelValue.post.post_id" />
     </div>
@@ -60,12 +59,23 @@ interface TPostCardProps {
   selected?: string[];
 }
 
+interface TPostCardEmits {
+  (e: "update:selected", value: string[]): void;
+}
+
 const props = withDefaults(defineProps<TPostCardProps>(), {
   selectMode: false,
 });
+const emits = defineEmits<TPostCardEmits>();
 const isAct = ref<boolean>(false);
 const card = ref<TGApp.Plugins.Mys.News.RenderCard>();
-const selectedList = computed(() => props.selected);
+const selectedList = computed({
+  get: () => props.selected,
+  set: (v) => {
+    if (v === undefined) return;
+    emits("update:selected", v);
+  },
+});
 
 onBeforeMount(() => {
   card.value = getPostCard(props.modelValue);
@@ -235,7 +245,7 @@ function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.N
 
 .tpc-select {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   display: flex;
   align-items: center;
