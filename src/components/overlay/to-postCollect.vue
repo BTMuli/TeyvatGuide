@@ -223,8 +223,6 @@ function onCancel() {
   width: 100%;
   max-height: 300px;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
   overflow-y: auto;
   row-gap: 10px;
 }
