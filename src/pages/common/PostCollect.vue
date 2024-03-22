@@ -62,6 +62,7 @@
         :title="selectedMode ? '删除帖子分类' : '清空合集'"
       />
       <v-btn
+        :disabled="curSelect === '未分类'"
         size="small"
         class="pc-btn"
         icon="mdi-delete-forever"
