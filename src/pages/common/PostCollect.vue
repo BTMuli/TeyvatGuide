@@ -55,14 +55,12 @@
       />
       <v-btn
         size="small"
-        :disabled="curSelect === '未分类'"
         class="pc-btn"
         icon="mdi-delete"
         @click="deleteOper(false)"
         :title="selectedMode ? '删除帖子分类' : '清空合集'"
       />
       <v-btn
-        :disabled="curSelect === '未分类'"
         size="small"
         class="pc-btn"
         icon="mdi-delete-forever"
@@ -144,9 +142,12 @@ async function load(): Promise<void> {
   if (postUnCollect.length > 0) {
     selected.value = postUnCollect;
     curSelect.value = "未分类";
-  } else {
+  } else if (collections.value.length > 0) {
     selected.value = await TSUserCollection.getCollectPostList(collections.value[0].title);
     curSelect.value = collections.value[0].title;
+  } else {
+    selected.value = [];
+    curSelect.value = "未分类";
   }
   selectedMode.value = false;
   selectedPost.value = [];
@@ -335,6 +336,13 @@ async function deletePost(force: boolean = false): Promise<void> {
 }
 
 async function deleteCollect(force: boolean): Promise<void> {
+  if (curSelect.value === "未分类" && force) {
+    showSnackbar({
+      text: "未分类不可删除",
+      color: "error",
+    });
+    return;
+  }
   const title = force ? "删除分类" : "清空分类";
   const res = await showConfirm({ title: `确定${title}?` });
   if (!res) {
@@ -344,7 +352,12 @@ async function deleteCollect(force: boolean): Promise<void> {
     });
     return;
   }
-  const resD = await TSUserCollection.deleteCollect(curSelect.value, force);
+  let resD;
+  if (curSelect.value !== "未分类") {
+    resD = await TSUserCollection.deleteCollect(curSelect.value, force);
+  } else {
+    resD = await TSUserCollection.deleteUnCollectPost();
+  }
   if (resD) {
     showSnackbar({
       text: `成功 ${title}`,

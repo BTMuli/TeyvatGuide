@@ -115,6 +115,18 @@ async function deleteCollect(title: string, force: boolean): Promise<boolean> {
 }
 
 /**
+ * @description 删除未分类帖子
+ * @since Beta v0.4.5
+ * @return {Promise<boolean>} 返回是否删除成功
+ */
+async function deleteUnCollectPost(): Promise<boolean> {
+  const db = await TGSqlite.getDB();
+  const sql = "DELETE FROM UFPost WHERE id NOT IN (SELECT postId FROM UFMap)";
+  await db.execute(sql);
+  return true;
+}
+
+/**
  * @description 更新收藏合集信息，标题/描述
  * @since Beta v0.4.5
  * @param {string} title 收藏合集标题
@@ -365,6 +377,7 @@ const TSUserCollection = {
   getUnCollectPostList,
   createCollect,
   deleteCollect,
+  deleteUnCollectPost,
   updateCollect,
   addCollect,
   updatePostInfo,
