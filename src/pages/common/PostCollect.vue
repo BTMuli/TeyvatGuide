@@ -15,6 +15,13 @@
         </template>
       </v-select>
       <v-btn
+        size="small"
+        class="pc-btn"
+        icon="mdi-sort"
+        @click="sortPost(!sortId)"
+        :title="sortId ? '按更新时间排序' : '按帖子ID排序'"
+      />
+      <v-btn
         :disabled="selectedMode"
         size="small"
         class="pc-btn"
@@ -83,8 +90,10 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { event } from "@tauri-apps/api";
+import { UnlistenFn } from "@tauri-apps/api/helpers/event";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount, onMounted, ref, watch } from "vue";
+import { computed, onBeforeMount, onMounted, onUnmounted, ref, watch } from "vue";
 
 import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
@@ -115,6 +124,9 @@ const view = computed(() => {
 const selectedMode = ref<boolean>(false);
 const selectedPost = ref<Array<string>>([]);
 const showOverlay = ref(false);
+const sortId = ref<boolean>(false);
+
+let collectListener: UnlistenFn | undefined = undefined;
 
 onBeforeMount(async () => {
   if (!(await TGSqlite.checkTableExist("UFPost"))) {
@@ -124,12 +136,34 @@ onBeforeMount(async () => {
       color: "success",
     });
   }
+  collectListener = await event.listen("refreshCollect", async () => await load());
 });
 
 onMounted(async () => await load());
+onUnmounted(() => {
+  if (collectListener) collectListener();
+});
 
 function updateSelected(v: string[]) {
   selectedPost.value = v;
+}
+
+function sortPost(value: boolean) {
+  let ori = sortId.value;
+  sortId.value = value;
+  selected.value = selected.value.sort((a, b) => {
+    if (sortId.value) {
+      return Number(b.id) - Number(a.id);
+    } else {
+      return Number(b.updated) - Number(a.updated);
+    }
+  });
+  if (ori !== sortId.value) {
+    showSnackbar({
+      text: `已${sortId.value ? "按帖子ID排序" : "按更新时间排序"}`,
+      color: "success",
+    });
+  }
 }
 
 async function load(): Promise<void> {
@@ -139,19 +173,18 @@ async function load(): Promise<void> {
   collections.value = await TSUserCollection.getCollectList();
   loadingTitle.value = "获取未分类帖子...";
   const postUnCollect = await TSUserCollection.getUnCollectPostList();
-  if (postUnCollect.length > 0) {
+  if (curSelect.value === "未分类" || collections.value.length === 0) {
+    selected.value = postUnCollect;
+  } else if (collections.value.find((c) => c.title === curSelect.value)) {
+    selected.value = await TSUserCollection.getCollectPostList(curSelect.value);
+  } else {
     selected.value = postUnCollect;
     curSelect.value = "未分类";
-  } else if (collections.value.length > 0) {
-    selected.value = await TSUserCollection.getCollectPostList(collections.value[0].title);
-    curSelect.value = collections.value[0].title;
-  } else {
-    selected.value = [];
-    curSelect.value = "未分类";
   }
+  sortPost(sortId.value);
   selectedMode.value = false;
   selectedPost.value = [];
-  page.value = 1;
+  if (page.value > length.value) page.value = 1;
   loading.value = false;
 }
 

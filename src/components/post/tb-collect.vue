@@ -12,6 +12,7 @@
   <ToPostCollect v-model="showEdit" :post="props.data" @submit="refresh()" />
 </template>
 <script lang="ts" setup>
+import { event } from "@tauri-apps/api";
 import { onBeforeMount, ref, watch } from "vue";
 
 import TSUserCollection from "../../plugins/Sqlite/modules/userCollect";
@@ -34,6 +35,7 @@ const props = defineProps<TbCollectProps>();
 onBeforeMount(async () => await refresh());
 
 async function refresh(): Promise<void> {
+  await event.emit("refreshCollect");
   const check = await TSUserCollection.getPostCollect(props.modelValue.toString());
   if (typeof check === "boolean") {
     isCollected.value = check;
@@ -57,6 +59,7 @@ watch(
     if (val === undefined) return;
     if (isCollected.value === false) return;
     const res = await TSUserCollection.updatePostInfo(props.modelValue.toString(), val);
+    await event.emit("refreshCollect");
     if (!res) {
       showSnackbar({
         text: "更新帖子信息失败，数据库中不存在帖子信息！",
@@ -82,6 +85,7 @@ async function switchCollect(): Promise<void> {
       return;
     }
     await TSUserCollection.addCollect(props.modelValue.toString(), props.data);
+    await event.emit("refreshCollect");
     isCollected.value = true;
     showSnackbar({
       text: "收藏成功",
@@ -99,6 +103,7 @@ async function switchCollect(): Promise<void> {
     }
   }
   await TSUserCollection.deletePostCollect(props.modelValue.toString(), true);
+  await event.emit("refreshCollect");
   isCollected.value = false;
   showSnackbar({
     text: "取消收藏成功",
