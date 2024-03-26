@@ -8,6 +8,11 @@
     <v-icon size="small">mdi-gift</v-icon>
     <span>{{ props.data.insert.lottery.toast }}</span>
   </div>
+  <TpoLottery
+    v-if="props.data.insert.lottery"
+    v-model="showLottery"
+    :lottery="props.data.insert.lottery.id"
+  />
   <details v-else-if="props.data.insert.fold" class="tp-backup-fold">
     <summary class="tp-backup-summary">
       <img alt="marker" src="/source/post/fold_marker.webp" class="tp-backup-marker" />
@@ -20,11 +25,11 @@
   <TpUnknown v-else :data="<TGApp.Plugins.Mys.SctPost.Empty>props.data" />
 </template>
 <script lang="ts" setup>
-import { toRaw } from "vue";
-import { useRouter } from "vue-router";
+import { ref, toRaw } from "vue";
 
 import TpParser from "./tp-parser.vue";
 import TpUnknown from "./tp-unknown.vue";
+import TpoLottery from "./tpo-lottery.vue";
 
 interface TpBackupText {
   insert: {
@@ -46,18 +51,15 @@ interface TpBackupTextProps {
 }
 
 const props = defineProps<TpBackupTextProps>();
-const router = useRouter();
+const showLottery = ref(false);
 
 console.log("tpBackupText", props.data.insert.backup_text, toRaw(props.data));
 
 async function toLottery() {
-  if (!props.data.insert.lottery) return;
-  await router.push({
-    name: "抽奖详情",
-    params: {
-      lottery_id: props.data.insert.lottery.id,
-    },
-  });
+  if (showLottery.value) {
+    showLottery.value = false;
+  }
+  showLottery.value = true;
 }
 </script>
 <style lang="css" scoped>
