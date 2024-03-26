@@ -32,7 +32,7 @@ export async function getGameRoleListByLToken(
       body: http.Body.json(data),
     })
     .then((res) => {
-      if (res.data.retcode !== 0) return res.data;
+      if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
       return res.data.data.avatars;
     });
 }
