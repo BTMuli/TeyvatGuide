@@ -1,7 +1,7 @@
 <template>
   <div class="tbc-box" data-html2canvas-ignore>
     <div class="tbc-btn" @click="switchCollect()" :title="isCollected ? '取消收藏' : '收藏'">
-      <v-icon :color="isCollected ? 'yellow' : 'white'">
+      <v-icon size="large" :color="isCollected ? 'yellow' : 'inherit'">
         {{ isCollected ? "mdi-star" : "mdi-star-outline" }}
       </v-icon>
     </div>

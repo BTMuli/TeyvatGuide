@@ -1,13 +1,13 @@
 /**
  * @file assets/themes/default.css
  * @description 主题样式文件-默认（浅色）主题
- * @since Beta v0.4.1
+ * @since Beta v0.4.5
  */
 
 /* default(light) theme */
 html.default {
   /* app container */
-  --app-page-bg: #f9f6f2;
+  --app-page-bg: #ffffff;
   --app-page-content: #2f2f2f;
   --app-side-bg: #f2f2f2;
   --app-side-content: #222222;
