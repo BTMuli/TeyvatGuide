@@ -15,6 +15,9 @@
       <div class="tab-link" @click="toStore()" title="点击查看商店页面">
         <img src="/platforms/other/microsoft-store.webp" alt="store" />
       </div>
+      <div class="tab-link" @click="toSite()" title="点击查看更新说明">
+        <v-icon color="white">mdi-update</v-icon>
+      </div>
     </div>
   </div>
 </template>
@@ -46,6 +49,10 @@ function toGithub() {
 
 function toStore() {
   window.open("https://www.microsoft.com/store/productId/9NLBNNNBNSJN");
+}
+
+function toSite() {
+  window.open("https://app.btmuli.ink/docs/Changelogs.html");
 }
 </script>
 <style lang="css" scoped>
