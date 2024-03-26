@@ -1,7 +1,7 @@
 /**
  * @file assets/themes/dark.css
  * @description 主题样式文件-深色主题
- * @since Beta v0.4.1
+ * @since Beta v0.4.5
  */
 
 /* dark mode */
@@ -17,6 +17,8 @@ html.dark {
   --box-bg-2: #323844;
   --box-bg-3: #282c34;
   --box-bg-4: #3d424b;
+
+  --box-bg-blue: var(--tgc-blue-1);
 
   /* box bg transparent */
   --box-bg-t-1: var(--tgc-white-3);

@@ -1,78 +1,60 @@
 <template>
-  <div class="calendar-box">
-    <div class="calendar-title">
-      <div class="calendar-title-left">
-        <v-icon size="small" style="opacity: 0.8">mdi-calendar-clock</v-icon>
-        <span>今日素材</span>
-        <span>{{ dateNow }}</span>
+  <THomecard append>
+    <template #title>今日素材 {{ dateNow }}</template>
+    <template #title-append>
+      <v-switch
+        class="tc-switch"
+        variant="outline"
+        :label="switchType === 'avatar' ? '角色' : '武器'"
+        @change="switchType = switchType === 'avatar' ? 'weapon' : 'avatar'"
+      />
+    </template>
+    <template #default>
+      <div class="tc-top">
+        <div class="tc-btns">
+          <v-btn
+            v-for="text of btnText"
+            :key="text.week"
+            rounded
+            :style="{
+              border: text.week === weekNow ? '1px solid var(--common-shadow-4)' : 'none',
+              backgroundColor: text.week === btnNow ? 'var(--tgc-yellow-1)' : 'var(--tgc-btn-1)',
+              color: text.week === btnNow ? 'var(--box-text-4)' : 'var(--btn-text)',
+            }"
+            @click="getContents(text.week)"
+            >{{ text.text }}
+          </v-btn>
+        </div>
+        <v-pagination class="tc-page" v-model="page" total-visible="20" :length="length" />
       </div>
-      <div class="calendar-title-mid">
-        <v-btn
-          v-for="text of btnText"
-          :key="text.week"
-          :style="{
-            border: text.week === weekNow ? '1px solid var(--box-text-2)' : 'none',
-            borderRadius: '5px',
-            backgroundColor: text.week === btnNow ? 'var(--tgc-yellow-1)' : 'inherit',
-            color: text.week === btnNow ? 'var(--box-text-4)' : 'inherit',
-          }"
-          variant="tonal"
-          @click="getContents(text.week)"
-        >
-          {{ text.text }}
-        </v-btn>
+      <div class="calendar-grid">
+        <div v-for="item in getGrid()" :key="item.id" @click="selectItem(item)">
+          <TibCalendarItem
+            :data="<TGApp.App.Calendar.Item>item"
+            :model="switchType"
+            :clickable="true"
+          />
+        </div>
       </div>
-      <div class="calendar-title-right">
-        <v-switch
-          class="calendar-title-switch"
-          color="var(--common-shadow-4)"
-          variant="outline"
-          :label="switchType === 'avatar' ? '角色' : '武器'"
-          @change="switchType = switchType === 'avatar' ? 'weapon' : 'avatar'"
-        />
-        <v-btn class="calendar-title-btn" @click="share" data-html2canvas-ignore>
-          <template #prepend>
-            <v-icon>mdi-share-variant</v-icon>
-          </template>
-          <span>分享</span>
-        </v-btn>
-      </div>
-    </div>
-    <v-divider class="calendar-divider" />
-    <div v-show="switchType === 'avatar'" class="calendar-grid">
-      <div v-for="item in characterCards" :key="item.id" @click="selectAvatar(item)">
-        <TibCalendarItem
-          :data="<TGApp.App.Calendar.Item>item"
-          :model="'avatar'"
-          :clickable="true"
-        />
-      </div>
-    </div>
-    <div v-show="switchType !== 'avatar'" class="calendar-grid">
-      <div v-for="item in weaponCards" :key="item.id" @click="selectWeapon(item)">
-        <TibCalendarItem
-          :data="<TGApp.App.Calendar.Item>item"
-          :model="'weapon'"
-          :clickable="true"
-        />
-      </div>
-    </div>
-    <ToCalendar v-model="showItem" :data-type="selectedType" :data-val="selectedItem" />
-  </div>
+    </template>
+  </THomecard>
+  <ToCalendar v-model="showItem" :data-type="selectedType" :data-val="selectedItem" />
 </template>
 <script lang="ts" setup>
 import { computed, onMounted, ref } from "vue";
 
+import THomecard from "./t-homecard.vue";
 import { AppCalendarData } from "../../data";
-import { generateShareImg } from "../../utils/TGShare";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 import ToCalendar from "../overlay/to-calendar.vue";
 
-// data
-const calendarData = computed<TGApp.App.Calendar.Item[]>(() => AppCalendarData);
 const weekNow = ref<number>(0);
 const btnNow = ref<number>(0);
 const dateNow = ref<string>("");
+
+// page
+const page = ref<number>(1);
+const length = ref<number>(0);
 
 // calendar
 const calendarNow = ref<TGApp.App.Calendar.Item[]>([]);
@@ -81,7 +63,7 @@ const weaponCards = ref<TGApp.App.Calendar.Item[]>([]);
 
 // calendar item
 const showItem = ref<boolean>(false);
-const switchType = ref<string>("avatar");
+const switchType = ref<"avatar" | "weapon">("avatar");
 const selectedItem = ref<TGApp.App.Calendar.Item>(<TGApp.App.Calendar.Item>{});
 const selectedType = ref<"avatar" | "weapon">("avatar");
 
@@ -145,18 +127,23 @@ onMounted(async () => {
 
 // 获取当前日历
 function getCalendar(day: number): TGApp.App.Calendar.Item[] {
-  return calendarData.value.filter((item) => item.dropDays.includes(day));
+  return AppCalendarData.filter((item) => item.dropDays.includes(day));
 }
 
-function selectAvatar(item: TGApp.App.Calendar.Item): void {
-  selectedItem.value = item;
-  selectedType.value = "avatar";
-  showItem.value = true;
+function getGrid(): TGApp.App.Calendar.Item[] {
+  let selectedCards: TGApp.App.Calendar.Item[] = [];
+  if (switchType.value === "avatar") {
+    selectedCards = characterCards.value;
+  } else {
+    selectedCards = weaponCards.value;
+  }
+  length.value = Math.ceil(selectedCards.length / 20);
+  return selectedCards.slice((page.value - 1) * 20, page.value * 20);
 }
 
-function selectWeapon(item: TGApp.App.Calendar.Item): void {
+function selectItem(item: TGApp.App.Calendar.Item): void {
   selectedItem.value = item;
-  selectedType.value = "weapon";
+  selectedType.value = switchType.value;
   showItem.value = true;
 }
 
@@ -165,65 +152,20 @@ function getContents(day: number): void {
   calendarNow.value = getCalendar(day);
   characterCards.value = calendarNow.value.filter((item) => item.itemType === "character");
   weaponCards.value = calendarNow.value.filter((item) => item.itemType === "weapon");
-}
-
-async function share(): Promise<void> {
-  emits("loadOuter", { show: true, text: "正在生成图片..." });
-  const div = <HTMLElement>document.querySelector(".calendar-box");
-  const showType = switchType.value === "avatar" ? "角色" : "武器";
-  const title = `【今日素材】${showType}${btnNow.value}`;
-  await generateShareImg(title, div);
-  emits("loadOuter", { show: false });
+  page.value = 1;
 }
 </script>
 <style lang="css" scoped>
-.calendar-box {
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  border-radius: 5px;
-  background: var(--box-bg-1);
-  gap: 5px;
-}
-
-.calendar-title {
+.tc-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 10px;
   font-family: var(--font-title);
   font-size: 20px;
 }
 
-.calendar-title-left {
-  display: flex;
-  align-items: center;
-  justify-content: start;
-  color: var(--common-text-title);
-  column-gap: 10px;
-}
-
-.calendar-title-gift {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.calendar-title-mid {
-  display: flex;
-  align-items: center;
-  justify-content: start;
-  column-gap: 15px;
-}
-
-.calendar-title-right {
-  display: flex;
-  align-items: center;
-  justify-content: start;
-  gap: 15px;
-}
-
-.calendar-title-switch {
+.tc-switch {
   display: flex;
   height: 36px;
   align-items: center;
@@ -231,21 +173,17 @@ async function share(): Promise<void> {
   color: var(--box-text-1);
 }
 
-.calendar-title-btn {
-  border: 1px solid var(--common-shadow-4);
-  border-radius: 5px;
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
-}
-
-.calendar-divider {
-  margin: 10px 0;
-  opacity: 0.2;
+.tc-btns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 5px;
 }
 
 .calendar-grid {
   display: grid;
+  place-items: center flex-start;
   grid-gap: 10px;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(10, 1fr);
 }
 </style>

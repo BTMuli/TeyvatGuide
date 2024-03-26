@@ -1,7 +1,7 @@
 /**
  * @file router/modules/sub.ts
  * @description 子路由模块，用于二级窗口
- * @since Beta v0.4.4
+ * @since Beta v0.4.5
  */
 
 const subRoutes = [
@@ -25,11 +25,6 @@ const subRoutes = [
     path: "/post_detail_json/:post_id",
     name: "帖子详情（JSON）",
     component: async () => await import("../../views/t-post-json.vue"),
-  },
-  {
-    path: "/lottery/:lottery_id",
-    name: "抽奖详情",
-    component: async () => await import("../../views/t-lottery.vue"),
   },
 ];
 

@@ -18,6 +18,8 @@ html.default {
   --box-bg-3: #dee4e9;
   --box-bg-4: #f5f5f5;
 
+  --box-bg-blue: var(--tgc-blue-2);
+
   /* box bg transparent */
   --box-bg-t-1: var(--tgc-dark-5);
 

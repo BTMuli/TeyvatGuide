@@ -1,70 +1,66 @@
 <template>
-  <div class="pool-box">
-    <div class="pool-title">
-      <div class="pool-title-left">
-        <img src="../../assets/icons/icon-wish.svg" alt="wish" />
-        <span>限时祈愿</span>
-      </div>
-      <div class="pool-title-right">
-        <v-switch
-          class="pool-switch"
-          color="var(--common-shadow-4)"
-          variant="outline"
-          :label="showNew ? '查看当前祈愿' : '查看后续祈愿'"
-          v-show="hasNew"
-          @change="switchPool"
-        />
-      </div>
-    </div>
-    <div class="pool-grid">
-      <div v-for="pool in poolSelect" :key="pool.postId" class="pool-card">
-        <div class="pool-cover" @click="createPost(pool.postId, pool.title)">
-          <img :src="pool.cover" alt="cover" />
-        </div>
-        <div class="pool-bottom">
-          <div class="pool-character">
-            <div class="pool-icons">
-              <div
-                v-for="character in pool.characters"
-                :key="character.url"
-                class="pool-icon"
-                @click="toOuter(character, pool.title)"
-              >
-                <TItembox
-                  :title="character.info.name"
-                  v-if="character.info"
-                  :model-value="getCBox(character.info)"
-                />
-                <img v-else :src="character.icon" alt="character" />
+  <THomecard :append="hasNew">
+    <template #title>限时祈愿</template>
+    <template #title-append>
+      <v-switch
+        class="pool-switch"
+        variant="outline"
+        :label="showNew ? '查看当前祈愿' : '查看后续祈愿'"
+        @change="switchPool"
+      />
+    </template>
+    <template #default>
+      <div class="pool-grid">
+        <div v-for="pool in poolSelect" :key="pool.postId" class="pool-card">
+          <div class="pool-cover" @click="createPost(pool.postId, pool.title)">
+            <img :src="pool.cover" alt="cover" />
+          </div>
+          <div class="pool-bottom">
+            <div class="pool-character">
+              <div class="pool-icons">
+                <div
+                  v-for="character in pool.characters"
+                  :key="character.url"
+                  class="pool-icon"
+                  @click="toOuter(character, pool.title)"
+                >
+                  <TItembox
+                    :title="character.info.name"
+                    v-if="character.info"
+                    :model-value="getCBox(character.info)"
+                  />
+                  <img v-else :src="character.icon" alt="character" />
+                </div>
+              </div>
+            </div>
+            <div class="pool-time">
+              <div>
+                <v-icon>mdi-calendar-clock</v-icon>
+                {{ pool.time.str }}
+              </div>
+              <v-progress-linear :model-value="poolTimePass[pool.postId]" :rounded="true">
+              </v-progress-linear>
+              <div v-if="poolTimeGet[pool.postId] === '已结束'">
+                {{ poolTimeGet[pool.postId] }}
+              </div>
+              <div v-else>
+                <span>剩余时间：</span>
+                <span>
+                  {{ poolTimeGet[pool.postId] }}
+                </span>
               </div>
             </div>
           </div>
-          <div class="pool-time">
-            <div>
-              <v-icon>mdi-calendar-clock</v-icon>
-              {{ pool.time.str }}
-            </div>
-            <v-progress-linear :model-value="poolTimePass[pool.postId]" :rounded="true">
-            </v-progress-linear>
-            <div v-if="poolTimeGet[pool.postId] === '已结束'">
-              {{ poolTimeGet[pool.postId] }}
-            </div>
-            <div v-else>
-              <span>剩余时间：</span>
-              <span>
-                {{ poolTimeGet[pool.postId] }}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
-    </div>
-  </div>
+    </template>
+  </THomecard>
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 
+import THomecard from "./t-homecard.vue";
 import Mys from "../../plugins/Mys";
 import { useHomeStore } from "../../store/modules/home";
 import { createPost, createTGWindow } from "../../utils/TGWindow";
@@ -244,37 +240,6 @@ onUnmounted(() => {
 </script>
 
 <style lang="css" scoped>
-.pool-box {
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  border-radius: 5px;
-  background: var(--box-bg-1);
-  gap: 10px;
-}
-
-.pool-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-family: var(--font-title);
-  font-size: 20px;
-}
-
-.pool-title-left {
-  display: flex;
-  align-items: center;
-  justify-content: start;
-  color: var(--common-text-title);
-  column-gap: 10px;
-}
-
-.pool-title-left img {
-  width: 25px;
-  height: 25px;
-  filter: brightness(0.8);
-}
-
 .pool-title-right {
   display: flex;
   align-items: center;
@@ -287,7 +252,6 @@ onUnmounted(() => {
   height: 36px;
   align-items: center;
   justify-content: center;
-  color: var(--box-text-1);
 }
 
 .pool-grid {

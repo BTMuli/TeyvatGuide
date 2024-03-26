@@ -1,51 +1,51 @@
 <template>
-  <div class="position-box">
-    <div class="position-title">
-      <img src="../../assets/icons/board.svg" alt="act" />
-      <span>近期活动</span>
-    </div>
-    <div class="position-grid">
-      <v-card
-        v-for="card in positionCards"
-        :key="card.postId"
-        class="position-card"
-        variant="outlined"
-      >
-        <v-list class="position-list">
-          <v-list-item :title="card.title" :subtitle="card.abstract">
-            <template #prepend>
-              <v-avatar rounded="0" @click="createPost(card.postId, card.title)">
-                <v-img :src="card.icon" class="position-icon" />
-              </v-avatar>
-            </template>
-            <template #append>
-              <v-btn class="position-card-btn" @click="createPost(card.postId, card.title)">
-                查看
-              </v-btn>
-            </template>
-          </v-list-item>
-        </v-list>
-        <v-divider />
-        <v-card-text>
-          <div class="position-card-text">
-            <v-icon>mdi-calendar-clock</v-icon>
-            <span>{{ card.time.start }}~{{ card.time.end }}</span>
-          </div>
-          <div class="position-card-text">
-            <v-icon>mdi-clock-outline</v-icon>
-            <span v-if="positionTimeGet[card.postId] !== '已结束'">{{
-              positionTimeGet[card.postId]
-            }}</span>
-            <span v-else>已结束</span>
-          </div>
-        </v-card-text>
-      </v-card>
-    </div>
-  </div>
+  <THomecard>
+    <template #title>近期活动</template>
+    <template #default>
+      <div class="position-grid">
+        <v-card
+          v-for="card in positionCards"
+          :key="card.postId"
+          class="position-card"
+          variant="outlined"
+        >
+          <v-list class="position-list">
+            <v-list-item :title="card.title" :subtitle="card.abstract">
+              <template #prepend>
+                <v-avatar rounded="0" @click="createPost(card.postId, card.title)">
+                  <v-img :src="card.icon" class="position-icon" />
+                </v-avatar>
+              </template>
+              <template #append>
+                <v-btn class="position-card-btn" @click="createPost(card.postId, card.title)">
+                  查看
+                </v-btn>
+              </template>
+            </v-list-item>
+          </v-list>
+          <v-divider />
+          <v-card-text>
+            <div class="position-card-text">
+              <v-icon>mdi-calendar-clock</v-icon>
+              <span>{{ card.time.start }}~{{ card.time.end }}</span>
+            </div>
+            <div class="position-card-text">
+              <v-icon>mdi-clock-outline</v-icon>
+              <span v-if="positionTimeGet[card.postId] !== '已结束'">{{
+                positionTimeGet[card.postId]
+              }}</span>
+              <span v-else>已结束</span>
+            </div>
+          </v-card-text>
+        </v-card>
+      </div>
+    </template>
+  </THomecard>
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
 
+import THomecard from "./t-homecard.vue";
 import Mys from "../../plugins/Mys";
 import { createPost } from "../../utils/TGWindow";
 import { stamp2LastTime } from "../../utils/toolFunc";
@@ -106,28 +106,6 @@ onUnmounted(() => {
 </script>
 
 <style lang="css" scoped>
-.position-box {
-  padding: 10px;
-  border-radius: 5px;
-  background: var(--box-bg-1);
-}
-
-.position-title {
-  display: flex;
-  align-items: center;
-  justify-content: start;
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 20px;
-}
-
-.position-title img {
-  width: 20px;
-  height: 20px;
-  margin: 0 10px;
-  filter: brightness(0.9);
-}
-
 .position-grid {
   display: grid;
   margin-top: 10px;
@@ -138,7 +116,7 @@ onUnmounted(() => {
 .position-card {
   border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
-  background: var(--box-bg-2);
+  background: var(--box-bg-1);
 }
 
 .position-list {
