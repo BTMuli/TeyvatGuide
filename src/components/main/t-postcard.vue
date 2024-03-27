@@ -199,6 +199,7 @@ function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.N
   align-items: center;
   justify-content: center;
   aspect-ratio: 36 / 13;
+  background: var(--common-shadow-2);
 }
 
 .tpc-cover img {

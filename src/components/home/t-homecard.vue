@@ -12,11 +12,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-interface THomecardProps {
+interface THomeCardProps {
   append?: boolean;
 }
 
-const props = defineProps<THomecardProps>();
+const props = defineProps<THomeCardProps>();
 </script>
 <style lang="css" scoped>
 .thc-container {
@@ -41,14 +41,17 @@ const props = defineProps<THomecardProps>();
   background: var(--box-bg-blue);
   box-shadow: 0 0 5px var(--common-shadow-2);
   font-family: var(--font-title);
-  font-size: 20px;
 }
 
 .thc-title {
   left: 10px;
+  color: var(--tgc-white-4);
+  font-size: 20px;
 }
 
 .thc-append {
   right: 10px;
+  color: var(--tgc-white-1);
+  font-size: 16px;
 }
 </style>

@@ -2,12 +2,8 @@
   <THomecard :append="hasNew">
     <template #title>限时祈愿</template>
     <template #title-append>
-      <v-switch
-        class="pool-switch"
-        variant="outline"
-        :label="showNew ? '查看当前祈愿' : '查看后续祈愿'"
-        @change="switchPool"
-      />
+      <v-switch class="pool-switch" @change="switchPool" />
+      {{ showNew ? "查看当前祈愿" : "查看后续祈愿" }}
     </template>
     <template #default>
       <div class="pool-grid">
@@ -240,18 +236,12 @@ onUnmounted(() => {
 </script>
 
 <style lang="css" scoped>
-.pool-title-right {
-  display: flex;
-  align-items: center;
-  justify-content: start;
-  gap: 15px;
-}
-
 .pool-switch {
   display: flex;
   height: 36px;
   align-items: center;
   justify-content: center;
+  margin-right: 5px;
 }
 
 .pool-grid {

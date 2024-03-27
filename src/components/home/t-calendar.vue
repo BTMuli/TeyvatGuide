@@ -4,10 +4,9 @@
     <template #title-append>
       <v-switch
         class="tc-switch"
-        variant="outline"
-        :label="switchType === 'avatar' ? '角色' : '武器'"
         @change="switchType = switchType === 'avatar' ? 'weapon' : 'avatar'"
       />
+      {{ switchType === "avatar" ? "角色" : "武器" }}
     </template>
     <template #default>
       <div class="tc-top">
@@ -170,7 +169,7 @@ function getContents(day: number): void {
   height: 36px;
   align-items: center;
   justify-content: center;
-  color: var(--box-text-1);
+  margin-right: 5px;
 }
 
 .tc-btns {
@@ -182,8 +181,8 @@ function getContents(day: number): void {
 
 .calendar-grid {
   display: grid;
-  place-items: center flex-start;
   grid-gap: 10px;
   grid-template-columns: repeat(10, 1fr);
+  place-items: center flex-start;
 }
 </style>

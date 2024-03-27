@@ -3,12 +3,7 @@
     <template #title>近期活动</template>
     <template #default>
       <div class="position-grid">
-        <v-card
-          v-for="card in positionCards"
-          :key="card.postId"
-          class="position-card"
-          variant="outlined"
-        >
+        <v-card v-for="card in positionCards" :key="card.postId" rounded class="position-card">
           <v-list class="position-list">
             <v-list-item :title="card.title" :subtitle="card.abstract">
               <template #prepend>
@@ -114,8 +109,7 @@ onUnmounted(() => {
 }
 
 .position-card {
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 5px;
+  border: none;
   background: var(--box-bg-1);
 }
 
