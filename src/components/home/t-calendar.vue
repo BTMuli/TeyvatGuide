@@ -40,7 +40,7 @@
   <ToCalendar v-model="showItem" :data-type="selectedType" :data-val="selectedItem" />
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 
 import THomecard from "./t-homecard.vue";
 import { AppCalendarData } from "../../data";
@@ -130,7 +130,7 @@ function getCalendar(day: number): TGApp.App.Calendar.Item[] {
 }
 
 function getGrid(): TGApp.App.Calendar.Item[] {
-  let selectedCards: TGApp.App.Calendar.Item[] = [];
+  let selectedCards: TGApp.App.Calendar.Item[];
   if (switchType.value === "avatar") {
     selectedCards = characterCards.value;
   } else {

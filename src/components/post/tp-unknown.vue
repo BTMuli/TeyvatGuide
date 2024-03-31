@@ -10,7 +10,7 @@ import TGLogger from "../../utils/TGLogger";
 
 interface TpUnknownProps {
   data: TGApp.Plugins.Mys.SctPost.Empty;
-  next: unknown;
+  next?: unknown;
 }
 
 const props = defineProps<TpUnknownProps>();
