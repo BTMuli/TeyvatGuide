@@ -1,5 +1,5 @@
 <template>
-  <THomecard>
+  <THomeCard>
     <template #title>近期活动</template>
     <template #default>
       <div class="position-grid">
@@ -35,12 +35,12 @@
         </v-card>
       </div>
     </template>
-  </THomecard>
+  </THomeCard>
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
 
-import THomecard from "./t-homecard.vue";
+import THomeCard from "./t-homecard.vue";
 import Mys from "../../plugins/Mys";
 import { createPost } from "../../utils/TGWindow";
 import { stamp2LastTime } from "../../utils/toolFunc";

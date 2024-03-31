@@ -1,5 +1,5 @@
 <template>
-  <THomecard :append="hasNew">
+  <THomeCard :append="hasNew">
     <template #title>限时祈愿</template>
     <template #title-append>
       <v-switch class="pool-switch" @change="switchPool" />
@@ -50,13 +50,13 @@
         </div>
       </div>
     </template>
-  </THomecard>
+  </THomeCard>
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 
-import THomecard from "./t-homecard.vue";
+import THomeCard from "./t-homecard.vue";
 import Mys from "../../plugins/Mys";
 import { useHomeStore } from "../../store/modules/home";
 import { createPost, createTGWindow } from "../../utils/TGWindow";

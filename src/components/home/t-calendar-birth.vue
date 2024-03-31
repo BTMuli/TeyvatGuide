@@ -1,0 +1,64 @@
+<template>
+  <div class="tcb-container">
+    <img v-if="!isBirthday" src="/source/UI/empty.webp" alt="empty" />
+    <img @click="toPost()" v-else src="/source/UI/act_birthday.png" alt="empty" class="active" />
+    <span>{{
+      isBirthday ? `今天是 ${cur.map((i) => i.name).join("、")} 的生日！` : "没有角色今天过生日哦~"
+    }}</span>
+    <span v-if="next.length > 0"
+      >即将到来：{{ next[0].birthday[0] }}月{{ next[0].birthday[1] }}日</span
+    >
+    <span v-if="next.length > 0">{{ next.map((i) => i.name).join("、") }}</span>
+  </div>
+</template>
+<script lang="ts" setup>
+import { onBeforeMount, ref } from "vue";
+import { useRouter } from "vue-router";
+
+import TSAvatarBirth from "../../plugins/Sqlite/modules/avatarBirth";
+
+const isBirthday = ref<boolean>(false);
+const router = useRouter();
+const cur = ref<TGApp.Sqlite.Character.AppData[]>([]);
+const next = ref<TGApp.App.Character.WikiBriefInfo[]>([]);
+
+onBeforeMount(async () => {
+  const check = await TSAvatarBirth.isAvatarBirth();
+  if (check.length !== 0) {
+    isBirthday.value = true;
+    cur.value = check;
+  }
+  next.value = TSAvatarBirth.getNextAvatarBirth();
+});
+
+async function toPost() {
+  await router.push("/news/2");
+}
+</script>
+<style lang="css" scoped>
+.tcb-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 5px inset var(--common-shadow-2);
+  overflow-y: auto;
+}
+
+.tcb-container img {
+  width: 100px;
+  height: 100px;
+}
+
+.tcb-container img.active {
+  cursor: pointer;
+}
+
+span {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+}
+</style>

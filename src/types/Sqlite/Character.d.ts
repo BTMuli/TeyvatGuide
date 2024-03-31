@@ -1,10 +1,15 @@
 /**
- * @file types Sqlite Character.d.ts
+ * @file types/Sqlite/Character.d.ts
  * @description 角色相关类型定义文件
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
 
+/**
+ * @namespace TGApp.Sqlite.Character
+ * @since Alpha v0.2.0
+ * @description 角色相关类型定义命名空间
+ * @memberof TGApp.Sqlite
+ */
 declare namespace TGApp.Sqlite.Character {
   /**
    * @description 应用数据库中的角色类型
@@ -21,7 +26,7 @@ declare namespace TGApp.Sqlite.Character {
    * @property {string} updated - 数据更新时间
    * @return AppData
    */
-  export interface AppData {
+  interface AppData {
     id: number;
     name: string;
     title: string;
@@ -54,7 +59,7 @@ declare namespace TGApp.Sqlite.Character {
    * @property {string} updated - 数据更新时间
    * @return UserRole
    */
-  export interface UserRole {
+  interface UserRole {
     uid: number;
     cid: number;
     img: string;
@@ -86,7 +91,7 @@ declare namespace TGApp.Sqlite.Character {
    * @property {number} affix - 武器精炼
    * @return RoleWeapon
    */
-  export interface RoleWeapon {
+  interface RoleWeapon {
     id: number;
     name: string;
     type: string;
@@ -114,7 +119,7 @@ declare namespace TGApp.Sqlite.Character {
    * @property {string} set.effect[].description - 圣遗物套装效果描述
    * @return RoleReliquary
    */
-  export interface RoleReliquary {
+  interface RoleReliquary {
     id: number;
     name: string;
     pos: number;
@@ -144,7 +149,7 @@ declare namespace TGApp.Sqlite.Character {
    * @property {number} pos - 命座位置
    * @return RoleConstellation
    */
-  export interface RoleConstellation {
+  interface RoleConstellation {
     id: number;
     name: string;
     icon: string;
@@ -162,7 +167,7 @@ declare namespace TGApp.Sqlite.Character {
    * @property {string} icon - 时装图标
    * @return RoleCostume
    */
-  export interface RoleCostume {
+  interface RoleCostume {
     id: number;
     name: string;
     icon: string;
@@ -180,7 +185,7 @@ declare namespace TGApp.Sqlite.Character {
    * @property {number} level - 天赋等级
    * @return RoleTalent
    */
-  export interface RoleTalent {
+  interface RoleTalent {
     id: number;
     pos: number;
     name: string;

@@ -1,5 +1,5 @@
 <template>
-  <THomecard append>
+  <THomeCard append>
     <template #title>今日素材 {{ dateNow }}</template>
     <template #title-append>
       <v-switch
@@ -26,23 +26,27 @@
         </div>
         <v-pagination class="tc-page" v-model="page" total-visible="20" :length="length" />
       </div>
-      <div class="calendar-grid">
-        <div v-for="item in getGrid()" :key="item.id" @click="selectItem(item)">
-          <TibCalendarItem
-            :data="<TGApp.App.Calendar.Item>item"
-            :model="switchType"
-            :clickable="true"
-          />
+      <div class="tc-content">
+        <TCalendarBirth />
+        <div class="calendar-grid">
+          <div v-for="item in getGrid()" :key="item.id" @click="selectItem(item)">
+            <TibCalendarItem
+              :data="<TGApp.App.Calendar.Item>item"
+              :model="switchType"
+              :clickable="true"
+            />
+          </div>
         </div>
       </div>
     </template>
-  </THomecard>
+  </THomeCard>
   <ToCalendar v-model="showItem" :data-type="selectedType" :data-val="selectedItem" />
 </template>
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 
-import THomecard from "./t-homecard.vue";
+import TCalendarBirth from "./t-calendar-birth.vue";
+import THomeCard from "./t-homecard.vue";
 import { AppCalendarData } from "../../data";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 import ToCalendar from "../overlay/to-calendar.vue";
@@ -179,10 +183,20 @@ function getContents(day: number): void {
   column-gap: 5px;
 }
 
+.tc-content {
+  position: relative;
+  display: flex;
+  height: 210px;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 10px;
+}
+
 .calendar-grid {
   display: grid;
+  height: 100%;
   grid-gap: 10px;
-  grid-template-columns: repeat(10, 1fr);
-  place-items: center flex-start;
+  grid-template-columns: repeat(10, 100px);
+  place-items: flex-start flex-start;
 }
 </style>
