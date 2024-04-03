@@ -48,7 +48,7 @@ function getNextAvatarBirth(date?: [number, number]): TGApp.App.Character.WikiBr
     if (item.birthday[0] === 0) {
       continue;
     }
-    if (item.birthday[0] < month || (item.birthday[0] === month && item.birthday[1] < day)) {
+    if (item.birthday[0] < month || (item.birthday[0] === month && item.birthday[1] <= day)) {
       birthDateList.push(new Date(year + 1, item.birthday[0] - 1, item.birthday[1]));
     } else {
       birthDateList.push(new Date(year, item.birthday[0] - 1, item.birthday[1]));

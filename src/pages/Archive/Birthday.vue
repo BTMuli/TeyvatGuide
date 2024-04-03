@@ -4,12 +4,10 @@
       <div @click="toAct" class="ab-draw-act" title="前往网页活动">
         <img src="/source/UI/act_birthday.png" alt="archive_birthday_icon" class="side-icon" />
       </div>
-      <v-switch
-        class="ab-draw-switch"
-        v-model="isAether"
-        center-affix
-        :label="isAether ? '空' : '荧'"
-      />
+      <v-switch class="ab-draw-switch" v-model="isAether" />
+      {{ isAether ? "空" : "荧" }}
+      <v-btn @click="resetData" size="small" title="重置" v-if="canReset" icon="mdi-reload" />
+      <!-- todo 根据角色筛选 -->
     </div>
     <div class="ab-draw-grid">
       <div v-for="item in selectedItem" :key="item.op_id" class="ab-draw">
@@ -28,30 +26,58 @@
 </template>
 <script lang="ts" setup>
 import { onMounted, ref, watch, watchEffect } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
+import showSnackbar from "../../components/func/snackbar";
 import ToArcBrith from "../../components/overlay/to-arcBrith.vue";
 import { ArcBirDraw } from "../../data";
 import TGClient from "../../utils/TGClient";
 
 const page = ref(1);
 const length = ref(0);
+const visible = ref(0);
+const renderItems = ref<TGApp.Archive.Birth.DrawItem[]>([]);
 const selectedItem = ref<TGApp.Archive.Birth.DrawItem[]>(ArcBirDraw);
 const current = ref<TGApp.Archive.Birth.DrawItem>();
 const isAether = ref<boolean>(false);
 const showOverlay = ref(false);
 
+const route = useRoute();
+const router = useRouter();
+const canReset = ref(false);
+
 watch(page, (val) => {
   const start = (val - 1) * 12;
   const end = start + 12;
-  selectedItem.value = ArcBirDraw.slice(start, end);
+  selectedItem.value = renderItems.value.slice(start, end);
 });
 
 watchEffect(() => {
-  selectedItem.value = ArcBirDraw.slice(0, 12);
+  selectedItem.value = renderItems.value.slice(0, 12);
+  visible.value = length.value > 5 ? 5 : length.value;
 });
 
 onMounted(() => {
-  length.value = Math.ceil(ArcBirDraw.length / 12);
+  const { date } = route.params;
+  let errLabel;
+  if (date) {
+    renderItems.value = ArcBirDraw.filter((item) => item.birthday.toString() === date);
+    errLabel = `没有找到生日为 ${date} 的角色数据`;
+    canReset.value = true;
+  } else {
+    renderItems.value = ArcBirDraw;
+    errLabel = "没有找到角色数据";
+  }
+  if (renderItems.value.length === 0) {
+    showSnackbar({
+      text: errLabel,
+      color: "error",
+    });
+    renderItems.value = ArcBirDraw;
+  }
+  length.value = Math.ceil(renderItems.value.length / 12);
+  visible.value = length.value > 5 ? 5 : length.value;
+  page.value = 1;
 });
 
 function showImg(item: TGApp.Archive.Birth.DrawItem) {
@@ -61,6 +87,10 @@ function showImg(item: TGApp.Archive.Birth.DrawItem) {
 
 async function toAct(): Promise<void> {
   await TGClient.open("birthday");
+}
+
+async function resetData(): Promise<void> {
+  await router.push({ name: "留影叙佳期" });
 }
 </script>
 <style lang="css" scoped>

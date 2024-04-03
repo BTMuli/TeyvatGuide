@@ -1,11 +1,13 @@
+<!-- todo ui 优化。结合 birth_calendar/birth_role 数据 -->
 <template>
   <div class="tcb-container">
     <img v-if="!isBirthday" src="/source/UI/empty.webp" alt="empty" />
     <img @click="toPost()" v-else src="/source/UI/act_birthday.png" alt="empty" class="active" />
-    <span>{{
-      isBirthday ? `今天是 ${cur.map((i) => i.name).join("、")} 的生日！` : "没有角色今天过生日哦~"
-    }}</span>
-    <span v-if="next.length > 0"
+    <span v-if="isBirthday" class="tcb-label" @click="toBirth('today')">
+      今天是{{ cur.map((i) => i.name).join("、") }}的生日哦~
+    </span>
+    <span v-else>今天没有角色过生日哦~</span>
+    <span v-if="next.length > 0" @click="toBirth('next')" class="tcb-label"
       >即将到来：{{ next[0].birthday[0] }}月{{ next[0].birthday[1] }}日</span
     >
     <span v-if="next.length > 0">{{ next.map((i) => i.name).join("、") }}</span>
@@ -34,6 +36,21 @@ onBeforeMount(async () => {
 async function toPost() {
   await router.push("/news/2");
 }
+
+function toBirth(type: "today" | "next") {
+  let dateStr;
+  if (type === "today") {
+    const date = new Date();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    dateStr = `${month}/${day}`;
+  } else {
+    const month = next.value[0].birthday[0];
+    const day = next.value[0].birthday[1];
+    dateStr = `${month}/${day}`;
+  }
+  router.push({ name: "留影叙佳期", params: { date: dateStr } });
+}
 </script>
 <style lang="css" scoped>
 .tcb-container {
@@ -60,5 +77,11 @@ span {
   display: block;
   margin-top: 10px;
   text-align: center;
+}
+
+.tcb-label {
+  flex-wrap: wrap;
+  cursor: pointer;
+  word-break: break-all;
 }
 </style>
