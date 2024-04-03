@@ -54,7 +54,6 @@
 import { computed, onMounted, ref, watch } from "vue";
 
 import { AppAchievementsData, AppAchievementSeriesData } from "../../data";
-import TGClient from "../../utils/TGClient";
 import TGLogger from "../../utils/TGLogger";
 import TOverlay from "../main/t-overlay.vue";
 
@@ -103,7 +102,7 @@ async function search(word: string): Promise<void> {
   await TGLogger.Info(`[ToAchiInfo][${props.data?.id}][Search] 查询 ${word}`);
   const str = encodeURIComponent(word);
   const url = `https://www.miyoushe.com/ys/search?keyword=${str}`;
-  await TGClient.open("web_thin", url);
+  window.open(url, "_blank");
 }
 </script>
 <style lang="css" scoped>

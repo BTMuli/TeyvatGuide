@@ -20,8 +20,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TGClient from "../../utils/TGClient";
-
 interface TpAvatarProps {
   data: TGApp.Plugins.Mys.User.Post;
   position: "left" | "right";
@@ -37,8 +35,8 @@ function getAuthorDesc(): string {
 }
 
 async function toAuthor(): Promise<void> {
-  const url = `https://m.miyoushe.com/ys/#/accountCenter/0?id=${props.data.uid}`;
-  await TGClient.open("web_thin", url);
+  const url = `https://www.miyoushe.com/ys/#/accountCenter/0?id=${props.data.uid}`;
+  window.open(url, "_blank");
 }
 
 const flexAlign = props.position === "left" ? "flex-start" : "flex-end";

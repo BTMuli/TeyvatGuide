@@ -1,6 +1,6 @@
 //! @file src/client/menu.rs
 //! @desc 客户端菜单模块，负责操作米游社客户端菜单
-//! @since Beta v0.4.3
+//! @since Beta v0.4.5
 
 use tauri::{AppHandle, CustomMenuItem, LogicalSize, Manager, Menu, Size, Submenu, WindowUrl};
 use url::Url;
@@ -27,8 +27,8 @@ fn create_utils_menu() -> Menu {
   let retry_bridge = CustomMenuItem::new("retry".to_string(), "重试桥接");
   let mock_touch = CustomMenuItem::new("mock_touch".to_string(), "模拟触摸");
   let remove_overlay = CustomMenuItem::new("remove_overlay".to_string(), "移除遮罩");
-  // 旋转窗口/切换横屏或者竖屏
   let rotate_window = CustomMenuItem::new("rotate_window".to_string(), "旋转窗口");
+  let switch_ua = CustomMenuItem::new("switch_ua".to_string(), "切换 UA");
   return Menu::new()
     .add_item(retry_bridge)
     .add_item(mock_touch)
@@ -65,6 +65,7 @@ pub fn handle_menu_event(app_handle: AppHandle, event: tauri::MenuEvent) {
     "mock_touch" => handle_menu_mock_touch(app_handle),
     "remove_overlay" => handle_menu_remove_overlay(app_handle),
     "rotate_window" => handle_menu_rotate_window(app_handle),
+    "switch_ua" => handle_menu_switch_ua(app_handle),
     _ => {}
   }
 }
@@ -209,4 +210,24 @@ fn handle_menu_rotate_window(app_handle: AppHandle) {
   }
   window.center().unwrap();
   window.set_focus().unwrap();
+}
+
+// 处理切换 UA 菜单
+fn handle_menu_switch_ua(app_handle: AppHandle) {
+  let window = app_handle.get_window("mhy_client");
+  let execute_js = r#"
+  javascript:(async function(){
+    const isPc = navigator.userAgent.includes("Windows NT");
+    const arg = {
+      method: 'teyvat_switch_ua',
+      payload: {
+        url: window.location.href,
+        isPc,
+      }
+    }
+    await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
+  })()"#;
+  if window.is_some() {
+    window.unwrap().eval(&execute_js).ok().unwrap();
+  }
 }

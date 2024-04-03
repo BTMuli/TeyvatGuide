@@ -1,6 +1,6 @@
 //! @file src/client/mod.rs
 //! @desc 客户端模块，负责操作米游社客户端
-//! @since Beta v0.4.3
+//! @since Beta v0.4.5
 
 mod menu;
 use tauri::async_runtime::block_on;
@@ -15,6 +15,11 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
   } else {
     mhy_window_config.url = menu::get_mhy_client_url(func.clone());
   }
+  //   if pc {
+  //     let user_agent = mhy_window_config.user_agent.as_ref().unwrap();
+  //     let version = user_agent.split("/").last().unwrap();
+  //     mhy_window_config.user_agent = Some(format!("Mozilla/5.0 (Windows NT 10.0; Win64; x64) miHoYoBBS/{}", version));
+  //   }
   if func == "birthday"
     || func == "web_act"
     || url.starts_with("https://webstatic.mihoyo.com/ys/event/e20220303-birthday/index.html")

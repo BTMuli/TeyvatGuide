@@ -56,7 +56,7 @@
         :key="achievement.id"
         class="card-achi"
         :title="allSeriesData.find((item) => item.id === achievement.series)?.name ?? ''"
-        @click="toAchiInfo(achievement, index)"
+        @click="showAchiInfo(achievement, index)"
       >
         <div class="achi-version">v{{ achievement.version }}</div>
         <div class="achi-pre">
@@ -259,7 +259,7 @@ function openImg(): void {
 }
 
 // 打开成就详情
-function toAchiInfo(item: TGApp.Sqlite.Achievement.SingleTable, index: number): void {
+function showAchiInfo(item: TGApp.Sqlite.Achievement.SingleTable, index: number): void {
   showAchiData.value = item;
   showAchi.value = true;
   curAchiDataIndex.value = index;
