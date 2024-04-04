@@ -51,7 +51,7 @@
       <slot name="right"></slot>
     </div>
   </TOverlay>
-  <ToPostSearch gid="2" v-model="showSearch" :keyword="search" />
+  <ToPostSearch gid="2" v-model="showSearch" v-model:keyword="search" />
 </template>
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from "vue";
@@ -103,7 +103,7 @@ function onCancel() {
   visible.value = false;
 }
 
-// 查找
+// todo 存在 bug，点击成就标题时可能会没有效果
 async function searchDirect(word: string): Promise<void> {
   await TGLogger.Info(`[ToAchiInfo][${props.data?.id}][Search] 查询 ${word}`);
   search.value = word;

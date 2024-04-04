@@ -4,7 +4,7 @@
       <div class="tops-top">查找：{{ search }}</div>
       <div class="tops-act">
         <span>分区：{{ getGidLabel() }}</span>
-        <v-btn size="small" class="tops-btn" @click="searchPosts()" rounded>
+        <v-btn :loading="load" size="small" class="tops-btn" @click="searchPosts()" rounded>
           加载更多({{ results.length }})
         </v-btn>
       </div>
@@ -20,15 +20,17 @@
 import { computed, onMounted, ref, watch } from "vue";
 
 import Mys from "../../plugins/Mys";
+import showSnackbar from "../func/snackbar";
 import TOverlay from "../main/t-overlay.vue";
 import TPostCard from "../main/t-postcard.vue";
 
 // data
 const search = ref("");
-const game = ref("2");
 const lastId = ref("");
+const game = ref("2");
 const isLast = ref(false);
 const results = ref<TGApp.Plugins.Mys.Post.FullData[]>([]);
+const load = ref(false);
 
 interface ToPostSearchProps {
   modelValue: boolean;
@@ -38,7 +40,6 @@ interface ToPostSearchProps {
 
 interface ToPostSearchEmits {
   (e: "update:modelValue", value: boolean): void;
-
   (e: "cancel"): void;
 }
 
@@ -85,18 +86,52 @@ watch(
 watch(
   () => props.keyword,
   async (value) => {
-    search.value = value;
-    results.value = [];
-    lastId.value = "";
-    isLast.value = false;
+    if (search.value === "" && value !== "") {
+      search.value = value;
+      await searchPosts();
+    } else if (search.value !== value && value !== "") {
+      search.value = value;
+      results.value = [];
+      lastId.value = "";
+      isLast.value = false;
+    }
+  },
+);
+
+watch(
+  () => props.gid,
+  async (value) => {
+    if (game.value !== value) {
+      game.value = value;
+      results.value = [];
+      lastId.value = "";
+      isLast.value = false;
+    }
   },
 );
 
 async function searchPosts() {
+  if (load.value) return;
+  load.value = true;
   if (!props.gid || !props.keyword) {
+    showSnackbar({
+      text: "参数错误",
+    });
+    load.value = false;
     return;
   }
   if (isLast.value) {
+    showSnackbar({
+      text: "没有更多了",
+    });
+    load.value = false;
+    return;
+  }
+  if (search.value === "") {
+    showSnackbar({
+      text: "请输入搜索关键词",
+    });
+    load.value = false;
     return;
   }
   const res = await Mys.Posts.search(game.value, search.value, lastId.value);
@@ -107,6 +142,7 @@ async function searchPosts() {
   }
   lastId.value = res.last_id;
   isLast.value = res.is_last;
+  load.value = false;
 }
 
 function getGidLabel(): string {
