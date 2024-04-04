@@ -1,12 +1,10 @@
 /**
- * @file plugins Mys request getPositionData.ts
+ * @file plugins/Mys/request/getPositionData.ts
  * @description Mys 插件热点追踪请求
- * @since Alpha v0.2.1
+ * @since Beta v0.4.5
  */
 
 import { http } from "@tauri-apps/api";
-
-import MysApi from "../api";
 
 /**
  * @description 深度优先遍历
@@ -29,12 +27,14 @@ function DfsObc(list: TGApp.Plugins.Mys.Position.ObcItem[]): TGApp.Plugins.Mys.P
 
 /**
  * @description 获取热点追踪信息
- * @since Alpha v0.2.1
+ * @since Beta v0.4.5
  * @return {Promise<TGApp.Plugins.Mys.Position.Data[]>}
  */
-async function getPositionData(): Promise<TGApp.Plugins.Mys.Position.Data[]> {
+export async function getPositionData(): Promise<TGApp.Plugins.Mys.Position.Data[]> {
+  const url =
+    "https://api-static.mihoyo.com/common/blackboard/ys_obc/v1/home/position?app_sn=ys_obc";
   const res = await http
-    .fetch<TGApp.Plugins.Mys.Position.Response>(MysApi.Position, {
+    .fetch<TGApp.Plugins.Mys.Position.Response>(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -45,5 +45,3 @@ async function getPositionData(): Promise<TGApp.Plugins.Mys.Position.Data[]> {
     });
   return DfsObc(res);
 }
-
-export default getPositionData;

@@ -1,7 +1,7 @@
 /**
  * @file plugins Mys request getPostData.ts
  * @description Mys帖子请求
- * @since Alpha v0.2.1
+ * @since Beta v0.4.5
  */
 
 import { http } from "@tauri-apps/api";
@@ -10,19 +10,23 @@ import MysApi from "../api";
 
 /**
  * @description 获取帖子信息
- * @since Alpha v0.2.1
+ * @since Beta v0.4.5
  * @param {number} postId 帖子 ID
  * @return {Promise<TGApp.Plugins.Mys.Post.FullData>}
  */
 async function getPostData(postId: number): Promise<TGApp.Plugins.Mys.Post.FullData> {
-  const url = MysApi.Post.Api.replace("{postId}", postId.toString());
+  const url = "https://bbs-api.mihoyo.com/post/wapi/getPostFull";
+  const params = {
+    post_id: postId.toString(),
+  };
   return await http
     .fetch<TGApp.Plugins.Mys.Post.Response>(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Referer: MysApi.Post.Referer,
+        Referer: MysApi.PostReferer,
       },
+      query: params,
     })
     .then((res) => {
       return res.data.data.post;

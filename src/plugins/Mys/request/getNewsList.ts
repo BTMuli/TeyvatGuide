@@ -1,16 +1,14 @@
 /**
- * @file plugins Mys request getNewsList.ts
+ * @file plugins/Mys/request/getNewsList.ts
  * @description Mys 插件咨讯请求
- * @since Alpha v0.2.1
+ * @since Beta v0.4.5
  */
 
 import { http } from "@tauri-apps/api";
 
-import MysApi from "../api";
-
 /**
  * @description 获取 News 列表
- * @since Alpha v0.2.1
+ * @since Beta v0.4.5
  * @param {string} gid GID
  * @param {string} newsType 咨讯类型: 1 为公告，2 为活动，3 为咨讯
  * @param {number} pageSize 返回数量
@@ -23,11 +21,22 @@ async function getNewsList(
   pageSize: number = 20,
   lastId: number = 0,
 ): Promise<TGApp.Plugins.Mys.News.FullData> {
-  const url = MysApi.News.replace("{pageSize}", pageSize.toString())
-    .replace("{gid}", gid)
-    .replace("{newsType}", newsType)
-    .replace("{lastId}", lastId.toString());
-  return await http.fetch<TGApp.Plugins.Mys.News.Response>(url).then((res) => res.data.data);
+  const url = "https://bbs-api.mihoyo.com/post/wapi/getNewsList";
+  const params = {
+    gids: gid,
+    page_size: pageSize.toString(),
+    type: newsType,
+    last_id: lastId.toString(),
+  };
+  return await http
+    .fetch<TGApp.Plugins.Mys.News.Response>(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      query: params,
+    })
+    .then((res) => res.data.data);
 }
 
 export default getNewsList;

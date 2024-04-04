@@ -6,8 +6,6 @@
 
 import { http } from "@tauri-apps/api";
 
-import MysApi from "../api";
-
 /**
  * @description 获取抽奖信息
  * @since Beta v0.4.5
@@ -17,12 +15,17 @@ import MysApi from "../api";
 async function getLotteryData(
   lotteryId: string,
 ): Promise<TGApp.BBS.Response.Base | TGApp.Plugins.Mys.Lottery.FullData> {
+  const url = "https://bbs-api.miyoushe.com/painter/wapi/lottery/user/show";
+  const params = {
+    id: lotteryId,
+  };
   return await http
-    .fetch<TGApp.Plugins.Mys.Lottery.Response>(MysApi.Lottery.replace("{lotteryId}", lotteryId), {
+    .fetch<TGApp.Plugins.Mys.Lottery.Response>(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
+      query: params,
     })
     .then((res) => {
       if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;

@@ -12,7 +12,7 @@ import getGachaData from "./request/getGachaData";
 import getHomeNavigator from "./request/getHomeNavigator";
 import getLotteryData from "./request/getLotteryData";
 import getNewsList from "./request/getNewsList";
-import getPositionData from "./request/getPositionData";
+import { getPositionData } from "./request/getPositionData";
 import getPostData from "./request/getPostData";
 import { getVoteInfo, getVoteResult } from "./request/getVoteData";
 import { getGachaCard } from "./utils/getGachaCard";
