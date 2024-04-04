@@ -1,3 +1,4 @@
+<!-- todo 角色名片 -->
 <template>
   <div class="twc-box" v-if="data !== undefined">
     <div class="twc-brief">
@@ -20,7 +21,11 @@
             <span>命之座</span>
             <span>{{ data.brief.constellation }}</span>
           </div>
-          <div class="twc-big-item">
+          <div
+            class="twc-big-item active"
+            title="点击查看生日画片"
+            @click="toBirth(data.brief.birth)"
+          >
             <span>生日</span>
             <span>{{ data.brief.birth }}</span>
           </div>
@@ -92,6 +97,7 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 
 import TwcConstellations from "./twc-constellations.vue";
 import TwcMaterials from "./twc-materials.vue";
@@ -125,6 +131,7 @@ const box = computed(() => {
     clickable: false,
   };
 });
+const router = useRouter();
 
 async function loadData(): Promise<void> {
   const res = WikiCharacterData.find((item) => item.id === props.item.id);
@@ -168,6 +175,11 @@ async function toWiki(): Promise<void> {
     800,
     true,
   );
+}
+
+async function toBirth(date: string): Promise<void> {
+  const birth = date.replace("月", "/").replace("日", "");
+  await router.push({ name: "留影叙佳期", params: { date: birth } });
 }
 </script>
 <style lang="css" scoped>
@@ -230,6 +242,10 @@ async function toWiki(): Promise<void> {
 .twc-big-item {
   display: flex;
   column-gap: 5px;
+}
+
+.twc-big-item.active {
+  cursor: pointer;
 }
 
 .twc-big-item :nth-child(1) {

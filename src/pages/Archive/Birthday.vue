@@ -30,12 +30,12 @@
         <div class="ab-di-text" :title="item.word_text">{{ item.word_text }}</div>
       </div>
     </div>
-    <v-pagination v-model="page" :length="length" />
+    <v-pagination v-model="page" :length="length" :total-visible="visible" />
   </div>
   <ToArcBrith v-model="showOverlay" :data="current" :choice="isAether" />
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, watch, watchEffect } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import ToArcBrith from "../../components/overlay/to-arcBrith.vue";
@@ -67,9 +67,6 @@ watch(curSelect, (val) => {
   }
   length.value = Math.ceil(renderItems.value.length / 12);
   page.value = 1;
-});
-
-watchEffect(() => {
   selectedItem.value = renderItems.value.slice(0, 12);
   visible.value = length.value > 5 ? 5 : length.value;
 });

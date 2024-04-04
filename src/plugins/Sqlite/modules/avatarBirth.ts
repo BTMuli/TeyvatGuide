@@ -4,35 +4,38 @@
  * @since Beta v0.4.5
  */
 
-import { AppCharacterData } from "../../../data";
-import TGSqlite from "../index";
+import { ArcBirCalendar, ArcBirRole } from "../../../data";
 
 /**
  * @description 判断今天是不是角色生日
  * @since Beta v0.4.5
- * @param {[number,number]} date - 日期
- * @return {Promise<TGApp.Sqlite.Character.AppData[]>} 角色生日
+ * @return {TGApp.Archive.Birth.CalendarItem[]} 角色生日
  */
-async function isAvatarBirth(date?: [number, number]): Promise<TGApp.Sqlite.Character.AppData[]> {
-  let dateNow: [number, number];
-  if (date) {
-    dateNow = date;
-  } else {
-    const date = new Date();
-    dateNow = [date.getMonth() + 1, date.getDate()];
-  }
-  const db = await TGSqlite.getDB();
-  const sql = "SELECT * FROM AppCharacters WHERE birthday = ?";
-  return await db.select(sql, [dateNow.join(",")]);
+function isAvatarBirth(): TGApp.Archive.Birth.CalendarItem[] {
+  const date = new Date();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const days = ArcBirCalendar[month];
+  return days.filter((i) => i.role_birthday === `${month}/${day}`);
+}
+
+/**
+ * @description 获取角色生日
+ * @since Beta v0.4.5
+ * @param {string} roleBirthday - 角色生日
+ * @return {[number,number]} 角色生日
+ */
+function getRoleBirth(roleBirthday: string): [number, number] {
+  return roleBirthday.split("/").map(Number) as [number, number];
 }
 
 /**
  * @description 获取下一个角色生日
  * @since Beta v0.4.5
  * @param {[number,number]} date - 日期
- * @return {TGApp.Sqlite.Character.AppData[]} 下一个角色生日
+ * @return {TGApp.Archive.Birth.RoleItem[]} 下一个角色生日
  */
-function getNextAvatarBirth(date?: [number, number]): TGApp.App.Character.WikiBriefInfo[] {
+function getNextAvatarBirth(date?: [number, number]): TGApp.Archive.Birth.RoleItem[] {
   const year = new Date().getFullYear();
   let month, day;
   if (date) {
@@ -44,24 +47,18 @@ function getNextAvatarBirth(date?: [number, number]): TGApp.App.Character.WikiBr
     day = dateNow.getDate();
   }
   const birthDateList: Date[] = [];
-  for (const item of AppCharacterData) {
-    if (item.birthday[0] === 0) {
-      continue;
-    }
-    if (item.birthday[0] < month || (item.birthday[0] === month && item.birthday[1] <= day)) {
-      birthDateList.push(new Date(year + 1, item.birthday[0] - 1, item.birthday[1]));
+  for (const item of ArcBirRole) {
+    const roleBirth = getRoleBirth(item.role_birthday);
+    if (roleBirth[0] < month || (roleBirth[0] === month && roleBirth[1] <= day)) {
+      birthDateList.push(new Date(year + 1, roleBirth[0] - 1, roleBirth[1]));
     } else {
-      birthDateList.push(new Date(year, item.birthday[0] - 1, item.birthday[1]));
+      birthDateList.push(new Date(year, roleBirth[0] - 1, roleBirth[1]));
     }
   }
   birthDateList.sort((a, b) => a.getTime() - b.getTime());
   const nextDateGet = birthDateList[0];
   const nextDate = [nextDateGet.getMonth() + 1, nextDateGet.getDate()];
-  return (
-    AppCharacterData.filter(
-      (item) => item.birthday[0] === nextDate[0] && item.birthday[1] === nextDate[1],
-    ) ?? []
-  );
+  return ArcBirRole.filter((i) => i.role_birthday === `${nextDate[0]}/${nextDate[1]}`);
 }
 
 const TSAvatarBirth = {

@@ -24,7 +24,7 @@
             >{{ text.text }}
           </v-btn>
         </div>
-        <v-pagination class="tc-page" v-model="page" total-visible="20" :length="length" />
+        <v-pagination class="tc-page" v-model="page" :total-visible="visible" :length="length" />
       </div>
       <div class="tc-content">
         <TCalendarBirth />
@@ -58,6 +58,7 @@ const dateNow = ref<string>("");
 // page
 const page = ref<number>(1);
 const length = ref<number>(0);
+const visible = 16;
 
 // calendar
 const calendarNow = ref<TGApp.App.Calendar.Item[]>([]);
@@ -140,8 +141,8 @@ function getGrid(): TGApp.App.Calendar.Item[] {
   } else {
     selectedCards = weaponCards.value;
   }
-  length.value = Math.ceil(selectedCards.length / 20);
-  return selectedCards.slice((page.value - 1) * 20, page.value * 20);
+  length.value = Math.ceil(selectedCards.length / visible);
+  return selectedCards.slice((page.value - 1) * visible, page.value * visible);
 }
 
 function selectItem(item: TGApp.App.Calendar.Item): void {
@@ -196,7 +197,7 @@ function getContents(day: number): void {
   display: grid;
   height: 100%;
   grid-gap: 10px;
-  grid-template-columns: repeat(10, 100px);
+  grid-template-columns: repeat(8, 100px);
   place-items: flex-start flex-start;
 }
 </style>

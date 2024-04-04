@@ -1,16 +1,21 @@
-<!-- todo ui 优化。结合 birth_calendar/birth_role 数据 -->
 <template>
   <div class="tcb-container">
-    <img v-if="!isBirthday" src="/source/UI/empty.webp" alt="empty" />
-    <img @click="toPost()" v-else src="/source/UI/act_birthday.png" alt="empty" class="active" />
-    <span v-if="isBirthday" class="tcb-label" @click="toBirth('today')">
-      今天是{{ cur.map((i) => i.name).join("、") }}的生日哦~
-    </span>
-    <span v-else>今天没有角色过生日哦~</span>
-    <span v-if="next.length > 0" @click="toBirth('next')" class="tcb-label"
-      >即将到来：{{ next[0].birthday[0] }}月{{ next[0].birthday[1] }}日</span
-    >
-    <span v-if="next.length > 0">{{ next.map((i) => i.name).join("、") }}</span>
+    <div class="tcb-top-none" v-if="!isBirthday">
+      <img src="/source/UI/empty.webp" alt="empty" />
+      <span>今天没有角色过生日哦~</span>
+    </div>
+    <div class="tcb-top-active" @click="toBirth(true)" v-else>
+      <img @click="toPost()" src="/source/UI/act_birthday.png" alt="empty" class="active" />
+      <span>今天是{{ cur.map((i) => i.name).join("、") }}的生日哦~</span>
+    </div>
+    <div>即将到来：{{ next[0].role_birthday }}</div>
+    <div v-for="i in next" :key="i.role_id" class="tcb-item" @click="toBirth(i)">
+      <img :src="i.head_icon" :alt="i.introduce" />
+      <div class="tcb-item-info">
+        <span>{{ i.name }} 所属：{{ i.belong }}</span>
+        <span>{{ i.text }}</span>
+      </div>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -21,11 +26,11 @@ import TSAvatarBirth from "../../plugins/Sqlite/modules/avatarBirth";
 
 const isBirthday = ref<boolean>(false);
 const router = useRouter();
-const cur = ref<TGApp.Sqlite.Character.AppData[]>([]);
-const next = ref<TGApp.App.Character.WikiBriefInfo[]>([]);
+const cur = ref<TGApp.Archive.Birth.CalendarItem[]>([]);
+const next = ref<TGApp.Archive.Birth.RoleItem[]>([]);
 
 onBeforeMount(async () => {
-  const check = await TSAvatarBirth.isAvatarBirth();
+  const check = TSAvatarBirth.isAvatarBirth();
   if (check.length !== 0) {
     isBirthday.value = true;
     cur.value = check;
@@ -37,17 +42,15 @@ async function toPost() {
   await router.push("/news/2");
 }
 
-function toBirth(type: "today" | "next") {
+function toBirth(type: TGApp.Archive.Birth.RoleItem | true) {
   let dateStr;
-  if (type === "today") {
+  if (type === true) {
     const date = new Date();
     const month = date.getMonth() + 1;
     const day = date.getDate();
     dateStr = `${month}/${day}`;
   } else {
-    const month = next.value[0].birthday[0];
-    const day = next.value[0].birthday[1];
-    dateStr = `${month}/${day}`;
+    dateStr = type.role_birthday;
   }
   router.push({ name: "留影叙佳期", params: { date: dateStr } });
 }
@@ -58,30 +61,61 @@ function toBirth(type: "today" | "next") {
   width: 100%;
   height: 100%;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding: 10px;
+  border-radius: 5px;
   box-shadow: 0 0 5px inset var(--common-shadow-2);
   overflow-y: auto;
 }
 
-.tcb-container img {
-  width: 100px;
+.tcb-top-none,
+.tcb-top-active {
+  display: flex;
   height: 100px;
+  align-items: center;
+  justify-content: center;
 }
 
-.tcb-container img.active {
+.tcb-top-none img,
+.tcb-top-active img {
+  width: 50px;
+  height: 50px;
+}
+
+.tcb-top-active img.active {
   cursor: pointer;
 }
 
-span {
-  display: block;
-  margin-top: 10px;
-  text-align: center;
+.tcb-item {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5px;
+  border-radius: 10px;
+  background: var(--box-bg-1);
 }
 
-.tcb-label {
-  flex-wrap: wrap;
+.tcb-item img {
+  height: 100px;
+  aspect-ratio: 1;
   cursor: pointer;
+}
+
+.tcb-item-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.tcb-item-info :first-child {
+  font-family: var(--font-title);
+  font-size: 20px;
+}
+
+.tcb-item-info :last-child {
   word-break: break-all;
 }
 </style>
