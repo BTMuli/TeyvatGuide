@@ -14,9 +14,9 @@
     "introduce": "遗传了稀薄的「非人」血统的少女，「猫尾酒馆」的超人气调酒师。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000045,
@@ -33,9 +33,9 @@
     "introduce": "除了打扮哪里都不像神职人员的修女。冷淡的言行中透着锐利。总是单独行动。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000050,
@@ -52,9 +52,28 @@
     "introduce": "神里家的家政官，活跃在稻妻的「地头蛇」。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000061,
+    "name": "绮良良",
+    "belong": "狛荷屋",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "箱筥座",
+    "element": "草",
+    "text": "「感谢选择『狛荷屋』！」",
+    "role_birthday": "1/22",
+    "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/06f8af712227267d912df1d57d168174_6981528938140917044.png",
+    "head_image": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/06f8af712227267d912df1d57d168174_6981528938140917044.png",
+    "introduce": "稻妻快递公司「狛荷屋」的送货员，一只热爱自己工作、向往人类社会的「猫又」。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000075,
@@ -71,9 +90,28 @@
     "introduce": "身份成谜的流浪人士。衣着打扮像是修验者，言行却并不是修验者应有的模样。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000090,
+    "name": "夏沃蕾",
+    "belong": "特巡队",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "剑铳座",
+    "element": "火",
+    "text": "「铳枪是我最喜欢的武器，它具有强大的杀伤力和威慑力。有些时候，后者甚至比前者更有用。」",
+    "role_birthday": "1/10",
+    "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/09/5828fdd01663302159fe82ebbb220f16_3335038397646407748.png",
+    "head_image": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/09/5828fdd01663302159fe82ebbb220f16_3335038397646407748.png",
+    "introduce": "时刻恪守着心中「正义」的特巡队队长，手中的铳枪只会指向负罪之人。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000024,
@@ -90,9 +128,9 @@
     "introduce": "武装船队「南十字」的首领，豪快的大姐头。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000032,
@@ -109,9 +147,9 @@
     "introduce": "蒙德的冒险家少年，拥有与他的善良毫不相称的霉运。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000054,
@@ -128,9 +166,66 @@
     "introduce": "海祇岛的「现人神巫女」，统管海祇岛各项事宜的少女。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000078,
+    "name": "艾尔海森",
+    "belong": "须弥教令院",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "天隼座",
+    "element": "草",
+    "text": "「大部分人都不会主动与我接触，也许是因为忌惮，也许是因为性格不合。对此我很满意。」",
+    "role_birthday": "2/11",
+    "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/01/18/aa946c056451c6280e7718571d1cfa8c_2141826118635568897.png",
+    "head_image": "https://webstatic.mihoyo.com/upload/static-resource/2023/01/18/aa946c056451c6280e7718571d1cfa8c_2141826118635568897.png",
+    "introduce": "须弥教令院现任书记官，有过人的智慧与才能。生活得自由自在，一般人基本找不到他。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000083,
+    "name": "琳妮特",
+    "belong": "布法蒂公馆",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "白尾猫座",
+    "element": "风",
+    "text": "「进入待机模式…希望不要有人来打扰我。」",
+    "role_birthday": "2/2",
+    "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/17/3be7d0575e32f46172ba95a97a647856_3883052919929914724.png",
+    "head_image": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/17/3be7d0575e32f46172ba95a97a647856_3883052919929914724.png",
+    "introduce": "寡言少语，罕有表情的魔术助手，性情像猫一样难以猜测。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000084,
+    "name": "林尼",
+    "belong": "布法蒂公馆",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "黑斑猫座",
+    "element": "火",
+    "text": "「今晚有大魔术师的演出，你肯定没忘吧？」",
+    "role_birthday": "2/2",
+    "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/17/adfd562a6ab78c04fa38f5aed4091c0c_6090118550113251285.png",
+    "head_image": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/17/adfd562a6ab78c04fa38f5aed4091c0c_6090118550113251285.png",
+    "introduce": "伶牙俐齿，演技精湛的著名枫丹魔术师，以精妙的手法和言语牵动着观众的心。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000003,
@@ -147,9 +242,9 @@
     "introduce": "正直严谨的蒲公英骑士，蒙德西风骑士团的代理团长。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000034,
@@ -166,9 +261,9 @@
     "introduce": "「西风骑士团」的可靠女仆，梦想有一天能成为正式的骑士。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000035,
@@ -185,9 +280,9 @@
     "introduce": "药庐「不卜庐」的采药姑娘兼学徒，面色苍白如纸的不死之人。话很少，也没有什么表情。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000063,
@@ -204,9 +299,9 @@
     "introduce": "气质出尘的仙家子弟。隐修在璃月群山之间，个性也如仙人般淡漠疏离。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000066,
@@ -223,9 +318,28 @@
     "introduce": "社奉行神里家年轻有为的现任家主，为人温雅有礼，处事颇有手段。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000077,
+    "name": "瑶瑶",
+    "belong": "歌尘浪市真君洞天",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "木樨座",
+    "element": "草",
+    "text": "「真奇怪，为什么总有人想寻仙问道呢？仙人不是到处都是吗？」",
+    "role_birthday": "3/6",
+    "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/01/18/7d2c2316efb1c8095695361e8ffac76e_5024352982681421540.png",
+    "head_image": "https://webstatic.mihoyo.com/upload/static-resource/2023/01/18/7d2c2316efb1c8095695361e8ffac76e_5024352982681421540.png",
+    "introduce": "歌尘浪市真君膝下最年幼的弟子，温柔体贴的「小大人」。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000016,
@@ -242,9 +356,9 @@
     "introduce": "坐拥蒙德大半酒业的贵公子，财力、人望、能力都令人无法小觑。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000026,
@@ -261,9 +375,9 @@
     "introduce": "守护璃月的仙人，「夜叉」。美号「降魔大圣」，妙称「护法夜叉大将」。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000060,
@@ -280,9 +394,66 @@
     "introduce": "自称供职于总务司的神秘人士，却又是总务司名录里的「不存在之人」。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000079,
+    "name": "迪希雅",
+    "belong": "镀金旅团",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "蝎尾鬃狮座",
+    "element": "火",
+    "text": "「跟紧我，不要乱走，沙漠可不会对任何人留情。」",
+    "role_birthday": "4/7",
+    "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/01/ee30eb223c696985e7f66bbb123a2285_5269618229783031045.png",
+    "head_image": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/01/ee30eb223c696985e7f66bbb123a2285_5269618229783031045.png",
+    "introduce": "横行须弥沙漠的佣兵组织「镀金旅团」的成员，勇敢而又强大的战士，在「镀金旅团」内部声名赫赫。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000082,
+    "name": "白术",
+    "belong": "不卜庐",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "悬壶座",
+    "element": "草",
+    "text": "「良药苦口啊。」",
+    "role_birthday": "4/25",
+    "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/0db84d2600e52e87e863535622febb9d_9065720012393184544.png",
+    "head_image": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/0db84d2600e52e87e863535622febb9d_9065720012393184544.png",
+    "introduce": "药庐「不卜庐」的主人，随身悬着名为「长生」的白蛇。精于药石，深于城府。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000088,
+    "name": "夏洛蒂",
+    "belong": "蒸汽鸟报社",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "真视镜座",
+    "element": "冰",
+    "text": "「只要眼睛够尖，脑子够快，每天都能找到好新闻。」",
+    "role_birthday": "4/10",
+    "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/08/3d242260e049500bc3ad1ff4793f9569_6339574078137157086.png",
+    "head_image": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/08/3d242260e049500bc3ad1ff4793f9569_6339574078137157086.png",
+    "introduce": "充满活力的蒸汽鸟报记者，每时每刻都在为「真相」而奔走。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000031,
@@ -299,9 +470,9 @@
     "introduce": "自称「断罪之皇女」，与名为奥兹的漆黑夜鸦同行的神秘少女。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000055,
@@ -318,9 +489,9 @@
     "introduce": "海祇岛军的大将，深受部下信赖。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000064,
@@ -337,9 +508,9 @@
     "introduce": "集剧作与演唱能力于一身的璃月戏曲名角。风格自成一派，雅致柔美，恰如其人。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000067,
@@ -356,9 +527,9 @@
     "introduce": "活跃于道成林的见习巡林员，热情的言行背后是一颗依旧稍显内向的心。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000072,
@@ -375,9 +546,9 @@
     "introduce": "有着琥珀色左眼的赤王后裔，阿如村的守护者。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": -1,
@@ -394,9 +565,9 @@
     "introduce": "<p style=\"white-space: pre-wrap;\">旅行者，我们还要一起走很远很远的路，度过好久好久的时光。</p><p style=\"white-space: pre-wrap;\">派蒙永远都是你最最最好的伙伴！</p><p style=\"white-space: pre-wrap; min-height: 1.5em;\"></p>",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000006,
@@ -413,9 +584,9 @@
     "introduce": "慵懒而博学的图书管理员，须弥教令院「两百年一见」的天才毕业生。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000022,
@@ -432,9 +603,9 @@
     "introduce": "蒙德城诸多吟游诗人中的一位，自由自在地穿行在街头巷尾。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000049,
@@ -451,9 +622,9 @@
     "introduce": "「长野原烟花店」店长，「夏祭的女王」，将人们的愿望寄托于烟花中的能工巧匠。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000052,
@@ -470,9 +641,9 @@
     "introduce": "其身为御建鸣神主尊大御所大人，许稻妻人民以亘古不变之「永恒」。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000057,
@@ -489,9 +660,9 @@
     "introduce": "活跃在稻妻城花见坂的「荒泷派」初代目头领。什么，从没听说过荒泷派？你是想找茬吗？",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000058,
@@ -508,9 +679,9 @@
     "introduce": "鸣神大社的宫司大人，兼任「八重堂」总编。艳丽动人的外表下藏着令人意想不到的聪慧与狡黠。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000071,
@@ -527,9 +698,9 @@
     "introduce": "教令院内负责监管学者们的「大风纪官」。工作时比刹诃伐罗学院制作的「大风机关」更有效率。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000014,
@@ -546,9 +717,9 @@
     "introduce": "蒙德城的大家都喜欢芭芭拉。「偶像」这个词是她从一本杂志里看到的。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000029,
@@ -565,9 +736,9 @@
     "introduce": "西风骑士团禁闭室的常客，蒙德的爆破大师。人称「逃跑的太阳」。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000033,
@@ -584,9 +755,9 @@
     "introduce": "愚人众执行官第十一位，「公子」，其战绩威名远扬。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000046,
@@ -603,9 +774,9 @@
     "introduce": "「往生堂」七十七代堂主，年纪轻轻就已主掌璃月的葬仪事务。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000048,
@@ -622,9 +793,9 @@
     "introduce": "活跃在璃月港的知名律法咨询师，混有仙兽血脉的精明少女。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000056,
@@ -641,9 +812,9 @@
     "introduce": "「天领奉行」的大将，杀伐果断，骁勇善战。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000059,
@@ -660,9 +831,9 @@
     "introduce": "天领奉行的天才少年侦探，直觉敏锐，心思玲珑。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000065,
@@ -679,9 +850,28 @@
     "introduce": "干练可靠的「荒泷派」的副手——特别注明：干练可靠形容的不是「荒泷派」而是副手。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000081,
+    "name": "卡维",
+    "belong": "独立设计工作室",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "天堂鸟座",
+    "element": "草",
+    "text": "「上次的方案还能优化一下，趁没到截止日再改改好了…」",
+    "role_birthday": "7/9",
+    "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/08995849606dd35893b43145db2733e0_1747493019822729825.png",
+    "head_image": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/08995849606dd35893b43145db2733e0_1747493019822729825.png",
+    "introduce": "须弥著名建筑设计师，对太多事物抱有过度关怀心。美学主义者，为现实所困扰。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000021,
@@ -698,9 +888,9 @@
     "introduce": "永远充满活力的女孩，骑士团最优秀，同时也是最后的侦察骑士。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000027,
@@ -717,9 +907,9 @@
     "introduce": "「璃月七星」中的「天权」，其名下财富之多，全大陆鲜有人能望其项背。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000041,
@@ -736,9 +926,9 @@
     "introduce": "神秘的少女占星术士，声称自己是「伟大的占星术士莫娜」，拥有与名号相符的不俗实力，博学而高傲。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000076,
@@ -755,9 +945,47 @@
     "introduce": "来自「一百年前」的学者，喜欢以前辈自居，对各类古老文字与古典机关都颇有研究。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000080,
+    "name": "米卡",
+    "belong": "西风骑士团",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "林鸽座",
+    "element": "冰",
+    "text": "「我…我来为队伍探路！」",
+    "role_birthday": "8/11",
+    "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/d484942f89c63c226924e7614bf4b34d_1694746196088497938.png",
+    "head_image": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/d484942f89c63c226924e7614bf4b34d_1694746196088497938.png",
+    "introduce": "平凡家庭出身的年轻骑士，在小队中担任「前进测绘员」一职。为人低调，谨小慎微。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000091,
+    "name": "娜维娅",
+    "belong": "刺玫会",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "野蔷薇座",
+    "element": "岩",
+    "text": "「玫瑰礼花！刺玫会特别定制版。」",
+    "role_birthday": "8/16",
+    "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/12/a5848e8fa8f8501266eb24a874c95b91_1483986270711755191.png",
+    "head_image": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/12/a5848e8fa8f8501266eb24a874c95b91_1483986270711755191.png",
+    "introduce": "刺玫会现任会长，一位可爱、尽责的好老板。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000002,
@@ -774,9 +1002,9 @@
     "introduce": "稻妻「社奉行」神里家的大小姐。端庄而文雅，聪慧又坚韧。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000020,
@@ -793,9 +1021,9 @@
     "introduce": "住在蒙德地区奔狼领，远离城市与人群，和狼一同生活的少年。直觉锐利，身姿迅捷。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000036,
@@ -812,9 +1040,9 @@
     "introduce": "驱邪世家出身的年轻方士，为压制自身的「纯阳之体」费尽心思。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000038,
@@ -831,9 +1059,28 @@
     "introduce": "西风骑士团首席炼金术士兼调查小队队长，被称做「白垩之子」的天才。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000085,
+    "name": "菲米尼",
+    "belong": "布法蒂公馆",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "机巧座",
+    "element": "冰",
+    "text": "「想去无人的海底，一个人安静地待着…」",
+    "role_birthday": "9/24",
+    "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/17/e9a9b20e6de721fec99e0d94991ced1b_2524954025192355249.png",
+    "head_image": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/17/e9a9b20e6de721fec99e0d94991ced1b_2524954025192355249.png",
+    "introduce": "精于潜水的寡言少年，在如寒冰般拒人千里的外表下，藏有一颗无瑕的纯真之心。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000025,
@@ -850,9 +1097,9 @@
     "introduce": "经常能在书摊看到的少年人。手执长剑，胸中常怀侠义之心。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000044,
@@ -869,9 +1116,9 @@
     "introduce": "璃月港唯一的摇滚乐手，以音乐和热情歌颂着对「成见」的反抗。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000047,
@@ -888,9 +1135,9 @@
     "introduce": "来自稻妻的浪人武士，如今栖身于璃月船队「南十字」中。性情温和而洒脱，心中埋藏着许多往事。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000051,
@@ -907,9 +1154,9 @@
     "introduce": "古老家族出身的「浪花骑士」，西风骑士团游击小队队长。身为旧贵族后裔却加入了堪称死对头的西风骑士团，该事件至今仍是蒙德一大谜团。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000053,
@@ -926,9 +1173,9 @@
     "introduce": "隶属于「终末番」的忍者。身形小巧，总像没睡饱一样。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000073,
@@ -945,9 +1192,28 @@
     "introduce": "深居净善宫的笼中之鸟，只能在梦中将世界尽收眼底。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000089,
+    "name": "芙宁娜",
+    "belong": "枫丹廷",
+    "divine_type": "uncertain",
+    "is_god": false,
+    "seat_life": "司颂座",
+    "element": "水",
+    "text": "「好无聊啊，没有什么更有趣的事吗？」",
+    "role_birthday": "10/13",
+    "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/08/48bfa1678335c611a41ea7b3ea0d5797_3458972102493077083.png",
+    "head_image": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/08/48bfa1678335c611a41ea7b3ea0d5797_3458972102493077083.png",
+    "introduce": "审判舞台上的绝对焦点，直至谢幕的掌声响起。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000015,
@@ -964,9 +1230,9 @@
     "introduce": "异国面容的剑斗士，西风骑士团的头脑派人物。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000023,
@@ -983,9 +1249,9 @@
     "introduce": "来自璃月、名声在外的少女厨师，对料理之道极具热情，拿手麻辣菜肴堪称一绝。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000042,
@@ -1002,9 +1268,9 @@
     "introduce": "璃月七星之一，玉衡星。对「帝君一言而决的璃月」颇有微词——但实际上，神挺欣赏她这样的人。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000043,
@@ -1021,9 +1287,28 @@
     "introduce": "对万物充满好奇的炼金术士，「生物炼金」学派的研究者。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000086,
+    "name": "莱欧斯利",
+    "belong": "梅洛彼得堡",
+    "divine_type": "eye",
+    "is_god": false,
+    "seat_life": "守狱犬座",
+    "element": "冰",
+    "text": "「理论上来讲，完全不认识我的人会比较幸福。」",
+    "role_birthday": "11/23",
+    "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/23/1f1a85c15de8f823e5d44a6d53c11ae6_1801124067913491530.png",
+    "head_image": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/23/1f1a85c15de8f823e5d44a6d53c11ae6_1801124067913491530.png",
+    "introduce": "梅洛彼得堡的公爵，隐于漆黑海底的领主。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000030,
@@ -1040,9 +1325,9 @@
     "introduce": "被「往生堂」请来的神秘客人，知识渊博，对各种事物都颇有见地。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000037,
@@ -1059,9 +1344,9 @@
     "introduce": "月海亭的秘书，体内流淌着仙兽「麒麟」的血脉。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000068,
@@ -1078,9 +1363,9 @@
     "introduce": "神出鬼没的旅行百货商人，最喜欢亮闪闪的摩拉。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000069,
@@ -1097,9 +1382,9 @@
     "introduce": "精通植物学的少年学者，现于道成林任巡林官一职。直率热忱，擅长教导脑瓜糊涂的人。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000070,
@@ -1116,9 +1401,9 @@
     "introduce": "祖拜尔剧场的知名舞者，舞姿灵动优美，为人纯真亲善。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
   },
   {
     "role_id": 10000074,
@@ -1135,8 +1420,27 @@
     "introduce": "专攻理论星相学的梨多梵谛学院学生。时常梦游，长期缺觉，饱受睡眠问题困扰。",
     "is_subscribe": true,
     "is_finish_task": false,
-    "current_compensate_num": 54,
+    "current_compensate_num": 56,
     "is_compensate_num": true,
-    "year_compensate_num": 18
+    "year_compensate_num": 20
+  },
+  {
+    "role_id": 10000087,
+    "name": "那维莱特",
+    "belong": "枫丹廷",
+    "divine_type": "uncertain",
+    "is_god": false,
+    "seat_life": "？？？",
+    "element": "水",
+    "text": "「我既认可我自身工作的价值，也认同枫丹大众所作所为的意义。」",
+    "role_birthday": "12/18",
+    "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/08/6c6aca299da65d209ea26afc78aa87f9_2945262558080815123.png",
+    "head_image": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/08/6c6aca299da65d209ea26afc78aa87f9_2945262558080815123.png",
+    "introduce": "枫丹的最高审判官，因其无懈可击的「秉公无私」而闻名。",
+    "is_subscribe": true,
+    "is_finish_task": false,
+    "current_compensate_num": 56,
+    "is_compensate_num": true,
+    "year_compensate_num": 20
   }
 ]

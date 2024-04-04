@@ -22,10 +22,24 @@
       "is_subscribe": true
     },
     {
+      "role_id": 10000061,
+      "name": "绮良良",
+      "role_birthday": "1/22",
+      "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/06f8af712227267d912df1d57d168174_6981528938140917044.png",
+      "is_subscribe": true
+    },
+    {
       "role_id": 10000075,
       "name": "流浪者",
       "role_birthday": "1/3",
       "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/16/149d46e87b7805b916f24d8fa426dc4f_7980041467691988039.png",
+      "is_subscribe": true
+    },
+    {
+      "role_id": 10000090,
+      "name": "夏沃蕾",
+      "role_birthday": "1/10",
+      "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/09/5828fdd01663302159fe82ebbb220f16_3335038397646407748.png",
       "is_subscribe": true
     }
   ],
@@ -49,6 +63,27 @@
       "name": "珊瑚宫心海",
       "role_birthday": "2/22",
       "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/1987e71779ee95abef18be97b79e0104_4521215417254992430.png",
+      "is_subscribe": true
+    },
+    {
+      "role_id": 10000078,
+      "name": "艾尔海森",
+      "role_birthday": "2/11",
+      "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/01/18/aa946c056451c6280e7718571d1cfa8c_2141826118635568897.png",
+      "is_subscribe": true
+    },
+    {
+      "role_id": 10000083,
+      "name": "琳妮特",
+      "role_birthday": "2/2",
+      "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/17/3be7d0575e32f46172ba95a97a647856_3883052919929914724.png",
+      "is_subscribe": true
+    },
+    {
+      "role_id": 10000084,
+      "name": "林尼",
+      "role_birthday": "2/2",
+      "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/17/adfd562a6ab78c04fa38f5aed4091c0c_6090118550113251285.png",
       "is_subscribe": true
     }
   ],
@@ -87,6 +122,13 @@
       "role_birthday": "3/26",
       "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2022/03/30/0496e0c13ca5fa8f378fc55df1eea3fe_4076052981305794654.png",
       "is_subscribe": true
+    },
+    {
+      "role_id": 10000077,
+      "name": "瑶瑶",
+      "role_birthday": "3/6",
+      "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/01/18/7d2c2316efb1c8095695361e8ffac76e_5024352982681421540.png",
+      "is_subscribe": true
     }
   ],
   "4": [
@@ -109,6 +151,27 @@
       "name": "夜兰",
       "role_birthday": "4/20",
       "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2022/09/13/ed74fcd862ff9bc4d73347724e8ba693_7444591801787948295.png",
+      "is_subscribe": true
+    },
+    {
+      "role_id": 10000079,
+      "name": "迪希雅",
+      "role_birthday": "4/7",
+      "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/03/01/ee30eb223c696985e7f66bbb123a2285_5269618229783031045.png",
+      "is_subscribe": true
+    },
+    {
+      "role_id": 10000082,
+      "name": "白术",
+      "role_birthday": "4/25",
+      "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/0db84d2600e52e87e863535622febb9d_9065720012393184544.png",
+      "is_subscribe": true
+    },
+    {
+      "role_id": 10000088,
+      "name": "夏洛蒂",
+      "role_birthday": "4/10",
+      "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/08/3d242260e049500bc3ad1ff4793f9569_6339574078137157086.png",
       "is_subscribe": true
     }
   ],
@@ -263,6 +326,13 @@
       "role_birthday": "7/27",
       "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2022/06/20/d25065cdd0f2e16f6b5c3f28a343b492_7181900211254841503.png",
       "is_subscribe": true
+    },
+    {
+      "role_id": 10000081,
+      "name": "卡维",
+      "role_birthday": "7/9",
+      "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/08995849606dd35893b43145db2733e0_1747493019822729825.png",
+      "is_subscribe": true
     }
   ],
   "8": [
@@ -293,6 +363,20 @@
       "role_birthday": "8/20",
       "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2022/12/16/e472a6c16e5af333cc49fef339dc71b5_5881966747313782097.png",
       "is_subscribe": true
+    },
+    {
+      "role_id": 10000080,
+      "name": "米卡",
+      "role_birthday": "8/11",
+      "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2023/05/26/d484942f89c63c226924e7614bf4b34d_1694746196088497938.png",
+      "is_subscribe": true
+    },
+    {
+      "role_id": 10000091,
+      "name": "娜维娅",
+      "role_birthday": "8/16",
+      "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2024/01/12/a5848e8fa8f8501266eb24a874c95b91_1483986270711755191.png",
+      "is_subscribe": true
     }
   ],
   "9": [
@@ -322,6 +406,13 @@
       "name": "阿贝多",
       "role_birthday": "9/13",
       "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/879e228684643d5c269ea46fb8f87a2d_8262390748306210857.png",
+      "is_subscribe": true
+    },
+    {
+      "role_id": 10000085,
+      "name": "菲米尼",
+      "role_birthday": "9/24",
+      "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/08/17/e9a9b20e6de721fec99e0d94991ced1b_2524954025192355249.png",
       "is_subscribe": true
     }
   ],
@@ -367,6 +458,13 @@
       "role_birthday": "10/27",
       "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2022/11/21/e8b642a3fda4c4aa67232a3dd120c490_6184638667025833225.png",
       "is_subscribe": true
+    },
+    {
+      "role_id": 10000089,
+      "name": "芙宁娜",
+      "role_birthday": "10/13",
+      "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/11/08/48bfa1678335c611a41ea7b3ea0d5797_3458972102493077083.png",
+      "is_subscribe": true
     }
   ],
   "11": [
@@ -396,6 +494,13 @@
       "name": "砂糖",
       "role_birthday": "11/26",
       "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/bba7cf971fd63b7a65312ce946da1755_362828863795999201.png",
+      "is_subscribe": true
+    },
+    {
+      "role_id": 10000086,
+      "name": "莱欧斯利",
+      "role_birthday": "11/23",
+      "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/23/1f1a85c15de8f823e5d44a6d53c11ae6_1801124067913491530.png",
       "is_subscribe": true
     }
   ],
@@ -440,6 +545,13 @@
       "name": "莱依拉",
       "role_birthday": "12/19",
       "head_icon": "https://webstatic.mihoyo.com/upload/static-resource/2022/11/21/481ab7c8ec92170c3159017c3f2cfc36_8829963866565670667.png",
+      "is_subscribe": true
+    },
+    {
+      "role_id": 10000087,
+      "name": "那维莱特",
+      "role_birthday": "12/18",
+      "head_icon": "https://fastcdn.mihoyo.com/static-resource-v2/2023/10/08/6c6aca299da65d209ea26afc78aa87f9_2945262558080815123.png",
       "is_subscribe": true
     }
   ]
