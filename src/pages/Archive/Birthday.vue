@@ -58,9 +58,10 @@ watchEffect(() => {
 });
 
 onMounted(() => {
-  const { date } = route.params;
+  let { date } = route.params;
   let errLabel;
   if (date) {
+    if (Array.isArray(date)) date = date[0];
     renderItems.value = ArcBirDraw.filter((item) => item.birthday.toString() === date);
     errLabel = `没有找到生日为 ${date} 的角色数据`;
     canReset.value = true;

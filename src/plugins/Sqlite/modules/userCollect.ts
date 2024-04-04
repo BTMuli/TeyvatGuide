@@ -346,7 +346,11 @@ async function updatePostsCollect(
     if (postRes.length === 0) {
       return false;
     }
-    if (force) {
+    const unclassifiedSql = "SELECT * FROM UFMap where postId = ?";
+    const unclassifiedRes: TGApp.Sqlite.UserCollection.UFMap[] = await db.select(unclassifiedSql, [
+      postIds[i],
+    ]);
+    if (force && unclassifiedRes.length > 0) {
       const deleteCheck = await deletePostCollect(postIds[i]);
       if (!deleteCheck) return false;
     }
