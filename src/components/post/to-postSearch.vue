@@ -40,6 +40,7 @@ interface ToPostSearchProps {
 
 interface ToPostSearchEmits {
   (e: "update:modelValue", value: boolean): void;
+
   (e: "cancel"): void;
 }
 
@@ -94,6 +95,7 @@ watch(
       results.value = [];
       lastId.value = "";
       isLast.value = false;
+      await searchPosts();
     }
   },
 );
@@ -143,6 +145,9 @@ async function searchPosts() {
   lastId.value = res.last_id;
   isLast.value = res.is_last;
   load.value = false;
+  if (!visible.value) {
+    visible.value = true;
+  }
 }
 
 function getGidLabel(): string {

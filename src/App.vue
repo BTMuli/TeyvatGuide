@@ -184,20 +184,11 @@ async function getDeepLink(): Promise<UnlistenFn> {
     }
     await TGLogger.Info(`[App][getDeepLink] ${e.payload}`);
     if (e.payload === "") return;
-    // 导入格式: teyvatguide://import_uigf?app=appName
-    // 跳转格式: localhost:4000/achievements/?app=appName
-    // todo 后续更改路径&参数名称
-    if (e.payload.startsWith("teyvatguide://import_uigf")) {
-      const param = (<string>e.payload).split("teyvatguide://import_uigf/?")[1];
-      let appName = "";
-      if (param) {
-        appName = param.split("app=")[1];
-      }
-      if (appName === "") {
-        await router.push("/achievements");
-      } else {
-        await router.push("/achievements/?app=" + appName);
-      }
+    if (
+      e.payload.startsWith("teyvatguide://import_uigf") ||
+      e.payload.startsWith("teyvatguide://import_uiaf")
+    ) {
+      await toUIAF(e.payload);
     } else {
       showSnackbar({
         text: "无效的 deep link！",
@@ -206,6 +197,16 @@ async function getDeepLink(): Promise<UnlistenFn> {
       });
     }
   });
+}
+
+async function toUIAF(link: string) {
+  const url = new URL(link);
+  const app = url.searchParams.get("app");
+  if (app === null) {
+    await router.push("/achievements");
+  } else {
+    await router.push("/achievements/?app=" + app);
+  }
 }
 
 // 检测更新
