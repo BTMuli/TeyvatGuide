@@ -1,12 +1,12 @@
 /**
  * @file plugins/Mys/types/post.d.ts
  * @description Mys 插件帖子类型定义文件
- * @since Beta v0.4.0
+ * @since Beta v0.4.5
  */
 
 /**
  * @description Mys 插件帖子类型
- * @since Beta v0.4.0
+ * @since Beta v0.4.5
  * @namespace TGApp.Plugins.Mys.Post
  * @memberof TGApp.Plugins.Mys
  */
@@ -27,7 +27,7 @@ declare namespace TGApp.Plugins.Mys.Post {
 
   /**
    * @description 帖子数据
-   * @since Beta v0.4.0
+   * @since Beta v0.4.5
    * @interface FullData
    * @property {Post} post  帖子信息
    * @property {Forum} forum  所属版块
@@ -73,7 +73,7 @@ declare namespace TGApp.Plugins.Mys.Post {
     is_block_on: boolean;
     forum_rank_info: unknown | null;
     link_card_list: unknown[];
-    news_meta: TGApp.Plugins.Mys.News.Meta | null;
+    news_meta: TGApp.Plugins.Mys.News.Meta | null | undefined;
     recommend_reason: unknown | null;
     villa_card: unknown | null;
     is_mentor: boolean;

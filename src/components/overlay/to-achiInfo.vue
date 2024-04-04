@@ -4,7 +4,9 @@
       <slot name="left"></slot>
       <div class="toai-box">
         <div class="toai-top">
-          <span class="toai-click" @click="search(props.data.name)">{{ props.data.name }}</span>
+          <span class="toai-click" @click="searchDirect(props.data.name)">{{
+            props.data.name
+          }}</span>
           <span>{{ props.data.description }}</span>
         </div>
         <div v-if="achiLC">
@@ -24,7 +26,7 @@
           </div>
           <div class="toai-mid-item" v-for="item in achiLC.trigger.task" :key="item.questId">
             <v-icon>mdi-alert-decagram</v-icon>
-            <span class="toai-click" @click="search(item.name)">{{ item.name }}</span>
+            <span class="toai-click" @click="searchDirect(item.name)">{{ item.name }}</span>
             <span>（{{ item.type }}）</span>
           </div>
         </div>
@@ -49,6 +51,7 @@
       <slot name="right"></slot>
     </div>
   </TOverlay>
+  <ToPostSearch gid="2" v-model="showSearch" :keyword="search" />
 </template>
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from "vue";
@@ -56,6 +59,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { AppAchievementsData, AppAchievementSeriesData } from "../../data";
 import TGLogger from "../../utils/TGLogger";
 import TOverlay from "../main/t-overlay.vue";
+import ToPostSearch from "../post/to-postSearch.vue";
 
 interface ToAchiInfoProps {
   modelValue: boolean;
@@ -70,6 +74,8 @@ interface ToAchiInfoEmits {
 
 const props = defineProps<ToAchiInfoProps>();
 const emits = defineEmits<ToAchiInfoEmits>();
+const showSearch = ref(false);
+const search = ref("");
 
 const visible = computed({
   get: () => props.modelValue,
@@ -98,11 +104,10 @@ function onCancel() {
 }
 
 // 查找
-async function search(word: string): Promise<void> {
+async function searchDirect(word: string): Promise<void> {
   await TGLogger.Info(`[ToAchiInfo][${props.data?.id}][Search] 查询 ${word}`);
-  const str = encodeURIComponent(word);
-  const url = `https://www.miyoushe.com/ys/search?keyword=${str}`;
-  window.open(url, "_blank");
+  search.value = word;
+  showSearch.value = true;
 }
 </script>
 <style lang="css" scoped>

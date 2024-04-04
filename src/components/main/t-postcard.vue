@@ -38,7 +38,7 @@
         </div>
       </div>
     </div>
-    <div class="tpc-forum" :title="`频道: ${card.forum.name}`">
+    <div class="tpc-forum" v-if="card.forum.icon !== ''" :title="`频道: ${card.forum.name}`">
       <img :src="card.forum.icon" :alt="card.forum.name" />
       <span>{{ card.forum.name }}</span>
     </div>
@@ -179,7 +179,11 @@ function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys
 
 function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.News.RenderCard {
   const commonCard = getCommonCard(item);
-  if (item.news_meta !== null && item.news_meta.start_at_sec !== "0") {
+  if (
+    item.news_meta !== undefined &&
+    item.news_meta !== null &&
+    item.news_meta.start_at_sec !== "0"
+  ) {
     isAct.value = true;
     const startTime = new Date(Number(item.news_meta.start_at_sec) * 1000).toLocaleDateString();
     const endTime = new Date(Number(item.news_meta.end_at_sec) * 1000).toLocaleDateString();

@@ -15,6 +15,7 @@ import getNewsList from "./request/getNewsList";
 import { getPositionData } from "./request/getPositionData";
 import getPostData from "./request/getPostData";
 import { getVoteInfo, getVoteResult } from "./request/getVoteData";
+import searchPosts from "./request/searchPost";
 import { getGachaCard } from "./utils/getGachaCard";
 import getLotteryCard from "./utils/getLotteryCard";
 import getPositionCard from "./utils/getPositionCard";
@@ -31,6 +32,7 @@ const Mys = {
   Posts: {
     get: getForumList,
     nav: getHomeNavigator,
+    search: searchPosts,
   },
   Gacha: {
     get: getGachaData,

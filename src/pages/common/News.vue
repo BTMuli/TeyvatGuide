@@ -8,7 +8,7 @@
       v-model="search"
       class="news-search"
       append-icon="mdi-magnify"
-      label="请输入米游社帖子 ID"
+      label="请输入帖子 ID 或搜索词"
       :single-line="true"
       hide-details
       @click:append="searchPost"
@@ -40,6 +40,7 @@
     </v-window-item>
   </v-window>
   <ToChannel v-model="showList" :gid="gid" />
+  <ToPostSearch :gid="gid" v-model="showSearch" :keyword="search" />
 </template>
 
 <script lang="ts" setup>
@@ -50,6 +51,7 @@ import showSnackbar from "../../components/func/snackbar";
 import TPostCard from "../../components/main/t-postcard.vue";
 import ToChannel from "../../components/overlay/to-channel.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
+import ToPostSearch from "../../components/post/to-postSearch.vue";
 import Mys from "../../plugins/Mys";
 import { useAppStore } from "../../store/modules/app";
 import TGLogger from "../../utils/TGLogger";
@@ -87,6 +89,7 @@ const loadingSub = ref<boolean>(false);
 const appStore = useAppStore();
 const tab = ref<NewsKey>("notice");
 const showList = ref<boolean>(false);
+const showSearch = ref<boolean>(false);
 const tabValues = ref<Array<NewsKey>>(["notice", "activity", "news"]);
 
 // 渲染数据
@@ -193,13 +196,11 @@ function searchPost(): void {
     });
     return;
   }
-  if (!isNaN(Number(search.value))) {
-    createPost(search.value);
+  const numCheck = Number(search.value);
+  if (isNaN(numCheck)) {
+    showSearch.value = true;
   } else {
-    showSnackbar({
-      text: "请输入搜索内容",
-      color: "error",
-    });
+    createPost(search.value);
   }
 }
 </script>

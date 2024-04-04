@@ -4,7 +4,7 @@
       <div>{{ props.data.nickname }}</div>
       <div :title="getAuthorDesc()">{{ getAuthorDesc() }}</div>
     </div>
-    <div class="tpa-img" @click="toAuthor()" title="点击前往用户主页">
+    <div class="tpa-img">
       <img :src="props.data.avatar_url" alt="avatar" class="tpa-icon" />
       <img
         :src="props.data.pendant"
@@ -32,11 +32,6 @@ function getAuthorDesc(): string {
     return props.data.certification.label;
   }
   return props.data.introduce;
-}
-
-async function toAuthor(): Promise<void> {
-  const url = `https://www.miyoushe.com/ys/#/accountCenter/0?id=${props.data.uid}`;
-  window.open(url, "_blank");
 }
 
 const flexAlign = props.position === "left" ? "flex-start" : "flex-end";
@@ -83,7 +78,6 @@ const textAlign = props.position;
   position: relative;
   width: 50px;
   height: 50px;
-  cursor: pointer;
 }
 
 .tpa-icon {

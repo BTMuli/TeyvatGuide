@@ -27,7 +27,7 @@
         v-model="search"
         class="post-switch-item"
         append-inner-icon="mdi-magnify"
-        label="请输入帖子 ID"
+        label="请输入帖子 ID 或搜索词"
         variant="outlined"
         :single-line="true"
         hide-details
@@ -51,6 +51,7 @@
       </div>
     </div>
   </div>
+  <ToPostSearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
 </template>
 <script setup lang="ts">
 import { nextTick, onMounted, ref, watch } from "vue";
@@ -59,6 +60,7 @@ import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
 import TPostCard from "../../components/main/t-postcard.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
+import ToPostSearch from "../../components/post/to-postSearch.vue";
 import Mys from "../../plugins/Mys";
 import TGClient from "../../utils/TGClient";
 import TGLogger from "../../utils/TGLogger";
@@ -162,7 +164,8 @@ const curSortType = ref<number>(0);
 // 渲染数据
 const posts = ref<TGApp.Plugins.Mys.Post.FullData[]>([]);
 const nav = ref<TGApp.BBS.Navigator.Navigator[]>([]);
-const search = ref<string>();
+const search = ref<string>("");
+const showSearch = ref<boolean>(false);
 
 onMounted(async () => {
   await TGLogger.Info(
@@ -281,20 +284,18 @@ function freshCurForum(newVal: string): void {
 
 // 查询帖子
 function searchPost(): void {
-  if (search.value === undefined || search.value === "") {
+  if (search.value === "") {
     showSnackbar({
       text: "请输入搜索内容",
       color: "error",
     });
     return;
   }
-  if (!isNaN(Number(search.value))) {
-    createPost(search.value);
+  const numCheck = Number(search.value);
+  if (isNaN(numCheck)) {
+    showSearch.value = true;
   } else {
-    showSnackbar({
-      text: "请输入搜索内容",
-      color: "error",
-    });
+    createPost(search.value);
   }
 }
 </script>
@@ -351,7 +352,7 @@ function searchPost(): void {
 }
 
 .post-switch-item {
-  max-width: 200px;
+  width: fit-content;
   height: 50px;
 }
 
