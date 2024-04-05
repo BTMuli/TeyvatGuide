@@ -176,7 +176,11 @@ function getContents(day: number): void {
   calendarNow.value = getCalendar(day);
   characterCards.value = calendarNow.value.filter((item) => item.itemType === "character");
   weaponCards.value = calendarNow.value.filter((item) => item.itemType === "weapon");
-  page.value = 1;
+  if (page.value !== 1) {
+    page.value = 1;
+  } else {
+    renderItems.value = getGrid();
+  }
 }
 </script>
 <style lang="css" scoped>
