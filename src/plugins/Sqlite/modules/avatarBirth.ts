@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/avatarBirth.ts
  * @description 角色生日模块
- * @since Beta v0.4.5
+ * @since Beta v0.4.6
  */
 
 import { ArcBirCalendar, ArcBirRole } from "../../../data";
@@ -21,12 +21,13 @@ function isAvatarBirth(): TGApp.Archive.Birth.CalendarItem[] {
 
 /**
  * @description 获取角色生日
- * @since Beta v0.4.5
+ * @since Beta v0.4.6
  * @param {string} roleBirthday - 角色生日
  * @return {[number,number]} 角色生日
  */
 function getRoleBirth(roleBirthday: string): [number, number] {
-  return roleBirthday.split("/").map(Number) as [number, number];
+  const arr: string[] = roleBirthday.split("/");
+  return [Number(arr[0]), Number(arr[1])];
 }
 
 /**

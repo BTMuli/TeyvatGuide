@@ -202,7 +202,7 @@ async function getDeepLink(): Promise<UnlistenFn> {
 async function toUIAF(link: string) {
   const url = new URL(link);
   const app = url.searchParams.get("app");
-  if (app === null) {
+  if (app === null || app === "") {
     await router.push("/achievements");
   } else {
     await router.push("/achievements/?app=" + app);
@@ -225,7 +225,6 @@ async function checkUpdate(): Promise<void> {
         color: "error",
         timeout: 3000,
       });
-      window.open("https://app.btmuli.ink/docs/Changelogs.html");
       return;
     }
     appStore.buildTime = getBuildTime();
@@ -235,6 +234,7 @@ async function checkUpdate(): Promise<void> {
       color: "success",
       timeout: 3000,
     });
+    window.open("https://app.btmuli.ink/docs/Changelogs.html");
   }
 }
 

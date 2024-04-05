@@ -47,7 +47,7 @@ const length = ref(0);
 const visible = ref(0);
 const renderItems = ref<TGApp.Archive.Birth.DrawItem[]>([]);
 const curSelect = ref<string | null>(null);
-const selectedItem = ref<TGApp.Archive.Birth.DrawItem[]>(ArcBirDraw);
+const selectedItem = ref<TGApp.Archive.Birth.DrawItem[]>([]);
 const current = ref<TGApp.Archive.Birth.DrawItem>();
 const isAether = ref<boolean>(false);
 const showOverlay = ref(false);
@@ -78,7 +78,7 @@ onMounted(() => {
     curSelect.value = date;
   } else {
     renderItems.value = ArcBirDraw;
-    curSelect.value = null;
+    selectedItem.value = renderItems.value.slice(0, 12);
   }
   length.value = Math.ceil(renderItems.value.length / 12);
   visible.value = length.value > 5 ? 5 : length.value;
