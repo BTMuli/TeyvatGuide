@@ -1,9 +1,9 @@
 {
   "name": "TeyvatGuide",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Game Tool for Genshin Impact player",
   "private": true,
-  "packageManager": "pnpm@8.15.3",
+  "packageManager": "pnpm@8.15.6",
   "scripts": {
     "build": "tauri build",
     "debug": "tauri build --debug",

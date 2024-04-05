@@ -2,13 +2,36 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-01-15
-Update: 2024-02-09
+Update: 2024-04-05
 ---
 
-> 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli)
-> 自动生成于 `2024-01-15 17:29:15`
+> 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-01-15 17:29:15`
 >
-> 更新于 `2024-02-09 20:30:26`
+> 更新于 `2024-04-05 14:19:04`
+
+## [0.4.5](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.5) (2024-04-05)
+
+### Feat
+
+- 添加收藏页面，支持导入用户收藏 [`#100`](https://github.com/BTMuli/TeyvatGuide/issues/100)
+- 设置页添加更新日志跳转
+- 首页：组件样式迭代
+- 帖子：替换默认封面
+- 帖子：支持关键词搜索 [`#103`](https://github.com/BTMuli/TeyvatGuide/issues/103)
+
+### Fix
+
+- 成就：修正部分成就版本信息 [`3501590f`](https://github.com/BTMuli/TeyvatGuide/commit/3501590f)
+- 帖子：链接卡片添加间距
+- 图鉴：修复埃洛伊背景渲染异常
+- 留影叙佳期：补充遗漏数据，支持特定日期查看
+
+### Change
+
+- 帖子：微调解析逻辑
+- 重构：通用帖子卡片抽离作为组件，添加 `select` 状态
+- 帖子：抽奖详情改为 `overlay`
+- 应用：调整默认颜色
 
 ## [0.4.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.4) (2024-03-13)
 

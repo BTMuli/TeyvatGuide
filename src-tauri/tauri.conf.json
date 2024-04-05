@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "TeyvatGuide",
-    "version": "0.4.4"
+    "version": "0.4.5"
   },
   "tauri": {
     "allowlist": {
@@ -170,7 +170,7 @@
         "title": "米游社",
         "label": "mhy_client",
         "url": "",
-        "userAgent": "Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/2.67.1",
+        "userAgent": "Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/2.70.1",
         "visible": false,
         "width": 400,
         "height": 800,
