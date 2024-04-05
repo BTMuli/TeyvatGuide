@@ -38,7 +38,7 @@
         <v-tab value="5">5☆</v-tab>
         <v-tab value="4">4☆</v-tab>
       </v-tabs>
-      <v-window v-model="tab">
+      <v-window v-model="tab" class="gro-bottom-window">
         <v-window-item value="5" class="gro-b-window-item">
           <div v-for="(item, index) in star5List" :key="index" class="gro-bwi-item">
             <div class="gro-bwi-icon">
@@ -249,9 +249,12 @@ watch(
   width: 100%;
 }
 
+.gro-bottom-window {
+  height: calc(100vh - 440px);
+}
+
 .gro-b-window-item {
   display: flex;
-  max-height: calc(100vh - 420px);
   flex-direction: column;
   margin-top: 10px;
   gap: 5px;
@@ -262,7 +265,7 @@ watch(
   display: flex;
   width: 100%;
   height: 30px;
-  gap: 10px;
+  gap: 5px;
 }
 
 .gro-bwi-icon {

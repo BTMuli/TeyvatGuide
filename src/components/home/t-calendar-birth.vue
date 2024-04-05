@@ -9,11 +9,11 @@
       <span>今天是{{ cur.map((i) => i.name).join("、") }}的生日哦~</span>
     </div>
     <div>即将到来：{{ next[0].role_birthday }}</div>
-    <div v-for="i in next" :key="i.role_id" class="tcb-item" @click="toBirth(i)">
-      <img :src="i.head_icon" :alt="i.introduce" />
+    <div v-for="i in next" :key="i.role_id" class="tcb-item">
+      <img :src="i.head_icon" :alt="i.name" @click="toBirth(i)" />
       <div class="tcb-item-info">
         <span>{{ i.name }} 所属：{{ i.belong }}</span>
-        <span>{{ i.text }}</span>
+        <span>{{ i.introduce }}</span>
       </div>
     </div>
   </div>

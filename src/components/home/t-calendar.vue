@@ -29,7 +29,7 @@
       <div class="tc-content">
         <TCalendarBirth />
         <div class="calendar-grid">
-          <div v-for="item in getGrid()" :key="item.id" @click="selectItem(item)">
+          <div v-for="item in renderItems" :key="item.id" @click="selectItem(item)">
             <TibCalendarItem
               :data="<TGApp.App.Calendar.Item>item"
               :model="switchType"
@@ -43,7 +43,7 @@
   <ToCalendar v-model="showItem" :data-type="selectedType" :data-val="selectedItem" />
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 import TCalendarBirth from "./t-calendar-birth.vue";
 import THomeCard from "./t-homecard.vue";
@@ -70,6 +70,7 @@ const showItem = ref<boolean>(false);
 const switchType = ref<"avatar" | "weapon">("avatar");
 const selectedItem = ref<TGApp.App.Calendar.Item>(<TGApp.App.Calendar.Item>{});
 const selectedType = ref<"avatar" | "weapon">("avatar");
+const renderItems = ref<TGApp.App.Calendar.Item[]>([]);
 
 const btnText = [
   {
@@ -126,8 +127,27 @@ onMounted(async () => {
   calendarNow.value = getCalendar(dayNow);
   characterCards.value = calendarNow.value.filter((item) => item.itemType === "character");
   weaponCards.value = calendarNow.value.filter((item) => item.itemType === "weapon");
+  renderItems.value = getGrid();
   emits("success");
 });
+
+watch(
+  () => page.value,
+  () => {
+    renderItems.value = getGrid();
+  },
+);
+
+watch(
+  () => switchType.value,
+  () => {
+    if (page.value !== 1) {
+      page.value = 1;
+    } else {
+      renderItems.value = getGrid();
+    }
+  },
+);
 
 // 获取当前日历
 function getCalendar(day: number): TGApp.App.Calendar.Item[] {

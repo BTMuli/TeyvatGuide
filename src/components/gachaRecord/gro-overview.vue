@@ -50,9 +50,8 @@ watch(
 <style lang="css" scoped>
 .gro-o-container {
   display: grid;
-  width: 100%;
   height: 100%;
-  grid-gap: 10px;
+  grid-column-gap: 10px;
   grid-template-columns: v-bind(cnCols);
 }
 </style>
