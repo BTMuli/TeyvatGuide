@@ -1,10 +1,10 @@
 <template>
   <div :style="getLineStyle()" class="tp-texts">
-    <TpText v-for="(text, indexT) in props.data.children" :data="text" :key="indexT" />
+    <TpText v-for="(text, index) in props.data.children" :data="text" :key="index" />
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, StyleValue, toRaw } from "vue";
+import { StyleValue } from "vue";
 
 import TpText, { type TpText as TpTextType } from "./tp-text.vue";
 
@@ -18,10 +18,6 @@ interface TpTextsProps {
 
 const props = defineProps<TpTextsProps>();
 
-if (props.data.attributes) {
-  console.warn("TpTexts", props.data.attributes);
-}
-
 function getLineStyle(): StyleValue {
   const style = <Array<StyleValue>>[];
   if (props.data.attributes === undefined) {
@@ -31,8 +27,7 @@ function getLineStyle(): StyleValue {
   const headerFontSizes = ["2rem", "1.75rem", "1.5rem", "1.25rem", "1rem", "0.75rem"];
   if (props.data.attributes.align) {
     const ruleAlign: StyleValue = `textAlign: ${props.data.attributes.align}`;
-    if (props.data.attributes.align !== "center") style.push("display: inline");
-    else style.push(ruleAlign);
+    style.push(ruleAlign);
   }
   if (props.data.attributes.header) {
     const ruleHeader: StyleValue = `fontSize: ${headerFontSizes[props.data.attributes.header - 1]}`;
