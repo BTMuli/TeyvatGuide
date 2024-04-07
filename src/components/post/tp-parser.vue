@@ -1,10 +1,9 @@
 <template>
   <component
-    v-for="(tp, index) in props.data"
+    v-for="(tp, index) in getParsedData(props.data)"
     :key="index"
     :is="getTpName(tp)"
     :data="tp"
-    :next="getTpNext(index)"
   />
 </template>
 <script lang="ts" setup>
@@ -13,7 +12,8 @@ import TpDivider from "./tp-divider.vue";
 import TpImage from "./tp-image.vue";
 import TpLinkCard from "./tp-linkCard.vue";
 import TpMention from "./tp-mention.vue";
-import TpText from "./tp-text.vue";
+import TpText, { type TpText as TpTextType } from "./tp-text.vue";
+import TpTexts from "./tp-texts.vue";
 import TpUnknown from "./tp-unknown.vue";
 import TpVideo from "./tp-video.vue";
 import TpVod from "./tp-vod.vue";
@@ -25,7 +25,65 @@ interface TpParserProps {
 
 const props = defineProps<TpParserProps>();
 
+function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.Mys.SctPost.Base[] {
+  const res: TGApp.Plugins.Mys.SctPost.Base[] = [];
+  let child: TGApp.Plugins.Mys.SctPost.Base[] = [];
+  let cur: TGApp.Plugins.Mys.SctPost.Base | undefined;
+  for (const tp of data) {
+    const tpName = getTpName(tp);
+    if (tpName !== TpText) {
+      cur = tp;
+      child = [];
+      res.push(cur);
+      continue;
+    }
+    if (tp.insert === "\n") {
+      child.push(tp);
+      cur = {
+        insert: "",
+        attributes: tp.attributes,
+        children: child,
+      };
+      res.push(cur);
+      child = [];
+      continue;
+    }
+    const parsedText = getParsedText(tp);
+    for (const text of parsedText) {
+      child.push(text);
+      if (text.insert === "\n") {
+        cur = {
+          insert: "",
+          attributes: text.attributes,
+          children: child,
+        };
+        res.push(cur);
+        child = [];
+      }
+    }
+  }
+  return res;
+}
+
+function getParsedText(data: TpTextType): TpTextType[] {
+  if (data.insert.includes("\n") && data.insert !== "\n") {
+    const splits = data.insert.split("\n");
+    const res = [];
+    for (let i = 0; i < splits.length; i++) {
+      if (splits[i] !== "") {
+        res.push({ insert: splits[i], attributes: data.attributes });
+      }
+      if (i !== splits.length - 1) {
+        res.push({ insert: "\n", attributes: data.attributes });
+      }
+    }
+    return res;
+  }
+  return [data];
+}
+
 function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base) {
+  if (tp.children) return TpTexts;
   if (typeof tp.insert === "string") {
     return TpText;
   } else if ("image" in tp.insert) {
@@ -46,12 +104,5 @@ function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base) {
     return TpVote;
   }
   return TpUnknown;
-}
-
-function getTpNext(index: number) {
-  if (index + 1 >= props.data.length) {
-    return undefined;
-  }
-  return props.data[index + 1];
 }
 </script>

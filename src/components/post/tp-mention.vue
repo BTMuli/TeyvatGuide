@@ -22,7 +22,6 @@ interface TpMention {
 
 interface TpMentionProps {
   data: TpMention;
-  next: unknown;
 }
 
 const props = defineProps<TpMentionProps>();

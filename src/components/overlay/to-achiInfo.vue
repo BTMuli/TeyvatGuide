@@ -103,7 +103,6 @@ function onCancel() {
   visible.value = false;
 }
 
-// todo 存在 bug，点击成就标题时可能会没有效果
 async function searchDirect(word: string): Promise<void> {
   await TGLogger.Info(`[ToAchiInfo][${props.data?.id}][Search] 查询 ${word}`);
   search.value = word;

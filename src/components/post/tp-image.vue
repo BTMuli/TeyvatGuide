@@ -29,7 +29,6 @@ export interface TpImage {
 }
 interface TpImageProps {
   data: TpImage;
-  next: unknown;
 }
 
 const props = defineProps<TpImageProps>();

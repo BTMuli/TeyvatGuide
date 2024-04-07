@@ -47,7 +47,6 @@ interface TpBackupText {
 
 interface TpBackupTextProps {
   data: TpBackupText;
-  next: unknown;
 }
 
 const props = defineProps<TpBackupTextProps>();

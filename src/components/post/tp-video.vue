@@ -38,7 +38,6 @@ interface TpVideo {
 
 interface TpVideoProps {
   data: TpVideo;
-  next: unknown;
 }
 
 const props = defineProps<TpVideoProps>();
