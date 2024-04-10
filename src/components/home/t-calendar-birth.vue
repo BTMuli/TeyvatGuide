@@ -4,13 +4,14 @@
       <img src="/source/UI/empty.webp" alt="empty" />
       <span>今天没有角色过生日哦~</span>
     </div>
-    <div class="tcb-top-active" @click="toBirth(true)" v-else>
-      <img @click="toPost()" src="/source/UI/act_birthday.png" alt="empty" class="active" />
+    <div class="tcb-top-active" v-else>
+      <img @click="toBirth(true)" src="/source/UI/act_birthday.png" alt="empty" class="active" />
       <span>今天是{{ cur.map((i) => i.name).join("、") }}的生日哦~</span>
+      <img v-for="i in cur" :key="i.role_id" class="tcb-cur" :alt="i.name" :src="i.head_icon" />
     </div>
     <div>即将到来：{{ next[0].role_birthday }}</div>
     <div v-for="i in next" :key="i.role_id" class="tcb-item">
-      <img :src="i.head_icon" :alt="i.name" @click="toBirth(i)" />
+      <img :src="i.head_icon" :alt="i.name" @click="toBirth(i)" :title="i.name" />
       <div class="tcb-item-info">
         <span>{{ i.name }} 所属：{{ i.belong }}</span>
         <span>{{ i.introduce }}</span>
@@ -38,10 +39,6 @@ onBeforeMount(async () => {
   next.value = TSAvatarBirth.getNextAvatarBirth();
 });
 
-async function toPost() {
-  await router.push("/news/2");
-}
-
 function toBirth(type: TGApp.Archive.Birth.RoleItem | true) {
   let dateStr;
   if (type === true) {
@@ -51,6 +48,14 @@ function toBirth(type: TGApp.Archive.Birth.RoleItem | true) {
     dateStr = `${month}/${day}`;
   } else {
     dateStr = type.role_birthday;
+  }
+  if (type != true) {
+    router.push({ name: "留影叙佳期", params: { date: dateStr } });
+    return;
+  }
+  if (cur.value.length > 0 && !cur.value[0].is_subscribe) {
+    router.push("/news/2/news");
+    return;
   }
   router.push({ name: "留影叙佳期", params: { date: dateStr } });
 }
@@ -85,6 +90,14 @@ function toBirth(type: TGApp.Archive.Birth.RoleItem | true) {
 
 .tcb-top-active img.active {
   cursor: pointer;
+}
+
+.tcb-top-active img.tcb-cur {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-left: 5px;
+  background: var(--common-shadow-1);
 }
 
 .tcb-item {

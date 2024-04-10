@@ -79,7 +79,7 @@ type RawData = {
 // 路由
 const router = useRouter();
 const gid = <string>useRoute().params.gid;
-
+let type = <string | undefined>useRoute().params.type;
 // loading
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载");
@@ -120,6 +120,9 @@ const rawData = ref<RawData>({
 onMounted(async () => {
   await TGLogger.Info(`[News][${gid}][onMounted] 打开咨讯页面`);
   const typeList = ["notice", "activity", "news"];
+  if (type != undefined) {
+    appStore.recentNewsType = type;
+  }
   const curType = appStore.recentNewsType;
   if (typeList.includes(curType)) {
     tab.value = <NewsKey>curType;

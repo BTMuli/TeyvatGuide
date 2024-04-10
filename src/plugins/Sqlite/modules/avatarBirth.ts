@@ -4,7 +4,7 @@
  * @since Beta v0.4.6
  */
 
-import { ArcBirCalendar, ArcBirRole } from "../../../data";
+import { AppCharacterData, ArcBirCalendar, ArcBirRole } from "../../../data";
 
 /**
  * @description 判断今天是不是角色生日
@@ -16,7 +16,19 @@ function isAvatarBirth(): TGApp.Archive.Birth.CalendarItem[] {
   const month = date.getMonth() + 1;
   const day = date.getDate();
   const days = ArcBirCalendar[month];
-  return days.filter((i) => i.role_birthday === `${month}/${day}`);
+  const find = days.filter((i) => i.role_birthday === `${month}/${day}`);
+  if (find.length > 0) return find.map((i) => (i.is_subscribe = true));
+  const find2 = AppCharacterData.filter((i) => i.birthday.toString() === [month, day].toString());
+  return find2.map(
+    (i) =>
+      <TGApp.Archive.Birth.CalendarItem>{
+        role_id: i.id,
+        name: i.name,
+        role_birthday: `${month}/${day}`,
+        head_icon: `/WIKI/character/${i.id}.webp`,
+        is_subscribe: false,
+      },
+  );
 }
 
 /**
