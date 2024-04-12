@@ -1,0 +1,43 @@
+name: 原神游戏资源更新（仅供开发者使用）
+description: 版本前瞻后的例行资源更新
+title: "[Update] "
+labels:
+  - 资源
+body:
+  - type: checkboxes
+    attributes:
+      label: Issue Check
+      options:
+        - label: 个人明确了解该模板仅供开发者使用
+          required: true
+  - type: input
+    id: version
+    attributes:
+      label: 游戏版本
+      description: 请填写游戏版本
+      placeholder: 如 4.6
+  - type: checkboxes
+    id: resources
+    attributes:
+      label: 包括的资源
+      options:
+        - label: 角色&名片，有新角色时选择
+          required: false
+        - label: 武器，有新武器时选择
+          required: false
+        - label: 成就，有新成就时选择
+          required: false
+        - label: 卡牌，有新卡牌时选择
+          required: false
+        - label: 材料，有新材料时选择
+          required: false
+  - type: markdown
+    attributes:
+      value: |
+        对上述资源的更新描述进行详细说明
+  - type: textarea
+    id: additional
+    attributes:
+      label: 其他信息
+      description: 请填写其他信息
+      placeholder: 请填写其他信息
