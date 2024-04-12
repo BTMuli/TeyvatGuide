@@ -31,10 +31,11 @@ body:
           required: false
         - label: 材料，有新材料时选择
           required: false
-  - type: markdown
+  - type: textarea
+    id: detail
     attributes:
-      value: |
-        对上述资源的更新描述进行详细说明
+      label: 详情
+      description: 对上述内容进行详细说明
   - type: textarea
     id: additional
     attributes:
