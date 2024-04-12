@@ -9,13 +9,12 @@
 </template>
 <script lang="ts" setup>
 import { event } from "@tauri-apps/api";
-import { computed, onMounted } from "vue";
+import { UnlistenFn } from "@tauri-apps/api/helpers/event";
+import { computed, onMounted, onUnmounted } from "vue";
 
 import { useAppStore } from "../../store/modules/app";
 
-// store
 const appStore = useAppStore();
-// theme
 const themeGet = computed({
   get() {
     return appStore.theme;
@@ -24,9 +23,10 @@ const themeGet = computed({
     appStore.theme = value;
   },
 });
+let themeListener: UnlistenFn;
 
 onMounted(async () => {
-  await listenOnTheme();
+  themeListener = await listenOnTheme();
 });
 
 async function switchTheme(): Promise<void> {
@@ -34,12 +34,18 @@ async function switchTheme(): Promise<void> {
   await event.emit("readTheme", themeGet.value);
 }
 
-async function listenOnTheme(): Promise<void> {
-  await event.listen("readTheme", (e) => {
-    const theme = <string>e.payload;
+async function listenOnTheme(): Promise<UnlistenFn> {
+  return await event.listen<string>("readTheme", (e) => {
+    const theme = e.payload;
     themeGet.value = theme === "default" ? "default" : "dark";
   });
 }
+
+onUnmounted(() => {
+  if (themeListener) {
+    themeListener();
+  }
+});
 </script>
 <style lang="css" scoped>
 .switch-box {
