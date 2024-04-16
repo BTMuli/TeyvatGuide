@@ -3,7 +3,7 @@
   "version": "0.4.5",
   "description": "Game Tool for Genshin Impact player",
   "private": true,
-  "packageManager": "pnpm@8.15.6",
+  "packageManager": "pnpm@9.0.1",
   "scripts": {
     "build": "tauri build",
     "debug": "tauri build --debug",
@@ -98,8 +98,8 @@
     "@vitejs/plugin-vue": "^5.0.4",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
+    "eslint-config-love": "^47.0.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-config-standard-with-typescript": "^43.0.1",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsonc": "^2.15.0",
     "eslint-plugin-n": "^16.6.2",

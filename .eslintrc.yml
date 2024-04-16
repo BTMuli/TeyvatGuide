@@ -21,7 +21,7 @@ rules:
   vue/valid-template-root: off
 overrides:
   - files: ["*.ts"]
-    extends: standard-with-typescript
+    extends: love
     # 将此处规则 copy 到下面的 .vue 文件的 rules 中
     rules: &typescript-rules
       import/order:

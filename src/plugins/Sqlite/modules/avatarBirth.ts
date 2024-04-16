@@ -8,7 +8,7 @@ import { AppCharacterData, ArcBirCalendar, ArcBirRole } from "../../../data";
 
 /**
  * @description 判断今天是不是角色生日
- * @since Beta v0.4.5
+ * @since Beta v0.4.6
  * @return {TGApp.Archive.Birth.CalendarItem[]} 角色生日
  */
 function isAvatarBirth(): TGApp.Archive.Birth.CalendarItem[] {
@@ -17,18 +17,22 @@ function isAvatarBirth(): TGApp.Archive.Birth.CalendarItem[] {
   const day = date.getDate();
   const days = ArcBirCalendar[month];
   const find = days.filter((i) => i.role_birthday === `${month}/${day}`);
-  if (find.length > 0) return find.map((i) => (i.is_subscribe = true));
+  if (find.length > 0) {
+    return find.map((i) => {
+      i.is_subscribe = true;
+      return i;
+    });
+  }
   const find2 = AppCharacterData.filter((i) => i.birthday.toString() === [month, day].toString());
-  return find2.map(
-    (i) =>
-      <TGApp.Archive.Birth.CalendarItem>{
-        role_id: i.id,
-        name: i.name,
-        role_birthday: `${month}/${day}`,
-        head_icon: `/WIKI/character/${i.id}.webp`,
-        is_subscribe: false,
-      },
-  );
+  return find2.map((i) => {
+    return <TGApp.Archive.Birth.CalendarItem>{
+      role_id: i.id,
+      name: i.name,
+      role_birthday: `${month}/${day}`,
+      head_icon: `/WIKI/character/${i.id}.webp`,
+      is_subscribe: false,
+    };
+  });
 }
 
 /**
