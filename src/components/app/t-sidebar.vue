@@ -27,7 +27,12 @@
           <img src="../../assets/icons/board.svg" alt="annoIcon" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'咨讯'" value="news" :link="true" href="/news/2">
+      <v-list-item
+        :title.attr="'咨讯'"
+        value="news"
+        :link="true"
+        :href="`/news/2/${appStore.recentNewsType}`"
+      >
         <template #title>咨讯</template>
         <template #prepend>
           <img src="/platforms/mhy/mys.webp" alt="mihoyo" class="side-icon" />
