@@ -15,8 +15,8 @@ const tsConfigRules = {
     },
   ],
   "@typescript-eslint/no-import-type-side-effects": "error",
-  "@typescript-eslint/strict-boolean-expressions": "warn",
-  "@typescript-eslint/no-explicit-any": "warn",
+  "@typescript-eslint/strict-boolean-expressions": "off",
+  "@typescript-eslint/no-explicit-any": "off",
   "import/order": [
     "error",
     {

@@ -26,7 +26,7 @@ const pkgJsonConfig = {
           "keywords",
           "author",
           "license",
-          "respository",
+          "repository",
           "homepage",
           "bugs",
           "dependencies",
@@ -66,7 +66,7 @@ const tscJsonConfig = {
 };
 
 const jsoncConfig = {
-  files: ["source/data/out/**/*.json"],
+  files: ["source/data/out/**/*.json", ".vscode/**/*.json"],
   plugins: {
     jsonc: eslint_jsonc,
   },

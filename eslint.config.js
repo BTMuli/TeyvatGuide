@@ -7,6 +7,17 @@ export default [
   ymlEslintConfig,
   ...vueEslintConfig,
   {
-    ignores: ["dist", "src-tauri/target", "pnpm-lock.yaml", "src/data/**/*.json"],
+    ignores: [
+      "dist",
+      "src-tauri/target",
+      "pnpm-lock.yaml",
+      "src/data/**/*.json",
+      "src-tauri/tauri.conf.json",
+      "qodana.yaml",
+      ".github",
+      ".vscode",
+      ".prettierrc.yml",
+      ".stylelintrc.yml",
+    ],
   },
 ];

@@ -1,18 +1,15 @@
-import eslint_import from "eslint-plugin-import";
 import eslint_yml from "eslint-plugin-yml";
 import yml_parser from "yaml-eslint-parser";
 
 const ymlEslintConfig = {
-  files: ["*.yaml", "*.yml"],
+  files: ["**/*.yml", "**/*.yaml"],
   plugins: {
     yml: eslint_yml,
-    import: eslint_import,
   },
   languageOptions: {
     parser: yml_parser,
     parserOptions: {
       defaultYAMLVersion: "1.2",
-      project: "./tsconfig.json",
       extraFileExtensions: [".yaml", ".yml"],
     },
   },

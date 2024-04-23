@@ -16,8 +16,8 @@
     "composite": true
   },
   "include": [
-    "**/*.yml",
-    "**/*.yaml",
+    "*.yml",
+    "*.yaml",
     "package.json",
     "src/**/*.d.ts",
     "src/**/*.ts",
