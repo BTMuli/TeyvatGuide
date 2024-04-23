@@ -40,10 +40,11 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
 
-import THomeCard from "./t-homecard.vue";
 import Mys from "../../plugins/Mys";
 import { createPost } from "../../utils/TGWindow";
 import { stamp2LastTime } from "../../utils/toolFunc";
+
+import THomeCard from "./t-homecard.vue";
 
 // data
 const positionCards = ref<TGApp.Plugins.Mys.Position.RenderCard[]>([]);

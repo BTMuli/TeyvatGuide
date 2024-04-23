@@ -53,13 +53,14 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from "vue";
 
-import TwcMaterials from "./twc-materials.vue";
 import { WikiWeaponData } from "../../data";
 import Mys from "../../plugins/Mys";
 import { createTGWindow } from "../../utils/TGWindow";
 import { parseHtmlText } from "../../utils/toolFunc";
 import showSnackbar from "../func/snackbar";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
+
+import TwcMaterials from "./twc-materials.vue";
 
 interface TwcWeaponProps {
   item: TGApp.App.Weapon.WikiBriefInfo;

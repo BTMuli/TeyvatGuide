@@ -9,10 +9,6 @@ import type { Event } from "@tauri-apps/api/event";
 import type { UnlistenFn } from "@tauri-apps/api/helpers/event";
 import { appWindow, WebviewWindow } from "@tauri-apps/api/window";
 
-import { parseLink } from "./linkParser";
-import TGLogger from "./TGLogger";
-import { createPost } from "./TGWindow";
-import { getDeviceInfo } from "./toolFunc";
 import showSnackbar from "../components/func/snackbar";
 import TGSqlite from "../plugins/Sqlite";
 import { useAppStore } from "../store/modules/app";
@@ -21,6 +17,11 @@ import TGConstant from "../web/constant/TGConstant";
 import { getCookieTokenBySToken } from "../web/request/getCookieToken";
 import TGRequest from "../web/request/TGRequest";
 import { getDS4JS } from "../web/utils/getRequestHeader";
+
+import { parseLink } from "./linkParser";
+import TGLogger from "./TGLogger";
+import { createPost } from "./TGWindow";
+import { getDeviceInfo } from "./toolFunc";
 
 // invoke 参数
 interface InvokeArg {

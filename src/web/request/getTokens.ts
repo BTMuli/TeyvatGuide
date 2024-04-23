@@ -25,7 +25,7 @@ export async function getTokensByLoginTicket(
     login_uid: uid,
   };
   const url = TGApi.GameTokens.getTokens;
-  // eslint-disable-next-line camelcase
+
   const params = { login_ticket: ticket, token_types: "3", uid };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http

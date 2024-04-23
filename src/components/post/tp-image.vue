@@ -12,8 +12,9 @@
 <script lang="ts" setup>
 import { StyleValue, ref } from "vue";
 
-import TpoImage from "./tpo-image.vue";
 import { bytesToSize } from "../../utils/toolFunc";
+
+import TpoImage from "./tpo-image.vue";
 
 export interface TpImage {
   insert: {

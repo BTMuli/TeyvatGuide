@@ -4,9 +4,10 @@
  * @since Beta v0.4.4
  */
 
-import { decodeRegExp } from "./tools";
 import { saveImgLocal } from "../../utils/TGShare";
 import { isColorSimilar } from "../../utils/toolFunc";
+
+import { decodeRegExp } from "./tools";
 
 /**
  * @description 解析 a

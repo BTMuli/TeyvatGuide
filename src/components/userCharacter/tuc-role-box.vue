@@ -66,7 +66,7 @@ const avatarBox = computed(() => {
     innerHeight: 20,
     outerText: getAvatarName(),
     outerHeight: 20,
-    display: <"outer">"outer",
+    display: <const>"outer",
     clickable: true,
   };
 });
@@ -85,7 +85,7 @@ const weaponBox = computed(() => {
     innerHeight: 20,
     outerText: weapon.name,
     outerHeight: 20,
-    display: <"outer">"outer",
+    display: <const>"outer",
     clickable: true,
   };
 });

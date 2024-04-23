@@ -63,7 +63,7 @@ function transAvatar(data: TGApp.Game.Record.Avatar[]): string {
         level: item.level,
         star: item.rarity === 105 ? 5 : item.rarity,
         constellation: item.actived_constellation_num,
-        isShow: item.is_chosen ? <1>1 : <0>0,
+        isShow: item.is_chosen ? <const>1 : <const>0,
       };
     })
     .sort((a, b) => {

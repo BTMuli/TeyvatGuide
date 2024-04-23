@@ -22,7 +22,7 @@ export async function getGameRoleListByLToken(
 ): Promise<TGApp.Game.Character.ListItem[] | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.byCookie.getCharacter;
   const uid = account.gameUid;
-  // eslint-disable-next-line camelcase
+
   const data = { role_id: uid, server: TGUtils.Tools.getServerByUid(uid) };
   const header = TGUtils.User.getHeader(cookie, "POST", JSON.stringify(data), "common");
   return await http

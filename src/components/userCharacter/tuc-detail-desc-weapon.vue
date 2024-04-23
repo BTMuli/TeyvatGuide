@@ -29,9 +29,10 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
+import { parseHtmlText } from "../../utils/toolFunc";
+
 import TucDetailDesc from "./tuc-detail-desc.vue";
 import TucDetailItemBox from "./tuc-detail-itembox.vue";
-import { parseHtmlText } from "../../utils/toolFunc";
 
 interface TucDetailDescWeaponProps {
   modelValue: TGApp.Sqlite.Character.RoleWeapon;

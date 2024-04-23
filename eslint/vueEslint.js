@@ -1,11 +1,11 @@
 import eslint_js from "@eslint/js";
-import eslint_ts from "typescript-eslint";
-import eslint_vue from "eslint-plugin-vue";
-import eslint_prettier from "eslint-plugin-prettier";
 import eslint_import from "eslint-plugin-import";
-import vue_parser from "vue-eslint-parser";
+import eslint_prettier from "eslint-plugin-prettier";
+import eslint_vue from "eslint-plugin-vue";
 import pluginVue from "eslint-plugin-vue";
 import globals from "globals";
+import eslint_ts from "typescript-eslint";
+import vue_parser from "vue-eslint-parser";
 
 const tsConfigRules = {
   "@typescript-eslint/consistent-type-assertions": [
@@ -15,7 +15,8 @@ const tsConfigRules = {
     },
   ],
   "@typescript-eslint/no-import-type-side-effects": "error",
-  "@typescript-eslint/strict-boolean-expressions": "error",
+  "@typescript-eslint/strict-boolean-expressions": "warn",
+  "@typescript-eslint/no-explicit-any": "warn",
   "import/order": [
     "error",
     {

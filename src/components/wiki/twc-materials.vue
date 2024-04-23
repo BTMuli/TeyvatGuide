@@ -24,9 +24,10 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 
-import TwoMaterial from "./two-material.vue";
 import { WikiMaterialData } from "../../data";
 import showSnackbar from "../func/snackbar";
+
+import TwoMaterial from "./two-material.vue";
 
 interface TwcMaterialsProp {
   data: TGApp.App.Calendar.Material[];

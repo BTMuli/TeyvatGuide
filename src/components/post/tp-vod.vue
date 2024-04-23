@@ -83,7 +83,6 @@ onMounted(async () => {
     }),
     fullscreen: true,
     icons: {
-      // eslint-disable-next-line @typescript-eslint/quotes
       state: `<img src="/source/UI/video_play.svg" alt="icon" />`,
     },
     lang: "zh-cn",

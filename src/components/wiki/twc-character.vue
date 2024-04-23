@@ -99,15 +99,16 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
-import TwcConstellations from "./twc-constellations.vue";
-import TwcMaterials from "./twc-materials.vue";
-import TwcSkills from "./twc-skills.vue";
 import { WikiCharacterData } from "../../data";
 import Mys from "../../plugins/Mys";
 import { createTGWindow } from "../../utils/TGWindow";
 import { parseHtmlText } from "../../utils/toolFunc";
 import showSnackbar from "../func/snackbar";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
+
+import TwcConstellations from "./twc-constellations.vue";
+import TwcMaterials from "./twc-materials.vue";
+import TwcSkills from "./twc-skills.vue";
 
 interface TwcCharacterProps {
   item: TGApp.App.Character.WikiBriefInfo;

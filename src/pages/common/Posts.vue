@@ -278,7 +278,6 @@ async function freshPostData(): Promise<void> {
 
 function freshCurForum(newVal: string): void {
   const forum = forumList[curGameLabel.value];
-  // @ts-ignore
   curForum.value = forum[newVal];
 }
 

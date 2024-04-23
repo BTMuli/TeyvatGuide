@@ -24,9 +24,10 @@
   </TucDetailDesc>
 </template>
 <script lang="ts" setup>
+import { parseHtmlText } from "../../utils/toolFunc";
+
 import TucDetailConstellation from "./tuc-detail-constellation.vue";
 import TucDetailDesc from "./tuc-detail-desc.vue";
-import { parseHtmlText } from "../../utils/toolFunc";
 
 interface TucDetailDescConstellationProps {
   modelValue: TGApp.Sqlite.Character.RoleConstellation;

@@ -188,7 +188,7 @@ function getAnnoTime(content: string): string | false {
     /(?:〓(?:活动|折扣)时间〓|祈愿时间|【上架时间】).*?(\d\.\d版本更新后).*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/,
     /(?:〓(?:活动|折扣)时间〓|祈愿时间|【上架时间】).*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/,
     /〓活动时间〓.*?(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}).*?(\d\.\d版本结束)/,
-    /〓更新时间〓.+?&lt;t class=\"t_(?:gl|lc)\".*?&gt;(.*?)&;lt;\/t&gt;/,
+    /〓更新时间〓.+?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&;lt;\/t&gt;/,
   ];
   if (content.match(regexes[0])) {
     const res = content.match(regexes[0]);

@@ -45,11 +45,12 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from "vue";
 
-import TCalendarBirth from "./t-calendar-birth.vue";
-import THomeCard from "./t-homecard.vue";
 import { AppCalendarData } from "../../data";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 import ToCalendar from "../overlay/to-calendar.vue";
+
+import TCalendarBirth from "./t-calendar-birth.vue";
+import THomeCard from "./t-homecard.vue";
 
 const weekNow = ref<number>(0);
 const btnNow = ref<number>(0);

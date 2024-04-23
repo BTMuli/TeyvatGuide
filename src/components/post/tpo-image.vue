@@ -25,11 +25,12 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from "vue";
 
-import { TpImage } from "./tp-image.vue";
 import { copyToClipboard, getImageBuffer, saveCanvasImg } from "../../utils/TGShare";
 import { bytesToSize } from "../../utils/toolFunc";
 import showSnackbar from "../func/snackbar";
 import TOverlay from "../main/t-overlay.vue";
+
+import { TpImage } from "./tp-image.vue";
 
 interface TpoImageProps {
   image: TpImage;

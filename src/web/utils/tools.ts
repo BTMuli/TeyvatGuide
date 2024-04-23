@@ -19,7 +19,7 @@ export function decodeRegExp(data: string): string {
   res = res.replace(/&gt;/g, ">");
   res = res.replace(/&nbsp;/g, " ");
   res = res.replace(/&#39;/g, "'");
-  // eslint-disable-next-line @typescript-eslint/quotes
+
   res = res.replace(/&quot;/g, `"`);
   res = res.replace(/&apos;/g, "'");
   res = res.replace(/&amp;/g, "&");

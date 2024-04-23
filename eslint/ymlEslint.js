@@ -1,6 +1,6 @@
+import eslint_import from "eslint-plugin-import";
 import eslint_yml from "eslint-plugin-yml";
 import yml_parser from "yaml-eslint-parser";
-import eslint_import from "eslint-plugin-import";
 
 const ymlEslintConfig = {
   files: ["*.yaml", "*.yml"],

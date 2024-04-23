@@ -7,8 +7,9 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-import TurWorldSub from "./tur-world-sub.vue";
 import showSnackbar from "../func/snackbar";
+
+import TurWorldSub from "./tur-world-sub.vue";
 
 interface TurWorldGridProps {
   modelValue?: string;

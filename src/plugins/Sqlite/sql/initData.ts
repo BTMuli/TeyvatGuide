@@ -6,13 +6,6 @@
 
 import { app } from "@tauri-apps/api";
 
-import initTableSql from "./initTable";
-import {
-  insertAchievementData,
-  insertAchievementSeriesData,
-  insertNameCardData,
-  insertCharacterData,
-} from "./insertData";
 import {
   AppAchievementsData,
   AppAchievementSeriesData,
@@ -20,6 +13,14 @@ import {
   AppCharacterData,
 } from "../../../data";
 import { getBuildTime } from "../../../utils/TGBuild";
+
+import initTableSql from "./initTable";
+import {
+  insertAchievementData,
+  insertAchievementSeriesData,
+  insertNameCardData,
+  insertCharacterData,
+} from "./insertData";
 
 /**
  * @description 初始化应用表数据

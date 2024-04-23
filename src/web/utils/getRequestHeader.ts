@@ -6,9 +6,10 @@
 
 import Md5 from "js-md5";
 
-import { transCookie, transParams } from "./tools";
 import { getDeviceInfo, getRandomString } from "../../utils/toolFunc";
 import TGConstant from "../constant/TGConstant";
+
+import { transCookie, transParams } from "./tools";
 
 /**
  * @description 获取 salt

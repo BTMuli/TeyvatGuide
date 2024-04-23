@@ -23,9 +23,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
+import TOverlay from "../main/t-overlay.vue";
+
 import TwoConvert from "./two-convert.vue";
 import TwoSource from "./two-source.vue";
-import TOverlay from "../main/t-overlay.vue";
 
 interface TwoMaterialProps {
   modelValue: boolean;

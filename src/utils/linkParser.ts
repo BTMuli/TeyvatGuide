@@ -4,10 +4,11 @@
  * @since Beta v0.3.9
  */
 
-import TGClient from "./TGClient";
-import { createPost } from "./TGWindow";
 import showConfirm from "../components/func/confirm";
 import showSnackbar from "../components/func/snackbar";
+
+import TGClient from "./TGClient";
+import { createPost } from "./TGWindow";
 
 /**
  * @function parsePost

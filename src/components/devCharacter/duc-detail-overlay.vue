@@ -43,12 +43,13 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUpdated, ref } from "vue";
 
-import DucDetailOlb from "./duc-detail-olb.vue";
-import DucDetailOlt from "./duc-detail-olt.vue";
-import DucDetailOrt from "./duc-detail-ort.vue";
 import TGSqlite from "../../plugins/Sqlite";
 import { generateShareImg } from "../../utils/TGShare";
 import TOverlay from "../main/t-overlay.vue";
+
+import DucDetailOlb from "./duc-detail-olb.vue";
+import DucDetailOlt from "./duc-detail-olt.vue";
+import DucDetailOrt from "./duc-detail-ort.vue";
 
 interface DucDetailOverlayProps {
   modelValue: boolean;
