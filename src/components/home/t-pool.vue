@@ -144,8 +144,7 @@ onMounted(async () => {
   });
   if (poolCards.value.length > 2) {
     poolSelect.value = poolCards.value.filter(
-      (pool) =>
-        poolTimeGet.value[pool.postId] !== "未开始" && poolTimeGet.value[pool.postId] !== "已结束",
+      (pool) => poolTimeGet.value[pool.postId] !== "未开始",
     );
     hasNew.value =
       poolCards.value.filter((pool) => poolTimeGet.value[pool.postId] === "未开始").length > 0;
@@ -222,8 +221,7 @@ async function switchPool(): Promise<void> {
     );
   } else {
     poolSelect.value = poolCards.value.filter(
-      (pool) =>
-        poolTimeGet.value[pool.postId] !== "未开始" && poolTimeGet.value[pool.postId] !== "已结束",
+      (pool) => poolTimeGet.value[pool.postId] !== "未开始",
     );
   }
 }

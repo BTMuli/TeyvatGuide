@@ -1,7 +1,7 @@
 /**
  * @file router/modules/wiki.ts
  * @description wiki 路由模块
- * @since Beta v0.4.1
+ * @since Beta v0.4.6
  */
 
 const wikiRoutes = [
@@ -34,11 +34,6 @@ const wikiRoutes = [
     path: "/wiki/weapon/:id",
     name: "武器图鉴",
     component: async () => await import("../../pages/WIKI/Weapon.vue"),
-  },
-  {
-    path: "/wiki/detail/GCG/:id",
-    name: "卡牌详情",
-    component: async () => await import("../../views/tw-gcg.vue"),
   },
 ];
 
