@@ -320,8 +320,8 @@ onUnmounted(() => {
 }
 
 .pool-icon {
-  max-width: 60px;
-  max-height: 60px;
+  width: 60px;
+  height: 60px;
   transition: all ease-in-out 0.3s;
 }
 
@@ -331,9 +331,10 @@ onUnmounted(() => {
 }
 
 .pool-icon img {
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 5px;
   cursor: pointer;
 }
 
