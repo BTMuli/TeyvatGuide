@@ -497,6 +497,18 @@
     }
   },
   {
+    "id": 1411,
+    "contentId": 501156,
+    "name": "久岐忍",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/久岐忍.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_ELECTRO": "雷元素",
+      "GCG_TAG_WEAPON_SWORD": "单手剑",
+      "GCG_TAG_NATION_INAZUMA": "稻妻"
+    }
+  },
+  {
     "id": 1501,
     "contentId": 5361,
     "name": "砂糖",
@@ -591,6 +603,18 @@
       "GCG_TAG_NATION_FONTAINE": "枫丹",
       "GCG_TAG_CAMP_FATUI": "愚人众",
       "GCG_TAG_FACTION_OUSIA": "始基力：荒性"
+    }
+  },
+  {
+    "id": 1509,
+    "contentId": 501154,
+    "name": "珐露珊",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/珐露珊.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_ANEMO": "风元素",
+      "GCG_TAG_WEAPON_BOW": "弓",
+      "GCG_TAG_NATION_SUMERU": "须弥"
     }
   },
   {
@@ -810,6 +834,18 @@
     }
   },
   {
+    "id": 2203,
+    "contentId": 501143,
+    "name": "深渊使徒·激流",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/深渊使徒·激流.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_HYDRO": "水元素",
+      "GCG_TAG_WEAPON_NONE": "其他武器",
+      "GCG_TAG_CAMP_MONSTER": "魔物"
+    }
+  },
+  {
     "id": 2301,
     "contentId": 5526,
     "name": "愚人众·火之债务处理人",
@@ -843,6 +879,18 @@
       "GCG_TAG_ELEMENT_PYRO": "火元素",
       "GCG_TAG_WEAPON_NONE": "其他武器",
       "GCG_TAG_CAMP_EREMITE": "镀金旅团"
+    }
+  },
+  {
+    "id": 2304,
+    "contentId": 501144,
+    "name": "铁甲熔火帝皇",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/铁甲熔火帝皇.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_PYRO": "火元素",
+      "GCG_TAG_WEAPON_NONE": "其他武器",
+      "GCG_TAG_CAMP_MONSTER": "魔物"
     }
   },
   {
@@ -953,6 +1001,22 @@
       "GCG_TAG_WEAPON_NONE": "其他武器",
       "GCG_TAG_CAMP_MONSTER": "魔物"
     }
+  },
+  {
+    "id": 0,
+    "contentId": 501125,
+    "name": "大型冰史莱姆",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/大型冰史莱姆.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 501124,
+    "name": "嗜雷·兽境猎犬",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/嗜雷·兽境猎犬.webp",
+    "tags": {}
   },
   {
     "id": 0,
@@ -1780,6 +1844,17 @@
     }
   },
   {
+    "id": 214111,
+    "contentId": 501147,
+    "name": "割舍软弱之心",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/割舍软弱之心.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
     "id": 215011,
     "contentId": 5507,
     "name": "混元熵增论",
@@ -1862,6 +1937,17 @@
     "name": "如影流露的冷刃",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/如影流露的冷刃.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
+    "id": 215091,
+    "contentId": 501142,
+    "name": "妙道合真",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/妙道合真.webp",
     "tags": {
       "GCG_TAG_TALENT": "天赋",
       "GCG_TAG_SLOWLY": "战斗行动"
@@ -2064,6 +2150,16 @@
     }
   },
   {
+    "id": 222031,
+    "contentId": 501145,
+    "name": "暗流涌动",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/暗流涌动.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋"
+    }
+  },
+  {
     "id": 223011,
     "contentId": 5443,
     "name": "悉数讨回",
@@ -2093,6 +2189,16 @@
     "tags": {
       "GCG_TAG_TALENT": "天赋",
       "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
+    "id": 223041,
+    "contentId": 501146,
+    "name": "熔火铁甲",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/熔火铁甲.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋"
     }
   },
   {
@@ -2491,6 +2597,17 @@
     }
   },
   {
+    "id": 311408,
+    "contentId": 501153,
+    "name": "公义的酬报",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/公义的酬报.webp",
+    "tags": {
+      "GCG_TAG_WEAPON": "武器",
+      "GCG_TAG_WEAPON_POLE": "长柄武器"
+    }
+  },
+  {
     "id": 311501,
     "contentId": 5418,
     "name": "旅行剑",
@@ -2803,6 +2920,16 @@
     "name": "黄金剧团的奖赏",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/黄金剧团的奖赏.webp",
+    "tags": {
+      "GCG_TAG_ARTIFACT": "圣遗物"
+    }
+  },
+  {
+    "id": 312027,
+    "contentId": 501152,
+    "name": "紫晶的花冠",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/紫晶的花冠.webp",
     "tags": {
       "GCG_TAG_ARTIFACT": "圣遗物"
     }
@@ -3128,6 +3255,16 @@
     }
   },
   {
+    "id": 321019,
+    "contentId": 501155,
+    "name": "清籁岛",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/清籁岛.webp",
+    "tags": {
+      "GCG_TAG_PLACE": "场地"
+    }
+  },
+  {
     "id": 322001,
     "contentId": 5448,
     "name": "派蒙",
@@ -3353,6 +3490,26 @@
     "name": "西尔弗和迈勒斯",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/西尔弗和迈勒斯.webp",
+    "tags": {
+      "GCG_TAG_ALLY": "伙伴"
+    }
+  },
+  {
+    "id": 322024,
+    "contentId": 501151,
+    "name": "太郎丸",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/太郎丸.webp",
+    "tags": {
+      "GCG_TAG_ALLY": "伙伴"
+    }
+  },
+  {
+    "id": 322025,
+    "contentId": 501150,
+    "name": "白手套和渔夫",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/白手套和渔夫.webp",
     "tags": {
       "GCG_TAG_ALLY": "伙伴"
     }
@@ -3912,6 +4069,14 @@
     "tags": null
   },
   {
+    "id": 332031,
+    "contentId": 0,
+    "name": "海中寻宝",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/海中寻宝.webp",
+    "tags": null
+  },
+  {
     "id": 333001,
     "contentId": 5479,
     "name": "绝云锅巴",
@@ -4047,6 +4212,16 @@
     "name": "松茸酿肉卷",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/松茸酿肉卷.webp",
+    "tags": {
+      "GCG_TAG_FOOD": "料理"
+    }
+  },
+  {
+    "id": 333015,
+    "contentId": 501148,
+    "name": "缤纷马卡龙",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/缤纷马卡龙.webp",
     "tags": {
       "GCG_TAG_FOOD": "料理"
     }

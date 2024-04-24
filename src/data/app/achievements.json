@@ -3787,6 +3787,170 @@
     }
   },
   {
+    "id": 80313,
+    "series": 48,
+    "order": 289,
+    "name": "我们的海",
+    "description": "点亮枫丹区域中，诺思托伊区的地图。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "UNLOCK_AREA"
+    }
+  },
+  {
+    "id": 80314,
+    "series": 48,
+    "order": 290,
+    "name": "永恒的颂福纳",
+    "description": "点亮枫丹区域中，旧日之海的地图。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "UNLOCK_AREA"
+    }
+  },
+  {
+    "id": 80315,
+    "series": 48,
+    "order": 291,
+    "name": "从大海到大海",
+    "description": "解锁枫丹区域中，诺思托伊区、旧日之海所有传送锚点。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "UNLOCK_TRANS_POINT"
+    }
+  },
+  {
+    "id": 80316,
+    "series": 48,
+    "order": 292,
+    "name": "圣龛巡礼·古海狂诗",
+    "description": "解除枫丹区域中，诺思托伊区、旧日之海所有地灵龛的封印。",
+    "reward": 10,
+    "version": "4.6",
+    "trigger": {
+      "type": "UNLOCK_GATE_TEMPLE"
+    }
+  },
+  {
+    "id": 80317,
+    "series": 48,
+    "order": 293,
+    "name": "金宫引路人",
+    "description": "在诺思托伊区、旧日之海追随6个仙灵，并点亮仙灵之庭。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80320,
+    "series": 48,
+    "order": 296,
+    "name": "古海的寻宝者",
+    "description": "在诺思托伊区、旧日之海开启30个宝箱。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "OPEN_WORLD_CHEST"
+    }
+  },
+  {
+    "id": 80321,
+    "series": 48,
+    "order": 297,
+    "name": "古海的寻宝者",
+    "description": "在诺思托伊区、旧日之海开启60个宝箱。",
+    "reward": 10,
+    "version": "4.6",
+    "trigger": {
+      "type": "OPEN_WORLD_CHEST"
+    }
+  },
+  {
+    "id": 80322,
+    "series": 48,
+    "order": 298,
+    "name": "古海的寻宝者",
+    "description": "在诺思托伊区、旧日之海开启120个宝箱。",
+    "reward": 20,
+    "version": "4.6",
+    "trigger": {
+      "type": "OPEN_WORLD_CHEST"
+    }
+  },
+  {
+    "id": 80323,
+    "series": 48,
+    "order": 299,
+    "name": "古海的冒险家",
+    "description": "在诺思托伊区、旧日之海完成6个大世界限时挑战。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80324,
+    "series": 48,
+    "order": 300,
+    "name": "古海的冒险家",
+    "description": "在诺思托伊区、旧日之海完成12个大世界限时挑战。",
+    "reward": 10,
+    "version": "4.6",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80325,
+    "series": 48,
+    "order": 301,
+    "name": "古海的冒险家",
+    "description": "在诺思托伊区、旧日之海完成24个大世界限时挑战。",
+    "reward": 20,
+    "version": "4.6",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80326,
+    "series": 48,
+    "order": 302,
+    "name": "大乐章的回声",
+    "description": "奏响「古老的自鸣音乐盒」中的所有乐章。",
+    "reward": 10,
+    "version": "4.6",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": []
+    }
+  },
+  {
+    "id": 80327,
+    "series": 48,
+    "order": 303,
+    "name": "谐律上的咏叙诗",
+    "description": "完成「谐律上的咏叙诗」。",
+    "reward": 10,
+    "version": "4.6",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74196,
+          "name": "哀悼命运之疮",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
     "id": 81000,
     "series": 0,
     "order": 1000,
@@ -9811,6 +9975,223 @@
     }
   },
   {
+    "id": 81472,
+    "series": 0,
+    "order": 1456,
+    "name": "「西尼阿斯」",
+    "description": "战胜地方传奇·西尼阿斯。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81473,
+    "series": 0,
+    "order": 1457,
+    "name": "龙蜥特急斯库拉号",
+    "description": "第一次使用斯库拉召唤的激流前往目标地点。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 81474,
+    "series": 0,
+    "order": 1458,
+    "name": "吾之所问，汝为人乎？",
+    "description": "第一次停住并拾取神出鬼没的魔导书。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "FINISH_QUEST_OR",
+      "task": []
+    }
+  },
+  {
+    "id": 81475,
+    "series": 0,
+    "order": 1459,
+    "name": "为书所爱的人",
+    "description": "使用魔导书激活褪色城堡里的全部神秘书柜。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81476,
+    "series": 0,
+    "order": 1460,
+    "name": "「漂泊的异乡人」",
+    "description": "使失落的曲谱重见天日。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": []
+    }
+  },
+  {
+    "id": 81477,
+    "series": 0,
+    "order": 1461,
+    "name": "根本就没藏嘛！",
+    "description": "搜集朱利亚诺遗留的四处宝藏。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81478,
+    "series": 0,
+    "order": 1462,
+    "name": "饲主的职分",
+    "description": "为「小呜斯」带来了新鲜的食物。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81479,
+    "series": 0,
+    "order": 1463,
+    "name": "第十位缪斯",
+    "description": "得以掌握「乐章」的力量。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 74184,
+          "name": "佩特莉可的阴霾",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81480,
+    "series": 0,
+    "order": 1464,
+    "name": "墙上的奥德赛",
+    "description": "完成褪色城堡的舞台演奏。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81481,
+    "series": 0,
+    "order": 1465,
+    "name": "「请转告王城的公民…」",
+    "description": "「我们长眠于此，至死恪守誓言…」",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81482,
+    "series": 0,
+    "order": 1466,
+    "name": "时间的神秘形式",
+    "description": "向钟声致敬。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81483,
+    "series": 0,
+    "order": 1467,
+    "name": "曾与世界为敌",
+    "description": "封印千年的龙蜥之王，苏醒了…",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 74183,
+          "name": "雷穆利亚的最后一日",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81484,
+    "series": 0,
+    "order": 1468,
+    "name": "条条大路通雷马",
+    "description": "造访静滞的「永恒之城」。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 74183,
+          "name": "雷穆利亚的最后一日",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81485,
+    "series": 0,
+    "order": 1469,
+    "name": "迟来的继业者",
+    "description": "他的愿望，将由你来完成…",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 74196,
+          "name": "哀悼命运之疮",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81487,
+    "series": 0,
+    "order": 1471,
+    "name": "宽缓的归途",
+    "description": "帮助朱斯蒂诺返回故乡。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74216,
+          "name": "迟来的归乡",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
@@ -11942,6 +12323,114 @@
     "description": "探寻隐山猊兽与冰元素之间的关系。",
     "reward": 5,
     "version": "4.4",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82190,
+    "series": 0,
+    "order": 2190,
+    "name": "「我警惕雷穆利亚人…」",
+    "description": "「…即使他们带着乐器。」",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82191,
+    "series": 0,
+    "order": 2191,
+    "name": "同样的错误",
+    "description": "「远程作战对我们有利…咦？」",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82192,
+    "series": 0,
+    "order": 2192,
+    "name": "盛宴之后",
+    "description": "在厄月的见证下，渡越血色的盛宴。",
+    "reward": 10,
+    "version": "4.6",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82193,
+    "series": 49,
+    "order": 2193,
+    "name": "剧场消防演练",
+    "description": "在魔像督军举剑释放怒焰冲击时，摧毁其护盾。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82194,
+    "series": 49,
+    "order": 2194,
+    "name": "未兆的封印咒缚",
+    "description": "击败吸收半幻人后正处于强化状态下的水形幻人。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82195,
+    "series": 49,
+    "order": 2195,
+    "name": "鲸腹中的三日夜",
+    "description": "在不被幻形攻击命中的情况下逃离鲸腹。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82196,
+    "series": 49,
+    "order": 2196,
+    "name": "「吉位！」",
+    "description": "一次挑战中，通过元素反应，使隐山猊兽分别在汇集风元素与水元素的仙力时陷入瘫痪状态。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82197,
+    "series": 49,
+    "order": 2197,
+    "name": "若你渴盼鲜血…",
+    "description": "在一次「仆人」挑战中，释放四次血汐冲击。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82199,
+    "series": 49,
+    "order": 2199,
+    "name": "白之契约者",
+    "description": "在一次「仆人」挑战中，不曾在具有生命之契的情况下被她的攻击命中，并击败「仆人」。",
+    "reward": 10,
+    "version": "4.6",
     "trigger": {
       "type": "COMBAT_CONFIG_COMMON"
     }
@@ -16284,6 +16773,25 @@
         {
           "questId": 71114,
           "name": "水土暂服",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84574,
+    "series": 0,
+    "order": 4098,
+    "name": "在那梦中之墟…",
+    "description": "见证「空想俱乐部」的故事。",
+    "reward": 5,
+    "version": "4.6",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 74217,
+          "name": "超越时空之空想",
           "type": "世界任务"
         }
       ]

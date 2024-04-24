@@ -180,6 +180,16 @@
     "profile": "/source/nameCard/profile/专辑·闪耀的群星.webp"
   },
   {
+    "name": "枫丹·露泉",
+    "index": 198,
+    "type": 0,
+    "desc": "名片纹饰。不要喝露景泉的水，因为你不知道会喝下谁的泪。",
+    "source": "露景泉等级达到48级时领取。",
+    "icon": "/source/nameCard/icon/枫丹·露泉.webp",
+    "bg": "/source/nameCard/bg/枫丹·露泉.webp",
+    "profile": "/source/nameCard/profile/枫丹·露泉.webp"
+  },
+  {
     "name": "成就·游遍",
     "index": 21,
     "type": 1,
@@ -638,6 +648,26 @@
     "icon": "/source/nameCard/icon/成就·仙谷.webp",
     "bg": "/source/nameCard/bg/成就·仙谷.webp",
     "profile": "/source/nameCard/profile/成就·仙谷.webp"
+  },
+  {
+    "name": "枫丹·调律",
+    "index": 196,
+    "type": 1,
+    "desc": "名片纹饰。乐章「福波斯」已然狂乱失序，调律师的职责就是使其重回正调。然而「法图纳」无声地行进，因命运知晓，完美的乐章也有演奏结束的一刻。",
+    "source": "达成「古海狂诗」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/枫丹·调律.webp",
+    "bg": "/source/nameCard/bg/枫丹·调律.webp",
+    "profile": "/source/nameCard/profile/枫丹·调律.webp"
+  },
+  {
+    "name": "成就·掣鲸",
+    "index": 197,
+    "type": 1,
+    "desc": "名片纹饰。这次达达利亚与它激战了相当长的时间，尽管仍然没能打败它。第三次追捕鲸鱼是不吉利的，可达达利亚不会放弃。不过等它康复可能得花上好久好久。",
+    "source": "达成「挑战者·第九辑」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/成就·掣鲸.webp",
+    "bg": "/source/nameCard/bg/成就·掣鲸.webp",
+    "profile": "/source/nameCard/profile/成就·掣鲸.webp"
   },
   {
     "name": "安柏·兔兔",
@@ -1430,6 +1460,16 @@
     "profile": "/source/nameCard/profile/千织·展袖.webp"
   },
   {
+    "name": "阿蕾奇诺·法度",
+    "index": 195,
+    "type": 2,
+    "desc": "名片纹饰。「父亲」大人为壁炉之家订立了严苛的法度，当中有些条目甚至有些不近人情。熟悉她的人，或许能借由这些规则，隐约勾勒出她从不轻言的理想吧。",
+    "source": "阿蕾奇诺的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/阿蕾奇诺·法度.webp",
+    "bg": "/source/nameCard/bg/阿蕾奇诺·法度.webp",
+    "profile": "/source/nameCard/profile/阿蕾奇诺·法度.webp"
+  },
+  {
     "name": "纪行·捕风",
     "index": 2,
     "type": 3,
@@ -1738,6 +1778,16 @@
     "icon": "/source/nameCard/icon/纪行·魔萃.webp",
     "bg": "/source/nameCard/bg/纪行·魔萃.webp",
     "profile": "/source/nameCard/profile/纪行·魔萃.webp"
+  },
+  {
+    "name": "纪行·邦摇",
+    "index": 199,
+    "type": 3,
+    "desc": "名片纹饰。「世界不疼爱他的孩子，不然干嘛赶着他们去另一个世界？」「你懂什么？说不定那边更摇滚呢。」",
+    "source": "纪行系统奖励获取。",
+    "icon": "/source/nameCard/icon/纪行·邦摇.webp",
+    "bg": "/source/nameCard/bg/纪行·邦摇.webp",
+    "profile": "/source/nameCard/profile/纪行·邦摇.webp"
   },
   {
     "name": "庆典·无相",

@@ -1,5 +1,17 @@
 [
   {
+    "id": 10000096,
+    "contentId": 501157,
+    "name": "阿蕾奇诺",
+    "title": "孤暝厄月",
+    "area": "愚人众",
+    "birthday": [8, 22],
+    "star": 5,
+    "element": "火",
+    "weapon": "长柄武器",
+    "nameCard": "阿蕾奇诺·法度"
+  },
+  {
     "id": 10000094,
     "contentId": 500987,
     "name": "千织",
