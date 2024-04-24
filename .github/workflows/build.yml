@@ -26,7 +26,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Add Rust targets(macOS)
+      - name: Add Rust targets(macOS Intel)
+        if: matrix.settings.target == 'macos-intel'
+        run: rustup target add x86_64-apple-darwin
+      - name: Add Rust targets(macOS ARM)
         if: matrix.settings.target == 'macos-arm'
         run: rustup target add aarch64-apple-darwin
 
@@ -44,7 +47,7 @@ jobs:
       - name: setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 9.0.4
+          version: 9.0.5
       - name: remove lockfile
         run: rm pnpm-lock.yaml
       - name: Install frontend dependencies
