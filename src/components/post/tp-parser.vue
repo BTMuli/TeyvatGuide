@@ -31,6 +31,11 @@ function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.My
   let cur: TGApp.Plugins.Mys.SctPost.Base | undefined;
   for (const tp of data) {
     const tpName = getTpName(tp);
+    // 单独处理 TpMention
+    if (tpName === TpMention) {
+      child.push(tp);
+      continue;
+    }
     if (tpName !== TpText) {
       cur = tp;
       child = [];

@@ -11,7 +11,7 @@ import TGClient from "../../utils/TGClient";
 import showConfirm from "../func/confirm";
 import showSnackbar from "../func/snackbar";
 
-interface TpMention {
+export interface TpMention {
   insert: {
     mention: {
       uid: string;
