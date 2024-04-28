@@ -223,6 +223,10 @@ async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
     window.open(item.app_path);
     return;
   }
+  if (item.name === "签到福利") {
+    await TGClient.open("web_act_thin", item.app_path);
+    return;
+  }
   const modeConfirm = await showConfirm({
     title: "是否采用宽屏模式打开？",
     text: "取消则采用竖屏模式打开",

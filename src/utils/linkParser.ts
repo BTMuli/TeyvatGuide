@@ -1,8 +1,10 @@
 /**
  * @file src/utils/linkParser.ts
  * @description 处理链接
- * @since Beta v0.3.9
+ * @since Beta v0.4.7
  */
+
+import { emit } from "@tauri-apps/api/event";
 
 import showConfirm from "../components/func/confirm";
 import showSnackbar from "../components/func/snackbar";
@@ -50,7 +52,7 @@ export async function parsePost(link: string): Promise<false | string> {
 
 /**
  * @function parseLink
- * @since Beta v0.3.9
+ * @since Beta v0.4.7
  * @description 处理链接
  * @param {string} link - 链接
  * @param {boolean} useInner - 是否采用内置 JSBridge 打开
@@ -77,6 +79,16 @@ export async function parseLink(
       if (url.pathname === "//openURL" && url.search.startsWith("?url=")) {
         const urlTransform = decodeURIComponent(url.search.replace("?url=", ""));
         return await parseLink(urlTransform, useInner);
+      }
+      console.log(url.pathname, url.search);
+      // 处理特定路径
+      if (url.pathname.startsWith("//discussion")) {
+        await emit("active_deep_link", "router?path=/posts");
+        return true;
+      }
+      if (link === "mihoyobbs://homeForum?game_id=2&tab_type=2") {
+        await emit("active_deep_link", "router?path=/news/2/news");
+        return true;
       }
     }
     return false;

@@ -189,13 +189,26 @@ async function getDeepLink(): Promise<UnlistenFn> {
       e.payload.startsWith("teyvatguide://import_uiaf")
     ) {
       await toUIAF(e.payload);
-    } else {
-      showSnackbar({
-        text: "无效的 deep link！",
-        color: "error",
-        timeout: 3000,
-      });
+      return;
     }
+    if (e.payload.startsWith("router?path=")) {
+      const routerPath = e.payload.replace("router?path=", "");
+      if (router.currentRoute.value.path === routerPath) {
+        showSnackbar({
+          text: "已在当前页面！",
+          color: "warn",
+          timeout: 3000,
+        });
+        return;
+      }
+      await router.push(routerPath);
+      return;
+    }
+    showSnackbar({
+      text: "无效的 deep link！",
+      color: "error",
+      timeout: 3000,
+    });
   });
 }
 
