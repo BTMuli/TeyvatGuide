@@ -10,7 +10,7 @@
     <template #actions>
       <v-spacer />
       <v-btn variant="outlined" @click="scan = true" icon="mdi-qrcode-scan" />
-      <v-btn variant="outlined" @click="toWebLogin" icon="mdi-web" />
+      <v-btn v-if="false" variant="outlined" @click="toWebLogin" icon="mdi-web" />
       <v-btn variant="outlined" @click="confirmRefreshUser" icon="mdi-refresh" :loading="loading" />
     </template>
   </v-card>
