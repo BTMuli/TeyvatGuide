@@ -29,6 +29,7 @@ const data = reactive<TGApp.Component.Snackbar.Params>({
   text: "",
 });
 const show = ref<boolean>(false);
+// eslint-disable-next-line no-undef
 let timer: NodeJS.Timeout;
 
 onMounted(() => {

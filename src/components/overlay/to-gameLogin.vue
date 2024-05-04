@@ -50,6 +50,7 @@ const visible = computed({
     emits("update:modelValue", value);
   },
 });
+// eslint-disable-next-line no-undef
 let cycleTimer: NodeJS.Timeout | null = null;
 
 const qrCode = ref<string>("");

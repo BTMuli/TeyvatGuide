@@ -66,6 +66,7 @@ const jsonData = ref<TGApp.Plugins.Mys.Lottery.FullData>();
 const timeStatus = ref<string>("未知");
 const upWay = ref<string>("未知");
 
+// eslint-disable-next-line no-undef
 let timer: NodeJS.Timeout | undefined = undefined;
 
 const visible = computed({
