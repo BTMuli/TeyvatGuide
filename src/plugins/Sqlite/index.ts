@@ -18,7 +18,7 @@ import {
   insertRecordData,
   insertRoleData,
 } from "./sql/insertData";
-import { importUIAFData, importUIGFData } from "./sql/updateData";
+import { importUIAFData } from "./sql/updateData";
 
 class Sqlite {
   /**
@@ -115,15 +115,13 @@ class Sqlite {
 
   /**
    * @description 插入 Account 数据
-   * @since Beta v0.4.1
+   * @since Beta v0.4.7
    * @param {TGApp.User.Account.Game[]} accounts
    * @returns {Promise<void>}
    */
   public async saveAccount(accounts: TGApp.User.Account.Game[]): Promise<void> {
     const db = await this.getDB();
-    // 为了防止多账号的情况，先清空数据表
-    const clear = "DELETE FROM GameAccount WHERE 1=1;";
-    await db.execute(clear);
+    await db.execute("DELETE FROM GameAccount WHERE true;");
     for (const a of accounts) {
       const sql = insertGameAccountData(a);
       await db.execute(sql);
@@ -397,98 +395,6 @@ class Sqlite {
     const res: TGApp.Sqlite.Character.UserRole[] = await db.select(sql);
     if (res.length === 0) return false;
     return res;
-  }
-
-  /**
-   * @description 获取已有 uid 列表
-   * @since Beta v0.3.3
-   * @returns {Promise<string[]>}
-   */
-  public async getUidList(): Promise<string[]> {
-    const db = await this.getDB();
-    const sql = "SELECT DISTINCT uid FROM GachaRecords";
-    const res: Array<{ uid: string }> = await db.select(sql);
-    return res.map((item) => item.uid);
-  }
-
-  /**
-   * @description 获取指定 uid 的用户角色数据
-   * @since Beta v0.3.3
-   * @param {string} uid 用户 uid
-   * @returns {Promise<TGApp.Sqlite.GachaRecords.SingleTable[]>}
-   */
-  public async getGachaRecords(uid: string): Promise<TGApp.Sqlite.GachaRecords.SingleTable[]> {
-    const db = await this.getDB();
-    const sql = `SELECT *
-                 FROM GachaRecords
-                 WHERE uid = '${uid}'`;
-    return await db.select(sql);
-  }
-
-  /**
-   * @description 删除指定 uid 的祈愿数据
-   * @since Beta v0.3.3
-   * @param {string} uid 用户 uid
-   * @returns {Promise<void>}
-   */
-  public async deleteGachaRecords(uid: string): Promise<void> {
-    const db = await this.getDB();
-    const sql = `DELETE
-                 FROM GachaRecords
-                 WHERE uid = '${uid}'`;
-    await db.execute(sql);
-  }
-
-  /**
-   * @description 合并祈愿数据
-   * @since Beta v0.3.3
-   * @param {string} uid UID
-   * @param {TGApp.Plugins.UIGF.GachaItem[]} data UIGF 数据
-   * @returns {Promise<void>}
-   */
-  public async mergeUIGF(uid: string, data: TGApp.Plugins.UIGF.GachaItem[]): Promise<void> {
-    const db = await this.getDB();
-    const sql = importUIGFData(uid, data);
-    for (const item of sql) {
-      await db.execute(item);
-    }
-  }
-
-  /**
-   * @description 判断今天是否是某个角色的生日
-   * @since Beta v0.3.6
-   * @returns {Promise<false|string>}
-   */
-  public async isBirthday(): Promise<false | string> {
-    const db = await this.getDB();
-    const dateNow = new Date();
-    const date = `${dateNow.getMonth() + 1},${dateNow.getDate()}`;
-    const sql = `SELECT name
-                 FROM AppCharacters
-                 WHERE birthday = '${date}';`;
-    const res: Array<{ name: string }> = await db.select(sql);
-    if (res.length === 0) return false;
-    return res.map((item) => item.name).join("、");
-  }
-
-  /**
-   * @description 用于检测祈愿增量更新的 gacha id
-   * @since Beta v0.4.4
-   * @param {string} uid 用户 uid
-   * @param {string} type 卡池类型
-   * @returns {Promise<string|undefined>}
-   */
-  async getGachaCheck(uid: string, type: string): Promise<string | undefined> {
-    const db = await this.getDB();
-    const sql = `SELECT id
-                 FROM GachaRecords
-                 WHERE uid = '${uid}'
-                   AND gachaType = '${type}'
-                 ORDER BY id DESC
-                 LIMIT 1;`;
-    const res: Array<{ id: string }> = await db.select(sql);
-    if (res.length === 0) return undefined;
-    return res[0].id;
   }
 
   /**

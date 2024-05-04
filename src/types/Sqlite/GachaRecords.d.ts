@@ -23,7 +23,7 @@ declare namespace TGApp.Sqlite.GachaRecords {
    * @property {string} updated - 数据库更新时间
    * @return SingleTable
    */
-  export interface SingleTable {
+  interface SingleTable {
     id: string;
     uid: string;
     gachaType: string;

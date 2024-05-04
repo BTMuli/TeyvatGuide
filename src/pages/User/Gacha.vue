@@ -5,11 +5,11 @@
     <v-select v-model="uidCur" class="gacha-top-select" :items="selectItem" variant="outlined" />
     <div class="gacha-top-btns">
       <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh"
-        >增量刷新</v-btn
-      >
+        >增量刷新
+      </v-btn>
       <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(true)"
-        >全量刷新</v-btn
-      >
+        >全量刷新
+      </v-btn>
       <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn()">导入</v-btn>
       <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="handleExportBtn">导出</v-btn>
       <v-btn prepend-icon="mdi-cloud-download" class="gacha-top-btn" @click="backupGacha">
@@ -52,7 +52,7 @@ import GroHistory from "../../components/gachaRecord/gro-history.vue";
 import GroOverview from "../../components/gachaRecord/gro-overview.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import { AppCharacterData, AppWeaponData } from "../../data";
-import TGSqlite from "../../plugins/Sqlite";
+import TSUserGacha from "../../plugins/Sqlite/modules/userGacha";
 import { useAppStore } from "../../store/modules/app";
 import { useUserStore } from "../../store/modules/user";
 import TGLogger from "../../utils/TGLogger";
@@ -79,7 +79,7 @@ const tab = ref<string>("");
 onMounted(async () => {
   await TGLogger.Info("[UserGacha][onMounted] 进入角色祈愿页面");
   loadingTitle.value = "正在获取祈愿 UID 列表";
-  selectItem.value = await TGSqlite.getUidList();
+  selectItem.value = await TSUserGacha.getUidList();
   if (selectItem.value.length === 0) {
     showSnackbar({
       color: "error",
@@ -91,7 +91,7 @@ onMounted(async () => {
   }
   uidCur.value = selectItem.value[0];
   loadingTitle.value = `正在获取祈愿数据，默认 UID：${uidCur.value}`;
-  gachaListCur.value = await TGSqlite.getGachaRecords(uidCur.value);
+  gachaListCur.value = await TSUserGacha.getGachaRecords(uidCur.value);
   await TGLogger.Info(
     `[UserGacha][onMounted] 获取到 ${uidCur.value} 的 ${gachaListCur.value.length} 条祈愿数据`,
   );
@@ -159,11 +159,11 @@ async function confirmRefresh(force: boolean = false): Promise<void> {
   ];
   if (force) {
     loadingTitle.value = "正在获取数据库祈愿最新 ID";
-    checkList[0] = await TGSqlite.getGachaCheck(account.gameUid, "200");
-    checkList[1] = await TGSqlite.getGachaCheck(account.gameUid, "301");
-    checkList[2] = await TGSqlite.getGachaCheck(account.gameUid, "400");
-    checkList[3] = await TGSqlite.getGachaCheck(account.gameUid, "302");
-    checkList[4] = await TGSqlite.getGachaCheck(account.gameUid, "500");
+    checkList[0] = await TSUserGacha.getGachaCheck(account.gameUid, "200");
+    checkList[1] = await TSUserGacha.getGachaCheck(account.gameUid, "301");
+    checkList[2] = await TSUserGacha.getGachaCheck(account.gameUid, "400");
+    checkList[3] = await TSUserGacha.getGachaCheck(account.gameUid, "302");
+    checkList[4] = await TSUserGacha.getGachaCheck(account.gameUid, "500");
   }
   console.log(checkList);
   loadingTitle.value = "正在刷新新手祈愿数据";
@@ -190,7 +190,7 @@ async function confirmRefresh(force: boolean = false): Promise<void> {
   window.location.reload();
 }
 
-// 获取祈愿数据并写入数据库
+// 获取祈愿数据并写入数据库，不用考虑多语言，因为从api获取的数据是中文
 async function getGachaLogs(
   pool: string,
   endId: string = "0",
@@ -236,7 +236,7 @@ async function getGachaLogs(
       }
       uigfList.push(tempItem);
     });
-    await TGSqlite.mergeUIGF(account.gameUid, uigfList);
+    await TSUserGacha.mergeUIGF(account.gameUid, uigfList);
     if (check !== undefined && gachaRes.some((i) => i.id === check)) {
       await new Promise((resolve) => {
         setTimeout(() => {
@@ -334,7 +334,7 @@ async function handleImportBtn(savePath?: string): Promise<void> {
     });
     return;
   }
-  await TGSqlite.mergeUIGF(remoteData.info.uid, remoteData.list);
+  await TSUserGacha.mergeUIGF(remoteData.info.uid, remoteData.list);
   loading.value = false;
   showSnackbar({
     text: `成功导入 ${remoteData.list.length} 条祈愿数据`,
@@ -342,14 +342,14 @@ async function handleImportBtn(savePath?: string): Promise<void> {
   await TGLogger.Info(
     `[UserGacha][handleImportBtn] 成功导入 ${remoteData.info.uid} 的 ${remoteData.list.length} 条祈愿数据`,
   );
-  setTimeout(() => {
-    window.location.reload();
-  }, 1000);
+  // setTimeout(() => {
+  //   window.location.reload();
+  // }, 1000);
 }
 
 // 导出按钮点击事件
 async function handleExportBtn(): Promise<void> {
-  const gachaList = await TGSqlite.getGachaRecords(uidCur.value);
+  const gachaList = await TSUserGacha.getGachaRecords(uidCur.value);
   if (gachaList.length === 0) {
     showSnackbar({
       color: "error",
@@ -460,25 +460,25 @@ async function deleteGacha(): Promise<void> {
     await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 已取消祈愿数据删除`);
     return;
   }
-  const uidList = await TGSqlite.getUidList();
+  const uidList = await TSUserGacha.getUidList();
   let secondConfirm: string | boolean | undefined;
   if (uidList.length <= 1) {
     secondConfirm = await showConfirm({
       title: "删除后数据库将为空，确定删除？",
       text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
     });
-  }
-  if (!secondConfirm) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消祈愿数据删除",
-    });
-    await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 已取消祈愿数据删除`);
-    return;
+    if (!secondConfirm) {
+      showSnackbar({
+        color: "cancel",
+        text: "已取消祈愿数据删除",
+      });
+      await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 已取消祈愿数据删除`);
+      return;
+    }
   }
   loadingTitle.value = `正在删除${uidCur.value}的祈愿数据`;
   loading.value = true;
-  await TGSqlite.deleteGachaRecords(uidCur.value);
+  await TSUserGacha.deleteGachaRecords(uidCur.value);
   loading.value = false;
   showSnackbar({
     text: `已成功删除 ${uidCur.value} 的祈愿数据`,
@@ -493,7 +493,7 @@ async function deleteGacha(): Promise<void> {
 
 // 监听 UID 变化
 watch(uidCur, async (newUid) => {
-  gachaListCur.value = await TGSqlite.getGachaRecords(newUid);
+  gachaListCur.value = await TSUserGacha.getGachaRecords(newUid);
   showSnackbar({
     text: `成功获取 ${gachaListCur.value.length} 条祈愿数据`,
   });
