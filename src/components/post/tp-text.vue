@@ -6,7 +6,7 @@
     :title="props.data.attributes?.link"
     :style="getTextStyle()"
   >
-    <v-icon size="small">mdi-link-variant</v-icon>
+    <v-icon size="small" v-if="!props.data.insert.startsWith('>>')">mdi-link-variant</v-icon>
     <span>{{ props.data.insert }}</span>
   </div>
   <span v-else-if="mode == 'emoji'" class="tp-text-emoji">
