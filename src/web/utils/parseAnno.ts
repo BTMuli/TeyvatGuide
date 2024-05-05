@@ -1,7 +1,7 @@
 /**
  * @file web/utils/parseAnno.ts
  * @description 解析游戏内公告数据
- * @since Beta v0.4.4
+ * @since Beta v0.4.7
  */
 
 import { saveImgLocal } from "../../utils/TGShare";
@@ -33,7 +33,7 @@ function parseAnnoA(a: HTMLAnchorElement): HTMLAnchorElement {
 
 /**
  * @description 解析 p
- * @since Beta v0.4.4
+ * @since Beta v0.4.7
  * @param {HTMLParagraphElement} p p 元素
  * @returns {HTMLParagraphElement} 解析后的 p 元素
  */
@@ -42,9 +42,7 @@ function parseAnnoP(p: HTMLParagraphElement): HTMLParagraphElement {
     p.innerHTML = decodeRegExp(p.innerHTML);
   } else {
     p.querySelectorAll("*").forEach((child) => {
-      if (child.children.length === 0) {
-        child.innerHTML = decodeRegExp(child.innerHTML);
-      }
+      child.innerHTML = decodeRegExp(child.innerHTML);
     });
   }
   return p;
@@ -72,6 +70,9 @@ function parseAnnoSpan(span: HTMLSpanElement): HTMLSpanElement {
       if (child.children.length === 0) {
         child.innerHTML = decodeRegExp(child.innerHTML);
       }
+      if (child.tagName === "T") {
+        child.outerHTML = child.innerHTML;
+      }
     });
   }
   return span;
@@ -79,14 +80,16 @@ function parseAnnoSpan(span: HTMLSpanElement): HTMLSpanElement {
 
 /**
  * @description 解析 table
- * @since Beta v0.4.4
+ * @since Beta v0.4.7
  * @param {HTMLTableElement} table table 元素
  * @returns {HTMLTableElement} 解析后的 table 元素
  */
 function parseAnnoTable(table: HTMLTableElement): HTMLTableElement {
   table.style.borderColor = "var(--common-shadow-2)";
+  table.querySelectorAll("colgroup").forEach((colgroup) => colgroup.remove());
   table.querySelectorAll("td").forEach((td) => {
     if (td.style.backgroundColor) td.style.backgroundColor = "var(--box-bg-1)";
+    td.style.textAlign = "center";
   });
   return table;
 }
