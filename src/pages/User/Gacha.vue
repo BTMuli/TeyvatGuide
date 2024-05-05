@@ -304,13 +304,7 @@ async function handleImportBtn(savePath?: string): Promise<void> {
     return;
   }
   const check = await verifyUigfData(<string>selectedFile);
-  if (!check) {
-    showSnackbar({
-      color: "error",
-      text: "读取 UIGF 文件失败，请检查文件是否符合规范",
-    });
-    return;
-  }
+  if (!check) return;
   const remoteData = await readUigfData(<string>selectedFile);
   const res = await showConfirm({
     title: "是否导入祈愿数据？",
@@ -342,9 +336,9 @@ async function handleImportBtn(savePath?: string): Promise<void> {
   await TGLogger.Info(
     `[UserGacha][handleImportBtn] 成功导入 ${remoteData.info.uid} 的 ${remoteData.list.length} 条祈愿数据`,
   );
-  // setTimeout(() => {
-  //   window.location.reload();
-  // }, 1000);
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
 }
 
 // 导出按钮点击事件

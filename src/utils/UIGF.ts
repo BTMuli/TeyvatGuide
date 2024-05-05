@@ -1,10 +1,15 @@
 /**
  * @file utils/UIGF.ts
  * @description UIGF工具类
- * @since Beta v0.4.4
+ * @since Beta v0.4.7
  */
 
 import { app, fs, path } from "@tauri-apps/api";
+import Ajv from "ajv";
+import { ErrorObject } from "ajv/lib/types/index.js";
+
+import showSnackbar from "../components/func/snackbar.js";
+import { AppUigfSchema } from "../data/index.js";
 
 import { timestampToDate } from "./toolFunc";
 
@@ -65,16 +70,30 @@ export function convertDataToUigf(
 }
 
 /**
- * @description 检测是否存在 UIGF 数据
- * @description 粗略检测，不保证数据完整性
- * @since Alpha v0.2.3
+ * @description 检测是否存在 UIGF 数据，采用 ajv 验证 schema
+ * @since Beta v0.4.7
  * @param {string} path - UIGF 数据路径
  * @returns {Promise<boolean>} 是否存在 UIGF 数据
  */
 export async function verifyUigfData(path: string): Promise<boolean> {
   const fileData: string = await fs.readTextFile(path);
-  const UigfData: TGApp.Plugins.UIGF.Export = JSON.parse(fileData)?.info;
-  return UigfData?.uigf_version !== undefined;
+  const ajv = new Ajv();
+  const validate = ajv.compile(AppUigfSchema);
+  try {
+    const fileJson = JSON.parse(fileData);
+    if (!validate(fileJson)) {
+      const error: ErrorObject = validate.errors[0];
+      showSnackbar({
+        text: `${error.instancePath || error.schemaPath} ${error.message}`,
+        color: "error",
+      });
+      return false;
+    }
+    return true;
+  } catch (e) {
+    showSnackbar({ text: `UIGF 数据格式错误 ${e}`, color: "error" });
+    return false;
+  }
 }
 
 /**

@@ -1,0 +1,96 @@
+{
+  "type": "object",
+  "properties": {
+    "info": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "title": "UID of the export record"
+        },
+        "lang": {
+          "type": "string",
+          "title": "language in the format of languagecode2-country/regioncode2"
+        },
+        "export_timestamp": {
+          "type": "number",
+          "title": "Export UNIX timestamp (accurate to the second)"
+        },
+        "export_time": {
+          "type": "string",
+          "title": "Export time",
+          "description": "yyyy-MM-dd HH:mm:ss"
+        },
+        "export_app": {
+          "type": "string",
+          "title": "Name of the export application"
+        },
+        "export_app_version": {
+          "type": "string",
+          "title": "Version of the export application"
+        },
+        "uigf_version": {
+          "type": "string",
+          "title": "UIGF version; follow the regular expression pattern",
+          "pattern": "v\\d+\\.\\d+"
+        },
+        "region_time_zone": {
+          "type": "number",
+          "title": "Region timezone offset"
+        }
+      },
+      "required": ["uid", "uigf_version"],
+      "title": "UIGF Export Information"
+    },
+    "list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "uigf_gacha_type": {
+            "type": "string",
+            "title": "UIGF gacha type",
+            "description": "Used to differentiate different gacha types with the same pity calculation for items"
+          },
+          "gacha_type": {
+            "type": "string",
+            "title": "Gacha type"
+          },
+          "item_id": {
+            "type": "string",
+            "title": "Internal ID of the item"
+          },
+          "count": {
+            "type": "string",
+            "title": "Count, usually 1"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time when the item was obtained"
+          },
+          "name": {
+            "type": "string",
+            "title": "Item name"
+          },
+          "item_type": {
+            "type": "string",
+            "title": "Item type"
+          },
+          "rank_type": {
+            "type": "string",
+            "title": "Item rank"
+          },
+          "id": {
+            "type": "string",
+            "title": "Internal ID of the record"
+          }
+        },
+        "required": ["uigf_gacha_type", "gacha_type", "id", "item_id", "time"],
+        "title": "UIGF Item"
+      },
+      "title": "Item List"
+    }
+  },
+  "required": ["info", "list"],
+  "title": "UIGF Root Object"
+}
