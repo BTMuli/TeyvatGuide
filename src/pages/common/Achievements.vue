@@ -348,14 +348,8 @@ async function importJson(): Promise<void> {
     await TGLogger.Info("[Achievements][importJson] 已取消文件选择");
     return;
   }
-  if (!(await verifyUiafData(<string>selectedFile))) {
-    showSnackbar({
-      color: "error",
-      text: "读取 UIAF 数据失败，请检查文件是否符合规范",
-    });
-    await TGLogger.Error("[Achievements][importJson] 读取 UIAF 数据失败，请检查文件是否符合规范");
-    return;
-  }
+  const check = await verifyUiafData(<string>selectedFile);
+  if (!check) return;
   const remoteRaw = await readUiafData(<string>selectedFile);
   await TGLogger.Info("[Achievements][importJson] 读取 UIAF 数据成功");
   await TGLogger.Info(`[Achievements][importJson] 导入来源：${remoteRaw.info.export_app}`);

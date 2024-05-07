@@ -54,7 +54,7 @@ export async function getUiafHeader(): Promise<TGApp.Plugins.UIAF.Export> {
  */
 export async function verifyUiafData(path: string): Promise<boolean> {
   const fileData: string = await fs.readTextFile(path);
-  const ajv = new Ajv();
+  const ajv = new Ajv({ strict: false });
   const validate = ajv.compile(UiafSchema);
   try {
     const fileJson = JSON.parse(fileData);
@@ -65,7 +65,7 @@ export async function verifyUiafData(path: string): Promise<boolean> {
         color: "error",
       });
       await TGLogger.Error(`UIAF 数据验证失败，文件路径：${path}`);
-      await TGLogger.Error(`错误信息 ${validate.errors}`);
+      await TGLogger.Error(`错误信息 ${validate.errors?.toString()}`);
       return false;
     }
     return true;
