@@ -14,7 +14,7 @@ declare namespace TGApp.Plugins.UIAF {
    * @property {Achievement[]} list UIAF 成就列表
    * @return Data
    */
-  export interface Data {
+  interface Data {
     info: Export;
     list: Achievement[];
   }
@@ -29,7 +29,7 @@ declare namespace TGApp.Plugins.UIAF {
    * @property {string} uiaf_version UIAF 版本
    * @return Export
    */
-  export interface Export {
+  interface Export {
     export_app: string;
     export_timestamp: number;
     export_app_version: string;
@@ -46,7 +46,7 @@ declare namespace TGApp.Plugins.UIAF {
    * @property {number} status 成就状态，0 为未完成，1 为已完成
    * @return Achievement
    */
-  export interface Achievement {
+  interface Achievement {
     id: number;
     timestamp: number;
     current: number;

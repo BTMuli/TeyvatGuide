@@ -1,0 +1,59 @@
+{
+  "type": "object",
+  "properties": {
+    "info": {
+      "type": "object",
+      "properties": {
+        "export_app": {
+          "type": "string",
+          "description": "Export application name"
+        },
+        "export_app_version": {
+          "type": "string",
+          "description": "Export application version"
+        },
+        "uiaf_version": {
+          "type": "string",
+          "description": "UIAF version applied; Used to prevent application not working when UIGF have breaking update",
+          "pattern": "v\\d+.\\d+"
+        },
+        "export_timestamp": {
+          "type": "number",
+          "description": "Export time in UNIX timestamp"
+        }
+      },
+      "required": ["export_app", "uiaf_version"],
+      "description": "Include basic information defined by export application"
+    },
+    "list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Achievement ID"
+          },
+          "current": {
+            "type": "number",
+            "description": "Process"
+          },
+          "status": {
+            "type": "number",
+            "description": "Finished status",
+            "enum": [0, 1, 2, 3],
+            "enumDesc": "ACHIEVEMENT_INVALID = 0; ACHIEVEMENT_UNFINISHED = 1; ACHIEVEMENT_FINISHED = 2;ACHIEVEMENT_POINT_TAKEN = 3;"
+          },
+          "timestamp": {
+            "type": "number",
+            "description": "Finished time"
+          }
+        },
+        "required": ["id", "current", "status", "timestamp"],
+        "description": "To represent an achievement"
+      },
+      "description": "Include finished or unfinished achievements"
+    }
+  },
+  "required": ["info", "list"]
+}

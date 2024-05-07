@@ -1,7 +1,7 @@
 /**
  * @file types/Sqlite/Achievement.d.ts
  * @description 数据库成就相关类型定义文件
- * @since Alpha v0.2.0
+ * @since Beta v0.4.7
  */
 
 declare namespace TGApp.Sqlite.Achievement {
@@ -59,5 +59,18 @@ declare namespace TGApp.Sqlite.Achievement {
     finCount: number;
     nameCard: string;
     updated: string;
+  }
+
+  /**
+   * @description 成就概况
+   * @since Beta v0.4.7
+   * @interface Overview
+   * @property {number} total - 总成就数
+   * @property {number} fin - 已完成成就数
+   * @returns Overview
+   */
+  interface Overview {
+    total: number;
+    fin: number;
   }
 }

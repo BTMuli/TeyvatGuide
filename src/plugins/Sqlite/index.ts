@@ -1,13 +1,11 @@
 /**
  * @file plugins/Sqlite/index.ts
  * @description Sqlite 数据库操作类
- * @since Beta v0.4.5
+ * @since Beta v0.4.7
  */
 
 import { app } from "@tauri-apps/api";
 import Database from "tauri-plugin-sql-api";
-
-import { getUiafStatus } from "../../utils/UIAF";
 
 import initDataSql from "./sql/initData";
 import {
@@ -18,7 +16,6 @@ import {
   insertRecordData,
   insertRoleData,
 } from "./sql/insertData";
-import { importUIAFData } from "./sql/updateData";
 
 class Sqlite {
   /**
@@ -199,57 +196,6 @@ class Sqlite {
       }),
     );
     await this.initDB();
-  }
-
-  /**
-   * @description 获取最新成就版本
-   * @since Beta v0.3.3
-   * @returns {Promise<string>}
-   */
-  public async getLatestAchievementVersion(): Promise<string> {
-    const db = await this.getDB();
-    const sql = "SELECT version FROM Achievements ORDER BY version DESC LIMIT 1;";
-    const res: Array<{ version: string }> = await db.select(sql);
-    return res[0].version;
-  }
-
-  /**
-   * @description 合并 UIAF 数据
-   * @since Beta v0.3.3
-   * @param {TGApp.Plugins.UIAF.Achievement[]} achievements UIAF 数据
-   * @returns {Promise<void>}
-   */
-  public async mergeUIAF(achievements: TGApp.Plugins.UIAF.Achievement[]): Promise<void> {
-    const db = await this.getDB();
-    const sql = importUIAFData(achievements);
-    for (const item of sql) {
-      await db.execute(item);
-    }
-  }
-
-  /**
-   * @description 获取 UIAF 数据
-   * @since Beta v0.3.3
-   * @returns {Promise<TGApp.Plugins.UIAF.Achievement[]>}
-   */
-  public async getUIAF(): Promise<TGApp.Plugins.UIAF.Achievement[]> {
-    const db = await this.getDB();
-    const sql = "SELECT * FROM Achievements WHERE isCompleted = 1 OR progress > 0";
-    const res: TGApp.Sqlite.Achievement.SingleTable[] = await db.select(sql);
-
-    const achievements: TGApp.Plugins.UIAF.Achievement[] = [];
-    for (const item of res) {
-      const completed = item.isCompleted === 1;
-      const status = getUiafStatus(completed, item.progress);
-      achievements.push({
-        id: item.id,
-        status,
-        timestamp:
-          completed && item.completedTime ? new Date(item.completedTime).getTime() / 1000 : 0,
-        current: item.progress,
-      });
-    }
-    return achievements;
   }
 
   /**

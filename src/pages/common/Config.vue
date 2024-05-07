@@ -98,6 +98,7 @@ import showConfirm from "../../components/func/confirm";
 import showSnackbar from "../../components/func/snackbar";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TGSqlite from "../../plugins/Sqlite";
+import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
 import { useAchievementsStore } from "../../store/modules/achievements";
 import { useAppStore } from "../../store/modules/app";
 import { useHomeStore } from "../../store/modules/home";
@@ -237,7 +238,7 @@ async function confirmUpdate(title?: string): Promise<void> {
   loadingTitle.value = "正在更新数据库...";
   loading.value = true;
   await TGSqlite.update();
-  achievementsStore.lastVersion = await TGSqlite.getLatestAchievementVersion();
+  achievementsStore.lastVersion = await TSUserAchi.getLatestAchiVersion();
   appStore.buildTime = getBuildTime();
   loading.value = false;
   showSnackbar({

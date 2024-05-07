@@ -9,8 +9,9 @@ import Ajv from "ajv";
 import { ErrorObject } from "ajv/lib/types/index.js";
 
 import showSnackbar from "../components/func/snackbar.js";
-import { AppUigfSchema } from "../data/index.js";
+import { UigfSchema } from "../data/index.js";
 
+import TGLogger from "./TGLogger.js";
 import { timestampToDate } from "./toolFunc";
 
 /**
@@ -78,7 +79,7 @@ export function convertDataToUigf(
 export async function verifyUigfData(path: string): Promise<boolean> {
   const fileData: string = await fs.readTextFile(path);
   const ajv = new Ajv();
-  const validate = ajv.compile(AppUigfSchema);
+  const validate = ajv.compile(UigfSchema);
   try {
     const fileJson = JSON.parse(fileData);
     if (!validate(fileJson)) {
@@ -87,11 +88,15 @@ export async function verifyUigfData(path: string): Promise<boolean> {
         text: `${error.instancePath || error.schemaPath} ${error.message}`,
         color: "error",
       });
+      await TGLogger.Error(`UIGF 数据验证失败，文件路径：${path}`);
+      await TGLogger.Error(`错误信息 ${validate.errors}`);
       return false;
     }
     return true;
   } catch (e) {
     showSnackbar({ text: `UIGF 数据格式错误 ${e}`, color: "error" });
+    await TGLogger.Error(`UIGF 数据格式错误，文件路径：${path}`);
+    await TGLogger.Error(`错误信息 ${e}`);
     return false;
   }
 }

@@ -126,11 +126,16 @@ import ToAchiInfo from "../../components/overlay/to-achiInfo.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import ToNamecard from "../../components/overlay/to-namecard.vue";
 import { AppAchievementSeriesData, AppNameCardsData } from "../../data";
-import TGSqlite from "../../plugins/Sqlite";
+import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
 import { useAchievementsStore } from "../../store/modules/achievements";
 import TGLogger from "../../utils/TGLogger";
 import { getNowStr } from "../../utils/toolFunc";
-import { getUiafHeader, readUiafData, verifyUiafData } from "../../utils/UIAF";
+import {
+  getUiafHeader,
+  readUiafData,
+  verifyUiafData,
+  verifyUiafDataClipboard,
+} from "../../utils/UIAF";
 
 // Store
 const achievementsStore = useAchievementsStore();
@@ -185,7 +190,7 @@ async function switchHideFin() {
 
 // 刷新概况
 async function flushOverview(): Promise<void> {
-  const { total, fin } = await getAchiOverview();
+  const { total, fin } = await TSUserAchi.getOverview();
   achievementsStore.flushData(total, fin);
   title.value = achievementsStore.title;
 }
@@ -197,8 +202,8 @@ onMounted(async () => {
   loadingTitle.value = "正在获取成就系列数据";
   await flushOverview();
   await TGLogger.Info(`[Achievements][onMounted] ${title.value}`);
-  allSeriesData.value = await getSeriesData();
-  achievementsStore.lastVersion = await TGSqlite.getLatestAchievementVersion();
+  allSeriesData.value = await TSUserAchi.getSeries();
+  achievementsStore.lastVersion = await TSUserAchi.getLatestAchiVersion();
   loadingTitle.value = "正在获取成就数据";
   selectedAchievement.value = await getAchiData("all");
   loading.value = false;
@@ -229,7 +234,7 @@ async function selectSeries(index: number): Promise<void> {
   selectedSeries.value = index;
   selectedAchievement.value = await getAchiData("series", index.toString());
   loadingTitle.value = "正在查找对应的成就名片";
-  curCardName.value = await getNameCardName(index);
+  curCardName.value = await TSUserAchi.getSeriesNameCard(index);
   if (curCardName.value !== "") {
     curCard.value = AppNameCardsData.find((item) => item.name === curCardName.value);
   }
@@ -360,7 +365,7 @@ async function importJson(): Promise<void> {
   loadingTitle.value = "正在解析数据";
   loading.value = true;
   loadingTitle.value = "正在合并成就数据";
-  await TGSqlite.mergeUIAF(remoteRaw.list);
+  await TSUserAchi.mergeUIAF(remoteRaw.list);
   loadingTitle.value = "即将刷新页面";
   setTimeout(() => {
     window.location.reload();
@@ -382,7 +387,7 @@ async function exportJson(): Promise<void> {
   // 获取本地数据
   const UiafData = {
     info: await getUiafHeader(),
-    list: await TGSqlite.getUIAF(),
+    list: await TSUserAchi.getUIAF(),
   };
   const fileName = `UIAF_${UiafData.info.export_app}_${UiafData.info.export_app_version}_${UiafData.info.export_timestamp}`;
   const isSave = await dialog.save({
@@ -430,32 +435,21 @@ async function handleImportOuter(app: string): Promise<void> {
   }
   // 读取 剪贴板
   const clipboard = await window.navigator.clipboard.readText();
-  let data: TGApp.Plugins.UIAF.Achievement[];
-  // 里面是完整的 uiaf 数据
-  try {
-    data = JSON.parse(clipboard).list;
-    loadingTitle.value = "正在导入数据";
-    loading.value = true;
-    await TGSqlite.mergeUIAF(data);
-    loading.value = false;
-    showSnackbar({
-      color: "success",
-      text: "导入成功，即将刷新页面",
-    });
-    await TGLogger.Info("[Achievements][handleImportOuter] 导入成功");
-  } catch (e) {
-    if (e instanceof Error)
-      await TGLogger.Error(`[Achievements][handleImportOuter] 导入失败 ${e.name}: ${e.message}`);
-    else console.error(e);
-    showSnackbar({
-      color: "error",
-      text: "读取 UIAF 数据失败，请检查文件是否符合规范",
-    });
-  } finally {
-    setTimeout(async () => {
-      await router.push("/achievements");
-    }, 1500);
-  }
+  const check = await verifyUiafDataClipboard();
+  if (!check) return;
+  const data: TGApp.Plugins.UIAF.Data = JSON.parse(clipboard);
+  loadingTitle.value = "正在导入数据";
+  loading.value = true;
+  await TSUserAchi.mergeUIAF(data);
+  loading.value = false;
+  showSnackbar({
+    color: "success",
+    text: "导入成功，即将刷新页面",
+  });
+  await TGLogger.Info("[Achievements][handleImportOuter] 导入成功");
+  setTimeout(async () => {
+    await router.push("/achievements");
+  }, 1500);
 }
 
 // 改变成就状态
@@ -474,10 +468,12 @@ async function setAchi(
   }
   renderSelect.value[renderSelect.value.findIndex((item) => item.id === achievement.id)] =
     newAchievement;
-  await setAchiDB(newAchievement);
+  await TSUserAchi.updateAchievement(newAchievement);
   await flushOverview();
-  allSeriesData.value[allSeriesData.value.findIndex((item) => item.id === newAchievement.series)] =
-    (await getSeriesData(newAchievement.series))[0];
+  const seriesIndex = allSeriesData.value.findIndex((item) => item.id === newAchievement.series);
+  if (seriesIndex === -1) return;
+  const seriesGet = await TSUserAchi.getSeries(newAchievement.series);
+  allSeriesData.value[seriesIndex] = seriesGet[0];
   showSnackbar({
     text: `已将成就 ${newAchievement.name}[${newAchievement.id}] 标记为 ${
       target ? "已完成" : "未完成"
@@ -490,88 +486,22 @@ async function setAchi(
   );
 }
 
-/* 以下为数据库操作 */
-// 获取成就概况
-async function getAchiOverview(): Promise<{
-  total: number;
-  fin: number;
-}> {
-  const db = await TGSqlite.getDB();
-  const sql = "SELECT SUM(totalCount) AS total, SUM(finCount) AS fin FROM AchievementSeries;";
-  const res: Array<{ total: number; fin: number }> = await db.select(sql);
-  return res[0];
-}
-
-// 获取成就系列
-async function getSeriesData(series?: number): Promise<TGApp.Sqlite.Achievement.SeriesTable[]> {
-  const db = await TGSqlite.getDB();
-  let sql = "SELECT * FROM AchievementSeries ORDER BY `order`;";
-  if (series) {
-    sql = `SELECT *
-           FROM AchievementSeries
-           WHERE id = ${series}
-           ORDER BY \`order\`;`;
-  }
-  return await db.select(sql);
-}
-
 // 获取成就（某个系列）
 async function getAchiData(
   type: "all" | "series" | "search",
   value?: string,
 ): Promise<TGApp.Sqlite.Achievement.SingleTable[]> {
-  const db = await TGSqlite.getDB();
-  let sql = "";
-  if (type === "all" || (type == "series" && value === undefined)) {
-    sql = "SELECT * FROM Achievements ORDER BY isCompleted, `order`;";
-  } else if (type === "series") {
-    sql = `SELECT *
-           FROM Achievements
-           WHERE series = ${value}
-           ORDER BY isCompleted, \`order\`;`;
-  } else if (type === "search") {
-    if (value === undefined) {
-      showSnackbar({
-        color: "error",
-        text: "搜索内容不能为空",
-      });
-      return [];
-    }
-    if (value.startsWith("v")) {
-      const version = value.replace("v", "");
-      sql = `SELECT *
-             FROM Achievements
-             WHERE version LIKE '%${version}%'
-             ORDER BY isCompleted, \`order\`;`;
-    } else {
-      sql = `SELECT *
-             FROM Achievements
-             WHERE name LIKE '%${value}%'
-                OR description LIKE '%${value}%'
-             ORDER BY isCompleted, \`order\`;`;
-    }
+  if (type !== "search") {
+    return TSUserAchi.getAchievements(value);
   }
-  return await db.select(sql);
-}
-
-// 获取成就名片
-async function getNameCardName(series: number): Promise<string> {
-  const db = await TGSqlite.getDB();
-  const sql = `SELECT nameCard
-               FROM AchievementSeries
-               WHERE id = ${series};`;
-  const res: Array<{ nameCard: string }> = await db.select(sql);
-  return res[0].nameCard;
-}
-
-// 更新成就数据
-async function setAchiDB(achievement: TGApp.Sqlite.Achievement.SingleTable): Promise<void> {
-  const db = await TGSqlite.getDB();
-  const sql = `UPDATE Achievements
-               SET isCompleted   = ${achievement.isCompleted},
-                   completedTime = '${achievement.completedTime}'
-               WHERE id = ${achievement.id};`;
-  await db.execute(sql);
+  if (value === undefined) {
+    showSnackbar({
+      color: "error",
+      text: "搜索内容不能为空",
+    });
+    return [];
+  }
+  return TSUserAchi.searchAchievements(value);
 }
 </script>
 <!-- 顶部栏跟 wrap 大概布局 -->

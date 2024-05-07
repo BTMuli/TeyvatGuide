@@ -7,43 +7,39 @@
 import minifySql from "../../../utils/minifySql";
 
 /**
- * @description 导入UIAF数据
- * @since Alpha v0.2.3
- * @param {TGApp.Plugins.UIAF.Achievement[]} data
- * @returns {string[]} sql
+ * @description 导入UIAF数据-单项
+ * @since Beta v0.4.7
+ * @param {TGApp.Plugins.UIAF.Achievement} data
+ * @returns {string} sql
  */
-export function importUIAFData(data: TGApp.Plugins.UIAF.Achievement[]): string[] {
-  const sqlRes: string[] = [];
-  data.map((achievement) => {
-    let sql;
-    // 获取完成状态
-    const isCompleted = achievement.status === 2 || achievement.status === 3;
-    if (isCompleted) {
-      const completedTime = new Date(achievement.timestamp * 1000)
-        .toISOString()
-        .replace("T", " ")
-        .slice(0, 19);
-      sql = `
-          UPDATE Achievements
-          SET isCompleted   = 1,
-              completedTime = '${completedTime}',
-              progress      = ${achievement.current},
-              updated       = datetime('now', 'localtime')
-          WHERE id = ${achievement.id}
-            AND (isCompleted = 0 OR completedTime != '${completedTime}' OR progress != ${achievement.current});
-      `;
-    } else {
-      sql = `
+export function importUIAFData(data: TGApp.Plugins.UIAF.Achievement): string[] {
+  let sql;
+  const isCompleted = data.status === 2 || data.status === 3;
+  if (isCompleted) {
+    const completedTime = new Date(data.timestamp * 1000)
+      .toISOString()
+      .replace("T", " ")
+      .slice(0, 19);
+    sql = `
+        UPDATE Achievements
+        SET isCompleted   = 1,
+            completedTime = '${completedTime}',
+            progress      = ${data.current},
+            updated       = datetime('now', 'localtime')
+        WHERE id = ${data.id}
+          AND (isCompleted = 0 OR completedTime != '${completedTime}'
+            OR progress != ${data.current});
+    `;
+  } else {
+    sql = `
           UPDATE Achievements
           SET progress = ${achievement.current},
               updated  = datetime('now', 'localtime')
           WHERE id = ${achievement.id}
             AND progress != ${achievement.current};
       `;
-    }
-    return sqlRes.push(minifySql(sql));
-  });
-  return sqlRes;
+  }
+  return minifySql(sql);
 }
 
 /**

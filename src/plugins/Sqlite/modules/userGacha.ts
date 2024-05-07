@@ -130,7 +130,6 @@ async function mergeUIGF(uid: string, data: TGApp.Plugins.UIGF.GachaItem[]): Pro
   const db = await TGSqlite.getDB();
   for (const gacha of data) {
     const trans = transGacha(gacha);
-    console.log(trans);
     const sql = importUIGFData(uid, trans);
     await db.execute(sql);
   }
