@@ -20,7 +20,6 @@ const pkgJsonConfig = {
           "version",
           "description",
           "type",
-          "packageManager",
           "scripts",
           "lint-staged",
           "keywords",
