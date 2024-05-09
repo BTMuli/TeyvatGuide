@@ -20,9 +20,9 @@ type gachaItemTypeRes =
  * @return {gachaItemTypeRes}
  */
 function getGachaItemType(item_id: string): gachaItemTypeRes {
-  const findAvatar = AppCharacterData.find((i) => i.id === item_id);
+  const findAvatar = AppCharacterData.find((i) => i.id.toString() === item_id);
   if (findAvatar !== undefined) return ["角色", findAvatar];
-  const findWeapon = AppWeaponData.find((i) => i.id === item_id);
+  const findWeapon = AppWeaponData.find((i) => i.id.toString() === item_id);
   if (findWeapon !== undefined) return ["武器", findWeapon];
   return ["未知", "未知"];
 }
@@ -139,6 +139,7 @@ const TSUserGacha = {
   getUidList,
   getGachaCheck,
   getGachaRecords,
+  getGachaItemType,
   deleteGachaRecords,
   mergeUIGF,
 };

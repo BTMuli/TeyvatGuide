@@ -66,8 +66,9 @@
   </div>
 </template>
 <script lang="ts" setup>
-// vue
 import { onMounted, ref, watch } from "vue";
+
+import TSUserGacha from "../../plugins/Sqlite/modules/userGacha.js";
 
 interface GachaDataViewProps {
   dataType: "new" | "avatar" | "weapon" | "normal" | "mix";
@@ -179,8 +180,9 @@ function getStar5Avg(): string {
 }
 
 // 获取物品图标
-function getIcon(itemId: string, type: string): string {
-  if (type === "角色") {
+function getIcon(itemId: string): string {
+  const type = TSUserGacha.getGachaItemType(itemId);
+  if (type[0] === "角色") {
     return "/WIKI/character/" + itemId + ".webp";
   } else {
     return "/WIKI/weapon/" + itemId + ".webp";
