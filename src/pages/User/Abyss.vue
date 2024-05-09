@@ -301,6 +301,11 @@ async function uploadAbyss(): Promise<void> {
   color: var(--box-text-4);
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
+.ua-left-box :deep(.v-tabs.v-slide-group--vertical) {
+  max-height: calc(100% - 150px);
+}
+
 .ua-tabs-box {
   max-height: calc(100% - 150px);
   overflow-y: auto;
