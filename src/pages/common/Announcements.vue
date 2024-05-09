@@ -184,7 +184,7 @@ async function loadData(): Promise<void> {
 function getAnnoTime(content: string): string | false {
   const regexes = [
     /〓活动时间〓.*?\d\.\d版本期间持续开放/,
-    /(?:〓活动时间〓|〓任务开放时间〓).*?\d\.\d版本更新(?:完成|)后永久开放/,
+    /(?:〓活动时间〓|〓任务开放时间〓).*?(?:(\d\.\d版本更新(?:完成|))|(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}).*?)后永久开放/,
     /(?:〓(?:活动|折扣)时间〓|祈愿时间|【上架时间】).*?(\d\.\d版本更新后).*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/,
     /(?:〓(?:活动|折扣)时间〓|祈愿时间|【上架时间】).*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/,
     /〓活动时间〓.*?(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}).*?(\d\.\d版本结束)/,
@@ -198,8 +198,11 @@ function getAnnoTime(content: string): string | false {
     const res = content.match(regexes[1]);
     if (res === null) return false;
     const regex2 = /\d\.\d版本更新(?:完成|)后永久开放/;
+    const regex3 = /\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}/;
     const res2 = res[0].match(regex2);
-    return res2 === null ? false : res2[0];
+    if (res2 !== null) return res2[0];
+    const res3 = res[0].match(regex3);
+    return res3 === null ? false : `${res3[0]} 后永久开放`;
   }
   if (content.match(regexes[2])) {
     const res = content.match(regexes[2]);
@@ -211,7 +214,7 @@ function getAnnoTime(content: string): string | false {
   }
   if (content.match(regexes[4])) {
     const res = content.match(regexes[4]);
-    if (res != null) {
+    if (res !== null) {
       const cnt = res[0].match(/〓/g);
       if (cnt && cnt.length > 2) return false;
     }
