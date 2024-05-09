@@ -183,9 +183,9 @@ function getBox(id: number): TItemBoxData {
   display: flex;
   width: 100%;
   height: 100%;
-  flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  column-gap: 10px;
 }
 
 .gro-tabs {
@@ -194,8 +194,8 @@ function getBox(id: number): TItemBoxData {
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
-.v-tabs.v-slide-group--vertical {
-  height: 100%;
+.gro-container :deep(.v-tabs.v-slide-group--vertical) {
+  max-height: 100%;
 }
 
 .gro-window {
@@ -208,6 +208,11 @@ function getBox(id: number): TItemBoxData {
   justify-content: space-between;
   padding-right: 10px;
   overflow-y: scroll;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.gro-window :deep(.v-window__container) {
+  width: 100%;
 }
 
 .gro-pools {

@@ -69,22 +69,21 @@ onMounted(async () => {
 </script>
 <style lang="css" scoped>
 .hta-tt-box {
-  width: calc(100% - 10px);
+  display: flex;
   height: 100%;
+  column-gap: 10px;
 }
 
 .hta-tt-tab {
-  position: absolute;
   height: 100%;
   color: var(--box-text-4);
 }
 
 .hta-tt-window {
   overflow: auto;
-  width: calc(100% - 100px);
+  width: 100%;
   height: 100%;
   max-height: calc(100vh - 130px);
-  margin-left: 100px;
   overflow-x: hidden;
 }
 

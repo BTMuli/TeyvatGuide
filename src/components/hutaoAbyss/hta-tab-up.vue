@@ -43,19 +43,20 @@ onMounted(async () => {
 </script>
 <style lang="css" scoped>
 .hta-tu-box {
+  display: flex;
   height: 100%;
+  padding-top: 10px;
+  column-gap: 10px;
 }
 
 .hta-tu-tab {
-  position: absolute;
   height: 100%;
   color: var(--box-text-4);
 }
 
 .hta-tu-window {
-  width: calc(100% - 100px);
+  width: 100%;
   height: 100%;
-  margin-left: 100px;
 }
 
 .hta-tu-grid {

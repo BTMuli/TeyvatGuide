@@ -1,18 +1,18 @@
 <template>
-  <div class="hta-tu-box">
-    <v-tabs v-model="tab" direction="vertical" class="hta-tu-tab">
+  <div class="hta-tus-box">
+    <v-tabs v-model="tab" direction="vertical" class="hta-tus-tab">
       <v-tab value="9">第09层</v-tab>
       <v-tab value="10">第10层</v-tab>
       <v-tab value="11">第11层</v-tab>
       <v-tab value="12">第12层</v-tab>
     </v-tabs>
-    <v-window v-model="tab" class="hta-tu-window">
+    <v-window v-model="tab" class="hta-tus-window">
       <v-window-item
         v-for="selectItem in select"
         :key="selectItem.Floor"
         :value="selectItem.Floor.toString()"
       >
-        <div class="hta-tu-grid">
+        <div class="hta-tus-grid">
           <TibWikiAbyss v-for="item in selectItem.Ranks" :key="item.Item" :model-value="item" />
         </div>
       </v-window-item>
@@ -42,23 +42,25 @@ onMounted(async () => {
 });
 </script>
 <style lang="css" scoped>
-.hta-tu-box {
+.hta-tus-box {
+  display: flex;
   height: 100%;
+  padding-top: 10px;
+  column-gap: 10px;
 }
 
-.hta-tu-tab {
-  position: absolute;
+.hta-tus-tab {
+  width: 100px;
   height: 100%;
   color: var(--box-text-4);
 }
 
-.hta-tu-window {
-  width: calc(100% - 100px);
+.hta-tus-window {
+  width: 100%;
   height: 100%;
-  margin-left: 100px;
 }
 
-.hta-tu-grid {
+.hta-tus-grid {
   display: grid;
   overflow: auto;
   width: 100%;
