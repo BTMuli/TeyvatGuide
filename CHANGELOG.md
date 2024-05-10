@@ -2,12 +2,25 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-01-15
-Update: 2024-04-24
+Update: 2024-05-10
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-01-15 17:29:15`
 >
-> 更新于 `2024-04-24 15:36:42`
+> 更新于 `2024-05-10 23:55:15`
+
+## [0.4.7](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.7) (2024-05-10)
+
+- 🐛 修复 mention 类型渲染异常
+- ⚡️ 对签到链接跳转进行处理，优化部分网页活动打开
+- ♻️ 重构用户祈愿数据库相关处理
+- 🔥 隐藏网页登录模块 [`#108`](https://github.com/BTMuli/TeyvatGuide/issues/108)
+- ✨ 采用 ajv 验证 UIGF [`#109`](https://github.com/BTMuli/TeyvatGuide/issues/109)
+- 💄 完善公告`table`&`p`部分的渲染
+- 💄 调整帖子文本部分的样式
+- ♻️ UIAF重构，支持祈愿备份/恢复
+- ⚡️ 完善公告正则
+- ♻️ 名片组件抽离，wiki添加名片信息
 
 ## [0.4.6](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.6) (2024-04-24)
 
