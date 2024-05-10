@@ -167,7 +167,6 @@ async function confirmBackup(): Promise<void> {
   }
   loadingTitle.value = "正在备份数据...";
   loading.value = true;
-  loadingSub.value = "祈愿数据需单独备份";
   await backUpUserData(saveDir);
   loading.value = false;
   showSnackbar({ text: "数据已备份!" });

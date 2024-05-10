@@ -36,7 +36,8 @@ export async function backUpUserData(dir: string): Promise<void> {
   const uidList = await TSUserGacha.getUidList();
   for (const uid of uidList) {
     const dataGacha = await TSUserGacha.getGachaRecords(uid);
-    await exportUigfData(uid, dataGacha);
+    const savePath = `${dir}${path.sep}UIGF_${uid}.json`;
+    await exportUigfData(uid, dataGacha, savePath);
   }
 }
 
