@@ -10,19 +10,10 @@
       @keyup.enter="searchNamecard"
     />
     <div class="tw-nc-list">
-      <v-virtual-scroll :items="sortNameCardsData" :item-height="80" class="cards-list">
+      <v-virtual-scroll :items="sortNameCardsData" :item-height="80">
         <template #default="{ item }">
-          <v-list
-            :style="{ backgroundImage: item.name === '原神·印象' ? 'none' : `url(${item.bg})` }"
-            class="card-box"
-            @click="toNameCard(item)"
-          >
-            <v-list-item :title="item.name" :subtitle="item.desc">
-              <template #prepend>
-                <v-img width="80px" style="margin-right: 10px" :src="item.icon" />
-              </template>
-            </v-list-item>
-          </v-list>
+          <TopNamecard :data="item" @selected="toNameCard" />
+          <div style="height: 10px" />
         </template>
       </v-virtual-scroll>
     </div>
@@ -45,6 +36,7 @@ import { onMounted, ref } from "vue";
 
 import showSnackbar from "../../components/func/snackbar";
 import ToNamecard from "../../components/overlay/to-namecard.vue";
+import TopNamecard from "../../components/overlay/top-namecard.vue";
 import { AppNameCardsData } from "../../data";
 
 const curNameCard = ref<TGApp.App.NameCard.Item>();
@@ -133,19 +125,6 @@ function searchNamecard() {
   overflow: auto;
   height: calc(100vh - 100px);
   padding-right: 10px;
-}
-
-.card-box {
-  width: 100%;
-  height: 80px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 10px 50px 50px 10px;
-  margin-bottom: 10px;
-  background-color: var(--box-bg-1);
-  background-position: right;
-  background-repeat: no-repeat;
-  cursor: pointer;
-  font-family: var(--font-title);
 }
 
 .card-arrow {

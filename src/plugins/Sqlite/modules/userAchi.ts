@@ -43,7 +43,7 @@ async function getLatestAchiVersion(): Promise<string> {
  */
 async function getSeries(id?: number): Promise<TGApp.Sqlite.Achievement.SeriesTable[]> {
   const db = await TGSqlite.getDB();
-  let res: TGApp.Sqlite.Achievement.SeriesTable[] = [];
+  let res: TGApp.Sqlite.Achievement.SeriesTable[];
   if (id === undefined) {
     res = await db.select<TGApp.Sqlite.Achievement.SeriesTable>(
       "SELECT * FROM AchievementSeries ORDER BY `order`;",
@@ -65,7 +65,7 @@ async function getSeries(id?: number): Promise<TGApp.Sqlite.Achievement.SeriesTa
  */
 async function getAchievements(id?: string): Promise<TGApp.Sqlite.Achievement.SingleTable[]> {
   const db = await TGSqlite.getDB();
-  let res: TGApp.Sqlite.Achievement.SingleTable[] = [];
+  let res: TGApp.Sqlite.Achievement.SingleTable[];
   if (id === undefined) {
     res = await db.select<TGApp.Sqlite.Achievement.SingleTable>(
       "SELECT * FROM Achievements ORDER BY isCompleted,`order`;",

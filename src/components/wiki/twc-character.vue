@@ -1,4 +1,3 @@
-<!-- todo 角色名片 -->
 <template>
   <div class="twc-box" v-if="data !== undefined">
     <div class="twc-brief">
@@ -50,6 +49,7 @@
         </div>
       </div>
     </div>
+    <TopNamecard :data="nameCard" @selected="toNameCard" />
     <TwcMaterials :data="data.materials" />
     <TwcSkills :data="data.skills" />
     <TwcConstellations :data="data.constellation" />
@@ -94,17 +94,20 @@
       </v-expansion-panel>
     </v-expansion-panels>
   </div>
+  <ToNamecard v-if="hasNc" v-model="showNc" :data="nameCard" />
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
-import { WikiCharacterData } from "../../data";
+import { WikiCharacterData, AppNameCardsData, AppCharacterData } from "../../data";
 import Mys from "../../plugins/Mys";
 import { createTGWindow } from "../../utils/TGWindow";
 import { parseHtmlText } from "../../utils/toolFunc";
 import showSnackbar from "../func/snackbar";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
+import ToNamecard from "../overlay/to-namecard.vue";
+import TopNamecard from "../overlay/top-namecard.vue";
 
 import TwcConstellations from "./twc-constellations.vue";
 import TwcMaterials from "./twc-materials.vue";
@@ -115,6 +118,7 @@ interface TwcCharacterProps {
 }
 
 const props = defineProps<TwcCharacterProps>();
+const router = useRouter();
 
 const data = ref<TGApp.App.Character.WikiItem>();
 const box = computed(() => {
@@ -132,7 +136,9 @@ const box = computed(() => {
     clickable: false,
   };
 });
-const router = useRouter();
+const hasNc = ref(false);
+const showNc = ref(false);
+const nameCard = ref<TGApp.App.NameCard.Item>();
 
 async function loadData(): Promise<void> {
   const res = WikiCharacterData.find((item) => item.id === props.item.id);
@@ -144,6 +150,13 @@ async function loadData(): Promise<void> {
     return;
   }
   data.value = res;
+  const appC = AppCharacterData.find((i) => i.name === data.value?.name);
+  if (appC !== undefined) {
+    hasNc.value = true;
+    nameCard.value = AppNameCardsData.find((i) => i.name === appC.nameCard);
+  } else {
+    hasNc.value = false;
+  }
   showSnackbar({
     text: `成功获取角色 ${props.item.name} 的 Wiki 数据`,
     color: "success",
@@ -181,6 +194,11 @@ async function toWiki(): Promise<void> {
 async function toBirth(date: string): Promise<void> {
   const birth = date.replace("月", "/").replace("日", "");
   await router.push({ name: "留影叙佳期", params: { date: birth } });
+}
+
+function toNameCard(): void {
+  if (showNc.value === true) showNc.value = false;
+  showNc.value = true;
 }
 </script>
 <style lang="css" scoped>

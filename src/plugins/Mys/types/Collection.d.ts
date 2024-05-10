@@ -47,7 +47,7 @@ declare namespace TGApp.Plugins.Mys.Collection {
    * @property {boolean} is_following 是否关注
    * @property {number} post_num 帖子数量
    * @property {number} post_updated_at 帖子更新时间（秒级时间戳）
-   * @property {number} status 状态 // todo: 未知
+   * @property {number} status 状态
    * @property {string} title 标题
    * @property {number} uid 用户 ID
    * @property {number} view_num 浏览量

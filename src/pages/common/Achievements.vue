@@ -38,18 +38,7 @@
     <!-- 右侧内容-->
     <div class="right-wrap">
       <div v-if="curCardName !== '' && selectedSeries !== -1 && !loading">
-        <v-list
-          v-if="curCard"
-          class="achi-series"
-          :style="{ backgroundImage: `url(${curCard.bg})` }"
-          @click="openImg()"
-        >
-          <v-list-item :title="curCard.name" :subtitle="curCard.desc">
-            <template #prepend>
-              <v-img width="80px" style="margin-right: 10px" :src="curCard.icon" />
-            </template>
-          </v-list-item>
-        </v-list>
+        <TopNamecard :data="curCard" @selected="openImg()" />
       </div>
       <div
         v-for="(achievement, index) in renderSelect"
@@ -125,6 +114,7 @@ import showSnackbar from "../../components/func/snackbar";
 import ToAchiInfo from "../../components/overlay/to-achiInfo.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import ToNamecard from "../../components/overlay/to-namecard.vue";
+import TopNamecard from "../../components/overlay/top-namecard.vue";
 import { AppAchievementSeriesData, AppNameCardsData } from "../../data";
 import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
 import { useAchievementsStore } from "../../store/modules/achievements";
@@ -627,19 +617,6 @@ async function getAchiData(
 <!-- 右侧成就 -->
 <style lang="css" scoped>
 /* 成就卡片 */
-.achi-series {
-  position: relative;
-  width: 100%;
-  height: 80px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 10px 50px 50px 10px;
-  background-color: var(--box-bg-1);
-  background-position: right;
-  background-repeat: no-repeat;
-  cursor: pointer;
-  font-family: var(--font-title);
-}
-
 .card-achi {
   position: relative;
   display: flex;
