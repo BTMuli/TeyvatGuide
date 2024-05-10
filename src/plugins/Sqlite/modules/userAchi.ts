@@ -141,10 +141,12 @@ async function updateAchievement(data: TGApp.Sqlite.Achievement.SingleTable): Pr
  */
 function transDb2Uiaf(data: TGApp.Sqlite.Achievement.SingleTable): TGApp.Plugins.UIAF.Achievement {
   const isCompleted = data.isCompleted === 1;
+  let timestamp = 0;
+  if (isCompleted) timestamp = new Date(data.completedTime).getTime();
   const status = getUiafStatus(isCompleted, data.progress);
   return {
     id: data.id,
-    timestamp: data.timestamp,
+    timestamp: timestamp,
     current: data.progress,
     status,
   };

@@ -54,7 +54,7 @@ export async function getUiafHeader(): Promise<TGApp.Plugins.UIAF.Export> {
  */
 export async function verifyUiafData(path: string): Promise<boolean> {
   const fileData: string = await fs.readTextFile(path);
-  const ajv = new Ajv({ strict: false });
+  const ajv = new Ajv();
   const validate = ajv.compile(UiafSchema);
   try {
     const fileJson = JSON.parse(fileData);
