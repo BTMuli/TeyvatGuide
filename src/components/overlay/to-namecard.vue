@@ -95,7 +95,7 @@ function onCancel() {
 
 function parseNamecard(desc: string): string {
   let array = [];
-  if (desc.startsWith("名片纹饰。「")) {
+  if (desc.startsWith("名片纹饰。「") && desc.endsWith("」")) {
     array.push("名片纹饰。");
     const reg = /「.+?」/g;
     const match = desc.match(reg);
