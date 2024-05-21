@@ -1,14 +1,13 @@
 <template>
-  <div
+  <span
     v-if="mode == 'link'"
     class="tp-text-link"
     @click="toLink()"
     :title="props.data.attributes?.link"
     :style="getTextStyle()"
   >
-    <v-icon size="small" v-if="!props.data.insert.startsWith('>>')">mdi-link-variant</v-icon>
-    <span>{{ props.data.insert }}</span>
-  </div>
+    {{ props.data.insert }}
+  </span>
   <span v-else-if="mode == 'emoji'" class="tp-text-emoji">
     <img :src="getEmojiUrl()" :alt="getEmojiName()" :title="getEmojiName()" />
   </span>
@@ -18,9 +17,7 @@
     :data="emoji"
     :key="indexE"
   />
-  <span v-else :style="getTextStyle()">
-    {{ props.data.insert }}
-  </span>
+  <span v-else :style="getTextStyle()">{{ props.data.insert }}</span>
 </template>
 <script lang="ts" setup>
 import { onMounted, ref, StyleValue, toRaw } from "vue";
@@ -157,11 +154,10 @@ function getEmojiName() {
 </script>
 <style lang="css" scoped>
 .tp-text-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   color: #00c3ff;
   cursor: pointer;
+  text-decoration: underline solid #00c3ff;
+  text-underline-position: under;
   transform: translateY(2px);
 }
 
