@@ -13,8 +13,8 @@
     <div v-for="i in next" :key="i.role_id" class="tcb-item">
       <img :src="i.head_icon" :alt="i.name" @click="toBirth(i)" :title="i.name" />
       <div class="tcb-item-info">
-        <span>{{ i.name }} 所属：{{ i.belong }}</span>
-        <span>{{ i.introduce }}</span>
+        <span>{{ i.name }} 所属：{{ i.belong === "" ? "未知" : i.belong }}</span>
+        <span>{{ parseDesc(i.introduce) }}</span>
       </div>
     </div>
   </div>
@@ -59,6 +59,12 @@ function toBirth(type: TGApp.Archive.Birth.RoleItem | true) {
   }
   router.push({ name: "留影叙佳期", params: { date: dateStr } });
 }
+
+function parseDesc(intro: string): string {
+  const dom = document.createElement("div");
+  dom.innerHTML = intro;
+  return dom.innerText;
+}
 </script>
 <style lang="css" scoped>
 .tcb-container {
@@ -72,6 +78,7 @@ function toBirth(type: TGApp.Archive.Birth.RoleItem | true) {
   border-radius: 5px;
   box-shadow: 0 0 5px inset var(--common-shadow-2);
   overflow-y: auto;
+  row-gap: 10px;
 }
 
 .tcb-top-none,
