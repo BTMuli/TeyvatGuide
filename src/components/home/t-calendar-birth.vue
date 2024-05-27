@@ -5,9 +5,17 @@
       <span>今天没有角色过生日哦~</span>
     </div>
     <div class="tcb-top-active" v-else>
+      <span>今天是</span>
+      <img
+        v-for="i in cur"
+        :key="i.role_id"
+        class="tcb-cur"
+        :alt="i.name"
+        :src="i.head_icon"
+        :title="i.name"
+      />
+      <span>的生日哦~</span>
       <img @click="toBirth(true)" src="/source/UI/act_birthday.png" alt="empty" class="active" />
-      <span>今天是{{ cur.map((i) => i.name).join("、") }}的生日哦~</span>
-      <img v-for="i in cur" :key="i.role_id" class="tcb-cur" :alt="i.name" :src="i.head_icon" />
     </div>
     <div>即将到来：{{ next[0].role_birthday }}</div>
     <div v-for="i in next" :key="i.role_id" class="tcb-item">
@@ -68,12 +76,8 @@ function parseDesc(intro: string): string {
 </script>
 <style lang="css" scoped>
 .tcb-container {
-  display: flex;
   width: 100%;
   height: 100%;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
   padding: 10px;
   border-radius: 5px;
   box-shadow: 0 0 5px inset var(--common-shadow-2);
@@ -84,9 +88,9 @@ function parseDesc(intro: string): string {
 .tcb-top-none,
 .tcb-top-active {
   display: flex;
-  height: 100px;
   align-items: center;
   justify-content: center;
+  margin-bottom: 10px;
 }
 
 .tcb-top-none img,
@@ -96,6 +100,7 @@ function parseDesc(intro: string): string {
 }
 
 .tcb-top-active img.active {
+  margin-left: auto;
   cursor: pointer;
 }
 
@@ -103,7 +108,6 @@ function parseDesc(intro: string): string {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  margin-left: 5px;
   background: var(--common-shadow-1);
 }
 
@@ -115,6 +119,7 @@ function parseDesc(intro: string): string {
   justify-content: flex-start;
   padding: 5px;
   border-radius: 10px;
+  margin-top: 10px;
   background: var(--box-bg-1);
 }
 
