@@ -670,6 +670,16 @@
     "profile": "/source/nameCard/profile/成就·掣鲸.webp"
   },
   {
+    "name": "成就·诗页",
+    "index": 203,
+    "type": 1,
+    "desc": "名片纹饰。谁人所织造的梦幻是虚假的，但是最后指向了真实不虚的东西。在这条的路的尽头，一定有着「回忆」化成的永恒吧。",
+    "source": "达成「幻想真境剧诗·第一辑」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/成就·诗页.webp",
+    "bg": "/source/nameCard/bg/成就·诗页.webp",
+    "profile": "/source/nameCard/profile/成就·诗页.webp"
+  },
+  {
     "name": "安柏·兔兔",
     "index": 3,
     "type": 2,
@@ -1470,6 +1480,36 @@
     "profile": "/source/nameCard/profile/阿蕾奇诺·法度.webp"
   },
   {
+    "name": "克洛琳德·取人",
+    "index": 200,
+    "type": 2,
+    "desc": "名片纹饰。用心的主持人在「桌上剧团」游戏中会切换帽子来表示身份的切换。那克洛琳德主持游戏是不是——想什么呢，她游泳都没摘过这顶帽子。",
+    "source": "克洛琳德的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/克洛琳德·取人.webp",
+    "bg": "/source/nameCard/bg/克洛琳德·取人.webp",
+    "profile": "/source/nameCard/profile/克洛琳德·取人.webp"
+  },
+  {
+    "name": "希格雯·疗法",
+    "index": 201,
+    "type": 2,
+    "desc": "名片纹饰。希格雯会好好照顾病患的。注射治疗没有那么痛，药物治疗的话，虽然也不好吃，但味道至少不像是特制奶昔那么荒芜。",
+    "source": "希格雯的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/希格雯·疗法.webp",
+    "bg": "/source/nameCard/bg/希格雯·疗法.webp",
+    "profile": "/source/nameCard/profile/希格雯·疗法.webp"
+  },
+  {
+    "name": "赛索斯·跋灵",
+    "index": 202,
+    "type": 2,
+    "desc": "名片纹饰。跋灵各有象征。看起来像是沙漏，但是这其实象征着赤王统治里上下风蚀赤土的联合。而其中的明灯则是赫曼努比斯的智慧。",
+    "source": "赛索斯的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/赛索斯·跋灵.webp",
+    "bg": "/source/nameCard/bg/赛索斯·跋灵.webp",
+    "profile": "/source/nameCard/profile/赛索斯·跋灵.webp"
+  },
+  {
     "name": "纪行·捕风",
     "index": 2,
     "type": 3,
@@ -1788,6 +1828,16 @@
     "icon": "/source/nameCard/icon/纪行·邦摇.webp",
     "bg": "/source/nameCard/bg/纪行·邦摇.webp",
     "profile": "/source/nameCard/profile/纪行·邦摇.webp"
+  },
+  {
+    "name": "纪行·衍演",
+    "index": 204,
+    "type": 3,
+    "desc": "名片纹饰。「胜利只是游戏者的错觉，沉默方是棋盘上的终结。所以唯一的善行是落子，而唯一的恶行是弃局。」「少玩点『推演』吧！」",
+    "source": "纪行系统奖励获取。",
+    "icon": "/source/nameCard/icon/纪行·衍演.webp",
+    "bg": "/source/nameCard/bg/纪行·衍演.webp",
+    "profile": "/source/nameCard/profile/纪行·衍演.webp"
   },
   {
     "name": "庆典·无相",

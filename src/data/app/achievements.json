@@ -12436,6 +12436,126 @@
     }
   },
   {
+    "id": 82203,
+    "series": 50,
+    "order": 2206,
+    "name": "协演的歌舞剧",
+    "description": "幻想真境剧诗：邀请过助演角色的情况下，完成整场演出。",
+    "reward": 5,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82204,
+    "series": 50,
+    "order": 2207,
+    "name": "无法预测的命运馈赠",
+    "description": "幻想真境剧诗：在任意难度下，完成整场演出时，选择过至少8次神秘收获事件。",
+    "reward": 5,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82205,
+    "series": 50,
+    "order": 2208,
+    "name": "可靠的叙事者",
+    "description": "幻想真境剧诗：在任意难度下，完成整场演出时，选择过至少8次奇妙助益事件。",
+    "reward": 5,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82206,
+    "series": 50,
+    "order": 2209,
+    "name": "比珠宝还珍贵",
+    "description": "累计获得3枚玩具勋章。",
+    "reward": 5,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82207,
+    "series": 50,
+    "order": 2210,
+    "name": "比珠宝还珍贵",
+    "description": "累计获得6枚玩具勋章。",
+    "reward": 10,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82208,
+    "series": 50,
+    "order": 2211,
+    "name": "比珠宝还珍贵",
+    "description": "累计获得9枚玩具勋章。",
+    "reward": 20,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82209,
+    "series": 50,
+    "order": 2212,
+    "name": "魔法的用途",
+    "description": "在小狼提供的「剧演嘉奖」中，累计学习过3次表演诀窍。",
+    "reward": 5,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82210,
+    "series": 50,
+    "order": 2203,
+    "name": "首演之夜",
+    "description": "幻想真境剧诗：完成任意难度的第3幕演出。",
+    "reward": 5,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82211,
+    "series": 50,
+    "order": 2204,
+    "name": "首演之夜",
+    "description": "幻想真境剧诗：完成任意难度的第6幕演出。",
+    "reward": 10,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82212,
+    "series": 50,
+    "order": 2205,
+    "name": "首演之夜",
+    "description": "幻想真境剧诗：完成任意难度的第8幕演出。",
+    "reward": 20,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
     "id": 84000,
     "series": 0,
     "order": 4001,
@@ -15363,6 +15483,54 @@
           "type": "魔神任务"
         }
       ]
+    }
+  },
+  {
+    "id": 84317,
+    "series": 0,
+    "order": 5096,
+    "name": "只有我消失的村落",
+    "description": "调查「只存在于记忆里的人」。",
+    "reward": 5,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 84318,
+    "series": 0,
+    "order": 5097,
+    "name": "渴盼已久之时",
+    "description": "在你不知道的时候，戴因斯雷布与你的血亲展开了战斗…",
+    "reward": 5,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 84319,
+    "series": 0,
+    "order": 5098,
+    "name": "存在的证明",
+    "description": "来到卡利贝尔的「意识空间」。",
+    "reward": 5,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 84320,
+    "series": 0,
+    "order": 5099,
+    "name": "睡前故事",
+    "description": "完成「睡前故事」。",
+    "reward": 10,
+    "version": "4.7",
+    "trigger": {
+      "type": "Unknown"
     }
   },
   {

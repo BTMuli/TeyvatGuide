@@ -106,7 +106,6 @@ async function searchAchievements(
   if (keyword === "") return await getAchievements();
   const db = await TGSqlite.getDB();
   const versionReg = /^v\d+(\.\d+)?$/;
-  console.log(versionReg.test(keyword));
   if (versionReg.test(keyword)) {
     const version = keyword.replace("v", "");
     return await db.select<TGApp.Sqlite.Achievement.SingleTable>(

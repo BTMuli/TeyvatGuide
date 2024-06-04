@@ -3,7 +3,7 @@
     "id": 0,
     "order": 1,
     "name": "天地万象",
-    "version": "4.6",
+    "version": "4.7",
     "card": "",
     "icon": "/icon/achievement/UI_AchievementIcon_O001.webp"
   },
@@ -398,5 +398,13 @@
     "version": "4.6",
     "card": "枫丹·调律",
     "icon": "/icon/achievement/UI_AchievementIcon_A018.webp"
+  },
+  {
+    "id": 50,
+    "order": 51,
+    "name": "幻想真境剧诗·第一辑",
+    "version": "4.7",
+    "card": "成就·诗页",
+    "icon": "/icon/achievement/UI_AchievementIcon_B006.webp"
   }
 ]

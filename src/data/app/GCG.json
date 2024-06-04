@@ -121,6 +121,19 @@
     }
   },
   {
+    "id": 1111,
+    "contentId": 0,
+    "name": "莱欧斯利",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/莱欧斯利.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_CRYO": "冰元素",
+      "GCG_TAG_WEAPON_CATALYST": "法器",
+      "GCG_TAG_NATION_FONTAINE": "枫丹",
+      "GCG_TAG_FACTION_OUSIA": "始基力：荒性"
+    }
+  },
+  {
     "id": 1201,
     "contentId": 5372,
     "name": "芭芭拉",
@@ -239,6 +252,19 @@
       "GCG_TAG_WEAPON_CATALYST": "法器",
       "GCG_TAG_NATION_FONTAINE": "枫丹",
       "GCG_TAG_FACTION_PNEUMA": "始基力：芒性"
+    }
+  },
+  {
+    "id": 1211,
+    "contentId": 0,
+    "name": "芙宁娜",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/芙宁娜.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_HYDRO": "水元素",
+      "GCG_TAG_WEAPON_SWORD": "单手剑",
+      "GCG_TAG_NATION_FONTAINE": "枫丹",
+      "GCG_TAG_FACTION_OUSIA": "始基力：荒性"
     }
   },
   {
@@ -374,6 +400,18 @@
       "GCG_TAG_ELEMENT_PYRO": "火元素",
       "GCG_TAG_WEAPON_POLE": "长柄武器",
       "GCG_TAG_NATION_INAZUMA": "稻妻"
+    }
+  },
+  {
+    "id": 1312,
+    "contentId": 0,
+    "name": "辛焱",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/辛焱.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_PYRO": "火元素",
+      "GCG_TAG_WEAPON_CLAYMORE": "双手剑",
+      "GCG_TAG_NATION_LIYUE": "璃月"
     }
   },
   {
@@ -690,6 +728,18 @@
     }
   },
   {
+    "id": 1607,
+    "contentId": 0,
+    "name": "云堇",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/云堇.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_GEO": "岩元素",
+      "GCG_TAG_WEAPON_POLE": "长柄武器",
+      "GCG_TAG_NATION_LIYUE": "璃月"
+    }
+  },
+  {
     "id": 1701,
     "contentId": 5357,
     "name": "柯莱",
@@ -774,6 +824,18 @@
     }
   },
   {
+    "id": 1708,
+    "contentId": 0,
+    "name": "卡维",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/卡维.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_DENDRO": "草元素",
+      "GCG_TAG_WEAPON_CLAYMORE": "双手剑",
+      "GCG_TAG_NATION_SUMERU": "须弥"
+    }
+  },
+  {
     "id": 2101,
     "contentId": 6565,
     "name": "愚人众·冰萤术士",
@@ -839,6 +901,18 @@
     "name": "深渊使徒·激流",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/深渊使徒·激流.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_HYDRO": "水元素",
+      "GCG_TAG_WEAPON_NONE": "其他武器",
+      "GCG_TAG_CAMP_MONSTER": "魔物"
+    }
+  },
+  {
+    "id": 2204,
+    "contentId": 0,
+    "name": "吞星之鲸",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/吞星之鲸.webp",
     "tags": {
       "GCG_TAG_ELEMENT_HYDRO": "水元素",
       "GCG_TAG_WEAPON_NONE": "其他武器",
@@ -942,6 +1016,19 @@
     }
   },
   {
+    "id": 2405,
+    "contentId": 0,
+    "name": "圣骸毒蝎",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/圣骸毒蝎.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_ELECTRO": "雷元素",
+      "GCG_TAG_WEAPON_NONE": "其他武器",
+      "GCG_TAG_CAMP_MONSTER": "魔物",
+      "GCG_TAG_CAMP_SACREAD": "圣骸兽"
+    }
+  },
+  {
     "id": 2501,
     "contentId": 5525,
     "name": "魔偶剑鬼",
@@ -963,6 +1050,19 @@
       "GCG_TAG_ELEMENT_ANEMO": "风元素",
       "GCG_TAG_WEAPON_NONE": "其他武器",
       "GCG_TAG_CAMP_MONSTER": "魔物"
+    }
+  },
+  {
+    "id": 2503,
+    "contentId": 0,
+    "name": "圣骸飞蛇",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/圣骸飞蛇.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_ANEMO": "风元素",
+      "GCG_TAG_WEAPON_NONE": "其他武器",
+      "GCG_TAG_CAMP_MONSTER": "魔物",
+      "GCG_TAG_CAMP_SACREAD": "圣骸兽"
     }
   },
   {
@@ -1001,6 +1101,42 @@
       "GCG_TAG_WEAPON_NONE": "其他武器",
       "GCG_TAG_CAMP_MONSTER": "魔物"
     }
+  },
+  {
+    "id": 2702,
+    "contentId": 0,
+    "name": "阿佩普的绿洲守望者",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/阿佩普的绿洲守望者.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_DENDRO": "草元素",
+      "GCG_TAG_WEAPON_NONE": "其他武器",
+      "GCG_TAG_CAMP_MONSTER": "魔物"
+    }
+  },
+  {
+    "id": 0,
+    "contentId": 501317,
+    "name": "雷丘丘萨满",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/雷丘丘萨满.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 501316,
+    "name": "冰史莱姆",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/冰史莱姆.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 501315,
+    "name": "大型水史莱姆",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/大型水史莱姆.webp",
+    "tags": {}
   },
   {
     "id": 0,
@@ -1504,6 +1640,17 @@
     }
   },
   {
+    "id": 211111,
+    "contentId": 0,
+    "name": "予行恶者以惩惧",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/予行恶者以惩惧.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
     "id": 212011,
     "contentId": 5496,
     "name": "光辉的季节",
@@ -1608,6 +1755,17 @@
     "name": "古海孑遗的权柄",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/古海孑遗的权柄.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
+    "id": 212111,
+    "contentId": 0,
+    "name": "「诸君听我颂，共举爱之杯！」",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/「诸君听我颂，共举爱之杯！」.webp",
     "tags": {
       "GCG_TAG_TALENT": "天赋",
       "GCG_TAG_SLOWLY": "战斗行动"
@@ -1729,6 +1887,17 @@
     "name": "僚佐的才巧",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/僚佐的才巧.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
+    "id": 213121,
+    "contentId": 0,
+    "name": "地狱里摇摆",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/地狱里摇摆.webp",
     "tags": {
       "GCG_TAG_TALENT": "天赋",
       "GCG_TAG_SLOWLY": "战斗行动"
@@ -2020,6 +2189,17 @@
     }
   },
   {
+    "id": 216071,
+    "contentId": 0,
+    "name": "庄谐并举",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/庄谐并举.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
     "id": 217011,
     "contentId": 5441,
     "name": "飞叶迴斜",
@@ -2097,6 +2277,17 @@
     }
   },
   {
+    "id": 217081,
+    "contentId": 0,
+    "name": "预算师的技艺",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/预算师的技艺.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
     "id": 221011,
     "contentId": 6622,
     "name": "冰萤寒光",
@@ -2157,6 +2348,17 @@
     "icon": "/WIKI/GCG/normal/暗流涌动.webp",
     "tags": {
       "GCG_TAG_TALENT": "天赋"
+    }
+  },
+  {
+    "id": 222041,
+    "contentId": 0,
+    "name": "无光鲸噬",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/无光鲸噬.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
     }
   },
   {
@@ -2245,6 +2447,16 @@
     }
   },
   {
+    "id": 224051,
+    "contentId": 0,
+    "name": "亡雷凝蓄",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/亡雷凝蓄.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋"
+    }
+  },
+  {
     "id": 225011,
     "contentId": 5381,
     "name": "机巧神通",
@@ -2264,6 +2476,16 @@
     "tags": {
       "GCG_TAG_TALENT": "天赋",
       "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
+    "id": 225031,
+    "contentId": 0,
+    "name": "亡风啸卷",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/亡风啸卷.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋"
     }
   },
   {
@@ -2297,6 +2519,16 @@
     "tags": {
       "GCG_TAG_TALENT": "天赋",
       "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
+    "id": 227021,
+    "contentId": 0,
+    "name": "万千子嗣",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/万千子嗣.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋"
     }
   },
   {
@@ -2388,6 +2620,17 @@
     }
   },
   {
+    "id": 311109,
+    "contentId": 0,
+    "name": "金流监督",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/金流监督.webp",
+    "tags": {
+      "GCG_TAG_WEAPON": "武器",
+      "GCG_TAG_WEAPON_CATALYST": "法器"
+    }
+  },
+  {
     "id": 311201,
     "contentId": 5409,
     "name": "鸦羽弓",
@@ -2454,6 +2697,17 @@
     }
   },
   {
+    "id": 311207,
+    "contentId": 0,
+    "name": "竭泽",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/竭泽.webp",
+    "tags": {
+      "GCG_TAG_WEAPON": "武器",
+      "GCG_TAG_WEAPON_BOW": "弓"
+    }
+  },
+  {
     "id": 311301,
     "contentId": 5412,
     "name": "白铁大剑",
@@ -2514,6 +2768,17 @@
     "name": "苇海信标",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/苇海信标.webp",
+    "tags": {
+      "GCG_TAG_WEAPON": "武器",
+      "GCG_TAG_WEAPON_CLAYMORE": "双手剑"
+    }
+  },
+  {
+    "id": 311307,
+    "contentId": 0,
+    "name": "森林王器",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/森林王器.webp",
     "tags": {
       "GCG_TAG_WEAPON": "武器",
       "GCG_TAG_WEAPON_CLAYMORE": "双手剑"
@@ -2679,6 +2944,17 @@
     "name": "原木刀",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/原木刀.webp",
+    "tags": {
+      "GCG_TAG_WEAPON": "武器",
+      "GCG_TAG_WEAPON_SWORD": "单手剑"
+    }
+  },
+  {
+    "id": 311508,
+    "contentId": 0,
+    "name": "静水流涌之辉",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/静水流涌之辉.webp",
     "tags": {
       "GCG_TAG_WEAPON": "武器",
       "GCG_TAG_WEAPON_SWORD": "单手剑"
@@ -2915,6 +3191,16 @@
     }
   },
   {
+    "id": 312024,
+    "contentId": 0,
+    "name": "逐影猎人",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/逐影猎人.webp",
+    "tags": {
+      "GCG_TAG_ARTIFACT": "圣遗物"
+    }
+  },
+  {
     "id": 312025,
     "contentId": 501004,
     "name": "黄金剧团的奖赏",
@@ -2925,11 +3211,31 @@
     }
   },
   {
+    "id": 312026,
+    "contentId": 0,
+    "name": "黄金剧团",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/黄金剧团.webp",
+    "tags": {
+      "GCG_TAG_ARTIFACT": "圣遗物"
+    }
+  },
+  {
     "id": 312027,
     "contentId": 501152,
     "name": "紫晶的花冠",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/紫晶的花冠.webp",
+    "tags": {
+      "GCG_TAG_ARTIFACT": "圣遗物"
+    }
+  },
+  {
+    "id": 312028,
+    "contentId": 0,
+    "name": "乐园遗落之花",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/乐园遗落之花.webp",
     "tags": {
       "GCG_TAG_ARTIFACT": "圣遗物"
     }
@@ -3265,6 +3571,26 @@
     }
   },
   {
+    "id": 321020,
+    "contentId": 0,
+    "name": "赤王陵",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/赤王陵.webp",
+    "tags": {
+      "GCG_TAG_PLACE": "场地"
+    }
+  },
+  {
+    "id": 321021,
+    "contentId": 0,
+    "name": "中央实验室遗址",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/中央实验室遗址.webp",
+    "tags": {
+      "GCG_TAG_PLACE": "场地"
+    }
+  },
+  {
     "id": 322001,
     "contentId": 5448,
     "name": "派蒙",
@@ -3515,6 +3841,16 @@
     }
   },
   {
+    "id": 322026,
+    "contentId": 0,
+    "name": "亚瑟先生",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/亚瑟先生.webp",
+    "tags": {
+      "GCG_TAG_ALLY": "伙伴"
+    }
+  },
+  {
     "id": 323001,
     "contentId": 5446,
     "name": "参量质变仪",
@@ -3585,6 +3921,16 @@
     }
   },
   {
+    "id": 323008,
+    "contentId": 0,
+    "name": "苦舍桓",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/苦舍桓.webp",
+    "tags": {
+      "GCG_TAG_ITEM": "道具"
+    }
+  },
+  {
     "id": 330001,
     "contentId": 500025,
     "name": "旧时庭园",
@@ -3650,6 +3996,16 @@
     "name": "抗争之日·碎梦之时",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/抗争之日·碎梦之时.webp",
+    "tags": {
+      "GCG_TAG_LEGEND": "秘传"
+    }
+  },
+  {
+    "id": 330008,
+    "contentId": 0,
+    "name": "旧日鏖战",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/旧日鏖战.webp",
     "tags": {
       "GCG_TAG_LEGEND": "秘传"
     }
@@ -3824,6 +4180,14 @@
     "name": "草与智慧",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/草与智慧.webp",
+    "tags": null
+  },
+  {
+    "id": 331805,
+    "contentId": 0,
+    "name": "水与正义",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/水与正义.webp",
     "tags": null
   },
   {
@@ -4070,10 +4434,18 @@
   },
   {
     "id": 332031,
-    "contentId": 0,
+    "contentId": 501149,
     "name": "海中寻宝",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/海中寻宝.webp",
+    "tags": null
+  },
+  {
+    "id": 332032,
+    "contentId": 0,
+    "name": "幻戏倒计时：3",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/幻戏倒计时：3.webp",
     "tags": null
   },
   {

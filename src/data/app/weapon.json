@@ -1,5 +1,14 @@
 [
   {
+    "id": 15513,
+    "contentId": 0,
+    "name": "白雨心弦",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/15513.webp"
+  },
+  {
     "id": 15512,
     "contentId": 6936,
     "name": "最初的大魔术",
@@ -306,6 +315,15 @@
     "icon": "/WIKI/weapon/12501.webp"
   },
   {
+    "id": 11515,
+    "contentId": 0,
+    "name": "赦罪",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/11515.webp"
+  },
+  {
     "id": 11514,
     "contentId": 500996,
     "name": "有乐御簾切",
@@ -412,6 +430,15 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "icon": "/WIKI/weapon/15427.webp"
+  },
+  {
+    "id": 15426,
+    "contentId": 0,
+    "name": "筑云",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/15426.webp"
   },
   {
     "id": 15425,

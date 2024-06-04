@@ -1,5 +1,17 @@
 [
   {
+    "id": 10000098,
+    "contentId": 501213,
+    "name": "克洛琳德",
+    "title": "秉烛狝影",
+    "area": "枫丹",
+    "birthday": [9, 20],
+    "star": 5,
+    "element": "雷",
+    "weapon": "单手剑",
+    "nameCard": "克洛琳德·取人"
+  },
+  {
     "id": 10000096,
     "contentId": 501157,
     "name": "阿蕾奇诺",
@@ -10,6 +22,18 @@
     "element": "火",
     "weapon": "长柄武器",
     "nameCard": "阿蕾奇诺·法度"
+  },
+  {
+    "id": 10000095,
+    "contentId": 501214,
+    "name": "希格雯",
+    "title": "龙女妙变",
+    "area": "枫丹",
+    "birthday": [3, 30],
+    "star": 5,
+    "element": "水",
+    "weapon": "弓",
+    "nameCard": "希格雯·疗法"
   },
   {
     "id": 10000094,
@@ -514,6 +538,18 @@
     "element": "冰",
     "weapon": "单手剑",
     "nameCard": "神里绫华·扇子"
+  },
+  {
+    "id": 10000097,
+    "contentId": 501212,
+    "name": "赛索斯",
+    "title": "衡明知度",
+    "area": "须弥",
+    "birthday": [5, 31],
+    "star": 4,
+    "element": "雷",
+    "weapon": "弓",
+    "nameCard": "赛索斯·跋灵"
   },
   {
     "id": 10000092,

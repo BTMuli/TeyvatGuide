@@ -880,6 +880,50 @@
     }
   },
   {
+    "id": 10000095,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "希格雯",
+    "itemType": "character",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "elementIcon": "/icon/element/水元素.webp",
+    "icon": "/WIKI/character/10000095.webp",
+    "materials": [
+      {
+        "id": 104338,
+        "name": "「公平」的教导",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/104338.webp"
+      },
+      {
+        "id": 104339,
+        "name": "「公平」的指引",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/104339.webp"
+      },
+      {
+        "id": 104340,
+        "name": "「公平」的哲学",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/104340.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "旋韵",
+      "icon": "/icon/nation/枫丹.webp"
+    }
+  },
+  {
     "id": 10000016,
     "contentId": 75,
     "dropDays": [2, 5, 7],
@@ -1537,6 +1581,50 @@
       "area": "须弥",
       "name": "圆镜",
       "icon": "/icon/nation/须弥.webp"
+    }
+  },
+  {
+    "id": 10000098,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "克洛琳德",
+    "itemType": "character",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "elementIcon": "/icon/element/雷元素.webp",
+    "icon": "/WIKI/character/10000098.webp",
+    "materials": [
+      {
+        "id": 104341,
+        "name": "「正义」的教导",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/104341.webp"
+      },
+      {
+        "id": 104342,
+        "name": "「正义」的指引",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/104342.webp"
+      },
+      {
+        "id": 104343,
+        "name": "「正义」的哲学",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/104343.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "箴铭",
+      "icon": "/icon/nation/枫丹.webp"
     }
   },
   {
@@ -3300,6 +3388,50 @@
     }
   },
   {
+    "id": 10000097,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "赛索斯",
+    "itemType": "character",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "elementIcon": "/icon/element/雷元素.webp",
+    "icon": "/WIKI/character/10000097.webp",
+    "materials": [
+      {
+        "id": 104335,
+        "name": "「笃行」的教导",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/104335.webp"
+      },
+      {
+        "id": 104336,
+        "name": "「笃行」的指引",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/104336.webp"
+      },
+      {
+        "id": 104337,
+        "name": "「笃行」的哲学",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/104337.webp"
+      }
+    ],
+    "source": {
+      "index": 4,
+      "area": "须弥",
+      "name": "律藏",
+      "icon": "/icon/nation/须弥.webp"
+    }
+  },
+  {
     "id": 10000043,
     "contentId": 1055,
     "dropDays": [1, 4, 7],
@@ -4081,6 +4213,57 @@
     }
   },
   {
+    "id": 11515,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "赦罪",
+    "itemType": "weapon",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/11515.webp",
+    "materials": [
+      {
+        "id": 114049,
+        "name": "悠古弦音的残章",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114049.webp"
+      },
+      {
+        "id": 114050,
+        "name": "悠古弦音的断章",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114050.webp"
+      },
+      {
+        "id": 114051,
+        "name": "悠古弦音的乐章",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114051.webp"
+      },
+      {
+        "id": 114052,
+        "name": "悠古弦音的回响",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114052.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "机思",
+      "icon": "/icon/nation/枫丹.webp"
+    }
+  },
+  {
     "id": 12501,
     "contentId": 291,
     "dropDays": [2, 5, 7],
@@ -4842,6 +5025,57 @@
       "index": 5,
       "area": "枫丹",
       "name": "机思",
+      "icon": "/icon/nation/枫丹.webp"
+    }
+  },
+  {
+    "id": 15513,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "白雨心弦",
+    "itemType": "weapon",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/15513.webp",
+    "materials": [
+      {
+        "id": 114053,
+        "name": "纯圣露滴的滤渣",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114053.webp"
+      },
+      {
+        "id": 114054,
+        "name": "纯圣露滴的凝华",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114054.webp"
+      },
+      {
+        "id": 114055,
+        "name": "纯圣露滴的醴泉",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114055.webp"
+      },
+      {
+        "id": 114056,
+        "name": "纯圣露滴的真粹",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114056.webp"
+      }
+    ],
+    "source": {
+      "index": 5,
+      "area": "枫丹",
+      "name": "匠理",
       "icon": "/icon/nation/枫丹.webp"
     }
   },
@@ -8680,6 +8914,57 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/弓.webp",
     "icon": "/WIKI/weapon/15411.webp",
+    "materials": [
+      {
+        "id": 114021,
+        "name": "漆黑陨铁的一粒",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/114021.webp"
+      },
+      {
+        "id": 114022,
+        "name": "漆黑陨铁的一片",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/114022.webp"
+      },
+      {
+        "id": 114023,
+        "name": "漆黑陨铁的一角",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/114023.webp"
+      },
+      {
+        "id": 114024,
+        "name": "漆黑陨铁的一块",
+        "star": 5,
+        "starIcon": "/icon/star/5.webp",
+        "bg": "/icon/bg/5-Star.webp",
+        "icon": "/icon/material/114024.webp"
+      }
+    ],
+    "source": {
+      "index": 2,
+      "area": "璃月",
+      "name": "古雷试炼场",
+      "icon": "/icon/nation/璃月.webp"
+    }
+  },
+  {
+    "id": 15426,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "筑云",
+    "itemType": "weapon",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/15426.webp",
     "materials": [
       {
         "id": 114021,
