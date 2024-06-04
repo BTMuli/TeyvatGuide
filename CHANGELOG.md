@@ -2,12 +2,20 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-01-15
-Update: 2024-05-10
+Update: 2024-06-04
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-01-15 17:29:15`
 >
-> 更新于 `2024-05-10 23:55:15`
+> 更新于 `2024-06-04 20:07:53`
+
+## [0.4.8](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.8) (2024-06-04)
+
+- 🐛 修复名片解析异常 [`#110`](https://github.com/BTMuli/TeyvatGuide/issues/110)
+- 💄 调整链接组件样式
+- 💄 调整首页生日组件样式
+- 🐛 修复版本搜索失效，未完成成就优先
+- 🍱 更新 4.7 版本资源 [`#112`](https://github.com/BTMuli/TeyvatGuide/issues/112)
 
 ## [0.4.7](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.7) (2024-05-10)
 
