@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/userAchi.ts
  * @description 用户成就模块
- * @since Beta v0.4.7
+ * @since Beta v0.4.8
  */
 
 import { getUiafStatus } from "../../../utils/UIAF.js";
@@ -59,7 +59,7 @@ async function getSeries(id?: number): Promise<TGApp.Sqlite.Achievement.SeriesTa
 
 /**
  * @description 获取成就数据
- * @since Beta v0.4.7
+ * @since Beta v0.4.8
  * @param {number|undefined} id 成就系列ID
  * @returns {Promise<TGApp.Sqlite.Achievement.SingleTable[]>} 成就数据
  */
@@ -72,7 +72,7 @@ async function getAchievements(id?: string): Promise<TGApp.Sqlite.Achievement.Si
     );
   } else {
     res = await db.select<TGApp.Sqlite.Achievement.SingleTable>(
-      "SELECT * FROM Achievements WHERE series = ? ORDER BY `order`;",
+      "SELECT * FROM Achievements WHERE series = ? ORDER BY isCompleted,`order`;",
       [id],
     );
   }
@@ -96,7 +96,7 @@ async function getSeriesNameCard(id: string): Promise<string> {
 
 /**
  * @description 查找成就数据
- * @since Beta v0.4.7
+ * @since Beta v0.4.8
  * @param {string} keyword 关键词
  * @returns {Promise<TGApp.Sqlite.Achievement.SingleTable[]>} 成就数据
  */
@@ -106,10 +106,12 @@ async function searchAchievements(
   if (keyword === "") return await getAchievements();
   const db = await TGSqlite.getDB();
   const versionReg = /^v\d+(\.\d+)?$/;
+  console.log(versionReg.test(keyword));
   if (versionReg.test(keyword)) {
+    const version = keyword.replace("v", "");
     return await db.select<TGApp.Sqlite.Achievement.SingleTable>(
       "SELECT * FROM Achievements WHERE version LIKE ? ORDER BY isCompleted,`order`;",
-      [keyword],
+      [`%${version}%`],
     );
   }
   return await db.select<TGApp.Sqlite.Achievement.SingleTable>(
