@@ -376,9 +376,10 @@ onUnmounted(() => {
 /* extra */
 .tp-post-extra {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: start;
-  column-gap: 10px;
+  gap: 5px 10px;
 }
 
 /* collection */
