@@ -1,14 +1,14 @@
 /**
  * @file plugins/Sqlite/sql/updateData.ts
  * @description 更新数据
- * @since Beta v0.4.7
+ * @since Beta v0.4.9
  */
 
 import minifySql from "../../../utils/minifySql";
 
 /**
  * @description 导入UIAF数据-单项
- * @since Beta v0.4.7
+ * @since Beta v0.4.9
  * @param {TGApp.Plugins.UIAF.Achievement} data
  * @returns {string} sql
  */
@@ -33,10 +33,10 @@ export function importUIAFData(data: TGApp.Plugins.UIAF.Achievement): string[] {
   } else {
     sql = `
           UPDATE Achievements
-          SET progress = ${achievement.current},
+          SET progress = ${data.current},
               updated  = datetime('now', 'localtime')
-          WHERE id = ${achievement.id}
-            AND progress != ${achievement.current};
+          WHERE id = ${data.id}
+            AND progress != ${data.current};
       `;
   }
   return minifySql(sql);

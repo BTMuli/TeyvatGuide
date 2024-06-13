@@ -424,7 +424,7 @@ async function handleImportOuter(app: string): Promise<void> {
   const data: TGApp.Plugins.UIAF.Data = JSON.parse(clipboard);
   loadingTitle.value = "正在导入数据";
   loading.value = true;
-  await TSUserAchi.mergeUIAF(data);
+  await TSUserAchi.mergeUIAF(data.list);
   loading.value = false;
   showSnackbar({
     color: "success",
