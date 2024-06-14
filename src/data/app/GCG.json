@@ -122,7 +122,7 @@
   },
   {
     "id": 1111,
-    "contentId": 0,
+    "contentId": 501414,
     "name": "莱欧斯利",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/莱欧斯利.webp",
@@ -404,7 +404,7 @@
   },
   {
     "id": 1312,
-    "contentId": 0,
+    "contentId": 501397,
     "name": "辛焱",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/辛焱.webp",
@@ -729,7 +729,7 @@
   },
   {
     "id": 1607,
-    "contentId": 0,
+    "contentId": 501399,
     "name": "云堇",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/云堇.webp",
@@ -825,7 +825,7 @@
   },
   {
     "id": 1708,
-    "contentId": 0,
+    "contentId": 501424,
     "name": "卡维",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/卡维.webp",
@@ -909,7 +909,7 @@
   },
   {
     "id": 2204,
-    "contentId": 0,
+    "contentId": 501405,
     "name": "吞星之鲸",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/吞星之鲸.webp",
@@ -1017,7 +1017,7 @@
   },
   {
     "id": 2405,
-    "contentId": 0,
+    "contentId": 501390,
     "name": "圣骸毒蝎",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/圣骸毒蝎.webp",
@@ -1054,7 +1054,7 @@
   },
   {
     "id": 2503,
-    "contentId": 0,
+    "contentId": 501391,
     "name": "圣骸飞蛇",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/圣骸飞蛇.webp",
@@ -1104,7 +1104,7 @@
   },
   {
     "id": 2702,
-    "contentId": 0,
+    "contentId": 501389,
     "name": "阿佩普的绿洲守望者",
     "type": "角色牌",
     "icon": "/WIKI/GCG/normal/阿佩普的绿洲守望者.webp",
@@ -1113,6 +1113,54 @@
       "GCG_TAG_WEAPON_NONE": "其他武器",
       "GCG_TAG_CAMP_MONSTER": "魔物"
     }
+  },
+  {
+    "id": 0,
+    "contentId": 501447,
+    "name": "歼灭特化型机关",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/歼灭特化型机关.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 501446,
+    "name": "歼灭特化型机关·芒",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/歼灭特化型机关·芒.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 501445,
+    "name": "歼灭特化型机关·荒",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/歼灭特化型机关·荒.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 501444,
+    "name": "机关·算力增幅器·荒",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/机关·算力增幅器·荒.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 501443,
+    "name": "机关·算力增幅器",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/机关·算力增幅器.webp",
+    "tags": {}
+  },
+  {
+    "id": 0,
+    "contentId": 501442,
+    "name": "机关·算力增幅器·芒",
+    "type": "魔物牌",
+    "icon": "/WIKI/GCG/normal/机关·算力增幅器·芒.webp",
+    "tags": {}
   },
   {
     "id": 0,
@@ -1641,7 +1689,7 @@
   },
   {
     "id": 211111,
-    "contentId": 0,
+    "contentId": 501398,
     "name": "予行恶者以惩惧",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/予行恶者以惩惧.webp",
@@ -1762,7 +1810,7 @@
   },
   {
     "id": 212111,
-    "contentId": 0,
+    "contentId": 501400,
     "name": "「诸君听我颂，共举爱之杯！」",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/「诸君听我颂，共举爱之杯！」.webp",
@@ -1894,7 +1942,7 @@
   },
   {
     "id": 213121,
-    "contentId": 0,
+    "contentId": 501396,
     "name": "地狱里摇摆",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/地狱里摇摆.webp",
@@ -2190,7 +2238,7 @@
   },
   {
     "id": 216071,
-    "contentId": 0,
+    "contentId": 501402,
     "name": "庄谐并举",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/庄谐并举.webp",
@@ -2278,7 +2326,7 @@
   },
   {
     "id": 217081,
-    "contentId": 0,
+    "contentId": 501403,
     "name": "预算师的技艺",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/预算师的技艺.webp",
@@ -2352,7 +2400,7 @@
   },
   {
     "id": 222041,
-    "contentId": 0,
+    "contentId": 501404,
     "name": "无光鲸噬",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/无光鲸噬.webp",
@@ -2448,7 +2496,7 @@
   },
   {
     "id": 224051,
-    "contentId": 0,
+    "contentId": 501393,
     "name": "亡雷凝蓄",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/亡雷凝蓄.webp",
@@ -2480,7 +2528,7 @@
   },
   {
     "id": 225031,
-    "contentId": 0,
+    "contentId": 501392,
     "name": "亡风啸卷",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/亡风啸卷.webp",
@@ -2523,7 +2571,7 @@
   },
   {
     "id": 227021,
-    "contentId": 0,
+    "contentId": 501386,
     "name": "万千子嗣",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/万千子嗣.webp",
@@ -2621,7 +2669,7 @@
   },
   {
     "id": 311109,
-    "contentId": 0,
+    "contentId": 501419,
     "name": "金流监督",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/金流监督.webp",
@@ -2698,7 +2746,7 @@
   },
   {
     "id": 311207,
-    "contentId": 0,
+    "contentId": 501418,
     "name": "竭泽",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/竭泽.webp",
@@ -2775,7 +2823,7 @@
   },
   {
     "id": 311307,
-    "contentId": 0,
+    "contentId": 501421,
     "name": "森林王器",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/森林王器.webp",
@@ -2951,7 +2999,7 @@
   },
   {
     "id": 311508,
-    "contentId": 0,
+    "contentId": 501420,
     "name": "静水流涌之辉",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/静水流涌之辉.webp",
@@ -3192,7 +3240,7 @@
   },
   {
     "id": 312024,
-    "contentId": 0,
+    "contentId": 501407,
     "name": "逐影猎人",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/逐影猎人.webp",
@@ -3212,7 +3260,7 @@
   },
   {
     "id": 312026,
-    "contentId": 0,
+    "contentId": 501422,
     "name": "黄金剧团",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/黄金剧团.webp",
@@ -3232,7 +3280,7 @@
   },
   {
     "id": 312028,
-    "contentId": 0,
+    "contentId": 501406,
     "name": "乐园遗落之花",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/乐园遗落之花.webp",
@@ -3572,7 +3620,7 @@
   },
   {
     "id": 321020,
-    "contentId": 0,
+    "contentId": 501388,
     "name": "赤王陵",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/赤王陵.webp",
@@ -3582,7 +3630,7 @@
   },
   {
     "id": 321021,
-    "contentId": 0,
+    "contentId": 501410,
     "name": "中央实验室遗址",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/中央实验室遗址.webp",
@@ -3842,7 +3890,7 @@
   },
   {
     "id": 322026,
-    "contentId": 0,
+    "contentId": 501409,
     "name": "亚瑟先生",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/亚瑟先生.webp",
@@ -3922,7 +3970,7 @@
   },
   {
     "id": 323008,
-    "contentId": 0,
+    "contentId": 501408,
     "name": "苦舍桓",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/苦舍桓.webp",
@@ -4002,7 +4050,7 @@
   },
   {
     "id": 330008,
-    "contentId": 0,
+    "contentId": 501412,
     "name": "旧日鏖战",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/旧日鏖战.webp",
@@ -4184,7 +4232,7 @@
   },
   {
     "id": 331805,
-    "contentId": 0,
+    "contentId": 501413,
     "name": "水与正义",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/水与正义.webp",
@@ -4442,7 +4490,7 @@
   },
   {
     "id": 332032,
-    "contentId": 0,
+    "contentId": 501415,
     "name": "幻戏倒计时：3",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/幻戏倒计时：3.webp",
