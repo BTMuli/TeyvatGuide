@@ -2,12 +2,20 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-01-15
-Update: 2024-06-04
+Update: 2024-06-14
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-01-15 17:29:15`
 >
-> 更新于 `2024-06-04 20:07:53`
+> 更新于 `2024-06-14 22:52:08`
+
+## [0.4.9](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.9) (2024-06-14)
+
+- 💄 调整帖子 `tag` 样式
+- 🐛 修复成就导入异常
+- ✏️ 修正角色图鉴部分描述
+- 🍱 更新卡牌资料
+- ⚡️ 成就查询输入为空时重置结果
 
 ## [0.4.8](https://github.com/BTMuli/TeyvatGuide/releases/v0.4.8) (2024-06-04)
 
