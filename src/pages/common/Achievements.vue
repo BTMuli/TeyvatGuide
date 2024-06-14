@@ -284,12 +284,31 @@ function switchAchiInfo(next: boolean) {
   showAchiData.value = renderSelect.value[curAchiDataIndex.value];
 }
 
+async function searchAll(): Promise<void> {
+  if (selectedAchievement.value.length === achievementsStore.totalAchievements) {
+    showSnackbar({
+      color: "warn",
+      text: "已经是全部成就",
+    });
+    return;
+  }
+  loading.value = true;
+  loadingTitle.value = "正在获取全部成就数据";
+  selectedSeries.value = -1;
+  selectedAchievement.value = await getAchiData("all");
+  await nextTick(() => {
+    loading.value = false;
+    setTimeout(() => {
+      showSnackbar({
+        text: `已获取 ${renderSelect.value.length} 条成就数据`,
+      });
+    }, 500);
+  });
+}
+
 async function searchCard(): Promise<void> {
   if (search.value === "") {
-    showSnackbar({
-      color: "error",
-      text: "请输入搜索内容",
-    });
+    await searchAll();
     return;
   }
   selectedSeries.value = -1;
