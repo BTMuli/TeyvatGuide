@@ -9,7 +9,7 @@ import { defineConfig } from "vite";
 // import VueDevtools from "vite-plugin-vue-devtools";
 import vuetify from "vite-plugin-vuetify";
 
-import buildTimePlugin from "./src/utils/TGBuild";
+import buildTimePlugin from "./src/utils/TGBuild.js";
 
 // https://vitejs.dev/config/
 export default defineConfig({

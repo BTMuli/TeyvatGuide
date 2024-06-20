@@ -76,9 +76,9 @@
 import { app, os } from "@tauri-apps/api";
 import { onMounted, ref } from "vue";
 
-import TGSqlite from "../../plugins/Sqlite";
-import { useAchievementsStore } from "../../store/modules/achievements";
-import showSnackbar from "../func/snackbar";
+import TGSqlite from "../../plugins/Sqlite/index.js";
+import { useAchievementsStore } from "../../store/modules/achievements.js";
+import showSnackbar from "../func/snackbar.js";
 
 const achievementsStore = useAchievementsStore();
 

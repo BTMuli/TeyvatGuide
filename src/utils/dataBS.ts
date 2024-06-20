@@ -1,16 +1,18 @@
 /**
  * @file utils/dataBS.ts
  * @description 用户数据的备份、恢复、迁移
- * @since Beta v0.4.7
+ * @since Beta v0.4.10
  */
 
 import { fs, path } from "@tauri-apps/api";
+import { FileEntry } from "@tauri-apps/api/fs";
 
-import showSnackbar from "../components/func/snackbar";
-import TGSqlite from "../plugins/Sqlite";
+import showSnackbar from "../components/func/snackbar.js";
+import TGSqlite from "../plugins/Sqlite/index.js";
 import TSUserAchi from "../plugins/Sqlite/modules/userAchi.js";
 import TSUserGacha from "../plugins/Sqlite/modules/userGacha.js";
 
+import TGLogger from "./TGLogger.js";
 import { exportUigfData, readUigfData, verifyUigfData } from "./UIGF.js";
 
 /**
@@ -56,7 +58,9 @@ export async function restoreUserData(dir: string): Promise<void> {
     });
     return;
   }
-  const files = (await fs.readDir(dir)).filter((item) => item.type === "File");
+  const filesRead = await fs.readDir(dir, { recursive: false });
+  const files: FileEntry[] = filesRead.filter((item: FileEntry) => item.path.endsWith(".json"));
+  await TGLogger.Info(`[DataBS][restoreUserData] files: ${JSON.stringify(files)}`);
   // 恢复成就数据
   const achiFind = files.find((item) => item.name === "UIAF.json");
   if (achiFind) {
@@ -65,11 +69,13 @@ export async function restoreUserData(dir: string): Promise<void> {
         await fs.readTextFile(achiFind.path),
       );
       await TSUserAchi.mergeUIAF(dataAchi);
+      await TGLogger.Info(`[DataBS][restoreUserData] 成就数据恢复成功`);
     } catch (e) {
       showSnackbar({
         text: `成就数据恢复失败 ${e}`,
         color: "error",
       });
+      await TGLogger.Error(`[DataBS][restoreUserData] 成就数据恢复失败 ${e}`);
       errNum++;
     }
   } else {
@@ -77,6 +83,8 @@ export async function restoreUserData(dir: string): Promise<void> {
       text: "成就数据恢复失败，备份文件不存在",
       color: "warn",
     });
+    await TGLogger.Warn(`[DataBS][restoreUserData] 未检测到成就数据备份文件`);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
   }
   // 恢复 ck
   const ckFind = files.find((item) => item.name === "cookie.json");
@@ -84,11 +92,13 @@ export async function restoreUserData(dir: string): Promise<void> {
     try {
       const dataCK = await fs.readTextFile(ckFind.path);
       await TGSqlite.saveAppData("cookie", JSON.stringify(JSON.parse(dataCK)));
+      await TGLogger.Info(`[DataBS][restoreUserData] Cookie 数据恢复成功`);
     } catch (e) {
       showSnackbar({
         text: `Cookie 数据恢复失败 ${e}`,
         color: "error",
       });
+      await TGLogger.Error(`[DataBS][restoreUserData] Cookie 数据恢复失败 ${e}`);
       errNum++;
     }
   } else {
@@ -96,6 +106,8 @@ export async function restoreUserData(dir: string): Promise<void> {
       text: "Cookie 数据恢复失败，备份文件不存在",
       color: "warn",
     });
+    await TGLogger.Warn(`[DataBS][restoreUserData] 未检测到 Cookie 数据备份文件`);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
   }
   // 恢复深渊数据
   const abyssFind = files.find((item) => item.name === "abyss.json");
@@ -117,27 +129,29 @@ export async function restoreUserData(dir: string): Promise<void> {
       text: "深渊数据恢复失败，备份文件不存在",
       color: "warn",
     });
+    await TGLogger.Warn(`[DataBS][restoreUserData] 未检测到深渊数据备份文件`);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
   }
   // 恢复祈愿数据
   const reg = /UIGF_(\d+).json/;
-  const dataGachaList = files.filter((item) => reg.test(item.name));
+  const dataGachaList = files.filter((item) => reg.test(item.path));
   for (const item of dataGachaList) {
     const check = await verifyUigfData(item.path);
     if (!check) {
       errNum++;
       continue;
     }
+    const data = await readUigfData(item.path);
+    const uid = data.info.uid;
     try {
-      const data = await readUigfData(item.path);
-      const uid = data.info.uid;
-      for (const item of data.list) {
-        await TSUserGacha.mergeUIGF(uid, item);
-      }
+      await TSUserGacha.mergeUIGF(uid, data.list);
+      await TGLogger.Info(`[DataBS][restoreUserData] UID: ${uid} 祈愿数据恢复成功`);
     } catch (e) {
       showSnackbar({
         text: `UID: ${uid} 祈愿数据恢复失败`,
         color: "error",
       });
+      await TGLogger.Error(`[DataBS][restoreUserData] UID: ${uid} 祈愿数据恢复失败 ${e}`);
       errNum++;
     }
   }

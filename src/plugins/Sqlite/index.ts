@@ -7,7 +7,7 @@
 import { app } from "@tauri-apps/api";
 import Database from "tauri-plugin-sql-api";
 
-import initDataSql from "./sql/initData";
+import initDataSql from "./sql/initData.js";
 import {
   importAbyssData,
   insertAbyssData,
@@ -15,7 +15,7 @@ import {
   insertGameAccountData,
   insertRecordData,
   insertRoleData,
-} from "./sql/insertData";
+} from "./sql/insertData.js";
 
 class Sqlite {
   /**

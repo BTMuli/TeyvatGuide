@@ -4,9 +4,9 @@
  * @since Beta v0.4.7
  */
 
-import { AppCharacterData, AppWeaponData } from "../../../data/index";
-import TGSqlite from "../index";
-import { importUIGFData } from "../sql/updateData";
+import { AppCharacterData, AppWeaponData } from "../../../data/index.js";
+import TGSqlite from "../index.js";
+import { importUIGFData } from "../sql/updateData.js";
 
 type gachaItemTypeRes =
   | ["角色", TGApp.App.Character.WikiBriefInfo]
@@ -34,7 +34,7 @@ function getGachaItemType(item_id: string): gachaItemTypeRes {
  * @return {TGApp.Plugins.UIGF.GachaItem} 转换后的数据
  */
 function transGacha(gacha: TGApp.Plugins.UIGF.GachaItem): TGApp.Plugins.UIGF.GachaItem {
-  const type = getGachaItemType(gacha.item_id);
+  const type = getGachaItemType(gacha.item_id!);
   let res = gacha;
   res.item_type = type[0];
   if (type[0] === "角色") {

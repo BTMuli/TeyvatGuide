@@ -6,14 +6,14 @@
     <v-list class="config-list">
       <v-list-subheader :inset="true" class="config-header" title="设置" />
       <v-divider :inset="true" class="border-opacity-75" />
-      <v-list-item title="数据备份" @click="confirmBackup">
+      <v-list-item title="数据备份" @click="confirmBackup()">
         <template #prepend>
           <div class="config-icon">
             <v-icon>mdi-database-export</v-icon>
           </div>
         </template>
       </v-list-item>
-      <v-list-item title="数据恢复" @click="confirmRestore">
+      <v-list-item title="数据恢复" @click="confirmRestore()">
         <template #prepend>
           <div class="config-icon">
             <v-icon>mdi-database-import</v-icon>
