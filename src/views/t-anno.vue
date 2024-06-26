@@ -30,13 +30,13 @@ import { useRoute } from "vue-router";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
-import { useAppStore } from "../store/modules/app";
-import TGLogger from "../utils/TGLogger";
-import { saveImgLocal } from "../utils/TGShare";
-import { createTGWindow } from "../utils/TGWindow";
-import { AnnoLang, AnnoServer } from "../web/request/getAnno";
-import TGRequest from "../web/request/TGRequest";
-import TGUtils from "../web/utils/TGUtils";
+import { useAppStore } from "../store/modules/app.js";
+import TGLogger from "../utils/TGLogger.js";
+import { saveImgLocal } from "../utils/TGShare.js";
+import { createTGWindow } from "../utils/TGWindow.js";
+import { AnnoLang, AnnoServer } from "../web/request/getAnno.js";
+import TGRequest from "../web/request/TGRequest.js";
+import TGUtils from "../web/utils/TGUtils.js";
 
 // loading
 const loading = ref<boolean>(true);

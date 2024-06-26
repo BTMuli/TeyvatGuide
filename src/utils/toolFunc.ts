@@ -6,7 +6,7 @@
 
 import { os, path } from "@tauri-apps/api";
 import colorConvert from "color-convert";
-import type { KEYWORD } from "color-convert/conversions";
+import type { KEYWORD } from "color-convert/conversions.js";
 import { v4 } from "uuid";
 import { score } from "wcag-color";
 

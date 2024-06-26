@@ -16,7 +16,7 @@ import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
-import Mys from "../plugins/Mys";
+import Mys from "../plugins/Mys/index.js";
 
 // loading
 const loading = ref<boolean>(true);

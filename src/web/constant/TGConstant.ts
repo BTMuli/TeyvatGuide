@@ -4,9 +4,9 @@
  * @since Beta v0.3.6
  */
 
-import { BBS_APP_ID, BBS_SALT, BBS_UA_MOBILE, BBS_UA_PC, BBS_VERSION } from "./bbs";
-import SERVER from "./server";
-import { GAME_BIZ } from "./utils";
+import { BBS_APP_ID, BBS_SALT, BBS_UA_MOBILE, BBS_UA_PC, BBS_VERSION } from "./bbs.js";
+import SERVER from "./server.js";
+import { GAME_BIZ } from "./utils.js";
 
 const TGConstant = {
   BBS: {

@@ -4,10 +4,10 @@
  * @since Beta v0.4.7
  */
 
-import { saveImgLocal } from "../../utils/TGShare";
-import { isColorSimilar } from "../../utils/toolFunc";
+import { saveImgLocal } from "../../utils/TGShare.js";
+import { isColorSimilar } from "../../utils/toolFunc.js";
 
-import { decodeRegExp } from "./tools";
+import { decodeRegExp } from "./tools.js";
 
 /**
  * @description 解析 a

@@ -1,13 +1,13 @@
 /**
  * @file plugins Hutao request getWeaponCollect.ts
  * @description 获取武器搭配
- * @author BTMuli <bt-muli@outlook.com>
  * @since Alpha v0.2.0
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import HutaoApi from "../api";
+import HutaoApi from "../api/index.js";
 
 /**
  * @description 获取武器搭配
@@ -17,10 +17,8 @@ import HutaoApi from "../api";
 async function getWeaponCollect(): Promise<TGApp.Plugins.Hutao.Abyss.WeaponCollocation[]> {
   const url = HutaoApi.Abyss.weapon;
   return await http
-    .fetch<TGApp.Plugins.Hutao.Abyss.WeaponCollocationResponse>(url, {
-      method: "GET",
-    })
-    .then((res) => {
+    .fetch(url, { method: "GET" })
+    .then((res: Response<TGApp.Plugins.Hutao.Abyss.WeaponCollocationResponse>) => {
       return res.data.data;
     });
 }

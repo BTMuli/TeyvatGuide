@@ -47,5 +47,4 @@ interface ImportMetaEnv {
 
 declare interface ImportMeta {
   readonly env: ImportMetaEnv;
-  readonly glob: (path: string) => Record<string, () => Promise<any>>;
 }

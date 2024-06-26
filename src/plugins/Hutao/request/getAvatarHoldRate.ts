@@ -5,8 +5,9 @@
  */
 
 import { http } from "@tauri-apps/api";
+import { Response } from "@tauri-apps/api/http";
 
-import HutaoApi from "../api";
+import HutaoApi from "../api/index.js";
 
 /**
  * @description 获取角色持有率数据
@@ -16,10 +17,8 @@ import HutaoApi from "../api";
 async function getAvatarHoldRate(): Promise<TGApp.Plugins.Hutao.Abyss.AvatarHold[]> {
   const url = HutaoApi.Abyss.avatar.holdRate;
   return await http
-    .fetch<TGApp.Plugins.Hutao.Abyss.AvatarHoldResponse>(url, {
-      method: "GET",
-    })
-    .then((res) => {
+    .fetch(url, { method: "GET" })
+    .then((res: Response<TGApp.Plugins.Hutao.Abyss.AvatarHoldResponse>) => {
       return res.data.data;
     });
 }

@@ -93,11 +93,11 @@ import TbCollect from "../components/post/tb-collect.vue";
 import TpAvatar from "../components/post/tp-avatar.vue";
 import TpParser from "../components/post/tp-parser.vue";
 import TpoCollection from "../components/post/tpo-collection.vue";
-import Mys from "../plugins/Mys";
-import { useAppStore } from "../store/modules/app";
-import TGClient from "../utils/TGClient";
-import TGLogger from "../utils/TGLogger";
-import { createTGWindow } from "../utils/TGWindow";
+import Mys from "../plugins/Mys/index.js";
+import { useAppStore } from "../store/modules/app.js";
+import TGClient from "../utils/TGClient.js";
+import TGLogger from "../utils/TGLogger.js";
+import { createTGWindow } from "../utils/TGWindow.js";
 
 // loading
 const loading = ref<boolean>(true);

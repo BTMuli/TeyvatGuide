@@ -9,19 +9,19 @@ import type { Event } from "@tauri-apps/api/event";
 import type { UnlistenFn } from "@tauri-apps/api/helpers/event";
 import { appWindow, WebviewWindow } from "@tauri-apps/api/window";
 
-import showSnackbar from "../components/func/snackbar";
-import TGSqlite from "../plugins/Sqlite";
-import { useAppStore } from "../store/modules/app";
-import { useUserStore } from "../store/modules/user";
-import TGConstant from "../web/constant/TGConstant";
-import { getCookieTokenBySToken } from "../web/request/getCookieToken";
-import TGRequest from "../web/request/TGRequest";
-import { getDS4JS } from "../web/utils/getRequestHeader";
+import showSnackbar from "../components/func/snackbar.js";
+import TGSqlite from "../plugins/Sqlite/index.js";
+import { useAppStore } from "../store/modules/app.js";
+import { useUserStore } from "../store/modules/user.js";
+import TGConstant from "../web/constant/TGConstant.js";
+import { getCookieTokenBySToken } from "../web/request/getCookieToken.js";
+import TGRequest from "../web/request/TGRequest.js";
+import { getDS4JS } from "../web/utils/getRequestHeader.js";
 
-import { parseLink } from "./linkParser";
-import TGLogger from "./TGLogger";
-import { createPost } from "./TGWindow";
-import { getDeviceInfo } from "./toolFunc";
+import { parseLink } from "./linkParser.js";
+import TGLogger from "./TGLogger.js";
+import { createPost } from "./TGWindow.js";
+import { getDeviceInfo } from "./toolFunc.js";
 
 // invoke 参数
 interface InvokeArg {

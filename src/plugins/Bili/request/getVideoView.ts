@@ -5,6 +5,7 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
 /**
  * @description 获取视频基本信息
@@ -26,10 +27,8 @@ async function getVideoView(
     throw new Error("参数错误");
   }
   return await http
-    .fetch<TGApp.Plugins.Bili.Video.ViewResponse>(url, {
-      method: "GET",
-    })
-    .then((res) => {
+    .fetch(url, { method: "GET" })
+    .then((res: Response<TGApp.Plugins.Bili.Video.ViewResponse>) => {
       return res.data.data;
     });
 }

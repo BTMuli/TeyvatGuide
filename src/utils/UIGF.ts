@@ -12,7 +12,7 @@ import showSnackbar from "../components/func/snackbar.js";
 import { UigfSchema } from "../data/index.js";
 
 import TGLogger from "./TGLogger.js";
-import { timestampToDate } from "./toolFunc";
+import { timestampToDate } from "./toolFunc.js";
 
 /**
  * @description 获取 UIGF 时区
@@ -83,6 +83,7 @@ export async function verifyUigfData(path: string): Promise<boolean> {
   try {
     const fileJson = JSON.parse(fileData);
     if (!validate(fileJson)) {
+      if (!validate.errors || validate.errors.length === 0) return false;
       const error: ErrorObject = validate.errors[0];
       showSnackbar({
         text: `${error.instancePath || error.schemaPath} ${error.message}`,

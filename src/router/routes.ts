@@ -4,11 +4,11 @@
  * @since Beta v0.4.4
  */
 
-import archiveRoutes from "./modules/archive";
-import mainRoutes from "./modules/main";
-import subRoutes from "./modules/sub";
-import userRoutes from "./modules/user";
-import wikiRoutes from "./modules/wiki";
+import archiveRoutes from "./modules/archive.js";
+import mainRoutes from "./modules/main.js";
+import subRoutes from "./modules/sub.js";
+import userRoutes from "./modules/user.js";
+import wikiRoutes from "./modules/wiki.js";
 
 // 合并路由
 const routes = [...mainRoutes, ...subRoutes, ...archiveRoutes, ...wikiRoutes, ...userRoutes];

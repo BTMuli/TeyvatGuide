@@ -5,9 +5,9 @@
  * @since Beta v0.3.2
  */
 
-import { BBSUserInfoApi } from "./BBS";
-import { ENKA_API } from "./ENKA";
-import { PassportTokenApi, PassportCookieTokenApi, PassportVerifyApi } from "./Passport";
+import { BBSUserInfoApi } from "./BBS.js";
+import { ENKA_API } from "./ENKA.js";
+import { PassportTokenApi, PassportCookieTokenApi, PassportVerifyApi } from "./Passport.js";
 import {
   TakumiTokensApi,
   TakumiRecordCardApi,
@@ -19,7 +19,7 @@ import {
   TakumiCookieBindingRolesApi,
   TakumiCalculateSyncAvatarListApi,
   TakumiCalculateSyncAvatarDetailApi,
-} from "./Takumi";
+} from "./Takumi.js";
 
 // 应用 API
 const TGApi = {

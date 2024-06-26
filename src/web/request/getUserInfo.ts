@@ -5,9 +5,10 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import TGApi from "../api/TGApi";
-import TGUtils from "../utils/TGUtils";
+import TGApi from "../api/TGApi.js";
+import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 根据 cookie 获取用户信息
@@ -28,12 +29,8 @@ export async function getUserInfoByCookie(
   const params = { gids: "2" };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common", true);
   return await http
-    .fetch<TGApp.Plugins.Mys.User.HomeResponse | TGApp.BBS.Response.Base>(url, {
-      method: "GET",
-      headers: header,
-      query: params,
-    })
-    .then((res) => {
+    .fetch(url, { method: "GET", headers: header, query: params })
+    .then((res: Response<TGApp.Plugins.Mys.User.HomeResponse | TGApp.BBS.Response.Base>) => {
       if (res.data.retcode !== 0) return res.data;
       return res.data.data.user_info;
     });

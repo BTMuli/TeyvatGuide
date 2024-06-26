@@ -5,8 +5,9 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import HutaoApi from "../api";
+import HutaoApi from "../api/index.js";
 
 /**
  * @description 上传用户数据
@@ -19,11 +20,8 @@ async function uploadData(
 ): Promise<TGApp.Plugins.Hutao.Abyss.UploadResponse> {
   const url = HutaoApi.Abyss.upload;
   return await http
-    .fetch<TGApp.Plugins.Hutao.Abyss.UploadResponse>(url, {
-      method: "POST",
-      body: http.Body.json(data),
-    })
-    .then((res) => res.data);
+    .fetch(url, { method: "POST", body: http.Body.json(data) })
+    .then((res: Response<TGApp.Plugins.Hutao.Abyss.UploadResponse>) => res.data);
 }
 
 export default uploadData;

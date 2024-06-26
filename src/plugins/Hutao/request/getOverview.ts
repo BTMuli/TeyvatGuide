@@ -5,8 +5,9 @@
  */
 
 import { http } from "@tauri-apps/api";
+import { Response } from "@tauri-apps/api/http";
 
-import HutaoApi from "../api";
+import HutaoApi from "../api/index.js";
 
 /**
  * @description 获取深渊概览数据
@@ -16,10 +17,8 @@ import HutaoApi from "../api";
 async function getOverview(): Promise<TGApp.Plugins.Hutao.Abyss.OverviewData> {
   const url = HutaoApi.Abyss.overview;
   return await http
-    .fetch<TGApp.Plugins.Hutao.Abyss.OverviewResponse>(url, {
-      method: "GET",
-    })
-    .then((res) => {
+    .fetch(url, { method: "GET" })
+    .then((res: Response<TGApp.Plugins.Hutao.Abyss.OverviewResponse>) => {
       return res.data.data;
     });
 }

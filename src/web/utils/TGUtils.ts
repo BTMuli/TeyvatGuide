@@ -4,10 +4,10 @@
  * @since Beta v0.3.4
  */
 
-import { getAnnoCard } from "./getAnnoCard";
-import { getRequestHeader } from "./getRequestHeader";
-import { parseAnnoContent } from "./parseAnno";
-import { getServerByUid, transCookie } from "./tools";
+import { getAnnoCard } from "./getAnnoCard.js";
+import { getRequestHeader } from "./getRequestHeader.js";
+import { parseAnnoContent } from "./parseAnno.js";
+import { getServerByUid, transCookie } from "./tools.js";
 
 const TGUtils = {
   Anno: {

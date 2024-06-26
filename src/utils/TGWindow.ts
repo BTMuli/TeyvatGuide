@@ -7,7 +7,7 @@
 import { invoke, window as TauriWindow } from "@tauri-apps/api";
 import type { WindowOptions } from "@tauri-apps/api/window";
 
-import TGLogger from "./TGLogger";
+import TGLogger from "./TGLogger.js";
 
 /**
  * @description 创建TG窗口
@@ -50,7 +50,7 @@ export function createTGWindow(
       .then(() => {
         createTGWindow(url, label, title, width, height, resizable, visible);
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         console.error(err);
       });
   } else {
@@ -61,11 +61,11 @@ export function createTGWindow(
           .then(() => {
             console.log(`[createTGWindow][${label}] ${title} created.`);
           })
-          .catch((err) => {
+          .catch((err: unknown) => {
             console.error(err);
           });
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         console.error(err);
       });
   }

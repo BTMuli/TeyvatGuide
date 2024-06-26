@@ -5,8 +5,9 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import MysApi from "../api";
+import MysApi from "../api/index.js";
 
 /**
  * @description 获取投票信息
@@ -17,20 +18,14 @@ import MysApi from "../api";
  */
 export async function getVoteInfo(id: string, uid: string): Promise<TGApp.Plugins.Mys.Vote.Info> {
   const url = "https://bbs-api.miyoushe.com/apihub/api/getVotes";
-  const params = {
-    owner_uid: uid,
-    vote_ids: id,
-  };
+  const params = { owner_uid: uid, vote_ids: id };
   return await http
-    .fetch<TGApp.Plugins.Mys.Vote.InfoResponse>(url, {
+    .fetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Referer: MysApi.PostReferer,
-      },
+      headers: { "Content-Type": "application/json", Referer: MysApi.PostReferer },
       query: params,
     })
-    .then((res) => {
+    .then((res: Response<TGApp.Plugins.Mys.Vote.InfoResponse>) => {
       return res.data.data.data[0];
     });
 }
@@ -47,20 +42,14 @@ export async function getVoteResult(
   uid: string,
 ): Promise<TGApp.Plugins.Mys.Vote.Result> {
   const url = "https://bbs-api.miyoushe.com/apihub/api/getVotesResult";
-  const params = {
-    owner_uid: uid,
-    vote_ids: id,
-  };
+  const params = { owner_uid: uid, vote_ids: id };
   return await http
-    .fetch<TGApp.Plugins.Mys.Vote.ResultResponse>(url, {
+    .fetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Referer: MysApi.PostReferer,
-      },
+      headers: { "Content-Type": "application/json", Referer: MysApi.PostReferer },
       query: params,
     })
-    .then((res) => {
+    .then((res: Response<TGApp.Plugins.Mys.Vote.ResultResponse>) => {
       return res.data.data.data[0];
     });
 }

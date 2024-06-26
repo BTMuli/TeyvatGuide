@@ -5,8 +5,9 @@
  */
 
 import { http } from "@tauri-apps/api";
+import { Response } from "@tauri-apps/api/http";
 
-import getWrid from "../utils/getWrid";
+import getWrid from "../utils/getWrid.js";
 
 /**
  * @description 获取视频播放地址
@@ -31,14 +32,14 @@ async function getVideoUrl(cid: number, bvid: string): Promise<TGApp.Plugins.Bil
     wrid: wridRes[1],
   };
   return await http
-    .fetch<TGApp.Plugins.Bili.Video.UrlResponse>(url, {
+    .fetch(url, {
       method: "GET",
       query: params,
       headers: {
         referer: "https://www.bilibili.com/",
       },
     })
-    .then((res) => {
+    .then((res: Response<TGApp.Plugins.Bili.Video.UrlResponse>) => {
       return res.data.data;
     });
 }

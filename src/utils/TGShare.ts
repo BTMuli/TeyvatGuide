@@ -7,11 +7,11 @@
 import { dialog, fs, http, path } from "@tauri-apps/api";
 import html2canvas from "html2canvas";
 
-import showConfirm from "../components/func/confirm";
-import showSnackbar from "../components/func/snackbar";
+import showConfirm from "../components/func/confirm.js";
+import showSnackbar from "../components/func/snackbar.js";
 
-import TGLogger from "./TGLogger";
-import { bytesToSize } from "./toolFunc";
+import TGLogger from "./TGLogger.js";
+import { bytesToSize } from "./toolFunc.js";
 
 /**
  * @description 保存图片-canvas

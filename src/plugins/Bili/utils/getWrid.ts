@@ -6,7 +6,7 @@
 
 import md5 from "js-md5";
 
-import getNav from "../request/getNav";
+import getNav from "../request/getNav.js";
 
 /**
  * @description 获取 key 值

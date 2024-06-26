@@ -6,11 +6,11 @@
 
 import { emit } from "@tauri-apps/api/event";
 
-import showConfirm from "../components/func/confirm";
-import showSnackbar from "../components/func/snackbar";
+import showConfirm from "../components/func/confirm.js";
+import showSnackbar from "../components/func/snackbar.js";
 
-import TGClient from "./TGClient";
-import { createPost } from "./TGWindow";
+import TGClient from "./TGClient.js";
+import { createPost } from "./TGWindow.js";
 
 /**
  * @function parsePost

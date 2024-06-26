@@ -5,15 +5,15 @@
  * @since Beta v0.3.0
  */
 
-import getAvatarCollect from "./request/getAvatarCollect";
-import getAvatarHoldRate from "./request/getAvatarHoldRate";
-import getAvatarUpRate from "./request/getAvatarUpRate";
-import getAvatarUseRate from "./request/getAvatarUseRate";
-import getOverview from "./request/getOverview";
-import getTeamCollect from "./request/getTeamCollect";
-import getWeaponCollect from "./request/getWeaponCollect";
-import uploadData from "./request/uploadData";
-import { transAvatars, transLocal } from "./utils/transLocal";
+import getAvatarCollect from "./request/getAvatarCollect.js";
+import getAvatarHoldRate from "./request/getAvatarHoldRate.js";
+import getAvatarUpRate from "./request/getAvatarUpRate.js";
+import getAvatarUseRate from "./request/getAvatarUseRate.js";
+import getOverview from "./request/getOverview.js";
+import getTeamCollect from "./request/getTeamCollect.js";
+import getWeaponCollect from "./request/getWeaponCollect.js";
+import uploadData from "./request/uploadData.js";
+import { transAvatars, transLocal } from "./utils/transLocal.js";
 
 const Hutao = {
   Abyss: {

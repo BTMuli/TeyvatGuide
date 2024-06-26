@@ -4,8 +4,8 @@
  * @since Beta v0.4.4
  */
 
-import { AppCharacterData } from "../../../data";
-import getPostData from "../request/getPostData";
+import { AppCharacterData } from "../../../data/index.js";
+import getPostData from "../request/getPostData.js";
 
 /**
  * @description 根据单个卡池信息转为渲染用的卡池信息

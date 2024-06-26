@@ -4,7 +4,7 @@
  * @since Beta v0.4.9
  */
 
-import minifySql from "../../../utils/minifySql";
+import minifySql from "../../../utils/minifySql.js";
 
 /**
  * @description 导入UIAF数据-单项
@@ -12,7 +12,7 @@ import minifySql from "../../../utils/minifySql";
  * @param {TGApp.Plugins.UIAF.Achievement} data
  * @returns {string} sql
  */
-export function importUIAFData(data: TGApp.Plugins.UIAF.Achievement): string[] {
+export function importUIAFData(data: TGApp.Plugins.UIAF.Achievement): string {
   let sql;
   const isCompleted = data.status === 2 || data.status === 3;
   if (isCompleted) {

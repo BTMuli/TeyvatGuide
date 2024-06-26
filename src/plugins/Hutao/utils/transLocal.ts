@@ -86,11 +86,11 @@ function transLevel(data: TGApp.Sqlite.Abyss.Level): TGApp.Plugins.Hutao.Abyss.L
   const battles: Array<{ Index: number; Avatars: number[] }> = [];
   battles.push({
     Index: 1,
-    Avatars: data.upBattle.characters.map((character) => character.id),
+    Avatars: data.upBattle!.characters.map((character) => character.id),
   });
   battles.push({
     Index: 2,
-    Avatars: data.downBattle.characters.map((character) => character.id),
+    Avatars: data.downBattle!.characters.map((character) => character.id),
   });
   return {
     Index: data.id,

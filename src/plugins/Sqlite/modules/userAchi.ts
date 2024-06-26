@@ -5,8 +5,8 @@
  */
 
 import { getUiafStatus } from "../../../utils/UIAF.js";
-import TGSqlite from "../index";
-import { importUIAFData } from "../sql/updateData";
+import TGSqlite from "../index.js";
+import { importUIAFData } from "../sql/updateData.js";
 
 /**
  * @description 获取成就概况
@@ -15,7 +15,7 @@ import { importUIAFData } from "../sql/updateData";
  */
 async function getOverview(): Promise<TGApp.Sqlite.Achievement.Overview> {
   const db = await TGSqlite.getDB();
-  const res = await db.select<TGApp.Sqlite.Achievement.Overview>(
+  const res = await db.select<TGApp.Sqlite.Achievement.Overview[]>(
     "SELECT SUM(totalCount) as total,SUM(finCount) AS fin From AchievementSeries",
   );
   return res[0];
@@ -29,7 +29,7 @@ async function getOverview(): Promise<TGApp.Sqlite.Achievement.Overview> {
 async function getLatestAchiVersion(): Promise<string> {
   const db = await TGSqlite.getDB();
   type resType = { version: string };
-  const res = await db.select<resType>(
+  const res = await db.select<resType[]>(
     "SELECT version FROM Achievements ORDER BY version DESC LIMIT 1;",
   );
   return res[0].version;
@@ -45,11 +45,11 @@ async function getSeries(id?: number): Promise<TGApp.Sqlite.Achievement.SeriesTa
   const db = await TGSqlite.getDB();
   let res: TGApp.Sqlite.Achievement.SeriesTable[];
   if (id === undefined) {
-    res = await db.select<TGApp.Sqlite.Achievement.SeriesTable>(
+    res = await db.select<TGApp.Sqlite.Achievement.SeriesTable[]>(
       "SELECT * FROM AchievementSeries ORDER BY `order`;",
     );
   } else {
-    res = await db.select<TGApp.Sqlite.Achievement.SeriesTable>(
+    res = await db.select<TGApp.Sqlite.Achievement.SeriesTable[]>(
       "SELECT * FROM AchievementSeries WHERE id = ?;",
       [id],
     );
@@ -67,11 +67,11 @@ async function getAchievements(id?: string): Promise<TGApp.Sqlite.Achievement.Si
   const db = await TGSqlite.getDB();
   let res: TGApp.Sqlite.Achievement.SingleTable[];
   if (id === undefined) {
-    res = await db.select<TGApp.Sqlite.Achievement.SingleTable>(
+    res = await db.select<TGApp.Sqlite.Achievement.SingleTable[]>(
       "SELECT * FROM Achievements ORDER BY isCompleted,`order`;",
     );
   } else {
-    res = await db.select<TGApp.Sqlite.Achievement.SingleTable>(
+    res = await db.select<TGApp.Sqlite.Achievement.SingleTable[]>(
       "SELECT * FROM Achievements WHERE series = ? ORDER BY isCompleted,`order`;",
       [id],
     );
@@ -88,7 +88,7 @@ async function getAchievements(id?: string): Promise<TGApp.Sqlite.Achievement.Si
 async function getSeriesNameCard(id: string): Promise<string> {
   const db = await TGSqlite.getDB();
   type resType = { nameCard: string };
-  const res = await db.select<resType>("SELECT nameCard FROM AchievementSeries WHERE id = ?;", [
+  const res = await db.select<resType[]>("SELECT nameCard FROM AchievementSeries WHERE id = ?;", [
     id,
   ]);
   return res[0].nameCard;
@@ -108,12 +108,12 @@ async function searchAchievements(
   const versionReg = /^v\d+(\.\d+)?$/;
   if (versionReg.test(keyword)) {
     const version = keyword.replace("v", "");
-    return await db.select<TGApp.Sqlite.Achievement.SingleTable>(
+    return await db.select<TGApp.Sqlite.Achievement.SingleTable[]>(
       "SELECT * FROM Achievements WHERE version LIKE ? ORDER BY isCompleted,`order`;",
       [`%${version}%`],
     );
   }
-  return await db.select<TGApp.Sqlite.Achievement.SingleTable>(
+  return await db.select<TGApp.Sqlite.Achievement.SingleTable[]>(
     "SELECT * FROM Achievements WHERE name LIKE ? OR description LIKE ? ORDER BY isCompleted,`order`;",
     [`%${keyword}%`, `%${keyword}%`],
   );
@@ -160,9 +160,11 @@ function transDb2Uiaf(data: TGApp.Sqlite.Achievement.SingleTable): TGApp.Plugins
  */
 async function getUIAF(): Promise<TGApp.Plugins.UIAF.Achievement[]> {
   const db = await TGSqlite.getDB();
-  const data = await db.select<TGApp.Sqlite.Achievement.SingleTable>("SELECT * FROM Achievements;");
+  const data = await db.select<TGApp.Sqlite.Achievement.SingleTable[]>(
+    "SELECT * FROM Achievements;",
+  );
   const res: TGApp.Plugins.UIAF.Achievement[] = [];
-  for (const item: TGApp.Sqlite.Achievement.SingleTable of data) {
+  for (const item of data) {
     res.push(transDb2Uiaf(item));
   }
   return res;

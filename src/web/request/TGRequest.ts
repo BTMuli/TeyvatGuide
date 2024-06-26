@@ -4,25 +4,25 @@
  * @since Beta v0.4.5
  */
 
-import { genAuthkey, genAuthkey2 } from "./genAuthkey";
-import { getAbyss } from "./getAbyss";
-import { getActionTicketBySToken } from "./getActionTicket";
-import { getAnnoContent, getAnnoList } from "./getAnno";
-import { getCookieTokenByGameToken, getCookieTokenBySToken } from "./getCookieToken";
-import { getDeviceFp } from "./getDeviceFp";
+import { genAuthkey, genAuthkey2 } from "./genAuthkey.js";
+import { getAbyss } from "./getAbyss.js";
+import { getActionTicketBySToken } from "./getActionTicket.js";
+import { getAnnoContent, getAnnoList } from "./getAnno.js";
+import { getCookieTokenByGameToken, getCookieTokenBySToken } from "./getCookieToken.js";
+import { getDeviceFp } from "./getDeviceFp.js";
 // import * from "./getEnkaData.ts";
-import { getGachaLog } from "./getGachaLog";
-import { getGameAccountsByCookie, getGameAccountsBySToken } from "./getGameAccounts";
-import { getGameRecord } from "./getGameRecord";
-import { getLTokenBySToken } from "./getLToken";
-import { getGameRoleListByLToken } from "./getRoleList";
-import { getStokenByGameToken, getTokenBySToken } from "./getStoken";
-import getSyncAvatarDetail from "./getSyncAvatarDetail";
-import getSyncAvatarListAll from "./getSyncAvatarListAll";
-import { getTokensByLoginTicket } from "./getTokens";
-import { getUserCollect } from "./getUserCollect";
-import { getUserInfoByCookie } from "./getUserInfo";
-import { verifyLToken } from "./verifyLToken";
+import { getGachaLog } from "./getGachaLog.js";
+import { getGameAccountsByCookie, getGameAccountsBySToken } from "./getGameAccounts.js";
+import { getGameRecord } from "./getGameRecord.js";
+import { getLTokenBySToken } from "./getLToken.js";
+import { getGameRoleListByLToken } from "./getRoleList.js";
+import { getStokenByGameToken, getTokenBySToken } from "./getStoken.js";
+import getSyncAvatarDetail from "./getSyncAvatarDetail.js";
+import getSyncAvatarListAll from "./getSyncAvatarListAll.js";
+import { getTokensByLoginTicket } from "./getTokens.js";
+import { getUserCollect } from "./getUserCollect.js";
+import { getUserInfoByCookie } from "./getUserInfo.js";
+import { verifyLToken } from "./verifyLToken.js";
 
 const TGRequest = {
   Anno: {

@@ -16,8 +16,8 @@ import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
-import { AnnoLang, AnnoServer } from "../web/request/getAnno";
-import TGRequest from "../web/request/TGRequest";
+import { AnnoLang, AnnoServer } from "../web/request/getAnno.js";
+import TGRequest from "../web/request/TGRequest.js";
 
 // loading
 const loading = ref<boolean>(true);

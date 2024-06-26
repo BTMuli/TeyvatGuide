@@ -59,6 +59,7 @@ export async function verifyUiafData(path: string): Promise<boolean> {
   try {
     const fileJson = JSON.parse(fileData);
     if (!validate(fileJson)) {
+      if (validate.errors === undefined || validate.errors === null) return false;
       const error: ErrorObject = validate.errors[0];
       showSnackbar({
         text: `${error.instancePath || error.schemaPath} ${error.message}`,
@@ -89,6 +90,7 @@ export async function verifyUiafDataClipboard(): Promise<boolean> {
   try {
     const fileJson = JSON.parse(data);
     if (!validate(fileJson)) {
+      if (validate.errors === undefined || validate.errors === null) return false;
       const error: ErrorObject = validate.errors[0];
       showSnackbar({
         text: `${error.instancePath || error.schemaPath} ${error.message}`,

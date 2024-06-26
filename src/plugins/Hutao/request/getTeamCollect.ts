@@ -5,8 +5,9 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import HutaoApi from "../api";
+import HutaoApi from "../api/index.js";
 
 /**
  * @description 获取队伍搭配数据
@@ -16,10 +17,8 @@ import HutaoApi from "../api";
 async function getTeamCollect(): Promise<TGApp.Plugins.Hutao.Abyss.TeamCombination[]> {
   const url = HutaoApi.Abyss.team;
   return await http
-    .fetch<TGApp.Plugins.Hutao.Abyss.TeamCombinationResponse>(url, {
-      method: "GET",
-    })
-    .then((res) => {
+    .fetch(url, { method: "GET" })
+    .then((res: Response<TGApp.Plugins.Hutao.Abyss.TeamCombinationResponse>) => {
       return res.data.data;
     });
 }

@@ -5,6 +5,7 @@
  */
 
 import { http } from "@tauri-apps/api";
+import { Response } from "@tauri-apps/api/http";
 
 /**
  * @description Bili 插件导航请求
@@ -13,7 +14,7 @@ import { http } from "@tauri-apps/api";
  */
 async function getNav(): Promise<TGApp.Plugins.Bili.Nav.NavData> {
   const url = "https://api.bilibili.com/x/web-interface/nav";
-  return await http.fetch<TGApp.Plugins.Bili.Nav.NavResponse>(url).then((res) => {
+  return await http.fetch(url).then((res: Response<TGApp.Plugins.Bili.Nav.NavResponse>) => {
     return res.data.data;
   });
 }
