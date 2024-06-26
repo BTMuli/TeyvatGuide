@@ -56,8 +56,8 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from "vue";
 
-import { AppAchievementsData, AppAchievementSeriesData } from "../../data";
-import TGLogger from "../../utils/TGLogger";
+import { AppAchievementsData, AppAchievementSeriesData } from "../../data/index.js";
+import TGLogger from "../../utils/TGLogger.js";
 import TOverlay from "../main/t-overlay.vue";
 import ToPostSearch from "../post/to-postSearch.vue";
 

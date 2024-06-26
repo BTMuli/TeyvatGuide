@@ -13,9 +13,9 @@
         clearable
         variant="outlined"
         label="角色"
-        :item-value="(item) => item.role_birthday"
-        :item-title="(item) => item.name"
-        :item-props="(item) => getItemProps(item)"
+        :item-value="(item: TGApp.Archive.Birth.RoleItem) => item.role_birthday"
+        :item-title="(item: TGApp.Archive.Birth.RoleItem) => item.name"
+        :item-props="(item: TGApp.Archive.Birth.RoleItem) => getItemProps(item)"
       >
       </v-select>
     </div>
@@ -39,8 +39,8 @@ import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import ToArcBrith from "../../components/overlay/to-arcBrith.vue";
-import { ArcBirDraw, ArcBirRole } from "../../data";
-import TGClient from "../../utils/TGClient";
+import { ArcBirDraw, ArcBirRole } from "../../data/index.js";
+import TGClient from "../../utils/TGClient.js";
 
 const page = ref(1);
 const length = ref(0);

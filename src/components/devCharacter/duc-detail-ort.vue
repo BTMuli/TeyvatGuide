@@ -10,7 +10,7 @@
 <script lang="ts" setup>
 import { onMounted, onUpdated, ref } from "vue";
 
-import { saveImgLocal } from "../../utils/TGShare";
+import { saveImgLocal } from "../../utils/TGShare.js";
 
 interface DucDetailOrtProps {
   modelValue: TGApp.Sqlite.Character.RoleTalent[];

@@ -31,7 +31,7 @@
 import { onBeforeMount, ref } from "vue";
 import { useRouter } from "vue-router";
 
-import TSAvatarBirth from "../../plugins/Sqlite/modules/avatarBirth";
+import TSAvatarBirth from "../../plugins/Sqlite/modules/avatarBirth.js";
 
 const isBirthday = ref<boolean>(false);
 const router = useRouter();

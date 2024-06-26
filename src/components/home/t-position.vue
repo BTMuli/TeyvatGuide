@@ -40,9 +40,9 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
 
-import Mys from "../../plugins/Mys";
-import { createPost } from "../../utils/TGWindow";
-import { stamp2LastTime } from "../../utils/toolFunc";
+import Mys from "../../plugins/Mys/index.js";
+import { createPost } from "../../utils/TGWindow.js";
+import { stamp2LastTime } from "../../utils/toolFunc.js";
 
 import THomeCard from "./t-homecard.vue";
 

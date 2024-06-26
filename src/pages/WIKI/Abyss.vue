@@ -40,7 +40,7 @@ import HtaTabTeam from "../../components/hutaoAbyss/hta-tab-team.vue";
 import HtaTabUp from "../../components/hutaoAbyss/hta-tab-up.vue";
 import HtaTabUse from "../../components/hutaoAbyss/hta-tab-use.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import Hutao from "../../plugins/Hutao";
+import Hutao from "../../plugins/Hutao/index.js";
 
 // loading
 const loading = ref<boolean>(false);

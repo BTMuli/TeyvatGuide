@@ -50,8 +50,8 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
-import Mys from "../../plugins/Mys";
-import showSnackbar from "../func/snackbar";
+import Mys from "../../plugins/Mys/index.js";
+import showSnackbar from "../func/snackbar.js";
 import TOverlay from "../main/t-overlay.vue";
 
 interface TpoCollectionProps {

@@ -38,7 +38,8 @@
     <!-- 右侧内容-->
     <div class="right-wrap">
       <div v-if="curCardName !== '' && selectedSeries !== -1 && !loading">
-        <TopNamecard :data="curCard" @selected="openImg()" />
+        <!-- todo，这边用 v-if 包装，需要经过测试 -->
+        <TopNamecard :data="curCard" @selected="openImg()" v-if="curCard" />
       </div>
       <div
         v-for="(achievement, index) in renderSelect"
@@ -109,23 +110,23 @@ import { dialog, fs, path } from "@tauri-apps/api";
 import { computed, nextTick, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import showConfirm from "../../components/func/confirm";
-import showSnackbar from "../../components/func/snackbar";
+import showConfirm from "../../components/func/confirm.js";
+import showSnackbar from "../../components/func/snackbar.js";
 import ToAchiInfo from "../../components/overlay/to-achiInfo.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import ToNamecard from "../../components/overlay/to-namecard.vue";
 import TopNamecard from "../../components/overlay/top-namecard.vue";
-import { AppAchievementSeriesData, AppNameCardsData } from "../../data";
+import { AppAchievementSeriesData, AppNameCardsData } from "../../data/index.js";
 import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
-import { useAchievementsStore } from "../../store/modules/achievements";
-import TGLogger from "../../utils/TGLogger";
-import { getNowStr } from "../../utils/toolFunc";
+import { useAchievementsStore } from "../../store/modules/achievements.js";
+import TGLogger from "../../utils/TGLogger.js";
+import { getNowStr } from "../../utils/toolFunc.js";
 import {
   getUiafHeader,
   readUiafData,
   verifyUiafData,
   verifyUiafDataClipboard,
-} from "../../utils/UIAF";
+} from "../../utils/UIAF.js";
 
 // Store
 const achievementsStore = useAchievementsStore();
@@ -224,7 +225,7 @@ async function selectSeries(index: number): Promise<void> {
   selectedSeries.value = index;
   selectedAchievement.value = await getAchiData("series", index.toString());
   loadingTitle.value = "正在查找对应的成就名片";
-  curCardName.value = await TSUserAchi.getSeriesNameCard(index);
+  curCardName.value = await TSUserAchi.getSeriesNameCard(String(index));
   if (curCardName.value !== "") {
     curCard.value = AppNameCardsData.find((item) => item.name === curCardName.value);
   }

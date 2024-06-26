@@ -22,11 +22,11 @@ import { storeToRefs } from "pinia";
 import QrcodeVue from "qrcode.vue";
 import { computed, onUnmounted, reactive, ref, watch } from "vue";
 
-import Mys from "../../plugins/Mys";
-import { useUserStore } from "../../store/modules/user";
-import TGLogger from "../../utils/TGLogger";
-import TGRequest from "../../web/request/TGRequest";
-import showSnackbar from "../func/snackbar";
+import Mys from "../../plugins/Mys/index.js";
+import { useUserStore } from "../../store/modules/user.js";
+import TGLogger from "../../utils/TGLogger.js";
+import TGRequest from "../../web/request/TGRequest.js";
+import showSnackbar from "../func/snackbar.js";
 import TOverlay from "../main/t-overlay.vue";
 
 interface ToWebLoginProps {

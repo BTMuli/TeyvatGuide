@@ -29,7 +29,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-import { parseHtmlText } from "../../utils/toolFunc";
+import { parseHtmlText } from "../../utils/toolFunc.js";
 
 import TucDetailDesc from "./tuc-detail-desc.vue";
 import TucDetailItemBox from "./tuc-detail-itembox.vue";

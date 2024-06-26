@@ -7,7 +7,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-import showSnackbar from "../func/snackbar";
+import showSnackbar from "../func/snackbar.js";
 
 import TurWorldSub from "./tur-world-sub.vue";
 

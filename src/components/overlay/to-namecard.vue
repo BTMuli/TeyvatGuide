@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 
-import { generateShareImg } from "../../utils/TGShare";
+import { generateShareImg } from "../../utils/TGShare.js";
 import TOverlay from "../main/t-overlay.vue";
 
 interface ToNamecardProps {

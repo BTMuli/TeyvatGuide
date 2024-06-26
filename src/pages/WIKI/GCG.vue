@@ -36,10 +36,10 @@
 <script lang="ts" setup>
 import { onBeforeMount, onMounted, ref } from "vue";
 
-import showSnackbar from "../../components/func/snackbar";
+import showSnackbar from "../../components/func/snackbar.js";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TwgCard from "../../components/wiki/twg-card.vue";
-import { AppGCGData } from "../../data";
+import { AppGCGData } from "../../data/index.js";
 
 const loading = ref<boolean>(true);
 const doSearch = ref<boolean>(false);

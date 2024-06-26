@@ -123,7 +123,7 @@ function loadData(): void {
         star4List.value.push({
           ...item,
           gachaCount: reset4count.value,
-          icon: getIcon(item.itemId, item.type),
+          icon: getIcon(item.itemId),
         });
         reset4count.value = 0;
       } else if (item.rank === "5") {
@@ -131,7 +131,7 @@ function loadData(): void {
         star5List.value.push({
           ...item,
           gachaCount: reset5count.value,
-          icon: getIcon(item.itemId, item.type),
+          icon: getIcon(item.itemId),
         });
         reset5count.value = 0;
       }

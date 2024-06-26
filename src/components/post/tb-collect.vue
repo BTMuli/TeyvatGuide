@@ -15,10 +15,10 @@
 import { event } from "@tauri-apps/api";
 import { onBeforeMount, ref, watch } from "vue";
 
-import TSUserCollection from "../../plugins/Sqlite/modules/userCollect";
-import TGLogger from "../../utils/TGLogger";
-import showConfirm from "../func/confirm";
-import showSnackbar from "../func/snackbar";
+import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
+import TGLogger from "../../utils/TGLogger.js";
+import showConfirm from "../func/confirm.js";
+import showSnackbar from "../func/snackbar.js";
 import ToPostCollect from "../overlay/to-postCollect.vue";
 
 const isCollected = ref(false);

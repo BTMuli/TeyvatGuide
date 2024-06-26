@@ -4,7 +4,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 
-import TGSqlite from "../../plugins/Sqlite";
+import TGSqlite from "../../plugins/Sqlite/index.js";
 import TItemBox, { type TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibWikiAbyssProps {

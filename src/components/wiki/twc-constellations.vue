@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 
-import { parseHtmlText } from "../../utils/toolFunc";
+import { parseHtmlText } from "../../utils/toolFunc.js";
 
 interface TwcConstellationProps {
   data: TGApp.Plugins.Hutao.Character.RhisdTalent[];

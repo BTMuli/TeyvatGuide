@@ -8,9 +8,9 @@
   </v-card>
 </template>
 <script lang="ts" setup>
-import Mys from "../../plugins/Mys";
-import { createTGWindow } from "../../utils/TGWindow";
-import showSnackbar from "../func/snackbar";
+import Mys from "../../plugins/Mys/index.js";
+import { createTGWindow } from "../../utils/TGWindow.js";
+import showSnackbar from "../func/snackbar.js";
 
 interface TwgCardProps {
   data: TGApp.App.GCG.WikiBriefInfo;

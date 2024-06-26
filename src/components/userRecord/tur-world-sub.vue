@@ -43,7 +43,7 @@ import { event } from "@tauri-apps/api";
 import { UnlistenFn } from "@tauri-apps/api/helpers/event";
 import { onMounted, onUnmounted, ref } from "vue";
 
-import { saveImgLocal } from "../../utils/TGShare";
+import { saveImgLocal } from "../../utils/TGShare.js";
 
 interface TurWorldSubProps {
   theme: "default" | "dark";

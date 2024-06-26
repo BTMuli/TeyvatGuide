@@ -19,13 +19,14 @@
       </div>
     </div>
   </div>
+  <!-- todo 这边加了 v-if，需要经过测试 -->
   <TwoMaterial :data="curData" v-model="showOverlay" />
 </template>
 <script lang="ts" setup>
 import { ref } from "vue";
 
-import { WikiMaterialData } from "../../data";
-import showSnackbar from "../func/snackbar";
+import { WikiMaterialData } from "../../data/index.js";
+import showSnackbar from "../func/snackbar.js";
 
 import TwoMaterial from "./two-material.vue";
 
@@ -35,7 +36,15 @@ interface TwcMaterialsProp {
 
 const props = defineProps<TwcMaterialsProp>();
 const showOverlay = ref(false);
-const curData = ref<TGApp.App.Material.WikiItem>();
+const curData = ref<TGApp.App.Material.WikiItem>({
+  id: 0,
+  name: "",
+  description: "",
+  type: "",
+  star: 0,
+  source: [],
+  convert: [],
+});
 
 function checkData(item: TGApp.App.Calendar.Material) {
   if (showOverlay.value) showOverlay.value = false;

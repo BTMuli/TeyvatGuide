@@ -33,9 +33,9 @@ import { ResponseType } from "@tauri-apps/api/http";
 import { computed, onMounted, ref, watch } from "vue";
 import { xml2json } from "xml-js";
 
-import { copyToClipboard, getImageBuffer, saveCanvasImg } from "../../utils/TGShare";
-import { bytesToSize } from "../../utils/toolFunc";
-import showSnackbar from "../func/snackbar";
+import { copyToClipboard, getImageBuffer, saveCanvasImg } from "../../utils/TGShare.js";
+import { bytesToSize } from "../../utils/toolFunc.js";
+import showSnackbar from "../func/snackbar.js";
 import TOverlay from "../main/t-overlay.vue";
 
 interface ToArcBirthProps {

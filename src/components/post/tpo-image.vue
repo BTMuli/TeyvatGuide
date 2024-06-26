@@ -25,9 +25,9 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from "vue";
 
-import { copyToClipboard, getImageBuffer, saveCanvasImg } from "../../utils/TGShare";
-import { bytesToSize } from "../../utils/toolFunc";
-import showSnackbar from "../func/snackbar";
+import { copyToClipboard, getImageBuffer, saveCanvasImg } from "../../utils/TGShare.js";
+import { bytesToSize } from "../../utils/toolFunc.js";
+import showSnackbar from "../func/snackbar.js";
 import TOverlay from "../main/t-overlay.vue";
 
 import { TpImage } from "./tp-image.vue";

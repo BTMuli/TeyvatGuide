@@ -34,8 +34,8 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
-import TGSqlite from "../../plugins/Sqlite";
-import { saveImgLocal } from "../../utils/TGShare";
+import TGSqlite from "../../plugins/Sqlite/index.js";
+import { saveImgLocal } from "../../utils/TGShare.js";
 import TItemBox from "../main/t-itembox.vue";
 
 interface TucRoleBoxProps {

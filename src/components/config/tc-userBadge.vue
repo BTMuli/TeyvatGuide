@@ -17,19 +17,19 @@
 </template>
 <script lang="ts" setup>
 import { event, window as windowTauri } from "@tauri-apps/api";
-import type { UnlistenFn } from "@tauri-apps/api/helpers/event";
+import type { UnlistenFn, Event } from "@tauri-apps/api/helpers/event";
 import { storeToRefs } from "pinia";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
-import TGSqlite from "../../plugins/Sqlite";
-import { useAppStore } from "../../store/modules/app";
-import { useUserStore } from "../../store/modules/user";
-import TGClient from "../../utils/TGClient";
-import TGLogger from "../../utils/TGLogger";
-import { getDeviceFp } from "../../web/request/getDeviceFp";
-import TGRequest from "../../web/request/TGRequest";
-import showConfirm from "../func/confirm";
-import showSnackbar from "../func/snackbar";
+import TGSqlite from "../../plugins/Sqlite/index.js";
+import { useAppStore } from "../../store/modules/app.js";
+import { useUserStore } from "../../store/modules/user.js";
+import TGClient from "../../utils/TGClient.js";
+import TGLogger from "../../utils/TGLogger.js";
+import { getDeviceFp } from "../../web/request/getDeviceFp.js";
+import TGRequest from "../../web/request/TGRequest.js";
+import showConfirm from "../func/confirm.js";
+import showSnackbar from "../func/snackbar.js";
 import ToGameLogin from "../overlay/to-gameLogin.vue";
 
 interface TcUserBadgeEmits {
@@ -77,7 +77,7 @@ async function toWebLogin(): Promise<void> {
     return;
   }
   await TGClient.open("config_sign_in", "https://user.mihoyo.com");
-  signListener = await event.listen("config_user_sign", async (e) => {
+  signListener = await event.listen("config_user_sign", async (e: Event<unknown>) => {
     if (typeof e.payload !== "string") {
       showSnackbar({
         color: "error",

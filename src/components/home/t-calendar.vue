@@ -45,7 +45,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from "vue";
 
-import { AppCalendarData } from "../../data";
+import { AppCalendarData } from "../../data/index.js";
 import TibCalendarItem from "../itembox/tib-calendar-item.vue";
 import ToCalendar from "../overlay/to-calendar.vue";
 

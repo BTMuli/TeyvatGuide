@@ -27,8 +27,8 @@
 import { window as TauriWindow } from "@tauri-apps/api";
 import { onBeforeMount, onMounted, ref } from "vue";
 
-import Bili from "../../plugins/Bili";
-import { saveImgLocal } from "../../utils/TGShare";
+import Bili from "../../plugins/Bili/index.js";
+import { saveImgLocal } from "../../utils/TGShare.js";
 
 interface TpVideo {
   insert: {

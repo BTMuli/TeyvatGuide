@@ -29,8 +29,8 @@
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 
-import { useAppStore } from "../../store/modules/app";
-import showSnackbar from "../func/snackbar";
+import { useAppStore } from "../../store/modules/app.js";
+import showSnackbar from "../func/snackbar.js";
 import TOverlay from "../main/t-overlay.vue";
 
 interface ToChannelProps {

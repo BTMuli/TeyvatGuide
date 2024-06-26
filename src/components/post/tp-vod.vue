@@ -15,7 +15,7 @@
 <script lang="ts" setup>
 import { window as TauriWindow } from "@tauri-apps/api";
 import Artplayer from "artplayer";
-import type { Option } from "artplayer/types/option";
+import type { Option } from "artplayer/types/option.js";
 import { onMounted, ref, toRaw } from "vue";
 
 interface TpVod {

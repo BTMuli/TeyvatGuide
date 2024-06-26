@@ -24,7 +24,7 @@
   </TucDetailDesc>
 </template>
 <script lang="ts" setup>
-import { parseHtmlText } from "../../utils/toolFunc";
+import { parseHtmlText } from "../../utils/toolFunc.js";
 
 import TucDetailConstellation from "./tuc-detail-constellation.vue";
 import TucDetailDesc from "./tuc-detail-desc.vue";

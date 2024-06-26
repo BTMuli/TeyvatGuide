@@ -57,12 +57,12 @@ import { nextTick, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import ToLoading from "../../components/overlay/to-loading.vue";
-import { useAppStore } from "../../store/modules/app";
-import TGLogger from "../../utils/TGLogger";
-import { createTGWindow } from "../../utils/TGWindow";
-import { AnnoLang, AnnoServer } from "../../web/request/getAnno";
-import TGRequest from "../../web/request/TGRequest";
-import TGUtils from "../../web/utils/TGUtils";
+import { useAppStore } from "../../store/modules/app.js";
+import TGLogger from "../../utils/TGLogger.js";
+import { createTGWindow } from "../../utils/TGWindow.js";
+import { AnnoLang, AnnoServer } from "../../web/request/getAnno.js";
+import TGRequest from "../../web/request/TGRequest.js";
+import TGUtils from "../../web/utils/TGUtils.js";
 
 // 服务器名称-服务器对应
 type AnnoServerMap = {

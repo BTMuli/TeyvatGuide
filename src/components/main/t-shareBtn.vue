@@ -7,8 +7,8 @@
 </template>
 <script lang="ts" setup>
 // utils
-import TGLogger from "../../utils/TGLogger";
-import { generateShareImg } from "../../utils/TGShare";
+import TGLogger from "../../utils/TGLogger.js";
+import { generateShareImg } from "../../utils/TGShare.js";
 
 interface TShareBtnProps {
   modelValue: HTMLElement;

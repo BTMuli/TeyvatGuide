@@ -47,15 +47,15 @@
 import { nextTick, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import showSnackbar from "../../components/func/snackbar";
+import showSnackbar from "../../components/func/snackbar.js";
 import TPostCard from "../../components/main/t-postcard.vue";
 import ToChannel from "../../components/overlay/to-channel.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import ToPostSearch from "../../components/post/to-postSearch.vue";
-import Mys from "../../plugins/Mys";
-import { useAppStore } from "../../store/modules/app";
-import TGLogger from "../../utils/TGLogger";
-import { createPost } from "../../utils/TGWindow";
+import Mys from "../../plugins/Mys/index.js";
+import { useAppStore } from "../../store/modules/app.js";
+import TGLogger from "../../utils/TGLogger.js";
+import { createPost } from "../../utils/TGWindow.js";
 
 // 类型定义
 enum NewsType {

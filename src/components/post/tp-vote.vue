@@ -23,7 +23,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 
-import Mys from "../../plugins/Mys";
+import Mys from "../../plugins/Mys/index.js";
 
 interface TpVote {
   insert: {

@@ -56,15 +56,15 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref, watch } from "vue";
 
-import showConfirm from "../../components/func/confirm";
-import showSnackbar from "../../components/func/snackbar";
+import showConfirm from "../../components/func/confirm.js";
+import showSnackbar from "../../components/func/snackbar.js";
 import TPostCard from "../../components/main/t-postcard.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import ToPostSearch from "../../components/post/to-postSearch.vue";
-import Mys from "../../plugins/Mys";
-import TGClient from "../../utils/TGClient";
-import TGLogger from "../../utils/TGLogger";
-import { createPost } from "../../utils/TGWindow";
+import Mys from "../../plugins/Mys/index.js";
+import TGClient from "../../utils/TGClient.js";
+import TGLogger from "../../utils/TGLogger.js";
+import { createPost } from "../../utils/TGWindow.js";
 
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载数据");
@@ -282,6 +282,8 @@ async function freshPostData(): Promise<void> {
 
 function freshCurForum(newVal: string): void {
   const forum = forumList[curGameLabel.value];
+  // todo，这边需要优化逻辑以经过测试，目前暂时ignore
+  // @ts-expect-error-next-line Vue: Element implicitly has an any type because expression of type string can't be used to index type
   curForum.value = forum[newVal];
 }
 

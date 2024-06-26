@@ -243,15 +243,15 @@
 
 <script lang="ts" setup>
 import { event, window as TauriWindow } from "@tauri-apps/api";
-import { UnlistenFn } from "@tauri-apps/api/helpers/event";
+import { UnlistenFn, Event } from "@tauri-apps/api/helpers/event";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
-import { useAppStore } from "../../store/modules/app";
-import { useUserStore } from "../../store/modules/user";
-import mhyClient from "../../utils/TGClient";
-import TGLogger from "../../utils/TGLogger";
-import showSnackbar from "../func/snackbar";
+import { useAppStore } from "../../store/modules/app.js";
+import { useUserStore } from "../../store/modules/user.js";
+import mhyClient from "../../utils/TGClient.js";
+import TGLogger from "../../utils/TGLogger.js";
+import showSnackbar from "../func/snackbar.js";
 
 const appStore = useAppStore();
 const userStore = storeToRefs(useUserStore());
@@ -298,8 +298,8 @@ function collapse(): void {
 let themeListener: UnlistenFn;
 
 onMounted(async () => {
-  themeListener = await event.listen("readTheme", (e) => {
-    const theme = <string>e.payload;
+  themeListener = await event.listen("readTheme", (e: Event<string>) => {
+    const theme = e.payload;
     themeGet.value = theme === "default" ? "default" : "dark";
   });
   if (TauriWindow.getCurrent().label === "TeyvatGuide") {
@@ -329,9 +329,7 @@ function login(): void {
   });
 }
 
-onUnmounted(() => {
-  themeListener();
-});
+onUnmounted(() => themeListener());
 </script>
 
 <style lang="css" scoped>

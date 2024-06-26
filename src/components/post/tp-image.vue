@@ -12,7 +12,7 @@
 <script lang="ts" setup>
 import { StyleValue, ref } from "vue";
 
-import { bytesToSize } from "../../utils/toolFunc";
+import { bytesToSize } from "../../utils/toolFunc.js";
 
 import TpoImage from "./tpo-image.vue";
 

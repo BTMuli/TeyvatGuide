@@ -16,7 +16,7 @@
 <script lang="ts" setup>
 import { onMounted, onUpdated, ref } from "vue";
 
-import { saveImgLocal } from "../../utils/TGShare";
+import { saveImgLocal } from "../../utils/TGShare.js";
 
 interface DucDetailOlbProps {
   modelValue: TGApp.Sqlite.Character.RoleConstellation[];

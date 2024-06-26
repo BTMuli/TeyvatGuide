@@ -12,21 +12,21 @@
 
 <script lang="ts" setup>
 import { app, event, fs, tauri, window as TauriWindow } from "@tauri-apps/api";
-import { UnlistenFn } from "@tauri-apps/api/helpers/event";
+import { UnlistenFn, Event } from "@tauri-apps/api/helpers/event";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import TBackTop from "./components/app/t-backTop.vue";
 import TSidebar from "./components/app/t-sidebar.vue";
-import showConfirm from "./components/func/confirm";
-import showSnackbar from "./components/func/snackbar";
-import TGSqlite from "./plugins/Sqlite";
-import { useAppStore } from "./store/modules/app";
-import { useUserStore } from "./store/modules/user";
-import { getBuildTime } from "./utils/TGBuild";
-import TGLogger from "./utils/TGLogger";
-import TGRequest from "./web/request/TGRequest";
+import showConfirm from "./components/func/confirm.js";
+import showSnackbar from "./components/func/snackbar.js";
+import TGSqlite from "./plugins/Sqlite/index.js";
+import { useAppStore } from "./store/modules/app.js";
+import { useUserStore } from "./store/modules/user.js";
+import { getBuildTime } from "./utils/TGBuild.js";
+import TGLogger from "./utils/TGLogger.js";
+import TGRequest from "./web/request/TGRequest.js";
 
 const appStore = useAppStore();
 const userStore = storeToRefs(useUserStore());
@@ -54,8 +54,8 @@ onBeforeMount(async () => {
 
 onMounted(async () => {
   document.documentElement.className = theme.value;
-  themeListener = await event.listen("readTheme", async (e) => {
-    const themeGet = <string>e.payload;
+  themeListener = await event.listen("readTheme", async (e: Event<string>) => {
+    const themeGet = e.payload;
     if (theme.value !== themeGet) {
       theme.value = themeGet;
       document.documentElement.className = theme.value;
@@ -108,15 +108,18 @@ async function resetDB(): Promise<void> {
 // 检测 deviceFp
 async function checkDeviceFp(): Promise<void> {
   const appData = await TGSqlite.getAppData();
-  const deviceInfo = appData.find((item) => item.key === "deviceInfo")?.value;
   const deviceLocal = appStore.deviceInfo;
-  if (deviceInfo === undefined) {
-    if (deviceLocal.device_fp === "0000000000000")
+  const deviceFind = appData.find((item) => item.key === "deviceInfo");
+  if (typeof deviceFind === "undefined") {
+    if (deviceLocal.device_fp === "0000000000000") {
       appStore.deviceInfo = await TGRequest.Device.getFp(appStore.deviceInfo);
+    }
     await TGSqlite.saveAppData("deviceInfo", JSON.stringify(deviceLocal));
     return;
   }
-  if (JSON.parse(deviceInfo) !== deviceLocal) appStore.deviceInfo = JSON.parse(deviceInfo);
+  if (JSON.parse(deviceFind.value) !== deviceLocal) {
+    appStore.deviceInfo = JSON.parse(deviceFind.value);
+  }
 }
 
 // 检测 ck,info 数据
@@ -138,9 +141,9 @@ async function checkUserLoad(): Promise<void> {
   const infoLocal = userStore.briefInfo.value;
   const appData = await TGSqlite.getAppData();
   const infoDB = appData.find((item) => item.key === "userInfo")?.value;
-  if (infoDB === undefined && JSON.stringify(infoLocal) !== "{}") {
+  if (typeof infoDB === "undefined" && JSON.stringify(infoLocal) !== "{}") {
     await TGSqlite.saveAppData("userInfo", JSON.stringify(infoLocal));
-  } else if (infoDB !== undefined && infoLocal !== JSON.parse(infoDB)) {
+  } else if (typeof infoDB !== "undefined" && infoLocal !== JSON.parse(infoDB)) {
     userStore.briefInfo.value = JSON.parse(infoDB);
     console.info("briefInfo 数据已更新！");
   }
@@ -158,7 +161,7 @@ async function checkUserLoad(): Promise<void> {
   }
   if (accountDB !== accountLocal) userStore.account.value = accountDB;
   const userDir = appData.find((item) => item.key === "userDir")?.value;
-  if (userDir === undefined) {
+  if (typeof userDir === "undefined") {
     await TGSqlite.saveAppData("userDir", appStore.userDir);
     return;
   }
@@ -167,7 +170,7 @@ async function checkUserLoad(): Promise<void> {
 }
 
 async function getDeepLink(): Promise<UnlistenFn> {
-  return await event.listen("active_deep_link", async (e) => {
+  return await event.listen("active_deep_link", async (e: Event<unknown>) => {
     const windowGet = new TauriWindow.WebviewWindow("TeyvatGuide");
     if (await windowGet.isMinimized()) {
       await windowGet.unminimize();
@@ -215,7 +218,7 @@ async function getDeepLink(): Promise<UnlistenFn> {
 async function toUIAF(link: string) {
   const url = new URL(link);
   const app = url.searchParams.get("app");
-  if (app === null || app === "") {
+  if (app == null || app === "") {
     await router.push("/achievements");
   } else {
     await router.push("/achievements/?app=" + app);

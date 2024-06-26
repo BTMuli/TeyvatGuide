@@ -16,7 +16,7 @@ import { CanvasRenderer } from "echarts/renderers";
 import { onMounted, provide } from "vue";
 import VChart, { THEME_KEY } from "vue-echarts";
 
-import showSnackbar from "../func/snackbar";
+import showSnackbar from "../func/snackbar.js";
 // echarts
 
 use([

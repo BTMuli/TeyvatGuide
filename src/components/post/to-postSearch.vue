@@ -19,8 +19,8 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from "vue";
 
-import Mys from "../../plugins/Mys";
-import showSnackbar from "../func/snackbar";
+import Mys from "../../plugins/Mys/index.js";
+import showSnackbar from "../func/snackbar.js";
 import TOverlay from "../main/t-overlay.vue";
 import TPostCard from "../main/t-postcard.vue";
 

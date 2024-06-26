@@ -28,20 +28,32 @@
 import { onBeforeMount, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import showConfirm from "../../components/func/confirm";
-import showSnackbar from "../../components/func/snackbar";
+import showConfirm from "../../components/func/confirm.js";
+import showSnackbar from "../../components/func/snackbar.js";
 import TwcCharacter from "../../components/wiki/twc-character.vue";
 import TwcListItem from "../../components/wiki/twc-list-item.vue";
 import TwoSelectC, { SelectedCValue } from "../../components/wiki/two-select-c.vue";
-import { AppCharacterData } from "../../data";
-import Mys from "../../plugins/Mys";
-import { createTGWindow } from "../../utils/TGWindow";
+import { AppCharacterData } from "../../data/index.js";
+import Mys from "../../plugins/Mys/index.js";
+import { createTGWindow } from "../../utils/TGWindow.js";
 
 const id = useRoute().params.id.toString() ?? "0";
 const showSelect = ref(false);
 const resetSelect = ref(false);
 const cardsInfo = ref(AppCharacterData);
-const curItem = ref<TGApp.App.Character.WikiBriefInfo>();
+// todo，这边赋予了默认值，需要经过测试
+const curItem = ref<TGApp.App.Character.WikiBriefInfo>({
+  id: 0,
+  contentId: 0,
+  name: "",
+  title: "",
+  area: "",
+  birthday: [0, 0],
+  star: 0,
+  element: "",
+  weapon: "",
+  nameCard: "",
+});
 
 onBeforeMount(() => {
   if (id === "0") {

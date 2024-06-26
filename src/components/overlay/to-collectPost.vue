@@ -24,9 +24,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 
-import TSUserCollection from "../../plugins/Sqlite/modules/userCollect";
-import showConfirm from "../func/confirm";
-import showSnackbar from "../func/snackbar";
+import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
+import showConfirm from "../func/confirm.js";
+import showSnackbar from "../func/snackbar.js";
 import TOverlay from "../main/t-overlay.vue";
 
 interface ToPostCollectProps {

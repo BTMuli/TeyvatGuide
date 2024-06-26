@@ -7,9 +7,9 @@
 <script lang="ts" setup>
 import { toRaw } from "vue";
 
-import TGClient from "../../utils/TGClient";
-import showConfirm from "../func/confirm";
-import showSnackbar from "../func/snackbar";
+import TGClient from "../../utils/TGClient.js";
+import showConfirm from "../func/confirm.js";
+import showSnackbar from "../func/snackbar.js";
 
 export interface TpMention {
   insert: {

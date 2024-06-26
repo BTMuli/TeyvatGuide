@@ -25,7 +25,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from "vue";
 
-import { parseHtmlText } from "../../utils/toolFunc";
+import { parseHtmlText } from "../../utils/toolFunc.js";
 
 interface TwcSkillsProps {
   data: TGApp.App.Character.WikiSkill[];

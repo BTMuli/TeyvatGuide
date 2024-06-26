@@ -8,8 +8,8 @@ import { createApp } from "vue";
 import { createVuetify } from "vuetify";
 
 import App from "./App.vue";
-import router from "./router";
-import store from "./store";
+import router from "./router/index.js";
+import store from "./store/index.js";
 
 import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";

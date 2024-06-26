@@ -25,7 +25,7 @@
 import { app } from "@tauri-apps/api";
 import { computed, onMounted, ref } from "vue";
 
-import { useAppStore } from "../../store/modules/app";
+import { useAppStore } from "../../store/modules/app.js";
 
 const appStore = useAppStore();
 const versionApp = ref<string>();

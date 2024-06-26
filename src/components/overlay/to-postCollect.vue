@@ -36,9 +36,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 
-import TSUserCollection from "../../plugins/Sqlite/modules/userCollect";
-import showConfirm from "../func/confirm";
-import showSnackbar from "../func/snackbar";
+import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
+import showConfirm from "../func/confirm.js";
+import showSnackbar from "../func/snackbar.js";
 import TOverlay from "../main/t-overlay.vue";
 
 interface ToPostCollectProps {
@@ -100,7 +100,8 @@ async function deleteCollect(item: TGApp.Sqlite.UserCollection.UFCollection): Pr
     });
     return;
   }
-  const resD = await TSUserCollection.deleteCollect(item.title);
+  // todo,这边暂时将默认force设为false，后续需要根据需求修改
+  const resD = await TSUserCollection.deleteCollect(item.title, false);
   if (resD) {
     showSnackbar({
       text: "删除成功",

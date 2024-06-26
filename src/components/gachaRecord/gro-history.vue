@@ -54,11 +54,11 @@
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
-import { AppGachaData, AppCharacterData, AppWeaponData } from "../../data";
-import { createPost } from "../../utils/TGWindow";
-import { timestampToDate } from "../../utils/toolFunc";
-import showConfirm from "../func/confirm";
-import showSnackbar from "../func/snackbar";
+import { AppGachaData, AppCharacterData, AppWeaponData } from "../../data/index.js";
+import { createPost } from "../../utils/TGWindow.js";
+import { timestampToDate } from "../../utils/toolFunc.js";
+import showConfirm from "../func/confirm.js";
+import showSnackbar from "../func/snackbar.js";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
 
 interface GroHistoryMap {

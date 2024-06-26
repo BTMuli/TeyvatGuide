@@ -4,7 +4,7 @@
  * @since Beta v0.4.7
  */
 
-import type { SchemaType } from "ajv/lib/types/index.js";
+import type { Schema } from "ajv";
 
 import achievements from "./app/achievements.json";
 import achievementSeries from "./app/achievementSeries.json";
@@ -33,8 +33,8 @@ export const AppGCGData: TGApp.App.GCG.WikiBriefInfo[] = GCG;
 export const AppNameCardsData: TGApp.App.NameCard.Item[] = nameCards;
 export const AppWeaponData: TGApp.App.Weapon.WikiBriefInfo[] = weapon;
 // Schema
-export const UiafSchema: SchemaType = schemaUiaf;
-export const UigfSchema: SchemaType = schemaUigf;
+export const UiafSchema: Schema = schemaUiaf;
+export const UigfSchema: Schema = schemaUigf;
 // Archive
 export const ArcBirCalendar: TGApp.Archive.Birth.CalendarData = arcBirCalendar;
 export const ArcBirDraw: TGApp.Archive.Birth.DrawItem[] = arcBirDraw;

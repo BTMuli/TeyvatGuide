@@ -25,14 +25,14 @@
 <script lang="ts" setup>
 import { onMounted, onUnmounted, ref, shallowRef } from "vue";
 
-import showSnackbar from "../../components/func/snackbar";
+import showSnackbar from "../../components/func/snackbar.js";
 import TCalendar from "../../components/home/t-calendar.vue";
 import TPool from "../../components/home/t-pool.vue";
 import TPosition from "../../components/home/t-position.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import { useAppStore } from "../../store/modules/app";
-import { useHomeStore } from "../../store/modules/home";
-import TGLogger from "../../utils/TGLogger";
+import { useAppStore } from "../../store/modules/app.js";
+import { useHomeStore } from "../../store/modules/home.js";
+import TGLogger from "../../utils/TGLogger.js";
 
 // store
 const appStore = useAppStore();

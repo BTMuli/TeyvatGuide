@@ -56,11 +56,11 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 
-import Mys from "../../plugins/Mys";
-import { useHomeStore } from "../../store/modules/home";
-import { createPost, createTGWindow } from "../../utils/TGWindow";
-import { stamp2LastTime } from "../../utils/toolFunc";
-import showSnackbar from "../func/snackbar";
+import Mys from "../../plugins/Mys/index.js";
+import { useHomeStore } from "../../store/modules/home.js";
+import { createPost, createTGWindow } from "../../utils/TGWindow.js";
+import { stamp2LastTime } from "../../utils/toolFunc.js";
+import showSnackbar from "../func/snackbar.js";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
 
 import THomeCard from "./t-homecard.vue";

@@ -95,16 +95,16 @@ import { UnlistenFn } from "@tauri-apps/api/helpers/event";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeMount, onMounted, onUnmounted, ref, watch } from "vue";
 
-import showConfirm from "../../components/func/confirm";
-import showSnackbar from "../../components/func/snackbar";
+import showConfirm from "../../components/func/confirm.js";
+import showSnackbar from "../../components/func/snackbar.js";
 import TPostCard from "../../components/main/t-postcard.vue";
 import ToCollectPost from "../../components/overlay/to-collectPost.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import TGSqlite from "../../plugins/Sqlite";
-import TSUserCollection from "../../plugins/Sqlite/modules/userCollect";
-import { useUserStore } from "../../store/modules/user";
-import TGLogger from "../../utils/TGLogger";
-import TGRequest from "../../web/request/TGRequest";
+import TGSqlite from "../../plugins/Sqlite/index.js";
+import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
+import { useUserStore } from "../../store/modules/user.js";
+import TGLogger from "../../utils/TGLogger.js";
+import TGRequest from "../../web/request/TGRequest.js";
 
 const loading = ref(false);
 const loadingTitle = ref("加载中...");

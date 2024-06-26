@@ -16,7 +16,7 @@ import {
   UidCheckApi,
   UidRankApi,
   WeaponCollocationApi,
-} from "./abyss";
+} from "./abyss.js";
 
 const HutaoApi = {
   Abyss: {

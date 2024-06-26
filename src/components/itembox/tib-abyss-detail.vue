@@ -4,7 +4,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 
-import TGSqlite from "../../plugins/Sqlite";
+import TGSqlite from "../../plugins/Sqlite/index.js";
 import TItemBox from "../main/t-itembox.vue";
 import type { TItemBoxData } from "../main/t-itembox.vue";
 

@@ -23,10 +23,10 @@
 import { onMounted, ref, StyleValue, toRaw } from "vue";
 import { useRouter } from "vue-router";
 
-import { getEmojis } from "../../plugins/Mys/request/getEmojis";
-import { parseLink, parsePost } from "../../utils/linkParser";
-import { isColorSimilar } from "../../utils/toolFunc";
-import showSnackbar from "../func/snackbar";
+import { getEmojis } from "../../plugins/Mys/request/getEmojis.js";
+import { parseLink, parsePost } from "../../utils/linkParser.js";
+import { isColorSimilar } from "../../utils/toolFunc.js";
+import showSnackbar from "../func/snackbar.js";
 
 export interface TpText {
   insert: string;

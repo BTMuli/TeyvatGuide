@@ -43,13 +43,14 @@
 </template>
 <script lang="ts" setup>
 import { dialog, fs, path } from "@tauri-apps/api";
+import { FileEntry } from "@tauri-apps/api/fs";
 
-import TGSqlite from "../../plugins/Sqlite";
-import { useAppStore } from "../../store/modules/app";
-import { backUpUserData } from "../../utils/dataBS";
-import TGShell from "../../utils/TGShell";
-import showConfirm from "../func/confirm";
-import showSnackbar from "../func/snackbar";
+import TGSqlite from "../../plugins/Sqlite/index.js";
+import { useAppStore } from "../../store/modules/app.js";
+import { backUpUserData } from "../../utils/dataBS.js";
+import TGShell from "../../utils/TGShell.js";
+import showConfirm from "../func/confirm.js";
+import showSnackbar from "../func/snackbar.js";
 
 const appStore = useAppStore();
 
@@ -127,7 +128,7 @@ async function confirmCLD(): Promise<void> {
   }
   const logDir = appStore.logDir;
   const files = await fs.readDir(logDir);
-  const delFiles = files.filter((file) => {
+  const delFiles = files.filter((file: FileEntry) => {
     // yyyy-mm-dd.log
     const reg = /(\d{4}-\d{2}-\d{2}\.log)/;
     const match = file.path.match(reg);

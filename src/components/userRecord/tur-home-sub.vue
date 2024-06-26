@@ -36,7 +36,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 
-import { saveImgLocal } from "../../utils/TGShare";
+import { saveImgLocal } from "../../utils/TGShare.js";
 
 interface TurHomeSubProps {
   data: TGApp.Sqlite.Record.Home;

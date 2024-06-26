@@ -71,17 +71,17 @@
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 
-import showSnackbar from "../../components/func/snackbar";
+import showSnackbar from "../../components/func/snackbar.js";
 import TSubLine from "../../components/main/t-subline.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TuaDetail from "../../components/userAbyss/tua-detail.vue";
 import TuaOverview from "../../components/userAbyss/tua-overview.vue";
-import Hutao from "../../plugins/Hutao";
-import TGSqlite from "../../plugins/Sqlite";
-import { useUserStore } from "../../store/modules/user";
-import TGLogger from "../../utils/TGLogger";
-import { generateShareImg } from "../../utils/TGShare";
-import TGRequest from "../../web/request/TGRequest";
+import Hutao from "../../plugins/Hutao/index.js";
+import TGSqlite from "../../plugins/Sqlite/index.js";
+import { useUserStore } from "../../store/modules/user.js";
+import TGLogger from "../../utils/TGLogger.js";
+import { generateShareImg } from "../../utils/TGShare.js";
+import TGRequest from "../../web/request/TGRequest.js";
 
 // store
 const userStore = storeToRefs(useUserStore());

@@ -45,19 +45,19 @@ import { dialog, path } from "@tauri-apps/api";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, watch } from "vue";
 
-import showConfirm from "../../components/func/confirm";
-import showSnackbar from "../../components/func/snackbar";
+import showConfirm from "../../components/func/confirm.js";
+import showSnackbar from "../../components/func/snackbar.js";
 import GroEcharts from "../../components/gachaRecord/gro-echarts.vue";
 import GroHistory from "../../components/gachaRecord/gro-history.vue";
 import GroOverview from "../../components/gachaRecord/gro-overview.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import { AppCharacterData, AppWeaponData } from "../../data";
-import TSUserGacha from "../../plugins/Sqlite/modules/userGacha";
-import { useAppStore } from "../../store/modules/app";
-import { useUserStore } from "../../store/modules/user";
-import TGLogger from "../../utils/TGLogger";
-import { backupUigfData, exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF";
-import TGRequest from "../../web/request/TGRequest";
+import { AppCharacterData, AppWeaponData } from "../../data/index.js";
+import TSUserGacha from "../../plugins/Sqlite/modules/userGacha.js";
+import { useAppStore } from "../../store/modules/app.js";
+import { useUserStore } from "../../store/modules/user.js";
+import TGLogger from "../../utils/TGLogger.js";
+import { backupUigfData, exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF.js";
+import TGRequest from "../../web/request/TGRequest.js";
 
 // store
 const appStore = useAppStore();

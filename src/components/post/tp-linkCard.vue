@@ -16,8 +16,8 @@
 import { toRaw } from "vue";
 import { useRouter } from "vue-router";
 
-import { parseLink, parsePost } from "../../utils/linkParser";
-import showSnackbar from "../func/snackbar";
+import { parseLink, parsePost } from "../../utils/linkParser.js";
+import showSnackbar from "../func/snackbar.js";
 
 interface TpLinkCard {
   insert: {

@@ -50,7 +50,7 @@
 <script lang="ts" setup>
 import { computed, onBeforeMount, ref } from "vue";
 
-import { createPost } from "../../utils/TGWindow";
+import { createPost } from "../../utils/TGWindow.js";
 import TpAvatar from "../post/tp-avatar.vue";
 
 interface TPostCardProps {

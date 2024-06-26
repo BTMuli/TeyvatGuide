@@ -53,11 +53,11 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from "vue";
 
-import { WikiWeaponData } from "../../data";
-import Mys from "../../plugins/Mys";
-import { createTGWindow } from "../../utils/TGWindow";
-import { parseHtmlText } from "../../utils/toolFunc";
-import showSnackbar from "../func/snackbar";
+import { WikiWeaponData } from "../../data/index.js";
+import Mys from "../../plugins/Mys/index.js";
+import { createTGWindow } from "../../utils/TGWindow.js";
+import { parseHtmlText } from "../../utils/toolFunc.js";
+import showSnackbar from "../func/snackbar.js";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
 
 import TwcMaterials from "./twc-materials.vue";

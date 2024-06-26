@@ -6,7 +6,7 @@
 <script lang="ts" setup>
 import { onMounted, toRaw } from "vue";
 
-import TGLogger from "../../utils/TGLogger";
+import TGLogger from "../../utils/TGLogger.js";
 
 interface TpUnknownProps {
   data: TGApp.Plugins.Mys.SctPost.Empty;

@@ -9,10 +9,10 @@
 </template>
 <script lang="ts" setup>
 import { event } from "@tauri-apps/api";
-import { UnlistenFn } from "@tauri-apps/api/helpers/event";
+import { UnlistenFn, Event } from "@tauri-apps/api/helpers/event";
 import { computed, onMounted, onUnmounted } from "vue";
 
-import { useAppStore } from "../../store/modules/app";
+import { useAppStore } from "../../store/modules/app.js";
 
 const appStore = useAppStore();
 const themeGet = computed({
@@ -35,17 +35,13 @@ async function switchTheme(): Promise<void> {
 }
 
 async function listenOnTheme(): Promise<UnlistenFn> {
-  return await event.listen<string>("readTheme", (e) => {
+  return await event.listen("readTheme", (e: Event<string>) => {
     const theme = e.payload;
     themeGet.value = theme === "default" ? "default" : "dark";
   });
 }
 
-onUnmounted(() => {
-  if (themeListener) {
-    themeListener();
-  }
-});
+onUnmounted(() => themeListener());
 </script>
 <style lang="css" scoped>
 .switch-box {

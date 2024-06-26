@@ -4,21 +4,21 @@
  * @since Beta v0.4.5
  */
 
-import MysApi from "./api";
-import { getLoginQr, getLoginStatus } from "./request/doGameLogin";
-import { getCollectionData, getCollectionPosts } from "./request/getCollectionData";
-import getForumList from "./request/getForumList";
-import getGachaData from "./request/getGachaData";
-import getHomeNavigator from "./request/getHomeNavigator";
-import getLotteryData from "./request/getLotteryData";
-import getNewsList from "./request/getNewsList";
-import { getPositionData } from "./request/getPositionData";
-import getPostData from "./request/getPostData";
-import { getVoteInfo, getVoteResult } from "./request/getVoteData";
-import searchPosts from "./request/searchPost";
-import { getGachaCard } from "./utils/getGachaCard";
-import getLotteryCard from "./utils/getLotteryCard";
-import getPositionCard from "./utils/getPositionCard";
+import MysApi from "./api/index.js";
+import { getLoginQr, getLoginStatus } from "./request/doGameLogin.js";
+import { getCollectionData, getCollectionPosts } from "./request/getCollectionData.js";
+import getForumList from "./request/getForumList.js";
+import getGachaData from "./request/getGachaData.js";
+import getHomeNavigator from "./request/getHomeNavigator.js";
+import getLotteryData from "./request/getLotteryData.js";
+import getNewsList from "./request/getNewsList.js";
+import { getPositionData } from "./request/getPositionData.js";
+import getPostData from "./request/getPostData.js";
+import { getVoteInfo, getVoteResult } from "./request/getVoteData.js";
+import searchPosts from "./request/searchPost.js";
+import { getGachaCard } from "./utils/getGachaCard.js";
+import getLotteryCard from "./utils/getLotteryCard.js";
+import getPositionCard from "./utils/getPositionCard.js";
 
 const Mys = {
   Api: MysApi,

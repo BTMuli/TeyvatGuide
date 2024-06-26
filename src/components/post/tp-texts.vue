@@ -9,7 +9,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { StyleValue } from "vue";
+import { Component, StyleValue } from "vue";
 
 import TpMention, { type TpMention as TpMentionType } from "./tp-mention.vue";
 import TpText, { type TpText as TpTextType } from "./tp-text.vue";
@@ -24,7 +24,7 @@ interface TpTextsProps {
 
 const props = defineProps<TpTextsProps>();
 
-function getComp(text: TpTextType | TpMentionType): string {
+function getComp(text: TpTextType | TpMentionType): Component {
   if (typeof text.insert === "string") {
     return TpText;
   }

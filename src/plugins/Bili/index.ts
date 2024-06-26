@@ -4,8 +4,8 @@
  * @since Beta v0.4.0
  */
 
-import getVideoUrl from "./request/getVideoUrl";
-import getVideoView from "./request/getVideoView";
+import getVideoUrl from "./request/getVideoUrl.js";
+import getVideoView from "./request/getVideoView.js";
 
 const Bili = {
   video: {

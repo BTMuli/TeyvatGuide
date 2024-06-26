@@ -49,7 +49,7 @@
         </div>
       </div>
     </div>
-    <TopNamecard :data="nameCard" @selected="toNameCard" />
+    <TopNamecard :data="nameCard" @selected="toNameCard" v-if="nameCard" />
     <TwcMaterials :data="data.materials" />
     <TwcSkills :data="data.skills" />
     <TwcConstellations :data="data.constellation" />
@@ -100,11 +100,11 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
-import { WikiCharacterData, AppNameCardsData, AppCharacterData } from "../../data";
-import Mys from "../../plugins/Mys";
-import { createTGWindow } from "../../utils/TGWindow";
-import { parseHtmlText } from "../../utils/toolFunc";
-import showSnackbar from "../func/snackbar";
+import { WikiCharacterData, AppNameCardsData, AppCharacterData } from "../../data/index.js";
+import Mys from "../../plugins/Mys/index.js";
+import { createTGWindow } from "../../utils/TGWindow.js";
+import { parseHtmlText } from "../../utils/toolFunc.js";
+import showSnackbar from "../func/snackbar.js";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
 import ToNamecard from "../overlay/to-namecard.vue";
 import TopNamecard from "../overlay/top-namecard.vue";

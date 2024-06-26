@@ -43,8 +43,8 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUpdated, ref } from "vue";
 
-import TGSqlite from "../../plugins/Sqlite";
-import { generateShareImg } from "../../utils/TGShare";
+import TGSqlite from "../../plugins/Sqlite/index.js";
+import { generateShareImg } from "../../utils/TGShare.js";
 import TOverlay from "../main/t-overlay.vue";
 
 import DucDetailOlb from "./duc-detail-olb.vue";
