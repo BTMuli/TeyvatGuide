@@ -11,16 +11,16 @@ import {
   AppAchievementSeriesData,
   AppNameCardsData,
   AppCharacterData,
-} from "../../../data";
-import { getBuildTime } from "../../../utils/TGBuild";
+} from "../../../data/index.js";
+import { getBuildTime } from "../../../utils/TGBuild.js";
 
-import initTableSql from "./initTable";
+import initTableSql from "./initTable.js";
 import {
   insertAchievementData,
   insertAchievementSeriesData,
   insertNameCardData,
   insertCharacterData,
-} from "./insertData";
+} from "./insertData.js";
 
 /**
  * @description 初始化应用表数据

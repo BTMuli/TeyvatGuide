@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/utils/transUserRecord.ts
  * @description Sqlite 数据转换 用户战绩数据转换模块
- * @since Beta v0.4.3
+ * @since Beta v0.4.10
  */
 
 /**
@@ -79,11 +79,17 @@ function transAvatar(data: TGApp.Game.Record.Avatar[]): string {
 
 /**
  * @description 将统计信息转换为数据库中的数据
- * @since Alpha v0.2.2
+ * @since Beta v0.4.10
  * @param {TGApp.Game.Record.Stats} data 统计信息
  * @return {string} 转换后的统计信息
  */
 function transStat(data: TGApp.Game.Record.Stats): string {
+  let combatRole: string;
+  if (!data.role_combat.is_unlock) {
+    combatRole = "未解锁";
+  } else {
+    combatRole = `第 ${data.role_combat.max_round_id} 幕`;
+  }
   const stats: TGApp.Sqlite.Record.Stats = {
     activeDays: data.active_day_number,
     achievementNumber: data.achievement_number,
@@ -96,6 +102,7 @@ function transStat(data: TGApp.Game.Record.Stats): string {
     dendroCulus: data.dendroculus_number,
     hydroCulus: data.hydroculus_number,
     sprialAbyss: data.spiral_abyss,
+    combatRole: combatRole,
     luxuriousChest: data.luxurious_chest_number,
     preciousChest: data.precious_chest_number,
     exquisiteChest: data.exquisite_chest_number,

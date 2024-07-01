@@ -1,12 +1,12 @@
 /**
  * @file types/Game/Record.d.ts
  * @description 原神战绩相关类型定义文件
- * @since Alpha v0.2.2
+ * @since Beta v0.4.10
  */
 
 /**
  * @description 原神战绩相关类型定义命名空间
- * @since Alpha v0.2.2
+ * @since Beta v0.4.10
  * @namespace TGApp.Game.Record
  * @memberof TGApp.Game
  */
@@ -47,11 +47,12 @@ declare namespace TGApp.Game.Record {
   /**
    * @description 角色信息类型
    * @interface Role
-   * @since Alpha v0.2.0
+   * @since Beta v0.4.10
    * @property {string} AvatarUrl - 角色头像 // 通常为 ""
    * @property {string} nickname - 角色昵称
    * @property {string} region - 区域
    * @property {number} level - 等级
+   * @property {string} game_head_icon - 游戏头像
    * @return Role
    */
   interface Role {
@@ -59,6 +60,7 @@ declare namespace TGApp.Game.Record {
     nickname: string;
     region: string;
     level: number;
+    game_head_icon: string;
   }
 
   /**
@@ -93,7 +95,7 @@ declare namespace TGApp.Game.Record {
   /**
    * @description 统计信息类型
    * @interface Stats
-   * @since Alpha v0.2.2
+   * @since Beta v0.4.10
    * @property {number} active_day_number - 活跃天数
    * @property {number} achievement_number - 成就数量
    * @property {number} anemoculus_number - 风神瞳数量
@@ -110,6 +112,8 @@ declare namespace TGApp.Game.Record {
    * @property {number} magic_chest_number - 奇馈宝箱数量
    * @property {number} dendroculus_number - 草神瞳数量
    * @property {number} hydroculus_number - 水神瞳数量
+   * @property {unknown} field_ext_map - 数据对应链接的map，用不到设为 unknown
+   * @property {CombatStats} role_combat - 幻想真境剧诗数据
    * @return Stats
    */
   interface Stats {
@@ -129,6 +133,25 @@ declare namespace TGApp.Game.Record {
     magic_chest_number: number;
     dendroculus_number: number;
     hydroculus_number: number;
+    field_ext_map: unknown;
+    role_combat: CombatStats;
+  }
+
+  /**
+   * @description 幻想真境剧诗数据类型
+   * @interface CombatStats
+   * @since Beta v0.4.10
+   * @property {boolean} is_unlock - 是否解锁
+   * @property {number} max_round_id - 最大报幕数
+   * @property {boolean} has_data - 是否有数据
+   * @property {boolean} has_detail_data - 是否有详细数据
+   * @return CombatStats
+   */
+  interface CombatStats {
+    is_unlock: boolean;
+    max_round_id: number;
+    has_data: boolean;
+    has_detail_data: boolean;
   }
 
   /**

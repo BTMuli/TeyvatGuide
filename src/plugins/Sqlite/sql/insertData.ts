@@ -4,10 +4,10 @@
  * @since Beta v0.3.3
  */
 
-import { transCharacterData, transFloorData } from "../utils/transAbyssData";
-import { timeToSecond } from "../utils/transTime";
-import { transUserRecord } from "../utils/transUserRecord";
-import { transUserRoles } from "../utils/transUserRoles";
+import { transCharacterData, transFloorData } from "../utils/transAbyssData.js";
+import { timeToSecond } from "../utils/transTime.js";
+import { transUserRecord } from "../utils/transUserRecord.js";
+import { transUserRoles } from "../utils/transUserRoles.js";
 
 /**
  * @description 插入成就数据

@@ -5,6 +5,7 @@
     <TurOverviewSub title="成就达成数" :text="data.achievementNumber" />
     <TurOverviewSub title="获得角色数" :text="data.avatarNumber" />
     <TurOverviewSub title="深境螺旋" :text="data.sprialAbyss" />
+    <TurOverviewSub title="幻想真境剧诗" :text="data.combatRole" />
     <TurOverviewSub title="解锁传送点" :text="data.wayPoints" />
     <TurOverviewSub title="解锁秘境" :text="data.domainNumber" />
     <TurOverviewSub title="风神瞳" :text="data.anemoCulus" />

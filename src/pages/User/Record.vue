@@ -104,6 +104,8 @@ async function refresh(): Promise<void> {
   const res = await TGRequest.User.getRecord(cookie, user);
   if (!("retcode" in res)) {
     await TGLogger.Info(`[UserRecord][refresh][${user.gameUid}] 获取战绩数据成功`);
+    await TGLogger.Info(`[UserRecord][refresh][${user.gameUid}]`, false);
+    await TGLogger.Info(JSON.stringify(res), false);
     loadingTitle.value = "正在保存战绩数据";
     await TGSqlite.saveUserRecord(res, user.gameUid);
     await initUserRecordData();

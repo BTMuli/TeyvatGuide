@@ -4,7 +4,7 @@
  * @since Beta v0.3.9
  */
 
-import { timeToSecond } from "./transTime";
+import { timeToSecond } from "./transTime.js";
 
 /**
  * @description 将通过 api 获取到的深渊数据转换为数据库中的数据
