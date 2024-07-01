@@ -5,6 +5,7 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
 /**
  * @description 获取抽卡记录
@@ -31,11 +32,8 @@ export async function getGachaLog(
     end_id: endId,
   };
   return await http
-    .fetch<TGApp.Game.Gacha.GachaLogResponse | TGApp.BBS.Response.Base>(url, {
-      method: "GET",
-      query: params,
-    })
-    .then((res) => {
+    .fetch(url, { method: "GET", query: params })
+    .then((res: Response<TGApp.Game.Gacha.GachaLogResponse | TGApp.BBS.Response.Base>) => {
       if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
       return res.data.data.list;
     });

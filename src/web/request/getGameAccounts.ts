@@ -5,10 +5,11 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import TGApi from "../api/TGApi";
-import TGConstant from "../constant/TGConstant";
-import TGUtils from "../utils/TGUtils";
+import TGApi from "../api/TGApi.js";
+import TGConstant from "../constant/TGConstant.js";
+import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 通过 stoken 获取游戏账号
@@ -22,10 +23,7 @@ export async function getGameAccountsBySToken(
   stuid: string,
 ): Promise<TGApp.User.Account.Game[] | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.bySToken.getAccounts;
-  const cookie = {
-    stuid,
-    stoken,
-  };
+  const cookie = { stuid, stoken };
   const params = { stoken, stuid, game_biz: TGConstant.Utils.GAME_BIZ };
   return await getGameAccounts(url, cookie, params);
 }
@@ -42,10 +40,7 @@ export async function getGameAccountsByCookie(
   account_id: string,
 ): Promise<TGApp.User.Account.Game[] | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.byCookie.getAccounts;
-  const cookie = {
-    account_id,
-    cookie_token,
-  };
+  const cookie = { account_id, cookie_token };
   const params = { game_biz: TGConstant.Utils.GAME_BIZ };
   return await getGameAccounts(url, cookie, params);
 }
@@ -65,12 +60,8 @@ async function getGameAccounts(
 ): Promise<TGApp.BBS.Response.Base | TGApp.User.Account.Game[]> {
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http
-    .fetch<TGApp.User.Account.GameResponse | TGApp.BBS.Response.Base>(url, {
-      method: "GET",
-      headers: header,
-      query: params,
-    })
-    .then((res) => {
+    .fetch(url, { method: "GET", headers: header, query: params })
+    .then((res: Response<TGApp.User.Account.GameResponse | TGApp.BBS.Response.Base>) => {
       if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
       return res.data.data.list;
     });

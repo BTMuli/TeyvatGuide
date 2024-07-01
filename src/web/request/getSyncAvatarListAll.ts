@@ -5,9 +5,10 @@
  */
 
 import { app, http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import TGApi from "../api/TGApi";
-import TGUtils from "../utils/TGUtils";
+import TGApi from "../api/TGApi.js";
+import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 获取同步角色列表请求
@@ -23,11 +24,7 @@ async function getSyncAvatarList(
   page: number,
 ): Promise<TGApp.Game.Calculate.AvatarListItem[] | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.calculate.getSyncAvatarList; // 获取同步角色列表请求地址
-  const data = {
-    uid,
-    region: TGUtils.Tools.getServerByUid(uid),
-    page,
-  };
+  const data = { uid, region: TGUtils.Tools.getServerByUid(uid), page };
   const version = await app.getVersion();
   const header = {
     "User-Agent": `TeyvatGuide/${version}`,
@@ -35,15 +32,13 @@ async function getSyncAvatarList(
     Cookie: TGUtils.Tools.transCookie(cookie),
   };
   return await http
-    .fetch<TGApp.Game.Calculate.SyncAvatarListResponse | TGApp.BBS.Response.Base>(url, {
-      method: "POST",
-      body: http.Body.json(data),
-      headers: header,
-    })
-    .then((res) => {
-      if (res.data.retcode !== 0) return res.data;
-      return res.data.data.list;
-    });
+    .fetch(url, { method: "POST", body: http.Body.json(data), headers: header })
+    .then(
+      (res: Response<TGApp.Game.Calculate.SyncAvatarListResponse | TGApp.BBS.Response.Base>) => {
+        if (res.data.retcode !== 0) return res.data;
+        return res.data.data.list;
+      },
+    );
 }
 
 /**

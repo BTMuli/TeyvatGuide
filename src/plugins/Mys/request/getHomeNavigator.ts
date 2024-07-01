@@ -5,6 +5,7 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
 /**
  * @description 获取首页导航列表
@@ -14,18 +15,10 @@ import { http } from "@tauri-apps/api";
  */
 async function getHomeNavigator(gid: number = 2): Promise<TGApp.BBS.Navigator.Navigator[]> {
   const url = "https://bbs-api.miyoushe.com/apihub/api/home/new";
-  const params = {
-    gids: gid.toString(),
-  };
+  const params = { gids: gid.toString() };
   return await http
-    .fetch<TGApp.BBS.Navigator.HomeResponse>(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      query: params,
-    })
-    .then((res) => res.data.data.navigator);
+    .fetch(url, { method: "GET", headers: { "Content-Type": "application/json" }, query: params })
+    .then((res: Response<TGApp.BBS.Navigator.HomeResponse>) => res.data.data.navigator);
 }
 
 export default getHomeNavigator;

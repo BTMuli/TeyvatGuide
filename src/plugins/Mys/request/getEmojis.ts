@@ -5,6 +5,7 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
 /**
  * @description 获取表情包列表
@@ -14,8 +15,8 @@ import { http } from "@tauri-apps/api";
 export async function getEmojis(): Promise<Record<string, string> | TGApp.BBS.Response.Base> {
   const url = "https://bbs-api-static.miyoushe.com/misc/api/emoticon_set";
   return await http
-    .fetch<TGApp.Plugins.Mys.Emoji.Response | TGApp.BBS.Response.Base>(url)
-    .then((res) => {
+    .fetch(url)
+    .then((res: Response<TGApp.Plugins.Mys.Emoji.Response | TGApp.BBS.Response.Base>) => {
       if (res.data.retcode === 0) {
         const emojis: Record<string, string> = {};
         res.data.data.list.forEach((series) => {

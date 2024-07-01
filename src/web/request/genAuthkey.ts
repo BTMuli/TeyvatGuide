@@ -5,9 +5,10 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import TGConstant from "../constant/TGConstant";
-import TGUtils from "../utils/TGUtils";
+import TGConstant from "../constant/TGConstant.js";
+import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 生成 authkey
@@ -29,12 +30,8 @@ export async function genAuthkey(
   };
   const header = TGUtils.User.getHeader(cookie, "POST", JSON.stringify(data), "lk2", true);
   return await http
-    .fetch<TGApp.Game.Gacha.AuthkeyResponse | TGApp.BBS.Response.Base>(url, {
-      method: "POST",
-      headers: header,
-      body: http.Body.json(data),
-    })
-    .then((res) => {
+    .fetch(url, { method: "POST", headers: header, body: http.Body.json(data) })
+    .then((res: Response<TGApp.Game.Gacha.AuthkeyResponse | TGApp.BBS.Response.Base>) => {
       if (res.data.retcode === 0) return res.data.data.authkey;
       return res.data;
     });
@@ -54,10 +51,6 @@ export async function genAuthkey2(
   const url = "https://api-takumi.mihoyo.com/binding/api/genAuthKey";
   const header = TGUtils.User.getHeader(cookie, "POST", JSON.stringify(payload), "lk2", true);
   return await http
-    .fetch<TGApp.BBS.Response.Base>(url, {
-      method: "POST",
-      headers: header,
-      body: http.Body.json(payload),
-    })
-    .then((res) => res.data);
+    .fetch(url, { method: "POST", headers: header, body: http.Body.json(payload) })
+    .then((res: Response<TGApp.BBS.Response.Base>) => res.data);
 }

@@ -4,6 +4,7 @@
  * @since Beta v0.4.4
  */
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
 export enum AnnoServer {
   CN_ISLAND = "cn_gf01",
@@ -62,11 +63,8 @@ export async function getAnnoList(
     url = "https://hk4e-api-os.hoyoverse.com/common/hk4e_global/announcement/api/getAnnList";
   }
   return await http
-    .fetch<TGApp.BBS.Announcement.ListResponse>(url, {
-      method: "GET",
-      query: params,
-    })
-    .then((res) => res.data.data);
+    .fetch(url, { method: "GET", query: params })
+    .then((res: Response<TGApp.BBS.Announcement.ListResponse>) => res.data.data);
 }
 
 /**
@@ -88,11 +86,8 @@ export async function getAnnoContent(
     url = "https://hk4e-api-os.hoyoverse.com/common/hk4e_global/announcement/api/getAnnContent";
   }
   const annoContents: TGApp.BBS.Announcement.ContentItem[] = await http
-    .fetch<TGApp.BBS.Announcement.ContentResponse>(url, {
-      method: "GET",
-      query: params,
-    })
-    .then((res) => res.data.data.list);
+    .fetch(url, { method: "GET", query: params })
+    .then((res: Response<TGApp.BBS.Announcement.ContentResponse>) => res.data.data.list);
   const annoContent = annoContents.find((item) => item.ann_id === annId);
   if (annoContent != null) {
     return annoContent;

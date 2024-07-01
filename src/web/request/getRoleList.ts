@@ -5,9 +5,10 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import TGApi from "../api/TGApi";
-import TGUtils from "../utils/TGUtils";
+import TGApi from "../api/TGApi.js";
+import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 通过 Cookie 获取用户角色列表
@@ -26,12 +27,8 @@ export async function getGameRoleListByLToken(
   const data = { role_id: uid, server: TGUtils.Tools.getServerByUid(uid) };
   const header = TGUtils.User.getHeader(cookie, "POST", JSON.stringify(data), "common");
   return await http
-    .fetch<TGApp.Game.Character.ListResponse | TGApp.BBS.Response.Base>(url, {
-      method: "POST",
-      headers: header,
-      body: http.Body.json(data),
-    })
-    .then((res) => {
+    .fetch(url, { method: "POST", headers: header, body: http.Body.json(data) })
+    .then((res: Response<TGApp.Game.Character.ListResponse | TGApp.BBS.Response.Base>) => {
       if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
       return res.data.data.avatars;
     });

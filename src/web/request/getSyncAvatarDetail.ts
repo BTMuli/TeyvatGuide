@@ -5,9 +5,10 @@
  */
 
 import { app, http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import TGApi from "../api/TGApi";
-import TGUtils from "../utils/TGUtils";
+import TGApi from "../api/TGApi.js";
+import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 获取同步角色详情
@@ -37,15 +38,13 @@ async function getSyncAvatarDetail(
     Cookie: TGUtils.Tools.transCookie({ account_id: accountId, cookie_token: cookieToken }),
   };
   return await http
-    .fetch<TGApp.Game.Calculate.SyncAvatarDetailResponse | TGApp.BBS.Response.Base>(url, {
-      method: "GET",
-      headers: header,
-      query: params,
-    })
-    .then((res) => {
-      if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
-      return res.data.data;
-    });
+    .fetch(url, { method: "GET", headers: header, query: params })
+    .then(
+      (res: Response<TGApp.Game.Calculate.SyncAvatarDetailResponse | TGApp.BBS.Response.Base>) => {
+        if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
+        return res.data.data;
+      },
+    );
 }
 
 export default getSyncAvatarDetail;

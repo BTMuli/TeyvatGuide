@@ -5,8 +5,9 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import MysApi from "../api";
+import MysApi from "../api/index.js";
 
 /**
  * @description 获取合集信息
@@ -23,15 +24,12 @@ export async function getCollectionData(
     id: collectionId.toString(),
   };
   return await http
-    .fetch<TGApp.Plugins.Mys.Collection.Response>(url, {
+    .fetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Referer: MysApi.PostReferer,
-      },
+      headers: { "Content-Type": "application/json", Referer: MysApi.PostReferer },
       query: params,
     })
-    .then((res) => {
+    .then((res: Response<TGApp.Plugins.Mys.Collection.Response>) => {
       console.log(res.data);
       return res.data.data;
     });
@@ -47,19 +45,12 @@ export async function getCollectionPosts(
   collectionId: string,
 ): Promise<TGApp.Plugins.Mys.Collection.Data[]> {
   const url = "https://bbs-api.miyoushe.com/post/wapi/getPostFullInCollection";
-  const params = {
-    collection_id: collectionId,
-  };
+  const params = { collection_id: collectionId };
   return await http
-    .fetch<TGApp.Plugins.Mys.Collection.ResponsePosts>(url, {
+    .fetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Referer: MysApi.PostReferer,
-      },
+      headers: { "Content-Type": "application/json", Referer: MysApi.PostReferer },
       query: params,
     })
-    .then((res) => {
-      return res.data.data.posts;
-    });
+    .then((res: Response<TGApp.Plugins.Mys.Collection.ResponsePosts>) => res.data.data.posts);
 }

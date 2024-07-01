@@ -25,9 +25,7 @@ export async function getVoteInfo(id: string, uid: string): Promise<TGApp.Plugin
       headers: { "Content-Type": "application/json", Referer: MysApi.PostReferer },
       query: params,
     })
-    .then((res: Response<TGApp.Plugins.Mys.Vote.InfoResponse>) => {
-      return res.data.data.data[0];
-    });
+    .then((res: Response<TGApp.Plugins.Mys.Vote.InfoResponse>) => res.data.data.data[0]);
 }
 
 /**
@@ -49,7 +47,5 @@ export async function getVoteResult(
       headers: { "Content-Type": "application/json", Referer: MysApi.PostReferer },
       query: params,
     })
-    .then((res: Response<TGApp.Plugins.Mys.Vote.ResultResponse>) => {
-      return res.data.data.data[0];
-    });
+    .then((res: Response<TGApp.Plugins.Mys.Vote.ResultResponse>) => res.data.data.data[0]);
 }

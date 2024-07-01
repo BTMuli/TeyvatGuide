@@ -5,8 +5,9 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import MysApi from "../api";
+import MysApi from "../api/index.js";
 
 /**
  * @description 获取帖子信息
@@ -20,17 +21,12 @@ async function getPostData(postId: number): Promise<TGApp.Plugins.Mys.Post.FullD
     post_id: postId.toString(),
   };
   return await http
-    .fetch<TGApp.Plugins.Mys.Post.Response>(url, {
+    .fetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Referer: MysApi.PostReferer,
-      },
+      headers: { "Content-Type": "application/json", Referer: MysApi.PostReferer },
       query: params,
     })
-    .then((res) => {
-      return res.data.data.post;
-    });
+    .then((res: Response<TGApp.Plugins.Mys.Post.Response>) => res.data.data.post);
 }
 
 export default getPostData;

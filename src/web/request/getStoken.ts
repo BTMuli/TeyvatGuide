@@ -5,9 +5,10 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import TGConstant from "../constant/TGConstant";
-import { getRequestHeader } from "../utils/getRequestHeader";
+import TGConstant from "../constant/TGConstant.js";
+import { getRequestHeader } from "../utils/getRequestHeader.js";
 
 /**
  * @description 获取 stoken
@@ -27,16 +28,10 @@ export async function getStokenByGameToken(
     url = "https://api-takumi.mihoyo.com/account/ma-cn-session/app/getTokenByGameToken";
   }
   const data = { account_id: Number(accountId), game_token: token };
-  const header = {
-    "x-rpc-app_id": TGConstant.BBS.APP_ID,
-  };
+  const header = { "x-rpc-app_id": TGConstant.BBS.APP_ID };
   return await http
-    .fetch<TGApp.BBS.Response.getStokenByGameToken | TGApp.BBS.Response.Base>(url, {
-      method: "POST",
-      headers: header,
-      body: http.Body.json(data),
-    })
-    .then((res) => {
+    .fetch(url, { method: "POST", headers: header, body: http.Body.json(data) })
+    .then((res: Response<TGApp.BBS.Response.getStokenByGameToken | TGApp.BBS.Response.Base>) => {
       if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
       return res.data.data;
     });
@@ -54,20 +49,14 @@ export async function getTokenBySToken(
   stuid: string,
 ): Promise<TGApp.BBS.Response.getTokenBySTokenData | TGApp.BBS.Response.Base> {
   const url = "https://passport-api.mihoyo.com/account/ma-cn-session/app/getTokenBySToken";
-  const cookie = {
-    stoken,
-    stuid,
-  };
+  const cookie = { stoken, stuid };
   const header = {
     "x-rpc-app_id": TGConstant.BBS.APP_ID,
     ...getRequestHeader(cookie, "POST", "", "prod"),
   };
   return await http
-    .fetch<TGApp.BBS.Response.getTokenBySToken | TGApp.BBS.Response.Base>(url, {
-      method: "POST",
-      headers: header,
-    })
-    .then((res) => {
+    .fetch(url, { method: "POST", headers: header })
+    .then((res: Response<TGApp.BBS.Response.getTokenBySToken | TGApp.BBS.Response.Base>) => {
       if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
       return res.data.data;
     });

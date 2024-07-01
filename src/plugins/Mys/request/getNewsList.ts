@@ -5,6 +5,7 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
 /**
  * @description 获取 News 列表
@@ -29,14 +30,8 @@ async function getNewsList(
     last_id: lastId.toString(),
   };
   return await http
-    .fetch<TGApp.Plugins.Mys.News.Response>(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      query: params,
-    })
-    .then((res) => res.data.data);
+    .fetch(url, { method: "GET", headers: { "Content-Type": "application/json" }, query: params })
+    .then((res: Response<TGApp.Plugins.Mys.News.Response>) => res.data.data);
 }
 
 export default getNewsList;

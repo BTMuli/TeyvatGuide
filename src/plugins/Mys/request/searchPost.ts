@@ -5,6 +5,7 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
 /**
  * @description 搜索帖子
@@ -20,23 +21,10 @@ async function searchPosts(
   last_id: string,
 ): Promise<TGApp.Plugins.Mys.Search.PostsResponseData> {
   const url = "https://bbs-api.miyoushe.com/post/wapi/searchPosts";
-  const params = {
-    gids: gid,
-    keyword,
-    last_id,
-    size: "20",
-  };
+  const params = { gids: gid, keyword, last_id, size: "20" };
   return await http
-    .fetch<TGApp.Plugins.Mys.Search.PostsResponse>(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      query: params,
-    })
-    .then((res) => {
-      return res.data.data;
-    });
+    .fetch(url, { method: "GET", headers: { "Content-Type": "application/json" }, query: params })
+    .then((res: Response<TGApp.Plugins.Mys.Search.PostsResponse>) => res.data.data);
 }
 
 export default searchPosts;

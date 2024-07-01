@@ -4,7 +4,7 @@
  * @since Beta v0.4.6
  */
 
-import { AppCharacterData, ArcBirCalendar, ArcBirRole } from "../../../data";
+import { AppCharacterData, ArcBirCalendar, ArcBirRole } from "../../../data/index.js";
 
 /**
  * @description 判断今天是不是角色生日

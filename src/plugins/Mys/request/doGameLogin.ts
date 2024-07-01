@@ -5,9 +5,10 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import { getDeviceInfo } from "../../../utils/toolFunc";
-import { getRequestHeader } from "../../../web/utils/getRequestHeader";
+import { getDeviceInfo } from "../../../utils/toolFunc.js";
+import { getRequestHeader } from "../../../web/utils/getRequestHeader.js";
 
 const APP_ID = 8;
 
@@ -21,21 +22,16 @@ export async function getLoginQr(): Promise<
 > {
   const url = "https://hk4e-sdk.mihoyo.com/hk4e_cn/combo/panda/qrcode/fetch";
   const device = getDeviceInfo("device_id");
-  const data = {
-    app_id: APP_ID,
-    device,
-  };
+  const data = { app_id: APP_ID, device };
   const header = getRequestHeader({}, "POST", data, "common");
   return await http
-    .fetch<TGApp.Plugins.Mys.GameLogin.GetLoginQrResponse | TGApp.BBS.Response.Base>(url, {
-      headers: header,
-      method: "POST",
-      body: http.Body.json(data),
-    })
-    .then((res) => {
-      if (res.data.retcode === 0) return res.data.data;
-      return <TGApp.BBS.Response.Base>res.data;
-    });
+    .fetch(url, { headers: header, method: "POST", body: http.Body.json(data) })
+    .then(
+      (res: Response<TGApp.Plugins.Mys.GameLogin.GetLoginQrResponse | TGApp.BBS.Response.Base>) => {
+        if (res.data.retcode === 0) return res.data.data;
+        return <TGApp.BBS.Response.Base>res.data;
+      },
+    );
 }
 
 /**
@@ -52,13 +48,13 @@ export async function getLoginStatus(
   const data = { app_id: APP_ID, device, ticket };
   const header = getRequestHeader({}, "POST", data, "common");
   return await http
-    .fetch<TGApp.Plugins.Mys.GameLogin.GetLoginStatusResponse | TGApp.BBS.Response.Base>(url, {
-      headers: header,
-      method: "POST",
-      body: http.Body.json(data),
-    })
-    .then((res) => {
-      if (res.data.retcode === 0) return res.data.data;
-      return <TGApp.BBS.Response.Base>res.data;
-    });
+    .fetch(url, { headers: header, method: "POST", body: http.Body.json(data) })
+    .then(
+      (
+        res: Response<TGApp.Plugins.Mys.GameLogin.GetLoginStatusResponse | TGApp.BBS.Response.Base>,
+      ) => {
+        if (res.data.retcode === 0) return res.data.data;
+        return <TGApp.BBS.Response.Base>res.data;
+      },
+    );
 }

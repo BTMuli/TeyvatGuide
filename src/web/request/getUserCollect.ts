@@ -5,8 +5,9 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import TGUtils from "../utils/TGUtils";
+import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 获取用户收藏帖子
@@ -25,12 +26,8 @@ export async function getUserCollect(
   const params = { size: "20", uid, offset };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http
-    .fetch<TGApp.BBS.Collection.PostResponse | TGApp.BBS.Response.Base>(url, {
-      method: "GET",
-      headers: header,
-      query: params,
-    })
-    .then((res) => {
+    .fetch(url, { method: "GET", headers: header, query: params })
+    .then((res: Response<TGApp.BBS.Collection.PostResponse | TGApp.BBS.Response.Base>) => {
       if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
       return res.data.data;
     });

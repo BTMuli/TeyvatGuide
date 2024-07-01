@@ -5,9 +5,10 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import TGApi from "../api/TGApi";
-import TGUtils from "../utils/TGUtils";
+import TGApi from "../api/TGApi.js";
+import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 根据 stoken 获取 cookie_token
@@ -21,19 +22,12 @@ export async function getCookieTokenBySToken(
   Stoken: string,
 ): Promise<string | TGApp.BBS.Response.Base> {
   const url = TGApi.GameTokens.getCookieToken;
-  const cookie = {
-    mid: Mid,
-    stoken: Stoken,
-  };
+  const cookie = { mid: Mid, stoken: Stoken };
   const params = { stoken: Stoken };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http
-    .fetch<TGApp.BBS.Response.getCookieTokenBySToken | TGApp.BBS.Response.Base>(url, {
-      method: "GET",
-      headers: header,
-      query: params,
-    })
-    .then((res) => {
+    .fetch(url, { method: "GET", headers: header, query: params })
+    .then((res: Response<TGApp.BBS.Response.getCookieTokenBySToken | TGApp.BBS.Response.Base>) => {
       if (res.data.retcode !== 0) return res.data;
       return res.data.data.cookie_token;
     });
@@ -53,12 +47,11 @@ export async function getCookieTokenByGameToken(
   const url = "https://api-takumi.mihoyo.com/auth/api/getCookieAccountInfoByGameToken";
   const data = { account_id: Number(accountId), game_token: gameToken };
   return await http
-    .fetch<TGApp.BBS.Response.getCookieTokenByGameToken | TGApp.BBS.Response.Base>(url, {
-      method: "POST",
-      body: http.Body.json(data),
-    })
-    .then((res) => {
-      if (res.data.retcode !== 0) return res.data;
-      return res.data.data.cookie_token;
-    });
+    .fetch(url, { method: "POST", body: http.Body.json(data) })
+    .then(
+      (res: Response<TGApp.BBS.Response.getCookieTokenByGameToken | TGApp.BBS.Response.Base>) => {
+        if (res.data.retcode !== 0) return res.data;
+        return res.data.data.cookie_token;
+      },
+    );
 }

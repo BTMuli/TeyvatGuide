@@ -5,9 +5,10 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import TGApi from "../api/TGApi";
-import TGUtils from "../utils/TGUtils";
+import TGApi from "../api/TGApi.js";
+import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 获取深渊信息
@@ -27,12 +28,8 @@ export async function getAbyss(
   const params = { role_id, schedule_type, server: account.region };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http
-    .fetch<TGApp.Game.Abyss.Response | TGApp.BBS.Response.Base>(url, {
-      method: "GET",
-      headers: header,
-      query: params,
-    })
-    .then((res) => {
+    .fetch(url, { method: "GET", headers: header, query: params })
+    .then((res: Response<TGApp.Game.Abyss.Response | TGApp.BBS.Response.Base>) => {
       if (res.data.retcode !== 0) return res.data;
       return res.data.data;
     });

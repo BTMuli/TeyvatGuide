@@ -5,6 +5,7 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
 /**
  * @description 深度优先遍历
@@ -34,14 +35,7 @@ export async function getPositionData(): Promise<TGApp.Plugins.Mys.Position.Data
   const url =
     "https://api-static.mihoyo.com/common/blackboard/ys_obc/v1/home/position?app_sn=ys_obc";
   const res = await http
-    .fetch<TGApp.Plugins.Mys.Position.Response>(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-    .then((res) => {
-      return res.data.data.list;
-    });
+    .fetch(url, { method: "GET", headers: { "Content-Type": "application/json" } })
+    .then((res: Response<TGApp.Plugins.Mys.Position.Response>) => res.data.data.list);
   return DfsObc(res);
 }

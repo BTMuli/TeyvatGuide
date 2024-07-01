@@ -5,9 +5,10 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import TGApi from "../api/TGApi";
-import TGUtils from "../utils/TGUtils";
+import TGApi from "../api/TGApi.js";
+import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 根据 stoken_v2 获取 ltoken
@@ -21,19 +22,12 @@ export async function getLTokenBySToken(
   Stoken: string,
 ): Promise<string | TGApp.BBS.Response.Base> {
   const url = TGApi.GameTokens.getLToken;
-  const cookie = {
-    mid: Mid,
-    stoken: Stoken,
-  };
+  const cookie = { mid: Mid, stoken: Stoken };
   const params = { stoken: Stoken };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
   return await http
-    .fetch<TGApp.BBS.Response.getLTokenBySToken | TGApp.BBS.Response.Base>(url, {
-      method: "GET",
-      headers: header,
-      query: params,
-    })
-    .then((res) => {
+    .fetch(url, { method: "GET", headers: header, query: params })
+    .then((res: Response<TGApp.BBS.Response.getLTokenBySToken | TGApp.BBS.Response.Base>) => {
       if (res.data.retcode !== 0) return res.data;
       return res.data.data.ltoken;
     });

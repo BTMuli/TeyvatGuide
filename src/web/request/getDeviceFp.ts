@@ -5,9 +5,10 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import { getInitDeviceInfo } from "../../utils/toolFunc";
-import TGConstant from "../constant/TGConstant";
+import { getInitDeviceInfo } from "../../utils/toolFunc.js";
+import TGConstant from "../constant/TGConstant.js";
 
 /**
  * @description 获取设备指纹
@@ -93,12 +94,8 @@ export async function getDeviceFp(
     Referer: "https://webstatic.mihoyo.com/",
   };
   info.device_fp = await http
-    .fetch<TGApp.BBS.Response.getDeviceFp>(url, {
-      method: "POST",
-      body: http.Body.json(data),
-      headers: header,
-    })
-    .then((res) => {
+    .fetch(url, { method: "POST", body: http.Body.json(data), headers: header })
+    .then((res: Response<TGApp.BBS.Response.getDeviceFp>) => {
       if (res.data.data.code === 200) return res.data.data.device_fp;
       return "0000000000000";
     });

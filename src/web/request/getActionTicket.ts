@@ -5,8 +5,9 @@
  */
 
 import { http } from "@tauri-apps/api";
+import type { Response } from "@tauri-apps/api/http";
 
-import TGUtils from "../utils/TGUtils";
+import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 通过 stoken 获取 ActionTicket
@@ -24,23 +25,10 @@ export async function getActionTicketBySToken(
   UID: string,
 ): Promise<TGApp.BBS.Response.getActionTicketBySToken> {
   const url = "https://api-takumi.mihoyo.com/auth/api/getActionTicketBySToken";
-  const params = {
-    action_type: ActionType,
-    stoken: SToken,
-    uid: UID,
-  };
-  const cookie = {
-    mid: MID,
-    stoken: SToken,
-  };
+  const params = { action_type: ActionType, stoken: SToken, uid: UID };
+  const cookie = { mid: MID, stoken: SToken };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "k2");
   return await http
-    .fetch<TGApp.BBS.Response.getActionTicketBySToken>(url, {
-      method: "GET",
-      headers: header,
-      query: params,
-    })
-    .then((res) => {
-      return res.data;
-    });
+    .fetch(url, { method: "GET", headers: header, query: params })
+    .then((res: Response<TGApp.BBS.Response.getActionTicketBySToken>) => res.data);
 }
