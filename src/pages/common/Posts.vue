@@ -108,6 +108,8 @@ const forumWd = {
 const forumZzz = {
   咖啡馆: 57,
   同人图: 59,
+  攻略: 64,
+  COS: 65,
 };
 const forumDby = {
   校园: 54,
