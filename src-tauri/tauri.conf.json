@@ -1,159 +1,45 @@
 {
+  "productName": "TeyvatGuide",
+  "version": "0.4.9",
   "build": {
     "beforeDevCommand": "pnpm vite:dev",
     "beforeBuildCommand": "pnpm vite:build",
-    "devPath": "http://localhost:4000",
-    "distDir": "../dist",
-    "withGlobalTauri": true
+    "devUrl": "http://localhost:4000",
+    "frontendDist": "../dist"
   },
-  "package": {
-    "productName": "TeyvatGuide",
-    "version": "0.4.9"
-  },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "fs": {
-        "all": false,
-        "exists": true,
-        "readFile": true,
-        "readDir": true,
-        "writeFile": true,
-        "createDir": true,
-        "removeDir": true,
-        "removeFile": true,
-        "scope": ["**", "**/*"]
-      },
-      "http": {
-        "all": false,
-        "request": true,
-        "scope": ["http://**", "https://**"]
-      },
-      "dialog": {
-        "all": false,
-        "open": true,
-        "save": true,
-        "message": true
-      },
-      "clipboard": {
-        "all": true
-      },
-      "path": {
-        "all": true
-      },
-      "window": {
-        "all": false,
-        "close": true,
-        "hide": true,
-        "setAlwaysOnTop": true,
-        "setFocus": true,
-        "setFullscreen": true,
-        "setTitle": true,
-        "show": true,
-        "unminimize": true
-      },
-      "os": {
-        "all": true
-      },
-      "process": {
-        "all": false,
-        "exit": true
-      },
-      "shell": {
-        "all": false,
-        "open": true,
-        "execute": true,
-        "scope": [
-          {
-            "name": "win_open",
-            "cmd": "explorer",
-            "args": true
-          },
-          {
-            "name": "mac_open",
-            "cmd": "open",
-            "args": true
-          }
-        ]
+  "bundle": {
+    "active": true,
+    "icon": [
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/32x32.png",
+      "icons/Square107x107Logo.png",
+      "icons/Square142x142Logo.png",
+      "icons/Square150x150Logo.png",
+      "icons/Square284x284Logo.png",
+      "icons/Square30x30Logo.png",
+      "icons/Square310x310Logo.png",
+      "icons/Square44x44Logo.png",
+      "icons/Square71x71Logo.png",
+      "icons/Square89x89Logo.png",
+      "icons/StoreLogo.png",
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
+    "targets": [
+      "msi",
+      "app",
+      "dmg"
+    ],
+    "windows": {
+      "wix": {
+        "language": "zh-CN"
       }
     },
-    "bundle": {
-      "active": true,
-      "icon": [
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/32x32.png",
-        "icons/Square107x107Logo.png",
-        "icons/Square142x142Logo.png",
-        "icons/Square150x150Logo.png",
-        "icons/Square284x284Logo.png",
-        "icons/Square30x30Logo.png",
-        "icons/Square310x310Logo.png",
-        "icons/Square44x44Logo.png",
-        "icons/Square71x71Logo.png",
-        "icons/Square89x89Logo.png",
-        "icons/StoreLogo.png",
-        "icons/icon.ico",
-        "icons/icon.png"
-      ],
-      "identifier": "TeyvatGuide",
-      "targets": ["msi", "app", "dmg"],
-      "windows": {
-        "wix": {
-          "language": "zh-CN"
-        }
-      },
-      "macOS": {}
-    },
-    "security": {
-      "dangerousRemoteDomainIpcAccess": [
-        {
-          "domain": "act.mihoyo.com",
-          "windows": ["mhy_client"],
-          "enableTauriAPI": true
-        },
-        {
-          "domain": "m.miyoushe.com",
-          "windows": ["mhy_client"],
-          "enableTauriAPI": true
-        },
-        {
-          "domain": "qaa.miyoushe.com",
-          "windows": ["mhy_client"],
-          "enableTauriAPI": true
-        },
-        {
-          "domain": "user.mihoyo.com",
-          "windows": ["mhy_client"],
-          "enableTauriAPI": true
-        },
-        {
-          "domain": "webstatic.mihoyo.com",
-          "windows": ["mhy_client"],
-          "enableTauriAPI": true
-        },
-        {
-          "domain": "bbs.mihoyo.com",
-          "windows": ["mhy_client"],
-          "enableTauriAPI": true
-        },
-        {
-          "domain": "api-takumi-record.mihoyo.com",
-          "windows": ["mhy_client"],
-          "enableTauriAPI": true
-        }
-      ],
-      "csp": null
-    },
-    "updater": {
-      "active": false,
-      "dialog": true,
-      "endpoints": [
-        "https://raw.fastgit.org/BTMuli/TeyvatGuide/master/latest.json",
-        "https://raw.kgithub.com/BTMuli/TeyvatGuide/master/latest.json"
-      ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg2MkVGRjMxQzJDQzFBNTkKUldSWkdzekNNZjh1aHJGRXBEOGtwbUxLaU1wdWNVeUJaeGhoV2ZlZ3VlYmQ0b2tYZWQwODdnTHkK"
-    },
+    "macOS": {}
+  },
+  "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "fullscreen": false,
@@ -178,6 +64,37 @@
         "decorations": true,
         "closable": true
       }
-    ]
+    ],
+    "security": {
+      "capabilities": [
+        {
+          "identifier": "TeyvatGuide",
+          "description": "米游社客户端",
+          "windows": [
+            "mhy_client"
+          ],
+          "permissions": [],
+          "remote": {
+            "urls": [
+              "https://*.mihoyo.com/*",
+              "https://*.miyoushe.com/*"
+            ]
+          },
+          "platforms": [
+            "windows",
+            "macOS"
+          ]
+        }
+      ]
+    }
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": [
+          "teyvatguide"
+        ]
+      }
+    }
   }
 }
