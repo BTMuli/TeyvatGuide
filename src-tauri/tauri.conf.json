@@ -26,11 +26,7 @@
       "icons/icon.ico",
       "icons/icon.png"
     ],
-    "targets": [
-      "msi",
-      "app",
-      "dmg"
-    ],
+    "targets": ["msi", "app", "dmg"],
     "windows": {
       "wix": {
         "language": "zh-CN"
@@ -66,35 +62,15 @@
       }
     ],
     "security": {
-      "capabilities": [
-        {
-          "identifier": "TeyvatGuide",
-          "description": "米游社客户端",
-          "windows": [
-            "mhy_client"
-          ],
-          "permissions": [],
-          "remote": {
-            "urls": [
-              "https://*.mihoyo.com/*",
-              "https://*.miyoushe.com/*"
-            ]
-          },
-          "platforms": [
-            "windows",
-            "macOS"
-          ]
-        }
-      ]
+      "capabilities": ["TeyvatGuide", "Mys"]
     }
   },
   "plugins": {
     "deep-link": {
       "desktop": {
-        "schemes": [
-          "teyvatguide"
-        ]
-      }
+        "schemes": ["teyvatguide"]
+      },
+      "mobile": []
     }
   }
 }

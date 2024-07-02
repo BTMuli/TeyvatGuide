@@ -1,6 +1,6 @@
 //! @file src/client/menu.rs
 //! @desc 客户端菜单模块，负责操作米游社客户端菜单
-//! @since Beta v0.4.10
+//! @since Beta v0.5.0
 
 use tauri::menu::{Menu, MenuBuilder, MenuEvent, MenuItemBuilder, Submenu, SubmenuBuilder};
 use tauri::{AppHandle, LogicalSize, Manager, Size, Window, Wry};

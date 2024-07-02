@@ -1,15 +1,14 @@
 /**
  * @file plugins/Mys/request/getNewsList.ts
  * @description Mys 插件咨讯请求
- * @since Beta v0.4.5
+ * @since Beta v0.5.0
  */
 
-import { http } from "@tauri-apps/api";
-import type { Response } from "@tauri-apps/api/http";
+import TGHttp from "../../../utils/TGHttp.js";
 
 /**
  * @description 获取 News 列表
- * @since Beta v0.4.5
+ * @since Beta v0.5.0
  * @param {string} gid GID
  * @param {string} newsType 咨讯类型: 1 为公告，2 为活动，3 为咨讯
  * @param {number} pageSize 返回数量
@@ -29,9 +28,12 @@ async function getNewsList(
     type: newsType,
     last_id: lastId.toString(),
   };
-  return await http
-    .fetch(url, { method: "GET", headers: { "Content-Type": "application/json" }, query: params })
-    .then((res: Response<TGApp.Plugins.Mys.News.Response>) => res.data.data);
+  const resp = await TGHttp<TGApp.Plugins.Mys.News.Response>(url, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    query: params,
+  });
+  return resp.data;
 }
 
 export default getNewsList;

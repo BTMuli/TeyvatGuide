@@ -11,8 +11,9 @@
 </template>
 
 <script lang="ts" setup>
-import { app, event, fs, tauri, window as TauriWindow } from "@tauri-apps/api";
-import { UnlistenFn, Event } from "@tauri-apps/api/helpers/event";
+import { app, event, core, window as TauriWindow } from "@tauri-apps/api";
+import { UnlistenFn, Event } from "@tauri-apps/api/event";
+import { mkdir } from "@tauri-apps/plugin-fs";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -46,15 +47,15 @@ onBeforeMount(async () => {
   if (isMain.value) {
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
     await win.setTitle(title);
-    await listenOnInit();
-    await tauri.invoke("init_app");
+    listenOnInit();
+    await core.invoke("init_app");
     urlListener = await getDeepLink();
   }
 });
 
-onMounted(async () => {
+onMounted(() => {
   document.documentElement.className = theme.value;
-  themeListener = await event.listen("readTheme", async (e: Event<string>) => {
+  themeListener = event.listen("readTheme", async (e: Event<string>) => {
     const themeGet = e.payload;
     if (theme.value !== themeGet) {
       theme.value = themeGet;
@@ -64,9 +65,9 @@ onMounted(async () => {
 });
 
 // 启动后只执行一次的监听
-async function listenOnInit(): Promise<void> {
-  await event.listen("initApp", async () => {
-    await tauri.invoke("register_deep_link");
+function listenOnInit(): void {
+  console.info("[App][listenOnInit] 监听初始化事件！");
+  event.listen("initApp", async () => {
     await checkAppLoad();
     await checkDeviceFp();
     try {
@@ -78,7 +79,6 @@ async function listenOnInit(): Promise<void> {
     }
     await checkUpdate();
   });
-  return;
 }
 
 async function checkAppLoad(): Promise<void> {
@@ -166,7 +166,7 @@ async function checkUserLoad(): Promise<void> {
     return;
   }
   if (userDir !== appStore.userDir) appStore.userDir = userDir;
-  await fs.createDir(appStore.userDir, { recursive: true });
+  await mkdir(appStore.userDir, { recursive: true });
 }
 
 async function getDeepLink(): Promise<UnlistenFn> {

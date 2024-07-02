@@ -1,6 +1,6 @@
 //! @file src/client/mod.rs
 //! @desc 客户端模块，负责操作米游社客户端
-//! @since Beta v0.4.10
+//! @since Beta v0.5.0
 
 mod menu;
 use tauri::async_runtime::block_on;

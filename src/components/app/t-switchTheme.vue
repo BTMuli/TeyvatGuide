@@ -9,7 +9,7 @@
 </template>
 <script lang="ts" setup>
 import { event } from "@tauri-apps/api";
-import { UnlistenFn, Event } from "@tauri-apps/api/helpers/event";
+import { UnlistenFn, Event } from "@tauri-apps/api/event";
 import { computed, onMounted, onUnmounted } from "vue";
 
 import { useAppStore } from "../../store/modules/app.js";
@@ -25,8 +25,8 @@ const themeGet = computed({
 });
 let themeListener: UnlistenFn;
 
-onMounted(async () => {
-  themeListener = await listenOnTheme();
+onMounted(() => {
+  themeListener = listenOnTheme();
 });
 
 async function switchTheme(): Promise<void> {
@@ -34,8 +34,8 @@ async function switchTheme(): Promise<void> {
   await event.emit("readTheme", themeGet.value);
 }
 
-async function listenOnTheme(): Promise<UnlistenFn> {
-  return await event.listen("readTheme", (e: Event<string>) => {
+function listenOnTheme(): UnlistenFn {
+  return event.listen("readTheme", (e: Event<string>) => {
     const theme = e.payload;
     themeGet.value = theme === "default" ? "default" : "dark";
   });

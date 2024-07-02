@@ -1,6 +1,6 @@
 //! @file src/plugins.rs
 //! @desc 插件模块，用于注册插件
-//! @since Beta v0.4.10
+//! @since Beta v0.5.0
 
 use super::utils;
 use log::LevelFilter;

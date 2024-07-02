@@ -1,27 +1,26 @@
 //! @file src/commands.rs
 //! @desc 命令模块，负责处理命令
-//! @since Beta v0.4.10
+//! @since Beta v0.5.0
 
-use tauri::{Manager, WebviewWindowBuilder};
+use tauri::{AppHandle, Manager, WebviewWindowBuilder};
 use tauri_utils::config::WindowConfig;
 
 // 放一个常数，用来判断应用是否初始化
 static mut APP_INITIALIZED: bool = false;
-static mut DEEP_LINK_REGISTERED: bool = false;
 
 // 初始化应用
 #[tauri::command]
-pub async fn init_app(app_handle: tauri::AppHandle) {
+pub async fn init_app(app_handle: AppHandle) {
   unsafe {
-    if APP_INITIALIZED == true && DEEP_LINK_REGISTERED == true {
+    if APP_INITIALIZED == true {
       return;
     }
   }
   dbg!("init_app");
   let _mhy = app_handle.get_webview_window("mhy_client");
   if _mhy.is_some() {
-    std::thread::sleep(std::time::Duration::from_millis(1000));
-    _mhy.unwrap().close().unwrap();
+    // todo 这里应该延时，否则可能造成 macOS 平台的崩溃
+    //  _mhy.unwrap().close().unwrap();
   }
   app_handle.emit("initApp", ()).unwrap();
   unsafe {

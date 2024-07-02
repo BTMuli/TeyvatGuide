@@ -1,12 +1,12 @@
 /**
  * @file types/Sqlite/Record.d.ts
  * @description Sqlite 原神战绩相关类型定义文件
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  */
 
 /**
  * @description Sqlite 原神战绩相关类型定义命名空间
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  * @namespace Record
  * @memberof TGApp.Sqlite
  */
@@ -78,7 +78,7 @@ declare namespace TGApp.Sqlite.Record {
   /**
    * @description 统计信息类型
    * @interface Stats
-   * @since Beta v0.4.10
+   * @since Beta v0.5.0
    * @property {number} activeDays - 活跃天数
    * @property {number} achievementNumber - 成就达成数
    * @property {number} avatarNumber - 获得角色数

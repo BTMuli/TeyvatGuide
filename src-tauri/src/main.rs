@@ -1,6 +1,6 @@
 //! @file src/main.rs
 //! @desc 主模块，用于启动应用
-//! @since Beta v0.4.10
+//! @since Beta v0.5.0
 
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
@@ -35,9 +35,13 @@ fn window_event_handler(app: &tauri::Window, event: &tauri::WindowEvent) {
 fn main() {
   tauri::Builder::default()
     .on_window_event(move |app, event| window_event_handler(app, event))
+    .plugin(tauri_plugin_deep_link::init())
+    .plugin(tauri_plugin_http::init())
+    .plugin(tauri_plugin_fs::init())
+    .plugin(tauri_plugin_os::init())
+    .plugin(tauri_plugin_dialog::init())
     .plugin(plugins::build_sql_plugin())
     .plugin(plugins::build_log_plugin())
-    .plugin(tauri_plugin_deep_link::init())
     .setup(|_app| {
       let _window = _app.get_webview_window("TeyvatGuide");
       #[cfg(debug_assertions)]

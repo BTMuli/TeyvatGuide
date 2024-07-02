@@ -1,17 +1,15 @@
 /**
  * @file web/request/getActionTicket.ts
  * @description 获取米游社动态的 ActionTicket
- * @since Beta v0.3.4
+ * @since Beta v0.5.0
  */
 
-import { http } from "@tauri-apps/api";
-import type { Response } from "@tauri-apps/api/http";
-
+import TGHttp from "../../utils/TGHttp.js";
 import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 通过 stoken 获取 ActionTicket
- * @since Beta v0.3.4
+ * @since Beta v0.5.0
  * @param {string} ActionType 动作类型
  * @param {string} SToken stoken
  * @param {string} MID 用户 MID
@@ -28,7 +26,9 @@ export async function getActionTicketBySToken(
   const params = { action_type: ActionType, stoken: SToken, uid: UID };
   const cookie = { mid: MID, stoken: SToken };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "k2");
-  return await http
-    .fetch(url, { method: "GET", headers: header, query: params })
-    .then((res: Response<TGApp.BBS.Response.getActionTicketBySToken>) => res.data);
+  return await TGHttp<TGApp.BBS.Response.getActionTicketBySToken>(url, {
+    method: "GET",
+    headers: header,
+    query: params,
+  });
 }

@@ -1,18 +1,19 @@
 /**
  * @file utils/TGWindow.ts
  * @description 窗口创建相关工具函数
- * @since Beta v0.4.2
+ * @since Beta v0.5.0
  */
 
-import { invoke, window as TauriWindow } from "@tauri-apps/api";
+import { core, window as TauriWindow } from "@tauri-apps/api";
 import type { WindowOptions } from "@tauri-apps/api/window";
 
 import TGLogger from "./TGLogger.js";
 
 /**
  * @description 创建TG窗口
- * @since Beta v0.3.4
+ * @since Beta v0.5.0
  * @see https://github.com/tauri-apps/tauri/issues/5380
+ * @todo 需要根据 2.0 版本的 Tauri API 进行修改
  * @param {string} url 窗口地址
  * @param {string} label 窗口标签
  * @param {string} title 窗口标题
@@ -38,7 +39,7 @@ export function createTGWindow(
     height,
     width,
     resizable,
-    url,
+    // url,
     title,
     visible,
     x: left,
@@ -46,7 +47,8 @@ export function createTGWindow(
   };
   const isGet = TauriWindow.WebviewWindow.getByLabel(label);
   if (isGet === null) {
-    invoke("create_window", { label, option })
+    core
+      .invoke("create_window", { label, option })
       .then(() => {
         createTGWindow(url, label, title, width, height, resizable, visible);
       })
@@ -57,7 +59,8 @@ export function createTGWindow(
     isGet
       .close()
       .then(() => {
-        invoke("create_window", { label, option })
+        core
+          .invoke("create_window", { label, option })
           .then(() => {
             console.log(`[createTGWindow][${label}] ${title} created.`);
           })

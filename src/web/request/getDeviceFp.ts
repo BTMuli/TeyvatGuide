@@ -1,18 +1,16 @@
 /**
  * @file src/web/request/getDeviceFp.ts
  * @description 获取设备指纹
- * @since Beta v0.4.1
+ * @since Beta v0.5.0
  */
 
-import { http } from "@tauri-apps/api";
-import type { Response } from "@tauri-apps/api/http";
-
+import TGHttp from "../../utils/TGHttp.js";
 import { getInitDeviceInfo } from "../../utils/toolFunc.js";
 import TGConstant from "../constant/TGConstant.js";
 
 /**
  * @description 获取设备指纹
- * @since Beta v0.4.1
+ * @since Beta v0.5.0
  * @param {TGApp.App.Device.DeviceInfo} Info - 设备信息
  * @returns {Promise<string>} 设备指纹
  */
@@ -93,11 +91,19 @@ export async function getDeviceFp(
     "x-requested-with": "com.mihoyo.hyperion",
     Referer: "https://webstatic.mihoyo.com/",
   };
-  info.device_fp = await http
-    .fetch(url, { method: "POST", body: http.Body.json(data), headers: header })
-    .then((res: Response<TGApp.BBS.Response.getDeviceFp>) => {
-      if (res.data.data.code === 200) return res.data.data.device_fp;
-      return "0000000000000";
+  try {
+    const resp = await TGHttp<TGApp.BBS.Response.getDeviceFp>(url, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: header,
     });
+    if (resp.retcode !== 0) {
+      info.device_fp = "0000000000000";
+    } else {
+      info.device_fp = resp.data.device_fp;
+    }
+  } catch (error) {
+    info.device_fp = "0000000000000";
+  }
   return info;
 }

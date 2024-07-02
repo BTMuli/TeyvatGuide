@@ -1,0 +1,32 @@
+{
+  "$schema": "./schemas/desktop-schema.json",
+  "identifier": "TeyvatGuide",
+  "description": "Capability for the main window",
+  "windows": ["TeyvatGuide"],
+  "permissions": [
+    "path:allow-resolve-directory",
+    "path:default",
+    "event:allow-listen",
+    "event:default",
+    "app:allow-version",
+    "app:default",
+    "window:allow-set-title",
+    "sql:allow-load",
+    "sql:default",
+    "sql:allow-execute",
+    "log:allow-log",
+    "log:default",
+    "http:allow-fetch",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://*.miyoushe.com/*"
+        },
+        {
+          "url": "https://*.mihoyo.com/*"
+        }
+      ]
+    }
+  ]
+}

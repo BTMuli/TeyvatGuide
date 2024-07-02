@@ -1,17 +1,15 @@
 /**
  * @file web/request/getUserCollect.ts
  * @description 获取用户收藏请求模块
- * @since Beta v0.4.5
+ * @since Beta v0.5.0
  */
 
-import { http } from "@tauri-apps/api";
-import type { Response } from "@tauri-apps/api/http";
-
+import TGHttp from "../../utils/TGHttp.js";
 import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 获取用户收藏帖子
- * @since Beta v0.4.5
+ * @since Beta v0.5.0
  * @param {Record<string, string>} cookie - 用户 cookie
  * @param {string} uid - 用户 uid
  * @param {string} offset - 偏移量
@@ -25,10 +23,11 @@ export async function getUserCollect(
   const url = "https://bbs-api.miyoushe.com/post/wapi/userFavouritePost";
   const params = { size: "20", uid, offset };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
-  return await http
-    .fetch(url, { method: "GET", headers: header, query: params })
-    .then((res: Response<TGApp.BBS.Collection.PostResponse | TGApp.BBS.Response.Base>) => {
-      if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
-      return res.data.data;
-    });
+  const resp = await TGHttp<TGApp.BBS.Collection.PostResponse | TGApp.BBS.Response.Base>(url, {
+    method: "GET",
+    headers: header,
+    query: params,
+  });
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
 }

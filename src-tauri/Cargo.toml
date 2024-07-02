@@ -17,19 +17,28 @@ chrono = "0.4.38"
 log = "0.4.21"
 serde = { version = "1.0.203", features = ["derive"] }
 serde_json = "1.0.117"
-tauri = "2.0.0-beta.23"
+tauri = { version = "2.0.0-beta.23", features = [] }
 tauri-utils = "2.0.0-beta.18"
 url = "2.5.1"
 walkdir = "2.5.0"
 
-# sqlite 插件
-[dependencies.tauri-plugin-sql]
-git = "https://github.com/tauri-apps/plugins-workspace"
-branch = "v2"
-features = ["sqlite"]
-
 # deep link 插件
 [dependencies.tauri-plugin-deep-link]
+git = "https://github.com/tauri-apps/plugins-workspace"
+branch = "v2"
+
+# dialog 插件
+[dependencies.tauri-plugin-dialog]
+git = "https://github.com/tauri-apps/plugins-workspace"
+branch = "v2"
+
+# fs 插件
+[dependencies.tauri-plugin-fs]
+git = "https://github.com/tauri-apps/plugins-workspace"
+branch = "v2"
+
+# http 插件
+[dependencies.tauri-plugin-http]
 git = "https://github.com/tauri-apps/plugins-workspace"
 branch = "v2"
 
@@ -37,6 +46,17 @@ branch = "v2"
 [dependencies.tauri-plugin-log]
 git = "https://github.com/tauri-apps/plugins-workspace"
 branch = "v2"
+
+# os 插件
+[dependencies.tauri-plugin-os]
+git = "https://github.com/tauri-apps/plugins-workspace"
+branch = "v2"
+
+# sqlite 插件
+[dependencies.tauri-plugin-sql]
+git = "https://github.com/tauri-apps/plugins-workspace"
+branch = "v2"
+features = ["sqlite"]
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

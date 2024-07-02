@@ -1,0 +1,11 @@
+{
+  "$schema": "./schemas/desktop-schema.json",
+  "identifier": "Mys",
+  "description": "Capability for the mys client window",
+  "windows": ["mhy_client"],
+  "permissions": [],
+  "remote": {
+    "urls": ["https://*.mihoyo.com/*", "https://*.miyoushe.com/*"]
+  },
+  "platforms": ["windows", "macOS"]
+}

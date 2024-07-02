@@ -243,7 +243,7 @@
 
 <script lang="ts" setup>
 import { event, window as TauriWindow } from "@tauri-apps/api";
-import { UnlistenFn, Event } from "@tauri-apps/api/helpers/event";
+import { UnlistenFn, Event } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 

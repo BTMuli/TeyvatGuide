@@ -77,7 +77,7 @@ async function toWebLogin(): Promise<void> {
     return;
   }
   await TGClient.open("config_sign_in", "https://user.mihoyo.com");
-  signListener = await event.listen("config_user_sign", async (e: Event<unknown>) => {
+  signListener = event.listen("config_user_sign", async (e: Event<unknown>) => {
     if (typeof e.payload !== "string") {
       showSnackbar({
         color: "error",

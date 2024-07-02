@@ -1,12 +1,10 @@
 /**
- * @file plugins/Mys/utils/doGameLogin
+ * @file plugins/Mys/request/doGameLogin
  * @description 获取 gameToken，曲线获取 stoken
- * @since Beta v0.4.4
+ * @since Beta v0.5.0
  */
 
-import { http } from "@tauri-apps/api";
-import type { Response } from "@tauri-apps/api/http";
-
+import TGHttp from "../../../utils/TGHttp.js";
 import { getDeviceInfo } from "../../../utils/toolFunc.js";
 import { getRequestHeader } from "../../../web/utils/getRequestHeader.js";
 
@@ -14,7 +12,7 @@ const APP_ID = 8;
 
 /**
  * @description 获取登录二维码
- * @since Beta v0.4.4
+ * @since Beta v0.5.0
  * @returns {Promise<TGApp.Plugins.Mys.GameLogin.GetLoginQrData|TGApp.BBS.Response.Base>}
  */
 export async function getLoginQr(): Promise<
@@ -24,19 +22,20 @@ export async function getLoginQr(): Promise<
   const device = getDeviceInfo("device_id");
   const data = { app_id: APP_ID, device };
   const header = getRequestHeader({}, "POST", data, "common");
-  return await http
-    .fetch(url, { headers: header, method: "POST", body: http.Body.json(data) })
-    .then(
-      (res: Response<TGApp.Plugins.Mys.GameLogin.GetLoginQrResponse | TGApp.BBS.Response.Base>) => {
-        if (res.data.retcode === 0) return res.data.data;
-        return <TGApp.BBS.Response.Base>res.data;
-      },
-    );
+  const resp = await TGHttp<
+    TGApp.Plugins.Mys.GameLogin.GetLoginQrResponse | TGApp.BBS.Response.Base
+  >(url, {
+    method: "POST",
+    headers: header,
+    body: JSON.stringify(data),
+  });
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
 }
 
 /**
  * @description 获取登录状态
- * @since Beta v0.4.4
+ * @since Beta v0.5.0
  * @param {string} ticket 二维码 ticket
  * @returns {Promise<TGApp.Plugins.Mys.GameLogin.GetLoginStatusData | TGApp.BBS.Response.Base>}
  */
@@ -47,14 +46,13 @@ export async function getLoginStatus(
   const device = getDeviceInfo("device_id");
   const data = { app_id: APP_ID, device, ticket };
   const header = getRequestHeader({}, "POST", data, "common");
-  return await http
-    .fetch(url, { headers: header, method: "POST", body: http.Body.json(data) })
-    .then(
-      (
-        res: Response<TGApp.Plugins.Mys.GameLogin.GetLoginStatusResponse | TGApp.BBS.Response.Base>,
-      ) => {
-        if (res.data.retcode === 0) return res.data.data;
-        return <TGApp.BBS.Response.Base>res.data;
-      },
-    );
+  const resp = await TGHttp<
+    TGApp.Plugins.Mys.GameLogin.GetLoginStatusResponse | TGApp.BBS.Response.Base
+  >(url, {
+    method: "POST",
+    headers: header,
+    body: JSON.stringify(data),
+  });
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
 }

@@ -1,7 +1,7 @@
 /**
  * @file vite.config.ts
  * @description vite 配置文件
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  */
 
 import vue from "@vitejs/plugin-vue";

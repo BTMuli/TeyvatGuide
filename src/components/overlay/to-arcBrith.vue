@@ -28,8 +28,7 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
-import { http } from "@tauri-apps/api";
-import { ResponseType } from "@tauri-apps/api/http";
+import { fetch } from "@tauri-apps/plugin-http";
 import { computed, onMounted, ref, watch } from "vue";
 import { xml2json } from "xml-js";
 
@@ -166,11 +165,10 @@ async function loadText(): Promise<void> {
 
 async function parseXml(link: string) {
   try {
-    const res = await http.fetch<string>(link, {
-      method: "GET",
-      responseType: ResponseType.Text,
-    });
-    return JSON.parse(xml2json(res.data));
+    const response = await fetch(link, { method: "GET" });
+    const data = await response.arrayBuffer();
+    const xml = new TextDecoder("utf-8").decode(data);
+    return JSON.parse(xml2json(xml));
   } catch (error) {
     console.error(error);
     return false;

@@ -1,12 +1,10 @@
 /**
  * @file web/request/getGameAccounts.ts
  * @description 获取游戏账号信息相关请求函数
- * @since Beta v0.4.3
+ * @since Beta v0.5.0
  */
 
-import { http } from "@tauri-apps/api";
-import type { Response } from "@tauri-apps/api/http";
-
+import TGHttp from "../../utils/TGHttp.js";
 import TGApi from "../api/TGApi.js";
 import TGConstant from "../constant/TGConstant.js";
 import TGUtils from "../utils/TGUtils.js";
@@ -47,7 +45,7 @@ export async function getGameAccountsByCookie(
 
 /**
  * @description 获取游戏账号信息
- * @since Alpha v0.2.0
+ * @since Beta v0.5.0
  * @param {string} url 请求地址
  * @param {Record<string, string>} cookie cookie
  * @param {Record<string, string>} params 请求参数
@@ -59,10 +57,11 @@ async function getGameAccounts(
   params: Record<string, string>,
 ): Promise<TGApp.BBS.Response.Base | TGApp.User.Account.Game[]> {
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
-  return await http
-    .fetch(url, { method: "GET", headers: header, query: params })
-    .then((res: Response<TGApp.User.Account.GameResponse | TGApp.BBS.Response.Base>) => {
-      if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
-      return res.data.data.list;
-    });
+  const resp = await TGHttp<TGApp.User.Account.GameResponse | TGApp.BBS.Response.Base>(url, {
+    method: "GET",
+    headers: header,
+    query: params,
+  });
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data.list;
 }

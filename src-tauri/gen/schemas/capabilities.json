@@ -1,1 +1,36 @@
-{}
+{
+  "Mys": {
+    "identifier": "Mys",
+    "description": "Capability for the mys client window",
+    "remote": { "urls": ["https://*.mihoyo.com/*", "https://*.miyoushe.com/*"] },
+    "local": true,
+    "windows": ["mhy_client"],
+    "permissions": [],
+    "platforms": ["windows", "macOS"]
+  },
+  "TeyvatGuide": {
+    "identifier": "TeyvatGuide",
+    "description": "Capability for the main window",
+    "local": true,
+    "windows": ["TeyvatGuide"],
+    "permissions": [
+      "path:allow-resolve-directory",
+      "path:default",
+      "event:allow-listen",
+      "event:default",
+      "app:allow-version",
+      "app:default",
+      "window:allow-set-title",
+      "sql:allow-load",
+      "sql:default",
+      "sql:allow-execute",
+      "log:allow-log",
+      "log:default",
+      "http:allow-fetch",
+      {
+        "identifier": "http:default",
+        "allow": [{ "url": "https://*.miyoushe.com/*" }, { "url": "https://*.mihoyo.com/*" }]
+      }
+    ]
+  }
+}

@@ -1,18 +1,16 @@
 /**
  * @file web/request/getStoken.ts
  * @description 获取 stoken
- * @since Beta v0.4.4
+ * @since Beta v0.5.0
  */
 
-import { http } from "@tauri-apps/api";
-import type { Response } from "@tauri-apps/api/http";
-
+import TGHttp from "../../utils/TGHttp.js";
 import TGConstant from "../constant/TGConstant.js";
 import { getRequestHeader } from "../utils/getRequestHeader.js";
 
 /**
  * @description 获取 stoken
- * @since Beta v0.4.4
+ * @since Beta v0.5.0
  * @param {string} accountId 账户 ID
  * @param {string} token 游戏 Token
  * @param {string} isGameToken 是否为游戏 Token
@@ -29,17 +27,17 @@ export async function getStokenByGameToken(
   }
   const data = { account_id: Number(accountId), game_token: token };
   const header = { "x-rpc-app_id": TGConstant.BBS.APP_ID };
-  return await http
-    .fetch(url, { method: "POST", headers: header, body: http.Body.json(data) })
-    .then((res: Response<TGApp.BBS.Response.getStokenByGameToken | TGApp.BBS.Response.Base>) => {
-      if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
-      return res.data.data;
-    });
+  const resp = await TGHttp<TGApp.BBS.Response.getStokenByGameToken | TGApp.BBS.Response.Base>(
+    url,
+    { method: "POST", headers: header, body: JSON.stringify(data) },
+  );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
 }
 
 /**
  * @description stoken v1 到 v2
- * @since Beta v0.4.3
+ * @since Beta v0.5.0
  * @param {string} stoken 账户 ID
  * @param {string} stuid 游戏 Token
  * @returns {Promise<TGApp.BBS.Response.getStokenByGameTokenData | TGApp.BBS.Response.Base>}
@@ -54,10 +52,10 @@ export async function getTokenBySToken(
     "x-rpc-app_id": TGConstant.BBS.APP_ID,
     ...getRequestHeader(cookie, "POST", "", "prod"),
   };
-  return await http
-    .fetch(url, { method: "POST", headers: header })
-    .then((res: Response<TGApp.BBS.Response.getTokenBySToken | TGApp.BBS.Response.Base>) => {
-      if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
-      return res.data.data;
-    });
+  const resp = await TGHttp<TGApp.BBS.Response.getTokenBySToken | TGApp.BBS.Response.Base>(url, {
+    method: "POST",
+    headers: header,
+  });
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
 }
