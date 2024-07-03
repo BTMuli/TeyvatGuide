@@ -1,10 +1,11 @@
 /**
  * @file utils/UIGF.ts
  * @description UIGF工具类
- * @since Beta v0.4.7
+ * @since Beta v0.5.0
  */
 
-import { app, fs, path } from "@tauri-apps/api";
+import { app, path } from "@tauri-apps/api";
+import { mkdir, exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import Ajv from "ajv";
 import { ErrorObject } from "ajv/lib/types/index.js";
 
@@ -72,12 +73,12 @@ export function convertDataToUigf(
 
 /**
  * @description 检测是否存在 UIGF 数据，采用 ajv 验证 schema
- * @since Beta v0.4.7
+ * @since Beta v0.5.0
  * @param {string} path - UIGF 数据路径
  * @returns {Promise<boolean>} 是否存在 UIGF 数据
  */
 export async function verifyUigfData(path: string): Promise<boolean> {
-  const fileData: string = await fs.readTextFile(path);
+  const fileData: string = await readTextFile(path);
   const ajv = new Ajv();
   const validate = ajv.compile(UigfSchema);
   try {
@@ -104,18 +105,18 @@ export async function verifyUigfData(path: string): Promise<boolean> {
 
 /**
  * @description 读取 UIGF 数据
- * @since Alpha v0.2.3
+ * @since Beta v0.5.0
  * @param {string} userPath - UIGF 数据路径
  * @returns {Promise<TGApp.Plugins.UIGF.FullData>} UIGF 数据
  */
 export async function readUigfData(userPath: string): Promise<TGApp.Plugins.UIGF.FullData> {
-  const fileData = await fs.readTextFile(userPath);
+  const fileData = await readTextFile(userPath);
   return <TGApp.Plugins.UIGF.FullData>JSON.parse(fileData);
 }
 
 /**
  * @description 导出 UIGF 数据
- * @since Alpha v0.2.3
+ * @since Beta v0.5.0
  * @param {string} uid - UID
  * @param {TGApp.Sqlite.GachaRecords.SingleTable[]} gachaList - 祈愿列表
  * @param {string} savePath - 保存路径
@@ -131,12 +132,12 @@ export async function exportUigfData(
     list: convertDataToUigf(gachaList),
   };
   const filePath = savePath ?? `${await path.appLocalDataDir()}userData\\UIGF_${uid}.json`;
-  await fs.writeTextFile(filePath, JSON.stringify(UigfData));
+  await writeTextFile(filePath, JSON.stringify(UigfData));
 }
 
 /**
  * @description 备份 UIGF 数据
- * @since Beta v0.4.1
+ * @since Beta v0.5.0
  * @param {string} dirPath - 备份路径
  * @param {string} uid - UID
  * @param {TGApp.Sqlite.GachaRecords.SingleTable[]} gachaList - 祈愿列表
@@ -147,6 +148,6 @@ export async function backupUigfData(
   uid: string,
   gachaList: TGApp.Sqlite.GachaRecords.SingleTable[],
 ): Promise<void> {
-  if (!(await fs.exists(dirPath))) await fs.createDir(dirPath, { recursive: true });
+  if (!(await exists(dirPath))) await mkdir(dirPath, { recursive: true });
   await exportUigfData(uid, gachaList, `${dirPath}${path.sep}UIGF_${uid}.json`);
 }

@@ -13,6 +13,7 @@ import { fetch } from "@tauri-apps/plugin-http";
  * @property {Record<string,string>} headers 请求头
  * @property {Record<string,string>} query 请求参数
  * @property {string} body 请求体
+ * @property {boolean} isBlob 是否为Blob
  * @return TGHttpParams
  */
 type TGHttpParams = {
@@ -20,6 +21,7 @@ type TGHttpParams = {
   headers?: Record<string, string>;
   query?: Record<string, any>;
   body?: string;
+  isBlob?: boolean;
 };
 
 /**
@@ -31,24 +33,29 @@ type TGHttpParams = {
  * @returns {Promise<T>}
  */
 async function TGHttp<T>(url: string, options: TGHttpParams): Promise<T> {
-  let httpHeaders = new Headers();
+  const httpHeaders = new Headers();
   if (options.headers) {
-    httpHeaders = new Headers(options.headers);
+    for (const key in options.headers) {
+      httpHeaders.append(key, options.headers[key]);
+    }
   }
   const fetchOptions: RequestInit = {
     method: options.method,
     headers: httpHeaders,
   };
+  if (options.body) {
+    fetchOptions.body = options.body;
+  }
   if (options.query) {
     const query = new URLSearchParams(options.query).toString();
     url += `?${query}`;
   }
-  if (options.body) {
-    fetchOptions.body = options.body;
-  }
+  console.log("fetch url: ", url);
+  console.log("fetch options: ", fetchOptions);
   return await fetch(url, fetchOptions)
     .then((res) => {
       if (res.ok) {
+        if (options.isBlob) return res.arrayBuffer();
         return res.json();
       }
       throw new Error(`HTTP error! status: ${res.status}`);

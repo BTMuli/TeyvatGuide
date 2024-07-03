@@ -3,7 +3,7 @@
   "identifier": "Mys",
   "description": "Capability for the mys client window",
   "windows": ["mhy_client"],
-  "permissions": [],
+  "permissions": ["event:allow-emit"],
   "remote": {
     "urls": ["https://*.mihoyo.com/*", "https://*.miyoushe.com/*"]
   },

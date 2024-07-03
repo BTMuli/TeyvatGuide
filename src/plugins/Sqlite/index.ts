@@ -1,11 +1,11 @@
 /**
  * @file plugins/Sqlite/index.ts
  * @description Sqlite 数据库操作类
- * @since Beta v0.4.7
+ * @since Beta v0.5.0
  */
 
 import { app } from "@tauri-apps/api";
-import Database from "tauri-plugin-sql-api";
+import Database from "@tauri-apps/plugin-sql";
 
 import initDataSql from "./sql/initData.js";
 import {

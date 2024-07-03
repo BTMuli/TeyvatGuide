@@ -4,19 +4,32 @@
   "description": "Capability for the main window",
   "windows": ["TeyvatGuide"],
   "permissions": [
-    "path:allow-resolve-directory",
-    "path:default",
-    "event:allow-listen",
-    "event:default",
     "app:allow-version",
     "app:default",
-    "window:allow-set-title",
-    "sql:allow-load",
-    "sql:default",
-    "sql:allow-execute",
+    "event:allow-listen",
+    "event:default",
+    "fs:allow-remove",
+    "fs:default",
+    "fs:scope-cache-recursive",
+    "fs:scope-document-recursive",
+    "http:allow-fetch",
     "log:allow-log",
     "log:default",
-    "http:allow-fetch",
+    "path:allow-resolve-directory",
+    "path:default",
+    "process:allow-exit",
+    "process:allow-restart",
+    "process:default",
+    "shell:allow-execute",
+    "shell:allow-open",
+    "shell:default",
+    "sql:allow-load",
+    "sql:allow-execute",
+    "sql:default",
+    "window:allow-close",
+    "window:allow-destroy",
+    "window:allow-set-title",
+    "window:allow-show",
     {
       "identifier": "http:default",
       "allow": [
@@ -25,8 +38,27 @@
         },
         {
           "url": "https://*.mihoyo.com/*"
+        },
+        {
+          "url": "https://homa.snapgenshin.com/*"
+        }
+      ]
+    },
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "win_open",
+          "cmd": "explorer",
+          "args": true
+        },
+        {
+          "name": "mac_open",
+          "cmd": "open",
+          "args": true
         }
       ]
     }
-  ]
+  ],
+  "platforms": ["windows", "macOS"]
 }

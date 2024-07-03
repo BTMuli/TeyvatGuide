@@ -41,6 +41,7 @@ branch = "v2"
 [dependencies.tauri-plugin-http]
 git = "https://github.com/tauri-apps/plugins-workspace"
 branch = "v2"
+features = ["unsafe-headers"]
 
 # log 插件
 [dependencies.tauri-plugin-log]
@@ -49,6 +50,16 @@ branch = "v2"
 
 # os 插件
 [dependencies.tauri-plugin-os]
+git = "https://github.com/tauri-apps/plugins-workspace"
+branch = "v2"
+
+# process 插件
+[dependencies.tauri-plugin-process]
+git = "https://github.com/tauri-apps/plugins-workspace"
+branch = "v2"
+
+# shell 插件
+[dependencies.tauri-plugin-shell]
 git = "https://github.com/tauri-apps/plugins-workspace"
 branch = "v2"
 

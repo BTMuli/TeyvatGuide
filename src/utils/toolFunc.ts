@@ -116,12 +116,12 @@ export async function getCacheDir(): Promise<string[] | false> {
   const cacheDir = await path.appCacheDir();
   const osType = type().toLowerCase();
   if (osType === "windows") {
-    const cache = `${cacheDir}EBWebview${path.sep}Default${path.sep}Cache`;
-    const codeCache = `${cacheDir}EBWebview${path.sep}Default${path.sep}Code Cache`;
+    const cache = `${cacheDir}${path.sep()}EBWebview${path.sep()}Default${path.sep()}Cache`;
+    const codeCache = `${cacheDir}${path.sep()}EBWebview${path.sep()}Default${path.sep()}Code Cache`;
     return [cache, codeCache];
   }
   if (osType === "macos") {
-    return [`${cacheDir}WebKit`];
+    return [`${cacheDir}${path.sep()}WebKit`];
   }
   return false;
 }

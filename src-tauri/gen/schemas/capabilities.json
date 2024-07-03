@@ -5,7 +5,37 @@
     "remote": { "urls": ["https://*.mihoyo.com/*", "https://*.miyoushe.com/*"] },
     "local": true,
     "windows": ["mhy_client"],
-    "permissions": [],
+    "permissions": ["event:allow-emit"],
+    "platforms": ["windows", "macOS"]
+  },
+  "SubWindow": {
+    "identifier": "SubWindow",
+    "description": "Capability for the sub window",
+    "local": true,
+    "windows": ["Sub_window"],
+    "permissions": [
+      "app:allow-version",
+      "app:default",
+      "event:allow-listen",
+      "event:default",
+      "http:allow-fetch",
+      "log:allow-log",
+      "log:default",
+      "path:allow-resolve-directory",
+      "path:default",
+      "sql:allow-load",
+      "sql:allow-execute",
+      "sql:default",
+      "window:allow-close",
+      "window:allow-destroy",
+      "window:allow-set-title",
+      "window:allow-set-fullscreen",
+      "window:allow-show",
+      {
+        "identifier": "http:default",
+        "allow": [{ "url": "https://*.miyoushe.com/*" }, { "url": "https://*.mihoyo.com/*" }]
+      }
+    ],
     "platforms": ["windows", "macOS"]
   },
   "TeyvatGuide": {
@@ -14,23 +44,48 @@
     "local": true,
     "windows": ["TeyvatGuide"],
     "permissions": [
-      "path:allow-resolve-directory",
-      "path:default",
-      "event:allow-listen",
-      "event:default",
       "app:allow-version",
       "app:default",
-      "window:allow-set-title",
-      "sql:allow-load",
-      "sql:default",
-      "sql:allow-execute",
+      "event:allow-listen",
+      "event:default",
+      "fs:allow-remove",
+      "fs:default",
+      "fs:scope-cache-recursive",
+      "fs:scope-document-recursive",
+      "http:allow-fetch",
       "log:allow-log",
       "log:default",
-      "http:allow-fetch",
+      "path:allow-resolve-directory",
+      "path:default",
+      "process:allow-exit",
+      "process:allow-restart",
+      "process:default",
+      "shell:allow-execute",
+      "shell:allow-open",
+      "shell:default",
+      "sql:allow-load",
+      "sql:allow-execute",
+      "sql:default",
+      "window:allow-close",
+      "window:allow-destroy",
+      "window:allow-set-title",
+      "window:allow-show",
       {
         "identifier": "http:default",
-        "allow": [{ "url": "https://*.miyoushe.com/*" }, { "url": "https://*.mihoyo.com/*" }]
+        "allow": [
+          { "url": "https://*.miyoushe.com/*" },
+          { "url": "https://*.mihoyo.com/*" },
+          { "url": "https://homa.snapgenshin.com/*" }
+        ]
+      },
+      {
+        "identifier": "shell:allow-execute",
+        "allow": [
+          { "args": true, "cmd": "explorer", "name": "win_open" },
+          { "args": true, "cmd": "open", "name": "mac_open" }
+        ]
       }
-    ]
+    ],
+    "platforms": ["windows", "macOS"]
   }
 }

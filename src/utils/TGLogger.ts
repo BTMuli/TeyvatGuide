@@ -1,10 +1,10 @@
 /**
  * @file utils/TGLogger.ts
  * @description 日志工具
- * @since Beta v0.4.4
+ * @since Beta v0.5.0
  */
 
-import { info, warn, error, attachConsole } from "tauri-plugin-log-api";
+import { info, warn, error, attachConsole } from "@tauri-apps/plugin-log";
 
 /**
  * @description 日志工具

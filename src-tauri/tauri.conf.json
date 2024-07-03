@@ -62,13 +62,13 @@
       }
     ],
     "security": {
-      "capabilities": ["TeyvatGuide", "Mys"]
+      "capabilities": ["TeyvatGuide", "Mys", "SubWindow"]
     }
   },
   "plugins": {
     "deep-link": {
       "desktop": {
-        "schemes": ["teyvatguide"]
+        "schemes": ["teyvatguide", "test"]
       },
       "mobile": []
     }

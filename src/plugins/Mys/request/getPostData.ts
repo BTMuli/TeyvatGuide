@@ -18,7 +18,7 @@ async function getPostData(postId: number): Promise<TGApp.Plugins.Mys.Post.FullD
   const params = { post_id: postId.toString() };
   const resp = await TGHttp<TGApp.Plugins.Mys.Post.Response>(url, {
     method: "GET",
-    headers: { "Content-Type": "application/json", Referer: MysApi.PostReferer },
+    headers: { referer: MysApi.PostReferer },
     query: params,
   });
   return resp.data.post;

@@ -50,7 +50,7 @@ export async function saveCanvasImg(
  * @returns {Promise<string>} 图片元素
  */
 export async function saveImgLocal(url: string): Promise<string> {
-  const res = await TGHttp<Uint8Array>(url, { method: "GET" });
+  const res = await TGHttp<Uint8Array>(url, { method: "GET", isBlob: true });
   const buffer = new Uint8Array(res);
   const blob = new Blob([buffer], { type: "image/png" });
   return URL.createObjectURL(blob);

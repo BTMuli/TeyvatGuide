@@ -22,11 +22,11 @@ fn window_event_handler(app: &tauri::Window, event: &tauri::WindowEvent) {
         for label in SUB_WINDOW_LABELS.iter() {
           let sub = app.get_webview_window(label);
           if sub.is_some() {
-            sub.unwrap().close().unwrap();
+            sub.unwrap().destroy().unwrap();
           }
         }
       }
-      app.close().unwrap();
+      app.destroy().unwrap();
     }
     _ => {}
   }
@@ -36,10 +36,12 @@ fn main() {
   tauri::Builder::default()
     .on_window_event(move |app, event| window_event_handler(app, event))
     .plugin(tauri_plugin_deep_link::init())
-    .plugin(tauri_plugin_http::init())
-    .plugin(tauri_plugin_fs::init())
-    .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_fs::init())
+    .plugin(tauri_plugin_http::init())
+    .plugin(tauri_plugin_os::init())
+    .plugin(tauri_plugin_process::init())
+    .plugin(tauri_plugin_shell::init())
     .plugin(plugins::build_sql_plugin())
     .plugin(plugins::build_log_plugin())
     .setup(|_app| {

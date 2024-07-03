@@ -106,7 +106,9 @@
 </template>
 
 <script lang="ts" setup>
-import { dialog, fs, path } from "@tauri-apps/api";
+import { path } from "@tauri-apps/api";
+import { open, save } from "@tauri-apps/plugin-dialog";
+import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { computed, nextTick, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -338,7 +340,7 @@ async function searchCard(): Promise<void> {
 // 导入 UIAF 数据，进行数据合并、刷新
 async function importJson(): Promise<void> {
   await TGLogger.Info("[Achievements][importJson] 导入 UIAF 数据");
-  const selectedFile = await dialog.open({
+  const selectedFile = await open({
     title: "选择 UIAF 数据文件",
     multiple: false,
     filters: [
@@ -358,9 +360,9 @@ async function importJson(): Promise<void> {
     await TGLogger.Info("[Achievements][importJson] 已取消文件选择");
     return;
   }
-  const check = await verifyUiafData(<string>selectedFile);
+  const check = await verifyUiafData(selectedFile.path);
   if (!check) return;
-  const remoteRaw = await readUiafData(<string>selectedFile);
+  const remoteRaw = await readUiafData(selectedFile.path);
   await TGLogger.Info("[Achievements][importJson] 读取 UIAF 数据成功");
   await TGLogger.Info(`[Achievements][importJson] 导入来源：${remoteRaw.info.export_app}`);
   await TGLogger.Info(`[Achievements][importJson] 导入版本：${remoteRaw.info.export_app_version}`);
@@ -394,7 +396,7 @@ async function exportJson(): Promise<void> {
     list: await TSUserAchi.getUIAF(),
   };
   const fileName = `UIAF_${UiafData.info.export_app}_${UiafData.info.export_app_version}_${UiafData.info.export_timestamp}`;
-  const isSave = await dialog.save({
+  const isSave = await save({
     title: "导出 UIAF 数据",
     filters: [
       {
@@ -412,7 +414,7 @@ async function exportJson(): Promise<void> {
     await TGLogger.Info("[Achievements][exportJson] 已取消导出");
     return;
   }
-  await fs.writeTextFile(isSave, JSON.stringify(UiafData));
+  await writeTextFile(isSave, JSON.stringify(UiafData));
   showSnackbar({ text: "导出成功" });
   await TGLogger.Info("[Achievements][exportJson] 导出成功");
   await TGLogger.Info(`[Achievements][exportJson] 导出路径：${isSave}`);
