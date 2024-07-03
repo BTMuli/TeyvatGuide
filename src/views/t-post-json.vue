@@ -9,7 +9,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { appWindow } from "@tauri-apps/api/window";
+import { webviewWindow } from "@tauri-apps/api";
 import { onMounted, reactive, ref } from "vue";
 import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
@@ -30,7 +30,7 @@ let parseData = reactive<TGApp.Plugins.Mys.SctPost.Base[]>([]);
 const isEmpty = ref<boolean>(false);
 
 onMounted(async () => {
-  await appWindow.show();
+  await webviewWindow.getCurrent().show();
   if (!postId) {
     loadingEmpty.value = true;
     loadingTitle.value = "错误的 POST ID！";

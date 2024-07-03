@@ -6,8 +6,7 @@
   </transition>
 </template>
 <script lang="ts" setup>
-// vue
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 
 const scrollTop = ref(0); // 滚动条距离顶部的距离
 const canTop = ref(false); // 默认不显示
@@ -44,6 +43,11 @@ function handleScrollTop(): void {
 // 监听滚动事件
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
+});
+
+// 销毁监听
+onUnmounted(() => {
+  window.removeEventListener("scroll", handleScroll);
 });
 </script>
 

@@ -20,6 +20,7 @@ async function uploadData(
   return await TGHttp<TGApp.Plugins.Hutao.Abyss.UploadResponse>(url, {
     method: "POST",
     body: JSON.stringify(data),
+    headers: { "Content-Type": "application/json" },
   });
 }
 

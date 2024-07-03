@@ -160,7 +160,7 @@ onMounted(async () => {
   const isDev = useAppStore().devMode ?? false;
   if (isDev) {
     await TGLogger.Info(`[t-post][${postId}][onMounted] 打开 JSON 窗口`);
-    createPostJson(postId);
+    await createPostJson(postId);
   }
   await nextTick(() => {
     shareTimeTimer.value = setInterval(() => {
@@ -253,10 +253,10 @@ function parseContent(content: string): string {
   return JSON.stringify(result);
 }
 
-function createPostJson(postId: number): void {
+async function createPostJson(postId: number): Promise<void> {
   const jsonPath = `/post_detail_json/${postId}`;
   const jsonTitle = `Post_${postId}_JSON`;
-  createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
+  await createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
 }
 
 async function toPost(): Promise<void> {

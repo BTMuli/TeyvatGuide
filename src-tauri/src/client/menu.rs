@@ -43,16 +43,11 @@ fn create_utils_menu(app: AppHandle) -> Submenu<Wry> {
 }
 
 // 创建米游社客户端菜单
-pub fn create_mhy_menu(func: String, app: AppHandle) -> Menu<Wry> {
+pub fn create_mhy_menu(app: AppHandle) -> Menu<Wry> {
   let top_menu = MenuItemBuilder::with_id("top", "置顶").build(&app).unwrap();
   let cancel_top_menu = MenuItemBuilder::with_id("cancel_top", "取消置顶").build(&app).unwrap();
-  let sign_in_menu = MenuItemBuilder::with_id("sign_in", "用户登录").build(&app).unwrap();
   let open_post_menu = MenuItemBuilder::with_id("open_post", "打开帖子").build(&app).unwrap();
   let utils_menu = create_utils_menu(app.clone());
-  // 如果是登录
-  if func == "config_sign_in" {
-    return MenuBuilder::new(&app).item(&sign_in_menu).build().expect("failed to create mhy_menu");
-  }
   return MenuBuilder::new(&app)
     .item(&top_menu)
     .item(&cancel_top_menu)
@@ -67,7 +62,6 @@ pub fn handle_menu_event(window: &Window, event: MenuEvent) {
   match event.id.as_ref() {
     "top" => handle_menu_top(window),
     "cancel_top" => handle_menu_cancel_top(window),
-    "sign_in" => handle_menu_sign_in(window),
     "open_post" => handle_menu_open_post(window),
     "retry" => handle_menu_retry(window),
     "mock_touch" => handle_menu_mock_touch(window),
@@ -90,29 +84,6 @@ fn handle_menu_cancel_top(app_handle: &Window) {
   let window = app_handle.get_webview_window("mhy_client");
   if window.is_some() {
     window.unwrap().set_always_on_top(false).unwrap();
-  }
-}
-
-// 处理用户登录菜单
-fn handle_menu_sign_in(app_handle: &Window) {
-  let window = app_handle.get_webview_window("mhy_client");
-  let execute_js = r#"
-  javascript:(async function(){
-    // 首先检测是不是 user.mihoyo.com
-    const url = new URL(window.location.href);
-    if(url.hostname !== "user.mihoyo.com"){
-      alert("当前页面不是米游社登录页面");
-      return;
-    }
-    const ck = document.cookie;
-    const arg = {
-      method: 'teyvat_sign_in',
-      payload: ck,
-    }
-    await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
-  })()"#;
-  if window.is_some() {
-    window.unwrap().eval(&execute_js).ok().unwrap();
   }
 }
 

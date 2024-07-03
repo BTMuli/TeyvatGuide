@@ -1,5 +1,6 @@
 {
   "productName": "TeyvatGuide",
+  "identifier": "TeyvatGuide",
   "version": "0.4.9",
   "build": {
     "beforeDevCommand": "pnpm vite:dev",
@@ -62,13 +63,13 @@
       }
     ],
     "security": {
-      "capabilities": ["TeyvatGuide", "Mys", "SubWindow"]
+      "capabilities": ["TeyvatGuide", "Mys", "SubWindow", "DevJson"]
     }
   },
   "plugins": {
     "deep-link": {
       "desktop": {
-        "schemes": ["teyvatguide", "test"]
+        "schemes": ["teyvatguide"]
       },
       "mobile": []
     }

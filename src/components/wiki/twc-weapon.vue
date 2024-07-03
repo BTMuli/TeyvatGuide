@@ -119,7 +119,7 @@ async function toWiki(): Promise<void> {
     return;
   }
   const url = Mys.Api.Obc.replace("{contentId}", props.item.contentId.toString());
-  createTGWindow(
+  await createTGWindow(
     url,
     "Sub_window",
     `Content_${props.item.contentId} ${props.item.name}`,

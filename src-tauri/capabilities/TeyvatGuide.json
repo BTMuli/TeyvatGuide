@@ -8,10 +8,7 @@
     "app:default",
     "event:allow-listen",
     "event:default",
-    "fs:allow-remove",
     "fs:default",
-    "fs:scope-cache-recursive",
-    "fs:scope-document-recursive",
     "http:allow-fetch",
     "log:allow-log",
     "log:default",
@@ -26,10 +23,43 @@
     "sql:allow-load",
     "sql:allow-execute",
     "sql:default",
+    "webview:allow-create-webview-window",
+    "webview:default",
     "window:allow-close",
     "window:allow-destroy",
+    "window:default",
+    "window:allow-is-minimized",
     "window:allow-set-title",
+    "window:allow-set-focus",
     "window:allow-show",
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [{ "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [{ "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-read-dir",
+      "allow": [{ "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-read-text-file",
+      "allow": [{ "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-remove",
+      "allow": [{ "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [{ "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-write-text-file",
+      "allow": [{ "path": "**" }]
+    },
     {
       "identifier": "http:default",
       "allow": [

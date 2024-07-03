@@ -32,7 +32,7 @@ async function getVideoUrl(cid: number, bvid: string): Promise<TGApp.Plugins.Bil
   const resp = await TGHttp<TGApp.Plugins.Bili.Video.UrlResponse>(url, {
     method: "GET",
     query: params,
-    referrer: "https://www.bilibili.com/",
+    headers: { referer: "https://www.bilibili.com/" },
   });
   return resp.data;
 }

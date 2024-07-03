@@ -404,7 +404,7 @@ async function exportJson(): Promise<void> {
         extensions: ["json"],
       },
     ],
-    defaultPath: `${await path.downloadDir()}${path.sep}${fileName}.json`,
+    defaultPath: `${await path.downloadDir()}${path.sep()}${fileName}.json`,
   });
   if (isSave === null) {
     showSnackbar({

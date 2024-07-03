@@ -1,0 +1,37 @@
+{
+  "$schema": "./schemas/desktop-schema.json",
+  "identifier": "DevJson",
+  "description": "Capability for the dev json window",
+  "windows": ["Dev_JSON"],
+  "permissions": [
+    "app:allow-version",
+    "app:default",
+    "event:allow-listen",
+    "event:default",
+    "http:allow-fetch",
+    "log:allow-log",
+    "log:default",
+    "path:allow-resolve-directory",
+    "path:default",
+    "sql:allow-load",
+    "sql:allow-execute",
+    "sql:default",
+    "window:allow-close",
+    "window:allow-destroy",
+    "window:allow-set-title",
+    "window:allow-set-fullscreen",
+    "window:allow-show",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://*.miyoushe.com/*"
+        },
+        {
+          "url": "https://*.mihoyo.com/*"
+        }
+      ]
+    }
+  ],
+  "platforms": ["windows", "macOS"]
+}

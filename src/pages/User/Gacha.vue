@@ -372,7 +372,7 @@ async function handleExportBtn(): Promise<void> {
         extensions: ["json"],
       },
     ],
-    defaultPath: `${await path.downloadDir()}${path.sep}UIGF${uidCur.value}.json`,
+    defaultPath: `${await path.downloadDir()}${path.sep()}UIGF${uidCur.value}.json`,
   });
   if (!file) {
     showSnackbar({

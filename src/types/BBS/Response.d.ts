@@ -42,33 +42,6 @@ declare namespace TGApp.BBS.Response {
   }
 
   /**
-   * @description 获取 ltoken 跟 stoken 的响应数据返回
-   * @interface getTokensRes
-   * @since Alpha v0.1.5
-   * @property {string} name - token 名称
-   * @property {string} token - token 值
-   * @return getTokensRes
-   */
-  interface getTokensRes {
-    name: string;
-    token: string;
-  }
-
-  /**
-   * @description 获取 ltoken 跟 stoken 的响应数据
-   * @interface getTokens
-   * @since Alpha v0.1.5
-   * @extends BaseWithData
-   * @property {getTokensRes[]} data.list - token 列表
-   * @return getTokens
-   */
-  interface getTokens extends BaseWithData {
-    data: {
-      list: getTokensRes[];
-    };
-  }
-
-  /**
    * @description 根据 stoken 获取 ltoken 的响应数据
    * @interface getLTokenBySToken
    * @since Alpha v0.1.5

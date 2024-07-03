@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { app, event, core, window as TauriWindow } from "@tauri-apps/api";
+import { app, event, core, webviewWindow } from "@tauri-apps/api";
 import { UnlistenFn, Event } from "@tauri-apps/api/event";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { storeToRefs } from "pinia";
@@ -42,7 +42,7 @@ let themeListener: UnlistenFn;
 let urlListener: UnlistenFn;
 
 onBeforeMount(async () => {
-  const win = TauriWindow.getCurrent();
+  const win = webviewWindow.getCurrent();
   isMain.value = win.label === "TeyvatGuide";
   if (isMain.value) {
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
@@ -171,7 +171,7 @@ async function checkUserLoad(): Promise<void> {
 
 async function getDeepLink(): Promise<UnlistenFn> {
   return await event.listen("active_deep_link", async (e: Event<unknown>) => {
-    const windowGet = new TauriWindow.WebviewWindow("TeyvatGuide");
+    const windowGet = new webviewWindow.WebviewWindow("TeyvatGuide");
     if (await windowGet.isMinimized()) {
       await windowGet.unminimize();
     }

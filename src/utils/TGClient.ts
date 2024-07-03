@@ -4,10 +4,9 @@
  * @since Beta v0.5.0
  */
 
-import { event, core } from "@tauri-apps/api";
+import { event, core, webviewWindow } from "@tauri-apps/api";
 import type { Event } from "@tauri-apps/api/event";
 import type { UnlistenFn } from "@tauri-apps/api/event";
-import { Window } from "@tauri-apps/api/window";
 
 import showSnackbar from "../components/func/snackbar.js";
 import TGSqlite from "../plugins/Sqlite/index.js";
@@ -43,14 +42,6 @@ class TGClient {
   private listener: UnlistenFn | undefined;
 
   /**
-   * @private 窗口实例
-   * @since Beta v0.5.0
-   * @type {Window}
-   * @memberof TGClient
-   */
-  private window: Window | null;
-
-  /**
    * @private 模拟路由
    * @since Beta v0.3.4
    * @type {string[]}
@@ -65,11 +56,6 @@ class TGClient {
    * @memberof TGClient
    */
   constructor() {
-    try {
-      this.window = Window.getByLabel("mhy_client");
-    } catch (error) {
-      this.window = null;
-    }
     this.route = [];
     this.listener = undefined;
   }
@@ -285,7 +271,7 @@ class TGClient {
     await TGLogger.Info(`[TGClient][handleCustomCallback] ${JSON.stringify(arg)}`);
     switch (arg.method) {
       case "teyvat_open":
-        createPost(<string>arg.payload);
+        await createPost(<string>arg.payload);
         break;
       case "teyvat_remove":
         await this.hideOverlay();
@@ -442,33 +428,6 @@ class TGClient {
   }
 
   /**
-   * @func loadSignIn
-   * @since Beta v0.5.0
-   * @desc 自动检测登录ck
-   * @returns {Promise<void>}
-   */
-  async loadSignIn(): Promise<void> {
-    const executeJS = `javascript:(async function() {
-      let isLogin = false;
-      while(!isLogin) {
-        var ck = document.cookie;
-        if(ck.includes("login_ticket")) {
-          const arg = {
-            method: 'teyvat_sign_in',
-            payload: ck,
-          }
-          await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
-          isLogin = true;
-        } else {
-          // 等待 500 ms
-          await new Promise((resolve) => setTimeout(resolve, 500));
-        }
-      }
-    })();`;
-    await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
-  }
-
-  /**
    * @func nullCallback
    * @since Beta v0.3.9
    * @desc 空回调函数
@@ -491,14 +450,12 @@ class TGClient {
     if (url === undefined) url = this.getUrl(func);
     this.route = [url];
     await TGLogger.Info(`[TGClient][open][${func}] ${url}`);
-    await core.invoke<InvokeArg>("create_mhy_client", { func, url });
-    this.window = Window.getByLabel("mhy_client");
-    await this.window?.show();
-    await this.window?.setFocus();
-    await this.loadJSBridge();
-    if (func === "config_sign_in") {
-      await this.loadSignIn();
+    const windowFind = webviewWindow.WebviewWindow.getByLabel("mhy_client");
+    if (windowFind !== null) {
+      await windowFind.destroy();
     }
+    await core.invoke<InvokeArg>("create_mhy_client", { func, url });
+    await this.loadJSBridge();
   }
 
   /* JSBridge 回调处理 */
@@ -512,7 +469,7 @@ class TGClient {
   async closePage(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     this.route.pop();
     if (this.route.length === 0) {
-      await this.window?.close();
+      await webviewWindow.WebviewWindow.getByLabel("mhy_client")?.destroy();
       return;
     }
     const url = this.route[this.route.length - 1];
@@ -769,7 +726,7 @@ class TGClient {
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenApplicationPayload>,
   ): Promise<void> {
     console.log(`[openApplication] ${JSON.stringify(arg.payload)}`);
-    const appWindow = Window.getByLabel("TeyvatGuide");
+    const appWindow = webviewWindow.WebviewWindow.getByLabel("TeyvatGuide");
     await appWindow?.setFocus();
     showSnackbar({
       text: `不支持的操作：OpenApplication(${JSON.stringify(arg.payload)})`,
@@ -780,7 +737,10 @@ class TGClient {
         resolve();
       }, 1500);
     });
-    await this.window?.setFocus();
+    const windowFind = webviewWindow.WebviewWindow.getByLabel("mhy_client");
+    if (windowFind !== null) {
+      await windowFind.setFocus();
+    }
   }
 
   /**
@@ -795,7 +755,7 @@ class TGClient {
   ): Promise<void> {
     const res = await parseLink(arg.payload.page, true);
     if (!res) {
-      const appWindow = Window.getByLabel("TeyvatGuide");
+      const appWindow = webviewWindow.WebviewWindow.getByLabel("TeyvatGuide");
       await appWindow?.setFocus();
       showSnackbar({
         text: `未知链接:${arg.payload.page}`,
@@ -807,7 +767,10 @@ class TGClient {
           resolve();
         }, 3000);
       });
-      await this.window?.setFocus();
+      const windowFind = webviewWindow.WebviewWindow.getByLabel("mhy_client");
+      if (windowFind !== null) {
+        await windowFind.setFocus();
+      }
       return;
     }
     if (typeof res !== "string") return;
@@ -820,7 +783,11 @@ class TGClient {
     await this.loadJSBridge();
     await this.hideSideBar();
     await this.hideOverlay();
-    await this.window?.setFocus();
+    const windowFind = webviewWindow.WebviewWindow.getByLabel("mhy_client");
+    if (windowFind !== null) {
+      await windowFind.show();
+      await windowFind.setFocus();
+    }
   }
 
   /**
@@ -910,18 +877,15 @@ class TGClient {
         var buffer = new Uint8Array(atob(img.split(",")[1]).split("").map(function(item) {
           return item.charCodeAt(0);
         }));
-        var _t = window.__TAURI__;
-        var savePath = await _t.path.downloadDir() + Date.now() + ".png";
-        var save = await _t.dialog.save({
+        var _path = window.__TAURI__.path;
+        var saveDefault = await _path.downloadDir() + _path.sep() + Date.now() + ".png";
+        var savePath = await window.__TAURI_PLUGIN_DIALOG__.save({
           title: "保存图片",
           filters: [{ name: "图片", extensions: ["png"] }],
-          defaultPath: savePath
+          defaultPath: saveDefault,
         });
-        if (save) {
-          await _t.fs.writeBinaryFile({
-            contents: buffer,
-            path: save
-          });
+        if (savePath !== null) {
+          await window.__TAURI_PLUGIN_FS__.writeFile(savePath, buffer);
           alert("保存成功");
         }
         mhyWebBridge("${arg.callback}", {});

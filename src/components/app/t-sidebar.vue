@@ -242,7 +242,7 @@
 </template>
 
 <script lang="ts" setup>
-import { event, window as TauriWindow } from "@tauri-apps/api";
+import { event, webviewWindow } from "@tauri-apps/api";
 import { UnlistenFn, Event } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
@@ -302,7 +302,7 @@ onMounted(async () => {
     const theme = e.payload;
     themeGet.value = theme === "default" ? "default" : "dark";
   });
-  if (TauriWindow.getCurrent().label === "TeyvatGuide") {
+  if (webviewWindow.getCurrent().label === "TeyvatGuide") {
     await mhyClient.run();
   }
   if (userStore.briefInfo.value && userStore.briefInfo.value.nickname) {

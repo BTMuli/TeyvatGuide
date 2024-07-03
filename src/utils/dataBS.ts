@@ -27,18 +27,18 @@ export async function backUpUserData(dir: string): Promise<void> {
     await mkdir(dir, { recursive: true });
   }
   const dataAchi = await TSUserAchi.getUIAF();
-  await writeTextFile(`${dir}${path.sep}UIAF.json`, JSON.stringify(dataAchi));
+  await writeTextFile(`${dir}${path.sep()}UIAF.json`, JSON.stringify(dataAchi));
   // 备份 ck
   const dataCK = await TGSqlite.getCookie();
-  await writeTextFile(`${dir}${path.sep}cookie.json`, JSON.stringify(dataCK));
+  await writeTextFile(`${dir}${path.sep()}cookie.json`, JSON.stringify(dataCK));
   // 备份深渊数据
   const dataAbyss = await TGSqlite.getAbyss();
-  await writeTextFile(`${dir}${path.sep}abyss.json`, JSON.stringify(dataAbyss));
+  await writeTextFile(`${dir}${path.sep()}abyss.json`, JSON.stringify(dataAbyss));
   // 备份祈愿数据
   const uidList = await TSUserGacha.getUidList();
   for (const uid of uidList) {
     const dataGacha = await TSUserGacha.getGachaRecords(uid);
-    const savePath = `${dir}${path.sep}UIGF_${uid}.json`;
+    const savePath = `${dir}${path.sep()}UIGF_${uid}.json`;
     await exportUigfData(uid, dataGacha, savePath);
   }
 }

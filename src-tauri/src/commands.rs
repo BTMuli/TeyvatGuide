@@ -38,8 +38,7 @@ pub async fn create_window(
 ) {
   let window_find = app_handle.get_webview_window(&label);
   if window_find.is_some() {
-    let window = window_find.unwrap();
-    window.destroy().unwrap();
+    window_find.unwrap().destroy().unwrap();
     return;
   }
   let url_parse = WebviewUrl::App(url.parse().unwrap());
@@ -55,10 +54,10 @@ pub async fn create_window(
 
 // 执行 js
 #[tauri::command]
-pub async fn execute_js(app_handle: tauri::AppHandle, label: String, js: String) {
+pub async fn execute_js(app_handle: AppHandle, label: String, js: String) {
   let window = app_handle.get_webview_window(&label);
   if window.is_some() {
-    window.unwrap().eval(&js).ok().unwrap();
+    window.unwrap().eval(&js).unwrap();
   }
 }
 

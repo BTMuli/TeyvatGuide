@@ -149,5 +149,5 @@ export async function backupUigfData(
   gachaList: TGApp.Sqlite.GachaRecords.SingleTable[],
 ): Promise<void> {
   if (!(await exists(dirPath))) await mkdir(dirPath, { recursive: true });
-  await exportUigfData(uid, gachaList, `${dirPath}${path.sep}UIGF_${uid}.json`);
+  await exportUigfData(uid, gachaList, `${dirPath}${path.sep()}UIGF_${uid}.json`);
 }
