@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/types/news.d.ts
  * @description Mys 插件咨讯类型定义文件
- * @since Beta v0.4.5
+ * @since Beta v0.5.0
  */
 
 /**
@@ -55,14 +55,14 @@ declare namespace TGApp.Plugins.Mys.News {
 
   /**
    * @description 用于渲染的咨讯卡片
-   * @since Beta v0.4.0
+   * @since Beta v0.5.0
    * @interface RenderCard
    * @property {string} title 标题
    * @property {string} cover 封面图片 URL
    * @property {number} postId 帖子 ID
    * @property {string} subtitle 副标题
-   * @property {TGApp.Plugins.Mys.User.Post} user 发帖用户
-   * @property forum 版块
+   * @property {TGApp.Plugins.Mys.User.Post|null} user 发帖用户
+   * @property forum 版块，可能为 null
    * @property {string} forum.name 版块名称
    * @property {string} forum.icon 版块图标
    * @property {RenderStatus} status 活动状态，仅活动咨讯有
@@ -79,11 +79,11 @@ declare namespace TGApp.Plugins.Mys.News {
     cover: string;
     postId: number;
     subtitle: string;
-    user: TGApp.Plugins.Mys.User.Post;
+    user: TGApp.Plugins.Mys.User.Post | null;
     forum: {
       name: string;
       icon: string;
-    };
+    } | null;
     data: {
       mark: number;
       forward: number;

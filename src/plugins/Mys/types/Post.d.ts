@@ -1,12 +1,12 @@
 /**
  * @file plugins/Mys/types/post.d.ts
  * @description Mys 插件帖子类型定义文件
- * @since Beta v0.4.5
+ * @since Beta v0.5.0
  */
 
 /**
  * @description Mys 插件帖子类型
- * @since Beta v0.4.5
+ * @since Beta v0.5.0
  * @namespace TGApp.Plugins.Mys.Post
  * @memberof TGApp.Plugins.Mys
  */
@@ -27,12 +27,12 @@ declare namespace TGApp.Plugins.Mys.Post {
 
   /**
    * @description 帖子数据
-   * @since Beta v0.4.5
+   * @since Beta v0.5.0
    * @interface FullData
    * @property {Post} post  帖子信息
    * @property {Forum} forum  所属版块
    * @property {Topic[]} topics 所属话题
-   * @property {TGApp.Plugins.Mys.User.Post} user 发帖人
+   * @property {TGApp.Plugins.Mys.User.Post|null} user 发帖人
    * @property {TGApp.Plugins.Mys.User.SelfOperation} self_operation 当前用户操作
    * @property {Stat} stat 帖子统计
    * @property {HelpSys} help_sys 帮助系统，可能为 null
@@ -54,9 +54,9 @@ declare namespace TGApp.Plugins.Mys.Post {
    */
   interface FullData {
     post: Post;
-    forum: Forum;
+    forum: Forum | null;
     topics: Topic[];
-    user: TGApp.Plugins.Mys.User.Post;
+    user: TGApp.Plugins.Mys.User.Post | null;
     self_operation: TGApp.Plugins.Mys.User.SelfOperation;
     stat: Stat;
     help_sys: HelpSys | null;
