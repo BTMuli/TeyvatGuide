@@ -131,7 +131,7 @@ class TGClient {
 
   /**
    * @func getUrl
-   * @since Beta v0.3.8
+   * @since Beta v0.5.0
    * @desc 获取 url
    * @param {string} func - 方法名
    * @returns {string} - url
@@ -141,7 +141,7 @@ class TGClient {
       case "sign_in":
         return "https://act.mihoyo.com/bbs/event/signin/hk4e/index.html?act_id=e202311201442471&bbs_auth_required=true&bbs_presentation_style=fullscreen&mhy_presentation_style=fullscreen&utm_source=bbs&utm_medium=ys&utm_campaign=icon";
       case "game_record":
-        return "https://webstatic.mihoyo.com/app/community-game-records/index.html?bbs_presentation_style=fullscreen";
+        return "https://webstatic.mihoyo.com/app/community-game-records/index.html?bbs_presentation_style=fullscreen&game_id=2";
       case "daily_note":
         return "https://webstatic.mihoyo.com/app/community-game-records/index.html?bbs_presentation_style=fullscreen#/ys/daily/";
       case "tavern":
@@ -452,7 +452,14 @@ class TGClient {
     await TGLogger.Info(`[TGClient][open][${func}] ${url}`);
     const windowFind = webviewWindow.WebviewWindow.getByLabel("mhy_client");
     if (windowFind !== null) {
-      await windowFind.destroy();
+      try {
+        await windowFind.destroy();
+      } catch (e) {
+        showSnackbar({
+          text: `[TGClient][open] ${e}`,
+          color: "error",
+        });
+      }
     }
     await core.invoke<InvokeArg>("create_mhy_client", { func, url });
     await this.loadJSBridge();

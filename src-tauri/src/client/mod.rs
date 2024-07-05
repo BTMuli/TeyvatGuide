@@ -8,7 +8,9 @@ use tauri_utils::config::WebviewUrl;
 
 #[tauri::command]
 pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
-  let mut option = handle.config().app.windows.get(1).unwrap().clone();
+  let mut win_width = 400.0;
+  let mut win_height = 800.0;
+  let win_ua = "Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/2.72.2";
   let url_parse;
   if url != "" {
     url_parse = WebviewUrl::External(url.parse().unwrap());
@@ -19,8 +21,8 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
     || func == "web_act"
     || url.starts_with("https://webstatic.mihoyo.com/ys/event/e20220303-birthday/index.html")
   {
-    option.width = 1280.0;
-    option.height = 720.0;
+    win_width = 1280.0;
+    win_height = 720.0;
   }
   let window_find = handle.get_webview_window("mhy_client");
   if window_find.is_some() {
@@ -28,10 +30,10 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
     return;
   }
   WebviewWindowBuilder::new(&handle, "mhy_client", url_parse)
-    .inner_size(option.width, option.height)
-    .title(option.title)
+    .inner_size(win_width, win_height)
+    .title("米游社")
     .center()
-    .user_agent(option.user_agent.unwrap().as_str())
+    .user_agent(win_ua)
     .menu(menu::create_mhy_menu(handle.clone()))
     .on_menu_event(move |app, event| menu::handle_menu_event(app, event))
     .build()

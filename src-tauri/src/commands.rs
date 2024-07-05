@@ -16,12 +16,6 @@ pub async fn init_app(app_handle: AppHandle) {
       return;
     }
   }
-  dbg!("init_app");
-  let _mhy = app_handle.get_webview_window("mhy_client");
-  if _mhy.is_some() {
-    // todo 这里应该延时，否则可能造成 macOS 平台的崩溃
-    _mhy.unwrap().destroy().unwrap();
-  }
   app_handle.emit("initApp", ()).unwrap();
   unsafe {
     APP_INITIALIZED = true;

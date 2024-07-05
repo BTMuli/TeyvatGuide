@@ -1,7 +1,7 @@
 {
   "productName": "TeyvatGuide",
   "identifier": "TeyvatGuide",
-  "version": "0.4.9",
+  "version": "0.5.0",
   "build": {
     "beforeDevCommand": "pnpm vite:dev",
     "beforeBuildCommand": "pnpm vite:build",
@@ -46,20 +46,6 @@
         "width": 1600,
         "height": 900,
         "center": true
-      },
-      {
-        "fullscreen": false,
-        "resizable": false,
-        "title": "米游社",
-        "label": "mhy_client",
-        "url": "",
-        "userAgent": "Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/2.70.1",
-        "visible": false,
-        "width": 400,
-        "height": 800,
-        "center": true,
-        "decorations": true,
-        "closable": true
       }
     ],
     "security": {
@@ -69,7 +55,7 @@
   "plugins": {
     "deep-link": {
       "desktop": {
-        "schemes": ["teyvatguide"]
+        "schemes": ["teyvatguide", "teyvat"]
       },
       "mobile": []
     }
