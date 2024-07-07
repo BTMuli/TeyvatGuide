@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.4.4
+ * @since Beta v0.5.0
  */
 
 import { path } from "@tauri-apps/api";
@@ -12,11 +12,11 @@ import { getInitDeviceInfo } from "../../utils/toolFunc.js";
 import { type AnnoLang, AnnoServer } from "../../web/request/getAnno.js";
 
 // 用于存储用户数据的路径
-const userDataDir = `${await path.appLocalDataDir()}userData`;
+const userDataDir = `${await path.appLocalDataDir()}${path.sep()}userData`;
 // 用于存放数据库的路径
-const dbDataPath = `${await path.appConfigDir()}TeyvatGuide.db`;
+const dbDataPath = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
 // 用于存放日志的路径
-const logDataDir = `${await path.appConfigDir()}logs`;
+const logDataDir = `${await path.appConfigDir()}${path.sep()}logs`;
 
 export const useAppStore = defineStore(
   "app",
