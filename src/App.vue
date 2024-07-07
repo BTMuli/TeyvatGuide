@@ -170,49 +170,62 @@ async function checkUserLoad(): Promise<void> {
 }
 
 async function getDeepLink(): Promise<UnlistenFn> {
-  return await event.listen("active_deep_link", async (e: Event<unknown>) => {
+  return await event.listen("active_deep_link", async (e: Event<string>) => {
     const windowGet = new webviewWindow.WebviewWindow("TeyvatGuide");
     if (await windowGet.isMinimized()) {
       await windowGet.unminimize();
     }
     await windowGet.setFocus();
-    if (typeof e.payload !== "string") {
+    const payload = parseDeepLink(e.payload);
+    if (payload === false) {
       showSnackbar({
         text: "无效的 deep link！",
         color: "error",
         timeout: 3000,
       });
-      await TGLogger.Error(`[App][getDeepLink] 无效的 deep link！ ${JSON.stringify(e)}`);
+      await TGLogger.Error(`[App][getDeepLink] 无效的 deep link！ ${JSON.stringify(e.payload)}`);
       return;
     }
     await TGLogger.Info(`[App][getDeepLink] ${e.payload}`);
-    if (e.payload === "") return;
-    if (
-      e.payload.startsWith("teyvatguide://import_uigf") ||
-      e.payload.startsWith("teyvatguide://import_uiaf")
-    ) {
-      await toUIAF(e.payload);
-      return;
-    }
-    if (e.payload.startsWith("router?path=")) {
-      const routerPath = e.payload.replace("router?path=", "");
-      if (router.currentRoute.value.path === routerPath) {
-        showSnackbar({
-          text: "已在当前页面！",
-          color: "warn",
-          timeout: 3000,
-        });
-        return;
-      }
-      await router.push(routerPath);
-      return;
-    }
-    showSnackbar({
-      text: "无效的 deep link！",
-      color: "error",
-      timeout: 3000,
-    });
+    await handleDeepLink(payload);
   });
+}
+
+function parseDeepLink(payload: string | string[]): string | false {
+  try {
+    if (typeof payload === "string") return payload;
+    if (payload.length < 2) return "teyvatguide://";
+    return payload[1];
+  } catch (e) {
+    if (e instanceof Error) {
+      TGLogger.Error(`[App][parseDeepLink] ${e.name}: ${e.message}`);
+    } else console.error(e);
+    return false;
+  }
+}
+
+async function handleDeepLink(payload: string): Promise<void> {
+  if (payload === "" || payload === "teyvatguide://") return;
+  if (
+    payload.startsWith("teyvatguide://import_uigf") ||
+    payload.startsWith("teyvatguide://import_uiaf")
+  ) {
+    await toUIAF(payload);
+    return;
+  }
+  if (payload.startsWith("router?path=")) {
+    const routerPath = payload.replace("router?path=", "");
+    if (router.currentRoute.value.path === routerPath) {
+      showSnackbar({
+        text: "已在当前页面！",
+        color: "warn",
+        timeout: 3000,
+      });
+      return;
+    }
+    await router.push(routerPath);
+    return;
+  }
 }
 
 async function toUIAF(link: string) {

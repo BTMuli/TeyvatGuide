@@ -35,6 +35,9 @@ fn window_event_handler(app: &tauri::Window, event: &tauri::WindowEvent) {
 fn main() {
   tauri::Builder::default()
     .on_window_event(move |app, event| window_event_handler(app, event))
+    .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+      app.emit("active_deep_link", argv).unwrap();
+    }))
     .plugin(tauri_plugin_deep_link::init())
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_fs::init())

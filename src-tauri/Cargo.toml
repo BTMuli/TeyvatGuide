@@ -1,6 +1,6 @@
 [package]
 name = "TeyvatGuide"
-version = "0.4.9"
+version = "0.5.0"
 description = "Game Tool for Genshin Impact player"
 authors = ["BTMuli <bt-muli@outlook.com>"]
 license = "MIT"
@@ -60,6 +60,11 @@ branch = "v2"
 
 # shell 插件
 [dependencies.tauri-plugin-shell]
+git = "https://github.com/tauri-apps/plugins-workspace"
+branch = "v2"
+
+# single-instance 插件
+[dependencies.tauri-plugin-single-instance]
 git = "https://github.com/tauri-apps/plugins-workspace"
 branch = "v2"
 

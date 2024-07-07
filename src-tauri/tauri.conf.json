@@ -55,7 +55,7 @@
   "plugins": {
     "deep-link": {
       "desktop": {
-        "schemes": ["teyvatguide", "teyvat"]
+        "schemes": ["teyvatguide"]
       },
       "mobile": []
     }
