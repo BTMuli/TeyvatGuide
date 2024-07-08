@@ -61,12 +61,12 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {string} cover 封面图片 URL
    * @property {number} postId 帖子 ID
    * @property {string} subtitle 副标题
-   * @property {TGApp.Plugins.Mys.User.Post|null} user 发帖用户
+   * @property {TGApp.Plugins.Mys.User.Post|null} user 发帖用户，可能为 null
    * @property forum 版块，可能为 null
    * @property {string} forum.name 版块名称
    * @property {string} forum.icon 版块图标
    * @property {RenderStatus} status 活动状态，仅活动咨讯有
-   * @property data 帖子统计
+   * @property data 帖子统计，可能为 null
    * @property {number} data.mark 帖子收藏数
    * @property {number} data.forward 帖子转发数
    * @property {number} data.like 帖子点赞数
@@ -90,7 +90,7 @@ declare namespace TGApp.Plugins.Mys.News {
       like: number;
       reply: number;
       view: number;
-    };
+    } | null;
     status?: RenderStatus;
   }
 

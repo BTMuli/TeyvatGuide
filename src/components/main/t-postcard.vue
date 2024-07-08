@@ -15,7 +15,7 @@
     <div class="tpc-content">
       <div class="tpc-title" :title="card.title">{{ card.title }}</div>
       <TpAvatar v-if="card.user" :data="card.user" position="left" />
-      <div class="tpc-data">
+      <div class="tpc-data" v-if="card.data">
         <div class="tpc-info-item" :title="`浏览数：${card.data.view}`">
           <v-icon>mdi-eye</v-icon>
           <span>{{ card.data.view }}</span>
@@ -158,10 +158,20 @@ function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
  */
 function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.News.RenderCard {
   let forum = null;
+  let data = null;
   if (item.forum !== null) {
     forum = {
       name: item.forum.name,
       icon: item.forum.icon,
+    };
+  }
+  if (item.stat !== null) {
+    data = {
+      mark: item.stat.bookmark_num,
+      forward: item.stat.forward_num,
+      like: item.stat.like_num,
+      reply: item.stat.reply_num,
+      view: item.stat.view_num,
     };
   }
   return {
@@ -171,13 +181,7 @@ function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys
     subtitle: item.post.post_id,
     user: item.user,
     forum: forum,
-    data: {
-      mark: item.stat.bookmark_num,
-      forward: item.stat.forward_num,
-      like: item.stat.like_num,
-      reply: item.stat.reply_num,
-      view: item.stat.view_num,
-    },
+    data: data,
   };
 }
 

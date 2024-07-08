@@ -90,6 +90,10 @@ export async function parseLink(
         await emit("active_deep_link", "router?path=/news/2/news");
         return true;
       }
+      if (link === "mihoyobbs://homeForum?game_id=8&tab_type=2") {
+        await emit("active_deep_link", "router?path=/news/8/news");
+        return true;
+      }
     }
     return false;
   }
