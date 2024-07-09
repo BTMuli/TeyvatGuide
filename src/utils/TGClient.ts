@@ -909,19 +909,16 @@ class TGClient {
           var buffer = new Uint8Array(atob('${image}'.split(',')[1]).split('').map(function(item) {
             return item.charCodeAt(0);
           }));
-          var _t = window.__TAURI__;
-          var savePath = await _t.path.downloadDir() + Date.now() + '.png';
-          var save = await _t.dialog.save({
-            title: '保存图片',
-            filters: [{ name: '图片', extensions: ['png'] }],
-            defaultPath: savePath,
+          var _path = window.__TAURI__.path;
+          var saveDefault = await _path.downloadDir() + _path.sep() + Date.now() + ".png";
+          var savePath = await window.__TAURI_PLUGIN_DIALOG__.save({
+            title: "保存图片",
+            filters: [{ name: "图片", extensions: ["png"] }],
+            defaultPath: saveDefault,
           });
-          if (save) {
-            await _t.fs.writeBinaryFile({
-              contents: buffer,
-              path: save,
-            });
-            alert('保存成功');
+          if (savePath !== null) {
+            await window.__TAURI_PLUGIN_FS__.writeFile(savePath, buffer);
+            alert("保存成功");
           }
           mhyWebBridge('${arg.callback}', {});
         })();`;
