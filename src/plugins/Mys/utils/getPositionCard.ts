@@ -1,12 +1,12 @@
 /**
  * @file plugins/Mys/utils/getPositionCard.ts
  * @description Mys 插件热点追踪工具
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  */
 
 /**
  * @description 根据热点追踪信息转为渲染用的数据
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  * @param {TGApp.Plugins.Mys.Position.Data[]} positionData 列表
  * @returns {TGApp.Plugins.Mys.Position.RenderCard[]} 返回列表
  */

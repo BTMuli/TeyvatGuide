@@ -1,10 +1,11 @@
 /**
  * @file utils/UIAF.ts
  * @description UIAF工具类
- * @since Beta v0.4.7
+ * @since Beta v0.5.0
  */
 
-import { app, fs } from "@tauri-apps/api";
+import { app } from "@tauri-apps/api";
+import { readTextFile } from "@tauri-apps/plugin-fs";
 import Ajv from "ajv";
 import { ErrorObject } from "ajv/lib/types/index.js";
 
@@ -48,12 +49,12 @@ export async function getUiafHeader(): Promise<TGApp.Plugins.UIAF.Export> {
 
 /**
  * @description 检测是否存在 UIAF 数据，采用 ajv 验证 schema
- * @since Beta v0.4.7
+ * @since Beta v0.5.0
  * @param {string} path - UIAF 数据路径
  * @returns {Promise<boolean>} 是否存在 UIAF 数据
  */
 export async function verifyUiafData(path: string): Promise<boolean> {
-  const fileData: string = await fs.readTextFile(path);
+  const fileData: string = await readTextFile(path);
   const ajv = new Ajv();
   const validate = ajv.compile(UiafSchema);
   try {
@@ -111,11 +112,11 @@ export async function verifyUiafDataClipboard(): Promise<boolean> {
 
 /**
  * @description 读取 UIAF 数据
- * @since Alpha v0.2.3
+ * @since Beta v0.5.0
  * @param {string} userPath - UIAF 数据路径
  * @returns {Promise<TGApp.Plugins.UIAF.Data>} UIAF 数据
  */
 export async function readUiafData(userPath: string): Promise<TGApp.Plugins.UIAF.Data> {
-  const fileData = await fs.readTextFile(userPath);
+  const fileData = await readTextFile(userPath);
   return <TGApp.Plugins.UIAF.Data>JSON.parse(fileData);
 }

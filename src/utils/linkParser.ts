@@ -1,7 +1,7 @@
 /**
  * @file src/utils/linkParser.ts
  * @description 处理链接
- * @since Beta v0.4.7
+ * @since Beta v0.5.0
  */
 
 import { emit } from "@tauri-apps/api/event";
@@ -52,7 +52,7 @@ export async function parsePost(link: string): Promise<false | string> {
 
 /**
  * @function parseLink
- * @since Beta v0.4.7
+ * @since Beta v0.5.0
  * @description 处理链接
  * @param {string} link - 链接
  * @param {boolean} useInner - 是否采用内置 JSBridge 打开
@@ -68,7 +68,7 @@ export async function parseLink(
       if (url.pathname.startsWith("//article/")) {
         const postId = url.pathname.split("/").pop();
         if (!postId) return false;
-        createPost(postId);
+        await createPost(postId);
         return true;
       }
       if (url.pathname === "//webview" && url.search.startsWith("?link=")) {
@@ -90,6 +90,10 @@ export async function parseLink(
         await emit("active_deep_link", "router?path=/news/2/news");
         return true;
       }
+      if (link === "mihoyobbs://homeForum?game_id=8&tab_type=2") {
+        await emit("active_deep_link", "router?path=/news/8/news");
+        return true;
+      }
     }
     return false;
   }
@@ -100,7 +104,7 @@ export async function parseLink(
       if (!useInner) {
         return "post";
       }
-      createPost(postId);
+      await createPost(postId);
       return true;
     }
   }

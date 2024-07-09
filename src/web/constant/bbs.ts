@@ -1,7 +1,7 @@
 /**
  * @file web/constant/bbs.ts
  * @description 常量-应用数据
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  */
 
 export const BBS_VERSION = "2.72.2";
@@ -12,7 +12,7 @@ export const BBS_APP_ID = "bll8iq97cem8";
 /**
  * @description salt 值
  * @version 2.72.2
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  */
 export const BBS_SALT = {
   K2: "KsQAfcXzHdMjoQQqjnPXVTXAygltZbSI",

@@ -40,7 +40,7 @@
 </template>
 <script lang="ts" setup>
 import { event } from "@tauri-apps/api";
-import { UnlistenFn } from "@tauri-apps/api/helpers/event";
+import { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { onMounted, onUnmounted, ref } from "vue";
 
 import { saveImgLocal } from "../../utils/TGShare.js";
@@ -59,8 +59,8 @@ const iconDark = ref<string>();
 const offer = ref<string>();
 
 onMounted(async () => {
-  themeListener = await event.listen("readTheme", (e) => {
-    const theme = <string>e.payload;
+  themeListener = event.listen("readTheme", (e: Event<string>) => {
+    const theme = e.payload;
     if (theme === "dark") {
       icon.value = iconLight.value;
     } else {
@@ -77,9 +77,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  if (themeListener) {
-    themeListener();
-  }
+  themeListener();
   const urlList = [iconLight.value, iconDark.value, offer.value];
   urlList.forEach((url) => {
     URL.revokeObjectURL(typeof url === "string" ? url : "");

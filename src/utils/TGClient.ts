@@ -1,13 +1,12 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.4.4
+ * @since Beta v0.5.0
  */
 
-import { event, invoke } from "@tauri-apps/api";
+import { event, core, webviewWindow } from "@tauri-apps/api";
 import type { Event } from "@tauri-apps/api/event";
-import type { UnlistenFn } from "@tauri-apps/api/helpers/event";
-import { appWindow, WebviewWindow } from "@tauri-apps/api/window";
+import type { UnlistenFn } from "@tauri-apps/api/event";
 
 import showSnackbar from "../components/func/snackbar.js";
 import TGSqlite from "../plugins/Sqlite/index.js";
@@ -43,14 +42,6 @@ class TGClient {
   private listener: UnlistenFn | undefined;
 
   /**
-   * @private 窗口实例
-   * @since Beta v0.3.4
-   * @type {WebviewWindow}
-   * @memberof TGClient
-   */
-  private window: WebviewWindow | null;
-
-  /**
    * @private 模拟路由
    * @since Beta v0.3.4
    * @type {string[]}
@@ -65,11 +56,6 @@ class TGClient {
    * @memberof TGClient
    */
   constructor() {
-    try {
-      this.window = WebviewWindow.getByLabel("mhy_client");
-    } catch (error) {
-      this.window = null;
-    }
     this.route = [];
     this.listener = undefined;
   }
@@ -94,7 +80,7 @@ class TGClient {
 
   /**
    * @func callback
-   * @since Beta v0.4.2
+   * @since Beta v0.5.0
    * @desc 回调函数
    * @param {string} callback - 回调函数名
    * @param {object} data - 回调数据
@@ -108,7 +94,7 @@ class TGClient {
     };
     const js = `javascript:mhyWebBridge("${callback}", ${JSON.stringify(response)});`;
     console.info(`[callback] ${js}`);
-    await invoke("execute_js", { label: "mhy_client", js });
+    await core.invoke("execute_js", { label: "mhy_client", js });
   }
 
   /**
@@ -145,7 +131,7 @@ class TGClient {
 
   /**
    * @func getUrl
-   * @since Beta v0.3.8
+   * @since Beta v0.5.0
    * @desc 获取 url
    * @param {string} func - 方法名
    * @returns {string} - url
@@ -155,7 +141,7 @@ class TGClient {
       case "sign_in":
         return "https://act.mihoyo.com/bbs/event/signin/hk4e/index.html?act_id=e202311201442471&bbs_auth_required=true&bbs_presentation_style=fullscreen&mhy_presentation_style=fullscreen&utm_source=bbs&utm_medium=ys&utm_campaign=icon";
       case "game_record":
-        return "https://webstatic.mihoyo.com/app/community-game-records/index.html?bbs_presentation_style=fullscreen";
+        return "https://webstatic.mihoyo.com/app/community-game-records/index.html?bbs_presentation_style=fullscreen&game_id=2";
       case "daily_note":
         return "https://webstatic.mihoyo.com/app/community-game-records/index.html?bbs_presentation_style=fullscreen#/ys/daily/";
       case "tavern":
@@ -270,13 +256,13 @@ class TGClient {
         await this.nullCallback(<TGApp.Plugins.JSBridge.NullArg>argParse);
         break;
       default:
-        console.warn(`[${arg.windowLabel}] ${JSON.stringify(argParse)}`);
+        console.warn(`[${arg.event}] ${JSON.stringify(argParse)}`);
     }
   }
 
   /**
    * @func handleCustomCallback
-   * @since Beta v0.4.3
+   * @since Beta v0.5.0
    * @desc 处理自定义的 callback
    * @param {TGApp.Plugins.JSBridge.Arg<any>} arg - 事件参数
    * @returns {Promise<void>} - 返回值
@@ -285,7 +271,7 @@ class TGClient {
     await TGLogger.Info(`[TGClient][handleCustomCallback] ${JSON.stringify(arg)}`);
     switch (arg.method) {
       case "teyvat_open":
-        createPost(<string>arg.payload);
+        await createPost(<string>arg.payload);
         break;
       case "teyvat_remove":
         await this.hideOverlay();
@@ -294,7 +280,7 @@ class TGClient {
         const executeJS = `javascript:(function(){
           window.location.reload();
         })();`;
-        await invoke("execute_js", { label: "mhy_client", js: executeJS });
+        await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
         await this.loadJSBridge();
         break;
       }
@@ -380,7 +366,7 @@ class TGClient {
           };
           document.addEventListener("mousedown", mouseDownListener);
         })()`;
-        await invoke("execute_js", { label: "mhy_client", js: executeJS });
+        await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
         break;
       }
       default:
@@ -390,7 +376,7 @@ class TGClient {
 
   /**
    * @func hideOverlay
-   * @since Beta v0.3.7
+   * @since Beta v0.5.0
    * @desc 隐藏遮罩
    * @returns {Promise<void>}
    */
@@ -401,12 +387,12 @@ class TGClient {
         box.remove();
       }
     })();`;
-    await invoke("execute_js", { label: "mhy_client", js: executeJS });
+    await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
   }
 
   /**
    * @func hideSideBar
-   * @since Beta v0.3.5
+   * @since Beta v0.5.0
    * @desc 隐藏侧边栏
    * @returns {void} - 无返回值
    */
@@ -421,12 +407,12 @@ class TGClient {
         document.querySelector('body').appendChild(style);
       }
     })();`;
-    await invoke("execute_js", { label: "mhy_client", js: executeJS });
+    await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
   }
 
   /**
    * @func loadJSBridge
-   * @since Beta v0.3.8
+   * @since Beta v0.5.0
    * @desc 加载 JSBridge
    * @returns {void} - 无返回值
    */
@@ -438,34 +424,7 @@ class TGClient {
         closePage: function() { this.postMessage('{"method":"closePage"}') },
       };
     })();`;
-    await invoke("execute_js", { label: "mhy_client", js: executeJS });
-  }
-
-  /**
-   * @func loadSignIn
-   * @since Beta v0.4.4
-   * @desc 自动检测登录ck
-   * @returns {Promise<void>}
-   */
-  async loadSignIn(): Promise<void> {
-    const executeJS = `javascript:(async function() {
-      let isLogin = false;
-      while(!isLogin) {
-        var ck = document.cookie;
-        if(ck.includes("login_ticket")) {
-          const arg = {
-            method: 'teyvat_sign_in',
-            payload: ck,
-          }
-          await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
-          isLogin = true;
-        } else {
-          // 等待 500 ms
-          await new Promise((resolve) => setTimeout(resolve, 500));
-        }
-      }
-    })();`;
-    await invoke("execute_js", { label: "mhy_client", js: executeJS });
+    await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
   }
 
   /**
@@ -481,7 +440,7 @@ class TGClient {
 
   /**
    * @func open
-   * @since Beta v0.4.4
+   * @since Beta v0.5.0
    * @desc 打开米游社客户端
    * @param {string} func - 方法名
    * @param {string} url - url
@@ -491,20 +450,25 @@ class TGClient {
     if (url === undefined) url = this.getUrl(func);
     this.route = [url];
     await TGLogger.Info(`[TGClient][open][${func}] ${url}`);
-    await invoke<InvokeArg>("create_mhy_client", { func, url });
-    this.window = WebviewWindow.getByLabel("mhy_client");
-    await this.window?.show();
-    await this.window?.setFocus();
-    await this.loadJSBridge();
-    if (func === "config_sign_in") {
-      await this.loadSignIn();
+    const windowFind = webviewWindow.WebviewWindow.getByLabel("mhy_client");
+    if (windowFind !== null) {
+      try {
+        await windowFind.destroy();
+      } catch (e) {
+        showSnackbar({
+          text: `[TGClient][open] ${e}`,
+          color: "error",
+        });
+      }
     }
+    await core.invoke<InvokeArg>("create_mhy_client", { func, url });
+    await this.loadJSBridge();
   }
 
   /* JSBridge 回调处理 */
   /**
    * @func closePage
-   * @since Beta v0.3.9
+   * @since Beta v0.5.0
    * @desc 关闭米游社客户端的页面
    * @param {TGApp.Plugins.JSBridge.NullArg} arg - 请求参数
    * @returns {void} - 无返回值
@@ -512,7 +476,7 @@ class TGClient {
   async closePage(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     this.route.pop();
     if (this.route.length === 0) {
-      await this.window?.close();
+      await webviewWindow.WebviewWindow.getByLabel("mhy_client")?.destroy();
       return;
     }
     const url = this.route[this.route.length - 1];
@@ -520,7 +484,7 @@ class TGClient {
     const executeJS = `javascript:(function(){
       window.location.href = '${url}';
     })();`;
-    await invoke("execute_js", { label: "mhy_client", js: executeJS });
+    await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
     await this.loadJSBridge();
   }
 
@@ -618,7 +582,7 @@ class TGClient {
 
   /**
    * @func getCookieToken
-   * @since Beta v0.4.0
+   * @since Beta v0.5.0
    * @desc 获取米游社客户端的 cookie_token
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetCookieTokenPayload>} arg - 请求参数
    * @returns {void} - 无返回值
@@ -648,7 +612,7 @@ class TGClient {
       document.cookie = "ltmid_v2=${user.cookie.mid};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
     })();`;
     console.info(`[getCookieToken] ${executeJS}`);
-    await invoke("execute_js", { label: "mhy_client", js: executeJS });
+    await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
     const data = {
       cookie_token: user.cookie.cookie_token,
     };
@@ -744,7 +708,7 @@ class TGClient {
 
   /**
    * @func onClickImg
-   * @since Beta v0.3.9
+   * @since Beta v0.5.0
    * @desc 点击图片，下载到本地
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OnClickImgPayload>} arg - 方法参数
    * @returns {void} - 无返回值
@@ -755,12 +719,12 @@ class TGClient {
     const { image_list } = arg.payload;
     const image = image_list[0];
     const executeJS = this.getSaveImgJS(image.url, image.format);
-    await invoke("execute_js", { label: "mhy_client", js: executeJS });
+    await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
   }
 
   /**
    * @func openApplication
-   * @since Beta v0.3.9
+   * @since Beta v0.5.0
    * @desc 打开应用
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenApplicationPayload>} arg - 方法参数
    * @returns {void} - 无返回值
@@ -769,7 +733,8 @@ class TGClient {
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenApplicationPayload>,
   ): Promise<void> {
     console.log(`[openApplication] ${JSON.stringify(arg.payload)}`);
-    await appWindow.setFocus();
+    const appWindow = webviewWindow.WebviewWindow.getByLabel("TeyvatGuide");
+    await appWindow?.setFocus();
     showSnackbar({
       text: `不支持的操作：OpenApplication(${JSON.stringify(arg.payload)})`,
       color: "error",
@@ -779,12 +744,15 @@ class TGClient {
         resolve();
       }, 1500);
     });
-    await this.window?.setFocus();
+    const windowFind = webviewWindow.WebviewWindow.getByLabel("mhy_client");
+    if (windowFind !== null) {
+      await windowFind.setFocus();
+    }
   }
 
   /**
    * @func pushPage
-   * @since Beta v0.3.9
+   * @since Beta v0.5.0
    * @desc 打开米游社客户端的页面
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.PushPagePayload>} arg - 方法参数
    * @returns {Promise<void>} - 无返回值
@@ -794,7 +762,8 @@ class TGClient {
   ): Promise<void> {
     const res = await parseLink(arg.payload.page, true);
     if (!res) {
-      await appWindow.setFocus();
+      const appWindow = webviewWindow.WebviewWindow.getByLabel("TeyvatGuide");
+      await appWindow?.setFocus();
       showSnackbar({
         text: `未知链接:${arg.payload.page}`,
         color: "error",
@@ -805,7 +774,10 @@ class TGClient {
           resolve();
         }, 3000);
       });
-      await this.window?.setFocus();
+      const windowFind = webviewWindow.WebviewWindow.getByLabel("mhy_client");
+      if (windowFind !== null) {
+        await windowFind.setFocus();
+      }
       return;
     }
     if (typeof res !== "string") return;
@@ -814,11 +786,15 @@ class TGClient {
     const executeJS = `javascript:(function(){
       window.location.href = '${res}';
     })();`;
-    await invoke("execute_js", { label: "mhy_client", js: executeJS });
+    await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
     await this.loadJSBridge();
     await this.hideSideBar();
     await this.hideOverlay();
-    await this.window?.setFocus();
+    const windowFind = webviewWindow.WebviewWindow.getByLabel("mhy_client");
+    if (windowFind !== null) {
+      await windowFind.show();
+      await windowFind.setFocus();
+    }
   }
 
   /**
@@ -838,7 +814,7 @@ class TGClient {
 
   /**
    * @func share
-   * @since Beta v0.4.4
+   * @since Beta v0.5.0
    * @desc 分享
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.SharePayload>} arg - 方法参数
    * @returns {Promise<void>} - 无返回值
@@ -849,7 +825,7 @@ class TGClient {
       const image = arg.payload.content.image_url;
       const format = image.split(".").pop();
       const executeJS = this.getSaveImgJS(image, format ?? "png");
-      await invoke("execute_js", { label: "mhy_client", js: executeJS });
+      await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
       await this.callback(arg.callback, {});
       return;
     }
@@ -908,23 +884,20 @@ class TGClient {
         var buffer = new Uint8Array(atob(img.split(",")[1]).split("").map(function(item) {
           return item.charCodeAt(0);
         }));
-        var _t = window.__TAURI__;
-        var savePath = await _t.path.downloadDir() + Date.now() + ".png";
-        var save = await _t.dialog.save({
+        var _path = window.__TAURI__.path;
+        var saveDefault = await _path.downloadDir() + _path.sep() + Date.now() + ".png";
+        var savePath = await window.__TAURI_PLUGIN_DIALOG__.save({
           title: "保存图片",
           filters: [{ name: "图片", extensions: ["png"] }],
-          defaultPath: savePath
+          defaultPath: saveDefault,
         });
-        if (save) {
-          await _t.fs.writeBinaryFile({
-            contents: buffer,
-            path: save
-          });
+        if (savePath !== null) {
+          await window.__TAURI_PLUGIN_FS__.writeFile(savePath, buffer);
           alert("保存成功");
         }
         mhyWebBridge("${arg.callback}", {});
       })();`;
-      await invoke("execute_js", { label: "mhy_client", js: executeJS });
+      await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
       return;
     }
     if (arg.payload.type === "image") {
@@ -952,7 +925,7 @@ class TGClient {
           }
           mhyWebBridge('${arg.callback}', {});
         })();`;
-        await invoke("execute_js", { label: "mhy_client", js: executeJS });
+        await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
         return;
       }
     }

@@ -1,17 +1,15 @@
 /**
  * @file plugins/Bili/request/getVideoUrl.ts
  * @description Bili 插件视频请求文件
- * @since Beta v0.4.1
+ * @since Beta v0.5.0
  */
 
-import { http } from "@tauri-apps/api";
-import { Response } from "@tauri-apps/api/http";
-
+import TGHttp from "../../../utils/TGHttp.js";
 import getWrid from "../utils/getWrid.js";
 
 /**
  * @description 获取视频播放地址
- * @since Beta v0.4.1
+ * @since Beta v0.5.0
  * @see https://socialsisteryi.github.io/bilibili-API-collect/docs/video/videostream_url.html#dash%E6%A0%BC%E5%BC%8F
  * @param {string} bvid 视频BV号
  * @param {number} cid 视频分P号
@@ -31,17 +29,12 @@ async function getVideoUrl(cid: number, bvid: string): Promise<TGApp.Plugins.Bil
     wts: wridRes[0],
     wrid: wridRes[1],
   };
-  return await http
-    .fetch(url, {
-      method: "GET",
-      query: params,
-      headers: {
-        referer: "https://www.bilibili.com/",
-      },
-    })
-    .then((res: Response<TGApp.Plugins.Bili.Video.UrlResponse>) => {
-      return res.data.data;
-    });
+  const resp = await TGHttp<TGApp.Plugins.Bili.Video.UrlResponse>(url, {
+    method: "GET",
+    query: params,
+    headers: { referer: "https://www.bilibili.com/" },
+  });
+  return resp.data;
 }
 
 export default getVideoUrl;

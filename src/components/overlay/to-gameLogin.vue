@@ -80,6 +80,10 @@ function onCancel(): void {
     text: "已取消登录",
     color: "cancel",
   });
+  if (cycleTimer !== null) {
+    clearInterval(cycleTimer);
+    cycleTimer = null;
+  }
 }
 
 async function freshQr(): Promise<void> {

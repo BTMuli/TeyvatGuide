@@ -42,8 +42,9 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-import { dialog, fs, path } from "@tauri-apps/api";
-import { FileEntry } from "@tauri-apps/api/fs";
+import { path } from "@tauri-apps/api";
+import { open } from "@tauri-apps/plugin-dialog";
+import { readDir, remove } from "@tauri-apps/plugin-fs";
 
 import TGSqlite from "../../plugins/Sqlite/index.js";
 import { useAppStore } from "../../store/modules/app.js";
@@ -67,7 +68,7 @@ async function confirmCUD(): Promise<void> {
     });
     return;
   }
-  const dir = await dialog.open({
+  const dir: string | null = await open({
     directory: true,
     defaultPath: oriDir,
     multiple: false,
@@ -76,13 +77,6 @@ async function confirmCUD(): Promise<void> {
     showSnackbar({
       color: "error",
       text: "路径不能为空!",
-    });
-    return;
-  }
-  if (typeof dir !== "string") {
-    showSnackbar({
-      color: "error",
-      text: "路径错误!",
     });
     return;
   }
@@ -96,7 +90,7 @@ async function confirmCUD(): Promise<void> {
   appStore.userDir = dir;
   await TGSqlite.saveAppData("userDir", dir);
   await backUpUserData(dir);
-  await fs.removeDir(oriDir, { recursive: true });
+  await remove(oriDir, { recursive: true });
   showSnackbar({
     text: "已重新备份数据!即将刷新页面！",
     timeout: 3000,
@@ -127,11 +121,11 @@ async function confirmCLD(): Promise<void> {
     return;
   }
   const logDir = appStore.logDir;
-  const files = await fs.readDir(logDir);
-  const delFiles = files.filter((file: FileEntry) => {
+  const files = await readDir(logDir);
+  const delFiles = files.filter((file) => {
     // yyyy-mm-dd.log
     const reg = /(\d{4}-\d{2}-\d{2}\.log)/;
-    const match = file.path.match(reg);
+    const match = file.name.match(reg);
     if (!Array.isArray(match) || match.length < 1) return false;
     const date = match[1].replace(".log", "");
     return isOverWeek(date);
@@ -144,7 +138,8 @@ async function confirmCLD(): Promise<void> {
     return;
   }
   for (const file of delFiles) {
-    await fs.removeFile(file.path);
+    const filePath = `${logDir}/${file.name}`;
+    await remove(filePath);
   }
   showSnackbar({
     text: `已清理 ${delFiles.length} 个日志文件!`,

@@ -1,12 +1,12 @@
 /**
  * @file types/Game/Record.d.ts
  * @description 原神战绩相关类型定义文件
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  */
 
 /**
  * @description 原神战绩相关类型定义命名空间
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  * @namespace TGApp.Game.Record
  * @memberof TGApp.Game
  */
@@ -47,7 +47,7 @@ declare namespace TGApp.Game.Record {
   /**
    * @description 角色信息类型
    * @interface Role
-   * @since Beta v0.4.10
+   * @since Beta v0.5.0
    * @property {string} AvatarUrl - 角色头像 // 通常为 ""
    * @property {string} nickname - 角色昵称
    * @property {string} region - 区域
@@ -95,7 +95,7 @@ declare namespace TGApp.Game.Record {
   /**
    * @description 统计信息类型
    * @interface Stats
-   * @since Beta v0.4.10
+   * @since Beta v0.5.0
    * @property {number} active_day_number - 活跃天数
    * @property {number} achievement_number - 成就数量
    * @property {number} anemoculus_number - 风神瞳数量
@@ -140,7 +140,7 @@ declare namespace TGApp.Game.Record {
   /**
    * @description 幻想真境剧诗数据类型
    * @interface CombatStats
-   * @since Beta v0.4.10
+   * @since Beta v0.5.0
    * @property {boolean} is_unlock - 是否解锁
    * @property {number} max_round_id - 最大报幕数
    * @property {boolean} has_data - 是否有数据

@@ -41,7 +41,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { dialog, path } from "@tauri-apps/api";
+import { path } from "@tauri-apps/api";
+import { open, save } from "@tauri-apps/plugin-dialog";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, watch } from "vue";
 
@@ -270,7 +271,7 @@ async function handleImportBtn(savePath?: string): Promise<void> {
   await TGLogger.Info("[UserGacha][handleImportBtn] 导入祈愿数据");
   let selectedFile;
   if (savePath) {
-    selectedFile = await dialog.open({
+    selectedFile = await open({
       multiple: false,
       title: "选择要导入的祈愿数据文件",
       filters: [
@@ -283,7 +284,7 @@ async function handleImportBtn(savePath?: string): Promise<void> {
       directory: false,
     });
   } else {
-    selectedFile = await dialog.open({
+    selectedFile = await open({
       multiple: false,
       title: "选择要导入的祈愿数据文件",
       filters: [
@@ -303,9 +304,9 @@ async function handleImportBtn(savePath?: string): Promise<void> {
     });
     return;
   }
-  const check = await verifyUigfData(<string>selectedFile);
+  const check = await verifyUigfData(selectedFile.path);
   if (!check) return;
-  const remoteData = await readUigfData(<string>selectedFile);
+  const remoteData = await readUigfData(selectedFile.path);
   const res = await showConfirm({
     title: "是否导入祈愿数据？",
     text: `UID：${remoteData.info.uid} 共 ${remoteData.list.length} 条数据`,
@@ -363,7 +364,7 @@ async function handleExportBtn(): Promise<void> {
     });
     return;
   }
-  const file = await dialog.save({
+  const file = await save({
     title: "选择导出祈愿数据的文件路径",
     filters: [
       {
@@ -371,7 +372,7 @@ async function handleExportBtn(): Promise<void> {
         extensions: ["json"],
       },
     ],
-    defaultPath: `${await path.downloadDir()}${path.sep}UIGF${uidCur.value}.json`,
+    defaultPath: `${await path.downloadDir()}${path.sep()}UIGF${uidCur.value}.json`,
   });
   if (!file) {
     showSnackbar({

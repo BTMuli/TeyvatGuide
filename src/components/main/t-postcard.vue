@@ -14,8 +14,8 @@
     </div>
     <div class="tpc-content">
       <div class="tpc-title" :title="card.title">{{ card.title }}</div>
-      <TpAvatar :data="card.user" position="left" />
-      <div class="tpc-data">
+      <TpAvatar v-if="card.user" :data="card.user" position="left" />
+      <div class="tpc-data" v-if="card.data">
         <div class="tpc-info-item" :title="`浏览数：${card.data.view}`">
           <v-icon>mdi-eye</v-icon>
           <span>{{ card.data.view }}</span>
@@ -38,7 +38,7 @@
         </div>
       </div>
     </div>
-    <div class="tpc-forum" v-if="card.forum.icon !== ''" :title="`频道: ${card.forum.name}`">
+    <div class="tpc-forum" v-if="card.forum" :title="`频道: ${card.forum.name}`">
       <img :src="card.forum.icon" :alt="card.forum.name" />
       <span>{{ card.forum.name }}</span>
     </div>
@@ -157,23 +157,31 @@ function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
  * @returns {TGApp.Plugins.Mys.News.RenderCard} 渲染用咨讯列表项
  */
 function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.News.RenderCard {
+  let forum = null;
+  let data = null;
+  if (item.forum !== null) {
+    forum = {
+      name: item.forum.name,
+      icon: item.forum.icon,
+    };
+  }
+  if (item.stat !== null) {
+    data = {
+      mark: item.stat.bookmark_num,
+      forward: item.stat.forward_num,
+      like: item.stat.like_num,
+      reply: item.stat.reply_num,
+      view: item.stat.view_num,
+    };
+  }
   return {
     title: item.post.subject,
     cover: getPostCover(item),
     postId: Number(item.post.post_id),
     subtitle: item.post.post_id,
     user: item.user,
-    forum: {
-      name: item.forum.name,
-      icon: item.forum.icon,
-    },
-    data: {
-      mark: item.stat.bookmark_num,
-      forward: item.stat.forward_num,
-      like: item.stat.like_num,
-      reply: item.stat.reply_num,
-      view: item.stat.view_num,
-    },
+    forum: forum,
+    data: data,
   };
 }
 

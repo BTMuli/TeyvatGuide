@@ -1,10 +1,11 @@
 /**
  * @file utils/toolFunc.ts
  * @description 一些工具函数
- * @since Beta v0.4.1
+ * @since Beta v0.5.0
  */
 
-import { os, path } from "@tauri-apps/api";
+import { path } from "@tauri-apps/api";
+import { type } from "@tauri-apps/plugin-os";
 import colorConvert from "color-convert";
 import type { KEYWORD } from "color-convert/conversions.js";
 import { v4 } from "uuid";
@@ -108,18 +109,19 @@ export function bytesToSize(bytes: number): string {
 
 /**
  * @description 获取缓存目录
- * @since Beta v0.3.4
+ * @since Beta v0.5.0
  * @returns {string|string[]} 缓存目录
  */
 export async function getCacheDir(): Promise<string[] | false> {
   const cacheDir = await path.appCacheDir();
-  const osType = await os.type();
-  if (osType === "Windows_NT") {
-    const cache = `${cacheDir}EBWebview${path.sep}Default${path.sep}Cache`;
-    const codeCache = `${cacheDir}EBWebview${path.sep}Default${path.sep}Code Cache`;
+  const osType = type().toLowerCase();
+  if (osType === "windows") {
+    const cache = `${cacheDir}${path.sep()}EBWebview${path.sep()}Default${path.sep()}Cache`;
+    const codeCache = `${cacheDir}${path.sep()}EBWebview${path.sep()}Default${path.sep()}Code Cache`;
     return [cache, codeCache];
-  } else if (osType === "Darwin") {
-    return [`${cacheDir}WebKit`];
+  }
+  if (osType === "macos") {
+    return [`${cacheDir}${path.sep()}WebKit`];
   }
   return false;
 }

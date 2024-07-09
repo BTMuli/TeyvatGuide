@@ -1,18 +1,18 @@
 /**
  * @file web/request/getSyncAvatarDetail.ts
  * @description 获取同步角色详情相关请求函数
- * @since Beta v0.3.8
+ * @since Beta v0.5.0
  */
 
-import { app, http } from "@tauri-apps/api";
-import type { Response } from "@tauri-apps/api/http";
+import { app } from "@tauri-apps/api";
 
+import TGHttp from "../../utils/TGHttp.js";
 import TGApi from "../api/TGApi.js";
 import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 获取同步角色详情
- * @since Beta v0.3.8
+ * @since Beta v0.5.0
  * @param {string} accountId 账号 id
  * @param {string} cookieToken cookie token
  * @param {string} uid 用户 uid
@@ -37,14 +37,15 @@ async function getSyncAvatarDetail(
     Referer: "https://webstatic.mihoyo.com/",
     Cookie: TGUtils.Tools.transCookie({ account_id: accountId, cookie_token: cookieToken }),
   };
-  return await http
-    .fetch(url, { method: "GET", headers: header, query: params })
-    .then(
-      (res: Response<TGApp.Game.Calculate.SyncAvatarDetailResponse | TGApp.BBS.Response.Base>) => {
-        if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
-        return res.data.data;
-      },
-    );
+  const resp = await TGHttp<
+    TGApp.Game.Calculate.SyncAvatarDetailResponse | TGApp.BBS.Response.Base
+  >(url, {
+    method: "GET",
+    headers: header,
+    query: params,
+  });
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
 }
 
 export default getSyncAvatarDetail;

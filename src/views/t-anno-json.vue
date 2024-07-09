@@ -9,7 +9,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { appWindow } from "@tauri-apps/api/window";
+import { webviewWindow } from "@tauri-apps/api";
 import { ref, onMounted, reactive } from "vue";
 import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
@@ -33,7 +33,7 @@ let jsonList = reactive({});
 let jsonContent = reactive({});
 
 onMounted(async () => {
-  await appWindow.show();
+  await webviewWindow.getCurrent().show();
   // 检查数据
   if (!annoId) {
     loadingEmpty.value = true;

@@ -2,7 +2,7 @@
   <v-list class="config-list">
     <v-list-subheader :inset="true" class="config-header" title="相关信息" />
     <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item title="Tauri 版本" @click="toOuter('https://next--tauri.netlify.app/')">
+    <v-list-item title="Tauri 版本" @click="toOuter('https://v2.tauri.app/')">
       <template #prepend>
         <v-img class="config-icon" src="/platforms/tauri.webp" alt="Tauri" />
       </template>
@@ -73,7 +73,8 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-import { app, os } from "@tauri-apps/api";
+import { app } from "@tauri-apps/api";
+import { platform, version } from "@tauri-apps/plugin-os";
 import { onMounted, ref } from "vue";
 
 import TGSqlite from "../../plugins/Sqlite/index.js";
@@ -92,25 +93,25 @@ const dbInfo = ref<Array<TGApp.Sqlite.AppData.Item>>([]);
 onMounted(async () => {
   versionApp.value = await app.getVersion();
   versionTauri.value = await app.getTauriVersion();
-  osPlatform.value = `${await os.platform()}`;
+  osPlatform.value = platform();
   switch (osPlatform.value) {
     case "linux":
       iconPlatform.value = "mdi-linux";
       break;
-    case "darwin":
+    case "macos":
       iconPlatform.value = "mdi-apple";
       break;
     case "ios":
       iconPlatform.value = "mdi-apple-ios";
       break;
-    case "win32":
+    case "windows":
       iconPlatform.value = "mdi-microsoft-windows";
       break;
     default:
       iconPlatform.value = "mdi-desktop-classic";
       break;
   }
-  osVersion.value = await os.version();
+  osVersion.value = version();
   try {
     dbInfo.value = await TGSqlite.getAppData();
   } catch (e) {

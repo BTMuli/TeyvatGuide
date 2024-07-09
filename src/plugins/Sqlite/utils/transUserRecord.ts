@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/utils/transUserRecord.ts
  * @description Sqlite 数据转换 用户战绩数据转换模块
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  */
 
 /**
@@ -79,7 +79,7 @@ function transAvatar(data: TGApp.Game.Record.Avatar[]): string {
 
 /**
  * @description 将统计信息转换为数据库中的数据
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  * @param {TGApp.Game.Record.Stats} data 统计信息
  * @return {string} 转换后的统计信息
  */

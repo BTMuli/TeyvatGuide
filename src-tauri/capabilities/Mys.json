@@ -1,0 +1,45 @@
+{
+  "$schema": "./schemas/desktop-schema.json",
+  "identifier": "Mys",
+  "description": "Capability for the mys client window",
+  "windows": ["mhy_client"],
+  "permissions": [
+    "dialog:allow-message",
+    "dialog:default",
+    "event:allow-emit",
+    "path:allow-resolve-directory",
+    "path:default",
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [{ "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [{ "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-read-dir",
+      "allow": [{ "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-read-text-file",
+      "allow": [{ "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-remove",
+      "allow": [{ "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [{ "path": "**" }]
+    },
+    {
+      "identifier": "fs:allow-write-text-file",
+      "allow": [{ "path": "**" }]
+    }
+  ],
+  "remote": {
+    "urls": ["https://*.mihoyo.com/*", "https://*.miyoushe.com/*"]
+  },
+  "platforms": ["windows", "macOS"]
+}

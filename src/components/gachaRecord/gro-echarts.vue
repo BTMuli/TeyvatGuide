@@ -2,6 +2,7 @@
   <v-chart :option="getPoolData()" autoresize />
 </template>
 <script lang="ts" setup>
+// todo 解决引用问题
 import type { EChartsOption } from "echarts";
 import { PieChart } from "echarts/charts";
 import {

@@ -1,10 +1,10 @@
 /**
  * @file web/request/getAnnouncement.ts
  * @description 获取游戏内公告
- * @since Beta v0.4.4
+ * @since Beta v0.5.0
  */
-import { http } from "@tauri-apps/api";
-import type { Response } from "@tauri-apps/api/http";
+
+import TGHttp from "../../utils/TGHttp.js";
 
 export enum AnnoServer {
   CN_ISLAND = "cn_gf01",
@@ -48,7 +48,7 @@ function getAnnoParams(
 
 /**
  * @description 获取游戏内公告列表
- * @since Beta v0.4.3
+ * @since Beta v0.5.0
  * @param {string} region 服务器
  * @param {AnnoLang} lang 语言
  * @returns {Promise<TGApp.BBS.Announcement.ListData>}
@@ -62,14 +62,16 @@ export async function getAnnoList(
   if (region !== AnnoServer.CN_ISLAND && region !== AnnoServer.CN_TREE) {
     url = "https://hk4e-api-os.hoyoverse.com/common/hk4e_global/announcement/api/getAnnList";
   }
-  return await http
-    .fetch(url, { method: "GET", query: params })
-    .then((res: Response<TGApp.BBS.Announcement.ListResponse>) => res.data.data);
+  const resp = await TGHttp<TGApp.BBS.Announcement.ListResponse>(url, {
+    method: "GET",
+    query: params,
+  });
+  return resp.data;
 }
 
 /**
  * @description 获取游戏内公告内容
- * @since Beta v0.4.3
+ * @since Beta v0.5.0
  * @param {number} annId 公告 ID
  * @param {AnnoServer} region 服务器
  * @param {AnnoLang} lang 语言
@@ -85,10 +87,11 @@ export async function getAnnoContent(
   if (region !== AnnoServer.CN_ISLAND && region !== AnnoServer.CN_TREE) {
     url = "https://hk4e-api-os.hoyoverse.com/common/hk4e_global/announcement/api/getAnnContent";
   }
-  const annoContents: TGApp.BBS.Announcement.ContentItem[] = await http
-    .fetch(url, { method: "GET", query: params })
-    .then((res: Response<TGApp.BBS.Announcement.ContentResponse>) => res.data.data.list);
-  const annoContent = annoContents.find((item) => item.ann_id === annId);
+  const annoResp = await TGHttp<TGApp.BBS.Announcement.ContentResponse>(url, {
+    method: "GET",
+    query: params,
+  });
+  const annoContent = annoResp.data.list.find((item) => item.ann_id === annId);
   if (annoContent != null) {
     return annoContent;
   } else {

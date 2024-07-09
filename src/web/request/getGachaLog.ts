@@ -1,15 +1,14 @@
 /**
  * @file web/request/getGachaLog.ts
  * @description 获取抽卡记录请求函数
- * @since Beta v0.3.5
+ * @since Beta v0.5.0
  */
 
-import { http } from "@tauri-apps/api";
-import type { Response } from "@tauri-apps/api/http";
+import TGHttp from "../../utils/TGHttp.js";
 
 /**
  * @description 获取抽卡记录
- * @since Beta v0.3.5
+ * @since Beta v0.5.0
  * @param {string} authkey authkey
  * @param {string} gachaType 抽卡类型
  * @param {string} endId 结束 id，默认为 0
@@ -31,10 +30,10 @@ export async function getGachaLog(
     size: "20",
     end_id: endId,
   };
-  return await http
-    .fetch(url, { method: "GET", query: params })
-    .then((res: Response<TGApp.Game.Gacha.GachaLogResponse | TGApp.BBS.Response.Base>) => {
-      if (res.data.retcode !== 0) return <TGApp.BBS.Response.Base>res.data;
-      return res.data.data.list;
-    });
+  const resp = await TGHttp<TGApp.Game.Gacha.GachaLogResponse | TGApp.BBS.Response.Base>(url, {
+    method: "GET",
+    query: params,
+  });
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data.list;
 }

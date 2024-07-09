@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/utils/getGachaCard.ts
  * @description Mys 插件抽卡工具
- * @since Beta v0.4.4
+ * @since Beta v0.5.0
  */
 
 import { AppCharacterData } from "../../../data/index.js";
@@ -9,7 +9,7 @@ import getPostData from "../request/getPostData.js";
 
 /**
  * @description 根据单个卡池信息转为渲染用的卡池信息
- * @since Beta v0.4.4
+ * @since Beta v0.5.0
  * @param {TGApp.Plugins.Mys.Gacha.Data} data 卡池信息
  * @param {string} poolCover 卡池封面
  * @returns {Promise<TGApp.Plugins.Mys.Gacha.RenderCard>}

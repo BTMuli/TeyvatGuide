@@ -1,18 +1,16 @@
 /**
  * @file web/request/getAbyss.ts
  * @description 获取深渊信息
- * @since Beta v0.3.0
+ * @since Beta v0.5.0
  */
 
-import { http } from "@tauri-apps/api";
-import type { Response } from "@tauri-apps/api/http";
-
+import TGHttp from "../../utils/TGHttp.js";
 import TGApi from "../api/TGApi.js";
 import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 获取深渊信息
- * @since Beta v0.3.0
+ * @since Beta v0.5.0
  * @param {Record<string, string>} cookie cookie
  * @param {string} schedule_type 1: 本期, 2: 上期
  * @param {TGApp.Sqlite.Account.Game} account 游戏账号
@@ -27,10 +25,11 @@ export async function getAbyss(
   const role_id = account.gameUid;
   const params = { role_id, schedule_type, server: account.region };
   const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
-  return await http
-    .fetch(url, { method: "GET", headers: header, query: params })
-    .then((res: Response<TGApp.Game.Abyss.Response | TGApp.BBS.Response.Base>) => {
-      if (res.data.retcode !== 0) return res.data;
-      return res.data.data;
-    });
+  const resp = await TGHttp<TGApp.Game.Abyss.Response | TGApp.BBS.Response.Base>(url, {
+    method: "GET",
+    headers: header,
+    query: params,
+  });
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
 }

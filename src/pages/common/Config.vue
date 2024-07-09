@@ -87,7 +87,10 @@
 </template>
 
 <script lang="ts" setup>
-import { dialog, fs, invoke, process as TauriProcess } from "@tauri-apps/api";
+import { core } from "@tauri-apps/api";
+import { open } from "@tauri-apps/plugin-dialog";
+import { remove } from "@tauri-apps/plugin-fs";
+import { exit } from "@tauri-apps/plugin-process";
 import { onMounted, ref } from "vue";
 
 import TcAppBadge from "../../components/config/tc-appBadge.vue";
@@ -141,7 +144,7 @@ async function confirmBackup(): Promise<void> {
   }
   let saveDir = appStore.userDir;
   if (res === false) {
-    const dir = await dialog.open({
+    const dir: string | null = await open({
       directory: true,
       defaultPath: saveDir,
       multiple: false,
@@ -154,13 +157,6 @@ async function confirmBackup(): Promise<void> {
       return;
     }
     await TGLogger.Info(`[Config][confirmBackup] 选择备份路径 ${dir.toString()}`);
-    if (typeof dir !== "string") {
-      showSnackbar({
-        color: "error",
-        text: "路径错误!",
-      });
-      return;
-    }
     saveDir = dir;
   } else {
     await TGLogger.Info(`[Config][confirmBackup] 备份到默认路径 ${saveDir}`);
@@ -188,7 +184,7 @@ async function confirmRestore(): Promise<void> {
   }
   let saveDir = appStore.userDir;
   if (resConfirm === false) {
-    const dir = await dialog.open({
+    const dir: string | null = await open({
       directory: true,
       defaultPath: saveDir,
       multiple: false,
@@ -201,13 +197,6 @@ async function confirmRestore(): Promise<void> {
       return;
     }
     await TGLogger.Info(`[Config][confirmRestore] 选择恢复路径 ${dir.toString()}`);
-    if (typeof dir !== "string") {
-      showSnackbar({
-        color: "error",
-        text: "路径错误!",
-      });
-      return;
-    }
     saveDir = dir;
   } else {
     await TGLogger.Info(`[Config][confirmRestore] 恢复到默认路径 ${saveDir}`);
@@ -332,7 +321,7 @@ async function confirmDelCache(): Promise<void> {
   loading.value = true;
   const timeStart = Date.now();
   for (const dir of CacheDir) {
-    const size: number = await invoke("get_dir_size", { path: dir });
+    const size: number = await core.invoke("get_dir_size", { path: dir });
     cacheBSize += size;
   }
   const cacheSize = bytesToSize(cacheBSize);
@@ -354,7 +343,7 @@ async function confirmDelCache(): Promise<void> {
   loadingTitle.value = "正在清除缓存...";
   loading.value = true;
   for (const dir of CacheDir) {
-    await fs.removeDir(dir, { recursive: true });
+    await remove(dir, { recursive: true });
   }
   await TGLogger.Info("[Config][confirmDelCache] 缓存清除完成");
   loading.value = false;
@@ -362,7 +351,7 @@ async function confirmDelCache(): Promise<void> {
     text: "缓存已清除!即将退出应用！",
   });
   setTimeout(async () => {
-    await TauriProcess.exit();
+    await exit();
   }, 1000);
 }
 

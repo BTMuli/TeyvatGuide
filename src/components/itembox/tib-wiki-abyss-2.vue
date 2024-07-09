@@ -8,7 +8,7 @@ import TGSqlite from "../../plugins/Sqlite/index.js";
 import TItemBox, { type TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibWikiAbyssProps {
-  modelValue: string;
+  modelValue: string | number;
 }
 
 const props = defineProps<TibWikiAbyssProps>();

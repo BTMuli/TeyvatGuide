@@ -91,7 +91,7 @@
 </template>
 <script lang="ts" setup>
 import { event } from "@tauri-apps/api";
-import { UnlistenFn } from "@tauri-apps/api/helpers/event";
+import { UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeMount, onMounted, onUnmounted, ref, watch } from "vue";
 
@@ -136,7 +136,7 @@ onBeforeMount(async () => {
       color: "success",
     });
   }
-  collectListener = await event.listen("refreshCollect", async () => await load());
+  collectListener = event.listen("refreshCollect", async () => await load());
 });
 
 onMounted(async () => await load());

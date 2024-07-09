@@ -22,8 +22,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { app } from "@tauri-apps/api";
-import { appWindow } from "@tauri-apps/api/window";
+import { app, webviewWindow } from "@tauri-apps/api";
 import { ref, onMounted, watch, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 
@@ -60,7 +59,7 @@ const annoHtml = ref<string>();
 const annoBanner = ref<string>();
 
 onMounted(async () => {
-  await appWindow.show();
+  await webviewWindow.getCurrent().show();
   appVersion.value = await app.getVersion();
   // 检查数据
   if (!annoId || !region) {
@@ -77,7 +76,7 @@ onMounted(async () => {
     annoHtml.value = await TGUtils.Anno.parseContent(annoData.value.content);
     if (annoData.value.banner !== "") annoBanner.value = await saveImgLocal(annoData.value.banner);
     annoTitle.value = `Anno_${annoId}`;
-    await appWindow.setTitle(`Anno_${annoId} ${annoData.value.title}`);
+    await webviewWindow.getCurrent().setTitle(`Anno_${annoId} ${annoData.value.title}`);
     annoRef.value = <HTMLElement>document.querySelector(".anno-body");
   } catch (error) {
     if (error instanceof Error)
@@ -85,7 +84,7 @@ onMounted(async () => {
     else console.error(error);
     loadingEmpty.value = true;
     loadingTitle.value = "公告不存在或解析失败";
-    await appWindow.setTitle(`Anno_${annoId} Parsing Error`);
+    await webviewWindow.getCurrent().setTitle(`Anno_${annoId} Parsing Error`);
     return;
   }
   // 打开 json

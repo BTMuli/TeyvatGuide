@@ -11,8 +11,9 @@
 </template>
 
 <script lang="ts" setup>
-import { app, event, fs, tauri, window as TauriWindow } from "@tauri-apps/api";
-import { UnlistenFn, Event } from "@tauri-apps/api/helpers/event";
+import { app, event, core, webviewWindow } from "@tauri-apps/api";
+import { UnlistenFn, Event } from "@tauri-apps/api/event";
+import { mkdir } from "@tauri-apps/plugin-fs";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -41,20 +42,20 @@ let themeListener: UnlistenFn;
 let urlListener: UnlistenFn;
 
 onBeforeMount(async () => {
-  const win = TauriWindow.getCurrent();
+  const win = webviewWindow.getCurrent();
   isMain.value = win.label === "TeyvatGuide";
   if (isMain.value) {
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
     await win.setTitle(title);
-    await listenOnInit();
-    await tauri.invoke("init_app");
+    listenOnInit();
+    await core.invoke("init_app");
     urlListener = await getDeepLink();
   }
 });
 
-onMounted(async () => {
+onMounted(() => {
   document.documentElement.className = theme.value;
-  themeListener = await event.listen("readTheme", async (e: Event<string>) => {
+  themeListener = event.listen("readTheme", async (e: Event<string>) => {
     const themeGet = e.payload;
     if (theme.value !== themeGet) {
       theme.value = themeGet;
@@ -64,9 +65,9 @@ onMounted(async () => {
 });
 
 // 启动后只执行一次的监听
-async function listenOnInit(): Promise<void> {
-  await event.listen("initApp", async () => {
-    await tauri.invoke("register_deep_link");
+function listenOnInit(): void {
+  console.info("[App][listenOnInit] 监听初始化事件！");
+  event.listen("initApp", async () => {
     await checkAppLoad();
     await checkDeviceFp();
     try {
@@ -78,7 +79,6 @@ async function listenOnInit(): Promise<void> {
     }
     await checkUpdate();
   });
-  return;
 }
 
 async function checkAppLoad(): Promise<void> {
@@ -166,53 +166,66 @@ async function checkUserLoad(): Promise<void> {
     return;
   }
   if (userDir !== appStore.userDir) appStore.userDir = userDir;
-  await fs.createDir(appStore.userDir, { recursive: true });
+  await mkdir(appStore.userDir, { recursive: true });
 }
 
 async function getDeepLink(): Promise<UnlistenFn> {
-  return await event.listen("active_deep_link", async (e: Event<unknown>) => {
-    const windowGet = new TauriWindow.WebviewWindow("TeyvatGuide");
+  return await event.listen("active_deep_link", async (e: Event<string>) => {
+    const windowGet = new webviewWindow.WebviewWindow("TeyvatGuide");
     if (await windowGet.isMinimized()) {
       await windowGet.unminimize();
     }
     await windowGet.setFocus();
-    if (typeof e.payload !== "string") {
+    const payload = parseDeepLink(e.payload);
+    if (payload === false) {
       showSnackbar({
         text: "无效的 deep link！",
         color: "error",
         timeout: 3000,
       });
-      await TGLogger.Error(`[App][getDeepLink] 无效的 deep link！ ${JSON.stringify(e)}`);
+      await TGLogger.Error(`[App][getDeepLink] 无效的 deep link！ ${JSON.stringify(e.payload)}`);
       return;
     }
     await TGLogger.Info(`[App][getDeepLink] ${e.payload}`);
-    if (e.payload === "") return;
-    if (
-      e.payload.startsWith("teyvatguide://import_uigf") ||
-      e.payload.startsWith("teyvatguide://import_uiaf")
-    ) {
-      await toUIAF(e.payload);
-      return;
-    }
-    if (e.payload.startsWith("router?path=")) {
-      const routerPath = e.payload.replace("router?path=", "");
-      if (router.currentRoute.value.path === routerPath) {
-        showSnackbar({
-          text: "已在当前页面！",
-          color: "warn",
-          timeout: 3000,
-        });
-        return;
-      }
-      await router.push(routerPath);
-      return;
-    }
-    showSnackbar({
-      text: "无效的 deep link！",
-      color: "error",
-      timeout: 3000,
-    });
+    await handleDeepLink(payload);
   });
+}
+
+function parseDeepLink(payload: string | string[]): string | false {
+  try {
+    if (typeof payload === "string") return payload;
+    if (payload.length < 2) return "teyvatguide://";
+    return payload[1];
+  } catch (e) {
+    if (e instanceof Error) {
+      TGLogger.Error(`[App][parseDeepLink] ${e.name}: ${e.message}`);
+    } else console.error(e);
+    return false;
+  }
+}
+
+async function handleDeepLink(payload: string): Promise<void> {
+  if (payload === "" || payload === "teyvatguide://") return;
+  if (
+    payload.startsWith("teyvatguide://import_uigf") ||
+    payload.startsWith("teyvatguide://import_uiaf")
+  ) {
+    await toUIAF(payload);
+    return;
+  }
+  if (payload.startsWith("router?path=")) {
+    const routerPath = payload.replace("router?path=", "");
+    if (router.currentRoute.value.path === routerPath) {
+      showSnackbar({
+        text: "已在当前页面！",
+        color: "warn",
+        timeout: 3000,
+      });
+      return;
+    }
+    await router.push(routerPath);
+    return;
+  }
 }
 
 async function toUIAF(link: string) {

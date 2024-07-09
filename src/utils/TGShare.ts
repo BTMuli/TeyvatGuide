@@ -1,22 +1,24 @@
 /**
  * @file utils/TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  */
 
-import { dialog, fs, http, path } from "@tauri-apps/api";
-import type { Response } from "@tauri-apps/api/http";
+import { path } from "@tauri-apps/api";
+import { save } from "@tauri-apps/plugin-dialog";
+import { writeFile } from "@tauri-apps/plugin-fs";
 import html2canvas from "html2canvas";
 
 import showConfirm from "../components/func/confirm.js";
 import showSnackbar from "../components/func/snackbar.js";
 
+import TGHttp from "./TGHttp.js";
 import TGLogger from "./TGLogger.js";
 import { bytesToSize } from "./toolFunc.js";
 
 /**
  * @description 保存图片-canvas
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  * @param {Uint8Array} buffer - 图片数据
  * @param {string} filename - 文件名
  * @param {string} format - 文件格式
@@ -28,7 +30,7 @@ export async function saveCanvasImg(
   format?: string,
 ): Promise<void> {
   if (format === undefined) format = "png";
-  const res = await dialog.save({
+  const res = await save({
     title: "保存图片",
     filters: [{ name: "图片", extensions: [format] }],
     defaultPath: `${await path.downloadDir()}${path.sep}${filename}.${format}`,
@@ -37,38 +39,32 @@ export async function saveCanvasImg(
     await TGLogger.Info(`[saveCanvasImg][${filename}] 未选择保存路径`);
     return;
   }
-  await fs.writeBinaryFile({ path: res, contents: buffer });
+  await writeFile(res, buffer);
   await TGLogger.Info(`[saveCanvasImg][${filename}] 已将图像保存到本地`);
 }
 
 /**
  * @description 将图片保存到本地
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  * @param {string} url - 图片链接
  * @returns {Promise<string>} 图片元素
  */
 export async function saveImgLocal(url: string): Promise<string> {
-  const res: Response<Uint8Array> = await http.fetch(url, {
-    method: "GET",
-    responseType: http.ResponseType.Binary,
-  });
-  const buffer = new Uint8Array(res.data);
+  const res = await TGHttp<Uint8Array>(url, { method: "GET", isBlob: true });
+  const buffer = new Uint8Array(res);
   const blob = new Blob([buffer], { type: "image/png" });
   return URL.createObjectURL(blob);
 }
 
 /**
  * @description 返回图片 buffer
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  * @param {string} url - 图片链接
  * @returns {Promise<Uint8Array>} 图片 buffer
  */
 export async function getImageBuffer(url: string): Promise<Uint8Array> {
-  const res: Response<Uint8Array> = await http.fetch(url, {
-    method: "GET",
-    responseType: http.ResponseType.Binary,
-  });
-  return new Uint8Array(res.data);
+  const res = await TGHttp<Uint8Array>(url, { method: "GET" });
+  return new Uint8Array(res);
 }
 
 /**

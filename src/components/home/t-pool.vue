@@ -193,7 +193,7 @@ async function toOuter(
     });
     return;
   }
-  createTGWindow(url, "Sub_window", `Pool_${title}`, 1200, 800, true, true);
+  await createTGWindow(url, "Sub_window", `Pool_${title}`, 1200, 800, true, true);
 }
 
 function getCBox(info: TGApp.App.Character.WikiBriefInfo): TItemBoxData {

@@ -93,8 +93,8 @@
         </template>
       </v-expansion-panel>
     </v-expansion-panels>
+    <ToNamecard v-if="hasNc" v-model="showNc" :data="nameCard" />
   </div>
-  <ToNamecard v-if="hasNc" v-model="showNc" :data="nameCard" />
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
@@ -181,7 +181,7 @@ async function toWiki(): Promise<void> {
     return;
   }
   const url = Mys.Api.Obc.replace("{contentId}", props.item.contentId.toString());
-  createTGWindow(
+  await createTGWindow(
     url,
     "Sub_window",
     `Content_${props.item.contentId} ${props.item.name}`,

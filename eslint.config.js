@@ -13,6 +13,7 @@ export default [
       "pnpm-lock.yaml",
       "src/data/**/*.json",
       "src-tauri/tauri.conf.json",
+      "src-tauri/gen/*.json",
       "qodana.yaml",
       ".github",
       ".vscode",

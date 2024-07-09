@@ -1,11 +1,11 @@
 /**
  * @file utils/dataBS.ts
  * @description 用户数据的备份、恢复、迁移
- * @since Beta v0.4.10
+ * @since Beta v0.5.0
  */
 
-import { fs, path } from "@tauri-apps/api";
-import { FileEntry } from "@tauri-apps/api/fs";
+import { path } from "@tauri-apps/api";
+import { exists, mkdir, writeTextFile, readDir, readTextFile } from "@tauri-apps/plugin-fs";
 
 import showSnackbar from "../components/func/snackbar.js";
 import TGSqlite from "../plugins/Sqlite/index.js";
@@ -17,56 +17,56 @@ import { exportUigfData, readUigfData, verifyUigfData } from "./UIGF.js";
 
 /**
  * @description 备份用户数据
- * @since Beta v0.4.7
+ * @since Beta v0.5.0
  * @param {string} dir 备份目录路径
  * @returns {Promise<void>}
  */
 export async function backUpUserData(dir: string): Promise<void> {
-  if (!(await fs.exists(dir))) {
+  if (!(await exists(dir))) {
     console.log("备份目录不存在，创建备份目录");
-    await fs.createDir(dir, { recursive: true });
+    await mkdir(dir, { recursive: true });
   }
   const dataAchi = await TSUserAchi.getUIAF();
-  await fs.writeTextFile(`${dir}${path.sep}UIAF.json`, JSON.stringify(dataAchi));
+  await writeTextFile(`${dir}${path.sep()}UIAF.json`, JSON.stringify(dataAchi));
   // 备份 ck
   const dataCK = await TGSqlite.getCookie();
-  await fs.writeTextFile(`${dir}${path.sep}cookie.json`, JSON.stringify(dataCK));
+  await writeTextFile(`${dir}${path.sep()}cookie.json`, JSON.stringify(dataCK));
   // 备份深渊数据
   const dataAbyss = await TGSqlite.getAbyss();
-  await fs.writeTextFile(`${dir}${path.sep}abyss.json`, JSON.stringify(dataAbyss));
+  await writeTextFile(`${dir}${path.sep()}abyss.json`, JSON.stringify(dataAbyss));
   // 备份祈愿数据
   const uidList = await TSUserGacha.getUidList();
   for (const uid of uidList) {
     const dataGacha = await TSUserGacha.getGachaRecords(uid);
-    const savePath = `${dir}${path.sep}UIGF_${uid}.json`;
+    const savePath = `${dir}${path.sep()}UIGF_${uid}.json`;
     await exportUigfData(uid, dataGacha, savePath);
   }
 }
 
 /**
  * @description 恢复用户数据
- * @since Beta v0.4.7
+ * @since Beta v0.5.0
  * @param {string} dir 备份目录路径
  * @returns {Promise<void>}
  */
 export async function restoreUserData(dir: string): Promise<void> {
   let errNum = 0;
-  if (!(await fs.exists(dir))) {
+  if (!(await exists(dir))) {
     showSnackbar({
       text: "备份目录不存在",
       color: "error",
     });
     return;
   }
-  const filesRead = await fs.readDir(dir, { recursive: false });
-  const files: FileEntry[] = filesRead.filter((item: FileEntry) => item.path.endsWith(".json"));
+  const filesRead = await readDir(dir);
+  const files = filesRead.filter((item) => item.isFile && item.name.endsWith(".json"));
   await TGLogger.Info(`[DataBS][restoreUserData] files: ${JSON.stringify(files)}`);
   // 恢复成就数据
   const achiFind = files.find((item) => item.name === "UIAF.json");
   if (achiFind) {
     try {
       const dataAchi: TGApp.Plugins.UIAF.Achievement[] = JSON.parse(
-        await fs.readTextFile(achiFind.path),
+        await readTextFile(achiFind.name),
       );
       await TSUserAchi.mergeUIAF(dataAchi);
       await TGLogger.Info(`[DataBS][restoreUserData] 成就数据恢复成功`);
@@ -90,7 +90,7 @@ export async function restoreUserData(dir: string): Promise<void> {
   const ckFind = files.find((item) => item.name === "cookie.json");
   if (ckFind) {
     try {
-      const dataCK = await fs.readTextFile(ckFind.path);
+      const dataCK = await readTextFile(ckFind.name);
       await TGSqlite.saveAppData("cookie", JSON.stringify(JSON.parse(dataCK)));
       await TGLogger.Info(`[DataBS][restoreUserData] Cookie 数据恢复成功`);
     } catch (e) {
@@ -114,7 +114,7 @@ export async function restoreUserData(dir: string): Promise<void> {
   if (abyssFind) {
     try {
       const dataAbyss: TGApp.Sqlite.Abyss.SingleTable[] = JSON.parse(
-        await fs.readTextFile(abyssFind.path),
+        await readTextFile(abyssFind.name),
       );
       await TGSqlite.restoreAbyss(dataAbyss);
     } catch (e) {
@@ -134,14 +134,14 @@ export async function restoreUserData(dir: string): Promise<void> {
   }
   // 恢复祈愿数据
   const reg = /UIGF_(\d+).json/;
-  const dataGachaList = files.filter((item) => reg.test(item.path));
+  const dataGachaList = files.filter((item) => reg.test(item.name));
   for (const item of dataGachaList) {
-    const check = await verifyUigfData(item.path);
+    const check = await verifyUigfData(item.name);
     if (!check) {
       errNum++;
       continue;
     }
-    const data = await readUigfData(item.path);
+    const data = await readUigfData(item.name);
     const uid = data.info.uid;
     try {
       await TSUserGacha.mergeUIGF(uid, data.list);

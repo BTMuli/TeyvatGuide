@@ -9,7 +9,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { Component, StyleValue } from "vue";
+import { StyleValue } from "vue";
+import type { Component } from "vue";
 
 import TpMention, { type TpMention as TpMentionType } from "./tp-mention.vue";
 import TpText, { type TpText as TpTextType } from "./tp-text.vue";

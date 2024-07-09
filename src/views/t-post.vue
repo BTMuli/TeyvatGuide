@@ -82,7 +82,7 @@
 </template>
 <script lang="ts" setup>
 import { app } from "@tauri-apps/api";
-import { appWindow } from "@tauri-apps/api/window";
+import { webviewWindow } from "@tauri-apps/api";
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
@@ -123,13 +123,13 @@ const shareTimeTimer = ref<any>();
 const showCollection = ref<boolean>(false);
 
 onMounted(async () => {
-  await appWindow.show();
+  await webviewWindow.getCurrent().show();
   appVersion.value = await app.getVersion();
   // 检查数据
   if (!postId) {
     loadingEmpty.value = true;
     loadingTitle.value = "未找到数据";
-    await appWindow.setTitle("未找到数据");
+    await webviewWindow.getCurrent().setTitle("未找到数据");
     await TGLogger.Error("[t-post][onMounted] PostID 不存在");
     return;
   }
@@ -140,7 +140,7 @@ onMounted(async () => {
     loadingTitle.value = "正在渲染数据...";
     renderPost.value = getRenderPost(postData.value);
     shareTitle.value = `Post_${postId}`;
-    await appWindow.setTitle(`Post_${postId} ${postData.value.post.subject}`);
+    await webviewWindow.getCurrent().setTitle(`Post_${postId} ${postData.value.post.subject}`);
   } catch (error) {
     if (error instanceof Error) {
       await TGLogger.Error(`[t-post][${postId}] ${error.name}: ${error.message}`);
@@ -152,7 +152,7 @@ onMounted(async () => {
       loadingSub.value = "请检查帖子是否存在或者是否为合法的帖子";
     }
     loadingEmpty.value = true;
-    await appWindow.setTitle(`Post_${postId} Parsing Error`);
+    await webviewWindow.getCurrent().setTitle(`Post_${postId} Parsing Error`);
     return;
   }
   await TGLogger.Info(`[t-post][${postId}][onMounted] ${postData.value.post.subject}`);
@@ -160,7 +160,7 @@ onMounted(async () => {
   const isDev = useAppStore().devMode ?? false;
   if (isDev) {
     await TGLogger.Info(`[t-post][${postId}][onMounted] 打开 JSON 窗口`);
-    createPostJson(postId);
+    await createPostJson(postId);
   }
   await nextTick(() => {
     shareTimeTimer.value = setInterval(() => {
@@ -253,10 +253,10 @@ function parseContent(content: string): string {
   return JSON.stringify(result);
 }
 
-function createPostJson(postId: number): void {
+async function createPostJson(postId: number): Promise<void> {
   const jsonPath = `/post_detail_json/${postId}`;
   const jsonTitle = `Post_${postId}_JSON`;
-  createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
+  await createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
 }
 
 async function toPost(): Promise<void> {
