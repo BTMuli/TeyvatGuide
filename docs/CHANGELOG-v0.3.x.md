@@ -1,6 +1,6 @@
 ---
 Author: 目棃
-Description: CHANGELOG
+Description: CHANGELOG v0.3.x
 Date: 2023-09-08
 Update: 2024-01-15
 ---

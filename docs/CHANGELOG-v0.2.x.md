@@ -1,7 +1,7 @@
 ---
 Author: 目棃
 Date: 2023-06-18
-Description: CHANGELOG
+Description: CHANGELOG v0.2.x
 Update: 2023-08-31
 ---
 
