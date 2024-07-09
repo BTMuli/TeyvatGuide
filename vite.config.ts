@@ -38,6 +38,8 @@ export default defineConfig({
     minify: !process.env.TAURI_DEBUG ? "esbuild" : false,
     // produce sourcemaps for debug builds
     sourcemap: !!process.env.TAURI_DEBUG,
+    // chunk size warning limit, default is 500kB,here set 4096KB which is 4MB
+    chunkSizeWarningLimit: 4096, // KB
     // rollup options
     rollupOptions: {
       // chunking
