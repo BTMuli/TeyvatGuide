@@ -39,12 +39,7 @@
         <span>刷新</span>
       </v-btn>
     </div>
-    <div class="posts-nav">
-      <div v-for="navItem in nav" :key="navItem.id" class="post-nav" @click="toNav(navItem)">
-        <img alt="navIcon" :src="navItem.icon" />
-        <span>{{ navItem.name }}</span>
-      </div>
-    </div>
+    <TGameNav :model-value="curGid" />
     <div class="posts-grid">
       <div v-for="post in posts" :key="post.post.post_id">
         <TPostCard :model-value="post" v-if="post" />
@@ -56,13 +51,12 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref, watch } from "vue";
 
-import showConfirm from "../../components/func/confirm.js";
 import showSnackbar from "../../components/func/snackbar.js";
+import TGameNav from "../../components/main/t-gamenav.vue";
 import TPostCard from "../../components/main/t-postcard.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import ToPostSearch from "../../components/post/to-postSearch.vue";
 import Mys from "../../plugins/Mys/index.js";
-import TGClient from "../../utils/TGClient.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { createPost } from "../../utils/TGWindow.js";
 
@@ -165,7 +159,6 @@ const curSortType = ref<number>(0);
 
 // 渲染数据
 const posts = ref<TGApp.Plugins.Mys.Post.FullData[]>([]);
-const nav = ref<TGApp.BBS.Navigator.Navigator[]>([]);
 const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 
@@ -174,7 +167,6 @@ onMounted(async () => {
     `[Posts][${curGameLabel.value}][onMounted][${curForumLabel.value}] 打开帖子列表`,
   );
   loading.value = true;
-  await freshNavData();
   await freshPostData();
   loading.value = false;
 });
@@ -190,7 +182,6 @@ watch(curGameLabel, async (newVal) => {
     freshCurForum(curForumLabel.value);
     await freshPostData();
   }
-  await freshNavData();
 });
 
 // 监听论坛变化
@@ -204,71 +195,6 @@ watch(curSortLabel, async (newVal) => {
   curSortType.value = sortList[newVal];
   await freshPostData();
 });
-
-async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
-  await TGLogger.Info(`[Posts][${curGameLabel.value}][toNav] 打开网页活动 ${item.name}`);
-  await TGLogger.Info(`[Posts][${curGameLabel.value}][toNav] ${item.app_path}`);
-  const link = new URL(item.app_path);
-  const mysList = [
-    "https://act.mihoyo.com",
-    "https://webstatic.mihoyo.com",
-    "https://bbs.mihoyo.com",
-    "https://qaa.miyoushe.com",
-    "https://mhyurl.cn",
-  ];
-  if (link.protocol != "https:") {
-    toBBS(link);
-    return;
-  }
-  // 如果不在上面的域名里面，就直接打开
-  if (!mysList.includes(link.origin)) {
-    window.open(item.app_path);
-    return;
-  }
-  if (item.name === "签到福利") {
-    await TGClient.open("web_act_thin", item.app_path);
-    return;
-  }
-  const modeConfirm = await showConfirm({
-    title: "是否采用宽屏模式打开？",
-    text: "取消则采用竖屏模式打开",
-  });
-  if (modeConfirm === undefined) {
-    showSnackbar({
-      text: "已取消打开",
-      color: "cancel",
-    });
-    return;
-  }
-  if (modeConfirm) await TGClient.open("web_act", item.app_path);
-  else await TGClient.open("web_act_thin", item.app_path);
-}
-
-// 处理 protocol
-function toBBS(link: URL): void {
-  if (link.protocol == "mihoyobbs:") {
-    if (link.pathname.startsWith("//article")) {
-      const postId = link.pathname.split("/").pop();
-      createPost(<string>postId);
-      return;
-    }
-    if (link.pathname.startsWith("//forum")) {
-      const forumId = link.pathname.split("/").pop();
-      const url = `https://www.miyoushe.com/ys/home/${forumId}`;
-      window.open(url);
-      return;
-    }
-  }
-  showSnackbar({
-    text: `不支持的链接：${link.href}`,
-    color: "warn",
-  });
-}
-
-async function freshNavData(): Promise<void> {
-  await TGLogger.Info(`[Posts][${curGameLabel.value}][freshNavData] 获取网页活动`);
-  nav.value = await Mys.Posts.nav(curGid.value);
-}
 
 async function freshPostData(): Promise<void> {
   await TGLogger.Info(
@@ -311,43 +237,6 @@ function searchPost(): void {
   display: flex;
   flex-direction: column;
   row-gap: 10px;
-}
-
-.posts-nav {
-  display: flex;
-  flex-wrap: wrap;
-  padding: 5px;
-  gap: 10px 10px;
-}
-
-.post-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px;
-  border-radius: 5px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: var(--common-shadow-t-4);
-  box-shadow: 0 0 5px var(--common-shadow-4);
-  color: var(--tgc-white-1);
-  cursor: pointer;
-}
-
-.post-nav img {
-  width: 25px;
-  height: 25px;
-}
-
-.posts-nav span {
-  display: none;
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 16px;
-}
-
-.post-nav:hover span {
-  display: block;
 }
 
 .posts-switch {

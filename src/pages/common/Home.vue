@@ -12,6 +12,16 @@
       />
       <v-btn class="select-btn" @click="submitHome" rounded>确定</v-btn>
     </div>
+    <div class="home-tools" v-if="appStore.isLogin">
+      <v-select
+        v-model="curGameLabel"
+        class="home-tool-select"
+        :items="gameItem"
+        hide-details
+        variant="outlined"
+      />
+      <TGameNav :model-value="gameList[curGameLabel]" />
+    </div>
     <component
       :is="item"
       v-for="item in components"
@@ -29,6 +39,7 @@ import showSnackbar from "../../components/func/snackbar.js";
 import TCalendar from "../../components/home/t-calendar.vue";
 import TPool from "../../components/home/t-pool.vue";
 import TPosition from "../../components/home/t-position.vue";
+import TGameNav from "../../components/main/t-gamenav.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import { useAppStore } from "../../store/modules/app.js";
 import { useHomeStore } from "../../store/modules/home.js";
@@ -47,6 +58,27 @@ const loadingSubtitle = ref<string>("");
 const endNum = ref<number>(0);
 const components = shallowRef<any[]>([]);
 const showHome = ref<string[]>(homeStore.getShowValue());
+
+// top nav
+const gameList = {
+  原神: 2,
+  "崩坏：星穹铁道": 6,
+  崩坏3: 1,
+  崩坏2: 3,
+  未定事件簿: 4,
+  绝区零: 8,
+  大别野: 5,
+};
+const curGameLabel = ref<keyof typeof gameList>("原神");
+const gameItem = ref<string[]>([
+  "原神",
+  "崩坏：星穹铁道",
+  "绝区零",
+  "崩坏3",
+  "崩坏2",
+  "未定事件簿",
+  "大别野",
+]);
 
 onMounted(async () => {
   loadingTitle.value = "正在加载首页";
@@ -128,6 +160,17 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+}
+
+.home-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.home-tool-select {
+  max-width: 200px;
 }
 
 .select-btn {
