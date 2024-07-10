@@ -864,7 +864,9 @@ class TGClient {
           width: shareDom.scrollWidth * scale,
           style: {
             transform: "scale(" + scale + ")",
-            transformOrigin: "top left"
+            transformOrigin: "top left",
+            padding: "0",
+            margin: "0",
           }
         };
         // 等待3s，让图片充分加载
