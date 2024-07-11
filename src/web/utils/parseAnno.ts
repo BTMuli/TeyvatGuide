@@ -1,7 +1,7 @@
 /**
  * @file web/utils/parseAnno.ts
  * @description 解析游戏内公告数据
- * @since Beta v0.4.7
+ * @since Beta v0.5.0
  */
 
 import { saveImgLocal } from "../../utils/TGShare.js";
@@ -11,14 +11,11 @@ import { decodeRegExp } from "./tools.js";
 
 /**
  * @description 解析 a
- * @since Beta v0.4.4
+ * @since Beta v0.5.0
  * @param {HTMLAnchorElement} a a 元素
  * @returns {HTMLAnchorElement} 解析后的 a 元素
  */
 function parseAnnoA(a: HTMLAnchorElement): HTMLAnchorElement {
-  const span = document.createElement("i");
-  span.classList.add("mdi", "mdi-link-variant", "anno-link-icon");
-  a.prepend(span);
   const regex = /javascript:miHoYoGameJSSDK.openIn(Browser|Webview)\('(.+)'\);/;
   if (regex.test(a.getAttribute("href") ?? "")) {
     const href = a.getAttribute("href")?.match(regex);

@@ -69,6 +69,8 @@
       "log:default",
       "path:allow-resolve-directory",
       "path:default",
+      "shell:allow-open",
+      "shell:default",
       "sql:allow-load",
       "sql:allow-execute",
       "sql:default",

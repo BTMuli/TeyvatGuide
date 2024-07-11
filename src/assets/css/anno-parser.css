@@ -1,7 +1,7 @@
 /*
  * @file assets/css/post-parser.css
  * @description 游戏公告解析 css
- * @since Beta v0.4.5
+ * @since Beta v0.5.0
  */
 
 .anno-body {
@@ -37,15 +37,12 @@
   line-height: 2;
 }
 
-.anno-link-icon {
-  width: 18px;
-  height: 18px;
-  color: #00c3ff;
-}
-
 .anno-content :deep(a) {
   color: #00c3ff;
-  text-decoration: none;
+  cursor: pointer;
+  text-decoration: underline solid #00c3ff;
+  text-underline-position: under;
+  transform: translateY(2px);
 }
 
 .anno-content :deep(p) {
