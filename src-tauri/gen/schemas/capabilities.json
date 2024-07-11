@@ -59,8 +59,11 @@
     "permissions": [
       "app:allow-version",
       "app:default",
+      "dialog:allow-save",
+      "dialog:default",
       "event:allow-listen",
       "event:default",
+      "fs:default",
       "http:allow-fetch",
       "log:allow-log",
       "log:default",
@@ -74,6 +77,13 @@
       "window:allow-set-title",
       "window:allow-set-fullscreen",
       "window:allow-show",
+      { "identifier": "fs:allow-exists", "allow": [{ "path": "**" }] },
+      { "identifier": "fs:allow-mkdir", "allow": [{ "path": "**" }] },
+      { "identifier": "fs:allow-read-dir", "allow": [{ "path": "**" }] },
+      { "identifier": "fs:allow-read-text-file", "allow": [{ "path": "**" }] },
+      { "identifier": "fs:allow-remove", "allow": [{ "path": "**" }] },
+      { "identifier": "fs:allow-write-file", "allow": [{ "path": "**" }] },
+      { "identifier": "fs:allow-write-text-file", "allow": [{ "path": "**" }] },
       {
         "identifier": "http:default",
         "allow": [{ "url": "https://*.miyoushe.com/*" }, { "url": "https://*.mihoyo.com/*" }]

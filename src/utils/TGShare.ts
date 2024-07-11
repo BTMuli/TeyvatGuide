@@ -33,7 +33,7 @@ export async function saveCanvasImg(
   const res = await save({
     title: "保存图片",
     filters: [{ name: "图片", extensions: [format] }],
-    defaultPath: `${await path.downloadDir()}${path.sep}${filename}.${format}`,
+    defaultPath: `${await path.downloadDir()}${path.sep()}${filename}.${format}`,
   });
   if (res === null) {
     await TGLogger.Info(`[saveCanvasImg][${filename}] 未选择保存路径`);
@@ -63,7 +63,7 @@ export async function saveImgLocal(url: string): Promise<string> {
  * @returns {Promise<Uint8Array>} 图片 buffer
  */
 export async function getImageBuffer(url: string): Promise<Uint8Array> {
-  const res = await TGHttp<Uint8Array>(url, { method: "GET" });
+  const res = await TGHttp<Uint8Array>(url, { method: "GET", isBlob: true });
   return new Uint8Array(res);
 }
 
