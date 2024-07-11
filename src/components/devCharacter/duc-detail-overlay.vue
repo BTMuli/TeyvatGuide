@@ -32,6 +32,11 @@
         <div class="duc-doc-lb">
           <DucDetailOlb :model-value="JSON.parse(props.dataVal.constellation)" />
         </div>
+        <!-- 底部水印信息 -->
+        <div class="duc-doc-bt">
+          UID: {{ props.dataVal.uid }} Updated: {{ props.dataVal.updated }} | Rendered by
+          TeyvatGuide v{{ version }}
+        </div>
       </div>
       <!-- 右侧箭头 -->
       <div class="duc-arrow-right" @click="handleClick('right')">
@@ -41,6 +46,7 @@
   </TOverlay>
 </template>
 <script lang="ts" setup>
+import { app } from "@tauri-apps/api";
 import { computed, onMounted, onUpdated, ref } from "vue";
 
 import TGSqlite from "../../plugins/Sqlite/index.js";
@@ -64,6 +70,7 @@ type DucDetailOverlayEmits = {
 
 const props = defineProps<DucDetailOverlayProps>();
 const emits = defineEmits<DucDetailOverlayEmits>();
+const version = await app.getVersion();
 const visible = computed({
   get: () => props.modelValue,
   set: (value) => {
@@ -198,5 +205,14 @@ async function share(): Promise<void> {
   bottom: 10px;
   left: 10px;
   padding: 5px;
+}
+
+.duc-doc-bt {
+  position: absolute;
+  right: 10px;
+  bottom: -1px;
+  color: var(--tgc-white-1);
+  font-size: 12px;
+  text-shadow: 0 0 2px var(--tgc-dark-2);
 }
 </style>
