@@ -18,6 +18,10 @@ import Artplayer from "artplayer";
 import type { Option } from "artplayer/types/option.js";
 import { onMounted, ref, toRaw } from "vue";
 
+import { getImageBuffer, saveCanvasImg } from "../../utils/TGShare.js";
+import { bytesToSize } from "../../utils/toolFunc.js";
+import showSnackbar from "../func/snackbar.js";
+
 interface TpVod {
   insert: {
     vod: {
@@ -96,6 +100,19 @@ onMounted(async () => {
           props.data.insert.vod?.view_num ?? 0
         }</span>`,
         tooltip: `播放数：${props.data.insert.vod?.view_num ?? 0}`,
+      },
+      {
+        name: "download-cover",
+        index: 0,
+        position: "right",
+        html: `<i class="mdi mdi-download"></i>`,
+        tooltip: "下载封面",
+        click: async () => {
+          const buffer = await getImageBuffer(props.data.insert.vod.cover);
+          const size = bytesToSize(buffer.byteLength);
+          await saveCanvasImg(buffer, `vod-cover-${props.data.insert.vod.id}`);
+          showSnackbar({ text: `封面已下载到本地，大小：${size}` });
+        },
       },
     ],
   };
