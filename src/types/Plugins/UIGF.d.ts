@@ -1,28 +1,41 @@
 /**
  * @file types/Plugins/UIGF.d.ts
  * @description UIGF 插件类型定义文件
- * @since Beta v0.3.5
- * @version UIGF v2.4
+ * @since Beta v0.5.0
+ * @version UIGF v3.0 | UIGF v4.0
  */
 
 declare namespace TGApp.Plugins.UIGF {
   /**
    * @description UIGF 数据
-   * @since Alpha v0.2.3
-   * @interface FullData
-   * @property {Export} info - UIGF 头部信息
+   * @since Beta v0.5.0
+   * @interface Schema
+   * @property {Info} info - UIGF 头部信息
    * @property {GachaItem[]} list - UIGF 祈愿列表
-   * @return FullData
+   * @return Schema
    */
-  interface FullData {
-    info: Export;
+  interface Schema {
+    info: Info;
     list: GachaItem[];
   }
 
   /**
+   * @description UIGF 数据， v4.0
+   * @since Beta v0.5.0
+   * @interface Schema4
+   * @property {Info4} info - UIGF 头部信息
+   * @property {GachaItem4[]} hk4e - UIGF 祈愿列表，原神数据
+   * @return Schema4
+   */
+  interface Schema4 {
+    info: Info4;
+    hk4e: GachaHk4e[];
+  }
+
+  /**
    * @description UIGF 头部信息
-   * @since Beta v0.3.5
-   * @interface Export
+   * @since Beta v0.5.0
+   * @interface Info
    * @see docs\UIGF.md
    * @property {string} uid - UID
    * @property {string} lang - 语言
@@ -32,9 +45,9 @@ declare namespace TGApp.Plugins.UIGF {
    * @property {string} export_app - 导出应用
    * @property {string} export_app_version - 导出应用版本
    * @property {number} region_time_zone - 时区
-   * @return Export
+   * @return Info
    */
-  interface Export {
+  interface Info {
     uid: string;
     lang: string;
     uigf_version: string;
@@ -43,6 +56,24 @@ declare namespace TGApp.Plugins.UIGF {
     export_app?: string;
     export_app_version?: string;
     region_time_zone?: number;
+  }
+
+  /**
+   * @description UIGF 头部信息， v4.0
+   * @since Beta v0.5.0
+   * @interface Info4
+   * @see docs\UIGF4.md
+   * @property {string} export_timestamp - 导出时间戳(秒)
+   * @property {string} export_app - 导出应用
+   * @property {string} export_app_version - 导出应用版本
+   * @property {string} version - UIGF 版本
+   * @return Info4
+   */
+  interface Info4 {
+    export_timestamp: string;
+    export_app: string;
+    export_app_version: string;
+    version: string;
   }
 
   /**
@@ -97,6 +128,7 @@ declare namespace TGApp.Plugins.UIGF {
    * @return GachaItem
    */
   interface GachaItem {
+    uigf_gacha_type: string;
     gacha_type: string;
     item_id?: string;
     count?: string;
@@ -105,6 +137,22 @@ declare namespace TGApp.Plugins.UIGF {
     item_type?: string;
     rank_type?: string;
     id: string;
-    uigf_gacha_type: string;
+  }
+
+  /**
+   * @description UIGF 祈愿列表， v4.0，原神数据
+   * @since Beta v0.5.0
+   * @interface GachaHk4e
+   * @property {string|number} uid - UID
+   * @property {number} timezone - 时区
+   * @property {string} lang - 语言
+   * @property {GachaItem[]} list - 祈愿列表
+   * @return GachaHk4e
+   */
+  interface GachaHk4e {
+    uid: string | number;
+    timezone: number;
+    lang?: string;
+    list: GachaItem[];
   }
 }

@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/userGacha.ts
  * @description 用户祈愿模块
- * @since Beta v0.4.7
+ * @since Beta v0.5.0
  */
 
 import { AppCharacterData, AppWeaponData } from "../../../data/index.js";
@@ -135,6 +135,21 @@ async function mergeUIGF(uid: string, data: TGApp.Plugins.UIGF.GachaItem[]): Pro
   }
 }
 
+/**
+ * @description 合并祈愿数据（v4.0）
+ * @since Beta v0.5.0
+ * @param {TGApp.Plugins.UIGF.GachaHk4e} data - UIGF数据
+ * @return {Promise<void>}
+ */
+async function mergeUIGF4(data: TGApp.Plugins.UIGF.GachaHk4e): Promise<void> {
+  const db = await TGSqlite.getDB();
+  for (const gacha of data.list) {
+    const trans = transGacha(gacha);
+    const sql = importUIGFData(data.uid.toString(), trans);
+    await db.execute(sql);
+  }
+}
+
 const TSUserGacha = {
   getUidList,
   getGachaCheck,
@@ -142,6 +157,7 @@ const TSUserGacha = {
   getGachaItemType,
   deleteGachaRecords,
   mergeUIGF,
+  mergeUIGF4,
 };
 
 export default TSUserGacha;

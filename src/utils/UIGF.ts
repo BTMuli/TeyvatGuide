@@ -5,12 +5,13 @@
  */
 
 import { app, path } from "@tauri-apps/api";
-import { mkdir, exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import Ajv from "ajv";
 import { ErrorObject } from "ajv/lib/types/index.js";
 
 import showSnackbar from "../components/func/snackbar.js";
-import { UigfSchema } from "../data/index.js";
+import { Uigf4Schema, UigfSchema } from "../data/index.js";
+import TSUserGacha from "../plugins/Sqlite/modules/userGacha.js";
 
 import TGLogger from "./TGLogger.js";
 import { timestampToDate } from "./toolFunc.js";
@@ -31,9 +32,9 @@ function getUigfTimeZone(uid: string): number {
  * @description 获取 UIGF 头部信息
  * @since Beta v0.4.4
  * @param {string} uid - UID
- * @returns {Promise<TGApp.Plugins.UIGF.Export>}
+ * @returns {Promise<TGApp.Plugins.UIGF.Info>}
  */
-export async function getUigfHeader(uid: string): Promise<TGApp.Plugins.UIGF.Export> {
+async function getUigfHeader(uid: string): Promise<TGApp.Plugins.UIGF.Info> {
   const stamp = Date.now();
   return {
     uid,
@@ -48,12 +49,27 @@ export async function getUigfHeader(uid: string): Promise<TGApp.Plugins.UIGF.Exp
 }
 
 /**
+ * @description 获取 UIGF v4.0 头部信息
+ * @since Beta v0.5.0
+ * @returns {TGApp.Plugins.UIGF.Info4} UIGF v4.0 头部信息
+ */
+async function getUigf4Header(): Promise<TGApp.Plugins.UIGF.Info4> {
+  const stamp = Date.now();
+  return {
+    export_timestamp: Math.floor(stamp / 1000).toString(),
+    export_app: "TeyvatGuide",
+    export_app_version: await app.getVersion(),
+    version: "v4.0",
+  };
+}
+
+/**
  * @description 数据转换-数据库到 UIGF
  * @since Alpha v0.2.3
  * @param {TGApp.Sqlite.GachaRecords.SingleTable[]} data - 数据库数据
  * @returns {TGApp.Plugins.UIGF.GachaItem[]} UIGF 数据
  */
-export function convertDataToUigf(
+function convertDataToUigf(
   data: TGApp.Sqlite.GachaRecords.SingleTable[],
 ): TGApp.Plugins.UIGF.GachaItem[] {
   return data.map((gacha) => {
@@ -75,26 +91,15 @@ export function convertDataToUigf(
  * @description 检测是否存在 UIGF 数据，采用 ajv 验证 schema
  * @since Beta v0.5.0
  * @param {string} path - UIGF 数据路径
+ * @param {boolean} isVersion4 - 是否为 UIGF v4.0
  * @returns {Promise<boolean>} 是否存在 UIGF 数据
  */
-export async function verifyUigfData(path: string): Promise<boolean> {
+export async function verifyUigfData(path: string, isVersion4: boolean = false): Promise<boolean> {
   const fileData: string = await readTextFile(path);
-  const ajv = new Ajv();
-  const validate = ajv.compile(UigfSchema);
   try {
     const fileJson = JSON.parse(fileData);
-    if (!validate(fileJson)) {
-      if (!validate.errors || validate.errors.length === 0) return false;
-      const error: ErrorObject = validate.errors[0];
-      showSnackbar({
-        text: `${error.instancePath || error.schemaPath} ${error.message}`,
-        color: "error",
-      });
-      await TGLogger.Error(`UIGF 数据验证失败，文件路径：${path}`);
-      await TGLogger.Error(`错误信息 ${validate.errors}`);
-      return false;
-    }
-    return true;
+    if (isVersion4) return validateUigf4Data(fileJson);
+    return validateUigfData(fileJson);
   } catch (e) {
     showSnackbar({ text: `UIGF 数据格式错误 ${e}`, color: "error" });
     await TGLogger.Error(`UIGF 数据格式错误，文件路径：${path}`);
@@ -104,14 +109,67 @@ export async function verifyUigfData(path: string): Promise<boolean> {
 }
 
 /**
+ * @description 验证 UIGF 数据
+ * @since Beta v0.5.0
+ * @param {object} data - UIGF 数据
+ * @returns {boolean} 是否验证通过
+ */
+function validateUigfData(data: object): boolean {
+  const ajv = new Ajv();
+  const validate = ajv.compile(UigfSchema);
+  if (!validate(data)) {
+    if (!validate.errors || validate.errors.length === 0) return false;
+    const error: ErrorObject = validate.errors[0];
+    showSnackbar({
+      text: `${error.instancePath || error.schemaPath} ${error.message}`,
+      color: "error",
+    });
+    return false;
+  }
+  return true;
+}
+
+/**
+ * @description 验证 UIGF v4.0 数据
+ * @since Beta v0.5.0
+ * @param {object} data - UIGF 数据
+ * @returns {boolean} 是否验证通过
+ */
+function validateUigf4Data(data: object): boolean {
+  const ajv = new Ajv();
+  const validate4 = ajv.compile(Uigf4Schema);
+  if (!validate4(data)) {
+    if (!validate4.errors || validate4.errors.length === 0) return false;
+    const error: ErrorObject = validate4.errors[0];
+    showSnackbar({
+      text: `${error.instancePath || error.schemaPath} ${error.message}`,
+      color: "error",
+    });
+    return false;
+  }
+  return true;
+}
+
+/**
  * @description 读取 UIGF 数据
  * @since Beta v0.5.0
  * @param {string} userPath - UIGF 数据路径
- * @returns {Promise<TGApp.Plugins.UIGF.FullData>} UIGF 数据
+ * @returns {Promise<TGApp.Plugins.UIGF.Schema>} UIGF 数据
  */
-export async function readUigfData(userPath: string): Promise<TGApp.Plugins.UIGF.FullData> {
-  const fileData = await readTextFile(userPath);
-  return <TGApp.Plugins.UIGF.FullData>JSON.parse(fileData);
+export async function readUigfData(userPath: string): Promise<TGApp.Plugins.UIGF.Schema> {
+  const fileData: string = await readTextFile(userPath);
+  return JSON.parse(fileData);
+}
+
+/**
+ * @description 读取 UIGF 4.0 数据
+ * @since Beta v0.5.0
+ * @param {string} userPath - UIGF 数据路径
+ * @returns {Promise<TGApp.Plugins.UIGF.Schema4>} UIGF 数据
+ */
+export async function readUigf4Data(userPath: string): Promise<TGApp.Plugins.UIGF.Schema4> {
+  const fileData: string = await readTextFile(userPath);
+  return JSON.parse(fileData);
 }
 
 /**
@@ -136,18 +194,31 @@ export async function exportUigfData(
 }
 
 /**
- * @description 备份 UIGF 数据
+ * @description 导出 UIGF v4.0 数据
  * @since Beta v0.5.0
- * @param {string} dirPath - 备份路径
- * @param {string} uid - UID
- * @param {TGApp.Sqlite.GachaRecords.SingleTable[]} gachaList - 祈愿列表
+ * @param {string} filePath - 保存路径
+ * @param {string} uid - UID，如果为空表示导出所有数据
  * @returns {Promise<void>}
  */
-export async function backupUigfData(
-  dirPath: string,
-  uid: string,
-  gachaList: TGApp.Sqlite.GachaRecords.SingleTable[],
-): Promise<void> {
-  if (!(await exists(dirPath))) await mkdir(dirPath, { recursive: true });
-  await exportUigfData(uid, gachaList, `${dirPath}${path.sep()}UIGF_${uid}.json`);
+export async function exportUigf4Data(filePath: string, uid?: string): Promise<void> {
+  const UigfData: TGApp.Plugins.UIGF.Schema4 = {
+    info: await getUigf4Header(),
+    hk4e: [],
+  };
+  let uidList: string[] = [];
+  if (uid) {
+    uidList.push(uid);
+  } else {
+    uidList = await TSUserGacha.getUidList();
+  }
+  for (const uid of uidList) {
+    const gachaList = await TSUserGacha.getGachaRecords(uid);
+    const data: TGApp.Plugins.UIGF.GachaHk4e = {
+      uid: uid,
+      timezone: getUigfTimeZone(uid),
+      list: convertDataToUigf(gachaList),
+    };
+    UigfData.hk4e.push(data);
+  }
+  await writeTextFile(filePath, JSON.stringify(UigfData));
 }

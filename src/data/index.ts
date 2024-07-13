@@ -1,7 +1,7 @@
 /**
  * @file src/data/index.ts
  * @description 数据文件入口
- * @since Beta v0.4.7
+ * @since Beta v0.5.0
  */
 
 import type { Schema } from "ajv";
@@ -19,6 +19,7 @@ import arcBirDraw from "./archive/birth_draw.json";
 import arcBirRole from "./archive/birth_role.json";
 import schemaUiaf from "./schema/uiaf-schema.json";
 import schemaUigf from "./schema/uigf-schema.json";
+import scheamUigf4 from "./schema/uigf4-schema.json";
 import wikiCharacter from "./WIKI/character.json";
 import wikiMaterial from "./WIKI/material.json";
 import wikiWeapon from "./WIKI/weapon.json";
@@ -35,6 +36,7 @@ export const AppWeaponData: TGApp.App.Weapon.WikiBriefInfo[] = weapon;
 // Schema
 export const UiafSchema: Schema = schemaUiaf;
 export const UigfSchema: Schema = schemaUigf;
+export const Uigf4Schema: Schema = scheamUigf4;
 // Archive
 export const ArcBirCalendar: TGApp.Archive.Birth.CalendarData = arcBirCalendar;
 export const ArcBirDraw: TGApp.Archive.Birth.DrawItem[] = arcBirDraw;
