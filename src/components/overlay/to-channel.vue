@@ -73,6 +73,11 @@ const channelList: ToChannelItem[] = [
     gid: "6",
   },
   {
+    title: "绝区零",
+    icon: "/platforms/mhy/zzz.webp",
+    gid: "8",
+  },
+  {
     title: "崩坏3",
     icon: "/platforms/mhy/bh3.webp",
     gid: "1",
@@ -86,11 +91,6 @@ const channelList: ToChannelItem[] = [
     title: "未定事件簿",
     icon: "/platforms/mhy/wd.webp",
     gid: "4",
-  },
-  {
-    title: "绝区零",
-    icon: "/platforms/mhy/zzz.webp",
-    gid: "8",
   },
   {
     title: "大别野",
