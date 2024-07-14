@@ -88,7 +88,7 @@ onMounted(async () => {
   }
   // 打开 json
   const isDev = useAppStore().devMode ?? false;
-  if (isDev) createAnnoJson(annoId, region, lang);
+  if (isDev) await createAnnoJson(annoId, region, lang);
   setTimeout(() => {
     loading.value = false;
   }, 200);
@@ -111,10 +111,10 @@ function parseText(title: string): string {
   return div.innerText;
 }
 
-function createAnnoJson(annoId: number, region: AnnoServer, lang: AnnoLang) {
+async function createAnnoJson(annoId: number, region: AnnoServer, lang: AnnoLang): Promise<void> {
   const jsonPath = `/anno_detail_json/${region}/${annoId}/${lang}`;
   const jsonTitle = `Anno_${region}_${annoId}_${lang}_JSON`;
-  createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
+  await createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
 }
 
 onUnmounted(() => {

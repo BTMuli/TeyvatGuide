@@ -117,7 +117,14 @@ async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
     return;
   }
   const url = Mys.Api.Obc.replace("{contentId}", item.contentId.toString());
-  createTGWindow(url, "Sub_window", `Content_${item.contentId} ${item.name}`, 1200, 800, true);
+  await createTGWindow(
+    url,
+    "Sub_window",
+    `Content_${item.contentId} ${item.name}`,
+    1200,
+    800,
+    true,
+  );
 }
 </script>
 <style scoped>

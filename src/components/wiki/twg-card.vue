@@ -18,7 +18,7 @@ interface TwgCardProps {
 
 const props = defineProps<TwgCardProps>();
 
-function toWiki(): void {
+async function toWiki(): Promise<void> {
   if (!props.data.contentId || props.data.contentId === 0) {
     showSnackbar({
       text: `卡牌 ${props.data.name} 暂无外部链接`,
@@ -27,7 +27,7 @@ function toWiki(): void {
     return;
   }
   const url = Mys.Api.Obc.replace("{contentId}", props.data.contentId.toString());
-  createTGWindow(
+  await createTGWindow(
     url,
     "Sub_window",
     `Content_${props.data.contentId} ${props.data.name}`,

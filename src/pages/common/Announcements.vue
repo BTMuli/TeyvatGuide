@@ -239,12 +239,11 @@ async function switchNews(): Promise<void> {
   await router.push("/news/2");
 }
 
-function createAnno(item: TGApp.App.Announcement.ListCard): void {
+async function createAnno(item: TGApp.App.Announcement.ListCard): Promise<void> {
   const annoPath = `/anno_detail/${curRegion.value}/${item.id}/${curLang.value}`;
   const annoTitle = `Anno_${item.id} ${item.title}`;
-  TGLogger.Info(`[Announcements][createAnno][${item.id}] 打开公告窗口`).then(() =>
-    createTGWindow(annoPath, "Sub_window", annoTitle, 960, 720, false, false),
-  );
+  await TGLogger.Info(`[Announcements][createAnno][${item.id}] 打开公告窗口`);
+  await createTGWindow(annoPath, "Sub_window", annoTitle, 960, 720, false, false);
 }
 </script>
 
