@@ -2,16 +2,16 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2024-04-05
+Update: 2024-07-14
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2024-04-05 14:25:24`
+> 更新于 `2024-07-14 08:50:43`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
-![](https://img.shields.io/badge/UIAF-v1.1-orange?style=for-the-badge) ![](https://img.shields.io/badge/UIGF-v3.0-red?style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/TeyvatGuide?style=for-the-badge)
+![](https://img.shields.io/badge/UIAF-v1.1-orange?style=for-the-badge) ![](https://img.shields.io/badge/UIGF-v3.0-red?style=for-the-badge) ![](https://img.shields.io/badge/UIGF-v4.0-red?style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/TeyvatGuide?style=for-the-badge)
 
 <div style="width: 100%; text-align: center; margin: 0 auto;">
   <img alt="icon" src="https://s2.loli.net/2023/10/19/Y5DpBQRy3usLHEb.png" />
@@ -48,7 +48,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 米游社官方帖获取（支持通过 ID 获取）
   - [x] 米游社各分区帖子获取（支持通过 ID 获取）
   - [x] 成就管理（UIAF v1.1），支持 [`YaeAchievement`](https://github.com/HolographicHat/YaeAchievement) 导入
-  - [x] 祈愿管理（UIGF v3.0）
+  - [x] 祈愿管理（UIGF v3.0，0.5.0 起支持 UIGF v4.0）
   - [x] 留影叙佳期画片查看
   - [x] 帖子收藏
 
