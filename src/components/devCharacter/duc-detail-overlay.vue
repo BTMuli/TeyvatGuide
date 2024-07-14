@@ -13,6 +13,7 @@
         <div class="duc-doc-lt">
           <DucDetailOlt :data="props.dataVal" mode="avatar" />
           <DucDetailOlt :data="JSON.parse(props.dataVal.weapon)" mode="weapon" />
+          <!-- todo 分享 btn 移至右上角并移除文字，该位置添加圣遗物 icon 及其数据 -->
           <v-btn
             class="duc-doc-btn"
             @click="share"
