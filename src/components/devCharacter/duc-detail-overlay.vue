@@ -13,18 +13,18 @@
         <div class="duc-doc-lt">
           <DucDetailOlt :data="props.dataVal" mode="avatar" />
           <DucDetailOlt :data="JSON.parse(props.dataVal.weapon)" mode="weapon" />
-          <!-- todo 分享 btn 移至右上角并移除文字，该位置添加圣遗物 icon 及其数据 -->
-          <v-btn
-            class="duc-doc-btn"
-            @click="share"
-            variant="outlined"
-            :loading="loading"
-            data-html2canvas-ignore
-          >
-            <v-icon>mdi-share-variant</v-icon>
-            <span>分享</span>
-          </v-btn>
+          <DucDetailRelics :data="JSON.parse(props.dataVal.reliquary)" />
         </div>
+        <v-btn
+          class="duc-doc-btn"
+          @click="share"
+          variant="outlined"
+          :loading="loading"
+          data-html2canvas-ignore
+        >
+          <v-icon>mdi-share-variant</v-icon>
+          <span>分享</span>
+        </v-btn>
         <!-- 右侧天赋 -->
         <div class="duc-doc-rt">
           <DucDetailOrt :model-value="JSON.parse(props.dataVal.talent)" />
@@ -57,6 +57,7 @@ import TOverlay from "../main/t-overlay.vue";
 import DucDetailOlb from "./duc-detail-olb.vue";
 import DucDetailOlt from "./duc-detail-olt.vue";
 import DucDetailOrt from "./duc-detail-ort.vue";
+import DucDetailRelics from "./duc-detail-relics.vue";
 
 interface DucDetailOverlayProps {
   modelValue: boolean;
@@ -191,6 +192,9 @@ async function share(): Promise<void> {
 }
 
 .duc-doc-btn {
+  position: absolute;
+  bottom: 90px;
+  left: 370px;
   color: var(--tgc-white-1);
 }
 
