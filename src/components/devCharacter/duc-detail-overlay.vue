@@ -13,7 +13,7 @@
         <div class="duc-doc-lt">
           <DucDetailOlt :data="props.dataVal" mode="avatar" />
           <DucDetailOlt :data="JSON.parse(props.dataVal.weapon)" mode="weapon" />
-          <DucDetailRelics :data="JSON.parse(props.dataVal.reliquary)" />
+          <DucDetailRelics :data="props.dataVal.reliquary" />
         </div>
         <v-btn
           class="duc-doc-btn"
@@ -99,6 +99,8 @@ onMounted(async () => {
 });
 onUpdated(async () => {
   await loadData();
+  console.log("updated, loadData");
+  console.log(props.dataVal);
 });
 
 async function loadData(): Promise<void> {

@@ -14,18 +14,25 @@ import { computed } from "vue";
 import DucDetailRelic from "./duc-detail-relic.vue";
 
 interface DucDetailRelicsProps {
-  data: TGApp.Sqlite.Character.RoleReliquary[];
+  data: string;
 }
 
 const props = defineProps<DucDetailRelicsProps>();
-const transData = computed(() => {
-  let relics: (TGApp.Sqlite.Character.RoleReliquary | false)[] = [];
-  for (let i = 0; i < 5; i++) {
-    const relic = props.data.find((relic) => relic.pos === i + 1);
-    if (relic) relics.push(relic);
-    else relics.push(false);
+const transData = computed<Array<TGApp.Sqlite.Character.RoleReliquary | false>>(() => {
+  if (!props.data || props.data === "") return [false, false, false, false, false];
+  try {
+    const parsedData: TGApp.Sqlite.Character.RoleReliquary[] = JSON.parse(props.data);
+    let relics: Array<TGApp.Sqlite.Character.RoleReliquary | false> = [];
+    for (let i = 0; i < 5; i++) {
+      const relic = parsedData.find((relic) => relic.pos === i + 1);
+      if (relic) relics.push(relic);
+      else relics.push(false);
+    }
+    return relics;
+  } catch (e) {
+    console.error(e);
+    return [false, false, false, false, false];
   }
-  return relics;
 });
 </script>
 <style lang="css" scoped>
