@@ -123,7 +123,6 @@ const shareTimeTimer = ref<any>();
 const showCollection = ref<boolean>(false);
 
 onMounted(async () => {
-  await webviewWindow.getCurrent().show();
   appVersion.value = await app.getVersion();
   // 检查数据
   if (!postId) {

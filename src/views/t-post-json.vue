@@ -30,7 +30,6 @@ let parseData = reactive<TGApp.Plugins.Mys.SctPost.Base[]>([]);
 const isEmpty = ref<boolean>(false);
 
 onMounted(async () => {
-  await webviewWindow.getCurrent().show();
   if (!postId) {
     loadingEmpty.value = true;
     loadingTitle.value = "错误的 POST ID！";

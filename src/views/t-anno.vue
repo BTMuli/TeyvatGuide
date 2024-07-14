@@ -59,7 +59,6 @@ const annoHtml = ref<string>();
 const annoBanner = ref<string>();
 
 onMounted(async () => {
-  await webviewWindow.getCurrent().show();
   appVersion.value = await app.getVersion();
   // 检查数据
   if (!annoId || !region) {

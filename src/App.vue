@@ -51,6 +51,7 @@ onBeforeMount(async () => {
     await core.invoke("init_app");
     urlListener = await getDeepLink();
   }
+  await win.show();
 });
 
 onMounted(() => {

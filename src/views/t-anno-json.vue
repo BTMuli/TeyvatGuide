@@ -33,7 +33,6 @@ let jsonList = reactive({});
 let jsonContent = reactive({});
 
 onMounted(async () => {
-  await webviewWindow.getCurrent().show();
   // 检查数据
   if (!annoId) {
     loadingEmpty.value = true;

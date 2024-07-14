@@ -45,7 +45,8 @@
         "label": "TeyvatGuide",
         "width": 1600,
         "height": 900,
-        "center": true
+        "center": true,
+        "visible": false
       }
     ],
     "security": {
