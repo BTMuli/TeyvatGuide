@@ -275,6 +275,17 @@ async function getGachaLogs(
 // 导入按钮点击事件
 async function handleImportBtn(isV4: boolean): Promise<void> {
   if (isV4) {
+    const checkConfirm = await showConfirm({
+      title: "确定导入UIGFv4格式的祈愿数据？",
+      text: "该标准尚在制定完善当中，可能会有不兼容的情况",
+    });
+    if (!checkConfirm) {
+      showSnackbar({
+        color: "cancel",
+        text: "已取消 UIGF v4 格式导入",
+      });
+      return;
+    }
     await TGLogger.Info("[UserGacha][handleImportBtn] 导入祈愿数据(v4)");
   } else {
     await TGLogger.Info("[UserGacha][handleImportBtn] 导入祈愿数据");
@@ -301,17 +312,6 @@ async function handleImportBtn(isV4: boolean): Promise<void> {
   const check = await verifyUigfData(selectedFile.path, isV4);
   if (!check) return;
   if (isV4) {
-    const checkConfirm = await showConfirm({
-      title: "确定导入 UIGF v4 格式的祈愿数据？",
-      text: "该标准尚在制定完善当中，可能会有不兼容的情况",
-    });
-    if (!checkConfirm) {
-      showSnackbar({
-        color: "cancel",
-        text: "已取消 UIGF v4 格式导入",
-      });
-      return;
-    }
     await importUigf4(selectedFile.path);
   } else {
     await importUigf(selectedFile.path);
@@ -441,7 +441,7 @@ async function exportUigf(): Promise<void> {
 // 导出 UIGF v4 版本的祈愿数据
 async function exportUigf4(): Promise<void> {
   const checkConfirm = await showConfirm({
-    title: "确定采用 UIGF v4 格式导出祈愿数据？",
+    title: "确定导出UIGFv4格式的祈愿数据？",
     text: "该标准尚在制定完善当中，可能会有不兼容的情况",
   });
   if (!checkConfirm) {
