@@ -19,7 +19,6 @@
       </div>
     </div>
   </div>
-  <!-- todo 这边加了 v-if，需要经过测试 -->
   <TwoMaterial :data="curData" v-model="showOverlay" />
 </template>
 <script lang="ts" setup>

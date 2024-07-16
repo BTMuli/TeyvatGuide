@@ -1,6 +1,7 @@
 <template>
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
     <div v-if="props.data" class="twom-container">
+      <slot name="left"></slot>
       <div class="twom-box">
         <div class="twom-top">
           <img :src="`/icon/material/${props.data.id}.webp`" alt="icon" class="twom-left" />
@@ -17,6 +18,7 @@
           </div>
         </div>
       </div>
+      <slot name="right"></slot>
     </div>
   </TOverlay>
 </template>
@@ -66,17 +68,17 @@ function onCancel() {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  border-radius: 10px;
-  background: var(--box-bg-1);
+  column-gap: 10px;
 }
 
 .twom-box {
   position: relative;
   display: flex;
-  max-width: 800px;
+  width: 800px;
   flex-direction: column;
+  padding: 10px;
   border-radius: 10px;
+  background: var(--box-bg-1);
   row-gap: 10px;
 }
 

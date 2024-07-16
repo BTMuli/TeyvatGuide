@@ -160,7 +160,6 @@
             value="wiki-material"
             :link="true"
             href="/wiki/material"
-            v-if="isDevEnv"
           >
             <template #prepend>
               <img src="/source/UI/wikiGCG.webp" alt="gcgIcon" class="side-icon-menu" />
