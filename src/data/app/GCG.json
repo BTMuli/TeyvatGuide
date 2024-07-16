@@ -415,6 +415,19 @@
     }
   },
   {
+    "id": 1313,
+    "contentId": 0,
+    "name": "夏沃蕾",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/夏沃蕾.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_PYRO": "火元素",
+      "GCG_TAG_WEAPON_POLE": "长柄武器",
+      "GCG_TAG_NATION_FONTAINE": "枫丹",
+      "GCG_TAG_FACTION_OUSIA": "始基力：荒性"
+    }
+  },
+  {
     "id": 1401,
     "contentId": 5365,
     "name": "菲谢尔",
@@ -740,6 +753,19 @@
     }
   },
   {
+    "id": 1608,
+    "contentId": 0,
+    "name": "娜维娅",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/娜维娅.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_GEO": "岩元素",
+      "GCG_TAG_WEAPON_CLAYMORE": "双手剑",
+      "GCG_TAG_NATION_FONTAINE": "枫丹",
+      "GCG_TAG_FACTION_OUSIA": "始基力：荒性"
+    }
+  },
+  {
     "id": 1701,
     "contentId": 5357,
     "name": "柯莱",
@@ -869,6 +895,18 @@
       "GCG_TAG_ELEMENT_CRYO": "冰元素",
       "GCG_TAG_WEAPON_NONE": "其他武器",
       "GCG_TAG_CAMP_MONSTER": "魔物"
+    }
+  },
+  {
+    "id": 2104,
+    "contentId": 0,
+    "name": "愚人众·霜役人",
+    "type": "角色牌",
+    "icon": "/WIKI/GCG/normal/愚人众·霜役人.webp",
+    "tags": {
+      "GCG_TAG_ELEMENT_CRYO": "冰元素",
+      "GCG_TAG_WEAPON_NONE": "其他武器",
+      "GCG_TAG_CAMP_FATUI": "愚人众"
     }
   },
   {
@@ -1952,6 +1990,16 @@
     }
   },
   {
+    "id": 213131,
+    "contentId": 0,
+    "name": "尖兵协同战法",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/尖兵协同战法.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋"
+    }
+  },
+  {
     "id": 214011,
     "contentId": 5504,
     "name": "噬星魔鸦",
@@ -2248,6 +2296,17 @@
     }
   },
   {
+    "id": 216081,
+    "contentId": 0,
+    "name": "不明流通渠道",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/不明流通渠道.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
+    }
+  },
+  {
     "id": 217011,
     "contentId": 5441,
     "name": "飞叶迴斜",
@@ -2364,6 +2423,17 @@
     "icon": "/WIKI/GCG/normal/严霜棱晶.webp",
     "tags": {
       "GCG_TAG_TALENT": "天赋"
+    }
+  },
+  {
+    "id": 221041,
+    "contentId": 0,
+    "name": "冰雅刺剑",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/冰雅刺剑.webp",
+    "tags": {
+      "GCG_TAG_TALENT": "天赋",
+      "GCG_TAG_SLOWLY": "战斗行动"
     }
   },
   {
@@ -2833,6 +2903,17 @@
     }
   },
   {
+    "id": 311308,
+    "contentId": 0,
+    "name": "「究极霸王超级魔剑」",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/「究极霸王超级魔剑」.webp",
+    "tags": {
+      "GCG_TAG_WEAPON": "武器",
+      "GCG_TAG_WEAPON_CLAYMORE": "双手剑"
+    }
+  },
+  {
     "id": 311401,
     "contentId": 5415,
     "name": "白缨枪",
@@ -2915,6 +2996,17 @@
     "name": "公义的酬报",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/公义的酬报.webp",
+    "tags": {
+      "GCG_TAG_WEAPON": "武器",
+      "GCG_TAG_WEAPON_POLE": "长柄武器"
+    }
+  },
+  {
+    "id": 311409,
+    "contentId": 0,
+    "name": "勘探钻机",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/勘探钻机.webp",
     "tags": {
       "GCG_TAG_WEAPON": "武器",
       "GCG_TAG_WEAPON_POLE": "长柄武器"
@@ -3284,6 +3376,16 @@
     "name": "乐园遗落之花",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/乐园遗落之花.webp",
+    "tags": {
+      "GCG_TAG_ARTIFACT": "圣遗物"
+    }
+  },
+  {
+    "id": 312029,
+    "contentId": 0,
+    "name": "角斗士的凯旋",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/角斗士的凯旋.webp",
     "tags": {
       "GCG_TAG_ARTIFACT": "圣遗物"
     }
@@ -3899,6 +4001,16 @@
     }
   },
   {
+    "id": 322027,
+    "contentId": 0,
+    "name": "瑟琳",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/瑟琳.webp",
+    "tags": {
+      "GCG_TAG_ALLY": "伙伴"
+    }
+  },
+  {
     "id": 323001,
     "contentId": 5446,
     "name": "参量质变仪",
@@ -4494,6 +4606,22 @@
     "name": "幻戏倒计时：3",
     "type": "行动牌",
     "icon": "/WIKI/GCG/normal/幻戏倒计时：3.webp",
+    "tags": null
+  },
+  {
+    "id": 332036,
+    "contentId": 0,
+    "name": "「看到那小子挣钱…」",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/「看到那小子挣钱…」.webp",
+    "tags": null
+  },
+  {
+    "id": 332037,
+    "contentId": 0,
+    "name": "噔噔！",
+    "type": "行动牌",
+    "icon": "/WIKI/GCG/normal/噔噔！.webp",
     "tags": null
   },
   {

@@ -12444,7 +12444,7 @@
     "reward": 5,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "ROLE_COMBAT_PASS_LEVEL_BY_RENT"
     }
   },
   {
@@ -12456,7 +12456,7 @@
     "reward": 5,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "ROLE_COMBAT_PASS_LEVEL_BY_CHANCE"
     }
   },
   {
@@ -12468,7 +12468,7 @@
     "reward": 5,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "ROLE_COMBAT_PASS_LEVEL_BY_BUFF"
     }
   },
   {
@@ -12480,7 +12480,7 @@
     "reward": 5,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "OBTAIN_MATERIAL_NUM"
     }
   },
   {
@@ -12492,7 +12492,7 @@
     "reward": 10,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "OBTAIN_MATERIAL_NUM"
     }
   },
   {
@@ -12504,7 +12504,7 @@
     "reward": 20,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "OBTAIN_MATERIAL_NUM"
     }
   },
   {
@@ -12516,7 +12516,7 @@
     "reward": 5,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "BUY_SHOP_GOODS_COUNT"
     }
   },
   {
@@ -12528,7 +12528,7 @@
     "reward": 5,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "ROLE_COMBAT_FINISH_ROUND"
     }
   },
   {
@@ -12540,7 +12540,7 @@
     "reward": 10,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "ROLE_COMBAT_FINISH_ROUND"
     }
   },
   {
@@ -12552,7 +12552,7 @@
     "reward": 20,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "ROLE_COMBAT_FINISH_ROUND"
     }
   },
   {
@@ -15494,7 +15494,14 @@
     "reward": 5,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 8019,
+          "name": "积存已久的委托",
+          "type": "魔神任务"
+        }
+      ]
     }
   },
   {
@@ -15506,7 +15513,14 @@
     "reward": 5,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 8020,
+          "name": "不应存在的记忆",
+          "type": "魔神任务"
+        }
+      ]
     }
   },
   {
@@ -15518,7 +15532,14 @@
     "reward": 5,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 8021,
+          "name": "以世界之格的诉说",
+          "type": "魔神任务"
+        }
+      ]
     }
   },
   {
@@ -15530,7 +15551,14 @@
     "reward": 10,
     "version": "4.7",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 8021,
+          "name": "以世界之格的诉说",
+          "type": "魔神任务"
+        }
+      ]
     }
   },
   {

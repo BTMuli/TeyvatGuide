@@ -1,7 +1,7 @@
 [
   {
     "id": 15513,
-    "contentId": 0,
+    "contentId": 501495,
     "name": "白雨心弦",
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
@@ -180,6 +180,15 @@
     "icon": "/WIKI/weapon/14501.webp"
   },
   {
+    "id": 13513,
+    "contentId": 0,
+    "name": "柔灯挽歌",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/长柄武器.webp",
+    "icon": "/WIKI/weapon/13513.webp"
+  },
+  {
     "id": 13512,
     "contentId": 501137,
     "name": "赤月之形",
@@ -316,7 +325,7 @@
   },
   {
     "id": 11515,
-    "contentId": 0,
+    "contentId": 501384,
     "name": "赦罪",
     "star": 5,
     "bg": "/icon/bg/5-Star.webp",
@@ -433,7 +442,7 @@
   },
   {
     "id": 15426,
-    "contentId": 0,
+    "contentId": 501449,
     "name": "筑云",
     "star": 4,
     "bg": "/icon/bg/4-Star.webp",

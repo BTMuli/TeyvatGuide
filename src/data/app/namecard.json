@@ -1510,6 +1510,16 @@
     "profile": "/source/nameCard/profile/赛索斯·跋灵.webp"
   },
   {
+    "name": "艾梅莉埃·后调",
+    "index": 205,
+    "type": 2,
+    "desc": "名片纹饰。「前调甜美，中调浓郁却不会喧宾夺主，后调有种淡淡的檀香味。多么精致的一款香水啊。」工作一个接一个，为了避免气味干扰现场，艾梅莉埃很少自己用香水。她什么时候有机会闻到后调呢？",
+    "source": "艾梅莉埃的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/艾梅莉埃·后调.webp",
+    "bg": "/source/nameCard/bg/艾梅莉埃·后调.webp",
+    "profile": "/source/nameCard/profile/艾梅莉埃·后调.webp"
+  },
+  {
     "name": "纪行·捕风",
     "index": 2,
     "type": 3,
@@ -1840,6 +1850,16 @@
     "profile": "/source/nameCard/profile/纪行·衍演.webp"
   },
   {
+    "name": "纪行·拟像",
+    "index": 206,
+    "type": 3,
+    "desc": "名片纹饰。木头被做成了纸，纸片折叠成为树。纸折成的大家，虚假之中仍有一丝真我。",
+    "source": "纪行系统奖励获取。",
+    "icon": "/source/nameCard/icon/纪行·拟像.webp",
+    "bg": "/source/nameCard/bg/纪行·拟像.webp",
+    "profile": "/source/nameCard/profile/纪行·拟像.webp"
+  },
+  {
     "name": "庆典·无相",
     "index": 53,
     "type": 4,
@@ -1998,5 +2018,15 @@
     "icon": "/source/nameCard/icon/庆典·奏雅.webp",
     "bg": "/source/nameCard/bg/庆典·奏雅.webp",
     "profile": "/source/nameCard/profile/庆典·奏雅.webp"
+  },
+  {
+    "name": "庆典·盛宴·其二",
+    "index": 207,
+    "type": 4,
+    "desc": "名片纹饰。大餐是由什么做成的？番茄、洋葱，还有所有美味的东西。",
+    "source": "活动兑换获取。",
+    "icon": "/source/nameCard/icon/庆典·盛宴·其二.webp",
+    "bg": "/source/nameCard/bg/庆典·盛宴·其二.webp",
+    "profile": "/source/nameCard/profile/庆典·盛宴·其二.webp"
   }
 ]

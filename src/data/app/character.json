@@ -1,5 +1,17 @@
 [
   {
+    "id": 10000099,
+    "contentId": 501441,
+    "name": "艾梅莉埃",
+    "title": "千缕之踪",
+    "area": "枫丹",
+    "birthday": [9, 22],
+    "star": 5,
+    "element": "草",
+    "weapon": "长柄武器",
+    "nameCard": "艾梅莉埃·后调"
+  },
+  {
     "id": 10000098,
     "contentId": 501213,
     "name": "克洛琳德",
