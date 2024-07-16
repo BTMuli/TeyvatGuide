@@ -47,7 +47,7 @@ jobs:
       - name: setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 9.1.0
+          version: 9.5.0
       - name: remove lockfile
         run: rm pnpm-lock.yaml
       - name: Install frontend dependencies

@@ -2,12 +2,12 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-07-09
-Update: 2024-07-14
+Update: 2024-07-16
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-07-09 14:16:16`
 >
-> 更新于 `2024-07-14 08:53:47`
+> 更新于 `2024-07-16 22:03:11`
 
 ## [0.5.0](https://github.com/BTMuli/TeyvatGuide/releases/v0.5.0) (2024-07-09)
 
@@ -23,3 +23,5 @@ Update: 2024-07-14
 - ✨ 视频支持封面下载
 - ⚡️ 咨讯页调整绝区零版块排序
 - ✨ 祈愿添加 UIGF v4 支持
+- 🍱 更新 4.8 版本资源 [`#115`](https://github.com/BTMuli/TeyvatGuide/issues/115)
+- ✨ 材料 wiki 页面草创
