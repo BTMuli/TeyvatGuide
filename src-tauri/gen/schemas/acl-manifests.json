@@ -3257,6 +3257,11 @@
         "description": "Enables the set_title command without any pre-configured scope.",
         "commands": { "allow": ["set_title"], "deny": [] }
       },
+      "allow-set-title-bar-style": {
+        "identifier": "allow-set-title-bar-style",
+        "description": "Enables the set_title_bar_style command without any pre-configured scope.",
+        "commands": { "allow": ["set_title_bar_style"], "deny": [] }
+      },
       "allow-set-visible-on-all-workspaces": {
         "identifier": "allow-set-visible-on-all-workspaces",
         "description": "Enables the set_visible_on_all_workspaces command without any pre-configured scope.",
@@ -3571,6 +3576,11 @@
         "identifier": "deny-set-title",
         "description": "Denies the set_title command without any pre-configured scope.",
         "commands": { "allow": [], "deny": ["set_title"] }
+      },
+      "deny-set-title-bar-style": {
+        "identifier": "deny-set-title-bar-style",
+        "description": "Denies the set_title_bar_style command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["set_title_bar_style"] }
       },
       "deny-set-visible-on-all-workspaces": {
         "identifier": "deny-set-visible-on-all-workspaces",

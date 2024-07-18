@@ -2,7 +2,7 @@
   <TOverlay v-model="visible" hide blur-val="20px" :to-click="onCancel">
     <div class="tog-box">
       <div class="tog-top">
-        <div class="tog-title">请使用米游社或原神进行操作</div>
+        <div class="tog-title">请使用米游社APP进行操作</div>
         <div class="tog-subtitle">所需米游社版本 >= 2.57.1</div>
       </div>
       <div class="tog-mid">
@@ -135,7 +135,7 @@ async function cycleGetData() {
     if (res.payload.proto !== "OpenToken" && res.payload.proto !== "Account") {
       await TGLogger.Warn(`[to-gameLogin] 检测到意外协议：${res.payload.proto}`);
       showSnackbar({
-        text: "请使用米游社或原神进行扫码操作",
+        text: "请使用米游社APP进行扫码操作",
         color: "error",
       });
       visible.value = false;

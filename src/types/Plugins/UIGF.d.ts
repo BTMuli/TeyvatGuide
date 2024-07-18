@@ -1,7 +1,7 @@
 /**
  * @file types/Plugins/UIGF.d.ts
  * @description UIGF 插件类型定义文件
- * @since Beta v0.5.0
+ * @since Beta v0.5.1
  * @version UIGF v3.0 | UIGF v4.0
  */
 
@@ -114,7 +114,8 @@ declare namespace TGApp.Plugins.UIGF {
 
   /**
    * @description UIGF 祈愿列表
-   * @since Alpha v0.2.3
+   * @Beta v0.5.1
+   * @version UIGF v3.0
    * @interface GachaItem
    * @property {EnumGachaType} gacha_type - 祈愿类型
    * @property {string} item_id - 物品ID
@@ -130,7 +131,7 @@ declare namespace TGApp.Plugins.UIGF {
   interface GachaItem {
     uigf_gacha_type: string;
     gacha_type: string;
-    item_id?: string;
+    item_id: string;
     count?: string;
     time: string;
     name: string;

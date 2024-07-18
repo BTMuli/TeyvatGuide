@@ -1,7 +1,7 @@
 /**
  * @file utils/UIGF.ts
  * @description UIGF工具类
- * @since Beta v0.5.0
+ * @since Beta v0.5.1
  */
 
 import { app, path } from "@tauri-apps/api";
@@ -110,7 +110,7 @@ export async function verifyUigfData(path: string, isVersion4: boolean = false):
 
 /**
  * @description 验证 UIGF 数据
- * @since Beta v0.5.0
+ * @since Beta v0.5.1
  * @param {object} data - UIGF 数据
  * @returns {boolean} 是否验证通过
  */
@@ -122,6 +122,14 @@ function validateUigfData(data: object): boolean {
     const error: ErrorObject = validate.errors[0];
     showSnackbar({
       text: `${error.instancePath || error.schemaPath} ${error.message}`,
+      color: "error",
+    });
+    return false;
+  }
+  const parsedData: TGApp.Plugins.UIGF.Schema = <TGApp.Plugins.UIGF.Schema>data;
+  if (parsedData.info.uigf_version < "v2.3") {
+    showSnackbar({
+      text: "UIGF 版本过低，请使用 v2.3 或以上版本",
       color: "error",
     });
     return false;

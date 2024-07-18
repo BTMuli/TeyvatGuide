@@ -1,11 +1,11 @@
 //! @file src/main.rs
 //! @desc 主模块，用于启动应用
-//! @since Beta v0.5.0
+//! @since Beta v0.5.1
 
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 mod client;
 mod commands;
 mod plugins;

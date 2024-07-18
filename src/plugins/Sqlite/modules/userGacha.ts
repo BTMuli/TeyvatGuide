@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/userGacha.ts
  * @description 用户祈愿模块
- * @since Beta v0.5.0
+ * @since Beta v0.5.1
  */
 
 import { AppCharacterData, AppWeaponData } from "../../../data/index.js";
@@ -29,12 +29,12 @@ function getGachaItemType(item_id: string): gachaItemTypeRes {
 
 /**
  * @description 转换祈愿数据，防止多语言
- * @since Beta v0.4.7
+ * @since Beta v0.5.1
  * @param {TGApp.Plugins.UIGF.GachaItem} gacha - UIGF数据
  * @return {TGApp.Plugins.UIGF.GachaItem} 转换后的数据
  */
 function transGacha(gacha: TGApp.Plugins.UIGF.GachaItem): TGApp.Plugins.UIGF.GachaItem {
-  const type = getGachaItemType(gacha.item_id!);
+  const type = getGachaItemType(gacha.item_id);
   let res = gacha;
   res.item_type = type[0];
   if (type[0] === "角色") {

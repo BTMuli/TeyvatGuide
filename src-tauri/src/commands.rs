@@ -1,8 +1,8 @@
 //! @file src/commands.rs
 //! @desc 命令模块，负责处理命令
-//! @since Beta v0.5.0
+//! @since Beta v0.5.1
 
-use tauri::{AppHandle, Manager, WebviewWindowBuilder};
+use tauri::{AppHandle, Emitter, Manager, WebviewWindowBuilder};
 use tauri_utils::config::{WebviewUrl, WindowConfig};
 
 // 放一个常数，用来判断应用是否初始化
