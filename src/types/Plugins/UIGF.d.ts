@@ -60,13 +60,14 @@ declare namespace TGApp.Plugins.UIGF {
 
   /**
    * @description UIGF 头部信息， v4.0
-   * @since Beta v0.5.0
+   * @since Beta v0.5.1
    * @interface Info4
    * @see docs\UIGF4.md
    * @property {string} export_timestamp - 导出时间戳(秒)
    * @property {string} export_app - 导出应用
    * @property {string} export_app_version - 导出应用版本
    * @property {string} version - UIGF 版本
+   * @property {string} lang - 语言
    * @return Info4
    */
   interface Info4 {
@@ -74,6 +75,7 @@ declare namespace TGApp.Plugins.UIGF {
     export_app: string;
     export_app_version: string;
     version: string;
+    lang?: string;
   }
 
   /**

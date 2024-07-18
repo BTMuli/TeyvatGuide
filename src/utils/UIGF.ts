@@ -50,7 +50,7 @@ async function getUigfHeader(uid: string): Promise<TGApp.Plugins.UIGF.Info> {
 
 /**
  * @description 获取 UIGF v4.0 头部信息
- * @since Beta v0.5.0
+ * @since Beta v0.5.1
  * @returns {TGApp.Plugins.UIGF.Info4} UIGF v4.0 头部信息
  */
 async function getUigf4Header(): Promise<TGApp.Plugins.UIGF.Info4> {
@@ -60,6 +60,7 @@ async function getUigf4Header(): Promise<TGApp.Plugins.UIGF.Info4> {
     export_app: "TeyvatGuide",
     export_app_version: await app.getVersion(),
     version: "v4.0",
+    lang: "zh-cn",
   };
 }
 
