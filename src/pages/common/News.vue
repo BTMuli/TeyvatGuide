@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import showSnackbar from "../../components/func/snackbar.js";
@@ -79,7 +79,6 @@ type RawData = {
 // 路由
 const router = useRouter();
 const gid = <string>useRoute().params.gid;
-let type = <string | undefined>useRoute().params.type;
 // loading
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载");
@@ -87,10 +86,21 @@ const loadingSub = ref<boolean>(false);
 
 // UI 数据
 const appStore = useAppStore();
-const tab = ref<NewsKey>("notice");
 const showList = ref<boolean>(false);
 const showSearch = ref<boolean>(false);
 const tabValues = ref<Array<NewsKey>>(["notice", "activity", "news"]);
+const tabList = ["notice", "activity", "news"];
+const tab = computed({
+  get: () => {
+    if (appStore.recentNewsType === "" || !tabList.includes(appStore.recentNewsType)) {
+      return "notice";
+    }
+    return <NewsKey>appStore.recentNewsType;
+  },
+  set: (val) => {
+    appStore.recentNewsType = val;
+  },
+});
 
 // 渲染数据
 const search = ref<string>("");
@@ -117,25 +127,7 @@ const rawData = ref<RawData>({
   },
 });
 
-onMounted(async () => {
-  await TGLogger.Info(`[News][${gid}][onMounted] 打开咨讯页面`);
-  const typeList = ["notice", "activity", "news"];
-  if (type != undefined) {
-    appStore.recentNewsType = type;
-  }
-  const curType = appStore.recentNewsType;
-  if (typeList.includes(curType)) {
-    tab.value = <NewsKey>curType;
-  } else {
-    tab.value = "notice";
-    appStore.recentNewsType = "notice";
-  }
-  await firstLoad(tab.value);
-});
-
-watch(tab, (val) => {
-  appStore.recentNewsType = val;
-});
+onMounted(async () => await firstLoad(tab.value));
 
 async function firstLoad(key: NewsKey): Promise<void> {
   if (rawData.value[key].lastId !== 0) {
