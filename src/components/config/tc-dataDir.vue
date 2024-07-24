@@ -2,41 +2,58 @@
   <v-list class="config-list">
     <v-list-subheader :inset="true" class="config-header" title="路径" />
     <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item>
+    <v-list-item title="用户数据目录" :subtitle="appStore.userDir">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-key</v-icon>
         </div>
       </template>
-      <v-list-item-title style="cursor: pointer" @click="confirmCUD"
-        >用户数据目录
-      </v-list-item-title>
-      <v-list-item-subtitle @click="openPath('user')">{{ appStore.userDir }}</v-list-item-subtitle>
       <template #append>
-        <v-icon @click="copyPath('user')">mdi-content-copy</v-icon>
+        <v-icon @click="confirmCUD" style="cursor: pointer" title="修改用户数据目录"
+          >mdi-pencil
+        </v-icon>
+        &emsp;
+        <v-icon @clikc="openPath('user')" style="cursor: pointer" title="打开用户数据目录"
+          >mdi-folder-open
+        </v-icon>
+        &emsp;
+        <v-icon @click="copyPath('user')" style="cursor: pointer" title="复制用户数据目录路径"
+          >mdi-content-copy
+        </v-icon>
       </template>
     </v-list-item>
-    <v-list-item title="应用数据库路径">
+    <v-list-item title="应用数据库路径" :subtitle="appStore.dbPath">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-account</v-icon>
         </div>
       </template>
-      <v-list-item-subtitle @click="openPath('db')">{{ appStore.dbPath }}</v-list-item-subtitle>
       <template #append>
-        <v-icon @click="copyPath('db')">mdi-content-copy</v-icon>
+        <v-icon @click="openPath('db')" style="cursor: pointer" title="打开数据库目录"
+          >mdi-folder-open
+        </v-icon>
+        &emsp;
+        <v-icon @click="copyPath('db')" style="cursor: pointer" title="复制数据库目录路径"
+          >mdi-content-copy
+        </v-icon>
       </template>
     </v-list-item>
-    <v-list-item>
+    <v-list-item title="日志目录" :subtitle="appStore.logDir">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-multiple</v-icon>
         </div>
       </template>
-      <v-list-item-title style="cursor: pointer" @click="confirmCLD">日志目录</v-list-item-title>
-      <v-list-item-subtitle @click="openPath('log')">{{ appStore.logDir }}</v-list-item-subtitle>
       <template #append>
-        <v-icon @click="copyPath('log')">mdi-content-copy</v-icon>
+        <v-icon @click="confirmCLD" style="cursor: pointer" title="清理日志文件">mdi-delete</v-icon>
+        &emsp;
+        <v-icon @click="openPath('log')" style="cursor: pointer" title="打开日志目录"
+          >mdi-folder-open</v-icon
+        >
+        &emsp;
+        <v-icon @click="copyPath('log')" style="cursor: pointer" title="复制日志目录路径"
+          >mdi-content-copy</v-icon
+        >
       </template>
     </v-list-item>
   </v-list>
