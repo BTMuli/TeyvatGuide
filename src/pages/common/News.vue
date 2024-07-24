@@ -11,18 +11,20 @@
       label="请输入帖子 ID 或搜索词"
       :single-line="true"
       hide-details
-      @click:append="searchPost"
-      @keyup.enter="searchPost"
+      @keyup.enter="searchPost()"
     />
     <v-spacer />
-    <v-btn class="news-switch-btn" @click="switchAnno">
+    <v-btn class="news-top-btn" @click="firstLoad(tab, true)">
+      <v-icon>mdi-refresh</v-icon>
+    </v-btn>
+    <v-btn class="news-top-btn" @click="showList = true">
+      <v-icon>mdi-view-list</v-icon>
+    </v-btn>
+    <v-btn class="news-top-btn" @click="switchAnno">
       <template #prepend>
         <v-icon>mdi-bullhorn</v-icon>
       </template>
       切换游戏内公告
-    </v-btn>
-    <v-btn class="news-switch-btn" @click="showList = true">
-      <v-icon>mdi-view-list</v-icon>
     </v-btn>
   </v-tabs>
   <v-window v-model="tab">
@@ -33,7 +35,7 @@
         </div>
       </div>
       <div class="load-news">
-        <v-btn class="news-switch-btn" rounded :loading="loadingSub" @click="loadMore(value)">
+        <v-btn class="news-top-btn" rounded :loading="loadingSub" @click="loadMore(value)">
           已加载：{{ rawData[value].lastId }}，加载更多
         </v-btn>
       </div>
@@ -129,9 +131,11 @@ const rawData = ref<RawData>({
 
 onMounted(async () => await firstLoad(tab.value));
 
-async function firstLoad(key: NewsKey): Promise<void> {
+async function firstLoad(key: NewsKey, refresh: boolean = false): Promise<void> {
   if (rawData.value[key].lastId !== 0) {
-    return;
+    if (!refresh) return;
+    postData.value[key] = [];
+    rawData.value[key].lastId = 0;
   }
   loadingTitle.value = `正在获取${rawData.value[key].name}数据...`;
   loading.value = true;
@@ -183,7 +187,7 @@ async function loadMore(key: NewsKey): Promise<void> {
   });
 }
 
-function searchPost(): void {
+async function searchPost(): Promise<void> {
   if (search.value === "") {
     showSnackbar({
       text: "请输入搜索内容",
@@ -195,7 +199,7 @@ function searchPost(): void {
   if (isNaN(numCheck)) {
     showSearch.value = true;
   } else {
-    createPost(search.value);
+    await createPost(search.value);
   }
 }
 </script>
@@ -207,7 +211,7 @@ function searchPost(): void {
   font-family: var(--font-title);
 }
 
-.news-switch-btn {
+.news-top-btn {
   height: 40px;
   margin-left: 15px;
   background: var(--btn-bg-1);
@@ -215,7 +219,7 @@ function searchPost(): void {
   font-family: var(--font-title);
 }
 
-.dark .news-switch-btn {
+.dark .news-top-btn {
   border: 1px solid var(--common-shadow-2);
 }
 
