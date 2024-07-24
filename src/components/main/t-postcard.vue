@@ -38,13 +38,20 @@
         </div>
       </div>
     </div>
-    <div class="tpc-forum" v-if="card.forum" :title="`频道: ${card.forum.name}`">
+    <div
+      class="tpc-forum"
+      v-if="card.forum && card.forum.name !== ''"
+      :title="`频道: ${card.forum.name}`"
+    >
       <img :src="card.forum.icon" :alt="card.forum.name" />
       <span>{{ card.forum.name }}</span>
     </div>
-    <div v-if="props.selectMode" class="tpc-select">
-      <v-checkbox-btn v-model="selectedList" :value="props.modelValue.post.post_id" />
-    </div>
+    <v-checkbox-btn
+      v-if="props.selectMode"
+      class="tpc-select"
+      v-model="selectedList"
+      :value="props.modelValue.post.post_id"
+    />
   </v-card>
 </template>
 <script lang="ts" setup>
@@ -254,15 +261,23 @@ function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.N
   border-bottom-left-radius: 5px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
+  text-shadow: 0 0 5px var(--tgc-dark-1);
 }
 
 .tpc-select {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   display: flex;
+  width: 30px;
+  height: 30px;
   align-items: center;
   justify-content: center;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  background: var(--tgc-yellow-2);
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 0 10px var(--tgc-dark-1);
 }
 
 .tpc-forum img {

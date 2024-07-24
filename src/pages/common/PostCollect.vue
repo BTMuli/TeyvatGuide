@@ -317,11 +317,11 @@ async function toEdit(): Promise<void> {
   await load();
 }
 
-async function deleteOper(forever: boolean): Promise<void> {
+async function deleteOper(force: boolean): Promise<void> {
   if (selectedMode.value) {
-    await deletePost(forever);
+    await deletePost(force);
   } else {
-    await deleteCollect(forever);
+    await deleteCollect(force);
   }
 }
 
@@ -377,7 +377,10 @@ async function deleteCollect(force: boolean): Promise<void> {
     return;
   }
   const title = force ? "删除分类" : "清空分类";
-  const res = await showConfirm({ title: `确定${title}?` });
+  const res = await showConfirm({
+    title: `确定${title}?`,
+    text: `该分类下${selected.value.length}条帖子将被${force ? "删除" : "移除分类(未分类将被删除)"}`,
+  });
   if (!res) {
     showSnackbar({
       text: "取消删除",

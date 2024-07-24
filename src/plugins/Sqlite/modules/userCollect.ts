@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/userCollect.ts
  * @description 用户收藏模块
- * @since Beta v0.4.5
+ * @since Beta v0.5.1
  */
 
 import TGSqlite from "../index.js";
@@ -93,7 +93,7 @@ async function createCollect(title: string, desc: string): Promise<boolean> {
 
 /**
  * @description 删除收藏合集
- * @since Beta v0.4.5
+ * @since Beta v0.5.1
  * @param {string} title 收藏合集标题
  * @param {boolean} force 是否强制删除
  * @return {Promise<boolean>} 返回是否删除成功
@@ -108,6 +108,9 @@ async function deleteCollect(title: string, force: boolean): Promise<boolean> {
   if (force) {
     const deleteSql = "DELETE FROM UFCollection WHERE title = ?";
     await db.execute(deleteSql, [title]);
+    const deletePostSql =
+      "DELETE FROM UFPost WHERE id IN (SELECT postId FROM UFMap WHERE collectionId = ?)";
+    await db.execute(deletePostSql, [res[0].id]);
   }
   const deleteRefSql = "DELETE FROM UFMap WHERE collectionId = ?";
   await db.execute(deleteRefSql, [res[0].id]);
