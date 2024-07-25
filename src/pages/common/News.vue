@@ -20,7 +20,7 @@
     <v-btn class="news-top-btn" @click="showList = true">
       <v-icon>mdi-view-list</v-icon>
     </v-btn>
-    <v-btn class="news-top-btn" @click="switchAnno">
+    <v-btn class="news-top-btn" @click="switchAnno" v-if="gid === '2'">
       <template #prepend>
         <v-icon>mdi-bullhorn</v-icon>
       </template>
