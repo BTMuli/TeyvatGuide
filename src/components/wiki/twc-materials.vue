@@ -4,7 +4,7 @@
       class="twc-material-box"
       v-for="(item, index) in props.data"
       :key="index"
-      @click="checkData(item)"
+      @click="checkData(item, index)"
     >
       <div class="twc-material-left">
         <div class="twc-material-bg">
@@ -19,7 +19,18 @@
       </div>
     </div>
   </div>
-  <TwoMaterial :data="curData" v-model="showOverlay" />
+  <TwoMaterial :data="curData" v-model="showOverlay">
+    <template #left>
+      <div class="card-arrow left" @click="switchMaterial(false)">
+        <img src="../../assets/icons/arrow-right.svg" alt="right" />
+      </div>
+    </template>
+    <template #right>
+      <div class="card-arrow" @click="switchMaterial(true)">
+        <img src="../../assets/icons/arrow-right.svg" alt="right" />
+      </div>
+    </template>
+  </TwoMaterial>
 </template>
 <script lang="ts" setup>
 import { ref } from "vue";
@@ -35,6 +46,7 @@ interface TwcMaterialsProp {
 
 const props = defineProps<TwcMaterialsProp>();
 const showOverlay = ref(false);
+const curIndex = ref(0);
 const curData = ref<TGApp.App.Material.WikiItem>({
   id: 0,
   name: "",
@@ -45,11 +57,12 @@ const curData = ref<TGApp.App.Material.WikiItem>({
   convert: [],
 });
 
-function checkData(item: TGApp.App.Calendar.Material) {
+function checkData(item: TGApp.App.Calendar.Material, index: number) {
   if (showOverlay.value) showOverlay.value = false;
   const material = WikiMaterialData.find((m) => m.id === item.id);
   if (material) {
     curData.value = material;
+    curIndex.value = index;
     showOverlay.value = true;
   } else {
     showSnackbar({
@@ -57,6 +70,39 @@ function checkData(item: TGApp.App.Calendar.Material) {
       color: "warn",
     });
   }
+}
+
+function switchMaterial(isNext: boolean) {
+  if (isNext) {
+    if (curIndex.value === props.data.length - 1) {
+      showSnackbar({
+        text: "已经是最后一个材料了",
+        color: "warn",
+      });
+      return;
+    }
+    curIndex.value++;
+  } else {
+    if (curIndex.value === 0) {
+      showSnackbar({
+        text: "已经是第一个材料了",
+        color: "warn",
+      });
+      return;
+    }
+    curIndex.value--;
+  }
+  const curItem = props.data[curIndex.value];
+  const material = WikiMaterialData.find((m) => m.id === curItem.id);
+  if (material) {
+    curData.value = material;
+    return;
+  }
+  showSnackbar({
+    text: `材料 ${curItem.name} 暂无详细信息`,
+    color: "warn",
+  });
+  isNext ? curIndex.value-- : curIndex.value++;
 }
 </script>
 <style lang="css" scoped>
@@ -110,5 +156,28 @@ function checkData(item: TGApp.App.Calendar.Material) {
   justify-content: center;
   color: var(--box-text-2);
   font-size: 14px;
+}
+
+.card-arrow {
+  position: relative;
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dark .card-arrow {
+  filter: invert(11%) sepia(73%) saturate(11%) hue-rotate(139deg) brightness(97%) contrast(81%);
+}
+
+.card-arrow img {
+  width: 100%;
+  height: 100%;
+}
+
+.card-arrow.left img {
+  transform: rotate(180deg);
 }
 </style>
