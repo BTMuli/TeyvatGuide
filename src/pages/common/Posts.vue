@@ -202,7 +202,7 @@ async function freshPostData(): Promise<void> {
   );
   loading.value = true;
   loadingTitle.value = `正在加载 ${curGameLabel.value}-${curForumLabel.value}-${curSortLabel.value} 的数据`;
-  const postsGet = await Mys.Posts.get(curForum.value, curSortType.value);
+  const postsGet = await Mys.Posts.get(curForum.value, curSortType.value, 12);
   posts.value = postsGet.list;
   await nextTick();
   loading.value = false;
