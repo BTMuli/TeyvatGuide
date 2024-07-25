@@ -11,11 +11,10 @@ import { getDeviceInfo } from "../../../utils/toolFunc.js";
 import TGConstant from "../../../web/constant/TGConstant.js";
 
 const PUB_KEY = `-----BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDvekdPMHN3AYhm/vktJT+YJr7cI5DcsNK
-qdsx5DZX0gDuWFuIjzdwButrIYPNmRJ1G8ybDIF7oDW2eEpm5sMbL9zs9ExXCdvqrn51qELb
-qj0XxtMTIpaCHFSI50PfPpTFV9Xt/hmyVwokoOXFlAEgCn+QCgGs52bFoYMtyi+xEQIDAQAB
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDvekdPMHN3AYhm/vktJT+YJr7cI5DcsNKqdsx5DZX0gDuWFuIjzdwButrIYPNmRJ1G8ybDIF7oDW2eEpm5sMbL9zs
+9ExXCdvqrn51qELbqj0XxtMTIpaCHFSI50PfPpTFV9Xt/hmyVwokoOXFlAEgCn+Q
+CgGs52bFoYMtyi+xEQIDAQAB
 -----END PUBLIC KEY-----`;
-const EncryptAreaCode = rsaEncrypt("+86");
 
 /**
  * @description rsa 加密
@@ -43,7 +42,7 @@ export async function getCaptcha(
   const device_name = getDeviceInfo("device_name");
   const device_id = getDeviceInfo("device_id");
   const device_model = getDeviceInfo("product");
-  const body = { area: EncryptAreaCode, phone: rsaEncrypt(phone) };
+  const body = { area_code: rsaEncrypt("+86"), mobile: rsaEncrypt(phone) };
   const header = {
     "x-rpc-aigis": "",
     "x-rpc-app_version": TGConstant.BBS.VERSION,
@@ -53,7 +52,13 @@ export async function getCaptcha(
     "x-rpc-device_name": device_name,
     "x-rpc-device_id": device_id,
     "x-rpc-device_model": device_model,
+    "user-agent": TGConstant.BBS.UA_MOBILE,
+    "content-type": "application/json",
+    referer: "https://user.miyoushe.com/",
+    "x-rpc-game_biz": TGConstant.Utils.GAME_BIZ,
   };
+  console.log("getCaptcha header: ", header);
+  console.log("getCaptcha body: ", body);
   const resp = await TGHttp<
     TGApp.Plugins.Mys.CaptchaLogin.CaptchaResponse | TGApp.BBS.Response.Base
   >(url, {
@@ -69,14 +74,14 @@ export async function getCaptcha(
  * @description 通过短信验证码登录
  * @since Beta v0.5.1
  * @param {string} phone - 手机号
- * @param {string} action_type - 操作类型
  * @param {string} captcha - 验证码
+ * @param {string} action_type - 操作类型
  * @returns {Promise<TGApp.Plugins.Mys.CaptchaLogin.LoginData | TGApp.BBS.Response.Base>}
  */
 export async function doCaptchaLogin(
   phone: string,
-  action_type: string,
   captcha: string,
+  action_type: string,
 ): Promise<TGApp.Plugins.Mys.CaptchaLogin.LoginData | TGApp.BBS.Response.Base> {
   const url = "https://passport-api.mihoyo.com/account/ma-cn-passport/app/loginByMobileCaptcha";
   const device_fp = getDeviceInfo("device_fp");
@@ -84,8 +89,8 @@ export async function doCaptchaLogin(
   const device_id = getDeviceInfo("device_id");
   const device_model = getDeviceInfo("product");
   const body = {
-    area: EncryptAreaCode,
-    phone: rsaEncrypt(phone),
+    area_code: rsaEncrypt("+86"),
+    mobile: rsaEncrypt(phone),
     action_type,
     captcha,
   };
@@ -98,7 +103,10 @@ export async function doCaptchaLogin(
     "x-rpc-device_name": device_name,
     "x-rpc-device_id": device_id,
     "x-rpc-device_model": device_model,
+    "user-agent": TGConstant.BBS.UA_MOBILE,
   };
+  console.log("doCaptchaLogin header: ", header);
+  console.log("doCaptchaLogin body: ", body);
   const resp = await TGHttp<TGApp.Plugins.Mys.CaptchaLogin.LoginResponse | TGApp.BBS.Response.Base>(
     url,
     {

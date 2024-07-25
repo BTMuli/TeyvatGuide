@@ -13,9 +13,46 @@
         </div>
       </div>
     </div>
+    <h1>验证码登录测试</h1>
+    <div class="test-item">
+      <div class="btn-list">
+        <button class="test-btn" @click="tryCaptchaLogin()">获取验证码</button>
+      </div>
+    </div>
   </div>
 </template>
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import showConfirm from "../../components/func/confirm.js";
+import showSnackbar from "../../components/func/snackbar.js";
+import Mys from "../../plugins/Mys/index.js";
+
+async function tryCaptchaLogin(): Promise<void> {
+  const phone = await showConfirm({
+    mode: "input",
+    title: "请输入手机号",
+    text: "+86",
+  });
+  if (!phone) return;
+  const captchaResp = await Mys.User.getCaptcha(phone);
+  console.log("[captchaResp]", captchaResp);
+  if ("retcode" in captchaResp) {
+    showSnackbar({
+      text: `[${captchaResp.retcode}] ${captchaResp.message}`,
+      color: "error",
+    });
+    return;
+  }
+  const action_type = captchaResp.action_type;
+  const captcha = await showConfirm({
+    mode: "input",
+    title: "请输入验证码",
+    text: "验证码：",
+  });
+  if (!captcha) return;
+  const loginResp = await Mys.User.login(phone, captcha, action_type);
+  console.log("[loginResp]", loginResp);
+}
+</script>
 <style lang="css" scoped>
 .test-box {
   display: flex;
@@ -36,6 +73,11 @@
 }
 
 .test-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 5px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
 }
