@@ -11,7 +11,13 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "lib": ["DOM", "ESNext"],
-    "types": ["vite/client"],
+    "types": [
+      "vite/client",
+      "src/types",
+      "src/plugins/Bili/types",
+      "src/plugins/Hutao/types",
+      "src/plugins/Mys/types"
+    ],
     "allowSyntheticDefaultImports": true,
     "composite": true
   },

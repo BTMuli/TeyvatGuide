@@ -81,7 +81,7 @@ export function getInitDeviceInfo(): TGApp.App.Device.DeviceInfo {
  * @param {string} key - 设备信息 key
  * @returns {string} 设备信息
  */
-export function getDeviceInfo(key: "device_id" | "device_fp"): string {
+export function getDeviceInfo(key: keyof TGApp.App.Device.DeviceInfo): string {
   const localDevice = localStorage.getItem("deviceInfo");
   let deviceInfo: TGApp.App.Device.DeviceInfo;
   if (localDevice === null) {

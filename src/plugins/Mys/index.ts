@@ -1,10 +1,11 @@
 /**
  * @file plugins/Mys/index.ts
  * @description Mys plugin index
- * @since Beta v0.4.5
+ * @since Beta v0.5.1
  */
 
 import MysApi from "./api/index.js";
+import { getCaptcha, doCaptchaLogin } from "./request/doCaptchaLogin.js";
 import { getLoginQr, getLoginStatus } from "./request/doGameLogin.js";
 import { getCollectionData, getCollectionPosts } from "./request/getCollectionData.js";
 import getForumList from "./request/getForumList.js";
@@ -50,6 +51,8 @@ const Mys = {
   User: {
     getQr: getLoginQr,
     getData: getLoginStatus,
+    getCaptcha,
+    login: doCaptchaLogin,
   },
   Vote: {
     get: getVoteInfo,
