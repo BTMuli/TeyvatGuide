@@ -89,13 +89,11 @@ watch(
   async (value) => {
     if (search.value === "" && value !== "") {
       search.value = value;
-      await searchPosts();
     } else if (search.value !== value && value !== "") {
       search.value = value;
       results.value = [];
       lastId.value = "";
       isLast.value = false;
-      await searchPosts();
     }
   },
 );
