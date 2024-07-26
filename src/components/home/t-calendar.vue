@@ -16,9 +16,19 @@
             :key="text.week"
             rounded
             :style="{
-              border: text.week === weekNow ? '1px solid var(--common-shadow-4)' : 'none',
-              backgroundColor: text.week === btnNow ? 'var(--tgc-yellow-1)' : 'var(--tgc-btn-1)',
-              color: text.week === btnNow ? 'var(--box-text-4)' : 'var(--btn-text)',
+              border: text.week === weekNow ? '1px solid var(--tgc-yellow-1)' : 'none',
+              backgroundColor:
+                text.week === btnNow
+                  ? 'var(--tgc-yellow-1)'
+                  : text.week === weekNow
+                    ? 'transparent'
+                    : 'var(--tgc-btn-1)',
+              color:
+                text.week === btnNow
+                  ? 'var(--box-text-4)'
+                  : text.week === weekNow
+                    ? 'var(--tgc-yellow-1)'
+                    : 'var(--btn-text)',
             }"
             @click="getContents(text.week)"
             >{{ text.text }}
