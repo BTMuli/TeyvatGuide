@@ -46,6 +46,9 @@ export const useUserStore = defineStore(
       if (cookie.value.stoken && cookie.value.stoken !== "") {
         res += `stoken=${cookie.value.stoken};`;
       }
+      if (cookie.value.stuid && cookie.value.stuid !== "") {
+        res += `stuid=${cookie.value.stuid};`;
+      }
       if (cookie.value.account_id && cookie.value.account_id !== "") {
         res += `account_id=${cookie.value.account_id};`;
       }
