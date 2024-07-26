@@ -65,7 +65,7 @@ async function TGHttp<T>(
   return await fetch(url, fetchOptions)
     .then((res) => {
       if (res.ok) {
-        const data = options.isBlob ? res.blob() : res.json();
+        const data = options.isBlob ? res.arrayBuffer() : res.json();
         if (fullResponse) {
           return { data, resp: res };
         }
