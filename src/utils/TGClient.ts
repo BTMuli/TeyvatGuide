@@ -813,7 +813,7 @@ class TGClient {
 
   /**
    * @func share
-   * @since Beta v0.5.0
+   * @since Beta v0.5.1
    * @desc 分享
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.SharePayload>} arg - 方法参数
    * @returns {Promise<void>} - 无返回值
@@ -858,7 +858,7 @@ class TGClient {
         var scale = 1.5;
         var option = {
           debug: true,
-          backgroundColor: "white",
+          backgroundColor: "transparent",
           height: shareDom.scrollHeight * scale,
           width: shareDom.scrollWidth * scale,
           style: {
