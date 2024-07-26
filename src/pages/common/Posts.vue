@@ -49,7 +49,8 @@
   <ToPostSearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
 </template>
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from "vue";
+import { nextTick, onBeforeMount, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 
 import showSnackbar from "../../components/func/snackbar.js";
 import TGameNav from "../../components/main/t-gamenav.vue";
@@ -134,6 +135,10 @@ const gameList = {
   大别野: 5,
 };
 
+// 路由
+const gid = useRoute().params.gid;
+const forum = useRoute().params.forum;
+
 // 渲染参数
 const curForumLabel = ref<string>("酒馆");
 const forumItem = ref<string[]>(["酒馆", "攻略", "同人图", "COS", "硬核"]);
@@ -162,12 +167,44 @@ const posts = ref<TGApp.Plugins.Mys.Post.FullData[]>([]);
 const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 
+onBeforeMount(async () => {
+  if (gid && typeof gid === "string") {
+    const gameKeys = Object.values(gameList);
+    if (!gameKeys.includes(Number(gid))) {
+      showSnackbar({
+        text: `不存在GID为${gid}的游戏`,
+        color: "error",
+      });
+      return;
+    }
+    curGameLabel.value = <keyof typeof gameList>(
+      Object.keys(gameList)[gameKeys.indexOf(Number(gid))]
+    );
+    curGid.value = Number(gid);
+  }
+  if (forum && typeof forum === "string") {
+    const forumKeys = Object.keys(forumList[curGameLabel.value]);
+    if (!forumKeys.includes(forum)) {
+      showSnackbar({
+        text: `${curGameLabel.value}不存在ID为${forum}的版块`,
+        color: "error",
+      });
+      return;
+    }
+    curForumLabel.value = forum;
+  }
+});
+
 onMounted(async () => {
   await TGLogger.Info(
     `[Posts][${curGameLabel.value}][onMounted][${curForumLabel.value}] 打开帖子列表`,
   );
   loading.value = true;
-  await freshPostData();
+  if (gid && forum) {
+    freshCurForum(curForumLabel.value);
+  } else {
+    await freshPostData();
+  }
   loading.value = false;
 });
 

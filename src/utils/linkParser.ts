@@ -1,7 +1,7 @@
 /**
  * @file src/utils/linkParser.ts
  * @description 处理链接
- * @since Beta v0.5.0
+ * @since Beta v0.5.1
  */
 
 import { emit } from "@tauri-apps/api/event";
@@ -52,7 +52,7 @@ export async function parsePost(link: string): Promise<false | string> {
 
 /**
  * @function parseLink
- * @since Beta v0.5.0
+ * @since Beta v0.5.1
  * @description 处理链接
  * @param {string} link - 链接
  * @param {boolean} useInner - 是否采用内置 JSBridge 打开
@@ -83,16 +83,24 @@ export async function parseLink(
       console.log(url.pathname, url.search);
       // 处理特定路径
       if (url.pathname.startsWith("//discussion")) {
-        await emit("active_deep_link", "router?path=/posts");
+        const gid = url.pathname.split("/").pop();
+        const forum = url.searchParams.get("forum_id");
+        await emit("active_deep_link", `router?path=/posts/${gid}/${forum}`);
         return true;
       }
-      if (link === "mihoyobbs://homeForum?game_id=2&tab_type=2") {
-        await emit("active_deep_link", "router?path=/news/2/news");
-        return true;
-      }
-      if (link === "mihoyobbs://homeForum?game_id=8&tab_type=2") {
-        await emit("active_deep_link", "router?path=/news/8/news");
-        return true;
+      if (url.pathname.startsWith("//homeForum")) {
+        const game_id = url.searchParams.get("game_id");
+        const tab_type = url.searchParams.get("tab_type");
+        if (game_id && tab_type) {
+          const tabList = ["", "notice", "activity", "news"];
+          if (["1", "2", "3"].includes(tab_type)) {
+            await emit(
+              "active_deep_link",
+              `router?path=/news/${game_id}/${tabList[parseInt(tab_type)]}`,
+            );
+            return true;
+          }
+        }
       }
     }
     return false;

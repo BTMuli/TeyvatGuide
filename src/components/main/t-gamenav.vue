@@ -7,6 +7,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { emit } from "@tauri-apps/api/event";
 import { onMounted, ref, watch } from "vue";
 
 import Mys from "../../plugins/Mys/index.js";
@@ -95,8 +96,15 @@ async function toBBS(link: URL): Promise<void> {
     }
     if (link.pathname.startsWith("//forum")) {
       const forumId = link.pathname.split("/").pop();
-      const url = `https://www.miyoushe.com/ys/home/${forumId}`;
-      window.open(url);
+      const localPath = getLocalPath(forumId);
+      if (localPath === "") {
+        showSnackbar({
+          text: `不支持的链接：${link.href}`,
+          color: "warn",
+        });
+        return;
+      }
+      await emit("active_deep_link", `router?path=${localPath}`);
       return;
     }
   }
@@ -105,12 +113,40 @@ async function toBBS(link: URL): Promise<void> {
     color: "warn",
   });
 }
+
+function getLocalPath(forum?: string): string {
+  if (!forum) return "";
+  const forumLocalMap: Record<string, string> = {
+    "31": "/news/3", // 崩坏2官方
+    "6": "/news/1", // 崩坏3官方
+    "28": "/news/2", // 原神官方
+    "33": "/news/4", // 未定官方
+    "58": "/news/8", // 绝区零官方
+    "36": "/news/5", // 大别野公告
+  };
+  if (forumLocalMap[forum]) return forumLocalMap[forum];
+  const ysForums = ["26", "43", "29", "49", "50"];
+  const srForums = ["52", "61", "56", "62"];
+  const bh3Forums = ["1", "14", "4", "41"];
+  const bh2Forums = ["30", "51", "40"];
+  const wdForums = ["37", "60", "42", "38"];
+  const zzzForums = ["57", "59", "64", "65"];
+  const dbyForums = ["54", "35", "34", "39", "47", "48", "55", "36"];
+  if (ysForums.includes(forum)) return `/posts/2/${forum}`;
+  if (srForums.includes(forum)) return `/posts/6/${forum}`;
+  if (bh3Forums.includes(forum)) return `/posts/1/${forum}`;
+  if (bh2Forums.includes(forum)) return `/posts/3/${forum}`;
+  if (wdForums.includes(forum)) return `/posts/4/${forum}`;
+  if (zzzForums.includes(forum)) return `/posts/8/${forum}`;
+  if (dbyForums.includes(forum)) return `/posts/5/${forum}`;
+  return "";
+}
 </script>
 <style lang="css" scoped>
 .tgn-container {
   display: flex;
   padding: 5px;
-  gap: 10px 10px;
+  gap: 10px;
 }
 
 .tgn-nav {
