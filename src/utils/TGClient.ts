@@ -1,7 +1,7 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.5.0
+ * @since Beta v0.5.1
  */
 
 import { event, core, webviewWindow } from "@tauri-apps/api";
@@ -99,7 +99,7 @@ class TGClient {
 
   /**
    * @func getSaveImgJS
-   * @since Beta v0.3.7
+   * @since Beta v0.5.1
    * @desc 获取保存图片的 JS
    * @param {string} url - 图片链接
    * @param {string} format - 图片格式
@@ -107,22 +107,21 @@ class TGClient {
    */
   getSaveImgJS(url: string, format: string): string {
     return `javascript:(async function() {
-      const _t = window.__TAURI__;
-      const defaultPath = await _t.path.downloadDir() + Date.now() + '.${format}';
-      const savePath = await _t.dialog.save({
+      var _path = window.__TAURI__.path;
+      var saveDefault = await _path.downloadDir() + _path.sep() + Date.now() + '.${format}';
+      var savePath = await window.__TAURI_PLUGIN_DIALOG__.save({
         title: '保存图片',
-        filters: [{ name: '图片', extensions: ['png'] }],
-        defaultPath: defaultPath,
+        filters: [{ name: '图片', extensions: ['${format}'] }],
+        defaultPath: saveDefault,
       });
-      if (savePath) {
-        const resBlob = await _t.http.fetch('${url}',{
-          method: 'GET',
-          responseType: _t.http.ResponseType.Binary
-        });
-        const buffer = new Uint8Array(resBlob.data);
-        await _t.fs.writeBinaryFile({
+      if(savePath !== null) {
+        var resBlob = await window.__TAURI_PLUGIN_HTTP__.fetch('${url}',{
+          method: 'GET'
+        }).then(res => res.blob());
+        var buffer = new Uint8Array(await resBlob.arrayBuffer());
+        await window.__TAURI_PLUGIN_FS__.writeBinaryFile({
           contents: buffer,
-          path: savePath,
+          path: savePath
         });
         alert('保存成功');
       }
