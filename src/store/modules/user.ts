@@ -1,7 +1,7 @@
 /**
  * @file store/modules/user.ts
  * @description 用户信息模块
- * @since Beta v0.3.9
+ * @since Beta v0.5.1
  */
 
 import { defineStore } from "pinia";
@@ -28,10 +28,35 @@ export const useUserStore = defineStore(
     });
     const cookie = ref<TGApp.User.Account.Cookie>();
 
+    function getAllCookie(): string {
+      let res = "";
+      if (!cookie.value) return res;
+      if (cookie.value.ltuid && cookie.value.ltuid !== "") {
+        res += `ltuid=${cookie.value.ltuid};`;
+      }
+      if (cookie.value.ltoken && cookie.value.ltoken !== "") {
+        res += `ltoken=${cookie.value.ltoken};`;
+      }
+      if (cookie.value.mid && cookie.value.mid !== "") {
+        res += `mid=${cookie.value.mid};`;
+      }
+      if (cookie.value.cookie_token && cookie.value.cookie_token !== "") {
+        res += `cookie_token=${cookie.value.cookie_token};`;
+      }
+      if (cookie.value.stoken && cookie.value.stoken !== "") {
+        res += `stoken=${cookie.value.stoken};`;
+      }
+      if (cookie.value.account_id && cookie.value.account_id !== "") {
+        res += `account_id=${cookie.value.account_id};`;
+      }
+      return res;
+    }
+
     return {
       cookie,
       briefInfo,
       account,
+      getAllCookie,
     };
   },
   {

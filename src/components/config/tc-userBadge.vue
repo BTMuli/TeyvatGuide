@@ -9,8 +9,15 @@
     <template #text>{{ userInfo.desc }}</template>
     <template #actions>
       <v-spacer />
-      <v-btn variant="outlined" @click="scan = true" icon="mdi-qrcode-scan" />
-      <v-btn variant="outlined" @click="confirmRefreshUser" icon="mdi-refresh" :loading="loading" />
+      <v-btn variant="outlined" @click="scan = true" icon="mdi-qrcode-scan" title="扫码登录" />
+      <v-btn
+        variant="outlined"
+        @click="confirmRefreshUser"
+        icon="mdi-refresh"
+        :loading="loading"
+        title="刷新用户信息"
+      />
+      <v-btn variant="outlined" @click="confirmCopyCookie" icon="mdi-cookie" title="复制Cookie" />
     </template>
   </v-card>
 </template>
@@ -216,6 +223,33 @@ async function confirmRefreshUser(): Promise<void> {
     return;
   }
   await refreshUser();
+}
+
+async function confirmCopyCookie(): Promise<void> {
+  const res = await showConfirm({
+    title: "确认复制 Cookie 吗？",
+    text: "将会复制当前登录的 Cookie",
+  });
+  if (!res) {
+    showSnackbar({
+      color: "cancel",
+      text: "已取消复制",
+    });
+    return;
+  }
+  if (!userStore.cookie) {
+    showSnackbar({
+      color: "error",
+      text: "请先登录",
+    });
+    return;
+  }
+  const ckText = useUserStore().getAllCookie();
+  await navigator.clipboard.writeText(ckText);
+  showSnackbar({
+    text: "已复制 Cookie!",
+    color: "success",
+  });
 }
 
 onUnmounted(() => {
