@@ -4,17 +4,20 @@
  * @since Beta v0.5.1
  */
 
-import { publicEncrypt } from "node:crypto";
+import { JSEncrypt } from "jsencrypt";
 
+import showSnackbar from "../../../components/func/snackbar.js";
 import TGHttp from "../../../utils/TGHttp.js";
 import { getDeviceInfo } from "../../../utils/toolFunc.js";
 import TGConstant from "../../../web/constant/TGConstant.js";
 
-const PUB_KEY = `-----BEGIN PUBLIC KEY-----
+const PUB_KEY_STR = `-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDvekdPMHN3AYhm/vktJT+YJr7cI5DcsNKqdsx5DZX0gDuWFuIjzdwButrIYPNmRJ1G8ybDIF7oDW2eEpm5sMbL9zs
 9ExXCdvqrn51qELbqj0XxtMTIpaCHFSI50PfPpTFV9Xt/hmyVwokoOXFlAEgCn+Q
 CgGs52bFoYMtyi+xEQIDAQAB
 -----END PUBLIC KEY-----`;
+const encrypt = new JSEncrypt();
+encrypt.setPublicKey(PUB_KEY_STR);
 
 /**
  * @description rsa 加密
@@ -23,8 +26,15 @@ CgGs52bFoYMtyi+xEQIDAQAB
  * @returns {string} 加密后数据
  */
 function rsaEncrypt(data: string): string {
-  const buffer = Buffer.from(data);
-  return publicEncrypt(PUB_KEY, buffer).toString("base64");
+  const res = encrypt.encrypt(data.toString());
+  if (res === false) {
+    showSnackbar({
+      text: "RSA 加密失败",
+      color: "error",
+    });
+    return "";
+  }
+  return res;
 }
 
 /**
@@ -36,14 +46,14 @@ function rsaEncrypt(data: string): string {
  */
 export async function getCaptcha(
   phone: string,
-): Promise<TGApp.Plugins.Mys.CaptchaLogin.CaptchaData | TGApp.BBS.Response.Base> {
+): Promise<TGApp.Plugins.Mys.CaptchaLogin.CaptchaData | TGApp.BBS.Response.BaseWithData> {
   const url = "https://passport-api.mihoyo.com/account/ma-cn-verifier/verifier/createLoginCaptcha";
   const device_fp = getDeviceInfo("device_fp");
   const device_name = getDeviceInfo("device_name");
   const device_id = getDeviceInfo("device_id");
   const device_model = getDeviceInfo("product");
   const body = { area_code: rsaEncrypt("+86"), mobile: rsaEncrypt(phone) };
-  const header = {
+  const header: Record<string, string> = {
     "x-rpc-aigis": "",
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "2",
@@ -61,13 +71,24 @@ export async function getCaptcha(
   console.log("getCaptcha body: ", body);
   const resp = await TGHttp<
     TGApp.Plugins.Mys.CaptchaLogin.CaptchaResponse | TGApp.BBS.Response.Base
-  >(url, {
-    method: "POST",
-    headers: header,
-    body: JSON.stringify(body),
-  });
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  return resp.data;
+  >(
+    url,
+    {
+      method: "POST",
+      headers: header,
+      body: JSON.stringify(body),
+    },
+    true,
+  );
+  const data = await resp.data;
+  if (data.retcode !== 0) {
+    return <TGApp.BBS.Response.BaseWithData>{
+      retcode: data.retcode,
+      message: data.message,
+      data: resp.resp.headers.get("x-rpc-aigis"),
+    };
+  }
+  return <TGApp.Plugins.Mys.CaptchaLogin.CaptchaData>data.data;
 }
 
 /**
@@ -76,12 +97,14 @@ export async function getCaptcha(
  * @param {string} phone - 手机号
  * @param {string} captcha - 验证码
  * @param {string} action_type - 操作类型
+ * @param {string} [aigis] - 验证数据
  * @returns {Promise<TGApp.Plugins.Mys.CaptchaLogin.LoginData | TGApp.BBS.Response.Base>}
  */
 export async function doCaptchaLogin(
   phone: string,
   captcha: string,
   action_type: string,
+  aigis?: string,
 ): Promise<TGApp.Plugins.Mys.CaptchaLogin.LoginData | TGApp.BBS.Response.Base> {
   const url = "https://passport-api.mihoyo.com/account/ma-cn-passport/app/loginByMobileCaptcha";
   const device_fp = getDeviceInfo("device_fp");
@@ -95,7 +118,7 @@ export async function doCaptchaLogin(
     captcha,
   };
   const header = {
-    "x-rpc-aigis": "",
+    "x-rpc-aigis": aigis || "",
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "2",
     "x-rpc-app_id": TGConstant.BBS.APP_ID,

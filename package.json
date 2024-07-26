@@ -84,6 +84,7 @@
     "geetest": "^4.1.2",
     "html2canvas": "^1.4.1",
     "js-md5": "^0.8.3",
+    "jsencrypt": "^3.3.2",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
     "qrcode.vue": "^3.4.1",

@@ -1,14 +1,14 @@
 /**
  * @file utils/TGHttp.ts
  * @description 封装HTTP请求
- * @since Beta v0.5.0
+ * @since Beta v0.5.1
  */
 
 import { fetch } from "@tauri-apps/plugin-http";
 
 /**
  * @description 请求参数
- * @since Beta v0.5.0
+ * @since Beta v0.5.1
  * @property {"GET"|"POST"} method 请求方法
  * @property {Record<string,string>} headers 请求头
  * @property {Record<string,string>} query 请求参数
@@ -26,13 +26,23 @@ type TGHttpParams = {
 
 /**
  * @description 发送请求
- * @since Beta v0.5.0
+ * @since Beta v0.5.1
  * @template T
  * @param {string} url 请求地址
  * @param {TGHttpParams} options 请求参数
- * @returns {Promise<T>}
+ * @returns {Promise<T>} 请求结果
  */
-async function TGHttp<T>(url: string, options: TGHttpParams): Promise<T> {
+async function TGHttp<T>(url: string, options: TGHttpParams): Promise<T>;
+async function TGHttp<T>(
+  url: string,
+  options: TGHttpParams,
+  fullResponse: true,
+): Promise<{ data: Promise<T>; resp: Response }>;
+async function TGHttp<T>(
+  url: string,
+  options: TGHttpParams,
+  fullResponse?: true,
+): Promise<T | { data: Promise<T>; resp: Response }> {
   const httpHeaders = new Headers();
   if (options.headers) {
     for (const key in options.headers) {
@@ -55,8 +65,11 @@ async function TGHttp<T>(url: string, options: TGHttpParams): Promise<T> {
   return await fetch(url, fetchOptions)
     .then((res) => {
       if (res.ok) {
-        if (options.isBlob) return res.arrayBuffer();
-        return res.json();
+        const data = options.isBlob ? res.blob() : res.json();
+        if (fullResponse) {
+          return { data, resp: res };
+        }
+        return data;
       }
       throw new Error(`HTTP error! status: ${res.status}`);
     })
