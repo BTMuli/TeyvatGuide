@@ -13,7 +13,7 @@
           >mdi-pencil
         </v-icon>
         &emsp;
-        <v-icon @clikc="openPath('user')" style="cursor: pointer" title="打开用户数据目录"
+        <v-icon @click="openPath('user')" style="cursor: pointer" title="打开用户数据目录"
           >mdi-folder-open
         </v-icon>
         &emsp;
@@ -48,12 +48,12 @@
         <v-icon @click="confirmCLD" style="cursor: pointer" title="清理日志文件">mdi-delete</v-icon>
         &emsp;
         <v-icon @click="openPath('log')" style="cursor: pointer" title="打开日志目录"
-          >mdi-folder-open</v-icon
-        >
+          >mdi-folder-open
+        </v-icon>
         &emsp;
         <v-icon @click="copyPath('log')" style="cursor: pointer" title="复制日志目录路径"
-          >mdi-content-copy</v-icon
-        >
+          >mdi-content-copy
+        </v-icon>
       </template>
     </v-list-item>
   </v-list>
@@ -74,10 +74,7 @@ const appStore = useAppStore();
 
 async function confirmCUD(): Promise<void> {
   const oriDir = appStore.userDir;
-  const check = await showConfirm({
-    title: "确认修改用户数据路径吗？",
-    text: "祈愿数据需修改后重新手动备份！",
-  });
+  const check = await showConfirm({ title: "确认修改用户数据路径吗？" });
   if (!check) {
     showSnackbar({
       color: "cancel",
@@ -107,11 +104,21 @@ async function confirmCUD(): Promise<void> {
   appStore.userDir = dir;
   await TGSqlite.saveAppData("userDir", dir);
   await backUpUserData(dir);
-  await remove(oriDir, { recursive: true });
   showSnackbar({
-    text: "已重新备份数据!即将刷新页面！",
-    timeout: 3000,
+    text: "已重新备份数据!",
+    color: "success",
   });
+  const confirm = await showConfirm({
+    title: "是否删除原用户数据目录？",
+    text: "删除后不可恢复!",
+  });
+  if (confirm) {
+    await remove(oriDir, { recursive: true });
+    showSnackbar({
+      text: "已删除原用户数据目录!",
+      color: "success",
+    });
+  }
   setTimeout(() => {
     window.location.reload();
   }, 4000);
