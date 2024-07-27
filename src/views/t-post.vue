@@ -15,31 +15,32 @@
       </div>
       <div class="tp-post-meta">
         <div class="mpm-forum" v-if="postData.forum">
+          <img :src="getGameIcon(postData.forum.game_id)" alt="gameIcon" />
           <img :src="postData.forum.icon" alt="forumIcon" />
           <span>{{ postData.forum.name }}</span>
         </div>
-        <div class="mpm-item" :title="`浏览数：${postData.stat.view_num}`">
+        <div class="mpm-item" :title="`浏览数：${postData?.stat?.view_num}`">
           <v-icon>mdi-eye</v-icon>
-          <span>{{ postData.stat.view_num }}</span>
+          <span>{{ postData?.stat?.view_num }}</span>
         </div>
-        <div class="mpm-item" :title="`收藏数：${postData.stat.bookmark_num}`">
+        <div class="mpm-item" :title="`收藏数：${postData?.stat?.bookmark_num}`">
           <v-icon>mdi-star</v-icon>
-          <span>{{ postData.stat.bookmark_num }}</span>
+          <span>{{ postData?.stat?.bookmark_num }}</span>
         </div>
-        <div class="mpm-item" :title="`回复数：${postData.stat.reply_num}`">
+        <div class="mpm-item" :title="`回复数：${postData?.stat?.reply_num}`">
           <v-icon>mdi-comment</v-icon>
-          <span>{{ postData.stat.reply_num }}</span>
+          <span>{{ postData?.stat?.reply_num }}</span>
         </div>
-        <div class="mpm-item" :title="`点赞数：${postData.stat.like_num}`">
+        <div class="mpm-item" :title="`点赞数：${postData?.stat?.like_num}`">
           <v-icon>mdi-thumb-up</v-icon>
-          <span>{{ postData.stat.like_num }}</span>
+          <span>{{ postData?.stat?.like_num }}</span>
         </div>
-        <div class="mpm-item" :title="`转发数：${postData.stat.forward_num}`">
+        <div class="mpm-item" :title="`转发数：${postData?.stat?.forward_num}`">
           <v-icon>mdi-share-variant</v-icon>
-          <span>{{ postData.stat.forward_num }}</span>
+          <span>{{ postData?.stat?.forward_num }}</span>
         </div>
       </div>
-      <TpAvatar :data="postData.user" position="right" />
+      <TpAvatar :data="postData.user" position="right" v-if="postData.user" />
     </div>
     <div class="tp-post-title" @click="toPost()" title="点击查看评论">
       <span class="mpt-official" v-if="postData.post.post_status.is_official">官</span>
@@ -98,6 +99,7 @@ import { useAppStore } from "../store/modules/app.js";
 import TGClient from "../utils/TGClient.js";
 import TGLogger from "../utils/TGLogger.js";
 import { createTGWindow } from "../utils/TGWindow.js";
+import TGConstant from "../web/constant/TGConstant.js";
 
 // loading
 const loading = ref<boolean>(true);
@@ -121,6 +123,12 @@ const shareTime = ref<number>(Math.floor(Date.now() / 1000));
 const shareTimeTimer = ref<any>();
 // 合集
 const showCollection = ref<boolean>(false);
+
+function getGameIcon(gameId: number): string {
+  const find = TGConstant.BBS.CHANNELS.find((item) => item.gid === gameId.toString());
+  if (find) return find.icon;
+  return "/platforms/mhy/mys.webp";
+}
 
 onMounted(async () => {
   appVersion.value = await app.getVersion();
@@ -355,6 +363,11 @@ onUnmounted(() => {
   width: 30px;
   height: 30px;
   object-fit: cover;
+}
+
+.mpm-forum img:first-child {
+  border-radius: 5px;
+  margin-right: 5px;
 }
 
 .mpm-forum span {

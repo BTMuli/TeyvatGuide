@@ -30,6 +30,8 @@ import { computed } from "vue";
 import { useRouter } from "vue-router";
 
 import { useAppStore } from "../../store/modules/app.js";
+import { ToChannelItem } from "../../web/constant/bbs.js";
+import TGConstant from "../../web/constant/TGConstant.js";
 import showSnackbar from "../func/snackbar.js";
 import TOverlay from "../main/t-overlay.vue";
 
@@ -40,12 +42,6 @@ interface ToChannelProps {
 }
 
 type ToChannelEmits = (e: "update:modelValue", value: boolean) => void;
-
-interface ToChannelItem {
-  title: string;
-  icon: string;
-  gid: string;
-}
 
 const props = withDefaults(defineProps<ToChannelProps>(), {
   modelValue: false,
@@ -60,44 +56,7 @@ const visible = computed({
 });
 const router = useRouter();
 const appStore = useAppStore();
-
-const channelList: ToChannelItem[] = [
-  {
-    title: "原神",
-    icon: "/platforms/mhy/ys.webp",
-    gid: "2",
-  },
-  {
-    title: "崩坏：星穹铁道",
-    icon: "/platforms/mhy/sr.webp",
-    gid: "6",
-  },
-  {
-    title: "绝区零",
-    icon: "/platforms/mhy/zzz.webp",
-    gid: "8",
-  },
-  {
-    title: "崩坏3",
-    icon: "/platforms/mhy/bh3.webp",
-    gid: "1",
-  },
-  {
-    title: "崩坏2",
-    icon: "/platforms/mhy/bh2.webp",
-    gid: "3",
-  },
-  {
-    title: "未定事件簿",
-    icon: "/platforms/mhy/wd.webp",
-    gid: "4",
-  },
-  {
-    title: "大别野",
-    icon: "/platforms/mhy/dby.webp",
-    gid: "5",
-  },
-];
+const channelList = TGConstant.BBS.CHANNELS;
 
 function onCancel(): void {
   visible.value = false;
