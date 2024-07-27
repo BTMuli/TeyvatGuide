@@ -52,6 +52,10 @@
           </div>
         </template>
         <v-list-item-title @click="confirmUpdateDevice()">刷新设备信息</v-list-item-title>
+        <v-list-item-subtitle>
+          {{ appStore.deviceInfo.device_name }}({{ appStore.deviceInfo.product }}) -
+          {{ appStore.deviceInfo.device_fp }}
+        </v-list-item-subtitle>
         <template #append>
           <v-icon @click="confirmUpdateDevice(true)">mdi-bug</v-icon>
         </template>
