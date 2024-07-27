@@ -39,6 +39,21 @@ declare namespace TGApp.Plugins.Mys.CaptchaLogin {
   }
 
   /**
+   * @description 触发验证的序列化数据
+   * @since Beta v0.5.1
+   * @interface CaptchaAigis
+   * @property {string} session_id 会话 id
+   * @property {number} mmt_type mmt 类型
+   * @property {TGApp.Plugins.Mys.Geetest.getData} data 数据
+   * @return CaptchaBody
+   */
+  interface CaptchaAigis {
+    session_id: string;
+    mmt_type: number;
+    data: TGApp.Plugins.Mys.Geetest.reqResp;
+  }
+
+  /**
    * @description 短信验证码登录返回数据
    * @since Beta v0.5.1
    * @interface LoginResponse

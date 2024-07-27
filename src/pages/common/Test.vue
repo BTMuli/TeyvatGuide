@@ -23,6 +23,7 @@
 </template>
 <script lang="ts" setup>
 import showConfirm from "../../components/func/confirm.js";
+import showGeetest from "../../components/func/geetest.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import Mys from "../../plugins/Mys/index.js";
 
@@ -33,16 +34,8 @@ async function tryCaptchaLogin(): Promise<void> {
     text: "+86",
   });
   if (!phone) return;
-  const captchaResp = await Mys.User.getCaptcha(phone);
-  console.log("[captchaResp]", captchaResp);
-  if ("retcode" in captchaResp) {
-    showSnackbar({
-      text: `[${captchaResp.retcode}] ${captchaResp.message}`,
-      color: "error",
-    });
-    return;
-  }
-  const action_type = captchaResp.action_type;
+  const action_type = await tryGetCaptcha(phone);
+  if (!action_type) return;
   const captcha = await showConfirm({
     mode: "input",
     title: "请输入验证码",
@@ -51,6 +44,25 @@ async function tryCaptchaLogin(): Promise<void> {
   if (!captcha) return;
   const loginResp = await Mys.User.login(phone, captcha, action_type);
   console.log("[loginResp]", loginResp);
+}
+
+async function tryGetCaptcha(phone: string, aigis?: string): Promise<string | false> {
+  const captchaResp = await Mys.User.getCaptcha(phone, aigis);
+  console.log("[captchaResp]", captchaResp);
+  if ("retcode" in captchaResp) {
+    if (!captchaResp.data || captchaResp.data === "") {
+      showSnackbar({
+        text: `[${captchaResp.retcode}] ${captchaResp.message}`,
+        color: "error",
+      });
+      return false;
+    }
+    const aigis: TGApp.Plugins.Mys.CaptchaLogin.CaptchaAigis = JSON.parse(captchaResp.data);
+    const resp = await showGeetest(aigis.data);
+    const aigisStr = btoa(`${aigis.session_id};${JSON.stringify(resp)}`);
+    return await tryGetCaptcha(phone, aigisStr);
+  }
+  return captchaResp.action_type;
 }
 </script>
 <style lang="css" scoped>

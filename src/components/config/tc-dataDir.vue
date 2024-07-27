@@ -9,7 +9,7 @@
         </div>
       </template>
       <template #append>
-        <v-icon @click="confirmCUD" style="cursor: pointer" title="修改用户数据目录"
+        <v-icon @click="confirmCUD()" style="cursor: pointer" title="修改用户数据目录"
           >mdi-pencil
         </v-icon>
         &emsp;
@@ -45,7 +45,9 @@
         </div>
       </template>
       <template #append>
-        <v-icon @click="confirmCLD" style="cursor: pointer" title="清理日志文件">mdi-delete</v-icon>
+        <v-icon @click="confirmCLD()" style="cursor: pointer" title="清理日志文件"
+          >mdi-delete</v-icon
+        >
         &emsp;
         <v-icon @click="openPath('log')" style="cursor: pointer" title="打开日志目录"
           >mdi-folder-open

@@ -40,12 +40,13 @@ function rsaEncrypt(data: string): string {
 /**
  * @description 获取短信验证码
  * @since Beta v0.5.1
- * @todo retcode 为-3101时，表示需要进行验证，需要从resp.headers["x-rpc-aigis"]中获取相关数据
  * @param {string} phone - 手机号
+ * @param {string} [aigis] - 验证数据
  * @returns {Promise<TGApp.Plugins.Mys.CaptchaLogin.CaptchaData | TGApp.BBS.Response.Base>}
  */
 export async function getCaptcha(
   phone: string,
+  aigis?: string,
 ): Promise<TGApp.Plugins.Mys.CaptchaLogin.CaptchaData | TGApp.BBS.Response.BaseWithData> {
   const url = "https://passport-api.mihoyo.com/account/ma-cn-verifier/verifier/createLoginCaptcha";
   const device_fp = getDeviceInfo("device_fp");
@@ -54,7 +55,7 @@ export async function getCaptcha(
   const device_model = getDeviceInfo("product");
   const body = { area_code: rsaEncrypt("+86"), mobile: rsaEncrypt(phone) };
   const header: Record<string, string> = {
-    "x-rpc-aigis": "",
+    "x-rpc-aigis": aigis || "",
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "2",
     "x-rpc-app_id": TGConstant.BBS.APP_ID,
