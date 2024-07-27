@@ -9,6 +9,12 @@
     <template #text>{{ userInfo.desc }}</template>
     <template #actions>
       <v-spacer />
+      <v-btn
+        variant="outlined"
+        @click="tryCaptchaLogin()"
+        icon="mdi-cellphone"
+        title="验证码登录"
+      />
       <v-btn variant="outlined" @click="scan = true" icon="mdi-qrcode-scan" title="扫码登录" />
       <v-btn
         variant="outlined"
@@ -22,10 +28,11 @@
   </v-card>
 </template>
 <script lang="ts" setup>
-import type { UnlistenFn } from "@tauri-apps/api/event";
+import { UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
+import Mys from "../../plugins/Mys/index.js";
 import TGSqlite from "../../plugins/Sqlite/index.js";
 import { useAppStore } from "../../store/modules/app.js";
 import { useUserStore } from "../../store/modules/user.js";
@@ -33,6 +40,7 @@ import TGLogger from "../../utils/TGLogger.js";
 import { getDeviceFp } from "../../web/request/getDeviceFp.js";
 import TGRequest from "../../web/request/TGRequest.js";
 import showConfirm from "../func/confirm.js";
+import showGeetest from "../func/geetest.js";
 import showSnackbar from "../func/snackbar.js";
 import ToGameLogin from "../overlay/to-gameLogin.vue";
 
@@ -67,6 +75,65 @@ watch(userStore.briefInfo, (v) => {
     userInfo.value = v;
   }
 });
+
+async function tryCaptchaLogin(): Promise<void> {
+  const phone = await showConfirm({
+    mode: "input",
+    title: "请输入手机号",
+    text: "+86",
+  });
+  if (!phone) {
+    showSnackbar({
+      color: "cancel",
+      text: "已取消验证码登录",
+    });
+    return;
+  }
+  const phoneReg = /^1[3-9]\d{9}$/;
+  if (!phoneReg.test(phone)) {
+    showSnackbar({
+      color: "error",
+      text: "请输入正确的手机号",
+    });
+    return;
+  }
+  const actionType = await tryGetCaptcha(phone);
+  if (!actionType) return;
+  showSnackbar({
+    text: `已发送验证码到 ${phone}`,
+  });
+  const captcha = await showConfirm({
+    mode: "input",
+    title: "请输入验证码",
+    text: "验证码：",
+    otcancel: false,
+  });
+  if (!captcha) {
+    showSnackbar({
+      color: "error",
+      text: "输入验证码为空",
+    });
+    return;
+  }
+  const loginResp = await tryLoginByCaptcha(phone, captcha, actionType);
+  if (!loginResp) return;
+  userStore.cookie.value = {
+    account_id: loginResp.user_info.aid,
+    ltuid: loginResp.user_info.aid,
+    stuid: loginResp.user_info.aid,
+    mid: loginResp.user_info.mid,
+    cookie_token: "",
+    stoken: loginResp.token.token,
+    ltoken: "",
+  };
+  showSnackbar({
+    text: "登录成功，即将刷新用户信息",
+    color: "success",
+  });
+  setTimeout(() => {
+    refreshUser();
+  }, 1000);
+}
 
 async function refreshUser() {
   const ck = userStore.cookie.value;
@@ -154,8 +221,8 @@ async function refreshUser() {
   emits("loadOuter", { show: false });
 }
 
-async function refreshUserInfo(cnt: number = 0): Promise<number> {
-  let failCount = cnt;
+async function refreshUserInfo(): Promise<number> {
+  let failCount = 0;
   const ck = userStore.cookie.value;
   if (ck === undefined) {
     showSnackbar({
@@ -250,6 +317,47 @@ async function confirmCopyCookie(): Promise<void> {
     text: "已复制 Cookie!",
     color: "success",
   });
+}
+
+async function tryGetCaptcha(phone: string, aigis?: string): Promise<string | false> {
+  const captchaResp = await Mys.User.getCaptcha(phone, aigis);
+  if ("retcode" in captchaResp) {
+    if (!captchaResp.data || captchaResp.data === "") {
+      showSnackbar({
+        text: `[${captchaResp.retcode}] ${captchaResp.message}`,
+        color: "error",
+      });
+      return false;
+    }
+    const aigisResp: TGApp.Plugins.Mys.CaptchaLogin.CaptchaAigis = JSON.parse(captchaResp.data);
+    const resp = await showGeetest(JSON.parse(aigisResp.data));
+    const aigisStr = `${aigisResp.session_id};${btoa(JSON.stringify(resp))}`;
+    return await tryGetCaptcha(phone, aigisStr);
+  }
+  return captchaResp.action_type;
+}
+
+async function tryLoginByCaptcha(
+  phone: string,
+  captcha: string,
+  actionType: string,
+  aigis?: string,
+): Promise<TGApp.Plugins.Mys.CaptchaLogin.LoginData | false> {
+  const loginResp = await Mys.User.login(phone, captcha, actionType, aigis);
+  if ("retcode" in loginResp) {
+    if (!loginResp.data || loginResp.data === "") {
+      showSnackbar({
+        text: `[${loginResp.retcode}] ${loginResp.message}`,
+        color: "error",
+      });
+      return false;
+    }
+    const aigisResp: TGApp.Plugins.Mys.CaptchaLogin.CaptchaAigis = JSON.parse(loginResp.data);
+    const resp = await showGeetest(JSON.parse(aigisResp.data));
+    const aigisStr = `${aigisResp.session_id};${btoa(JSON.stringify(resp))}`;
+    return await tryLoginByCaptcha(phone, captcha, actionType, aigisStr);
+  }
+  return loginResp;
 }
 
 onUnmounted(() => {
