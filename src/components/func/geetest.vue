@@ -15,21 +15,7 @@
   </transition>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
-
-interface GeetestProps {
-  gt: string;
-  challenge: string;
-  new_captcha: number;
-  success: number;
-}
-
-const props = withDefaults(defineProps<GeetestProps>(), {
-  gt: "",
-  challenge: "",
-  new_captcha: 0,
-  success: 0,
-});
+import { ref, watch } from "vue";
 
 const show = ref<boolean>(false);
 const showOuter = ref<boolean>(false);
@@ -53,14 +39,9 @@ watch(show, () => {
   }
 });
 
-onMounted(async () => {
-  await displayBox(props);
-});
-
 async function displayBox(
   props: TGApp.Plugins.Mys.Geetest.reqResp,
 ): Promise<TGApp.Plugins.Mys.Geetest.validateResp | false> {
-  if (!props.gt || !props.challenge) return false;
   show.value = true;
   return await new Promise<TGApp.Plugins.Mys.Geetest.validateResp>((resolve) => {
     // eslint-disable-next-line no-undef
@@ -80,9 +61,9 @@ async function displayBox(
         captchaObj.onSuccess(async () => {
           const validate = captchaObj.getValidate();
           resolve(validate);
-          captchaObj.onClose(() => {
-            show.value = false;
-          });
+        });
+        captchaObj.onClose(() => {
+          show.value = false;
         });
       },
     );

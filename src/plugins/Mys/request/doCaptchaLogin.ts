@@ -68,8 +68,6 @@ export async function getCaptcha(
     referer: "https://user.miyoushe.com/",
     "x-rpc-game_biz": TGConstant.Utils.GAME_BIZ,
   };
-  console.log("getCaptcha header: ", header);
-  console.log("getCaptcha body: ", body);
   const resp = await TGHttp<
     TGApp.Plugins.Mys.CaptchaLogin.CaptchaResponse | TGApp.BBS.Response.Base
   >(
@@ -129,8 +127,6 @@ export async function doCaptchaLogin(
     "x-rpc-device_model": device_model,
     "user-agent": TGConstant.BBS.UA_MOBILE,
   };
-  console.log("doCaptchaLogin header: ", header);
-  console.log("doCaptchaLogin body: ", body);
   const resp = await TGHttp<TGApp.Plugins.Mys.CaptchaLogin.LoginResponse | TGApp.BBS.Response.Base>(
     url,
     {

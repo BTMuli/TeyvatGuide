@@ -44,13 +44,14 @@ declare namespace TGApp.Plugins.Mys.CaptchaLogin {
    * @interface CaptchaAigis
    * @property {string} session_id 会话 id
    * @property {number} mmt_type mmt 类型
-   * @property {TGApp.Plugins.Mys.Geetest.getData} data 数据
+   * @see TGApp.Plugins.Mys.Geetest.validateResp
+   * @property {string} data 数据，为上面的序列化数据
    * @return CaptchaBody
    */
   interface CaptchaAigis {
     session_id: string;
     mmt_type: number;
-    data: TGApp.Plugins.Mys.Geetest.reqResp;
+    data: string;
   }
 
   /**
