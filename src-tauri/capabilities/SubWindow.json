@@ -21,11 +21,16 @@
     "sql:allow-load",
     "sql:allow-execute",
     "sql:default",
+    "webview:allow-set-webview-zoom",
+    "webview:default",
+    "window:allow-center",
     "window:allow-close",
     "window:allow-destroy",
+    "window:allow-set-size",
     "window:allow-set-title",
     "window:allow-set-fullscreen",
     "window:allow-show",
+    "window:default",
     {
       "identifier": "fs:allow-exists",
       "allow": [{ "path": "**" }]

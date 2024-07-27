@@ -115,14 +115,11 @@ class TGClient {
         defaultPath: saveDefault,
       });
       if(savePath !== null) {
-        var resBlob = await window.__TAURI_PLUGIN_HTTP__.fetch('${url}',{
+        var resp = await window.__TAURI_PLUGIN_HTTP__.fetch('${url}',{
           method: 'GET'
-        }).then(res => res.blob());
-        var buffer = new Uint8Array(await resBlob.arrayBuffer());
-        await window.__TAURI_PLUGIN_FS__.writeBinaryFile({
-          contents: buffer,
-          path: savePath
-        });
+        }).then(res => res.arrayBuffer());
+        var buffer = new Uint8Array(resp);
+        await window.__TAURI_PLUGIN_FS__.writeFile(savePath, buffer);
         alert('保存成功');
       }
     })();`;
@@ -819,8 +816,7 @@ class TGClient {
    * @returns {Promise<void>} - 无返回值
    */
   async share(arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.SharePayload>): Promise<void> {
-    // 如果有数据
-    if (arg.payload.type === "image" && arg.payload.content?.image_url !== undefined) {
+    if (arg.payload.type === "default") {
       const image = arg.payload.content.image_url;
       const format = image.split(".").pop();
       const executeJS = this.getSaveImgJS(image, format ?? "png");
@@ -902,6 +898,14 @@ class TGClient {
       return;
     }
     if (arg.payload.type === "image") {
+      if (arg.payload.content?.image_url !== undefined) {
+        const image = arg.payload.content.image_url;
+        const format = image.split(".").pop();
+        const executeJS = this.getSaveImgJS(image, format ?? "png");
+        await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
+        await this.callback(arg.callback, {});
+        return;
+      }
       if (arg.payload.content?.image_base64 !== undefined) {
         let image = arg.payload.content.image_base64;
         image = `data:image/png;base64,${image}`;
