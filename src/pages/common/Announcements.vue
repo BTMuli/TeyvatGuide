@@ -346,6 +346,7 @@ async function createAnno(item: TGApp.App.Announcement.ListCard): Promise<void> 
   border-bottom-left-radius: 5px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
+  text-shadow: 0 0 5px var(--tgc-dark-1);
 }
 
 .anno-label img {
