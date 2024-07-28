@@ -399,7 +399,7 @@ async function exportUigf(): Promise<void> {
     });
     return;
   }
-  const res = showConfirm({
+  const res = await showConfirm({
     title: "是否导出祈愿数据？",
     text: `UID：${uidCur.value}，共 ${gachaList.length} 条数据`,
   });
