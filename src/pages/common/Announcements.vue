@@ -184,11 +184,10 @@ async function loadData(): Promise<void> {
 function getAnnoTime(content: string): string | false {
   const regexes = [
     /〓活动时间〓.*?\d\.\d版本期间持续开放/,
-    /(?:〓活动时间〓|〓任务开放时间〓).*?(?:(\d\.\d版本更新(?:完成|))|(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}).*?)后永久开放/,
-    /(?:〓(?:活动|折扣)时间〓|祈愿时间|【上架时间】).*?(\d\.\d版本更新后).*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/,
-    /(?:〓(?:活动|折扣)时间〓|祈愿时间|【上架时间】).*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/,
+    /(?:〓活动时间〓|〓任务开放时间〓).*?(?:(\d\.\d)版本更新(?:完成|)|&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt; *?)后永久开放/s,
+    /(?:〓活动时间〓|祈愿时间|【上架时间】|〓折扣时间〓).*?(\d\.\d)版本更新后.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/s,
+    /(?:〓(?:活动|折扣)时间〓|祈愿时间|【上架时间】).*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/s,
     /〓活动时间〓.*?(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}).*?(\d\.\d版本结束)/,
-    /〓更新时间〓.+?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&;lt;\/t&gt;/,
   ];
   if (content.match(regexes[0])) {
     const res = content.match(regexes[0]);
@@ -206,6 +205,9 @@ function getAnnoTime(content: string): string | false {
   }
   if (content.match(regexes[2])) {
     const res = content.match(regexes[2]);
+    if (res?.[1]?.match(/\d\.\d/)) {
+      return `${res?.[1]}版本更新后 ~ ${res?.[2]}`;
+    }
     return `${res?.[1]} ~ ${res?.[2]}`;
   }
   if (content.match(regexes[3])) {
@@ -219,11 +221,6 @@ function getAnnoTime(content: string): string | false {
       if (cnt && cnt.length > 2) return false;
     }
     return `${res?.[1]} ~ ${res?.[2]}`;
-  }
-  if (content.match(regexes[5])) {
-    console.log("verUpdateTime");
-    // todo 待处理
-    return false;
   }
   return false;
 }
