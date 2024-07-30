@@ -12,6 +12,7 @@
 
 <script lang="ts" setup>
 import { app, event, core, webviewWindow } from "@tauri-apps/api";
+import { PhysicalSize } from "@tauri-apps/api/dpi";
 import { UnlistenFn, Event } from "@tauri-apps/api/event";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { storeToRefs } from "pinia";
@@ -52,7 +53,30 @@ onBeforeMount(async () => {
     urlListener = await getDeepLink();
   }
   await win.show();
+  await checkResize();
 });
+
+async function checkResize(): Promise<void> {
+  const windowCur = await webviewWindow.getCurrent();
+  const winScale = await windowCur.scaleFactor();
+  if (winScale > 1) {
+    const newSize = getSize(windowCur.label);
+    await windowCur.setSize(newSize);
+    await windowCur.setZoom(1 / winScale);
+    await windowCur.center();
+  } else if (winScale === 1) {
+    const newSize = getSize(windowCur.label);
+    await windowCur.setSize(newSize);
+    await windowCur.setZoom(1);
+    await windowCur.center();
+  }
+}
+
+function getSize(label: string): PhysicalSize {
+  if (label === "TeyvatGuide") return new PhysicalSize(1600, 900);
+  if (label === "Sub_Window" || label === "Dev_JSON") return new PhysicalSize(960, 720);
+  return new PhysicalSize(1280, 720);
+}
 
 onMounted(() => {
   document.documentElement.className = theme.value;
