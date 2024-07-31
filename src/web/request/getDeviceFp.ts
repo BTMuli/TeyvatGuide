@@ -12,7 +12,7 @@ import TGConstant from "../constant/TGConstant.js";
  * @description 获取设备指纹
  * @since Beta v0.5.0
  * @param {TGApp.App.Device.DeviceInfo} Info - 设备信息
- * @returns {Promise<string>} 设备指纹
+ * @returns {Promise<TGApp.App.Device.DeviceInfo>} 设备指纹
  */
 export async function getDeviceFp(
   Info?: TGApp.App.Device.DeviceInfo,

@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2024-07-14
+Update: 2024-07-31
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2024-07-14 08:50:43`
+> 更新于 `2024-07-31 18:21:43`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -33,7 +33,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 
 > macOS 用户可以通过 Github Release 下载
 
-[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/BTMuli/TeyvatGuide?include_prereleases&style=for-the-badge)](https://github.com/BTMuli/TeyvatGuide/releases/latest)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/BTMuli/TeyvatGuide?style=for-the-badge)](https://github.com/BTMuli/TeyvatGuide/releases/latest)
 
 ## 仓库概况 / Repo Stats
 
@@ -48,7 +48,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 米游社官方帖获取（支持通过 ID 获取）
   - [x] 米游社各分区帖子获取（支持通过 ID 获取）
   - [x] 成就管理（UIAF v1.1），支持 [`YaeAchievement`](https://github.com/HolographicHat/YaeAchievement) 导入
-  - [x] 祈愿管理（UIGF v3.0，0.5.0 起支持 UIGF v4.0）
+  - [x] 祈愿管理（UIGF v3.0，UIGF v4.0）
   - [x] 留影叙佳期画片查看
   - [x] 帖子收藏
 
@@ -66,6 +66,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 武器图鉴
   - [x] 名片图鉴
   - [x] 卡牌图鉴
+  - [x] 材料图鉴
 
 - 应用功能：
   - [x] 浅色/深色主题切换

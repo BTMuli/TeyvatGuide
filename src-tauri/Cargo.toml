@@ -16,8 +16,8 @@ tauri-build = { version = "2.0.0-beta.19", features = [] }
 chrono = "0.4.38"
 log = "0.4.22"
 serde = { version = "1.0.204", features = ["derive"] }
-serde_json = "1.0.120"
-tauri = { version = "2.0.0-beta.24", features = [] }
+serde_json = "1.0.121"
+tauri = { version = "2.0.0-beta.25", features = [] }
 tauri-utils = "2.0.0-beta.19"
 url = "2.5.2"
 walkdir = "2.5.0"
