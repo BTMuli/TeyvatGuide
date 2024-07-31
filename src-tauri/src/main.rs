@@ -1,6 +1,6 @@
 //! @file src/main.rs
 //! @desc 主模块，用于启动应用
-//! @since Beta v0.5.1
+//! @since Beta v0.5.2
 
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
@@ -45,7 +45,7 @@ fn main() {
     .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_process::init())
     .plugin(tauri_plugin_shell::init())
-    .plugin(plugins::build_sql_plugin())
+    .plugin(tauri_plugin_sql::Builder::default().build())
     .plugin(plugins::build_log_plugin())
     .setup(|_app| {
       let _window = _app.get_webview_window("TeyvatGuide");

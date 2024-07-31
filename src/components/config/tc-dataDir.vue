@@ -46,8 +46,8 @@
       </template>
       <template #append>
         <v-icon @click="confirmCLD()" style="cursor: pointer" title="清理日志文件"
-          >mdi-delete</v-icon
-        >
+          >mdi-delete
+        </v-icon>
         &emsp;
         <v-icon @click="openPath('log')" style="cursor: pointer" title="打开日志目录"
           >mdi-folder-open
@@ -64,6 +64,7 @@
 import { path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readDir, remove } from "@tauri-apps/plugin-fs";
+import { onMounted } from "vue";
 
 import TGSqlite from "../../plugins/Sqlite/index.js";
 import { useAppStore } from "../../store/modules/app.js";
@@ -73,6 +74,27 @@ import showConfirm from "../func/confirm.js";
 import showSnackbar from "../func/snackbar.js";
 
 const appStore = useAppStore();
+
+onMounted(async () => {
+  const logDir = await path.appLogDir();
+  const dbPath = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
+  let message = "";
+  if (appStore.dbPath !== dbPath) {
+    appStore.dbPath = dbPath;
+    await TGSqlite.saveAppData("dbPath", dbPath);
+    message += "数据库路径 ";
+  }
+  if (appStore.logDir !== logDir) {
+    appStore.logDir = logDir;
+    message += "日志路径 ";
+  }
+  if (message !== "") {
+    showSnackbar({
+      text: `${message}已更新!`,
+      color: "success",
+    });
+  }
+});
 
 async function confirmCUD(): Promise<void> {
   const oriDir = appStore.userDir;

@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.5.0
+ * @since Beta v0.5.2
  */
 
 import { path } from "@tauri-apps/api";
@@ -16,7 +16,7 @@ const userDataDir = `${await path.appLocalDataDir()}${path.sep()}userData`;
 // 用于存放数据库的路径
 const dbDataPath = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
 // 用于存放日志的路径
-const logDataDir = `${await path.appConfigDir()}${path.sep()}logs`;
+const logDataDir = await path.appLogDir();
 
 export const useAppStore = defineStore(
   "app",
