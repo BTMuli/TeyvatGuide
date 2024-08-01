@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { app, event, core, webviewWindow } from "@tauri-apps/api";
+import { app, event, core, webviewWindow, window as TauriWindow } from "@tauri-apps/api";
 import { PhysicalSize } from "@tauri-apps/api/dpi";
 import { UnlistenFn, Event } from "@tauri-apps/api/event";
 import { mkdir } from "@tauri-apps/plugin-fs";
@@ -52,24 +52,34 @@ onBeforeMount(async () => {
     await core.invoke("init_app");
     urlListener = await getDeepLink();
   }
-  await win.show();
   await checkResize();
+  await win.show();
 });
 
 async function checkResize(): Promise<void> {
-  const windowCur = await webviewWindow.getCurrent();
-  const winScale = await windowCur.scaleFactor();
-  if (winScale > 1) {
-    const newSize = getSize(windowCur.label);
-    await windowCur.setSize(newSize);
-    await windowCur.setZoom(1 / winScale);
-    await windowCur.center();
-  } else if (winScale === 1) {
-    const newSize = getSize(windowCur.label);
-    await windowCur.setSize(newSize);
-    await windowCur.setZoom(1);
-    await windowCur.center();
+  const screen = await TauriWindow.currentMonitor();
+  if (screen === null) {
+    showSnackbar({
+      text: "获取屏幕信息失败！",
+      color: "error",
+      timeout: 3000,
+    });
+    return;
   }
+  const windowCur = await webviewWindow.getCurrent();
+  if (await windowCur.isMaximized()) return;
+  const designSize = getSize(windowCur.label);
+  const widthScale = screen.size.width / 1920;
+  const heightScale = screen.size.height / 1080;
+  await windowCur.setSize(
+    new PhysicalSize(
+      Math.round(designSize.width * widthScale),
+      Math.round(designSize.height * heightScale),
+    ),
+  );
+  await windowCur.setZoom((1 / screen.scaleFactor) * Math.min(widthScale, heightScale));
+  await windowCur.center();
+  return;
 }
 
 function getSize(label: string): PhysicalSize {
