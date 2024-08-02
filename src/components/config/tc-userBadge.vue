@@ -1,5 +1,4 @@
 <template>
-  <ToGameLogin v-model="scan" @success="refreshUser" />
   <v-card class="tcu-box">
     <template #prepend>
       <v-avatar :image="userInfo.avatar" />
@@ -15,7 +14,6 @@
         icon="mdi-cellphone"
         title="验证码登录"
       />
-      <v-btn variant="outlined" @click="scan = true" icon="mdi-qrcode-scan" title="扫码登录" />
       <v-btn
         variant="outlined"
         @click="confirmRefreshUser"
@@ -42,7 +40,6 @@ import TGRequest from "../../web/request/TGRequest.js";
 import showConfirm from "../func/confirm.js";
 import showGeetest from "../func/geetest.js";
 import showSnackbar from "../func/snackbar.js";
-import ToGameLogin from "../overlay/to-gameLogin.vue";
 
 interface TcUserBadgeEmits {
   (e: "loadOuter", v: TGApp.Component.Loading.EmitParams): void;
@@ -54,7 +51,6 @@ const appStore = useAppStore();
 const userStore = storeToRefs(useUserStore());
 
 const loading = ref<boolean>(false);
-const scan = ref<boolean>(false);
 const userInfo = ref<TGApp.App.Account.BriefInfo>({
   nickname: "未登录",
   uid: "-1",
@@ -141,7 +137,7 @@ async function refreshUser() {
     await TGLogger.Error("[tc-userBadge][refreshUser] cookie 不存在");
     showSnackbar({
       color: "error",
-      text: "扫码登录后才能刷新用户信息!",
+      text: "登录后才能刷新用户信息!",
     });
     appStore.isLogin = false;
     return;
