@@ -1,7 +1,7 @@
 /**
  * @file web/utils/parseAnno.ts
  * @description 解析游戏内公告数据
- * @since Beta v0.5.0
+ * @since Beta v0.5.2
  */
 
 import { saveImgLocal } from "../../utils/TGShare.js";
@@ -30,7 +30,7 @@ function parseAnnoA(a: HTMLAnchorElement): HTMLAnchorElement {
 
 /**
  * @description 解析 p
- * @since Beta v0.4.7
+ * @since Beta v0.5.2
  * @param {HTMLParagraphElement} p p 元素
  * @returns {HTMLParagraphElement} 解析后的 p 元素
  */
@@ -40,6 +40,7 @@ function parseAnnoP(p: HTMLParagraphElement): HTMLParagraphElement {
   } else {
     p.querySelectorAll("*").forEach((child) => {
       child.innerHTML = decodeRegExp(child.innerHTML);
+      child.querySelectorAll("span").forEach((span) => parseAnnoSpan(span));
     });
   }
   return p;

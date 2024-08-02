@@ -212,6 +212,15 @@ function getAnnoTime(content: string): string | false {
   }
   if (content.match(regexes[3])) {
     const res = content.match(regexes[3]);
+    try {
+      const span1 = document.createElement("span");
+      span1.innerHTML = res?.[1] ?? "";
+      const span2 = document.createElement("span");
+      span2.innerHTML = res?.[2] ?? "";
+      return `${span1.innerText} ~ ${span2.innerText}`;
+    } catch (e) {
+      console.error(e);
+    }
     return `${res?.[1]} ~ ${res?.[2]}`;
   }
   if (content.match(regexes[4])) {
