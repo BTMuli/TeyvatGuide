@@ -136,7 +136,7 @@ onMounted(async () => {
   if (!postId) {
     loadingEmpty.value = true;
     loadingTitle.value = "未找到数据";
-    await webviewWindow.getCurrent().setTitle("未找到数据");
+    await webviewWindow.getCurrentWebviewWindow().setTitle("未找到数据");
     await TGLogger.Error("[t-post][onMounted] PostID 不存在");
     return;
   }
@@ -147,7 +147,9 @@ onMounted(async () => {
     loadingTitle.value = "正在渲染数据...";
     renderPost.value = getRenderPost(postData.value);
     shareTitle.value = `Post_${postId}`;
-    await webviewWindow.getCurrent().setTitle(`Post_${postId} ${postData.value.post.subject}`);
+    await webviewWindow
+      .getCurrentWebviewWindow()
+      .setTitle(`Post_${postId} ${postData.value.post.subject}`);
   } catch (error) {
     if (error instanceof Error) {
       await TGLogger.Error(`[t-post][${postId}] ${error.name}: ${error.message}`);
@@ -159,7 +161,7 @@ onMounted(async () => {
       loadingSub.value = "请检查帖子是否存在或者是否为合法的帖子";
     }
     loadingEmpty.value = true;
-    await webviewWindow.getCurrent().setTitle(`Post_${postId} Parsing Error`);
+    await webviewWindow.getCurrentWebviewWindow().setTitle(`Post_${postId} Parsing Error`);
     return;
   }
   await TGLogger.Info(`[t-post][${postId}][onMounted] ${postData.value.post.subject}`);

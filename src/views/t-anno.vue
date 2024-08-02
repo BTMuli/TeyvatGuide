@@ -75,7 +75,9 @@ onMounted(async () => {
     annoHtml.value = await TGUtils.Anno.parseContent(annoData.value.content);
     if (annoData.value.banner !== "") annoBanner.value = await saveImgLocal(annoData.value.banner);
     annoTitle.value = `Anno_${annoId}`;
-    await webviewWindow.getCurrent().setTitle(`Anno_${annoId} ${annoData.value.title}`);
+    await webviewWindow
+      .getCurrentWebviewWindow()
+      .setTitle(`Anno_${annoId} ${annoData.value.title}`);
     annoRef.value = <HTMLElement>document.querySelector(".anno-body");
   } catch (error) {
     if (error instanceof Error)
@@ -83,7 +85,7 @@ onMounted(async () => {
     else console.error(error);
     loadingEmpty.value = true;
     loadingTitle.value = "公告不存在或解析失败";
-    await webviewWindow.getCurrent().setTitle(`Anno_${annoId} Parsing Error`);
+    await webviewWindow.getCurrentWebviewWindow().setTitle(`Anno_${annoId} Parsing Error`);
     return;
   }
   // 打开 json

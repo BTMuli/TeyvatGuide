@@ -6,14 +6,14 @@
   "permissions": [
     "dialog:allow-message",
     "dialog:default",
-    "event:allow-emit",
+    "core:event:allow-emit",
     "http:allow-fetch",
-    "webview:allow-set-webview-zoom",
-    "webview:default",
-    "window:allow-center",
-    "window:default",
-    "path:allow-resolve-directory",
-    "path:default",
+    "core:webview:allow-set-webview-zoom",
+    "core:webview:default",
+    "core:window:allow-center",
+    "core:window:default",
+    "core:path:allow-resolve-directory",
+    "core:path:default",
     {
       "identifier": "fs:allow-exists",
       "allow": [

@@ -301,7 +301,7 @@ onMounted(async () => {
     const theme = e.payload;
     themeGet.value = theme === "default" ? "default" : "dark";
   });
-  if (webviewWindow.getCurrent().label === "TeyvatGuide") {
+  if (webviewWindow.getCurrentWebviewWindow().label === "TeyvatGuide") {
     await mhyClient.run();
   }
   if (userStore.briefInfo.value && userStore.briefInfo.value.nickname) {

@@ -43,7 +43,7 @@ let themeListener: UnlistenFn;
 let urlListener: UnlistenFn;
 
 onBeforeMount(async () => {
-  const win = webviewWindow.getCurrent();
+  const win = webviewWindow.getCurrentWebviewWindow();
   isMain.value = win.label === "TeyvatGuide";
   if (isMain.value) {
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
@@ -66,7 +66,7 @@ async function checkResize(): Promise<void> {
     });
     return;
   }
-  const windowCur = await webviewWindow.getCurrent();
+  const windowCur = await webviewWindow.getCurrentWebviewWindow();
   if (await windowCur.isMaximized()) return;
   const designSize = getSize(windowCur.label);
   const widthScale = screen.size.width / 1920;
