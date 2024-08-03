@@ -63,6 +63,7 @@ onMounted(async () => {
   const width = highestResolution.width;
   const height = highestResolution.height;
   if (width && height) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     width > height
       ? (vodAspectRatio.value = width / height)
       : (vodAspectRatio.value = height / width);
@@ -118,7 +119,7 @@ onMounted(async () => {
   };
   container.value = new Artplayer(option);
   container.value?.on("fullscreen", async (state) => {
-    await TauriWindow.getCurrent().setFullscreen(state);
+    await TauriWindow.getCurrentWindow().setFullscreen(state);
   });
 });
 
