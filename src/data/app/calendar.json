@@ -1409,7 +1409,7 @@
   },
   {
     "id": 10000099,
-    "contentId": 0,
+    "contentId": 501441,
     "dropDays": [3, 6, 7],
     "name": "艾梅莉埃",
     "itemType": "character",
@@ -6094,7 +6094,7 @@
   },
   {
     "id": 13513,
-    "contentId": 0,
+    "contentId": 501725,
     "dropDays": [3, 6, 7],
     "name": "柔灯挽歌",
     "itemType": "weapon",
