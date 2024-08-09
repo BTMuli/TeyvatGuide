@@ -42,7 +42,6 @@ watch(show, () => {
 async function displayBox(
   props: TGApp.Plugins.Mys.Geetest.reqResp,
 ): Promise<TGApp.Plugins.Mys.Geetest.validateResp | false> {
-  show.value = true;
   return await new Promise<TGApp.Plugins.Mys.Geetest.validateResp>((resolve) => {
     // eslint-disable-next-line no-undef
     initGeetest(
@@ -58,6 +57,9 @@ async function displayBox(
       (captchaObj: TGApp.Plugins.Mys.Geetest.GeetestCaptcha) => {
         geetestRef.value.innerHTML = "";
         captchaObj.appendTo("#geetest");
+        captchaObj.onReady(() => {
+          show.value = true;
+        });
         captchaObj.onSuccess(async () => {
           const validate = captchaObj.getValidate();
           resolve(validate);

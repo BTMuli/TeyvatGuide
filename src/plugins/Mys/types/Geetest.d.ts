@@ -1,12 +1,12 @@
 /**
  * @file plugins/Mys/types/Geetest.d.ts
  * @description Mys 插件 Geetest 类型定义文件
- * @since Beta v0.5.1
+ * @since Beta v0.5.2
  */
 
 /**
  * @description Mys 插件 Geetest 类型
- * @since Beta v0.5.1
+ * @since Beta v0.5.2
  * @namespace TGApp.Plugins.Mys.Geetest
  * @memberof TGApp.Plugins.Mys
  */
@@ -66,12 +66,13 @@ declare namespace TGApp.Plugins.Mys.Geetest {
 
   /**
    * @description Geetest 插件 captchaObj
-   * @since Beta v0.5.1
+   * @since Beta v0.5.2
    * @interface GeetestCaptcha
    * @property {Function} appendTo
    * @property {Function} getValidate
    * @property {Function} onSuccess
    * @property {Function} onClose
+   * @property {Function} onReady
    * @return GeetestCaptcha
    */
   interface GeetestCaptcha {
@@ -79,6 +80,7 @@ declare namespace TGApp.Plugins.Mys.Geetest {
     getValidate: () => validateResp;
     onSuccess: (callback: () => void) => void;
     onClose: (callback: () => void) => void;
+    onReady: (callback: () => void) => void;
   }
 
   /**

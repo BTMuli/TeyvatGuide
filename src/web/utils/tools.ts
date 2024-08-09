@@ -4,7 +4,7 @@
  * @since Beta v0.4.3
  */
 
-import TGConstant from "../constant/TGConstant";
+import TGConstant from "../constant/TGConstant.js";
 
 /**
  * @description 转义正则表达式

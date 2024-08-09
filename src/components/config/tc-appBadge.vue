@@ -52,7 +52,7 @@ function toStore() {
 }
 
 function toSite() {
-  window.open("https://app.btmuli.ink/docs/Changelogs.html");
+  window.open("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");
 }
 </script>
 <style lang="css" scoped>
