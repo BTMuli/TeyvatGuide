@@ -2,12 +2,21 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-07-09
-Update: 2024-07-31
+Update: 2024-08-11
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-07-09 14:16:16`
 >
-> 更新于 `2024-07-31 18:18:53`
+> 更新于 `2024-08-11 15:43:34`
+
+## [0.5.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.5.2) (2024-08-11)
+
+- 🐛 修复日志目录异常
+- ♻️ 重构窗体/缩放调整逻辑
+- 🐛 修复公告时间获取异常&内容渲染异常
+- 🔥 移除扫码登录模块
+  👽️ 调整更新日志链接
+- 🍱 更新4.8下半数据
 
 ## [0.5.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.5.1) (2024-07-30)
 
