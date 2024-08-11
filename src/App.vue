@@ -52,7 +52,8 @@ onBeforeMount(async () => {
     await core.invoke("init_app");
     urlListener = await getDeepLink();
   }
-  await checkResize();
+  if (appStore.needResize === undefined) appStore.needResize = true;
+  if (appStore.needResize) await checkResize();
   await win.show();
 });
 

@@ -45,6 +45,22 @@
           />
         </template>
       </v-list-item>
+      <v-list-item title="窗口回正" subtitle="根据分辨率动态调整窗体大小">
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-window-restore</v-icon>
+          </div>
+        </template>
+        <template #append>
+          <v-switch
+            v-model="appStore.needResize"
+            :label="appStore.needResize ? '开启' : '关闭'"
+            :inset="true"
+            color="#FAC51E"
+            @click="submitResize"
+          />
+        </template>
+      </v-list-item>
       <v-list-item>
         <template #prepend>
           <div class="config-icon">
@@ -442,9 +458,20 @@ async function confirmResetDB(title?: string): Promise<void> {
 
 // 开启 dev 模式
 function submitDevMode(): void {
-  appStore.devMode
-    ? showSnackbar({ text: "已关闭 dev 模式!" })
-    : showSnackbar({ text: "已开启 dev 模式!" });
+  if (appStore.devMode) {
+    showSnackbar({ text: "已关闭 dev 模式!" });
+    return;
+  }
+  showSnackbar({ text: "已开启 dev 模式!" });
+}
+
+// 开启窗口回正
+function submitResize(): void {
+  if (appStore.needResize) {
+    showSnackbar({ text: "已开启窗口回正!" });
+    return;
+  }
+  showSnackbar({ text: "已关闭窗口回正!" });
 }
 
 // 通过子组件的事件来控制 loading

@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.5.2
+ * @since Beta v0.5.3
  */
 
 import { path } from "@tauri-apps/api";
@@ -50,6 +50,8 @@ export const useAppStore = defineStore(
     const lang = ref<AnnoLang>("zh-cn");
     // 最近的咨讯类型
     const recentNewsType = ref("notice");
+    // 是否开启分辨率回正
+    const needResize = ref<boolean | undefined>(true);
 
     // 初始化
     function init(): void {
@@ -61,6 +63,7 @@ export const useAppStore = defineStore(
       server.value = AnnoServer.CN_ISLAND;
       lang.value = "zh-cn";
       recentNewsType.value = "notice";
+      needResize.value = true;
       initDevice();
     }
 
@@ -87,6 +90,7 @@ export const useAppStore = defineStore(
       server,
       lang,
       recentNewsType,
+      needResize,
       init,
       changeTheme,
     };
@@ -101,7 +105,7 @@ export const useAppStore = defineStore(
       {
         key: "app",
         storage: window.localStorage,
-        paths: ["devMode", "loading", "buildTime", "isLogin"],
+        paths: ["devMode", "loading", "buildTime", "isLogin", "needResize"],
       },
       {
         key: "sidebar",
