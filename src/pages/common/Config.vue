@@ -468,10 +468,10 @@ function submitDevMode(): void {
 // 开启窗口回正
 function submitResize(): void {
   if (appStore.needResize) {
-    showSnackbar({ text: "已开启窗口回正!" });
+    showSnackbar({ text: "已关闭窗口回正!" });
     return;
   }
-  showSnackbar({ text: "已关闭窗口回正!" });
+  showSnackbar({ text: "已开启窗口回正!" });
 }
 
 // 通过子组件的事件来控制 loading
