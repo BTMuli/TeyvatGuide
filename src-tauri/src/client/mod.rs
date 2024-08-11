@@ -1,8 +1,10 @@
 //! @file src/client/mod.rs
 //! @desc 客户端模块，负责操作米游社客户端
-//! @since Beta v0.5.0
+//! @since Beta v0.5.2
 
 mod menu;
+mod utils;
+
 use tauri::{AppHandle, Manager, WebviewWindowBuilder};
 use tauri_utils::config::WebviewUrl;
 
@@ -29,8 +31,9 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
     window_find.unwrap().destroy().unwrap();
     return;
   }
+  let trans_size = utils::get_window_size(handle.clone(), win_width, win_height);
   WebviewWindowBuilder::new(&handle, "mhy_client", url_parse)
-    .inner_size(win_width, win_height)
+    .inner_size(trans_size.0, trans_size.1)
     .title("米游社")
     .center()
     .user_agent(win_ua)

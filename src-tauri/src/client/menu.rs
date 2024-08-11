@@ -1,7 +1,8 @@
 //! @file src/client/menu.rs
 //! @desc 客户端菜单模块，负责操作米游社客户端菜单
-//! @since Beta v0.5.0
+//! @since Beta v0.5.2
 
+use crate::client::utils;
 use tauri::menu::{Menu, MenuBuilder, MenuEvent, MenuItemBuilder, Submenu, SubmenuBuilder};
 use tauri::{AppHandle, LogicalSize, Manager, Size, Window, Wry};
 use tauri_utils::config::WebviewUrl;
@@ -21,7 +22,7 @@ pub fn get_mhy_client_url(func: String) -> WebviewUrl {
             .parse()
             .unwrap();
   }
-  return WebviewUrl::External(url_res);
+  WebviewUrl::External(url_res)
 }
 
 // 创建子菜单-工具
@@ -39,7 +40,7 @@ fn create_utils_menu(app: AppHandle) -> Submenu<Wry> {
     .item(&rotate_window_submenu)
     .build()
     .expect("failed to create utils_menu");
-  return utils_menu;
+  utils_menu
 }
 
 // 创建米游社客户端菜单
@@ -48,13 +49,13 @@ pub fn create_mhy_menu(app: AppHandle) -> Menu<Wry> {
   let cancel_top_menu = MenuItemBuilder::with_id("cancel_top", "取消置顶").build(&app).unwrap();
   let open_post_menu = MenuItemBuilder::with_id("open_post", "打开帖子").build(&app).unwrap();
   let utils_menu = create_utils_menu(app.clone());
-  return MenuBuilder::new(&app)
+  MenuBuilder::new(&app)
     .item(&top_menu)
     .item(&cancel_top_menu)
     .item(&open_post_menu)
     .item(&utils_menu)
     .build()
-    .expect("failed to create mhy_menu");
+    .expect("failed to create mhy_menu")
 }
 
 // 菜单栏事件处理
@@ -181,10 +182,17 @@ fn handle_menu_rotate_window(app_handle: &Window) {
   let window = window_get.unwrap();
   // 获取窗口宽高比
   let cur_size = window.inner_size().ok().unwrap();
+  let monitor = window.primary_monitor().ok().unwrap().unwrap();
   if cur_size.width > cur_size.height {
-    window.set_size(Size::Logical(LogicalSize { width: 400.0, height: 800.0 })).unwrap();
+    let trans_size = utils::get_window_size2(monitor, 400.0, 800.0);
+    window
+      .set_size(Size::Logical(LogicalSize { width: trans_size.0, height: trans_size.1 }))
+      .unwrap();
   } else {
-    window.set_size(Size::Logical(LogicalSize { width: 1280.0, height: 720.0 })).unwrap();
+    let trans_size = utils::get_window_size2(monitor, 1280.0, 720.0);
+    window
+      .set_size(Size::Logical(LogicalSize { width: trans_size.0, height: trans_size.1 }))
+      .unwrap();
   }
   window.center().unwrap();
   window.set_focus().unwrap();
