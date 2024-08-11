@@ -63,8 +63,8 @@ onMounted(async () => {
     is_over: voteResult.is_over,
     data: voteInfo.vote_option_indexes.map((item, index) => ({
       title: item,
-      count: voteResult.option_stats[index],
-      percent: (voteResult.option_stats[index] / voteResult.user_cnt) * 100,
+      count: voteResult.option_stats[index] ?? 0,
+      percent: ((voteResult.option_stats[index] ?? 0) / voteResult.user_cnt) * 100,
     })),
   };
 });
