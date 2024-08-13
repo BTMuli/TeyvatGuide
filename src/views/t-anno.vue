@@ -9,7 +9,7 @@
     :title="annoTitle"
   />
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" :empty="loadingEmpty" />
-  <div class="anno-body">
+  <div class="anno-body" v-if="annoData">
     <div class="anno-info">AnnoID: {{ annoId }} | Render by TeyvatGuide v{{ appVersion }}</div>
     <div class="anno-title">
       {{ annoData.title }}
@@ -17,8 +17,10 @@
     <div class="anno-subtitle">
       {{ parseText(annoData.subtitle) }}
     </div>
-    <img v-if="annoData.banner !== ''" :src="annoBanner" alt="cover" class="anno-img" />
-    <div class="anno-content" v-html="annoHtml" />
+    <!--    <div class="anno-content" v-html="annoHtml" />-->
+    <div class="anno-content">
+      <TaParser :data="annoData" />
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -26,16 +28,15 @@ import { app, webviewWindow } from "@tauri-apps/api";
 import { ref, onMounted, watch, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 
+import TaParser from "../components/anno/ta-parser.vue";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import { useAppStore } from "../store/modules/app.js";
 import TGLogger from "../utils/TGLogger.js";
-import { saveImgLocal } from "../utils/TGShare.js";
 import { createTGWindow } from "../utils/TGWindow.js";
 import { AnnoLang, AnnoServer } from "../web/request/getAnno.js";
 import TGRequest from "../web/request/TGRequest.js";
-import TGUtils from "../web/utils/TGUtils.js";
 
 // loading
 const loading = ref<boolean>(true);
@@ -54,9 +55,7 @@ const annoId = Number(route.params.anno_id);
 const region = <AnnoServer>route.params.region;
 const lang = <AnnoLang>route.params.lang;
 const appVersion = ref<string>();
-const annoData = ref<TGApp.BBS.Announcement.ContentItem>(<TGApp.BBS.Announcement.ContentItem>{});
-const annoHtml = ref<string>();
-const annoBanner = ref<string>();
+const annoData = ref<TGApp.BBS.Announcement.ContentItem | undefined>();
 
 onMounted(async () => {
   appVersion.value = await app.getVersion();
@@ -72,8 +71,6 @@ onMounted(async () => {
   try {
     annoData.value = await TGRequest.Anno.getContent(annoId, region, lang);
     loadingTitle.value = "正在渲染数据...";
-    annoHtml.value = await TGUtils.Anno.parseContent(annoData.value.content);
-    if (annoData.value.banner !== "") annoBanner.value = await saveImgLocal(annoData.value.banner);
     annoTitle.value = `Anno_${annoId}`;
     await webviewWindow
       .getCurrentWebviewWindow()

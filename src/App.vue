@@ -308,7 +308,7 @@ onUnmounted(() => {
   if (urlListener) urlListener();
 });
 </script>
-<style lang="css">
+<style lang="css" scoped>
 .app-container {
   height: 100%;
   background: var(--app-page-bg);

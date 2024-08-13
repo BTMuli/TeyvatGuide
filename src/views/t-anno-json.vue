@@ -9,7 +9,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { webviewWindow } from "@tauri-apps/api";
 import { ref, onMounted, reactive } from "vue";
 import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";

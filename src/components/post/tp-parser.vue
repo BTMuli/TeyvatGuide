@@ -89,25 +89,15 @@ function getParsedText(data: TpTextType): TpTextType[] {
 
 function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base) {
   if (tp.children) return TpTexts;
-  if (typeof tp.insert === "string") {
-    return TpText;
-  } else if ("image" in tp.insert) {
-    return TpImage;
-  } else if ("vod" in tp.insert) {
-    return TpVod;
-  } else if ("video" in tp.insert) {
-    return TpVideo;
-  } else if ("backup_text" in tp.insert) {
-    return TpBackupText;
-  } else if ("link_card" in tp.insert) {
-    return TpLinkCard;
-  } else if ("divider" in tp.insert) {
-    return TpDivider;
-  } else if ("mention" in tp.insert) {
-    return TpMention;
-  } else if ("vote" in tp.insert) {
-    return TpVote;
-  }
+  if (typeof tp.insert === "string") return TpText;
+  if ("image" in tp.insert) return TpImage;
+  if ("vod" in tp.insert) return TpVod;
+  if ("video" in tp.insert) return TpVideo;
+  if ("backup_text" in tp.insert) return TpBackupText;
+  if ("link_card" in tp.insert) return TpLinkCard;
+  if ("divider" in tp.insert) return TpDivider;
+  if ("mention" in tp.insert) return TpMention;
+  if ("vote" in tp.insert) return TpVote;
   return TpUnknown;
 }
 </script>

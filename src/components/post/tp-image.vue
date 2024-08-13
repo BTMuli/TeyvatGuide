@@ -28,6 +28,7 @@ export interface TpImage {
     align?: "center"; // 待补充
   };
 }
+
 interface TpImageProps {
   data: TpImage;
 }
@@ -66,6 +67,7 @@ function getImageTitle(): string {
 function getImageUrl(): string {
   const img = props.data.insert.image;
   const append = "?x-oss-process=image/format,png";
+  console.log("getImageUrl", img, append);
   if (img.endsWith(".gif")) return img;
   return img + append;
 }
