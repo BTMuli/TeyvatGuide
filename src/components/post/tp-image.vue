@@ -2,7 +2,7 @@
   <div class="tp-image-box" @click="showOverlay = true">
     <img
       :style="getImageStyle()"
-      :src="getImageUrl()"
+      :src="localUrl"
       :alt="props.data.insert.image"
       :title="getImageTitle()"
     />
@@ -10,8 +10,9 @@
   <TpoImage :image="props.data" v-model="showOverlay" />
 </template>
 <script lang="ts" setup>
-import { StyleValue, ref } from "vue";
+import { StyleValue, ref, onMounted, onUnmounted } from "vue";
 
+import { saveImgLocal } from "../../utils/TGShare.js";
 import { bytesToSize } from "../../utils/toolFunc.js";
 
 import TpoImage from "./tpo-image.vue";
@@ -35,8 +36,18 @@ interface TpImageProps {
 
 const props = defineProps<TpImageProps>();
 const showOverlay = ref(false);
+const localUrl = ref<string>();
 
 console.log("tp-image", props.data.insert.image, props.data.attributes);
+
+onMounted(async () => {
+  const link = getImageUrl();
+  localUrl.value = await saveImgLocal(link);
+});
+
+onUnmounted(() => {
+  if (localUrl.value) URL.revokeObjectURL(localUrl.value);
+});
 
 function getImageStyle(): StyleValue {
   let style: StyleValue = <Array<StyleValue>>[];
@@ -67,7 +78,6 @@ function getImageTitle(): string {
 function getImageUrl(): string {
   const img = props.data.insert.image;
   const append = "?x-oss-process=image/format,png";
-  console.log("getImageUrl", img, append);
   if (img.endsWith(".gif")) return img;
   return img + append;
 }
