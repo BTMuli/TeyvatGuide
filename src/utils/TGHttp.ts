@@ -61,7 +61,7 @@ async function TGHttp<T>(
     url += `?${query}`;
   }
   console.log("fetch url: ", url);
-  console.log("fetch options: ", fetchOptions);
+  console.log("fetch options: ", options);
   return await fetch(url, fetchOptions)
     .then((res) => {
       if (res.ok) {

@@ -53,7 +53,7 @@ declare namespace TGApp.Game.Avatar {
    * @property {number} rarity - 角色稀有度
    * @property {string} side_icon - 角色侧边头像
    * @property {Weapon} weapon - 角色武器
-   * @property {number} weapon_type - 角色武器类型 // todo: 需要查明枚举类型
+   * @property {number} weapon_type - 角色武器类型
    * @return Avatar
    */
   interface Avatar {
@@ -81,7 +81,7 @@ declare namespace TGApp.Game.Avatar {
    * @property {number} id - 武器 ID
    * @property {number} level - 武器等级
    * @property {number} rarity - 武器稀有度
-   * @property {number} type - 武器类型，与上面的 weapon_type 一致 // todo: 需要查明枚举类型
+   * @property {number} type - 武器类型，与上面的 weapon_type 一致
    * @return Weapon
    */
   interface Weapon {

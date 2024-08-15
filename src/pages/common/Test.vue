@@ -13,9 +13,56 @@
         </div>
       </div>
     </div>
+    <h1>数据请求测试</h1>
+    <div class="btn-list">
+      <v-btn class="test-btn" @click="tryGetList">获取角色列表</v-btn>
+      <v-btn class="test-btn" @click="tryGetDetail">获取角色详情</v-btn>
+    </div>
   </div>
 </template>
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import showSnackbar from "../../components/func/snackbar.js";
+import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
+import { useUserStore } from "../../store/modules/user.js";
+import TGRequest from "../../web/request/TGRequest.js";
+
+const userStore = useUserStore();
+
+async function tryGetList(): Promise<void> {
+  const ck = userStore.cookie;
+  if (!userStore.cookie) {
+    showSnackbar({ text: "请先登录！", color: "warn" });
+    return;
+  }
+  const cookie = { account_id: ck!.account_id, cookie_token: ck!.cookie_token };
+  const account = userStore.account;
+  const res = await TGRequest.User.byCookie.getAvatarList(cookie, account.gameUid);
+  if (!Array.isArray(res)) {
+    showSnackbar({ text: `[${res.retcode}] ${res.message}`, color: "error" });
+    return;
+  }
+  console.log(res);
+  showSnackbar({ text: "获取成功！", color: "success" });
+}
+
+async function tryGetDetail(): Promise<void> {
+  const ck = userStore.cookie;
+  if (!userStore.cookie) {
+    showSnackbar({ text: "请先登录！", color: "warn" });
+    return;
+  }
+  const cookie = { account_id: ck!.account_id, cookie_token: ck!.cookie_token };
+  const account = userStore.account;
+  const idList = await TSUserAvatar.getAllAvatarId();
+  const res = await TGRequest.User.byCookie.getAvatarDetail(cookie, account.gameUid, idList);
+  if ("retcode" in res) {
+    showSnackbar({ text: `[${res.retcode}] ${res.message}`, color: "error" });
+    return;
+  }
+  console.log(res);
+  showSnackbar({ text: "获取成功！", color: "success" });
+}
+</script>
 <style lang="css" scoped>
 .test-box {
   display: flex;
