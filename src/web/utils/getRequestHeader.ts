@@ -1,7 +1,7 @@
 /**
  * @file web/utils/getRequestHeader.ts
  * @description 获取请求头
- * @since Beta v0.3.9
+ * @since Beta v0.5.3
  */
 
 import Md5 from "js-md5";
@@ -67,7 +67,7 @@ function getDS(method: string, data: string, saltType: string, isSign: boolean):
 
 /**
  * @description 获取请求头
- * @since Beta v0.3.6
+ * @since Beta v0.5.3
  * @param {Record<string, string>} cookie cookie
  * @param {string} method 请求方法
  * @param {Record<string, string|number>|string} data 请求数据
@@ -78,7 +78,7 @@ function getDS(method: string, data: string, saltType: string, isSign: boolean):
 export function getRequestHeader(
   cookie: Record<string, string>,
   method: string,
-  data: Record<string, string | number> | string,
+  data: Record<string, string | number | string[]> | string,
   saltType: string,
   isSign: boolean = false,
 ): Record<string, string> {
