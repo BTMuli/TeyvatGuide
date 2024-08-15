@@ -98,7 +98,7 @@ declare namespace TGApp.Game.Avatar {
    * @interface AvatarDetail
    * @since Beta v0.5.3
    * @property {DetailList[]} list - 角色详情列表
-   * @property {PropMap[]} property_map - 角色属性映射
+   * @property {PropMap} property_map - 角色属性映射
    * @property {PropRecommend} relic_property_options - 圣遗物属性选项
    * @property {Record<string, string>} relic_wiki - 圣遗物属性对应的百科
    * @property {Record<string, string>} weapon_wiki - 武器属性对应的百科
@@ -107,7 +107,7 @@ declare namespace TGApp.Game.Avatar {
    */
   interface AvatarDetail {
     list: DetailList[];
-    property_map: PropMap[];
+    property_map: PropMap;
     relic_property_options: PropRecommend;
     relic_wiki: Record<string, string>;
     weapon_wiki: Record<string, string>;

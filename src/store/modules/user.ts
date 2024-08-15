@@ -1,7 +1,7 @@
 /**
  * @file store/modules/user.ts
  * @description 用户信息模块
- * @since Beta v0.5.1
+ * @since Beta v0.5.3
  */
 
 import { defineStore } from "pinia";
@@ -27,6 +27,7 @@ export const useUserStore = defineStore(
       regionName: "",
     });
     const cookie = ref<TGApp.User.Account.Cookie>();
+    const propMap = ref<TGApp.Game.Avatar.PropMap>();
 
     function getAllCookie(): string {
       let res = "";
@@ -59,6 +60,7 @@ export const useUserStore = defineStore(
       cookie,
       briefInfo,
       account,
+      propMap,
       getAllCookie,
     };
   },
@@ -78,6 +80,11 @@ export const useUserStore = defineStore(
         key: "account",
         storage: window.localStorage,
         paths: ["account"],
+      },
+      {
+        key: "propMap",
+        storage: window.localStorage,
+        paths: ["propMap"],
       },
     ],
   },

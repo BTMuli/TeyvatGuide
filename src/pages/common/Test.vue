@@ -61,6 +61,7 @@ async function tryGetDetail(): Promise<void> {
   }
   console.log(res);
   showSnackbar({ text: "获取成功！", color: "success" });
+  userStore.propMap = res.property_map;
 }
 </script>
 <style lang="css" scoped>
