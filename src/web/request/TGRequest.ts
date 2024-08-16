@@ -9,6 +9,7 @@ import { getAbyss } from "./getAbyss.js";
 import { getActionTicketBySToken } from "./getActionTicket.js";
 import { getAnnoContent, getAnnoList } from "./getAnno.js";
 import { getAvatarList, getAvatarDetail } from "./getAvatarDetail.js";
+import getCode from "./getCode.js";
 import { getCookieTokenByGameToken, getCookieTokenBySToken } from "./getCookieToken.js";
 import { getDeviceFp } from "./getDeviceFp.js";
 import { getGachaLog } from "./getGachaLog.js";
@@ -63,6 +64,9 @@ const TGRequest = {
       getSyncAvatarListAll,
       getSyncAvatarDetail,
     },
+  },
+  Nav: {
+    getCode,
   },
 };
 

@@ -264,4 +264,35 @@ declare namespace TGApp.BBS.Navigator {
       user_status: unknown;
     };
   }
+
+  /**
+   * @description 兑换码接口返回数据
+   * @interface CodeResponse
+   * @since Beta v0.5.3
+   * @extends TGApp.BBS.Response.BaseWithData
+   * @property {CodeData[]} data.code_list - 兑换码数据
+   * @return CodeResponse
+   */
+  interface CodeResponse extends TGApp.BBS.Response.BaseWithData {
+    data: {
+      code_list: CodeData[];
+    };
+  }
+
+  /**
+   * @description 兑换码数据
+   * @interface CodeData
+   * @since Beta v0.5.3
+   * @property {string} title - 兑换码标题，为html字符串
+   * @property {string} code - 兑换码
+   * @property {string} img - 兑换码图片
+   * @property {string} to_get_time - 过期时间，时间戳（单位：秒）
+   * @return CodeData
+   */
+  interface CodeData {
+    title: string;
+    code: string;
+    img: string;
+    to_get_time: string;
+  }
 }

@@ -4,19 +4,25 @@
       <img alt="navIcon" :src="navItem.icon" />
       <span>{{ navItem.name }}</span>
     </div>
+    <div v-if="props.modelValue === 2 && hasNav" class="tgn-nav">
+      <v-btn size="25" @click="tryGetCode" title="查看兑换码" icon="mdi-code-tags-check"></v-btn>
+    </div>
+    <ToLivecode v-model="showOverlay" :data="codeData" />
   </div>
 </template>
 <script lang="ts" setup>
 import { emit } from "@tauri-apps/api/event";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import Mys from "../../plugins/Mys/index.js";
 import { useAppStore } from "../../store/modules/app.js";
 import TGClient from "../../utils/TGClient.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { createPost } from "../../utils/TGWindow.js";
+import TGRequest from "../../web/request/TGRequest.js";
 import showConfirm from "../func/confirm.js";
 import showSnackbar from "../func/snackbar.js";
+import ToLivecode from "../overlay/to-livecode.vue";
 
 interface TGameNavProps {
   modelValue: number;
@@ -28,6 +34,13 @@ const props = withDefaults(defineProps<TGameNavProps>(), {
 
 const appStore = useAppStore();
 const nav = ref<TGApp.BBS.Navigator.Navigator[]>([]);
+const codeData = ref<TGApp.BBS.Navigator.CodeData[]>([]);
+const showOverlay = ref<boolean>(false);
+
+const hasNav = computed<boolean>(() => {
+  if (props.modelValue !== 2) return false;
+  return nav.value.find((item) => item.name === "前瞻直播") !== undefined;
+});
 
 onMounted(async () => await loadNav());
 
@@ -38,6 +51,34 @@ watch(
 
 async function loadNav(): Promise<void> {
   nav.value = await Mys.Posts.nav(props.modelValue);
+}
+
+async function tryGetCode(): Promise<void> {
+  if (props.modelValue !== 2) return;
+  const navFind = nav.value.find((item) => item.name === "前瞻直播");
+  if (!navFind) return;
+  const actId = new URL(navFind.app_path).searchParams.get("act_id");
+  if (!actId) {
+    showSnackbar({
+      text: "未找到活动ID",
+      color: "warn",
+    });
+    return;
+  }
+  const res = await TGRequest.Nav.getCode(actId);
+  if (!Array.isArray(res)) {
+    showSnackbar({
+      text: `[${res.retcode}] ${res.message}`,
+      color: "warn",
+    });
+    return;
+  }
+  codeData.value = res;
+  showSnackbar({
+    text: "获取兑换码成功",
+    color: "success",
+  });
+  showOverlay.value = true;
 }
 
 async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
