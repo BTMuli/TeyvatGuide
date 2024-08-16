@@ -11,11 +11,11 @@
     <div class="gro-mid-list">
       <div class="gro-ml-item">
         <span>4☆已垫</span>
-        <span>{{ reset4count }}</span>
+        <span>{{ reset4count - 1 }}</span>
       </div>
       <div class="gro-ml-item">
         <span>5☆已垫</span>
-        <span>{{ reset5count }}</span>
+        <span>{{ reset5count - 1 }}</span>
       </div>
       <div class="gro-ml-item">
         <span>5☆平均</span>
@@ -92,8 +92,8 @@ const startDate = ref<string>(""); // 最早的时间
 const endDate = ref<string>(""); // 最晚的时间
 const star5List = ref<renderGachaItem[]>([]); // 5星物品数据
 const star4List = ref<renderGachaItem[]>([]); // 4星物品数据
-const reset5count = ref<number>(0); // 5星垫抽数量
-const reset4count = ref<number>(0); // 4星垫抽数量
+const reset5count = ref<number>(1); // 5星垫抽数量
+const reset4count = ref<number>(1); // 4星垫抽数量
 const star3count = ref<number>(0); // 3星物品数量
 const star5avg = ref<string>(""); // 5星平均抽数
 const tab = ref<string>("5"); // tab
@@ -108,7 +108,7 @@ function loadData(): void {
   const tempData = props.dataVal;
   // 按照 id 升序
   tempData
-    .sort((a, b) => Number(a.id) - Number(b.id))
+    .sort((a, b) => a.id.localeCompare(b.id))
     .forEach((item) => {
       // 处理时间
       if (startDate.value === "" || item.time < startDate.value) startDate.value = item.time;
@@ -195,9 +195,9 @@ watch(
   () => {
     star5List.value = [];
     star4List.value = [];
-    reset5count.value = 0;
-    reset4count.value = 0;
-    star3count.value = 0;
+    reset5count.value = 1;
+    reset4count.value = 1;
+    star3count.value = 1;
     startDate.value = "";
     endDate.value = "";
     star5avg.value = "";
