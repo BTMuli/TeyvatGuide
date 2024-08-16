@@ -56,12 +56,18 @@ export const useUserStore = defineStore(
       return res;
     }
 
+    function getProp(prop: number): TGApp.Game.Avatar.PropMapItem | false {
+      if (!propMap.value) return false;
+      return propMap.value[prop.toString()] || false;
+    }
+
     return {
       cookie,
       briefInfo,
       account,
       propMap,
       getAllCookie,
+      getProp,
     };
   },
   {

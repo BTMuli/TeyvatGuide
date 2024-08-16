@@ -224,3 +224,31 @@ export function parseHtmlText(desc: string): string {
   desc = desc.replace(/\\n/g, "<br />");
   return desc;
 }
+
+/**
+ * @description 根据英文element获取中文
+ * @since Beta v0.5.3
+ * @param {string} element - 英文element
+ * @returns {string} 中文element
+ */
+export function getZhElement(element: string): string {
+  const elementUpper = element.toUpperCase();
+  switch (elementUpper) {
+    case "ANEMO":
+      return "风";
+    case "CRYO":
+      return "冰";
+    case "DENDRO":
+      return "草";
+    case "ELECTRO":
+      return "雷";
+    case "GEO":
+      return "岩";
+    case "HYDRO":
+      return "水";
+    case "PYRO":
+      return "火";
+    default:
+      return "未知";
+  }
+}

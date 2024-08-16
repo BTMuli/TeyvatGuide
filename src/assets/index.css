@@ -1,7 +1,7 @@
 /*
  * @file assets/index.css
  * @description 全局样式文件
- * @since Beta v0.3.5
+ * @since Beta v0.5.3
  */
 
 @import "fonts/index.css";
@@ -36,6 +36,14 @@
   --tgc-yellow-1: #ffcd0c; /* Genshin btn bg */
   --tgc-yellow-2: #f4d8a8; /* Genshin confirm text */
   --tgc-yellow-3: #e0c06b; /* Genshin btn border */
+
+  /* color one-dark */
+  --tgc-od-blue: #61afef; /* one-dark blue */
+  --tgc-od-green: #98c379; /* one-dark green */
+  --tgc-od-orange: #d19a66; /* one-dark orange */
+  --tgc-od-white: #abb2bf; /* one-dark white */
+  --tgc-od-red: #e06c75; /* one-dark red */
+  --tgc-od-purple: #c678dd; /* one-dark purple */
 
   /* some css same in dark and default theme */
   --tgc-btn-1: var(--tgc-dark-7); /* button bg */
