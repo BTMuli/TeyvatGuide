@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/index.ts
  * @description Sqlite 数据库操作类
- * @since Beta v0.5.0
+ * @since Beta v0.5.3
  */
 
 import { app } from "@tauri-apps/api";
@@ -14,7 +14,6 @@ import {
   insertAppData,
   insertGameAccountData,
   insertRecordData,
-  insertRoleData,
 } from "./sql/insertData.js";
 
 class Sqlite {
@@ -287,60 +286,6 @@ class Sqlite {
                  WHERE id = ${id}`;
     const res: TGApp.Sqlite.Character.AppData[] = await db.select(sql);
     return res[0];
-  }
-
-  /**
-   * @description 保存用户角色数据
-   * @since Beta v0.3.3
-   * @param {string} uid 用户 uid
-   * @param {TGApp.Game.Character.ListItem[]} data 角色数据
-   * @returns {Promise<void>}
-   */
-  public async saveUserCharacter(
-    uid: string,
-    data: TGApp.Game.Character.ListItem[],
-  ): Promise<void> {
-    const db = await this.getDB();
-    const sql = insertRoleData(uid, data);
-    await db.execute(sql);
-  }
-
-  /**
-   * @description 保存用户角色天赋数据
-   * @since Beta v0.3.3
-   * @param {string} uid 用户 uid
-   * @param {number} cid 角色 ID
-   * @param {TGApp.Sqlite.Character.RoleTalent[]} data 角色天赋数据
-   * @returns {Promise<void>}
-   */
-  public async saveUserCharacterTalent(
-    uid: string,
-    cid: number,
-    data: TGApp.Sqlite.Character.RoleTalent[],
-  ): Promise<void> {
-    const db = await this.getDB();
-    const sql = `UPDATE UserCharacters
-                 SET talent  = '${JSON.stringify(data)}',
-                     updated = datetime('now', 'localtime')
-                 WHERE uid = '${uid}'
-                   AND cid = ${cid}`;
-    await db.execute(sql);
-  }
-
-  /**
-   * @description 获取用户角色数据
-   * @since Beta v0.3.3
-   * @param {string} uid 用户 uid
-   * @returns {Promise<TGApp.Sqlite.Character.UserRole[]|false>}
-   */
-  public async getUserCharacter(uid: string): Promise<TGApp.Sqlite.Character.UserRole[] | false> {
-    const db = await this.getDB();
-    const sql = `SELECT *
-                 FROM UserCharacters
-                 WHERE uid = '${uid}'`;
-    const res: TGApp.Sqlite.Character.UserRole[] = await db.select(sql);
-    if (res.length === 0) return false;
-    return res;
   }
 
   /**

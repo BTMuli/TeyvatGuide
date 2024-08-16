@@ -123,12 +123,12 @@ declare namespace TGApp.Game.Avatar {
    * @property {Relic[]} relics - 角色圣遗物信息
    * @property {Constellation[]} constellations - 角色命座信息
    * @property {Costume[]} costumes - 角色时装信息
-   * @property {WeaponProp[]} selected_properties - 角色选中属性
-   * @property {WeaponProp[]} base_properties - 角色基础属性
-   * @property {WeaponProp[]} extra_properties - 角色额外属性
-   * @property {WeaponProp[]} element_properties - 角色元素属性
+   * @property {Prop[]} selected_properties - 角色选中属性
+   * @property {Prop[]} base_properties - 角色基础属性
+   * @property {Prop[]} extra_properties - 角色额外属性
+   * @property {Prop[]} element_properties - 角色元素属性
    * @property {Skill[]} skills - 角色技能信息
-   * @property {RelicRecommendProp[]} recommend_relic_properties - 推荐圣遗物属性
+   * @property {RelicRecommendProp} recommend_relic_property - 推荐圣遗物属性
    * @return DetailList
    */
   interface DetailList {
@@ -137,12 +137,12 @@ declare namespace TGApp.Game.Avatar {
     relics: Relic[];
     constellations: Constellation[];
     costumes: Costume[];
-    selected_properties: WeaponProp[];
-    base_properties: WeaponProp[];
-    extra_properties: WeaponProp[];
-    element_properties: WeaponProp[];
+    selected_properties: Prop[];
+    base_properties: Prop[];
+    extra_properties: Prop[];
+    element_properties: Prop[];
     skills: Skill[];
-    recommend_relic_properties: RelicRecommendProp[];
+    recommend_relic_property: RelicRecommendProp;
   }
 
   /**
@@ -159,8 +159,8 @@ declare namespace TGApp.Game.Avatar {
    * @property {string} type_name - 武器类型名称
    * @property {string} desc - 武器描述
    * @property {number} affix_level - 武器精炼等级
-   * @property {WeaponProp} main_property - 武器主属性
-   * @property {WeaponProp} sub_property - 武器副属性
+   * @property {Prop} main_property - 武器主属性
+   * @property {Prop} sub_property - 武器副属性
    * @return WeaponDetail
    */
   interface WeaponDetail {
@@ -174,21 +174,21 @@ declare namespace TGApp.Game.Avatar {
     type_name: string;
     desc: string;
     affix_level: number;
-    main_property: WeaponProp;
-    sub_property: WeaponProp;
+    main_property: Prop;
+    sub_property: Prop;
   }
 
   /**
    * @description 角色详情武器属性数据类型
-   * @interface WeaponProp
+   * @interface Prop
    * @since Beta v0.5.3
    * @property {number} property_type - 属性类型
    * @property {string} base - 基础属性
    * @property {string} add - 附加属性
    * @property {string} final - 最终属性
-   * @return WeaponProp
+   * @return Prop
    */
-  interface WeaponProp {
+  interface Prop {
     property_type: number;
     base: string;
     add: string;

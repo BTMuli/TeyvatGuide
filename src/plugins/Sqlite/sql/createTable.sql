@@ -1,6 +1,6 @@
--- @file plugins Sqlite sql createTable.sql
+-- @file plugins/Sqlite/sql/createTable.sql
 -- @brief sqlite数据库创建表语句
--- @since Beta v0.4.5
+-- @since Beta v0.5.3
 
 -- @brief 创建成就数据表
 create table if not exists Achievements
@@ -114,23 +114,24 @@ create table if not exists UserRecord
     updated      text
 );
 
+-- @brief 删除旧的角色数据表
+drop table if exists UserCharacters;
+
 -- @brief 创建角色数据表
 create table if not exists UserCharacters
 (
     uid                 integer,
     cid                 integer,
-    img                 text,
-    name                text,
-    fetter              integer,
-    level               integer,
-    element             text,
-    star                integer,
+    avatar              text,
     weapon              text,
-    reliquary           text,
-    constellation       text,
-    activeConstellation integer,
-    costume             text,
-    talent              text,
+    relics              text,
+    constellations      text,
+    costumes            text,
+    skills              text,
+    propSelected        text,
+    propBase            text,
+    propExtra           text,
+    propRecommend     text,
     updated             text,
     primary key (uid, cid)
 );

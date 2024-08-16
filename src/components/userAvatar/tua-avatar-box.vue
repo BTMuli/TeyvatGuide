@@ -9,7 +9,7 @@
       <div class="tua-abl-mid">
         <div class="tua-abl-fetter">
           <img src="/icon/material/105.webp" alt="fetter" />
-          <span>{{ props.modelValue.base.fetter }}</span>
+          <span>{{ props.modelValue.avatar.fetter }}</span>
         </div>
         <div class="tua-abl-other">
           <span v-if="!isFetterMax">
@@ -41,8 +41,8 @@
             <img :src="`/icon/relic/${index + 1}.webp`" alt="relic" v-if="relic === false" />
             <img :src="relic.icon" alt="relic" v-if="relic !== false" />
           </div>
-          <div class="tua-rl-bg" v-if="relic !== false">
-            <img :src="`/icon/bg/${relic.rarity}-Star.webp`" alt="bg" />
+          <div class="tua-rl-bg">
+            <img :src="`/icon/bg/${relic.rarity}-Star.webp`" alt="bg" v-if="relic !== false" />
           </div>
           <div :class="`tua-rl-relic rarity${relic.rarity}`" v-if="relic !== false">
             {{ relic.level }}
@@ -51,10 +51,18 @@
         <!-- 右侧数值及加成 -->
         <div class="tua-relic-right">
           <div class="tua-relic-name">
-            {{ relic === false ? getRelicName(index) : getPropName(relic) }}
+            {{ relic === false ? getRelicName(index) : relic.main_property.value }}
           </div>
-          <div class="tua-relic-prop">
-            {{ relic !== false ? relic.main_property.value : "" }}
+          <div class="tua-relic-prop" v-if="relic !== false">
+            <div v-if="getPropName(relic) !== false">
+              <img
+                v-if="getPropName(relic).icon !== ''"
+                :src="getPropName(relic).icon"
+                alt="prop"
+                :title="getPropName(relic).name"
+              />
+              <span v-else>{{ getPropName(relic)?.name }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -70,7 +78,7 @@ import { getZhElement } from "../../utils/toolFunc.js";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
 
 interface TuaAvatarBoxProps {
-  modelValue: TGApp.Game.Avatar.DetailList;
+  modelValue: TGApp.Sqlite.Character.UserRole;
 }
 
 type FixedLenArr<T, N extends number> = [T, ...T[]] & { length: N };
@@ -80,7 +88,7 @@ const props = defineProps<TuaAvatarBoxProps>();
 const userStore = useUserStore();
 
 const avatarBox = computed<TItemBoxData>(() => {
-  const avatar = props.modelValue.base;
+  const avatar = props.modelValue.avatar;
   return {
     size: "100px",
     height: "120px",
@@ -118,10 +126,10 @@ const weaponBox = computed<TItemBoxData>(() => {
   };
 });
 const isFetterMax = computed<boolean>(() => {
-  if (props.modelValue.base.id === 10000005 || props.modelValue.base.id === 10000007) {
+  if (props.modelValue.avatar.id === 10000005 || props.modelValue.avatar.id === 10000007) {
     return true;
   }
-  return props.modelValue.base.fetter === 10;
+  return props.modelValue.avatar.fetter === 10;
 });
 const skills = computed<TGApp.Game.Avatar.Skill[]>(() => {
   return props.modelValue.skills.filter((skill) => skill.skill_type === 1);
@@ -141,8 +149,8 @@ const nameCard = ref<string | false>(false);
 
 onMounted(async () => {
   if (!props.modelValue) return;
-  if (props.modelValue.base.id !== 10000005 && props.modelValue.base.id !== 10000007) {
-    const role = await TGSqlite.getAppCharacter(props.modelValue.base.id);
+  if (props.modelValue.avatar.id !== 10000005 && props.modelValue.avatar.id !== 10000007) {
+    const role = await TGSqlite.getAppCharacter(props.modelValue.avatar.id);
     nameCard.value = `/source/nameCard/profile/${role.nameCard}.webp`;
   } else {
     nameCard.value = "/source/nameCard/profile/原神·印象.webp";
@@ -154,9 +162,8 @@ function getRelicName(pos: number): string {
   return nameList[pos];
 }
 
-function getPropName(relic: TGApp.Game.Avatar.Relic): string {
-  const prop = userStore.getProp(relic.main_property.property_type);
-  return prop === false ? "" : prop.name;
+function getPropName(relic: TGApp.Game.Avatar.Relic): TGApp.Game.Avatar.PropMapItem | false {
+  return userStore.getProp(relic.main_property.property_type);
 }
 </script>
 <style lang="css" scoped>
@@ -307,8 +314,7 @@ function getPropName(relic: TGApp.Game.Avatar.Relic): string {
 
 .tua-abr-relic {
   display: flex;
-  width: 180px;
-  height: 60px;
+  width: 120px;
   align-items: center;
   justify-content: space-between;
   column-gap: 5px;
@@ -341,13 +347,15 @@ function getPropName(relic: TGApp.Game.Avatar.Relic): string {
 }
 
 .tua-rl-bg {
+  overflow: hidden;
   width: 100%;
   height: 100%;
+  border-radius: 50%;
+  background: var(--box-bg-3);
 
   img {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
   }
 }
 
@@ -398,7 +406,6 @@ function getPropName(relic: TGApp.Game.Avatar.Relic): string {
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  row-gap: 5px;
 }
 
 .tua-relic-name {
@@ -408,7 +415,15 @@ function getPropName(relic: TGApp.Game.Avatar.Relic): string {
 }
 
 .tua-relic-prop {
+  display: inline-flex;
   color: var(--box-text-4);
   font-size: 12px;
+
+  img {
+    width: 20px;
+    height: 20px;
+    filter: invert(0.5) contrast(1) drop-shadow(0 0 5px var(--common-shadow-4));
+    object-fit: contain;
+  }
 }
 </style>

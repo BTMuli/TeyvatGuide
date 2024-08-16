@@ -9,19 +9,13 @@
         <span v-else> 暂无数据 </span>
       </div>
       <div class="uc-top-btns" data-html2canvas-ignore>
-        <v-btn class="uc-top-btn" @click="refreshRoles()">
+        <v-btn class="uc-top-btn" @click="refresh()">
           <template #prepend>
             <v-icon>mdi-refresh</v-icon>
           </template>
-          更新角色数据
+          刷新
         </v-btn>
-        <v-btn class="uc-top-btn" @click="refreshTalent()">
-          <template #prepend>
-            <v-icon>mdi-refresh</v-icon>
-          </template>
-          更新天赋数据
-        </v-btn>
-        <v-btn class="uc-top-btn" @click="shareRoles()">
+        <v-btn class="uc-top-btn" @click="share()">
           <template #prepend>
             <v-icon>mdi-share</v-icon>
           </template>
@@ -30,7 +24,7 @@
       </div>
     </div>
     <div class="uc-grid">
-      <TucRoleBox
+      <TuaAvatarBox
         v-for="(role, index) in roleList"
         :key="index"
         :model-value="role"
@@ -38,31 +32,15 @@
       />
     </div>
   </div>
-  <TucDetailOverlay
-    v-if="!detailDev"
-    v-model="visible"
-    @clickL="clickOverlay('left')"
-    @clickR="clickOverlay('right')"
-    :data-val="dataVal"
-  />
-  <DucDetailOverlay
-    v-if="detailDev"
-    v-model="visible"
-    @clickL="clickOverlay('left')"
-    @clickR="clickOverlay('right')"
-    :data-val="dataVal"
-  />
 </template>
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
 import { onBeforeMount, onMounted, ref } from "vue";
 
-import DucDetailOverlay from "../../components/devCharacter/duc-detail-overlay.vue";
 import showSnackbar from "../../components/func/snackbar.js";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import TucDetailOverlay from "../../components/userCharacter/tuc-detail-overlay.vue";
-import TucRoleBox from "../../components/userCharacter/tuc-role-box.vue";
-import TGSqlite from "../../plugins/Sqlite/index.js";
+import TuaAvatarBox from "../../components/userAvatar/tua-avatar-box.vue";
+import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { generateShareImg } from "../../utils/TGShare.js";
@@ -87,23 +65,6 @@ const dataVal = ref<TGApp.Sqlite.Character.UserRole>(<TGApp.Sqlite.Character.Use
 const selectIndex = ref(0);
 const detailDev = ref(true);
 
-function clickOverlay(pos: "left" | "right") {
-  if (pos === "left") {
-    if (selectIndex.value === 0) {
-      selectIndex.value = roleList.value.length - 1;
-    } else {
-      selectIndex.value -= 1;
-    }
-  } else {
-    if (selectIndex.value === roleList.value.length - 1) {
-      selectIndex.value = 0;
-    } else {
-      selectIndex.value += 1;
-    }
-  }
-  dataVal.value = roleList.value[selectIndex.value];
-}
-
 onBeforeMount(() => {
   if (userStore.account.value) {
     user.value = userStore.account.value;
@@ -114,7 +75,7 @@ onMounted(async () => {
   await TGLogger.Info("[Character][onMounted] 进入角色页面");
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
-  await loadRole();
+  await load();
   loading.value = false;
 });
 
@@ -125,31 +86,28 @@ function switchOld(): void {
   });
 }
 
-async function loadRole(): Promise<void> {
+async function load(): Promise<void> {
   if (!user.value) return;
-  const roleData = await TGSqlite.getUserCharacter(user.value.gameUid);
-  if (roleData !== false) {
-    roleData.sort((a, b) => {
-      if (a.star !== b.star) return b.star - a.star;
-      if (a.element !== b.element) return a.element.localeCompare(b.element);
-      return a.cid - b.cid;
-    });
-    roleList.value = roleData;
-    dataVal.value = roleData[selectIndex.value];
-    isEmpty.value = false;
-    await TGLogger.Info(`[Character][loadRole][${user.value.gameUid}] 成功加载角色数据`);
-    await TGLogger.Info(
-      `[Character][loadRole][${user.value.gameUid}] 共获取到${roleData.length}个角色`,
-    );
-  } else {
-    await TGLogger.Warn(`[Character][loadRole][${user.value.gameUid}] 未获取到角色数据`);
-  }
+  const roleData = await TSUserAvatar.getAvatars(user.value.gameUid);
+  roleData.sort((a, b) => {
+    if (a.avatar.rarity !== b.avatar.rarity) return b.avatar.rarity - a.avatar.rarity;
+    if (a.avatar.element !== b.avatar.element)
+      return a.avatar.element.localeCompare(b.avatar.element);
+    return a.cid - b.cid;
+  });
+  roleList.value = roleData;
+  dataVal.value = roleData[selectIndex.value];
+  isEmpty.value = false;
+  await TGLogger.Info(`[Character][loadRole][${user.value.gameUid}] 成功加载角色数据`);
+  await TGLogger.Info(
+    `[Character][loadRole][${user.value.gameUid}] 共获取到${roleData.length}个角色`,
+  );
 }
 
-async function refreshRoles(): Promise<void> {
+async function refresh(): Promise<void> {
   if (!user.value) return;
   await TGLogger.Info(`[Character][refreshRoles][${user.value.gameUid}] 正在更新角色数据`);
-  loadingTitle.value = "正在获取角色数据";
+  loadingTitle.value = "正在获取角色列表";
   loading.value = true;
   if (!userStore.cookie.value) {
     showSnackbar({
@@ -162,94 +120,48 @@ async function refreshRoles(): Promise<void> {
   const cookie = {
     account_id: userStore.cookie.value.account_id,
     cookie_token: userStore.cookie.value.cookie_token,
-    ltoken: userStore.cookie.value.ltoken,
-    ltuid: userStore.cookie.value.ltuid,
   };
-  const res = await TGRequest.User.byLToken.getRoleList(cookie, user.value);
-  if (Array.isArray(res)) {
-    await TGLogger.Info(`[Character][refreshRoles][${user.value.gameUid}] 获取角色数据成功`);
-    await TGLogger.Info(
-      `[Character][refreshRoles][${user.value.gameUid}] 共获取到${res.length}个角色`,
+  const listRes = await TGRequest.User.byCookie.getAvatarList(cookie, user.value.gameUid);
+  if (!Array.isArray(listRes)) {
+    showSnackbar({
+      text: `[${listRes.retcode}] ${listRes.message}`,
+      color: "error",
+    });
+    await TGLogger.Error(`[Character][refreshRoles][${user.value.gameUid}] 获取角色列表失败`);
+    await TGLogger.Error(
+      `[Character][refreshRoles][${user.value.gameUid}] ${listRes.retcode} ${listRes.message}`,
     );
-    loadingTitle.value = "正在保存角色数据";
-    await TGSqlite.saveUserCharacter(user.value.gameUid, res);
-    loadingTitle.value = "正在更新角色数据";
-    await loadRole();
-  } else {
+    loading.value = false;
+    return;
+  }
+  const idList = listRes.map((i) => i.id.toString());
+  loadingTitle.value = "正在获取角色数据";
+  loadingSub.value = `共${idList.length}个角色`;
+  const res = await TGRequest.User.byCookie.getAvatarDetail(cookie, user.value.gameUid, idList);
+  if ("retcode" in res) {
     showSnackbar({
       text: `[${res.retcode}] ${res.message}`,
       color: "error",
     });
-    await TGLogger.Error(`[Character][refreshRoles][${user.value.gameUid}] 更新角色数据失败`);
+    await TGLogger.Error(`[Character][refreshRoles][${user.value.gameUid}] 获取角色数据失败`);
     await TGLogger.Error(
       `[Character][refreshRoles][${user.value.gameUid}] ${res.retcode} ${res.message}`,
     );
-  }
-  loading.value = false;
-}
-
-async function refreshTalent(): Promise<void> {
-  if (!user.value) return;
-  loadingTitle.value = "正在获取天赋数据";
-  loading.value = true;
-  if (!userStore.cookie.value) {
-    showSnackbar({
-      text: "请先登录",
-      color: "error",
-    });
     loading.value = false;
     return;
   }
-  for (const role of roleList.value) {
-    loadingTitle.value = `正在获取${role.name}的天赋数据`;
-    loadingSub.value = `CID：${role.cid}`;
-    const res = await TGRequest.User.calculate.getSyncAvatarDetail(
-      userStore.cookie.value.account_id,
-      userStore.cookie.value.cookie_token,
-      user.value.gameUid,
-      role.cid,
-    );
-    if ("skill_list" in res) {
-      const talent: TGApp.Sqlite.Character.RoleTalent[] = [];
-      res.skill_list.map((skill, index) => {
-        return talent.push({
-          id: skill.id,
-          pos: index,
-          level: skill.level_current,
-          max: skill.max_level,
-          name: skill.name,
-          icon: skill.icon,
-        });
-      });
-      const skillStr = talent.map((i) => `${i.id}:${i.level}`).join(",");
-      await TGLogger.Info(
-        `[Character][refreshTalent][${user.value.gameUid}] 成功获取到${role.name}的天赋数据 ${skillStr}`,
-      );
-      await TGSqlite.saveUserCharacterTalent(user.value.gameUid, role.cid, talent);
-    } else {
-      loadingTitle.value = `获取${role.name}的天赋数据失败`;
-      loadingSub.value = `[${res.retcode}] ${res.message}`;
-      await TGLogger.Error(
-        `[Character][refreshTalent][${user.value.gameUid}] 获取 ${role.name} 的天赋数据失败`,
-      );
-      await TGLogger.Error(
-        `[Character][refreshTalent][${user.value.gameUid}] ${res.retcode} ${res.message}`,
-      );
-      setTimeout(() => {}, 1000);
-    }
-  }
-  loadingTitle.value = "正在更新天赋数据";
-  loadingSub.value = "";
+  userStore.propMap.value = res.property_map;
+  loadingTitle.value = "正在保存角色数据";
+  await TSUserAvatar.saveAvatars(user.value.gameUid, res.list);
+  await TGLogger.Info(`[Character][refreshRoles][${user.value.gameUid}] 成功更新角色数据`);
+  await TGLogger.Info(
+    `[Character][refreshRoles][${user.value.gameUid}] 共更新${res.list.length}个角色`,
+  );
+  await load();
   loading.value = false;
-  showSnackbar({
-    text: "成功更新数据，即将刷新页面",
-  });
-  setTimeout(() => {
-    window.location.reload();
-  }, 1000);
 }
 
-async function shareRoles(): Promise<void> {
+async function share(): Promise<void> {
   if (!user.value) return;
   await TGLogger.Info(`[Character][shareRoles][${user.value.gameUid}] 正在生成分享图片`);
   const rolesBox = <HTMLElement>document.querySelector(".uc-box");
@@ -323,6 +235,6 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
 .uc-grid {
   display: grid;
   grid-gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
 }
 </style>

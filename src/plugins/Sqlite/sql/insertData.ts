@@ -1,7 +1,7 @@
 /**
- * @file plugins Sqlite sql insertData.ts
+ * @file plugins/Sqlite/sql/insertData.ts
  * @description Sqlite 插入数据 sql 语句
- * @since Beta v0.3.3
+ * @since Beta v0.5.3
  */
 
 import { transCharacterData, transFloorData } from "../utils/transAbyssData.js";
@@ -237,34 +237,32 @@ export function insertRecordData(data: TGApp.Game.Record.FullData, uid: string):
 
 /**
  * @description 插入用户角色数据
- * @since Alpha v0.2.1
+ * @since Beta v0.5.3
  * @param {string} uid 用户 UID
- * @param {TGApp.User.Character.Item[]} data 角色数据
+ * @param {TGApp.Game.Avatar.DetailList[]} data 角色数据
  * @returns {string} sql
  */
-export function insertRoleData(uid: string, data: TGApp.Game.Character.ListItem[]): string {
+export function insertRoleData(uid: string, data: TGApp.Game.Avatar.DetailList[]): string {
   const sql = data.map((item) => {
     const role = transUserRoles(item);
     return `
-        INSERT INTO UserCharacters (uid, cid, name, img, name, fetter, level, element, star, weapon, reliquary,
-                                    constellation, activeConstellation, costume, updated)
-        VALUES (${uid}, ${role.cid}, '${role.name}', '${role.img}', '${role.name}', ${role.fetter}, ${role.level},
-                '${role.element}', ${role.star}, '${role.weapon}', '${role.reliquary}', '${role.constellation}',
-                ${role.activeConstellation}, '${role.costume}', datetime('now', 'localtime'))
+        INSERT INTO UserCharacters (uid, cid, avatar, weapon, relics, constellations, costumes, skills,
+                                    propSelected, propBase, propExtra, propRecommend, updated)
+        VALUES (${uid}, ${role.cid}, '${role.avatar}', '${role.weapon}', '${role.relics}', '${role.constellations}',
+                '${role.costumes}', '${role.skills}', '${role.propSelected}', '${role.propBase}', '${role.propExtra}',
+                '${role.propRecommend}', datetime('now', 'localtime'))
         ON CONFLICT(uid, cid) DO UPDATE
-            SET name                = '${role.name}',
-                img                 = '${role.img}',
-                name                = '${role.name}',
-                fetter              = ${role.fetter},
-                level               = ${role.level},
-                element             = '${role.element}',
-                star                = ${role.star},
-                weapon              = '${role.weapon}',
-                reliquary           = '${role.reliquary}',
-                constellation       = '${role.constellation}',
-                activeConstellation = ${role.activeConstellation},
-                costume             = '${role.costume}',
-                updated             = datetime('now', 'localtime');
+            SET avatar         = '${role.avatar}',
+                weapon         = '${role.weapon}',
+                relics         = '${role.relics}',
+                constellations = '${role.constellations}',
+                costumes       = '${role.costumes}',
+                skills         = '${role.skills}',
+                propSelected   = '${role.propSelected}',
+                propBase       = '${role.propBase}',
+                propExtra      = '${role.propExtra}',
+                propRecommend  = '${role.propRecommend}',
+                updated        = datetime('now', 'localtime');
     `;
   });
   return sql.join("");
