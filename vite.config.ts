@@ -6,7 +6,6 @@
 
 import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vite";
-import { nodePolyfills } from "vite-plugin-node-polyfills";
 import VueDevtools from "vite-plugin-vue-devtools";
 import vuetify from "vite-plugin-vuetify";
 
@@ -14,7 +13,7 @@ import buildTimePlugin from "./src/utils/TGBuild.js";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), vuetify(), buildTimePlugin(), VueDevtools(), nodePolyfills()],
+  plugins: [vue(), vuetify(), buildTimePlugin(), VueDevtools()],
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   // prevent vite from obscuring rust errors

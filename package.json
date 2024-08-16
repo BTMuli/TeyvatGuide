@@ -133,7 +133,6 @@
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.0",
-    "vite-plugin-node-polyfills": "^0.22.0",
     "vite-plugin-vue-devtools": "^7.3.7",
     "vite-plugin-vuetify": "^2.0.4",
     "vue-eslint-parser": "^9.4.3",
