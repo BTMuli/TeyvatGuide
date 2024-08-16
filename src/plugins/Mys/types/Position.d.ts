@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/types/Position.d.ts
  * @description Mys 插件热点追踪接口
- * @since Alpha v0.2.1
+ * @since Beta v0.5.3
  */
 
 /**
@@ -74,10 +74,11 @@ declare namespace TGApp.Plugins.Mys.Position {
 
   /**
    * @description 渲染用的热点追踪信息
-   * @since Alpha v0.2.1
+   * @since Beta v0.5.3
    * @interface RenderCard
    * @property {string} title 标题
    * @property {number} postId 帖子ID
+   * @property {string} link 链接
    * @property {string} icon 图标
    * @property {string} abstract 摘要
    * @property time 时间
@@ -90,6 +91,7 @@ declare namespace TGApp.Plugins.Mys.Position {
   interface RenderCard {
     title: string;
     postId: number;
+    link: string;
     icon: string;
     abstract: string;
     time: {

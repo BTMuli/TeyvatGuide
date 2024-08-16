@@ -3,7 +3,7 @@
     <template #title>近期活动</template>
     <template #default>
       <div class="position-grid">
-        <v-card v-for="card in positionCards" :key="card.postId" rounded class="position-card">
+        <v-card v-for="(card, index) in positionCards" :key="index" rounded class="position-card">
           <v-list class="position-list">
             <v-list-item :title="card.title" :subtitle="card.abstract">
               <template #prepend>
@@ -12,9 +12,7 @@
                 </v-avatar>
               </template>
               <template #append>
-                <v-btn class="position-card-btn" @click="createPost(card.postId, card.title)">
-                  查看
-                </v-btn>
+                <v-btn class="position-card-btn" @click="openPosition(card)"> 查看</v-btn>
               </template>
             </v-list-item>
           </v-list>
@@ -41,8 +39,10 @@
 import { ref, onMounted, onUnmounted } from "vue";
 
 import Mys from "../../plugins/Mys/index.js";
+import { parseLink } from "../../utils/linkParser.js";
 import { createPost } from "../../utils/TGWindow.js";
 import { stamp2LastTime } from "../../utils/toolFunc.js";
+import showSnackbar from "../func/snackbar.js";
 
 import THomeCard from "./t-homecard.vue";
 
@@ -93,6 +93,19 @@ onMounted(async () => {
   });
   emits("success");
 });
+
+async function openPosition(card: TGApp.Plugins.Mys.Position.RenderCard): Promise<void> {
+  const res = await parseLink(card.link);
+  if (res === "post") await createPost(card.postId, card.title);
+  if (res === false) {
+    showSnackbar({
+      text: `未知链接:${card.link}`,
+      color: "error",
+      timeout: 3000,
+    });
+    return;
+  }
+}
 
 onUnmounted(() => {
   Object.keys(positionTimer.value).forEach((key) => {
