@@ -5,10 +5,17 @@
       data-html2canvas-ignore
       :id="`tp-vod-${props.data.insert.vod.id}`"
     ></div>
-    <div class="tp-vod-cover">
-      <img alt="cover" :src="props.data.insert.vod.cover" />
-      <img src="/source/UI/video_play.svg" alt="icon" />
-      <span>{{ getVodTime() }}</span>
+    <div class="tp-vod-share">
+      <img alt="cover" :src="props.data.insert.vod.cover" class="tp-vod-cover" />
+      <img src="/source/UI/video_play.svg" alt="icon" class="tp-vod-icon" />
+      <div class="tp-vod-time">
+        <v-icon size="12">mdi-clock-time-four-outline</v-icon>
+        <span>{{ getVodTime() }}</span>
+      </div>
+      <div class="tp-vod-view">
+        <v-icon size="12">mdi-eye</v-icon>
+        <span>{{ props.data.insert.vod.view_num ?? 0 }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -153,7 +160,7 @@ function getVodTime(): string {
   aspect-ratio: v-bind(vodAspectRatio);
 }
 
-.tp-vod-cover {
+.tp-vod-share {
   position: absolute;
   z-index: -1;
   top: 0;
@@ -167,28 +174,51 @@ function getVodTime(): string {
   aspect-ratio: v-bind(vodAspectRatio);
 }
 
-.tp-vod-cover :first-child {
+.tp-vod-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   object-fit: cover;
 }
 
-.tp-vod-cover :nth-child(2) {
+.tp-vod-icon {
   position: absolute;
-  top: calc(50% - 40px);
-  left: calc(50% - 40px);
-  width: 80px;
-  height: 80px;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  opacity: 0.8;
+  transform: translate(-50%, -50%);
 }
 
-.tp-vod-cover :nth-child(3) {
+.tp-vod-time {
   position: absolute;
-  right: 10px;
   bottom: 10px;
-  padding: 0 5px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  padding: 2px 5px;
   border-radius: 5px;
   background: rgb(0 0 0/50%);
   color: var(--tgc-white-4);
   font-family: var(--font-title);
   font-size: 12px;
+  gap: 5px;
+}
+
+.tp-vod-view {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  padding: 2px 5px;
+  border-radius: 5px;
+  background: rgb(0 0 0/50%);
+  color: var(--tgc-white-4);
+  font-family: var(--font-title);
+  font-size: 12px;
+  gap: 5px;
 }
 </style>
