@@ -23,13 +23,18 @@
         </v-btn>
       </div>
     </div>
-    <div class="uc-grid">
-      <TuaAvatarBox
-        v-for="(role, index) in roleList"
-        :key="index"
-        :model-value="role"
-        @click="selectRole(role)"
-      />
+    <div class="uc-content">
+      <div class="uc-left">
+        <div class="ucl-top"></div>
+        <div class="uc-grid">
+          <TuaAvatarBox
+            v-for="(role, index) in roleList"
+            :key="index"
+            :model-value="role"
+            @click="selectRole(role)"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -235,6 +240,6 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
 .uc-grid {
   display: grid;
   grid-gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 </style>
