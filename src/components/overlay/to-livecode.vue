@@ -8,7 +8,7 @@
         </template>
         <template #subtitle>
           <div v-html="item.title"></div>
-          <span>{{ timestampToDate(Number(item.to_get_time) * 1000) }} 过期</span>
+          <span>{{ timestampToDate(Number(item.to_get_time) * 1000) }}</span>
         </template>
         <template #prepend>
           <img :src="item.img" alt="icon" />
