@@ -14,6 +14,8 @@ import TpText from "../post/tp-text.vue";
 import TpTexts from "../post/tp-texts.vue";
 import TpUnknown from "../post/tp-unknown.vue";
 
+import TaTable from "./ta-table.vue";
+
 interface TaParserProps {
   data: TGApp.BBS.Announcement.ContentItem;
 }
@@ -25,6 +27,7 @@ function getTaName(ta: TGApp.Plugins.Mys.SctPost.Base) {
   if (typeof ta.insert === "string") return TpText;
   if ("image" in ta.insert) return TpImage;
   if ("backup_text" in ta.insert) return TpBackupText;
+  if ("table" in ta.insert) return TaTable;
   return TpUnknown;
 }
 </script>

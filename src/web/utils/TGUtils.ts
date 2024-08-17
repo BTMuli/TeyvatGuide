@@ -6,13 +6,11 @@
 
 import { getAnnoCard } from "./getAnnoCard.js";
 import { getRequestHeader } from "./getRequestHeader.js";
-import { parseAnnoContent } from "./parseAnno.js";
 import { getServerByUid, transCookie } from "./tools.js";
 
 const TGUtils = {
   Anno: {
     getCard: getAnnoCard,
-    parseContent: parseAnnoContent,
   },
   User: {
     getHeader: getRequestHeader,

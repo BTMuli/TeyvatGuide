@@ -47,7 +47,6 @@ const props = defineProps<TpTextProps>();
 const mode = ref<string>("text");
 const localEmojis = ref(localStorage.getItem("emojis"));
 const emojis = ref<TpText[]>([]);
-const router = useRouter();
 
 console.log("tpText", JSON.stringify(props.data.insert), toRaw(props.data)?.attributes);
 
@@ -100,7 +99,7 @@ async function toLink() {
   const link = props.data.attributes.link;
   const isPost = await parsePost(link);
   if (isPost !== false) {
-    await router.push({
+    await useRouter().push({
       name: "帖子详情",
       params: {
         post_id: isPost,

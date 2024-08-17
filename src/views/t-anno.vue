@@ -1,5 +1,3 @@
-<!-- eslint-disable vue/no-v-html -->
-<!-- todo 优化显示样式 -->
 <template>
   <TSwitchTheme />
   <TShareBtn
@@ -17,7 +15,6 @@
     <div class="anno-subtitle">
       {{ parseText(annoData.subtitle) }}
     </div>
-    <!--    <div class="anno-content" v-html="annoHtml" />-->
     <div class="anno-content">
       <TaParser :data="annoData" />
     </div>
@@ -137,5 +134,29 @@ onUnmounted(() => {
   font-family: var(--font-title);
   font-size: 14px;
 }
+
+.anno-body {
+  width: 800px;
+  margin: 0 auto;
+  font-family: var(--font-text);
+}
+
+.anno-title,
+.anno-subtitle {
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+}
+
+.anno-title {
+  font-size: 20px;
+}
+
+.anno-subtitle {
+  font-size: 16px;
+  opacity: 0.6;
+}
+
+.anno-content {
+  line-height: 2;
+}
 </style>
-<style lang="css" src="../assets/css/anno-parser.css" scoped></style>
