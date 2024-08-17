@@ -7,10 +7,6 @@
 <script lang="ts" setup>
 import { toRaw } from "vue";
 
-import TGClient from "../../utils/TGClient.js";
-import showConfirm from "../func/confirm.js";
-import showSnackbar from "../func/snackbar.js";
-
 export interface TpMention {
   insert: {
     mention: {
@@ -29,26 +25,9 @@ const props = defineProps<TpMentionProps>();
 console.log("tpMention", props.data.insert.mention.uid, toRaw(props.data).insert.mention);
 
 async function toLink(): Promise<void> {
-  let prefix = "";
   const uid = props.data.insert.mention.uid;
-  const confirm = await showConfirm({
-    title: "跳转提示",
-    text: "是否采用内置 JSBridge 跳转？",
-  });
-  if (confirm === undefined) {
-    showSnackbar({
-      text: "已取消跳转",
-      color: "info",
-    });
-    return;
-  }
-  if (confirm === true) {
-    prefix = "https://m.miyoushe.com/ys/#/accountCenter/0?id=";
-    await TGClient.open("mention", `${prefix}${uid}`);
-    return;
-  }
-  prefix = "https://www.miyoushe.com/ys/accountCenter/postList?id=";
-  window.open(`${prefix}${uid}`);
+  const link = `https://www.miyoushe.com/ys/accountCenter/postList?id=${uid}`;
+  window.open(link);
 }
 </script>
 <style lang="css" scoped>
