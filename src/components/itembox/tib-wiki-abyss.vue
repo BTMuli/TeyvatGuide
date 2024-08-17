@@ -36,13 +36,12 @@ const box = computed<TItemBoxData>(() => {
     height: "100px",
     icon: `/WIKI/character/${avatar.value?.id}.webp`,
     innerHeight: 20,
-    // 0.24688451 => 24.688%
     innerText: (props.modelValue.Rate * 100).toFixed(3) + "%",
     lt:
       avatar.value.element !== ""
         ? `/icon/element/${avatar.value.element}元素.webp`
         : `/icon/weapon/${avatar.value.weapon}.webp`,
-    ltSize: "30px",
+    ltSize: "20px",
     outerHeight: 20,
     outerText: avatar.value.name,
     size: "80px",

@@ -19,7 +19,7 @@ onMounted(async () => {
   const res = await TGSqlite.getAppCharacter(props.modelValue.id);
   box.value = {
     height: "80px",
-    ltSize: "30px",
+    ltSize: "20px",
     clickable: false,
     bg: `/icon/bg/${props.modelValue.star}-Star.webp`,
     icon: `/WIKI/character/${props.modelValue.id}.webp`,

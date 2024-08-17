@@ -161,12 +161,11 @@ const props = defineProps<TItemBoxProps>();
 
 .tib-lt {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 3%;
+  left: 3%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px;
 }
 
 .tib-lt img {

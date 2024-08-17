@@ -39,7 +39,7 @@ const box = computed<TItemBoxData>(() => {
       avatar.value.element !== ""
         ? `/icon/element/${avatar.value.element}元素.webp`
         : `/icon/weapon/${avatar.value.weapon}.webp`,
-    ltSize: "30px",
+    ltSize: "20px",
     size: "80px",
   };
 });

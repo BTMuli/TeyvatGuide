@@ -26,7 +26,7 @@ onMounted(async () => {
   box.value = {
     size: "80px",
     height: "80px",
-    ltSize: "30px",
+    ltSize: "20px",
     clickable: false,
     bg: `/icon/bg/${props.modelValue.star}-Star.webp`,
     icon: `/WIKI/character/${props.modelValue.id}.webp`,

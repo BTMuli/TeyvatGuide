@@ -205,7 +205,7 @@ function getCBox(info: TGApp.App.Character.WikiBriefInfo): TItemBoxData {
     display: "inner",
     clickable: true,
     lt: `/icon/element/${info.element}元素.webp`,
-    ltSize: "25px",
+    ltSize: "20px",
     innerHeight: 20,
     innerIcon: `/icon/weapon/${info.weapon}.webp`,
     innerText: info.name,

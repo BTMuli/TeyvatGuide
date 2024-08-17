@@ -21,7 +21,7 @@ onMounted(async () => {
     box.value = {
       clickable: false,
       height: "70px",
-      ltSize: "25px",
+      ltSize: "20px",
       bg: `/icon/bg/${props.modelValue.star}-Star.webp`,
       icon: `/WIKI/character/${props.modelValue.id}.webp`,
       lt: `/icon/weapon/${res.weapon}.webp`,
@@ -34,7 +34,7 @@ onMounted(async () => {
     box.value = {
       clickable: false,
       height: "70px",
-      ltSize: "25px",
+      ltSize: "20px",
       bg: `/icon/bg/${props.modelValue.star}-Star.webp`,
       icon: `/WIKI/character/${props.modelValue.id}.webp`,
       lt: `/icon/element/${res.element}元素.webp`,

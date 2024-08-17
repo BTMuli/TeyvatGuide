@@ -2,9 +2,9 @@
   <div class="tua-ab-box">
     <!-- 左侧角色、武器、天赋、好感、衣装、名片 -->
     <div class="tua-ab-top">
-      <TuaItemBox v-model="avatarBox" />
+      <TItembox v-model="avatarBox" />
       <div class="tua-abt-right">
-        <TuaItemBox v-model="weaponBox" />
+        <TItembox v-model="weaponBox" />
         <div v-for="(relic, index) in relicsBox" :key="index" class="tua-relic-box">
           <div class="tua-relic-bg">
             <img :src="`/icon/bg/${relic.rarity}-Star.webp`" alt="bg" v-if="relic !== false" />
@@ -22,6 +22,17 @@
       </div>
     </div>
     <div class="tua-abl-mid">
+      <div class="tua-abl-bg">
+        <img v-if="nameCard !== false && isFetterMax" :src="nameCard" alt="nameCard" />
+      </div>
+      <div class="tua-abl-skills">
+        <div v-for="skill in skills" :key="skill.skill_id" class="tua-abl-skill">
+          <img :src="skill.icon" alt="skill" />
+          <span>Lv.{{ skill.level }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="tua-abl-bottom">
       <div class="tua-abl-fetter">
         <img src="/icon/material/105.webp" alt="fetter" />
         <span>{{ props.modelValue.avatar.fetter }}</span>
@@ -35,17 +46,6 @@
         </span>
       </div>
     </div>
-    <div class="tua-abl-bottom">
-      <div class="tua-abl-bg">
-        <img v-if="nameCard !== false && isFetterMax" :src="nameCard" alt="nameCard" />
-      </div>
-      <div class="tua-abl-skills">
-        <div v-for="skill in skills" :key="skill.skill_id" class="tua-abl-skill">
-          <img :src="skill.icon" alt="skill" />
-          <span>Lv.{{ skill.level }}</span>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -53,8 +53,7 @@ import { computed, onMounted, ref } from "vue";
 
 import TGSqlite from "../../plugins/Sqlite/index.js";
 import { getZhElement } from "../../utils/toolFunc.js";
-
-import TuaItemBox, { TuaItemBoxType } from "./tua-item-box.vue";
+import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
 
 interface TuaAvatarBoxProps {
   modelValue: TGApp.Sqlite.Character.UserRole;
@@ -65,31 +64,35 @@ const props = defineProps<TuaAvatarBoxProps>();
 type FixedLenArr<T, N extends number> = [T, ...T[]] & { length: N };
 type AvatarRelics = FixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
 
-const avatarBox = computed<TuaItemBoxType>(() => {
+const avatarBox = computed<TItemBoxData>(() => {
   const avatar = props.modelValue.avatar;
   return {
-    star: avatar.rarity,
-    type: "character",
-    id: avatar.id,
     size: "130px",
+    height: "130px",
+    bg: `/icon/bg/${avatar.rarity}-Star.webp`,
+    icon: `/WIKI/character/${avatar.id}.webp`,
     lt: `/icon/element/${getZhElement(avatar.element)}元素.webp`,
-    ltSize: "30px",
+    ltSize: "20px",
     rt: avatar.actived_constellation_num.toString() || "0",
     rtSize: "20px",
+    innerText: avatar.name,
+    innerHeight: 30,
+    display: "inner",
     clickable: true,
   };
 });
-const weaponBox = computed<TuaItemBoxType>(() => {
+const weaponBox = computed<TItemBoxData>(() => {
   const weapon = props.modelValue.weapon;
   return {
-    star: weapon.rarity,
-    type: "weapon",
-    id: weapon.id,
     size: "40px",
+    height: "40px",
+    bg: `/icon/bg/${weapon.rarity}-Star.webp`,
+    icon: `/WIKI/weapon/${weapon.id}.webp`,
     lt: `/icon/weapon/${weapon.type_name}.webp`,
     ltSize: "15px",
-    rt: weapon.affix_level.toString() || "0",
-    rtSize: "15px",
+    innerText: "",
+    innerHeight: 0,
+    display: "inner",
     clickable: true,
   };
 });
@@ -145,12 +148,10 @@ onMounted(async () => {
 }
 
 .tua-abt-right {
-  display: flex;
-  width: 85px;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  padding: 5px;
   gap: 5px;
+  grid-template-columns: repeat(2, 40px);
 }
 
 .tua-relic-box {
@@ -198,7 +199,7 @@ onMounted(async () => {
   }
 }
 
-.tua-abl-mid {
+.tua-abl-bottom {
   display: flex;
   width: 100%;
   align-items: center;
@@ -222,7 +223,7 @@ onMounted(async () => {
   }
 }
 
-.tua-abl-bottom {
+.tua-abl-mid {
   position: relative;
   width: 100%;
   height: 80px;
@@ -255,8 +256,6 @@ onMounted(async () => {
 .tua-abl-skills {
   position: relative;
   display: flex;
-  width: 210px;
-  height: 100%;
   align-items: center;
   justify-content: space-between;
   padding: 5px;

@@ -240,6 +240,6 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
 .uc-grid {
   display: grid;
   grid-gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 }
 </style>
