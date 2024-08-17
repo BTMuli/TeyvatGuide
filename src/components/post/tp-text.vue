@@ -21,7 +21,6 @@
 </template>
 <script lang="ts" setup>
 import { onMounted, ref, StyleValue, toRaw } from "vue";
-import { useRouter } from "vue-router";
 
 import { getEmojis } from "../../plugins/Mys/request/getEmojis.js";
 import { parseLink, parsePost } from "../../utils/linkParser.js";
@@ -99,12 +98,7 @@ async function toLink() {
   const link = props.data.attributes.link;
   const isPost = await parsePost(link);
   if (isPost !== false) {
-    await useRouter().push({
-      name: "帖子详情",
-      params: {
-        post_id: isPost,
-      },
-    });
+    location.href = `/post_detail/${isPost}`;
     return;
   }
   const res = await parseLink(link);
