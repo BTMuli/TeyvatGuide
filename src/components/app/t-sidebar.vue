@@ -134,17 +134,6 @@
           </v-list-item>
           <v-list-item
             class="side-item-menu"
-            title="GCG"
-            value="wiki-GCG"
-            :link="true"
-            href="/wiki/GCG"
-          >
-            <template #prepend>
-              <img src="/source/UI/wikiGCG.webp" alt="gcgIcon" class="side-icon-menu" />
-            </template>
-          </v-list-item>
-          <v-list-item
-            class="side-item-menu"
             value="wiki-namecard"
             :link="true"
             href="/wiki/namecard"
