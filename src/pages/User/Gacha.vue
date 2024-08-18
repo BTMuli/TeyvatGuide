@@ -280,10 +280,7 @@ async function getGachaLogs(
 // 导入按钮点击事件
 async function handleImportBtn(isV4: boolean): Promise<void> {
   if (isV4) {
-    const checkConfirm = await showConfirm({
-      title: "确定导入UIGFv4格式的祈愿数据？",
-      text: "该标准尚在制定完善当中，可能会有不兼容的情况",
-    });
+    const checkConfirm = await showConfirm({ title: "确定导入UIGFv4格式的祈愿数据？" });
     if (!checkConfirm) {
       showSnackbar({
         color: "cancel",
@@ -445,10 +442,7 @@ async function exportUigf(): Promise<void> {
 
 // 导出 UIGF v4 版本的祈愿数据
 async function exportUigf4(): Promise<void> {
-  const checkConfirm = await showConfirm({
-    title: "确定导出UIGFv4格式的祈愿数据？",
-    text: "该标准尚在制定完善当中，可能会有不兼容的情况",
-  });
+  const checkConfirm = await showConfirm({ title: "确定导出UIGFv4格式的祈愿数据？" });
   if (!checkConfirm) {
     showSnackbar({
       color: "cancel",
@@ -457,6 +451,7 @@ async function exportUigf4(): Promise<void> {
     return;
   }
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf4] 导出祈愿数据(v4)`);
+  // todo 单开一个overlay用于选取导出的UID
   const allConfirm = await showConfirm({
     title: "是否导出所有 UID 的祈愿数据？",
     text: "取消则只导出当前 UID 的祈愿数据",
