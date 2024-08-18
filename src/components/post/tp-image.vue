@@ -1,18 +1,11 @@
 <template>
   <div class="tp-image-box" @click="showOverlay = true">
-    <div :style="{ width: getWidth }">
-      <img
-        :style="getImageStyle()"
-        :src="localUrl"
-        :alt="props.data.insert.image"
-        :title="getImageTitle()"
-      />
-    </div>
+    <img :src="localUrl" :alt="props.data.insert.image" :title="getImageTitle()" />
   </div>
   <TpoImage :image="props.data" v-model="showOverlay" />
 </template>
 <script lang="ts" setup>
-import { StyleValue, ref, onMounted, onUnmounted, computed } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 
 import { saveImgLocal } from "../../utils/TGShare.js";
 import { bytesToSize } from "../../utils/toolFunc.js";
@@ -47,25 +40,9 @@ onMounted(async () => {
   localUrl.value = await saveImgLocal(link);
 });
 
-const getWidth = computed(() => {
-  if (props.data.attributes == undefined) return "auto";
-  return `${props.data.attributes.width}px`;
-});
-
 onUnmounted(() => {
   if (localUrl.value) URL.revokeObjectURL(localUrl.value);
 });
-
-function getImageStyle(): StyleValue {
-  let style: StyleValue = <Array<StyleValue>>[];
-  style.push("cursor: pointer");
-  if (props.data.attributes == undefined) return style;
-  if (props.data.attributes.width < 800) {
-    const widthFullRule: StyleValue = "width: 100%";
-    style.push(widthFullRule);
-  }
-  return style;
-}
 
 function getImageTitle(): string {
   if (props.data.attributes == undefined) return "";
@@ -101,5 +78,6 @@ function getImageUrl(): string {
   max-width: 100%;
   height: auto;
   border-radius: 10px;
+  cursor: pointer;
 }
 </style>
