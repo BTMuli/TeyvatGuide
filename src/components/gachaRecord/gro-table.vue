@@ -11,7 +11,7 @@
       <template v-slot:item="{ item }">
         <tr class="ua-gt-tr">
           <td>{{ item.time }}</td>
-          <td>{{ getPool(item.gachaType) }}</td>
+          <td>{{ getPool(item.uigfType) }}</td>
           <td>{{ item.type }}</td>
           <td>{{ item.name }}</td>
           <td>{{ item.rank }}</td>
@@ -45,7 +45,7 @@ function getPool(type: string) {
       return "角色活动祈愿";
     case "302":
       return "武器活动祈愿";
-    case "400":
+    case "500":
       return "集录祈愿";
     default:
       return "未知";
