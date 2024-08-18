@@ -66,9 +66,9 @@ onMounted(async () => {
   }
   videoRef.value?.addEventListener("fullscreenchange", async () => {
     if (document.fullscreenElement) {
-      await TauriWindow.getCurrent().setFullscreen(true);
+      await TauriWindow.getCurrentWindow().setFullscreen(true);
     } else {
-      await TauriWindow.getCurrent().setFullscreen(false);
+      await TauriWindow.getCurrentWindow().setFullscreen(false);
     }
   });
 });
