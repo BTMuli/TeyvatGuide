@@ -1,16 +1,18 @@
 <template>
   <div class="tp-image-box" @click="showOverlay = true">
-    <img
-      :style="getImageStyle()"
-      :src="localUrl"
-      :alt="props.data.insert.image"
-      :title="getImageTitle()"
-    />
+    <div :style="{ width: getWidth }">
+      <img
+        :style="getImageStyle()"
+        :src="localUrl"
+        :alt="props.data.insert.image"
+        :title="getImageTitle()"
+      />
+    </div>
   </div>
   <TpoImage :image="props.data" v-model="showOverlay" />
 </template>
 <script lang="ts" setup>
-import { StyleValue, ref, onMounted, onUnmounted } from "vue";
+import { StyleValue, ref, onMounted, onUnmounted, computed } from "vue";
 
 import { saveImgLocal } from "../../utils/TGShare.js";
 import { bytesToSize } from "../../utils/toolFunc.js";
@@ -43,6 +45,11 @@ console.log("tp-image", props.data.insert.image, props.data.attributes);
 onMounted(async () => {
   const link = getImageUrl();
   localUrl.value = await saveImgLocal(link);
+});
+
+const getWidth = computed(() => {
+  if (props.data.attributes == undefined) return "auto";
+  return `${props.data.attributes.width}px`;
 });
 
 onUnmounted(() => {
@@ -84,6 +91,9 @@ function getImageUrl(): string {
 </script>
 <style lang="css" scoped>
 .tp-image-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 10px auto;
 }
 
