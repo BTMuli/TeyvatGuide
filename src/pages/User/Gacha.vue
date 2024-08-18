@@ -27,6 +27,7 @@
     <v-tabs v-model="tab" align-tabs="start" class="gacha-tab">
       <v-tab value="echarts">图表概览</v-tab>
       <v-tab value="overview">数据概览</v-tab>
+      <v-tab value="table">数据表格</v-tab>
       <v-tab value="history">过往祈愿</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="gacha-window">
@@ -35,6 +36,9 @@
       </v-window-item>
       <v-window-item value="overview" class="gacha-window-item">
         <gro-overview v-model="gachaListCur" />
+      </v-window-item>
+      <v-window-item value="table" class="gacha-window-item">
+        <gro-table v-model="gachaListCur" />
       </v-window-item>
       <v-window-item value="history" class="gacha-window-item">
         <gro-history />
@@ -53,6 +57,7 @@ import showSnackbar from "../../components/func/snackbar.js";
 import GroEcharts from "../../components/gachaRecord/gro-echarts.vue";
 import GroHistory from "../../components/gachaRecord/gro-history.vue";
 import GroOverview from "../../components/gachaRecord/gro-overview.vue";
+import GroTable from "../../components/gachaRecord/gro-table.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import { AppCharacterData, AppWeaponData } from "../../data/index.js";
 import TSUserGacha from "../../plugins/Sqlite/modules/userGacha.js";
