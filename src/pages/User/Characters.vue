@@ -1,5 +1,27 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
+  <v-app-bar>
+    <template #title>
+      <span v-if="user"> {{ user.nickname }}({{ user.gameUid }})</span>
+      <span v-else> 暂无数据 </span>
+    </template>
+    <template #append>
+      <div class="uc-top-btns">
+        <v-btn @click="refresh()" rounded variant="outlined" v-model:loading="loadData">
+          <template #prepend>
+            <v-icon>mdi-refresh</v-icon>
+          </template>
+          刷新
+        </v-btn>
+        <v-btn @click="share()" rounded variant="outlined" v-model:loading="loadShare">
+          <template #prepend>
+            <v-icon>mdi-share</v-icon>
+          </template>
+          分享
+        </v-btn>
+      </div>
+    </template>
+  </v-app-bar>
   <div class="uc-box">
     <div class="uc-top">
       <div class="uc-top-title" @click="switchOld">
@@ -8,33 +30,14 @@
         </span>
         <span v-else> 暂无数据 </span>
       </div>
-      <div class="uc-top-btns" data-html2canvas-ignore>
-        <v-btn class="uc-top-btn" @click="refresh()">
-          <template #prepend>
-            <v-icon>mdi-refresh</v-icon>
-          </template>
-          刷新
-        </v-btn>
-        <v-btn class="uc-top-btn" @click="share()">
-          <template #prepend>
-            <v-icon>mdi-share</v-icon>
-          </template>
-          分享
-        </v-btn>
-      </div>
     </div>
-    <div class="uc-content">
-      <div class="uc-left">
-        <div class="ucl-top"></div>
-        <div class="uc-grid">
-          <TuaAvatarBox
-            v-for="(role, index) in roleList"
-            :key="index"
-            :model-value="role"
-            @click="selectRole(role)"
-          />
-        </div>
-      </div>
+    <div class="uc-grid">
+      <TuaAvatarBox
+        v-for="(role, index) in roleList"
+        :key="index"
+        :model-value="role"
+        @click="selectRole(role)"
+      />
     </div>
   </div>
 </template>
@@ -57,6 +60,8 @@ const user = ref<TGApp.Sqlite.Account.Game>();
 
 // loading
 const loading = ref<boolean>(false);
+const loadData = ref<boolean>(false);
+const loadShare = ref<boolean>(false);
 const loadingTitle = ref<string>();
 const loadingSub = ref<string>();
 
@@ -80,8 +85,10 @@ onMounted(async () => {
   await TGLogger.Info("[Character][onMounted] 进入角色页面");
   loadingTitle.value = "正在获取角色数据";
   loading.value = true;
+  loadData.value = true;
   await load();
   loading.value = false;
+  loadData.value = false;
 });
 
 function switchOld(): void {
@@ -114,12 +121,14 @@ async function refresh(): Promise<void> {
   await TGLogger.Info(`[Character][refreshRoles][${user.value.gameUid}] 正在更新角色数据`);
   loadingTitle.value = "正在获取角色列表";
   loading.value = true;
+  loadData.value = true;
   if (!userStore.cookie.value) {
     showSnackbar({
       text: "请先登录",
       color: "error",
     });
     loading.value = false;
+    loadData.value = false;
     return;
   }
   const cookie = {
@@ -137,6 +146,7 @@ async function refresh(): Promise<void> {
       `[Character][refreshRoles][${user.value.gameUid}] ${listRes.retcode} ${listRes.message}`,
     );
     loading.value = false;
+    loadData.value = false;
     return;
   }
   const idList = listRes.map((i) => i.id.toString());
@@ -153,6 +163,7 @@ async function refresh(): Promise<void> {
       `[Character][refreshRoles][${user.value.gameUid}] ${res.retcode} ${res.message}`,
     );
     loading.value = false;
+    loadData.value = false;
     return;
   }
   userStore.propMap.value = res.property_map;
@@ -164,6 +175,7 @@ async function refresh(): Promise<void> {
   );
   await load();
   loading.value = false;
+  loadData.value = false;
 }
 
 async function share(): Promise<void> {
@@ -174,9 +186,11 @@ async function share(): Promise<void> {
   loadingTitle.value = "正在生成图片";
   loadingSub.value = `${fileName}.png`;
   loading.value = true;
+  loadShare.value = true;
   await generateShareImg(fileName, rolesBox);
   loadingSub.value = "";
   loading.value = false;
+  loadShare.value = false;
   await TGLogger.Info(`[Character][shareRoles][${user.value.gameUid}] 生成分享图片成功`);
 }
 
@@ -226,20 +240,13 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
 
 .uc-top-btns {
   display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.uc-top-btn {
-  border-radius: 5px;
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
-  font-family: var(--font-text);
+  align-content: center;
+  column-gap: 10px;
 }
 
 .uc-grid {
   display: grid;
-  grid-gap: 10px;
+  grid-gap: 15px;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 }
 </style>

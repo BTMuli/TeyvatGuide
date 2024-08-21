@@ -1,23 +1,19 @@
 <template>
   <div class="tua-ab-box">
-    <!-- 左侧角色、武器、天赋、好感、衣装、名片 -->
     <div class="tua-ab-top">
       <TItembox v-model="avatarBox" />
       <div class="tua-abt-right">
-        <TItembox v-model="weaponBox" />
-        <div v-for="(relic, index) in relicsBox" :key="index" class="tua-relic-box">
-          <div class="tua-relic-bg">
-            <img :src="`/icon/bg/${relic.rarity}-Star.webp`" alt="bg" v-if="relic !== false" />
+        <div class="tua-abt-rt">
+          <TItembox v-model="weaponBox" :title="getWeaponTitle()" />
+          <div class="tua-abt-rtr">
+            <TuaRelicBox :model-value="relicsBox[0]" :position="1" />
+            <TuaRelicBox :model-value="relicsBox[1]" :position="2" />
           </div>
-          <div class="tua-relic-icon">
-            <img
-              :src="`/icon/relic/${index + 1}.webp`"
-              :alt="`relic${index + 1}`"
-              v-if="relic === false"
-              class="empty"
-            />
-            <img :src="relic.icon" :alt="relic.name" v-else />
-          </div>
+        </div>
+        <div class="tua-abt-rb">
+          <TuaRelicBox :model-value="relicsBox[2]" :position="3" />
+          <TuaRelicBox :model-value="relicsBox[3]" :position="4" />
+          <TuaRelicBox :model-value="relicsBox[4]" :position="5" />
         </div>
       </div>
     </div>
@@ -52,14 +48,18 @@
 import { computed, onMounted, ref } from "vue";
 
 import TGSqlite from "../../plugins/Sqlite/index.js";
+import { useUserStore } from "../../store/modules/user.js";
 import { getZhElement } from "../../utils/toolFunc.js";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
+
+import TuaRelicBox from "./tua-relic-box.vue";
 
 interface TuaAvatarBoxProps {
   modelValue: TGApp.Sqlite.Character.UserRole;
 }
 
 const props = defineProps<TuaAvatarBoxProps>();
+const userStore = useUserStore();
 
 type FixedLenArr<T, N extends number> = [T, ...T[]] & { length: N };
 type AvatarRelics = FixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
@@ -67,8 +67,8 @@ type AvatarRelics = FixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
 const avatarBox = computed<TItemBoxData>(() => {
   const avatar = props.modelValue.avatar;
   return {
-    size: "130px",
-    height: "130px",
+    size: "100px",
+    height: "100px",
     bg: `/icon/bg/${avatar.rarity}-Star.webp`,
     icon: `/WIKI/character/${avatar.id}.webp`,
     lt: `/icon/element/${getZhElement(avatar.element)}元素.webp`,
@@ -78,22 +78,24 @@ const avatarBox = computed<TItemBoxData>(() => {
     innerText: avatar.name,
     innerHeight: 30,
     display: "inner",
-    clickable: true,
+    clickable: false,
   };
 });
 const weaponBox = computed<TItemBoxData>(() => {
   const weapon = props.modelValue.weapon;
   return {
-    size: "40px",
-    height: "40px",
+    size: "65px",
+    height: "65px",
     bg: `/icon/bg/${weapon.rarity}-Star.webp`,
     icon: `/WIKI/weapon/${weapon.id}.webp`,
     lt: `/icon/weapon/${weapon.type_name}.webp`,
-    ltSize: "15px",
-    innerText: "",
-    innerHeight: 0,
+    ltSize: "20px",
+    rt: weapon.affix_level.toString(),
+    rtSize: "20px",
+    innerText: weapon.name,
+    innerHeight: 20,
     display: "inner",
-    clickable: true,
+    clickable: false,
   };
 });
 const relicsBox = computed<AvatarRelics>(() => {
@@ -127,6 +129,18 @@ onMounted(async () => {
     nameCard.value = "/source/nameCard/profile/原神·印象.webp";
   }
 });
+
+function getWeaponTitle(): string {
+  const weapon = props.modelValue.weapon;
+  const title: string[] = [];
+  title.push(`${weapon.type_name} - ${weapon.name}`);
+  title.push(`${weapon.rarity}星 精炼${weapon.affix_level} Lv.${weapon.level}`);
+  const propMain = userStore.getProp(weapon.main_property.property_type);
+  title.push(`${propMain !== false ? propMain.name : "未知属性"} - ${weapon.main_property.final}`);
+  const propSub = userStore.getProp(weapon.sub_property.property_type);
+  title.push(`${propSub !== false ? propSub.name : "未知属性"} - ${weapon.sub_property.final}`);
+  return title.join("\n");
+}
 </script>
 <style lang="css" scoped>
 .tua-ab-box {
@@ -144,59 +158,38 @@ onMounted(async () => {
   display: flex;
   width: 100%;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  column-gap: 10px;
 }
 
 .tua-abt-right {
-  display: grid;
-  padding: 5px;
-  gap: 5px;
-  grid-template-columns: repeat(2, 40px);
-}
-
-.tua-relic-box {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  border-radius: 5px;
-}
-
-.tua-relic-icon {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  border-radius: 5px;
-
-  img {
-    width: 100%;
-    height: 100%;
-    border-radius: 5px;
-    object-fit: cover;
-  }
-
-  .empty {
-    padding: 5px;
-  }
-}
-
-.tua-relic-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
   display: flex;
-  width: 100%;
-  height: 100%;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  border-radius: 5px;
-  background: var(--box-bg-3);
+  justify-content: space-between;
+  row-gap: 5px;
+}
 
-  img {
-    width: 100%;
-    height: 100%;
-    border-radius: 5px;
-    object-fit: cover;
-  }
+.tua-abt-rt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 5px;
+}
+
+.tua-abt-rtr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  row-gap: 5px;
+}
+
+.tua-abt-rb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 5px;
 }
 
 .tua-abl-bottom {

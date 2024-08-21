@@ -208,7 +208,7 @@ declare namespace TGApp.Game.Avatar {
    * @property {RelicSet} set - 圣遗物套装
    * @property {string} pos_name - 圣遗物位置名称
    * @property {RelicProp} main_property - 圣遗物主属性
-   * @property {RelicProp[]} sub_properties - 圣遗物副属性
+   * @property {RelicProp[]} sub_property_list - 圣遗物副属性
    * @return Relic
    */
   interface Relic {
@@ -221,7 +221,7 @@ declare namespace TGApp.Game.Avatar {
     set: RelicSet;
     pos_name: string;
     main_property: RelicProp;
-    sub_properties: RelicProp[];
+    sub_property_list: RelicProp[];
   }
 
   /**

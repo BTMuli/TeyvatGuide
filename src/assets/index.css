@@ -62,7 +62,7 @@ html {
 
 /*
  * @description 侧边滚动条样式
- * @since Beta v0.3.0
+ * @since Beta v0.5.3
  */
 ::-webkit-scrollbar {
   width: 8px;
@@ -76,9 +76,9 @@ html {
 
 ::-webkit-scrollbar-thumb {
   border-radius: 5px;
-  background: var(--common-shadow-2);
+  background: var(--tgc-od-white);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--common-shadow-4);
+  background: var(--tgc-od-orange);
 }
