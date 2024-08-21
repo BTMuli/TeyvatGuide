@@ -27,8 +27,6 @@ body:
           required: false
         - label: 成就，有新成就时选择
           required: false
-        - label: 卡牌，有新卡牌时选择
-          required: false
         - label: 材料，有新材料时选择
           required: false
   - type: textarea
