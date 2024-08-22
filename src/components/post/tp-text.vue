@@ -35,6 +35,7 @@ export interface TpText {
     bold?: boolean;
     color?: string;
     align?: string;
+    italic?: boolean;
   };
 }
 
@@ -76,8 +77,12 @@ function getTextStyle(): StyleValue {
   style.push("white-space: pre-wrap");
   if (data.attributes) {
     const ruleBold: StyleValue = "fontFamily: var(--font-title)";
+    const ruleItalic: StyleValue = "fontStyle: italic";
     if (data.attributes.bold) {
       style.push(ruleBold);
+    }
+    if (data.attributes.italic) {
+      style.push(ruleItalic);
     }
     if (data.attributes.color) {
       let colorGet = data.attributes.color;
