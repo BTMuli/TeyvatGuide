@@ -32,11 +32,13 @@ import { onBeforeMount, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import TSAvatarBirth from "../../plugins/Sqlite/modules/avatarBirth.js";
+import { useAppStore } from "../../store/modules/app.js";
 
 const isBirthday = ref<boolean>(false);
 const router = useRouter();
 const cur = ref<TGApp.Archive.Birth.CalendarItem[]>([]);
 const next = ref<TGApp.Archive.Birth.RoleItem[]>([]);
+const appStore = useAppStore();
 
 onBeforeMount(async () => {
   const check = TSAvatarBirth.isAvatarBirth();
@@ -62,6 +64,7 @@ function toBirth(type: TGApp.Archive.Birth.RoleItem | true) {
     return;
   }
   if (cur.value.length > 0 && !cur.value[0].is_subscribe) {
+    appStore.recentNewsType = "news";
     router.push("/news/2/news");
     return;
   }
