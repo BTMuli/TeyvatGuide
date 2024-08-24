@@ -10,19 +10,16 @@
           <span>{{ props.modelValue.name }}</span>
           <span>Lv.{{ props.modelValue.level }}</span>
           <span>精炼</span>
-          <span>{{ props.modelValue.affix }}</span>
+          <span>{{ props.modelValue.affix_level }}</span>
           <span>阶</span>
         </div>
         <div class="tuc-ddwc-bottom">
-          <img :src="`/icon/star/${props.modelValue.star}.webp`" alt="star" />
+          <img :src="`/icon/star/${props.modelValue.rarity}.webp`" alt="star" />
         </div>
       </div>
     </template>
     <template #desc>
-      <span
-        v-if="props.modelValue.description"
-        v-html="parseHtmlText(props.modelValue.description)"
-      ></span>
+      <span v-if="props.modelValue.desc" v-html="parseHtmlText(props.modelValue.desc)"></span>
     </template>
   </TucDetailDesc>
 </template>
@@ -35,13 +32,13 @@ import TucDetailDesc from "./tuc-detail-desc.vue";
 import TucDetailItemBox from "./tuc-detail-itembox.vue";
 
 interface TucDetailDescWeaponProps {
-  modelValue: TGApp.Sqlite.Character.RoleWeapon;
+  modelValue: TGApp.Game.Avatar.WeaponDetail;
 }
 
 const props = defineProps<TucDetailDescWeaponProps>();
 const box = computed(() => {
   return {
-    bg: `/icon/bg/${props.modelValue.star}-Star.webp`,
+    bg: `/icon/bg/${props.modelValue.rarity}-Star.webp`,
     icon: `/WIKI/weapon/${props.modelValue.id}.webp`,
   };
 });

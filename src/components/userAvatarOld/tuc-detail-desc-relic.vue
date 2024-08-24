@@ -12,26 +12,25 @@
           <span>{{ props.modelValue.level }}</span>
         </div>
         <div class="tuc-ddrc-bottom">
-          <img :src="`/icon/star/${props.modelValue.star}.webp`" alt="star" />
+          <img :src="`/icon/star/${props.modelValue.rarity}.webp`" alt="star" />
         </div>
       </div>
     </template>
     <template #desc>
       <div class="tuc-ddrd-title">{{ props.modelValue.set.name }}：</div>
-      <div v-for="(desc, index) in props.modelValue.set.effect" :key="index" class="tuc-ddrc-desc">
-        <span>{{ desc.active }}件套：</span>
-        <span>{{ desc.description }}</span>
+      <div v-for="(desc, index) in props.modelValue.set.affixes" :key="index" class="tuc-ddrc-desc">
+        <span>{{ desc.activation_number }}件套：</span>
+        <span>{{ desc.effect }}</span>
       </div>
     </template>
   </TucDetailDesc>
 </template>
 <script lang="ts" setup>
-// vue
 import TucDetailDesc from "./tuc-detail-desc.vue";
 import TucDetailRelic from "./tuc-detail-relic.vue";
 
 interface TucDetailDescRelicProps {
-  modelValue: TGApp.Sqlite.Character.RoleReliquary;
+  modelValue: TGApp.Game.Avatar.Relic;
 }
 
 const props = defineProps<TucDetailDescRelicProps>();

@@ -14,6 +14,7 @@
 </template>
 <style lang="css" scoped>
 .tuc-dd-box {
+  width: 100%;
   padding: 10px;
   border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
@@ -45,7 +46,7 @@
 
 .tuc-dd-desc {
   width: 100%;
-  max-height: 50px;
+  height: 80px;
   margin-top: 5px;
   color: var(--box-text-4);
   font-family: var(--font-text);
@@ -53,10 +54,5 @@
   overflow-x: hidden;
   text-align: left;
   word-break: break-all;
-}
-
-/* 隐藏 desc 侧面滚动条 */
-.tuc-dd-desc::-webkit-scrollbar {
-  display: none;
 }
 </style>

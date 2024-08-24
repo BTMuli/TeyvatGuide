@@ -13,7 +13,13 @@
           </template>
           刷新
         </v-btn>
-        <v-btn @click="share()" rounded variant="outlined" v-model:loading="loadShare">
+        <v-btn
+          :disabled="showOverlay"
+          @click="share()"
+          rounded
+          variant="outlined"
+          v-model:loading="loadShare"
+        >
           <template #prepend>
             <v-icon>mdi-share</v-icon>
           </template>
@@ -25,10 +31,21 @@
       <div class="uc-select">
         <v-btn variant="outlined" @click="showSelect = true">筛选角色</v-btn>
         <v-btn variant="outlined" @click="resetSelect = true">重置筛选</v-btn>
+        <v-select
+          v-model="showMode"
+          :items="modeList"
+          label="详情视图模式"
+          hide-details
+          item-title="label"
+          item-value="value"
+          variant="outlined"
+          class="uc-select-mode"
+          density="compact"
+        />
       </div>
-      <!-- todo 展示模式切换 -->
     </template>
   </v-app-bar>
+  <TwoSelectC v-model="showSelect" @select-c="handleSelect" v-model:reset="resetSelect" />
   <div class="uc-box">
     <div class="uc-top">
       <div class="uc-top-title">
@@ -39,7 +56,7 @@
         <span v-else> 暂无数据 </span>
       </div>
     </div>
-    <div class="uc-grid">
+    <div class="uc-grid" v-if="!isEmpty">
       <TuaAvatarBox
         v-for="(role, index) in selectedList"
         :key="index"
@@ -47,8 +64,16 @@
         @click="selectRole(role)"
       />
     </div>
+    <div class="uc-empty" v-else>
+      <img src="/source/UI/empty.webp" alt="empty" />
+    </div>
   </div>
-  <TwoSelectC v-model="showSelect" @select-c="handleSelect" v-model:reset="resetSelect" />
+  <TuaDetailOverlay
+    v-model="showOverlay"
+    :avatar="dataVal"
+    v-model:mode="showMode"
+    @to-next="handleSwitch"
+  />
 </template>
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
@@ -57,6 +82,7 @@ import { onBeforeMount, onMounted, ref, watch } from "vue";
 import showSnackbar from "../../components/func/snackbar.js";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TuaAvatarBox from "../../components/userAvatar/tua-avatar-box.vue";
+import TuaDetailOverlay from "../../components/userAvatar/tua-detail-overlay.vue";
 import TwoSelectC, { SelectedCValue } from "../../components/wiki/two-select-c.vue";
 import { AppCharacterData } from "../../data/index.js";
 import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
@@ -77,17 +103,23 @@ const loadingTitle = ref<string>();
 const loadingSub = ref<string>();
 
 // data
-const isEmpty = ref(true);
+const isEmpty = ref<boolean>(true);
 const roleList = ref<TGApp.Sqlite.Character.UserRole[]>([]);
 const selectedList = ref<TGApp.Sqlite.Character.UserRole[]>([]);
 
 // overlay
-const visible = ref(false);
 const dataVal = ref<TGApp.Sqlite.Character.UserRole>(<TGApp.Sqlite.Character.UserRole>{});
-const selectIndex = ref(0);
+const showOverlay = ref<boolean>(false);
+const selectIndex = ref<number>(0);
 
 const showSelect = ref<boolean>(false);
+const showMode = ref<"classic" | "card" | "dev">("classic");
 const resetSelect = ref<boolean>(false);
+const modeList = [
+  { label: "经典视图", value: "classic" },
+  { label: "卡片视图（简略）", value: "card" },
+  { label: "卡片视图（详细）", value: "dev" },
+];
 
 onBeforeMount(() => {
   if (userStore.account.value) user.value = userStore.account.value;
@@ -108,6 +140,24 @@ watch(resetSelect, (val) => {
     selectedList.value = getOrderedList(roleList.value);
     showSnackbar({
       text: "已重置筛选条件",
+      color: "success",
+    });
+  }
+});
+watch(showMode, (val) => {
+  if (val === "classic") {
+    showSnackbar({
+      text: "已切换至经典视图",
+      color: "success",
+    });
+  } else if (val === "card") {
+    showSnackbar({
+      text: "已切换至卡片视图（简略）",
+      color: "success",
+    });
+  } else {
+    showSnackbar({
+      text: "已切换至卡片视图（详细）",
       color: "success",
     });
   }
@@ -144,6 +194,10 @@ async function load(): Promise<void> {
 
 async function refresh(): Promise<void> {
   if (!user.value) return;
+  if (showOverlay.value) {
+    showOverlay.value = false;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
   await TGLogger.Info(`[Character][refreshRoles][${user.value.gameUid}] 正在更新角色数据`);
   loadingTitle.value = "正在获取角色列表";
   loading.value = true;
@@ -205,7 +259,13 @@ async function refresh(): Promise<void> {
 }
 
 async function share(): Promise<void> {
-  if (!user.value) return;
+  if (!user.value || isEmpty.value) {
+    showSnackbar({
+      text: "暂无数据",
+      color: "error",
+    });
+    return;
+  }
   await TGLogger.Info(`[Character][shareRoles][${user.value.gameUid}] 正在生成分享图片`);
   const rolesBox = <HTMLElement>document.querySelector(".uc-box");
   const fileName = `【角色列表】-${user.value.gameUid}`;
@@ -234,7 +294,7 @@ function getUpdateTime(): string {
 function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
   dataVal.value = role;
   selectIndex.value = roleList.value.indexOf(role);
-  visible.value = true;
+  showOverlay.value = true;
 }
 
 function handleSelect(val: SelectedCValue) {
@@ -260,6 +320,17 @@ function handleSelect(val: SelectedCValue) {
   const selectedId = filterC.map((item) => item.id);
   selectedList.value = roleList.value.filter((role) => selectedId.includes(role.avatar.id));
 }
+
+function handleSwitch(next: boolean): void {
+  if (next) {
+    selectIndex.value += 1;
+    if (selectIndex.value >= roleList.value.length) selectIndex.value = 0;
+  } else {
+    selectIndex.value -= 1;
+    if (selectIndex.value < 0) selectIndex.value = roleList.value.length - 1;
+  }
+  dataVal.value = roleList.value[selectIndex.value];
+}
 </script>
 <style lang="css" scoped>
 .uc-select {
@@ -268,6 +339,15 @@ function handleSelect(val: SelectedCValue) {
   justify-content: flex-start;
   margin: 0 10px;
   gap: 10px;
+}
+
+.uc-select-mode {
+  display: flex;
+  width: 200px;
+  height: 40px;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 14px;
 }
 
 .uc-box {
@@ -307,5 +387,12 @@ function handleSelect(val: SelectedCValue) {
   display: grid;
   grid-gap: 15px;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.uc-empty {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
 }
 </style>

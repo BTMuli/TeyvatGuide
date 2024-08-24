@@ -1,5 +1,5 @@
 <template>
-  <div class="tua-ab-box">
+  <div class="tua-ab-box" title="点击查看详情">
     <div class="tua-ab-top">
       <TItembox v-model="avatarBox" />
       <div class="tua-abt-right">

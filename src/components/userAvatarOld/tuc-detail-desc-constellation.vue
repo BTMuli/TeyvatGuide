@@ -19,7 +19,7 @@
     </template>
     <template #desc>
       <!-- eslint-disable-next-line vue/no-v-html -->
-      <span v-html="parseHtmlText(props.modelValue.description)"></span>
+      <span v-html="parseHtmlText(props.modelValue.effect)"></span>
     </template>
   </TucDetailDesc>
 </template>
@@ -30,7 +30,7 @@ import TucDetailConstellation from "./tuc-detail-constellation.vue";
 import TucDetailDesc from "./tuc-detail-desc.vue";
 
 interface TucDetailDescConstellationProps {
-  modelValue: TGApp.Sqlite.Character.RoleConstellation;
+  modelValue: TGApp.Game.Avatar.Constellation;
 }
 
 const props = defineProps<TucDetailDescConstellationProps>();

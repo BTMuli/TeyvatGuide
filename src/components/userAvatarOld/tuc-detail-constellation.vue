@@ -1,6 +1,6 @@
 <template>
   <div class="tuc-dc-box">
-    <div v-if="!modelValue.active" class="tuc-dc-lock">
+    <div v-if="!modelValue.is_actived" class="tuc-dc-lock">
       <v-icon color="white"> mdi-lock </v-icon>
     </div>
     <div class="tuc-dc-icon">
@@ -10,7 +10,7 @@
 </template>
 <script lang="ts" setup>
 interface TucDetailConstellationProps {
-  modelValue: TGApp.Sqlite.Character.RoleConstellation;
+  modelValue: TGApp.Game.Avatar.Constellation;
 }
 
 defineProps<TucDetailConstellationProps>();
