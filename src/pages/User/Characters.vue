@@ -318,18 +318,18 @@ function handleSelect(val: SelectedCValue) {
     color: "success",
   });
   const selectedId = filterC.map((item) => item.id);
-  selectedList.value = roleList.value.filter((role) => selectedId.includes(role.avatar.id));
+  selectedList.value = roleList.value.filter((role) => selectedId.includes(role.cid));
 }
 
 function handleSwitch(next: boolean): void {
   if (next) {
     selectIndex.value += 1;
-    if (selectIndex.value >= roleList.value.length) selectIndex.value = 0;
+    if (selectIndex.value >= selectedList.value.length) selectIndex.value = 0;
   } else {
     selectIndex.value -= 1;
-    if (selectIndex.value < 0) selectIndex.value = roleList.value.length - 1;
+    if (selectIndex.value < 0) selectIndex.value = selectedList.value.length - 1;
   }
-  dataVal.value = roleList.value[selectIndex.value];
+  dataVal.value = selectedList.value[selectIndex.value];
 }
 </script>
 <style lang="css" scoped>
