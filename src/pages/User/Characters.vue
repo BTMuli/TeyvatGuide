@@ -113,7 +113,7 @@ const showOverlay = ref<boolean>(false);
 const selectIndex = ref<number>(0);
 
 const showSelect = ref<boolean>(false);
-const showMode = ref<"classic" | "card" | "dev">("classic");
+const showMode = ref<"classic" | "card" | "dev">("card");
 const resetSelect = ref<boolean>(false);
 const modeList = [
   { label: "经典视图", value: "classic" },

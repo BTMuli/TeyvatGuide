@@ -1,7 +1,7 @@
 <template>
   <div class="tuc-do-box">
     <img :src="bg" alt="role" class="tuc-do-bg" />
-    <div v-if="props.dataVal.costumes.length > 0" class="tuc-do-costume">
+    <div v-if="props.modelValue.costumes.length > 0" class="tuc-do-costume">
       <v-switch v-model="showCostumeSwitch" color="#fb7299" @click="switchBg">
         <template #label>
           <v-icon>mdi-tshirt-crew-outline</v-icon>
@@ -9,7 +9,7 @@
       </v-switch>
     </div>
     <div v-if="showCostumeSwitch" class="tuc-do-costume-name">
-      {{ props.dataVal.costumes[0].name }}
+      {{ props.modelValue.costumes[0].name }}
     </div>
     <div class="tuc-do-show">
       <div class="tuc-do-main">
@@ -17,7 +17,7 @@
           <div
             class="tuc-dol-item"
             :style="`opacity: ${selected.pos === 0 ? '1' : '0.5'}`"
-            @click="showDetail(props.dataVal.weapon, '武器', 0)"
+            @click="showDetail(props.modelValue.weapon, '武器', 0)"
           >
             <TucDetailItemBox :model-value="weaponBox" />
           </div>
@@ -38,7 +38,7 @@
         <div class="tuc-do-right">
           <div class="tuc-dor-box">
             <TucDetailConstellation
-              v-for="item in props.dataVal.constellations"
+              v-for="item in props.modelValue.constellations"
               :key="item.pos"
               class="tuc-dor-item"
               :model-value="item"
@@ -52,7 +52,10 @@
       </div>
       <!-- 底部说明 -->
       <div class="tuc-do-bottom">
-        <TucDetailDescWeapon v-if="selected.type === '武器'" :model-value="props.dataVal.weapon" />
+        <TucDetailDescWeapon
+          v-if="selected.type === '武器'"
+          :model-value="props.modelValue.weapon"
+        />
         <TucDetailDescConstellation
           v-if="selected.type === '命座' && selectConstellation"
           :model-value="selectConstellation"
@@ -77,7 +80,7 @@ import TucDetailItemBox from "./tuc-detail-itembox.vue";
 import TucDetailRelic from "./tuc-detail-relic.vue";
 
 interface ToUcDetailProps {
-  dataVal: TGApp.Sqlite.Character.UserRole;
+  modelValue: TGApp.Sqlite.Character.UserRole;
 }
 
 interface ToUcDetailSelect {
@@ -91,15 +94,15 @@ type RelicList = fixedLenArray<TGApp.Game.Avatar.Relic | false, 5>;
 const props = defineProps<ToUcDetailProps>();
 const relicList = computed<RelicList>(() => {
   return [
-    props.dataVal.relics.find((item) => item.pos === 1) || false,
-    props.dataVal.relics.find((item) => item.pos === 2) || false,
-    props.dataVal.relics.find((item) => item.pos === 3) || false,
-    props.dataVal.relics.find((item) => item.pos === 4) || false,
-    props.dataVal.relics.find((item) => item.pos === 5) || false,
+    props.modelValue.relics.find((item) => item.pos === 1) || false,
+    props.modelValue.relics.find((item) => item.pos === 2) || false,
+    props.modelValue.relics.find((item) => item.pos === 3) || false,
+    props.modelValue.relics.find((item) => item.pos === 4) || false,
+    props.modelValue.relics.find((item) => item.pos === 5) || false,
   ];
 });
 const weaponBox = computed(() => {
-  const weapon = props.dataVal.weapon;
+  const weapon = props.modelValue.weapon;
   return {
     icon: `/WIKI/weapon/${weapon.id}.webp`,
     bg: `/icon/bg/${weapon.rarity}-Star.webp`,
@@ -110,7 +113,9 @@ const selectConstellation = ref<TGApp.Game.Avatar.Constellation>();
 const selectRelic = ref<TGApp.Game.Avatar.Relic>();
 const selected = ref<ToUcDetailSelect>({ type: "武器", pos: 0 });
 const bg = computed<string>(() => {
-  return showCostumeSwitch.value ? props.dataVal.costumes[0].icon : props.dataVal.avatar.image;
+  return showCostumeSwitch.value
+    ? props.modelValue.costumes[0].icon
+    : props.modelValue.avatar.image;
 });
 const bgTransY = computed<string>(() => {
   return showCostumeSwitch.value ? "0" : "10px";
@@ -131,7 +136,7 @@ onMounted(() => {
   loadData();
 });
 watch(
-  () => props.dataVal,
+  () => props.modelValue,
   () => {
     loadData();
   },

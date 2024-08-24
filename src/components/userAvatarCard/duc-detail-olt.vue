@@ -1,6 +1,6 @@
 <template>
   <div class="ddo-lt-box">
-    <div class="ddo-ltb-icon" :title="getTitle">
+    <div class="ddo-ltb-icon" :title="props.data.name">
       <TItemBox :model-value="boxData" />
     </div>
     <div class="ddo-ltb-info">
@@ -13,67 +13,58 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
+import { getZhElement } from "../../utils/toolFunc.js";
 import TItemBox, { TItemBoxData } from "../main/t-itembox.vue";
 
 type DucDetailOltProps =
   | {
-      data: TGApp.Sqlite.Character.UserRole;
+      data: TGApp.Game.Avatar.Avatar;
       mode: "avatar";
     }
   | {
-      data: TGApp.Sqlite.Character.RoleWeapon;
+      data: TGApp.Game.Avatar.WeaponDetail;
       mode: "weapon";
     };
 
 const props = defineProps<DucDetailOltProps>();
-const getTitle = computed(() => {
-  if (props.mode === "avatar") {
-    return `${props.data.name}`;
-  } else {
-    const descriptionList = props.data.description.split("");
-    return descriptionList.reduce((prev: string, cur: string, index: number) => {
-      if (index % 10 === 0) {
-        return `${prev}\n${cur}`;
-      } else {
-        return `${prev}${cur}`;
-      }
-    }, "");
-  }
-});
 const boxData = computed<TItemBoxData>(() => {
   if (props.mode === "avatar") {
+    const avatar = <TGApp.Game.Avatar.Avatar>props.data;
     return {
-      bg: `/icon/bg/${props.data.star}-Star.webp`,
-      icon: `/WIKI/character/${props.data.cid}.webp`,
+      bg: `/icon/bg/${avatar.rarity}-Star.webp`,
+      icon: `/WIKI/character/${avatar.id}.webp`,
       size: "100px",
       height: "100px",
       display: "inner",
       innerHeight: 0,
       innerText: "",
       clickable: false,
-      lt: `/icon/element/${props.data.element}.webp`,
+      lt: `/icon/element/${getZhElement(avatar.element)}元素.webp`,
       ltSize: "30px",
     };
   } else {
+    const weapon = <TGApp.Game.Avatar.WeaponDetail>props.data;
     return {
-      bg: `/icon/bg/${props.data.star}-Star.webp`,
-      icon: `/WIKI/weapon/${props.data.id}.webp`,
+      bg: `/icon/bg/${weapon.rarity}-Star.webp`,
+      icon: `/WIKI/weapon/${weapon.id}.webp`,
       size: "100px",
       height: "100px",
       display: "inner",
       innerHeight: 0,
       innerText: "",
       clickable: false,
-      lt: `/icon/weapon/${props.data.type}.webp`,
+      lt: `/icon/weapon/${weapon.type_name}.webp`,
       ltSize: "30px",
     };
   }
 });
 const info = computed(() => {
   if (props.mode === "avatar") {
-    return `好感 ${props.data.fetter}`;
+    const avatar = <TGApp.Game.Avatar.Avatar>props.data;
+    return `好感 ${avatar.fetter}`;
   } else {
-    return `精炼 ${props.data.affix}`;
+    const weapon = <TGApp.Game.Avatar.WeaponDetail>props.data;
+    return `精炼 ${weapon.affix_level}`;
   }
 });
 </script>

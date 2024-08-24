@@ -1,12 +1,13 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+  <TOverlay v-model="visible" hide blur-val="20px">
     <div class="tdo-box">
       <div class="tdo-tabs-container">
-        <v-tabs v-model="modeTab" class="tdo-tabs" :rounded="true">
+        <v-tabs v-model="modeTab" class="tdo-tabs">
           <v-tab value="classic">经典视图</v-tab>
           <v-tab value="card">卡片视图（简略）</v-tab>
           <v-tab value="dev">卡片视图（详细）</v-tab>
         </v-tabs>
+        <v-btn @click="onCancel" icon="mdi-close" size="28" variant="outlined" />
       </div>
       <div class="tdo-container">
         <div class="tdo-box-arrow left" @click="handleClick('left')">
@@ -14,10 +15,12 @@
         </div>
         <v-window class="tdo-box-container" v-model="modeTab">
           <v-window-item value="classic">
-            <TucDetailCard :data-val="avatar" />
+            <TucDetailOld :model-value="avatar" />
           </v-window-item>
-          <v-window-item value="card"> </v-window-item>
-          <v-window-item value="dev"> </v-window-item>
+          <v-window-item value="card">
+            <TucDetailCard :model-value="avatar" />
+          </v-window-item>
+          <v-window-item value="dev"></v-window-item>
         </v-window>
         <div class="tdo-box-arrow right" @click="handleClick('right')">
           <img alt="right" src="../../assets/icons/arrow-right.svg" />
@@ -30,7 +33,8 @@
 import { computed } from "vue";
 
 import TOverlay from "../main/t-overlay.vue";
-import TucDetailCard from "../userAvatarOld/tuc-detail-card.vue";
+import TucDetailCard from "../userAvatarCard/tuc-detail-card.vue";
+import TucDetailOld from "../userAvatarOld/tuc-detail-old.vue";
 
 interface TuaDetailOverlayProps {
   modelValue: boolean;
@@ -78,9 +82,15 @@ function handleClick(pos: "left" | "right"): void {
 }
 
 .tdo-tabs-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  border-radius: 10px;
   background: var(--box-bg-1);
-  box-shadow: 0 0 10px var(--common-shadow-2);
+  box-shadow: 0 0 5px var(--common-shadow-2);
   color: var(--box-text-1);
+  column-gap: 10px;
 }
 
 .tdo-container {
@@ -117,5 +127,6 @@ function handleClick(pos: "left" | "right"): void {
 
 .tdo-box-container {
   position: relative;
+  transition: all 1s ease-in-out;
 }
 </style>

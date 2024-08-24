@@ -6,7 +6,7 @@
       :title="constellation.name"
       class="duc-dolb-item"
     >
-      <div v-if="!constellation.active" class="duc-dolb-lock">
+      <div v-if="!constellation.is_actived" class="duc-dolb-lock">
         <v-icon color="white">mdi-lock</v-icon>
       </div>
       <img class="duc-dolb-icon" :src="constellation.icon" alt="constellation" />
@@ -14,19 +14,19 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, onUpdated, ref } from "vue";
+import { onMounted, ref, watch, onUnmounted } from "vue";
 
 import { saveImgLocal } from "../../utils/TGShare.js";
 
 interface DucDetailOlbProps {
-  modelValue: TGApp.Sqlite.Character.RoleConstellation[];
+  modelValue: TGApp.Game.Avatar.Constellation[];
 }
 
 const props = defineProps<DucDetailOlbProps>();
-const constellations = ref<TGApp.Sqlite.Character.RoleConstellation[]>([]);
+const constellations = ref<TGApp.Game.Avatar.Constellation[]>([]);
 
 async function loadData() {
-  const tempConstellations = props.modelValue;
+  const tempConstellations = JSON.parse(JSON.stringify(props.modelValue));
   for (const constellation of tempConstellations) {
     if (constellation.icon.startsWith("blob:")) return;
     constellation.icon = await saveImgLocal(constellation.icon);
@@ -37,9 +37,23 @@ async function loadData() {
 onMounted(async () => {
   await loadData();
 });
-
-onUpdated(async () => {
-  await loadData();
+watch(
+  () => props.modelValue,
+  async () => {
+    for (const constellation of constellations.value) {
+      if (constellation.icon.startsWith("blob:")) {
+        URL.revokeObjectURL(constellation.icon);
+      }
+    }
+    await loadData();
+  },
+);
+onUnmounted(() => {
+  for (const constellation of constellations.value) {
+    if (constellation.icon.startsWith("blob:")) {
+      URL.revokeObjectURL(constellation.icon);
+    }
+  }
 });
 </script>
 <style>

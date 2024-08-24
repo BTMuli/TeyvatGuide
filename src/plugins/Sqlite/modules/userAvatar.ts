@@ -61,10 +61,27 @@ async function saveAvatars(uid: string, data: TGApp.Game.Avatar.DetailList[]): P
   await db.execute(sql);
 }
 
+/**
+ * @description 获取角色名片
+ * @since Beta v0.5.3
+ * @param {number} id 角色 id
+ * @returns {Promise<string|false>}
+ */
+async function getAvatarCard(id: number): Promise<string | false> {
+  const db = await TGSqlite.getDB();
+  type resType = Array<{ card: string }>;
+  const res = await db.select<resType>("SELECT nameCard as card FROM AppCharacters WHERE id = ?;", [
+    id,
+  ]);
+  if (res.length === 0) return false;
+  return res[0].card;
+}
+
 const TSUserAvatar = {
   getAllAvatarId,
   getAvatars,
   saveAvatars,
+  getAvatarCard,
 };
 
 export default TSUserAvatar;

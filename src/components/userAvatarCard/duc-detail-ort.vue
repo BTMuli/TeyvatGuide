@@ -1,6 +1,11 @@
 <template>
   <div class="duc-dort-box">
-    <div :title="talent.name" v-for="talent in talents" :key="talent.pos" class="duc-dort-item">
+    <div
+      :title="talent.name"
+      v-for="talent in talents"
+      :key="talent.skill_id"
+      class="duc-dort-item"
+    >
       <span>{{ talent.name }}</span>
       <img :src="talent.icon" alt="talent" />
       <span>Lv.{{ talent.level === 0 ? 1 : talent.level }}</span>
@@ -8,19 +13,19 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, onUpdated, ref } from "vue";
+import { onMounted, watch, ref, onUnmounted } from "vue";
 
 import { saveImgLocal } from "../../utils/TGShare.js";
 
 interface DucDetailOrtProps {
-  modelValue: TGApp.Sqlite.Character.RoleTalent[];
+  modelValue: TGApp.Game.Avatar.Skill[];
 }
 
 const props = defineProps<DucDetailOrtProps>();
-const talents = ref<TGApp.Sqlite.Character.RoleTalent[]>([]);
+const talents = ref<TGApp.Game.Avatar.Skill[]>([]);
 
 async function loadData(): Promise<void> {
-  const tempTalent = props.modelValue;
+  const tempTalent = JSON.parse(JSON.stringify(props.modelValue));
   for (const talent of tempTalent) {
     if (talent.icon.startsWith("blob:")) return;
     talent.icon = await saveImgLocal(talent.icon);
@@ -31,9 +36,23 @@ async function loadData(): Promise<void> {
 onMounted(async () => {
   await loadData();
 });
-
-onUpdated(async () => {
-  await loadData();
+watch(
+  () => props.modelValue,
+  async () => {
+    for (const talent of talents.value) {
+      if (talent.icon.startsWith("blob:")) {
+        URL.revokeObjectURL(talent.icon);
+      }
+    }
+    await loadData();
+  },
+);
+onUnmounted(() => {
+  for (const talent of talents.value) {
+    if (talent.icon.startsWith("blob:")) {
+      URL.revokeObjectURL(talent.icon);
+    }
+  }
 });
 </script>
 <style lang="css" scoped>
