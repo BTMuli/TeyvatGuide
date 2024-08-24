@@ -2,9 +2,7 @@
   <div class="wc-box">
     <div class="wc-left">
       <div class="wc-select">
-        <v-btn @click="showSelect = true">
-          <span>筛选角色</span>
-        </v-btn>
+        <v-btn @click="showSelect = true">筛选角色</v-btn>
         <v-btn @click="resetSelect = true">重置筛选</v-btn>
       </div>
       <div class="wc-list">
@@ -93,6 +91,7 @@ function handleSelect(val: SelectedCValue) {
   }
   showSnackbar({
     text: `筛选出符合条件的角色 ${filterC.length} 个`,
+    color: "success",
   });
   cardsInfo.value = filterC;
 }

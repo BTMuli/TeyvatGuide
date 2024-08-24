@@ -21,33 +21,44 @@
         </v-btn>
       </div>
     </template>
+    <template #extension>
+      <div class="uc-select">
+        <v-btn variant="outlined" @click="showSelect = true">筛选角色</v-btn>
+        <v-btn variant="outlined" @click="resetSelect = true">重置筛选</v-btn>
+      </div>
+      <!-- todo 展示模式切换 -->
+    </template>
   </v-app-bar>
   <div class="uc-box">
     <div class="uc-top">
-      <div class="uc-top-title" @click="switchOld">
+      <div class="uc-top-title">
         <span v-if="user">
           {{ user.nickname }} UID：{{ user.gameUid }} 更新于 {{ getUpdateTime() }}
+          <!-- todo 展示筛选条件 -->
         </span>
         <span v-else> 暂无数据 </span>
       </div>
     </div>
     <div class="uc-grid">
       <TuaAvatarBox
-        v-for="(role, index) in roleList"
+        v-for="(role, index) in selectedList"
         :key="index"
         :model-value="role"
         @click="selectRole(role)"
       />
     </div>
   </div>
+  <TwoSelectC v-model="showSelect" @select-c="handleSelect" v-model:reset="resetSelect" />
 </template>
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
-import { onBeforeMount, onMounted, ref } from "vue";
+import { onBeforeMount, onMounted, ref, watch } from "vue";
 
 import showSnackbar from "../../components/func/snackbar.js";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TuaAvatarBox from "../../components/userAvatar/tua-avatar-box.vue";
+import TwoSelectC, { SelectedCValue } from "../../components/wiki/two-select-c.vue";
+import { AppCharacterData } from "../../data/index.js";
 import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
@@ -68,17 +79,18 @@ const loadingSub = ref<string>();
 // data
 const isEmpty = ref(true);
 const roleList = ref<TGApp.Sqlite.Character.UserRole[]>([]);
+const selectedList = ref<TGApp.Sqlite.Character.UserRole[]>([]);
 
 // overlay
 const visible = ref(false);
 const dataVal = ref<TGApp.Sqlite.Character.UserRole>(<TGApp.Sqlite.Character.UserRole>{});
 const selectIndex = ref(0);
-const detailDev = ref(true);
+
+const showSelect = ref<boolean>(false);
+const resetSelect = ref<boolean>(false);
 
 onBeforeMount(() => {
-  if (userStore.account.value) {
-    user.value = userStore.account.value;
-  }
+  if (userStore.account.value) user.value = userStore.account.value;
 });
 
 onMounted(async () => {
@@ -91,29 +103,43 @@ onMounted(async () => {
   loadData.value = false;
 });
 
-function switchOld(): void {
-  detailDev.value = !detailDev.value;
-  showSnackbar({
-    text: `已切换到${detailDev.value ? "新" : "旧"}版角色详情页面`,
+watch(resetSelect, (val) => {
+  if (val) {
+    selectedList.value = getOrderedList(roleList.value);
+    showSnackbar({
+      text: "已重置筛选条件",
+      color: "success",
+    });
+  }
+});
+
+function getOrderedList(
+  data: TGApp.Sqlite.Character.UserRole[],
+): TGApp.Sqlite.Character.UserRole[] {
+  return data.sort((a, b) => {
+    if (a.avatar.rarity !== b.avatar.rarity) return b.avatar.rarity - a.avatar.rarity;
+    if (a.avatar.element !== b.avatar.element) {
+      return a.avatar.element.localeCompare(b.avatar.element);
+    }
+    return a.cid - b.cid;
   });
 }
 
 async function load(): Promise<void> {
   if (!user.value) return;
   const roleData = await TSUserAvatar.getAvatars(user.value.gameUid);
-  roleData.sort((a, b) => {
-    if (a.avatar.rarity !== b.avatar.rarity) return b.avatar.rarity - a.avatar.rarity;
-    if (a.avatar.element !== b.avatar.element)
-      return a.avatar.element.localeCompare(b.avatar.element);
-    return a.cid - b.cid;
-  });
-  roleList.value = roleData;
+  roleList.value = getOrderedList(roleData);
+  selectedList.value = roleList.value;
   dataVal.value = roleData[selectIndex.value];
   isEmpty.value = false;
   await TGLogger.Info(`[Character][loadRole][${user.value.gameUid}] 成功加载角色数据`);
   await TGLogger.Info(
     `[Character][loadRole][${user.value.gameUid}] 共获取到${roleData.length}个角色`,
   );
+  showSnackbar({
+    text: `成功加载${roleData.length}个角色`,
+    color: "success",
+  });
 }
 
 async function refresh(): Promise<void> {
@@ -210,8 +236,40 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
   selectIndex.value = roleList.value.indexOf(role);
   visible.value = true;
 }
+
+function handleSelect(val: SelectedCValue) {
+  showSelect.value = false;
+  const filterC = AppCharacterData.filter((avatar) => {
+    if (!roleList.value.find((role) => role.avatar.id === avatar.id)) return false;
+    if (!val.star.includes(avatar.star)) return false;
+    if (!val.weapon.includes(avatar.weapon)) return false;
+    if (!val.elements.includes(avatar.element)) return false;
+    return val.area.includes(avatar.area);
+  });
+  if (filterC.length === 0) {
+    showSnackbar({
+      text: "未找到符合条件的角色",
+      color: "warn",
+    });
+    return;
+  }
+  showSnackbar({
+    text: `筛选出符合条件的角色 ${filterC.length} 个`,
+    color: "success",
+  });
+  const selectedId = filterC.map((item) => item.id);
+  selectedList.value = roleList.value.filter((role) => selectedId.includes(role.avatar.id));
+}
 </script>
 <style lang="css" scoped>
+.uc-select {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0 10px;
+  gap: 10px;
+}
+
 .uc-box {
   display: flex;
   flex-direction: column;
@@ -241,6 +299,7 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
 .uc-top-btns {
   display: flex;
   align-content: center;
+  margin: 0 10px;
   column-gap: 10px;
 }
 
