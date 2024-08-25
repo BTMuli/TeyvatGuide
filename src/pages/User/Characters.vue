@@ -45,7 +45,6 @@
       </div>
     </template>
   </v-app-bar>
-  <TwoSelectC v-model="showSelect" @select-c="handleSelect" v-model:reset="resetSelect" />
   <div class="uc-box">
     <div class="uc-top">
       <div class="uc-top-title">
@@ -76,6 +75,7 @@
     @to-next="handleSwitch"
     @to-avatar="selectRole"
   />
+  <TwoSelectC v-model="showSelect" @select-c="handleSelect" v-model:reset="resetSelect" />
 </template>
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
@@ -196,6 +196,10 @@ async function load(): Promise<void> {
 
 async function refresh(): Promise<void> {
   if (!user.value) return;
+  if (showSelect.value) {
+    showSelect.value = false;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
   if (showOverlay.value) {
     showOverlay.value = false;
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -321,6 +325,10 @@ function handleSelect(val: SelectedCValue) {
   });
   const selectedId = filterC.map((item) => item.id);
   selectedList.value = roleList.value.filter((role) => selectedId.includes(role.cid));
+  if (!selectedList.value.includes(dataVal.value)) {
+    dataVal.value = selectedList.value[0];
+    selectIndex.value = 0;
+  }
 }
 
 function handleSwitch(next: boolean): void {
