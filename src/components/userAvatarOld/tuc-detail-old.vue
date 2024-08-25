@@ -1,16 +1,6 @@
 <template>
   <div class="tuc-do-box">
     <img :src="bg" alt="role" class="tuc-do-bg" />
-    <div v-if="props.modelValue.costumes.length > 0" class="tuc-do-costume">
-      <v-switch v-model="showCostumeSwitch" color="#fb7299" @click="switchBg">
-        <template #label>
-          <v-icon>mdi-tshirt-crew-outline</v-icon>
-        </template>
-      </v-switch>
-    </div>
-    <div v-if="showCostumeSwitch" class="tuc-do-costume-name">
-      {{ props.modelValue.costumes[0].name }}
-    </div>
     <div class="tuc-do-show">
       <div class="tuc-do-main">
         <div class="tuc-do-left">
@@ -34,7 +24,6 @@
             <TucDetailRelic :model-value="item" :pos="index + 1" />
           </div>
         </div>
-        <!-- 右侧环状排列6个命座 -->
         <div class="tuc-do-right">
           <div class="tuc-dor-box">
             <TucDetailConstellation
@@ -49,8 +38,23 @@
             />
           </div>
         </div>
+        <div v-if="props.modelValue.costumes.length > 0" class="tuc-do-costume">
+          <v-switch
+            density="compact"
+            hide-details
+            v-model="showCostumeSwitch"
+            color="#fb7299"
+            @click="switchBg"
+          >
+            <template #label>
+              <v-icon>mdi-tshirt-crew-outline</v-icon>
+            </template>
+          </v-switch>
+        </div>
+        <div v-if="showCostumeSwitch" class="tuc-do-costume-name">
+          {{ props.modelValue.costumes[0].name }}
+        </div>
       </div>
-      <!-- 底部说明 -->
       <div class="tuc-do-bottom">
         <TucDetailDescWeapon
           v-if="selected.type === '武器'"
@@ -200,24 +204,33 @@ function switchBg(): void {
   position: absolute;
   z-index: 1;
   top: 5px;
-  right: 10px;
+  right: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  border-radius: 5px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  background: var(--common-shadow-2);
   color: var(--tgc-pink-1);
 }
 
 .tuc-do-costume-name {
   position: absolute;
-  top: 10px;
-  left: calc(50% - 80px);
-  width: 160px;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
   border-radius: 5px;
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
-  background: var(--tgc-white-1);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  background: var(--common-shadow-2);
   color: var(--tgc-yellow-1);
-  font-family: var(--font-text);
-  font-size: 16px;
-  opacity: 0.8;
-  text-align: center;
+  font-family: var(--font-title);
+  text-shadow: 0 0 5px var(--tgc-dark-1);
 }
 
 .tuc-do-show {
