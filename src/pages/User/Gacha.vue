@@ -25,17 +25,17 @@
   </div>
   <div class="gacha-container">
     <v-tabs v-model="tab" align-tabs="start" class="gacha-tab">
-      <v-tab value="echarts">图表概览</v-tab>
       <v-tab value="overview">数据概览</v-tab>
+      <v-tab value="echarts">图表概览</v-tab>
       <v-tab value="table">数据表格</v-tab>
       <v-tab value="history">过往祈愿</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="gacha-window">
-      <v-window-item value="echarts" class="gacha-window-item">
-        <gro-echarts v-model="gachaListCur" />
-      </v-window-item>
       <v-window-item value="overview" class="gacha-window-item">
         <gro-overview v-model="gachaListCur" />
+      </v-window-item>
+      <v-window-item value="echarts" class="gacha-window-item">
+        <gro-echarts v-model="gachaListCur" />
       </v-window-item>
       <v-window-item value="table" class="gacha-window-item">
         <gro-table v-model="gachaListCur" />
@@ -86,7 +86,7 @@ const loadingSub = ref<string>();
 const selectItem = ref<string[]>([]);
 const uidCur = ref<string>("");
 const gachaListCur = ref<TGApp.Sqlite.GachaRecords.SingleTable[]>([]);
-const tab = ref<string>("");
+const tab = ref<string>("overview");
 
 onMounted(async () => {
   await TGLogger.Info("[UserGacha][onMounted] 进入角色祈愿页面");
@@ -108,7 +108,6 @@ onMounted(async () => {
     `[UserGacha][onMounted] 获取到 ${uidCur.value} 的 ${gachaListCur.value.length} 条祈愿数据`,
   );
   loadingTitle.value = "正在渲染数据";
-  tab.value = "echarts";
   loading.value = false;
   showSnackbar({
     text: `成功获取 ${gachaListCur.value.length} 条祈愿数据`,
