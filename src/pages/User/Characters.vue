@@ -71,8 +71,10 @@
   <TuaDetailOverlay
     v-model="showOverlay"
     :avatar="dataVal"
+    :avatars="selectedList"
     v-model:mode="showMode"
     @to-next="handleSwitch"
+    @to-avatar="selectRole"
   />
 </template>
 <script lang="ts" setup>
@@ -294,7 +296,7 @@ function getUpdateTime(): string {
 function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
   dataVal.value = role;
   selectIndex.value = roleList.value.indexOf(role);
-  showOverlay.value = true;
+  if (!showOverlay.value) showOverlay.value = true;
 }
 
 function handleSelect(val: SelectedCValue) {

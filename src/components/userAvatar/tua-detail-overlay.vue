@@ -10,27 +10,42 @@
         <v-btn @click="onCancel" icon="mdi-close" size="28" variant="outlined" />
       </div>
       <div class="tdo-container">
-        <div class="tdo-box-arrow left" @click="handleClick('left')">
-          <img alt="left" src="../../assets/icons/arrow-right.svg" />
+        <div class="tdo-avatars-container">
+          <v-tabs v-model="avatarTab" density="compact" center-active>
+            <v-tab
+              v-for="avatar in avatars"
+              :key="avatar.avatar.id"
+              :value="avatar.avatar.id"
+              @click="onAvatarClick(avatar)"
+              :title="avatar.avatar.name"
+            >
+              <v-avatar :image="avatar.avatar.side_icon" class="tdo-avatar" />
+            </v-tab>
+          </v-tabs>
         </div>
-        <v-window class="tdo-box-container" v-model="modeTab">
-          <v-window-item value="classic">
-            <TucDetailOld :model-value="avatar" />
-          </v-window-item>
-          <v-window-item value="card">
-            <TucDetailCard :model-value="avatar" />
-          </v-window-item>
-          <v-window-item value="dev"></v-window-item>
-        </v-window>
-        <div class="tdo-box-arrow right" @click="handleClick('right')">
-          <img alt="right" src="../../assets/icons/arrow-right.svg" />
+        <div class="tdo-card-container">
+          <div class="tdo-box-arrow left" @click="handleClick('left')">
+            <img alt="left" src="../../assets/icons/arrow-right.svg" />
+          </div>
+          <v-window class="tdo-box-container" v-model="modeTab">
+            <v-window-item value="classic">
+              <TucDetailOld :model-value="avatar" />
+            </v-window-item>
+            <v-window-item value="card">
+              <TucDetailCard :model-value="avatar" />
+            </v-window-item>
+            <v-window-item value="dev"></v-window-item>
+          </v-window>
+          <div class="tdo-box-arrow right" @click="handleClick('right')">
+            <img alt="right" src="../../assets/icons/arrow-right.svg" />
+          </div>
         </div>
       </div>
     </div>
   </TOverlay>
 </template>
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 
 import TOverlay from "../main/t-overlay.vue";
 import TucDetailCard from "../userAvatarCard/tuc-detail-card.vue";
@@ -40,6 +55,7 @@ interface TuaDetailOverlayProps {
   modelValue: boolean;
   avatar: TGApp.Sqlite.Character.UserRole;
   mode: "classic" | "card" | "dev";
+  avatars: TGApp.Sqlite.Character.UserRole[];
 }
 
 interface TuaDetailOverlayEmits {
@@ -48,10 +64,13 @@ interface TuaDetailOverlayEmits {
   (e: "update:mode", val: "classic" | "card" | "dev"): void;
 
   (e: "toNext", val: boolean): void;
+
+  (e: "toAvatar", val: TGApp.Sqlite.Character.UserRole): void;
 }
 
 const props = defineProps<TuaDetailOverlayProps>();
 const emits = defineEmits<TuaDetailOverlayEmits>();
+const avatarTab = ref<number>();
 
 const visible = computed<boolean>({
   get: () => props.modelValue,
@@ -61,6 +80,25 @@ const modeTab = computed<"classic" | "card" | "dev">({
   get: () => props.mode,
   set: (val) => emits("update:mode", val),
 });
+const avatarsWidth = computed<string>(() => {
+  switch (props.mode) {
+    case "classic":
+      return "500px";
+    case "card":
+      return "800px";
+    case "dev":
+      return "300px";
+    default:
+      return "100px";
+  }
+});
+
+watch(
+  () => props.avatar,
+  () => {
+    avatarTab.value = props.avatar.cid;
+  },
+);
 
 function onCancel(): void {
   visible.value = false;
@@ -69,6 +107,10 @@ function onCancel(): void {
 function handleClick(pos: "left" | "right"): void {
   if (pos === "left") emits("toNext", false);
   else emits("toNext", true);
+}
+
+function onAvatarClick(avatar: TGApp.Sqlite.Character.UserRole): void {
+  emits("toAvatar", avatar);
 }
 </script>
 <style lang="css" scoped>
@@ -79,6 +121,16 @@ function handleClick(pos: "left" | "right"): void {
   justify-content: center;
   margin-top: 120px;
   row-gap: 10px;
+}
+
+.tdo-avatars-container {
+  position: relative;
+  width: v-bind(avatarsWidth);
+}
+
+.tdo-avatar {
+  cursor: pointer;
+  transform: translateY(-10px);
 }
 
 .tdo-tabs-container {
@@ -94,6 +146,14 @@ function handleClick(pos: "left" | "right"): void {
 }
 
 .tdo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  row-gap: 10px;
+}
+
+.tdo-card-container {
   display: flex;
   align-items: center;
   justify-content: center;
