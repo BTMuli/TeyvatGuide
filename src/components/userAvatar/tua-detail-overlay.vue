@@ -1,44 +1,36 @@
 <template>
-  <TOverlay v-model="visible" hide blur-val="20px">
+  <TOverlay v-model="visible" hide blur-val="20px" :to-click="onCancel">
     <div class="tdo-box">
-      <div class="tdo-tabs-container">
-        <v-tabs v-model="modeTab" class="tdo-tabs">
-          <v-tab value="classic">经典视图</v-tab>
-          <v-tab value="card">卡片视图（简略）</v-tab>
-          <v-tab value="dev">卡片视图（详细）</v-tab>
+      <div class="tdo-avatars-container">
+        <v-tabs v-model="avatarTab" density="compact" center-active>
+          <v-tab
+            v-for="avatar in avatars"
+            :key="avatar.avatar.id"
+            :value="avatar.avatar.id"
+            @click="onAvatarClick(avatar)"
+            :title="avatar.avatar.name"
+          >
+            <v-avatar :image="avatar.avatar.side_icon" class="tdo-avatar" />
+          </v-tab>
         </v-tabs>
-        <v-btn @click="onCancel" icon="mdi-close" size="28" variant="outlined" />
       </div>
-      <div class="tdo-container">
-        <div class="tdo-avatars-container">
-          <v-tabs v-model="avatarTab" density="compact" center-active>
-            <v-tab
-              v-for="avatar in avatars"
-              :key="avatar.avatar.id"
-              :value="avatar.avatar.id"
-              @click="onAvatarClick(avatar)"
-              :title="avatar.avatar.name"
-            >
-              <v-avatar :image="avatar.avatar.side_icon" class="tdo-avatar" />
-            </v-tab>
-          </v-tabs>
+      <div class="tdo-card-container">
+        <div class="tdo-box-arrow left" @click="handleClick('left')">
+          <img alt="left" src="../../assets/icons/arrow-right.svg" />
         </div>
-        <div class="tdo-card-container">
-          <div class="tdo-box-arrow left" @click="handleClick('left')">
-            <img alt="left" src="../../assets/icons/arrow-right.svg" />
-          </div>
-          <v-window class="tdo-box-container" v-model="modeTab">
-            <v-window-item value="classic">
-              <TucDetailOld :model-value="avatar" />
-            </v-window-item>
-            <v-window-item value="card">
-              <TucDetailCard :model-value="avatar" />
-            </v-window-item>
-            <v-window-item value="dev"></v-window-item>
-          </v-window>
-          <div class="tdo-box-arrow right" @click="handleClick('right')">
-            <img alt="right" src="../../assets/icons/arrow-right.svg" />
-          </div>
+        <v-window class="tdo-box-container" v-model="modeTab">
+          <v-window-item value="classic">
+            <TucDetailOld :model-value="avatar" />
+          </v-window-item>
+          <v-window-item value="card">
+            <TucDetailCard :model-value="avatar" />
+          </v-window-item>
+          <v-window-item value="dev">
+            <TuaDetailCard :model-value="avatar" />
+          </v-window-item>
+        </v-window>
+        <div class="tdo-box-arrow right" @click="handleClick('right')">
+          <img alt="right" src="../../assets/icons/arrow-right.svg" />
         </div>
       </div>
     </div>
@@ -50,6 +42,8 @@ import { computed, ref, watch } from "vue";
 import TOverlay from "../main/t-overlay.vue";
 import TucDetailCard from "../userAvatarCard/tuc-detail-card.vue";
 import TucDetailOld from "../userAvatarOld/tuc-detail-old.vue";
+
+import TuaDetailCard from "./tua-detail-card.vue";
 
 interface TuaDetailOverlayProps {
   modelValue: boolean;
@@ -87,7 +81,7 @@ const avatarsWidth = computed<string>(() => {
     case "card":
       return "800px";
     case "dev":
-      return "300px";
+      return "800px";
     default:
       return "100px";
   }
@@ -131,26 +125,6 @@ function onAvatarClick(avatar: TGApp.Sqlite.Character.UserRole): void {
 .tdo-avatar {
   cursor: pointer;
   transform: translateY(-10px);
-}
-
-.tdo-tabs-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 10px;
-  border-radius: 10px;
-  background: var(--box-bg-1);
-  box-shadow: 0 0 5px var(--common-shadow-2);
-  color: var(--box-text-1);
-  column-gap: 10px;
-}
-
-.tdo-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  row-gap: 10px;
 }
 
 .tdo-card-container {
