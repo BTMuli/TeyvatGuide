@@ -396,7 +396,7 @@ function handleSwitch(next: boolean): void {
 .uc-grid {
   display: grid;
   grid-gap: 15px;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(210px, 0.2fr));
 }
 
 .uc-empty {
