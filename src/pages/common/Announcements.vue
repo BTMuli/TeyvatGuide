@@ -1,33 +1,40 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" />
-  <v-tabs v-model="tab" align-tabs="start" class="anno-tab">
-    <v-tab v-for="(value, index) in tabValues" :key="index" :value="value">
-      {{ AnnoType[value] }}
-    </v-tab>
-    <v-select
-      class="anno-select"
-      :items="annoServerList"
-      v-model="curRegionName"
-      label="服务器"
-      dense
-      outlined
-    />
-    <v-select
-      class="anno-select"
-      :items="langList"
-      v-model="curLangName"
-      label="语言"
-      dense
-      outlined
-    />
-    <v-spacer />
-    <v-btn class="anno-switch-btn" @click="switchNews">
-      <template #prepend>
-        <v-icon>mdi-bullhorn</v-icon>
-      </template>
-      切换米游社咨讯
-    </v-btn>
-  </v-tabs>
+  <v-app-bar>
+    <template #prepend>
+      <v-tabs v-model="tab" align-tabs="start" class="anno-tab">
+        <v-tab v-for="(value, index) in tabValues" :key="index" :value="value">
+          {{ AnnoType[value] }}
+        </v-tab>
+      </v-tabs>
+      <div class="anno-selects">
+        <v-select
+          class="anno-select"
+          :items="annoServerList"
+          v-model="curRegionName"
+          label="服务器"
+          width="200px"
+          density="compact"
+        />
+        <v-select
+          class="anno-select"
+          :items="langList"
+          v-model="curLangName"
+          label="语言"
+          width="200px"
+          density="compact"
+        />
+      </div>
+    </template>
+    <template #append>
+      <v-btn class="anno-switch-btn" @click="switchNews">
+        <template #prepend>
+          <v-icon>mdi-bullhorn</v-icon>
+        </template>
+        切换米游社咨讯
+      </v-btn>
+    </template>
+  </v-app-bar>
   <v-window v-model="tab">
     <v-window-item v-for="(value, index) in tabValues" :key="index" :value="value">
       <div class="anno-grid">
@@ -257,14 +264,21 @@ async function createAnno(item: TGApp.App.Announcement.ListCard): Promise<void> 
 
 <style lang="css" scoped>
 .anno-tab {
-  margin-bottom: 10px;
   color: var(--common-text-title);
   font-family: var(--font-title);
 }
 
+.anno-selects {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 25px;
+  margin: 0 10px;
+  gap: 10px;
+}
+
 .anno-select {
   width: 150px;
-  margin-left: 10px;
   color: var(--common-text-title);
   font-family: var(--font-title);
 }

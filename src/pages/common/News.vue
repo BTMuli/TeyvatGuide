@@ -1,33 +1,44 @@
-<!-- todo app-bar -->
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" />
-  <v-tabs v-model="tab" align-tabs="start" class="news-tab">
-    <v-tab v-for="(value, index) in tabValues" :key="index" :value="value" @click="firstLoad(value)"
-      >{{ rawData[value].name }}
-    </v-tab>
-    <v-text-field
-      v-model="search"
-      class="news-search"
-      append-icon="mdi-magnify"
-      label="请输入帖子 ID 或搜索词"
-      :single-line="true"
-      hide-details
-      @keyup.enter="searchPost()"
-    />
-    <v-spacer />
-    <v-btn class="news-top-btn" @click="firstLoad(tab, true)">
-      <v-icon>mdi-refresh</v-icon>
-    </v-btn>
-    <v-btn class="news-top-btn" @click="showList = true">
-      <v-icon>mdi-view-list</v-icon>
-    </v-btn>
-    <v-btn class="news-top-btn" @click="switchAnno" v-if="gid === '2'">
-      <template #prepend>
-        <v-icon>mdi-bullhorn</v-icon>
-      </template>
-      切换游戏内公告
-    </v-btn>
-  </v-tabs>
+  <v-app-bar density="compact">
+    <template #prepend>
+      <v-tabs v-model="tab" align-tabs="start" class="news-tab">
+        <v-tab
+          v-for="(value, index) in tabValues"
+          :key="index"
+          :value="value"
+          @click="firstLoad(value)"
+          >{{ rawData[value].name }}
+        </v-tab>
+      </v-tabs>
+    </template>
+    <template #title>
+      <v-text-field
+        v-model="search"
+        class="news-search"
+        append-icon="mdi-magnify"
+        label="请输入帖子 ID 或搜索词"
+        :single-line="true"
+        hide-details
+        @keyup.enter="searchPost()"
+        @click:append="searchPost()"
+      />
+    </template>
+    <template #append>
+      <v-btn class="news-top-btn" @click="firstLoad(tab, true)">
+        <v-icon>mdi-refresh</v-icon>
+      </v-btn>
+      <v-btn class="news-top-btn" @click="showList = true">
+        <v-icon>mdi-view-list</v-icon>
+      </v-btn>
+      <v-btn class="news-top-btn" @click="switchAnno" v-if="gid === '2'">
+        <template #prepend>
+          <v-icon>mdi-bullhorn</v-icon>
+        </template>
+        切换游戏内公告
+      </v-btn>
+    </template>
+  </v-app-bar>
   <v-window v-model="tab">
     <v-window-item v-for="(value, index) in tabValues" :key="index" :value="value">
       <div class="news-grid">
@@ -225,7 +236,7 @@ async function searchPost(): Promise<void> {
 }
 
 .news-search {
-  margin-left: 10px;
+  margin: 0 10px;
   color: var(--box-text-1);
 }
 
