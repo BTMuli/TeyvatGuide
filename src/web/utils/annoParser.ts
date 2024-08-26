@@ -257,6 +257,12 @@ function parseAnnoParagraph(
         children: res,
       };
     }
+    if (child.tagName === "T") {
+      return {
+        insert: "",
+        children: parseAnnoNode(child),
+      };
+    }
     return defaultRes;
   }
   const res: TGApp.Plugins.Mys.SctPost.Base = {

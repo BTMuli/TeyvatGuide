@@ -63,6 +63,7 @@ import { createTGWindow } from "../../utils/TGWindow.js";
 import { AnnoLang, AnnoServer } from "../../web/request/getAnno.js";
 import TGRequest from "../../web/request/TGRequest.js";
 import TGUtils from "../../web/utils/TGUtils.js";
+import { decodeRegExp } from "../../web/utils/tools.js";
 
 // 服务器名称-服务器对应
 type AnnoServerMap = {
@@ -206,7 +207,8 @@ function getAnnoTime(content: string): string | false {
   if (content.match(regexes[2])) {
     const res = content.match(regexes[2]);
     if (res?.[1]?.match(/\d\.\d/)) {
-      return `${res?.[1]}版本更新后 ~ ${res?.[2]}`;
+      const parser = new DOMParser().parseFromString(decodeRegExp(res[2]), "text/html");
+      return `${res?.[1]}版本更新后 ~ ${parser.body.innerText}`;
     }
     return `${res?.[1]} ~ ${res?.[2]}`;
   }
