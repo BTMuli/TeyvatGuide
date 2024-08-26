@@ -1,6 +1,6 @@
 <template>
   <div class="tua-dc-container">
-    <img :src="props.modelValue.avatar.image" class="tua-dc-avatar" alt="avatar" />
+    <img :src="avatar" class="tua-dc-avatar" alt="avatar" />
     <v-btn
       class="tua-dc-share"
       prepend-icon="mdi-share-variant"
@@ -46,11 +46,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
 import { useUserStore } from "../../store/modules/user.js";
-import { generateShareImg } from "../../utils/TGShare.js";
+import { generateShareImg, saveImgLocal } from "../../utils/TGShare.js";
 
 import TuaDcConstellations from "./tua-dc-constellations.vue";
 import TuaDcProp from "./tua-dc-prop.vue";
@@ -84,15 +84,26 @@ const propMain = computed<Array<TGApp.Game.Avatar.PropMapItem | false>>(() => {
 });
 
 const bg = ref<string>("/source/nameCard/profile/原神·印象.webp");
+const avatar = ref<string>(props.modelValue.avatar.image);
 const loading = ref<boolean>(false);
 
 onMounted(async () => {
   await loadData();
 });
 
+onUnmounted(() => {
+  if (avatar.value.startsWith("blob:")) {
+    URL.revokeObjectURL(avatar.value);
+  }
+});
+
 watch(
   () => props.modelValue,
   async () => {
+    if (avatar.value.startsWith("blob:")) {
+      URL.revokeObjectURL(avatar.value);
+    }
+    avatar.value = props.modelValue.avatar.image;
     await loadData();
   },
 );
@@ -107,6 +118,9 @@ async function loadData(): Promise<void> {
     } else {
       bg.value = "url('/source/nameCard/profile/原神·印象.webp')";
     }
+  }
+  if (!avatar.value.startsWith("blob:")) {
+    avatar.value = await saveImgLocal(props.modelValue.avatar.image);
   }
 }
 
