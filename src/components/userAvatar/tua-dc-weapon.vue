@@ -33,19 +33,28 @@
         <span>{{ props.modelValue.sub_property.final }}</span>
       </div>
     </div>
+    <div class="tua-dcw-share">
+      <span class="tua-share-title">UID:{{ props.uid }}</span>
+      <span class="tua-share-time">更新于{{ props.updated }}</span>
+      <span class="tua-share-version">TeyvatGuide v{{ version }}</span>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
+import { app } from "@tauri-apps/api";
 import { computed } from "vue";
 
 import { useUserStore } from "../../store/modules/user.js";
 
 interface TuaDcWeaponProps {
   modelValue: TGApp.Game.Avatar.WeaponDetail;
+  updated: string;
+  uid: number;
 }
 
 const props = defineProps<TuaDcWeaponProps>();
 const userStore = useUserStore();
+const version = await app.getVersion();
 
 const propMain = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   return userStore.getProp(props.modelValue.main_property.property_type);
@@ -67,6 +76,7 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   backdrop-filter: blur(10px);
   background: rgb(0 0 0 / 20%);
   color: var(--tgc-white-1);
+  font-size: 12px;
   text-shadow: 0 0 5px rgb(0 0 0 / 50%);
 }
 
@@ -89,7 +99,6 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
 
 .tua-dcw-title {
   font-family: var(--font-title);
-  font-size: 16px;
 }
 
 .tua-dcw-sub {
@@ -114,9 +123,6 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 5px;
-  border-bottom: 1px solid rgb(255 255 255 / 40%);
-  font-family: var(--font-title);
 }
 
 .tua-prop-sub {
@@ -125,8 +131,6 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 5px;
-  font-size: 14px;
 
   img {
     width: 14px;
@@ -147,8 +151,8 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   justify-content: center;
 
   img {
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     border-radius: 5px;
   }
 
@@ -159,5 +163,30 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
     width: 100%;
     height: 100%;
   }
+}
+
+.tua-dcw-share {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  border-top: 1px solid rgb(255 255 255 / 20%);
+  margin-top: auto;
+}
+
+.tua-share-title {
+  font-family: var(--font-title);
+  font-size: 14px;
+}
+
+.tua-share-time {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.tua-share-version {
+  margin-left: auto;
+  text-shadow: 0 0 5px rgb(0 0 0 / 50%);
 }
 </style>

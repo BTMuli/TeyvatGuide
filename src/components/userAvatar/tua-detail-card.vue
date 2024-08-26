@@ -3,16 +3,35 @@
     <img :src="props.modelValue.avatar.image" class="tua-dc-avatar" alt="avatar" />
     <v-btn
       class="tua-dc-share"
-      icon="mdi-share-variant"
+      prepend-icon="mdi-share-variant"
       @click="share"
       variant="outlined"
       :loading="loading"
       data-html2canvas-ignore
       size="small"
-    />
+    >
+      分享
+    </v-btn>
+    <!-- 右上整体属性&角色-->
+    <div class="tua-dc-rt">
+      <div class="tua-dcr-avatar">
+        <span>{{ props.modelValue.avatar.name }}</span>
+        <span>Lv.{{ props.modelValue.avatar.level }}</span>
+        <span>好感{{ props.modelValue.avatar.fetter }}</span>
+      </div>
+      <div v-for="(prop, index) in props.modelValue.propSelected" :key="index">
+        <div v-if="propMain[index] !== false" class="tua-dc-prop">
+          <TuaDcProp :model-value="prop" :prop="propMain[index]" />
+        </div>
+      </div>
+    </div>
     <!-- 右侧武器跟圣遗物具体属性 -->
     <div class="tua-dc-detail">
-      <TuaDcWeapon :model-value="props.modelValue.weapon" />
+      <TuaDcWeapon
+        :model-value="props.modelValue.weapon"
+        :uid="props.modelValue.uid"
+        :updated="props.modelValue.updated"
+      />
       <TuaDcRelic :model-value="relicList[0]" pos="1" />
       <TuaDcRelic :model-value="relicList[1]" pos="2" />
       <TuaDcRelic :model-value="relicList[2]" pos="3" />
@@ -30,9 +49,11 @@
 import { computed, onMounted, ref, watch } from "vue";
 
 import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
+import { useUserStore } from "../../store/modules/user.js";
 import { generateShareImg } from "../../utils/TGShare.js";
 
 import TuaDcConstellations from "./tua-dc-constellations.vue";
+import TuaDcProp from "./tua-dc-prop.vue";
 import TuaDcRelic from "./tua-dc-relic.vue";
 import TuaDcTalents from "./tua-dc-talents.vue";
 import TuaDcWeapon from "./tua-dc-weapon.vue";
@@ -42,6 +63,7 @@ interface TuaDetailCardProps {
 }
 
 const props = defineProps<TuaDetailCardProps>();
+const userStore = useUserStore();
 
 type fixedLenArr<T, N extends number> = [T, ...T[]] & { length: N };
 type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
@@ -54,6 +76,11 @@ const relicList = computed<RelicList>(() => {
     props.modelValue.relics.find((item) => item.pos === 4) || false,
     props.modelValue.relics.find((item) => item.pos === 5) || false,
   ];
+});
+const propMain = computed<Array<TGApp.Game.Avatar.PropMapItem | false>>(() => {
+  return props.modelValue.propSelected.map((item) => {
+    return userStore.getProp(item.property_type);
+  });
 });
 
 const bg = ref<string>("/source/nameCard/profile/原神·印象.webp");
@@ -115,6 +142,39 @@ async function share(): Promise<void> {
   left: -80px;
   height: 100%;
   object-fit: contain;
+}
+
+.tua-dc-rt {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  width: 520px;
+  height: 80px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 5px;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 5px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  background: rgb(0 0 0 / 20%);
+  gap: 0;
+}
+
+.tua-dcr-avatar {
+  position: absolute;
+  bottom: 5px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: var(--tgc-white-1);
+  column-gap: 10px;
+  font-family: var(--font-title);
+  font-size: 14px;
+  text-shadow: 0 0 5px rgb(0 0 0 / 50%);
 }
 
 .tua-dc-detail {
