@@ -232,8 +232,10 @@ function getRelicTitle(): string {
 .tua-prop-time {
   width: 14px;
   height: 14px;
+  padding-bottom: 1px;
   border: 1px solid rgb(255 255 255 / 20%);
   border-radius: 4px;
+  background: rgb(0 0 0 / 20%);
   font-size: 10px;
   line-height: 14px;
   text-align: center;

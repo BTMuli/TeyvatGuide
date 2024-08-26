@@ -147,6 +147,10 @@ async function share(): Promise<void> {
   position: absolute;
   top: 5px;
   left: 5px;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 5px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   color: var(--tgc-white-1);
 }
 

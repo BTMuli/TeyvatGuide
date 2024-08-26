@@ -35,8 +35,8 @@
     </div>
     <div class="tua-dcw-share">
       <span class="tua-share-title">UID:{{ props.uid }}</span>
-      <span class="tua-share-time">更新于{{ props.updated }}</span>
-      <span class="tua-share-version">TeyvatGuide v{{ version }}</span>
+      <span class="tua-share-sub">更新于{{ props.updated }}</span>
+      <span class="tua-share-sub">Render by TeyvatGuide v{{ version }}</span>
     </div>
   </div>
 </template>
@@ -131,6 +131,7 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 1px solid rgb(255 255 255 / 20%);
 
   img {
     width: 14px;
@@ -171,7 +172,6 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  border-top: 1px solid rgb(255 255 255 / 20%);
   margin-top: auto;
 }
 
@@ -180,13 +180,9 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   font-size: 14px;
 }
 
-.tua-share-time {
-  font-size: 10px;
-  opacity: 0.8;
-}
-
-.tua-share-version {
+.tua-share-sub {
   margin-left: auto;
-  text-shadow: 0 0 5px rgb(0 0 0 / 50%);
+  font-size: 9px;
+  opacity: 0.8;
 }
 </style>
