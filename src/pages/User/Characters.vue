@@ -144,6 +144,11 @@ watch(resetSelect, (val) => {
       text: "已重置筛选条件",
       color: "success",
     });
+    selectIndex.value = selectedList.value.indexOf(dataVal.value);
+    if (selectIndex.value === -1) {
+      dataVal.value = selectedList.value[0];
+      selectIndex.value = 0;
+    }
   }
 });
 watch(showMode, (val) => {
@@ -328,6 +333,8 @@ function handleSelect(val: SelectedCValue) {
   if (!selectedList.value.includes(dataVal.value)) {
     dataVal.value = selectedList.value[0];
     selectIndex.value = 0;
+  } else {
+    selectIndex.value = selectedList.value.indexOf(dataVal.value);
   }
 }
 
