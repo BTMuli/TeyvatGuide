@@ -1,6 +1,6 @@
 <template>
   <div class="tua-dc-container">
-    <!-- 右上分享 -->
+    <img :src="props.modelValue.avatar.image" class="tua-dc-avatar" alt="avatar" />
     <v-btn
       class="tua-dc-share"
       icon="mdi-share-variant"
@@ -8,9 +8,8 @@
       variant="outlined"
       :loading="loading"
       data-html2canvas-ignore
+      size="small"
     />
-    <!-- 左侧角色剪影 -->
-    <img :src="props.modelValue.avatar.image" class="tua-dc-avatar" alt="avatar" />
     <!-- 右侧武器跟圣遗物具体属性 -->
     <div class="tua-dc-detail">
       <TuaDcWeapon :model-value="props.modelValue.weapon" />
@@ -20,6 +19,11 @@
       <TuaDcRelic :model-value="relicList[3]" pos="4" />
       <TuaDcRelic :model-value="relicList[4]" pos="5" />
     </div>
+    <!-- 左下命座跟天赋 -->
+    <div class="tua-dc-lb">
+      <TuaDcTalents :model-value="props.modelValue.skills" />
+      <TuaDcConstellations :model-value="props.modelValue.constellations" />
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -28,7 +32,9 @@ import { computed, onMounted, ref, watch } from "vue";
 import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
 import { generateShareImg } from "../../utils/TGShare.js";
 
+import TuaDcConstellations from "./tua-dc-constellations.vue";
 import TuaDcRelic from "./tua-dc-relic.vue";
+import TuaDcTalents from "./tua-dc-talents.vue";
 import TuaDcWeapon from "./tua-dc-weapon.vue";
 
 interface TuaDetailCardProps {
@@ -98,8 +104,8 @@ async function share(): Promise<void> {
 
 .tua-dc-share {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 5px;
+  left: 5px;
   color: var(--tgc-white-1);
 }
 
@@ -120,5 +126,18 @@ async function share(): Promise<void> {
   gap: 5px;
   grid-template-columns: repeat(3, 170px);
   grid-template-rows: repeat(2, 140px);
+}
+
+.tua-dc-lb {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  display: flex;
+  width: 260px;
+  height: 90px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
 }
 </style>
