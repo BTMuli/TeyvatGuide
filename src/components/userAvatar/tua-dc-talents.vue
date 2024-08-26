@@ -10,7 +10,7 @@
       <div v-if="!skill.is_unlock" class="tua-dct-lock">
         <v-icon size="10px">mdi-lock</v-icon>
       </div>
-      <div class="tua-dct-level" v-if="skill.is_unlock">
+      <div class="tua-dct-level" v-if="skill.is_unlock && skill.skill_type === 1">
         {{ skill.level === 0 ? 1 : skill.level }}
       </div>
     </div>
