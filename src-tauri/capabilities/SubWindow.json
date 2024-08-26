@@ -67,6 +67,9 @@
         },
         {
           "url": "https://*.mihoyo.com/*"
+        },
+        {
+          "url": "https://*.mihoyogift.com/*"
         }
       ]
     }

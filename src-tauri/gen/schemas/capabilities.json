@@ -107,7 +107,11 @@
       { "identifier": "fs:allow-write-text-file", "allow": [{ "path": "**" }] },
       {
         "identifier": "http:default",
-        "allow": [{ "url": "https://*.miyoushe.com/*" }, { "url": "https://*.mihoyo.com/*" }]
+        "allow": [
+          { "url": "https://*.miyoushe.com/*" },
+          { "url": "https://*.mihoyo.com/*" },
+          { "url": "https://*.mihoyogift.com/*" }
+        ]
       }
     ],
     "platforms": ["windows", "macOS"]

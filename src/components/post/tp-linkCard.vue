@@ -1,6 +1,6 @@
 <template>
   <div class="tp-link-card-box">
-    <img :src="props.data.insert.link_card.cover" alt="cover" @click="toLink()" />
+    <img :src="cover" alt="cover" @click="toLink()" />
     <div class="tp-link-card-content">
       <span>{{ props.data.insert.link_card.title }}</span>
       <div v-if="props.data.insert.link_card.price" class="tp-link-card-price">
@@ -13,10 +13,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { toRaw } from "vue";
+import { onMounted, toRaw, ref, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 
 import { parseLink, parsePost } from "../../utils/linkParser.js";
+import { saveImgLocal } from "../../utils/TGShare.js";
 import showSnackbar from "../func/snackbar.js";
 
 interface TpLinkCard {
@@ -43,6 +44,20 @@ interface TpLinkCardProps {
 
 const props = defineProps<TpLinkCardProps>();
 const router = useRouter();
+
+const cover = ref<string>(props.data.insert.link_card.cover);
+
+onMounted(async () => {
+  if (!cover.value.startsWith("blob:")) {
+    cover.value = await saveImgLocal(props.data.insert.link_card.cover);
+  }
+});
+
+onUnmounted(() => {
+  if (cover.value.startsWith("blob:")) {
+    URL.revokeObjectURL(cover.value);
+  }
+});
 
 console.log("tpLinkCard", props.data.insert.link_card.card_id, toRaw(props.data).insert.link_card);
 
