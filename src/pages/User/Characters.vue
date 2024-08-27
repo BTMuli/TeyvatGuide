@@ -14,7 +14,7 @@
           刷新
         </v-btn>
         <v-btn
-          :disabled="showOverlay"
+          :disabled="enableShare"
           @click="share()"
           rounded
           variant="outlined"
@@ -79,7 +79,7 @@
 </template>
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
-import { onBeforeMount, onMounted, ref, watch } from "vue";
+import { onBeforeMount, onMounted, ref, watch, computed } from "vue";
 
 import showSnackbar from "../../components/func/snackbar.js";
 import ToLoading from "../../components/overlay/to-loading.vue";
@@ -122,6 +122,11 @@ const modeList = [
   { label: "卡片视图（简略）", value: "card" },
   { label: "卡片视图（详细）", value: "dev" },
 ];
+
+const enableShare = computed<boolean>(() => {
+  if (showOverlay.value) return true;
+  return !!showSelect.value;
+});
 
 onBeforeMount(() => {
   if (userStore.account.value) user.value = userStore.account.value;
