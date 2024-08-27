@@ -1,5 +1,7 @@
 <template>
-  <v-chart :option="getPoolData()" autoresize />
+  <div class="gro-echart">
+    <v-chart :option="getPoolData()" autoresize />
+  </div>
 </template>
 <script lang="ts" setup>
 import type { EChartsOption } from "echarts";
@@ -13,10 +15,9 @@ import {
 import { use } from "echarts/core";
 import { LabelLayout } from "echarts/features";
 import { CanvasRenderer } from "echarts/renderers";
-import { onMounted, provide } from "vue";
+import { provide } from "vue";
 import VChart, { THEME_KEY } from "vue-echarts";
 
-import showSnackbar from "../func/snackbar.js";
 // echarts
 
 use([
@@ -36,13 +37,6 @@ interface GachaOverviewEchartsProps {
 }
 
 const props = defineProps<GachaOverviewEchartsProps>();
-
-onMounted(async () => {
-  const totalNum = props.modelValue.length;
-  showSnackbar({
-    text: `成功获取 ${totalNum} 条祈愿数据`,
-  });
-});
 
 // data
 const defaultOptions = <EChartsOption>{
@@ -213,3 +207,12 @@ function getPoolData(): EChartsOption {
   return data;
 }
 </script>
+<style lang="css" scoped>
+.gro-echart {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+</style>

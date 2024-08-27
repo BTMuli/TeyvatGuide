@@ -155,12 +155,13 @@ function getBox(id: number): TItemBoxData {
       display: "inner",
       clickable: true,
       lt: `/icon/element/${cFind.element}元素.webp`,
-      ltSize: "30px",
+      ltSize: "20px",
       innerHeight: 20,
       innerIcon: `/icon/weapon/${cFind.weapon}.webp`,
       innerText: cFind.name,
     };
-  } else if (wFind) {
+  }
+  if (wFind) {
     return {
       bg: `/icon/bg/${wFind.star}-Star.webp`,
       icon: `/WIKI/weapon/${wFind.id}.webp`,
@@ -169,13 +170,23 @@ function getBox(id: number): TItemBoxData {
       display: "inner",
       clickable: true,
       lt: wFind.weaponIcon,
-      ltSize: "30px",
+      ltSize: "20px",
       innerHeight: 20,
       innerText: wFind.name,
     };
-  } else {
-    throw new Error("未找到对应角色或武器");
   }
+  return {
+    bg: "/icon/bg/0-Star.webp",
+    icon: "/source/UI/empty/webp",
+    size: "80px",
+    height: "80px",
+    display: "inner",
+    clickable: false,
+    lt: "",
+    ltSize: "0",
+    innerHeight: 20,
+    innerText: "未找到对应角色或武器",
+  };
 }
 </script>
 <style lang="css" scoped>
