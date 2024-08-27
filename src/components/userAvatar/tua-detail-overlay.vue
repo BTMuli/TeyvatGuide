@@ -90,7 +90,7 @@ const avatarsWidth = computed<string>(() => {
 watch(
   () => props.avatar,
   () => {
-    avatarTab.value = props.avatar.cid;
+    if (props.avatar) avatarTab.value = props.avatar.cid;
   },
 );
 

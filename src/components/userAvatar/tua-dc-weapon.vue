@@ -94,16 +94,19 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   height: 100%;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .tua-dcw-title {
+  overflow: hidden;
   font-family: var(--font-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tua-dcw-sub {
   display: flex;
-  width: 100%;
+  width: 117px;
   align-items: center;
   justify-content: space-between;
   font-size: 12px;
