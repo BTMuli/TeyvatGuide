@@ -67,14 +67,16 @@
       <img src="/source/UI/empty.webp" alt="empty" />
     </div>
   </div>
-  <TuaDetailOverlay
-    v-model="showOverlay"
-    :avatar="dataVal"
-    :avatars="selectedList"
-    v-model:mode="showMode"
-    @to-next="handleSwitch"
-    @to-avatar="selectRole"
-  />
+  <suspense>
+    <TuaDetailOverlay
+      v-model="showOverlay"
+      :avatar="dataVal"
+      :avatars="selectedList"
+      v-model:mode="showMode"
+      @to-next="handleSwitch"
+      @to-avatar="selectRole"
+    />
+  </suspense>
   <TwoSelectC v-model="showSelect" @select-c="handleSelect" v-model:reset="resetSelect" />
 </template>
 <script lang="ts" setup>
@@ -310,7 +312,9 @@ function getUpdateTime(): string {
 function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
   dataVal.value = role;
   selectIndex.value = roleList.value.indexOf(role);
-  if (!showOverlay.value) showOverlay.value = true;
+  if (!showOverlay.value) {
+    showOverlay.value = true;
+  }
 }
 
 function handleSelect(val: SelectedCValue) {

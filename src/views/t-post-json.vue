@@ -9,7 +9,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { webviewWindow } from "@tauri-apps/api";
 import { onMounted, reactive, ref } from "vue";
 import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
@@ -17,6 +16,7 @@ import { useRoute } from "vue-router";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import Mys from "../plugins/Mys/index.js";
+import TGLogger from "../utils/TGLogger.js";
 
 // loading
 const loading = ref<boolean>(true);
@@ -41,16 +41,19 @@ onMounted(async () => {
   } catch (e) {
     loadingTitle.value = "获取数据失败";
     loadingEmpty.value = true;
+    await TGLogger.Error(`[${postId}]获取帖子数据失败：${e}`);
     return;
   }
   try {
     parseData = JSON.parse(jsonData.post.content);
-  } catch (e) {
+  } catch (err) {
     try {
       parseData = JSON.parse(jsonData.post.structured_content);
     } catch (e) {
       isEmpty.value = true;
+      await TGLogger.Error(`[${postId}]解析帖子数据失败：${e}`);
     }
+    console.warn(`[${postId}]解析帖子数据失败：${err}`);
   }
   loading.value = false;
 });

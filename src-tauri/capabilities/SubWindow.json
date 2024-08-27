@@ -28,6 +28,7 @@
     "core:window:allow-destroy",
     "core:window:allow-set-size",
     "core:window:allow-set-title",
+    "core:window:allow-set-focus",
     "core:window:allow-set-fullscreen",
     "core:window:allow-show",
     "core:window:default",

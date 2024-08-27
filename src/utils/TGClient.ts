@@ -1,7 +1,7 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.5.1
+ * @since Beta v0.5.5
  */
 
 import { event, core, webviewWindow } from "@tauri-apps/api";
@@ -436,7 +436,7 @@ class TGClient {
 
   /**
    * @func open
-   * @since Beta v0.5.0
+   * @since Beta v0.5.5
    * @desc 打开米游社客户端
    * @param {string} func - 方法名
    * @param {string} url - url
@@ -446,7 +446,7 @@ class TGClient {
     if (url === undefined) url = this.getUrl(func);
     this.route = [url];
     await TGLogger.Info(`[TGClient][open][${func}] ${url}`);
-    const windowFind = webviewWindow.WebviewWindow.getByLabel("mhy_client");
+    const windowFind = await webviewWindow.WebviewWindow.getByLabel("mhy_client");
     if (windowFind !== null) {
       try {
         await windowFind.destroy();
@@ -455,6 +455,7 @@ class TGClient {
           text: `[TGClient][open] ${e}`,
           color: "error",
         });
+        await TGLogger.Error(`[TGClient][open] ${e}`);
       }
     }
     await core.invoke<InvokeArg>("create_mhy_client", { func, url });
@@ -472,7 +473,10 @@ class TGClient {
   async closePage(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     this.route.pop();
     if (this.route.length === 0) {
-      await webviewWindow.WebviewWindow.getByLabel("mhy_client")?.destroy();
+      const windowFind = await webviewWindow.WebviewWindow.getByLabel("mhy_client");
+      if (windowFind != null) {
+        await windowFind.destroy();
+      }
       return;
     }
     const url = this.route[this.route.length - 1];
@@ -578,7 +582,7 @@ class TGClient {
 
   /**
    * @func getCookieToken
-   * @since Beta v0.5.0
+   * @since Beta v0.5.5
    * @desc 获取米游社客户端的 cookie_token
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetCookieTokenPayload>} arg - 请求参数
    * @returns {void} - 无返回值
@@ -598,14 +602,20 @@ class TGClient {
     }
     // todo 优化代码
     const executeJS = `javascript:(function(){
-      document.cookie = "account_id_v2=${user.cookie.account_id};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "cookie_token=${user.cookie.cookie_token};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "ltuid_v2=${user.cookie.ltuid};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "ltoken=${user.cookie.ltoken};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "account_id=${user.cookie.account_id};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "account_mid_v2=${user.cookie.mid};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "ltuid_v2=${user.cookie.ltuid};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "ltmid_v2=${user.cookie.mid};domain=.mihoyo.com;path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      let domainCur = window.location.hostname;
+      if(domainCur.endsWith('.miyoushe.com')) {
+        domainCur = '.miyoushe.com';
+      } else {
+        domainCur = '.mihoyo.com';
+      }
+      document.cookie = "account_id_v2=${user.cookie.account_id};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "cookie_token=${user.cookie.cookie_token};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "ltuid_v2=${user.cookie.ltuid};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "ltoken=${user.cookie.ltoken};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "account_id=${user.cookie.account_id};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "account_mid_v2=${user.cookie.mid};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "ltuid_v2=${user.cookie.ltuid};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+      document.cookie = "ltmid_v2=${user.cookie.mid};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
     })();`;
     console.info(`[getCookieToken] ${executeJS}`);
     await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
@@ -720,7 +730,7 @@ class TGClient {
 
   /**
    * @func openApplication
-   * @since Beta v0.5.0
+   * @since Beta v0.5.5
    * @desc 打开应用
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenApplicationPayload>} arg - 方法参数
    * @returns {void} - 无返回值
@@ -729,7 +739,7 @@ class TGClient {
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenApplicationPayload>,
   ): Promise<void> {
     console.log(`[openApplication] ${JSON.stringify(arg.payload)}`);
-    const appWindow = webviewWindow.WebviewWindow.getByLabel("TeyvatGuide");
+    const appWindow = await webviewWindow.WebviewWindow.getByLabel("TeyvatGuide");
     await appWindow?.setFocus();
     showSnackbar({
       text: `不支持的操作：OpenApplication(${JSON.stringify(arg.payload)})`,
@@ -740,7 +750,7 @@ class TGClient {
         resolve();
       }, 1500);
     });
-    const windowFind = webviewWindow.WebviewWindow.getByLabel("mhy_client");
+    const windowFind = await webviewWindow.WebviewWindow.getByLabel("mhy_client");
     if (windowFind !== null) {
       await windowFind.setFocus();
     }
@@ -748,7 +758,7 @@ class TGClient {
 
   /**
    * @func pushPage
-   * @since Beta v0.5.0
+   * @since Beta v0.5.5
    * @desc 打开米游社客户端的页面
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.PushPagePayload>} arg - 方法参数
    * @returns {Promise<void>} - 无返回值
@@ -758,8 +768,10 @@ class TGClient {
   ): Promise<void> {
     const res = await parseLink(arg.payload.page, true);
     if (!res) {
-      const appWindow = webviewWindow.WebviewWindow.getByLabel("TeyvatGuide");
-      await appWindow?.setFocus();
+      const appWindow = await webviewWindow.WebviewWindow.getByLabel("TeyvatGuide");
+      if (appWindow != null) {
+        await appWindow.setFocus();
+      }
       showSnackbar({
         text: `未知链接:${arg.payload.page}`,
         color: "error",
@@ -770,7 +782,7 @@ class TGClient {
           resolve();
         }, 3000);
       });
-      const windowFind = webviewWindow.WebviewWindow.getByLabel("mhy_client");
+      const windowFind = await webviewWindow.WebviewWindow.getByLabel("mhy_client");
       if (windowFind !== null) {
         await windowFind.setFocus();
       }
@@ -786,7 +798,7 @@ class TGClient {
     await this.loadJSBridge();
     await this.hideSideBar();
     await this.hideOverlay();
-    const windowFind = webviewWindow.WebviewWindow.getByLabel("mhy_client");
+    const windowFind = await webviewWindow.WebviewWindow.getByLabel("mhy_client");
     if (windowFind !== null) {
       await windowFind.show();
       await windowFind.setFocus();

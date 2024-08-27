@@ -1,7 +1,7 @@
 /**
  * @file src/utils/linkParser.ts
  * @description 处理链接
- * @since Beta v0.5.1
+ * @since Beta v0.5.5
  */
 
 import { emit } from "@tauri-apps/api/event";
@@ -52,7 +52,7 @@ export async function parsePost(link: string): Promise<false | string> {
 
 /**
  * @function parseLink
- * @since Beta v0.5.1
+ * @since Beta v0.5.5
  * @description 处理链接
  * @param {string} link - 链接
  * @param {boolean} useInner - 是否采用内置 JSBridge 打开
@@ -133,6 +133,7 @@ export async function parseLink(
     "act.mihoyo.com",
     "mhyurl.cn",
     "webstatic.mihoyo.com",
+    "webstatic.miyoushe.com",
     "bbs.mihoyo.com",
     "qaa.miyoushe.com",
   ];

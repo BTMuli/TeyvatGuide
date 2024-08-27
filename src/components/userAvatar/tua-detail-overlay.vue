@@ -124,7 +124,6 @@ function onAvatarClick(avatar: TGApp.Sqlite.Character.UserRole): void {
 
 .tdo-avatar {
   cursor: pointer;
-  transform: translateY(-10px);
 }
 
 .tdo-card-container {
