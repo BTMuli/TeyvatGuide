@@ -3951,6 +3951,243 @@
     }
   },
   {
+    "id": 80328,
+    "series": 51,
+    "order": 304,
+    "name": "大地勘探·万火燎灼之原·其一",
+    "description": "点亮纳塔区域中，万火之瓯、坚岩隘谷、踞石山、涌流地的地图。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "UNLOCK_AREA"
+    }
+  },
+  {
+    "id": 80329,
+    "series": 51,
+    "order": 305,
+    "name": "攀越炽焰的圣山·其一",
+    "description": "解锁纳塔区域中，万火之瓯、坚岩隘谷、踞石山、涌流地所有传送锚点。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "UNLOCK_TRANS_POINT"
+    }
+  },
+  {
+    "id": 80330,
+    "series": 51,
+    "order": 306,
+    "name": "圣龛巡礼·万火燎灼之原·其一",
+    "description": "解除纳塔区域中，万火之瓯、坚岩隘谷、踞石山、涌流地所有地灵龛的封印。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "UNLOCK_GATE_TEMPLE"
+    }
+  },
+  {
+    "id": 80331,
+    "series": 51,
+    "order": 307,
+    "name": "煌耀如火",
+    "description": "将纳塔的七天神像供奉至满级。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "CITY_LEVEL_UP"
+    }
+  },
+  {
+    "id": 80332,
+    "series": 51,
+    "order": 309,
+    "name": "炎日的燧色",
+    "description": "将万火之瓯的煅石之轮等级提升至满级。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "OFFERING_LEVEL"
+    }
+  },
+  {
+    "id": 80333,
+    "series": 51,
+    "order": 310,
+    "name": "幻写引路人·其一",
+    "description": "在万火之瓯、坚岩隘谷、踞石山、涌流地追随8个幻写灵，并完成涂鸦。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80334,
+    "series": 51,
+    "order": 311,
+    "name": "幻写引路人·其一",
+    "description": "在万火之瓯、坚岩隘谷、踞石山、涌流地追随16个幻写灵，并完成涂鸦。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80335,
+    "series": 51,
+    "order": 312,
+    "name": "幻写引路人·其一",
+    "description": "在万火之瓯、坚岩隘谷、踞石山、涌流地追随32个幻写灵，并完成涂鸦。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80336,
+    "series": 51,
+    "order": 313,
+    "name": "燔炎的寻宝者·其一",
+    "description": "在万火之瓯、坚岩隘谷、踞石山、涌流地开启80个宝箱。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "OPEN_WORLD_CHEST"
+    }
+  },
+  {
+    "id": 80337,
+    "series": 51,
+    "order": 314,
+    "name": "燔炎的寻宝者·其一",
+    "description": "在万火之瓯、坚岩隘谷、踞石山、涌流地开启160个宝箱。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "OPEN_WORLD_CHEST"
+    }
+  },
+  {
+    "id": 80338,
+    "series": 51,
+    "order": 315,
+    "name": "燔炎的寻宝者·其一",
+    "description": "在万火之瓯、坚岩隘谷、踞石山、涌流地开启320个宝箱。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "OPEN_WORLD_CHEST"
+    }
+  },
+  {
+    "id": 80339,
+    "series": 51,
+    "order": 316,
+    "name": "燔炎的冒险家·其一",
+    "description": "在万火之瓯、坚岩隘谷、踞石山、涌流地完成3个大世界限时挑战。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80342,
+    "series": 51,
+    "order": 319,
+    "name": "追忆先祖",
+    "description": "帮助蒂图解放了部族先民的灵魂。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75004,
+          "name": "令眠者得安宁",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 80343,
+    "series": 51,
+    "order": 320,
+    "name": "不是所有宝藏都是金和银",
+    "description": "未能寻找到「治疗一切的秘药」。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75011,
+          "name": "溯寻者不可得",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 80345,
+    "series": 51,
+    "order": 322,
+    "name": "太阳之金，以及血液…",
+    "description": "自「盗火贤者」的遗迹中，取得前往火山朝圣的信物。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75002,
+          "name": "自过往的启示",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 80346,
+    "series": 51,
+    "order": 308,
+    "name": "夜馈寻迹·万火燎灼之原·其一",
+    "description": "解除纳塔区域中，万火之瓯、坚岩隘谷、踞石山、涌流地所有部族秘藏之所的封印。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80347,
+    "series": 51,
+    "order": 317,
+    "name": "燔炎的冒险家·其一",
+    "description": "在万火之瓯、坚岩隘谷、踞石山、涌流地完成6个大世界限时挑战。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 80348,
+    "series": 51,
+    "order": 318,
+    "name": "燔炎的冒险家·其一",
+    "description": "在万火之瓯、坚岩隘谷、踞石山、涌流地完成12个大世界限时挑战。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
     "id": 81000,
     "series": 0,
     "order": 1000,
@@ -10192,6 +10429,528 @@
     }
   },
   {
+    "id": 81488,
+    "series": 0,
+    "order": 1472,
+    "name": "舞！舞！舞！",
+    "description": "在「回声之子」观看「钻头热舞」的比赛。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": []
+    }
+  },
+  {
+    "id": 81489,
+    "series": 0,
+    "order": 1473,
+    "name": "侧耳倾听",
+    "description": "在「流泉之众」观看即兴乐队的演出。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": []
+    }
+  },
+  {
+    "id": 81490,
+    "series": 0,
+    "order": 1474,
+    "name": "禁止随意拿取！",
+    "description": "将黑曜石的偶像还回「悬木人」祖地的祭坛之上。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75005,
+          "name": "将夜晚放还于夜晚",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81491,
+    "series": 0,
+    "order": 1475,
+    "name": "前有隐藏…",
+    "description": "在浮土静界完成试炼，令中空之岛得以浮现。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 75011,
+          "name": "溯寻者不可得",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81492,
+    "series": 0,
+    "order": 1476,
+    "name": "如飘向空中的丝绸…",
+    "description": "开启通往浮土静界的游隙灵道。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 75006,
+          "name": "溯往者不可追",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81493,
+    "series": 0,
+    "order": 1477,
+    "name": "「哇！是大逆转！」",
+    "description": "不妨把思路掉转过来…",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 75034,
+          "name": "合成台疑案",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81494,
+    "series": 0,
+    "order": 1478,
+    "name": "下次还是别讲冷笑话了…",
+    "description": "「缝影针」从天而落…",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75001,
+          "name": "在晶岩下",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81496,
+    "series": 0,
+    "order": 1480,
+    "name": "传说中的勇者传说",
+    "description": "证明自己与龙伙伴的羁绊，得到「盗火贤者」的护符。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75019,
+          "name": "勇敢者的仪式",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81497,
+    "series": 0,
+    "order": 1481,
+    "name": "红海啊，让开道路吧…",
+    "description": "与龙伙伴携手完成「盗火贤者」的试炼，开启通往岩浆之底的通路。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 75002,
+          "name": "自过往的启示",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81499,
+    "series": 0,
+    "order": 1483,
+    "name": "战场的召唤",
+    "description": "首次触碰「夜魂试炼」的图腾。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81500,
+    "series": 0,
+    "order": 1484,
+    "name": "以战斗平息…",
+    "description": "完成「夜魂试炼之所」的战斗挑战。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
+    }
+  },
+  {
+    "id": 81501,
+    "series": 0,
+    "order": 1485,
+    "name": "献给虚无的供物",
+    "description": "收集了全部的「残夜的碎玉」，合成了献贡的祭物「夜之玉」。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": []
+    }
+  },
+  {
+    "id": 81502,
+    "series": 0,
+    "order": 1486,
+    "name": "真的能出成果吗？",
+    "description": "将收集到的「镌光铭印」碎片交给了研究员秋纽奥。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": []
+    }
+  },
+  {
+    "id": 81503,
+    "series": 0,
+    "order": 1487,
+    "name": "烦请高抬贵脚",
+    "description": "危险可能从天而降。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81504,
+    "series": 0,
+    "order": 1488,
+    "name": "「好烫！好烫！ 」",
+    "description": "不是游泳的好地方…",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "KILLED_BY_SPECIFIC_ABILITY"
+    }
+  },
+  {
+    "id": 81505,
+    "series": 0,
+    "order": 1489,
+    "name": "福无双至…",
+    "description": "祸不单行。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 81506,
+    "series": 0,
+    "order": 1490,
+    "name": "再见了伙伴",
+    "description": "感谢你一路的陪伴。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 81507,
+    "series": 0,
+    "order": 1491,
+    "name": "最后的仁慈",
+    "description": "再一次分享食物给拦路的匿叶龙。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81508,
+    "series": 0,
+    "order": 1492,
+    "name": "新的希望",
+    "description": "就像种子发出新芽…",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81509,
+    "series": 0,
+    "order": 1493,
+    "name": "谢谢你们的鱼",
+    "description": "多谢款待！",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75015,
+          "name": "今天是吃鱼的心情！",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81510,
+    "series": 0,
+    "order": 1494,
+    "name": "走入画中…",
+    "description": "打开画壁之后的世界。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81511,
+    "series": 0,
+    "order": 1495,
+    "name": "网中之梦",
+    "description": "捕捉夜晚的讯息…",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
+    }
+  },
+  {
+    "id": 81512,
+    "series": 0,
+    "order": 1496,
+    "name": "正义的反抗",
+    "description": "总之，邪恶的机器被关闭了…",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81513,
+    "series": 0,
+    "order": 1497,
+    "name": "「为最美者」",
+    "description": "令火榴树的根系汲取到足够的液态燃素，使「山王火榴」成熟。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75020,
+          "name": "熟是生非",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81516,
+    "series": 0,
+    "order": 1500,
+    "name": "高速滑空",
+    "description": "首次乘坐游隙灵道。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 81518,
+    "series": 0,
+    "order": 1502,
+    "name": "只有锻炼的地方还留着？",
+    "description": "来到了失落的古代试炼所…",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": []
+    }
+  },
+  {
+    "id": 81519,
+    "series": 0,
+    "order": 1503,
+    "name": "「觉醒吧！夜之头脑！」",
+    "description": "…然而，什么也没有发生。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81520,
+    "series": 0,
+    "order": 1504,
+    "name": "捉回四处逃逸的色彩",
+    "description": "让幻写灵回到该回的地方。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81521,
+    "series": 0,
+    "order": 1505,
+    "name": "或许是个好的营地？",
+    "description": "第二次通过发光的遗迹石柱进入歇息处…",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81522,
+    "series": 0,
+    "order": 1506,
+    "name": "六荣冠与夜的传说",
+    "description": "纳塔所有部族的声望等级达到4级。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "TRIBAL_REPUTATION_FULL_LEVEL_NUM"
+    }
+  },
+  {
+    "id": 81523,
+    "series": 0,
+    "order": 1507,
+    "name": "只能听见夜风",
+    "description": "5秒内，通过具有夜魂性质的攻击击败4名敌人。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "ATTACK_TAG_TIMELIMIT_KILL_NUM"
+    }
+  },
+  {
+    "id": 81524,
+    "series": 0,
+    "order": 1508,
+    "name": "永夜的酬礼",
+    "description": "进入夜魂加持状态并维持18秒。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 81525,
+    "series": 0,
+    "order": 1509,
+    "name": "正午的海鸟",
+    "description": "帮助帕尼娅解决了浮流鸟的困扰。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": []
+    }
+  },
+  {
+    "id": 81526,
+    "series": 0,
+    "order": 1510,
+    "name": "湖上之光",
+    "description": "见证了流泉之众大训练场的竣工…这东西真的有用吗？",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 75104,
+          "name": "踏虹破浪！",
+          "type": "世界任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 81527,
+    "series": 0,
+    "order": 1511,
+    "name": "是突破天际的！",
+    "description": "完成全部的「回声之子」勇士挑战并获得最高等级的评价。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81528,
+    "series": 0,
+    "order": 1512,
+    "name": "无名指追魂索",
+    "description": "完成全部的「悬木人」勇士挑战并获得最高等级的评价。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
+    "id": 81529,
+    "series": 0,
+    "order": 1513,
+    "name": "月光州",
+    "description": "完成全部的「流泉之众」勇士挑战并获得最高等级的评价。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "GROUP_NOTIFY"
+    }
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
@@ -12080,7 +12839,7 @@
     "series": 39,
     "order": 2164,
     "name": "…攻彼之盾",
-    "description": "在正机之神进行藏界百摄爆轰时，摧毁其护盾。",
+    "description": "在正机之神进行藏界百摄爆轰时，摧毁其护罩。",
     "reward": 10,
     "version": "3.6",
     "trigger": {
@@ -12368,7 +13127,7 @@
     "series": 49,
     "order": 2193,
     "name": "剧场消防演练",
-    "description": "在魔像督军举剑释放怒焰冲击时，摧毁其护盾。",
+    "description": "在魔像督军举剑释放怒焰冲击时，摧毁其护罩。",
     "reward": 5,
     "version": "4.6",
     "trigger": {
@@ -12464,7 +13223,7 @@
     "series": 50,
     "order": 2208,
     "name": "可靠的叙事者",
-    "description": "幻想真境剧诗：在任意难度下，完成整场演出时，选择过至少8次奇妙助益事件。",
+    "description": "幻想真境剧诗：在任意难度下，完成整场演出时，选择过至少8次奇妙助益或辉彩祝福事件。",
     "reward": 5,
     "version": "4.7",
     "trigger": {
@@ -12553,6 +13312,474 @@
     "version": "4.7",
     "trigger": {
       "type": "ROLE_COMBAT_FINISH_ROUND"
+    }
+  },
+  {
+    "id": 82213,
+    "series": 52,
+    "order": 2213,
+    "name": "画中之梦",
+    "description": "完成1名角色的绘想游迹挑战。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_CHAR_MASTER_LEVEL_COUNT_REACH"
+    }
+  },
+  {
+    "id": 82214,
+    "series": 52,
+    "order": 2214,
+    "name": "画中之梦",
+    "description": "完成3名角色的绘想游迹挑战。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_CHAR_MASTER_LEVEL_COUNT_REACH"
+    }
+  },
+  {
+    "id": 82215,
+    "series": 52,
+    "order": 2215,
+    "name": "画中之梦",
+    "description": "完成5名角色的绘想游迹挑战。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_CHAR_MASTER_LEVEL_COUNT_REACH"
+    }
+  },
+  {
+    "id": 82216,
+    "series": 52,
+    "order": 2216,
+    "name": "至高的杰作",
+    "description": "幻想真境剧诗：在卓越模式下，完成整场演出。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "ROLE_COMBAT_PASS_LEVEL_BY_DIFFICULTY"
+    }
+  },
+  {
+    "id": 82217,
+    "series": 52,
+    "order": 2217,
+    "name": "星光闪耀时",
+    "description": "幻想真境剧诗：获得6枚星章的情况下，完成整场演出。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "ROLE_COMBAT_PASS_LEVEL_BY_MEDAL"
+    }
+  },
+  {
+    "id": 82218,
+    "series": 52,
+    "order": 2218,
+    "name": "星光闪耀时",
+    "description": "幻想真境剧诗：获得8枚星章的情况下，完成整场演出。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "ROLE_COMBAT_PASS_LEVEL_BY_MEDAL"
+    }
+  },
+  {
+    "id": 82219,
+    "series": 52,
+    "order": 2219,
+    "name": "星光闪耀时",
+    "description": "幻想真境剧诗：获得10枚星章的情况下，完成整场演出。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "ROLE_COMBAT_PASS_LEVEL_BY_MEDAL"
+    }
+  },
+  {
+    "id": 82220,
+    "series": 54,
+    "order": 2220,
+    "name": "「异色三连星」",
+    "description": "战胜地方传奇·异色三连星。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82221,
+    "series": 54,
+    "order": 2221,
+    "name": "「异色三连星」",
+    "description": "在先击败瓦西里后，再击败异色三连星的其他成员。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82222,
+    "series": 54,
+    "order": 2222,
+    "name": "「异色三连星」",
+    "description": "在击败第一名成员后的10秒内，击败异色三连星。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82223,
+    "series": 54,
+    "order": 2223,
+    "name": "「科西霍」",
+    "description": "战胜地方传奇·科西霍。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82224,
+    "series": 54,
+    "order": 2224,
+    "name": "「科西霍」",
+    "description": "在科西霍从未生成过雷棘护罩的情况下，将其击败。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82225,
+    "series": 54,
+    "order": 2225,
+    "name": "「科西霍」",
+    "description": "在科西霍生成过雷棘护罩，且角色不被来自护罩的反噬攻击命中的情况下，将其击败。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82226,
+    "series": 54,
+    "order": 2226,
+    "name": "「海浪中的莎孚」",
+    "description": "战胜地方传奇「海浪中的莎孚」。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82227,
+    "series": 54,
+    "order": 2227,
+    "name": "「海浪中的莎孚」",
+    "description": "在不触发「海浪中的莎孚」的碎冰打击的情况下，将其击败。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82228,
+    "series": 54,
+    "order": 2228,
+    "name": "「海浪中的莎孚」",
+    "description": "在不让冰元素喷罐爆炸的情况下，击败「海浪中的莎孚」。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82229,
+    "series": 54,
+    "order": 2229,
+    "name": "「巴拉奇科」",
+    "description": "战胜地方传奇「巴拉奇科」。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82230,
+    "series": 54,
+    "order": 2230,
+    "name": "「巴拉奇科」",
+    "description": "在完成一次挑战的过程中，在「巴拉奇科」进行刃影战法期间，从未击破过本体以外的目标。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82231,
+    "series": 54,
+    "order": 2231,
+    "name": "「巴拉奇科」",
+    "description": "在完成一次挑战的过程中，连续击破3具「巴拉奇科」释放刃影战法之前制造的分身。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82232,
+    "series": 54,
+    "order": 2232,
+    "name": "「嵌合神骨的蛇姬」",
+    "description": "战胜地方传奇·嵌合神骨的蛇姬。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82233,
+    "series": 54,
+    "order": 2233,
+    "name": "「嵌合神骨的蛇姬」",
+    "description": "在完成一次挑战的过程中，曾于嵌合神骨的蛇姬进入飞悬状态时，击破所有的钩索锁点。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82234,
+    "series": 54,
+    "order": 2234,
+    "name": "「嵌合神骨的蛇姬」",
+    "description": "击败处于飞悬状态下的嵌合神骨的蛇姬。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82235,
+    "series": 54,
+    "order": 2235,
+    "name": "「不死」",
+    "description": "战胜地方传奇「不死」。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82236,
+    "series": 54,
+    "order": 2236,
+    "name": "「不死」",
+    "description": "在不被「绝技·巨型不死冲撞」命中的情况下，击败「不死」。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82237,
+    "series": 54,
+    "order": 2237,
+    "name": "「不死」",
+    "description": "在打断3次「绝技·巨型不死冲撞」的蓄力后，击败「不死」。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82238,
+    "series": 54,
+    "order": 2238,
+    "name": "「特拉扎库伊洛特尔」",
+    "description": "战胜地方传奇「特拉扎库伊洛特尔」。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82239,
+    "series": 54,
+    "order": 2239,
+    "name": "「特拉扎库伊洛特尔」",
+    "description": "在完成一次挑战的过程中，每次均只通过1次攻击，破除「特拉扎库伊洛特尔」的护罩。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82240,
+    "series": 54,
+    "order": 2240,
+    "name": "「特拉扎库伊洛特尔」",
+    "description": "在不被来自「特拉扎库伊洛特尔」的攻击命中的情况下，将其击败。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82241,
+    "series": 54,
+    "order": 2241,
+    "name": "「依奇卡胡伊皮利的庇护」",
+    "description": "战胜地方传奇「依奇卡胡伊皮利的庇护」。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82242,
+    "series": 54,
+    "order": 2242,
+    "name": "「依奇卡胡伊皮利的庇护」",
+    "description": "在完成一次挑战的过程中，于抉择的试炼期间，击败10名夜魂战士。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82243,
+    "series": 54,
+    "order": 2243,
+    "name": "「依奇卡胡伊皮利的庇护」",
+    "description": "在不被来自「依奇卡胡伊皮利的庇护」的攻击命中的情况下，将其击败。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82244,
+    "series": 54,
+    "order": 2244,
+    "name": "「切玛利的遮荫」",
+    "description": "战胜地方传奇「切玛利的遮荫」。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82245,
+    "series": 54,
+    "order": 2245,
+    "name": "「切玛利的遮荫」",
+    "description": "在没有角色倒下的情况下，击败「切玛利的遮荫」。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82246,
+    "series": 54,
+    "order": 2246,
+    "name": "「切玛利的遮荫」",
+    "description": "在完成一次挑战的过程中，于「切玛利的遮荫」吸收「流水造物」时，通过击飞冻结的「流水造物」，破除她的元素护罩。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82247,
+    "series": 54,
+    "order": 2247,
+    "name": "「阿特拉托的佑助」",
+    "description": "战胜地方传奇「阿特拉托的佑助」。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82248,
+    "series": 54,
+    "order": 2248,
+    "name": "「阿特拉托的佑助」",
+    "description": "在完成一次挑战的过程中，使用「格挡」，反击「阿特拉托的佑助」的所有强力攻击并对其造成伤害。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82249,
+    "series": 54,
+    "order": 2249,
+    "name": "「阿特拉托的佑助」",
+    "description": "在不受到来自「阿特拉托的佑助」的伤害的情况下，将其击败。",
+    "reward": 20,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82250,
+    "series": 0,
+    "order": 2250,
+    "name": "猎龙的黑箭…",
+    "description": "击破「金焰」形态下金焰绒翼龙暴君的火元素护罩，使其从空中坠落。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82251,
+    "series": 0,
+    "order": 2251,
+    "name": "你也是迪诺巴鲁托？",
+    "description": "在贪食匿叶龙山王吞下火榴果之前将其点燃，使果子在被吞下后爆炸。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -15562,6 +16789,144 @@
     }
   },
   {
+    "id": 84321,
+    "series": 0,
+    "order": 5100,
+    "name": "龙的国度",
+    "description": "一切都很特别。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_OR",
+      "task": [
+        {
+          "questId": 5000,
+          "name": "纳塔！新的旅程",
+          "type": "魔神任务"
+        },
+        {
+          "questId": 5000,
+          "name": "纳塔！新的旅程",
+          "type": "魔神任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84322,
+    "series": 0,
+    "order": 5101,
+    "name": "一切荣光的归处",
+    "description": "梦想碰撞时，会迸发最耀眼的火花。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 5001,
+          "name": "归火圣夜巡礼",
+          "type": "魔神任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84323,
+    "series": 0,
+    "order": 5102,
+    "name": "冰与火的战场",
+    "description": "立场需要强大的力量做支撑。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 5003,
+          "name": "抉择",
+          "type": "魔神任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84324,
+    "series": 0,
+    "order": 5104,
+    "name": "逃出生天",
+    "description": "困住归路的边界破碎，有光照入混沌的黑暗。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 5006,
+          "name": "坠入永夜",
+          "type": "魔神任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84325,
+    "series": 0,
+    "order": 5103,
+    "name": "再相见",
+    "description": "我一定会找到你，无论跨过多么遥远的距离。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 5006,
+          "name": "坠入永夜",
+          "type": "魔神任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84326,
+    "series": 0,
+    "order": 5105,
+    "name": "黑石湮落白石下",
+    "description": "完成「黑石湮落白石下」。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 5007,
+          "name": "过去与未来",
+          "type": "魔神任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84327,
+    "series": 0,
+    "order": 5106,
+    "name": "荣花与炎日之途",
+    "description": "完成「荣花与炎日之途」。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 5002,
+          "name": "温泉之乡",
+          "type": "魔神任务"
+        }
+      ]
+    }
+  },
+  {
     "id": 84501,
     "series": 10,
     "order": 4026,
@@ -16994,6 +18359,128 @@
     }
   },
   {
+    "id": 84575,
+    "series": 0,
+    "order": 4099,
+    "name": "龙的摇篮",
+    "description": "与一只小匿叶龙成为了朋友。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "QUEST_GLOBAL_VAR_EQUAL"
+    }
+  },
+  {
+    "id": 84576,
+    "series": 0,
+    "order": 4100,
+    "name": "纳塔博学者",
+    "description": "在凯塔的一轮提问中，正确地回答了所有问题。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 25036,
+          "name": "咦？纳塔？",
+          "type": "每日委托"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84578,
+    "series": 0,
+    "order": 4102,
+    "name": "「霍莱，过来——」",
+    "description": "和霍莱玩过了头…",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 25021,
+          "name": "洗理嵴锋·修锋",
+          "type": "每日委托"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84579,
+    "series": 0,
+    "order": 4103,
+    "name": "音乐不灭！",
+    "description": "将唱片完整地交给米卢·努伊。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "FINISH_QUEST_OR",
+      "task": [
+        {
+          "questId": 25028,
+          "name": "流行音乐，谁先知？",
+          "type": "每日委托"
+        },
+        {
+          "questId": 25028,
+          "name": "流行音乐，谁先知？",
+          "type": "每日委托"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84580,
+    "series": 0,
+    "order": 4104,
+    "name": "飞叶捎来的胜利",
+    "description": "在限定时间内到达了终点。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "QUEST_GLOBAL_VAR_EQUAL"
+    }
+  },
+  {
+    "id": 84581,
+    "series": 0,
+    "order": 4105,
+    "name": "原信奉还",
+    "description": "将四封快件都归还原主。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "QUEST_GLOBAL_VAR_EQUAL"
+    }
+  },
+  {
+    "id": 84582,
+    "series": 0,
+    "order": 4106,
+    "name": "妙手采风",
+    "description": "帮助子澄寻找到作诗的灵感…？",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "QUEST_GLOBAL_VAR_EQUAL"
+    }
+  },
+  {
+    "id": 84583,
+    "series": 0,
+    "order": 4107,
+    "name": "更高，更快，更强！",
+    "description": "为阿蕾梅做出完美的锻炼示范。",
+    "reward": 5,
+    "version": "5.0",
+    "trigger": {
+      "type": "QUEST_GLOBAL_VAR_EQUAL"
+    }
+  },
+  {
     "id": 85000,
     "series": 0,
     "order": 5000,
@@ -17570,6 +19057,114 @@
     "description": "与其他玩家一同战胜铁甲熔火帝皇。",
     "reward": 10,
     "version": "4.0",
+    "trigger": {
+      "type": "MP_KILL_MONSTER_NUM"
+    }
+  },
+  {
+    "id": 86039,
+    "series": 53,
+    "order": 9038,
+    "name": "你相信「场力」吗？",
+    "description": "与其他玩家一同战胜实验性场力发生装置。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "MP_KILL_MONSTER_NUM"
+    }
+  },
+  {
+    "id": 86040,
+    "series": 53,
+    "order": 9039,
+    "name": "探海索珠",
+    "description": "与其他玩家一同战胜千年珍珠骏麟。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "MP_KILL_MONSTER_NUM"
+    }
+  },
+  {
+    "id": 86041,
+    "series": 53,
+    "order": 9040,
+    "name": "虚造星光发生学",
+    "description": "与其他玩家一同战胜水形幻人。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "MP_KILL_MONSTER_NUM"
+    }
+  },
+  {
+    "id": 86042,
+    "series": 53,
+    "order": 9041,
+    "name": "我自渊底刺向你",
+    "description": "与其他玩家一同战胜吞星之鲸。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "MP_KILL_MONSTER_NUM"
+    }
+  },
+  {
+    "id": 86043,
+    "series": 53,
+    "order": 9042,
+    "name": "踏水穿云",
+    "description": "与其他玩家一同战胜隐山猊兽。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "MP_KILL_MONSTER_NUM"
+    }
+  },
+  {
+    "id": 86044,
+    "series": 53,
+    "order": 9043,
+    "name": "荣华易散",
+    "description": "与其他玩家一同战胜魔像督军。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "MP_KILL_MONSTER_NUM"
+    }
+  },
+  {
+    "id": 86045,
+    "series": 53,
+    "order": 9044,
+    "name": "另一侧的厄月",
+    "description": "与其他玩家一同战胜「仆人」。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "MP_KILL_MONSTER_ID_NUM"
+    }
+  },
+  {
+    "id": 86046,
+    "series": 53,
+    "order": 9045,
+    "name": "群山瓦解之日",
+    "description": "与其他玩家一同战胜贪食匿叶龙山王。",
+    "reward": 10,
+    "version": "5.0",
+    "trigger": {
+      "type": "MP_KILL_MONSTER_NUM"
+    }
+  },
+  {
+    "id": 86047,
+    "series": 53,
+    "order": 9046,
+    "name": "「这便是暴君的结局」",
+    "description": "与其他玩家一同战胜金焰绒翼龙暴君。",
+    "reward": 10,
+    "version": "5.0",
     "trigger": {
       "type": "MP_KILL_MONSTER_NUM"
     }

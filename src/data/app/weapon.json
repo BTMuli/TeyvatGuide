@@ -81,6 +81,15 @@
     "icon": "/WIKI/weapon/15501.webp"
   },
   {
+    "id": 14516,
+    "contentId": 501962,
+    "name": "冲浪时光",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/14516.webp"
+  },
+  {
     "id": 14515,
     "contentId": 500674,
     "name": "鹤鸣余音",
@@ -261,6 +270,15 @@
     "icon": "/WIKI/weapon/13501.webp"
   },
   {
+    "id": 12513,
+    "contentId": 0,
+    "name": "山王长牙",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "icon": "/WIKI/weapon/12513.webp"
+  },
+  {
     "id": 12512,
     "contentId": 500420,
     "name": "裁断",
@@ -430,6 +448,15 @@
     "bg": "/icon/bg/5-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "icon": "/WIKI/weapon/11501.webp"
+  },
+  {
+    "id": 15431,
+    "contentId": 501964,
+    "name": "碎链",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/15431.webp"
   },
   {
     "id": 15427,
@@ -639,6 +666,24 @@
     "icon": "/WIKI/weapon/15401.webp"
   },
   {
+    "id": 14431,
+    "contentId": 501965,
+    "name": "木棉之环",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/14431.webp"
+  },
+  {
+    "id": 14427,
+    "contentId": 0,
+    "name": "苍纹角杯",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/14427.webp"
+  },
+  {
     "id": 14426,
     "contentId": 7381,
     "name": "无垠蔚蓝之歌",
@@ -810,6 +855,15 @@
     "icon": "/WIKI/weapon/14401.webp"
   },
   {
+    "id": 13431,
+    "contentId": 501966,
+    "name": "虹的行迹",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/长柄武器.webp",
+    "icon": "/WIKI/weapon/13431.webp"
+  },
+  {
     "id": 13427,
     "contentId": 7407,
     "name": "勘探钻机",
@@ -970,6 +1024,15 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/长柄武器.webp",
     "icon": "/WIKI/weapon/13401.webp"
+  },
+  {
+    "id": 12431,
+    "contentId": 501967,
+    "name": "撼地者",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "icon": "/WIKI/weapon/12431.webp"
   },
   {
     "id": 12427,
@@ -1159,6 +1222,15 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "icon": "/WIKI/weapon/12401.webp"
+  },
+  {
+    "id": 11431,
+    "contentId": 501963,
+    "name": "息燧之笛",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/11431.webp"
   },
   {
     "id": 11428,

@@ -73,7 +73,7 @@ import TOverlay from "../main/t-overlay.vue";
 const selectStarList = [4, 5];
 const selectWeaponList = ["单手剑", "双手剑", "弓", "法器", "长柄武器"];
 const selectElementList = ["冰", "岩", "水", "火", "草", "雷", "风"];
-const selectAreaList = ["蒙德", "璃月", "稻妻", "须弥", "枫丹", "愚人众", "至冬", "其他"];
+const selectAreaList = ["蒙德", "璃月", "稻妻", "须弥", "枫丹", "纳塔", "愚人众", "至冬", "其他"];
 
 // 选中的元素
 const selectedStar = ref<number[]>(selectStarList);

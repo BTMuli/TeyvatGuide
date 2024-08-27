@@ -190,6 +190,36 @@
     "profile": "/source/nameCard/profile/枫丹·露泉.webp"
   },
   {
+    "name": "纳塔·神军",
+    "index": 211,
+    "type": 0,
+    "desc": "名片纹饰。「…沐浴于隐秘的太阳之下，希巴拉克的行军势不可挡。他让世间再度充满兵戈，但他的目的绝不仅是如此…」",
+    "source": "声望等级提升至最高的部族数量达到1个时获取。",
+    "icon": "/source/nameCard/icon/纳塔·神军.webp",
+    "bg": "/source/nameCard/bg/纳塔·神军.webp",
+    "profile": "/source/nameCard/profile/纳塔·神军.webp"
+  },
+  {
+    "name": "纳塔·炎龙",
+    "index": 212,
+    "type": 0,
+    "desc": "名片纹饰。「…那归来的月光之下，分享了光、热与智慧的龙之王静候着来人。他再度醒转，并不只是为了…」",
+    "source": "声望等级提升至最高的部族数量达到4个时获取。",
+    "icon": "/source/nameCard/icon/纳塔·炎龙.webp",
+    "bg": "/source/nameCard/bg/纳塔·炎龙.webp",
+    "profile": "/source/nameCard/profile/纳塔·炎龙.webp"
+  },
+  {
+    "name": "庆典·甘脆",
+    "index": 218,
+    "type": 0,
+    "desc": "名片纹饰。盐糖得位，甜咸交宁，色金质脆，美味生焉。",
+    "source": "？？？",
+    "icon": "/source/nameCard/icon/庆典·甘脆.webp",
+    "bg": "/source/nameCard/bg/庆典·甘脆.webp",
+    "profile": "/source/nameCard/profile/庆典·甘脆.webp"
+  },
+  {
     "name": "成就·游遍",
     "index": 21,
     "type": 1,
@@ -678,6 +708,46 @@
     "icon": "/source/nameCard/icon/成就·诗页.webp",
     "bg": "/source/nameCard/bg/成就·诗页.webp",
     "profile": "/source/nameCard/profile/成就·诗页.webp"
+  },
+  {
+    "name": "成就·尽头",
+    "index": 213,
+    "type": 1,
+    "desc": "名片纹饰。真实的星天在夜空中划出一圈又一圈的轨迹。花海等待着离开的那一朵回归，等待着心与花瓣变得柔软的那一天。",
+    "source": "达成「异世相逢·第五辑」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/成就·尽头.webp",
+    "bg": "/source/nameCard/bg/成就·尽头.webp",
+    "profile": "/source/nameCard/profile/成就·尽头.webp"
+  },
+  {
+    "name": "成就·喵运",
+    "index": 214,
+    "type": 1,
+    "desc": "名片纹饰。你问未来？且在此处坐好。让猫猫忍住把水晶球扒落到地下的冲动，为你把命运的秘密偷来。",
+    "source": "达成「幻想真境剧诗·第二辑」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/成就·喵运.webp",
+    "bg": "/source/nameCard/bg/成就·喵运.webp",
+    "profile": "/source/nameCard/profile/成就·喵运.webp"
+  },
+  {
+    "name": "纳塔·归火",
+    "index": 215,
+    "type": 1,
+    "desc": "名片纹饰。享受角逐本身吧。胜败同等尊荣，皆归于夜中之火。",
+    "source": "达成「纳塔·火与竞逐的盟地·其之一」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/纳塔·归火.webp",
+    "bg": "/source/nameCard/bg/纳塔·归火.webp",
+    "profile": "/source/nameCard/profile/纳塔·归火.webp"
+  },
+  {
+    "name": "成就·夜主",
+    "index": 216,
+    "type": 1,
+    "desc": "名片纹饰。抚平那些不息意念的办法？在这片土地上，唯有战斗一途！",
+    "source": "达成「对决者·第一辑」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/成就·夜主.webp",
+    "bg": "/source/nameCard/bg/成就·夜主.webp",
+    "profile": "/source/nameCard/profile/成就·夜主.webp"
   },
   {
     "name": "安柏·兔兔",
@@ -1520,6 +1590,36 @@
     "profile": "/source/nameCard/profile/艾梅莉埃·后调.webp"
   },
   {
+    "name": "基尼奇·阿乔",
+    "index": 208,
+    "type": 2,
+    "desc": "名片纹饰。听起来很像是伟大的圣龙库胡勒·阿乔终于让基尼奇小子成为了自己的意志容器。很可惜，这只是因为名片的命名规则如此罢了。",
+    "source": "基尼奇的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/基尼奇·阿乔.webp",
+    "bg": "/source/nameCard/bg/基尼奇·阿乔.webp",
+    "profile": "/source/nameCard/profile/基尼奇·阿乔.webp"
+  },
+  {
+    "name": "玛拉妮·鲨鲨",
+    "index": 209,
+    "type": 2,
+    "desc": "名片纹饰。海里的鲨鲨其实不喜欢吃人，只喜欢吃海洋生物。玛拉妮的鲨鲨冲浪板原型是淡水温泉鲨，所以只吃温泉生物。骗你的，不吃豚兽的啦。一是因为肉很柴，二是因为冲浪板不吃东西。",
+    "source": "玛拉妮的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/玛拉妮·鲨鲨.webp",
+    "bg": "/source/nameCard/bg/玛拉妮·鲨鲨.webp",
+    "profile": "/source/nameCard/profile/玛拉妮·鲨鲨.webp"
+  },
+  {
+    "name": "卡齐娜·转转",
+    "index": 210,
+    "type": 2,
+    "desc": "名片纹饰。冲天转转上半部分的搭乘仓稳定性很好。但是如果下半被卡住，那也确实很容易让搭乘者被转晕。",
+    "source": "卡齐娜的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/卡齐娜·转转.webp",
+    "bg": "/source/nameCard/bg/卡齐娜·转转.webp",
+    "profile": "/source/nameCard/profile/卡齐娜·转转.webp"
+  },
+  {
     "name": "纪行·捕风",
     "index": 2,
     "type": 3,
@@ -1858,6 +1958,16 @@
     "icon": "/source/nameCard/icon/纪行·拟像.webp",
     "bg": "/source/nameCard/bg/纪行·拟像.webp",
     "profile": "/source/nameCard/profile/纪行·拟像.webp"
+  },
+  {
+    "name": "纪行·源火",
+    "index": 217,
+    "type": 3,
+    "desc": "名片纹饰。为什么是绿色、棕色、紫色呢？一般来说最早遇到的同伴不应该是红、绿、蓝或者赤、青、黄的吗？",
+    "source": "纪行系统奖励获取。",
+    "icon": "/source/nameCard/icon/纪行·源火.webp",
+    "bg": "/source/nameCard/bg/纪行·源火.webp",
+    "profile": "/source/nameCard/profile/纪行·源火.webp"
   },
   {
     "name": "庆典·无相",

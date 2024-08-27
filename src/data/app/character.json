@@ -1,5 +1,29 @@
 [
   {
+    "id": 10000102,
+    "contentId": 501625,
+    "name": "玛拉妮",
+    "title": "哗啦啦逐浪客",
+    "area": "纳塔",
+    "birthday": [8, 3],
+    "star": 5,
+    "element": "水",
+    "weapon": "法器",
+    "nameCard": "玛拉妮·鲨鲨"
+  },
+  {
+    "id": 10000101,
+    "contentId": 501624,
+    "name": "基尼奇",
+    "title": "回火之狩",
+    "area": "纳塔",
+    "birthday": [11, 11],
+    "star": 5,
+    "element": "草",
+    "weapon": "双手剑",
+    "nameCard": "基尼奇·阿乔"
+  },
+  {
     "id": 10000099,
     "contentId": 501441,
     "name": "艾梅莉埃",
@@ -550,6 +574,18 @@
     "element": "冰",
     "weapon": "单手剑",
     "nameCard": "神里绫华·扇子"
+  },
+  {
+    "id": 10000100,
+    "contentId": 501626,
+    "name": "卡齐娜",
+    "title": "斑金矿朴",
+    "area": "纳塔",
+    "birthday": [4, 22],
+    "star": 4,
+    "element": "岩",
+    "weapon": "长柄武器",
+    "nameCard": "卡齐娜·转转"
   },
   {
     "id": 10000097,
