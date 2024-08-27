@@ -2,12 +2,33 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-07-09
-Update: 2024-08-11
+Update: 2024-08-27
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-07-09 14:16:16`
 >
-> 更新于 `2024-08-11 15:43:34`
+> 更新于 `2024-08-27 12:07:18`
+
+## [0.5.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.5.3) (2024-08-27)
+
+- 💥 `UserCharacters` 表重建，**请务必执行更新数据库操作**
+- 🔥 移除卡牌wiki及其相关组件、资源
+- ✨ 设置页添加窗口回正开关，默认开启
+- ✨ 网页小工具组件支持特定条件下的前瞻兑换码查看
+- ✨ 适配新版角色详情返回数据，支持角色筛选，UI重构，支持三种样式浮窗 [`#121`](https://github.com/BTMuli/TeyvatGuide/issues/121)
+- ✨ 更新 5.0 版本游戏资源 [`#122`](https://github.com/BTMuli/TeyvatGuide/issues/122)
+- 🐛 修复首页近期活动组件特定链接点击异常
+- 🐛 修复首页今日素材组件角色生日时的跳转异常
+- 🐛 修复祈愿抽数计算错误
+- 🐛 修复特定条件下帖子`vote`组件数据 NAN
+- 🐛 修复帖子`linkCard`组件分享图米游铺图标渲染异常
+- ♻️ 公告解析重构
+- ♻️ 帖子`mention`组件点击改为直接打开新窗口
+- 💄 公告页&咨讯页UI调整，顶部改为`appbar`置顶
+- 💄 祈愿页面添加表格查看，`tab`顺序调整
+- 💄 调整帖子`vod`组件分享截图样式
+- 💄 调整帖子`image`组件样式，不会自动放大
+- ✏️ 完善帖子`text`组件，支持`italic`样式渲染
 
 ## [0.5.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.5.2) (2024-08-11)
 

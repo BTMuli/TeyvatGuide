@@ -1,6 +1,6 @@
 [package]
 name = "TeyvatGuide"
-version = "0.5.2"
+version = "0.5.3"
 description = "Game Tool for Genshin Impact player"
 authors = ["BTMuli <bt-muli@outlook.com>"]
 license = "MIT"
