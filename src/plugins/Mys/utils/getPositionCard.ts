@@ -4,6 +4,8 @@
  * @since Beta v0.5.3
  */
 
+import Mys from "../index.js";
+
 /**
  * @description 根据热点追踪信息转为渲染用的数据
  * @since Beta v0.5.3
@@ -21,10 +23,14 @@ function getPositionCard(
     } else {
       endStr = new Date(Number(position.end_time)).toLocaleDateString().replace(/\//g, "-");
     }
+    let link = position.url;
+    if (position.url === "" && position.content_id !== 0) {
+      link = Mys.Api.Obc.replace("{contentId}", position.content_id.toString());
+    }
     const card: TGApp.Plugins.Mys.Position.RenderCard = {
       title: position.title,
-      postId: Number(position.url.split("/").pop()),
-      link: position.url,
+      postId: position.url !== "" ? Number(position.url.split("/").pop()) : position.content_id,
+      link: link,
       icon: position.icon,
       abstract: position.abstract,
       time: {

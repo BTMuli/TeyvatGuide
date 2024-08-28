@@ -7,7 +7,7 @@
           <v-list class="position-list">
             <v-list-item :title="card.title" :subtitle="card.abstract">
               <template #prepend>
-                <v-avatar rounded="0" @click="createPost(card.postId, card.title)">
+                <v-avatar rounded="0" @click="openPosition(card)">
                   <v-img :src="card.icon" class="position-icon" />
                 </v-avatar>
               </template>
