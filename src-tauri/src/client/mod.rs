@@ -12,7 +12,7 @@ use tauri_utils::config::WebviewUrl;
 pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
   let mut win_width = 400.0;
   let mut win_height = 800.0;
-  let win_ua = "Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/2.72.2";
+  let win_ua = "Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/2.75.1";
   let url_parse;
   if url != "" {
     url_parse = WebviewUrl::External(url.parse().unwrap());
