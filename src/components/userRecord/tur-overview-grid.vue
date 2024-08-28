@@ -4,6 +4,7 @@
     <TurOverviewSub title="活跃天数" :text="data.activeDays" />
     <TurOverviewSub title="成就达成数" :text="data.achievementNumber" />
     <TurOverviewSub title="获得角色数" :text="data.avatarNumber" />
+    <TurOverviewSub title="满好感角色数" :text="data.avatarFetter" />
     <TurOverviewSub title="深境螺旋" :text="data.sprialAbyss" />
     <TurOverviewSub title="幻想真境剧诗" :text="data.combatRole" />
     <TurOverviewSub title="解锁传送点" :text="data.wayPoints" />
@@ -13,6 +14,7 @@
     <TurOverviewSub title="雷神瞳" :text="data.electroCulus" />
     <TurOverviewSub title="草神瞳" :text="data.dendroCulus" />
     <TurOverviewSub title="水神瞳" :text="data.hydroCulus" />
+    <TurOverviewSub title="火神瞳" :text="data.pyroCulus" />
     <TurOverviewSub title="华丽宝箱数" :text="data.luxuriousChest" />
     <TurOverviewSub title="珍贵宝箱数" :text="data.preciousChest" />
     <TurOverviewSub title="精致宝箱数" :text="data.exquisiteChest" />

@@ -1,12 +1,12 @@
 /**
  * @file types/Sqlite/Record.d.ts
  * @description Sqlite 原神战绩相关类型定义文件
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  */
 
 /**
  * @description Sqlite 原神战绩相关类型定义命名空间
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  * @namespace Record
  * @memberof TGApp.Sqlite
  */
@@ -78,10 +78,11 @@ declare namespace TGApp.Sqlite.Record {
   /**
    * @description 统计信息类型
    * @interface Stats
-   * @since Beta v0.5.0
+   * @since Beta v0.5.5
    * @property {number} activeDays - 活跃天数
    * @property {number} achievementNumber - 成就达成数
    * @property {number} avatarNumber - 获得角色数
+   * @property {number} avatarFetter - 满好感角色数
    * @property {number} wayPoints - 解锁传送点数
    * @property {number} domainNumber - 解锁秘境数
    * @property {number} anemoCulus - 风神瞳数
@@ -89,6 +90,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {number} electroCulus - 雷神瞳数
    * @property {number} dendroCulus - 草神瞳数
    * @property {number} hydroCulus - 水神瞳数
+   * @property {number} pyroCulus - 火神瞳数
    * @property {string} sprialAbyss - 深境螺旋信息
    * @property {string} combatRole - 幻想真境剧诗
    * @property {number} luxuriousChest - 华丽宝箱数
@@ -102,6 +104,7 @@ declare namespace TGApp.Sqlite.Record {
     activeDays: number;
     achievementNumber: number;
     avatarNumber: number;
+    avatarFetter: number;
     wayPoints: number;
     domainNumber: number;
     anemoCulus: number;
@@ -109,6 +112,7 @@ declare namespace TGApp.Sqlite.Record {
     electroCulus: number;
     dendroCulus: number;
     hydroCulus: number;
+    pyroCulus: number;
     sprialAbyss: string;
     combatRole: string;
     luxuriousChest: number;

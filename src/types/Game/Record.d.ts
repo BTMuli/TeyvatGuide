@@ -1,12 +1,12 @@
 /**
  * @file types/Game/Record.d.ts
  * @description 原神战绩相关类型定义文件
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  */
 
 /**
  * @description 原神战绩相关类型定义命名空间
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  * @namespace TGApp.Game.Record
  * @memberof TGApp.Game
  */
@@ -95,7 +95,7 @@ declare namespace TGApp.Game.Record {
   /**
    * @description 统计信息类型
    * @interface Stats
-   * @since Beta v0.5.0
+   * @since Beta v0.5.5
    * @property {number} active_day_number - 活跃天数
    * @property {number} achievement_number - 成就数量
    * @property {number} anemoculus_number - 风神瞳数量
@@ -112,8 +112,10 @@ declare namespace TGApp.Game.Record {
    * @property {number} magic_chest_number - 奇馈宝箱数量
    * @property {number} dendroculus_number - 草神瞳数量
    * @property {number} hydroculus_number - 水神瞳数量
+   * @property {number} pyroculus_number - 火神瞳数量
    * @property {unknown} field_ext_map - 数据对应链接的map，用不到设为 unknown
    * @property {CombatStats} role_combat - 幻想真境剧诗数据
+   * @property {number} full_fetter_avatar_num - 满好感角色数
    * @return Stats
    */
   interface Stats {
@@ -133,8 +135,10 @@ declare namespace TGApp.Game.Record {
     magic_chest_number: number;
     dendroculus_number: number;
     hydroculus_number: number;
+    pyroculus_number: number;
     field_ext_map: unknown;
     role_combat: CombatStats;
+    full_fetter_avatar_num: number;
   }
 
   /**

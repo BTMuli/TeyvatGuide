@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/utils/transUserRecord.ts
  * @description Sqlite 数据转换 用户战绩数据转换模块
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  */
 
 /**
@@ -79,7 +79,7 @@ function transAvatar(data: TGApp.Game.Record.Avatar[]): string {
 
 /**
  * @description 将统计信息转换为数据库中的数据
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  * @param {TGApp.Game.Record.Stats} data 统计信息
  * @return {string} 转换后的统计信息
  */
@@ -94,6 +94,7 @@ function transStat(data: TGApp.Game.Record.Stats): string {
     activeDays: data.active_day_number,
     achievementNumber: data.achievement_number,
     avatarNumber: data.avatar_number,
+    avatarFetter: data.full_fetter_avatar_num,
     wayPoints: data.way_point_number,
     domainNumber: data.domain_number,
     anemoCulus: data.anemoculus_number,
@@ -101,6 +102,7 @@ function transStat(data: TGApp.Game.Record.Stats): string {
     electroCulus: data.electroculus_number,
     dendroCulus: data.dendroculus_number,
     hydroCulus: data.hydroculus_number,
+    pyroCulus: data.pyroculus_number,
     sprialAbyss: data.spiral_abyss,
     combatRole: combatRole,
     luxuriousChest: data.luxurious_chest_number,
