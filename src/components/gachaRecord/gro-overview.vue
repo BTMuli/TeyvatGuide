@@ -1,14 +1,14 @@
 <template>
   <div class="gro-o-container">
-    <gro-dataview v-if="newData.length !== 0" v-model:data-val="newData" data-type="new" />
-    <gro-dataview v-model:data-val="normalData" data-type="normal" />
-    <gro-dataview v-model:data-val="avatarData" data-type="avatar" />
-    <gro-dataview v-model:data-val="weaponData" data-type="weapon" />
-    <gro-dataview v-if="mixData.length !== 0" v-model:data-val="mixData" data-type="mix" />
+    <gro-dataview v-if="newData.length !== 0" :data-val="newData" data-type="new" />
+    <gro-dataview :data-val="normalData" data-type="normal" />
+    <gro-dataview :data-val="avatarData" data-type="avatar" />
+    <gro-dataview :data-val="weaponData" data-type="weapon" />
+    <gro-dataview v-if="mixData.length !== 0" :data-val="mixData" data-type="mix" />
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 import GroDataview from "./gro-dataview.vue";
 
@@ -18,32 +18,46 @@ interface GachaOverviewProps {
 
 const props = defineProps<GachaOverviewProps>();
 // data
-let newData = props.modelValue.filter((item) => item.uigfType === "100");
-let normalData = props.modelValue.filter((item) => item.uigfType === "200");
-let avatarData = props.modelValue.filter((item) => item.uigfType === "301");
-let weaponData = props.modelValue.filter((item) => item.uigfType === "302");
-let mixData = props.modelValue.filter((item) => item.uigfType === "500");
+const newData = computed<TGApp.Sqlite.GachaRecords.SingleTable[]>(() =>
+  props.modelValue.filter((item) => item.uigfType === "100"),
+);
+const normalData = computed<TGApp.Sqlite.GachaRecords.SingleTable[]>(() =>
+  props.modelValue.filter((item) => item.uigfType === "200"),
+);
+const avatarData = computed<TGApp.Sqlite.GachaRecords.SingleTable[]>(() =>
+  props.modelValue.filter((item) => item.uigfType === "301"),
+);
+const weaponData = computed<TGApp.Sqlite.GachaRecords.SingleTable[]>(() =>
+  props.modelValue.filter((item) => item.uigfType === "302"),
+);
+const mixData = computed<TGApp.Sqlite.GachaRecords.SingleTable[]>(() =>
+  props.modelValue.filter((item) => item.uigfType === "500"),
+);
 
-const cnCols = computed(() => {
+const cnCols = ref<string>(getCnCols());
+
+function getCnCols(): string {
   let total = 5;
-  if (newData.length === 0) {
+  if (newData.value.length === 0) {
     total -= 1;
   }
-  if (mixData.length === 0) {
+  if (mixData.value.length === 0) {
     total -= 1;
   }
-  return `repeat(${total}, 1fr)`;
-});
+  if (total === 5) {
+    return "repeat(5, 0.2fr)";
+  } else if (total === 4) {
+    return "repeat(4, 0.25fr)";
+  } else {
+    return "repeat(3, 0.33fr)";
+  }
+}
 
 // 监听数据变化
 watch(
   () => props.modelValue,
-  (newVal) => {
-    newData = newVal.filter((item) => item.uigfType === "100");
-    normalData = newVal.filter((item) => item.uigfType === "200");
-    avatarData = newVal.filter((item) => item.uigfType === "301");
-    weaponData = newVal.filter((item) => item.uigfType === "302");
-    mixData = newVal.filter((item) => item.uigfType === "500");
+  () => {
+    cnCols.value = getCnCols();
   },
 );
 </script>
