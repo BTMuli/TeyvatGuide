@@ -51,7 +51,7 @@
       <slot name="right"></slot>
     </div>
   </TOverlay>
-  <ToPostSearch gid="2" v-model="showSearch" v-model:keyword="search" />
+  <ToPostSearch gid="2" v-model="showSearch" :keyword="search" />
 </template>
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from "vue";
