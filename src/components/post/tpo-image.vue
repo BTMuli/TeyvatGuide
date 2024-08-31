@@ -1,7 +1,7 @@
 <template>
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="10px">
     <div class="tpoi-box">
-      <div :class="isOriSize ? 'tpoi-top ori-size' : 'tpoi-top'">
+      <div :class="isOriSize ? 'tpoi-top-ori' : 'tpoi-top'">
         <img :src="props.image.insert.image" alt="图片" @click="resizeImg" />
       </div>
       <div class="tpoi-bottom">
@@ -120,8 +120,8 @@ onUnmounted(() => {
 .tpoi-box {
   position: relative;
   display: flex;
-  min-width: 400px;
-  max-width: 90vw;
+  max-width: 90%;
+  max-height: 90%;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
@@ -130,32 +130,33 @@ onUnmounted(() => {
 }
 
 .tpoi-top {
+  position: relative;
   display: flex;
-  overflow: hidden;
   width: 100%;
-  max-height: 70vh;
+  max-height: 70%;
   align-items: flex-start;
   justify-content: center;
   border-radius: 10px;
-  background-color: var(--common-shadow-2);
-}
-
-.tpoi-top.ori-size {
+  background: v-bind(bg);
+  cursor: zoom-in;
   overflow-y: auto;
 }
 
-.tpoi-top img {
-  max-width: 90vw;
-  max-height: 70vh;
-  background-color: v-bind(bg);
-  cursor: zoom-in;
-  object-fit: contain;
+.tpoi-top-ori {
+  position: relative;
+  display: flex;
+  overflow: auto;
+  max-width: 100%;
+  max-height: 70%;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
 }
 
-.tpoi-top.ori-size img {
+.tpoi-top img {
   max-width: 100%;
-  max-height: none;
-  cursor: zoom-out;
+  max-height: 100%;
+  border-radius: 10px;
   object-fit: contain;
 }
 
@@ -164,6 +165,7 @@ onUnmounted(() => {
   width: 100%;
   align-items: flex-end;
   justify-content: space-between;
+  gap: 10px;
 }
 
 .tpoi-info {
