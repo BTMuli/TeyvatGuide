@@ -66,6 +66,16 @@ function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.My
         child = [];
       }
     }
+    // 可能没有换行符，导致res为空
+    if (res.length === 0) {
+      cur = {
+        insert: "",
+        attributes: tp.attributes,
+        children: child,
+      };
+      res.push(cur);
+      child = [];
+    }
   }
   return res;
 }
