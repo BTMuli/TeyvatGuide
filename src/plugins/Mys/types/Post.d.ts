@@ -1,12 +1,12 @@
 /**
  * @file plugins/Mys/types/post.d.ts
  * @description Mys 插件帖子类型定义文件
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  */
 
 /**
  * @description Mys 插件帖子类型
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  * @namespace TGApp.Plugins.Mys.Post
  * @memberof TGApp.Plugins.Mys
  */
@@ -249,7 +249,7 @@ declare namespace TGApp.Plugins.Mys.Post {
 
   /**
    * @description 图片数据
-   * @since Alpha v0.2.1
+   * @since Beta v0.5.5
    * @interface Image
    * @property {string} url 图片 URL
    * @property {number} height 图片高度
@@ -282,7 +282,7 @@ declare namespace TGApp.Plugins.Mys.Post {
       h: number;
       url: string;
     } | null;
-    is_user_set_cover: boolean;
+    is_user_set_cover?: boolean;
     image_id: string;
     entity_type: string;
     entity_id: string;

@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/index.ts
  * @description Mys plugin index
- * @since Beta v0.5.1
+ * @since Beta v0.5.5
  */
 
 import MysApi from "./api/index.js";
@@ -15,6 +15,7 @@ import getLotteryData from "./request/getLotteryData.js";
 import getNewsList from "./request/getNewsList.js";
 import { getPositionData } from "./request/getPositionData.js";
 import getPostData from "./request/getPostData.js";
+import { getPostReply, getPostSubRoot, getPostSubReply } from "./request/getPostReply.js";
 import { getVoteInfo, getVoteResult } from "./request/getVoteData.js";
 import searchPosts from "./request/searchPost.js";
 import { getGachaCard } from "./utils/getGachaCard.js";
@@ -25,6 +26,9 @@ const Mys = {
   Api: MysApi,
   Post: {
     get: getPostData,
+    reply: getPostReply,
+    replySubRoot: getPostSubRoot,
+    replySub: getPostSubReply,
   },
   Collection: {
     info: getCollectionData,
