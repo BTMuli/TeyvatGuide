@@ -7,6 +7,7 @@
     v-model:loading="loadShare"
     :title="shareTitle"
   />
+  <TprMain :gid="postData.post.game_id" :post-id="postData.post.post_id" v-if="postData" />
   <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="tp-post-body" v-if="postData">
     <div class="tp-post-info">
@@ -94,6 +95,7 @@ import TbCollect from "../components/post/tb-collect.vue";
 import TpAvatar from "../components/post/tp-avatar.vue";
 import TpParser from "../components/post/tp-parser.vue";
 import TpoCollection from "../components/post/tpo-collection.vue";
+import TprMain from "../components/postReply/tpr-main.vue";
 import Mys from "../plugins/Mys/index.js";
 import { useAppStore } from "../store/modules/app.js";
 import TGClient from "../utils/TGClient.js";

@@ -10,7 +10,7 @@ import MysApi from "../api/index.js";
 /**
  * @description 获取帖子回复信息
  * @since Beta v0.5.5
- * @param {number} postId 帖子 ID
+ * @param {string} postId 帖子 ID
  * @param {number} gid 社区 ID
  * @param {boolean} isHot 是否热门
  * @param {boolean} onlyMaster 是否只看楼主
@@ -20,10 +20,10 @@ import MysApi from "../api/index.js";
  * @return {Promise<TGApp.Plugins.Mys.Reply.ReplyData|TGApp.BBS.Response.Base>}
  */
 export async function getPostReply(
-  postId: number,
+  postId: string,
   gid: number,
-  isHot: boolean,
-  lastId: string,
+  isHot: boolean = true,
+  lastId?: string,
   onlyMaster: boolean = false,
   orderType?: 1 | 2,
   size: number = 20,
