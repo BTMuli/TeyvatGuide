@@ -4,6 +4,9 @@
       class="tpr-bubble"
       v-if="props.modelValue.user.reply_bubble !== null"
       :title="props.modelValue.user.reply_bubble.name"
+      :style="{
+        backgroundColor: props.modelValue.user.reply_bubble.bg_color,
+      }"
     >
       <img :src="props.modelValue.user.reply_bubble.url" alt="bubble" />
     </div>

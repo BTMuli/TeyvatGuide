@@ -53,17 +53,11 @@ const loading = ref<boolean>(false);
 
 async function showReply(): Promise<void> {
   if (reply.value.length > 0) return;
+  if (isLast.value) return;
   await loadReply();
 }
 
 async function loadReply(): Promise<void> {
-  if (isLast.value) {
-    showSnackbar({
-      text: "没有更多了",
-      color: "info",
-    });
-    return;
-  }
   loading.value = true;
   const resp = await Mys.Post.reply(props.postId, props.gid, true, lastId.value);
   if ("retcode" in resp) {
@@ -77,6 +71,12 @@ async function loadReply(): Promise<void> {
   lastId.value = resp.last_id;
   reply.value = reply.value.concat(resp.list);
   loading.value = false;
+  if (isLast.value) {
+    showSnackbar({
+      text: "没有更多了",
+      color: "info",
+    });
+  }
 }
 
 async function handleSubReply(item: TGApp.Plugins.Mys.Reply.ReplyFull): Promise<void> {
