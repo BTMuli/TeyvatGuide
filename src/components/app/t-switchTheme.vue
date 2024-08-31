@@ -1,5 +1,5 @@
 <template>
-  <div class="switch-box">
+  <div class="switch-box" :title="themeGet === 'default' ? '切换到深色模式' : '切换到浅色模式'">
     <div class="switch-btn" @click="switchTheme()">
       <v-icon>
         {{ themeGet === "default" ? "mdi-weather-night" : "mdi-weather-sunny" }}
@@ -45,7 +45,7 @@ onUnmounted(() => themeListener());
 </script>
 <style lang="css" scoped>
 .switch-box {
-  position: absolute;
+  position: fixed;
   top: 20px;
   left: 20px;
   border: 2px solid var(--common-shadow-8);

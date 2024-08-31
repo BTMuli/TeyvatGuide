@@ -113,8 +113,8 @@ async function switchCollect(): Promise<void> {
 </script>
 <style lang="css" scoped>
 .tbc-box {
-  position: absolute;
-  top: 80px;
+  position: fixed;
+  top: 70px;
   right: 20px;
   border: 2px solid var(--common-shadow-8);
   border-radius: 50%;
