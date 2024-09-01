@@ -116,7 +116,7 @@ function transStat(data: TGApp.Game.Record.Stats): string {
 
 /**
  * @description 将探索信息转换为数据库中的数据
- * @since Beta v0.4.3
+ * @since Beta v0.5.5
  * @param {TGApp.Game.Record.WorldExplore[]} data 城市探索信息
  * @returns {TGApp.Sqlite.Record.WorldExplore[]} 转换后的城市探索信息
  */
@@ -145,6 +145,15 @@ function transWorld(data: TGApp.Game.Record.WorldExplore[]): TGApp.Sqlite.Record
         level: area.offerings[0].level,
         icon: area.offerings[0].icon,
       };
+    }
+    // 对纳塔的特殊处理
+    if (area.name === "纳塔") {
+      world.iconLight =
+        "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-15.fd274778.png";
+      world.iconDark =
+        "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-15.fd274778.png";
+      world.bg =
+        "https://fastcdn.mihoyo.com/static-resource-v2/2024/08/19/8856eafed39be791276a21a6d522426b_6903333123294722705.png";
     }
     const children = areaChild.filter((i) => i.parent_id === area.id);
     children.map((child) => {

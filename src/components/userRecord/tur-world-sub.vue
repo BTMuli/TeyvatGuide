@@ -73,7 +73,11 @@ onMounted(async () => {
   if (props.data.offering) {
     offer.value = await saveImgLocal(props.data.offering.icon);
   }
-  props.theme === "dark" ? (icon.value = iconLight.value) : (icon.value = iconDark.value);
+  if (props.theme === "dark") {
+    icon.value = iconLight.value;
+  } else {
+    icon.value = iconDark.value;
+  }
 });
 
 onUnmounted(() => {
