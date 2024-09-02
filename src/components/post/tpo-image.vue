@@ -144,12 +144,9 @@ onUnmounted(() => {
 
 .tpoi-top-ori {
   position: relative;
-  display: flex;
   overflow: auto;
   max-width: 100%;
   max-height: 70%;
-  align-items: center;
-  justify-content: center;
   cursor: zoom-out;
 }
 

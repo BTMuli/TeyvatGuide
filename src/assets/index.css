@@ -1,7 +1,7 @@
 /*
  * @file assets/index.css
  * @description 全局样式文件
- * @since Beta v0.5.3
+ * @since Beta v0.5.5
  */
 
 @import "fonts/index.css";
@@ -62,14 +62,20 @@ html {
 
 /*
  * @description 侧边滚动条样式
- * @since Beta v0.5.3
+ * @since Beta v0.5.5
  */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background: var(--common-shadow-2);
+}
+
+::-webkit-scrollbar-corner {
   border-radius: 5px;
   background: var(--common-shadow-2);
 }
