@@ -21,7 +21,8 @@
         />
       </div>
       <div class="tpru-right" :title="props.modelValue.user.nickname">
-        {{ props.modelValue.user.nickname }}
+        <span>{{ props.modelValue.user.nickname }}</span>
+        <span v-if="props.modelValue.is_lz" class="tpru-lz">楼主</span>
       </div>
     </div>
     <div class="tpr-content">
@@ -150,9 +151,21 @@ function getTime(): string {
   overflow: hidden;
   align-items: center;
   justify-content: center;
+  column-gap: 5px;
   font-family: var(--font-title);
   font-size: 16px;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tpru-lz {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+  border-radius: 2px;
+  background: var(--tgc-od-blue);
+  font-size: 12px;
 }
 
 .tpr-content {
