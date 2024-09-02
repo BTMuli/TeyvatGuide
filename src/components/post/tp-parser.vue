@@ -68,22 +68,10 @@ function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.My
         check += child.length;
         child = [];
       }
-      if (i === parsedText.length - 1 && check !== parsedText.length) {
-        if (child.length === 1) {
-          res.push(child[0]);
-          child = [];
-          continue;
-        }
-        cur = {
-          insert: "",
-          attributes: text.attributes,
-          children: child,
-        };
-        res.push(cur);
-        child = [];
-      }
     }
+    if (check !== parsedText.length - 1 && child.length > 1) res.push(...child);
   }
+  if (res.length === 0 && child.length > 0) res.push(...child);
   return res;
 }
 
