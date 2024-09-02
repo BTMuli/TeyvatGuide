@@ -1,6 +1,10 @@
 <template>
-  <div class="tp-image-box" @click="showOverlay = true">
+  <div class="tp-image-box" @click="showOverlay = true" v-if="localUrl !== undefined">
     <img :src="localUrl" :alt="props.data.insert.image" :title="getImageTitle()" />
+  </div>
+  <div v-else class="tp-image-load" :title="getImageUrl()">
+    <v-progress-circular indeterminate color="primary" size="small" />
+    <span>加载中...</span>
   </div>
   <TpoImage :image="props.data" v-model="showOverlay" />
 </template>
@@ -31,7 +35,7 @@ interface TpImageProps {
 
 const props = defineProps<TpImageProps>();
 const showOverlay = ref(false);
-const localUrl = ref<string>();
+const localUrl = ref<string | undefined>(undefined);
 
 console.log("tp-image", props.data.insert.image, props.data.attributes);
 
@@ -79,5 +83,13 @@ function getImageUrl(): string {
   height: auto;
   border-radius: 10px;
   cursor: pointer;
+}
+
+.tp-image-load {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px auto;
+  column-gap: 5px;
 }
 </style>
