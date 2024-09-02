@@ -14,7 +14,7 @@ import { createPost } from "./TGWindow.js";
 
 /**
  * @function parsePost
- * @since Beta v0.3.8
+ * @since Beta v0.5.5
  * @description 处理帖子
  * @param {string} link
  * @returns {Promise<false|string>} - 处理情况，或者转换后的链接
@@ -40,9 +40,13 @@ export async function parsePost(link: string): Promise<false | string> {
     }
     return false;
   }
-  if (url.hostname === "bbs.mihoyo.com" || url.hostname === "www.miyoushe.com") {
+  if (url.hostname.endsWith(".mihoyo.com") || url.hostname.endsWith(".miyoushe.com")) {
     if (url.pathname.includes("/article/")) {
       const postId = url.pathname.split("/").pop();
+      if (typeof postId !== "string") return false;
+      return postId;
+    } else if (url.hash.startsWith("#/article/")) {
+      const postId = url.hash.split("/").pop();
       if (typeof postId !== "string") return false;
       return postId;
     }
