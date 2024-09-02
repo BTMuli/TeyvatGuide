@@ -34,6 +34,9 @@
         },
         {
           "url": "https://*.mihoyo.com/*"
+        },
+        {
+          "url": "https://*.hoyoverse.com/*"
         }
       ]
     }

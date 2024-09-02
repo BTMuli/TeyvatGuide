@@ -29,7 +29,11 @@
       "core:window:default",
       {
         "identifier": "http:default",
-        "allow": [{ "url": "https://*.miyoushe.com/*" }, { "url": "https://*.mihoyo.com/*" }]
+        "allow": [
+          { "url": "https://*.miyoushe.com/*" },
+          { "url": "https://*.mihoyo.com/*" },
+          { "url": "https://*.hoyoverse.com/*" }
+        ]
       }
     ],
     "platforms": ["windows", "macOS"]
@@ -111,7 +115,9 @@
         "allow": [
           { "url": "https://*.miyoushe.com/*" },
           { "url": "https://*.mihoyo.com/*" },
-          { "url": "https://*.mihoyogift.com/*" }
+          { "url": "https://*.mihoyogift.com/*" },
+          { "url": "https://*.bilibili.com/*" },
+          { "url": "https://*.hoyoverse.com/*" }
         ]
       }
     ],
@@ -168,7 +174,8 @@
         "allow": [
           { "url": "https://*.miyoushe.com/*" },
           { "url": "https://*.mihoyo.com/*" },
-          { "url": "https://homa.snapgenshin.com/*" }
+          { "url": "https://homa.snapgenshin.com/*" },
+          { "url": "https://*.hoyoverse.com/*" }
         ]
       },
       {

@@ -76,6 +76,9 @@
         },
         {
           "url": "https://homa.snapgenshin.com/*"
+        },
+        {
+          "url": "https://*.hoyoverse.com/*"
         }
       ]
     },

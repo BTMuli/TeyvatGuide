@@ -701,7 +701,6 @@
       "identifier": "default",
       "description": "Default permissions for the plugin.",
       "permissions": [
-        "allow-get-all-webviews",
         "allow-webview-position",
         "allow-webview-size",
         "allow-internal-toggle-devtools"
@@ -717,11 +716,6 @@
         "identifier": "allow-create-webview-window",
         "description": "Enables the create_webview_window command without any pre-configured scope.",
         "commands": { "allow": ["create_webview_window"], "deny": [] }
-      },
-      "allow-get-all-webviews": {
-        "identifier": "allow-get-all-webviews",
-        "description": "Enables the get_all_webviews command without any pre-configured scope.",
-        "commands": { "allow": ["get_all_webviews"], "deny": [] }
       },
       "allow-internal-toggle-devtools": {
         "identifier": "allow-internal-toggle-devtools",
@@ -783,11 +777,6 @@
         "description": "Denies the create_webview_window command without any pre-configured scope.",
         "commands": { "allow": [], "deny": ["create_webview_window"] }
       },
-      "deny-get-all-webviews": {
-        "identifier": "deny-get-all-webviews",
-        "description": "Denies the get_all_webviews command without any pre-configured scope.",
-        "commands": { "allow": [], "deny": ["get_all_webviews"] }
-      },
       "deny-internal-toggle-devtools": {
         "identifier": "deny-internal-toggle-devtools",
         "description": "Denies the internal_toggle_devtools command without any pre-configured scope.",
@@ -847,7 +836,6 @@
       "identifier": "default",
       "description": "Default permissions for the plugin.",
       "permissions": [
-        "allow-get-all-windows",
         "allow-scale-factor",
         "allow-inner-position",
         "allow-outer-position",
@@ -908,11 +896,6 @@
         "identifier": "allow-destroy",
         "description": "Enables the destroy command without any pre-configured scope.",
         "commands": { "allow": ["destroy"], "deny": [] }
-      },
-      "allow-get-all-windows": {
-        "identifier": "allow-get-all-windows",
-        "description": "Enables the get_all_windows command without any pre-configured scope.",
-        "commands": { "allow": ["get_all_windows"], "deny": [] }
       },
       "allow-hide": {
         "identifier": "allow-hide",
@@ -1238,11 +1221,6 @@
         "identifier": "deny-destroy",
         "description": "Denies the destroy command without any pre-configured scope.",
         "commands": { "allow": [], "deny": ["destroy"] }
-      },
-      "deny-get-all-windows": {
-        "identifier": "deny-get-all-windows",
-        "description": "Denies the get_all_windows command without any pre-configured scope.",
-        "commands": { "allow": [], "deny": ["get_all_windows"] }
       },
       "deny-hide": {
         "identifier": "deny-hide",

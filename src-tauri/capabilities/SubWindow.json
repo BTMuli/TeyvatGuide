@@ -71,6 +71,12 @@
         },
         {
           "url": "https://*.mihoyogift.com/*"
+        },
+        {
+          "url": "https://*.bilibili.com/*"
+        },
+        {
+          "url": "https://*.hoyoverse.com/*"
         }
       ]
     }

@@ -2459,11 +2459,6 @@
           "enum": ["core:webview:allow-create-webview-window"]
         },
         {
-          "description": "core:webview:allow-get-all-webviews -> Enables the get_all_webviews command without any pre-configured scope.",
-          "type": "string",
-          "enum": ["core:webview:allow-get-all-webviews"]
-        },
-        {
           "description": "core:webview:allow-internal-toggle-devtools -> Enables the internal_toggle_devtools command without any pre-configured scope.",
           "type": "string",
           "enum": ["core:webview:allow-internal-toggle-devtools"]
@@ -2522,11 +2517,6 @@
           "description": "core:webview:deny-create-webview-window -> Denies the create_webview_window command without any pre-configured scope.",
           "type": "string",
           "enum": ["core:webview:deny-create-webview-window"]
-        },
-        {
-          "description": "core:webview:deny-get-all-webviews -> Denies the get_all_webviews command without any pre-configured scope.",
-          "type": "string",
-          "enum": ["core:webview:deny-get-all-webviews"]
         },
         {
           "description": "core:webview:deny-internal-toggle-devtools -> Denies the internal_toggle_devtools command without any pre-configured scope.",
@@ -2617,11 +2607,6 @@
           "description": "core:window:allow-destroy -> Enables the destroy command without any pre-configured scope.",
           "type": "string",
           "enum": ["core:window:allow-destroy"]
-        },
-        {
-          "description": "core:window:allow-get-all-windows -> Enables the get_all_windows command without any pre-configured scope.",
-          "type": "string",
-          "enum": ["core:window:allow-get-all-windows"]
         },
         {
           "description": "core:window:allow-hide -> Enables the hide command without any pre-configured scope.",
@@ -2947,11 +2932,6 @@
           "description": "core:window:deny-destroy -> Denies the destroy command without any pre-configured scope.",
           "type": "string",
           "enum": ["core:window:deny-destroy"]
-        },
-        {
-          "description": "core:window:deny-get-all-windows -> Denies the get_all_windows command without any pre-configured scope.",
-          "type": "string",
-          "enum": ["core:window:deny-get-all-windows"]
         },
         {
           "description": "core:window:deny-hide -> Denies the hide command without any pre-configured scope.",
