@@ -54,9 +54,26 @@ function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.My
       continue;
     }
     const parsedText = getParsedText(tp);
-    for (const text of parsedText) {
-      child.push(text);
+    let check = 0;
+    for (let i = 0; i < parsedText.length; i++) {
+      const text = parsedText[i];
+      child.push(parsedText[i]);
       if (text.insert === "\n") {
+        cur = {
+          insert: "",
+          attributes: text.attributes,
+          children: child,
+        };
+        res.push(cur);
+        check += child.length;
+        child = [];
+      }
+      if (i === parsedText.length - 1 && check !== parsedText.length) {
+        if (child.length === 1) {
+          res.push(child[0]);
+          child = [];
+          continue;
+        }
         cur = {
           insert: "",
           attributes: text.attributes,
@@ -65,16 +82,6 @@ function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.My
         res.push(cur);
         child = [];
       }
-    }
-    // 可能没有换行符，导致res为空
-    if (res.length === 0) {
-      cur = {
-        insert: "",
-        attributes: tp.attributes,
-        children: child,
-      };
-      res.push(cur);
-      child = [];
     }
   }
   return res;
