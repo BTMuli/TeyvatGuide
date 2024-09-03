@@ -113,7 +113,7 @@ declare namespace TGApp.Plugins.Mys.Reply {
    * @property {Array<ReplyFull>} sub_replies - 子回复数据
    * @property {boolean} is_lz - 是否楼主
    * @property {number} sub_reply_count - 子回复数量
-   * @property {unknown} r_user - 未知数据
+   * @property {TGApp.Plugins.Mys.User.Reply} r_user - 回复用户数据
    * @property {unknown} r_reply - 未知数据
    * @property {unknown} r_post - 未知数据
    * @property {unknown} user_game_info - 未知数据
@@ -129,7 +129,7 @@ declare namespace TGApp.Plugins.Mys.Reply {
     sub_replies: Array<ReplyFull>;
     is_lz: boolean;
     sub_reply_count: number;
-    r_user: unknown;
+    r_user: TGApp.Plugins.Mys.User.Reply | null;
     r_reply: unknown;
     r_post: unknown;
     user_game_info: unknown;

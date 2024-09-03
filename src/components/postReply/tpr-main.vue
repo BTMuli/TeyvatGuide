@@ -6,7 +6,6 @@
       v-model="showOverlay"
       :persistent="true"
       :no-click-animation="true"
-      z-index="0"
     >
       <template #activator="{ props }">
         <v-btn
@@ -44,7 +43,7 @@
           </v-btn>
         </div>
         <v-list class="tpr-reply-list">
-          <TprReply v-for="(item, index) in reply" :key="index" :modelValue="item" />
+          <TprReply v-for="(item, index) in reply" :key="index" :modelValue="item" mode="main" />
           <div v-if="isLast" class="tpr-list-item">
             <v-chip color="info" label>没有更多了</v-chip>
           </div>

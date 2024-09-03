@@ -52,10 +52,14 @@
             location="end"
             :close-on-content-click="false"
             v-model="showSub"
-            z-index="0"
           >
             <v-list class="tpr-reply-sub" width="300px" max-height="400px">
-              <TprReply v-for="(reply, index) in subReplies" :key="index" :modelValue="reply" />
+              <TprReply
+                v-for="(reply, index) in subReplies"
+                :key="index"
+                :modelValue="reply"
+                mode="sub"
+              />
               <div v-if="isLast" class="tpr-list-item">
                 <v-chip color="info" label>没有更多了</v-chip>
               </div>
@@ -67,9 +71,12 @@
         </span>
       </div>
     </div>
-    <div class="tpr-extra">
-      <span>{{ props.modelValue.reply.reply_id }}</span>
-      <span>{{ props.modelValue.reply.floor_id }}F</span>
+    <div class="tpr-extra" :title="`ID:${props.modelValue.reply.reply_id}`">
+      <span v-if="props.modelValue.r_user" class="tpr-reply-user">
+        <span>回复</span>
+        <span>{{ props.modelValue.r_user.nickname }}</span>
+      </span>
+      <span v-if="props.mode === 'main'">{{ props.modelValue.reply.floor_id }}F</span>
     </div>
   </div>
 </template>
@@ -81,6 +88,7 @@ import showSnackbar from "../func/snackbar.js";
 import TpParser from "../post/tp-parser.vue";
 
 interface TprReplyProps {
+  mode: "main" | "sub";
   modelValue: TGApp.Plugins.Mys.Reply.ReplyFull;
 }
 
@@ -277,6 +285,19 @@ async function loadSub(): Promise<void> {
   font-size: 12px;
   gap: 5px;
   opacity: 0.3;
+}
+
+.tpr-reply-user {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  :last-child {
+    color: #00c3ff;
+    text-decoration: underline solid #00c3ff;
+    text-underline-position: under;
+  }
 }
 
 .tpr-reply-sub {
