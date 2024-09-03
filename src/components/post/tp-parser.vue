@@ -60,6 +60,11 @@ function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.My
       const text = parsedText[i];
       child.push(parsedText[i]);
       if (text.insert === "\n") {
+        if (child.length === 1) {
+          res.push(child[0]);
+          child = [];
+          continue;
+        }
         cur = {
           insert: "",
           attributes: text.attributes,
@@ -70,7 +75,7 @@ function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.My
         child = [];
       }
     }
-    if (check !== parsedText.length - 1 && child.length > 1) res.push(...child);
+    if (check !== parsedText.length - 1 && child.length > 0) res.push(...child);
   }
   if (res.length === 0 && child.length > 0) res.push(...child);
   return res;

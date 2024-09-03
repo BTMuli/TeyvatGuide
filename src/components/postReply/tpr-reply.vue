@@ -45,7 +45,6 @@
           @click="showReply()"
         >
           <v-icon size="small">mdi-message-text</v-icon>
-          {{ props.modelValue.sub_replies.length }}
           <v-menu
             submenu
             activator="parent"
