@@ -49,12 +49,19 @@
         </span>
       </div>
     </div>
+    <div class="tpr-extra">
+      <span>{{ props.modelValue.reply.reply_id }}</span>
+      <span>{{ props.modelValue.reply.floor_id }}F</span>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
+import { toRaw } from "vue";
+
 import TpParser from "../post/tp-parser.vue";
 
 interface TprReplyProps {
+  mode: "main" | "root" | "sub";
   modelValue: TGApp.Plugins.Mys.Reply.ReplyFull;
 }
 
@@ -66,6 +73,8 @@ interface TprReplyEmits {
 
 const props = defineProps<TprReplyProps>();
 const emit = defineEmits<TprReplyEmits>();
+
+console.log("TprReply", toRaw(props.modelValue));
 
 function getTime(): string {
   const time = new Date(props.modelValue.reply.created_at * 1000);
@@ -86,13 +95,13 @@ function getTime(): string {
 .tpr-reply-box {
   position: relative;
   display: flex;
-  width: 280px;
+  width: 100%;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
   padding: 5px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
-  margin: 5px;
   background: var(--box-bg-1);
   row-gap: 5px;
   word-break: break-all;
@@ -207,5 +216,15 @@ function getTime(): string {
   justify-content: center;
   cursor: pointer;
   gap: 5px;
+}
+
+.tpr-extra {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 12px;
+  gap: 5px;
+  opacity: 0.3;
 }
 </style>
