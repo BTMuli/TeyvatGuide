@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/userCollect.ts
  * @description 用户收藏模块
- * @since Beta v0.5.1
+ * @since Beta v0.5.5
  */
 
 import TGSqlite from "../index.js";
@@ -41,7 +41,7 @@ async function getCollectList(): Promise<TGApp.Sqlite.UserCollection.UFCollectio
 
 /**
  * @description 获取收藏合集中的帖子列表
- * @since Beta v0.4.5
+ * @since Beta v0.5.5
  * @param {string} collection 收藏合集标题
  * @return {Promise<TGApp.Sqlite.UserCollection.UFPost[]>} 返回收藏合集中的帖子列表
  */
@@ -55,7 +55,7 @@ async function getCollectPostList(
   for (let i = 0; i < res.length; i++) {
     const postSql = "SELECT * FROM UFPost WHERE id = ?";
     const postRes: TGApp.Sqlite.UserCollection.UFPost[] = await db.select(postSql, [res[i].postId]);
-    postList.push(postRes[0]);
+    if (postRes.length > 0) postList.push(postRes[0]);
   }
   return postList;
 }

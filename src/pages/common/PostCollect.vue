@@ -439,7 +439,11 @@ function getPageItems(): TGApp.Plugins.Mys.Post.FullData[] {
       card.push(JSON.parse(post.content));
     } catch (e) {
       TGLogger.Error("[PostCollect] getPageItems");
-      TGLogger.Error(<string>e);
+      if (typeof e === "string") {
+        TGLogger.Error(e);
+      } else if (e instanceof Error) {
+        TGLogger.Error(e.message);
+      }
     }
   }
   return card;
