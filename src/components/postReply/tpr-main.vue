@@ -44,13 +44,7 @@
           </v-btn>
         </div>
         <v-list class="tpr-reply-list">
-          <TprReply
-            v-for="(item, index) in reply"
-            :key="index"
-            :modelValue="item"
-            mode="main"
-            @replySub="handleSubReply(item)"
-          />
+          <TprReply v-for="(item, index) in reply" :key="index" :modelValue="item" />
           <div v-if="isLast" class="tpr-list-item">
             <v-chip color="info" label>没有更多了</v-chip>
           </div>
@@ -61,9 +55,6 @@
       </div>
     </v-menu>
   </div>
-  <div v-if="curSub !== undefined">
-    <TprSub v-model="showSub" :reply="curSub" />
-  </div>
 </template>
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
@@ -72,7 +63,6 @@ import Mys from "../../plugins/Mys/index.js";
 import showSnackbar from "../func/snackbar.js";
 
 import TprReply from "./tpr-reply.vue";
-import TprSub from "./tpr-sub.vue";
 
 interface TprMainProps {
   gid: number;
@@ -81,12 +71,10 @@ interface TprMainProps {
 
 const props = defineProps<TprMainProps>();
 const reply = ref<Array<TGApp.Plugins.Mys.Reply.ReplyFull>>([]);
-const curSub = ref<TGApp.Plugins.Mys.Reply.ReplyFull | undefined>(undefined);
 const lastId = ref<string | undefined>(undefined);
 const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
-const showSub = ref<boolean>(false);
 const onlyLz = ref<boolean>(false);
 const orderType = ref<"hot" | "latest" | "oldest">("hot");
 const orderList = [
@@ -114,9 +102,6 @@ async function showReply(): Promise<void> {
   if (reply.value.length > 0) return;
   if (isLast.value) return;
   await loadReply();
-  if (reply.value.length > 0 && curSub.value === undefined) {
-    curSub.value = reply.value[0];
-  }
 }
 
 async function reloadReply(): Promise<void> {
@@ -152,12 +137,6 @@ async function loadReply(): Promise<void> {
       color: "info",
     });
   }
-}
-
-async function handleSubReply(item: TGApp.Plugins.Mys.Reply.ReplyFull): Promise<void> {
-  curSub.value = item;
-  showSub.value = true;
-  console.log("handleSubReply", item);
 }
 </script>
 <style lang="css" scoped>

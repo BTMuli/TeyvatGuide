@@ -41,11 +41,29 @@
         <span
           v-if="props.modelValue.sub_replies.length > 0"
           class="tpr-reply"
-          @click="emit('replySub', props.modelValue)"
           title="查看子回复"
+          @click="showReply()"
         >
           <v-icon size="small">mdi-message-text</v-icon>
           {{ props.modelValue.sub_replies.length }}
+          <v-menu
+            submenu
+            activator="parent"
+            location="end"
+            :close-on-content-click="false"
+            v-model="showSub"
+            z-index="0"
+          >
+            <v-list class="tpr-reply-sub" width="300px" max-height="400px">
+              <TprReply v-for="(reply, index) in subReplies" :key="index" :modelValue="reply" />
+              <div v-if="isLast" class="tpr-list-item">
+                <v-chip color="info" label>没有更多了</v-chip>
+              </div>
+              <div v-else class="tpr-list-item">
+                <v-btn @click="loadSub()" color="primary" :loading="loading">加载更多</v-btn>
+              </div>
+            </v-list>
+          </v-menu>
         </span>
       </div>
     </div>
@@ -56,23 +74,22 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { toRaw } from "vue";
+import { toRaw, ref } from "vue";
 
+import Mys from "../../plugins/Mys/index.js";
+import showSnackbar from "../func/snackbar.js";
 import TpParser from "../post/tp-parser.vue";
 
 interface TprReplyProps {
-  mode: "main" | "root" | "sub";
   modelValue: TGApp.Plugins.Mys.Reply.ReplyFull;
 }
 
-interface TprReplyEmits {
-  (e: "update:modelValue", value: TGApp.Plugins.Mys.Reply.ReplyFull): void;
-
-  (e: "replySub", value: TGApp.Plugins.Mys.Reply.ReplyFull): void;
-}
-
 const props = defineProps<TprReplyProps>();
-const emit = defineEmits<TprReplyEmits>();
+const showSub = ref<boolean>(false);
+const subReplies = ref<Array<TGApp.Plugins.Mys.Reply.ReplyFull>>([]);
+const lastId = ref<string | undefined>(undefined);
+const isLast = ref<boolean>(false);
+const loading = ref<boolean>(false);
 
 console.log("TprReply", toRaw(props.modelValue));
 
@@ -89,6 +106,40 @@ function getTime(): string {
   }
   // 否则显示 yyyy-MM-dd
   return time.toLocaleDateString();
+}
+
+async function showReply(): Promise<void> {
+  if (subReplies.value.length > 0) return;
+  if (isLast.value) return;
+  await loadSub();
+}
+
+async function loadSub(): Promise<void> {
+  loading.value = true;
+  const resp = await Mys.Post.replySub(
+    props.modelValue.reply.floor_id,
+    props.modelValue.reply.game_id,
+    props.modelValue.reply.post_id,
+    lastId.value,
+  );
+  if ("retcode" in resp) {
+    showSnackbar({
+      text: `[${resp.retcode}] ${resp.message}`,
+      color: "error",
+    });
+    loading.value = false;
+    return;
+  }
+  isLast.value = resp.is_last;
+  lastId.value = resp.last_id;
+  subReplies.value = subReplies.value.concat(resp.list);
+  loading.value = false;
+  if (isLast.value) {
+    showSnackbar({
+      text: "没有更多了",
+      color: "info",
+    });
+  }
 }
 </script>
 <style lang="css" scoped>
@@ -226,5 +277,19 @@ function getTime(): string {
   font-size: 12px;
   gap: 5px;
   opacity: 0.3;
+}
+
+.tpr-reply-sub {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-height: 360px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5px;
+  background: var(--app-page-bg);
+  overflow-y: auto;
+  row-gap: 5px;
 }
 </style>
