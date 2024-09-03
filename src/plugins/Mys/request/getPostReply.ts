@@ -41,6 +41,7 @@ export async function getPostReply(
     params["order_type"] = orderType;
   }
   if (onlyMaster) {
+    params["is_hot"] = false;
     params["only_master"] = onlyMaster;
   }
   const link = "https://bbs-api.miyoushe.com/post/wapi/getPostReplies";
@@ -91,7 +92,7 @@ export async function getPostSubReply(
   floorId: number,
   gid: number,
   postId: string,
-  lastId: string,
+  lastId?: string,
   size: number = 20,
 ): Promise<TGApp.Plugins.Mys.Reply.SubData | TGApp.BBS.Response.Base> {
   const params: Record<string, string | number> = {
