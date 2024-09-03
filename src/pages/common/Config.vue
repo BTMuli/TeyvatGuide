@@ -82,6 +82,7 @@
             <v-icon>mdi-database-remove</v-icon>
           </div>
         </template>
+        <template #append>{{ bytesToSize(cacheSize) }}</template>
       </v-list-item>
       <v-list-item v-show="showReset" title="重置数据库" @click="confirmResetDB()">
         <template #prepend>
@@ -144,9 +145,19 @@ const loadingTitle = ref<string>("正在加载...");
 const loadingSub = ref<string>("");
 const showReset = ref<boolean>(false);
 
+const cacheSize = ref<number>(0);
+
 onMounted(async () => {
   await TGLogger.Info("[Config] 打开设置页面");
   loading.value = false;
+  const cacheDir = await getCacheDir();
+  if (cacheDir === false) return;
+  let cacheBSize: number = 0;
+  for (const dir of cacheDir) {
+    const size: number = await core.invoke("get_dir_size", { path: dir });
+    cacheBSize += size;
+  }
+  cacheSize.value = cacheBSize;
 });
 
 // 备份数据
@@ -337,20 +348,16 @@ async function confirmDelCache(): Promise<void> {
   }
   let cacheBSize: number = 0;
   loadingTitle.value = "正在检测缓存...";
-  loadingSub.value = "耗时较久，请稍作等候";
   loading.value = true;
-  const timeStart = Date.now();
   for (const dir of CacheDir) {
     const size: number = await core.invoke("get_dir_size", { path: dir });
     cacheBSize += size;
   }
-  const cacheSize = bytesToSize(cacheBSize);
-  await TGLogger.Info(`[Config][confirmDelCache] 当前缓存大小为 ${cacheSize}`);
+  cacheSize.value = cacheBSize;
   loading.value = false;
-  const timeEnd = Date.now();
   const res = await showConfirm({
     title: "确认清除缓存吗？",
-    text: `当前缓存大小为 ${cacheSize}，耗时 ${timeEnd - timeStart} 毫秒`,
+    text: `当前缓存大小为 ${bytesToSize(cacheBSize)}`,
   });
   if (!res) {
     showSnackbar({
