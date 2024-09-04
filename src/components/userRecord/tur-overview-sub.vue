@@ -2,12 +2,15 @@
   <div class="tur-os-box">
     <div class="tur-os-title">
       <slot name="title">
-        {{ title }}
+        {{ props.title }}
       </slot>
     </div>
     <div class="tur-os-text">
+      <div v-if="props.icon" class="tur-os-icon">
+        <img :src="props.icon" alt="icon" />
+      </div>
       <slot name="val-text">
-        {{ text }}
+        {{ props.text }}
       </slot>
     </div>
   </div>
@@ -16,9 +19,10 @@
 interface TAOProps {
   title: string;
   text: string | number | undefined;
+  icon?: string;
 }
 
-defineProps<TAOProps>();
+const props = defineProps<TAOProps>();
 </script>
 <style lang="css" scoped>
 .tur-os-box {
@@ -40,13 +44,28 @@ defineProps<TAOProps>();
 }
 
 .tur-os-text {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
   color: var(--tgc-yellow-1);
   font-family: var(--font-text);
   font-size: 20px;
+  gap: 5px;
 }
 
 .dark .tur-os-text {
   color: var(--tgc-yellow-1);
   text-shadow: none;
+}
+
+.tur-os-icon {
+  width: 25px;
+  height: 25px;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
 }
 </style>
