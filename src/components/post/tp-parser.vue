@@ -70,7 +70,7 @@ function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.My
         child = [];
       }
     }
-    if (check !== parsedText.length && check !== 0) {
+    if (check < parsedText.length && check !== 0) {
       res.push(...child);
       child = [];
     }

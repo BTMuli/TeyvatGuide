@@ -30,7 +30,7 @@
     </div>
     <div class="tpr-info">
       <div class="tpri-left">
-        <span>{{ getTime() }}</span>
+        <span :title="getFullTime()">{{ getTime() }}</span>
         <span>{{ props.modelValue.user.ip_region }}</span>
       </div>
       <div class="tpri-right">
@@ -128,7 +128,6 @@ watch(
   async (value) => {
     if (value) {
       await event.emit("openReplySub", props.modelValue.reply.reply_id);
-      console.error("emit openReplySub");
     }
   },
 );
@@ -136,11 +135,14 @@ watch(
 async function listenSub(): Promise<UnlistenFn> {
   return await event.listen("openReplySub", async (e: Event<string>) => {
     if (e.payload !== props.modelValue.reply.reply_id) {
-      if (showSub.value) {
-        showSub.value = false;
-      }
+      if (showSub.value) showSub.value = false;
     }
   });
+}
+
+function getFullTime(): string {
+  const time = new Date(props.modelValue.reply.created_at * 1000);
+  return time.toLocaleString().replace(/\//g, "-");
 }
 
 function getTime(): string {
@@ -152,10 +154,10 @@ function getTime(): string {
   }
   // 如果是今年，显示 MM-dd
   if (time.getFullYear() === now.getFullYear()) {
-    return time.toLocaleDateString().slice(5);
+    return time.toLocaleDateString().slice(5).replace(/\//g, "-");
   }
   // 否则显示 yyyy-MM-dd
-  return time.toLocaleDateString();
+  return time.toLocaleDateString().replace(/\//g, "-");
 }
 
 async function showReply(): Promise<void> {
