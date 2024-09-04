@@ -71,6 +71,9 @@
       </div>
     </div>
     <div class="tpr-extra" :title="`ID:${props.modelValue.reply.reply_id}`">
+      <span class="tpr-debug" @click="exportData">
+        <v-icon size="small">mdi-file-export</v-icon>
+      </span>
       <span v-if="props.modelValue.r_user" class="tpr-reply-user">
         <span>回复</span>
         <span>{{ props.modelValue.r_user.nickname }}</span>
@@ -80,9 +83,13 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { path } from "@tauri-apps/api";
+import { save } from "@tauri-apps/plugin-dialog";
+import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { toRaw, ref } from "vue";
 
 import Mys from "../../plugins/Mys/index.js";
+import showConfirm from "../func/confirm.js";
 import showSnackbar from "../func/snackbar.js";
 import TpParser from "../post/tp-parser.vue";
 
@@ -147,6 +154,39 @@ async function loadSub(): Promise<void> {
       color: "info",
     });
   }
+}
+
+async function exportData(): Promise<void> {
+  const confirm = await showConfirm({
+    title: "导出数据?",
+    text: "将回复对应的JSON数据导出到文件",
+  });
+  if (!confirm) {
+    showSnackbar({
+      text: "已取消",
+      color: "cancel",
+    });
+    return;
+  }
+  const data = JSON.stringify(toRaw(props.modelValue), null, 2);
+  const fileName = `reply_${props.modelValue.reply.post_id}_${props.modelValue.reply.floor_id}_${props.modelValue.reply.reply_id}`;
+  const savePath = await save({
+    title: "导出回复数据",
+    filters: [{ name: "JSON", extensions: ["json"] }],
+    defaultPath: `${await path.downloadDir()}${path.sep()}${fileName}.json`,
+  });
+  if (savePath === null) {
+    showSnackbar({
+      text: "已取消",
+      color: "cancel",
+    });
+    return;
+  }
+  await writeTextFile(savePath, data);
+  showSnackbar({
+    text: "导出成功",
+    color: "success",
+  });
 }
 </script>
 <style lang="css" scoped>
@@ -284,6 +324,13 @@ async function loadSub(): Promise<void> {
   font-size: 12px;
   gap: 5px;
   opacity: 0.3;
+}
+
+.tpr-debug {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
 .tpr-reply-user {

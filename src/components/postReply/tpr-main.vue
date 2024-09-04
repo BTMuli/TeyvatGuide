@@ -21,7 +21,13 @@
       <div class="tpr-main-reply">
         <!-- 顶部负责显示回复条件&关闭按钮&刷新按钮 -->
         <div class="tpr-main-filter">
-          <v-chip color="primary" label>回复列表</v-chip>
+          <v-chip
+            color="primary"
+            label
+            @click="handleDebug"
+            :style="{ cursor: appStore.devMode ? 'pointer' : 'not-allowed' }"
+            >回复列表
+          </v-chip>
           <v-switch
             v-model="onlyLz"
             color="primary"
@@ -54,13 +60,16 @@
       </div>
     </v-menu>
   </div>
+  <TprDebug v-if="appStore.devMode" v-model="showDebug" />
 </template>
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
 
 import Mys from "../../plugins/Mys/index.js";
+import { useAppStore } from "../../store/modules/app.js";
 import showSnackbar from "../func/snackbar.js";
 
+import TprDebug from "./tpr-debug.vue";
 import TprReply from "./tpr-reply.vue";
 
 interface TprMainProps {
@@ -69,18 +78,23 @@ interface TprMainProps {
 }
 
 const props = defineProps<TprMainProps>();
-const reply = ref<Array<TGApp.Plugins.Mys.Reply.ReplyFull>>([]);
-const lastId = ref<string | undefined>(undefined);
-const isLast = ref<boolean>(false);
-const loading = ref<boolean>(false);
-const showOverlay = ref<boolean>(false);
-const onlyLz = ref<boolean>(false);
-const orderType = ref<"hot" | "latest" | "oldest">("hot");
+const appStore = useAppStore();
+
 const orderList = [
   { label: "热门", value: "hot" },
   { label: "最新", value: "latest" },
   { label: "最早", value: "oldest" },
 ];
+
+const reply = ref<Array<TGApp.Plugins.Mys.Reply.ReplyFull>>([]);
+const lastId = ref<string | undefined>(undefined);
+const isLast = ref<boolean>(false);
+const loading = ref<boolean>(false);
+const showOverlay = ref<boolean>(false);
+const showDebug = ref<boolean>(false);
+const onlyLz = ref<boolean>(false);
+const orderType = ref<"hot" | "latest" | "oldest">("hot");
+
 const isHot = computed<boolean>(() => orderType.value === "hot");
 const replyOrder = computed<1 | 2 | undefined>(() => {
   if (orderType.value === "hot") return undefined;
@@ -136,6 +150,14 @@ async function loadReply(): Promise<void> {
       color: "info",
     });
   }
+}
+
+function handleDebug(): void {
+  if (!appStore.devMode || showDebug.value) {
+    showDebug.value = false;
+    return;
+  }
+  showDebug.value = true;
 }
 </script>
 <style lang="css" scoped>

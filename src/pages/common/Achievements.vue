@@ -38,7 +38,6 @@
     <!-- 右侧内容-->
     <div class="right-wrap">
       <div v-if="curCardName !== '' && selectedSeries !== -1 && !loading">
-        <!-- todo，这边用 v-if 包装，需要经过测试 -->
         <TopNamecard :data="curCard" @selected="openImg()" v-if="curCard" />
       </div>
       <div
