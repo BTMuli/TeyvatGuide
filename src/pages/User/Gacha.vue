@@ -4,7 +4,7 @@
     <div class="gacha-top-title">祈愿记录</div>
     <v-select v-model="uidCur" class="gacha-top-select" :items="selectItem" variant="outlined" />
     <div class="gacha-top-btns">
-      <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh"
+      <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(false)"
         >增量刷新
       </v-btn>
       <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(true)"
@@ -115,7 +115,7 @@ onMounted(async () => {
 });
 
 // 刷新按钮点击事件
-async function confirmRefresh(force: boolean = false): Promise<void> {
+async function confirmRefresh(force: boolean): Promise<void> {
   await TGLogger.Info(`[UserGacha][${account.gameUid}][confirmRefresh] 刷新祈愿数据`);
   const confirmRes = await showConfirm({
     title: "是否刷新祈愿数据？",
@@ -168,7 +168,7 @@ async function confirmRefresh(force: boolean = false): Promise<void> {
     undefined,
     undefined,
   ];
-  if (force) {
+  if (!force) {
     loadingTitle.value = "正在获取数据库祈愿最新 ID";
     checkList[0] = await TSUserGacha.getGachaCheck(account.gameUid, "200");
     checkList[1] = await TSUserGacha.getGachaCheck(account.gameUid, "301");
@@ -201,12 +201,7 @@ async function confirmRefresh(force: boolean = false): Promise<void> {
   window.location.reload();
 }
 
-// 获取祈愿数据并写入数据库，不用考虑多语言，因为从api获取的数据是中文
-async function getGachaLogs(
-  pool: string,
-  endId: string = "0",
-  check: string | undefined,
-): Promise<void> {
+async function getGachaLogs(pool: string, endId: string = "0", check?: string): Promise<void> {
   await TGLogger.Info(
     `[UserGacha][${account.gameUid}][getGachaLogs] 获取祈愿数据，pool：${pool}，endId：${endId}`,
   );
