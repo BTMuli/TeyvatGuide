@@ -6,8 +6,10 @@
       </slot>
     </div>
     <div class="tur-os-text">
-      <div v-if="props.icon" class="tur-os-icon">
-        <img :src="props.icon" alt="icon" />
+      <div v-if="props.icon !== undefined" class="tur-os-icon">
+        <slot name="icon">
+          <img :src="props.icon" alt="icon" />
+        </slot>
       </div>
       <slot name="val-text">
         {{ props.text }}
@@ -19,7 +21,7 @@
 interface TAOProps {
   title: string;
   text: string | number | undefined;
-  icon?: string;
+  icon?: string | undefined;
 }
 
 const props = defineProps<TAOProps>();

@@ -17,11 +17,16 @@
         :text="data.avatarFetter"
         icon="/icon/material/105.webp"
       />
-      <TurOverviewSub
-        title="成就达成数"
-        :text="data.achievementNumber"
-        icon="/src/assets/icons/achievements.svg"
-      />
+      <TurOverviewSub title="成就达成数" :text="data.achievementNumber" icon="icon">
+        <template #icon>
+          <img
+            src="../../assets/icons/achievements.svg"
+            alt="achievement-icon"
+            width="25px"
+            height="25px"
+          />
+        </template>
+      </TurOverviewSub>
       <TurOverviewSub title="解锁传送点" :text="data.wayPoints" icon="/icon/material/220005.webp" />
       <TurOverviewSub title="解锁秘境" :text="data.domainNumber" />
       <TurOverviewSub title="火神瞳" :text="data.pyroCulus" icon="/icon/material/107028.webp" />
