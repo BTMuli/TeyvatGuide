@@ -58,24 +58,22 @@ function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.My
     let check = 0;
     for (let i = 0; i < parsedText.length; i++) {
       const text = parsedText[i];
-      child.push(parsedText[i]);
+      child.push(text);
       if (text.insert === "\n") {
-        if (child.length === 1) {
-          res.push(child[0]);
-          child = [];
-          continue;
-        }
+        check += child.length;
         cur = {
           insert: "",
           attributes: text.attributes,
           children: child,
         };
         res.push(cur);
-        check += child.length;
         child = [];
       }
     }
-    if (check !== parsedText.length - 1 && child.length > 1) res.push(...child);
+    if (check !== parsedText.length && check !== 0) {
+      res.push(...child);
+      child = [];
+    }
   }
   if (res.length === 0 && child.length > 0) res.push(...child);
   return res;

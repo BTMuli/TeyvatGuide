@@ -51,6 +51,7 @@
             location="end"
             :close-on-content-click="false"
             v-model="showSub"
+            :persistent="true"
           >
             <v-list class="tpr-reply-sub" width="300px" max-height="400px">
               <TprReply
@@ -71,7 +72,7 @@
       </div>
     </div>
     <div class="tpr-extra" :title="`ID:${props.modelValue.reply.reply_id}`">
-      <span class="tpr-debug" @click="exportData">
+      <span class="tpr-debug" @click="exportData" title="导出数据">
         <v-icon size="small">mdi-file-export</v-icon>
       </span>
       <span v-if="props.modelValue.r_user" class="tpr-reply-user">
@@ -83,10 +84,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { path } from "@tauri-apps/api";
+import { event, path } from "@tauri-apps/api";
+import { UnlistenFn, Event } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
-import { toRaw, ref } from "vue";
+import { toRaw, ref, watch, onMounted, onUnmounted } from "vue";
 
 import Mys from "../../plugins/Mys/index.js";
 import showConfirm from "../func/confirm.js";
@@ -104,8 +106,42 @@ const subReplies = ref<Array<TGApp.Plugins.Mys.Reply.ReplyFull>>([]);
 const lastId = ref<string | undefined>(undefined);
 const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
+let subListener: UnlistenFn | null = null;
 
 console.log("TprReply", toRaw(props.modelValue));
+
+onMounted(async () => {
+  if (props.mode === "main") {
+    subListener = await listenSub();
+  }
+});
+
+onUnmounted(() => {
+  if (subListener !== null) {
+    subListener();
+    subListener = null;
+  }
+});
+
+watch(
+  () => showSub.value,
+  async (value) => {
+    if (value) {
+      await event.emit("openReplySub", props.modelValue.reply.reply_id);
+      console.error("emit openReplySub");
+    }
+  },
+);
+
+async function listenSub(): Promise<UnlistenFn> {
+  return await event.listen("openReplySub", async (e: Event<string>) => {
+    if (e.payload !== props.modelValue.reply.reply_id) {
+      if (showSub.value) {
+        showSub.value = false;
+      }
+    }
+  });
+}
 
 function getTime(): string {
   const time = new Date(props.modelValue.reply.created_at * 1000);

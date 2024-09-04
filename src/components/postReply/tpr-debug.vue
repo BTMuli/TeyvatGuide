@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="5px">
+  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="0">
     <div class="tpr-debug-box">
       <div class="tpr-debug-title">
         <span>文件：</span>

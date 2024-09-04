@@ -6,6 +6,7 @@
       v-model="showOverlay"
       :persistent="true"
       :no-click-animation="true"
+      z-index="40"
     >
       <template #activator="{ props }">
         <v-btn
@@ -21,13 +22,7 @@
       <div class="tpr-main-reply">
         <!-- 顶部负责显示回复条件&关闭按钮&刷新按钮 -->
         <div class="tpr-main-filter">
-          <v-chip
-            color="primary"
-            label
-            @click="handleDebug"
-            :style="{ cursor: appStore.devMode ? 'pointer' : 'not-allowed' }"
-            >回复列表
-          </v-chip>
+          <v-chip color="primary" label @click="handleDebug">回复列表</v-chip>
           <v-switch
             v-model="onlyLz"
             color="primary"
@@ -149,15 +144,24 @@ async function loadReply(): Promise<void> {
       text: "没有更多了",
       color: "info",
     });
+  } else {
+    showSnackbar({
+      text: `成功加载${resp.list.length}条回复`,
+      color: "success",
+    });
   }
 }
 
-function handleDebug(): void {
-  if (!appStore.devMode || showDebug.value) {
-    showDebug.value = false;
+async function handleDebug(): Promise<void> {
+  if (appStore.devMode) {
+    showDebug.value = true;
     return;
   }
-  showDebug.value = true;
+  if (showDebug.value) {
+    showDebug.value = false;
+  }
+  // 刷新回复
+  await reloadReply();
 }
 </script>
 <style lang="css" scoped>
