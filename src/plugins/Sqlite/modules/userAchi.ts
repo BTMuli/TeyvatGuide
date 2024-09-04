@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/userAchi.ts
  * @description 用户成就模块
- * @since Beta v0.4.8
+ * @since Beta v0.5.5
  */
 
 import { getUiafStatus } from "../../../utils/UIAF.js";
@@ -136,14 +136,14 @@ async function updateAchievement(data: TGApp.Sqlite.Achievement.SingleTable): Pr
 
 /**
  * @description 将数据库数据转换为UIAF数据
- * @since Beta v0.4.7
+ * @since Beta v0.5.5
  * @param {TGApp.Sqlite.Achievement.SingleTable} data 数据库数据
  * @returns {TGApp.Plugins.UIAF.Achievement} UIAF数据
  */
 function transDb2Uiaf(data: TGApp.Sqlite.Achievement.SingleTable): TGApp.Plugins.UIAF.Achievement {
   const isCompleted = data.isCompleted === 1;
   let timestamp = 0;
-  if (isCompleted) timestamp = new Date(data.completedTime).getTime();
+  if (isCompleted) timestamp = Math.floor(new Date(data.completedTime).getTime() / 1000);
   const status = getUiafStatus(isCompleted, data.progress);
   return {
     id: data.id,
