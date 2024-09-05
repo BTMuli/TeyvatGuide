@@ -6,7 +6,7 @@
       v-model="showOverlay"
       :persistent="true"
       :no-click-animation="true"
-      z-index="40"
+      z-index="60"
     >
       <template #activator="{ props }">
         <v-btn

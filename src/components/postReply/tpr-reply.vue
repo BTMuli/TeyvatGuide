@@ -50,6 +50,7 @@
             activator="parent"
             location="end"
             :close-on-content-click="false"
+            :no-click-animation="true"
             v-model="showSub"
             :persistent="true"
           >
