@@ -1,7 +1,7 @@
 /**
  * @file web/utils/annoParser.ts
  * @description 解析游戏内公告数据
- * @since Beta v0.5.3
+ * @since Beta v0.5.5
  */
 
 import { h, render } from "vue";
@@ -194,7 +194,7 @@ function parseAnnoNode(
 
 /**
  * @description 解析公告段落
- * @since Beta v0.5.3
+ * @since Beta v0.5.5
  * @param {HTMLElement} p - 段落元素
  * @param {Record<string, string>} attr - 属性
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
@@ -230,14 +230,14 @@ function parseAnnoParagraph(
       span.innerHTML = p.innerHTML;
       return {
         insert: "",
-        children: [parseAnnoSpan(span, attr)],
+        children: [parseAnnoSpan(span, attr), { insert: "\n" }],
       };
     }
     const child = <HTMLElement>p.childNodes[0];
     if (child.tagName === "SPAN") {
       return {
         insert: "",
-        children: [parseAnnoSpan(child, attr)],
+        children: [parseAnnoSpan(child, attr), { insert: "\n" }],
       };
     }
     if (child.tagName === "IMG") {
@@ -304,6 +304,7 @@ function parseAnnoParagraph(
     }
     res.children!.push(childRes);
   });
+  res.children?.push({ insert: "\n" });
   return res;
 }
 
