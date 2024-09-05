@@ -55,12 +55,16 @@ function getTitle(): string {
 
 function getLineStyle(): StyleValue {
   const style = <Array<StyleValue>>[];
+  const ruleInline: StyleValue = "display: inline";
   if (props.data.attributes === undefined) {
+    style.push(ruleInline);
     return style;
   }
   if (props.data.attributes.align) {
     const ruleAlign: StyleValue = `textAlign: ${props.data.attributes.align}`;
     style.push(ruleAlign);
+  } else {
+    style.push(ruleInline);
   }
   return style;
 }
