@@ -8,7 +8,7 @@
     >
       <img :src="constellation.icon" alt="constellation" class="tua-dcc-icon" />
       <div v-if="!constellation.is_actived" class="tua-dcc-lock">
-        <v-icon size="10px">mdi-lock</v-icon>
+        <v-icon size="10px" color="var(--tgc-od-white)">mdi-lock</v-icon>
       </div>
     </div>
   </div>

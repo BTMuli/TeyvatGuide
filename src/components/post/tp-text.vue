@@ -156,7 +156,6 @@ function getEmojiName() {
   cursor: pointer;
   text-decoration: underline solid #00c3ff;
   text-underline-position: under;
-  transform: translateY(2px);
 }
 
 .tp-text-emoji {

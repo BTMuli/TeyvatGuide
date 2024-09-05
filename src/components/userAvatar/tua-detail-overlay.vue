@@ -1,8 +1,13 @@
 <template>
-  <TOverlay v-model="visible" hide blur-val="20px" :to-click="onCancel">
+  <TOverlay v-model="visible" hide blur-val="5px" :to-click="onCancel">
     <div class="tdo-box">
       <div class="tdo-avatars-container">
-        <v-tabs v-model="avatarTab" density="compact" center-active>
+        <v-tabs
+          v-model="avatarTab"
+          density="compact"
+          center-active
+          slider-color="var(--tgc-od-white)"
+        >
           <v-tab
             v-for="avatar in avatars"
             :key="avatar.avatar.id"
@@ -10,7 +15,17 @@
             @click="onAvatarClick(avatar)"
             :title="avatar.avatar.name"
           >
-            <v-avatar :image="avatar.avatar.side_icon" class="tdo-avatar" />
+            <div
+              class="tdo-avatar"
+              :style="{
+                backgroundColor:
+                  props.avatar.avatar.id === avatar.avatar.id
+                    ? 'var(--tgc-od-white)'
+                    : 'transparent',
+              }"
+            >
+              <img :src="avatar.avatar.side_icon" :alt="avatar.avatar.name" />
+            </div>
           </v-tab>
         </v-tabs>
       </div>
@@ -122,8 +137,27 @@ function onAvatarClick(avatar: TGApp.Sqlite.Character.UserRole): void {
   width: v-bind(avatarsWidth);
 }
 
+/* stylelint-disable selector-class-pattern */
+.tdo-avatars-container :deep(.v-slide-group__next),
+.tdo-avatars-container :deep(.v-slide-group__prev) {
+  color: var(--tgc-od-white);
+}
+
 .tdo-avatar {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--tgc-white-1);
+  border-radius: 50%;
   cursor: pointer;
+
+  img {
+    position: absolute;
+    top: -4px;
+    left: -1px;
+    width: 30px;
+    object-fit: contain;
+  }
 }
 
 .tdo-card-container {
