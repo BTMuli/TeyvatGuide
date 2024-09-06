@@ -53,8 +53,8 @@
         </template>
         <template #append>
           <v-switch
-            v-model="appStore.needResize"
-            :label="appStore.needResize ? '开启' : '关闭'"
+            v-model="needResize"
+            :label="needResize ? '开启' : '关闭'"
             :inset="true"
             color="#FAC51E"
             @click="submitResize"
@@ -144,6 +144,7 @@ const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载...");
 const loadingSub = ref<string>("");
 const showReset = ref<boolean>(false);
+const needResize = ref<boolean>(appStore.needResize !== "false");
 
 const cacheSize = ref<number>(0);
 
@@ -174,7 +175,7 @@ async function confirmBackup(): Promise<void> {
     return;
   }
   let saveDir = appStore.userDir;
-  if (res === false) {
+  if (!res) {
     const dir: string | null = await open({
       directory: true,
       defaultPath: saveDir,
@@ -214,7 +215,7 @@ async function confirmRestore(): Promise<void> {
     return;
   }
   let saveDir = appStore.userDir;
-  if (resConfirm === false) {
+  if (!resConfirm) {
     const dir: string | null = await open({
       directory: true,
       defaultPath: saveDir,
@@ -474,7 +475,8 @@ function submitDevMode(): void {
 
 // 开启窗口回正
 function submitResize(): void {
-  if (appStore.needResize) {
+  appStore.needResize = (!needResize.value).toString();
+  if (needResize.value) {
     showSnackbar({ text: "已关闭窗口回正!" });
     return;
   }

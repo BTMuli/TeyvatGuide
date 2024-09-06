@@ -51,7 +51,7 @@ export const useAppStore = defineStore(
     // 最近的咨讯类型
     const recentNewsType = ref("notice");
     // 是否开启分辨率回正
-    const needResize = ref<boolean | undefined>(true);
+    const needResize = ref<string>("true");
 
     // 初始化
     function init(): void {
@@ -63,7 +63,7 @@ export const useAppStore = defineStore(
       server.value = AnnoServer.CN_ISLAND;
       lang.value = "zh-cn";
       recentNewsType.value = "notice";
-      needResize.value = true;
+      needResize.value = "true";
       initDevice();
     }
 

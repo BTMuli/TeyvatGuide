@@ -52,8 +52,7 @@ onBeforeMount(async () => {
     await core.invoke("init_app");
     urlListener = await getDeepLink();
   }
-  if (appStore.needResize === undefined) appStore.needResize = true;
-  if (appStore.needResize) await checkResize();
+  if (appStore.needResize !== "false") await checkResize();
   await win.show();
 });
 
@@ -85,7 +84,7 @@ async function checkResize(): Promise<void> {
 
 function getSize(label: string): PhysicalSize {
   if (label === "TeyvatGuide") return new PhysicalSize(1600, 900);
-  if (label === "Sub_Window" || label === "Dev_JSON") return new PhysicalSize(960, 720);
+  if (label === "Sub_window" || label === "Dev_JSON") return new PhysicalSize(960, 720);
   return new PhysicalSize(1280, 720);
 }
 
