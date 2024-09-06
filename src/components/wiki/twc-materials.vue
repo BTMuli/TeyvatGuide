@@ -102,7 +102,8 @@ function switchMaterial(isNext: boolean) {
     text: `材料 ${curItem.name} 暂无详细信息`,
     color: "warn",
   });
-  isNext ? curIndex.value-- : curIndex.value++;
+  if (isNext) curIndex.value--;
+  else curIndex.value++;
 }
 </script>
 <style lang="css" scoped>

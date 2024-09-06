@@ -24,7 +24,7 @@ declare namespace TGApp.Plugins.UIGF {
    * @since Beta v0.5.0
    * @interface Schema4
    * @property {Info4} info - UIGF 头部信息
-   * @property {GachaItem4[]} hk4e - UIGF 祈愿列表，原神数据
+   * @property {GachaHk4e[]} hk4e - UIGF 祈愿列表，原神数据
    * @return Schema4
    */
   interface Schema4 {

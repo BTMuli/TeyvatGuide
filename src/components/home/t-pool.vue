@@ -53,6 +53,7 @@
   </THomeCard>
 </template>
 <script lang="ts" setup>
+import { storeToRefs } from "pinia";
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 
@@ -66,7 +67,7 @@ import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
 import THomeCard from "./t-homecard.vue";
 
 // store
-const homeStore = useHomeStore();
+const homeStore = storeToRefs(useHomeStore());
 
 const router = useRouter();
 const hasNew = ref<boolean>(false);
@@ -122,9 +123,9 @@ onMounted(async () => {
       coverData[pool.id] = pool.cover;
       return pool;
     });
-    homeStore.poolCover = coverData;
+    homeStore.poolCover.value = coverData;
   } else {
-    poolCards.value = await Mys.Gacha.card(gachaData, homeStore.poolCover);
+    poolCards.value = await Mys.Gacha.card(gachaData, homeStore.poolCover.value);
   }
   poolCards.value.map((pool) => {
     poolTimeGet.value[pool.postId] = stamp2LastTime(pool.time.endStamp - Date.now());

@@ -99,7 +99,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^9.9.1",
-    "@tauri-apps/cli": "2.0.0-beta.21",
+    "@tauri-apps/cli": "2.0.0-rc.11",
     "@types/color-convert": "^2.0.3",
     "@types/js-md5": "^0.7.2",
     "@types/node": "^22.5.4",

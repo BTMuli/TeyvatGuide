@@ -79,6 +79,7 @@ import { onMounted, ref } from "vue";
 
 import TGSqlite from "../../plugins/Sqlite/index.js";
 import { useAchievementsStore } from "../../store/modules/achievements.js";
+import TGLogger from "../../utils/TGLogger.js";
 import showSnackbar from "../func/snackbar.js";
 
 const achievementsStore = useAchievementsStore();
@@ -119,6 +120,7 @@ onMounted(async () => {
       text: "加载数据库错误，请重置数据库!",
       color: "error",
     });
+    await TGLogger.Error(`加载数据库错误: ${e}`);
   }
 });
 

@@ -1,7 +1,7 @@
 /**
  * @file utils/TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  */
 
 import { path } from "@tauri-apps/api";
@@ -86,7 +86,7 @@ function getShareImgBgColor(): string {
 
 /**
  * @description 生成分享截图
- * @since Beta v0.4.2
+ * @since Beta v0.5.5
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
@@ -153,6 +153,7 @@ export async function generateShareImg(
     });
     await TGLogger.Info(`[generateShareImg][${fileName}] 已将图像复制到剪贴板`);
   } catch (e) {
+    await TGLogger.Error(`[generateShareImg][${fileName}] 复制到剪贴板失败 ${e}`);
     await saveCanvasImg(buffer, fileName);
   }
 }

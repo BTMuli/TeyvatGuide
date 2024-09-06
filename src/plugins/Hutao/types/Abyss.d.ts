@@ -1,7 +1,6 @@
 /**
- * @file src plugins Hutao types Abyss.d.ts
+ * @file src/plugins/Hutao/types/Abyss.d.ts
  * @description Hutao 插件深渊类型定义文件
- * @author BTMuli <bt-muli@outlook.com>
  * @since Beta v0.3.0
  */
 
@@ -24,7 +23,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {string} ReservedUserName - 保留用户名
    * @return RecordUpload
    */
-  export interface RecordUpload {
+  interface RecordUpload {
     Uid: string;
     Identity: string;
     SpiralAbyss: RecordData;
@@ -52,7 +51,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {Floor[]} Floors - 楼层信息
    * @return RecordData
    */
-  export interface RecordData {
+  interface RecordData {
     ScheduleId: number;
     TotalBattleTimes: number;
     TotalWinTimes: number;
@@ -88,7 +87,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {Level[]} Levels - 楼层关卡信息
    * @return Floor
    */
-  export interface Floor {
+  interface Floor {
     Index: number;
     Star: number;
     Levels: Level[];
@@ -104,7 +103,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {number[]} Battles[].Avatars - 战斗角色ID
    * @return Level
    */
-  export interface Level {
+  interface Level {
     Index: number;
     Star: number;
     Battles: Array<{
@@ -123,7 +122,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {number} ActivedConstellationNumber - 已激活命座数量
    * @return Avatar
    */
-  export interface Avatar {
+  interface Avatar {
     AvatarId: number;
     WeaponId: number;
     ReliquarySetIds: number[];
@@ -138,7 +137,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @extends TGApp.Plugins.Hutao.Base.Response
    * @return UploadResponse
    */
-  export interface UploadResponse extends TGApp.Plugins.Hutao.Base.Response {}
+  type UploadResponse = TGApp.Plugins.Hutao.Base.Response;
 
   /**
    * @description 获取深渊总览数据返回
@@ -149,7 +148,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {OverviewData} data - 深渊总览数据
    * @return OverviewResponse
    */
-  export interface OverviewResponse extends TGApp.Plugins.Hutao.Base.Response {
+  interface OverviewResponse extends TGApp.Plugins.Hutao.Base.Response {
     data: OverviewData;
   }
 
@@ -169,7 +168,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {number} TimeAverage - 平均耗时
    * @return OverviewData
    */
-  export interface OverviewData {
+  interface OverviewData {
     ScheduleId: number;
     RecordTotal: number;
     SpiralAbyssTotal: number;
@@ -191,7 +190,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {AvatarUp[]} data - 角色深渊上场率
    * @return AvatarUpResponse
    */
-  export interface AvatarUpResponse extends TGApp.Plugins.Hutao.Base.Response {
+  interface AvatarUpResponse extends TGApp.Plugins.Hutao.Base.Response {
     data: AvatarUp[];
   }
 
@@ -204,7 +203,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {number} Ranks[].Rate - 上场率
    * @return AvatarUp
    */
-  export interface AvatarUp {
+  interface AvatarUp {
     Floor: number;
     Ranks: Array<{
       Item: number;
@@ -221,7 +220,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {AvatarUse[]} data - 角色深渊使用率
    * @return AvatarUseResponse
    */
-  export interface AvatarUseResponse extends TGApp.Plugins.Hutao.Base.Response {
+  interface AvatarUseResponse extends TGApp.Plugins.Hutao.Base.Response {
     data: AvatarUse[];
   }
 
@@ -234,7 +233,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {number} Ranks[].Rate - 使用率
    * @return AvatarUse
    */
-  export interface AvatarUse {
+  interface AvatarUse {
     Floor: number;
     Ranks: Array<{
       Item: number;
@@ -251,7 +250,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {AvatarHold[]} data - 角色深渊持有率
    * @return AvatarHoldResponse
    */
-  export interface AvatarHoldResponse extends TGApp.Plugins.Hutao.Base.Response {
+  interface AvatarHoldResponse extends TGApp.Plugins.Hutao.Base.Response {
     data: AvatarHold[];
   }
 
@@ -265,7 +264,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {number} AvatarId - 角色ID
    * @return AvatarHold
    */
-  export interface AvatarHold {
+  interface AvatarHold {
     HoldingRate: number;
     Constellations: Array<{
       Item: number;
@@ -283,7 +282,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {AvatarCollocation[]} data - 角色搭配
    * @return AvatarCollocationResponse
    */
-  export interface AvatarCollocationResponse extends TGApp.Plugins.Hutao.Base.Response {
+  interface AvatarCollocationResponse extends TGApp.Plugins.Hutao.Base.Response {
     data: AvatarCollocation[];
   }
 
@@ -300,7 +299,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {number} Weapons[].Rate - 武器搭配率
    * @return AvatarCollocation
    */
-  export interface AvatarCollocation {
+  interface AvatarCollocation {
     AvatarId: number;
     Avatars: Array<{
       Item: number;
@@ -324,7 +323,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @extends TGApp.Plugins.Hutao.Base.Response
    * @property {WeaponCollocation[]} data - 武器搭配角色
    */
-  export interface WeaponCollocationResponse extends TGApp.Plugins.Hutao.Base.Response {
+  interface WeaponCollocationResponse extends TGApp.Plugins.Hutao.Base.Response {
     data: WeaponCollocation[];
   }
 
@@ -337,7 +336,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {number} Avatars[].Rate - 角色搭配率
    * @return WeaponCollocation
    */
-  export interface WeaponCollocation {
+  interface WeaponCollocation {
     WeaponId: number;
     Avatars: Array<{
       Item: number;
@@ -354,7 +353,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {TeamCombination[]} data - 队伍搭配
    * @return TeamCombinationResponse
    */
-  export interface TeamCombinationResponse extends TGApp.Plugins.Hutao.Base.Response {
+  interface TeamCombinationResponse extends TGApp.Plugins.Hutao.Base.Response {
     data: TeamCombination[];
   }
 
@@ -369,7 +368,7 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @property {number} Down[].Rate - 统计次数
    * @return TeamCombination
    */
-  export interface TeamCombination {
+  interface TeamCombination {
     Floor: number;
     Up: Array<{
       Item: string;

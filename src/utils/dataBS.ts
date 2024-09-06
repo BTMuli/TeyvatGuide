@@ -1,7 +1,7 @@
 /**
  * @file utils/dataBS.ts
  * @description 用户数据的备份、恢复、迁移
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  */
 
 import { path } from "@tauri-apps/api";
@@ -45,7 +45,7 @@ export async function backUpUserData(dir: string): Promise<void> {
 
 /**
  * @description 恢复用户数据
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  * @param {string} dir 备份目录路径
  * @returns {Promise<void>}
  */
@@ -118,6 +118,7 @@ export async function restoreUserData(dir: string): Promise<void> {
       );
       await TGSqlite.restoreAbyss(dataAbyss);
     } catch (e) {
+      await TGLogger.Error(`[DataBS][restoreUserData] 深渊数据恢复失败 ${e}`);
       showSnackbar({
         text: "深渊数据恢复失败",
         color: "error",

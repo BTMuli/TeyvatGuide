@@ -7,8 +7,6 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-import showSnackbar from "../func/snackbar.js";
-
 import TurWorldSub from "./tur-world-sub.vue";
 
 interface TurWorldGridProps {
@@ -26,19 +24,8 @@ const theme = computed(() => {
 });
 
 function getData(): TGApp.Sqlite.Record.WorldExplore[] {
-  let res: TGApp.Sqlite.Record.WorldExplore[] = JSON.parse(<string>props.modelValue);
-  try {
-    if (res[0].children) {
-      console.log("检测到children字段");
-    }
-  } catch (e) {
-    showSnackbar({
-      text: "数据解析错误，建议刷新页面",
-      color: "error",
-    });
-    res = [];
-  }
-  return res;
+  if (!props.modelValue) return [];
+  return JSON.parse(props.modelValue);
 }
 </script>
 <style lang="css" scoped>

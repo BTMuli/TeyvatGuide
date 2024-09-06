@@ -1,16 +1,17 @@
 /**
  * @file src/web/request/getDeviceFp.ts
  * @description 获取设备指纹
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  */
 
 import TGHttp from "../../utils/TGHttp.js";
+import TGLogger from "../../utils/TGLogger.js";
 import { getInitDeviceInfo } from "../../utils/toolFunc.js";
 import TGConstant from "../constant/TGConstant.js";
 
 /**
  * @description 获取设备指纹
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  * @param {TGApp.App.Device.DeviceInfo} Info - 设备信息
  * @returns {Promise<TGApp.App.Device.DeviceInfo>} 设备指纹
  */
@@ -104,6 +105,7 @@ export async function getDeviceFp(
     }
   } catch (error) {
     info.device_fp = "0000000000000";
+    await TGLogger.Error(`获取设备指纹失败: ${error}`);
   }
   return info;
 }
