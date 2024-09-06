@@ -45,7 +45,7 @@ interface TpTextProps {
 
 const props = defineProps<TpTextProps>();
 const mode = ref<string>("text");
-const localEmojis = ref(localStorage.getItem("emojis"));
+const localEmojis = ref<string | null>(localStorage.getItem("emojis"));
 const emojis = ref<TpText[]>([]);
 
 console.log("tpText", JSON.stringify(props.data.insert), toRaw(props.data)?.attributes);
@@ -121,7 +121,7 @@ async function toLink() {
 
 // 解析表情链接
 function getEmojiUrl(): string {
-  if (localEmojis.value == null || !JSON.parse(localEmojis.value)[getEmojiName()]) {
+  if (localEmojis.value === null || !JSON.parse(localEmojis.value)[getEmojiName()]) {
     console.warn("tpEmoji unknown", getEmojiName());
     getEmojis().then((res) => {
       if ("retcode" in res) {
