@@ -171,7 +171,7 @@ async function checkUserLoad(): Promise<void> {
     return;
   }
   if (JSON.stringify(ckDB) !== "{}" && !appStore.isLogin) appStore.isLogin = true;
-  const ckLocal = userStore.cookie;
+  const ckLocal = userStore.cookie.value;
   if (JSON.stringify(ckLocal) !== JSON.stringify(ckDB)) userStore.cookie.value = ckDB;
   const infoLocal = userStore.briefInfo.value;
   const appData = await TGSqlite.getAppData();
