@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+  <TOverlay v-model="visible" :hide="true" :to-click="onCancel" blur-val="20px">
     <div class="tolc-box">
       <div class="tolc-title">兑换码</div>
       <v-list-item v-for="(item, index) in props.data" :key="index">
@@ -34,10 +34,7 @@ interface ToLiveCodeProps {
 
 type ToLiveCodeEmits = (e: "update:modelValue", value: boolean) => void;
 
-const props = withDefaults(defineProps<ToLiveCodeProps>(), {
-  data: <TGApp.BBS.Navigator.CodeData[]>[],
-  modelValue: false,
-});
+const props = withDefaults(defineProps<ToLiveCodeProps>(), { modelValue: false });
 const emits = defineEmits<ToLiveCodeEmits>();
 
 const visible = computed<boolean>({

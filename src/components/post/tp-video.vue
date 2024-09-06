@@ -2,13 +2,12 @@
   <div class="tp-video-box">
     <!-- todo https://socialsisteryi.github.io/bilibili-API-collect/docs/video/videostream_url.html#%E8%A7%86%E9%A2%91%E4%BC%B4%E9%9F%B3%E9%9F%B3%E8%B4%A8%E4%BB%A3%E7%A0%81 -->
     <iframe
-      ref="videoRef"
       class="tp-video-container"
-      data-html2canvas-ignore
       :src="props.data.insert.video"
       :allowfullscreen="true"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       sandbox="allow-forms allow-same-origin allow-popups allow-presentation allow-scripts"
+      :id="`tp-video-${props.data.insert.video}`"
     >
     </iframe>
     <!-- todo 优化 -->
@@ -25,7 +24,7 @@
 // https://artplayer.org/document/library/flv.html
 //  https://api.bilibili.com/x/player/playurl?avid=666064953&cid=1400018762&qn=64&otype=json
 import { window as TauriWindow } from "@tauri-apps/api";
-import { onBeforeMount, onMounted, ref } from "vue";
+import { onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 
 import Bili from "../../plugins/Bili/index.js";
 import { saveImgLocal } from "../../utils/TGShare.js";
@@ -51,7 +50,15 @@ onBeforeMount(async () => {
   const url = new URL(props.data.insert.video);
   const aid = url.searchParams.get("aid") ?? undefined;
   const bvid = url.searchParams.get("bvid") ?? undefined;
-  videoData.value = await Bili.video.view(aid, bvid);
+  try {
+    videoData.value = await Bili.video.view(aid, bvid);
+  } catch (e) {
+    console.warn(e);
+  }
+  if (!videoData.value) {
+    console.error("videoData is null");
+    return;
+  }
   const meta = videoData.value.dimension;
   if (meta.width > meta.height) {
     videoAspectRatio.value = meta.width / meta.height;
@@ -64,7 +71,10 @@ onMounted(async () => {
   if (videoData.value && videoData.value.pic && !videoData.value.pic.startsWith("blob:")) {
     videoData.value.pic = await saveImgLocal(videoData.value.pic);
   }
-  videoRef.value?.addEventListener("fullscreenchange", async () => {
+  videoRef.value = <HTMLIFrameElement>(
+    document.getElementById(`tp-video-${props.data.insert.video}`)
+  );
+  videoRef.value.addEventListener("fullscreenchange", async () => {
     if (document.fullscreenElement) {
       await TauriWindow.getCurrentWindow().setFullscreen(true);
     } else {
@@ -86,6 +96,12 @@ function getVideoTime(): string {
   result += `${seconds.toString().padStart(2, "0")}`;
   return result;
 }
+
+onUnmounted(() => {
+  if (videoData.value?.pic && videoData.value.pic.startsWith("blob:")) {
+    URL.revokeObjectURL(videoData.value.pic);
+  }
+});
 </script>
 <style lang="css" scoped>
 .tp-video-box {

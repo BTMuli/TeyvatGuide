@@ -51,7 +51,7 @@ interface TurWorldSubProps {
 }
 
 const props = defineProps<TurWorldSubProps>();
-let themeListener: UnlistenFn;
+let themeListener: UnlistenFn | null = null;
 const bg = ref<string>();
 const icon = ref<string>();
 const iconLight = ref<string>();
@@ -59,7 +59,7 @@ const iconDark = ref<string>();
 const offer = ref<string>();
 
 onMounted(async () => {
-  themeListener = event.listen("readTheme", (e: Event<string>) => {
+  themeListener = await event.listen("readTheme", (e: Event<string>) => {
     const theme = e.payload;
     if (theme === "dark") {
       icon.value = iconLight.value;
@@ -81,7 +81,10 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  themeListener();
+  if (themeListener !== null) {
+    themeListener();
+    themeListener = null;
+  }
   const urlList = [iconLight.value, iconDark.value, offer.value];
   urlList.forEach((url) => {
     URL.revokeObjectURL(typeof url === "string" ? url : "");

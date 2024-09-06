@@ -63,9 +63,9 @@ async function selectFile(): Promise<void> {
     });
     return;
   }
-  filePath.value = file.path;
+  filePath.value = file;
   try {
-    const data = await readTextFile(file.path);
+    const data = await readTextFile(file);
     replyData.value = JSON.parse(data);
   } catch (error) {
     showSnackbar({

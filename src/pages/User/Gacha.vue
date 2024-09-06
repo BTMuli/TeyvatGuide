@@ -298,19 +298,19 @@ async function handleImportBtn(isV4: boolean): Promise<void> {
     defaultPath: await path.downloadDir(),
     directory: false,
   });
-  if (!selectedFile) {
+  if (selectedFile === null) {
     showSnackbar({
       color: "cancel",
       text: "已取消文件选择",
     });
     return;
   }
-  const check = await verifyUigfData(selectedFile.path, isV4);
+  const check = await verifyUigfData(selectedFile, isV4);
   if (!check) return;
   if (isV4) {
-    await importUigf4(selectedFile.path);
+    await importUigf4(selectedFile);
   } else {
-    await importUigf(selectedFile.path);
+    await importUigf(selectedFile);
   }
 }
 

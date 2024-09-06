@@ -126,7 +126,7 @@ const selectedPost = ref<Array<string>>([]);
 const showOverlay = ref(false);
 const sortId = ref<boolean>(false);
 
-let collectListener: UnlistenFn | undefined = undefined;
+let collectListener: UnlistenFn | null = null;
 
 onBeforeMount(async () => {
   if (!(await TGSqlite.checkTableExist("UFPost"))) {
@@ -136,12 +136,15 @@ onBeforeMount(async () => {
       color: "success",
     });
   }
-  collectListener = event.listen("refreshCollect", async () => await load());
+  collectListener = await event.listen("refreshCollect", async () => await load());
 });
 
 onMounted(async () => await load());
 onUnmounted(() => {
-  if (collectListener) collectListener();
+  if (collectListener !== null) {
+    collectListener();
+    collectListener = null;
+  }
 });
 
 function updateSelected(v: string[]) {

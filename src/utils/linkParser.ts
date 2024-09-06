@@ -32,7 +32,7 @@ export async function parsePost(link: string): Promise<false | string> {
         const urlTransform = decodeURIComponent(url.search.replace("?link=", ""));
         return await parsePost(urlTransform);
       }
-      // todo 不保证转换后的链接可用
+      // 不保证转换后的链接可用
       if (url.pathname === "//openURL" && url.search.startsWith("?url=")) {
         const urlTransform = decodeURIComponent(url.search.replace("?url=", ""));
         return await parsePost(urlTransform);
@@ -79,7 +79,7 @@ export async function parseLink(
         const urlTransform = decodeURIComponent(url.search.replace("?link=", ""));
         return await parseLink(urlTransform, useInner);
       }
-      // todo 不保证转换后的链接可用
+      // 不保证转换后的链接可用
       if (url.pathname === "//openURL" && url.search.startsWith("?url=")) {
         const urlTransform = decodeURIComponent(url.search.replace("?url=", ""));
         return await parseLink(urlTransform, useInner);

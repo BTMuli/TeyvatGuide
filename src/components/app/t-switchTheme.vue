@@ -23,10 +23,10 @@ const themeGet = computed({
     appStore.theme = value;
   },
 });
-let themeListener: UnlistenFn;
+let themeListener: UnlistenFn | null = null;
 
-onMounted(() => {
-  themeListener = listenOnTheme();
+onMounted(async () => {
+  themeListener = await listenOnTheme();
 });
 
 async function switchTheme(): Promise<void> {
@@ -34,14 +34,19 @@ async function switchTheme(): Promise<void> {
   await event.emit("readTheme", themeGet.value);
 }
 
-function listenOnTheme(): UnlistenFn {
-  return event.listen("readTheme", (e: Event<string>) => {
+async function listenOnTheme(): Promise<UnlistenFn> {
+  return await event.listen("readTheme", (e: Event<string>) => {
     const theme = e.payload;
     themeGet.value = theme === "default" ? "default" : "dark";
   });
 }
 
-onUnmounted(() => themeListener());
+onUnmounted(() => {
+  if (themeListener !== null) {
+    themeListener();
+    themeListener = null;
+  }
+});
 </script>
 <style lang="css" scoped>
 .switch-box {

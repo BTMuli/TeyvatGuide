@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="5px">
+  <TOverlay v-model="visible" :hide="true" :to-click="onCancel" blur-val="5px">
     <div class="tpoc-box">
       <div class="tpoc-top">
         <span>{{ props.collection.collection_title }}</span>
@@ -84,7 +84,7 @@ const posts = ref<TpoCollectionItem[]>([]);
 const router = useRouter();
 
 onMounted(async () => {
-  const collectionPosts = await Mys.Collection.data(props.collection.collection_id);
+  const collectionPosts = await Mys.PostCollect(props.collection.collection_id);
   const tempArr: TpoCollectionItem[] = [];
   for (const postItem of collectionPosts) {
     const post: TpoCollectionItem = {
@@ -92,8 +92,8 @@ onMounted(async () => {
       title: postItem.post.subject,
       created: postItem.post.created_at,
       updated: postItem.post.updated_at,
-      comments: postItem.stat.reply_num,
-      likes: postItem.stat.like_num,
+      comments: postItem.stat === null ? 0 : postItem.stat.reply_num,
+      likes: postItem.stat === null ? 0 : postItem.stat.like_num,
     };
     tempArr.push(post);
   }

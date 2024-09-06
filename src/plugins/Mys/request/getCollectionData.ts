@@ -1,31 +1,11 @@
 /**
  * @file plugins/Mys/request/getCollectionPosts.ts
  * @description Mys 获取合集帖子
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  */
 
 import TGHttp from "../../../utils/TGHttp.js";
 import MysApi from "../api/index.js";
-
-/**
- * @description 获取合集信息
- * @since Beta v0.5.0
- * @todo invalid request
- * @param {number} collectionId 合集 ID
- * @returns {Promise<TGApp.Plugins.Mys.Collection.ResponseData>} 合集信息
- */
-export async function getCollectionData(
-  collectionId: number,
-): Promise<TGApp.Plugins.Mys.Collection.ResponseData> {
-  const url = "https://bbs-api.miyoushe.com/collection/wapi/collection/detail";
-  const params = { id: collectionId.toString() };
-  const resp = await TGHttp<TGApp.Plugins.Mys.Collection.Response>(url, {
-    method: "GET",
-    query: params,
-    headers: { "Content-Type": "application/json", Referer: MysApi.PostReferer },
-  });
-  return resp.data;
-}
 
 /**
  * @description 获取合集帖子

@@ -1,7 +1,7 @@
 /**
  * @file plugins/Hutao/utils/transLocal.ts
  * @description 将本地数据转为上传用的数据
- * @since Beta v0.3.4
+ * @since Beta v0.5.5
  */
 
 /**
@@ -101,7 +101,7 @@ function transLevel(data: TGApp.Sqlite.Abyss.Level): TGApp.Plugins.Hutao.Abyss.L
 
 /**
  * @description 转换角色数据
- * @since Alpha v0.2.1
+ * @since Beta v0.5.5
  * @param {TGApp.Sqlite.Character.UserRole[]} avatars 角色数据
  * @returns {TGApp.Plugins.Hutao.Abyss.Avatar[]} 上传用的数据
  */
@@ -109,19 +109,11 @@ export function transAvatars(
   avatars: TGApp.Sqlite.Character.UserRole[],
 ): TGApp.Plugins.Hutao.Abyss.Avatar[] {
   return avatars.map((avatar) => {
-    const weapon: TGApp.Sqlite.Character.RoleWeapon = JSON.parse(avatar.weapon);
-    let relics: number[];
-    if (avatar.reliquary === "") {
-      relics = [];
-    } else {
-      const relicSet: TGApp.Sqlite.Character.RoleReliquary[] = JSON.parse(avatar.reliquary);
-      relics = relicSet.map((relic) => relic.set.id);
-    }
     return {
-      AvatarId: avatar.cid,
-      WeaponId: weapon.id,
-      ReliquarySetIds: relics,
-      ActivedConstellationNumber: avatar.activeConstellation,
+      AvatarId: avatar.avatar.id,
+      WeaponId: avatar.weapon.id,
+      ReliquarySetIds: avatar.relics.map((relic) => relic.set.id),
+      ActivedConstellationNumber: avatar.avatar.actived_constellation_num,
     };
   });
 }

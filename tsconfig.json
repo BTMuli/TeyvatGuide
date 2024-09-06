@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
-    "module": "ESNext",
+    "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "strict": true,
     "jsx": "preserve",
@@ -11,13 +11,7 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "lib": ["DOM", "ESNext"],
-    "types": [
-      "vite/client",
-      "src/types",
-      "src/plugins/Bili/types",
-      "src/plugins/Hutao/types",
-      "src/plugins/Mys/types"
-    ],
+    "types": ["vite/client", "node", "color-convert", "js-md5", "uuid", "ajv"],
     "allowSyntheticDefaultImports": true,
     "composite": true
   },

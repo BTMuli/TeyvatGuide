@@ -44,7 +44,7 @@ export default defineConfig({
     rollupOptions: {
       // chunking
       output: {
-        manualChunks(id) {
+        manualChunks(id: string) {
           // pnpm 依赖包路径格式为 本地路径/node_modules/.pnpm/包名@版本号/node_modules/依赖包名/文件路径
           if (id.includes("node_modules")) {
             const arr = id.split("node_modules/");

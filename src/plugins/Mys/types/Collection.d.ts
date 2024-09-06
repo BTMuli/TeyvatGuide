@@ -1,41 +1,16 @@
 /**
  * @file plugins/Mys/types/Collection.d.ts
  * @description Mys 插件合集类型声明
- * @since Beta v0.3.9
+ * @since Beta v0.5.5
  */
 
 /**
  * @description Mys 合集类型
- * @since Beta v0.3.9
+ * @since Beta v0.5.5
  * @namespace TGApp.Plugins.Mys.Collection
  * @memberof TGApp.Plugins.Mys
  */
 declare namespace TGApp.Plugins.Mys.Collection {
-  /**
-   * @description 合集信息返回
-   * @since Beta v0.3.9
-   * @interface Response
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {ResponseData} data 返回数据
-   * @return Response
-   */
-  interface Response extends TGApp.BBS.Response.BaseWithData {
-    data: ResponseData;
-  }
-
-  /**
-   * @description 合集信息返回数据
-   * @since Beta v0.3.9
-   * @interface ResponseData
-   * @property {Info} collection_info 合集信息
-   * @property {TGApp.Plugins.Mys.User.Collection} author_info 用户信息
-   * @return ResponseData
-   */
-  interface ResponseData {
-    collection_info: Info;
-    author_info: TGApp.Plugins.Mys.User.Collection;
-  }
-
   /**
    * @description 合集信息
    * @since Beta v0.3.9

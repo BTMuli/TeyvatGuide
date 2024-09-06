@@ -1,7 +1,7 @@
 /**
  * @file store/modules/user.ts
  * @description 用户信息模块
- * @since Beta v0.5.3
+ * @since Beta v0.5.5
  */
 
 import { defineStore } from "pinia";
@@ -75,22 +75,22 @@ export const useUserStore = defineStore(
       {
         key: "cookie",
         storage: window.localStorage,
-        paths: ["cookie"],
+        pick: ["cookie"],
       },
       {
         key: "briefInfo",
         storage: window.localStorage,
-        paths: ["briefInfo"],
+        pick: ["briefInfo"],
       },
       {
         key: "account",
         storage: window.localStorage,
-        paths: ["account"],
+        pick: ["account"],
       },
       {
         key: "propMap",
         storage: window.localStorage,
-        paths: ["propMap"],
+        pick: ["propMap"],
       },
     ],
   },

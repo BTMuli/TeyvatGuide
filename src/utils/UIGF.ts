@@ -1,12 +1,12 @@
 /**
  * @file utils/UIGF.ts
  * @description UIGF工具类
- * @since Beta v0.5.1
+ * @since Beta v0.5.5
  */
 
 import { app, path } from "@tauri-apps/api";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
-import Ajv from "ajv";
+import { Ajv } from "ajv";
 import { ErrorObject } from "ajv/lib/types/index.js";
 
 import showSnackbar from "../components/func/snackbar.js";

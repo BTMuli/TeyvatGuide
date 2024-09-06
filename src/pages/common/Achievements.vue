@@ -351,7 +351,7 @@ async function importJson(): Promise<void> {
     defaultPath: await path.downloadDir(),
     directory: false,
   });
-  if (!selectedFile) {
+  if (selectedFile === null) {
     showSnackbar({
       color: "cancel",
       text: "已取消文件选择",
@@ -359,9 +359,9 @@ async function importJson(): Promise<void> {
     await TGLogger.Info("[Achievements][importJson] 已取消文件选择");
     return;
   }
-  const check = await verifyUiafData(selectedFile.path);
+  const check = await verifyUiafData(selectedFile);
   if (!check) return;
-  const remoteRaw = await readUiafData(selectedFile.path);
+  const remoteRaw = await readUiafData(selectedFile);
   await TGLogger.Info("[Achievements][importJson] 读取 UIAF 数据成功");
   await TGLogger.Info(`[Achievements][importJson] 导入来源：${remoteRaw.info.export_app}`);
   await TGLogger.Info(`[Achievements][importJson] 导入版本：${remoteRaw.info.export_app_version}`);

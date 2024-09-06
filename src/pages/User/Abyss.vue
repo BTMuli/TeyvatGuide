@@ -78,6 +78,7 @@ import TuaDetail from "../../components/userAbyss/tua-detail.vue";
 import TuaOverview from "../../components/userAbyss/tua-overview.vue";
 import Hutao from "../../plugins/Hutao/index.js";
 import TGSqlite from "../../plugins/Sqlite/index.js";
+import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { generateShareImg } from "../../utils/TGShare.js";
@@ -245,7 +246,7 @@ async function uploadAbyss(): Promise<void> {
     loading.value = true;
     const transAbyss = Hutao.Abyss.utils.transData(abyssData);
     loadingTitle.value = "正在获取角色数据";
-    const roles = await TGSqlite.getUserCharacter(user.value.gameUid);
+    const roles = await TSUserAvatar.getAvatars(user.value.gameUid);
     if (!roles) {
       loading.value = false;
       return;

@@ -7,7 +7,7 @@
 import MysApi from "./api/index.js";
 import { getCaptcha, doCaptchaLogin } from "./request/doCaptchaLogin.js";
 import { getLoginQr, getLoginStatus } from "./request/doGameLogin.js";
-import { getCollectionData, getCollectionPosts } from "./request/getCollectionData.js";
+import { getCollectionPosts } from "./request/getCollectionData.js";
 import getForumList from "./request/getForumList.js";
 import getGachaData from "./request/getGachaData.js";
 import getHomeNavigator from "./request/getHomeNavigator.js";
@@ -30,10 +30,7 @@ const Mys = {
     replySubRoot: getPostSubRoot,
     replySub: getPostSubReply,
   },
-  Collection: {
-    info: getCollectionData,
-    data: getCollectionPosts,
-  },
+  PostCollect: getCollectionPosts,
   Posts: {
     get: getForumList,
     nav: getHomeNavigator,

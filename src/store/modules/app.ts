@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.5.3
+ * @since Beta v0.5.5
  */
 
 import { path } from "@tauri-apps/api";
@@ -100,27 +100,27 @@ export const useAppStore = defineStore(
       {
         key: "appPath",
         storage: window.localStorage,
-        paths: ["userDir", "dbPath", "logDir"],
+        pick: ["userDir", "dbPath", "logDir"],
       },
       {
         key: "app",
         storage: window.localStorage,
-        paths: ["devMode", "loading", "buildTime", "isLogin", "needResize"],
+        pick: ["devMode", "loading", "buildTime", "isLogin", "needResize"],
       },
       {
         key: "sidebar",
         storage: window.localStorage,
-        paths: ["sidebar"],
+        pick: ["sidebar"],
       },
       {
         key: "theme",
         storage: window.localStorage,
-        paths: ["theme", "server", "lang", "recentNewsType"],
+        pick: ["theme", "server", "lang", "recentNewsType"],
       },
       {
         key: "deviceInfo",
         storage: window.localStorage,
-        paths: ["deviceInfo"],
+        pick: ["deviceInfo"],
       },
     ],
   },

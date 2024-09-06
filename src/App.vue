@@ -39,8 +39,8 @@ const vuetifyTheme = computed(() => {
   return appStore.theme === "dark" ? "dark" : "light";
 });
 
-let themeListener: UnlistenFn;
-let urlListener: UnlistenFn;
+let themeListener: UnlistenFn | null = null;
+let urlListener: UnlistenFn | null = null;
 
 onBeforeMount(async () => {
   const win = webviewWindow.getCurrentWebviewWindow();
@@ -89,9 +89,9 @@ function getSize(label: string): PhysicalSize {
   return new PhysicalSize(1280, 720);
 }
 
-onMounted(() => {
+onMounted(async () => {
   document.documentElement.className = theme.value;
-  themeListener = event.listen("readTheme", async (e: Event<string>) => {
+  themeListener = await event.listen("readTheme", async (e: Event<string>) => {
     const themeGet = e.payload;
     if (theme.value !== themeGet) {
       theme.value = themeGet;
@@ -304,8 +304,14 @@ async function checkUpdate(): Promise<void> {
 }
 
 onUnmounted(() => {
-  if (themeListener) themeListener();
-  if (urlListener) urlListener();
+  if (themeListener !== null) {
+    themeListener();
+    themeListener = null;
+  }
+  if (urlListener !== null) {
+    urlListener();
+    urlListener = null;
+  }
 });
 </script>
 <style lang="css" scoped>
