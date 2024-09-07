@@ -247,8 +247,7 @@ async function freshPostData(): Promise<void> {
 
 function freshCurForum(newVal: string): void {
   const forum = forumList[curGameLabel.value];
-  // todo，这边需要优化逻辑以经过测试，目前暂时ignore
-  // @ts-expect-error-next-line Vue: Element implicitly has an any type because expression of type string can't be used to index type
+  // @ts-expect-error-next-line
   curForum.value = forum[newVal];
 }
 

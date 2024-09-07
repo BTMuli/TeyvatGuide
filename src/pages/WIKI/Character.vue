@@ -39,7 +39,6 @@ const id = useRoute().params.id.toString() ?? "0";
 const showSelect = ref(false);
 const resetSelect = ref(false);
 const cardsInfo = ref(AppCharacterData);
-// todo，这边赋予了默认值，需要经过测试
 const curItem = ref<TGApp.App.Character.WikiBriefInfo>({
   id: 0,
   contentId: 0,

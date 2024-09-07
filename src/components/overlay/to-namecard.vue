@@ -128,7 +128,6 @@ function parseNamecard(desc: string): string {
 function parseDesc(desc: string, inQuote: boolean = false): string[] {
   let res = desc.replace(/。/g, "。\n");
   res = res.replace(/；/g, "；\n");
-  // todo 正则优化
   if (props?.data?.index !== 187) {
     res = res.replace(/：/g, "：\n");
     res = res.replace(/？/g, "？\n");

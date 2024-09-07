@@ -50,7 +50,6 @@
       <div class="uc-top-title">
         <span v-if="user">
           {{ user.nickname }} UID：{{ user.gameUid }} 更新于 {{ getUpdateTime() }}
-          <!-- todo 展示筛选条件 -->
         </span>
         <span v-else> 暂无数据 </span>
       </div>

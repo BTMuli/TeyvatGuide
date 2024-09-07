@@ -1,5 +1,4 @@
 <template>
-  <!-- todo ui 优化 -->
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="config-box">
     <TcInfo />

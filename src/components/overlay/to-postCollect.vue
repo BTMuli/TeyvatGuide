@@ -100,7 +100,6 @@ async function deleteCollect(item: TGApp.Sqlite.UserCollection.UFCollection): Pr
     });
     return;
   }
-  // todo,这边暂时将默认force设为false，后续需要根据需求修改
   const resD = await TSUserCollection.deleteCollect(item.title, false);
   if (resD) {
     showSnackbar({
