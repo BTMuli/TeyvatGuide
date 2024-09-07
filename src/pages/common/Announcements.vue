@@ -1,5 +1,5 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" />
+  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <v-app-bar>
     <template #prepend>
       <v-tabs v-model="tab" align-tabs="start" class="anno-tab">
@@ -11,15 +11,19 @@
         <v-select
           class="anno-select"
           :items="annoServerList"
-          v-model="curRegionName"
+          v-model="curRegion"
+          item-title="text"
+          item-value="value"
           label="服务器"
           width="200px"
           density="compact"
         />
         <v-select
           class="anno-select"
-          :items="langList"
-          v-model="curLangName"
+          :items="annoLangList"
+          v-model="curLang"
+          item-title="text"
+          item-value="value"
           label="语言"
           width="200px"
           density="compact"
@@ -38,7 +42,7 @@
   <v-window v-model="tab">
     <v-window-item v-for="(value, index) in tabValues" :key="index" :value="value">
       <div class="anno-grid">
-        <v-card rounded v-for="item in annoCards[value]" :key="item.id">
+        <v-card :rounded="true" v-for="item in annoCards[value]" :key="item.id">
           <div class="anno-cover" :title="item.title">
             <img :src="item.banner" alt="cover" @click="createAnno(item)" />
             <div class="anno-info">
@@ -63,6 +67,7 @@
 import { nextTick, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
+import showSnackbar from "../../components/func/snackbar.js";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import { useAppStore } from "../../store/modules/app.js";
 import TGLogger from "../../utils/TGLogger.js";
@@ -72,36 +77,22 @@ import TGRequest from "../../web/request/TGRequest.js";
 import TGUtils from "../../web/utils/TGUtils.js";
 import { decodeRegExp } from "../../web/utils/tools.js";
 
-// 服务器名称-服务器对应
-type AnnoServerMap = {
-  [key: string]: AnnoServer;
-};
+type AnnoSelect = { text: string; value: string };
 
-const annoServerList: string[] = [
-  "国服-官方服",
-  "国服-渠道服",
-  "国际服-亚服",
-  "国际服-欧服",
-  "国际服-美服",
-  "国际服-港澳台服",
+const annoServerList: AnnoSelect[] = [
+  { text: "国服-官方服", value: AnnoServer.CN_ISLAND },
+  { text: "国服-渠道服", value: AnnoServer.CN_TREE },
+  { text: "国际服-亚服", value: AnnoServer.OS_ASIA },
+  { text: "国际服-欧服", value: AnnoServer.OS_EURO },
+  { text: "国际服-美服", value: AnnoServer.OS_USA },
+  { text: "国际服-港澳台服", value: AnnoServer.OS_CHT },
 ];
-const langList: string[] = ["简体中文", "繁体中文", "English", "日本語"];
-
-// 服务器列表
-const annoServerMap: AnnoServerMap = {
-  "国服-官方服": AnnoServer.CN_ISLAND,
-  "国服-渠道服": AnnoServer.CN_TREE,
-  "国际服-亚服": AnnoServer.OS_ASIA,
-  "国际服-欧服": AnnoServer.OS_EURO,
-  "国际服-美服": AnnoServer.OS_USA,
-  "国际服-港澳台服": AnnoServer.OS_CHT,
-};
-const langMap: Record<string, AnnoLang> = {
-  简体中文: "zh-cn",
-  繁体中文: "zh-tw",
-  English: "en",
-  日本語: "ja",
-};
+const annoLangList: AnnoSelect[] = [
+  { text: "简体中文", value: "zh-cn" },
+  { text: "繁体中文", value: "zh-tw" },
+  { text: "English", value: "en" },
+  { text: "日本語", value: "ja" },
+];
 
 // 类型定义
 enum AnnoType {
@@ -117,15 +108,14 @@ type AnnoCard = {
 // loading
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载");
+const loadingSub = ref<string>("请稍后");
 
 const appStore = useAppStore();
 
 // 路由
 const router = useRouter();
 const curRegion = ref<AnnoServer>(appStore.server);
-const curRegionName = ref<string>(annoServerList[0]);
 const curLang = ref<AnnoLang>(appStore.lang);
-const curLangName = ref<string>(langList[0]);
 
 // 数据
 const tab = ref<AnnoKey>("activity");
@@ -135,39 +125,38 @@ const annoCards = ref<AnnoCard>({
   game: [],
 });
 
-watch(curRegionName, async (value) => {
-  appStore.server = annoServerMap[value] || AnnoServer.CN_ISLAND;
-  curRegion.value = annoServerMap[value] || AnnoServer.CN_ISLAND;
-  await TGLogger.Info(`[Announcements][watch][curRegionName] 切换服务器：${value}`);
+watch(curRegion, async (value) => {
+  appStore.server = value;
+  const name = getRegionName(value);
+  await TGLogger.Info(`[Announcements][watch][curRegionName] 切换服务器：${name}`);
   await loadData();
+  showSnackbar({
+    text: `服务器切换为：${name}`,
+    color: "success",
+  });
 });
 
-watch(curLangName, async (value) => {
-  appStore.lang = langMap[value] || "zh-cn";
-  curLang.value = langMap[value] || "zh-cn";
-  await TGLogger.Info(`[Announcements][watch][curLang] 切换语言：${value}`);
+watch(curLang, async (value) => {
+  appStore.lang = value;
+  const name = getLangName(value);
+  await TGLogger.Info(`[Announcements][watch][curLangName] 切换语言：${name}`);
   await loadData();
+  showSnackbar({
+    text: `语言切换为：${name}`,
+    color: "success",
+  });
 });
 
 onMounted(async () => {
   await TGLogger.Info("[Announcements][onMounted] 打开公告页面");
-  for (const key in annoServerMap) {
-    if (annoServerMap[key] === curRegion.value) {
-      curRegionName.value = key;
-      break;
-    }
-  }
-  for (const key in langMap) {
-    if (langMap[key] === curLang.value) {
-      curLangName.value = key;
-      break;
-    }
-  }
+  curRegion.value = appStore.server;
+  curLang.value = appStore.lang;
   await loadData();
 });
 
 async function loadData(): Promise<void> {
   loadingTitle.value = "正在获取公告数据";
+  loadingSub.value = `服务器：${getRegionName(curRegion.value)}，语言：${getLangName(curLang.value)}`;
   loading.value = true;
   const annoData = await TGRequest.Anno.getList(curRegion.value, curLang.value);
   const listCards = TGUtils.Anno.getCard(annoData);
@@ -187,6 +176,14 @@ async function loadData(): Promise<void> {
   await nextTick(async () => {
     loading.value = false;
   });
+}
+
+function getRegionName(value: AnnoServer): string {
+  return annoServerList.find((item) => item.value === value)?.text ?? annoServerList[0].text;
+}
+
+function getLangName(value: AnnoLang): string {
+  return annoLangList.find((item) => item.value === value)?.text ?? annoLangList[0].text;
 }
 
 function getAnnoTime(content: string): string | false {
@@ -244,9 +241,8 @@ function getAnnoTime(content: string): string | false {
 }
 
 function parseTitle(title: string): string {
-  const div = document.createElement("div");
-  div.innerHTML = title;
-  return div.innerText;
+  const dom = new DOMParser().parseFromString(title, "text/html");
+  return dom.body.innerText;
 }
 
 async function switchNews(): Promise<void> {
