@@ -6,5 +6,5 @@ node_modules
 dist
 # Secrets
 .env.sh
-# wiki(Dev)
-src/data/WIKI/GCG/
+# vue-tsc --noEmit
+*.tsbuildinfo
