@@ -1,5 +1,5 @@
 <template>
-  <div class="tpr-reply-box">
+  <div class="tpr-reply-box" :id="replyId">
     <div
       class="tpr-bubble"
       v-if="props.modelValue.user.reply_bubble !== null"
@@ -39,12 +39,13 @@
           {{ props.modelValue.stat.like_num }}
         </span>
         <span
-          v-if="props.modelValue.sub_replies.length > 0"
+          v-if="props.modelValue.sub_reply_count > 0"
           class="tpr-reply"
           title="查看子回复"
           @click="showReply()"
         >
           <v-icon size="small">mdi-message-text</v-icon>
+          <span>{{ props.modelValue.sub_reply_count }}</span>
           <v-menu
             submenu
             activator="parent"
@@ -73,6 +74,13 @@
       </div>
     </div>
     <div class="tpr-extra" :title="`ID:${props.modelValue.reply.reply_id}`">
+      <span
+        class="tpr-pin"
+        v-if="props.mode === 'main' && props.modelValue.reply.reply_id === props.pinId"
+      >
+        <v-icon size="small">mdi-pin</v-icon>
+        <span>置顶评论</span>
+      </span>
       <span class="tpr-debug" @click="exportData" title="导出数据">
         <v-icon size="small">mdi-file-export</v-icon>
       </span>
@@ -80,8 +88,18 @@
         <span>回复</span>
         <span>{{ props.modelValue.r_user.nickname }}</span>
       </span>
-      <span v-if="props.mode === 'main'">{{ props.modelValue.reply.floor_id }}F</span>
+      <span v-if="props.mode === 'main'" class="tpr-floor">
+        {{ props.modelValue.reply.floor_id }}F
+      </span>
     </div>
+    <div class="tpr-share" @click="share" data-html2canvas-ignore title="分享">
+      <v-icon size="small">mdi-share-variant</v-icon>
+    </div>
+    <div class="tpr-share-info bottom">
+      <span>{{ props.modelValue.reply.post_id }}</span>
+      <span v-if="props.mode === 'sub'"> | {{ props.modelValue.reply.floor_id }}F</span>
+    </div>
+    <div class="tpr-share-info top">{{ props.modelValue.reply.reply_id }}</div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -92,14 +110,21 @@ import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { toRaw, ref, watch, onMounted, onUnmounted } from "vue";
 
 import Mys from "../../plugins/Mys/index.js";
+import { generateShareImg } from "../../utils/TGShare.js";
 import showConfirm from "../func/confirm.js";
 import showSnackbar from "../func/snackbar.js";
 import TpParser from "../post/tp-parser.vue";
 
-interface TprReplyProps {
-  mode: "main" | "sub";
-  modelValue: TGApp.Plugins.Mys.Reply.ReplyFull;
-}
+type TprReplyProps =
+  | {
+      mode: "sub";
+      modelValue: TGApp.Plugins.Mys.Reply.ReplyFull;
+    }
+  | {
+      mode: "main";
+      modelValue: TGApp.Plugins.Mys.Reply.ReplyFull;
+      pinId: string;
+    };
 
 const props = defineProps<TprReplyProps>();
 const showSub = ref<boolean>(false);
@@ -107,6 +132,7 @@ const subReplies = ref<Array<TGApp.Plugins.Mys.Reply.ReplyFull>>([]);
 const lastId = ref<string | undefined>(undefined);
 const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
+const replyId = `reply_${props.modelValue.reply.post_id}_${props.modelValue.reply.floor_id}_${props.modelValue.reply.reply_id}`;
 let subListener: UnlistenFn | null = null;
 
 console.log("TprReply", toRaw(props.modelValue));
@@ -139,6 +165,12 @@ async function listenSub(): Promise<UnlistenFn> {
       if (showSub.value) showSub.value = false;
     }
   });
+}
+
+async function share(): Promise<void> {
+  const replyDom = document.getElementById(replyId);
+  if (replyDom === null) return;
+  await generateShareImg(replyId, replyDom);
 }
 
 function getFullTime(): string {
@@ -208,11 +240,10 @@ async function exportData(): Promise<void> {
     return;
   }
   const data = JSON.stringify(toRaw(props.modelValue), null, 2);
-  const fileName = `reply_${props.modelValue.reply.post_id}_${props.modelValue.reply.floor_id}_${props.modelValue.reply.reply_id}`;
   const savePath = await save({
     title: "导出回复数据",
     filters: [{ name: "JSON", extensions: ["json"] }],
-    defaultPath: `${await path.downloadDir()}${path.sep()}${fileName}.json`,
+    defaultPath: `${await path.downloadDir()}${path.sep()}${replyId}.json`,
   });
   if (savePath === null) {
     showSnackbar({
@@ -362,7 +393,13 @@ async function exportData(): Promise<void> {
   justify-content: flex-end;
   font-size: 12px;
   gap: 5px;
-  opacity: 0.3;
+}
+
+.tpr-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tgc-od-red);
 }
 
 .tpr-debug {
@@ -370,6 +407,7 @@ async function exportData(): Promise<void> {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  opacity: 0.3;
 }
 
 .tpr-reply-user {
@@ -377,12 +415,20 @@ async function exportData(): Promise<void> {
   align-items: center;
   justify-content: center;
   gap: 5px;
+  opacity: 0.3;
 
   :last-child {
     color: #00c3ff;
     text-decoration: underline solid #00c3ff;
     text-underline-position: under;
   }
+}
+
+.tpr-floor {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.3;
 }
 
 .tpr-reply-sub {
@@ -397,5 +443,35 @@ async function exportData(): Promise<void> {
   background: var(--app-page-bg);
   overflow-y: auto;
   row-gap: 5px;
+}
+
+.tpr-share {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  cursor: pointer;
+  opacity: 0.3;
+}
+
+.tpr-share-info {
+  position: absolute;
+  z-index: -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tgc-od-white);
+  font-size: 12px;
+  gap: 5px;
+  text-shadow: 1px 1px 1px var(--tgc-dark-1);
+}
+
+.tpr-share-info.top {
+  top: 0;
+  right: 5px;
+}
+
+.tpr-share-info.bottom {
+  bottom: 5px;
+  left: 5px;
 }
 </style>

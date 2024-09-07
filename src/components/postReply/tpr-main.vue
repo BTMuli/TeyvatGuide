@@ -26,7 +26,7 @@
           <v-switch
             v-model="onlyLz"
             color="primary"
-            hide-details
+            :hide-details="true"
             title="只看楼主"
             @change="reloadReply"
           />
@@ -39,12 +39,16 @@
             item-value="value"
             title="排序方式"
           />
-          <v-btn @click="showOverlay = false" icon class="tpr-btn-close" size="small">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+          <v-btn @click="showOverlay = false" icon="mdi-close" class="tpr-btn-close" size="small" />
         </div>
         <v-list class="tpr-reply-list">
-          <TprReply v-for="(item, index) in reply" :key="index" :modelValue="item" mode="main" />
+          <TprReply
+            v-for="(item, index) in reply"
+            :key="index"
+            :modelValue="item"
+            mode="main"
+            :pinId="pinId"
+          />
           <div v-if="isLast" class="tpr-list-item">
             <v-chip color="info" label>没有更多了</v-chip>
           </div>
@@ -82,6 +86,7 @@ const orderList = [
 ];
 
 const reply = ref<Array<TGApp.Plugins.Mys.Reply.ReplyFull>>([]);
+const pinId = ref<string>("0");
 const lastId = ref<string | undefined>(undefined);
 const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
@@ -137,6 +142,7 @@ async function loadReply(): Promise<void> {
   }
   isLast.value = resp.is_last;
   lastId.value = resp.last_id;
+  pinId.value = resp.pin_reply_id;
   reply.value = reply.value.concat(resp.list);
   loading.value = false;
   if (isLast.value) {
