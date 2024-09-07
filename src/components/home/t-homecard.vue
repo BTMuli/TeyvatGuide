@@ -23,10 +23,10 @@ const props = defineProps<THomeCardProps>();
   position: relative;
   min-height: 100px;
   padding: 20px 10px 10px;
-  border: 1px solid var(--common-shadow-1);
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   margin-top: 30px;
-  box-shadow: 5px 5px 10px var(--common-shadow-2);
+  box-shadow: 2px 2px 5px var(--common-shadow-1);
 }
 
 .thc-title,
@@ -38,8 +38,7 @@ const props = defineProps<THomeCardProps>();
   justify-content: center;
   padding: 0 10px;
   border-radius: 5px;
-  background: var(--box-bg-blue);
-  box-shadow: 0 0 5px var(--common-shadow-2);
+  background: var(--tgc-od-blue);
   font-family: var(--font-title);
 }
 

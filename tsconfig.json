@@ -12,7 +12,7 @@
     "esModuleInterop": true,
     "lib": ["DOM", "ESNext"],
     "skipLibCheck": true,
-    "types": ["vite/client", "node", "color-convert", "js-md5", "uuid"],
+    "types": ["vite/client", "node", "color-convert", "js-md5", "uuid", "src/vite-env"],
     "allowSyntheticDefaultImports": true,
     "composite": true
   },

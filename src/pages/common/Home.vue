@@ -1,26 +1,32 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSubtitle" />
   <div class="home-container">
-    <div class="home-select">
-      <v-select
-        variant="outlined"
-        v-model="showHome"
-        :items="homeStore.getShowItems()"
-        hide-details
-        :multiple="true"
-        :chips="true"
-      />
-      <v-btn class="select-btn" @click="submitHome" rounded>确定</v-btn>
-    </div>
-    <div class="home-tools" v-if="appStore.isLogin">
-      <v-select
-        v-model="curGameLabel"
-        class="home-tool-select"
-        :items="gameItem"
-        hide-details
-        variant="outlined"
-      />
-      <TGameNav :model-value="gameList[curGameLabel]" />
+    <div class="home-top">
+      <div class="home-tools" v-if="appStore.isLogin">
+        <v-select
+          v-model="curGid"
+          class="home-tool-select"
+          :items="gameSelectList"
+          item-title="title"
+          item-value="gid"
+          :hide-details="true"
+          variant="outlined"
+          label="分区"
+        />
+        <TGameNav :model-value="curGid" />
+      </div>
+      <div class="home-select">
+        <v-select
+          variant="outlined"
+          v-model="showHome"
+          :items="homeStore.getShowItems()"
+          :hide-details="true"
+          :multiple="true"
+          :chips="true"
+          label="首页组件显示"
+        />
+        <v-btn class="select-btn" @click="submitHome" :rounded="true">确定</v-btn>
+      </div>
     </div>
     <component
       :is="item"
@@ -44,6 +50,7 @@ import ToLoading from "../../components/overlay/to-loading.vue";
 import { useAppStore } from "../../store/modules/app.js";
 import { useHomeStore } from "../../store/modules/home.js";
 import TGLogger from "../../utils/TGLogger.js";
+import TGConstant from "../../web/constant/TGConstant.js";
 
 // store
 const appStore = useAppStore();
@@ -59,26 +66,8 @@ const endNum = ref<number>(0);
 const components = shallowRef<any[]>([]);
 const showHome = ref<string[]>(homeStore.getShowValue());
 
-// top nav
-const gameList = {
-  原神: 2,
-  "崩坏：星穹铁道": 6,
-  崩坏3: 1,
-  崩坏2: 3,
-  未定事件簿: 4,
-  绝区零: 8,
-  大别野: 5,
-};
-const curGameLabel = ref<keyof typeof gameList>("原神");
-const gameItem = ref<string[]>([
-  "原神",
-  "崩坏：星穹铁道",
-  "绝区零",
-  "崩坏3",
-  "崩坏2",
-  "未定事件簿",
-  "大别野",
-]);
+const gameSelectList = TGConstant.BBS.CHANNELS;
+const curGid = ref<string>(gameSelectList[0].gid);
 
 onMounted(async () => {
   loadingTitle.value = "正在加载首页";
@@ -155,8 +144,15 @@ onUnmounted(() => {
 });
 </script>
 <style lang="css" scoped>
-.home-select {
+.home-container {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.home-top {
+  display: flex;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
@@ -170,7 +166,15 @@ onUnmounted(() => {
 }
 
 .home-tool-select {
+  width: 200px;
   max-width: 200px;
+}
+
+.home-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .select-btn {
@@ -178,11 +182,5 @@ onUnmounted(() => {
   height: 40px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
-}
-
-.home-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 </style>

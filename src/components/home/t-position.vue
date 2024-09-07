@@ -119,7 +119,7 @@ onUnmounted(() => {
   display: grid;
   margin-top: 10px;
   grid-gap: 20px;
-  grid-template-columns: repeat(auto-fill, minmax(calc(400px + 2rem), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(calc(400px + 2rem), 0.5fr));
 }
 
 .position-card {

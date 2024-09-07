@@ -49,7 +49,7 @@ onBeforeMount(async () => {
   next.value = TSAvatarBirth.getNextAvatarBirth();
 });
 
-function toBirth(type: TGApp.Archive.Birth.RoleItem | true) {
+function toBirth(type: TGApp.Archive.Birth.RoleItem) {
   let dateStr;
   if (type === true) {
     const date = new Date();
@@ -59,7 +59,7 @@ function toBirth(type: TGApp.Archive.Birth.RoleItem | true) {
   } else {
     dateStr = type.role_birthday;
   }
-  if (type != true) {
+  if (type !== true) {
     router.push({ name: "留影叙佳期", params: { date: dateStr } });
     return;
   }
@@ -72,20 +72,23 @@ function toBirth(type: TGApp.Archive.Birth.RoleItem | true) {
 }
 
 function parseDesc(intro: string): string {
-  const dom = document.createElement("div");
-  dom.innerHTML = intro;
-  return dom.innerText;
+  const dom = new DOMParser().parseFromString(intro, "text/html");
+  return dom.body.textContent || "";
 }
 </script>
 <style lang="css" scoped>
 .tcb-container {
+  display: flex;
   width: 100%;
   height: 100%;
-  padding: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 5px;
   border-radius: 5px;
-  box-shadow: 0 0 5px inset var(--common-shadow-2);
+  box-shadow: 0 0 5px inset var(--common-shadow-1);
   overflow-y: auto;
-  row-gap: 10px;
+  row-gap: 5px;
 }
 
 .tcb-top-none,
@@ -93,13 +96,12 @@ function parseDesc(intro: string): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
 }
 
 .tcb-top-none img,
 .tcb-top-active img {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
 }
 
 .tcb-top-active img.active {
@@ -108,8 +110,8 @@ function parseDesc(intro: string): string {
 }
 
 .tcb-top-active img.tcb-cur {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--common-shadow-1);
 }
@@ -122,7 +124,6 @@ function parseDesc(intro: string): string {
   justify-content: flex-start;
   padding: 5px;
   border-radius: 10px;
-  margin-top: 10px;
   background: var(--box-bg-1);
 }
 

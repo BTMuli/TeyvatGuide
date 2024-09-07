@@ -86,7 +86,7 @@ interface TPoolEmits {
 
 const emits = defineEmits<TPoolEmits>();
 
-function poolLastInterval(postId: number): TGApp.Plugins.Mys.Gacha.RenderCard | undefined {
+function poolLastInterval(postId: number): TGApp.Plugins.Mys.Gacha.RenderCard {
   const pool = poolCards.value.find((pool) => pool.postId === postId);
   if (!pool) return;
   if (poolTimeGet.value[postId] === "未开始") {
@@ -206,7 +206,7 @@ function getCBox(info: TGApp.App.Character.WikiBriefInfo): TItemBoxData {
     display: "inner",
     clickable: true,
     lt: `/icon/element/${info.element}元素.webp`,
-    ltSize: "20px",
+    ltSize: "15px",
     innerHeight: 20,
     innerIcon: `/icon/weapon/${info.weapon}.webp`,
     innerText: info.name,
@@ -258,7 +258,7 @@ onUnmounted(() => {
   width: 100%;
   border-radius: 5px;
   aspect-ratio: 69 / 32;
-  box-shadow: 0 5px 5px var(--common-shadow-4);
+  box-shadow: 2px 2px 5px var(--common-shadow-2);
 }
 
 .pool-cover {
