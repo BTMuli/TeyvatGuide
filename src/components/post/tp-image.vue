@@ -3,13 +3,13 @@
     <img :src="localUrl" :alt="props.data.insert.image" :title="getImageTitle()" />
   </div>
   <div v-else class="tp-image-load" :title="getImageUrl()">
-    <v-progress-circular indeterminate color="primary" size="small" />
+    <v-progress-circular :indeterminate="true" color="primary" size="small" />
     <span>加载中...</span>
   </div>
   <TpoImage :image="props.data" v-model="showOverlay" />
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { computed, ref, onMounted, onUnmounted } from "vue";
 
 import { saveImgLocal } from "../../utils/TGShare.js";
 import { bytesToSize } from "../../utils/toolFunc.js";
@@ -36,6 +36,12 @@ interface TpImageProps {
 const props = defineProps<TpImageProps>();
 const showOverlay = ref(false);
 const localUrl = ref<string | undefined>(undefined);
+
+const imgWidth = computed<string>(() => {
+  if (props.data.attributes === undefined) return "auto";
+  if (props.data.attributes.width >= 690) return "100%";
+  return `${props.data.attributes.width}px`;
+});
 
 console.log("tp-image", props.data.insert.image, props.data.attributes);
 
@@ -79,6 +85,7 @@ function getImageUrl(): string {
 }
 
 .tp-image-box img {
+  width: v-bind(imgWidth);
   max-width: 100%;
   height: auto;
   border-radius: 10px;

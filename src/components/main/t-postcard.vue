@@ -1,5 +1,5 @@
 <template>
-  <v-card rounded v-if="card">
+  <v-card :rounded="true" v-if="card">
     <div class="tpc-cover">
       <img :src="card.cover" alt="cover" @click="createPost(card)" />
       <div v-if="isAct" class="tpc-act">
@@ -100,19 +100,19 @@ onBeforeMount(() => {
 const EnumStatus = {
   STARTED: {
     status: "进行中",
-    colorCss: "#1EE2BA",
+    colorCss: "var(--tgc-od-green)",
   },
   FINISHED: {
     status: "已结束",
-    colorCss: "#C0C5C8",
+    colorCss: "var(--tgc-od-white)",
   },
   SELECTION: {
     status: "评选中",
-    colorCss: "#FF983B",
+    colorCss: "var(--tgc-od-orange)",
   },
   UNKNOWN: {
     status: "未知",
-    colorCss: "#F03F24", // 胭脂红
+    colorCss: "var(--tgc-od-red)",
   },
 };
 
