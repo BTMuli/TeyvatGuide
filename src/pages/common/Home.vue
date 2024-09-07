@@ -13,7 +13,7 @@
           variant="outlined"
           label="分区"
         />
-        <TGameNav :model-value="curGid" />
+        <TGameNav :model-value="Number(curGid)" />
       </div>
       <div class="home-select">
         <v-select

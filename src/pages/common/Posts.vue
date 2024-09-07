@@ -3,23 +3,29 @@
   <div class="posts-box">
     <div class="posts-switch">
       <v-select
-        v-model="curGameLabel"
+        v-model="curGid"
         class="post-switch-item"
-        :items="gameItem"
+        :items="sortGameList"
+        item-title="text"
+        item-value="gid"
         variant="outlined"
-        label="游戏"
+        label="分区"
       />
       <v-select
-        v-model="curForumLabel"
+        v-model="curForum"
         class="post-switch-item"
-        :items="forumItem"
+        :items="getGameForums(curGid)"
+        item-title="text"
+        item-value="value"
         variant="outlined"
-        label="频道"
+        label="版块"
       />
       <v-select
-        v-model="curSortLabel"
+        v-model="curSortType"
         class="post-switch-item"
-        :items="sortItem"
+        :items="sortOrderList"
+        item-title="text"
+        item-value="value"
         variant="outlined"
         label="排序"
       />
@@ -30,11 +36,11 @@
         label="请输入帖子 ID 或搜索词"
         variant="outlined"
         :single-line="true"
-        hide-details
+        :hide-details="true"
         @click:append="searchPost"
         @keyup.enter="searchPost"
       />
-      <v-btn rounded class="post-fresh-btn" @click="freshPostData()">
+      <v-btn :rounded="true" class="post-fresh-btn" @click="freshPostData()">
         <v-icon>mdi-refresh</v-icon>
         <span>刷新</span>
       </v-btn>
@@ -64,103 +70,141 @@ import { createPost } from "../../utils/TGWindow.js";
 const loading = ref<boolean>(true);
 const loadingTitle = ref<string>("正在加载数据");
 
-// 常量
-const sortList = {
-  默认排序: 0,
-  最新回复: 1,
-  最新发布: 2,
+type SortSelect = {
+  text: string;
+  value: number;
 };
-const forumGenshin = {
-  酒馆: 26,
-  攻略: 43,
-  同人图: 29,
-  COS: 49,
-  硬核: 50,
+type SortSelectGame = {
+  gid: number;
+  forum: SortSelect[];
+  text: string;
 };
-const forumSr = {
-  候车室: 52,
-  攻略: 61,
-  同人图: 56,
-  COS: 62,
-};
-const forumBh3 = {
-  甲板: 1,
-  攻略: 14,
-  同人图: 4,
-  同人文: 41,
-};
-const forumBh2 = {
-  学园: 30,
-  攻略: 51,
-  同人图: 40,
-};
-const forumWd = {
-  律所: 37,
-  攻略: 60,
-  同人文: 42,
-  同人图: 38,
-};
-const forumZzz = {
-  咖啡馆: 57,
-  同人图: 59,
-  攻略: 64,
-  COS: 65,
-};
-const forumDby = {
-  校园: 54,
-  ACG: 35,
-  生活: 34,
-  同人图: 39,
-  COS: 47,
-  脑洞: 48,
-  科技: 55,
-  公告: 36,
-};
-const forumList = {
-  原神: forumGenshin,
-  "崩坏：星穹铁道": forumSr,
-  崩坏3: forumBh3,
-  崩坏2: forumBh2,
-  未定事件簿: forumWd,
-  绝区零: forumZzz,
-  大别野: forumDby,
-};
-const gameList = {
-  原神: 2,
-  "崩坏：星穹铁道": 6,
-  崩坏3: 1,
-  崩坏2: 3,
-  未定事件簿: 4,
-  绝区零: 8,
-  大别野: 5,
-};
+
+const sortOrderList: SortSelect[] = [
+  { text: "默认排序", value: 0 },
+  { text: "最新回复", value: 1 },
+  { text: "最新发布", value: 2 },
+];
+const forumYsList: SortSelect[] = [
+  { text: "酒馆", value: 26 },
+  { text: "攻略", value: 43 },
+  { text: "同人图", value: 29 },
+  { text: "COS", value: 49 },
+  { text: "硬核", value: 50 },
+];
+const forumSrList: SortSelect[] = [
+  { text: "候车室", value: 52 },
+  { text: "攻略", value: 61 },
+  { text: "同人图", value: 56 },
+  { text: "COS", value: 62 },
+];
+const forumBh3List: SortSelect[] = [
+  { text: "甲板", value: 1 },
+  { text: "攻略", value: 14 },
+  { text: "同人图", value: 4 },
+  { text: "同人文", value: 41 },
+];
+const forumBh2List: SortSelect[] = [
+  { text: "学园", value: 30 },
+  { text: "攻略", value: 51 },
+  { text: "同人图", value: 40 },
+];
+const forumWdList: SortSelect[] = [
+  { text: "律所", value: 37 },
+  { text: "攻略", value: 60 },
+  { text: "同人文", value: 42 },
+  { text: "同人图", value: 38 },
+];
+const forumZzzList: SortSelect[] = [
+  { text: "咖啡馆", value: 57 },
+  { text: "攻略", value: 64 },
+  { text: "同人图", value: 59 },
+  { text: "COS", value: 65 },
+];
+const forumDbyList: SortSelect[] = [
+  { text: "校园", value: 54 },
+  { text: "ACG", value: 35 },
+  { text: "生活", value: 34 },
+  { text: "同人图", value: 39 },
+  { text: "COS", value: 47 },
+  { text: "脑洞", value: 48 },
+  { text: "科技", value: 55 },
+  { text: "公告", value: 36 },
+];
+const sortGameList: SortSelectGame[] = [
+  {
+    gid: 2,
+    forum: forumYsList,
+    text: "原神",
+  },
+  {
+    gid: 6,
+    forum: forumSrList,
+    text: "崩坏：星穹铁道",
+  },
+  {
+    gid: 1,
+    forum: forumBh3List,
+    text: "崩坏3",
+  },
+  {
+    gid: 3,
+    forum: forumBh2List,
+    text: "崩坏2",
+  },
+  {
+    gid: 4,
+    forum: forumWdList,
+    text: "未定事件簿",
+  },
+  {
+    gid: 8,
+    forum: forumZzzList,
+    text: "绝区零",
+  },
+  {
+    gid: 5,
+    forum: forumDbyList,
+    text: "大别野",
+  },
+];
 
 // 路由
 const gid = useRoute().params.gid;
 const forum = useRoute().params.forum;
 
+function getGameForums(gid: number): SortSelect[] {
+  const game = sortGameList.find((item) => item.gid === gid);
+  if (game) {
+    return game.forum;
+  }
+  return [];
+}
+
+function getGameLabel(gid: number): string {
+  const game = sortGameList.find((item) => item.gid === gid);
+  if (game) {
+    return game.text;
+  }
+  return "";
+}
+
+function getForumLabel(gid: number, forum: number): string {
+  const forums = getGameForums(gid);
+  const forumItem = forums.find((item) => item.value === forum);
+  return forumItem ? forumItem.text : "";
+}
+
+function getSortLabel(value: number): string {
+  const order = sortOrderList.find((item) => item.value === value);
+  return order ? order.text : "";
+}
+
 // 渲染参数
-const curForumLabel = ref<string>("酒馆");
-const forumItem = ref<string[]>(["酒馆", "攻略", "同人图", "COS", "硬核"]);
-const curForum = ref<number>(26);
-
-// 游戏相关
-const curGameLabel = ref<keyof typeof gameList>("原神");
-const gameItem = ref<string[]>([
-  "原神",
-  "崩坏：星穹铁道",
-  "绝区零",
-  "崩坏3",
-  "崩坏2",
-  "未定事件簿",
-  "大别野",
-]);
 const curGid = ref<number>(2);
-
-// 排序相关
-const curSortLabel = ref<keyof typeof sortList>("默认排序");
-const sortItem = ref<string[]>(["默认排序", "最新回复", "最新发布"]);
 const curSortType = ref<number>(0);
+const curForum = ref<number>(26);
+const curForumLabel = ref<string>("");
 
 // 渲染数据
 const posts = ref<TGApp.Plugins.Mys.Post.FullData[]>([]);
@@ -169,86 +213,82 @@ const showSearch = ref<boolean>(false);
 
 onBeforeMount(async () => {
   if (gid && typeof gid === "string") {
-    const gameKeys = Object.values(gameList);
-    if (!gameKeys.includes(Number(gid))) {
-      showSnackbar({
-        text: `不存在GID为${gid}的游戏`,
-        color: "error",
-      });
-      return;
-    }
-    curGameLabel.value = <keyof typeof gameList>(
-      Object.keys(gameList)[gameKeys.indexOf(Number(gid))]
-    );
     curGid.value = Number(gid);
   }
   if (forum && typeof forum === "string") {
-    const forumKeys = Object.keys(forumList[curGameLabel.value]);
-    if (!forumKeys.includes(forum)) {
-      showSnackbar({
-        text: `${curGameLabel.value}不存在ID为${forum}的版块`,
-        color: "error",
-      });
-      return;
-    }
-    curForumLabel.value = forum;
+    curForum.value = Number(forum);
   }
 });
 
 onMounted(async () => {
-  await TGLogger.Info(
-    `[Posts][${curGameLabel.value}][onMounted][${curForumLabel.value}] 打开帖子列表`,
-  );
+  const gameLabel = getGameLabel(curGid.value);
+  const forumLabel = getForumLabel(curGid.value, curForum.value);
+  await TGLogger.Info(`[Posts][${gameLabel}][onMounted][${forumLabel}] 打开帖子列表`);
   loading.value = true;
-  if (gid && forum) {
-    freshCurForum(curForumLabel.value);
-  } else {
-    await freshPostData();
-  }
+  await freshPostData();
+  curForumLabel.value = forumLabel;
   loading.value = false;
 });
 
-// 监听游戏变化
-watch(curGameLabel, async (newVal) => {
-  curGid.value = gameList[newVal];
-  forumItem.value = Object.keys(forumList[newVal]);
-  if (!forumItem.value.includes(curForumLabel.value)) {
-    curForumLabel.value = forumItem.value[0];
-    freshCurForum(forumItem.value[0]);
-  } else {
-    freshCurForum(curForumLabel.value);
-    await freshPostData();
-  }
-});
+watch(
+  () => curGid.value,
+  async (newVal: number) => {
+    const forums = getGameForums(newVal);
+    const forumFind = forums.find((item) => item.text === curForumLabel.value);
+    if (forumFind) {
+      curForum.value = forumFind.value;
+    } else {
+      curForum.value = forums[0].value;
+    }
+    await nextTick();
+    showSnackbar({
+      text: `已将分区切换到 ${getGameLabel(newVal)}`,
+      color: "success",
+    });
+  },
+);
 
-// 监听论坛变化
-watch(curForumLabel, async (newVal) => {
-  freshCurForum(newVal);
-  await freshPostData();
-});
+watch(
+  () => curForum.value,
+  async () => {
+    await freshPostData();
+    const oldForumLabel = JSON.parse(JSON.stringify(curForumLabel.value));
+    curForumLabel.value = getForumLabel(curGid.value, curForum.value);
+    if (oldForumLabel !== curForumLabel.value) {
+      showSnackbar({
+        text: `已将版块切换到 ${curForumLabel.value}`,
+        color: "success",
+      });
+    }
+  },
+);
 
 // 监听排序变化
-watch(curSortLabel, async (newVal) => {
-  curSortType.value = sortList[newVal];
-  await freshPostData();
-});
+watch(
+  () => curSortType.value,
+  async (newVal) => {
+    await freshPostData();
+    const sortLabel = getSortLabel(newVal);
+    showSnackbar({
+      text: `已将排序切换到 ${sortLabel}`,
+      color: "success",
+    });
+  },
+);
 
 async function freshPostData(): Promise<void> {
+  const gameLabel = getGameLabel(curGid.value);
+  const forumLabel = getForumLabel(curGid.value, curForum.value);
+  const sortLabel = getSortLabel(curSortType.value);
   await TGLogger.Info(
-    `[Posts][${curGameLabel.value}][freshPostData][${curForumLabel.value}] 刷新帖子列表`,
+    `[Posts][${gameLabel}][freshPostData][${forumLabel}][${sortLabel}] 刷新帖子列表`,
   );
   loading.value = true;
-  loadingTitle.value = `正在加载 ${curGameLabel.value}-${curForumLabel.value}-${curSortLabel.value} 的数据`;
+  loadingTitle.value = `正在加载 ${gameLabel}-${forumLabel}-${sortLabel} 数据`;
   const postsGet = await Mys.Posts.get(curForum.value, curSortType.value, 12);
   posts.value = postsGet.list;
   await nextTick();
   loading.value = false;
-}
-
-function freshCurForum(newVal: string): void {
-  const forum = forumList[curGameLabel.value];
-  // @ts-expect-error-next-line
-  curForum.value = forum[newVal];
 }
 
 // 查询帖子
