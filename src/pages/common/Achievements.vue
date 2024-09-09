@@ -5,7 +5,7 @@
       v-model="search"
       append-icon="mdi-magnify"
       label="搜索"
-      hide-details
+      :hide-details="true"
       variant="outlined"
       @click:append="searchCard"
       @keyup.enter="searchCard"
@@ -601,18 +601,15 @@ async function getAchiData(
   font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
+  text-shadow: 1px 1px 1px var(--common-shadow-1);
 }
 
 .series-icon {
   width: 40px;
   height: 40px;
   padding: 5px;
-  border-radius: 5px;
-  filter: invert(60%) brightness(100%);
-}
-
-.dark .series-icon {
-  filter: none;
+  border-radius: 50%;
+  background: var(--tgc-dark-7);
 }
 
 .series-content {

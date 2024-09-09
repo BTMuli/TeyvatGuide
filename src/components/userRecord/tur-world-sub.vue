@@ -41,12 +41,12 @@
 <script lang="ts" setup>
 import { event } from "@tauri-apps/api";
 import { Event, UnlistenFn } from "@tauri-apps/api/event";
-import { onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
+import { useAppStore } from "../../store/modules/app.js";
 import { saveImgLocal } from "../../utils/TGShare.js";
 
 interface TurWorldSubProps {
-  theme: "default" | "dark";
   data: TGApp.Sqlite.Record.WorldExplore;
 }
 
@@ -57,6 +57,13 @@ const icon = ref<string>();
 const iconLight = ref<string>();
 const iconDark = ref<string>();
 const offer = ref<string>();
+const appStore = useAppStore();
+
+const imgFilter = computed<string>(() => {
+  if (props.data.name !== "纳塔") return "none";
+  if (appStore.theme === "dark") return "none";
+  return "invert(0.75)";
+});
 
 onMounted(async () => {
   themeListener = await event.listen("readTheme", (e: Event<string>) => {
@@ -73,7 +80,7 @@ onMounted(async () => {
   if (props.data.offering) {
     offer.value = await saveImgLocal(props.data.offering.icon);
   }
-  if (props.theme === "dark") {
+  if (appStore.theme === "dark") {
     icon.value = iconLight.value;
   } else {
     icon.value = iconDark.value;
@@ -120,6 +127,7 @@ onUnmounted(() => {
 .tur-ws-icon img {
   width: 100%;
   height: 100%;
+  filter: v-bind(imgFilter);
 }
 
 .tur-ws-content {
