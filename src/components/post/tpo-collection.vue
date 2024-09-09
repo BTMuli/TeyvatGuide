@@ -5,7 +5,7 @@
         <span>{{ props.collection.collection_title }}</span>
         <span>合集ID：{{ props.collection.collection_id }}</span>
       </div>
-      <div class="tpoc-list">
+      <div class="tpoc-list" :id="`post-collect-overlay-${props.collection.collection_id}`">
         <div
           class="tpoc-item"
           v-for="(item, index) in posts"
@@ -47,7 +47,7 @@
   </TOverlay>
 </template>
 <script lang="ts" setup>
-import { ref, computed, onMounted } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import Mys from "../../plugins/Mys/index.js";
@@ -82,6 +82,25 @@ const visible = computed({
 const posts = ref<TpoCollectionItem[]>([]);
 
 const router = useRouter();
+
+watch(
+  () => visible.value,
+  async (value) => {
+    if (value) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const postList = document.getElementById(
+        `post-collect-overlay-${props.collection.collection_id}`,
+      );
+      if (postList === null) return;
+      if (props.collection.cur < 6) return;
+      const lastItem = <HTMLDivElement>postList.children[postList.children.length - 1];
+      postList.scrollTo({
+        top: lastItem.offsetTop - postList.clientHeight / 2 + lastItem.clientHeight / 2,
+        behavior: "smooth",
+      });
+    }
+  },
+);
 
 onMounted(async () => {
   const collectionPosts = await Mys.PostCollect(props.collection.collection_id);
