@@ -40,26 +40,20 @@
       </v-tabs>
       <v-window v-model="tab" class="gro-bottom-window">
         <v-window-item value="5" class="gro-b-window-item">
-          <div v-for="(item, index) in star5List" :key="index" class="gro-bwi-item">
-            <div class="gro-bwi-icon">
-              <img :src="item.icon" alt="icon" />
-            </div>
-            <div class="gro-bwi-data" :title="item.time">
-              <span>{{ item.name }}</span>
-              <span>{{ item.gachaCount }}</span>
-            </div>
-          </div>
+          <GroDataLine
+            v-for="(item, index) in star5List"
+            :key="index"
+            :data="item.data"
+            :count="item.count"
+          />
         </v-window-item>
         <v-window-item value="4" class="gro-b-window-item">
-          <div v-for="(item, index) in star4List" :key="index" class="gro-bwi-item">
-            <div class="gro-bwi-icon">
-              <img :src="item.icon" alt="icon" />
-            </div>
-            <div class="gro-bwi-data" :title="item.time">
-              <span>{{ item.name }}</span>
-              <span>{{ item.gachaCount }}</span>
-            </div>
-          </div>
+          <GroDataLine
+            v-for="(item, index) in star4List"
+            :key="index"
+            :data="item.data"
+            :count="item.count"
+          />
         </v-window-item>
       </v-window>
     </div>
@@ -68,7 +62,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from "vue";
 
-import TSUserGacha from "../../plugins/Sqlite/modules/userGacha.js";
+import GroDataLine, { GroDataLineProps } from "./gro-data-line.vue";
 
 interface GachaDataViewProps {
   dataType: "new" | "avatar" | "weapon" | "normal" | "mix";
@@ -77,21 +71,13 @@ interface GachaDataViewProps {
 
 const props = defineProps<GachaDataViewProps>();
 
-// 单个祈愿物品
-interface renderGachaItem extends TGApp.Sqlite.GachaRecords.SingleTable {
-  // 第几抽出的
-  gachaCount: number;
-  // 图标
-  icon: string;
-}
-
 // data
 const loading = ref<boolean>(true); // 是否加载完
 const title = ref<string>(""); // 卡片标题
 const startDate = ref<string>(""); // 最早的时间
 const endDate = ref<string>(""); // 最晚的时间
-const star5List = ref<renderGachaItem[]>([]); // 5星物品数据
-const star4List = ref<renderGachaItem[]>([]); // 4星物品数据
+const star5List = ref<GroDataLineProps[]>([]); // 5星物品数据
+const star4List = ref<GroDataLineProps[]>([]); // 4星物品数据
 const reset5count = ref<number>(1); // 5星垫抽数量
 const reset4count = ref<number>(1); // 4星垫抽数量
 const star3count = ref<number>(0); // 3星物品数量
@@ -121,17 +107,15 @@ function loadData(): void {
       } else if (item.rank === "4") {
         reset5count.value++;
         star4List.value.push({
-          ...item,
-          gachaCount: reset4count.value,
-          icon: getIcon(item.itemId),
+          data: item,
+          count: reset4count.value,
         });
         reset4count.value = 1;
       } else if (item.rank === "5") {
         reset4count.value++;
         star5List.value.push({
-          ...item,
-          gachaCount: reset5count.value,
-          icon: getIcon(item.itemId),
+          data: item,
+          count: reset5count.value,
         });
         reset5count.value = 1;
       }
@@ -173,20 +157,10 @@ function getTitle(type: "top" | "5" | "4" | "3"): string {
 
 // 获取5星平均抽数
 function getStar5Avg(): string {
-  const resetList = star5List.value.map((item) => item.gachaCount);
+  const resetList = star5List.value.map((item) => item.count);
   if (resetList.length === 0) return "0";
   const total = resetList.reduce((a, b) => a + b);
   return (total / star5List.value.length).toFixed(2);
-}
-
-// 获取物品图标
-function getIcon(itemId: string): string {
-  const type = TSUserGacha.getGachaItemType(itemId);
-  if (type[0] === "角色") {
-    return "/WIKI/character/" + itemId + ".webp";
-  } else {
-    return "/WIKI/weapon/" + itemId + ".webp";
-  }
 }
 
 // 监听数据变化
@@ -261,36 +235,5 @@ watch(
   margin-top: 10px;
   gap: 5px;
   overflow-y: auto;
-}
-
-.gro-bwi-item {
-  display: flex;
-  width: 100%;
-  height: 30px;
-  gap: 5px;
-}
-
-.gro-bwi-icon {
-  display: flex;
-  width: 30px;
-  height: 30px;
-  align-items: center;
-  justify-content: center;
-}
-
-.gro-bwi-icon img {
-  width: 100%;
-  height: 100%;
-}
-
-.gro-bwi-data {
-  display: flex;
-  width: calc(100% - 50px);
-  height: 100%;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 10px;
-  border-radius: 5px;
-  background: var(--box-bg-3);
 }
 </style>
