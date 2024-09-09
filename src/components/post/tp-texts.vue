@@ -71,7 +71,9 @@ function getLineStyle(): StyleValue {
 </script>
 <style lang="css" scoped>
 .tp-texts {
+  line-break: anywhere;
   white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .tp-texts-header1,
