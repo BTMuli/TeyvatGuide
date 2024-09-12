@@ -143,6 +143,11 @@ const sortGameList: SortSelectGame[] = [
     text: "崩坏：星穹铁道",
   },
   {
+    gid: 8,
+    forum: forumZzzList,
+    text: "绝区零",
+  },
+  {
     gid: 1,
     forum: forumBh3List,
     text: "崩坏3",
@@ -156,11 +161,6 @@ const sortGameList: SortSelectGame[] = [
     gid: 4,
     forum: forumWdList,
     text: "未定事件簿",
-  },
-  {
-    gid: 8,
-    forum: forumZzzList,
-    text: "绝区零",
   },
   {
     gid: 5,
