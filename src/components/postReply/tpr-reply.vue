@@ -168,7 +168,7 @@ async function listenSub(): Promise<UnlistenFn> {
 }
 
 async function share(): Promise<void> {
-  const replyDom = document.getElementById(replyId);
+  const replyDom: HTMLElement | null = document.getElementById(replyId);
   if (replyDom === null) return;
   await generateShareImg(replyId, replyDom, 3);
 }

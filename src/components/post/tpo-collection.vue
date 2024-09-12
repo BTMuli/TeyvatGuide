@@ -88,7 +88,7 @@ watch(
   async (value) => {
     if (value) {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      const postList = document.getElementById(
+      const postList: HTMLElement | null = document.getElementById(
         `post-collect-overlay-${props.collection.collection_id}`,
       );
       if (postList === null) return;
