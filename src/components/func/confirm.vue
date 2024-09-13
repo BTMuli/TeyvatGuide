@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, reactive, ref, watch } from "vue";
+import { nextTick, onMounted, reactive, ref, watch, useTemplateRef } from "vue";
 
 interface ConfirmProps {
   title: string;
@@ -56,7 +56,7 @@ const showOuter = ref<boolean>(false);
 const showInner = ref<boolean>(false);
 const confirmVal = ref<boolean | string | undefined>();
 const inputVal = ref<string>("");
-const inputRef = ref<HTMLInputElement>();
+const inputEl = useTemplateRef<HTMLInputElement>("inputRef");
 
 watch(show, () => {
   if (show.value) {
@@ -95,7 +95,7 @@ async function displayBox(
       if (data.mode === "input") {
         // 等待确认框打开，聚焦输入框
         setTimeout(() => {
-          inputRef.value?.focus();
+          inputEl.value?.focus();
         }, 100);
       }
     });

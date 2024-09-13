@@ -1,7 +1,7 @@
 /**
  * @file web/request/getAnnouncement.ts
  * @description 获取游戏内公告
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  */
 
 import TGHttp from "../../utils/TGHttp.js";
@@ -16,6 +16,9 @@ export enum AnnoServer {
 }
 
 export type AnnoLang = "zh-cn" | "zh-tw" | "en" | "ja";
+
+const AnnoApi = "https://hk4e-ann-api.mihoyo.com/common/hk4e_cn/announcement/api";
+const AnnoApiGlobal = "https://hk4e-api-os.hoyoverse.com/common/hk4e_global/announcement/api";
 
 /**
  * @description 获取游戏内公告参数
@@ -48,7 +51,7 @@ function getAnnoParams(
 
 /**
  * @description 获取游戏内公告列表
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  * @param {string} region 服务器
  * @param {AnnoLang} lang 语言
  * @returns {Promise<TGApp.BBS.Announcement.ListData>}
@@ -58,9 +61,9 @@ export async function getAnnoList(
   lang: AnnoLang = "zh-cn",
 ): Promise<TGApp.BBS.Announcement.ListData> {
   const params: TGApp.BBS.Announcement.Params = getAnnoParams(region, lang);
-  let url = "https://hk4e-api.mihoyo.com/common/hk4e_cn/announcement/api/getAnnList";
+  let url = `${AnnoApi}/getAnnList`;
   if (region !== AnnoServer.CN_ISLAND && region !== AnnoServer.CN_TREE) {
-    url = "https://hk4e-api-os.hoyoverse.com/common/hk4e_global/announcement/api/getAnnList";
+    url = `${AnnoApiGlobal}/getAnnList`;
   }
   const resp = await TGHttp<TGApp.BBS.Announcement.ListResponse>(url, {
     method: "GET",
@@ -71,7 +74,7 @@ export async function getAnnoList(
 
 /**
  * @description 获取游戏内公告内容
- * @since Beta v0.5.0
+ * @since Beta v0.5.5
  * @param {number} annId 公告 ID
  * @param {AnnoServer} region 服务器
  * @param {AnnoLang} lang 语言
@@ -83,9 +86,9 @@ export async function getAnnoContent(
   lang: AnnoLang = "zh-cn",
 ): Promise<TGApp.BBS.Announcement.ContentItem> {
   const params: TGApp.BBS.Announcement.Params = getAnnoParams(region, lang);
-  let url = "https://hk4e-api.mihoyo.com/common/hk4e_cn/announcement/api/getAnnContent";
+  let url = `${AnnoApi}/getAnnContent`;
   if (region !== AnnoServer.CN_ISLAND && region !== AnnoServer.CN_TREE) {
-    url = "https://hk4e-api-os.hoyoverse.com/common/hk4e_global/announcement/api/getAnnContent";
+    url = `${AnnoApiGlobal}/getAnnContent`;
   }
   const annoResp = await TGHttp<TGApp.BBS.Announcement.ContentResponse>(url, {
     method: "GET",

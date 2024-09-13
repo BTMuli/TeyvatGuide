@@ -15,13 +15,13 @@
   </transition>
 </template>
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, useTemplateRef } from "vue";
 
 const show = ref<boolean>(false);
 const showOuter = ref<boolean>(false);
 const showInner = ref<boolean>(false);
 
-const geetestRef = ref<HTMLElement>(<HTMLElement>document.getElementById("geetest"));
+const geetestEl = useTemplateRef<HTMLDivElement>("geetestRef");
 
 watch(show, () => {
   if (show.value) {
@@ -55,7 +55,8 @@ async function displayBox(
         width: "250px",
       },
       (captchaObj: TGApp.Plugins.Mys.Geetest.GeetestCaptcha) => {
-        geetestRef.value.innerHTML = "";
+        if (geetestEl.value === null) return;
+        geetestEl.value.innerHTML = "";
         captchaObj.appendTo("#geetest");
         captchaObj.onReady(() => {
           show.value = true;
