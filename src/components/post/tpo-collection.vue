@@ -5,7 +5,7 @@
         <span>{{ props.collection.collection_title }}</span>
         <span>合集ID：{{ props.collection.collection_id }}</span>
       </div>
-      <div class="tpoc-list" :id="`post-collect-overlay-${props.collection.collection_id}`">
+      <div class="tpoc-list" ref="postListRef">
         <div
           class="tpoc-item"
           v-for="(item, index) in posts"
@@ -47,7 +47,7 @@
   </TOverlay>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import Mys from "../../plugins/Mys/index.js";
@@ -72,6 +72,7 @@ interface TpoCollectionItem {
 
 const props = defineProps<TpoCollectionProps>();
 const emits = defineEmits<TpoCollectionEmits>();
+const postListEl = useTemplateRef<HTMLDivElement>("postListRef");
 
 const visible = computed({
   get: () => props.modelValue,
@@ -88,16 +89,11 @@ watch(
   async (value) => {
     if (value) {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      const postList: HTMLElement | null = document.getElementById(
-        `post-collect-overlay-${props.collection.collection_id}`,
-      );
-      if (postList === null) return;
-      if (props.collection.cur < 6) return;
-      const lastItem = <HTMLDivElement>postList.children[postList.children.length - 1];
-      postList.scrollTo({
-        top: lastItem.offsetTop - postList.clientHeight / 2 + lastItem.clientHeight / 2,
-        behavior: "smooth",
-      });
+      if (postListEl.value === null || props.collection.total < 5) return;
+      let topNum: number;
+      if (props.collection.total - props.collection.cur < 3) topNum = props.collection.total;
+      else topNum = props.collection.cur - 3;
+      postListEl.value.scrollTo({ top: topNum * 69, behavior: "smooth" });
     }
   },
 );
