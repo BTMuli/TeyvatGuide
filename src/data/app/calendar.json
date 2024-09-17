@@ -1497,7 +1497,7 @@
   },
   {
     "id": 10000101,
-    "contentId": 0,
+    "contentId": 501624,
     "dropDays": [2, 5, 7],
     "name": "基尼奇",
     "itemType": "character",
@@ -4798,7 +4798,7 @@
   },
   {
     "id": 12513,
-    "contentId": 0,
+    "contentId": 502471,
     "dropDays": [2, 5, 7],
     "name": "山王长牙",
     "itemType": "weapon",
