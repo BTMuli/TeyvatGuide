@@ -43,11 +43,11 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 22.3.0
+          node-version: 22.8.0
       - name: setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 9.9.0
+          version: 9.10.0
       - name: Install frontend dependencies
         run: pnpm install
 

@@ -1,6 +1,6 @@
 -- @file plugins/Sqlite/sql/createTable.sql
 -- @brief sqlite数据库创建表语句
--- @since Beta v0.5.3
+-- @since Beta v0.5.5
 
 -- @brief 创建成就数据表
 create table if not exists Achievements
@@ -113,9 +113,6 @@ create table if not exists UserRecord
     homes        text,
     updated      text
 );
-
--- @brief 删除旧的角色数据表
-drop table if exists UserCharacters;
 
 -- @brief 创建角色数据表
 create table if not exists UserCharacters

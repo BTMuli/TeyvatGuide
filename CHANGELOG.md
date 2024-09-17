@@ -2,12 +2,36 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-07-09
-Update: 2024-08-27
+Update: 2024-09-17
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-07-09 14:16:16`
 >
-> 更新于 `2024-08-27 12:07:18`
+> 更新于 `2024-09-17 09:03:55`
+
+## [0.5.5](https://github.com/BTMuli/TeyvatGuide/releases/v0.5.5) (2024-09-17)
+
+- ✨ 帖子回复&子回复查看&分享
+- 🐛 修复特定条件下活动组件点击异常
+- 💄 战绩页面适配纳塔版本数据，部分数据添加icon
+- 💄 祈愿页面修复特定条件下的内容溢出
+- ♻️ 重构`tp-image`的放缩逻辑及其浮窗的放缩逻辑
+- 💄 固定帖子子窗口`主题切换` `图片分享` `收藏编辑`等按钮
+- ♻️ 重构数据解析逻辑&公告数据转换逻辑
+- 💄 优化图片加载显示
+- 🐛 修复特定条件下的帖子数据未能正确解析
+- 🐛 添加hoyoverse域名准入，修复公告页无法加载国际服数据
+- 🎨 设置页缓存即时显示
+- 🐛 修复祈愿页面全量刷新逻辑异常
+- 🍱 更新5.0数据
+- 🐛 修复成就导出时间戳异常 [`#125`](https://github.com/BTMuli/TeyvatGuide/issues/125)
+- 🐛 修正子窗口label&子窗口回正异常
+- 🐛 修复AppOnInit报错
+- ♻️ 重构帖子页面的代码逻辑
+- 💄 调整成就系列IconUI，调整纳塔Icon浅色模式下的样式
+- 💄 祈愿页数据行样式美化
+- 🎨 帖子合集浮窗自动平滑滚动到当前帖子
+- 🐛 修复子窗口分辨率适应异常
 
 ## [0.5.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.5.3) (2024-08-27)
 

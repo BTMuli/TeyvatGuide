@@ -14,13 +14,11 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 22.0.0
+          node-version: 22.8.0
       - name: setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 9.9.0
-      - name: remove lockfile
-        run: rm -f pnpm-lock.yaml
+          version: 9.10.0
       - name: Install dependencies
         run: pnpm install
       - name: "Qodana Scan"
