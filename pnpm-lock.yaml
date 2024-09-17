@@ -12,34 +12,34 @@ importers:
         specifier: 7.4.47
         version: 7.4.47
       '@tauri-apps/api':
-        specifier: 2.0.0-rc.4
+        specifier: ^2.0.0-rc.4
         version: 2.0.0-rc.4
       '@tauri-apps/plugin-deep-link':
-        specifier: 2.0.0-rc.2
+        specifier: ^2.0.0-rc.2
         version: 2.0.0-rc.2
       '@tauri-apps/plugin-dialog':
-        specifier: 2.0.0-rc.1
+        specifier: ^2.0.0-rc.1
         version: 2.0.0-rc.1
       '@tauri-apps/plugin-fs':
-        specifier: 2.0.0-rc.2
+        specifier: ^2.0.0-rc.2
         version: 2.0.0-rc.2
       '@tauri-apps/plugin-http':
-        specifier: 2.0.0-rc.2
+        specifier: ^2.0.0-rc.2
         version: 2.0.0-rc.2
       '@tauri-apps/plugin-log':
-        specifier: 2.0.0-rc.1
+        specifier: ^2.0.0-rc.1
         version: 2.0.0-rc.1
       '@tauri-apps/plugin-os':
-        specifier: 2.0.0-rc.1
+        specifier: ^2.0.0-rc.1
         version: 2.0.0-rc.1
       '@tauri-apps/plugin-process':
-        specifier: 2.0.0-rc.1
+        specifier: ^2.0.0-rc.1
         version: 2.0.0-rc.1
       '@tauri-apps/plugin-shell':
-        specifier: 2.0.0-rc.1
+        specifier: ^2.0.0-rc.1
         version: 2.0.0-rc.1
       '@tauri-apps/plugin-sql':
-        specifier: 2.0.0-rc.1
+        specifier: ^2.0.0-rc.1
         version: 2.0.0-rc.1
       ajv:
         specifier: ^8.17.1
@@ -5448,14 +5448,14 @@ snapshots:
     dependencies:
       htmlparser2: 8.0.2
       js-tokens: 8.0.3
-      postcss: 8.4.45
-      postcss-safe-parser: 6.0.0(postcss@8.4.45)
+      postcss: 8.4.47
+      postcss-safe-parser: 6.0.0(postcss@8.4.47)
 
   postcss-resolve-nested-selector@0.1.6: {}
 
-  postcss-safe-parser@6.0.0(postcss@8.4.45):
+  postcss-safe-parser@6.0.0(postcss@8.4.47):
     dependencies:
-      postcss: 8.4.45
+      postcss: 8.4.47
 
   postcss-safe-parser@7.0.0(postcss@8.4.45):
     dependencies:
