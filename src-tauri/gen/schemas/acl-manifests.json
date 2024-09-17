@@ -1,4 +1,24 @@
 {
+  "core": {
+    "default_permission": {
+      "identifier": "default",
+      "description": "Default core plugins set which includes:\n- 'core:path:default'\n- 'core:event:default'\n- 'core:window:default'\n- 'core:webview:default'\n- 'core:app:default'\n- 'core:image:default'\n- 'core:resources:default'\n- 'core:menu:default'\n- 'core:tray:default'\n",
+      "permissions": [
+        "core:path:default",
+        "core:event:default",
+        "core:window:default",
+        "core:webview:default",
+        "core:app:default",
+        "core:image:default",
+        "core:resources:default",
+        "core:menu:default",
+        "core:tray:default"
+      ]
+    },
+    "permissions": {},
+    "permission_sets": {},
+    "global_scope_schema": null
+  },
   "core:app": {
     "default_permission": {
       "identifier": "default",
@@ -1784,16 +1804,7 @@
       "create-app-specific-dirs": {
         "identifier": "create-app-specific-dirs",
         "description": "This permissions allows to create the application specific directories.\n",
-        "commands": { "allow": ["mkdir"], "deny": [] },
-        "scope": {
-          "allow": [
-            { "path": "$APPCONFIG" },
-            { "path": "$APPDATA" },
-            { "path": "$APPLOCALDATA" },
-            { "path": "$APPCACHE" },
-            { "path": "$APPLOG" }
-          ]
-        }
+        "commands": { "allow": ["mkdir", "scope-app-index"], "deny": [] }
       },
       "deny-copy-file": {
         "identifier": "deny-copy-file",
@@ -1958,18 +1969,10 @@
             "read_text_file",
             "read_text_file_lines",
             "read_text_file_lines_next",
-            "exists"
+            "exists",
+            "scope-app-recursive"
           ],
           "deny": []
-        },
-        "scope": {
-          "allow": [
-            { "path": "$APPCONFIG/**" },
-            { "path": "$APPDATA/**" },
-            { "path": "$APPLOCALDATA/**" },
-            { "path": "$APPCACHE/**" },
-            { "path": "$APPLOG/**" }
-          ]
         }
       },
       "read-dirs": {
@@ -2009,25 +2012,59 @@
       },
       "scope-app": {
         "identifier": "scope-app",
-        "description": "This scope permits access to all files and list content of top level directories in the `$APP`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the application folders.",
         "commands": { "allow": [], "deny": [] },
-        "scope": { "allow": [{ "path": "$APP" }, { "path": "$APP/*" }] }
+        "scope": {
+          "allow": [
+            { "path": "$APPCONFIG" },
+            { "path": "$APPCONFIG/*" },
+            { "path": "$APPDATA" },
+            { "path": "$APPDATA/*" },
+            { "path": "$APPLOCALDATA" },
+            { "path": "$APPLOCALDATA/*" },
+            { "path": "$APPCACHE" },
+            { "path": "$APPCACHE/*" },
+            { "path": "$APPLOG" },
+            { "path": "$APPLOG/*" }
+          ]
+        }
       },
       "scope-app-index": {
         "identifier": "scope-app-index",
-        "description": "This scope permits to list all files and folders in the `$APP`folder.",
+        "description": "This scope permits to list all files and folders in the application directories.",
         "commands": { "allow": [], "deny": [] },
-        "scope": { "allow": [{ "path": "$APP" }] }
+        "scope": {
+          "allow": [
+            { "path": "$APPCONFIG" },
+            { "path": "$APPDATA" },
+            { "path": "$APPLOCALDATA" },
+            { "path": "$APPCACHE" },
+            { "path": "$APPLOG" }
+          ]
+        }
       },
       "scope-app-recursive": {
         "identifier": "scope-app-recursive",
-        "description": "This scope permits recursive access to the complete `$APP` folder, including sub directories and files.",
+        "description": "This scope permits recursive access to the complete application folders, including sub directories and files.",
         "commands": { "allow": [], "deny": [] },
-        "scope": { "allow": [{ "path": "$APP" }, { "path": "$APP/**" }] }
+        "scope": {
+          "allow": [
+            { "path": "$APPCONFIG" },
+            { "path": "$APPCONFIG/**" },
+            { "path": "$APPDATA" },
+            { "path": "$APPDATA/**" },
+            { "path": "$APPLOCALDATA" },
+            { "path": "$APPLOCALDATA/**" },
+            { "path": "$APPCACHE" },
+            { "path": "$APPCACHE/**" },
+            { "path": "$APPLOG" },
+            { "path": "$APPLOG/**" }
+          ]
+        }
       },
       "scope-appcache": {
         "identifier": "scope-appcache",
-        "description": "This scope permits access to all files and list content of top level directories in the `$APPCACHE`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$APPCACHE` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$APPCACHE" }, { "path": "$APPCACHE/*" }] }
       },
@@ -2045,7 +2082,7 @@
       },
       "scope-appconfig": {
         "identifier": "scope-appconfig",
-        "description": "This scope permits access to all files and list content of top level directories in the `$APPCONFIG`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$APPCONFIG` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$APPCONFIG" }, { "path": "$APPCONFIG/*" }] }
       },
@@ -2063,7 +2100,7 @@
       },
       "scope-appdata": {
         "identifier": "scope-appdata",
-        "description": "This scope permits access to all files and list content of top level directories in the `$APPDATA`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$APPDATA` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$APPDATA" }, { "path": "$APPDATA/*" }] }
       },
@@ -2081,7 +2118,7 @@
       },
       "scope-applocaldata": {
         "identifier": "scope-applocaldata",
-        "description": "This scope permits access to all files and list content of top level directories in the `$APPLOCALDATA`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$APPLOCALDATA` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$APPLOCALDATA" }, { "path": "$APPLOCALDATA/*" }] }
       },
@@ -2099,7 +2136,7 @@
       },
       "scope-applog": {
         "identifier": "scope-applog",
-        "description": "This scope permits access to all files and list content of top level directories in the `$APPLOG`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$APPLOG` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$APPLOG" }, { "path": "$APPLOG/*" }] }
       },
@@ -2117,7 +2154,7 @@
       },
       "scope-audio": {
         "identifier": "scope-audio",
-        "description": "This scope permits access to all files and list content of top level directories in the `$AUDIO`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$AUDIO` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$AUDIO" }, { "path": "$AUDIO/*" }] }
       },
@@ -2135,7 +2172,7 @@
       },
       "scope-cache": {
         "identifier": "scope-cache",
-        "description": "This scope permits access to all files and list content of top level directories in the `$CACHE`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$CACHE` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$CACHE" }, { "path": "$CACHE/*" }] }
       },
@@ -2153,7 +2190,7 @@
       },
       "scope-config": {
         "identifier": "scope-config",
-        "description": "This scope permits access to all files and list content of top level directories in the `$CONFIG`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$CONFIG` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$CONFIG" }, { "path": "$CONFIG/*" }] }
       },
@@ -2171,7 +2208,7 @@
       },
       "scope-data": {
         "identifier": "scope-data",
-        "description": "This scope permits access to all files and list content of top level directories in the `$DATA`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$DATA` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$DATA" }, { "path": "$DATA/*" }] }
       },
@@ -2189,7 +2226,7 @@
       },
       "scope-desktop": {
         "identifier": "scope-desktop",
-        "description": "This scope permits access to all files and list content of top level directories in the `$DESKTOP`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$DESKTOP` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$DESKTOP" }, { "path": "$DESKTOP/*" }] }
       },
@@ -2207,7 +2244,7 @@
       },
       "scope-document": {
         "identifier": "scope-document",
-        "description": "This scope permits access to all files and list content of top level directories in the `$DOCUMENT`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$DOCUMENT` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/*" }] }
       },
@@ -2225,7 +2262,7 @@
       },
       "scope-download": {
         "identifier": "scope-download",
-        "description": "This scope permits access to all files and list content of top level directories in the `$DOWNLOAD`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$DOWNLOAD` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$DOWNLOAD" }, { "path": "$DOWNLOAD/*" }] }
       },
@@ -2243,7 +2280,7 @@
       },
       "scope-exe": {
         "identifier": "scope-exe",
-        "description": "This scope permits access to all files and list content of top level directories in the `$EXE`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$EXE` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$EXE" }, { "path": "$EXE/*" }] }
       },
@@ -2261,7 +2298,7 @@
       },
       "scope-font": {
         "identifier": "scope-font",
-        "description": "This scope permits access to all files and list content of top level directories in the `$FONT`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$FONT` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$FONT" }, { "path": "$FONT/*" }] }
       },
@@ -2279,7 +2316,7 @@
       },
       "scope-home": {
         "identifier": "scope-home",
-        "description": "This scope permits access to all files and list content of top level directories in the `$HOME`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$HOME` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$HOME" }, { "path": "$HOME/*" }] }
       },
@@ -2297,7 +2334,7 @@
       },
       "scope-localdata": {
         "identifier": "scope-localdata",
-        "description": "This scope permits access to all files and list content of top level directories in the `$LOCALDATA`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$LOCALDATA` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$LOCALDATA" }, { "path": "$LOCALDATA/*" }] }
       },
@@ -2315,7 +2352,7 @@
       },
       "scope-log": {
         "identifier": "scope-log",
-        "description": "This scope permits access to all files and list content of top level directories in the `$LOG`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$LOG` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$LOG" }, { "path": "$LOG/*" }] }
       },
@@ -2333,7 +2370,7 @@
       },
       "scope-picture": {
         "identifier": "scope-picture",
-        "description": "This scope permits access to all files and list content of top level directories in the `$PICTURE`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$PICTURE` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$PICTURE" }, { "path": "$PICTURE/*" }] }
       },
@@ -2351,7 +2388,7 @@
       },
       "scope-public": {
         "identifier": "scope-public",
-        "description": "This scope permits access to all files and list content of top level directories in the `$PUBLIC`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$PUBLIC` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$PUBLIC" }, { "path": "$PUBLIC/*" }] }
       },
@@ -2369,7 +2406,7 @@
       },
       "scope-resource": {
         "identifier": "scope-resource",
-        "description": "This scope permits access to all files and list content of top level directories in the `$RESOURCE`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$RESOURCE` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$RESOURCE" }, { "path": "$RESOURCE/*" }] }
       },
@@ -2387,7 +2424,7 @@
       },
       "scope-runtime": {
         "identifier": "scope-runtime",
-        "description": "This scope permits access to all files and list content of top level directories in the `$RUNTIME`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$RUNTIME` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$RUNTIME" }, { "path": "$RUNTIME/*" }] }
       },
@@ -2405,7 +2442,7 @@
       },
       "scope-temp": {
         "identifier": "scope-temp",
-        "description": "This scope permits access to all files and list content of top level directories in the `$TEMP`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$TEMP` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$TEMP" }, { "path": "$TEMP/*" }] }
       },
@@ -2423,7 +2460,7 @@
       },
       "scope-template": {
         "identifier": "scope-template",
-        "description": "This scope permits access to all files and list content of top level directories in the `$TEMPLATE`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$TEMPLATE` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$TEMPLATE" }, { "path": "$TEMPLATE/*" }] }
       },
@@ -2441,7 +2478,7 @@
       },
       "scope-video": {
         "identifier": "scope-video",
-        "description": "This scope permits access to all files and list content of top level directories in the `$VIDEO`folder.",
+        "description": "This scope permits access to all files and list content of top level directories in the `$VIDEO` folder.",
         "commands": { "allow": [], "deny": [] },
         "scope": { "allow": [{ "path": "$VIDEO" }, { "path": "$VIDEO/*" }] }
       },
@@ -2498,32 +2535,32 @@
     "permission_sets": {
       "allow-app-meta": {
         "identifier": "allow-app-meta",
-        "description": "This allows non-recursive read access to metadata of the `$APP` folder, including file listing and statistics.",
+        "description": "This allows non-recursive read access to metadata of the application folders, including file listing and statistics.",
         "permissions": ["read-meta", "scope-app-index"]
       },
       "allow-app-meta-recursive": {
         "identifier": "allow-app-meta-recursive",
-        "description": "This allows full recursive read access to metadata of the `$APP` folder, including file listing and statistics.",
+        "description": "This allows full recursive read access to metadata of the application folders, including file listing and statistics.",
         "permissions": ["read-meta", "scope-app-recursive"]
       },
       "allow-app-read": {
         "identifier": "allow-app-read",
-        "description": "This allows non-recursive read access to the `$APP` folder.",
+        "description": "This allows non-recursive read access to the application folders.",
         "permissions": ["read-all", "scope-app"]
       },
       "allow-app-read-recursive": {
         "identifier": "allow-app-read-recursive",
-        "description": "This allows full recursive read access to the complete `$APP` folder, files and subdirectories.",
+        "description": "This allows full recursive read access to the complete application folders, files and subdirectories.",
         "permissions": ["read-all", "scope-app-recursive"]
       },
       "allow-app-write": {
         "identifier": "allow-app-write",
-        "description": "This allows non-recursive write access to the `$APP` folder.",
+        "description": "This allows non-recursive write access to the application folders.",
         "permissions": ["write-all", "scope-app"]
       },
       "allow-app-write-recursive": {
         "identifier": "allow-app-write-recursive",
-        "description": "This allows full recursive write access to the complete `$APP` folder, files and subdirectories.",
+        "description": "This allows full recursive write access to the complete application folders, files and subdirectories.",
         "permissions": ["write-all", "scope-app-recursive"]
       },
       "allow-appcache-meta": {
@@ -3603,7 +3640,7 @@
           "description": "The allowed arguments for the command execution."
         },
         "cmd": {
-          "description": "The command name. It can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$APP`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
+          "description": "The command name. It can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
           "type": "string"
         },
         "name": {
