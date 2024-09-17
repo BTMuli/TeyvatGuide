@@ -175,10 +175,7 @@ function getVodTime(): string {
 }
 
 .tp-vod-cover {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
+  max-width: 100%;
   object-fit: cover;
 }
 
