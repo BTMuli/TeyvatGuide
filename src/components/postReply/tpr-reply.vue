@@ -81,7 +81,7 @@
         <v-icon size="small">mdi-pin</v-icon>
         <span>置顶评论</span>
       </span>
-      <span class="tpr-debug" @click="exportData" title="导出数据">
+      <span class="tpr-debug" @click="exportData" data-html2canvas-ignore title="导出数据">
         <v-icon size="small">mdi-file-export</v-icon>
       </span>
       <span v-if="props.modelValue.r_user" class="tpr-reply-user">

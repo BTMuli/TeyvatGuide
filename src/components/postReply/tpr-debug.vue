@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="0">
+  <TOverlay v-model="visible" :hide="true" :to-click="onCancel" blur-val="0">
     <div class="tpr-debug-box">
       <div class="tpr-debug-title">
         <span>文件：</span>
@@ -7,7 +7,7 @@
         <v-btn @click="selectFile" color="primary">选择文件</v-btn>
       </div>
       <div class="tpr-debug-reply">
-        <TprReply mode="main" :modelValue="replyData" v-if="replyData !== null" />
+        <TprReply mode="main" :modelValue="replyData" v-if="replyData !== null" pinId="0" />
       </div>
     </div>
   </TOverlay>
