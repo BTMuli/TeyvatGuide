@@ -41,7 +41,7 @@ onMounted(async () => {
 });
 
 watch(
-  () => props.cur,
+  () => props.uid,
   async () => await refreshOverview(),
 );
 

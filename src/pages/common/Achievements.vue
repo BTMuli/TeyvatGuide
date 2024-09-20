@@ -57,7 +57,7 @@ import { path } from "@tauri-apps/api";
 import { UnlistenFn, listen } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
-import { onMounted, ref, computed, onUnmounted } from "vue";
+import { onMounted, ref, watch, computed, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import showConfirm from "../../components/func/confirm.js";
@@ -115,6 +115,11 @@ onMounted(async () => {
   }
   achiListener = await listen<number>("updateAchi", async () => await refreshOverview());
 });
+
+watch(
+  () => uidCur,
+  async () => await refreshOverview(),
+);
 
 onUnmounted(async () => {
   if (achiListener !== null) {
