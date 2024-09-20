@@ -117,7 +117,7 @@ onMounted(async () => {
 });
 
 watch(
-  () => uidCur,
+  () => uidCur.value,
   async () => await refreshOverview(),
 );
 
