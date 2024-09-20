@@ -63,7 +63,7 @@ const showNc = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
 
 const renderAchi = computed<Array<TGApp.Sqlite.Achievement.RenderAchi>>(() => {
-  if (props.hideFin) return achievements.value.filter((a) => a.isCompleted);
+  if (props.hideFin) return achievements.value.filter((a) => !a.isCompleted);
   return achievements.value;
 });
 

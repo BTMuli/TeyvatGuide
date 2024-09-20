@@ -98,11 +98,6 @@ let achiListener: UnlistenFn | null = null;
 
 async function switchHideFin() {
   const text = hideFin.value ? "显示已完成" : "隐藏已完成";
-  const res = await showConfirm({ title: "是否切换显示已完成？", text });
-  if (!res) {
-    showSnackbar({ color: "cancel", text: "已取消切换" });
-    return;
-  }
   hideFin.value = !hideFin.value;
   showSnackbar({ text: `已${text}`, color: "success" });
 }
