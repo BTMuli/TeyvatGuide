@@ -1,12 +1,11 @@
 /**
  * @file plugins/Sqlite/modules/userGacha.ts
  * @description 用户祈愿模块
- * @since Beta v0.5.1
+ * @since Beta v0.6.0
  */
 
 import { AppCharacterData, AppWeaponData } from "../../../data/index.js";
 import TGSqlite from "../index.js";
-import { importUIGFData } from "../sql/updateData.js";
 
 type gachaItemTypeRes =
   | ["角色", TGApp.App.Character.WikiBriefInfo]
@@ -25,6 +24,34 @@ function getGachaItemType(item_id: string): gachaItemTypeRes {
   const findWeapon = AppWeaponData.find((i) => i.id.toString() === item_id);
   if (findWeapon !== undefined) return ["武器", findWeapon];
   return ["未知", "未知"];
+}
+
+/**
+ * @description 获取导入 Sql
+ * @since Beta v.6.0
+ * @param {string} uid - UID
+ * @param {TGApp.Plugins.UIGF.GachaItem} gacha - UIGF数据
+ * @returns {string}
+ */
+function getInsertSql(uid: string, gacha: TGApp.Plugins.UIGF.GachaItem): string {
+  return `
+      INSERT INTO GachaRecords (uid, gachaType, itemId, count, time, name, type, rank, id, uigfType, updated)
+      VALUES ('${uid}', '${gacha.gacha_type}', '${gacha.item_id ?? null}', '${gacha.count ?? null}', '${gacha.time}',
+              '${gacha.name}', '${gacha.item_type ?? null}', '${gacha.rank_type ?? null}', '${gacha.id}',
+              '${gacha.uigf_gacha_type}', datetime('now', 'localtime'))
+      ON CONFLICT (id)
+          DO UPDATE
+          SET uid       = '${uid}',
+              gachaType = '${gacha.gacha_type}',
+              uigfType  = '${gacha.uigf_gacha_type}',
+              time      = '${gacha.time}',
+              itemId    = '${gacha.item_id ?? null}',
+              count     = '${gacha.count ?? null}',
+              name      = '${gacha.name}',
+              type      = '${gacha.item_type ?? null}',
+              rank      = '${gacha.rank_type ?? null}',
+              updated   = datetime('now', 'localtime');
+  `;
 }
 
 /**
@@ -130,7 +157,7 @@ async function mergeUIGF(uid: string, data: TGApp.Plugins.UIGF.GachaItem[]): Pro
   const db = await TGSqlite.getDB();
   for (const gacha of data) {
     const trans = transGacha(gacha);
-    const sql = importUIGFData(uid, trans);
+    const sql = getInsertSql(uid, trans);
     await db.execute(sql);
   }
 }
@@ -145,7 +172,7 @@ async function mergeUIGF4(data: TGApp.Plugins.UIGF.GachaHk4e): Promise<void> {
   const db = await TGSqlite.getDB();
   for (const gacha of data.list) {
     const trans = transGacha(gacha);
-    const sql = importUIGFData(data.uid.toString(), trans);
+    const sql = getInsertSql(data.uid.toString(), trans);
     await db.execute(sql);
   }
 }

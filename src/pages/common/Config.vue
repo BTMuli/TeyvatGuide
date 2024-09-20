@@ -121,8 +121,6 @@ import showConfirm from "../../components/func/confirm.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TGSqlite from "../../plugins/Sqlite/index.js";
-import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
-import { useAchievementsStore } from "../../store/modules/achievements.js";
 import { useAppStore } from "../../store/modules/app.js";
 import { useHomeStore } from "../../store/modules/home.js";
 import { backUpUserData, restoreUserData } from "../../utils/dataBS.js";
@@ -134,7 +132,6 @@ import TGRequest from "../../web/request/TGRequest.js";
 // Store
 const appStore = useAppStore();
 const homeStore = useHomeStore();
-const achievementsStore = useAchievementsStore();
 
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 
@@ -257,7 +254,6 @@ async function confirmUpdate(title?: string): Promise<void> {
   loadingTitle.value = "正在更新数据库...";
   loading.value = true;
   await TGSqlite.update();
-  achievementsStore.lastVersion = await TSUserAchi.getLatestAchiVersion();
   appStore.buildTime = getBuildTime();
   loading.value = false;
   showSnackbar({
@@ -398,7 +394,6 @@ async function confirmResetApp(): Promise<void> {
   }
   appStore.init();
   homeStore.init();
-  achievementsStore.init();
   await TGLogger.Info("[Config][confirmResetApp] 恢复默认设置完成");
   showSnackbar({ text: "已恢复默认配置!即将刷新页面..." });
   setTimeout(() => {

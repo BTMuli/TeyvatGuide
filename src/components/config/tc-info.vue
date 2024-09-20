@@ -15,7 +15,7 @@
         <img class="config-icon" src="../../assets/icons/achievements.svg" alt="Achievements" />
       </template>
       <template #append>
-        <v-list-item-subtitle>{{ achievementsStore.lastVersion }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{ latestAchiVersion }}</v-list-item-subtitle>
       </template>
     </v-list-item>
     <v-list-item title="系统平台">
@@ -78,11 +78,11 @@ import { platform, version } from "@tauri-apps/plugin-os";
 import { onMounted, ref } from "vue";
 
 import TGSqlite from "../../plugins/Sqlite/index.js";
-import { useAchievementsStore } from "../../store/modules/achievements.js";
+import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
 import TGLogger from "../../utils/TGLogger.js";
 import showSnackbar from "../func/snackbar.js";
 
-const achievementsStore = useAchievementsStore();
+const latestAchiVersion = TSUserAchi.getLatestAchiVersion();
 
 const versionApp = ref<string>("");
 const versionTauri = ref<string>("");

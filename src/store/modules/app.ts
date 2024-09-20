@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.5.5
+ * @since Beta v0.6.0
  */
 
 import { path } from "@tauri-apps/api";
@@ -21,8 +21,6 @@ const logDataDir = await path.appLogDir();
 export const useAppStore = defineStore(
   "app",
   () => {
-    // 应用加载状态
-    const loading = ref(false);
     // 应用打包时间
     const buildTime = ref("");
     // 侧边栏设置
@@ -55,7 +53,6 @@ export const useAppStore = defineStore(
 
     // 初始化
     function init(): void {
-      loading.value = false;
       devMode.value = false;
       theme.value = "default";
       isLogin.value = false;
@@ -78,7 +75,6 @@ export const useAppStore = defineStore(
 
     return {
       theme,
-      loading,
       buildTime,
       sidebar,
       devMode,

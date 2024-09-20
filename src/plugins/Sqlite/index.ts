@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/index.ts
  * @description Sqlite 数据库操作类
- * @since Beta v0.5.3
+ * @since Beta v0.6.0
  */
 
 import { app } from "@tauri-apps/api";
@@ -163,22 +163,6 @@ class Sqlite {
     for (const item of sqlD) {
       await db.execute(item);
     }
-  }
-
-  /**
-   * @description 检测数据库完整性
-   * @since Beta v0.4.4
-   * @returns {Promise<boolean>}
-   */
-  public async check(): Promise<boolean> {
-    const db = await this.getDB();
-    let isVerified = false;
-    const sqlT = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
-    const res: Array<{ name: string }> = await db.select(sqlT);
-    if (this.tables.every((item) => res.map((i) => i.name).includes(item))) {
-      isVerified = true;
-    }
-    return isVerified;
   }
 
   /**

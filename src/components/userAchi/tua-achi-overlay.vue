@@ -1,50 +1,48 @@
 <template>
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="0">
-    <div class="toai-container" v-if="props.data">
+    <div class="tua-ao-container" v-if="props.data">
       <slot name="left"></slot>
-      <div class="toai-box">
-        <div class="toai-top">
-          <span class="toai-click" @click="searchDirect(props.data.name)">{{
-            props.data.name
-          }}</span>
+      <div class="tua-ao-box">
+        <div class="tua-ao-top">
+          <span class="tua-ao-click" @click="searchDirect(props.data.name)">
+            {{ props.data.name }}
+          </span>
           <span>{{ props.data.description }}</span>
         </div>
-        <div v-if="achiLC">
-          <div class="toai-mid-title">
-            <span>所属系列：</span>
-            <span class="toai-click" @click="emits('selectS', props.data.series)">{{
-              AppAchievementSeriesData.find((s) => s.id === props.data?.series)?.name ?? "未知"
-            }}</span>
-          </div>
-          <div class="toai-mid-title">
-            <span>原石奖励：</span>
-            <span>{{ props.data.reward }}</span>
-          </div>
-          <div class="toai-mid-title">
-            <span>触发方式：</span>
-            <span>{{ achiLC.trigger.task ? "完成以下所有任务" : achiLC.trigger.type }}</span>
-          </div>
-          <div class="toai-mid-item" v-for="item in achiLC.trigger.task" :key="item.questId">
-            <v-icon>mdi-alert-decagram</v-icon>
-            <span class="toai-click" @click="searchDirect(item.name)">{{ item.name }}</span>
-            <span>（{{ item.type }}）</span>
-          </div>
+        <div class="tua-ao-mid-title">
+          <span>所属系列：</span>
+          <span class="tua-ao-click" @click="emits('select-series', props.data.series)">
+            {{ AppAchievementSeriesData.find((s) => s.id === props.data?.series)?.name ?? "未知" }}
+          </span>
+        </div>
+        <div class="tua-ao-mid-title">
+          <span>原石奖励：</span>
+          <span>{{ props.data.reward }}</span>
+        </div>
+        <div class="tua-ao-mid-title">
+          <span>触发方式：</span>
+          <span>{{ props.data.trigger.task ? "完成以下所有任务" : props.data.trigger.type }}</span>
+        </div>
+        <div class="tua-ao-mid-item" v-for="item in props.data.trigger.task" :key="item.questId">
+          <v-icon>mdi-alert-decagram</v-icon>
+          <span class="tua-ao-click" @click="searchDirect(item.name)">{{ item.name }}</span>
+          <span>（{{ item.type }}）</span>
         </div>
         <div>
-          <div class="toai-bottom-title">
+          <div class="tua-ao-bottom-title">
             <span>是否完成：</span>
             <span>{{ props.data.isCompleted ? "是" : "否" }}</span>
           </div>
-          <div class="toai-bottom-title">
+          <div class="tua-ao-bottom-title">
             <span>完成时间：</span>
             <span>{{ props.data.completedTime }}</span>
           </div>
-          <div class="toai-bottom-title">
+          <div class="tua-ao-bottom-title">
             <span>当前进度：</span>
             <span>{{ props.data.progress }}</span>
           </div>
         </div>
-        <div class="toai-extra">
+        <div class="tua-ao-extra">
           <span>ID：{{ props.data.id }}</span>
         </div>
       </div>
@@ -54,22 +52,22 @@
   <ToPostSearch gid="2" v-model="showSearch" :keyword="search" />
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, ref } from "vue";
 
-import { AppAchievementsData, AppAchievementSeriesData } from "../../data/index.js";
+import { AppAchievementSeriesData } from "../../data/index.js";
 import TGLogger from "../../utils/TGLogger.js";
 import TOverlay from "../main/t-overlay.vue";
 import ToPostSearch from "../post/to-postSearch.vue";
 
 interface ToAchiInfoProps {
   modelValue: boolean;
-  data?: TGApp.Sqlite.Achievement.SingleTable;
+  data: TGApp.Sqlite.Achievement.RenderAchi;
 }
 
 interface ToAchiInfoEmits {
   (e: "update:modelValue", v: boolean): void;
 
-  (e: "selectS", v: number): void;
+  (e: "select-series", v: number): void;
 }
 
 const props = defineProps<ToAchiInfoProps>();
@@ -84,40 +82,25 @@ const visible = computed({
   },
 });
 
-const achiLC = ref<TGApp.App.Achievement.Item>();
-
-onMounted(() => getData);
-watch(() => props.data, getData);
-
-function getData(): void {
-  const res = AppAchievementsData.find((item) => item.id === props.data?.id);
-  if (res) {
-    achiLC.value = res;
-  } else {
-    achiLC.value = undefined;
-  }
-}
-
-// 点击外部关闭
 function onCancel() {
   visible.value = false;
 }
 
 async function searchDirect(word: string): Promise<void> {
-  await TGLogger.Info(`[ToAchiInfo][${props.data?.id}][Search] 查询 ${word}`);
+  await TGLogger.Info(`[ToAchiInfo][${props.data.id}][Search] 查询 ${word}`);
   search.value = word;
   showSearch.value = true;
 }
 </script>
 <style lang="css" scoped>
-.toai-container {
+.tua-ao-container {
   display: flex;
   align-items: center;
   justify-content: center;
   column-gap: 10px;
 }
 
-.toai-box {
+.tua-ao-box {
   position: relative;
   display: flex;
   overflow: hidden;
@@ -130,7 +113,7 @@ async function searchDirect(word: string): Promise<void> {
   row-gap: 10px;
 }
 
-.toai-top {
+.tua-ao-top {
   display: flex;
   width: 100%;
   flex-direction: column;
@@ -138,13 +121,13 @@ async function searchDirect(word: string): Promise<void> {
   justify-content: space-between;
 }
 
-.toai-top :first-child {
+.tua-ao-top :first-child {
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 24px;
 }
 
-.toai-top-main :last-child {
+.tua-ao-top-main :last-child {
   padding: 0 5px;
   border-radius: 5px;
   background: var(--box-bg-2);
@@ -152,21 +135,21 @@ async function searchDirect(word: string): Promise<void> {
   font-family: var(--font-title);
 }
 
-.toai-mid-title,
-.toai-bottom-title {
+.tua-ao-mid-title,
+.tua-ao-bottom-title {
   font-size: 18px;
 }
 
-.toai-mid-title :first-child,
-.toai-bottom-title :first-child {
+.tua-ao-mid-title :first-child,
+.tua-ao-bottom-title :first-child {
   font-family: var(--font-title);
 }
 
-.toai-mid-title :last-child {
+.tua-ao-mid-title :last-child {
   color: var(--box-text-3);
 }
 
-.toai-mid-item {
+.tua-ao-mid-item {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -176,17 +159,17 @@ async function searchDirect(word: string): Promise<void> {
   font-size: 18px;
 }
 
-.toai-mid-item :first-child {
+.tua-ao-mid-item :first-child {
   color: var(--box-text-5);
 }
 
-.toai-extra {
+.tua-ao-extra {
   position: absolute;
   right: 10px;
   bottom: 10px;
 }
 
-.toai-click {
+.tua-ao-click {
   cursor: pointer;
 }
 </style>

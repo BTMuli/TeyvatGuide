@@ -1,9 +1,5 @@
 <template>
-  <v-list
-    :style="{ backgroundImage: props.data.name === '原神·印象' ? 'none' : `url(${props.data.bg})` }"
-    class="top-nc-box"
-    @click="toNameCard(props.data)"
-  >
+  <v-list class="top-nc-box" @click="toNameCard(props.data)">
     <v-list-item :title="props.data.name">
       <template #subtitle>
         <span :title="props.data.desc">{{ props.data.desc }}</span>
@@ -15,16 +11,23 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-interface TopNamecardProps {
+import { computed } from "vue";
+
+interface TopNameCardProps {
   data: TGApp.App.NameCard.Item;
 }
 
-interface TopNamecardEmits {
+interface TopNameCardEmits {
   (e: "selected", data: TGApp.App.NameCard.Item): void;
 }
 
-const props = defineProps<TopNamecardProps>();
-const emit = defineEmits<TopNamecardEmits>();
+const props = defineProps<TopNameCardProps>();
+const emit = defineEmits<TopNameCardEmits>();
+
+const bgImage = computed<string>(() => {
+  if (props.data.name === "原神·印象") return "none;";
+  return `url("${props.data.bg}")`;
+});
 
 function toNameCard(item: TGApp.App.NameCard.Item) {
   emit("selected", item);
@@ -37,6 +40,7 @@ function toNameCard(item: TGApp.App.NameCard.Item) {
   border: 1px solid var(--common-shadow-2);
   border-radius: 10px 50px 50px 10px;
   background-color: var(--box-bg-1);
+  background-image: v-bind(bgImage);
   background-position: right;
   background-repeat: no-repeat;
   cursor: pointer;

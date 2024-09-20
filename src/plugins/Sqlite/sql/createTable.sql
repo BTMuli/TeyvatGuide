@@ -1,35 +1,23 @@
 -- @file plugins/Sqlite/sql/createTable.sql
 -- @brief sqlite数据库创建表语句
--- @since Beta v0.5.5
+-- @since Beta v0.6.0
 
+-- @brief 重新创建成就数据表
+drop table if exists Achievements;
 -- @brief 创建成就数据表
 create table if not exists Achievements
 (
-    id            integer primary key,
-    series        integer,
-    `order`       integer,
-    name          text,
-    description   text,
-    reward        integer,
+    id            integer not null,
+    uid           integer not null,
     isCompleted   boolean default false,
     completedTime text,
     progress      integer default 0,
-    version       text,
-    updated       text
+    updated       text,
+    primary key (id, uid)
 );
 
--- @brief 创建成就系列数据表
-create table if not exists AchievementSeries
-(
-    id         integer primary key,
-    `order`    integer,
-    name       text,
-    version    text,
-    totalCount integer default 0,
-    finCount   integer default 0,
-    nameCard   text,
-    updated    text
-);
+-- @brief 重新创建成就系列数据表
+drop table if exists AchievementSeries;
 
 -- @brief 创建角色数据表
 create table if not exists AppCharacters
@@ -117,19 +105,19 @@ create table if not exists UserRecord
 -- @brief 创建角色数据表
 create table if not exists UserCharacters
 (
-    uid                 integer,
-    cid                 integer,
-    avatar              text,
-    weapon              text,
-    relics              text,
-    constellations      text,
-    costumes            text,
-    skills              text,
-    propSelected        text,
-    propBase            text,
-    propExtra           text,
-    propRecommend     text,
-    updated             text,
+    uid            integer,
+    cid            integer,
+    avatar         text,
+    weapon         text,
+    relics         text,
+    constellations text,
+    costumes       text,
+    skills         text,
+    propSelected   text,
+    propBase       text,
+    propExtra      text,
+    propRecommend  text,
+    updated        text,
     primary key (uid, cid)
 );
 

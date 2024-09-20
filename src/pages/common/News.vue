@@ -19,7 +19,7 @@
         append-icon="mdi-magnify"
         label="请输入帖子 ID 或搜索词"
         :single-line="true"
-        hide-details
+        :hide-details="true"
         @keyup.enter="searchPost()"
         @click:append="searchPost()"
       />
@@ -47,7 +47,7 @@
         </div>
       </div>
       <div class="load-news">
-        <v-btn class="news-top-btn" rounded :loading="loadingSub" @click="loadMore(value)">
+        <v-btn class="news-top-btn" :rounded="true" :loading="loadingSub" @click="loadMore(value)">
           已加载：{{ rawData[value].lastId }}，加载更多
         </v-btn>
       </div>

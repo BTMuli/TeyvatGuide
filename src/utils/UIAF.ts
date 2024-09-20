@@ -1,7 +1,7 @@
 /**
  * @file utils/UIAF.ts
  * @description UIAF工具类
- * @since Beta v0.5.0
+ * @since Beta v0.6.0
  */
 
 import { app } from "@tauri-apps/api";
@@ -13,25 +13,6 @@ import showSnackbar from "../components/func/snackbar.js";
 import { UiafSchema } from "../data/index.js";
 
 import TGLogger from "./TGLogger.js";
-
-/**
- * @description 根据 completed 跟 progress 获取 status
- * @since Alpha v0.1.4
- * @param {boolean} completed - 是否完成
- * @param {number} progress - 进度
- * @returns {number} status
- */
-export function getUiafStatus(completed: boolean, progress: number): number {
-  if (progress !== 0 && !completed) {
-    return 1;
-  } else if (progress === 0 && completed) {
-    return 2;
-  } else if (progress !== 0 && completed) {
-    return 3;
-  } else {
-    return 0;
-  }
-}
 
 /**
  * @description 获取 UIAF 头部信息

@@ -35,6 +35,7 @@ const renderBox = (props: TGApp.Component.Snackbar.Params): VNode => {
 
 let snackbarInstance: VNode;
 
+// todo 参数重构
 function showSnackbar(props: TGApp.Component.Snackbar.Params): void {
   if (snackbarInstance !== undefined) {
     const boxVue = <SnackbarInstance>snackbarInstance.component;

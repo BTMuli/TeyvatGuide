@@ -1,10 +1,15 @@
 /**
- * @file types Plugins UIAF.d.ts
+ * @file types/Plugins/UIAF.d.ts
  * @description UIAF 插件类型定义文件
- * @author BTMuli<bt-muli@outlook.com>
- * @since Alpha v0.1.5
+ * @since Beta v0.6.0
  */
 
+/**
+ * @description UIAF 插件类型命名空间
+ * @namespace TGApp.Plugins.UIAF
+ * @merberof TGApp.Plugins
+ * @since Beta v0.6.0
+ */
 declare namespace TGApp.Plugins.UIAF {
   /**
    * @interface Data
@@ -51,5 +56,18 @@ declare namespace TGApp.Plugins.UIAF {
     timestamp: number;
     current: number;
     status: number;
+  }
+
+  /**
+   * @interface Backup
+   * @description 数据备份时的格式，用于标识不同存档
+   * @since Beta v0.6.0
+   * @property {number} uid - 存档UID
+   * @property {Achievement[]} data - 存档数据
+   * @returns Backup
+   */
+  interface Backup {
+    uid: number;
+    data: Achievement[];
   }
 }

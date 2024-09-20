@@ -36,9 +36,16 @@ import { nextTick, onMounted, reactive, ref, watch, useTemplateRef } from "vue";
 interface ConfirmProps {
   title: string;
   text?: string;
-  mode?: "confirm" | "input";
+  mode: "confirm" | "input";
   otcancel?: boolean;
 }
+
+const defaultProp: ConfirmProps = {
+  title: "",
+  text: "",
+  mode: "confirm",
+  otcancel: false,
+};
 
 const props = withDefaults(defineProps<ConfirmProps>(), {
   title: "",
@@ -48,9 +55,7 @@ const props = withDefaults(defineProps<ConfirmProps>(), {
 });
 
 // 组件参数
-const data = reactive<TGApp.Component.Confirm.Params>({
-  title: "",
-});
+const data = reactive<TGApp.Component.Confirm.Params>(defaultProp);
 const show = ref<boolean>(false);
 const showOuter = ref<boolean>(false);
 const showInner = ref<boolean>(false);

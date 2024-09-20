@@ -1,26 +1,16 @@
 /**
  * @file plugins/Sqlite/sql/initData.ts
  * @description Sqlite 初始化数据 sql 语句
- * @since Beta v0.4.5
+ * @since Beta v0.6.0
  */
 
 import { app } from "@tauri-apps/api";
 
-import {
-  AppAchievementsData,
-  AppAchievementSeriesData,
-  AppNameCardsData,
-  AppCharacterData,
-} from "../../../data/index.js";
+import { AppNameCardsData, AppCharacterData } from "../../../data/index.js";
 import { getBuildTime } from "../../../utils/TGBuild.js";
 
 import initTableSql from "./initTable.js";
-import {
-  insertAchievementData,
-  insertAchievementSeriesData,
-  insertNameCardData,
-  insertCharacterData,
-} from "./insertData.js";
+import { insertNameCardData, insertCharacterData } from "./insertData.js";
 
 /**
  * @description 初始化应用表数据
@@ -52,24 +42,6 @@ async function initAppData(): Promise<string[]> {
 }
 
 /**
- * @description 初始化成就系列数据
- * @since Alpha v0.2.0
- * @returns {string[]} sql
- */
-function initAchievementSeriesData(): string[] {
-  return AppAchievementSeriesData.map((item) => insertAchievementSeriesData(item));
-}
-
-/**
- * @description 初始化成就数据
- * @since Alpha v0.2.0
- * @returns {string[]} sql
- */
-function initAchievementData(): string[] {
-  return AppAchievementsData.map((item) => insertAchievementData(item));
-}
-
-/**
  * @description 初始化应用名片数据
  * @since Alpha v0.2.0
  * @returns {string[]} sql
@@ -96,8 +68,6 @@ async function initDataSql(): Promise<string[]> {
   const sqlRes: string[] = [];
   sqlRes.push(...initTableSql());
   sqlRes.push(...(await initAppData()));
-  sqlRes.push(...initAchievementSeriesData());
-  sqlRes.push(...initAchievementData());
   sqlRes.push(...initNameCardData());
   sqlRes.push(...initCharacterData());
   return sqlRes;

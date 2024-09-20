@@ -1,55 +1,13 @@
 /**
  * @file plugins/Sqlite/sql/insertData.ts
  * @description Sqlite 插入数据 sql 语句
- * @since Beta v0.5.3
+ * @since Beta v0.6.0
  */
 
 import { transCharacterData, transFloorData } from "../utils/transAbyssData.js";
 import { timeToSecond } from "../utils/transTime.js";
 import { transUserRecord } from "../utils/transUserRecord.js";
 import { transUserRoles } from "../utils/transUserRoles.js";
-
-/**
- * @description 插入成就数据
- * @since Alpha v0.2.0
- * @param {TGApp.App.Achievement.Item} data 成就数据
- * @returns {string} sql
- */
-export function insertAchievementData(data: TGApp.App.Achievement.Item): string {
-  return `
-      INSERT INTO Achievements (id, series, "order", name, description, reward, completedTime, version, updated)
-      VALUES (${data.id}, ${data.series}, ${data.order}, '${data.name}', '${data.description}', ${data.reward}, '',
-              '${data.version}', datetime('now', 'localtime'))
-      ON CONFLICT(id) DO UPDATE
-          SET series      = ${data.series},
-              "order"     = ${data.order},
-              name        = '${data.name}',
-              description = '${data.description}',
-              reward      = '${data.reward}',
-              version     = '${data.version}',
-              updated     = datetime('now', 'localtime');
-  `;
-}
-
-/**
- * @description 插入成就系列数据
- * @since Alpha v0.2.0
- * @param {TGApp.App.Achievement.Series} data 成就系列数据
- * @returns {string} sql
- */
-export function insertAchievementSeriesData(data: TGApp.App.Achievement.Series): string {
-  return `
-      INSERT INTO AchievementSeries (id, "order", name, version, nameCard, updated)
-      VALUES (${data.id}, ${data.order}, '${data.name}', '${data.version}', '${data.card}',
-              datetime('now', 'localtime'))
-      ON CONFLICT(id) DO UPDATE
-          SET name     = '${data.name}',
-              "order"  = ${data.order},
-              version  = '${data.version}',
-              nameCard = '${data.card}',
-              updated  = datetime('now', 'localtime');
-  `;
-}
 
 /**
  * @description 插入应用数据
