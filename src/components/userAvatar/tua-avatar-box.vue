@@ -47,7 +47,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from "vue";
 
-import TGSqlite from "../../plugins/Sqlite/index.js";
+import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
 import { useUserStore } from "../../store/modules/user.js";
 import { getZhElement } from "../../utils/toolFunc.js";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
@@ -120,14 +120,10 @@ const skills = computed<TGApp.Game.Avatar.Skill[]>(() => {
 
 const nameCard = ref<string | false>(false);
 
-onMounted(async () => {
+onMounted(() => {
   if (!props.modelValue) return;
-  if (props.modelValue.avatar.id !== 10000005 && props.modelValue.avatar.id !== 10000007) {
-    const role = await TGSqlite.getAppCharacter(props.modelValue.avatar.id);
-    nameCard.value = `/source/nameCard/profile/${role.nameCard}.webp`;
-  } else {
-    nameCard.value = "/source/nameCard/profile/原神·印象.webp";
-  }
+  const cardFind = TSUserAvatar.getAvatarCard(props.modelValue.avatar.id);
+  nameCard.value = `/source/nameCard/profile/${cardFind}.webp`;
 });
 
 function getWeaponTitle(): string {
