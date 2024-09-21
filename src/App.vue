@@ -256,7 +256,7 @@ async function checkUpdate(): Promise<void> {
     await TGLogger.Info("[App][checkUpdate] 检测到版本更新！");
     const confirm = await showConfirm({
       title: "检测到版本更新",
-      text: "是否更新数据库数据？",
+      text: "是否更新数据库数据？（请确保成就数据已导出）",
     });
     if (!confirm) {
       showSnackbar({
@@ -273,7 +273,8 @@ async function checkUpdate(): Promise<void> {
       color: "success",
       timeout: 3000,
     });
-    window.open("https://app.btmuli.ink/docs/Changelogs.html");
+    // todo 6.0发版时取消注释
+    // window.open("https://app.btmuli.ink/docs/Changelogs.html");
   }
 }
 
