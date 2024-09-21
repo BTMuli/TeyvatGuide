@@ -1,5 +1,6 @@
 <template>
   <TSwitchTheme />
+  <TPinWin />
   <TShareBtn
     v-show="!loadingEmpty"
     v-model="annoRef"
@@ -26,8 +27,9 @@ import { ref, onMounted, watch, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 
 import TaParser from "../components/anno/ta-parser.vue";
+import TPinWin from "../components/app/t-pinWin.vue";
+import TShareBtn from "../components/app/t-shareBtn.vue";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
-import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import { useAppStore } from "../store/modules/app.js";
 import TGLogger from "../utils/TGLogger.js";

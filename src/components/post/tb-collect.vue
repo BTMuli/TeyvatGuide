@@ -1,7 +1,7 @@
 <template>
   <div class="tbc-box" data-html2canvas-ignore>
     <div class="tbc-btn" @click="switchCollect()" :title="isCollected ? '取消收藏' : '收藏'">
-      <v-icon size="large" :color="isCollected ? 'yellow' : 'inherit'">
+      <v-icon :color="isCollected ? 'yellow' : 'inherit'">
         {{ isCollected ? "mdi-star" : "mdi-star-outline" }}
       </v-icon>
     </div>
@@ -57,7 +57,7 @@ watch(
   () => props.data,
   async (val) => {
     if (val === undefined) return;
-    if (isCollected.value === false) return;
+    if (!isCollected.value) return;
     const res = await TSUserCollection.updatePostInfo(props.modelValue.toString(), val);
     await event.emit("refreshCollect");
     if (!res) {
@@ -76,7 +76,7 @@ watch(
 );
 
 async function switchCollect(): Promise<void> {
-  if (isCollected.value === false) {
+  if (!isCollected.value) {
     if (props.data === undefined) {
       showSnackbar({
         text: "未获取到帖子信息",
@@ -119,10 +119,10 @@ async function switchCollect(): Promise<void> {
   border: 2px solid var(--common-shadow-8);
   border-radius: 50%;
   cursor: pointer;
-}
 
-.tbc-box:hover {
-  opacity: 0.8;
+  :hover {
+    opacity: 0.8;
+  }
 }
 
 .tbc-btn {
@@ -131,7 +131,6 @@ async function switchCollect(): Promise<void> {
   height: 24px;
   align-items: center;
   justify-content: center;
-  padding-right: 2px;
   margin: 5px;
 }
 

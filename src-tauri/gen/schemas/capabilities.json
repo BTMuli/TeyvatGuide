@@ -102,6 +102,7 @@
       "core:window:allow-set-focus",
       "core:window:allow-set-fullscreen",
       "core:window:allow-show",
+      "core:window:allow-set-always-on-top",
       "core:window:default",
       { "identifier": "fs:allow-exists", "allow": [{ "path": "**" }] },
       { "identifier": "fs:allow-mkdir", "allow": [{ "path": "**" }] },

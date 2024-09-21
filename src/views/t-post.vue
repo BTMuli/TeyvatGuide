@@ -1,5 +1,6 @@
 <template>
   <TSwitchTheme />
+  <TPinWin />
   <TbCollect :model-value="postId" :data="postData" />
   <TShareBtn
     v-show="!loadingEmpty"
@@ -88,8 +89,9 @@ import { webviewWindow } from "@tauri-apps/api";
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
+import TPinWin from "../components/app/t-pinWin.vue";
+import TShareBtn from "../components/app/t-shareBtn.vue";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
-import TShareBtn from "../components/main/t-shareBtn.vue";
 import ToLoading from "../components/overlay/to-loading.vue";
 import TbCollect from "../components/post/tb-collect.vue";
 import TpAvatar from "../components/post/tp-avatar.vue";

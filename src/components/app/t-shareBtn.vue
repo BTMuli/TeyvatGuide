@@ -63,7 +63,7 @@ async function shareContent(): Promise<void> {
   height: 24px;
   align-items: center;
   justify-content: center;
-  padding-right: 2px;
+  padding-right: 3px;
   margin: 5px;
 }
 </style>
