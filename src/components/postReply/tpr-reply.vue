@@ -22,6 +22,7 @@
       </div>
       <div class="tpru-right" :title="props.modelValue.user.nickname">
         <span>{{ props.modelValue.user.nickname }}</span>
+        <span class="level">Lv.{{ props.modelValue.user.level_exp.level }}</span>
         <span v-if="props.modelValue.is_lz" class="tpru-lz">楼主</span>
       </div>
     </div>
@@ -107,7 +108,7 @@ import { event, path } from "@tauri-apps/api";
 import { UnlistenFn, Event } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
-import { toRaw, ref, watch, onMounted, onUnmounted } from "vue";
+import { toRaw, ref, watch, computed, onMounted, onUnmounted } from "vue";
 
 import Mys from "../../plugins/Mys/index.js";
 import { generateShareImg } from "../../utils/TGShare.js";
@@ -136,6 +137,15 @@ const replyId = `reply_${props.modelValue.reply.post_id}_${props.modelValue.repl
 let subListener: UnlistenFn | null = null;
 
 console.log("TprReply", toRaw(props.modelValue));
+
+const levelColor = computed<string>(() => {
+  const level = props.modelValue.user.level_exp.level;
+  if (level < 5) return "var(--tgc-od-green)";
+  if (level < 9) return "var(--tgc-od-blue)";
+  if (level < 13) return "var(--tgc-od-purple)";
+  if (level > 12) return "var(--tgc-od-orange)";
+  return "var(--tgc-od-white)";
+});
 
 onMounted(async () => {
   if (props.mode === "main") {
@@ -321,6 +331,16 @@ async function exportData(): Promise<void> {
   width: 40px;
   height: 40px;
   object-fit: cover;
+}
+
+.level {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+  border-radius: 2px;
+  background: v-bind(levelColor);
+  font-size: 12px;
 }
 
 .tpru-right {

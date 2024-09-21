@@ -12,6 +12,7 @@
         class="tpa-pendant"
         v-if="props.data.pendant !== ''"
       />
+      <div :class="`tpa-level-${props.position}`">{{ props.data.level_exp.level }}</div>
     </div>
     <div v-if="props.position === 'left'" class="tpa-text">
       <div>{{ props.data.nickname }}</div>
@@ -20,6 +21,8 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { computed } from "vue";
+
 interface TpAvatarProps {
   data: TGApp.Plugins.Mys.User.Post;
   position: "left" | "right";
@@ -36,6 +39,14 @@ function getAuthorDesc(): string {
 
 const flexAlign = props.position === "left" ? "flex-start" : "flex-end";
 const textAlign = props.position;
+const levelColor = computed<string>(() => {
+  const level = props.data.level_exp.level;
+  if (level < 5) return "var(--tgc-od-green)";
+  if (level < 9) return "var(--tgc-od-blue)";
+  if (level < 13) return "var(--tgc-od-purple)";
+  if (level > 12) return "var(--tgc-od-orange)";
+  return "var(--tgc-od-white)";
+});
 </script>
 <style lang="css" scoped>
 .tp-avatar-box {
@@ -84,10 +95,10 @@ const textAlign = props.position;
   position: absolute;
   top: 5px;
   left: 5px;
-  overflow: hidden;
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  background: var(--common-shadow-1);
 }
 
 .tpa-pendant {
@@ -96,5 +107,28 @@ const textAlign = props.position;
   left: 0;
   width: 50px;
   height: 50px;
+}
+
+.tpa-level-left,
+.tpa-level-right {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: v-bind(levelColor);
+  color: var(--tgc-white-1);
+  font-size: 10px;
+}
+
+.tpa-level-right {
+  right: 0;
+}
+
+.tpa-level-left {
+  left: 0;
 }
 </style>
