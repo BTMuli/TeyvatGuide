@@ -310,6 +310,7 @@ async function restoreUiaf(dir: string): Promise<boolean> {
   // 正则匹配 UIAF_xx.json
   for (const file of files) {
     try {
+      // todo 完善正则判断
       const reg = new RegExp(/(.*)UIAF_d{9}.json/);
       if (!file.name.match(reg)) return false;
       const uid: number = Number(file.name.match(reg)![0]);

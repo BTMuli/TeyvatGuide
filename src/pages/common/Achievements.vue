@@ -31,8 +31,7 @@
     </template>
   </v-app-bar>
   <div class="wrap">
-    <!-- 左侧菜单 -->
-    <div class="left-wrap" v-if="uidCur">
+    <div class="left-wrap">
       <TuaSeries
         v-for="(series, index) in seriesList"
         :key="index"
@@ -43,7 +42,6 @@
       />
     </div>
     <TuaAchiList
-      v-if="uidCur"
       :uid="uidCur"
       :hideFin="hideFin"
       v-model:series="selectedSeries"
@@ -271,14 +269,43 @@ async function handleImportOuter(app: string): Promise<void> {
 }
 
 async function createUid(): Promise<void> {
-  // todo
+  const uidInput = await showConfirm({
+    mode: "input",
+    title: "请输入新存档UID",
+    text: "UID:",
+  });
+  if (uidInput === undefined || uidInput === false) {
+    showSnackbar({ text: "已取消", color: "cancel" });
+    return;
+  }
+  if (isNaN(Number(uidInput))) {
+    showSnackbar({ text: "请输入合法数字", color: "warn" });
+    return;
+  }
+  if (uidList.value.includes(Number(uidInput))) {
+    showSnackbar({ text: "该存档已存在！", color: "warn" });
+    return;
+  }
+  uidList.value.push(Number(uidInput));
+  uidCur.value = Number(uidInput);
+  showSnackbar({ text: `切换到新存档 ${Number(uidInput)}`, color: "success" });
 }
 
 async function deleteUid(): Promise<void> {
-  // todo
+  const uidInput = await showConfirm({
+    title: "确定删除该存档?",
+    text: `确认则清空存档-${uidCur.value}对应数据`,
+  });
+  if (uidInput === undefined || !uidInput) {
+    showSnackbar({ text: "已取消删除存档", color: "cancel" });
+    return;
+  }
+  await TSUserAchi.delUid(uidCur.value);
+  uidList.value = uidList.value.filter((e) => e !== uidCur.value);
+  if (uidList.value.length === 0) uidList.value = [0];
+  uidCur.value = uidList.value[0];
 }
 </script>
-<!-- 顶部栏跟 wrap 大概布局 -->
 <style lang="css" scoped>
 .achi-search {
   position: relative;
@@ -318,14 +345,12 @@ async function deleteUid(): Promise<void> {
   gap: 10px;
 }
 
-/* 内容区域 */
 .wrap {
   display: flex;
   height: calc(100vh - 150px);
   column-gap: 10px;
 }
 
-/* 左侧系列 */
 .left-wrap {
   display: flex;
   width: 400px;

@@ -47,7 +47,6 @@ watch(
 
 async function refreshOverview(): Promise<void> {
   overview.value = await TSUserAchi.getOverview(props.uid, props.series);
-  console.log(overview.value);
 }
 
 async function listenAchi(): Promise<UnlistenFn> {
