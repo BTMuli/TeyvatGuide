@@ -109,16 +109,8 @@ watch(
 );
 
 async function loadData(): Promise<void> {
-  if (props.modelValue.cid === 10000005 || props.modelValue.cid === 10000007) {
-    bg.value = "url('/source/nameCard/profile/原神·印象.webp')";
-  } else {
-    const card = await TSUserAvatar.getAvatarCard(props.modelValue.cid);
-    if (card !== false) {
-      bg.value = `url("/source/nameCard/profile/${card}.webp")`;
-    } else {
-      bg.value = "url('/source/nameCard/profile/原神·印象.webp')";
-    }
-  }
+  const card = TSUserAvatar.getAvatarCard(props.modelValue.cid);
+  bg.value = `url("/source/nameCard/profile/${card}.webp")`;
   if (!avatar.value.startsWith("blob:")) {
     avatar.value = await saveImgLocal(props.modelValue.avatar.image);
   }

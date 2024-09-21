@@ -7,7 +7,7 @@
     </template>
     <template #append>
       <div class="uc-top-btns">
-        <v-btn @click="refresh()" rounded variant="outlined" v-model:loading="loadData">
+        <v-btn @click="refresh()" :rounded="true" variant="outlined" v-model:loading="loadData">
           <template #prepend>
             <v-icon>mdi-refresh</v-icon>
           </template>
@@ -16,7 +16,7 @@
         <v-btn
           :disabled="enableShare"
           @click="share()"
-          rounded
+          :rounded="true"
           variant="outlined"
           v-model:loading="loadShare"
         >
@@ -35,7 +35,7 @@
           v-model="showMode"
           :items="modeList"
           label="详情视图模式"
-          hide-details
+          :hide-details="true"
           item-title="label"
           item-value="value"
           variant="outlined"
@@ -126,7 +126,7 @@ const modeList = [
 
 const enableShare = computed<boolean>(() => {
   if (showOverlay.value) return true;
-  return !!showSelect.value;
+  return showSelect.value;
 });
 
 onBeforeMount(() => {

@@ -16,22 +16,11 @@ create table if not exists Achievements
     primary key (id, uid)
 );
 
--- @brief 重新创建成就系列数据表
+-- @brief 移除成就系列数据表
 drop table if exists AchievementSeries;
 
--- @brief 创建角色数据表
-create table if not exists AppCharacters
-(
-    id       integer primary key,
-    name     text,
-    title    text,
-    birthday text,
-    star     integer,
-    element  text,
-    weapon   text,
-    nameCard text,
-    updated  text
-);
+-- @brief 移除角色数据表
+drop table if exists AppCharacters;
 
 -- @brief 创建应用数据表
 create table if not exists AppData
@@ -41,9 +30,22 @@ create table if not exists AppData
     updated text
 );
 
+-- @brief 创建用户数据表
+create table if not exists UserAccount
+(
+    uid     text primary key,
+    cookie  text,
+    brief   text,
+    updated text
+);
+
+-- @brief 重新创建账号数据表
+drop table if exists GameAccount;
+
 -- @brief 创建游戏账号数据表
 create table if not exists GameAccount
 (
+    uid        text,
     gameBiz    text,
     gameUid    text,
     isChosen   boolean,
@@ -53,7 +55,7 @@ create table if not exists GameAccount
     region     text,
     regionName text,
     updated    text,
-    primary key (gameBiz, gameUid)
+    primary key (uid, gameUid)
 );
 
 -- @brief 移除名片表

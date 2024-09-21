@@ -1,7 +1,7 @@
 /**
  * @file store/modules/user.ts
  * @description 用户信息模块
- * @since Beta v0.5.5
+ * @since Beta v0.6.0
  */
 
 import { defineStore } from "pinia";
@@ -17,6 +17,7 @@ export const useUserStore = defineStore(
       desc: "",
     });
     const account = ref<TGApp.Sqlite.Account.Game>({
+      uid: "",
       gameBiz: "",
       gameUid: "",
       isChosen: 0,
@@ -25,36 +26,11 @@ export const useUserStore = defineStore(
       nickname: "",
       region: "",
       regionName: "",
+      updated: "",
     });
-    const cookie = ref<TGApp.User.Account.Cookie>();
+    const uid = ref<string>();
+    const cookie = ref<TGApp.App.Account.Cookie>();
     const propMap = ref<TGApp.Game.Avatar.PropMap>();
-
-    function getAllCookie(): string {
-      let res = "";
-      if (!cookie.value) return res;
-      if (cookie.value.ltuid && cookie.value.ltuid !== "") {
-        res += `ltuid=${cookie.value.ltuid};`;
-      }
-      if (cookie.value.ltoken && cookie.value.ltoken !== "") {
-        res += `ltoken=${cookie.value.ltoken};`;
-      }
-      if (cookie.value.mid && cookie.value.mid !== "") {
-        res += `mid=${cookie.value.mid};`;
-      }
-      if (cookie.value.cookie_token && cookie.value.cookie_token !== "") {
-        res += `cookie_token=${cookie.value.cookie_token};`;
-      }
-      if (cookie.value.stoken && cookie.value.stoken !== "") {
-        res += `stoken=${cookie.value.stoken};`;
-      }
-      if (cookie.value.stuid && cookie.value.stuid !== "") {
-        res += `stuid=${cookie.value.stuid};`;
-      }
-      if (cookie.value.account_id && cookie.value.account_id !== "") {
-        res += `account_id=${cookie.value.account_id};`;
-      }
-      return res;
-    }
 
     function getProp(prop: number): TGApp.Game.Avatar.PropMapItem | false {
       if (!propMap.value) return false;
@@ -62,30 +38,20 @@ export const useUserStore = defineStore(
     }
 
     return {
+      uid,
       cookie,
       briefInfo,
       account,
       propMap,
-      getAllCookie,
       getProp,
     };
   },
   {
     persist: [
       {
-        key: "cookie",
+        key: "curAccount",
         storage: window.localStorage,
-        pick: ["cookie"],
-      },
-      {
-        key: "briefInfo",
-        storage: window.localStorage,
-        pick: ["briefInfo"],
-      },
-      {
-        key: "account",
-        storage: window.localStorage,
-        pick: ["account"],
+        pick: ["uid", "briefInfo", "cookie", "account"],
       },
       {
         key: "propMap",

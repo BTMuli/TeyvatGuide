@@ -160,7 +160,7 @@ async function refreshAbyss(): Promise<void> {
     return;
   }
   if (uidCur.value && uidCur.value !== user.value.gameUid) {
-    const confirm = showConfirm({
+    const confirm = await showConfirm({
       title: "确定刷新？",
       text: `用户UID-${user.value.gameUid}与当前深渊UID-${uidCur.value}不一致`,
     });

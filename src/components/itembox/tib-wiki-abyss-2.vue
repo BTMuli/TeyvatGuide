@@ -4,7 +4,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 
-import TGSqlite from "../../plugins/Sqlite/index.js";
+import { AppCharacterData } from "../../data/index.js";
 import TItemBox, { type TItemBoxData } from "../main/t-itembox.vue";
 
 interface TibWikiAbyssProps {
@@ -12,33 +12,24 @@ interface TibWikiAbyssProps {
 }
 
 const props = defineProps<TibWikiAbyssProps>();
-const defaultAvatar = <TGApp.Sqlite.Character.AppData>{
-  birthday: "",
-  element: "",
-  id: Number(props.modelValue),
-  name: "旅行者",
-  nameCard: "",
-  star: 5,
-  title: "",
-  updated: "",
-  weapon: "单手剑",
-};
 
-const avatar = ref<TGApp.Sqlite.Character.AppData>(defaultAvatar);
+const avatar = ref<TGApp.App.Character.WikiBriefInfo>();
 
 const box = computed<TItemBoxData>(() => {
   return {
-    bg: `/icon/bg/${avatar.value?.star}-Star.webp`,
+    bg: `/icon/bg/${avatar.value?.star ?? 5}-Star.webp`,
     clickable: false,
     display: "outer",
     height: "80px",
-    icon: `/WIKI/character/${avatar.value?.id}.webp`,
+    icon: `/WIKI/character/${props.modelValue}.webp`,
     innerHeight: 20,
-    innerText: avatar.value.name,
+    innerText: avatar.value?.name ?? "旅行者",
     lt:
-      avatar.value.element !== ""
-        ? `/icon/element/${avatar.value.element}元素.webp`
-        : `/icon/weapon/${avatar.value.weapon}.webp`,
+      avatar.value === undefined
+        ? ""
+        : avatar.value.element !== ""
+          ? `/icon/element/${avatar.value.element}元素.webp`
+          : `/icon/weapon/${avatar.value.weapon}.webp`,
     ltSize: "20px",
     size: "80px",
   };
@@ -49,6 +40,6 @@ onMounted(async () => {
   if (props.modelValue === "10000005" || props.modelValue === "10000007") {
     return;
   }
-  avatar.value = await TGSqlite.getAppCharacter(Number(props.modelValue));
+  avatar.value = AppCharacterData.find((a) => a.id === props.modelValue)!;
 });
 </script>

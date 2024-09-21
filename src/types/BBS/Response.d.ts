@@ -1,12 +1,12 @@
 /**
  * @file types/BBS/Response.d.ts
  * @description BBS 返回数据类型定义文件
- * @since Beta v0.4.3
+ * @since Beta v0.6.0
  */
 
 /**
  * @description BBS 返回数据类型定义
- * @since Beta v0.4.3
+ * @since Beta v0.6.0
  * @namespace TGApp.BBS.Response
  * @memberof TGApp.BBS
  */
@@ -207,6 +207,20 @@ declare namespace TGApp.BBS.Response {
       device_fp: string;
       code: number;
       msg: string;
+    };
+  }
+
+  /**
+   * @description 获取游戏账户数据
+   * @interface getGameAccounts
+   * @since Beta v0.6.0
+   * @extends BaseWithData
+   * @property {TGApp.BBS.Account.GameAccount[]} data.list - 返回数据
+   * @returns getGameAccounts
+   */
+  interface getGameAccounts extends BaseWithData {
+    data: {
+      list: TGApp.BBS.Account.GameAccount[];
     };
   }
 }

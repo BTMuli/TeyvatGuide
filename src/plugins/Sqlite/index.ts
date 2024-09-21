@@ -8,7 +8,7 @@ import { app } from "@tauri-apps/api";
 import Database from "@tauri-apps/plugin-sql";
 
 import initDataSql from "./sql/initData.js";
-import { insertAppData, insertGameAccountData, insertRecordData } from "./sql/insertData.js";
+import { insertAppData, insertRecordData } from "./sql/insertData.js";
 
 class Sqlite {
   /**
@@ -90,48 +90,6 @@ class Sqlite {
   }
 
   /**
-   * @description 获取 cookie
-   * @since Beta v0.3.8
-   * @returns {Promise<TGApp.User.Account.Cookie>}
-   */
-  public async getCookie(): Promise<TGApp.User.Account.Cookie> {
-    const db = await this.getDB();
-    const sql = "SELECT value FROM AppData WHERE key='cookie';";
-    const res: Array<{ value: string }> = await db.select(sql);
-    return JSON.parse(res[0].value);
-  }
-
-  /**
-   * @description 插入 Account 数据
-   * @since Beta v0.4.7
-   * @param {TGApp.User.Account.Game[]} accounts
-   * @returns {Promise<void>}
-   */
-  public async saveAccount(accounts: TGApp.User.Account.Game[]): Promise<void> {
-    const db = await this.getDB();
-    await db.execute("DELETE FROM GameAccount WHERE true;");
-    for (const a of accounts) {
-      const sql = insertGameAccountData(a);
-      await db.execute(sql);
-    }
-  }
-
-  /**
-   * @description 获取当前选择的游戏账号
-   * @since Beta v0.4.1
-   * @returns {Promise<TGApp.Sqlite.Account.Game|false>}
-   */
-  public async getCurAccount(): Promise<TGApp.Sqlite.Account.Game | false> {
-    const db = await this.getDB();
-    const check = "SELECT * FROM GameAccount";
-    const checkRes: TGApp.Sqlite.Account.Game[] = await db.select(check);
-    if (checkRes.length === 0) return false;
-    if (checkRes.length === 1) return checkRes[0];
-    const res = checkRes.filter((item) => item.isChosen === 1);
-    return res.length === 0 ? false : res[0];
-  }
-
-  /**
    * @description 保存 appData
    * @since Beta v0.3.3
    * @param {string} key
@@ -199,21 +157,6 @@ class Sqlite {
                  WHERE uid = '${uid}'`;
     const res: TGApp.Sqlite.Record.SingleTable[] = await db.select(sql);
     if (res.length === 0) return false;
-    return res[0];
-  }
-
-  /**
-   * @description 获取角色数据
-   * @since Beta v0.3.3
-   * @param {number} id 角色 ID
-   * @returns {Promise<TGApp.Sqlite.Character.AppData}> 角色数据
-   */
-  public async getAppCharacter(id: number): Promise<TGApp.Sqlite.Character.AppData> {
-    const db = await this.getDB();
-    const sql = `SELECT *
-                 FROM AppCharacters
-                 WHERE id = ${id}`;
-    const res: TGApp.Sqlite.Character.AppData[] = await db.select(sql);
     return res[0];
   }
 

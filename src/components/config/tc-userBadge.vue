@@ -6,6 +6,36 @@
     <template #title>{{ userInfo.nickname }}</template>
     <template #subtitle>UID:{{ userInfo.uid }}</template>
     <template #text>{{ userInfo.desc }}</template>
+    <template #append>
+      <v-menu location="start">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            variant="outlined"
+            @click="showAccounts()"
+            title="切换默认游戏账户"
+            v-bind="props"
+            icon="mdi-gamepad-variant"
+          />
+        </template>
+        <v-list>
+          <v-list-item
+            v-for="account in gameAccounts"
+            :key="account.gameUid"
+            @click="switchGameAccount(account)"
+          >
+            <v-list-item-title>{{ account.nickname }}</v-list-item-title>
+            <v-list-item-subtitle>
+              {{ account.gameUid }}({{ account.regionName }})
+            </v-list-item-subtitle>
+            <template #append>
+              <div v-if="account.gameUid === userStore.account.value.gameUid" title="当前登录账号">
+                <v-icon color="green">mdi-check</v-icon>
+              </div>
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </template>
     <template #actions>
       <v-spacer />
       <v-btn
@@ -16,26 +46,50 @@
       />
       <v-btn
         variant="outlined"
-        @click="confirmRefreshUser"
+        @click="confirmRefreshUser(userStore.uid.value!)"
+        :disabled="userStore.uid.value === undefined"
         icon="mdi-refresh"
         :loading="loading"
         title="刷新用户信息"
       />
       <v-btn variant="outlined" @click="confirmCopyCookie" icon="mdi-cookie" title="复制Cookie" />
+      <v-menu location="start">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            variant="outlined"
+            icon="mdi-account-switch"
+            title="切换账户"
+            @click="showMenu"
+            v-bind="props"
+          />
+        </template>
+        <v-list>
+          <v-list-item
+            v-for="account in accounts"
+            :key="account.uid"
+            @click="loadAccount(account.uid)"
+          >
+            <v-list-item-title>{{ account.brief.nickname }}</v-list-item-title>
+            <v-list-item-subtitle>{{ account.brief.uid }}</v-list-item-subtitle>
+            <template #append>
+              <div v-if="account.uid === userStore.uid.value" title="当前登录账号">
+                <v-icon color="green">mdi-check</v-icon>
+              </div>
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </template>
   </v-card>
 </template>
 <script lang="ts" setup>
-import { UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, ref } from "vue";
 
 import Mys from "../../plugins/Mys/index.js";
-import TGSqlite from "../../plugins/Sqlite/index.js";
-import { useAppStore } from "../../store/modules/app.js";
+import TSUserAccount from "../../plugins/Sqlite/modules/userAccount.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
-import { getDeviceFp } from "../../web/request/getDeviceFp.js";
 import TGRequest from "../../web/request/TGRequest.js";
 import showConfirm from "../func/confirm.js";
 import showGeetest from "../func/geetest.js";
@@ -46,58 +100,36 @@ interface TcUserBadgeEmits {
 }
 
 const emits = defineEmits<TcUserBadgeEmits>();
-
-const appStore = useAppStore();
 const userStore = storeToRefs(useUserStore());
 
 const loading = ref<boolean>(false);
-const userInfo = ref<TGApp.App.Account.BriefInfo>({
-  nickname: "未登录",
-  uid: "-1",
-  desc: "请扫码登录",
-  avatar: "/source/UI/lumine.webp",
-});
-
-let signListener: UnlistenFn;
-
-onMounted(() => {
-  if (userStore.briefInfo.value && userStore.briefInfo.value.nickname) {
-    userInfo.value = userStore.briefInfo.value;
-  }
-});
-
-watch(userStore.briefInfo, (v) => {
-  if (v && v.nickname) {
-    userInfo.value = v;
-  }
+const accounts = ref<TGApp.App.Account.User[]>([]);
+const gameAccounts = ref<TGApp.Sqlite.Account.Game[]>([]);
+const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
+  if (userStore.uid.value === undefined)
+    return {
+      nickname: "未登录",
+      uid: "-1",
+      desc: "请使用短信验证码登录",
+      avatar: "/source/UI/lumine.webp",
+    };
+  return userStore.briefInfo.value;
 });
 
 async function tryCaptchaLogin(): Promise<void> {
-  const phone = await showConfirm({
-    mode: "input",
-    title: "请输入手机号",
-    text: "+86",
-  });
+  const phone = await showConfirm({ mode: "input", title: "请输入手机号", text: "+86" });
   if (!phone) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消验证码登录",
-    });
+    showSnackbar({ color: "cancel", text: "已取消验证码登录" });
     return;
   }
   const phoneReg = /^1[3-9]\d{9}$/;
   if (!phoneReg.test(phone)) {
-    showSnackbar({
-      color: "error",
-      text: "请输入正确的手机号",
-    });
+    showSnackbar({ color: "error", text: "请输入正确的手机号" });
     return;
   }
   const actionType = await tryGetCaptcha(phone);
   if (!actionType) return;
-  showSnackbar({
-    text: `已发送验证码到 ${phone}`,
-  });
+  showSnackbar({ text: `已发送验证码到 ${phone}` });
   const captcha = await showConfirm({
     mode: "input",
     title: "请输入验证码",
@@ -105,15 +137,13 @@ async function tryCaptchaLogin(): Promise<void> {
     otcancel: false,
   });
   if (!captcha) {
-    showSnackbar({
-      color: "error",
-      text: "输入验证码为空",
-    });
+    showSnackbar({ color: "error", text: "输入验证码为空" });
     return;
   }
   const loginResp = await tryLoginByCaptcha(phone, captcha, actionType);
   if (!loginResp) return;
-  userStore.cookie.value = {
+  loading.value = true;
+  const ck: TGApp.App.Account.Cookie = {
     account_id: loginResp.user_info.aid,
     ltuid: loginResp.user_info.aid,
     stuid: loginResp.user_info.aid,
@@ -122,34 +152,84 @@ async function tryCaptchaLogin(): Promise<void> {
     stoken: loginResp.token.token,
     ltoken: "",
   };
-  showSnackbar({
-    text: "登录成功，即将刷新用户信息",
-    color: "success",
-  });
-  setTimeout(() => {
-    refreshUser();
-  }, 1000);
-}
-
-async function refreshUser() {
-  const ck = userStore.cookie.value;
-  if (ck === undefined || JSON.stringify(ck) === "{}") {
-    await TGLogger.Error("[tc-userBadge][refreshUser] cookie 不存在");
-    showSnackbar({
-      color: "error",
-      text: "登录后才能刷新用户信息!",
-    });
-    appStore.isLogin = false;
+  emits("loadOuter", { show: true, title: "正在获取 LToken" });
+  const ltokenRes = await TGRequest.User.bySToken.getLToken(ck.mid, ck.stoken);
+  if (typeof ltokenRes !== "string") {
+    showSnackbar({ text: `[${ltokenRes.retcode}]${ltokenRes.message}`, color: "error" });
+    await TGLogger.Error(`获取LToken失败：${ltokenRes.retcode}-${ltokenRes.message}`);
+    loading.value = false;
+    emits("loadOuter", { show: false });
     return;
   }
+  ck.ltoken = ltokenRes;
+  emits("loadOuter", { show: true, title: "正在获取 cookieToken " });
+  const cookieTokenRes = await TGRequest.User.bySToken.getCookieToken(ck.mid, ck.stoken);
+  if (typeof cookieTokenRes !== "string") {
+    showSnackbar({ text: `[${cookieTokenRes.retcode}]${cookieTokenRes.message}`, color: "error" });
+    await TGLogger.Error(
+      `获取CookieToken失败：${cookieTokenRes.retcode}-${cookieTokenRes.message}`,
+    );
+    loading.value = false;
+    emits("loadOuter", { show: false });
+    return;
+  }
+  ck.cookie_token = cookieTokenRes;
+  emits("loadOuter", { show: true, title: "正在获取用户信息" });
+  const briefRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
+  if ("retcode" in briefRes) {
+    showSnackbar({ text: `[${briefRes.retcode}]${briefRes.message}` });
+    await TGLogger.Error(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
+    loading.value = false;
+    emits("loadOuter", { show: false });
+    return;
+  }
+  const briefInfo: TGApp.App.Account.BriefInfo = {
+    nickname: briefRes.nickname,
+    uid: briefRes.uid,
+    avatar: briefRes.avatar_url,
+    desc: briefRes.introduce,
+  };
+  emits("loadOuter", { show: true, title: "正在保存并切换用户" });
+  await TSUserAccount.account.saveAccount({
+    uid: briefInfo.uid,
+    cookie: ck,
+    brief: briefInfo,
+    updated: "",
+  });
+  userStore.uid.value = briefInfo.uid;
+  userStore.briefInfo.value = briefInfo;
+  userStore.cookie.value = ck;
+  emits("loadOuter", { show: true, title: "正在获取游戏账号" });
+  const gameRes = await TGRequest.User.bySToken.getAccounts(ck.stoken, ck.stuid);
+  if (!Array.isArray(gameRes)) {
+    loading.value = false;
+    emits("loadOuter", { show: false });
+    showSnackbar({ text: `[${gameRes.retcode}]${gameRes.message}` });
+    return;
+  }
+  await TSUserAccount.game.saveAccounts(briefInfo.uid, gameRes);
+  const curAccount = await TSUserAccount.game.getCurAccount(briefInfo.uid);
+  if (!curAccount) {
+    showSnackbar({ text: "未检测到游戏账号，请重新刷新", color: "warn" });
+    loading.value = false;
+    emits("loadOuter", { show: false });
+    return;
+  }
+  userStore.account.value = curAccount;
+  loading.value = false;
+  emits("loadOuter", { show: false });
+  showSnackbar({ text: "成功加载用户数据!" });
+}
+
+async function refreshUser(uid: string) {
+  let account = await TSUserAccount.account.getAccount(uid);
+  if (!account) {
+    showSnackbar({ text: `未获取到${userStore.uid.value}账号数据，请重新登录!`, color: "error" });
+    return;
+  }
+  let ck = account.cookie;
   loading.value = true;
   emits("loadOuter", { show: true, title: "正在刷新用户信息" });
-  const deviceInfo = appStore.deviceInfo;
-  if (deviceInfo.device_fp === "00000000000") {
-    appStore.deviceInfo = await getDeviceFp(appStore.deviceInfo);
-    await TGLogger.Warn("[tc-userBadge][refreshUser] 刷新设备信息");
-  }
-  let failCount = 0;
   emits("loadOuter", { show: true, title: "正在验证 LToken" });
   const verifyLTokenRes = await TGRequest.User.byLToken.verify(ck.ltoken, ck.ltuid);
   if (typeof verifyLTokenRes === "string") {
@@ -176,7 +256,6 @@ async function refreshUser() {
       await TGLogger.Error(
         `[tc-userBadge][refreshUser] ${ltokenRes.retcode}: ${ltokenRes.message}`,
       );
-      failCount++;
     }
   }
   emits("loadOuter", { show: true, title: "正在获取 CookieToken" });
@@ -199,93 +278,74 @@ async function refreshUser() {
     await TGLogger.Error(
       `[tc-userBadge][refreshUser] ${cookieTokenRes.retcode}: ${cookieTokenRes.message}`,
     );
-    failCount++;
   }
-  userStore.cookie.value = ck;
-  await TGSqlite.saveAppData("cookie", JSON.stringify(ck));
-  failCount = await refreshUserInfo();
-  if (failCount > 0) {
-    showSnackbar({
-      color: "error",
-      text: "刷新失败!重试或者重新扫码登录！",
-    });
-  } else {
-    showSnackbar({ text: "刷新成功!" });
-    appStore.isLogin = true;
-  }
-  loading.value = false;
-  emits("loadOuter", { show: false });
-}
-
-async function refreshUserInfo(): Promise<number> {
-  let failCount = 0;
-  const ck = userStore.cookie.value;
-  if (ck === undefined) {
-    showSnackbar({
-      text: "未获取到用户 ck!",
-      color: "error",
-    });
-    await TGLogger.Error("[tc-userBadge][refreshUserInfo] 未获取到用户 ck");
-    return 0;
-  }
+  account.cookie = ck;
   emits("loadOuter", { show: true, title: "正在获取用户信息" });
   const infoRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
   if ("retcode" in infoRes) {
     emits("loadOuter", { show: true, title: "正在获取用户信息", text: "获取用户信息失败!" });
     await TGLogger.Error("[tc-userBadge][refreshUserInfo] 获取用户信息失败");
     await TGLogger.Error(`[tc-userBadge][refreshUserInfo] ${infoRes.retcode}: ${infoRes.message}`);
-    failCount++;
   } else {
     emits("loadOuter", { show: true, title: "正在获取用户信息", text: "获取用户信息成功!" });
-    const briefInfo: TGApp.App.Account.BriefInfo = {
+    account.brief = {
       nickname: infoRes.nickname,
       uid: infoRes.uid,
       avatar: infoRes.avatar_url,
       desc: infoRes.introduce,
     };
-    userStore.briefInfo.value = briefInfo;
-    await TGSqlite.saveAppData("userInfo", JSON.stringify(briefInfo));
     await TGLogger.Info("[tc-userBadge][refreshUserInfo] 获取用户信息成功");
   }
+  await TSUserAccount.account.saveAccount(account);
   emits("loadOuter", { show: true, title: "正在获取账号信息" });
   const accountRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);
   if (Array.isArray(accountRes)) {
     emits("loadOuter", { show: true, title: "正在获取账号信息", text: "获取账号信息成功!" });
     await TGLogger.Info("[tc-userBadge][refreshUserInfo] 获取账号信息成功");
-    await TGSqlite.saveAccount(accountRes);
-    const curAccount = await TGSqlite.getCurAccount();
-    if (curAccount) userStore.account.value = curAccount;
+    await TSUserAccount.game.saveAccounts(account.uid, accountRes);
   } else {
     emits("loadOuter", { show: true, title: "正在获取账号信息", text: "获取账号信息失败!" });
     await TGLogger.Error("[tc-userBadge][refreshUserInfo] 获取账号信息失败");
     await TGLogger.Error(
       `[tc-userBadge][refreshUserInfo] ${accountRes.retcode}: ${accountRes.message}`,
     );
-    failCount++;
   }
-  return failCount;
+  loading.value = false;
+  emits("loadOuter", { show: false });
 }
 
-async function confirmRefreshUser(): Promise<void> {
-  const res = await showConfirm({
-    title: "确认刷新用户信息吗？",
-    text: "将会重新获取用户信息",
-  });
+async function loadAccount(uid: string): Promise<void> {
+  if (userStore.uid.value && uid === userStore.uid.value) {
+    showSnackbar({ text: "该账户已经登录，无需切换", color: "warn" });
+    return;
+  }
+  const account = await TSUserAccount.account.getAccount(uid);
+  if (!account) {
+    showSnackbar({ text: `无法获取${uid}的账号信息`, color: "warn" });
+    return;
+  }
+  userStore.uid.value = uid;
+  userStore.briefInfo.value = account.brief;
+  userStore.cookie.value = account.cookie;
+  const gameAccount = await TSUserAccount.game.getCurAccount(uid);
+  if (!gameAccount) {
+    showSnackbar({ text: `无法获取${uid}的游戏信息`, color: "warn" });
+    return;
+  }
+  userStore.account.value = gameAccount;
+  showSnackbar({ text: `成功切换到用户${uid}` });
+}
+
+async function confirmRefreshUser(uid: string): Promise<void> {
+  const res = await showConfirm({ title: "确认刷新用户信息吗？", text: "将会重新获取用户信息" });
   if (!res) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消刷新",
-    });
+    showSnackbar({ color: "cancel", text: "已取消刷新" });
     return;
   }
-  if (!userStore.cookie) {
-    showSnackbar({
-      color: "error",
-      text: "请先登录",
-    });
-    return;
-  }
-  await refreshUser();
+  await refreshUser(uid);
+  const confirm = await showConfirm({ title: "是否切换用户？", text: `将切换到用户${uid}` });
+  if (!confirm) return;
+  await loadAccount(uid);
 }
 
 async function confirmCopyCookie(): Promise<void> {
@@ -294,35 +354,23 @@ async function confirmCopyCookie(): Promise<void> {
     text: "将会复制当前登录的 Cookie",
   });
   if (!res) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消复制",
-    });
+    showSnackbar({ color: "cancel", text: "已取消复制" });
     return;
   }
-  if (!userStore.cookie) {
-    showSnackbar({
-      color: "error",
-      text: "请先登录",
-    });
+  if (!userStore.cookie.value) {
+    showSnackbar({ color: "error", text: "请先登录" });
     return;
   }
-  const ckText = useUserStore().getAllCookie();
+  const ckText = TSUserAccount.account.copy(userStore.cookie.value);
   await navigator.clipboard.writeText(ckText);
-  showSnackbar({
-    text: "已复制 Cookie!",
-    color: "success",
-  });
+  showSnackbar({ text: "已复制 Cookie!", color: "success" });
 }
 
 async function tryGetCaptcha(phone: string, aigis?: string): Promise<string | false> {
   const captchaResp = await Mys.User.getCaptcha(phone, aigis);
   if ("retcode" in captchaResp) {
     if (!captchaResp.data || captchaResp.data === "") {
-      showSnackbar({
-        text: `[${captchaResp.retcode}] ${captchaResp.message}`,
-        color: "error",
-      });
+      showSnackbar({ text: `[${captchaResp.retcode}] ${captchaResp.message}`, color: "error" });
       return false;
     }
     const aigisResp: TGApp.Plugins.Mys.CaptchaLogin.CaptchaAigis = JSON.parse(captchaResp.data);
@@ -342,10 +390,7 @@ async function tryLoginByCaptcha(
   const loginResp = await Mys.User.login(phone, captcha, actionType, aigis);
   if ("retcode" in loginResp) {
     if (!loginResp.data || loginResp.data === "") {
-      showSnackbar({
-        text: `[${loginResp.retcode}] ${loginResp.message}`,
-        color: "error",
-      });
+      showSnackbar({ text: `[${loginResp.retcode}] ${loginResp.message}`, color: "error" });
       return false;
     }
     const aigisResp: TGApp.Plugins.Mys.CaptchaLogin.CaptchaAigis = JSON.parse(loginResp.data);
@@ -356,9 +401,29 @@ async function tryLoginByCaptcha(
   return loginResp;
 }
 
-onUnmounted(() => {
-  if (signListener) signListener();
-});
+async function showMenu(): Promise<void> {
+  accounts.value = await TSUserAccount.account.getAllAccount();
+}
+
+async function showAccounts(): Promise<void> {
+  if (!userStore.uid.value) return;
+  gameAccounts.value = await TSUserAccount.game.getAccount(userStore.uid.value);
+}
+
+async function switchGameAccount(account: TGApp.Sqlite.Account.Game): Promise<void> {
+  if (account.gameUid === userStore.account.value.gameUid) {
+    showSnackbar({ text: "已经登录，无需切换!", color: "warn" });
+    return;
+  }
+  await TSUserAccount.game.switchAccount(account.uid, account.gameUid);
+  const gameAccount = await TSUserAccount.game.getCurAccount(account.uid);
+  if (!gameAccount) {
+    showSnackbar({ text: `无法获取${account.uid}的游戏信息`, color: "warn" });
+    return;
+  }
+  userStore.account.value = gameAccount;
+  showSnackbar({ text: "成功切换游戏账户!", color: "success" });
+}
 </script>
 <style lang="css" scoped>
 .tcu-box {

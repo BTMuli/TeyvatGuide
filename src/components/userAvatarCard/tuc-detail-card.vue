@@ -87,16 +87,8 @@ watch(
 );
 
 async function loadData(): Promise<void> {
-  if (props.modelValue.cid === 10000005 || props.modelValue.cid === 10000007) {
-    nameCard.value = "/source/nameCard/profile/原神·印象.webp";
-  } else {
-    const card = await TSUserAvatar.getAvatarCard(props.modelValue.cid);
-    if (card !== false) {
-      nameCard.value = `/source/nameCard/profile/${card}.webp`;
-    } else {
-      nameCard.value = false;
-    }
-  }
+  const card = TSUserAvatar.getAvatarCard(props.modelValue.cid);
+  nameCard.value = `/source/nameCard/profile/${card}.webp`;
 }
 
 async function share(): Promise<void> {

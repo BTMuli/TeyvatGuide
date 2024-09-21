@@ -24,6 +24,7 @@ import TSidebar from "./components/app/t-sidebar.vue";
 import showConfirm from "./components/func/confirm.js";
 import showSnackbar from "./components/func/snackbar.js";
 import TGSqlite from "./plugins/Sqlite/index.js";
+import TSUserAccount from "./plugins/Sqlite/modules/userAccount.js";
 import { useAppStore } from "./store/modules/app.js";
 import { useUserStore } from "./store/modules/user.js";
 import { getBuildTime } from "./utils/TGBuild.js";
@@ -132,51 +133,40 @@ async function checkDeviceFp(): Promise<void> {
   }
 }
 
-// 检测 ck,info 数据
 async function checkUserLoad(): Promise<void> {
-  const ckDB = await TGSqlite.getCookie();
-  if (JSON.stringify(ckDB) === "{}" && appStore.isLogin) {
-    showSnackbar({
-      text: "获取 Cookie 失败！请重新登录！",
-      color: "error",
-      timeout: 3000,
-    });
-    appStore.isLogin = false;
-    await TGLogger.Error("[App][checkUserLoad] 获取 Cookie 失败！");
-    return;
-  }
-  if (JSON.stringify(ckDB) !== "{}" && !appStore.isLogin) appStore.isLogin = true;
-  const ckLocal = userStore.cookie.value;
-  if (JSON.stringify(ckLocal) !== JSON.stringify(ckDB)) userStore.cookie.value = ckDB;
-  const infoLocal = userStore.briefInfo.value;
+  // 检测用户数据目录
   const appData = await TGSqlite.getAppData();
-  const infoDB = appData.find((item) => item.key === "userInfo")?.value;
-  if (typeof infoDB === "undefined" && JSON.stringify(infoLocal) !== "{}") {
-    await TGSqlite.saveAppData("userInfo", JSON.stringify(infoLocal));
-  } else if (typeof infoDB !== "undefined" && infoLocal !== JSON.parse(infoDB)) {
-    userStore.briefInfo.value = JSON.parse(infoDB);
-    console.info("briefInfo 数据已更新！");
-  }
-  const accountLocal = userStore.account.value;
-  const accountDB = await TGSqlite.getCurAccount();
-  if (accountDB === false) {
-    if (!appStore.isLogin) return;
-    showSnackbar({
-      text: "获取 GameAccount 失败！请尝试更新数据库！",
-      color: "error",
-      timeout: 3000,
-    });
-    await TGLogger.Error("[App][checkUserLoad] 获取 GameAccount 失败！");
-    return;
-  }
-  if (accountDB !== accountLocal) userStore.account.value = accountDB;
   const userDir = appData.find((item) => item.key === "userDir")?.value;
-  if (typeof userDir === "undefined") {
-    await TGSqlite.saveAppData("userDir", appStore.userDir);
+  if (typeof userDir === "undefined") await TGSqlite.saveAppData("userDir", appStore.userDir);
+  else if (userDir !== appStore.userDir) appStore.userDir = userDir;
+  await mkdir(appStore.userDir, { recursive: true });
+  // 检测用户数据
+  const uidDB = await TSUserAccount.account.getAllUid();
+  if (uidDB.length === 0) {
+    showSnackbar({ text: "未检测到可用UID，请重新登录!", color: "warn" });
     return;
   }
-  if (userDir !== appStore.userDir) appStore.userDir = userDir;
-  await mkdir(appStore.userDir, { recursive: true });
+  // 然后获取最近的UID
+  if (userStore.uid.value === undefined || !uidDB.includes(userStore.uid.value)) {
+    userStore.uid.value = uidDB[0];
+  }
+  const curAccount = await TSUserAccount.account.getAccount(userStore.uid.value);
+  if (curAccount === false) {
+    showSnackbar({ text: `未获取到${userStore.uid.value}账号数据`, color: "error" });
+    await TGLogger.Error(`[App][listenOnInit] 获取${userStore.uid.value}账号数据失败`);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  } else {
+    userStore.briefInfo.value = curAccount.brief;
+    userStore.cookie.value = curAccount.cookie;
+  }
+  const curGameAccount = await TSUserAccount.game.getCurAccount(userStore.uid.value);
+  if (curGameAccount === false) {
+    showSnackbar({ text: `未获取到${userStore.uid.value}游戏数据`, color: "error" });
+    await TGLogger.Error(`[App][listenOnInit] 获取${userStore.uid.value}游戏数据失败`);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  } else {
+    userStore.account.value = curGameAccount;
+  }
 }
 
 async function getDeepLink(): Promise<UnlistenFn> {

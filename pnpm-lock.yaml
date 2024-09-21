@@ -71,9 +71,6 @@ importers:
       pinia-plugin-persistedstate:
         specifier: ^4.0.1
         version: 4.0.1(pinia@2.2.2(typescript@5.6.2)(vue@3.5.6(typescript@5.6.2)))(rollup@4.21.2)
-      qrcode.vue:
-        specifier: ^3.4.1
-        version: 3.4.1(vue@3.5.6(typescript@5.6.2))
       uuid:
         specifier: ^10.0.0
         version: 10.0.0
@@ -2452,11 +2449,6 @@ packages:
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
-
-  qrcode.vue@3.4.1:
-    resolution: {integrity: sha512-wq/zHsifH4FJ1GXQi8/wNxD1KfQkckIpjK1KPTc/qwYU5/Bkd4me0w4xZSg6EXk6xLBkVDE0zxVagewv5EMAVA==}
-    peerDependencies:
-      vue: ^3.0.0
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
@@ -5493,10 +5485,6 @@ snapshots:
   prettier@3.3.3: {}
 
   punycode@2.3.1: {}
-
-  qrcode.vue@3.4.1(vue@3.5.6(typescript@5.6.2)):
-    dependencies:
-      vue: 3.5.6(typescript@5.6.2)
 
   queue-microtask@1.2.3: {}
 
