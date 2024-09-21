@@ -8,13 +8,7 @@ import { app } from "@tauri-apps/api";
 import Database from "@tauri-apps/plugin-sql";
 
 import initDataSql from "./sql/initData.js";
-import {
-  importAbyssData,
-  insertAbyssData,
-  insertAppData,
-  insertGameAccountData,
-  insertRecordData,
-} from "./sql/insertData.js";
+import { insertAppData, insertGameAccountData, insertRecordData } from "./sql/insertData.js";
 
 class Sqlite {
   /**
@@ -30,11 +24,9 @@ class Sqlite {
    */
   private readonly tables: string[] = [
     "Achievements",
-    "AchievementSeries",
     "AppCharacters",
     "AppData",
     "GameAccount",
-    "NameCard",
     "SpiralAbyss",
     "UserCharacters",
     "UserRecord",
@@ -179,53 +171,6 @@ class Sqlite {
       }),
     );
     await this.initDB();
-  }
-
-  /**
-   * @description 保存深渊数据
-   * @since Beta v0.3.3
-   * @param {string} uid 游戏 UID
-   * @param {TGApp.Game.Abyss.FullData} data 深渊数据
-   * @returns {Promise<void>}
-   */
-  public async saveAbyss(uid: string, data: TGApp.Game.Abyss.FullData): Promise<void> {
-    const db = await this.getDB();
-    const sql = insertAbyssData(uid, data);
-    await db.execute(sql);
-  }
-
-  /**
-   * @description 获取深渊数据
-   * @since Beta v0.3.3
-   * @param {string} uid 游戏 UID
-   * @returns {Promise<TGApp.Game.Abyss.FullData>}
-   */
-  public async getAbyss(uid?: string): Promise<TGApp.Sqlite.Abyss.SingleTable[]> {
-    const db = await this.getDB();
-    let sql;
-    if (uid) {
-      sql = `SELECT *
-             FROM SpiralAbyss
-             WHERE uid = '${uid}'
-             order by id desc`;
-    } else {
-      sql = "SELECT * FROM SpiralAbyss order by uid, id desc";
-    }
-    return await db.select(sql);
-  }
-
-  /**
-   * @description 恢复深渊数据
-   * @since Beta v0.3.3
-   * @param {TGApp.Sqlite.Abyss.SingleTable[]} data 深渊数据
-   * @returns {Promise<void>}
-   */
-  public async restoreAbyss(data: TGApp.Sqlite.Abyss.SingleTable[]): Promise<void> {
-    const db = await this.getDB();
-    for (const item of data) {
-      const sql = importAbyssData(item);
-      await db.execute(sql);
-    }
   }
 
   /**

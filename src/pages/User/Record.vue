@@ -66,10 +66,7 @@ onMounted(async () => {
   loadingTitle.value = "正在加载战绩数据";
   loading.value = true;
   await initUserRecordData();
-  // 保证图片加载完毕
-  setTimeout(() => {
-    loading.value = false;
-  }, 3000);
+  loading.value = false;
 });
 
 async function initUserRecordData(): Promise<void> {

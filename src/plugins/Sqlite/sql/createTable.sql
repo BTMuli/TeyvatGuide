@@ -56,16 +56,8 @@ create table if not exists GameAccount
     primary key (gameBiz, gameUid)
 );
 
--- @brief 名片数据表
-create table if not exists NameCard
-(
-    name    text,
-    desc    text,
-    type    text,
-    source  text,
-    updated text,
-    primary key (name, type)
-);
+-- @brief 移除名片表
+drop table if exists NameCard;
 
 -- @brief 创建深渊数据表
 create table if not exists SpiralAbyss

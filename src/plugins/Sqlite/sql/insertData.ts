@@ -4,8 +4,6 @@
  * @since Beta v0.6.0
  */
 
-import { transCharacterData, transFloorData } from "../utils/transAbyssData.js";
-import { timeToSecond } from "../utils/transTime.js";
 import { transUserRecord } from "../utils/transUserRecord.js";
 import { transUserRoles } from "../utils/transUserRoles.js";
 
@@ -86,86 +84,6 @@ export function insertCharacterData(data: TGApp.App.Character.WikiBriefInfo): st
               weapon   = '${data.weapon}',
               nameCard = '${data.nameCard}',
               birthday = '${data.birthday.toString()}';
-  `;
-}
-
-/**
- * @description 插入深渊数据
- * @since Alpha v0.2.0
- * @param {string} uid 用户 uid
- * @param {TGApp.User.Abyss} data 深渊数据
- * @returns {string} sql
- */
-export function insertAbyssData(uid: string, data: TGApp.Game.Abyss.FullData): string {
-  const startTime = timeToSecond(data.start_time);
-  const endTime = timeToSecond(data.end_time);
-  const isUnlock = data.is_unlock ? 1 : 0;
-  const revealRank = transCharacterData(data.reveal_rank);
-  const defeatRank = transCharacterData(data.defeat_rank);
-  const damageRank = transCharacterData(data.damage_rank);
-  const takeDamageRank = transCharacterData(data.take_damage_rank);
-  const normalSkillRank = transCharacterData(data.normal_skill_rank);
-  const energySkillRank = transCharacterData(data.energy_skill_rank);
-  const floors = transFloorData(data.floors);
-  return `
-      INSERT INTO SpiralAbyss (uid, id, startTime, endTime, totalBattleTimes, totalWinTimes,
-                               maxFloor, totalStar, isUnlock, revealRank, defeatRank, damageRank,
-                               takeDamageRank, normalSkillRank, energySkillRank, floors, updated)
-      VALUES ('${uid}', ${data.schedule_id}, '${startTime}', '${endTime}', ${data.total_battle_times},
-              ${data.total_win_times}, '${data.max_floor}', ${data.total_star},
-              ${isUnlock}, '${revealRank}', '${defeatRank}', '${damageRank}', '${takeDamageRank}',
-              '${normalSkillRank}', '${energySkillRank}', '${floors}', datetime('now', 'localtime'))
-      ON CONFLICT(uid, id) DO UPDATE
-          SET startTime        = '${startTime}',
-              endTime          = '${endTime}',
-              totalBattleTimes = ${data.total_battle_times},
-              totalWinTimes    = ${data.total_win_times},
-              maxFloor         = '${data.max_floor}',
-              totalStar        = ${data.total_star},
-              isUnlock         = ${isUnlock},
-              revealRank       = '${revealRank}',
-              defeatRank       = '${defeatRank}',
-              damageRank       = '${damageRank}',
-              takeDamageRank   = '${takeDamageRank}',
-              normalSkillRank  = '${normalSkillRank}',
-              energySkillRank  = '${energySkillRank}',
-              floors           = '${floors}',
-              updated          = datetime('now', 'localtime');
-  `;
-}
-
-/**
- * @description 恢复深渊数据
- * @since Alpha v0.2.0
- * @param {TGApp.Sqlite.Abyss.SingleTable} data 深渊数据
- * @returns {string} sql
- */
-export function importAbyssData(data: TGApp.Sqlite.Abyss.SingleTable): string {
-  return `
-      INSERT INTO SpiralAbyss (uid, id, startTime, endTime, totalBattleTimes, totalWinTimes,
-                               maxFloor, totalStar, isUnlock, revealRank, defeatRank, damageRank,
-                               takeDamageRank, normalSkillRank, energySkillRank, floors, updated)
-      VALUES ('${data.uid}', ${data.id}, '${data.startTime}', '${data.endTime}', ${data.totalBattleTimes},
-              ${data.totalWinTimes}, '${data.maxFloor}', ${data.totalStar},
-              ${data.isUnlock}, '${data.revealRank}', '${data.defeatRank}', '${data.damageRank}',
-              '${data.takeDamageRank}', '${data.normalSkillRank}', '${data.energySkillRank}', '${data.floors}',
-              datetime('now', 'localtime'))
-      ON CONFLICT(uid, id) DO UPDATE
-          SET startTime        = '${data.startTime}',
-              endTime          = '${data.endTime}',
-              totalBattleTimes = ${data.totalBattleTimes},
-              totalWinTimes    = ${data.totalWinTimes},
-              maxFloor         = '${data.maxFloor}',
-              totalStar        = ${data.totalStar},
-              isUnlock         = ${data.isUnlock},
-              revealRank       = '${data.revealRank}',
-              defeatRank       = '${data.defeatRank}',
-              damageRank       = '${data.damageRank}',
-              takeDamageRank   = '${data.takeDamageRank}',
-              normalSkillRank  = '${data.normalSkillRank}',
-              energySkillRank  = '${data.energySkillRank}',
-              floors           = '${data.floors}',
-              updated          = datetime('now', 'localtime');
   `;
 }
 

@@ -9,6 +9,7 @@ import { exists, mkdir, writeTextFile, readDir, readTextFile } from "@tauri-apps
 
 import showSnackbar from "../components/func/snackbar.js";
 import TGSqlite from "../plugins/Sqlite/index.js";
+import TSUserAbyss from "../plugins/Sqlite/modules/userAbyss.js";
 import TSUserAchi from "../plugins/Sqlite/modules/userAchi.js";
 import TSUserGacha from "../plugins/Sqlite/modules/userGacha.js";
 
@@ -32,8 +33,7 @@ export async function backUpUserData(dir: string): Promise<void> {
   const dataCK = await TGSqlite.getCookie();
   await writeTextFile(`${dir}${path.sep()}cookie.json`, JSON.stringify(dataCK));
   // 备份深渊数据
-  const dataAbyss = await TGSqlite.getAbyss();
-  await writeTextFile(`${dir}${path.sep()}abyss.json`, JSON.stringify(dataAbyss));
+  await TSUserAbyss.backupAbyss(dir);
   // 备份祈愿数据
   const uidList = await TSUserGacha.getUidList();
   for (const uid of uidList) {
@@ -81,22 +81,10 @@ export async function restoreUserData(dir: string): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 1500));
   }
   // 恢复深渊数据
-  const abyssFind = files.find((item) => item.name === "abyss.json");
-  if (abyssFind) {
-    try {
-      const dataAbyss: TGApp.Sqlite.Abyss.SingleTable[] = JSON.parse(
-        await readTextFile(abyssFind.name),
-      );
-      await TGSqlite.restoreAbyss(dataAbyss);
-    } catch (e) {
-      await TGLogger.Error(`[DataBS][restoreUserData] 深渊数据恢复失败 ${e}`);
-      showSnackbar({ text: "深渊数据恢复失败", color: "error" });
-      errNum++;
-    }
-  } else {
-    showSnackbar({ text: "深渊数据恢复失败，备份文件不存在", color: "warn" });
-    await TGLogger.Warn(`[DataBS][restoreUserData] 未检测到深渊数据备份文件`);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+  const restoreAbyss = await TSUserAbyss.restoreAbyss(dir);
+  if (!restoreAbyss) {
+    showSnackbar({ text: "深渊数据恢复失败", color: "error" });
+    errNum++;
   }
   // 恢复祈愿数据
   const reg = /UIGF_(\d+).json/;

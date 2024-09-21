@@ -1,27 +1,49 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
-  <div class="ua-box">
-    <div class="ua-left-box">
-      <v-tabs v-model="userTab" direction="vertical" class="ua-tabs-box">
-        <v-tab v-for="item in localAbyss" :key="item.id" :value="item.id" @click="toAbyss(item.id)">
-          第{{ item.id }}期
-        </v-tab>
-      </v-tabs>
-      <div class="ua-tab-bottom">
-        <v-btn class="ua-btn" @click="shareAbyss" rounded>
+  <v-app-bar>
+    <template #prepend>
+      <div class="uat-left">
+        <img alt="icon" src="/source/UI/userAbyss.webp" />
+        <span>深境螺旋</span>
+        <v-select
+          variant="outlined"
+          v-model="uidCur"
+          :items="uidList"
+          :hide-details="true"
+          title="游戏UID"
+        />
+      </div>
+    </template>
+    <template #append>
+      <div class="uat-right">
+        <v-btn
+          class="ua-btn"
+          @click="shareAbyss()"
+          :rounded="true"
+          :disabled="localAbyss.length === 0"
+        >
           <v-icon>mdi-share</v-icon>
           <span>分享</span>
         </v-btn>
-        <v-btn class="ua-btn" @click="getAbyssData" rounded>
+        <v-btn class="ua-btn" @click="refreshAbyss()" :rounded="true">
           <v-icon>mdi-refresh</v-icon>
           <span>刷新</span>
         </v-btn>
-        <v-btn class="ua-btn" @click="uploadAbyss" rounded>
+        <v-btn class="ua-btn" @click="uploadAbyss()" :rounded="true">
           <v-icon>mdi-cloud-upload</v-icon>
           <span>上传</span>
         </v-btn>
+        <v-btn class="ua-btn" @click="deleteAbyss()" :rounded="true">
+          <v-icon>mdi-delete</v-icon>
+          <span>删除</span>
+        </v-btn>
       </div>
-    </div>
+    </template>
+  </v-app-bar>
+  <div class="ua-box">
+    <v-tabs v-model="userTab" direction="vertical" class="ua-tabs-box" center-active>
+      <v-tab v-for="item in localAbyss" :key="item.id" :value="item.id"> 第{{ item.id }}期</v-tab>
+    </v-tabs>
     <v-window v-model="userTab" class="ua-window">
       <v-window-item
         v-for="item in localAbyss"
@@ -61,7 +83,7 @@
         </div>
       </v-window-item>
     </v-window>
-    <div v-show="localAbyssID.length === 0" class="user-empty">
+    <div v-show="localAbyss.length === 0" class="user-empty">
       <img src="/source/UI/empty.webp" alt="empty" />
       <span>暂无数据，请尝试刷新</span>
     </div>
@@ -69,15 +91,16 @@
 </template>
 <script lang="ts" setup>
 import { storeToRefs } from "pinia";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch, computed } from "vue";
 
+import showConfirm from "../../components/func/confirm.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TSubLine from "../../components/main/t-subline.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TuaDetail from "../../components/userAbyss/tua-detail.vue";
 import TuaOverview from "../../components/userAbyss/tua-overview.vue";
 import Hutao from "../../plugins/Hutao/index.js";
-import TGSqlite from "../../plugins/Sqlite/index.js";
+import TSUserAbyss from "../../plugins/Sqlite/modules/userAbyss.js";
 import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
@@ -96,123 +119,114 @@ const userTab = ref<number>(0);
 const user = ref<TGApp.Sqlite.Account.Game>(userStore.account.value);
 
 const localAbyss = ref<TGApp.Sqlite.Abyss.SingleTable[]>([]);
-const localAbyssID = ref<number[]>([]);
-const curAbyss = ref<TGApp.Sqlite.Abyss.SingleTable>(<TGApp.Sqlite.Abyss.SingleTable>{});
 const abyssRef = ref<HTMLElement>(<HTMLElement>{});
+
+const uidList = ref<string[]>();
+const uidCur = ref<string>();
+const abyssIdList = computed<number[]>(() => {
+  return localAbyss.value.map((abyss) => abyss.id);
+});
 
 onMounted(async () => {
   await TGLogger.Info("[UserAbyss][onMounted] 打开角色深渊页面");
   loadingTitle.value = "正在加载深渊数据";
-  await initAbyssData();
+  uidList.value = await TSUserAbyss.getAllUid();
+  if (uidList.value.includes(user.value.gameUid)) uidCur.value = user.value.gameUid;
+  else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
+  else uidCur.value = "";
+  await loadAbyss();
   loading.value = false;
 });
 
-async function initAbyssData(): Promise<void> {
-  const abyssGet = await TGSqlite.getAbyss(user.value.gameUid);
-  if (abyssGet.length === 0) {
-    await TGLogger.Warn("[UserAbyss][initAbyssData] 未找到深渊数据");
-    return;
-  }
-  localAbyss.value = abyssGet;
-  localAbyss.value.forEach((item) => {
-    localAbyssID.value.push(item.id);
-  });
-  curAbyss.value = localAbyss.value[0];
-  userTab.value = localAbyssID.value[0];
-  await TGLogger.Info(`[UserAbyss][initAbyssData] 成功获取 ${abyssGet.length} 条深渊数据`);
+watch(
+  () => uidCur.value,
+  async () => await loadAbyss(),
+);
+
+async function loadAbyss(): Promise<void> {
+  localAbyss.value = [];
+  if (uidCur.value === undefined || uidCur.value === "") return;
+  localAbyss.value = await TSUserAbyss.getAbyss(uidCur.value);
+  if (localAbyss.value.length > 0) userTab.value = localAbyss.value[0].id;
 }
 
-async function getAbyssData(): Promise<void> {
-  await TGLogger.Info("[UserAbyss][getAbyssData] 更新深渊数据");
-  loadingTitle.value = "正在获取深渊数据";
-  loading.value = true;
+async function refreshAbyss(): Promise<void> {
   if (!userStore.cookie.value) {
     showSnackbar({
       text: "未登录",
       color: "error",
     });
-    loading.value = false;
     await TGLogger.Warn("[UserAbyss][getAbyssData] 未登录");
     return;
   }
+  if (uidCur.value && uidCur.value !== user.value.gameUid) {
+    const confirm = showConfirm({
+      title: "确定刷新？",
+      text: `用户UID-${user.value.gameUid}与当前深渊UID-${uidCur.value}不一致`,
+    });
+    if (!confirm) {
+      showSnackbar({ text: "已取消深渊数据刷新", color: "cancel" });
+      return;
+    }
+  }
+  await TGLogger.Info("[UserAbyss][getAbyssData] 更新深渊数据");
+  loadingTitle.value = `正在获取${user.value.gameUid}的深渊数据`;
+  loading.value = true;
   const cookie = {
     account_id: userStore.cookie.value.account_id,
     cookie_token: userStore.cookie.value.cookie_token,
     ltoken: userStore.cookie.value.ltoken,
     ltuid: userStore.cookie.value.ltuid,
   };
-  loadingTitle.value = "正在获取上期深渊数据";
+  loadingTitle.value = `正在获取${user.value.gameUid}的上期深渊数据`;
   const resP = await TGRequest.User.byCookie.getAbyss(cookie, "2", user.value);
   if (!("retcode" in resP)) {
     await TGLogger.Info("[UserAbyss][getAbyssData] 成功获取上期深渊数据");
-    loadingTitle.value = "正在保存上期深渊数据";
-    await TGSqlite.saveAbyss(user.value.gameUid, resP);
+    loadingTitle.value = `正在保存${user.value.gameUid}的上期深渊数据`;
+    await TSUserAbyss.saveAbyss(user.value.gameUid, resP);
   } else {
-    showSnackbar({
-      text: `[${resP.retcode}]${resP.message}`,
-      color: "error",
-    });
+    showSnackbar({ text: `[${resP.retcode}]${resP.message}`, color: "error" });
     loading.value = false;
-    await TGLogger.Error("[UserAbyss][getAbyssData] 获取上期深渊数据失败");
+    await TGLogger.Error(`[UserAbyss][getAbyssData] 获取${user.value.gameUid}的上期深渊数据失败`);
     await TGLogger.Error(`[UserAbyss][getAbyssData] ${resP.retcode} ${resP.message}`);
     return;
   }
-  loadingTitle.value = "正在获取本期深渊数据";
+  loadingTitle.value = `正在获取${user.value.gameUid}的上期深渊数据`;
   const res = await TGRequest.User.byCookie.getAbyss(cookie, "1", user.value);
   if (!("retcode" in res)) {
-    loadingTitle.value = "正在保存本期深渊数据";
-    await TGSqlite.saveAbyss(user.value.gameUid, res);
-    await TGLogger.Info("[UserAbyss][getAbyssData] 成功获取本期深渊数据");
+    loadingTitle.value = `正在保存${user.value.gameUid}的本期深渊数据`;
+    await TSUserAbyss.saveAbyss(user.value.gameUid, res);
+    await TGLogger.Info(`[UserAbyss][getAbyssData] 成功获取${user.value.gameUid}的本期深渊数据`);
   } else {
-    showSnackbar({
-      text: `[${res.retcode}]${res.message}`,
-      color: "error",
-    });
+    showSnackbar({ text: `[${res.retcode}]${res.message}`, color: "error" });
     loading.value = false;
-    await TGLogger.Error("[UserAbyss][getAbyssData] 获取本期深渊数据失败");
+    await TGLogger.Error(`[UserAbyss][getAbyssData] 获取${user.value.gameUid}的本期深渊数据失败`);
     await TGLogger.Error(`[UserAbyss][getAbyssData] ${res.retcode} ${res.message}`);
     return;
   }
   loadingTitle.value = "正在加载深渊数据";
-  await initAbyssData();
+  uidList.value = await TSUserAbyss.getAllUid();
+  uidCur.value = user.value.gameUid;
+  await loadAbyss();
   loading.value = false;
-}
-
-function toAbyss(id: number): void {
-  const abyssFind = localAbyss.value.find((item) => item.id === id);
-  if (abyssFind) {
-    curAbyss.value = abyssFind;
-  } else {
-    showSnackbar({
-      text: "未找到该深渊数据",
-      color: "error",
-    });
-  }
 }
 
 async function shareAbyss(): Promise<void> {
-  if (localAbyssID.value.length === 0) {
-    showSnackbar({
-      text: "暂无数据",
-      color: "error",
-    });
-    return;
-  }
-  await TGLogger.Info(`[UserAbyss][shareAbyss][${curAbyss.value.id}] 生成深渊数据分享图片`);
-  const fileName = `【深渊数据】${curAbyss.value.id}-${user.value.gameUid}`;
+  await TGLogger.Info(`[UserAbyss][shareAbyss][${userTab.value}] 生成深渊数据分享图片`);
+  const fileName = `【深渊数据】${userTab.value}-${user.value.gameUid}`;
   loadingTitle.value = "正在生成图片";
   loadingSub.value = `${fileName}.png`;
   loading.value = true;
-  abyssRef.value = <HTMLElement>document.getElementById(`user-abyss-${curAbyss.value.id}`);
+  abyssRef.value = <HTMLElement>document.getElementById(`user-abyss-${userTab.value}`);
   await generateShareImg(fileName, abyssRef.value);
   loadingSub.value = "";
   loading.value = false;
-  await TGLogger.Info(`[UserAbyss][shareAbyss][${curAbyss.value.id}] 生成深渊数据分享图片成功`);
+  await TGLogger.Info(`[UserAbyss][shareAbyss][${userTab.value}] 生成深渊数据分享图片成功`);
 }
 
 async function uploadAbyss(): Promise<void> {
   await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据");
-  const abyssData = localAbyss.value.find((item) => item.id === Math.max(...localAbyssID.value));
+  const abyssData = localAbyss.value.find((item) => item.id === Math.max(...abyssIdList.value));
   if (!abyssData) {
     showSnackbar({
       text: "未找到深渊数据",
@@ -279,43 +293,58 @@ async function uploadAbyss(): Promise<void> {
   }
   if (loading.value) loading.value = false;
 }
+
+async function deleteAbyss(): Promise<void> {
+  if (uidCur.value === undefined || uidCur.value === "") {
+    showSnackbar({ text: "未找到符合条件的数据!", color: "error" });
+    return;
+  }
+  const confirm = await showConfirm({
+    title: "确定删除数据？",
+    text: `将清除 ${uidCur.value} 的所有深渊数据`,
+  });
+  if (!confirm) {
+    showSnackbar({ text: "已取消删除", color: "cancel" });
+    return;
+  }
+  loadingTitle.value = `正在删除 ${uidCur.value} 的深渊数据`;
+  loading.value = true;
+  await TSUserAbyss.delAbyss(uidCur.value);
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  loading.value = false;
+  showSnackbar({ text: `已清除 ${uidCur.value} 的深渊数据，即将刷新`, color: "success" });
+  uidList.value = await TSUserAbyss.getAllUid();
+  if (uidList.value.length > 0) uidCur.value = uidList.value[0];
+  else uidCur.value = undefined;
+  await loadAbyss();
+}
 </script>
 <style lang="css" scoped>
-.ua-box {
-  display: flex;
-  height: calc(100vh - 35px);
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--common-shadow-4);
-  border-radius: 5px;
-}
-
-.ua-left-box {
-  position: relative;
-  display: flex;
-  width: 100px;
-  height: 100%;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  border-right: 1px solid var(--common-shadow-2);
-  color: var(--box-text-4);
-}
-
-/* stylelint-disable-next-line selector-class-pattern */
-.ua-left-box :deep(.v-tabs.v-slide-group--vertical) {
-  max-height: calc(100% - 150px);
-}
-
-.ua-tabs-box {
-  max-height: calc(100% - 150px);
-  overflow-y: auto;
-}
-
-.ua-tab-bottom {
+.uat-left {
   display: flex;
   width: 100%;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  gap: 10px;
+
+  img {
+    width: 32px;
+    height: 32px;
+  }
+
+  span {
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 20px;
+  }
+}
+
+.uat-right {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
   padding: 10px;
   gap: 10px;
 }
@@ -324,6 +353,20 @@ async function uploadAbyss(): Promise<void> {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-text);
+}
+
+.ua-box {
+  display: flex;
+  height: calc(100vh - 100px);
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--common-shadow-4);
+  border-radius: 5px;
+}
+
+.ua-tabs-box {
+  max-height: 100%;
+  overflow-y: auto;
 }
 
 .ua-window {

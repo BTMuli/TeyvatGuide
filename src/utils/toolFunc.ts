@@ -1,7 +1,7 @@
 /**
  * @file utils/toolFunc.ts
  * @description 一些工具函数
- * @since Beta v0.5.0
+ * @since Beta v0.6.0
  */
 
 import { path } from "@tauri-apps/api";
@@ -28,35 +28,19 @@ export function stamp2LastTime(time: number): string {
 
 /**
  * @description 时间戳转换为日期
- * @since Alpha v0.2.3
+ * @since Beta v0.6.0
  * @param {number} timestamp - 时间戳（毫秒）
  * @returns {string} 日期 2021-01-01 00:00:00
  */
 export function timestampToDate(timestamp: number): string {
-  return new Date(timestamp).toLocaleString("zh", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
-
-/**
- * @description 获取当前时间, YY-MM-DD HH:MM:SS
- * @since Beta v0.3.6
- * @returns {string} 当前时间
- */
-export function getNowStr(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, "0");
-  const date = now.getDate().toString().padStart(2, "0");
-  const hour = now.getHours().toString().padStart(2, "0");
-  const minute = now.getMinutes().toString().padStart(2, "0");
-  const second = now.getSeconds().toString().padStart(2, "0");
-  return `${year}-${month}-${date} ${hour}:${minute}:${second}`;
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+  const second = String(date.getSeconds()).padStart(2, "0");
+  return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 }
 
 /**

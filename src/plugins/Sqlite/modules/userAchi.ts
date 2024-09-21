@@ -307,14 +307,14 @@ async function restoreUiaf(dir: string): Promise<boolean> {
   if (!(await exists(dir))) return false;
   const filesRead = await readDir(dir);
   const files = filesRead.filter((item) => item.name.includes("UIAF_") && item.isFile);
-  // 正则匹配 UIAF_xx.json
   for (const file of files) {
     try {
       // todo 完善正则判断
-      const reg = new RegExp(/(.*)UIAF_d{9}.json/);
+      const reg = /UIAF_(\d+).json/;
       if (!file.name.match(reg)) return false;
       const uid: number = Number(file.name.match(reg)![0]);
-      const data: TGApp.Plugins.UIAF.Achievement[] = JSON.parse(await readTextFile(file.name));
+      const filePath = `${dir}${path.sep()}${file.name}`;
+      const data: TGApp.Plugins.UIAF.Achievement[] = JSON.parse(await readTextFile(filePath));
       await TSUserAchi.mergeUiaf(data, uid);
     } catch (e) {
       await TGLogger.Error(`[UIAF][RESTORE] 恢复成就数据${file.name} `);
