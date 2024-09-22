@@ -353,6 +353,11 @@ async function exportData(): Promise<void> {
   font-size: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  :first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .tpru-lz {
