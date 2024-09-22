@@ -70,8 +70,7 @@
   <div class="uc-box">
     <div class="uc-top">
       <div class="uc-top-title">
-        <span v-if="uidCur">UID：{{ uidCur }} 更新于 {{ getUpdateTime() }}</span>
-        <span v-else> 暂无数据 </span>
+        UID：{{ uidCur }} {{ isEmpty ? "暂无数据" : `更新于 ${getUpdateTime()}` }}
       </div>
       <div class="uc-top-info">Render by TeyvatGuide v{{ version }}</div>
     </div>
@@ -224,7 +223,6 @@ async function loadUid(): Promise<void> {
   } else {
     uidCur.value = uidList.value[0];
   }
-  console.log(uidCur.value, user.value.gameUid);
 }
 
 async function loadRole(): Promise<void> {
@@ -233,7 +231,7 @@ async function loadRole(): Promise<void> {
     return;
   }
   roleList.value = [];
-  const roleData = await TSUserAvatar.getAvatars(uidCur.value);
+  const roleData = await TSUserAvatar.getAvatars(Number(uidCur.value));
   roleList.value = getOrderedList(roleData);
   selectedList.value = roleList.value;
   dataVal.value = roleData[selectIndex.value];
@@ -358,6 +356,7 @@ async function deleteUid(): Promise<void> {
   await TSUserAvatar.deleteUid(uidCur.value);
   showSnackbar({ text: `成功删除${uidCur.value}的角色数据` });
   await loadUid();
+  await loadRole();
 }
 
 function getUpdateTime(): string {
