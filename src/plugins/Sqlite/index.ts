@@ -8,7 +8,7 @@ import { app } from "@tauri-apps/api";
 import Database from "@tauri-apps/plugin-sql";
 
 import initDataSql from "./sql/initData.js";
-import { insertAppData, insertRecordData } from "./sql/insertData.js";
+import { insertAppData } from "./sql/insertData.js";
 
 class Sqlite {
   /**
@@ -129,35 +129,6 @@ class Sqlite {
       }),
     );
     await this.initDB();
-  }
-
-  /**
-   * @description 保存战绩数据
-   * @since Beta v0.3.3
-   * @param {TGApp.Game.Record.FullData} data 战绩数据
-   * @param {string} uid 用户 uid
-   * @returns {Promise<void>}
-   */
-  public async saveUserRecord(data: TGApp.Game.Record.FullData, uid: string): Promise<void> {
-    const db = await this.getDB();
-    const sql = insertRecordData(data, uid);
-    await db.execute(sql);
-  }
-
-  /**
-   * @description 获取战绩数据
-   * @since Beta v0.3.3
-   * @param {string} uid 用户 uid
-   * @returns {Promise<TGApp.Sqlite.Record.SingleTable|false>}
-   */
-  public async getUserRecord(uid: string): Promise<TGApp.Sqlite.Record.SingleTable | false> {
-    const db = await this.getDB();
-    const sql = `SELECT *
-                 FROM UserRecord
-                 WHERE uid = '${uid}'`;
-    const res: TGApp.Sqlite.Record.SingleTable[] = await db.select(sql);
-    if (res.length === 0) return false;
-    return res[0];
   }
 
   /**

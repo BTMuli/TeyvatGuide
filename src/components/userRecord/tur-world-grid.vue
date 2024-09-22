@@ -1,22 +1,17 @@
 <template>
-  <div v-if="!props.modelValue">暂无数据</div>
+  <div v-if="props.modelValue.length === 0">暂无数据</div>
   <div v-else class="tur-wg-box">
-    <TurWorldSub v-for="area in getData()" :key="area.id" :data="area" />
+    <TurWorldSub v-for="area in props.modelValue" :key="area.id" :data="area" />
   </div>
 </template>
 <script lang="ts" setup>
 import TurWorldSub from "./tur-world-sub.vue";
 
 interface TurWorldGridProps {
-  modelValue?: string;
+  modelValue: TGApp.Sqlite.Record.WorldExplore[];
 }
 
 const props = defineProps<TurWorldGridProps>();
-
-function getData(): TGApp.Sqlite.Record.WorldExplore[] {
-  if (!props.modelValue) return [];
-  return JSON.parse(props.modelValue);
-}
 </script>
 <style lang="css" scoped>
 .tur-wg-box {

@@ -59,18 +59,18 @@ function getInsertSql(uid: string, data: TGApp.Game.Avatar.DetailList): string {
  */
 async function getAllUid(): Promise<string[]> {
   const db = await TGSqlite.getDB();
-  type resType = Array<{ uid: string }>;
+  type resType = Array<{ uid: number }>;
   const res = await db.select<resType>("SELECT DISTINCT uid FROM UserCharacters;");
-  return res.map((i) => i.uid);
+  return res.map((i) => i.uid.toString());
 }
 
 /**
  * @description 获取用户角色数据
  * @since Beta v0.5.3
- * @param {string} uid 用户 uid
+ * @param {number} uid 用户 uid
  * @returns {Promise<TGApp.Sqlite.Character.UserRole[]>}
  */
-async function getAvatars(uid: string): Promise<TGApp.Sqlite.Character.UserRole[]> {
+async function getAvatars(uid: number): Promise<TGApp.Sqlite.Character.UserRole[]> {
   const db = await TGSqlite.getDB();
   type resType = Array<TGApp.Sqlite.Character.UserRoleDB>;
   const res = await db.select<resType>("SELECT * FROM UserCharacters WHERE uid = ?;", [uid]);

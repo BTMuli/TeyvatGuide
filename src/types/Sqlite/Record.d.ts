@@ -1,12 +1,12 @@
 /**
  * @file types/Sqlite/Record.d.ts
  * @description Sqlite 原神战绩相关类型定义文件
- * @since Beta v0.5.5
+ * @since Beta v0.6.0
  */
 
 /**
  * @description Sqlite 原神战绩相关类型定义命名空间
- * @since Beta v0.5.5
+ * @since Beta v0.6.0
  * @namespace Record
  * @memberof TGApp.Sqlite
  */
@@ -14,40 +14,64 @@ declare namespace TGApp.Sqlite.Record {
   /**
    * @description 原神战绩数据表
    * @interface SingleTable
-   * @since Alpha v0.2.0
-   * @property {string} uid - UID
-   * @description 下面的数据在数据库中以 string 类型存储
-   * @property {Role} role - 角色信息
-   * @property {Avatar[]} avatars - 角色列表
-   * @property {Stats} stats - 统计信息
-   * @property {WorldExplore} worldExplore - 世界探索信息
-   * @property {Home[]} homes - 尘歌壶信息
+   * @since Beta v0.6.0
+   * @property {number} uid - UID
+   * @property {string} role - 角色信息
+   * @property {string} avatars - 角色列表
+   * @property {string} stats - 统计信息
+   * @property {string} worldExplore - 世界探索信息
+   * @property {string} homes - 尘歌壶信息
    * @property {string} updated - 更新时间
    * @return SingleTable
    */
   interface SingleTable {
-    uid: string;
-    role: string; // Role
-    avatars: string; // Avatar[]
-    stats: string; // Stats
-    worldExplore: string; // WorldExplore
-    homes: string; // Home[]
+    uid: number;
+    role: string;
+    avatars: string;
+    stats: string;
+    worldExplore: string;
+    homes: string;
+    updated: string;
+  }
+
+  /**
+   * @description 渲染用数据
+   * @interface RenderData
+   * @since Beta v0.6.0
+   * @property {number} uid - UID
+   * @property {Role} role - 用户信息
+   * @property {Avatar[]} avatars - 角色列表
+   * @property {Stats} stats - 统计信息
+   * @property {WorldExplore[]} worldExplore - 世界探索信息
+   * @property {Home[]} homes - 尘歌壶信息
+   * @property {string} updated - 更新时间
+   * @returns RenderData
+   */
+  interface RenderData {
+    uid: number;
+    role: Role;
+    avatars: Avatar[];
+    stats: Stats;
+    worldExplore: WorldExplore[];
+    homes: Home[];
     updated: string;
   }
 
   /**
    * @description 角色信息类型
    * @interface Role
-   * @since Alpha v0.2.0
+   * @since Beta v0.6.0
    * @property {string} nickname - 角色昵称
    * @property {string} region - 区域
    * @property {number} level - 等级
+   * @property {string} avatar - 头像
    * @return Role
    */
   interface Role {
     nickname: string;
     region: string;
     level: number;
+    avatar: string;
   }
 
   /**

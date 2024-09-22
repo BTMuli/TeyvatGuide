@@ -4,7 +4,7 @@
     <template #prepend>
       <div class="uc-top-title">
         <img alt="icon" src="/source/UI/userAvatar.webp" />
-        <span>原神战绩</span>
+        <span>我的角色</span>
         <v-btn variant="outlined" @click="showSelect = true">筛选角色</v-btn>
         <v-btn variant="outlined" @click="resetSelect = true">重置筛选</v-btn>
       </div>
@@ -224,6 +224,7 @@ async function loadUid(): Promise<void> {
   } else {
     uidCur.value = uidList.value[0];
   }
+  console.log(uidCur.value, user.value.gameUid);
 }
 
 async function loadRole(): Promise<void> {

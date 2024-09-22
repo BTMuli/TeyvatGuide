@@ -1,49 +1,53 @@
 /**
  * @file plugins/Sqlite/utils/transUserRecord.ts
  * @description Sqlite 数据转换 用户战绩数据转换模块
- * @since Beta v0.5.5
+ * @since Beta v0.6.0
  */
 
 /**
- * @description 将通过 api 获取到的用户战绩数据转换为数据库中的数据
- * @since Beta v0.4.3
+ * @description 将通过 api 获取到的用户战绩数据转换为渲染用的数据
+ * @since Beta v0.6.0
+ * @param {number} uid - 用户UID
  * @param {TGApp.Game.Record.FullData} data 用户战绩数据
- * @returns {TGApp.Sqlite.Record.SingleTable} 转换后的用户战绩数据
+ * @returns {TGApp.Sqlite.Record.RenderData} 转换后的用户战绩数据
  */
-export function transUserRecord(data: TGApp.Game.Record.FullData): TGApp.Sqlite.Record.SingleTable {
+export function transUserRecord(
+  uid: number,
+  data: TGApp.Game.Record.FullData,
+): TGApp.Sqlite.Record.RenderData {
   return {
-    uid: "",
+    uid: uid,
     role: transRole(data.role),
-    avatars: transAvatar(data.avatars),
+    avatars: data.avatars.map(transAvatar).sort((a, b) => b.star - a.star || b.id - a.id),
     stats: transStat(data.stats),
-    worldExplore: JSON.stringify(transWorld(data.world_explorations)),
-    homes: transHome(data.homes),
+    worldExplore: transWorld(data.world_explorations),
+    homes: data.homes.map(transHome),
     updated: "",
   };
 }
 
 /**
  * @description 将角色信息转换为数据库中的数据
- * @since Alpha v0.2.0
+ * @since Beta v0.6.0
  * @param {TGApp.Game.Record.Role} data 角色信息
- * @returns {string} 转换后的角色信息
+ * @returns {TGApp.Sqlite.Record.Role} 转换后的角色信息
  */
-function transRole(data: TGApp.Game.Record.Role): string {
-  const role: TGApp.Sqlite.Record.Role = {
+function transRole(data: TGApp.Game.Record.Role): TGApp.Sqlite.Record.Role {
+  return {
     nickname: data.nickname,
     region: data.region,
     level: data.level,
+    avatar: data.game_head_icon,
   };
-  return JSON.stringify(role);
 }
 
 /**
  * @description 将角色列表转换为数据库中的数据
- * @since Alpha v0.2.0
- * @param {TGApp.Game.Record.Avatar[]} data 角色列表
- * @returns {string} 转换后的角色列表
+ * @since Beta v0.6.0
+ * @param {TGApp.Game.Record.Avatar} data 角色列表
+ * @returns {TGApp.Sqlite.Record.Avatar} 转换后的角色列表
  */
-function transAvatar(data: TGApp.Game.Record.Avatar[]): string {
+function transAvatar(data: TGApp.Game.Record.Avatar): TGApp.Sqlite.Record.Avatar {
   const elementMap: Record<string, string> = {
     Anemo: "风",
     Geo: "岩",
@@ -53,44 +57,26 @@ function transAvatar(data: TGApp.Game.Record.Avatar[]): string {
     Cryo: "冰",
     Dendro: "草",
   };
-  const avatars: TGApp.Sqlite.Record.Avatar[] = data
-    .map((item) => {
-      return {
-        id: item.id,
-        name: item.name,
-        element: elementMap[item.element],
-        fetter: item.fetter,
-        level: item.level,
-        star: item.rarity === 105 ? 5 : item.rarity,
-        constellation: item.actived_constellation_num,
-        isShow: item.is_chosen ? <const>1 : <const>0,
-      };
-    })
-    .sort((a, b) => {
-      // 先按星级降序
-      if (a.star !== b.star) {
-        return b.star - a.star;
-      }
-      // 再按 id 降序
-      return b.id - a.id;
-    });
-  return JSON.stringify(avatars);
+  return {
+    id: data.id,
+    name: data.name,
+    element: elementMap[data.element],
+    fetter: data.fetter,
+    level: data.level,
+    star: data.rarity === 105 ? 5 : data.rarity,
+    constellation: data.actived_constellation_num,
+    isShow: data.is_chosen ? 1 : 0,
+  };
 }
 
 /**
  * @description 将统计信息转换为数据库中的数据
- * @since Beta v0.5.5
+ * @since Beta v0.6.0
  * @param {TGApp.Game.Record.Stats} data 统计信息
- * @return {string} 转换后的统计信息
+ * @return {TGApp.Sqlite.Record.Stats } 转换后的统计信息
  */
-function transStat(data: TGApp.Game.Record.Stats): string {
-  let combatRole: string;
-  if (!data.role_combat.is_unlock) {
-    combatRole = "未解锁";
-  } else {
-    combatRole = `第 ${data.role_combat.max_round_id} 幕`;
-  }
-  const stats: TGApp.Sqlite.Record.Stats = {
+function transStat(data: TGApp.Game.Record.Stats): TGApp.Sqlite.Record.Stats {
+  return {
     activeDays: data.active_day_number,
     achievementNumber: data.achievement_number,
     avatarNumber: data.avatar_number,
@@ -104,14 +90,13 @@ function transStat(data: TGApp.Game.Record.Stats): string {
     hydroCulus: data.hydroculus_number,
     pyroCulus: data.pyroculus_number,
     sprialAbyss: data.spiral_abyss,
-    combatRole: combatRole,
+    combatRole: data.role_combat.is_unlock ? `第 ${data.role_combat.max_round_id} 幕` : "未解锁",
     luxuriousChest: data.luxurious_chest_number,
     preciousChest: data.precious_chest_number,
     exquisiteChest: data.exquisite_chest_number,
     commonChest: data.common_chest_number,
     magicChest: data.magic_chest_number,
   };
-  return JSON.stringify(stats);
 }
 
 /**
@@ -170,22 +155,19 @@ function transWorld(data: TGApp.Game.Record.WorldExplore[]): TGApp.Sqlite.Record
 
 /**
  * @description 将住宅信息转换为数据库中的数据
- * @since Alpha v0.2.0
- * @param {TGApp.Game.Record.Home[]} data 住宅信息
- * @returns {string} 转换后的住宅信息
+ * @since Beta v0.6.0
+ * @param {TGApp.Game.Record.Home} data 住宅信息
+ * @returns {TGApp.Sqlite.Record.Home} 转换后的住宅信息
  */
-function transHome(data: TGApp.Game.Record.Home[]): string {
-  const homes: TGApp.Sqlite.Record.Home[] = data.map((item) => {
-    return {
-      comfortIcon: item.comfort_level_icon,
-      comfortName: item.comfort_level_name,
-      name: item.name,
-      level: item.level,
-      comfort: item.comfort_num,
-      furniture: item.item_num,
-      visit: item.visit_num,
-      bg: item.icon,
-    };
-  });
-  return JSON.stringify(homes);
+function transHome(data: TGApp.Game.Record.Home): TGApp.Sqlite.Record.Home {
+  return {
+    comfortIcon: data.comfort_level_icon,
+    comfortName: data.comfort_level_name,
+    name: data.name,
+    level: data.level,
+    comfort: data.comfort_num,
+    furniture: data.item_num,
+    visit: data.visit_num,
+    bg: data.icon,
+  };
 }

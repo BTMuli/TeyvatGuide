@@ -1,21 +1,18 @@
 <template>
-  <div v-if="!props.modelValue">暂无数据</div>
+  <div v-if="props.modelValue.length === 0">暂无数据</div>
   <div v-else class="tur-ag-box">
-    <TibUrAvatar v-for="avatar in data" :key="avatar.id" :model-value="avatar" />
+    <TibUrAvatar v-for="avatar in props.modelValue" :key="avatar.id" :model-value="avatar" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
-
 import TibUrAvatar from "../itembox/tib-ur-avatar.vue";
 
 interface TurAvatarGridProps {
-  modelValue?: string;
+  modelValue: TGApp.Sqlite.Record.Avatar[];
 }
 
 const props = defineProps<TurAvatarGridProps>();
-const data = computed<TGApp.Sqlite.Record.Avatar[]>(() => JSON.parse(<string>props.modelValue));
 </script>
 <style lang="css" scoped>
 .tur-ag-box {
