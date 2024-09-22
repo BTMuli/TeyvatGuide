@@ -216,6 +216,18 @@ async function saveGameAccount(
   }
 }
 
+/**
+ * @description 删除游戏账户数据
+ * @since Beta v0.6.0
+ * @param {string} uid - 米社UID
+ * @returns {Promise<void>}
+ */
+async function deleteAccount(uid: string): Promise<void> {
+  const db = await TGSqlite.getDB();
+  await db.execute("DELETE FROM GameAccount WHERE uid = ?;", [uid]);
+  await db.execute("DELETE FROM UserAccount WHERE uid = ?;", [uid]);
+}
+
 const TSUserAccount = {
   account: {
     getAllUid: getAllAccountId,
@@ -223,6 +235,7 @@ const TSUserAccount = {
     getAccount: getUserAccount,
     saveAccount,
     copy: copyCookie,
+    deleteAccount,
   },
   game: {
     getAccount: getGameAccount,

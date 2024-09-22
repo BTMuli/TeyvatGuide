@@ -64,18 +64,32 @@
           />
         </template>
         <v-list>
-          <v-list-item
-            v-for="account in accounts"
-            :key="account.uid"
-            @click="loadAccount(account.uid)"
-          >
+          <v-list-item v-for="account in accounts" :key="account.uid">
             <v-list-item-title>{{ account.brief.nickname }}</v-list-item-title>
             <v-list-item-subtitle>{{ account.brief.uid }}</v-list-item-subtitle>
             <template #append>
               <div v-if="account.uid === userStore.uid.value" title="当前登录账号">
-                <v-icon color="green">mdi-check</v-icon>
+                <v-icon color="green">mdi-account-check</v-icon>
               </div>
+              <v-icon
+                v-else
+                size="small"
+                icon="mdi-account-convert"
+                title="切换用户"
+                @click="loadAccount(account.uid)"
+              />
+              <v-icon
+                class="tcu-btn"
+                icon="mdi-delete"
+                title="删除用户"
+                size="small"
+                @click="clearUser(account)"
+              />
             </template>
+          </v-list-item>
+          <v-list-item @click="addByCookie()" append-icon="mdi-account-plus">
+            <v-list-item-title>手动添加</v-list-item-title>
+            <v-list-item-subtitle>手动输入Cookie</v-list-item-subtitle>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -416,10 +430,130 @@ async function showAccounts(): Promise<void> {
     return;
   }
 }
+
+async function addByCookie(): Promise<void> {
+  const ckInput = await showConfirm({
+    mode: "input",
+    title: "请输入cookie",
+    text: "Cookie:",
+  });
+  if (!ckInput) {
+    showSnackbar({ text: "已取消Cookie输入", color: "cancel" });
+    return;
+  }
+  if (ckInput === "") {
+    showSnackbar({ text: "请输入Cookie!", color: "warn" });
+    return;
+  }
+  const ckArr = ckInput.split(";");
+  let ckRes = { stoken: "", stuid: "", mid: "" };
+  for (const ck of ckArr) {
+    if (ck.startsWith("mid=")) ckRes.mid = ck.substring(4);
+    else if (ck.startsWith("stoken=")) ckRes.stoken = ck.substring(7);
+    else if (ck.startsWith("stuid=")) ckRes.stuid = ck.substring(6);
+  }
+  if (ckRes.mid === "" || ckRes.stoken === "" || ckRes.stuid === "") {
+    showSnackbar({ text: "解析Cookie失败", color: "error" });
+    await TGLogger.Error(`解析Cookie失败：${ckInput}`);
+    return;
+  }
+  loading.value = true;
+  emits("loadOuter", { show: true, title: "尝试刷新Cookie" });
+  const ck: TGApp.App.Account.Cookie = {
+    account_id: ckRes.stuid,
+    ltuid: ckRes.stuid,
+    stuid: ckRes.stuid,
+    mid: ckRes.mid,
+    cookie_token: "",
+    stoken: ckRes.stoken,
+    ltoken: "",
+  };
+  emits("loadOuter", { show: true, title: "正在获取 LToken" });
+  const ltokenRes = await TGRequest.User.bySToken.getLToken(ck.mid, ck.stoken);
+  if (typeof ltokenRes !== "string") {
+    showSnackbar({ text: `[${ltokenRes.retcode}]${ltokenRes.message}`, color: "error" });
+    await TGLogger.Error(`获取LToken失败：${ltokenRes.retcode}-${ltokenRes.message}`);
+    loading.value = false;
+    emits("loadOuter", { show: false });
+    return;
+  }
+  ck.ltoken = ltokenRes;
+  emits("loadOuter", { show: true, title: "正在获取 cookieToken " });
+  const cookieTokenRes = await TGRequest.User.bySToken.getCookieToken(ck.mid, ck.stoken);
+  if (typeof cookieTokenRes !== "string") {
+    showSnackbar({ text: `[${cookieTokenRes.retcode}]${cookieTokenRes.message}`, color: "error" });
+    await TGLogger.Error(
+      `获取CookieToken失败：${cookieTokenRes.retcode}-${cookieTokenRes.message}`,
+    );
+    loading.value = false;
+    emits("loadOuter", { show: false });
+    return;
+  }
+  ck.cookie_token = cookieTokenRes;
+  emits("loadOuter", { show: true, title: "正在获取用户信息" });
+  const briefRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
+  if ("retcode" in briefRes) {
+    showSnackbar({ text: `[${briefRes.retcode}]${briefRes.message}` });
+    await TGLogger.Error(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
+    loading.value = false;
+    emits("loadOuter", { show: false });
+    return;
+  }
+  const briefInfo: TGApp.App.Account.BriefInfo = {
+    nickname: briefRes.nickname,
+    uid: briefRes.uid,
+    avatar: briefRes.avatar_url,
+    desc: briefRes.introduce,
+  };
+  emits("loadOuter", { show: true, title: "正在保存用户数据" });
+  await TSUserAccount.account.saveAccount({
+    uid: briefInfo.uid,
+    cookie: ck,
+    brief: briefInfo,
+    updated: "",
+  });
+  emits("loadOuter", { show: true, title: "正在获取游戏账号" });
+  const gameRes = await TGRequest.User.bySToken.getAccounts(ck.stoken, ck.stuid);
+  if (!Array.isArray(gameRes)) {
+    loading.value = false;
+    emits("loadOuter", { show: false });
+    showSnackbar({ text: `[${gameRes.retcode}]${gameRes.message}` });
+    return;
+  }
+  await TSUserAccount.game.saveAccounts(briefInfo.uid, gameRes);
+  const curAccount = await TSUserAccount.game.getCurAccount(briefInfo.uid);
+  if (!curAccount) {
+    showSnackbar({ text: "未检测到游戏账号，请重新刷新", color: "warn" });
+    loading.value = false;
+    emits("loadOuter", { show: false });
+    return;
+  }
+  loading.value = false;
+  emits("loadOuter", { show: false });
+  showSnackbar({ text: "成功加载用户数据!" });
+}
+
+async function clearUser(user: TGApp.App.Account.User): Promise<void> {
+  if (user.uid === userStore.uid.value) {
+    showSnackbar({ text: "当前登录用户不许删除！", color: "warn" });
+    return;
+  }
+  const confirm = await showConfirm({ title: "确认删除", text: "将删除账号及其游戏账号数据" });
+  if (!confirm) {
+    showSnackbar({ text: "取消删除用户数据", color: "cancel" });
+    return;
+  }
+  await TSUserAccount.account.deleteAccount(user.uid);
+  showSnackbar({ text: "成功删除用户!", color: "success" });
+}
 </script>
 <style lang="css" scoped>
 .tcu-box {
   border-radius: 10px;
   background-image: linear-gradient(to right, #f78ca0 0%, #f9748f 19%, #fd868c 60%, #fe9a8b 100%);
+}
+
+.tcu-btn {
+  margin-left: 5px;
 }
 </style>

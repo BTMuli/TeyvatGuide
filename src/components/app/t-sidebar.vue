@@ -347,6 +347,7 @@ onUnmounted(() => themeListener());
 .side-icon.paimon {
   width: 32px;
   height: 32px;
+  border-radius: 50%;
   margin-right: 24px;
   transform: translateX(-4px);
 }
