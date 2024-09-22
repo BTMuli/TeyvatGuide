@@ -56,7 +56,7 @@
             <span>第</span>
             <span>{{ item.id }}</span>
             <span>期 UID</span>
-            <span>{{ user.gameUid }}</span>
+            <span>{{ uidCur }}</span>
             <span>更新于</span>
             <span>{{ item.updated }}</span>
           </div>
@@ -116,7 +116,7 @@ const loadingSub = ref<string>();
 
 // data
 const userTab = ref<number>(0);
-const user = ref<TGApp.Sqlite.Account.Game>(userStore.account.value);
+const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
 
 const localAbyss = ref<TGApp.Sqlite.Abyss.SingleTable[]>([]);
 const abyssRef = ref<HTMLElement>(<HTMLElement>{});
@@ -152,17 +152,23 @@ async function loadAbyss(): Promise<void> {
 
 async function refreshAbyss(): Promise<void> {
   if (!userStore.cookie.value) {
-    showSnackbar({
-      text: "未登录",
-      color: "error",
-    });
+    showSnackbar({ text: "未登录", color: "error" });
     await TGLogger.Warn("[UserAbyss][getAbyssData] 未登录");
     return;
   }
   if (uidCur.value && uidCur.value !== user.value.gameUid) {
+    const confirmSwitch = await showConfirm({
+      title: "是否切换游戏账户",
+      text: `确认则尝试切换至 ${uidCur.value}`,
+    });
+    if (confirmSwitch) {
+      await useUserStore().switchGameAccount(uidCur.value);
+      await refreshAbyss();
+      return;
+    }
     const confirm = await showConfirm({
       title: "确定刷新？",
-      text: `用户UID-${user.value.gameUid}与当前深渊UID-${uidCur.value}不一致`,
+      text: `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
     });
     if (!confirm) {
       showSnackbar({ text: "已取消深渊数据刷新", color: "cancel" });
@@ -228,19 +234,13 @@ async function uploadAbyss(): Promise<void> {
   await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据");
   const abyssData = localAbyss.value.find((item) => item.id === Math.max(...abyssIdList.value));
   if (!abyssData) {
-    showSnackbar({
-      text: "未找到深渊数据",
-      color: "error",
-    });
+    showSnackbar({ text: "未找到深渊数据", color: "error" });
     await TGLogger.Warn("[UserAbyss][uploadAbyss] 未找到深渊数据");
     return;
   }
   const maxFloor = Number(abyssData.maxFloor.split("-")[0]);
   if (isNaN(maxFloor) || maxFloor <= 9) {
-    showSnackbar({
-      text: "尚未完成深渊，请完成深渊后重试！",
-      color: "error",
-    });
+    showSnackbar({ text: "尚未完成深渊，请完成深渊后重试！", color: "error" });
     await TGLogger.Warn(`[UserAbyss][uploadAbyss] 尚未完成深渊 ${abyssData.maxFloor}`);
     return;
   }
@@ -248,10 +248,7 @@ async function uploadAbyss(): Promise<void> {
   const endTime = new Date(abyssData.endTime).getTime();
   const nowTime = new Date().getTime();
   if (nowTime < startTime || nowTime > endTime) {
-    showSnackbar({
-      text: "非最新深渊数据，请刷新深渊数据后重试！",
-      color: "error",
-    });
+    showSnackbar({ text: "非最新深渊数据，请刷新深渊数据后重试！", color: "error" });
     await TGLogger.Warn("[UserAbyss][uploadAbyss] 非最新深渊数据");
     return;
   }
@@ -274,19 +271,13 @@ async function uploadAbyss(): Promise<void> {
       showSnackbar({ text: res.message ?? "上传深渊数据成功" });
       await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据成功");
     } else {
-      showSnackbar({
-        text: `[${res.retcode}]${res.message}`,
-        color: "error",
-      });
+      showSnackbar({ text: `[${res.retcode}]${res.message}`, color: "error" });
       await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
       await TGLogger.Error(`[UserAbyss][uploadAbyss] ${res.retcode} ${res.message}`);
     }
   } catch (e) {
     if (e instanceof Error) {
-      showSnackbar({
-        text: e.message,
-        color: "error",
-      });
+      showSnackbar({ text: e.message, color: "error" });
       await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
       await TGLogger.Error(`[UserAbyss][uploadAbyss] ${e.message}`);
     }
@@ -301,7 +292,7 @@ async function deleteAbyss(): Promise<void> {
   }
   const confirm = await showConfirm({
     title: "确定删除数据？",
-    text: `将清除 ${uidCur.value} 的所有深渊数据`,
+    text: `将清除${uidCur.value}的所有深渊数据`,
   });
   if (!confirm) {
     showSnackbar({ text: "已取消删除", color: "cancel" });
@@ -312,7 +303,7 @@ async function deleteAbyss(): Promise<void> {
   await TSUserAbyss.delAbyss(uidCur.value);
   await new Promise((resolve) => setTimeout(resolve, 1000));
   loading.value = false;
-  showSnackbar({ text: `已清除 ${uidCur.value} 的深渊数据，即将刷新`, color: "success" });
+  showSnackbar({ text: `已清除 ${uidCur.value} 的深渊数据`, color: "success" });
   uidList.value = await TSUserAbyss.getAllUid();
   if (uidList.value.length > 0) uidCur.value = uidList.value[0];
   else uidCur.value = undefined;

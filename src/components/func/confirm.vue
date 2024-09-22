@@ -36,7 +36,7 @@ import { nextTick, onMounted, reactive, ref, watch, useTemplateRef } from "vue";
 interface ConfirmProps {
   title: string;
   text?: string;
-  mode: "confirm" | "input";
+  mode?: "confirm" | "input";
   otcancel?: boolean;
 }
 

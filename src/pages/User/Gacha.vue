@@ -1,24 +1,27 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="gacha-top-bar">
-    <div class="gacha-top-title">祈愿记录</div>
+    <div class="gacha-top-title">
+      <img src="/source/UI/userGacha.webp" alt="gacha" />
+      <span>祈愿记录</span>
+    </div>
     <v-select v-model="uidCur" class="gacha-top-select" :items="selectItem" variant="outlined" />
     <div class="gacha-top-btns">
-      <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(false)"
-        >增量刷新
+      <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(false)">
+        增量刷新
       </v-btn>
-      <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(true)"
-        >全量刷新
+      <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(true)">
+        全量刷新
       </v-btn>
-      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn(false)"
-        >导入
+      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn(false)">
+        导入
       </v-btn>
-      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn(true)"
-        >导入(v4)
+      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn(true)">
+        导入(v4)
       </v-btn>
       <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="exportUigf()">导出</v-btn>
-      <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="exportUigf4()"
-        >导出(v4)
+      <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="exportUigf4()">
+        导出(v4)
       </v-btn>
       <v-btn prepend-icon="mdi-delete" class="gacha-top-btn" @click="deleteGacha()">删除</v-btn>
     </div>
@@ -50,7 +53,7 @@
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch, computed } from "vue";
 
 import showConfirm from "../../components/func/confirm.js";
 import showSnackbar from "../../components/func/snackbar.js";
@@ -74,7 +77,7 @@ import TGRequest from "../../web/request/TGRequest.js";
 
 // store
 const userStore = storeToRefs(useUserStore());
-const account = userStore.account.value;
+const account = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
 const authkey = ref<string>("");
 
 // loading
@@ -84,9 +87,22 @@ const loadingSub = ref<string>();
 
 // data
 const selectItem = ref<string[]>([]);
-const uidCur = ref<string>("");
+const uidCur = ref<string>();
 const gachaListCur = ref<TGApp.Sqlite.GachaRecords.SingleTable[]>([]);
 const tab = ref<string>("overview");
+
+// 监听 UID 变化
+watch(
+  () => uidCur.value,
+  async (newUid) => {
+    if (!newUid) return;
+    gachaListCur.value = await TSUserGacha.getGachaRecords(newUid);
+    showSnackbar({ text: `成功获取 ${gachaListCur.value.length} 条祈愿数据` });
+    await TGLogger.Info(
+      `[UserGacha][${newUid}][watch] 成功获取 ${gachaListCur.value.length} 条祈愿数据`,
+    );
+  },
+);
 
 onMounted(async () => {
   await TGLogger.Info("[UserGacha][onMounted] 进入角色祈愿页面");
@@ -116,26 +132,30 @@ onMounted(async () => {
 
 // 刷新按钮点击事件
 async function confirmRefresh(force: boolean): Promise<void> {
-  await TGLogger.Info(`[UserGacha][${account.gameUid}][confirmRefresh] 刷新祈愿数据`);
-  const confirmRes = await showConfirm({
-    title: "是否刷新祈愿数据？",
-    text: `将刷新 UID：${account.gameUid} 的祈愿数据`,
-  });
-  if (!confirmRes) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消刷新祈愿数据",
+  await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 刷新祈愿数据`);
+  if (uidCur.value && uidCur.value !== account.value.gameUid) {
+    const confirmSwitch = await showConfirm({
+      title: "是否切换游戏账户",
+      text: `确认则尝试切换至 ${uidCur.value}`,
     });
-    await TGLogger.Warn("[UserGacha][${account.gameUid}][confirmRefresh] 已取消刷新祈愿数据");
-    return;
+    if (confirmSwitch) {
+      await useUserStore().switchGameAccount(uidCur.value);
+      await confirmRefresh(force);
+      return;
+    }
+    const confirm = await showConfirm({
+      title: "确定刷新？",
+      text: `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
+    });
+    if (!confirm) {
+      showSnackbar({ text: "已取消祈愿数据刷新", color: "cancel" });
+      return;
+    }
   }
   loadingTitle.value = "正在获取 authkey";
   loading.value = true;
   if (!userStore.cookie.value) {
-    showSnackbar({
-      color: "error",
-      text: "请先登录",
-    });
+    showSnackbar({ color: "error", text: "请先登录" });
     loading.value = false;
     await TGLogger.Warn("[UserGacha][${account.gameUid}][confirmRefresh] 未检测到 cookie");
     return;
@@ -144,19 +164,16 @@ async function confirmRefresh(force: boolean): Promise<void> {
     stoken: userStore.cookie.value.stoken,
     mid: userStore.cookie.value.mid,
   };
-  const gameUid = account.gameUid;
+  const gameUid = account.value.gameUid;
   const authkeyRes = await TGRequest.User.getAuthkey(cookie, gameUid);
   if (typeof authkeyRes === "string") {
     authkey.value = authkeyRes;
-    await TGLogger.Info(`[UserGacha][${account.gameUid}][confirmRefresh] 成功获取 authkey`);
+    await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 成功获取 authkey`);
   } else {
-    showSnackbar({
-      color: "error",
-      text: "获取 authkey 失败",
-    });
-    await TGLogger.Error(`[UserGacha][${account.gameUid}][confirmRefresh] 获取 authkey 失败`);
+    showSnackbar({ color: "error", text: "获取 authkey 失败" });
+    await TGLogger.Error(`[UserGacha][${account.value.gameUid}][confirmRefresh] 获取 authkey 失败`);
     await TGLogger.Error(
-      `[UserGacha][${account.gameUid}][confirmRefresh] ${authkeyRes.retcode} ${authkeyRes.message}`,
+      `[UserGacha][${account.value.gameUid}][confirmRefresh] ${authkeyRes.retcode} ${authkeyRes.message}`,
     );
     loading.value = false;
     return;
@@ -170,11 +187,11 @@ async function confirmRefresh(force: boolean): Promise<void> {
   ];
   if (!force) {
     loadingTitle.value = "正在获取数据库祈愿最新 ID";
-    checkList[0] = await TSUserGacha.getGachaCheck(account.gameUid, "200");
-    checkList[1] = await TSUserGacha.getGachaCheck(account.gameUid, "301");
-    checkList[2] = await TSUserGacha.getGachaCheck(account.gameUid, "400");
-    checkList[3] = await TSUserGacha.getGachaCheck(account.gameUid, "302");
-    checkList[4] = await TSUserGacha.getGachaCheck(account.gameUid, "500");
+    checkList[0] = await TSUserGacha.getGachaCheck(account.value.gameUid, "200");
+    checkList[1] = await TSUserGacha.getGachaCheck(account.value.gameUid, "301");
+    checkList[2] = await TSUserGacha.getGachaCheck(account.value.gameUid, "400");
+    checkList[3] = await TSUserGacha.getGachaCheck(account.value.gameUid, "302");
+    checkList[4] = await TSUserGacha.getGachaCheck(account.value.gameUid, "500");
   }
   console.log(checkList);
   loadingTitle.value = "正在刷新新手祈愿数据";
@@ -197,19 +214,20 @@ async function confirmRefresh(force: boolean): Promise<void> {
       resolve("");
     }, 1000);
   });
-  await TGLogger.Info(`[UserGacha][${account.gameUid}][confirmRefresh] 刷新祈愿数据完成`);
+  await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 刷新祈愿数据完成`);
   window.location.reload();
 }
 
 async function getGachaLogs(pool: string, endId: string = "0", check?: string): Promise<void> {
+  const uid = account.value.gameUid;
   await TGLogger.Info(
-    `[UserGacha][${account.gameUid}][getGachaLogs] 获取祈愿数据，pool：${pool}，endId：${endId}`,
+    `[UserGacha][${uid}][getGachaLogs] 获取祈愿数据，pool：${pool}，endId：${endId}`,
   );
   const gachaRes = await TGRequest.User.getGachaLog(authkey.value, pool, endId);
   console.log(pool, endId, gachaRes);
   if (Array.isArray(gachaRes)) {
     await TGLogger.Info(
-      `[UserGacha][${account.gameUid}][getGachaLogs] 成功获取到 ${gachaRes.length} 条祈愿数据`,
+      `[UserGacha][${uid}][getGachaLogs] 成功获取到 ${gachaRes.length} 条祈愿数据`,
     );
     if (gachaRes.length === 0) {
       await new Promise((resolve) => {
@@ -242,7 +260,7 @@ async function getGachaLogs(pool: string, endId: string = "0", check?: string): 
       }
       uigfList.push(tempItem);
     });
-    await TSUserGacha.mergeUIGF(account.gameUid, uigfList);
+    await TSUserGacha.mergeUIGF(uid, uigfList);
     if (check !== undefined && gachaRes.some((i) => i.id === check)) {
       await new Promise((resolve) => {
         setTimeout(() => {
@@ -260,13 +278,10 @@ async function getGachaLogs(pool: string, endId: string = "0", check?: string): 
       await getGachaLogs(pool, gachaRes[gachaRes.length - 1].id, check);
     }
   } else {
-    showSnackbar({
-      color: "error",
-      text: `[${pool}][${gachaRes.retcode}] ${gachaRes.message}`,
-    });
-    await TGLogger.Error(`[UserGacha][${account.gameUid}][getGachaLogs] 获取祈愿数据失败`);
+    showSnackbar({ color: "error", text: `[${pool}][${gachaRes.retcode}] ${gachaRes.message}` });
+    await TGLogger.Error(`[UserGacha][${uid}][getGachaLogs] 获取祈愿数据失败`);
     await TGLogger.Error(
-      `[UserGacha][${account.gameUid}][getGachaLogs] ${gachaRes.retcode} ${gachaRes.message}`,
+      `[UserGacha][${uid}][getGachaLogs] ${gachaRes.retcode} ${gachaRes.message}`,
     );
   }
 }
@@ -276,10 +291,7 @@ async function handleImportBtn(isV4: boolean): Promise<void> {
   if (isV4) {
     const checkConfirm = await showConfirm({ title: "确定导入UIGFv4格式的祈愿数据？" });
     if (!checkConfirm) {
-      showSnackbar({
-        color: "cancel",
-        text: "已取消 UIGF v4 格式导入",
-      });
+      showSnackbar({ color: "cancel", text: "已取消 UIGF v4 格式导入" });
       return;
     }
     await TGLogger.Info("[UserGacha][handleImportBtn] 导入祈愿数据(v4)");
@@ -299,10 +311,7 @@ async function handleImportBtn(isV4: boolean): Promise<void> {
     directory: false,
   });
   if (selectedFile === null) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消文件选择",
-    });
+    showSnackbar({ color: "cancel", text: "已取消文件选择" });
     return;
   }
   const check = await verifyUigfData(selectedFile, isV4);
@@ -324,10 +333,7 @@ async function importUigf4(filePath: string): Promise<void> {
     text: `共 ${uidCount} 个 UID，${dataCount} 条数据`,
   });
   if (!res) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消祈愿数据导入",
-    });
+    showSnackbar({ color: "cancel", text: "已取消祈愿数据导入" });
     return;
   }
   loadingTitle.value = "正在导入祈愿数据(v4)";
@@ -337,9 +343,7 @@ async function importUigf4(filePath: string): Promise<void> {
     await TSUserGacha.mergeUIGF4(account);
   }
   loading.value = false;
-  showSnackbar({
-    text: `成功导入 ${uidCount} 个 UID 的 ${dataCount} 条祈愿数据`,
-  });
+  showSnackbar({ text: `成功导入 ${uidCount} 个 UID 的 ${dataCount} 条祈愿数据` });
   await TGLogger.Info(
     `[UserGacha][importUigf4] 成功导入 ${uidCount} 个 UID，${dataCount} 条祈愿数据`,
   );
@@ -355,27 +359,19 @@ async function importUigf(filePath: string): Promise<void> {
     text: `UID：${remoteData.info.uid}，共 ${remoteData.list.length} 条数据`,
   });
   if (!confirm) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消祈愿数据导入",
-    });
+    showSnackbar({ color: "cancel", text: "已取消祈愿数据导入" });
     return;
   }
   loadingTitle.value = "正在导入祈愿数据";
   loading.value = true;
   if (remoteData.list.length === 0) {
     loading.value = false;
-    showSnackbar({
-      color: "error",
-      text: "导入的祈愿数据为空",
-    });
+    showSnackbar({ color: "error", text: "导入的祈愿数据为空" });
     return;
   }
   await TSUserGacha.mergeUIGF(remoteData.info.uid, remoteData.list);
   loading.value = false;
-  showSnackbar({
-    text: `成功导入 ${remoteData.list.length} 条祈愿数据`,
-  });
+  showSnackbar({ text: `成功导入 ${remoteData.list.length} 条祈愿数据` });
   await TGLogger.Info(
     `[UserGacha][importUigf] 成功导入 ${remoteData.info.uid} 的 ${remoteData.list.length} 条祈愿数据`,
   );
@@ -386,13 +382,11 @@ async function importUigf(filePath: string): Promise<void> {
 
 // 导出当前UID的祈愿数据
 async function exportUigf(): Promise<void> {
+  if (!uidCur.value) return;
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf] 导出祈愿数据`);
   const gachaList = await TSUserGacha.getGachaRecords(uidCur.value);
   if (gachaList.length === 0) {
-    showSnackbar({
-      color: "error",
-      text: `UID ${uidCur.value} 暂无祈愿数据`,
-    });
+    showSnackbar({ color: "error", text: `UID ${uidCur.value} 暂无祈愿数据` });
     return;
   }
   const res = await showConfirm({
@@ -400,10 +394,7 @@ async function exportUigf(): Promise<void> {
     text: `UID：${uidCur.value}，共 ${gachaList.length} 条数据`,
   });
   if (!res) {
-    showSnackbar({
-      color: "cancel",
-      text: `已取消 UID ${uidCur.value} 的祈愿数据导出`,
-    });
+    showSnackbar({ color: "cancel", text: `已取消 UID ${uidCur.value} 的祈愿数据导出` });
     return;
   }
   const file = await save({
@@ -417,10 +408,7 @@ async function exportUigf(): Promise<void> {
     defaultPath: `${await path.downloadDir()}${path.sep()}UIGF_${uidCur.value}.json`,
   });
   if (!file) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消文件保存",
-    });
+    showSnackbar({ color: "cancel", text: "已取消文件保存" });
     return;
   }
   await TGLogger.Info(
@@ -436,12 +424,10 @@ async function exportUigf(): Promise<void> {
 
 // 导出 UIGF v4 版本的祈愿数据
 async function exportUigf4(): Promise<void> {
+  if (!uidCur.value) return;
   const checkConfirm = await showConfirm({ title: "确定导出UIGFv4格式的祈愿数据？" });
   if (!checkConfirm) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消 UIGF v4 格式导出",
-    });
+    showSnackbar({ color: "cancel", text: "已取消 UIGF v4 格式导出" });
     return;
   }
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf4] 导出祈愿数据(v4)`);
@@ -451,19 +437,13 @@ async function exportUigf4(): Promise<void> {
     text: "取消则只导出当前 UID 的祈愿数据",
   });
   if (allConfirm === undefined) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消祈愿数据导出",
-    });
+    showSnackbar({ color: "cancel", text: "已取消祈愿数据导出" });
     return;
   }
-  if (allConfirm === false) {
+  if (!allConfirm) {
     const gachaList = await TSUserGacha.getGachaRecords(uidCur.value);
     if (gachaList.length === 0) {
-      showSnackbar({
-        color: "error",
-        text: `UID ${uidCur.value} 暂无祈愿数据`,
-      });
+      showSnackbar({ color: "error", text: `UID ${uidCur.value} 暂无祈愿数据` });
       return;
     }
   }
@@ -478,33 +458,25 @@ async function exportUigf4(): Promise<void> {
     defaultPath: `${await path.downloadDir()}${path.sep()}UIGF4.json`,
   });
   if (!file) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消文件保存",
-    });
+    showSnackbar({ color: "cancel", text: "已取消文件保存" });
     return;
   }
   loadingTitle.value = "正在导出祈愿数据";
   loading.value = true;
-  if (allConfirm === false) {
+  if (!allConfirm) {
     await exportUigf4Data(file, uidCur.value);
   } else {
     await exportUigf4Data(file);
   }
   loading.value = false;
-  showSnackbar({
-    text: "祈愿数据已成功导出",
-  });
+  showSnackbar({ text: "祈愿数据已成功导出" });
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf4] 导出祈愿数据完成`);
 }
 
 // 删除当前 UID 的祈愿数据
 async function deleteGacha(): Promise<void> {
-  if (gachaListCur.value.length === 0) {
-    showSnackbar({
-      color: "error",
-      text: "暂无祈愿数据",
-    });
+  if (gachaListCur.value.length === 0 || !uidCur.value) {
+    showSnackbar({ color: "error", text: "暂无祈愿数据" });
     return;
   }
   await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 删除祈愿数据`);
@@ -513,10 +485,7 @@ async function deleteGacha(): Promise<void> {
     text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
   });
   if (!firstConfirm) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消祈愿数据删除",
-    });
+    showSnackbar({ color: "cancel", text: "已取消祈愿数据删除" });
     await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 已取消祈愿数据删除`);
     return;
   }
@@ -528,10 +497,7 @@ async function deleteGacha(): Promise<void> {
       text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
     });
     if (!secondConfirm) {
-      showSnackbar({
-        color: "cancel",
-        text: "已取消祈愿数据删除",
-      });
+      showSnackbar({ color: "cancel", text: "已取消祈愿数据删除" });
       await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 已取消祈愿数据删除`);
       return;
     }
@@ -540,9 +506,7 @@ async function deleteGacha(): Promise<void> {
   loading.value = true;
   await TSUserGacha.deleteGachaRecords(uidCur.value);
   loading.value = false;
-  showSnackbar({
-    text: `已成功删除 ${uidCur.value} 的祈愿数据`,
-  });
+  showSnackbar({ text: `已成功删除 ${uidCur.value} 的祈愿数据` });
   await TGLogger.Info(
     `[UserGacha][${uidCur.value}][deleteGacha] 成功删除 ${gachaListCur.value.length} 条祈愿数据`,
   );
@@ -550,17 +514,6 @@ async function deleteGacha(): Promise<void> {
     window.location.reload();
   }, 1000);
 }
-
-// 监听 UID 变化
-watch(uidCur, async (newUid) => {
-  gachaListCur.value = await TSUserGacha.getGachaRecords(newUid);
-  showSnackbar({
-    text: `成功获取 ${gachaListCur.value.length} 条祈愿数据`,
-  });
-  await TGLogger.Info(
-    `[UserGacha][${newUid}][watch] 成功获取 ${gachaListCur.value.length} 条祈愿数据`,
-  );
-});
 </script>
 <style lang="css" scoped>
 .gacha-top-bar {
@@ -569,6 +522,7 @@ watch(uidCur, async (newUid) => {
   align-items: center;
   justify-content: space-between;
   padding: 10px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   margin-bottom: 10px;
   background: var(--box-bg-1);
@@ -578,7 +532,22 @@ watch(uidCur, async (newUid) => {
 }
 
 .gacha-top-title {
-  color: var(--common-text-title);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  gap: 10px;
+
+  img {
+    width: 32px;
+    height: 32px;
+  }
+
+  span {
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 20px;
+  }
 }
 
 .gacha-top-select {

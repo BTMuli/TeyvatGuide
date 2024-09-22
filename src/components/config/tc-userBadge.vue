@@ -21,7 +21,7 @@
           <v-list-item
             v-for="account in gameAccounts"
             :key="account.gameUid"
-            @click="switchGameAccount(account)"
+            @click="useUserStore().switchGameAccount(account.gameUid)"
           >
             <v-list-item-title>{{ account.nickname }}</v-list-item-title>
             <v-list-item-subtitle>
@@ -406,23 +406,15 @@ async function showMenu(): Promise<void> {
 }
 
 async function showAccounts(): Promise<void> {
-  if (!userStore.uid.value) return;
+  if (!userStore.uid.value) {
+    showSnackbar({ text: "未登录!", color: "error" });
+    return;
+  }
   gameAccounts.value = await TSUserAccount.game.getAccount(userStore.uid.value);
-}
-
-async function switchGameAccount(account: TGApp.Sqlite.Account.Game): Promise<void> {
-  if (account.gameUid === userStore.account.value.gameUid) {
-    showSnackbar({ text: "已经登录，无需切换!", color: "warn" });
+  if (gameAccounts.value.length === 0) {
+    showSnackbar({ text: "未找到账户的游戏数据，请尝试刷新!", color: "warn" });
     return;
   }
-  await TSUserAccount.game.switchAccount(account.uid, account.gameUid);
-  const gameAccount = await TSUserAccount.game.getCurAccount(account.uid);
-  if (!gameAccount) {
-    showSnackbar({ text: `无法获取${account.uid}的游戏信息`, color: "warn" });
-    return;
-  }
-  userStore.account.value = gameAccount;
-  showSnackbar({ text: "成功切换游戏账户!", color: "success" });
 }
 </script>
 <style lang="css" scoped>

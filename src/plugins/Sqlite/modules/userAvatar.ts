@@ -53,14 +53,14 @@ function getInsertSql(uid: string, data: TGApp.Game.Avatar.DetailList): string {
 }
 
 /**
- * @description 获取用户角色id列表
- * @since Beta v0.5.3
+ * @description 获取用户UID列表
+ * @since Beta v0.6.0
  * @returns {Promise<string[]>} 角色id列表
  */
 async function getAllUid(): Promise<string[]> {
   const db = await TGSqlite.getDB();
   type resType = Array<{ uid: string }>;
-  const res = await db.select<resType>("SELECT DISTINCT cid FROM UserCharacters;");
+  const res = await db.select<resType>("SELECT DISTINCT uid FROM UserCharacters;");
   return res.map((i) => i.uid);
 }
 
@@ -115,8 +115,19 @@ async function saveAvatars(uid: string, data: TGApp.Game.Avatar.DetailList[]): P
  */
 function getAvatarCard(id: number): string {
   const find = AppCharacterData.find((c) => c.id === id);
-  if (!find) return "原神·印象";
+  if (find === undefined || find.nameCard === "") return "原神·印象";
   return find.nameCard;
+}
+
+/**
+ * @description 删除指定UID的数据
+ * @since Beta v0.6.0
+ * @param {string} uid - 游戏UID
+ * @return {Promise<void>}
+ */
+async function deleteUid(uid: string): Promise<void> {
+  const db = await TGSqlite.getDB();
+  await db.execute("DELETE FROM UserCharacters WHERE uid = ?;", [uid]);
 }
 
 const TSUserAvatar = {
@@ -124,6 +135,7 @@ const TSUserAvatar = {
   getAvatars,
   saveAvatars,
   getAvatarCard,
+  deleteUid,
 };
 
 export default TSUserAvatar;

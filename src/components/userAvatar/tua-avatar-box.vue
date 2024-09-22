@@ -19,7 +19,7 @@
     </div>
     <div class="tua-abl-mid">
       <div class="tua-abl-bg">
-        <img v-if="nameCard !== false && isFetterMax" :src="nameCard" alt="nameCard" />
+        <img v-if="isFetterMax" :src="nameCard" alt="nameCard" />
       </div>
       <div class="tua-abl-skills">
         <div v-for="skill in skills" :key="skill.skill_id" class="tua-abl-skill">
@@ -45,7 +45,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue";
+import { computed } from "vue";
 
 import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
 import { useUserStore } from "../../store/modules/user.js";
@@ -118,12 +118,9 @@ const skills = computed<TGApp.Game.Avatar.Skill[]>(() => {
   return props.modelValue.skills.filter((skill) => skill.skill_type === 1);
 });
 
-const nameCard = ref<string | false>(false);
-
-onMounted(() => {
-  if (!props.modelValue) return;
+const nameCard = computed<string>(() => {
   const cardFind = TSUserAvatar.getAvatarCard(props.modelValue.avatar.id);
-  nameCard.value = `/source/nameCard/profile/${cardFind}.webp`;
+  return `/source/nameCard/profile/${cardFind}.webp`;
 });
 
 function getWeaponTitle(): string {
