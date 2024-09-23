@@ -19,18 +19,21 @@ class Sqlite {
   private readonly dbPath: string = "sqlite:TeyvatGuide.db";
   /**
    * @description 数据库包含的表
-   * @since Alpha v0.2.3
+   * @since Beta v0.6.0
    * @private
    */
   private readonly tables: string[] = [
     "Achievements",
-    "AppCharacters",
     "AppData",
+    "GachaRecords",
     "GameAccount",
     "SpiralAbyss",
+    "UFCollection",
+    "UFMap",
+    "UFPost",
+    "UserAccount",
     "UserCharacters",
     "UserRecord",
-    "GachaRecords",
   ];
 
   /**

@@ -4,6 +4,8 @@
  * @since Beta v0.6.0
  */
 
+import { getZhElement } from "../../../utils/toolFunc.js";
+
 /**
  * @description 将通过 api 获取到的用户战绩数据转换为渲染用的数据
  * @since Beta v0.6.0
@@ -48,19 +50,10 @@ function transRole(data: TGApp.Game.Record.Role): TGApp.Sqlite.Record.Role {
  * @returns {TGApp.Sqlite.Record.Avatar} 转换后的角色列表
  */
 function transAvatar(data: TGApp.Game.Record.Avatar): TGApp.Sqlite.Record.Avatar {
-  const elementMap: Record<string, string> = {
-    Anemo: "风",
-    Geo: "岩",
-    Electro: "雷",
-    Hydro: "水",
-    Pyro: "火",
-    Cryo: "冰",
-    Dendro: "草",
-  };
   return {
     id: data.id,
     name: data.name,
-    element: elementMap[data.element],
+    element: getZhElement(data.element),
     fetter: data.fetter,
     level: data.level,
     star: data.rarity === 105 ? 5 : data.rarity,

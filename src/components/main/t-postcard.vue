@@ -1,5 +1,5 @@
 <template>
-  <v-card :rounded="true" v-if="card">
+  <v-card :rounded="true" v-if="card" :id="`post-card-${card.postId}`" class="tpc-card">
     <div class="tpc-cover">
       <img :src="card.cover" alt="cover" @click="createPost(card)" />
       <div v-if="isAct" class="tpc-act">
@@ -13,7 +13,7 @@
       </div>
     </div>
     <div class="tpc-content">
-      <div class="tpc-title" :title="card.title">{{ card.title }}</div>
+      <div class="tpc-title" :title="card.title" @click="shareCard">{{ card.title }}</div>
       <TpAvatar v-if="card.user" :data="card.user" position="left" />
       <div class="tpc-data" v-if="card.data">
         <div class="tpc-info-item" :title="`浏览数：${card.data.view}`">
@@ -51,12 +51,14 @@
       class="tpc-select"
       v-model="selectedList"
       :value="props.modelValue.post.post_id"
+      data-html2canvas-ignore
     />
   </v-card>
 </template>
 <script lang="ts" setup>
 import { computed, onBeforeMount, ref } from "vue";
 
+import { generateShareImg } from "../../utils/TGShare.js";
 import { createPost } from "../../utils/TGWindow.js";
 import TpAvatar from "../post/tp-avatar.vue";
 
@@ -208,8 +210,20 @@ function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.N
   }
   return commonCard;
 }
+
+async function shareCard(): Promise<void> {
+  if (!card.value) return;
+  const dom = <HTMLDivElement>document.querySelector(`#post-card-${card.value.postId}`);
+  const fileName = `PostCard_${card.value.postId}`;
+  await generateShareImg(fileName, dom, 2);
+}
 </script>
 <style lang="css" scoped>
+.tpc-card {
+  border: 1px solid var(--common-shadow-1);
+  box-shadow: 2px 2px 5px var(--common-shadow-2);
+}
+
 .tpc-cover {
   position: relative;
   display: flex;
@@ -223,7 +237,6 @@ function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.N
 
 .tpc-cover img {
   min-width: 100%;
-  height: 100%;
   object-fit: cover;
   object-position: center;
   transition: all 0.3s linear;
@@ -241,6 +254,7 @@ function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.N
 .tpc-title {
   overflow: hidden;
   width: 100%;
+  cursor: pointer;
   font-family: var(--font-title);
   font-size: 18px;
   text-overflow: ellipsis;
