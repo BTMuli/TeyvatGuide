@@ -1,5 +1,5 @@
 <template>
-  <v-card :rounded="true" v-if="card" :id="`post-card-${card.postId}`" class="tpc-card">
+  <div v-if="card" :id="`post-card-${card.postId}`" class="tpc-card">
     <div class="tpc-cover">
       <img :src="card.cover" alt="cover" @click="createPost(card)" />
       <div v-if="isAct" class="tpc-act">
@@ -53,7 +53,8 @@
       :value="props.modelValue.post.post_id"
       data-html2canvas-ignore
     />
-  </v-card>
+    <div class="tpc-info-id" v-else>{{ props.modelValue.post.post_id }}</div>
+  </div>
 </template>
 <script lang="ts" setup>
 import { computed, onBeforeMount, ref } from "vue";
@@ -215,12 +216,16 @@ async function shareCard(): Promise<void> {
   if (!card.value) return;
   const dom = <HTMLDivElement>document.querySelector(`#post-card-${card.value.postId}`);
   const fileName = `PostCard_${card.value.postId}`;
-  await generateShareImg(fileName, dom, 2);
+  await generateShareImg(fileName, dom, 2.5);
 }
 </script>
 <style lang="css" scoped>
 .tpc-card {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
   border: 1px solid var(--common-shadow-1);
+  border-radius: 5px;
   box-shadow: 2px 2px 5px var(--common-shadow-2);
 }
 
@@ -236,7 +241,7 @@ async function shareCard(): Promise<void> {
 }
 
 .tpc-cover img {
-  min-width: 100%;
+  width: 100%;
   object-fit: cover;
   object-position: center;
   transition: all 0.3s linear;
@@ -375,5 +380,24 @@ async function shareCard(): Promise<void> {
   color: var(--tgc-white-1);
   gap: 5px;
   opacity: 0.8;
+}
+
+.tpc-info-id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  background: var(--common-shadow-1);
+  border-bottom-right-radius: 5px;
+  border-top-left-radius: 5px;
+  box-shadow: 2px 2px 5px var(--tgc-dark-1);
+  color: var(--tgc-white-1);
+  font-size: 12px;
+  text-shadow: 0 0 5px var(--tgc-dark-1);
 }
 </style>
