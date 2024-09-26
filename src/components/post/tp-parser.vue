@@ -42,7 +42,7 @@ function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.My
       res.push(cur);
       continue;
     }
-    tp.insert = tp.insert.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    tp.insert = tp.insert.replace(/\r/g, "\n");
     if (tp.insert === "\n") {
       child.push(tp);
       cur = {
