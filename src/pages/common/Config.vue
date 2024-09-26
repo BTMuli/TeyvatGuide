@@ -110,7 +110,6 @@
 import { core } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { remove } from "@tauri-apps/plugin-fs";
-import { exit } from "@tauri-apps/plugin-process";
 import { onMounted, ref } from "vue";
 
 import TcAppBadge from "../../components/config/tc-appBadge.vue";
@@ -370,11 +369,10 @@ async function confirmDelCache(): Promise<void> {
   }
   await TGLogger.Info("[Config][confirmDelCache] 缓存清除完成");
   loading.value = false;
-  showSnackbar({
-    text: "缓存已清除!即将退出应用！",
-  });
+  showSnackbar({ text: "缓存已清除!即将重启应用！" });
   setTimeout(async () => {
-    await exit();
+    const { relaunch } = window.__TAURI_PLUGIN_PROCESS__;
+    await relaunch();
   }, 1000);
 }
 
