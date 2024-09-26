@@ -164,6 +164,7 @@ async function refreshRecord(): Promise<void> {
     loadingTitle.value = "正在保存战绩数据";
     await TSUserRecord.saveRecord(Number(user.value.gameUid), res);
     await loadUid();
+    await loadRecord();
     if (recordData.value === undefined) await loadRecord();
   } else {
     showSnackbar({ text: `[${res.retcode}] ${res.message}`, color: "error" });
