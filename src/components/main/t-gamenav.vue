@@ -7,7 +7,7 @@
     <div v-if="props.modelValue === 2 && hasNav" class="tgn-nav">
       <v-btn size="25" @click="tryGetCode" title="查看兑换码" icon="mdi-code-tags-check"></v-btn>
     </div>
-    <ToLivecode v-model="showOverlay" :data="codeData" />
+    <ToLivecode v-model="showOverlay" :data="codeData" v-model:actId="actId" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -36,6 +36,7 @@ const appStore = useAppStore();
 const nav = ref<TGApp.BBS.Navigator.Navigator[]>([]);
 const codeData = ref<TGApp.BBS.Navigator.CodeData[]>([]);
 const showOverlay = ref<boolean>(false);
+const actId = ref<string>();
 
 const hasNav = computed<boolean>(() => {
   if (props.modelValue !== 2) return false;
@@ -57,12 +58,13 @@ async function tryGetCode(): Promise<void> {
   if (props.modelValue !== 2) return;
   const navFind = nav.value.find((item) => item.name === "前瞻直播");
   if (!navFind) return;
-  const actId = new URL(navFind.app_path).searchParams.get("act_id");
-  if (!actId) {
+  const actIdFind = new URL(navFind.app_path).searchParams.get("act_id");
+  if (!actIdFind) {
     showSnackbar({ text: "未找到活动ID", color: "warn" });
     return;
   }
-  const res = await TGRequest.Nav.getCode(actId);
+  actId.value = actIdFind;
+  const res = await TGRequest.Nav.getCode(actIdFind);
   if (!Array.isArray(res)) {
     showSnackbar({ text: `[${res.retcode}] ${res.message}`, color: "warn" });
     return;
