@@ -88,8 +88,8 @@ async function shareImg(): Promise<void> {
 .tolc-box {
   position: relative;
   width: 340px;
-  height: 200px;
-  padding: 5px;
+  padding: 10px;
+  border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   background: var(--app-page-bg);
 }
