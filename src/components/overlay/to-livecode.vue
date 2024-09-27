@@ -4,17 +4,27 @@
       <div class="tolc-title">兑换码</div>
       <v-list-item v-for="(item, index) in props.data" :key="index">
         <template #title>
-          {{ item.code }}
+          {{ item.code === "" ? "暂无兑换码" : item.code }}
         </template>
         <template #subtitle>
           <div v-html="item.title"></div>
-          <span>{{ timestampToDate(Number(item.to_get_time) * 1000) }}</span>
+          <span title="开放时间">{{ timestampToDate(Number(item.to_get_time) * 1000) }}</span>
         </template>
         <template #prepend>
-          <img :src="item.img" alt="icon" />
+          <img
+            :src="item.img === '' ? '/source/UI/empty.webp' : item.img"
+            alt="icon"
+            class="tolc-icon"
+          />
         </template>
         <template #append>
-          <v-btn @click="copy(item.code)" icon="mdi-content-copy" variant="outlined"></v-btn>
+          <v-btn
+            :disabled="item.code === ''"
+            @click="copy(item.code)"
+            icon="mdi-content-copy"
+            variant="outlined"
+            class="tolc-btn"
+          ></v-btn>
         </template>
       </v-list-item>
     </div>
@@ -65,5 +75,15 @@ function copy(code: string): void {
   font-family: var(--font-title);
   font-size: 20px;
   text-align: center;
+}
+
+.tolc-icon {
+  width: 40px;
+  margin-right: 10px;
+  aspect-ratio: 1;
+}
+
+.tolc-btn {
+  margin-left: 10px;
 }
 </style>

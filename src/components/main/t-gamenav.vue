@@ -59,25 +59,17 @@ async function tryGetCode(): Promise<void> {
   if (!navFind) return;
   const actId = new URL(navFind.app_path).searchParams.get("act_id");
   if (!actId) {
-    showSnackbar({
-      text: "未找到活动ID",
-      color: "warn",
-    });
+    showSnackbar({ text: "未找到活动ID", color: "warn" });
     return;
   }
   const res = await TGRequest.Nav.getCode(actId);
   if (!Array.isArray(res)) {
-    showSnackbar({
-      text: `[${res.retcode}] ${res.message}`,
-      color: "warn",
-    });
+    showSnackbar({ text: `[${res.retcode}] ${res.message}`, color: "warn" });
     return;
   }
   codeData.value = res;
-  showSnackbar({
-    text: "获取兑换码成功",
-    color: "success",
-  });
+  showSnackbar({ text: "获取兑换码成功", color: "success" });
+  await TGLogger.Info(JSON.stringify(res));
   showOverlay.value = true;
 }
 
