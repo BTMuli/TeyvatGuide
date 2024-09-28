@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2024-09-17
+Update: 2024-09-28
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2024-09-17 19:39:44`
+> 更新于 `2024-09-28 10:56:37`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -82,7 +82,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 ## UI 参考 / UI Reference
 
 - [Snap.Hutao](https://github.com/DGP-Studio/Snap.Hutao)
-- [StarWard](https://github.com/Scighost/Starward)
+- [Starward](https://github.com/Scighost/Starward)
 - [米游社](https://www.miyoushe.com/ys/)
 - [原神](https://yuanshen.com/)
 
@@ -97,7 +97,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 
 - [MuCli](https://github.com/BTMuli/MuCli)：基于 NodeJS 的命令行工具，用于生成项目文档。
 - [TGAssistant](https://github.com/BTMuli/TGAssistant)：Teyvat Guide 的资源获取、解析、处理仓库。
-- [WhiteTea](https://github.com/BTMuli/WhiteTea)：Github Bot，（半）自动化处理 Teyvat Guide 的 Issue 和 Pull Request。
+- ~~[WhiteTea](https://github.com/BTMuli/WhiteTea)：Github Bot，（半）自动化处理 Teyvat Guide 的 Issue 和 Pull Request。~~ 服务已挂T_T
 
 ## 技术栈 / Tech Stack
 
@@ -108,8 +108,10 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 
 ## 第三方组件 / Plugins
 
-- [Echarts](https://echarts.apache.org/zh/index.html)：用于祈愿概览图生成
+- [Ajv](https://github.com/ajv-validator/ajv/)：用于校验UIAF&UIGF导入数据
 - [Artplayer](https://artplayer.org/)：用于米游社帖子视频播放解析
+- [Echarts](https://echarts.apache.org/zh/index.html)：用于祈愿概览图生成
+- [Html2Canvas](https://github.com/niklasvh/html2canvas)：用于分享图生成
 
 ## 协议 / License
 
