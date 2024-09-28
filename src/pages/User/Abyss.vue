@@ -257,7 +257,7 @@ async function uploadAbyss(): Promise<void> {
     loading.value = true;
     const transAbyss = Hutao.Abyss.utils.transData(abyssData);
     loadingTitle.value = "正在获取角色数据";
-    const roles = await TSUserAvatar.getAvatars(user.value.gameUid);
+    const roles = await TSUserAvatar.getAvatars(Number(user.value.gameUid));
     if (!roles) {
       loading.value = false;
       return;
