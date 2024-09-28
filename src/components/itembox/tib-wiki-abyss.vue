@@ -41,10 +41,6 @@ const box = computed<TItemBoxData>(() => {
 });
 
 onMounted(async () => {
-  // 如果是 10000005或 10000007，就是主角
-  if (props.modelValue.Item === 10000005 || props.modelValue.Item === 10000007) {
-    return;
-  }
   avatar.value = AppCharacterData.find((a) => a.id === props.modelValue.Item);
 });
 </script>
