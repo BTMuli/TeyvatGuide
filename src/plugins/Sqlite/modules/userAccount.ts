@@ -4,6 +4,10 @@
  * @since Beta v0.6.0
  */
 
+import { path } from "@tauri-apps/api";
+import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+
+import TGLogger from "../../../utils/TGLogger.js";
 import { timestampToDate } from "../../../utils/toolFunc.js";
 import TGSqlite from "../index.js";
 
@@ -118,6 +122,51 @@ async function saveAccount(data: TGApp.App.Account.User): Promise<void> {
     (?,?,?,?) ON CONFLICT (uid) DO UPDATE SET cookie=?,brief=?,updated=?",
     [table.uid, table.cookie, table.brief, timeNow, table.cookie, table.brief, timeNow],
   );
+}
+
+/**
+ * @description 备份用户数据
+ * @since Beta v0.6.0
+ * @param {string} dir - 备份目录
+ * @returns {Promise<void>}
+ */
+async function backUpAccount(dir: string): Promise<void> {
+  if (!(await exists(dir))) {
+    await TGLogger.Warn("不存在指定的账户备份目录，即将创建");
+    await mkdir(dir, { recursive: true });
+  }
+  const accounts = await getAllAccount();
+  await writeTextFile(`${dir}${path.sep()}accounts.json`, JSON.stringify(accounts, null, 2));
+  await TGLogger.Info("账户数据备份完成");
+}
+
+/**
+ * @description 恢复用户数据
+ * @since Beta v0.6.0
+ * @param {string} dir
+ * @returns {Promise<boolean>}
+ */
+async function restoreAccount(dir: string): Promise<boolean> {
+  if (!(await exists(dir))) {
+    await TGLogger.Warn("不存在指定的账户备份目录");
+    return false;
+  }
+  try {
+    const filePath = `${dir}${path.sep()}accounts.json`;
+    if (!(await exists(filePath))) {
+      await TGLogger.Warn("不存在指定的账户备份文件");
+      return false;
+    }
+    const data = await readTextFile(filePath);
+    const accounts: TGApp.App.Account.User[] = JSON.parse(data);
+    for (const account of accounts) {
+      await saveAccount(account);
+    }
+  } catch (e) {
+    await TGLogger.Error(`[UserAccount][restoreAccount] ${e}`);
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -236,6 +285,8 @@ const TSUserAccount = {
     saveAccount,
     copy: copyCookie,
     deleteAccount,
+    backup: backUpAccount,
+    restore: restoreAccount,
   },
   game: {
     getAccount: getGameAccount,

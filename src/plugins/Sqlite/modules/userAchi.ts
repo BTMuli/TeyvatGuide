@@ -306,22 +306,23 @@ async function backupUiaf(dir: string, uid?: number): Promise<void> {
 async function restoreUiaf(dir: string): Promise<boolean> {
   if (!(await exists(dir))) return false;
   const filesRead = await readDir(dir);
-  const files = filesRead.filter((item) => item.name.includes("UIAF_") && item.isFile);
+  // 校验 UIAF_xxx.json 文件
+  const fileRegex = /^UIAF_\d+\.json$/;
+  const files = filesRead.filter((item) => item.isFile && fileRegex.test(item.name));
+  if (files.length === 0) return false;
   for (const file of files) {
     try {
-      // todo 完善正则判断
-      const reg = /UIAF_(\d+).json/;
-      if (!file.name.match(reg)) return false;
-      const uid: number = Number(file.name.match(reg)![0]);
+      const uid = parseInt(file.name.replace("UIAF_", "").replace(".json", ""));
       const filePath = `${dir}${path.sep()}${file.name}`;
       const data: TGApp.Plugins.UIAF.Achievement[] = JSON.parse(await readTextFile(filePath));
       await TSUserAchi.mergeUiaf(data, uid);
     } catch (e) {
       await TGLogger.Error(`[UIAF][RESTORE] 恢复成就数据${file.name} `);
       await TGLogger.Error(`${e}`);
+      return false;
     }
   }
-  return false;
+  return true;
 }
 
 /**

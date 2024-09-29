@@ -4,7 +4,12 @@
  * @since Beta v0.6.0
  */
 
+import { path } from "@tauri-apps/api";
+import { exists, mkdir, readDir } from "@tauri-apps/plugin-fs";
+
 import { AppCharacterData, AppWeaponData } from "../../../data/index.js";
+import TGLogger from "../../../utils/TGLogger.js";
+import { exportUigfData, readUigfData, verifyUigfData } from "../../../utils/UIGF.js";
 import TGSqlite from "../index.js";
 
 type gachaItemTypeRes =
@@ -177,6 +182,62 @@ async function mergeUIGF4(data: TGApp.Plugins.UIGF.GachaHk4e): Promise<void> {
   }
 }
 
+/**
+ * @description 备份祈愿数据
+ * @since Beta v0.6.0
+ * @param {string} dir - 备份目录
+ * @returns {Promise<void>}
+ */
+async function backUpUigf(dir: string): Promise<void> {
+  if (!(await exists(dir))) {
+    await TGLogger.Warn("不存在指定的祈愿备份目录，即将创建");
+    await mkdir(dir, { recursive: true });
+  }
+  const uidList = await getUidList();
+  for (const uid of uidList) {
+    const dataGacha = await getGachaRecords(uid);
+    const savePath = `${dir}${path.sep()}UIGF_${uid}.json`;
+    await exportUigfData(uid, dataGacha, savePath);
+  }
+  await TGLogger.Info("祈愿数据备份完成");
+}
+
+/**
+ * @description 恢复祈愿数据
+ * @since Beta v0.6.0
+ * @param {string} dir - 备份目录
+ * @returns {Promise<boolean>}
+ */
+async function restoreUigf(dir: string): Promise<boolean> {
+  if (!(await exists(dir))) {
+    await TGLogger.Warn("不存在指定的祈愿备份目录");
+    return false;
+  }
+  const filesRead = await readDir(dir);
+  // 校验 UIGF_xxx.json 文件
+  const fileRegex = /^UIGF_\d+\.json$/;
+  const files = filesRead.filter((item) => item.isFile && fileRegex.test(item.name));
+  if (files.length === 0) return false;
+  try {
+    for (const file of files) {
+      const filePath = `${dir}${path.sep()}${file.name}`;
+      const check = await verifyUigfData(filePath);
+      if (!check) {
+        await TGLogger.Warn(`UIGF数据校验失败${filePath}`);
+        continue;
+      }
+      const data = await readUigfData(filePath);
+      const uid = data.info.uid;
+      await mergeUIGF(uid, data.list);
+    }
+  } catch (e) {
+    await TGLogger.Error(`恢复祈愿数据失败${dir}`);
+    await TGLogger.Error(typeof e === "string" ? e : JSON.stringify(e));
+    return false;
+  }
+  return true;
+}
+
 const TSUserGacha = {
   getUidList,
   getGachaCheck,
@@ -185,6 +246,8 @@ const TSUserGacha = {
   deleteGachaRecords,
   mergeUIGF,
   mergeUIGF4,
+  backUpUigf,
+  restoreUigf,
 };
 
 export default TSUserGacha;
