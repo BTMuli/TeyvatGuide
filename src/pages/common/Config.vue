@@ -103,6 +103,7 @@
   <div class="config-right">
     <TcAppBadge />
     <TcUserBadge @loadOuter="loadHandle" />
+    <TcGameBadge />
   </div>
 </template>
 
@@ -115,6 +116,7 @@ import { onMounted, ref } from "vue";
 
 import TcAppBadge from "../../components/config/tc-appBadge.vue";
 import TcDataDir from "../../components/config/tc-dataDir.vue";
+import TcGameBadge from "../../components/config/tc-gameBadge.vue";
 import TcInfo from "../../components/config/tc-info.vue";
 import TcUserBadge from "../../components/config/tc-userBadge.vue";
 import showConfirm from "../../components/func/confirm.js";

@@ -29,17 +29,19 @@ export const useAppStore = defineStore(
       collapse: true,
     });
     // 开发者模式
-    const devMode = ref(false);
+    const devMode = ref<boolean>(false);
     // 应用主题
-    const theme = ref("default");
+    const theme = ref<string>("default");
     // 是否登录
-    const isLogin = ref(false);
+    const isLogin = ref<boolean>(false);
     // 用户数据目录
-    const userDir = ref(userDataDir);
+    const userDir = ref<string>(userDataDir);
     // 数据库路径
-    const dbPath = ref(dbDataPath);
+    const dbPath = ref<string>(dbDataPath);
     // 日志目录
-    const logDir = ref(logDataDir);
+    const logDir = ref<string>(logDataDir);
+    // 游戏安装目录
+    const gameDir = ref<string>("未设置");
     // 设备信息
     const deviceInfo = ref<TGApp.App.Device.DeviceInfo>(getInitDeviceInfo());
     // 服务器
@@ -47,7 +49,7 @@ export const useAppStore = defineStore(
     // 语言
     const lang = ref<AnnoLang>("zh-cn");
     // 最近的咨讯类型
-    const recentNewsType = ref("notice");
+    const recentNewsType = ref<string>("notice");
     // 是否开启分辨率回正
     const needResize = ref<string>("true");
 
@@ -61,6 +63,7 @@ export const useAppStore = defineStore(
       lang.value = "zh-cn";
       recentNewsType.value = "notice";
       needResize.value = "true";
+      gameDir.value = "未设置";
       initDevice();
     }
 
@@ -87,6 +90,7 @@ export const useAppStore = defineStore(
       lang,
       recentNewsType,
       needResize,
+      gameDir,
       init,
       changeTheme,
     };
@@ -96,7 +100,7 @@ export const useAppStore = defineStore(
       {
         key: "appPath",
         storage: window.localStorage,
-        pick: ["userDir", "dbPath", "logDir"],
+        pick: ["userDir", "dbPath", "logDir", "gameDir"],
       },
       {
         key: "app",

@@ -17,17 +17,26 @@ async function getVideoView(
   aid?: string,
   bvid?: string,
 ): Promise<TGApp.Plugins.Bili.Video.ViewData> {
-  let url = "https://api.bilibili.com/x/web-interface/view?";
+  const url = "https://api.bilibili.com/x/web-interface/wbi/view";
+  const params: Record<string, string | number | boolean> = {
+    need_view: 1,
+    isGaiaAoided: true,
+  };
   if (aid) {
-    url += `aid=${aid}`;
+    params.aid = aid;
   } else if (bvid) {
-    url += `bvid=${bvid}`;
+    params.bvid = bvid;
   } else {
     throw new Error("参数错误");
   }
   const resp = await TGHttp<TGApp.Plugins.Bili.Video.ViewResponse>(url, {
     method: "GET",
+    query: params,
+  }).catch((err) => {
+    console.error(err);
+    return err;
   });
+  console.warn(resp.data);
   return resp.data;
 }
 

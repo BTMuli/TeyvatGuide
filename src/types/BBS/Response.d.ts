@@ -223,4 +223,18 @@ declare namespace TGApp.BBS.Response {
       list: TGApp.BBS.Account.GameAccount[];
     };
   }
+
+  /**
+   * @description 获取登录 ticket
+   * @interface getAuthTicketByGameBiz
+   * @since Beta v0.6.0
+   * @extends BaseWithData
+   * @property {string} data.ticket
+   * @returns getAuthTicketByGameBiz
+   */
+  interface getAuthTicketByGameBiz extends BaseWithData {
+    data: {
+      ticket: string;
+    };
+  }
 }

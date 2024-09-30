@@ -2,60 +2,59 @@
   <v-list class="config-list">
     <v-list-subheader :inset="true" class="config-header" title="路径" />
     <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item title="用户数据目录" :subtitle="appStore.userDir">
+    <v-list-item title="用户数据目录" :subtitle="appStore.userDir.value">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-key</v-icon>
         </div>
       </template>
       <template #append>
-        <v-icon @click="confirmCUD()" style="cursor: pointer" title="修改用户数据目录"
-          >mdi-pencil
-        </v-icon>
-        &emsp;
-        <v-icon @click="openPath('user')" style="cursor: pointer" title="打开用户数据目录"
-          >mdi-folder-open
-        </v-icon>
-        &emsp;
-        <v-icon @click="copyPath('user')" style="cursor: pointer" title="复制用户数据目录路径"
-          >mdi-content-copy
-        </v-icon>
+        <div class="config-opers">
+          <v-icon @click="confirmCUD()" title="修改用户数据目录"> mdi-pencil </v-icon>
+          <v-icon @click="openPath('user')" title="打开用户数据目录"> mdi-folder-open </v-icon>
+          <v-icon @click="copyPath('user')" title="复制用户数据目录路径"> mdi-content-copy </v-icon>
+        </div>
       </template>
     </v-list-item>
-    <v-list-item title="应用数据库路径" :subtitle="appStore.dbPath">
+    <v-list-item title="应用数据库路径" :subtitle="appStore.dbPath.value">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-account</v-icon>
         </div>
       </template>
       <template #append>
-        <v-icon @click="openPath('db')" style="cursor: pointer" title="打开数据库目录"
-          >mdi-folder-open
-        </v-icon>
-        &emsp;
-        <v-icon @click="copyPath('db')" style="cursor: pointer" title="复制数据库目录路径"
-          >mdi-content-copy
-        </v-icon>
+        <div class="config-opers">
+          <v-icon @click="openPath('db')" title="打开数据库目录"> mdi-folder-open </v-icon>
+          <v-icon @click="copyPath('db')" title="复制数据库目录路径"> mdi-content-copy </v-icon>
+        </div>
       </template>
     </v-list-item>
-    <v-list-item title="日志目录" :subtitle="appStore.logDir">
+    <v-list-item title="启动器安装目录" :subtitle="appStore.gameDir.value">
+      <template #prepend>
+        <div class="config-icon">
+          <v-icon>mdi-gamepad</v-icon>
+        </div>
+      </template>
+      <template #append>
+        <div class="config-opers">
+          <v-icon @click="confirmCGD()" title="修改启动器安装目录"> mdi-pencil </v-icon>
+          <v-icon @click="openPath('game')" title="打开游戏安装目录"> mdi-folder-open </v-icon>
+          <v-icon @click="copyPath('game')" title="复制游戏安装目录"> mdi-content-copy </v-icon>
+        </div>
+      </template>
+    </v-list-item>
+    <v-list-item title="日志目录" :subtitle="appStore.logDir.value">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-multiple</v-icon>
         </div>
       </template>
       <template #append>
-        <v-icon @click="confirmCLD()" style="cursor: pointer" title="清理日志文件"
-          >mdi-delete
-        </v-icon>
-        &emsp;
-        <v-icon @click="openPath('log')" style="cursor: pointer" title="打开日志目录"
-          >mdi-folder-open
-        </v-icon>
-        &emsp;
-        <v-icon @click="copyPath('log')" style="cursor: pointer" title="复制日志目录路径"
-          >mdi-content-copy
-        </v-icon>
+        <div class="config-opers">
+          <v-icon @click="confirmCLD()" title="清理日志文件"> mdi-delete </v-icon>
+          <v-icon @click="openPath('log')" title="打开日志目录"> mdi-folder-open </v-icon>
+          <v-icon @click="copyPath('log')" title="复制日志目录路径"> mdi-content-copy </v-icon>
+        </div>
       </template>
     </v-list-item>
   </v-list>
@@ -63,7 +62,9 @@
 <script lang="ts" setup>
 import { path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
-import { readDir, remove } from "@tauri-apps/plugin-fs";
+import { exists, readDir, remove } from "@tauri-apps/plugin-fs";
+import { platform } from "@tauri-apps/plugin-os";
+import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 
 import TGSqlite from "../../plugins/Sqlite/index.js";
@@ -73,37 +74,31 @@ import TGShell from "../../utils/TGShell.js";
 import showConfirm from "../func/confirm.js";
 import showSnackbar from "../func/snackbar.js";
 
-const appStore = useAppStore();
+const appStore = storeToRefs(useAppStore());
 
 onMounted(async () => {
   const logDir = await path.appLogDir();
   const dbPath = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
   let message = "";
-  if (appStore.dbPath !== dbPath) {
-    appStore.dbPath = dbPath;
+  if (appStore.dbPath.value !== dbPath) {
+    appStore.dbPath.value = dbPath;
     await TGSqlite.saveAppData("dbPath", dbPath);
     message += "数据库路径 ";
   }
-  if (appStore.logDir !== logDir) {
-    appStore.logDir = logDir;
+  if (appStore.logDir.value !== logDir) {
+    appStore.logDir.value = logDir;
     message += "日志路径 ";
   }
   if (message !== "") {
-    showSnackbar({
-      text: `${message}已更新!`,
-      color: "success",
-    });
+    showSnackbar({ text: `${message}已更新!`, color: "success" });
   }
 });
 
 async function confirmCUD(): Promise<void> {
-  const oriDir = appStore.userDir;
+  const oriDir = appStore.userDir.value;
   const check = await showConfirm({ title: "确认修改用户数据路径吗？" });
   if (!check) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消修改",
-    });
+    showSnackbar({ color: "cancel", text: "已取消修改" });
     return;
   }
   const dir: string | null = await open({
@@ -112,40 +107,78 @@ async function confirmCUD(): Promise<void> {
     multiple: false,
   });
   if (dir === null) {
-    showSnackbar({
-      color: "error",
-      text: "路径不能为空!",
-    });
+    showSnackbar({ color: "error", text: "路径不能为空!" });
     return;
   }
   if (dir === oriDir) {
-    showSnackbar({
-      color: "warn",
-      text: "路径未修改!",
-    });
+    showSnackbar({ color: "warn", text: "路径未修改!" });
     return;
   }
-  appStore.userDir = dir;
+  appStore.userDir.value = dir;
   await TGSqlite.saveAppData("userDir", dir);
   await backUpUserData(dir);
-  showSnackbar({
-    text: "已重新备份数据!",
-    color: "success",
-  });
-  const confirm = await showConfirm({
-    title: "是否删除原用户数据目录？",
-    text: "删除后不可恢复!",
-  });
+  showSnackbar({ text: "已重新备份数据!", color: "success" });
+  const confirm = await showConfirm({ title: "是否删除原用户数据目录？", text: "删除后不可恢复!" });
   if (confirm) {
     await remove(oriDir, { recursive: true });
-    showSnackbar({
-      text: "已删除原用户数据目录!",
-      color: "success",
-    });
+    showSnackbar({ text: "已删除原用户数据目录!", color: "success" });
   }
   setTimeout(() => {
     window.location.reload();
   }, 4000);
+}
+
+async function confirmCGD(): Promise<void> {
+  if (platform() !== "windows") {
+    showSnackbar({ text: "不支持的平台！", color: "warning" });
+    return;
+  }
+  const oriEmpty = appStore.gameDir.value === "未设置";
+  const editConfirm = await showConfirm({
+    title: oriEmpty ? "确认设置目录？" : "确认修改目录？",
+    text: oriEmpty ? "请选择启动器所在目录" : `当前：${appStore.gameDir.value}`,
+  });
+  if (!editConfirm) {
+    showSnackbar({ text: oriEmpty ? "取消设置启动器目录" : "取消修改启动器目录", color: "cancel" });
+    return;
+  }
+  const dir: string | null = await open({
+    directory: true,
+    defaultPath: oriEmpty ? undefined : appStore.gameDir.value,
+    multiple: false,
+  });
+  if (dir === null) {
+    showSnackbar({ text: "路径不能为空!", color: "error" });
+    return;
+  }
+  if (!oriEmpty && appStore.gameDir.value === dir) {
+    showSnackbar({ text: "路径未修改！", color: "warn" });
+    return;
+  }
+  /// 校验 launcher.exe 跟 games 目录判断是否为合法的启动器路径
+  if (!(await exists(`${dir}${path.sep()}launcher.exe`))) {
+    showSnackbar({ text: "未检测到 launcher.exe", color: "error" });
+    return;
+  }
+  if (
+    !(await exists(
+      `${dir}${path.sep()}games${path.sep()}Genshin Impact Game${path.sep()}YuanShen.exe`,
+    ))
+  ) {
+    const confirm = await showConfirm({
+      title: "确认设置为启动器目录？",
+      text: "未检测到原神本体应用",
+    });
+    if (!confirm) {
+      showSnackbar({
+        text: oriEmpty ? "取消设置启动器目录" : "取消修改启动器目录",
+        color: "cancel",
+      });
+      return;
+    }
+  }
+  appStore.gameDir.value = dir;
+  showSnackbar({ text: oriEmpty ? "成功设置启动器目录" : "成功修改启动器目录" });
 }
 
 // 判断是否超过一周
@@ -162,13 +195,10 @@ async function confirmCLD(): Promise<void> {
     text: "将保留一周内的日志文件",
   });
   if (!check) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消清理",
-    });
+    showSnackbar({ color: "cancel", text: "已取消清理" });
     return;
   }
-  const logDir = appStore.logDir;
+  const logDir = appStore.logDir.value;
   const files = await readDir(logDir);
   const delFiles = files.filter((file) => {
     // yyyy-mm-dd.log
@@ -179,54 +209,61 @@ async function confirmCLD(): Promise<void> {
     return isOverWeek(date);
   });
   if (delFiles.length < 1) {
-    showSnackbar({
-      color: "warn",
-      text: "无需清理!",
-    });
+    showSnackbar({ color: "warn", text: "无需清理!" });
     return;
   }
   for (const file of delFiles) {
     const filePath = `${logDir}/${file.name}`;
     await remove(filePath);
   }
-  showSnackbar({
-    text: `已清理 ${delFiles.length} 个日志文件!`,
-  });
+  showSnackbar({ text: `已清理 ${delFiles.length} 个日志文件!` });
 }
 
-function copyPath(type: "db" | "user" | "log"): void {
+function copyPath(type: "db" | "user" | "log" | "game"): void {
   let targetPath: string, targetName: string;
   switch (type) {
     case "db":
-      targetPath = appStore.dbPath;
+      targetPath = appStore.dbPath.value;
       targetName = "数据库";
       break;
     case "user":
-      targetPath = appStore.userDir;
+      targetPath = appStore.userDir.value;
       targetName = "用户数据";
       break;
     case "log":
-      targetPath = appStore.logDir;
+      targetPath = appStore.logDir.value;
       targetName = "日志";
       break;
+    case "game":
+      if (appStore.gameDir.value === "未设置") {
+        showSnackbar({ text: "未设置游戏目录！", color: "warn" });
+        return;
+      }
+      targetPath = appStore.gameDir.value;
+      targetName = "游戏安装目录";
   }
   navigator.clipboard.writeText(targetPath);
-  showSnackbar({
-    text: `${targetName}路径已复制!`,
-  });
+  showSnackbar({ text: `${targetName}路径已复制!` });
 }
 
-async function openPath(type: "db" | "user" | "log"): Promise<void> {
+async function openPath(type: "db" | "user" | "log" | "game"): Promise<void> {
   let targetPath: string;
   switch (type) {
     case "db":
       targetPath = await path.appConfigDir();
       break;
     case "user":
-      targetPath = appStore.userDir;
+      targetPath = appStore.userDir.value;
       break;
     case "log":
-      targetPath = appStore.logDir;
+      targetPath = appStore.logDir.value;
+      break;
+    case "game":
+      if (appStore.gameDir.value === "未设置") {
+        showSnackbar({ text: "未设置游戏目录！", color: "warn" });
+        return;
+      }
+      targetPath = appStore.gameDir.value;
       break;
   }
   await TGShell.openPath(targetPath);
@@ -252,5 +289,12 @@ async function openPath(type: "db" | "user" | "log"): Promise<void> {
   margin-right: 15px;
   background: var(--box-bg-2);
   color: var(--box-text-2);
+}
+
+.config-opers {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  column-gap: 10px;
 }
 </style>
