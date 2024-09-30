@@ -2,21 +2,12 @@
   <div class="tgb-box">
     <div class="tgb-top">
       <div class="tgb-title">✨原神，启动！</div>
-      <div class="tgb-btns">
-        <v-btn size="small" icon="mdi-refresh" @click="refreshAccount" variant="outlined" />
-        <v-btn
-          size="small"
-          :disabled="!canPlay"
-          icon="mdi-rocket"
-          variant="outlined"
-          @click="tryPlayGame()"
-        />
-      </div>
+      <v-btn size="small" icon="mdi-rocket" variant="outlined" @click="tryPlayGame()" />
     </div>
     <v-list-item v-if="account">
-      <v-list-item-title class="tgb-name"
-        >{{ account.nickname }}({{ account.regionName }})</v-list-item-title
-      >
+      <v-list-item-title class="tgb-name">
+        {{ account.nickname }}({{ account.regionName }})
+      </v-list-item-title>
       <v-list-item-subtitle>{{ account.gameUid }} Lv.{{ account.level }}</v-list-item-subtitle>
     </v-list-item>
   </div>
@@ -26,7 +17,7 @@ import { path } from "@tauri-apps/api";
 import { exists } from "@tauri-apps/plugin-fs";
 import { Command } from "@tauri-apps/plugin-shell";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref } from "vue";
 
 import TSUserAccount from "../../plugins/Sqlite/modules/userAccount.js";
 import { useAppStore } from "../../store/modules/app.js";
@@ -37,12 +28,7 @@ import showSnackbar from "../func/snackbar.js";
 
 const userStore = storeToRefs(useUserStore());
 const appStore = storeToRefs(useAppStore());
-
 const account = ref<TGApp.Sqlite.Account.Game>();
-const canPlay = computed<boolean>(() => {
-  if (!account.value) return false;
-  return account.value.isOfficial === 1;
-});
 
 onMounted(async () => {
   if (!userStore.uid.value) return;
@@ -53,7 +39,6 @@ async function refreshAccount(): Promise<void> {
   const accountFind = await TSUserAccount.game.getCurAccount(userStore.uid.value!);
   if (!accountFind) account.value = undefined;
   else account.value = accountFind;
-  showSnackbar({ text: "成功刷新当前登录用户！" });
 }
 
 async function tryPlayGame(): Promise<void> {
@@ -119,6 +104,7 @@ async function tryPlayGame(): Promise<void> {
 .tgb-top {
   position: relative;
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
 }
