@@ -43,6 +43,7 @@ async function refreshAccount(): Promise<void> {
 
 async function tryPlayGame(): Promise<void> {
   await refreshAccount();
+
   if (!userStore.uid.value || !userStore.cookie.value) {
     showSnackbar({ text: "请先登录！", color: "warn" });
     return;
@@ -59,7 +60,7 @@ async function tryPlayGame(): Promise<void> {
     showSnackbar({ text: "未设置游戏安装目录！", color: "warn" });
     return;
   }
-  const gamePath = `${appStore.gameDir.value}${path.sep()}games${path.sep()}Genshin Impact Game${path.sep()}YuanShen.exe`;
+  const gamePath = `${appStore.gameDir.value}${path.sep()}YuanShen.exe`;
   if (!(await exists(gamePath))) {
     showSnackbar({ text: "未检测到原神本体应用！", color: "warn" });
     return;

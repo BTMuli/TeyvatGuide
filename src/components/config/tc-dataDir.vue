@@ -29,7 +29,7 @@
         </div>
       </template>
     </v-list-item>
-    <v-list-item title="启动器安装目录" :subtitle="appStore.gameDir.value">
+    <v-list-item title="游戏安装目录" :subtitle="appStore.gameDir.value">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-gamepad</v-icon>
@@ -37,7 +37,7 @@
       </template>
       <template #append>
         <div class="config-opers">
-          <v-icon @click="confirmCGD()" title="修改启动器安装目录"> mdi-pencil </v-icon>
+          <v-icon @click="confirmCGD()" title="修改游戏安装目录"> mdi-pencil </v-icon>
           <v-icon @click="openPath('game')" title="打开游戏安装目录"> mdi-folder-open </v-icon>
           <v-icon @click="copyPath('game')" title="复制游戏安装目录"> mdi-content-copy </v-icon>
         </div>
@@ -155,30 +155,13 @@ async function confirmCGD(): Promise<void> {
     showSnackbar({ text: "路径未修改！", color: "warn" });
     return;
   }
-  /// 校验 launcher.exe 跟 games 目录判断是否为合法的启动器路径
-  if (!(await exists(`${dir}${path.sep()}launcher.exe`))) {
-    showSnackbar({ text: "未检测到 launcher.exe", color: "error" });
+  // 校验是否存在游戏本体
+  if (!(await exists(`${dir}${path.sep()}YuanShen.exe`))) {
+    showSnackbar({ text: "未检测到游戏本体", color: "error" });
     return;
   }
-  if (
-    !(await exists(
-      `${dir}${path.sep()}games${path.sep()}Genshin Impact Game${path.sep()}YuanShen.exe`,
-    ))
-  ) {
-    const confirm = await showConfirm({
-      title: "确认设置为启动器目录？",
-      text: "未检测到原神本体应用",
-    });
-    if (!confirm) {
-      showSnackbar({
-        text: oriEmpty ? "取消设置启动器目录" : "取消修改启动器目录",
-        color: "cancel",
-      });
-      return;
-    }
-  }
   appStore.gameDir.value = dir;
-  showSnackbar({ text: oriEmpty ? "成功设置启动器目录" : "成功修改启动器目录" });
+  showSnackbar({ text: oriEmpty ? "成功设置游戏目录" : "成功修改游戏目录" });
 }
 
 // 判断是否超过一周
