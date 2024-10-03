@@ -1,7 +1,7 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.5.5
+ * @since Beta v0.6.0
  */
 
 import { event, core, webviewWindow } from "@tauri-apps/api";
@@ -153,7 +153,7 @@ class TGClient {
 
   /**
    * @func handleCallback
-   * @since Beta v0.4.2
+   * @since Beta v0.6.0
    * @desc 处理米游社客户端的 callback
    * @param {Event<string>} arg - 事件参数
    * @returns {Promise<void>} - 返回值
@@ -233,6 +233,11 @@ class TGClient {
       case "openApplication":
         await this.openApplication(
           <TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenApplicationPayload>>argParse,
+        );
+        break;
+      case "openSystemBrowser":
+        await this.openSystemBrowser(
+          <TGApp.Plugins.JSBrigde.Arg<TGApp.Plugins.JSBridge.OpenSystemBrowserPayload>>argParse,
         );
         break;
       case "pushPage":
@@ -754,6 +759,19 @@ class TGClient {
     if (windowFind !== null) {
       await windowFind.setFocus();
     }
+  }
+
+  /**
+   * @func openSystemBrowser
+   * @since Beta v0.6.0
+   * @desc 打开系统浏览器
+   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenSystemBrowserPayload>} arg - 方法参数
+   * @returns {Promise<void>}
+   */
+  async openSystemBrowser(arg: TGApp.Plugins.JSBridge.OpenSystemBrowserPayload): Promise<void> {
+    console.log(`[openSystemBrowser] ${JSON.stringify(arg)}`);
+    const url = arg.open_url;
+    window.open(url);
   }
 
   /**

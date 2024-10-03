@@ -1,12 +1,12 @@
 /**
  * @file types/Plugins/JSBridge.d.ts
  * @description JSBridge 插件相关类型定义文件
- * @since Beta v0.3.9
+ * @since Beta v0.6.0
  */
 
 /**
  * @description JSBridge 插件相关类型命名
- * @since Beta v0.3.9
+ * @since Beta v0.6.0
  * @namespace TGApp.Plugins.JSBridge
  * @memberof TGApp.Plugins
  */
@@ -171,6 +171,17 @@ declare namespace TGApp.Plugins.JSBridge {
    */
   interface OpenApplicationPayload {
     gameCenterId: number;
+  }
+
+  /**
+   * @description 打开系统浏览器
+   * @since Beta v0.6.0
+   * @interface OpenSystemBrowserPayload
+   * @property {string} open_url - 打开的链接
+   * @return OpenSystemBrowserPayload
+   */
+  interface OpenSystemBrowserPayload {
+    open_url: string;
   }
 
   /**
