@@ -130,10 +130,7 @@ watch(curRegion, async (value) => {
   const name = getRegionName(value);
   await TGLogger.Info(`[Announcements][watch][curRegionName] 切换服务器：${name}`);
   await loadData();
-  showSnackbar({
-    text: `服务器切换为：${name}`,
-    color: "success",
-  });
+  showSnackbar({ text: `服务器切换为：${name}`, color: "success" });
 });
 
 watch(curLang, async (value) => {
@@ -141,10 +138,7 @@ watch(curLang, async (value) => {
   const name = getLangName(value);
   await TGLogger.Info(`[Announcements][watch][curLangName] 切换语言：${name}`);
   await loadData();
-  showSnackbar({
-    text: `语言切换为：${name}`,
-    color: "success",
-  });
+  showSnackbar({ text: `语言切换为：${name}`, color: "success" });
 });
 
 onMounted(async () => {

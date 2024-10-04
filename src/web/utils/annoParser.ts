@@ -1,7 +1,7 @@
 /**
  * @file web/utils/annoParser.ts
  * @description 解析游戏内公告数据
- * @since Beta v0.5.5
+ * @since Beta v0.6.0
  */
 
 import { h, render } from "vue";
@@ -105,7 +105,7 @@ export function parseAnnoContent(
 
 /**
  * @description 解析公告节点
- * @since Beta v0.5.3
+ * @since Beta v0.6.0
  * @param {Node} node - 节点
  * @param {Record<string, string>} attr - 属性
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
@@ -146,6 +146,19 @@ function parseAnnoNode(
     Array.from(element.children).forEach((child) => {
       res.push(...parseAnnoNode(child, attr));
     });
+    for (const comp of res) {
+      if (comp.children) {
+        for (const child of comp.children) {
+          if (child.insert !== "" && child.insert !== "\n") {
+            child.insert = ` ${child.insert}`;
+          }
+        }
+      } else {
+        if (comp.insert !== "" && comp.insert !== "\n") {
+          comp.insert = ` ${comp.insert}`;
+        }
+      }
+    }
     return res;
   }
   if (element.tagName === "DETAILS") {

@@ -23,7 +23,7 @@
 </template>
 <script lang="ts" setup>
 import { app, webviewWindow } from "@tauri-apps/api";
-import { ref, onMounted, watch, onUnmounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import TaParser from "../components/anno/ta-parser.vue";
@@ -87,9 +87,7 @@ onMounted(async () => {
   // 打开 json
   const isDev = useAppStore().devMode ?? false;
   if (isDev) await createAnnoJson(annoId, region, lang);
-  setTimeout(() => {
-    loading.value = false;
-  }, 200);
+  loading.value = false;
 });
 
 watch(loadShare, (value) => {
@@ -114,15 +112,6 @@ async function createAnnoJson(annoId: number, region: AnnoServer, lang: AnnoLang
   const jsonTitle = `Anno_${region}_${annoId}_${lang}_JSON`;
   await createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
 }
-
-onUnmounted(() => {
-  document
-    .querySelector(".anno-body")
-    ?.querySelectorAll("img")
-    .forEach((img) => {
-      if (img.src.startsWith("blob:")) URL.revokeObjectURL(img.src);
-    });
-});
 </script>
 <style lang="css" scoped>
 .anno-info {
