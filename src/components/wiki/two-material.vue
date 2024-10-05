@@ -9,7 +9,7 @@
           <div class="twom-type">{{ props.data.type }}</div>
         </div>
         <div class="twom-bottom">
-          <div class="twom-desc">{{ parseDesc() }}</div>
+          <div class="twom-desc" v-html="parseHtmlText(props.data.description)" />
           <div class="twom-source" v-if="props.data.source.length > 1">
             <TwoSource :data="item" v-for="(item, index) in props.data.source" :key="index" />
           </div>
@@ -25,6 +25,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
+import { parseHtmlText } from "../../utils/toolFunc.js";
 import TOverlay from "../main/t-overlay.vue";
 
 import TwoConvert from "./two-convert.vue";
@@ -41,25 +42,15 @@ const props = defineProps<TwoMaterialProps>();
 const emits = defineEmits<TwoMaterialEmits>();
 
 const visible = computed({
-  get() {
-    return props.modelValue;
-  },
-  set(value) {
-    emits("update:modelValue", value);
-  },
+  get: () => props.modelValue,
+  set: (val) => emits("update:modelValue", val),
 });
 const iconBg = computed(() => {
   if (!props.data) return "url('/icon/bg/0-BGC.webp')";
   return `url('/icon/bg/${props.data.star}-BGC.webp')`;
 });
 
-function parseDesc() {
-  if (!props.data) return "";
-  return props.data.description.replace(/\\n/g, "\n");
-}
-
 function onCancel() {
-  console.log(props.data);
   visible.value = false;
 }
 </script>

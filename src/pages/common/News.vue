@@ -20,7 +20,7 @@
         label="请输入帖子 ID 或搜索词"
         :single-line="true"
         :hide-details="true"
-        @keyup.enter="searchPost()"
+        @keydown.enter="searchPost()"
         @click:append="searchPost()"
       />
     </template>

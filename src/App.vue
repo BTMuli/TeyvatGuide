@@ -60,11 +60,7 @@ onBeforeMount(async () => {
 async function checkResize(): Promise<void> {
   const screen = await TauriWindow.currentMonitor();
   if (screen === null) {
-    showSnackbar({
-      text: "获取屏幕信息失败！",
-      color: "error",
-      timeout: 3000,
-    });
+    showSnackbar({ text: "获取屏幕信息失败！", color: "error", timeout: 3000 });
     return;
   }
   const windowCur = await webviewWindow.getCurrentWebviewWindow();
@@ -178,11 +174,7 @@ async function getDeepLink(): Promise<UnlistenFn> {
     await windowGet.setFocus();
     const payload = parseDeepLink(e.payload);
     if (payload === false) {
-      showSnackbar({
-        text: "无效的 deep link！",
-        color: "error",
-        timeout: 3000,
-      });
+      showSnackbar({ text: "无效的 deep link！", color: "error", timeout: 3000 });
       await TGLogger.Error(`[App][getDeepLink] 无效的 deep link！ ${JSON.stringify(e.payload)}`);
       return;
     }
@@ -216,11 +208,7 @@ async function handleDeepLink(payload: string): Promise<void> {
   if (payload.startsWith("router?path=")) {
     const routerPath = payload.replace("router?path=", "");
     if (router.currentRoute.value.path === routerPath) {
-      showSnackbar({
-        text: "已在当前页面！",
-        color: "warn",
-        timeout: 3000,
-      });
+      showSnackbar({ text: "已在当前页面！", color: "warn", timeout: 3000 });
       return;
     }
     await router.push(routerPath);
@@ -258,11 +246,7 @@ async function checkUpdate(): Promise<void> {
     }
     appStore.buildTime = getBuildTime();
     await TGSqlite.update();
-    showSnackbar({
-      text: "数据库已更新！",
-      color: "success",
-      timeout: 3000,
-    });
+    showSnackbar({ text: "数据库已更新！", color: "success", timeout: 3000 });
     // todo 6.0发版时取消注释
     // window.open("https://app.btmuli.ink/docs/Changelogs.html");
   }
