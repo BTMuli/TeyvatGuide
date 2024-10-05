@@ -1,7 +1,7 @@
 /**
  * @file utils/TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.5.5
+ * @since Beta v0.6.0
  */
 
 import { path } from "@tauri-apps/api";
@@ -86,18 +86,22 @@ function getShareImgBgColor(): string {
 
 /**
  * @description 生成分享截图
- * @since Beta v0.5.5
+ * @since Beta v0.6.0
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
+ * @param {boolean} scrollable - 是否可滚动，一般为上下滚动
  * @returns {Promise<void>} 无返回值
  */
 export async function generateShareImg(
   fileName: string,
   element: HTMLElement,
   scale: number = 1.2,
+  scrollable: boolean = false,
 ): Promise<void> {
   const canvas = document.createElement("canvas");
+  const maxHeight = element.style.maxHeight;
+  if (scrollable) element.style.maxHeight = "100%";
   const width = element.clientWidth + 30;
   const height = element.clientHeight + 30;
   canvas.width = width * scale;
@@ -115,6 +119,7 @@ export async function generateShareImg(
     dpi: 350,
   };
   const canvasData = await html2canvas(element, opts);
+  if (scrollable) element.style.maxHeight = maxHeight;
   const buffer = new Uint8Array(
     atob(canvasData.toDataURL("image/png").split(",")[1])
       .split("")

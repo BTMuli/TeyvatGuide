@@ -3,9 +3,12 @@
     <div v-if="props.data" class="twom-container">
       <slot name="left"></slot>
       <div class="twom-box">
+        <div class="twom-share">
+          Material {{ props.data.id }} | Render By TeyvatGuide v{{ version }}
+        </div>
         <div class="twom-top">
           <img :src="`/icon/material/${props.data.id}.webp`" alt="icon" class="twom-left" />
-          <div class="twom-name">{{ props.data.name }}</div>
+          <div class="twom-name" @click="shareMaterial()">{{ props.data.name }}</div>
           <div class="twom-type">{{ props.data.type }}</div>
         </div>
         <div class="twom-bottom">
@@ -23,8 +26,10 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
+import { getVersion } from "@tauri-apps/api/app";
 import { computed } from "vue";
 
+import { generateShareImg } from "../../utils/TGShare.js";
 import { parseHtmlText } from "../../utils/toolFunc.js";
 import TOverlay from "../main/t-overlay.vue";
 
@@ -41,17 +46,25 @@ type TwoMaterialEmits = (e: "update:modelValue", value: boolean) => void;
 const props = defineProps<TwoMaterialProps>();
 const emits = defineEmits<TwoMaterialEmits>();
 
-const visible = computed({
+const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (val) => emits("update:modelValue", val),
 });
-const iconBg = computed(() => {
+const iconBg = computed<string>(() => {
   if (!props.data) return "url('/icon/bg/0-BGC.webp')";
   return `url('/icon/bg/${props.data.star}-BGC.webp')`;
 });
 
+const version = await getVersion();
+
 function onCancel() {
   visible.value = false;
+}
+
+async function shareMaterial(): Promise<void> {
+  const element = <HTMLElement>document.querySelector(".twom-box");
+  const fileName = `material_${props.data.id}`;
+  await generateShareImg(fileName, element, 1.2, true);
 }
 </script>
 <style lang="css" scoped>
@@ -66,11 +79,25 @@ function onCancel() {
   position: relative;
   display: flex;
   width: 800px;
+  max-height: 600px;
   flex-direction: column;
   padding: 10px;
   border-radius: 10px;
   background: var(--box-bg-1);
+  overflow-y: auto;
   row-gap: 10px;
+}
+
+.twom-share {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
 }
 
 .twom-top {
@@ -98,6 +125,7 @@ function onCancel() {
 
 .twom-name {
   color: var(--common-text-title);
+  cursor: pointer;
   font-family: var(--font-title);
   font-size: 30px;
 }
@@ -111,10 +139,7 @@ function onCancel() {
 
 .twom-bottom {
   display: flex;
-  max-height: 400px;
   flex-direction: column;
-  padding-right: 10px;
-  overflow-y: auto;
   row-gap: 10px;
 }
 

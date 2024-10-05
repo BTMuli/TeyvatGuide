@@ -54,18 +54,20 @@
       <div class="twm-item-id">{{ item.id }}</div>
     </div>
   </div>
-  <TwoMaterial v-model="visible" :data="curMaterial">
-    <template #left>
-      <div class="card-arrow left" @click="switchMaterial(false)">
-        <img src="../../assets/icons/arrow-right.svg" alt="right" />
-      </div>
-    </template>
-    <template #right>
-      <div class="card-arrow" @click="switchMaterial(true)">
-        <img src="../../assets/icons/arrow-right.svg" alt="right" />
-      </div>
-    </template>
-  </TwoMaterial>
+  <Suspense>
+    <TwoMaterial v-model="visible" :data="curMaterial">
+      <template #left>
+        <div class="card-arrow left" @click="switchMaterial(false)">
+          <img src="../../assets/icons/arrow-right.svg" alt="right" />
+        </div>
+      </template>
+      <template #right>
+        <div class="card-arrow" @click="switchMaterial(true)">
+          <img src="../../assets/icons/arrow-right.svg" alt="right" />
+        </div>
+      </template>
+    </TwoMaterial>
+  </Suspense>
 </template>
 <script lang="ts" setup>
 import { onMounted, ref, watch } from "vue";

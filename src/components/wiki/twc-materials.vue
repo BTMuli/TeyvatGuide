@@ -19,18 +19,20 @@
       </div>
     </div>
   </div>
-  <TwoMaterial :data="curData" v-model="showOverlay">
-    <template #left>
-      <div class="card-arrow left" @click="switchMaterial(false)">
-        <img src="../../assets/icons/arrow-right.svg" alt="right" />
-      </div>
-    </template>
-    <template #right>
-      <div class="card-arrow" @click="switchMaterial(true)">
-        <img src="../../assets/icons/arrow-right.svg" alt="right" />
-      </div>
-    </template>
-  </TwoMaterial>
+  <Suspense>
+    <TwoMaterial :data="curData" v-model="showOverlay">
+      <template #left>
+        <div class="card-arrow left" @click="switchMaterial(false)">
+          <img src="../../assets/icons/arrow-right.svg" alt="right" />
+        </div>
+      </template>
+      <template #right>
+        <div class="card-arrow" @click="switchMaterial(true)">
+          <img src="../../assets/icons/arrow-right.svg" alt="right" />
+        </div>
+      </template>
+    </TwoMaterial>
+  </Suspense>
 </template>
 <script lang="ts" setup>
 import { ref } from "vue";
