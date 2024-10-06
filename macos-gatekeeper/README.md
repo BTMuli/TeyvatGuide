@@ -2,9 +2,13 @@
 
 由于 Teyvat Guide 没有经过苹果官方公证，故需要进行一些额外的操作来确保 Teyvat Guide 能在 macOS 平台正常运行。
 
+> Teyvat Guide 是一个**基于 MIT 协议**的开源软件，所有源代码都托管在 GitHub 上，如果您对软件安全性抱有疑虑，可以自行审查源代码或者下载编译打包。
+
 ## Apple 关于任何来源及门禁(`Gatekeeper`)属性的相关链接
 
-
+- [在 Mac 上安全地打开 App](https://support.apple.com/102445)
+- [macOS 中的门禁和运行时保护](https://support.apple.com/guide/security/sec5599b66df/)
+- [在 macOS 中防范恶意软件](https://support.apple.com/guide/security/sec469d47bd8/)
 
 ## 报错界面
 
