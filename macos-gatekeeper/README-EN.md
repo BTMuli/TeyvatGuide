@@ -44,7 +44,7 @@ During the process, you may be asked to enter a password, where "password" refer
 
 ### Step 1: Enable "Allow Apps from Anywhere"
 
-Open the terminal, enter `sudo spctl --master-disable` to enable "Allow Apps from Anywhere," and make the selection in the "Security & Privacy" section in System Preferences. **You may need to scroll down**.
+Open the terminal, enter `sudo spctl --master-disable` to enable "Allow Apps from Anywhere", and make the selection "Allow applications from **anywhere**" in the "Privacy & Security" section in System Preferences， **you may need to scroll down**.
 
   ![Enable Allow Apps from Anywhere](gatekeeper.png)
 
