@@ -1,3 +1,5 @@
+[English Version](README-EN.md)
+
 # 针对 macOS 用户的特殊提示
 
 由于 Teyvat Guide 没有经过苹果官方公证，故需要进行一些额外的操作来确保 Teyvat Guide 能在 macOS 平台正常运行。
