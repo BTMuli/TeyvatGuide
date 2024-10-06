@@ -26,7 +26,7 @@ appDIR="/Applications/${appBashName}"
 # Check system language
 LANGUAGE=$(defaults read -g AppleLocale | cut -d "_" -f 1)
 
-if [ "$LANGUAGE" == "en" ]; then
+if [ "$LANGUAGE" != "zh" ]; then
 
   echo -e "Fix tool of 『${RED}${appBashName%.*} ${NC}is damaged and cannot be opened / from an unidentified developer』"
   echo ""
