@@ -8,9 +8,9 @@ Due to Teyvat Guide not being notarized by Apple, some additional steps are requ
 
 ## Apple's Related Links on "Allowing Apps from Anywhere" and Gatekeeper
 
-- [Safely Open Apps on Mac](https://support.apple.com/102445)
-- [Gatekeeper and Runtime Protections in macOS](https://support.apple.com/guide/security/sec5599b66df/)
-- [Preventing Malware in macOS](https://support.apple.com/guide/security/sec469d47bd8/)
+- [Safely open apps on your Mac](https://support.apple.com/102445)
+- [Gatekeeper and runtime protections in macOS](https://support.apple.com/guide/security/sec5599b66df/)
+- [Preventing against malware in macOS](https://support.apple.com/guide/security/sec469d47bd8/)
 
 ## Error Prompt
 
