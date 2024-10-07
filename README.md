@@ -93,6 +93,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - 资源来源：[项目资源说明](docs/项目资源说明.md)
 - UIAF：[UIAF v1.1](docs/UIAF.md)
 - UIGF：[UIGF v3.0](docs/UIGF.md)
+- [macOS 平台门禁属性导致应用无法打开应用的修复指引](docs/macos-gatekeeper/README.md)
 
 ## 特定项目 / Special Project
 
