@@ -1,4 +1,4 @@
-[English Version](README-EN.md)
+[English Version](./README-EN.md)
 
 # 针对 macOS 用户的特殊提示
 
@@ -14,12 +14,12 @@
 
 ## 报错界面
 
-![打开 Teyvat Guide 时的报错界面](error.png)
+![打开 Teyvat Guide 时的报错界面](./error.png)
 
 下面的所有操作请**确保 Teyvat Guide 已经安装**，即 Teyvat Guide 已经被复制到 `/Applications` 目录下。
 
 > 注：下面所述的“输入密码”过程不会在控制台上显示，仅会显示一个钥匙图标，请~~凭感觉~~输入后按回车键确认。
-> ![输入密码时的显示状态](password.png)
+> ![输入密码时的显示状态](./password.png)
 
 ## Method 1 一键脚本
 
@@ -33,7 +33,7 @@
 
 在访达中找到 Teyvat Guide 的安装位置，**右键（或按住键盘上的control⌃并点击）选择打开**。
 
-![启动 Teyvat Guide](open.png)
+![启动 Teyvat Guide](./open.png)
 
 ## Method 2 手动操作
 
@@ -46,18 +46,18 @@
 
 打开终端，输入`sudo spctl --master-disable`开启“任何来源”，并在设置中的“安全与隐私”部分进行选择，**你可能需要向下滑动**。
 
-  ![打开任何来源](gatekeeper.png)
+  ![打开任何来源](./gatekeeper.png)
 
-  ![设置界面二次确认](gatekeeper-settings.png)
+  ![设置界面二次确认](./gatekeeper-settings.png)
 
 ### Step 2 清除门禁属性
 
 在终端输入`sudo xattr -c /Applications/TeyvatGuide.app`清除 Teyvat Guide 的 `Gatekeeper` 属性。
 
-![清除门禁属性](remove-gatekeeper.png)
+![清除门禁属性](./remove-gatekeeper.png)
 
 ### Step 3 启动 Teyvat Guide
 
 在访达中找到 Teyvat Guide 的安装位置，**右键（或按住键盘上的control⌃并点击）选择打开**。
 
-![启动 Teyvat Guide](open.png)
+![启动 Teyvat Guide](./open.png)

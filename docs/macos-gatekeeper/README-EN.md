@@ -1,4 +1,4 @@
-[中文版本](README.md)
+[中文版本](./README.md)
 
 # Special Tips for macOS Users
 
@@ -14,12 +14,12 @@ Due to Teyvat Guide not being notarized by Apple, some additional steps are requ
 
 ## Error Prompt
 
-![Error Prompt when Opening Teyvat Guide](error.png)
+![Error Prompt when Opening Teyvat Guide](./error.png)
 
 Please ensure that Teyvat Guide has been installed, meaning it has been copied to the `/Applications` directory.
 
 > Note: The "enter password" process described below will not display on the console; only a key icon will appear. Please enter the password based on your intuition and press Enter to confirm.
-> ![Display Status when Entering Password](password.png)
+> ![Display Status when Entering Password](./password.png)
 
 ## Method 1: One-Click Script
 
@@ -33,7 +33,7 @@ Download the `one-click.sh` file in this folder, open the terminal, enter `bash 
 
 Locate the installation location of Teyvat Guide in Finder, **right-click (or hold down the control⌃ key and click)** to choose "Open."
 
-![Launch Teyvat Guide](open.png)
+![Launch Teyvat Guide](./open.png)
 
 ## Method 2: Manual Operations
 
@@ -46,18 +46,18 @@ During the process, you may be asked to enter a password, where "password" refer
 
 Open the terminal, enter `sudo spctl --master-disable` to enable "Allow Apps from Anywhere", and make the selection "Allow applications from **anywhere**" in the "Privacy & Security" section in System Preferences， **you may need to scroll down**.
 
-  ![Enable Allow Apps from Anywhere](gatekeeper.png)
+  ![Enable Allow Apps from Anywhere](./gatekeeper.png)
 
-  ![Secondary Confirmation in System Preferences](gatekeeper-settings.png)
+  ![Secondary Confirmation in System Preferences](./gatekeeper-settings.png)
 
 ### Step 2: Clear Gatekeeper Attributes
 
 Enter `sudo xattr -c /Applications/TeyvatGuide.app` in the terminal to clear the Gatekeeper attributes of Teyvat Guide.
 
-![Clear Gatekeeper Attributes](remove-gatekeeper.png)
+![Clear Gatekeeper Attributes](./remove-gatekeeper.png)
 
 ### Step 3: Launch Teyvat Guide
 
 Locate the installation location of Teyvat Guide in Finder, **right-click (or hold down the control⌃ key and click)** to choose "Open."
 
-![Launch Teyvat Guide](open.png)
+![Launch Teyvat Guide](./open.png)
