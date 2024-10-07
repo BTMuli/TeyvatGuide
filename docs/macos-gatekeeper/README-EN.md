@@ -1,3 +1,14 @@
+---
+Author: Lucas <lucas04@foxmail.com>
+Description: macOS gatekeeper guide
+Date: 2024-10-07
+Update: 2024-10-07
+---
+
+> 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-07 21:16:38`
+>
+> 更新于 `2024-10-07 21:48:11`
+
 [中文版本](./README.md)
 
 # Special Tips for macOS Users
@@ -46,9 +57,9 @@ During the process, you may be asked to enter a password, where "password" refer
 
 Open the terminal, enter `sudo spctl --master-disable` to enable "Allow Apps from Anywhere", and make the selection "Allow applications from **anywhere**" in the "Privacy & Security" section in System Preferences， **you may need to scroll down**.
 
-  ![Enable Allow Apps from Anywhere](./gatekeeper.png)
+![Enable Allow Apps from Anywhere](./gatekeeper.png)
 
-  ![Secondary Confirmation in System Preferences](./gatekeeper-settings.png)
+![Secondary Confirmation in System Preferences](./gatekeeper-settings.png)
 
 ### Step 2: Clear Gatekeeper Attributes
 

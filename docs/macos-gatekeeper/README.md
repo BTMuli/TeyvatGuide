@@ -1,3 +1,14 @@
+---
+Author: Lucas <lucas04@foxmail.com>
+Description: macOS 平台门禁属性导致应用无法打开应用的修复指引
+Date: 2024-10-07
+Update: 2024-10-07
+---
+
+> 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-07 21:16:38`
+>
+> 更新于 `2024-10-07 21:50:28`
+
 [English Version](./README-EN.md)
 
 # 针对 macOS 用户的特殊提示
@@ -46,9 +57,9 @@
 
 打开终端，输入`sudo spctl --master-disable`开启“任何来源”，并在设置中的“安全与隐私”部分进行选择，**你可能需要向下滑动**。
 
-  ![打开任何来源](./gatekeeper.png)
+![打开任何来源](./gatekeeper.png)
 
-  ![设置界面二次确认](./gatekeeper-settings.png)
+![设置界面二次确认](./gatekeeper-settings.png)
 
 ### Step 2 清除门禁属性
 
