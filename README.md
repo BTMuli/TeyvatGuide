@@ -32,6 +32,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 </a>
 
 > macOS 用户可以通过 Github Release 下载，可能需要[额外操作](docs/macos-gatekeeper/README.md)以打开。
+
 > macOS users could download the app from GitHub release, [extra steps](docs/macos-gatekeeper/README-EN.md) are needed to open the app.
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/BTMuli/TeyvatGuide?style=for-the-badge)](https://github.com/BTMuli/TeyvatGuide/releases/latest)
