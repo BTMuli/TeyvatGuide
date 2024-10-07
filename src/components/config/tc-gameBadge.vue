@@ -17,9 +17,8 @@ import { path } from "@tauri-apps/api";
 import { exists } from "@tauri-apps/plugin-fs";
 import { Command } from "@tauri-apps/plugin-shell";
 import { storeToRefs } from "pinia";
-import { onMounted, ref } from "vue";
+import { computed } from "vue";
 
-import TSUserAccount from "../../plugins/Sqlite/modules/userAccount.js";
 import { useAppStore } from "../../store/modules/app.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
@@ -28,28 +27,11 @@ import showSnackbar from "../func/snackbar.js";
 
 const userStore = storeToRefs(useUserStore());
 const appStore = storeToRefs(useAppStore());
-const account = ref<TGApp.Sqlite.Account.Game>();
-
-onMounted(async () => {
-  if (!userStore.uid.value) return;
-  await refreshAccount();
-});
-
-async function refreshAccount(): Promise<void> {
-  const accountFind = await TSUserAccount.game.getCurAccount(userStore.uid.value!);
-  if (!accountFind) account.value = undefined;
-  else account.value = accountFind;
-}
+const account = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
 
 async function tryPlayGame(): Promise<void> {
-  await refreshAccount();
-
   if (!userStore.uid.value || !userStore.cookie.value) {
     showSnackbar({ text: "请先登录！", color: "warn" });
-    return;
-  }
-  if (account.value === undefined) {
-    showSnackbar({ text: "未检测到当前登录用户！", color: "warn" });
     return;
   }
   if (account.value.isOfficial === 0) {
