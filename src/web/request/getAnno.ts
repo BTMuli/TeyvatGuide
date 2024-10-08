@@ -1,7 +1,7 @@
 /**
  * @file web/request/getAnnouncement.ts
  * @description 获取游戏内公告
- * @since Beta v0.5.5
+ * @since Beta v0.6.0
  */
 
 import TGHttp from "../../utils/TGHttp.js";
@@ -18,7 +18,7 @@ export enum AnnoServer {
 export type AnnoLang = "zh-cn" | "zh-tw" | "en" | "ja";
 
 const AnnoApi = "https://hk4e-ann-api.mihoyo.com/common/hk4e_cn/announcement/api";
-const AnnoApiGlobal = "https://hk4e-api-os.hoyoverse.com/common/hk4e_global/announcement/api";
+const AnnoApiGlobal = "https://sg-hk4e-api.hoyoverse.com/common/hk4e_global/announcement/api";
 
 /**
  * @description 获取游戏内公告参数
