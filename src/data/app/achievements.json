@@ -13783,6 +13783,18 @@
     }
   },
   {
+    "id": 82252,
+    "series": 0,
+    "order": 2252,
+    "name": "月亮还没有出来",
+    "description": "在秘源机兵·构型械准备「球状雷炮」时，破坏「汲聚械」打断它的蓄能。",
+    "reward": 5,
+    "version": "5.1",
+    "trigger": {
+      "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
     "id": 84000,
     "series": 0,
     "order": 4001,
@@ -16921,6 +16933,120 @@
         {
           "questId": 5002,
           "name": "温泉之乡",
+          "type": "魔神任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84329,
+    "series": 0,
+    "order": 5108,
+    "name": "谜境中的将军",
+    "description": "与愚人众执行官「队长」的正式会面。",
+    "reward": 5,
+    "version": "5.1",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 5016,
+          "name": "向着迷烟飘往之处",
+          "type": "魔神任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84330,
+    "series": 0,
+    "order": 5109,
+    "name": "未奉献的牺牲",
+    "description": "他所追寻的究竟是什么…",
+    "reward": 5,
+    "version": "5.1",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 5016,
+          "name": "向着迷烟飘往之处",
+          "type": "魔神任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84331,
+    "series": 0,
+    "order": 5110,
+    "name": "镜与谜烟的彼方",
+    "description": "完成「镜与谜烟的彼方」。",
+    "reward": 10,
+    "version": "5.1",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 5017,
+          "name": "摇曳灯火一分为二",
+          "type": "魔神任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84332,
+    "series": 0,
+    "order": 5111,
+    "name": "在夜明之前",
+    "description": "唯有携手，才能觅见光明。",
+    "reward": 5,
+    "version": "5.1",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 5009,
+          "name": "秘源之下",
+          "type": "魔神任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84333,
+    "series": 0,
+    "order": 5112,
+    "name": "胜者重燃",
+    "description": "终于，纳塔再一次迎来了胜利。",
+    "reward": 5,
+    "version": "5.1",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 5014,
+          "name": "名为「命运」的燃料",
+          "type": "魔神任务"
+        }
+      ]
+    }
+  },
+  {
+    "id": 84334,
+    "series": 0,
+    "order": 5113,
+    "name": "命定将焚的虹光",
+    "description": "完成「命定将焚的虹光」。",
+    "reward": 10,
+    "version": "5.1",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 5014,
+          "name": "名为「命运」的燃料",
           "type": "魔神任务"
         }
       ]

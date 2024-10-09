@@ -1,5 +1,17 @@
 [
   {
+    "id": 10000103,
+    "contentId": 502306,
+    "name": "希诺宁",
+    "title": "焮火铸魂",
+    "area": "纳塔",
+    "birthday": [3, 13],
+    "star": 5,
+    "element": "岩",
+    "weapon": "单手剑",
+    "nameCard": "希诺宁·律动"
+  },
+  {
     "id": 10000102,
     "contentId": 501625,
     "name": "玛拉妮",

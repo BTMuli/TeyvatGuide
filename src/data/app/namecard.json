@@ -1620,6 +1620,16 @@
     "profile": "/source/nameCard/profile/卡齐娜·转转.webp"
   },
   {
+    "name": "希诺宁·律动",
+    "index": 219,
+    "type": 2,
+    "desc": "名片纹饰。万山回响着希诺宁锻打的律动。当最后一丝回声渐消，那会儿她早已停下工作，寻找午后的日光去小睡了。",
+    "source": "希诺宁的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/希诺宁·律动.webp",
+    "bg": "/source/nameCard/bg/希诺宁·律动.webp",
+    "profile": "/source/nameCard/profile/希诺宁·律动.webp"
+  },
+  {
     "name": "纪行·捕风",
     "index": 2,
     "type": 3,
@@ -1968,6 +1978,16 @@
     "icon": "/source/nameCard/icon/纪行·源火.webp",
     "bg": "/source/nameCard/bg/纪行·源火.webp",
     "profile": "/source/nameCard/profile/纪行·源火.webp"
+  },
+  {
+    "name": "纪行·神诞",
+    "index": 220,
+    "type": 3,
+    "desc": "名片纹饰。「十二个月亮又十二个月亮，新的记忆会生长。」",
+    "source": "纪行系统奖励获取。",
+    "icon": "/source/nameCard/icon/纪行·神诞.webp",
+    "bg": "/source/nameCard/bg/纪行·神诞.webp",
+    "profile": "/source/nameCard/profile/纪行·神诞.webp"
   },
   {
     "name": "庆典·无相",

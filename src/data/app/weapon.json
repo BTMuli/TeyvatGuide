@@ -342,6 +342,15 @@
     "icon": "/WIKI/weapon/12501.webp"
   },
   {
+    "id": 11516,
+    "contentId": 502898,
+    "name": "岩峰巡歌",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/11516.webp"
+  },
+  {
     "id": 11515,
     "contentId": 501384,
     "name": "赦罪",
@@ -864,6 +873,15 @@
     "icon": "/WIKI/weapon/13431.webp"
   },
   {
+    "id": 13430,
+    "contentId": 502897,
+    "name": "镇山之钉",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/长柄武器.webp",
+    "icon": "/WIKI/weapon/13430.webp"
+  },
+  {
     "id": 13427,
     "contentId": 7407,
     "name": "勘探钻机",
@@ -1033,6 +1051,15 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "icon": "/WIKI/weapon/12431.webp"
+  },
+  {
+    "id": 12430,
+    "contentId": 0,
+    "name": "硕果钩",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/双手剑.webp",
+    "icon": "/WIKI/weapon/12430.webp"
   },
   {
     "id": 12427,
@@ -1231,6 +1258,15 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/单手剑.webp",
     "icon": "/WIKI/weapon/11431.webp"
+  },
+  {
+    "id": 11430,
+    "contentId": 502896,
+    "name": "弥坚骨",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/11430.webp"
   },
   {
     "id": 11428,
