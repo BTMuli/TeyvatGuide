@@ -247,8 +247,7 @@ async function checkUpdate(): Promise<void> {
     appStore.buildTime = getBuildTime();
     await TGSqlite.update();
     showSnackbar({ text: "数据库已更新！", color: "success", timeout: 3000 });
-    // todo 6.0发版时取消注释
-    // window.open("https://app.btmuli.ink/docs/Changelogs.html");
+    window.open("https://app.btmuli.ink/docs/Changelogs.html");
   }
 }
 
