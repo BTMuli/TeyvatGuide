@@ -528,6 +528,50 @@
     }
   },
   {
+    "id": 10000103,
+    "contentId": 502306,
+    "dropDays": [2, 5, 7],
+    "name": "希诺宁",
+    "itemType": "character",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "elementIcon": "/icon/element/岩元素.webp",
+    "icon": "/WIKI/character/10000103.webp",
+    "materials": [
+      {
+        "id": 104350,
+        "name": "「焚燔」的教导",
+        "star": 2,
+        "starIcon": "/icon/star/2.webp",
+        "bg": "/icon/bg/2-Star.webp",
+        "icon": "/icon/material/104350.webp"
+      },
+      {
+        "id": 104351,
+        "name": "「焚燔」的指引",
+        "star": 3,
+        "starIcon": "/icon/star/3.webp",
+        "bg": "/icon/bg/3-Star.webp",
+        "icon": "/icon/material/104351.webp"
+      },
+      {
+        "id": 104352,
+        "name": "「焚燔」的哲学",
+        "star": 4,
+        "starIcon": "/icon/star/4.webp",
+        "bg": "/icon/bg/4-Star.webp",
+        "icon": "/icon/material/104352.webp"
+      }
+    ],
+    "source": {
+      "index": 6,
+      "area": "纳塔",
+      "name": "空华",
+      "icon": "/icon/nation/纳塔.webp"
+    }
+  },
+  {
     "id": 10000033,
     "contentId": 1220,
     "dropDays": [1, 4, 7],
