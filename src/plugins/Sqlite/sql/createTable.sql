@@ -1,9 +1,7 @@
 -- @file plugins/Sqlite/sql/createTable.sql
 -- @brief sqlite数据库创建表语句
--- @since Beta v0.6.0
+-- @since Beta v0.6.1
 
--- @brief 重新创建成就数据表
-drop table if exists Achievements;
 -- @brief 创建成就数据表
 create table if not exists Achievements
 (
@@ -15,12 +13,6 @@ create table if not exists Achievements
     updated       text,
     primary key (id, uid)
 );
-
--- @brief 移除成就系列数据表
-drop table if exists AchievementSeries;
-
--- @brief 移除角色数据表
-drop table if exists AppCharacters;
 
 -- @brief 创建应用数据表
 create table if not exists AppData
@@ -39,9 +31,6 @@ create table if not exists UserAccount
     updated text
 );
 
--- @brief 重新创建账号数据表
-drop table if exists GameAccount;
-
 -- @brief 创建游戏账号数据表
 create table if not exists GameAccount
 (
@@ -57,9 +46,6 @@ create table if not exists GameAccount
     updated    text,
     primary key (uid, gameUid)
 );
-
--- @brief 移除名片表
-drop table if exists NameCard;
 
 -- @brief 创建深渊数据表
 create table if not exists SpiralAbyss

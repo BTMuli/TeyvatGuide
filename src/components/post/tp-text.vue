@@ -75,6 +75,8 @@ function getTextStyle(): StyleValue {
   const style = <Array<StyleValue>>[];
   const data: TpText = props.data;
   style.push("white-space: pre-wrap");
+  style.push("line-break: anywhere");
+  style.push("word-break: break-all");
   if (data.attributes) {
     const ruleBold: StyleValue = "fontFamily: var(--font-title)";
     const ruleItalic: StyleValue = "fontStyle: italic";
