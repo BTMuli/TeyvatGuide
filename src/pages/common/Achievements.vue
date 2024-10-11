@@ -31,16 +31,17 @@
     </template>
   </v-app-bar>
   <div class="wrap">
-    <div class="left-wrap">
-      <TuaSeries
-        v-for="(series, index) in seriesList"
-        :key="index"
-        @click="selectSeries(series)"
-        v-model:cur="selectedSeries"
-        :uid="uidCur"
-        :series="series"
-      />
-    </div>
+    <v-virtual-scroll class="left-wrap" :items="seriesList" item-height="60">
+      <template #default="{ item }">
+        <TuaSeries
+          @click="selectSeries(item)"
+          v-model:cur="selectedSeries"
+          :uid="uidCur"
+          :series="item"
+        />
+        <div style="height: 10px" />
+      </template>
+    </v-virtual-scroll>
     <TuaAchiList
       :uid="uidCur"
       :hideFin="hideFin"
@@ -352,12 +353,9 @@ async function deleteUid(): Promise<void> {
 }
 
 .left-wrap {
-  display: flex;
   width: 400px;
   height: 100%;
-  flex-direction: column;
   padding-right: 10px;
   overflow-y: auto;
-  row-gap: 10px;
 }
 </style>

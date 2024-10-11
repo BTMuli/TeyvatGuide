@@ -115,6 +115,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
 .achi-container {
   position: relative;
   display: flex;
+  height: 60px;
   align-items: center;
   justify-content: space-between;
   padding: 10px;

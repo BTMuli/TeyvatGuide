@@ -3,10 +3,12 @@
     <div v-if="ncData !== undefined">
       <TopNameCard :data="ncData" @selected="showNc = true" />
     </div>
-    <!-- todo 虚拟列表优化 -->
-    <div v-for="(item, index) in renderAchi" :key="index">
-      <TuaAchi :modelValue="item" @select-achi="selectAchi" />
-    </div>
+    <v-virtual-scroll :items="renderAchi" :item-height="60" class="tua-al-list">
+      <template #default="{ item }">
+        <TuaAchi :modelValue="item" @select-achi="selectAchi" />
+        <div style="height: 10px" />
+      </template>
+    </v-virtual-scroll>
     <ToNameCard v-model="showNc" :data="ncData" v-if="ncData" />
     <ToAchiInfo
       v-if="selectedAchi"
@@ -144,9 +146,12 @@ function switchAchiInfo(next: boolean): void {
   width: 100%;
   height: 100%;
   flex-direction: column;
-  padding-right: 10px;
-  overflow-y: scroll;
+  overflow-y: auto;
   row-gap: 10px;
+}
+
+.tua-al-list {
+  padding-right: 10px;
 }
 
 .card-arrow {

@@ -4,7 +4,7 @@
       v-model="search"
       prepend-inner-icon="mdi-magnify"
       label="搜索"
-      hide-details
+      :hide-details="true"
       variant="outlined"
       @click:prepend-inner="searchNamecard"
       @keyup.enter="searchNamecard"
