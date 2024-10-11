@@ -7,7 +7,7 @@
         :indeterminate="true"
         v-else-if="props.modelValue.banner !== ''"
       />
-      <img src="/source/UI/defaultCover.webp" alt="cover" v-else />
+      <img src="/source/UI/defaultCover.webp" alt="cover" @click="createAnno" v-else />
       <div class="anno-info">
         <div class="anno-time">
           <v-icon>mdi-clock-time-four-outline</v-icon>
@@ -112,8 +112,7 @@ async function shareAnno(): Promise<void> {
 }
 
 .anno-cover img {
-  min-width: 100%;
-  height: 100%;
+  width: 100%;
   object-fit: cover;
   object-position: center;
   transition: all 0.3s linear;

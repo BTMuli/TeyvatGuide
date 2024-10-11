@@ -1,7 +1,9 @@
 <template>
   <div v-if="card" :id="`post-card-${card.postId}`" class="tpc-card">
     <div class="tpc-cover">
-      <img :src="card.cover" alt="cover" @click="createPost(card)" />
+      <img :src="localCover" alt="cover" @click="createPost(card)" v-if="localCover" />
+      <v-progress-circular color="primary" :indeterminate="true" v-else-if="card.cover !== ''" />
+      <img src="/source/UI/defaultCover.webp" alt="cover" @click="createPost(card)" v-else />
       <div v-if="isAct" class="tpc-act">
         <div class="tpc-status" :style="{ background: card.status?.colorCss }">
           {{ card.status?.status }}
@@ -57,9 +59,9 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onBeforeMount, ref } from "vue";
+import { computed, onBeforeMount, onUnmounted, ref } from "vue";
 
-import { generateShareImg } from "../../utils/TGShare.js";
+import { generateShareImg, saveImgLocal } from "../../utils/TGShare.js";
 import { createPost } from "../../utils/TGWindow.js";
 import TpAvatar from "../post/tp-avatar.vue";
 
@@ -79,6 +81,7 @@ const props = withDefaults(defineProps<TPostCardProps>(), {
 const emits = defineEmits<TPostCardEmits>();
 const isAct = ref<boolean>(false);
 const card = ref<TGApp.Plugins.Mys.News.RenderCard>();
+const localCover = ref<string>();
 const selectedList = computed({
   get: () => props.selected,
   set: (v) => {
@@ -87,8 +90,15 @@ const selectedList = computed({
   },
 });
 
-onBeforeMount(() => {
+onBeforeMount(async () => {
   card.value = getPostCard(props.modelValue);
+  if (card.value && card.value.cover !== "") {
+    localCover.value = await saveImgLocal(card.value.cover);
+  }
+});
+
+onUnmounted(() => {
+  if (localCover.value) URL.revokeObjectURL(localCover.value);
 });
 
 /**
@@ -138,15 +148,7 @@ function getActivityStatus(status: number): TGApp.Plugins.Mys.News.RenderStatus 
   }
 }
 
-/**
- * @description 获取封面图
- * @since Beta v0.4.5
- * @param {TGApp.Plugins.Mys.Post.FullData} item 咨讯列表项
- * @returns {string} 封面图链接
- */
 function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
-  // 默认封面图
-  const defaultCover = "/source/UI/defaultCover.webp";
   let cover;
   if (item.cover) {
     cover = item.cover.url;
@@ -155,14 +157,14 @@ function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
   } else if (item.post.images.length > 0) {
     cover = item.post.images[0];
   }
-  if (cover === undefined) return defaultCover;
+  if (cover === undefined) return "";
   if (cover.endsWith(".gif")) return cover;
   return `${cover}?x-oss-process=image/format,png`;
 }
 
 /**
  * @description 获取公共属性
- * @since Beta v0.4.5
+ * @since Beta v0.6.1
  * @param {TGApp.Plugins.Mys.Post.FullData} item 咨讯列表项
  * @returns {TGApp.Plugins.Mys.News.RenderCard} 渲染用咨讯列表项
  */
