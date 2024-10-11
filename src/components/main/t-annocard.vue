@@ -2,7 +2,12 @@
   <div :id="`anno_card_${props.modelValue.id}`" class="anno-card">
     <div class="anno-cover" :title="props.modelValue.title">
       <img :src="localBanner" alt="cover" @click="createAnno" v-if="localBanner" />
-      <v-progress-circular color="primary" :indeterminate="true" />
+      <v-progress-circular
+        color="primary"
+        :indeterminate="true"
+        v-else-if="props.modelValue.banner !== ''"
+      />
+      <img src="/source/UI/defaultCover.webp" alt="cover" v-else />
       <div class="anno-info">
         <div class="anno-time">
           <v-icon>mdi-clock-time-four-outline</v-icon>
@@ -39,7 +44,9 @@ const localBanner = ref<string>();
 const localTag = ref<string>();
 
 onMounted(async () => {
-  localBanner.value = await saveImgLocal(props.modelValue.banner);
+  if (props.modelValue.banner !== "") {
+    localBanner.value = await saveImgLocal(props.modelValue.banner);
+  }
   localTag.value = await saveImgLocal(props.modelValue.tagIcon);
 });
 
@@ -48,10 +55,14 @@ watch(
   async () => {
     if (localBanner.value && localBanner.value.startsWith("blob:")) {
       URL.revokeObjectURL(localBanner.value);
+      localBanner.value = undefined;
     }
-    localBanner.value = await saveImgLocal(props.modelValue.banner);
+    if (props.modelValue.banner !== "") {
+      localBanner.value = await saveImgLocal(props.modelValue.banner);
+    }
     if (localTag.value && localTag.value.startsWith("blob:")) {
       URL.revokeObjectURL(localTag.value);
+      localTag.value = undefined;
     }
     localTag.value = await saveImgLocal(props.modelValue.tagIcon);
   },

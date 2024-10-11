@@ -1,11 +1,8 @@
 /**
  * @file web utils transAnno.ts
  * @description 公告数据转换工具
- * @since Beta v0.4.4
+ * @since Beta v0.6.1
  */
-
-// 默认封面图
-const defaultCover = "/source/UI/defaultCover.webp";
 
 /**
  * @description 获取公告标签
@@ -31,7 +28,7 @@ function getAnnoTag(tag: string): string {
 
 /**
  * @description 将获取到的数据转为渲染用的卡片
- * @since Beta v0.4.3
+ * @since Beta v0.6.1
  * @param {TGApp.BBS.Announcement.ListData[]} data 公告数据
  * @returns {TGApp.App.Announcement.ListCard[]} 渲染用的卡片
  */
@@ -48,7 +45,7 @@ export function getAnnoCard(
         id: anno.ann_id,
         title: anno.title,
         subtitle: anno.subtitle.replace(/<br \/>/g, " "),
-        banner: anno.banner || defaultCover,
+        banner: anno.banner,
         typeLabel: anno.type === 2 ? "游戏公告" : "活动公告",
         tagIcon: anno.tag_icon,
         tagLabel: getAnnoTag(anno.tag_label),
