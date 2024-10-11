@@ -42,22 +42,13 @@
   <v-window v-model="tab">
     <v-window-item v-for="(value, index) in tabValues" :key="index" :value="value">
       <div class="anno-grid">
-        <v-card :rounded="true" v-for="item in annoCards[value]" :key="item.id">
-          <div class="anno-cover" :title="item.title">
-            <img :src="item.banner" alt="cover" @click="createAnno(item)" />
-            <div class="anno-info">
-              <div class="anno-time">
-                <v-icon>mdi-clock-time-four-outline</v-icon>
-                <span>{{ item.timeStr }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="anno-title" :title="item.title">{{ parseTitle(item.subtitle) }}</div>
-          <div class="anno-label" :title="`标签：${item.tagLabel}`">
-            <img :src="item.tagIcon" alt="tag" />
-            <span>{{ item.tagLabel }}</span>
-          </div>
-        </v-card>
+        <TAnnocard
+          v-for="item in annoCards[value]"
+          :key="item.id"
+          :model-value="item"
+          :region="curRegion"
+          :lang="curLang"
+        />
       </div>
     </v-window-item>
   </v-window>
@@ -68,10 +59,10 @@ import { nextTick, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import showSnackbar from "../../components/func/snackbar.js";
+import TAnnocard from "../../components/main/t-annocard.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import { useAppStore } from "../../store/modules/app.js";
 import TGLogger from "../../utils/TGLogger.js";
-import { createTGWindow } from "../../utils/TGWindow.js";
 import { AnnoLang, AnnoServer } from "../../web/request/getAnno.js";
 import TGRequest from "../../web/request/TGRequest.js";
 import TGUtils from "../../web/utils/TGUtils.js";
@@ -235,21 +226,9 @@ function getAnnoTime(content: string): string | false {
   return false;
 }
 
-function parseTitle(title: string): string {
-  const dom = new DOMParser().parseFromString(title, "text/html");
-  return dom.body.innerText;
-}
-
 async function switchNews(): Promise<void> {
   await TGLogger.Info("[Announcements][switchNews] 切换米游社咨讯");
   await router.push("/news/2");
-}
-
-async function createAnno(item: TGApp.App.Announcement.ListCard): Promise<void> {
-  const annoPath = `/anno_detail/${curRegion.value}/${item.id}/${curLang.value}`;
-  const annoTitle = `Anno_${item.id} ${item.title}`;
-  await TGLogger.Info(`[Announcements][createAnno][${item.id}] 打开公告窗口`);
-  await createTGWindow(annoPath, "Sub_window", annoTitle, 960, 720, false, false);
 }
 </script>
 
@@ -291,86 +270,5 @@ async function createAnno(item: TGApp.App.Announcement.ListCard): Promise<void> 
   font-family: var(--font-title);
   grid-gap: 10px;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-}
-
-.anno-cover {
-  position: relative;
-  display: flex;
-  overflow: hidden;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 36 / 13;
-}
-
-.anno-cover img {
-  min-width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  transition: all 0.3s linear;
-}
-
-.anno-title {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  padding: 5px;
-  font-size: 18px;
-  text-align: right;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.anno-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: rgb(0 0 0/50%);
-  font-size: 12px;
-}
-
-.anno-time {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  margin: 5px;
-  color: var(--tgc-white-1);
-  gap: 5px;
-}
-
-.anno-label {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 5px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: var(--common-shadow-2);
-  border-bottom-left-radius: 5px;
-  box-shadow: 0 0 10px var(--tgc-dark-1);
-  color: var(--tgc-white-1);
-  text-shadow: 0 0 5px var(--tgc-dark-1);
-}
-
-.anno-label img {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
-}
-
-.anno-cover img:hover {
-  cursor: pointer;
-  transform: scale(1.1);
-  transition: all 0.3s linear;
 }
 </style>
