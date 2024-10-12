@@ -280,11 +280,14 @@ async function refresh(): Promise<void> {
     loadData.value = false;
     return;
   }
-  const cookie = {
-    account_id: userStore.cookie.value.account_id,
-    cookie_token: userStore.cookie.value.cookie_token,
-  };
-  const listRes = await TGRequest.User.byCookie.getAvatarList(cookie, user.value.gameUid);
+  const indexRes = await TGRequest.User.byCookie.getAvatarIndex(userStore.cookie.value, user.value);
+  if (indexRes.retcode !== 0) {
+    showSnackbar({ text: `[${indexRes.retcode}] ${indexRes.message}` });
+    loading.value = false;
+    loadData.value = false;
+    return;
+  }
+  const listRes = await TGRequest.User.byCookie.getAvatarList(userStore.cookie.value, user.value);
   if (!Array.isArray(listRes)) {
     showSnackbar({ text: `[${listRes.retcode}] ${listRes.message}`, color: "error" });
     await TGLogger.Error(`[Character][refreshRoles][${user.value.gameUid}] 获取角色列表失败`);
@@ -298,7 +301,11 @@ async function refresh(): Promise<void> {
   const idList = listRes.map((i) => i.id.toString());
   loadingTitle.value = "正在获取角色数据";
   loadingSub.value = `共${idList.length}个角色`;
-  const res = await TGRequest.User.byCookie.getAvatarDetail(cookie, user.value.gameUid, idList);
+  const res = await TGRequest.User.byCookie.getAvatarDetail(
+    userStore.cookie.value,
+    user.value,
+    idList,
+  );
   if ("retcode" in res) {
     showSnackbar({ text: `[${res.retcode}] ${res.message}`, color: "error" });
     await TGLogger.Error(`[Character][refreshRoles][${user.value.gameUid}] 获取角色数据失败`);
