@@ -59,7 +59,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onBeforeMount, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { generateShareImg, saveImgLocal } from "../../utils/TGShare.js";
 import { createPost } from "../../utils/TGWindow.js";
@@ -90,15 +90,26 @@ const selectedList = computed({
   },
 });
 
-onBeforeMount(async () => {
-  card.value = getPostCard(props.modelValue);
+onMounted(async () => await reload(props.modelValue));
+
+watch(() => props.modelValue, reload);
+
+async function reload(data: TGApp.Plugins.Mys.Post.FullData): Promise<void> {
+  if (localCover.value) {
+    URL.revokeObjectURL(localCover.value);
+    localCover.value = undefined;
+  }
+  card.value = getPostCard(data);
   if (card.value && card.value.cover !== "") {
     localCover.value = await saveImgLocal(card.value.cover);
   }
-});
+}
 
 onUnmounted(() => {
-  if (localCover.value) URL.revokeObjectURL(localCover.value);
+  if (localCover.value) {
+    URL.revokeObjectURL(localCover.value);
+    localCover.value = undefined;
+  }
 });
 
 /**

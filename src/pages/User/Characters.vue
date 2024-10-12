@@ -283,6 +283,7 @@ async function refresh(): Promise<void> {
   const indexRes = await TGRequest.User.byCookie.getAvatarIndex(userStore.cookie.value, user.value);
   if (indexRes.retcode !== 0) {
     showSnackbar({ text: `[${indexRes.retcode}] ${indexRes.message}` });
+    await TGLogger.Error(JSON.stringify(indexRes.message));
     loading.value = false;
     loadData.value = false;
     return;
