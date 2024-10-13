@@ -1,13 +1,13 @@
 <template>
   <div :id="`anno_card_${props.modelValue.id}`" class="anno-card">
-    <div class="anno-cover" :title="props.modelValue.title">
-      <img :src="localBanner" alt="cover" @click="createAnno" v-if="localBanner" />
+    <div class="anno-cover" :title="props.modelValue.title" @click="createAnno">
+      <img :src="localBanner" alt="cover" v-if="localBanner" />
       <v-progress-circular
         color="primary"
         :indeterminate="true"
         v-else-if="props.modelValue.banner !== ''"
       />
-      <img src="/source/UI/defaultCover.webp" alt="cover" @click="createAnno" v-else />
+      <img src="/source/UI/defaultCover.webp" alt="cover" v-else />
       <div class="anno-info">
         <div class="anno-time">
           <v-icon>mdi-clock-time-four-outline</v-icon>
@@ -109,6 +109,7 @@ async function shareAnno(): Promise<void> {
   align-items: center;
   justify-content: center;
   aspect-ratio: 36 / 13;
+  cursor: pointer;
 }
 
 .anno-cover img {
@@ -177,7 +178,6 @@ async function shareAnno(): Promise<void> {
 }
 
 .anno-cover img:hover {
-  cursor: pointer;
   transform: scale(1.1);
   transition: all 0.3s linear;
 }

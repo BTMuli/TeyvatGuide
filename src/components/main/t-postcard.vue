@@ -1,9 +1,9 @@
 <template>
   <div v-if="card" :id="`post-card-${card.postId}`" class="tpc-card">
-    <div class="tpc-cover">
-      <img :src="localCover" alt="cover" @click="createPost(card)" v-if="localCover" />
+    <div class="tpc-cover" @click="createPost(card)">
+      <img :src="localCover" alt="cover" v-if="localCover" />
       <v-progress-circular color="primary" :indeterminate="true" v-else-if="card.cover !== ''" />
-      <img src="/source/UI/defaultCover.webp" alt="cover" @click="createPost(card)" v-else />
+      <img src="/source/UI/defaultCover.webp" alt="cover" v-else />
       <div v-if="isAct" class="tpc-act">
         <div class="tpc-status" :style="{ background: card.status?.colorCss }">
           {{ card.status?.status }}
@@ -251,6 +251,7 @@ async function shareCard(): Promise<void> {
   justify-content: center;
   aspect-ratio: 36 / 13;
   background: var(--common-shadow-2);
+  cursor: pointer;
 }
 
 .tpc-cover img {
@@ -319,7 +320,6 @@ async function shareCard(): Promise<void> {
 }
 
 .tpc-cover img:hover {
-  cursor: pointer;
   transform: scale(1.1);
   transition: all 0.3s linear;
 }
