@@ -100,6 +100,7 @@ onMounted(async () => {
 function listenOnInit(): void {
   console.info("[App][listenOnInit] 监听初始化事件！");
   event.listen("initApp", async () => {
+    await checkAppLoad();
     await checkDeviceFp();
     try {
       await checkUserLoad();
@@ -110,6 +111,19 @@ function listenOnInit(): void {
     }
     await checkUpdate();
   });
+}
+
+async function checkAppLoad(): Promise<void> {
+  let checkDB = false;
+  try {
+    checkDB = await TGSqlite.check();
+  } catch (error) {
+    if (error instanceof Error) {
+      await TGLogger.Error(`[App][checkAppLoad] ${error.name}: ${error.message}`);
+    } else console.error(error);
+  }
+  if (!checkDB) await TGSqlite.update();
+  else await TGLogger.Info("[App][checkAppLoad] 数据库已成功加载！");
 }
 
 // 检测 deviceFp

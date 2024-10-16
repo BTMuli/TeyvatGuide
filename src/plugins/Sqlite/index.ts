@@ -1,11 +1,13 @@
 /**
  * @file plugins/Sqlite/index.ts
  * @description Sqlite 数据库操作类
- * @since Beta v0.6.0
+ * @since Beta v0.6.1
  */
 
 import { app } from "@tauri-apps/api";
 import Database from "@tauri-apps/plugin-sql";
+
+import TGLogger from "../../utils/TGLogger.js";
 
 import initDataSql from "./sql/initData.js";
 import { insertAppData } from "./sql/insertData.js";
@@ -53,6 +55,27 @@ class Sqlite {
       this.db = await Database.load(this.dbPath);
     }
     return this.db;
+  }
+
+  /**
+   * @description 检测是否需要创建数据库
+   * @since Beta v0.6.1
+   * @returns {Promise<boolean>}
+   */
+  public async check(): Promise<boolean> {
+    try {
+      const db = await this.getDB();
+      let isVerified = false;
+      const sqlT = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
+      const res: Array<{ name: string }> = await db.select(sqlT);
+      if (this.tables.every((item) => res.map((i) => i.name).includes(item))) {
+        isVerified = true;
+      }
+      return isVerified;
+    } catch (e) {
+      await TGLogger.Error(JSON.stringify(e));
+      return false;
+    }
   }
 
   /**
