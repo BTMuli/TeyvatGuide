@@ -66,6 +66,7 @@ create table if not exists SpiralAbyss
     normalSkillRank  text,
     energySkillRank  text,
     floors           text,
+    skippedFloor     text,
     updated          text,
     primary key (uid, id)
 );

@@ -1,19 +1,19 @@
 /**
  * @file types/Sqlite/Abyss.d.ts
  * @description 数据库深境螺旋相关类型定义文件
- * @since Beta v0.3.9
+ * @since Beta v0.6.1
  */
 
 /**
  * @description 数据库深渊类型命名
- * @since Beta v0.3.9
+ * @since Beta v0.6.1
  * @namespace TGApp.Sqlite.Abyss
  * @memberof TGApp.Sqlite
  */
 declare namespace TGApp.Sqlite.Abyss {
   /**
    * @description 数据库-深境螺旋表
-   * @since Alpha v0.2.0
+   * @since Beta v0.6.1
    * @interface SingleTable
    * @property {string} uid - 用户 UID
    * @property {number} id - 深境螺旋 ID
@@ -32,6 +32,7 @@ declare namespace TGApp.Sqlite.Abyss {
    * @property {Character[]} normalSkillRank - 元素战技释放数
    * @property {Character[]} energySkillRank - 元素爆发次数
    * @property {Floor[]} floors - 深境螺旋各层数据
+   * @property {string} skippedFloor - 跳过楼层
    * @property {string} updated - 更新时间
    * @return SingleTable
    */
@@ -52,6 +53,7 @@ declare namespace TGApp.Sqlite.Abyss {
     normalSkillRank: string; // Character[]
     energySkillRank: string; // Character[]
     floors: string; // Floor[]
+    skippedFloor: string;
     updated: string;
   }
 

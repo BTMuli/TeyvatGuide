@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/userAbyss.ts
  * @description Sqlite-用户深渊模块
- * @since Beta v0.6.0
+ * @since Beta v0.6.1
  */
 
 import { path } from "@tauri-apps/api";
@@ -50,7 +50,7 @@ function getRestoreSql(data: TGApp.Sqlite.Abyss.SingleTable): string {
 
 /**
  * @description 获取深渊数据的插入更新Sql
- * @since Beta v0.6.0
+ * @since Beta v0.6.1
  * @param {string} uid - 用户UID
  * @param {TGApp.Game.Abyss.FullData} data -深渊数据
  * @returns {string}
@@ -66,15 +66,16 @@ function getInsertSql(uid: string, data: TGApp.Game.Abyss.FullData): string {
   const normalSkillRank = transCharacterData(data.normal_skill_rank);
   const energySkillRank = transCharacterData(data.energy_skill_rank);
   const floors = transFloorData(data.floors);
+  const skippedFloor = data.is_just_skipped_floor ? data.skipped_floor : "";
   const timeNow = timestampToDate(new Date().getTime());
   return `
-      INSERT INTO SpiralAbyss (uid, id, startTime, endTime, totalBattleTimes, totalWinTimes,
-                               maxFloor, totalStar, isUnlock, revealRank, defeatRank, damageRank,
-                               takeDamageRank, normalSkillRank, energySkillRank, floors, updated)
+      INSERT INTO SpiralAbyss (uid, id, startTime, endTime, totalBattleTimes, totalWinTimes, maxFloor,
+                               totalStar, isUnlock, revealRank, defeatRank, damageRank, takeDamageRank,
+                               normalSkillRank, energySkillRank, floors, skippedFloor, updated)
       VALUES ('${uid}', ${data.schedule_id}, '${startTime}', '${endTime}', ${data.total_battle_times},
-              ${data.total_win_times}, '${data.max_floor}', ${data.total_star},
-              ${isUnlock}, '${revealRank}', '${defeatRank}', '${damageRank}', '${takeDamageRank}',
-              '${normalSkillRank}', '${energySkillRank}', '${floors}', '${timeNow}')
+              ${data.total_win_times}, '${data.max_floor}', ${data.total_star}, ${isUnlock},
+              '${revealRank}', '${defeatRank}', '${damageRank}', '${takeDamageRank}', '${normalSkillRank}',
+              '${energySkillRank}', '${floors}', '${skippedFloor}', '${timeNow}')
       ON CONFLICT(uid, id) DO UPDATE
           SET startTime        = '${startTime}',
               endTime          = '${endTime}',
@@ -90,6 +91,7 @@ function getInsertSql(uid: string, data: TGApp.Game.Abyss.FullData): string {
               normalSkillRank  = '${normalSkillRank}',
               energySkillRank  = '${energySkillRank}',
               floors           = '${floors}',
+              skippedFloor     = '${skippedFloor}',
               updated          = '${timeNow}';
   `;
 }

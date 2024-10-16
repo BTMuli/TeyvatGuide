@@ -139,6 +139,24 @@ class Sqlite {
     for (const item of sqlD) {
       await db.execute(item);
     }
+    // 检测是否存在字段
+    await this.updateAbyss();
+  }
+
+  /**
+   * @description 更新 SpiralAbyss 表
+   * @since Beta v0.6.1
+   * @returns {Promise<void>}
+   */
+  public async updateAbyss(): Promise<void> {
+    const db = await this.getDB();
+    try {
+      await db.select("SELECT skippedFloor FROM SpiralAbyss;");
+    } catch (e) {
+      await TGLogger.Error(JSON.stringify(e));
+      const sql = "ALTER TABLE SpiralAbyss ADD skippedFloor TEXT DEFAULT ''";
+      await db.execute(sql);
+    }
   }
 
   /**

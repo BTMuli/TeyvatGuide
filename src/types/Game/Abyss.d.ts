@@ -26,7 +26,7 @@ declare namespace TGApp.Game.Abyss {
   /**
    * @description 深渊数据类型
    * @interface FullData
-   * @since Alpha v0.2.0
+   * @since Beta v0.6.1
    * @property {number} schedule_id - 深渊周期 ID
    * @property {string} start_time - 深渊开始时间，单位：秒
    * @property {string} end_time - 深渊结束时间，单位：秒
@@ -42,6 +42,8 @@ declare namespace TGApp.Game.Abyss {
    * @property {Floor[]} floors - 深渊各层数据
    * @property {number} total_star - 总星数
    * @property {boolean} is_unlock - 是否解锁
+   * @property {boolean} is_just_skipped_floor - 是否跳过楼层
+   * @property {boolean} skipped_floor - 跳过楼层
    * @return FullData
    */
   interface FullData {
@@ -60,6 +62,8 @@ declare namespace TGApp.Game.Abyss {
     floors: Floor[];
     total_star: number;
     is_unlock: boolean;
+    is_just_skipped_floor: boolean;
+    skipped_floor: string;
   }
 
   /**
