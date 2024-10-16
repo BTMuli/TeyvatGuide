@@ -64,7 +64,12 @@
           <div class="uaw-o-box">
             <TuaOverview title="战斗次数" :val-text="item.totalBattleTimes" />
             <TuaOverview title="获得渊星" :val-text="item.totalStar" />
-            <TuaOverview title="最深抵达" :val-text="item.maxFloor" />
+            <TuaOverview
+              title="最深抵达"
+              :val-text="
+                item.skippedFloor !== '' ? `${item.maxFloor}(${item.skippedFloor})` : item.maxFloor
+              "
+            />
             <TuaOverview title="最多击破" :val-icons="item.defeatRank" />
             <TuaOverview title="最多承伤" :val-icons="item.takeDamageRank" />
             <TuaOverview title="最强一击" :val-icons="item.damageRank" />
