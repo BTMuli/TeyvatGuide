@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/userAccounts.ts
  * @description 用户账户模块
- * @since Beta v0.6.0
+ * @since Beta v0.6.1
  */
 
 import { path } from "@tauri-apps/api";
@@ -35,6 +35,24 @@ function getInsertGameAccountSql(uid: string, data: TGApp.BBS.Account.GameAccoun
               region     = '${data.region}',
               regionName = '${data.region_name}',
               updated    = '${timeNow}';
+  `;
+}
+
+/**
+ * @description 获取插入账号数据的 sql
+ * @since Beta v0.6.1
+ * @param {TGApp.App.Account.User} user
+ * @returns {string}
+ */
+function getInsertAccountSql(user: TGApp.App.Account.User): string {
+  const table = transUser(user);
+  return `
+      INSERT INTO UserAccount(uid, cookie, brief, updated)
+      VALUES ('${table.uid}', '${table.cookie}', '${table.brief}', '${table.updated}')
+      ON CONFLICT(uid) DO UPDATE
+          SET cookie  = '${table.cookie}',
+              brief   = '${table.brief}',
+              updated = '${table.updated}';
   `;
 }
 
@@ -109,19 +127,14 @@ async function getUserAccount(uid: string): Promise<TGApp.App.Account.User | fal
 
 /**
  * @description 更新用户数据
- * @since Beta v0.6.0
+ * @since Beta v0.6.1
  * @param {TGApp.App.Account.User} data - 用户cookie
  * @returns {Promise<void>}
  */
 async function saveAccount(data: TGApp.App.Account.User): Promise<void> {
   const db = await TGSqlite.getDB();
-  const table = transUser(data);
-  const timeNow = timestampToDate(new Date().getTime());
-  await db.execute(
-    "INSERT INTO UserAccount(uid, cookie, brief, updated) VALUES \
-    (?,?,?,?) ON CONFLICT (uid) DO UPDATE SET cookie=?,brief=?,updated=?",
-    [table.uid, table.cookie, table.brief, timeNow, table.cookie, table.brief, timeNow],
-  );
+  const sql = getInsertAccountSql(data);
+  await db.execute(sql);
 }
 
 /**
