@@ -35,14 +35,18 @@
             :src="propMain.icon"
             alt="propMain"
           />
-          <span>{{ propMain !== false ? propMain.name : "未知属性" }}</span>
+          <span :style="getPropMainStyle()">
+            {{ propMain !== false ? propMain.name : "未知属性" }}
+          </span>
         </span>
         <span>{{ props.modelValue.main_property.value }}</span>
       </div>
       <div v-for="(prop, index) in propSubs" :key="index" class="tua-dcr-prop">
         <span class="tua-prop-sub">
           <img v-if="prop !== false && prop.icon !== ''" :src="prop.icon" alt="propSub" />
-          <span>{{ prop !== false ? prop.name : "未知属性" }}</span>
+          <span :style="getPropSubStyle(prop, props.recommend.sub_property_list)">
+            {{ prop !== false ? prop.name : "未知属性" }}
+          </span>
           <span class="tua-prop-time" v-if="props.modelValue.sub_property_list[index].times !== 0">
             {{ props.modelValue.sub_property_list[index].times }}
           </span>
@@ -60,6 +64,7 @@ import { useUserStore } from "../../store/modules/user.js";
 interface TuaDcRelicProps {
   modelValue: TGApp.Game.Avatar.Relic | false;
   pos: "1" | "2" | "3" | "4" | "5";
+  recommend: TGApp.Game.Avatar.PropRecommend;
 }
 
 const props = defineProps<TuaDcRelicProps>();
@@ -84,6 +89,45 @@ function getRelicPos(): string {
 function getRelicTitle(): string {
   if (props.modelValue === false) return getRelicPos();
   return props.modelValue.name;
+}
+
+function getPropMainStyle(): string {
+  if (props.modelValue === false) return "";
+  if (props.pos === "3") {
+    if (
+      props.recommend.sand_main_property_list.includes(props.modelValue.main_property.property_type)
+    ) {
+      return "color: var(--tgc-yellow-1);";
+    }
+  }
+  if (props.pos === "4") {
+    if (
+      props.recommend.goblet_main_property_list.includes(
+        props.modelValue.main_property.property_type,
+      )
+    ) {
+      return "color: var(--tgc-yellow-1);";
+    }
+  }
+  if (props.pos === "5") {
+    if (
+      props.recommend.circlet_main_property_list.includes(
+        props.modelValue.main_property.property_type,
+      )
+    ) {
+      return "color: var(--tgc-yellow-1);";
+    }
+  }
+  return "";
+}
+
+function getPropSubStyle(
+  propItem: TGApp.Game.Avatar.PropMapItem | false,
+  propsR: number[],
+): string {
+  if (propItem === false) return "";
+  if (propsR.includes(propItem.property_type)) return "color: var(--tgc-yellow-1);";
+  return "";
 }
 </script>
 <style lang="css" scoped>
@@ -232,7 +276,6 @@ function getRelicTitle(): string {
 .tua-prop-time {
   width: 14px;
   height: 14px;
-  padding-bottom: 1px;
   border: 1px solid rgb(255 255 255 / 20%);
   border-radius: 4px;
   background: rgb(0 0 0 / 20%);

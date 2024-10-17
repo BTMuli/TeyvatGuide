@@ -52,13 +52,16 @@
         class="ua-window-item"
       >
         <div :id="`user-abyss-${item.id}`" class="uaw-i-ref">
-          <div class="uaw-title">
-            <span>第</span>
-            <span>{{ item.id }}</span>
-            <span>期 UID</span>
-            <span>{{ uidCur }}</span>
-            <span>更新于</span>
-            <span>{{ item.updated }}</span>
+          <div class="uaw-top">
+            <div class="uaw-title">
+              <span>第</span>
+              <span>{{ item.id }}</span>
+              <span>期 UID</span>
+              <span>{{ uidCur }}</span>
+              <span>更新于</span>
+              <span>{{ item.updated }}</span>
+            </div>
+            <div class="uaw-share">Render by TeyvatGuide v{{ version }}</div>
           </div>
           <TSubLine>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</TSubLine>
           <div class="uaw-o-box">
@@ -95,6 +98,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { getVersion } from "@tauri-apps/api/app";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, watch, computed } from "vue";
 
@@ -125,6 +129,7 @@ const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
 
 const localAbyss = ref<TGApp.Sqlite.Abyss.SingleTable[]>([]);
 const abyssRef = ref<HTMLElement>(<HTMLElement>{});
+const version = ref<string>();
 
 const uidList = ref<string[]>();
 const uidCur = ref<string>();
@@ -133,6 +138,7 @@ const abyssIdList = computed<number[]>(() => {
 });
 
 onMounted(async () => {
+  version.value = await getVersion();
   await TGLogger.Info("[UserAbyss][onMounted] 打开角色深渊页面");
   loadingTitle.value = "正在加载深渊数据";
   uidList.value = await TSUserAbyss.getAllUid();
@@ -379,6 +385,13 @@ async function deleteAbyss(): Promise<void> {
   gap: 5px;
 }
 
+.uaw-top {
+  display: flex;
+  width: 100%;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
 .uaw-title {
   display: flex;
   align-items: center;
@@ -391,6 +404,12 @@ async function deleteAbyss(): Promise<void> {
   margin-right: 10px;
   margin-left: 10px;
   color: var(--tgc-yellow-1);
+}
+
+.uaw-share {
+  z-index: -1;
+  font-size: 12px;
+  opacity: 0.8;
 }
 
 .uaw-o-box {

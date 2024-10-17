@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide blur-val="5px" :to-click="onCancel">
+  <TOverlay v-model="visible" :hide="true" blur-val="5px" :to-click="onCancel">
     <div class="tdo-box">
       <div class="tdo-avatars-container">
         <v-tabs
@@ -15,15 +15,7 @@
             @click="onAvatarClick(avatar)"
             :title="avatar.avatar.name"
           >
-            <div
-              class="tdo-avatar"
-              :style="{
-                backgroundColor:
-                  props.avatar.avatar.id === avatar.avatar.id
-                    ? 'var(--tgc-od-white)'
-                    : 'transparent',
-              }"
-            >
+            <div class="tdo-avatar" :style="getAvatarBg(avatar)">
               <img :src="avatar.avatar.side_icon" :alt="avatar.avatar.name" />
             </div>
           </v-tab>
@@ -89,6 +81,7 @@ const modeTab = computed<"classic" | "card" | "dev">({
   get: () => props.mode,
   set: (val) => emits("update:mode", val),
 });
+
 const avatarsWidth = computed<string>(() => {
   switch (props.mode) {
     case "classic":
@@ -120,6 +113,13 @@ function handleClick(pos: "left" | "right"): void {
 
 function onAvatarClick(avatar: TGApp.Sqlite.Character.UserRole): void {
   emits("toAvatar", avatar);
+}
+
+function getAvatarBg(avatar: TGApp.Sqlite.Character.UserRole): string {
+  if (props.avatar.avatar.id === avatar.avatar.id) {
+    return "background-color:var(--tgc-od-white);";
+  }
+  return "background-color:transparent;";
 }
 </script>
 <style lang="css" scoped>

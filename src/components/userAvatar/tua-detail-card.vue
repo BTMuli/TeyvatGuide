@@ -32,11 +32,31 @@
         :uid="props.modelValue.uid"
         :updated="props.modelValue.updated"
       />
-      <TuaDcRelic :model-value="relicList[0]" pos="1" />
-      <TuaDcRelic :model-value="relicList[1]" pos="2" />
-      <TuaDcRelic :model-value="relicList[2]" pos="3" />
-      <TuaDcRelic :model-value="relicList[3]" pos="4" />
-      <TuaDcRelic :model-value="relicList[4]" pos="5" />
+      <TuaDcRelic
+        :model-value="relicList[0]"
+        pos="1"
+        :recommend="props.modelValue.propRecommend.recommend_properties"
+      />
+      <TuaDcRelic
+        :model-value="relicList[1]"
+        pos="2"
+        :recommend="props.modelValue.propRecommend.recommend_properties"
+      />
+      <TuaDcRelic
+        :model-value="relicList[2]"
+        pos="3"
+        :recommend="props.modelValue.propRecommend.recommend_properties"
+      />
+      <TuaDcRelic
+        :model-value="relicList[3]"
+        pos="4"
+        :recommend="props.modelValue.propRecommend.recommend_properties"
+      />
+      <TuaDcRelic
+        :model-value="relicList[4]"
+        pos="5"
+        :recommend="props.modelValue.propRecommend.recommend_properties"
+      />
     </div>
     <!-- 左下命座跟天赋 -->
     <div class="tua-dc-lb">
