@@ -66,12 +66,12 @@
       </div>
     </div>
     <div class="tp-post-subtitle">
-      <span :title="`更新时间: ${getDate(postData.post.updated_at)}`">
-        创建时间：{{ getDate(postData.post.created_at) }}
+      <span :title="`更新于:${getDate(postData.post.updated_at)}`">
+        创建于:{{ getDate(postData.post.created_at) }}
       </span>
-      <span>分享时间：{{ getDate(shareTime) }}</span>
+      <span>分享于:{{ getDate(shareTime) }}</span>
       <span v-if="postData.post.republish_authorization !== 0" class="tp-post-copyright">
-        <v-icon size="20">mdi-copyright</v-icon>
+        <v-icon size="16">mdi-copyright</v-icon>
         <span>{{ getRepublishAuthorization(postData.post.republish_authorization) }}</span>
       </span>
     </div>
@@ -324,7 +324,11 @@ onUnmounted(() => {
 }
 
 .tp-post-copyright {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--common-text-title);
+  column-gap: 5px;
   font-family: var(--font-title);
 }
 
