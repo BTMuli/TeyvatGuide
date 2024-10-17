@@ -66,7 +66,7 @@ function getInsertSql(uid: string, data: TGApp.Game.Abyss.FullData): string {
   const normalSkillRank = transCharacterData(data.normal_skill_rank);
   const energySkillRank = transCharacterData(data.energy_skill_rank);
   const floors = transFloorData(data.floors);
-  const skippedFloor = data.is_just_skipped_floor ? data.skipped_floor : "";
+  const skippedFloor = data.skipped_floor;
   const timeNow = timestampToDate(new Date().getTime());
   return `
       INSERT INTO SpiralAbyss (uid, id, startTime, endTime, totalBattleTimes, totalWinTimes, maxFloor,

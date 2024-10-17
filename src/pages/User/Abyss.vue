@@ -183,14 +183,8 @@ async function refreshAbyss(): Promise<void> {
   await TGLogger.Info("[UserAbyss][getAbyssData] 更新深渊数据");
   loadingTitle.value = `正在获取${user.value.gameUid}的深渊数据`;
   loading.value = true;
-  const cookie = {
-    account_id: userStore.cookie.value.account_id,
-    cookie_token: userStore.cookie.value.cookie_token,
-    ltoken: userStore.cookie.value.ltoken,
-    ltuid: userStore.cookie.value.ltuid,
-  };
   loadingTitle.value = `正在获取${user.value.gameUid}的上期深渊数据`;
-  const resP = await TGRequest.User.byCookie.getAbyss(cookie, "2", user.value);
+  const resP = await TGRequest.User.byCookie.getAbyss(userStore.cookie.value, "2", user.value);
   if (!("retcode" in resP)) {
     await TGLogger.Info("[UserAbyss][getAbyssData] 成功获取上期深渊数据");
     loadingTitle.value = `正在保存${user.value.gameUid}的上期深渊数据`;
@@ -203,7 +197,7 @@ async function refreshAbyss(): Promise<void> {
     return;
   }
   loadingTitle.value = `正在获取${user.value.gameUid}的上期深渊数据`;
-  const res = await TGRequest.User.byCookie.getAbyss(cookie, "1", user.value);
+  const res = await TGRequest.User.byCookie.getAbyss(userStore.cookie.value, "1", user.value);
   if (!("retcode" in res)) {
     loadingTitle.value = `正在保存${user.value.gameUid}的本期深渊数据`;
     await TSUserAbyss.saveAbyss(user.value.gameUid, res);

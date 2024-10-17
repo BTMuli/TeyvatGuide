@@ -1,7 +1,7 @@
 /**
  * @file web/request/getAbyss.ts
  * @description 获取深渊信息
- * @since Beta v0.5.0
+ * @since Beta v0.6.1
  */
 
 import TGHttp from "../../utils/TGHttp.js";
@@ -10,21 +10,26 @@ import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 获取深渊信息
- * @since Beta v0.5.0
- * @param {Record<string, string>} cookie cookie
- * @param {string} schedule_type 1: 本期, 2: 上期
+ * @since Beta v0.6.1
+ * @param {TGApp.App.Account.Cookie} cookie cookie
+ * @param {string} schedule 1: 本期, 2: 上期
  * @param {TGApp.Sqlite.Account.Game} account 游戏账号
  * @returns {Promise<TGApp.Game.Abyss.FullData|TGApp.BBS.Response.Base>}
  */
 export async function getAbyss(
-  cookie: Record<string, string>,
-  schedule_type: string,
+  cookie: TGApp.App.Account.Cookie,
+  schedule: string,
   account: TGApp.Sqlite.Account.Game,
 ): Promise<TGApp.Game.Abyss.FullData | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.getAbyss;
-  const role_id = account.gameUid;
-  const params = { role_id, schedule_type, server: account.region };
-  const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
+  const params = { role_id: account.gameUid, schedule_type: schedule, server: account.region };
+  const ck = {
+    account_id: cookie.account_id,
+    cookie_token: cookie.cookie_token,
+    ltoken: cookie.ltoken,
+    ltuid: cookie.ltuid,
+  };
+  const header = TGUtils.User.getHeader(ck, "GET", params, "common");
   const resp = await TGHttp<TGApp.Game.Abyss.Response | TGApp.BBS.Response.Base>(url, {
     method: "GET",
     headers: header,
