@@ -1,6 +1,6 @@
 [package]
 name = "TeyvatGuide"
-version = "0.6.0"
+version = "0.6.1"
 description = "Game Tool for Genshin Impact player"
 authors = ["BTMuli <bt-muli@outlook.com>"]
 license = "MIT"
@@ -16,9 +16,9 @@ tauri-build = { version = "2.0.0", features = [] }
 chrono = "0.4.38"
 log = "0.4.22"
 serde = { version = "1.0.210", features = ["derive"] }
-serde_json = "1.0.128"
-tauri = { version = "2.0.2", features = [] }
-tauri-utils = "2.0.1"
+serde_json = "1.0.132"
+tauri = { version = "2.0.6", features = [] }
+tauri-utils = "2.0.2"
 url = "2.5.2"
 walkdir = "2.5.0"
 

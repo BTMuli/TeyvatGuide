@@ -2,12 +2,26 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2024-10-09
+Update: 2024-10-22
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2024-10-09 15:59:58`
+> 更新于 `2024-10-22 20:51:24`
+
+## [0.6.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.0) (2024-10-22)
+
+- 🐛 新用户数据库初始化异常 [`#131`](https://github.com/BTMuli/TeyavtGuide/issues/131)
+- 🐛 修复角色数据未即时刷新
+- 🐛 修复`openSystemBrowser`回调执行异常
+- ♻️ 公告卡片组件抽离，支持分享
+- 🎨 成就页面&名片图鉴页面采用虚拟列表优化性能
+- 🎨 调整卡片封面加载逻辑
+- 💄 处理特定情况下的内容溢出
+- 💄 适配深渊新字段，显示跳过楼层
+- 💄深渊分享显示应用信息，圣遗物详情推荐属性高亮
+- 💄调整帖子子窗口副标题样式
+- 💄调整留影叙佳期选项样式
 
 ## [0.6.0](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.0) (2024-10-09)
 
