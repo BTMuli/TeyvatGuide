@@ -153,7 +153,7 @@ class TGClient {
 
   /**
    * @func handleCallback
-   * @since Beta v0.6.0
+   * @since Beta v0.6.1
    * @desc 处理米游社客户端的 callback
    * @param {Event<string>} arg - 事件参数
    * @returns {Promise<void>} - 返回值
@@ -237,7 +237,7 @@ class TGClient {
         break;
       case "openSystemBrowser":
         await this.openSystemBrowser(
-          <TGApp.Plugins.JSBrigde.Arg<TGApp.Plugins.JSBridge.OpenSystemBrowserPayload>>argParse,
+          <TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenSystemBrowserPayload>>argParse,
         );
         break;
       case "pushPage":
@@ -763,14 +763,16 @@ class TGClient {
 
   /**
    * @func openSystemBrowser
-   * @since Beta v0.6.0
+   * @since Beta v0.6.1
    * @desc 打开系统浏览器
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenSystemBrowserPayload>} arg - 方法参数
    * @returns {Promise<void>}
    */
-  async openSystemBrowser(arg: TGApp.Plugins.JSBridge.OpenSystemBrowserPayload): Promise<void> {
+  async openSystemBrowser(
+    arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenSystemBrowserPayload>,
+  ): Promise<void> {
     console.log(`[openSystemBrowser] ${JSON.stringify(arg)}`);
-    const url = arg.open_url;
+    const url = arg.payload.open_url;
     window.open(url);
   }
 

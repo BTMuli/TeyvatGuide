@@ -38,7 +38,6 @@ let confirmInstance: VNode;
 /**
  * @function showConfirm
  * @since Beta v0.3.9
- * @todo 重载重构
  * @description 弹出 confirm
  * @param {TGApp.Component.Confirm.Params} props confirm 的参数
  * @return {Promise<string | boolean | undefined>} 点击确认返回 true，点击取消返回 false，点击外部返回 undefined
