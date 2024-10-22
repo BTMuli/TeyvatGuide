@@ -13,8 +13,7 @@
         clearable
         variant="outlined"
         label="角色"
-        :item-value="(item: TGApp.Archive.Birth.RoleItem) => item.role_birthday"
-        :item-title="(item: TGApp.Archive.Birth.RoleItem) => item.name"
+        :item-value="(item: TGApp.Archive.Birth.RoleItem) => item"
         :item-props="(item: TGApp.Archive.Birth.RoleItem) => getItemProps(item)"
       >
       </v-select>
@@ -46,36 +45,44 @@ const page = ref(1);
 const length = ref(0);
 const visible = ref(0);
 const renderItems = ref<TGApp.Archive.Birth.DrawItem[]>([]);
-const curSelect = ref<string | null>(null);
+const curSelect = ref<TGApp.Archive.Birth.RoleItem | null>(null);
 const selectedItem = ref<TGApp.Archive.Birth.DrawItem[]>([]);
 const current = ref<TGApp.Archive.Birth.DrawItem>();
 const isAether = ref<boolean>(false);
 const showOverlay = ref(false);
 const route = useRoute();
 
-watch(page, (val) => {
-  const start = (val - 1) * 12;
-  const end = start + 12;
-  selectedItem.value = renderItems.value.slice(start, end);
-});
+watch(
+  () => page.value,
+  () => {
+    const start = (page.value - 1) * 12;
+    const end = start + 12;
+    selectedItem.value = renderItems.value.slice(start, end);
+  },
+);
 
-watch(curSelect, (val) => {
-  if (val) {
-    renderItems.value = ArcBirDraw.filter((item) => item.birthday === val);
-  } else {
-    renderItems.value = ArcBirDraw;
-  }
-  length.value = Math.ceil(renderItems.value.length / 12);
-  page.value = 1;
-  selectedItem.value = renderItems.value.slice(0, 12);
-  visible.value = length.value > 5 ? 5 : length.value;
-});
+watch(
+  () => curSelect.value,
+  () => {
+    if (curSelect.value) {
+      renderItems.value = ArcBirDraw.filter(
+        (item) => item.birthday === curSelect.value?.role_birthday,
+      );
+    } else {
+      renderItems.value = ArcBirDraw;
+    }
+    length.value = Math.ceil(renderItems.value.length / 12);
+    page.value = 1;
+    selectedItem.value = renderItems.value.slice(0, 12);
+    visible.value = length.value > 5 ? 5 : length.value;
+  },
+);
 
 onMounted(() => {
   let { date } = route.params;
   if (date) {
-    if (Array.isArray(date)) date = date[0];
-    curSelect.value = date;
+    const dataFind = ArcBirRole.find((i) => i.role_birthday === date);
+    if (dataFind) curSelect.value = dataFind;
   } else {
     renderItems.value = ArcBirDraw;
     selectedItem.value = renderItems.value.slice(0, 12);
@@ -97,7 +104,7 @@ async function toAct(): Promise<void> {
 function getItemProps(item: TGApp.Archive.Birth.RoleItem) {
   return {
     title: `${item.name} ${item.role_birthday}`,
-    subtitle: item.text,
+    subtitle: new DOMParser().parseFromString(item.text, "text/html").body.textContent,
     prependAvatar: item.head_icon,
   };
 }
