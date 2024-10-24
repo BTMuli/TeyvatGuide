@@ -51,7 +51,7 @@ watch(
 );
 
 async function loadNav(): Promise<void> {
-  nav.value = await Mys.Posts.nav(props.modelValue);
+  nav.value = await Mys.ApiHub.homeNew(props.modelValue);
 }
 
 async function tryGetCode(): Promise<void> {

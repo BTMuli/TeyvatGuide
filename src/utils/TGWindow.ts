@@ -1,7 +1,7 @@
 /**
  * @file utils/TGWindow.ts
  * @description 窗口创建相关工具函数
- * @since Beta v0.5.0
+ * @since Beta v0.6.2
  */
 
 import { core, window as TauriWindow } from "@tauri-apps/api";
@@ -69,4 +69,16 @@ export async function createPost(
   TGLogger.Info(`[createPost][${postId}] 打开帖子`).catch((err) => {
     console.error(err);
   });
+}
+
+/**
+ * @description 打开观测枢
+ * @since Beta 0.6.2
+ * @param {string} contentId
+ * @param {string} label
+ * @returns {Promise<void>}
+ */
+export async function createObc(contentId: number, label: string): Promise<void> {
+  const obcUrl = `https://bbs.mihoyo.com/ys/obc/content/${contentId}/detail?bbs_presentation_style=no_header`;
+  await createTGWindow(obcUrl, "Sub_window", `Content_${contentId}_${label}`, 1200, 800, true);
 }

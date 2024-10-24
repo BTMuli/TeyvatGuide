@@ -1,14 +1,12 @@
 /**
  * @file plugins/Mys/utils/getPositionCard.ts
  * @description Mys 插件热点追踪工具
- * @since Beta v0.5.3
+ * @since Beta v0.6.2
  */
-
-import Mys from "../index.js";
 
 /**
  * @description 根据热点追踪信息转为渲染用的数据
- * @since Beta v0.5.3
+ * @since Beta v0.6.2
  * @param {TGApp.Plugins.Mys.Position.Data[]} positionData 列表
  * @returns {TGApp.Plugins.Mys.Position.RenderCard[]} 返回列表
  */
@@ -25,7 +23,7 @@ function getPositionCard(
     }
     let link = position.url;
     if (position.url === "" && position.content_id !== 0) {
-      link = Mys.Api.Obc.replace("{contentId}", position.content_id.toString());
+      link = `https://bbs.mihoyo.com/ys/obc/content/${position.content_id}/detail?bbs_presentation_style=no_header`;
     }
     const card: TGApp.Plugins.Mys.Position.RenderCard = {
       title: position.title,

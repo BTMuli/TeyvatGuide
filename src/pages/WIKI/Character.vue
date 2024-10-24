@@ -32,8 +32,7 @@ import TwcCharacter from "../../components/wiki/twc-character.vue";
 import TwcListItem from "../../components/wiki/twc-list-item.vue";
 import TwoSelectC, { SelectedCValue } from "../../components/wiki/two-select-c.vue";
 import { AppCharacterData } from "../../data/index.js";
-import Mys from "../../plugins/Mys/index.js";
-import { createTGWindow } from "../../utils/TGWindow.js";
+import { createObc } from "../../utils/TGWindow.js";
 
 const id = useRoute().params.id.toString() ?? "0";
 const showSelect = ref(false);
@@ -55,18 +54,15 @@ const curItem = ref<TGApp.App.Character.WikiBriefInfo>({
 onBeforeMount(() => {
   if (id === "0") {
     curItem.value = cardsInfo.value[0];
-  } else {
-    const item = cardsInfo.value.find((item) => item.id.toString() === id);
-    if (item) {
-      curItem.value = item;
-    } else {
-      showSnackbar({
-        text: `角色 ${id} 不存在`,
-        color: "warn",
-      });
-      curItem.value = cardsInfo.value[0];
-    }
+    return;
   }
+  const item = cardsInfo.value.find((item) => item.id.toString() === id);
+  if (item) {
+    curItem.value = item;
+    return;
+  }
+  showSnackbar({ text: `角色 ${id} 不存在`, color: "warn" });
+  curItem.value = cardsInfo.value[0];
 });
 
 watch(resetSelect, (val) => {
@@ -82,16 +78,10 @@ function handleSelect(val: SelectedCValue) {
     return val.area.includes(item.area);
   });
   if (filterC.length === 0) {
-    showSnackbar({
-      text: "未找到符合条件的角色",
-      color: "warn",
-    });
+    showSnackbar({ text: "未找到符合条件的角色", color: "warn" });
     return;
   }
-  showSnackbar({
-    text: `筛选出符合条件的角色 ${filterC.length} 个`,
-    color: "success",
-  });
+  showSnackbar({ text: `筛选出符合条件的角色 ${filterC.length} 个` });
   cardsInfo.value = filterC;
 }
 
@@ -106,10 +96,7 @@ async function switchC(item: TGApp.App.Character.WikiBriefInfo): Promise<void> {
 async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> {
   if (!item) return;
   if (item.contentId === 0) {
-    showSnackbar({
-      text: `角色 ${item.name} 暂无观测枢页面`,
-      color: "warn",
-    });
+    showSnackbar({ text: `角色 ${item.name} 暂无观测枢页面`, color: "warn" });
     return;
   }
   const confirm = await showConfirm({
@@ -117,21 +104,10 @@ async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> 
     text: "是否打开观测枢页面？",
   });
   if (!confirm) {
-    showSnackbar({
-      text: "已取消",
-      color: "cancel",
-    });
+    showSnackbar({ text: "已取消", color: "cancel" });
     return;
   }
-  const url = Mys.Api.Obc.replace("{contentId}", item.contentId.toString());
-  await createTGWindow(
-    url,
-    "Sub_window",
-    `Content_${item.contentId} ${item.name}`,
-    1200,
-    800,
-    true,
-  );
+  await createObc(item.contentId, item.name);
 }
 </script>
 <style scoped>

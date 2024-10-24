@@ -54,8 +54,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 
 import { WikiWeaponData } from "../../data/index.js";
-import Mys from "../../plugins/Mys/index.js";
-import { createTGWindow } from "../../utils/TGWindow.js";
+import { createObc } from "../../utils/TGWindow.js";
 import { parseHtmlText } from "../../utils/toolFunc.js";
 import showSnackbar from "../func/snackbar.js";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
@@ -88,17 +87,11 @@ const selectItems = ref<number[]>([]);
 async function loadData(): Promise<void> {
   const res = WikiWeaponData.find((item) => item.id === props.item.id);
   if (res === undefined) {
-    showSnackbar({
-      text: `未获取到武器 ${props.item.name} 的 Wiki 数据`,
-      color: "error",
-    });
+    showSnackbar({ text: `未获取到武器 ${props.item.name} 的 Wiki 数据`, color: "error" });
     return;
   }
   data.value = res;
-  showSnackbar({
-    text: `成功获取武器 ${props.item.name} 的 Wiki 数据`,
-    color: "success",
-  });
+  showSnackbar({ text: `成功获取武器 ${props.item.name} 的 Wiki 数据` });
   if (data.value?.affix === undefined) return;
   selectItems.value = data.value?.affix.Descriptions.map((item) => item.Level) ?? [];
 }
@@ -112,21 +105,10 @@ onMounted(async () => await loadData());
 
 async function toWiki(): Promise<void> {
   if (props.item.contentId === 0) {
-    showSnackbar({
-      text: `武器 ${props.item.name} 暂无详情`,
-      color: "warn",
-    });
+    showSnackbar({ text: `武器 ${props.item.name} 暂无详情`, color: "warn" });
     return;
   }
-  const url = Mys.Api.Obc.replace("{contentId}", props.item.contentId.toString());
-  await createTGWindow(
-    url,
-    "Sub_window",
-    `Content_${props.item.contentId} ${props.item.name}`,
-    1200,
-    800,
-    true,
-  );
+  await createObc(props.item.contentId, props.item.name);
 }
 </script>
 <style lang="css" scoped>

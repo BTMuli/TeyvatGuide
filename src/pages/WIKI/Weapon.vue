@@ -35,8 +35,7 @@ import TwcListItem from "../../components/wiki/twc-list-item.vue";
 import TwcWeapon from "../../components/wiki/twc-weapon.vue";
 import TwoSelectW, { SelectedWValue } from "../../components/wiki/two-select-w.vue";
 import { AppWeaponData } from "../../data/index.js";
-import Mys from "../../plugins/Mys/index.js";
-import { createTGWindow } from "../../utils/TGWindow.js";
+import { createObc } from "../../utils/TGWindow.js";
 
 const id = useRoute().params.id.toString() ?? "0";
 const showSelect = ref(false);
@@ -55,18 +54,15 @@ const curItem = ref<TGApp.App.Weapon.WikiBriefInfo>({
 onBeforeMount(() => {
   if (id === "0") {
     curItem.value = cardsInfo.value[0];
-  } else {
-    const item = cardsInfo.value.find((item) => item.id.toString() === id);
-    if (item) {
-      curItem.value = item;
-    } else {
-      showSnackbar({
-        text: `武器 ${id} 不存在`,
-        color: "warn",
-      });
-      curItem.value = cardsInfo.value[0];
-    }
+    return;
   }
+  const item = cardsInfo.value.find((item) => item.id.toString() === id);
+  if (item) {
+    curItem.value = item;
+    return;
+  }
+  showSnackbar({ text: `武器 ${id} 不存在`, color: "warn" });
+  curItem.value = cardsInfo.value[0];
 });
 
 function handleSelectW(val: SelectedWValue) {
@@ -79,15 +75,10 @@ function handleSelectW(val: SelectedWValue) {
     return val.weapon.includes(match[1]);
   });
   if (filterW.length === 0) {
-    showSnackbar({
-      text: "未找到符合条件的武器",
-      color: "warn",
-    });
+    showSnackbar({ text: "未找到符合条件的武器", color: "warn" });
     return;
   }
-  showSnackbar({
-    text: `找到 ${filterW.length} 件符合条件的武器`,
-  });
+  showSnackbar({ text: `找到 ${filterW.length} 件符合条件的武器` });
   cardsInfo.value = filterW;
 }
 
@@ -98,10 +89,7 @@ async function switchW(item: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
 async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
   if (!item) return;
   if (item.contentId === 0) {
-    showSnackbar({
-      text: `武器 ${item.name} 暂无观测枢页面`,
-      color: "warn",
-    });
+    showSnackbar({ text: `武器 ${item.name} 暂无观测枢页面`, color: "warn" });
     return;
   }
   const confirm = await showConfirm({
@@ -109,21 +97,10 @@ async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
     text: "是否打开观测枢页面？",
   });
   if (!confirm) {
-    showSnackbar({
-      text: "已取消",
-      color: "cancel",
-    });
+    showSnackbar({ text: "已取消", color: "cancel" });
     return;
   }
-  const url = Mys.Api.Obc.replace("{contentId}", item.contentId.toString());
-  await createTGWindow(
-    url,
-    "Sub_window",
-    `Content_${item.contentId} ${item.name}`,
-    1200,
-    800,
-    true,
-  );
+  await createObc(item.contentId, item.name);
 }
 </script>
 <style scoped>

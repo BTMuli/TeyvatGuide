@@ -37,7 +37,7 @@ onMounted(async () => {
   }
   loadingTitle.value = "正在获取数据...";
   try {
-    jsonData = await Mys.Post.get(postId);
+    jsonData = await Mys.Post.getPostFull(postId);
   } catch (e) {
     loadingTitle.value = "获取数据失败";
     loadingEmpty.value = true;

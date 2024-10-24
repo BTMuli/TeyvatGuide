@@ -125,7 +125,7 @@ async function reloadReply(): Promise<void> {
 
 async function loadReply(): Promise<void> {
   loading.value = true;
-  const resp = await Mys.Post.reply(
+  const resp = await Mys.Post.getPostReplies(
     props.postId,
     props.gid,
     isHot.value,

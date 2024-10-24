@@ -1,6 +1,13 @@
 <template>
   <ToLoading v-model="loading" :title="loadingTitle" />
-  <div class="posts-box">
+  <v-app-bar>
+    <template #prepend>
+      <div class="posts-top">
+        <img src="/source/UI/posts.png" alt="posts" />
+        <span>帖子</span>
+        <!-- todo 提供话题入口 -->
+      </div>
+    </template>
     <div class="posts-switch">
       <v-select
         v-model="curGid"
@@ -45,11 +52,13 @@
         <span>刷新</span>
       </v-btn>
     </div>
-    <TGameNav :model-value="curGid" />
-    <div class="posts-grid">
-      <div v-for="post in posts" :key="post.post.post_id">
-        <TPostCard :model-value="post" v-if="post" />
-      </div>
+    <template #extension>
+      <TGameNav :model-value="curGid" />
+    </template>
+  </v-app-bar>
+  <div class="posts-grid">
+    <div v-for="post in posts" :key="post.post.post_id">
+      <TPostCard :model-value="post" v-if="post" />
     </div>
   </div>
   <ToPostSearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
@@ -212,12 +221,8 @@ const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 
 onBeforeMount(async () => {
-  if (gid && typeof gid === "string") {
-    curGid.value = Number(gid);
-  }
-  if (forum && typeof forum === "string") {
-    curForum.value = Number(forum);
-  }
+  if (gid && typeof gid === "string") curGid.value = Number(gid);
+  if (forum && typeof forum === "string") curForum.value = Number(forum);
 });
 
 onMounted(async () => {
@@ -247,7 +252,6 @@ watch(
     });
   },
 );
-
 watch(
   () => curForum.value,
   async () => {
@@ -262,8 +266,6 @@ watch(
     }
   },
 );
-
-// 监听排序变化
 watch(
   () => curSortType.value,
   async (newVal) => {
@@ -285,7 +287,7 @@ async function freshPostData(): Promise<void> {
   );
   loading.value = true;
   loadingTitle.value = `正在加载 ${gameLabel}-${forumLabel}-${sortLabel} 数据`;
-  const postsGet = await Mys.Posts.get(curForum.value, curSortType.value, 12);
+  const postsGet = await Mys.Post.getForumPostList(curForum.value, curSortType.value, 12);
   posts.value = postsGet.list;
   await nextTick();
   loading.value = false;
@@ -309,22 +311,34 @@ function searchPost(): void {
 }
 </script>
 <style lang="css" scoped>
-.posts-box {
+.posts-top {
   display: flex;
-  flex-direction: column;
-  row-gap: 10px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  img {
+    width: 32px;
+    height: 32px;
+  }
+
+  span {
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 20px;
+  }
 }
 
 .posts-switch {
   display: flex;
   align-items: flex-end;
-  justify-content: flex-start;
-  padding: 5px;
-  column-gap: 10px;
+  justify-content: center;
+  margin: 0 10px;
+  gap: 10px;
 }
 
 .post-switch-item {
-  width: fit-content;
+  width: 250px;
   height: 50px;
 }
 

@@ -99,7 +99,7 @@ watch(
 );
 
 onMounted(async () => {
-  const collectionPosts = await Mys.PostCollect(props.collection.collection_id);
+  const collectionPosts = await Mys.Post.getPostFullInCollection(props.collection.collection_id);
   const tempArr: TpoCollectionItem[] = [];
   for (const postItem of collectionPosts) {
     const post: TpoCollectionItem = {

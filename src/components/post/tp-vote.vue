@@ -55,8 +55,8 @@ const votes = ref<TpVoteInfo>();
 
 onMounted(async () => {
   const vote = props.data.insert.vote;
-  const voteInfo = await Mys.Vote.get(vote.id, vote.uid);
-  const voteResult = await Mys.Vote.result(vote.id, vote.uid);
+  const voteInfo = await Mys.ApiHub.getVotes(vote.id, vote.uid);
+  const voteResult = await Mys.ApiHub.getVoteResult(vote.id, vote.uid);
   votes.value = {
     title: voteInfo.title,
     count: voteResult.user_cnt,

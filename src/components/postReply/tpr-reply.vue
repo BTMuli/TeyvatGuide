@@ -207,17 +207,14 @@ async function showReply(): Promise<void> {
 
 async function loadSub(): Promise<void> {
   loading.value = true;
-  const resp = await Mys.Post.replySub(
+  const resp = await Mys.Post.getSubReplies(
     props.modelValue.reply.floor_id,
     props.modelValue.reply.game_id,
     props.modelValue.reply.post_id,
     lastId.value,
   );
   if ("retcode" in resp) {
-    showSnackbar({
-      text: `[${resp.retcode}] ${resp.message}`,
-      color: "error",
-    });
+    showSnackbar({ text: `[${resp.retcode}] ${resp.message}`, color: "error" });
     loading.value = false;
     return;
   }
@@ -225,12 +222,7 @@ async function loadSub(): Promise<void> {
   lastId.value = resp.last_id;
   subReplies.value = subReplies.value.concat(resp.list);
   loading.value = false;
-  if (isLast.value) {
-    showSnackbar({
-      text: "没有更多了",
-      color: "info",
-    });
-  }
+  if (isLast.value) showSnackbar({ text: "没有更多了", color: "info" });
 }
 
 async function exportData(): Promise<void> {

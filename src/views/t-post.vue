@@ -147,7 +147,7 @@ onMounted(async () => {
   // 获取数据
   loadingTitle.value = "正在获取数据...";
   try {
-    postData.value = await Mys.Post.get(postId);
+    postData.value = await Mys.Post.getPostFull(postId);
     loadingTitle.value = "正在渲染数据...";
     renderPost.value = getRenderPost(postData.value);
     shareTitle.value = `Post_${postId}`;

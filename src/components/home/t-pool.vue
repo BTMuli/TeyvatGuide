@@ -86,7 +86,7 @@ interface TPoolEmits {
 
 const emits = defineEmits<TPoolEmits>();
 
-function poolLastInterval(postId: number): TGApp.Plugins.Mys.Gacha.RenderCard {
+function poolLastInterval(postId: number): TGApp.Plugins.Mys.Gacha.RenderCard | undefined {
   const pool = poolCards.value.find((pool) => pool.postId === postId);
   if (!pool) return;
   if (poolTimeGet.value[postId] === "未开始") {
@@ -162,7 +162,7 @@ function checkCover(data: TGApp.Plugins.Mys.Gacha.Data[]): boolean {
     return false;
   }
   const cover = homeStore.poolCover;
-  if (cover === undefined) return false;
+  if (cover.value === undefined) return false;
   let checkList = data.length;
   Object.entries(cover).forEach(([key, value]: [string, unknown]) => {
     const pool = data.find((item: TGApp.Plugins.Mys.Gacha.Data) => item.id.toString() === key);

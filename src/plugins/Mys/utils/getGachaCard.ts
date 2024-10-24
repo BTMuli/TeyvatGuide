@@ -1,15 +1,15 @@
 /**
  * @file plugins/Mys/utils/getGachaCard.ts
  * @description Mys 插件抽卡工具
- * @since Beta v0.5.0
+ * @since Beta v0.6.2
  */
 
 import { AppCharacterData } from "../../../data/index.js";
-import getPostData from "../request/getPostData.js";
+import { getPostFull } from "../request/postReq.js";
 
 /**
  * @description 根据单个卡池信息转为渲染用的卡池信息
- * @since Beta v0.5.0
+ * @since Beta v0.6.2
  * @param {TGApp.Plugins.Mys.Gacha.Data} data 卡池信息
  * @param {string} poolCover 卡池封面
  * @returns {Promise<TGApp.Plugins.Mys.Gacha.RenderCard>}
@@ -28,7 +28,7 @@ async function getGachaItemCard(
   } else {
     try {
       console.log("调用 getPostData");
-      const post = await getPostData(postId);
+      const post = await getPostFull(postId);
       cover = post.cover?.url ?? post.post.images[0];
     } catch (error) {
       console.error(error);

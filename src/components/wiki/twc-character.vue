@@ -63,9 +63,9 @@
               v-for="(item, index) in data?.talks"
               :key="index"
             >
-              <template #title
-                ><span class="twc-text-item-title">{{ item.Title }}</span></template
-              >
+              <template #title>
+                <span class="twc-text-item-title">{{ item.Title }}</span>
+              </template>
               <template #text>
                 <span class="twc-text-item-content" v-html="parseHtmlText(item.Context)" />
               </template>
@@ -82,12 +82,12 @@
               v-for="(item, index) in data.stories"
               :key="index"
             >
-              <template #title
-                ><span class="twc-text-item-title">{{ item.Title }}</span></template
-              >
-              <template #text
-                ><span class="twc-text-item-content">{{ item.Context }}</span></template
-              >
+              <template #title>
+                <span class="twc-text-item-title">{{ item.Title }}</span>
+              </template>
+              <template #text>
+                <span class="twc-text-item-content">{{ item.Context }}</span>
+              </template>
             </v-expansion-panel>
           </v-expansion-panels>
         </template>
@@ -101,8 +101,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import { WikiCharacterData, AppNameCardsData, AppCharacterData } from "../../data/index.js";
-import Mys from "../../plugins/Mys/index.js";
-import { createTGWindow } from "../../utils/TGWindow.js";
+import { createObc } from "../../utils/TGWindow.js";
 import { parseHtmlText } from "../../utils/toolFunc.js";
 import showSnackbar from "../func/snackbar.js";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
@@ -143,10 +142,7 @@ const nameCard = ref<TGApp.App.NameCard.Item>();
 async function loadData(): Promise<void> {
   const res = WikiCharacterData.find((item) => item.id === props.item.id);
   if (res === undefined) {
-    showSnackbar({
-      text: `未获取到角色 ${props.item.name} 的 Wiki 数据`,
-      color: "error",
-    });
+    showSnackbar({ text: `未获取到角色 ${props.item.name} 的 Wiki 数据`, color: "error" });
     return;
   }
   data.value = res;
@@ -157,38 +153,22 @@ async function loadData(): Promise<void> {
   } else {
     hasNc.value = false;
   }
-  showSnackbar({
-    text: `成功获取角色 ${props.item.name} 的 Wiki 数据`,
-    color: "success",
-  });
+  showSnackbar({ text: `成功获取角色 ${props.item.name} 的 Wiki 数据` });
 }
 
 watch(
   () => props.item,
-  async () => {
-    await loadData();
-  },
+  async () => await loadData(),
 );
 
 onMounted(async () => await loadData());
 
 async function toWiki(): Promise<void> {
   if (props.item.contentId === 0) {
-    showSnackbar({
-      text: `角色 ${props.item.name} 暂无详情`,
-      color: "warn",
-    });
+    showSnackbar({ text: `角色 ${props.item.name} 暂无详情`, color: "warn" });
     return;
   }
-  const url = Mys.Api.Obc.replace("{contentId}", props.item.contentId.toString());
-  await createTGWindow(
-    url,
-    "Sub_window",
-    `Content_${props.item.contentId} ${props.item.name}`,
-    1200,
-    800,
-    true,
-  );
+  await createObc(props.item.contentId, props.item.name);
 }
 
 async function toBirth(date: string): Promise<void> {

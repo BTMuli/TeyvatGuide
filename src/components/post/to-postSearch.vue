@@ -134,7 +134,7 @@ async function searchPosts() {
     load.value = false;
     return;
   }
-  const res = await Mys.Posts.search(game.value, search.value, lastId.value);
+  const res = await Mys.Post.searchPosts(game.value, search.value, lastId.value);
   if (lastId.value === "") {
     results.value = res.posts;
   } else {
