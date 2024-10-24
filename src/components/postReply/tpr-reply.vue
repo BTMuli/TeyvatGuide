@@ -4,9 +4,7 @@
       class="tpr-bubble"
       v-if="props.modelValue.user.reply_bubble !== null"
       :title="props.modelValue.user.reply_bubble.name"
-      :style="{
-        backgroundColor: props.modelValue.user.reply_bubble.bg_color,
-      }"
+      :style="{ backgroundColor: props.modelValue.user.reply_bubble.bg_color }"
     >
       <img :src="props.modelValue.user.reply_bubble.url" alt="bubble" />
     </div>
@@ -52,9 +50,7 @@
             activator="parent"
             location="end"
             :close-on-content-click="false"
-            :no-click-animation="true"
             v-model="showSub"
-            :persistent="true"
           >
             <v-list class="tpr-reply-sub" width="300px" max-height="400px">
               <TprReply
