@@ -15,7 +15,7 @@ tauri-build = { version = "2.0.0", features = [] }
 [dependencies]
 chrono = "0.4.38"
 log = "0.4.22"
-serde = { version = "1.0.210", features = ["derive"] }
+serde = { version = "1.0.213", features = ["derive"] }
 serde_json = "1.0.132"
 tauri = { version = "2.0.6", features = [] }
 tauri-utils = "2.0.2"
@@ -24,53 +24,53 @@ walkdir = "2.5.0"
 
 # deep link 插件
 [dependencies.tauri-plugin-deep-link]
-git = "https://github.com/tauri-apps/plugins-workspace"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # dialog 插件
 [dependencies.tauri-plugin-dialog]
-git = "https://github.com/tauri-apps/plugins-workspace"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # fs 插件
 [dependencies.tauri-plugin-fs]
-git = "https://github.com/tauri-apps/plugins-workspace"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # http 插件
 [dependencies.tauri-plugin-http]
-git = "https://github.com/tauri-apps/plugins-workspace"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 features = ["unsafe-headers"]
 
 # log 插件
 [dependencies.tauri-plugin-log]
-git = "https://github.com/tauri-apps/plugins-workspace"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # os 插件
 [dependencies.tauri-plugin-os]
-git = "https://github.com/tauri-apps/plugins-workspace"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # process 插件
 [dependencies.tauri-plugin-process]
-git = "https://github.com/tauri-apps/plugins-workspace"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # shell 插件
 [dependencies.tauri-plugin-shell]
-git = "https://github.com/tauri-apps/plugins-workspace"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # single-instance 插件
 [dependencies.tauri-plugin-single-instance]
-git = "https://github.com/tauri-apps/plugins-workspace"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # sqlite 插件
 [dependencies.tauri-plugin-sql]
-git = "https://github.com/tauri-apps/plugins-workspace"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 features = ["sqlite"]
 
