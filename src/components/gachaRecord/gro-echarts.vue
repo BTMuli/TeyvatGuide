@@ -4,22 +4,22 @@
   </div>
 </template>
 <script lang="ts" setup>
-import type { EChartsOption } from "echarts";
-import { PieChart } from "echarts/charts";
+// about import err,see:https://github.com/apache/echarts/issues/19992
+import { PieChart } from "echarts/charts.js";
 import {
   LegendComponent,
   TitleComponent,
   TooltipComponent,
   ToolboxComponent,
-} from "echarts/components";
-import { use } from "echarts/core";
-import { LabelLayout } from "echarts/features";
-import { CanvasRenderer } from "echarts/renderers";
+} from "echarts/components.js";
+import { use } from "echarts/core.js";
+import { LabelLayout } from "echarts/features.js";
+import { CanvasRenderer } from "echarts/renderers.js";
+import type { EChartsOption } from "echarts/types/dist/shared.js";
 import { provide } from "vue";
 import VChart, { THEME_KEY } from "vue-echarts";
 
 // echarts
-
 use([
   TitleComponent,
   TooltipComponent,
@@ -67,9 +67,7 @@ const defaultOptions = <EChartsOption>{
       bottom: "10%",
     },
   ],
-  tooltip: {
-    trigger: "item",
-  },
+  tooltip: { trigger: "item" },
   legend: {
     type: "scroll",
     orient: "vertical",
@@ -136,36 +134,50 @@ const defaultOptions = <EChartsOption>{
 };
 
 // 获取卡池分布的数据
+// todo 重构以完善类型
 function getPoolData(): EChartsOption {
-  const data = JSON.parse(JSON.stringify(defaultOptions));
-  data.title[0].subtext = `共 ${props.modelValue.length} 条数据`;
-  data.series[0].data = [
-    { value: props.modelValue.filter((item) => item.uigfType === "100").length, name: "新手祈愿" },
-    { value: props.modelValue.filter((item) => item.uigfType === "200").length, name: "常驻祈愿" },
-    {
-      value: props.modelValue.filter((item) => item.uigfType === "301").length,
-      name: "角色活动祈愿",
-    },
-    {
-      value: props.modelValue.filter((item) => item.uigfType === "302").length,
-      name: "武器活动祈愿",
-    },
-    {
-      value: props.modelValue.filter((item) => item.uigfType === "500").length,
-      name: "集录祈愿",
-    },
-  ];
-  data.series[1].data = [
-    { value: props.modelValue.filter((item) => item.rank === "3").length, name: "3星" },
-    { value: props.modelValue.filter((item) => item.rank === "4").length, name: "4星" },
-    { value: props.modelValue.filter((item) => item.rank === "5").length, name: "5星" },
-  ];
+  const data: EChartsOption = JSON.parse(JSON.stringify(defaultOptions));
+  if (data.title !== undefined && Array.isArray(data.title)) {
+    data.title[0].subtext = `共 ${props.modelValue.length} 条数据`;
+  }
+  if (data.series !== undefined && Array.isArray(data.series)) {
+    data.series[0].data = [
+      {
+        value: props.modelValue.filter((item) => item.uigfType === "100").length,
+        name: "新手祈愿",
+      },
+      {
+        value: props.modelValue.filter((item) => item.uigfType === "200").length,
+        name: "常驻祈愿",
+      },
+      {
+        value: props.modelValue.filter((item) => item.uigfType === "301").length,
+        name: "角色活动祈愿",
+      },
+      {
+        value: props.modelValue.filter((item) => item.uigfType === "302").length,
+        name: "武器活动祈愿",
+      },
+      {
+        value: props.modelValue.filter((item) => item.uigfType === "500").length,
+        name: "集录祈愿",
+      },
+    ];
+    data.series[1].data = [
+      { value: props.modelValue.filter((item) => item.rank === "3").length, name: "3星" },
+      { value: props.modelValue.filter((item) => item.rank === "4").length, name: "4星" },
+      { value: props.modelValue.filter((item) => item.rank === "5").length, name: "5星" },
+    ];
+  }
+
   const tempSet = new Set<string>();
   const tempRecord = new Map<string, number>();
   // 角色池分析
   let tempList = props.modelValue.filter((item) => item.uigfType === "301");
   let star3 = tempList.filter((item) => item.rank === "3").length;
-  data.title[3].subtext = `共 ${tempList.length} 条数据, 其中三星武器 ${star3} 抽`;
+  if (data.title !== undefined && Array.isArray(data.title)) {
+    data.title[3].subtext = `共 ${tempList.length} 条数据, 其中三星武器 ${star3} 抽`;
+  }
   tempList
     .filter((item) => item.rank !== "3")
     .forEach((item) => {
@@ -176,18 +188,22 @@ function getPoolData(): EChartsOption {
         tempRecord.set(item.name, 1);
       }
     });
-  data.series[2].data = Array.from(tempRecord).map((item) => {
-    return {
-      value: item[1],
-      name: item[0],
-    };
-  });
+  if (data.series !== undefined && Array.isArray(data.series)) {
+    data.series[2].data = Array.from(tempRecord).map((item) => {
+      return {
+        value: item[1],
+        name: item[0],
+      };
+    });
+  }
   tempSet.clear();
   tempRecord.clear();
   // 武器池分析
   tempList = props.modelValue.filter((item) => item.uigfType === "302");
   star3 = tempList.filter((item) => item.rank === "3").length;
-  data.title[4].subtext = `共 ${tempList.length} 条数据，其中三星武器 ${star3} 抽`;
+  if (data.title !== undefined && Array.isArray(data.title)) {
+    data.title[4].subtext = `共 ${tempList.length} 条数据，其中三星武器 ${star3} 抽`;
+  }
   tempList
     .filter((item) => item.rank !== "3")
     .forEach((item) => {
@@ -198,12 +214,14 @@ function getPoolData(): EChartsOption {
         tempRecord.set(item.name, 1);
       }
     });
-  data.series[3].data = Array.from(tempRecord).map((item) => {
-    return {
-      value: item[1],
-      name: item[0],
-    };
-  });
+  if (data.series !== undefined && Array.isArray(data.series)) {
+    data.series[3].data = Array.from(tempRecord).map((item) => {
+      return {
+        value: item[1],
+        name: item[0],
+      };
+    });
+  }
   return data;
 }
 </script>
