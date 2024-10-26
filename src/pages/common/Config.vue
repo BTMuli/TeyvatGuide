@@ -103,7 +103,7 @@
   <div class="config-right">
     <TcAppBadge />
     <TcUserBadge @loadOuter="loadHandle" />
-    <TcGameBadge />
+    <TcGameBadge v-if="platform() === 'windows'" />
   </div>
 </template>
 
@@ -111,6 +111,7 @@
 import { core } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { remove } from "@tauri-apps/plugin-fs";
+import { platform } from "@tauri-apps/plugin-os";
 import { exit } from "@tauri-apps/plugin-process";
 import { onMounted, ref } from "vue";
 

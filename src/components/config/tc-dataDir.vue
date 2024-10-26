@@ -29,7 +29,11 @@
         </div>
       </template>
     </v-list-item>
-    <v-list-item title="游戏安装目录" :subtitle="appStore.gameDir.value">
+    <v-list-item
+      title="游戏安装目录"
+      :subtitle="appStore.gameDir.value"
+      v-if="platform() === 'windows'"
+    >
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-gamepad</v-icon>

@@ -120,6 +120,7 @@ export async function generateShareImg(
     y: -15,
     dpi: 350,
   };
+  // @ts-expect-error This expression is not callable.
   const canvasData = await html2canvas(element, opts);
   if (scrollable) element.style.maxHeight = maxHeight;
   const buffer = new Uint8Array(
