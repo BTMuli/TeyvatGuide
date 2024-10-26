@@ -1,7 +1,7 @@
 /**
  * @file utils/TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.6.0
+ * @since Beta v0.6.2
  */
 
 import { path } from "@tauri-apps/api";
@@ -18,7 +18,7 @@ import { bytesToSize } from "./toolFunc.js";
 
 /**
  * @description 保存图片-canvas
- * @since Beta v0.5.0
+ * @since Beta v0.6.2
  * @param {Uint8Array} buffer - 图片数据
  * @param {string} filename - 文件名
  * @param {string} format - 文件格式
@@ -37,10 +37,12 @@ export async function saveCanvasImg(
   });
   if (res === null) {
     await TGLogger.Info(`[saveCanvasImg][${filename}] 未选择保存路径`);
+    showSnackbar({ text: "未选择保存路径", color: "cancel" });
     return;
   }
   await writeFile(res, buffer);
   await TGLogger.Info(`[saveCanvasImg][${filename}] 已将图像保存到本地`);
+  showSnackbar({ text: `已将 ${filename} 保存到本地` });
 }
 
 /**
@@ -156,13 +158,17 @@ export async function generateShareImg(
 
 /**
  * @description 复制到剪贴板
- * @since Beta v0.3.7
+ * @since Beta v0.6.2
  * @param {Uint8Array} buffer - 图片数据
  * @returns {Promise<void>} 无返回值
  */
 export async function copyToClipboard(buffer: Uint8Array): Promise<void> {
   const blob = new Blob([buffer], { type: "image/png" });
   const url = URL.createObjectURL(blob);
+  // todo mac 会报错: https://bugs.webkit.org/show_bug.cgi?id=222262
+  // NotAllowedError:
+  // The request is not allowed by the user agent or the platform in the current context,
+  // possibly because the user denied permission.
   await navigator.clipboard.write([
     new ClipboardItem({
       [blob.type]: blob,
