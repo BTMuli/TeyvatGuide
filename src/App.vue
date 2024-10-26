@@ -152,10 +152,12 @@ async function checkUserLoad(): Promise<void> {
   await mkdir(appStore.userDir, { recursive: true });
   // 检测用户数据
   const uidDB = await TSUserAccount.account.getAllUid();
-  if (uidDB.length === 0) {
+  if (uidDB.length === 0 && appStore.isLogin) {
     showSnackbar({ text: "未检测到可用UID，请重新登录!", color: "warn" });
+    appStore.isLogin = false;
     return;
   }
+  if (!appStore.isLogin) appStore.isLogin = true;
   // 然后获取最近的UID
   if (userStore.uid.value === undefined || !uidDB.includes(userStore.uid.value)) {
     userStore.uid.value = uidDB[0];

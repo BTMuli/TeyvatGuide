@@ -108,6 +108,7 @@ import { computed, ref } from "vue";
 
 import Mys from "../../plugins/Mys/index.js";
 import TSUserAccount from "../../plugins/Sqlite/modules/userAccount.js";
+import { useAppStore } from "../../store/modules/app.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
 import TGRequest from "../../web/request/TGRequest.js";
@@ -121,6 +122,7 @@ interface TcUserBadgeEmits {
 
 const emits = defineEmits<TcUserBadgeEmits>();
 const userStore = storeToRefs(useUserStore());
+const appStore = storeToRefs(useAppStore());
 
 const loading = ref<boolean>(false);
 const accounts = ref<TGApp.App.Account.User[]>([]);
@@ -219,6 +221,7 @@ async function tryCaptchaLogin(): Promise<void> {
   userStore.uid.value = briefInfo.uid;
   userStore.briefInfo.value = briefInfo;
   userStore.cookie.value = ck;
+  appStore.isLogin.value = true;
   emits("loadOuter", { show: true, title: "正在获取游戏账号" });
   const gameRes = await TGRequest.User.bySToken.getAccounts(ck.stoken, ck.stuid);
   if (!Array.isArray(gameRes)) {
