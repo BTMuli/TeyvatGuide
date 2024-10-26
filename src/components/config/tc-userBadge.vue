@@ -52,7 +52,13 @@
         :loading="loading"
         title="刷新用户信息"
       />
-      <v-btn variant="outlined" @click="confirmCopyCookie" icon="mdi-cookie" title="复制Cookie" />
+      <v-btn
+        variant="outlined"
+        @click="confirmCopyCookie"
+        :disabled="!userStore.cookie.value"
+        icon="mdi-cookie"
+        title="复制Cookie"
+      />
       <v-menu location="start">
         <template v-slot:activator="{ props }">
           <v-btn

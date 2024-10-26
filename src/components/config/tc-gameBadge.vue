@@ -4,11 +4,14 @@
       <div class="tgb-title">✨原神，启动！</div>
       <v-btn size="small" icon="mdi-rocket" variant="outlined" @click="tryPlayGame()" />
     </div>
-    <v-list-item v-if="account">
+    <v-list-item v-if="account.uid">
       <v-list-item-title class="tgb-name">
         {{ account.nickname }}({{ account.regionName }})
       </v-list-item-title>
       <v-list-item-subtitle>{{ account.gameUid }} Lv.{{ account.level }}</v-list-item-subtitle>
+    </v-list-item>
+    <v-list-item v-else>
+      <v-list-item-title>未登录，请先登录!</v-list-item-title>
     </v-list-item>
   </div>
 </template>
