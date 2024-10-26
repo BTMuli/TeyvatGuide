@@ -56,6 +56,7 @@ onUnmounted(() => {
   position: fixed;
   right: 10px;
   bottom: 10px;
+  width: 40px;
   height: 40px;
   border-radius: 50%;
   transition: all 0.3s ease-in-out;
