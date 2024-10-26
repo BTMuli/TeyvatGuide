@@ -354,7 +354,7 @@ async function deleteAbyss(): Promise<void> {
 .ua-box {
   display: flex;
   height: calc(100vh - 100px);
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   border: 1px solid var(--common-shadow-4);
   border-radius: 5px;
