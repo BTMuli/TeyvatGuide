@@ -50,8 +50,8 @@ fn main() {
     .plugin(tauri_plugin_sql::Builder::default().build())
     .plugin(build_log_plugin())
     .setup(|_app| {
-      #[cfg(debug_assertions)]
       let _window = _app.get_webview_window("TeyvatGuide");
+      #[cfg(debug_assertions)]
       if _window.is_some() {
         _window.unwrap().open_devtools();
       }
