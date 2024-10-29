@@ -1,41 +1,70 @@
 <template>
   <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
     <div class="hta-oo-box">
+      <v-btn
+        :loading="loadShare"
+        class="hta-oob-share"
+        @click="share()"
+        data-html2canvas-ignore
+        variant="flat"
+        icon="mdi-share-variant"
+        size="24px"
+      />
       <div class="hta-oob-title">数据收集统计</div>
-      <div class="hta-oob-item">
-        <span>当期深渊ID</span>
-        <span>{{ props.data.ScheduleId }}</span>
-        <span>上传记录总数</span>
-        <span>{{ props.data.RecordTotal }}</span>
-      </div>
+      <HtaOverviewLine
+        label="当期深渊ID"
+        :cur="dataCur.ScheduleId"
+        :last="dataLast.ScheduleId"
+        :show-diff="false"
+      />
+      <HtaOverviewLine
+        label="上传记录总数"
+        :cur="dataCur.RecordTotal"
+        :last="dataLast.RecordTotal"
+      />
       <div class="hta-oob-title">深渊数据统计</div>
-      <div class="hta-oob-item">
-        <span>总计深渊记录</span>
-        <span>{{ props.data.SpiralAbyssTotal }}</span>
-        <span>通关深渊记录</span>
-        <span>{{ props.data.SpiralAbyssPassed }}</span>
-        <span>满星深渊记录</span>
-        <span>{{ props.data.SpiralAbyssFullStar }}</span>
-        <span>平均获取渊星</span>
-        <span>{{
-          (props.data.SpiralAbyssStarTotal / props.data.SpiralAbyssTotal).toFixed(2)
-        }}</span>
-        <span>平均战斗次数</span>
-        <span>{{
-          (props.data.SpiralAbyssBattleTotal / props.data.SpiralAbyssTotal).toFixed(2)
-        }}</span>
-      </div>
+      <HtaOverviewLine
+        label="总计深渊记录"
+        :cur="dataCur.SpiralAbyssTotal"
+        :last="dataLast.SpiralAbyssTotal"
+      />
+      <HtaOverviewLine
+        label="通关深渊记录"
+        :cur="dataCur.SpiralAbyssPassed"
+        :last="dataLast.SpiralAbyssPassed"
+      />
+      <HtaOverviewLine
+        label="满星深渊记录"
+        :cur="dataCur.SpiralAbyssFullStar"
+        :last="dataLast.SpiralAbyssFullStar"
+      />
+      <HtaOverviewLine
+        label="平均获取渊星"
+        :cur="dataCur.SpiralAbyssStarTotal / dataCur.SpiralAbyssTotal"
+        :last="dataLast.SpiralAbyssStarTotal / dataLast.SpiralAbyssTotal"
+      />
+      <HtaOverviewLine
+        label="平均战斗次数"
+        :cur="dataCur.SpiralAbyssBattleTotal / dataCur.SpiralAbyssTotal"
+        :last="dataLast.SpiralAbyssBattleTotal / dataLast.SpiralAbyssTotal"
+      />
+      <div class="hta-oob-extra">更新于 {{ timestampToDate(props.data.cur.Timestamp) }}</div>
     </div>
   </TOverlay>
 </template>
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
+import { AbyssDataItem } from "../../pages/WIKI/Abyss.vue";
+import { generateShareImg } from "../../utils/TGShare.js";
+import { timestampToDate } from "../../utils/toolFunc.js";
 import TOverlay from "../main/t-overlay.vue";
+
+import HtaOverviewLine from "./hta-overview-line.vue";
 
 interface HtaOverlayOverviewProps {
   modelValue: boolean;
-  data: TGApp.Plugins.Hutao.Abyss.OverviewData;
+  data: AbyssDataItem<TGApp.Plugins.Hutao.Abyss.OverviewData>;
 }
 
 interface HtaOverlayOverviewEmits {
@@ -46,6 +75,9 @@ interface HtaOverlayOverviewEmits {
 
 const props = defineProps<HtaOverlayOverviewProps>();
 const emits = defineEmits<HtaOverlayOverviewEmits>();
+const dataCur = computed(() => props.data.cur);
+const dataLast = computed(() => props.data.last);
+const loadShare = ref<boolean>(false);
 
 const visible = computed({
   get: () => props.modelValue,
@@ -58,42 +90,52 @@ function onCancel(): void {
   visible.value = false;
   emits("cancel");
 }
+
+async function share(): Promise<void> {
+  loadShare.value = true;
+  const shareEl = <HTMLElement>document.querySelector(".hta-oo-box");
+  const fileName = `深渊数据统计_${timestampToDate(dataCur.value.Timestamp)}.png`;
+  await generateShareImg(fileName, shareEl, 2);
+  loadShare.value = false;
+}
 </script>
 <style lang="css" scoped>
 .hta-oo-box {
+  position: relative;
+  display: flex;
   width: 300px;
-  padding: 10px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   background: var(--box-bg-1);
+  row-gap: 8px;
 }
 
-.hta-oo-box:nth-child(3) {
-  margin-top: 10px;
+.hta-oob-share {
+  position: absolute;
+  top: 8px;
+  right: 8px;
 }
 
 .hta-oob-title {
+  width: 100%;
   border-bottom: 1px solid var(--common-shadow-4);
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
 }
 
-.hta-oob-item {
-  display: grid;
+.hta-oob-extra {
+  position: absolute;
+  z-index: -1;
+  right: 4px;
+  bottom: 4px;
+  display: flex;
   align-items: center;
-  justify-content: space-between;
-  grid-gap: 5px;
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.hta-oob-item :nth-child(2n-1) {
-  color: var(--box-text-2);
-  text-align: left;
-}
-
-.hta-oob-item :nth-child(2n) {
-  color: var(--box-text-3);
-  text-align: right;
+  justify-content: flex-end;
+  font-size: 12px;
 }
 </style>
