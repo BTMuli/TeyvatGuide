@@ -26,20 +26,20 @@
   <div class="hta-box">
     <v-window v-model="tab" class="hta-tab-item">
       <v-window-item value="use">
-        <HtaTabUse v-if="abyssData.use !== null" :data="avatarUse" />
+        <HtaTabUse v-if="abyssData.use !== null" :data="abyssData.use" />
       </v-window-item>
       <v-window-item value="up">
-        <HtaTabUp v-if="abyssData.up !== null" :data="avatarUp" />
+        <HtaTabUp v-if="abyssData.up !== null" :data="abyssData.up" />
       </v-window-item>
       <v-window-item value="team">
-        <HtaTabTeam v-if="abyssData.team !== null" :data="teamCombination" />
+        <HtaTabTeam v-if="abyssData.team !== null" :data="abyssData.team" />
       </v-window-item>
       <v-window-item value="hold">
-        <HtaTabHold v-if="abyssData.hold !== null" :data="avatarHold" />
+        <HtaTabHold v-if="abyssData.hold !== null" :data="abyssData.hold" />
       </v-window-item>
     </v-window>
   </div>
-  <HtaOverlayOverview v-model="showDialog" :data="overview" />
+  <HtaOverlayOverview v-if="overview" v-model="showDialog" :data="overview" />
 </template>
 <script lang="ts" setup>
 import { onMounted, ref, watch } from "vue";
@@ -112,8 +112,7 @@ onMounted(async () => {
 });
 
 function show(): void {
-  if (showDialog.value) showDialog.value = false;
-  showDialog.value = true;
+  showDialog.value = !showDialog.value;
 }
 
 async function refreshData(type: AbyssTab): Promise<void> {
@@ -200,15 +199,13 @@ async function getData(type: AbyssTab): Promise<AbyssDataItemType<AbyssTab>> {
 .hta-box {
   overflow: auto;
   width: 100%;
-  max-height: calc(100vh - 30px);
   box-sizing: border-box;
-  padding: 10px;
   border-radius: 5px;
   box-shadow: 0 0 10px var(--common-shadow-4);
 }
 
 .hta-tab-item {
   width: 100%;
-  height: calc(100% - 60px);
+  height: 100%;
 }
 </style>

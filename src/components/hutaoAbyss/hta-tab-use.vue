@@ -13,7 +13,11 @@
         :value="selectItem.Floor.toString()"
       >
         <div class="hta-tus-grid">
-          <TibWikiAbyss v-for="item in selectItem.Ranks" :key="item.Item" :model-value="item" />
+          <TibWikiAbyss
+            v-for="(item, index) in selectItem.Ranks"
+            :key="index"
+            :model-value="item"
+          />
         </div>
       </v-window-item>
     </v-window>
@@ -22,35 +26,51 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 
+import { AbyssDataItem } from "../../pages/WIKI/Abyss.vue";
 import TibWikiAbyss from "../itembox/tib-wiki-abyss.vue";
 
 interface HtaTabUseProps {
-  modelValue: TGApp.Plugins.Hutao.Abyss.AvatarUse[];
+  data: AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>;
+}
+
+interface HtaTabUseData {
+  Floor: number;
+  Ranks: Array<AbyssDataItem<{ Item: number; Rate: number }>>;
 }
 
 const props = defineProps<HtaTabUseProps>();
 
 // data
 const tab = ref<string>("9");
-const select = ref<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>([]);
+const select = ref<Array<HtaTabUseData>>([]);
 
 onMounted(async () => {
-  props.modelValue.forEach((item) => {
-    item.Ranks.sort((a, b) => b.Rate - a.Rate);
-    select.value.push(item);
-  });
+  for (const floor of props.data.cur) {
+    const floorLast = props.data.last.find((f) => f.Floor === floor.Floor);
+    const floorRank = {
+      Floor: floor.Floor,
+      Ranks: <Array<AbyssDataItem<{ Item: number; Rate: number }>>>[],
+    };
+    floor.Ranks.sort((a, b) => b.Rate - a.Rate);
+    for (const rank of floor.Ranks) {
+      const rankLast = floorLast?.Ranks.find((r) => r.Item === rank.Item);
+      floorRank.Ranks.push({
+        cur: rank,
+        last: rankLast ?? { Item: rank.Item, Rate: 0 },
+      });
+    }
+    select.value.push(floorRank);
+  }
 });
 </script>
 <style lang="css" scoped>
 .hta-tus-box {
   display: flex;
   height: 100%;
-  padding-top: 10px;
   column-gap: 10px;
 }
 
 .hta-tus-tab {
-  width: 100px;
   height: 100%;
   color: var(--box-text-4);
 }
@@ -64,11 +84,11 @@ onMounted(async () => {
   display: grid;
   overflow: auto;
   width: 100%;
-  height: 100%;
+  max-height: calc(100vh - 100px);
   align-items: center;
   justify-content: center;
-  padding: 5px;
-  grid-gap: 5px;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  padding: 10px;
+  grid-gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 0.2fr));
 }
 </style>

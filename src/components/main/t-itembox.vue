@@ -1,93 +1,38 @@
 <template>
-  <div
-    class="tib-box"
-    :style="{
-      width: modelValue.size,
-      height: modelValue.height,
-      cursor: modelValue.clickable ? 'pointer' : 'default',
-    }"
-  >
-    <div
-      class="tib-bg"
-      :style="{
-        width: modelValue.size,
-        height: modelValue.size,
-      }"
-    >
+  <div class="tib-box">
+    <div class="tib-bg">
       <slot name="bg">
-        <img :src="modelValue.bg" alt="bg" />
+        <img :src="props.modelValue.bg" alt="bg" />
       </slot>
     </div>
-    <div
-      class="tib-icon"
-      :style="{
-        width: modelValue.size,
-        height: modelValue.size,
-      }"
-    >
+    <div class="tib-icon">
       <slot name="icon">
-        <img :src="modelValue.icon" alt="icon" />
+        <img :src="props.modelValue.icon" alt="icon" />
       </slot>
     </div>
-    <div
-      class="tib-cover"
-      :style="{
-        width: modelValue.size,
-        height: modelValue.size,
-      }"
-    >
-      <div
-        class="tib-lt"
-        :style="{
-          width: modelValue.ltSize,
-          height: modelValue.ltSize,
-        }"
-      >
-        <img :src="modelValue.lt" alt="lt" />
+    <div class="tib-cover">
+      <div class="tib-lt">
+        <img :src="props.modelValue.lt" alt="lt" />
       </div>
-      <div
-        v-show="modelValue.rt"
-        class="tib-rt"
-        :style="{
-          width: modelValue.rtSize,
-          height: modelValue.rtSize,
-        }"
-      >
-        {{ modelValue.rt }}
+      <div v-show="props.modelValue.rt" class="tib-rt">
+        {{ props.modelValue.rt }}
       </div>
-      <div
-        class="tib-inner"
-        :style="{
-          height: `${props.modelValue.innerHeight ?? 0}px`,
-          fontSize: `${props.modelValue.innerHeight ? props.modelValue.innerHeight / 2 : 0}px`,
-        }"
-      >
+      <div class="tib-inner">
         <slot name="inner-icon">
           <img
-            v-show="modelValue.innerIcon"
-            :src="modelValue.innerIcon"
+            v-show="props.modelValue.innerIcon"
+            :src="props.modelValue.innerIcon"
             alt="inner-icon"
-            :style="{
-              width: `${props.modelValue.innerHeight ?? 0}px`,
-              height: `${props.modelValue.innerHeight ?? 0}px`,
-            }"
           />
         </slot>
         <slot name="inner-text">
-          <span :title="modelValue.innerText">{{ modelValue.innerText }}</span>
+          <span :title="props.modelValue.innerText">{{ props.modelValue.innerText }}</span>
         </slot>
       </div>
     </div>
-    <div
-      v-if="modelValue.display === 'outer'"
-      class="tib-outer"
-      :style="{
-        height: `${props.modelValue.outerHeight ?? 0}px`,
-        fontSize: `${props.modelValue.outerHeight ? props.modelValue.outerHeight / 2 : 0}px`,
-      }"
-    >
+    <div v-if="props.modelValue.display === 'outer'" class="tib-outer">
       <slot name="outer-text">
-        <span>{{ modelValue.outerText }}</span>
+        <span>{{ props.modelValue.outerText }}</span>
       </slot>
     </div>
   </div>
@@ -109,6 +54,7 @@ export interface TItemBoxData {
   innerText: string;
   outerHeight?: number;
   outerText?: string;
+  innerBlur?: string;
 }
 
 interface TItemBoxProps {
@@ -116,10 +62,23 @@ interface TItemBoxProps {
 }
 
 const props = defineProps<TItemBoxProps>();
+const size = props.modelValue.size;
+const height = props.modelValue.height;
+const cursor = props.modelValue.clickable ? "pointer" : "default";
+const sizeLt = props.modelValue.ltSize;
+const sizeRt = props.modelValue.rtSize;
+const sizeInner = props.modelValue.innerHeight ?? 0;
+const fontSizeInner = sizeInner ? `${sizeInner / 2}px` : "0";
+const sizeOuter = props.modelValue.outerHeight ?? 0;
+const fontSizeOuter = sizeOuter ? `${sizeOuter / 2}px` : "0";
+const innerBlur = props.modelValue.innerBlur ?? "0";
 </script>
 <style lang="css" scoped>
 .tib-box {
   position: relative;
+  width: v-bind(size);
+  height: v-bind(height);
+  cursor: v-bind(cursor);
 }
 
 .tib-bg {
@@ -127,6 +86,8 @@ const props = defineProps<TItemBoxProps>();
   top: 0;
   left: 0;
   overflow: hidden;
+  width: v-bind(size);
+  height: v-bind(size);
   border-radius: 5px;
 }
 
@@ -139,6 +100,8 @@ const props = defineProps<TItemBoxProps>();
 .tib-icon {
   position: relative;
   overflow: hidden;
+  width: v-bind(size);
+  height: v-bind(size);
   border-radius: 5px;
 }
 
@@ -153,6 +116,8 @@ const props = defineProps<TItemBoxProps>();
   top: 0;
   left: 0;
   display: flex;
+  width: v-bind(size);
+  height: v-bind(size);
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -164,6 +129,8 @@ const props = defineProps<TItemBoxProps>();
   top: 3%;
   left: 3%;
   display: flex;
+  width: v-bind(sizeLt);
+  height: v-bind(sizeLt);
   align-items: center;
   justify-content: center;
 }
@@ -179,6 +146,8 @@ const props = defineProps<TItemBoxProps>();
   top: 0;
   right: 0;
   display: flex;
+  width: v-bind(sizeRt);
+  height: v-bind(sizeRt);
   align-items: center;
   justify-content: center;
   background: rgb(0 0 0 / 40%);
@@ -194,16 +163,22 @@ const props = defineProps<TItemBoxProps>();
   left: 0;
   display: flex;
   width: 100%;
+  height: v-bind(sizeInner);
   align-items: center;
   justify-content: center;
+  -webkit-backdrop-filter: blur(v-bind(innerBlur));
+  backdrop-filter: blur(v-bind(innerBlur));
   background: rgb(20 20 20 / 40%);
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   color: var(--tgc-white-1);
   font-family: var(--font-title);
+  font-size: v-bind(fontSizeInner);
 }
 
 .tib-inner img {
+  width: v-bind(sizeInner);
+  height: v-bind(sizeInner);
   margin-right: 5px;
 }
 
@@ -219,9 +194,11 @@ const props = defineProps<TItemBoxProps>();
   bottom: 0;
   display: flex;
   width: 100%;
+  height: v-bind(sizeOuter);
   align-items: center;
   justify-content: center;
   color: var(--common-text-title);
+  font-size: v-bind(fontSizeOuter);
   text-align: center;
 }
 </style>
