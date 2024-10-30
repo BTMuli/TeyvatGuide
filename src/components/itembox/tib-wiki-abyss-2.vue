@@ -19,7 +19,7 @@ const box = computed<TItemBoxData>(() => {
   return {
     bg: `/icon/bg/${avatar.value?.star ?? 5}-Star.webp`,
     clickable: false,
-    display: "outer",
+    display: "inner",
     height: "80px",
     icon: `/WIKI/character/${props.modelValue}.webp`,
     innerHeight: 20,
@@ -32,6 +32,8 @@ const box = computed<TItemBoxData>(() => {
           : `/icon/weapon/${avatar.value.weapon}.webp`,
     ltSize: "20px",
     size: "80px",
+    innerIcon: `/icon/weapon/${avatar.value?.weapon}.webp`,
+    innerBlur: "5px",
   };
 });
 
