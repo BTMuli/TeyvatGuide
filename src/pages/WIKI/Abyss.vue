@@ -32,7 +32,7 @@
         <HtaTabUp v-if="abyssData.up !== null" :data="abyssData.up" />
       </v-window-item>
       <v-window-item value="team">
-        <HtaTabTeam v-if="abyssData.team !== null" :data="abyssData.team" />
+        <HtaTabTeam v-if="abyssData.team !== null" :model-value="abyssData.team" />
       </v-window-item>
       <v-window-item value="hold">
         <HtaTabHold v-if="abyssData.hold !== null" :data="abyssData.hold" />
@@ -63,15 +63,15 @@ enum AbyssTabEnum {
 type AbyssTab = keyof typeof AbyssTabEnum;
 type AbyssList = Array<{ label: AbyssTabEnum; value: AbyssTab }>;
 export type AbyssDataItem<T> = { cur: T; last: T };
-export type AbyssDataItemType<T extends AbyssTab> = AbyssDataItem<
-  T extends "use"
-    ? TGApp.Plugins.Hutao.Abyss.AvatarUse[]
-    : T extends "up"
-      ? TGApp.Plugins.Hutao.Abyss.AvatarUp[]
-      : T extends "team"
-        ? TGApp.Plugins.Hutao.Abyss.TeamCombination[]
-        : TGApp.Plugins.Hutao.Abyss.AvatarHold[]
->;
+export type AbyssDataItemType<T extends AbyssTab> = T extends "use"
+  ? AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>
+  : T extends "up"
+    ? AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUp[]>
+    : T extends "team"
+      ? TGApp.Plugins.Hutao.Abyss.TeamCombination[]
+      : T extends "hold"
+        ? AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarHold[]>
+        : null;
 type AbyssData = {
   [key in AbyssTab]: AbyssDataItemType<key> | null;
 };
@@ -106,7 +106,7 @@ onMounted(async () => {
     last: await Hutao.Abyss.getOverview(true),
   };
   loadT.value = "正在获取深渊数据";
-  const useData = await getData("use");
+  const useData = <AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>>await getData("use");
   abyssData.value = { use: useData, up: null, team: null, hold: null };
   loading.value = false;
 });
@@ -151,10 +151,7 @@ async function getData(type: AbyssTab): Promise<AbyssDataItemType<AbyssTab>> {
         last: await Hutao.Abyss.avatar.getUpRate(true),
       };
     case "team":
-      return {
-        cur: await Hutao.Abyss.getTeamCollect(),
-        last: await Hutao.Abyss.getTeamCollect(true),
-      };
+      return await Hutao.Abyss.getTeamCollect();
     case "hold":
       return {
         cur: await Hutao.Abyss.avatar.getHoldRate(),

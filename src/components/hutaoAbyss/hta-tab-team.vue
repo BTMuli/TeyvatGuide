@@ -15,29 +15,19 @@
         <div v-if="select" class="hta-tt-flex">
           <div class="hta-tuf-box">
             <div class="hta-tuf-title">上半</div>
-            <div v-for="items in selectItem.Up" :key="items.Rate" class="hta-tuf-item">
-              <div class="hta-tuf-item-icons">
-                <TibWikiAbyss2
-                  v-for="item in items.Item.split(',')"
-                  :key="item"
-                  :model-value="item"
-                />
-              </div>
-              <div class="hta-tuf-item-rate">上场{{ items.Rate }}次</div>
-            </div>
+            <v-virtual-scroll :items="selectItem.Up" item-height="100" class="hta-tuf-item">
+              <template #default="{ item }">
+                <HtaTeamLine :model-value="item" />
+              </template>
+            </v-virtual-scroll>
           </div>
           <div class="hta-tuf-box">
             <div class="hta-tuf-title">下半</div>
-            <div v-for="items in selectItem.Down" :key="items.Rate" class="hta-tuf-item">
-              <div class="hta-tuf-item-icons">
-                <TibWikiAbyss2
-                  v-for="item in items.Item.split(',')"
-                  :key="item"
-                  :model-value="item"
-                />
-              </div>
-              <div class="hta-tuf-item-rate">上场{{ items.Rate }}次</div>
-            </div>
+            <v-virtual-scroll :items="selectItem.Down" item-height="100" class="hta-tuf-item">
+              <template #default="{ item }">
+                <HtaTeamLine :model-value="item" />
+              </template>
+            </v-virtual-scroll>
           </div>
         </div>
       </v-window-item>
@@ -47,7 +37,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 
-import TibWikiAbyss2 from "../itembox/tib-wiki-abyss-2.vue";
+import HtaTeamLine from "./hta-team-line.vue";
 
 interface HtaTabTeamProps {
   modelValue: TGApp.Plugins.Hutao.Abyss.TeamCombination[];
@@ -117,29 +107,10 @@ onMounted(async () => {
 }
 
 .hta-tuf-item {
-  display: flex;
+  position: relative;
   width: 100%;
-  height: 100px;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 5px;
+  max-height: calc(100vh - 200px);
   border-radius: 5px;
   background: var(--box-bg-1);
-  column-gap: 10px;
-}
-
-.hta-tuf-item-icons {
-  display: grid;
-  column-gap: 10px;
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.hta-tuf-item-rate {
-  display: flex;
-  width: calc(100% - 360px);
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-title);
 }
 </style>
