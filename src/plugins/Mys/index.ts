@@ -17,6 +17,7 @@ import getPositionCard from "./utils/getPositionCard.js";
 
 const Mys = {
   Post,
+  Painter,
   ApiHub,
   Gacha: {
     get: getGachaData,

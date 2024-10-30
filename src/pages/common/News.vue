@@ -151,7 +151,7 @@ async function firstLoad(key: NewsKey, refresh: boolean = false): Promise<void> 
   }
   loadingTitle.value = `正在获取${rawData.value[key].name}数据...`;
   loading.value = true;
-  const getData = await Mys.Post.getNewsList(gid, NewsType[key]);
+  const getData = await Mys.Painter.getNewsList(gid, NewsType[key]);
   rawData.value[key].isLast = getData.is_last;
   rawData.value[key].lastId = getData.list.length;
   postData.value[key] = getData.list;
