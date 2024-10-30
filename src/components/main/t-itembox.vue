@@ -67,10 +67,10 @@ const height = props.modelValue.height;
 const cursor = props.modelValue.clickable ? "pointer" : "default";
 const sizeLt = props.modelValue.ltSize;
 const sizeRt = props.modelValue.rtSize;
-const sizeInner = props.modelValue.innerHeight ?? 0;
-const fontSizeInner = sizeInner ? `${sizeInner / 2}px` : "0";
-const sizeOuter = props.modelValue.outerHeight ?? 0;
-const fontSizeOuter = sizeOuter ? `${sizeOuter / 2}px` : "0";
+const sizeInner = `${props.modelValue.innerHeight ?? 0}px`;
+const fontSizeInner = props.modelValue.innerHeight ? `${props.modelValue.innerHeight / 2}px` : "0";
+const sizeOuter = `${props.modelValue.outerHeight ?? 0}px`;
+const fontSizeOuter = props.modelValue.outerHeight ? `${props.modelValue.outerHeight / 2}px` : "0";
 const innerBlur = props.modelValue.innerBlur ?? "0";
 </script>
 <style lang="css" scoped>
