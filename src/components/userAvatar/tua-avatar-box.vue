@@ -27,19 +27,19 @@
           <span>Lv.{{ skill.level }}</span>
         </div>
       </div>
-    </div>
-    <div class="tua-abl-bottom">
-      <div class="tua-abl-fetter">
-        <img src="/icon/material/105.webp" alt="fetter" />
-        <span>{{ props.modelValue.avatar.fetter }}</span>
-      </div>
-      <div class="tua-abl-other">
-        <span v-if="!isFetterMax">
-          <v-icon>mdi-lock-outline</v-icon>
-        </span>
-        <span v-if="props.modelValue.costumes.length > 0">
-          <v-icon>mdi-tshirt-crew-outline</v-icon>
-        </span>
+      <div class="tua-abl-bottom">
+        <div class="tua-abl-fetter">
+          <img src="/icon/material/105.webp" alt="fetter" />
+          <span>{{ props.modelValue.avatar.fetter }}</span>
+        </div>
+        <div class="tua-abl-other">
+          <span v-if="!isFetterMax">
+            <v-icon>mdi-lock-outline</v-icon>
+          </span>
+          <span v-if="props.modelValue.costumes.length > 0">
+            <v-icon>mdi-tshirt-crew-outline</v-icon>
+          </span>
+        </div>
       </div>
     </div>
   </div>
@@ -186,13 +186,17 @@ function getWeaponTitle(): string {
 }
 
 .tua-abl-bottom {
+  position: relative;
   display: flex;
   width: 100%;
   align-items: center;
   justify-content: space-between;
   padding: 5px;
-  border-radius: 5px;
-  background: var(--box-bg-3);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  background: rgb(0 0 0 / 40%);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
   font-family: var(--font-title);
 }
 
@@ -211,10 +215,14 @@ function getWeaponTitle(): string {
 
 .tua-abl-mid {
   position: relative;
+  display: flex;
+  overflow: hidden;
   width: 100%;
-  height: 80px;
+  flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   border-radius: 5px;
+  aspect-ratio: 21/10;
 }
 
 .tua-abl-bg {
@@ -223,10 +231,10 @@ function getWeaponTitle(): string {
   left: 0;
   display: flex;
   width: 100%;
-  height: 100%;
   align-items: center;
   justify-content: center;
   border-radius: 5px;
+  aspect-ratio: 21/10;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   background: var(--box-bg-3);
@@ -235,13 +243,13 @@ function getWeaponTitle(): string {
     width: 100%;
     height: 100%;
     border-radius: 5px;
-    object-fit: fill;
   }
 }
 
 .tua-abl-skills {
   position: relative;
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
   padding: 5px;
