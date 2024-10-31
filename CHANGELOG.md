@@ -2,14 +2,27 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2024-10-22
+Update: 2024-10-31
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2024-10-22 20:51:24`
+> 更新于 `2024-10-31 10:36:33`
 
-## [0.6.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.0) (2024-10-22)
+## [0.6.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.2)
+
+- 🐛 修复用户登录状态异常 [`#132`](https://github.com/BTMuli/TeyvatGudie/issues/132)
+- 💄 帖子子回复取消保持，点击其他隐藏
+- 💄 调整未登录时的部分内容渲染
+- 💄 调整保存时图片的hint
+- 💄 `mac`:修复回顶组件宽度异常
+- 💄 `mac`:修复视频封面位置异常
+- 💄 调整角色卡片UI，维持名片比例
+- ♻️ 深渊数据库重构，概览显示差距
+- 🍱 更新下半卡池
+- 👽️ 修正咨讯Api
+
+## [0.6.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.1) (2024-10-22)
 
 - 🐛 新用户数据库初始化异常 [`#131`](https://github.com/BTMuli/TeyavtGuide/issues/131)
 - 🐛 修复角色数据未即时刷新
