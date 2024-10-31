@@ -1,5 +1,5 @@
 <template>
-  <TItemBox v-model="box" :title="hoverTitle" />
+  <TItemBox :model-value="getBox()" :title="hoverTitle" />
 </template>
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
@@ -12,7 +12,6 @@ interface TibUrAvatarProps {
 }
 
 const props = defineProps<TibUrAvatarProps>();
-const box = ref<TItemBoxData>(<TItemBoxData>{});
 const hoverTitle = ref<string>("点击查看详情");
 const getName = (): string => {
   return props.modelValue.id === 10000005
@@ -22,8 +21,8 @@ const getName = (): string => {
       : props.modelValue.name;
 };
 
-onMounted(async () => {
-  box.value = {
+function getBox(): TItemBoxData {
+  return {
     size: "80px",
     height: "80px",
     ltSize: "20px",
@@ -37,6 +36,9 @@ onMounted(async () => {
     innerHeight: 20,
     display: "inner",
   };
+}
+
+onMounted(async () => {
   hoverTitle.value = `等级：${props.modelValue.level}\n好感：${props.modelValue.fetter}\n角色ID：${props.modelValue.id}`;
 });
 </script>

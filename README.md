@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2024-10-07
+Update: 2024-10-31
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2024-10-07 21:51:00`
+> 更新于 `2024-10-31 17:39:57`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -100,7 +100,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 
 - [MuCli](https://github.com/BTMuli/MuCli)：基于 NodeJS 的命令行工具，用于生成项目文档。
 - [TGAssistant](https://github.com/BTMuli/TGAssistant)：Teyvat Guide 的资源获取、解析、处理仓库。
-- ~~[WhiteTea](https://github.com/BTMuli/WhiteTea)：Github Bot，（半）自动化处理 Teyvat Guide 的 Issue 和 Pull Request。~~ 服务已挂T_T
+- [WhiteTea](https://github.com/BTMuli/WhiteTea)：Github Bot，（半）自动化处理 Teyvat Guide 的 Issue 和 Pull Request。
 
 ## 技术栈 / Tech Stack
 
