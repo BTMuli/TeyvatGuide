@@ -63,7 +63,8 @@ function getEndHint(): string {
 }
 
 const progressColor = computed<string>(() => {
-  if (hint === "UP") return "var(--tgc-od-orange)";
+  if (hint === "UP" && props.data.rank === "5") return "var(--tgc-od-orange)";
+  if (hint === "UP" && props.data.rank === "4") return "var(--tgc-od-purple)";
   if (hint === "歪") return "var(--tgc-od-red)";
   return "var(--tgc-od-blue)";
 });
