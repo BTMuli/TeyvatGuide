@@ -14,6 +14,7 @@ import TpLinkCard from "./tp-linkCard.vue";
 import TpMention from "./tp-mention.vue";
 import TpText, { type TpText as TpTextType } from "./tp-text.vue";
 import TpTexts from "./tp-texts.vue";
+import TpUid from "./tp-uid.vue";
 import TpUnknown from "./tp-unknown.vue";
 import TpVideo from "./tp-video.vue";
 import TpVod from "./tp-vod.vue";
@@ -102,6 +103,7 @@ function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base) {
   if ("image" in tp.insert) return TpImage;
   if ("vod" in tp.insert) return TpVod;
   if ("video" in tp.insert) return TpVideo;
+  if ("game_user_info" in tp.insert) return TpUid;
   if ("backup_text" in tp.insert) return TpBackupText;
   if ("link_card" in tp.insert) return TpLinkCard;
   if ("divider" in tp.insert) return TpDivider;

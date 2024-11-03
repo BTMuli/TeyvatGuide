@@ -25,6 +25,7 @@ onMounted(async () => {
 <style lang="css" scoped>
 .tp-unknown-box {
   width: 800px;
+  max-width: 100%;
   padding: 10px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 10px;
