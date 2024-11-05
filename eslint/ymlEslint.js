@@ -1,28 +1,17 @@
-import eslint_yml from "eslint-plugin-yml";
-import yml_parser from "yaml-eslint-parser";
+import pluginYml from "eslint-plugin-yml";
+import parserYml from "yaml-eslint-parser";
 
 const ymlEslintConfig = {
   files: ["**/*.yml", "**/*.yaml"],
-  plugins: {
-    yml: eslint_yml,
-  },
+  plugins: { yml: pluginYml },
   languageOptions: {
-    parser: yml_parser,
-    parserOptions: {
-      defaultYAMLVersion: "1.2",
-      extraFileExtensions: [".yaml", ".yml"],
-    },
+    parser: parserYml,
+    parserOptions: { defaultYAMLVersion: "1.2", extraFileExtensions: [".yaml", ".yml"] },
   },
   rules: {
     "yml/indent": ["error", 2],
     "yml/key-spacing": ["error"],
-    "yml/quotes": [
-      "error",
-      {
-        prefer: "double",
-        avoidEscape: true,
-      },
-    ],
+    "yml/quotes": ["error", { prefer: "double", avoidEscape: true }],
     "yml/sort-keys": ["error", "asc"],
   },
 };

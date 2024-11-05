@@ -16,3 +16,4 @@ qodana.yaml
 # data
 !src/data/**/*.json
 src-tauri/gen/*.json
+!eslint

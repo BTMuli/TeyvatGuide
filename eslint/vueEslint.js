@@ -1,7 +1,5 @@
-import eslint_js from "@eslint/js";
-import eslint_import from "eslint-plugin-import";
-import eslint_prettier from "eslint-plugin-prettier";
-import eslint_vue from "eslint-plugin-vue";
+import pluginImport from "eslint-plugin-import";
+import pluginPrettier from "eslint-plugin-prettier";
 import pluginVue from "eslint-plugin-vue";
 import globals from "globals";
 import eslint_ts from "typescript-eslint";
@@ -32,35 +30,20 @@ const tsConfigRules = {
 };
 
 const tsConfig = {
-  files: ["*.ts"],
-  plugins: {
-    typescript: eslint_ts,
-    import: eslint_import,
-    prettier: eslint_prettier,
-  },
+  files: ["*.ts", "*.d.ts", "src/**/*.ts", "src/**/*.d.ts"],
+  plugins: { typescript: eslint_ts, import: pluginImport, prettier: pluginPrettier },
   languageOptions: {
     parser: eslint_ts.parser,
-    parserOptions: {
-      project: "tsconfig.json",
-      tsconfigRootDir: ".",
-    },
+    parserOptions: { project: "tsconfig.json", tsconfigRootDir: "." },
   },
   rules: tsConfigRules,
 };
 
 const vueConfig = {
-  plugins: {
-    vue: eslint_vue,
-    import: eslint_import,
-    prettier: eslint_prettier,
-  },
+  files: ["src/**/*.vue"],
+  plugins: { vue: pluginVue, import: pluginImport, prettier: pluginPrettier },
   languageOptions: {
-    globals: {
-      ...globals.browser,
-      ...globals.es2021,
-      TGApp: "readonly",
-      window: "readonly",
-    },
+    globals: { ...globals.browser, ...globals.es2021, TGApp: "readonly", window: "readonly" },
     ecmaVersion: "latest",
     sourceType: "module",
     parser: vue_parser,
@@ -71,17 +54,7 @@ const vueConfig = {
       tsconfigRootDir: ".",
     },
   },
-  rules: {
-    ...tsConfigRules,
-    "vue/multi-word-component-names": "off",
-  },
+  rules: { ...tsConfigRules, "vue/multi-word-component-names": "off" },
 };
 
-export const vueEslintConfig = [
-  eslint_js.configs.recommended,
-  ...eslint_ts.configs.recommended,
-  ...eslint_vue.configs["flat/essential"],
-  ...pluginVue.configs["flat/essential"],
-  tsConfig,
-  vueConfig,
-];
+export const vueEslintConfig = [tsConfig, vueConfig];

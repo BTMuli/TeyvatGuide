@@ -6,6 +6,7 @@
     "moduleResolution": "NodeNext",
     "strict": true,
     "jsx": "preserve",
+    "rootDir": ".",
     "sourceMap": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
