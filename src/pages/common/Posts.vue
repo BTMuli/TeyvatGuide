@@ -141,41 +141,13 @@ const forumDbyList: SortSelect[] = [
   { text: "公告", value: 36 },
 ];
 const sortGameList: SortSelectGame[] = [
-  {
-    gid: 2,
-    forum: forumYsList,
-    text: "原神",
-  },
-  {
-    gid: 6,
-    forum: forumSrList,
-    text: "崩坏：星穹铁道",
-  },
-  {
-    gid: 8,
-    forum: forumZzzList,
-    text: "绝区零",
-  },
-  {
-    gid: 1,
-    forum: forumBh3List,
-    text: "崩坏3",
-  },
-  {
-    gid: 3,
-    forum: forumBh2List,
-    text: "崩坏2",
-  },
-  {
-    gid: 4,
-    forum: forumWdList,
-    text: "未定事件簿",
-  },
-  {
-    gid: 5,
-    forum: forumDbyList,
-    text: "大别野",
-  },
+  { gid: 2, forum: forumYsList, text: "原神" },
+  { gid: 6, forum: forumSrList, text: "崩坏：星穹铁道" },
+  { gid: 8, forum: forumZzzList, text: "绝区零" },
+  { gid: 1, forum: forumBh3List, text: "崩坏3" },
+  { gid: 3, forum: forumBh2List, text: "崩坏2" },
+  { gid: 4, forum: forumWdList, text: "未定事件簿" },
+  { gid: 5, forum: forumDbyList, text: "大别野" },
 ];
 
 // 路由
@@ -184,17 +156,13 @@ const forum = useRoute().params.forum;
 
 function getGameForums(gid: number): SortSelect[] {
   const game = sortGameList.find((item) => item.gid === gid);
-  if (game) {
-    return game.forum;
-  }
+  if (game) return game.forum;
   return [];
 }
 
 function getGameLabel(gid: number): string {
   const game = sortGameList.find((item) => item.gid === gid);
-  if (game) {
-    return game.text;
-  }
+  if (game) return game.text;
   return "";
 }
 
@@ -240,16 +208,10 @@ watch(
   async (newVal: number) => {
     const forums = getGameForums(newVal);
     const forumFind = forums.find((item) => item.text === curForumLabel.value);
-    if (forumFind) {
-      curForum.value = forumFind.value;
-    } else {
-      curForum.value = forums[0].value;
-    }
+    if (forumFind) curForum.value = forumFind.value;
+    else curForum.value = forums[0].value;
     await nextTick();
-    showSnackbar({
-      text: `已将分区切换到 ${getGameLabel(newVal)}`,
-      color: "success",
-    });
+    showSnackbar({ text: `已将分区切换到 ${getGameLabel(newVal)}`, color: "success" });
   },
 );
 watch(
@@ -268,13 +230,10 @@ watch(
 );
 watch(
   () => curSortType.value,
-  async (newVal) => {
+  async () => {
     await freshPostData();
-    const sortLabel = getSortLabel(newVal);
-    showSnackbar({
-      text: `已将排序切换到 ${sortLabel}`,
-      color: "success",
-    });
+    const sortLabel = getSortLabel(curSortType.value);
+    showSnackbar({ text: `已将排序切换到 ${sortLabel}`, color: "success" });
   },
 );
 
@@ -287,7 +246,7 @@ async function freshPostData(): Promise<void> {
   );
   loading.value = true;
   loadingTitle.value = `正在加载 ${gameLabel}-${forumLabel}-${sortLabel} 数据`;
-  const postsGet = await Mys.Post.getForumPostList(curForum.value, curSortType.value, 12);
+  const postsGet = await Mys.Post.getForumPostList(curForum.value, curSortType.value);
   posts.value = postsGet.list;
   await nextTick();
   loading.value = false;
@@ -296,18 +255,12 @@ async function freshPostData(): Promise<void> {
 // 查询帖子
 function searchPost(): void {
   if (search.value === "") {
-    showSnackbar({
-      text: "请输入搜索内容",
-      color: "error",
-    });
+    showSnackbar({ text: "请输入搜索内容", color: "error" });
     return;
   }
   const numCheck = Number(search.value);
-  if (isNaN(numCheck)) {
-    showSearch.value = true;
-  } else {
-    createPost(search.value);
-  }
+  if (isNaN(numCheck)) showSearch.value = true;
+  else createPost(search.value);
 }
 </script>
 <style lang="css" scoped>
