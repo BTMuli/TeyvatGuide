@@ -254,7 +254,7 @@ async function refreshUser(uid: string) {
   loading.value = true;
   emits("loadOuter", { show: true, title: "正在刷新用户信息" });
   emits("loadOuter", { show: true, title: "正在验证 LToken" });
-  const verifyLTokenRes = await TGRequest.User.byLToken.verify(ck.ltoken, ck.ltuid);
+  const verifyLTokenRes = await TGRequest.User.verifyLToken(ck.ltoken, ck.ltuid);
   if (typeof verifyLTokenRes === "string") {
     emits("loadOuter", { show: true, title: "正在验证 LToken", text: "验证 LToken 成功!" });
     await TGLogger.Info("[tc-userBadge][refreshUser] 验证 LToken 成功");

@@ -160,12 +160,7 @@ async function confirmRefresh(force: boolean): Promise<void> {
     await TGLogger.Warn("[UserGacha][${account.gameUid}][confirmRefresh] 未检测到 cookie");
     return;
   }
-  const cookie = {
-    stoken: userStore.cookie.value.stoken,
-    mid: userStore.cookie.value.mid,
-  };
-  const gameUid = account.value.gameUid;
-  const authkeyRes = await TGRequest.User.getAuthkey(cookie, gameUid);
+  const authkeyRes = await TGRequest.User.getAuthkey(userStore.cookie.value, account.value);
   if (typeof authkeyRes === "string") {
     authkey.value = authkeyRes;
     await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 成功获取 authkey`);

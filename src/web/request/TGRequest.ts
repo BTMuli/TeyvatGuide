@@ -1,7 +1,7 @@
 /**
  * @file web/request/TGRequest.ts
  * @description 应用用到的请求函数
- * @since Beta v0.6.1
+ * @since Beta v0.6.2
  */
 
 import { genAuthkey, genAuthkey2 } from "./genAuthkey.js";
@@ -17,10 +17,7 @@ import { getGachaLog } from "./getGachaLog.js";
 import { getGameAccountsByCookie, getGameAccountsBySToken } from "./getGameAccounts.js";
 import { getGameRecord } from "./getGameRecord.js";
 import { getLTokenBySToken } from "./getLToken.js";
-import { getGameRoleListByLToken } from "./getRoleList.js";
 import { getStokenByGameToken, getTokenBySToken } from "./getStoken.js";
-import getSyncAvatarDetail from "./getSyncAvatarDetail.js";
-import getSyncAvatarListAll from "./getSyncAvatarListAll.js";
 import { getUserCollect } from "./getUserCollect.js";
 import { getUserInfoByCookie } from "./getUserInfo.js";
 import { verifyLToken } from "./verifyLToken.js";
@@ -40,6 +37,7 @@ const TGRequest = {
     getCollect: getUserCollect,
     getGachaLog,
     getRecord: getGameRecord,
+    verifyLToken,
     byCookie: {
       getAbyss,
       getAccounts: getGameAccountsByCookie,
@@ -47,10 +45,6 @@ const TGRequest = {
       getAvatarIndex,
       getAvatarList,
       getAvatarDetail,
-    },
-    byLToken: {
-      verify: verifyLToken,
-      getRoleList: getGameRoleListByLToken,
     },
     bySToken: {
       update: getTokenBySToken,
@@ -62,10 +56,6 @@ const TGRequest = {
     bgGameToken: {
       getCookieToken: getCookieTokenByGameToken,
       getStoken: getStokenByGameToken,
-    },
-    calculate: {
-      getSyncAvatarListAll,
-      getSyncAvatarDetail,
     },
   },
   Nav: {
