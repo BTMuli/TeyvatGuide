@@ -6,12 +6,7 @@ import eslint_ts from "typescript-eslint";
 import vue_parser from "vue-eslint-parser";
 
 const tsConfigRules = {
-  "@typescript-eslint/consistent-type-assertions": [
-    "error",
-    {
-      assertionStyle: "angle-bracket",
-    },
-  ],
+  "@typescript-eslint/consistent-type-assertions": ["error", { assertionStyle: "angle-bracket" }],
   "@typescript-eslint/no-import-type-side-effects": "error",
   "@typescript-eslint/strict-boolean-expressions": "off",
   "@typescript-eslint/no-explicit-any": "off",
@@ -20,10 +15,7 @@ const tsConfigRules = {
     {
       groups: ["builtin", "external", "internal", "parent", "sibling", "index", "unknown"],
       "newlines-between": "always",
-      alphabetize: {
-        order: "asc",
-        caseInsensitive: true,
-      },
+      alphabetize: { order: "asc", caseInsensitive: true },
     },
   ],
   "prettier/prettier": "error",

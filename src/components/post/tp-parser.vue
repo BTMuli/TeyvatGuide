@@ -9,6 +9,7 @@
 <script lang="ts" setup>
 import TpBackupText from "./tp-backupText.vue";
 import TpDivider from "./tp-divider.vue";
+import TpEmoticon from "./tp-emoticon.vue";
 import TpImage from "./tp-image.vue";
 import TpLinkCard from "./tp-linkCard.vue";
 import TpMention from "./tp-mention.vue";
@@ -104,6 +105,7 @@ function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base) {
   if ("vod" in tp.insert) return TpVod;
   if ("video" in tp.insert) return TpVideo;
   if ("game_user_info" in tp.insert) return TpUid;
+  if ("custom_emoticon" in tp.insert) return TpEmoticon;
   if ("backup_text" in tp.insert) return TpBackupText;
   if ("link_card" in tp.insert) return TpLinkCard;
   if ("divider" in tp.insert) return TpDivider;
