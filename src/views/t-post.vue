@@ -16,6 +16,7 @@
         PostID：{{ postId }} | Render by TeyvatGuide v{{ appVersion }}
       </div>
       <div class="tp-post-meta">
+        <!-- todo 点击跳转 -->
         <div class="mpm-forum" v-if="postData.forum">
           <img :src="getGameIcon(postData.forum.game_id)" alt="gameIcon" />
           <img :src="postData.forum.icon" alt="forumIcon" />
@@ -60,6 +61,7 @@
         <span>{{ postData.collection.collection_title }}</span>
         <span>{{ postData.collection.cur }}/{{ postData.collection.total }}</span>
       </div>
+      <!-- todo 点击跳转 -->
       <div v-for="topic in postData.topics" :key="topic.id" class="tp-post-topic">
         <v-icon size="12">mdi-tag</v-icon>
         <span>{{ topic.name }}</span>
@@ -242,24 +244,14 @@ function parseContent(content: string): string {
   keys.forEach((key) => {
     switch (key) {
       case "describe":
-        result.push({
-          insert: data.describe,
-        });
+        result.push({ insert: data.describe });
         break;
       case "imgs":
-        data.imgs.forEach((item) => {
-          result.push({
-            insert: {
-              image: item,
-            },
-          });
-        });
+        data.imgs.forEach((item) => result.push({ insert: { image: item } }));
         break;
       default:
         TGLogger.Warn(`[t-post][${postId}][parseContent] Unknown key: ${key}`);
-        result.push({
-          insert: data[key],
-        });
+        result.push({ insert: data[key] });
         break;
     }
   });

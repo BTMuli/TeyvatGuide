@@ -1,7 +1,7 @@
 /**
  * @file web/api/TGApi.ts
  * @description 应用用到的 API
- * @since Beta v0.5.3
+ * @since Beta v0.6.2
  */
 
 import { BBSUserInfoApi } from "./BBS.js";
@@ -20,6 +20,7 @@ import {
   TakumiCalculateSyncAvatarDetailApi,
   TakumiRecordCharacterListApi,
   TakumiRecordCharacterDetailApi,
+  TakumiRecordCombatApi,
 } from "./Takumi.js";
 
 // 应用 API
@@ -50,6 +51,7 @@ const TGApi = {
     getUserBase: TakumiRecordIndexApi, // 获取用户基本信息
     getDailyNotes: TakumiRecordDailyNotesApi, // 获取实时便笺
     getAbyss: TakumiRecordAbyssApi, // 获取深境螺旋信息
+    getRoleCombat: TakumiRecordCombatApi, // 获取幻想真境剧诗
   },
 };
 

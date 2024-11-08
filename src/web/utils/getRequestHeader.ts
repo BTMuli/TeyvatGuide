@@ -67,10 +67,10 @@ function getDS(method: string, data: string, saltType: string, isSign: boolean):
 
 /**
  * @description 获取请求头
- * @since Beta v0.5.3
+ * @since Beta v0.6.2
  * @param {Record<string, string>} cookie cookie
  * @param {string} method 请求方法
- * @param {Record<string, string|number>|string} data 请求数据
+ * @param {Record<string, string|number|string[]|boolean>|string} data 请求数据
  * @param {string} saltType salt 类型
  * @param {boolean} isSign 是否为签名
  * @returns {Record<string, string>} 请求头
@@ -78,7 +78,7 @@ function getDS(method: string, data: string, saltType: string, isSign: boolean):
 export function getRequestHeader(
   cookie: Record<string, string>,
   method: string,
-  data: Record<string, string | number | string[]> | string,
+  data: Record<string, string | number | string[] | boolean> | string,
   saltType: string,
   isSign: boolean = false,
 ): Record<string, string> {
