@@ -1,5 +1,11 @@
 <template>
-  <TOverlay v-model="visible" :hide="true" :to-click="onCancel" blur-val="20px">
+  <TOverlay
+    v-model="visible"
+    :hide="true"
+    :to-click="onCancel"
+    blur-val="20px"
+    class="tolc-overlay"
+  >
     <div class="tolc-box">
       <div class="tolc-title">
         <span>兑换码</span>
@@ -85,6 +91,10 @@ async function shareImg(): Promise<void> {
 }
 </script>
 <style lang="css" scoped>
+.tolc-overlay {
+  height: 100vh;
+}
+
 .tolc-box {
   position: relative;
   width: 340px;
