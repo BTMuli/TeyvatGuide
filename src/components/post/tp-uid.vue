@@ -1,9 +1,10 @@
 <template>
   <div class="tpu-box">
-    <div class="tpu-main">
-      <span>UID {{ props.data.insert.game_user_info.game_uid }}</span>
+    <div class="tpu-top">
       <span @click="copyUid()" data-html2canvas-ignore><v-icon>mdi-content-copy</v-icon>复制</span>
+      <span class="tpu-game">{{ getGameName() }}</span>
     </div>
+    <div class="tpu-main">UID {{ props.data.insert.game_user_info.game_uid }}</div>
     <div class="tpu-sub">
       <span>{{ props.data.insert.game_user_info.nickname }}</span>
       <span>|</span>
@@ -11,7 +12,6 @@
       <span>|</span>
       <span>{{ props.data.insert.game_user_info.level }}级</span>
     </div>
-    <div class="tpu-game">原神</div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -41,6 +41,17 @@ function copyUid(): void {
   navigator.clipboard.writeText(props.data.insert.game_user_info.game_uid);
   showSnackbar({ text: "已复制UID" });
 }
+
+function getGameName(): string {
+  const gameBiz = props.data.insert.game_user_info.game_biz;
+  if (gameBiz.startsWith("hkrpg")) return "崩坏·星穹铁道";
+  if (gameBiz.startsWith("hk4e")) return "原神";
+  if (gameBiz.startsWith("nap")) return "绝区零";
+  if (gameBiz.startsWith("bh2")) return "崩坏学园2";
+  if (gameBiz.startsWith("bh3")) return "崩坏3";
+  if (gameBiz.startsWith("nxx")) return "未定事件簿";
+  return "未知游戏";
+}
 </script>
 <style lang="css" scoped>
 .tpu-box {
@@ -61,6 +72,19 @@ function copyUid(): void {
   color: #a17a58;
 }
 
+.tpu-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+  column-gap: 5px;
+
+  :first-child {
+    cursor: pointer;
+    font-size: 12px;
+  }
+}
+
 .tpu-main {
   display: flex;
   align-items: center;
@@ -68,11 +92,6 @@ function copyUid(): void {
   column-gap: 5px;
   font-family: var(--font-title);
   font-size: 16px;
-
-  :last-child {
-    cursor: pointer;
-    font-size: 12px;
-  }
 }
 
 .tpu-sub {
@@ -84,9 +103,6 @@ function copyUid(): void {
 }
 
 .tpu-game {
-  position: absolute;
-  top: 5px;
-  right: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
