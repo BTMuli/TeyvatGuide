@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2024-10-31
+Update: 2024-11-11
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2024-10-31 17:39:57`
+> 更新于 `2024-11-11 11:59:05`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -93,7 +93,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - Changelog: [CHANGELOG](CHANGELOG.md)
 - 资源来源：[项目资源说明](docs/项目资源说明.md)
 - UIAF：[UIAF v1.1](docs/UIAF.md)
-- UIGF：[UIGF v3.0](docs/UIGF.md)
+- UIGF：[UIGF v3.0](docs/UIGF3.md)，[UIGF v4.0](docs/UIGF.md)
 - [macOS 平台门禁属性导致应用无法打开应用的修复指引](docs/macos-gatekeeper/README.md)
 
 ## 特定项目 / Special Project
