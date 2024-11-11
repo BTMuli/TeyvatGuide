@@ -124,6 +124,7 @@ import TuaOverview from "../../components/userAbyss/tua-overview.vue";
 import Hutao from "../../plugins/Hutao/index.js";
 import TSUserAbyss from "../../plugins/Sqlite/modules/userAbyss.js";
 import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
+import TSUserCombat from "../../plugins/Sqlite/modules/userCombat.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { generateShareImg } from "../../utils/TGShare.js";
@@ -169,6 +170,11 @@ watch(
 );
 
 async function toCombat(): Promise<void> {
+  const check = await TSUserCombat.check();
+  if (!check) {
+    showSnackbar({ text: "未检测到剧诗表，请更新数据库！", color: "warn" });
+    return;
+  }
   await router.push({ name: "真境剧诗" });
 }
 

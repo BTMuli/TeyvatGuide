@@ -13,6 +13,23 @@ import TGSqlite from "../index.js";
 import { transUserCombat } from "../utils/transUserCombat.js";
 
 /**
+ * @description 数据表检测
+ * @since Beta v0.6.3
+ * @todo 版更后移除，该方法仅用于测试版过渡
+ * @return {Promise<boolean>}
+ */
+async function check(): Promise<boolean> {
+  const db = await TGSqlite.getDB();
+  try {
+    await db.select("SELECT DISTINCT uid FROM RoleCombat;");
+    return true;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+}
+
+/**
  * @description 直接插入数据
  * @since Beta v0.6.3
  * @param {string} uid 用户UID
@@ -148,6 +165,7 @@ async function restoreCombat(dir: string): Promise<boolean> {
 }
 
 const TSUserCombat = {
+  check,
   getAllUid,
   getCombat,
   saveCombat,
