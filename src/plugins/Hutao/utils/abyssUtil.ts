@@ -1,22 +1,22 @@
 /**
- * @file plugins/Hutao/utils/transLocal.ts
+ * @file plugins/Hutao/utils/abyssUtil.ts
  * @description 将本地数据转为上传用的数据
- * @since Beta v0.5.5
+ * @since Beta v0.6.2
  */
 
 /**
  * @description 将本地数据转为上传用的数据
- * @since Beta v0.3.4
+ * @since Beta v0.6.2
  * @param {TGApp.Sqlite.Abyss.SingleTable} data 本地数据
  * @returns {TGApp.Plugins.Hutao.Abyss.RecordUpload} 上传用的数据
  */
-export function transLocal(
+export function transAbyssLocal(
   data: TGApp.Sqlite.Abyss.SingleTable,
 ): TGApp.Plugins.Hutao.Abyss.RecordUpload {
   return {
     Uid: data.uid,
     Identity: "TeyvatGuide",
-    SpiralAbyss: transAbyss(data),
+    SpiralAbyss: transAbyssData(data),
     Avatars: [],
     ReservedUserName: "",
   };
@@ -28,7 +28,9 @@ export function transLocal(
  * @param {TGApp.Sqlite.Abyss.SingleTable} data 本地数据
  * @returns {TGApp.Plugins.Hutao.Abyss.RecordData} 上传用的数据
  */
-function transAbyss(data: TGApp.Sqlite.Abyss.SingleTable): TGApp.Plugins.Hutao.Abyss.RecordData {
+function transAbyssData(
+  data: TGApp.Sqlite.Abyss.SingleTable,
+): TGApp.Plugins.Hutao.Abyss.RecordData {
   const defeat: TGApp.Sqlite.Abyss.Character = JSON.parse(data.defeatRank)[0];
   const energySkill: TGApp.Sqlite.Abyss.Character = JSON.parse(data.energySkillRank)[0];
   const normalSkill: TGApp.Sqlite.Abyss.Character = JSON.parse(data.normalSkillRank)[0];
@@ -105,7 +107,7 @@ function transLevel(data: TGApp.Sqlite.Abyss.Level): TGApp.Plugins.Hutao.Abyss.L
  * @param {TGApp.Sqlite.Character.UserRole[]} avatars 角色数据
  * @returns {TGApp.Plugins.Hutao.Abyss.Avatar[]} 上传用的数据
  */
-export function transAvatars(
+export function transAbyssAvatars(
   avatars: TGApp.Sqlite.Character.UserRole[],
 ): TGApp.Plugins.Hutao.Abyss.Avatar[] {
   return avatars.map((avatar) => {

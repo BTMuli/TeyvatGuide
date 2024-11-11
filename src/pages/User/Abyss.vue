@@ -270,7 +270,7 @@ async function uploadAbyss(): Promise<void> {
     loadingTitle.value = "正在转换角色数据";
     transAbyss.Avatars = Hutao.Abyss.utils.transAvatars(roles);
     loadingTitle.value = "正在上传深渊数据";
-    const res = await Hutao.Abyss.postData(transAbyss);
+    const res = await Hutao.Abyss.upload(transAbyss);
     loading.value = false;
     if (res.retcode === 0) {
       showSnackbar({ text: res.message ?? "上传深渊数据成功" });

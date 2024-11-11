@@ -1,15 +1,9 @@
 /**
  * @file src/plugins/Hutao/types/Base.d.ts
  * @description Hutao 插件基础类型定义文件
- * @since Beta v0.3.8
+ * @since Beta v0.6.2
  */
 
-/**
- * @description Hutao 插件基础类型
- * @since Beta v0.3.8
- * @namespace Base
- * @return Base
- */
 declare namespace TGApp.Plugins.Hutao.Base {
   /**
    * @description Hutao Response 统一接口
@@ -24,6 +18,19 @@ declare namespace TGApp.Plugins.Hutao.Base {
     retcode?: number;
     message?: string;
     data?: any;
+  }
+
+  /**
+   * @description 使用率
+   * @since Beta v0.6.2
+   * @interface Rate
+   * @property {number} Item id
+   * @property {number} Rate 使用率
+   * @return Rate
+   */
+  interface Rate<T = number> {
+    Item: T;
+    Rate: number;
   }
 
   /**

@@ -102,8 +102,8 @@ onMounted(async () => {
   loading.value = true;
   loadT.value = "正在获取深渊概览";
   overview.value = {
-    cur: await Hutao.Abyss.getOverview(),
-    last: await Hutao.Abyss.getOverview(true),
+    cur: await Hutao.Abyss.overview(),
+    last: await Hutao.Abyss.overview(true),
   };
   loadT.value = "正在获取深渊数据";
   const useData = <AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>>await getData("use");
@@ -142,20 +142,20 @@ async function getData(type: AbyssTab): Promise<AbyssDataItemType<AbyssTab>> {
   switch (type) {
     case "use":
       return {
-        cur: await Hutao.Abyss.avatar.getUseRate(),
-        last: await Hutao.Abyss.avatar.getUseRate(true),
+        cur: await Hutao.Abyss.avatar.use(),
+        last: await Hutao.Abyss.avatar.use(true),
       };
     case "up":
       return {
-        cur: await Hutao.Abyss.avatar.getUpRate(),
-        last: await Hutao.Abyss.avatar.getUpRate(true),
+        cur: await Hutao.Abyss.avatar.up(),
+        last: await Hutao.Abyss.avatar.up(true),
       };
     case "team":
-      return await Hutao.Abyss.getTeamCollect();
+      return await Hutao.Abyss.team();
     case "hold":
       return {
-        cur: await Hutao.Abyss.avatar.getHoldRate(),
-        last: await Hutao.Abyss.avatar.getHoldRate(true),
+        cur: await Hutao.Abyss.avatar.hold(),
+        last: await Hutao.Abyss.avatar.hold(true),
       };
   }
 }

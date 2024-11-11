@@ -199,16 +199,12 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @since Alpha v0.2.1
    * @interface AvatarUp
    * @property {number} Floor - 楼层
-   * @property {number} Ranks[].Item - 角色ID
-   * @property {number} Ranks[].Rate - 上场率
+   * @property {Array<TGApp.Plugins.Hutao.Base.Rate>} Ranks - 角色上场率
    * @return AvatarUp
    */
   interface AvatarUp {
     Floor: number;
-    Ranks: Array<{
-      Item: number;
-      Rate: number;
-    }>;
+    Ranks: Array<TGApp.Plugins.Hutao.Base.Rate>;
   }
 
   /**
@@ -229,16 +225,12 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @since Alpha v0.2.1
    * @interface AvatarUse
    * @property {number} Floor - 楼层
-   * @property {number} Ranks[].Item - 角色ID
-   * @property {number} Ranks[].Rate - 使用率
+   * @property {Array<TGApp.Plugins.Hutao.Base.Rate>} Ranks 角色使用率
    * @return AvatarUse
    */
   interface AvatarUse {
     Floor: number;
-    Ranks: Array<{
-      Item: number;
-      Rate: number;
-    }>;
+    Ranks: Array<TGApp.Plugins.Hutao.Base.Rate>;
   }
 
   /**
@@ -259,17 +251,13 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @since Alpha v0.2.1
    * @interface AvatarHold
    * @property {number} HoldingRate - 持有率
-   * @property {number} Constellations[].Item - 命座ID
-   * @property {number} Constellations[].Rate - 持有率
+   * @property {Array<TGApp.Plugins.Hutao.Base.Rate>} Constellations - 持有率
    * @property {number} AvatarId - 角色ID
    * @return AvatarHold
    */
   interface AvatarHold {
     HoldingRate: number;
-    Constellations: Array<{
-      Item: number;
-      Rate: number;
-    }>;
+    Constellations: Array<TGApp.Plugins.Hutao.Base.Rate>;
     AvatarId: number;
   }
 
@@ -291,28 +279,16 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @since Alpha v0.2.1
    * @interface AvatarCollocation
    * @property {number} AvatarId - 角色ID
-   * @property {number} Avatars[].Item - 角色ID
-   * @property {number} Avatars[].Rate - 角色搭配率
-   * @property {string} Reliquaries[].Item - 圣遗物套装ID // id-num,id-num
-   * @property {number} Reliquaries[].Rate - 圣遗物套装搭配率
-   * @property {number} Weapons[].Item - 武器ID
-   * @property {number} Weapons[].Rate - 武器搭配率
+   * @property {Array<TGApp.Plugins.Hutao.Base.Rate>} Avatars - 角色搭配率
+   * @property {Array<TGApp.Plugins.Hutao.Base.Rate<string>>} Reliquaries - 圣遗物套装搭配率
+   * @property {Array<TGApp.Plugins.Hutao.Base.Rate>} Weapons - 武器搭配率
    * @return AvatarCollocation
    */
   interface AvatarCollocation {
     AvatarId: number;
-    Avatars: Array<{
-      Item: number;
-      Rate: number;
-    }>;
-    Reliquaries: Array<{
-      Item: string;
-      Rate: number;
-    }>;
-    Weapons: Array<{
-      Item: number;
-      Rate: number;
-    }>;
+    Avatars: Array<TGApp.Plugins.Hutao.Base.Rate>;
+    Reliquaries: Array<TGApp.Plugins.Hutao.Base.Rate<string>>;
+    Weapons: Array<TGApp.Plugins.Hutao.Base.Rate>;
   }
 
   /**
@@ -332,16 +308,12 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @since Alpha v0.2.1
    * @interface WeaponCollocation
    * @property {number} WeaponId - 武器ID
-   * @property {number} Avatars[].Item - 角色ID
-   * @property {number} Avatars[].Rate - 角色搭配率
+   * @property {Array<TGApp.Plugins.Hutao.Base.Rate>} Avatars - 角色搭配率
    * @return WeaponCollocation
    */
   interface WeaponCollocation {
     WeaponId: number;
-    Avatars: Array<{
-      Item: number;
-      Rate: number;
-    }>;
+    Avatars: Array<TGApp.Plugins.Hutao.Base.Rate>;
   }
 
   /**
@@ -362,21 +334,13 @@ declare namespace TGApp.Plugins.Hutao.Abyss {
    * @since Alpha v0.2.1
    * @interface TeamCombination
    * @property {number} Floor - 楼层
-   * @property {string} Up[].Item - 角色ID // id,id,id,id
-   * @property {number} Up[].Rate - 统计次数
-   * @property {string} Down[].Item - 角色ID // id,id,id,id
-   * @property {number} Down[].Rate - 统计次数
+   * @property {Array<TGApp.Plugins.Hutao.Base.Rate<string>>} Up - 统计次数
+   * @property {Array<TGApp.Plugins.Hutao.Base.Rate<string>>} Down - 统计次数
    * @return TeamCombination
    */
   interface TeamCombination {
     Floor: number;
-    Up: Array<{
-      Item: string;
-      Rate: number;
-    }>;
-    Down: Array<{
-      Item: string;
-      Rate: number;
-    }>;
+    Up: Array<TGApp.Plugins.Hutao.Base.Rate<string>>;
+    Down: Array<TGApp.Plugins.Hutao.Base.Rate<string>>;
   }
 }

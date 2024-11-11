@@ -4,30 +4,39 @@
  * @since Beta v0.6.2
  */
 
-import getAvatarCollect from "./request/getAvatarCollect.js";
-import getAvatarHoldRate from "./request/getAvatarHoldRate.js";
-import getAvatarUpRate from "./request/getAvatarUpRate.js";
-import getAvatarUseRate from "./request/getAvatarUseRate.js";
-import getOverview from "./request/getOverview.js";
-import getTeamCollect from "./request/getTeamCollect.js";
-import uploadData from "./request/uploadData.js";
-import { transAvatars, transLocal } from "./utils/transLocal.js";
+import {
+  getAbyssOverview,
+  getAvatarCollect,
+  getAvatarHoldRate,
+  getAvatarUpRate,
+  getAvatarUseRate,
+  getTeamCollect,
+  uploadAbyssData,
+} from "./request/abyssReq.js";
+import { getCombatStatistic, uploadCombatData } from "./request/combatReq.js";
+import { transAbyssAvatars, transAbyssLocal } from "./utils/abyssUtil.js";
+import { transCombatLocal } from "./utils/combatUtil.js";
 
 const Hutao = {
   Abyss: {
     avatar: {
-      getCollect: getAvatarCollect,
-      getHoldRate: getAvatarHoldRate,
-      getUpRate: getAvatarUpRate,
-      getUseRate: getAvatarUseRate,
+      collect: getAvatarCollect,
+      hold: getAvatarHoldRate,
+      up: getAvatarUpRate,
+      use: getAvatarUseRate,
     },
-    getOverview,
-    getTeamCollect,
-    postData: uploadData,
+    overview: getAbyssOverview,
+    team: getTeamCollect,
+    upload: uploadAbyssData,
     utils: {
-      transData: transLocal,
-      transAvatars,
+      transData: transAbyssLocal,
+      transAvatars: transAbyssAvatars,
     },
+  },
+  Combat: {
+    upload: uploadCombatData,
+    data: getCombatStatistic,
+    trans: transCombatLocal,
   },
 };
 
