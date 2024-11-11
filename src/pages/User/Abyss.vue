@@ -12,6 +12,18 @@
           :hide-details="true"
           title="游戏UID"
         />
+        <v-btn :rounded="true" class="ua-btn" @click="toCombat()">
+          <template #prepend>
+            <img src="/source/UI/userCombat.webp" alt="combat" />
+          </template>
+          <span>幻想真境剧诗</span>
+        </v-btn>
+        <v-btn :rounded="true" class="ua-btn" @click="toWiki()">
+          <template #prepend>
+            <img src="/source/UI/wikiAbyss.webp" alt="wiki" />
+          </template>
+          <span>深渊数据库</span>
+        </v-btn>
       </div>
     </template>
     <template #append>
@@ -61,7 +73,7 @@
               <span>更新于</span>
               <span>{{ item.updated }}</span>
             </div>
-            <div class="uaw-share">Render by TeyvatGuide v{{ version }}</div>
+            <div class="uaw-share">深境螺旋 | Render by TeyvatGuide v{{ version }}</div>
           </div>
           <TSubLine>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</TSubLine>
           <div class="uaw-o-box">
@@ -101,6 +113,7 @@
 import { getVersion } from "@tauri-apps/api/app";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, watch, computed } from "vue";
+import { useRouter } from "vue-router";
 
 import showConfirm from "../../components/func/confirm.js";
 import showSnackbar from "../../components/func/snackbar.js";
@@ -130,6 +143,7 @@ const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
 const localAbyss = ref<TGApp.Sqlite.Abyss.SingleTable[]>([]);
 const abyssRef = ref<HTMLElement>(<HTMLElement>{});
 const version = ref<string>();
+const router = useRouter();
 
 const uidList = ref<string[]>();
 const uidCur = ref<string>();
@@ -153,6 +167,14 @@ watch(
   () => uidCur.value,
   async () => await loadAbyss(),
 );
+
+async function toCombat(): Promise<void> {
+  await router.push({ name: "真境剧诗" });
+}
+
+async function toWiki(): Promise<void> {
+  await router.push({ name: "深渊数据库" });
+}
 
 async function loadAbyss(): Promise<void> {
   localAbyss.value = [];
@@ -330,9 +352,12 @@ async function deleteAbyss(): Promise<void> {
   }
 
   span {
-    color: var(--common-text-title);
     font-family: var(--font-title);
     font-size: 20px;
+  }
+
+  span :first-child {
+    color: var(--common-text-title);
   }
 }
 

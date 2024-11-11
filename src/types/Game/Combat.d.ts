@@ -43,7 +43,7 @@ declare namespace TGApp.Game.Combat {
    * @interface Avatar
    * @since Beta v0.6.3
    * @property {number} avatar_id 角色id
-   * @property {number} avatar_type 角色武器类型 // todo
+   * @property {number} avatar_type 角色类型 // 0-自己角色，1-试用角色，2-助演角色
    * @property {string} name 角色名称
    * @property {string} element 角色元素 // todo Dendro
    * @property {string} image 角色图像

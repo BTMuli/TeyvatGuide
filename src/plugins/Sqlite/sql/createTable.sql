@@ -1,6 +1,6 @@
 -- @file plugins/Sqlite/sql/createTable.sql
 -- @brief sqlite数据库创建表语句
--- @since Beta v0.6.1
+-- @since Beta v0.6.3
 
 -- @brief 创建成就数据表
 create table if not exists Achievements
@@ -68,6 +68,21 @@ create table if not exists SpiralAbyss
     floors           text,
     skippedFloor     text,
     updated          text,
+    primary key (uid, id)
+);
+
+-- @brief 创建幻想真境剧诗数据表
+create table if not exists RoleCombat
+(
+    uid           text,
+    id            integer,
+    startTime     text,
+    endTime       text,
+    hasData       boolean,
+    hasDetailData boolean,
+    stat          text,
+    detail        text,
+    updated       text,
     primary key (uid, id)
 );
 

@@ -1,0 +1,424 @@
+<template>
+  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
+  <v-app-bar>
+    <template #prepend>
+      <div class="uct-left">
+        <img alt="icon" src="/source/UI/userCombat.webp" />
+        <span>幻想真境剧诗</span>
+        <v-select
+          variant="outlined"
+          v-model="uidCur"
+          :items="uidList"
+          :hide-details="true"
+          title="游戏UID"
+        />
+        <v-btn :rounded="true" class="uc-btn" @click="toAbyss()">
+          <template #prepend>
+            <img src="/source/UI/userAbyss.webp" alt="abyss" />
+          </template>
+          <span>深境螺旋</span>
+        </v-btn>
+      </div>
+    </template>
+    <template #append>
+      <div class="uct-right">
+        <v-btn
+          class="uc-btn"
+          @click="shareCombat()"
+          :rounded="true"
+          :disabled="localCombat.length === 0"
+        >
+          <v-icon>mdi-share</v-icon>
+          <span>分享</span>
+        </v-btn>
+        <v-btn class="uc-btn" @click="refreshCombat()" :rounded="true">
+          <v-icon>mdi-refresh</v-icon>
+          <span>刷新</span>
+        </v-btn>
+        <v-btn class="uc-btn" @click="uploadCombat()" :rounded="true">
+          <v-icon>mdi-cloud-upload</v-icon>
+          <span>上传</span>
+        </v-btn>
+        <v-btn class="uc-btn" @click="deleteCombat()" :rounded="true">
+          <v-icon>mdi-delete</v-icon>
+          <span>删除</span>
+        </v-btn>
+      </div>
+    </template>
+  </v-app-bar>
+  <div class="uc-box">
+    <v-tabs v-model="userTab" direction="vertical" class="uc-tabs-box" center-active>
+      <v-tab v-for="item in localCombat" :key="item.id" :value="item.id"> 第{{ item.id }}期</v-tab>
+    </v-tabs>
+    <v-window v-model="userTab" class="uc-window">
+      <v-window-item
+        v-for="item in localCombat"
+        :key="item.id"
+        :value="item.id"
+        class="uc-window-item"
+      >
+        <div :id="`user-combat-${item.id}`" class="ucw-i-ref">
+          <div class="ucw-top">
+            <div class="ucw-title">
+              <span>第</span>
+              <span>{{ item.id }}</span>
+              <span>期 UID</span>
+              <span>{{ uidCur }}</span>
+              <span>更新于</span>
+              <span>{{ item.updated }}</span>
+            </div>
+            <div class="ucw-share">真境剧诗 | Render by TeyvatGuide v{{ version }}</div>
+          </div>
+          <TSubLine>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</TSubLine>
+          <TucOverview :data="item.stat" :fights="item.detail.fight_statisic" />
+          <TSubLine>使用角色</TSubLine>
+          <TucAvatars :model-value="item.detail.backup_avatars" />
+          <TSubLine>详情</TSubLine>
+          <div class="ucw-rounds">
+            <TucRound
+              v-for="(round, idx) in item.detail.rounds_data"
+              :key="idx"
+              :model-value="round"
+            />
+          </div>
+        </div>
+      </v-window-item>
+    </v-window>
+    <div v-show="localCombat.length === 0" class="user-empty">
+      <img src="/source/UI/empty.webp" alt="empty" />
+      <span>暂无数据，请尝试刷新</span>
+    </div>
+  </div>
+</template>
+<script lang="ts" setup>
+import { getVersion } from "@tauri-apps/api/app";
+import { storeToRefs } from "pinia";
+import { onMounted, ref, watch, computed } from "vue";
+import { useRouter } from "vue-router";
+
+import showConfirm from "../../components/func/confirm.js";
+import showSnackbar from "../../components/func/snackbar.js";
+import TSubLine from "../../components/main/t-subline.vue";
+import ToLoading from "../../components/overlay/to-loading.vue";
+import TucAvatars from "../../components/userCombat/tuc-avatars.vue";
+import TucOverview from "../../components/userCombat/tuc-overview.vue";
+import TucRound from "../../components/userCombat/tuc-round.vue";
+import Hutao from "../../plugins/Hutao/index.js";
+import TSUserCombat from "../../plugins/Sqlite/modules/userCombat.js";
+import { useUserStore } from "../../store/modules/user.js";
+import TGLogger from "../../utils/TGLogger.js";
+import { generateShareImg } from "../../utils/TGShare.js";
+import TGRequest from "../../web/request/TGRequest.js";
+
+// store
+const userStore = storeToRefs(useUserStore());
+// loading
+const loading = ref<boolean>(true);
+const loadingTitle = ref<string>();
+const loadingSub = ref<string>();
+
+// data
+const userTab = ref<number>(0);
+const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
+
+const localCombat = ref<TGApp.Sqlite.Combat.SingleTable[]>([]);
+const combatRef = ref<HTMLElement>(<HTMLElement>{});
+const version = ref<string>();
+const router = useRouter();
+
+const uidList = ref<string[]>();
+const uidCur = ref<string>();
+const combatIdList = computed<number[]>(() => {
+  return localCombat.value.map((combat) => combat.id);
+});
+
+onMounted(async () => {
+  version.value = await getVersion();
+  await TGLogger.Info("[UserCombat][onMounted] 打开真境剧诗页面");
+  loadingTitle.value = "正在加载剧诗数据";
+  uidList.value = await TSUserCombat.getAllUid();
+  if (uidList.value.includes(user.value.gameUid)) uidCur.value = user.value.gameUid;
+  else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
+  else uidCur.value = "";
+  await loadCombat();
+  loading.value = false;
+});
+
+watch(
+  () => uidCur.value,
+  async () => await loadCombat(),
+);
+
+async function toAbyss(): Promise<void> {
+  await router.push({ name: "深渊记录" });
+}
+
+async function loadCombat(): Promise<void> {
+  localCombat.value = [];
+  if (uidCur.value === undefined || uidCur.value === "") return;
+  localCombat.value = await TSUserCombat.getCombat(uidCur.value);
+  if (localCombat.value.length > 0) userTab.value = localCombat.value[0].id;
+}
+
+async function refreshCombat(): Promise<void> {
+  if (!userStore.cookie.value) {
+    showSnackbar({ text: "未登录", color: "error" });
+    await TGLogger.Warn("[UserCombat][getAbyssData] 未登录");
+    return;
+  }
+  if (uidCur.value && uidCur.value !== user.value.gameUid) {
+    const confirmSwitch = await showConfirm({
+      title: "是否切换游戏账户",
+      text: `确认则尝试切换至 ${uidCur.value}`,
+    });
+    if (confirmSwitch) {
+      await useUserStore().switchGameAccount(uidCur.value);
+      await refreshCombat();
+      return;
+    }
+    const confirm = await showConfirm({
+      title: "确定刷新？",
+      text: `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
+    });
+    if (!confirm) {
+      showSnackbar({ text: "已取消剧诗数据刷新", color: "cancel" });
+      return;
+    }
+  }
+  await TGLogger.Info("[UserCombat][getCombatData] 更新剧诗数据");
+  loadingTitle.value = `正在获取${user.value.gameUid}的深渊数据`;
+  loading.value = true;
+  loadingTitle.value = `正在获取${user.value.gameUid}的剧诗数据`;
+  const res = await TGRequest.User.byCookie.getCombat(userStore.cookie.value, user.value);
+  if (res === false) {
+    loading.value = false;
+    showSnackbar({ text: "用户未解锁幻想真境剧诗!", color: "warn" });
+    return;
+  }
+  if ("retcode" in res) {
+    showSnackbar({ text: `[${res.retcode}]${res.message}`, color: "error" });
+    loading.value = false;
+    await TGLogger.Error(`[UserCombat][getCombatData] 获取${user.value.gameUid}的剧诗数据失败`);
+    await TGLogger.Error(`[UserCombat][getCombatData] ${res.retcode} ${res.message}`);
+    return;
+  }
+  loadingTitle.value = `正在保存剧诗数据`;
+  for (const combat of res) {
+    loadingSub.value = `正在保存第${combat.schedule.schedule_id}期数据`;
+    await TSUserCombat.saveCombat(user.value.gameUid, combat);
+  }
+  loadingTitle.value = "正在加载剧诗数据";
+  uidList.value = await TSUserCombat.getAllUid();
+  uidCur.value = user.value.gameUid;
+  await loadCombat();
+  loading.value = false;
+}
+
+async function shareCombat(): Promise<void> {
+  await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片`);
+  const fileName = `【剧诗数据】${userTab.value}-${user.value.gameUid}`;
+  loadingTitle.value = "正在生成图片";
+  loadingSub.value = `${fileName}.png`;
+  loading.value = true;
+  combatRef.value = <HTMLElement>document.getElementById(`user-combat-${userTab.value}`);
+  await generateShareImg(fileName, combatRef.value);
+  loadingSub.value = "";
+  loading.value = false;
+  await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片成功`);
+}
+
+async function uploadCombat(): Promise<void> {
+  await TGLogger.Info("[UserCombat][uploadCombat] 上传剧诗数据");
+  const combatData = localCombat.value.find((item) => item.id === Math.max(...combatIdList.value));
+  if (!combatData) {
+    showSnackbar({ text: "未找到剧诗数据", color: "error" });
+    await TGLogger.Warn("[UserCombat][uploadCombat] 未找到深渊数据");
+    return;
+  }
+  if (!combatData.hasDetailData) {
+    showSnackbar({ text: "未获取到详情数据", color: "error" });
+    await TGLogger.Warn(`[UserCombat][uploadCombat] 未获取到详细数据`);
+    return;
+  }
+  const startTime = new Date(combatData.startTime).getTime();
+  const endTime = new Date(combatData.endTime).getTime();
+  const nowTime = new Date().getTime();
+  if (nowTime < startTime || nowTime > endTime) {
+    showSnackbar({ text: "非最新剧诗数据，请刷新剧诗数据后重试！", color: "error" });
+    await TGLogger.Warn("[UserCombat][uploadCombat] 非最新剧诗数据");
+    return;
+  }
+  try {
+    loadingTitle.value = "正在转换剧诗数据";
+    loadingSub.value = "";
+    loading.value = true;
+    const transCombat = Hutao.Combat.trans(combatData);
+    loadingTitle.value = "正在上传剧诗数据";
+    const res = await Hutao.Combat.upload(transCombat);
+    loading.value = false;
+    if (res.retcode === 0) {
+      showSnackbar({ text: res.message ?? "上传剧诗数据成功" });
+      await TGLogger.Info("[UserCombat][uploadCombat] 上传剧诗数据成功");
+    } else {
+      showSnackbar({ text: `[${res.retcode}]${res.message}`, color: "error" });
+      await TGLogger.Error("[UserCombat][uploadCombat] 上传剧诗数据失败");
+      await TGLogger.Error(`[UserCombat][uploadCombat] ${res.retcode} ${res.message}`);
+    }
+  } catch (e) {
+    if (e instanceof Error) {
+      showSnackbar({ text: e.message, color: "error" });
+      await TGLogger.Error("[UserCombat][uploadCombat] 上传剧诗数据失败");
+      await TGLogger.Error(`[UserCombat][uploadCombat] ${e.message}`);
+    }
+  }
+  if (loading.value) loading.value = false;
+}
+
+async function deleteCombat(): Promise<void> {
+  if (uidCur.value === undefined || uidCur.value === "") {
+    showSnackbar({ text: "未找到符合条件的数据!", color: "error" });
+    return;
+  }
+  const confirm = await showConfirm({
+    title: "确定删除数据？",
+    text: `将清除${uidCur.value}的所有剧诗数据`,
+  });
+  if (!confirm) {
+    showSnackbar({ text: "已取消删除", color: "cancel" });
+    return;
+  }
+  loadingTitle.value = `正在删除 ${uidCur.value} 的剧诗数据`;
+  loading.value = true;
+  await TSUserCombat.delCombat(uidCur.value);
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  loading.value = false;
+  showSnackbar({ text: `已清除 ${uidCur.value} 的剧诗数据`, color: "success" });
+  uidList.value = await TSUserCombat.getAllUid();
+  if (uidList.value.length > 0) uidCur.value = uidList.value[0];
+  else uidCur.value = undefined;
+  await loadCombat();
+}
+</script>
+<style lang="css" scoped>
+.uct-left {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  gap: 10px;
+
+  img {
+    width: 32px;
+    height: 32px;
+  }
+
+  span {
+    font-family: var(--font-title);
+    font-size: 20px;
+  }
+
+  span :first-child {
+    color: var(--common-text-title);
+  }
+}
+
+.uct-right {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  gap: 10px;
+}
+
+.uc-btn {
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
+  font-family: var(--font-text);
+}
+
+.uc-box {
+  display: flex;
+  height: calc(100vh - 100px);
+  align-items: flex-start;
+  justify-content: center;
+  border: 1px solid var(--common-shadow-4);
+  border-radius: 5px;
+}
+
+.uc-tabs-box {
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.uc-window {
+  overflow: hidden;
+  width: calc(100% - 100px);
+  height: 100%;
+  padding: 10px;
+}
+
+.uc-window-item {
+  height: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-y: auto;
+}
+
+.ucw-i-ref {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ucw-top {
+  display: flex;
+  width: 100%;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.ucw-title {
+  display: flex;
+  align-items: center;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 20px;
+}
+
+.ucw-title :nth-child(2n) {
+  margin-right: 10px;
+  margin-left: 10px;
+  color: var(--tgc-yellow-1);
+}
+
+.ucw-share {
+  z-index: -1;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.user-empty {
+  position: absolute;
+  top: calc(50vh - 200px);
+  left: calc(50vw - 400px);
+  display: flex;
+  width: 800px;
+  height: 400px;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 5px;
+  background: var(--common-shadow-t-2);
+  box-shadow: 0 0 5px var(--common-shadow-2);
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+}
+
+.ucw-rounds {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+}
+</style>
