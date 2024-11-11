@@ -1,7 +1,7 @@
 /**
  * @file web/utils/tools.ts
  * @description 应用用到的工具函数
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  */
 
 import TGConstant from "../constant/TGConstant.js";
@@ -42,7 +42,7 @@ export function transCookie(cookie: Record<string, string>): string {
 
 /**
  * @description ds 算法需要数据转换后的字符串是按照字典序排序的
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  * @param {Record<string, string|number>} obj object
  * @returns {string} query string
  */

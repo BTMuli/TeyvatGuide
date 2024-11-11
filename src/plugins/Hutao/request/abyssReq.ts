@@ -1,7 +1,7 @@
 /**
  * @file plugins/Hutao/request/abyssReq.ts
  * @description 深渊相关请求
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  */
 import TGHttp from "../../../utils/TGHttp.js";
 
@@ -9,7 +9,7 @@ const AbyssUrl = `https://homa.snapgenshin.com/Statistics/`;
 
 /**
  * @description 获取深渊概览数据
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  * @param {boolean} isLast 是否获取上期数据
  * @return {Promise<TGApp.Plugins.Hutao.Abyss.OverviewData>}
  */
@@ -26,7 +26,7 @@ export async function getAbyssOverview(
 
 /**
  * @description 获取角色搭配数据
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  * @param {boolean} isLast 是否获取上期数据
  * @return {Promise<TGApp.Plugins.Hutao.Abyss.AvatarCollocation[]>}
  */
@@ -43,7 +43,7 @@ export async function getAvatarCollect(
 
 /**
  * @description 获取角色持有率数据
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  * @param {boolean} isLast 是否获取上期数据
  * @returns {Promise<TGApp.Plugins.Hutao.Abyss.AvatarHold[]>}
  */
@@ -60,7 +60,7 @@ export async function getAvatarHoldRate(
 
 /**
  * @description 获取角色上场率数据
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  * @param {boolean} isLast 是否获取上期数据
  * @return {Promise<TGApp.Plugins.Hutao.Abyss.AvatarUp[]>}
  */
@@ -77,7 +77,7 @@ export async function getAvatarUpRate(
 
 /**
  * @description 获取角色使用率
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  * @param {boolean} isLast 是否获取上期数据
  * @return {Promise<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>}
  */
@@ -94,7 +94,7 @@ export async function getAvatarUseRate(
 
 /**
  * @description 获取队伍搭配数据
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  * @param {boolean} isLast 是否获取上期数据
  * @return {Promise<TGApp.Plugins.Hutao.Abyss.TeamCombination[]>}
  */

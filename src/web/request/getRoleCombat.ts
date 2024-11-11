@@ -1,7 +1,7 @@
 /**
  * @file web/request/getRoleCombat.ts
  * @description 真境剧诗
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  */
 
 import TGHttp from "../../utils/TGHttp.js";
@@ -10,7 +10,7 @@ import TGUtils from "../utils/TGUtils.js";
 
 /**
  * @description 获取剧诗信息
- * @since Beta v.0.6.2
+ * @since Beta v.0.6.3
  * @param {TGApp.App.Account.Cookie} cookie
  * @param {TGApp.Sqlite.Account.Game} account
  * @returns {Promise<TGApp.Game.Combat.Combat[]|TGApp.BBS.Response.Base|false>}

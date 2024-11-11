@@ -1,12 +1,12 @@
 /**
  * @file types/Game/Combat.d.ts
  * @description 幻想真境剧诗类型定义
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  */
 
 /**
  * @description 幻想真境剧诗相关类型
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  * @namespace TGApp.Game.Combat
  * @memberOf TGApp.Game
  */
@@ -14,7 +14,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 幻想真境剧诗数据返回类型
    * @interface Response
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @extends TGApp.BBS.Response.BaseWithData
    * @property {FullData} data
    * @return Response
@@ -26,7 +26,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 返回完整数据类型
    * @interface FullData
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {boolean} is_unlock 是否解锁
    * @property {Record<string,string>} links 相关链接
    * @property {Array<Combat>} data 挑战数据
@@ -41,7 +41,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 角色数据
    * @interface Avatar
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {number} avatar_id 角色id
    * @property {number} avatar_type 角色武器类型 // todo
    * @property {string} name 角色名称
@@ -64,7 +64,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 简要角色
    * @interface AvatarMini
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {number} avatar_id 角色id
    * @property {number} avatar_icon 角色图标
    * @property {string} value 值
@@ -81,7 +81,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description Buff
    * @interface Buff
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {string} name 名称
    * @property {string} icon 图标
    * @property {number} level 等级
@@ -98,7 +98,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description Buff助益
    * @interface BuffEffect
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {string} icon 图标
    * @property {string} name 名称
    * @property {string} desc 描述
@@ -113,7 +113,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 卡片
    * @interface Card
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {string} icon 图标
    * @property {string} name 名称
    * @property {string} desc 描述 // todo 带 <color>
@@ -132,7 +132,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 时间
    * @interface DateTime
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {number} year 年份
    * @property {number} month 月份
    * @property {number} day 日期
@@ -153,7 +153,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 状态
    * @interface Stat
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {number} difficulty_id 难度等级
    * @property {number} max_round_id 最多层数
    * @property {number} heraldry 纹章数
@@ -178,7 +178,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 敌人
    * @interface Enemy
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {string} name 名称
    * @property {string} icon 图标
    * @property {number} level 等级
@@ -193,7 +193,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 单期挑战数据
    * @interface Combat
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {Detail} detail 挑战详情
    * @property {Stat} stat 挑战状态
    * @property {Schedule} schedule 挑战期数
@@ -212,7 +212,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 挑战详情
    * @interface Detail
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {Array<RoundData>} rounds_data 轮次数据
    * @property {Stat} detail_stat 详细状态
    * @property {string} lineup_link 未知链接
@@ -230,7 +230,7 @@ declare namespace TGApp.Game.Combat {
 
   /**
    * @description 轮次数据
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @interface RoundData
    * @property {Array<Avatar>} avatars 角色
    * @property {Array<Card>} choice_cards 选中卡片
@@ -258,7 +258,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 总体buff
    * @interface SplendourBuff
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {object} summary 概况
    * @property {number} summary.total_level 总等级
    * @property {string} summary.desc 描述
@@ -276,7 +276,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 战斗数据
    * @interface FightStatisic
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {AvatarMini} max_defeat_avatar 击败最多敌人
    * @property {AvatarMini} max_damage_avatar 最高伤害输出
    * @property {AvatarMini} max_take_damage_avatar 最高承受伤害
@@ -299,7 +299,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 期数
    * @interface Schedule
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @property {string} start_time 开始时间（秒级时间戳）
    * @property {string} end_time 结束时间（秒级时间戳）
    * @property {number} schedule_type 类型 // 1-本期。2-上期

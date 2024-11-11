@@ -49,7 +49,7 @@ onBeforeMount(async () => {
   next.value = TSAvatarBirth.getNextAvatarBirth();
 });
 
-function toBirth(type: TGApp.Archive.Birth.RoleItem) {
+function toBirth(type: TGApp.Archive.Birth.RoleItem | true): void {
   let dateStr;
   if (type === true) {
     const date = new Date();

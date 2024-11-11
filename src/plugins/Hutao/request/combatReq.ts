@@ -1,7 +1,7 @@
 /**
  * @file plugins/Hutao/request/combatReq.ts
  * @description 幻想真境剧诗相关请求
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  */
 import TGHttp from "../../../utils/TGHttp.js";
 
@@ -9,7 +9,7 @@ const CombatUrl = "https://homa.snapgenshin.com/RoleCombat/";
 
 /**
  * @description 获取数据
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  * @param {boolean} isLast
  * @return {Promise<TGApp.Plugins.Hutao.Combat.Data>}
  */
@@ -26,7 +26,7 @@ export async function getCombatStatistic(
 
 /**
  * @description 上传数据
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  * @param {TGApp.Plugins.Hutao.Combat.UploadData} data
  * @returns {Promise<TGApp.Plugins.Hutao.Combat.UploadResponse>}
  */

@@ -6,7 +6,7 @@
 
 /**
  * @description 将本地数据转为上传用的数据
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  * @param {TGApp.Sqlite.Abyss.SingleTable} data 本地数据
  * @returns {TGApp.Plugins.Hutao.Abyss.RecordUpload} 上传用的数据
  */

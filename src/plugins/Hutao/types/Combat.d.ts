@@ -1,13 +1,13 @@
 /**
  * @file plugins/Hutao/types/Combat.d.ts
  * @description 幻想真境剧诗
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  */
 
 declare namespace TGApp.Plugins.Hutao.Combat {
   /**
    * @description 上传返回
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @interface UploadResponse
    * @extends TGApp.Plugins.Hutao.Base.Response
    * @return UploadResponse
@@ -16,7 +16,7 @@ declare namespace TGApp.Plugins.Hutao.Combat {
 
   /**
    * @description 上传数据
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @interface UploadData
    * @property {number} Version
    * @property {string} Uid
@@ -35,7 +35,7 @@ declare namespace TGApp.Plugins.Hutao.Combat {
 
   /**
    * @description 数据获取返回
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @interface Response
    * @extends TGApp.Plugins.Hutao.Base.Response
    * @property {Data} data
@@ -47,7 +47,7 @@ declare namespace TGApp.Plugins.Hutao.Combat {
 
   /**
    * @description 数据
-   * @since Beta v0.6.2
+   * @since Beta v0.6.3
    * @interface Data
    * @property {number} RecordTotal 总数
    * @property {Array<TGApp.Plugins.Hutao.Base.Rate>} BackupAvatarRates 使用率

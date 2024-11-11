@@ -1,12 +1,12 @@
 /**
  * @file plugins/Hutao/utils/combatUtil.ts
  * @description 将本地数据转为上传用的数据
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  */
 
 /**
  * @description 将本地数据转为上传用的数据
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  * @param {number[]} avatars 角色
  * @param {number} schedule 期数
  * @param {number} uid UID
