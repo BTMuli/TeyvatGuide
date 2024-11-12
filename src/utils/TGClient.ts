@@ -1,7 +1,7 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.6.0
+ * @since Beta v0.6.3
  */
 
 import { event, core, webviewWindow } from "@tauri-apps/api";
@@ -456,10 +456,7 @@ class TGClient {
       try {
         await windowFind.destroy();
       } catch (e) {
-        showSnackbar({
-          text: `[TGClient][open] ${e}`,
-          color: "error",
-        });
+        showSnackbar({ text: `[TGClient][open] ${e}`, color: "error" });
         await TGLogger.Error(`[TGClient][open] ${e}`);
       }
     }
@@ -479,9 +476,7 @@ class TGClient {
     this.route.pop();
     if (this.route.length === 0) {
       const windowFind = await webviewWindow.WebviewWindow.getByLabel("mhy_client");
-      if (windowFind != null) {
-        await windowFind.destroy();
-      }
+      if (windowFind != null) await windowFind.destroy();
       return;
     }
     const url = this.route[this.route.length - 1];
@@ -535,10 +530,7 @@ class TGClient {
   ): Promise<void> {
     const userStore = useUserStore();
     if (!userStore.cookie) return;
-    const cookie = {
-      mid: userStore.cookie.mid,
-      stoken: userStore.cookie.stoken,
-    };
+    const cookie = { mid: userStore.cookie.mid, stoken: userStore.cookie.stoken };
     const res = await TGRequest.User.getAuthkey2(cookie, arg.payload);
     await this.callback(arg.callback, res.data);
   }
@@ -577,17 +569,13 @@ class TGClient {
   async getCookieInfo(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     const user = useUserStore();
     if (!user.cookie) return;
-    const data = {
-      ltoken: user.cookie.ltoken,
-      ltuid: user.cookie.ltuid,
-      login_ticket: "",
-    };
+    const data = { ltoken: user.cookie.ltoken, ltuid: user.cookie.ltuid, login_ticket: "" };
     await this.callback(arg.callback, data);
   }
 
   /**
    * @func getCookieToken
-   * @since Beta v0.5.5
+   * @since Beta v0.6.3
    * @desc 获取米游社客户端的 cookie_token
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetCookieTokenPayload>} arg - 请求参数
    * @returns {void} - 无返回值
@@ -599,34 +587,25 @@ class TGClient {
     if (!user.cookie) return;
     if (arg.payload.forceRefresh) {
       const res = await getCookieTokenBySToken(user.cookie.mid, user.cookie.stoken);
-      if (typeof res !== "string") {
-        return;
-      }
+      if (typeof res !== "string") return;
       user.cookie.cookie_token = res;
       await TGSqlite.saveAppData("cookie", JSON.stringify(user.cookie));
     }
-    // todo 优化代码
     const executeJS = `javascript:(function(){
-      let domainCur = window.location.hostname;
-      if(domainCur.endsWith('.miyoushe.com')) {
-        domainCur = '.miyoushe.com';
-      } else {
-        domainCur = '.mihoyo.com';
-      }
-      document.cookie = "account_id_v2=${user.cookie.account_id};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "cookie_token=${user.cookie.cookie_token};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "ltuid_v2=${user.cookie.ltuid};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "ltoken=${user.cookie.ltoken};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "account_id=${user.cookie.account_id};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "account_mid_v2=${user.cookie.mid};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "ltuid_v2=${user.cookie.ltuid};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
-      document.cookie = "ltmid_v2=${user.cookie.mid};domain=" + domainCur + ";path=/;expires=Fri, 31 Dec 9999 23:59:59 GMT;";
+    let domainCur = window.location.hostname;
+    if (domainCur.endsWith('.miyoushe.com')) domainCur = '.miyoushe.com';
+    else domainCur = '.mihoyo.com';
+    document.cookie = 'account_id=${user.cookie!.account_id}; domain=' + domainCur + '; path=/; max-age=31536000';
+    document.cookie = 'account_id_v2=${user.cookie!.account_id}; domain=' + domainCur + '; path=/; max-age=31536000';
+    document.cookie = 'account_mid_v2=${user.cookie!.mid}; domain=' + domainCur + '; path=/; max-age=31536000';
+    document.cookie = 'cookie_token=${user.cookie!.cookie_token}; domain=' + domainCur + '; path=/; max-age=31536000';
+    document.cookie = 'ltmid_v2=${user.cookie!.mid}; domain=' + domainCur + '; path=/; max-age=31536000';
+    document.cookie = 'ltoken=${user.cookie!.ltoken}; domain=' + domainCur + '; path=/; max-age=31536000';
+    document.cookie = 'ltuid_v2=${user.cookie!.ltuid}; domain=' + domainCur + '; path=/; max-age=31536000';
     })();`;
     console.info(`[getCookieToken] ${executeJS}`);
     await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
-    const data = {
-      cookie_token: user.cookie.cookie_token,
-    };
+    const data = { cookie_token: user.cookie.cookie_token };
     await this.callback(arg.callback, data);
   }
 
@@ -638,9 +617,7 @@ class TGClient {
    * @returns {void} - 无返回值
    */
   async getDS(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
-    const data = {
-      DS: getDS4JS("lk2", 1, undefined, undefined),
-    };
+    const data = { DS: getDS4JS("lk2", 1, undefined, undefined) };
     await this.callback(arg.callback, data);
   }
 
@@ -691,9 +668,7 @@ class TGClient {
    * @returns {void} - 无返回值
    */
   async getStatusBarHeight(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
-    const data = {
-      statusBarHeight: 0,
-    };
+    const data = { statusBarHeight: 0 };
     await this.callback(arg.callback, data);
   }
 
@@ -750,15 +725,9 @@ class TGClient {
       text: `不支持的操作：OpenApplication(${JSON.stringify(arg.payload)})`,
       color: "error",
     });
-    await new Promise<void>((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 1500);
-    });
+    await new Promise<void>((resolve) => setTimeout(() => resolve(), 1500));
     const windowFind = await webviewWindow.WebviewWindow.getByLabel("mhy_client");
-    if (windowFind !== null) {
-      await windowFind.setFocus();
-    }
+    if (windowFind !== null) await windowFind.setFocus();
   }
 
   /**
@@ -792,11 +761,7 @@ class TGClient {
       if (appWindow != null) {
         await appWindow.setFocus();
       }
-      showSnackbar({
-        text: `未知链接:${arg.payload.page}`,
-        color: "error",
-        timeout: 3000,
-      });
+      showSnackbar({ text: `未知链接:${arg.payload.page}`, color: "error", timeout: 3000 });
       await new Promise<void>((resolve) => {
         setTimeout(() => {
           resolve();
