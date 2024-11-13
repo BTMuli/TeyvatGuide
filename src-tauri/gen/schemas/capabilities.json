@@ -41,7 +41,9 @@
   "Mys": {
     "identifier": "Mys",
     "description": "Capability for the mys client window",
-    "remote": { "urls": ["https://*.mihoyo.com/*", "https://*.miyoushe.com/*"] },
+    "remote": {
+      "urls": ["https://*.mihoyo.com/*", "https://*.miyoushe.com/*", "https://*.genshinnet.com/*"]
+    },
     "local": true,
     "windows": ["mhy_client"],
     "permissions": [
@@ -64,7 +66,11 @@
       { "identifier": "fs:allow-write-text-file", "allow": [{ "path": "**" }] },
       {
         "identifier": "http:default",
-        "allow": [{ "url": "https://*.miyoushe.com/*" }, { "url": "https://*.mihoyo.com/*" }]
+        "allow": [
+          { "url": "https://*.miyoushe.com/*" },
+          { "url": "https://*.mihoyo.com/*" },
+          { "url": "https://*.genshinnet.com/*" }
+        ]
       }
     ],
     "platforms": ["windows", "macOS"]
@@ -118,7 +124,8 @@
           { "url": "https://*.mihoyo.com/*" },
           { "url": "https://*.mihoyogift.com/*" },
           { "url": "https://*.bilibili.com/*" },
-          { "url": "https://*.hoyoverse.com/*" }
+          { "url": "https://*.hoyoverse.com/*" },
+          { "url": "https://*.genshinnet.com/*" }
         ]
       }
     ],

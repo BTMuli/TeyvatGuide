@@ -78,12 +78,15 @@
         },
         {
           "url": "https://*.mihoyo.com/*"
+        },
+        {
+          "url": "https://*.genshinnet.com/*"
         }
       ]
     }
   ],
   "remote": {
-    "urls": ["https://*.mihoyo.com/*", "https://*.miyoushe.com/*"]
+    "urls": ["https://*.mihoyo.com/*", "https://*.miyoushe.com/*", "https://*.genshinnet.com/*"]
   },
   "platforms": ["windows", "macOS"]
 }

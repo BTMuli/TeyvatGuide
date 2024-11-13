@@ -80,12 +80,8 @@ function getTextStyle(): StyleValue {
   if (data.attributes) {
     const ruleBold: StyleValue = "fontFamily: var(--font-title)";
     const ruleItalic: StyleValue = "fontStyle: italic";
-    if (data.attributes.bold) {
-      style.push(ruleBold);
-    }
-    if (data.attributes.italic) {
-      style.push(ruleItalic);
-    }
+    if (data.attributes.bold) style.push(ruleBold);
+    if (data.attributes.italic) style.push(ruleItalic);
     if (data.attributes.color) {
       let colorGet = data.attributes.color;
       if (isColorSimilar("#000000", data.attributes.color)) {
@@ -111,11 +107,7 @@ async function toLink() {
   const res = await parseLink(link);
   if (res === true) return;
   if (res === false) {
-    showSnackbar({
-      text: `未知链接:${link}`,
-      color: "error",
-      timeout: 3000,
-    });
+    showSnackbar({ text: `未知链接:${link}`, color: "error", timeout: 3000 });
     return;
   }
   window.open(res);
@@ -128,23 +120,17 @@ function getEmojiUrl(): string {
     getEmojis().then((res) => {
       if ("retcode" in res) {
         console.error(res);
-        showSnackbar({
-          text: "获取表情包失败！",
-          color: "error",
-        });
+        showSnackbar({ text: "获取表情包失败！", color: "error" });
         mode.value = "text";
         return "";
-      } else {
-        localEmojis.value = JSON.stringify(res);
-        localStorage.setItem("emojis", localEmojis.value);
       }
+      localEmojis.value = JSON.stringify(res);
+      localStorage.setItem("emojis", localEmojis.value);
     });
   }
   const emojiName = getEmojiName();
   const emojiMap: Record<string, string> = JSON.parse(<string>localEmojis.value);
-  if (!Object.keys(emojiMap).includes(emojiName)) {
-    mode.value = "text";
-  }
+  if (!Object.keys(emojiMap).includes(emojiName)) mode.value = "text";
   return JSON.parse(<string>localEmojis.value)[emojiName];
 }
 

@@ -78,6 +78,9 @@
         },
         {
           "url": "https://*.hoyoverse.com/*"
+        },
+        {
+          "url": "https://*.genshinnet.com/*"
         }
       ]
     }
