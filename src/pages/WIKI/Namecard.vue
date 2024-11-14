@@ -55,10 +55,7 @@ function sortData(data: TGApp.App.NameCard.Item[]) {
   curIndex.value = 0;
   total.value = sortNameCardsData.value.length;
   curNameCard.value = sortNameCardsData.value[curIndex.value];
-  showSnackbar({
-    text: `共搜索到 ${sortNameCardsData.value.length} 个结果`,
-    color: "success",
-  });
+  showSnackbar.success(`共搜索到 ${sortNameCardsData.value.length} 个结果`);
 }
 
 function toNameCard(item: TGApp.App.NameCard.Item) {
@@ -70,19 +67,13 @@ function toNameCard(item: TGApp.App.NameCard.Item) {
 function switchCard(isNext: boolean) {
   if (isNext) {
     if (curIndex.value === total.value - 1) {
-      showSnackbar({
-        text: "已经是最后一个了",
-        color: "warn",
-      });
+      showSnackbar.warn("已经是最后一个了");
       return;
     }
     curIndex.value++;
   } else {
     if (curIndex.value === 0) {
-      showSnackbar({
-        text: "已经是第一个了",
-        color: "warn",
-      });
+      showSnackbar.warn("已经是第一个了");
       return;
     }
     curIndex.value--;
@@ -95,10 +86,7 @@ function searchNamecard() {
     sortData(AppNameCardsData);
   } else if (search.value === "") {
     if (sortNameCardsData.value.length === AppNameCardsData.length) {
-      showSnackbar({
-        text: "请先输入搜索内容",
-        color: "warn",
-      });
+      showSnackbar.warn("请先输入搜索内容");
     } else {
       sortData(AppNameCardsData);
     }

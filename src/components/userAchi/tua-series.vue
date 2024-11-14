@@ -64,10 +64,7 @@ onUnmounted(async () => {
 
 async function selectSeries(): Promise<void> {
   if (props.cur === props.series) {
-    showSnackbar({
-      text: "已选中当前系列！",
-      color: "warn",
-    });
+    showSnackbar.warn("已选中当前系列！");
     return;
   }
   emits("selectSeries", props.series);

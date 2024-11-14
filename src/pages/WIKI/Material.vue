@@ -102,7 +102,7 @@ onMounted(() => {
     }
   });
   sortData(WikiMaterialData);
-  showSnackbar({ text: `成功获取${sortMaterialsData.value.length}条数据` });
+  showSnackbar.success(`成功获取${sortMaterialsData.value.length}条数据`);
 });
 
 function getSelectMaterials(): TGApp.App.Material.WikiItem[] {
@@ -150,23 +150,22 @@ function searchMaterial() {
   let selectData = getSelectMaterials();
   if (search.value === undefined || search.value === "") {
     if (sortMaterialsData.value.length === selectData.length) {
-      showSnackbar({ text: "请输入搜索内容!", color: "warn" });
+      showSnackbar.warn("请输入搜索内容!");
       return;
-    } else {
-      sortData(selectData);
-      showSnackbar({ text: "已重置!" });
     }
+    sortData(selectData);
+    showSnackbar.success("已重置!");
     return;
   }
   selectData = selectData.filter(
     (i) => i.name.includes(search.value!) || i.description.includes(search.value!),
   );
   if (selectData.length === 0) {
-    showSnackbar({ text: "未找到符合条件的材料!", color: "warn" });
+    showSnackbar.warn("未找到符合条件的材料!");
     return;
   }
   sortData(selectData);
-  showSnackbar({ text: `找到 ${selectData.length} 条符合条件的内容` });
+  showSnackbar.success(`找到${selectData.length}条符合条件的材料`);
 }
 </script>
 <style lang="css" scoped>

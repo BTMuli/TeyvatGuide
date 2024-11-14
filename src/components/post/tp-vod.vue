@@ -119,7 +119,7 @@ onMounted(async () => {
           const buffer = await getImageBuffer(props.data.insert.vod.cover);
           const size = bytesToSize(buffer.byteLength);
           await saveCanvasImg(buffer, `vod-cover-${props.data.insert.vod.id}`);
-          showSnackbar({ text: `封面已下载到本地，大小：${size}` });
+          showSnackbar.success(`封面已下载到本地，大小：${size}`);
         },
       },
     ],

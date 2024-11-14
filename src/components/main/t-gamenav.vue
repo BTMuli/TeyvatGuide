@@ -60,27 +60,24 @@ async function tryGetCode(): Promise<void> {
   if (!navFind) return;
   const actIdFind = new URL(navFind.app_path).searchParams.get("act_id");
   if (!actIdFind) {
-    showSnackbar({ text: "未找到活动ID", color: "warn" });
+    showSnackbar.warn("未找到活动ID");
     return;
   }
   actId.value = actIdFind;
   const res = await TGRequest.Nav.getCode(actIdFind);
   if (!Array.isArray(res)) {
-    showSnackbar({ text: `[${res.retcode}] ${res.message}`, color: "warn" });
+    showSnackbar.warn(`[${res.retcode}] ${res.message}`);
     return;
   }
   codeData.value = res;
-  showSnackbar({ text: "获取兑换码成功", color: "success" });
+  showSnackbar.success("获取兑换码成功");
   await TGLogger.Info(JSON.stringify(res));
   showOverlay.value = true;
 }
 
 async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
   if (!appStore.isLogin) {
-    showSnackbar({
-      text: "请先登录",
-      color: "warn",
-    });
+    showSnackbar.warn("请先登录");
     return;
   }
   await TGLogger.Info(`[TGameNav][toNav] 打开网页活动 ${item.name}`);
@@ -111,10 +108,7 @@ async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
     text: "取消则采用竖屏模式打开",
   });
   if (modeConfirm === undefined) {
-    showSnackbar({
-      text: "已取消打开",
-      color: "cancel",
-    });
+    showSnackbar.cancel("已取消打开");
     return;
   }
   if (modeConfirm) await TGClient.open("web_act", item.app_path);
@@ -133,20 +127,14 @@ async function toBBS(link: URL): Promise<void> {
       const forumId = link.pathname.split("/").pop();
       const localPath = getLocalPath(forumId);
       if (localPath === "") {
-        showSnackbar({
-          text: `不支持的链接：${link.href}`,
-          color: "warn",
-        });
+        showSnackbar.warn(`不支持的链接：${link.href}`);
         return;
       }
       await emit("active_deep_link", `router?path=${localPath}`);
       return;
     }
   }
-  showSnackbar({
-    text: `不支持的链接：${link.href}`,
-    color: "warn",
-  });
+  showSnackbar.warn(`不支持的链接：${link.href}`);
 }
 
 function getLocalPath(forum?: string): string {

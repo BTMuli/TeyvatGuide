@@ -39,7 +39,7 @@ console.log("tpUid", props.data.insert.game_user_info);
 
 function copyUid(): void {
   navigator.clipboard.writeText(props.data.insert.game_user_info.game_uid);
-  showSnackbar({ text: "已复制UID" });
+  showSnackbar.success("已复制UID");
 }
 
 function getGameName(): string {

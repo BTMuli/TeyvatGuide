@@ -135,7 +135,7 @@ import TGRequest from "../../web/request/TGRequest.js";
 // Store
 const appStore = useAppStore();
 const homeStore = useHomeStore();
-
+// @ts-expect-error-next-line
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 
 // loading
@@ -167,10 +167,7 @@ async function confirmBackup(): Promise<void> {
     text: "取消则自选路径，点击外部不做处理",
   });
   if (res === undefined) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消备份",
-    });
+    showSnackbar.cancel("已取消备份");
     return;
   }
   let saveDir = appStore.userDir;
@@ -181,10 +178,7 @@ async function confirmBackup(): Promise<void> {
       multiple: false,
     });
     if (dir === null) {
-      showSnackbar({
-        color: "error",
-        text: "路径不能为空!",
-      });
+      showSnackbar.error("路径不能为空!");
       return;
     }
     await TGLogger.Info(`[Config][confirmBackup] 选择备份路径 ${dir.toString()}`);
@@ -196,7 +190,7 @@ async function confirmBackup(): Promise<void> {
   loading.value = true;
   await backUpUserData(saveDir);
   loading.value = false;
-  showSnackbar({ text: "数据已备份!" });
+  showSnackbar.success("数据已备份!");
   await TGLogger.Info("[Config][confirmBackup] 备份完成");
 }
 
@@ -207,10 +201,7 @@ async function confirmRestore(): Promise<void> {
     text: "取消则自选路径，点击外部不做处理",
   });
   if (resConfirm === undefined) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消恢复",
-    });
+    showSnackbar.cancel("已取消恢复");
     return;
   }
   let saveDir = appStore.userDir;
@@ -221,10 +212,7 @@ async function confirmRestore(): Promise<void> {
       multiple: false,
     });
     if (dir === null) {
-      showSnackbar({
-        color: "error",
-        text: "路径不能为空!",
-      });
+      showSnackbar.error("路径不能为空!");
       return;
     }
     await TGLogger.Info(`[Config][confirmRestore] 选择恢复路径 ${dir.toString()}`);
@@ -233,25 +221,19 @@ async function confirmRestore(): Promise<void> {
     await TGLogger.Info(`[Config][confirmRestore] 恢复到默认路径 ${saveDir}`);
   }
   loadingTitle.value = "正在恢复数据...";
+  loadingSub.value = "请稍后...";
   loading.value = true;
-  loadingSub.value = "祈愿数据需单独恢复";
   await restoreUserData(saveDir);
   loading.value = false;
-  showSnackbar({ text: "数据已恢复!" });
+  showSnackbar.success("数据已恢复!");
   await TGLogger.Info("[Config][confirmRestore] 恢复完成");
 }
 
 // 更新数据
 async function confirmUpdate(title?: string): Promise<void> {
-  const res = await showConfirm({
-    title: title ?? "确认更新数据吗？",
-    text: "请确保存在备份数据",
-  });
+  const res = await showConfirm({ title: title ?? "确认更新数据吗？", text: "请确保存在备份数据" });
   if (!res) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消更新数据库",
-    });
+    showSnackbar.cancel("已取消更新数据库");
     return;
   }
   loadingTitle.value = "正在更新数据库...";
@@ -259,11 +241,8 @@ async function confirmUpdate(title?: string): Promise<void> {
   await TGSqlite.update();
   appStore.buildTime = getBuildTime();
   loading.value = false;
-  showSnackbar({
-    text: "数据库已更新!",
-  });
+  showSnackbar.success("数据库已更新!");
   await TGLogger.Info("[Config][confirmUpdate] 数据库更新完成");
-  // 刷新
   window.location.reload();
 }
 
@@ -276,25 +255,17 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
       text: `DeviceFp:${appStore.deviceInfo.device_fp}`,
     });
     if (!resF) {
-      showSnackbar({
-        text: "已取消强制更新设备信息",
-        color: "cancel",
-      });
+      showSnackbar.cancel("已取消强制更新设备信息");
       await TGLogger.Info("[Config][confirmUpdateDevice][force] 取消强制更新设备信息");
       return;
     }
     appStore.deviceInfo = await TGRequest.Device.getFp();
     if (appStore.deviceInfo.device_fp === "0000000000000") {
       appStore.deviceInfo.device_fp = getRandomString(13, "hex");
-      showSnackbar({
-        text: `设备信息获取失败!已使用随机值 ${appStore.deviceInfo.device_fp} 代替`,
-        color: "warn",
-      });
+      showSnackbar.warn(`设备信息获取失败!已使用随机值${appStore.deviceInfo.device_fp}代替`);
       await TGLogger.Warn("[Config][confirmUpdateDevice][force] 设备信息获取失败!已使用随机值代替");
     } else {
-      showSnackbar({
-        text: "设备信息已更新! DeviceFp: " + appStore.deviceInfo.device_fp,
-      });
+      showSnackbar.success(`设备信息已更新! DeviceFp: ${appStore.deviceInfo.device_fp}`);
     }
     await TGSqlite.saveAppData("deviceInfo", JSON.stringify(appStore.deviceInfo));
     await TGLogger.Info("[Config][confirmUpdateDevice][force] 设备信息更新完成");
@@ -303,15 +274,9 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
   await TGLogger.Info("[Config][confirmUpdateDevice] 开始更新设备信息");
   const localFp = getDeviceInfo("device_fp");
   if (localFp !== "0000000000000") {
-    const res = await showConfirm({
-      title: "确认更新设备信息吗？",
-      text: `DeviceFp:${localFp}`,
-    });
+    const res = await showConfirm({ title: "确认更新设备信息吗？", text: `DeviceFp:${localFp}` });
     if (!res) {
-      showSnackbar({
-        text: "已取消更新设备信息",
-        color: "cancel",
-      });
+      showSnackbar.cancel("已取消更新设备信息");
       await TGLogger.Info("[Config][confirmUpdateDevice] 取消更新设备信息");
       return;
     }
@@ -321,15 +286,11 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
   console.log(appStore.deviceInfo);
   if (appStore.deviceInfo.device_fp === "0000000000000") {
     appStore.deviceInfo.device_fp = getRandomString(13, "hex");
-    showSnackbar({
-      text: "设备信息获取失败!已使用随机值代替",
-    });
+    showSnackbar.warn(`设备信息获取失败!已使用随机值${appStore.deviceInfo.device_fp}代替`);
     await TGLogger.Warn("[Config][confirmUpdateDevice] 设备信息获取失败!已使用随机值代替");
     return;
   }
-  showSnackbar({
-    text: "设备信息已更新! DeviceFp: " + appStore.deviceInfo.device_fp,
-  });
+  showSnackbar.success(`设备信息已更新! DeviceFp: ${appStore.deviceInfo.device_fp}`);
   await TGSqlite.saveAppData("deviceInfo", JSON.stringify(appStore.deviceInfo));
   await TGLogger.Info("[Config][confirmUpdateDevice] 设备信息更新完成");
 }
@@ -339,10 +300,7 @@ async function confirmDelCache(): Promise<void> {
   await TGLogger.Info("[Config][confirmDelCache] 开始清除缓存");
   const CacheDir = await getCacheDir();
   if (CacheDir === false) {
-    showSnackbar({
-      color: "error",
-      text: "不支持的平台!",
-    });
+    showSnackbar.error("不支持的平台!");
     return;
   }
   let cacheBSize: number = 0;
@@ -359,10 +317,7 @@ async function confirmDelCache(): Promise<void> {
     text: `当前缓存大小为 ${bytesToSize(cacheBSize)}`,
   });
   if (!res) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消清除缓存",
-    });
+    showSnackbar.cancel("已取消清除缓存");
     await TGLogger.Info("[Config][confirmDelCache] 取消清除缓存");
     return;
   }
@@ -373,35 +328,24 @@ async function confirmDelCache(): Promise<void> {
   }
   await TGLogger.Info("[Config][confirmDelCache] 缓存清除完成");
   loading.value = false;
-  showSnackbar({
-    text: "缓存已清除!即将退出应用！",
-  });
-  setTimeout(async () => {
-    await exit();
-  }, 1000);
+  showSnackbar.success("缓存已清除!即将退出应用！");
+  setTimeout(async () => await exit(), 1000);
 }
 
 // 恢复默认设置
 async function confirmResetApp(): Promise<void> {
   await TGLogger.Info("[Config][confirmResetApp] 开始恢复默认设置");
-  const res = await showConfirm({
-    title: "确认恢复默认设置吗？",
-  });
+  const res = await showConfirm({ title: "确认恢复默认设置吗？" });
   if (!res) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消恢复默认设置",
-    });
+    showSnackbar.cancel("已取消恢复默认设置");
     await TGLogger.Info("[Config][confirmResetApp] 取消恢复默认设置");
     return;
   }
   appStore.init();
   homeStore.init();
   await TGLogger.Info("[Config][confirmResetApp] 恢复默认设置完成");
-  showSnackbar({ text: "已恢复默认配置!即将刷新页面..." });
-  setTimeout(() => {
-    window.location.reload();
-  }, 1500);
+  showSnackbar.success("已恢复默认配置!即将刷新页面...");
+  setTimeout(() => window.location.reload(), 1500);
 }
 
 // 前置
@@ -412,25 +356,17 @@ async function tryShowReset(): Promise<void> {
     mode: "input",
   });
   if (!res) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消",
-    });
+    showSnackbar.cancel("已取消");
     return;
   }
   const time = getBuildTime();
   const code = time.startsWith("dev.") ? "dev" : time;
   if (res === code || res === "reset1128") {
     showReset.value = true;
-    showSnackbar({
-      text: "已开启重置数据库选项",
-    });
-  } else {
-    showSnackbar({
-      color: "error",
-      text: "验证失败",
-    });
+    showSnackbar.success("已开启重置数据库选项");
+    return;
   }
+  showSnackbar.error("验证失败");
 }
 
 // 重置数据库
@@ -441,10 +377,7 @@ async function confirmResetDB(title?: string): Promise<void> {
     text: "请确认已经备份关键数据",
   });
   if (!res) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消重置数据库",
-    });
+    showSnackbar.cancel("已取消重置数据库");
     await TGLogger.Info("[Config][confirmResetDB] 取消重置数据库");
     return;
   }
@@ -453,42 +386,34 @@ async function confirmResetDB(title?: string): Promise<void> {
   await TGSqlite.reset();
   await TGLogger.Info("[Config][confirmResetDB] 数据库重置完成");
   loading.value = false;
-  showSnackbar({
-    text: "数据库已重置!请进行再次检查。",
-  });
-  setTimeout(() => {
-    window.location.reload();
-  }, 1500);
+  showSnackbar.success("数据库已重置!请进行再次检查。");
+  setTimeout(() => window.location.reload(), 1500);
 }
 
 // 开启 dev 模式
 function submitDevMode(): void {
   if (appStore.devMode) {
-    showSnackbar({ text: "已关闭 dev 模式!" });
+    showSnackbar.success("已关闭 dev 模式!");
     return;
   }
-  showSnackbar({ text: "已开启 dev 模式!" });
+  showSnackbar.success("已开启 dev 模式!");
 }
 
 // 开启窗口回正
 function submitResize(): void {
   appStore.needResize = (!needResize.value).toString();
   if (needResize.value) {
-    showSnackbar({ text: "已关闭窗口回正!" });
+    showSnackbar.success("已关闭窗口回正!");
     return;
   }
-  showSnackbar({ text: "已开启窗口回正!" });
+  showSnackbar.success("已开启窗口回正!");
 }
 
 // 通过子组件的事件来控制 loading
 function loadHandle(params: TGApp.Component.Loading.EmitParams): void {
   loading.value = params.show;
-  if (params.title) {
-    loadingTitle.value = params.title;
-  }
-  if (params.text) {
-    loadingSub.value = params.text;
-  }
+  if (params.title) loadingTitle.value = params.title;
+  if (params.text) loadingSub.value = params.text;
 }
 </script>
 <style lang="css" scoped>

@@ -107,7 +107,7 @@ async function toLink() {
   const res = await parseLink(link);
   if (res === true) return;
   if (res === false) {
-    showSnackbar({ text: `未知链接:${link}`, color: "error", timeout: 3000 });
+    showSnackbar.error(`未知链接:${link}`, 3000);
     return;
   }
   window.open(res);
@@ -120,7 +120,7 @@ function getEmojiUrl(): string {
     getEmojis().then((res) => {
       if ("retcode" in res) {
         console.error(res);
-        showSnackbar({ text: "获取表情包失败！", color: "error" });
+        showSnackbar.error("获取表情包失败！");
         mode.value = "text";
         return "";
       }

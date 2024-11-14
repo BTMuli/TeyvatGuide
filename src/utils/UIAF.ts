@@ -36,6 +36,7 @@ export async function getUiafHeader(): Promise<TGApp.Plugins.UIAF.Export> {
  */
 export async function verifyUiafData(path: string): Promise<boolean> {
   const fileData: string = await readTextFile(path);
+  // @ts-expect-error-next-line
   const ajv = new Ajv();
   const validate = ajv.compile(UiafSchema);
   try {
@@ -43,17 +44,14 @@ export async function verifyUiafData(path: string): Promise<boolean> {
     if (!validate(fileJson)) {
       if (validate.errors === undefined || validate.errors === null) return false;
       const error: ErrorObject = validate.errors[0];
-      showSnackbar({
-        text: `${error.instancePath || error.schemaPath} ${error.message}`,
-        color: "error",
-      });
+      showSnackbar.error(`${error.instancePath || error.schemaPath} ${error.message}`);
       await TGLogger.Error(`UIAF 数据验证失败，文件路径：${path}`);
       await TGLogger.Error(`错误信息 ${validate.errors?.toString()}`);
       return false;
     }
     return true;
   } catch (e) {
-    showSnackbar({ text: `UIAF 数据格式错误 ${e}`, color: "error" });
+    showSnackbar.error(`UIAF 数据格式错误 ${e}`);
     await TGLogger.Error(`UIAF 数据格式错误，文件路径：${path}`);
     await TGLogger.Error(`错误信息 ${e}`);
     return false;
@@ -66,6 +64,7 @@ export async function verifyUiafData(path: string): Promise<boolean> {
  * @returns {boolean} 是否验证通过
  */
 export async function verifyUiafDataClipboard(): Promise<boolean> {
+  // @ts-expect-error-next-line
   const ajv = new Ajv();
   const validate = ajv.compile(UiafSchema);
   const data = await window.navigator.clipboard.readText();
@@ -74,17 +73,14 @@ export async function verifyUiafDataClipboard(): Promise<boolean> {
     if (!validate(fileJson)) {
       if (validate.errors === undefined || validate.errors === null) return false;
       const error: ErrorObject = validate.errors[0];
-      showSnackbar({
-        text: `${error.instancePath || error.schemaPath} ${error.message}`,
-        color: "error",
-      });
+      showSnackbar.error(`${error.instancePath || error.schemaPath} ${error.message}`);
       await TGLogger.Error(`UIAF 数据验证失败，剪贴板数据：${data}`);
       await TGLogger.Error(`错误信息 ${validate.errors}`);
       return false;
     }
     return true;
   } catch (e) {
-    showSnackbar({ text: `UIAF 数据格式错误 ${e}`, color: "error" });
+    showSnackbar.error(`UIAF 数据格式错误 ${e}`);
     await TGLogger.Error(`UIAF 数据格式错误，剪贴板数据：${data}`);
     await TGLogger.Error(`错误信息 ${e}`);
     return false;

@@ -172,7 +172,7 @@ watch(
 async function toCombat(): Promise<void> {
   const check = await TSUserCombat.check();
   if (!check) {
-    showSnackbar({ text: "未检测到剧诗表，请更新数据库！", color: "warn" });
+    showSnackbar.warn("未检测到剧诗表，请更新数据库！");
     return;
   }
   await router.push({ name: "真境剧诗" });
@@ -191,7 +191,7 @@ async function loadAbyss(): Promise<void> {
 
 async function refreshAbyss(): Promise<void> {
   if (!userStore.cookie.value) {
-    showSnackbar({ text: "未登录", color: "error" });
+    showSnackbar.warn("未登录");
     await TGLogger.Warn("[UserAbyss][getAbyssData] 未登录");
     return;
   }
@@ -210,7 +210,7 @@ async function refreshAbyss(): Promise<void> {
       text: `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
     });
     if (!confirm) {
-      showSnackbar({ text: "已取消深渊数据刷新", color: "cancel" });
+      showSnackbar.cancel("已取消深渊数据刷新");
       return;
     }
   }
@@ -219,30 +219,28 @@ async function refreshAbyss(): Promise<void> {
   loading.value = true;
   loadingTitle.value = `正在获取${user.value.gameUid}的上期深渊数据`;
   const resP = await TGRequest.User.byCookie.getAbyss(userStore.cookie.value, "2", user.value);
-  if (!("retcode" in resP)) {
-    await TGLogger.Info("[UserAbyss][getAbyssData] 成功获取上期深渊数据");
-    loadingTitle.value = `正在保存${user.value.gameUid}的上期深渊数据`;
-    await TSUserAbyss.saveAbyss(user.value.gameUid, resP);
-  } else {
-    showSnackbar({ text: `[${resP.retcode}]${resP.message}`, color: "error" });
+  if ("retcode" in resP) {
+    showSnackbar.error(`[${resP.retcode}]${resP.message}`);
     loading.value = false;
     await TGLogger.Error(`[UserAbyss][getAbyssData] 获取${user.value.gameUid}的上期深渊数据失败`);
     await TGLogger.Error(`[UserAbyss][getAbyssData] ${resP.retcode} ${resP.message}`);
     return;
   }
+  await TGLogger.Info("[UserAbyss][getAbyssData] 成功获取上期深渊数据");
+  loadingTitle.value = `正在保存${user.value.gameUid}的上期深渊数据`;
+  await TSUserAbyss.saveAbyss(user.value.gameUid, resP);
   loadingTitle.value = `正在获取${user.value.gameUid}的上期深渊数据`;
   const res = await TGRequest.User.byCookie.getAbyss(userStore.cookie.value, "1", user.value);
-  if (!("retcode" in res)) {
-    loadingTitle.value = `正在保存${user.value.gameUid}的本期深渊数据`;
-    await TSUserAbyss.saveAbyss(user.value.gameUid, res);
-    await TGLogger.Info(`[UserAbyss][getAbyssData] 成功获取${user.value.gameUid}的本期深渊数据`);
-  } else {
-    showSnackbar({ text: `[${res.retcode}]${res.message}`, color: "error" });
+  if ("retcode" in res) {
+    showSnackbar.error(`[${res.retcode}]${res.message}`);
     loading.value = false;
     await TGLogger.Error(`[UserAbyss][getAbyssData] 获取${user.value.gameUid}的本期深渊数据失败`);
     await TGLogger.Error(`[UserAbyss][getAbyssData] ${res.retcode} ${res.message}`);
     return;
   }
+  loadingTitle.value = `正在保存${user.value.gameUid}的本期深渊数据`;
+  await TSUserAbyss.saveAbyss(user.value.gameUid, res);
+  await TGLogger.Info(`[UserAbyss][getAbyssData] 成功获取${user.value.gameUid}的本期深渊数据`);
   loadingTitle.value = "正在加载深渊数据";
   uidList.value = await TSUserAbyss.getAllUid();
   uidCur.value = user.value.gameUid;
@@ -267,13 +265,13 @@ async function uploadAbyss(): Promise<void> {
   await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据");
   const abyssData = localAbyss.value.find((item) => item.id === Math.max(...abyssIdList.value));
   if (!abyssData) {
-    showSnackbar({ text: "未找到深渊数据", color: "error" });
+    showSnackbar.warn("未找到深渊数据");
     await TGLogger.Warn("[UserAbyss][uploadAbyss] 未找到深渊数据");
     return;
   }
   const maxFloor = Number(abyssData.maxFloor.split("-")[0]);
   if (isNaN(maxFloor) || maxFloor <= 9) {
-    showSnackbar({ text: "尚未完成深渊，请完成深渊后重试！", color: "error" });
+    showSnackbar.warn("尚未完成深渊，请完成深渊后重试！");
     await TGLogger.Warn(`[UserAbyss][uploadAbyss] 尚未完成深渊 ${abyssData.maxFloor}`);
     return;
   }
@@ -281,7 +279,7 @@ async function uploadAbyss(): Promise<void> {
   const endTime = new Date(abyssData.endTime).getTime();
   const nowTime = new Date().getTime();
   if (nowTime < startTime || nowTime > endTime) {
-    showSnackbar({ text: "非最新深渊数据，请刷新深渊数据后重试！", color: "error" });
+    showSnackbar.warn("非最新深渊数据，请刷新深渊数据后重试！");
     await TGLogger.Warn("[UserAbyss][uploadAbyss] 非最新深渊数据");
     return;
   }
@@ -300,17 +298,17 @@ async function uploadAbyss(): Promise<void> {
     loadingTitle.value = "正在上传深渊数据";
     const res = await Hutao.Abyss.upload(transAbyss);
     loading.value = false;
-    if (res.retcode === 0) {
-      showSnackbar({ text: res.message ?? "上传深渊数据成功" });
-      await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据成功");
-    } else {
-      showSnackbar({ text: `[${res.retcode}]${res.message}`, color: "error" });
+    if (res.retcode !== 0) {
+      showSnackbar.error(`[${res.retcode}]${res.message}`);
       await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
       await TGLogger.Error(`[UserAbyss][uploadAbyss] ${res.retcode} ${res.message}`);
+      return;
     }
+    showSnackbar.success(res.message ?? "上传深渊数据成功");
+    await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据成功");
   } catch (e) {
     if (e instanceof Error) {
-      showSnackbar({ text: e.message, color: "error" });
+      showSnackbar.error(e.message);
       await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
       await TGLogger.Error(`[UserAbyss][uploadAbyss] ${e.message}`);
     }
@@ -320,7 +318,7 @@ async function uploadAbyss(): Promise<void> {
 
 async function deleteAbyss(): Promise<void> {
   if (uidCur.value === undefined || uidCur.value === "") {
-    showSnackbar({ text: "未找到符合条件的数据!", color: "error" });
+    showSnackbar.warn("未选择游戏UID");
     return;
   }
   const confirm = await showConfirm({
@@ -328,7 +326,7 @@ async function deleteAbyss(): Promise<void> {
     text: `将清除${uidCur.value}的所有深渊数据`,
   });
   if (!confirm) {
-    showSnackbar({ text: "已取消删除", color: "cancel" });
+    showSnackbar.cancel("已取消删除");
     return;
   }
   loadingTitle.value = `正在删除 ${uidCur.value} 的深渊数据`;
@@ -336,7 +334,7 @@ async function deleteAbyss(): Promise<void> {
   await TSUserAbyss.delAbyss(uidCur.value);
   await new Promise((resolve) => setTimeout(resolve, 1000));
   loading.value = false;
-  showSnackbar({ text: `已清除 ${uidCur.value} 的深渊数据`, color: "success" });
+  showSnackbar.success(`已清除 ${uidCur.value} 的深渊数据`);
   uidList.value = await TSUserAbyss.getAllUid();
   if (uidList.value.length > 0) uidCur.value = uidList.value[0];
   else uidCur.value = undefined;

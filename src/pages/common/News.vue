@@ -171,10 +171,7 @@ async function switchAnno(): Promise<void> {
 async function loadMore(key: NewsKey): Promise<void> {
   loadingSub.value = true;
   if (rawData.value[key].isLast) {
-    showSnackbar({
-      text: "已经是最后一页了",
-      color: "warn",
-    });
+    showSnackbar.warn("已经是最后一页了");
     loadingSub.value = false;
     return;
   }
@@ -185,10 +182,7 @@ async function loadMore(key: NewsKey): Promise<void> {
   rawData.value[key].isLast = getData.is_last;
   postData.value[key] = postData.value[key].concat(getData.list);
   if (rawData.value[key].isLast) {
-    showSnackbar({
-      text: "已经是最后一页了",
-      color: "warn",
-    });
+    showSnackbar.warn("已经是最后一页了");
     loadingSub.value = false;
     loading.value = false;
     return;
@@ -201,10 +195,7 @@ async function loadMore(key: NewsKey): Promise<void> {
 
 async function searchPost(): Promise<void> {
   if (search.value === "") {
-    showSnackbar({
-      text: "请输入搜索内容",
-      color: "error",
-    });
+    showSnackbar.warn("请输入搜索内容");
     return;
   }
   const numCheck = Number(search.value);

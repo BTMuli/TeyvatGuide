@@ -94,25 +94,16 @@ async function deleteCollect(item: TGApp.Sqlite.UserCollection.UFCollection): Pr
     text: "该分类若有帖子，则会变为未分类",
   });
   if (!res) {
-    showSnackbar({
-      text: "取消删除",
-      color: "cancel",
-    });
+    showSnackbar.cancel("取消删除");
     return;
   }
   const resD = await TSUserCollection.deleteCollect(item.title, false);
-  if (resD) {
-    showSnackbar({
-      text: "删除成功",
-      color: "success",
-    });
-    await freshData();
-  } else {
-    showSnackbar({
-      text: "删除失败",
-      color: "error",
-    });
+  if (!resD) {
+    showSnackbar.error("删除失败");
+    return;
   }
+  showSnackbar.success("删除成功");
+  await freshData();
 }
 
 async function newCollect(): Promise<void> {
@@ -124,17 +115,11 @@ async function newCollect(): Promise<void> {
   });
   if (titleC === undefined || titleC === false) return;
   if (titleC === "未分类") {
-    showSnackbar({
-      text: "分类名不可为未分类",
-      color: "error",
-    });
+    showSnackbar.warn("分类名不可为未分类");
     return;
   }
   if (collectList.value.find((i) => i.title === titleC)) {
-    showSnackbar({
-      text: "分类已存在",
-      color: "error",
-    });
+    showSnackbar.warn("分类已存在");
     return;
   }
   title = titleC;
@@ -147,26 +132,17 @@ async function newCollect(): Promise<void> {
   if (descC === undefined) desc = title;
   else desc = descC;
   const res = await TSUserCollection.createCollect(title, desc);
-  if (res) {
-    showSnackbar({
-      text: "新建成功",
-      color: "success",
-    });
-    await freshData();
-  } else {
-    showSnackbar({
-      text: "新建失败",
-      color: "error",
-    });
+  if (!res) {
+    showSnackbar.error("新建失败");
+    return;
   }
+  showSnackbar.success("新建成功");
+  await freshData();
 }
 
 async function onSubmit(): Promise<void> {
   if (!props.post) {
-    showSnackbar({
-      text: "未找到帖子信息",
-      color: "error",
-    });
+    showSnackbar.warn("未找到帖子信息");
     return;
   }
   submit.value = true;
@@ -177,17 +153,11 @@ async function onSubmit(): Promise<void> {
   await freshData();
   emits("submit");
   submit.value = false;
-  if (res) {
-    showSnackbar({
-      text: "更新成功",
-      color: "success",
-    });
-  } else {
-    showSnackbar({
-      text: "更新失败",
-      color: "error",
-    });
+  if (!res) {
+    showSnackbar.error("更新失败");
+    return;
   }
+  showSnackbar.success("更新成功");
 }
 
 function onCancel() {

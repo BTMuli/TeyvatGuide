@@ -79,7 +79,7 @@
     <div class="pc-posts">
       <div v-for="item in getPageItems()" :key="item.post.post_id">
         <TPostCard
-          @update:selected="updateSelected"
+          @update:selected="selectedPost = $event"
           :model-value="item"
           :selected="selectedPost"
           :select-mode="selectedMode"
@@ -93,14 +93,13 @@
 import { event } from "@tauri-apps/api";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import showConfirm from "../../components/func/confirm.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TPostCard from "../../components/main/t-postcard.vue";
 import ToCollectPost from "../../components/overlay/to-collectPost.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
-import TGSqlite from "../../plugins/Sqlite/index.js";
 import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
@@ -128,28 +127,16 @@ const sortId = ref<boolean>(false);
 
 let collectListener: UnlistenFn | null = null;
 
-onBeforeMount(async () => {
-  if (!(await TGSqlite.checkTableExist("UFPost"))) {
-    await TGSqlite.update();
-    showSnackbar({
-      text: "数据库已更新",
-      color: "success",
-    });
-  }
+onMounted(async () => {
   collectListener = await event.listen("refreshCollect", async () => await load());
+  await load();
 });
-
-onMounted(async () => await load());
 onUnmounted(() => {
   if (collectListener !== null) {
     collectListener();
     collectListener = null;
   }
 });
-
-function updateSelected(v: string[]) {
-  selectedPost.value = v;
-}
 
 function sortPost(value: boolean) {
   let ori = sortId.value;
@@ -162,10 +149,7 @@ function sortPost(value: boolean) {
     }
   });
   if (ori !== sortId.value) {
-    showSnackbar({
-      text: `已${sortId.value ? "按帖子ID排序" : "按更新时间排序"}`,
-      color: "success",
-    });
+    showSnackbar.success(`已${sortId.value ? "按帖子ID排序" : "按更新时间排序"}`);
   }
 }
 
@@ -192,14 +176,14 @@ async function load(): Promise<void> {
 }
 
 function toSelect() {
-  if (!selectedMode.value) {
-    selectedPost.value = [];
-    selectedMode.value = true;
-  } else {
+  if (selectedMode.value) {
     selectedMode.value = false;
     if (selectedPost.value.length === 0) return;
     showOverlay.value = true;
+    return;
   }
+  selectedPost.value = [];
+  selectedMode.value = true;
 }
 
 async function addCollect(): Promise<void> {
@@ -211,17 +195,11 @@ async function addCollect(): Promise<void> {
   });
   if (titleC === undefined || titleC === false) return;
   if (titleC === "未分类") {
-    showSnackbar({
-      text: "分类名不可为未分类",
-      color: "error",
-    });
+    showSnackbar.warn("分类名不可为未分类");
     return;
   }
   if (collections.value.find((i) => i.title === titleC)) {
-    showSnackbar({
-      text: "分类已存在",
-      color: "error",
-    });
+    showSnackbar.warn("分类已存在");
     return;
   }
   title = titleC;
@@ -235,26 +213,17 @@ async function addCollect(): Promise<void> {
   else desc = descC;
   const res = await TSUserCollection.createCollect(title, desc);
   if (res) {
-    showSnackbar({
-      text: "新建成功",
-      color: "success",
-    });
+    showSnackbar.success("成功新建分类");
     await load();
-  } else {
-    showSnackbar({
-      text: "新建失败",
-      color: "error",
-    });
+    return;
   }
+  showSnackbar.error("新建失败");
 }
 
 async function toEdit(): Promise<void> {
   const collect = collections.value.find((c) => c.title === curSelect.value);
   if (collect === undefined) {
-    showSnackbar({
-      text: "未找到合集信息！",
-      color: "error",
-    });
+    showSnackbar.warn("未找到合集信息");
     return;
   }
   let cTc = await showConfirm({
@@ -264,25 +233,16 @@ async function toEdit(): Promise<void> {
     input: collect.title,
   });
   if (cTc === false) {
-    showSnackbar({
-      text: "取消修改分类信息",
-      color: "cancel",
-    });
+    showSnackbar.cancel("取消修改分类信息");
     return;
   }
   if (typeof cTc !== "string") cTc = collect.title;
   if (cTc === "未分类") {
-    showSnackbar({
-      text: "该名称为保留名称，不可用于作为分类名！",
-      color: "error",
-    });
+    showSnackbar.warn("分类名不可为未分类");
     return;
   }
   if (cTc !== collect.title && collections.value.find((c) => c.title === cTc)) {
-    showSnackbar({
-      text: "分类名称重复！",
-      color: "error",
-    });
+    showSnackbar.warn("分类名称重复");
     return;
   }
   let cTd = await showConfirm({
@@ -292,15 +252,9 @@ async function toEdit(): Promise<void> {
     input: collect.desc,
   });
   if (typeof cTd !== "string") cTd = collect.desc;
-  const cc = await showConfirm({
-    title: "确定修改？",
-    text: `[${cTc}] ${cTd}`,
-  });
+  const cc = await showConfirm({ title: "确定修改？", text: `[${cTc}] ${cTd}` });
   if (!cc) {
-    showSnackbar({
-      text: "取消修改分类信息",
-      color: "cancel",
-    });
+    showSnackbar.cancel("取消修改分类信息");
     return;
   }
   loadingTitle.value = "正在修改分类信息...";
@@ -308,32 +262,21 @@ async function toEdit(): Promise<void> {
   const check = await TSUserCollection.updateCollect(collect.title, cTc, cTd);
   loading.value = false;
   if (!check) {
-    showSnackbar({
-      text: "修改分类信息失败!",
-      color: "error",
-    });
+    showSnackbar.warn("修改分类信息失败");
     return;
   }
-  showSnackbar({
-    text: "成功修改分类信息！",
-  });
+  showSnackbar.success("成功修改分类信息！");
   await load();
 }
 
 async function deleteOper(force: boolean): Promise<void> {
-  if (selectedMode.value) {
-    await deletePost(force);
-  } else {
-    await deleteCollect(force);
-  }
+  if (selectedMode.value) await deletePost(force);
+  else await deleteCollect(force);
 }
 
 async function deletePost(force: boolean = false): Promise<void> {
   if (selectedPost.value.length === 0) {
-    showSnackbar({
-      text: "未选择帖子",
-      color: "error",
-    });
+    showSnackbar.warn("未选择帖子");
     return;
   }
   const title = force ? "删除帖子" : "移除帖子分类";
@@ -342,10 +285,7 @@ async function deletePost(force: boolean = false): Promise<void> {
     text: `共 ${selectedPost.value.length} 条帖子`,
   });
   if (!res) {
-    showSnackbar({
-      text: "取消操作",
-      color: "cancel",
-    });
+    showSnackbar.cancel("取消操作");
     return;
   }
   loadingTitle.value = `正在${title}...`;
@@ -353,30 +293,21 @@ async function deletePost(force: boolean = false): Promise<void> {
   let success = 0;
   for (const post of selectedPost.value) {
     const check = await TSUserCollection.deletePostCollect(post, force);
-    if (!check) {
-      showSnackbar({
-        text: `帖子 ${post} 操作失败`,
-        color: "error",
-      });
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-    } else {
+    if (check) {
       success++;
+      continue;
     }
+    showSnackbar.warn(`帖子 ${post} 操作失败`);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
   }
   loading.value = false;
-  showSnackbar({
-    text: `成功${title} ${success} 条`,
-    color: "success",
-  });
+  showSnackbar.success(`成功${title} ${success} 条`);
   await load();
 }
 
 async function deleteCollect(force: boolean): Promise<void> {
   if (curSelect.value === "未分类" && force) {
-    showSnackbar({
-      text: "未分类不可删除",
-      color: "error",
-    });
+    showSnackbar.warn("未分类不可删除");
     return;
   }
   const title = force ? "删除分类" : "清空分类";
@@ -385,10 +316,7 @@ async function deleteCollect(force: boolean): Promise<void> {
     text: `该分类下${selected.value.length}条帖子将被${force ? "删除" : "移除分类(未分类将被删除)"}`,
   });
   if (!res) {
-    showSnackbar({
-      text: "取消删除",
-      color: "cancel",
-    });
+    showSnackbar.cancel("取消操作");
     return;
   }
   let resD;
@@ -398,17 +326,11 @@ async function deleteCollect(force: boolean): Promise<void> {
     resD = await TSUserCollection.deleteUnCollectPost();
   }
   if (resD) {
-    showSnackbar({
-      text: `成功 ${title}`,
-      color: "success",
-    });
+    showSnackbar.success(`成功${title}`);
     await load();
-  } else {
-    showSnackbar({
-      text: `${title} 失败`,
-      color: "error",
-    });
+    return;
   }
+  showSnackbar.warn(`${title} 失败`);
 }
 
 // 根据合集筛选
@@ -427,10 +349,7 @@ async function freshPost(select: string | null): Promise<void> {
   }
   page.value = 1;
   loading.value = false;
-  showSnackbar({
-    text: `切换合集 ${select}，共 ${selected.value.length} 条帖子`,
-    color: "success",
-  });
+  showSnackbar.success(`切换合集 ${select}，共 ${selected.value.length} 条帖子`);
 }
 
 // 获取当前页的帖子
@@ -452,9 +371,10 @@ function getPageItems(): TGApp.Plugins.Mys.Post.FullData[] {
   return card;
 }
 
-watch(curSelect, async () => {
-  await freshPost(curSelect.value);
-});
+watch(
+  () => curSelect.value,
+  async () => await freshPost(curSelect.value),
+);
 
 async function freshOther(): Promise<void> {
   const input = await showConfirm({
@@ -464,27 +384,18 @@ async function freshOther(): Promise<void> {
   });
   if (typeof input === "string") {
     if (isNaN(Number(input))) {
-      showSnackbar({
-        text: "UID 格式错误，请输入数字",
-        color: "error",
-      });
+      showSnackbar.warn("UID 格式错误，请输入数字");
       return;
     }
     await freshUser(input);
     return;
   }
-  showSnackbar({
-    text: "取消导入",
-    color: "cancel",
-  });
+  showSnackbar.cancel("取消导入");
 }
 
 async function freshUser(uid?: string): Promise<void> {
   if (!userStore.cookie.value) {
-    showSnackbar({
-      text: "请先登录",
-      color: "error",
-    });
+    showSnackbar.warn("请先登录");
     return;
   }
   const cookie = {
@@ -494,43 +405,30 @@ async function freshUser(uid?: string): Promise<void> {
   loadingTitle.value = "获取用户收藏...";
   loading.value = true;
   let res = await TGRequest.User.getCollect(cookie, uid || userStore.briefInfo.value.uid);
-  let is_last = false;
-  while (!is_last) {
+  while (true) {
     if ("retcode" in res) {
       if (res.retcode === 1001) {
-        showSnackbar({
-          text: "用户收藏已设为私密，无法获取",
-          color: "error",
-        });
+        showSnackbar.warn("用户收藏已设为私密，无法获取");
       } else {
-        showSnackbar({
-          text: `[${res.retcode}] ${res.message}`,
-          color: "error",
-        });
+        showSnackbar.error(`[${res.retcode}] ${res.message}`);
       }
       loading.value = false;
-      return;
+      break;
     }
     let posts = res.list;
     loadingTitle.value = `合并收藏帖子 [offset]${res.next_offset}...`;
     await mergePosts(posts, uid || userStore.briefInfo.value.uid);
-    if (res.is_last) {
-      is_last = true;
-    } else {
-      loadingTitle.value = "获取用户收藏...";
-      loadingSub.value = `[offset]${res.next_offset} [is_last]${res.is_last}`;
-      res = await TGRequest.User.getCollect(
-        cookie,
-        uid || userStore.briefInfo.value.uid,
-        res.next_offset,
-      );
-    }
+    if (res.is_last) break;
+    loadingTitle.value = "获取用户收藏...";
+    loadingSub.value = `[offset]${res.next_offset} [is_last]${res.is_last}`;
+    res = await TGRequest.User.getCollect(
+      cookie,
+      uid || userStore.briefInfo.value.uid,
+      res.next_offset,
+    );
   }
   loading.value = false;
-  showSnackbar({
-    text: "获取用户收藏成功",
-    color: "success",
-  });
+  showSnackbar.success("获取用户收藏成功");
   window.location.reload();
 }
 

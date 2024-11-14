@@ -98,11 +98,7 @@ async function openPosition(card: TGApp.Plugins.Mys.Position.RenderCard): Promis
   const res = await parseLink(card.link);
   if (res === "post") await createPost(card.postId, card.title);
   if (res === false) {
-    showSnackbar({
-      text: `未知链接:${card.link}`,
-      color: "error",
-      timeout: 3000,
-    });
+    showSnackbar.warn(`未知链接:${card.link}`, 3000);
     return;
   }
 }

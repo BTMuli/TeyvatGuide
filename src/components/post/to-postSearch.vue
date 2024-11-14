@@ -114,23 +114,17 @@ async function searchPosts() {
   if (load.value) return;
   load.value = true;
   if (!props.gid || !props.keyword) {
-    showSnackbar({
-      text: "参数错误",
-    });
+    showSnackbar.warn("参数错误");
     load.value = false;
     return;
   }
   if (isLast.value) {
-    showSnackbar({
-      text: "没有更多了",
-    });
+    showSnackbar.warn("没有更多了");
     load.value = false;
     return;
   }
   if (search.value === "") {
-    showSnackbar({
-      text: "请输入搜索关键词",
-    });
+    showSnackbar.warn("请输入搜索关键词");
     load.value = false;
     return;
   }

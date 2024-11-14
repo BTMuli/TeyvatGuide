@@ -95,7 +95,7 @@ async function onCopy(): Promise<void> {
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
   const size = bytesToSize(buffer.value.byteLength);
   await copyToClipboard(buffer.value);
-  showSnackbar({ text: `图片已复制到剪贴板，大小：${size}` });
+  showSnackbar.success(`图片已复制到剪贴板，大小：${size}`);
 }
 
 async function onDownload() {
@@ -104,7 +104,7 @@ async function onDownload() {
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
   const size = bytesToSize(buffer.value.byteLength);
   await saveCanvasImg(buffer.value, Date.now().toString());
-  showSnackbar({ text: `图片已下载到本地，大小：${size}` });
+  showSnackbar.success(`图片已下载到本地，大小：${size}`);
 }
 
 async function loadText(): Promise<void> {
@@ -115,10 +115,7 @@ async function loadText(): Promise<void> {
   }
   const resSource: any = await parseXml(props.data.gal_resource);
   if (resSource === false) {
-    showSnackbar({
-      text: "对白数据加载失败",
-      color: "error",
-    });
+    showSnackbar.warn("对白数据加载失败");
     return;
   }
   const keyMap: XmlKeyMap[] = resSource["elements"][0]["elements"][0]["elements"]

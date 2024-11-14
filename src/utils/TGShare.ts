@@ -37,12 +37,12 @@ export async function saveCanvasImg(
   });
   if (res === null) {
     await TGLogger.Info(`[saveCanvasImg][${filename}] 未选择保存路径`);
-    showSnackbar({ text: "未选择保存路径", color: "cancel" });
+    showSnackbar.cancel("未选择保存路径");
     return;
   }
   await writeFile(res, buffer);
   await TGLogger.Info(`[saveCanvasImg][${filename}] 已将图像保存到本地`);
-  showSnackbar({ text: `已将 ${filename} 保存到本地` });
+  showSnackbar.success(`已将 ${filename} 保存到本地`);
 }
 
 /**
@@ -132,7 +132,7 @@ export async function generateShareImg(
   const sizeStr = bytesToSize(size);
   await TGLogger.Info(`[generateShareImg][${fileName}] 图像大小为 ${sizeStr}`);
   if (size > 80000000) {
-    showSnackbar({ text: `图像大小为 ${sizeStr}，过大，无法保存`, color: "warn", timeout: 3000 });
+    showSnackbar.warn(`图像过大(${sizeStr})，无法保存`, 3000);
     return;
   }
   if (size > 20000000) {
@@ -145,11 +145,11 @@ export async function generateShareImg(
       await saveCanvasImg(buffer, fileName);
       return;
     }
-    showSnackbar({ color: "warn", text: "将尝试保存到剪贴板" });
+    showSnackbar.warn("将尝试保存到剪贴板");
   }
   try {
     await copyToClipboard(buffer);
-    showSnackbar({ text: `已将 ${fileName} 复制到剪贴板，大小为 ${sizeStr}` });
+    showSnackbar.success(`已将 ${fileName} 复制到剪贴板，大小为 ${sizeStr}`);
     await TGLogger.Info(`[generateShareImg][${fileName}] 已将图像复制到剪贴板`);
   } catch (e) {
     await TGLogger.Error(`[generateShareImg][${fileName}] 复制到剪贴板失败 ${e}`);

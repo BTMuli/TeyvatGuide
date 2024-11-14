@@ -76,11 +76,7 @@ async function toLink() {
   const res = await parseLink(link);
   if (res === true) return;
   if (res === false) {
-    showSnackbar({
-      text: `未知链接:${link}`,
-      color: "error",
-      timeout: 3000,
-    });
+    showSnackbar.error(`未知链接:${link}`, 3000);
     return;
   }
   window.open(res);

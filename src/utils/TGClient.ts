@@ -456,7 +456,7 @@ class TGClient {
       try {
         await windowFind.destroy();
       } catch (e) {
-        showSnackbar({ text: `[TGClient][open] ${e}`, color: "error" });
+        showSnackbar.error(`[TGClient][open] ${e}`);
         await TGLogger.Error(`[TGClient][open] ${e}`);
       }
     }
@@ -721,10 +721,7 @@ class TGClient {
     console.log(`[openApplication] ${JSON.stringify(arg.payload)}`);
     const appWindow = await webviewWindow.WebviewWindow.getByLabel("TeyvatGuide");
     await appWindow?.setFocus();
-    showSnackbar({
-      text: `不支持的操作：OpenApplication(${JSON.stringify(arg.payload)})`,
-      color: "error",
-    });
+    showSnackbar.error(`不支持的操作：OpenApplication(${JSON.stringify(arg.payload)})`);
     await new Promise<void>((resolve) => setTimeout(() => resolve(), 1500));
     const windowFind = await webviewWindow.WebviewWindow.getByLabel("mhy_client");
     if (windowFind !== null) await windowFind.setFocus();
@@ -761,7 +758,7 @@ class TGClient {
       if (appWindow != null) {
         await appWindow.setFocus();
       }
-      showSnackbar({ text: `未知链接:${arg.payload.page}`, color: "error", timeout: 3000 });
+      showSnackbar.error(`未知链接:${arg.payload.page}`, 3000);
       await new Promise<void>((resolve) => {
         setTimeout(() => {
           resolve();

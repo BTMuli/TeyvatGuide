@@ -148,10 +148,7 @@ export async function parseLink(
       text: "取消则使用外部浏览器打开",
     });
     if (openCheck === undefined) {
-      showSnackbar({
-        text: "已取消打开",
-        color: "warn",
-      });
+      showSnackbar.cancel("已取消打开");
       return true;
     }
     if (!openCheck) return url.href;

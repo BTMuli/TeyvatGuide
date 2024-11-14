@@ -77,24 +77,19 @@ function resizeImg() {
 function setBlackBg() {
   bgMode.value = (bgMode.value + 1) % 3;
   const bgLabelList = ["透明", "黑色", "白色"];
-  showSnackbar({
-    text: `背景已切换为${bgLabelList[bgMode.value]}`,
-  });
+  showSnackbar.success(`背景已切换为${bgLabelList[bgMode.value]}`);
 }
 
 async function onCopy(): Promise<void> {
   if (format.value === "gif") {
-    showSnackbar({
-      text: "GIF 图片不支持复制到剪贴板",
-      color: "error",
-    });
+    showSnackbar.warn("GIF 图片不支持复制到剪贴板");
     return;
   }
   const image = props.image.insert.image;
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
   const size = bytesToSize(buffer.value.byteLength);
   await copyToClipboard(buffer.value);
-  showSnackbar({ text: `图片已复制到剪贴板，大小：${size}` });
+  showSnackbar.success(`图片已复制到剪贴板，大小：${size}`);
 }
 
 async function onDownload() {
@@ -102,19 +97,14 @@ async function onDownload() {
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
   const size = bytesToSize(buffer.value.byteLength);
   if (buffer.value.byteLength > 80000000) {
-    showSnackbar({
-      text: "图片过大，无法下载到本地",
-      color: "error",
-    });
+    showSnackbar.warn("图片过大，无法下载到本地");
     return;
   }
   await saveCanvasImg(buffer.value, Date.now().toString(), format.value);
-  showSnackbar({ text: `图片已下载到本地，大小：${size}` });
+  showSnackbar.success(`图片已下载到本地，大小：${size}`);
 }
 
-onUnmounted(() => {
-  buffer.value = null;
-});
+onUnmounted(() => (buffer.value = null));
 </script>
 <style lang="css" scoped>
 .tpoi-box {

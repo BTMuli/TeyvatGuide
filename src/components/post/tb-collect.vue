@@ -61,16 +61,10 @@ watch(
     const res = await TSUserCollection.updatePostInfo(props.modelValue.toString(), val);
     await event.emit("refreshCollect");
     if (!res) {
-      showSnackbar({
-        text: "更新帖子信息失败，数据库中不存在帖子信息！",
-        color: "error",
-      });
+      showSnackbar.warn("更新帖子信息失败，数据库中不存在帖子信息！");
       return;
     }
-    showSnackbar({
-      text: "已更新帖子信息",
-      color: "success",
-    });
+    showSnackbar.success("已更新帖子信息");
     await TGLogger.Info(`[TbCollect] 更新帖子信息：${props.modelValue.toString()}`);
   },
 );
@@ -78,19 +72,13 @@ watch(
 async function switchCollect(): Promise<void> {
   if (!isCollected.value) {
     if (props.data === undefined) {
-      showSnackbar({
-        text: "未获取到帖子信息",
-        color: "error",
-      });
+      showSnackbar.warn("未获取到帖子信息");
       return;
     }
     await TSUserCollection.addCollect(props.modelValue.toString(), props.data);
     await event.emit("refreshCollect");
     isCollected.value = true;
-    showSnackbar({
-      text: "收藏成功",
-      color: "success",
-    });
+    showSnackbar.success("收藏成功");
     return;
   }
   if (collect.value.length > 1) {
@@ -105,10 +93,7 @@ async function switchCollect(): Promise<void> {
   await TSUserCollection.deletePostCollect(props.modelValue.toString(), true);
   await event.emit("refreshCollect");
   isCollected.value = false;
-  showSnackbar({
-    text: "取消收藏成功",
-    color: "success",
-  });
+  showSnackbar.success("取消收藏成功");
 }
 </script>
 <style lang="css" scoped>

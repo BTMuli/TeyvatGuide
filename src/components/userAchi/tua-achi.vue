@@ -78,25 +78,22 @@ async function setAchiStat(stat: boolean): Promise<void> {
     await TSUserAchi.updateAchi(data.value);
     emits("update:modelValue", data.value);
     await event.emit("updateAchi", data.value.series);
-    showSnackbar({
-      text: `已将成就 ${data.value.name}(${data.value.id}) 状态设为未完成`,
-      color: "success",
-    });
+    showSnackbar.success(`已将成就 ${data.value.name}(${data.value.id}) 状态设为未完成`);
     return;
   }
-  let progress: false | undefined | string = await showConfirm({
+  let progress: boolean | undefined | string = await showConfirm({
     mode: "input",
     title: "请输入成就进度",
     text: "进度",
     input: data.value.progress,
   });
   if (progress === false) {
-    showSnackbar({ text: "已取消成就编辑", color: "cancel" });
+    showSnackbar.cancel("已取消成就编辑");
     return;
   }
   if (progress === undefined) progress = data.value.progress.toString();
   if (isNaN(Number(progress)) || progress === "0") {
-    showSnackbar({ text: "请输入有效数字！", color: "warn" });
+    showSnackbar.warn("请输入有效数字！");
     return;
   }
   data.value.progress = Number(progress);
@@ -104,10 +101,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
   data.value.isCompleted = true;
   await TSUserAchi.updateAchi(data.value);
   await event.emit("updateAchi", data.value.series);
-  showSnackbar({
-    text: `已将成就 ${data.value.name}(${data.value.id}) 状态设为已完成`,
-    color: "success",
-  });
+  showSnackbar.success(`已将成就 ${data.value.name}(${data.value.id}) 状态设为已完成`);
   emits("update:modelValue", data.value);
 }
 </script>

@@ -24,8 +24,7 @@ onMounted(async () => {
 async function switchPin(): Promise<void> {
   isPined.value = !isPined.value;
   await getCurrentWindow().setAlwaysOnTop(isPined.value);
-  const text = isPined.value ? "已将窗口置顶！" : "已经取消窗口置顶!";
-  showSnackbar({ text: text, color: "success" });
+  showSnackbar.success(isPined.value ? "已将窗口置顶！" : "已经取消窗口置顶!");
 }
 </script>
 <style lang="css" scoped>

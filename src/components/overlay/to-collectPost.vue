@@ -68,10 +68,7 @@ watch(
 
 async function onSubmit(): Promise<void> {
   if (!select.value) {
-    showSnackbar({
-      text: "请选择分类",
-      color: "error",
-    });
+    showSnackbar.warn("请选择分类");
     return;
   }
   submit.value = true;
@@ -83,17 +80,11 @@ async function onSubmit(): Promise<void> {
   if (forceCheck === false) force = true;
   const check = await TSUserCollection.updatePostsCollect(props.post, select.value, force);
   if (!check) {
-    showSnackbar({
-      text: "处理失败",
-      color: "error",
-    });
+    showSnackbar.warn("处理失败");
     submit.value = false;
     return;
   }
-  showSnackbar({
-    text: `成功处理 ${props.post.length} 个帖子`,
-    color: "success",
-  });
+  showSnackbar.success(`成功处理 ${props.post.length} 个帖子`);
   submit.value = false;
   visible.value = false;
   emits("submit");
@@ -108,17 +99,11 @@ async function newCollect(): Promise<void> {
   });
   if (titleC === undefined || titleC === false) return;
   if (titleC === "未分类") {
-    showSnackbar({
-      text: "分类名不可为未分类",
-      color: "error",
-    });
+    showSnackbar.warn("分类名不可为未分类");
     return;
   }
   if (collectList.value.find((i) => i.title === titleC)) {
-    showSnackbar({
-      text: "分类已存在",
-      color: "error",
-    });
+    showSnackbar.warn("分类已存在");
     return;
   }
   title = titleC;
@@ -131,18 +116,12 @@ async function newCollect(): Promise<void> {
   if (descC === undefined) desc = title;
   else desc = descC;
   const res = await TSUserCollection.createCollect(title, desc);
-  if (res) {
-    showSnackbar({
-      text: "新建成功",
-      color: "success",
-    });
-    await freshData();
-  } else {
-    showSnackbar({
-      text: "新建失败",
-      color: "error",
-    });
+  if (!res) {
+    showSnackbar.warn("新建失败");
+    return;
   }
+  showSnackbar.success("新建成功");
+  await freshData();
 }
 
 async function freshData(): Promise<void> {

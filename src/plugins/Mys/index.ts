@@ -1,14 +1,13 @@
 /**
  * @file plugins/Mys/index.ts
  * @description Mys plugin index
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  */
 
 import * as ApiHub from "./request/apiHubReq.js";
 import { getCaptcha, doCaptchaLogin } from "./request/doCaptchaLogin.js";
 import { getLoginQr, getLoginStatus } from "./request/doGameLogin.js";
-import getGachaData from "./request/getGachaData.js";
-import { getPositionData } from "./request/getPositionData.js";
+import { getPositionData, getGachaData } from "./request/obcReq.js";
 import * as Painter from "./request/painterReq.js";
 import * as Post from "./request/postReq.js";
 import { getGachaCard } from "./utils/getGachaCard.js";

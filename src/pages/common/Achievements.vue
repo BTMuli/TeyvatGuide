@@ -98,7 +98,7 @@ let achiListener: UnlistenFn | null = null;
 async function switchHideFin() {
   const text = hideFin.value ? "显示已完成" : "隐藏已完成";
   hideFin.value = !hideFin.value;
-  showSnackbar({ text: `已${text}`, color: "success" });
+  showSnackbar.success(`已${text}`);
 }
 
 onMounted(async () => {
@@ -140,20 +140,12 @@ async function importJson(): Promise<void> {
   const selectedFile = await open({
     title: "选择 UIAF 数据文件",
     multiple: false,
-    filters: [
-      {
-        name: "UIAF JSON",
-        extensions: ["json"],
-      },
-    ],
+    filters: [{ name: "UIAF JSON", extensions: ["json"] }],
     defaultPath: await path.downloadDir(),
     directory: false,
   });
   if (selectedFile === null) {
-    showSnackbar({
-      color: "cancel",
-      text: "已取消文件选择",
-    });
+    showSnackbar.cancel("已取消文件选择");
     await TGLogger.Info("[Achievements][importJson] 已取消文件选择");
     return;
   }
@@ -166,12 +158,12 @@ async function importJson(): Promise<void> {
     input: uidCur.value.toString(),
   });
   if (uidInput === false) {
-    showSnackbar({ text: "已取消存档导入!", color: "cancel" });
+    showSnackbar.cancel("已取消存档导入");
     return;
   }
   if (uidInput === undefined) uidInput = uidCur.value.toString();
   else if (isNaN(Number(uidInput))) {
-    showSnackbar({ text: "请输入合法数字", color: "warn" });
+    showSnackbar.warn("请输入合法数字");
     return;
   }
   const remoteRaw = await readUiafData(selectedFile);
@@ -186,15 +178,13 @@ async function importJson(): Promise<void> {
   loadingTitle.value = "正在合并成就数据";
   await TSUserAchi.mergeUiaf(remoteRaw.list, Number(uidInput));
   loadingTitle.value = "即将刷新页面";
-  setTimeout(() => {
-    window.location.reload();
-  }, 1000);
+  setTimeout(() => window.location.reload(), 1000);
 }
 
 async function exportJson(): Promise<void> {
   await TGLogger.Info("[Achievements][exportJson] 导出 UIAF 数据");
   if (overview.value.fin === 0) {
-    showSnackbar({ color: "error", text: "没有可导出的数据" });
+    showSnackbar.warn("没有可导出的数据");
     await TGLogger.Warn("[Achievements][exportJson] 没有可导出的数据");
     return;
   }
@@ -205,21 +195,16 @@ async function exportJson(): Promise<void> {
   const fileName = `UIAF_${UiafData.info.export_app}_${UiafData.info.export_app_version}_${uidCur.value}`;
   const isSave = await save({
     title: "导出 UIAF 数据",
-    filters: [
-      {
-        name: "UIAF JSON",
-        extensions: ["json"],
-      },
-    ],
+    filters: [{ name: "UIAF JSON", extensions: ["json"] }],
     defaultPath: `${await path.downloadDir()}${path.sep()}${fileName}.json`,
   });
   if (isSave === null) {
-    showSnackbar({ color: "warn", text: "已取消导出" });
+    showSnackbar.cancel("已取消导出");
     await TGLogger.Info("[Achievements][exportJson] 已取消导出");
     return;
   }
   await writeTextFile(isSave, JSON.stringify(UiafData));
-  showSnackbar({ text: "导出成功", color: "success" });
+  showSnackbar.success("导出成功");
   await TGLogger.Info("[Achievements][exportJson] 导出成功");
   await TGLogger.Info(`[Achievements][exportJson] 导出路径：${isSave}`);
 }
@@ -231,10 +216,7 @@ async function handleImportOuter(app: string): Promise<void> {
     text: `来源APP：${app}`,
   });
   if (!confirm) {
-    showSnackbar({
-      color: "warn",
-      text: "已取消导入",
-    });
+    showSnackbar.cancel("已取消导入");
     await TGLogger.Info("[Achievements][handleImportOuter] 已取消导入");
     return;
   }
@@ -249,12 +231,12 @@ async function handleImportOuter(app: string): Promise<void> {
     input: uidCur.value.toString(),
   });
   if (uidInput === false) {
-    showSnackbar({ text: "已取消存档导入!", color: "cancel" });
+    showSnackbar.cancel("已取消存档导入");
     return;
   }
   if (uidInput === undefined) uidInput = uidCur.value.toString();
   else if (isNaN(Number(uidInput))) {
-    showSnackbar({ text: "请输入合法数字", color: "warn" });
+    showSnackbar.warn("请输入合法数字");
     return;
   }
   const data: TGApp.Plugins.UIAF.Data = JSON.parse(clipboard);
@@ -262,11 +244,9 @@ async function handleImportOuter(app: string): Promise<void> {
   loading.value = true;
   await TSUserAchi.mergeUiaf(data.list, Number(uidInput));
   loading.value = false;
-  showSnackbar({ color: "success", text: "导入成功，即将刷新页面" });
+  showSnackbar.success("导入成功，即将刷新页面");
   await TGLogger.Info("[Achievements][handleImportOuter] 导入成功");
-  setTimeout(async () => {
-    await router.push("/achievements");
-  }, 1500);
+  setTimeout(async () => await router.push("/achievements"), 1500);
 }
 
 async function createUid(): Promise<void> {
@@ -276,20 +256,20 @@ async function createUid(): Promise<void> {
     text: "UID:",
   });
   if (uidInput === undefined || uidInput === false) {
-    showSnackbar({ text: "已取消", color: "cancel" });
+    showSnackbar.cancel("已取消");
     return;
   }
   if (isNaN(Number(uidInput))) {
-    showSnackbar({ text: "请输入合法数字", color: "warn" });
+    showSnackbar.warn("请输入合法数字");
     return;
   }
   if (uidList.value.includes(Number(uidInput))) {
-    showSnackbar({ text: "该存档已存在！", color: "warn" });
+    showSnackbar.warn("该存档已存在！");
     return;
   }
   uidList.value.push(Number(uidInput));
   uidCur.value = Number(uidInput);
-  showSnackbar({ text: `切换到新存档 ${Number(uidInput)}`, color: "success" });
+  showSnackbar.success(`切换到新存档 ${Number(uidInput)}`);
 }
 
 async function deleteUid(): Promise<void> {
@@ -298,7 +278,7 @@ async function deleteUid(): Promise<void> {
     text: `确认则清空存档-${uidCur.value}对应数据`,
   });
   if (uidInput === undefined || !uidInput) {
-    showSnackbar({ text: "已取消删除存档", color: "cancel" });
+    showSnackbar.cancel("已取消删除存档");
     return;
   }
   await TSUserAchi.delUid(uidCur.value);

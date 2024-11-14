@@ -60,7 +60,7 @@ onBeforeMount(async () => {
 async function checkResize(): Promise<void> {
   const screen = await TauriWindow.currentMonitor();
   if (screen === null) {
-    showSnackbar({ text: "获取屏幕信息失败！", color: "error", timeout: 3000 });
+    showSnackbar.error("获取屏幕信息失败！", 3000);
     return;
   }
   const windowCur = await webviewWindow.getCurrentWebviewWindow();
@@ -153,7 +153,7 @@ async function checkUserLoad(): Promise<void> {
   // 检测用户数据
   const uidDB = await TSUserAccount.account.getAllUid();
   if (uidDB.length === 0 && appStore.isLogin) {
-    showSnackbar({ text: "未检测到可用UID，请重新登录!", color: "warn" });
+    showSnackbar.warn("未检测到可用UID，请重新登录！");
     appStore.isLogin = false;
     return;
   }
@@ -164,7 +164,7 @@ async function checkUserLoad(): Promise<void> {
   }
   const curAccount = await TSUserAccount.account.getAccount(userStore.uid.value);
   if (curAccount === false) {
-    showSnackbar({ text: `未获取到${userStore.uid.value}账号数据`, color: "error" });
+    showSnackbar.error(`未获取到${userStore.uid.value}的账号数据！`);
     await TGLogger.Error(`[App][listenOnInit] 获取${userStore.uid.value}账号数据失败`);
     await new Promise((resolve) => setTimeout(resolve, 1000));
   } else {
@@ -173,7 +173,7 @@ async function checkUserLoad(): Promise<void> {
   }
   const curGameAccount = await TSUserAccount.game.getCurAccount(userStore.uid.value);
   if (curGameAccount === false) {
-    showSnackbar({ text: `未获取到${userStore.uid.value}游戏数据`, color: "error" });
+    showSnackbar.error(`未获取到${userStore.uid.value}的游戏数据！`);
     await TGLogger.Error(`[App][listenOnInit] 获取${userStore.uid.value}游戏数据失败`);
     await new Promise((resolve) => setTimeout(resolve, 1000));
   } else {
@@ -184,13 +184,11 @@ async function checkUserLoad(): Promise<void> {
 async function getDeepLink(): Promise<UnlistenFn> {
   return await event.listen("active_deep_link", async (e: Event<string>) => {
     const windowGet = new webviewWindow.WebviewWindow("TeyvatGuide");
-    if (await windowGet.isMinimized()) {
-      await windowGet.unminimize();
-    }
+    if (await windowGet.isMinimized()) await windowGet.unminimize();
     await windowGet.setFocus();
     const payload = parseDeepLink(e.payload);
     if (payload === false) {
-      showSnackbar({ text: "无效的 deep link！", color: "error", timeout: 3000 });
+      showSnackbar.error("无效的 deep link！", 3000);
       await TGLogger.Error(`[App][getDeepLink] 无效的 deep link！ ${JSON.stringify(e.payload)}`);
       return;
     }
@@ -224,7 +222,7 @@ async function handleDeepLink(payload: string): Promise<void> {
   if (payload.startsWith("router?path=")) {
     const routerPath = payload.replace("router?path=", "");
     if (router.currentRoute.value.path === routerPath) {
-      showSnackbar({ text: "已在当前页面！", color: "warn", timeout: 3000 });
+      showSnackbar.warn("已在当前页面！", 3000);
       return;
     }
     await router.push(routerPath);
@@ -244,6 +242,7 @@ async function toUIAF(link: string) {
 
 // 检测更新
 async function checkUpdate(): Promise<void> {
+  // @ts-expect-error-next-line
   const isProdEnv = import.meta.env.MODE === "production";
   const needUpdate = await TGSqlite.checkUpdate();
   if (needUpdate && isProdEnv) {
@@ -253,16 +252,12 @@ async function checkUpdate(): Promise<void> {
       text: "是否更新数据库数据？（请确保成就数据已导出）",
     });
     if (!confirm) {
-      showSnackbar({
-        text: "请到设置页手动更新数据库！",
-        color: "error",
-        timeout: 3000,
-      });
+      showSnackbar.error("请到设置页手动更新数据库！", 3000);
       return;
     }
     appStore.buildTime = getBuildTime();
     await TGSqlite.update();
-    showSnackbar({ text: "数据库已更新！", color: "success", timeout: 3000 });
+    showSnackbar.success("数据库已更新！", 3000);
     window.open("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");
   }
 }

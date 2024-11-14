@@ -66,30 +66,21 @@ function checkData(item: TGApp.App.Calendar.Material, index: number) {
     curData.value = material;
     curIndex.value = index;
     showOverlay.value = true;
-  } else {
-    showSnackbar({
-      text: `材料 ${item.name} 暂无详细信息`,
-      color: "warn",
-    });
+    return;
   }
+  showSnackbar.warn(`材料 ${item.name} 暂无详细信息`);
 }
 
 function switchMaterial(isNext: boolean) {
   if (isNext) {
     if (curIndex.value === props.data.length - 1) {
-      showSnackbar({
-        text: "已经是最后一个材料了",
-        color: "warn",
-      });
+      showSnackbar.warn("已经是最后一个材料了");
       return;
     }
     curIndex.value++;
   } else {
     if (curIndex.value === 0) {
-      showSnackbar({
-        text: "已经是第一个材料了",
-        color: "warn",
-      });
+      showSnackbar.warn("已经是第一个材料了");
       return;
     }
     curIndex.value--;
@@ -100,10 +91,7 @@ function switchMaterial(isNext: boolean) {
     curData.value = material;
     return;
   }
-  showSnackbar({
-    text: `材料 ${curItem.name} 暂无详细信息`,
-    color: "warn",
-  });
+  showSnackbar.warn(`材料 ${curItem.name} 暂无详细信息`);
   if (isNext) curIndex.value--;
   else curIndex.value++;
 }

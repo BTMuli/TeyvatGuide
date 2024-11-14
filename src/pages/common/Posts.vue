@@ -64,7 +64,7 @@
   <ToPostSearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
 </template>
 <script setup lang="ts">
-import { nextTick, onBeforeMount, onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import showSnackbar from "../../components/func/snackbar.js";
@@ -188,12 +188,9 @@ const posts = ref<TGApp.Plugins.Mys.Post.FullData[]>([]);
 const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 
-onBeforeMount(async () => {
+onMounted(async () => {
   if (gid && typeof gid === "string") curGid.value = Number(gid);
   if (forum && typeof forum === "string") curForum.value = Number(forum);
-});
-
-onMounted(async () => {
   const gameLabel = getGameLabel(curGid.value);
   const forumLabel = getForumLabel(curGid.value, curForum.value);
   await TGLogger.Info(`[Posts][${gameLabel}][onMounted][${forumLabel}] 打开帖子列表`);
@@ -210,8 +207,7 @@ watch(
     const forumFind = forums.find((item) => item.text === curForumLabel.value);
     if (forumFind) curForum.value = forumFind.value;
     else curForum.value = forums[0].value;
-    await nextTick();
-    showSnackbar({ text: `已将分区切换到 ${getGameLabel(newVal)}`, color: "success" });
+    showSnackbar.success(`已将分区切换到 ${getGameLabel(newVal)}`);
   },
 );
 watch(
@@ -221,10 +217,7 @@ watch(
     const oldForumLabel = JSON.parse(JSON.stringify(curForumLabel.value));
     curForumLabel.value = getForumLabel(curGid.value, curForum.value);
     if (oldForumLabel !== curForumLabel.value) {
-      showSnackbar({
-        text: `已将版块切换到 ${curForumLabel.value}`,
-        color: "success",
-      });
+      showSnackbar.success(`已将版块切换到 ${curForumLabel.value}`);
     }
   },
 );
@@ -233,7 +226,7 @@ watch(
   async () => {
     await freshPostData();
     const sortLabel = getSortLabel(curSortType.value);
-    showSnackbar({ text: `已将排序切换到 ${sortLabel}`, color: "success" });
+    showSnackbar.success(`已将排序切换到 ${sortLabel}`);
   },
 );
 
@@ -248,14 +241,13 @@ async function freshPostData(): Promise<void> {
   loadingTitle.value = `正在加载 ${gameLabel}-${forumLabel}-${sortLabel} 数据`;
   const postsGet = await Mys.Post.getForumPostList(curForum.value, curSortType.value);
   posts.value = postsGet.list;
-  await nextTick();
   loading.value = false;
 }
 
 // 查询帖子
 function searchPost(): void {
   if (search.value === "") {
-    showSnackbar({ text: "请输入搜索内容", color: "error" });
+    showSnackbar.warn("请输入搜索内容");
     return;
   }
   const numCheck = Number(search.value);

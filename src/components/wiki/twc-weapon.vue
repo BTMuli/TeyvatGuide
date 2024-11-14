@@ -87,11 +87,11 @@ const selectItems = ref<number[]>([]);
 async function loadData(): Promise<void> {
   const res = WikiWeaponData.find((item) => item.id === props.item.id);
   if (res === undefined) {
-    showSnackbar({ text: `未获取到武器 ${props.item.name} 的 Wiki 数据`, color: "error" });
+    showSnackbar.warn(`未获取到武器 ${props.item.name} 的 Wiki 数据`);
     return;
   }
   data.value = res;
-  showSnackbar({ text: `成功获取武器 ${props.item.name} 的 Wiki 数据` });
+  showSnackbar.success(`成功获取武器 ${props.item.name} 的 Wiki 数据`);
   if (data.value?.affix === undefined) return;
   selectItems.value = data.value?.affix.Descriptions.map((item) => item.Level) ?? [];
 }
@@ -105,7 +105,7 @@ onMounted(async () => await loadData());
 
 async function toWiki(): Promise<void> {
   if (props.item.contentId === 0) {
-    showSnackbar({ text: `武器 ${props.item.name} 暂无详情`, color: "warn" });
+    showSnackbar.warn(`武器 ${props.item.name} 暂无详情`);
     return;
   }
   await createObc(props.item.contentId, props.item.name);

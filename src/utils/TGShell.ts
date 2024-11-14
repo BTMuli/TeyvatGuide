@@ -23,12 +23,12 @@ class TGShell {
   async openPath(path: string): Promise<void> {
     const plat = platform();
     let command: string;
-    if (plat === "windows") command = "win_open";
-    else if (plat === "macos") command = "mac_open";
-    else {
-      showSnackbar({ text: "暂不支持该平台", color: "warn" });
+    if (plat !== "windows" && plat !== "macos") {
+      showSnackbar.warn("暂不支持该平台");
       return;
     }
+    if (plat === "windows") command = "win_open";
+    else command = "mac_open";
     await Command.create(command, [path]).execute();
   }
 }

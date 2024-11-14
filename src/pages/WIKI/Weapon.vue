@@ -61,7 +61,7 @@ onBeforeMount(() => {
     curItem.value = item;
     return;
   }
-  showSnackbar({ text: `武器 ${id} 不存在`, color: "warn" });
+  showSnackbar.warn(`武器 ${id} 不存在`);
   curItem.value = cardsInfo.value[0];
 });
 
@@ -75,10 +75,10 @@ function handleSelectW(val: SelectedWValue) {
     return val.weapon.includes(match[1]);
   });
   if (filterW.length === 0) {
-    showSnackbar({ text: "未找到符合条件的武器", color: "warn" });
+    showSnackbar.warn("未找到符合条件的武器");
     return;
   }
-  showSnackbar({ text: `找到 ${filterW.length} 件符合条件的武器` });
+  showSnackbar.success(`找到 ${filterW.length} 件符合条件的武器`);
   cardsInfo.value = filterW;
 }
 
@@ -89,7 +89,7 @@ async function switchW(item: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
 async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
   if (!item) return;
   if (item.contentId === 0) {
-    showSnackbar({ text: `武器 ${item.name} 暂无观测枢页面`, color: "warn" });
+    showSnackbar.warn(`武器 ${item.name} 暂无观测枢页面`);
     return;
   }
   const confirm = await showConfirm({
@@ -97,7 +97,7 @@ async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
     text: "是否打开观测枢页面？",
   });
   if (!confirm) {
-    showSnackbar({ text: "已取消", color: "cancel" });
+    showSnackbar.cancel("已取消打开观测枢页面");
     return;
   }
   await createObc(item.contentId, item.name);

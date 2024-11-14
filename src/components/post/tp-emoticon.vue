@@ -71,13 +71,13 @@ async function download(): Promise<void> {
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
   const size = bytesToSize(props.data.insert.custom_emoticon.size.file_size);
   if (buffer.value.byteLength > 80000000) {
-    showSnackbar({ text: "图片过大，无法下载到本地", color: "warn" });
+    showSnackbar.warn(`图片过大(${size})，无法下载到本地`);
     return;
   }
   const format = image.split(".").pop();
   const title = props.data.insert.custom_emoticon.hash;
   await saveCanvasImg(buffer.value, props.data.insert.custom_emoticon.hash, format);
-  showSnackbar({ text: `已保存${title}.${format}到本地，大小为${size}` });
+  showSnackbar.success(`已保存${title}.${format}到本地，大小为${size}`);
 }
 </script>
 <style lang="css" scoped>

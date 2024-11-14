@@ -28,10 +28,7 @@ encrypt.setPublicKey(PUB_KEY_STR);
 function rsaEncrypt(data: string): string {
   const res = encrypt.encrypt(data.toString());
   if (res === false) {
-    showSnackbar({
-      text: "RSA 加密失败",
-      color: "error",
-    });
+    showSnackbar.error("RSA 加密失败");
     return "";
   }
   return res;

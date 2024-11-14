@@ -95,10 +95,7 @@ async function load(): Promise<void> {
   if (card.value) return;
   const cardGet = await Mys.Lottery.get(props.lottery);
   if ("retcode" in cardGet) {
-    showSnackbar({
-      text: `[${cardGet.retcode}] ${cardGet.message}`,
-      color: "error",
-    });
+    showSnackbar.error(`[${cardGet.retcode}] ${cardGet.message}`);
     return;
   }
   jsonData.value = cardGet;

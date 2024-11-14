@@ -40,12 +40,7 @@ interface ConfirmProps {
   otcancel?: boolean;
 }
 
-const defaultProp: ConfirmProps = {
-  title: "",
-  text: "",
-  mode: "confirm",
-  otcancel: false,
-};
+const defaultProp: ConfirmProps = { title: "", text: "", mode: "confirm", otcancel: false };
 
 const props = withDefaults(defineProps<ConfirmProps>(), {
   title: "",
@@ -63,25 +58,20 @@ const confirmVal = ref<boolean | string | undefined>();
 const inputVal = ref<string>("");
 const inputEl = useTemplateRef<HTMLInputElement>("inputRef");
 
-watch(show, () => {
-  if (show.value) {
-    showOuter.value = true;
-    setTimeout(() => {
-      showInner.value = true;
-    }, 100);
-  } else {
-    setTimeout(() => {
-      showInner.value = false;
-    }, 100);
-    setTimeout(() => {
-      showOuter.value = false;
-    }, 300);
-  }
-});
+watch(
+  () => show.value,
+  () => {
+    if (show.value) {
+      showOuter.value = true;
+      setTimeout(() => (showInner.value = true), 100);
+      return;
+    }
+    setTimeout(() => (showInner.value = false), 100);
+    setTimeout(() => (showOuter.value = false), 300);
+  },
+);
 
-onMounted(async () => {
-  await displayBox(props);
-});
+onMounted(async () => await displayBox(props));
 
 async function displayBox(
   params: TGApp.Component.Confirm.Params,
@@ -90,26 +80,20 @@ async function displayBox(
   data.text = params.text ?? "";
   data.mode = params.mode ?? "confirm";
   data.otcancel = params.otcancel ?? true;
-  if (params.mode === "input" && params.input) {
-    inputVal.value = params.input;
-  }
+  if (params.mode === "input" && params.input) inputVal.value = params.input;
   show.value = true;
   // 等待确认框关闭，返回关闭后的confirmVal
   return await new Promise<string | boolean | undefined>((resolve) => {
     nextTick(() => {
       if (data.mode === "input") {
         // 等待确认框打开，聚焦输入框
-        setTimeout(() => {
-          inputEl.value?.focus();
-        }, 100);
+        setTimeout(() => inputEl.value?.focus(), 100);
       }
     });
-    watch(show, () => {
-      // 等 0.5s 动画
-      setTimeout(() => {
-        resolve(confirmVal.value);
-      }, 500);
-    });
+    watch(
+      () => show.value,
+      () => setTimeout(() => resolve(confirmVal.value), 500),
+    );
   });
 }
 
@@ -138,11 +122,8 @@ function handleOuter(): void {
   }
 }
 
-defineExpose({
-  displayBox,
-});
+defineExpose({ displayBox });
 </script>
-
 <style scoped>
 .func-confirm-outer-enter-active,
 .func-confirm-outer-leave-active,

@@ -97,7 +97,7 @@ watch(
   async (newUid) => {
     if (!newUid) return;
     gachaListCur.value = await TSUserGacha.getGachaRecords(newUid);
-    showSnackbar({ text: `成功获取 ${gachaListCur.value.length} 条祈愿数据` });
+    showSnackbar.success(`成功获取 ${gachaListCur.value.length} 条祈愿数据`);
     await TGLogger.Info(
       `[UserGacha][${newUid}][watch] 成功获取 ${gachaListCur.value.length} 条祈愿数据`,
     );
@@ -109,10 +109,7 @@ onMounted(async () => {
   loadingTitle.value = "正在获取祈愿 UID 列表";
   selectItem.value = await TSUserGacha.getUidList();
   if (selectItem.value.length === 0) {
-    showSnackbar({
-      color: "error",
-      text: "暂无祈愿数据，请先导入祈愿数据",
-    });
+    showSnackbar.error("暂无祈愿数据，请先导入祈愿数据");
     loading.value = false;
     await TGLogger.Warn("[UserGacha][onMounted] 暂无祈愿数据，请先导入祈愿数据");
     return;
@@ -125,9 +122,7 @@ onMounted(async () => {
   );
   loadingTitle.value = "正在渲染数据";
   loading.value = false;
-  showSnackbar({
-    text: `成功获取 ${gachaListCur.value.length} 条祈愿数据`,
-  });
+  showSnackbar.success(`成功获取 ${gachaListCur.value.length} 条祈愿数据`);
 });
 
 // 刷新按钮点击事件
@@ -148,14 +143,14 @@ async function confirmRefresh(force: boolean): Promise<void> {
       text: `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
     });
     if (!confirm) {
-      showSnackbar({ text: "已取消祈愿数据刷新", color: "cancel" });
+      showSnackbar.cancel("已取消祈愿数据刷新");
       return;
     }
   }
   loadingTitle.value = "正在获取 authkey";
   loading.value = true;
   if (!userStore.cookie.value) {
-    showSnackbar({ color: "error", text: "请先登录" });
+    showSnackbar.error("请先登录");
     loading.value = false;
     await TGLogger.Warn("[UserGacha][${account.gameUid}][confirmRefresh] 未检测到 cookie");
     return;
@@ -165,7 +160,7 @@ async function confirmRefresh(force: boolean): Promise<void> {
     authkey.value = authkeyRes;
     await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 成功获取 authkey`);
   } else {
-    showSnackbar({ color: "error", text: "获取 authkey 失败" });
+    showSnackbar.error("获取 authkey 失败");
     await TGLogger.Error(`[UserGacha][${account.value.gameUid}][confirmRefresh] 获取 authkey 失败`);
     await TGLogger.Error(
       `[UserGacha][${account.value.gameUid}][confirmRefresh] ${authkeyRes.retcode} ${authkeyRes.message}`,
@@ -225,11 +220,7 @@ async function getGachaLogs(pool: string, endId: string = "0", check?: string): 
       `[UserGacha][${uid}][getGachaLogs] 成功获取到 ${gachaRes.length} 条祈愿数据`,
     );
     if (gachaRes.length === 0) {
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve("");
-        }, 1000);
-      });
+      await new Promise((resolve) => setTimeout(() => resolve(""), 1000));
       return;
     }
     const uigfList: TGApp.Plugins.UIGF.GachaItem[] = [];
@@ -273,7 +264,7 @@ async function getGachaLogs(pool: string, endId: string = "0", check?: string): 
       await getGachaLogs(pool, gachaRes[gachaRes.length - 1].id, check);
     }
   } else {
-    showSnackbar({ color: "error", text: `[${pool}][${gachaRes.retcode}] ${gachaRes.message}` });
+    showSnackbar.error(`[${pool}][${gachaRes.retcode}] ${gachaRes.message}`);
     await TGLogger.Error(`[UserGacha][${uid}][getGachaLogs] 获取祈愿数据失败`);
     await TGLogger.Error(
       `[UserGacha][${uid}][getGachaLogs] ${gachaRes.retcode} ${gachaRes.message}`,
@@ -292,7 +283,7 @@ async function handleImportBtn(isV4: boolean): Promise<void> {
     directory: false,
   });
   if (selectedFile === null) {
-    showSnackbar({ color: "cancel", text: "已取消文件选择" });
+    showSnackbar.cancel("已取消文件选择");
     return;
   }
   const check = await verifyUigfData(selectedFile, isV4);
@@ -311,7 +302,7 @@ async function importUigf4(filePath: string): Promise<void> {
     text: `共 ${uidCount} 个 UID，${dataCount} 条数据`,
   });
   if (!res) {
-    showSnackbar({ color: "cancel", text: "已取消祈愿数据导入" });
+    showSnackbar.cancel("已取消祈愿数据导入");
     return;
   }
   loadingTitle.value = "正在导入祈愿数据(v4)";
@@ -321,13 +312,11 @@ async function importUigf4(filePath: string): Promise<void> {
     await TSUserGacha.mergeUIGF4(account);
   }
   loading.value = false;
-  showSnackbar({ text: `成功导入 ${uidCount} 个 UID 的 ${dataCount} 条祈愿数据` });
+  showSnackbar.success(`成功导入 ${uidCount} 个 UID 的 ${dataCount} 条祈愿数据`);
   await TGLogger.Info(
     `[UserGacha][importUigf4] 成功导入 ${uidCount} 个 UID，${dataCount} 条祈愿数据`,
   );
-  setTimeout(() => {
-    window.location.reload();
-  }, 1000);
+  setTimeout(() => window.location.reload(), 1000);
 }
 
 async function importUigf(filePath: string): Promise<void> {
@@ -337,25 +326,23 @@ async function importUigf(filePath: string): Promise<void> {
     text: `UID：${remoteData.info.uid}，共 ${remoteData.list.length} 条数据`,
   });
   if (!confirm) {
-    showSnackbar({ color: "cancel", text: "已取消祈愿数据导入" });
+    showSnackbar.cancel("已取消祈愿数据导入");
     return;
   }
   loadingTitle.value = "正在导入祈愿数据";
   loading.value = true;
   if (remoteData.list.length === 0) {
     loading.value = false;
-    showSnackbar({ color: "error", text: "导入的祈愿数据为空" });
+    showSnackbar.error("导入的祈愿数据为空");
     return;
   }
   await TSUserGacha.mergeUIGF(remoteData.info.uid, remoteData.list);
   loading.value = false;
-  showSnackbar({ text: `成功导入 ${remoteData.list.length} 条祈愿数据` });
+  showSnackbar.success(`成功导入 ${remoteData.list.length} 条祈愿数据`);
   await TGLogger.Info(
     `[UserGacha][importUigf] 成功导入 ${remoteData.info.uid} 的 ${remoteData.list.length} 条祈愿数据`,
   );
-  setTimeout(() => {
-    window.location.reload();
-  }, 1000);
+  setTimeout(() => window.location.reload(), 1000);
 }
 
 // 导出当前UID的祈愿数据
@@ -364,7 +351,7 @@ async function exportUigf(): Promise<void> {
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf] 导出祈愿数据`);
   const gachaList = await TSUserGacha.getGachaRecords(uidCur.value);
   if (gachaList.length === 0) {
-    showSnackbar({ color: "error", text: `UID ${uidCur.value} 暂无祈愿数据` });
+    showSnackbar.error(`UID ${uidCur.value} 暂无祈愿数据`);
     return;
   }
   const res = await showConfirm({
@@ -372,7 +359,7 @@ async function exportUigf(): Promise<void> {
     text: `UID：${uidCur.value}，共 ${gachaList.length} 条数据`,
   });
   if (!res) {
-    showSnackbar({ color: "cancel", text: `已取消 UID ${uidCur.value} 的祈愿数据导出` });
+    showSnackbar.cancel(`已取消 UID ${uidCur.value} 的祈愿数据导出`);
     return;
   }
   const file = await save({
@@ -381,7 +368,7 @@ async function exportUigf(): Promise<void> {
     defaultPath: `${await path.downloadDir()}${path.sep()}UIGF_${uidCur.value}.json`,
   });
   if (!file) {
-    showSnackbar({ color: "cancel", text: "已取消文件保存" });
+    showSnackbar.cancel("已取消文件保存");
     return;
   }
   await TGLogger.Info(
@@ -391,7 +378,7 @@ async function exportUigf(): Promise<void> {
   loading.value = true;
   await exportUigfData(uidCur.value, gachaList, file);
   loading.value = false;
-  showSnackbar({ text: `成功导出 ${uidCur.value} 的祈愿数据` });
+  showSnackbar.success(`成功导出 ${uidCur.value} 的祈愿数据`);
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf] 导出祈愿数据完成`);
 }
 
@@ -400,7 +387,7 @@ async function exportUigf4(): Promise<void> {
   if (!uidCur.value) return;
   const checkConfirm = await showConfirm({ title: "确定导出UIGFv4格式的祈愿数据？" });
   if (!checkConfirm) {
-    showSnackbar({ color: "cancel", text: "已取消 UIGF v4 格式导出" });
+    showSnackbar.cancel("已取消 UIGF v4 格式导出");
     return;
   }
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf4] 导出祈愿数据(v4)`);
@@ -410,28 +397,23 @@ async function exportUigf4(): Promise<void> {
     text: "取消则只导出当前 UID 的祈愿数据",
   });
   if (allConfirm === undefined) {
-    showSnackbar({ color: "cancel", text: "已取消祈愿数据导出" });
+    showSnackbar.cancel("已取消 UIGF v4 格式导出");
     return;
   }
   if (!allConfirm) {
     const gachaList = await TSUserGacha.getGachaRecords(uidCur.value);
     if (gachaList.length === 0) {
-      showSnackbar({ color: "error", text: `UID ${uidCur.value} 暂无祈愿数据` });
+      showSnackbar.error(`UID ${uidCur.value} 暂无祈愿数据`);
       return;
     }
   }
   const file = await save({
     title: "选择导出祈愿数据的文件路径",
-    filters: [
-      {
-        name: "UIGF JSON",
-        extensions: ["json"],
-      },
-    ],
+    filters: [{ name: "UIGF JSON", extensions: ["json"] }],
     defaultPath: `${await path.downloadDir()}${path.sep()}UIGF4.json`,
   });
   if (!file) {
-    showSnackbar({ color: "cancel", text: "已取消文件保存" });
+    showSnackbar.cancel("已取消文件保存");
     return;
   }
   loadingTitle.value = "正在导出祈愿数据";
@@ -442,14 +424,14 @@ async function exportUigf4(): Promise<void> {
     await exportUigf4Data(file);
   }
   loading.value = false;
-  showSnackbar({ text: "祈愿数据已成功导出" });
+  showSnackbar.success("祈愿数据已成功导出");
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf4] 导出祈愿数据完成`);
 }
 
 // 删除当前 UID 的祈愿数据
 async function deleteGacha(): Promise<void> {
   if (gachaListCur.value.length === 0 || !uidCur.value) {
-    showSnackbar({ color: "error", text: "暂无祈愿数据" });
+    showSnackbar.error("暂无祈愿数据");
     return;
   }
   await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 删除祈愿数据`);
@@ -458,7 +440,7 @@ async function deleteGacha(): Promise<void> {
     text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
   });
   if (!firstConfirm) {
-    showSnackbar({ color: "cancel", text: "已取消祈愿数据删除" });
+    showSnackbar.cancel("已取消祈愿数据删除");
     await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 已取消祈愿数据删除`);
     return;
   }
@@ -470,7 +452,7 @@ async function deleteGacha(): Promise<void> {
       text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
     });
     if (!secondConfirm) {
-      showSnackbar({ color: "cancel", text: "已取消祈愿数据删除" });
+      showSnackbar.cancel("已取消祈愿数据删除");
       await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 已取消祈愿数据删除`);
       return;
     }
@@ -479,13 +461,11 @@ async function deleteGacha(): Promise<void> {
   loading.value = true;
   await TSUserGacha.deleteGachaRecords(uidCur.value);
   loading.value = false;
-  showSnackbar({ text: `已成功删除 ${uidCur.value} 的祈愿数据` });
+  showSnackbar.success(`已成功删除 ${uidCur.value} 的祈愿数据`);
   await TGLogger.Info(
     `[UserGacha][${uidCur.value}][deleteGacha] 成功删除 ${gachaListCur.value.length} 条祈愿数据`,
   );
-  setTimeout(() => {
-    window.location.reload();
-  }, 1000);
+  setTimeout(() => window.location.reload(), 1000);
 }
 </script>
 <style lang="css" scoped>

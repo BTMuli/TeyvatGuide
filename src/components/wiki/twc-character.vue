@@ -142,7 +142,7 @@ const nameCard = ref<TGApp.App.NameCard.Item>();
 async function loadData(): Promise<void> {
   const res = WikiCharacterData.find((item) => item.id === props.item.id);
   if (res === undefined) {
-    showSnackbar({ text: `未获取到角色 ${props.item.name} 的 Wiki 数据`, color: "error" });
+    showSnackbar.warn(`未获取到角色 ${props.item.name} 的 Wiki 数据`);
     return;
   }
   data.value = res;
@@ -153,7 +153,7 @@ async function loadData(): Promise<void> {
   } else {
     hasNc.value = false;
   }
-  showSnackbar({ text: `成功获取角色 ${props.item.name} 的 Wiki 数据` });
+  showSnackbar.success(`成功获取角色 ${props.item.name} 的 Wiki 数据`);
 }
 
 watch(
@@ -165,7 +165,7 @@ onMounted(async () => await loadData());
 
 async function toWiki(): Promise<void> {
   if (props.item.contentId === 0) {
-    showSnackbar({ text: `角色 ${props.item.name} 暂无详情`, color: "warn" });
+    showSnackbar.warn(`角色 ${props.item.name} 暂无详情`);
     return;
   }
   await createObc(props.item.contentId, props.item.name);

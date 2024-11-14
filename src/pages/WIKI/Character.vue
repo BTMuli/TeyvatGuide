@@ -61,7 +61,7 @@ onBeforeMount(() => {
     curItem.value = item;
     return;
   }
-  showSnackbar({ text: `角色 ${id} 不存在`, color: "warn" });
+  showSnackbar.warn(`角色 ${id} 不存在`);
   curItem.value = cardsInfo.value[0];
 });
 
@@ -78,10 +78,10 @@ function handleSelect(val: SelectedCValue) {
     return val.area.includes(item.area);
   });
   if (filterC.length === 0) {
-    showSnackbar({ text: "未找到符合条件的角色", color: "warn" });
+    showSnackbar.warn("未找到符合条件的角色");
     return;
   }
-  showSnackbar({ text: `筛选出符合条件的角色 ${filterC.length} 个` });
+  showSnackbar.success(`筛选出符合条件的角色 ${filterC.length} 个`);
   cardsInfo.value = filterC;
 }
 
@@ -96,7 +96,7 @@ async function switchC(item: TGApp.App.Character.WikiBriefInfo): Promise<void> {
 async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> {
   if (!item) return;
   if (item.contentId === 0) {
-    showSnackbar({ text: `角色 ${item.name} 暂无观测枢页面`, color: "warn" });
+    showSnackbar.warn(`角色 ${item.name} 暂无观测枢页面`);
     return;
   }
   const confirm = await showConfirm({
@@ -104,7 +104,7 @@ async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> 
     text: "是否打开观测枢页面？",
   });
   if (!confirm) {
-    showSnackbar({ text: "已取消", color: "cancel" });
+    showSnackbar.cancel("已取消打开观测枢页面");
     return;
   }
   await createObc(item.contentId, item.name);

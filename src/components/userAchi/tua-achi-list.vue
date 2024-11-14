@@ -100,7 +100,7 @@ async function loadAchi(): Promise<void> {
     if (ncFind) ncData.value = ncFind;
     else ncData.value = undefined;
   }
-  showSnackbar({ text: `已获取 ${renderAchi.value.length} 条成就数据`, color: "success" });
+  showSnackbar.success(`已获取 ${achievements.value.length} 条成就数据`);
 }
 
 function selectAchi(data: TGApp.Sqlite.Achievement.RenderAchi): void {
@@ -114,27 +114,26 @@ function selectSeries(data: number): void {
 
 function switchAchiInfo(next: boolean): void {
   if (selectedAchi.value === undefined) {
-    showSnackbar({ text: "当前未选中成就！", color: "warn" });
+    showSnackbar.warn("当前未选中成就！");
     return;
   }
   const index = renderAchi.value.findIndex((i) => i === selectedAchi.value);
   if (index === -1) {
-    showSnackbar({
-      text: `未找到选中成就 ${selectedAchi.value.name}(${selectedAchi.value.id}) 的索引！`,
-      color: "error",
-    });
+    showSnackbar.warn(
+      `未找到选中成就 ${selectedAchi.value.name}(${selectedAchi.value.id}) 的索引！`,
+    );
     return;
   }
   if (next) {
     if (index === renderAchi.value.length - 1) {
-      showSnackbar({ text: "已经是最后一个了", color: "warn" });
+      showSnackbar.warn("已经是最后一个了");
       return;
     }
     selectedAchi.value = renderAchi.value[index + 1];
     return;
   }
   if (index === 0) {
-    showSnackbar({ text: "已经是第一个了", color: "warn" });
+    showSnackbar.warn("已经是第一个了");
     return;
   }
   selectedAchi.value = renderAchi.value[index - 1];

@@ -64,10 +64,7 @@ function onCancel(): void {
 
 async function toChannel(item: ToChannelItem): Promise<void> {
   if (props.gid === item.gid) {
-    showSnackbar({
-      text: "当前已经在该频道",
-      color: "warn",
-    });
+    showSnackbar.warn("当前已经在该频道");
     return;
   }
   visible.value = false;

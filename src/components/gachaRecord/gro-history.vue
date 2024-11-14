@@ -94,31 +94,15 @@ async function toWiki(id: number): Promise<void> {
     title: "是否跳转到对应图鉴界面？",
   });
   if (confirm === undefined || confirm === false) {
-    showSnackbar({
-      text: "已取消",
-      color: "cancel",
-    });
+    showSnackbar.cancel("已取消");
     return;
   }
   if (cFind) {
-    await router.push({
-      name: "角色图鉴",
-      params: {
-        id: id.toString(),
-      },
-    });
+    await router.push({ name: "角色图鉴", params: { id: id.toString() } });
   } else if (wFind) {
-    await router.push({
-      name: "武器图鉴",
-      params: {
-        id: id.toString(),
-      },
-    });
+    await router.push({ name: "武器图鉴", params: { id: id.toString() } });
   } else {
-    showSnackbar({
-      text: "未找到对应角色或武器",
-      color: "error",
-    });
+    showSnackbar.warn("未找到对应角色或武器");
   }
 }
 

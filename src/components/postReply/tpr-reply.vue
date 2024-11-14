@@ -214,7 +214,7 @@ async function loadSub(): Promise<void> {
     lastId.value,
   );
   if ("retcode" in resp) {
-    showSnackbar({ text: `[${resp.retcode}] ${resp.message}`, color: "error" });
+    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     loading.value = false;
     return;
   }
@@ -222,7 +222,7 @@ async function loadSub(): Promise<void> {
   lastId.value = resp.last_id;
   subReplies.value = subReplies.value.concat(resp.list);
   loading.value = false;
-  if (isLast.value) showSnackbar({ text: "没有更多了", color: "info" });
+  if (isLast.value) showSnackbar.warn("没有更多了");
 }
 
 async function exportData(): Promise<void> {
@@ -231,10 +231,7 @@ async function exportData(): Promise<void> {
     text: "将回复对应的JSON数据导出到文件",
   });
   if (!confirm) {
-    showSnackbar({
-      text: "已取消",
-      color: "cancel",
-    });
+    showSnackbar.cancel("已取消");
     return;
   }
   const data = JSON.stringify(toRaw(props.modelValue), null, 2);
@@ -244,17 +241,11 @@ async function exportData(): Promise<void> {
     defaultPath: `${await path.downloadDir()}${path.sep()}${replyId}.json`,
   });
   if (savePath === null) {
-    showSnackbar({
-      text: "已取消",
-      color: "cancel",
-    });
+    showSnackbar.cancel("已取消");
     return;
   }
   await writeTextFile(savePath, data);
-  showSnackbar({
-    text: "导出成功",
-    color: "success",
-  });
+  showSnackbar.success("导出成功");
 }
 </script>
 <style lang="css" scoped>

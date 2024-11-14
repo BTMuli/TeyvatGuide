@@ -162,7 +162,7 @@ async function loadCombat(): Promise<void> {
 
 async function refreshCombat(): Promise<void> {
   if (!userStore.cookie.value) {
-    showSnackbar({ text: "未登录", color: "error" });
+    showSnackbar.error("未登录");
     await TGLogger.Warn("[UserCombat][getAbyssData] 未登录");
     return;
   }
@@ -181,7 +181,7 @@ async function refreshCombat(): Promise<void> {
       text: `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
     });
     if (!confirm) {
-      showSnackbar({ text: "已取消剧诗数据刷新", color: "cancel" });
+      showSnackbar.cancel("已取消剧诗数据刷新");
       return;
     }
   }
@@ -192,11 +192,11 @@ async function refreshCombat(): Promise<void> {
   const res = await TGRequest.User.byCookie.getCombat(userStore.cookie.value, user.value);
   if (res === false) {
     loading.value = false;
-    showSnackbar({ text: "用户未解锁幻想真境剧诗!", color: "warn" });
+    showSnackbar.warn("用户未解锁幻想真境剧诗");
     return;
   }
   if ("retcode" in res) {
-    showSnackbar({ text: `[${res.retcode}]${res.message}`, color: "error" });
+    showSnackbar.error(`[${res.retcode}]${res.message}`);
     loading.value = false;
     await TGLogger.Error(`[UserCombat][getCombatData] 获取${user.value.gameUid}的剧诗数据失败`);
     await TGLogger.Error(`[UserCombat][getCombatData] ${res.retcode} ${res.message}`);
@@ -231,12 +231,12 @@ async function uploadCombat(): Promise<void> {
   await TGLogger.Info("[UserCombat][uploadCombat] 上传剧诗数据");
   const combatData = localCombat.value.find((item) => item.id === Math.max(...combatIdList.value));
   if (!combatData) {
-    showSnackbar({ text: "未找到剧诗数据", color: "error" });
+    showSnackbar.error("未找到剧诗数据");
     await TGLogger.Warn("[UserCombat][uploadCombat] 未找到深渊数据");
     return;
   }
   if (!combatData.hasDetailData) {
-    showSnackbar({ text: "未获取到详情数据", color: "error" });
+    showSnackbar.error("未获取到详情数据");
     await TGLogger.Warn(`[UserCombat][uploadCombat] 未获取到详细数据`);
     return;
   }
@@ -244,7 +244,7 @@ async function uploadCombat(): Promise<void> {
   const endTime = new Date(combatData.endTime).getTime();
   const nowTime = new Date().getTime();
   if (nowTime < startTime || nowTime > endTime) {
-    showSnackbar({ text: "非最新剧诗数据，请刷新剧诗数据后重试！", color: "error" });
+    showSnackbar.warn("非最新剧诗数据，请刷新剧诗数据后重试！");
     await TGLogger.Warn("[UserCombat][uploadCombat] 非最新剧诗数据");
     return;
   }
@@ -257,16 +257,16 @@ async function uploadCombat(): Promise<void> {
     const res = await Hutao.Combat.upload(transCombat);
     loading.value = false;
     if (res.retcode === 0) {
-      showSnackbar({ text: res.message ?? "上传剧诗数据成功" });
+      showSnackbar.success(res.message ?? "上传剧诗数据成功");
       await TGLogger.Info("[UserCombat][uploadCombat] 上传剧诗数据成功");
     } else {
-      showSnackbar({ text: `[${res.retcode}]${res.message}`, color: "error" });
+      showSnackbar.error(`[${res.retcode}]${res.message}`);
       await TGLogger.Error("[UserCombat][uploadCombat] 上传剧诗数据失败");
       await TGLogger.Error(`[UserCombat][uploadCombat] ${res.retcode} ${res.message}`);
     }
   } catch (e) {
     if (e instanceof Error) {
-      showSnackbar({ text: e.message, color: "error" });
+      showSnackbar.error(e.message);
       await TGLogger.Error("[UserCombat][uploadCombat] 上传剧诗数据失败");
       await TGLogger.Error(`[UserCombat][uploadCombat] ${e.message}`);
     }
@@ -276,7 +276,7 @@ async function uploadCombat(): Promise<void> {
 
 async function deleteCombat(): Promise<void> {
   if (uidCur.value === undefined || uidCur.value === "") {
-    showSnackbar({ text: "未找到符合条件的数据!", color: "error" });
+    showSnackbar.error("未找到符合条件的数据!");
     return;
   }
   const confirm = await showConfirm({
@@ -284,7 +284,7 @@ async function deleteCombat(): Promise<void> {
     text: `将清除${uidCur.value}的所有剧诗数据`,
   });
   if (!confirm) {
-    showSnackbar({ text: "已取消删除", color: "cancel" });
+    showSnackbar.cancel("已取消删除");
     return;
   }
   loadingTitle.value = `正在删除 ${uidCur.value} 的剧诗数据`;
@@ -292,7 +292,7 @@ async function deleteCombat(): Promise<void> {
   await TSUserCombat.delCombat(uidCur.value);
   await new Promise((resolve) => setTimeout(resolve, 1000));
   loading.value = false;
-  showSnackbar({ text: `已清除 ${uidCur.value} 的剧诗数据`, color: "success" });
+  showSnackbar.success(`已清除 ${uidCur.value} 的剧诗数据`);
   uidList.value = await TSUserCombat.getAllUid();
   if (uidList.value.length > 0) uidCur.value = uidList.value[0];
   else uidCur.value = undefined;

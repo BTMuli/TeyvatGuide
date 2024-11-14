@@ -134,10 +134,7 @@ async function loadReply(): Promise<void> {
     replyOrder.value,
   );
   if ("retcode" in resp) {
-    showSnackbar({
-      text: `[${resp.retcode}] ${resp.message}`,
-      color: "warn",
-    });
+    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     return;
   }
   isLast.value = resp.is_last;
@@ -146,16 +143,10 @@ async function loadReply(): Promise<void> {
   reply.value = reply.value.concat(resp.list);
   loading.value = false;
   if (isLast.value) {
-    showSnackbar({
-      text: "没有更多了",
-      color: "info",
-    });
-  } else {
-    showSnackbar({
-      text: `成功加载${resp.list.length}条回复`,
-      color: "success",
-    });
+    showSnackbar.warn("没有更多了");
+    return;
   }
+  showSnackbar.success(`成功加载${resp.list.length}条回复`);
 }
 
 async function handleDebug(): Promise<void> {

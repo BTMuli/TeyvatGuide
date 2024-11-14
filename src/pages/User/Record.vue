@@ -139,7 +139,7 @@ async function refreshRecord(): Promise<void> {
       text: `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
     });
     if (!confirm) {
-      showSnackbar({ text: "已取消战绩数据刷新", color: "cancel" });
+      showSnackbar.cancel("已取消战绩数据刷新");
       return;
     }
   }
@@ -147,7 +147,7 @@ async function refreshRecord(): Promise<void> {
   loadingTitle.value = "正在获取战绩数据";
   loading.value = true;
   if (!userStore.cookie.value) {
-    showSnackbar({ text: "请先登录", color: "error" });
+    showSnackbar.warn("请先登录");
     loading.value = false;
     await TGLogger.Warn(`[UserRecord][refresh][${user.value.gameUid}] 未登录`);
     return;
@@ -167,7 +167,7 @@ async function refreshRecord(): Promise<void> {
     await loadRecord();
     if (recordData.value === undefined) await loadRecord();
   } else {
-    showSnackbar({ text: `[${res.retcode}] ${res.message}`, color: "error" });
+    showSnackbar.error(`[${res.retcode}] ${res.message}`);
     await TGLogger.Error(`[UserRecord][refresh][${user.value.gameUid}] 获取战绩数据失败`);
     await TGLogger.Error(
       `[UserRecord][refresh][${user.value.gameUid}] ${res.retcode} ${res.message}`,
@@ -178,7 +178,7 @@ async function refreshRecord(): Promise<void> {
 
 async function shareRecord(): Promise<void> {
   if (!recordData.value) {
-    showSnackbar({ text: "未找到战绩数据，请尝试刷新", color: "warn" });
+    showSnackbar.warn("未找到战绩数据，请尝试刷新");
     return;
   }
   await TGLogger.Info(`[UserRecord][shareRecord][${user.value.gameUid}] 生成分享图片`);
@@ -195,7 +195,7 @@ async function shareRecord(): Promise<void> {
 
 async function deleteRecord(): Promise<void> {
   if (!uidCur.value) {
-    showSnackbar({ text: "未找到当前UID", color: "error" });
+    showSnackbar.warn("未找到当前UID");
     return;
   }
   const confirm = await showConfirm({
@@ -203,11 +203,11 @@ async function deleteRecord(): Promise<void> {
     text: `将删除${uidCur.value}对应的战绩数据`,
   });
   if (!confirm) {
-    showSnackbar({ text: "已取消删除战绩数据", color: "cancel" });
+    showSnackbar.cancel("已取消删除战绩数据");
     return;
   }
   await TSUserRecord.deleteUid(uidCur.value);
-  showSnackbar({ text: `成功删除${uidCur.value}的战绩数据` });
+  showSnackbar.success(`成功删除${uidCur.value}的战绩数据`);
   await loadUid();
   await loadRecord();
 }

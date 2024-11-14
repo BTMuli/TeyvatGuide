@@ -116,21 +116,27 @@ const annoCards = ref<AnnoCard>({
   game: [],
 });
 
-watch(curRegion, async (value) => {
-  appStore.server = value;
-  const name = getRegionName(value);
-  await TGLogger.Info(`[Announcements][watch][curRegionName] 切换服务器：${name}`);
-  await loadData();
-  showSnackbar({ text: `服务器切换为：${name}`, color: "success" });
-});
+watch(
+  () => curRegion.value,
+  async () => {
+    appStore.server = curRegion.value;
+    const name = getRegionName(curRegion.value);
+    await TGLogger.Info(`[Announcements][watch][curRegionName] 切换服务器：${name}`);
+    await loadData();
+    showSnackbar.success(`服务器切换为：${name}`);
+  },
+);
 
-watch(curLang, async (value) => {
-  appStore.lang = value;
-  const name = getLangName(value);
-  await TGLogger.Info(`[Announcements][watch][curLangName] 切换语言：${name}`);
-  await loadData();
-  showSnackbar({ text: `语言切换为：${name}`, color: "success" });
-});
+watch(
+  () => curLang.value,
+  async () => {
+    appStore.lang = curLang.value;
+    const name = getLangName(curLang.value);
+    await TGLogger.Info(`[Announcements][watch][curLangName] 切换语言：${name}`);
+    await loadData();
+    showSnackbar.success(`语言切换为：${name}`);
+  },
+);
 
 onMounted(async () => {
   await TGLogger.Info("[Announcements][onMounted] 打开公告页面");
@@ -158,9 +164,7 @@ async function loadData(): Promise<void> {
     game: listCards.filter((item) => item.typeLabel === AnnoType.game),
   };
   loadingTitle.value = "正在渲染公告数据";
-  await nextTick(async () => {
-    loading.value = false;
-  });
+  await nextTick(() => (loading.value = false));
 }
 
 function getRegionName(value: AnnoServer): string {

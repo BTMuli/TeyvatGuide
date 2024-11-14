@@ -169,10 +169,10 @@ onMounted(async () => {
 
 watch(
   () => resetSelect.value,
-  (val) => {
-    if (val) {
+  () => {
+    if (resetSelect.value) {
       selectedList.value = getOrderedList(roleList.value);
-      showSnackbar({ text: "已重置筛选条件", color: "success" });
+      showSnackbar.success("已重置筛选条件");
       if (!dataVal.value) return;
       selectIndex.value = selectedList.value.indexOf(dataVal.value);
       if (selectIndex.value === -1) {
@@ -184,16 +184,16 @@ watch(
 );
 watch(
   () => showMode.value,
-  (val) => {
-    switch (val) {
+  () => {
+    switch (showMode.value) {
       case "classic":
-        showSnackbar({ text: "已切换至经典视图", color: "success" });
+        showSnackbar.success("已切换至经典视图");
         break;
       case "card":
-        showSnackbar({ text: "已切换至卡片视图（简略）", color: "success" });
+        showSnackbar.success("已切换至卡片视图（简略）");
         break;
       case "dev":
-        showSnackbar({ text: "已切换至卡片视图（详细）", color: "success" });
+        showSnackbar.success("已切换至卡片视图（详细）");
         break;
     }
   },
@@ -238,7 +238,7 @@ async function loadRole(): Promise<void> {
   isEmpty.value = roleList.value.length === 0;
   await TGLogger.Info(`[Character][loadRole][${uidCur.value}] 成功加载角色数据`);
   await TGLogger.Info(`[Character][loadRole][${uidCur.value}] 共获取到${roleData.length}个角色`);
-  showSnackbar({ text: `成功加载${roleData.length}个角色`, color: "success" });
+  showSnackbar.success(`成功加载${roleData.length}个角色`);
 }
 
 async function refresh(): Promise<void> {
@@ -266,7 +266,7 @@ async function refresh(): Promise<void> {
       text: `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
     });
     if (!confirm) {
-      showSnackbar({ text: "已取消角色数据刷新", color: "cancel" });
+      showSnackbar.cancel("已取消角色数据刷新");
       return;
     }
   }
@@ -275,14 +275,14 @@ async function refresh(): Promise<void> {
   loading.value = true;
   loadData.value = true;
   if (!userStore.cookie.value) {
-    showSnackbar({ text: "请先登录", color: "error" });
+    showSnackbar.warn("请先登录");
     loading.value = false;
     loadData.value = false;
     return;
   }
   const indexRes = await TGRequest.User.byCookie.getAvatarIndex(userStore.cookie.value, user.value);
   if (indexRes.retcode !== 0) {
-    showSnackbar({ text: `[${indexRes.retcode}] ${indexRes.message}` });
+    showSnackbar.error(`[${indexRes.retcode}] ${indexRes.message}`);
     await TGLogger.Error(JSON.stringify(indexRes.message));
     loading.value = false;
     loadData.value = false;
@@ -290,7 +290,7 @@ async function refresh(): Promise<void> {
   }
   const listRes = await TGRequest.User.byCookie.getAvatarList(userStore.cookie.value, user.value);
   if (!Array.isArray(listRes)) {
-    showSnackbar({ text: `[${listRes.retcode}] ${listRes.message}`, color: "error" });
+    showSnackbar.error(`[${listRes.retcode}] ${listRes.message}`);
     await TGLogger.Error(`[Character][refreshRoles][${user.value.gameUid}] 获取角色列表失败`);
     await TGLogger.Error(
       `[Character][refreshRoles][${user.value.gameUid}] ${listRes.retcode} ${listRes.message}`,
@@ -308,7 +308,7 @@ async function refresh(): Promise<void> {
     idList,
   );
   if ("retcode" in res) {
-    showSnackbar({ text: `[${res.retcode}] ${res.message}`, color: "error" });
+    showSnackbar.error(`[${res.retcode}] ${res.message}`);
     await TGLogger.Error(`[Character][refreshRoles][${user.value.gameUid}] 获取角色数据失败`);
     await TGLogger.Error(
       `[Character][refreshRoles][${user.value.gameUid}] ${res.retcode} ${res.message}`,
@@ -331,7 +331,7 @@ async function refresh(): Promise<void> {
 
 async function share(): Promise<void> {
   if (!user.value || isEmpty.value) {
-    showSnackbar({ text: "暂无数据", color: "error" });
+    showSnackbar.warn("暂无数据");
     return;
   }
   await TGLogger.Info(`[Character][shareRoles][${user.value.gameUid}] 正在生成分享图片`);
@@ -350,7 +350,7 @@ async function share(): Promise<void> {
 
 async function deleteUid(): Promise<void> {
   if (!uidCur.value) {
-    showSnackbar({ text: "未找到当前UID", color: "error" });
+    showSnackbar.warn("未找到当前UID");
     return;
   }
   const confirm = await showConfirm({
@@ -358,11 +358,11 @@ async function deleteUid(): Promise<void> {
     text: `将删除${uidCur.value}对应的角色数据`,
   });
   if (!confirm) {
-    showSnackbar({ text: "已取消删除", color: "cancel" });
+    showSnackbar.cancel("已取消删除");
     return;
   }
   await TSUserAvatar.deleteUid(uidCur.value);
-  showSnackbar({ text: `成功删除${uidCur.value}的角色数据` });
+  showSnackbar.success(`成功删除${uidCur.value}的角色数据`);
   await loadUid();
   await loadRole();
 }
@@ -397,10 +397,10 @@ function handleSelect(val: SelectedCValue) {
     return val.area.includes(avatar.area);
   });
   if (filterC.length === 0) {
-    showSnackbar({ text: "未找到符合条件的角色", color: "warn" });
+    showSnackbar.warn("未找到符合条件的角色");
     return;
   }
-  showSnackbar({ text: `筛选出符合条件的角色 ${filterC.length} 个`, color: "success" });
+  showSnackbar.success(`筛选出符合条件的角色 ${filterC.length} 个`);
   const selectedId = filterC.map((item) => item.id);
   selectedList.value = roleList.value.filter((role) => selectedId.includes(role.cid));
   if (!dataVal.value) return;

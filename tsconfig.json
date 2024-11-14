@@ -27,7 +27,7 @@
     "src/data/**/*.json",
     "tsconfig.json",
     "vite.config.ts",
-    "eslint.config.js"
+    "eslint.config.mjs"
   ],
   "exclude": ["node_modules"]
 }

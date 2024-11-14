@@ -178,20 +178,12 @@ async function toOuter(
   title: string,
 ): Promise<void> {
   if (character.info !== undefined) {
-    await router.push({
-      name: "角色图鉴",
-      params: {
-        id: character.info.id,
-      },
-    });
+    await router.push({ name: "角色图鉴", params: { id: character.info.id } });
     return;
   }
   const url = character.url;
   if (url === "") {
-    showSnackbar({
-      text: "链接为空!",
-      color: "error",
-    });
+    showSnackbar.warn("链接为空!");
     return;
   }
   await createTGWindow(url, "Sub_window", `Pool_${title}`, 1200, 800, true, true);

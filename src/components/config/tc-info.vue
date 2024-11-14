@@ -116,10 +116,7 @@ onMounted(async () => {
   try {
     dbInfo.value = await TGSqlite.getAppData();
   } catch (e) {
-    showSnackbar({
-      text: "加载数据库错误，请重置数据库!",
-      color: "error",
-    });
+    showSnackbar.warn("加载数据库错误，请重置数据库!");
     await TGLogger.Error(`加载数据库错误: ${e}`);
   }
 });

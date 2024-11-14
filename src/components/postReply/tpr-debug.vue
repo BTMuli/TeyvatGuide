@@ -51,16 +51,10 @@ async function selectFile(): Promise<void> {
   const file = await open({
     multiple: false,
     directory: false,
-    filter: {
-      name: "JSON",
-      extensions: ["json"],
-    },
+    filter: { name: "JSON", extensions: ["json"] },
   });
   if (file === null) {
-    showSnackbar({
-      text: "未选择文件",
-      color: "error",
-    });
+    showSnackbar.warn("未选择文件");
     return;
   }
   filePath.value = file;
@@ -68,10 +62,7 @@ async function selectFile(): Promise<void> {
     const data = await readTextFile(file);
     replyData.value = JSON.parse(data);
   } catch (error) {
-    showSnackbar({
-      text: `解析失败：${error}`,
-      color: "error",
-    });
+    showSnackbar.error(`解析失败：${error}`);
     return;
   }
 }

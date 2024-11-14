@@ -71,6 +71,7 @@ const curGid = ref<string>(gameSelectList[0].gid);
 
 onMounted(async () => {
   loadingTitle.value = "正在加载首页";
+  // @ts-expect-error-next-line
   const isProdEnv = import.meta.env.MODE === "production";
   // 获取当前环境
   if (isProdEnv && appStore.devMode) {
@@ -101,21 +102,13 @@ onMounted(async () => {
 async function submitHome(): Promise<void> {
   const show = showHome.value;
   if (show.length < 1) {
-    showSnackbar({
-      color: "error",
-      text: "请至少选择一个!",
-    });
+    showSnackbar.warn("请至少选择一个!");
     return;
   }
   homeStore.setShowValue(show);
-  showSnackbar({
-    color: "success",
-    text: "设置成功!",
-  });
+  showSnackbar.success("设置成功!");
   await TGLogger.Info("[Home][submitHome] 首页设置成功，当前显示：" + show.join("、"));
-  setTimeout(() => {
-    window.location.reload();
-  }, 1000);
+  setTimeout(() => window.location.reload(), 1000);
 }
 
 // 组件加载完成

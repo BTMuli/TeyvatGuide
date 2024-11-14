@@ -81,7 +81,7 @@ function onCancel(): void {
 
 function copy(code: string): void {
   navigator.clipboard.writeText(code);
-  showSnackbar({ text: "已复制到剪贴板", color: "success" });
+  showSnackbar.success("已复制到剪贴板");
 }
 
 async function shareImg(): Promise<void> {

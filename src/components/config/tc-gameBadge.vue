@@ -34,32 +34,32 @@ const account = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.valu
 
 async function tryPlayGame(): Promise<void> {
   if (!userStore.uid.value || !userStore.cookie.value) {
-    showSnackbar({ text: "请先登录！", color: "warn" });
+    showSnackbar.warn("请先登录！");
     return;
   }
   if (account.value.isOfficial === 0) {
-    showSnackbar({ text: "仅支持官服用户启动！", color: "warn" });
+    showSnackbar.warn("仅支持官服用户启动！");
     return;
   }
   if (appStore.gameDir.value === "未设置") {
-    showSnackbar({ text: "未设置游戏安装目录！", color: "warn" });
+    showSnackbar.warn("未设置游戏安装目录！");
     return;
   }
   const gamePath = `${appStore.gameDir.value}${path.sep()}YuanShen.exe`;
   if (!(await exists(gamePath))) {
-    showSnackbar({ text: "未检测到原神本体应用！", color: "warn" });
+    showSnackbar.warn("未检测到原神本体应用！");
     return;
   }
   const resp = await TGRequest.User.getAuthTicket(account.value, userStore.cookie.value);
   if (typeof resp !== "string") {
-    showSnackbar({ text: `[${resp.retcode}] ${resp.message}`, color: "error" });
+    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     await TGLogger.Error(
       `[config][gameBadge] 尝试获取authTicket失败，当前用户：${account.value.uid}-${account.value.gameUid}`,
     );
     await TGLogger.Error(`[config][gameBadge] resp: ${JSON.stringify(resp)}`);
     return;
   }
-  showSnackbar({ text: `成功获取ticket:${resp}，正在启动应用...` });
+  showSnackbar.success(`成功获取ticket:${resp}，正在启动应用...`);
   const cmd = Command.create("exec-sh", [`&"${gamePath}" login_auth_ticket=${resp}`], {
     cwd: appStore.gameDir.value,
     encoding: "utf-8",
@@ -69,7 +69,7 @@ async function tryPlayGame(): Promise<void> {
   if (result.stderr) {
     await TGLogger.Error(`[config][gameBadge] 启动游戏本体失败！`);
     console.error(result.stderr);
-    showSnackbar({ text: `[config][gameBadge] ${result.stderr}`, color: "error" });
+    showSnackbar.error(`[${result.code}] ${result.stderr}`);
   }
 }
 </script>

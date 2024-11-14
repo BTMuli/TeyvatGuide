@@ -10,37 +10,27 @@
   </transition>
 </template>
 <script lang="ts" setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref, toRaw } from "vue";
 
 interface SnackbarProps {
   text: string;
-  color?: string;
-  timeout?: number;
+  color: string;
+  timeout: number;
 }
 
-const props = withDefaults(defineProps<SnackbarProps>(), {
-  text: "",
-  color: "success",
-  timeout: 1500,
-});
-
+const props = defineProps<SnackbarProps>();
+const data = ref<TGApp.Component.Snackbar.Params>(toRaw(props));
 // 组件参数
-const data = reactive<TGApp.Component.Snackbar.Params>({
-  text: "",
-});
 const show = ref<boolean>(false);
-// eslint-disable-next-line no-undef
-let timer: NodeJS.Timeout;
 
-onMounted(() => {
-  displayBox(props);
-});
+// eslint-disable-next-line no-undef
+let timer: NodeJS.Timeout | undefined = undefined;
+
+onMounted(() => displayBox(props));
 
 // 根据输入的颜色转换为 hex 格式
 function transColor(color: string): string {
-  if (color.startsWith("#")) {
-    return color;
-  }
+  if (color.startsWith("#")) return color;
   switch (color) {
     case "success":
       return "#7ebd21";
@@ -58,19 +48,18 @@ function transColor(color: string): string {
 }
 
 function displayBox(params: TGApp.Component.Snackbar.Params): void {
-  data.text = params.text;
-  data.color = transColor(params.color ?? "success");
-  data.timeout = params.timeout ?? 1500;
+  data.value.text = params.text;
+  data.value.color = transColor(params.color);
+  data.value.timeout = params.timeout;
   show.value = true;
-  clearTimeout(timer);
-  timer = setTimeout(() => {
-    show.value = false;
-  }, data.timeout);
+  if (timer != undefined) {
+    clearTimeout(timer);
+    timer = undefined;
+  }
+  timer = setTimeout(() => (show.value = false), data.value.timeout);
 }
 
-defineExpose({
-  displayBox,
-});
+defineExpose({ displayBox });
 </script>
 <style lang="css" scoped>
 .func-snackbar-enter-active,

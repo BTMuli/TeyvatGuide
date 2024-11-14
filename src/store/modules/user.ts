@@ -42,22 +42,22 @@ export const useUserStore = defineStore(
 
     async function switchGameAccount(uidG: string): Promise<boolean> {
       if (!uid.value) {
-        showSnackbar({ text: "未找到登录用户", color: "error" });
+        showSnackbar.warn("未找到登录用户");
         return false;
       }
       if (uidG === account.value.gameUid) {
-        showSnackbar({ text: "该账户已经选中", color: "warn" });
+        showSnackbar.warn("该账户已经选中");
         return false;
       }
       const gameAccounts = await TSUserAccount.game.getAccount(uid.value);
       const accountFind = gameAccounts.find((a) => a.gameUid === uidG);
       if (!accountFind) {
-        showSnackbar({ text: "未找到账户绑定的游戏账户", color: "error" });
+        showSnackbar.warn("未找到账户绑定的游戏账户");
         return false;
       }
       account.value = accountFind;
       await TSUserAccount.game.switchAccount(uid.value, uidG);
-      showSnackbar({ text: `成功切换游戏账户为${uidG}` });
+      showSnackbar.success(`成功切换游戏账户为${uidG}`);
       return true;
     }
 

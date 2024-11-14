@@ -102,7 +102,7 @@ export async function verifyUigfData(path: string, isVersion4: boolean = false):
     if (isVersion4) return validateUigf4Data(fileJson);
     return validateUigfData(fileJson);
   } catch (e) {
-    showSnackbar({ text: `UIGF 数据格式错误 ${e}`, color: "error" });
+    showSnackbar.error(`UIGF 数据格式错误 ${e}`);
     await TGLogger.Error(`UIGF 数据格式错误，文件路径：${path}`);
     await TGLogger.Error(`错误信息 ${e}`);
     return false;
@@ -121,18 +121,12 @@ function validateUigfData(data: object): boolean {
   if (!validate(data)) {
     if (!validate.errors || validate.errors.length === 0) return false;
     const error: ErrorObject = validate.errors[0];
-    showSnackbar({
-      text: `${error.instancePath || error.schemaPath} ${error.message}`,
-      color: "error",
-    });
+    showSnackbar.error(`${error.instancePath || error.schemaPath} ${error.message}`);
     return false;
   }
   const parsedData: TGApp.Plugins.UIGF.Schema = <TGApp.Plugins.UIGF.Schema>data;
   if (parsedData.info.uigf_version < "v2.3") {
-    showSnackbar({
-      text: "UIGF 版本过低，请使用 v2.3 或以上版本",
-      color: "error",
-    });
+    showSnackbar.error("UIGF 版本过低，请使用 v2.3 或以上版本");
     return false;
   }
   return true;
@@ -150,10 +144,7 @@ function validateUigf4Data(data: object): boolean {
   if (!validate4(data)) {
     if (!validate4.errors || validate4.errors.length === 0) return false;
     const error: ErrorObject = validate4.errors[0];
-    showSnackbar({
-      text: `${error.instancePath || error.schemaPath} ${error.message}`,
-      color: "error",
-    });
+    showSnackbar.error(`${error.instancePath || error.schemaPath} ${error.message}`);
     return false;
   }
   return true;
