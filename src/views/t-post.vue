@@ -211,7 +211,7 @@ watch(
   },
 );
 
-async function toTopic(topic: TGApp.Plugins.Mys.Post.Topic): Promise<void> {
+async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
   const gid = postData.value?.post.game_id ?? topic.game_id;
   await emit("active_deep_link", `router?path=/posts/${gid}/${topic.id}`);
 }

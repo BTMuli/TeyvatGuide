@@ -26,7 +26,7 @@
       <v-select
         v-model="curSortType"
         class="post-switch-item"
-        :items="sortOrderList"
+        :items="sortList"
         item-title="text"
         item-value="value"
         variant="outlined"
@@ -43,7 +43,7 @@
         @click:append="searchPost"
         @keyup.enter="searchPost"
       />
-      <v-btn :rounded="true" class="post-fresh-btn" @click="freshPostData()">
+      <v-btn :rounded="true" class="post-fresh-btn" @click="firstLoad()">
         <v-icon>mdi-refresh</v-icon>
         <span>刷新</span>
       </v-btn>
@@ -62,7 +62,7 @@
   <ToPostSearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, toRaw, watch } from "vue";
+import { computed, onMounted, ref, toRaw, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import showSnackbar from "../../components/func/snackbar.js";
@@ -90,12 +90,20 @@ const isLastPage = ref<boolean>(false);
 const curGame = ref<TGApp.Plugins.Mys.Topic.GameInfo>();
 
 type SortSelect = { text: string; value: number };
-// todo 根据实际情况修改
-const sortOrderList: SortSelect[] = [
-  { text: "默认排序", value: 0 },
-  { text: "按时间排序", value: 1 },
-  { text: "按热度排序", value: 2 },
-];
+const sortList = computed<SortSelect[]>(() => {
+  if (!topicInfo.value) return [];
+  if (!topicInfo.value.good_post_exist) {
+    return [
+      { text: "最新", value: 0 },
+      { text: "热门", value: 2 },
+    ];
+  }
+  return [
+    { text: "最新", value: 0 },
+    { text: "热门", value: 2 },
+    { text: "精华", value: 1 },
+  ];
+});
 
 onMounted(async () => await firstLoad());
 watch(
@@ -122,7 +130,7 @@ async function firstLoad(): Promise<void> {
   }
   if (curGame.value === undefined) curGame.value = info.game_info_list[0];
   loadingTitle.value = `正在加载${curGame.value.name}帖子列表`;
-  const postList = await Mys.Post.getTopicPostList(gid, topic);
+  const postList = await Mys.Post.getTopicPostList(gid, topic, curSortType.value);
   if ("retcode" in postList) {
     showSnackbar.error(`[${postList.retcode}] ${postList.message}`);
     loading.value = false;

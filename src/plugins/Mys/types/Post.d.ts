@@ -1,15 +1,9 @@
 /**
  * @file plugins/Mys/types/post.d.ts
  * @description Mys 插件帖子类型定义文件
- * @since Beta v0.5.5
+ * @since Beta v0.6.3
  */
 
-/**
- * @description Mys 插件帖子类型
- * @since Beta v0.5.5
- * @namespace TGApp.Plugins.Mys.Post
- * @memberof TGApp.Plugins.Mys
- */
 declare namespace TGApp.Plugins.Mys.Post {
   /**
    * @description 帖子返回数据
@@ -55,7 +49,7 @@ declare namespace TGApp.Plugins.Mys.Post {
   interface FullData {
     post: Post;
     forum: Forum | null;
-    topics: Topic[];
+    topics: TGApp.Plugins.Mys.Topic.Info[];
     user: TGApp.Plugins.Mys.User.Post | null;
     self_operation: TGApp.Plugins.Mys.User.SelfOperation;
     stat: Stat | null;
@@ -193,31 +187,6 @@ declare namespace TGApp.Plugins.Mys.Post {
     icon: string;
     game_id: number;
     forum_cate: unknown | null;
-  }
-
-  /**
-   * @description 话题信息
-   * @since Alpha v0.2.1
-   * @interface Topic
-   * @property {number} id 话题 ID
-   * @property {string} name 话题名称
-   * @property {string} cover 话题封面图 URL
-   * @property {boolean} is_top 是否置顶
-   * @property {boolean} is_good 是否加精
-   * @property {boolean} is_interactive 是否互动
-   * @property {number} game_id 游戏 ID
-   * @property {number} content_type 内容类型
-   * @return Topic
-   */
-  interface Topic {
-    id: number;
-    name: string;
-    cover: string;
-    is_top: boolean;
-    is_good: boolean;
-    is_interactive: boolean;
-    game_id: number;
-    content_type: number;
   }
 
   /**
