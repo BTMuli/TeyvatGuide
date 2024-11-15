@@ -17,6 +17,14 @@
     <div class="tpc-content">
       <div class="tpc-title" :title="card.title" @click="shareCard">{{ card.title }}</div>
       <TpAvatar v-if="card.user" :data="card.user" position="left" />
+    </div>
+    <div class="tpc-bottom">
+      <div class="tpc-tags">
+        <div v-for="topic in card.topics" :key="topic.id" class="tpc-tag" @click="toTopic(topic)">
+          <v-icon>mdi-tag</v-icon>
+          <span>{{ topic.name }}</span>
+        </div>
+      </div>
       <div class="tpc-data" v-if="card.data">
         <div class="tpc-info-item" :title="`浏览数：${card.data.view}`">
           <v-icon>mdi-eye</v-icon>
@@ -59,6 +67,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { emit } from "@tauri-apps/api/event";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { generateShareImg, saveImgLocal } from "../../utils/TGShare.js";
@@ -205,6 +214,7 @@ function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys
     user: item.user,
     forum: forum,
     data: data,
+    topics: item.topics,
   };
 }
 
@@ -231,12 +241,22 @@ async function shareCard(): Promise<void> {
   const fileName = `PostCard_${card.value.postId}`;
   await generateShareImg(fileName, dom, 2.5);
 }
+
+async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
+  const gid = props.modelValue.post.game_id;
+  await emit("active_deep_link", `router?path=/posts/${gid}/${topic.id}`);
+}
 </script>
 <style lang="css" scoped>
 .tpc-card {
   position: relative;
+  display: flex;
   overflow: hidden;
   width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   box-shadow: 2px 2px 5px var(--common-shadow-2);
@@ -270,6 +290,15 @@ async function shareCard(): Promise<void> {
   gap: 10px;
 }
 
+.tpc-bottom {
+  position: relative;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  padding: 10px;
+  gap: 10px;
+}
+
 .tpc-title {
   overflow: hidden;
   width: 100%;
@@ -278,6 +307,27 @@ async function shareCard(): Promise<void> {
   font-size: 18px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.tpc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  color: var(--tgc-pink-1);
+  cursor: pointer;
+  font-size: 12px;
+  gap: 3px;
+
+  :hover {
+    color: var(--tgc-blue-2);
+  }
+}
+
+.tpc-tag {
+  padding: 0 3px;
+  border-radius: 5px;
+  background: var(--box-bg-2);
 }
 
 .tpc-forum {

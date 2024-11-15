@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/types/news.d.ts
  * @description Mys 插件咨讯类型定义文件
- * @since Beta v0.5.0
+ * @since Beta v0.6.3
  */
 
 /**
@@ -55,7 +55,7 @@ declare namespace TGApp.Plugins.Mys.News {
 
   /**
    * @description 用于渲染的咨讯卡片
-   * @since Beta v0.5.0
+   * @since Beta v0.6.3
    * @interface RenderCard
    * @property {string} title 标题
    * @property {string} cover 封面图片 URL
@@ -72,6 +72,7 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {number} data.like 帖子点赞数
    * @property {number} data.reply 帖子回复数
    * @property {number} data.view 帖子浏览数
+   * @property {TGApp.Plugins.Mys.Topic.Info[]} topics 帖子话题
    * @return RenderCard
    */
   interface RenderCard {
@@ -92,6 +93,7 @@ declare namespace TGApp.Plugins.Mys.News {
       view: number;
     } | null;
     status?: RenderStatus;
+    topics: TGApp.Plugins.Mys.Topic.Info[];
   }
 
   /**
