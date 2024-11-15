@@ -193,7 +193,6 @@ onMounted(async () => {
   showLoading.update(`正在获取 ${gameLabel}-${forumLabel} 数据`);
   await freshPostData();
   curForumLabel.value = forumLabel;
-  showLoading.end();
 });
 
 watch(
@@ -233,7 +232,7 @@ async function freshPostData(): Promise<void> {
   await TGLogger.Info(
     `[Posts][${gameLabel}][freshPostData][${forumLabel}][${sortLabel}] 刷新帖子列表`,
   );
-  showLoading.start(`正在加载 ${gameLabel}-${forumLabel}-${sortLabel} 数据`);
+  showLoading.update(`正在加载 ${gameLabel}-${forumLabel}-${sortLabel} 数据`);
   const postsGet = await Mys.Post.getForumPostList(curForum.value, curSortType.value);
   posts.value = postsGet.list;
   showLoading.end();
