@@ -23,21 +23,18 @@ const showInner = ref<boolean>(false);
 
 const geetestEl = useTemplateRef<HTMLDivElement>("geetestRef");
 
-watch(show, () => {
-  if (show.value) {
-    showOuter.value = true;
-    setTimeout(() => {
-      showInner.value = true;
-    }, 100);
-  } else {
-    setTimeout(() => {
-      showInner.value = false;
-    }, 100);
-    setTimeout(() => {
-      showOuter.value = false;
-    }, 300);
-  }
-});
+watch(
+  () => show.value,
+  () => {
+    if (show.value) {
+      showOuter.value = true;
+      setTimeout(() => (showInner.value = true), 100);
+    } else {
+      setTimeout(() => (showInner.value = false), 100);
+      setTimeout(() => (showOuter.value = false), 300);
+    }
+  },
+);
 
 async function displayBox(
   props: TGApp.Plugins.Mys.Geetest.reqResp,
@@ -58,24 +55,18 @@ async function displayBox(
         if (geetestEl.value === null) return;
         geetestEl.value.innerHTML = "";
         captchaObj.appendTo("#geetest");
-        captchaObj.onReady(() => {
-          show.value = true;
-        });
-        captchaObj.onSuccess(async () => {
+        captchaObj.onReady(() => (show.value = true));
+        captchaObj.onSuccess(() => {
           const validate = captchaObj.getValidate();
           resolve(validate);
         });
-        captchaObj.onClose(() => {
-          show.value = false;
-        });
+        captchaObj.onClose(() => (show.value = false));
       },
     );
   });
 }
 
-defineExpose({
-  displayBox,
-});
+defineExpose({ displayBox });
 </script>
 <style lang="css" scoped>
 .func-geetest-outer-enter-active,
@@ -116,7 +107,7 @@ defineExpose({
 
 .geetest-overlay {
   position: fixed;
-  z-index: 100;
+  z-index: 999;
   top: 0;
   left: 0;
   display: flex;
@@ -124,7 +115,7 @@ defineExpose({
   height: 100%;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(10px);
   background: rgb(0 0 0 / 50%);
 }
 

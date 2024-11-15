@@ -1,19 +1,19 @@
 <template>
   <TOverlay v-model="show" :blur-val="'5px'">
-    <div class="tol-div">
-      <div class="tol-box">
-        <div class="tol-title">
+    <div class="loading-container">
+      <div class="loading-box">
+        <div class="loading-title">
           <slot name="title">
             {{ title }}
           </slot>
           <v-progress-circular v-show="!empty" indeterminate color="#f4d8a8" />
         </div>
-        <div v-if="subtitle" class="tol-subtitle">
+        <div v-if="subtitle" class="loading-subtitle">
           <slot name="subtitle">
             {{ subtitle }}
           </slot>
         </div>
-        <div class="tol-img">
+        <div class="loading-img">
           <slot name="img">
             <img v-if="!empty" src="/source/UI/loading.webp" alt="loading" />
             <img v-else src="/source/UI/empty.webp" alt="empty" />
@@ -52,7 +52,7 @@ watch(
 );
 </script>
 <style lang="css" scoped>
-.tol-div {
+.loading-container {
   display: flex;
   min-width: 800px;
   min-height: 300px;
@@ -62,7 +62,7 @@ watch(
   box-shadow: 0 0 10px rgb(0 0 0 / 50%);
 }
 
-.tol-box {
+.loading-box {
   display: flex;
   width: 100%;
   box-sizing: content-box;
@@ -75,7 +75,7 @@ watch(
   color: #f4d8a8;
 }
 
-.tol-title {
+.loading-title {
   display: flex;
   width: 100%;
   height: 50px;
@@ -86,7 +86,7 @@ watch(
   font-weight: 600;
 }
 
-.tol-subtitle {
+.loading-subtitle {
   width: 100%;
   height: 25px;
   font-family: Genshin-Light, serif;
@@ -94,7 +94,7 @@ watch(
   text-align: center;
 }
 
-.tol-img {
+.loading-img {
   display: flex;
   width: 100%;
   height: 200px;
@@ -102,7 +102,7 @@ watch(
   justify-content: center;
 }
 
-.tol-img:deep(img) {
+.loading-img:deep(img) {
   max-width: 100%;
   max-height: 200px;
   border-radius: 5px;
