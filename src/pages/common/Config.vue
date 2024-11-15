@@ -120,7 +120,7 @@ import TcDataDir from "../../components/config/tc-dataDir.vue";
 import TcGameBadge from "../../components/config/tc-gameBadge.vue";
 import TcInfo from "../../components/config/tc-info.vue";
 import TcUserBadge from "../../components/config/tc-userBadge.vue";
-import showConfirm from "../../components/func/confirm.js";
+import showDialog from "../../components/func/dialog.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TGSqlite from "../../plugins/Sqlite/index.js";
@@ -162,16 +162,13 @@ onMounted(async () => {
 
 // 备份数据
 async function confirmBackup(): Promise<void> {
-  const res = await showConfirm({
-    title: "是否备份到默认路径",
-    text: "取消则自选路径，点击外部不做处理",
-  });
-  if (res === undefined) {
+  const bcCheck = await showDialog.check("是否备份到默认路径", "取消则自选路径，点击外部不做处理");
+  if (bcCheck === undefined) {
     showSnackbar.cancel("已取消备份");
     return;
   }
   let saveDir = appStore.userDir;
-  if (!res) {
+  if (!bcCheck) {
     const dir: string | null = await open({
       directory: true,
       defaultPath: saveDir,
@@ -196,16 +193,13 @@ async function confirmBackup(): Promise<void> {
 
 // 恢复数据
 async function confirmRestore(): Promise<void> {
-  const resConfirm = await showConfirm({
-    title: "是否从默认路径恢复",
-    text: "取消则自选路径，点击外部不做处理",
-  });
-  if (resConfirm === undefined) {
+  const rsCheck = await showDialog.check("是否从默认路径恢复", "取消则自选路径，点击外部不做处理");
+  if (rsCheck === undefined) {
     showSnackbar.cancel("已取消恢复");
     return;
   }
   let saveDir = appStore.userDir;
-  if (!resConfirm) {
+  if (!rsCheck) {
     const dir: string | null = await open({
       directory: true,
       defaultPath: saveDir,
@@ -231,8 +225,8 @@ async function confirmRestore(): Promise<void> {
 
 // 更新数据
 async function confirmUpdate(title?: string): Promise<void> {
-  const res = await showConfirm({ title: title ?? "确认更新数据吗？", text: "请确保存在备份数据" });
-  if (!res) {
+  const updateCheck = await showDialog.check(title ?? "确认更新数据吗？");
+  if (!updateCheck) {
     showSnackbar.cancel("已取消更新数据库");
     return;
   }
@@ -250,11 +244,11 @@ async function confirmUpdate(title?: string): Promise<void> {
 async function confirmUpdateDevice(force?: boolean): Promise<void> {
   if (force !== undefined && force) {
     await TGLogger.Info("[Config][confirmUpdateDevice][force] 开始强制更新设备信息");
-    const resF = await showConfirm({
-      title: "确认强制更新设备信息吗？",
-      text: `DeviceFp:${appStore.deviceInfo.device_fp}`,
-    });
-    if (!resF) {
+    const forceCheck = await showDialog.check(
+      "确认强制更新设备信息吗？",
+      `DeviceFp:${appStore.deviceInfo.device_fp}`,
+    );
+    if (!forceCheck) {
       showSnackbar.cancel("已取消强制更新设备信息");
       await TGLogger.Info("[Config][confirmUpdateDevice][force] 取消强制更新设备信息");
       return;
@@ -274,8 +268,8 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
   await TGLogger.Info("[Config][confirmUpdateDevice] 开始更新设备信息");
   const localFp = getDeviceInfo("device_fp");
   if (localFp !== "0000000000000") {
-    const res = await showConfirm({ title: "确认更新设备信息吗？", text: `DeviceFp:${localFp}` });
-    if (!res) {
+    const updateCheck = await showDialog.check("确认更新设备信息吗？", `DeviceFp:${localFp}`);
+    if (!updateCheck) {
       showSnackbar.cancel("已取消更新设备信息");
       await TGLogger.Info("[Config][confirmUpdateDevice] 取消更新设备信息");
       return;
@@ -312,11 +306,11 @@ async function confirmDelCache(): Promise<void> {
   }
   cacheSize.value = cacheBSize;
   loading.value = false;
-  const res = await showConfirm({
-    title: "确认清除缓存吗？",
-    text: `当前缓存大小为 ${bytesToSize(cacheBSize)}`,
-  });
-  if (!res) {
+  const delCheck = await showDialog.check(
+    "确认清除缓存吗？",
+    `当前缓存大小为 ${bytesToSize(cacheBSize)}`,
+  );
+  if (!delCheck) {
     showSnackbar.cancel("已取消清除缓存");
     await TGLogger.Info("[Config][confirmDelCache] 取消清除缓存");
     return;
@@ -335,8 +329,8 @@ async function confirmDelCache(): Promise<void> {
 // 恢复默认设置
 async function confirmResetApp(): Promise<void> {
   await TGLogger.Info("[Config][confirmResetApp] 开始恢复默认设置");
-  const res = await showConfirm({ title: "确认恢复默认设置吗？" });
-  if (!res) {
+  const resetCheck = await showDialog.check("确认恢复默认设置吗？");
+  if (!resetCheck) {
     showSnackbar.cancel("已取消恢复默认设置");
     await TGLogger.Info("[Config][confirmResetApp] 取消恢复默认设置");
     return;
@@ -350,18 +344,14 @@ async function confirmResetApp(): Promise<void> {
 
 // 前置
 async function tryShowReset(): Promise<void> {
-  const res = await showConfirm({
-    title: "请输入验证 Code",
-    text: "请联系开发者获取",
-    mode: "input",
-  });
-  if (!res) {
+  const codeInput = await showDialog.input("请输入验证 Code", "请联系开发者获取");
+  if (!codeInput) {
     showSnackbar.cancel("已取消");
     return;
   }
   const time = getBuildTime();
   const code = time.startsWith("dev.") ? "dev" : time;
-  if (res === code || res === "reset1128") {
+  if (codeInput === code || codeInput === "reset1128") {
     showReset.value = true;
     showSnackbar.success("已开启重置数据库选项");
     return;
@@ -372,11 +362,11 @@ async function tryShowReset(): Promise<void> {
 // 重置数据库
 async function confirmResetDB(title?: string): Promise<void> {
   await TGLogger.Info("[Config][confirmResetDB] 开始重置数据库");
-  const res = await showConfirm({
-    title: title ?? "确认重置数据库吗？",
-    text: "请确认已经备份关键数据",
-  });
-  if (!res) {
+  const resetCheck = await showDialog.check(
+    title ?? "确认重置数据库吗？",
+    "请确认已经备份关键数据",
+  );
+  if (!resetCheck) {
     showSnackbar.cancel("已取消重置数据库");
     await TGLogger.Info("[Config][confirmResetDB] 取消重置数据库");
     return;

@@ -103,7 +103,7 @@ import { getVersion } from "@tauri-apps/api/app";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, watch, computed } from "vue";
 
-import showConfirm from "../../components/func/confirm.js";
+import showDialog from "../../components/func/dialog.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TuaAvatarBox from "../../components/userAvatar/tua-avatar-box.vue";
@@ -252,20 +252,20 @@ async function refresh(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
   if (uidCur.value && uidCur.value !== user.value.gameUid) {
-    const switchConfirm = await showConfirm({
-      title: "是否切换游戏账户",
-      text: `确认则尝试切换至${uidCur.value}`,
-    });
-    if (switchConfirm) {
+    const switchCheck = await showDialog.check(
+      "是否切换游戏账户",
+      `确认则尝试切换至${uidCur.value}`,
+    );
+    if (switchCheck) {
       await useUserStore().switchGameAccount(uidCur.value);
       await refresh();
       return;
     }
-    const confirm = await showConfirm({
-      title: "确定刷新？",
-      text: `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
-    });
-    if (!confirm) {
+    const freshCheck = await showDialog.check(
+      "是否刷新角色数据",
+      `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
+    );
+    if (!freshCheck) {
       showSnackbar.cancel("已取消角色数据刷新");
       return;
     }
@@ -353,11 +353,8 @@ async function deleteUid(): Promise<void> {
     showSnackbar.warn("未找到当前UID");
     return;
   }
-  const confirm = await showConfirm({
-    title: "确定删除？",
-    text: `将删除${uidCur.value}对应的角色数据`,
-  });
-  if (!confirm) {
+  const delCheck = await showDialog.check("确定删除？", `将删除${uidCur.value}对应的角色数据`);
+  if (!delCheck) {
     showSnackbar.cancel("已取消删除");
     return;
   }

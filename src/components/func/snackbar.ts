@@ -1,6 +1,6 @@
 /**
- * @file component func snackbar.ts
- * @description 封装 vuetify 的 snackbar 组件，通过函数调用的方式，简化 snackbar 的使用
+ * @file component/func/snackbar.ts
+ * @description snackbar 组件封装，函数式调用
  * @since Beta v0.6.3
  */
 
@@ -11,32 +11,32 @@ import snackbar from "./snackbar.vue";
 
 const snackbarId = "tg-func-snackbar";
 
+export type SnackbarParams = { text: string; color: string; timeout: number };
+
 /**
  * @description 自定义 snackbar 组件
- * @since Beta v0.3.3
- * @extends ComponentInternalInstance
- * @property {Function} exposeProxy.displayBox 显示 snackbar
+ * @since Beta v0.6.3
  * @return SnackbarInstance
  */
 interface SnackbarInstance extends ComponentInternalInstance {
   exposeProxy: {
-    displayBox: (props: TGApp.Component.Snackbar.Params) => void;
+    displayBox: (props: SnackbarParams) => void;
   };
 }
 
-const renderBox = (props: TGApp.Component.Snackbar.Params): VNode => {
+function renderBox(props: SnackbarParams): VNode {
   const container = document.createElement("div");
   container.id = snackbarId;
   const boxVNode: VNode = h(snackbar, props);
   render(boxVNode, container);
   document.body.appendChild(container);
   return boxVNode;
-};
+}
 
 let snackbarInstance: VNode;
 
 function showSnackbarFull(text: string, color?: string, timeout?: number): void {
-  const params: TGApp.Component.Snackbar.Params = {
+  const params: SnackbarParams = {
     text: text,
     color: color ?? "success",
     timeout: timeout ?? 1500,

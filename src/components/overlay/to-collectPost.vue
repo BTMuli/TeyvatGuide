@@ -25,7 +25,7 @@
 import { computed, ref, watch } from "vue";
 
 import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
-import showConfirm from "../func/confirm.js";
+import showDialog from "../func/dialog.js";
 import showSnackbar from "../func/snackbar.js";
 import TOverlay from "../main/t-overlay.vue";
 
@@ -73,10 +73,7 @@ async function onSubmit(): Promise<void> {
   }
   submit.value = true;
   let force = false;
-  const forceCheck = await showConfirm({
-    title: "是否保留原分类",
-    text: "若否则仅保留新分类",
-  });
+  const forceCheck = await showDialog.check("是否保留原分类", "若否则仅保留新分类");
   if (forceCheck === false) force = true;
   const check = await TSUserCollection.updatePostsCollect(props.post, select.value, force);
   if (!check) {
@@ -92,11 +89,7 @@ async function onSubmit(): Promise<void> {
 
 async function newCollect(): Promise<void> {
   let title, desc;
-  const titleC = await showConfirm({
-    mode: "input",
-    title: "新建分类",
-    text: "请输入分类名称",
-  });
+  const titleC = await showDialog.input("新建分类", "请输入分类名称");
   if (titleC === undefined || titleC === false) return;
   if (titleC === "未分类") {
     showSnackbar.warn("分类名不可为未分类");
@@ -107,11 +100,7 @@ async function newCollect(): Promise<void> {
     return;
   }
   title = titleC;
-  const descC = await showConfirm({
-    mode: "input",
-    title: "新建分类",
-    text: "请输入分类描述",
-  });
+  const descC = await showDialog.input("新建分类", "请输入分类描述");
   if (descC === false) return;
   if (descC === undefined) desc = title;
   else desc = descC;

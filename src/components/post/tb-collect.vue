@@ -17,7 +17,7 @@ import { onBeforeMount, ref, watch } from "vue";
 
 import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
 import TGLogger from "../../utils/TGLogger.js";
-import showConfirm from "../func/confirm.js";
+import showDialog from "../func/dialog.js";
 import showSnackbar from "../func/snackbar.js";
 import ToPostCollect from "../overlay/to-postCollect.vue";
 
@@ -82,13 +82,8 @@ async function switchCollect(): Promise<void> {
     return;
   }
   if (collect.value.length > 1) {
-    const check = await showConfirm({
-      title: "确定取消收藏？",
-      text: "该帖子有多个收藏分类，是否全部取消？",
-    });
-    if (!check) {
-      return;
-    }
+    const check = await showDialog.check("确定取消收藏？", "该帖子有多个收藏分类，是否全部取消？");
+    if (!check) return;
   }
   await TSUserCollection.deletePostCollect(props.modelValue.toString(), true);
   await event.emit("refreshCollect");

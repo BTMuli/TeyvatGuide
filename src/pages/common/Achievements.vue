@@ -59,7 +59,7 @@ import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { onMounted, ref, watch, computed, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import showConfirm from "../../components/func/confirm.js";
+import showDialog from "../../components/func/dialog.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import ToLoading from "../../components/overlay/to-loading.vue";
 import TuaAchiList from "../../components/userAchi/tua-achi-list.vue";
@@ -151,12 +151,7 @@ async function importJson(): Promise<void> {
   }
   const check = await verifyUiafData(selectedFile);
   if (!check) return;
-  let uidInput = await showConfirm({
-    mode: "input",
-    title: "请输入存档UID",
-    text: "UID:",
-    input: uidCur.value.toString(),
-  });
+  let uidInput = await showDialog.input("请输入存档UID", "UID:", uidCur.value.toString());
   if (uidInput === false) {
     showSnackbar.cancel("已取消存档导入");
     return;
@@ -211,25 +206,16 @@ async function exportJson(): Promise<void> {
 
 async function handleImportOuter(app: string): Promise<void> {
   await TGLogger.Info(`[Achievements][handleImportOuter] 导入来源：${app}`);
-  const confirm = await showConfirm({
-    title: "是否导入祈愿数据？",
-    text: `来源APP：${app}`,
-  });
-  if (!confirm) {
+  const importCheck = await showDialog.check("是否导入祈愿数据？", `来源APP：${app}`);
+  if (!importCheck) {
     showSnackbar.cancel("已取消导入");
-    await TGLogger.Info("[Achievements][handleImportOuter] 已取消导入");
     return;
   }
   // 读取 剪贴板
   const clipboard = await window.navigator.clipboard.readText();
   const check = await verifyUiafDataClipboard();
   if (!check) return;
-  let uidInput = await showConfirm({
-    mode: "input",
-    title: "请输入存档UID",
-    text: "UID:",
-    input: uidCur.value.toString(),
-  });
+  let uidInput = await showDialog.input("请输入存档UID", "UID:", uidCur.value.toString());
   if (uidInput === false) {
     showSnackbar.cancel("已取消存档导入");
     return;
@@ -250,11 +236,7 @@ async function handleImportOuter(app: string): Promise<void> {
 }
 
 async function createUid(): Promise<void> {
-  const uidInput = await showConfirm({
-    mode: "input",
-    title: "请输入新存档UID",
-    text: "UID:",
-  });
+  const uidInput = await showDialog.input("请输入新存档UID", "UID:");
   if (uidInput === undefined || uidInput === false) {
     showSnackbar.cancel("已取消");
     return;
@@ -273,11 +255,11 @@ async function createUid(): Promise<void> {
 }
 
 async function deleteUid(): Promise<void> {
-  const uidInput = await showConfirm({
-    title: "确定删除该存档?",
-    text: `确认则清空存档-${uidCur.value}对应数据`,
-  });
-  if (uidInput === undefined || !uidInput) {
+  const delCheck = await showDialog.check(
+    "确定删除该存档?",
+    `确认则清空存档-${uidCur.value}对应数据`,
+  );
+  if (!delCheck) {
     showSnackbar.cancel("已取消删除存档");
     return;
   }

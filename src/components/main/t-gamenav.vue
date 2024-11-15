@@ -20,7 +20,7 @@ import TGClient from "../../utils/TGClient.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { createPost } from "../../utils/TGWindow.js";
 import TGRequest from "../../web/request/TGRequest.js";
-import showConfirm from "../func/confirm.js";
+import showDialog from "../func/dialog.js";
 import showSnackbar from "../func/snackbar.js";
 import ToLivecode from "../overlay/to-livecode.vue";
 
@@ -103,16 +103,13 @@ async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
     await TGClient.open("web_act_thin", item.app_path);
     return;
   }
-  const modeConfirm = await showConfirm({
-    title: "是否采用宽屏模式打开？",
-    text: "取消则采用竖屏模式打开",
-  });
-  if (modeConfirm === undefined) {
+  const modeCheck = await showDialog.check("是否采用宽屏模式打开？", "取消则采用竖屏模式打开");
+  if (modeCheck === undefined) {
     showSnackbar.cancel("已取消打开");
     return;
   }
-  if (modeConfirm) await TGClient.open("web_act", item.app_path);
-  else await TGClient.open("web_act_thin", item.app_path);
+  if (!modeCheck) await TGClient.open("web_act_thin", item.app_path);
+  else await TGClient.open("web_act", item.app_path);
 }
 
 // 处理 protocol

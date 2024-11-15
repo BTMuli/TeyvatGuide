@@ -112,7 +112,7 @@ import { useAppStore } from "../../store/modules/app.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
 import TGRequest from "../../web/request/TGRequest.js";
-import showConfirm from "../func/confirm.js";
+import showDialog from "../func/dialog.js";
 import showGeetest from "../func/geetest.js";
 import showSnackbar from "../func/snackbar.js";
 
@@ -139,7 +139,7 @@ const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
 });
 
 async function tryCaptchaLogin(): Promise<void> {
-  const phone = await showConfirm({ mode: "input", title: "请输入手机号", text: "+86" });
+  const phone = await showDialog.input("请输入手机号", "+86");
   if (!phone) {
     showSnackbar.cancel("已取消验证码登录");
     return;
@@ -152,12 +152,7 @@ async function tryCaptchaLogin(): Promise<void> {
   const actionType = await tryGetCaptcha(phone);
   if (!actionType) return;
   showSnackbar.success(`已发送验证码到 ${phone}`);
-  const captcha = await showConfirm({
-    mode: "input",
-    title: "请输入验证码",
-    text: "验证码：",
-    otcancel: false,
-  });
+  const captcha = await showDialog.input("请输入验证码", "验证码：", undefined, false);
   if (!captcha) {
     showSnackbar.warn("输入验证码为空");
     return;
@@ -365,29 +360,26 @@ async function loadAccount(uid: string): Promise<void> {
 }
 
 async function confirmRefreshUser(uid: string): Promise<void> {
-  const res = await showConfirm({ title: "确认刷新用户信息吗？", text: "将会重新获取用户信息" });
-  if (!res) {
+  const freshCheck = await showDialog.check("确认刷新用户信息吗？", "将会重新获取用户信息");
+  if (!freshCheck) {
     showSnackbar.cancel("已取消刷新用户信息");
     return;
   }
   await refreshUser(uid);
   if (userStore.uid.value === uid) showSnackbar.success("成功刷新用户信息");
-  const confirm = await showConfirm({ title: "是否切换用户？", text: `将切换到用户${uid}` });
-  if (!confirm) return;
+  const switchCheck = await showDialog.check("是否切换用户？", `将切换到用户${uid}`);
+  if (!switchCheck) return;
   await loadAccount(uid);
 }
 
 async function confirmCopyCookie(): Promise<void> {
-  const res = await showConfirm({
-    title: "确认复制 Cookie 吗？",
-    text: "将会复制当前登录的 Cookie",
-  });
-  if (!res) {
-    showSnackbar.cancel("已取消复制 Cookie");
-    return;
-  }
   if (!userStore.cookie.value) {
     showSnackbar.warn("请先登录");
+    return;
+  }
+  const copyCheck = await showDialog.check("确认复制 Cookie 吗？", "将会复制当前登录的 Cookie");
+  if (!copyCheck) {
+    showSnackbar.cancel("已取消复制 Cookie");
     return;
   }
   const ckText = TSUserAccount.account.copy(userStore.cookie.value);
@@ -447,11 +439,7 @@ async function showAccounts(): Promise<void> {
 }
 
 async function addByCookie(): Promise<void> {
-  const ckInput = await showConfirm({
-    mode: "input",
-    title: "请输入cookie",
-    text: "Cookie:",
-  });
+  const ckInput = await showDialog.input("请输入Cookie", "Cookie:");
   if (!ckInput) {
     showSnackbar.cancel("已取消Cookie输入");
     return;
@@ -553,8 +541,8 @@ async function clearUser(user: TGApp.App.Account.User): Promise<void> {
     showSnackbar.warn("当前登录用户不许删除！");
     return;
   }
-  const confirm = await showConfirm({ title: "确认删除", text: "将删除账号及其游戏账号数据" });
-  if (!confirm) {
+  const delCheck = await showDialog.check("确认删除用户吗？", "将删除账号及其游戏账号数据");
+  if (!delCheck) {
     showSnackbar.cancel("已取消删除用户数据");
     return;
   }

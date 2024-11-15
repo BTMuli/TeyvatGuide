@@ -95,7 +95,7 @@ import { UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
-import showConfirm from "../../components/func/confirm.js";
+import showDialog from "../../components/func/dialog.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TPostCard from "../../components/main/t-postcard.vue";
 import ToCollectPost from "../../components/overlay/to-collectPost.vue";
@@ -188,11 +188,7 @@ function toSelect() {
 
 async function addCollect(): Promise<void> {
   let title, desc;
-  const titleC = await showConfirm({
-    mode: "input",
-    title: "新建分类",
-    text: "请输入分类名称",
-  });
+  const titleC = await showDialog.input("新建分类", "分类名称：");
   if (titleC === undefined || titleC === false) return;
   if (titleC === "未分类") {
     showSnackbar.warn("分类名不可为未分类");
@@ -203,11 +199,7 @@ async function addCollect(): Promise<void> {
     return;
   }
   title = titleC;
-  const descC = await showConfirm({
-    mode: "input",
-    title: "新建分类",
-    text: "请输入分类描述",
-  });
+  const descC = await showDialog.input("新建分类", "分类描述：");
   if (descC === false) return;
   if (descC === undefined) desc = title;
   else desc = descC;
@@ -226,12 +218,7 @@ async function toEdit(): Promise<void> {
     showSnackbar.warn("未找到合集信息");
     return;
   }
-  let cTc = await showConfirm({
-    title: "修改分类标题",
-    mode: "input",
-    text: "请输入分类标题",
-    input: collect.title,
-  });
+  let cTc = await showDialog.input("修改分类标题", "分类标题：", collect.title);
   if (cTc === false) {
     showSnackbar.cancel("取消修改分类信息");
     return;
@@ -245,14 +232,9 @@ async function toEdit(): Promise<void> {
     showSnackbar.warn("分类名称重复");
     return;
   }
-  let cTd = await showConfirm({
-    title: "修改分类描述",
-    mode: "input",
-    text: "请输入分类描述",
-    input: collect.desc,
-  });
+  let cTd = await showDialog.input("修改分类描述", "分类描述：", collect.desc);
   if (typeof cTd !== "string") cTd = collect.desc;
-  const cc = await showConfirm({ title: "确定修改？", text: `[${cTc}] ${cTd}` });
+  const cc = await showDialog.check("确定修改？", `[${cTc}] ${cTd}`);
   if (!cc) {
     showSnackbar.cancel("取消修改分类信息");
     return;
@@ -280,11 +262,8 @@ async function deletePost(force: boolean = false): Promise<void> {
     return;
   }
   const title = force ? "删除帖子" : "移除帖子分类";
-  const res = await showConfirm({
-    title: `确定${title}?`,
-    text: `共 ${selectedPost.value.length} 条帖子`,
-  });
-  if (!res) {
+  const check = await showDialog.check(`确定${title}?`, `共 ${selectedPost.value.length} 条帖子`);
+  if (!check) {
     showSnackbar.cancel("取消操作");
     return;
   }
@@ -311,11 +290,11 @@ async function deleteCollect(force: boolean): Promise<void> {
     return;
   }
   const title = force ? "删除分类" : "清空分类";
-  const res = await showConfirm({
-    title: `确定${title}?`,
-    text: `该分类下${selected.value.length}条帖子将被${force ? "删除" : "移除分类(未分类将被删除)"}`,
-  });
-  if (!res) {
+  const check = await showDialog.check(
+    `确定${title}?`,
+    `该分类下 ${selected.value.length} 条帖子将被${force ? "删除" : "移除分类(未分类将被删除)"}`,
+  );
+  if (!check) {
     showSnackbar.cancel("取消操作");
     return;
   }
@@ -377,17 +356,13 @@ watch(
 );
 
 async function freshOther(): Promise<void> {
-  const input = await showConfirm({
-    mode: "input",
-    title: "导入其他用户收藏",
-    text: "请输入用户米游社UID",
-  });
-  if (typeof input === "string") {
-    if (isNaN(Number(input))) {
+  const uidInput = await showDialog.input("导入其他用户收藏", "米游社UID：");
+  if (typeof uidInput === "string") {
+    if (isNaN(Number(uidInput))) {
       showSnackbar.warn("UID 格式错误，请输入数字");
       return;
     }
-    await freshUser(input);
+    await freshUser(uidInput);
     return;
   }
   showSnackbar.cancel("取消导入");

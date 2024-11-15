@@ -108,7 +108,7 @@ import { toRaw, ref, watch, computed, onMounted, onUnmounted } from "vue";
 
 import Mys from "../../plugins/Mys/index.js";
 import { generateShareImg } from "../../utils/TGShare.js";
-import showConfirm from "../func/confirm.js";
+import showDialog from "../func/dialog.js";
 import showSnackbar from "../func/snackbar.js";
 import TpParser from "../post/tp-parser.vue";
 
@@ -226,12 +226,9 @@ async function loadSub(): Promise<void> {
 }
 
 async function exportData(): Promise<void> {
-  const confirm = await showConfirm({
-    title: "导出数据?",
-    text: "将回复对应的JSON数据导出到文件",
-  });
-  if (!confirm) {
-    showSnackbar.cancel("已取消");
+  const exportCheck = await showDialog.check("导出数据", "是否导出回复数据？");
+  if (!exportCheck) {
+    showSnackbar.cancel("已取消导出该回复数据");
     return;
   }
   const data = JSON.stringify(toRaw(props.modelValue), null, 2);

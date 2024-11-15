@@ -57,7 +57,7 @@ import { useRouter } from "vue-router";
 import { AppGachaData, AppCharacterData, AppWeaponData } from "../../data/index.js";
 import { createPost } from "../../utils/TGWindow.js";
 import { timestampToDate } from "../../utils/toolFunc.js";
-import showConfirm from "../func/confirm.js";
+import showDialog from "../func/dialog.js";
 import showSnackbar from "../func/snackbar.js";
 import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
 
@@ -90,20 +90,20 @@ onMounted(() => {
 async function toWiki(id: number): Promise<void> {
   const cFind = AppCharacterData.find((item) => item.id === id);
   const wFind = AppWeaponData.find((item) => item.id === id);
-  const confirm = await showConfirm({
-    title: "是否跳转到对应图鉴界面？",
-  });
-  if (confirm === undefined || confirm === false) {
+  const jumpCheck = await showDialog.check("是否跳转到对应图鉴界面？");
+  if (!jumpCheck) {
     showSnackbar.cancel("已取消");
     return;
   }
   if (cFind) {
     await router.push({ name: "角色图鉴", params: { id: id.toString() } });
-  } else if (wFind) {
-    await router.push({ name: "武器图鉴", params: { id: id.toString() } });
-  } else {
-    showSnackbar.warn("未找到对应角色或武器");
+    return;
   }
+  if (wFind) {
+    await router.push({ name: "武器图鉴", params: { id: id.toString() } });
+    return;
+  }
+  showSnackbar.warn("未找到对应角色或武器");
 }
 
 function getType(type: TGApp.App.Gacha.WishType): string {

@@ -1,7 +1,7 @@
 <template>
   <transition name="func-snackbar">
     <div class="func-snackbar-container" v-show="show">
-      <div class="func-snackbar" :style="{ backgroundColor: data.color }">
+      <div class="func-snackbar">
         <slot name="text">
           <span class="func-snackbar-text">{{ data.text }}</span>
         </slot>
@@ -10,18 +10,14 @@
   </transition>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, toRaw } from "vue";
+import { computed, onMounted, ref, toRaw } from "vue";
 
-interface SnackbarProps {
-  text: string;
-  color: string;
-  timeout: number;
-}
+import { SnackbarParams } from "./snackbar.js";
 
-const props = defineProps<SnackbarProps>();
-const data = ref<TGApp.Component.Snackbar.Params>(toRaw(props));
-// 组件参数
+const props = defineProps<SnackbarParams>();
+const data = ref<SnackbarParams>(toRaw(props));
 const show = ref<boolean>(false);
+const bgColor = computed(() => data.value.color);
 
 // eslint-disable-next-line no-undef
 let timer: NodeJS.Timeout | undefined = undefined;
@@ -99,6 +95,7 @@ defineExpose({ displayBox });
   justify-content: center;
   padding: 10px 20px;
   border-radius: 5px;
+  background-color: v-bind(bgColor);
   box-shadow: 0 0 10px rgb(0 0 0 / 20%);
 }
 

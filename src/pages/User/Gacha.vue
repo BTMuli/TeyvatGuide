@@ -55,7 +55,7 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, watch, computed } from "vue";
 
-import showConfirm from "../../components/func/confirm.js";
+import showDialog from "../../components/func/dialog.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import GroEcharts from "../../components/gachaRecord/gro-echarts.vue";
 import GroHistory from "../../components/gachaRecord/gro-history.vue";
@@ -129,20 +129,20 @@ onMounted(async () => {
 async function confirmRefresh(force: boolean): Promise<void> {
   await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 刷新祈愿数据`);
   if (uidCur.value && uidCur.value !== account.value.gameUid) {
-    const confirmSwitch = await showConfirm({
-      title: "是否切换游戏账户",
-      text: `确认则尝试切换至 ${uidCur.value}`,
-    });
-    if (confirmSwitch) {
+    const switchCheck = await showDialog.check(
+      "是否切换游戏账户",
+      `确认则尝试切换至 ${uidCur.value}`,
+    );
+    if (switchCheck) {
       await useUserStore().switchGameAccount(uidCur.value);
       await confirmRefresh(force);
       return;
     }
-    const confirm = await showConfirm({
-      title: "确定刷新？",
-      text: `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
-    });
-    if (!confirm) {
+    const freshCheck = await showDialog.check(
+      "确定刷新?",
+      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
+    );
+    if (!freshCheck) {
       showSnackbar.cancel("已取消祈愿数据刷新");
       return;
     }
@@ -297,11 +297,11 @@ async function importUigf4(filePath: string): Promise<void> {
   const remoteData = await readUigf4Data(filePath);
   const uidCount = remoteData.hk4e.length;
   const dataCount = remoteData.hk4e.reduce((acc, cur) => acc + cur.list.length, 0);
-  const res = await showConfirm({
-    title: "是否导入祈愿数据？",
-    text: `共 ${uidCount} 个 UID，${dataCount} 条数据`,
-  });
-  if (!res) {
+  const importCheck = await showDialog.check(
+    "是否导入祈愿数据？",
+    `共 ${uidCount} 个 UID，${dataCount} 条数据`,
+  );
+  if (!importCheck) {
     showSnackbar.cancel("已取消祈愿数据导入");
     return;
   }
@@ -321,11 +321,11 @@ async function importUigf4(filePath: string): Promise<void> {
 
 async function importUigf(filePath: string): Promise<void> {
   const remoteData = await readUigfData(filePath);
-  const confirm = await showConfirm({
-    title: "是否导入祈愿数据？",
-    text: `UID：${remoteData.info.uid}，共 ${remoteData.list.length} 条数据`,
-  });
-  if (!confirm) {
+  const importCheck = await showDialog.check(
+    "是否导入祈愿数据？",
+    `UID：${remoteData.info.uid}，共 ${remoteData.list.length} 条数据`,
+  );
+  if (!importCheck) {
     showSnackbar.cancel("已取消祈愿数据导入");
     return;
   }
@@ -354,11 +354,11 @@ async function exportUigf(): Promise<void> {
     showSnackbar.error(`UID ${uidCur.value} 暂无祈愿数据`);
     return;
   }
-  const res = await showConfirm({
-    title: "是否导出祈愿数据？",
-    text: `UID：${uidCur.value}，共 ${gachaList.length} 条数据`,
-  });
-  if (!res) {
+  const exportCheck = await showDialog.check(
+    "是否导出祈愿数据？",
+    `UID：${uidCur.value}，共 ${gachaList.length} 条数据`,
+  );
+  if (!exportCheck) {
     showSnackbar.cancel(`已取消 UID ${uidCur.value} 的祈愿数据导出`);
     return;
   }
@@ -385,22 +385,22 @@ async function exportUigf(): Promise<void> {
 // 导出 UIGF v4 版本的祈愿数据
 async function exportUigf4(): Promise<void> {
   if (!uidCur.value) return;
-  const checkConfirm = await showConfirm({ title: "确定导出UIGFv4格式的祈愿数据？" });
-  if (!checkConfirm) {
+  const exportCheck = await showDialog.check("确定导出UIGFv4格式的祈愿数据？");
+  if (!exportCheck) {
     showSnackbar.cancel("已取消 UIGF v4 格式导出");
     return;
   }
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf4] 导出祈愿数据(v4)`);
   // todo 单开一个overlay用于选取导出的UID
-  const allConfirm = await showConfirm({
-    title: "是否导出所有 UID 的祈愿数据？",
-    text: "取消则只导出当前 UID 的祈愿数据",
-  });
-  if (allConfirm === undefined) {
+  const exportAllCheck = await showDialog.check(
+    "是否导出所有 UID 的祈愿数据？",
+    "取消则只导出当前 UID 的祈愿数据",
+  );
+  if (exportAllCheck === undefined) {
     showSnackbar.cancel("已取消 UIGF v4 格式导出");
     return;
   }
-  if (!allConfirm) {
+  if (!exportAllCheck) {
     const gachaList = await TSUserGacha.getGachaRecords(uidCur.value);
     if (gachaList.length === 0) {
       showSnackbar.error(`UID ${uidCur.value} 暂无祈愿数据`);
@@ -418,7 +418,7 @@ async function exportUigf4(): Promise<void> {
   }
   loadingTitle.value = "正在导出祈愿数据";
   loading.value = true;
-  if (!allConfirm) {
+  if (!exportAllCheck) {
     await exportUigf4Data(file, uidCur.value);
   } else {
     await exportUigf4Data(file);
@@ -435,25 +435,20 @@ async function deleteGacha(): Promise<void> {
     return;
   }
   await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 删除祈愿数据`);
-  const firstConfirm = await showConfirm({
-    title: "是否删除祈愿数据？",
-    text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
-  });
-  if (!firstConfirm) {
+  const delCheck = await showDialog.check(
+    "确定删除祈愿数据？",
+    `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
+  );
+  if (!delCheck) {
     showSnackbar.cancel("已取消祈愿数据删除");
     await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 已取消祈愿数据删除`);
     return;
   }
   const uidList = await TSUserGacha.getUidList();
-  let secondConfirm: string | boolean | undefined;
   if (uidList.length <= 1) {
-    secondConfirm = await showConfirm({
-      title: "删除后数据库将为空，确定删除？",
-      text: `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
-    });
-    if (!secondConfirm) {
+    const forceCheck = await showDialog.check("删除后数据库将为空，确定删除？");
+    if (!forceCheck) {
       showSnackbar.cancel("已取消祈愿数据删除");
-      await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 已取消祈愿数据删除`);
       return;
     }
   }

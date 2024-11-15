@@ -37,7 +37,7 @@
 import { computed, ref, watch } from "vue";
 
 import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
-import showConfirm from "../func/confirm.js";
+import showDialog from "../func/dialog.js";
 import showSnackbar from "../func/snackbar.js";
 import TOverlay from "../main/t-overlay.vue";
 
@@ -89,11 +89,8 @@ const visible = computed({
 });
 
 async function deleteCollect(item: TGApp.Sqlite.UserCollection.UFCollection): Promise<void> {
-  const res = await showConfirm({
-    title: "确定删除分类?",
-    text: "该分类若有帖子，则会变为未分类",
-  });
-  if (!res) {
+  const delCheck = await showDialog.check("确定删除分类?", "该分类若有帖子，则会变为未分类");
+  if (!delCheck) {
     showSnackbar.cancel("取消删除");
     return;
   }
@@ -108,11 +105,7 @@ async function deleteCollect(item: TGApp.Sqlite.UserCollection.UFCollection): Pr
 
 async function newCollect(): Promise<void> {
   let title, desc;
-  const titleC = await showConfirm({
-    mode: "input",
-    title: "新建分类",
-    text: "请输入分类名称",
-  });
+  const titleC = await showDialog.input("新建分类", "请输入分类名称");
   if (titleC === undefined || titleC === false) return;
   if (titleC === "未分类") {
     showSnackbar.warn("分类名不可为未分类");
@@ -123,11 +116,7 @@ async function newCollect(): Promise<void> {
     return;
   }
   title = titleC;
-  const descC = await showConfirm({
-    mode: "input",
-    title: "新建分类",
-    text: "请输入分类描述",
-  });
+  const descC = await showDialog.input("新建分类", "请输入分类描述");
   if (descC === false) return;
   if (descC === undefined) desc = title;
   else desc = descC;

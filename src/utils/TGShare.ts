@@ -9,7 +9,7 @@ import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import html2canvas from "html2canvas";
 
-import showConfirm from "../components/func/confirm.js";
+import showDialog from "../components/func/dialog.js";
 import showSnackbar from "../components/func/snackbar.js";
 
 import TGHttp from "./TGHttp.js";
@@ -137,11 +137,8 @@ export async function generateShareImg(
   }
   if (size > 20000000) {
     const sizeStr = bytesToSize(size);
-    const saveFile = await showConfirm({
-      title: "图像过大",
-      text: `图像大小为 ${sizeStr}，是否保存到文件？`,
-    });
-    if (saveFile === true) {
+    const saveCheck = await showDialog.check("图像过大", `图像大小为 ${sizeStr}，是否保存到文件？`);
+    if (saveCheck === true) {
       await saveCanvasImg(buffer, fileName);
       return;
     }

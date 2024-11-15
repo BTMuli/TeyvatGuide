@@ -115,7 +115,7 @@ import { storeToRefs } from "pinia";
 import { onMounted, ref, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 
-import showConfirm from "../../components/func/confirm.js";
+import showDialog from "../../components/func/dialog.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TSubLine from "../../components/main/t-subline.vue";
 import ToLoading from "../../components/overlay/to-loading.vue";
@@ -196,20 +196,20 @@ async function refreshAbyss(): Promise<void> {
     return;
   }
   if (uidCur.value && uidCur.value !== user.value.gameUid) {
-    const confirmSwitch = await showConfirm({
-      title: "是否切换游戏账户",
-      text: `确认则尝试切换至 ${uidCur.value}`,
-    });
-    if (confirmSwitch) {
+    const switchCheck = await showDialog.check(
+      "是否切换游戏账户",
+      `确认则尝试切换至 ${uidCur.value}`,
+    );
+    if (switchCheck) {
       await useUserStore().switchGameAccount(uidCur.value);
       await refreshAbyss();
       return;
     }
-    const confirm = await showConfirm({
-      title: "确定刷新？",
-      text: `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
-    });
-    if (!confirm) {
+    const freshCheck = await showDialog.check(
+      "确定刷新？",
+      `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
+    );
+    if (!freshCheck) {
       showSnackbar.cancel("已取消深渊数据刷新");
       return;
     }
@@ -321,11 +321,8 @@ async function deleteAbyss(): Promise<void> {
     showSnackbar.warn("未选择游戏UID");
     return;
   }
-  const confirm = await showConfirm({
-    title: "确定删除数据？",
-    text: `将清除${uidCur.value}的所有深渊数据`,
-  });
-  if (!confirm) {
+  const delCheck = await showDialog.check("确定删除数据？", `将清除${uidCur.value}的所有深渊数据`);
+  if (!delCheck) {
     showSnackbar.cancel("已取消删除");
     return;
   }

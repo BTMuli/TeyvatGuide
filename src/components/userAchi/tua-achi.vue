@@ -36,7 +36,7 @@ import { toRaw, ref, watch } from "vue";
 import { AppAchievementSeriesData } from "../../data/index.js";
 import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
 import { timestampToDate } from "../../utils/toolFunc.js";
-import showConfirm from "../func/confirm.js";
+import showDialog from "../func/dialog.js";
 import showSnackbar from "../func/snackbar.js";
 
 interface TuaAchiProps {
@@ -81,12 +81,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
     showSnackbar.success(`已将成就 ${data.value.name}(${data.value.id}) 状态设为未完成`);
     return;
   }
-  let progress: boolean | undefined | string = await showConfirm({
-    mode: "input",
-    title: "请输入成就进度",
-    text: "进度",
-    input: data.value.progress,
-  });
+  let progress = await showDialog.input("请输入成就进度", "进度", data.value.progress.toString());
   if (progress === false) {
     showSnackbar.cancel("已取消成就编辑");
     return;

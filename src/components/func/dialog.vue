@@ -1,0 +1,294 @@
+<template>
+  <transition name="func-dialog-outer">
+    <div v-show="show || showOuter" class="dialog-overlay" @click.self.prevent="handleOuter">
+      <transition name="func-dialog-inner">
+        <div v-show="showInner" class="dialog-box">
+          <div class="dialog-title">{{ data.title }}</div>
+          <div
+            v-show="data?.text !== '' && data.mode === 'check'"
+            class="dialog-subtitle"
+            :title="data.text"
+          >
+            {{ data.text }}
+          </div>
+          <div v-show="data?.text !== '' && data.mode === 'input'" class="dialog-input">
+            <div class="dialog-input-label">{{ data.text }}</div>
+            <input
+              v-model="inputDefault"
+              class="dialog-input-box"
+              ref="inputRef"
+              @keydown.enter="handleConfirm"
+            />
+          </div>
+          <div class="dialog-btn-box">
+            <button class="dialog-btn no-btn" @click="handleCancel">取消</button>
+            <button class="dialog-btn ok-btn" @click="handleConfirm">确定</button>
+          </div>
+        </div>
+      </transition>
+    </div>
+  </transition>
+</template>
+
+<script lang="ts" setup>
+import { nextTick, onMounted, reactive, ref, watch, useTemplateRef, computed } from "vue";
+
+import { DialogCheckParams, DialogInputParams, DialogParams } from "./dialog.js";
+
+const defaultProp: DialogParams = { title: "", text: "", mode: "check", otcancel: false };
+const props = defineProps<DialogParams>();
+
+// 组件参数
+const data = reactive<DialogParams>(defaultProp);
+const show = ref<boolean>(false);
+const showOuter = ref<boolean>(false);
+const showInner = ref<boolean>(false);
+const dialogVal = ref<boolean | string | undefined>();
+
+const inputDefault = ref<string>("");
+const inputEl = useTemplateRef<HTMLInputElement>("inputRef");
+
+const checkVal = computed<boolean | undefined>(() => {
+  if (typeof dialogVal.value === "string") return dialogVal.value !== "";
+  return dialogVal.value;
+});
+const inputVal = computed<string | false | undefined>(() => {
+  if (typeof dialogVal.value === "string") return dialogVal.value;
+  if (dialogVal.value === undefined) return undefined;
+  return false;
+});
+
+watch(
+  () => show.value,
+  () => {
+    if (show.value) {
+      showOuter.value = true;
+      setTimeout(() => (showInner.value = true), 100);
+      return;
+    }
+    setTimeout(() => (showInner.value = false), 100);
+    setTimeout(() => (showOuter.value = false), 300);
+  },
+);
+
+onMounted(async () => {
+  if (props.mode === "input") {
+    const param: DialogInputParams = {
+      mode: "input",
+      title: props.title,
+      text: props.text,
+      input: props.input,
+      otcancel: props.otcancel,
+    };
+    await displayInputBox(param);
+  } else {
+    const param: DialogCheckParams = {
+      mode: "check",
+      title: props.title,
+      text: props.text,
+      otcancel: props.otcancel,
+    };
+    await displayCheckBox(param);
+  }
+});
+
+async function displayCheckBox(params: DialogCheckParams): Promise<boolean | undefined> {
+  data.title = params.title;
+  data.text = params.text ?? "";
+  data.mode = "check";
+  data.otcancel = params.otcancel ?? true;
+  show.value = true;
+  return await new Promise<boolean | undefined>((resolve) => {
+    watch(
+      () => show.value,
+      () => setTimeout(() => resolve(checkVal.value), 500),
+    );
+  });
+}
+
+async function displayInputBox(params: DialogInputParams): Promise<string | false | undefined> {
+  data.title = params.title;
+  data.text = params.text ?? "";
+  data.mode = "input";
+  data.otcancel = params.otcancel ?? true;
+  show.value = true;
+  return await new Promise<string | false | undefined>((resolve) => {
+    nextTick(() => setTimeout(() => inputEl.value?.focus(), 100));
+    watch(
+      () => show.value,
+      () => setTimeout(() => resolve(inputVal.value), 500),
+    );
+  });
+}
+
+// 确认
+function handleConfirm(): void {
+  if (data.mode === "input") {
+    dialogVal.value = inputDefault.value;
+    inputDefault.value = "";
+  } else {
+    dialogVal.value = true;
+  }
+  show.value = false;
+}
+
+// 取消
+function handleCancel(): void {
+  dialogVal.value = false;
+  show.value = false;
+}
+
+// 点击外部事件
+function handleOuter(): void {
+  if (data.otcancel) {
+    dialogVal.value = undefined;
+    show.value = false;
+  }
+}
+
+defineExpose({ displayInputBox, displayCheckBox });
+</script>
+<style scoped>
+.func-dialog-outer-enter-active,
+.func-dialog-outer-leave-active,
+.func-dialog-inner-enter-active {
+  transition: all 0.3s;
+}
+
+.func-dialog-inner-leave-active {
+  transition: all 0.5s ease-in-out;
+}
+
+.func-dialog-inner-enter-from {
+  opacity: 0;
+  transform: scale(1.5);
+}
+
+.func-dialog-inner-enter-to,
+.func-dialog-inner-leave-from {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.func-dialog-outer-enter-to,
+.func-dialog-outer-leave-from {
+  opacity: 1;
+}
+
+.func-dialog-outer-enter-from,
+.func-dialog-outer-leave-to {
+  opacity: 0;
+}
+
+.func-dialog-inner-leave-to {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.dialog-overlay {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+
+  /* 颜色变量 */
+  --dialog-title: var(--tgc-dark-7);
+  --dialog-bg: var(--tgc-white-1);
+}
+
+/* 深色模式 */
+.dark .dialog-overlay {
+  --dialog-title: var(--tgc-white-1);
+  --dialog-bg: var(--tgc-dark-7);
+}
+
+.dialog-box {
+  display: flex;
+  width: 520px;
+  height: 240px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 15px;
+  background: var(--dialog-bg);
+  box-shadow: 0 0 10px var(--common-shadow-t-1);
+  color: var(--tgc-yellow-3);
+}
+
+.dialog-title {
+  width: 100%;
+  border-bottom: 1px solid var(--dialog-title);
+  color: var(--dialog-title);
+  font-family: var(--font-title);
+  font-size: 30px;
+  text-align: center;
+}
+
+.dialog-subtitle {
+  overflow: hidden;
+  width: 100%;
+  font-family: var(--font-text);
+  font-size: 20px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-all;
+}
+
+.dialog-input {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-text);
+  font-size: 16px;
+  gap: 10px;
+}
+
+.dialog-input-box {
+  width: 50%;
+  height: 100%;
+  padding: 5px;
+  border: 1px solid var(--dialog-title);
+  border-radius: 5px;
+  background: inherit;
+  color: var(--dialog-title);
+}
+
+.dialog-btn-box {
+  display: flex;
+  width: 100%;
+  align-items: flex-end;
+  justify-content: space-around;
+}
+
+.dialog-btn {
+  position: relative;
+  display: flex;
+  width: 180px;
+  height: 60px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 20px;
+}
+
+.no-btn {
+  border: 1px solid var(--tgc-yellow-1);
+}
+
+.ok-btn {
+  background: var(--dialog-title);
+}
+</style>

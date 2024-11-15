@@ -26,7 +26,7 @@
 import { onBeforeMount, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import showConfirm from "../../components/func/confirm.js";
+import showDialog from "../../components/func/dialog.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TwcCharacter from "../../components/wiki/twc-character.vue";
 import TwcListItem from "../../components/wiki/twc-list-item.vue";
@@ -99,11 +99,8 @@ async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> 
     showSnackbar.warn(`角色 ${item.name} 暂无观测枢页面`);
     return;
   }
-  const confirm = await showConfirm({
-    title: `角色 ${item.name} 暂无数据`,
-    text: "是否打开观测枢页面？",
-  });
-  if (!confirm) {
+  const openCheck = await showDialog.check(`角色 ${item.name} 暂无数据`, "是否打开观测枢页面？");
+  if (!openCheck) {
     showSnackbar.cancel("已取消打开观测枢页面");
     return;
   }

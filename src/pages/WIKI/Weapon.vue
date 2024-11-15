@@ -29,7 +29,7 @@
 import { onBeforeMount, ref } from "vue";
 import { useRoute } from "vue-router";
 
-import showConfirm from "../../components/func/confirm.js";
+import showDialog from "../../components/func/dialog.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TwcListItem from "../../components/wiki/twc-list-item.vue";
 import TwcWeapon from "../../components/wiki/twc-weapon.vue";
@@ -92,11 +92,8 @@ async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
     showSnackbar.warn(`武器 ${item.name} 暂无观测枢页面`);
     return;
   }
-  const confirm = await showConfirm({
-    title: `武器 ${item.name} 暂无数据`,
-    text: "是否打开观测枢页面？",
-  });
-  if (!confirm) {
+  const check = await showDialog.check(`武器 ${item.name} 暂无数据`, "是否打开观测枢页面？");
+  if (!check) {
     showSnackbar.cancel("已取消打开观测枢页面");
     return;
   }

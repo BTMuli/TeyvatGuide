@@ -21,7 +21,7 @@ import { useRouter } from "vue-router";
 
 import TBackTop from "./components/app/t-backTop.vue";
 import TSidebar from "./components/app/t-sidebar.vue";
-import showConfirm from "./components/func/confirm.js";
+import showDialog from "./components/func/dialog.js";
 import showSnackbar from "./components/func/snackbar.js";
 import TGSqlite from "./plugins/Sqlite/index.js";
 import TSUserAccount from "./plugins/Sqlite/modules/userAccount.js";
@@ -247,11 +247,8 @@ async function checkUpdate(): Promise<void> {
   const needUpdate = await TGSqlite.checkUpdate();
   if (needUpdate && isProdEnv) {
     await TGLogger.Info("[App][checkUpdate] 检测到版本更新！");
-    const confirm = await showConfirm({
-      title: "检测到版本更新",
-      text: "是否更新数据库数据？（请确保成就数据已导出）",
-    });
-    if (!confirm) {
+    const updateCheck = await showDialog.check("检测到版本更新", "是否更新数据库数据？");
+    if (!updateCheck) {
       showSnackbar.error("请到设置页手动更新数据库！", 3000);
       return;
     }

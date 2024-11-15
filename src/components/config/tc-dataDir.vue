@@ -75,7 +75,7 @@ import TGSqlite from "../../plugins/Sqlite/index.js";
 import { useAppStore } from "../../store/modules/app.js";
 import { backUpUserData } from "../../utils/dataBS.js";
 import TGShell from "../../utils/TGShell.js";
-import showConfirm from "../func/confirm.js";
+import showDialog from "../func/dialog.js";
 import showSnackbar from "../func/snackbar.js";
 
 const appStore = storeToRefs(useAppStore());
@@ -100,8 +100,8 @@ onMounted(async () => {
 
 async function confirmCUD(): Promise<void> {
   const oriDir = appStore.userDir.value;
-  const check = await showConfirm({ title: "确认修改用户数据路径吗？" });
-  if (!check) {
+  const changeCheck = await showDialog.check("确认修改用户数据路径吗？");
+  if (!changeCheck) {
     showSnackbar.cancel("已取消修改");
     return;
   }
@@ -122,8 +122,8 @@ async function confirmCUD(): Promise<void> {
   await TGSqlite.saveAppData("userDir", dir);
   await backUpUserData(dir);
   showSnackbar.success("已修改用户数据路径!");
-  const confirm = await showConfirm({ title: "是否删除原用户数据目录？", text: "删除后不可恢复!" });
-  if (confirm) {
+  const delCheck = await showDialog.check("是否删除原用户数据目录？");
+  if (delCheck) {
     await remove(oriDir, { recursive: true });
     showSnackbar.success("已删除原用户数据目录!");
   }
@@ -136,11 +136,11 @@ async function confirmCGD(): Promise<void> {
     return;
   }
   const oriEmpty = appStore.gameDir.value === "未设置";
-  const editConfirm = await showConfirm({
-    title: oriEmpty ? "确认设置目录？" : "确认修改目录？",
-    text: oriEmpty ? "请选择启动器所在目录" : `当前：${appStore.gameDir.value}`,
-  });
-  if (!editConfirm) {
+  const editCheck = await showDialog.check(
+    oriEmpty ? "确认设置游戏目录？" : "确认修改游戏目录？",
+    oriEmpty ? "请选择启动器所在目录" : `当前：${appStore.gameDir.value}`,
+  );
+  if (!editCheck) {
     showSnackbar.cancel(oriEmpty ? "已取消设置" : "已取消修改");
     return;
   }
@@ -175,11 +175,8 @@ function isOverWeek(date: string): boolean {
 }
 
 async function confirmCLD(): Promise<void> {
-  const check = await showConfirm({
-    title: "确认清理日志文件吗？",
-    text: "将保留一周内的日志文件",
-  });
-  if (!check) {
+  const delCheck = await showDialog.check("确认清理日志文件吗？", "将保留一周内的日志文件");
+  if (!delCheck) {
     showSnackbar.cancel("已取消清理");
     return;
   }
