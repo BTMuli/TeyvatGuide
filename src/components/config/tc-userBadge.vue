@@ -183,6 +183,7 @@ async function tryCaptchaLogin(): Promise<void> {
     emits("loadOuter", { show: false });
     return;
   }
+  showSnackbar.success("获取LToken成功");
   ck.ltoken = ltokenRes;
   emits("loadOuter", { show: true, title: "正在获取 cookieToken " });
   const cookieTokenRes = await TGRequest.User.bySToken.getCookieToken(ck.mid, ck.stoken);
@@ -195,6 +196,7 @@ async function tryCaptchaLogin(): Promise<void> {
     emits("loadOuter", { show: false });
     return;
   }
+  showSnackbar.success("获取CookieToken成功");
   ck.cookie_token = cookieTokenRes;
   emits("loadOuter", { show: true, title: "正在获取用户信息" });
   const briefRes = await TGRequest.User.byCookie.getUserInfo(ck.cookie_token, ck.account_id);
@@ -205,6 +207,7 @@ async function tryCaptchaLogin(): Promise<void> {
     emits("loadOuter", { show: false });
     return;
   }
+  showSnackbar.success("获取用户信息成功");
   const briefInfo: TGApp.App.Account.BriefInfo = {
     nickname: briefRes.nickname,
     uid: briefRes.uid,
@@ -223,13 +226,15 @@ async function tryCaptchaLogin(): Promise<void> {
   userStore.cookie.value = ck;
   appStore.isLogin.value = true;
   emits("loadOuter", { show: true, title: "正在获取游戏账号" });
-  const gameRes = await TGRequest.User.bySToken.getAccounts(ck.stoken, ck.stuid);
+  const gameRes = await TGRequest.User.byCookie.getAccounts(ck.cookie_token, ck.account_id);
   if (!Array.isArray(gameRes)) {
     loading.value = false;
     emits("loadOuter", { show: false });
     showSnackbar.error(`[${gameRes.retcode}]${gameRes.message}`);
+    await TGLogger.Error(`获取游戏账号失败：${gameRes.retcode}-${gameRes.message}`);
     return;
   }
+  showSnackbar.success("获取游戏账号成功");
   await TSUserAccount.game.saveAccounts(briefInfo.uid, gameRes);
   const curAccount = await TSUserAccount.game.getCurAccount(briefInfo.uid);
   if (!curAccount) {
@@ -366,6 +371,7 @@ async function confirmRefreshUser(uid: string): Promise<void> {
     return;
   }
   await refreshUser(uid);
+  if (userStore.uid.value === uid) showSnackbar.success("成功刷新用户信息");
   const confirm = await showConfirm({ title: "是否切换用户？", text: `将切换到用户${uid}` });
   if (!confirm) return;
   await loadAccount(uid);
