@@ -188,7 +188,7 @@ onMounted(async () => {
     shareTimeTimer.value = undefined;
   }
   shareTimeTimer.value = setInterval(() => (shareTime.value = Math.floor(Date.now() / 1000)), 1000);
-  postRef.value = <HTMLElement>document.querySelector(".tp-post-title");
+  postRef.value = <HTMLElement>document.querySelector(".tp-post-body");
   loading.value = false;
 });
 
