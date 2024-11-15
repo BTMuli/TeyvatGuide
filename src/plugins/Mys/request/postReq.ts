@@ -8,6 +8,8 @@ import TGHttp from "../../../utils/TGHttp.js";
 
 // MysPostApiBaseUrl => Mpabu
 const Mpabu = "https://bbs-api.mihoyo.com/post/wapi/";
+// MysTopicApiBaseUrl => Mtapu
+const Mtabu = "https://bbs-api.miyoushe.com/topic/wapi/";
 const Referer = "https://bbs.mihoyo.com/";
 
 /**
@@ -141,6 +143,59 @@ export async function getSubReplies(
     method: "GET",
     headers: { referer: Referer },
     query: params,
+  });
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
+}
+
+/**
+ * @description 获取特定话题信息
+ * @since Beta v0.6.3
+ * @param {string} gid 游戏分区 ID
+ * @param {string} topicId 话题 ID
+ * @return {Promise<TGApp.Plugins.Mys.Topic.InfoData|TGApp.BBS.Response.Base>}
+ */
+export async function getTopicFullInfo(
+  gid: string,
+  topicId: string,
+): Promise<TGApp.Plugins.Mys.Topic.InfoData | TGApp.BBS.Response.Base> {
+  const resp = await TGHttp<TGApp.Plugins.Mys.Topic.InfoResponse>(`${Mtabu}getTopicFullInfo`, {
+    method: "GET",
+    headers: { referer: Referer },
+    query: { gids: gid, id: topicId },
+  });
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
+}
+
+/**
+ * @description 获取特定话题帖子列表
+ * @since Beta v0.6.3
+ * @param {string} gid 游戏分区 ID
+ * @param {string} topicId 话题 ID
+ * @param {string} orderType 排序方式
+ * @param {string} lastId 最后一条帖子 ID
+ * @param {number} size 每页大小
+ * @return {Promise<TGApp.Plugins.Mys.Topic.PostData|TGApp.BBS.Response.Base>}
+ */
+export async function getTopicPostList(
+  gid: string,
+  topicId: string,
+  orderType: number = 0,
+  lastId?: string,
+  size: number = 20,
+): Promise<TGApp.Plugins.Mys.Topic.PostData | TGApp.BBS.Response.Base> {
+  const resp = await TGHttp<TGApp.Plugins.Mys.Topic.PostResponse>(`${Mpabu}getTopicPostList`, {
+    method: "GET",
+    headers: { referer: Referer },
+    query: {
+      gids: gid,
+      game_id: gid,
+      topic_id: topicId,
+      list_type: orderType,
+      last_id: lastId ?? "",
+      page_size: size,
+    },
   });
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data;

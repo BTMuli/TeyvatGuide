@@ -5,7 +5,6 @@
       <div class="posts-top">
         <img src="/source/UI/posts.png" alt="posts" />
         <span>帖子</span>
-        <!-- todo 提供话题入口 -->
       </div>
     </template>
     <div class="posts-switch">

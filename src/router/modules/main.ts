@@ -1,7 +1,7 @@
 /**
  * @file router/modules/main.ts
  * @description 主路由模块
- * @since Beta v0.5.1
+ * @since Beta v0.6.3
  */
 
 const mainRoutes = [
@@ -23,7 +23,12 @@ const mainRoutes = [
   {
     path: "/posts/:gid?/:forum?",
     name: "酒馆",
-    component: async () => await import("../../pages/common/Posts.vue"),
+    component: async () => await import("../../pages/common/PostForum.vue"),
+  },
+  {
+    path: "/posts/:gid?/:topic",
+    name: "话题",
+    component: async () => await import("../../pages/common/PostTopic.vue"),
   },
   {
     path: "/achievements/:app?",

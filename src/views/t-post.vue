@@ -61,8 +61,12 @@
         <span>{{ postData.collection.collection_title }}</span>
         <span>{{ postData.collection.cur }}/{{ postData.collection.total }}</span>
       </div>
-      <!-- todo 点击跳转 -->
-      <div v-for="topic in postData.topics" :key="topic.id" class="tp-post-topic">
+      <div
+        v-for="topic in postData.topics"
+        :key="topic.id"
+        class="tp-post-topic"
+        @click="toTopic(topic)"
+      >
         <v-icon size="12">mdi-tag</v-icon>
         <span>{{ topic.name }}</span>
       </div>
@@ -88,6 +92,7 @@
 <script lang="ts" setup>
 import { app } from "@tauri-apps/api";
 import { webviewWindow } from "@tauri-apps/api";
+import { emit } from "@tauri-apps/api/event";
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
@@ -125,8 +130,8 @@ const renderPost = ref<TGApp.Plugins.Mys.SctPost.Base[]>([]);
 const postData = ref<TGApp.Plugins.Mys.Post.FullData>();
 // 当前时间，秒级时间戳
 const shareTime = ref<number>(Math.floor(Date.now() / 1000));
-// 时间更新定时器
-const shareTimeTimer = ref<any>();
+// eslint-disable-next-line no-undef
+const shareTimeTimer = ref<NodeJS.Timeout | undefined>(undefined);
 // 合集
 const showCollection = ref<boolean>(false);
 
@@ -177,28 +182,39 @@ onMounted(async () => {
     await TGLogger.Info(`[t-post][${postId}][onMounted] 打开 JSON 窗口`);
     await createPostJson(postId);
   }
-  await nextTick(() => {
-    shareTimeTimer.value = setInterval(() => {
-      shareTime.value = Math.floor(Date.now() / 1000);
-    }, 1000);
-    loading.value = false;
-    postRef.value = <HTMLElement>document.querySelector(".tp-post-body");
-  });
+  await nextTick();
+  if (shareTimeTimer.value !== undefined) {
+    clearInterval(shareTimeTimer.value);
+    shareTimeTimer.value = undefined;
+  }
+  shareTimeTimer.value = setInterval(() => (shareTime.value = Math.floor(Date.now() / 1000)), 1000);
+  postRef.value = <HTMLElement>document.querySelector(".tp-post-title");
+  loading.value = false;
 });
 
-watch(loadShare, async (value) => {
-  if (value) {
+watch(
+  () => loadShare.value,
+  async () => {
+    if (!loadShare.value) {
+      loadingSub.value = "";
+      loading.value = false;
+      await TGLogger.Info(
+        `[t-post.vue][${postId}][share] 生成分享图片完成：${shareTitle.value}.png`,
+      );
+      return;
+    }
     shareTime.value = Math.floor(Date.now() / 1000);
     loadingTitle.value = "正在生成分享图片";
     loadingSub.value = `${shareTitle.value}.png`;
     loading.value = true;
     await TGLogger.Info(`[t-post.vue][${postId}][share] 生成分享图片：${shareTitle.value}.png`);
-  } else {
-    loadingSub.value = "";
-    loading.value = false;
-    await TGLogger.Info(`[t-post.vue][${postId}][share] 生成分享图片完成：${shareTitle.value}.png`);
-  }
-});
+  },
+);
+
+async function toTopic(topic: TGApp.Plugins.Mys.Post.Topic): Promise<void> {
+  const gid = postData.value?.post.game_id ?? topic.game_id;
+  await emit("active_deep_link", `router?path=/posts/${gid}/${topic.id}`);
+}
 
 function showOverlayC() {
   showCollection.value = true;
@@ -270,7 +286,10 @@ async function toPost(): Promise<void> {
 }
 
 onUnmounted(() => {
-  clearInterval(shareTimeTimer.value);
+  if (shareTimeTimer.value !== undefined) {
+    clearInterval(shareTimeTimer.value);
+    shareTimeTimer.value = undefined;
+  }
 });
 </script>
 <style lang="css" scoped>
@@ -417,6 +436,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   color: var(--box-text-5);
+  cursor: pointer;
   font-family: var(--font-title);
   font-size: 12px;
 }
