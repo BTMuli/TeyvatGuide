@@ -1,5 +1,4 @@
 <template>
-  <ToLoading v-model="loading" :title="loadT" />
   <v-app-bar>
     <template #prepend>
       <div class="hta-top-prepend">
@@ -44,12 +43,12 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from "vue";
 
+import showLoading from "../../components/func/loading.js";
 import HtaOverlayOverview from "../../components/hutaoAbyss/hta-overlay-overview.vue";
 import HtaTabHold from "../../components/hutaoAbyss/hta-tab-hold.vue";
 import HtaTabTeam from "../../components/hutaoAbyss/hta-tab-team.vue";
 import HtaTabUp from "../../components/hutaoAbyss/hta-tab-up.vue";
 import HtaTabUse from "../../components/hutaoAbyss/hta-tab-use.vue";
-import ToLoading from "../../components/overlay/to-loading.vue";
 import Hutao from "../../plugins/Hutao/index.js";
 import { timestampToDate } from "../../utils/toolFunc.js";
 
@@ -82,9 +81,6 @@ const abyssList: AbyssList = [
   { label: AbyssTabEnum.team, value: "team" },
   { label: AbyssTabEnum.hold, value: "hold" },
 ];
-
-const loading = ref<boolean>(false);
-const loadT = ref<string>("");
 const showDialog = ref<boolean>(false);
 
 // data
@@ -98,17 +94,15 @@ watch(
 );
 
 onMounted(async () => {
-  loadT.value = "正在获取深渊数据";
-  loading.value = true;
-  loadT.value = "正在获取深渊概览";
+  showLoading.start("正在获取深渊数据...", "正在获取深渊概览");
   overview.value = {
     cur: await Hutao.Abyss.overview(),
     last: await Hutao.Abyss.overview(true),
   };
-  loadT.value = "正在获取深渊数据";
+  showLoading.update("正在获取深渊数据...", "正在角色使用率数据");
   const useData = <AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>>await getData("use");
   abyssData.value = { use: useData, up: null, team: null, hold: null };
-  loading.value = false;
+  showLoading.end();
 });
 
 function show(): void {
@@ -117,9 +111,7 @@ function show(): void {
 
 async function refreshData(type: AbyssTab): Promise<void> {
   if (abyssData.value && abyssData.value[type] !== null) return;
-  if (loading.value) return;
-  loading.value = true;
-  loadT.value = `正在获取 ${AbyssTabEnum[type]} 数据`;
+  showLoading.update("正在获取深渊数据...", `正在获取 ${AbyssTabEnum[type]} 数据`);
   const data = await getData(type);
   switch (type) {
     case "use":
@@ -135,7 +127,7 @@ async function refreshData(type: AbyssTab): Promise<void> {
       abyssData.value.hold = <AbyssDataItemType<"hold">>data;
       break;
   }
-  loading.value = false;
+  showLoading.end();
 }
 
 async function getData(type: AbyssTab): Promise<AbyssDataItemType<AbyssTab>> {

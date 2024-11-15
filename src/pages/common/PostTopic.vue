@@ -1,5 +1,4 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" />
   <v-app-bar>
     <template #prepend>
       <div class="post-topic-top" v-if="topicInfo">
@@ -65,19 +64,16 @@
 import { computed, onMounted, ref, toRaw, watch } from "vue";
 import { useRoute } from "vue-router";
 
+import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TGameNav from "../../components/main/t-gamenav.vue";
 import TPostCard from "../../components/main/t-postcard.vue";
-import ToLoading from "../../components/overlay/to-loading.vue";
 import ToPostSearch from "../../components/post/to-postSearch.vue";
 import Mys from "../../plugins/Mys/index.js";
 import { createPost } from "../../utils/TGWindow.js";
 
 const gid = <string>useRoute().params.gid;
 const topic = <string>useRoute().params.topic;
-
-const loading = ref<boolean>(false);
-const loadingTitle = ref<string>("");
 const showSearch = ref<boolean>(false);
 
 const curGid = ref<number>(Number(gid));
@@ -116,12 +112,11 @@ watch(
 );
 
 async function firstLoad(): Promise<void> {
-  loading.value = true;
-  loadingTitle.value = `正在加载话题${topic}信息`;
+  showLoading.start(`正在加载话题${topic}信息`);
   const info = await Mys.Post.getTopicFullInfo(gid, topic);
   if ("retcode" in info) {
+    showLoading.end();
     showSnackbar.error(`[${info.retcode}] ${info.message}`);
-    loading.value = false;
     return;
   }
   topicInfo.value = info;
@@ -129,17 +124,17 @@ async function firstLoad(): Promise<void> {
     curGame.value = toRaw(info.game_info_list.find((i) => i.id === curGid.value));
   }
   if (curGame.value === undefined) curGame.value = info.game_info_list[0];
-  loadingTitle.value = `正在加载${curGame.value.name}帖子列表`;
+  showLoading.update(`正在加载${curGame.value.name}帖子列表`);
   const postList = await Mys.Post.getTopicPostList(gid, topic, curSortType.value);
   if ("retcode" in postList) {
+    showLoading.end();
     showSnackbar.error(`[${postList.retcode}] ${postList.message}`);
-    loading.value = false;
     return;
   }
   isLastPage.value = postList.is_last;
   lastPostId.value = postList.last_id;
   posts.value = postList.posts;
-  loading.value = false;
+  showLoading.end();
   showSnackbar.success(`加载了 ${postList.posts.length} 条帖子`);
 }
 
@@ -148,18 +143,17 @@ async function freshPostData(): Promise<void> {
     showSnackbar.warn("已经到底了");
     return;
   }
-  loading.value = true;
-  loadingTitle.value = "正在加载帖子列表";
+  showLoading.start("正在加载帖子列表");
   const postList = await Mys.Post.getTopicPostList(gid, topic, curSortType.value, lastPostId.value);
   if ("retcode" in postList) {
+    showLoading.end();
     showSnackbar.error(`[${postList.retcode}] ${postList.message}`);
-    loading.value = false;
     return;
   }
   isLastPage.value = postList.is_last;
   lastPostId.value = postList.last_id;
   posts.value = posts.value.concat(postList.posts);
-  loading.value = false;
+  showLoading.end();
   showSnackbar.success(`加载了 ${postList.posts.length} 条帖子`);
 }
 

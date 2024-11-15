@@ -1,5 +1,4 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" />
   <v-app-bar>
     <template #prepend>
       <div class="posts-top">
@@ -66,17 +65,14 @@
 import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
+import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TGameNav from "../../components/main/t-gamenav.vue";
 import TPostCard from "../../components/main/t-postcard.vue";
-import ToLoading from "../../components/overlay/to-loading.vue";
 import ToPostSearch from "../../components/post/to-postSearch.vue";
 import Mys from "../../plugins/Mys/index.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { createPost } from "../../utils/TGWindow.js";
-
-const loading = ref<boolean>(true);
-const loadingTitle = ref<string>("正在加载数据");
 
 type SortSelect = {
   text: string;
@@ -188,15 +184,16 @@ const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 
 onMounted(async () => {
+  showLoading.start("正在获取帖子数据...");
   if (gid && typeof gid === "string") curGid.value = Number(gid);
   if (forum && typeof forum === "string") curForum.value = Number(forum);
   const gameLabel = getGameLabel(curGid.value);
   const forumLabel = getForumLabel(curGid.value, curForum.value);
   await TGLogger.Info(`[Posts][${gameLabel}][onMounted][${forumLabel}] 打开帖子列表`);
-  loading.value = true;
+  showLoading.update(`正在获取 ${gameLabel}-${forumLabel} 数据`);
   await freshPostData();
   curForumLabel.value = forumLabel;
-  loading.value = false;
+  showLoading.end();
 });
 
 watch(
@@ -236,11 +233,10 @@ async function freshPostData(): Promise<void> {
   await TGLogger.Info(
     `[Posts][${gameLabel}][freshPostData][${forumLabel}][${sortLabel}] 刷新帖子列表`,
   );
-  loading.value = true;
-  loadingTitle.value = `正在加载 ${gameLabel}-${forumLabel}-${sortLabel} 数据`;
+  showLoading.start(`正在加载 ${gameLabel}-${forumLabel}-${sortLabel} 数据`);
   const postsGet = await Mys.Post.getForumPostList(curForum.value, curSortType.value);
   posts.value = postsGet.list;
-  loading.value = false;
+  showLoading.end();
 }
 
 // 查询帖子

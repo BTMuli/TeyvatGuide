@@ -2,14 +2,8 @@
   <TSwitchTheme />
   <TPinWin />
   <TbCollect :model-value="postId" :data="postData" />
-  <TShareBtn
-    v-show="!loadingEmpty"
-    v-model="postRef"
-    v-model:loading="loadShare"
-    :title="shareTitle"
-  />
+  <TShareBtn v-model="postRef" :title="shareTitle" />
   <TprMain :gid="postData.post.game_id" :post-id="postData.post.post_id" v-if="postData" />
-  <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="tp-post-body" v-if="postData">
     <div class="tp-post-info">
       <div class="tp-post-version">
@@ -93,13 +87,13 @@
 import { app } from "@tauri-apps/api";
 import { webviewWindow } from "@tauri-apps/api";
 import { emit } from "@tauri-apps/api/event";
-import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { nextTick, onMounted, onUnmounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
 import TPinWin from "../components/app/t-pinWin.vue";
 import TShareBtn from "../components/app/t-shareBtn.vue";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
-import ToLoading from "../components/overlay/to-loading.vue";
+import showLoading from "../components/func/loading.js";
 import TbCollect from "../components/post/tb-collect.vue";
 import TpAvatar from "../components/post/tp-avatar.vue";
 import TpParser from "../components/post/tp-parser.vue";
@@ -111,13 +105,6 @@ import TGClient from "../utils/TGClient.js";
 import TGLogger from "../utils/TGLogger.js";
 import { createTGWindow } from "../utils/TGWindow.js";
 import TGConstant from "../web/constant/TGConstant.js";
-
-// loading
-const loading = ref<boolean>(true);
-const loadShare = ref<boolean>(false);
-const loadingTitle = ref<string>("正在加载");
-const loadingSub = ref<string>();
-const loadingEmpty = ref<boolean>(false);
 
 // share
 const postRef = ref<HTMLElement>(<HTMLElement>{});
@@ -142,20 +129,19 @@ function getGameIcon(gameId: number): string {
 }
 
 onMounted(async () => {
+  showLoading.start(`正在加载帖子数据...`);
   appVersion.value = await app.getVersion();
   // 检查数据
   if (!postId) {
-    loadingEmpty.value = true;
-    loadingTitle.value = "未找到数据";
+    showLoading.empty("未找到数据", "PostID 不存在");
     await webviewWindow.getCurrentWebviewWindow().setTitle("未找到数据");
     await TGLogger.Error("[t-post][onMounted] PostID 不存在");
     return;
   }
-  // 获取数据
-  loadingTitle.value = "正在获取数据...";
+  showLoading.update("正在获取数据...", `帖子ID: ${postId}`);
   try {
     postData.value = await Mys.Post.getPostFull(postId);
-    loadingTitle.value = "正在渲染数据...";
+    showLoading.update("正在渲染数据...", `帖子ID: ${postId}`);
     renderPost.value = getRenderPost(postData.value);
     shareTitle.value = `Post_${postId}`;
     await webviewWindow
@@ -164,14 +150,12 @@ onMounted(async () => {
   } catch (error) {
     if (error instanceof Error) {
       await TGLogger.Error(`[t-post][${postId}] ${error.name}: ${error.message}`);
-      loadingTitle.value = error.name;
-      loadingSub.value = error.message;
+      showLoading.update(error.name, error.message, true);
     } else {
       console.error(error);
-      loadingTitle.value = "帖子不存在或解析失败";
-      loadingSub.value = "请检查帖子是否存在或者是否为合法的帖子";
+      await TGLogger.Error(`[t-post][${postId}] 未知错误${JSON.stringify(error)}`);
+      showLoading.empty("帖子不存在或解析失败", "请检查帖子是否存在或者是否为合法的帖子");
     }
-    loadingEmpty.value = true;
     await webviewWindow.getCurrentWebviewWindow().setTitle(`Post_${postId} Parsing Error`);
     return;
   }
@@ -189,27 +173,8 @@ onMounted(async () => {
   }
   shareTimeTimer.value = setInterval(() => (shareTime.value = Math.floor(Date.now() / 1000)), 1000);
   postRef.value = <HTMLElement>document.querySelector(".tp-post-body");
-  loading.value = false;
+  showLoading.end();
 });
-
-watch(
-  () => loadShare.value,
-  async () => {
-    if (!loadShare.value) {
-      loadingSub.value = "";
-      loading.value = false;
-      await TGLogger.Info(
-        `[t-post.vue][${postId}][share] 生成分享图片完成：${shareTitle.value}.png`,
-      );
-      return;
-    }
-    shareTime.value = Math.floor(Date.now() / 1000);
-    loadingTitle.value = "正在生成分享图片";
-    loadingSub.value = `${shareTitle.value}.png`;
-    loading.value = true;
-    await TGLogger.Info(`[t-post.vue][${postId}][share] 生成分享图片：${shareTitle.value}.png`);
-  },
-);
 
 async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
   const gid = postData.value?.post.game_id ?? topic.game_id;

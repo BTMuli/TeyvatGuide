@@ -1,5 +1,4 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" />
   <v-app-bar density="compact">
     <template #prepend>
       <v-tabs v-model="tab" align-tabs="start" class="news-tab">
@@ -47,7 +46,7 @@
         </div>
       </div>
       <div class="load-news">
-        <v-btn class="news-top-btn" :rounded="true" :loading="loadingSub" @click="loadMore(value)">
+        <v-btn class="news-top-btn" :rounded="true" :loading="loading" @click="loadMore(value)">
           已加载：{{ rawData[value].lastId }}，加载更多
         </v-btn>
       </div>
@@ -61,10 +60,10 @@
 import { computed, nextTick, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TPostCard from "../../components/main/t-postcard.vue";
 import ToChannel from "../../components/overlay/to-channel.vue";
-import ToLoading from "../../components/overlay/to-loading.vue";
 import ToPostSearch from "../../components/post/to-postSearch.vue";
 import Mys from "../../plugins/Mys/index.js";
 import { useAppStore } from "../../store/modules/app.js";
@@ -94,9 +93,7 @@ type RawData = {
 const router = useRouter();
 const gid = <string>useRoute().params.gid;
 // loading
-const loading = ref<boolean>(true);
-const loadingTitle = ref<string>("正在加载");
-const loadingSub = ref<boolean>(false);
+const loading = ref<boolean>(false);
 
 // UI 数据
 const appStore = useAppStore();
@@ -149,16 +146,13 @@ async function firstLoad(key: NewsKey, refresh: boolean = false): Promise<void> 
     postData.value[key] = [];
     rawData.value[key].lastId = 0;
   }
-  loadingTitle.value = `正在获取${rawData.value[key].name}数据...`;
-  loading.value = true;
+  showLoading.start(`正在获取${rawData.value[key].name}数据...`);
   const getData = await Mys.Painter.getNewsList(gid, NewsType[key]);
   rawData.value[key].isLast = getData.is_last;
   rawData.value[key].lastId = getData.list.length;
   postData.value[key] = getData.list;
-  loadingTitle.value = `正在渲染${rawData.value[key].name}数据...`;
-  await nextTick(() => {
-    loading.value = false;
-  });
+  showLoading.update(`正在渲染${rawData.value[key].name}数据...`);
+  await nextTick(() => showLoading.end());
   await TGLogger.Info(`[News][${gid}][firstLoad] 获取${rawData.value[key].name}数据成功`);
 }
 
@@ -169,28 +163,25 @@ async function switchAnno(): Promise<void> {
 
 // 加载更多
 async function loadMore(key: NewsKey): Promise<void> {
-  loadingSub.value = true;
+  loading.value = true;
   if (rawData.value[key].isLast) {
     showSnackbar.warn("已经是最后一页了");
-    loadingSub.value = false;
+    loading.value = false;
     return;
   }
-  loadingTitle.value = `正在获取${rawData.value[key].name}数据...`;
-  loading.value = true;
+  showLoading.start(`正在获取${rawData.value[key].name}数据...`);
   const getData = await Mys.Painter.getNewsList(gid, NewsType[key], 20, rawData.value[key].lastId);
   rawData.value[key].lastId = rawData.value[key].lastId + getData.list.length;
   rawData.value[key].isLast = getData.is_last;
   postData.value[key] = postData.value[key].concat(getData.list);
   if (rawData.value[key].isLast) {
+    showLoading.end();
     showSnackbar.warn("已经是最后一页了");
-    loadingSub.value = false;
     loading.value = false;
     return;
   }
-  await nextTick(() => {
-    loadingSub.value = false;
-    loading.value = false;
-  });
+  await nextTick(() => showLoading.end());
+  loading.value = false;
 }
 
 async function searchPost(): Promise<void> {

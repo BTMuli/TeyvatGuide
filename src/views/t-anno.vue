@@ -1,21 +1,11 @@
 <template>
   <TSwitchTheme />
   <TPinWin />
-  <TShareBtn
-    v-show="!loadingEmpty"
-    v-model="annoRef"
-    v-model:loading="loadShare"
-    :title="annoTitle"
-  />
-  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" :empty="loadingEmpty" />
+  <TShareBtn v-model="annoRef" :title="annoTitle" />
   <div class="anno-body" v-if="annoData">
     <div class="anno-info">AnnoID: {{ annoId }} | Render by TeyvatGuide v{{ appVersion }}</div>
-    <div class="anno-title">
-      {{ annoData.title }}
-    </div>
-    <div class="anno-subtitle">
-      {{ parseText(annoData.subtitle) }}
-    </div>
+    <div class="anno-title">{{ annoData.title }}</div>
+    <div class="anno-subtitle">{{ parseText(annoData.subtitle) }}</div>
     <div class="anno-content">
       <TaParser :data="annoData" />
     </div>
@@ -23,29 +13,21 @@
 </template>
 <script lang="ts" setup>
 import { app, webviewWindow } from "@tauri-apps/api";
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 
 import TaParser from "../components/anno/ta-parser.vue";
 import TPinWin from "../components/app/t-pinWin.vue";
 import TShareBtn from "../components/app/t-shareBtn.vue";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
-import ToLoading from "../components/overlay/to-loading.vue";
+import showLoading from "../components/func/loading.js";
 import { useAppStore } from "../store/modules/app.js";
 import TGLogger from "../utils/TGLogger.js";
 import { createTGWindow } from "../utils/TGWindow.js";
 import { AnnoLang, AnnoServer } from "../web/request/getAnno.js";
 import TGRequest from "../web/request/TGRequest.js";
 
-// loading
-const loading = ref<boolean>(true);
-const loadShare = ref<boolean>(false);
-const loadingTitle = ref<string>("正在加载");
-const loadingSub = ref<string>();
-const loadingEmpty = ref<boolean>(false);
-
-// share
-const annoRef = ref<HTMLElement | null | undefined>();
+const annoRef = ref<HTMLElement>(<HTMLElement>{});
 const annoTitle = ref<string>("");
 
 // 数据
@@ -57,19 +39,17 @@ const appVersion = ref<string>();
 const annoData = ref<TGApp.BBS.Announcement.ContentItem | undefined>();
 
 onMounted(async () => {
+  showLoading.start("正在加载公告数据...");
   appVersion.value = await app.getVersion();
-  // 检查数据
   if (!annoId || !region) {
-    loadingEmpty.value = true;
-    loadingTitle.value = "未找到数据";
+    showLoading.empty("未找到数据", "公告不存在或解析失败");
     await TGLogger.Error("[t-anno.vue] 未找到数据");
     return;
   }
-  // 获取数据
-  loadingTitle.value = "正在获取数据...";
+  showLoading.update("正在获取数据...", `公告ID:${annoId}`);
   try {
     annoData.value = await TGRequest.Anno.getContent(annoId, region, lang);
-    loadingTitle.value = "正在渲染数据...";
+    showLoading.update("正在渲染数据...", `公告ID：${annoId}`);
     annoTitle.value = `Anno_${annoId}`;
     await webviewWindow
       .getCurrentWebviewWindow()
@@ -79,26 +59,14 @@ onMounted(async () => {
     if (error instanceof Error)
       await TGLogger.Error(`[t-anno.vue][${annoId}] ${error.name}：${error.message}`);
     else console.error(error);
-    loadingEmpty.value = true;
-    loadingTitle.value = "公告不存在或解析失败";
+    showLoading.empty("未找到数据", "公告不存在或解析失败");
     await webviewWindow.getCurrentWebviewWindow().setTitle(`Anno_${annoId} Parsing Error`);
     return;
   }
   // 打开 json
   const isDev = useAppStore().devMode ?? false;
   if (isDev) await createAnnoJson(annoId, region, lang);
-  loading.value = false;
-});
-
-watch(loadShare, (value) => {
-  if (value) {
-    loadingTitle.value = "正在生成分享图片";
-    loadingSub.value = `${annoTitle.value}.png`;
-    loading.value = true;
-  } else {
-    loadingSub.value = "";
-    loading.value = false;
-  }
+  showLoading.end();
 });
 
 function parseText(title: string): string {

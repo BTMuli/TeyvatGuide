@@ -116,8 +116,6 @@ const btnText = [
 
 interface TCalendarEmits {
   (e: "success"): void;
-
-  (e: "loadOuter", v: TGApp.Component.Loading.EmitParams): void;
 }
 
 const emits = defineEmits<TCalendarEmits>();

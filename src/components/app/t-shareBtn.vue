@@ -1,29 +1,25 @@
 <template>
   <div class="share-box" title="分享">
     <div class="share-btn" @click="shareContent()">
-      <v-icon> mdi-share-variant</v-icon>
+      <v-icon>mdi-share-variant</v-icon>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-// utils
 import TGLogger from "../../utils/TGLogger.js";
 import { generateShareImg } from "../../utils/TGShare.js";
+import showLoading from "../func/loading.js";
 
 interface TShareBtnProps {
   modelValue: HTMLElement;
   title: string;
-  loading: boolean;
 }
 
-type TShareBtnEmits = (e: "update:loading", value: boolean) => void;
-
 const props = defineProps<TShareBtnProps>();
-const emit = defineEmits<TShareBtnEmits>();
 
 async function shareContent(): Promise<void> {
+  showLoading.start("正在生成分享图片", props.title);
   await TGLogger.Info("[TShareBtn][shareContent] 开始生成分享图片");
-  emit("update:loading", true);
   props.modelValue.querySelectorAll("details").forEach((item) => {
     if (item.open) {
       item.setAttribute("details-open", "");
@@ -39,7 +35,7 @@ async function shareContent(): Promise<void> {
       item.open = false;
     }
   });
-  emit("update:loading", false);
+  showLoading.end();
   await TGLogger.Info("[TShareBtn][shareContent] 生成分享图片完成");
 }
 </script>

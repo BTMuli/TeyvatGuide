@@ -1,5 +1,4 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <v-app-bar>
     <template #prepend>
       <div class="uc-top-title">
@@ -104,8 +103,8 @@ import { storeToRefs } from "pinia";
 import { onMounted, ref, watch, computed } from "vue";
 
 import showDialog from "../../components/func/dialog.js";
+import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
-import ToLoading from "../../components/overlay/to-loading.vue";
 import TuaAvatarBox from "../../components/userAvatar/tua-avatar-box.vue";
 import TuaDetailOverlay from "../../components/userAvatar/tua-detail-overlay.vue";
 import TwoSelectC, { SelectedCValue } from "../../components/wiki/two-select-c.vue";
@@ -122,12 +121,9 @@ const userStore = storeToRefs(useUserStore());
 const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
 
 // loading
-const loading = ref<boolean>(false);
 const loadData = ref<boolean>(false);
 const loadShare = ref<boolean>(false);
 const loadDel = ref<boolean>(false);
-const loadingTitle = ref<string>();
-const loadingSub = ref<string>();
 const version = ref<string>();
 
 // data
@@ -158,13 +154,12 @@ const uidCur = ref<string>();
 const uidList = ref<string[]>([]);
 
 onMounted(async () => {
+  showLoading.start("正在获取角色数据...");
   await TGLogger.Info("[Character][onMounted] 进入角色页面");
-  loadingTitle.value = "正在获取角色数据";
-  loading.value = true;
   version.value = await getVersion();
   await loadUid();
-  loading.value = false;
   loadData.value = false;
+  showLoading.end();
 });
 
 watch(
@@ -271,20 +266,20 @@ async function refresh(): Promise<void> {
     }
   }
   await TGLogger.Info(`[Character][refreshRoles][${user.value.gameUid}] 正在更新角色数据`);
-  loadingTitle.value = "正在获取角色列表";
-  loading.value = true;
+  showLoading.start("正在更新角色数据...", `UID: ${user.value.gameUid}`);
   loadData.value = true;
   if (!userStore.cookie.value) {
+    showLoading.end();
     showSnackbar.warn("请先登录");
-    loading.value = false;
     loadData.value = false;
     return;
   }
+  showLoading.update("正在更新角色数据...", "正在获取角色列表");
   const indexRes = await TGRequest.User.byCookie.getAvatarIndex(userStore.cookie.value, user.value);
   if (indexRes.retcode !== 0) {
     showSnackbar.error(`[${indexRes.retcode}] ${indexRes.message}`);
     await TGLogger.Error(JSON.stringify(indexRes.message));
-    loading.value = false;
+    showLoading.end();
     loadData.value = false;
     return;
   }
@@ -295,13 +290,12 @@ async function refresh(): Promise<void> {
     await TGLogger.Error(
       `[Character][refreshRoles][${user.value.gameUid}] ${listRes.retcode} ${listRes.message}`,
     );
-    loading.value = false;
+    showLoading.end();
     loadData.value = false;
     return;
   }
   const idList = listRes.map((i) => i.id.toString());
-  loadingTitle.value = "正在获取角色数据";
-  loadingSub.value = `共${idList.length}个角色`;
+  showLoading.update("正在更新角色数据...", `共${idList.length}个角色`);
   const res = await TGRequest.User.byCookie.getAvatarDetail(
     userStore.cookie.value,
     user.value,
@@ -313,19 +307,19 @@ async function refresh(): Promise<void> {
     await TGLogger.Error(
       `[Character][refreshRoles][${user.value.gameUid}] ${res.retcode} ${res.message}`,
     );
-    loading.value = false;
+    showLoading.end();
     loadData.value = false;
     return;
   }
   userStore.propMap.value = res.property_map;
-  loadingTitle.value = "正在保存角色数据";
+  showLoading.update("正在更新角色数据...", "正在保存角色数据");
   await TSUserAvatar.saveAvatars(user.value.gameUid, res.list);
   await TGLogger.Info(`[Character][refreshRoles][${user.value.gameUid}] 成功更新角色数据`);
   await TGLogger.Info(
     `[Character][refreshRoles][${user.value.gameUid}] 共更新${res.list.length}个角色`,
   );
   await loadRole();
-  loading.value = false;
+  showLoading.end();
   loadData.value = false;
 }
 
@@ -337,13 +331,10 @@ async function share(): Promise<void> {
   await TGLogger.Info(`[Character][shareRoles][${user.value.gameUid}] 正在生成分享图片`);
   const rolesBox = <HTMLElement>document.querySelector(".uc-box");
   const fileName = `【角色列表】-${user.value.gameUid}`;
-  loadingTitle.value = "正在生成图片";
-  loadingSub.value = `${fileName}.png`;
-  loading.value = true;
+  showLoading.start("正在生成图片", `${fileName}.png`);
   loadShare.value = true;
   await generateShareImg(fileName, rolesBox);
-  loadingSub.value = "";
-  loading.value = false;
+  showLoading.end();
   loadShare.value = false;
   await TGLogger.Info(`[Character][shareRoles][${user.value.gameUid}] 生成分享图片成功`);
 }

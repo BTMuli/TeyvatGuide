@@ -1,5 +1,4 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSubtitle" />
   <div class="home-container">
     <div class="home-top">
       <div class="home-tools" v-if="appStore.isLogin">
@@ -28,25 +27,19 @@
         <v-btn class="select-btn" @click="submitHome" :rounded="true">确定</v-btn>
       </div>
     </div>
-    <component
-      :is="item"
-      v-for="item in components"
-      :key="item"
-      @success="loadEnd(item)"
-      @loadOuter="handleLoad"
-    />
+    <component :is="item" v-for="item in components" :key="item" @success="loadEnd(item)" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { onMounted, onUnmounted, ref, shallowRef } from "vue";
 
+import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TCalendar from "../../components/home/t-calendar.vue";
 import TPool from "../../components/home/t-pool.vue";
 import TPosition from "../../components/home/t-position.vue";
 import TGameNav from "../../components/main/t-gamenav.vue";
-import ToLoading from "../../components/overlay/to-loading.vue";
 import { useAppStore } from "../../store/modules/app.js";
 import { useHomeStore } from "../../store/modules/home.js";
 import TGLogger from "../../utils/TGLogger.js";
@@ -55,11 +48,6 @@ import TGConstant from "../../web/constant/TGConstant.js";
 // store
 const appStore = useAppStore();
 const homeStore = useHomeStore();
-
-// loading
-const loading = ref<boolean>(true);
-const loadingTitle = ref<string>("正在加载首页");
-const loadingSubtitle = ref<string>("");
 
 // data
 const endNum = ref<number>(0);
@@ -70,7 +58,7 @@ const gameSelectList = TGConstant.BBS.CHANNELS;
 const curGid = ref<string>(gameSelectList[0].gid);
 
 onMounted(async () => {
-  loadingTitle.value = "正在加载首页";
+  showLoading.start("正在加载首页...");
   // @ts-expect-error-next-line
   const isProdEnv = import.meta.env.MODE === "production";
   // 获取当前环境
@@ -94,7 +82,7 @@ onMounted(async () => {
     }
   }
   const items = showHome.value.join("、");
-  loadingSubtitle.value = `正在加载：${items}`;
+  showLoading.update("正在加载首页...", `正在加载：${items}`);
   components.value = temp;
   await TGLogger.Info(`[Home][onMounted] 打开首页，当前显示：${items}`);
 });
@@ -116,25 +104,11 @@ async function loadEnd(item: any): Promise<void> {
   await TGLogger.Info(`[Home][loadEnd] ${item.__name} 加载完成`);
   endNum.value++;
   if (endNum.value === components.value.length) {
-    loading.value = false;
+    showLoading.end();
   }
 }
 
-function handleLoad(params: TGApp.Component.Loading.EmitParams): void {
-  loading.value = params.show;
-  if (params.title) {
-    loadingTitle.value = params.title;
-  }
-  if (params.text) {
-    loadingSubtitle.value = params.text;
-  } else {
-    loadingSubtitle.value = "";
-  }
-}
-
-onUnmounted(() => {
-  components.value = [];
-});
+onUnmounted(() => (components.value = []));
 </script>
 <style lang="css" scoped>
 .home-container {

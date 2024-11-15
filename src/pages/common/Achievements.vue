@@ -1,5 +1,4 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" />
   <v-app-bar>
     <div class="top-title" @click="switchHideFin">{{ title }}</div>
     <template #append>
@@ -60,8 +59,8 @@ import { onMounted, ref, watch, computed, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import showDialog from "../../components/func/dialog.js";
+import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
-import ToLoading from "../../components/overlay/to-loading.vue";
 import TuaAchiList from "../../components/userAchi/tua-achi-list.vue";
 import TuaSeries from "../../components/userAchi/tua-series.vue";
 import { AppAchievementSeriesData } from "../../data/index.js";
@@ -74,8 +73,6 @@ import {
   verifyUiafDataClipboard,
 } from "../../utils/UIAF.js";
 
-const loading = ref<boolean>(true);
-const loadingTitle = ref<string>("正在加载数据");
 const search = ref<string>("");
 const hideFin = ref<boolean>(false);
 
@@ -102,13 +99,13 @@ async function switchHideFin() {
 }
 
 onMounted(async () => {
+  showLoading.start("正在加载成就数据...");
   await TGLogger.Info("[Achievements][onMounted] 打开成就页面");
-  loading.value = true;
   uidList.value = await TSUserAchi.getAllUid();
   if (uidList.value.length === 0) uidList.value = [0];
   uidCur.value = uidList.value[0];
   await refreshOverview();
-  loading.value = false;
+  showLoading.end();
   if (route.query.app && typeof route.query.app === "string") {
     await handleImportOuter(route.query.app);
   }
@@ -161,6 +158,7 @@ async function importJson(): Promise<void> {
     showSnackbar.warn("请输入合法数字");
     return;
   }
+  showLoading.start("正在导入数据", "正在解析数据");
   const remoteRaw = await readUiafData(selectedFile);
   await TGLogger.Info("[Achievements][importJson] 读取 UIAF 数据成功");
   await TGLogger.Info(`[Achievements][importJson] 导入来源：${remoteRaw.info.export_app}`);
@@ -168,11 +166,9 @@ async function importJson(): Promise<void> {
   await TGLogger.Info(`[Achievements][importJson] 导入时间：${remoteRaw.info.export_timestamp}`);
   await TGLogger.Info(`[Achievements][importJson] 导入数据：${remoteRaw.list.length} 条`);
   await TGLogger.Info(`[Achievements][importJson] 导入存档：${uidInput}`);
-  loadingTitle.value = "正在解析数据";
-  loading.value = true;
-  loadingTitle.value = "正在合并成就数据";
+  showLoading.update("正在导入数据", "正在合并数据");
   await TSUserAchi.mergeUiaf(remoteRaw.list, Number(uidInput));
-  loadingTitle.value = "即将刷新页面";
+  showLoading.end();
   setTimeout(() => window.location.reload(), 1000);
 }
 
@@ -226,10 +222,9 @@ async function handleImportOuter(app: string): Promise<void> {
     return;
   }
   const data: TGApp.Plugins.UIAF.Data = JSON.parse(clipboard);
-  loadingTitle.value = "正在导入数据";
-  loading.value = true;
+  showLoading.start("正在导入数据", "正在解析数据");
   await TSUserAchi.mergeUiaf(data.list, Number(uidInput));
-  loading.value = false;
+  showLoading.end();
   showSnackbar.success("导入成功，即将刷新页面");
   await TGLogger.Info("[Achievements][handleImportOuter] 导入成功");
   setTimeout(async () => await router.push("/achievements"), 1500);

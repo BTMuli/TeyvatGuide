@@ -1,6 +1,5 @@
 <template>
   <TSwitchTheme />
-  <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
   <div class="post-json">
     <div class="post-title">帖子返回内容 JSON</div>
     <JsonViewer :value="jsonData" copyable boxed />
@@ -14,33 +13,25 @@ import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
-import ToLoading from "../components/overlay/to-loading.vue";
+import showLoading from "../components/func/loading.js";
 import Mys from "../plugins/Mys/index.js";
 import TGLogger from "../utils/TGLogger.js";
 
-// loading
-const loading = ref<boolean>(true);
-const loadingTitle = ref<string>("正在加载");
-const loadingEmpty = ref<boolean>(false);
-
-// 数据
 const postId = Number(useRoute().params.post_id);
 let jsonData = reactive<TGApp.Plugins.Mys.Post.FullData>(<TGApp.Plugins.Mys.Post.FullData>{});
 let parseData = reactive<TGApp.Plugins.Mys.SctPost.Base[]>([]);
 const isEmpty = ref<boolean>(false);
 
 onMounted(async () => {
+  showLoading.start(`正在获取帖子数据...`);
   if (!postId) {
-    loadingEmpty.value = true;
-    loadingTitle.value = "错误的 POST ID！";
+    showLoading.empty("错误的帖子ID！");
     return;
   }
-  loadingTitle.value = "正在获取数据...";
   try {
     jsonData = await Mys.Post.getPostFull(postId);
   } catch (e) {
-    loadingTitle.value = "获取数据失败";
-    loadingEmpty.value = true;
+    showLoading.empty("获取数据失败", `帖子ID:${postId}`);
     await TGLogger.Error(`[${postId}]获取帖子数据失败：${e}`);
     return;
   }
@@ -55,7 +46,7 @@ onMounted(async () => {
     }
     console.warn(`[${postId}]解析帖子数据失败：${err}`);
   }
-  loading.value = false;
+  showLoading.end();
 });
 </script>
 <style lang="css" scoped>

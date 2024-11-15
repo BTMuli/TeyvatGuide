@@ -1,5 +1,4 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <v-app-bar>
     <template #prepend>
       <v-tabs v-model="tab" align-tabs="start" class="anno-tab">
@@ -58,9 +57,9 @@
 import { nextTick, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
+import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TAnnocard from "../../components/main/t-annocard.vue";
-import ToLoading from "../../components/overlay/to-loading.vue";
 import { useAppStore } from "../../store/modules/app.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { AnnoLang, AnnoServer } from "../../web/request/getAnno.js";
@@ -95,11 +94,6 @@ type AnnoKey = keyof typeof AnnoType;
 type AnnoCard = {
   [key in AnnoKey]: TGApp.App.Announcement.ListCard[];
 };
-
-// loading
-const loading = ref<boolean>(true);
-const loadingTitle = ref<string>("正在加载");
-const loadingSub = ref<string>("请稍后");
 
 const appStore = useAppStore();
 
@@ -146,9 +140,10 @@ onMounted(async () => {
 });
 
 async function loadData(): Promise<void> {
-  loadingTitle.value = "正在获取公告数据";
-  loadingSub.value = `服务器：${getRegionName(curRegion.value)}，语言：${getLangName(curLang.value)}`;
-  loading.value = true;
+  showLoading.start(
+    "正在获取公告数据",
+    `服务器：${getRegionName(curRegion.value)}，语言：${getLangName(curLang.value)}`,
+  );
   const annoData = await TGRequest.Anno.getList(curRegion.value, curLang.value);
   const listCards = TGUtils.Anno.getCard(annoData);
   await Promise.all(
@@ -163,8 +158,8 @@ async function loadData(): Promise<void> {
     activity: listCards.filter((item) => item.typeLabel === AnnoType.activity),
     game: listCards.filter((item) => item.typeLabel === AnnoType.game),
   };
-  loadingTitle.value = "正在渲染公告数据";
-  await nextTick(() => (loading.value = false));
+  showLoading.update("正在渲染公告数据");
+  await nextTick(() => showLoading.end());
 }
 
 function getRegionName(value: AnnoServer): string {

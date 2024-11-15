@@ -1,5 +1,4 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <v-app-bar>
     <template #prepend>
       <div class="uct-left">
@@ -97,9 +96,9 @@ import { onMounted, ref, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 
 import showDialog from "../../components/func/dialog.js";
+import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TSubLine from "../../components/main/t-subline.vue";
-import ToLoading from "../../components/overlay/to-loading.vue";
 import TucAvatars from "../../components/userCombat/tuc-avatars.vue";
 import TucOverview from "../../components/userCombat/tuc-overview.vue";
 import TucRound from "../../components/userCombat/tuc-round.vue";
@@ -112,10 +111,6 @@ import TGRequest from "../../web/request/TGRequest.js";
 
 // store
 const userStore = storeToRefs(useUserStore());
-// loading
-const loading = ref<boolean>(true);
-const loadingTitle = ref<string>();
-const loadingSub = ref<string>();
 
 // data
 const userTab = ref<number>(0);
@@ -133,15 +128,16 @@ const combatIdList = computed<number[]>(() => {
 });
 
 onMounted(async () => {
+  showLoading.start("正在加载剧诗数据...");
   version.value = await getVersion();
   await TGLogger.Info("[UserCombat][onMounted] 打开真境剧诗页面");
-  loadingTitle.value = "正在加载剧诗数据";
+  showLoading.update("正在加载用户数据...");
   uidList.value = await TSUserCombat.getAllUid();
   if (uidList.value.includes(user.value.gameUid)) uidCur.value = user.value.gameUid;
   else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
   else uidCur.value = "";
   await loadCombat();
-  loading.value = false;
+  showLoading.end();
 });
 
 watch(
@@ -186,44 +182,39 @@ async function refreshCombat(): Promise<void> {
     }
   }
   await TGLogger.Info("[UserCombat][getCombatData] 更新剧诗数据");
-  loadingTitle.value = `正在获取${user.value.gameUid}的深渊数据`;
-  loading.value = true;
-  loadingTitle.value = `正在获取${user.value.gameUid}的剧诗数据`;
+  showLoading.start("正在获取剧诗数据...", `UID: ${user.value.gameUid}`);
   const res = await TGRequest.User.byCookie.getCombat(userStore.cookie.value, user.value);
   if (res === false) {
-    loading.value = false;
+    showLoading.end();
     showSnackbar.warn("用户未解锁幻想真境剧诗");
     return;
   }
   if ("retcode" in res) {
+    showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);
-    loading.value = false;
     await TGLogger.Error(`[UserCombat][getCombatData] 获取${user.value.gameUid}的剧诗数据失败`);
     await TGLogger.Error(`[UserCombat][getCombatData] ${res.retcode} ${res.message}`);
     return;
   }
-  loadingTitle.value = `正在保存剧诗数据`;
+  showLoading.update("正在保存剧诗数据...");
   for (const combat of res) {
-    loadingSub.value = `正在保存第${combat.schedule.schedule_id}期数据`;
+    showLoading.update("正在保存剧诗数据...", `第${combat.schedule.schedule_id}期`);
     await TSUserCombat.saveCombat(user.value.gameUid, combat);
   }
-  loadingTitle.value = "正在加载剧诗数据";
+  showLoading.update("正在加载剧诗数据...");
   uidList.value = await TSUserCombat.getAllUid();
   uidCur.value = user.value.gameUid;
   await loadCombat();
-  loading.value = false;
+  showLoading.end();
 }
 
 async function shareCombat(): Promise<void> {
   await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片`);
   const fileName = `【剧诗数据】${userTab.value}-${user.value.gameUid}`;
-  loadingTitle.value = "正在生成图片";
-  loadingSub.value = `${fileName}.png`;
-  loading.value = true;
+  showLoading.start("正在生成图片", `${fileName}.png`);
   combatRef.value = <HTMLElement>document.getElementById(`user-combat-${userTab.value}`);
   await generateShareImg(fileName, combatRef.value);
-  loadingSub.value = "";
-  loading.value = false;
+  showLoading.end();
   await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片成功`);
 }
 
@@ -249,13 +240,10 @@ async function uploadCombat(): Promise<void> {
     return;
   }
   try {
-    loadingTitle.value = "正在转换剧诗数据";
-    loadingSub.value = "";
-    loading.value = true;
+    showLoading.start("正在上传剧诗数据");
     const transCombat = Hutao.Combat.trans(combatData);
-    loadingTitle.value = "正在上传剧诗数据";
     const res = await Hutao.Combat.upload(transCombat);
-    loading.value = false;
+    showLoading.end();
     if (res.retcode === 0) {
       showSnackbar.success(res.message ?? "上传剧诗数据成功");
       await TGLogger.Info("[UserCombat][uploadCombat] 上传剧诗数据成功");
@@ -271,7 +259,7 @@ async function uploadCombat(): Promise<void> {
       await TGLogger.Error(`[UserCombat][uploadCombat] ${e.message}`);
     }
   }
-  if (loading.value) loading.value = false;
+  showLoading.end();
 }
 
 async function deleteCombat(): Promise<void> {
@@ -284,16 +272,15 @@ async function deleteCombat(): Promise<void> {
     showSnackbar.cancel("已取消删除");
     return;
   }
-  loadingTitle.value = `正在删除 ${uidCur.value} 的剧诗数据`;
-  loading.value = true;
+  showLoading.start(`正在删除 ${uidCur.value} 的剧诗数据`);
   await TSUserCombat.delCombat(uidCur.value);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  loading.value = false;
+  showLoading.update("正在加载剧诗数据...");
   showSnackbar.success(`已清除 ${uidCur.value} 的剧诗数据`);
   uidList.value = await TSUserCombat.getAllUid();
   if (uidList.value.length > 0) uidCur.value = uidList.value[0];
   else uidCur.value = undefined;
   await loadCombat();
+  showLoading.end();
 }
 </script>
 <style lang="css" scoped>

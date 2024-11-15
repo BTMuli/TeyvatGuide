@@ -1,5 +1,4 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <div class="config-box">
     <TcInfo />
     <v-list class="config-list">
@@ -102,7 +101,7 @@
   </div>
   <div class="config-right">
     <TcAppBadge />
-    <TcUserBadge @loadOuter="loadHandle" />
+    <TcUserBadge />
     <TcGameBadge v-if="platform() === 'windows'" />
   </div>
 </template>
@@ -121,8 +120,8 @@ import TcGameBadge from "../../components/config/tc-gameBadge.vue";
 import TcInfo from "../../components/config/tc-info.vue";
 import TcUserBadge from "../../components/config/tc-userBadge.vue";
 import showDialog from "../../components/func/dialog.js";
+import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
-import ToLoading from "../../components/overlay/to-loading.vue";
 import TGSqlite from "../../plugins/Sqlite/index.js";
 import { useAppStore } from "../../store/modules/app.js";
 import { useHomeStore } from "../../store/modules/home.js";
@@ -137,19 +136,14 @@ const appStore = useAppStore();
 const homeStore = useHomeStore();
 // @ts-expect-error-next-line
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
-
-// loading
-const loading = ref<boolean>(true);
-const loadingTitle = ref<string>("正在加载...");
-const loadingSub = ref<string>("");
 const showReset = ref<boolean>(false);
 const needResize = ref<boolean>(appStore.needResize !== "false");
 
 const cacheSize = ref<number>(0);
 
 onMounted(async () => {
+  showLoading.start("正在获取应用信息...");
   await TGLogger.Info("[Config] 打开设置页面");
-  loading.value = false;
   const cacheDir = await getCacheDir();
   if (cacheDir === false) return;
   let cacheBSize: number = 0;
@@ -158,6 +152,7 @@ onMounted(async () => {
     cacheBSize += size;
   }
   cacheSize.value = cacheBSize;
+  showLoading.end();
 });
 
 // 备份数据
@@ -183,10 +178,9 @@ async function confirmBackup(): Promise<void> {
   } else {
     await TGLogger.Info(`[Config][confirmBackup] 备份到默认路径 ${saveDir}`);
   }
-  loadingTitle.value = "正在备份数据...";
-  loading.value = true;
+  showLoading.start("正在备份数据...");
   await backUpUserData(saveDir);
-  loading.value = false;
+  showLoading.end();
   showSnackbar.success("数据已备份!");
   await TGLogger.Info("[Config][confirmBackup] 备份完成");
 }
@@ -214,11 +208,9 @@ async function confirmRestore(): Promise<void> {
   } else {
     await TGLogger.Info(`[Config][confirmRestore] 恢复到默认路径 ${saveDir}`);
   }
-  loadingTitle.value = "正在恢复数据...";
-  loadingSub.value = "请稍后...";
-  loading.value = true;
+  showLoading.start("正在恢复数据...");
   await restoreUserData(saveDir);
-  loading.value = false;
+  showLoading.end();
   showSnackbar.success("数据已恢复!");
   await TGLogger.Info("[Config][confirmRestore] 恢复完成");
 }
@@ -230,11 +222,10 @@ async function confirmUpdate(title?: string): Promise<void> {
     showSnackbar.cancel("已取消更新数据库");
     return;
   }
-  loadingTitle.value = "正在更新数据库...";
-  loading.value = true;
+  showLoading.start("正在更新数据库...");
   await TGSqlite.update();
   appStore.buildTime = getBuildTime();
-  loading.value = false;
+  showLoading.end();
   showSnackbar.success("数据库已更新!");
   await TGLogger.Info("[Config][confirmUpdate] 数据库更新完成");
   window.location.reload();
@@ -298,14 +289,13 @@ async function confirmDelCache(): Promise<void> {
     return;
   }
   let cacheBSize: number = 0;
-  loadingTitle.value = "正在检测缓存...";
-  loading.value = true;
+  showLoading.start("正在检测缓存...");
   for (const dir of CacheDir) {
     const size: number = await core.invoke("get_dir_size", { path: dir });
     cacheBSize += size;
   }
   cacheSize.value = cacheBSize;
-  loading.value = false;
+  showLoading.end();
   const delCheck = await showDialog.check(
     "确认清除缓存吗？",
     `当前缓存大小为 ${bytesToSize(cacheBSize)}`,
@@ -315,13 +305,13 @@ async function confirmDelCache(): Promise<void> {
     await TGLogger.Info("[Config][confirmDelCache] 取消清除缓存");
     return;
   }
-  loadingTitle.value = "正在清除缓存...";
-  loading.value = true;
+  showLoading.start("正在清除缓存...");
   for (const dir of CacheDir) {
+    showLoading.update("正在清除缓存...", dir);
     await remove(dir, { recursive: true });
   }
+  showLoading.end();
   await TGLogger.Info("[Config][confirmDelCache] 缓存清除完成");
-  loading.value = false;
   showSnackbar.success("缓存已清除!即将退出应用！");
   setTimeout(async () => await exit(), 1000);
 }
@@ -371,11 +361,10 @@ async function confirmResetDB(title?: string): Promise<void> {
     await TGLogger.Info("[Config][confirmResetDB] 取消重置数据库");
     return;
   }
-  loadingTitle.value = "正在重置数据库...";
-  loading.value = true;
+  showLoading.start("正在重置数据库...");
   await TGSqlite.reset();
+  showLoading.end();
   await TGLogger.Info("[Config][confirmResetDB] 数据库重置完成");
-  loading.value = false;
   showSnackbar.success("数据库已重置!请进行再次检查。");
   setTimeout(() => window.location.reload(), 1500);
 }
@@ -397,13 +386,6 @@ function submitResize(): void {
     return;
   }
   showSnackbar.success("已开启窗口回正!");
-}
-
-// 通过子组件的事件来控制 loading
-function loadHandle(params: TGApp.Component.Loading.EmitParams): void {
-  loading.value = params.show;
-  if (params.title) loadingTitle.value = params.title;
-  if (params.text) loadingSub.value = params.text;
 }
 </script>
 <style lang="css" scoped>

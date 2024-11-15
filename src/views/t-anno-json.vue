@@ -1,6 +1,5 @@
 <template>
   <TSwitchTheme />
-  <ToLoading v-model="loading" :empty="loadingEmpty" :title="loadingTitle" />
   <div class="anno-json">
     <div class="anno-title">活动列表 JSON</div>
     <JsonViewer :value="jsonList" copyable boxed />
@@ -9,19 +8,14 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, reactive } from "vue";
+import { onMounted, reactive } from "vue";
 import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
-import ToLoading from "../components/overlay/to-loading.vue";
+import showLoading from "../components/func/loading.js";
 import { AnnoLang, AnnoServer } from "../web/request/getAnno.js";
 import TGRequest from "../web/request/TGRequest.js";
-
-// loading
-const loading = ref<boolean>(true);
-const loadingTitle = ref<string>("正在加载");
-const loadingEmpty = ref<boolean>(false);
 
 // 数据
 const route = useRoute();
@@ -32,14 +26,12 @@ let jsonList = reactive({});
 let jsonContent = reactive({});
 
 onMounted(async () => {
-  // 检查数据
+  showLoading.start("正在获取公告数据...");
   if (!annoId) {
-    loadingEmpty.value = true;
-    loadingTitle.value = "未找到数据";
+    showLoading.empty("未找到数据");
     return;
   }
-  // 获取数据
-  loadingTitle.value = "正在获取数据...";
+  showLoading.update("正在获取数据...", `公告ID: ${annoId}`);
   const listData = await TGRequest.Anno.getList();
   listData.list.map((item: TGApp.BBS.Announcement.ListItem) => {
     return item.list.map((single: TGApp.BBS.Announcement.AnnoSingle) => {
@@ -47,9 +39,7 @@ onMounted(async () => {
     });
   });
   jsonContent = await TGRequest.Anno.getContent(annoId, region, lang);
-  setTimeout(() => {
-    loading.value = false;
-  }, 200);
+  showLoading.end();
 });
 </script>
 <style lang="css" scoped>

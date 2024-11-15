@@ -1,5 +1,4 @@
 <template>
-  <ToLoading v-model="loading" :title="loadingTitle" :subtitle="loadingSub" />
   <v-app-bar>
     <template #prepend>
       <div class="ur-top-title">
@@ -61,9 +60,9 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
 
 import showDialog from "../../components/func/dialog.js";
+import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TSubLine from "../../components/main/t-subline.vue";
-import ToLoading from "../../components/overlay/to-loading.vue";
 import TurAvatarGrid from "../../components/userRecord/tur-avatar-grid.vue";
 import TurHomeGrid from "../../components/userRecord/tur-home-grid.vue";
 import TurOverviewGrid from "../../components/userRecord/tur-overview-grid.vue";
@@ -79,11 +78,6 @@ import TGRequest from "../../web/request/TGRequest.js";
 const userStore = storeToRefs(useUserStore());
 const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
 
-// loading
-const loading = ref<boolean>(false);
-const loadingTitle = ref<string>();
-const loadingSub = ref<string>();
-
 // data
 const uidCur = ref<number>();
 const uidList = ref<number[]>([]);
@@ -91,12 +85,11 @@ const recordData = ref<TGApp.Sqlite.Record.RenderData>();
 const version = ref<string>();
 
 onMounted(async () => {
+  showLoading.start("正在获取战绩数据...");
   await TGLogger.Info("[UserRecord][onMounted] 打开角色战绩页面");
-  loadingTitle.value = "正在加载战绩数据";
-  loading.value = true;
   version.value = await getVersion();
   await loadUid();
-  loading.value = false;
+  showLoading.end();
 });
 
 watch(
@@ -143,12 +136,11 @@ async function refreshRecord(): Promise<void> {
       return;
     }
   }
+  showLoading.start("正在刷新战绩数据...");
   await TGLogger.Info(`[UserRecord][refresh][${user.value.gameUid}] 刷新战绩数据`);
-  loadingTitle.value = "正在获取战绩数据";
-  loading.value = true;
   if (!userStore.cookie.value) {
+    showLoading.end();
     showSnackbar.warn("请先登录");
-    loading.value = false;
     await TGLogger.Warn(`[UserRecord][refresh][${user.value.gameUid}] 未登录`);
     return;
   }
@@ -161,7 +153,7 @@ async function refreshRecord(): Promise<void> {
     await TGLogger.Info(`[UserRecord][refresh][${user.value.gameUid}] 获取战绩数据成功`);
     await TGLogger.Info(`[UserRecord][refresh][${user.value.gameUid}]`, false);
     await TGLogger.Info(JSON.stringify(res), false);
-    loadingTitle.value = "正在保存战绩数据";
+    showLoading.update("正在保存战绩数据");
     await TSUserRecord.saveRecord(Number(user.value.gameUid), res);
     await loadUid();
     await loadRecord();
@@ -173,7 +165,7 @@ async function refreshRecord(): Promise<void> {
       `[UserRecord][refresh][${user.value.gameUid}] ${res.retcode} ${res.message}`,
     );
   }
-  loading.value = false;
+  showLoading.end();
 }
 
 async function shareRecord(): Promise<void> {
@@ -184,12 +176,9 @@ async function shareRecord(): Promise<void> {
   await TGLogger.Info(`[UserRecord][shareRecord][${user.value.gameUid}] 生成分享图片`);
   const recordBox = <HTMLElement>document.querySelector(".ur-box");
   const fileName = `【原神战绩】-${user.value.gameUid}`;
-  loadingTitle.value = "正在生成图片";
-  loadingSub.value = `${fileName}.png`;
-  loading.value = true;
+  showLoading.start("正在生成图片", fileName);
   await generateShareImg(fileName, recordBox);
-  loadingSub.value = "";
-  loading.value = false;
+  showLoading.end();
   await TGLogger.Info(`[UserRecord][shareRecord][${user.value.gameUid}] 生成分享图片成功`);
 }
 
