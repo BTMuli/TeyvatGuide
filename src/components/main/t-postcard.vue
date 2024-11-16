@@ -5,7 +5,7 @@
       <v-progress-circular color="primary" :indeterminate="true" v-else-if="card.cover !== ''" />
       <img src="/source/UI/defaultCover.webp" alt="cover" v-else />
       <div v-if="isAct" class="tpc-act">
-        <div class="tpc-status" :style="{ background: card.status?.colorCss }">
+        <div class="tpc-status">
           {{ card.status?.status }}
         </div>
         <div class="tpc-time">
@@ -18,14 +18,14 @@
       <div class="tpc-title" :title="card.title" @click="shareCard">{{ card.title }}</div>
       <TpAvatar v-if="card.user" :data="card.user" position="left" />
     </div>
-    <div class="tpc-bottom">
+    <div class="tpc-bottom" v-if="card.data">
       <div class="tpc-tags">
         <div v-for="topic in card.topics" :key="topic.id" class="tpc-tag" @click="toTopic(topic)">
           <v-icon>mdi-tag</v-icon>
           <span>{{ topic.name }}</span>
         </div>
       </div>
-      <div class="tpc-data" v-if="card.data">
+      <div class="tpc-data">
         <div class="tpc-info-item" :title="`浏览数：${card.data.view}`">
           <v-icon>mdi-eye</v-icon>
           <span>{{ card.data.view }}</span>
@@ -97,6 +97,10 @@ const selectedList = computed({
     if (v === undefined) return;
     emits("update:selected", v);
   },
+});
+const cardBg = computed<string>(() => {
+  if (card.value && card.value.status) return card.value.status.colorCss;
+  return "none";
 });
 
 onMounted(async () => await reload(props.modelValue));
@@ -414,6 +418,7 @@ async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
   align-items: center;
   justify-content: flex-start;
   padding: 5px 30px 5px 5px;
+  background-color: v-bind(cardBg);
   clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
   color: var(--tgc-white-1);
 

@@ -6,9 +6,12 @@
           <div class="loading-box">
             <div class="loading-title">
               <span>{{ data.title }}</span>
-              <span class="loading-circle" v-show="!empty" />
+              <div class="loading-circle" v-show="!empty">
+                <div />
+                <div />
+              </div>
             </div>
-            <div class="loading-subtitle">{{ data.subtitle }}</div>
+            <div class="loading-subtitle" v-show="data.subtitle !== ''">{{ data.subtitle }}</div>
             <div class="loading-img">
               <img v-if="!empty" src="/source/UI/loading.webp" alt="loading" />
               <img v-else src="/source/UI/empty.webp" alt="empty" />
@@ -111,7 +114,7 @@ defineExpose({ displayBox });
   height: 100%;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(10px);
   background: rgb(0 0 0 / 50%);
 }
 
@@ -150,25 +153,6 @@ defineExpose({ displayBox });
   font-weight: 600;
 }
 
-.loading-circle {
-  width: 40px;
-  height: 40px;
-  border: 5px solid #f4d8a8;
-  border-radius: 100%;
-  border-top-color: transparent;
-  animation: circle infinite 0.75s linear;
-}
-
-@keyframes circle {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 .loading-subtitle {
   width: 100%;
   height: 25px;
@@ -187,6 +171,79 @@ defineExpose({ displayBox });
     max-width: 100%;
     max-height: 200px;
     border-radius: 5px;
+  }
+}
+</style>
+<!-- loading -->
+<style lang="css" scoped>
+.loading-circle,
+.loading-circle > div {
+  position: relative;
+  box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.loading-circle {
+  display: block;
+  width: 32px;
+  height: 32px;
+  color: #f4d8a8;
+  font-size: 0;
+}
+
+.loading-circle > div {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: inline-block;
+  border: 0 solid currentcolor;
+  border-radius: 100%;
+  background-color: currentcolor;
+  float: none;
+}
+
+.loading-circle > div:first-child {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-width: 2px;
+  border-style: solid;
+  border-right-color: transparent;
+  border-left-color: transparent;
+  animation: ball-clip-rotate-pulse-rotate 1s cubic-bezier(0.09, 0.57, 0.49, 0.9) infinite;
+  background: transparent;
+}
+
+.loading-circle > div:last-child {
+  width: 16px;
+  height: 16px;
+  animation: ball-clip-rotate-pulse-scale 1s cubic-bezier(0.09, 0.57, 0.49, 0.9) infinite;
+}
+
+@keyframes ball-clip-rotate-pulse-rotate {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) rotate(180deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes ball-clip-rotate-pulse-scale {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  30% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(0.15);
   }
 }
 </style>

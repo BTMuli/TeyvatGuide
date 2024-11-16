@@ -11,7 +11,7 @@ import loading from "./loading.vue";
 
 const loadingId = "tg-func-loading";
 
-export type LoadingParams = { show: boolean; title: string; subtitle?: string; empty?: boolean };
+export type LoadingParams = { show: boolean; title: string; subtitle: string; empty?: boolean };
 
 /**
  * @description 自定义 loading 组件

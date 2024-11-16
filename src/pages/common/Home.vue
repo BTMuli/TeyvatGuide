@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref, shallowRef } from "vue";
+import { onMounted, onUnmounted, ref, shallowRef, toRaw } from "vue";
 
 import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
@@ -53,6 +53,7 @@ const homeStore = useHomeStore();
 const endNum = ref<number>(0);
 const components = shallowRef<any[]>([]);
 const showHome = ref<string[]>(homeStore.getShowValue());
+const loadComp = ref<string[]>(toRaw(showHome.value));
 
 const gameSelectList = TGConstant.BBS.CHANNELS;
 const curGid = ref<string>(gameSelectList[0].gid);
@@ -99,13 +100,29 @@ async function submitHome(): Promise<void> {
   setTimeout(() => window.location.reload(), 1000);
 }
 
+function getName(name: string): string {
+  switch (name) {
+    case "t-pool":
+      return "限时祈愿";
+    case "t-position":
+      return "近期活动";
+    case "t-calendar":
+      return "素材日历";
+    default:
+      return "";
+  }
+}
+
 // 组件加载完成
 async function loadEnd(item: any): Promise<void> {
   await TGLogger.Info(`[Home][loadEnd] ${item.__name} 加载完成`);
+  loadComp.value = loadComp.value.filter((v) => v !== getName(item.__name));
   endNum.value++;
   if (endNum.value === components.value.length) {
     showLoading.end();
+    return;
   }
+  showLoading.update("正在加载首页...", `正在加载：${loadComp.value.join("、")}`);
 }
 
 onUnmounted(() => (components.value = []));
