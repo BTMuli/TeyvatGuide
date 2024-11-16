@@ -124,8 +124,9 @@ async function firstLoad(): Promise<void> {
     curGame.value = toRaw(info.game_info_list.find((i) => i.id === curGid.value));
   }
   if (curGame.value === undefined) curGame.value = info.game_info_list[0];
+  curGid.value = curGame.value.id;
   showLoading.update(`正在加载${curGame.value.name}帖子列表`);
-  const postList = await Mys.Post.getTopicPostList(gid, topic, curSortType.value);
+  const postList = await Mys.Post.getTopicPostList(curGid.value, topic, curSortType.value);
   if ("retcode" in postList) {
     showLoading.end();
     showSnackbar.error(`[${postList.retcode}] ${postList.message}`);
@@ -144,7 +145,12 @@ async function freshPostData(): Promise<void> {
     return;
   }
   showLoading.start("正在加载帖子列表");
-  const postList = await Mys.Post.getTopicPostList(gid, topic, curSortType.value, lastPostId.value);
+  const postList = await Mys.Post.getTopicPostList(
+    curGid.value,
+    topic,
+    curSortType.value,
+    lastPostId.value,
+  );
   if ("retcode" in postList) {
     showLoading.end();
     showSnackbar.error(`[${postList.retcode}] ${postList.message}`);

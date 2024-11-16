@@ -171,7 +171,7 @@ export async function getTopicFullInfo(
 /**
  * @description 获取特定话题帖子列表
  * @since Beta v0.6.3
- * @param {string} gid 游戏分区 ID
+ * @param {number} gid 游戏分区 ID
  * @param {string} topicId 话题 ID
  * @param {string} orderType 排序方式
  * @param {string} lastId 最后一条帖子 ID
@@ -179,7 +179,7 @@ export async function getTopicFullInfo(
  * @return {Promise<TGApp.Plugins.Mys.Topic.PostData|TGApp.BBS.Response.Base>}
  */
 export async function getTopicPostList(
-  gid: string,
+  gid: number,
   topicId: string,
   orderType: number = 0,
   lastId?: string,
