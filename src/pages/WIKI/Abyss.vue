@@ -99,7 +99,7 @@ onMounted(async () => {
     cur: await Hutao.Abyss.overview(),
     last: await Hutao.Abyss.overview(true),
   };
-  showLoading.update("正在获取深渊数据...", "正在角色使用率数据");
+  showLoading.update("正在获取深渊数据...", "正在获取角色使用率数据");
   const useData = <AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>>await getData("use");
   abyssData.value = { use: useData, up: null, team: null, hold: null };
   showLoading.end();
@@ -181,6 +181,7 @@ async function getData(type: AbyssTab): Promise<AbyssDataItemType<AbyssTab>> {
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  padding-right: 10px;
   cursor: pointer;
   font-family: var(--font-title);
 }

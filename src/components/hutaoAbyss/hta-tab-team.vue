@@ -1,7 +1,6 @@
 <template>
   <div class="hta-tt-box">
     <v-tabs v-model="tab" direction="vertical" class="hta-tt-tab">
-      <v-tab value="9">第09层</v-tab>
       <v-tab value="10">第10层</v-tab>
       <v-tab value="11">第11层</v-tab>
       <v-tab value="12">第12层</v-tab>

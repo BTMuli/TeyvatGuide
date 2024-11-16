@@ -10,6 +10,10 @@ const tsConfigRules = {
   "@typescript-eslint/no-import-type-side-effects": "error",
   "@typescript-eslint/strict-boolean-expressions": "off",
   "@typescript-eslint/no-explicit-any": "off",
+  "@typescript-eslint/no-unused-expressions": [
+    "error",
+    { allowShortCircuit: false },
+  ],
   "import/order": [
     "error",
     {
