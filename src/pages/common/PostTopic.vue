@@ -101,17 +101,7 @@ const sortList = computed<SortSelect[]>(() => {
   ];
 });
 
-onMounted(async () => await firstLoad());
-watch(
-  () => curGame.value,
-  async () => await firstLoad(),
-);
-watch(
-  () => curSortType.value,
-  async () => await firstLoad(),
-);
-
-async function firstLoad(): Promise<void> {
+onMounted(async () => {
   showLoading.start(`正在加载话题${topic}信息`);
   const info = await Mys.Post.getTopicFullInfo(gid, topic);
   if ("retcode" in info) {
@@ -124,8 +114,22 @@ async function firstLoad(): Promise<void> {
     curGame.value = toRaw(info.game_info_list.find((i) => i.id === curGid.value));
   }
   if (curGame.value === undefined) curGame.value = info.game_info_list[0];
-  curGid.value = curGame.value.id;
-  showLoading.update(`正在加载${curGame.value.name}帖子列表`);
+  await firstLoad();
+});
+watch(
+  () => curGame.value,
+  async () => {
+    if (curGame.value) curGid.value = curGame.value.id;
+    await firstLoad();
+  },
+);
+watch(
+  () => curSortType.value,
+  async () => await firstLoad(),
+);
+
+async function firstLoad(): Promise<void> {
+  if (curGame.value) showLoading.update(`正在加载${curGame.value.name}帖子列表`);
   const postList = await Mys.Post.getTopicPostList(curGid.value, topic, curSortType.value);
   if ("retcode" in postList) {
     showLoading.end();
