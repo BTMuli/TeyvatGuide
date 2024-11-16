@@ -47,7 +47,7 @@ watch(
 onMounted(() => displayBox(props));
 
 function displayBox(params: LoadingParams): void {
-  if (params.show != showBox.value && !params.show) {
+  if (!params.show) {
     showBox.value = false;
     setTimeout(() => {
       data.title = "";
