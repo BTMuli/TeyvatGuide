@@ -56,30 +56,11 @@ export function transParams(obj: Record<string, string | number | string[] | boo
 }
 
 /**
- * @description 根据 uid 获取 server
- * @since Beta v0.4.3
- * @todo instead of account.region
- * @deprecated
- * @param {string} uid uid
- * @returns {string} server
+ * @description 根据 gid 获取游戏名称
+ * @param {number} gid
+ * @returns {string}
  */
-export function getServerByUid(uid: string): string {
-  // 若长度为 10，则为国际服亚服
-  if (uid.length === 10) return TGConstant.Server.OS_ASIA;
-  // 获取第一个字符
-  const first = uid[0];
-  // 1-4 为国服-天空岛
-  if (first >= "1" && first <= "4") return TGConstant.Server.CN_ISLAND;
-  // 5 为国服-世界树
-  if (first === "5") return TGConstant.Server.CN_TREE;
-  // 6 为美服
-  if (first === "6") return TGConstant.Server.OS_USA;
-  // 7 为欧服
-  if (first === "7") return TGConstant.Server.OS_EURO;
-  // 8 为亚服
-  if (first === "8") return TGConstant.Server.OS_ASIA;
-  // 9 为台服
-  if (first === "9") return TGConstant.Server.OS_CHT;
-  // 其他情况返回未知
-  return TGConstant.Server.UNKNOWN;
+export function getGameName(gid: number): string {
+  const game = TGConstant.BBS.CHANNELS.find((item) => item.gid === gid.toString());
+  return game ? game.title : "未知游戏";
 }

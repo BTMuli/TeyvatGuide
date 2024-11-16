@@ -6,7 +6,7 @@
 
 import TGHttp from "../../utils/TGHttp.js";
 import TGApi from "../api/TGApi.js";
-import TGUtils from "../utils/TGUtils.js";
+import { getRequestHeader } from "../utils/getRequestHeader.js";
 
 /**
  * @description 验证 ltoken 有效性，返回 mid
@@ -22,7 +22,7 @@ export async function verifyLToken(
   const url = TGApi.GameTokens.verifyLToken;
   const cookie = { ltoken, ltuid };
   const data = { ltoken };
-  const header = TGUtils.User.getHeader(cookie, "POST", data, "common");
+  const header = getRequestHeader(cookie, "POST", data, "common");
   const resp = await TGHttp<TGApp.BBS.Response.verifyUserInfoBySToken | TGApp.BBS.Response.Base>(
     url,
     {

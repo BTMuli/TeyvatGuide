@@ -6,7 +6,7 @@
 
 import TGHttp from "../../utils/TGHttp.js";
 import TGApi from "../api/TGApi.js";
-import TGUtils from "../utils/TGUtils.js";
+import { getRequestHeader } from "../utils/getRequestHeader.js";
 
 /**
  * @description 获取深渊信息
@@ -29,7 +29,7 @@ export async function getAbyss(
     ltoken: cookie.ltoken,
     ltuid: cookie.ltuid,
   };
-  const header = TGUtils.User.getHeader(ck, "GET", params, "common");
+  const header = getRequestHeader(ck, "GET", params, "common");
   const resp = await TGHttp<TGApp.Game.Abyss.Response | TGApp.BBS.Response.Base>(url, {
     method: "GET",
     headers: header,

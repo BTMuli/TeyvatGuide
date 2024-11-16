@@ -73,6 +73,7 @@ import ToPostSearch from "../../components/post/to-postSearch.vue";
 import Mys from "../../plugins/Mys/index.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { createPost } from "../../utils/TGWindow.js";
+import { getGameName } from "../../web/utils/tools.js";
 
 type SortSelect = {
   text: string;
@@ -184,9 +185,9 @@ const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 
 onMounted(async () => {
-  showLoading.start("正在获取帖子数据...");
   if (gid && typeof gid === "string") curGid.value = Number(gid);
   if (forum && typeof forum === "string") curForum.value = Number(forum);
+  showLoading.start(`正在获取${getGameName(curGid.value)}帖子数据...`);
   const gameLabel = getGameLabel(curGid.value);
   const forumLabel = getForumLabel(curGid.value, curForum.value);
   await TGLogger.Info(`[Posts][${gameLabel}][onMounted][${forumLabel}] 打开帖子列表`);

@@ -7,7 +7,7 @@
 import TGHttp from "../../utils/TGHttp.js";
 import TGApi from "../api/TGApi.js";
 import TGConstant from "../constant/TGConstant.js";
-import TGUtils from "../utils/TGUtils.js";
+import { getRequestHeader } from "../utils/getRequestHeader.js";
 
 /**
  * @description 通过 stoken 获取游戏账号
@@ -22,7 +22,7 @@ export async function getGameAccountsBySToken(
 ): Promise<TGApp.BBS.Account.GameAccount[] | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.bySToken.getAccounts;
   const cookie = { stuid, stoken };
-  const params = { stoken, stuid, game_biz: TGConstant.Utils.GAME_BIZ };
+  const params = { stoken, stuid, game_biz: TGConstant.GAME_BIZ };
   return await getGameAccounts(url, cookie, params);
 }
 
@@ -39,7 +39,7 @@ export async function getGameAccountsByCookie(
 ): Promise<TGApp.BBS.Account.GameAccount[] | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.byCookie.getAccounts;
   const cookie = { account_id, cookie_token };
-  const params = { game_biz: TGConstant.Utils.GAME_BIZ };
+  const params = { game_biz: TGConstant.GAME_BIZ };
   return await getGameAccounts(url, cookie, params);
 }
 
@@ -56,7 +56,7 @@ async function getGameAccounts(
   cookie: Record<string, string>,
   params: Record<string, string>,
 ): Promise<TGApp.BBS.Response.Base | TGApp.BBS.Account.GameAccount[]> {
-  const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
+  const header = getRequestHeader(cookie, "GET", params, "common");
   const resp = await TGHttp<TGApp.BBS.Response.getGameAccounts | TGApp.BBS.Response.Base>(url, {
     method: "GET",
     headers: header,

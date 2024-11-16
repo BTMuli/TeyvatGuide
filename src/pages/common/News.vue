@@ -69,6 +69,7 @@ import Mys from "../../plugins/Mys/index.js";
 import { useAppStore } from "../../store/modules/app.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { createPost } from "../../utils/TGWindow.js";
+import { getGameName } from "../../web/utils/tools.js";
 
 // 类型定义
 enum NewsType {
@@ -92,6 +93,7 @@ type RawData = {
 // 路由
 const router = useRouter();
 const gid = <string>useRoute().params.gid;
+const gameName = getGameName(Number(gid));
 // loading
 const loading = ref<boolean>(false);
 
@@ -146,12 +148,12 @@ async function firstLoad(key: NewsKey, refresh: boolean = false): Promise<void> 
     postData.value[key] = [];
     rawData.value[key].lastId = 0;
   }
-  showLoading.start(`正在获取${rawData.value[key].name}数据...`);
+  showLoading.start(`正在获取${gameName}${rawData.value[key].name}数据...`);
   const getData = await Mys.Painter.getNewsList(gid, NewsType[key]);
   rawData.value[key].isLast = getData.is_last;
   rawData.value[key].lastId = getData.list.length;
   postData.value[key] = getData.list;
-  showLoading.update(`正在渲染${rawData.value[key].name}数据...`);
+  showLoading.update(`正在渲染${gameName}${rawData.value[key].name}数据...`);
   await nextTick(() => showLoading.end());
   await TGLogger.Info(`[News][${gid}][firstLoad] 获取${rawData.value[key].name}数据成功`);
 }
@@ -169,7 +171,7 @@ async function loadMore(key: NewsKey): Promise<void> {
     loading.value = false;
     return;
   }
-  showLoading.start(`正在获取${rawData.value[key].name}数据...`);
+  showLoading.start(`正在获取${gameName}${rawData.value[key].name}数据...`);
   const getData = await Mys.Painter.getNewsList(gid, NewsType[key], 20, rawData.value[key].lastId);
   rawData.value[key].lastId = rawData.value[key].lastId + getData.list.length;
   rawData.value[key].isLast = getData.is_last;

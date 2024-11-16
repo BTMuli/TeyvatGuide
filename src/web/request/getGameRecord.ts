@@ -6,7 +6,7 @@
 
 import TGHttp from "../../utils/TGHttp.js";
 import TGApi from "../api/TGApi.js";
-import TGUtils from "../utils/TGUtils.js";
+import { getRequestHeader } from "../utils/getRequestHeader.js";
 
 /**
  * @description 获取用户游戏数据
@@ -23,7 +23,7 @@ export async function getGameRecord(
 ): Promise<TGApp.Game.Record.FullData | TGApp.BBS.Response.Base> {
   const url = TGApi.GameData.getUserBase;
   const params = { role_id: user.gameUid, server: user.region };
-  const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
+  const header = getRequestHeader(cookie, "GET", params, "common");
   const resp = await TGHttp<TGApp.Game.Record.Response | TGApp.BBS.Response.Base>(url, {
     method: "GET",
     headers: header,

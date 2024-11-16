@@ -63,7 +63,7 @@ export async function getCaptcha(
     "user-agent": TGConstant.BBS.UA_MOBILE,
     "content-type": "application/json",
     referer: "https://user.miyoushe.com/",
-    "x-rpc-game_biz": TGConstant.Utils.GAME_BIZ,
+    "x-rpc-game_biz": TGConstant.GAME_BIZ,
   };
   const resp = await TGHttp<
     TGApp.Plugins.Mys.CaptchaLogin.CaptchaResponse | TGApp.BBS.Response.Base

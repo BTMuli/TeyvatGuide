@@ -64,7 +64,7 @@ import { useAppStore } from "../../store/modules/app.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { AnnoLang, AnnoServer } from "../../web/request/getAnno.js";
 import TGRequest from "../../web/request/TGRequest.js";
-import TGUtils from "../../web/utils/TGUtils.js";
+import { getAnnoCard } from "../../web/utils/getAnnoCard.js";
 import { decodeRegExp } from "../../web/utils/tools.js";
 
 type AnnoSelect = { text: string; value: string };
@@ -145,7 +145,7 @@ async function loadData(): Promise<void> {
     `服务器：${getRegionName(curRegion.value)}，语言：${getLangName(curLang.value)}`,
   );
   const annoData = await TGRequest.Anno.getList(curRegion.value, curLang.value);
-  const listCards = TGUtils.Anno.getCard(annoData);
+  const listCards = getAnnoCard(annoData);
   await Promise.all(
     listCards.map(async (item) => {
       if (item.typeLabel === AnnoType.game) return;

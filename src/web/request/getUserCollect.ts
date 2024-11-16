@@ -5,7 +5,7 @@
  */
 
 import TGHttp from "../../utils/TGHttp.js";
-import TGUtils from "../utils/TGUtils.js";
+import { getRequestHeader } from "../utils/getRequestHeader.js";
 
 /**
  * @description 获取用户收藏帖子
@@ -22,7 +22,7 @@ export async function getUserCollect(
 ): Promise<TGApp.BBS.Collection.PostRespData | TGApp.BBS.Response.Base> {
   const url = "https://bbs-api.miyoushe.com/post/wapi/userFavouritePost";
   const params = { size: "20", uid, offset };
-  const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
+  const header = getRequestHeader(cookie, "GET", params, "common");
   const resp = await TGHttp<TGApp.BBS.Collection.PostResponse | TGApp.BBS.Response.Base>(url, {
     method: "GET",
     headers: header,

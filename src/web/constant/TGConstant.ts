@@ -1,7 +1,7 @@
 /**
  * @file web/constant/TGConstant.ts
  * @description 常量
- * @since Beta v0.5.1
+ * @since Beta v0.6.3
  */
 
 import {
@@ -12,7 +12,6 @@ import {
   BBS_VERSION,
   CHANNEL_LIST,
 } from "./bbs.js";
-import SERVER from "./server.js";
 import { GAME_BIZ } from "./utils.js";
 
 const TGConstant = {
@@ -24,10 +23,7 @@ const TGConstant = {
     CHANNELS: CHANNEL_LIST,
   },
   Salt: BBS_SALT,
-  Server: SERVER,
-  Utils: {
-    GAME_BIZ,
-  },
+  GAME_BIZ,
 };
 
 export default TGConstant;

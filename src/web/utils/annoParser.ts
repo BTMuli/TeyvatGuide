@@ -207,7 +207,7 @@ function parseAnnoNode(
 
 /**
  * @description 解析公告段落
- * @since Beta v0.5.5
+ * @since Beta v0.6.3
  * @param {HTMLElement} p - 段落元素
  * @param {Record<string, string>} attr - 属性
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
@@ -267,7 +267,7 @@ function parseAnnoParagraph(
       const res = parseAnnoNode(child, { bold: "true" });
       return {
         insert: "",
-        children: res,
+        children: [...res, { insert: "\n" }],
       };
     }
     if (child.tagName === "T") {
@@ -295,10 +295,12 @@ function parseAnnoParagraph(
       } else if (element.tagName === "A") {
         childRes = parseAnnoAnchor(element);
       } else if (element.tagName === "STRONG") {
-        childRes = {
-          insert: element.innerHTML,
-          attributes: { bold: true },
-        };
+        const resS = parseAnnoNode(element, { bold: "true" });
+        if (resS.length > 1) {
+          childRes = { insert: element.outerHTML };
+        } else {
+          childRes = resS[0];
+        }
       } else if (element.tagName === "T") {
         element.innerHTML = element.outerHTML;
         const resE = parseAnnoNode(element);

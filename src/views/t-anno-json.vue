@@ -8,7 +8,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, reactive } from "vue";
+import { onMounted, ref } from "vue";
 import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
 
@@ -22,8 +22,8 @@ const route = useRoute();
 const annoId = Number(route.params.anno_id);
 const region = <AnnoServer>route.params.region;
 const lang = <AnnoLang>route.params.lang;
-let jsonList = reactive({});
-let jsonContent = reactive({});
+const jsonList = ref<TGApp.BBS.Announcement.AnnoSingle>();
+const jsonContent = ref<TGApp.BBS.Announcement.ContentItem>();
 
 onMounted(async () => {
   showLoading.start("正在获取公告数据...");
@@ -35,10 +35,10 @@ onMounted(async () => {
   const listData = await TGRequest.Anno.getList();
   listData.list.map((item: TGApp.BBS.Announcement.ListItem) => {
     return item.list.map((single: TGApp.BBS.Announcement.AnnoSingle) => {
-      return single.ann_id === annoId ? (jsonList = single) : null;
+      return single.ann_id === annoId ? (jsonList.value = single) : null;
     });
   });
-  jsonContent = await TGRequest.Anno.getContent(annoId, region, lang);
+  jsonContent.value = await TGRequest.Anno.getContent(annoId, region, lang);
   showLoading.end();
 });
 </script>

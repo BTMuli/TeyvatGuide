@@ -6,7 +6,7 @@
 
 import TGHttp from "../../utils/TGHttp.js";
 import TGApi from "../api/TGApi.js";
-import TGUtils from "../utils/TGUtils.js";
+import { getRequestHeader } from "../utils/getRequestHeader.js";
 
 /**
  * @description 根据 stoken_v2 获取 ltoken
@@ -22,7 +22,7 @@ export async function getLTokenBySToken(
   const url = TGApi.GameTokens.getLToken;
   const cookie = { mid: Mid, stoken: Stoken };
   const params = { stoken: Stoken };
-  const header = TGUtils.User.getHeader(cookie, "GET", params, "common");
+  const header = getRequestHeader(cookie, "GET", params, "common");
   const resp = await TGHttp<TGApp.BBS.Response.getLTokenBySToken | TGApp.BBS.Response.Base>(url, {
     method: "GET",
     headers: header,

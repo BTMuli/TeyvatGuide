@@ -6,7 +6,7 @@
 
 import TGHttp from "../../utils/TGHttp.js";
 import TGConstant from "../constant/TGConstant.js";
-import TGUtils from "../utils/TGUtils.js";
+import { getRequestHeader } from "../utils/getRequestHeader.js";
 
 /**
  * @description 生成 authkey
@@ -23,11 +23,11 @@ export async function genAuthkey(
   const ck = { stoken: cookie.stoken, mid: cookie.mid };
   const data = {
     auth_appid: "webview_gacha",
-    game_biz: TGConstant.Utils.GAME_BIZ,
+    game_biz: TGConstant.GAME_BIZ,
     game_uid: account.gameUid,
     region: account.region,
   };
-  const header = TGUtils.User.getHeader(ck, "POST", JSON.stringify(data), "lk2", true);
+  const header = getRequestHeader(ck, "POST", JSON.stringify(data), "lk2", true);
   const resp = await TGHttp<TGApp.Game.Gacha.AuthkeyResponse | TGApp.BBS.Response.Base>(url, {
     method: "POST",
     headers: header,
@@ -49,7 +49,7 @@ export async function genAuthkey2(
   payload: Record<string, string>,
 ): Promise<TGApp.BBS.Response.Base> {
   const url = "https://api-takumi.mihoyo.com/binding/api/genAuthKey";
-  const header = TGUtils.User.getHeader(cookie, "POST", JSON.stringify(payload), "lk2", true);
+  const header = getRequestHeader(cookie, "POST", JSON.stringify(payload), "lk2", true);
   return await TGHttp<TGApp.BBS.Response.Base>(url, {
     method: "POST",
     headers: header,

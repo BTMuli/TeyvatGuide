@@ -6,7 +6,7 @@
 
 import TGHttp from "../../utils/TGHttp.js";
 import TGApi from "../api/TGApi.js";
-import TGUtils from "../utils/TGUtils.js";
+import { getRequestHeader } from "../utils/getRequestHeader.js";
 
 /**
  * @description 获取剧诗信息
@@ -27,7 +27,7 @@ export async function getRoleCombat(
     ltoken: cookie.ltoken,
     ltuid: cookie.ltuid,
   };
-  const header = TGUtils.User.getHeader(ck, "GET", params, "common");
+  const header = getRequestHeader(ck, "GET", params, "common");
   const resp = await TGHttp<TGApp.Game.Combat.Response | TGApp.BBS.Response.Base>(url, {
     method: "GET",
     headers: header,

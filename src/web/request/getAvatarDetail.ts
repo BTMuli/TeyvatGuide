@@ -6,7 +6,7 @@
 
 import TGHttp from "../../utils/TGHttp.js";
 import TGApi from "../api/TGApi.js";
-import TGUtils from "../utils/TGUtils.js";
+import { getRequestHeader } from "../utils/getRequestHeader.js";
 
 /**
  * @description 手动刷新角色数据
@@ -22,7 +22,7 @@ export async function getAvatarIndex(
   const url = TGApi.GameData.getUserBase;
   const params = { avatar_list_type: 1, role_id: user.gameUid, server: user.region };
   const ck = { cookie_token: cookie.cookie_token, account_id: cookie.account_id };
-  const header = TGUtils.User.getHeader(ck, "GET", params, "common");
+  const header = getRequestHeader(ck, "GET", params, "common");
   return await TGHttp<TGApp.BBS.Response.Base>(url, {
     method: "GET",
     headers: header,
@@ -44,7 +44,7 @@ export async function getAvatarList(
   const url = TGApi.GameData.byCookie.getAvatarList;
   const data = { role_id: user.gameUid, server: user.region };
   const ck = { cookie_token: cookie.cookie_token, account_id: cookie.account_id };
-  const header = TGUtils.User.getHeader(ck, "POST", data, "common");
+  const header = getRequestHeader(ck, "POST", data, "common");
   const resp = await TGHttp<TGApp.Game.Avatar.ListResponse | TGApp.BBS.Response.Base>(url, {
     method: "POST",
     body: JSON.stringify(data),
@@ -70,7 +70,7 @@ export async function getAvatarDetail(
   const url = TGApi.GameData.byCookie.getAvatarDetail;
   const data = { role_id: user.gameUid, server: user.region, character_ids: avatarIds };
   const ck = { cookie_token: cookie.cookie_token, account_id: cookie.account_id };
-  const header = TGUtils.User.getHeader(ck, "POST", data, "common");
+  const header = getRequestHeader(ck, "POST", data, "common");
   const resp = await TGHttp<TGApp.Game.Avatar.DetailResponse | TGApp.BBS.Response.Base>(url, {
     method: "POST",
     body: JSON.stringify(data),

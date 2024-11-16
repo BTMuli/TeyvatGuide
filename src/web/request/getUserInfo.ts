@@ -6,7 +6,7 @@
 
 import TGHttp from "../../utils/TGHttp.js";
 import TGApi from "../api/TGApi.js";
-import TGUtils from "../utils/TGUtils.js";
+import { getRequestHeader } from "../utils/getRequestHeader.js";
 
 /**
  * @description 根据 cookie 获取用户信息
@@ -25,7 +25,7 @@ export async function getUserInfoByCookie(
   };
   const url = TGApi.GameData.byCookie.getUserInfo;
   const params = { gids: "2" };
-  const header = TGUtils.User.getHeader(cookie, "GET", params, "common", true);
+  const header = getRequestHeader(cookie, "GET", params, "common", true);
   const resp = await TGHttp<TGApp.Plugins.Mys.User.HomeResponse | TGApp.BBS.Response.Base>(url, {
     method: "GET",
     headers: header,
