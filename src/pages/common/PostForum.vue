@@ -45,7 +45,7 @@
         @click:append="searchPost"
         @keyup.enter="searchPost"
       />
-      <v-btn :rounded="true" class="post-fresh-btn" @click="freshPostData()">
+      <v-btn :rounded="true" class="post-forum-btn" @click="freshPostData()">
         <v-icon>mdi-refresh</v-icon>
         <span>刷新</span>
       </v-btn>
@@ -58,6 +58,11 @@
     <div v-for="post in posts" :key="post.post.post_id">
       <TPostCard :model-value="post" v-if="post" />
     </div>
+  </div>
+  <div class="posts-load-more">
+    <v-btn class="post-forum-btn" :rounded="true" @click="loadMore()">
+      已加载：{{ posts.length }}，加载更多
+    </v-btn>
   </div>
   <ToPostSearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
 </template>
@@ -86,9 +91,9 @@ type SortSelectGame = {
 };
 
 const sortOrderList: SortSelect[] = [
-  { text: "默认排序", value: 0 },
   { text: "最新回复", value: 1 },
   { text: "最新发布", value: 2 },
+  { text: "热门", value: 3 },
 ];
 const forumYsList: SortSelect[] = [
   { text: "酒馆", value: 26 },
@@ -175,12 +180,14 @@ function getSortLabel(value: number): string {
 
 // 渲染参数
 const curGid = ref<number>(2);
-const curSortType = ref<number>(0);
+const curSortType = ref<number>(1);
 const curForum = ref<number>(26);
 const curForumLabel = ref<string>("");
 
 // 渲染数据
 const posts = ref<TGApp.Plugins.Mys.Post.FullData[]>([]);
+const lastId = ref<string>("");
+const isLast = ref<boolean>(false);
 const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 const firstLoad = ref<boolean>(false);
@@ -236,9 +243,26 @@ async function freshPostData(): Promise<void> {
   await TGLogger.Info(
     `[Posts][${gameLabel}][freshPostData][${forumLabel}][${sortLabel}] 刷新帖子列表`,
   );
-  showLoading.update(`正在加载 ${gameLabel}-${forumLabel}-${sortLabel} 数据`);
+  showLoading.update(`正在刷新 ${gameLabel}-${forumLabel}-${sortLabel} 数据`);
+  document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
   const postsGet = await Mys.Post.getForumPostList(curForum.value, curSortType.value);
   posts.value = postsGet.list;
+  lastId.value = postsGet.last_id;
+  isLast.value = postsGet.is_last;
+  showLoading.end();
+}
+
+async function loadMore(): Promise<void> {
+  if (isLast.value) {
+    showSnackbar.warn("没有更多帖子了");
+    return;
+  }
+  showLoading.start("正在加载更多帖子数据...");
+  const postsGet = await Mys.Post.getForumPostList(curForum.value, curSortType.value, lastId.value);
+  posts.value = posts.value.concat(postsGet.list);
+  lastId.value = postsGet.last_id;
+  isLast.value = postsGet.is_last;
+  showSnackbar.success(`加载成功，共加载 ${postsGet.list.length} 条帖子`);
   showLoading.end();
 }
 
@@ -285,14 +309,14 @@ function searchPost(): void {
   height: 50px;
 }
 
-.post-fresh-btn {
+.post-forum-btn {
   height: 40px;
   background: var(--btn-bg-1);
   color: var(--btn-text-1);
   font-family: var(--font-title);
 }
 
-.dark .post-fresh-btn {
+.dark .post-forum-btn {
   border: 1px solid var(--common-shadow-2);
 }
 
@@ -302,5 +326,14 @@ function searchPost(): void {
   font-family: var(--font-title);
   grid-gap: 10px;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.posts-load-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px;
+  font-family: var(--font-title);
+  transition: all 0.3s linear;
 }
 </style>

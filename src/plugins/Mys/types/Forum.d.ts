@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/types/Forum.d.ts
  * @description Mys 插件论坛类型定义文件
- * @since Beta v0.4.5
+ * @since Beta v0.6.3
  */
 
 /**
@@ -25,9 +25,9 @@ declare namespace TGApp.Plugins.Mys.Forum {
 
   /**
    * @description 特定论坛数据
-   * @since Beta v0.4.5
+   * @since Beta v0.6.3
    * @interface FullData
-   * @property {number} last_id 最后一条帖子 ID
+   * @property {string} last_id 最后一条帖子 ID
    * @property {boolean} is_last 是否最后一页
    * @property {boolean} is_origin 是否原创
    * @property {number} page 页码
@@ -36,7 +36,7 @@ declare namespace TGApp.Plugins.Mys.Forum {
    * @return FullData
    */
   interface FullData {
-    last_id: number;
+    last_id: string;
     is_last: boolean;
     is_origin: boolean;
     page: number;

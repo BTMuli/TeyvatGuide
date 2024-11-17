@@ -42,7 +42,7 @@
         @click:append="searchPost"
         @keyup.enter="searchPost"
       />
-      <v-btn :rounded="true" class="post-fresh-btn" @click="firstLoad()">
+      <v-btn :rounded="true" class="post-topic-btn" @click="firstLoad()">
         <v-icon>mdi-refresh</v-icon>
         <span>刷新</span>
       </v-btn>
@@ -97,7 +97,7 @@ const sortList = computed<SortSelect[]>(() => {
   return [
     { text: "最新", value: 0 },
     { text: "热门", value: 2 },
-    { text: "精华", value: 1 },
+    { text: "精选", value: 1 },
   ];
 });
 
@@ -130,6 +130,7 @@ watch(
 
 async function firstLoad(): Promise<void> {
   if (curGame.value) showLoading.update(`正在加载${curGame.value.name}帖子列表`);
+  document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
   const postList = await Mys.Post.getTopicPostList(curGid.value, topic, curSortType.value);
   if ("retcode" in postList) {
     showLoading.end();
@@ -229,14 +230,14 @@ function searchPost(): void {
   height: 50px;
 }
 
-.post-fresh-btn {
+.post-topic-btn {
   height: 40px;
   background: var(--btn-bg-1);
   color: var(--btn-text-1);
   font-family: var(--font-title);
 }
 
-.dark .post-fresh-btn {
+.dark .post-topic-btn {
   border: 1px solid var(--common-shadow-2);
 }
 

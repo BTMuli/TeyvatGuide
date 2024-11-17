@@ -24,13 +24,13 @@
       />
     </template>
     <template #append>
-      <v-btn class="news-top-btn" @click="firstLoad(tab, true)">
+      <v-btn class="post-news-btn" @click="firstLoad(tab, true)">
         <v-icon>mdi-refresh</v-icon>
       </v-btn>
-      <v-btn class="news-top-btn" @click="showList = true">
+      <v-btn class="post-news-btn" @click="showList = true">
         <v-icon>mdi-view-list</v-icon>
       </v-btn>
-      <v-btn class="news-top-btn" @click="switchAnno" v-if="gid === '2'">
+      <v-btn class="post-news-btn" @click="switchAnno" v-if="gid === '2'">
         <template #prepend>
           <v-icon>mdi-bullhorn</v-icon>
         </template>
@@ -46,7 +46,7 @@
         </div>
       </div>
       <div class="load-news">
-        <v-btn class="news-top-btn" :rounded="true" :loading="loading" @click="loadMore(value)">
+        <v-btn class="post-news-btn" :rounded="true" :loading="loading" @click="loadMore(value)">
           已加载：{{ rawData[value].lastId }}，加载更多
         </v-btn>
       </div>
@@ -149,6 +149,7 @@ async function firstLoad(key: NewsKey, refresh: boolean = false): Promise<void> 
     rawData.value[key].lastId = 0;
   }
   showLoading.start(`正在获取${gameName}${rawData.value[key].name}数据...`);
+  document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
   const getData = await Mys.Painter.getNewsList(gid, NewsType[key]);
   rawData.value[key].isLast = getData.is_last;
   rawData.value[key].lastId = getData.list.length;
@@ -207,7 +208,7 @@ async function searchPost(): Promise<void> {
   font-family: var(--font-title);
 }
 
-.news-top-btn {
+.post-news-btn {
   height: 40px;
   margin-left: 15px;
   background: var(--btn-bg-1);
@@ -215,7 +216,7 @@ async function searchPost(): Promise<void> {
   font-family: var(--font-title);
 }
 
-.dark .news-top-btn {
+.dark .post-news-btn {
   border: 1px solid var(--common-shadow-2);
 }
 

@@ -17,18 +17,38 @@ const Referer = "https://bbs.mihoyo.com/";
  * @since Beta v0.6.2
  * @param {number} forumId 特定论坛 ID
  * @param {number} type 排序方式: 0-按热度排序，1-最新回复，2-按时间排序
+ * @param {string} last_id 最后 ID
  * @param {number} page_size 每页数量
  * @return {Promise<TGApp.Plugins.Mys.Forum.FullData>}
  */
 export async function getForumPostList(
   forumId: number,
-  type: number = 0,
+  type: number = 1,
+  last_id?: string,
   page_size: number = 20,
 ): Promise<TGApp.Plugins.Mys.Forum.FullData> {
+  let params;
+  if (type === 3) {
+    params = {
+      forum_id: forumId,
+      is_hot: true,
+      page_size: page_size,
+      last_id: last_id,
+    };
+  } else {
+    params = {
+      forum_id: forumId,
+      sort_type: type,
+      is_good: false,
+      is_hot: false,
+      page_size: page_size,
+      last_id: last_id,
+    };
+  }
   return (
     await TGHttp<TGApp.Plugins.Mys.Forum.Response>(`${Mpabu}getForumPostList`, {
       method: "GET",
-      query: { forum_id: forumId, sort_type: type, page_size: page_size },
+      query: params,
     })
   ).data;
 }
