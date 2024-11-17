@@ -171,11 +171,6 @@ onMounted(async () => {
   showLoading.end();
 });
 
-async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
-  const gid = postData.value?.post.game_id ?? topic.game_id;
-  await emit("active_deep_link", `router?path=/posts/${gid}/${topic.id}`);
-}
-
 function showOverlayC() {
   showCollection.value = true;
 }
@@ -243,6 +238,11 @@ async function createPostJson(postId: number): Promise<void> {
 async function toPost(): Promise<void> {
   const url = `https://m.miyoushe.com/ys/#/article/${postId}`;
   await TGClient.open("web_thin", url);
+}
+
+async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
+  const gid = postData.value?.post.game_id ?? topic.game_id;
+  await emit("active_deep_link", `router?path=/posts/topic/${gid}/${topic.id}`);
 }
 
 async function toForum(forum: TGApp.Plugins.Mys.Post.Forum): Promise<void> {
