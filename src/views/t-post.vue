@@ -94,6 +94,7 @@ import TPinWin from "../components/app/t-pinWin.vue";
 import TShareBtn from "../components/app/t-shareBtn.vue";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import showLoading from "../components/func/loading.js";
+import showSnackbar from "../components/func/snackbar.js";
 import TbCollect from "../components/post/tb-collect.vue";
 import TpAvatar from "../components/post/tp-avatar.vue";
 import TpParser from "../components/post/tp-parser.vue";
@@ -139,26 +140,21 @@ onMounted(async () => {
     return;
   }
   showLoading.update("正在获取数据...", `帖子ID: ${postId}`);
-  try {
-    postData.value = await Mys.Post.getPostFull(postId);
-    showLoading.update("正在渲染数据...", `帖子ID: ${postId}`);
-    renderPost.value = getRenderPost(postData.value);
-    shareTitle.value = `Post_${postId}`;
-    await webviewWindow
-      .getCurrentWebviewWindow()
-      .setTitle(`Post_${postId} ${postData.value.post.subject}`);
-  } catch (error) {
-    if (error instanceof Error) {
-      await TGLogger.Error(`[t-post][${postId}] ${error.name}: ${error.message}`);
-      showLoading.update(error.name, error.message, true);
-    } else {
-      console.error(error);
-      await TGLogger.Error(`[t-post][${postId}] 未知错误${JSON.stringify(error)}`);
-      showLoading.empty("帖子不存在或解析失败", "请检查帖子是否存在或者是否为合法的帖子");
-    }
-    await webviewWindow.getCurrentWebviewWindow().setTitle(`Post_${postId} Parsing Error`);
+  const resp = await Mys.Post.getPostFull(postId);
+  if ("retcode" in resp) {
+    showLoading.empty(`[code]${resp.retcode}`, resp.message);
+    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+    await webviewWindow.getCurrentWebviewWindow().setTitle(`Post_${postId} ${resp.message}`);
+    await TGLogger.Error(`[t-post][${postId}][onMounted] ${resp.retcode}: ${resp.message}`);
     return;
   }
+  postData.value = resp;
+  showLoading.update("正在渲染数据...", `帖子ID: ${postId}`);
+  renderPost.value = getRenderPost(postData.value);
+  shareTitle.value = `Post_${postId}`;
+  await webviewWindow
+    .getCurrentWebviewWindow()
+    .setTitle(`Post_${postId} ${postData.value.post.subject}`);
   await TGLogger.Info(`[t-post][${postId}][onMounted] ${postData.value.post.subject}`);
   // 打开 json
   const isDev = useAppStore().devMode ?? false;

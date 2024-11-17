@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/request/postReq.ts
  * @description 帖子相关的获取
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  */
 
 import TGHttp from "../../../utils/TGHttp.js";
@@ -35,18 +35,20 @@ export async function getForumPostList(
 
 /**
  * @description 获取单个帖子信息
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  * @param {number} postId 帖子 ID
- * @return {Promise<TGApp.Plugins.Mys.Post.FullData>}
+ * @return {Promise<TGApp.Plugins.Mys.Post.FullData|TGApp.BBS.Response.Base>}
  */
-export async function getPostFull(postId: number): Promise<TGApp.Plugins.Mys.Post.FullData> {
-  return (
-    await TGHttp<TGApp.Plugins.Mys.Post.Response>(`${Mpabu}getPostFull`, {
-      method: "GET",
-      headers: { referer: Referer },
-      query: { post_id: postId },
-    })
-  ).data.post;
+export async function getPostFull(
+  postId: number,
+): Promise<TGApp.Plugins.Mys.Post.FullData | TGApp.BBS.Response.Base> {
+  const resp = await TGHttp<TGApp.Plugins.Mys.Post.Response>(`${Mpabu}getPostFull`, {
+    method: "GET",
+    headers: { referer: Referer },
+    query: { post_id: postId },
+  });
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data.post;
 }
 
 /**

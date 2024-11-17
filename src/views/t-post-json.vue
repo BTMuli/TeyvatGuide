@@ -8,18 +8,19 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
 import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import showLoading from "../components/func/loading.js";
+import showSnackbar from "../components/func/snackbar.js";
 import Mys from "../plugins/Mys/index.js";
 import TGLogger from "../utils/TGLogger.js";
 
 const postId = Number(useRoute().params.post_id);
-let jsonData = reactive<TGApp.Plugins.Mys.Post.FullData>(<TGApp.Plugins.Mys.Post.FullData>{});
-let parseData = reactive<TGApp.Plugins.Mys.SctPost.Base[]>([]);
+const jsonData = ref<TGApp.Plugins.Mys.Post.FullData>();
+const parseData = ref<TGApp.Plugins.Mys.SctPost.Base[]>();
 const isEmpty = ref<boolean>(false);
 
 onMounted(async () => {
@@ -28,18 +29,19 @@ onMounted(async () => {
     showLoading.empty("错误的帖子ID！");
     return;
   }
-  try {
-    jsonData = await Mys.Post.getPostFull(postId);
-  } catch (e) {
-    showLoading.empty("获取数据失败", `帖子ID:${postId}`);
-    await TGLogger.Error(`[${postId}]获取帖子数据失败：${e}`);
+  const resp = await Mys.Post.getPostFull(postId);
+  if ("retcode" in resp) {
+    showLoading.empty("获取数据失败", `[${resp.retcode}]${resp.message}`);
+    showSnackbar.error(`[${resp.retcode}]${resp.message}`);
+    await TGLogger.Error(`[${postId}]获取帖子数据失败：${resp.retcode} ${resp.message}`);
     return;
   }
+  jsonData.value = resp;
   try {
-    parseData = JSON.parse(jsonData.post.content);
+    parseData.value = JSON.parse(jsonData.value.post.content);
   } catch (err) {
     try {
-      parseData = JSON.parse(jsonData.post.structured_content);
+      parseData.value = JSON.parse(jsonData.value.post.structured_content);
     } catch (e) {
       isEmpty.value = true;
       await TGLogger.Error(`[${postId}]解析帖子数据失败：${e}`);
