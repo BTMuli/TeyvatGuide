@@ -44,6 +44,9 @@ const columnCnt = computed<number>(() => {
   height: 80px;
   align-items: center;
   justify-content: center;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: var(--box-bg-3);
 
   img {
     width: 100%;
