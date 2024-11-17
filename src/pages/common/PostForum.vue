@@ -183,10 +183,12 @@ const curForumLabel = ref<string>("");
 const posts = ref<TGApp.Plugins.Mys.Post.FullData[]>([]);
 const search = ref<string>("");
 const showSearch = ref<boolean>(false);
+const firstLoad = ref<boolean>(false);
 
 onMounted(async () => {
   if (gid && typeof gid === "string") curGid.value = Number(gid);
   if (forum && typeof forum === "string") curForum.value = Number(forum);
+  firstLoad.value = true;
   showLoading.start(`正在获取${getGameName(curGid.value)}帖子数据...`);
   const gameLabel = getGameLabel(curGid.value);
   const forumLabel = getForumLabel(curGid.value, curForum.value);
@@ -198,12 +200,13 @@ onMounted(async () => {
 
 watch(
   () => curGid.value,
-  async (newVal: number) => {
-    const forums = getGameForums(newVal);
+  () => {
+    const forums = getGameForums(curGid.value);
     const forumFind = forums.find((item) => item.text === curForumLabel.value);
+    if (!firstLoad.value) return;
     if (forumFind) curForum.value = forumFind.value;
     else curForum.value = forums[0].value;
-    showSnackbar.success(`已将分区切换到 ${getGameLabel(newVal)}`);
+    showSnackbar.success(`已将分区切换到 ${getGameLabel(curGid.value)}`);
   },
 );
 watch(
