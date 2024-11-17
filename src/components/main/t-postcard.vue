@@ -1,27 +1,27 @@
 <template>
   <div v-if="card" :id="`post-card-${card.postId}`" class="tpc-card">
-    <div class="tpc-cover" @click="createPost(card)">
-      <img :src="localCover" alt="cover" v-if="localCover" />
-      <v-progress-circular color="primary" :indeterminate="true" v-else-if="card.cover !== ''" />
-      <img src="/source/UI/defaultCover.webp" alt="cover" v-else />
-      <div v-if="isAct" class="tpc-act">
-        <div class="tpc-status">
-          {{ card.status?.status }}
-        </div>
-        <div class="tpc-time">
-          <v-icon>mdi-clock-time-four-outline</v-icon>
-          <span>{{ card.subtitle }}</span>
+    <div class="tpc-top">
+      <div class="tpc-cover" @click="createPost(card)">
+        <img :src="localCover" alt="cover" v-if="localCover" />
+        <v-progress-circular color="primary" :indeterminate="true" v-else-if="card.cover !== ''" />
+        <img src="/source/UI/defaultCover.webp" alt="cover" v-else />
+        <div v-if="isAct" class="tpc-act">
+          <div class="tpc-status">{{ card.status?.status }}</div>
+          <div class="tpc-time">
+            <v-icon>mdi-clock-time-four-outline</v-icon>
+            <span>{{ card.subtitle }}</span>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="tpc-content">
       <div class="tpc-title" :title="card.title" @click="shareCard">{{ card.title }}</div>
-      <TpAvatar v-if="card.user" :data="card.user" position="left" />
+    </div>
+    <div class="tpc-mid" v-if="card.user">
+      <TpAvatar :data="card.user" position="left" />
     </div>
     <div class="tpc-bottom" v-if="card.data">
       <div class="tpc-tags">
         <div v-for="topic in card.topics" :key="topic.id" class="tpc-tag" @click="toTopic(topic)">
-          <v-icon>mdi-tag</v-icon>
+          <v-icon size="10">mdi-tag</v-icon>
           <span>{{ topic.name }}</span>
         </div>
       </div>
@@ -52,6 +52,7 @@
       class="tpc-forum"
       v-if="card.forum && card.forum.name !== ''"
       :title="`频道: ${card.forum.name}`"
+      @click="toForum(card.forum)"
     >
       <img :src="card.forum.icon" :alt="card.forum.name" />
       <span>{{ card.forum.name }}</span>
@@ -193,12 +194,13 @@ function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
  * @returns {TGApp.Plugins.Mys.News.RenderCard} 渲染用咨讯列表项
  */
 function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.News.RenderCard {
-  let forum = null;
-  let data = null;
+  let forum: TGApp.Plugins.Mys.News.RenderForum | null = null;
+  let data: TGApp.Plugins.Mys.News.RenderData | null = null;
   if (item.forum !== null) {
     forum = {
       name: item.forum.name,
       icon: item.forum.icon,
+      id: item.forum.id,
     };
   }
   if (item.stat !== null) {
@@ -248,7 +250,12 @@ async function shareCard(): Promise<void> {
 
 async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
   const gid = props.modelValue.post.game_id;
-  await emit("active_deep_link", `router?path=/posts/${gid}/${topic.id}`);
+  await emit("active_deep_link", `router?path=/posts/topic/${gid}/${topic.id}`);
+}
+
+async function toForum(forum: TGApp.Plugins.Mys.News.RenderForum): Promise<void> {
+  const gid = props.modelValue.post.game_id;
+  await emit("active_deep_link", `router?path=/posts/forum/${gid}/${forum.id}`);
 }
 </script>
 <style lang="css" scoped>
@@ -263,7 +270,18 @@ async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
   justify-content: space-between;
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
+  background: var(--box-bg-1);
   box-shadow: 2px 2px 5px var(--common-shadow-2);
+  row-gap: 10px;
+}
+
+.tpc-top {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  row-gap: 5px;
 }
 
 .tpc-cover {
@@ -285,13 +303,10 @@ async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
   transition: all 0.3s linear;
 }
 
-.tpc-content {
+.tpc-mid {
   position: relative;
-  display: flex;
   width: 100%;
-  flex-direction: column;
-  padding: 10px;
-  gap: 10px;
+  padding: 0 10px;
 }
 
 .tpc-bottom {
@@ -299,13 +314,14 @@ async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
   display: flex;
   width: 100%;
   flex-direction: column;
-  padding: 10px;
-  gap: 10px;
+  padding: 5px 10px;
+  row-gap: 5px;
 }
 
 .tpc-title {
   overflow: hidden;
   width: 100%;
+  padding: 5px 10px;
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 18px;
@@ -318,20 +334,25 @@ async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: flex-start;
-  color: var(--tgc-pink-1);
+  color: var(--box-text-5);
   cursor: pointer;
   font-size: 12px;
-  gap: 3px;
+  gap: 5px;
 
   :hover {
-    color: var(--tgc-blue-2);
+    color: var(--box-text-3);
   }
 }
 
 .tpc-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0 3px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   background: var(--box-bg-2);
+  gap: 3px;
 }
 
 .tpc-forum {
@@ -348,6 +369,7 @@ async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
   border-bottom-left-radius: 5px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
+  cursor: pointer;
   text-shadow: 0 0 5px var(--tgc-dark-1);
 }
 

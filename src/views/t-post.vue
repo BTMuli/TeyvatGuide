@@ -10,8 +10,7 @@
         PostID：{{ postId }} | Render by TeyvatGuide v{{ appVersion }}
       </div>
       <div class="tp-post-meta">
-        <!-- todo 点击跳转 -->
-        <div class="mpm-forum" v-if="postData.forum">
+        <div class="mpm-forum" v-if="postData.forum" @click="toForum(postData.forum)">
           <img :src="getGameIcon(postData.forum.game_id)" alt="gameIcon" />
           <img :src="postData.forum.icon" alt="forumIcon" />
           <span>{{ postData.forum.name }}</span>
@@ -246,6 +245,10 @@ async function toPost(): Promise<void> {
   await TGClient.open("web_thin", url);
 }
 
+async function toForum(forum: TGApp.Plugins.Mys.Post.Forum): Promise<void> {
+  await emit("active_deep_link", `router?path=/posts/forum/${forum.game_id}/${forum.id}`);
+}
+
 onUnmounted(() => {
   if (shareTimeTimer.value !== undefined) {
     clearInterval(shareTimeTimer.value);
@@ -339,6 +342,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
 .mpm-forum img {
@@ -400,5 +404,9 @@ onUnmounted(() => {
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 12px;
+
+  &:hover {
+    color: var(--box-text-3);
+  }
 }
 </style>

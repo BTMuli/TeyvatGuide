@@ -38,7 +38,7 @@
           <img src="/platforms/mhy/mys.webp" alt="mihoyo" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'帖子'" value="posts" :link="true" href="/posts">
+      <v-list-item :title.attr="'帖子'" value="posts" :link="true" href="/posts/forum">
         <template #title>帖子</template>
         <template #prepend>
           <img src="/source/UI/posts.png" alt="posts" class="side-icon" />

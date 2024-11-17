@@ -21,12 +21,12 @@ const mainRoutes = [
     component: async () => await import("../../pages/common/News.vue"),
   },
   {
-    path: "/posts/:gid?/:forum?",
+    path: "/posts/forum/:gid?/:forum?",
     name: "酒馆",
     component: async () => await import("../../pages/common/PostForum.vue"),
   },
   {
-    path: "/posts/:gid?/:topic",
+    path: "/posts/topic/:gid?/:topic",
     name: "话题",
     component: async () => await import("../../pages/common/PostTopic.vue"),
   },

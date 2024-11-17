@@ -89,7 +89,7 @@ export async function parseLink(
       if (url.pathname.startsWith("//discussion")) {
         const gid = url.pathname.split("/").pop();
         const forum = url.searchParams.get("forum_id");
-        await emit("active_deep_link", `router?path=/posts/${gid}/${forum}`);
+        await emit("active_deep_link", `router?path=/posts/forum/${gid}/${forum}`);
         return true;
       }
       if (url.pathname.startsWith("//homeForum")) {

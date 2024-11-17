@@ -81,17 +81,8 @@ declare namespace TGApp.Plugins.Mys.News {
     postId: number;
     subtitle: string;
     user: TGApp.Plugins.Mys.User.Post | null;
-    forum: {
-      name: string;
-      icon: string;
-    } | null;
-    data: {
-      mark: number;
-      forward: number;
-      like: number;
-      reply: number;
-      view: number;
-    } | null;
+    forum: RenderForum | null;
+    data: RenderData | null;
     status?: RenderStatus;
     topics: TGApp.Plugins.Mys.Topic.Info[];
   }
@@ -106,5 +97,39 @@ declare namespace TGApp.Plugins.Mys.News {
   interface RenderStatus {
     status: string;
     colorCss: string;
+  }
+
+  /**
+   * @description 用于渲染的咨讯信息
+   * @since Beta v0.6.3
+   * @interface RenderData
+   * @property {number} mark 帖子收藏数
+   * @property {number} forward 帖子转发数
+   * @property {number} like 帖子点赞数
+   * @property {number} reply 帖子回复数
+   * @property {number} view 帖子浏览数
+   * @return RenderData
+   */
+  interface RenderData {
+    mark: number;
+    forward: number;
+    like: number;
+    reply: number;
+    view: number;
+  }
+
+  /**
+   * @description 用于渲染的版块信息
+   * @since Beta v0.6.3
+   * @interface RenderForum
+   * @property {string} name 版块名称
+   * @property {string} icon 版块图标
+   * @property {string} id 版块 ID
+   * @return RenderForum
+   */
+  interface RenderForum {
+    name: string;
+    icon: string;
+    id: number;
   }
 }

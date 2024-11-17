@@ -152,13 +152,13 @@ function getLocalPath(forum?: string): string {
   const wdForums = ["37", "60", "42", "38"];
   const zzzForums = ["57", "59", "64", "65"];
   const dbyForums = ["54", "35", "34", "39", "47", "48", "55", "36"];
-  if (ysForums.includes(forum)) return `/posts/2/${forum}`;
-  if (srForums.includes(forum)) return `/posts/6/${forum}`;
-  if (bh3Forums.includes(forum)) return `/posts/1/${forum}`;
-  if (bh2Forums.includes(forum)) return `/posts/3/${forum}`;
-  if (wdForums.includes(forum)) return `/posts/4/${forum}`;
-  if (zzzForums.includes(forum)) return `/posts/8/${forum}`;
-  if (dbyForums.includes(forum)) return `/posts/5/${forum}`;
+  if (ysForums.includes(forum)) return `/posts/forum/2/${forum}`;
+  if (srForums.includes(forum)) return `/posts/forum/6/${forum}`;
+  if (bh3Forums.includes(forum)) return `/posts/forum/1/${forum}`;
+  if (bh2Forums.includes(forum)) return `/posts/forum/3/${forum}`;
+  if (wdForums.includes(forum)) return `/posts/forum/4/${forum}`;
+  if (zzzForums.includes(forum)) return `/posts/forum/8/${forum}`;
+  if (dbyForums.includes(forum)) return `/posts/forum/5/${forum}`;
   return "";
 }
 </script>
