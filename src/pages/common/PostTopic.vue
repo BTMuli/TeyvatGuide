@@ -5,7 +5,7 @@
         <img :src="topicInfo.topic.cover" alt="cover" />
         <div class="post-topic-info">
           <span>{{ topicInfo.topic.name }}({{ topic }})</span>
-          <span>{{ topicInfo.topic.desc }}</span>
+          <span :title="topicInfo.topic.desc">{{ topicInfo.topic.desc }}</span>
         </div>
       </div>
     </template>
@@ -179,6 +179,7 @@ function searchPost(): void {
 </script>
 <style lang="css" scoped>
 .post-topic-top {
+  position: relative;
   display: flex;
   overflow: hidden;
   align-items: center;
@@ -194,6 +195,7 @@ function searchPost(): void {
   }
 
   .post-topic-info {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -202,6 +204,14 @@ function searchPost(): void {
       color: var(--common-text-title);
       font-family: var(--font-title);
       font-size: 20px;
+    }
+
+    :last-child {
+      overflow: hidden;
+      height: 24px;
+      max-lines: 1;
+      text-overflow: ellipsis;
+      word-break: break-all;
     }
   }
 }
