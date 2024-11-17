@@ -31,7 +31,7 @@ interface TpCustomEmoticon {
       size: {
         width: number;
         height: number;
-        file_size: number;
+        file_size?: number;
       };
       is_available: boolean;
       hash: string;
@@ -69,15 +69,20 @@ function getImageUrl(): string {
 async function download(): Promise<void> {
   const image = props.data.insert.custom_emoticon.url;
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
-  const size = bytesToSize(props.data.insert.custom_emoticon.size.file_size);
-  if (buffer.value.byteLength > 80000000) {
-    showSnackbar.warn(`图片过大(${size})，无法下载到本地`);
+  let size = 0;
+  if (props.data.insert.custom_emoticon.size.file_size) {
+    size = props.data.insert.custom_emoticon.size.file_size;
+  } else {
+    size = buffer.value.byteLength;
+  }
+  if (size > 80000000) {
+    showSnackbar.warn(`图片过大(${bytesToSize(size)})，无法下载到本地`);
     return;
   }
   const format = image.split(".").pop();
   const title = props.data.insert.custom_emoticon.hash;
   await saveCanvasImg(buffer.value, props.data.insert.custom_emoticon.hash, format);
-  showSnackbar.success(`已保存${title}.${format}到本地，大小为${size}`);
+  showSnackbar.success(`已保存${title}.${format}到本地，大小为${bytesToSize(size)}`);
 }
 </script>
 <style lang="css" scoped>
