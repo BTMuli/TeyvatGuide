@@ -60,8 +60,7 @@
     <v-checkbox-btn
       v-if="props.selectMode"
       class="tpc-select"
-      v-model="selectedList"
-      :value="props.modelValue.post.post_id"
+      @click="emits('onSelected', props.modelValue.post.post_id)"
       data-html2canvas-ignore
     />
     <div class="tpc-info-id" v-else>{{ props.modelValue.post.post_id }}</div>
@@ -78,11 +77,10 @@ import TpAvatar from "../post/tp-avatar.vue";
 interface TPostCardProps {
   modelValue: TGApp.Plugins.Mys.Post.FullData;
   selectMode?: boolean;
-  selected?: string[];
 }
 
 interface TPostCardEmits {
-  (e: "onSelected", value: string[]): void;
+  (e: "onSelected", value: string): void;
 }
 
 const props = withDefaults(defineProps<TPostCardProps>(), {
@@ -92,13 +90,7 @@ const emits = defineEmits<TPostCardEmits>();
 const isAct = ref<boolean>(false);
 const card = ref<TGApp.Plugins.Mys.News.RenderCard>();
 const localCover = ref<string>();
-const selectedList = computed({
-  get: () => props.selected,
-  set: (v) => {
-    if (v === undefined) return;
-    emits("onSelected", v);
-  },
-});
+
 const cardBg = computed<string>(() => {
   if (card.value && card.value.status) return card.value.status.colorCss;
   return "none";
@@ -384,9 +376,10 @@ async function toForum(forum: TGApp.Plugins.Mys.News.RenderForum): Promise<void>
   justify-content: center;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  background: var(--tgc-yellow-2);
+  background: var(--box-bg-2);
   border-bottom-right-radius: 4px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
+  color: var(--box-text-5);
 }
 
 .tpc-forum img {

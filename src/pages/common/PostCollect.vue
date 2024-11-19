@@ -1,6 +1,10 @@
 <template>
-  <div class="pc-container">
+  <v-app-bar>
     <div class="pc-top">
+      <div class="pc-title">
+        <img src="/source/UI/posts.png" alt="posts" />
+        <span>收藏</span>
+      </div>
       <v-select
         v-model="curSelect"
         class="pc-select"
@@ -13,80 +17,81 @@
           <v-list-item v-bind="props" :title="item.raw.title" :subtitle="item.raw.desc" />
         </template>
       </v-select>
-      <v-btn
-        size="small"
-        class="pc-btn"
-        icon="mdi-sort"
-        @click="sortPost(!sortId)"
-        :title="sortId ? '按更新时间排序' : '按帖子ID排序'"
-      />
-      <v-btn
-        :disabled="selectedMode"
-        size="small"
-        class="pc-btn"
-        icon="mdi-refresh"
-        title="获取用户收藏"
-        @click="freshUser()"
-      />
-      <v-btn
-        :disabled="selectedMode"
-        size="small"
-        class="pc-btn"
-        icon="mdi-import"
-        @click="freshOther"
-        title="导入其他用户收藏"
-      />
-      <v-btn
-        size="small"
-        class="pc-btn"
-        :icon="selectedMode ? 'mdi-folder-move' : 'mdi-pencil'"
-        @click="toSelect()"
-        title="编辑收藏"
-      />
-      <v-btn
-        :disabled="selectedMode"
-        size="small"
-        class="pc-btn"
-        icon="mdi-plus"
-        @click="addCollect"
-        title="新建分类"
-      />
-      <v-btn
-        :disabled="selectedMode || curSelect === '未分类'"
-        size="small"
-        class="pc-btn"
-        icon="mdi-information"
-        @click="toEdit()"
-        title="编辑分类"
-      />
-      <v-btn
-        size="small"
-        class="pc-btn"
-        icon="mdi-delete"
-        @click="deleteOper(false)"
-        :title="selectedMode ? '删除帖子分类' : '清空合集'"
-      />
-      <v-btn
-        size="small"
-        class="pc-btn"
-        icon="mdi-delete-forever"
-        @click="deleteOper(true)"
-        :title="selectedMode ? '删除帖子' : '删除合集'"
-      />
-      <v-pagination class="pc-page" v-model="page" :total-visible="view" :length="length" />
     </div>
-    <div class="pc-posts">
-      <div v-for="item in getPageItems()" :key="item.post.post_id">
-        <TPostCard
-          @onSelected="handleSelected"
-          :model-value="item"
-          :selected="selectedPost"
-          :select-mode="selectedMode"
+    <template #append>
+      <v-pagination class="pc-page" v-model="page" :total-visible="view" :length="length" />
+    </template>
+    <template #extension>
+      <div class="pc-btns">
+        <v-btn
+          size="small"
+          class="pc-btn"
+          icon="mdi-sort"
+          @click="sortPost(!sortId)"
+          :title="sortId ? '按更新时间排序' : '按帖子ID排序'"
+        />
+        <v-btn
+          :disabled="selectedMode"
+          size="small"
+          class="pc-btn"
+          icon="mdi-refresh"
+          title="获取用户收藏"
+          @click="freshUser()"
+        />
+        <v-btn
+          :disabled="selectedMode"
+          size="small"
+          class="pc-btn"
+          icon="mdi-import"
+          @click="freshOther"
+          title="导入其他用户收藏"
+        />
+        <v-btn
+          size="small"
+          class="pc-btn"
+          :icon="selectedMode ? 'mdi-folder-move' : 'mdi-pencil'"
+          @click="toSelect()"
+          title="编辑收藏"
+        />
+        <v-btn
+          :disabled="selectedMode"
+          size="small"
+          class="pc-btn"
+          icon="mdi-plus"
+          @click="addCollect"
+          title="新建分类"
+        />
+        <v-btn
+          :disabled="selectedMode || curSelect === '未分类'"
+          size="small"
+          class="pc-btn"
+          icon="mdi-information"
+          @click="toEdit()"
+          title="编辑分类"
+        />
+        <v-btn
+          size="small"
+          class="pc-btn"
+          icon="mdi-delete"
+          @click="deleteOper(false)"
+          :title="selectedMode ? '删除帖子分类' : '清空合集'"
+        />
+        <v-btn
+          size="small"
+          class="pc-btn"
+          icon="mdi-delete-forever"
+          @click="deleteOper(true)"
+          :title="selectedMode ? '删除帖子' : '删除合集'"
         />
       </div>
-      <ToCollectPost @submit="load" :post="selectedPost" v-model="showOverlay" />
+    </template>
+  </v-app-bar>
+  <div class="pc-posts">
+    <div v-for="item in curPosts" :key="item.post.post_id">
+      <TPostCard @onSelected="handleSelected" :model-value="item" :select-mode="selectedMode" />
     </div>
   </div>
+  <ToCollectPost @submit="load" :post="selectedPost" v-model="showOverlay" />
 </template>
 <script lang="ts" setup>
 import { event } from "@tauri-apps/api";
@@ -115,6 +120,11 @@ const view = computed(() => {
   if (length.value === 1) return 0;
   return length.value > 5 ? 5 : length.value;
 });
+const curPosts = computed<TGApp.Plugins.Mys.Post.FullData[]>(() => {
+  return selected.value
+    .slice((page.value - 1) * 12, page.value * 12)
+    .map((i) => JSON.parse(i.content));
+});
 
 const selectedMode = ref<boolean>(false);
 const selectedPost = ref<Array<string>>([]);
@@ -134,8 +144,12 @@ onUnmounted(() => {
   }
 });
 
-function handleSelected(v: string[]) {
-  selectedPost.value = v;
+function handleSelected(v: string) {
+  if (selectedPost.value.includes(v)) {
+    selectedPost.value = selectedPost.value.filter((i) => i !== v);
+  } else {
+    selectedPost.value.push(v);
+  }
 }
 
 function sortPost(value: boolean) {
@@ -326,25 +340,6 @@ async function freshPost(select: string | null): Promise<void> {
   showSnackbar.success(`切换合集 ${select}，共 ${selected.value.length} 条帖子`);
 }
 
-// 获取当前页的帖子
-function getPageItems(): TGApp.Plugins.Mys.Post.FullData[] {
-  const posts = selected.value.slice((page.value - 1) * 12, page.value * 12);
-  const card: TGApp.Plugins.Mys.Post.FullData[] = [];
-  for (const post of posts) {
-    try {
-      card.push(JSON.parse(post.content));
-    } catch (e) {
-      TGLogger.Error("[PostCollect] getPageItems");
-      if (typeof e === "string") {
-        TGLogger.Error(e);
-      } else if (e instanceof Error) {
-        TGLogger.Error(e.message);
-      }
-    }
-  }
-  return card;
-}
-
 watch(
   () => curSelect.value,
   async () => await freshPost(curSelect.value),
@@ -413,59 +408,55 @@ async function mergePosts(
 }
 </script>
 <style lang="css" scoped>
-.pc-container {
-  position: relative;
+.pc-top {
   display: flex;
-  height: 100%;
-  flex-direction: column;
-  align-items: center;
-  row-gap: 10px;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 10px;
+  gap: 10px;
 }
 
-.pc-top {
-  position: relative;
+.pc-title {
   display: flex;
-  width: 100%;
-  height: 60px;
   align-items: center;
-  justify-content: flex-start;
-  column-gap: 10px;
+  justify-content: center;
+  gap: 10px;
+
+  img {
+    width: 32px;
+    height: 32px;
+  }
+
+  span {
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 20px;
+  }
 }
 
 .pc-select {
   max-width: 400px;
-  max-height: 100%;
+  height: 50px;
 }
 
-.pc-page {
-  margin-left: auto;
-}
-
-/* stylelint-disable-next-line selector-class-pattern */
-.pc-page > .v-pagination__list {
-  justify-content: flex-end;
-}
-
-/* stylelint-disable-next-line selector-class-pattern */
-.v-btn--disabled.pc-btn {
-  background: var(--tgc-dark-1);
-  color: var(--tgc-white-1);
+.pc-btns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  gap: 10px;
 }
 
 .pc-btn {
   height: 40px;
+  border: 1px solid var(--common-shadow-4);
   background: var(--btn-bg-1);
   color: var(--btn-text-1);
   font-family: var(--font-title);
 }
 
-.dark .pc-btn {
-  border: 1px solid var(--common-shadow-2);
-}
-
 .pc-posts {
   display: grid;
-  font-family: var(--font-title);
   grid-gap: 10px;
   grid-template-columns: repeat(4, minmax(320px, 1fr));
 }
