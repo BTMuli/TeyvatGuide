@@ -53,7 +53,7 @@
             v-model="showSub"
           >
             <v-list class="tpr-reply-sub" width="300px" max-height="400px">
-              <TprReply
+              <VpReplyItem
                 v-for="(reply, index) in subReplies"
                 :key="index"
                 :modelValue="reply"
