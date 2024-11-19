@@ -156,7 +156,7 @@ async function refreshRecord(): Promise<void> {
   }
   await TGLogger.Info(`[UserRecord][refresh][${user.value.gameUid}] 获取战绩数据成功`);
   await TGLogger.Info(`[UserRecord][refresh][${user.value.gameUid}]`, false);
-  await TGLogger.Info(JSON.stringify(res), false);
+  console.log(res);
   showLoading.update("正在保存战绩数据");
   await TSUserRecord.saveRecord(Number(user.value.gameUid), res);
   showLoading.update("正在加载战绩数据");

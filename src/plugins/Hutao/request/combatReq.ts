@@ -15,7 +15,7 @@ const CombatUrl = "https://homa.snapgenshin.com/RoleCombat/";
  */
 export async function getCombatStatistic(
   isLast: boolean = false,
-): Promise<TGApp.Plugins.Hutao.Combat.Data> {
+): Promise<TGApp.Plugins.Hutao.Combat.Data | undefined> {
   const url = `${CombatUrl}Statistics`;
   const resp = await TGHttp<TGApp.Plugins.Hutao.Combat.Response>(url, {
     method: "GET",

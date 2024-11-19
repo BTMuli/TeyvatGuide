@@ -102,7 +102,7 @@
 <script lang="ts" setup>
 import { getVersion } from "@tauri-apps/api/app";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, watch, computed } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import showDialog from "../../components/func/dialog.js";
 import showLoading from "../../components/func/loading.js";
@@ -112,7 +112,6 @@ import TuaAvatarBox from "../../components/userAvatar/tua-avatar-box.vue";
 import TuaDetailOverlay from "../../components/userAvatar/tua-detail-overlay.vue";
 import { AppCharacterData } from "../../data/index.js";
 import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
-import TSUserRecord from "../../plugins/Sqlite/modules/userRecord.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { generateShareImg } from "../../utils/TGShare.js";
@@ -277,17 +276,14 @@ async function refresh(): Promise<void> {
     loadData.value = false;
     return;
   }
-  showLoading.update("正在更新角色数据...", "正在获取战绩数据");
-  const indexRes = await TakumiRecordGenshinApi.index(userStore.cookie.value, user.value);
+  showLoading.update("正在更新角色数据...", "正在刷新首页数据");
+  const indexRes = await TakumiRecordGenshinApi.index(userStore.cookie.value, user.value, 1);
   if ("retcode" in indexRes) {
     showSnackbar.error(`[${indexRes.retcode}] ${indexRes.message}`);
     await TGLogger.Error(JSON.stringify(indexRes.message));
     showLoading.end();
     loadData.value = false;
     return;
-  } else {
-    showLoading.update("正在更新角色数据...", "正在保存战绩数据");
-    await TSUserRecord.saveRecord(Number(user.value.gameUid), indexRes);
   }
   showLoading.update("正在更新角色数据...", "正在获取角色列表");
   const listRes = await TakumiRecordGenshinApi.character.list(userStore.cookie.value, user.value);

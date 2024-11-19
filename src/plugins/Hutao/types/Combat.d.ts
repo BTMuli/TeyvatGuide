@@ -49,12 +49,16 @@ declare namespace TGApp.Plugins.Hutao.Combat {
    * @description 数据
    * @since Beta v0.6.3
    * @interface Data
+   * @property {string} ScheduleId 期数
    * @property {number} RecordTotal 总数
+   * @property {number} Timestamp 时间戳
    * @property {Array<TGApp.Plugins.Hutao.Base.Rate>} BackupAvatarRates 使用率
    * @return Data
    */
   interface Data {
+    ScheduleId: string;
     RecordTotal: number;
+    Timestamp: number;
     BackupAvatarRates: Array<TGApp.Plugins.Hutao.Base.Rate>;
   }
 }

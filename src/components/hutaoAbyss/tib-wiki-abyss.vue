@@ -9,14 +9,14 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import { AppCharacterData } from "../../data/index.js";
 import { AbyssDataItem } from "../../pages/WIKI/Abyss.vue";
 import TItemBox, { type TItemBoxData } from "../app/t-item-box.vue";
 
-interface TibWikiAbyssProps {
-  modelValue: AbyssDataItem<{ Item: number; Rate: number }>;
+export interface TibWikiAbyssProps {
+  modelValue: AbyssDataItem<TGApp.Plugins.Hutao.Base.Rate>;
 }
 
 const props = defineProps<TibWikiAbyssProps>();

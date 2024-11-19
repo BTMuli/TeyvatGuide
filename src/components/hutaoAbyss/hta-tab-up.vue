@@ -35,7 +35,7 @@ interface HtaTabUpProps {
 
 interface HtaTabUpData {
   Floor: number;
-  Ranks: Array<AbyssDataItem<{ Item: number; Rate: number }>>;
+  Ranks: Array<AbyssDataItem<TGApp.Plugins.Hutao.Base.Rate>>;
 }
 
 const props = defineProps<HtaTabUpProps>();
@@ -49,7 +49,7 @@ onMounted(async () => {
     const floorLast = props.data.last.find((f) => f.Floor === floor.Floor);
     const floorRank = {
       Floor: floor.Floor,
-      Ranks: <Array<AbyssDataItem<{ Item: number; Rate: number }>>>[],
+      Ranks: <Array<AbyssDataItem<TGApp.Plugins.Hutao.Base.Rate>>>[],
     };
     floor.Ranks.sort((a, b) => b.Rate - a.Rate);
     for (const rank of floor.Ranks) {

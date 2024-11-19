@@ -33,7 +33,7 @@ import { onMounted, ref } from "vue";
 
 import { AppCharacterData } from "../../data/index.js";
 import { AbyssDataItem } from "../../pages/WIKI/Abyss.vue";
-import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
+import TItemBox, { type TItemBoxData } from "../app/t-item-box.vue";
 
 interface HtaTabHoldProps {
   data: AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarHold[]>;

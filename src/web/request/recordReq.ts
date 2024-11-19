@@ -65,15 +65,17 @@ async function characterList(
  * @since Beta v0.6.3
  * @param {TGApp.App.Account.Cookie} cookie Cookie
  * @param {TGApp.Sqlite.Account.Game} user 用户
+ * @param {number} listType 列表类型
  * @returns {Promise<TGApp.Game.Record.FullData | TGApp.BBS.Response.Base>}
  */
 async function index(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
+  listType: number = 0,
 ): Promise<TGApp.Game.Record.FullData | TGApp.BBS.Response.Base> {
   const url = `${trgAbu}index`;
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
-  const params = { avatar_list_type: 1, role_id: user.gameUid, server: user.region };
+  const params = { avatar_list_type: listType, role_id: user.gameUid, server: user.region };
   const header = getRequestHeader(ck, "GET", params, "common");
   const resp = await TGHttp<TGApp.Game.Record.Response | TGApp.BBS.Response.Base>(url, {
     method: "GET",

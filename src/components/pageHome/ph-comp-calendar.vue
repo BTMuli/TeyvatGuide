@@ -40,7 +40,7 @@
       <div class="tc-content">
         <TCalendarBirth />
         <div class="calendar-grid">
-          <TItemBoxData
+          <TItemBox
             v-for="item in renderItems"
             :key="item.id"
             @click="selectItem(item)"
@@ -57,7 +57,7 @@ import { onMounted, ref, watch } from "vue";
 
 import { AppCalendarData } from "../../data/index.js";
 import { timestampToDate } from "../../utils/toolFunc.js";
-import type { TItemBoxData } from "../app/t-item-box.vue";
+import TItemBox, { type TItemBoxData } from "../app/t-item-box.vue";
 
 import TCalendarBirth from "./ph-calendar-birth.vue";
 import ToCalendar from "./ph-calendar-overlay.vue";

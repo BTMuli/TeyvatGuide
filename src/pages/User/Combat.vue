@@ -17,6 +17,12 @@
           </template>
           <span>深境螺旋</span>
         </v-btn>
+        <v-btn :rounded="true" class="uc-btn" @click="loadWiki()">
+          <template #prepend>
+            <img src="/source/UI/wikiAbyss.webp" alt="abyss" />
+          </template>
+          <span>统计数据</span>
+        </v-btn>
       </div>
     </template>
     <template #append>
@@ -88,11 +94,12 @@
       <span>暂无数据，请尝试刷新</span>
     </div>
   </div>
+  <TucOverlay v-model="showData" :data="cloudCombat" />
 </template>
 <script lang="ts" setup>
 import { getVersion } from "@tauri-apps/api/app";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, watch, computed } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import TSubLine from "../../components/app/t-subline.vue";
@@ -100,6 +107,7 @@ import showDialog from "../../components/func/dialog.js";
 import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
 import TucAvatars from "../../components/userCombat/tuc-avatars.vue";
+import TucOverlay from "../../components/userCombat/tuc-overlay.vue";
 import TucOverview from "../../components/userCombat/tuc-overview.vue";
 import TucRound from "../../components/userCombat/tuc-round.vue";
 import Hutao from "../../plugins/Hutao/index.js";
@@ -118,6 +126,8 @@ const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
 
 const localCombat = ref<TGApp.Sqlite.Combat.SingleTable[]>([]);
 const combatRef = ref<HTMLElement>(<HTMLElement>{});
+const cloudCombat = ref<TGApp.Plugins.Hutao.Combat.Data>();
+const showData = ref<boolean>(false);
 const version = ref<string>();
 const router = useRouter();
 
@@ -154,6 +164,16 @@ async function loadCombat(): Promise<void> {
   if (uidCur.value === undefined || uidCur.value === "") return;
   localCombat.value = await TSUserCombat.getCombat(uidCur.value);
   if (localCombat.value.length > 0) userTab.value = localCombat.value[0].id;
+}
+
+async function loadWiki(): Promise<void> {
+  showLoading.start("正在加载统计数据...");
+  const res = await Hutao.Combat.data();
+  if (res === undefined) showSnackbar.error("未获取到剧诗数据");
+  else cloudCombat.value = <TGApp.Plugins.Hutao.Combat.Data>res;
+  showLoading.end();
+  showSnackbar.success("成功获取统计数据");
+  showData.value = true;
 }
 
 async function refreshCombat(): Promise<void> {
