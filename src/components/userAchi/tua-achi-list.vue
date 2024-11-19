@@ -46,10 +46,13 @@ interface TuaAchiListProps {
   hideFin: boolean;
   series?: number;
   search?: string;
+  isSearch: boolean;
 }
 
 interface TuaAchiListEmits {
   (e: "update:series", v: number): void;
+
+  (e: "update:isSearch", v: boolean): false;
 }
 
 const props = defineProps<TuaAchiListProps>();
@@ -72,17 +75,32 @@ const renderAchi = computed<Array<TGApp.Sqlite.Achievement.RenderAchi>>(() => {
 onMounted(async () => await loadAchi());
 
 watch(
-  () => [props.series, props.search, props.uid],
+  () => [props.search, props.isSearch],
+  async () => await searchAchi(),
+);
+
+watch(
+  () => [props.series, props.uid],
   async () => await loadAchi(),
 );
 
-async function loadAchi(): Promise<void> {
-  if (props.search && props.search !== "") {
-    nameCard.value = undefined;
-    ncData.value = undefined;
-    achievements.value = await TSUserAchi.searchAchi(props.uid, props.search);
+async function searchAchi(): Promise<void> {
+  if (!props.isSearch) return;
+  if (!props.search || props.search === "") {
+    showSnackbar.warn("请输入搜索内容");
+    emits("update:isSearch", false);
     return;
   }
+  nameCard.value = undefined;
+  ncData.value = undefined;
+  achievements.value = await TSUserAchi.searchAchi(props.uid, props.search);
+  if (achievements.value.length > 0) {
+    showSnackbar.success(`成功获取${achievements.value.length}条成就`);
+  }
+  emits("update:isSearch", false);
+}
+
+async function loadAchi(): Promise<void> {
   achievements.value = await TSUserAchi.getAchievements(props.uid, props.series);
   if (!selectedAchi.value && achievements.value.length > 0) {
     selectedAchi.value = achievements.value[0];

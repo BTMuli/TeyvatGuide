@@ -9,6 +9,7 @@
           label="搜索"
           :hide-details="true"
           :single-line="true"
+          @keydown.enter="isSearch = true"
         />
       </div>
     </template>
@@ -46,6 +47,7 @@
       :hideFin="hideFin"
       v-model:series="selectedSeries"
       v-model:search="search"
+      v-model:isSearch="isSearch"
     />
   </div>
 </template>
@@ -74,6 +76,7 @@ import {
 } from "../../utils/UIAF.js";
 
 const search = ref<string>("");
+const isSearch = ref<boolean>(false);
 const hideFin = ref<boolean>(false);
 
 const uidList = ref<number[]>([]);

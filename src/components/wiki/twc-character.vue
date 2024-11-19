@@ -128,7 +128,7 @@ const box = computed(() => {
     height: "128px",
     display: "inner",
     lt: `/icon/element/${data.value?.element}元素.webp`,
-    ltSize: "40px",
+    ltSize: "30px",
     innerHeight: 30,
     innerIcon: `/icon/weapon/${data.value?.weapon}.webp`,
     innerText: data.value?.name,
