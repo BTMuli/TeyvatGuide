@@ -4196,7 +4196,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "UNLOCK_AREA"
     }
   },
   {
@@ -4208,7 +4208,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "UNLOCK_TRANS_POINT"
     }
   },
   {
@@ -4220,7 +4220,7 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "UNLOCK_GATE_TEMPLE"
     }
   },
   {
@@ -4232,7 +4232,7 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -4244,7 +4244,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -4256,7 +4256,7 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -4268,7 +4268,7 @@
     "reward": 20,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -4280,7 +4280,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "OPEN_WORLD_CHEST"
     }
   },
   {
@@ -4292,7 +4292,7 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "OPEN_WORLD_CHEST"
     }
   },
   {
@@ -4304,7 +4304,7 @@
     "reward": 20,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "OPEN_WORLD_CHEST"
     }
   },
   {
@@ -4316,7 +4316,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -4328,7 +4328,7 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -4340,7 +4340,7 @@
     "reward": 20,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -4352,7 +4352,14 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75138,
+          "name": "受选者的诺言",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -4364,7 +4371,8 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -11139,7 +11147,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -11151,7 +11159,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -11163,7 +11171,14 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75107,
+          "name": "石子、椰子、龙贩子",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -11175,7 +11190,14 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75108,
+          "name": "火与水的好友",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -11187,7 +11209,8 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -11199,7 +11222,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -11211,7 +11234,14 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75033,
+          "name": "勇士的每一面",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -11223,7 +11253,14 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75071,
+          "name": "常伴相随",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -11235,7 +11272,14 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75017,
+          "name": "为我敞开心扉",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -11247,7 +11291,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -11259,7 +11303,8 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -11271,7 +11316,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -11283,7 +11328,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -11295,7 +11340,14 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75069,
+          "name": "扭曲的延伸",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -11307,7 +11359,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -11319,7 +11371,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -11331,7 +11383,14 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75094,
+          "name": "名为夜的孤岛",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -11343,7 +11402,14 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 75087,
+          "name": "再见了，最后的龙龙饼干",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -11355,7 +11421,14 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75087,
+          "name": "再见了，最后的龙龙饼干",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -11367,7 +11440,14 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75076,
+          "name": "浮羽之滨的迷局",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -11379,7 +11459,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -11391,7 +11471,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -11403,7 +11483,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "GROUP_NOTIFY"
     }
   },
   {
@@ -11415,7 +11495,8 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -11427,7 +11508,8 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -11439,7 +11521,14 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        {
+          "questId": 75018,
+          "name": "龙医生的困境",
+          "type": "世界任务"
+        }
+      ]
     }
   },
   {
@@ -11451,7 +11540,8 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_QUEST_AND",
+      "task": []
     }
   },
   {
@@ -14307,7 +14397,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14319,7 +14409,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14331,7 +14421,7 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14343,7 +14433,7 @@
     "reward": 20,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14355,7 +14445,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14367,7 +14457,7 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14379,7 +14469,7 @@
     "reward": 20,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14391,7 +14481,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14403,7 +14493,7 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14415,7 +14505,7 @@
     "reward": 20,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14427,7 +14517,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14439,7 +14529,7 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14451,7 +14541,7 @@
     "reward": 20,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14463,7 +14553,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14475,7 +14565,7 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14487,7 +14577,7 @@
     "reward": 20,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14499,7 +14589,7 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14511,7 +14601,7 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -14523,7 +14613,7 @@
     "reward": 20,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "COMBAT_CONFIG_COMMON"
     }
   },
   {
@@ -17793,7 +17883,14 @@
     "reward": 5,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 5026,
+          "name": "为同一片土地",
+          "type": "魔神任务"
+        }
+      ]
     }
   },
   {
@@ -17805,7 +17902,14 @@
     "reward": 10,
     "version": "5.2",
     "trigger": {
-      "type": "Unknown"
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        {
+          "questId": 5026,
+          "name": "为同一片土地",
+          "type": "魔神任务"
+        }
+      ]
     }
   },
   {
