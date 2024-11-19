@@ -38,7 +38,7 @@
   <div class="ur-box" v-if="recordData">
     <div class="ur-box-title">
       <TurRoleInfo :model-value="recordData.role" :uid="uidCur ?? 0" />
-      <span>Render by TeyvatGuide v{{ version }}</span>
+      <span>原神战绩|Render by TeyvatGuide v{{ version }}|更新于 {{ recordData.updated }}</span>
     </div>
     <TSubLine>数据总览</TSubLine>
     <TurOverviewGrid :model-value="recordData.stats" />
@@ -243,6 +243,12 @@ async function deleteRecord(): Promise<void> {
   width: 100%;
   align-items: flex-end;
   justify-content: space-between;
+
+  :last-child {
+    z-index: -1;
+    font-size: 14px;
+    opacity: 0.8;
+  }
 }
 
 .ur-empty {

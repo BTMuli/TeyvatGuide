@@ -68,10 +68,12 @@
   </v-app-bar>
   <div class="uc-box">
     <div class="uc-top">
-      <div class="uc-top-title">
-        UID：{{ uidCur }} {{ isEmpty ? "暂无数据" : `更新于 ${getUpdateTime()}` }}
+      <div class="uc-top-title">UID：{{ uidCur }}</div>
+      <div class="uc-top-info">
+        <span>角色详情</span>
+        <span>|Render by TeyvatGuide v{{ version }}|</span>
+        <span>更新于 {{ getUpdateTime() }}</span>
       </div>
-      <div class="uc-top-info">Render by TeyvatGuide v{{ version }}</div>
     </div>
     <div class="uc-grid" v-if="!isEmpty">
       <TuaAvatarBox
