@@ -45,7 +45,7 @@ declare namespace TGApp.Game.Combat {
    * @property {number} avatar_id 角色id
    * @property {number} avatar_type 角色类型 // 0-自己角色，1-试用角色，2-助演角色
    * @property {string} name 角色名称
-   * @property {string} element 角色元素 // todo Dendro
+   * @property {string} element 角色元素
    * @property {string} image 角色图像
    * @property {number} level 角色等级
    * @property {number} rarity 角色稀有度
@@ -116,7 +116,7 @@ declare namespace TGApp.Game.Combat {
    * @since Beta v0.6.3
    * @property {string} icon 图标
    * @property {string} name 名称
-   * @property {string} desc 描述 // todo 带 <color>
+   * @property {string} desc 描述
    * @property {boolean} is_enhanced 是否加强
    * @property {number} id ID
    * @return Card

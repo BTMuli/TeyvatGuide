@@ -72,7 +72,7 @@ import TSUserRecord from "../../plugins/Sqlite/modules/userRecord.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { generateShareImg } from "../../utils/TGShare.js";
-import TGRequest from "../../web/request/TGRequest.js";
+import TakumiRecordGenshinApi from "../../web/request/recordReq.js";
 
 // store
 const userStore = storeToRefs(useUserStore());
@@ -144,27 +144,25 @@ async function refreshRecord(): Promise<void> {
     await TGLogger.Warn(`[UserRecord][refresh][${user.value.gameUid}] 未登录`);
     return;
   }
-  const cookie = {
-    account_id: userStore.cookie.value.account_id,
-    cookie_token: userStore.cookie.value.cookie_token,
-  };
-  const res = await TGRequest.User.getRecord(cookie, user.value);
-  if (!("retcode" in res)) {
-    await TGLogger.Info(`[UserRecord][refresh][${user.value.gameUid}] 获取战绩数据成功`);
-    await TGLogger.Info(`[UserRecord][refresh][${user.value.gameUid}]`, false);
-    await TGLogger.Info(JSON.stringify(res), false);
-    showLoading.update("正在保存战绩数据");
-    await TSUserRecord.saveRecord(Number(user.value.gameUid), res);
-    await loadUid();
-    await loadRecord();
-    if (recordData.value === undefined) await loadRecord();
-  } else {
+  const res = await TakumiRecordGenshinApi.index(userStore.cookie.value, user.value);
+  if ("retcode" in res) {
+    showLoading.end();
     showSnackbar.error(`[${res.retcode}] ${res.message}`);
     await TGLogger.Error(`[UserRecord][refresh][${user.value.gameUid}] 获取战绩数据失败`);
     await TGLogger.Error(
       `[UserRecord][refresh][${user.value.gameUid}] ${res.retcode} ${res.message}`,
     );
+    return;
   }
+  await TGLogger.Info(`[UserRecord][refresh][${user.value.gameUid}] 获取战绩数据成功`);
+  await TGLogger.Info(`[UserRecord][refresh][${user.value.gameUid}]`, false);
+  await TGLogger.Info(JSON.stringify(res), false);
+  showLoading.update("正在保存战绩数据");
+  await TSUserRecord.saveRecord(Number(user.value.gameUid), res);
+  showLoading.update("正在加载战绩数据");
+  await loadUid();
+  await loadRecord();
+  if (recordData.value === undefined) await loadRecord();
   showLoading.end();
 }
 

@@ -78,7 +78,7 @@
     <div class="pc-posts">
       <div v-for="item in getPageItems()" :key="item.post.post_id">
         <TPostCard
-          @update:selected="(v) => (selectedPost = v)"
+          @onSelected="handleSelected"
           :model-value="item"
           :selected="selectedPost"
           :select-mode="selectedMode"
@@ -102,7 +102,7 @@ import ToCollectPost from "../../components/overlay/to-collectPost.vue";
 import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
-import TGRequest from "../../web/request/TGRequest.js";
+import BBSApi from "../../web/request/bbsReq.js";
 
 const userStore = storeToRefs(useUserStore());
 
@@ -133,6 +133,10 @@ onUnmounted(() => {
     collectListener = null;
   }
 });
+
+function handleSelected(v: string[]) {
+  selectedPost.value = v;
+}
 
 function sortPost(value: boolean) {
   let ori = sortId.value;
@@ -364,12 +368,9 @@ async function freshUser(uid?: string): Promise<void> {
     showSnackbar.warn("请先登录");
     return;
   }
-  const cookie = {
-    cookie_token: userStore.cookie.value.cookie_token,
-    account_id: userStore.cookie.value.account_id,
-  };
-  showLoading.start("获取用户收藏...", `UID: ${uid || userStore.briefInfo.value.uid}`);
-  let res = await TGRequest.User.getCollect(cookie, uid || userStore.briefInfo.value.uid);
+  const uidReal = uid || userStore.briefInfo.value.uid;
+  showLoading.start("获取用户收藏...", `UID: ${uidReal}`);
+  let res = await BBSApi.lovePost(userStore.cookie.value, uidReal);
   while (true) {
     if ("retcode" in res) {
       showLoading.end();
@@ -385,8 +386,8 @@ async function freshUser(uid?: string): Promise<void> {
     await mergePosts(posts, uid || userStore.briefInfo.value.uid);
     if (res.is_last) break;
     showLoading.update("获取用户收藏...", `[offset]${res.next_offset} [is_last]${res.is_last}`);
-    res = await TGRequest.User.getCollect(
-      cookie,
+    res = await BBSApi.lovePost(
+      userStore.cookie.value,
       uid || userStore.briefInfo.value.uid,
       res.next_offset,
     );

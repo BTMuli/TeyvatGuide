@@ -13,8 +13,10 @@ import TGSqlite from "../plugins/Sqlite/index.js";
 import { useAppStore } from "../store/modules/app.js";
 import { useUserStore } from "../store/modules/user.js";
 import TGConstant from "../web/constant/TGConstant.js";
-import { getCookieTokenBySToken } from "../web/request/getCookieToken.js";
-import TGRequest from "../web/request/TGRequest.js";
+import BBSApi from "../web/request/bbsReq.js";
+import OtherApi from "../web/request/otherReq.js";
+import PassportApi from "../web/request/passportReq.js";
+import TakumiApi from "../web/request/takumiReq.js";
 import { getDS4JS } from "../web/utils/getRequestHeader.js";
 
 import { parseLink } from "./linkParser.js";
@@ -531,7 +533,7 @@ class TGClient {
     const userStore = useUserStore();
     if (!userStore.cookie) return;
     const cookie = { mid: userStore.cookie.mid, stoken: userStore.cookie.stoken };
-    const res = await TGRequest.User.getAuthkey2(cookie, arg.payload);
+    const res = await TakumiApi.bind.authKey2(cookie, arg.payload);
     await this.callback(arg.callback, res.data);
   }
 
@@ -545,16 +547,12 @@ class TGClient {
   async getActionTicket(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetActionTicketPayload>,
   ): Promise<void> {
-    const user = useUserStore();
-    if (!user.cookie) return;
-    const uid = user.account.gameUid;
-    const mid = user.cookie.mid;
-    const stoken = user.cookie.stoken;
-    const ActionTicket = await TGRequest.User.bySToken.getActionTicket(
+    const userStore = useUserStore();
+    if (!userStore.cookie) return;
+    const ActionTicket = await TakumiApi.auth.actionTicket(
+      userStore.cookie,
+      userStore.account,
       arg.payload.action_type,
-      stoken,
-      mid,
-      uid,
     );
     await this.callback(arg.callback, ActionTicket.data);
   }
@@ -586,7 +584,7 @@ class TGClient {
     const user = useUserStore();
     if (!user.cookie) return;
     if (arg.payload.forceRefresh) {
-      const res = await getCookieTokenBySToken(user.cookie.mid, user.cookie.stoken);
+      const res = await PassportApi.cookieToken(user.cookie);
       if (typeof res !== "string") return;
       user.cookie.cookie_token = res;
       await TGSqlite.saveAppData("cookie", JSON.stringify(user.cookie));
@@ -647,9 +645,7 @@ class TGClient {
   async getHTTPRequestHeaders(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     const localFp = getDeviceInfo("device_fp");
     let deviceInfo = useAppStore().deviceInfo;
-    if (localFp === "0000000000000") {
-      deviceInfo = await TGRequest.Device.getFp(deviceInfo);
-    }
+    if (localFp === "0000000000000") deviceInfo = await OtherApi.fp(deviceInfo);
     const data = {
       "user-agent": TGConstant.BBS.UA_MOBILE,
       "x-rpc-client_type": "2",
@@ -682,9 +678,7 @@ class TGClient {
   async getUserInfo(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     const user = useUserStore();
     if (!user.cookie) return;
-    const cookieToken = user.cookie.cookie_token;
-    const accountId = user.cookie.account_id;
-    const userInfo = await TGRequest.User.byCookie.getUserInfo(cookieToken, accountId);
+    const userInfo = await BBSApi.userInfo(user.cookie);
     if ("retcode" in userInfo) {
       console.error(`[${arg.callback}] ${userInfo.message}`);
       return;

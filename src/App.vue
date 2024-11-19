@@ -29,7 +29,7 @@ import { useAppStore } from "./store/modules/app.js";
 import { useUserStore } from "./store/modules/user.js";
 import { getBuildTime } from "./utils/TGBuild.js";
 import TGLogger from "./utils/TGLogger.js";
-import TGRequest from "./web/request/TGRequest.js";
+import OtherApi from "./web/request/otherReq.js";
 
 const appStore = useAppStore();
 const userStore = storeToRefs(useUserStore());
@@ -133,7 +133,7 @@ async function checkDeviceFp(): Promise<void> {
   const deviceFind = appData.find((item) => item.key === "deviceInfo");
   if (typeof deviceFind === "undefined") {
     if (deviceLocal.device_fp === "0000000000000") {
-      appStore.deviceInfo = await TGRequest.Device.getFp(appStore.deviceInfo);
+      appStore.deviceInfo = await OtherApi.fp(appStore.deviceInfo);
     }
     await TGSqlite.saveAppData("deviceInfo", JSON.stringify(deviceLocal));
     return;

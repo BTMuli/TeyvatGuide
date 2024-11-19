@@ -129,7 +129,7 @@ import { backUpUserData, restoreUserData } from "../../utils/dataBS.js";
 import { getBuildTime } from "../../utils/TGBuild.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { bytesToSize, getCacheDir, getDeviceInfo, getRandomString } from "../../utils/toolFunc.js";
-import TGRequest from "../../web/request/TGRequest.js";
+import OtherApi from "../../web/request/otherReq.js";
 
 // Store
 const appStore = useAppStore();
@@ -244,7 +244,7 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
       await TGLogger.Info("[Config][confirmUpdateDevice][force] 取消强制更新设备信息");
       return;
     }
-    appStore.deviceInfo = await TGRequest.Device.getFp();
+    appStore.deviceInfo = await OtherApi.fp();
     if (appStore.deviceInfo.device_fp === "0000000000000") {
       appStore.deviceInfo.device_fp = getRandomString(13, "hex");
       showSnackbar.warn(`设备信息获取失败!已使用随机值${appStore.deviceInfo.device_fp}代替`);
@@ -267,7 +267,7 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
     }
   }
   console.log(appStore.deviceInfo);
-  appStore.deviceInfo = await TGRequest.Device.getFp(appStore.deviceInfo);
+  appStore.deviceInfo = await OtherApi.fp(appStore.deviceInfo);
   console.log(appStore.deviceInfo);
   if (appStore.deviceInfo.device_fp === "0000000000000") {
     appStore.deviceInfo.device_fp = getRandomString(13, "hex");

@@ -82,7 +82,7 @@ interface TPostCardProps {
 }
 
 interface TPostCardEmits {
-  (e: "update:selected", value: string[]): void;
+  (e: "onSelected", value: string[]): void;
 }
 
 const props = withDefaults(defineProps<TPostCardProps>(), {
@@ -96,7 +96,7 @@ const selectedList = computed({
   get: () => props.selected,
   set: (v) => {
     if (v === undefined) return;
-    emits("update:selected", v);
+    emits("onSelected", v);
   },
 });
 const cardBg = computed<string>(() => {

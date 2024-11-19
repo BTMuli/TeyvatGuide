@@ -107,7 +107,7 @@ import TSUserCombat from "../../plugins/Sqlite/modules/userCombat.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { generateShareImg } from "../../utils/TGShare.js";
-import TGRequest from "../../web/request/TGRequest.js";
+import TakumiRecordGenshinApi from "../../web/request/recordReq.js";
 
 // store
 const userStore = storeToRefs(useUserStore());
@@ -183,7 +183,7 @@ async function refreshCombat(): Promise<void> {
   }
   await TGLogger.Info("[UserCombat][getCombatData] 更新剧诗数据");
   showLoading.start("正在获取剧诗数据...", `UID: ${user.value.gameUid}`);
-  const res = await TGRequest.User.byCookie.getCombat(userStore.cookie.value, user.value);
+  const res = await TakumiRecordGenshinApi.roleCombat(userStore.cookie.value, user.value);
   if (res === false) {
     showLoading.end();
     showSnackbar.warn("用户未解锁幻想真境剧诗");

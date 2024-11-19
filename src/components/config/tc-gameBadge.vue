@@ -25,7 +25,7 @@ import { computed } from "vue";
 import { useAppStore } from "../../store/modules/app.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
-import TGRequest from "../../web/request/TGRequest.js";
+import PassportApi from "../../web/request/passportReq.js";
 import showSnackbar from "../func/snackbar.js";
 
 const userStore = storeToRefs(useUserStore());
@@ -50,7 +50,7 @@ async function tryPlayGame(): Promise<void> {
     showSnackbar.warn("未检测到原神本体应用！");
     return;
   }
-  const resp = await TGRequest.User.getAuthTicket(account.value, userStore.cookie.value);
+  const resp = await PassportApi.authTicket(account.value, userStore.cookie.value);
   if (typeof resp !== "string") {
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     await TGLogger.Error(
@@ -102,13 +102,6 @@ async function tryPlayGame(): Promise<void> {
   color: var(--tgc-yellow-1);
   font-family: var(--font-title);
   font-size: 18px;
-}
-
-.tgb-btns {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  column-gap: 10px;
 }
 
 .tgb-name {

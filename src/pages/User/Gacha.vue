@@ -72,7 +72,8 @@ import {
   verifyUigfData,
   exportUigf4Data,
 } from "../../utils/UIGF.js";
-import TGRequest from "../../web/request/TGRequest.js";
+import Hk4eApi from "../../web/request/hk4eReq.js";
+import TakumiApi from "../../web/request/takumiReq.js";
 
 // store
 const userStore = storeToRefs(useUserStore());
@@ -147,7 +148,7 @@ async function confirmRefresh(force: boolean): Promise<void> {
     await TGLogger.Warn("[UserGacha][${account.gameUid}][confirmRefresh] 未检测到 cookie");
     return;
   }
-  const authkeyRes = await TGRequest.User.getAuthkey(userStore.cookie.value, account.value);
+  const authkeyRes = await TakumiApi.bind.authKey(userStore.cookie.value, account.value);
   if (typeof authkeyRes === "string") {
     authkey.value = authkeyRes;
     await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 成功获取 authkey`);
@@ -204,7 +205,7 @@ async function getGachaLogs(
   await TGLogger.Info(
     `[UserGacha][${uid}][getGachaLogs] 获取祈愿数据，pool：${pool}，endId：${endId}`,
   );
-  const gachaRes = await TGRequest.User.getGachaLog(authkey.value, pool, endId);
+  const gachaRes = await Hk4eApi.gacha(authkey.value, pool, endId);
   console.log(pool, endId, gachaRes);
   if (Array.isArray(gachaRes)) {
     await TGLogger.Info(

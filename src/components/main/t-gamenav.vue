@@ -19,7 +19,7 @@ import { useAppStore } from "../../store/modules/app.js";
 import TGClient from "../../utils/TGClient.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { createPost } from "../../utils/TGWindow.js";
-import TGRequest from "../../web/request/TGRequest.js";
+import OtherApi from "../../web/request/otherReq.js";
 import showDialog from "../func/dialog.js";
 import showSnackbar from "../func/snackbar.js";
 import ToLivecode from "../overlay/to-livecode.vue";
@@ -64,7 +64,7 @@ async function tryGetCode(): Promise<void> {
     return;
   }
   actId.value = actIdFind;
-  const res = await TGRequest.Nav.getCode(actIdFind);
+  const res = await OtherApi.code(actIdFind);
   if (!Array.isArray(res)) {
     showSnackbar.warn(`[${res.retcode}] ${res.message}`);
     return;

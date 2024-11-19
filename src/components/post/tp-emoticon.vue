@@ -69,7 +69,7 @@ function getImageUrl(): string {
 async function download(): Promise<void> {
   const image = props.data.insert.custom_emoticon.url;
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
-  let size = 0;
+  let size: number;
   if (props.data.insert.custom_emoticon.size.file_size) {
     size = props.data.insert.custom_emoticon.size.file_size;
   } else {

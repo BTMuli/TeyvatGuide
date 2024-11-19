@@ -11,14 +11,16 @@ import TGConstant from "../constant/TGConstant.js";
 
 import { transCookie, transParams } from "./tools.js";
 
+type SaltType = "common" | "prod" | "lk2" | "k2";
+
 /**
  * @description 获取 salt
- * @since Beta v0.3.3
+ * @since Beta v0.6.3
  * @version 2.59.1
- * @param {string} saltType salt 类型
+ * @param {SaltType} saltType salt 类型
  * @returns {string} salt
  */
-function getSalt(saltType: string): string {
+function getSalt(saltType: SaltType): string {
   switch (saltType) {
     case "common":
       return TGConstant.Salt.X4;
@@ -26,6 +28,8 @@ function getSalt(saltType: string): string {
       return TGConstant.Salt.PROD;
     case "lk2":
       return TGConstant.Salt.LK2;
+    case "k2":
+      return TGConstant.Salt.K2;
     default:
       return TGConstant.Salt.X4;
   }
@@ -48,11 +52,11 @@ function getRandomNumber(min: number, max: number): number {
  * @version 2.50.1
  * @param {string} method 请求方法
  * @param {string} data 请求数据
- * @param {string} saltType salt 类型
+ * @param {SaltType} saltType salt 类型
  * @param {boolean} isSign 是否为签名
  * @returns {string} ds
  */
-function getDS(method: string, data: string, saltType: string, isSign: boolean): string {
+function getDS(method: string, data: string, saltType: SaltType, isSign: boolean): string {
   const salt = getSalt(saltType);
   const time = Math.floor(Date.now() / 1000).toString();
   let random = getRandomNumber(100000, 200000).toString();
@@ -71,7 +75,7 @@ function getDS(method: string, data: string, saltType: string, isSign: boolean):
  * @param {Record<string, string>} cookie cookie
  * @param {string} method 请求方法
  * @param {Record<string, string|number|string[]|boolean>|string} data 请求数据
- * @param {string} saltType salt 类型
+ * @param {SaltType} saltType salt 类型
  * @param {boolean} isSign 是否为签名
  * @returns {Record<string, string>} 请求头
  */
@@ -79,7 +83,7 @@ export function getRequestHeader(
   cookie: Record<string, string>,
   method: string,
   data: Record<string, string | number | string[] | boolean> | string,
-  saltType: string,
+  saltType: SaltType,
   isSign: boolean = false,
 ): Record<string, string> {
   let ds;
@@ -104,21 +108,21 @@ export function getRequestHeader(
 /**
  * @description 获取 DS
  * @since Beta v0.3.9
- * @param {string} saltType salt 类型
+ * @param {SaltType} saltType salt 类型
  * @param {number} dsType ds 类型
  * @param {Record<string, string|number>|string} body
  * @param {Record<string, string|number>|string} query
  * @returns {string} DS
  */
-export function getDS4JS(saltType: string, dsType: 1, body: undefined, query: undefined): string;
+export function getDS4JS(saltType: SaltType, dsType: 1, body: undefined, query: undefined): string;
 export function getDS4JS(
-  saltType: string,
+  saltType: SaltType,
   dsType: 2,
   body: Record<string, string | number> | string,
   query: Record<string, string | number> | string,
 ): string;
 export function getDS4JS(
-  saltType: string,
+  saltType: SaltType,
   dsType: 1 | 2,
   body?: Record<string, string | number> | string,
   query?: Record<string, string | number> | string,

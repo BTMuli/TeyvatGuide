@@ -1,7 +1,7 @@
 /**
- * @file web/request/getAnnouncement.ts
- * @description 获取游戏内公告
- * @since Beta v0.6.0
+ * @file web/request/hk4eReq.ts
+ * @description Hk4eApi 请求模块
+ * @since Beta v0.6.3
  */
 
 import TGHttp from "../../utils/TGHttp.js";
@@ -56,7 +56,7 @@ function getAnnoParams(
  * @param {AnnoLang} lang 语言
  * @returns {Promise<TGApp.BBS.Announcement.ListData>}
  */
-export async function getAnnoList(
+async function getAnnoList(
   region: AnnoServer = AnnoServer.CN_ISLAND,
   lang: AnnoLang = "zh-cn",
 ): Promise<TGApp.BBS.Announcement.ListData> {
@@ -80,7 +80,7 @@ export async function getAnnoList(
  * @param {AnnoLang} lang 语言
  * @returns {Promise<TGApp.BBS.Announcement.ContentItem>}
  */
-export async function getAnnoContent(
+async function getAnnoContent(
   annId: number,
   region: AnnoServer = AnnoServer.CN_ISLAND,
   lang: AnnoLang = "zh-cn",
@@ -101,3 +101,45 @@ export async function getAnnoContent(
     throw new Error("公告内容不存在");
   }
 }
+
+/**
+ * @description 获取抽卡记录
+ * @since Beta v0.5.0
+ * @param {string} authKey authKey
+ * @param {string} gachaType 抽卡类型
+ * @param {string} endId 结束 id，默认为 0
+ * @returns {Promise<TGApp.Game.Gacha.GachaItem[] | TGApp.BBS.Response.Base>} 抽卡记录
+ */
+async function getGachaLog(
+  authKey: string,
+  gachaType: string,
+  endId: string = "0",
+): Promise<TGApp.Game.Gacha.GachaItem[] | TGApp.BBS.Response.Base> {
+  const url = "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog";
+  const params = {
+    lang: "zh-cn",
+    auth_appid: "webview_gacha",
+    authkey: authKey,
+    authkey_ver: "1",
+    sign_type: "2",
+    gacha_type: gachaType,
+    size: "20",
+    end_id: endId,
+  };
+  const resp = await TGHttp<TGApp.Game.Gacha.GachaLogResponse | TGApp.BBS.Response.Base>(url, {
+    method: "GET",
+    query: params,
+  });
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data.list;
+}
+
+const Hk4eApi = {
+  anno: {
+    list: getAnnoList,
+    content: getAnnoContent,
+  },
+  gacha: getGachaLog,
+};
+
+export default Hk4eApi;

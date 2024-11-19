@@ -110,11 +110,12 @@ import TuaDetailOverlay from "../../components/userAvatar/tua-detail-overlay.vue
 import TwoSelectC, { SelectedCValue } from "../../components/wiki/two-select-c.vue";
 import { AppCharacterData } from "../../data/index.js";
 import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
+import TSUserRecord from "../../plugins/Sqlite/modules/userRecord.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { generateShareImg } from "../../utils/TGShare.js";
 import { timestampToDate } from "../../utils/toolFunc.js";
-import TGRequest from "../../web/request/TGRequest.js";
+import TakumiRecordGenshinApi from "../../web/request/recordReq.js";
 
 // store
 const userStore = storeToRefs(useUserStore());
@@ -274,16 +275,20 @@ async function refresh(): Promise<void> {
     loadData.value = false;
     return;
   }
-  showLoading.update("正在更新角色数据...", "正在获取角色列表");
-  const indexRes = await TGRequest.User.byCookie.getAvatarIndex(userStore.cookie.value, user.value);
-  if (indexRes.retcode !== 0) {
+  showLoading.update("正在更新角色数据...", "正在获取战绩数据");
+  const indexRes = await TakumiRecordGenshinApi.index(userStore.cookie.value, user.value);
+  if ("retcode" in indexRes) {
     showSnackbar.error(`[${indexRes.retcode}] ${indexRes.message}`);
     await TGLogger.Error(JSON.stringify(indexRes.message));
     showLoading.end();
     loadData.value = false;
     return;
+  } else {
+    showLoading.update("正在更新角色数据...", "正在保存战绩数据");
+    await TSUserRecord.saveRecord(Number(user.value.gameUid), indexRes);
   }
-  const listRes = await TGRequest.User.byCookie.getAvatarList(userStore.cookie.value, user.value);
+  showLoading.update("正在更新角色数据...", "正在获取角色列表");
+  const listRes = await TakumiRecordGenshinApi.character.list(userStore.cookie.value, user.value);
   if (!Array.isArray(listRes)) {
     showSnackbar.error(`[${listRes.retcode}] ${listRes.message}`);
     await TGLogger.Error(`[Character][refreshRoles][${user.value.gameUid}] 获取角色列表失败`);
@@ -296,7 +301,7 @@ async function refresh(): Promise<void> {
   }
   const idList = listRes.map((i) => i.id.toString());
   showLoading.update("正在更新角色数据...", `共${idList.length}个角色`);
-  const res = await TGRequest.User.byCookie.getAvatarDetail(
+  const res = await TakumiRecordGenshinApi.character.detail(
     userStore.cookie.value,
     user.value,
     idList,

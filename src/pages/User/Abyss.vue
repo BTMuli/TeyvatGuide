@@ -127,7 +127,7 @@ import TSUserCombat from "../../plugins/Sqlite/modules/userCombat.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { generateShareImg } from "../../utils/TGShare.js";
-import TGRequest from "../../web/request/TGRequest.js";
+import TakumiRecordGenshinApi from "../../web/request/recordReq.js";
 
 // store
 const userStore = storeToRefs(useUserStore());
@@ -211,7 +211,7 @@ async function refreshAbyss(): Promise<void> {
   }
   await TGLogger.Info("[UserAbyss][getAbyssData] 更新深渊数据");
   showLoading.start("正在获取上期深渊数据...", `UID: ${user.value.gameUid}`);
-  const resP = await TGRequest.User.byCookie.getAbyss(userStore.cookie.value, "2", user.value);
+  const resP = await TakumiRecordGenshinApi.spiralAbyss(userStore.cookie.value, user.value, "2");
   if ("retcode" in resP) {
     showLoading.end();
     showSnackbar.error(`[${resP.retcode}]${resP.message}`);
@@ -223,7 +223,7 @@ async function refreshAbyss(): Promise<void> {
   showLoading.update("正在保存上期深渊数据...", `UID: ${user.value.gameUid}`);
   await TSUserAbyss.saveAbyss(user.value.gameUid, resP);
   showLoading.update("正在获取本期深渊数据...", `UID: ${user.value.gameUid}`);
-  const res = await TGRequest.User.byCookie.getAbyss(userStore.cookie.value, "1", user.value);
+  const res = await TakumiRecordGenshinApi.spiralAbyss(userStore.cookie.value, user.value, "1");
   if ("retcode" in res) {
     showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);

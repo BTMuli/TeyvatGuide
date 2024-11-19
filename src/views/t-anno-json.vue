@@ -14,8 +14,7 @@ import { useRoute } from "vue-router";
 
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import showLoading from "../components/func/loading.js";
-import { AnnoLang, AnnoServer } from "../web/request/getAnno.js";
-import TGRequest from "../web/request/TGRequest.js";
+import Hk4eApi, { AnnoLang, AnnoServer } from "../web/request/hk4eReq.js";
 
 // 数据
 const route = useRoute();
@@ -32,13 +31,13 @@ onMounted(async () => {
     return;
   }
   showLoading.update("正在获取数据...", `公告ID: ${annoId}`);
-  const listData = await TGRequest.Anno.getList();
+  const listData = await Hk4eApi.anno.list(region, lang);
   listData.list.map((item: TGApp.BBS.Announcement.ListItem) => {
     return item.list.map((single: TGApp.BBS.Announcement.AnnoSingle) => {
       return single.ann_id === annoId ? (jsonList.value = single) : null;
     });
   });
-  jsonContent.value = await TGRequest.Anno.getContent(annoId, region, lang);
+  jsonContent.value = await Hk4eApi.anno.content(annoId, region, lang);
   showLoading.end();
 });
 </script>

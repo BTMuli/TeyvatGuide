@@ -1,7 +1,7 @@
 /**
- * @file src/web/request/getDeviceFp.ts
- * @description 获取设备指纹
- * @since Beta v0.5.5
+ * @file web/request/otherReq.ts
+ * @description Other API
+ * @since Beta v0.6.3
  */
 
 import TGHttp from "../../utils/TGHttp.js";
@@ -15,7 +15,7 @@ import TGConstant from "../constant/TGConstant.js";
  * @param {TGApp.App.Device.DeviceInfo} Info - 设备信息
  * @returns {Promise<TGApp.App.Device.DeviceInfo>} 设备指纹
  */
-export async function getDeviceFp(
+async function getDeviceFp(
   Info?: TGApp.App.Device.DeviceInfo,
 ): Promise<TGApp.App.Device.DeviceInfo> {
   const info = Info ?? getInitDeviceInfo();
@@ -86,7 +86,7 @@ export async function getDeviceFp(
     device_fp: info.device_fp,
   };
   const header = {
-    "User-Agent": `Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/${TGConstant.BBS.VERSION}`,
+    "User-Agent": TGConstant.BBS.UA_MOBILE,
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "5",
     "x-requested-with": "com.mihoyo.hyperion",
@@ -109,3 +109,29 @@ export async function getDeviceFp(
   }
   return info;
 }
+
+/**
+ * @description 获取兑换码请求
+ * @since Beta v0.5.3
+ * @param {string} actId - 活动 id
+ * @return {Promise<TGApp.BBS.Navigator.CodeData[]|TGApp.BBS.Response.Base>}
+ */
+async function refreshCode(
+  actId: string,
+): Promise<TGApp.BBS.Navigator.CodeData[] | TGApp.BBS.Response.Base> {
+  const url = "https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode";
+  const header = { "x-rpc-act_id": actId };
+  const res = await TGHttp<TGApp.BBS.Navigator.CodeResponse | TGApp.BBS.Response.Base>(url, {
+    method: "GET",
+    headers: header,
+  });
+  if (res.retcode !== 0) return <TGApp.BBS.Response.Base>res;
+  return res.data.code_list;
+}
+
+const OtherApi = {
+  code: refreshCode,
+  fp: getDeviceFp,
+};
+
+export default OtherApi;

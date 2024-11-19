@@ -9,7 +9,7 @@ import { defineStore } from "pinia";
 import { reactive, ref } from "vue";
 
 import { getInitDeviceInfo } from "../../utils/toolFunc.js";
-import { type AnnoLang, AnnoServer } from "../../web/request/getAnno.js";
+import { type AnnoLang, AnnoServer } from "../../web/request/hk4eReq.js";
 
 // 用于存储用户数据的路径
 const userDataDir = `${await path.appLocalDataDir()}${path.sep()}userData`;

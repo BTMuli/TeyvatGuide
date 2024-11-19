@@ -41,7 +41,7 @@
   <v-window v-model="tab">
     <v-window-item v-for="(value, index) in tabValues" :key="index" :value="value">
       <div class="anno-grid">
-        <TAnnocard
+        <TAnnoCard
           v-for="item in annoCards[value]"
           :key="item.id"
           :model-value="item"
@@ -59,11 +59,10 @@ import { useRouter } from "vue-router";
 
 import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
-import TAnnocard from "../../components/main/t-annocard.vue";
+import TAnnoCard from "../../components/main/t-annocard.vue";
 import { useAppStore } from "../../store/modules/app.js";
 import TGLogger from "../../utils/TGLogger.js";
-import { AnnoLang, AnnoServer } from "../../web/request/getAnno.js";
-import TGRequest from "../../web/request/TGRequest.js";
+import Hk4eApi, { AnnoLang, AnnoServer } from "../../web/request/hk4eReq.js";
 import { getAnnoCard } from "../../web/utils/getAnnoCard.js";
 import { decodeRegExp } from "../../web/utils/tools.js";
 
@@ -144,12 +143,12 @@ async function loadData(): Promise<void> {
     "正在获取公告数据",
     `服务器：${getRegionName(curRegion.value)}，语言：${getLangName(curLang.value)}`,
   );
-  const annoData = await TGRequest.Anno.getList(curRegion.value, curLang.value);
+  const annoData = await Hk4eApi.anno.list(curRegion.value, curLang.value);
   const listCards = getAnnoCard(annoData);
   await Promise.all(
     listCards.map(async (item) => {
       if (item.typeLabel === AnnoType.game) return;
-      const detail = await TGRequest.Anno.getContent(item.id, curRegion.value, "zh-cn");
+      const detail = await Hk4eApi.anno.content(item.id, curRegion.value, "zh-cn");
       const timeStr = getAnnoTime(detail.content);
       if (timeStr !== false) item.timeStr = timeStr;
     }),

@@ -24,8 +24,7 @@ import showLoading from "../components/func/loading.js";
 import { useAppStore } from "../store/modules/app.js";
 import TGLogger from "../utils/TGLogger.js";
 import { createTGWindow } from "../utils/TGWindow.js";
-import { AnnoLang, AnnoServer } from "../web/request/getAnno.js";
-import TGRequest from "../web/request/TGRequest.js";
+import Hk4eApi, { AnnoLang, AnnoServer } from "../web/request/hk4eReq.js";
 
 const annoRef = ref<HTMLElement>(<HTMLElement>{});
 const annoTitle = ref<string>("");
@@ -48,7 +47,7 @@ onMounted(async () => {
   }
   showLoading.update("正在获取数据...", `公告ID:${annoId}`);
   try {
-    annoData.value = await TGRequest.Anno.getContent(annoId, region, lang);
+    annoData.value = await Hk4eApi.anno.content(annoId, region, lang);
     showLoading.update("正在渲染数据...", `公告ID：${annoId}`);
     annoTitle.value = `Anno_${annoId}`;
     await webviewWindow
