@@ -8,17 +8,17 @@ const mainRoutes = [
   {
     path: "/",
     name: "首页",
-    component: async () => await import("../../pages/common/Home.vue"),
+    component: async () => await import("../../pages/common/PageHome.vue"),
   },
   {
     path: "/announcements",
     name: "公告",
-    component: async () => await import("../../pages/common/Announcements.vue"),
+    component: async () => await import("../../pages/common/PageAnno.vue"),
   },
   {
     path: "/news/:gid/:type?",
     name: "咨讯",
-    component: async () => await import("../../pages/common/News.vue"),
+    component: async () => await import("../../pages/common/PostNews.vue"),
   },
   {
     path: "/posts/forum/:gid?/:forum?",
@@ -33,7 +33,7 @@ const mainRoutes = [
   {
     path: "/achievements/:app?",
     name: "成就",
-    component: async () => await import("../../pages/common/Achievements.vue"),
+    component: async () => await import("../../pages/common/PageAchi.vue"),
   },
   {
     path: "/collection",
@@ -43,12 +43,12 @@ const mainRoutes = [
   {
     path: "/test",
     name: "测试页",
-    component: async () => await import("../../pages/common/Test.vue"),
+    component: async () => await import("../../pages/common/PageTest.vue"),
   },
   {
     path: "/config",
     name: "设置",
-    component: async () => await import("../../pages/common/Config.vue"),
+    component: async () => await import("../../pages/common/PageConfig.vue"),
   },
 ];
 

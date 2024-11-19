@@ -59,10 +59,10 @@ import { getVersion } from "@tauri-apps/api/app";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
 
+import TSubLine from "../../components/app/t-subline.vue";
 import showDialog from "../../components/func/dialog.js";
 import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
-import TSubLine from "../../components/main/t-subline.vue";
 import TurAvatarGrid from "../../components/userRecord/tur-avatar-grid.vue";
 import TurHomeGrid from "../../components/userRecord/tur-home-grid.vue";
 import TurOverviewGrid from "../../components/userRecord/tur-overview-grid.vue";

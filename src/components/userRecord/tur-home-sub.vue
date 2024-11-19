@@ -1,10 +1,10 @@
 <template>
   <div
-    class="tur-hs-box"
     :style="{
       backgroundImage: 'url(' + getUrl.bg + ')',
       backgroundSize: 'cover',
     }"
+    class="tur-hs-box"
   >
     <div class="tur-hs-name">
       {{ data.name }}

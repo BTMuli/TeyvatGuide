@@ -1,17 +1,17 @@
 /**
  * @file plugins/Hutao/utils/abyssUtil.ts
  * @description 将本地数据转为上传用的数据
- * @since Beta v0.6.2
+ * @since Beta v0.6.3
  */
 
 /**
  * @description 将本地数据转为上传用的数据
  * @since Beta v0.6.3
- * @param {TGApp.Sqlite.Abyss.SingleTable} data 本地数据
+ * @param {TGApp.Sqlite.Abyss.TableRaw} data 本地数据
  * @returns {TGApp.Plugins.Hutao.Abyss.RecordUpload} 上传用的数据
  */
 export function transAbyssLocal(
-  data: TGApp.Sqlite.Abyss.SingleTable,
+  data: TGApp.Sqlite.Abyss.TableData,
 ): TGApp.Plugins.Hutao.Abyss.RecordUpload {
   return {
     Uid: data.uid,
@@ -24,43 +24,36 @@ export function transAbyssLocal(
 
 /**
  * @description 转换深渊数据
- * @since Alpha v0.2.2
- * @param {TGApp.Sqlite.Abyss.SingleTable} data 本地数据
+ * @since Beta v0.6.3
+ * @param {TGApp.Sqlite.Abyss.TableRaw} data 本地数据
  * @returns {TGApp.Plugins.Hutao.Abyss.RecordData} 上传用的数据
  */
-function transAbyssData(
-  data: TGApp.Sqlite.Abyss.SingleTable,
-): TGApp.Plugins.Hutao.Abyss.RecordData {
-  const defeat: TGApp.Sqlite.Abyss.Character = JSON.parse(data.defeatRank)[0];
-  const energySkill: TGApp.Sqlite.Abyss.Character = JSON.parse(data.energySkillRank)[0];
-  const normalSkill: TGApp.Sqlite.Abyss.Character = JSON.parse(data.normalSkillRank)[0];
-  const damage: TGApp.Sqlite.Abyss.Character = JSON.parse(data.damageRank)[0];
-  const takeDamage: TGApp.Sqlite.Abyss.Character = JSON.parse(data.takeDamageRank)[0];
+function transAbyssData(data: TGApp.Sqlite.Abyss.TableData): TGApp.Plugins.Hutao.Abyss.RecordData {
   return {
     ScheduleId: data.id,
     TotalBattleTimes: data.totalBattleTimes,
     TotalWinTimes: data.totalWinTimes,
     Defeat: {
-      AvatarId: defeat.id,
-      Value: defeat.value,
+      AvatarId: data.defeatRank[0].id,
+      Value: data.defeatRank[0].value,
     },
     EnergySkill: {
-      AvatarId: energySkill.id,
-      Value: energySkill.value,
+      AvatarId: data.energySkillRank[0].id,
+      Value: data.energySkillRank[0].value,
     },
     NormalSkill: {
-      AvatarId: normalSkill.id,
-      Value: normalSkill.value,
+      AvatarId: data.normalSkillRank[0].id,
+      Value: data.normalSkillRank[0].value,
     },
     Damage: {
-      AvatarId: damage.id,
-      Value: damage.value,
+      AvatarId: data.damageRank[0].id,
+      Value: data.damageRank[0].value,
     },
     TakeDamage: {
-      AvatarId: takeDamage.id,
-      Value: takeDamage.value,
+      AvatarId: data.takeDamageRank[0].id,
+      Value: data.takeDamageRank[0].value,
     },
-    Floors: JSON.parse(data.floors).map((floor: TGApp.Sqlite.Abyss.Floor) => transFloor(floor)),
+    Floors: data.floors.map((floor: TGApp.Sqlite.Abyss.Floor) => transFloor(floor)),
   };
 }
 

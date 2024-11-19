@@ -34,9 +34,9 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 
+import ToNamecard from "../../components/app/to-namecard.vue";
+import TopNamecard from "../../components/app/top-namecard.vue";
 import showSnackbar from "../../components/func/snackbar.js";
-import ToNamecard from "../../components/overlay/to-namecard.vue";
-import TopNamecard from "../../components/overlay/top-namecard.vue";
 import { AppNameCardsData } from "../../data/index.js";
 
 const curNameCard = ref<TGApp.App.NameCard.Item>();

@@ -58,7 +58,7 @@ import { computed, ref } from "vue";
 import { AbyssDataItem } from "../../pages/WIKI/Abyss.vue";
 import { generateShareImg } from "../../utils/TGShare.js";
 import { timestampToDate } from "../../utils/toolFunc.js";
-import TOverlay from "../main/t-overlay.vue";
+import TOverlay from "../app/t-overlay.vue";
 
 import HtaOverviewLine from "./hta-overview-line.vue";
 

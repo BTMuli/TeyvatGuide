@@ -73,7 +73,7 @@
 import { onMounted, ref, watch } from "vue";
 
 import showSnackbar from "../../components/func/snackbar.js";
-import TwoMaterial from "../../components/wiki/two-material.vue";
+import TwoMaterial from "../../components/pageWiki/two-material.vue";
 import { WikiMaterialData } from "../../data/index.js";
 
 const curMaterial = ref<TGApp.App.Material.WikiItem>(<TGApp.App.Material.WikiItem>{});

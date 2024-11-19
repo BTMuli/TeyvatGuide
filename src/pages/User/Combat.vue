@@ -95,10 +95,10 @@ import { storeToRefs } from "pinia";
 import { onMounted, ref, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 
+import TSubLine from "../../components/app/t-subline.vue";
 import showDialog from "../../components/func/dialog.js";
 import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
-import TSubLine from "../../components/main/t-subline.vue";
 import TucAvatars from "../../components/userCombat/tuc-avatars.vue";
 import TucOverview from "../../components/userCombat/tuc-overview.vue";
 import TucRound from "../../components/userCombat/tuc-round.vue";

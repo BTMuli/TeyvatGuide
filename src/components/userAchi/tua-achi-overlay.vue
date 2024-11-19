@@ -49,15 +49,15 @@
       <slot name="right"></slot>
     </div>
   </TOverlay>
-  <ToPostSearch gid="2" v-model="showSearch" :keyword="search" />
+  <VpOverlaySearch gid="2" v-model="showSearch" :keyword="search" />
 </template>
 <script lang="ts" setup>
 import { computed, ref } from "vue";
 
 import { AppAchievementSeriesData } from "../../data/index.js";
 import TGLogger from "../../utils/TGLogger.js";
-import TOverlay from "../main/t-overlay.vue";
-import ToPostSearch from "../post/to-postSearch.vue";
+import TOverlay from "../app/t-overlay.vue";
+import VpOverlaySearch from "../viewPost/vp-overlay-search.vue";
 
 interface ToAchiInfoProps {
   modelValue: boolean;

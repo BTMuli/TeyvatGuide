@@ -37,7 +37,7 @@
 import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import ToArcBrith from "../../components/overlay/to-arcBrith.vue";
+import ToArcBrith from "../../components/pageArchive/to-arcBrith.vue";
 import { ArcBirDraw, ArcBirRole } from "../../data/index.js";
 import TGClient from "../../utils/TGClient.js";
 

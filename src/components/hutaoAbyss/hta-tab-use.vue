@@ -26,7 +26,8 @@
 import { onMounted, ref } from "vue";
 
 import { AbyssDataItem } from "../../pages/WIKI/Abyss.vue";
-import TibWikiAbyss from "../itembox/tib-wiki-abyss.vue";
+
+import TibWikiAbyss from "./tib-wiki-abyss.vue";
 
 interface HtaTabUseProps {
   data: AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>;

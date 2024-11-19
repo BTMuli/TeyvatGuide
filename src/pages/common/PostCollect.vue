@@ -99,11 +99,11 @@ import { UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
+import TPostCard from "../../components/app/t-postcard.vue";
 import showDialog from "../../components/func/dialog.js";
 import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
-import TPostCard from "../../components/main/t-postcard.vue";
-import ToCollectPost from "../../components/overlay/to-collectPost.vue";
+import ToCollectPost from "../../components/pageCollect/to-collectPost.vue";
 import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";

@@ -14,7 +14,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
+import TItembox, { TItemBoxData } from "../app/t-item-box.vue";
 
 interface TucFightProps {
   label: string;

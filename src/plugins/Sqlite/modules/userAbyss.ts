@@ -15,10 +15,10 @@ import { transCharacterData, transFloorData } from "../utils/transAbyssData.js";
 /**
  * @description 直接插入数据
  * @since Beta v0.6.0
- * @param {TGApp.Sqlite.Abyss.SingleTable} data - 数据
+ * @param {TGApp.Sqlite.Abyss.TableRaw} data - 数据
  * @returns {string}
  */
-function getRestoreSql(data: TGApp.Sqlite.Abyss.SingleTable): string {
+function getRestoreSql(data: TGApp.Sqlite.Abyss.TableRaw): string {
   const timeNow = timestampToDate(new Date().getTime());
   return `
       INSERT INTO SpiralAbyss (uid, id, startTime, endTime, totalBattleTimes, totalWinTimes,
@@ -97,6 +97,35 @@ function getInsertSql(uid: string, data: TGApp.Game.Abyss.FullData): string {
 }
 
 /**
+ * @description 原始数据转table数据
+ * @since Beta v0.6.1
+ * @param {TGApp.Sqlite.Abyss.TableRaw} data - 原始数据
+ * @returns {TGApp.Sqlite.Abyss.TableData}
+ */
+function raw2Data(data: TGApp.Sqlite.Abyss.TableRaw): TGApp.Sqlite.Abyss.TableData {
+  return {
+    uid: data.uid,
+    id: data.id,
+    startTime: data.startTime,
+    endTime: data.endTime,
+    totalBattleTimes: data.totalBattleTimes,
+    totalWinTimes: data.totalWinTimes,
+    maxFloor: data.maxFloor,
+    totalStar: data.totalStar,
+    isUnlock: data.isUnlock,
+    revealRank: JSON.parse(data.revealRank),
+    defeatRank: JSON.parse(data.defeatRank),
+    damageRank: JSON.parse(data.damageRank),
+    takeDamageRank: JSON.parse(data.takeDamageRank),
+    normalSkillRank: JSON.parse(data.normalSkillRank),
+    energySkillRank: JSON.parse(data.energySkillRank),
+    floors: JSON.parse(data.floors),
+    skippedFloor: data.skippedFloor,
+    updated: data.updated,
+  };
+}
+
+/**
  * @description 获取所有有数据的UID
  * @since Beta v0.6.0
  * @returns {Promise<void>}
@@ -110,21 +139,24 @@ async function getAllUid(): Promise<Array<string>> {
 
 /**
  * @description 获取深渊数据
- * @since Beta v0.6.0
+ * @since Beta v0.6.3
  * @param {string} uid - 游戏UID
- * @returns {Promise<TGApp.Sqlite.Abyss.SingleTable[]>}
+ * @returns {Promise<TGApp.Sqlite.Abyss.TableRaw[]>}
  */
-async function getAbyss(uid?: string): Promise<TGApp.Sqlite.Abyss.SingleTable[]> {
+async function getAbyss(uid?: string): Promise<TGApp.Sqlite.Abyss.TableData[]> {
   const db = await TGSqlite.getDB();
+  let res: TGApp.Sqlite.Abyss.TableRaw[];
   if (uid === undefined) {
-    return await db.select<TGApp.Sqlite.Abyss.SingleTable[]>(
+    res = await db.select<TGApp.Sqlite.Abyss.TableRaw[]>(
       "SELECT * FROM SpiralAbyss order by id DESC;",
     );
+  } else {
+    res = await db.select<TGApp.Sqlite.Abyss.TableRaw[]>(
+      "SELECT * FROM SpiralAbyss WHERE uid = ? order by id DESC;",
+      [uid],
+    );
   }
-  return await db.select<TGApp.Sqlite.Abyss.SingleTable[]>(
-    "SELECT * FROM SpiralAbyss WHERE uid = ? order by id DESC;",
-    [uid],
-  );
+  return res.map((i) => raw2Data(i));
 }
 
 /**
@@ -175,7 +207,7 @@ async function restoreAbyss(dir: string): Promise<boolean> {
   const filePath = `${dir}${path.sep()}abyss.json`;
   if (!(await exists(filePath))) return false;
   try {
-    const data: TGApp.Sqlite.Abyss.SingleTable[] = JSON.parse(await readTextFile(filePath));
+    const data: TGApp.Sqlite.Abyss.TableRaw[] = JSON.parse(await readTextFile(filePath));
     const db = await TGSqlite.getDB();
     for (const abyss of data) {
       await db.execute(getRestoreSql(abyss));

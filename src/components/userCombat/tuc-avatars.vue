@@ -7,7 +7,7 @@
 import { computed } from "vue";
 
 import { getZhElement } from "../../utils/toolFunc.js";
-import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
+import TItembox, { TItemBoxData } from "../app/t-item-box.vue";
 
 interface TucAvatarsProps {
   modelValue: TGApp.Game.Combat.Avatar[];

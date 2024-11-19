@@ -1,9 +1,9 @@
 <template>
   <TSwitchTheme />
   <TPinWin />
-  <TbCollect :model-value="postId" :data="postData" />
+  <VpBtnCollect :model-value="postId" :data="postData" />
   <TShareBtn v-model="postRef" :title="shareTitle" />
-  <TprMain :gid="postData.post.game_id" :post-id="postData.post.post_id" v-if="postData" />
+  <VpBtnReply :gid="postData.post.game_id" :post-id="postData.post.post_id" v-if="postData" />
   <div class="tp-post-body" v-if="postData">
     <div class="tp-post-info">
       <div class="tp-post-version">
@@ -76,7 +76,7 @@
     </div>
     <TpParser v-model:data="renderPost" />
   </div>
-  <TpoCollection
+  <VpOverlayCollection
     v-model="showCollection"
     :collection="postData.collection"
     v-if="postData?.collection"
@@ -94,11 +94,11 @@ import TShareBtn from "../components/app/t-shareBtn.vue";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import showLoading from "../components/func/loading.js";
 import showSnackbar from "../components/func/snackbar.js";
-import TbCollect from "../components/post/tb-collect.vue";
-import TpAvatar from "../components/post/tp-avatar.vue";
-import TpParser from "../components/post/tp-parser.vue";
-import TpoCollection from "../components/post/tpo-collection.vue";
-import TprMain from "../components/postReply/tpr-main.vue";
+import TpAvatar from "../components/viewPost/tp-avatar.vue";
+import TpParser from "../components/viewPost/tp-parser.vue";
+import VpBtnCollect from "../components/viewPost/vp-btn-collect.vue";
+import VpBtnReply from "../components/viewPost/vp-btn-reply.vue";
+import VpOverlayCollection from "../components/viewPost/vp-overlay-collection.vue";
 import Mys from "../plugins/Mys/index.js";
 import { useAppStore } from "../store/modules/app.js";
 import TGClient from "../utils/TGClient.js";

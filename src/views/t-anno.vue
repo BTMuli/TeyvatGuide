@@ -16,11 +16,11 @@ import { app, webviewWindow } from "@tauri-apps/api";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 
-import TaParser from "../components/anno/ta-parser.vue";
 import TPinWin from "../components/app/t-pinWin.vue";
 import TShareBtn from "../components/app/t-shareBtn.vue";
 import TSwitchTheme from "../components/app/t-switchTheme.vue";
 import showLoading from "../components/func/loading.js";
+import TaParser from "../components/pageAnno/ta-parser.vue";
 import { useAppStore } from "../store/modules/app.js";
 import TGLogger from "../utils/TGLogger.js";
 import { createTGWindow } from "../utils/TGWindow.js";

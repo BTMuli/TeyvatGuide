@@ -3,7 +3,7 @@
     <template v-slot:item="{ item }">
       <tr class="hta-th-tr">
         <td class="hta-th-icon">
-          <TibWikiAbyss2 v-model="item.AvatarId" />
+          <TItemBox :model-value="getBoxData(item.AvatarId)" />
         </td>
         <td>
           <span>{{ (item.HoldingRate.cur * 100).toFixed(3) }}%</span>
@@ -31,8 +31,9 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
 
+import { AppCharacterData } from "../../data/index.js";
 import { AbyssDataItem } from "../../pages/WIKI/Abyss.vue";
-import TibWikiAbyss2 from "../itembox/tib-wiki-abyss-2.vue";
+import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
 
 interface HtaTabHoldProps {
   data: AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarHold[]>;
@@ -100,6 +101,29 @@ function getRateClass(cur: number, last: number): string {
 function getRateStr(cur: number, last: number): string {
   const diff = Math.abs(cur - last) * 100;
   return `(${cur > last ? "↑" : "↓"}${diff.toFixed(3)}%)`;
+}
+
+function getBoxData(id: number): TItemBoxData {
+  const avatar = AppCharacterData.find((a) => a.id === id);
+  return {
+    bg: `/icon/bg/${avatar?.star ?? 5}-Star.webp`,
+    clickable: false,
+    display: "inner",
+    height: "80px",
+    icon: `/WIKI/character/${id}.webp`,
+    innerHeight: 20,
+    innerText: avatar?.name ?? "旅行者",
+    lt:
+      avatar === undefined
+        ? ""
+        : avatar.element !== ""
+          ? `/icon/element/${avatar.element}元素.webp`
+          : `/icon/weapon/${avatar.weapon}.webp`,
+    ltSize: "20px",
+    size: "80px",
+    innerIcon: `/icon/weapon/${avatar?.weapon ?? "单手剑"}.webp`,
+    innerBlur: "5px",
+  };
 }
 </script>
 <style lang="css" scoped>

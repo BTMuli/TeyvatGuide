@@ -2,16 +2,17 @@
   <div class="tud-db-box">
     <div class="tud-db-time">{{ props.title }} {{ props.modelValue.time }}</div>
     <div class="tud-db-icons-grid">
-      <TibAbyssDetail
+      <TItemBox
         v-for="avatar in props.modelValue.characters"
         :key="avatar.id"
-        :model-value="avatar"
+        :model-value="getBoxData(avatar)"
       />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import TibAbyssDetail from "../itembox/tib-abyss-detail.vue";
+import { AppCharacterData } from "../../data/index.js";
+import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
 
 interface TuaDetailBattleProps {
   title: string;
@@ -19,6 +20,36 @@ interface TuaDetailBattleProps {
 }
 
 const props = defineProps<TuaDetailBattleProps>();
+
+function getBoxData(avatar: TGApp.Sqlite.Abyss.CharacterInfo): TItemBoxData {
+  const res = AppCharacterData.find((i) => i.id === avatar.id);
+  if (avatar.id === 10000005 || avatar.id === 10000007) {
+    return {
+      clickable: false,
+      height: "70px",
+      ltSize: "20px",
+      bg: `/icon/bg/${avatar.star}-Star.webp`,
+      icon: `/WIKI/character/${avatar.id}.webp`,
+      lt: `/icon/weapon/${res?.weapon ?? "单手剑"}.webp`,
+      innerText: `Lv.${avatar.level}`,
+      innerHeight: 20,
+      display: "inner",
+      size: "70px",
+    };
+  }
+  return {
+    clickable: false,
+    height: "70px",
+    ltSize: "20px",
+    bg: `/icon/bg/${avatar.star}-Star.webp`,
+    icon: `/WIKI/character/${avatar.id}.webp`,
+    lt: `/icon/element/${res?.element ?? "风"}元素.webp`,
+    innerText: `Lv.${avatar.level}`,
+    innerHeight: 20,
+    display: "inner",
+    size: "70px",
+  };
+}
 </script>
 <style lang="css" scoped>
 .tud-db-icons-grid {

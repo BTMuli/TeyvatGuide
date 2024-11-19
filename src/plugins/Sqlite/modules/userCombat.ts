@@ -71,7 +71,7 @@ async function getAllUid(): Promise<Array<string>> {
  * @description 获取剧诗数据
  * @since Beta v0.6.3
  * @param {string} uid - 游戏UID
- * @returns {Promise<TGApp.Sqlite.Abyss.SingleTable[]>}
+ * @returns {Promise<TGApp.Sqlite.Abyss.TableRaw[]>}
  */
 async function getCombat(uid?: string): Promise<TGApp.Sqlite.Combat.SingleTable[]> {
   const db = await TGSqlite.getDB();

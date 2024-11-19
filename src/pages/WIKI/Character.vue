@@ -28,9 +28,9 @@ import { useRoute } from "vue-router";
 
 import showDialog from "../../components/func/dialog.js";
 import showSnackbar from "../../components/func/snackbar.js";
-import TwcCharacter from "../../components/wiki/twc-character.vue";
-import TwcListItem from "../../components/wiki/twc-list-item.vue";
-import TwoSelectC, { SelectedCValue } from "../../components/wiki/two-select-c.vue";
+import TwcCharacter from "../../components/pageWiki/twc-character.vue";
+import TwcListItem from "../../components/pageWiki/twc-list-item.vue";
+import TwoSelectC, { SelectedCValue } from "../../components/pageWiki/two-select-c.vue";
 import { AppCharacterData } from "../../data/index.js";
 import { createObc } from "../../utils/TGWindow.js";
 

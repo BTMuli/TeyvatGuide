@@ -34,9 +34,9 @@ import { ref, computed, watch, onMounted } from "vue";
 
 import { AppAchievementSeriesData, AppNameCardsData } from "../../data/index.js";
 import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
+import ToNameCard from "../app/to-namecard.vue";
+import TopNameCard from "../app/top-namecard.vue";
 import showSnackbar from "../func/snackbar.js";
-import ToNameCard from "../overlay/to-namecard.vue";
-import TopNameCard from "../overlay/top-namecard.vue";
 
 import ToAchiInfo from "./tua-achi-overlay.vue";
 import TuaAchi from "./tua-achi.vue";

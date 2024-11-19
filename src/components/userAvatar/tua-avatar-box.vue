@@ -50,7 +50,7 @@ import { computed } from "vue";
 import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
 import { useUserStore } from "../../store/modules/user.js";
 import { getZhElement } from "../../utils/toolFunc.js";
-import TItembox, { TItemBoxData } from "../main/t-itembox.vue";
+import TItembox, { TItemBoxData } from "../app/t-item-box.vue";
 
 import TuaRelicBox from "./tua-relic-box.vue";
 

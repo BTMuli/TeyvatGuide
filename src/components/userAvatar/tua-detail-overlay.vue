@@ -46,7 +46,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
 
-import TOverlay from "../main/t-overlay.vue";
+import TOverlay from "../app/t-overlay.vue";
 import TucDetailCard from "../userAvatarCard/tuc-detail-card.vue";
 import TucDetailOld from "../userAvatarOld/tuc-detail-old.vue";
 

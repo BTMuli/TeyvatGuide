@@ -12,10 +12,10 @@
     </div>
     <div v-if="props.valIcons" class="tuao-val-icons">
       <slot name="val-icons">
-        <TibAbyssOverview
-          v-for="avatar in JSON.parse(props.valIcons) as TGApp.Sqlite.Abyss.Character[]"
+        <TItemBox
+          v-for="avatar in props.valIcons"
           :key="avatar.id"
-          :model-value="avatar"
+          :model-value="getBoxData(avatar)"
         />
       </slot>
     </div>
@@ -24,17 +24,34 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-import TibAbyssOverview from "../itembox/tib-abyss-overview.vue";
+import { AppCharacterData } from "../../data/index.js";
+import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
 
 interface TAOProps {
   title: string;
   valText?: string | number;
-  valIcons?: string;
+  valIcons?: TGApp.Sqlite.Abyss.Character[];
   multi4?: boolean;
 }
 
 const props = defineProps<TAOProps>();
 const getIconNum = computed(() => (props.multi4 ? 4 : 1));
+
+function getBoxData(avatar: TGApp.Sqlite.Abyss.Character): TItemBoxData {
+  const res = AppCharacterData.find((a) => a.id === avatar.id);
+  return {
+    height: "80px",
+    ltSize: "20px",
+    clickable: false,
+    bg: `/icon/bg/${avatar.star}-Star.webp`,
+    icon: `/WIKI/character/${avatar.id}.webp`,
+    lt: `/icon/element/${res?.element ?? "风"}元素.webp`,
+    innerText: avatar.value.toString(),
+    display: "inner",
+    size: "80px",
+    innerHeight: 20,
+  };
+}
 </script>
 <style lang="css" scoped>
 .tuao-box {

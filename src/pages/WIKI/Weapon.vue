@@ -31,9 +31,9 @@ import { useRoute } from "vue-router";
 
 import showDialog from "../../components/func/dialog.js";
 import showSnackbar from "../../components/func/snackbar.js";
-import TwcListItem from "../../components/wiki/twc-list-item.vue";
-import TwcWeapon from "../../components/wiki/twc-weapon.vue";
-import TwoSelectW, { SelectedWValue } from "../../components/wiki/two-select-w.vue";
+import TwcListItem from "../../components/pageWiki/twc-list-item.vue";
+import TwcWeapon from "../../components/pageWiki/twc-weapon.vue";
+import TwoSelectW, { SelectedWValue } from "../../components/pageWiki/two-select-w.vue";
 import { AppWeaponData } from "../../data/index.js";
 import { createObc } from "../../utils/TGWindow.js";
 

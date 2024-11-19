@@ -6,7 +6,7 @@
 
 import { h, render } from "vue";
 
-import TpText from "../../components/post/tp-text.vue";
+import TpText from "../../components/viewPost/tp-text.vue";
 
 import { decodeRegExp } from "./tools.js";
 

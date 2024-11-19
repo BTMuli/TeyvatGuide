@@ -14,7 +14,7 @@
 import { computed } from "vue";
 
 import { getZhElement } from "../../utils/toolFunc.js";
-import TItemBox, { TItemBoxData } from "../main/t-itembox.vue";
+import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
 
 type DucDetailOltProps =
   | {

@@ -1,23 +1,47 @@
 <template>
   <div class="hta-tl-box">
     <div class="hta-tl-item">
-      <TibWikiAbyss2
+      <TItemBox
         v-for="item in props.modelValue.Item.split(',')"
         :key="item"
-        :model-value="item"
+        :model-value="getBoxData(item)"
       />
     </div>
     <div class="hta-tl-rate">上场{{ props.modelValue.Rate }}次</div>
   </div>
 </template>
 <script lang="ts" setup>
-import TibWikiAbyss2 from "../itembox/tib-wiki-abyss-2.vue";
+import { AppCharacterData } from "../../data/index.js";
+import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
 
 interface HtaTeamLineProps {
   modelValue: { Item: string; Rate: number };
 }
 
 const props = defineProps<HtaTeamLineProps>();
+
+function getBoxData(id: string): TItemBoxData {
+  const avatar = AppCharacterData.find((i) => i.id.toString() === id);
+  return {
+    bg: `/icon/bg/${avatar?.star ?? 5}-Star.webp`,
+    clickable: false,
+    display: "inner",
+    height: "80px",
+    icon: `/WIKI/character/${id}.webp`,
+    innerHeight: 20,
+    innerText: avatar?.name ?? "旅行者",
+    lt:
+      avatar === undefined
+        ? ""
+        : avatar.element !== ""
+          ? `/icon/element/${avatar.element}元素.webp`
+          : `/icon/weapon/${avatar.weapon}.webp`,
+    ltSize: "20px",
+    size: "80px",
+    innerIcon: `/icon/weapon/${avatar?.weapon ?? "单手剑"}.webp`,
+    innerBlur: "5px",
+  };
+}
 </script>
 <style lang="css" scoped>
 .hta-tl-box {

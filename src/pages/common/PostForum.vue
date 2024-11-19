@@ -64,17 +64,17 @@
       已加载：{{ posts.length }}，加载更多
     </v-btn>
   </div>
-  <ToPostSearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
+  <VpOverlaySearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
 </template>
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
+import TGameNav from "../../components/app/t-gamenav.vue";
+import TPostCard from "../../components/app/t-postcard.vue";
 import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
-import TGameNav from "../../components/main/t-gamenav.vue";
-import TPostCard from "../../components/main/t-postcard.vue";
-import ToPostSearch from "../../components/post/to-postSearch.vue";
+import VpOverlaySearch from "../../components/viewPost/vp-overlay-search.vue";
 import Mys from "../../plugins/Mys/index.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { createPost } from "../../utils/TGWindow.js";

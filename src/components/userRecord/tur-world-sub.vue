@@ -13,18 +13,18 @@
           <span>级</span>
         </span>
       </div>
-      <div class="tur-ws-sub" v-if="data.children.length === 0">
+      <div v-if="data.children.length === 0" class="tur-ws-sub">
         <span>探索度：</span>
         <span>{{ data.exploration / 10 }}</span>
         <span>%</span>
       </div>
       <div v-else>
-        <div class="tur-ws-sub" v-if="data.exploration !== 0">
+        <div v-if="data.exploration !== 0" class="tur-ws-sub">
           <span>{{ data.name }}探索度：</span>
           <span>{{ data.exploration / 10 }}</span>
           <span>%</span>
         </div>
-        <div class="tur-ws-sub" v-for="item in data.children" :key="item.id">
+        <div v-for="item in data.children" :key="item.id" class="tur-ws-sub">
           <span>{{ item.name }}探索度：</span>
           <span>{{ item.exploration / 10 }}</span>
           <span>%</span>

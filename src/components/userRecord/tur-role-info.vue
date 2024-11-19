@@ -1,7 +1,7 @@
 <template>
   <div class="tur-ri-box">
     <div class="tur-ri-avatar">
-      <img alt="avatar" :src="props.modelValue.avatar" />
+      <img :src="props.modelValue.avatar" alt="avatar" />
     </div>
     <div class="tur-ri-content">
       <div class="tur-ri-title">

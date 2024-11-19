@@ -93,11 +93,7 @@
           </div>
           <TSubLine>详情</TSubLine>
           <div class="uaw-d-box">
-            <TuaDetail
-              v-for="floor in JSON.parse(item.floors) as TGApp.Sqlite.Abyss.Floor[]"
-              :key="floor.id"
-              :model-value="floor"
-            />
+            <TuaDetail v-for="floor in item.floors" :key="floor.id" :model-value="floor" />
           </div>
         </div>
       </v-window-item>
@@ -111,13 +107,13 @@
 <script lang="ts" setup>
 import { getVersion } from "@tauri-apps/api/app";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, watch, computed } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
+import TSubLine from "../../components/app/t-subline.vue";
 import showDialog from "../../components/func/dialog.js";
 import showLoading from "../../components/func/loading.js";
 import showSnackbar from "../../components/func/snackbar.js";
-import TSubLine from "../../components/main/t-subline.vue";
 import TuaDetail from "../../components/userAbyss/tua-detail.vue";
 import TuaOverview from "../../components/userAbyss/tua-overview.vue";
 import Hutao from "../../plugins/Hutao/index.js";
@@ -136,7 +132,7 @@ const userStore = storeToRefs(useUserStore());
 const userTab = ref<number>(0);
 const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
 
-const localAbyss = ref<TGApp.Sqlite.Abyss.SingleTable[]>([]);
+const localAbyss = ref<TGApp.Sqlite.Abyss.TableData[]>([]);
 const abyssRef = ref<HTMLElement>(<HTMLElement>{});
 const version = ref<string>();
 const router = useRouter();
