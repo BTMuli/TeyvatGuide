@@ -2,14 +2,39 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2024-10-31
+Update: 2024-11-19
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2024-10-31 10:36:33`
+> 更新于 `2024-11-19 17:06:05`
 
-## [0.6.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.2)
+## [0.6.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.3) (2024-11-19)
+
+- 🐛 修复用户战绩角色数据`undefined`
+- 🐛 修复咨讯页加载更多异常
+- 🐛 修复验证码登录提示`-100`，数据刷新后若为已登录UID则不会再提示切换
+- 🐛 修复部分公告渲染异常
+- 🐛 修复成就页面在存在搜索内容时点击左侧成就系列无响应
+- ✨ 帖子新增 UID 卡片解析&渲染
+- ✨ 帖子新增自定义表情解析&渲染
+- ✨ 真境剧诗适配，新增真境剧诗页面，支持获取&分享&上传（胡桃数据库），可通过深渊页面进入
+- ✨ 新增话题页面，可通过帖子卡片标签点击或帖子详情顶部标签点击进入
+- ✨ 更完善的`loading`显示，调整了组件UI
+- 🍱 更新5.2版本资源 [`#133`](https://github.com/BTMuli/TeyvatGuide/issues/133)
+- 💄 调整祈愿记录UP四星颜色
+- 💄 修复帖子页兑换码弹窗高度异常
+- 💄 调整帖子卡片UI，增加显示帖子话题（如存在），话题&版块支持点击跳转
+- 💄 调整帖子详情页UI，顶部话题&版块支持点击跳转
+- 💄 调整帖子显示数量，支持加载更多，默认排序改为`最新回复`，移除`默认排序`，增加`热门`排序
+- 💄 咨讯、帖子等页面刷新时自动滚动到顶部
+- 🔥 深渊数据库显示移除第9层统计数据
+- 👽️ 米游社子窗口增加`genshinnet`域名支持
+- 🎨 优化帖子详情数据加载的错误处理
+- ♻️ `snackbar`、`confirm`、`loading`组件重构
+- ♻️ 请求模块重构
+
+## [0.6.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.2) (2024-10-31)
 
 - 🐛 修复用户登录状态异常 [`#132`](https://github.com/BTMuli/TeyvatGudie/issues/132)
 - 💄 帖子子回复取消保持，点击其他隐藏

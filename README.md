@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2024-11-15
+Update: 2024-11-19
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2024-11-15 09:53:36`
+> 更新于 `2024-11-19 17:06:18`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -49,6 +49,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 游戏内公告&活动获取
   - [x] 米游社官方帖获取（支持通过 ID 获取）
   - [x] 米游社各分区帖子获取（支持通过 ID 获取）
+  - [x] 米游社话题帖子获取（通过话题点击跳转）
   - [x] 成就管理（UIAF v1.1），支持 [`YaeAchievement`](https://github.com/HolographicHat/YaeAchievement) 导入
   - [x] 祈愿管理（UIGF v3.0，UIGF v4.0）
   - [x] 留影叙佳期画片查看
@@ -60,7 +61,9 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 原神战绩数据获取
   - [x] 角色详情数据获取
   - [x] 螺旋深渊数据获取
+  - [x] 真境剧诗数据获取
   - [x] 祈愿数据获取（近一年）
+  - [x] 用户收藏帖子获取
 
 - Wiki 功能：
 
