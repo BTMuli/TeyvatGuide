@@ -3,7 +3,7 @@
     "id": 0,
     "order": 1,
     "name": "天地万象",
-    "version": "5.1",
+    "version": "5.2",
     "card": "",
     "icon": "/icon/achievement/UI_AchievementIcon_O001.webp"
   },
@@ -432,11 +432,27 @@
     "icon": "/icon/achievement/UI_AchievementIcon_A019.webp"
   },
   {
-    "id": 54,
+    "id": 55,
     "order": 55,
+    "name": "纳塔·火与竞逐的盟地·其之二",
+    "version": "5.2",
+    "card": "纳塔·空梦",
+    "icon": "/icon/achievement/UI_AchievementIcon_A019_Part2.webp"
+  },
+  {
+    "id": 54,
+    "order": 56,
     "name": "对决者·第一辑",
     "version": "5.0",
     "card": "成就·夜主",
     "icon": "/icon/achievement/UI_AchievementIcon_B007.webp"
+  },
+  {
+    "id": 56,
+    "order": 57,
+    "name": "对决者·第二辑",
+    "version": "5.2",
+    "card": "成就·战意",
+    "icon": "/icon/achievement/UI_AchievementIcon_B007_Part2.webp"
   }
 ]

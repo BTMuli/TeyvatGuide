@@ -750,6 +750,26 @@
     "profile": "/source/nameCard/profile/成就·夜主.webp"
   },
   {
+    "name": "纳塔·空梦",
+    "index": 223,
+    "type": 1,
+    "desc": "名片纹饰。欲使人为龙的贤哲，与欲使人为人的君王，奋其私智的规划皆已成梦。但残缺是好的，高于完满。",
+    "source": "达成「纳塔·火与竞逐的盟地·其之二」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/纳塔·空梦.webp",
+    "bg": "/source/nameCard/bg/纳塔·空梦.webp",
+    "profile": "/source/nameCard/profile/纳塔·空梦.webp"
+  },
+  {
+    "name": "成就·战意",
+    "index": 224,
+    "type": 1,
+    "desc": "名片纹饰。即使已失去肉体，即使已身在冰冷的幽泉之中，持续不断斗争的意志仍然不会消亡。",
+    "source": "达成「对决者·第二辑」下所有成就时获取。",
+    "icon": "/source/nameCard/icon/成就·战意.webp",
+    "bg": "/source/nameCard/bg/成就·战意.webp",
+    "profile": "/source/nameCard/profile/成就·战意.webp"
+  },
+  {
     "name": "安柏·兔兔",
     "index": 3,
     "type": 2,
@@ -1630,6 +1650,26 @@
     "profile": "/source/nameCard/profile/希诺宁·律动.webp"
   },
   {
+    "name": "恰斯卡·全弹",
+    "index": 221,
+    "type": 2,
+    "desc": "名片纹饰。放心吧，人家是来调停的，又不是来打架的。问题也就是要不要省几发子弹罢了…对着天空警告射击的那种。",
+    "source": "恰斯卡的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/恰斯卡·全弹.webp",
+    "bg": "/source/nameCard/bg/恰斯卡·全弹.webp",
+    "profile": "/source/nameCard/profile/恰斯卡·全弹.webp"
+  },
+  {
+    "name": "欧洛伦·夜翳",
+    "index": 222,
+    "type": 2,
+    "desc": "名片纹饰。就像星光无法照亮夜色，烛灯下亦有阴影，心的空洞也同样难以填满。",
+    "source": "欧洛伦的好感等级达到10级时获取。",
+    "icon": "/source/nameCard/icon/欧洛伦·夜翳.webp",
+    "bg": "/source/nameCard/bg/欧洛伦·夜翳.webp",
+    "profile": "/source/nameCard/profile/欧洛伦·夜翳.webp"
+  },
+  {
     "name": "纪行·捕风",
     "index": 2,
     "type": 3,
@@ -1988,6 +2028,16 @@
     "icon": "/source/nameCard/icon/纪行·神诞.webp",
     "bg": "/source/nameCard/bg/纪行·神诞.webp",
     "profile": "/source/nameCard/profile/纪行·神诞.webp"
+  },
+  {
+    "name": "纪行·灵织",
+    "index": 225,
+    "type": 3,
+    "desc": "名片纹饰。烟谜主的织卷之所以可以记录故事，那是因为万物皆有经纬，曾经之事与纺织的纵横亦然。",
+    "source": "纪行系统奖励获取。",
+    "icon": "/source/nameCard/icon/纪行·灵织.webp",
+    "bg": "/source/nameCard/bg/纪行·灵织.webp",
+    "profile": "/source/nameCard/profile/纪行·灵织.webp"
   },
   {
     "name": "庆典·无相",

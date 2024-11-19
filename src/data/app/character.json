@@ -1,5 +1,17 @@
 [
   {
+    "id": 10000104,
+    "contentId": 502928,
+    "name": "恰斯卡",
+    "title": "巡宇翦定",
+    "area": "纳塔",
+    "birthday": [12, 10],
+    "star": 5,
+    "element": "风",
+    "weapon": "弓",
+    "nameCard": "恰斯卡·全弹"
+  },
+  {
     "id": 10000103,
     "contentId": 502306,
     "name": "希诺宁",
@@ -586,6 +598,18 @@
     "element": "冰",
     "weapon": "单手剑",
     "nameCard": "神里绫华·扇子"
+  },
+  {
+    "id": 10000105,
+    "contentId": 502927,
+    "name": "欧洛伦",
+    "title": "深黯的谜烟",
+    "area": "纳塔",
+    "birthday": [10, 14],
+    "star": 4,
+    "element": "雷",
+    "weapon": "弓",
+    "nameCard": "欧洛伦·夜翳"
   },
   {
     "id": 10000100,

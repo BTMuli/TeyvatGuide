@@ -4188,6 +4188,186 @@
     }
   },
   {
+    "id": 80349,
+    "series": 55,
+    "order": 323,
+    "name": "大地勘探·万火燎灼之原·其二",
+    "description": "点亮纳塔区域中，镜璧山、翘枝崖、奥奇卡纳塔的地图。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80350,
+    "series": 55,
+    "order": 324,
+    "name": "攀越炽焰的圣山·其二",
+    "description": "解锁纳塔区域中，镜璧山、翘枝崖、奥奇卡纳塔所有传送锚点。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80351,
+    "series": 55,
+    "order": 325,
+    "name": "圣龛巡礼·万火燎灼之原·其二",
+    "description": "解除纳塔区域中，翘枝崖、奥奇卡纳塔所有地灵龛的封印。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80352,
+    "series": 55,
+    "order": 326,
+    "name": "夜馈寻迹·万火燎灼之原·其二",
+    "description": "解除纳塔区域中，镜璧山、翘枝崖所有部族秘藏之所的封印。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80353,
+    "series": 55,
+    "order": 327,
+    "name": "幻写引路人·其二",
+    "description": "在镜璧山、翘枝崖、奥奇卡纳塔追随3个幻写灵，并完成涂鸦。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80354,
+    "series": 55,
+    "order": 328,
+    "name": "幻写引路人·其二",
+    "description": "在镜璧山、翘枝崖、奥奇卡纳塔追随6个幻写灵，并完成涂鸦。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80355,
+    "series": 55,
+    "order": 329,
+    "name": "幻写引路人·其二",
+    "description": "在镜璧山、翘枝崖、奥奇卡纳塔追随10个幻写灵，并完成涂鸦。",
+    "reward": 20,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80356,
+    "series": 55,
+    "order": 330,
+    "name": "燔炎的寻宝者·其二",
+    "description": "在镜璧山、翘枝崖、奥奇卡纳塔开启40个宝箱。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80357,
+    "series": 55,
+    "order": 331,
+    "name": "燔炎的寻宝者·其二",
+    "description": "在镜璧山、翘枝崖、奥奇卡纳塔开启80个宝箱。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80358,
+    "series": 55,
+    "order": 332,
+    "name": "燔炎的寻宝者·其二",
+    "description": "在镜璧山、翘枝崖、奥奇卡纳塔开启160个宝箱。",
+    "reward": 20,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80359,
+    "series": 55,
+    "order": 333,
+    "name": "燔炎的冒险家·其二",
+    "description": "在镜璧山、翘枝崖、奥奇卡纳塔完成3个大世界限时挑战。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80360,
+    "series": 55,
+    "order": 334,
+    "name": "燔炎的冒险家·其二",
+    "description": "在镜璧山、翘枝崖、奥奇卡纳塔完成6个大世界限时挑战。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80361,
+    "series": 55,
+    "order": 335,
+    "name": "燔炎的冒险家·其二",
+    "description": "在镜璧山、翘枝崖、奥奇卡纳塔完成10个大世界限时挑战。",
+    "reward": 20,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80362,
+    "series": 55,
+    "order": 336,
+    "name": "流灰之国的迷旅人",
+    "description": "完成「流灰之国的迷旅人」。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 80363,
+    "series": 55,
+    "order": 337,
+    "name": "画龙点睛？",
+    "description": "让镜璧山上的巨大涂鸦重新恢复力量。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
     "id": 81000,
     "series": 0,
     "order": 1000,
@@ -10951,6 +11131,330 @@
     }
   },
   {
+    "id": 81530,
+    "series": 0,
+    "order": 1514,
+    "name": "冰上轻驰",
+    "description": "完成全部的「烟谜主」勇士挑战并获得最高等级的评价。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81531,
+    "series": 0,
+    "order": 1515,
+    "name": "战斗妖精…",
+    "description": "完成全部的「花羽会」勇士挑战并获得最高等级的评价。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81532,
+    "series": 0,
+    "order": 1516,
+    "name": "给虾枪用猫粮",
+    "description": "为受伤的纳塔龙众快速建造了安全屋。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81533,
+    "series": 0,
+    "order": 1517,
+    "name": "枫丹兽会吃纳塔鱼吗？",
+    "description": "解救被困在了犯罪营地里的膨膨兽。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81534,
+    "series": 0,
+    "order": 1518,
+    "name": "高警惕，多防范！",
+    "description": "戳破了利用暝视龙的诈骗者的骗局。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81535,
+    "series": 0,
+    "order": 1519,
+    "name": "在不可逆的时间里…",
+    "description": "在「游靶气球」玩法中，击破所有的气球。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81536,
+    "series": 0,
+    "order": 1520,
+    "name": "追逐的荣光，或其意义…",
+    "description": "调解了飞屋三姐弟之间的矛盾与分歧。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81537,
+    "series": 0,
+    "order": 1521,
+    "name": "直到长出青苔",
+    "description": "协助枫丹摄影师完成对纳塔龙众的拍摄。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81538,
+    "series": 0,
+    "order": 1522,
+    "name": "献与永恒的宁静",
+    "description": "自旧日的统律者处取得如玉的机心。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81539,
+    "series": 0,
+    "order": 1523,
+    "name": "海岸边的缤纷色彩",
+    "description": "陪海边的幻写灵玩耍。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81540,
+    "series": 0,
+    "order": 1524,
+    "name": "猎人从不追丢他的猎物",
+    "description": "完成「目随羽视」挑战。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81542,
+    "series": 0,
+    "order": 1526,
+    "name": "心差一角此时全",
+    "description": "帮助海边幽会的部族成员摆正了心型石头的一角。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81543,
+    "series": 0,
+    "order": 1527,
+    "name": "天蛇船的翼下",
+    "description": "天蛇船之下的遗迹组件，从前究竟有何作用呢？",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81544,
+    "series": 0,
+    "order": 1528,
+    "name": "我是谁？",
+    "description": "与部族勇士一起消灭了深渊的魔物。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81545,
+    "series": 0,
+    "order": 1529,
+    "name": "把场地让出来吧",
+    "description": "将游玩的场所自深渊魔物手中还给小嵴锋龙。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81546,
+    "series": 0,
+    "order": 1530,
+    "name": "烬火重燃",
+    "description": "重新打开五处烬火炽燃所中的秘源机关装置。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81547,
+    "series": 0,
+    "order": 1531,
+    "name": "或许还需要走很多路…",
+    "description": "在托佐兹之岛上取得了龙蛋。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81548,
+    "series": 0,
+    "order": 1532,
+    "name": "格斗龙龙！大决斗！",
+    "description": "靠龙伙伴的力量在对决中获得了胜利。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81549,
+    "series": 0,
+    "order": 1533,
+    "name": "凡走过必留痕迹",
+    "description": "龙龙饼干是开始也是结束。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81550,
+    "series": 0,
+    "order": 1534,
+    "name": "真的假不了",
+    "description": "帮助真正的大灵显化身对抗虚假的敌人。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81551,
+    "series": 0,
+    "order": 1535,
+    "name": "饥饿派画家",
+    "description": "向着山壁肆意倾泻心中的色彩。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81552,
+    "series": 0,
+    "order": 1536,
+    "name": "急急现形",
+    "description": "第一次使用「灵谜涂鸦」的力量，创生「灵谜体」。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81553,
+    "series": 0,
+    "order": 1537,
+    "name": "画中有话",
+    "description": "再现了昆图尔的冒险。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81554,
+    "series": 0,
+    "order": 1538,
+    "name": "套圈也是圈套",
+    "description": "让每只浮流鸟都有圈可居。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81555,
+    "series": 0,
+    "order": 1539,
+    "name": "坏事不过三…",
+    "description": "在纳塔三次帮助倒霉的部落人逃离困境。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81556,
+    "series": 0,
+    "order": 1540,
+    "name": "至少是个开始…",
+    "description": "让「咕噜噜」服下了药剂。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 81557,
+    "series": 0,
+    "order": 1541,
+    "name": "勇者的归途",
+    "description": "在故事的最后，你改变了「她」的结局。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
@@ -13792,6 +14296,234 @@
     "version": "5.1",
     "trigger": {
       "type": "COMBAT_CONFIG_COMMON"
+    }
+  },
+  {
+    "id": 82253,
+    "series": 0,
+    "order": 2253,
+    "name": "元素穿甲弹",
+    "description": "破除一次深邃摹结株的虚界力护罩。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82254,
+    "series": 56,
+    "order": 2254,
+    "name": "「铜锁」",
+    "description": "战胜地方传奇「铜锁」。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82255,
+    "series": 56,
+    "order": 2255,
+    "name": "「铜锁」",
+    "description": "在完成一次挑战的过程中，累计破坏3次「铜锁」的核心。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82256,
+    "series": 56,
+    "order": 2256,
+    "name": "「铜锁」",
+    "description": "在「铜锁」累计提高过4种不同的元素抗性后，将其击败。",
+    "reward": 20,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82257,
+    "series": 56,
+    "order": 2257,
+    "name": "「莉莱」",
+    "description": "战胜地方传奇·莉莱。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82258,
+    "series": 56,
+    "order": 2258,
+    "name": "「莉莱」",
+    "description": "在莉莱施放「熔融新星」期间，将其击败。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82259,
+    "series": 56,
+    "order": 2259,
+    "name": "「莉莱」",
+    "description": "在莉莱施放「熔融新星」期间，不被敌人的攻击命中并将其击败。",
+    "reward": 20,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82260,
+    "series": 56,
+    "order": 2260,
+    "name": "「陨落的晨星之灵」",
+    "description": "战胜地方传奇「陨落的晨星之灵」。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82261,
+    "series": 56,
+    "order": 2261,
+    "name": "「陨落的晨星之灵」",
+    "description": "在从未解冻被冰封的火炬的情况下，击败「陨落的晨星之灵」。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82262,
+    "series": 56,
+    "order": 2262,
+    "name": "「陨落的晨星之灵」",
+    "description": "在从未被「曜石风暴」命中过的情况下，击败「陨落的晨星之灵」。",
+    "reward": 20,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82263,
+    "series": 56,
+    "order": 2263,
+    "name": "「波塔波的声援」",
+    "description": "战胜地方传奇「波塔波的声援」。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82264,
+    "series": 56,
+    "order": 2264,
+    "name": "「波塔波的声援」",
+    "description": "在完成一次挑战的过程中，让所有「佑灵身」的生命值均完全恢复。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82265,
+    "series": 56,
+    "order": 2265,
+    "name": "「波塔波的声援」",
+    "description": "在完成一次挑战的过程中，没有角色倒下，且让「佑灵身」释放过「决胜·晨昏破晓之束」。",
+    "reward": 20,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82266,
+    "series": 56,
+    "order": 2266,
+    "name": "「图帕尧的协辅」",
+    "description": "战胜地方传奇「图帕尧的协辅」。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82267,
+    "series": 56,
+    "order": 2267,
+    "name": "「图帕尧的协辅」",
+    "description": "在完成一次挑战的过程中，没有角色倒下。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82268,
+    "series": 56,
+    "order": 2268,
+    "name": "「图帕尧的协辅」",
+    "description": "在「图帕尧的协辅」悬停于空中时，将其击败。",
+    "reward": 20,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82269,
+    "series": 56,
+    "order": 2269,
+    "name": "「铁须」",
+    "description": "战胜地方传奇·铁须。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82270,
+    "series": 56,
+    "order": 2270,
+    "name": "「铁须」",
+    "description": "在从未让铁须破坏「熔裂突刺」的情况下，将其击败。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 82271,
+    "series": 56,
+    "order": 2271,
+    "name": "「铁须」",
+    "description": "在不被来自铁须的攻击命中的情况下，将其击败。",
+    "reward": 20,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
     }
   },
   {
@@ -17050,6 +17782,30 @@
           "type": "魔神任务"
         }
       ]
+    }
+  },
+  {
+    "id": 84335,
+    "series": 0,
+    "order": 5114,
+    "name": "小小的一步",
+    "description": "在过程中积累的经验，与在开始前进行的思考同样重要。",
+    "reward": 5,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
+    }
+  },
+  {
+    "id": 84336,
+    "series": 0,
+    "order": 5115,
+    "name": "万火归一",
+    "description": "完成「万火归一」。",
+    "reward": 10,
+    "version": "5.2",
+    "trigger": {
+      "type": "Unknown"
     }
   },
   {

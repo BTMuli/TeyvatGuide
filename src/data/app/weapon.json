@@ -1,5 +1,14 @@
 [
   {
+    "id": 15514,
+    "contentId": 0,
+    "name": "星鹫赤羽",
+    "star": 5,
+    "bg": "/icon/bg/5-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/15514.webp"
+  },
+  {
     "id": 15513,
     "contentId": 501495,
     "name": "白雨心弦",
@@ -468,6 +477,15 @@
     "icon": "/WIKI/weapon/15431.webp"
   },
   {
+    "id": 15430,
+    "contentId": 0,
+    "name": "缀花之翎",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/弓.webp",
+    "icon": "/WIKI/weapon/15430.webp"
+  },
+  {
     "id": 15427,
     "contentId": 7406,
     "name": "测距规",
@@ -682,6 +700,15 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/法器.webp",
     "icon": "/WIKI/weapon/14431.webp"
+  },
+  {
+    "id": 14430,
+    "contentId": 0,
+    "name": "乘浪的回旋",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/法器.webp",
+    "icon": "/WIKI/weapon/14430.webp"
   },
   {
     "id": 14427,
@@ -1249,6 +1276,15 @@
     "bg": "/icon/bg/4-Star.webp",
     "weaponIcon": "/icon/weapon/双手剑.webp",
     "icon": "/WIKI/weapon/12401.webp"
+  },
+  {
+    "id": 11432,
+    "contentId": 0,
+    "name": "厄水之祸",
+    "star": 4,
+    "bg": "/icon/bg/4-Star.webp",
+    "weaponIcon": "/icon/weapon/单手剑.webp",
+    "icon": "/WIKI/weapon/11432.webp"
   },
   {
     "id": 11431,
