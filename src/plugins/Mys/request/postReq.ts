@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/request/postReq.ts
  * @description 帖子相关的获取
- * @since Beta v0.6.3
+ * @since Beta v0.6.4
  */
 
 import TGHttp from "../../../utils/TGHttp.js";
@@ -91,7 +91,7 @@ export async function getPostFullInCollection(
 
 /**
  * @description 获取帖子回复信息
- * @since Beta v0.6.2
+ * @since Beta v0.6.4
  * @param {string} postId 帖子 ID
  * @param {number} gid 社区 ID
  * @param {boolean} isHot 是否热门
@@ -125,6 +125,7 @@ export async function getPostReplies(
   if (onlyMaster) {
     params.is_hot = false;
     params.only_master = onlyMaster;
+    params.order_type = 1;
   }
   const resp = await TGHttp<TGApp.Plugins.Mys.Reply.Response>(`${Mpabu}getPostReplies`, {
     method: "GET",

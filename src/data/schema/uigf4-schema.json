@@ -114,7 +114,10 @@
                 "id": {
                   "type": "string",
                   "description": "记录内部 ID，米哈游 API 返回"
-                }
+                },
+                "maxLength": 19,
+                "minLength": 1,
+                "pattern": "^[0-9]+$"
               },
               "required": ["uigf_gacha_type", "gacha_type", "item_id", "time", "id"]
             }

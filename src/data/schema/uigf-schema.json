@@ -82,7 +82,10 @@
           },
           "id": {
             "type": "string",
-            "title": "Internal ID of the record"
+            "title": "Internal ID of the record",
+            "maxLength": 19,
+            "minLength": 1,
+            "pattern": "^[0-9]+$"
           }
         },
         "required": ["uigf_gacha_type", "gacha_type", "id", "item_id", "time"],
