@@ -1,22 +1,14 @@
 <template>
   <div class="tib-box">
     <div class="tib-bg">
-      <slot name="bg">
-        <img :src="props.modelValue.bg" alt="bg" />
-      </slot>
+      <slot name="bg"><img :src="props.modelValue.bg" alt="bg" /></slot>
     </div>
     <div class="tib-icon">
-      <slot name="icon">
-        <img :src="props.modelValue.icon" alt="icon" />
-      </slot>
+      <slot name="icon"><img :src="props.modelValue.icon" alt="icon" /></slot>
     </div>
     <div class="tib-cover">
-      <div class="tib-lt">
-        <img :src="props.modelValue.lt" alt="lt" />
-      </div>
-      <div v-show="props.modelValue.rt" class="tib-rt">
-        {{ props.modelValue.rt }}
-      </div>
+      <div class="tib-lt"><img :src="props.modelValue.lt" alt="lt" /></div>
+      <div v-show="props.modelValue.rt" class="tib-rt">{{ props.modelValue.rt }}</div>
       <div class="tib-inner">
         <slot name="inner-icon">
           <img
@@ -32,13 +24,13 @@
     </div>
     <div v-if="props.modelValue.display === 'outer'" class="tib-outer">
       <slot name="outer-text">
-        <span>{{ props.modelValue.outerText }}</span>
+        <span :title="props.modelValue.innerText">{{ props.modelValue.outerText }}</span>
       </slot>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-export interface TItemBoxData {
+export type TItemBoxData = {
   bg: string;
   icon: string;
   size: string;
@@ -55,11 +47,8 @@ export interface TItemBoxData {
   outerHeight?: number;
   outerText?: string;
   innerBlur?: string;
-}
-
-interface TItemBoxProps {
-  modelValue: TItemBoxData;
-}
+};
+type TItemBoxProps = { modelValue: TItemBoxData };
 
 const props = defineProps<TItemBoxProps>();
 const size = props.modelValue.size;
@@ -179,7 +168,7 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
 .tib-inner img {
   width: v-bind(sizeInner);
   height: v-bind(sizeInner);
-  margin-right: 5px;
+  padding: 1px;
 }
 
 .tib-inner span {
