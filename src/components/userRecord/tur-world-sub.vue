@@ -44,7 +44,6 @@ import { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import { useAppStore } from "../../store/modules/app.js";
-import { saveImgLocal } from "../../utils/TGShare.js";
 
 interface TurWorldSubProps {
   data: TGApp.Sqlite.Record.WorldExplore;
@@ -52,13 +51,13 @@ interface TurWorldSubProps {
 
 const props = defineProps<TurWorldSubProps>();
 let themeListener: UnlistenFn | null = null;
-const bg = ref<string>();
 const icon = ref<string>();
-const iconLight = ref<string>();
-const iconDark = ref<string>();
 const offer = ref<string>();
 const appStore = useAppStore();
 
+const bg = computed<string>(() => {
+  return `url('${props.data.bg}')`;
+});
 const imgFilter = computed<string>(() => {
   if (props.data.name !== "纳塔") return "none";
   if (appStore.theme === "dark") return "none";
@@ -68,41 +67,18 @@ const imgFilter = computed<string>(() => {
 onMounted(async () => {
   themeListener = await event.listen("readTheme", (e: Event<string>) => {
     const theme = e.payload;
-    if (theme === "dark") {
-      icon.value = iconLight.value;
-    } else {
-      icon.value = iconDark.value;
-    }
+    if (theme === "dark") icon.value = props.data.iconLight;
+    else icon.value = props.data.iconDark;
   });
-  bg.value = `url('${await saveImgLocal(props.data.bg)}')`;
-  iconLight.value = await saveImgLocal(props.data.iconLight);
-  iconDark.value = await saveImgLocal(props.data.iconDark);
-  if (props.data.offering) {
-    offer.value = await saveImgLocal(props.data.offering.icon);
-  }
-  if (appStore.theme === "dark") {
-    icon.value = iconLight.value;
-  } else {
-    icon.value = iconDark.value;
-  }
+  if (props.data.offering) offer.value = props.data.offering.icon;
+  if (appStore.theme === "dark") icon.value = props.data.iconLight;
+  else icon.value = props.data.iconDark;
 });
 
 onUnmounted(() => {
   if (themeListener !== null) {
     themeListener();
     themeListener = null;
-  }
-  const urlList = [iconLight.value, iconDark.value, offer.value];
-  urlList.forEach((url) => {
-    URL.revokeObjectURL(typeof url === "string" ? url : "");
-  });
-  const reg = /url\(['"]?([^'"]*)['"]?\)/;
-  if (bg.value) {
-    const bgOri = bg.value?.replace("url('", "").replace("')", "");
-    const bgUrl = bgOri.match(reg);
-    if (bgUrl) {
-      URL.revokeObjectURL(bgUrl[1]);
-    }
   }
 });
 </script>

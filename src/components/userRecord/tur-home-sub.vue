@@ -1,7 +1,7 @@
 <template>
   <div
     :style="{
-      backgroundImage: 'url(' + getUrl.bg + ')',
+      backgroundImage: 'url(' + props.data.bg + ')',
       backgroundSize: 'cover',
     }"
     class="tur-hs-box"
@@ -10,7 +10,7 @@
       {{ data.name }}
     </div>
     <div class="tur-hs-title">
-      <img :src="getUrl.icon" alt="comfort" />
+      <img :src="props.data.comfortIcon" alt="comfort" />
       {{ data.comfortName }}
     </div>
     <div class="tur-hs-text-grid">
@@ -34,24 +34,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
-
-import { saveImgLocal } from "../../utils/TGShare.js";
-
 interface TurHomeSubProps {
   data: TGApp.Sqlite.Record.Home;
 }
 
 const props = defineProps<TurHomeSubProps>();
-const getUrl = ref({
-  icon: "",
-  bg: "",
-});
-
-onMounted(async () => {
-  getUrl.value.icon = await saveImgLocal(props.data.comfortIcon);
-  getUrl.value.bg = await saveImgLocal(props.data.bg);
-});
 </script>
 <style lang="css" scoped>
 .tur-hs-box {
