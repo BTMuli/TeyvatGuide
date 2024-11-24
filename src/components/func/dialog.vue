@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, reactive, ref, watch, useTemplateRef, computed } from "vue";
+import { computed, nextTick, onMounted, reactive, ref, useTemplateRef, watch } from "vue";
 
 import { DialogCheckParams, DialogInputParams, DialogParams } from "./dialog.js";
 
@@ -110,6 +110,7 @@ async function displayInputBox(params: DialogInputParams): Promise<string | fals
   data.title = params.title;
   data.text = params.text ?? "";
   data.mode = "input";
+  inputDefault.value = params.input ?? "";
   data.otcancel = params.otcancel ?? true;
   show.value = true;
   return await new Promise<string | false | undefined>((resolve) => {
