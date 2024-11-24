@@ -78,7 +78,7 @@ const avatarBox = computed<TItemBoxData>(() => {
     innerText: avatar.name,
     innerHeight: 30,
     display: "inner",
-    clickable: false,
+    clickable: true,
   };
 });
 const weaponBox = computed<TItemBoxData>(() => {
@@ -95,7 +95,7 @@ const weaponBox = computed<TItemBoxData>(() => {
     innerText: weapon.name,
     innerHeight: 20,
     display: "inner",
-    clickable: false,
+    clickable: true,
   };
 });
 const relicsBox = computed<AvatarRelics>(() => {
@@ -144,6 +144,7 @@ function getWeaponTitle(): string {
   border: 1px inset var(--common-shadow-2);
   border-radius: 5px;
   background: var(--box-bg-2);
+  cursor: pointer;
   row-gap: 5px;
 }
 

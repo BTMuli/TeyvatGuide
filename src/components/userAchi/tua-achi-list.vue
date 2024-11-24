@@ -30,7 +30,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import { AppAchievementSeriesData, AppNameCardsData } from "../../data/index.js";
 import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
@@ -161,7 +161,8 @@ function switchAchiInfo(next: boolean): void {
 .tua-al-container {
   display: flex;
   width: 100%;
-  height: 100%;
+  height: fit-content;
+  max-height: 100%;
   flex-direction: column;
   overflow-y: auto;
   row-gap: 10px;
