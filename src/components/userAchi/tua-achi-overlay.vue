@@ -72,8 +72,8 @@ interface ToAchiInfoEmits {
 
 const props = defineProps<ToAchiInfoProps>();
 const emits = defineEmits<ToAchiInfoEmits>();
-const showSearch = ref(false);
-const search = ref("");
+const showSearch = ref<boolean>(false);
+const search = ref<string>();
 
 const visible = computed({
   get: () => props.modelValue,

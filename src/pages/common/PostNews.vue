@@ -197,6 +197,7 @@ async function searchPost(): Promise<void> {
     showSearch.value = true;
   } else {
     await createPost(search.value);
+    showSearch.value = false;
   }
 }
 </script>

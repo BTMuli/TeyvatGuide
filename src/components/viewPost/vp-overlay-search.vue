@@ -25,17 +25,17 @@ import TPostCard from "../app/t-postcard.vue";
 import showSnackbar from "../func/snackbar.js";
 
 // data
-const search = ref("");
-const lastId = ref("");
-const game = ref("2");
-const isLast = ref(false);
+const search = ref<string>();
+const lastId = ref<string>("");
+const game = ref<string>("2");
+const isLast = ref<boolean>(false);
 const results = ref<TGApp.Plugins.Mys.Post.FullData[]>([]);
-const load = ref(false);
+const load = ref<boolean>(false);
 
 interface ToPostSearchProps {
   modelValue: boolean;
   gid: string;
-  keyword: string;
+  keyword?: string;
 }
 
 interface ToPostSearchEmits {
@@ -69,40 +69,44 @@ function onCancel() {
 }
 
 onMounted(async () => {
-  search.value = props.keyword;
   game.value = props.gid;
+  if (props.keyword && props.keyword !== "") search.value = props.keyword;
+  if (props.modelValue) await searchPosts();
 });
 
 watch(
   () => props.modelValue,
-  async (value) => {
-    if (value && results.value.length === 0) {
+  async () => {
+    if (props.modelValue && results.value.length === 0) {
       await searchPosts();
-    } else {
-      visible.value = value;
+      return;
     }
+    visible.value = props.modelValue;
   },
 );
 
 watch(
   () => props.keyword,
-  async (value) => {
-    if (search.value === "" && value !== "") {
-      search.value = value;
-    } else if (search.value !== value && value !== "") {
-      search.value = value;
+  async () => {
+    if (search.value === "" && props.keyword !== "") {
+      search.value = props.keyword;
+      return;
+    }
+    if (search.value !== props.keyword && props.keyword !== "") {
+      search.value = props.keyword;
       results.value = [];
       lastId.value = "";
       isLast.value = false;
+      if (props.modelValue) await searchPosts();
     }
   },
 );
 
 watch(
   () => props.gid,
-  async (value) => {
-    if (game.value !== value) {
-      game.value = value;
+  async () => {
+    if (game.value !== props.gid) {
+      game.value = props.gid;
       results.value = [];
       lastId.value = "";
       isLast.value = false;
@@ -111,7 +115,7 @@ watch(
 );
 
 async function searchPosts() {
-  if (load.value) return;
+  if (load.value || !search.value) return;
   load.value = true;
   if (!props.gid || !props.keyword) {
     showSnackbar.warn("参数错误");
