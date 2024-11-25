@@ -2452,7 +2452,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4979f22fdb869068da03c9f7528f8297c6fd2606bc3a4affe42e6a823fdb8da4"
 dependencies = [
  "cfg-if",
- "windows-targets 0.52.6",
+ "windows-targets 0.48.5",
 ]
 
 [[package]]
@@ -3941,9 +3941,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.17"
+version = "0.23.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f1a745511c54ba6d4465e8d5dfbd81b45791756de28d4981af70d6dca128f1e"
+checksum = "9c9cc1d47e243d655ace55ed38201c19ae02c148ae56412ab8750e8f0166ab7f"
 dependencies = [
  "once_cell",
  "ring",
@@ -4949,10 +4949,9 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-deep-link"
 version = "2.0.1"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#ee3fb1dba69ecf0abaafddc8979dddcf9822c2d7"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#50704768166c3c4298238dfd9e09ea5bc161759c"
 dependencies = [
  "dunce",
- "log",
  "rust-ini",
  "serde",
  "serde_json",
@@ -4960,6 +4959,7 @@ dependencies = [
  "tauri-plugin",
  "tauri-utils",
  "thiserror 2.0.3",
+ "tracing",
  "url",
  "windows-registry 0.3.0",
  "windows-result",
@@ -4968,7 +4968,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-dialog"
 version = "2.0.3"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#ee3fb1dba69ecf0abaafddc8979dddcf9822c2d7"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#50704768166c3c4298238dfd9e09ea5bc161759c"
 dependencies = [
  "log",
  "raw-window-handle",
@@ -4985,7 +4985,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-fs"
 version = "2.0.3"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#ee3fb1dba69ecf0abaafddc8979dddcf9822c2d7"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#50704768166c3c4298238dfd9e09ea5bc161759c"
 dependencies = [
  "anyhow",
  "dunce",
@@ -4997,7 +4997,9 @@ dependencies = [
  "serde_repr",
  "tauri",
  "tauri-plugin",
+ "tauri-utils",
  "thiserror 2.0.3",
+ "toml 0.8.19",
  "url",
  "uuid",
 ]
@@ -5005,7 +5007,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-http"
 version = "2.0.3"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#ee3fb1dba69ecf0abaafddc8979dddcf9822c2d7"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#50704768166c3c4298238dfd9e09ea5bc161759c"
 dependencies = [
  "data-url",
  "http",
@@ -5026,7 +5028,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-log"
 version = "2.0.2"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#ee3fb1dba69ecf0abaafddc8979dddcf9822c2d7"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#50704768166c3c4298238dfd9e09ea5bc161759c"
 dependencies = [
  "android_logger",
  "byte-unit",
@@ -5047,7 +5049,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-os"
 version = "2.0.1"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#ee3fb1dba69ecf0abaafddc8979dddcf9822c2d7"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#50704768166c3c4298238dfd9e09ea5bc161759c"
 dependencies = [
  "gethostname",
  "log",
@@ -5064,7 +5066,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-process"
 version = "2.0.1"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#ee3fb1dba69ecf0abaafddc8979dddcf9822c2d7"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#50704768166c3c4298238dfd9e09ea5bc161759c"
 dependencies = [
  "tauri",
  "tauri-plugin",
@@ -5073,7 +5075,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-shell"
 version = "2.0.2"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#ee3fb1dba69ecf0abaafddc8979dddcf9822c2d7"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#50704768166c3c4298238dfd9e09ea5bc161759c"
 dependencies = [
  "encoding_rs",
  "log",
@@ -5093,13 +5095,13 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-single-instance"
 version = "2.0.1"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#ee3fb1dba69ecf0abaafddc8979dddcf9822c2d7"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#50704768166c3c4298238dfd9e09ea5bc161759c"
 dependencies = [
- "log",
  "serde",
  "serde_json",
  "tauri",
  "thiserror 2.0.3",
+ "tracing",
  "windows-sys 0.59.0",
  "zbus 4.4.0",
 ]
@@ -5107,7 +5109,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-sql"
 version = "2.0.2"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#ee3fb1dba69ecf0abaafddc8979dddcf9822c2d7"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#50704768166c3c4298238dfd9e09ea5bc161759c"
 dependencies = [
  "futures-core",
  "indexmap 2.6.0",
