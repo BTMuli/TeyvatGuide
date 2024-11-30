@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.6.0
+ * @since Beta v0.6.4
  */
 
 import { path } from "@tauri-apps/api";
@@ -24,10 +24,7 @@ export const useAppStore = defineStore(
     // 应用打包时间
     const buildTime = ref("");
     // 侧边栏设置
-    const sidebar = reactive({
-      // 是否折叠
-      collapse: true,
-    });
+    const sidebar = reactive({ collapse: true });
     // 开发者模式
     const devMode = ref<boolean>(false);
     // 应用主题
@@ -52,6 +49,8 @@ export const useAppStore = defineStore(
     const recentNewsType = ref<string>("notice");
     // 是否开启分辨率回正
     const needResize = ref<string>("true");
+    // 分享图生成默认设置，为0表示默认保存到文件，为数字表示当大小超过xMB时保存到文件，否则保存到剪贴板
+    const shareDefaultFile = ref<number>(10);
 
     // 初始化
     function init(): void {
@@ -64,6 +63,7 @@ export const useAppStore = defineStore(
       recentNewsType.value = "notice";
       needResize.value = "true";
       gameDir.value = "未设置";
+      shareDefaultFile.value = 10;
       initDevice();
     }
 
@@ -91,6 +91,7 @@ export const useAppStore = defineStore(
       recentNewsType,
       needResize,
       gameDir,
+      shareDefaultFile,
       init,
       changeTheme,
     };
@@ -105,7 +106,7 @@ export const useAppStore = defineStore(
       {
         key: "app",
         storage: window.localStorage,
-        pick: ["devMode", "loading", "buildTime", "isLogin", "needResize"],
+        pick: ["devMode", "loading", "buildTime", "isLogin", "needResize", "shareDefaultFile"],
       },
       {
         key: "sidebar",

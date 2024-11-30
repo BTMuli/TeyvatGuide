@@ -1,16 +1,17 @@
 /**
  * @file utils/TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.6.2
+ * @since Beta v0.6.4
  */
 
 import { path } from "@tauri-apps/api";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import html2canvas from "html2canvas";
+import { storeToRefs } from "pinia";
 
-import showDialog from "../components/func/dialog.js";
 import showSnackbar from "../components/func/snackbar.js";
+import { useAppStore } from "../store/modules/app.js";
 
 import TGHttp from "./TGHttp.js";
 import TGLogger from "./TGLogger.js";
@@ -18,7 +19,7 @@ import { bytesToSize } from "./toolFunc.js";
 
 /**
  * @description 保存图片-canvas
- * @since Beta v0.6.2
+ * @since Beta v0.6.4
  * @param {Uint8Array} buffer - 图片数据
  * @param {string} filename - 文件名
  * @param {string} format - 文件格式
@@ -42,7 +43,7 @@ export async function saveCanvasImg(
   }
   await writeFile(res, buffer);
   await TGLogger.Info(`[saveCanvasImg][${filename}] 已将图像保存到本地`);
-  showSnackbar.success(`已将 ${filename} 保存到本地`);
+  showSnackbar.success(`已将 ${filename} 保存到本地，大小为 ${bytesToSize(buffer.length)}`);
 }
 
 /**
@@ -88,7 +89,7 @@ function getShareImgBgColor(): string {
 
 /**
  * @description 生成分享截图
- * @since Beta v0.6.0
+ * @since Beta v0.6.4
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
@@ -131,19 +132,28 @@ export async function generateShareImg(
   const size = buffer.length;
   const sizeStr = bytesToSize(size);
   await TGLogger.Info(`[generateShareImg][${fileName}] 图像大小为 ${sizeStr}`);
-  if (size > 80000000) {
-    showSnackbar.warn(`图像过大(${sizeStr})，无法保存`, 3000);
+  const { shareDefaultFile } = storeToRefs(useAppStore());
+  if (shareDefaultFile.value === 0) {
+    await saveCanvasImg(buffer, fileName);
     return;
   }
-  if (size > 20000000) {
-    const sizeStr = bytesToSize(size);
-    const saveCheck = await showDialog.check("图像过大", `图像大小为 ${sizeStr}，是否保存到文件？`);
-    if (saveCheck === true) {
-      await saveCanvasImg(buffer, fileName);
-      return;
-    }
-    showSnackbar.warn("将尝试保存到剪贴板");
+  if (typeof shareDefaultFile.value === "number" && size > shareDefaultFile.value * 1000000) {
+    await saveCanvasImg(buffer, fileName);
+    return;
   }
+  // if (size > 80000000) {
+  //   showSnackbar.warn(`图像过大(${sizeStr})，无法保存`, 3000);
+  //   return;
+  // }
+  // if (size > 20000000) {
+  //   const sizeStr = bytesToSize(size);
+  //   const saveCheck = await showDialog.check("图像过大", `图像大小为 ${sizeStr}，是否保存到文件？`);
+  //   if (saveCheck === true) {
+  //     await saveCanvasImg(buffer, fileName);
+  //     return;
+  //   }
+  //   showSnackbar.warn("将尝试保存到剪贴板");
+  // }
   try {
     await copyToClipboard(buffer);
     showSnackbar.success(`已将 ${fileName} 复制到剪贴板，大小为 ${sizeStr}`);

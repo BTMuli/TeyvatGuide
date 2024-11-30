@@ -59,6 +59,23 @@
           />
         </template>
       </v-list-item>
+      <v-list-item title="分享设置">
+        <template #subtitle>
+          {{
+            appStore.shareDefaultFile === true
+              ? "默认保存到文件"
+              : `默认保存到剪贴板，超过${appStore.shareDefaultFile}MB时保存到文件`
+          }}
+        </template>
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-share-variant</v-icon>
+          </div>
+        </template>
+        <template #append>
+          <v-icon @click="confirmShare()">mdi-cog</v-icon>
+        </template>
+      </v-list-item>
       <v-list-item>
         <template #prepend>
           <div class="config-icon">
@@ -229,6 +246,45 @@ async function confirmUpdate(title?: string): Promise<void> {
   showSnackbar.success("数据库已更新!");
   await TGLogger.Info("[Config][confirmUpdate] 数据库更新完成");
   window.location.reload();
+}
+
+// 分享设置
+async function confirmShare(): Promise<void> {
+  const input = await showDialog.input(
+    "请输入分享文件大小阈值(MB)",
+    "阈值：",
+    appStore.shareDefaultFile.toString(),
+  );
+  if (input === null) {
+    showSnackbar.cancel("已取消修改分享设置");
+    return;
+  }
+  if (input === "") {
+    showSnackbar.error("阈值不能为空!");
+    return;
+  }
+  if (isNaN(Number(input))) {
+    showSnackbar.error("阈值必须为数字!");
+    return;
+  }
+  if (Number(input) === appStore.shareDefaultFile) {
+    showSnackbar.cancel("未修改分享设置");
+    return;
+  }
+  if (Number(input) > 2000) {
+    showSnackbar.error("阈值不能大于2000MB!");
+    return;
+  }
+  const check = await showDialog.check(
+    "确认修改分享设置吗？",
+    `新阈值为${input}MB，超过将保存到文件`,
+  );
+  if (!check) {
+    showSnackbar.cancel("已取消修改分享设置");
+    return;
+  }
+  appStore.shareDefaultFile = Number(input);
+  showSnackbar.success(`成功修改分享设置!新阈值为${input}MB`);
 }
 
 // 更新设备信息
