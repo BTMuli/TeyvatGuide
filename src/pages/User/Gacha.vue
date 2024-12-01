@@ -52,7 +52,7 @@
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, watch, computed } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import showDialog from "../../components/func/dialog.js";
 import showLoading from "../../components/func/loading.js";
@@ -66,11 +66,11 @@ import TSUserGacha from "../../plugins/Sqlite/modules/userGacha.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
 import {
+  exportUigf4Data,
   exportUigfData,
   readUigf4Data,
   readUigfData,
   verifyUigfData,
-  exportUigf4Data,
 } from "../../utils/UIGF.js";
 import Hk4eApi from "../../web/request/hk4eReq.js";
 import TakumiApi from "../../web/request/takumiReq.js";
@@ -161,66 +161,57 @@ async function confirmRefresh(force: boolean): Promise<void> {
     showLoading.end();
     return;
   }
-  let checkList: Array<string | undefined> = [
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-  ];
-  if (!force) {
-    showLoading.update("正在刷新祈愿数据", "正在获取数据库祈愿最新 ID");
-    checkList[0] = await TSUserGacha.getGachaCheck(account.value.gameUid, "200");
-    checkList[1] = await TSUserGacha.getGachaCheck(account.value.gameUid, "301");
-    checkList[2] = await TSUserGacha.getGachaCheck(account.value.gameUid, "400");
-    checkList[3] = await TSUserGacha.getGachaCheck(account.value.gameUid, "302");
-    checkList[4] = await TSUserGacha.getGachaCheck(account.value.gameUid, "500");
-  }
-  console.log(checkList);
-  showLoading.update("正在刷新新手祈愿数据");
-  await getGachaLogs("100", "0", "新手祈愿", undefined);
-  showLoading.update("正在刷新常驻祈愿数据");
-  await getGachaLogs("200", "0", "常驻祈愿", checkList[0]);
-  showLoading.update("正在刷新角色祈愿数据");
-  await getGachaLogs("301", "0", "角色祈愿", checkList[1]);
-  showLoading.update("正在刷新角色祈愿2数据");
-  await getGachaLogs("400", "0", "角色祈愿2", checkList[2]);
-  showLoading.update("正在刷新武器祈愿数据");
-  await getGachaLogs("302", "0", "武器祈愿", checkList[3]);
-  showLoading.update("正在刷新集录祈愿数据");
-  await getGachaLogs("500", "0", "集录祈愿", checkList[4]);
+  await refreshGachaPool("100", "新手祈愿", force);
+  await refreshGachaPool("200", "常驻祈愿", force);
+  await refreshGachaPool("301", "角色祈愿", force);
+  await refreshGachaPool("400", "角色祈愿2", force);
+  await refreshGachaPool("302", "武器祈愿", force);
+  await refreshGachaPool("500", "集录祈愿", force);
   showLoading.update("正在刷新祈愿数据", "数据获取完成，即将刷新页面");
   showLoading.end();
   await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 刷新祈愿数据完成`);
   window.location.reload();
 }
 
-async function getGachaLogs(
-  pool: string,
-  endId: string = "0",
-  title: string,
-  check?: string,
+// 刷新单个池子
+async function refreshGachaPool(
+  type: string,
+  label: string,
+  force: boolean = false,
 ): Promise<void> {
-  const uid = account.value.gameUid;
-  await TGLogger.Info(
-    `[UserGacha][${uid}][getGachaLogs] 获取祈愿数据，pool：${pool}，endId：${endId}`,
-  );
-  const gachaRes = await Hk4eApi.gacha(authkey.value, pool, endId);
-  console.log(pool, endId, gachaRes);
-  if (Array.isArray(gachaRes)) {
-    await TGLogger.Info(
-      `[UserGacha][${uid}][getGachaLogs] 成功获取到 ${gachaRes.length} 条祈愿数据`,
-    );
+  let endId = "0";
+  // 全量刷新时时间与id的对应关系
+  let gachaDataMap: Record<string, string[]> | undefined = undefined;
+  if (!force) {
+    showLoading.update(`正在刷新${label}数据`, "正在获取数据库祈愿最新 ID");
+    endId = (await TSUserGacha.getGachaCheck(account.value.gameUid, type)) ?? "0";
+    showLoading.update(`正在刷新${label}数据`, `最新 ID：${endId}`);
+  } else {
+    showLoading.update(`正在刷新${label}数据`);
+  }
+  while (true) {
+    const gachaRes = await Hk4eApi.gacha(authkey.value, type, endId);
+    if (!Array.isArray(gachaRes)) {
+      showSnackbar.error(`[${type}][${gachaRes.retcode}] ${gachaRes.message}`);
+      await TGLogger.Error(
+        `[UserGacha][${account.value.gameUid}][refreshGachaPool] 获取祈愿数据失败`,
+      );
+      await TGLogger.Error(
+        `[UserGacha][${account.value.gameUid}][refreshGachaPool] ${gachaRes.retcode} ${gachaRes.message}`,
+      );
+      break;
+    }
     if (gachaRes.length === 0) {
-      await new Promise((resolve) => setTimeout(() => resolve(""), 1000));
-      return;
+      if (force) {
+        showLoading.update(`正在清理${label}数据`);
+        if (gachaDataMap)
+          await TSUserGacha.cleanGachaRecords(account.value.gameUid, type, gachaDataMap);
+      }
+      break;
     }
     const uigfList: TGApp.Plugins.UIGF.GachaItem[] = [];
-    gachaRes.forEach((item) => {
-      showLoading.update(
-        `正在导入 ${title} 数据`,
-        `[${item.item_type}][${item.time}] ${item.name}`,
-      );
+    for (const item of gachaRes) {
+      showLoading.update(`正在刷新${label}数据`, `[${item.item_type}][${item.time}] ${item.name}`);
       const tempItem: TGApp.Plugins.UIGF.GachaItem = {
         gacha_type: item.gacha_type,
         item_id: item.item_id,
@@ -240,22 +231,15 @@ async function getGachaLogs(
         if (find) tempItem.item_id = find.id.toString();
       }
       uigfList.push(tempItem);
-    });
-    await TSUserGacha.mergeUIGF(uid, uigfList);
-    if (check !== undefined && gachaRes.some((i) => i.id === check)) {
-      await new Promise<void>((resolve) => setTimeout(() => resolve(), 1000));
-      return;
+      if (force) {
+        if (!gachaDataMap) gachaDataMap = {};
+        if (!gachaDataMap[item.time]) gachaDataMap[item.time] = [];
+        gachaDataMap[item.time].push(item.id);
+      }
     }
-    if (gachaRes.length === 20) {
-      await new Promise<void>((resolve) => setTimeout(() => resolve(), 1000));
-      await getGachaLogs(pool, gachaRes[gachaRes.length - 1].id, title, check);
-    }
-  } else {
-    showSnackbar.error(`[${pool}][${gachaRes.retcode}] ${gachaRes.message}`);
-    await TGLogger.Error(`[UserGacha][${uid}][getGachaLogs] 获取祈愿数据失败`);
-    await TGLogger.Error(
-      `[UserGacha][${uid}][getGachaLogs] ${gachaRes.retcode} ${gachaRes.message}`,
-    );
+    await TSUserGacha.mergeUIGF(account.value.gameUid, uigfList);
+    endId = gachaRes[gachaRes.length - 1].id;
+    await new Promise<void>((resolve) => setTimeout(() => resolve(), 1000));
   }
 }
 

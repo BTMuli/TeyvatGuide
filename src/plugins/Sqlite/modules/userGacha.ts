@@ -7,6 +7,7 @@
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readDir } from "@tauri-apps/plugin-fs";
 
+import showSnackbar from "../../../components/func/snackbar.js";
 import { AppCharacterData, AppWeaponData } from "../../../data/index.js";
 import TGLogger from "../../../utils/TGLogger.js";
 import { exportUigfData, readUigfData, verifyUigfData } from "../../../utils/UIGF.js";
@@ -152,6 +153,36 @@ async function deleteGachaRecords(uid: string): Promise<void> {
 }
 
 /**
+ * @description 清理祈愿记录
+ * @since Beta v0.6.4
+ * @param {string} uid - UID
+ * @param {string} pool - 池子
+ * @param {Record<string,string[]>} map - 祈愿数据
+ * @return {Promise<void>}
+ */
+async function cleanGachaRecords(
+  uid: string,
+  pool: string,
+  map: Record<string, string[]>,
+): Promise<void> {
+  const db = await TGSqlite.getDB();
+  for (const [time, ids] of Object.entries(map)) {
+    const sql = `DELETE
+                 FROM GachaRecords
+                 WHERE uid = '${uid}'
+                   AND gachaType = '${pool}'
+                   AND time = '${time}'
+                   AND id NOT IN (${ids.map((i) => `'${i}'`).join(",")});
+    `;
+    const res = await db.execute(sql);
+    if (res.rowsAffected > 0) {
+      showSnackbar.success(`[${uid}][${pool}][${time}]清理了${res.rowsAffected}条祈愿记录`);
+      await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+    }
+  }
+}
+
+/**
  * @description 合并祈愿数据
  * @since Beta v0.4.7
  * @param {string} uid - UID
@@ -244,6 +275,7 @@ const TSUserGacha = {
   getGachaRecords,
   getGachaItemType,
   deleteGachaRecords,
+  cleanGachaRecords,
   mergeUIGF,
   mergeUIGF4,
   backUpUigf,
