@@ -1815,7 +1815,7 @@
       "allow-read-text-file-lines": {
         "identifier": "allow-read-text-file-lines",
         "description": "Enables the read_text_file_lines command without any pre-configured scope.",
-        "commands": { "allow": ["read_text_file_lines"], "deny": [] }
+        "commands": { "allow": ["read_text_file_lines", "read_text_file_lines_next"], "deny": [] }
       },
       "allow-read-text-file-lines-next": {
         "identifier": "allow-read-text-file-lines-next",
@@ -1836,6 +1836,11 @@
         "identifier": "allow-seek",
         "description": "Enables the seek command without any pre-configured scope.",
         "commands": { "allow": ["seek"], "deny": [] }
+      },
+      "allow-size": {
+        "identifier": "allow-size",
+        "description": "Enables the size command without any pre-configured scope.",
+        "commands": { "allow": ["size"], "deny": [] }
       },
       "allow-stat": {
         "identifier": "allow-stat",
@@ -1865,7 +1870,7 @@
       "allow-write-file": {
         "identifier": "allow-write-file",
         "description": "Enables the write_file command without any pre-configured scope.",
-        "commands": { "allow": ["write_file"], "deny": [] }
+        "commands": { "allow": ["write_file", "open", "write"], "deny": [] }
       },
       "allow-write-text-file": {
         "identifier": "allow-write-text-file",
@@ -1961,6 +1966,11 @@
         "identifier": "deny-seek",
         "description": "Denies the seek command without any pre-configured scope.",
         "commands": { "allow": [], "deny": ["seek"] }
+      },
+      "deny-size": {
+        "identifier": "deny-size",
+        "description": "Denies the size command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["size"] }
       },
       "deny-stat": {
         "identifier": "deny-stat",
@@ -2074,7 +2084,10 @@
       "read-meta": {
         "identifier": "read-meta",
         "description": "This enables all index or metadata related commands without any pre-configured accessible paths.",
-        "commands": { "allow": ["read_dir", "stat", "lstat", "fstat", "exists"], "deny": [] }
+        "commands": {
+          "allow": ["read_dir", "stat", "lstat", "fstat", "exists", "size"],
+          "deny": []
+        }
       },
       "scope": {
         "identifier": "scope",
@@ -3363,9 +3376,17 @@
     "global_scope_schema": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "anyOf": [
-        { "description": "FS scope path.", "type": "string" },
         {
-          "properties": { "path": { "description": "FS scope path.", "type": "string" } },
+          "description": "A path that can be accessed by the webview when using the fs APIs. FS scope path pattern.\n\nThe pattern can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$APP`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
+          "type": "string"
+        },
+        {
+          "properties": {
+            "path": {
+              "description": "A path that can be accessed by the webview when using the fs APIs.\n\nThe pattern can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$APP`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
+              "type": "string"
+            }
+          },
           "required": ["path"],
           "type": "object"
         }

@@ -2,12 +2,22 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2024-11-19
+Update: 2024-12-03
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2024-11-19 17:06:05`
+> 更新于 `2024-12-03 19:57:50`
+
+## [0.6.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.4) (2024-12-03)
+
+- 🐛 修复子回复渲染异常
+- ✏️ 祈愿记录将验证非空ID
+- 🐛 修复战绩分享图渲染异常
+- 🐛 修复`dialog`组件`input`默认值无效
+- 🎨 调整帖子查找overlay逻辑
+- ✨ 分享图生成阈值自定义
+- 👽️ 全量刷新时清理旧数据，修复由于米哈游数据异常导致的重复数据
 
 ## [0.6.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.3) (2024-11-19)
 

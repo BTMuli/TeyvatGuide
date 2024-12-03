@@ -1,8 +1,9 @@
 {
   "name": "teyvatguide",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "Game Tool for GenshinImpact player",
   "private": true,
+  "packageManager": "pnpm@9.14.4",
   "type": "module",
   "scripts": {
     "build": "tauri build",

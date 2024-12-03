@@ -975,6 +975,11 @@
                         "const": "fs:allow-seek"
                       },
                       {
+                        "description": "Enables the size command without any pre-configured scope.",
+                        "type": "string",
+                        "const": "fs:allow-size"
+                      },
+                      {
                         "description": "Enables the stat command without any pre-configured scope.",
                         "type": "string",
                         "const": "fs:allow-stat"
@@ -1098,6 +1103,11 @@
                         "description": "Denies the seek command without any pre-configured scope.",
                         "type": "string",
                         "const": "fs:deny-seek"
+                      },
+                      {
+                        "description": "Denies the size command without any pre-configured scope.",
+                        "type": "string",
+                        "const": "fs:deny-size"
                       },
                       {
                         "description": "Denies the stat command without any pre-configured scope.",
@@ -1571,7 +1581,7 @@
                       "description": "FS scope entry.",
                       "anyOf": [
                         {
-                          "description": "FS scope path.",
+                          "description": "A path that can be accessed by the webview when using the fs APIs. FS scope path pattern.\n\nThe pattern can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$APP`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
                           "type": "string"
                         },
                         {
@@ -1579,7 +1589,7 @@
                           "required": ["path"],
                           "properties": {
                             "path": {
-                              "description": "FS scope path.",
+                              "description": "A path that can be accessed by the webview when using the fs APIs.\n\nThe pattern can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$APP`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
                               "type": "string"
                             }
                           }
@@ -1593,7 +1603,7 @@
                       "description": "FS scope entry.",
                       "anyOf": [
                         {
-                          "description": "FS scope path.",
+                          "description": "A path that can be accessed by the webview when using the fs APIs. FS scope path pattern.\n\nThe pattern can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$APP`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
                           "type": "string"
                         },
                         {
@@ -1601,7 +1611,7 @@
                           "required": ["path"],
                           "properties": {
                             "path": {
-                              "description": "FS scope path.",
+                              "description": "A path that can be accessed by the webview when using the fs APIs.\n\nThe pattern can start with a variable that resolves to a system base directory. The variables are: `$AUDIO`, `$CACHE`, `$CONFIG`, `$DATA`, `$LOCALDATA`, `$DESKTOP`, `$DOCUMENT`, `$DOWNLOAD`, `$EXE`, `$FONT`, `$HOME`, `$PICTURE`, `$PUBLIC`, `$RUNTIME`, `$TEMPLATE`, `$VIDEO`, `$RESOURCE`, `$APP`, `$LOG`, `$TEMP`, `$APPCONFIG`, `$APPDATA`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG`.",
                               "type": "string"
                             }
                           }
@@ -4382,6 +4392,11 @@
           "const": "fs:allow-seek"
         },
         {
+          "description": "Enables the size command without any pre-configured scope.",
+          "type": "string",
+          "const": "fs:allow-size"
+        },
+        {
           "description": "Enables the stat command without any pre-configured scope.",
           "type": "string",
           "const": "fs:allow-stat"
@@ -4505,6 +4520,11 @@
           "description": "Denies the seek command without any pre-configured scope.",
           "type": "string",
           "const": "fs:deny-seek"
+        },
+        {
+          "description": "Denies the size command without any pre-configured scope.",
+          "type": "string",
+          "const": "fs:deny-size"
         },
         {
           "description": "Denies the stat command without any pre-configured scope.",
