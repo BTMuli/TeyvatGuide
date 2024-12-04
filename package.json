@@ -81,7 +81,7 @@
     "artplayer": "^5.2.1",
     "clipboard": "^2.0.11",
     "color-convert": "^2.0.1",
-    "echarts": "file:../../Node/echarts",
+    "echarts": "^5.5.1",
     "html2canvas": "^1.4.1",
     "js-md5": "^0.8.3",
     "jsencrypt": "^3.3.2",

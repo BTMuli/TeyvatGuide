@@ -54,8 +54,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
       echarts:
-        specifier: file:../../Node/echarts
-        version: file:../../Node/echarts
+        specifier: ^5.5.1
+        version: 5.5.1
       html2canvas:
         specifier: ^1.4.1
         version: 1.4.1
@@ -79,7 +79,7 @@ importers:
         version: 3.5.13(typescript@5.7.2)
       vue-echarts:
         specifier: ^7.0.3
-        version: 7.0.3(@vue/runtime-core@3.5.13)(echarts@file:../../Node/echarts)(vue@3.5.13(typescript@5.7.2))
+        version: 7.0.3(@vue/runtime-core@3.5.13)(echarts@5.5.1)(vue@3.5.13(typescript@5.7.2))
       vue-json-viewer:
         specifier: ^3.0.4
         version: 3.0.4(vue@3.5.13(typescript@5.7.2))
@@ -1432,8 +1432,8 @@ packages:
     resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
     engines: {node: '>=12'}
 
-  echarts@file:../../Node/echarts:
-    resolution: {directory: ../../Node/echarts, type: directory}
+  echarts@5.5.1:
+    resolution: {integrity: sha512-Fce8upazaAXUVUVsjgV6mBnGuqgO+JNDlcgF79Dksy4+wgGpQB2lmYoO4TSweFg/mZITdpGHomw/cNBJZj1icA==}
 
   electron-to-chromium@1.5.14:
     resolution: {integrity: sha512-bEfPECb3fJ15eaDnu9LEJ2vPGD6W1vt7vZleSVyFhYuMIKm3vz/g9lt7IvEzgdwj58RjbPKUF2rXTCN/UW47tQ==}
@@ -3062,7 +3062,6 @@ packages:
 
   vue-echarts@7.0.3:
     resolution: {integrity: sha512-/jSxNwOsw5+dYAUcwSfkLwKPuzTQ0Cepz1LxCOpj2QcHrrmUa/Ql0eQqMmc1rTPQVrh2JQ29n2dhq75ZcHvRDw==}
-    version: 7.0.3
     peerDependencies:
       '@vue/runtime-core': ^3.0.0
       echarts: ^5.5.1
@@ -3192,9 +3191,8 @@ packages:
     resolution: {integrity: sha512-GQHQqAopRhwU8Kt1DDM8NjibDXHC8eoh1erhGAJPEyveY9qqVeXvVikNKrDz69sHowPMorbPUrH/mx8c50eiBQ==}
     engines: {node: '>=18'}
 
-  zrender@https://codeload.github.com/ecomfe/zrender/tar.gz/980b0ea43e68da10f82aa9a18449357e8c40bba0:
-    resolution: {tarball: https://codeload.github.com/ecomfe/zrender/tar.gz/980b0ea43e68da10f82aa9a18449357e8c40bba0}
-    version: 5.6.0
+  zrender@5.6.0:
+    resolution: {integrity: sha512-uzgraf4njmmHAbEUxMJ8Oxg+P3fT04O+9p7gY+wJRVxo8Ge+KmYv0WJev945EH4wFuc4OY2NLXz46FZrWS9xJg==}
 
 snapshots:
 
@@ -4433,10 +4431,10 @@ snapshots:
 
   dotenv@16.4.5: {}
 
-  echarts@file:../../Node/echarts:
+  echarts@5.5.1:
     dependencies:
       tslib: 2.3.0
-      zrender: https://codeload.github.com/ecomfe/zrender/tar.gz/980b0ea43e68da10f82aa9a18449357e8c40bba0
+      zrender: 5.6.0
 
   electron-to-chromium@1.5.14: {}
 
@@ -6191,9 +6189,9 @@ snapshots:
     dependencies:
       vue: 3.5.13(typescript@5.7.2)
 
-  vue-echarts@7.0.3(@vue/runtime-core@3.5.13)(echarts@file:../../Node/echarts)(vue@3.5.13(typescript@5.7.2)):
+  vue-echarts@7.0.3(@vue/runtime-core@3.5.13)(echarts@5.5.1)(vue@3.5.13(typescript@5.7.2)):
     dependencies:
-      echarts: file:../../Node/echarts
+      echarts: 5.5.1
       vue: 3.5.13(typescript@5.7.2)
       vue-demi: 0.13.11(vue@3.5.13(typescript@5.7.2))
     optionalDependencies:
@@ -6324,6 +6322,6 @@ snapshots:
 
   yoctocolors@2.1.1: {}
 
-  zrender@https://codeload.github.com/ecomfe/zrender/tar.gz/980b0ea43e68da10f82aa9a18449357e8c40bba0:
+  zrender@5.6.0:
     dependencies:
       tslib: 2.3.0
