@@ -61,11 +61,7 @@
       </v-list-item>
       <v-list-item title="分享设置">
         <template #subtitle>
-          {{
-            appStore.shareDefaultFile === true
-              ? "默认保存到文件"
-              : `默认保存到剪贴板，超过${appStore.shareDefaultFile}MB时保存到文件`
-          }}
+          默认保存到剪贴板，超过{{ appStore.shareDefaultFile }}MB时保存到文件
         </template>
         <template #prepend>
           <div class="config-icon">
@@ -255,7 +251,7 @@ async function confirmShare(): Promise<void> {
     "阈值：",
     appStore.shareDefaultFile.toString(),
   );
-  if (input === null) {
+  if (input === undefined) {
     showSnackbar.cancel("已取消修改分享设置");
     return;
   }

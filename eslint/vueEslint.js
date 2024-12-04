@@ -2,8 +2,8 @@ import pluginImport from "eslint-plugin-import";
 import pluginPrettier from "eslint-plugin-prettier";
 import pluginVue from "eslint-plugin-vue";
 import globals from "globals";
-import eslint_ts from "typescript-eslint";
-import vue_parser from "vue-eslint-parser";
+import eslintTs from "typescript-eslint";
+import parserVue from "vue-eslint-parser";
 
 const tsConfigRules = {
   "@typescript-eslint/consistent-type-assertions": ["error", { assertionStyle: "angle-bracket" }],
@@ -24,25 +24,25 @@ const tsConfigRules = {
 
 const tsConfig = {
   files: ["*.ts", "*.d.ts", "src/**/*.ts", "src/**/*.d.ts"],
-  plugins: { typescript: eslint_ts, import: pluginImport, prettier: pluginPrettier },
+  plugins: { typescript: eslintTs, import: pluginImport, prettier: pluginPrettier },
   languageOptions: {
-    parser: eslint_ts.parser,
+    parser: eslintTs.parser,
     parserOptions: { project: "tsconfig.json", tsconfigRootDir: "." },
   },
   rules: tsConfigRules,
 };
 
 const vueConfig = {
-  files: ["src/**/*.vue"],
+  files: ["src/**/*.vue", "src/App.vue"],
   plugins: { vue: pluginVue, import: pluginImport, prettier: pluginPrettier },
   languageOptions: {
     globals: { ...globals.browser, ...globals.es2021, TGApp: "readonly", window: "readonly" },
     ecmaVersion: "latest",
     sourceType: "module",
-    parser: vue_parser,
+    parser: parserVue,
     parserOptions: {
       project: "tsconfig.json",
-      parser: eslint_ts.parser,
+      parser: eslintTs.parser,
       extraFileExtensions: [".vue"],
       tsconfigRootDir: ".",
     },

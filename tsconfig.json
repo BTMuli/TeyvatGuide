@@ -24,6 +24,7 @@
     "src/**/*.d.ts",
     "src/**/*.ts",
     "src/**/*.vue",
+    "src/App.vue",
     "src/data/**/*.json",
     "tsconfig.json",
     "vite.config.ts",
