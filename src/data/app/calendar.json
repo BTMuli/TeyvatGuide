@@ -5491,7 +5491,7 @@
   },
   {
     "id": 15514,
-    "contentId": 0,
+    "contentId": 503390,
     "dropDays": [3, 6, 7],
     "name": "星鹫赤羽",
     "itemType": "weapon",
@@ -7888,7 +7888,7 @@
   },
   {
     "id": 11432,
-    "contentId": 0,
+    "contentId": 503608,
     "dropDays": [2, 5, 7],
     "name": "厄水之祸",
     "itemType": "weapon",
@@ -10285,7 +10285,7 @@
   },
   {
     "id": 15430,
-    "contentId": 0,
+    "contentId": 503391,
     "dropDays": [3, 6, 7],
     "name": "缀花之翎",
     "itemType": "weapon",
@@ -11407,7 +11407,7 @@
   },
   {
     "id": 14430,
-    "contentId": 0,
+    "contentId": 503389,
     "dropDays": [1, 4, 7],
     "name": "乘浪的回旋",
     "itemType": "weapon",

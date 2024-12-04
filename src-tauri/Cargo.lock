@@ -4949,7 +4949,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-deep-link"
 version = "2.0.2"
-source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#6dbc304c280e3b6a3b97f7b7dfd1dce8723470da"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#715a0477be8f6f77af0377f4eca2b649554446be"
 dependencies = [
  "dunce",
  "rust-ini",
@@ -4968,7 +4968,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-dialog"
 version = "2.0.4"
-source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#6dbc304c280e3b6a3b97f7b7dfd1dce8723470da"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#715a0477be8f6f77af0377f4eca2b649554446be"
 dependencies = [
  "log",
  "raw-window-handle",
@@ -4985,7 +4985,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-fs"
 version = "2.1.0"
-source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#6dbc304c280e3b6a3b97f7b7dfd1dce8723470da"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#715a0477be8f6f77af0377f4eca2b649554446be"
 dependencies = [
  "anyhow",
  "dunce",
@@ -5007,7 +5007,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-http"
 version = "2.0.4"
-source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#6dbc304c280e3b6a3b97f7b7dfd1dce8723470da"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#715a0477be8f6f77af0377f4eca2b649554446be"
 dependencies = [
  "data-url",
  "http",
@@ -5028,7 +5028,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-log"
 version = "2.0.3"
-source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#6dbc304c280e3b6a3b97f7b7dfd1dce8723470da"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#715a0477be8f6f77af0377f4eca2b649554446be"
 dependencies = [
  "android_logger",
  "byte-unit",
@@ -5049,7 +5049,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-os"
 version = "2.0.1"
-source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#6dbc304c280e3b6a3b97f7b7dfd1dce8723470da"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#715a0477be8f6f77af0377f4eca2b649554446be"
 dependencies = [
  "gethostname",
  "log",
@@ -5066,7 +5066,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-process"
 version = "2.0.1"
-source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#6dbc304c280e3b6a3b97f7b7dfd1dce8723470da"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#715a0477be8f6f77af0377f4eca2b649554446be"
 dependencies = [
  "tauri",
  "tauri-plugin",
@@ -5075,7 +5075,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-shell"
 version = "2.0.2"
-source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#6dbc304c280e3b6a3b97f7b7dfd1dce8723470da"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#715a0477be8f6f77af0377f4eca2b649554446be"
 dependencies = [
  "encoding_rs",
  "log",
@@ -5095,7 +5095,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-single-instance"
 version = "2.0.2"
-source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#6dbc304c280e3b6a3b97f7b7dfd1dce8723470da"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#715a0477be8f6f77af0377f4eca2b649554446be"
 dependencies = [
  "serde",
  "serde_json",
@@ -5109,7 +5109,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-sql"
 version = "2.0.3"
-source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#6dbc304c280e3b6a3b97f7b7dfd1dce8723470da"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#715a0477be8f6f77af0377f4eca2b649554446be"
 dependencies = [
  "futures-core",
  "indexmap 2.6.0",
@@ -5669,9 +5669,9 @@ checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 
 [[package]]
 name = "url"
-version = "2.5.3"
+version = "2.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d157f1b96d14500ffdc1f10ba712e780825526c03d9a49b4d0324b0d9113ada"
+checksum = "32f8b686cadd1473f4bd0117a5d28d36b1ade384ea9b5069a1c40aefed7fda60"
 dependencies = [
  "form_urlencoded",
  "idna",
