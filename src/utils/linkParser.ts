@@ -1,13 +1,14 @@
 /**
  * @file src/utils/linkParser.ts
  * @description 处理链接
- * @since Beta v0.6.3
+ * @since Beta v0.6.5
  */
 
 import { emit } from "@tauri-apps/api/event";
 
 import showDialog from "../components/func/dialog.js";
 import showSnackbar from "../components/func/snackbar.js";
+import { getGameId } from "../web/utils/tools.js";
 
 import TGClient from "./TGClient.js";
 import { createPost } from "./TGWindow.js";
@@ -56,7 +57,7 @@ export async function parsePost(link: string): Promise<false | string> {
 
 /**
  * @function parseLink
- * @since Beta v0.6.3
+ * @since Beta v0.6.5
  * @description 处理链接
  * @param {string} link - 链接
  * @param {boolean} useInner - 是否采用内置 JSBridge 打开
@@ -117,6 +118,14 @@ export async function parseLink(
         return "post";
       }
       await createPost(postId);
+      return true;
+    } else if (url.pathname.includes("/topicDetail/")) {
+      const regex = /\/(\w+)\/topicDetail\/(\d+)/;
+      const result = url.pathname.match(regex);
+      if (!result) return false;
+      const [, game, topicId] = result;
+      const id = getGameId(game);
+      await emit("active_deep_link", `router?path=/posts/topic/${id}/${topicId}`);
       return true;
     }
   }

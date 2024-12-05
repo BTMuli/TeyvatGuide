@@ -80,6 +80,7 @@
         </template>
         <v-list-item-title @click="confirmUpdateDevice()">刷新设备信息</v-list-item-title>
         <v-list-item-subtitle>
+          <!-- @ts-expect-error-next-line Deprecated symbol used -->
           {{ appStore.deviceInfo.device_name }}({{ appStore.deviceInfo.product }}) -
           {{ appStore.deviceInfo.device_fp }}
         </v-list-item-subtitle>

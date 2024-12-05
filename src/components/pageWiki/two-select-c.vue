@@ -104,21 +104,13 @@ interface TwoSelectCEmits {
 const props = defineProps<TwoSelectCProps>();
 const emits = defineEmits<TwoSelectCEmits>();
 
-const visible = computed({
-  get() {
-    return props.modelValue;
-  },
-  set(value) {
-    emits("update:modelValue", value);
-  },
+const visible = computed<boolean>({
+  get: () => props.modelValue,
+  set: (v: boolean) => emits("update:modelValue", v),
 });
-const reset = computed({
-  get() {
-    return props.reset;
-  },
-  set(value) {
-    emits("update:reset", value);
-  },
+const reset = computed<boolean>({
+  get: () => props.reset,
+  set: (v: boolean) => emits("update:reset", v),
 });
 
 watch(

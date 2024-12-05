@@ -64,3 +64,13 @@ export function getGameName(gid: number): string {
   const game = TGConstant.BBS.CHANNELS.find((item) => item.gid === gid.toString());
   return game ? game.title : "未知游戏";
 }
+
+/**
+ * @description 获取游戏id
+ * @param {string} mini
+ * @returns {string}
+ */
+export function getGameId(mini: string): string {
+  const game = TGConstant.BBS.CHANNELS.find((item) => item.mini === mini);
+  return game ? game.gid : "0";
+}
