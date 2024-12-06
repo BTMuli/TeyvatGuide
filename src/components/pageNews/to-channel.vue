@@ -31,7 +31,7 @@ import { storeToRefs } from "pinia";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 
-import { useAppStore } from "../../store/modules/app.js";
+import { NewsType, useAppStore } from "../../store/modules/app.js";
 import { ToChannelItem } from "../../web/constant/bbs.js";
 import TGConstant from "../../web/constant/TGConstant.js";
 import TOverlay from "../app/t-overlay.vue";
@@ -55,7 +55,7 @@ async function toChannel(item: ToChannelItem): Promise<void> {
   }
   visible.value = false;
   let link = `/news/${item.gid}/{type}`;
-  if (recentNewsType.value satisfies TGApp.App.Store.NewsType) {
+  if (recentNewsType.value satisfies NewsType) {
     link = link.replace("{type}", recentNewsType.value);
   } else {
     link = link.replace("{type}", "notice");
