@@ -9,7 +9,9 @@
         </v-btn>
       </div>
       <div class="tops-list">
-        <TPostCard v-for="item in results" :key="item.post.post_id" :model-value="item" />
+        <div v-for="item in results" :key="item.post.post_id">
+          <TPostCard :model-value="item" />
+        </div>
       </div>
     </div>
   </TOverlay>
@@ -145,6 +147,7 @@ async function searchPosts() {
 }
 
 .tops-list {
+  position: relative;
   display: flex;
   width: 400px;
   max-height: 400px;
