@@ -11,7 +11,7 @@ import TGHttp from "../../../utils/TGHttp.js";
 import { getDeviceInfo } from "../../../utils/toolFunc.js";
 import TGConstant from "../../../web/constant/TGConstant.js";
 
-const PUB_KEY_STR = `-----BEGIN PUBLIC KEY-----
+const PUB_KEY_STR: Readonly<string> = `-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDvekdPMHN3AYhm/vktJT+YJr7cI5DcsNKqdsx5DZX0gDuWFuIjzdwButrIYPNmRJ1G8ybDIF7oDW2eEpm5sMbL9zs
 9ExXCdvqrn51qELbqj0XxtMTIpaCHFSI50PfPpTFV9Xt/hmyVwokoOXFlAEgCn+Q
 CgGs52bFoYMtyi+xEQIDAQAB
@@ -55,7 +55,7 @@ export async function getCaptcha(
     "x-rpc-aigis": aigis || "",
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "2",
-    "x-rpc-app_id": TGConstant.BBS.APP_ID,
+    "x-rpc-app_id": "bll8iq97cem8",
     "x-rpc-device_fp": device_fp,
     "x-rpc-device_name": device_name,
     "x-rpc-device_id": device_id,
@@ -63,7 +63,7 @@ export async function getCaptcha(
     "user-agent": TGConstant.BBS.UA_MOBILE,
     "content-type": "application/json",
     referer: "https://user.miyoushe.com/",
-    "x-rpc-game_biz": TGConstant.GAME_BIZ,
+    "x-rpc-game_biz": "hk4e_cn",
   };
   const resp = await TGHttp<
     TGApp.Plugins.Mys.CaptchaLogin.CaptchaResponse | TGApp.BBS.Response.Base
@@ -117,7 +117,7 @@ export async function doCaptchaLogin(
     "x-rpc-aigis": aigis || "",
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "2",
-    "x-rpc-app_id": TGConstant.BBS.APP_ID,
+    "x-rpc-app_id": "bll8iq97cem8",
     "x-rpc-device_fp": device_fp,
     "x-rpc-device_name": device_name,
     "x-rpc-device_id": device_id,

@@ -15,10 +15,10 @@
       </div>
       <div class="tpc-title" :title="card.title" @click="shareCard">{{ card.title }}</div>
     </div>
-    <div class="tpc-mid" v-if="card.user">
+    <div class="tpc-mid" v-if="card.user !== null">
       <TpAvatar :data="card.user" position="left" />
     </div>
-    <div class="tpc-bottom" v-if="card.data">
+    <div class="tpc-bottom" v-if="card.data !== null">
       <div class="tpc-tags">
         <div v-for="topic in card.topics" :key="topic.id" class="tpc-tag" @click="toTopic(topic)">
           <v-icon size="10">mdi-tag</v-icon>
@@ -50,7 +50,7 @@
     </div>
     <div
       class="tpc-forum"
-      v-if="card.forum && card.forum.name !== ''"
+      v-if="card.forum !== null && card.forum.name !== ''"
       :title="`频道: ${card.forum.name}`"
       @click="toForum(card.forum)"
     >
@@ -68,27 +68,20 @@
 </template>
 <script lang="ts" setup>
 import { emit } from "@tauri-apps/api/event";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 
 import { generateShareImg, saveImgLocal } from "../../utils/TGShare.js";
 import { createPost } from "../../utils/TGWindow.js";
+import showSnackbar from "../func/snackbar.js";
 import TpAvatar from "../viewPost/tp-avatar.vue";
 
-interface TPostCardProps {
-  modelValue: TGApp.Plugins.Mys.Post.FullData;
-  selectMode?: boolean;
-}
+type TPostCardProps = { modelValue: TGApp.Plugins.Mys.Post.FullData; selectMode?: boolean };
+type TPostCardEmits = (e: "onSelected", v: string) => void;
 
-interface TPostCardEmits {
-  (e: "onSelected", value: string): void;
-}
-
-const props = withDefaults(defineProps<TPostCardProps>(), {
-  selectMode: false,
-});
+const props = withDefaults(defineProps<TPostCardProps>(), { selectMode: false });
 const emits = defineEmits<TPostCardEmits>();
 const isAct = ref<boolean>(false);
-const card = ref<TGApp.Plugins.Mys.News.RenderCard>();
+const card = shallowRef<TGApp.Plugins.Mys.News.RenderCard>();
 const localCover = ref<string>();
 
 const cardBg = computed<string>(() => {
@@ -106,9 +99,8 @@ async function reload(data: TGApp.Plugins.Mys.Post.FullData): Promise<void> {
     localCover.value = undefined;
   }
   card.value = getPostCard(data);
-  if (card.value && card.value.cover !== "") {
+  if (card.value && card.value.cover !== "")
     localCover.value = await saveImgLocal(card.value.cover);
-  }
 }
 
 onUnmounted(() => {
@@ -186,32 +178,30 @@ function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
  * @returns {TGApp.Plugins.Mys.News.RenderCard} 渲染用咨讯列表项
  */
 function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.News.RenderCard {
-  let forum: TGApp.Plugins.Mys.News.RenderForum | null = null;
-  let data: TGApp.Plugins.Mys.News.RenderData | null = null;
-  if (item.forum !== null) {
-    forum = {
-      name: item.forum.name,
-      icon: item.forum.icon,
-      id: item.forum.id,
-    };
-  }
-  if (item.stat !== null) {
-    data = {
-      mark: item.stat.bookmark_num,
-      forward: item.stat.forward_num,
-      like: item.stat.like_num,
-      reply: item.stat.reply_num,
-      view: item.stat.view_num,
-    };
-  }
   return {
     title: item.post.subject,
     cover: getPostCover(item),
     postId: Number(item.post.post_id),
     subtitle: item.post.post_id,
     user: item.user,
-    forum: forum,
-    data: data,
+    forum:
+      item.forum !== null
+        ? {
+            name: item.forum.name,
+            icon: item.forum.icon,
+            id: item.forum.id,
+          }
+        : null,
+    data:
+      item.stat !== null
+        ? {
+            mark: item.stat.bookmark_num,
+            forward: item.stat.forward_num,
+            like: item.stat.like_num,
+            reply: item.stat.reply_num,
+            view: item.stat.view_num,
+          }
+        : null,
     topics: item.topics,
   };
 }
@@ -235,9 +225,13 @@ function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.N
 
 async function shareCard(): Promise<void> {
   if (!card.value) return;
-  const dom = <HTMLDivElement>document.querySelector(`#post-card-${card.value.postId}`);
+  const shareDom = document.querySelector<HTMLDivElement>(`#post-card-${card.value.postId}`);
+  if (shareDom === null) {
+    showSnackbar.error("分享内容不存在", 3000);
+    return;
+  }
   const fileName = `PostCard_${card.value.postId}`;
-  await generateShareImg(fileName, dom, 2.5);
+  await generateShareImg(fileName, shareDom, 2.5);
 }
 
 async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {

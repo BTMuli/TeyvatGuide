@@ -1,7 +1,7 @@
 <template>
   <TSwitchTheme />
   <TPinWin />
-  <TShareBtn v-model="annoRef" :title="annoTitle" />
+  <TShareBtn selector=".anno-body" :title="`Anno_${route.params.anno_id}`" />
   <div class="anno-body" v-if="annoData">
     <div class="anno-info">AnnoID: {{ annoId }} | Render by TeyvatGuide v{{ appVersion }}</div>
     <div class="anno-title">{{ annoData.title }}</div>
@@ -13,7 +13,7 @@
 </template>
 <script lang="ts" setup>
 import { app, webviewWindow } from "@tauri-apps/api";
-import { ref, onMounted } from "vue";
+import { onMounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
 import TPinWin from "../components/app/t-pinWin.vue";
@@ -26,16 +26,12 @@ import TGLogger from "../utils/TGLogger.js";
 import { createTGWindow } from "../utils/TGWindow.js";
 import Hk4eApi, { AnnoLang, AnnoServer } from "../web/request/hk4eReq.js";
 
-const annoRef = ref<HTMLElement>(<HTMLElement>{});
-const annoTitle = ref<string>("");
-
-// 数据
 const route = useRoute();
 const annoId = Number(route.params.anno_id);
 const region = <AnnoServer>route.params.region;
 const lang = <AnnoLang>route.params.lang;
 const appVersion = ref<string>();
-const annoData = ref<TGApp.BBS.Announcement.ContentItem | undefined>();
+const annoData = shallowRef<TGApp.BBS.Announcement.ContentItem | undefined>();
 
 onMounted(async () => {
   showLoading.start("正在加载公告数据...");
@@ -49,11 +45,9 @@ onMounted(async () => {
   try {
     annoData.value = await Hk4eApi.anno.content(annoId, region, lang);
     showLoading.update("正在渲染数据...", `公告ID：${annoId}`);
-    annoTitle.value = `Anno_${annoId}`;
     await webviewWindow
       .getCurrentWebviewWindow()
       .setTitle(`Anno_${annoId} ${annoData.value.title}`);
-    annoRef.value = <HTMLElement>document.querySelector(".anno-body");
   } catch (error) {
     if (error instanceof Error)
       await TGLogger.Error(`[t-anno.vue][${annoId}] ${error.name}：${error.message}`);

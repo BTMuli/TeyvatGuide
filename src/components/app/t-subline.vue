@@ -1,13 +1,11 @@
 <template>
   <div class="tsl-box">
     <img src="../../assets/icons/arrow-right.svg" alt="right" />
-    <slot>{{ props.title }}</slot>
+    <slot>{{ title }}</slot>
   </div>
 </template>
 <script lang="ts" setup>
-const props = defineProps<{
-  title?: string;
-}>();
+defineProps<{ title?: string }>();
 </script>
 <style lang="css" scoped>
 .tsl-box {

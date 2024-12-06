@@ -17,8 +17,29 @@ export enum AnnoServer {
 
 export type AnnoLang = "zh-cn" | "zh-tw" | "en" | "ja";
 
-const AnnoApi = "https://hk4e-ann-api.mihoyo.com/common/hk4e_cn/announcement/api";
-const AnnoApiGlobal = "https://sg-hk4e-api.hoyoverse.com/common/hk4e_global/announcement/api";
+const AnnoApi: Readonly<string> = "https://hk4e-ann-api.mihoyo.com/common/hk4e_cn/announcement/api";
+const AnnoApiGlobal: Readonly<string> =
+  "https://sg-hk4e-api.hoyoverse.com/common/hk4e_global/announcement/api";
+
+/**
+ * @description 判断是否为国内服务器
+ * @since Beta v0.6.5
+ * @param {AnnoServer} region 服务器
+ * @returns {boolean} 是否为国内服务器
+ */
+function isCN(region: AnnoServer): boolean {
+  return region === AnnoServer.CN_ISLAND || region === AnnoServer.CN_TREE;
+}
+
+/**
+ * @description 根据服务器获取公告地址
+ * @since Beta v0.6.5
+ * @param {AnnoServer} region 服务器
+ * @returns {string} 公告地址
+ */
+function getAnnoApi(region: AnnoServer): string {
+  return isCN(region) ? AnnoApi : AnnoApiGlobal;
+}
 
 /**
  * @description 获取游戏内公告参数
@@ -31,22 +52,16 @@ function getAnnoParams(
   region: AnnoServer = AnnoServer.CN_ISLAND,
   lang: AnnoLang = "zh-cn",
 ): TGApp.BBS.Announcement.Params {
-  const params: TGApp.BBS.Announcement.Params = {
+  return {
     game: "hk4e",
-    game_biz: "hk4e_cn",
+    game_biz: isCN(region) ? "hk4e_cn" : "hk4e_global",
     lang,
-    bundle_id: "hk4e_cn",
+    bundle_id: isCN(region) ? "hk4e_cn" : "hk4e_global",
     platform: "pc",
     region,
     level: "55",
     uid: "100000000",
   };
-  if (region === AnnoServer.CN_ISLAND || region === AnnoServer.CN_TREE) {
-    return params;
-  }
-  params.game_biz = "hk4e_global";
-  params.bundle_id = "hk4e_global";
-  return params;
 }
 
 /**
@@ -60,15 +75,10 @@ async function getAnnoList(
   region: AnnoServer = AnnoServer.CN_ISLAND,
   lang: AnnoLang = "zh-cn",
 ): Promise<TGApp.BBS.Announcement.ListData> {
-  const params: TGApp.BBS.Announcement.Params = getAnnoParams(region, lang);
-  let url = `${AnnoApi}/getAnnList`;
-  if (region !== AnnoServer.CN_ISLAND && region !== AnnoServer.CN_TREE) {
-    url = `${AnnoApiGlobal}/getAnnList`;
-  }
-  const resp = await TGHttp<TGApp.BBS.Announcement.ListResponse>(url, {
-    method: "GET",
-    query: params,
-  });
+  const resp = await TGHttp<TGApp.BBS.Announcement.ListResponse>(
+    `${getAnnoApi(region)}/getAnnList`,
+    { method: "GET", query: getAnnoParams(region, lang) },
+  );
   return resp.data;
 }
 
@@ -85,21 +95,15 @@ async function getAnnoContent(
   region: AnnoServer = AnnoServer.CN_ISLAND,
   lang: AnnoLang = "zh-cn",
 ): Promise<TGApp.BBS.Announcement.ContentItem> {
-  const params: TGApp.BBS.Announcement.Params = getAnnoParams(region, lang);
-  let url = `${AnnoApi}/getAnnContent`;
-  if (region !== AnnoServer.CN_ISLAND && region !== AnnoServer.CN_TREE) {
-    url = `${AnnoApiGlobal}/getAnnContent`;
-  }
-  const annoResp = await TGHttp<TGApp.BBS.Announcement.ContentResponse>(url, {
-    method: "GET",
-    query: params,
-  });
+  const annoResp = await TGHttp<TGApp.BBS.Announcement.ContentResponse>(
+    `${getAnnoApi(region)}/getAnnContent`,
+    { method: "GET", query: getAnnoParams(region, lang) },
+  );
   const annoContent = annoResp.data.list.find((item) => item.ann_id === annId);
-  if (annoContent != null) {
-    return annoContent;
-  } else {
+  if (annoContent === undefined) {
     throw new Error("公告内容不存在");
   }
+  return annoContent;
 }
 
 /**
@@ -115,7 +119,6 @@ async function getGachaLog(
   gachaType: string,
   endId: string = "0",
 ): Promise<TGApp.Game.Gacha.GachaItem[] | TGApp.BBS.Response.Base> {
-  const url = "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog";
   const params = {
     lang: "zh-cn",
     auth_appid: "webview_gacha",
@@ -126,19 +129,16 @@ async function getGachaLog(
     size: "20",
     end_id: endId,
   };
-  const resp = await TGHttp<TGApp.Game.Gacha.GachaLogResponse | TGApp.BBS.Response.Base>(url, {
-    method: "GET",
-    query: params,
-  });
+  const resp = await TGHttp<TGApp.Game.Gacha.GachaLogResponse | TGApp.BBS.Response.Base>(
+    "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog",
+    { method: "GET", query: params },
+  );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data.list;
 }
 
 const Hk4eApi = {
-  anno: {
-    list: getAnnoList,
-    content: getAnnoContent,
-  },
+  anno: { list: getAnnoList, content: getAnnoContent },
   gacha: getGachaLog,
 };
 

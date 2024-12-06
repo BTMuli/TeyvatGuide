@@ -19,7 +19,7 @@ async function getDeviceFp(
   Info?: TGApp.App.Device.DeviceInfo,
 ): Promise<TGApp.App.Device.DeviceInfo> {
   const info = Info ?? getInitDeviceInfo();
-  const deviceFPHeader = {
+  const deviceFPHeader: Record<string, string | number> = {
     proxyStatus: 0,
     isRoot: 0,
     romCapacity: "512",
@@ -74,8 +74,7 @@ async function getDeviceFp(
     hasKeyboard: 0,
     board: "taro",
   };
-  const url = "https://public-data-api.mihoyo.com/device-fp/api/getFp";
-  const data = {
+  const data: Record<string, string> = {
     device_id: info.device_id,
     seed_id: info.seed_id,
     platform: "2",
@@ -85,24 +84,20 @@ async function getDeviceFp(
     bbs_device_id: info.device_id,
     device_fp: info.device_fp,
   };
-  const header = {
-    "User-Agent": TGConstant.BBS.UA_MOBILE,
+  const header: Record<string, string> = {
+    "user-agent": TGConstant.BBS.UA_MOBILE,
     "x-rpc-app_version": TGConstant.BBS.VERSION,
     "x-rpc-client_type": "5",
     "x-requested-with": "com.mihoyo.hyperion",
     Referer: "https://webstatic.mihoyo.com/",
   };
   try {
-    const resp = await TGHttp<TGApp.BBS.Response.getDeviceFp>(url, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: header,
-    });
-    if (resp.retcode !== 0) {
-      info.device_fp = "0000000000000";
-    } else {
-      info.device_fp = resp.data.device_fp;
-    }
+    const resp = await TGHttp<TGApp.BBS.Response.getDeviceFp>(
+      "https://public-data-api.mihoyo.com/device-fp/api/getFp",
+      { method: "POST", body: JSON.stringify(data), headers: header },
+    );
+    if (resp.retcode !== 0) info.device_fp = "0000000000000";
+    else info.device_fp = resp.data.device_fp;
   } catch (error) {
     info.device_fp = "0000000000000";
     await TGLogger.Error(`获取设备指纹失败: ${error}`);
@@ -119,19 +114,14 @@ async function getDeviceFp(
 async function refreshCode(
   actId: string,
 ): Promise<TGApp.BBS.Navigator.CodeData[] | TGApp.BBS.Response.Base> {
-  const url = "https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode";
-  const header = { "x-rpc-act_id": actId };
-  const res = await TGHttp<TGApp.BBS.Navigator.CodeResponse | TGApp.BBS.Response.Base>(url, {
-    method: "GET",
-    headers: header,
-  });
+  const res = await TGHttp<TGApp.BBS.Navigator.CodeResponse | TGApp.BBS.Response.Base>(
+    "https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode",
+    { method: "GET", headers: { "x-rpc-act_id": actId } },
+  );
   if (res.retcode !== 0) return <TGApp.BBS.Response.Base>res;
   return res.data.code_list;
 }
 
-const OtherApi = {
-  code: refreshCode,
-  fp: getDeviceFp,
-};
+const OtherApi = { code: refreshCode, fp: getDeviceFp };
 
 export default OtherApi;

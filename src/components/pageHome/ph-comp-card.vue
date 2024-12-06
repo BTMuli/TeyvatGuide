@@ -12,10 +12,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-interface THomeCardProps {
-  append?: boolean;
-}
-
+type THomeCardProps = { append?: boolean };
 const props = defineProps<THomeCardProps>();
 </script>
 <style lang="css" scoped>

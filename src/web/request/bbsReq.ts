@@ -16,15 +16,12 @@ import { getRequestHeader } from "../utils/getRequestHeader.js";
 async function getUserFullInfo(
   cookie: TGApp.App.Account.Cookie,
 ): Promise<TGApp.BBS.Response.Base | TGApp.Plugins.Mys.User.Info> {
-  const url = "https://bbs-api.miyoushe.com/user/wapi/getUserFullInfo";
   const ck = { cookie_token: cookie.cookie_token, account_id: cookie.account_id };
   const params = { gids: "2" };
-  const header = getRequestHeader(ck, "GET", params, "common", true);
-  const resp = await TGHttp<TGApp.Plugins.Mys.User.HomeResponse | TGApp.BBS.Response.Base>(url, {
-    method: "GET",
-    headers: header,
-    query: params,
-  });
+  const resp = await TGHttp<TGApp.Plugins.Mys.User.HomeResponse | TGApp.BBS.Response.Base>(
+    "https://bbs-api.miyoushe.com/user/wapi/getUserFullInfo",
+    { method: "GET", headers: getRequestHeader(ck, "GET", params, "X4", true), query: params },
+  );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data.user_info;
 }
@@ -42,22 +39,16 @@ async function userFavouritePost(
   uid: string,
   offset: string = "",
 ): Promise<TGApp.BBS.Collection.PostRespData | TGApp.BBS.Response.Base> {
-  const url = "https://bbs-api.miyoushe.com/post/wapi/userFavouritePost";
   const ck = { cookie_token: cookie.cookie_token, account_id: cookie.account_id };
   const params = { size: "20", uid, offset };
-  const header = getRequestHeader(ck, "GET", params, "common");
-  const resp = await TGHttp<TGApp.BBS.Collection.PostResponse | TGApp.BBS.Response.Base>(url, {
-    method: "GET",
-    headers: header,
-    query: params,
-  });
+  const resp = await TGHttp<TGApp.BBS.Collection.PostResponse | TGApp.BBS.Response.Base>(
+    "https://bbs-api.miyoushe.com/post/wapi/userFavouritePost",
+    { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
+  );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data;
 }
 
-const BBSApi = {
-  userInfo: getUserFullInfo,
-  lovePost: userFavouritePost,
-};
+const BBSApi = { userInfo: getUserFullInfo, lovePost: userFavouritePost };
 
 export default BBSApi;

@@ -8,23 +8,13 @@
   </transition>
 </template>
 <script lang="ts" setup>
-// vue
 import { ref, watch } from "vue";
 
-interface TolProps {
-  modelValue: boolean;
-  toClick?: () => void;
-  blurVal: string;
-  hide?: true;
-}
+type TolProps = { modelValue: boolean; toClick?: () => void; blurVal: string; hide?: true };
 
-const props = withDefaults(defineProps<TolProps>(), {
-  modelValue: false,
-  blurVal: "20px",
-});
-
-const showTolo = ref(!props.hide);
-const showToli = ref(!props.hide);
+const props = withDefaults(defineProps<TolProps>(), { modelValue: false, blurVal: "20px" });
+const showTolo = ref<boolean>(!props.hide);
+const showToli = ref<boolean>(!props.hide);
 
 watch(
   () => props.modelValue,
@@ -32,14 +22,10 @@ watch(
     if (props.modelValue) {
       showTolo.value = true;
       showToli.value = true;
-    } else {
-      setTimeout(() => {
-        showToli.value = false;
-      }, 100);
-      setTimeout(() => {
-        showTolo.value = false;
-      }, 300);
+      return;
     }
+    setTimeout(() => (showToli.value = false), 100);
+    setTimeout(() => (showTolo.value = false), 300);
   },
 );
 </script>

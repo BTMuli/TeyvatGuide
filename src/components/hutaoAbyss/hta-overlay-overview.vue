@@ -59,6 +59,7 @@ import { AbyssDataItem } from "../../pages/WIKI/Abyss.vue";
 import { generateShareImg } from "../../utils/TGShare.js";
 import { timestampToDate } from "../../utils/toolFunc.js";
 import TOverlay from "../app/t-overlay.vue";
+import showSnackbar from "../func/snackbar.js";
 
 import HtaOverviewLine from "./hta-overview-line.vue";
 
@@ -93,7 +94,12 @@ function onCancel(): void {
 
 async function share(): Promise<void> {
   loadShare.value = true;
-  const shareEl = <HTMLElement>document.querySelector(".hta-oo-box");
+  const shareEl = document.querySelector<HTMLElement>(".hta-oo-box");
+  if (shareEl === null) {
+    showSnackbar.warn("分享失败");
+    loadShare.value = false;
+    return;
+  }
   const fileName = `深渊数据统计_${timestampToDate(dataCur.value.Timestamp)}.png`;
   await generateShareImg(fileName, shareEl, 2);
   loadShare.value = false;

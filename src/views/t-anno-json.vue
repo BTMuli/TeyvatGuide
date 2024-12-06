@@ -8,7 +8,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onMounted, shallowRef } from "vue";
 import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
 
@@ -21,8 +21,8 @@ const route = useRoute();
 const annoId = Number(route.params.anno_id);
 const region = <AnnoServer>route.params.region;
 const lang = <AnnoLang>route.params.lang;
-const jsonList = ref<TGApp.BBS.Announcement.AnnoSingle>();
-const jsonContent = ref<TGApp.BBS.Announcement.ContentItem>();
+const jsonList = shallowRef<TGApp.BBS.Announcement.AnnoSingle>();
+const jsonContent = shallowRef<TGApp.BBS.Announcement.ContentItem>();
 
 onMounted(async () => {
   showLoading.start("正在获取公告数据...");
@@ -32,11 +32,14 @@ onMounted(async () => {
   }
   showLoading.update("正在获取数据...", `公告ID: ${annoId}`);
   const listData = await Hk4eApi.anno.list(region, lang);
-  listData.list.map((item: TGApp.BBS.Announcement.ListItem) => {
-    return item.list.map((single: TGApp.BBS.Announcement.AnnoSingle) => {
-      return single.ann_id === annoId ? (jsonList.value = single) : null;
-    });
-  });
+  for (const listItem of listData.list) {
+    for (const single of listItem.list) {
+      if (single.ann_id === annoId) {
+        jsonList.value = single;
+        break;
+      }
+    }
+  }
   jsonContent.value = await Hk4eApi.anno.content(annoId, region, lang);
   showLoading.end();
 });

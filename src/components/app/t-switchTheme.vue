@@ -9,25 +9,19 @@
 </template>
 <script lang="ts" setup>
 import { event } from "@tauri-apps/api";
-import { UnlistenFn, Event } from "@tauri-apps/api/event";
-import { computed, onMounted, onUnmounted } from "vue";
+import { Event, UnlistenFn } from "@tauri-apps/api/event";
+import { computed, onMounted, onUnmounted, shallowRef } from "vue";
 
 import { useAppStore } from "../../store/modules/app.js";
 
 const appStore = useAppStore();
-const themeGet = computed({
-  get() {
-    return appStore.theme;
-  },
-  set(value: string) {
-    appStore.theme = value;
-  },
+const themeGet = computed<string>({
+  get: () => appStore.theme,
+  set: (v: string) => (appStore.theme = v),
 });
-let themeListener: UnlistenFn | null = null;
+const themeListener = shallowRef<UnlistenFn | null>(null);
 
-onMounted(async () => {
-  themeListener = await listenOnTheme();
-});
+onMounted(async () => (themeListener.value = await listenOnTheme()));
 
 async function switchTheme(): Promise<void> {
   appStore.changeTheme();
@@ -42,9 +36,9 @@ async function listenOnTheme(): Promise<UnlistenFn> {
 }
 
 onUnmounted(() => {
-  if (themeListener !== null) {
-    themeListener();
-    themeListener = null;
+  if (themeListener.value !== null) {
+    themeListener.value();
+    themeListener.value = null;
   }
 });
 </script>

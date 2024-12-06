@@ -64,16 +64,14 @@ interface ToLiveCodeProps {
   modelValue: boolean;
 }
 
-type ToLiveCodeEmits = (e: "update:modelValue", value: boolean) => void;
+type ToLiveCodeEmits = (e: "update:modelValue", v: boolean) => void;
 
 const props = withDefaults(defineProps<ToLiveCodeProps>(), { modelValue: false });
 const emits = defineEmits<ToLiveCodeEmits>();
 
 const visible = computed<boolean>({
   get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
+  set: (v: boolean) => emits("update:modelValue", v),
 });
 
 function onCancel(): void {
@@ -86,7 +84,11 @@ function copy(code: string): void {
 }
 
 async function shareImg(): Promise<void> {
-  const element = <HTMLElement>document.querySelector(".tolc-box");
+  const element = document.querySelector<HTMLElement>(".tolc-box");
+  if (element === null) {
+    showSnackbar.error("未获取到分享内容");
+    return;
+  }
   const fileName = `LiveCode_${props.actId}_${new Date().getTime()}`;
   await generateShareImg(fileName, element, 2);
 }

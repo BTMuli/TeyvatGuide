@@ -9,31 +9,28 @@
 import TGLogger from "../../utils/TGLogger.js";
 import { generateShareImg } from "../../utils/TGShare.js";
 import showLoading from "../func/loading.js";
+import showSnackbar from "../func/snackbar.js";
 
-interface TShareBtnProps {
-  modelValue: HTMLElement;
-  title: string;
-}
-
+type TShareBtnProps = { selector: string; title: string };
 const props = defineProps<TShareBtnProps>();
 
 async function shareContent(): Promise<void> {
   showLoading.start("正在生成分享图片", props.title);
   await TGLogger.Info("[TShareBtn][shareContent] 开始生成分享图片");
-  props.modelValue.querySelectorAll("details").forEach((item) => {
-    if (item.open) {
-      item.setAttribute("details-open", "");
-    } else {
-      item.open = true;
-    }
+  const shareDom = document.querySelector<HTMLElement>(props.selector);
+  if (shareDom === null) {
+    showSnackbar.error("分享内容不存在", 3000);
+    showLoading.end();
+    return;
+  }
+  shareDom.querySelectorAll("details").forEach((item) => {
+    if (item.open) item.setAttribute("details-open", "");
+    else item.open = true;
   });
-  await generateShareImg(props.title, props.modelValue);
-  props.modelValue.querySelectorAll("details").forEach((item) => {
-    if (item.hasAttribute("details-open")) {
-      item.removeAttribute("details-open");
-    } else {
-      item.open = false;
-    }
+  await generateShareImg(props.title, shareDom);
+  shareDom.querySelectorAll("details").forEach((item) => {
+    if (item.hasAttribute("details-open")) item.removeAttribute("details-open");
+    else item.open = false;
   });
   showLoading.end();
   await TGLogger.Info("[TShareBtn][shareContent] 生成分享图片完成");

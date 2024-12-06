@@ -8,7 +8,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, shallowRef } from "vue";
 import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
 
@@ -19,8 +19,8 @@ import Mys from "../plugins/Mys/index.js";
 import TGLogger from "../utils/TGLogger.js";
 
 const postId = Number(useRoute().params.post_id);
-const jsonData = ref<TGApp.Plugins.Mys.Post.FullData>();
-const parseData = ref<TGApp.Plugins.Mys.SctPost.Base[]>();
+const jsonData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
+const parseData = shallowRef<TGApp.Plugins.Mys.SctPost.Base[]>();
 const isEmpty = ref<boolean>(false);
 
 onMounted(async () => {

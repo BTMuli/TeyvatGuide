@@ -4,9 +4,8 @@
  * @since Beta v0.6.3
  */
 
-import { event, core, webviewWindow } from "@tauri-apps/api";
-import type { Event } from "@tauri-apps/api/event";
-import type { UnlistenFn } from "@tauri-apps/api/event";
+import { core, event, webviewWindow } from "@tauri-apps/api";
+import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 
 import showSnackbar from "../components/func/snackbar.js";
 import TGSqlite from "../plugins/Sqlite/index.js";
@@ -615,7 +614,7 @@ class TGClient {
    * @returns {void} - 无返回值
    */
   async getDS(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
-    const data = { DS: getDS4JS("lk2", 1, undefined, undefined) };
+    const data = { DS: getDS4JS("LK2", 1, undefined, undefined) };
     await this.callback(arg.callback, data);
   }
 
@@ -630,7 +629,7 @@ class TGClient {
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetDS2Payload>,
   ): Promise<void> {
     const data = {
-      DS: getDS4JS("common", 2, arg.payload.body, arg.payload.query),
+      DS: getDS4JS("X4", 2, arg.payload.body, arg.payload.query),
     };
     await this.callback(arg.callback, data);
   }

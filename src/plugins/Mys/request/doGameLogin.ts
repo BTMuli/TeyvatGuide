@@ -18,15 +18,15 @@ const APP_ID = 8;
 export async function getLoginQr(): Promise<
   TGApp.Plugins.Mys.GameLogin.GetLoginQrData | TGApp.BBS.Response.Base
 > {
-  const url = "https://hk4e-sdk.mihoyo.com/hk4e_cn/combo/panda/qrcode/fetch";
-  const device = getDeviceInfo("device_id");
-  const data = { app_id: APP_ID, device };
-  const header = getRequestHeader({}, "POST", data, "common");
+  const data: Record<string, string | number> = {
+    app_id: APP_ID,
+    device: getDeviceInfo("device_id"),
+  };
   const resp = await TGHttp<
     TGApp.Plugins.Mys.GameLogin.GetLoginQrResponse | TGApp.BBS.Response.Base
-  >(url, {
+  >("https://hk4e-sdk.mihoyo.com/hk4e_cn/combo/panda/qrcode/fetch", {
     method: "POST",
-    headers: header,
+    headers: getRequestHeader({}, "POST", data),
     body: JSON.stringify(data),
   });
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
@@ -42,15 +42,16 @@ export async function getLoginQr(): Promise<
 export async function getLoginStatus(
   ticket: string,
 ): Promise<TGApp.Plugins.Mys.GameLogin.GetLoginStatusData | TGApp.BBS.Response.Base> {
-  const url = "https://hk4e-sdk.mihoyo.com/hk4e_cn/combo/panda/qrcode/query";
-  const device = getDeviceInfo("device_id");
-  const data = { app_id: APP_ID, device, ticket };
-  const header = getRequestHeader({}, "POST", data, "common");
+  const data: Record<string, string | number> = {
+    app_id: APP_ID,
+    device: getDeviceInfo("device_id"),
+    ticket,
+  };
   const resp = await TGHttp<
     TGApp.Plugins.Mys.GameLogin.GetLoginStatusResponse | TGApp.BBS.Response.Base
-  >(url, {
+  >("https://hk4e-sdk.mihoyo.com/hk4e_cn/combo/panda/qrcode/query", {
     method: "POST",
-    headers: header,
+    headers: getRequestHeader({}, "POST", data),
     body: JSON.stringify(data),
   });
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;

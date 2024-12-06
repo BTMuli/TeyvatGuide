@@ -23,7 +23,7 @@
   </transition>
 </template>
 <script lang="ts" setup>
-import { reactive, ref, watch, onMounted, toRaw } from "vue";
+import { ref, watch, onMounted, toRaw } from "vue";
 
 import { LoadingParams } from "./loading.js";
 
@@ -32,7 +32,7 @@ const showOuter = ref<boolean>(false);
 const showInner = ref<boolean>(false);
 
 const props = defineProps<LoadingParams>();
-const data = reactive<LoadingParams>(toRaw(props));
+const data = ref<LoadingParams>(toRaw(props));
 
 watch(
   () => showBox.value,
@@ -53,15 +53,15 @@ function displayBox(params: LoadingParams): void {
   if (!params.show) {
     showBox.value = false;
     setTimeout(() => {
-      data.title = "";
-      data.subtitle = "";
-      data.empty = false;
+      data.value.title = "";
+      data.value.subtitle = "";
+      data.value.empty = false;
     }, 500);
     return;
   }
-  data.title = params.title;
-  data.subtitle = params.subtitle;
-  data.empty = params.empty;
+  data.value.title = params.title;
+  data.value.subtitle = params.subtitle;
+  data.value.empty = params.empty;
   showBox.value = true;
 }
 
@@ -179,7 +179,6 @@ defineExpose({ displayBox });
 .loading-circle,
 .loading-circle > div {
   position: relative;
-  box-sizing: border-box;
   box-sizing: border-box;
 }
 

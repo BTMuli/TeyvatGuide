@@ -12,7 +12,7 @@
 </template>
 <script lang="ts" setup>
 import { emit } from "@tauri-apps/api/event";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import Mys from "../../plugins/Mys/index.js";
 import { useAppStore } from "../../store/modules/app.js";
@@ -25,17 +25,12 @@ import showSnackbar from "../func/snackbar.js";
 
 import ToLivecode from "./to-livecode.vue";
 
-interface TGameNavProps {
-  modelValue: number;
-}
-
-const props = withDefaults(defineProps<TGameNavProps>(), {
-  modelValue: 2,
-});
+type TGameNavProps = { modelValue: number };
+const props = withDefaults(defineProps<TGameNavProps>(), { modelValue: 2 });
 
 const appStore = useAppStore();
-const nav = ref<TGApp.BBS.Navigator.Navigator[]>([]);
-const codeData = ref<TGApp.BBS.Navigator.CodeData[]>([]);
+const nav = shallowRef<TGApp.BBS.Navigator.Navigator[]>([]);
+const codeData = shallowRef<TGApp.BBS.Navigator.CodeData[]>([]);
 const showOverlay = ref<boolean>(false);
 const actId = ref<string>();
 

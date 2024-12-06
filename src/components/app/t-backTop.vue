@@ -6,10 +6,10 @@
   </transition>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 
-const scrollTop = ref(0); // 滚动条距离顶部的距离
-const canTop = ref(false); // 默认不显示
+const scrollTop = ref<number>(0); // 滚动条距离顶部的距离
+const canTop = ref<boolean>(false); // 默认不显示
 
 // 监听滚动事件
 function handleScroll(): void {
@@ -40,15 +40,8 @@ function handleScrollTop(): void {
   });
 }
 
-// 监听滚动事件
-onMounted(() => {
-  window.addEventListener("scroll", handleScroll);
-});
-
-// 销毁监听
-onUnmounted(() => {
-  window.removeEventListener("scroll", handleScroll);
-});
+onMounted(() => window.addEventListener("scroll", handleScroll));
+onUnmounted(() => window.removeEventListener("scroll", handleScroll));
 </script>
 
 <style scoped>

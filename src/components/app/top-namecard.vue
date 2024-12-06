@@ -1,5 +1,5 @@
 <template>
-  <v-list class="top-nc-box" @click="toNameCard(props.data)">
+  <v-list class="top-nc-box" @click="emit('selected', props.data)">
     <v-list-item :title="props.data.name">
       <template #subtitle>
         <span :title="props.data.desc">{{ props.data.desc }}</span>
@@ -13,13 +13,8 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-interface TopNameCardProps {
-  data: TGApp.App.NameCard.Item;
-}
-
-interface TopNameCardEmits {
-  (e: "selected", data: TGApp.App.NameCard.Item): void;
-}
+type TopNameCardProps = { data: TGApp.App.NameCard.Item };
+type TopNameCardEmits = (e: "selected", v: TGApp.App.NameCard.Item) => void;
 
 const props = defineProps<TopNameCardProps>();
 const emit = defineEmits<TopNameCardEmits>();
@@ -28,10 +23,6 @@ const bgImage = computed<string>(() => {
   if (props.data.name === "原神·印象") return "none;";
   return `url("${props.data.bg}")`;
 });
-
-function toNameCard(item: TGApp.App.NameCard.Item) {
-  emit("selected", item);
-}
 </script>
 <style lang="css" scoped>
 .top-nc-box {

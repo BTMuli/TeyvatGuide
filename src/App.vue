@@ -3,7 +3,9 @@
     <TSidebar v-if="isMain" />
     <v-main>
       <v-container :fluid="true" class="app-container">
-        <router-view />
+        <Suspense>
+          <router-view />
+        </Suspense>
       </v-container>
     </v-main>
     <TBackTop />
@@ -11,9 +13,9 @@
 </template>
 
 <script lang="ts" setup>
-import { app, event, core, webviewWindow, window as TauriWindow } from "@tauri-apps/api";
+import { app, core, event, webviewWindow, window as TauriWindow } from "@tauri-apps/api";
 import { PhysicalSize } from "@tauri-apps/api/dpi";
-import { UnlistenFn, Event } from "@tauri-apps/api/event";
+import { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeMount, onMounted, onUnmounted, ref } from "vue";

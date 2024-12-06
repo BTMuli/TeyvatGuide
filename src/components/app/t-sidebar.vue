@@ -2,7 +2,7 @@
   <v-navigation-drawer :permanent="true" :rail="rail" class="tsb-box">
     <v-list class="side-list" density="compact" :nav="true">
       <!-- 负责收缩侧边栏 -->
-      <v-list-item @click="collapse()">
+      <v-list-item @click="rail = !rail">
         <template v-if="rail" #prepend>
           <v-list-item-action>
             <v-icon>mdi-chevron-right</v-icon>
@@ -202,7 +202,7 @@
               class="side-item-menu"
               title="登录"
               @click="login"
-              v-show="userStore.cookie.value?.stoken === ''"
+              v-show="cookie?.stoken === ''"
             >
               <template #prepend>
                 <img src="/source/UI/lumine.webp" class="side-icon-menu" alt="login" />
@@ -231,71 +231,46 @@
 
 <script lang="ts" setup>
 import { event, webviewWindow } from "@tauri-apps/api";
-import { UnlistenFn, Event } from "@tauri-apps/api/event";
+import { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, shallowRef } from "vue";
 
 import { useAppStore } from "../../store/modules/app.js";
 import { useUserStore } from "../../store/modules/user.js";
 import mhyClient from "../../utils/TGClient.js";
-import TGLogger from "../../utils/TGLogger.js";
 import showSnackbar from "../func/snackbar.js";
 
 const appStore = useAppStore();
-const userStore = storeToRefs(useUserStore());
+const { cookie, briefInfo } = storeToRefs(useUserStore());
 
-const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
-
-const userInfo = ref({
-  nickname: "未登录",
-  uid: "-1",
-  desc: "请扫码登录",
-  avatar: "/source/UI/lumine.webp",
+// @ts-expect-error The import.meta meta-property is not allowed in files which will build into CommonJS output.
+const isDevEnv = import.meta.env.MODE === "development";
+const themeListener = shallowRef<UnlistenFn | null>(null);
+const rail = computed<boolean>({
+  get: () => appStore.sidebar.collapse,
+  set: (v: boolean) => (appStore.sidebar.collapse = v),
 });
-
-watch(userStore.briefInfo, (val) => {
-  if (val && val.nickname) {
-    userInfo.value = val;
-  }
+const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
+  if (briefInfo.value && briefInfo.value.nickname) return briefInfo.value;
+  return {
+    nickname: "未登录",
+    uid: "-1",
+    desc: "请扫码登录",
+    avatar: "/source/UI/lumine.webp",
+  };
 });
-
-const rail = ref(appStore.sidebar.collapse);
-// theme
-const themeGet = computed({
-  get() {
-    return appStore.theme;
-  },
-  set(value: string) {
-    appStore.theme = value;
-  },
+const themeGet = computed<string>({
+  get: () => appStore.theme,
+  set: (v: string) => (appStore.theme = v),
 });
-const themeTitle = computed(() => {
-  return themeGet.value === "default" ? "夜间模式" : "日间模式";
-});
-
-watch(themeTitle, async (val) => {
-  const themeNow = val === "夜间模式" ? "浅色模式" : "深色模式";
-  await TGLogger.Info(`[App][theme] 已切换到${themeNow}`);
-});
-
-function collapse(): void {
-  rail.value = !rail.value;
-  appStore.sidebar.collapse = rail.value;
-}
-
-let themeListener: UnlistenFn;
+const themeTitle = computed<string>(() => (themeGet.value === "default" ? "夜间模式" : "日间模式"));
 
 onMounted(async () => {
-  themeListener = await event.listen("readTheme", (e: Event<string>) => {
+  themeListener.value = await event.listen("readTheme", (e: Event<string>) => {
     const theme = e.payload;
     themeGet.value = theme === "default" ? "default" : "dark";
   });
-  if (webviewWindow.getCurrentWebviewWindow().label === "TeyvatGuide") {
-    await mhyClient.run();
-  }
-  if (userStore.briefInfo.value && userStore.briefInfo.value.nickname) {
-    userInfo.value = userStore.briefInfo.value;
-  }
+  if (webviewWindow.getCurrentWebviewWindow().label === "TeyvatGuide") await mhyClient.run();
 });
 
 async function switchTheme(): Promise<void> {
@@ -303,21 +278,16 @@ async function switchTheme(): Promise<void> {
 }
 
 async function openClient(func: string): Promise<void> {
-  if (appStore.isLogin) {
-    await mhyClient.open(func);
-  } else {
-    login();
+  if (appStore.isLogin) await mhyClient.open(func);
+  else showSnackbar.warn("请前往设置页面登录！");
+}
+
+onUnmounted(() => {
+  if (themeListener.value !== null) {
+    themeListener.value();
+    themeListener.value = null;
   }
-}
-
-function login(): void {
-  showSnackbar({
-    text: "请前往设置页面登录！",
-    color: "warn",
-  });
-}
-
-onUnmounted(() => themeListener());
+});
 </script>
 
 <style lang="css" scoped>

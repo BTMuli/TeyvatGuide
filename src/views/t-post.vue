@@ -2,7 +2,7 @@
   <TSwitchTheme />
   <TPinWin />
   <VpBtnCollect :model-value="postId" :data="postData" />
-  <TShareBtn v-model="postRef" :title="shareTitle" />
+  <TShareBtn selector=".tp-post-body" :title="`Post_${postId}`" />
   <VpBtnReply :gid="postData.post.game_id" :post-id="postData.post.post_id" v-if="postData" />
   <div class="tp-post-body" v-if="postData">
     <div class="tp-post-info">
@@ -83,10 +83,9 @@
   />
 </template>
 <script lang="ts" setup>
-import { app } from "@tauri-apps/api";
-import { webviewWindow } from "@tauri-apps/api";
+import { app, webviewWindow } from "@tauri-apps/api";
 import { emit } from "@tauri-apps/api/event";
-import { nextTick, onMounted, onUnmounted, ref } from "vue";
+import { nextTick, onMounted, onUnmounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
 import TPinWin from "../components/app/t-pinWin.vue";
@@ -106,21 +105,14 @@ import TGLogger from "../utils/TGLogger.js";
 import { createTGWindow } from "../utils/TGWindow.js";
 import TGConstant from "../web/constant/TGConstant.js";
 
-// share
-const postRef = ref<HTMLElement>(<HTMLElement>{});
-const shareTitle = ref<string>("");
-
-// 数据
-const appVersion = ref<string>();
+const appVersion = await app.getVersion();
 const postId = Number(useRoute().params.post_id);
-const renderPost = ref<TGApp.Plugins.Mys.SctPost.Base[]>([]);
-const postData = ref<TGApp.Plugins.Mys.Post.FullData>();
-// 当前时间，秒级时间戳
+const renderPost = shallowRef<TGApp.Plugins.Mys.SctPost.Base[]>([]);
+const postData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
+const showCollection = ref<boolean>(false);
 const shareTime = ref<number>(Math.floor(Date.now() / 1000));
 // eslint-disable-next-line no-undef
 const shareTimeTimer = ref<NodeJS.Timeout | undefined>(undefined);
-// 合集
-const showCollection = ref<boolean>(false);
 
 function getGameIcon(gameId: number): string {
   const find = TGConstant.BBS.CHANNELS.find((item) => item.gid === gameId.toString());
@@ -130,7 +122,6 @@ function getGameIcon(gameId: number): string {
 
 onMounted(async () => {
   showLoading.start(`正在加载帖子数据...`);
-  appVersion.value = await app.getVersion();
   // 检查数据
   if (!postId) {
     showLoading.empty("未找到数据", "PostID 不存在");
@@ -150,7 +141,6 @@ onMounted(async () => {
   postData.value = resp;
   showLoading.update("正在渲染数据...", `帖子ID: ${postId}`);
   renderPost.value = getRenderPost(postData.value);
-  shareTitle.value = `Post_${postId}`;
   await webviewWindow
     .getCurrentWebviewWindow()
     .setTitle(`Post_${postId} ${postData.value.post.subject}`);
@@ -167,7 +157,6 @@ onMounted(async () => {
     shareTimeTimer.value = undefined;
   }
   shareTimeTimer.value = setInterval(() => (shareTime.value = Math.floor(Date.now() / 1000)), 1000);
-  postRef.value = <HTMLElement>document.querySelector(".tp-post-body");
   showLoading.end();
 });
 

@@ -8,7 +8,8 @@ import TGHttp from "../../utils/TGHttp.js";
 import { getRequestHeader } from "../utils/getRequestHeader.js";
 
 // TakumiRecordGenshinApiBaseUrl => trgAbu
-const trgAbu = "https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/";
+const trgAbu: Readonly<string> =
+  "https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/";
 
 /**
  * @description 获取角色详情
@@ -23,15 +24,12 @@ async function characterDetail(
   user: TGApp.Sqlite.Account.Game,
   avatarIds: string[],
 ): Promise<TGApp.Game.Avatar.AvatarDetail | TGApp.BBS.Response.Base> {
-  const url = `${trgAbu}character/detail`;
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const data = { role_id: user.gameUid, server: user.region, character_ids: avatarIds };
-  const header = getRequestHeader(ck, "POST", data, "common");
-  const resp = await TGHttp<TGApp.Game.Avatar.DetailResponse | TGApp.BBS.Response.Base>(url, {
-    method: "POST",
-    body: JSON.stringify(data),
-    headers: header,
-  });
+  const resp = await TGHttp<TGApp.Game.Avatar.DetailResponse | TGApp.BBS.Response.Base>(
+    `${trgAbu}character/detail`,
+    { method: "POST", body: JSON.stringify(data), headers: getRequestHeader(ck, "POST", data) },
+  );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data;
 }
@@ -47,15 +45,12 @@ async function characterList(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
 ): Promise<TGApp.Game.Avatar.Avatar[] | TGApp.BBS.Response.Base> {
-  const url = `${trgAbu}character/list`;
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const data = { role_id: user.gameUid, server: user.region };
-  const header = getRequestHeader(ck, "POST", data, "common");
-  const resp = await TGHttp<TGApp.Game.Avatar.ListResponse | TGApp.BBS.Response.Base>(url, {
-    method: "POST",
-    body: JSON.stringify(data),
-    headers: header,
-  });
+  const resp = await TGHttp<TGApp.Game.Avatar.ListResponse | TGApp.BBS.Response.Base>(
+    `${trgAbu}character/list`,
+    { method: "POST", body: JSON.stringify(data), headers: getRequestHeader(ck, "POST", data) },
+  );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data.list;
 }
@@ -73,15 +68,12 @@ async function index(
   user: TGApp.Sqlite.Account.Game,
   listType: number = 0,
 ): Promise<TGApp.Game.Record.FullData | TGApp.BBS.Response.Base> {
-  const url = `${trgAbu}index`;
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const params = { avatar_list_type: listType, role_id: user.gameUid, server: user.region };
-  const header = getRequestHeader(ck, "GET", params, "common");
-  const resp = await TGHttp<TGApp.Game.Record.Response | TGApp.BBS.Response.Base>(url, {
-    method: "GET",
-    headers: header,
-    query: params,
-  });
+  const resp = await TGHttp<TGApp.Game.Record.Response | TGApp.BBS.Response.Base>(
+    `${trgAbu}index`,
+    { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
+  );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data;
 }
@@ -97,7 +89,6 @@ async function roleCombat(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
 ): Promise<TGApp.Game.Combat.Combat[] | TGApp.BBS.Response.Base | false> {
-  const url = `${trgAbu}role_combat`;
   const ck = {
     account_id: cookie.account_id,
     cookie_token: cookie.cookie_token,
@@ -105,12 +96,10 @@ async function roleCombat(
     ltuid: cookie.ltuid,
   };
   const params = { role_id: user.gameUid, server: user.region, active: 1, need_detail: true };
-  const header = getRequestHeader(ck, "GET", params, "common");
-  const resp = await TGHttp<TGApp.Game.Combat.Response | TGApp.BBS.Response.Base>(url, {
-    method: "GET",
-    headers: header,
-    query: params,
-  });
+  const resp = await TGHttp<TGApp.Game.Combat.Response | TGApp.BBS.Response.Base>(
+    `${trgAbu}role_combat`,
+    { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
+  );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   if (!resp.data.is_unlock) return false;
   return resp.data.data;
@@ -129,7 +118,6 @@ async function spiralAbyss(
   user: TGApp.Sqlite.Account.Game,
   schedule: string,
 ): Promise<TGApp.Game.Abyss.FullData | TGApp.BBS.Response.Base> {
-  const url = `${trgAbu}spiralAbyss`;
   const ck = {
     account_id: cookie.account_id,
     cookie_token: cookie.cookie_token,
@@ -137,22 +125,17 @@ async function spiralAbyss(
     ltuid: cookie.ltuid,
   };
   const params = { role_id: user.gameUid, schedule_type: schedule, server: user.region };
-  const header = getRequestHeader(ck, "GET", params, "common");
-  const resp = await TGHttp<TGApp.Game.Abyss.Response | TGApp.BBS.Response.Base>(url, {
-    method: "GET",
-    headers: header,
-    query: params,
-  });
+  const resp = await TGHttp<TGApp.Game.Abyss.Response | TGApp.BBS.Response.Base>(
+    `${trgAbu}spiralAbyss`,
+    { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
+  );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data;
 }
 
 const TakumiRecordGenshinApi = {
   index: index,
-  character: {
-    list: characterList,
-    detail: characterDetail,
-  },
+  character: { list: characterList, detail: characterDetail },
   roleCombat: roleCombat,
   spiralAbyss: spiralAbyss,
 };

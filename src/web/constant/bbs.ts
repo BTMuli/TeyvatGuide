@@ -5,22 +5,7 @@
  */
 
 export const BBS_VERSION = "2.78.1";
-export const BBS_UA_PC = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) miHoYoBBS/${BBS_VERSION}`;
 export const BBS_UA_MOBILE = `Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/${BBS_VERSION}`;
-export const BBS_APP_ID = "bll8iq97cem8";
-
-/**
- * @description salt 值
- * @version 2.78.1
- * @since Beta v0.6.5
- */
-export const BBS_SALT = {
-  K2: "GuODIETRPuJxpiUQoZairQxHtmzZKYFl",
-  LK2: "ACDpsiiEFSqqLiEpzXMuXNsLNqGkrIQc",
-  X4: "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs",
-  X6: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
-  PROD: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
-};
 
 /**
  * @description 频道列表
@@ -44,7 +29,7 @@ export interface ToChannelItem {
  * @since Beta v0.6.5
  * @type {Array<ToChannelItem>}
  */
-export const CHANNEL_LIST: ToChannelItem[] = [
+export const CHANNEL_LIST: Readonly<Array<ToChannelItem>> = [
   {
     title: "原神",
     icon: "/platforms/mhy/ys.webp",
