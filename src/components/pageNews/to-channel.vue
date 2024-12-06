@@ -39,6 +39,7 @@ import showSnackbar from "../func/snackbar.js";
 
 type ToChannelProps = { gid?: string; curType?: string; modelValue: boolean };
 type ToChannelEmits = (e: "update:modelValue", v: boolean) => void;
+const router = useRouter();
 const props = withDefaults(defineProps<ToChannelProps>(), { modelValue: false });
 const emits = defineEmits<ToChannelEmits>();
 const { recentNewsType } = storeToRefs(useAppStore());
@@ -61,7 +62,7 @@ async function toChannel(item: ToChannelItem): Promise<void> {
     link = link.replace("{type}", "notice");
     recentNewsType.value = "notice";
   }
-  await useRouter().push(link);
+  await router.push(link);
 }
 </script>
 <style lang="css" scoped>
