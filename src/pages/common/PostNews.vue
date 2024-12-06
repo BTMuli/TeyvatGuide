@@ -67,14 +67,14 @@ import showSnackbar from "../../components/func/snackbar.js";
 import ToChannel from "../../components/pageNews/to-channel.vue";
 import VpOverlaySearch from "../../components/viewPost/vp-overlay-search.vue";
 import Mys from "../../plugins/Mys/index.js";
-import { useAppStore } from "../../store/modules/app.js";
+import { NewsType, NewsTypeEnum, useAppStore } from "../../store/modules/app.js";
 import TGLogger from "../../utils/TGLogger.js";
 import { createPost } from "../../utils/TGWindow.js";
 import { getGameName } from "../../web/utils/tools.js";
 
-type PostData = { [key in TGApp.App.Store.NewsType]: TGApp.Plugins.Mys.Post.FullData[] };
+type PostData = { [key in NewsType]: TGApp.Plugins.Mys.Post.FullData[] };
 type RawData = {
-  [key in TGApp.App.Store.NewsType]: { isLast: boolean; name: string; lastId: number };
+  [key in NewsType]: { isLast: boolean; name: string; lastId: number };
 };
 
 const router = useRouter();
@@ -82,12 +82,12 @@ const appStore = useAppStore();
 const gid = <string>useRoute().params.gid;
 const gameName = getGameName(Number(gid));
 const loading = ref<boolean>(false);
-const tabValues: Readonly<Array<TGApp.App.Store.NewsType>> = ["notice", "activity", "news"];
+const tabValues: Readonly<Array<NewsType>> = ["notice", "activity", "news"];
 const showList = ref<boolean>(false);
 const showSearch = ref<boolean>(false);
-const tab = computed<TGApp.App.Store.NewsType>({
+const tab = computed<NewsType>({
   get: () => {
-    if (!(appStore.recentNewsType satisfies TGApp.App.Store.NewsType)) return "notice";
+    if (!(appStore.recentNewsType satisfies NewsType)) return "notice";
     return appStore.recentNewsType;
   },
   set: (v) => (appStore.recentNewsType = v),
@@ -104,7 +104,7 @@ const rawData = ref<RawData>({
 
 onMounted(async () => await firstLoad(tab.value));
 
-async function firstLoad(key: TGApp.App.Store.NewsType, refresh: boolean = false): Promise<void> {
+async function firstLoad(key: NewsType, refresh: boolean = false): Promise<void> {
   if (rawData.value[key].lastId !== 0) {
     if (!refresh) return;
     postData.value[key] = [];
@@ -112,7 +112,7 @@ async function firstLoad(key: TGApp.App.Store.NewsType, refresh: boolean = false
   }
   showLoading.start(`正在获取${gameName}${rawData.value[key].name}数据...`);
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
-  const getData = await Mys.Painter.getNewsList(gid, TGApp.App.Store.NewsTypeEnum[key]);
+  const getData = await Mys.Painter.getNewsList(gid, NewsTypeEnum[key]);
   rawData.value[key].isLast = getData.is_last;
   rawData.value[key].lastId = getData.list.length;
   postData.value[key] = getData.list;
@@ -127,7 +127,7 @@ async function switchAnno(): Promise<void> {
 }
 
 // 加载更多
-async function loadMore(key: TGApp.App.Store.NewsType): Promise<void> {
+async function loadMore(key: NewsType): Promise<void> {
   loading.value = true;
   if (rawData.value[key].isLast) {
     showSnackbar.warn("已经是最后一页了");
@@ -137,7 +137,7 @@ async function loadMore(key: TGApp.App.Store.NewsType): Promise<void> {
   showLoading.start(`正在获取${gameName}${rawData.value[key].name}数据...`);
   const getData = await Mys.Painter.getNewsList(
     gid,
-    TGApp.App.Store.NewsTypeEnum[key],
+    NewsTypeEnum[key],
     20,
     rawData.value[key].lastId,
   );
