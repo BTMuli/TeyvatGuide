@@ -17,8 +17,8 @@
       <div class="home-select">
         <v-select
           variant="outlined"
-          v-model="showHome"
-          :items="homeStore.getShowItems()"
+          v-model="showItems"
+          :items="showItemsAll"
           :hide-details="true"
           :multiple="true"
           :chips="true"
@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref, shallowRef, toRaw } from "vue";
+import { type Component, computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import TGameNav from "../../components/app/t-gamenav.vue";
 import showLoading from "../../components/func/loading.js";
@@ -41,33 +41,55 @@ import PhCompCalendar from "../../components/pageHome/ph-comp-calendar.vue";
 import PhCompPool from "../../components/pageHome/ph-comp-pool.vue";
 import PhCompPosition from "../../components/pageHome/ph-comp-position.vue";
 import { useAppStore } from "../../store/modules/app.js";
-import { useHomeStore } from "../../store/modules/home.js";
+import { ShowItemEnum, useHomeStore } from "../../store/modules/home.js";
 import TGLogger from "../../utils/TGLogger.js";
 import TGConstant from "../../web/constant/TGConstant.js";
 
-// store
+type SFComp = Component & {
+  __file?: string;
+  __hmrId?: string;
+  __name?: string;
+  __scopeId?: string;
+};
+
 const appStore = useAppStore();
 const homeStore = useHomeStore();
 
-// data
-const endNum = ref<number>(0);
-const components = shallowRef<any[]>([]);
-const showHome = ref<string[]>(homeStore.getShowValue());
-const loadComp = ref<string[]>(toRaw(showHome.value));
+const showItemsAll: Array<ShowItemEnum> = [
+  ShowItemEnum.calendar,
+  ShowItemEnum.pool,
+  ShowItemEnum.position,
+];
+const showItems = computed<ShowItemEnum[]>({
+  get: () => homeStore.getShowItems(),
+  set: (v: ShowItemEnum[]) => homeStore.setShowItems(v),
+});
+const loadItems = shallowRef<ShowItemEnum[]>([]);
+const components = shallowRef<SFComp[]>([]);
 
 const gameSelectList = TGConstant.BBS.CHANNELS;
 const curGid = ref<string>(gameSelectList[0].gid);
 
 onMounted(async () => {
   showLoading.start("正在加载首页...");
-  // @ts-expect-error-next-line
+  // @ts-expect-error-next-line The import.meta meta-property is not allowed in files which will build into CommonJS output.
   const isProdEnv = import.meta.env.MODE === "production";
-  // 获取当前环境
-  if (isProdEnv && appStore.devMode) {
-    appStore.devMode = false;
-  }
-  const temp = [];
-  for (const item of showHome.value) {
+  if (isProdEnv && appStore.devMode) appStore.devMode = false;
+  await loadComp();
+});
+
+watch(
+  () => components.value,
+  (cur, old) => {
+    const newComp = cur.filter((i) => !old.includes(i));
+    if (newComp.length === 0) showLoading.end();
+  },
+);
+
+async function loadComp(): Promise<void> {
+  showLoading.start("正在加载首页...");
+  const temp: SFComp[] = [];
+  for (const item of showItems.value) {
     switch (item) {
       case "限时祈愿":
         temp.push(PhCompPool);
@@ -78,54 +100,46 @@ onMounted(async () => {
       case "素材日历":
         temp.push(PhCompCalendar);
         break;
-      default:
-        break;
     }
   }
-  const items = showHome.value.join("、");
-  showLoading.update("正在加载首页...", `正在加载：${items}`);
+  showLoading.update("正在加载首页...", `正在加载：${showItems.value.join("、")}`);
   components.value = temp;
-  await TGLogger.Info(`[Home][onMounted] 打开首页，当前显示：${items}`);
-});
+  await TGLogger.Info(`[Home][loadComp] 打开首页，当前显示：${showItems.value.join("、")}`);
+}
 
 async function submitHome(): Promise<void> {
-  const show = showHome.value;
-  if (show.length < 1) {
+  if (showItems.value.length === 0) {
     showSnackbar.warn("请至少选择一个!");
     return;
   }
-  homeStore.setShowValue(show);
   showSnackbar.success("设置成功!");
-  await TGLogger.Info("[Home][submitHome] 首页设置成功，当前显示：" + show.join("、"));
-  setTimeout(() => window.location.reload(), 1000);
+  await TGLogger.Info("[Home][submitHome] 首页设置成功，当前显示：" + showItems.value.join("、"));
+  loadItems.value = showItems.value.filter((i) => loadItems.value.includes(i));
+  await loadComp();
 }
 
-function getName(name: string): string {
+function getName(name: string): ShowItemEnum | undefined {
   switch (name) {
     case "ph-comp-pool":
-      return "限时祈愿";
+      return ShowItemEnum.pool;
     case "ph-comp-position":
-      return "近期活动";
+      return ShowItemEnum.position;
     case "ph-comp-calendar":
-      return "素材日历";
+      return ShowItemEnum.calendar;
     default:
-      return "";
+      return undefined;
   }
 }
 
-// 组件加载完成
-async function loadEnd(item: any): Promise<void> {
-  await TGLogger.Info(`[Home][loadEnd] ${item.__name} 加载完成`);
-  loadComp.value = loadComp.value.filter((v) => v !== getName(item.__name));
-  endNum.value++;
-  if (endNum.value === components.value.length) {
-    showLoading.end();
-    return;
-  }
-  showLoading.update("正在加载首页...", `正在加载：${loadComp.value.join("、")}`);
+async function loadEnd(item: SFComp): Promise<void> {
+  const compName = getName(item.__name ?? "");
+  if (!compName) return;
+  await TGLogger.Info(`[Home][loadEnd] ${compName} 加载完成`);
+  showLoading.update("正在加载首页...", `${compName} 加载完成`);
+  if (!loadItems.value.includes(compName)) loadItems.value.push(compName);
+  else showSnackbar.warn(`${compName} 已加载`);
+  if (loadItems.value.length === components.value.length) showLoading.end();
 }
-
-onUnmounted(() => (components.value = []));
 </script>
 <style lang="css" scoped>
 .home-container {

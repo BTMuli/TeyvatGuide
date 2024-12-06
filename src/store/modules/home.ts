@@ -7,119 +7,45 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export const useHomeStore = defineStore(
-  "home",
-  () => {
-    const calendarShow = ref({
-      show: true,
-      order: 3,
-    });
-    const poolShow = ref({
-      show: true,
-      order: 1,
-    });
-    const positionShow = ref({
-      show: true,
-      order: 2,
-    });
-    const homeShow = ref({
-      calendarShow,
-      poolShow,
-      positionShow,
-    });
-    const poolCover = ref({} satisfies Record<number, string>);
+export const enum ShowItemEnum {
+  calendar = "素材日历",
+  pool = "限时祈愿",
+  position = "近期活动",
+}
 
-    function init(): void {
-      calendarShow.value = {
-        show: true,
-        order: 3,
-      };
-      poolShow.value = {
-        show: true,
-        order: 1,
-      };
-      positionShow.value = {
-        show: true,
-        order: 2,
-      };
-      poolCover.value = {};
+export type ShowItem = { show: boolean; order: number; label: ShowItemEnum };
+
+export const useHomeStore = defineStore("home", () => {
+  const homeShow = ref<Array<ShowItem>>([
+    { show: true, order: 1, label: ShowItemEnum.pool },
+    { show: true, order: 2, label: ShowItemEnum.position },
+    { show: true, order: 3, label: ShowItemEnum.calendar },
+  ]);
+  const poolCover = ref<Record<number, string>>();
+
+  function getShowItems(): Array<ShowItemEnum> {
+    const homeShowLocal = localStorage.getItem("homeShow");
+    if (homeShowLocal === null || !Array.isArray(JSON.parse(homeShowLocal))) {
+      localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
     }
+    homeShow.value = JSON.parse(localStorage.getItem("homeShow")!);
+    return homeShow.value
+      .filter((item) => item.show)
+      .sort((a, b) => a.order - b.order)
+      .map((item) => item.label);
+  }
 
-    function getShowItems(): string[] {
-      const defaultList = ["素材日历", "限时祈愿", "近期活动"];
-      defaultList.sort((a, b) => {
-        return getItemOrder(a) - getItemOrder(b);
-      });
-      return defaultList;
+  function setShowItems(items: Array<ShowItemEnum>): void {
+    let order = 1;
+    for (const item of items) {
+      const findIdx = homeShow.value.findIndex((i) => i.label === item);
+      if (findIdx === -1) continue;
+      homeShow.value[findIdx].show = true;
+      homeShow.value[findIdx].order = order++;
     }
+    for (const item of homeShow.value) if (!items.includes(item.label)) item.show = false;
+    localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
+  }
 
-    function getShowValue(): string[] {
-      const showValue = [];
-      if (calendarShow.value.show) showValue.push("素材日历");
-      if (poolShow.value.show) showValue.push("限时祈愿");
-      if (positionShow.value.show) showValue.push("近期活动");
-      showValue.sort((a, b) => {
-        return getItemOrder(a) - getItemOrder(b);
-      });
-      return showValue;
-    }
-
-    function getItemOrder(item: string): number {
-      if (item === "素材日历") return calendarShow.value.order;
-      if (item === "限时祈愿") return poolShow.value.order;
-      if (item === "近期活动") return positionShow.value.order;
-      return 4;
-    }
-
-    function setShowValue(value: string[]): void {
-      let order = 1;
-      // 遍历 value
-      value.forEach((item) => {
-        if (!getShowItems().includes(item)) {
-          throw new Error("传入的值不在可选范围内");
-        }
-        if (item === "素材日历") {
-          calendarShow.value.order = order;
-          calendarShow.value.show = true;
-          order++;
-        }
-        if (item === "限时祈愿") {
-          poolShow.value.order = order;
-          poolShow.value.show = true;
-          order++;
-        }
-        if (item === "近期活动") {
-          positionShow.value.order = order;
-          positionShow.value.show = true;
-          order++;
-        }
-      });
-      // 遍历 getShowItems()
-      getShowItems().forEach((item) => {
-        if (!value.includes(item)) {
-          if (item === "素材日历") {
-            calendarShow.value.show = false;
-          }
-          if (item === "限时祈愿") {
-            poolShow.value.show = false;
-          }
-          if (item === "近期活动") {
-            positionShow.value.show = false;
-          }
-        }
-      });
-    }
-
-    return {
-      homeShow,
-      poolCover,
-      init,
-      getShowItems,
-      getShowValue,
-      setShowValue,
-    };
-  },
-  {
-    persist: true,
-  },
-);
+  return { poolCover, getShowItems, setShowItems };
+});
