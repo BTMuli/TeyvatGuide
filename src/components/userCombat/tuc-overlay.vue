@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+  <TOverlay v-model="visible">
     <div class="tuc-overlay-box" v-if="data">
       <div class="tuc-overlay-top">
         <span class="tuc-overlay-title" @click="share()">
@@ -25,28 +25,25 @@ import { timestampToDate } from "../../utils/toolFunc.js";
 import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
 import TOverlay from "../app/t-overlay.vue";
 import showLoading from "../func/loading.js";
+import showSnackbar from "../func/snackbar.js";
 
-interface TucOverlayProps {
+type TucOverlayProps = {
   modelValue: boolean;
   data: TGApp.Plugins.Hutao.Combat.Data | undefined;
-}
-
+};
 type TucOverlayEmits = (e: "update:modelValue", v: boolean) => void;
+
 const props = defineProps<TucOverlayProps>();
 const emits = defineEmits<TucOverlayEmits>();
-
 const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),
 });
 const raw = computed<TGApp.Plugins.Hutao.Base.Rate[]>(() => {
+  if (!props.data) return [];
   const res: TGApp.Plugins.Hutao.Base.Rate[] = props.data.BackupAvatarRates;
   return res.sort((a, b) => b.Rate - a.Rate);
 });
-
-function onCancel(): void {
-  visible.value = false;
-}
 
 function getBoxData(item: TGApp.Plugins.Hutao.Base.Rate): TItemBoxData {
   const avatar = AppCharacterData.find((i) => i.id === item.Item);
@@ -73,7 +70,11 @@ function getBoxData(item: TGApp.Plugins.Hutao.Base.Rate): TItemBoxData {
 
 async function share(): Promise<void> {
   showLoading.start("正在生成分享图");
-  const element = <HTMLElement>document.querySelector(".tuc-overlay-box");
+  const element = document.querySelector<HTMLElement>(".tuc-overlay-box");
+  if (element === null) {
+    showSnackbar.error("未获取到分享内容");
+    return;
+  }
   const fileName = `真境剧诗_${new Date().getTime()}.png`;
   await generateShareImg(fileName, element, 1.2, true);
   showLoading.end();

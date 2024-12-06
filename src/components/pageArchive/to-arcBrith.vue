@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="5px">
+  <TOverlay v-model="visible" blur-val="5px">
     <div class="toab-container" v-if="props.data">
       <div class="toab-img">
         <img :src="props.data.take_picture[Number(props.choice)]" alt="顶部图像" />
@@ -29,61 +29,39 @@
 </template>
 <script setup lang="ts">
 import { fetch } from "@tauri-apps/plugin-http";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { xml2json } from "xml-js";
 
+import TGLogger from "../../utils/TGLogger.js";
 import { copyToClipboard, getImageBuffer, saveCanvasImg } from "../../utils/TGShare.js";
 import { bytesToSize } from "../../utils/toolFunc.js";
 import TOverlay from "../app/t-overlay.vue";
 import showSnackbar from "../func/snackbar.js";
 
-interface ToArcBirthProps {
+type ToArcBirthProps = {
   modelValue: boolean;
   data?: TGApp.Archive.Birth.DrawItem;
   choice: boolean;
-}
-
-interface ToArcBirthEmits {
-  (event: "update:modelValue", value: boolean): void;
-}
+};
+type ToArcBirthEmits = (e: "update:modelValue", v: boolean) => void;
+type XmlKeyMap = { id: string; rel: string; group?: string; icon: string };
+type XmlTextList = { chara: string; img: string; text: string };
+type XmlTextParse = { name: string; icon?: string; text: string };
 
 const props = defineProps<ToArcBirthProps>();
 const emits = defineEmits<ToArcBirthEmits>();
 const buffer = ref<Uint8Array | null>(null);
-const showText = ref(false);
-const textParse = ref<Array<XmlTextParse>>([]);
-
-const visible = computed({
+const showText = ref<boolean>(false);
+const textParse = shallowRef<Array<XmlTextParse>>([]);
+const visible = computed<boolean>({
   get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
+  set: (v) => emits("update:modelValue", v),
 });
+onMounted(() => clearData());
+watch(() => props.data, clearData);
+watch(() => props.choice, clearData);
 
-onMounted(loadData);
-watch(() => props.data, loadData);
-watch(() => props.choice, loadData);
-
-interface XmlKeyMap {
-  id: string;
-  rel: string;
-  group?: string;
-  icon: string;
-}
-
-interface XmlTextList {
-  chara: string;
-  img: string;
-  text: string;
-}
-
-interface XmlTextParse {
-  name: string;
-  icon?: string;
-  text: string;
-}
-
-function loadData() {
+function clearData(): void {
   buffer.value = null;
   textParse.value = [];
   showText.value = false;
@@ -113,67 +91,79 @@ async function loadText(): Promise<void> {
     showText.value = !showText.value;
     return;
   }
-  const resSource: any = await parseXml(props.data.gal_resource);
+  const resSource: unknown = await parseXml(props.data.gal_resource);
   if (resSource === false) {
     showSnackbar.warn("对白数据加载失败");
     return;
   }
-  const keyMap: XmlKeyMap[] = resSource["elements"][0]["elements"][0]["elements"]
-    .map((item: any) => {
-      if (item["name"] === "chara")
-        return <XmlKeyMap>{
-          id: item["attributes"]["id"],
-          rel: item["attributes"]["rel"],
-          group: item["attributes"]["group"],
-          icon: item["attributes"]["src"],
-        };
-    })
-    .filter((item: any) => item !== undefined);
-  const resXml = await parseXml(props.data.gal_xml);
-  const textList: XmlTextList[] = resXml["elements"][0]["elements"][0]["elements"][0]["elements"]
-    .map((item: any) => {
-      if (item["name"] === "simple_dialog") {
-        let img = item["attributes"]["img"];
-        if (!props.choice && img) img = img.replace("aether", "lumine");
-        return <XmlTextList>{
-          chara: item["attributes"]["chara"],
-          img: img,
-          text: item["elements"][0]["text"],
-        };
-      }
-    })
-    .filter((item: any) => item !== undefined);
-  textParse.value = textList.map((item: XmlTextList) => {
-    const key = keyMap.find((keyItem: XmlKeyMap) => keyItem.id === item.img);
-    if (!key) {
-      return {
-        name: "未知",
-        text: item.text,
-      };
-    }
-    return {
-      name: key.group ?? key.id,
-      text: item.text,
-      icon: key.icon,
-    };
+  const keyMap = getKeyMap(resSource);
+  const resXml: unknown = await parseXml(props.data.gal_xml);
+  const textList = getTextList(resXml);
+  textParse.value = textList.map((item) => {
+    const key = keyMap.find((keyItem) => keyItem.id === item.img);
+    if (!key) return { name: "未知", text: item.text };
+    return { name: key.group ?? key.id, text: item.text, icon: key.icon };
   });
   showText.value = true;
 }
 
-async function parseXml(link: string) {
+function getKeyMap(resSource: unknown): XmlKeyMap[] {
+  const res: XmlKeyMap[] = [];
+  if (!resSource || typeof resSource !== "object") return res;
+  if (!("elements" in resSource) || !Array.isArray(resSource["elements"])) return res;
+  const arr1 = resSource.elements;
+  if (arr1.length === 0 || !("elements" in arr1[0]) || !Array.isArray(arr1[0].elements)) return res;
+  const arr2 = arr1[0].elements;
+  if (arr2.length === 0 || !("elements" in arr2[0]) || !Array.isArray(arr2[0].elements)) return res;
+  const arr3 = arr2[0].elements;
+  for (const item of arr3) {
+    if (!("name" in item)) continue;
+    if (!("attributes" in item)) continue;
+    const attr = item.attributes;
+    if (!("id" in attr) || !("rel" in attr) || !("group" in attr) || !("src" in attr)) continue;
+    if (item.name !== "chara") continue;
+    res.push({ id: attr.id, rel: attr.rel, group: attr.group, icon: attr.src });
+  }
+  return res;
+}
+
+function getTextList(resXml: unknown): XmlTextList[] {
+  const res: XmlTextList[] = [];
+  if (!resXml || typeof resXml !== "object") return res;
+  if (!("elements" in resXml) || !Array.isArray(resXml["elements"])) return res;
+  const arr1 = resXml.elements;
+  if (arr1.length === 0 || !("elements" in arr1[0]) || !Array.isArray(arr1[0].elements)) return res;
+  const arr2 = arr1[0].elements;
+  if (arr2.length === 0 || !("elements" in arr2[0]) || !Array.isArray(arr2[0].elements)) return res;
+  const arr3 = arr2[0].elements;
+  if (arr3.length === 0 || !("elements" in arr3[0]) || !Array.isArray(arr3[0].elements)) return res;
+  const arr4 = arr3[0].elements;
+  for (const item of arr4) {
+    if (!("name" in item)) continue;
+    if (!("attributes" in item)) continue;
+    if (!("elements" in item) || !Array.isArray(item.elements)) continue;
+    const attr = item.attributes;
+    if (!("chara" in attr) || !("img" in attr)) continue;
+    if (item.name !== "simple_dialog") continue;
+    const img = props.choice ? attr.img : attr.img.replace("aether", "lumine");
+    res.push({ chara: attr.chara, img: img, text: item.elements[0].text });
+  }
+  return res;
+}
+
+async function parseXml(link: string): Promise<false | unknown> {
   try {
     const response = await fetch(link, { method: "GET" });
     const data = await response.arrayBuffer();
-    const xml = new TextDecoder("utf-8").decode(data);
-    return JSON.parse(xml2json(xml));
+    return JSON.parse(xml2json(new TextDecoder("utf-8").decode(data)));
   } catch (error) {
-    console.error(error);
+    if (error instanceof Error) {
+      await TGLogger.Error(`[to-arcBirth] parseXml: ${error.message}`);
+    } else {
+      await TGLogger.Error(`[to-arcBirth] parseXml: 未知错误-${error}`);
+    }
     return false;
   }
-}
-
-function onCancel() {
-  visible.value = false;
 }
 </script>
 <style lang="css" scoped>

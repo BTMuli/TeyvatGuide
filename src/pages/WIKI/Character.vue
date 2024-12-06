@@ -23,7 +23,7 @@
   <TwoSelectC v-model="showSelect" @select-c="handleSelect" v-model:reset="resetSelect" />
 </template>
 <script lang="ts" setup>
-import { onBeforeMount, ref, watch } from "vue";
+import { onBeforeMount, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import showDialog from "../../components/func/dialog.js";
@@ -35,10 +35,10 @@ import { AppCharacterData } from "../../data/index.js";
 import { createObc } from "../../utils/TGWindow.js";
 
 const id = useRoute().params.id.toString() ?? "0";
-const showSelect = ref(false);
-const resetSelect = ref(false);
-const cardsInfo = ref(AppCharacterData);
-const curItem = ref<TGApp.App.Character.WikiBriefInfo>({
+const showSelect = ref<boolean>(false);
+const resetSelect = ref<boolean>(false);
+const cardsInfo = shallowRef<TGApp.App.Character.WikiBriefInfo[]>(AppCharacterData);
+const curItem = shallowRef<TGApp.App.Character.WikiBriefInfo>({
   id: 0,
   contentId: 0,
   name: "",

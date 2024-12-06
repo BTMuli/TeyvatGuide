@@ -174,22 +174,6 @@ class Sqlite {
     );
     await this.initDB();
   }
-
-  /**
-   * @description 检测特定表是否存在
-   * @since Beta v0.4.5
-   * @param {string} table 表名
-   * @returns {Promise<boolean>}
-   */
-  async checkTableExist(table: string): Promise<boolean> {
-    const db = await this.getDB();
-    const sql = `SELECT name
-                 FROM sqlite_master
-                 WHERE type = 'table'
-                   AND name = '${table}';`;
-    const res: Array<{ name: string }> = await db.select(sql);
-    return res.length > 0;
-  }
 }
 
 const TGSqlite = new Sqlite();

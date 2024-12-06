@@ -198,16 +198,6 @@
                 <img src="/source/UI/posts.png" alt="collect" class="side-icon-menu" />
               </template>
             </v-list-item>
-            <v-list-item
-              class="side-item-menu"
-              title="登录"
-              @click="login"
-              v-show="cookie?.stoken === ''"
-            >
-              <template #prepend>
-                <img src="/source/UI/lumine.webp" class="side-icon-menu" alt="login" />
-              </template>
-            </v-list-item>
           </v-list>
         </v-menu>
         <v-list-item :title.attr="themeTitle" @click="switchTheme()">
@@ -233,7 +223,7 @@
 import { event, webviewWindow } from "@tauri-apps/api";
 import { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted, shallowRef } from "vue";
+import { computed, onMounted, onUnmounted } from "vue";
 
 import { useAppStore } from "../../store/modules/app.js";
 import { useUserStore } from "../../store/modules/user.js";
@@ -241,14 +231,13 @@ import mhyClient from "../../utils/TGClient.js";
 import showSnackbar from "../func/snackbar.js";
 
 const appStore = useAppStore();
-const { cookie, briefInfo } = storeToRefs(useUserStore());
-
+const { briefInfo } = storeToRefs(useUserStore());
+let themeListener: UnlistenFn | null = null;
 // @ts-expect-error The import.meta meta-property is not allowed in files which will build into CommonJS output.
 const isDevEnv = import.meta.env.MODE === "development";
-const themeListener = shallowRef<UnlistenFn | null>(null);
 const rail = computed<boolean>({
   get: () => appStore.sidebar.collapse,
-  set: (v: boolean) => (appStore.sidebar.collapse = v),
+  set: (v) => (appStore.sidebar.collapse = v),
 });
 const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
   if (briefInfo.value && briefInfo.value.nickname) return briefInfo.value;
@@ -261,12 +250,12 @@ const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
 });
 const themeGet = computed<string>({
   get: () => appStore.theme,
-  set: (v: string) => (appStore.theme = v),
+  set: (v) => (appStore.theme = v),
 });
 const themeTitle = computed<string>(() => (themeGet.value === "default" ? "夜间模式" : "日间模式"));
 
 onMounted(async () => {
-  themeListener.value = await event.listen("readTheme", (e: Event<string>) => {
+  themeListener = await event.listen("readTheme", (e: Event<string>) => {
     const theme = e.payload;
     themeGet.value = theme === "default" ? "default" : "dark";
   });
@@ -283,9 +272,9 @@ async function openClient(func: string): Promise<void> {
 }
 
 onUnmounted(() => {
-  if (themeListener.value !== null) {
-    themeListener.value();
-    themeListener.value = null;
+  if (themeListener !== null) {
+    themeListener();
+    themeListener = null;
   }
 });
 </script>

@@ -1,7 +1,7 @@
 /**
- * @file store modules home.ts
+ * @file store/modules/home.ts
  * @description Home store module
- * @since Alpha v0.1.6
+ * @since Beta v0.6.5
  */
 
 import { defineStore } from "pinia";

@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+  <TOverlay v-model="visible">
     <div class="toc-box">
       <div class="toc-top">
         <div class="toc-title">
@@ -9,7 +9,8 @@
           <div
             v-for="(item, index) in channelList"
             :key="index"
-            :class="props.gid === item.gid ? 'toc-list-item active' : 'toc-list-item'"
+            class="toc-list-item"
+            :class="{ active: props.gid === item.gid }"
             @click="toChannel(item)"
           >
             <img :src="item.icon" alt="icon" />
@@ -17,7 +18,7 @@
           </div>
         </div>
       </div>
-      <div class="toc-close" @click="onCancel">
+      <div class="toc-close" @click="visible = false">
         <div class="toc-close-btn">
           <v-icon>mdi-close</v-icon>
         </div>
@@ -26,6 +27,7 @@
   </TOverlay>
 </template>
 <script lang="ts" setup>
+import { storeToRefs } from "pinia";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 
@@ -35,32 +37,16 @@ import TGConstant from "../../web/constant/TGConstant.js";
 import TOverlay from "../app/t-overlay.vue";
 import showSnackbar from "../func/snackbar.js";
 
-interface ToChannelProps {
-  gid?: string;
-  curType?: string;
-  modelValue: boolean;
-}
-
-type ToChannelEmits = (e: "update:modelValue", value: boolean) => void;
-
-const props = withDefaults(defineProps<ToChannelProps>(), {
-  modelValue: false,
-});
+type ToChannelProps = { gid?: string; curType?: string; modelValue: boolean };
+type ToChannelEmits = (e: "update:modelValue", v: boolean) => void;
+const props = withDefaults(defineProps<ToChannelProps>(), { modelValue: false });
 const emits = defineEmits<ToChannelEmits>();
-
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
-});
-const router = useRouter();
-const appStore = useAppStore();
+const { recentNewsType } = storeToRefs(useAppStore());
 const channelList = TGConstant.BBS.CHANNELS;
-
-function onCancel(): void {
-  visible.value = false;
-}
+const visible = computed<boolean>({
+  get: () => props.modelValue,
+  set: (v) => emits("update:modelValue", v),
+});
 
 async function toChannel(item: ToChannelItem): Promise<void> {
   if (props.gid === item.gid) {
@@ -69,14 +55,13 @@ async function toChannel(item: ToChannelItem): Promise<void> {
   }
   visible.value = false;
   let link = `/news/${item.gid}/{type}`;
-  const typeList = ["notice", "news", "activity"];
-  if (typeList.includes(appStore.recentNewsType)) {
-    link = link.replace("{type}", appStore.recentNewsType);
+  if (recentNewsType.value satisfies TGApp.App.Store.NewsType) {
+    link = link.replace("{type}", recentNewsType.value);
   } else {
     link = link.replace("{type}", "notice");
-    appStore.recentNewsType = "notice";
+    recentNewsType.value = "notice";
   }
-  await router.push(link);
+  await useRouter().push(link);
 }
 </script>
 <style lang="css" scoped>
@@ -113,26 +98,26 @@ async function toChannel(item: ToChannelItem): Promise<void> {
   color: var(--box-text-1);
   cursor: pointer;
   transition: all 0.5s linear;
-}
 
-.toc-list-item.active {
-  border: 1px solid var(--common-shadow-1);
-  background: var(--box-bg-2);
-  color: var(--box-text-2);
-}
+  &.active {
+    border: 1px solid var(--common-shadow-1);
+    background: var(--box-bg-2);
+    color: var(--box-text-2);
+  }
 
-.toc-list-item img {
-  width: 45px;
-  height: 45px;
-  margin-right: 10px;
-  border-bottom-left-radius: 5px;
-  border-top-left-radius: 5px;
-}
+  img {
+    width: 45px;
+    height: 45px;
+    margin-right: 10px;
+    border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+  }
 
-.toc-list-item span {
-  margin-right: 10px;
-  font-family: var(--font-title);
-  font-size: 16px;
+  span {
+    margin-right: 10px;
+    font-family: var(--font-title);
+    font-size: 16px;
+  }
 }
 
 .toc-close {

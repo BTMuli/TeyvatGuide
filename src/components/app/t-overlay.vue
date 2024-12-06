@@ -1,6 +1,6 @@
 <template>
   <transition enter-from-class="tolo-enter-from" name="tolo">
-    <div v-if="showTolo" class="tolo-box" @click.self.prevent="toClick">
+    <div v-if="showTolo" class="tolo-box" @click.self.prevent="toClick()">
       <transition enter-from-class="toli-enter-from" name="toli">
         <slot v-if="showToli" />
       </transition>
@@ -10,11 +10,16 @@
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 
-type TolProps = { modelValue: boolean; toClick?: () => void; blurVal: string; hide?: true };
-
-const props = withDefaults(defineProps<TolProps>(), { modelValue: false, blurVal: "20px" });
-const showTolo = ref<boolean>(!props.hide);
-const showToli = ref<boolean>(!props.hide);
+type TolProps = { modelValue: boolean; blurVal?: string; dismissible?: boolean };
+type TolEmits = (e: "update:modelValue", v: boolean) => void;
+const emit = defineEmits<TolEmits>();
+const props = withDefaults(defineProps<TolProps>(), {
+  modelValue: false,
+  blurVal: "20px",
+  dismissible: true,
+});
+const showTolo = ref<boolean>(false);
+const showToli = ref<boolean>(false);
 
 watch(
   () => props.modelValue,
@@ -28,6 +33,11 @@ watch(
     setTimeout(() => (showTolo.value = false), 300);
   },
 );
+
+function toClick(): void {
+  if (!props.dismissible) return;
+  emit("update:modelValue", false);
+}
 </script>
 <style lang="css" scoped>
 .tolo-enter-active,

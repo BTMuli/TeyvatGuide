@@ -6,22 +6,22 @@
 
 import type { Schema } from "ajv";
 
-import achievements from "./app/achievements.json";
-import achievementSeries from "./app/achievementSeries.json";
-import calendar from "./app/calendar.json";
-import character from "./app/character.json";
-import gacha from "./app/gacha.json";
-import nameCards from "./app/namecard.json";
-import weapon from "./app/weapon.json";
-import arcBirCalendar from "./archive/birth_calendar.json";
-import arcBirDraw from "./archive/birth_draw.json";
-import arcBirRole from "./archive/birth_role.json";
-import schemaUiaf from "./schema/uiaf-schema.json";
-import schemaUigf from "./schema/uigf-schema.json";
-import scheamUigf4 from "./schema/uigf4-schema.json";
-import wikiCharacter from "./WIKI/character.json";
-import wikiMaterial from "./WIKI/material.json";
-import wikiWeapon from "./WIKI/weapon.json";
+import achievements from "./app/achievements.json" assert { type: "json" };
+import achievementSeries from "./app/achievementSeries.json" assert { type: "json" };
+import calendar from "./app/calendar.json" assert { type: "json" };
+import character from "./app/character.json" assert { type: "json" };
+import gacha from "./app/gacha.json" assert { type: "json" };
+import nameCards from "./app/namecard.json" assert { type: "json" };
+import weapon from "./app/weapon.json" assert { type: "json" };
+import arcBirCalendar from "./archive/birth_calendar.json" assert { type: "json" };
+import arcBirDraw from "./archive/birth_draw.json" assert { type: "json" };
+import arcBirRole from "./archive/birth_role.json" assert { type: "json" };
+import schemaUiaf from "./schema/uiaf-schema.json" assert { type: "json" };
+import schemaUigf from "./schema/uigf-schema.json" assert { type: "json" };
+import scheamUigf4 from "./schema/uigf4-schema.json" assert { type: "json" };
+import wikiCharacter from "./WIKI/character.json" assert { type: "json" };
+import wikiMaterial from "./WIKI/material.json" assert { type: "json" };
+import wikiWeapon from "./WIKI/weapon.json" assert { type: "json" };
 
 // App
 export const AppAchievementsData: TGApp.App.Achievement.Item[] = achievements;

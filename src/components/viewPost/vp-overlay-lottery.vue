@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+  <TOverlay v-model="visible">
     <div class="tpol-box" v-if="card">
       <div class="tpol-title">
         <span>抽奖详情</span>
@@ -48,45 +48,24 @@ import Mys from "../../plugins/Mys/index.js";
 import TOverlay from "../app/t-overlay.vue";
 import showSnackbar from "../func/snackbar.js";
 
-interface TpoLotteryProps {
-  modelValue: boolean;
-  lottery: string | undefined;
-}
-
-interface TpoLotteryEmits {
-  (e: "update:modelValue", value: boolean): void;
-
-  (e: "cancel"): void;
-}
-
+type TpoLotteryProps = { modelValue: boolean; lottery: string | undefined };
+type TpoLotteryEmits = (e: "update:modelValue", v: boolean) => void;
 const props = defineProps<TpoLotteryProps>();
 const emits = defineEmits<TpoLotteryEmits>();
 const card = ref<TGApp.Plugins.Mys.Lottery.RenderCard>();
 const jsonData = ref<TGApp.Plugins.Mys.Lottery.FullData>();
 const timeStatus = ref<string>("未知");
 const upWay = ref<string>("未知");
-
+const visible = computed<boolean>({
+  get: () => props.modelValue,
+  set: (v) => emits("update:modelValue", v),
+});
 // eslint-disable-next-line no-undef
 let timer: NodeJS.Timeout | undefined = undefined;
 
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
-});
-
-const onCancel = (): void => {
-  visible.value = false;
-  emits("cancel");
-};
-
 watch(
   () => props.lottery,
-  async (value) => {
-    if (!value) return;
-    await load();
-  },
+  async (v) => (v ? await load() : undefined),
   { immediate: true },
 );
 

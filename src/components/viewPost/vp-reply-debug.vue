@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" :hide="true" :to-click="onCancel" blur-val="0">
+  <TOverlay v-model="visible" blur-val="0">
     <div class="tpr-debug-box">
       <div class="tpr-debug-title">
         <span>文件：</span>
@@ -15,37 +15,24 @@
 <script lang="ts" setup>
 import { open } from "@tauri-apps/plugin-dialog";
 import { readTextFile } from "@tauri-apps/plugin-fs";
-import { computed, ref } from "vue";
+import { computed, ref, shallowRef } from "vue";
 
 import TOverlay from "../app/t-overlay.vue";
 import showSnackbar from "../func/snackbar.js";
 
 import TprReply from "./vp-reply-item.vue";
 
-interface TprDebugProps {
-  modelValue: boolean;
-}
-
-interface TprDebugEmits {
-  (event: "update:modelValue", value: boolean): void;
-}
+type TprDebugProps = { modelValue: boolean };
+type TprDebugEmits = (e: "update:modelValue", v: boolean) => void;
 
 const props = defineProps<TprDebugProps>();
 const emits = defineEmits<TprDebugEmits>();
-
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
-});
-
 const filePath = ref<string>("");
-const replyData = ref<TGApp.Plugins.Mys.Reply.ReplyFull | null>(null);
-
-function onCancel(): void {
-  visible.value = false;
-}
+const replyData = shallowRef<TGApp.Plugins.Mys.Reply.ReplyFull | null>(null);
+const visible = computed<boolean>({
+  get: () => props.modelValue,
+  set: (v) => emits("update:modelValue", v),
+});
 
 async function selectFile(): Promise<void> {
   const file = await open({

@@ -7,7 +7,8 @@
           :key="index"
           :value="value"
           @click="firstLoad(value)"
-          >{{ rawData[value].name }}
+        >
+          {{ rawData[value].name }}
         </v-tab>
       </v-tabs>
     </template>
@@ -71,78 +72,39 @@ import TGLogger from "../../utils/TGLogger.js";
 import { createPost } from "../../utils/TGWindow.js";
 import { getGameName } from "../../web/utils/tools.js";
 
-// 类型定义
-enum NewsType {
-  notice = "1",
-  activity = "2",
-  news = "3",
-}
-
-type NewsKey = keyof typeof NewsType;
-type PostData = {
-  [key in NewsKey]: TGApp.Plugins.Mys.Post.FullData[];
-};
+type PostData = { [key in TGApp.App.Store.NewsType]: TGApp.Plugins.Mys.Post.FullData[] };
 type RawData = {
-  [key in NewsKey]: {
-    isLast: boolean;
-    name: string;
-    lastId: number;
-  };
+  [key in TGApp.App.Store.NewsType]: { isLast: boolean; name: string; lastId: number };
 };
 
-// 路由
 const router = useRouter();
+const appStore = useAppStore();
 const gid = <string>useRoute().params.gid;
 const gameName = getGameName(Number(gid));
-// loading
 const loading = ref<boolean>(false);
-
-// UI 数据
-const appStore = useAppStore();
+const tabValues: Readonly<Array<TGApp.App.Store.NewsType>> = ["notice", "activity", "news"];
 const showList = ref<boolean>(false);
 const showSearch = ref<boolean>(false);
-const tabValues = ref<Array<NewsKey>>(["notice", "activity", "news"]);
-const tabList = ["notice", "activity", "news"];
-const tab = computed({
+const tab = computed<TGApp.App.Store.NewsType>({
   get: () => {
-    if (appStore.recentNewsType === "" || !tabList.includes(appStore.recentNewsType)) {
-      return "notice";
-    }
-    return <NewsKey>appStore.recentNewsType;
+    if (!(appStore.recentNewsType satisfies TGApp.App.Store.NewsType)) return "notice";
+    return appStore.recentNewsType;
   },
-  set: (val) => {
-    appStore.recentNewsType = val;
-  },
+  set: (v) => (appStore.recentNewsType = v),
 });
 
 // 渲染数据
 const search = ref<string>("");
-const postData = ref<PostData>({
-  notice: [],
-  activity: [],
-  news: [],
-});
+const postData = ref<PostData>({ notice: [], activity: [], news: [] });
 const rawData = ref<RawData>({
-  notice: {
-    isLast: false,
-    name: "公告",
-    lastId: 0,
-  },
-  activity: {
-    isLast: false,
-    name: "活动",
-    lastId: 0,
-  },
-  news: {
-    isLast: false,
-    name: "咨讯",
-    lastId: 0,
-  },
+  notice: { isLast: false, name: "公告", lastId: 0 },
+  activity: { isLast: false, name: "活动", lastId: 0 },
+  news: { isLast: false, name: "咨讯", lastId: 0 },
 });
 
 onMounted(async () => await firstLoad(tab.value));
 
-async function firstLoad(key: NewsKey, refresh: boolean = false): Promise<void> {
+async function firstLoad(key: TGApp.App.Store.NewsType, refresh: boolean = false): Promise<void> {
   if (rawData.value[key].lastId !== 0) {
     if (!refresh) return;
     postData.value[key] = [];
@@ -150,7 +112,7 @@ async function firstLoad(key: NewsKey, refresh: boolean = false): Promise<void> 
   }
   showLoading.start(`正在获取${gameName}${rawData.value[key].name}数据...`);
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
-  const getData = await Mys.Painter.getNewsList(gid, NewsType[key]);
+  const getData = await Mys.Painter.getNewsList(gid, TGApp.App.Store.NewsTypeEnum[key]);
   rawData.value[key].isLast = getData.is_last;
   rawData.value[key].lastId = getData.list.length;
   postData.value[key] = getData.list;
@@ -165,7 +127,7 @@ async function switchAnno(): Promise<void> {
 }
 
 // 加载更多
-async function loadMore(key: NewsKey): Promise<void> {
+async function loadMore(key: TGApp.App.Store.NewsType): Promise<void> {
   loading.value = true;
   if (rawData.value[key].isLast) {
     showSnackbar.warn("已经是最后一页了");
@@ -173,7 +135,12 @@ async function loadMore(key: NewsKey): Promise<void> {
     return;
   }
   showLoading.start(`正在获取${gameName}${rawData.value[key].name}数据...`);
-  const getData = await Mys.Painter.getNewsList(gid, NewsType[key], 20, rawData.value[key].lastId);
+  const getData = await Mys.Painter.getNewsList(
+    gid,
+    TGApp.App.Store.NewsTypeEnum[key],
+    20,
+    rawData.value[key].lastId,
+  );
   rawData.value[key].lastId = rawData.value[key].lastId + getData.list.length;
   rawData.value[key].isLast = getData.is_last;
   postData.value[key] = postData.value[key].concat(getData.list);
@@ -195,10 +162,10 @@ async function searchPost(): Promise<void> {
   const numCheck = Number(search.value);
   if (isNaN(numCheck)) {
     showSearch.value = true;
-  } else {
-    await createPost(search.value);
-    showSearch.value = false;
+    return;
   }
+  await createPost(search.value);
+  showSearch.value = false;
 }
 </script>
 

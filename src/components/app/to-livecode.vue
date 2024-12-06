@@ -1,11 +1,5 @@
 <template>
-  <TOverlay
-    v-model="visible"
-    :hide="true"
-    :to-click="onCancel"
-    blur-val="20px"
-    class="tolc-overlay"
-  >
+  <TOverlay v-model="visible" class="tolc-overlay">
     <div class="tolc-box">
       <div class="tolc-title">
         <span>兑换码</span>
@@ -58,25 +52,19 @@ import showSnackbar from "../func/snackbar.js";
 
 import TOverlay from "./t-overlay.vue";
 
-interface ToLiveCodeProps {
+type ToLiveCodeProps = {
   data: TGApp.BBS.Navigator.CodeData[];
   actId: string | undefined;
   modelValue: boolean;
-}
-
+};
 type ToLiveCodeEmits = (e: "update:modelValue", v: boolean) => void;
 
 const props = withDefaults(defineProps<ToLiveCodeProps>(), { modelValue: false });
 const emits = defineEmits<ToLiveCodeEmits>();
-
 const visible = computed<boolean>({
   get: () => props.modelValue,
-  set: (v: boolean) => emits("update:modelValue", v),
+  set: (v) => emits("update:modelValue", v),
 });
-
-function onCancel(): void {
-  visible.value = false;
-}
 
 function copy(code: string): void {
   navigator.clipboard.writeText(code);

@@ -46,7 +46,7 @@ export const useAppStore = defineStore(
     // 语言
     const lang = ref<AnnoLang>("zh-cn");
     // 最近的咨讯类型
-    const recentNewsType = ref<string>("notice");
+    const recentNewsType = ref<TGApp.App.Store.NewsType>("notice");
     // 是否开启分辨率回正
     const needResize = ref<string>("true");
     // 分享图生成默认设置，为0表示默认保存到文件，为数字表示当大小超过xMB时保存到文件，否则保存到剪贴板

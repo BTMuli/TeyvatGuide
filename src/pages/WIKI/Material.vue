@@ -55,7 +55,7 @@
     </div>
   </div>
   <Suspense>
-    <TwoMaterial v-model="visible" :data="curMaterial">
+    <TwoMaterial v-model="visible" :data="curMaterial" v-if="curMaterial">
       <template #left>
         <div class="card-arrow left" @click="switchMaterial(false)">
           <img src="../../assets/icons/arrow-right.svg" alt="right" />
@@ -70,47 +70,41 @@
   </Suspense>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 
 import showSnackbar from "../../components/func/snackbar.js";
 import TwoMaterial from "../../components/pageWiki/two-material.vue";
 import { WikiMaterialData } from "../../data/index.js";
 
-const curMaterial = ref<TGApp.App.Material.WikiItem>(<TGApp.App.Material.WikiItem>{});
-const sortMaterialsData = ref<Array<TGApp.App.Material.WikiItem>>([]);
-const curIndex = ref(0);
-const total = ref(0);
-const visible = ref(false);
+const curMaterial = shallowRef<TGApp.App.Material.WikiItem | undefined>();
+const sortMaterialsData = shallowRef<Array<TGApp.App.Material.WikiItem>>([]);
+const curIndex = ref<number>(0);
+const total = ref<number>(0);
+const visible = ref<boolean>(false);
 
-interface MaterialType {
-  type: string;
-  number: number;
-}
+type MaterialType = { type: string; number: number };
 
 const search = ref<string>();
 const selectType = ref<string | null>(null);
 const materialTypes = ref<MaterialType[]>([]);
 
 onMounted(() => {
-  WikiMaterialData.forEach((item: TGApp.App.Material.WikiItem) => {
+  for (const item of WikiMaterialData) {
     const typeFindIndex = materialTypes.value.findIndex((itemT) => itemT.type === item.type);
-    if (typeFindIndex !== -1) {
-      materialTypes.value[typeFindIndex].number++;
-    } else {
+    if (typeFindIndex === -1) {
       const itemN: MaterialType = { type: item.type, number: 1 };
       materialTypes.value.push(itemN);
+      continue;
     }
-  });
+    materialTypes.value[typeFindIndex].number++;
+  }
   sortData(WikiMaterialData);
   showSnackbar.success(`成功获取${sortMaterialsData.value.length}条数据`);
 });
 
 function getSelectMaterials(): TGApp.App.Material.WikiItem[] {
-  if (selectType.value === null) {
-    return WikiMaterialData;
-  } else {
-    return WikiMaterialData.filter((item) => item.type === selectType.value);
-  }
+  if (selectType.value === null) return WikiMaterialData;
+  else return WikiMaterialData.filter((item) => item.type === selectType.value);
 }
 
 watch(
@@ -133,14 +127,10 @@ function toMaterial(item: TGApp.App.Material.WikiItem) {
 
 function switchMaterial(isNext: boolean) {
   if (isNext) {
-    if (curIndex.value === total.value - 1) {
-      return;
-    }
+    if (curIndex.value === total.value - 1) return;
     curIndex.value++;
   } else {
-    if (curIndex.value === 0) {
-      return;
-    }
+    if (curIndex.value === 0) return;
     curIndex.value--;
   }
   curMaterial.value = sortMaterialsData.value[curIndex.value];

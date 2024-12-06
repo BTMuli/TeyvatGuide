@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="0">
+  <TOverlay v-model="visible" blur-val="0">
     <div class="tua-ao-container" v-if="props.data">
       <slot name="left"></slot>
       <div class="tua-ao-box">
@@ -59,32 +59,20 @@ import TGLogger from "../../utils/TGLogger.js";
 import TOverlay from "../app/t-overlay.vue";
 import VpOverlaySearch from "../viewPost/vp-overlay-search.vue";
 
-interface ToAchiInfoProps {
-  modelValue: boolean;
-  data: TGApp.Sqlite.Achievement.RenderAchi;
-}
-
-interface ToAchiInfoEmits {
+type ToAchiInfoProps = { modelValue: boolean; data: TGApp.Sqlite.Achievement.RenderAchi };
+type ToAchiInfoEmits = {
   (e: "update:modelValue", v: boolean): void;
-
   (e: "select-series", v: number): void;
-}
+};
 
 const props = defineProps<ToAchiInfoProps>();
 const emits = defineEmits<ToAchiInfoEmits>();
 const showSearch = ref<boolean>(false);
 const search = ref<string>();
-
-const visible = computed({
+const visible = computed<boolean>({
   get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
+  set: (v) => emits("update:modelValue", v),
 });
-
-function onCancel() {
-  visible.value = false;
-}
 
 async function searchDirect(word: string): Promise<void> {
   await TGLogger.Info(`[ToAchiInfo][${props.data.id}][Search] 查询 ${word}`);

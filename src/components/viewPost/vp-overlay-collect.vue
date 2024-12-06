@@ -1,6 +1,5 @@
-<!-- 编辑收藏帖子的合集 -->
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+  <TOverlay v-model="visible">
     <div class="topc-container">
       <div class="topc-post-info">
         {{ props.post?.post.subject }}
@@ -27,7 +26,7 @@
       </div>
       <div class="topc-bottom">
         <v-btn class="topc-btn" rounded @click="newCollect">新建分类</v-btn>
-        <v-btn class="topc-btn" rounded @click="onCancel">取消</v-btn>
+        <v-btn class="topc-btn" rounded @click="visible = false">取消</v-btn>
         <v-btn :loading="submit" class="topc-btn" rounded @click="onSubmit">确定</v-btn>
       </div>
     </div>
@@ -41,31 +40,29 @@ import TOverlay from "../app/t-overlay.vue";
 import showDialog from "../func/dialog.js";
 import showSnackbar from "../func/snackbar.js";
 
-interface ToPostCollectProps {
+type ToPostCollectProps = {
   modelValue: boolean;
   post: TGApp.Plugins.Mys.Post.FullData | undefined;
-}
-
-interface ToPostCollectEmits {
-  (e: "update:modelValue", value: boolean): void;
-
+};
+type ToPostCollectEmits = {
+  (e: "update:modelValue", v: boolean): void;
   (e: "submit"): void;
-}
+};
 
 const props = defineProps<ToPostCollectProps>();
 const emits = defineEmits<ToPostCollectEmits>();
 const collectList = ref<TGApp.Sqlite.UserCollection.UFCollection[]>([]);
 const postCollect = ref<TGApp.Sqlite.UserCollection.UFMap[]>([]);
 const selectList = ref<string[]>([]);
-const submit = ref(false);
+const submit = ref<boolean>(false);
+const visible = computed<boolean>({
+  get: () => props.modelValue,
+  set: (v) => emits("update:modelValue", v),
+});
 
 watch(
   () => props.modelValue,
-  async (val) => {
-    if (val) {
-      await freshData();
-    }
-  },
+  async (v) => (v ? await freshData() : null),
 );
 
 async function freshData(): Promise<void> {
@@ -75,18 +72,13 @@ async function freshData(): Promise<void> {
   if (Array.isArray(collectRes)) {
     postCollect.value = collectRes;
     selectList.value = postCollect.value.map((i) => i.collection);
-  } else if (collectRes) {
+    return;
+  }
+  if (collectRes) {
     postCollect.value = [];
     selectList.value = [];
   }
 }
-
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
-});
 
 async function deleteCollect(item: TGApp.Sqlite.UserCollection.UFCollection): Promise<void> {
   const delCheck = await showDialog.check("确定删除分类?", "该分类若有帖子，则会变为未分类");
@@ -147,10 +139,6 @@ async function onSubmit(): Promise<void> {
     return;
   }
   showSnackbar.success("更新成功");
-}
-
-function onCancel() {
-  visible.value = false;
 }
 </script>
 <style lang="css" scoped>

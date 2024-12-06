@@ -1,72 +1,43 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+  <TOverlay v-model="visible">
     <div class="tops-box">
       <div class="tops-top">查找：{{ search }}</div>
       <div class="tops-act">
-        <span>分区：{{ getGidLabel() }}</span>
+        <span>分区：{{ getGameName(Number(game)) }}</span>
         <v-btn :loading="load" size="small" class="tops-btn" @click="searchPosts()" rounded>
           加载更多({{ results.length }})
         </v-btn>
       </div>
       <div class="tops-list">
-        <div v-for="item in results" :key="item.post.post_id">
-          <TPostCard :model-value="item" />
-        </div>
+        <TPostCard v-for="item in results" :key="item.post.post_id" :model-value="item" />
       </div>
     </div>
   </TOverlay>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import Mys from "../../plugins/Mys/index.js";
+import { getGameName } from "../../web/utils/tools.js";
 import TOverlay from "../app/t-overlay.vue";
 import TPostCard from "../app/t-postcard.vue";
 import showSnackbar from "../func/snackbar.js";
 
-// data
 const search = ref<string>();
 const lastId = ref<string>("");
 const game = ref<string>("2");
 const isLast = ref<boolean>(false);
-const results = ref<TGApp.Plugins.Mys.Post.FullData[]>([]);
+const results = shallowRef<TGApp.Plugins.Mys.Post.FullData[]>([]);
 const load = ref<boolean>(false);
 
-interface ToPostSearchProps {
-  modelValue: boolean;
-  gid: string;
-  keyword?: string;
-}
-
-interface ToPostSearchEmits {
-  (e: "update:modelValue", value: boolean): void;
-
-  (e: "cancel"): void;
-}
-
+type ToPostSearchProps = { modelValue: boolean; gid: string; keyword?: string };
+type ToPostSearchEmits = (e: "update:modelValue", v: boolean) => void;
 const props = defineProps<ToPostSearchProps>();
 const emits = defineEmits<ToPostSearchEmits>();
-
-const gameList: Record<string, string> = {
-  "1": "崩坏3",
-  "2": "原神",
-  "3": "崩坏2",
-  "4": "未定事件簿",
-  "5": "大别野",
-  "6": "崩坏：星穹铁道",
-  "8": "绝区零",
-};
-// overlay
-const visible = computed({
+const visible = computed<boolean>({
   get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
+  set: (v) => emits("update:modelValue", v),
 });
-
-function onCancel() {
-  visible.value = false;
-}
 
 onMounted(async () => {
   game.value = props.gid;
@@ -144,13 +115,6 @@ async function searchPosts() {
   if (!visible.value) {
     visible.value = true;
   }
-}
-
-function getGidLabel(): string {
-  if (gameList[game.value]) {
-    return gameList[game.value];
-  }
-  return "未知";
 }
 </script>
 <style lang="css" scoped>

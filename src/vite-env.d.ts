@@ -50,14 +50,3 @@ interface ImportMetaEnv {
 declare interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
-
-/**
- * @description 极验验证的请求方法-请求参数
- * @param {TGApp.BBS.Geetest.InitGeetestParams} params
- * @param {(captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => void} callback
- * @return void
- */
-declare function initGeetest(
-  params: TGApp.Plugins.Mys.Geetest.InitGeetestParams,
-  callback: (captchaObj: TGApp.Plugins.Mys.Geetest.GeetestCaptcha) => void,
-): void;

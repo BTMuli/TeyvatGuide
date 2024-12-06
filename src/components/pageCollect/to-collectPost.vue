@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+  <TOverlay v-model="visible">
     <div class="tocp-container">
       <div class="tocp-title">选择分类</div>
       <div class="tocp-list">
@@ -15,55 +15,38 @@
       </div>
       <div class="tocp-bottom">
         <v-btn class="tocp-btn" rounded @click="newCollect">新建分类</v-btn>
-        <v-btn class="tocp-btn" rounded @click="onCancel">取消</v-btn>
+        <v-btn class="tocp-btn" rounded @click="visible = false">取消</v-btn>
         <v-btn :loading="submit" class="tocp-btn" rounded @click="onSubmit">确定</v-btn>
       </div>
     </div>
   </TOverlay>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref, shallowRef, watch } from "vue";
 
 import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
 import TOverlay from "../app/t-overlay.vue";
 import showDialog from "../func/dialog.js";
 import showSnackbar from "../func/snackbar.js";
 
-interface ToPostCollectProps {
-  modelValue: boolean;
-  post: string[];
-}
-
-interface ToPostCollectEmits {
-  (e: "update:modelValue", value: boolean): void;
-
+type ToPostCollectProps = { modelValue: boolean; post: string[] };
+type ToPostCollectEmits = {
+  (e: "update:modelValue", v: boolean): void;
   (e: "submit"): void;
-}
+};
 
 const props = defineProps<ToPostCollectProps>();
 const emits = defineEmits<ToPostCollectEmits>();
 const select = ref<string>();
-const collectList = ref<TGApp.Sqlite.UserCollection.UFCollection[]>([]);
-const submit = ref(false);
-
-const visible = computed({
+const submit = ref<boolean>(false);
+const collectList = shallowRef<TGApp.Sqlite.UserCollection.UFCollection[]>([]);
+const visible = computed<boolean>({
   get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
+  set: (v) => emits("update:modelValue", v),
 });
-
-function onCancel() {
-  visible.value = false;
-}
-
 watch(
   () => props.modelValue,
-  async (val) => {
-    if (val) {
-      await freshData();
-    }
-  },
+  async (val) => (val ? await freshData() : null),
 );
 
 async function onSubmit(): Promise<void> {
@@ -83,7 +66,6 @@ async function onSubmit(): Promise<void> {
   }
   showSnackbar.success(`成功处理 ${props.post.length} 个帖子`);
   submit.value = false;
-  visible.value = false;
   emits("submit");
 }
 

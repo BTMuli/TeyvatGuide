@@ -34,32 +34,27 @@
   <ToArcBrith v-model="showOverlay" :data="current" :choice="isAether" />
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import ToArcBrith from "../../components/pageArchive/to-arcBrith.vue";
 import { ArcBirDraw, ArcBirRole } from "../../data/index.js";
 import TGClient from "../../utils/TGClient.js";
 
-const page = ref(1);
-const length = ref(0);
-const visible = ref(0);
-const renderItems = ref<TGApp.Archive.Birth.DrawItem[]>([]);
-const curSelect = ref<TGApp.Archive.Birth.RoleItem | null>(null);
-const selectedItem = ref<TGApp.Archive.Birth.DrawItem[]>([]);
-const current = ref<TGApp.Archive.Birth.DrawItem>();
-const isAether = ref<boolean>(false);
-const showOverlay = ref(false);
 const route = useRoute();
 
-watch(
-  () => page.value,
-  () => {
-    const start = (page.value - 1) * 12;
-    const end = start + 12;
-    selectedItem.value = renderItems.value.slice(start, end);
-  },
-);
+const page = ref<number>(1);
+const length = ref<number>(0);
+const visible = ref(0);
+const renderItems = shallowRef<TGApp.Archive.Birth.DrawItem[]>([]);
+const curSelect = shallowRef<TGApp.Archive.Birth.RoleItem | null>(null);
+const current = shallowRef<TGApp.Archive.Birth.DrawItem>();
+const isAether = ref<boolean>(false);
+const showOverlay = ref<boolean>(false);
+
+const selectedItem = computed<TGApp.Archive.Birth.DrawItem[]>(() => {
+  return renderItems.value.slice((page.value - 1) * 12, page.value * 12);
+});
 
 watch(
   () => curSelect.value,
@@ -73,7 +68,6 @@ watch(
     }
     length.value = Math.ceil(renderItems.value.length / 12);
     page.value = 1;
-    selectedItem.value = renderItems.value.slice(0, 12);
     visible.value = length.value > 5 ? 5 : length.value;
   },
 );
@@ -85,7 +79,6 @@ onMounted(() => {
     if (dataFind) curSelect.value = dataFind;
   } else {
     renderItems.value = ArcBirDraw;
-    selectedItem.value = renderItems.value.slice(0, 12);
   }
   length.value = Math.ceil(renderItems.value.length / 12);
   visible.value = length.value > 5 ? 5 : length.value;

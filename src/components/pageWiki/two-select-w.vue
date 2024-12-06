@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+  <TOverlay v-model="visible">
     <div class="two-sw-container">
       <div class="two-sw-item">
         <div class="two-sw-title">星级</div>
@@ -28,7 +28,7 @@
         </v-item-group>
       </div>
       <div class="tow-sc-submit">
-        <v-btn variant="tonal" @click="onCancel">取消</v-btn>
+        <v-btn variant="tonal" @click="visible = false">取消</v-btn>
         <v-btn @click="confirmSelect">确定</v-btn>
       </div>
     </div>
@@ -39,50 +39,29 @@ import { computed, ref, watch } from "vue";
 
 import TOverlay from "../app/t-overlay.vue";
 
-// 一些数据
-const selectStarList = [4, 5];
-const selectWeaponList = ["单手剑", "双手剑", "弓", "法器", "长柄武器"];
-
-// 选中的元素
-const selectedStar = ref<number[]>(selectStarList);
-const selectedWeapon = ref<string[]>(selectWeaponList);
-
-export interface SelectedWValue {
-  star: number[];
-  weapon: string[];
-}
-
-interface TwoSelectWProps {
-  modelValue: boolean;
-  reset: boolean;
-}
-
-interface TwoSelectWEmits {
+export type SelectedWValue = { star: number[]; weapon: string[] };
+type TwoSelectWProps = { modelValue: boolean; reset: boolean };
+type TwoSelectWEmits = {
   (e: "update:modelValue", value: boolean): void;
-
   (e: "update:reset", value: boolean): void;
-
   (e: "select-w", value: SelectedWValue): void;
-}
+};
 
 const props = defineProps<TwoSelectWProps>();
 const emits = defineEmits<TwoSelectWEmits>();
 
-const visible = computed({
-  get() {
-    return props.modelValue;
-  },
-  set(value) {
-    emits("update:modelValue", value);
-  },
+const selectStarList = [4, 5];
+const selectWeaponList = ["单手剑", "双手剑", "弓", "法器", "长柄武器"];
+
+const selectedStar = ref<number[]>(selectStarList);
+const selectedWeapon = ref<string[]>(selectWeaponList);
+const visible = computed<boolean>({
+  get: () => props.modelValue,
+  set: (v) => emits("update:modelValue", v),
 });
-const reset = computed({
-  get() {
-    return props.reset;
-  },
-  set(value) {
-    emits("update:reset", value);
-  },
+const reset = computed<boolean>({
+  get: () => props.reset,
+  set: (v) => emits("update:reset", v),
 });
 
 watch(
@@ -97,16 +76,8 @@ watch(
   },
 );
 
-function onCancel() {
-  visible.value = false;
-}
-
-function confirmSelect() {
-  const value: SelectedWValue = {
-    star: selectedStar.value,
-    weapon: selectedWeapon.value,
-  };
-  emits("select-w", value);
+function confirmSelect(): void {
+  emits("select-w", { star: selectedStar.value, weapon: selectedWeapon.value });
   visible.value = false;
 }
 </script>

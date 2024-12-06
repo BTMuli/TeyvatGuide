@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+  <TOverlay v-model="visible">
     <div class="two-sc-container">
       <div class="two-sc-item">
         <div class="two-sc-title">星级</div>
@@ -58,7 +58,7 @@
         </v-item-group>
       </div>
       <div class="tow-sc-submit">
-        <v-btn variant="tonal" @click="onCancel">取消</v-btn>
+        <v-btn variant="tonal" @click="visible = false">取消</v-btn>
         <v-btn @click="confirmSelect">确定</v-btn>
       </div>
     </div>
@@ -69,7 +69,22 @@ import { computed, ref, watch } from "vue";
 
 import TOverlay from "../app/t-overlay.vue";
 
-// 一些数据
+export type SelectedCValue = {
+  star: number[];
+  weapon: string[];
+  elements: string[];
+  area: string[];
+};
+type TwoSelectCProps = { modelValue: boolean; reset: boolean };
+
+type TwoSelectCEmits = {
+  (e: "update:modelValue", v: boolean): void;
+  (e: "update:reset", v: boolean): void;
+  (e: "select-c", v: SelectedCValue): void;
+};
+
+const props = defineProps<TwoSelectCProps>();
+const emits = defineEmits<TwoSelectCEmits>();
 const selectStarList = [4, 5];
 const selectWeaponList = ["单手剑", "双手剑", "弓", "法器", "长柄武器"];
 const selectElementList = ["冰", "岩", "水", "火", "草", "雷", "风"];
@@ -80,33 +95,9 @@ const selectedStar = ref<number[]>(selectStarList);
 const selectedWeapon = ref<string[]>(selectWeaponList);
 const selectedElements = ref<string[]>(selectElementList);
 const selectedArea = ref<string[]>(selectAreaList);
-
-export interface SelectedCValue {
-  star: number[];
-  weapon: string[];
-  elements: string[];
-  area: string[];
-}
-
-interface TwoSelectCProps {
-  modelValue: boolean;
-  reset: boolean;
-}
-
-interface TwoSelectCEmits {
-  (e: "update:modelValue", value: boolean): void;
-
-  (e: "update:reset", value: boolean): void;
-
-  (e: "select-c", value: SelectedCValue): void;
-}
-
-const props = defineProps<TwoSelectCProps>();
-const emits = defineEmits<TwoSelectCEmits>();
-
 const visible = computed<boolean>({
   get: () => props.modelValue,
-  set: (v: boolean) => emits("update:modelValue", v),
+  set: (v) => emits("update:modelValue", v),
 });
 const reset = computed<boolean>({
   get: () => props.reset,
@@ -125,10 +116,6 @@ watch(
     }
   },
 );
-
-function onCancel() {
-  visible.value = false;
-}
 
 function confirmSelect() {
   const value: SelectedCValue = {

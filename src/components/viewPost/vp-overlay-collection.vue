@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" :hide="true" :to-click="onCancel" blur-val="5px">
+  <TOverlay v-model="visible" blur-val="5px">
     <div class="tpoc-box">
       <div class="tpoc-top">
         <span>{{ props.collection.collection_title }}</span>
@@ -47,43 +47,35 @@
   </TOverlay>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
+import { computed, onMounted, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import Mys from "../../plugins/Mys/index.js";
 import TOverlay from "../app/t-overlay.vue";
 import showSnackbar from "../func/snackbar.js";
 
-interface TpoCollectionProps {
+type TpoCollectionProps = {
   collection: TGApp.Plugins.Mys.Post.Collection;
   modelValue: boolean;
-}
-
-type TpoCollectionEmits = (e: "update:modelValue", value: boolean) => void;
-
-interface TpoCollectionItem {
+};
+type TpoCollectionEmits = (e: "update:modelValue", v: boolean) => void;
+type TpoCollectionItem = {
   postId: string;
   title: string;
   created: number;
   updated: number;
   comments: number;
   likes: number;
-}
-
+};
+const router = useRouter();
 const props = defineProps<TpoCollectionProps>();
 const emits = defineEmits<TpoCollectionEmits>();
 const postListEl = useTemplateRef<HTMLDivElement>("postListRef");
-
-const visible = computed({
+const posts = shallowRef<TpoCollectionItem[]>([]);
+const visible = computed<boolean>({
   get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
+  set: (v) => emits("update:modelValue", v),
 });
-const posts = ref<TpoCollectionItem[]>([]);
-
-const router = useRouter();
-
 watch(
   () => visible.value,
   async (value) => {
@@ -114,10 +106,6 @@ onMounted(async () => {
   }
   posts.value = tempArr;
 });
-
-function onCancel() {
-  visible.value = false;
-}
 
 function getDate(date: number): string {
   return new Date(date * 1000).toLocaleString().replace(/\//g, "-").split(" ")[0];

@@ -13,7 +13,7 @@
           v-model:cur-item="curItem"
           :key="index"
           :data="item"
-          @click="switchW(item)"
+          @click="curItem = item"
           mode="weapon"
         />
       </div>
@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
 import showDialog from "../../components/func/dialog.js";
@@ -38,10 +38,10 @@ import { AppWeaponData } from "../../data/index.js";
 import { createObc } from "../../utils/TGWindow.js";
 
 const id = useRoute().params.id.toString() ?? "0";
-const showSelect = ref(false);
-const resetSelect = ref(false);
-const cardsInfo = ref(AppWeaponData);
-const curItem = ref<TGApp.App.Weapon.WikiBriefInfo>({
+const showSelect = ref<boolean>(false);
+const resetSelect = ref<boolean>(false);
+const cardsInfo = shallowRef<Array<TGApp.App.Weapon.WikiBriefInfo>>(AppWeaponData);
+const curItem = shallowRef<TGApp.App.Weapon.WikiBriefInfo>({
   id: 0,
   contentId: 0,
   name: "",
@@ -80,10 +80,6 @@ function handleSelectW(val: SelectedWValue) {
   }
   showSnackbar.success(`找到 ${filterW.length} 件符合条件的武器`);
   cardsInfo.value = filterW;
-}
-
-async function switchW(item: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
-  curItem.value = item;
 }
 
 async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {

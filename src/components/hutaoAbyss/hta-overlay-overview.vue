@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+  <TOverlay v-model="visible">
     <div class="hta-oo-box">
       <v-btn
         :loading="loadShare"
@@ -63,34 +63,21 @@ import showSnackbar from "../func/snackbar.js";
 
 import HtaOverviewLine from "./hta-overview-line.vue";
 
-interface HtaOverlayOverviewProps {
+type HtaOverlayOverviewProps = {
   modelValue: boolean;
   data: AbyssDataItem<TGApp.Plugins.Hutao.Abyss.OverviewData>;
-}
-
-interface HtaOverlayOverviewEmits {
-  (e: "update:modelValue", value: boolean): void;
-
-  (e: "cancel"): void;
-}
+};
+type HtaOverlayOverviewEmits = (e: "update:modelValue", v: boolean) => void;
 
 const props = defineProps<HtaOverlayOverviewProps>();
 const emits = defineEmits<HtaOverlayOverviewEmits>();
+const loadShare = ref<boolean>(false);
+const visible = computed<boolean>({
+  get: () => props.modelValue,
+  set: (v) => emits("update:modelValue", v),
+});
 const dataCur = computed(() => props.data.cur);
 const dataLast = computed(() => props.data.last);
-const loadShare = ref<boolean>(false);
-
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
-});
-
-function onCancel(): void {
-  visible.value = false;
-  emits("cancel");
-}
 
 async function share(): Promise<void> {
   loadShare.value = true;

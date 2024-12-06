@@ -1,9 +1,9 @@
 <template>
-  <TOverlay v-model="visible" :to-click="onCancel" blur-val="20px" hide>
+  <TOverlay v-model="visible">
     <div class="toc-box">
       <div class="box-div">
         <div class="toc-top">
-          <TItemBox :model-value="getBoxData()" />
+          <TItemBox :model-value="boxData" />
           <div class="toc-material-grid">
             <TibCalendarMaterial
               v-for="(item, index) in itemVal.materials"
@@ -31,76 +31,47 @@ import { useRouter } from "vue-router";
 
 import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
 import TOverlay from "../app/t-overlay.vue";
+import showSnackbar from "../func/snackbar.js";
 
 import TibCalendarMaterial from "./ph-calendar-material.vue";
 
-interface ToCalendarProps {
+type ToCalendarProps = {
   modelValue: boolean;
   dataType: "weapon" | "avatar";
   dataVal: TGApp.App.Calendar.Item;
-}
+};
+type ToCalendarEmits = (e: "update:modelValue", v: boolean) => void;
 
-interface ToCalendarEmits {
-  (e: "update:modelValue", value: boolean): void;
-
-  (e: "cancel"): void;
-}
-
-const emits = defineEmits<ToCalendarEmits>();
 const props = defineProps<ToCalendarProps>();
-
+const emits = defineEmits<ToCalendarEmits>();
 const router = useRouter();
-
-const visible = computed({
+const visible = computed<boolean>({
   get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
+  set: (v) => emits("update:modelValue", v),
 });
 const itemVal = computed<TGApp.App.Calendar.Item>(() => props.dataVal);
-
-const onCancel = (): void => {
-  visible.value = false;
-  emits("cancel");
-};
+const boxData = computed<TItemBoxData>(() => {
+  return {
+    bg: itemVal.value.bg,
+    icon: itemVal.value.icon,
+    size: "100px",
+    height: "100px",
+    display: "inner",
+    clickable: false,
+    lt: props.dataType === "avatar" ? (itemVal.value.elementIcon ?? "") : itemVal.value.weaponIcon,
+    ltSize: "20px",
+    innerHeight: 25,
+    innerIcon: props.dataType === "avatar" ? itemVal.value.weaponIcon : undefined,
+    innerText: itemVal.value.name,
+  };
+});
 
 async function toDetail(item: TGApp.App.Calendar.Item): Promise<void> {
-  if (item.itemType === "character") {
-    await router.push(`/wiki/character/${item.id}`);
-  } else {
-    await router.push(`/wiki/weapon/${item.id}`);
+  if (!["character", "weapon"].includes(item.itemType)) {
+    showSnackbar.error("未知类型");
+    return;
   }
-}
-
-function getBoxData(): TItemBoxData {
-  if (props.dataType === "avatar") {
-    return {
-      bg: props.dataVal.bg,
-      icon: props.dataVal.icon,
-      size: "100px",
-      height: "100px",
-      display: "inner",
-      clickable: false,
-      lt: props.dataVal.elementIcon ?? "",
-      ltSize: "20px",
-      innerHeight: 25,
-      innerIcon: props.dataVal.weaponIcon,
-      innerText: props.dataVal.name,
-    };
-  } else {
-    return {
-      bg: props.dataVal.bg,
-      icon: props.dataVal.icon,
-      size: "100px",
-      height: "100px",
-      display: "inner",
-      clickable: false,
-      lt: props.dataVal.weaponIcon,
-      ltSize: "20px",
-      innerHeight: 25,
-      innerText: props.dataVal.name,
-    };
-  }
+  await router.push(`/wiki/${item.itemType}/${item.id}`);
 }
 </script>
 <style lang="css" scoped>

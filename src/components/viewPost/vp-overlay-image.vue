@@ -1,7 +1,7 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="10px">
+  <TOverlay v-model="visible" blur-val="10px">
     <div class="tpoi-box">
-      <div :class="isOriSize ? 'tpoi-top-ori' : 'tpoi-top'">
+      <div :class="{ 'tpoi-top-ori': isOriSize, 'tpoi-top': !isOriSize }">
         <img :src="props.image.insert.image" alt="图片" @click="resizeImg" />
       </div>
       <div class="tpoi-bottom">
@@ -16,7 +16,7 @@
           <v-icon @click="setBlackBg" title="切换背景色">mdi-format-color-fill</v-icon>
           <v-icon @click="onCopy" title="复制到剪贴板">mdi-content-copy</v-icon>
           <v-icon @click="onDownload" title="下载到本地">mdi-download</v-icon>
-          <v-icon @click="onCancel" title="关闭浮窗">mdi-close</v-icon>
+          <v-icon @click="visible = false" title="关闭浮窗">mdi-close</v-icon>
         </div>
       </div>
     </div>
@@ -32,49 +32,34 @@ import showSnackbar from "../func/snackbar.js";
 
 import { TpImage } from "./tp-image.vue";
 
-interface TpoImageProps {
-  image: TpImage;
-  modelValue: boolean;
-}
-
-type TpoImageEmits = {
-  (e: "update:modelValue", v: boolean): void;
-};
-
+type TpoImageProps = { image: TpImage; modelValue: boolean };
+type TpoImageEmits = (e: "update:modelValue", v: boolean) => void;
 const props = defineProps<TpoImageProps>();
 const emits = defineEmits<TpoImageEmits>();
 const buffer = ref<Uint8Array | null>(null);
-const bgMode = ref(0); // 0: transparent, 1: black, 2: white
-const isOriSize = ref(false);
-
-const visible = computed({
+const bgMode = ref<number>(0); // 0: transparent, 1: black, 2: white
+const isOriSize = ref<boolean>(false);
+const visible = computed<boolean>({
   get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
+  set: (v) => emits("update:modelValue", v),
 });
 const bg = computed(() => {
   if (bgMode.value === 1) return "black";
   if (bgMode.value === 2) return "white";
   return "transparent";
 });
-
-const format = computed(() => {
+const format = computed<string>(() => {
   if (props.image.attributes?.ext) return props.image.attributes.ext;
   const imageFormat = props.image.insert.image.split(".").pop();
   if (imageFormat !== undefined) return imageFormat;
   return "png";
 });
 
-function onCancel() {
-  visible.value = false;
-}
-
-function resizeImg() {
+function resizeImg(): void {
   isOriSize.value = !isOriSize.value;
 }
 
-function setBlackBg() {
+function setBlackBg(): void {
   bgMode.value = (bgMode.value + 1) % 3;
   const bgLabelList = ["透明", "黑色", "白色"];
   showSnackbar.success(`背景已切换为${bgLabelList[bgMode.value]}`);
@@ -92,7 +77,7 @@ async function onCopy(): Promise<void> {
   showSnackbar.success(`图片已复制到剪贴板，大小：${size}`);
 }
 
-async function onDownload() {
+async function onDownload(): Promise<void> {
   const image = props.image.insert.image;
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
   const size = bytesToSize(buffer.value.byteLength);

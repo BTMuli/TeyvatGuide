@@ -1,18 +1,18 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+  <TOverlay v-model="visible">
     <div v-if="props.data" class="ton-container">
       <slot name="left"></slot>
       <div class="ton-box">
         <img alt="bg" class="ton-bg" v-if="props.data" :src="props.data.profile" />
         <div class="ton-content">
           <span>{{ props.data.name }}</span>
-          <span>{{ parseNamecard(props.data.desc) }}</span>
+          <span>{{ parseNameCard(props.data.desc) }}</span>
           <span>获取途径：{{ props.data.source }}</span>
         </div>
         <div class="ton-type">{{ getType }}</div>
         <v-btn
           class="ton-share"
-          @click="shareNamecard"
+          @click="shareNameCard"
           variant="outlined"
           :loading="loading"
           data-html2canvas-ignore
@@ -29,15 +29,11 @@
 import { computed, ref } from "vue";
 
 import { generateShareImg } from "../../utils/TGShare.js";
+import showSnackbar from "../func/snackbar.js";
 
 import TOverlay from "./t-overlay.vue";
 
-interface ToNamecardProps {
-  modelValue: boolean;
-  data?: TGApp.App.NameCard.Item;
-}
-
-enum ToNamecardTypeEnum {
+enum ToNameCardTypeEnum {
   other = 0,
   achievement = 1,
   role = 2,
@@ -46,55 +42,32 @@ enum ToNamecardTypeEnum {
   unknown = 5,
 }
 
-type ToNamecardTypeMap = {
-  [key in ToNamecardTypeEnum]: string;
+type ToNameCardTypeMap = { [key in ToNameCardTypeEnum]: string };
+type ToNameCardProps = { modelValue: boolean; data?: TGApp.App.NameCard.Item };
+type ToNameCardEmits = (e: "update:modelValue", v: boolean) => void;
+const props = defineProps<ToNameCardProps>();
+const emits = defineEmits<ToNameCardEmits>();
+const typeMap: ToNameCardTypeMap = {
+  0: "其他",
+  1: "成就",
+  2: "角色",
+  3: "纪行",
+  4: "活动",
+  5: "未知",
 };
-
-const typeMap: ToNamecardTypeMap = {
-  [ToNamecardTypeEnum.other]: "其他",
-  [ToNamecardTypeEnum.achievement]: "成就",
-  [ToNamecardTypeEnum.role]: "角色",
-  [ToNamecardTypeEnum.record]: "纪行",
-  [ToNamecardTypeEnum.activity]: "活动",
-  [ToNamecardTypeEnum.unknown]: "未知",
-};
-
-type ToNamecardEmits = (e: "update:modelValue", value: boolean) => void;
-
-const props = defineProps<ToNamecardProps>();
-
-const emits = defineEmits<ToNamecardEmits>();
-
 const loading = ref<boolean>(false);
-
-const getType = computed(() => {
-  if (!props.data) return typeMap[ToNamecardTypeEnum.unknown];
-  switch (props.data.type) {
-    case ToNamecardTypeEnum.achievement:
-      return typeMap[ToNamecardTypeEnum.achievement];
-    case ToNamecardTypeEnum.role:
-      return typeMap[ToNamecardTypeEnum.role];
-    case ToNamecardTypeEnum.record:
-      return typeMap[ToNamecardTypeEnum.record];
-    case ToNamecardTypeEnum.activity:
-      return typeMap[ToNamecardTypeEnum.activity];
-    default:
-      return typeMap[ToNamecardTypeEnum.other];
-  }
-});
-
-const visible = computed({
+const visible = computed<boolean>({
   get: () => props.modelValue,
-  set: (value) => {
-    emits("update:modelValue", value);
-  },
+  set: (v) => emits("update:modelValue", v),
+});
+const getType = computed<string>(() => {
+  if (!props.data) return typeMap[ToNameCardTypeEnum.unknown];
+  if (!(props.data.type satisfies ToNameCardTypeEnum)) return typeMap[5];
+  const type: ToNameCardTypeEnum = props.data.type;
+  return typeMap[type];
 });
 
-function onCancel() {
-  visible.value = false;
-}
-
-function parseNamecard(desc: string): string {
+function parseNameCard(desc: string): string {
   let array = [];
   if (desc.startsWith("名片纹饰。「") && desc.endsWith("」")) {
     array.push("名片纹饰。");
@@ -104,22 +77,19 @@ function parseNamecard(desc: string): string {
       for (const item of match) {
         if (item.length <= 34) {
           array.push(item);
-        } else {
-          array.push("「");
-          array.push(...parseDesc(item.slice(1, -1), true));
-          const maxLength = Math.max(...array.map((item) => item.length));
-          array.push("  ".repeat(maxLength - 4) + "」");
+          continue;
         }
+        array.push("「");
+        array.push(...parseDesc(item.slice(1, -1), true));
+        const maxLength = Math.max(...array.map((item) => item.length));
+        array.push("  ".repeat(maxLength - 4) + "」");
       }
     }
   } else {
     array.push("名片纹饰。");
     const content = desc.slice(5);
-    if (content.length <= 32) {
-      array.push(content);
-    } else {
-      array.push(...parseDesc(content));
-    }
+    if (content.length <= 32) array.push(content);
+    else array.push(...parseDesc(content));
   }
   const res = array.join("\n");
   if (!res.endsWith("\n")) return res + "\n";
@@ -136,31 +106,31 @@ function parseDesc(desc: string, inQuote: boolean = false): string[] {
     res = res.replace("时候，", "时候，\n");
     res = res.replace("。\n」", "。」");
   }
-  if (!desc.includes("！」")) {
-    res = res.replace(/！/g, "！\n");
-  }
+  if (!desc.includes("！」")) res = res.replace(/！/g, "！\n");
   res = res.replace(/…/g, "…\n");
   const match = res.split("\n");
   let array: string[] = [];
   for (const item of match) {
     if (item.length > 0 && item.length <= 32) {
       array.push(item);
-    } else {
-      const match2 = item.replace(/，/g, "，\n").split("\n");
-      for (const item2 of match2) {
-        if (item2.length > 0) array.push(item2);
-      }
+      continue;
     }
+    const match2 = item.replace(/，/g, "，\n").split("\n");
+    match2.map((i) => (i.length > 0 ? array.push(i) : null));
   }
   if (inQuote) array = array.map((item) => `  ${item}`);
   return array;
 }
 
-async function shareNamecard(): Promise<void> {
-  const namecardBox = <HTMLElement>document.querySelector(".ton-box");
+async function shareNameCard(): Promise<void> {
+  const nameCardBox = document.querySelector<HTMLElement>(".ton-box");
+  if (nameCardBox === null) {
+    showSnackbar.error("未找到名片内容");
+    return;
+  }
   const fileName = `【${getType.value}名片】-${props.data?.name}`;
   loading.value = true;
-  await generateShareImg(fileName, namecardBox);
+  await generateShareImg(fileName, nameCardBox);
   loading.value = false;
 }
 </script>

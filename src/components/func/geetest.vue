@@ -15,7 +15,7 @@
   </transition>
 </template>
 <script setup lang="ts">
-import { ref, watch, useTemplateRef } from "vue";
+import { ref, useTemplateRef, watch } from "vue";
 
 const show = ref<boolean>(false);
 const showOuter = ref<boolean>(false);
@@ -36,11 +36,15 @@ watch(
   },
 );
 
+declare function initGeetest(
+  params: TGApp.Plugins.Mys.Geetest.InitGeetestParams,
+  callback: (captchaObj: TGApp.Plugins.Mys.Geetest.GeetestCaptcha) => void,
+): void;
+
 async function displayBox(
   props: TGApp.Plugins.Mys.Geetest.reqResp,
 ): Promise<TGApp.Plugins.Mys.Geetest.validateResp | false> {
   return await new Promise<TGApp.Plugins.Mys.Geetest.validateResp>((resolve) => {
-    // eslint-disable-next-line no-undef
     initGeetest(
       {
         gt: props.gt,

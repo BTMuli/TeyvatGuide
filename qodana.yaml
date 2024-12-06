@@ -25,3 +25,4 @@ profile:
 linter: jetbrains/qodana-js:latest
 include:
   - name: CheckDependencyLicenses
+

@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" hide :to-click="onCancel" blur-val="20px">
+  <TOverlay v-model="visible">
     <div v-if="props.data" class="twom-container">
       <slot name="left"></slot>
       <div class="twom-box">
@@ -32,37 +32,31 @@ import { computed } from "vue";
 import { generateShareImg } from "../../utils/TGShare.js";
 import { parseHtmlText } from "../../utils/toolFunc.js";
 import TOverlay from "../app/t-overlay.vue";
+import showSnackbar from "../func/snackbar.js";
 
 import TwoConvert from "./two-convert.vue";
 import TwoSource from "./two-source.vue";
 
-interface TwoMaterialProps {
-  modelValue: boolean;
-  data: TGApp.App.Material.WikiItem;
-}
-
-type TwoMaterialEmits = (e: "update:modelValue", value: boolean) => void;
-
+type TwoMaterialProps = { modelValue: boolean; data: TGApp.App.Material.WikiItem };
+type TwoMaterialEmits = (e: "update:modelValue", v: boolean) => void;
 const props = defineProps<TwoMaterialProps>();
 const emits = defineEmits<TwoMaterialEmits>();
-
 const visible = computed<boolean>({
   get: () => props.modelValue,
-  set: (val) => emits("update:modelValue", val),
+  set: (v) => emits("update:modelValue", v),
 });
 const iconBg = computed<string>(() => {
   if (!props.data) return "url('/icon/bg/0-BGC.webp')";
   return `url('/icon/bg/${props.data.star}-BGC.webp')`;
 });
-
 const version = await getVersion();
 
-function onCancel() {
-  visible.value = false;
-}
-
 async function shareMaterial(): Promise<void> {
-  const element = <HTMLElement>document.querySelector(".twom-box");
+  const element = document.querySelector<HTMLElement>(".twom-box");
+  if (element === null) {
+    showSnackbar.error("未获取到分享内容");
+    return;
+  }
   const fileName = `material_${props.data.id}`;
   await generateShareImg(fileName, element, 1.2, true);
 }

@@ -25,7 +25,7 @@ import VpOverlayCollect from "./vp-overlay-collect.vue";
 
 const isCollected = ref(false);
 const collect = ref<Array<TGApp.Sqlite.UserCollection.UFMap>>([]);
-const showEdit = ref(false);
+const showEdit = ref<boolean>(false);
 
 interface TbCollectProps {
   modelValue: number;

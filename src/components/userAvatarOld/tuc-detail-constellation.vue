@@ -9,11 +9,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-interface TucDetailConstellationProps {
-  modelValue: TGApp.Game.Avatar.Constellation;
-}
-
-defineProps<TucDetailConstellationProps>();
+defineProps<{ modelValue: TGApp.Game.Avatar.Constellation }>();
 </script>
 <style lang="css" scoped>
 .tuc-dc-box {

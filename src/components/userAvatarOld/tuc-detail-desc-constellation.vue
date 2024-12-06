@@ -4,22 +4,22 @@
       <span>命之座</span>
     </template>
     <template #content>
-      <TucDetailConstellation :model-value="props.modelValue" />
+      <TucDetailConstellation :model-value="modelValue" />
       <div class="tuc-ddc-content">
         <div class="tuc-ddc-top">
-          {{ props.modelValue.name }}
+          {{ modelValue.name }}
         </div>
         <div class="tuc-ddc-bottom">
           <span>命之座</span>
           <span>第</span>
-          <span>{{ props.modelValue.pos }}</span>
+          <span>{{ modelValue.pos }}</span>
           <span>层</span>
         </div>
       </div>
     </template>
     <template #desc>
       <!-- eslint-disable-next-line vue/no-v-html -->
-      <span v-html="parseHtmlText(props.modelValue.effect)"></span>
+      <span v-html="parseHtmlText(modelValue.effect)"></span>
     </template>
   </TucDetailDesc>
 </template>
@@ -29,11 +29,7 @@ import { parseHtmlText } from "../../utils/toolFunc.js";
 import TucDetailConstellation from "./tuc-detail-constellation.vue";
 import TucDetailDesc from "./tuc-detail-desc.vue";
 
-interface TucDetailDescConstellationProps {
-  modelValue: TGApp.Game.Avatar.Constellation;
-}
-
-const props = defineProps<TucDetailDescConstellationProps>();
+defineProps<{ modelValue: TGApp.Game.Avatar.Constellation }>();
 </script>
 <style lang="css" scoped>
 .tuc-ddc-content {

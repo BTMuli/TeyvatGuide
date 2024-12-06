@@ -6,19 +6,19 @@
       label="搜索"
       :hide-details="true"
       variant="outlined"
-      @click:prepend-inner="searchNamecard"
-      @keyup.enter="searchNamecard"
+      @click:prepend-inner="searchNameCard()"
+      @keyup.enter="searchNameCard()"
     />
     <div class="tw-nc-list">
       <v-virtual-scroll :items="sortNameCardsData" :item-height="80">
         <template #default="{ item }">
-          <TopNamecard :data="item" @selected="toNameCard" />
+          <TopNameCard :data="item" @selected="showNameCard(item)" />
           <div style="height: 10px" />
         </template>
       </v-virtual-scroll>
     </div>
   </div>
-  <ToNamecard v-model="visible" :data="curNameCard">
+  <ToNameCard v-model="visible" :data="curNameCard">
     <template #left>
       <div class="card-arrow left" @click="switchCard(false)">
         <img src="../../assets/icons/arrow-right.svg" alt="right" />
@@ -29,28 +29,26 @@
         <img src="../../assets/icons/arrow-right.svg" alt="right" />
       </div>
     </template>
-  </ToNamecard>
+  </ToNameCard>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, shallowRef } from "vue";
 
-import ToNamecard from "../../components/app/to-namecard.vue";
-import TopNamecard from "../../components/app/top-namecard.vue";
+import ToNameCard from "../../components/app/to-namecard.vue";
+import TopNameCard from "../../components/app/top-namecard.vue";
 import showSnackbar from "../../components/func/snackbar.js";
 import { AppNameCardsData } from "../../data/index.js";
 
-const curNameCard = ref<TGApp.App.NameCard.Item>();
-const sortNameCardsData = ref<TGApp.App.NameCard.Item[]>([]);
-const curIndex = ref(0);
-const total = ref(0);
-const visible = ref(false);
-const search = ref("");
+const curNameCard = shallowRef<TGApp.App.NameCard.Item>();
+const sortNameCardsData = shallowRef<TGApp.App.NameCard.Item[]>([]);
+const curIndex = ref<number>(0);
+const total = ref<number>(0);
+const visible = ref<boolean>(false);
+const search = ref<string>();
 
-onMounted(() => {
-  sortData(AppNameCardsData);
-});
+onMounted(() => sortData(AppNameCardsData));
 
-function sortData(data: TGApp.App.NameCard.Item[]) {
+function sortData(data: TGApp.App.NameCard.Item[]): void {
   sortNameCardsData.value = data.sort((a, b) => a.type - b.type || a.index - b.index);
   curIndex.value = 0;
   total.value = sortNameCardsData.value.length;
@@ -58,48 +56,45 @@ function sortData(data: TGApp.App.NameCard.Item[]) {
   showSnackbar.success(`共搜索到 ${sortNameCardsData.value.length} 个结果`);
 }
 
-function toNameCard(item: TGApp.App.NameCard.Item) {
+function showNameCard(item: TGApp.App.NameCard.Item): void {
   curNameCard.value = item;
   curIndex.value = sortNameCardsData.value.findIndex((i) => i.name === item.name);
   visible.value = true;
 }
 
-function switchCard(isNext: boolean) {
-  if (isNext) {
-    if (curIndex.value === total.value - 1) {
-      showSnackbar.warn("已经是最后一个了");
-      return;
-    }
-    curIndex.value++;
-  } else {
-    if (curIndex.value === 0) {
-      showSnackbar.warn("已经是第一个了");
-      return;
-    }
-    curIndex.value--;
+function switchCard(isNext: boolean): void {
+  if (isNext && curIndex.value === total.value - 1) {
+    showSnackbar.warn("已经是最后一个了");
+    return;
   }
+  if (!isNext && curIndex.value === 0) {
+    showSnackbar.warn("已经是第一个了");
+    return;
+  }
+  curIndex.value += isNext ? 1 : -1;
   curNameCard.value = sortNameCardsData.value[curIndex.value];
 }
 
-function searchNamecard() {
-  if (!search.value) {
+function searchNameCard(): void {
+  if (search.value === undefined) {
     sortData(AppNameCardsData);
-  } else if (search.value === "") {
+    return;
+  }
+  if (search.value === "") {
     if (sortNameCardsData.value.length === AppNameCardsData.length) {
       showSnackbar.warn("请先输入搜索内容");
-    } else {
-      sortData(AppNameCardsData);
+      return;
     }
-  } else {
-    const searchResult = AppNameCardsData.filter((item) => {
-      return (
-        item.name.includes(search.value) ||
-        item.desc.includes(search.value) ||
-        item.source.includes(search.value)
-      );
-    });
-    sortData(searchResult);
+    sortData(AppNameCardsData);
+    return;
   }
+  const searchResult = AppNameCardsData.filter(
+    (item) =>
+      item.name.includes(search.value!) ||
+      item.desc.includes(search.value!) ||
+      item.source.includes(search.value!),
+  );
+  sortData(searchResult);
 }
 </script>
 <style lang="css" scoped>

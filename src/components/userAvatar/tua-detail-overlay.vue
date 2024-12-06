@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" :hide="true" blur-val="5px" :to-click="onCancel">
+  <TOverlay v-model="visible" blur-val="5px">
     <div class="tdo-box">
       <div class="tdo-avatars-container">
         <v-tabs
@@ -12,7 +12,7 @@
             v-for="avatar in avatars"
             :key="avatar.avatar.id"
             :value="avatar.avatar.id"
-            @click="onAvatarClick(avatar)"
+            @click="emits('toAvatar', avatar)"
             :title="avatar.avatar.name"
           >
             <div class="tdo-avatar" :style="getAvatarBg(avatar)">
@@ -52,34 +52,29 @@ import TucDetailOld from "../userAvatarOld/tuc-detail-old.vue";
 
 import TuaDetailCard from "./tua-detail-card.vue";
 
-interface TuaDetailOverlayProps {
+type TuaDetailOverlayProps = {
   modelValue: boolean;
   avatar: TGApp.Sqlite.Character.UserRole;
   mode: "classic" | "card" | "dev";
   avatars: TGApp.Sqlite.Character.UserRole[];
-}
-
-interface TuaDetailOverlayEmits {
-  (e: "update:modelValue", val: boolean): void;
-
+};
+type TuaDetailOverlayEmits = {
+  (e: "update:modelValue", v: boolean): void;
   (e: "update:mode", val: "classic" | "card" | "dev"): void;
-
   (e: "toNext", val: boolean): void;
-
   (e: "toAvatar", val: TGApp.Sqlite.Character.UserRole): void;
-}
+};
 
 const props = defineProps<TuaDetailOverlayProps>();
 const emits = defineEmits<TuaDetailOverlayEmits>();
 const avatarTab = ref<number>();
-
 const visible = computed<boolean>({
   get: () => props.modelValue,
-  set: (val) => emits("update:modelValue", val),
+  set: (v) => emits("update:modelValue", v),
 });
 const modeTab = computed<"classic" | "card" | "dev">({
   get: () => props.mode,
-  set: (val) => emits("update:mode", val),
+  set: (v) => emits("update:mode", v),
 });
 
 const avatarsWidth = computed<string>(() => {
@@ -102,17 +97,9 @@ watch(
   },
 );
 
-function onCancel(): void {
-  visible.value = false;
-}
-
 function handleClick(pos: "left" | "right"): void {
   if (pos === "left") emits("toNext", false);
   else emits("toNext", true);
-}
-
-function onAvatarClick(avatar: TGApp.Sqlite.Character.UserRole): void {
-  emits("toAvatar", avatar);
 }
 
 function getAvatarBg(avatar: TGApp.Sqlite.Character.UserRole): string {

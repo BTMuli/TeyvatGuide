@@ -34,13 +34,11 @@ import TGLogger from "./utils/TGLogger.js";
 import OtherApi from "./web/request/otherReq.js";
 
 const appStore = useAppStore();
-const userStore = storeToRefs(useUserStore());
+const router = useRouter();
+const { uid, briefInfo, account, cookie } = storeToRefs(useUserStore());
 const isMain = ref<boolean>(false);
 const theme = ref<string>(appStore.theme);
-const router = useRouter();
-const vuetifyTheme = computed(() => {
-  return appStore.theme === "dark" ? "dark" : "light";
-});
+const vuetifyTheme = computed<string>(() => (appStore.theme === "dark" ? "dark" : "light"));
 
 let themeListener: UnlistenFn | null = null;
 let urlListener: UnlistenFn | null = null;
@@ -77,7 +75,7 @@ async function checkResize(): Promise<void> {
     ),
   );
   await windowCur.setZoom((1 / screen.scaleFactor) * Math.min(widthScale, heightScale));
-  await windowCur.center();
+  await windowCur.setFocus();
   return;
 }
 
@@ -161,26 +159,26 @@ async function checkUserLoad(): Promise<void> {
   }
   if (!appStore.isLogin) appStore.isLogin = true;
   // 然后获取最近的UID
-  if (userStore.uid.value === undefined || !uidDB.includes(userStore.uid.value)) {
-    userStore.uid.value = uidDB[0];
+  if (uid.value === undefined || !uidDB.includes(uid.value)) {
+    uid.value = uidDB[0];
   }
-  const curAccount = await TSUserAccount.account.getAccount(userStore.uid.value);
+  const curAccount = await TSUserAccount.account.getAccount(uid.value);
   if (curAccount === false) {
-    showSnackbar.error(`未获取到${userStore.uid.value}的账号数据！`);
-    await TGLogger.Error(`[App][listenOnInit] 获取${userStore.uid.value}账号数据失败`);
+    showSnackbar.error(`未获取到${uid.value}的账号数据！`);
+    await TGLogger.Error(`[App][listenOnInit] 获取${uid.value}账号数据失败`);
     await new Promise((resolve) => setTimeout(resolve, 1000));
   } else {
-    userStore.briefInfo.value = curAccount.brief;
-    userStore.cookie.value = curAccount.cookie;
+    briefInfo.value = curAccount.brief;
+    cookie.value = curAccount.cookie;
   }
-  const curGameAccount = await TSUserAccount.game.getCurAccount(userStore.uid.value);
-  if (curGameAccount === false) {
-    showSnackbar.error(`未获取到${userStore.uid.value}的游戏数据！`);
-    await TGLogger.Error(`[App][listenOnInit] 获取${userStore.uid.value}游戏数据失败`);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  } else {
-    userStore.account.value = curGameAccount;
+  const curGameAccount = await TSUserAccount.game.getCurAccount(uid.value);
+  if (curGameAccount !== false) {
+    account.value = curGameAccount;
+    return;
   }
+  showSnackbar.error(`未获取到${uid.value}的游戏数据！`);
+  await TGLogger.Error(`[App][listenOnInit] 获取${uid.value}游戏数据失败`);
+  await new Promise<void>((resolve) => setTimeout(resolve, 1000));
 }
 
 async function getDeepLink(): Promise<UnlistenFn> {

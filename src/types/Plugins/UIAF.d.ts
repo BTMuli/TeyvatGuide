@@ -57,17 +57,4 @@ declare namespace TGApp.Plugins.UIAF {
     current: number;
     status: number;
   }
-
-  /**
-   * @interface Backup
-   * @description 数据备份时的格式，用于标识不同存档
-   * @since Beta v0.6.0
-   * @property {number} uid - 存档UID
-   * @property {Achievement[]} data - 存档数据
-   * @returns Backup
-   */
-  interface Backup {
-    uid: number;
-    data: Achievement[];
-  }
 }

@@ -107,12 +107,12 @@ import TGConstant from "../web/constant/TGConstant.js";
 
 const appVersion = await app.getVersion();
 const postId = Number(useRoute().params.post_id);
-const renderPost = shallowRef<TGApp.Plugins.Mys.SctPost.Base[]>([]);
-const postData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
 const showCollection = ref<boolean>(false);
 const shareTime = ref<number>(Math.floor(Date.now() / 1000));
 // eslint-disable-next-line no-undef
 const shareTimeTimer = ref<NodeJS.Timeout | undefined>(undefined);
+const renderPost = shallowRef<TGApp.Plugins.Mys.SctPost.Base[]>([]);
+const postData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
 
 function getGameIcon(gameId: number): string {
   const find = TGConstant.BBS.CHANNELS.find((item) => item.gid === gameId.toString());
