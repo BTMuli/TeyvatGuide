@@ -66,9 +66,7 @@ export async function createPost(
   }
   const postPath = `/post_detail/${postId}`;
   await createTGWindow(postPath, "Sub_window", postTitle, 960, 720, false, false);
-  TGLogger.Info(`[createPost][${postId}] 打开帖子`).catch((err) => {
-    console.error(err);
-  });
+  await TGLogger.Info(`[createPost][${postId}] 打开帖子`);
 }
 
 /**

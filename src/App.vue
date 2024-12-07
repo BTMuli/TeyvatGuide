@@ -3,9 +3,7 @@
     <TSidebar v-if="isMain" />
     <v-main>
       <v-container :fluid="true" class="app-container">
-        <Suspense>
-          <router-view />
-        </Suspense>
+        <router-view />
       </v-container>
     </v-main>
     <TBackTop />
@@ -13,9 +11,10 @@
 </template>
 
 <script lang="ts" setup>
-import { app, core, event, webviewWindow, window as TauriWindow } from "@tauri-apps/api";
+import { app, core, event, webviewWindow } from "@tauri-apps/api";
 import { PhysicalSize } from "@tauri-apps/api/dpi";
 import { Event, UnlistenFn } from "@tauri-apps/api/event";
+import { currentMonitor, getCurrentWindow } from "@tauri-apps/api/window";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
@@ -33,18 +32,17 @@ import { getBuildTime } from "./utils/TGBuild.js";
 import TGLogger from "./utils/TGLogger.js";
 import OtherApi from "./web/request/otherReq.js";
 
-const appStore = useAppStore();
 const router = useRouter();
+const { theme, needResize, deviceInfo, isLogin, userDir, buildTime } = storeToRefs(useAppStore());
 const { uid, briefInfo, account, cookie } = storeToRefs(useUserStore());
 const isMain = ref<boolean>(false);
-const theme = ref<string>(appStore.theme);
-const vuetifyTheme = computed<string>(() => (appStore.theme === "dark" ? "dark" : "light"));
+const vuetifyTheme = computed<string>(() => (theme.value === "dark" ? "dark" : "light"));
 
 let themeListener: UnlistenFn | null = null;
 let urlListener: UnlistenFn | null = null;
 
 onBeforeMount(async () => {
-  const win = webviewWindow.getCurrentWebviewWindow();
+  const win = getCurrentWindow();
   isMain.value = win.label === "TeyvatGuide";
   if (isMain.value) {
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
@@ -53,17 +51,28 @@ onBeforeMount(async () => {
     await core.invoke("init_app");
     urlListener = await getDeepLink();
   }
-  if (appStore.needResize !== "false") await checkResize();
-  await win.show();
+  if (needResize.value !== "false") await checkResize();
+  document.documentElement.className = theme.value;
+});
+
+onMounted(async () => {
+  await getCurrentWindow().show();
+  themeListener = await event.listen("readTheme", async (e: Event<string>) => {
+    const themeGet = e.payload;
+    if (theme.value !== themeGet) {
+      theme.value = themeGet;
+      document.documentElement.className = theme.value;
+    }
+  });
 });
 
 async function checkResize(): Promise<void> {
-  const screen = await TauriWindow.currentMonitor();
+  const screen = await currentMonitor();
   if (screen === null) {
     showSnackbar.error("获取屏幕信息失败！", 3000);
     return;
   }
-  const windowCur = await webviewWindow.getCurrentWebviewWindow();
+  const windowCur = webviewWindow.getCurrentWebviewWindow();
   if (await windowCur.isMaximized()) return;
   const designSize = getSize(windowCur.label);
   const widthScale = screen.size.width / 1920;
@@ -84,17 +93,6 @@ function getSize(label: string): PhysicalSize {
   if (label === "Sub_window" || label === "Dev_JSON") return new PhysicalSize(960, 720);
   return new PhysicalSize(1280, 720);
 }
-
-onMounted(async () => {
-  document.documentElement.className = theme.value;
-  themeListener = await event.listen("readTheme", async (e: Event<string>) => {
-    const themeGet = e.payload;
-    if (theme.value !== themeGet) {
-      theme.value = themeGet;
-      document.documentElement.className = theme.value;
-    }
-  });
-});
 
 // 启动后只执行一次的监听
 function listenOnInit(): void {
@@ -129,35 +127,34 @@ async function checkAppLoad(): Promise<void> {
 // 检测 deviceFp
 async function checkDeviceFp(): Promise<void> {
   const appData = await TGSqlite.getAppData();
-  const deviceLocal = appStore.deviceInfo;
   const deviceFind = appData.find((item) => item.key === "deviceInfo");
   if (typeof deviceFind === "undefined") {
-    if (deviceLocal.device_fp === "0000000000000") {
-      appStore.deviceInfo = await OtherApi.fp(appStore.deviceInfo);
+    if (deviceInfo.value.device_fp === "0000000000000") {
+      deviceInfo.value = await OtherApi.fp(deviceInfo.value);
     }
-    await TGSqlite.saveAppData("deviceInfo", JSON.stringify(deviceLocal));
+    await TGSqlite.saveAppData("deviceInfo", JSON.stringify(deviceInfo.value));
     return;
   }
-  if (JSON.parse(deviceFind.value) !== deviceLocal) {
-    appStore.deviceInfo = JSON.parse(deviceFind.value);
+  if (JSON.parse(deviceFind.value) !== deviceInfo.value) {
+    deviceInfo.value = JSON.parse(deviceFind.value);
   }
 }
 
 async function checkUserLoad(): Promise<void> {
   // 检测用户数据目录
   const appData = await TGSqlite.getAppData();
-  const userDir = appData.find((item) => item.key === "userDir")?.value;
-  if (typeof userDir === "undefined") await TGSqlite.saveAppData("userDir", appStore.userDir);
-  else if (userDir !== appStore.userDir) appStore.userDir = userDir;
-  await mkdir(appStore.userDir, { recursive: true });
+  const userDirGet = appData.find((item) => item.key === "userDir")?.value;
+  if (typeof userDirGet === "undefined") await TGSqlite.saveAppData("userDir", userDir.value);
+  else if (userDirGet !== userDir.value) userDir.value = userDirGet;
+  await mkdir(userDir.value, { recursive: true });
   // 检测用户数据
   const uidDB = await TSUserAccount.account.getAllUid();
-  if (uidDB.length === 0 && appStore.isLogin) {
+  if (uidDB.length === 0 && isLogin.value) {
     showSnackbar.warn("未检测到可用UID，请重新登录！");
-    appStore.isLogin = false;
+    isLogin.value = false;
     return;
   }
-  if (!appStore.isLogin) appStore.isLogin = true;
+  if (!isLogin.value) isLogin.value = true;
   // 然后获取最近的UID
   if (uid.value === undefined || !uidDB.includes(uid.value)) {
     uid.value = uidDB[0];
@@ -252,7 +249,7 @@ async function checkUpdate(): Promise<void> {
       showSnackbar.error("请到设置页手动更新数据库！", 3000);
       return;
     }
-    appStore.buildTime = getBuildTime();
+    buildTime.value = getBuildTime();
     await TGSqlite.update();
     showSnackbar.success("数据库已更新！", 3000);
     window.open("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");

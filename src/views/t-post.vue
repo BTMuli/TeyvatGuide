@@ -105,7 +105,7 @@ import TGLogger from "../utils/TGLogger.js";
 import { createTGWindow } from "../utils/TGWindow.js";
 import TGConstant from "../web/constant/TGConstant.js";
 
-const appVersion = await app.getVersion();
+const appVersion = ref<string>();
 const postId = Number(useRoute().params.post_id);
 const showCollection = ref<boolean>(false);
 const shareTime = ref<number>(Math.floor(Date.now() / 1000));
@@ -121,6 +121,7 @@ function getGameIcon(gameId: number): string {
 }
 
 onMounted(async () => {
+  appVersion.value = await app.getVersion();
   showLoading.start(`正在加载帖子数据...`);
   // 检查数据
   if (!postId) {
