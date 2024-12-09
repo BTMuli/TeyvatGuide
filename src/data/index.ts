@@ -18,7 +18,7 @@ import arcBirDraw from "./archive/birth_draw.json" assert { type: "json" };
 import arcBirRole from "./archive/birth_role.json" assert { type: "json" };
 import schemaUiaf from "./schema/uiaf-schema.json" assert { type: "json" };
 import schemaUigf from "./schema/uigf-schema.json" assert { type: "json" };
-import scheamUigf4 from "./schema/uigf4-schema.json" assert { type: "json" };
+import schemaUigf4 from "./schema/uigf4-schema.json" assert { type: "json" };
 import wikiCharacter from "./WIKI/character.json" assert { type: "json" };
 import wikiMaterial from "./WIKI/material.json" assert { type: "json" };
 import wikiWeapon from "./WIKI/weapon.json" assert { type: "json" };
@@ -34,7 +34,7 @@ export const AppWeaponData: TGApp.App.Weapon.WikiBriefInfo[] = weapon;
 // Schema
 export const UiafSchema: Schema = schemaUiaf;
 export const UigfSchema: Schema = schemaUigf;
-export const Uigf4Schema: Schema = scheamUigf4;
+export const Uigf4Schema: Schema = schemaUigf4;
 // Archive
 export const ArcBirCalendar: TGApp.Archive.Birth.CalendarData = arcBirCalendar;
 export const ArcBirDraw: TGApp.Archive.Birth.DrawItem[] = arcBirDraw;
