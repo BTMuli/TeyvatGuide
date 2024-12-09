@@ -75,7 +75,7 @@ declare namespace TGApp.Game.Combat {
     avatar_id: number;
     avatar_icon: string;
     value: string;
-    rarity: number;
+    rarity?: number;
   }
 
   /**
@@ -276,7 +276,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 战斗数据
    * @interface FightStatisic
-   * @since Beta v0.6.3
+   * @since Beta v0.6.5
    * @property {AvatarMini} max_defeat_avatar 击败最多敌人
    * @property {AvatarMini} max_damage_avatar 最高伤害输出
    * @property {AvatarMini} max_take_damage_avatar 最高承受伤害
@@ -287,10 +287,10 @@ declare namespace TGApp.Game.Combat {
    * @return FightStatisic
    */
   interface FightStatisic {
-    max_defeat_avatar: AvatarMini;
-    max_damage_avatar: AvatarMini;
-    max_take_damage_avatar: AvatarMini;
-    total_coin_consumed: AvatarMini;
+    max_defeat_avatar: AvatarMini | null;
+    max_damage_avatar: AvatarMini | null;
+    max_take_damage_avatar: AvatarMini | null;
+    total_coin_consumed: AvatarMini | null;
     shortest_avatar_list: Array<AvatarMini>;
     total_use_time: number;
     is_show_battle_stats: boolean;

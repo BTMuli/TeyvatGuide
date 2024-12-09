@@ -76,7 +76,7 @@
           </div>
           <TSubLine>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</TSubLine>
           <TucOverview :data="item.stat" :fights="item.detail.fight_statisic" />
-          <TSubLine>使用角色</TSubLine>
+          <TSubLine>使用角色({{ item.detail.backup_avatars.length }}名)</TSubLine>
           <TucAvatars :model-value="item.detail.backup_avatars" />
           <TSubLine>详情</TSubLine>
           <div class="ucw-rounds">

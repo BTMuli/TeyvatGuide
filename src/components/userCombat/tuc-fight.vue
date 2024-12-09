@@ -3,13 +3,17 @@
     <div class="tucfi-label">
       <slot name="label">{{ props.label }}</slot>
     </div>
-    <div v-if="!Array.isArray(props.data)" class="tucfi-data">
+    <div v-if="props.data === null">
+      <span class="tucfi-data">暂无数据</span>
+    </div>
+    <div v-else-if="!Array.isArray(props.data)" class="tucfi-data">
       <TItembox :model-value="getBox()" />
     </div>
     <div class="tucfi-icons" v-else>
       <div v-for="(item, idx) in props.data" :key="idx" class="tucfi-icon">
         <TItembox :model-value="getBox2(item)" />
       </div>
+      <div v-if="props.data.length === 0" class="tucfi-data">暂无数据</div>
     </div>
   </div>
 </template>
@@ -18,7 +22,7 @@ import TItembox, { TItemBoxData } from "../app/t-item-box.vue";
 
 interface TucFightProps {
   label: string;
-  data: TGApp.Game.Combat.AvatarMini | TGApp.Game.Combat.AvatarMini[];
+  data: TGApp.Game.Combat.AvatarMini | TGApp.Game.Combat.AvatarMini[] | null;
 }
 
 const props = defineProps<TucFightProps>();
