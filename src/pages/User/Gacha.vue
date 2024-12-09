@@ -12,10 +12,8 @@
       <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(true)">
         全量刷新
       </v-btn>
-      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn(false)">
-        导入
-      </v-btn>
-      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="handleImportBtn(true)">
+      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="importUigf()">导入</v-btn>
+      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="importUigf4()">
         导入(v4)
       </v-btn>
       <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="exportUigf()">导出</v-btn>
@@ -47,6 +45,7 @@
       </v-window-item>
     </v-window>
   </div>
+  <UgoUid v-model="ovShow" :mode="ovMode" />
 </template>
 <script lang="ts" setup>
 import { path } from "@tauri-apps/api";
@@ -61,17 +60,12 @@ import GroEcharts from "../../components/userGacha/gro-echarts.vue";
 import GroHistory from "../../components/userGacha/gro-history.vue";
 import GroOverview from "../../components/userGacha/gro-overview.vue";
 import GroTable from "../../components/userGacha/gro-table.vue";
+import UgoUid from "../../components/userGacha/ugo-uid.vue";
 import { AppCharacterData, AppWeaponData } from "../../data/index.js";
 import TSUserGacha from "../../plugins/Sqlite/modules/userGacha.js";
 import { useUserStore } from "../../store/modules/user.js";
 import TGLogger from "../../utils/TGLogger.js";
-import {
-  exportUigf4Data,
-  exportUigfData,
-  readUigf4Data,
-  readUigfData,
-  verifyUigfData,
-} from "../../utils/UIGF.js";
+import { exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF.js";
 import Hk4eApi from "../../web/request/hk4eReq.js";
 import TakumiApi from "../../web/request/takumiReq.js";
 
@@ -85,6 +79,10 @@ const selectItem = ref<string[]>([]);
 const uidCur = ref<string>();
 const gachaListCur = ref<TGApp.Sqlite.GachaRecords.SingleTable[]>([]);
 const tab = ref<string>("overview");
+
+// overlay
+const ovShow = ref<boolean>(false);
+const ovMode = ref<"export" | "import">("import");
 
 // 监听 UID 变化
 watch(
@@ -243,9 +241,14 @@ async function refreshGachaPool(
   }
 }
 
-// 导入按钮点击事件
-async function handleImportBtn(isV4: boolean): Promise<void> {
-  await TGLogger.Info(`[UserGacha][handleImportBtn] 导入祈愿数据${isV4 ? "(v4)" : ""}`);
+// 导入 v4 版本的祈愿数据
+async function importUigf4(): Promise<void> {
+  ovMode.value = "import";
+  ovShow.value = true;
+}
+
+async function importUigf(): Promise<void> {
+  await TGLogger.Info(`[UserGacha][handleImportBtn] 导入祈愿数据`);
   const selectedFile = await open({
     multiple: false,
     title: "导入UIGF文件",
@@ -257,40 +260,9 @@ async function handleImportBtn(isV4: boolean): Promise<void> {
     showSnackbar.cancel("已取消文件选择");
     return;
   }
-  const check = await verifyUigfData(selectedFile, isV4);
+  const check = await verifyUigfData(selectedFile, false);
   if (!check) return;
-  if (isV4) await importUigf4(selectedFile);
-  else await importUigf(selectedFile);
-}
-
-// 导入 v4 版本的祈愿数据
-async function importUigf4(filePath: string): Promise<void> {
-  const remoteData = await readUigf4Data(filePath);
-  const uidCount = remoteData.hk4e.length;
-  const dataCount = remoteData.hk4e.reduce((acc, cur) => acc + cur.list.length, 0);
-  const importCheck = await showDialog.check(
-    "是否导入祈愿数据？",
-    `共 ${uidCount} 个 UID，${dataCount} 条数据`,
-  );
-  if (!importCheck) {
-    showSnackbar.cancel("已取消祈愿数据导入");
-    return;
-  }
-  showLoading.start("正在导入祈愿数据(v4)");
-  for (const account of remoteData.hk4e) {
-    showLoading.update("正在导入祈愿数据(v4)", `UID：${account.uid}`);
-    await TSUserGacha.mergeUIGF4(account);
-  }
-  showLoading.end();
-  showSnackbar.success(`成功导入 ${uidCount} 个 UID 的 ${dataCount} 条祈愿数据`);
-  await TGLogger.Info(
-    `[UserGacha][importUigf4] 成功导入 ${uidCount} 个 UID，${dataCount} 条祈愿数据`,
-  );
-  setTimeout(() => window.location.reload(), 1000);
-}
-
-async function importUigf(filePath: string): Promise<void> {
-  const remoteData = await readUigfData(filePath);
+  const remoteData = await readUigfData(selectedFile);
   const importCheck = await showDialog.check(
     "是否导入祈愿数据？",
     `UID：${remoteData.info.uid}，共 ${remoteData.list.length} 条数据`,
@@ -353,47 +325,13 @@ async function exportUigf(): Promise<void> {
 
 // 导出 UIGF v4 版本的祈愿数据
 async function exportUigf4(): Promise<void> {
-  if (!uidCur.value) return;
-  const exportCheck = await showDialog.check("确定导出UIGFv4格式的祈愿数据？");
-  if (!exportCheck) {
-    showSnackbar.cancel("已取消 UIGF v4 格式导出");
+  if (!uidCur.value) {
+    showSnackbar.error("未获取到 UID");
     return;
   }
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf4] 导出祈愿数据(v4)`);
-  // todo 单开一个overlay用于选取导出的UID
-  const exportAllCheck = await showDialog.check(
-    "是否导出所有 UID 的祈愿数据？",
-    "取消则只导出当前 UID 的祈愿数据",
-  );
-  if (exportAllCheck === undefined) {
-    showSnackbar.cancel("已取消 UIGF v4 格式导出");
-    return;
-  }
-  if (!exportAllCheck) {
-    const gachaList = await TSUserGacha.getGachaRecords(uidCur.value);
-    if (gachaList.length === 0) {
-      showSnackbar.error(`UID ${uidCur.value} 暂无祈愿数据`);
-      return;
-    }
-  }
-  const file = await save({
-    title: "选择导出祈愿数据的文件路径",
-    filters: [{ name: "UIGF JSON", extensions: ["json"] }],
-    defaultPath: `${await path.downloadDir()}${path.sep()}UIGF4.json`,
-  });
-  if (!file) {
-    showSnackbar.cancel("已取消文件保存");
-    return;
-  }
-  showLoading.start("正在导出祈愿数据", `路径：${file}`);
-  if (!exportAllCheck) {
-    await exportUigf4Data(file, uidCur.value);
-  } else {
-    await exportUigf4Data(file);
-  }
-  showLoading.end();
-  showSnackbar.success("祈愿数据已成功导出");
-  await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf4] 导出祈愿数据完成`);
+  ovMode.value = "export";
+  ovShow.value = true;
 }
 
 // 删除当前 UID 的祈愿数据

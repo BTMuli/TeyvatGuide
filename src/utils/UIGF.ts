@@ -1,7 +1,7 @@
 /**
  * @file utils/UIGF.ts
  * @description UIGF工具类
- * @since Beta v0.5.5
+ * @since Beta v0.6.5
  */
 
 import { app, path } from "@tauri-apps/api";
@@ -53,7 +53,7 @@ async function getUigfHeader(uid: string): Promise<TGApp.Plugins.UIGF.Info> {
  * @since Beta v0.5.1
  * @returns {TGApp.Plugins.UIGF.Info4} UIGF v4.0 头部信息
  */
-async function getUigf4Header(): Promise<TGApp.Plugins.UIGF.Info4> {
+export async function getUigf4Header(): Promise<TGApp.Plugins.UIGF.Info4> {
   const stamp = Date.now();
   return {
     export_timestamp: Math.floor(stamp / 1000).toString(),
@@ -90,14 +90,14 @@ function convertDataToUigf(
 
 /**
  * @description 检测是否存在 UIGF 数据，采用 ajv 验证 schema
- * @since Beta v0.5.0
+ * @since Beta v0.6.5
  * @param {string} path - UIGF 数据路径
  * @param {boolean} isVersion4 - 是否为 UIGF v4.0
  * @returns {Promise<boolean>} 是否存在 UIGF 数据
  */
 export async function verifyUigfData(path: string, isVersion4: boolean = false): Promise<boolean> {
-  const fileData: string = await readTextFile(path);
   try {
+    const fileData: string = await readTextFile(path);
     const fileJson = JSON.parse(fileData);
     if (isVersion4) return validateUigf4Data(fileJson);
     return validateUigfData(fileJson);
@@ -194,31 +194,15 @@ export async function exportUigfData(
 }
 
 /**
- * @description 导出 UIGF v4.0 数据
- * @since Beta v0.5.0
- * @param {string} filePath - 保存路径
- * @param {string} uid - UID，如果为空表示导出所有数据
- * @returns {Promise<void>}
+ * @description 获取单项UID的UIGF4.0数据
+ * @param {string} uid - UID
+ * @returns {Promise<TGApp.Plugins.UIGF.GachaHk4e>}
  */
-export async function exportUigf4Data(filePath: string, uid?: string): Promise<void> {
-  const UigfData: TGApp.Plugins.UIGF.Schema4 = {
-    info: await getUigf4Header(),
-    hk4e: [],
+export async function getUigf4Item(uid: string): Promise<TGApp.Plugins.UIGF.GachaHk4e> {
+  const gachaList = await TSUserGacha.getGachaRecords(uid);
+  return {
+    uid: uid,
+    timezone: getUigfTimeZone(uid),
+    list: convertDataToUigf(gachaList),
   };
-  let uidList: string[] = [];
-  if (uid) {
-    uidList.push(uid);
-  } else {
-    uidList = await TSUserGacha.getUidList();
-  }
-  for (const uid of uidList) {
-    const gachaList = await TSUserGacha.getGachaRecords(uid);
-    const data: TGApp.Plugins.UIGF.GachaHk4e = {
-      uid: uid,
-      timezone: getUigfTimeZone(uid),
-      list: convertDataToUigf(gachaList),
-    };
-    UigfData.hk4e.push(data);
-  }
-  await writeTextFile(filePath, JSON.stringify(UigfData));
 }
