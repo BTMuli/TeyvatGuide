@@ -2,12 +2,21 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2024-12-03
+Update: 2024-12-11
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2024-12-03 19:57:50`
+> 更新于 `2024-12-11 15:37:05`
+
+## [0.6.5](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.5) (2024-12-11)
+
+- 🍱 添加下半卡池数据&部分资源
+- ✨ 帖子内容中涉及的话题链接支持应用内跳转
+- ♻️ 首页组件加载逻辑重构
+- ✨ UIGF4导入/导出浮窗，支持自选UID
+- 💄 调整剧诗部分数据缺失时的显示
+- 🐛 调整部分UI，修复切换账户后角色详情刷新异常
 
 ## [0.6.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.4) (2024-12-03)
 
