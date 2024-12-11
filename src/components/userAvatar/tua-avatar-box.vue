@@ -130,8 +130,10 @@ function getWeaponTitle(): string {
   title.push(`${weapon.rarity}星 精炼${weapon.affix_level} Lv.${weapon.level}`);
   const propMain = userStore.getProp(weapon.main_property.property_type);
   title.push(`${propMain !== false ? propMain.name : "未知属性"} - ${weapon.main_property.final}`);
-  const propSub = userStore.getProp(weapon.sub_property.property_type);
-  title.push(`${propSub !== false ? propSub.name : "未知属性"} - ${weapon.sub_property.final}`);
+  if (weapon.sub_property !== null) {
+    const propSub = userStore.getProp(weapon.sub_property.property_type);
+    title.push(`${propSub !== false ? propSub.name : "未知属性"} - ${weapon.sub_property.final}`);
+  }
   return title.join("\n");
 }
 </script>
@@ -144,6 +146,7 @@ function getWeaponTitle(): string {
   border: 1px inset var(--common-shadow-2);
   border-radius: 5px;
   background: var(--box-bg-2);
+  color: var(--tgc-white-1);
   cursor: pointer;
   row-gap: 5px;
 }

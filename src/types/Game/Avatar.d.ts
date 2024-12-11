@@ -175,7 +175,7 @@ declare namespace TGApp.Game.Avatar {
     desc: string;
     affix_level: number;
     main_property: Prop;
-    sub_property: Prop;
+    sub_property: Prop | null;
   }
 
   /**

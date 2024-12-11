@@ -118,9 +118,7 @@ import { generateShareImg } from "../../utils/TGShare.js";
 import { timestampToDate } from "../../utils/toolFunc.js";
 import TakumiRecordGenshinApi from "../../web/request/recordReq.js";
 
-// store
-const userStore = storeToRefs(useUserStore());
-const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
+const { cookie, account, propMap } = storeToRefs(useUserStore());
 
 // loading
 const loadData = ref<boolean>(false);
@@ -214,9 +212,9 @@ function getOrderedList(
 
 async function loadUid(): Promise<void> {
   uidList.value = await TSUserAvatar.getAllUid();
-  if (uidList.value.length === 0) uidList.value = [user.value.gameUid];
-  if (uidList.value.includes(user.value.gameUid)) {
-    uidCur.value = user.value.gameUid;
+  if (uidList.value.length === 0) uidList.value = [account.value.gameUid];
+  if (uidList.value.includes(account.value.gameUid)) {
+    uidCur.value = account.value.gameUid;
   } else {
     uidCur.value = uidList.value[0];
   }
@@ -239,7 +237,10 @@ async function loadRole(): Promise<void> {
 }
 
 async function refresh(): Promise<void> {
-  if (!user.value) return;
+  if (!account.value) {
+    showSnackbar.warn("未获取到游戏账户");
+    return;
+  }
   if (showSelect.value) {
     showSelect.value = false;
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -248,7 +249,7 @@ async function refresh(): Promise<void> {
     showOverlay.value = false;
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
-  if (uidCur.value && uidCur.value !== user.value.gameUid) {
+  if (uidCur.value && uidCur.value !== account.value.gameUid) {
     const switchCheck = await showDialog.check(
       "是否切换游戏账户",
       `确认则尝试切换至${uidCur.value}`,
@@ -260,24 +261,24 @@ async function refresh(): Promise<void> {
     }
     const freshCheck = await showDialog.check(
       "是否刷新角色数据",
-      `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
+      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
     );
     if (!freshCheck) {
       showSnackbar.cancel("已取消角色数据刷新");
       return;
     }
   }
-  await TGLogger.Info(`[Character][refreshRoles][${user.value.gameUid}] 正在更新角色数据`);
-  showLoading.start("正在更新角色数据...", `UID: ${user.value.gameUid}`);
+  await TGLogger.Info(`[Character][refreshRoles][${account.value.gameUid}] 正在更新角色数据`);
+  showLoading.start("正在更新角色数据...", `UID: ${account.value.gameUid}`);
   loadData.value = true;
-  if (!userStore.cookie.value) {
+  if (!cookie.value) {
     showLoading.end();
     showSnackbar.warn("请先登录");
     loadData.value = false;
     return;
   }
   showLoading.update("正在更新角色数据...", "正在刷新首页数据");
-  const indexRes = await TakumiRecordGenshinApi.index(userStore.cookie.value, user.value, 1);
+  const indexRes = await TakumiRecordGenshinApi.index(cookie.value, account.value, 1);
   if ("retcode" in indexRes) {
     showSnackbar.error(`[${indexRes.retcode}] ${indexRes.message}`);
     await TGLogger.Error(JSON.stringify(indexRes.message));
@@ -286,12 +287,12 @@ async function refresh(): Promise<void> {
     return;
   }
   showLoading.update("正在更新角色数据...", "正在获取角色列表");
-  const listRes = await TakumiRecordGenshinApi.character.list(userStore.cookie.value, user.value);
+  const listRes = await TakumiRecordGenshinApi.character.list(cookie.value, account.value);
   if (!Array.isArray(listRes)) {
     showSnackbar.error(`[${listRes.retcode}] ${listRes.message}`);
-    await TGLogger.Error(`[Character][refreshRoles][${user.value.gameUid}] 获取角色列表失败`);
+    await TGLogger.Error(`[Character][refreshRoles][${account.value.gameUid}] 获取角色列表失败`);
     await TGLogger.Error(
-      `[Character][refreshRoles][${user.value.gameUid}] ${listRes.retcode} ${listRes.message}`,
+      `[Character][refreshRoles][${account.value.gameUid}] ${listRes.retcode} ${listRes.message}`,
     );
     showLoading.end();
     loadData.value = false;
@@ -299,47 +300,44 @@ async function refresh(): Promise<void> {
   }
   const idList = listRes.map((i) => i.id.toString());
   showLoading.update("正在更新角色数据...", `共${idList.length}个角色`);
-  const res = await TakumiRecordGenshinApi.character.detail(
-    userStore.cookie.value,
-    user.value,
-    idList,
-  );
+  const res = await TakumiRecordGenshinApi.character.detail(cookie.value, account.value, idList);
   if ("retcode" in res) {
     showSnackbar.error(`[${res.retcode}] ${res.message}`);
-    await TGLogger.Error(`[Character][refreshRoles][${user.value.gameUid}] 获取角色数据失败`);
+    await TGLogger.Error(`[Character][refreshRoles][${account.value.gameUid}] 获取角色数据失败`);
     await TGLogger.Error(
-      `[Character][refreshRoles][${user.value.gameUid}] ${res.retcode} ${res.message}`,
+      `[Character][refreshRoles][${account.value.gameUid}] ${res.retcode} ${res.message}`,
     );
     showLoading.end();
     loadData.value = false;
     return;
   }
-  userStore.propMap.value = res.property_map;
+  propMap.value = res.property_map;
   showLoading.update("正在更新角色数据...", "正在保存角色数据");
-  await TSUserAvatar.saveAvatars(user.value.gameUid, res.list);
-  await TGLogger.Info(`[Character][refreshRoles][${user.value.gameUid}] 成功更新角色数据`);
+  await TSUserAvatar.saveAvatars(account.value.gameUid, res.list);
+  await TGLogger.Info(`[Character][refreshRoles][${account.value.gameUid}] 成功更新角色数据`);
   await TGLogger.Info(
-    `[Character][refreshRoles][${user.value.gameUid}] 共更新${res.list.length}个角色`,
+    `[Character][refreshRoles][${account.value.gameUid}] 共更新${res.list.length}个角色`,
   );
+  await loadUid();
   await loadRole();
   showLoading.end();
   loadData.value = false;
 }
 
 async function share(): Promise<void> {
-  if (!user.value || isEmpty.value) {
+  if (!account.value || isEmpty.value) {
     showSnackbar.warn("暂无数据");
     return;
   }
-  await TGLogger.Info(`[Character][shareRoles][${user.value.gameUid}] 正在生成分享图片`);
+  await TGLogger.Info(`[Character][shareRoles][${account.value.gameUid}] 正在生成分享图片`);
   const rolesBox = <HTMLElement>document.querySelector(".uc-box");
-  const fileName = `【角色列表】-${user.value.gameUid}`;
+  const fileName = `【角色列表】-${account.value.gameUid}`;
   showLoading.start("正在生成图片", `${fileName}.png`);
   loadShare.value = true;
   await generateShareImg(fileName, rolesBox);
   showLoading.end();
   loadShare.value = false;
-  await TGLogger.Info(`[Character][shareRoles][${user.value.gameUid}] 生成分享图片成功`);
+  await TGLogger.Info(`[Character][shareRoles][${account.value.gameUid}] 生成分享图片成功`);
 }
 
 async function deleteUid(): Promise<void> {

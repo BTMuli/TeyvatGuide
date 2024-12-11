@@ -51,11 +51,6 @@ export type TItemBoxData = {
 type TItemBoxProps = { modelValue: TItemBoxData };
 
 const props = defineProps<TItemBoxProps>();
-const size = props.modelValue.size;
-const height = props.modelValue.height;
-const cursor = props.modelValue.clickable ? "pointer" : "default";
-const sizeLt = props.modelValue.ltSize;
-const sizeRt = props.modelValue.rtSize;
 const sizeInner = `${props.modelValue.innerHeight ?? 0}px`;
 const fontSizeInner = props.modelValue.innerHeight ? `${props.modelValue.innerHeight / 2}px` : "0";
 const sizeOuter = `${props.modelValue.outerHeight ?? 0}px`;
@@ -65,9 +60,9 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
 <style lang="css" scoped>
 .tib-box {
   position: relative;
-  width: v-bind(size);
-  height: v-bind(height);
-  cursor: v-bind(cursor);
+  width: v-bind("props.modelValue.size");
+  height: v-bind("props.modelValue.height");
+  cursor: v-bind('props.modelValue.clickable ? "pointer" : "default"');
 }
 
 .tib-bg {
@@ -75,8 +70,8 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
   top: 0;
   left: 0;
   overflow: hidden;
-  width: v-bind(size);
-  height: v-bind(size);
+  width: v-bind("props.modelValue.size");
+  height: v-bind("props.modelValue.size");
   border-radius: 5px;
 }
 
@@ -89,8 +84,8 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
 .tib-icon {
   position: relative;
   overflow: hidden;
-  width: v-bind(size);
-  height: v-bind(size);
+  width: v-bind("props.modelValue.size");
+  height: v-bind("props.modelValue.size");
   border-radius: 5px;
 }
 
@@ -105,8 +100,8 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
   top: 0;
   left: 0;
   display: flex;
-  width: v-bind(size);
-  height: v-bind(size);
+  width: v-bind("props.modelValue.size");
+  height: v-bind("props.modelValue.size");
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -118,8 +113,8 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
   top: 3%;
   left: 3%;
   display: flex;
-  width: v-bind(sizeLt);
-  height: v-bind(sizeLt);
+  width: v-bind("props.modelValue.ltSize");
+  height: v-bind("props.modelValue.ltSize");
   align-items: center;
   justify-content: center;
 }
@@ -135,8 +130,8 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
   top: 0;
   right: 0;
   display: flex;
-  width: v-bind(sizeRt);
-  height: v-bind(sizeRt);
+  width: v-bind("props.modelValue.rtSize");
+  height: v-bind("props.modelValue.rtSize");
   align-items: center;
   justify-content: center;
   background: rgb(0 0 0 / 40%);
@@ -152,7 +147,7 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
   left: 0;
   display: flex;
   width: 100%;
-  height: v-bind(sizeInner);
+  height: v-bind("props.modelValue.innerHeight ?? 0") px;
   align-items: center;
   justify-content: center;
   -webkit-backdrop-filter: blur(v-bind(innerBlur));
