@@ -1,5 +1,5 @@
 <template>
-  <v-app :theme="vuetifyTheme">
+  <v-app v-model:theme="vuetifyTheme">
     <TSidebar v-if="isMain" />
     <v-main>
       <v-container :fluid="true" class="app-container">
@@ -17,7 +17,7 @@ import { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { currentMonitor, getCurrentWindow } from "@tauri-apps/api/window";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import TBackTop from "./components/app/t-backTop.vue";
@@ -41,29 +41,23 @@ const vuetifyTheme = computed<string>(() => (theme.value === "dark" ? "dark" : "
 let themeListener: UnlistenFn | null = null;
 let urlListener: UnlistenFn | null = null;
 
-onBeforeMount(async () => {
+onMounted(async () => {
   const win = getCurrentWindow();
   isMain.value = win.label === "TeyvatGuide";
   if (isMain.value) {
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
     await win.setTitle(title);
-    listenOnInit();
+    await listenOnInit();
     await core.invoke("init_app");
     urlListener = await getDeepLink();
   }
   if (needResize.value !== "false") await checkResize();
   document.documentElement.className = theme.value;
-});
-
-onMounted(async () => {
-  await getCurrentWindow().show();
-  themeListener = await event.listen("readTheme", async (e: Event<string>) => {
-    const themeGet = e.payload;
-    if (theme.value !== themeGet) {
-      theme.value = themeGet;
-      document.documentElement.className = theme.value;
-    }
+  themeListener = await event.listen<string>("readTheme", (e: Event<string>) => {
+    theme.value = e.payload;
+    document.documentElement.className = theme.value;
   });
+  await getCurrentWindow().show();
 });
 
 async function checkResize(): Promise<void> {
@@ -95,9 +89,9 @@ function getSize(label: string): PhysicalSize {
 }
 
 // 启动后只执行一次的监听
-function listenOnInit(): void {
+async function listenOnInit(): Promise<void> {
   console.info("[App][listenOnInit] 监听初始化事件！");
-  event.listen("initApp", async () => {
+  await event.listen<void>("initApp", async () => {
     await checkAppLoad();
     await checkDeviceFp();
     try {
