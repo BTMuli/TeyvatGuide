@@ -168,7 +168,7 @@ async function confirmRefresh(force: boolean): Promise<void> {
   showLoading.update("正在刷新祈愿数据", "数据获取完成，即将刷新页面");
   showLoading.end();
   await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 刷新祈愿数据完成`);
-  window.location.reload();
+  // window.location.reload();
 }
 
 // 刷新单个池子
@@ -178,7 +178,7 @@ async function refreshGachaPool(
   force: boolean = false,
 ): Promise<void> {
   let endId = "0";
-  // 全量刷新时时间与id的对应关系
+  let reqId = "0";
   let gachaDataMap: Record<string, string[]> | undefined = undefined;
   if (!force) {
     showLoading.update(`正在刷新${label}数据`, "正在获取数据库祈愿最新 ID");
@@ -188,7 +188,7 @@ async function refreshGachaPool(
     showLoading.update(`正在刷新${label}数据`);
   }
   while (true) {
-    const gachaRes = await Hk4eApi.gacha(authkey.value, type, endId);
+    const gachaRes = await Hk4eApi.gacha(authkey.value, type, reqId);
     if (!Array.isArray(gachaRes)) {
       showSnackbar.error(`[${type}][${gachaRes.retcode}] ${gachaRes.message}`);
       await TGLogger.Error(
@@ -218,7 +218,7 @@ async function refreshGachaPool(
         name: item.name,
         item_type: item.item_type,
         rank_type: item.rank_type,
-        id: item.id,
+        id: item.id.toString(),
         uigf_gacha_type: item.gacha_type === "400" ? "301" : item.gacha_type,
       };
       if (item.item_type === "角色") {
@@ -232,12 +232,13 @@ async function refreshGachaPool(
       if (force) {
         if (!gachaDataMap) gachaDataMap = {};
         if (!gachaDataMap[item.time]) gachaDataMap[item.time] = [];
-        gachaDataMap[item.time].push(item.id);
+        gachaDataMap[item.time].push(item.id.toString());
       }
     }
     await TSUserGacha.mergeUIGF(account.value.gameUid, uigfList);
-    endId = gachaRes[gachaRes.length - 1].id;
     await new Promise<void>((resolve) => setTimeout(() => resolve(), 1000));
+    if (!force && gachaRes.some((i) => i.id.toString() === endId.toString())) break;
+    reqId = gachaRes[gachaRes.length - 1].id.toString();
   }
 }
 
