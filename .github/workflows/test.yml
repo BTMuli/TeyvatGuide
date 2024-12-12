@@ -40,20 +40,14 @@ jobs:
         run: ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
       - name: Test SSH connection
         run: ssh -T git@github.com || true
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
       - name: Add Rust targets(macOS Intel)
         if: matrix.settings.target == 'macos-intel'
         run: rustup target add x86_64-apple-darwin
       - name: Add Rust targets(macOS ARM)
         if: matrix.settings.target == 'macos-arm'
         run: rustup target add aarch64-apple-darwin
-
-      - name: Rust setup
-        uses: dtolnay/rust-toolchain@stable
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: "./src-tauri -> target"
-
       - name: setup node
         uses: actions/setup-node@v3
         with:
@@ -64,10 +58,8 @@ jobs:
           version: 9.15.0
       - name: Install frontend dependencies
         run: pnpm install
-
       - name: Build app
-        run: pnpm tauri build -- ${{ matrix.settings.args }}
-
+        run: pnpm build -- ${{ matrix.settings.args }}
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
