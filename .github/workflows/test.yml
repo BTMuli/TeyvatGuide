@@ -16,15 +16,15 @@ jobs:
           - platform: windows-latest
             args: "--verbose"
             target: "windows"
-            bundleDir: msi
+            bundlePath: msi/TeyvatGuide_v${{ github.event.inputs.version }}_x64_zh-CN.msi
           - platform: macos-latest
             args: "--target x86_64-apple-darwin"
             target: "macos-intel"
-            bundleDir: dmg
+            bundlePath: macos/TeyvatGuide.app
           - platform: macos-latest
             args: "--target aarch64-apple-darwin"
             target: "macos-arm"
-            bundleDir: dmg
+            bundlePath: macos/TeyvatGuide.app
     runs-on: ${{ matrix.settings.platform }}
 
     steps:
@@ -34,6 +34,10 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Add SSH known hosts
+        run: ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+      - name: Test SSH connection
+        run: ssh -T git@github.com || true
       - name: Add Rust targets(macOS Intel)
         if: matrix.settings.target == 'macos-intel'
         run: rustup target add x86_64-apple-darwin
@@ -71,5 +75,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: TeyvatGuide_v${{ github.event.inputs.version }}_${{ matrix.settings.target }}
-          path: src-tauri/target/${{ matrix.settings.target }}/release/bundle/${{ matrix.settings.bundleDir }}/
+          path: src-tauri/target/release/${{ matrix.settings.bundlePath }}
           if-no-files-found: error
