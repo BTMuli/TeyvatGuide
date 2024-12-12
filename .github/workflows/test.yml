@@ -1,7 +1,7 @@
 name: Build Test
 on:
   workflow_dispatch:
-    input:
+    inputs:
       version:
         description: "Version to build"
         required: true
