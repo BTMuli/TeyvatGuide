@@ -18,7 +18,7 @@ jobs:
           - platform: windows-latest
             args: ""
             target: "windows"
-            bundlePath: msi/TeyvatGuide_v${{ github.event.inputs.version }}_x64_zh-CN.msi
+            bundlePath: msi/
           - platform: macos-latest
             args: "--target x86_64-apple-darwin"
             target: "macos-intel"
