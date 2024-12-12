@@ -26,6 +26,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Add SSH known hosts
+        run: ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+      - name: Test SSH connection
+        run: ssh -T git@github.com || true
       - name: Add Rust targets(macOS Intel)
         if: matrix.settings.target == 'macos-intel'
         run: rustup target add x86_64-apple-darwin

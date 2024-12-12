@@ -9,12 +9,14 @@ on:
 
 jobs:
   build-tauri:
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
         settings:
           - platform: windows-latest
-            args: "--verbose"
+            args: ""
             target: "windows"
             bundlePath: msi/TeyvatGuide_v${{ github.event.inputs.version }}_x64_zh-CN.msi
           - platform: macos-latest
@@ -34,6 +36,8 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Add SSH known hosts
+        run: ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
       - name: Test SSH connection
         run: ssh -T git@github.com || true
       - name: Add Rust targets(macOS Intel)
@@ -63,15 +67,10 @@ jobs:
 
       - name: Build app
         run: pnpm tauri build -- ${{ matrix.settings.args }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_DIST_DIR: dist/${{ matrix.settings.target }}
-          TAURI_DIST_TARGET: ${{ matrix.settings.target }}
-          TAURI_VERSION: ${{ github.event.inputs.version }}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: TeyvatGuide_v${{ github.event.inputs.version }}_${{ matrix.settings.target }}
-          path: src-tauri/target/release/${{ matrix.settings.bundlePath }}
+          path: src-tauri/target/release/bundle/${{ matrix.settings.bundlePath }}
           if-no-files-found: error
