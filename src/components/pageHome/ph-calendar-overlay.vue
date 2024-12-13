@@ -6,7 +6,7 @@
           <TItemBox :model-value="boxData" />
           <div class="toc-material-grid">
             <TibCalendarMaterial
-              v-for="(item, index) in itemVal.materials"
+              v-for="(item, index) in props.dataVal.materials"
               :key="index"
               :item="item"
             />
@@ -16,28 +16,29 @@
         <div class="toc-bottom">
           <div class="toc-src-box">
             <div class="toc-src-text">来源：</div>
-            <img :src="`/icon/nation/${itemVal.source.area}.webp`" alt="icon" />
-            <div class="toc-src-text">{{ itemVal.source.area }} - {{ itemVal.source.name }}</div>
+            <img :src="`/icon/nation/${props.dataVal.source.area}.webp`" alt="icon" />
+            <div class="toc-src-text">
+              {{ props.dataVal.source.area }} - {{ props.dataVal.source.name }}
+            </div>
           </div>
-          <v-btn variant="outlined" @click="toDetail(itemVal)">详情</v-btn>
+          <v-btn variant="outlined" @click="toDetail(props.dataVal)">详情</v-btn>
         </div>
       </div>
     </div>
   </TOverlay>
 </template>
 <script lang="ts" setup>
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import TOverlay from "@comp/app/t-overlay.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-
-import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
-import TOverlay from "../app/t-overlay.vue";
-import showSnackbar from "../func/snackbar.js";
 
 import TibCalendarMaterial from "./ph-calendar-material.vue";
 
 type ToCalendarProps = {
   modelValue: boolean;
-  dataType: "weapon" | "avatar";
+  dataType: "weapon" | "character";
   dataVal: TGApp.App.Calendar.Item;
 };
 type ToCalendarEmits = (e: "update:modelValue", v: boolean) => void;
@@ -49,22 +50,19 @@ const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),
 });
-const itemVal = computed<TGApp.App.Calendar.Item>(() => props.dataVal);
-const boxData = computed<TItemBoxData>(() => {
-  return {
-    bg: itemVal.value.bg,
-    icon: itemVal.value.icon,
-    size: "100px",
-    height: "100px",
-    display: "inner",
-    clickable: false,
-    lt: props.dataType === "avatar" ? (itemVal.value.elementIcon ?? "") : itemVal.value.weaponIcon,
-    ltSize: "20px",
-    innerHeight: 25,
-    innerIcon: props.dataType === "avatar" ? itemVal.value.weaponIcon : undefined,
-    innerText: itemVal.value.name,
-  };
-});
+const boxData = computed<TItemBoxData>(() => ({
+  bg: props.dataVal.bg,
+  icon: props.dataVal.icon,
+  size: "100px",
+  height: "100px",
+  display: "inner",
+  clickable: false,
+  lt: props.dataType === "character" ? (props.dataVal.elementIcon ?? "") : props.dataVal.weaponIcon,
+  ltSize: "20px",
+  innerHeight: 25,
+  innerIcon: props.dataType === "character" ? props.dataVal.weaponIcon : undefined,
+  innerText: props.dataVal.name,
+}));
 
 async function toDetail(item: TGApp.App.Calendar.Item): Promise<void> {
   if (!["character", "weapon"].includes(item.itemType)) {

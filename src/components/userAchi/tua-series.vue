@@ -9,28 +9,21 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { listen, UnlistenFn } from "@tauri-apps/api/event";
-import { ref, onMounted, watch, onUnmounted } from "vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import TSUserAchi from "@Sqlite/modules/userAchi.js";
+import { type Event, listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { computed, onMounted, onUnmounted, shallowRef, watch } from "vue";
 
-import { AppAchievementSeriesData } from "../../data/index.js";
-import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
-import showSnackbar from "../func/snackbar.js";
+import { AppAchievementSeriesData } from "@/data/index.js";
 
-interface TuaSeriesProps {
-  uid: number;
-  series: number;
-  cur: number;
-}
-
-interface TuaSeriesEmits {
-  (e: "selectSeries", v: number): void;
-}
+type TuaSeriesProps = { uid: number; series: number; cur: number };
+type TuaSeriesEmits = (e: "selectSeries", v: number) => void;
 
 const props = defineProps<TuaSeriesProps>();
 const emits = defineEmits<TuaSeriesEmits>();
 
-const overview = ref<TGApp.Sqlite.Achievement.Overview>({ fin: 0, total: 0 });
-const data = ref<TGApp.App.Achievement.Series | undefined>(
+const overview = shallowRef<TGApp.Sqlite.Achievement.Overview>({ fin: 0, total: 0 });
+const data = computed<TGApp.App.Achievement.Series | undefined>(() =>
   AppAchievementSeriesData.find((s) => s.id === props.series),
 );
 let achiListener: UnlistenFn | null = null;
@@ -50,7 +43,7 @@ async function refreshOverview(): Promise<void> {
 }
 
 async function listenAchi(): Promise<UnlistenFn> {
-  return await listen<number>("updateAchi", async (e) => {
+  return await listen<number>("updateAchi", async (e: Event<number>) => {
     if (e.payload === props.series) await refreshOverview();
   });
 }
@@ -62,7 +55,7 @@ onUnmounted(async () => {
   }
 });
 
-async function selectSeries(): Promise<void> {
+function selectSeries(): void {
   if (props.cur === props.series) {
     showSnackbar.warn("已选中当前系列！");
     return;
@@ -78,6 +71,7 @@ async function selectSeries(): Promise<void> {
   justify-content: center;
   padding: 10px;
   border-radius: 10px;
+  margin-bottom: 10px;
   background: var(--box-bg-1);
   color: var(--box-text-1);
   column-gap: 10px;

@@ -13,14 +13,14 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, toRaw, ref, onUnmounted } from "vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import { onMounted, onUnmounted, ref, toRaw } from "vue";
 import { useRouter } from "vue-router";
 
-import { parseLink, parsePost } from "../../utils/linkParser.js";
-import { saveImgLocal } from "../../utils/TGShare.js";
-import showSnackbar from "../func/snackbar.js";
+import { parseLink, parsePost } from "@/utils/linkParser.js";
+import { saveImgLocal } from "@/utils/TGShare.js";
 
-interface TpLinkCard {
+type TpLinkCard = {
   insert: {
     link_card: {
       link_type: number;
@@ -36,11 +36,8 @@ interface TpLinkCard {
       landing_url_type: number;
     };
   };
-}
-
-interface TpLinkCardProps {
-  data: TpLinkCard;
-}
+};
+type TpLinkCardProps = { data: TpLinkCard };
 
 const props = defineProps<TpLinkCardProps>();
 const router = useRouter();
@@ -61,16 +58,11 @@ onUnmounted(() => {
 
 console.log("tpLinkCard", props.data.insert.link_card.card_id, toRaw(props.data).insert.link_card);
 
-async function toLink() {
+async function toLink(): Promise<void> {
   const link = props.data.insert.link_card.landing_url;
   const isPost = await parsePost(link);
   if (isPost !== false) {
-    await router.push({
-      name: "帖子详情",
-      params: {
-        post_id: isPost,
-      },
-    });
+    await router.push({ name: "帖子详情", params: { post_id: isPost } });
     return;
   }
   const res = await parseLink(link);

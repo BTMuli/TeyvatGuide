@@ -4,7 +4,7 @@
     <div class="duc-doc-bgc" />
     <!-- 左上角色跟武器 -->
     <div class="duc-doc-lt">
-      <DucDetailOlt :data="props.modelValue.avatar" mode="avatar" />
+      <DucDetailOlt :data="props.modelValue.avatar" mode="character" />
       <DucDetailOlt :data="props.modelValue.weapon" mode="weapon" />
       <div class="duc-relic">
         <DucDetailRelic
@@ -41,27 +41,24 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
+import TSUserAvatar from "@Sqlite/modules/userAvatar.js";
 import { app } from "@tauri-apps/api";
-import { computed, ref, watch, onMounted } from "vue";
-
-import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
-import { generateShareImg } from "../../utils/TGShare.js";
+import { computed, onMounted, ref, watch } from "vue";
 
 import DucDetailOlb from "./duc-detail-olb.vue";
 import DucDetailOlt from "./duc-detail-olt.vue";
 import DucDetailOrt from "./duc-detail-ort.vue";
 import DucDetailRelic from "./duc-detail-relic.vue";
 
-interface DucDetailOverlayProps {
-  modelValue: TGApp.Sqlite.Character.UserRole;
-}
+import { generateShareImg } from "@/utils/TGShare.js";
 
-type fixedLenArray<T, N extends number> = [T, ...T[]] & { length: N };
-type RelicList = fixedLenArray<TGApp.Game.Avatar.Relic | false, 5>;
+type DucDetailOverlayProps = { modelValue: TGApp.Sqlite.Character.UserRole };
+type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
+type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
 
 const props = defineProps<DucDetailOverlayProps>();
-const version = await app.getVersion();
-
+const version = ref<string>();
 const loading = ref<boolean>(false);
 
 const relicList = computed<RelicList>(() => {
@@ -77,22 +74,22 @@ const relicList = computed<RelicList>(() => {
 const nameCard = ref<string | false>(false);
 
 onMounted(async () => {
-  await loadData();
+  version.value = await app.getVersion();
+  loadData();
 });
-watch(
-  () => props.modelValue,
-  async () => {
-    await loadData();
-  },
-);
+watch(() => props.modelValue, loadData);
 
-async function loadData(): Promise<void> {
+function loadData(): void {
   const card = TSUserAvatar.getAvatarCard(props.modelValue.cid);
   nameCard.value = `/source/nameCard/profile/${card}.webp`;
 }
 
 async function share(): Promise<void> {
-  const detailBox = <HTMLElement>document.querySelector(".duc-do-container");
+  const detailBox = document.querySelector<HTMLElement>(".duc-do-container");
+  if (detailBox === null) {
+    showSnackbar.error("未找到角色详情");
+    return;
+  }
   const fileName = `【角色详情】-${props.modelValue.avatar.name}`;
   loading.value = true;
   await generateShareImg(fileName, detailBox);

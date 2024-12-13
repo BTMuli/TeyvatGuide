@@ -27,18 +27,14 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
-import TGLogger from "../../utils/TGLogger.js";
-import { generateShareImg, saveImgLocal } from "../../utils/TGShare.js";
-import { createTGWindow } from "../../utils/TGWindow.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { generateShareImg, saveImgLocal } from "@/utils/TGShare.js";
+import { createTGWindow } from "@/utils/TGWindow.js";
 
-interface TAnnoCardProps {
-  region: string;
-  modelValue: TGApp.App.Announcement.ListCard;
-  lang: string;
-}
-
+type TAnnoCardProps = { region: string; modelValue: TGApp.App.Announcement.ListCard; lang: string };
 const props = defineProps<TAnnoCardProps>();
 const localBanner = ref<string>();
 const localTag = ref<string>();
@@ -87,7 +83,11 @@ async function createAnno(): Promise<void> {
 
 async function shareAnno(): Promise<void> {
   const fileName = `AnnoCard_${props.modelValue.id}_${props.modelValue.subtitle}`;
-  const element = <HTMLElement>document.querySelector(`#anno_card_${props.modelValue.id}`);
+  const element = document.querySelector<HTMLElement>(`#anno_card_${props.modelValue.id}`);
+  if (element === null) {
+    showSnackbar.error("分享失败，未找到分享元素");
+    return;
+  }
   await generateShareImg(fileName, element, 2.5);
 }
 </script>

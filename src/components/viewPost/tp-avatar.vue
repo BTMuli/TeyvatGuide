@@ -12,7 +12,14 @@
         class="tpa-pendant"
         v-if="props.data.pendant !== ''"
       />
-      <div :class="`tpa-level-${props.position}`">{{ props.data.level_exp.level }}</div>
+      <div
+        :class="{
+          'tpa-level-left': props.position === 'left',
+          'tpa-level-right': props.position === 'right',
+        }"
+      >
+        {{ props.data.level_exp.level }}
+      </div>
     </div>
     <div v-if="props.position === 'left'" class="tpa-text">
       <div>{{ props.data.nickname }}</div>
@@ -23,22 +30,15 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-interface TpAvatarProps {
-  data: TGApp.Plugins.Mys.User.Post;
-  position: "left" | "right";
-}
+type TpAvatarProps = { data: TGApp.Plugins.Mys.User.Post; position: "left" | "right" };
 
 const props = defineProps<TpAvatarProps>();
 
 function getAuthorDesc(): string {
-  if (props.data.certification.label !== "") {
-    return props.data.certification.label;
-  }
+  if (props.data.certification.label !== "") return props.data.certification.label;
   return props.data.introduce;
 }
 
-const flexAlign = props.position === "left" ? "flex-start" : "flex-end";
-const textAlign = props.position;
 const levelColor = computed<string>(() => {
   const level = props.data.level_exp.level;
   if (level < 5) return "var(--tgc-od-green)";
@@ -62,7 +62,7 @@ const levelColor = computed<string>(() => {
   max-width: calc(100% - 50px);
   height: 50px;
   flex-direction: column;
-  align-items: v-bind(flexAlign);
+  align-items: v-bind("props.position === 'left' ? 'flex-start' : 'flex-end'");
   color: var(--box-text-4);
 }
 
@@ -79,7 +79,7 @@ const levelColor = computed<string>(() => {
   border-top: 2px solid var(--common-shadow-2);
   font-size: 14px;
   opacity: 0.7;
-  text-align: v-bind(textAlign);
+  text-align: v-bind("props.position");
   text-overflow: ellipsis;
   white-space: nowrap;
   word-break: break-all;

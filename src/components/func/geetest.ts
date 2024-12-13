@@ -1,7 +1,7 @@
 /**
  * @file component/func/geetest.ts
  * @description 封装自定义 geetest 组件，通过函数调用的方式，简化 geetest 的使用
- * @since Beta v0.5.1
+ * @since Beta v0.6.6
  */
 
 import { h, render } from "vue";
@@ -26,14 +26,14 @@ interface GeetestInstance extends ComponentInternalInstance {
   };
 }
 
-const renderBox = (props: TGApp.Plugins.Mys.Geetest.reqResp): VNode => {
+function renderBox(props: TGApp.Plugins.Mys.Geetest.reqResp): VNode {
   const container = document.createElement("div");
   container.id = geetestId;
   const boxVNode: VNode = h(geetest, props);
   render(boxVNode, container);
   document.body.appendChild(container);
   return boxVNode;
-};
+}
 
 let geetestInstance: VNode;
 

@@ -2,7 +2,7 @@
   <v-list class="config-list">
     <v-list-subheader :inset="true" class="config-header" title="路径" />
     <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item title="用户数据目录" :subtitle="appStore.userDir.value">
+    <v-list-item title="用户数据目录" :subtitle="userDir">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-key</v-icon>
@@ -16,7 +16,7 @@
         </div>
       </template>
     </v-list-item>
-    <v-list-item title="应用数据库路径" :subtitle="appStore.dbPath.value">
+    <v-list-item title="应用数据库路径" :subtitle="dbPath">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-account</v-icon>
@@ -29,11 +29,7 @@
         </div>
       </template>
     </v-list-item>
-    <v-list-item
-      title="游戏安装目录"
-      :subtitle="appStore.gameDir.value"
-      v-if="platform() === 'windows'"
-    >
+    <v-list-item title="游戏安装目录" :subtitle="gameDir" v-if="platform() === 'windows'">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-gamepad</v-icon>
@@ -47,7 +43,7 @@
         </div>
       </template>
     </v-list-item>
-    <v-list-item title="日志目录" :subtitle="appStore.logDir.value">
+    <v-list-item title="日志目录" :subtitle="logDir">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-multiple</v-icon>
@@ -64,6 +60,9 @@
   </v-list>
 </template>
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TGSqlite from "@Sqlite/index.js";
 import { path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { exists, readDir, remove } from "@tauri-apps/plugin-fs";
@@ -71,45 +70,36 @@ import { platform } from "@tauri-apps/plugin-os";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 
-import TGSqlite from "../../plugins/Sqlite/index.js";
-import { useAppStore } from "../../store/modules/app.js";
-import { backUpUserData } from "../../utils/dataBS.js";
-import TGShell from "../../utils/TGShell.js";
-import showDialog from "../func/dialog.js";
-import showSnackbar from "../func/snackbar.js";
+import { useAppStore } from "@/store/modules/app.js";
+import { backUpUserData } from "@/utils/dataBS.js";
+import TGShell from "@/utils/TGShell.js";
 
-const appStore = storeToRefs(useAppStore());
+const { dbPath, logDir, userDir, gameDir } = storeToRefs(useAppStore());
 
 onMounted(async () => {
-  const logDir = await path.appLogDir();
-  const dbPath = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
+  const logDirGet = await path.appLogDir();
+  const dbPathGet = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
   let message = "";
-  if (appStore.dbPath.value !== dbPath) {
-    appStore.dbPath.value = dbPath;
-    await TGSqlite.saveAppData("dbPath", dbPath);
+  if (dbPath.value !== dbPathGet) {
+    dbPath.value = dbPathGet;
+    await TGSqlite.saveAppData("dbPath", dbPathGet);
     message += "数据库路径 ";
   }
-  if (appStore.logDir.value !== logDir) {
-    appStore.logDir.value = logDir;
+  if (logDir.value !== logDirGet) {
+    logDir.value = logDirGet;
     message += "日志路径 ";
   }
-  if (message !== "") {
-    showSnackbar.success(`${message}已更新!`);
-  }
+  if (message !== "") showSnackbar.success(`${message}已更新!`);
 });
 
 async function confirmCUD(): Promise<void> {
-  const oriDir = appStore.userDir.value;
+  const oriDir = userDir.value;
   const changeCheck = await showDialog.check("确认修改用户数据路径吗？");
   if (!changeCheck) {
     showSnackbar.cancel("已取消修改");
     return;
   }
-  const dir: string | null = await open({
-    directory: true,
-    defaultPath: oriDir,
-    multiple: false,
-  });
+  const dir: string | null = await open({ directory: true, defaultPath: oriDir, multiple: false });
   if (dir === null) {
     showSnackbar.warn("路径不能为空!");
     return;
@@ -118,7 +108,7 @@ async function confirmCUD(): Promise<void> {
     showSnackbar.warn("路径未修改!");
     return;
   }
-  appStore.userDir.value = dir;
+  userDir.value = dir;
   await TGSqlite.saveAppData("userDir", dir);
   await backUpUserData(dir);
   showSnackbar.success("已修改用户数据路径!");
@@ -135,10 +125,10 @@ async function confirmCGD(): Promise<void> {
     showSnackbar.warn("不支持的平台！");
     return;
   }
-  const oriEmpty = appStore.gameDir.value === "未设置";
+  const oriEmpty = gameDir.value === "未设置";
   const editCheck = await showDialog.check(
     oriEmpty ? "确认设置游戏目录？" : "确认修改游戏目录？",
-    oriEmpty ? "请选择启动器所在目录" : `当前：${appStore.gameDir.value}`,
+    oriEmpty ? "请选择启动器所在目录" : `当前：${gameDir.value}`,
   );
   if (!editCheck) {
     showSnackbar.cancel(oriEmpty ? "已取消设置" : "已取消修改");
@@ -146,14 +136,14 @@ async function confirmCGD(): Promise<void> {
   }
   const dir: string | null = await open({
     directory: true,
-    defaultPath: oriEmpty ? undefined : appStore.gameDir.value,
+    defaultPath: oriEmpty ? undefined : gameDir.value,
     multiple: false,
   });
   if (dir === null) {
     showSnackbar.warn("路径不能为空!");
     return;
   }
-  if (!oriEmpty && appStore.gameDir.value === dir) {
+  if (!oriEmpty && gameDir.value === dir) {
     showSnackbar.warn("路径未修改！");
     return;
   }
@@ -162,7 +152,7 @@ async function confirmCGD(): Promise<void> {
     showSnackbar.warn("未检测到游戏本体");
     return;
   }
-  appStore.gameDir.value = dir;
+  gameDir.value = dir;
   showSnackbar.success(oriEmpty ? "成功设置游戏目录" : "成功修改游戏目录");
 }
 
@@ -180,8 +170,7 @@ async function confirmCLD(): Promise<void> {
     showSnackbar.cancel("已取消清理");
     return;
   }
-  const logDir = appStore.logDir.value;
-  const files = await readDir(logDir);
+  const files = await readDir(logDir.value);
   const delFiles = files.filter((file) => {
     // yyyy-mm-dd.log
     const reg = /(\d{4}-\d{2}-\d{2}\.log)/;
@@ -205,23 +194,23 @@ function copyPath(type: "db" | "user" | "log" | "game"): void {
   let targetPath: string, targetName: string;
   switch (type) {
     case "db":
-      targetPath = appStore.dbPath.value;
+      targetPath = dbPath.value;
       targetName = "数据库";
       break;
     case "user":
-      targetPath = appStore.userDir.value;
+      targetPath = userDir.value;
       targetName = "用户数据";
       break;
     case "log":
-      targetPath = appStore.logDir.value;
+      targetPath = logDir.value;
       targetName = "日志";
       break;
     case "game":
-      if (appStore.gameDir.value === "未设置") {
+      if (gameDir.value === "未设置") {
         showSnackbar.warn("未设置游戏目录！");
         return;
       }
-      targetPath = appStore.gameDir.value;
+      targetPath = gameDir.value;
       targetName = "游戏安装目录";
   }
   navigator.clipboard.writeText(targetPath);
@@ -235,17 +224,17 @@ async function openPath(type: "db" | "user" | "log" | "game"): Promise<void> {
       targetPath = await path.appConfigDir();
       break;
     case "user":
-      targetPath = appStore.userDir.value;
+      targetPath = userDir.value;
       break;
     case "log":
-      targetPath = appStore.logDir.value;
+      targetPath = logDir.value;
       break;
     case "game":
-      if (appStore.gameDir.value === "未设置") {
+      if (gameDir.value === "未设置") {
         showSnackbar.warn("未设置游戏目录！");
         return;
       }
-      targetPath = appStore.gameDir.value;
+      targetPath = gameDir.value;
       break;
   }
   await TGShell.openPath(targetPath);

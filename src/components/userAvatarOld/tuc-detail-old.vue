@@ -1,3 +1,4 @@
+<!-- todo 调整逻辑 -->
 <template>
   <div class="tuc-do-box">
     <img :src="bg" alt="role" class="tuc-do-bg" />
@@ -9,7 +10,10 @@
             :style="`opacity: ${selected.pos === 0 ? '1' : '0.5'}`"
             @click="showDetail(props.modelValue.weapon, '武器', 0)"
           >
-            <TucDetailItemBox :model-value="weaponBox" />
+            <TucDetailItemBox
+              :icon="`/WIKI/weapon/${props.modelValue.weapon.id}.webp`"
+              :bg="`/icon/bg/${props.modelValue.weapon.rarity}-Star.webp`"
+            />
           </div>
           <div
             v-for="(item, index) in relicList"
@@ -74,7 +78,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import TucDetailConstellation from "./tuc-detail-constellation.vue";
 import TucDetailDescConstellation from "./tuc-detail-desc-constellation.vue";
@@ -83,17 +87,10 @@ import TucDetailDescWeapon from "./tuc-detail-desc-weapon.vue";
 import TucDetailItemBox from "./tuc-detail-itembox.vue";
 import TucDetailRelic from "./tuc-detail-relic.vue";
 
-interface ToUcDetailProps {
-  modelValue: TGApp.Sqlite.Character.UserRole;
-}
-
-interface ToUcDetailSelect {
-  type: "命座" | "武器" | "圣遗物";
-  pos: number;
-}
-
-type fixedLenArray<T, N extends number> = [T, ...T[]] & { length: N };
-type RelicList = fixedLenArray<TGApp.Game.Avatar.Relic | false, 5>;
+type ToUcDetailProps = { modelValue: TGApp.Sqlite.Character.UserRole };
+type ToUcDetailSelect = { type: "命座" | "武器" | "圣遗物"; pos: number };
+type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
+type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
 
 const props = defineProps<ToUcDetailProps>();
 const relicList = computed<RelicList>(() => {
@@ -105,28 +102,15 @@ const relicList = computed<RelicList>(() => {
     props.modelValue.relics.find((item) => item.pos === 5) || false,
   ];
 });
-const weaponBox = computed(() => {
-  const weapon = props.modelValue.weapon;
-  return {
-    icon: `/WIKI/weapon/${weapon.id}.webp`,
-    bg: `/icon/bg/${weapon.rarity}-Star.webp`,
-  };
-});
-const showCostumeSwitch = ref(false);
-const selectConstellation = ref<TGApp.Game.Avatar.Constellation>();
-const selectRelic = ref<TGApp.Game.Avatar.Relic>();
-const selected = ref<ToUcDetailSelect>({ type: "武器", pos: 0 });
-const bg = computed<string>(() => {
-  return showCostumeSwitch.value
-    ? props.modelValue.costumes[0].icon
-    : props.modelValue.avatar.image;
-});
-const bgTransY = computed<string>(() => {
-  return showCostumeSwitch.value ? "0" : "10px";
-});
-const bgFit = computed<string>(() => {
-  return showCostumeSwitch.value ? "cover" : "contain";
-});
+const showCostumeSwitch = ref<boolean>(false);
+const selectConstellation = shallowRef<TGApp.Game.Avatar.Constellation>();
+const selectRelic = shallowRef<TGApp.Game.Avatar.Relic>();
+const selected = shallowRef<ToUcDetailSelect>({ type: "武器", pos: 0 });
+const bg = computed<string>(() =>
+  showCostumeSwitch.value ? props.modelValue.costumes[0].icon : props.modelValue.avatar.image,
+);
+const bgTransY = computed<string>(() => (showCostumeSwitch.value ? "0" : "10px"));
+const bgFit = computed<string>(() => (showCostumeSwitch.value ? "cover" : "contain"));
 
 // 加载数据
 function loadData(): void {
@@ -136,15 +120,8 @@ function loadData(): void {
   showCostumeSwitch.value = false;
 }
 
-onMounted(() => {
-  loadData();
-});
-watch(
-  () => props.modelValue,
-  () => {
-    loadData();
-  },
-);
+onMounted(() => loadData());
+watch(() => props.modelValue, loadData);
 
 function showDetail(
   item:
@@ -168,10 +145,7 @@ function showDetail(
     default:
       break;
   }
-  selected.value = {
-    type: selectType,
-    pos: selectPos,
-  };
+  selected.value = { type: selectType, pos: selectPos };
 }
 
 function switchBg(): void {

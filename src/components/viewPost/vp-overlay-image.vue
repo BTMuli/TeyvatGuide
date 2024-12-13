@@ -2,7 +2,7 @@
   <TOverlay v-model="visible" blur-val="10px">
     <div class="tpoi-box">
       <div :class="{ 'tpoi-top-ori': isOriSize, 'tpoi-top': !isOriSize }">
-        <img :src="props.image.insert.image" alt="图片" @click="resizeImg" />
+        <img :src="props.image.insert.image" alt="图片" @click="isOriSize = !isOriSize" />
       </div>
       <div class="tpoi-bottom">
         <div class="tpoi-info" v-if="props.image.attributes">
@@ -23,30 +23,25 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
-import { computed, onUnmounted, ref } from "vue";
+import TOverlay from "@comp/app/t-overlay.vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import { computed, ref, shallowRef } from "vue";
 
-import { copyToClipboard, getImageBuffer, saveCanvasImg } from "../../utils/TGShare.js";
-import { bytesToSize } from "../../utils/toolFunc.js";
-import TOverlay from "../app/t-overlay.vue";
-import showSnackbar from "../func/snackbar.js";
+import type { TpImage } from "./tp-image.vue";
 
-import { TpImage } from "./tp-image.vue";
+import { copyToClipboard, getImageBuffer, saveCanvasImg } from "@/utils/TGShare.js";
+import { bytesToSize } from "@/utils/toolFunc.js";
 
 type TpoImageProps = { image: TpImage; modelValue: boolean };
 type TpoImageEmits = (e: "update:modelValue", v: boolean) => void;
 const props = defineProps<TpoImageProps>();
 const emits = defineEmits<TpoImageEmits>();
-const buffer = ref<Uint8Array | null>(null);
 const bgMode = ref<number>(0); // 0: transparent, 1: black, 2: white
 const isOriSize = ref<boolean>(false);
+const buffer = shallowRef<Uint8Array | null>(null);
 const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),
-});
-const bg = computed(() => {
-  if (bgMode.value === 1) return "black";
-  if (bgMode.value === 2) return "white";
-  return "transparent";
 });
 const format = computed<string>(() => {
   if (props.image.attributes?.ext) return props.image.attributes.ext;
@@ -54,10 +49,6 @@ const format = computed<string>(() => {
   if (imageFormat !== undefined) return imageFormat;
   return "png";
 });
-
-function resizeImg(): void {
-  isOriSize.value = !isOriSize.value;
-}
 
 function setBlackBg(): void {
   bgMode.value = (bgMode.value + 1) % 3;
@@ -88,8 +79,6 @@ async function onDownload(): Promise<void> {
   await saveCanvasImg(buffer.value, Date.now().toString(), format.value);
   showSnackbar.success(`图片已下载到本地，大小：${size}`);
 }
-
-onUnmounted(() => (buffer.value = null));
 </script>
 <style lang="css" scoped>
 .tpoi-box {
@@ -112,7 +101,7 @@ onUnmounted(() => (buffer.value = null));
   align-items: flex-start;
   justify-content: center;
   border-radius: 10px;
-  background: v-bind(bg);
+  background: v-bind("bgMode === 1 ? 'black' : bgMode === 2 ? 'white' : 'transparent'");
   cursor: zoom-in;
   overflow-y: auto;
 }

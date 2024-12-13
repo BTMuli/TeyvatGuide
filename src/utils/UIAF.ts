@@ -4,15 +4,15 @@
  * @since Beta v0.6.0
  */
 
+import showSnackbar from "@comp/func/snackbar.js";
 import { app } from "@tauri-apps/api";
 import { readTextFile } from "@tauri-apps/plugin-fs";
 import Ajv from "ajv";
-import { ErrorObject } from "ajv/lib/types/index.js";
-
-import showSnackbar from "../components/func/snackbar.js";
-import { UiafSchema } from "../data/index.js";
+import type { ErrorObject } from "ajv/lib/types/index.js";
 
 import TGLogger from "./TGLogger.js";
+
+import { UiafSchema } from "@/data/index.js";
 
 /**
  * @description 获取 UIAF 头部信息
@@ -95,5 +95,5 @@ export async function verifyUiafDataClipboard(): Promise<boolean> {
  */
 export async function readUiafData(userPath: string): Promise<TGApp.Plugins.UIAF.Data> {
   const fileData = await readTextFile(userPath);
-  return <TGApp.Plugins.UIAF.Data>JSON.parse(fileData);
+  return JSON.parse(fileData) satisfies TGApp.Plugins.UIAF.Data;
 }

@@ -13,7 +13,6 @@
       <v-virtual-scroll :items="sortNameCardsData" :item-height="80">
         <template #default="{ item }">
           <TopNameCard :data="item" @selected="showNameCard(item)" />
-          <div style="height: 10px" />
         </template>
       </v-virtual-scroll>
     </div>
@@ -21,30 +20,30 @@
   <ToNameCard v-model="visible" :data="curNameCard">
     <template #left>
       <div class="card-arrow left" @click="switchCard(false)">
-        <img src="../../assets/icons/arrow-right.svg" alt="right" />
+        <img src="@/assets/icons/arrow-right.svg" alt="right" />
       </div>
     </template>
     <template #right>
       <div class="card-arrow" @click="switchCard(true)">
-        <img src="../../assets/icons/arrow-right.svg" alt="right" />
+        <img src="@/assets/icons/arrow-right.svg" alt="right" />
       </div>
     </template>
   </ToNameCard>
 </template>
 <script lang="ts" setup>
+import ToNameCard from "@comp/app/to-nameCard.vue";
+import TopNameCard from "@comp/app/top-nameCard.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import { onMounted, ref, shallowRef } from "vue";
 
-import ToNameCard from "../../components/app/to-namecard.vue";
-import TopNameCard from "../../components/app/top-namecard.vue";
-import showSnackbar from "../../components/func/snackbar.js";
-import { AppNameCardsData } from "../../data/index.js";
+import { AppNameCardsData } from "@/data/index.js";
 
-const curNameCard = shallowRef<TGApp.App.NameCard.Item>();
-const sortNameCardsData = shallowRef<TGApp.App.NameCard.Item[]>([]);
 const curIndex = ref<number>(0);
 const total = ref<number>(0);
 const visible = ref<boolean>(false);
 const search = ref<string>();
+const curNameCard = shallowRef<TGApp.App.NameCard.Item>();
+const sortNameCardsData = shallowRef<Array<TGApp.App.NameCard.Item>>([]);
 
 onMounted(() => sortData(AppNameCardsData));
 

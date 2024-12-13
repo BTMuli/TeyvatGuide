@@ -54,78 +54,77 @@
       <div class="twm-item-id">{{ item.id }}</div>
     </div>
   </div>
-  <Suspense>
-    <TwoMaterial v-model="visible" :data="curMaterial" v-if="curMaterial">
-      <template #left>
-        <div class="card-arrow left" @click="switchMaterial(false)">
-          <img src="../../assets/icons/arrow-right.svg" alt="right" />
-        </div>
-      </template>
-      <template #right>
-        <div class="card-arrow" @click="switchMaterial(true)">
-          <img src="../../assets/icons/arrow-right.svg" alt="right" />
-        </div>
-      </template>
-    </TwoMaterial>
-  </Suspense>
+  <TwoMaterial v-model="visible" :data="curMaterial" v-if="curMaterial">
+    <template #left>
+      <div class="card-arrow" @click="switchMaterial(false)">
+        <img src="@/assets/icons/arrow-right.svg" alt="right" />
+      </div>
+    </template>
+    <template #right>
+      <div class="card-arrow" @click="switchMaterial(true)">
+        <img src="@/assets/icons/arrow-right.svg" alt="right" />
+      </div>
+    </template>
+  </TwoMaterial>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
+import TwoMaterial from "@comp/pageWiki/two-material.vue";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
-import showSnackbar from "../../components/func/snackbar.js";
-import TwoMaterial from "../../components/pageWiki/two-material.vue";
-import { WikiMaterialData } from "../../data/index.js";
-
-const curMaterial = shallowRef<TGApp.App.Material.WikiItem | undefined>();
-const sortMaterialsData = shallowRef<Array<TGApp.App.Material.WikiItem>>([]);
-const curIndex = ref<number>(0);
-const total = ref<number>(0);
-const visible = ref<boolean>(false);
+import { WikiMaterialData } from "@/data/index.js";
 
 type MaterialType = { type: string; number: number };
 
+const curIndex = ref<number>(0);
+const total = ref<number>(0);
+const visible = ref<boolean>(false);
 const search = ref<string>();
 const selectType = ref<string | null>(null);
-const materialTypes = ref<MaterialType[]>([]);
+const materialTypes = shallowRef<Array<MaterialType>>([]);
+const curMaterial = shallowRef<TGApp.App.Material.WikiItem | undefined>();
+const sortMaterialsData = shallowRef<Array<TGApp.App.Material.WikiItem>>([]);
 
 onMounted(() => {
+  const tmpData: Array<MaterialType> = [];
   for (const item of WikiMaterialData) {
-    const typeFindIndex = materialTypes.value.findIndex((itemT) => itemT.type === item.type);
+    const typeFindIndex = tmpData.findIndex((itemT) => itemT.type === item.type);
     if (typeFindIndex === -1) {
       const itemN: MaterialType = { type: item.type, number: 1 };
-      materialTypes.value.push(itemN);
+      tmpData.push(itemN);
       continue;
     }
-    materialTypes.value[typeFindIndex].number++;
+    tmpData[typeFindIndex].number++;
   }
+  materialTypes.value = tmpData;
   sortData(WikiMaterialData);
   showSnackbar.success(`成功获取${sortMaterialsData.value.length}条数据`);
 });
-
-function getSelectMaterials(): TGApp.App.Material.WikiItem[] {
-  if (selectType.value === null) return WikiMaterialData;
-  else return WikiMaterialData.filter((item) => item.type === selectType.value);
-}
 
 watch(
   () => selectType.value,
   () => sortData(getSelectMaterials()),
 );
 
-function sortData(data: TGApp.App.Material.WikiItem[]) {
+function getSelectMaterials(): Array<TGApp.App.Material.WikiItem> {
+  if (selectType.value === null) return WikiMaterialData;
+  else return WikiMaterialData.filter((item) => item.type === selectType.value);
+}
+
+function sortData(data: Array<TGApp.App.Material.WikiItem>): void {
   sortMaterialsData.value = data;
   curIndex.value = 0;
   total.value = sortMaterialsData.value.length;
   curMaterial.value = sortMaterialsData.value[curIndex.value];
 }
 
-function toMaterial(item: TGApp.App.Material.WikiItem) {
+function toMaterial(item: TGApp.App.Material.WikiItem): void {
   curMaterial.value = item;
   curIndex.value = sortMaterialsData.value.findIndex((i) => i.id === item.id);
   visible.value = true;
 }
 
-function switchMaterial(isNext: boolean) {
+function switchMaterial(isNext: boolean): void {
   if (isNext) {
     if (curIndex.value === total.value - 1) return;
     curIndex.value++;
@@ -136,7 +135,7 @@ function switchMaterial(isNext: boolean) {
   curMaterial.value = sortMaterialsData.value[curIndex.value];
 }
 
-function searchMaterial() {
+function searchMaterial(): void {
   let selectData = getSelectMaterials();
   if (search.value === undefined || search.value === "") {
     if (sortMaterialsData.value.length === selectData.length) {
@@ -253,18 +252,18 @@ function searchMaterial() {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+
+  img {
+    width: 30px;
+    aspect-ratio: 1;
+  }
+
+  &:first-child {
+    transform: rotate(180deg);
+  }
 }
 
 .dark .card-arrow {
   filter: invert(11%) sepia(73%) saturate(11%) hue-rotate(139deg) brightness(97%) contrast(81%);
-}
-
-.card-arrow img {
-  width: 100%;
-  height: 100%;
-}
-
-.card-arrow.left img {
-  transform: rotate(180deg);
 }
 </style>

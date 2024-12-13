@@ -1,17 +1,12 @@
 <template>
-  <div
-    :style="{
-      backgroundImage: 'url(' + props.data.bg + ')',
-      backgroundSize: 'cover',
-    }"
-    class="tur-hs-box"
-  >
-    <div class="tur-hs-name">
-      {{ data.name }}
-    </div>
-    <div class="tur-hs-title">
-      <img :src="props.data.comfortIcon" alt="comfort" />
-      {{ data.comfortName }}
+  <div class="tur-hs-box">
+    <div class="bg"><img :src="data.bg" alt="bg" /></div>
+    <div class="tur-hs-top">
+      <div class="tur-hs-title">
+        <img :src="data.comfortIcon" alt="comfort" />
+        <span>{{ data.comfortName }}</span>
+      </div>
+      <div class="tur-hs-name">{{ data.name }}</div>
     </div>
     <div class="tur-hs-text-grid">
       <div class="tur-hs-text">
@@ -34,22 +29,40 @@
   </div>
 </template>
 <script lang="ts" setup>
-interface TurHomeSubProps {
-  data: TGApp.Sqlite.Record.Home;
-}
-
-const props = defineProps<TurHomeSubProps>();
+defineProps<{ data: TGApp.Sqlite.Record.Home }>();
 </script>
 <style lang="css" scoped>
 .tur-hs-box {
   position: relative;
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   border-radius: 5px;
 }
 
-.tur-hs-name {
+.bg {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  z-index: 0;
+  right: 0;
+  object-fit: cover;
+}
+
+.tur-hs-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.tur-hs-name {
   color: var(--tgc-white-1);
   font-family: var(--font-text);
   font-size: 16px;
@@ -58,7 +71,6 @@ const props = defineProps<TurHomeSubProps>();
 .tur-hs-title {
   display: flex;
   align-items: center;
-  padding: 10px;
   color: var(--tgc-white-1);
   font-family: var(--font-title);
   font-size: 20px;

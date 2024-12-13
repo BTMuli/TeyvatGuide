@@ -28,11 +28,9 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 
-import { parseHtmlText } from "../../utils/toolFunc.js";
+import { parseHtmlText } from "@/utils/toolFunc.js";
 
-interface TwcConstellationProps {
-  data: TGApp.Plugins.Hutao.Character.RhisdTalent[];
-}
+type TwcConstellationProps = { data: Array<TGApp.Plugins.Hutao.Character.RhisdTalent> };
 
 const props = defineProps<TwcConstellationProps>();
 const tab = ref<string>();
@@ -41,7 +39,7 @@ function loadData(): void {
   tab.value = props.data[0].Name;
 }
 
-onMounted(loadData);
+onMounted(() => loadData());
 
 watch(() => props.data, loadData);
 </script>

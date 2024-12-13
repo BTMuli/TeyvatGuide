@@ -6,32 +6,23 @@
       :title="props.data.insert.divider"
     />
   </div>
-  <TpUnknown v-else :data="emptyData" />
+  <TpUnknown v-else :data="<TGApp.Plugins.Mys.SctPost.Empty>props.data" />
 </template>
 <script lang="ts" setup>
 import { computed } from "vue";
 
 import TpUnknown from "./tp-unknown.vue";
 
-interface TpDivider {
-  insert: {
-    divider: string;
-  };
-}
-
-interface TpDividerProps {
-  data: TpDivider;
-}
+type TpDivider = { insert: { divider: string } };
+type TpDividerProps = { data: TpDivider };
 
 const props = defineProps<TpDividerProps>();
-const emptyData: TGApp.Plugins.Mys.SctPost.Empty = <TGApp.Plugins.Mys.SctPost.Empty>props.data;
 
 console.log("tpDivider", props.data.insert.divider);
 
-const isInclude = computed(() => {
-  const list = ["line_1", "line_2", "line_3", "line_4"];
-  return list.includes(props.data.insert.divider);
-});
+const isInclude = computed<boolean>(() =>
+  ["line_1", "line_2", "line_3", "line_4"].includes(props.data.insert.divider),
+);
 </script>
 <style lang="css" scoped>
 .tp-divider-box {

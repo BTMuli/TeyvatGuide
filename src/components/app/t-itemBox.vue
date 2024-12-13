@@ -51,11 +51,6 @@ export type TItemBoxData = {
 type TItemBoxProps = { modelValue: TItemBoxData };
 
 const props = defineProps<TItemBoxProps>();
-const sizeInner = `${props.modelValue.innerHeight ?? 0}px`;
-const fontSizeInner = props.modelValue.innerHeight ? `${props.modelValue.innerHeight / 2}px` : "0";
-const sizeOuter = `${props.modelValue.outerHeight ?? 0}px`;
-const fontSizeOuter = props.modelValue.outerHeight ? `${props.modelValue.outerHeight / 2}px` : "0";
-const innerBlur = props.modelValue.innerBlur ?? "0";
 </script>
 <style lang="css" scoped>
 .tib-box {
@@ -71,8 +66,8 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
   left: 0;
   overflow: hidden;
   width: v-bind("props.modelValue.size");
-  height: v-bind("props.modelValue.size");
   border-radius: 5px;
+  aspect-ratio: 1;
 }
 
 .tib-bg img {
@@ -85,8 +80,8 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
   position: relative;
   overflow: hidden;
   width: v-bind("props.modelValue.size");
-  height: v-bind("props.modelValue.size");
   border-radius: 5px;
+  aspect-ratio: 1;
 }
 
 .tib-icon img {
@@ -101,11 +96,11 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
   left: 0;
   display: flex;
   width: v-bind("props.modelValue.size");
-  height: v-bind("props.modelValue.size");
   flex-direction: column;
   align-items: center;
   justify-content: center;
   border-radius: 5px;
+  aspect-ratio: 1;
 }
 
 .tib-lt {
@@ -114,9 +109,9 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
   left: 3%;
   display: flex;
   width: v-bind("props.modelValue.ltSize");
-  height: v-bind("props.modelValue.ltSize");
   align-items: center;
   justify-content: center;
+  aspect-ratio: 1;
 }
 
 .tib-lt img {
@@ -131,9 +126,9 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
   right: 0;
   display: flex;
   width: v-bind("props.modelValue.rtSize");
-  height: v-bind("props.modelValue.rtSize");
   align-items: center;
   justify-content: center;
+  aspect-ratio: 1;
   background: rgb(0 0 0 / 40%);
   border-bottom-left-radius: 5px;
   border-top-right-radius: 5px;
@@ -150,20 +145,20 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
   height: v-bind("props.modelValue.innerHeight ?? 0") px;
   align-items: center;
   justify-content: center;
-  -webkit-backdrop-filter: blur(v-bind(innerBlur));
-  backdrop-filter: blur(v-bind(innerBlur));
+  -webkit-backdrop-filter: blur(v-bind("props.modelValue.innerBlur ?? 0"));
+  backdrop-filter: blur(v-bind("props.modelValue.innerBlur ?? 0"));
   background: rgb(20 20 20 / 40%);
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   color: var(--tgc-white-1);
   font-family: var(--font-title);
-  font-size: v-bind(fontSizeInner);
+  font-size: v-bind("((props.modelValue.innerHeight ?? 0) / 2).toString() + 'px'");
 }
 
 .tib-inner img {
-  width: v-bind(sizeInner);
-  height: v-bind(sizeInner);
+  width: v-bind("(props.modelValue.innerHeight ?? 0).toString() + 'px'");
   padding: 1px;
+  aspect-ratio: 1;
 }
 
 .tib-inner span {
@@ -178,11 +173,11 @@ const innerBlur = props.modelValue.innerBlur ?? "0";
   bottom: 0;
   display: flex;
   width: 100%;
-  height: v-bind(sizeOuter);
+  height: v-bind("(props.modelValue.outerHeight ?? 0).toString() + 'px'");
   align-items: center;
   justify-content: center;
   color: var(--common-text-title);
-  font-size: v-bind(fontSizeOuter);
+  font-size: v-bind("((props.modelValue.outerHeight ?? 0)/2).toString() + 'px'");
   text-align: center;
 }
 </style>

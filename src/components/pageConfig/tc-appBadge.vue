@@ -23,35 +23,33 @@
 </template>
 <script lang="ts" setup>
 import { app } from "@tauri-apps/api";
-import { computed, onMounted, ref } from "vue";
+import { storeToRefs } from "pinia";
+import { onMounted, ref } from "vue";
 
-import { useAppStore } from "../../store/modules/app.js";
+import { useAppStore } from "@/store/modules/app.js";
 
-const appStore = useAppStore();
+const { buildTime } = storeToRefs(useAppStore());
 const versionApp = ref<string>();
-const buildTime = computed(() => appStore.buildTime);
 
-onMounted(async () => {
-  versionApp.value = await app.getVersion();
-});
+onMounted(async () => (versionApp.value = await app.getVersion()));
 
-function toRelease() {
+function toRelease(): void {
   window.open("https://github.com/BTMuli/TeyvatGuide/releases/latest");
 }
 
-function toGroup() {
+function toGroup(): void {
   window.open("https://h5.qun.qq.com/s/3cgX0hJ4GA");
 }
 
-function toGithub() {
+function toGithub(): void {
   window.open("https://github.com/BTMuli/TeyvatGuide");
 }
 
-function toStore() {
+function toStore(): void {
   window.open("https://www.microsoft.com/store/productId/9NLBNNNBNSJN");
 }
 
-function toSite() {
+function toSite(): void {
   window.open("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");
 }
 </script>

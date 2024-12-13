@@ -11,23 +11,18 @@
           v-for="(item, index) in posts"
           :key="index"
           @click="toPost(item.postId, index)"
-          :style="{
-            backgroundColor:
-              index === props.collection.cur - 1 ? 'var(--box-bg-2)' : 'var(--box-bg-1)',
-            color: index === props.collection.cur - 1 ? 'var(--box-text-2)' : 'var(--box-text-1)',
-            cursor: index === props.collection.cur - 1 ? 'default' : 'pointer',
-          }"
+          :class="{ selected: index === props.collection.cur - 1 }"
         >
           <div class="tpoc-item-title" :title="item.title">{{ item.title }}</div>
           <div class="tpoc-item-info">
-            <div class="tpoc-iii">
+            <div class="tpoc-iii time">
               <span title="创建时间">
                 <v-icon size="12">mdi-clock-time-four-outline</v-icon>
-                <span>{{ getDate(item.created) }}</span>
+                <span>{{ timestampToDate(item.created * 1000) }}</span>
               </span>
               <span title="最后更新时间">
                 <v-icon size="12">mdi-clock-time-four-outline</v-icon>
-                <span>{{ getDate(item.updated) }}</span>
+                <span>{{ timestampToDate(item.updated * 1000) }}</span>
               </span>
             </div>
             <div class="tpoc-iii">
@@ -47,17 +42,15 @@
   </TOverlay>
 </template>
 <script lang="ts" setup>
+import TOverlay from "@comp/app/t-overlay.vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import Mys from "@Mys/index.js";
 import { computed, onMounted, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
-import Mys from "../../plugins/Mys/index.js";
-import TOverlay from "../app/t-overlay.vue";
-import showSnackbar from "../func/snackbar.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
-type TpoCollectionProps = {
-  collection: TGApp.Plugins.Mys.Post.Collection;
-  modelValue: boolean;
-};
+type TpoCollectionProps = { collection: TGApp.Plugins.Mys.Post.Collection; modelValue: boolean };
 type TpoCollectionEmits = (e: "update:modelValue", v: boolean) => void;
 type TpoCollectionItem = {
   postId: string;
@@ -71,7 +64,7 @@ const router = useRouter();
 const props = defineProps<TpoCollectionProps>();
 const emits = defineEmits<TpoCollectionEmits>();
 const postListEl = useTemplateRef<HTMLDivElement>("postListRef");
-const posts = shallowRef<TpoCollectionItem[]>([]);
+const posts = shallowRef<Array<TpoCollectionItem>>([]);
 const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),
@@ -92,7 +85,7 @@ watch(
 
 onMounted(async () => {
   const collectionPosts = await Mys.Post.getPostFullInCollection(props.collection.collection_id);
-  const tempArr: TpoCollectionItem[] = [];
+  const tempArr: Array<TpoCollectionItem> = [];
   for (const postItem of collectionPosts) {
     const post: TpoCollectionItem = {
       postId: postItem.post.post_id,
@@ -106,10 +99,6 @@ onMounted(async () => {
   }
   posts.value = tempArr;
 });
-
-function getDate(date: number): string {
-  return new Date(date * 1000).toLocaleString().replace(/\//g, "-").split(" ")[0];
-}
 
 async function toPost(postId: string, index: number): Promise<void> {
   if (index === props.collection.cur - 1) {
@@ -162,39 +151,57 @@ async function toPost(postId: string, index: number): Promise<void> {
   padding: 10px;
   border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
+  background-color: var(--box-bg-1);
+  color: var(--box-text-1);
   cursor: pointer;
+
+  &.selected {
+    background-color: var(--box-bg-2);
+    color: var(--box-text-2);
+    cursor: default;
+  }
 }
 
 .tpoc-item-title {
-  overflow: hidden;
   width: 100%;
+  max-width: 100%;
   font-family: var(--font-title);
   font-size: 16px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   word-break: break-all;
 }
 
 .tpoc-item-info {
   display: flex;
   width: 100%;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
   font-size: 12px;
   opacity: 0.8;
 }
 
 .tpoc-iii {
+  position: relative;
   display: flex;
+  width: 100%;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   column-gap: 5px;
-}
 
-.tpoc-iii span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  column-gap: 2px;
+  span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 2px;
+    white-space: nowrap;
+  }
+
+  &.time span :first-child {
+    color: var(--tgc-od-green);
+  }
+
+  &:last-child {
+    justify-content: flex-end;
+  }
 }
 </style>

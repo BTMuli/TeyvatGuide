@@ -26,20 +26,20 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
+import showSnackbar from "@comp/func/snackbar.js";
 import { computed, ref } from "vue";
-
-import { generateShareImg } from "../../utils/TGShare.js";
-import showSnackbar from "../func/snackbar.js";
 
 import TOverlay from "./t-overlay.vue";
 
+import { generateShareImg } from "@/utils/TGShare.js";
+
 enum ToNameCardTypeEnum {
-  other = 0,
-  achievement = 1,
-  role = 2,
-  record = 3,
-  activity = 4,
-  unknown = 5,
+  other,
+  achievement,
+  role,
+  record,
+  activity,
+  unknown,
 }
 
 type ToNameCardTypeMap = { [key in ToNameCardTypeEnum]: string };

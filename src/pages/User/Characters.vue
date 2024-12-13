@@ -87,71 +87,60 @@
       <img src="/source/UI/empty.webp" alt="empty" />
     </div>
   </div>
-  <suspense v-if="dataVal">
-    <TuaDetailOverlay
-      v-model="showOverlay"
-      :avatar="dataVal"
-      :avatars="selectedList"
-      v-model:mode="showMode"
-      @to-next="handleSwitch"
-      @to-avatar="selectRole"
-    />
-  </suspense>
+  <TuaDetailOverlay
+    v-if="dataVal"
+    v-model="showOverlay"
+    :avatar="dataVal"
+    :avatars="selectedList"
+    v-model:mode="showMode"
+    @to-next="handleSwitch"
+    @to-avatar="selectRole"
+  />
   <TwoSelectC v-model="showSelect" @select-c="handleSelect" v-model:reset="resetSelect" />
 </template>
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TwoSelectC, { type SelectedCValue } from "@comp/pageWiki/two-select-c.vue";
+import TuaAvatarBox from "@comp/userAvatar/tua-avatar-box.vue";
+import TuaDetailOverlay from "@comp/userAvatar/tua-detail-overlay.vue";
+import TSUserAvatar from "@Sqlite/modules/userAvatar.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
-import showDialog from "../../components/func/dialog.js";
-import showLoading from "../../components/func/loading.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import TwoSelectC, { SelectedCValue } from "../../components/pageWiki/two-select-c.vue";
-import TuaAvatarBox from "../../components/userAvatar/tua-avatar-box.vue";
-import TuaDetailOverlay from "../../components/userAvatar/tua-detail-overlay.vue";
-import { AppCharacterData } from "../../data/index.js";
-import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
-import { useUserStore } from "../../store/modules/user.js";
-import TGLogger from "../../utils/TGLogger.js";
-import { generateShareImg } from "../../utils/TGShare.js";
-import { timestampToDate } from "../../utils/toolFunc.js";
-import TakumiRecordGenshinApi from "../../web/request/recordReq.js";
+import { AppCharacterData } from "@/data/index.js";
+import { useUserStore } from "@/store/modules/user.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { generateShareImg } from "@/utils/TGShare.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
+import TakumiRecordGenshinApi from "@/web/request/recordReq.js";
 
-const { cookie, account, propMap } = storeToRefs(useUserStore());
+type TabItem = { label: string; value: string };
 
-// loading
-const loadData = ref<boolean>(false);
-const loadShare = ref<boolean>(false);
-const loadDel = ref<boolean>(false);
-const version = ref<string>();
-
-// data
-const isEmpty = ref<boolean>(true);
-const roleList = ref<TGApp.Sqlite.Character.UserRole[]>([]);
-const selectedList = ref<TGApp.Sqlite.Character.UserRole[]>([]);
-
-// overlay
-const dataVal = ref<TGApp.Sqlite.Character.UserRole>();
-const showOverlay = ref<boolean>(false);
-const selectIndex = ref<number>(0);
-
-const showSelect = ref<boolean>(false);
-const showMode = ref<"classic" | "card" | "dev">("dev");
-const resetSelect = ref<boolean>(false);
-const modeList = [
+const modeList: Readonly<Array<TabItem>> = [
   { label: "经典视图", value: "classic" },
   { label: "卡片视图（简略）", value: "card" },
   { label: "卡片视图（详细）", value: "dev" },
 ];
-
-const enableShare = computed<boolean>(() => {
-  if (showOverlay.value) return true;
-  return showSelect.value;
-});
-
+const { cookie, account, propMap } = storeToRefs(useUserStore());
+const loadData = ref<boolean>(false);
+const loadShare = ref<boolean>(false);
+const loadDel = ref<boolean>(false);
+const version = ref<string>();
+const isEmpty = ref<boolean>(true);
+const showOverlay = ref<boolean>(false);
+const selectIndex = ref<number>(0);
+const showSelect = ref<boolean>(false);
+const showMode = ref<"classic" | "card" | "dev">("dev");
+const resetSelect = ref<boolean>(false);
 const uidCur = ref<string>();
-const uidList = ref<string[]>([]);
+const uidList = shallowRef<Array<string>>([]);
+const roleList = shallowRef<Array<TGApp.Sqlite.Character.UserRole>>([]);
+const selectedList = shallowRef<Array<TGApp.Sqlite.Character.UserRole>>([]);
+const dataVal = shallowRef<TGApp.Sqlite.Character.UserRole>();
+const enableShare = computed<boolean>(() => (showOverlay.value ? true : showSelect.value));
 
 onMounted(async () => {
   showLoading.start("正在获取角色数据...");
@@ -193,31 +182,23 @@ watch(
     }
   },
 );
-watch(
-  () => uidCur.value,
-  async () => await loadRole(),
-);
+watch(() => uidCur.value, loadRole);
 
 function getOrderedList(
-  data: TGApp.Sqlite.Character.UserRole[],
-): TGApp.Sqlite.Character.UserRole[] {
+  data: Array<TGApp.Sqlite.Character.UserRole>,
+): Array<TGApp.Sqlite.Character.UserRole> {
   return data.sort((a, b) => {
     if (a.avatar.rarity !== b.avatar.rarity) return b.avatar.rarity - a.avatar.rarity;
-    if (a.avatar.element !== b.avatar.element) {
-      return a.avatar.element.localeCompare(b.avatar.element);
-    }
-    return a.cid - b.cid;
+    if (a.avatar.element === b.avatar.element) return a.cid - b.cid;
+    return a.avatar.element.localeCompare(b.avatar.element);
   });
 }
 
 async function loadUid(): Promise<void> {
   uidList.value = await TSUserAvatar.getAllUid();
   if (uidList.value.length === 0) uidList.value = [account.value.gameUid];
-  if (uidList.value.includes(account.value.gameUid)) {
-    uidCur.value = account.value.gameUid;
-  } else {
-    uidCur.value = uidList.value[0];
-  }
+  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
+  else uidCur.value = uidList.value[0];
 }
 
 async function loadRole(): Promise<void> {
@@ -330,7 +311,11 @@ async function share(): Promise<void> {
     return;
   }
   await TGLogger.Info(`[Character][shareRoles][${account.value.gameUid}] 正在生成分享图片`);
-  const rolesBox = <HTMLElement>document.querySelector(".uc-box");
+  const rolesBox = document.querySelector<HTMLElement>(".uc-box");
+  if (rolesBox === null) {
+    showSnackbar.error("未找到角色列表");
+    return;
+  }
   const fileName = `【角色列表】-${account.value.gameUid}`;
   showLoading.start("正在生成图片", `${fileName}.png`);
   loadShare.value = true;
@@ -359,21 +344,17 @@ async function deleteUid(): Promise<void> {
 function getUpdateTime(): string {
   if (roleList.value.length === 0) return "";
   let lastUpdateTime = 0;
-  roleList.value.forEach((role) => {
+  for (const role of roleList.value) {
     const updateTime = new Date(role.updated).getTime();
-    if (updateTime > lastUpdateTime) {
-      lastUpdateTime = updateTime;
-    }
-  });
+    if (updateTime > lastUpdateTime) lastUpdateTime = updateTime;
+  }
   return timestampToDate(lastUpdateTime);
 }
 
 function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
   dataVal.value = role;
   selectIndex.value = roleList.value.indexOf(role);
-  if (!showOverlay.value) {
-    showOverlay.value = true;
-  }
+  if (!showOverlay.value) showOverlay.value = true;
 }
 
 function handleSelect(val: SelectedCValue) {
@@ -396,9 +377,7 @@ function handleSelect(val: SelectedCValue) {
   if (!selectedList.value.includes(dataVal.value)) {
     dataVal.value = selectedList.value[0];
     selectIndex.value = 0;
-  } else {
-    selectIndex.value = selectedList.value.indexOf(dataVal.value);
-  }
+  } else selectIndex.value = selectedList.value.indexOf(dataVal.value);
 }
 
 function handleSwitch(next: boolean): void {

@@ -48,54 +48,35 @@
   <UgoUid v-model="ovShow" :mode="ovMode" />
 </template>
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import GroEcharts from "@comp/userGacha/gro-echarts.vue";
+import GroHistory from "@comp/userGacha/gro-history.vue";
+import GroOverview from "@comp/userGacha/gro-overview.vue";
+import GroTable from "@comp/userGacha/gro-table.vue";
+import UgoUid from "@comp/userGacha/ugo-uid.vue";
+import TSUserGacha from "@Sqlite/modules/userGacha.js";
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 
-import showDialog from "../../components/func/dialog.js";
-import showLoading from "../../components/func/loading.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import GroEcharts from "../../components/userGacha/gro-echarts.vue";
-import GroHistory from "../../components/userGacha/gro-history.vue";
-import GroOverview from "../../components/userGacha/gro-overview.vue";
-import GroTable from "../../components/userGacha/gro-table.vue";
-import UgoUid from "../../components/userGacha/ugo-uid.vue";
-import { AppCharacterData, AppWeaponData } from "../../data/index.js";
-import TSUserGacha from "../../plugins/Sqlite/modules/userGacha.js";
-import { useUserStore } from "../../store/modules/user.js";
-import TGLogger from "../../utils/TGLogger.js";
-import { exportUigfData, readUigfData, verifyUigfData } from "../../utils/UIGF.js";
-import Hk4eApi from "../../web/request/hk4eReq.js";
-import TakumiApi from "../../web/request/takumiReq.js";
+import { AppCharacterData, AppWeaponData } from "@/data/index.js";
+import { useUserStore } from "@/store/modules/user.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { exportUigfData, readUigfData, verifyUigfData } from "@/utils/UIGF.js";
+import Hk4eApi from "@/web/request/hk4eReq.js";
+import TakumiApi from "@/web/request/takumiReq.js";
 
-// store
-const userStore = storeToRefs(useUserStore());
-const account = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
+const { account, cookie } = storeToRefs(useUserStore());
 const authkey = ref<string>("");
-
-// data
-const selectItem = ref<string[]>([]);
 const uidCur = ref<string>();
-const gachaListCur = ref<TGApp.Sqlite.GachaRecords.SingleTable[]>([]);
 const tab = ref<string>("overview");
-
-// overlay
 const ovShow = ref<boolean>(false);
 const ovMode = ref<"export" | "import">("import");
-
-// 监听 UID 变化
-watch(
-  () => uidCur.value,
-  async (newUid) => {
-    if (!newUid) return;
-    gachaListCur.value = await TSUserGacha.getGachaRecords(newUid);
-    showSnackbar.success(`成功获取 ${gachaListCur.value.length} 条祈愿数据`);
-    await TGLogger.Info(
-      `[UserGacha][${newUid}][watch] 成功获取 ${gachaListCur.value.length} 条祈愿数据`,
-    );
-  },
-);
+const selectItem = shallowRef<Array<string>>([]);
+const gachaListCur = shallowRef<Array<TGApp.Sqlite.GachaRecords.SingleTable>>([]);
 
 onMounted(async () => {
   showLoading.start("正在加载祈愿数据...", "正在获取祈愿 UID 列表");
@@ -116,6 +97,19 @@ onMounted(async () => {
   showLoading.end();
   showSnackbar.success(`成功获取 ${gachaListCur.value.length} 条祈愿数据`);
 });
+
+// 监听 UID 变化
+watch(
+  () => uidCur.value,
+  async (newUid) => {
+    if (!newUid) return;
+    gachaListCur.value = await TSUserGacha.getGachaRecords(newUid);
+    showSnackbar.success(`成功获取 ${gachaListCur.value.length} 条祈愿数据`);
+    await TGLogger.Info(
+      `[UserGacha][${newUid}][watch] 成功获取 ${gachaListCur.value.length} 条祈愿数据`,
+    );
+  },
+);
 
 // 刷新按钮点击事件
 async function confirmRefresh(force: boolean): Promise<void> {
@@ -140,13 +134,13 @@ async function confirmRefresh(force: boolean): Promise<void> {
     }
   }
   showLoading.start("正在刷新祈愿数据", "正在获取 authkey");
-  if (!userStore.cookie.value) {
+  if (!cookie.value) {
     showLoading.end();
     showSnackbar.error("请先登录");
     await TGLogger.Warn("[UserGacha][${account.gameUid}][confirmRefresh] 未检测到 cookie");
     return;
   }
-  const authkeyRes = await TakumiApi.bind.authKey(userStore.cookie.value, account.value);
+  const authkeyRes = await TakumiApi.bind.authKey(cookie.value, account.value);
   if (typeof authkeyRes === "string") {
     authkey.value = authkeyRes;
     await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 成功获取 authkey`);
@@ -168,7 +162,7 @@ async function confirmRefresh(force: boolean): Promise<void> {
   showLoading.update("正在刷新祈愿数据", "数据获取完成，即将刷新页面");
   showLoading.end();
   await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 刷新祈愿数据完成`);
-  // window.location.reload();
+  window.location.reload();
 }
 
 // 刷新单个池子
@@ -242,8 +236,7 @@ async function refreshGachaPool(
   }
 }
 
-// 导入 v4 版本的祈愿数据
-async function importUigf4(): Promise<void> {
+function importUigf4(): void {
   ovMode.value = "import";
   ovShow.value = true;
 }

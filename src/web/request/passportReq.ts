@@ -3,8 +3,8 @@
  * @description Passport 相关请求
  * @since Beta v0.6.3
  */
-import TGHttp from "../../utils/TGHttp.js";
-import { getRequestHeader } from "../utils/getRequestHeader.js";
+import TGHttp from "@/utils/TGHttp.js";
+import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
 
 // PassportApiBaseUrl => pAbu
 const pAbu: Readonly<string> = "https://passport-api.mihoyo.com/";

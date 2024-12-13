@@ -16,24 +16,22 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
 import { path } from "@tauri-apps/api";
 import { exists } from "@tauri-apps/plugin-fs";
 import { Command } from "@tauri-apps/plugin-shell";
 import { storeToRefs } from "pinia";
-import { computed } from "vue";
 
-import { useAppStore } from "../../store/modules/app.js";
-import { useUserStore } from "../../store/modules/user.js";
-import TGLogger from "../../utils/TGLogger.js";
-import PassportApi from "../../web/request/passportReq.js";
-import showSnackbar from "../func/snackbar.js";
+import { useAppStore } from "@/store/modules/app.js";
+import { useUserStore } from "@/store/modules/user.js";
+import TGLogger from "@/utils/TGLogger.js";
+import PassportApi from "@/web/request/passportReq.js";
 
-const userStore = storeToRefs(useUserStore());
-const appStore = storeToRefs(useAppStore());
-const account = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
+const { gameDir } = storeToRefs(useAppStore());
+const { account, uid, cookie } = storeToRefs(useUserStore());
 
 async function tryPlayGame(): Promise<void> {
-  if (!userStore.uid.value || !userStore.cookie.value) {
+  if (!uid.value || !cookie.value) {
     showSnackbar.warn("请先登录！");
     return;
   }
@@ -41,16 +39,16 @@ async function tryPlayGame(): Promise<void> {
     showSnackbar.warn("仅支持官服用户启动！");
     return;
   }
-  if (appStore.gameDir.value === "未设置") {
+  if (gameDir.value === "未设置") {
     showSnackbar.warn("未设置游戏安装目录！");
     return;
   }
-  const gamePath = `${appStore.gameDir.value}${path.sep()}YuanShen.exe`;
+  const gamePath = `${gameDir.value}${path.sep()}YuanShen.exe`;
   if (!(await exists(gamePath))) {
     showSnackbar.warn("未检测到原神本体应用！");
     return;
   }
-  const resp = await PassportApi.authTicket(account.value, userStore.cookie.value);
+  const resp = await PassportApi.authTicket(account.value, cookie.value);
   if (typeof resp !== "string") {
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     await TGLogger.Error(
@@ -61,7 +59,7 @@ async function tryPlayGame(): Promise<void> {
   }
   showSnackbar.success(`成功获取ticket:${resp}，正在启动应用...`);
   const cmd = Command.create("exec-sh", [`&"${gamePath}" login_auth_ticket=${resp}`], {
-    cwd: appStore.gameDir.value,
+    cwd: gameDir.value,
     encoding: "utf-8",
   });
   console.log(cmd);

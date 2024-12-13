@@ -1,39 +1,16 @@
 <template>
-  <div
-    class="tud-t-box"
-    :style="{
-      fontFamily: props.mode === 'level' ? 'var(--font-text)' : 'var(--font-title)',
-    }"
-  >
-    <div
-      class="tud-t-title"
-      :style="{
-        fontSize: props.mode === 'level' ? '18px' : '20px',
-      }"
-    >
-      <slot name="title">
-        <span>{{ props.name }}</span>
-      </slot>
+  <div class="tud-t-box">
+    <div class="tud-t-title">
+      <slot name="title">{{ props.name }}</slot>
     </div>
-    <div
-      class="tud-t-val"
-      :style="{
-        fontSize: props.mode === 'level' ? '18px' : '20px',
-      }"
-    >
+    <div class="tud-t-val">
       <img src="/icon/star/Abyss.webp" alt="Abyss" />
-      <slot name="val">
-        <span>{{ props.val }}</span>
-      </slot>
+      <slot name="val">{{ props.val }}</slot>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-interface TuaDetailTitleProps {
-  name: string;
-  val: number;
-  mode: "floor" | "level";
-}
+type TuaDetailTitleProps = { name: string; val: number; mode: "floor" | "level" };
 
 const props = defineProps<TuaDetailTitleProps>();
 </script>
@@ -44,10 +21,12 @@ const props = defineProps<TuaDetailTitleProps>();
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--common-shadow-4);
+  font-family: v-bind("props.mode === 'level' ? 'var(--font-text)' : 'var(--font-title)'");
 }
 
 .tud-t-title {
   color: var(--box-text-4);
+  font-size: v-bind("props.mode === 'level' ? '18px' : '20px'");
 }
 
 .tud-t-val {
@@ -55,6 +34,7 @@ const props = defineProps<TuaDetailTitleProps>();
   align-items: center;
   color: var(--tgc-yellow-1);
   font-family: var(--font-title);
+  font-size: v-bind("props.mode === 'level' ? '18px' : '20px'");
   gap: 5px;
 }
 

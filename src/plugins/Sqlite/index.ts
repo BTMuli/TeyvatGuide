@@ -7,24 +7,14 @@
 import { app } from "@tauri-apps/api";
 import Database from "@tauri-apps/plugin-sql";
 
-import TGLogger from "../../utils/TGLogger.js";
-
 import initDataSql from "./sql/initData.js";
 import { insertAppData } from "./sql/insertData.js";
 
+import TGLogger from "@/utils/TGLogger.js";
+
 class Sqlite {
-  /**
-   * @description 数据库地址
-   * @since Alpha v0.2.0
-   * @private
-   */
   private readonly dbPath: string = "sqlite:TeyvatGuide.db";
-  /**
-   * @description 数据库包含的表
-   * @since Beta v0.6.0
-   * @private
-   */
-  private readonly tables: string[] = [
+  private readonly tables: Readonly<Array<string>> = [
     "Achievements",
     "AppData",
     "GachaRecords",
@@ -37,13 +27,15 @@ class Sqlite {
     "UserCharacters",
     "UserRecord",
   ];
-
-  /**
-   * @description 内部数据库实例
-   * @since Beta v0.3.3
-   * @private
-   */
   private db: Database | null = null;
+  private static instance: Sqlite | null = null;
+
+  static getInstance(): Sqlite {
+    if (this.instance === null) this.instance = new Sqlite();
+    return this.instance;
+  }
+
+  private constructor() {}
 
   /**
    * @description 获取数据库实例
@@ -51,9 +43,7 @@ class Sqlite {
    * @returns {Promise<Database>}
    */
   public async getDB(): Promise<Database> {
-    if (this.db === null) {
-      this.db = await Database.load(this.dbPath);
-    }
+    if (this.db === null) this.db = await Database.load(this.dbPath);
     return this.db;
   }
 
@@ -86,9 +76,7 @@ class Sqlite {
   public async initDB(): Promise<void> {
     const db = await this.getDB();
     const sql = await initDataSql();
-    for (const item of sql) {
-      await db.execute(item);
-    }
+    for (const item of sql) await db.execute(item);
   }
 
   /**
@@ -136,9 +124,7 @@ class Sqlite {
   public async update(): Promise<void> {
     const db = await this.getDB();
     const sqlD = await initDataSql();
-    for (const item of sqlD) {
-      await db.execute(item);
-    }
+    for (const item of sqlD) await db.execute(item);
     // 检测是否存在字段
     await this.updateAbyss();
   }
@@ -166,16 +152,14 @@ class Sqlite {
    */
   public async reset(): Promise<void> {
     const db = await this.getDB();
-    await Promise.all(
-      this.tables.map(async (item) => {
-        const sql = `DROP TABLE IF EXISTS ${item};`;
-        await db.execute(sql);
-      }),
-    );
+    for (const item of this.tables) {
+      const sql = `DROP TABLE IF EXISTS ${item};`;
+      await db.execute(sql);
+    }
     await this.initDB();
   }
 }
 
-const TGSqlite = new Sqlite();
+const TGSqlite = Sqlite.getInstance();
 
 export default TGSqlite;

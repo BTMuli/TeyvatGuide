@@ -1,16 +1,9 @@
 <template>
-  <div v-html="props.data.insert.table"></div>
+  <div v-html="props.data.insert.table" />
 </template>
 <script lang="ts" setup>
-interface TaTableType {
-  insert: {
-    table: string;
-  };
-}
-
-interface TaTableProps {
-  data: TaTableType;
-}
+type TaTableType = { insert: { table: string } };
+type TaTableProps = { data: TaTableType };
 
 const props = defineProps<TaTableProps>();
 </script>

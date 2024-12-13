@@ -52,12 +52,12 @@
   <VpOverlaySearch gid="2" v-model="showSearch" :keyword="search" />
 </template>
 <script lang="ts" setup>
+import TOverlay from "@comp/app/t-overlay.vue";
+import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import { computed, ref } from "vue";
 
-import { AppAchievementSeriesData } from "../../data/index.js";
-import TGLogger from "../../utils/TGLogger.js";
-import TOverlay from "../app/t-overlay.vue";
-import VpOverlaySearch from "../viewPost/vp-overlay-search.vue";
+import { AppAchievementSeriesData } from "@/data/index.js";
+import TGLogger from "@/utils/TGLogger.js";
 
 type ToAchiInfoProps = { modelValue: boolean; data: TGApp.Sqlite.Achievement.RenderAchi };
 type ToAchiInfoEmits = {

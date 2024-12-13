@@ -47,18 +47,18 @@
   </TOverlay>
 </template>
 <script lang="ts" setup>
+import TOverlay from "@comp/app/t-overlay.vue";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TSUserGacha from "@Sqlite/modules/userGacha.js";
 import { path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
-import TSUserGacha from "../../plugins/Sqlite/modules/userGacha.js";
-import TGLogger from "../../utils/TGLogger.js";
-import { timestampToDate } from "../../utils/toolFunc.js";
-import { getUigf4Header, getUigf4Item, readUigf4Data, verifyUigfData } from "../../utils/UIGF.js";
-import TOverlay from "../app/t-overlay.vue";
-import showLoading from "../func/loading.js";
-import showSnackbar from "../func/snackbar.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
+import { getUigf4Header, getUigf4Item, readUigf4Data, verifyUigfData } from "@/utils/UIGF.js";
 
 type UgoUidProps =
   | { modelValue: boolean; mode: "export" }
@@ -69,8 +69,8 @@ type UgoUidItem = { uid: string; length: number; time: string };
 const props = defineProps<UgoUidProps>();
 const emits = defineEmits<UgoUidEmits>();
 const dataRaw = shallowRef<TGApp.Plugins.UIGF.Schema4>();
-const data = shallowRef<UgoUidItem[]>([]);
-const selectedData = shallowRef<UgoUidItem[]>([]);
+const data = shallowRef<Array<UgoUidItem>>([]);
+const selectedData = shallowRef<Array<UgoUidItem>>([]);
 const title = computed<string>(() => (props.mode === "import" ? "导入" : "导出"));
 const fp = ref<string>("未选择");
 
@@ -161,7 +161,7 @@ function parseData(data: TGApp.Plugins.UIGF.GachaHk4e): UgoUidItem {
 
 async function handleExportData(): Promise<void> {
   const uidList = await TSUserGacha.getUidList();
-  const tmpData: UgoUidItem[] = [];
+  const tmpData: Array<UgoUidItem> = [];
   for (const uid of uidList) {
     const dataRaw = await TSUserGacha.getGachaRecords(uid);
     tmpData.push(parseDataRaw(dataRaw));

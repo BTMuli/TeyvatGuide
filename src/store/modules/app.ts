@@ -6,17 +6,17 @@
 
 import { path } from "@tauri-apps/api";
 import { defineStore } from "pinia";
-import { reactive, ref } from "vue";
+import { ref } from "vue";
 
-import { getInitDeviceInfo } from "../../utils/toolFunc.js";
-import { type AnnoLang, AnnoServer } from "../../web/request/hk4eReq.js";
+import { getInitDeviceInfo } from "@/utils/toolFunc.js";
+import { type AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
 
 // 用于存储用户数据的路径
-const userDataDir = `${await path.appLocalDataDir()}${path.sep()}userData`;
+const userDataDir: Readonly<string> = `${await path.appLocalDataDir()}${path.sep()}userData`;
 // 用于存放数据库的路径
-const dbDataPath = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
+const dbDataPath: Readonly<string> = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
 // 用于存放日志的路径
-const logDataDir = await path.appLogDir();
+const logDataDir: Readonly<string> = await path.appLogDir();
 
 export enum NewsTypeEnum {
   notice = "1",
@@ -30,9 +30,9 @@ export const useAppStore = defineStore(
   "app",
   () => {
     // 应用打包时间
-    const buildTime = ref("");
+    const buildTime = ref<string>("");
     // 侧边栏设置
-    const sidebar = reactive({ collapse: true });
+    const sidebar = ref({ collapse: true });
     // 开发者模式
     const devMode = ref<boolean>(false);
     // 应用主题
@@ -42,7 +42,7 @@ export const useAppStore = defineStore(
     // 用户数据目录
     const userDir = ref<string>(userDataDir);
     // 数据库路径
-    const dbPath = ref<string>(dbDataPath);
+    const dbPath = ref<Readonly<string>>(dbDataPath);
     // 日志目录
     const logDir = ref<string>(logDataDir);
     // 游戏安装目录
@@ -65,7 +65,7 @@ export const useAppStore = defineStore(
       devMode.value = false;
       theme.value = "default";
       isLogin.value = false;
-      sidebar.collapse = true;
+      sidebar.value.collapse = true;
       server.value = AnnoServer.CN_ISLAND;
       lang.value = "zh-cn";
       recentNewsType.value = "notice";

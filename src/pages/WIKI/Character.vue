@@ -17,27 +17,27 @@
       </div>
     </div>
     <div class="wc-detail">
-      <TwcCharacter :item="curItem" @error="toOuter(curItem)" />
+      <TwcCharacter :item="curItem" />
     </div>
   </div>
   <TwoSelectC v-model="showSelect" @select-c="handleSelect" v-model:reset="resetSelect" />
 </template>
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TwcCharacter from "@comp/pageWiki/twc-character.vue";
+import TwcListItem from "@comp/pageWiki/twc-list-item.vue";
+import TwoSelectC, { type SelectedCValue } from "@comp/pageWiki/two-select-c.vue";
 import { onBeforeMount, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import showDialog from "../../components/func/dialog.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import TwcCharacter from "../../components/pageWiki/twc-character.vue";
-import TwcListItem from "../../components/pageWiki/twc-list-item.vue";
-import TwoSelectC, { SelectedCValue } from "../../components/pageWiki/two-select-c.vue";
-import { AppCharacterData } from "../../data/index.js";
-import { createObc } from "../../utils/TGWindow.js";
+import { AppCharacterData } from "@/data/index.js";
+import { createObc } from "@/utils/TGWindow.js";
 
 const id = useRoute().params.id.toString() ?? "0";
 const showSelect = ref<boolean>(false);
 const resetSelect = ref<boolean>(false);
-const cardsInfo = shallowRef<TGApp.App.Character.WikiBriefInfo[]>(AppCharacterData);
+const cardsInfo = shallowRef<Array<TGApp.App.Character.WikiBriefInfo>>(AppCharacterData);
 const curItem = shallowRef<TGApp.App.Character.WikiBriefInfo>({
   id: 0,
   contentId: 0,
@@ -69,7 +69,7 @@ watch(resetSelect, (val) => {
   if (val) cardsInfo.value = AppCharacterData;
 });
 
-function handleSelect(val: SelectedCValue) {
+function handleSelect(val: SelectedCValue): void {
   showSelect.value = false;
   const filterC = AppCharacterData.filter((item) => {
     if (!val.star.includes(item.star)) return false;

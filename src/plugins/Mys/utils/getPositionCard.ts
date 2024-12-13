@@ -1,12 +1,12 @@
 /**
  * @file plugins/Mys/utils/getPositionCard.ts
  * @description Mys 插件热点追踪工具
- * @since Beta v0.6.2
+ * @since Beta v0.6.6
  */
 
 /**
  * @description 根据热点追踪信息转为渲染用的数据
- * @since Beta v0.6.2
+ * @since Beta v0.6.6
  * @param {TGApp.Plugins.Mys.Position.Data[]} positionData 列表
  * @returns {TGApp.Plugins.Mys.Position.RenderCard[]} 返回列表
  */
@@ -15,28 +15,19 @@ function getPositionCard(
 ): TGApp.Plugins.Mys.Position.RenderCard[] {
   const res: TGApp.Plugins.Mys.Position.RenderCard[] = [];
   for (const position of positionData) {
-    let endStr: string;
-    if (position.end_time === "0") {
-      endStr = "";
-    } else {
-      endStr = new Date(Number(position.end_time)).toLocaleDateString().replace(/\//g, "-");
-    }
     let link = position.url;
     if (position.url === "" && position.content_id !== 0) {
       link = `https://bbs.mihoyo.com/ys/obc/content/${position.content_id}/detail?bbs_presentation_style=no_header`;
     }
+    const startTs = new Date(position.create_time).getTime();
+    const endTs = Number(position.end_time);
     const card: TGApp.Plugins.Mys.Position.RenderCard = {
       title: position.title,
       postId: position.url !== "" ? Number(position.url.split("/").pop()) : position.content_id,
       link: link,
       icon: position.icon,
       abstract: position.abstract,
-      time: {
-        start: position.create_time.split(" ")[0].replace(/\//g, "-"),
-        startStamp: new Date(position.create_time).getTime(),
-        end: endStr,
-        endStamp: Number(position.end_time),
-      },
+      time: { startStamp: startTs, endStamp: endTs, totalStamp: endTs - startTs },
     };
     res.push(card);
   }

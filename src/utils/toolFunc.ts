@@ -71,9 +71,7 @@ export function getDeviceInfo(key: keyof TGApp.App.Device.DeviceInfo): string {
   if (localDevice === null) {
     deviceInfo = getInitDeviceInfo();
     localStorage.setItem("deviceInfo", JSON.stringify({ deviceInfo }));
-  } else {
-    deviceInfo = JSON.parse(localDevice).deviceInfo;
-  }
+  } else deviceInfo = JSON.parse(localDevice).deviceInfo;
   return deviceInfo[key];
 }
 
@@ -104,9 +102,7 @@ export async function getCacheDir(): Promise<string[] | false> {
     const codeCache = `${cacheDir}${path.sep()}EBWebview${path.sep()}Default${path.sep()}Code Cache`;
     return [cache, codeCache];
   }
-  if (osType === "macos") {
-    return [`${cacheDir}${path.sep()}WebKit`];
-  }
+  if (osType === "macos") return [`${cacheDir}${path.sep()}WebKit`];
   return false;
 }
 

@@ -7,7 +7,7 @@
         v-if="props.showDiff"
         class="hta-olv-diff"
         :title="`上期数据：${getNumStr(props.last)}`"
-        :class="{ 'hta-olv-up': isUp, 'hta-olv-down': !isUp }"
+        :class="{ 'hta-olv-up': props.cur > props.last, 'hta-olv-down': props.cur < props.last }"
       >
         {{ getDiff(props.cur, props.last) }}
       </div>
@@ -15,18 +15,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-interface HtaOverviewLineProps {
-  label: string;
-  cur: number;
-  last: number;
-  showDiff?: boolean;
-}
-
-const props = withDefaults(defineProps<HtaOverviewLineProps>(), {
-  showDiff: true,
-});
-
-const isUp = props.cur - props.last > 0;
+type HtaOverviewLineProps = { label: string; cur: number; last: number; showDiff?: boolean };
+const props = withDefaults(defineProps<HtaOverviewLineProps>(), { showDiff: true });
 
 function getNumStr(num: number): string {
   if (Number.isInteger(num)) return num.toString();

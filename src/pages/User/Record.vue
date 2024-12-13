@@ -55,34 +55,30 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TSubLine from "@comp/app/t-subline.vue";
+import showDialog from "@comp/func/dialog.js";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TurAvatarGrid from "@comp/userRecord/tur-avatar-grid.vue";
+import TurHomeGrid from "@comp/userRecord/tur-home-grid.vue";
+import TurOverviewGrid from "@comp/userRecord/tur-overview-grid.vue";
+import TurRoleInfo from "@comp/userRecord/tur-role-info.vue";
+import TurWorldGrid from "@comp/userRecord/tur-world-grid.vue";
+import TSUserRecord from "@Sqlite/modules/userRecord.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 
-import TSubLine from "../../components/app/t-subline.vue";
-import showDialog from "../../components/func/dialog.js";
-import showLoading from "../../components/func/loading.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import TurAvatarGrid from "../../components/userRecord/tur-avatar-grid.vue";
-import TurHomeGrid from "../../components/userRecord/tur-home-grid.vue";
-import TurOverviewGrid from "../../components/userRecord/tur-overview-grid.vue";
-import TurRoleInfo from "../../components/userRecord/tur-role-info.vue";
-import TurWorldGrid from "../../components/userRecord/tur-world-grid.vue";
-import TSUserRecord from "../../plugins/Sqlite/modules/userRecord.js";
-import { useUserStore } from "../../store/modules/user.js";
-import TGLogger from "../../utils/TGLogger.js";
-import { generateShareImg } from "../../utils/TGShare.js";
-import TakumiRecordGenshinApi from "../../web/request/recordReq.js";
+import { useUserStore } from "@/store/modules/user.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { generateShareImg } from "@/utils/TGShare.js";
+import TakumiRecordGenshinApi from "@/web/request/recordReq.js";
 
-// store
-const userStore = storeToRefs(useUserStore());
-const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
-
-// data
+const { account, cookie } = storeToRefs(useUserStore());
 const uidCur = ref<number>();
-const uidList = ref<number[]>([]);
-const recordData = ref<TGApp.Sqlite.Record.RenderData>();
 const version = ref<string>();
+const uidList = shallowRef<Array<number>>([]);
+const recordData = shallowRef<TGApp.Sqlite.Record.RenderData>();
 
 onMounted(async () => {
   showLoading.start("正在获取战绩数据...");
@@ -92,19 +88,14 @@ onMounted(async () => {
   showLoading.end();
 });
 
-watch(
-  () => uidCur.value,
-  async () => await loadRecord(),
-);
+watch(() => uidCur.value, loadRecord);
 
 async function loadUid(): Promise<void> {
   uidList.value = await TSUserRecord.getAllUid();
-  if (uidList.value.length === 0) uidList.value = [Number(user.value.gameUid)];
-  if (uidList.value.includes(Number(user.value.gameUid))) {
-    uidCur.value = Number(user.value.gameUid);
-  } else {
-    uidCur.value = uidList.value[0];
-  }
+  if (uidList.value.length === 0) uidList.value = [Number(account.value.gameUid)];
+  if (uidList.value.includes(Number(account.value.gameUid))) {
+    uidCur.value = Number(account.value.gameUid);
+  } else uidCur.value = uidList.value[0];
 }
 
 async function loadRecord(): Promise<void> {
@@ -116,8 +107,12 @@ async function loadRecord(): Promise<void> {
 }
 
 async function refreshRecord(): Promise<void> {
-  if (!user.value) return;
-  if (uidCur.value && uidCur.value.toString() !== user.value.gameUid) {
+  if (!cookie.value) {
+    showSnackbar.warn("请先登录");
+    await TGLogger.Warn(`[UserRecord][refresh][${account.value.gameUid}] 未登录`);
+    return;
+  }
+  if (uidCur.value && uidCur.value.toString() !== account.value.gameUid) {
     const switchCheck = await showDialog.check(
       "是否切换游戏账户",
       `确认则尝试切换至${uidCur.value}`,
@@ -129,7 +124,7 @@ async function refreshRecord(): Promise<void> {
     }
     const freshCheck = await showDialog.check(
       "是否刷新战绩数据",
-      `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
+      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
     );
     if (!freshCheck) {
       showSnackbar.cancel("已取消战绩数据刷新");
@@ -137,28 +132,22 @@ async function refreshRecord(): Promise<void> {
     }
   }
   showLoading.start("正在刷新战绩数据...");
-  await TGLogger.Info(`[UserRecord][refresh][${user.value.gameUid}] 刷新战绩数据`);
-  if (!userStore.cookie.value) {
-    showLoading.end();
-    showSnackbar.warn("请先登录");
-    await TGLogger.Warn(`[UserRecord][refresh][${user.value.gameUid}] 未登录`);
-    return;
-  }
-  const res = await TakumiRecordGenshinApi.index(userStore.cookie.value, user.value);
+  await TGLogger.Info(`[UserRecord][refresh][${account.value.gameUid}] 刷新战绩数据`);
+  const res = await TakumiRecordGenshinApi.index(cookie.value, account.value);
   if ("retcode" in res) {
     showLoading.end();
     showSnackbar.error(`[${res.retcode}] ${res.message}`);
-    await TGLogger.Error(`[UserRecord][refresh][${user.value.gameUid}] 获取战绩数据失败`);
+    await TGLogger.Error(`[UserRecord][refresh][${account.value.gameUid}] 获取战绩数据失败`);
     await TGLogger.Error(
-      `[UserRecord][refresh][${user.value.gameUid}] ${res.retcode} ${res.message}`,
+      `[UserRecord][refresh][${account.value.gameUid}] ${res.retcode} ${res.message}`,
     );
     return;
   }
-  await TGLogger.Info(`[UserRecord][refresh][${user.value.gameUid}] 获取战绩数据成功`);
-  await TGLogger.Info(`[UserRecord][refresh][${user.value.gameUid}]`, false);
+  await TGLogger.Info(`[UserRecord][refresh][${account.gameUid}] 获取战绩数据成功`);
+  await TGLogger.Info(`[UserRecord][refresh][${account.value.gameUid}]`, false);
   console.log(res);
   showLoading.update("正在保存战绩数据");
-  await TSUserRecord.saveRecord(Number(user.value.gameUid), res);
+  await TSUserRecord.saveRecord(Number(account.value.gameUid), res);
   showLoading.update("正在加载战绩数据");
   await loadUid();
   await loadRecord();
@@ -171,13 +160,17 @@ async function shareRecord(): Promise<void> {
     showSnackbar.warn("未找到战绩数据，请尝试刷新");
     return;
   }
-  await TGLogger.Info(`[UserRecord][shareRecord][${user.value.gameUid}] 生成分享图片`);
-  const recordBox = <HTMLElement>document.querySelector(".ur-box");
-  const fileName = `【原神战绩】-${user.value.gameUid}`;
+  await TGLogger.Info(`[UserRecord][shareRecord][${account.value.gameUid}] 生成分享图片`);
+  const recordBox = document.querySelector<HTMLElement>(".ur-box");
+  if (recordBox === null) {
+    showSnackbar.error("未找到战绩数据，请尝试刷新");
+    return;
+  }
+  const fileName = `【原神战绩】-${account.value.gameUid}`;
   showLoading.start("正在生成图片", fileName);
   await generateShareImg(fileName, recordBox);
   showLoading.end();
-  await TGLogger.Info(`[UserRecord][shareRecord][${user.value.gameUid}] 生成分享图片成功`);
+  await TGLogger.Info(`[UserRecord][shareRecord][${account.value.gameUid}] 生成分享图片成功`);
 }
 
 async function deleteRecord(): Promise<void> {

@@ -37,9 +37,7 @@ function getLotteryCard(
     status: lotteryData.status,
     creator: lotteryData.creator,
     drawTime: lotteryData.draw_time,
-    rewards: lotteryData.user_rewards.map((reward) => {
-      return getLotteryRewardCard(reward);
-    }),
+    rewards: lotteryData.user_rewards.map(getLotteryRewardCard),
   };
 }
 

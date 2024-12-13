@@ -3,7 +3,7 @@
     <div class="thc-title">
       <slot name="title"></slot>
     </div>
-    <div v-if="props.append" class="thc-append">
+    <div v-if="append" class="thc-append">
       <slot name="title-append"></slot>
     </div>
     <div class="thc-box">
@@ -12,8 +12,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-type THomeCardProps = { append?: boolean };
-const props = defineProps<THomeCardProps>();
+defineProps<{ append?: boolean }>();
 </script>
 <style lang="css" scoped>
 .thc-container {

@@ -1,7 +1,7 @@
 <template>
   <div class="tww-box" v-if="data !== undefined">
     <div class="tww-brief">
-      <TItembox :model-value="box" />
+      <TItemBox :model-value="box" />
       <div class="tww-brief-info">
         <div class="tww-brief-title">
           <span>{{ data.name }}</span>
@@ -51,40 +51,37 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from "vue";
-
-import { WikiWeaponData } from "../../data/index.js";
-import { createObc } from "../../utils/TGWindow.js";
-import { parseHtmlText } from "../../utils/toolFunc.js";
-import TItembox, { TItemBoxData } from "../app/t-item-box.vue";
-import showSnackbar from "../func/snackbar.js";
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import TwcMaterials from "./twc-materials.vue";
 
-interface TwcWeaponProps {
-  item: TGApp.App.Weapon.WikiBriefInfo;
-}
+import { WikiWeaponData } from "@/data/index.js";
+import { createObc } from "@/utils/TGWindow.js";
+import { parseHtmlText } from "@/utils/toolFunc.js";
+
+type TwcWeaponProps = { item: TGApp.App.Weapon.WikiBriefInfo };
 
 const props = defineProps<TwcWeaponProps>();
 
-const data = ref<TGApp.App.Weapon.WikiItem>();
-const box = computed(() => {
-  return <TItemBoxData>{
-    bg: `/icon/bg/${data.value?.star}-Star.webp`,
-    icon: `/WIKI/weapon/${data.value?.id}.webp`,
-    size: "128px",
-    height: "128px",
-    display: "inner",
-    lt: `/icon/weapon/${data.value?.weapon}.webp`,
-    ltSize: "40px",
-    innerHeight: 0,
-    clickable: false,
-  };
-});
+const data = shallowRef<TGApp.App.Weapon.WikiItem>();
+const box = computed<TItemBoxData>(() => ({
+  bg: `/icon/bg/${data.value?.star}-Star.webp`,
+  icon: `/WIKI/weapon/${data.value?.id}.webp`,
+  size: "128px",
+  height: "128px",
+  display: "inner",
+  lt: `/icon/weapon/${data.value?.weapon}.webp`,
+  ltSize: "40px",
+  innerHeight: 0,
+  innerText: "",
+  clickable: false,
+}));
 const select = ref<number>(1);
-const selectItems = ref<number[]>([]);
+const selectItems = shallowRef<Array<number>>([]);
 
-async function loadData(): Promise<void> {
+function loadData(): void {
   const res = WikiWeaponData.find((item) => item.id === props.item.id);
   if (res === undefined) {
     showSnackbar.warn(`未获取到武器 ${props.item.name} 的 Wiki 数据`);
@@ -96,12 +93,9 @@ async function loadData(): Promise<void> {
   selectItems.value = data.value?.affix.Descriptions.map((item) => item.Level) ?? [];
 }
 
-watch(
-  () => props.item,
-  async () => await loadData(),
-);
+watch(() => props.item, loadData);
 
-onMounted(async () => await loadData());
+onMounted(() => loadData());
 
 async function toWiki(): Promise<void> {
   if (props.item.contentId === 0) {

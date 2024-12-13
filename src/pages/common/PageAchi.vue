@@ -37,9 +37,8 @@
           v-model:cur="selectedSeries"
           :series="item"
           :uid="uidCur"
-          @click="selectSeries(item)"
+          @click="selectedSeries = item"
         />
-        <div style="height: 10px" />
       </template>
     </v-virtual-scroll>
     <TuaAchiList
@@ -53,53 +52,44 @@
 </template>
 
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TuaAchiList from "@comp/userAchi/tua-achi-list.vue";
+import TuaSeries from "@comp/userAchi/tua-series.vue";
+import TSUserAchi from "@Sqlite/modules/userAchi.js";
 import { path } from "@tauri-apps/api";
-import { listen, UnlistenFn } from "@tauri-apps/api/event";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import showDialog from "../../components/func/dialog.js";
-import showLoading from "../../components/func/loading.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import TuaAchiList from "../../components/userAchi/tua-achi-list.vue";
-import TuaSeries from "../../components/userAchi/tua-series.vue";
-import { AppAchievementSeriesData } from "../../data/index.js";
-import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
-import TGLogger from "../../utils/TGLogger.js";
+import { AppAchievementSeriesData } from "@/data/index.js";
+import TGLogger from "@/utils/TGLogger.js";
 import {
   getUiafHeader,
   readUiafData,
   verifyUiafData,
   verifyUiafDataClipboard,
-} from "../../utils/UIAF.js";
+} from "@/utils/UIAF.js";
+
+const seriesList = AppAchievementSeriesData.sort((a, b) => a.order - b.order).map((s) => s.id);
+const route = useRoute();
+const router = useRouter();
+let achiListener: UnlistenFn | null = null;
 
 const search = ref<string>("");
 const isSearch = ref<boolean>(false);
 const hideFin = ref<boolean>(false);
-
 const uidList = ref<number[]>([]);
 const uidCur = ref<number>(0);
-const overview = ref<TGApp.Sqlite.Achievement.Overview>({ fin: 0, total: 1 });
-const seriesList = AppAchievementSeriesData.sort((a, b) => a.order - b.order).map((s) => s.id);
 const selectedSeries = ref<number>(-1);
-
+const overview = shallowRef<TGApp.Sqlite.Achievement.Overview>({ fin: 0, total: 1 });
 const title = computed<string>(() => {
   const percentage = ((overview.value.fin * 100) / overview.value.total).toFixed(2);
   return `${overview.value.fin}/${overview.value.total} ${percentage}%`;
 });
-
-const route = useRoute();
-const router = useRouter();
-
-let achiListener: UnlistenFn | null = null;
-
-async function switchHideFin() {
-  const text = hideFin.value ? "显示已完成" : "隐藏已完成";
-  hideFin.value = !hideFin.value;
-  showSnackbar.success(`已${text}`);
-}
 
 onMounted(async () => {
   showLoading.start("正在加载成就数据...");
@@ -112,27 +102,19 @@ onMounted(async () => {
   if (route.query.app && typeof route.query.app === "string") {
     await handleImportOuter(route.query.app);
   }
-  achiListener = await listen<number>("updateAchi", async () => await refreshOverview());
+  achiListener = await listen<void>("updateAchi", async () => await refreshOverview());
 });
 
-watch(
-  () => uidCur.value,
-  async () => await refreshOverview(),
-);
+watch(() => uidCur.value, refreshOverview);
 
-onUnmounted(async () => {
-  if (achiListener !== null) {
-    achiListener();
-    achiListener = null;
-  }
-});
+function switchHideFin(): void {
+  const text = hideFin.value ? "显示已完成" : "隐藏已完成";
+  hideFin.value = !hideFin.value;
+  showSnackbar.success(`已${text}`);
+}
 
 async function refreshOverview(): Promise<void> {
   overview.value = await TSUserAchi.getOverview(uidCur.value);
-}
-
-function selectSeries(series: number): void {
-  selectedSeries.value = series;
 }
 
 async function importJson(): Promise<void> {
@@ -266,6 +248,13 @@ async function deleteUid(): Promise<void> {
   if (uidList.value.length === 0) uidList.value = [0];
   uidCur.value = uidList.value[0];
 }
+
+onUnmounted(async () => {
+  if (achiListener !== null) {
+    achiListener();
+    achiListener = null;
+  }
+});
 </script>
 <style lang="css" scoped>
 .achi-search {

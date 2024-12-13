@@ -1,5 +1,5 @@
+<!-- todo 优化，增加筛选功能，调整 typo -->
 <template>
-  <!-- todo 优化，增加筛选功能 -->
   <div class="ua-gt-box">
     <v-data-table
       :headers="headers"
@@ -21,9 +21,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-interface GroTableProps {
-  modelValue: TGApp.Sqlite.GachaRecords.SingleTable[];
-}
+type GroTableProps = { modelValue: Array<TGApp.Sqlite.GachaRecords.SingleTable> };
 
 const props = defineProps<GroTableProps>();
 

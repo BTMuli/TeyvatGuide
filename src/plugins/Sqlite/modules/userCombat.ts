@@ -4,30 +4,13 @@
  * @since Beta v0.6.3
  */
 
+import TGSqlite from "@Sqlite/index.js";
+import { transUserCombat } from "@Sqlite/utils/transUserCombat.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 
-import TGLogger from "../../../utils/TGLogger.js";
-import { timestampToDate } from "../../../utils/toolFunc.js";
-import TGSqlite from "../index.js";
-import { transUserCombat } from "../utils/transUserCombat.js";
-
-/**
- * @description 数据表检测
- * @since Beta v0.6.3
- * @todo 版更后移除，该方法仅用于测试版过渡
- * @return {Promise<boolean>}
- */
-async function check(): Promise<boolean> {
-  const db = await TGSqlite.getDB();
-  try {
-    await db.select("SELECT DISTINCT uid FROM RoleCombat;");
-    return true;
-  } catch (e) {
-    console.log(e);
-    return false;
-  }
-}
+import TGLogger from "@/utils/TGLogger.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
 /**
  * @description 直接插入数据
@@ -153,9 +136,7 @@ async function restoreCombat(dir: string): Promise<boolean> {
   try {
     const data: TGApp.Sqlite.Combat.SingleTable[] = JSON.parse(await readTextFile(filePath));
     const db = await TGSqlite.getDB();
-    for (const abyss of data) {
-      await db.execute(getInsertSql(abyss));
-    }
+    for (const abyss of data) await db.execute(getInsertSql(abyss));
     return true;
   } catch (e) {
     await TGLogger.Error(`恢复剧诗数据失败${filePath}`);
@@ -165,7 +146,6 @@ async function restoreCombat(dir: string): Promise<boolean> {
 }
 
 const TSUserCombat = {
-  check,
   getAllUid,
   getCombat,
   saveCombat,

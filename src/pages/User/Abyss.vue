@@ -30,30 +30,20 @@
         <v-btn
           class="ua-btn"
           @click="shareAbyss()"
-          :rounded="true"
           :disabled="localAbyss.length === 0"
+          prepend-icon="mdi-share"
         >
-          <v-icon>mdi-share</v-icon>
-          <span>分享</span>
+          分享
         </v-btn>
-        <v-btn class="ua-btn" @click="refreshAbyss()" :rounded="true">
-          <v-icon>mdi-refresh</v-icon>
-          <span>刷新</span>
-        </v-btn>
-        <v-btn class="ua-btn" @click="uploadAbyss()" :rounded="true">
-          <v-icon>mdi-cloud-upload</v-icon>
-          <span>上传</span>
-        </v-btn>
-        <v-btn class="ua-btn" @click="deleteAbyss()" :rounded="true">
-          <v-icon>mdi-delete</v-icon>
-          <span>删除</span>
-        </v-btn>
+        <v-btn class="ua-btn" @click="refreshAbyss()" prepend-icon="mdi-refresh">刷新</v-btn>
+        <v-btn class="ua-btn" @click="uploadAbyss()" prepend-icon="mdi-cloud-upload">上传</v-btn>
+        <v-btn class="ua-btn" @click="deleteAbyss()" prepend-icon="mdi-delete">删除</v-btn>
       </div>
     </template>
   </v-app-bar>
   <div class="ua-box">
     <v-tabs v-model="userTab" direction="vertical" class="ua-tabs-box" center-active>
-      <v-tab v-for="item in localAbyss" :key="item.id" :value="item.id"> 第{{ item.id }}期</v-tab>
+      <v-tab v-for="item in localAbyss" :key="item.id" :value="item.id">第{{ item.id }}期</v-tab>
     </v-tabs>
     <v-window v-model="userTab" class="ua-window">
       <v-window-item
@@ -105,67 +95,49 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TSubLine from "@comp/app/t-subline.vue";
+import showDialog from "@comp/func/dialog.js";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TuaDetail from "@comp/userAbyss/tua-detail.vue";
+import TuaOverview from "@comp/userAbyss/tua-overview.vue";
+import Hutao from "@Hutao/index.js";
+import TSUserAbyss from "@Sqlite/modules/userAbyss.js";
+import TSUserAvatar from "@Sqlite/modules/userAvatar.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
-import TSubLine from "../../components/app/t-subline.vue";
-import showDialog from "../../components/func/dialog.js";
-import showLoading from "../../components/func/loading.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import TuaDetail from "../../components/userAbyss/tua-detail.vue";
-import TuaOverview from "../../components/userAbyss/tua-overview.vue";
-import Hutao from "../../plugins/Hutao/index.js";
-import TSUserAbyss from "../../plugins/Sqlite/modules/userAbyss.js";
-import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
-import TSUserCombat from "../../plugins/Sqlite/modules/userCombat.js";
-import { useUserStore } from "../../store/modules/user.js";
-import TGLogger from "../../utils/TGLogger.js";
-import { generateShareImg } from "../../utils/TGShare.js";
-import TakumiRecordGenshinApi from "../../web/request/recordReq.js";
+import { useUserStore } from "@/store/modules/user.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { generateShareImg } from "@/utils/TGShare.js";
+import TakumiRecordGenshinApi from "@/web/request/recordReq.js";
 
-// store
-const userStore = storeToRefs(useUserStore());
-
-// data
-const userTab = ref<number>(0);
-const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
-
-const localAbyss = ref<TGApp.Sqlite.Abyss.TableData[]>([]);
-const abyssRef = ref<HTMLElement>(<HTMLElement>{});
-const version = ref<string>();
 const router = useRouter();
-
-const uidList = ref<string[]>();
+const { account, cookie } = storeToRefs(useUserStore());
+const userTab = ref<number>(0);
+const version = ref<string>();
 const uidCur = ref<string>();
-const abyssIdList = computed<number[]>(() => {
-  return localAbyss.value.map((abyss) => abyss.id);
-});
+const uidList = shallowRef<Array<string>>();
+const localAbyss = shallowRef<TGApp.Sqlite.Abyss.TableData[]>([]);
+const abyssIdList = computed<Array<number>>(() => localAbyss.value.map((abyss) => abyss.id));
 
 onMounted(async () => {
   showLoading.start("正在加载深渊数据...");
   version.value = await getVersion();
   await TGLogger.Info("[UserAbyss][onMounted] 打开角色深渊页面");
   uidList.value = await TSUserAbyss.getAllUid();
-  if (uidList.value.includes(user.value.gameUid)) uidCur.value = user.value.gameUid;
+  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
   else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
   else uidCur.value = "";
   await loadAbyss();
   showLoading.end();
 });
 
-watch(
-  () => uidCur.value,
-  async () => await loadAbyss(),
-);
+watch(() => uidCur.value, loadAbyss);
 
 async function toCombat(): Promise<void> {
-  const check = await TSUserCombat.check();
-  if (!check) {
-    showSnackbar.warn("未检测到剧诗表，请更新数据库！");
-    return;
-  }
   await router.push({ name: "真境剧诗" });
 }
 
@@ -181,12 +153,12 @@ async function loadAbyss(): Promise<void> {
 }
 
 async function refreshAbyss(): Promise<void> {
-  if (!userStore.cookie.value) {
+  if (!cookie.value) {
     showSnackbar.warn("未登录");
     await TGLogger.Warn("[UserAbyss][getAbyssData] 未登录");
     return;
   }
-  if (uidCur.value && uidCur.value !== user.value.gameUid) {
+  if (uidCur.value && uidCur.value !== account.value.gameUid) {
     const switchCheck = await showDialog.check(
       "是否切换游戏账户",
       `确认则尝试切换至 ${uidCur.value}`,
@@ -198,7 +170,7 @@ async function refreshAbyss(): Promise<void> {
     }
     const freshCheck = await showDialog.check(
       "确定刷新？",
-      `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
+      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
     );
     if (!freshCheck) {
       showSnackbar.cancel("已取消深渊数据刷新");
@@ -206,43 +178,53 @@ async function refreshAbyss(): Promise<void> {
     }
   }
   await TGLogger.Info("[UserAbyss][getAbyssData] 更新深渊数据");
-  showLoading.start("正在获取上期深渊数据...", `UID: ${user.value.gameUid}`);
-  const resP = await TakumiRecordGenshinApi.spiralAbyss(userStore.cookie.value, user.value, "2");
+  showLoading.start("正在获取上期深渊数据...", `UID: ${account.value.gameUid}`);
+  const resP = await TakumiRecordGenshinApi.spiralAbyss(cookie.value, account.value, "2");
   if ("retcode" in resP) {
     showLoading.end();
     showSnackbar.error(`[${resP.retcode}]${resP.message}`);
-    await TGLogger.Error(`[UserAbyss][getAbyssData] 获取${user.value.gameUid}的上期深渊数据失败`);
+    await TGLogger.Error(
+      `[UserAbyss][getAbyssData] 获取${account.value.gameUid}的上期深渊数据失败`,
+    );
     await TGLogger.Error(`[UserAbyss][getAbyssData] ${resP.retcode} ${resP.message}`);
     return;
   }
   await TGLogger.Info("[UserAbyss][getAbyssData] 成功获取上期深渊数据");
-  showLoading.update("正在保存上期深渊数据...", `UID: ${user.value.gameUid}`);
-  await TSUserAbyss.saveAbyss(user.value.gameUid, resP);
-  showLoading.update("正在获取本期深渊数据...", `UID: ${user.value.gameUid}`);
-  const res = await TakumiRecordGenshinApi.spiralAbyss(userStore.cookie.value, user.value, "1");
+  showLoading.update("正在保存上期深渊数据...", `UID: ${account.value.gameUid}`);
+  await TSUserAbyss.saveAbyss(account.value.gameUid, resP);
+  showLoading.update("正在获取本期深渊数据...", `UID: ${account.value.gameUid}`);
+  const res = await TakumiRecordGenshinApi.spiralAbyss(cookie.value, account.value, "1");
   if ("retcode" in res) {
     showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);
-    await TGLogger.Error(`[UserAbyss][getAbyssData] 获取${user.value.gameUid}的本期深渊数据失败`);
+    await TGLogger.Error(
+      `[UserAbyss][getAbyssData] 获取${account.value.gameUid}的本期深渊数据失败`,
+    );
     await TGLogger.Error(`[UserAbyss][getAbyssData] ${res.retcode} ${res.message}`);
     return;
   }
-  showLoading.update("正在保存本期深渊数据...", `UID: ${user.value.gameUid}`);
-  await TSUserAbyss.saveAbyss(user.value.gameUid, res);
-  await TGLogger.Info(`[UserAbyss][getAbyssData] 成功获取${user.value.gameUid}的本期深渊数据`);
-  showLoading.update("正在加载深渊数据...", `UID: ${user.value.gameUid}`);
+  showLoading.update("正在保存本期深渊数据...", `UID: ${account.value.gameUid}`);
+  await TSUserAbyss.saveAbyss(account.value.gameUid, res);
+  await TGLogger.Info(`[UserAbyss][getAbyssData] 成功获取${account.value.gameUid}的本期深渊数据`);
+  showLoading.update("正在加载深渊数据...", `UID: ${account.value.gameUid}`);
   uidList.value = await TSUserAbyss.getAllUid();
-  uidCur.value = user.value.gameUid;
+  uidCur.value = account.value.gameUid;
   await loadAbyss();
   showLoading.end();
 }
 
 async function shareAbyss(): Promise<void> {
   await TGLogger.Info(`[UserAbyss][shareAbyss][${userTab.value}] 生成深渊数据分享图片`);
-  const fileName = `【深渊数据】${userTab.value}-${user.value.gameUid}`;
+  const fileName = `【深渊数据】${userTab.value}-${account.value.gameUid}`;
   showLoading.start("正在生成图片", `${fileName}.png`);
-  abyssRef.value = <HTMLElement>document.getElementById(`user-abyss-${userTab.value}`);
-  await generateShareImg(fileName, abyssRef.value);
+  const shareDom = document.querySelector<HTMLElement>(`#user-abyss-${userTab.value}`);
+  if (shareDom === null) {
+    showLoading.end();
+    showSnackbar.error("未找到深渊数据");
+    await TGLogger.Error("[UserAbyss][shareAbyss] 未找到深渊数据");
+    return;
+  }
+  await generateShareImg(fileName, shareDom);
   showLoading.end();
   await TGLogger.Info(`[UserAbyss][shareAbyss][${userTab.value}] 生成深渊数据分享图片成功`);
 }
@@ -270,18 +252,18 @@ async function uploadAbyss(): Promise<void> {
     return;
   }
   try {
-    showLoading.start("正在上传深渊数据", `UID: ${user.value.gameUid}`);
+    showLoading.start("正在上传深渊数据", `UID: ${account.value.gameUid}`);
     const transAbyss = Hutao.Abyss.utils.transData(abyssData);
-    showLoading.update("正在获取角色数据", `UID: ${user.value.gameUid}`);
-    const roles = await TSUserAvatar.getAvatars(Number(user.value.gameUid));
+    showLoading.update("正在获取角色数据", `UID: ${account.value.gameUid}`);
+    const roles = await TSUserAvatar.getAvatars(Number(account.value.gameUid));
     if (!roles) {
       showLoading.end();
       showSnackbar.warn("未找到角色数据");
       return;
     }
-    showLoading.update("正在转换角色数据", `UID: ${user.value.gameUid}`);
+    showLoading.update("正在转换角色数据", `UID: ${account.value.gameUid}`);
     transAbyss.Avatars = Hutao.Abyss.utils.transAvatars(roles);
-    showLoading.update("正在上传深渊数据", `UID: ${user.value.gameUid}`);
+    showLoading.update("正在上传深渊数据", `UID: ${account.value.gameUid}`);
     const res = await Hutao.Abyss.upload(transAbyss);
     showLoading.end();
     if (res.retcode !== 0) {

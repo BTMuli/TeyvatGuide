@@ -28,17 +28,18 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onBeforeMount, ref } from "vue";
+import TSAvatarBirth from "@Sqlite/modules/avatarBirth.js";
+import { storeToRefs } from "pinia";
+import { onBeforeMount, ref, shallowRef } from "vue";
 import { useRouter } from "vue-router";
 
-import TSAvatarBirth from "../../plugins/Sqlite/modules/avatarBirth.js";
-import { useAppStore } from "../../store/modules/app.js";
+import { useAppStore } from "@/store/modules/app.js";
 
-const isBirthday = ref<boolean>(false);
 const router = useRouter();
-const cur = ref<TGApp.Archive.Birth.CalendarItem[]>([]);
-const next = ref<TGApp.Archive.Birth.RoleItem[]>([]);
-const appStore = useAppStore();
+const { recentNewsType } = storeToRefs(useAppStore());
+const isBirthday = ref<boolean>(false);
+const cur = shallowRef<Array<TGApp.Archive.Birth.CalendarItem>>([]);
+const next = shallowRef<Array<TGApp.Archive.Birth.RoleItem>>([]);
 
 onBeforeMount(async () => {
   const check = TSAvatarBirth.isAvatarBirth();
@@ -64,7 +65,7 @@ function toBirth(type: TGApp.Archive.Birth.RoleItem | true): void {
     return;
   }
   if (cur.value.length > 0 && !cur.value[0].is_subscribe) {
-    appStore.recentNewsType = "news";
+    recentNewsType.value = "news";
     router.push("/news/2/news");
     return;
   }

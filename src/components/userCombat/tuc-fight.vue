@@ -3,32 +3,29 @@
     <div class="tucfi-label">
       <slot name="label">{{ props.label }}</slot>
     </div>
-    <div v-if="props.data === null">
-      <span class="tucfi-data">暂无数据</span>
-    </div>
+    <div v-if="props.data === null"><span class="tucfi-data">暂无数据</span></div>
     <div v-else-if="!Array.isArray(props.data)" class="tucfi-data">
-      <TItembox :model-value="getBox()" />
+      <TItemBox :model-value="getBox(props.data)" />
     </div>
     <div class="tucfi-icons" v-else>
       <div v-for="(item, idx) in props.data" :key="idx" class="tucfi-icon">
-        <TItembox :model-value="getBox2(item)" />
+        <TItemBox :model-value="getBox2(item)" />
       </div>
       <div v-if="props.data.length === 0" class="tucfi-data">暂无数据</div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import TItembox, { TItemBoxData } from "../app/t-item-box.vue";
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 
-interface TucFightProps {
+type TucFightProps = {
   label: string;
-  data: TGApp.Game.Combat.AvatarMini | TGApp.Game.Combat.AvatarMini[] | null;
-}
+  data: TGApp.Game.Combat.AvatarMini | Array<TGApp.Game.Combat.AvatarMini> | null;
+};
 
 const props = defineProps<TucFightProps>();
 
-function getBox(): TItemBoxData {
-  const role = <TGApp.Game.Combat.AvatarMini>props.data;
+function getBox(role: TGApp.Game.Combat.AvatarMini): TItemBoxData {
   return {
     bg: `/icon/bg/${role.rarity === 105 ? 5 : role.rarity}-BGC.webp`,
     clickable: false,

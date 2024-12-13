@@ -4,7 +4,7 @@
  * @since Beta v0.5.0
  */
 
-import TGHttp from "../../../utils/TGHttp.js";
+import TGHttp from "@/utils/TGHttp.js";
 
 /**
  * @description 获取视频基本信息

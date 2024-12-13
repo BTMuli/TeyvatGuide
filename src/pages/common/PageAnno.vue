@@ -10,7 +10,7 @@
         <v-select
           class="anno-select"
           :items="annoServerList"
-          v-model="curRegion"
+          v-model="server"
           item-title="text"
           item-value="value"
           label="服务器"
@@ -20,7 +20,7 @@
         <v-select
           class="anno-select"
           :items="annoLangList"
-          v-model="curLang"
+          v-model="lang"
           item-title="text"
           item-value="value"
           label="语言"
@@ -30,10 +30,7 @@
       </div>
     </template>
     <template #append>
-      <v-btn class="anno-switch-btn" @click="switchNews">
-        <template #prepend>
-          <v-icon>mdi-bullhorn</v-icon>
-        </template>
+      <v-btn class="anno-switch-btn" @click="switchNews" prepend-icon="mdi-bullhorn">
         切换米游社咨讯
       </v-btn>
     </template>
@@ -45,8 +42,8 @@
           v-for="item in annoCards[value]"
           :key="item.id"
           :model-value="item"
-          :region="curRegion"
-          :lang="curLang"
+          :region="server"
+          :lang="lang"
         />
       </div>
     </v-window-item>
@@ -54,21 +51,24 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, ref, watch } from "vue";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TaCard from "@comp/pageAnno/ta-card.vue";
+import { storeToRefs } from "pinia";
+import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
-import showLoading from "../../components/func/loading.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import TaCard from "../../components/pageAnno/ta-card.vue";
-import { useAppStore } from "../../store/modules/app.js";
-import TGLogger from "../../utils/TGLogger.js";
-import Hk4eApi, { AnnoLang, AnnoServer } from "../../web/request/hk4eReq.js";
-import { getAnnoCard } from "../../web/utils/getAnnoCard.js";
-import { decodeRegExp } from "../../web/utils/tools.js";
+import { useAppStore } from "@/store/modules/app.js";
+import TGLogger from "@/utils/TGLogger.js";
+import Hk4eApi, { type AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
+import { getAnnoCard } from "@/web/utils/getAnnoCard.js";
+import { decodeRegExp } from "@/web/utils/tools.js";
 
 type AnnoSelect = { text: string; value: string };
+type AnnoKey = keyof typeof AnnoType;
+type AnnoCard = { [key in AnnoKey]: TGApp.App.Announcement.ListCard[] };
 
-const annoServerList: AnnoSelect[] = [
+const annoServerList: Array<AnnoSelect> = [
   { text: "国服-官方服", value: AnnoServer.CN_ISLAND },
   { text: "国服-渠道服", value: AnnoServer.CN_TREE },
   { text: "国际服-亚服", value: AnnoServer.OS_ASIA },
@@ -76,44 +76,28 @@ const annoServerList: AnnoSelect[] = [
   { text: "国际服-美服", value: AnnoServer.OS_USA },
   { text: "国际服-港澳台服", value: AnnoServer.OS_CHT },
 ];
-const annoLangList: AnnoSelect[] = [
+const annoLangList: Array<AnnoSelect> = [
   { text: "简体中文", value: "zh-cn" },
   { text: "繁体中文", value: "zh-tw" },
   { text: "English", value: "en" },
   { text: "日本語", value: "ja" },
 ];
 
-// 类型定义
 enum AnnoType {
   activity = "活动公告",
   game = "游戏公告",
 }
 
-type AnnoKey = keyof typeof AnnoType;
-type AnnoCard = {
-  [key in AnnoKey]: TGApp.App.Announcement.ListCard[];
-};
-
-const appStore = useAppStore();
-
-// 路由
+const { server, lang } = storeToRefs(useAppStore());
 const router = useRouter();
-const curRegion = ref<AnnoServer>(appStore.server);
-const curLang = ref<AnnoLang>(appStore.lang);
-
-// 数据
+const tabValues: Readonly<Array<AnnoKey>> = ["activity", "game"];
 const tab = ref<AnnoKey>("activity");
-const tabValues = ref<Array<AnnoKey>>(["activity", "game"]);
-const annoCards = ref<AnnoCard>({
-  activity: [],
-  game: [],
-});
+const annoCards = shallowRef<AnnoCard>({ activity: [], game: [] });
 
 watch(
-  () => curRegion.value,
+  () => server.value,
   async () => {
-    appStore.server = curRegion.value;
-    const name = getRegionName(curRegion.value);
+    const name = getRegionName(server.value);
     await TGLogger.Info(`[Announcements][watch][curRegionName] 切换服务器：${name}`);
     await loadData();
     showSnackbar.success(`服务器切换为：${name}`);
@@ -121,10 +105,9 @@ watch(
 );
 
 watch(
-  () => curLang.value,
+  () => lang.value,
   async () => {
-    appStore.lang = curLang.value;
-    const name = getLangName(curLang.value);
+    const name = getLangName(lang.value);
     await TGLogger.Info(`[Announcements][watch][curLangName] 切换语言：${name}`);
     await loadData();
     showSnackbar.success(`语言切换为：${name}`);
@@ -133,22 +116,20 @@ watch(
 
 onMounted(async () => {
   await TGLogger.Info("[Announcements][onMounted] 打开公告页面");
-  curRegion.value = appStore.server;
-  curLang.value = appStore.lang;
   await loadData();
 });
 
 async function loadData(): Promise<void> {
   showLoading.start(
     "正在获取公告数据",
-    `服务器：${getRegionName(curRegion.value)}，语言：${getLangName(curLang.value)}`,
+    `服务器：${getRegionName(server.value)}，语言：${getLangName(lang.value)}`,
   );
-  const annoData = await Hk4eApi.anno.list(curRegion.value, curLang.value);
+  const annoData = await Hk4eApi.anno.list(server.value, lang.value);
   const listCards = getAnnoCard(annoData);
   await Promise.all(
     listCards.map(async (item) => {
       if (item.typeLabel === AnnoType.game) return;
-      const detail = await Hk4eApi.anno.content(item.id, curRegion.value, "zh-cn");
+      const detail = await Hk4eApi.anno.content(item.id, server.value, "zh-cn");
       const timeStr = getAnnoTime(detail.content);
       if (timeStr !== false) item.timeStr = timeStr;
     }),
@@ -157,8 +138,7 @@ async function loadData(): Promise<void> {
     activity: listCards.filter((item) => item.typeLabel === AnnoType.activity),
     game: listCards.filter((item) => item.typeLabel === AnnoType.game),
   };
-  showLoading.update("正在渲染公告数据");
-  await nextTick(() => showLoading.end());
+  showLoading.end();
 }
 
 function getRegionName(value: AnnoServer): string {

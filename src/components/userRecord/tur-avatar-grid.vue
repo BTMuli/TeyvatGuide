@@ -10,11 +10,9 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TItembox, { TItemBoxData } from "../app/t-item-box.vue";
+import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 
-interface TurAvatarGridProps {
-  modelValue: TGApp.Sqlite.Record.Avatar[];
-}
+type TurAvatarGridProps = { modelValue: Array<TGApp.Sqlite.Record.Avatar> };
 
 const props = defineProps<TurAvatarGridProps>();
 

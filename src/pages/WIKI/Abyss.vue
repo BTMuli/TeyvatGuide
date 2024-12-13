@@ -16,7 +16,7 @@
     </template>
     <template #append>
       <div class="hta-top-append">
-        <span @click="show()" v-if="overview">
+        <span @click="showDialog = !showDialog" v-if="overview">
           更新于 {{ timestampToDate(overview.cur.Timestamp) }}
         </span>
       </div>
@@ -41,16 +41,16 @@
   <HtaOverlayOverview v-if="overview" v-model="showDialog" :data="overview" />
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
+import showLoading from "@comp/func/loading.js";
+import HtaOverlayOverview from "@comp/hutaoAbyss/hta-overlay-overview.vue";
+import HtaTabHold from "@comp/hutaoAbyss/hta-tab-hold.vue";
+import HtaTabTeam from "@comp/hutaoAbyss/hta-tab-team.vue";
+import HtaTabUp from "@comp/hutaoAbyss/hta-tab-up.vue";
+import HtaTabUse from "@comp/hutaoAbyss/hta-tab-use.vue";
+import Hutao from "@Hutao/index.js";
+import { onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 
-import showLoading from "../../components/func/loading.js";
-import HtaOverlayOverview from "../../components/hutaoAbyss/hta-overlay-overview.vue";
-import HtaTabHold from "../../components/hutaoAbyss/hta-tab-hold.vue";
-import HtaTabTeam from "../../components/hutaoAbyss/hta-tab-team.vue";
-import HtaTabUp from "../../components/hutaoAbyss/hta-tab-up.vue";
-import HtaTabUse from "../../components/hutaoAbyss/hta-tab-use.vue";
-import Hutao from "../../plugins/Hutao/index.js";
-import { timestampToDate } from "../../utils/toolFunc.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
 enum AbyssTabEnum {
   use = "角色使用",
@@ -63,30 +63,26 @@ type AbyssTab = keyof typeof AbyssTabEnum;
 type AbyssList = Array<{ label: AbyssTabEnum; value: AbyssTab }>;
 export type AbyssDataItem<T> = { cur: T; last: T };
 export type AbyssDataItemType<T extends AbyssTab> = T extends "use"
-  ? AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>
+  ? AbyssDataItem<Array<TGApp.Plugins.Hutao.Abyss.AvatarUse>>
   : T extends "up"
-    ? AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUp[]>
+    ? AbyssDataItem<Array<TGApp.Plugins.Hutao.Abyss.AvatarUp>>
     : T extends "team"
-      ? TGApp.Plugins.Hutao.Abyss.TeamCombination[]
+      ? Array<TGApp.Plugins.Hutao.Abyss.TeamCombination>
       : T extends "hold"
-        ? AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarHold[]>
+        ? AbyssDataItem<Array<TGApp.Plugins.Hutao.Abyss.AvatarHold>>
         : null;
-type AbyssData = {
-  [key in AbyssTab]: AbyssDataItemType<key> | null;
-};
+type AbyssData = { [key in AbyssTab]: AbyssDataItemType<key> | null };
 
-const abyssList: AbyssList = [
+const abyssList: Readonly<AbyssList> = [
   { label: AbyssTabEnum.use, value: "use" },
   { label: AbyssTabEnum.up, value: "up" },
   { label: AbyssTabEnum.team, value: "team" },
   { label: AbyssTabEnum.hold, value: "hold" },
 ];
 const showDialog = ref<boolean>(false);
-
-// data
-const overview = ref<AbyssDataItem<TGApp.Plugins.Hutao.Abyss.OverviewData>>();
-const tab = ref<AbyssTab>("use");
-const abyssData = ref<AbyssData>({ use: null, up: null, team: null, hold: null });
+const tab = shallowRef<AbyssTab>("use");
+const overview = shallowRef<AbyssDataItem<TGApp.Plugins.Hutao.Abyss.OverviewData>>();
+const abyssData = shallowRef<AbyssData>({ use: null, up: null, team: null, hold: null });
 
 watch(
   () => tab.value,
@@ -105,10 +101,6 @@ onMounted(async () => {
   showLoading.end();
 });
 
-function show(): void {
-  showDialog.value = !showDialog.value;
-}
-
 async function refreshData(type: AbyssTab): Promise<void> {
   if (abyssData.value && abyssData.value[type] !== null) return;
   showLoading.update("正在获取深渊数据...", `正在获取 ${AbyssTabEnum[type]} 数据`);
@@ -116,15 +108,19 @@ async function refreshData(type: AbyssTab): Promise<void> {
   switch (type) {
     case "use":
       abyssData.value.use = <AbyssDataItemType<"use">>data;
+      triggerRef(abyssData);
       break;
     case "up":
       abyssData.value.up = <AbyssDataItemType<"up">>data;
+      triggerRef(abyssData);
       break;
     case "team":
       abyssData.value.team = <AbyssDataItemType<"team">>data;
+      triggerRef(abyssData);
       break;
     case "hold":
       abyssData.value.hold = <AbyssDataItemType<"hold">>data;
+      triggerRef(abyssData);
       break;
   }
   showLoading.end();

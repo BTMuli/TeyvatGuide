@@ -11,7 +11,12 @@
             <div v-else-if="item.name !== '未知'" class="toab-dialog-item-name">
               {{ item.name }}
             </div>
-            <div :class="item.icon ? 'toab-dialog-item-text' : 'toab-dialog-item-text-mini'">
+            <div
+              :class="{
+                'toab-dialog-item-text': item.icon !== undefined,
+                'toab-dialog-item-text-mini': item.icon === undefined,
+              }"
+            >
               {{ item.text }}
             </div>
           </div>
@@ -28,15 +33,15 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
+import TOverlay from "@comp/app/t-overlay.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import { fetch } from "@tauri-apps/plugin-http";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { xml2json } from "xml-js";
 
-import TGLogger from "../../utils/TGLogger.js";
-import { copyToClipboard, getImageBuffer, saveCanvasImg } from "../../utils/TGShare.js";
-import { bytesToSize } from "../../utils/toolFunc.js";
-import TOverlay from "../app/t-overlay.vue";
-import showSnackbar from "../func/snackbar.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { copyToClipboard, getImageBuffer, saveCanvasImg } from "@/utils/TGShare.js";
+import { bytesToSize } from "@/utils/toolFunc.js";
 
 type ToArcBirthProps = {
   modelValue: boolean;
@@ -50,8 +55,8 @@ type XmlTextParse = { name: string; icon?: string; text: string };
 
 const props = defineProps<ToArcBirthProps>();
 const emits = defineEmits<ToArcBirthEmits>();
-const buffer = ref<Uint8Array | null>(null);
 const showText = ref<boolean>(false);
+const buffer = shallowRef<Uint8Array | null>(null);
 const textParse = shallowRef<Array<XmlTextParse>>([]);
 const visible = computed<boolean>({
   get: () => props.modelValue,
@@ -76,7 +81,7 @@ async function onCopy(): Promise<void> {
   showSnackbar.success(`图片已复制到剪贴板，大小：${size}`);
 }
 
-async function onDownload() {
+async function onDownload(): Promise<void> {
   if (!props.data) return;
   const image = props.data.take_picture[Number(props.choice)];
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
@@ -107,8 +112,8 @@ async function loadText(): Promise<void> {
   showText.value = true;
 }
 
-function getKeyMap(resSource: unknown): XmlKeyMap[] {
-  const res: XmlKeyMap[] = [];
+function getKeyMap(resSource: unknown): Array<XmlKeyMap> {
+  const res: Array<XmlKeyMap> = [];
   if (!resSource || typeof resSource !== "object") return res;
   if (!("elements" in resSource) || !Array.isArray(resSource["elements"])) return res;
   const arr1 = resSource.elements;
@@ -127,8 +132,8 @@ function getKeyMap(resSource: unknown): XmlKeyMap[] {
   return res;
 }
 
-function getTextList(resXml: unknown): XmlTextList[] {
-  const res: XmlTextList[] = [];
+function getTextList(resXml: unknown): Array<XmlTextList> {
+  const res: Array<XmlTextList> = [];
   if (!resXml || typeof resXml !== "object") return res;
   if (!("elements" in resXml) || !Array.isArray(resXml["elements"])) return res;
   const arr1 = resXml.elements;
@@ -202,7 +207,8 @@ async function parseXml(link: string): Promise<false | unknown> {
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   background-color: var(--common-shadow-t-2);
-  border-bottom-right-radius: 10px;
+  border-bottom-right-radius: 5px;
+  border-top-left-radius: 5px;
 }
 
 .toab-dialog {

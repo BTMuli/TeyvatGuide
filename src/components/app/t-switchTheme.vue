@@ -9,18 +9,18 @@
 </template>
 <script lang="ts" setup>
 import { event } from "@tauri-apps/api";
-import { Event, UnlistenFn } from "@tauri-apps/api/event";
+import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
 import { onMounted, onUnmounted } from "vue";
 
-import { useAppStore } from "../../store/modules/app.js";
+import { useAppStore } from "@/store/modules/app.js";
 
 const { theme } = storeToRefs(useAppStore());
 const appStore = useAppStore();
 let themeListener: UnlistenFn | null = null;
 
 onMounted(async () => {
-  themeListener = event.listen("readTheme", (e: Event<string>) => {
+  themeListener = await event.listen<string>("readTheme", (e: Event<string>) => {
     theme.value = e.payload === "default" ? "default" : "dark";
   });
 });

@@ -1,41 +1,32 @@
 <template>
   <TOverlay v-model="visible">
     <div class="toc-box">
-      <div class="toc-top">
-        <div class="toc-title">
-          <span>请选择要跳转的频道</span>
-        </div>
-        <div class="toc-list">
-          <div
-            v-for="(item, index) in channelList"
-            :key="index"
-            class="toc-list-item"
-            :class="{ active: props.gid === item.gid }"
-            @click="toChannel(item)"
-          >
-            <img :src="item.icon" alt="icon" />
-            <span>{{ item.title }}</span>
-          </div>
-        </div>
-      </div>
-      <div class="toc-close" @click="visible = false">
-        <div class="toc-close-btn">
-          <v-icon>mdi-close</v-icon>
+      <div class="toc-title">请选择要跳转的频道</div>
+      <div class="toc-list">
+        <div
+          v-for="(item, index) in channelList"
+          :key="index"
+          class="toc-list-item"
+          :class="{ active: props.gid === item.gid }"
+          @click="toChannel(item)"
+        >
+          <img :src="item.icon" alt="icon" />
+          <span>{{ item.title }}</span>
         </div>
       </div>
     </div>
   </TOverlay>
 </template>
 <script lang="ts" setup>
+import TOverlay from "@comp/app/t-overlay.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 
-import { NewsType, useAppStore } from "../../store/modules/app.js";
-import { ToChannelItem } from "../../web/constant/bbs.js";
-import TGConstant from "../../web/constant/TGConstant.js";
-import TOverlay from "../app/t-overlay.vue";
-import showSnackbar from "../func/snackbar.js";
+import { type NewsType, useAppStore } from "@/store/modules/app.js";
+import type { ToChannelItem } from "@/web/constant/bbs.js";
+import TGConstant from "@/web/constant/TGConstant.js";
 
 type ToChannelProps = { gid?: string; curType?: string; modelValue: boolean };
 type ToChannelEmits = (e: "update:modelValue", v: boolean) => void;
@@ -67,10 +58,6 @@ async function toChannel(item: ToChannelItem): Promise<void> {
 </script>
 <style lang="css" scoped>
 .toc-box {
-  padding: 10px;
-}
-
-.toc-top {
   padding: 10px;
   border-radius: 5px;
   background: var(--app-page-bg);

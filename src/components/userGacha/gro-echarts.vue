@@ -5,15 +5,19 @@
 </template>
 <script lang="ts" setup>
 // about import err,see:https://github.com/apache/echarts/issues/19992
+// @ts-expect-error no-exported-member
 import { PieChart } from "echarts/charts.js";
 import {
   LegendComponent,
   TitleComponent,
-  TooltipComponent,
   ToolboxComponent,
+  TooltipComponent,
 } from "echarts/components.js";
+// @ts-expect-error no-exported-member
 import { use } from "echarts/core.js";
+// @ts-expect-error no-exported-member
 import { LabelLayout } from "echarts/features.js";
+// @ts-expect-error no-exported-member
 import { CanvasRenderer } from "echarts/renderers.js";
 import type { EChartsOption } from "echarts/types/dist/shared.js";
 import { provide } from "vue";

@@ -4,51 +4,50 @@
     <div class="twa-diff">
       <span>{{ avatar?.name ?? "旅行者" }}</span>
       <span>{{ `${(props.modelValue.cur.Rate * 100).toFixed(3)}%` }}</span>
-      <span :class="diffUp ? 'up' : 'down'">{{ getDiffStr() }}</span>
+      <span
+        :class="{
+          up: props.modelValue.cur.Rate > props.modelValue.last.Rate,
+          down: props.modelValue.cur.Rate < props.modelValue.last.Rate,
+        }"
+      >
+        {{ getDiffStr() }}
+      </span>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import { computed, onMounted, shallowRef } from "vue";
 
-import { AppCharacterData } from "../../data/index.js";
-import { AbyssDataItem } from "../../pages/WIKI/Abyss.vue";
-import TItemBox, { type TItemBoxData } from "../app/t-item-box.vue";
+import { AppCharacterData } from "@/data/index.js";
+import type { AbyssDataItem } from "@/pages/WIKI/Abyss.vue";
 
-export interface TibWikiAbyssProps {
-  modelValue: AbyssDataItem<TGApp.Plugins.Hutao.Base.Rate>;
-}
+type TibWikiAbyssProps = { modelValue: AbyssDataItem<TGApp.Plugins.Hutao.Base.Rate> };
 
 const props = defineProps<TibWikiAbyssProps>();
+const avatar = shallowRef<TGApp.App.Character.WikiBriefInfo>();
 
-const avatar = ref<TGApp.App.Character.WikiBriefInfo>();
-const diffUp = computed(() => props.modelValue.cur.Rate > props.modelValue.last.Rate);
+const box = computed<TItemBoxData>(() => ({
+  bg: `/icon/bg/${avatar.value?.star}-Star.webp`,
+  clickable: false,
+  display: "inner",
+  icon: `/WIKI/character/${avatar.value?.id}.webp`,
+  innerHeight: 0,
+  innerText: avatar.value?.name ?? "旅行者",
+  lt:
+    avatar.value === undefined
+      ? ""
+      : avatar.value.element !== ""
+        ? `/icon/element/${avatar.value.element}元素.webp`
+        : `/icon/weapon/${avatar.value.weapon}.webp`,
+  ltSize: "15px",
+  size: "60px",
+  height: "60px",
+}));
 
-const box = computed<TItemBoxData>(() => {
-  return {
-    bg: `/icon/bg/${avatar.value?.star}-Star.webp`,
-    clickable: false,
-    display: "inner",
-    icon: `/WIKI/character/${avatar.value?.id}.webp`,
-    innerHeight: 0,
-    innerText: avatar.value?.name ?? "旅行者",
-    lt:
-      avatar.value === undefined
-        ? ""
-        : avatar.value.element !== ""
-          ? `/icon/element/${avatar.value.element}元素.webp`
-          : `/icon/weapon/${avatar.value.weapon}.webp`,
-    ltSize: "15px",
-    size: "60px",
-    height: "60px",
-  };
-});
+onMounted(() => (avatar.value = AppCharacterData.find((a) => a.id === props.modelValue.cur.Item)));
 
-onMounted(async () => {
-  avatar.value = AppCharacterData.find((a) => a.id === props.modelValue.cur.Item);
-});
-
-function getDiffStr() {
+function getDiffStr(): string {
   if (props.modelValue.cur.Rate === props.modelValue.last.Rate) return "";
   if (props.modelValue.last.Rate > props.modelValue.cur.Rate) {
     return `↓${((props.modelValue.last.Rate - props.modelValue.cur.Rate) * 100).toFixed(3)}%`;

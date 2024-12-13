@@ -3,110 +3,76 @@
     <template #title>近期活动</template>
     <template #default>
       <div class="position-grid">
-        <v-card v-for="(card, index) in positionCards" :key="index" class="position-card" rounded>
-          <v-list class="position-list">
-            <v-list-item :subtitle="card.abstract" :title="card.title">
-              <template #prepend>
-                <v-avatar rounded="0" @click="openPosition(card)">
-                  <v-img :src="card.icon" class="position-icon" />
-                </v-avatar>
-              </template>
-              <template #append>
-                <v-btn class="position-card-btn" @click="openPosition(card)"> 查看</v-btn>
-              </template>
-            </v-list-item>
-          </v-list>
-          <v-divider />
-          <v-card-text>
-            <div class="position-card-text">
-              <v-icon>mdi-calendar-clock</v-icon>
-              <span>{{ card.time.start }}~{{ card.time.end }}</span>
-            </div>
-            <div class="position-card-text">
-              <v-icon>mdi-clock-outline</v-icon>
-              <span v-if="positionTimeGet[card.postId] !== '已结束'">{{
-                positionTimeGet[card.postId]
-              }}</span>
-              <span v-else>已结束</span>
-            </div>
-          </v-card-text>
-        </v-card>
+        <PhPositionCard v-for="(card, index) in positionCards" :key="index" :position="card" />
       </div>
     </template>
   </THomeCard>
 </template>
 <script lang="ts" setup>
+import PhPositionCard from "@comp/pageHome/ph-position-card.vue";
+import Mys from "@Mys/index.js";
 import { onMounted, onUnmounted, ref } from "vue";
-
-import Mys from "../../plugins/Mys/index.js";
-import { parseLink } from "../../utils/linkParser.js";
-import { createPost } from "../../utils/TGWindow.js";
-import { stamp2LastTime } from "../../utils/toolFunc.js";
-import showSnackbar from "../func/snackbar.js";
 
 import THomeCard from "./ph-comp-card.vue";
 
-// data
-const positionCards = ref<TGApp.Plugins.Mys.Position.RenderCard[]>([]);
-const positionTimeGet = ref<Record<number, string>>({}); // 剩余时间/已结束/未知
-const positionTimeEnd = ref<Record<number, number>>({}); // 结束时间戳
-const positionTimer = ref<Record<number, any>>({}); // 定时器
-
-interface TPositionEmits {
-  (e: "success"): void;
-}
-
+type TPositionEmits = (e: "success") => void;
+type PositionStat = "past" | "now" | "future" | "unknown"; // 已结束 | 进行中 | 未开始 | 未知
+export type PositionItem = TGApp.Plugins.Mys.Position.RenderCard & {
+  timeRest: number;
+  stat: PositionStat;
+};
 const emits = defineEmits<TPositionEmits>();
-
-function positionLastInterval(postId: number): void {
-  const timeGet = positionTimeGet.value[postId];
-  if (timeGet === "未知" || timeGet === "已结束") {
-    clearInterval(positionTimer.value[postId]);
-    positionTimer.value[postId] = null;
-    return;
-  }
-  const timeLast = positionTimeEnd.value[postId] - Date.now();
-  if (timeLast <= 0) {
-    positionTimeGet.value[postId] = "已结束";
-  } else {
-    positionTimeGet.value[postId] = stamp2LastTime(timeLast);
-  }
-}
+// eslint-disable-next-line no-undef
+let timer: NodeJS.Timeout | null = null;
+const positionCards = ref<Array<PositionItem>>([]);
 
 onMounted(async () => {
   const positionData = await Mys.Position.get();
-  if (!positionData) {
-    console.error("获取近期活动失败");
-    return;
-  }
-  positionCards.value = Mys.Position.card(positionData);
-  positionCards.value.forEach((card) => {
-    if (card.time.endStamp === 0) {
-      positionTimeGet.value[card.postId] = "未知";
-    } else {
-      positionTimeGet.value[card.postId] = stamp2LastTime(card.time.endStamp - Date.now());
+  console.log(positionData);
+  const cards = Mys.Position.card(positionData);
+  for (const position of cards) {
+    if (position.time.endStamp === 0 || position.time.totalStamp < 0) {
+      positionCards.value.push({
+        ...position,
+        timeRest: 0,
+        stat: "unknown",
+      });
+      continue;
     }
-    positionTimeEnd.value[card.postId] = card.time.endStamp;
-    positionTimer.value[card.postId] = setInterval(() => {
-      positionLastInterval(card.postId);
-    }, 1000);
-  });
+    const timeRest = position.time.endStamp - Date.now();
+    positionCards.value.push({
+      ...position,
+      timeRest,
+      stat: timeRest > position.time.totalStamp ? "future" : timeRest > 0 ? "now" : "past",
+    });
+  }
+  if (timer !== null) clearInterval(timer);
+  timer = setInterval(getPositionTimer, 1000);
   emits("success");
 });
 
-async function openPosition(card: TGApp.Plugins.Mys.Position.RenderCard): Promise<void> {
-  const res = await parseLink(card.link);
-  if (res === "post") await createPost(card.postId, card.title);
-  if (res === false) {
-    showSnackbar.warn(`未知链接:${card.link}`, 3000);
-    return;
+function getPositionTimer(): void {
+  for (const position of positionCards.value) {
+    if (position.stat === "unknown") continue;
+    if (position.stat === "past") {
+      position.timeRest = 0;
+      continue;
+    }
+    position.timeRest = position.time.endStamp - Date.now();
+    if (position.timeRest <= 0) {
+      position.stat = "past";
+      position.timeRest = 0;
+    } else if (position.timeRest > position.time.totalStamp) {
+      position.stat = "future";
+    } else {
+      position.stat = "now";
+    }
   }
 }
 
 onUnmounted(() => {
-  Object.keys(positionTimer.value).forEach((key) => {
-    clearInterval(positionTimer.value[Number(key)]);
-  });
+  if (timer !== null) clearInterval(timer);
+  timer = null;
 });
 </script>
 
@@ -116,55 +82,5 @@ onUnmounted(() => {
   margin-top: 10px;
   grid-gap: 20px;
   grid-template-columns: repeat(auto-fill, minmax(calc(400px + 2rem), 0.5fr));
-}
-
-.position-card {
-  border: none;
-  background: var(--box-bg-1);
-}
-
-.position-list {
-  background: inherit;
-  color: inherit;
-  font-family: var(--font-title);
-}
-
-.position-icon {
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
-  border-radius: 5px;
-  object-fit: contain;
-}
-
-.position-icon :deep(img) {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: all 0.5s;
-}
-
-.position-icon :hover {
-  cursor: pointer;
-  scale: 1.2;
-}
-
-.position-card-btn {
-  border: 1px solid var(--common-shadow-4);
-  border-radius: 5px;
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
-}
-
-.position-card-text {
-  display: inline-block;
-  min-width: 200px;
-  align-items: flex-start;
-  margin-right: 5px;
-}
-
-.position-card-text :nth-child(1) {
-  color: var(--btn-text);
-  filter: brightness(0.8);
 }
 </style>

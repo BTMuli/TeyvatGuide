@@ -1,10 +1,10 @@
 <template>
   <div class="tua-ab-box" title="点击查看详情">
     <div class="tua-ab-top">
-      <TItembox v-model="avatarBox" />
+      <TItemBox v-model="avatarBox" />
       <div class="tua-abt-right">
         <div class="tua-abt-rt">
-          <TItembox v-model="weaponBox" :title="getWeaponTitle()" />
+          <TItemBox v-model="weaponBox" :title="getWeaponTitle()" />
           <div class="tua-abt-rtr">
             <TuaRelicBox :model-value="relicsBox[0]" :position="1" />
             <TuaRelicBox :model-value="relicsBox[1]" :position="2" />
@@ -45,59 +45,50 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import TSUserAvatar from "@Sqlite/modules/userAvatar.js";
 import { computed } from "vue";
-
-import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
-import { useUserStore } from "../../store/modules/user.js";
-import { getZhElement } from "../../utils/toolFunc.js";
-import TItembox, { TItemBoxData } from "../app/t-item-box.vue";
 
 import TuaRelicBox from "./tua-relic-box.vue";
 
-interface TuaAvatarBoxProps {
-  modelValue: TGApp.Sqlite.Character.UserRole;
-}
+import { useUserStore } from "@/store/modules/user.js";
+import { getZhElement } from "@/utils/toolFunc.js";
+
+type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
+type AvatarRelics = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
+type TuaAvatarBoxProps = { modelValue: TGApp.Sqlite.Character.UserRole };
 
 const props = defineProps<TuaAvatarBoxProps>();
 const userStore = useUserStore();
 
-type FixedLenArr<T, N extends number> = [T, ...T[]] & { length: N };
-type AvatarRelics = FixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
-
-const avatarBox = computed<TItemBoxData>(() => {
-  const avatar = props.modelValue.avatar;
-  return {
-    size: "100px",
-    height: "100px",
-    bg: `/icon/bg/${avatar.rarity}-Star.webp`,
-    icon: `/WIKI/character/${avatar.id}.webp`,
-    lt: `/icon/element/${getZhElement(avatar.element)}元素.webp`,
-    ltSize: "20px",
-    rt: avatar.actived_constellation_num.toString() || "0",
-    rtSize: "20px",
-    innerText: avatar.name,
-    innerHeight: 30,
-    display: "inner",
-    clickable: true,
-  };
-});
-const weaponBox = computed<TItemBoxData>(() => {
-  const weapon = props.modelValue.weapon;
-  return {
-    size: "65px",
-    height: "65px",
-    bg: `/icon/bg/${weapon.rarity}-Star.webp`,
-    icon: `/WIKI/weapon/${weapon.id}.webp`,
-    lt: `/icon/weapon/${weapon.type_name}.webp`,
-    ltSize: "20px",
-    rt: weapon.affix_level.toString(),
-    rtSize: "20px",
-    innerText: weapon.name,
-    innerHeight: 20,
-    display: "inner",
-    clickable: true,
-  };
-});
+const avatarBox = computed<TItemBoxData>(() => ({
+  size: "100px",
+  height: "100px",
+  bg: `/icon/bg/${props.modelValue.avatar.rarity}-Star.webp`,
+  icon: `/WIKI/character/${props.modelValue.avatar.id}.webp`,
+  lt: `/icon/element/${getZhElement(props.modelValue.avatar.element)}元素.webp`,
+  ltSize: "20px",
+  rt: props.modelValue.avatar.actived_constellation_num.toString() || "0",
+  rtSize: "20px",
+  innerText: props.modelValue.avatar.name,
+  innerHeight: 30,
+  display: "inner",
+  clickable: true,
+}));
+const weaponBox = computed<TItemBoxData>(() => ({
+  size: "65px",
+  height: "65px",
+  bg: `/icon/bg/${props.modelValue.weapon.rarity}-Star.webp`,
+  icon: `/WIKI/weapon/${props.modelValue.weapon.id}.webp`,
+  lt: `/icon/weapon/${props.modelValue.weapon.type_name}.webp`,
+  ltSize: "20px",
+  rt: props.modelValue.weapon.affix_level.toString(),
+  rtSize: "20px",
+  innerText: props.modelValue.weapon.name,
+  innerHeight: 20,
+  display: "inner",
+  clickable: true,
+}));
 const relicsBox = computed<AvatarRelics>(() => {
   const relics = props.modelValue.relics;
   return [
@@ -114,10 +105,9 @@ const isFetterMax = computed<boolean>(() => {
   }
   return props.modelValue.avatar.fetter === 10;
 });
-const skills = computed<TGApp.Game.Avatar.Skill[]>(() => {
-  return props.modelValue.skills.filter((skill) => skill.skill_type === 1);
-});
-
+const skills = computed<Array<TGApp.Game.Avatar.Skill>>(() =>
+  props.modelValue.skills.filter((skill) => skill.skill_type === 1),
+);
 const nameCard = computed<string>(() => {
   const cardFind = TSUserAvatar.getAvatarCard(props.modelValue.avatar.id);
   return `/source/nameCard/profile/${cardFind}.webp`;

@@ -18,9 +18,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-interface TucBuffProps {
-  modelValue: TGApp.Game.Combat.SplendourBuff;
-}
+type TucBuffProps = { modelValue: TGApp.Game.Combat.SplendourBuff };
 
 const props = defineProps<TucBuffProps>();
 const columnCnt = computed<number>(() => {

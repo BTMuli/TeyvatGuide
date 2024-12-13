@@ -35,8 +35,8 @@
         </template>
         <template #append>
           <v-switch
-            v-model="appStore.devMode"
-            :label="appStore.devMode ? '开启' : '关闭'"
+            v-model="devMode"
+            :label="devMode ? '开启' : '关闭'"
             :inset="true"
             color="#FAC51E"
             @click="submitDevMode"
@@ -51,8 +51,8 @@
         </template>
         <template #append>
           <v-switch
-            v-model="needResize"
-            :label="needResize ? '开启' : '关闭'"
+            v-model="isNeedResize"
+            :label="isNeedResize ? '开启' : '关闭'"
             :inset="true"
             color="#FAC51E"
             @click="submitResize"
@@ -60,9 +60,7 @@
         </template>
       </v-list-item>
       <v-list-item title="分享设置">
-        <template #subtitle>
-          默认保存到剪贴板，超过{{ appStore.shareDefaultFile }}MB时保存到文件
-        </template>
+        <template #subtitle>默认保存到剪贴板，超过{{ shareDefaultFile }}MB时保存到文件</template>
         <template #prepend>
           <div class="config-icon">
             <v-icon>mdi-share-variant</v-icon>
@@ -81,8 +79,7 @@
         <v-list-item-title @click="confirmUpdateDevice()">刷新设备信息</v-list-item-title>
         <v-list-item-subtitle>
           <!-- @ts-expect-error-next-line Deprecated symbol used -->
-          {{ appStore.deviceInfo.device_name }}({{ appStore.deviceInfo.product }}) -
-          {{ appStore.deviceInfo.device_fp }}
+          {{ deviceInfo.device_name }}({{ deviceInfo.product }}) - {{ deviceInfo.device_fp }}
         </v-list-item-subtitle>
         <template #append>
           <v-icon @click="confirmUpdateDevice(true)">mdi-bug</v-icon>
@@ -121,38 +118,40 @@
 </template>
 
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TcAppBadge from "@comp/pageConfig/tc-appBadge.vue";
+import TcDataDir from "@comp/pageConfig/tc-dataDir.vue";
+import TcGameBadge from "@comp/pageConfig/tc-gameBadge.vue";
+import TcInfo from "@comp/pageConfig/tc-info.vue";
+import TcUserBadge from "@comp/pageConfig/tc-userBadge.vue";
+import TGSqlite from "@Sqlite/index.js";
 import { core } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { remove } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import { exit } from "@tauri-apps/plugin-process";
+import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 
-import showDialog from "../../components/func/dialog.js";
-import showLoading from "../../components/func/loading.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import TcAppBadge from "../../components/pageConfig/tc-appBadge.vue";
-import TcDataDir from "../../components/pageConfig/tc-dataDir.vue";
-import TcGameBadge from "../../components/pageConfig/tc-gameBadge.vue";
-import TcInfo from "../../components/pageConfig/tc-info.vue";
-import TcUserBadge from "../../components/pageConfig/tc-userBadge.vue";
-import TGSqlite from "../../plugins/Sqlite/index.js";
-import { useAppStore } from "../../store/modules/app.js";
-import { useHomeStore } from "../../store/modules/home.js";
-import { backUpUserData, restoreUserData } from "../../utils/dataBS.js";
-import { getBuildTime } from "../../utils/TGBuild.js";
-import TGLogger from "../../utils/TGLogger.js";
-import { bytesToSize, getCacheDir, getDeviceInfo, getRandomString } from "../../utils/toolFunc.js";
-import OtherApi from "../../web/request/otherReq.js";
+import { useAppStore } from "@/store/modules/app.js";
+import { useHomeStore } from "@/store/modules/home.js";
+import { backUpUserData, restoreUserData } from "@/utils/dataBS.js";
+import { getBuildTime } from "@/utils/TGBuild.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { bytesToSize, getCacheDir, getDeviceInfo, getRandomString } from "@/utils/toolFunc.js";
+import OtherApi from "@/web/request/otherReq.js";
 
-// Store
+const { needResize, devMode, deviceInfo, shareDefaultFile, userDir, buildTime } =
+  storeToRefs(useAppStore());
 const appStore = useAppStore();
 const homeStore = useHomeStore();
+
 // @ts-expect-error-next-line
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 const showReset = ref<boolean>(false);
-const needResize = ref<boolean>(appStore.needResize !== "false");
-
+const isNeedResize = ref<boolean>(needResize.value !== "false");
 const cacheSize = ref<number>(0);
 
 onMounted(async () => {
@@ -176,7 +175,7 @@ async function confirmBackup(): Promise<void> {
     showSnackbar.cancel("已取消备份");
     return;
   }
-  let saveDir = appStore.userDir;
+  let saveDir = userDir.value;
   if (!bcCheck) {
     const dir: string | null = await open({
       directory: true,
@@ -189,9 +188,7 @@ async function confirmBackup(): Promise<void> {
     }
     await TGLogger.Info(`[Config][confirmBackup] 选择备份路径 ${dir.toString()}`);
     saveDir = dir;
-  } else {
-    await TGLogger.Info(`[Config][confirmBackup] 备份到默认路径 ${saveDir}`);
-  }
+  } else await TGLogger.Info(`[Config][confirmBackup] 备份到默认路径 ${saveDir}`);
   showLoading.start("正在备份数据...");
   await backUpUserData(saveDir);
   showLoading.end();
@@ -206,7 +203,7 @@ async function confirmRestore(): Promise<void> {
     showSnackbar.cancel("已取消恢复");
     return;
   }
-  let saveDir = appStore.userDir;
+  let saveDir = userDir.value;
   if (!rsCheck) {
     const dir: string | null = await open({
       directory: true,
@@ -219,9 +216,7 @@ async function confirmRestore(): Promise<void> {
     }
     await TGLogger.Info(`[Config][confirmRestore] 选择恢复路径 ${dir.toString()}`);
     saveDir = dir;
-  } else {
-    await TGLogger.Info(`[Config][confirmRestore] 恢复到默认路径 ${saveDir}`);
-  }
+  } else await TGLogger.Info(`[Config][confirmRestore] 恢复到默认路径 ${saveDir}`);
   showLoading.start("正在恢复数据...");
   await restoreUserData(saveDir);
   showLoading.end();
@@ -238,7 +233,7 @@ async function confirmUpdate(title?: string): Promise<void> {
   }
   showLoading.start("正在更新数据库...");
   await TGSqlite.update();
-  appStore.buildTime = getBuildTime();
+  buildTime.value = getBuildTime();
   showLoading.end();
   showSnackbar.success("数据库已更新!");
   await TGLogger.Info("[Config][confirmUpdate] 数据库更新完成");
@@ -250,7 +245,7 @@ async function confirmShare(): Promise<void> {
   const input = await showDialog.input(
     "请输入分享文件大小阈值(MB)",
     "阈值：",
-    appStore.shareDefaultFile.toString(),
+    shareDefaultFile.value.toString(),
   );
   if (input === undefined) {
     showSnackbar.cancel("已取消修改分享设置");
@@ -264,7 +259,7 @@ async function confirmShare(): Promise<void> {
     showSnackbar.error("阈值必须为数字!");
     return;
   }
-  if (Number(input) === appStore.shareDefaultFile) {
+  if (Number(input) === shareDefaultFile.value) {
     showSnackbar.cancel("未修改分享设置");
     return;
   }
@@ -280,7 +275,7 @@ async function confirmShare(): Promise<void> {
     showSnackbar.cancel("已取消修改分享设置");
     return;
   }
-  appStore.shareDefaultFile = Number(input);
+  shareDefaultFile.value = Number(input);
   showSnackbar.success(`成功修改分享设置!新阈值为${input}MB`);
 }
 
@@ -290,22 +285,20 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
     await TGLogger.Info("[Config][confirmUpdateDevice][force] 开始强制更新设备信息");
     const forceCheck = await showDialog.check(
       "确认强制更新设备信息吗？",
-      `DeviceFp:${appStore.deviceInfo.device_fp}`,
+      `DeviceFp:${deviceInfo.value.device_fp}`,
     );
     if (!forceCheck) {
       showSnackbar.cancel("已取消强制更新设备信息");
       await TGLogger.Info("[Config][confirmUpdateDevice][force] 取消强制更新设备信息");
       return;
     }
-    appStore.deviceInfo = await OtherApi.fp();
-    if (appStore.deviceInfo.device_fp === "0000000000000") {
-      appStore.deviceInfo.device_fp = getRandomString(13, "hex");
-      showSnackbar.warn(`设备信息获取失败!已使用随机值${appStore.deviceInfo.device_fp}代替`);
+    deviceInfo.value = await OtherApi.fp();
+    if (deviceInfo.value.device_fp === "0000000000000") {
+      deviceInfo.value.device_fp = getRandomString(13, "hex");
+      showSnackbar.warn(`设备信息获取失败!已使用随机值${deviceInfo.value.device_fp}代替`);
       await TGLogger.Warn("[Config][confirmUpdateDevice][force] 设备信息获取失败!已使用随机值代替");
-    } else {
-      showSnackbar.success(`设备信息已更新! DeviceFp: ${appStore.deviceInfo.device_fp}`);
-    }
-    await TGSqlite.saveAppData("deviceInfo", JSON.stringify(appStore.deviceInfo));
+    } else showSnackbar.success(`设备信息已更新! DeviceFp: ${deviceInfo.value.device_fp}`);
+    await TGSqlite.saveAppData("deviceInfo", JSON.stringify(deviceInfo.value));
     await TGLogger.Info("[Config][confirmUpdateDevice][force] 设备信息更新完成");
     return;
   }
@@ -319,17 +312,15 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
       return;
     }
   }
-  console.log(appStore.deviceInfo);
-  appStore.deviceInfo = await OtherApi.fp(appStore.deviceInfo);
-  console.log(appStore.deviceInfo);
-  if (appStore.deviceInfo.device_fp === "0000000000000") {
-    appStore.deviceInfo.device_fp = getRandomString(13, "hex");
-    showSnackbar.warn(`设备信息获取失败!已使用随机值${appStore.deviceInfo.device_fp}代替`);
+  deviceInfo.value = await OtherApi.fp(deviceInfo.value);
+  if (deviceInfo.value.device_fp === "0000000000000") {
+    deviceInfo.value.device_fp = getRandomString(13, "hex");
+    showSnackbar.warn(`设备信息获取失败!已使用随机值${deviceInfo.value.device_fp}代替`);
     await TGLogger.Warn("[Config][confirmUpdateDevice] 设备信息获取失败!已使用随机值代替");
     return;
   }
-  showSnackbar.success(`设备信息已更新! DeviceFp: ${appStore.deviceInfo.device_fp}`);
-  await TGSqlite.saveAppData("deviceInfo", JSON.stringify(appStore.deviceInfo));
+  showSnackbar.success(`设备信息已更新! DeviceFp: ${deviceInfo.value.device_fp}`);
+  await TGSqlite.saveAppData("deviceInfo", JSON.stringify(deviceInfo.value));
   await TGLogger.Info("[Config][confirmUpdateDevice] 设备信息更新完成");
 }
 
@@ -433,8 +424,8 @@ function submitDevMode(): void {
 
 // 开启窗口回正
 function submitResize(): void {
-  appStore.needResize = (!needResize.value).toString();
-  if (needResize.value) {
+  appStore.needResize = (!isNeedResize.value).toString();
+  if (isNeedResize.value) {
     showSnackbar.success("已关闭窗口回正!");
     return;
   }

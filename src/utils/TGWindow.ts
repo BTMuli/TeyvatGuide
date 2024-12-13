@@ -5,7 +5,7 @@
  */
 
 import { core, window as TauriWindow } from "@tauri-apps/api";
-import { WindowOptions } from "@tauri-apps/api/window";
+import type { WindowOptions } from "@tauri-apps/api/window";
 
 import TGLogger from "./TGLogger.js";
 
@@ -39,9 +39,7 @@ export async function createTGWindow(
     visible,
   };
   const window = await TauriWindow.Window.getByLabel(label);
-  if (window !== null) {
-    await window.destroy();
-  }
+  if (window !== null) await window.destroy();
   await core.invoke("create_window", { label, url, option: windowOpt });
 }
 

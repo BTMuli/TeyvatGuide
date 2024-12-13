@@ -67,71 +67,64 @@
   <VpOverlaySearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import TGameNav from "@comp/app/t-gameNav.vue";
+import TPostCard from "@comp/app/t-postcard.vue";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
+import Mys from "@Mys/index.js";
+import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import TGameNav from "../../components/app/t-gamenav.vue";
-import TPostCard from "../../components/app/t-postcard.vue";
-import showLoading from "../../components/func/loading.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import VpOverlaySearch from "../../components/viewPost/vp-overlay-search.vue";
-import Mys from "../../plugins/Mys/index.js";
-import TGLogger from "../../utils/TGLogger.js";
-import { createPost } from "../../utils/TGWindow.js";
-import { getGameName } from "../../web/utils/tools.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { createPost } from "@/utils/TGWindow.js";
+import { getGameName } from "@/web/utils/tools.js";
 
-type SortSelect = {
-  text: string;
-  value: number;
-};
-type SortSelectGame = {
-  gid: number;
-  forum: SortSelect[];
-  text: string;
-};
+type SortSelect = { text: string; value: number };
+type SortSelectGame = { gid: number; forum: Array<SortSelect>; text: string };
 
-const sortOrderList: SortSelect[] = [
+const sortOrderList: Array<SortSelect> = [
   { text: "最新回复", value: 1 },
   { text: "最新发布", value: 2 },
   { text: "热门", value: 3 },
 ];
-const forumYsList: SortSelect[] = [
+const forumYsList: Array<SortSelect> = [
   { text: "酒馆", value: 26 },
   { text: "攻略", value: 43 },
   { text: "同人图", value: 29 },
   { text: "COS", value: 49 },
   { text: "硬核", value: 50 },
 ];
-const forumSrList: SortSelect[] = [
+const forumSrList: Array<SortSelect> = [
   { text: "候车室", value: 52 },
   { text: "攻略", value: 61 },
   { text: "同人图", value: 56 },
   { text: "COS", value: 62 },
 ];
-const forumBh3List: SortSelect[] = [
+const forumBh3List: Array<SortSelect> = [
   { text: "甲板", value: 1 },
   { text: "攻略", value: 14 },
   { text: "同人图", value: 4 },
   { text: "同人文", value: 41 },
 ];
-const forumBh2List: SortSelect[] = [
+const forumBh2List: Array<SortSelect> = [
   { text: "学园", value: 30 },
   { text: "攻略", value: 51 },
   { text: "同人图", value: 40 },
 ];
-const forumWdList: SortSelect[] = [
+const forumWdList: Array<SortSelect> = [
   { text: "律所", value: 37 },
   { text: "攻略", value: 60 },
   { text: "同人文", value: 42 },
   { text: "同人图", value: 38 },
 ];
-const forumZzzList: SortSelect[] = [
+const forumZzzList: Array<SortSelect> = [
   { text: "咖啡馆", value: 57 },
   { text: "攻略", value: 64 },
   { text: "同人图", value: 59 },
   { text: "COS", value: 65 },
 ];
-const forumDbyList: SortSelect[] = [
+const forumDbyList: Array<SortSelect> = [
   { text: "校园", value: 54 },
   { text: "ACG", value: 35 },
   { text: "生活", value: 34 },
@@ -141,7 +134,7 @@ const forumDbyList: SortSelect[] = [
   { text: "科技", value: 55 },
   { text: "公告", value: 36 },
 ];
-const sortGameList: SortSelectGame[] = [
+const sortGameList: Readonly<Array<SortSelectGame>> = [
   { gid: 2, forum: forumYsList, text: "原神" },
   { gid: 6, forum: forumSrList, text: "崩坏：星穹铁道" },
   { gid: 8, forum: forumZzzList, text: "绝区零" },
@@ -150,47 +143,17 @@ const sortGameList: SortSelectGame[] = [
   { gid: 4, forum: forumWdList, text: "未定事件簿" },
   { gid: 5, forum: forumDbyList, text: "大别野" },
 ];
-
-// 路由
-const gid = useRoute().params.gid;
-const forum = useRoute().params.forum;
-
-function getGameForums(gid: number): SortSelect[] {
-  const game = sortGameList.find((item) => item.gid === gid);
-  if (game) return game.forum;
-  return [];
-}
-
-function getGameLabel(gid: number): string {
-  const game = sortGameList.find((item) => item.gid === gid);
-  if (game) return game.text;
-  return "";
-}
-
-function getForumLabel(gid: number, forum: number): string {
-  const forums = getGameForums(gid);
-  const forumItem = forums.find((item) => item.value === forum);
-  return forumItem ? forumItem.text : "";
-}
-
-function getSortLabel(value: number): string {
-  const order = sortOrderList.find((item) => item.value === value);
-  return order ? order.text : "";
-}
-
-// 渲染参数
+const { gid, forum } = useRoute().params;
 const curGid = ref<number>(2);
 const curSortType = ref<number>(1);
 const curForum = ref<number>(26);
 const curForumLabel = ref<string>("");
-
-// 渲染数据
-const posts = ref<TGApp.Plugins.Mys.Post.FullData[]>([]);
 const lastId = ref<string>("");
 const isLast = ref<boolean>(false);
 const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 const firstLoad = ref<boolean>(false);
+const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
 
 onMounted(async () => {
   if (gid && typeof gid === "string") curGid.value = Number(gid);
@@ -204,7 +167,6 @@ onMounted(async () => {
   await freshPostData();
   curForumLabel.value = forumLabel;
 });
-
 watch(
   () => curGid.value,
   () => {
@@ -236,6 +198,29 @@ watch(
   },
 );
 
+function getGameForums(gid: number): SortSelect[] {
+  const game = sortGameList.find((item) => item.gid === gid);
+  if (game) return game.forum;
+  return [];
+}
+
+function getGameLabel(gid: number): string {
+  const game = sortGameList.find((item) => item.gid === gid);
+  if (game) return game.text;
+  return "";
+}
+
+function getForumLabel(gid: number, forum: number): string {
+  const forums = getGameForums(gid);
+  const forumItem = forums.find((item) => item.value === forum);
+  return forumItem ? forumItem.text : "";
+}
+
+function getSortLabel(value: number): string {
+  const order = sortOrderList.find((item) => item.value === value);
+  return order ? order.text : "";
+}
+
 async function freshPostData(): Promise<void> {
   const gameLabel = getGameLabel(curGid.value);
   const forumLabel = getForumLabel(curGid.value, curForum.value);
@@ -266,7 +251,6 @@ async function loadMore(): Promise<void> {
   showLoading.end();
 }
 
-// 查询帖子
 function searchPost(): void {
   if (search.value === "") {
     showSnackbar.warn("请输入搜索内容");

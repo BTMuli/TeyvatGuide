@@ -1,7 +1,10 @@
 <template>
   <div class="tpu-box">
     <div class="tpu-top">
-      <span @click="copyUid()" data-html2canvas-ignore><v-icon>mdi-content-copy</v-icon>复制</span>
+      <span @click="copyUid()" data-html2canvas-ignore>
+        <v-icon>mdi-content-copy</v-icon>
+        <span>复制</span>
+      </span>
       <span class="tpu-game">{{ getGameName() }}</span>
     </div>
     <div class="tpu-main">UID {{ props.data.insert.game_user_info.game_uid }}</div>
@@ -15,9 +18,9 @@
   </div>
 </template>
 <script lang="ts" setup>
-import showSnackbar from "../func/snackbar.js";
+import showSnackbar from "@comp/func/snackbar.js";
 
-interface TpUid {
+type TpUid = {
   insert: {
     backup_text: string;
     game_user_info: {
@@ -28,11 +31,8 @@ interface TpUid {
       level: string;
     };
   };
-}
-
-interface TpUidProps {
-  data: TpUid;
-}
+};
+type TpUidProps = { data: TpUid };
 
 const props = defineProps<TpUidProps>();
 console.log("tpUid", props.data.insert.game_user_info);

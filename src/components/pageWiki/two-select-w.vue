@@ -35,11 +35,10 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
+import TOverlay from "@comp/app/t-overlay.vue";
 import { computed, ref, watch } from "vue";
 
-import TOverlay from "../app/t-overlay.vue";
-
-export type SelectedWValue = { star: number[]; weapon: string[] };
+export type SelectedWValue = { star: Array<number>; weapon: Array<string> };
 type TwoSelectWProps = { modelValue: boolean; reset: boolean };
 type TwoSelectWEmits = {
   (e: "update:modelValue", value: boolean): void;
@@ -53,8 +52,8 @@ const emits = defineEmits<TwoSelectWEmits>();
 const selectStarList = [4, 5];
 const selectWeaponList = ["单手剑", "双手剑", "弓", "法器", "长柄武器"];
 
-const selectedStar = ref<number[]>(selectStarList);
-const selectedWeapon = ref<string[]>(selectWeaponList);
+const selectedStar = ref<Array<number>>(selectStarList);
+const selectedWeapon = ref<Array<string>>(selectWeaponList);
 const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),

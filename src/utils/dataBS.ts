@@ -3,15 +3,14 @@
  * @description 用户数据的备份、恢复、迁移
  * @since Beta v0.6.3
  */
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TSUserAbyss from "@Sqlite/modules/userAbyss.js";
+import TSUserAccount from "@Sqlite/modules/userAccount.js";
+import TSUserAchi from "@Sqlite/modules/userAchi.js";
+import TSUserCombat from "@Sqlite/modules/userCombat.js";
+import TSUserGacha from "@Sqlite/modules/userGacha.js";
 import { exists, mkdir } from "@tauri-apps/plugin-fs";
-
-import showLoading from "../components/func/loading.js";
-import showSnackbar from "../components/func/snackbar.js";
-import TSUserAbyss from "../plugins/Sqlite/modules/userAbyss.js";
-import TSUserAccount from "../plugins/Sqlite/modules/userAccount.js";
-import TSUserAchi from "../plugins/Sqlite/modules/userAchi.js";
-import TSUserCombat from "../plugins/Sqlite/modules/userCombat.js";
-import TSUserGacha from "../plugins/Sqlite/modules/userGacha.js";
 
 import TGLogger from "./TGLogger.js";
 

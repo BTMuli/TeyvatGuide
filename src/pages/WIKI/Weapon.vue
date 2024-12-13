@@ -13,7 +13,7 @@
           v-model:cur-item="curItem"
           :key="index"
           :data="item"
-          @click="curItem = item"
+          @click="switchW(item)"
           mode="weapon"
         />
       </div>
@@ -24,18 +24,17 @@
   </div>
   <TwoSelectW v-model="showSelect" @select-w="handleSelectW" v-model:reset="resetSelect" />
 </template>
-
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TwcListItem from "@comp/pageWiki/twc-list-item.vue";
+import TwcWeapon from "@comp/pageWiki/twc-weapon.vue";
+import TwoSelectW, { type SelectedWValue } from "@comp/pageWiki/two-select-w.vue";
 import { onBeforeMount, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
-import showDialog from "../../components/func/dialog.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import TwcListItem from "../../components/pageWiki/twc-list-item.vue";
-import TwcWeapon from "../../components/pageWiki/twc-weapon.vue";
-import TwoSelectW, { SelectedWValue } from "../../components/pageWiki/two-select-w.vue";
-import { AppWeaponData } from "../../data/index.js";
-import { createObc } from "../../utils/TGWindow.js";
+import { AppWeaponData } from "@/data/index.js";
+import { createObc } from "@/utils/TGWindow.js";
 
 const id = useRoute().params.id.toString() ?? "0";
 const showSelect = ref<boolean>(false);
@@ -64,6 +63,10 @@ onBeforeMount(() => {
   showSnackbar.warn(`武器 ${id} 不存在`);
   curItem.value = cardsInfo.value[0];
 });
+
+function switchW(item: TGApp.App.Weapon.WikiBriefInfo): void {
+  curItem.value = item;
+}
 
 function handleSelectW(val: SelectedWValue) {
   showSelect.value = true;
@@ -96,7 +99,7 @@ async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
   await createObc(item.contentId, item.name);
 }
 </script>
-<style scoped>
+<style lang="css" scoped>
 .ww-box {
   position: relative;
   display: flex;

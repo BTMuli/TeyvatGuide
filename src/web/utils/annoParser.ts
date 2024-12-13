@@ -4,9 +4,8 @@
  * @since Beta v0.6.0
  */
 
+import TpText from "@comp/viewPost/tp-text.vue";
 import { h, render } from "vue";
-
-import TpText from "../../components/viewPost/tp-text.vue";
 
 import { decodeRegExp } from "./tools.js";
 
@@ -17,12 +16,11 @@ import { decodeRegExp } from "./tools.js";
  * @returns {HTMLParagraphElement} 解析后的 p 元素
  */
 function handleAnnoP(p: HTMLParagraphElement): HTMLParagraphElement {
-  if (p.children.length === 0) {
-    p.innerHTML = decodeRegExp(p.innerHTML);
-  } else {
+  if (p.children.length === 0) p.innerHTML = decodeRegExp(p.innerHTML);
+  else {
     p.querySelectorAll("*").forEach((child) => {
       child.innerHTML = decodeRegExp(child.innerHTML);
-      child.querySelectorAll("span").forEach((span) => handleAnnoSpan(span));
+      child.querySelectorAll("span").forEach(handleAnnoSpan);
     });
   }
   return p;
@@ -35,19 +33,12 @@ function handleAnnoP(p: HTMLParagraphElement): HTMLParagraphElement {
  * @returns {HTMLSpanElement} 解析后的 span 元素
  */
 function handleAnnoSpan(span: HTMLSpanElement): HTMLSpanElement {
-  if (span.style.fontSize) {
-    span.style.fontSize = "";
-  }
-  if (span.children.length === 0) {
-    span.innerHTML = decodeRegExp(span.innerHTML);
-  } else {
+  if (span.style.fontSize) span.style.fontSize = "";
+  if (span.children.length === 0) span.innerHTML = decodeRegExp(span.innerHTML);
+  else {
     span.querySelectorAll("*").forEach((child) => {
-      if (child.children.length === 0) {
-        child.innerHTML = decodeRegExp(child.innerHTML);
-      }
-      if (child.tagName === "T") {
-        child.outerHTML = child.innerHTML;
-      }
+      if (child.children.length === 0) child.innerHTML = decodeRegExp(child.innerHTML);
+      if (child.tagName === "T") child.outerHTML = child.innerHTML;
     });
   }
   return span;
@@ -75,11 +66,11 @@ function handleAnnoTable(table: HTMLTableElement): HTMLTableElement {
  * @param {string} data 游戏内公告数据
  * @returns {string} 解析后的数据
  */
-export function handleAnnoContent(data: string): string {
+function handleAnnoContent(data: string): string {
   const htmlBase = new DOMParser().parseFromString(data, "text/html");
-  htmlBase.querySelectorAll("p").forEach((p) => handleAnnoP(p));
-  htmlBase.querySelectorAll("span").forEach((span) => handleAnnoSpan(span));
-  htmlBase.querySelectorAll("table").forEach((table) => handleAnnoTable(table));
+  htmlBase.querySelectorAll("p").forEach(handleAnnoP);
+  htmlBase.querySelectorAll("span").forEach(handleAnnoSpan);
+  htmlBase.querySelectorAll("table").forEach(handleAnnoTable);
   return htmlBase.body.innerHTML;
 }
 
@@ -89,17 +80,15 @@ export function handleAnnoContent(data: string): string {
  * @param {TGApp.BBS.Announcement.ContentItem} anno - 公告内容
  * @returns {TGApp.Plugins.Mys.SctPost.Base[]} 结构化数据
  */
-export function parseAnnoContent(
+function parseAnnoContent(
   anno: TGApp.BBS.Announcement.ContentItem,
-): TGApp.Plugins.Mys.SctPost.Base[] {
+): Array<TGApp.Plugins.Mys.SctPost.Base> {
   const parser = new DOMParser();
   const first = handleAnnoContent(anno.content);
   const doc = parser.parseFromString(first, "text/html");
-  const children: TGApp.Plugins.Mys.SctPost.Base[] = [];
+  const children: Array<TGApp.Plugins.Mys.SctPost.Base> = [];
   if (anno.banner !== "") children.push({ insert: { image: anno.banner } });
-  doc.body.childNodes.forEach((child) => {
-    children.push(...parseAnnoNode(child));
-  });
+  doc.body.childNodes.forEach((child) => children.push(...parseAnnoNode(child)));
   return children;
 }
 
@@ -113,20 +102,12 @@ export function parseAnnoContent(
 function parseAnnoNode(
   node: Node,
   attr?: Record<string, string>,
-): TGApp.Plugins.Mys.SctPost.Base[] {
+): Array<TGApp.Plugins.Mys.SctPost.Base> {
   let defaultRes: TGApp.Plugins.Mys.SctPost.Base = {
-    insert: {
-      tag: node.nodeName,
-      text: node.textContent,
-      type: node.nodeType,
-    },
+    insert: { tag: node.nodeName, text: node.textContent, type: node.nodeType },
   };
-  if (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) {
-    return [defaultRes];
-  }
-  if (node.nodeType === Node.TEXT_NODE) {
-    return [{ insert: node.textContent, attributes: attr }];
-  }
+  if (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) return [defaultRes];
+  if (node.nodeType === Node.TEXT_NODE) return [{ insert: node.textContent, attributes: attr }];
   const element = <HTMLElement>node;
   defaultRes = {
     insert: {
@@ -142,37 +123,25 @@ function parseAnnoNode(
     return [parseAnnoParagraph(element, attr)];
   }
   if (element.tagName === "OL" || element.tagName === "LI" || element.tagName === "UL") {
-    const res: TGApp.Plugins.Mys.SctPost.Base[] = [];
-    Array.from(element.children).forEach((child) => {
-      res.push(...parseAnnoNode(child, attr));
-    });
+    const res: Array<TGApp.Plugins.Mys.SctPost.Base> = [];
+    Array.from(element.children).forEach((child) => res.push(...parseAnnoNode(child, attr)));
     for (const comp of res) {
       if (comp.children) {
         for (const child of comp.children) {
-          if (child.insert !== "" && child.insert !== "\n") {
-            child.insert = ` ${child.insert}`;
-          }
+          if (child.insert !== "" && child.insert !== "\n") child.insert = ` ${child.insert}`;
         }
-      } else {
-        if (comp.insert !== "" && comp.insert !== "\n") {
-          comp.insert = ` ${comp.insert}`;
-        }
+        continue;
       }
+      if (comp.insert !== "" && comp.insert !== "\n") comp.insert = ` ${comp.insert}`;
     }
     return res;
   }
-  if (element.tagName === "DETAILS") {
-    return [parseAnnoDetails(element)];
-  }
-  if (element.tagName === "TABLE") {
-    return [parseAnnoTable(element)];
-  }
+  if (element.tagName === "DETAILS") return [parseAnnoDetails(element)];
+  if (element.tagName === "TABLE") return [parseAnnoTable(element)];
   if (element.tagName === "DIV") {
     if (element.childNodes.length > 1) {
-      const res: TGApp.Plugins.Mys.SctPost.Base[] = [];
-      element.childNodes.forEach((child) => {
-        res.push(...parseAnnoNode(child, attr));
-      });
+      const res: Array<TGApp.Plugins.Mys.SctPost.Base> = [];
+      element.childNodes.forEach((child) => res.push(...parseAnnoNode(child, attr)));
       return res;
     }
     if (element.childNodes.length === 0) return [defaultRes];
@@ -185,21 +154,15 @@ function parseAnnoNode(
     p.innerHTML = element.innerHTML;
     return [parseAnnoParagraph(p, attr)];
   }
-  if (element.tagName === "SPAN") {
-    return [parseAnnoSpan(element, attr)];
-  }
+  if (element.tagName === "SPAN") return [parseAnnoSpan(element, attr)];
   if (element.tagName === "STRONG") {
-    const res: TGApp.Plugins.Mys.SctPost.Base[] = [];
-    element.childNodes.forEach((child) => {
-      res.push(...parseAnnoNode(child, { bold: "true" }));
-    });
+    const res: Array<TGApp.Plugins.Mys.SctPost.Base> = [];
+    element.childNodes.forEach((child) => res.push(...parseAnnoNode(child, { bold: "true" })));
     return res;
   }
   if (element.tagName === "T") {
-    const res: TGApp.Plugins.Mys.SctPost.Base[] = [];
-    element.childNodes.forEach((child) => {
-      res.push(...parseAnnoNode(child, attr));
-    });
+    const res: Array<TGApp.Plugins.Mys.SctPost.Base> = [];
+    element.childNodes.forEach((child) => res.push(...parseAnnoNode(child, attr)));
     return res;
   }
   return [defaultRes];
@@ -226,11 +189,7 @@ function parseAnnoParagraph(
       childrenLength: p.childNodes.length,
     },
   };
-  if (p.childNodes.length === 0) {
-    return {
-      insert: p.innerHTML === "" ? "\n" : p.textContent,
-    };
-  }
+  if (p.childNodes.length === 0) return { insert: p.innerHTML === "" ? "\n" : p.textContent };
   if (p.childNodes.length === 1) {
     if (
       p.childNodes[0].nodeType !== Node.ELEMENT_NODE &&
@@ -241,82 +200,45 @@ function parseAnnoParagraph(
     if (p.childNodes[0].nodeType === Node.TEXT_NODE) {
       const span = document.createElement("span");
       span.innerHTML = p.innerHTML;
-      return {
-        insert: "",
-        children: [parseAnnoSpan(span, attr), { insert: "\n" }],
-      };
+      return { insert: "", children: [parseAnnoSpan(span, attr), { insert: "\n" }] };
     }
     const child = <HTMLElement>p.childNodes[0];
     if (child.tagName === "SPAN") {
-      return {
-        insert: "",
-        children: [parseAnnoSpan(child, attr), { insert: "\n" }],
-      };
+      return { insert: "", children: [parseAnnoSpan(child, attr), { insert: "\n" }] };
     }
-    if (child.tagName === "IMG") {
-      return parseAnnoImage(child);
-    }
+    if (child.tagName === "IMG") return parseAnnoImage(child);
     if (child.tagName === "A") {
-      return {
-        insert: "",
-        children: [parseAnnoAnchor(child)],
-        attributes: { align: "center" },
-      };
+      return { insert: "", children: [parseAnnoAnchor(child)], attributes: { align: "center" } };
     }
     if (child.tagName === "STRONG") {
       const res = parseAnnoNode(child, { bold: "true" });
-      return {
-        insert: "",
-        children: [...res, { insert: "\n" }],
-      };
+      return { insert: "", children: [...res, { insert: "\n" }] };
     }
-    if (child.tagName === "T") {
-      return {
-        insert: "",
-        children: parseAnnoNode(child),
-      };
-    }
+    if (child.tagName === "T") return { insert: "", children: parseAnnoNode(child) };
     return defaultRes;
   }
-  const res: TGApp.Plugins.Mys.SctPost.Base = {
-    insert: "",
-    children: [],
-  };
+  const res: TGApp.Plugins.Mys.SctPost.Base = { insert: "", children: [] };
   p.childNodes.forEach((child) => {
     let childRes: TGApp.Plugins.Mys.SctPost.Base;
     if (child.nodeType === Node.TEXT_NODE) {
       childRes = { insert: child.textContent };
     } else if (child.nodeType === Node.ELEMENT_NODE) {
       const element = <HTMLElement>child;
-      if (element.tagName === "SPAN") {
-        childRes = parseAnnoSpan(element);
-      } else if (element.tagName === "BR") {
-        childRes = { insert: "\n" };
-      } else if (element.tagName === "A") {
-        childRes = parseAnnoAnchor(element);
-      } else if (element.tagName === "STRONG") {
+      if (element.tagName === "SPAN") childRes = parseAnnoSpan(element);
+      else if (element.tagName === "BR") childRes = { insert: "\n" };
+      else if (element.tagName === "A") childRes = parseAnnoAnchor(element);
+      else if (element.tagName === "STRONG") {
         const resS = parseAnnoNode(element, { bold: "true" });
-        if (resS.length > 1) {
-          childRes = { insert: element.outerHTML };
-        } else {
-          childRes = resS[0];
-        }
+        if (resS.length > 1) childRes = { insert: element.outerHTML };
+        else childRes = resS[0];
       } else if (element.tagName === "T") {
         element.innerHTML = element.outerHTML;
         const resE = parseAnnoNode(element);
-        if (resE.length > 1) {
-          childRes = { insert: element.outerHTML };
-        } else {
-          childRes = resE[0];
-        }
-      } else if (element.tagName === "IMG") {
-        childRes = parseAnnoImage(element);
-      } else {
-        throw new Error(`Unknown node type: ${element.tagName}`);
-      }
-    } else {
-      throw new Error(`Unknown node type: ${child.nodeType}`);
-    }
+        if (resE.length > 1) childRes = { insert: element.outerHTML };
+        else childRes = resE[0];
+      } else if (element.tagName === "IMG") childRes = parseAnnoImage(element);
+      else throw new Error(`Unknown node type: ${element.tagName}`);
+    } else throw new Error(`Unknown node type: ${child.nodeType}`);
     res.children!.push(childRes);
   });
   res.children?.push({ insert: "\n" });
@@ -365,21 +287,13 @@ function parseAnnoSpan(
     }
     let spanAttrs: Record<string, string> | undefined = attr;
     if (!spanAttrs) spanAttrs = {};
-    if (span.style.color !== "") {
-      spanAttrs.color = span.style.color;
-    }
+    if (span.style.color !== "") spanAttrs.color = span.style.color;
     const parse = decodeRegExp(span.innerHTML);
     if (parse.includes("</t>")) {
       const dom = new DOMParser().parseFromString(parse, "text/html");
-      return {
-        insert: dom.body.textContent,
-        attributes: spanAttrs,
-      };
+      return { insert: dom.body.textContent, attributes: spanAttrs };
     }
-    return {
-      insert: parse,
-      attributes: spanAttrs,
-    };
+    return { insert: parse, attributes: spanAttrs };
   }
   return defaultRes;
 }
@@ -403,11 +317,7 @@ function parseAnnoImage(img: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
     };
   }
   const image = <HTMLImageElement>img;
-  return {
-    insert: {
-      image: image.src,
-    },
-  };
+  return { insert: { image: image.src } };
 }
 
 /**
@@ -435,12 +345,7 @@ function parseAnnoAnchor(a: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
     const res = anchor.href.match(regex);
     if (res !== null && res.length > 2) link = res[2];
   }
-  return {
-    insert: anchor.textContent,
-    attributes: {
-      link: link,
-    },
-  };
+  return { insert: anchor.textContent, attributes: { link: link } };
 }
 
 /**
@@ -472,10 +377,7 @@ function parseAnnoDetails(details: HTMLElement): TGApp.Plugins.Mys.SctPost.Base 
   return {
     insert: {
       backup_text: "",
-      fold: {
-        title: JSON.stringify(summaryNode),
-        content: JSON.stringify(contentNode),
-      },
+      fold: { title: JSON.stringify(summaryNode), content: JSON.stringify(contentNode) },
     },
   };
 }
@@ -522,9 +424,7 @@ function parseAnnoTable(table: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
       });
     });
   });
-  return {
-    insert: {
-      table: table.outerHTML,
-    },
-  };
+  return { insert: { table: table.outerHTML } };
 }
+
+export default parseAnnoContent;

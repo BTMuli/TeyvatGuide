@@ -45,17 +45,10 @@ async function TGHttp<T>(
 ): Promise<T | { data: Promise<T>; resp: Response }> {
   const httpHeaders = new Headers();
   if (options.headers) {
-    for (const key in options.headers) {
-      httpHeaders.append(key, options.headers[key]);
-    }
+    for (const key in options.headers) httpHeaders.append(key, options.headers[key]);
   }
-  const fetchOptions: RequestInit = {
-    method: options.method,
-    headers: httpHeaders,
-  };
-  if (options.body) {
-    fetchOptions.body = options.body;
-  }
+  const fetchOptions: RequestInit = { method: options.method, headers: httpHeaders };
+  if (options.body) fetchOptions.body = options.body;
   if (options.query) {
     const query = new URLSearchParams(options.query).toString();
     url += `?${query}`;
@@ -66,9 +59,7 @@ async function TGHttp<T>(
     .then((res) => {
       if (res.ok) {
         const data = options.isBlob ? res.arrayBuffer() : res.json();
-        if (fullResponse) {
-          return { data, resp: res };
-        }
+        if (fullResponse) return { data, resp: res };
         return data;
       }
       throw new Error(`HTTP error! status: ${res.status}`);

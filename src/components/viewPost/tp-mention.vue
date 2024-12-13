@@ -7,24 +7,15 @@
 <script lang="ts" setup>
 import { toRaw } from "vue";
 
-export interface TpMention {
-  insert: {
-    mention: {
-      uid: string;
-      nickname: string;
-    };
-  };
-}
-
-interface TpMentionProps {
-  data: TpMention;
-}
+export type TpMention = { insert: { mention: { uid: string; nickname: string } } };
+type TpMentionProps = { data: TpMention };
 
 const props = defineProps<TpMentionProps>();
 
 console.log("tpMention", props.data.insert.mention.uid, toRaw(props.data).insert.mention);
 
-async function toLink(): Promise<void> {
+// todo 个人主页
+function toLink(): void {
   const uid = props.data.insert.mention.uid;
   const link = `https://www.miyoushe.com/ys/accountCenter/postList?id=${uid}`;
   window.open(link);

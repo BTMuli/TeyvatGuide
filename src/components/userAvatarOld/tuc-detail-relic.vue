@@ -1,23 +1,18 @@
 <template>
   <div class="tuc-dr-box">
     <div class="tuc-dr-bg">
-      <img :src="`/icon/relic/${props.pos}.webp`" alt="relic" />
+      <img :src="`/icon/relic/${pos}.webp`" alt="relic" />
     </div>
-    <div v-if="props.modelValue" class="tuc-dr-bg">
-      <img :src="`/icon/bg/${props.modelValue.rarity}-Star.webp`" alt="bg" />
+    <div v-if="modelValue" class="tuc-dr-bg">
+      <img :src="`/icon/bg/${modelValue.rarity}-Star.webp`" alt="bg" />
     </div>
-    <div v-if="props.modelValue" class="tuc-dr-icon">
-      <img :src="props.modelValue.icon" alt="relic" />
+    <div v-if="modelValue" class="tuc-dr-icon">
+      <img :src="modelValue.icon" alt="relic" />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-interface TucDetailRelicProps {
-  modelValue: TGApp.Game.Avatar.Relic | false;
-  pos: number;
-}
-
-const props = defineProps<TucDetailRelicProps>();
+defineProps<{ modelValue: TGApp.Game.Avatar.Relic | false; pos: number }>();
 </script>
 <style lang="css" scoped>
 .tuc-dr-box {

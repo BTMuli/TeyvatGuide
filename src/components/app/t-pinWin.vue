@@ -8,10 +8,9 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onMounted, ref } from "vue";
-
-import showSnackbar from "../func/snackbar.js";
 
 const isPined = ref<boolean>(false);
 

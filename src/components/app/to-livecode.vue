@@ -37,20 +37,20 @@
             variant="outlined"
             class="tolc-btn"
             data-html2canvas-ignore
-          ></v-btn>
+          />
         </template>
       </v-list-item>
     </div>
   </TOverlay>
 </template>
 <script setup lang="ts">
+import showSnackbar from "@comp/func/snackbar.js";
 import { computed } from "vue";
 
-import { generateShareImg } from "../../utils/TGShare.js";
-import { timestampToDate } from "../../utils/toolFunc.js";
-import showSnackbar from "../func/snackbar.js";
-
 import TOverlay from "./t-overlay.vue";
+
+import { generateShareImg } from "@/utils/TGShare.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
 type ToLiveCodeProps = {
   data: TGApp.BBS.Navigator.CodeData[];

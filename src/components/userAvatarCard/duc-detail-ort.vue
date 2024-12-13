@@ -13,16 +13,14 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, watch, ref, onUnmounted } from "vue";
+import { onMounted, onUnmounted, shallowRef, watch } from "vue";
 
-import { saveImgLocal } from "../../utils/TGShare.js";
+import { saveImgLocal } from "@/utils/TGShare.js";
 
-interface DucDetailOrtProps {
-  modelValue: TGApp.Game.Avatar.Skill[];
-}
+type DucDetailOrtProps = { modelValue: Array<TGApp.Game.Avatar.Skill> };
 
 const props = defineProps<DucDetailOrtProps>();
-const talents = ref<TGApp.Game.Avatar.Skill[]>([]);
+const talents = shallowRef<Array<TGApp.Game.Avatar.Skill>>([]);
 
 async function loadData(): Promise<void> {
   const tempTalent = JSON.parse(JSON.stringify(props.modelValue));
@@ -33,9 +31,7 @@ async function loadData(): Promise<void> {
   talents.value = tempTalent;
 }
 
-onMounted(async () => {
-  await loadData();
-});
+onMounted(async () => await loadData());
 watch(
   () => props.modelValue,
   async () => {

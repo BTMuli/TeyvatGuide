@@ -4,7 +4,7 @@
  * @since Beta v0.6.3
  */
 
-import TGHttp from "../../utils/TGHttp.js";
+import TGHttp from "@/utils/TGHttp.js";
 
 export enum AnnoServer {
   CN_ISLAND = "cn_gf01",

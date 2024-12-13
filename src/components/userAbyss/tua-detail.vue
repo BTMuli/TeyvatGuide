@@ -18,9 +18,7 @@
 import TuaDetailLevel from "./tua-detail-level.vue";
 import TuaDetailTitle from "./tua-detail-title.vue";
 
-interface TuaDetailProps {
-  modelValue: TGApp.Sqlite.Abyss.Floor;
-}
+type TuaDetailProps = { modelValue: TGApp.Sqlite.Abyss.Floor };
 
 const props = defineProps<TuaDetailProps>();
 </script>

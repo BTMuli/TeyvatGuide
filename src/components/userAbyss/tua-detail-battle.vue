@@ -11,13 +11,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { AppCharacterData } from "../../data/index.js";
-import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 
-interface TuaDetailBattleProps {
-  title: string;
-  modelValue: TGApp.Sqlite.Abyss.Battle;
-}
+import { AppCharacterData } from "@/data/index.js";
+
+type TuaDetailBattleProps = { title: string; modelValue: TGApp.Sqlite.Abyss.Battle };
 
 const props = defineProps<TuaDetailBattleProps>();
 

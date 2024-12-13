@@ -1,15 +1,11 @@
 <template>
   <div class="tuc-sub-box">
-    <div class="tuc-sub-title">{{ props.title }}</div>
+    <div class="tuc-sub-title">{{ title }}</div>
     <slot name="default" />
   </div>
 </template>
 <script lang="ts" setup>
-interface TucSubProps {
-  title: string;
-}
-
-const props = defineProps<TucSubProps>();
+defineProps<{ title: string }>();
 </script>
 <style lang="css" scoped>
 .tuc-sub-box {

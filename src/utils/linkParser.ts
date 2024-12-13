@@ -4,14 +4,14 @@
  * @since Beta v0.6.5
  */
 
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
 import { emit } from "@tauri-apps/api/event";
-
-import showDialog from "../components/func/dialog.js";
-import showSnackbar from "../components/func/snackbar.js";
-import { getGameId } from "../web/utils/tools.js";
 
 import TGClient from "./TGClient.js";
 import { createPost } from "./TGWindow.js";
+
+import { getGameId } from "@/web/utils/tools.js";
 
 /**
  * @function parsePost

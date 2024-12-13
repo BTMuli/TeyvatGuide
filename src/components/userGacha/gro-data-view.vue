@@ -60,14 +60,14 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 
-import GroDataLine, { GroDataLineProps } from "./gro-data-line.vue";
+import GroDataLine, { type GroDataLineProps } from "./gro-data-line.vue";
 
-interface GachaDataViewProps {
+type GachaDataViewProps = {
   dataType: "new" | "avatar" | "weapon" | "normal" | "mix";
-  dataVal: TGApp.Sqlite.GachaRecords.SingleTable[];
-}
+  dataVal: Array<TGApp.Sqlite.GachaRecords.SingleTable>;
+};
 
 const props = defineProps<GachaDataViewProps>();
 
@@ -76,8 +76,8 @@ const loading = ref<boolean>(true); // 是否加载完
 const title = ref<string>(""); // 卡片标题
 const startDate = ref<string>(""); // 最早的时间
 const endDate = ref<string>(""); // 最晚的时间
-const star5List = ref<GroDataLineProps[]>([]); // 5星物品数据
-const star4List = ref<GroDataLineProps[]>([]); // 4星物品数据
+const star5List = shallowRef<Array<GroDataLineProps>>([]); // 5星物品数据
+const star4List = shallowRef<Array<GroDataLineProps>>([]); // 4星物品数据
 const reset5count = ref<number>(1); // 5星垫抽数量
 const reset4count = ref<number>(1); // 4星垫抽数量
 const star3count = ref<number>(0); // 3星物品数量
@@ -92,6 +92,8 @@ onMounted(() => {
 function loadData(): void {
   title.value = getTitle("top");
   const tempData = props.dataVal;
+  const temp5Data: Array<GroDataLineProps> = [];
+  const temp4Data: Array<GroDataLineProps> = [];
   // 按照 id 升序
   tempData
     .sort((a, b) => a.id.localeCompare(b.id))
@@ -106,24 +108,17 @@ function loadData(): void {
         star3count.value++;
       } else if (item.rank === "4") {
         reset5count.value++;
-        star4List.value.push({
-          data: item,
-          count: reset4count.value,
-        });
+        temp4Data.push({ data: item, count: reset4count.value });
         reset4count.value = 1;
       } else if (item.rank === "5") {
         reset4count.value++;
-        star5List.value.push({
-          data: item,
-          count: reset5count.value,
-        });
+        temp5Data.push({ data: item, count: reset5count.value });
         reset5count.value = 1;
       }
     });
   star5avg.value = getStar5Avg();
-  // 两个列表反序
-  star5List.value.reverse();
-  star4List.value.reverse();
+  star5List.value = temp5Data.reverse();
+  star4List.value = temp4Data.reverse();
 }
 
 // 获取标题
@@ -135,24 +130,24 @@ function getTitle(type: "top" | "5" | "4" | "3"): string {
     if (props.dataType === "normal") return "常驻祈愿";
     if (props.dataType === "mix") return "集录祈愿";
     return "";
-  } else if (props.dataVal.length === 0) {
-    return "暂无数据";
-  } else if (type === "5") {
+  }
+  if (props.dataVal.length === 0) return "暂无数据";
+  if (type === "5") {
     // 5星物品统计 00.00%
     return `${star5List.value.length} [${((star5List.value.length * 100) / props.dataVal.length)
       .toFixed(2)
       .padStart(5, "0")}%]`;
-  } else if (type === "4") {
+  }
+  if (type === "4") {
     // 4星物品统计
     return `${star4List.value.length} [${((star4List.value.length * 100) / props.dataVal.length)
       .toFixed(2)
       .padStart(5, "0")}%]`;
-  } else {
-    // 3星物品统计
-    return `${star3count.value} [${((star3count.value * 100) / props.dataVal.length)
-      .toFixed(2)
-      .padStart(5, "0")}%]`;
   }
+  // 3星物品统计
+  return `${star3count.value} [${((star3count.value * 100) / props.dataVal.length)
+    .toFixed(2)
+    .padStart(5, "0")}%]`;
 }
 
 // 获取5星平均抽数

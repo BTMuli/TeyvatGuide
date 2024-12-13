@@ -4,14 +4,14 @@
  * @since Beta v0.6.0
  */
 
+import showSnackbar from "@comp/func/snackbar.js";
+import TGSqlite from "@Sqlite/index.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readDir } from "@tauri-apps/plugin-fs";
 
-import showSnackbar from "../../../components/func/snackbar.js";
-import { AppCharacterData, AppWeaponData } from "../../../data/index.js";
-import TGLogger from "../../../utils/TGLogger.js";
-import { exportUigfData, readUigfData, verifyUigfData } from "../../../utils/UIGF.js";
-import TGSqlite from "../index.js";
+import { AppCharacterData, AppWeaponData } from "@/data/index.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { exportUigfData, readUigfData, verifyUigfData } from "@/utils/UIGF.js";
 
 type gachaItemTypeRes =
   | ["角色", TGApp.App.Character.WikiBriefInfo]
@@ -44,19 +44,19 @@ function getInsertSql(uid: string, gacha: TGApp.Plugins.UIGF.GachaItem): string 
       INSERT INTO GachaRecords (uid, gachaType, itemId, count, time, name, type, rank, id, uigfType, updated)
       VALUES ('${uid}', '${gacha.gacha_type}', '${gacha.item_id ?? null}', '${gacha.count ?? null}', '${gacha.time}',
               '${gacha.name}', '${gacha.item_type ?? null}', '${gacha.rank_type ?? null}', '${gacha.id}',
-              '${gacha.uigf_gacha_type}', datetime('now', 'localtime'))
-      ON CONFLICT (id)
-          DO UPDATE
-          SET uid       = '${uid}',
-              gachaType = '${gacha.gacha_type}',
-              uigfType  = '${gacha.uigf_gacha_type}',
-              time      = '${gacha.time}',
-              itemId    = '${gacha.item_id ?? null}',
-              count     = '${gacha.count ?? null}',
-              name      = '${gacha.name}',
-              type      = '${gacha.item_type ?? null}',
-              rank      = '${gacha.rank_type ?? null}',
-              updated   = datetime('now', 'localtime');
+              '${gacha.uigf_gacha_type}', datetime('now', 'localtime')) ON CONFLICT (id)
+          DO
+      UPDATE
+          SET uid = '${uid}',
+          gachaType = '${gacha.gacha_type}',
+          uigfType = '${gacha.uigf_gacha_type}',
+          time = '${gacha.time}',
+          itemId = '${gacha.item_id ?? null}',
+          count = '${gacha.count ?? null}',
+          name = '${gacha.name}',
+          type = '${gacha.item_type ?? null}',
+          rank = '${gacha.rank_type ?? null}',
+          updated = datetime('now', 'localtime');
   `;
 }
 

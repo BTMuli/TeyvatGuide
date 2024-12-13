@@ -9,17 +9,15 @@
   <VpOverlayImage :image="props.data" v-model="showOverlay" />
 </template>
 <script lang="ts" setup>
-import { computed, ref, onMounted, onUnmounted } from "vue";
-
-import { saveImgLocal } from "../../utils/TGShare.js";
-import { bytesToSize } from "../../utils/toolFunc.js";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import VpOverlayImage from "./vp-overlay-image.vue";
 
-export interface TpImage {
-  insert: {
-    image: string;
-  };
+import { saveImgLocal } from "@/utils/TGShare.js";
+import { bytesToSize } from "@/utils/toolFunc.js";
+
+export type TpImage = {
+  insert: { image: string };
   attributes?: {
     width: number;
     height: number;
@@ -27,15 +25,12 @@ export interface TpImage {
     ext?: "png" | "jpg"; // 待补充
     align?: "center"; // 待补充
   };
-}
-
-interface TpImageProps {
-  data: TpImage;
-}
+};
+type TpImageProps = { data: TpImage };
 
 const props = defineProps<TpImageProps>();
-const showOverlay = ref(false);
-const localUrl = ref<string | undefined>(undefined);
+const showOverlay = ref<boolean>(false);
+const localUrl = ref<string>();
 
 const imgWidth = computed<string>(() => {
   if (props.data.attributes === undefined) return "auto";

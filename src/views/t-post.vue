@@ -83,36 +83,37 @@
   />
 </template>
 <script lang="ts" setup>
+import TPinWin from "@comp/app/t-pinWin.vue";
+import TShareBtn from "@comp/app/t-shareBtn.vue";
+import TSwitchTheme from "@comp/app/t-switchTheme.vue";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TpAvatar from "@comp/viewPost/tp-avatar.vue";
+import TpParser from "@comp/viewPost/tp-parser.vue";
+import VpBtnCollect from "@comp/viewPost/vp-btn-collect.vue";
+import VpBtnReply from "@comp/viewPost/vp-btn-reply.vue";
+import VpOverlayCollection from "@comp/viewPost/vp-overlay-collection.vue";
+import Mys from "@Mys/index.js";
 import { app, webviewWindow } from "@tauri-apps/api";
 import { emit } from "@tauri-apps/api/event";
-import { nextTick, onMounted, onUnmounted, ref, shallowRef } from "vue";
+import { onMounted, onUnmounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
-import TPinWin from "../components/app/t-pinWin.vue";
-import TShareBtn from "../components/app/t-shareBtn.vue";
-import TSwitchTheme from "../components/app/t-switchTheme.vue";
-import showLoading from "../components/func/loading.js";
-import showSnackbar from "../components/func/snackbar.js";
-import TpAvatar from "../components/viewPost/tp-avatar.vue";
-import TpParser from "../components/viewPost/tp-parser.vue";
-import VpBtnCollect from "../components/viewPost/vp-btn-collect.vue";
-import VpBtnReply from "../components/viewPost/vp-btn-reply.vue";
-import VpOverlayCollection from "../components/viewPost/vp-overlay-collection.vue";
-import Mys from "../plugins/Mys/index.js";
-import { useAppStore } from "../store/modules/app.js";
-import TGClient from "../utils/TGClient.js";
-import TGLogger from "../utils/TGLogger.js";
-import { createTGWindow } from "../utils/TGWindow.js";
-import TGConstant from "../web/constant/TGConstant.js";
+import { useAppStore } from "@/store/modules/app.js";
+import TGClient from "@/utils/TGClient.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { createTGWindow } from "@/utils/TGWindow.js";
+import TGConstant from "@/web/constant/TGConstant.js";
 
 const appVersion = ref<string>();
 const postId = Number(useRoute().params.post_id);
 const showCollection = ref<boolean>(false);
 const shareTime = ref<number>(Math.floor(Date.now() / 1000));
-// eslint-disable-next-line no-undef
-const shareTimeTimer = ref<NodeJS.Timeout | undefined>(undefined);
-const renderPost = shallowRef<TGApp.Plugins.Mys.SctPost.Base[]>([]);
+const renderPost = shallowRef<Array<TGApp.Plugins.Mys.SctPost.Base>>([]);
 const postData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
+
+// eslint-disable-next-line no-undef
+let shareTimer: NodeJS.Timeout | null = null;
 
 function getGameIcon(gameId: number): string {
   const find = TGConstant.BBS.CHANNELS.find((item) => item.gid === gameId.toString());
@@ -152,14 +153,17 @@ onMounted(async () => {
     await TGLogger.Info(`[t-post][${postId}][onMounted] 打开 JSON 窗口`);
     await createPostJson(postId);
   }
-  await nextTick();
-  if (shareTimeTimer.value !== undefined) {
-    clearInterval(shareTimeTimer.value);
-    shareTimeTimer.value = undefined;
+  if (shareTimer !== null) {
+    clearInterval(shareTimer);
+    shareTimer = null;
   }
-  shareTimeTimer.value = setInterval(() => (shareTime.value = Math.floor(Date.now() / 1000)), 1000);
+  shareTimer = setInterval(getShareTimer, 1000);
   showLoading.end();
 });
+
+function getShareTimer(): void {
+  shareTime.value = Math.floor(Date.now() / 1000);
+}
 
 function showOverlayC() {
   showCollection.value = true;
@@ -189,9 +193,7 @@ function getRenderPost(data: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys
     try {
       jsonParse = parseContent(data.post.content);
     } catch (e) {
-      if (e instanceof SyntaxError) {
-        TGLogger.Warn(`[t-post][${postId}] ${e.name}: ${e.message}`);
-      }
+      if (e instanceof SyntaxError) TGLogger.Warn(`[t-post][${postId}] ${e.name}: ${e.message}`);
       jsonParse = data.post.structured_content;
     }
   }
@@ -240,9 +242,9 @@ async function toForum(forum: TGApp.Plugins.Mys.Post.Forum): Promise<void> {
 }
 
 onUnmounted(() => {
-  if (shareTimeTimer.value !== undefined) {
-    clearInterval(shareTimeTimer.value);
-    shareTimeTimer.value = undefined;
+  if (shareTimer !== null) {
+    clearInterval(shareTimer);
+    shareTimer = null;
   }
 });
 </script>

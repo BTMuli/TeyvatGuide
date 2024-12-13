@@ -1,21 +1,12 @@
 <template>
   <div class="tuc-cards-box">
-    <div
-      class="tuc-cards-item"
-      v-for="(card, idx) in props.modelValue"
-      :key="idx"
-      :title="card.name"
-    >
+    <div class="tuc-cards-item" v-for="(card, idx) in modelValue" :key="idx" :title="card.name">
       <img :src="card.icon" :alt="card.name" />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-interface TucCardsProps {
-  modelValue: TGApp.Game.Combat.Card[];
-}
-
-const props = defineProps<TucCardsProps>();
+defineProps<{ modelValue: Array<TGApp.Game.Combat.Card> }>();
 </script>
 <style lang="css" scoped>
 .tuc-cards-box {

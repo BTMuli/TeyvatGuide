@@ -20,14 +20,14 @@
   <span v-else :style="getTextStyle()">{{ props.data.insert }}</span>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, StyleValue, toRaw } from "vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import { getEmojis } from "@Mys/request/getEmojis.js";
+import { onMounted, ref, shallowRef, StyleValue, toRaw } from "vue";
 
-import { getEmojis } from "../../plugins/Mys/request/getEmojis.js";
-import { parseLink, parsePost } from "../../utils/linkParser.js";
-import { isColorSimilar } from "../../utils/toolFunc.js";
-import showSnackbar from "../func/snackbar.js";
+import { parseLink, parsePost } from "@/utils/linkParser.js";
+import { isColorSimilar } from "@/utils/toolFunc.js";
 
-export interface TpText {
+export type TpText = {
   insert: string;
   attributes?: {
     header?: number;
@@ -37,16 +37,13 @@ export interface TpText {
     align?: string;
     italic?: boolean;
   };
-}
-
-interface TpTextProps {
-  data: TpText;
-}
+};
+type TpTextProps = { data: TpText };
 
 const props = defineProps<TpTextProps>();
 const mode = ref<string>("text");
 const localEmojis = ref<string | null>(localStorage.getItem("emojis"));
-const emojis = ref<TpText[]>([]);
+const emojis = shallowRef<Array<TpText>>([]);
 
 console.log("tpText", JSON.stringify(props.data.insert), toRaw(props.data)?.attributes);
 
@@ -72,7 +69,7 @@ onMounted(async () => {
 
 // 解析文本样式
 function getTextStyle(): StyleValue {
-  const style = <Array<StyleValue>>[];
+  const style: Array<StyleValue> = [];
   const data: TpText = props.data;
   style.push("white-space: pre-wrap");
   style.push("line-break: anywhere");
@@ -95,7 +92,7 @@ function getTextStyle(): StyleValue {
 }
 
 // 解析链接目标
-async function toLink() {
+async function toLink(): Promise<void> {
   if (!props.data.attributes) return;
   if (!props.data.attributes.link) return;
   const link = props.data.attributes.link;
@@ -128,13 +125,14 @@ function getEmojiUrl(): string {
       localStorage.setItem("emojis", localEmojis.value);
     });
   }
+  if (localEmojis.value === null) return "";
   const emojiName = getEmojiName();
-  const emojiMap: Record<string, string> = JSON.parse(<string>localEmojis.value);
+  const emojiMap: Record<string, string> = JSON.parse(localEmojis.value);
   if (!Object.keys(emojiMap).includes(emojiName)) mode.value = "text";
-  return JSON.parse(<string>localEmojis.value)[emojiName];
+  return JSON.parse(localEmojis.value)[emojiName];
 }
 
-function getEmojiName() {
+function getEmojiName(): string {
   return props.data.insert.slice(2, -1);
 }
 </script>

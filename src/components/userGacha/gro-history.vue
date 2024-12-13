@@ -28,7 +28,7 @@
             <div class="gro-pi-time">{{ getTimeStr(pool) }}</div>
             <div class="gro-pi-sub">Up 五星</div>
             <div class="gro-pool-up lv5">
-              <TItembox
+              <TItemBox
                 v-for="i in pool.up5List"
                 :key="i"
                 :model-value="getBox(i)"
@@ -37,7 +37,7 @@
             </div>
             <div class="gro-pi-sub">Up 四星</div>
             <div class="gro-pool-up lv4">
-              <TItembox
+              <TItemBox
                 v-for="i in pool.up4List"
                 :key="i"
                 :model-value="getBox(i)"
@@ -51,38 +51,32 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import { onMounted, ref, shallowRef } from "vue";
 import { useRouter } from "vue-router";
 
-import { AppGachaData, AppCharacterData, AppWeaponData } from "../../data/index.js";
-import { createPost } from "../../utils/TGWindow.js";
-import { timestampToDate } from "../../utils/toolFunc.js";
-import TItembox, { TItemBoxData } from "../app/t-item-box.vue";
-import showDialog from "../func/dialog.js";
-import showSnackbar from "../func/snackbar.js";
+import { AppCharacterData, AppGachaData, AppWeaponData } from "@/data/index.js";
+import { createPost } from "@/utils/TGWindow.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
-interface GroHistoryMap {
-  tab: string;
-  value: TGApp.App.Gacha.PoolItem[];
-}
+type GroHistoryMap = { tab: string; value: Array<TGApp.App.Gacha.PoolItem> };
 
 const historyTab = ref<string>("");
-const tabList = ref<GroHistoryMap[]>([]);
+const tabList = shallowRef<Array<GroHistoryMap>>([]);
 const router = useRouter();
 
 onMounted(() => {
-  const res: GroHistoryMap[] = [];
-  AppGachaData.forEach((pool) => {
+  const res: Array<GroHistoryMap> = [];
+  for (const pool of AppGachaData) {
     const index = res.findIndex((item) => item.tab === pool.version);
     if (index === -1) {
-      res.push({
-        tab: pool.version,
-        value: [pool],
-      });
-    } else {
-      res[index].value.push(pool);
+      res.push({ tab: pool.version, value: [pool] });
+      continue;
     }
-  });
+    res[index].value.push(pool);
+  }
   tabList.value = res.reverse();
   historyTab.value = res[0].tab;
 });

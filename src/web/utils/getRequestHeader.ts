@@ -6,8 +6,8 @@
 
 import Md5 from "js-md5";
 
-import { getDeviceInfo, getRandomString } from "../../utils/toolFunc.js";
-import { BBS_VERSION } from "../constant/bbs.js";
+import { getDeviceInfo, getRandomString } from "@/utils/toolFunc.js";
+import { BBS_VERSION } from "@/web/constant/bbs.js";
 
 /**
  * @description salt 类型

@@ -4,9 +4,10 @@
  * @since Beta v0.6.0
  */
 
-import { AppCharacterData } from "../../../data/index.js";
-import { timestampToDate } from "../../../utils/toolFunc.js";
-import TGSqlite from "../index.js";
+import TGSqlite from "@Sqlite/index.js";
+
+import { AppCharacterData } from "@/data/index.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
 /**
  * @description 获取角色插入Sql
@@ -102,9 +103,7 @@ async function getAvatars(uid: number): Promise<TGApp.Sqlite.Character.UserRole[
  */
 async function saveAvatars(uid: string, data: TGApp.Game.Avatar.DetailList[]): Promise<void> {
   const db = await TGSqlite.getDB();
-  for (const role of data) {
-    await db.execute(getInsertSql(uid, role));
-  }
+  for (const role of data) await db.execute(getInsertSql(uid, role));
 }
 
 /**

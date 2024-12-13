@@ -24,10 +24,10 @@
   </TucDetailDesc>
 </template>
 <script lang="ts" setup>
-import { parseHtmlText } from "../../utils/toolFunc.js";
-
 import TucDetailConstellation from "./tuc-detail-constellation.vue";
 import TucDetailDesc from "./tuc-detail-desc.vue";
+
+import { parseHtmlText } from "@/utils/toolFunc.js";
 
 defineProps<{ modelValue: TGApp.Game.Avatar.Constellation }>();
 </script>

@@ -75,6 +75,6 @@ declare namespace TGApp.Game.Gacha {
     lang: string;
     item_type: string;
     rank_type: string;
-    id: string;
+    id: number;
   }
 }

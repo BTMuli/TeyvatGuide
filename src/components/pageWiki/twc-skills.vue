@@ -23,25 +23,26 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 
-import { parseHtmlText } from "../../utils/toolFunc.js";
+import { parseHtmlText } from "@/utils/toolFunc.js";
 
-interface TwcSkillsProps {
-  data: TGApp.App.Character.WikiSkill[];
-}
+type TwcSkillsProps = { data: Array<TGApp.App.Character.WikiSkill> };
+type TabItem = { name: string; icon: string };
 
 const props = defineProps<TwcSkillsProps>();
 const tab = ref<string>();
-const tabValues = ref<Array<{ name: string; icon: string }>>([]);
+const tabValues = shallowRef<Array<TabItem>>([]);
 
 function loadData(): void {
   tabValues.value = [];
-  props.data.map((i) => tabValues.value.push({ name: i.Name, icon: i.Icon }));
+  const tmpData: Array<TabItem> = [];
+  props.data.map((i) => tmpData.push({ name: i.Name, icon: i.Icon }));
+  tabValues.value = tmpData;
   tab.value = tabValues.value[0].name;
 }
 
-onMounted(loadData);
+onMounted(() => loadData());
 
 watch(() => props.data, loadData);
 </script>

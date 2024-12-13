@@ -10,14 +10,10 @@
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 
-type TolProps = { modelValue: boolean; blurVal?: string; dismissible?: boolean };
+type TolProps = { modelValue: boolean; blurVal?: string };
 type TolEmits = (e: "update:modelValue", v: boolean) => void;
 const emit = defineEmits<TolEmits>();
-const props = withDefaults(defineProps<TolProps>(), {
-  modelValue: false,
-  blurVal: "20px",
-  dismissible: true,
-});
+const props = withDefaults(defineProps<TolProps>(), { modelValue: false, blurVal: "20px" });
 const showTolo = ref<boolean>(false);
 const showToli = ref<boolean>(false);
 
@@ -35,7 +31,6 @@ watch(
 );
 
 function toClick(): void {
-  if (!props.dismissible) return;
   emit("update:modelValue", false);
 }
 </script>

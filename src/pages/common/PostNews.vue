@@ -25,16 +25,14 @@
       />
     </template>
     <template #append>
-      <v-btn class="post-news-btn" @click="firstLoad(tab, true)">
-        <v-icon>mdi-refresh</v-icon>
-      </v-btn>
-      <v-btn class="post-news-btn" @click="showList = true">
-        <v-icon>mdi-view-list</v-icon>
-      </v-btn>
-      <v-btn class="post-news-btn" @click="switchAnno" v-if="gid === '2'">
-        <template #prepend>
-          <v-icon>mdi-bullhorn</v-icon>
-        </template>
+      <v-btn class="post-news-btn" @click="firstLoad(tab, true)" icon="mdi-refresh" />
+      <v-btn class="post-news-btn" @click="showList = true" icon="mdi-view-list" />
+      <v-btn
+        class="post-news-btn"
+        @click="switchAnno"
+        v-if="gid === '2'"
+        prepend-icon="mdi-bullhorn"
+      >
         切换游戏内公告
       </v-btn>
     </template>
@@ -56,50 +54,43 @@
   <ToChannel v-model="showList" :gid="gid" />
   <VpOverlaySearch :gid="gid" v-model="showSearch" :keyword="search" />
 </template>
-
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, ref } from "vue";
+import TPostCard from "@comp/app/t-postcard.vue";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import ToChannel from "@comp/pageNews/to-channel.vue";
+import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
+import Mys from "@Mys/index.js";
+import { storeToRefs } from "pinia";
+import { computed, onMounted, ref, shallowRef, triggerRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import TPostCard from "../../components/app/t-postcard.vue";
-import showLoading from "../../components/func/loading.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import ToChannel from "../../components/pageNews/to-channel.vue";
-import VpOverlaySearch from "../../components/viewPost/vp-overlay-search.vue";
-import Mys from "../../plugins/Mys/index.js";
-import { NewsType, NewsTypeEnum, useAppStore } from "../../store/modules/app.js";
-import TGLogger from "../../utils/TGLogger.js";
-import { createPost } from "../../utils/TGWindow.js";
-import { getGameName } from "../../web/utils/tools.js";
+import { type NewsType, NewsTypeEnum, useAppStore } from "@/store/modules/app.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { createPost } from "@/utils/TGWindow.js";
+import { getGameName } from "@/web/utils/tools.js";
 
-type PostData = { [key in NewsType]: TGApp.Plugins.Mys.Post.FullData[] };
-type RawData = {
-  [key in NewsType]: { isLast: boolean; name: string; lastId: number };
-};
+type PostData = { [key in NewsType]: Array<TGApp.Plugins.Mys.Post.FullData> };
+type RawData = { [key in NewsType]: { isLast: boolean; name: string; lastId: number } };
 
 const router = useRouter();
-const appStore = useAppStore();
-const gid = <string>useRoute().params.gid;
+const { recentNewsType } = storeToRefs(useAppStore());
+const tabValues: Readonly<Array<NewsType>> = ["notice", "activity", "news"];
+const { gid } = <{ gid: string }>useRoute().params;
 const gameName = getGameName(Number(gid));
 const loading = ref<boolean>(false);
-const tabValues: Readonly<Array<NewsType>> = ["notice", "activity", "news"];
 const showList = ref<boolean>(false);
 const showSearch = ref<boolean>(false);
-const tab = computed<NewsType>({
-  get: () => {
-    if (!(appStore.recentNewsType satisfies NewsType)) return "notice";
-    return appStore.recentNewsType;
-  },
-  set: (v) => (appStore.recentNewsType = v),
-});
-
-// 渲染数据
 const search = ref<string>("");
-const postData = ref<PostData>({ notice: [], activity: [], news: [] });
-const rawData = ref<RawData>({
+const postData = shallowRef<PostData>({ notice: [], activity: [], news: [] });
+const rawData = shallowRef<RawData>({
   notice: { isLast: false, name: "公告", lastId: 0 },
   activity: { isLast: false, name: "活动", lastId: 0 },
   news: { isLast: false, name: "咨讯", lastId: 0 },
+});
+const tab = computed<NewsType>({
+  get: () => ((recentNewsType.value satisfies NewsType) ? recentNewsType.value : "notice"),
+  set: (v) => (recentNewsType.value = v),
 });
 
 onMounted(async () => await firstLoad(tab.value));
@@ -116,8 +107,9 @@ async function firstLoad(key: NewsType, refresh: boolean = false): Promise<void>
   rawData.value[key].isLast = getData.is_last;
   rawData.value[key].lastId = getData.list.length;
   postData.value[key] = getData.list;
-  showLoading.update(`正在渲染${gameName}${rawData.value[key].name}数据...`);
-  await nextTick(() => showLoading.end());
+  triggerRef(postData);
+  triggerRef(rawData);
+  showLoading.end();
   await TGLogger.Info(`[News][${gid}][firstLoad] 获取${rawData.value[key].name}数据成功`);
 }
 
@@ -144,13 +136,15 @@ async function loadMore(key: NewsType): Promise<void> {
   rawData.value[key].lastId = rawData.value[key].lastId + getData.list.length;
   rawData.value[key].isLast = getData.is_last;
   postData.value[key] = postData.value[key].concat(getData.list);
+  triggerRef(postData);
+  triggerRef(rawData);
   if (rawData.value[key].isLast) {
     showLoading.end();
     showSnackbar.warn("已经是最后一页了");
     loading.value = false;
     return;
   }
-  await nextTick(() => showLoading.end());
+  showLoading.end();
   loading.value = false;
 }
 
@@ -168,7 +162,6 @@ async function searchPost(): Promise<void> {
   showSearch.value = false;
 }
 </script>
-
 <style lang="css" scoped>
 .news-tab {
   margin-bottom: 10px;
@@ -178,6 +171,7 @@ async function searchPost(): Promise<void> {
 
 .post-news-btn {
   height: 40px;
+  border-radius: 3px;
   margin-left: 15px;
   background: var(--btn-bg-1);
   color: var(--btn-text-1);

@@ -12,7 +12,7 @@
     </v-list-item>
     <v-list-item title="成就版本">
       <template #prepend>
-        <img class="config-icon" src="../../assets/icons/achievements.svg" alt="Achievements" />
+        <img class="config-icon" src="@/assets/icons/achievements.svg" alt="Achievements" />
       </template>
       <template #append>
         <v-list-item-subtitle>{{ latestAchiVersion }}</v-list-item-subtitle>
@@ -45,13 +45,13 @@
         </div>
       </template>
       <template #append>
-        <v-list-item-subtitle
-          >{{ dbInfo.find((item) => item.key === "dataUpdated")?.value }}
+        <v-list-item-subtitle>
+          {{ dbInfo.find((item) => item.key === "dataUpdated")?.value }}
         </v-list-item-subtitle>
       </template>
-      <v-list-item-subtitle
-        >更新于
-        {{ dbInfo.find((item) => item.key === "dataUpdated")?.updated }}
+      <v-list-item-subtitle>
+        <span>更新于</span>
+        <span>{{ dbInfo.find((item) => item.key === "dataUpdated")?.updated }}</span>
       </v-list-item-subtitle>
     </v-list-item>
     <v-list-item title="数据库版本">
@@ -61,41 +61,40 @@
         </div>
       </template>
       <template #append>
-        <v-list-item-subtitle
-          >{{ dbInfo.find((item) => item.key === "appVersion")?.value }}
+        <v-list-item-subtitle>
+          {{ dbInfo.find((item) => item.key === "appVersion")?.value }}
         </v-list-item-subtitle>
       </template>
-      <v-list-item-subtitle
-        >更新于
-        {{ dbInfo.find((item) => item.key === "appVersion")?.updated }}
+      <v-list-item-subtitle>
+        <span>更新于</span>
+        <span>{{ dbInfo.find((item) => item.key === "appVersion")?.updated }}</span>
       </v-list-item-subtitle>
     </v-list-item>
   </v-list>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
+import TGSqlite from "@Sqlite/index.js";
+import TSUserAchi from "@Sqlite/modules/userAchi.js";
 import { app } from "@tauri-apps/api";
 import { platform, version } from "@tauri-apps/plugin-os";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, shallowRef } from "vue";
 
-import TGSqlite from "../../plugins/Sqlite/index.js";
-import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
-import TGLogger from "../../utils/TGLogger.js";
-import showSnackbar from "../func/snackbar.js";
+import TGLogger from "@/utils/TGLogger.js";
 
 const latestAchiVersion = TSUserAchi.getLatestAchiVersion();
+const osPlatform = platform();
+const osVersion = version();
 
 const versionApp = ref<string>("");
 const versionTauri = ref<string>("");
-const osPlatform = ref<string>("");
 const iconPlatform = ref<string>("mdi-microsoft-windows");
-const osVersion = ref<string>("");
-const dbInfo = ref<Array<TGApp.Sqlite.AppData.Item>>([]);
+const dbInfo = shallowRef<Array<TGApp.Sqlite.AppData.Item>>([]);
 
 onMounted(async () => {
   versionApp.value = await app.getVersion();
   versionTauri.value = await app.getTauriVersion();
-  osPlatform.value = platform();
-  switch (osPlatform.value) {
+  switch (osPlatform) {
     case "linux":
       iconPlatform.value = "mdi-linux";
       break;
@@ -112,16 +111,20 @@ onMounted(async () => {
       iconPlatform.value = "mdi-desktop-classic";
       break;
   }
-  osVersion.value = version();
   try {
     dbInfo.value = await TGSqlite.getAppData();
   } catch (e) {
+    if (e instanceof Error) {
+      showSnackbar.warn(`加载数据库错误: ${e.message}`);
+      await TGLogger.Error(`加载数据库错误: ${e.message}`);
+      return;
+    }
     showSnackbar.warn("加载数据库错误，请重置数据库!");
     await TGLogger.Error(`加载数据库错误: ${e}`);
   }
 });
 
-function toOuter(url: string) {
+function toOuter(url: string): void {
   window.open(url);
 }
 </script>

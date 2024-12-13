@@ -59,7 +59,7 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install
       - name: Build app
-        run: pnpm build -- ${{ matrix.settings.args }}
+        run: pnpm build ${{ matrix.settings.args }}
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:

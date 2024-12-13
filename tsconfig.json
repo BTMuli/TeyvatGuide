@@ -15,7 +15,16 @@
     "skipLibCheck": true,
     "types": ["vite/client", "node", "color-convert", "js-md5", "uuid", "src/vite-env"],
     "allowSyntheticDefaultImports": true,
-    "composite": true
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@comp/*": ["src/components/*"],
+      "@Hutao/*": ["src/plugins/Hutao/*"],
+      "@Mys/*": ["src/plugins/Mys/*"],
+      "@Sqlite/*": ["src/plugins/Sqlite/*"],
+      "@Bili/*": ["src/plugins/Bili/*"]
+    }
   },
   "include": [
     "*.yml",

@@ -1,7 +1,7 @@
 /**
  * @file vite.config.ts
  * @description vite 配置文件
- * @since Beta v0.5.1
+ * @since Beta v0.6.5
  */
 
 import vue from "@vitejs/plugin-vue";
@@ -14,23 +14,20 @@ import buildTimePlugin from "./src/utils/TGBuild.js";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue(), vuetify(), buildTimePlugin(), VueDevtools()],
-
-  // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
-  // prevent vite from obscuring rust errors
-  clearScreen: false,
-  // tauri expects a fixed port, fail if that port is not available
-  server: {
-    port: 4000,
-    strictPort: true,
-  },
-  // to make use of `TAURI_DEBUG` and other env variables
-  // https://tauri.studio/v1/api/config#buildconfig.beforedevcommand
-  envPrefix: ["VITE_", "TAURI_"],
-  esbuild: {
-    supported: {
-      "top-level-await": true,
+  resolve: {
+    alias: {
+      "@/": "/src/",
+      "@comp/": "/src/components/",
+      "@Hutao/": "/src/plugins/Hutao/",
+      "@Mys/": "/src/plugins/Mys/",
+      "@Sqlite/": "/src/plugins/Sqlite/",
+      "@Bili/": "/src/plugins/Bili/",
     },
   },
+  clearScreen: false,
+  server: { port: 4000, strictPort: true },
+  envPrefix: ["VITE_", "TAURI_"],
+  esbuild: { supported: { "top-level-await": true } },
   build: {
     // Tauri supports es2021
     target: process.env.TAURI_PLATFORM === "windows" ? "chrome105" : "safari13",

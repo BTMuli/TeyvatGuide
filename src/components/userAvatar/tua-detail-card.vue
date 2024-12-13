@@ -66,11 +66,9 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
+import TSUserAvatar from "@Sqlite/modules/userAvatar.js";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-
-import TSUserAvatar from "../../plugins/Sqlite/modules/userAvatar.js";
-import { useUserStore } from "../../store/modules/user.js";
-import { generateShareImg, saveImgLocal } from "../../utils/TGShare.js";
 
 import TuaDcConstellations from "./tua-dc-constellations.vue";
 import TuaDcProp from "./tua-dc-prop.vue";
@@ -78,15 +76,15 @@ import TuaDcRelic from "./tua-dc-relic.vue";
 import TuaDcTalents from "./tua-dc-talents.vue";
 import TuaDcWeapon from "./tua-dc-weapon.vue";
 
-interface TuaDetailCardProps {
-  modelValue: TGApp.Sqlite.Character.UserRole;
-}
+import { useUserStore } from "@/store/modules/user.js";
+import { generateShareImg, saveImgLocal } from "@/utils/TGShare.js";
+
+type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
+type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
+type TuaDetailCardProps = { modelValue: TGApp.Sqlite.Character.UserRole };
 
 const props = defineProps<TuaDetailCardProps>();
 const userStore = useUserStore();
-
-type fixedLenArr<T, N extends number> = [T, ...T[]] & { length: N };
-type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
 
 const relicList = computed<RelicList>(() => {
   return [
@@ -97,11 +95,9 @@ const relicList = computed<RelicList>(() => {
     props.modelValue.relics.find((item) => item.pos === 5) || false,
   ];
 });
-const propMain = computed<Array<TGApp.Game.Avatar.PropMapItem | false>>(() => {
-  return props.modelValue.propSelected.map((item) => {
-    return userStore.getProp(item.property_type);
-  });
-});
+const propMain = computed<Array<TGApp.Game.Avatar.PropMapItem | false>>(() =>
+  props.modelValue.propSelected.map((item) => userStore.getProp(item.property_type)),
+);
 
 const bg = ref<string>("/source/nameCard/profile/原神·印象.webp");
 const avatar = ref<string>(props.modelValue.avatar.image);
@@ -137,7 +133,11 @@ async function loadData(): Promise<void> {
 }
 
 async function share(): Promise<void> {
-  const shareBox = <HTMLElement>document.querySelector(".tua-dc-container");
+  const shareBox = document.querySelector<HTMLElement>(".tua-dc-container");
+  if (shareBox === null) {
+    showSnackbar.error("分享失败，未找到分享内容");
+    return;
+  }
   const fileName = `【角色详情】${props.modelValue.avatar.name}`;
   loading.value = true;
   await generateShareImg(fileName, shareBox);

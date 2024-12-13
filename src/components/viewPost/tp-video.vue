@@ -1,3 +1,4 @@
+<!-- todo 优化 -->
 <template>
   <div class="tp-video-box">
     <!-- todo https://socialsisteryi.github.io/bilibili-API-collect/docs/video/videostream_url.html#%E8%A7%86%E9%A2%91%E4%BC%B4%E9%9F%B3%E9%9F%B3%E8%B4%A8%E4%BB%A3%E7%A0%81 -->
@@ -10,9 +11,8 @@
       :id="`tp-video-${props.data.insert.video}`"
     >
     </iframe>
-    <!-- todo 优化 -->
-    <div class="tp-video-cover" v-if="videoData">
-      <img alt="cover" :src="videoData.pic" />
+    <div class="tp-video-cover" v-if="videoCover">
+      <img alt="cover" :src="videoCover" />
       <img src="/source/UI/video_play.svg" alt="icon" />
       <span>{{ getVideoTime() }}</span>
     </div>
@@ -23,26 +23,21 @@
 // todo flv
 // https://artplayer.org/document/library/flv.html
 //  https://api.bilibili.com/x/player/playurl?avid=666064953&cid=1400018762&qn=64&otype=json
-import { window as TauriWindow } from "@tauri-apps/api";
-import { onBeforeMount, onMounted, onUnmounted, ref } from "vue";
+import Bili from "@Bili/index.js";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { onBeforeMount, onMounted, onUnmounted, ref, shallowRef, useTemplateRef } from "vue";
 
-import Bili from "../../plugins/Bili/index.js";
-import { saveImgLocal } from "../../utils/TGShare.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { saveImgLocal } from "@/utils/TGShare.js";
 
-interface TpVideo {
-  insert: {
-    video: string;
-  };
-}
-
-interface TpVideoProps {
-  data: TpVideo;
-}
+type TpVideo = { insert: { video: string } };
+type TpVideoProps = { data: TpVideo };
 
 const props = defineProps<TpVideoProps>();
 const videoAspectRatio = ref<number>(16 / 9);
-const videoData = ref<TGApp.Plugins.Bili.Video.ViewData>();
-const videoRef = ref<HTMLIFrameElement | null>(null);
+const videoCover = ref<string>();
+const videoData = shallowRef<TGApp.Plugins.Bili.Video.ViewData>();
+const videoRef = useTemplateRef<HTMLIFrameElement>(`#tp-video-${props.data.insert.video}`);
 
 console.log("tpVideo", props.data.insert.video);
 
@@ -53,35 +48,31 @@ onBeforeMount(async () => {
   try {
     videoData.value = await Bili.video.view(aid, bvid);
   } catch (e) {
-    console.warn(e);
+    if (e instanceof Error) {
+      await TGLogger.Error(`获取视频信息失败: ${e.message}`);
+    } else await TGLogger.Error(`获取视频信息失败: ${e}`);
   }
   if (!videoData.value) {
     console.error("videoData is null");
     return;
   }
   const meta = videoData.value.dimension;
-  if (meta.width > meta.height) {
-    videoAspectRatio.value = meta.width / meta.height;
-  } else {
-    videoAspectRatio.value = meta.height / meta.width;
-  }
+  if (meta.width > meta.height) videoAspectRatio.value = meta.width / meta.height;
+  else videoAspectRatio.value = meta.height / meta.width;
 });
 
 onMounted(async () => {
-  if (videoData.value && videoData.value.pic && !videoData.value.pic.startsWith("blob:")) {
-    videoData.value.pic = await saveImgLocal(videoData.value.pic);
+  if (videoData.value && videoData.value.pic) {
+    videoCover.value = await saveImgLocal(videoData.value.pic);
   }
-  videoRef.value = <HTMLIFrameElement>(
-    document.getElementById(`tp-video-${props.data.insert.video}`)
-  );
-  videoRef.value.addEventListener("fullscreenchange", async () => {
-    if (document.fullscreenElement) {
-      await TauriWindow.getCurrentWindow().setFullscreen(true);
-    } else {
-      await TauriWindow.getCurrentWindow().setFullscreen(false);
-    }
-  });
+  if (videoRef.value === null) return;
+  videoRef.value.addEventListener("fullscreenchange", listenFullScreen);
 });
+
+async function listenFullScreen(): Promise<void> {
+  if (document.fullscreenElement) await getCurrentWindow().setFullscreen(true);
+  else await getCurrentWindow().setFullscreen(false);
+}
 
 function getVideoTime(): string {
   const duration = videoData.value?.duration ?? 0;
@@ -89,17 +80,16 @@ function getVideoTime(): string {
   const minutes = Math.floor(duration / 60) % 60;
   const hours = Math.floor(duration / 3600);
   let result = "";
-  if (hours > 0) {
-    result += `${hours.toString().padStart(2, "0")}:`;
-  }
+  if (hours > 0) result += `${hours.toString().padStart(2, "0")}:`;
   result += `${minutes.toString().padStart(2, "0")}:`;
   result += `${seconds.toString().padStart(2, "0")}`;
   return result;
 }
 
 onUnmounted(() => {
-  if (videoData.value?.pic && videoData.value.pic.startsWith("blob:")) {
-    URL.revokeObjectURL(videoData.value.pic);
+  if (videoCover.value) URL.revokeObjectURL(videoCover.value);
+  if (videoRef.value !== null) {
+    videoRef.value.removeEventListener("fullscreenchange", listenFullScreen);
   }
 });
 </script>

@@ -4,8 +4,8 @@
  * @since Beta v0.6.5
  */
 
-export const BBS_VERSION = "2.78.1";
-export const BBS_UA_MOBILE = `Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/${BBS_VERSION}`;
+export const BBS_VERSION: Readonly<string> = "2.78.1";
+export const BBS_UA_MOBILE: Readonly<string> = `Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/${BBS_VERSION}`;
 
 /**
  * @description 频道列表

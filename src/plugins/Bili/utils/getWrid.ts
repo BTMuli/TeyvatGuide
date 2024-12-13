@@ -4,9 +4,8 @@
  * @since Beta v0.4.1
  */
 
+import getNav from "@Bili/request/getNav.js";
 import md5 from "js-md5";
-
-import getNav from "../request/getNav.js";
 
 /**
  * @description 获取 key 值
@@ -34,9 +33,7 @@ async function getMixinKey(): Promise<string> {
     54, 21, 56, 59, 6, 63, 57, 62, 11, 36, 20, 34, 44, 52,
   ];
   const res = [];
-  for (const i of MIXIN_KEY_ENC_TAB) {
-    res.push(key[i]);
-  }
+  for (const i of MIXIN_KEY_ENC_TAB) res.push(key[i]);
   return res.join("").slice(0, 32);
 }
 
@@ -57,11 +54,8 @@ async function getWrid(params: Record<string, string | number>): Promise<[string
   let md5Str = "";
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    if (i === keys.length - 1) {
-      md5Str += `${key}=${obj[key]}`;
-    } else {
-      md5Str += `${key}=${obj[key]}&`;
-    }
+    if (i === keys.length - 1) md5Str += `${key}=${obj[key]}`;
+    else md5Str += `${key}=${obj[key]}&`;
   }
   const wrid = md5.md5(`${md5Str}${mixin_key}`);
   return [wts.toString(), wrid];

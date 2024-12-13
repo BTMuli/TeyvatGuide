@@ -1,16 +1,12 @@
 <template>
   <div class="hta-tu-box">
     <v-tabs v-model="tab" direction="vertical" class="hta-tu-tab">
-      <v-tab value="10">第10层</v-tab>
-      <v-tab value="11">第11层</v-tab>
-      <v-tab value="12">第12层</v-tab>
+      <v-tab :value="10">第10层</v-tab>
+      <v-tab :value="11">第11层</v-tab>
+      <v-tab :value="12">第12层</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="hta-tu-window">
-      <v-window-item
-        v-for="selectItem in select"
-        :key="selectItem.Floor"
-        :value="selectItem.Floor.toString()"
-      >
+      <v-window-item v-for="selectItem in select" :key="selectItem.Floor" :value="selectItem.Floor">
         <div class="hta-tu-grid">
           <TibWikiAbyss
             v-for="(item, index) in selectItem.Ranks"
@@ -23,44 +19,32 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
-
-import { AbyssDataItem } from "../../pages/WIKI/Abyss.vue";
+import { onMounted, ref, shallowRef } from "vue";
 
 import TibWikiAbyss from "./tib-wiki-abyss.vue";
 
-interface HtaTabUpProps {
-  data: AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>;
-}
+import type { AbyssDataItem } from "@/pages/WIKI/Abyss.vue";
 
-interface HtaTabUpData {
-  Floor: number;
-  Ranks: Array<AbyssDataItem<TGApp.Plugins.Hutao.Base.Rate>>;
-}
+type HtaTabUpProps = { data: AbyssDataItem<Array<TGApp.Plugins.Hutao.Abyss.AvatarUse>> };
+type HtaTabUpData = { Floor: number; Ranks: Array<AbyssDataItem<TGApp.Plugins.Hutao.Base.Rate>> };
 
 const props = defineProps<HtaTabUpProps>();
-
-// data
-const tab = ref<string>("9");
-const select = ref<Array<HtaTabUpData>>([]);
+const tab = ref<number>(10);
+const select = shallowRef<Array<HtaTabUpData>>([]);
 
 onMounted(async () => {
+  const tmpData: Array<HtaTabUpData> = [];
   for (const floor of props.data.cur) {
     const floorLast = props.data.last.find((f) => f.Floor === floor.Floor);
-    const floorRank = {
-      Floor: floor.Floor,
-      Ranks: <Array<AbyssDataItem<TGApp.Plugins.Hutao.Base.Rate>>>[],
-    };
+    const floorRank: HtaTabUpData = { Floor: floor.Floor, Ranks: [] };
     floor.Ranks.sort((a, b) => b.Rate - a.Rate);
     for (const rank of floor.Ranks) {
       const rankLast = floorLast?.Ranks.find((r) => r.Item === rank.Item);
-      floorRank.Ranks.push({
-        cur: rank,
-        last: rankLast ?? { Item: rank.Item, Rate: 0 },
-      });
+      floorRank.Ranks.push({ cur: rank, last: rankLast ?? { Item: rank.Item, Rate: 0 } });
     }
-    select.value.push(floorRank);
+    tmpData.push(floorRank);
   }
+  select.value = tmpData;
 });
 </script>
 <style lang="css" scoped>

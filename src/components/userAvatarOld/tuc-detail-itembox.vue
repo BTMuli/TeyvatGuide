@@ -1,22 +1,15 @@
 <template>
   <div class="tuc-dib-box">
-    <div v-if="modelValue.bg" class="tuc-dib-bg">
-      <img :src="modelValue.bg" alt="bg" />
+    <div v-if="bg" class="tuc-dib-bg">
+      <img :src="bg" alt="bg" />
     </div>
-    <div v-if="modelValue.icon" class="tuc-dib-icon">
-      <img :src="modelValue.icon" alt="icon" />
+    <div v-if="icon" class="tuc-dib-icon">
+      <img :src="icon" alt="icon" />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-interface TucDetailItemBoxProps {
-  modelValue: {
-    icon?: string;
-    bg?: string;
-  };
-}
-
-defineProps<TucDetailItemBoxProps>();
+defineProps<{ icon?: string; bg?: string }>();
 </script>
 <style lang="css" scoped>
 .tuc-dib-box {

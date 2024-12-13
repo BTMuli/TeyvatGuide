@@ -11,13 +11,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { AppCharacterData } from "../../data/index.js";
-import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 
-interface HtaTeamLineProps {
-  modelValue: { Item: string; Rate: number };
-}
+import { AppCharacterData } from "@/data/index.js";
 
+type HtaTeamLineProps = { modelValue: { Item: string; Rate: number } };
 const props = defineProps<HtaTeamLineProps>();
 
 function getBoxData(id: string): TItemBoxData {

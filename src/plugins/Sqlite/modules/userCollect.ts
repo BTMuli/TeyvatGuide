@@ -4,7 +4,7 @@
  * @since Beta v0.5.5
  */
 
-import TGSqlite from "../index.js";
+import TGSqlite from "@Sqlite/index.js";
 
 /**
  * @description 获取单个帖子的收藏信息
@@ -18,9 +18,7 @@ async function getPostCollect(
   const db = await TGSqlite.getDB();
   const sql = "SELECT * FROM UFMap WHERE postId = ?";
   const res: TGApp.Sqlite.UserCollection.UFMap[] = await db.select(sql, [postId]);
-  if (res.length > 0) {
-    return res;
-  }
+  if (res.length > 0) return res;
   const unclassifiedSql = "SELECT * FROM UFPost WHERE id = ?";
   const unclassifiedRes: TGApp.Sqlite.UserCollection.UFPost[] = await db.select(unclassifiedSql, [
     postId,
@@ -83,9 +81,7 @@ async function createCollect(title: string, desc: string): Promise<boolean> {
   const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFCollection WHERE title = ?";
   const res: Array<{ id: number }> = await db.select(sql, [title]);
-  if (res.length > 0) {
-    return false;
-  }
+  if (res.length > 0) return false;
   const insertSql = "INSERT INTO UFCollection (title, desc,updated) VALUES (?, ?,?)";
   await db.execute(insertSql, [title, desc, new Date().getTime()]);
   return true;
@@ -102,9 +98,7 @@ async function deleteCollect(title: string, force: boolean): Promise<boolean> {
   const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFCollection WHERE title = ?";
   const res: Array<{ id: number }> = await db.select(sql, [title]);
-  if (res.length === 0) {
-    return false;
-  }
+  if (res.length === 0) return false;
   if (force) {
     const deleteSql = "DELETE FROM UFCollection WHERE title = ?";
     await db.execute(deleteSql, [title]);
@@ -141,9 +135,7 @@ async function updateCollect(title: string, newTitle: string, newDesc: string): 
   const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFCollection WHERE title = ?";
   const res: Array<{ id: number }> = await db.select(sql, [title]);
-  if (res.length === 0) {
-    return false;
-  }
+  if (res.length === 0) return false;
   const updateSql = "UPDATE UFCollection SET title = ?, desc = ?, updated = ? WHERE id = ?";
   await db.execute(updateSql, [newTitle, newDesc, new Date().getTime(), res[0].id]);
   const updateRefSql = "UPDATE UFMap SET collection = ?,desc=?,updated=? WHERE collectionId = ?";
@@ -169,9 +161,8 @@ async function addCollect(
   const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFPost WHERE id = ?";
   const res: Array<{ id: number }> = await db.select(sql, [postId]);
-  if (res.length > 0) {
-    await updatePostInfo(postId, post);
-  } else {
+  if (res.length > 0) await updatePostInfo(postId, post);
+  else {
     const insertSql = "INSERT INTO UFPost (id, title, content, updated) VALUES (?, ?, ?, ?)";
     await db.execute(insertSql, [
       postId,
@@ -186,13 +177,9 @@ async function addCollect(
       collection,
     ]);
     if (collectionRes.length === 0) {
-      if (!recursive) {
-        return false;
-      }
+      if (!recursive) return false;
       const createCollectionRes = await createCollect(collection, collection);
-      if (!createCollectionRes) {
-        return false;
-      }
+      if (!createCollectionRes) return false;
       collectionRes = await db.select(collectionSql, [collection]);
     }
     // 查找是否已经有了数据
@@ -242,9 +229,7 @@ async function updatePostInfo(
   const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFPost WHERE id = ?";
   const res: Array<{ id: number }> = await db.select(sql, [postId]);
-  if (res.length === 0) {
-    return false;
-  }
+  if (res.length === 0) return false;
   const updateSql = "UPDATE UFPost SET title = ?, content = ?, updated = ? WHERE id = ?";
   await db.execute(updateSql, [
     post.post.subject,
@@ -266,14 +251,10 @@ async function deletePostCollect(postId: string, force: boolean = false): Promis
   const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFPost WHERE id = ?";
   const res: Array<{ id: number }> = await db.select(sql, [postId]);
-  if (res.length === 0) {
-    return false;
-  }
+  if (res.length === 0) return false;
   const selectSql = "SELECT * FROM UFMap WHERE postId = ?";
   const selectRes: TGApp.Sqlite.UserCollection.UFMap[] = await db.select(selectSql, [postId]);
-  if (selectRes.length === 0 && !force) {
-    return false;
-  }
+  if (selectRes.length === 0 && !force) return false;
   if (force) {
     const deletePostSql = "DELETE FROM UFPost WHERE id = ?";
     await db.execute(deletePostSql, [postId]);
@@ -294,9 +275,7 @@ async function updatePostCollect(postId: string, collections: string[]): Promise
   const db = await TGSqlite.getDB();
   const sql = "SELECT id,title FROM UFPost WHERE id = ?";
   const res: Array<{ id: number; title: string }> = await db.select(sql, [postId]);
-  if (res.length === 0) {
-    return false;
-  }
+  if (res.length === 0) return false;
   const deleteSql = "DELETE FROM UFMap WHERE postId = ?";
   await db.execute(deleteSql, [postId]);
   for (let i = 0; i < collections.length; i++) {
@@ -305,9 +284,7 @@ async function updatePostCollect(postId: string, collections: string[]): Promise
       collectionSql,
       [collections[i]],
     );
-    if (collectionRes.length === 0) {
-      return false;
-    }
+    if (collectionRes.length === 0) return false;
     const insertSql =
       "INSERT INTO UFMap (postId, collectionId,post, collection, desc, updated) VALUES (?, ?, ?, ?, ?, ?)";
     await db.execute(insertSql, [
@@ -340,15 +317,11 @@ async function updatePostsCollect(
   const collectionRes: TGApp.Sqlite.UserCollection.UFCollection[] = await db.select(collectionSql, [
     collection,
   ]);
-  if (collectionRes.length === 0) {
-    return false;
-  }
+  if (collectionRes.length === 0) return false;
   for (let i = 0; i < postIds.length; i++) {
     const postSql = "SELECT id,title FROM UFPost WHERE id = ?";
     const postRes: Array<{ id: number; title: string }> = await db.select(postSql, [postIds[i]]);
-    if (postRes.length === 0) {
-      return false;
-    }
+    if (postRes.length === 0) return false;
     const unclassifiedSql = "SELECT * FROM UFMap where postId = ?";
     const unclassifiedRes: TGApp.Sqlite.UserCollection.UFMap[] = await db.select(unclassifiedSql, [
       postIds[i],

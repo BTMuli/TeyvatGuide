@@ -17,9 +17,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-interface TuaDcTalentsProps {
-  modelValue: TGApp.Game.Avatar.Skill[];
-}
+type TuaDcTalentsProps = { modelValue: Array<TGApp.Game.Avatar.Skill> };
 
 const props = defineProps<TuaDcTalentsProps>();
 </script>

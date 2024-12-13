@@ -21,9 +21,7 @@
 import TuaDetailBattle from "./tua-detail-battle.vue";
 import TuaDetailTitle from "./tua-detail-title.vue";
 
-interface TuaDetailLevelProps {
-  modelValue: TGApp.Sqlite.Abyss.Level;
-}
+type TuaDetailLevelProps = { modelValue: TGApp.Sqlite.Abyss.Level };
 
 const props = defineProps<TuaDetailLevelProps>();
 </script>

@@ -1,4 +1,3 @@
-<!-- 查看回复按钮 -->
 <template>
   <div class="tpr-main-box" title="查看回复">
     <v-menu
@@ -21,7 +20,6 @@
         />
       </template>
       <div class="tpr-main-reply">
-        <!-- 顶部负责显示回复条件&关闭按钮&刷新按钮 -->
         <div class="tpr-main-filter">
           <v-chip color="primary" label @click="handleDebug">回复列表</v-chip>
           <v-switch
@@ -60,42 +58,39 @@
       </div>
     </v-menu>
   </div>
-  <VpReplyDebug v-if="appStore.devMode" v-model="showDebug" />
+  <VpReplyDebug v-if="devMode" v-model="showDebug" />
 </template>
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
-
-import Mys from "../../plugins/Mys/index.js";
-import { useAppStore } from "../../store/modules/app.js";
-import showSnackbar from "../func/snackbar.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import Mys from "@Mys/index.js";
+import { storeToRefs } from "pinia";
+import { computed, ref, shallowRef, watch } from "vue";
 
 import VpReplyDebug from "./vp-reply-debug.vue";
 import VpReplyItem from "./vp-reply-item.vue";
 
-interface TprMainProps {
-  gid: number;
-  postId: string;
-}
+import { useAppStore } from "@/store/modules/app.js";
 
+type TprMainProps = { gid: number; postId: string };
+type SelectItem = { label: string; value: string };
 const props = defineProps<TprMainProps>();
-const appStore = useAppStore();
+const { devMode } = storeToRefs(useAppStore());
 
-const orderList = [
+const orderList: Array<SelectItem> = [
   { label: "热门", value: "hot" },
   { label: "最新", value: "latest" },
   { label: "最早", value: "oldest" },
 ];
 
-const reply = ref<Array<TGApp.Plugins.Mys.Reply.ReplyFull>>([]);
 const pinId = ref<string>("0");
-const lastId = ref<string | undefined>(undefined);
+const lastId = ref<string>();
 const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
 const showDebug = ref<boolean>(false);
 const onlyLz = ref<boolean>(false);
 const orderType = ref<"hot" | "latest" | "oldest">("hot");
-
+const reply = shallowRef<Array<TGApp.Plugins.Mys.Reply.ReplyFull>>([]);
 const isHot = computed<boolean>(() => orderType.value === "hot");
 const replyOrder = computed<1 | 2 | undefined>(() => {
   if (orderType.value === "hot") return undefined;
@@ -151,14 +146,11 @@ async function loadReply(): Promise<void> {
 }
 
 async function handleDebug(): Promise<void> {
-  if (appStore.devMode) {
+  if (devMode.value) {
     showDebug.value = true;
     return;
   }
-  if (showDebug.value) {
-    showDebug.value = false;
-  }
-  // 刷新回复
+  if (showDebug.value) showDebug.value = false;
   await reloadReply();
 }
 </script>

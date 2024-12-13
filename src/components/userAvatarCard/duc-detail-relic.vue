@@ -17,10 +17,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-interface ducDetailRelicProps {
-  modelValue: TGApp.Game.Avatar.Relic | false;
-  pos: number;
-}
+type ducDetailRelicProps = { modelValue: TGApp.Game.Avatar.Relic | false; pos: number };
 
 const props = defineProps<ducDetailRelicProps>();
 const relicBg = computed<string>(() => {

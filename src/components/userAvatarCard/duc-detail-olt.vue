@@ -11,15 +11,15 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import { computed } from "vue";
 
-import { getZhElement } from "../../utils/toolFunc.js";
-import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
+import { getZhElement } from "@/utils/toolFunc.js";
 
 type DucDetailOltProps =
   | {
       data: TGApp.Game.Avatar.Avatar;
-      mode: "avatar";
+      mode: "character";
     }
   | {
       data: TGApp.Game.Avatar.WeaponDetail;
@@ -27,45 +27,24 @@ type DucDetailOltProps =
     };
 
 const props = defineProps<DucDetailOltProps>();
-const boxData = computed<TItemBoxData>(() => {
-  if (props.mode === "avatar") {
-    const avatar = <TGApp.Game.Avatar.Avatar>props.data;
-    return {
-      bg: `/icon/bg/${avatar.rarity}-Star.webp`,
-      icon: `/WIKI/character/${avatar.id}.webp`,
-      size: "100px",
-      height: "100px",
-      display: "inner",
-      innerHeight: 0,
-      innerText: "",
-      clickable: false,
-      lt: `/icon/element/${getZhElement(avatar.element)}元素.webp`,
-      ltSize: "30px",
-    };
-  } else {
-    const weapon = <TGApp.Game.Avatar.WeaponDetail>props.data;
-    return {
-      bg: `/icon/bg/${weapon.rarity}-Star.webp`,
-      icon: `/WIKI/weapon/${weapon.id}.webp`,
-      size: "100px",
-      height: "100px",
-      display: "inner",
-      innerHeight: 0,
-      innerText: "",
-      clickable: false,
-      lt: `/icon/weapon/${weapon.type_name}.webp`,
-      ltSize: "30px",
-    };
-  }
-});
-const info = computed(() => {
-  if (props.mode === "avatar") {
-    const avatar = <TGApp.Game.Avatar.Avatar>props.data;
-    return `好感 ${avatar.fetter}`;
-  } else {
-    const weapon = <TGApp.Game.Avatar.WeaponDetail>props.data;
-    return `精炼 ${weapon.affix_level}`;
-  }
+const boxData = computed<TItemBoxData>(() => ({
+  bg: `/icon/bg/${props.data.rarity}-Star.webp`,
+  icon: `/WIKI/${props.mode}/${props.data.id}.webp`,
+  size: "100px",
+  height: "100px",
+  display: "inner",
+  innerHeight: 0,
+  innerText: "",
+  clickable: false,
+  lt:
+    props.mode === "character"
+      ? `/icon/element/${getZhElement(props.data.element)}元素.webp`
+      : `/icon/weapon/${props.data.type_name}.webp`,
+  ltSize: "30px",
+}));
+const info = computed<string>(() => {
+  if (props.mode === "character") return `好感 ${props.data.fetter}`;
+  else return `精炼 ${props.data.affix_level}`;
 });
 </script>
 <style lang="css" scoped>

@@ -4,7 +4,7 @@
  * @since Beta v0.4.6
  */
 
-import { AppCharacterData, ArcBirCalendar, ArcBirRole } from "../../../data/index.js";
+import { AppCharacterData, ArcBirCalendar, ArcBirRole } from "@/data/index.js";
 
 /**
  * @description 判断今天是不是角色生日
@@ -18,21 +18,17 @@ function isAvatarBirth(): TGApp.Archive.Birth.CalendarItem[] {
   const days = ArcBirCalendar[month];
   const find = days.filter((i) => i.role_birthday === `${month}/${day}`);
   if (find.length > 0) {
-    return find.map((i) => {
-      i.is_subscribe = true;
-      return i;
-    });
+    for (const i of find) i.is_subscribe = true;
+    return find;
   }
   const find2 = AppCharacterData.filter((i) => i.birthday.toString() === [month, day].toString());
-  return find2.map((i) => {
-    return <TGApp.Archive.Birth.CalendarItem>{
-      role_id: i.id,
-      name: i.name,
-      role_birthday: `${month}/${day}`,
-      head_icon: `/WIKI/character/${i.id}.webp`,
-      is_subscribe: false,
-    };
-  });
+  return find2.map((i) => ({
+    role_id: i.id,
+    name: i.name,
+    role_birthday: `${month}/${day}`,
+    head_icon: `/WIKI/character/${i.id}.webp`,
+    is_subscribe: false,
+  }));
 }
 
 /**
@@ -68,9 +64,7 @@ function getNextAvatarBirth(date?: [number, number]): TGApp.Archive.Birth.RoleIt
     const roleBirth = getRoleBirth(item.role_birthday);
     if (roleBirth[0] < month || (roleBirth[0] === month && roleBirth[1] <= day)) {
       birthDateList.push(new Date(year + 1, roleBirth[0] - 1, roleBirth[1]));
-    } else {
-      birthDateList.push(new Date(year, roleBirth[0] - 1, roleBirth[1]));
-    }
+    } else birthDateList.push(new Date(year, roleBirth[0] - 1, roleBirth[1]));
   }
   birthDateList.sort((a, b) => a.getTime() - b.getTime());
   const nextDateGet = birthDateList[0];
@@ -78,9 +72,6 @@ function getNextAvatarBirth(date?: [number, number]): TGApp.Archive.Birth.RoleIt
   return ArcBirRole.filter((i) => i.role_birthday === `${nextDate[0]}/${nextDate[1]}`);
 }
 
-const TSAvatarBirth = {
-  isAvatarBirth,
-  getNextAvatarBirth,
-};
+const TSAvatarBirth = { isAvatarBirth, getNextAvatarBirth };
 
 export default TSAvatarBirth;

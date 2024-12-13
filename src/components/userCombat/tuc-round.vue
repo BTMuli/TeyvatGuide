@@ -1,36 +1,32 @@
 <template>
   <div class="tucr-box">
     <div class="tucr-title">
-      <img :src="`/icon/star/combat${props.modelValue.is_get_medal ? 1 : 0}.webp`" alt="combat" />
-      <span class="main">第{{ props.modelValue.round_id }}幕</span>
-      <span class="sub">{{ timestampToDate(Number(props.modelValue.finish_time) * 1000) }}</span>
+      <img :src="`/icon/star/combat${modelValue.is_get_medal ? 1 : 0}.webp`" alt="combat" />
+      <span class="main">第{{ modelValue.round_id }}幕</span>
+      <span class="sub">{{ timestampToDate(Number(modelValue.finish_time) * 1000) }}</span>
     </div>
     <div class="tucr-content">
       <TucSub title="出演角色" class="main">
-        <TucAvatars :model-value="props.modelValue.avatars" />
+        <TucAvatars :model-value="modelValue.avatars" />
       </TucSub>
       <TucSub title="辉彩祝福" class="main">
-        <TucBuffs :model-value="props.modelValue.splendour_buff" />
+        <TucBuffs :model-value="modelValue.splendour_buff" />
       </TucSub>
-      <TucSub :title="`神秘收获(${props.modelValue.choice_cards.length})`" class="sub">
-        <TucCards :model-value="props.modelValue.choice_cards" />
+      <TucSub :title="`神秘收获(${modelValue.choice_cards.length})`" class="sub">
+        <TucCards :model-value="modelValue.choice_cards" />
       </TucSub>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { timestampToDate } from "../../utils/toolFunc.js";
-
 import TucAvatars from "./tuc-avatars.vue";
 import TucBuffs from "./tuc-buffs.vue";
 import TucCards from "./tuc-cards.vue";
 import TucSub from "./tuc-sub.vue";
 
-interface TucRoundProps {
-  modelValue: TGApp.Game.Combat.RoundData;
-}
+import { timestampToDate } from "@/utils/toolFunc.js";
 
-const props = defineProps<TucRoundProps>();
+defineProps<{ modelValue: TGApp.Game.Combat.RoundData }>();
 </script>
 <style lang="css" scoped>
 .tucr-box {

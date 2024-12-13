@@ -4,13 +4,14 @@
  * @since Beta v0.6.3
  */
 
-import showSnackbar from "../../../components/func/snackbar.js";
-import { AppCharacterData } from "../../../data/index.js";
-import { getPostFull } from "../request/postReq.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import { getPostFull } from "@Mys/request/postReq.js";
+
+import { AppCharacterData } from "@/data/index.js";
 
 /**
  * @description 根据单个卡池信息转为渲染用的卡池信息
- * @since Beta v0.6.3
+ * @since Beta v0.6.6
  * @param {TGApp.Plugins.Mys.Gacha.Data} data 卡池信息
  * @param {string} poolCover 卡池封面
  * @returns {Promise<TGApp.Plugins.Mys.Gacha.RenderCard>}
@@ -54,6 +55,7 @@ async function getGachaItemCard(
       str: timeStr,
       startStamp: new Date(data.start_time).getTime(),
       endStamp: new Date(data.end_time).getTime(),
+      totalStamp: new Date(data.end_time).getTime() - new Date(data.start_time).getTime(),
     },
   };
 }
@@ -70,11 +72,9 @@ export async function getGachaCard(
   poolCover?: Record<number, string>,
 ): Promise<TGApp.Plugins.Mys.Gacha.RenderCard[]> {
   const gachaCard: TGApp.Plugins.Mys.Gacha.RenderCard[] = [];
-  await Promise.allSettled(
-    gachaData.map(async (data: TGApp.Plugins.Mys.Gacha.Data) => {
-      const item = await getGachaItemCard(data, poolCover?.[Number(data.id)]);
-      if (item !== null) gachaCard.push(item);
-    }),
-  );
+  for (const data of gachaData) {
+    const item = await getGachaItemCard(data, poolCover?.[Number(data.id)]);
+    if (item !== null) gachaCard.push(item);
+  }
   return gachaCard;
 }

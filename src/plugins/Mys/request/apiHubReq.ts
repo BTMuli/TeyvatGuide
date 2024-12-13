@@ -4,11 +4,11 @@
  * @since Beta v0.6.2
  */
 
-import TGHttp from "../../../utils/TGHttp.js";
+import TGHttp from "@/utils/TGHttp.js";
 
 // MysApiHubApiBaseUrl => Mahabu
-const Mahabu = "https://bbs-api.miyoushe.com/apihub/api/";
-const Referer = "https://bbs.mihoyo.com/";
+const Mahabu: Readonly<string> = "https://bbs-api.miyoushe.com/apihub/api/";
+const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 
 /**
  * @description 获取投票信息

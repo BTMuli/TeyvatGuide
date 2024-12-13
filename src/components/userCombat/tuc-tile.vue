@@ -1,28 +1,18 @@
 <template>
   <div class="tuct-box">
     <div class="tuct-title">
-      <slot name="title">{{ props.title }}</slot>
+      <slot name="title">{{ title }}</slot>
     </div>
-    <div class="tuct-text" v-if="!Array.isArray(props.val)">
-      <slot name="text">{{ props.val }}</slot>
+    <div class="tuct-text" v-if="!Array.isArray(val)">
+      <slot name="text">{{ val }}</slot>
     </div>
     <div class="tuct-icons" v-else>
-      <img
-        v-for="(val, idx) in props.val"
-        :key="idx"
-        :src="`/icon/star/combat${val}.webp`"
-        :alt="`${val}`"
-      />
+      <img v-for="(v, idx) in val" :key="idx" :src="`/icon/star/combat${v}.webp`" :alt="`${v}`" />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-interface TucTileProps {
-  title: string;
-  val: string | number | number[];
-}
-
-const props = defineProps<TucTileProps>();
+defineProps<{ title: string; val: string | number | Array<number> }>();
 </script>
 <style lang="css" scoped>
 .tuct-box {

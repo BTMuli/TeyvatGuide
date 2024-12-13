@@ -33,28 +33,21 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import TOverlay from "@comp/app/t-overlay.vue";
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TSUserCollection from "@Sqlite/modules/userCollect.js";
+import { computed, ref, shallowRef, watch } from "vue";
 
-import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
-import TOverlay from "../app/t-overlay.vue";
-import showDialog from "../func/dialog.js";
-import showSnackbar from "../func/snackbar.js";
-
-type ToPostCollectProps = {
-  modelValue: boolean;
-  post: TGApp.Plugins.Mys.Post.FullData | undefined;
-};
-type ToPostCollectEmits = {
-  (e: "update:modelValue", v: boolean): void;
-  (e: "submit"): void;
-};
+type ToPostCollectProps = { modelValue: boolean; post?: TGApp.Plugins.Mys.Post.FullData };
+type ToPostCollectEmits = { (e: "update:modelValue", v: boolean): void; (e: "submit"): void };
 
 const props = defineProps<ToPostCollectProps>();
 const emits = defineEmits<ToPostCollectEmits>();
-const collectList = ref<TGApp.Sqlite.UserCollection.UFCollection[]>([]);
-const postCollect = ref<TGApp.Sqlite.UserCollection.UFMap[]>([]);
-const selectList = ref<string[]>([]);
 const submit = ref<boolean>(false);
+const collectList = shallowRef<Array<TGApp.Sqlite.UserCollection.UFCollection>>([]);
+const postCollect = shallowRef<Array<TGApp.Sqlite.UserCollection.UFMap>>([]);
+const selectList = shallowRef<Array<string>>([]);
 const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),
@@ -98,7 +91,10 @@ async function deleteCollect(item: TGApp.Sqlite.UserCollection.UFCollection): Pr
 async function newCollect(): Promise<void> {
   let title, desc;
   const titleC = await showDialog.input("新建分类", "请输入分类名称");
-  if (titleC === undefined || titleC === false) return;
+  if (titleC === undefined || titleC === false) {
+    showSnackbar.cancel("取消新建分类");
+    return;
+  }
   if (titleC === "未分类") {
     showSnackbar.warn("分类名不可为未分类");
     return;

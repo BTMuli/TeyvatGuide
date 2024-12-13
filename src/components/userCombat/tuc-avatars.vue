@@ -1,17 +1,15 @@
 <template>
   <div class="tuca-box">
-    <TItembox v-for="(item, idx) in props.modelValue" :key="idx" :model-value="getItemBox(item)" />
+    <TItemBox v-for="(item, idx) in props.modelValue" :key="idx" :model-value="getItemBox(item)" />
   </div>
 </template>
 <script lang="ts" setup>
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import { computed } from "vue";
 
-import { getZhElement } from "../../utils/toolFunc.js";
-import TItembox, { TItemBoxData } from "../app/t-item-box.vue";
+import { getZhElement } from "@/utils/toolFunc.js";
 
-interface TucAvatarsProps {
-  modelValue: TGApp.Game.Combat.Avatar[];
-}
+type TucAvatarsProps = { modelValue: Array<TGApp.Game.Combat.Avatar> };
 
 const props = defineProps<TucAvatarsProps>();
 const columnCnt = computed<number>(() => {

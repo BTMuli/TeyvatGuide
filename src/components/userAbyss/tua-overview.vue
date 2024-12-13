@@ -1,14 +1,10 @@
 <template>
   <div class="tuao-box">
     <div class="tuao-title">
-      <slot name="title">
-        {{ props.title }}
-      </slot>
+      <slot name="title">{{ props.title }}</slot>
     </div>
     <div v-if="props.valText" class="tuao-val-text">
-      <slot name="val-text">
-        {{ props.valText }}
-      </slot>
+      <slot name="val-text">{{ props.valText }}</slot>
     </div>
     <div v-if="props.valIcons" class="tuao-val-icons">
       <slot name="val-icons">
@@ -22,20 +18,18 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed } from "vue";
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 
-import { AppCharacterData } from "../../data/index.js";
-import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
+import { AppCharacterData } from "@/data/index.js";
 
-interface TAOProps {
+type TAOProps = {
   title: string;
   valText?: string | number;
-  valIcons?: TGApp.Sqlite.Abyss.Character[];
+  valIcons?: Array<TGApp.Sqlite.Abyss.Character>;
   multi4?: boolean;
-}
+};
 
 const props = defineProps<TAOProps>();
-const getIconNum = computed(() => (props.multi4 ? 4 : 1));
 
 function getBoxData(avatar: TGApp.Sqlite.Abyss.Character): TItemBoxData {
   const res = AppCharacterData.find((a) => a.id === avatar.id);
@@ -81,6 +75,6 @@ function getBoxData(avatar: TGApp.Sqlite.Abyss.Character): TItemBoxData {
 .tuao-val-icons {
   display: grid;
   column-gap: 10px;
-  grid-template-columns: repeat(v-bind(getIconNum), 1fr);
+  grid-template-columns: repeat(v-bind("props.multi4 ? 4 : 1"), 1fr);
 }
 </style>

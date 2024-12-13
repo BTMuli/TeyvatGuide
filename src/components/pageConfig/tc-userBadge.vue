@@ -19,16 +19,14 @@
         </template>
         <v-list>
           <v-list-item
-            v-for="account in gameAccounts"
-            :key="account.gameUid"
-            @click="useUserStore().switchGameAccount(account.gameUid)"
+            v-for="ac in gameAccounts"
+            :key="ac.gameUid"
+            @click="useUserStore().switchGameAccount(ac.gameUid)"
           >
-            <v-list-item-title>{{ account.nickname }}</v-list-item-title>
-            <v-list-item-subtitle>
-              {{ account.gameUid }}({{ account.regionName }})
-            </v-list-item-subtitle>
+            <v-list-item-title>{{ ac.nickname }}</v-list-item-title>
+            <v-list-item-subtitle> {{ ac.gameUid }}({{ ac.regionName }}) </v-list-item-subtitle>
             <template #append>
-              <div v-if="account.gameUid === userStore.account.value.gameUid" title="当前登录账号">
+              <div v-if="ac.gameUid === account.gameUid" title="当前登录账号">
                 <v-icon color="green">mdi-check</v-icon>
               </div>
             </template>
@@ -46,15 +44,15 @@
       />
       <v-btn
         variant="outlined"
-        @click="confirmRefreshUser(userStore.uid.value!)"
-        :disabled="userStore.uid.value === undefined"
+        @click="confirmRefreshUser(uid!)"
+        :disabled="uid === undefined"
         icon="mdi-refresh"
         title="刷新用户信息"
       />
       <v-btn
         variant="outlined"
         @click="confirmCopyCookie"
-        :disabled="!userStore.cookie.value"
+        :disabled="cookie === undefined"
         icon="mdi-cookie"
         title="复制Cookie"
       />
@@ -69,11 +67,11 @@
           />
         </template>
         <v-list>
-          <v-list-item v-for="account in accounts" :key="account.uid">
-            <v-list-item-title>{{ account.brief.nickname }}</v-list-item-title>
-            <v-list-item-subtitle>{{ account.brief.uid }}</v-list-item-subtitle>
+          <v-list-item v-for="ac in accounts" :key="ac.uid">
+            <v-list-item-title>{{ ac.brief.nickname }}</v-list-item-title>
+            <v-list-item-subtitle>{{ ac.brief.uid }}</v-list-item-subtitle>
             <template #append>
-              <div v-if="account.uid === userStore.uid.value" title="当前登录账号">
+              <div v-if="ac.uid === uid" title="当前登录账号">
                 <v-icon color="green">mdi-account-check</v-icon>
               </div>
               <v-icon
@@ -81,14 +79,14 @@
                 size="small"
                 icon="mdi-account-convert"
                 title="切换用户"
-                @click="loadAccount(account.uid)"
+                @click="loadAccount(ac.uid)"
               />
               <v-icon
                 class="tcu-btn"
                 icon="mdi-delete"
                 title="删除用户"
                 size="small"
-                @click="clearUser(account)"
+                @click="clearUser(ac)"
               />
             </template>
           </v-list-item>
@@ -102,36 +100,35 @@
   </v-card>
 </template>
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
+import showGeetest from "@comp/func/geetest.js";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import Mys from "@Mys/index.js";
+import TSUserAccount from "@Sqlite/modules/userAccount.js";
 import { storeToRefs } from "pinia";
-import { computed, ref } from "vue";
+import { computed, shallowRef } from "vue";
 
-import Mys from "../../plugins/Mys/index.js";
-import TSUserAccount from "../../plugins/Sqlite/modules/userAccount.js";
-import { useAppStore } from "../../store/modules/app.js";
-import { useUserStore } from "../../store/modules/user.js";
-import TGLogger from "../../utils/TGLogger.js";
-import BBSApi from "../../web/request/bbsReq.js";
-import PassportApi from "../../web/request/passportReq.js";
-import TakumiApi from "../../web/request/takumiReq.js";
-import showDialog from "../func/dialog.js";
-import showGeetest from "../func/geetest.js";
-import showLoading from "../func/loading.js";
-import showSnackbar from "../func/snackbar.js";
+import { useAppStore } from "@/store/modules/app.js";
+import { useUserStore } from "@/store/modules/user.js";
+import TGLogger from "@/utils/TGLogger.js";
+import BBSApi from "@/web/request/bbsReq.js";
+import PassportApi from "@/web/request/passportReq.js";
+import TakumiApi from "@/web/request/takumiReq.js";
 
-const userStore = storeToRefs(useUserStore());
-const appStore = storeToRefs(useAppStore());
+const { isLogin } = storeToRefs(useAppStore());
+const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
 
-const accounts = ref<TGApp.App.Account.User[]>([]);
-const gameAccounts = ref<TGApp.Sqlite.Account.Game[]>([]);
+const accounts = shallowRef<Array<TGApp.App.Account.User>>([]);
+const gameAccounts = shallowRef<Array<TGApp.Sqlite.Account.Game>>([]);
 const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
-  if (userStore.uid.value === undefined)
-    return {
-      nickname: "未登录",
-      uid: "-1",
-      desc: "请使用短信验证码登录",
-      avatar: "/source/UI/lumine.webp",
-    };
-  return userStore.briefInfo.value;
+  if (uid.value) return briefInfo.value;
+  return {
+    nickname: "未登录",
+    uid: "-1",
+    desc: "请使用短信验证码登录",
+    avatar: "/source/UI/lumine.webp",
+  };
 });
 
 async function tryCaptchaLogin(): Promise<void> {
@@ -196,7 +193,7 @@ async function tryCaptchaLogin(): Promise<void> {
     return;
   }
   showSnackbar.success("获取用户信息成功");
-  const briefInfo: TGApp.App.Account.BriefInfo = {
+  const briefInfoGet: TGApp.App.Account.BriefInfo = {
     nickname: briefRes.nickname,
     uid: briefRes.uid,
     avatar: briefRes.avatar_url,
@@ -204,17 +201,17 @@ async function tryCaptchaLogin(): Promise<void> {
   };
   showLoading.update("正在登录...", "正在保存用户数据");
   await TSUserAccount.account.saveAccount({
-    uid: briefInfo.uid,
+    uid: briefInfoGet.uid,
     cookie: ck,
-    brief: briefInfo,
+    brief: briefInfoGet,
     updated: "",
   });
-  userStore.uid.value = briefInfo.uid;
-  userStore.briefInfo.value = briefInfo;
-  userStore.cookie.value = ck;
-  appStore.isLogin.value = true;
+  uid.value = briefInfoGet.uid;
+  briefInfo.value = briefInfoGet;
+  cookie.value = ck;
+  isLogin.value = true;
   showLoading.update("正在登录...", "正在获取游戏账号");
-  const gameRes = await TakumiApi.bind.gameRoles(userStore.cookie.value);
+  const gameRes = await TakumiApi.bind.gameRoles(cookie.value);
   if (!Array.isArray(gameRes)) {
     showLoading.end();
     showSnackbar.error(`[${gameRes.retcode}]${gameRes.message}`);
@@ -222,14 +219,14 @@ async function tryCaptchaLogin(): Promise<void> {
     return;
   }
   showSnackbar.success("获取游戏账号成功");
-  await TSUserAccount.game.saveAccounts(briefInfo.uid, gameRes);
-  const curAccount = await TSUserAccount.game.getCurAccount(briefInfo.uid);
+  await TSUserAccount.game.saveAccounts(briefInfoGet.uid, gameRes);
+  const curAccount = await TSUserAccount.game.getCurAccount(briefInfoGet.uid);
   if (!curAccount) {
     showSnackbar.warn("未检测到游戏账号，请重新刷新");
     showLoading.end();
     return;
   }
-  userStore.account.value = curAccount;
+  account.value = curAccount;
   showLoading.end();
   showSnackbar.success("成功登录!");
 }
@@ -318,46 +315,46 @@ async function refreshUser(uid: string) {
   showLoading.end();
 }
 
-async function loadAccount(uid: string): Promise<void> {
-  if (userStore.uid.value && uid === userStore.uid.value) {
+async function loadAccount(ac: string): Promise<void> {
+  if (uid.value && ac === uid.value) {
     showSnackbar.warn("该账户已经登录，无需切换");
     return;
   }
-  const account = await TSUserAccount.account.getAccount(uid);
-  if (!account) {
+  const accountGet = await TSUserAccount.account.getAccount(ac);
+  if (!accountGet) {
     showSnackbar.warn(`未找到${uid}的账号信息，请重新登录`);
     return;
   }
-  userStore.uid.value = uid;
-  userStore.briefInfo.value = account.brief;
-  userStore.cookie.value = account.cookie;
-  const gameAccount = await TSUserAccount.game.getCurAccount(uid);
+  uid.value = ac;
+  briefInfo.value = accountGet.brief;
+  cookie.value = accountGet.cookie;
+  const gameAccount = await TSUserAccount.game.getCurAccount(ac);
   if (!gameAccount) {
     showSnackbar.warn(`未找到${uid}的游戏账号信息，请尝试刷新`);
     return;
   }
-  userStore.account.value = gameAccount;
+  account.value = gameAccount;
   showSnackbar.success(`成功切换到用户${uid}`);
 }
 
-async function confirmRefreshUser(uid: string): Promise<void> {
+async function confirmRefreshUser(ac: string): Promise<void> {
   const freshCheck = await showDialog.check("确认刷新用户信息吗？", "将会重新获取用户信息");
   if (!freshCheck) {
     showSnackbar.cancel("已取消刷新用户信息");
     return;
   }
-  await refreshUser(uid);
-  if (userStore.uid.value === uid) {
+  await refreshUser(ac);
+  if (uid.value === ac) {
     showSnackbar.success("成功刷新用户信息");
     return;
   }
-  const switchCheck = await showDialog.check("是否切换用户？", `将切换到用户${uid}`);
+  const switchCheck = await showDialog.check("是否切换用户？", `将切换到用户${ac}`);
   if (!switchCheck) return;
-  await loadAccount(uid);
+  await loadAccount(ac);
 }
 
 async function confirmCopyCookie(): Promise<void> {
-  if (!userStore.cookie.value) {
+  if (!cookie.value) {
     showSnackbar.warn("请先登录");
     return;
   }
@@ -366,7 +363,7 @@ async function confirmCopyCookie(): Promise<void> {
     showSnackbar.cancel("已取消复制 Cookie");
     return;
   }
-  const ckText = TSUserAccount.account.copy(userStore.cookie.value);
+  const ckText = TSUserAccount.account.copy(cookie.value);
   await navigator.clipboard.writeText(ckText);
   showSnackbar.success("已复制 Cookie!");
 }
@@ -411,11 +408,11 @@ async function showMenu(): Promise<void> {
 }
 
 async function showAccounts(): Promise<void> {
-  if (!userStore.uid.value) {
+  if (!uid.value) {
     showSnackbar.warn("未登录!");
     return;
   }
-  gameAccounts.value = await TSUserAccount.game.getAccount(userStore.uid.value);
+  gameAccounts.value = await TSUserAccount.game.getAccount(uid.value);
   if (gameAccounts.value.length === 0) {
     showSnackbar.warn("未找到账户的游戏数据，请尝试刷新!");
     return;
@@ -515,7 +512,7 @@ async function addByCookie(): Promise<void> {
 }
 
 async function clearUser(user: TGApp.App.Account.User): Promise<void> {
-  if (user.uid === userStore.uid.value) {
+  if (user.uid === uid.value) {
     showSnackbar.warn("当前登录用户不许删除！");
     return;
   }

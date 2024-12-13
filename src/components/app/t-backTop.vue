@@ -1,22 +1,19 @@
 <template>
   <transition name="fade">
     <div v-show="canTop" class="back-top" @click="handleScrollTop">
-      <img src="../../assets/icons/back-top.svg" alt="back-icon" />
+      <img src="@/assets/icons/back-top.svg" alt="back-icon" />
     </div>
   </transition>
 </template>
 <script lang="ts" setup>
 import { onMounted, onUnmounted, ref } from "vue";
 
-const scrollTop = ref<number>(0); // 滚动条距离顶部的距离
-const canTop = ref<boolean>(false); // 默认不显示
+const scrollTop = ref<number>(0);
+const canTop = ref<boolean>(false);
 
-// 监听滚动事件
 function handleScroll(): void {
   scrollTop.value = document.documentElement.scrollTop || document.body.scrollTop;
-  // 超过500px显示回到顶部按钮
   canTop.value = scrollTop.value > 500;
-  // 没超过500，但是到底部了，也显示回到顶部按钮
   if (!canTop.value) {
     const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
     const clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
@@ -24,7 +21,6 @@ function handleScroll(): void {
   }
 }
 
-// 点击回到顶部
 function handleScrollTop(): void {
   let timer = 0;
   cancelAnimationFrame(timer);
@@ -43,8 +39,7 @@ function handleScrollTop(): void {
 onMounted(() => window.addEventListener("scroll", handleScroll));
 onUnmounted(() => window.removeEventListener("scroll", handleScroll));
 </script>
-
-<style scoped>
+<style lang="css" scoped>
 .back-top {
   position: fixed;
   right: 10px;

@@ -7,11 +7,6 @@
 import getVideoUrl from "./request/getVideoUrl.js";
 import getVideoView from "./request/getVideoView.js";
 
-const Bili = {
-  video: {
-    view: getVideoView,
-    url: getVideoUrl,
-  },
-};
+const Bili = { video: { view: getVideoView, url: getVideoUrl } };
 
 export default Bili;

@@ -17,28 +17,21 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TSUserGacha from "@Sqlite/modules/userGacha.js";
 import { computed } from "vue";
 
-import { AppGachaData } from "../../data/index.js";
-import TSUserGacha from "../../plugins/Sqlite/modules/userGacha.js";
+import { AppGachaData } from "@/data/index.js";
 
-export interface GroDataLineProps {
-  data: TGApp.Sqlite.GachaRecords.SingleTable;
-  count: number;
-}
+export type GroDataLineProps = { data: TGApp.Sqlite.GachaRecords.SingleTable; count: number };
 
 const props = defineProps<GroDataLineProps>();
 const hint = getEndHint();
 
 function getIcon(): string {
   const itemType = TSUserGacha.getGachaItemType(props.data.itemId);
-  if (itemType[0] === "角色") {
-    return `/WIKI/character/${props.data.itemId}.webp`;
-  } else if (itemType[0] === "武器") {
-    return `/WIKI/weapon/${props.data.itemId}.webp`;
-  } else {
-    return `/source/UI/paimon.webp`;
-  }
+  if (itemType[0] === "角色") return `/WIKI/character/${props.data.itemId}.webp`;
+  if (itemType[0] === "武器") return `/WIKI/weapon/${props.data.itemId}.webp`;
+  return `/source/UI/paimon.webp`;
 }
 
 function getEndHint(): string {
@@ -55,7 +48,8 @@ function getEndHint(): string {
   if (props.data.rank === "5") {
     if (poolsFind.some((pool) => pool.up5List.includes(Number(props.data.itemId)))) return "UP";
     return "歪";
-  } else if (props.data.rank === "4") {
+  }
+  if (props.data.rank === "4") {
     if (poolsFind.some((pool) => pool.up4List.includes(Number(props.data.itemId)))) return "UP";
     return "歪";
   }
@@ -73,11 +67,8 @@ const progressWidth = computed<string>(() => {
   if (props.data.rank === "5") {
     if (props.data.gachaType === "302") final = 80;
     else final = 90;
-  } else if (props.data.rank === "4") {
-    final = 10;
-  } else {
-    return "0%";
-  }
+  } else if (props.data.rank === "4") final = 10;
+  else return "0%";
   return ((props.count / final) * 100).toFixed(2) + "%";
 });
 </script>

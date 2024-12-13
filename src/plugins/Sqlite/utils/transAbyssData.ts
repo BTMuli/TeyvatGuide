@@ -4,7 +4,7 @@
  * @since Beta v0.6.0
  */
 
-import { timestampToDate } from "../../../utils/toolFunc.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
 /**
  * @description 将通过 api 获取到的深渊数据转换为数据库中的数据
@@ -13,13 +13,11 @@ import { timestampToDate } from "../../../utils/toolFunc.js";
  * @returns {string} 转换后的深渊数据
  */
 export function transCharacterData(data: TGApp.Game.Abyss.CharacterData[]): string {
-  const res: TGApp.Sqlite.Abyss.Character[] = data.map((item) => {
-    return {
-      id: item.avatar_id,
-      value: item.value,
-      star: item.rarity,
-    };
-  });
+  const res: TGApp.Sqlite.Abyss.Character[] = data.map((item) => ({
+    id: item.avatar_id,
+    value: item.value,
+    star: item.rarity,
+  }));
   return JSON.stringify(res);
 }
 
@@ -30,15 +28,13 @@ export function transCharacterData(data: TGApp.Game.Abyss.CharacterData[]): stri
  * @returns {string} 转换后的深渊数据
  */
 export function transFloorData(data: TGApp.Game.Abyss.Floor[]): string {
-  const floor: TGApp.Sqlite.Abyss.Floor[] = data.map((item) => {
-    return {
-      id: item.index,
-      winStar: item.star,
-      maxStar: item.max_star,
-      isUnlock: item.is_unlock ? 1 : 0,
-      levels: item.levels.map((level) => transLevelData(level)),
-    };
-  });
+  const floor: TGApp.Sqlite.Abyss.Floor[] = data.map((item) => ({
+    id: item.index,
+    winStar: item.star,
+    maxStar: item.max_star,
+    isUnlock: item.is_unlock ? 1 : 0,
+    levels: item.levels.map((level) => transLevelData(level)),
+  }));
   return JSON.stringify(floor);
 }
 
@@ -55,11 +51,8 @@ function transLevelData(data: TGApp.Game.Abyss.Level): TGApp.Sqlite.Abyss.Level 
     maxStar: data.max_star,
   };
   for (const battle of data.battles) {
-    if (battle.index === 1) {
-      res.upBattle = transBattleData(battle);
-    } else {
-      res.downBattle = transBattleData(battle);
-    }
+    if (battle.index === 1) res.upBattle = transBattleData(battle);
+    else res.downBattle = transBattleData(battle);
   }
   return res;
 }
@@ -73,12 +66,10 @@ function transLevelData(data: TGApp.Game.Abyss.Level): TGApp.Sqlite.Abyss.Level 
 function transBattleData(data: TGApp.Game.Abyss.Battle): TGApp.Sqlite.Abyss.Battle {
   return {
     time: timestampToDate(Number(data.timestamp) * 1000),
-    characters: data.avatars.map((item) => {
-      return {
-        id: item.id,
-        level: item.level,
-        star: item.rarity,
-      };
-    }),
+    characters: data.avatars.map((item) => ({
+      id: item.id,
+      level: item.level,
+      star: item.rarity,
+    })),
   };
 }

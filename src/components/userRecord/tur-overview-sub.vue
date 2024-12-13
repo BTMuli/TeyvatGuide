@@ -1,28 +1,18 @@
 <template>
   <div class="tur-os-box">
     <div class="tur-os-title">
-      <slot name="title">
-        {{ props.title }}
-      </slot>
+      <slot name="title">{{ props.title }}</slot>
     </div>
     <div class="tur-os-text">
       <div v-if="props.icon !== undefined" class="tur-os-icon">
-        <slot name="icon">
-          <img :src="props.icon" alt="icon" />
-        </slot>
+        <slot name="icon"><img :src="props.icon" alt="icon" /></slot>
       </div>
-      <slot name="val-text">
-        {{ props.text }}
-      </slot>
+      <slot name="val-text">{{ props.text }}</slot>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-interface TAOProps {
-  title: string;
-  text: string | number | undefined;
-  icon?: string | undefined;
-}
+type TAOProps = { title: string; text: string | number | undefined; icon?: string | undefined };
 
 const props = defineProps<TAOProps>();
 </script>

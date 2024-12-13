@@ -3,10 +3,10 @@
  * @description painter下的请求
  * @since Beta v0.6.2
  */
-import TGHttp from "../../../utils/TGHttp.js";
+import TGHttp from "@/utils/TGHttp.js";
 
 // MysPainterApiBaseUrl => Mpabu
-const Mpabu = "https://bbs-api.miyoushe.com/painter/wapi/";
+const Mpabu: Readonly<string> = "https://bbs-api.miyoushe.com/painter/wapi/";
 
 /**
  * @description 获取 News 列表

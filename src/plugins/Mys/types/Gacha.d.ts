@@ -1,15 +1,9 @@
 /**
  * @file plugins/Mys/types/Gacha.d.ts
  * @description Mys 插件卡池类型定义文件
- * @since Beta v0.4.4
+ * @since Beta v0.6.6
  */
 
-/**
- * @description Mys 卡池类型定义
- * @since Beta v0.4.4
- * @namespace TGApp.Plugins.Mys.Gacha
- * @memberof TGApp.Plugins.Mys
- */
 declare namespace TGApp.Plugins.Mys.Gacha {
   /**
    * @description 获取卡池信息返回
@@ -60,7 +54,7 @@ declare namespace TGApp.Plugins.Mys.Gacha {
 
   /**
    * @description 用于渲染的卡池数据
-   * @since Beta v0.4.4
+   * @since Beta v0.6.6
    * @interface RenderCard
    * @property {string} id 卡池ID
    * @property {string} title 卡池标题
@@ -71,6 +65,7 @@ declare namespace TGApp.Plugins.Mys.Gacha {
    * @property {string} time.str 卡池时间字符串
    * @property {string} time.startStamp 卡池开始时间戳
    * @property {string} time.endStamp 卡池结束时间戳
+   * @property {string} time.totalStamp 卡池持续时间戳
    * @return RenderCard
    */
   interface RenderCard {
@@ -84,6 +79,7 @@ declare namespace TGApp.Plugins.Mys.Gacha {
       str: string;
       startStamp: number;
       endStamp: number;
+      totalStamp: number;
     };
   }
 

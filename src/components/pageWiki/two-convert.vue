@@ -2,14 +2,10 @@
   <div class="twoc-container">
     <v-icon>mdi-all-inclusive</v-icon>
     <div class="twoc-box" v-for="(item, index) in props.data.source" :key="index">
-      <img
-        class="twoc-left"
-        :src="`/icon/material/${item.id}.webp`"
-        alt="icon"
-        :style="{
-          'background-image': `url('/icon/bg/${item.star}-BGC.webp')`,
-        }"
-      />
+      <div class="twoc-left">
+        <img :src="`/icon/bg/${item.star}-BGC.webp`" alt="icon" class="bg" />
+        <img :src="`/icon/material/${item.id}.webp`" alt="icon" class="icon" />
+      </div>
       <div class="twoc-right">
         <span>{{ item.name }}</span>
         <span>{{ item.count }}</span>
@@ -18,9 +14,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-interface TwoConvertProps {
-  data: TGApp.App.Material.Convert;
-}
+type TwoConvertProps = { data: TGApp.App.Material.Convert };
 
 const props = defineProps<TwoConvertProps>();
 </script>
@@ -44,15 +38,29 @@ const props = defineProps<TwoConvertProps>();
 }
 
 .twoc-left {
+  position: relative;
   display: flex;
+  overflow: hidden;
   width: 45px;
   height: 45px;
   align-items: center;
   justify-content: center;
   border-radius: 5px;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+
+  .bg {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .icon {
+    z-index: 2;
+    width: 40px;
+    height: 40px;
+  }
 }
 
 .twoc-right {

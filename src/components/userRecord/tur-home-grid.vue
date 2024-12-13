@@ -1,17 +1,13 @@
 <template>
-  <div v-if="props.modelValue.length === 0">暂无数据</div>
+  <div v-if="modelValue.length === 0">暂无数据</div>
   <div v-else class="tur-hg-box">
-    <TurHomeSub v-for="(home, index) in props.modelValue" :key="index" :data="home" />
+    <TurHomeSub v-for="(home, index) in modelValue" :key="index" :data="home" />
   </div>
 </template>
 <script lang="ts" setup>
 import TurHomeSub from "./tur-home-sub.vue";
 
-interface TurHomeGridProps {
-  modelValue: TGApp.Sqlite.Record.Home[];
-}
-
-const props = defineProps<TurHomeGridProps>();
+defineProps<{ modelValue: Array<TGApp.Sqlite.Record.Home> }>();
 </script>
 <style lang="css" scoped>
 .tur-hg-box {

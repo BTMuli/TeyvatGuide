@@ -59,13 +59,13 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-import { useUserStore } from "../../store/modules/user.js";
+import { useUserStore } from "@/store/modules/user.js";
 
-interface TuaDcRelicProps {
+type TuaDcRelicProps = {
   modelValue: TGApp.Game.Avatar.Relic | false;
   pos: "1" | "2" | "3" | "4" | "5";
   recommend: TGApp.Game.Avatar.PropRecommend;
-}
+};
 
 const props = defineProps<TuaDcRelicProps>();
 const userStore = useUserStore();
@@ -76,9 +76,7 @@ const propMain = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
 });
 const propSubs = computed<Array<TGApp.Game.Avatar.PropMapItem | false>>(() => {
   if (props.modelValue === false) return [];
-  return props.modelValue.sub_property_list.map((item) => {
-    return userStore.getProp(item.property_type);
-  });
+  return props.modelValue.sub_property_list.map((item) => userStore.getProp(item.property_type));
 });
 
 function getRelicPos(): string {
@@ -123,7 +121,7 @@ function getPropMainStyle(): string {
 
 function getPropSubStyle(
   propItem: TGApp.Game.Avatar.PropMapItem | false,
-  propsR: number[],
+  propsR: Array<number>,
 ): string {
   if (propItem === false) return "";
   if (propsR.includes(propItem.property_type)) return "color: var(--tgc-yellow-1);";

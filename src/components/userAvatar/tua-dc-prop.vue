@@ -12,10 +12,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-interface TuaDcPropProps {
-  modelValue: TGApp.Game.Avatar.Prop;
-  prop: TGApp.Game.Avatar.PropMapItem;
-}
+type TuaDcPropProps = { modelValue: TGApp.Game.Avatar.Prop; prop: TGApp.Game.Avatar.PropMapItem };
 
 const props = defineProps<TuaDcPropProps>();
 const getWidth = computed<string>(() => {

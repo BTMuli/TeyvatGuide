@@ -7,11 +7,7 @@
 import { BBS_UA_MOBILE, BBS_VERSION, CHANNEL_LIST } from "./bbs.js";
 
 const TGConstant = {
-  BBS: {
-    VERSION: BBS_VERSION,
-    UA_MOBILE: BBS_UA_MOBILE,
-    CHANNELS: CHANNEL_LIST,
-  },
+  BBS: { VERSION: BBS_VERSION, UA_MOBILE: BBS_UA_MOBILE, CHANNELS: CHANNEL_LIST },
 };
 
 export default TGConstant;

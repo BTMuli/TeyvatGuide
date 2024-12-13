@@ -65,18 +65,16 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
+import TOverlay from "@comp/app/t-overlay.vue";
 import { computed, ref, watch } from "vue";
 
-import TOverlay from "../app/t-overlay.vue";
-
 export type SelectedCValue = {
-  star: number[];
-  weapon: string[];
-  elements: string[];
-  area: string[];
+  star: Array<number>;
+  weapon: Array<string>;
+  elements: Array<string>;
+  area: Array<string>;
 };
 type TwoSelectCProps = { modelValue: boolean; reset: boolean };
-
 type TwoSelectCEmits = {
   (e: "update:modelValue", v: boolean): void;
   (e: "update:reset", v: boolean): void;
@@ -91,10 +89,10 @@ const selectElementList = ["冰", "岩", "水", "火", "草", "雷", "风"];
 const selectAreaList = ["蒙德", "璃月", "稻妻", "须弥", "枫丹", "纳塔", "愚人众", "至冬", "其他"];
 
 // 选中的元素
-const selectedStar = ref<number[]>(selectStarList);
-const selectedWeapon = ref<string[]>(selectWeaponList);
-const selectedElements = ref<string[]>(selectElementList);
-const selectedArea = ref<string[]>(selectAreaList);
+const selectedStar = ref<Array<number>>(selectStarList);
+const selectedWeapon = ref<Array<string>>(selectWeaponList);
+const selectedElements = ref<Array<string>>(selectElementList);
+const selectedArea = ref<Array<string>>(selectAreaList);
 const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),

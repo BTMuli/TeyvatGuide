@@ -11,24 +11,25 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import Mys from "@Mys/index.js";
 import { emit } from "@tauri-apps/api/event";
+import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
-import Mys from "../../plugins/Mys/index.js";
-import { useAppStore } from "../../store/modules/app.js";
-import TGClient from "../../utils/TGClient.js";
-import TGLogger from "../../utils/TGLogger.js";
-import { createPost } from "../../utils/TGWindow.js";
-import OtherApi from "../../web/request/otherReq.js";
-import showDialog from "../func/dialog.js";
-import showSnackbar from "../func/snackbar.js";
-
 import ToLivecode from "./to-livecode.vue";
+
+import { useAppStore } from "@/store/modules/app.js";
+import TGClient from "@/utils/TGClient.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { createPost } from "@/utils/TGWindow.js";
+import OtherApi from "@/web/request/otherReq.js";
 
 type TGameNavProps = { modelValue: number };
 const props = withDefaults(defineProps<TGameNavProps>(), { modelValue: 2 });
 
-const appStore = useAppStore();
+const { isLogin } = storeToRefs(useAppStore());
 const nav = shallowRef<TGApp.BBS.Navigator.Navigator[]>([]);
 const codeData = shallowRef<TGApp.BBS.Navigator.CodeData[]>([]);
 const showOverlay = ref<boolean>(false);
@@ -72,7 +73,7 @@ async function tryGetCode(): Promise<void> {
 }
 
 async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
-  if (!appStore.isLogin) {
+  if (!isLogin.value) {
     showSnackbar.warn("请先登录");
     return;
   }
@@ -133,8 +134,8 @@ async function toBBS(link: URL): Promise<void> {
 function getLocalPath(forum?: string): string {
   if (!forum) return "";
   const forumLocalMap: Record<string, string> = {
-    "31": "/news/3", // 崩坏2官方
-    "6": "/news/1", // 崩坏3官方
+    "31": "/news/3", // 崩坏2 官方
+    "6": "/news/1", // 崩坏3 官方
     "28": "/news/2", // 原神官方
     "33": "/news/4", // 未定官方
     "58": "/news/8", // 绝区零官方

@@ -1,4 +1,3 @@
-<!-- 收藏按钮 -->
 <template>
   <div class="tbc-box" data-html2canvas-ignore>
     <div class="tbc-btn" @click="switchCollect()" :title="isCollected ? '取消收藏' : '收藏'">
@@ -6,33 +5,29 @@
         {{ isCollected ? "mdi-star" : "mdi-star-outline" }}
       </v-icon>
     </div>
-    <div class="tbc-edit" title="编辑收藏" v-if="isCollected" @click="editCollect()">
+    <div class="tbc-edit" title="编辑收藏" v-if="isCollected" @click="showEdit = !showEdit">
       <v-icon size="small">mdi-pencil</v-icon>
     </div>
   </div>
   <VpOverlayCollect v-model="showEdit" :post="props.data" @submit="refresh()" />
 </template>
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TSUserCollection from "@Sqlite/modules/userCollect.js";
 import { event } from "@tauri-apps/api";
-import { onBeforeMount, ref, watch } from "vue";
-
-import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
-import TGLogger from "../../utils/TGLogger.js";
-import showDialog from "../func/dialog.js";
-import showSnackbar from "../func/snackbar.js";
+import { onBeforeMount, ref, shallowRef, watch } from "vue";
 
 import VpOverlayCollect from "./vp-overlay-collect.vue";
 
-const isCollected = ref(false);
-const collect = ref<Array<TGApp.Sqlite.UserCollection.UFMap>>([]);
-const showEdit = ref<boolean>(false);
+import TGLogger from "@/utils/TGLogger.js";
 
-interface TbCollectProps {
-  modelValue: number;
-  data: TGApp.Plugins.Mys.Post.FullData | undefined;
-}
+type TbCollectProps = { modelValue: number; data?: TGApp.Plugins.Mys.Post.FullData };
 
 const props = defineProps<TbCollectProps>();
+const isCollected = ref<boolean>(false);
+const showEdit = ref<boolean>(false);
+const collect = shallowRef<Array<TGApp.Sqlite.UserCollection.UFMap>>([]);
 
 onBeforeMount(async () => await refresh());
 
@@ -48,17 +43,10 @@ async function refresh(): Promise<void> {
   collect.value = check;
 }
 
-function editCollect(): void {
-  if (showEdit.value) {
-    showEdit.value = false;
-  }
-  showEdit.value = true;
-}
-
 watch(
   () => props.data,
   async (val) => {
-    if (val === undefined) return;
+    if (!val) return;
     if (!isCollected.value) return;
     const res = await TSUserCollection.updatePostInfo(props.modelValue.toString(), val);
     await event.emit("refreshCollect");
@@ -73,7 +61,7 @@ watch(
 
 async function switchCollect(): Promise<void> {
   if (!isCollected.value) {
-    if (props.data === undefined) {
+    if (!props.data) {
       showSnackbar.warn("未获取到帖子信息");
       return;
     }

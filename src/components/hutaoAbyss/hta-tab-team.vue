@@ -1,17 +1,13 @@
 <template>
   <div class="hta-tt-box">
     <v-tabs v-model="tab" direction="vertical" class="hta-tt-tab">
-      <v-tab value="10">第10层</v-tab>
-      <v-tab value="11">第11层</v-tab>
-      <v-tab value="12">第12层</v-tab>
+      <v-tab :value="10">第10层</v-tab>
+      <v-tab :value="11">第11层</v-tab>
+      <v-tab :value="12">第12层</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="hta-tt-window">
-      <v-window-item
-        v-for="selectItem in select"
-        :key="selectItem.Floor"
-        :value="selectItem.Floor.toString()"
-      >
-        <div v-if="select" class="hta-tt-flex">
+      <v-window-item v-for="selectItem in select" :key="selectItem.Floor" :value="selectItem.Floor">
+        <div class="hta-tt-flex">
           <div class="hta-tuf-box">
             <div class="hta-tuf-title">上半</div>
             <v-virtual-scroll :items="selectItem.Up" item-height="100" class="hta-tuf-item">
@@ -34,26 +30,24 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, shallowRef } from "vue";
 
 import HtaTeamLine from "./hta-team-line.vue";
 
-interface HtaTabTeamProps {
-  modelValue: TGApp.Plugins.Hutao.Abyss.TeamCombination[];
-}
-
+type HtaTabTeamProps = { modelValue: Array<TGApp.Plugins.Hutao.Abyss.TeamCombination> };
 const props = defineProps<HtaTabTeamProps>();
 
-// data
-const tab = ref<string>("9");
-const select = ref<TGApp.Plugins.Hutao.Abyss.TeamCombination[]>([]);
+const tab = ref<number>(10);
+const select = shallowRef<Array<TGApp.Plugins.Hutao.Abyss.TeamCombination>>([]);
 
 onMounted(async () => {
-  props.modelValue.forEach((item) => {
+  const tempData: Array<TGApp.Plugins.Hutao.Abyss.TeamCombination> = [];
+  for (const item of props.modelValue) {
     item.Up.sort((a, b) => b.Rate - a.Rate);
     item.Down.sort((a, b) => b.Rate - a.Rate);
-    select.value.push(item);
-  });
+    tempData.push(item);
+  }
+  select.value = tempData;
 });
 </script>
 <style lang="css" scoped>

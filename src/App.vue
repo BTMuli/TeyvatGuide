@@ -11,26 +11,26 @@
 </template>
 
 <script lang="ts" setup>
+import TBackTop from "@comp/app/t-backTop.vue";
+import TSidebar from "@comp/app/t-sidebar.vue";
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TGSqlite from "@Sqlite/index.js";
+import TSUserAccount from "@Sqlite/modules/userAccount.js";
 import { app, core, event, webviewWindow } from "@tauri-apps/api";
 import { PhysicalSize } from "@tauri-apps/api/dpi";
-import { Event, UnlistenFn } from "@tauri-apps/api/event";
+import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { currentMonitor, getCurrentWindow } from "@tauri-apps/api/window";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
-import TBackTop from "./components/app/t-backTop.vue";
-import TSidebar from "./components/app/t-sidebar.vue";
-import showDialog from "./components/func/dialog.js";
-import showSnackbar from "./components/func/snackbar.js";
-import TGSqlite from "./plugins/Sqlite/index.js";
-import TSUserAccount from "./plugins/Sqlite/modules/userAccount.js";
-import { useAppStore } from "./store/modules/app.js";
-import { useUserStore } from "./store/modules/user.js";
-import { getBuildTime } from "./utils/TGBuild.js";
-import TGLogger from "./utils/TGLogger.js";
-import OtherApi from "./web/request/otherReq.js";
+import { useAppStore } from "@/store/modules/app.js";
+import { useUserStore } from "@/store/modules/user.js";
+import { getBuildTime } from "@/utils/TGBuild.js";
+import TGLogger from "@/utils/TGLogger.js";
+import OtherApi from "@/web/request/otherReq.js";
 
 const router = useRouter();
 const { theme, needResize, deviceInfo, isLogin, userDir, buildTime } = storeToRefs(useAppStore());
@@ -173,7 +173,7 @@ async function checkUserLoad(): Promise<void> {
 }
 
 async function getDeepLink(): Promise<UnlistenFn> {
-  return await event.listen("active_deep_link", async (e: Event<string>) => {
+  return await event.listen<string>("active_deep_link", async (e: Event<string>) => {
     const windowGet = new webviewWindow.WebviewWindow("TeyvatGuide");
     if (await windowGet.isMinimized()) await windowGet.unminimize();
     await windowGet.setFocus();

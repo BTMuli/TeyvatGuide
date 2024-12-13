@@ -1,3 +1,4 @@
+<!-- todo UI调整 -->
 <template>
   <v-navigation-drawer :permanent="true" :rail="rail" class="tsb-box">
     <v-list class="side-list" density="compact" :nav="true">
@@ -24,14 +25,14 @@
       <v-list-item :title.attr="'公告'" value="announcements" :link="true" href="/announcements">
         <template #title>公告</template>
         <template #prepend>
-          <img src="../../assets/icons/board.svg" alt="annoIcon" class="side-icon" />
+          <img src="@/assets/icons/board.svg" alt="annoIcon" class="side-icon" />
         </template>
       </v-list-item>
       <v-list-item
         :title.attr="'咨讯'"
         value="news"
         :link="true"
-        :href="`/news/2/${appStore.recentNewsType}`"
+        :href="`/news/2/${recentNewsType}`"
       >
         <template #title>咨讯</template>
         <template #prepend>
@@ -47,7 +48,7 @@
       <v-list-item :title.attr="'成就'" value="achievements" :link="true" href="/achievements">
         <template #title>成就</template>
         <template #prepend>
-          <img src="../../assets/icons/achievements.svg" alt="achievementsIcon" class="side-icon" />
+          <img src="@/assets/icons/achievements.svg" alt="achievementsIcon" class="side-icon" />
         </template>
       </v-list-item>
       <v-divider />
@@ -134,9 +135,9 @@
           </v-list-item>
           <v-list-item
             class="side-item-menu"
-            value="wiki-namecard"
+            value="wiki-nameCard"
             :link="true"
-            href="/wiki/namecard"
+            href="/wiki/nameCard"
           >
             <template #default>
               <v-icon size="20" color="var(--tgc-yellow-2)">mdi-credit-card-outline</v-icon>
@@ -204,70 +205,59 @@
           <template #title>{{ themeTitle }}</template>
           <template #prepend>
             <v-icon>
-              {{ themeGet === "default" ? "mdi-weather-night" : "mdi-weather-sunny" }}
+              {{ theme === "default" ? "mdi-weather-night" : "mdi-weather-sunny" }}
             </v-icon>
           </template>
         </v-list-item>
         <v-list-item :title.attr="'设置'" value="config" :link="true" href="/config">
           <template #title>设置</template>
           <template #prepend>
-            <img src="../../assets/icons/setting.svg" alt="setting" class="side-icon" />
+            <img src="@/assets/icons/setting.svg" alt="setting" class="side-icon" />
           </template>
         </v-list-item>
       </div>
     </v-list>
   </v-navigation-drawer>
 </template>
-
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
 import { event, webviewWindow } from "@tauri-apps/api";
-import { Event, UnlistenFn } from "@tauri-apps/api/event";
+import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted } from "vue";
 
-import { useAppStore } from "../../store/modules/app.js";
-import { useUserStore } from "../../store/modules/user.js";
-import mhyClient from "../../utils/TGClient.js";
-import showSnackbar from "../func/snackbar.js";
+import { useAppStore } from "@/store/modules/app.js";
+import { useUserStore } from "@/store/modules/user.js";
+import mhyClient from "@/utils/TGClient.js";
 
-const appStore = useAppStore();
+const { sidebar, theme, isLogin, recentNewsType } = storeToRefs(useAppStore());
 const { briefInfo } = storeToRefs(useUserStore());
 let themeListener: UnlistenFn | null = null;
 // @ts-expect-error The import.meta meta-property is not allowed in files which will build into CommonJS output.
 const isDevEnv = import.meta.env.MODE === "development";
 const rail = computed<boolean>({
-  get: () => appStore.sidebar.collapse,
-  set: (v) => (appStore.sidebar.collapse = v),
+  get: () => sidebar.value.collapse,
+  set: (v) => (sidebar.value.collapse = v),
 });
 const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
   if (briefInfo.value && briefInfo.value.nickname) return briefInfo.value;
-  return {
-    nickname: "未登录",
-    uid: "-1",
-    desc: "请扫码登录",
-    avatar: "/source/UI/lumine.webp",
-  };
+  return { nickname: "未登录", uid: "-1", desc: "请扫码登录", avatar: "/source/UI/lumine.webp" };
 });
-const themeGet = computed<string>({
-  get: () => appStore.theme,
-  set: (v) => (appStore.theme = v),
-});
-const themeTitle = computed<string>(() => (themeGet.value === "default" ? "夜间模式" : "日间模式"));
+const themeTitle = computed<string>(() => (theme.value === "default" ? "夜间模式" : "日间模式"));
 
 onMounted(async () => {
-  themeListener = await event.listen("readTheme", (e: Event<string>) => {
-    const theme = e.payload;
-    themeGet.value = theme === "default" ? "default" : "dark";
+  themeListener = await event.listen<string>("readTheme", (e: Event<string>) => {
+    theme.value = e.payload === "default" ? "default" : "dark";
   });
   if (webviewWindow.getCurrentWebviewWindow().label === "TeyvatGuide") await mhyClient.run();
 });
 
 async function switchTheme(): Promise<void> {
-  await event.emit("readTheme", themeGet.value === "default" ? "dark" : "default");
+  await event.emit("readTheme", theme.value === "default" ? "dark" : "default");
 }
 
 async function openClient(func: string): Promise<void> {
-  if (appStore.isLogin) await mhyClient.open(func);
+  if (isLogin.value) await mhyClient.open(func);
   else showSnackbar.warn("请前往设置页面登录！");
 }
 
@@ -278,7 +268,6 @@ onUnmounted(() => {
   }
 });
 </script>
-
 <style lang="css" scoped>
 .tsb-box {
   background: var(--app-side-bg);

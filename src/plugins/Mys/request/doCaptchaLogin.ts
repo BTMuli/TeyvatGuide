@@ -4,12 +4,12 @@
  * @since Beta v0.5.1
  */
 
+import showSnackbar from "@comp/func/snackbar.js";
 import { JSEncrypt } from "jsencrypt";
 
-import showSnackbar from "../../../components/func/snackbar.js";
-import TGHttp from "../../../utils/TGHttp.js";
-import { getDeviceInfo } from "../../../utils/toolFunc.js";
-import TGConstant from "../../../web/constant/TGConstant.js";
+import TGHttp from "@/utils/TGHttp.js";
+import { getDeviceInfo } from "@/utils/toolFunc.js";
+import TGConstant from "@/web/constant/TGConstant.js";
 
 const PUB_KEY_STR: Readonly<string> = `-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDvekdPMHN3AYhm/vktJT+YJr7cI5DcsNKqdsx5DZX0gDuWFuIjzdwButrIYPNmRJ1G8ybDIF7oDW2eEpm5sMbL9zs

@@ -42,10 +42,7 @@
         @click:append="searchPost"
         @keyup.enter="searchPost"
       />
-      <v-btn :rounded="true" class="post-topic-btn" @click="firstLoad()">
-        <v-icon>mdi-refresh</v-icon>
-        <span>刷新</span>
-      </v-btn>
+      <v-btn class="post-topic-btn" @click="firstLoad()" prepend-icon="mdi-refresh">刷新</v-btn>
     </div>
   </v-app-bar>
   <div class="post-topic-grid">
@@ -54,39 +51,37 @@
     </div>
   </div>
   <div class="load-more">
-    <v-btn class="post-topic-btn" :rounded="true" @click="freshPostData()">
+    <v-btn class="post-topic-btn" @click="freshPostData()">
       已加载：{{ posts.length }}，加载更多
     </v-btn>
   </div>
   <VpOverlaySearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, toRaw, watch } from "vue";
+import TGameNav from "@comp/app/t-gameNav.vue";
+import TPostCard from "@comp/app/t-postcard.vue";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
+import Mys from "@Mys/index.js";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import TGameNav from "../../components/app/t-gamenav.vue";
-import TPostCard from "../../components/app/t-postcard.vue";
-import showLoading from "../../components/func/loading.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import VpOverlaySearch from "../../components/viewPost/vp-overlay-search.vue";
-import Mys from "../../plugins/Mys/index.js";
-import { createPost } from "../../utils/TGWindow.js";
+import { createPost } from "@/utils/TGWindow.js";
 
-const gid = <string>useRoute().params.gid;
-const topic = <string>useRoute().params.topic;
+type SortSelect = { text: string; value: number };
+
+const { gid, topic } = <{ gid: string; topic: string }>useRoute().params;
 const showSearch = ref<boolean>(false);
-
 const curGid = ref<number>(Number(gid));
 const curSortType = ref<0 | 1 | 2>(0);
 const search = ref<string>("");
-const topicInfo = ref<TGApp.Plugins.Mys.Topic.InfoData>();
-const posts = ref<TGApp.Plugins.Mys.Post.FullData[]>([]);
 const lastPostId = ref<string>();
 const isLastPage = ref<boolean>(false);
-const curGame = ref<TGApp.Plugins.Mys.Topic.GameInfo>();
-
-type SortSelect = { text: string; value: number };
-const sortList = computed<SortSelect[]>(() => {
+const topicInfo = shallowRef<TGApp.Plugins.Mys.Topic.InfoData>();
+const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
+const curGame = shallowRef<TGApp.Plugins.Mys.Topic.GameInfo>();
+const sortList = computed<Array<SortSelect>>(() => {
   if (!topicInfo.value) return [];
   if (!topicInfo.value.good_post_exist) {
     return [
@@ -111,11 +106,12 @@ onMounted(async () => {
   }
   topicInfo.value = info;
   if (curGame.value === undefined) {
-    curGame.value = toRaw(info.game_info_list.find((i) => i.id === curGid.value));
+    curGame.value = info.game_info_list.find((i) => i.id === curGid.value);
   }
   if (curGame.value === undefined) curGame.value = info.game_info_list[0];
   await firstLoad();
 });
+
 watch(
   () => curGame.value,
   async () => {

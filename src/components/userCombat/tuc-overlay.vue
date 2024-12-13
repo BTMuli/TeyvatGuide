@@ -17,15 +17,15 @@
   </TOverlay>
 </template>
 <script lang="ts" setup>
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import TOverlay from "@comp/app/t-overlay.vue";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
 import { computed } from "vue";
 
-import { AppCharacterData } from "../../data/index.js";
-import { generateShareImg } from "../../utils/TGShare.js";
-import { timestampToDate } from "../../utils/toolFunc.js";
-import TItemBox, { TItemBoxData } from "../app/t-item-box.vue";
-import TOverlay from "../app/t-overlay.vue";
-import showLoading from "../func/loading.js";
-import showSnackbar from "../func/snackbar.js";
+import { AppCharacterData } from "@/data/index.js";
+import { generateShareImg } from "@/utils/TGShare.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
 type TucOverlayProps = {
   modelValue: boolean;
@@ -39,9 +39,9 @@ const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),
 });
-const raw = computed<TGApp.Plugins.Hutao.Base.Rate[]>(() => {
+const raw = computed<Array<TGApp.Plugins.Hutao.Base.Rate>>(() => {
   if (!props.data) return [];
-  const res: TGApp.Plugins.Hutao.Base.Rate[] = props.data.BackupAvatarRates;
+  const res = props.data.BackupAvatarRates;
   return res.sort((a, b) => b.Rate - a.Rate);
 });
 

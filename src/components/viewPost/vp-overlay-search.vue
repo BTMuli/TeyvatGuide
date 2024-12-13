@@ -17,25 +17,24 @@
   </TOverlay>
 </template>
 <script lang="ts" setup>
+import TOverlay from "@comp/app/t-overlay.vue";
+import TPostCard from "@comp/app/t-postcard.vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import Mys from "@Mys/index.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
-import Mys from "../../plugins/Mys/index.js";
-import { getGameName } from "../../web/utils/tools.js";
-import TOverlay from "../app/t-overlay.vue";
-import TPostCard from "../app/t-postcard.vue";
-import showSnackbar from "../func/snackbar.js";
-
-const search = ref<string>();
-const lastId = ref<string>("");
-const game = ref<string>("2");
-const isLast = ref<boolean>(false);
-const results = shallowRef<TGApp.Plugins.Mys.Post.FullData[]>([]);
-const load = ref<boolean>(false);
+import { getGameName } from "@/web/utils/tools.js";
 
 type ToPostSearchProps = { modelValue: boolean; gid: string; keyword?: string };
 type ToPostSearchEmits = (e: "update:modelValue", v: boolean) => void;
 const props = defineProps<ToPostSearchProps>();
 const emits = defineEmits<ToPostSearchEmits>();
+const search = ref<string>();
+const lastId = ref<string>("");
+const game = ref<string>("2");
+const isLast = ref<boolean>(false);
+const load = ref<boolean>(false);
+const results = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
 const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),
@@ -87,7 +86,7 @@ watch(
   },
 );
 
-async function searchPosts() {
+async function searchPosts(): Promise<void> {
   if (load.value || !search.value) return;
   load.value = true;
   if (!props.gid || !props.keyword) {
@@ -106,17 +105,12 @@ async function searchPosts() {
     return;
   }
   const res = await Mys.Post.searchPosts(game.value, search.value, lastId.value);
-  if (lastId.value === "") {
-    results.value = res.posts;
-  } else {
-    results.value = results.value.concat(res.posts);
-  }
+  if (lastId.value === "") results.value = res.posts;
+  else results.value = results.value.concat(res.posts);
   lastId.value = res.last_id;
   isLast.value = res.is_last;
   load.value = false;
-  if (!visible.value) {
-    visible.value = true;
-  }
+  if (!visible.value) visible.value = true;
 }
 </script>
 <style lang="css" scoped>

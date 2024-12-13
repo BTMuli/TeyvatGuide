@@ -4,11 +4,10 @@
  * @since Beta v0.6.0
  */
 
+import showSnackbar from "@comp/func/snackbar.js";
+import TSUserAccount from "@Sqlite/modules/userAccount.js";
 import { defineStore } from "pinia";
 import { ref } from "vue";
-
-import showSnackbar from "../../components/func/snackbar.js";
-import TSUserAccount from "../../plugins/Sqlite/modules/userAccount.js";
 
 export const useUserStore = defineStore(
   "user",

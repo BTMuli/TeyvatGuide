@@ -1,21 +1,17 @@
 <template>
   <div class="tcm-box">
     <div class="tcm-left">
-      <div class="tcm-bg"><img :src="props.item.bg" alt="bg" /></div>
-      <div class="tcm-icon"><img :src="props.item.icon" alt="icon" /></div>
-      <div class="tcm-star" v-if="props.item.star !== 0">
-        <img :src="props.item.starIcon" alt="element" />
+      <div class="tcm-bg"><img :src="item.bg" alt="bg" /></div>
+      <div class="tcm-icon"><img :src="item.icon" alt="icon" /></div>
+      <div class="tcm-star" v-if="item.star !== 0">
+        <img :src="item.starIcon" alt="element" />
       </div>
     </div>
-    <div class="tcm-right">{{ props.item.name }}</div>
+    <div class="tcm-right">{{ item.name }}</div>
   </div>
 </template>
 <script lang="ts" setup>
-interface TMiniWeaponProps {
-  item: TGApp.App.Calendar.Material;
-}
-
-const props = defineProps<TMiniWeaponProps>();
+defineProps<{ item: TGApp.App.Calendar.Material }>();
 </script>
 <style lang="css" scoped>
 .tcm-box {

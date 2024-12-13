@@ -13,9 +13,7 @@
       <div class="achi-pre-info" @click="selectAchi()">
         <span>
           <span>{{ data.name }}</span>
-          <span v-if="data.progress !== 0">
-            {{ data.progress }}
-          </span>
+          <span v-if="data.progress !== 0">{{ data.progress }}</span>
         </span>
         <span>{{ data.description }}</span>
       </div>
@@ -30,26 +28,21 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TSUserAchi from "@Sqlite/modules/userAchi.js";
 import { event } from "@tauri-apps/api";
-import { toRaw, ref, watch } from "vue";
+import { ref, toRaw, watch } from "vue";
 
-import { AppAchievementSeriesData } from "../../data/index.js";
-import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
-import { timestampToDate } from "../../utils/toolFunc.js";
-import showDialog from "../func/dialog.js";
-import showSnackbar from "../func/snackbar.js";
+import { AppAchievementSeriesData } from "@/data/index.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
-interface TuaAchiProps {
-  modelValue: TGApp.Sqlite.Achievement.RenderAchi;
-}
-
-interface TuaAchiEmits {
+type TuaAchiProps = { modelValue: TGApp.Sqlite.Achievement.RenderAchi };
+type TuaAchiEmits = {
   (e: "update:modelValue", data: TGApp.Sqlite.Achievement.RenderAchi): void;
-
   (e: "update:update", data: boolean): void;
-
   (e: "select-achi", data: TGApp.Sqlite.Achievement.RenderAchi): void;
-}
+};
 
 const props = defineProps<TuaAchiProps>();
 const emits = defineEmits<TuaAchiEmits>();
@@ -109,6 +102,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
   justify-content: space-between;
   padding: 10px;
   border-radius: 10px;
+  margin-bottom: 10px;
   background: var(--box-bg-1);
   color: var(--box-text-7);
   cursor: pointer;

@@ -12,15 +12,11 @@
           title="游戏UID"
         />
         <v-btn :rounded="true" class="uc-btn" @click="toAbyss()">
-          <template #prepend>
-            <img src="/source/UI/userAbyss.webp" alt="abyss" />
-          </template>
+          <template #prepend><img src="/source/UI/userAbyss.webp" alt="abyss" /></template>
           <span>深境螺旋</span>
         </v-btn>
         <v-btn :rounded="true" class="uc-btn" @click="loadWiki()">
-          <template #prepend>
-            <img src="/source/UI/wikiAbyss.webp" alt="abyss" />
-          </template>
+          <template #prepend><img src="/source/UI/wikiAbyss.webp" alt="abyss" /></template>
           <span>统计数据</span>
         </v-btn>
       </div>
@@ -32,21 +28,23 @@
           @click="shareCombat()"
           :rounded="true"
           :disabled="localCombat.length === 0"
+          prepend-icon="mdi-share"
         >
-          <v-icon>mdi-share</v-icon>
-          <span>分享</span>
+          分享
         </v-btn>
-        <v-btn class="uc-btn" @click="refreshCombat()" :rounded="true">
-          <v-icon>mdi-refresh</v-icon>
-          <span>刷新</span>
+        <v-btn class="uc-btn" @click="refreshCombat()" :rounded="true" prepend-icon="mdi-refresh">
+          刷新
         </v-btn>
-        <v-btn class="uc-btn" @click="uploadCombat()" :rounded="true">
-          <v-icon>mdi-cloud-upload</v-icon>
-          <span>上传</span>
+        <v-btn
+          class="uc-btn"
+          @click="uploadCombat()"
+          :rounded="true"
+          prepend-icon="mdi-cloud-upload"
+        >
+          上传
         </v-btn>
-        <v-btn class="uc-btn" @click="deleteCombat()" :rounded="true">
-          <v-icon>mdi-delete</v-icon>
-          <span>删除</span>
+        <v-btn class="uc-btn" @click="deleteCombat()" :rounded="true" prepend-icon="mdi-delete">
+          删除
         </v-btn>
       </div>
     </template>
@@ -97,45 +95,36 @@
   <TucOverlay v-model="showData" :data="cloudCombat" />
 </template>
 <script lang="ts" setup>
+import TSubLine from "@comp/app/t-subline.vue";
+import showDialog from "@comp/func/dialog.js";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TucAvatars from "@comp/userCombat/tuc-avatars.vue";
+import TucOverlay from "@comp/userCombat/tuc-overlay.vue";
+import TucOverview from "@comp/userCombat/tuc-overview.vue";
+import TucRound from "@comp/userCombat/tuc-round.vue";
+import Hutao from "@Hutao/index.js";
+import TSUserCombat from "@Sqlite/modules/userCombat.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
-import TSubLine from "../../components/app/t-subline.vue";
-import showDialog from "../../components/func/dialog.js";
-import showLoading from "../../components/func/loading.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import TucAvatars from "../../components/userCombat/tuc-avatars.vue";
-import TucOverlay from "../../components/userCombat/tuc-overlay.vue";
-import TucOverview from "../../components/userCombat/tuc-overview.vue";
-import TucRound from "../../components/userCombat/tuc-round.vue";
-import Hutao from "../../plugins/Hutao/index.js";
-import TSUserCombat from "../../plugins/Sqlite/modules/userCombat.js";
-import { useUserStore } from "../../store/modules/user.js";
-import TGLogger from "../../utils/TGLogger.js";
-import { generateShareImg } from "../../utils/TGShare.js";
-import TakumiRecordGenshinApi from "../../web/request/recordReq.js";
+import { useUserStore } from "@/store/modules/user.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { generateShareImg } from "@/utils/TGShare.js";
+import TakumiRecordGenshinApi from "@/web/request/recordReq.js";
 
-// store
-const userStore = storeToRefs(useUserStore());
-
-// data
+const router = useRouter();
+const { account, cookie } = storeToRefs(useUserStore());
 const userTab = ref<number>(0);
-const user = computed<TGApp.Sqlite.Account.Game>(() => userStore.account.value);
-
-const localCombat = ref<TGApp.Sqlite.Combat.SingleTable[]>([]);
-const combatRef = ref<HTMLElement>(<HTMLElement>{});
-const cloudCombat = ref<TGApp.Plugins.Hutao.Combat.Data>();
 const showData = ref<boolean>(false);
 const version = ref<string>();
-const router = useRouter();
-
-const uidList = ref<string[]>();
 const uidCur = ref<string>();
-const combatIdList = computed<number[]>(() => {
-  return localCombat.value.map((combat) => combat.id);
-});
+const uidList = shallowRef<Array<string>>();
+const localCombat = shallowRef<Array<TGApp.Sqlite.Combat.SingleTable>>([]);
+const cloudCombat = shallowRef<TGApp.Plugins.Hutao.Combat.Data>();
+const combatIdList = computed<Array<number>>(() => localCombat.value.map((combat) => combat.id));
 
 onMounted(async () => {
   showLoading.start("正在加载剧诗数据...");
@@ -143,17 +132,14 @@ onMounted(async () => {
   await TGLogger.Info("[UserCombat][onMounted] 打开真境剧诗页面");
   showLoading.update("正在加载用户数据...");
   uidList.value = await TSUserCombat.getAllUid();
-  if (uidList.value.includes(user.value.gameUid)) uidCur.value = user.value.gameUid;
+  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
   else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
   else uidCur.value = "";
   await loadCombat();
   showLoading.end();
 });
 
-watch(
-  () => uidCur.value,
-  async () => await loadCombat(),
-);
+watch(() => uidCur.value, loadCombat);
 
 async function toAbyss(): Promise<void> {
   await router.push({ name: "深渊记录" });
@@ -177,12 +163,12 @@ async function loadWiki(): Promise<void> {
 }
 
 async function refreshCombat(): Promise<void> {
-  if (!userStore.cookie.value) {
+  if (!cookie.value) {
     showSnackbar.error("未登录");
     await TGLogger.Warn("[UserCombat][getAbyssData] 未登录");
     return;
   }
-  if (uidCur.value && uidCur.value !== user.value.gameUid) {
+  if (uidCur.value && uidCur.value !== account.value.gameUid) {
     const switchCheck = await showDialog.check(
       "是否切换游戏账户",
       `确认则尝试切换至 ${uidCur.value}`,
@@ -194,7 +180,7 @@ async function refreshCombat(): Promise<void> {
     }
     const freshCheck = await showDialog.check(
       "确定刷新？",
-      `用户${user.value.gameUid}与当前UID${uidCur.value}不一致`,
+      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
     );
     if (!freshCheck) {
       showSnackbar.cancel("已取消剧诗数据刷新");
@@ -202,8 +188,8 @@ async function refreshCombat(): Promise<void> {
     }
   }
   await TGLogger.Info("[UserCombat][getCombatData] 更新剧诗数据");
-  showLoading.start("正在获取剧诗数据...", `UID: ${user.value.gameUid}`);
-  const res = await TakumiRecordGenshinApi.roleCombat(userStore.cookie.value, user.value);
+  showLoading.start("正在获取剧诗数据...", `UID: ${account.value.gameUid}`);
+  const res = await TakumiRecordGenshinApi.roleCombat(cookie.value, account.value);
   if (res === false) {
     showLoading.end();
     showSnackbar.warn("用户未解锁幻想真境剧诗");
@@ -212,28 +198,33 @@ async function refreshCombat(): Promise<void> {
   if ("retcode" in res) {
     showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);
-    await TGLogger.Error(`[UserCombat][getCombatData] 获取${user.value.gameUid}的剧诗数据失败`);
+    await TGLogger.Error(`[UserCombat][getCombatData] 获取${account.value.gameUid}的剧诗数据失败`);
     await TGLogger.Error(`[UserCombat][getCombatData] ${res.retcode} ${res.message}`);
     return;
   }
   showLoading.update("正在保存剧诗数据...");
   for (const combat of res) {
     showLoading.update("正在保存剧诗数据...", `第${combat.schedule.schedule_id}期`);
-    await TSUserCombat.saveCombat(user.value.gameUid, combat);
+    await TSUserCombat.saveCombat(account.value.gameUid, combat);
   }
   showLoading.update("正在加载剧诗数据...");
   uidList.value = await TSUserCombat.getAllUid();
-  uidCur.value = user.value.gameUid;
+  uidCur.value = account.value.gameUid;
   await loadCombat();
   showLoading.end();
 }
 
 async function shareCombat(): Promise<void> {
   await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片`);
-  const fileName = `【剧诗数据】${userTab.value}-${user.value.gameUid}`;
+  const fileName = `【剧诗数据】${userTab.value}-${account.value.gameUid}`;
+  const shareDom = document.querySelector<HTMLElement>(`#user-combat-${userTab.value}`);
+  if (shareDom === null) {
+    showSnackbar.error("未找到分享数据");
+    await TGLogger.Warn(`[UserCombat][shareCombat][${userTab.value}] 未找到分享数据`);
+    return;
+  }
   showLoading.start("正在生成图片", `${fileName}.png`);
-  combatRef.value = <HTMLElement>document.getElementById(`user-combat-${userTab.value}`);
-  await generateShareImg(fileName, combatRef.value);
+  await generateShareImg(fileName, shareDom);
   showLoading.end();
   await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片成功`);
 }

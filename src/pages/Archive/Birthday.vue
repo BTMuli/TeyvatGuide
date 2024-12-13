@@ -5,7 +5,7 @@
         <img src="/source/UI/act_birthday.png" alt="archive_birthday_icon" class="side-icon" />
       </div>
       <v-switch class="ab-draw-switch" v-model="isAether" />
-      {{ isAether ? "空" : "荧" }}
+      <span>{{ isAether ? "空" : "荧" }}</span>
       <v-select
         v-model="curSelect"
         class="ab-select"
@@ -15,8 +15,7 @@
         label="角色"
         :item-value="(item: TGApp.Archive.Birth.RoleItem) => item"
         :item-props="(item: TGApp.Archive.Birth.RoleItem) => getItemProps(item)"
-      >
-      </v-select>
+      />
     </div>
     <div class="ab-draw-grid">
       <div v-for="item in selectedItem" :key="item.op_id" class="ab-draw">
@@ -34,26 +33,36 @@
   <ToArcBrith v-model="showOverlay" :data="current" :choice="isAether" />
 </template>
 <script lang="ts" setup>
+import ToArcBrith from "@comp/pageArchive/to-arcBrith.vue";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import ToArcBrith from "../../components/pageArchive/to-arcBrith.vue";
-import { ArcBirDraw, ArcBirRole } from "../../data/index.js";
-import TGClient from "../../utils/TGClient.js";
+import { ArcBirDraw, ArcBirRole } from "@/data/index.js";
+import TGClient from "@/utils/TGClient.js";
 
 const route = useRoute();
 
 const page = ref<number>(1);
 const length = ref<number>(0);
-const visible = ref(0);
-const renderItems = shallowRef<TGApp.Archive.Birth.DrawItem[]>([]);
-const curSelect = shallowRef<TGApp.Archive.Birth.RoleItem | null>(null);
-const current = shallowRef<TGApp.Archive.Birth.DrawItem>();
+const visible = ref<number>(0);
 const isAether = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
+const renderItems = shallowRef<Array<TGApp.Archive.Birth.DrawItem>>([]);
+const curSelect = shallowRef<TGApp.Archive.Birth.RoleItem | null>(null);
+const current = shallowRef<TGApp.Archive.Birth.DrawItem>();
+const selectedItem = computed<Array<TGApp.Archive.Birth.DrawItem>>(() =>
+  renderItems.value.slice((page.value - 1) * 12, page.value * 12),
+);
 
-const selectedItem = computed<TGApp.Archive.Birth.DrawItem[]>(() => {
-  return renderItems.value.slice((page.value - 1) * 12, page.value * 12);
+onMounted(() => {
+  const { date } = route.params;
+  if (date) {
+    const dataFind = ArcBirRole.find((i) => i.role_birthday === date);
+    if (dataFind) curSelect.value = dataFind;
+  } else renderItems.value = ArcBirDraw;
+  length.value = Math.ceil(renderItems.value.length / 12);
+  visible.value = length.value > 5 ? 5 : length.value;
+  page.value = 1;
 });
 
 watch(
@@ -63,29 +72,14 @@ watch(
       renderItems.value = ArcBirDraw.filter(
         (item) => item.birthday === curSelect.value?.role_birthday,
       );
-    } else {
-      renderItems.value = ArcBirDraw;
-    }
+    } else renderItems.value = ArcBirDraw;
     length.value = Math.ceil(renderItems.value.length / 12);
     page.value = 1;
     visible.value = length.value > 5 ? 5 : length.value;
   },
 );
 
-onMounted(() => {
-  let { date } = route.params;
-  if (date) {
-    const dataFind = ArcBirRole.find((i) => i.role_birthday === date);
-    if (dataFind) curSelect.value = dataFind;
-  } else {
-    renderItems.value = ArcBirDraw;
-  }
-  length.value = Math.ceil(renderItems.value.length / 12);
-  visible.value = length.value > 5 ? 5 : length.value;
-  page.value = 1;
-});
-
-function showImg(item: TGApp.Archive.Birth.DrawItem) {
+function showImg(item: TGApp.Archive.Birth.DrawItem): void {
   current.value = item;
   showOverlay.value = true;
 }

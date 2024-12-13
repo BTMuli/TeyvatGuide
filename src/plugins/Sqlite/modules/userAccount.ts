@@ -4,12 +4,12 @@
  * @since Beta v0.6.1
  */
 
+import TGSqlite from "@Sqlite/index.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 
-import TGLogger from "../../../utils/TGLogger.js";
-import { timestampToDate } from "../../../utils/toolFunc.js";
-import TGSqlite from "../index.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
 /**
  * @description 获取插入游戏账号数据的sql
@@ -94,7 +94,7 @@ function transUser(data: TGApp.App.Account.User): TGApp.Sqlite.Account.User {
 async function getAllAccount(): Promise<TGApp.App.Account.User[]> {
   const db = await TGSqlite.getDB();
   const res = await db.select<TGApp.Sqlite.Account.User[]>("SELECT * FROM UserAccount;");
-  return res.map((account) => parseUser(account));
+  return res.map(parseUser);
 }
 
 /**

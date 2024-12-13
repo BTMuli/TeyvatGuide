@@ -8,20 +8,20 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TSwitchTheme from "@comp/app/t-switchTheme.vue";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import Mys from "@Mys/index.js";
 import { onMounted, ref, shallowRef } from "vue";
 import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
 
-import TSwitchTheme from "../components/app/t-switchTheme.vue";
-import showLoading from "../components/func/loading.js";
-import showSnackbar from "../components/func/snackbar.js";
-import Mys from "../plugins/Mys/index.js";
-import TGLogger from "../utils/TGLogger.js";
+import TGLogger from "@/utils/TGLogger.js";
 
 const postId = Number(useRoute().params.post_id);
-const jsonData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
-const parseData = shallowRef<TGApp.Plugins.Mys.SctPost.Base[]>();
 const isEmpty = ref<boolean>(false);
+const jsonData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
+const parseData = shallowRef<Array<TGApp.Plugins.Mys.SctPost.Base>>();
 
 onMounted(async () => {
   showLoading.start(`正在获取帖子数据...`);

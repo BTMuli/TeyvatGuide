@@ -7,6 +7,8 @@
   />
 </template>
 <script lang="ts" setup>
+import type { Component } from "vue";
+
 import TpBackupText from "./tp-backupText.vue";
 import TpDivider from "./tp-divider.vue";
 import TpEmoticon from "./tp-emoticon.vue";
@@ -21,15 +23,14 @@ import TpVideo from "./tp-video.vue";
 import TpVod from "./tp-vod.vue";
 import TpVote from "./tp-vote.vue";
 
-interface TpParserProps {
-  data: TGApp.Plugins.Mys.SctPost.Base[];
-}
+type SctPostDataArr = Array<TGApp.Plugins.Mys.SctPost.Base>;
+type TpParserProps = { data: SctPostDataArr };
 
 const props = defineProps<TpParserProps>();
 
-function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.Mys.SctPost.Base[] {
-  const res: TGApp.Plugins.Mys.SctPost.Base[] = [];
-  let child: TGApp.Plugins.Mys.SctPost.Base[] = [];
+function getParsedData(data: SctPostDataArr): SctPostDataArr {
+  const res: SctPostDataArr = [];
+  let child: SctPostDataArr = [];
   let cur: TGApp.Plugins.Mys.SctPost.Base | undefined;
   for (const tp of data) {
     const tpName = getTpName(tp);
@@ -47,11 +48,7 @@ function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.My
     tp.insert = tp.insert.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
     if (tp.insert === "\n") {
       child.push(tp);
-      cur = {
-        insert: "",
-        attributes: tp.attributes,
-        children: child,
-      };
+      cur = { insert: "", attributes: tp.attributes, children: child };
       res.push(cur);
       child = [];
       continue;
@@ -63,11 +60,7 @@ function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.My
       child.push(text);
       if (text.insert === "\n") {
         check += child.length;
-        cur = {
-          insert: "",
-          attributes: text.attributes,
-          children: child,
-        };
+        cur = { insert: "", attributes: text.attributes, children: child };
         res.push(cur);
         child = [];
       }
@@ -81,24 +74,20 @@ function getParsedData(data: TGApp.Plugins.Mys.SctPost.Base[]): TGApp.Plugins.My
   return res;
 }
 
-function getParsedText(data: TpTextType): TpTextType[] {
+function getParsedText(data: TpTextType): Array<TpTextType> {
   if (data.insert.includes("\n") && data.insert !== "\n") {
     const splits = data.insert.split("\n");
     const res = [];
     for (let i = 0; i < splits.length; i++) {
-      if (splits[i] !== "") {
-        res.push({ insert: splits[i], attributes: data.attributes });
-      }
-      if (i !== splits.length - 1) {
-        res.push({ insert: "\n", attributes: data.attributes });
-      }
+      if (splits[i] !== "") res.push({ insert: splits[i], attributes: data.attributes });
+      if (i !== splits.length - 1) res.push({ insert: "\n", attributes: data.attributes });
     }
     return res;
   }
   return [data];
 }
 
-function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base) {
+function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base): Component {
   if (tp.children) return TpTexts;
   if (typeof tp.insert === "string") return TpText;
   if ("image" in tp.insert) return TpImage;

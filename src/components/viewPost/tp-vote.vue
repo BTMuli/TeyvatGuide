@@ -14,44 +14,23 @@
           </span>
         </div>
         <div class="tp-vote-progress">
-          <div class="tp-vote-val" :style="{ width: item.percent + '%' }" />
+          <div class="tp-vote-val" :style="getWidth(item)" />
         </div>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import Mys from "@Mys/index.js";
+import { onMounted, shallowRef } from "vue";
 
-import Mys from "../../plugins/Mys/index.js";
-
-interface TpVote {
-  insert: {
-    vote: {
-      id: string;
-      uid: string;
-    };
-  };
-}
-
-interface TpVoteProps {
-  data: TpVote;
-}
-
-interface TpVoteInfo {
-  title: string;
-  count: number;
-  is_over: boolean;
-  data: Array<{
-    title: string;
-    count: number;
-    percent: number;
-  }>;
-}
+type TpVote = { insert: { vote: { id: string; uid: string } } };
+type TpVoteProps = { data: TpVote };
+type TpVoteData = { title: string; count: number; percent: number };
+type TpVoteInfo = { title: string; count: number; is_over: boolean; data: Array<TpVoteData> };
 
 const props = defineProps<TpVoteProps>();
-
-const votes = ref<TpVoteInfo>();
+const votes = shallowRef<TpVoteInfo>();
 
 onMounted(async () => {
   const vote = props.data.insert.vote;
@@ -68,6 +47,10 @@ onMounted(async () => {
     })),
   };
 });
+
+function getWidth(item: TpVoteData): string {
+  return `width: ${item.percent}%;`;
+}
 </script>
 <style lang="css" scoped>
 .tp-vote-box {

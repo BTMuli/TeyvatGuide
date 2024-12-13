@@ -4,41 +4,33 @@
  * @since Beta v0.6.3
  */
 
+import showSnackbar from "@comp/func/snackbar.js";
+import TGSqlite from "@Sqlite/index.js";
 import { core, event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
-
-import showSnackbar from "../components/func/snackbar.js";
-import TGSqlite from "../plugins/Sqlite/index.js";
-import { useAppStore } from "../store/modules/app.js";
-import { useUserStore } from "../store/modules/user.js";
-import TGConstant from "../web/constant/TGConstant.js";
-import BBSApi from "../web/request/bbsReq.js";
-import OtherApi from "../web/request/otherReq.js";
-import PassportApi from "../web/request/passportReq.js";
-import TakumiApi from "../web/request/takumiReq.js";
-import { getDS4JS } from "../web/utils/getRequestHeader.js";
 
 import { parseLink } from "./linkParser.js";
 import TGLogger from "./TGLogger.js";
 import { createPost } from "./TGWindow.js";
 import { getDeviceInfo } from "./toolFunc.js";
 
-// invoke 参数
-interface InvokeArg {
-  func: string;
-}
+import { useAppStore } from "@/store/modules/app.js";
+import { useUserStore } from "@/store/modules/user.js";
+import TGConstant from "@/web/constant/TGConstant.js";
+import BBSApi from "@/web/request/bbsReq.js";
+import OtherApi from "@/web/request/otherReq.js";
+import PassportApi from "@/web/request/passportReq.js";
+import TakumiApi from "@/web/request/takumiReq.js";
+import { getDS4JS } from "@/web/utils/getRequestHeader.js";
 
-/**
- * @class TGClient
- * @since Beta v0.4.4
- * @description 米游社客户端
- */
-class TGClient {
+// invoke 参数
+type InvokeArg = { func: string };
+
+class Client {
   /**
    * @private 监听实例
    * @since Beta v0.3.3
    * @type {EventEmitter}
-   * @memberof TGClient
    */
   private listener: UnlistenFn | undefined;
 
@@ -46,7 +38,6 @@ class TGClient {
    * @private 模拟路由
    * @since Beta v0.3.4
    * @type {string[]}
-   * @memberof TGClient
    */
   private route: string[] = [];
 
@@ -54,11 +45,17 @@ class TGClient {
    * @constructor
    * @since Beta v0.3.4
    * @description 构造函数
-   * @memberof TGClient
    */
-  constructor() {
+  private constructor() {
     this.route = [];
     this.listener = undefined;
+  }
+
+  private static instance: Client | null = null;
+
+  static getInstance(): Client {
+    if (this.instance === null) this.instance = new Client();
+    return this.instance;
   }
 
   /**
@@ -69,7 +66,7 @@ class TGClient {
    */
   async run(): Promise<void> {
     if (this.listener === undefined) {
-      this.listener = await event.listen("post_mhy_client", async (arg: Event<string>) => {
+      this.listener = await event.listen<string>("post_mhy_client", async (arg: Event<string>) => {
         await this.handleCallback(arg);
       });
     } else {
@@ -88,11 +85,7 @@ class TGClient {
    * @returns {void} - 无返回值
    */
   async callback(callback: string, data: object): Promise<void> {
-    const response = {
-      retcode: 0,
-      message: "success",
-      data: data ?? {},
-    };
+    const response = { retcode: 0, message: "success", data: data ?? {} };
     const js = `javascript:mhyWebBridge("${callback}", ${JSON.stringify(response)});`;
     console.info(`[callback] ${js}`);
     await core.invoke("execute_js", { label: "mhy_client", js });
@@ -926,6 +919,6 @@ class TGClient {
   }
 }
 
-const mhyClient = new TGClient();
+const TGClient = Client.getInstance();
 
-export default mhyClient;
+export default TGClient;

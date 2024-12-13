@@ -1,8 +1,7 @@
 <template>
   <div class="tur-ws-box">
-    <div class="tur-ws-icon">
-      <img :src="icon" alt="icon" />
-    </div>
+    <div class="tur-ws-bg"><img :src="data.bg" alt="bg" /></div>
+    <div class="tur-ws-icon"><img :src="icon" alt="icon" /></div>
     <div class="tur-ws-content">
       <div class="tur-ws-title">
         <span>{{ data.name }}</span>
@@ -40,38 +39,33 @@
 </template>
 <script lang="ts" setup>
 import { event } from "@tauri-apps/api";
-import { Event, UnlistenFn } from "@tauri-apps/api/event";
+import type { Event, UnlistenFn } from "@tauri-apps/api/event";
+import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
-import { useAppStore } from "../../store/modules/app.js";
+import { useAppStore } from "@/store/modules/app.js";
 
-interface TurWorldSubProps {
-  data: TGApp.Sqlite.Record.WorldExplore;
-}
+type TurWorldSubProps = { data: TGApp.Sqlite.Record.WorldExplore };
 
-const props = defineProps<TurWorldSubProps>();
 let themeListener: UnlistenFn | null = null;
+const { theme } = storeToRefs(useAppStore());
+const props = defineProps<TurWorldSubProps>();
 const icon = ref<string>();
 const offer = ref<string>();
-const appStore = useAppStore();
 
-const bg = computed<string>(() => {
-  return `url('${props.data.bg}')`;
-});
 const imgFilter = computed<string>(() => {
   if (props.data.name !== "纳塔") return "none";
-  if (appStore.theme === "dark") return "none";
+  if (theme.value === "dark") return "none";
   return "invert(0.75)";
 });
 
 onMounted(async () => {
-  themeListener = await event.listen("readTheme", (e: Event<string>) => {
-    const theme = e.payload;
-    if (theme === "dark") icon.value = props.data.iconLight;
+  themeListener = await event.listen<string>("readTheme", (e: Event<string>) => {
+    if (e.payload === "dark") icon.value = props.data.iconLight;
     else icon.value = props.data.iconDark;
   });
   if (props.data.offering) offer.value = props.data.offering.icon;
-  if (appStore.theme === "dark") icon.value = props.data.iconLight;
+  if (theme.value === "dark") icon.value = props.data.iconLight;
   else icon.value = props.data.iconDark;
 });
 
@@ -84,17 +78,25 @@ onUnmounted(() => {
 </script>
 <style lang="css" scoped>
 .tur-ws-box {
+  position: relative;
   display: flex;
+  overflow: hidden;
   align-items: center;
   justify-content: center;
   padding: 10px;
   border-radius: 5px;
-  background: var(--common-shadow-t-4) v-bind(bg) no-repeat;
-  background-position-x: right;
-  background-size: cover;
+}
+
+.tur-ws-bg {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  right: 0;
+  object-fit: cover;
 }
 
 .tur-ws-icon {
+  z-index: 1;
   width: 60px;
   height: 60px;
   padding: 5px;
@@ -107,6 +109,7 @@ onUnmounted(() => {
 }
 
 .tur-ws-content {
+  z-index: 1;
   width: calc(100% - 60px);
   height: 100%;
   color: var(--box-text-4);

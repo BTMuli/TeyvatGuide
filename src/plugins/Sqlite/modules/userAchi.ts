@@ -4,13 +4,13 @@
  * @since Beta v0.6.0
  */
 
+import TGSqlite from "@Sqlite/index.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 
-import { AppAchievementsData, AppAchievementSeriesData } from "../../../data/index.js";
-import TGLogger from "../../../utils/TGLogger.js";
-import { timestampToDate } from "../../../utils/toolFunc.js";
-import TGSqlite from "../index.js";
+import { AppAchievementsData, AppAchievementSeriesData } from "@/data/index.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
 /**
  * @description 根据 completed 跟 progress 获取 status
@@ -20,15 +20,10 @@ import TGSqlite from "../index.js";
  * @returns {number} status
  */
 function getUiafStatus(completed: boolean, progress: number): number {
-  if (progress !== 0 && !completed) {
-    return 1;
-  } else if (progress === 0 && completed) {
-    return 2;
-  } else if (progress !== 0 && completed) {
-    return 3;
-  } else {
-    return 0;
-  }
+  if (progress !== 0 && !completed) return 1;
+  if (progress === 0 && completed) return 2;
+  if (progress !== 0 && completed) return 3;
+  return 0;
 }
 
 /**
@@ -57,11 +52,8 @@ async function getOverview(
 ): Promise<TGApp.Sqlite.Achievement.Overview> {
   const db = await TGSqlite.getDB();
   let totalAchi: number[] = [];
-  if (series === undefined) {
-    totalAchi = AppAchievementsData.map((i) => i.id);
-  } else {
-    totalAchi = AppAchievementsData.filter((s) => s.series === series).map((i) => i.id);
-  }
+  if (series === undefined) totalAchi = AppAchievementsData.map((i) => i.id);
+  else totalAchi = AppAchievementsData.filter((s) => s.series === series).map((i) => i.id);
   const finAchi = (
     await db.select<TGApp.Sqlite.Achievement.TableAchi[]>(
       "SELECT * FROM Achievements WHERE uid = ? AND isCompleted = 1;",
@@ -235,12 +227,7 @@ function transDb2Uiaf(data: TGApp.Sqlite.Achievement.TableAchi): TGApp.Plugins.U
   let timestamp = 0;
   if (data.isCompleted === 1) timestamp = Math.floor(new Date(data.completedTime).getTime() / 1000);
   const status = getUiafStatus(data.isCompleted === 1, data.progress);
-  return {
-    id: data.id,
-    timestamp: timestamp,
-    current: data.progress,
-    status,
-  };
+  return { id: data.id, timestamp: timestamp, current: data.progress, status };
 }
 
 /**
@@ -256,9 +243,7 @@ async function getUiafData(uid: number): Promise<TGApp.Plugins.UIAF.Achievement[
     [uid],
   );
   const res: TGApp.Plugins.UIAF.Achievement[] = [];
-  for (const item of data) {
-    res.push(transDb2Uiaf(item));
-  }
+  for (const item of data) res.push(transDb2Uiaf(item));
   return res;
 }
 

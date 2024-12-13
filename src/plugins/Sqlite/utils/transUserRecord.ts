@@ -4,7 +4,7 @@
  * @since Beta v0.6.0
  */
 
-import { getZhElement } from "../../../utils/toolFunc.js";
+import { getZhElement } from "@/utils/toolFunc.js";
 
 /**
  * @description 将通过 api 获取到的用户战绩数据转换为渲染用的数据
@@ -114,9 +114,7 @@ function transWorld(data: TGApp.Game.Record.WorldExplore[]): TGApp.Sqlite.Record
       exploration: area.exploration_percentage,
       children: [],
     };
-    if (area.type === "Reputation") {
-      world.reputation = area.level;
-    }
+    if (area.type === "Reputation") world.reputation = area.level;
     if (area.offerings !== undefined && area.offerings.length > 0) {
       world.offering = {
         name: area.offerings[0].name,
@@ -134,13 +132,13 @@ function transWorld(data: TGApp.Game.Record.WorldExplore[]): TGApp.Sqlite.Record
         "https://fastcdn.mihoyo.com/static-resource-v2/2024/08/19/8856eafed39be791276a21a6d522426b_6903333123294722705.png";
     }
     const children = areaChild.filter((i) => i.parent_id === area.id);
-    children.map((child) => {
-      return world.children.push({
+    for (const child of children) {
+      world.children.push({
         id: child.id,
         name: child.name,
         exploration: child.exploration_percentage,
       });
-    });
+    }
     worlds.push(world);
   }
   return worlds;

@@ -30,6 +30,7 @@ const bgImage = computed<string>(() => {
   height: 80px;
   border: 1px solid var(--common-shadow-2);
   border-radius: 10px 50px 50px 10px;
+  margin-bottom: 10px;
   background-color: var(--box-bg-1);
   background-image: v-bind(bgImage);
   background-position: right;

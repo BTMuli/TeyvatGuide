@@ -13,55 +13,55 @@
       <div class="hta-oob-title">数据收集统计</div>
       <HtaOverviewLine
         label="当期深渊ID"
-        :cur="dataCur.ScheduleId"
-        :last="dataLast.ScheduleId"
+        :cur="props.data.cur.ScheduleId"
+        :last="props.data.last.ScheduleId"
         :show-diff="false"
       />
       <HtaOverviewLine
         label="上传记录总数"
-        :cur="dataCur.RecordTotal"
-        :last="dataLast.RecordTotal"
+        :cur="props.data.cur.RecordTotal"
+        :last="props.data.last.RecordTotal"
       />
       <div class="hta-oob-title">深渊数据统计</div>
       <HtaOverviewLine
         label="总计深渊记录"
-        :cur="dataCur.SpiralAbyssTotal"
-        :last="dataLast.SpiralAbyssTotal"
+        :cur="props.data.cur.SpiralAbyssTotal"
+        :last="props.data.last.SpiralAbyssTotal"
       />
       <HtaOverviewLine
         label="通关深渊记录"
-        :cur="dataCur.SpiralAbyssPassed"
-        :last="dataLast.SpiralAbyssPassed"
+        :cur="props.data.cur.SpiralAbyssPassed"
+        :last="props.data.last.SpiralAbyssPassed"
       />
       <HtaOverviewLine
         label="满星深渊记录"
-        :cur="dataCur.SpiralAbyssFullStar"
-        :last="dataLast.SpiralAbyssFullStar"
+        :cur="props.data.cur.SpiralAbyssFullStar"
+        :last="props.data.last.SpiralAbyssFullStar"
       />
       <HtaOverviewLine
         label="平均获取渊星"
-        :cur="dataCur.SpiralAbyssStarTotal / dataCur.SpiralAbyssTotal"
-        :last="dataLast.SpiralAbyssStarTotal / dataLast.SpiralAbyssTotal"
+        :cur="props.data.cur.SpiralAbyssStarTotal / props.data.cur.SpiralAbyssTotal"
+        :last="props.data.last.SpiralAbyssStarTotal / props.data.last.SpiralAbyssTotal"
       />
       <HtaOverviewLine
         label="平均战斗次数"
-        :cur="dataCur.SpiralAbyssBattleTotal / dataCur.SpiralAbyssTotal"
-        :last="dataLast.SpiralAbyssBattleTotal / dataLast.SpiralAbyssTotal"
+        :cur="props.data.cur.SpiralAbyssBattleTotal / props.data.cur.SpiralAbyssTotal"
+        :last="props.data.last.SpiralAbyssBattleTotal / props.data.last.SpiralAbyssTotal"
       />
       <div class="hta-oob-extra">更新于 {{ timestampToDate(props.data.cur.Timestamp) }}</div>
     </div>
   </TOverlay>
 </template>
 <script lang="ts" setup>
+import TOverlay from "@comp/app/t-overlay.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import { computed, ref } from "vue";
 
-import { AbyssDataItem } from "../../pages/WIKI/Abyss.vue";
-import { generateShareImg } from "../../utils/TGShare.js";
-import { timestampToDate } from "../../utils/toolFunc.js";
-import TOverlay from "../app/t-overlay.vue";
-import showSnackbar from "../func/snackbar.js";
-
 import HtaOverviewLine from "./hta-overview-line.vue";
+
+import type { AbyssDataItem } from "@/pages/WIKI/Abyss.vue";
+import { generateShareImg } from "@/utils/TGShare.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
 type HtaOverlayOverviewProps = {
   modelValue: boolean;
@@ -76,8 +76,6 @@ const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),
 });
-const dataCur = computed(() => props.data.cur);
-const dataLast = computed(() => props.data.last);
 
 async function share(): Promise<void> {
   loadShare.value = true;
@@ -87,7 +85,7 @@ async function share(): Promise<void> {
     loadShare.value = false;
     return;
   }
-  const fileName = `深渊数据统计_${timestampToDate(dataCur.value.Timestamp)}.png`;
+  const fileName = `深渊数据统计_${timestampToDate(props.data.cur.Timestamp)}.png`;
   await generateShareImg(fileName, shareEl, 2);
   loadShare.value = false;
 }

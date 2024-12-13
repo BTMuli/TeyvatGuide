@@ -26,30 +26,28 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
+import TOverlay from "@comp/app/t-overlay.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import { getVersion } from "@tauri-apps/api/app";
-import { computed } from "vue";
-
-import { generateShareImg } from "../../utils/TGShare.js";
-import { parseHtmlText } from "../../utils/toolFunc.js";
-import TOverlay from "../app/t-overlay.vue";
-import showSnackbar from "../func/snackbar.js";
+import { computed, onMounted, ref } from "vue";
 
 import TwoConvert from "./two-convert.vue";
 import TwoSource from "./two-source.vue";
+
+import { generateShareImg } from "@/utils/TGShare.js";
+import { parseHtmlText } from "@/utils/toolFunc.js";
 
 type TwoMaterialProps = { modelValue: boolean; data: TGApp.App.Material.WikiItem };
 type TwoMaterialEmits = (e: "update:modelValue", v: boolean) => void;
 const props = defineProps<TwoMaterialProps>();
 const emits = defineEmits<TwoMaterialEmits>();
+const version = ref<string>();
 const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),
 });
-const iconBg = computed<string>(() => {
-  if (!props.data) return "url('/icon/bg/0-BGC.webp')";
-  return `url('/icon/bg/${props.data.star}-BGC.webp')`;
-});
-const version = await getVersion();
+
+onMounted(async () => (version.value = await getVersion()));
 
 async function shareMaterial(): Promise<void> {
   const element = document.querySelector<HTMLElement>(".twom-box");
@@ -111,7 +109,7 @@ async function shareMaterial(): Promise<void> {
   width: 60px;
   border-radius: 50%;
   aspect-ratio: 1;
-  background-image: v-bind(iconBg);
+  background-image: v-bind("'url(/icon/bg/' + props.data.star + '-BGC.webp)'");
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;

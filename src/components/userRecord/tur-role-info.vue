@@ -16,10 +16,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-interface TurRoleInfoProps {
-  uid: number;
-  modelValue: TGApp.Sqlite.Record.Role;
-}
+type TurRoleInfoProps = { uid: number; modelValue: TGApp.Sqlite.Record.Role };
 
 const props = defineProps<TurRoleInfoProps>();
 </script>

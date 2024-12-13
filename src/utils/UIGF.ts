@@ -4,17 +4,17 @@
  * @since Beta v0.6.5
  */
 
+import showSnackbar from "@comp/func/snackbar.js";
+import TSUserGacha from "@Sqlite/modules/userGacha.js";
 import { app, path } from "@tauri-apps/api";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { Ajv } from "ajv";
-import { ErrorObject } from "ajv/lib/types/index.js";
-
-import showSnackbar from "../components/func/snackbar.js";
-import { Uigf4Schema, UigfSchema } from "../data/index.js";
-import TSUserGacha from "../plugins/Sqlite/modules/userGacha.js";
+import type { ErrorObject } from "ajv/lib/types/index.js";
 
 import TGLogger from "./TGLogger.js";
 import { timestampToDate } from "./toolFunc.js";
+
+import { Uigf4Schema, UigfSchema } from "@/data/index.js";
 
 /**
  * @description 获取 UIGF 时区
@@ -141,13 +141,11 @@ function validateUigfData(data: object): boolean {
 function validateUigf4Data(data: object): boolean {
   const ajv = new Ajv();
   const validate4 = ajv.compile(Uigf4Schema);
-  if (!validate4(data)) {
-    if (!validate4.errors || validate4.errors.length === 0) return false;
-    const error: ErrorObject = validate4.errors[0];
-    showSnackbar.error(`${error.instancePath || error.schemaPath} ${error.message}`);
-    return false;
-  }
-  return true;
+  if (validate4(data)) return true;
+  if (!validate4.errors || validate4.errors.length === 0) return false;
+  const error: ErrorObject = validate4.errors[0];
+  showSnackbar.error(`${error.instancePath || error.schemaPath} ${error.message}`);
+  return false;
 }
 
 /**
@@ -158,7 +156,7 @@ function validateUigf4Data(data: object): boolean {
  */
 export async function readUigfData(userPath: string): Promise<TGApp.Plugins.UIGF.Schema> {
   const fileData: string = await readTextFile(userPath);
-  return JSON.parse(fileData);
+  return JSON.parse(fileData) satisfies TGApp.Plugins.UIGF.Schema;
 }
 
 /**
@@ -169,7 +167,7 @@ export async function readUigfData(userPath: string): Promise<TGApp.Plugins.UIGF
  */
 export async function readUigf4Data(userPath: string): Promise<TGApp.Plugins.UIGF.Schema4> {
   const fileData: string = await readTextFile(userPath);
-  return JSON.parse(fileData);
+  return JSON.parse(fileData) satisfies TGApp.Plugins.UIGF.Schema4;
 }
 
 /**
@@ -185,10 +183,7 @@ export async function exportUigfData(
   gachaList: TGApp.Sqlite.GachaRecords.SingleTable[],
   savePath?: string,
 ): Promise<void> {
-  const UigfData = {
-    info: await getUigfHeader(uid),
-    list: convertDataToUigf(gachaList),
-  };
+  const UigfData = { info: await getUigfHeader(uid), list: convertDataToUigf(gachaList) };
   const filePath = savePath ?? `${await path.appLocalDataDir()}userData\\UIGF_${uid}.json`;
   await writeTextFile(filePath, JSON.stringify(UigfData));
 }

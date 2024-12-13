@@ -4,44 +4,35 @@
       <span>武器</span>
     </template>
     <template #content>
-      <TucDetailItemBox v-model="box" />
+      <TucDetailItemBox
+        :icon="`/icon/bg/${modelValue.rarity}-Star.webp`"
+        :bg="`/WIKI/weapon/${modelValue.id}.webp`"
+      />
       <div class="tuc-ddw-content">
         <div class="tuc-ddwc-top">
-          <span>{{ props.modelValue.name }}</span>
-          <span>Lv.{{ props.modelValue.level }}</span>
+          <span>{{ modelValue.name }}</span>
+          <span>Lv.{{ modelValue.level }}</span>
           <span>精炼</span>
-          <span>{{ props.modelValue.affix_level }}</span>
+          <span>{{ modelValue.affix_level }}</span>
           <span>阶</span>
         </div>
         <div class="tuc-ddwc-bottom">
-          <img :src="`/icon/star/${props.modelValue.rarity}.webp`" alt="star" />
+          <img :src="`/icon/star/${modelValue.rarity}.webp`" alt="star" />
         </div>
       </div>
     </template>
     <template #desc>
-      <span v-if="props.modelValue.desc" v-html="parseHtmlText(props.modelValue.desc)"></span>
+      <span v-if="modelValue.desc" v-html="parseHtmlText(modelValue.desc)"></span>
     </template>
   </TucDetailDesc>
 </template>
 <script lang="ts" setup>
-import { computed } from "vue";
-
-import { parseHtmlText } from "../../utils/toolFunc.js";
-
 import TucDetailDesc from "./tuc-detail-desc.vue";
 import TucDetailItemBox from "./tuc-detail-itembox.vue";
 
-interface TucDetailDescWeaponProps {
-  modelValue: TGApp.Game.Avatar.WeaponDetail;
-}
+import { parseHtmlText } from "@/utils/toolFunc.js";
 
-const props = defineProps<TucDetailDescWeaponProps>();
-const box = computed(() => {
-  return {
-    bg: `/icon/bg/${props.modelValue.rarity}-Star.webp`,
-    icon: `/WIKI/weapon/${props.modelValue.id}.webp`,
-  };
-});
+defineProps<{ modelValue: TGApp.Game.Avatar.WeaponDetail }>();
 </script>
 <style lang="css" scoped>
 .tuc-ddw-content {

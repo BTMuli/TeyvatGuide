@@ -20,16 +20,14 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { window as TauriWindow } from "@tauri-apps/api";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import Artplayer from "artplayer";
 import type { Option } from "artplayer/types/option.js";
-import { onMounted, ref, toRaw } from "vue";
+import { onMounted, ref, shallowRef, toRaw } from "vue";
 
-import { getImageBuffer, saveCanvasImg } from "../../utils/TGShare.js";
-import { bytesToSize } from "../../utils/toolFunc.js";
-import showSnackbar from "../func/snackbar.js";
+import { getImageBuffer, saveCanvasImg } from "@/utils/TGShare.js";
 
-interface TpVod {
+type TpVod = {
   insert: {
     vod: {
       id: string;
@@ -50,30 +48,26 @@ interface TpVod {
       review_status: number;
     };
   };
-}
-
-interface TpVodProps {
-  data: TpVod;
-}
+};
+type TpVodProps = { data: TpVod };
 
 const props = defineProps<TpVodProps>();
-const container = ref<Artplayer | null>(null);
+const container = shallowRef<Artplayer | null>(null);
 const vodAspectRatio = ref<number>(16 / 9);
+const coverBuffer = shallowRef<Uint8Array | null>(null);
 
 console.log("tpVod", props.data.insert.vod.id, toRaw(props.data).insert.vod);
 
 onMounted(async () => {
   const resolutions = props.data.insert.vod.resolutions;
-  const highestResolution = resolutions.reduce((prev, curr) => {
-    return prev.size > curr.size ? prev : curr;
-  });
+  const highestResolution = resolutions.reduce((prev, curr) =>
+    prev.size > curr.size ? prev : curr,
+  );
   const width = highestResolution.width;
   const height = highestResolution.height;
   if (width && height) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    width > height
-      ? (vodAspectRatio.value = width / height)
-      : (vodAspectRatio.value = height / width);
+    if (width > height) vodAspectRatio.value = width / height;
+    else vodAspectRatio.value = height / width;
   }
   const option: Option = {
     id: props.data.insert.vod.id,
@@ -86,17 +80,13 @@ onMounted(async () => {
     setting: true,
     hotkey: true,
     pip: true,
-    quality: resolutions.map((resolution) => {
-      return {
-        default: resolution.label == highestResolution.label,
-        html: resolution.label,
-        url: resolution.url,
-      };
-    }),
+    quality: resolutions.map((resolution) => ({
+      default: resolution.label == highestResolution.label,
+      html: resolution.label,
+      url: resolution.url,
+    })),
     fullscreen: true,
-    icons: {
-      state: `<img src="/source/UI/video_play.svg" alt="icon" />`,
-    },
+    icons: { state: `<img src="/source/UI/video_play.svg" alt="icon" />` },
     lang: "zh-cn",
     airplay: true,
     controls: [
@@ -104,9 +94,7 @@ onMounted(async () => {
         name: "subtitle",
         index: 100,
         position: "left",
-        html: `<i class="mdi mdi-eye"></i><span style="padding-left: 5px">${
-          props.data.insert.vod?.view_num ?? 0
-        }</span>`,
+        html: `<i class="mdi mdi-eye"></i><span style="padding-left: 5px">${props.data.insert.vod?.view_num ?? 0}</span>`,
         tooltip: `播放数：${props.data.insert.vod?.view_num ?? 0}`,
       },
       {
@@ -116,18 +104,16 @@ onMounted(async () => {
         html: `<i class="mdi mdi-download"></i>`,
         tooltip: "下载封面",
         click: async () => {
-          const buffer = await getImageBuffer(props.data.insert.vod.cover);
-          const size = bytesToSize(buffer.byteLength);
-          await saveCanvasImg(buffer, `vod-cover-${props.data.insert.vod.id}`);
-          showSnackbar.success(`封面已下载到本地，大小：${size}`);
+          if (!coverBuffer.value) {
+            coverBuffer.value = await getImageBuffer(props.data.insert.vod.cover);
+          }
+          await saveCanvasImg(coverBuffer.value, `vod-cover-${props.data.insert.vod.id}`);
         },
       },
     ],
   };
   container.value = new Artplayer(option);
-  container.value?.on("fullscreen", async (state) => {
-    await TauriWindow.getCurrentWindow().setFullscreen(state);
-  });
+  container.value?.on("fullscreen", async (s) => await getCurrentWindow().setFullscreen(s));
 });
 
 function getVodTime(): string {
@@ -137,9 +123,7 @@ function getVodTime(): string {
   const minutes = Math.floor(secTotal / 60) % 60;
   const hours = Math.floor(secTotal / 3600);
   let result = "";
-  if (hours > 0) {
-    result += `${hours.toString().padStart(2, "0")}:`;
-  }
+  if (hours > 0) result += `${hours.toString().padStart(2, "0")}:`;
   result += `${minutes.toString().padStart(2, "0")}:`;
   result += `${seconds.toString().padStart(2, "0")}`;
   return result;

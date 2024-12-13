@@ -4,10 +4,10 @@
  * @since Beta v0.6.3
  */
 
-import TGHttp from "../../utils/TGHttp.js";
-import TGLogger from "../../utils/TGLogger.js";
-import { getInitDeviceInfo } from "../../utils/toolFunc.js";
-import TGConstant from "../constant/TGConstant.js";
+import TGHttp from "@/utils/TGHttp.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { getInitDeviceInfo } from "@/utils/toolFunc.js";
+import TGConstant from "@/web/constant/TGConstant.js";
 
 /**
  * @description 获取设备指纹

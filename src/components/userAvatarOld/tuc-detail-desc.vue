@@ -1,15 +1,9 @@
 <template>
   <div class="tuc-dd-box">
-    <div class="tuc-dd-title">
-      <slot name="title" />
-    </div>
+    <div class="tuc-dd-title"><slot name="title" /></div>
     <div class="tuc-dd-divider" />
-    <div class="tuc-dd-content">
-      <slot name="content" />
-    </div>
-    <div class="tuc-dd-desc">
-      <slot name="desc" />
-    </div>
+    <div class="tuc-dd-content"><slot name="content" /></div>
+    <div class="tuc-dd-desc"><slot name="desc" /></div>
   </div>
 </template>
 <style lang="css" scoped>

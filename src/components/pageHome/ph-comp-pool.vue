@@ -2,8 +2,8 @@
   <THomeCard :append="hasNew">
     <template #title>限时祈愿</template>
     <template #title-append>
-      <v-switch class="pool-switch" @change="switchPool" />
-      {{ showNew ? "查看当前祈愿" : "查看后续祈愿" }}
+      <v-switch class="pool-switch" @change="showNew = !showNew" />
+      <span>{{ showNew ? "查看当前祈愿" : "查看后续祈愿" }}</span>
     </template>
     <template #default>
       <div class="pool-grid">
@@ -30,20 +30,22 @@
               </div>
             </div>
             <div class="pool-time">
-              <div>
+              <div class="left">
                 <v-icon>mdi-calendar-clock</v-icon>
-                {{ pool.time.str }}
+                <span>{{ pool.time.str }}</span>
               </div>
-              <v-progress-linear :model-value="poolTimePass[pool.postId]" :rounded="true">
-              </v-progress-linear>
-              <div v-if="poolTimeGet[pool.postId] === '已结束'">
-                {{ poolTimeGet[pool.postId] }}
+              <v-progress-linear
+                :model-value="
+                  pool.stat !== 'now' ? 100 : (pool.timeRest * 100) / pool.time.totalStamp
+                "
+                :rounded="true"
+              />
+              <div v-if="pool.stat !== 'now'" class="time">
+                {{ pool.stat === "future" ? "未开始" : "已结束" }}
               </div>
-              <div v-else>
+              <div v-else class="time">
                 <span>剩余时间：</span>
-                <span>
-                  {{ poolTimeGet[pool.postId] }}
-                </span>
+                <span>{{ stamp2LastTime(pool.timeRest) }}</span>
               </div>
             </div>
           </div>
@@ -53,122 +55,95 @@
   </THomeCard>
 </template>
 <script lang="ts" setup>
+import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import Mys from "@Mys/index.js";
 import { storeToRefs } from "pinia";
-import { ref, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
-
-import Mys from "../../plugins/Mys/index.js";
-import { useHomeStore } from "../../store/modules/home.js";
-import { createPost, createTGWindow } from "../../utils/TGWindow.js";
-import { stamp2LastTime } from "../../utils/toolFunc.js";
-import TItembox, { TItemBoxData } from "../app/t-item-box.vue";
-import showSnackbar from "../func/snackbar.js";
 
 import THomeCard from "./ph-comp-card.vue";
 
-// store
-const homeStore = storeToRefs(useHomeStore());
+import { useHomeStore } from "@/store/modules/home.js";
+import { createPost, createTGWindow } from "@/utils/TGWindow.js";
+import { stamp2LastTime } from "@/utils/toolFunc.js";
 
-const router = useRouter();
-const hasNew = ref<boolean>(false);
-const showNew = ref<boolean>(false);
-
-// data
-const poolCards = ref<TGApp.Plugins.Mys.Gacha.RenderCard[]>([]);
-const poolSelect = ref<TGApp.Plugins.Mys.Gacha.RenderCard[]>([]);
-const poolTimeGet = ref<Record<number, string>>({});
-const poolTimePass = ref<Record<number, number>>({});
-const timer = ref<Record<number, any>>({});
-
-interface TPoolEmits {
-  (e: "success"): void;
-}
+type TPoolEmits = (e: "success") => void;
+type PoolStat = "future" | "now" | "past"; // 未开始 | 进行中 | 已结束
+type PoolItem = TGApp.Plugins.Mys.Gacha.RenderCard & { timeRest: number; stat: PoolStat };
 
 const emits = defineEmits<TPoolEmits>();
+const { poolCover } = storeToRefs(useHomeStore());
+const router = useRouter();
+// eslint-disable-next-line no-undef
+let timer: NodeJS.Timeout | null = null;
 
-function poolLastInterval(postId: number): TGApp.Plugins.Mys.Gacha.RenderCard | undefined {
-  const pool = poolCards.value.find((pool) => pool.postId === postId);
-  if (!pool) return;
-  if (poolTimeGet.value[postId] === "未开始") {
-    const isStart = pool.time.startStamp - Date.now();
-    if (isStart > 0) return;
-    poolTimeGet.value[postId] = stamp2LastTime(pool.time.endStamp - Date.now());
-    poolTimePass.value[postId] = pool.time.endStamp - Date.now();
-  } else {
-    const isEnd = pool.time.endStamp - Date.now();
-    poolTimeGet.value[postId] = stamp2LastTime(isEnd);
-    poolTimePass.value[postId] =
-      ((pool.time.endStamp - Date.now()) / (pool.time.endStamp - pool.time.startStamp)) * 100;
-    if (isEnd >= 0) return;
-    clearInterval(timer.value[postId]);
-    timer.value[postId] = null;
-    poolTimePass.value[postId] = 100;
-    poolTimeGet.value[postId] = "已结束";
-  }
-  return pool;
-}
+const showNew = ref<boolean>(false);
+const poolCards = ref<Array<PoolItem>>([]);
+const hasNew = computed<boolean>(
+  () => poolCards.value.find((pool) => pool.stat === "future") !== undefined,
+);
+const poolSelect = computed<Array<PoolItem>>(() => {
+  if (!hasNew.value) return poolCards.value;
+  if (showNew.value) return poolCards.value.filter((pool) => pool.stat === "future");
+  return poolCards.value.filter((pool) => pool.stat !== "future");
+});
 
 onMounted(async () => {
   const gachaData = await Mys.Gacha.get();
-  if (!gachaData) {
-    console.error("获取限时祈愿数据失败");
-    return;
-  }
-  console.log("获取限时祈愿数据成功");
-  console.info(gachaData);
+  let cards: Array<TGApp.Plugins.Mys.Gacha.RenderCard>;
   if (!checkCover(gachaData)) {
-    poolCards.value = await Mys.Gacha.card(gachaData);
+    cards = await Mys.Gacha.card(gachaData);
     const coverData: Record<string, string> = {};
     poolCards.value.map((pool) => {
       coverData[pool.id] = pool.cover;
       return pool;
     });
-    homeStore.poolCover.value = coverData;
+    poolCover.value = coverData;
   } else {
-    poolCards.value = await Mys.Gacha.card(gachaData, homeStore.poolCover.value);
+    cards = await Mys.Gacha.card(gachaData, poolCover.value);
   }
-  poolCards.value.map((pool) => {
-    poolTimeGet.value[pool.postId] = stamp2LastTime(pool.time.endStamp - Date.now());
-    poolTimePass.value[pool.postId] = pool.time.endStamp - Date.now();
-    if (poolTimePass.value[pool.postId] <= 0) {
-      poolTimeGet.value[pool.postId] = "已结束";
-      poolTimePass.value[pool.postId] = 100;
-      showNew.value = false;
-    } else if (pool.time.startStamp - Date.now() > 0) {
-      poolTimeGet.value[pool.postId] = "未开始";
-      poolTimePass.value[pool.postId] = 100;
-    }
-    timer.value[pool.postId] = setInterval(() => {
-      poolLastInterval(pool.postId);
-    }, 1000);
-    return pool;
-  });
-  if (poolCards.value.length > 2) {
-    poolSelect.value = poolCards.value.filter(
-      (pool) => poolTimeGet.value[pool.postId] !== "未开始",
-    );
-    hasNew.value =
-      poolCards.value.filter((pool) => poolTimeGet.value[pool.postId] === "未开始").length > 0;
-  } else {
-    poolSelect.value = poolCards.value;
-    hasNew.value = false;
+  for (const pool of cards) {
+    const timeRest = pool.time.endStamp - Date.now();
+    poolCards.value.push({
+      ...pool,
+      stat: timeRest > pool.time.totalStamp ? "future" : timeRest > 0 ? "now" : "past",
+      timeRest: timeRest,
+    });
   }
+  if (timer !== null) clearInterval(timer);
+  timer = setInterval(poolTimeout, 1000);
   emits("success");
 });
 
-// 检测新卡池
-function checkCover(data: TGApp.Plugins.Mys.Gacha.Data[]): boolean {
-  if (!homeStore.poolCover || Object.keys(homeStore.poolCover).length === 0) {
-    return false;
-  }
-  const cover = homeStore.poolCover;
-  if (cover.value === undefined) return false;
-  let checkList = data.length;
-  Object.entries(cover).forEach(([key, value]: [string, unknown]) => {
-    const pool = data.find((item: TGApp.Plugins.Mys.Gacha.Data) => item.id.toString() === key);
-    if (pool && value !== "/source/UI/empty.webp") {
-      checkList--;
+function poolTimeout(): void {
+  for (const pool of poolCards.value) {
+    if (pool.stat === "past") {
+      if (pool.timeRest !== -1) pool.timeRest = -1;
+      continue;
     }
+    const timeRest = pool.time.endStamp - Date.now();
+    if (timeRest >= pool.time.totalStamp) {
+      pool.stat = "future";
+      pool.timeRest = timeRest;
+      continue;
+    }
+    if (timeRest <= 0) {
+      pool.stat = "past";
+      pool.timeRest = -1;
+      continue;
+    }
+    pool.stat = "now";
+    pool.timeRest = timeRest;
+  }
+}
+
+function checkCover(data: Array<TGApp.Plugins.Mys.Gacha.Data>): boolean {
+  if (poolCover.value === undefined || Object.keys(poolCover.value).length === 0) return false;
+  let checkList = data.length;
+  Object.entries(poolCover.value).forEach(([key, value]: [string, unknown]) => {
+    const pool = data.find((item) => item.id.toString() === key);
+    if (pool && value !== "/source/UI/empty.webp") checkList--;
   });
   return checkList === 0;
 }
@@ -205,25 +180,9 @@ function getCBox(info: TGApp.App.Character.WikiBriefInfo): TItemBoxData {
   };
 }
 
-// 更换显示的卡池
-async function switchPool(): Promise<void> {
-  showNew.value = !showNew.value;
-  if (showNew.value) {
-    poolSelect.value = poolCards.value.filter(
-      (pool) => poolTimeGet.value[pool.postId] === "未开始",
-    );
-  } else {
-    poolSelect.value = poolCards.value.filter(
-      (pool) => poolTimeGet.value[pool.postId] !== "未开始",
-    );
-  }
-}
-
 onUnmounted(() => {
-  Object.keys(timer.value).forEach((key) => {
-    clearInterval(timer.value[Number(key)]);
-  });
-  timer.value = {};
+  if (timer !== null) clearInterval(timer);
+  timer = null;
 });
 </script>
 

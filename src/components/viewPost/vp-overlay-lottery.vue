@@ -42,20 +42,19 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
-
-import Mys from "../../plugins/Mys/index.js";
-import TOverlay from "../app/t-overlay.vue";
-import showSnackbar from "../func/snackbar.js";
+import TOverlay from "@comp/app/t-overlay.vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import Mys from "@Mys/index.js";
+import { computed, onUnmounted, ref, shallowRef, watch } from "vue";
 
 type TpoLotteryProps = { modelValue: boolean; lottery: string | undefined };
 type TpoLotteryEmits = (e: "update:modelValue", v: boolean) => void;
 const props = defineProps<TpoLotteryProps>();
 const emits = defineEmits<TpoLotteryEmits>();
-const card = ref<TGApp.Plugins.Mys.Lottery.RenderCard>();
-const jsonData = ref<TGApp.Plugins.Mys.Lottery.FullData>();
 const timeStatus = ref<string>("未知");
 const upWay = ref<string>("未知");
+const card = shallowRef<TGApp.Plugins.Mys.Lottery.RenderCard>();
+const jsonData = shallowRef<TGApp.Plugins.Mys.Lottery.FullData>();
 const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),
@@ -78,16 +77,13 @@ async function load(): Promise<void> {
     return;
   }
   jsonData.value = cardGet;
-  if (cardGet.status === "Settled") {
-    timeStatus.value = "已开奖";
-  } else {
+  if (cardGet.status === "Settled") timeStatus.value = "已开奖";
+  else {
     if (timer !== undefined) {
       clearInterval(timer);
       timer = undefined;
     }
-    timer = setInterval(() => {
-      flushTimeStatus();
-    }, 1000);
+    timer = setInterval(flushTimeStatus, 1000);
   }
   card.value = Mys.Lottery.card(cardGet);
   upWay.value = getUpWay(card.value?.upWay);
@@ -120,6 +116,13 @@ function flushTimeStatus(): void {
     timeStatus.value = `${day}天${hour}小时${minute}分${second}秒`;
   }
 }
+
+onUnmounted(() => {
+  if (timer !== undefined) {
+    clearInterval(timer);
+    timer = undefined;
+  }
+});
 </script>
 <style lang="css" scoped>
 .tpol-box {

@@ -7,13 +7,11 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-interface TwoConvertProps {
-  data: TGApp.App.Material.Source;
-}
+type TwoConvertProps = { data: TGApp.App.Material.Source };
 
 const props = defineProps<TwoConvertProps>();
 
-const textColor = computed(() => {
+const textColor = computed<string>(() => {
   if (!props.data || !props.data.days) return "var(--tgc-blue-2)";
   const days = props.data.days;
   const day = new Date().getDay();

@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="props.data.insert.lottery"
-    @click="toLottery()"
+    @click="showLottery = !showLottery"
     class="tp-backup-lottery"
     :title="`ID: ${props.data.insert.lottery.id}`"
   >
@@ -31,35 +31,19 @@ import TpParser from "./tp-parser.vue";
 import TpUnknown from "./tp-unknown.vue";
 import VpOverlayLottery from "./vp-overlay-lottery.vue";
 
-interface TpBackupText {
+type TpBackupText = {
   insert: {
     backup_text: string;
-    fold?: {
-      title: string;
-      content: string;
-    };
-    lottery?: {
-      id: string;
-      toast: string;
-    };
+    fold?: { title: string; content: string };
+    lottery?: { id: string; toast: string };
   };
-}
-
-interface TpBackupTextProps {
-  data: TpBackupText;
-}
+};
+type TpBackupTextProps = { data: TpBackupText };
 
 const props = defineProps<TpBackupTextProps>();
-const showLottery = ref(false);
+const showLottery = ref<boolean>(false);
 
 console.log("tpBackupText", props.data.insert.backup_text, toRaw(props.data));
-
-async function toLottery() {
-  if (showLottery.value) {
-    showLottery.value = false;
-  }
-  showLottery.value = true;
-}
 </script>
 <style lang="css" scoped>
 .tp-backup-lottery {

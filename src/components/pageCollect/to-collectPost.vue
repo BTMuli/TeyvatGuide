@@ -22,14 +22,13 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
+import TOverlay from "@comp/app/t-overlay.vue";
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TSUserCollection from "@Sqlite/modules/userCollect.js";
 import { computed, ref, shallowRef, watch } from "vue";
 
-import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
-import TOverlay from "../app/t-overlay.vue";
-import showDialog from "../func/dialog.js";
-import showSnackbar from "../func/snackbar.js";
-
-type ToPostCollectProps = { modelValue: boolean; post: string[] };
+type ToPostCollectProps = { modelValue: boolean; post: Array<string> };
 type ToPostCollectEmits = {
   (e: "update:modelValue", v: boolean): void;
   (e: "submit"): void;
@@ -39,7 +38,7 @@ const props = defineProps<ToPostCollectProps>();
 const emits = defineEmits<ToPostCollectEmits>();
 const select = ref<string>();
 const submit = ref<boolean>(false);
-const collectList = shallowRef<TGApp.Sqlite.UserCollection.UFCollection[]>([]);
+const collectList = shallowRef<Array<TGApp.Sqlite.UserCollection.UFCollection>>([]);
 const visible = computed<boolean>({
   get: () => props.modelValue,
   set: (v) => emits("update:modelValue", v),

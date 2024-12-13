@@ -14,16 +14,14 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, watch, onUnmounted } from "vue";
+import { onMounted, onUnmounted, shallowRef, watch } from "vue";
 
-import { saveImgLocal } from "../../utils/TGShare.js";
+import { saveImgLocal } from "@/utils/TGShare.js";
 
-interface DucDetailOlbProps {
-  modelValue: TGApp.Game.Avatar.Constellation[];
-}
+type DucDetailOlbProps = { modelValue: Array<TGApp.Game.Avatar.Constellation> };
 
 const props = defineProps<DucDetailOlbProps>();
-const constellations = ref<TGApp.Game.Avatar.Constellation[]>([]);
+const constellations = shallowRef<Array<TGApp.Game.Avatar.Constellation>>([]);
 
 async function loadData() {
   const tempConstellations = JSON.parse(JSON.stringify(props.modelValue));
@@ -34,9 +32,7 @@ async function loadData() {
   constellations.value = tempConstellations;
 }
 
-onMounted(async () => {
-  await loadData();
-});
+onMounted(async () => await loadData());
 watch(
   () => props.modelValue,
   async () => {

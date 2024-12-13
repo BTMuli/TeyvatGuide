@@ -6,7 +6,6 @@
     <v-virtual-scroll :items="renderAchi" :item-height="60" class="tua-al-list">
       <template #default="{ item }">
         <TuaAchi :modelValue="item" @select-achi="selectAchi" />
-        <div style="height: 10px" />
       </template>
     </v-virtual-scroll>
     <ToNameCard v-model="showNc" :data="ncData" v-if="ncData" />
@@ -17,56 +16,50 @@
       @select-series="selectSeries"
     >
       <template #left>
-        <div class="card-arrow left" @click="switchAchiInfo(false)">
-          <img src="../../assets/icons/arrow-right.svg" alt="right" />
+        <div class="card-arrow" @click="switchAchiInfo(false)">
+          <img src="@/assets/icons/arrow-right.svg" alt="right" />
         </div>
       </template>
       <template #right>
         <div class="card-arrow" @click="switchAchiInfo(true)">
-          <img src="../../assets/icons/arrow-right.svg" alt="right" />
+          <img src="@/assets/icons/arrow-right.svg" alt="right" />
         </div>
       </template>
     </ToAchiInfo>
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from "vue";
-
-import { AppAchievementSeriesData, AppNameCardsData } from "../../data/index.js";
-import TSUserAchi from "../../plugins/Sqlite/modules/userAchi.js";
-import ToNameCard from "../app/to-namecard.vue";
-import TopNameCard from "../app/top-namecard.vue";
-import showSnackbar from "../func/snackbar.js";
+import ToNameCard from "@comp/app/to-nameCard.vue";
+import TopNameCard from "@comp/app/top-nameCard.vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import TSUserAchi from "@Sqlite/modules/userAchi.js";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import ToAchiInfo from "./tua-achi-overlay.vue";
 import TuaAchi from "./tua-achi.vue";
 
-interface TuaAchiListProps {
+import { AppAchievementSeriesData, AppNameCardsData } from "@/data/index.js";
+
+type TuaAchiListProps = {
   uid: number;
   hideFin: boolean;
   series?: number;
   search?: string;
   isSearch: boolean;
-}
-
-interface TuaAchiListEmits {
+};
+type TuaAchiListEmits = {
   (e: "update:series", v: number): void;
-
   (e: "update:isSearch", v: boolean): false;
-}
+};
 
 const props = defineProps<TuaAchiListProps>();
 const emits = defineEmits<TuaAchiListEmits>();
-
-const achievements = ref<TGApp.Sqlite.Achievement.RenderAchi[]>([]);
-const selectedAchi = ref<TGApp.Sqlite.Achievement.RenderAchi | undefined>(undefined);
-
 const nameCard = ref<string>();
-const ncData = ref<TGApp.App.NameCard.Item | undefined>(undefined);
 const showNc = ref<boolean>(false);
-
 const showOverlay = ref<boolean>(false);
-
+const ncData = shallowRef<TGApp.App.NameCard.Item>();
+const achievements = shallowRef<Array<TGApp.Sqlite.Achievement.RenderAchi>>([]);
+const selectedAchi = shallowRef<TGApp.Sqlite.Achievement.RenderAchi>();
 const renderAchi = computed<Array<TGApp.Sqlite.Achievement.RenderAchi>>(() => {
   if (props.hideFin) return achievements.value.filter((a) => !a.isCompleted);
   return achievements.value;
@@ -74,15 +67,8 @@ const renderAchi = computed<Array<TGApp.Sqlite.Achievement.RenderAchi>>(() => {
 
 onMounted(async () => await loadAchi());
 
-watch(
-  () => [props.search, props.isSearch],
-  async () => await searchAchi(),
-);
-
-watch(
-  () => [props.series, props.uid],
-  async () => await loadAchi(),
-);
+watch(() => [props.search, props.isSearch], searchAchi);
+watch(() => [props.series, props.uid], loadAchi);
 
 async function searchAchi(): Promise<void> {
   if (!props.isSearch) return;
@@ -165,7 +151,6 @@ function switchAchiInfo(next: boolean): void {
   max-height: 100%;
   flex-direction: column;
   overflow-y: auto;
-  row-gap: 10px;
 }
 
 .tua-al-list {
@@ -180,18 +165,18 @@ function switchAchiInfo(next: boolean): void {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+
+  &:first-child {
+    transform: rotate(180deg);
+  }
 }
 
 .dark .card-arrow {
   filter: invert(11%) sepia(73%) saturate(11%) hue-rotate(139deg) brightness(97%) contrast(81%);
-}
-
-.card-arrow img {
-  width: 100%;
-  height: 100%;
-}
-
-.card-arrow.left img {
-  transform: rotate(180deg);
 }
 </style>

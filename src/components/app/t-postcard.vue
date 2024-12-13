@@ -67,13 +67,13 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
+import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import { emit } from "@tauri-apps/api/event";
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 
-import { generateShareImg, saveImgLocal } from "../../utils/TGShare.js";
-import { createPost } from "../../utils/TGWindow.js";
-import showSnackbar from "../func/snackbar.js";
-import TpAvatar from "../viewPost/tp-avatar.vue";
+import { generateShareImg, saveImgLocal } from "@/utils/TGShare.js";
+import { createPost } from "@/utils/TGWindow.js";
 
 type TPostCardProps = { modelValue: TGApp.Plugins.Mys.Post.FullData; selectMode?: boolean };
 type TPostCardEmits = (e: "onSelected", v: string) => void;
@@ -91,7 +91,10 @@ const cardBg = computed<string>(() => {
 
 onMounted(async () => await reload(props.modelValue));
 
-watch(() => props.modelValue, reload);
+watch(
+  () => props.modelValue,
+  async () => await reload(props.modelValue),
+);
 
 async function reload(data: TGApp.Plugins.Mys.Post.FullData): Promise<void> {
   if (localCover.value) {
@@ -99,8 +102,9 @@ async function reload(data: TGApp.Plugins.Mys.Post.FullData): Promise<void> {
     localCover.value = undefined;
   }
   card.value = getPostCard(data);
-  if (card.value && card.value.cover !== "")
+  if (card.value && card.value.cover !== "") {
     localCover.value = await saveImgLocal(card.value.cover);
+  }
 }
 
 onUnmounted(() => {
@@ -110,6 +114,7 @@ onUnmounted(() => {
   }
 });
 
+// todo 优化结构
 /**
  * @description 活动状态
  * @since Alpha v0.2.1
@@ -159,13 +164,9 @@ function getActivityStatus(status: number): TGApp.Plugins.Mys.News.RenderStatus 
 
 function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
   let cover;
-  if (item.cover) {
-    cover = item.cover.url;
-  } else if (item.post.cover) {
-    cover = item.post.cover;
-  } else if (item.post.images.length > 0) {
-    cover = item.post.images[0];
-  }
+  if (item.cover) cover = item.cover.url;
+  else if (item.post.cover) cover = item.post.cover;
+  else if (item.post.images.length > 0) cover = item.post.images[0];
   if (cover === undefined) return "";
   if (cover.endsWith(".gif")) return cover;
   return `${cover}?x-oss-process=image/format,png`;
@@ -185,23 +186,19 @@ function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys
     subtitle: item.post.post_id,
     user: item.user,
     forum:
-      item.forum !== null
-        ? {
-            name: item.forum.name,
-            icon: item.forum.icon,
-            id: item.forum.id,
-          }
-        : null,
+      item.forum === null
+        ? null
+        : { name: item.forum.name, icon: item.forum.icon, id: item.forum.id },
     data:
-      item.stat !== null
-        ? {
+      item.stat === null
+        ? null
+        : {
             mark: item.stat.bookmark_num,
             forward: item.stat.forward_num,
             like: item.stat.like_num,
             reply: item.stat.reply_num,
             view: item.stat.view_num,
-          }
-        : null,
+          },
     topics: item.topics,
   };
 }

@@ -4,19 +4,24 @@
  * @since Beta v0.5.0
  */
 
-import { info, warn, error, attachConsole } from "@tauri-apps/plugin-log";
+import { attachConsole, error, info, warn } from "@tauri-apps/plugin-log";
 
 /**
  * @description 日志工具
  * @since Beta v0.4.4
  */
-class TGLogger {
-  constructor() {
+class Logger {
+  private constructor() {
     if (import.meta.env.MODE === "development") {
-      void attachConsole().then(() => {
-        console.log("Console attached");
-      });
+      void attachConsole().then(() => console.log("Console attached"));
     }
+  }
+
+  private static instance: Logger | null = null;
+
+  static getInstance(): Logger {
+    if (this.instance === null) this.instance = new Logger();
+    return this.instance;
   }
 
   /**
@@ -56,4 +61,6 @@ class TGLogger {
   }
 }
 
-export default new TGLogger();
+const TGLogger = Logger.getInstance();
+
+export default TGLogger;

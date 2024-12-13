@@ -17,10 +17,7 @@
 import TucFight from "./tuc-fight.vue";
 import TucTile from "./tuc-tile.vue";
 
-interface TucOverviewProps {
-  data: TGApp.Game.Combat.Stat;
-  fights: TGApp.Game.Combat.FightStatisic;
-}
+type TucOverviewProps = { data: TGApp.Game.Combat.Stat; fights: TGApp.Game.Combat.FightStatisic };
 
 const props = defineProps<TucOverviewProps>();
 

@@ -4,13 +4,20 @@
  * @since Beta v0.4.4
  */
 
+import { RouteRecordRaw } from "vue-router";
+
 import archiveRoutes from "./modules/archive.js";
 import mainRoutes from "./modules/main.js";
 import subRoutes from "./modules/sub.js";
 import userRoutes from "./modules/user.js";
 import wikiRoutes from "./modules/wiki.js";
 
-// 合并路由
-const routes = [...mainRoutes, ...subRoutes, ...archiveRoutes, ...wikiRoutes, ...userRoutes];
+const routes = (<const>[
+  ...mainRoutes,
+  ...subRoutes,
+  ...archiveRoutes,
+  ...wikiRoutes,
+  ...userRoutes,
+]) satisfies Array<RouteRecordRaw>;
 
 export default routes;

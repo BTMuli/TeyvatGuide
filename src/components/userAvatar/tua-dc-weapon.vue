@@ -30,7 +30,7 @@
           <img v-if="propSub !== false && propSub.icon !== ''" :src="propSub.icon" alt="propSub" />
           <span>{{ propSub !== false ? propSub.name : "未知属性" }}</span>
         </span>
-        <span>{{ props.modelValue.sub_property.final }}</span>
+        <span>{{ props.modelValue.sub_property?.final }}</span>
       </div>
     </div>
     <div class="tua-dcw-share">
@@ -42,24 +42,29 @@
 </template>
 <script lang="ts" setup>
 import { app } from "@tauri-apps/api";
-import { computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 
-import { useUserStore } from "../../store/modules/user.js";
+import { useUserStore } from "@/store/modules/user.js";
 
-interface TuaDcWeaponProps {
+type TuaDcWeaponProps = {
   modelValue: TGApp.Game.Avatar.WeaponDetail;
   updated: string;
   uid: number;
-}
+};
 
 const props = defineProps<TuaDcWeaponProps>();
 const userStore = useUserStore();
-const version = await app.getVersion();
+const version = ref<string>();
+
+onMounted(async () => {
+  version.value = await app.getVersion();
+});
 
 const propMain = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   return userStore.getProp(props.modelValue.main_property.property_type);
 });
 const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
+  if (props.modelValue.sub_property === null) return false;
   return userStore.getProp(props.modelValue.sub_property.property_type);
 });
 </script>

@@ -1,4 +1,5 @@
 <template>
+  <!-- todo fix typo err -->
   <v-data-table :headers="headers" fixed-header :items="holdData" height="calc(100vh - 160px)">
     <template v-slot:item="{ item }">
       <tr class="hta-th-tr">
@@ -9,7 +10,10 @@
           <span>{{ (item.HoldingRate.cur * 100).toFixed(3) }}%</span>
           <span
             v-if="item.HoldingRate.cur !== item.HoldingRate.last"
-            :class="getRateClass(item.HoldingRate.cur, item.HoldingRate.last)"
+            :class="{
+              'rate-up': item.HoldingRate.cur > item.HoldingRate.last,
+              'rate-down': item.HoldingRate.cur < item.HoldingRate.last,
+            }"
           >
             {{ getRateStr(item.HoldingRate.cur, item.HoldingRate.last) }}
           </span>
@@ -18,7 +22,10 @@
           <span>{{ (rate.RateCur * 100).toFixed(3) }}%</span>
           <span
             v-if="rate.RateCur !== rate.RateLast"
-            :class="getRateClass(rate.RateCur, rate.RateLast)"
+            :class="{
+              'rate-up': rate.RateCur > rate.RateLast,
+              'rate-down': rate.RateCur < rate.RateLast,
+            }"
             :title="`${(rate.RateLast * 100).toFixed(3)}%`"
           >
             {{ getRateStr(rate.RateCur, rate.RateLast) }}
@@ -29,30 +36,22 @@
   </v-data-table>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import { onMounted, shallowRef } from "vue";
 
-import { AppCharacterData } from "../../data/index.js";
-import { AbyssDataItem } from "../../pages/WIKI/Abyss.vue";
-import TItemBox, { type TItemBoxData } from "../app/t-item-box.vue";
+import { AppCharacterData } from "@/data/index.js";
+import type { AbyssDataItem } from "@/pages/WIKI/Abyss.vue";
 
-interface HtaTabHoldProps {
-  data: AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarHold[]>;
-}
-
-interface HtaTabHoldConstellation {
-  Item: number;
-  RateCur: number;
-  RateLast: number;
-}
-
-interface HtaTabHoldData {
+type HtaTabHoldProps = { data: AbyssDataItem<Array<TGApp.Plugins.Hutao.Abyss.AvatarHold>> };
+type HtaTabHoldConstellation = { Item: number; RateCur: number; RateLast: number };
+type HtaTabHoldData = {
   AvatarId: number;
   HoldingRate: AbyssDataItem<number>;
   Constellations: Array<HtaTabHoldConstellation>;
-}
+};
 
 const props = defineProps<HtaTabHoldProps>();
-const holdData = ref<HtaTabHoldData[]>([]);
+const holdData = shallowRef<Array<HtaTabHoldData>>([]);
 
 const headers = [
   { title: "角色", align: "center", key: "AvatarId" },
@@ -67,6 +66,7 @@ const headers = [
 ];
 
 onMounted(() => {
+  const tmpData: Array<HtaTabHoldData> = [];
   for (const avatar of props.data.cur) {
     const avatarLast = props.data.last.find((a) => a.AvatarId === avatar.AvatarId);
     if (!avatarLast) continue;
@@ -86,17 +86,10 @@ onMounted(() => {
         RateLast: constellationLast.Rate,
       });
     }
-    holdData.value.push({
-      AvatarId: avatar.AvatarId,
-      HoldingRate: Rate,
-      Constellations: Constellations,
-    });
+    tmpData.push({ AvatarId: avatar.AvatarId, HoldingRate: Rate, Constellations: Constellations });
   }
+  holdData.value = tmpData;
 });
-
-function getRateClass(cur: number, last: number): string {
-  return cur > last ? "rate-up" : "rate-down";
-}
 
 function getRateStr(cur: number, last: number): string {
   const diff = Math.abs(cur - last) * 100;

@@ -4,8 +4,8 @@
  * @since Beta v0.6.3
  */
 
-import TGHttp from "../../utils/TGHttp.js";
-import { getRequestHeader } from "../utils/getRequestHeader.js";
+import TGHttp from "@/utils/TGHttp.js";
+import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
 
 /**
  * @description 根据 cookie 获取用户信息

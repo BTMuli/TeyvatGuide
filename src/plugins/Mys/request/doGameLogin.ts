@@ -4,9 +4,9 @@
  * @since Beta v0.5.0
  */
 
-import TGHttp from "../../../utils/TGHttp.js";
-import { getDeviceInfo } from "../../../utils/toolFunc.js";
-import { getRequestHeader } from "../../../web/utils/getRequestHeader.js";
+import TGHttp from "@/utils/TGHttp.js";
+import { getDeviceInfo } from "@/utils/toolFunc.js";
+import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
 
 const APP_ID = 8;
 

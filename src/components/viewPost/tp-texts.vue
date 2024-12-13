@@ -1,5 +1,17 @@
 <template>
-  <div :style="getLineStyle()" :class="getClass()" :title="getTitle()">
+  <div
+    :style="getLineStyle()"
+    class="tp-texts"
+    :class="{
+      'tp-texts-header1': props.data.attributes && props.data.attributes.header === 1,
+      'tp-texts-header2': props.data.attributes && props.data.attributes.header === 2,
+      'tp-texts-header3': props.data.attributes && props.data.attributes.header === 3,
+      'tp-texts-header4': props.data.attributes && props.data.attributes.header === 4,
+      'tp-texts-header5': props.data.attributes && props.data.attributes.header === 5,
+      'tp-texts-header6': props.data.attributes && props.data.attributes.header === 6,
+    }"
+    :title="getTitle()"
+  >
     <component
       :is="getComp(text)"
       v-for="(text, index) in props.data.children"
@@ -9,64 +21,35 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { StyleValue } from "vue";
-import type { Component } from "vue";
+import type { Component, StyleValue } from "vue";
 
 import TpImage from "./tp-image.vue";
 import TpMention, { type TpMention as TpMentionType } from "./tp-mention.vue";
 import TpText, { type TpText as TpTextType } from "./tp-text.vue";
 
-interface TpTexts extends TpTextType {
-  children: (TpTextType | TpMentionType)[];
-}
-
-interface TpTextsProps {
-  data: TpTexts;
-}
+type TpTexts = { children: Array<TpTextType | TpMentionType> } & TpTextType;
+type TpTextsProps = { data: TpTexts };
 
 const props = defineProps<TpTextsProps>();
 
 function getComp(text: TpTextType | TpMentionType): Component {
-  if (typeof text.insert === "string") {
-    return TpText;
-  }
-  if ("image" in text.insert) {
-    return TpImage;
-  }
+  if (typeof text.insert === "string") return TpText;
+  if ("image" in text.insert) return TpImage;
   return TpMention;
 }
 
-function getClass(): string {
-  if (props.data.attributes && props.data.attributes.header) {
-    return `tp-texts tp-texts-header${props.data.attributes.header}`;
-  }
-  return "tp-texts";
-}
-
 function getTitle(): string {
-  if (props.data.attributes && props.data.attributes.link) {
-    return props.data.attributes.link;
-  }
-  if (props.data.attributes && props.data.attributes.header) {
-    return `H${props.data.attributes.header}`;
-  }
+  if (!props.data.attributes) return "";
+  if (props.data.attributes.link) return props.data.attributes.link;
+  if (props.data.attributes.header) return `H${props.data.attributes.header}`;
   return "";
 }
 
 function getLineStyle(): StyleValue {
-  const style = <Array<StyleValue>>[];
   const ruleInline: StyleValue = "display: inline";
-  if (props.data.attributes === undefined) {
-    style.push(ruleInline);
-    return style;
-  }
-  if (props.data.attributes.align) {
-    const ruleAlign: StyleValue = `textAlign: ${props.data.attributes.align}`;
-    style.push(ruleAlign);
-  } else {
-    style.push(ruleInline);
-  }
-  return style;
+  if (props.data.attributes === undefined) return ruleInline;
+  if (!props.data.attributes.align) return ruleInline;
+  return `textAlign: ${props.data.attributes.align}`;
 }
 </script>
 <style lang="css" scoped>

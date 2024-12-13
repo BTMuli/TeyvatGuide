@@ -14,9 +14,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-interface TuaDcConstellationsProps {
-  modelValue: TGApp.Game.Avatar.Constellation[];
-}
+type TuaDcConstellationsProps = { modelValue: Array<TGApp.Game.Avatar.Constellation> };
 
 const props = defineProps<TuaDcConstellationsProps>();
 </script>

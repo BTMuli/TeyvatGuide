@@ -4,9 +4,9 @@
  * @since Beta v0.6.3
  */
 
-import TGHttp from "../../../utils/TGHttp.js";
+import TGHttp from "@/utils/TGHttp.js";
 
-const obcApi = "https://api-takumi.mihoyo.com/common/blackboard/ys_obc/v1/";
+const obcApi: Readonly<string> = "https://api-takumi.mihoyo.com/common/blackboard/ys_obc/v1/";
 
 /**
  * @description 获取卡池信息

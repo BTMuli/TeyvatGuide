@@ -4,16 +4,24 @@
  * @since Beta v0.5.0
  */
 
+import showSnackbar from "@comp/func/snackbar.js";
 import { platform } from "@tauri-apps/plugin-os";
 import { Command } from "@tauri-apps/plugin-shell";
-
-import showSnackbar from "../components/func/snackbar.js";
 
 /**
  * @description Shell工具
  * @since Beta v0.5.0
  */
-class TGShell {
+class Shell {
+  private constructor() {}
+
+  private static instance: Shell | null = null;
+
+  static getInstance(): Shell {
+    if (this.instance === null) this.instance = new Shell();
+    return this.instance;
+  }
+
   /**
    * @description 打开文件
    * @since Beta v0.5.0
@@ -33,4 +41,6 @@ class TGShell {
   }
 }
 
-export default new TGShell();
+const TGShell = Shell.getInstance();
+
+export default TGShell;

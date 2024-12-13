@@ -31,9 +31,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, reactive, ref, useTemplateRef, watch } from "vue";
+import { computed, onMounted, reactive, ref, useTemplateRef, watch } from "vue";
 
-import { DialogCheckParams, DialogInputParams, DialogParams } from "./dialog.js";
+import type { DialogCheckParams, DialogInputParams, DialogParams } from "./dialog.js";
 
 const defaultProp: DialogParams = { title: "", text: "", mode: "check", otcancel: false };
 const props = defineProps<DialogParams>();
@@ -114,7 +114,7 @@ async function displayInputBox(params: DialogInputParams): Promise<string | fals
   data.otcancel = params.otcancel ?? true;
   show.value = true;
   return await new Promise<string | false | undefined>((resolve) => {
-    nextTick(() => setTimeout(() => inputEl.value?.focus(), 100));
+    setTimeout(() => inputEl.value?.focus(), 100);
     watch(
       () => show.value,
       () => setTimeout(() => resolve(inputVal.value), 500),

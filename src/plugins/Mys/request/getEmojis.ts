@@ -4,7 +4,7 @@
  * @since Beta v0.5.0
  */
 
-import TGHttp from "../../../utils/TGHttp.js";
+import TGHttp from "@/utils/TGHttp.js";
 
 /**
  * @description 获取表情包列表
@@ -18,10 +18,10 @@ export async function getEmojis(): Promise<Record<string, string> | TGApp.BBS.Re
   });
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   const emojis: Record<string, string> = {};
-  resp.data.list.forEach((series) => {
-    series.list.forEach((emoji) => {
+  for (const series of resp.data.list) {
+    for (const emoji of series.list) {
       emojis[emoji.name] = emoji.icon;
-    });
-  });
+    }
+  }
   return emojis;
 }

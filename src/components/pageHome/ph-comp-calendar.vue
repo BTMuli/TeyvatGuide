@@ -2,11 +2,8 @@
   <THomeCard append>
     <template #title>今日素材 {{ dateNow }}</template>
     <template #title-append>
-      <v-switch
-        class="tc-switch"
-        @change="switchType = switchType === 'avatar' ? 'weapon' : 'avatar'"
-      />
-      {{ switchType === "avatar" ? "角色" : "武器" }}
+      <v-switch class="tc-switch" @change="switchType()" />
+      <span>{{ selectedType === "character" ? "角色" : "武器" }}</span>
     </template>
     <template #default>
       <div class="tc-top">
@@ -15,22 +12,9 @@
             v-for="text of btnText"
             :key="text.week"
             rounded
-            :style="{
-              border: text.week === weekNow ? '1px solid var(--tgc-yellow-1)' : 'none',
-              backgroundColor:
-                text.week === btnNow
-                  ? 'var(--tgc-yellow-1)'
-                  : text.week === weekNow
-                    ? 'transparent'
-                    : 'var(--tgc-btn-1)',
-              color:
-                text.week === btnNow
-                  ? 'var(--box-text-4)'
-                  : text.week === weekNow
-                    ? 'var(--tgc-yellow-1)'
-                    : 'var(--btn-text)',
-            }"
-            @click="getContents(text.week)"
+            class="tc-btn"
+            :class="{ selected: text.week === btnNow, today: text.week === weekNow }"
+            @click="btnNow = text.week"
           >
             {{ text.text }}
           </v-btn>
@@ -53,38 +37,19 @@
   <ToCalendar v-model="showItem" :data-type="selectedType" :data-val="selectedItem" />
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
-
-import { AppCalendarData } from "../../data/index.js";
-import { timestampToDate } from "../../utils/toolFunc.js";
-import TItemBox, { type TItemBoxData } from "../app/t-item-box.vue";
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import { computed, onMounted, ref, shallowRef } from "vue";
 
 import TCalendarBirth from "./ph-calendar-birth.vue";
 import ToCalendar from "./ph-calendar-overlay.vue";
 import THomeCard from "./ph-comp-card.vue";
 
-const weekNow = ref<number>(0);
-const btnNow = ref<number>(0);
-const dateNow = ref<string>("");
+import { AppCalendarData } from "@/data/index.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
-// page
-const page = ref<number>(1);
-const length = ref<number>(0);
-const visible = 16;
-
-// calendar
-const calendarNow = ref<TGApp.App.Calendar.Item[]>([]);
-const characterCards = ref<TGApp.App.Calendar.Item[]>([]);
-const weaponCards = ref<TGApp.App.Calendar.Item[]>([]);
-
-// calendar item
-const showItem = ref<boolean>(false);
-const switchType = ref<"avatar" | "weapon">("avatar");
-const selectedItem = ref<TGApp.App.Calendar.Item>(<TGApp.App.Calendar.Item>{});
-const selectedType = ref<"avatar" | "weapon">("avatar");
-const renderItems = ref<TGApp.App.Calendar.Item[]>([]);
-
-const btnText = [
+type BtnItem = { week: 1 | 2 | 3 | 4 | 5 | 6 | 7; text: string };
+type TCalendarEmits = (e: "success") => void;
+const btnText: Array<BtnItem> = [
   { week: 7, text: "周日" },
   { week: 1, text: "周一" },
   { week: 2, text: "周二" },
@@ -93,98 +58,59 @@ const btnText = [
   { week: 5, text: "周五" },
   { week: 6, text: "周六" },
 ];
-
-interface TCalendarEmits {
-  (e: "success"): void;
-}
-
 const emits = defineEmits<TCalendarEmits>();
+const visible = 16;
 
-onMounted(async () => {
+const weekNow = ref<number>(0);
+const btnNow = ref<number>(0);
+const dateNow = ref<string>("");
+const page = ref<number>(1);
+const showItem = ref<boolean>(false);
+const selectedType = ref<"character" | "weapon">("character");
+const calendarTotal = computed<Array<TGApp.App.Calendar.Item>>(() =>
+  AppCalendarData.filter(
+    (i) => i.dropDays.includes(btnNow.value) && i.itemType === selectedType.value,
+  ),
+);
+const length = computed<number>(() => Math.ceil(calendarTotal.value.length / visible));
+const renderItems = computed<Array<TGApp.App.Calendar.Item>>(() =>
+  calendarTotal.value.slice((page.value - 1) * visible, page.value * visible),
+);
+const selectedItem = shallowRef<TGApp.App.Calendar.Item>(renderItems.value[0]);
+
+onMounted(() => {
   const dayNow = new Date().getDay() === 0 ? 7 : new Date().getDay();
-  const week = <{ week: number; text: string }>btnText.find((item) => item.week === dayNow);
+  const week = btnText.find((item) => item.week === dayNow) ?? { text: "周日", week: 7 };
   dateNow.value = `${timestampToDate(new Date().getTime())} ${week.text}`;
   weekNow.value = dayNow;
   btnNow.value = dayNow;
-  calendarNow.value = getCalendar(dayNow);
-  characterCards.value = calendarNow.value.filter((item) => item.itemType === "character");
-  weaponCards.value = calendarNow.value.filter((item) => item.itemType === "weapon");
-  renderItems.value = getGrid();
   emits("success");
 });
 
-watch(
-  () => page.value,
-  () => {
-    renderItems.value = getGrid();
-  },
-);
-
-watch(
-  () => switchType.value,
-  () => {
-    if (page.value !== 1) page.value = 1;
-    else renderItems.value = getGrid();
-  },
-);
-
-// 获取当前日历
-function getCalendar(day: number): TGApp.App.Calendar.Item[] {
-  return AppCalendarData.filter((item) => item.dropDays.includes(day));
-}
-
-function getGrid(): TGApp.App.Calendar.Item[] {
-  let selectedCards: TGApp.App.Calendar.Item[];
-  if (switchType.value === "avatar") selectedCards = characterCards.value;
-  else selectedCards = weaponCards.value;
-  length.value = Math.ceil(selectedCards.length / visible);
-  return selectedCards.slice((page.value - 1) * visible, page.value * visible);
+function switchType(): void {
+  selectedType.value = selectedType.value === "character" ? "weapon" : "character";
+  page.value = 1;
 }
 
 function selectItem(item: TGApp.App.Calendar.Item): void {
   selectedItem.value = item;
-  selectedType.value = switchType.value;
   showItem.value = true;
 }
 
-function getContents(day: number): void {
-  btnNow.value = day;
-  calendarNow.value = getCalendar(day);
-  characterCards.value = calendarNow.value.filter((item) => item.itemType === "character");
-  weaponCards.value = calendarNow.value.filter((item) => item.itemType === "weapon");
-  if (page.value !== 1) page.value = 1;
-  else renderItems.value = getGrid();
-}
-
 function getBoxData(item: TGApp.App.Calendar.Item): TItemBoxData {
-  if (switchType.value === "avatar") {
-    return {
-      bg: item.bg,
-      icon: item.icon,
-      size: "100px",
-      height: "100px",
-      display: "inner",
-      clickable: true,
-      lt: item.elementIcon ?? "",
-      ltSize: "20px",
-      innerHeight: 25,
-      innerIcon: item.weaponIcon,
-      innerText: item.name,
-    };
-  } else {
-    return {
-      bg: item.bg,
-      icon: item.icon,
-      size: "100px",
-      height: "100px",
-      display: "inner",
-      clickable: true,
-      lt: item.weaponIcon,
-      ltSize: "20px",
-      innerHeight: 25,
-      innerText: item.name,
-    };
-  }
+  return {
+    bg: item.bg,
+    icon: item.icon,
+    size: "100px",
+    height: "100px",
+    display: "inner",
+    clickable: true,
+    lt: selectedType.value === "weapon" ? item.weaponIcon : (item.elementIcon ?? ""),
+    ltSize: "20px",
+    innerHeight: 25,
+    innerIcon: selectedType.value === "character" ? item.weaponIcon : undefined,
+    innerText: item.name,
+  };
 }
 </script>
 <style lang="css" scoped>
@@ -210,6 +136,25 @@ function getBoxData(item: TGApp.App.Calendar.Item): TItemBoxData {
   align-items: center;
   justify-content: center;
   column-gap: 5px;
+}
+
+.tc-btn {
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
+
+  &.today {
+    border: 1px solid var(--tgc-yellow-1);
+  }
+
+  &.selected {
+    background-color: var(--tgc-yellow-1);
+    color: var(--box-text-4);
+  }
+
+  &.today:not(.selected) {
+    background-color: transparent;
+    color: var(--tgc-yellow-1);
+  }
 }
 
 .tc-content {

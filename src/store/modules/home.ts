@@ -35,6 +35,15 @@ export const useHomeStore = defineStore("home", () => {
       .map((item) => item.label);
   }
 
+  function init(): void {
+    homeShow.value = [
+      { show: true, order: 1, label: ShowItemEnum.pool },
+      { show: true, order: 2, label: ShowItemEnum.position },
+      { show: true, order: 3, label: ShowItemEnum.calendar },
+    ];
+    localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
+  }
+
   function setShowItems(items: Array<ShowItemEnum>): void {
     let order = 1;
     for (const item of items) {
@@ -47,5 +56,5 @@ export const useHomeStore = defineStore("home", () => {
     localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
   }
 
-  return { poolCover, getShowItems, setShowItems };
+  return { poolCover, getShowItems, setShowItems, init };
 });

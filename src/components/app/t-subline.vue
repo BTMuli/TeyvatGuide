@@ -1,12 +1,9 @@
 <template>
   <div class="tsl-box">
-    <img src="../../assets/icons/arrow-right.svg" alt="right" />
-    <slot>{{ title }}</slot>
+    <img src="@/assets/icons/arrow-right.svg" alt="right" />
+    <slot></slot>
   </div>
 </template>
-<script lang="ts" setup>
-defineProps<{ title?: string }>();
-</script>
 <style lang="css" scoped>
 .tsl-box {
   display: flex;

@@ -12,26 +12,26 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TPinWin from "@comp/app/t-pinWin.vue";
+import TShareBtn from "@comp/app/t-shareBtn.vue";
+import TSwitchTheme from "@comp/app/t-switchTheme.vue";
+import showLoading from "@comp/func/loading.js";
+import TaParser from "@comp/pageAnno/ta-parser.vue";
 import { app, webviewWindow } from "@tauri-apps/api";
 import { onMounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
-import TPinWin from "../components/app/t-pinWin.vue";
-import TShareBtn from "../components/app/t-shareBtn.vue";
-import TSwitchTheme from "../components/app/t-switchTheme.vue";
-import showLoading from "../components/func/loading.js";
-import TaParser from "../components/pageAnno/ta-parser.vue";
-import { useAppStore } from "../store/modules/app.js";
-import TGLogger from "../utils/TGLogger.js";
-import { createTGWindow } from "../utils/TGWindow.js";
-import Hk4eApi, { AnnoLang, AnnoServer } from "../web/request/hk4eReq.js";
+import { useAppStore } from "@/store/modules/app.js";
+import TGLogger from "@/utils/TGLogger.js";
+import { createTGWindow } from "@/utils/TGWindow.js";
+import Hk4eApi, { type AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
 
 const route = useRoute();
 const annoId = Number(route.params.anno_id);
 const region = <AnnoServer>route.params.region;
 const lang = <AnnoLang>route.params.lang;
 const appVersion = ref<string>();
-const annoData = shallowRef<TGApp.BBS.Announcement.ContentItem | undefined>();
+const annoData = shallowRef<TGApp.BBS.Announcement.ContentItem>();
 
 onMounted(async () => {
   showLoading.start("正在加载公告数据...");

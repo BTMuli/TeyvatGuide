@@ -4,13 +4,13 @@
  * @since Beta v0.6.4
  */
 
-import TGHttp from "../../../utils/TGHttp.js";
+import TGHttp from "@/utils/TGHttp.js";
 
 // MysPostApiBaseUrl => Mpabu
-const Mpabu = "https://bbs-api.mihoyo.com/post/wapi/";
+const Mpabu: Readonly<string> = "https://bbs-api.mihoyo.com/post/wapi/";
 // MysTopicApiBaseUrl => Mtapu
-const Mtabu = "https://bbs-api.miyoushe.com/topic/wapi/";
-const Referer = "https://bbs.mihoyo.com/";
+const Mtabu: Readonly<string> = "https://bbs-api.miyoushe.com/topic/wapi/";
+const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 
 /**
  * @description 获取特定论坛列表

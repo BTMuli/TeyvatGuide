@@ -1,15 +1,13 @@
 <template>
   <div class="twc-li-box">
     <div class="twc-li-left">
-      <img class="twc-li-bg" :src="getBg()" alt="bg" />
-      <img class="twc-li-icon" :src="getIcon()" alt="icon" />
+      <img class="twc-li-bg" :src="`/icon/bg/${props.data.star}-Star.webp`" alt="bg" />
+      <img class="twc-li-icon" :src="`/WIKI/${props.mode}/${props.data.id}.webp`" alt="icon" />
     </div>
     <div class="twc-li-right" :title="props.data.name">{{ props.data.name }}</div>
   </div>
 </template>
 <script lang="ts" setup>
-import { computed } from "vue";
-
 type TwcListItemProps =
   | {
       mode: "character";
@@ -23,24 +21,6 @@ type TwcListItemProps =
     };
 
 const props = defineProps<TwcListItemProps>();
-const isSelected = computed(() => {
-  return props.data.id === props.curItem.id;
-});
-const bgColor = computed(() => {
-  return isSelected.value ? "var(--box-bg-2)" : "var(--box-bg-1)";
-});
-
-function getBg(): string {
-  return `/icon/bg/${props.data.star}-Star.webp`;
-}
-
-function getIcon(): string {
-  if (props.mode === "character") {
-    return `/WIKI/character/${props.data.id}.webp`;
-  } else {
-    return `/WIKI/weapon/${props.data.id}.webp`;
-  }
-}
 </script>
 <style lang="css" scoped>
 .twc-li-box {
@@ -50,7 +30,7 @@ function getIcon(): string {
   align-items: center;
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
-  background: v-bind(bgColor);
+  background: v-bind("props.data.id === props.curItem.id ? 'var(--box-bg-2)' : 'var(--box-bg-1)'");
   cursor: pointer;
   gap: 10px;
 }

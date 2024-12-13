@@ -34,14 +34,14 @@ function getAnnoTag(tag: string): string {
  */
 export function getAnnoCard(
   data: TGApp.BBS.Announcement.ListData,
-): TGApp.App.Announcement.ListCard[] {
-  const cards: TGApp.App.Announcement.ListCard[] = [];
-  data.list.map((annoList: TGApp.BBS.Announcement.ListItem) => {
-    return annoList.list.map((anno: TGApp.BBS.Announcement.AnnoSingle) => {
+): Array<TGApp.App.Announcement.ListCard> {
+  const cards: Array<TGApp.App.Announcement.ListCard> = [];
+  for (const annoList of data.list) {
+    for (const anno of annoList.list) {
       const timeStart = anno.start_time.split(" ")[0];
       const timeEnd = anno.end_time.split(" ")[0];
       const time = `${timeStart} ~ ${timeEnd}`;
-      return cards.push({
+      cards.push({
         id: anno.ann_id,
         title: anno.title,
         subtitle: anno.subtitle.replace(/<br \/>/g, " "),
@@ -51,7 +51,7 @@ export function getAnnoCard(
         tagLabel: getAnnoTag(anno.tag_label),
         timeStr: time,
       });
-    });
-  });
+    }
+  }
   return cards;
 }

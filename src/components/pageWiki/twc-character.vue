@@ -49,7 +49,7 @@
         </div>
       </div>
     </div>
-    <TopNamecard :data="nameCard" @selected="toNameCard" v-if="nameCard" />
+    <TopNameCard :data="nameCard" @selected="showNc = !showNc" v-if="nameCard" />
     <TwcMaterials :data="data.materials" />
     <TwcSkills :data="data.skills" />
     <TwcConstellations :data="data.constellation" />
@@ -93,53 +93,53 @@
         </template>
       </v-expansion-panel>
     </v-expansion-panels>
-    <ToNamecard v-if="hasNc" v-model="showNc" :data="nameCard" />
+    <ToNameCard v-if="hasNc" v-model="showNc" :data="nameCard" />
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import ToNameCard from "@comp/app/to-nameCard.vue";
+import TopNameCard from "@comp/app/top-nameCard.vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
-
-import { WikiCharacterData, AppNameCardsData, AppCharacterData } from "../../data/index.js";
-import { createObc } from "../../utils/TGWindow.js";
-import { parseHtmlText } from "../../utils/toolFunc.js";
-import TItembox, { TItemBoxData } from "../app/t-item-box.vue";
-import ToNamecard from "../app/to-namecard.vue";
-import TopNamecard from "../app/top-namecard.vue";
-import showSnackbar from "../func/snackbar.js";
 
 import TwcConstellations from "./twc-constellations.vue";
 import TwcMaterials from "./twc-materials.vue";
 import TwcSkills from "./twc-skills.vue";
 
-interface TwcCharacterProps {
-  item: TGApp.App.Character.WikiBriefInfo;
-}
+import { AppCharacterData, AppNameCardsData, WikiCharacterData } from "@/data/index.js";
+import { createObc } from "@/utils/TGWindow.js";
+import { parseHtmlText } from "@/utils/toolFunc.js";
+
+type TwcCharacterProps = { item: TGApp.App.Character.WikiBriefInfo };
 
 const props = defineProps<TwcCharacterProps>();
 const router = useRouter();
 
-const data = ref<TGApp.App.Character.WikiItem>();
-const box = computed(() => {
-  return <TItemBoxData>{
-    bg: `/icon/bg/${data.value?.star}-Star.webp`,
-    icon: `/WIKI/character/${data.value?.id}.webp`,
-    size: "128px",
-    height: "128px",
-    display: "inner",
-    lt: `/icon/element/${data.value?.element}元素.webp`,
-    ltSize: "30px",
-    innerHeight: 30,
-    innerIcon: `/icon/weapon/${data.value?.weapon}.webp`,
-    innerText: data.value?.name,
-    clickable: false,
-  };
-});
-const hasNc = ref(false);
-const showNc = ref(false);
-const nameCard = ref<TGApp.App.NameCard.Item>();
+const hasNc = ref<boolean>(false);
+const showNc = ref<boolean>(false);
+const nameCard = shallowRef<TGApp.App.NameCard.Item>();
+const data = shallowRef<TGApp.App.Character.WikiItem>();
+const box = computed<TItemBoxData>(() => ({
+  bg: `/icon/bg/${data.value?.star ?? 5}-Star.webp`,
+  icon: `/WIKI/character/${data.value?.id ?? 10000005}.webp`,
+  size: "128px",
+  height: "128px",
+  display: "inner",
+  lt: `/icon/element/${data.value?.element ?? "风"}元素.webp`,
+  ltSize: "30px",
+  innerHeight: 30,
+  innerIcon: `/icon/weapon/${data.value?.weapon}.webp`,
+  innerText: data.value?.name ?? "旅行者",
+  clickable: false,
+}));
 
-async function loadData(): Promise<void> {
+onMounted(() => loadData());
+
+watch(() => props.item, loadData);
+
+function loadData(): void {
   const res = WikiCharacterData.find((item) => item.id === props.item.id);
   if (res === undefined) {
     showSnackbar.warn(`未获取到角色 ${props.item.name} 的 Wiki 数据`);
@@ -150,18 +150,9 @@ async function loadData(): Promise<void> {
   if (appC !== undefined) {
     hasNc.value = true;
     nameCard.value = AppNameCardsData.find((i) => i.name === appC.nameCard);
-  } else {
-    hasNc.value = false;
-  }
+  } else hasNc.value = false;
   showSnackbar.success(`成功获取角色 ${props.item.name} 的 Wiki 数据`);
 }
-
-watch(
-  () => props.item,
-  async () => await loadData(),
-);
-
-onMounted(async () => await loadData());
 
 async function toWiki(): Promise<void> {
   if (props.item.contentId === 0) {
@@ -174,11 +165,6 @@ async function toWiki(): Promise<void> {
 async function toBirth(date: string): Promise<void> {
   const birth = date.replace("月", "/").replace("日", "");
   await router.push({ name: "留影叙佳期", params: { date: birth } });
-}
-
-function toNameCard(): void {
-  if (showNc.value === true) showNc.value = false;
-  showNc.value = true;
 }
 </script>
 <style lang="css" scoped>

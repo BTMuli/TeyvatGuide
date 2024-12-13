@@ -94,47 +94,40 @@
   <ToCollectPost @submit="load" :post="selectedPost" v-model="showOverlay" />
 </template>
 <script lang="ts" setup>
+import TPostCard from "@comp/app/t-postcard.vue";
+import showDialog from "@comp/func/dialog.js";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import ToCollectPost from "@comp/pageCollect/to-collectPost.vue";
+import TSUserCollection from "@Sqlite/modules/userCollect.js";
 import { event } from "@tauri-apps/api";
-import { UnlistenFn } from "@tauri-apps/api/event";
+import type { UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 
-import TPostCard from "../../components/app/t-postcard.vue";
-import showDialog from "../../components/func/dialog.js";
-import showLoading from "../../components/func/loading.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import ToCollectPost from "../../components/pageCollect/to-collectPost.vue";
-import TSUserCollection from "../../plugins/Sqlite/modules/userCollect.js";
-import { useUserStore } from "../../store/modules/user.js";
-import TGLogger from "../../utils/TGLogger.js";
-import BBSApi from "../../web/request/bbsReq.js";
+import { useUserStore } from "@/store/modules/user.js";
+import TGLogger from "@/utils/TGLogger.js";
+import BBSApi from "@/web/request/bbsReq.js";
 
-const userStore = storeToRefs(useUserStore());
-
-const collections = ref<TGApp.Sqlite.UserCollection.UFCollection[]>([]);
-const selected = ref<TGApp.Sqlite.UserCollection.UFPost[]>([]);
-const curSelect = ref<string>("未分类");
-const page = ref(1);
-const length = computed(() => Math.ceil(selected.value.length / 12));
-const view = computed(() => {
-  if (length.value === 1) return 0;
-  return length.value > 5 ? 5 : length.value;
-});
-const curPosts = computed<TGApp.Plugins.Mys.Post.FullData[]>(() => {
-  return selected.value
-    .slice((page.value - 1) * 12, page.value * 12)
-    .map((i) => JSON.parse(i.content));
-});
-
-const selectedMode = ref<boolean>(false);
-const selectedPost = ref<Array<string>>([]);
-const showOverlay = ref(false);
-const sortId = ref<boolean>(false);
-
+const { cookie, briefInfo } = storeToRefs(useUserStore());
 let collectListener: UnlistenFn | null = null;
 
+const curSelect = ref<string>("未分类");
+const page = ref<number>(1);
+const selectedMode = ref<boolean>(false);
+const showOverlay = ref<boolean>(false);
+const sortId = ref<boolean>(false);
+const selectedPost = shallowRef<Array<string>>([]);
+const collections = shallowRef<Array<TGApp.Sqlite.UserCollection.UFCollection>>([]);
+const selected = shallowRef<Array<TGApp.Sqlite.UserCollection.UFPost>>([]);
+const length = computed<number>(() => Math.ceil(selected.value.length / 12));
+const view = computed<number>(() => (length.value === 1 ? 1 : length.value > 5 ? 5 : length.value));
+const curPosts = computed<Array<TGApp.Plugins.Mys.Post.FullData>>(() =>
+  selected.value.slice((page.value - 1) * 12, page.value * 12).map((i) => JSON.parse(i.content)),
+);
+
 onMounted(async () => {
-  collectListener = await event.listen("refreshCollect", async () => await load());
+  collectListener = await event.listen<void>("refreshCollect", load);
   await load();
 });
 onUnmounted(() => {
@@ -144,27 +137,22 @@ onUnmounted(() => {
   }
 });
 
-function handleSelected(v: string) {
-  if (selectedPost.value.includes(v)) {
-    selectedPost.value = selectedPost.value.filter((i) => i !== v);
-  } else {
-    selectedPost.value.push(v);
+function handleSelected(v: string): void {
+  if (!selectedPost.value.includes(v)) {
+    selectedPost.value = [...selectedPost.value, v];
+    return;
   }
+  selectedPost.value = selectedPost.value.filter((i) => i !== v);
 }
 
-function sortPost(value: boolean) {
+function sortPost(value: boolean): void {
   let ori = sortId.value;
   sortId.value = value;
-  selected.value = selected.value.sort((a, b) => {
-    if (sortId.value) {
-      return Number(b.id) - Number(a.id);
-    } else {
-      return Number(b.updated) - Number(a.updated);
-    }
-  });
-  if (ori !== sortId.value) {
-    showSnackbar.success(`已${sortId.value ? "按帖子ID排序" : "按更新时间排序"}`);
-  }
+  selected.value = selected.value.sort((a, b) =>
+    sortId.value ? Number(b.id) - Number(a.id) : Number(b.updated) - Number(a.updated),
+  );
+  if (ori === sortId.value) return;
+  showSnackbar.success(`已${sortId.value ? "按帖子ID排序" : "按更新时间排序"}`);
 }
 
 async function load(): Promise<void> {
@@ -187,7 +175,7 @@ async function load(): Promise<void> {
   showLoading.end();
 }
 
-function toSelect() {
+function toSelect(): void {
   if (selectedMode.value) {
     selectedMode.value = false;
     if (selectedPost.value.length === 0) return;
@@ -332,9 +320,7 @@ async function freshPost(select: string | null): Promise<void> {
   if (select === "未分类") {
     curSelect.value = "未分类";
     selected.value = await TSUserCollection.getUnCollectPostList();
-  } else {
-    selected.value = await TSUserCollection.getCollectPostList(select);
-  }
+  } else selected.value = await TSUserCollection.getCollectPostList(select);
   page.value = 1;
   showLoading.end();
   showSnackbar.success(`切换合集 ${select}，共 ${selected.value.length} 条帖子`);
@@ -359,33 +345,26 @@ async function freshOther(): Promise<void> {
 }
 
 async function freshUser(uid?: string): Promise<void> {
-  if (!userStore.cookie.value) {
+  if (!cookie.value) {
     showSnackbar.warn("请先登录");
     return;
   }
-  const uidReal = uid || userStore.briefInfo.value.uid;
+  const uidReal = uid || briefInfo.value.uid;
   showLoading.start("获取用户收藏...", `UID: ${uidReal}`);
-  let res = await BBSApi.lovePost(userStore.cookie.value, uidReal);
+  let res = await BBSApi.lovePost(cookie.value, uidReal);
   while (true) {
     if ("retcode" in res) {
       showLoading.end();
-      if (res.retcode === 1001) {
-        showSnackbar.warn("用户收藏已设为私密，无法获取");
-      } else {
-        showSnackbar.error(`[${res.retcode}] ${res.message}`);
-      }
+      if (res.retcode === 1001) showSnackbar.warn("用户收藏已设为私密，无法获取");
+      else showSnackbar.error(`[${res.retcode}] ${res.message}`);
       break;
     }
     let posts = res.list;
     showLoading.update("获取用户收藏...", `合并收藏帖子 [offset]${res.next_offset}...`);
-    await mergePosts(posts, uid || userStore.briefInfo.value.uid);
+    await mergePosts(posts, uid || briefInfo.value.uid);
     if (res.is_last) break;
     showLoading.update("获取用户收藏...", `[offset]${res.next_offset} [is_last]${res.is_last}`);
-    res = await BBSApi.lovePost(
-      userStore.cookie.value,
-      uid || userStore.briefInfo.value.uid,
-      res.next_offset,
-    );
+    res = await BBSApi.lovePost(cookie.value, uid || briefInfo.value.uid, res.next_offset);
   }
   showLoading.end();
   showSnackbar.success("获取用户收藏成功");
@@ -394,16 +373,14 @@ async function freshUser(uid?: string): Promise<void> {
 
 // 合并收藏帖子
 async function mergePosts(
-  posts: TGApp.Plugins.Mys.Post.FullData[],
+  posts: Array<TGApp.Plugins.Mys.Post.FullData>,
   collect: string,
 ): Promise<void> {
   const title = `用户收藏-${collect}`;
   for (const post of posts) {
     showLoading.start("获取用户收藏...", `[POST]${post.post.subject} [collection]${title}`);
     const res = await TSUserCollection.addCollect(post.post.post_id, post, title, true);
-    if (!res) {
-      await TGLogger.Error(`[PostCollect] mergePosts [${post.post.post_id}]`);
-    }
+    if (!res) await TGLogger.Error(`[PostCollect] mergePosts [${post.post.post_id}]`);
   }
 }
 </script>

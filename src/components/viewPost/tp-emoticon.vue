@@ -16,37 +16,29 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import { onMounted, onUnmounted, ref, shallowRef } from "vue";
 
-import { getImageBuffer, saveCanvasImg, saveImgLocal } from "../../utils/TGShare.js";
-import { bytesToSize } from "../../utils/toolFunc.js";
-import showSnackbar from "../func/snackbar.js";
+import { getImageBuffer, saveCanvasImg, saveImgLocal } from "@/utils/TGShare.js";
+import { bytesToSize } from "@/utils/toolFunc.js";
 
-interface TpCustomEmoticon {
+type TpCustomEmoticon = {
   insert: {
     backup_text: "[自定义表情]";
     custom_emoticon: {
       id: string;
       url: string;
-      size: {
-        width: number;
-        height: number;
-        file_size?: number;
-      };
+      size: { width: number; height: number; file_size?: number };
       is_available: boolean;
       hash: string;
     };
   };
-}
-
-interface TpEmoticonProps {
-  data: TpCustomEmoticon;
-}
+};
+type TpEmoticonProps = { data: TpCustomEmoticon };
 
 const props = defineProps<TpEmoticonProps>();
-const localUrl = ref<string | undefined>(undefined);
-const buffer = ref<Uint8Array | null>(null);
-const imgWidth = computed<string>(() => `${props.data.insert.custom_emoticon.size.width}px;`);
+const localUrl = ref<string>();
+const buffer = shallowRef<Uint8Array | null>(null);
 
 console.log("tp-emoticon", props.data.insert.custom_emoticon);
 
@@ -72,9 +64,7 @@ async function download(): Promise<void> {
   let size: number;
   if (props.data.insert.custom_emoticon.size.file_size) {
     size = props.data.insert.custom_emoticon.size.file_size;
-  } else {
-    size = buffer.value.byteLength;
-  }
+  } else size = buffer.value.byteLength;
   if (size > 80000000) {
     showSnackbar.warn(`图片过大(${bytesToSize(size)})，无法下载到本地`);
     return;
@@ -96,7 +86,7 @@ async function download(): Promise<void> {
 }
 
 .tp-emo-box img {
-  width: v-bind(imgWidth);
+  width: v-bind("props.data.insert.custom_emoticon.size.width + 'px'");
   max-width: 100%;
   height: auto;
   border-radius: 10px;

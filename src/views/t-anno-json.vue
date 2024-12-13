@@ -8,13 +8,13 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TSwitchTheme from "@comp/app/t-switchTheme.vue";
+import showLoading from "@comp/func/loading.js";
 import { onMounted, shallowRef } from "vue";
 import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
 
-import TSwitchTheme from "../components/app/t-switchTheme.vue";
-import showLoading from "../components/func/loading.js";
-import Hk4eApi, { AnnoLang, AnnoServer } from "../web/request/hk4eReq.js";
+import Hk4eApi, { type AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
 
 // 数据
 const route = useRoute();

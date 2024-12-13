@@ -15,15 +15,18 @@
             @click="emits('toAvatar', avatar)"
             :title="avatar.avatar.name"
           >
-            <div class="tdo-avatar" :style="getAvatarBg(avatar)">
+            <div
+              class="tdo-avatar"
+              :class="{ selected: props.avatar.avatar.id === avatar.avatar.id }"
+            >
               <img :src="avatar.avatar.side_icon" :alt="avatar.avatar.name" />
             </div>
           </v-tab>
         </v-tabs>
       </div>
       <div class="tdo-card-container">
-        <div class="tdo-box-arrow left" @click="handleClick('left')">
-          <img alt="left" src="../../assets/icons/arrow-right.svg" />
+        <div class="tdo-box-arrow" @click="handleClick('left')">
+          <img alt="left" src="@/assets/icons/arrow-right.svg" />
         </div>
         <v-window class="tdo-box-container" v-model="modeTab">
           <v-window-item value="classic">
@@ -36,19 +39,18 @@
             <TuaDetailCard :model-value="avatar" />
           </v-window-item>
         </v-window>
-        <div class="tdo-box-arrow right" @click="handleClick('right')">
-          <img alt="right" src="../../assets/icons/arrow-right.svg" />
+        <div class="tdo-box-arrow" @click="handleClick('right')">
+          <img alt="right" src="@/assets/icons/arrow-right.svg" />
         </div>
       </div>
     </div>
   </TOverlay>
 </template>
 <script lang="ts" setup>
+import TOverlay from "@comp/app/t-overlay.vue";
+import TucDetailCard from "@comp/userAvatarCard/tuc-detail-card.vue";
+import TucDetailOld from "@comp/userAvatarOld/tuc-detail-old.vue";
 import { computed, ref, watch } from "vue";
-
-import TOverlay from "../app/t-overlay.vue";
-import TucDetailCard from "../userAvatarCard/tuc-detail-card.vue";
-import TucDetailOld from "../userAvatarOld/tuc-detail-old.vue";
 
 import TuaDetailCard from "./tua-detail-card.vue";
 
@@ -56,7 +58,7 @@ type TuaDetailOverlayProps = {
   modelValue: boolean;
   avatar: TGApp.Sqlite.Character.UserRole;
   mode: "classic" | "card" | "dev";
-  avatars: TGApp.Sqlite.Character.UserRole[];
+  avatars: Array<TGApp.Sqlite.Character.UserRole>;
 };
 type TuaDetailOverlayEmits = {
   (e: "update:modelValue", v: boolean): void;
@@ -101,13 +103,6 @@ function handleClick(pos: "left" | "right"): void {
   if (pos === "left") emits("toNext", false);
   else emits("toNext", true);
 }
-
-function getAvatarBg(avatar: TGApp.Sqlite.Character.UserRole): string {
-  if (props.avatar.avatar.id === avatar.avatar.id) {
-    return "background-color:var(--tgc-od-white);";
-  }
-  return "background-color:transparent;";
-}
 </script>
 <style lang="css" scoped>
 .tdo-box {
@@ -136,7 +131,12 @@ function getAvatarBg(avatar: TGApp.Sqlite.Character.UserRole): string {
   height: 32px;
   border: 1px solid var(--tgc-white-1);
   border-radius: 50%;
+  background-color: transparent;
   cursor: pointer;
+
+  &.selected {
+    background-color: var(--tgc-od-white);
+  }
 
   img {
     position: absolute;
@@ -162,21 +162,19 @@ function getAvatarBg(avatar: TGApp.Sqlite.Character.UserRole): string {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+
+  &:first-child {
+    transform: rotate(180deg);
+  }
 }
 
 .dark .tdo-box-arrow {
   filter: invert(11%) sepia(73%) saturate(11%) hue-rotate(139deg) brightness(97%) contrast(81%);
-}
-
-.tdo-box-arrow.left img {
-  width: 100%;
-  height: 100%;
-  transform: rotate(180deg);
-}
-
-.tdo-box-arrow.right img {
-  width: 100%;
-  height: 100%;
 }
 
 .tdo-box-container {

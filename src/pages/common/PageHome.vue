@@ -1,7 +1,7 @@
 <template>
   <div class="home-container">
     <div class="home-top">
-      <div class="home-tools" v-if="appStore.isLogin">
+      <div class="home-tools" v-if="isLogin">
         <v-select
           v-model="curGid"
           class="home-tool-select"
@@ -32,18 +32,19 @@
 </template>
 
 <script lang="ts" setup>
+import TGameNav from "@comp/app/t-gameNav.vue";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import PhCompCalendar from "@comp/pageHome/ph-comp-calendar.vue";
+import PhCompPool from "@comp/pageHome/ph-comp-pool.vue";
+import PhCompPosition from "@comp/pageHome/ph-comp-position.vue";
+import { storeToRefs } from "pinia";
 import { type Component, computed, onMounted, ref, shallowRef, watch } from "vue";
 
-import TGameNav from "../../components/app/t-gamenav.vue";
-import showLoading from "../../components/func/loading.js";
-import showSnackbar from "../../components/func/snackbar.js";
-import PhCompCalendar from "../../components/pageHome/ph-comp-calendar.vue";
-import PhCompPool from "../../components/pageHome/ph-comp-pool.vue";
-import PhCompPosition from "../../components/pageHome/ph-comp-position.vue";
-import { useAppStore } from "../../store/modules/app.js";
-import { ShowItemEnum, useHomeStore } from "../../store/modules/home.js";
-import TGLogger from "../../utils/TGLogger.js";
-import TGConstant from "../../web/constant/TGConstant.js";
+import { useAppStore } from "@/store/modules/app.js";
+import { ShowItemEnum, useHomeStore } from "@/store/modules/home.js";
+import TGLogger from "@/utils/TGLogger.js";
+import TGConstant from "@/web/constant/TGConstant.js";
 
 type SFComp = Component & {
   __file?: string;
@@ -52,7 +53,7 @@ type SFComp = Component & {
   __scopeId?: string;
 };
 
-const appStore = useAppStore();
+const { devMode, isLogin } = storeToRefs(useAppStore());
 const homeStore = useHomeStore();
 
 const showItemsAll: Array<ShowItemEnum> = [
@@ -60,12 +61,12 @@ const showItemsAll: Array<ShowItemEnum> = [
   ShowItemEnum.pool,
   ShowItemEnum.position,
 ];
-const showItems = computed<ShowItemEnum[]>({
+const showItems = computed<Array<ShowItemEnum>>({
   get: () => homeStore.getShowItems(),
-  set: (v: ShowItemEnum[]) => homeStore.setShowItems(v),
+  set: (v: Array<ShowItemEnum>) => homeStore.setShowItems(v),
 });
-const loadItems = shallowRef<ShowItemEnum[]>([]);
-const components = shallowRef<SFComp[]>([]);
+const loadItems = shallowRef<Array<ShowItemEnum>>([]);
+const components = shallowRef<Array<SFComp>>([]);
 
 const gameSelectList = TGConstant.BBS.CHANNELS;
 const curGid = ref<string>(gameSelectList[0].gid);
@@ -74,7 +75,7 @@ onMounted(async () => {
   showLoading.start("正在加载首页...");
   // @ts-expect-error-next-line The import.meta meta-property is not allowed in files which will build into CommonJS output.
   const isProdEnv = import.meta.env.MODE === "production";
-  if (isProdEnv && appStore.devMode) appStore.devMode = false;
+  if (isProdEnv && devMode.value) devMode.value = false;
   await loadComp();
 });
 
@@ -88,7 +89,7 @@ watch(
 
 async function loadComp(): Promise<void> {
   showLoading.start("正在加载首页...");
-  const temp: SFComp[] = [];
+  const temp: Array<SFComp> = [];
   for (const item of showItems.value) {
     switch (item) {
       case "限时祈愿":

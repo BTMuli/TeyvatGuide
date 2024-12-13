@@ -4,7 +4,6 @@
       class="tpr-bubble"
       v-if="props.modelValue.user.reply_bubble !== null"
       :title="props.modelValue.user.reply_bubble.name"
-      :style="{ backgroundColor: props.modelValue.user.reply_bubble.bg_color }"
     >
       <img :src="props.modelValue.user.reply_bubble.url" alt="bubble" />
     </div>
@@ -29,7 +28,9 @@
     </div>
     <div class="tpr-info">
       <div class="tpri-left">
-        <span :title="getFullTime()">{{ getTime() }}</span>
+        <span :title="timestampToDate(props.modelValue.reply.created_at * 1000)">
+          {{ getTime() }}
+        </span>
         <span>{{ props.modelValue.user.ip_region }}</span>
       </div>
       <div class="tpri-right">
@@ -100,41 +101,35 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import Mys from "@Mys/index.js";
 import { event, path } from "@tauri-apps/api";
-import { UnlistenFn, Event } from "@tauri-apps/api/event";
+import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
-import { toRaw, ref, watch, computed, onMounted, onUnmounted } from "vue";
-
-import Mys from "../../plugins/Mys/index.js";
-import { generateShareImg } from "../../utils/TGShare.js";
-import showDialog from "../func/dialog.js";
-import showSnackbar from "../func/snackbar.js";
+import { computed, onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from "vue";
 
 import TpParser from "./tp-parser.vue";
 
+import { generateShareImg } from "@/utils/TGShare.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
+
 type TprReplyProps =
-  | {
-      mode: "sub";
-      modelValue: TGApp.Plugins.Mys.Reply.ReplyFull;
-    }
-  | {
-      mode: "main";
-      modelValue: TGApp.Plugins.Mys.Reply.ReplyFull;
-      pinId: string;
-    };
+  | { mode: "sub"; modelValue: TGApp.Plugins.Mys.Reply.ReplyFull }
+  | { mode: "main"; modelValue: TGApp.Plugins.Mys.Reply.ReplyFull; pinId: string };
 
 const props = defineProps<TprReplyProps>();
-const showSub = ref<boolean>(false);
-const subReplies = ref<Array<TGApp.Plugins.Mys.Reply.ReplyFull>>([]);
-const lastId = ref<string | undefined>(undefined);
-const isLast = ref<boolean>(false);
-const loading = ref<boolean>(false);
 const replyId = `reply_${props.modelValue.reply.post_id}_${props.modelValue.reply.floor_id}_${props.modelValue.reply.reply_id}`;
 let subListener: UnlistenFn | null = null;
 
 console.log("TprReply", toRaw(props.modelValue));
 
+const showSub = ref<boolean>(false);
+const lastId = ref<string>();
+const isLast = ref<boolean>(false);
+const loading = ref<boolean>(false);
+const subReplies = shallowRef<Array<TGApp.Plugins.Mys.Reply.ReplyFull>>([]);
 const levelColor = computed<string>(() => {
   const level = props.modelValue.user.level_exp.level;
   if (level < 5) return "var(--tgc-od-green)";
@@ -144,12 +139,7 @@ const levelColor = computed<string>(() => {
   return "var(--tgc-od-white)";
 });
 
-onMounted(async () => {
-  if (props.mode === "main") {
-    subListener = await listenSub();
-  }
-});
-
+onMounted(async () => (props.mode === "main" ? (subListener = await listenSub()) : null));
 onUnmounted(() => {
   if (subListener !== null) {
     subListener();
@@ -160,29 +150,20 @@ onUnmounted(() => {
 watch(
   () => showSub.value,
   async (value) => {
-    if (value) {
-      await event.emit("openReplySub", props.modelValue.reply.reply_id);
-    }
+    if (value) await event.emit("openReplySub", props.modelValue.reply.reply_id);
   },
 );
 
 async function listenSub(): Promise<UnlistenFn> {
-  return await event.listen("openReplySub", async (e: Event<string>) => {
-    if (e.payload !== props.modelValue.reply.reply_id) {
-      if (showSub.value) showSub.value = false;
-    }
+  return await event.listen<string>("openReplySub", async (e: Event<string>) => {
+    if (e.payload !== props.modelValue.reply.reply_id) if (showSub.value) showSub.value = false;
   });
 }
 
 async function share(): Promise<void> {
-  const replyDom: HTMLElement | null = document.getElementById(replyId);
+  const replyDom = document.querySelector<HTMLElement>(`#${replyId}`);
   if (replyDom === null) return;
   await generateShareImg(replyId, replyDom, 3);
-}
-
-function getFullTime(): string {
-  const time = new Date(props.modelValue.reply.created_at * 1000);
-  return time.toLocaleString().replace(/\//g, "-");
 }
 
 function getTime(): string {
@@ -266,6 +247,7 @@ async function exportData(): Promise<void> {
   position: absolute;
   top: 0;
   right: 0;
+  background-color: v-bind("props.modelValue.user.reply_bubble?.bg_color");
   opacity: 0.5;
 }
 

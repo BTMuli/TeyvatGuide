@@ -1,15 +1,9 @@
 /**
  * @file plugins/Mys/types/Position.d.ts
  * @description Mys 插件热点追踪接口
- * @since Beta v0.5.3
+ * @since Beta v0.6.6
  */
 
-/**
- * @description Mys 插件热点追踪类型
- * @since Alpha v0.2.1
- * @namespace TGApp.Plugins.Mys.Position
- * @memberof TGApp.Plugins.Mys
- */
 declare namespace TGApp.Plugins.Mys.Position {
   /**
    * @description 热点追踪信息的返回类型
@@ -74,7 +68,7 @@ declare namespace TGApp.Plugins.Mys.Position {
 
   /**
    * @description 渲染用的热点追踪信息
-   * @since Beta v0.5.3
+   * @since Beta v0.6.6
    * @interface RenderCard
    * @property {string} title 标题
    * @property {number} postId 帖子ID
@@ -82,10 +76,9 @@ declare namespace TGApp.Plugins.Mys.Position {
    * @property {string} icon 图标
    * @property {string} abstract 摘要
    * @property time 时间
-   * @property {string} time.start 开始时间
    * @property {number} time.startStamp 开始时间戳
-   * @property {string} time.end 结束时间
    * @property {number} time.endStamp 结束时间戳
+   * @property {number} time.totalStamp 总时间戳
    * @return RenderCard
    */
   interface RenderCard {
@@ -95,10 +88,9 @@ declare namespace TGApp.Plugins.Mys.Position {
     icon: string;
     abstract: string;
     time: {
-      start: string;
       startStamp: number;
-      end: string;
       endStamp: number;
+      totalStamp: number;
     };
   }
 }

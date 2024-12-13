@@ -4,18 +4,18 @@
  * @since Beta v0.6.4
  */
 
+import showSnackbar from "@comp/func/snackbar.js";
 import { path } from "@tauri-apps/api";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import html2canvas from "html2canvas";
 import { storeToRefs } from "pinia";
 
-import showSnackbar from "../components/func/snackbar.js";
-import { useAppStore } from "../store/modules/app.js";
-
 import TGHttp from "./TGHttp.js";
 import TGLogger from "./TGLogger.js";
 import { bytesToSize } from "./toolFunc.js";
+
+import { useAppStore } from "@/store/modules/app.js";
 
 /**
  * @description 保存图片-canvas
@@ -77,14 +77,9 @@ export async function getImageBuffer(url: string): Promise<Uint8Array> {
  */
 function getShareImgBgColor(): string {
   let theme = localStorage.getItem("theme");
-  if (theme) {
-    theme = JSON.parse(theme).theme;
-  }
-  if (theme === "dark") {
-    return "#1e1e1e";
-  } else {
-    return "#f9f6f2";
-  }
+  if (theme) theme = JSON.parse(theme).theme;
+  if (theme === "dark") return "#1e1e1e";
+  return "#f9f6f2";
 }
 
 /**
@@ -141,19 +136,6 @@ export async function generateShareImg(
     await saveCanvasImg(buffer, fileName);
     return;
   }
-  // if (size > 80000000) {
-  //   showSnackbar.warn(`图像过大(${sizeStr})，无法保存`, 3000);
-  //   return;
-  // }
-  // if (size > 20000000) {
-  //   const sizeStr = bytesToSize(size);
-  //   const saveCheck = await showDialog.check("图像过大", `图像大小为 ${sizeStr}，是否保存到文件？`);
-  //   if (saveCheck === true) {
-  //     await saveCanvasImg(buffer, fileName);
-  //     return;
-  //   }
-  //   showSnackbar.warn("将尝试保存到剪贴板");
-  // }
   try {
     await copyToClipboard(buffer);
     showSnackbar.success(`已将 ${fileName} 复制到剪贴板，大小为 ${sizeStr}`);
@@ -177,10 +159,6 @@ export async function copyToClipboard(buffer: Uint8Array): Promise<void> {
   // NotAllowedError:
   // The request is not allowed by the user agent or the platform in the current context,
   // possibly because the user denied permission.
-  await navigator.clipboard.write([
-    new ClipboardItem({
-      [blob.type]: blob,
-    }),
-  ]);
+  await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
   URL.revokeObjectURL(url);
 }

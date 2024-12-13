@@ -13,14 +13,15 @@
   </TOverlay>
 </template>
 <script lang="ts" setup>
+import TOverlay from "@comp/app/t-overlay.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readTextFile } from "@tauri-apps/plugin-fs";
 import { computed, ref, shallowRef } from "vue";
 
-import TOverlay from "../app/t-overlay.vue";
-import showSnackbar from "../func/snackbar.js";
-
 import TprReply from "./vp-reply-item.vue";
+
+import TGLogger from "@/utils/TGLogger.js";
 
 type TprDebugProps = { modelValue: boolean };
 type TprDebugEmits = (e: "update:modelValue", v: boolean) => void;
@@ -49,8 +50,13 @@ async function selectFile(): Promise<void> {
     const data = await readTextFile(file);
     replyData.value = JSON.parse(data);
   } catch (error) {
-    showSnackbar.error(`解析失败：${error}`);
-    return;
+    if (error instanceof Error) {
+      showSnackbar.error(`解析失败：${error.message}`);
+      await TGLogger.Error(`解析失败：${error.message}`);
+      return;
+    }
+    showSnackbar.error("解析失败");
+    await TGLogger.Error(`解析失败: ${error}`);
   }
 }
 </script>
