@@ -78,7 +78,7 @@
         </template>
         <v-list-item-title @click="confirmUpdateDevice()">刷新设备信息</v-list-item-title>
         <v-list-item-subtitle>
-          <!-- @ts-expect-error-next-line Deprecated symbol used -->
+          <!-- @ts-expect-error eslint-disable-next-line Deprecated symbol used -->
           {{ deviceInfo.device_name }}({{ deviceInfo.product }}) - {{ deviceInfo.device_fp }}
         </v-list-item-subtitle>
         <template #append>

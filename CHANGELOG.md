@@ -2,12 +2,18 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2024-12-11
+Update: 2024-12-13
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2024-12-11 15:37:05`
+> 更新于 `2024-12-13 16:46:25`
+
+## [0.6.6](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.6) (2024-12-13)
+
+- 🐛 修复主题切换响应异常
+- 🐛 修复增量刷新逻辑异常
+- ⚡️ 显著降低运行内存占用
 
 ## [0.6.5](https://github.com/BTMuli/TeyvatGuide/releases/v0.6.5) (2024-12-11)
 
