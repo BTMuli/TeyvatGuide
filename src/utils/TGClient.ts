@@ -27,30 +27,12 @@ import { getDS4JS } from "@/web/utils/getRequestHeader.js";
 type InvokeArg = { func: string };
 
 class Client {
-  /**
-   * @private 监听实例
-   * @since Beta v0.3.3
-   * @type {EventEmitter}
-   */
   private listener: UnlistenFn | undefined;
-
-  /**
-   * @private 模拟路由
-   * @since Beta v0.3.4
-   * @type {string[]}
-   */
   private route: string[] = [];
-
-  /**
-   * @constructor
-   * @since Beta v0.3.4
-   * @description 构造函数
-   */
   private constructor() {
     this.route = [];
     this.listener = undefined;
   }
-
   private static instance: Client | null = null;
 
   static getInstance(): Client {

@@ -28,25 +28,13 @@ declare module "vue-json-viewer" {
   export default component;
 }
 
-/**
- * @description import.meta.env
- * @package vite
- * @description 只写了用到的属性
- */
-interface ImportMetaEnv {
-  TAURI_ARCH: string;
-  TAURI_DEBUG: boolean;
-  TAURI_FAMILY: string;
-  TAURI_KEY_PASSWORD: string;
-  TAURI_PLATFORM: string;
-  TAURI_PLATFORM_TYPE: string;
-  BASE_URL: string;
-  MODE: string;
-  DEV: boolean;
-  PROD: boolean;
-  SSR: boolean;
-}
+declare type ImportMeta = { readonly env: { MODE: string } };
 
-declare interface ImportMeta {
-  readonly env: ImportMetaEnv;
+declare interface TauriProcessEnv extends NodeJS.ProcessEnv {
+  TAURI_ARCH?: string;
+  TAURI_DEBUG?: boolean;
+  TAURI_FAMILY?: string;
+  TAURI_KEY_PASSWORD?: string;
+  TAURI_PLATFORM?: string;
+  TAURI_PLATFORM_TYPE?: string;
 }

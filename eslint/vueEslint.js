@@ -41,7 +41,6 @@ const vueConfig = {
     sourceType: "module",
     parser: parserVue,
     parserOptions: {
-      project: "tsconfig.json",
       parser: eslintTs.parser,
       extraFileExtensions: [".vue"],
       tsconfigRootDir: ".",

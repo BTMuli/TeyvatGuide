@@ -11,6 +11,8 @@ import vuetify from "vite-plugin-vuetify";
 
 import buildTimePlugin from "./src/utils/TGBuild.js";
 
+const env: TauriProcessEnv = process.env;
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue(), vuetify(), buildTimePlugin(), VueDevtools()],
@@ -30,11 +32,11 @@ export default defineConfig({
   esbuild: { supported: { "top-level-await": true } },
   build: {
     // Tauri supports es2021
-    target: process.env.TAURI_PLATFORM === "windows" ? "chrome105" : "safari13",
+    target: env.TAURI_PLATFORM === "windows" ? "chrome105" : "safari13",
     // don't minify for debug builds
-    minify: !process.env.TAURI_DEBUG ? "esbuild" : false,
+    minify: !env.TAURI_DEBUG ? "esbuild" : false,
     // produce sourcemaps for debug builds
-    sourcemap: !!process.env.TAURI_DEBUG,
+    sourcemap: !!env.TAURI_DEBUG,
     // chunk size warning limit, default is 500kB,here set 4096KB which is 4MB
     chunkSizeWarningLimit: 4096, // KB
     // rollup options
