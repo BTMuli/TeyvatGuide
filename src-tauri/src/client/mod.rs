@@ -1,6 +1,6 @@
 //! @file src/client/mod.rs
 //! @desc 客户端模块，负责操作米游社客户端
-//! @since Beta v0.6.5
+//! @since Beta v0.6.7
 
 mod menu;
 mod utils;
@@ -8,11 +8,13 @@ mod utils;
 use tauri::{AppHandle, Manager, WebviewWindowBuilder};
 use tauri_utils::config::WebviewUrl;
 
+static BBS_VERSION: &'static str = "2.78.1";
+
 #[tauri::command]
 pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
   let mut win_width = 400.0;
   let mut win_height = 800.0;
-  let win_ua = "Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/2.78.1";
+  let win_ua = format!("Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/{BBS_VERSION}");
   let url_parse;
   if url != "" {
     url_parse = WebviewUrl::External(url.parse().unwrap());
@@ -36,7 +38,7 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
     .inner_size(trans_size.0, trans_size.1)
     .title("米游社")
     .center()
-    .user_agent(win_ua)
+    .user_agent(&win_ua)
     // todo mac环境下没看到menu
     .menu(menu::create_mhy_menu(handle.clone()))
     .on_menu_event(move |app, event| menu::handle_menu_event(app, event))

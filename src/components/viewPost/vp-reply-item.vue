@@ -299,6 +299,7 @@ async function exportData(): Promise<void> {
   padding: 0 2px;
   border-radius: 2px;
   background: v-bind(levelColor);
+  color: var(--tgc-white-1);
   font-size: 12px;
 }
 
