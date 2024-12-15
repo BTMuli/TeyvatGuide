@@ -191,8 +191,10 @@ async function handleDebug(): Promise<void> {
   padding: 5px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
+  margin-bottom: 40px;
   margin-left: 5px;
   background: var(--app-page-bg);
+  box-shadow: 5px 5px 8px var(--common-shadow-4);
   overflow-y: auto;
   row-gap: 10px;
 }
