@@ -158,7 +158,6 @@ const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
 onMounted(async () => {
   if (gid && typeof gid === "string") curGid.value = Number(gid);
   if (forum && typeof forum === "string") curForum.value = Number(forum);
-  firstLoad.value = true;
   showLoading.start(`正在获取${getGameName(curGid.value)}帖子数据...`);
   const gameLabel = getGameLabel(curGid.value);
   const forumLabel = getForumLabel(curGid.value, curForum.value);
@@ -166,6 +165,7 @@ onMounted(async () => {
   showLoading.update(`正在获取 ${gameLabel}-${forumLabel} 数据`);
   await freshPostData();
   curForumLabel.value = forumLabel;
+  firstLoad.value = true;
 });
 watch(
   () => curGid.value,
