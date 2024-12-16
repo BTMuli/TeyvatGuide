@@ -232,6 +232,7 @@ async function freshPostData(): Promise<void> {
   posts.value = postsGet.list;
   lastId.value = postsGet.last_id;
   isLast.value = postsGet.is_last;
+  showSnackbar.success(`刷新成功，共加载 ${postsGet.list.length} 条帖子`);
   await showLoading.end();
 }
 

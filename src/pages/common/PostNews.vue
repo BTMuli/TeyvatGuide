@@ -112,6 +112,9 @@ async function firstLoad(key: NewsType, refresh: boolean = false): Promise<void>
   triggerRef(rawData);
   await showLoading.end();
   await TGLogger.Info(`[News][${gid}][firstLoad] 获取${rawData.value[key].name}数据成功`);
+  showSnackbar.success(
+    `获取${gameName}${rawData.value[key].name}数据成功，共 ${getData.list.length} 条`,
+  );
 }
 
 async function switchAnno(): Promise<void> {
@@ -148,6 +151,7 @@ async function loadMore(key: NewsType): Promise<void> {
   }
   await showLoading.end();
   loading.value = false;
+  showSnackbar.success(`加载成功，共加载 ${getData.list.length} 条`);
 }
 
 async function searchPost(): Promise<void> {
