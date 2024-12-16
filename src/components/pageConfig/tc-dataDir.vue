@@ -61,9 +61,11 @@
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
+import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TGSqlite from "@Sqlite/index.js";
 import { path } from "@tauri-apps/api";
+import { sep } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { exists, readDir, remove } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
@@ -183,10 +185,15 @@ async function confirmCLD(): Promise<void> {
     showSnackbar.warn("无需清理!");
     return;
   }
+  showLoading.start("正在清理日志文件...");
   for (const file of delFiles) {
-    const filePath = `${logDir}/${file.name}`;
+    showLoading.update("正在清理日志文件...", `正在清理 ${file.name}`);
+    const filePath = `${logDir.value}${sep()}${file.name}`;
     await remove(filePath);
+    await new Promise<void>((resolve) => setTimeout(resolve, 200));
   }
+  await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+  showLoading.end();
   showSnackbar.success(`已清理 ${delFiles.length} 个日志文件!`);
 }
 
