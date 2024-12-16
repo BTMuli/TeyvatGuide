@@ -124,6 +124,7 @@
           { "url": "https://*.mihoyo.com/*" },
           { "url": "https://*.mihoyogift.com/*" },
           { "url": "https://*.bilibili.com/*" },
+          { "url": "http://*.hdslb.com/*" },
           { "url": "https://*.hoyoverse.com/*" },
           { "url": "https://*.genshinnet.com/*" }
         ]

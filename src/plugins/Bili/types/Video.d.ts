@@ -187,7 +187,7 @@ declare namespace TGApp.Plugins.Bili.Video {
    * @property {string} seek_type 视频跳转类型
    * @property {UrlDash} dash 视频播放地址
    * @property {UrlDurl[]} durl 视频播放地址
-   * @property {UrlFormats} support_formats 视频支持格式
+   * @property {UrlFormat[]} support_formats 视频支持格式
    * @property {unknown} high_format 视频高清格式
    * @property {number} last_play_time 视频上次播放时间
    * @property {number} last_play_cid 视频上次播放分P号
@@ -208,7 +208,7 @@ declare namespace TGApp.Plugins.Bili.Video {
     seek_type: string;
     dash: UrlDash; // dash 返回
     durl: UrlDurl[]; // mp4 返回
-    support_formats: UrlFormats;
+    support_formats: UrlFormat[];
     high_format: unknown;
     last_play_time: number;
     last_play_cid: number;
@@ -331,7 +331,7 @@ declare namespace TGApp.Plugins.Bili.Video {
    * @property {unknown} codecs 视频编码
    * @return UrlFormats
    */
-  interface UrlFormats {
+  interface UrlFormat {
     quality: number;
     format: string;
     new_description: string;

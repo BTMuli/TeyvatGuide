@@ -4,6 +4,7 @@
  * @since Beta v0.5.0
  */
 
+import headerBili from "@Bili/utils/getHeader.js";
 import getWrid from "@Bili/utils/getWrid.js";
 
 import TGHttp from "@/utils/TGHttp.js";
@@ -18,22 +19,13 @@ import TGHttp from "@/utils/TGHttp.js";
  */
 async function getVideoUrl(cid: number, bvid: string): Promise<TGApp.Plugins.Bili.Video.UrlData> {
   const url = "https://api.bilibili.com/x/player/playurl";
-  let params: Record<string, string> = {
-    bvid,
-    cid: cid.toString(),
-    fnval: "16",
-    platform: "pc",
-  };
+  let params: Record<string, string> = { bvid, cid: cid.toString(), fnval: "16", platform: "pc" };
   const wridRes = await getWrid(params);
-  params = {
-    ...params,
-    wts: wridRes[0],
-    wrid: wridRes[1],
-  };
+  params = { ...params, wts: wridRes[0], w_rid: wridRes[1] };
   const resp = await TGHttp<TGApp.Plugins.Bili.Video.UrlResponse>(url, {
     method: "GET",
     query: params,
-    headers: { referer: "https://www.bilibili.com/" },
+    headers: headerBili,
   });
   return resp.data;
 }

@@ -232,3 +232,20 @@ export function getZhElement(element: string): string {
       return "未知";
   }
 }
+
+/**
+ * @description 获取视频时长
+ * @since Beta v0.5.7
+ * @param {number} duration - 视频时长（秒）
+ * @returns {string} 视频时长
+ */
+export function getVideoDuration(duration: number): string {
+  const seconds = duration % 60;
+  const minutes = Math.floor(duration / 60) % 60;
+  const hours = Math.floor(duration / 3600);
+  let result = "";
+  if (hours > 0) result += `${hours.toString().padStart(2, "0")}:`;
+  result += `${minutes.toString().padStart(2, "0")}:`;
+  result += `${seconds.toString().padStart(2, "0")}`;
+  return result;
+}

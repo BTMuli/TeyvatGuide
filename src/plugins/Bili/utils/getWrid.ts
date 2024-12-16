@@ -43,13 +43,12 @@ async function getMixinKey(): Promise<string> {
  * @param {Record<string,string|number>} params 请求参数
  * @returns {Promise<[string|string]>} wrid
  */
-async function getWrid(params: Record<string, string | number>): Promise<[string, string]> {
+async function getWrid(
+  params: Record<string, string | number | boolean>,
+): Promise<[string, string]> {
   const mixin_key = await getMixinKey();
   const wts = Math.floor(Date.now() / 1000);
-  const obj: Record<string, string | number> = {
-    ...params,
-    wts,
-  };
+  const obj: Record<string, string | number> = { ...params, wts };
   const keys = Object.keys(obj).sort();
   let md5Str = "";
   for (let i = 0; i < keys.length; i++) {

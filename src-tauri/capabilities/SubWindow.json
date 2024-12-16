@@ -35,31 +35,59 @@
     "core:window:default",
     {
       "identifier": "fs:allow-exists",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-mkdir",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-read-dir",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-read-text-file",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-remove",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-write-file",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-write-text-file",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
     },
     {
       "identifier": "http:default",
@@ -75,6 +103,9 @@
         },
         {
           "url": "https://*.bilibili.com/*"
+        },
+        {
+          "url": "http://*.hdslb.com/*"
         },
         {
           "url": "https://*.hoyoverse.com/*"
