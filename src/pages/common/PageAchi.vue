@@ -58,7 +58,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TuaAchiList from "@comp/userAchi/tua-achi-list.vue";
 import TuaSeries from "@comp/userAchi/tua-series.vue";
 import TSUserAchi from "@Sqlite/modules/userAchi.js";
-import { path } from "@tauri-apps/api";
+import { path, window } from "@tauri-apps/api";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
@@ -92,13 +92,15 @@ const title = computed<string>(() => {
 });
 
 onMounted(async () => {
-  showLoading.start("正在加载成就数据...");
+  await showLoading.start("正在加载成就数据");
   await TGLogger.Info("[Achievements][onMounted] 打开成就页面");
+  await showLoading.update("正在读取UID列表");
   uidList.value = await TSUserAchi.getAllUid();
   if (uidList.value.length === 0) uidList.value = [0];
   uidCur.value = uidList.value[0];
+  await showLoading.update("正在获取成就概况");
   await refreshOverview();
-  showLoading.end();
+  await showLoading.end();
   if (route.query.app && typeof route.query.app === "string") {
     await handleImportOuter(route.query.app);
   }
@@ -131,8 +133,13 @@ async function importJson(): Promise<void> {
     await TGLogger.Info("[Achievements][importJson] 已取消文件选择");
     return;
   }
+  await showLoading.start("正在导入数据", "正在验证数据");
   const check = await verifyUiafData(selectedFile);
-  if (!check) return;
+  if (!check) {
+    await showLoading.end();
+    return;
+  }
+  await showLoading.end();
   let uidInput = await showDialog.input("请输入存档UID", "UID:", uidCur.value.toString());
   if (uidInput === false) {
     showSnackbar.cancel("已取消存档导入");
@@ -143,18 +150,13 @@ async function importJson(): Promise<void> {
     showSnackbar.warn("请输入合法数字");
     return;
   }
-  showLoading.start("正在导入数据", "正在解析数据");
+  await showLoading.start("正在导入数据", `存档UID：${uidInput}`);
   const remoteRaw = await readUiafData(selectedFile);
-  await TGLogger.Info("[Achievements][importJson] 读取 UIAF 数据成功");
-  await TGLogger.Info(`[Achievements][importJson] 导入来源：${remoteRaw.info.export_app}`);
-  await TGLogger.Info(`[Achievements][importJson] 导入版本：${remoteRaw.info.export_app_version}`);
-  await TGLogger.Info(`[Achievements][importJson] 导入时间：${remoteRaw.info.export_timestamp}`);
-  await TGLogger.Info(`[Achievements][importJson] 导入数据：${remoteRaw.list.length} 条`);
-  await TGLogger.Info(`[Achievements][importJson] 导入存档：${uidInput}`);
-  showLoading.update("正在导入数据", "正在合并数据");
   await TSUserAchi.mergeUiaf(remoteRaw.list, Number(uidInput));
-  showLoading.end();
-  setTimeout(() => window.location.reload(), 1000);
+  await showLoading.end();
+  showSnackbar.success("导入成功，即将刷新页面");
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+  window.location.reload();
 }
 
 async function exportJson(): Promise<void> {
@@ -192,10 +194,15 @@ async function handleImportOuter(app: string): Promise<void> {
     showSnackbar.cancel("已取消导入");
     return;
   }
-  // 读取 剪贴板
+  await showLoading.start("正在导入数据", "正在读取剪贴板");
   const clipboard = await window.navigator.clipboard.readText();
+  await showLoading.update("正在验证数据");
   const check = await verifyUiafDataClipboard();
-  if (!check) return;
+  if (!check) {
+    await showLoading.end();
+    return;
+  }
+  await showLoading.end();
   let uidInput = await showDialog.input("请输入存档UID", "UID:", uidCur.value.toString());
   if (uidInput === false) {
     showSnackbar.cancel("已取消存档导入");
@@ -207,12 +214,13 @@ async function handleImportOuter(app: string): Promise<void> {
     return;
   }
   const data: TGApp.Plugins.UIAF.Data = JSON.parse(clipboard);
-  showLoading.start("正在导入数据", "正在解析数据");
+  await showLoading.start("正在导入数据", `存档UID：${uidInput}`);
   await TSUserAchi.mergeUiaf(data.list, Number(uidInput));
-  showLoading.end();
+  await showLoading.end();
   showSnackbar.success("导入成功，即将刷新页面");
   await TGLogger.Info("[Achievements][handleImportOuter] 导入成功");
-  setTimeout(async () => await router.push("/achievements"), 1500);
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+  await router.push("/achievements");
 }
 
 async function createUid(): Promise<void> {

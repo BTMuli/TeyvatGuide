@@ -72,7 +72,6 @@ const gameSelectList = TGConstant.BBS.CHANNELS;
 const curGid = ref<string>(gameSelectList[0].gid);
 
 onMounted(async () => {
-  showLoading.start("正在加载首页...");
   // @ts-expect-error-next-line The import.meta meta-property is not allowed in files which will build into CommonJS output.
   const isProdEnv = import.meta.env.MODE === "production";
   if (isProdEnv && devMode.value) devMode.value = false;
@@ -81,14 +80,13 @@ onMounted(async () => {
 
 watch(
   () => components.value,
-  (cur, old) => {
+  async (cur, old) => {
     const newComp = cur.filter((i) => !old.includes(i));
-    if (newComp.length === 0) showLoading.end();
+    if (newComp.length === 0) await showLoading.end();
   },
 );
 
 async function loadComp(): Promise<void> {
-  showLoading.start("正在加载首页...");
   const temp: Array<SFComp> = [];
   for (const item of showItems.value) {
     switch (item) {
@@ -103,7 +101,7 @@ async function loadComp(): Promise<void> {
         break;
     }
   }
-  showLoading.update("正在加载首页...", `正在加载：${showItems.value.join("、")}`);
+  await showLoading.start(`正在加载：${showItems.value.join("、")}`);
   components.value = temp;
   await TGLogger.Info(`[Home][loadComp] 打开首页，当前显示：${showItems.value.join("、")}`);
 }
@@ -136,10 +134,10 @@ async function loadEnd(item: SFComp): Promise<void> {
   const compName = getName(item.__name ?? "");
   if (!compName) return;
   await TGLogger.Info(`[Home][loadEnd] ${compName} 加载完成`);
-  showLoading.update("正在加载首页...", `${compName} 加载完成`);
+  await showLoading.update(`${compName} 加载完成`);
   if (!loadItems.value.includes(compName)) loadItems.value.push(compName);
   else showSnackbar.warn(`${compName} 已加载`);
-  if (loadItems.value.length === components.value.length) showLoading.end();
+  if (loadItems.value.length === components.value.length) await showLoading.end();
 }
 </script>
 <style lang="css" scoped>

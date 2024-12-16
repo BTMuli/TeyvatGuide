@@ -78,7 +78,6 @@ import { useRoute } from "vue-router";
 
 import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
-import { getGameName } from "@/web/utils/tools.js";
 
 type SortSelect = { text: string; value: number };
 type SortSelectGame = { gid: number; forum: Array<SortSelect>; text: string };
@@ -158,11 +157,9 @@ const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
 onMounted(async () => {
   if (gid && typeof gid === "string") curGid.value = Number(gid);
   if (forum && typeof forum === "string") curForum.value = Number(forum);
-  showLoading.start(`正在获取${getGameName(curGid.value)}帖子数据...`);
   const gameLabel = getGameLabel(curGid.value);
   const forumLabel = getForumLabel(curGid.value, curForum.value);
   await TGLogger.Info(`[Posts][${gameLabel}][onMounted][${forumLabel}] 打开帖子列表`);
-  showLoading.update(`正在获取 ${gameLabel}-${forumLabel} 数据`);
   await freshPostData();
   curForumLabel.value = forumLabel;
   firstLoad.value = true;
@@ -222,19 +219,20 @@ function getSortLabel(value: number): string {
 }
 
 async function freshPostData(): Promise<void> {
+  await showLoading.start(`正在刷新${getGameLabel(curGid.value)}帖子`);
   const gameLabel = getGameLabel(curGid.value);
   const forumLabel = getForumLabel(curGid.value, curForum.value);
   const sortLabel = getSortLabel(curSortType.value);
   await TGLogger.Info(
     `[Posts][${gameLabel}][freshPostData][${forumLabel}][${sortLabel}] 刷新帖子列表`,
   );
-  showLoading.update(`正在刷新 ${gameLabel}-${forumLabel}-${sortLabel} 数据`);
+  await showLoading.update(`版块：${forumLabel}，排序：${sortLabel}`);
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
   const postsGet = await Mys.Post.getForumPostList(curForum.value, curSortType.value);
   posts.value = postsGet.list;
   lastId.value = postsGet.last_id;
   isLast.value = postsGet.is_last;
-  showLoading.end();
+  await showLoading.end();
 }
 
 async function loadMore(): Promise<void> {
@@ -242,13 +240,16 @@ async function loadMore(): Promise<void> {
     showSnackbar.warn("没有更多帖子了");
     return;
   }
-  showLoading.start("正在加载更多帖子数据...");
+  await showLoading.start("正在加载更多帖子数据", `游戏：${getGameLabel(curGid.value)}`);
   const postsGet = await Mys.Post.getForumPostList(curForum.value, curSortType.value, lastId.value);
+  await showLoading.update(
+    `版块：${curForumLabel.value}，排序：${getSortLabel(curSortType.value)}，数量：${postsGet.list.length}`,
+  );
   posts.value = posts.value.concat(postsGet.list);
   lastId.value = postsGet.last_id;
   isLast.value = postsGet.is_last;
   showSnackbar.success(`加载成功，共加载 ${postsGet.list.length} 条帖子`);
-  showLoading.end();
+  await showLoading.end();
 }
 
 function searchPost(): void {

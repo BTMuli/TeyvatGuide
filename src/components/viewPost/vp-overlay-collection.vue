@@ -73,7 +73,7 @@ watch(
   () => visible.value,
   async (value) => {
     if (value) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise<void>((resolve) => setTimeout(resolve, 500));
       if (postListEl.value === null || props.collection.total < 5) return;
       let topNum: number;
       if (props.collection.total - props.collection.cur < 3) topNum = props.collection.total;

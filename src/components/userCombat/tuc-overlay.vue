@@ -69,15 +69,15 @@ function getBoxData(item: TGApp.Plugins.Hutao.Base.Rate): TItemBoxData {
 }
 
 async function share(): Promise<void> {
-  showLoading.start("正在生成分享图");
   const element = document.querySelector<HTMLElement>(".tuc-overlay-box");
   if (element === null) {
     showSnackbar.error("未获取到分享内容");
     return;
   }
   const fileName = `真境剧诗_${new Date().getTime()}.png`;
+  await showLoading.start("正在生成分享图", fileName);
   await generateShareImg(fileName, element, 1.2, true);
-  showLoading.end();
+  await showLoading.end();
 }
 </script>
 <style lang="css" scoped>

@@ -19,14 +19,16 @@ const showToli = ref<boolean>(false);
 
 watch(
   () => props.modelValue,
-  () => {
+  async () => {
     if (props.modelValue) {
       showTolo.value = true;
       showToli.value = true;
       return;
     }
-    setTimeout(() => (showToli.value = false), 100);
-    setTimeout(() => (showTolo.value = false), 300);
+    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+    showToli.value = false;
+    await new Promise<void>((resolve) => setTimeout(resolve, 300));
+    showTolo.value = false;
   },
 );
 

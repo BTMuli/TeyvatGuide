@@ -122,34 +122,33 @@ function getGameIcon(gameId: number): string {
 }
 
 onMounted(async () => {
+  await showLoading.start(`正在加载帖子数据`);
   appVersion.value = await app.getVersion();
-  showLoading.start(`正在加载帖子数据...`);
-  // 检查数据
   if (!postId) {
-    showLoading.empty("未找到数据", "PostID 不存在");
+    await showLoading.empty("PostID 不存在");
     await webviewWindow.getCurrentWebviewWindow().setTitle("未找到数据");
     await TGLogger.Error("[t-post][onMounted] PostID 不存在");
     return;
   }
-  showLoading.update("正在获取数据...", `帖子ID: ${postId}`);
+  await showLoading.update(`帖子ID: ${postId}`);
   const resp = await Mys.Post.getPostFull(postId);
   if ("retcode" in resp) {
-    showLoading.empty(`[code]${resp.retcode}`, resp.message);
+    await showLoading.empty("数据加载失败", `[${resp.retcode}]${resp.message}`);
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     await webviewWindow.getCurrentWebviewWindow().setTitle(`Post_${postId} ${resp.message}`);
     await TGLogger.Error(`[t-post][${postId}][onMounted] ${resp.retcode}: ${resp.message}`);
     return;
   }
   postData.value = resp;
-  showLoading.update("正在渲染数据...", `帖子ID: ${postId}`);
+  await showLoading.update("正在渲染数据");
   renderPost.value = getRenderPost(postData.value);
   await webviewWindow
     .getCurrentWebviewWindow()
     .setTitle(`Post_${postId} ${postData.value.post.subject}`);
   await TGLogger.Info(`[t-post][${postId}][onMounted] ${postData.value.post.subject}`);
-  // 打开 json
   const isDev = useAppStore().devMode ?? false;
   if (isDev) {
+    await showLoading.update("正在打开调试窗口");
     await TGLogger.Info(`[t-post][${postId}][onMounted] 打开 JSON 窗口`);
     await createPostJson(postId);
   }
@@ -158,7 +157,7 @@ onMounted(async () => {
     shareTimer = null;
   }
   shareTimer = setInterval(getShareTimer, 1000);
-  showLoading.end();
+  await showLoading.end();
 });
 
 function getShareTimer(): void {

@@ -34,17 +34,17 @@ const appVersion = ref<string>();
 const annoData = shallowRef<TGApp.BBS.Announcement.ContentItem>();
 
 onMounted(async () => {
-  showLoading.start("正在加载公告数据...");
+  await showLoading.start("正在加载公告数据");
   appVersion.value = await app.getVersion();
   if (!annoId || !region) {
-    showLoading.empty("未找到数据", "公告不存在或解析失败");
+    await showLoading.empty("未找到数据", "未解析到公告ID或服务器");
     await TGLogger.Error("[t-anno.vue] 未找到数据");
     return;
   }
-  showLoading.update("正在获取数据...", `公告ID:${annoId}`);
+  await showLoading.update("正在获取数据");
   try {
     annoData.value = await Hk4eApi.anno.content(annoId, region, lang);
-    showLoading.update("正在渲染数据...", `公告ID：${annoId}`);
+    await showLoading.update("正在渲染数据");
     await webviewWindow
       .getCurrentWebviewWindow()
       .setTitle(`Anno_${annoId} ${annoData.value.title}`);
@@ -52,14 +52,13 @@ onMounted(async () => {
     if (error instanceof Error)
       await TGLogger.Error(`[t-anno.vue][${annoId}] ${error.name}：${error.message}`);
     else console.error(error);
-    showLoading.empty("未找到数据", "公告不存在或解析失败");
+    await showLoading.empty("未找到数据", "公告不存在或解析失败");
     await webviewWindow.getCurrentWebviewWindow().setTitle(`Anno_${annoId} Parsing Error`);
     return;
   }
-  // 打开 json
   const isDev = useAppStore().devMode ?? false;
   if (isDev) await createAnnoJson(annoId, region, lang);
-  showLoading.end();
+  await showLoading.end();
 });
 
 function parseText(title: string): string {

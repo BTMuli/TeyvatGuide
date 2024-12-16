@@ -101,15 +101,16 @@ async function firstLoad(key: NewsType, refresh: boolean = false): Promise<void>
     postData.value[key] = [];
     rawData.value[key].lastId = 0;
   }
-  showLoading.start(`正在获取${gameName}${rawData.value[key].name}数据...`);
+  await showLoading.start(`正在获取${gameName}${rawData.value[key].name}数据`);
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
   const getData = await Mys.Painter.getNewsList(gid, NewsTypeEnum[key]);
+  await showLoading.update(`数量：${getData.list.length}，是否最后一页：${getData.is_last}`);
   rawData.value[key].isLast = getData.is_last;
   rawData.value[key].lastId = getData.list.length;
   postData.value[key] = getData.list;
   triggerRef(postData);
   triggerRef(rawData);
-  showLoading.end();
+  await showLoading.end();
   await TGLogger.Info(`[News][${gid}][firstLoad] 获取${rawData.value[key].name}数据成功`);
 }
 
@@ -126,25 +127,26 @@ async function loadMore(key: NewsType): Promise<void> {
     loading.value = false;
     return;
   }
-  showLoading.start(`正在获取${gameName}${rawData.value[key].name}数据...`);
+  await showLoading.start(`正在获取${gameName}${rawData.value[key].name}数据`);
   const getData = await Mys.Painter.getNewsList(
     gid,
     NewsTypeEnum[key],
     20,
     rawData.value[key].lastId,
   );
+  await showLoading.update(`数量：${getData.list.length}，是否最后一页：${getData.is_last}`);
   rawData.value[key].lastId = rawData.value[key].lastId + getData.list.length;
   rawData.value[key].isLast = getData.is_last;
   postData.value[key] = postData.value[key].concat(getData.list);
   triggerRef(postData);
   triggerRef(rawData);
   if (rawData.value[key].isLast) {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.warn("已经是最后一页了");
     loading.value = false;
     return;
   }
-  showLoading.end();
+  await showLoading.end();
   loading.value = false;
 }
 

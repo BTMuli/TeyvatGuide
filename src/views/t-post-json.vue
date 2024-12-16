@@ -24,18 +24,19 @@ const jsonData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
 const parseData = shallowRef<Array<TGApp.Plugins.Mys.SctPost.Base>>();
 
 onMounted(async () => {
-  showLoading.start(`正在获取帖子数据...`);
+  await showLoading.start(`正在获取帖子数据`);
   if (!postId) {
-    showLoading.empty("错误的帖子ID！");
+    await showLoading.empty("未获取到PostID");
     return;
   }
   const resp = await Mys.Post.getPostFull(postId);
   if ("retcode" in resp) {
-    showLoading.empty("获取数据失败", `[${resp.retcode}]${resp.message}`);
+    await showLoading.empty("获取数据失败", `[${resp.retcode}]${resp.message}`);
     showSnackbar.error(`[${resp.retcode}]${resp.message}`);
     await TGLogger.Error(`[${postId}]获取帖子数据失败：${resp.retcode} ${resp.message}`);
     return;
   }
+  await showLoading.update("正在渲染帖子数据");
   jsonData.value = resp;
   try {
     parseData.value = JSON.parse(jsonData.value.post.content);
@@ -48,7 +49,7 @@ onMounted(async () => {
     }
     console.warn(`[${postId}]解析帖子数据失败：${err}`);
   }
-  showLoading.end();
+  await showLoading.end();
 });
 </script>
 <style lang="css" scoped>

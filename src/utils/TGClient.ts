@@ -29,10 +29,12 @@ type InvokeArg = { func: string };
 class Client {
   private listener: UnlistenFn | undefined;
   private route: string[] = [];
+
   private constructor() {
     this.route = [];
     this.listener = undefined;
   }
+
   private static instance: Client | null = null;
 
   static getInstance(): Client {
@@ -690,7 +692,7 @@ class Client {
     const appWindow = await webviewWindow.WebviewWindow.getByLabel("TeyvatGuide");
     await appWindow?.setFocus();
     showSnackbar.error(`不支持的操作：OpenApplication(${JSON.stringify(arg.payload)})`);
-    await new Promise<void>((resolve) => setTimeout(() => resolve(), 1500));
+    await new Promise<void>((resolve) => setTimeout(resolve, 1500));
     const windowFind = await webviewWindow.WebviewWindow.getByLabel("mhy_client");
     if (windowFind !== null) await windowFind.setFocus();
   }
@@ -727,11 +729,7 @@ class Client {
         await appWindow.setFocus();
       }
       showSnackbar.error(`未知链接:${arg.payload.page}`, 3000);
-      await new Promise<void>((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, 3000);
-      });
+      await new Promise<void>((resolve) => setTimeout(resolve, 3000));
       const windowFind = await webviewWindow.WebviewWindow.getByLabel("mhy_client");
       if (windowFind !== null) {
         await windowFind.setFocus();
@@ -894,10 +892,8 @@ class Client {
       }
     }
     console.warn("[share]", arg.payload);
-    // 延时 3s
-    setTimeout(async () => {
-      await this.callback(arg.callback, {});
-    }, 10000);
+    await new Promise<void>((resolve) => setTimeout(resolve, 3000));
+    await this.callback(arg.callback, {});
   }
 }
 

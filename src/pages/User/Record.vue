@@ -81,11 +81,11 @@ const uidList = shallowRef<Array<number>>([]);
 const recordData = shallowRef<TGApp.Sqlite.Record.RenderData>();
 
 onMounted(async () => {
-  showLoading.start("正在获取战绩数据...");
+  await showLoading.start("正在获取战绩数据");
   await TGLogger.Info("[UserRecord][onMounted] 打开角色战绩页面");
   version.value = await getVersion();
   await loadUid();
-  showLoading.end();
+  await showLoading.end();
 });
 
 watch(() => uidCur.value, loadRecord);
@@ -131,11 +131,11 @@ async function refreshRecord(): Promise<void> {
       return;
     }
   }
-  showLoading.start("正在刷新战绩数据...");
+  await showLoading.start(`正在刷新${account.value.gameUid}的战绩数据`);
   await TGLogger.Info(`[UserRecord][refresh][${account.value.gameUid}] 刷新战绩数据`);
   const res = await TakumiRecordGenshinApi.index(cookie.value, account.value);
   if ("retcode" in res) {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error(`[${res.retcode}] ${res.message}`);
     await TGLogger.Error(`[UserRecord][refresh][${account.value.gameUid}] 获取战绩数据失败`);
     await TGLogger.Error(
@@ -143,16 +143,15 @@ async function refreshRecord(): Promise<void> {
     );
     return;
   }
-  await TGLogger.Info(`[UserRecord][refresh][${account.gameUid}] 获取战绩数据成功`);
+  await TGLogger.Info(`[UserRecord][refresh][${account.value.gameUid}] 获取战绩数据成功`);
   await TGLogger.Info(`[UserRecord][refresh][${account.value.gameUid}]`, false);
   console.log(res);
-  showLoading.update("正在保存战绩数据");
+  await showLoading.update("正在保存战绩数据");
   await TSUserRecord.saveRecord(Number(account.value.gameUid), res);
-  showLoading.update("正在加载战绩数据");
+  await showLoading.update("正在加载战绩数据");
   await loadUid();
   await loadRecord();
-  if (recordData.value === undefined) await loadRecord();
-  showLoading.end();
+  await showLoading.end();
 }
 
 async function shareRecord(): Promise<void> {
@@ -166,10 +165,10 @@ async function shareRecord(): Promise<void> {
     showSnackbar.error("未找到战绩数据，请尝试刷新");
     return;
   }
-  const fileName = `【原神战绩】-${account.value.gameUid}`;
-  showLoading.start("正在生成图片", fileName);
+  const fileName = `【原神战绩】-${account.value.gameUid}.png`;
+  await showLoading.start("正在生成图片", fileName);
   await generateShareImg(fileName, recordBox);
-  showLoading.end();
+  await showLoading.end();
   await TGLogger.Info(`[UserRecord][shareRecord][${account.value.gameUid}] 生成分享图片成功`);
 }
 

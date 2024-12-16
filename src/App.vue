@@ -157,7 +157,7 @@ async function checkUserLoad(): Promise<void> {
   if (curAccount === false) {
     showSnackbar.error(`未获取到${uid.value}的账号数据！`);
     await TGLogger.Error(`[App][listenOnInit] 获取${uid.value}账号数据失败`);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise<void>((resolve) => setTimeout(resolve, 1000));
   } else {
     briefInfo.value = curAccount.brief;
     cookie.value = curAccount.cookie;

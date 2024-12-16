@@ -25,14 +25,17 @@ const geetestEl = useTemplateRef<HTMLDivElement>("geetestRef");
 
 watch(
   () => show.value,
-  () => {
+  async () => {
     if (show.value) {
       showOuter.value = true;
-      setTimeout(() => (showInner.value = true), 100);
-    } else {
-      setTimeout(() => (showInner.value = false), 100);
-      setTimeout(() => (showOuter.value = false), 300);
+      await new Promise<void>((resolve) => setTimeout(resolve, 100));
+      showInner.value = true;
+      return;
     }
+    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+    showInner.value = false;
+    await new Promise<void>((resolve) => setTimeout(resolve, 300));
+    showOuter.value = false;
   },
 );
 

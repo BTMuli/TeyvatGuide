@@ -155,7 +155,7 @@ const isNeedResize = ref<boolean>(needResize.value !== "false");
 const cacheSize = ref<number>(0);
 
 onMounted(async () => {
-  showLoading.start("正在获取应用信息...");
+  await showLoading.start("正在加载设置页面", "正在获取缓存大小");
   await TGLogger.Info("[Config] 打开设置页面");
   const cacheDir = await getCacheDir();
   if (cacheDir === false) return;
@@ -164,8 +164,9 @@ onMounted(async () => {
     const size: number = await core.invoke("get_dir_size", { path: dir });
     cacheBSize += size;
   }
+  await showLoading.update(`缓存大小：${bytesToSize(cacheBSize)}`);
   cacheSize.value = cacheBSize;
-  showLoading.end();
+  await showLoading.end();
 });
 
 // 备份数据
@@ -189,9 +190,9 @@ async function confirmBackup(): Promise<void> {
     await TGLogger.Info(`[Config][confirmBackup] 选择备份路径 ${dir.toString()}`);
     saveDir = dir;
   } else await TGLogger.Info(`[Config][confirmBackup] 备份到默认路径 ${saveDir}`);
-  showLoading.start("正在备份数据...");
+  await showLoading.start("正在备份数据");
   await backUpUserData(saveDir);
-  showLoading.end();
+  await showLoading.end();
   showSnackbar.success("数据已备份!");
   await TGLogger.Info("[Config][confirmBackup] 备份完成");
 }
@@ -217,9 +218,9 @@ async function confirmRestore(): Promise<void> {
     await TGLogger.Info(`[Config][confirmRestore] 选择恢复路径 ${dir.toString()}`);
     saveDir = dir;
   } else await TGLogger.Info(`[Config][confirmRestore] 恢复到默认路径 ${saveDir}`);
-  showLoading.start("正在恢复数据...");
+  await showLoading.start("正在恢复数据");
   await restoreUserData(saveDir);
-  showLoading.end();
+  await showLoading.end();
   showSnackbar.success("数据已恢复!");
   await TGLogger.Info("[Config][confirmRestore] 恢复完成");
 }
@@ -231,12 +232,13 @@ async function confirmUpdate(title?: string): Promise<void> {
     showSnackbar.cancel("已取消更新数据库");
     return;
   }
-  showLoading.start("正在更新数据库...");
+  await showLoading.start("正在更新数据库", "");
   await TGSqlite.update();
   buildTime.value = getBuildTime();
-  showLoading.end();
-  showSnackbar.success("数据库已更新!");
+  await showLoading.end();
+  showSnackbar.success("数据库已更新!即将刷新页面");
   await TGLogger.Info("[Config][confirmUpdate] 数据库更新完成");
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
   window.location.reload();
 }
 
@@ -333,13 +335,14 @@ async function confirmDelCache(): Promise<void> {
     return;
   }
   let cacheBSize: number = 0;
-  showLoading.start("正在检测缓存...");
+  await showLoading.start("正在检测缓存");
   for (const dir of CacheDir) {
     const size: number = await core.invoke("get_dir_size", { path: dir });
     cacheBSize += size;
   }
+  await showLoading.update(`缓存大小：${bytesToSize(cacheBSize)}`);
   cacheSize.value = cacheBSize;
-  showLoading.end();
+  await showLoading.end();
   const delCheck = await showDialog.check(
     "确认清除缓存吗？",
     `当前缓存大小为 ${bytesToSize(cacheBSize)}`,
@@ -349,15 +352,16 @@ async function confirmDelCache(): Promise<void> {
     await TGLogger.Info("[Config][confirmDelCache] 取消清除缓存");
     return;
   }
-  showLoading.start("正在清除缓存...");
+  await showLoading.start("正在清除缓存");
   for (const dir of CacheDir) {
-    showLoading.update("正在清除缓存...", dir);
+    await showLoading.update(dir);
     await remove(dir, { recursive: true });
   }
-  showLoading.end();
+  await showLoading.end();
   await TGLogger.Info("[Config][confirmDelCache] 缓存清除完成");
   showSnackbar.success("缓存已清除!即将退出应用！");
-  setTimeout(async () => await exit(), 1000);
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+  await exit();
 }
 
 // 恢复默认设置
@@ -372,8 +376,9 @@ async function confirmResetApp(): Promise<void> {
   appStore.init();
   homeStore.init();
   await TGLogger.Info("[Config][confirmResetApp] 恢复默认设置完成");
-  showSnackbar.success("已恢复默认配置!即将刷新页面...");
-  setTimeout(() => window.location.reload(), 1500);
+  showSnackbar.success("已恢复默认配置!即将刷新页面");
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+  window.location.reload();
 }
 
 // 前置
@@ -405,12 +410,13 @@ async function confirmResetDB(title?: string): Promise<void> {
     await TGLogger.Info("[Config][confirmResetDB] 取消重置数据库");
     return;
   }
-  showLoading.start("正在重置数据库...");
+  await showLoading.start("正在重置数据库");
   await TGSqlite.reset();
-  showLoading.end();
+  await showLoading.end();
   await TGLogger.Info("[Config][confirmResetDB] 数据库重置完成");
-  showSnackbar.success("数据库已重置!请进行再次检查。");
-  setTimeout(() => window.location.reload(), 1500);
+  showSnackbar.success("数据库已重置!即将刷新页面");
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+  window.location.reload();
 }
 
 // 开启 dev 模式

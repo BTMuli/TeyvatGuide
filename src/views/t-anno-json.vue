@@ -25,12 +25,12 @@ const jsonList = shallowRef<TGApp.BBS.Announcement.AnnoSingle>();
 const jsonContent = shallowRef<TGApp.BBS.Announcement.ContentItem>();
 
 onMounted(async () => {
-  showLoading.start("正在获取公告数据...");
+  await showLoading.start("正在获取公告数据");
   if (!annoId) {
-    showLoading.empty("未找到数据");
+    await showLoading.empty("未找到数据");
     return;
   }
-  showLoading.update("正在获取数据...", `公告ID: ${annoId}`);
+  await showLoading.update(`公告ID: ${annoId}`);
   const listData = await Hk4eApi.anno.list(region, lang);
   for (const listItem of listData.list) {
     for (const single of listItem.list) {
@@ -41,7 +41,7 @@ onMounted(async () => {
     }
   }
   jsonContent.value = await Hk4eApi.anno.content(annoId, region, lang);
-  showLoading.end();
+  await showLoading.end();
 });
 </script>
 <style lang="css" scoped>

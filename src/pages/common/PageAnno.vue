@@ -120,25 +120,25 @@ onMounted(async () => {
 });
 
 async function loadData(): Promise<void> {
-  showLoading.start(
+  await showLoading.start(
     "正在获取公告数据",
     `服务器：${getRegionName(server.value)}，语言：${getLangName(lang.value)}`,
   );
   const annoData = await Hk4eApi.anno.list(server.value, lang.value);
   const listCards = getAnnoCard(annoData);
-  await Promise.all(
-    listCards.map(async (item) => {
-      if (item.typeLabel === AnnoType.game) return;
-      const detail = await Hk4eApi.anno.content(item.id, server.value, "zh-cn");
-      const timeStr = getAnnoTime(detail.content);
-      if (timeStr !== false) item.timeStr = timeStr;
-    }),
-  );
+  await showLoading.update("", { title: "正在解析游戏内公告时间" });
+  for (const item of listCards) {
+    if (item.typeLabel === AnnoType.game) continue;
+    const detail = await Hk4eApi.anno.content(item.id, server.value, "zh-cn");
+    const timeStr = getAnnoTime(detail.content);
+    if (timeStr !== false) item.timeStr = timeStr;
+    await showLoading.update(`[${item.id}]${item.subtitle}:${item.timeStr}`);
+  }
   annoCards.value = {
     activity: listCards.filter((item) => item.typeLabel === AnnoType.activity),
     game: listCards.filter((item) => item.typeLabel === AnnoType.game),
   };
-  showLoading.end();
+  await showLoading.end();
 }
 
 function getRegionName(value: AnnoServer): string {

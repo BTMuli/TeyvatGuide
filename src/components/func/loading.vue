@@ -11,7 +11,9 @@
                 <div />
               </div>
             </div>
-            <div class="loading-subtitle" v-show="data.subtitle !== ''">{{ data.subtitle }}</div>
+            <div class="loading-subtitle" v-show="data.subtitle && data.subtitle !== ''">
+              {{ data.subtitle }}
+            </div>
             <div class="loading-img">
               <img v-if="!empty" src="/source/UI/loading.webp" alt="loading" />
               <img v-else src="/source/UI/empty.webp" alt="empty" />
@@ -23,7 +25,7 @@
   </transition>
 </template>
 <script lang="ts" setup>
-import { ref, watch, onMounted, toRaw } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 
 import { LoadingParams } from "./loading.js";
 
@@ -32,36 +34,39 @@ const showOuter = ref<boolean>(false);
 const showInner = ref<boolean>(false);
 
 const props = defineProps<LoadingParams>();
-const data = ref<LoadingParams>(toRaw(props));
+const data = shallowRef<LoadingParams>(props);
 
 watch(
   () => showBox.value,
-  () => {
+  async () => {
     if (showBox.value) {
       showOuter.value = true;
-      setTimeout(() => (showInner.value = true), 100);
+      await new Promise<void>((resolve) => setTimeout(resolve, 100));
+      showInner.value = true;
       return;
     }
-    setTimeout(() => (showInner.value = false), 100);
-    setTimeout(() => (showOuter.value = false), 300);
+    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+    showInner.value = false;
+    await new Promise<void>((resolve) => setTimeout(resolve, 300));
+    showOuter.value = false;
   },
 );
 
-onMounted(() => displayBox(props));
+onMounted(async () => await displayBox(props));
 
-function displayBox(params: LoadingParams): void {
+async function displayBox(params: LoadingParams): Promise<void> {
   if (!params.show) {
     showBox.value = false;
-    setTimeout(() => {
-      data.value.title = "";
-      data.value.subtitle = "";
-      data.value.empty = false;
-    }, 500);
+    await new Promise<void>((resolve) => setTimeout(resolve, 500));
+    data.value = { show: false, title: undefined, subtitle: undefined, empty: undefined };
     return;
   }
-  data.value.title = params.title;
-  data.value.subtitle = params.subtitle;
-  data.value.empty = params.empty;
+  data.value = {
+    title: params.title || data.value.title,
+    subtitle: params.subtitle || data.value.subtitle,
+    empty: params.empty || data.value.empty,
+    show: true,
+  };
   showBox.value = true;
 }
 

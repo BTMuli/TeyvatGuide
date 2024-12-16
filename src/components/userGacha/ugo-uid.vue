@@ -128,17 +128,17 @@ async function selectFile(): Promise<void> {
 async function handleImportData(): Promise<void> {
   if (fp.value === "未选择") return;
   try {
-    showLoading.start("正在导入数据...", "正在验证数据...");
+    await showLoading.start("正在导入数据...", "正在验证数据...");
     const check = await verifyUigfData(fp.value, true);
     if (!check) {
-      showLoading.end();
+      await showLoading.end();
       return;
     }
-    showLoading.update("正在导入数据...", "正在读取数据...");
+    await showLoading.update("数据验证成功，正在读取数据...");
     const uigfData = await readUigf4Data(fp.value);
     dataRaw.value = uigfData;
     data.value = uigfData.hk4e.map(parseData);
-    showLoading.end();
+    await showLoading.end();
   } catch (e) {
     if (e instanceof Error) {
       showSnackbar.error(`[${e.name}] ${e.message}`);
@@ -179,45 +179,51 @@ function parseDataRaw(data: TGApp.Sqlite.GachaRecords.SingleTable[]): UgoUidItem
 }
 
 async function handleSelected(): Promise<void> {
-  if (props.mode === "import") {
-    if (!dataRaw.value) {
-      showSnackbar.error("未获取到数据!");
-      fp.value = "未选择";
-      return;
-    }
-    if (selectedData.value.length === 0) {
-      showSnackbar.warn("请至少选择一个!");
-      return;
-    }
-    for (const item of selectedData.value) {
-      showLoading.start("正在导入数据...", `正在导入UID: ${item.uid}`);
-      const dataFind = dataRaw.value.hk4e.find((i) => i.uid.toString() === item.uid);
-      if (!dataFind) {
-        showSnackbar.error(`未找到UID: ${item.uid}`);
-        await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-        continue;
-      }
-      await TSUserGacha.mergeUIGF4(dataFind);
-    }
-    showLoading.end();
-    showSnackbar.success("导入成功!");
+  if (props.mode === "import") return await handleImport();
+  return await handleExport();
+}
+
+async function handleImport(): Promise<void> {
+  if (!dataRaw.value) {
+    showSnackbar.error("未获取到数据!");
+    fp.value = "未选择";
     return;
   }
   if (selectedData.value.length === 0) {
     showSnackbar.warn("请至少选择一个!");
     return;
   }
-  showLoading.start("正在导出数据...", "正在生成文件头");
+  await showLoading.start("正在导入数据...");
+  for (const item of selectedData.value) {
+    await showLoading.update(`正在导入UID: ${item.uid}`);
+    const dataFind = dataRaw.value.hk4e.find((i) => i.uid.toString() === item.uid);
+    if (!dataFind) {
+      showSnackbar.error(`未找到UID: ${item.uid}`);
+      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+      continue;
+    }
+    await TSUserGacha.mergeUIGF4(dataFind);
+  }
+  await showLoading.end();
+  showSnackbar.success("导入成功!");
+}
+
+async function handleExport(): Promise<void> {
+  if (selectedData.value.length === 0) {
+    showSnackbar.warn("请至少选择一个!");
+    return;
+  }
+  await showLoading.start("正在导出数据...", "正在生成文件头");
   const header = await getUigf4Header();
   const data: TGApp.Plugins.UIGF.GachaHk4e[] = [];
   for (const item of selectedData.value) {
-    showLoading.update("正在导出数据...", `正在导出UID: ${item.uid}`);
+    await showLoading.update(`正在导出UID: ${item.uid}`);
     const dataItem = await getUigf4Item(item.uid);
     data.push(dataItem);
   }
-  showLoading.update("正在导出数据...", "正在生成文件...");
+  await showLoading.update("正在写入文件...");
   await writeTextFile(fp.value, JSON.stringify({ info: header, hk4e: data }));
-  showLoading.end();
+  await showLoading.end();
   showSnackbar.success(`导出成功! 文件路径: ${fp.value}`);
   fp.value = await getDefaultSavePath();
 }

@@ -24,7 +24,7 @@
             @click="useUserStore().switchGameAccount(ac.gameUid)"
           >
             <v-list-item-title>{{ ac.nickname }}</v-list-item-title>
-            <v-list-item-subtitle> {{ ac.gameUid }}({{ ac.regionName }}) </v-list-item-subtitle>
+            <v-list-item-subtitle> {{ ac.gameUid }}({{ ac.regionName }})</v-list-item-subtitle>
             <template #append>
               <div v-if="ac.gameUid === account.gameUid" title="当前登录账号">
                 <v-icon color="green">mdi-check</v-icon>
@@ -152,7 +152,7 @@ async function tryCaptchaLogin(): Promise<void> {
   }
   const loginResp = await tryLoginByCaptcha(phone, captcha, actionType);
   if (!loginResp) return;
-  showLoading.start("正在登录...");
+  await showLoading.start("正在尝试登录...");
   const ck: TGApp.App.Account.Cookie = {
     account_id: loginResp.user_info.aid,
     ltuid: loginResp.user_info.aid,
@@ -162,20 +162,20 @@ async function tryCaptchaLogin(): Promise<void> {
     stoken: loginResp.token.token,
     ltoken: "",
   };
-  showLoading.update("正在登录...", "正在获取 LToken");
+  await showLoading.update("正在获取 LToken");
   const ltokenRes = await PassportApi.lToken.get(ck);
   if (typeof ltokenRes !== "string") {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error(`[${ltokenRes.retcode}]${ltokenRes.message}`);
     await TGLogger.Error(`获取LToken失败：${ltokenRes.retcode}-${ltokenRes.message}`);
     return;
   }
   showSnackbar.success("获取LToken成功");
   ck.ltoken = ltokenRes;
-  showLoading.update("正在登录...", "正在获取 CookieToken");
+  await showLoading.update("正在获取 CookieToken");
   const cookieTokenRes = await PassportApi.cookieToken(ck);
   if (typeof cookieTokenRes !== "string") {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error(`[${cookieTokenRes.retcode}]${cookieTokenRes.message}`);
     await TGLogger.Error(
       `获取CookieToken失败：${cookieTokenRes.retcode}-${cookieTokenRes.message}`,
@@ -184,10 +184,10 @@ async function tryCaptchaLogin(): Promise<void> {
   }
   showSnackbar.success("获取CookieToken成功");
   ck.cookie_token = cookieTokenRes;
-  showLoading.update("正在登录...", "正在获取用户信息");
+  await showLoading.update("正在获取用户信息");
   const briefRes = await BBSApi.userInfo(ck);
   if ("retcode" in briefRes) {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
     await TGLogger.Error(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
     return;
@@ -199,7 +199,7 @@ async function tryCaptchaLogin(): Promise<void> {
     avatar: briefRes.avatar_url,
     desc: briefRes.introduce,
   };
-  showLoading.update("正在登录...", "正在保存用户数据");
+  await showLoading.update("正在保存用户数据");
   await TSUserAccount.account.saveAccount({
     uid: briefInfoGet.uid,
     cookie: ck,
@@ -210,10 +210,10 @@ async function tryCaptchaLogin(): Promise<void> {
   briefInfo.value = briefInfoGet;
   cookie.value = ck;
   isLogin.value = true;
-  showLoading.update("正在登录...", "正在获取游戏账号");
+  await showLoading.update("正在获取游戏账号");
   const gameRes = await TakumiApi.bind.gameRoles(cookie.value);
   if (!Array.isArray(gameRes)) {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error(`[${gameRes.retcode}]${gameRes.message}`);
     await TGLogger.Error(`获取游戏账号失败：${gameRes.retcode}-${gameRes.message}`);
     return;
@@ -223,11 +223,11 @@ async function tryCaptchaLogin(): Promise<void> {
   const curAccount = await TSUserAccount.game.getCurAccount(briefInfoGet.uid);
   if (!curAccount) {
     showSnackbar.warn("未检测到游戏账号，请重新刷新");
-    showLoading.end();
+    await showLoading.end();
     return;
   }
   account.value = curAccount;
-  showLoading.end();
+  await showLoading.end();
   showSnackbar.success("成功登录!");
 }
 
@@ -238,14 +238,14 @@ async function refreshUser(uid: string) {
     return;
   }
   let ck = account.cookie;
-  showLoading.start("正在刷新用户信息", "正在验证 LToken");
+  await showLoading.start("正在刷新用户信息", "正在验证 LToken");
   const verifyLTokenRes = await PassportApi.lToken.verify(ck);
   if (typeof verifyLTokenRes === "string") {
-    showLoading.update("正在刷新用户信息", "验证 LToken 成功");
+    await showLoading.update("验证 LToken 成功");
     showSnackbar.success("验证 LToken 成功");
     await TGLogger.Info("[tc-userBadge][refreshUser] 验证 LToken 成功");
   } else {
-    showLoading.update("正在刷新用户信息", "验证 LToken 失败");
+    await showLoading.update("验证 LToken 失败，将尝试重新获取 LToken");
     showSnackbar.error(`[${verifyLTokenRes.retcode}]${verifyLTokenRes.message}`);
     await TGLogger.Warn("[tc-userBadge][refreshUser] 验证 LToken 失败");
     await TGLogger.Warn(
@@ -253,11 +253,11 @@ async function refreshUser(uid: string) {
     );
     const ltokenRes = await PassportApi.lToken.get(ck);
     if (typeof ltokenRes === "string") {
-      showLoading.update("正在刷新用户信息", "获取 LToken 成功");
+      await showLoading.update("获取 LToken 成功");
       ck.ltoken = ltokenRes;
       await TGLogger.Info("[tc-userBadge][refreshUser] 获取 LToken 成功");
     } else {
-      showLoading.update("正在刷新用户信息", "获取 LToken 失败");
+      await showLoading.update("获取 LToken 失败");
       showSnackbar.error(`[${ltokenRes.retcode}]${ltokenRes.message}`);
       await TGLogger.Error("[tc-userBadge][refreshUser] 获取 LToken 失败");
       await TGLogger.Error(
@@ -265,14 +265,14 @@ async function refreshUser(uid: string) {
       );
     }
   }
-  showLoading.update("正在刷新用户信息", "正在获取 CookieToken");
+  await showLoading.update("正在获取 CookieToken");
   const cookieTokenRes = await PassportApi.cookieToken(ck);
   if (typeof cookieTokenRes === "string") {
-    showLoading.update("正在刷新用户信息", "获取 CookieToken 成功");
+    await showLoading.update("获取 CookieToken 成功");
     ck.cookie_token = cookieTokenRes;
     await TGLogger.Info("[tc-userBadge][refreshUser] 获取 CookieToken 成功");
   } else {
-    showLoading.update("正在刷新用户信息", "获取 CookieToken 失败");
+    await showLoading.update("获取 CookieToken 失败");
     showSnackbar.error(`[${cookieTokenRes.retcode}]${cookieTokenRes.message}`);
     await TGLogger.Error("[tc-userBadge][refreshUser] 获取 CookieToken 失败");
     await TGLogger.Error(
@@ -280,15 +280,15 @@ async function refreshUser(uid: string) {
     );
   }
   account.cookie = ck;
-  showLoading.update("正在刷新用户信息", "正在获取用户信息");
+  await showLoading.update("正在获取用户信息");
   const infoRes = await BBSApi.userInfo(ck);
   if ("retcode" in infoRes) {
-    showLoading.update("正在刷新用户信息", "获取用户信息失败");
+    await showLoading.update("获取用户信息失败");
     showSnackbar.error(`[${infoRes.retcode}]${infoRes.message}`);
     await TGLogger.Error("[tc-userBadge][refreshUserInfo] 获取用户信息失败");
     await TGLogger.Error(`[tc-userBadge][refreshUserInfo] ${infoRes.retcode}: ${infoRes.message}`);
   } else {
-    showLoading.update("正在刷新用户信息", "获取用户信息成功");
+    await showLoading.update("获取用户信息成功");
     account.brief = {
       nickname: infoRes.nickname,
       uid: infoRes.uid,
@@ -298,21 +298,21 @@ async function refreshUser(uid: string) {
     await TGLogger.Info("[tc-userBadge][refreshUserInfo] 获取用户信息成功");
   }
   await TSUserAccount.account.saveAccount(account);
-  showLoading.update("正在刷新用户信息", "正在获取账号信息");
+  await showLoading.update("正在获取账号信息");
   const accountRes = await TakumiApi.bind.gameRoles(ck);
   if (Array.isArray(accountRes)) {
-    showLoading.update("正在刷新用户信息", "获取账号信息成功");
+    await showLoading.update("获取账号信息成功");
     await TGLogger.Info("[tc-userBadge][refreshUserInfo] 获取账号信息成功");
     await TSUserAccount.game.saveAccounts(account.uid, accountRes);
   } else {
-    showLoading.update("正在刷新用户信息", "获取账号信息失败");
+    await showLoading.update("获取账号信息失败");
     showSnackbar.error(`[${accountRes.retcode}]${accountRes.message}`);
     await TGLogger.Error("[tc-userBadge][refreshUserInfo] 获取账号信息失败");
     await TGLogger.Error(
       `[tc-userBadge][refreshUserInfo] ${accountRes.retcode}: ${accountRes.message}`,
     );
   }
-  showLoading.end();
+  await showLoading.end();
 }
 
 async function loadAccount(ac: string): Promise<void> {
@@ -441,7 +441,7 @@ async function addByCookie(): Promise<void> {
     await TGLogger.Error(`解析Cookie失败：${ckInput}`);
     return;
   }
-  showLoading.start("正在添加用户", "正在尝试刷新Cookie");
+  await showLoading.start("正在添加用户", "正在尝试刷新Cookie");
   const ck: TGApp.App.Account.Cookie = {
     account_id: ckRes.stuid,
     ltuid: ckRes.stuid,
@@ -451,19 +451,19 @@ async function addByCookie(): Promise<void> {
     stoken: ckRes.stoken,
     ltoken: "",
   };
-  showLoading.update("正在添加用户", "正在获取 LToken");
+  await showLoading.update("正在获取 LToken");
   const ltokenRes = await PassportApi.lToken.get(ck);
   if (typeof ltokenRes !== "string") {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error(`[${ltokenRes.retcode}]${ltokenRes.message}`);
     await TGLogger.Error(`获取LToken失败：${ltokenRes.retcode}-${ltokenRes.message}`);
     return;
   }
   ck.ltoken = ltokenRes;
-  showLoading.update("正在添加用户", "正在获取 CookieToken");
+  await showLoading.update("正在获取 CookieToken");
   const cookieTokenRes = await PassportApi.cookieToken(ck);
   if (typeof cookieTokenRes !== "string") {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error(`[${cookieTokenRes.retcode}]${cookieTokenRes.message}`);
     await TGLogger.Error(
       `获取CookieToken失败：${cookieTokenRes.retcode}-${cookieTokenRes.message}`,
@@ -471,10 +471,10 @@ async function addByCookie(): Promise<void> {
     return;
   }
   ck.cookie_token = cookieTokenRes;
-  showLoading.update("正在添加用户", "正在获取用户信息");
+  await showLoading.update("正在获取用户信息");
   const briefRes = await BBSApi.userInfo(ck);
   if ("retcode" in briefRes) {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
     await TGLogger.Error(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
     return;
@@ -485,29 +485,29 @@ async function addByCookie(): Promise<void> {
     avatar: briefRes.avatar_url,
     desc: briefRes.introduce,
   };
-  showLoading.update("正在添加用户", "正在保存用户数据");
+  await showLoading.update("正在保存用户数据");
   await TSUserAccount.account.saveAccount({
     uid: briefInfo.uid,
     cookie: ck,
     brief: briefInfo,
     updated: "",
   });
-  showLoading.update("正在添加用户", "正在获取游戏账号");
+  await showLoading.update("正在获取游戏账号");
   const gameRes = await TakumiApi.bind.gameRoles(ck);
   if (!Array.isArray(gameRes)) {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error(`[${gameRes.retcode}]${gameRes.message}`);
     return;
   }
-  showLoading.update("正在添加用户", "正在保存游戏账号");
+  await showLoading.update("正在保存游戏账号");
   await TSUserAccount.game.saveAccounts(briefInfo.uid, gameRes);
   const curAccount = await TSUserAccount.game.getCurAccount(briefInfo.uid);
   if (!curAccount) {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.warn("未检测到游戏账号，请重新刷新");
     return;
   }
-  showLoading.end();
+  await showLoading.end();
   showSnackbar.success("成功添加用户!");
 }
 
@@ -521,7 +521,9 @@ async function clearUser(user: TGApp.App.Account.User): Promise<void> {
     showSnackbar.cancel("已取消删除用户数据");
     return;
   }
+  await showLoading.start("正在删除用户数据", `正在删除用户${user.uid}`);
   await TSUserAccount.account.deleteAccount(user.uid);
+  await showLoading.end();
   showSnackbar.success("成功删除用户!");
 }
 </script>

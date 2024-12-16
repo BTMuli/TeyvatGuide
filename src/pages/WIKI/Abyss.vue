@@ -90,20 +90,20 @@ watch(
 );
 
 onMounted(async () => {
-  showLoading.start("正在获取深渊数据...", "正在获取深渊概览");
+  await showLoading.start("正在获取深渊数据", "正在获取深渊概览");
   overview.value = {
     cur: await Hutao.Abyss.overview(),
     last: await Hutao.Abyss.overview(true),
   };
-  showLoading.update("正在获取深渊数据...", "正在获取角色使用率数据");
+  await showLoading.update("正在获取角色使用率数据");
   const useData = <AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>>await getData("use");
   abyssData.value = { use: useData, up: null, team: null, hold: null };
-  showLoading.end();
+  await showLoading.end();
 });
 
 async function refreshData(type: AbyssTab): Promise<void> {
   if (abyssData.value && abyssData.value[type] !== null) return;
-  showLoading.update("正在获取深渊数据...", `正在获取 ${AbyssTabEnum[type]} 数据`);
+  await showLoading.start("正在获取深渊数据", `正在获取 ${AbyssTabEnum[type]} 数据`);
   const data = await getData(type);
   switch (type) {
     case "use":
@@ -123,7 +123,7 @@ async function refreshData(type: AbyssTab): Promise<void> {
       triggerRef(abyssData);
       break;
   }
-  showLoading.end();
+  await showLoading.end();
 }
 
 async function getData(type: AbyssTab): Promise<AbyssDataItemType<AbyssTab>> {

@@ -10,12 +10,12 @@
   </transition>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, toRaw } from "vue";
+import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
 
 import { SnackbarParams } from "./snackbar.js";
 
 const props = defineProps<SnackbarParams>();
-const data = ref<SnackbarParams>(toRaw(props));
+const data = shallowRef<SnackbarParams>(props);
 const show = ref<boolean>(false);
 const bgColor = computed(() => data.value.color);
 
@@ -43,17 +43,30 @@ function transColor(color: string): string {
   }
 }
 
-function displayBox(params: TGApp.Component.Snackbar.Params): void {
-  data.value.text = params.text;
-  data.value.color = transColor(params.color);
-  data.value.timeout = params.timeout;
+function getTimer(): void {
+  show.value = false;
+}
+
+function displayBox(params: SnackbarParams): void {
+  data.value = {
+    text: params.text,
+    color: transColor(params.color),
+    timeout: params.timeout,
+  };
   show.value = true;
   if (timer != undefined) {
     clearTimeout(timer);
     timer = undefined;
   }
-  timer = setTimeout(() => (show.value = false), data.value.timeout);
+  timer = setTimeout(getTimer, data.value.timeout);
 }
+
+onUnmounted(() => {
+  if (timer != undefined) {
+    clearTimeout(timer);
+    timer = undefined;
+  }
+});
 
 defineExpose({ displayBox });
 </script>

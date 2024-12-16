@@ -119,7 +119,9 @@ async function confirmCUD(): Promise<void> {
     await remove(oriDir, { recursive: true });
     showSnackbar.success("已删除原用户数据目录!");
   }
-  setTimeout(() => window.location.reload(), 4000);
+  showSnackbar.info("即将刷新页面...");
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+  window.location.reload();
 }
 
 async function confirmCGD(): Promise<void> {
@@ -185,15 +187,14 @@ async function confirmCLD(): Promise<void> {
     showSnackbar.warn("无需清理!");
     return;
   }
-  showLoading.start("正在清理日志文件...");
+  await showLoading.start("正在清理日志文件...");
   for (const file of delFiles) {
-    showLoading.update("正在清理日志文件...", `正在清理 ${file.name}`);
+    await showLoading.update(`正在清理 ${file.name}`);
     const filePath = `${logDir.value}${sep()}${file.name}`;
     await remove(filePath);
-    await new Promise<void>((resolve) => setTimeout(resolve, 200));
   }
   await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-  showLoading.end();
+  await showLoading.end();
   showSnackbar.success(`已清理 ${delFiles.length} 个日志文件!`);
 }
 

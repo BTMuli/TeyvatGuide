@@ -156,13 +156,13 @@ function sortPost(value: boolean): void {
 }
 
 async function load(): Promise<void> {
-  showLoading.start("正在加载收藏帖子...", "获取收藏合集");
+  await showLoading.start("正在加载收藏帖子", "获取收藏合集");
   collections.value = await TSUserCollection.getCollectList();
-  showLoading.update("正在加载收藏帖子...", "获取未分类帖子");
+  await showLoading.update("获取未分类帖子");
   const postUnCollect = await TSUserCollection.getUnCollectPostList();
-  if (curSelect.value === "未分类" || collections.value.length === 0) {
+  if (curSelect.value === "未分类" || collections.value.length === 0)
     selected.value = postUnCollect;
-  } else if (collections.value.find((c) => c.title === curSelect.value)) {
+  else if (collections.value.find((c) => c.title === curSelect.value)) {
     selected.value = await TSUserCollection.getCollectPostList(curSelect.value);
   } else {
     selected.value = postUnCollect;
@@ -172,7 +172,7 @@ async function load(): Promise<void> {
   selectedMode.value = false;
   selectedPost.value = [];
   if (page.value > length.value) page.value = 1;
-  showLoading.end();
+  await showLoading.end();
 }
 
 function toSelect(): void {
@@ -239,9 +239,9 @@ async function toEdit(): Promise<void> {
     showSnackbar.cancel("取消修改分类信息");
     return;
   }
-  showLoading.start("正在修改分类信息...");
+  await showLoading.start("正在修改分类信息");
   const check = await TSUserCollection.updateCollect(collect.title, cTc, cTd);
-  showLoading.end();
+  await showLoading.end();
   if (!check) {
     showSnackbar.warn("修改分类信息失败");
     return;
@@ -266,18 +266,19 @@ async function deletePost(force: boolean = false): Promise<void> {
     showSnackbar.cancel("取消操作");
     return;
   }
-  showLoading.start(`正在${title}...`);
+  await showLoading.start(`正在${title}`);
   let success = 0;
   for (const post of selectedPost.value) {
+    await showLoading.update(`正在处理帖子: ${post}`);
     const check = await TSUserCollection.deletePostCollect(post, force);
     if (check) {
       success++;
       continue;
     }
     showSnackbar.warn(`帖子 ${post} 操作失败`);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await new Promise<void>((resolve) => setTimeout(resolve, 1500));
   }
-  showLoading.end();
+  await showLoading.end();
   showSnackbar.success(`成功${title} ${success} 条`);
   await load();
 }
@@ -316,13 +317,13 @@ async function freshPost(select: string | null): Promise<void> {
     curSelect.value = "未分类";
     return;
   }
-  showLoading.start("正在获取合集帖子...", `获取合集 ${select}`);
+  await showLoading.start("正在获取合集帖子", `获取合集 ${select}`);
   if (select === "未分类") {
     curSelect.value = "未分类";
     selected.value = await TSUserCollection.getUnCollectPostList();
   } else selected.value = await TSUserCollection.getCollectPostList(select);
   page.value = 1;
-  showLoading.end();
+  await showLoading.end();
   showSnackbar.success(`切换合集 ${select}，共 ${selected.value.length} 条帖子`);
 }
 
@@ -350,24 +351,24 @@ async function freshUser(uid?: string): Promise<void> {
     return;
   }
   const uidReal = uid || briefInfo.value.uid;
-  showLoading.start("获取用户收藏...", `UID: ${uidReal}`);
+  await showLoading.start(`[${uidReal}]获取用户收藏`);
   let res = await BBSApi.lovePost(cookie.value, uidReal);
   while (true) {
     if ("retcode" in res) {
-      showLoading.end();
+      await showLoading.end();
       if (res.retcode === 1001) showSnackbar.warn("用户收藏已设为私密，无法获取");
       else showSnackbar.error(`[${res.retcode}] ${res.message}`);
       break;
     }
     let posts = res.list;
-    showLoading.update("获取用户收藏...", `合并收藏帖子 [offset]${res.next_offset}...`);
     await mergePosts(posts, uid || briefInfo.value.uid);
     if (res.is_last) break;
-    showLoading.update("获取用户收藏...", `[offset]${res.next_offset} [is_last]${res.is_last}`);
+    await showLoading.update(`[offset]${res.next_offset} [is_last]${res.is_last}`);
     res = await BBSApi.lovePost(cookie.value, uid || briefInfo.value.uid, res.next_offset);
   }
-  showLoading.end();
-  showSnackbar.success("获取用户收藏成功");
+  await showLoading.end();
+  showSnackbar.success("获取用户收藏成功，即将刷新页面");
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
   window.location.reload();
 }
 
@@ -378,7 +379,7 @@ async function mergePosts(
 ): Promise<void> {
   const title = `用户收藏-${collect}`;
   for (const post of posts) {
-    showLoading.start("获取用户收藏...", `[POST]${post.post.subject} [collection]${title}`);
+    await showLoading.update(`[POST]${post.post.subject} [collection]${title}`);
     const res = await TSUserCollection.addCollect(post.post.post_id, post, title, true);
     if (!res) await TGLogger.Error(`[PostCollect] mergePosts [${post.post.post_id}]`);
   }

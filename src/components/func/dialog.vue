@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref, useTemplateRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import type { DialogCheckParams, DialogInputParams, DialogParams } from "./dialog.js";
 
@@ -39,7 +39,7 @@ const defaultProp: DialogParams = { title: "", text: "", mode: "check", otcancel
 const props = defineProps<DialogParams>();
 
 // 组件参数
-const data = reactive<DialogParams>(defaultProp);
+const data = shallowRef<DialogParams>(defaultProp);
 const show = ref<boolean>(false);
 const showOuter = ref<boolean>(false);
 const showInner = ref<boolean>(false);
@@ -60,14 +60,17 @@ const inputVal = computed<string | false | undefined>(() => {
 
 watch(
   () => show.value,
-  () => {
+  async () => {
     if (show.value) {
       showOuter.value = true;
-      setTimeout(() => (showInner.value = true), 100);
+      await new Promise<void>((resolve) => setTimeout(resolve, 100));
+      showInner.value = true;
       return;
     }
-    setTimeout(() => (showInner.value = false), 100);
-    setTimeout(() => (showOuter.value = false), 300);
+    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+    showInner.value = false;
+    await new Promise<void>((resolve) => setTimeout(resolve, 300));
+    showOuter.value = false;
   },
 );
 
@@ -93,43 +96,51 @@ onMounted(async () => {
 });
 
 async function displayCheckBox(params: DialogCheckParams): Promise<boolean | undefined> {
-  data.title = params.title;
-  data.text = params.text ?? "";
-  data.mode = "check";
-  data.otcancel = params.otcancel ?? true;
+  data.value = {
+    title: params.title,
+    text: params.text ?? "",
+    mode: "check",
+    otcancel: params.otcancel ?? true,
+  };
   show.value = true;
   return await new Promise<boolean | undefined>((resolve) => {
     watch(
       () => show.value,
-      () => setTimeout(() => resolve(checkVal.value), 500),
+      async () => {
+        await new Promise<void>((res) => setTimeout(res, 500));
+        resolve(checkVal.value);
+      },
     );
   });
 }
 
 async function displayInputBox(params: DialogInputParams): Promise<string | false | undefined> {
-  data.title = params.title;
-  data.text = params.text ?? "";
-  data.mode = "input";
+  data.value = {
+    title: params.title,
+    text: params.text ?? "",
+    mode: "input",
+    otcancel: params.otcancel ?? true,
+  };
   inputDefault.value = params.input ?? "";
-  data.otcancel = params.otcancel ?? true;
   show.value = true;
   return await new Promise<string | false | undefined>((resolve) => {
     setTimeout(() => inputEl.value?.focus(), 100);
     watch(
       () => show.value,
-      () => setTimeout(() => resolve(inputVal.value), 500),
+      async () => {
+        await new Promise<void>((res) => setTimeout(res, 500));
+        resolve(inputVal.value);
+      },
     );
   });
 }
 
 // 确认
 function handleConfirm(): void {
-  if (data.mode === "input") {
+  if (data.value.mode === "input") {
     dialogVal.value = inputDefault.value;
     inputDefault.value = "";
-  } else {
-    dialogVal.value = true;
-  }
+  } else dialogVal.value = true;
   show.value = false;
 }
 
@@ -141,7 +152,7 @@ function handleCancel(): void {
 
 // 点击外部事件
 function handleOuter(): void {
-  if (data.otcancel) {
+  if (data.value.otcancel) {
     dialogVal.value = undefined;
     show.value = false;
   }

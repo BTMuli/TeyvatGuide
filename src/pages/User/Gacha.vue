@@ -79,22 +79,22 @@ const selectItem = shallowRef<Array<string>>([]);
 const gachaListCur = shallowRef<Array<TGApp.Sqlite.GachaRecords.SingleTable>>([]);
 
 onMounted(async () => {
-  showLoading.start("正在加载祈愿数据...", "正在获取祈愿 UID 列表");
+  await showLoading.start("正在加载祈愿数据", "正在获取祈愿 UID 列表");
   await TGLogger.Info("[UserGacha][onMounted] 进入角色祈愿页面");
   selectItem.value = await TSUserGacha.getUidList();
   if (selectItem.value.length === 0) {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error("暂无祈愿数据，请先导入祈愿数据");
     await TGLogger.Warn("[UserGacha][onMounted] 暂无祈愿数据，请先导入祈愿数据");
     return;
   }
   uidCur.value = selectItem.value[0];
-  showLoading.update("正在获取祈愿数据...", `UID：${uidCur.value}`);
+  await showLoading.update(`UID：${uidCur.value}`);
   gachaListCur.value = await TSUserGacha.getGachaRecords(uidCur.value);
   await TGLogger.Info(
     `[UserGacha][onMounted] 获取到 ${uidCur.value} 的 ${gachaListCur.value.length} 条祈愿数据`,
   );
-  showLoading.end();
+  await showLoading.end();
   showSnackbar.success(`成功获取 ${gachaListCur.value.length} 条祈愿数据`);
 });
 
@@ -114,6 +114,11 @@ watch(
 // 刷新按钮点击事件
 async function confirmRefresh(force: boolean): Promise<void> {
   await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 刷新祈愿数据`);
+  if (!cookie.value) {
+    showSnackbar.error("请先登录");
+    await TGLogger.Warn("[UserGacha][${account.gameUid}][confirmRefresh] 未检测到 cookie");
+    return;
+  }
   if (uidCur.value && uidCur.value !== account.value.gameUid) {
     const switchCheck = await showDialog.check(
       "是否切换游戏账户",
@@ -133,13 +138,7 @@ async function confirmRefresh(force: boolean): Promise<void> {
       return;
     }
   }
-  showLoading.start("正在刷新祈愿数据", "正在获取 authkey");
-  if (!cookie.value) {
-    showLoading.end();
-    showSnackbar.error("请先登录");
-    await TGLogger.Warn("[UserGacha][${account.gameUid}][confirmRefresh] 未检测到 cookie");
-    return;
-  }
+  await showLoading.start(`正在刷新祈愿数据`, `UID:${account.value.gameUid},正在获取 authkey`);
   const authkeyRes = await TakumiApi.bind.authKey(cookie.value, account.value);
   if (typeof authkeyRes === "string") {
     authkey.value = authkeyRes;
@@ -150,7 +149,7 @@ async function confirmRefresh(force: boolean): Promise<void> {
     await TGLogger.Error(
       `[UserGacha][${account.value.gameUid}][confirmRefresh] ${authkeyRes.retcode} ${authkeyRes.message}`,
     );
-    showLoading.end();
+    await showLoading.end();
     return;
   }
   await refreshGachaPool("100", "新手祈愿", force);
@@ -159,9 +158,10 @@ async function confirmRefresh(force: boolean): Promise<void> {
   await refreshGachaPool("400", "角色祈愿2", force);
   await refreshGachaPool("302", "武器祈愿", force);
   await refreshGachaPool("500", "集录祈愿", force);
-  showLoading.update("正在刷新祈愿数据", "数据获取完成，即将刷新页面");
-  showLoading.end();
+  await showLoading.end();
   await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 刷新祈愿数据完成`);
+  showSnackbar.success("祈愿数据刷新完成，即将刷新页面");
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
   window.location.reload();
 }
 
@@ -174,13 +174,8 @@ async function refreshGachaPool(
   let endId = "0";
   let reqId = "0";
   let gachaDataMap: Record<string, string[]> | undefined = undefined;
-  if (!force) {
-    showLoading.update(`正在刷新${label}数据`, "正在获取数据库祈愿最新 ID");
-    endId = (await TSUserGacha.getGachaCheck(account.value.gameUid, type)) ?? "0";
-    showLoading.update(`正在刷新${label}数据`, `最新 ID：${endId}`);
-  } else {
-    showLoading.update(`正在刷新${label}数据`);
-  }
+  await showLoading.start(`正在刷新${label}数据`);
+  if (!force) endId = (await TSUserGacha.getGachaCheck(account.value.gameUid, type)) ?? "0";
   while (true) {
     const gachaRes = await Hk4eApi.gacha(authkey.value, type, reqId);
     if (!Array.isArray(gachaRes)) {
@@ -195,15 +190,16 @@ async function refreshGachaPool(
     }
     if (gachaRes.length === 0) {
       if (force) {
-        showLoading.update(`正在清理${label}数据`);
-        if (gachaDataMap)
+        await showLoading.update(`正在清理${label}数据`);
+        if (gachaDataMap) {
           await TSUserGacha.cleanGachaRecords(account.value.gameUid, type, gachaDataMap);
+        }
       }
       break;
     }
     const uigfList: TGApp.Plugins.UIGF.GachaItem[] = [];
     for (const item of gachaRes) {
-      showLoading.update(`正在刷新${label}数据`, `[${item.item_type}][${item.time}] ${item.name}`);
+      await showLoading.update(`[${item.item_type}][${item.time}] ${item.name}`);
       const tempItem: TGApp.Plugins.UIGF.GachaItem = {
         gacha_type: item.gacha_type,
         item_id: item.item_id,
@@ -230,7 +226,6 @@ async function refreshGachaPool(
       }
     }
     await TSUserGacha.mergeUIGF(account.value.gameUid, uigfList);
-    await new Promise<void>((resolve) => setTimeout(() => resolve(), 1000));
     if (!force && gachaRes.some((i) => i.id.toString() === endId.toString())) break;
     reqId = gachaRes[gachaRes.length - 1].id.toString();
   }
@@ -254,31 +249,28 @@ async function importUigf(): Promise<void> {
     showSnackbar.cancel("已取消文件选择");
     return;
   }
+  await showLoading.start("正在导入祈愿数据", "正在验证祈愿数据");
   const check = await verifyUigfData(selectedFile, false);
-  if (!check) return;
-  const remoteData = await readUigfData(selectedFile);
-  const importCheck = await showDialog.check(
-    "是否导入祈愿数据？",
-    `UID：${remoteData.info.uid}，共 ${remoteData.list.length} 条数据`,
-  );
-  if (!importCheck) {
-    showSnackbar.cancel("已取消祈愿数据导入");
+  if (!check) {
+    await showLoading.end();
     return;
   }
-  showLoading.start("正在导入祈愿数据");
+  await showLoading.update("正在读取祈愿数据");
+  const remoteData = await readUigfData(selectedFile);
+  await showLoading.update(`UID：${remoteData.info.uid}，共 ${remoteData.list.length} 条数据`);
   if (remoteData.list.length === 0) {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error("导入的祈愿数据为空");
     return;
   }
-  showLoading.update("正在导入祈愿数据", `UID：${remoteData.info.uid}`);
   await TSUserGacha.mergeUIGF(remoteData.info.uid, remoteData.list);
-  showLoading.end();
-  showSnackbar.success(`成功导入 ${remoteData.list.length} 条祈愿数据`);
+  await showLoading.end();
+  showSnackbar.success(`成功导入 ${remoteData.list.length} 条祈愿数据，即将刷新页面`);
   await TGLogger.Info(
     `[UserGacha][importUigf] 成功导入 ${remoteData.info.uid} 的 ${remoteData.list.length} 条祈愿数据`,
   );
-  setTimeout(() => window.location.reload(), 1000);
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+  window.location.reload();
 }
 
 // 导出当前UID的祈愿数据
@@ -288,14 +280,6 @@ async function exportUigf(): Promise<void> {
   const gachaList = await TSUserGacha.getGachaRecords(uidCur.value);
   if (gachaList.length === 0) {
     showSnackbar.error(`UID ${uidCur.value} 暂无祈愿数据`);
-    return;
-  }
-  const exportCheck = await showDialog.check(
-    "是否导出祈愿数据？",
-    `UID：${uidCur.value}，共 ${gachaList.length} 条数据`,
-  );
-  if (!exportCheck) {
-    showSnackbar.cancel(`已取消 UID ${uidCur.value} 的祈愿数据导出`);
     return;
   }
   const file = await save({
@@ -310,9 +294,9 @@ async function exportUigf(): Promise<void> {
   await TGLogger.Info(
     `[UserGacha][${uidCur.value}][exportUigf] 导出${gachaList.length} 条祈愿数据到 ${file}`,
   );
-  showLoading.start("正在导出祈愿数据", `正在导出 ${uidCur.value} 的祈愿数据`);
+  await showLoading.start("正在导出祈愿数据", `UID:${uidCur.value}`);
   await exportUigfData(uidCur.value, gachaList, file);
-  showLoading.end();
+  await showLoading.end();
   showSnackbar.success(`成功导出 ${uidCur.value} 的祈愿数据`);
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf] 导出祈愿数据完成`);
 }
@@ -352,14 +336,15 @@ async function deleteGacha(): Promise<void> {
       return;
     }
   }
-  showLoading.start("正在删除祈愿数据", `正在删除${uidCur.value}的祈愿数据`);
+  await showLoading.start("正在删除祈愿数据", `UID:${uidCur.value}`);
   await TSUserGacha.deleteGachaRecords(uidCur.value);
-  showLoading.end();
-  showSnackbar.success(`已成功删除 ${uidCur.value} 的祈愿数据`);
+  await showLoading.end();
+  showSnackbar.success(`已成功删除 ${uidCur.value} 的祈愿数据，即将刷新页面`);
   await TGLogger.Info(
     `[UserGacha][${uidCur.value}][deleteGacha] 成功删除 ${gachaListCur.value.length} 条祈愿数据`,
   );
-  setTimeout(() => window.location.reload(), 1000);
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+  window.location.reload();
 }
 </script>
 <style lang="css" scoped>

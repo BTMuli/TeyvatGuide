@@ -16,12 +16,12 @@ type TShareBtnProps = { selector: string; title: string };
 const props = defineProps<TShareBtnProps>();
 
 async function shareContent(): Promise<void> {
-  showLoading.start("正在生成分享图片", props.title);
+  await showLoading.start("正在生成分享图片", props.title);
   await TGLogger.Info("[TShareBtn][shareContent] 开始生成分享图片");
   const shareDom = document.querySelector<HTMLElement>(props.selector);
   if (shareDom === null) {
     showSnackbar.error("分享内容不存在", 3000);
-    showLoading.end();
+    await showLoading.end();
     return;
   }
   shareDom.querySelectorAll("details").forEach((item) => {
@@ -33,7 +33,7 @@ async function shareContent(): Promise<void> {
     if (item.hasAttribute("details-open")) item.removeAttribute("details-open");
     else item.open = false;
   });
-  showLoading.end();
+  await showLoading.end();
   await TGLogger.Info("[TShareBtn][shareContent] 生成分享图片完成");
 }
 </script>

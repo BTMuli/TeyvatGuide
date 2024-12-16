@@ -97,10 +97,10 @@ const sortList = computed<Array<SortSelect>>(() => {
 });
 
 onMounted(async () => {
-  showLoading.start(`正在加载话题${topic}信息`);
+  await showLoading.start(`正在加载话题${topic}信息`);
   const info = await Mys.Post.getTopicFullInfo(gid, topic);
   if ("retcode" in info) {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error(`[${info.retcode}] ${info.message}`);
     return;
   }
@@ -125,18 +125,19 @@ watch(
 );
 
 async function firstLoad(): Promise<void> {
-  if (curGame.value) showLoading.update(`正在加载${curGame.value.name}帖子列表`);
+  await showLoading.start(`正在加载话题${topicInfo.value?.topic.name}信息`);
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
   const postList = await Mys.Post.getTopicPostList(curGid.value, topic, curSortType.value);
   if ("retcode" in postList) {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error(`[${postList.retcode}] ${postList.message}`);
     return;
   }
+  await showLoading.update(`数量：${postList.posts.length}，是否最后一页：${postList.is_last}`);
   isLastPage.value = postList.is_last;
   lastPostId.value = postList.last_id;
   posts.value = postList.posts;
-  showLoading.end();
+  await showLoading.end();
   showSnackbar.success(`加载了 ${postList.posts.length} 条帖子`);
 }
 
@@ -145,7 +146,7 @@ async function freshPostData(): Promise<void> {
     showSnackbar.warn("已经到底了");
     return;
   }
-  showLoading.start("正在加载帖子列表");
+  await showLoading.start(`正在刷新${topicInfo.value?.topic.name}帖子列表`);
   const postList = await Mys.Post.getTopicPostList(
     curGid.value,
     topic,
@@ -153,14 +154,15 @@ async function freshPostData(): Promise<void> {
     lastPostId.value,
   );
   if ("retcode" in postList) {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error(`[${postList.retcode}] ${postList.message}`);
     return;
   }
+  await showLoading.update(`数量：${postList.posts.length}，是否最后一页：${postList.is_last}`);
   isLastPage.value = postList.is_last;
   lastPostId.value = postList.last_id;
   posts.value = posts.value.concat(postList.posts);
-  showLoading.end();
+  await showLoading.end();
   showSnackbar.success(`加载了 ${postList.posts.length} 条帖子`);
 }
 
