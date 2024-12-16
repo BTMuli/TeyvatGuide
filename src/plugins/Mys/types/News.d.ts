@@ -1,15 +1,9 @@
 /**
  * @file plugins/Mys/types/news.d.ts
  * @description Mys 插件咨讯类型定义文件
- * @since Beta v0.6.3
+ * @since Beta v0.6.7
  */
 
-/**
- * @description Mys 插件咨讯类型
- * @since Beta v0.4.5
- * @namespace TGApp.Plugins.Mys.News
- * @memberof TGApp.Plugins.Mys
- */
 declare namespace TGApp.Plugins.Mys.News {
   /**
    * @description 咨讯返回数据
@@ -19,9 +13,7 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {FullData} data 咨讯数据
    * @return Response
    */
-  interface Response extends TGApp.BBS.Response.BaseWithData {
-    data: FullData;
-  }
+  type Response = TGApp.BBS.Response.BaseWithData & { data: FullData };
 
   /**
    * @description 咨讯数据
@@ -32,11 +24,11 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {Item[]} list 咨讯列表
    * @return FullData
    */
-  interface FullData {
+  type FullData = {
     last_id: number;
     is_last: boolean;
-    list: TGApp.Plugins.Mys.Post.FullData[];
-  }
+    list: Array<TGApp.Plugins.Mys.Post.FullData>;
+  };
 
   /**
    * @description 咨讯元数据，只有活动咨讯才有
@@ -47,11 +39,7 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {string} end_at_sec 活动结束时间戳，单位秒
    * @return Meta
    */
-  interface Meta {
-    activity_status: number;
-    start_at_sec: string;
-    end_at_sec: string;
-  }
+  type Meta = { activity_status: number; start_at_sec: string; end_at_sec: string };
 
   /**
    * @description 用于渲染的咨讯卡片
@@ -88,16 +76,15 @@ declare namespace TGApp.Plugins.Mys.News {
   }
 
   /**
-   * @description 活动状态
-   * @since Alpha v0.2.1
-   * @property {string} status 活动状态
-   * @property {string} colorCss 活动状态按钮背景色
-   * @returns RenderStatus
+   * @description 用于渲染的咨讯状态
+   * @since Beta v0.6.7
+   * @interface RenderStatus
+   * @property {number} stat 活动状态
+   * @property {string} label 活动状态标签
+   * @property {string} color 活动状态颜色
+   * @return RenderStatus
    */
-  interface RenderStatus {
-    status: string;
-    colorCss: string;
-  }
+  type RenderStatus = { stat: number; label: string; color: string };
 
   /**
    * @description 用于渲染的咨讯信息
@@ -110,13 +97,7 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {number} view 帖子浏览数
    * @return RenderData
    */
-  interface RenderData {
-    mark: number;
-    forward: number;
-    like: number;
-    reply: number;
-    view: number;
-  }
+  type RenderData = { mark: number; forward: number; like: number; reply: number; view: number };
 
   /**
    * @description 用于渲染的版块信息
@@ -127,9 +108,5 @@ declare namespace TGApp.Plugins.Mys.News {
    * @property {string} id 版块 ID
    * @return RenderForum
    */
-  interface RenderForum {
-    name: string;
-    icon: string;
-    id: number;
-  }
+  type RenderForum = { name: string; icon: string; id: number };
 }

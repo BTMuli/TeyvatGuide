@@ -1,76 +1,62 @@
-<!-- todo UI调整 -->
 <template>
   <v-navigation-drawer :permanent="true" :rail="rail" class="tsb-box">
     <v-list class="side-list" density="compact" :nav="true">
-      <!-- 负责收缩侧边栏 -->
-      <v-list-item @click="rail = !rail">
-        <template v-if="rail" #prepend>
-          <v-list-item-action>
-            <v-icon>mdi-chevron-right</v-icon>
-          </v-list-item-action>
-        </template>
-        <template v-else #append>
-          <v-list-item-action>
-            <v-icon>mdi-chevron-left</v-icon>
-          </v-list-item-action>
-        </template>
-      </v-list-item>
+      <v-list-item
+        @click="rail = !rail"
+        :prepend-icon="rail ? 'mdi-chevron-right' : undefined"
+        :append-icon="!rail ? 'mdi-chevron-left' : undefined"
+      />
       <!-- 菜单项 -->
-      <v-list-item :title.attr="'首页'" value="home" :link="true" href="/">
+      <v-list-item :title.attr="'首页'" :link="true" href="/">
         <template #title>首页</template>
         <template #prepend>
           <img src="/source/UI/paimon.webp" alt="homeIcon" class="side-icon paimon" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'公告'" value="announcements" :link="true" href="/announcements">
+      <v-list-item title.attr="'公告'" :link="true" href="/announcements">
         <template #title>公告</template>
         <template #prepend>
           <img src="@/assets/icons/board.svg" alt="annoIcon" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item
-        :title.attr="'咨讯'"
-        value="news"
-        :link="true"
-        :href="`/news/2/${recentNewsType}`"
-      >
+      <v-list-item :title.attr="'咨讯'" :link="true" :href="`/news/2/${recentNewsType}`">
         <template #title>咨讯</template>
         <template #prepend>
           <img src="/platforms/mhy/mys.webp" alt="mihoyo" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'帖子'" value="posts" :link="true" href="/posts/forum">
+      <v-list-item :title.attr="'帖子'" :link="true" href="/posts/forum">
         <template #title>帖子</template>
         <template #prepend>
           <img src="/source/UI/posts.png" alt="posts" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'成就'" value="achievements" :link="true" href="/achievements">
+      <v-list-item :title.attr="'成就'" :link="true" href="/achievements">
         <template #title>成就</template>
         <template #prepend>
           <img src="@/assets/icons/achievements.svg" alt="achievementsIcon" class="side-icon" />
         </template>
       </v-list-item>
       <v-divider />
-      <v-list-item :title.attr="'原神战绩'" value="record" :link="true" href="/user/record">
+      <v-list-item :title.attr="'原神战绩'" :link="true" href="/user/record">
         <template #title>原神战绩</template>
         <template #prepend>
           <img src="/source/UI/userRecord.webp" alt="record" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'我的角色'" value="character" :link="true" href="/user/characters">
+      <v-list-item :title.attr="'我的角色'" :link="true" href="/user/characters">
         <template #title>我的角色</template>
         <template #prepend>
           <img src="/source/UI/userAvatar.webp" alt="characters" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'深渊记录'" value="abyss" :link="true" href="/user/abyss">
+      <v-list-item :title.attr="'深渊记录'" :link="true" href="/user/abyss">
         <template #title>深渊记录</template>
         <template #prepend>
           <img src="/source/UI/userAbyss.webp" alt="abyss" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'祈愿记录'" value="gacha" :link="true" href="/user/gacha">
+      <v-list-item :title.attr="'祈愿记录'" :link="true" href="/user/gacha">
         <template #title>祈愿记录</template>
         <template #prepend>
           <img src="/source/UI/userGacha.webp" alt="gacha" class="side-icon" />
@@ -80,14 +66,11 @@
       <v-list-item
         v-show="isDevEnv"
         :title.attr="'测试页面'"
-        value="test"
         :link="true"
         href="/test"
+        prepend-icon="mdi-test-tube"
       >
         <template #title>测试页面</template>
-        <template #prepend>
-          <v-icon>mdi-test-tube</v-icon>
-        </template>
       </v-list-item>
       <v-divider v-show="isDevEnv" />
       <v-menu :open-on-click="true" location="end">
@@ -100,69 +83,36 @@
           </v-list-item>
         </template>
         <v-list class="side-list-menu wiki" density="compact" :nav="true">
-          <v-list-item
-            class="side-item-menu"
-            title="深渊数据库"
-            value="wiki-abyss"
-            :link="true"
-            href="/wiki/abyss"
-          >
+          <v-list-item class="side-item-menu" title="深渊数据库" :link="true" href="/wiki/abyss">
             <template #prepend>
               <img src="/source/UI/wikiAbyss.webp" alt="abyssIcon" class="side-icon-menu" />
             </template>
           </v-list-item>
-          <v-list-item
-            class="side-item-menu"
-            title="角色图鉴"
-            value="wiki-character"
-            :link="true"
-            href="/wiki/character/0"
-          >
+          <v-list-item class="side-item-menu" title="角色图鉴" :link="true" href="/wiki/character">
             <template #prepend>
               <img src="/source/UI/wikiAvatar.webp" alt="characterIcon" class="side-icon-menu" />
             </template>
           </v-list-item>
-          <v-list-item
-            class="side-item-menu"
-            title="武器图鉴"
-            value="wiki-weapon"
-            :link="true"
-            href="/wiki/weapon/0"
-          >
+          <v-list-item class="side-item-menu" title="武器图鉴" :link="true" href="/wiki/weapon">
             <template #prepend>
               <img src="/source/UI/wikiWeapon.webp" alt="weaponIcon" class="side-icon-menu" />
             </template>
           </v-list-item>
           <v-list-item
             class="side-item-menu"
-            value="wiki-nameCard"
             :link="true"
             href="/wiki/nameCard"
-          >
-            <template #default>
-              <v-icon size="20" color="var(--tgc-yellow-2)">mdi-credit-card-outline</v-icon>
-              <span style="margin-left: 10px; font-size: 0.8125rem">名片图鉴</span>
-            </template>
-          </v-list-item>
-          <v-list-item
-            class="side-item-menu"
-            title="材料图鉴"
-            value="wiki-material"
-            :link="true"
-            href="/wiki/material"
-          >
+            prepend-icon="mdi-credit-card-outline"
+            title="名片图鉴"
+          />
+          <v-list-item class="side-item-menu" title="材料图鉴" :link="true" href="/wiki/material">
             <template #prepend>
               <img src="/source/UI/wikiGCG.webp" alt="gcgIcon" class="side-icon-menu" />
             </template>
           </v-list-item>
         </v-list>
       </v-menu>
-      <v-list-item
-        :title.attr="'留影叙佳期'"
-        value="archive-birthday"
-        :link="true"
-        href="/archive/birthday"
-      >
+      <v-list-item :title.attr="'留影叙佳期'" :link="true" href="/archive/birthday">
         <template #title>留影叙佳期</template>
         <template #prepend>
           <img src="/source/UI/act_birthday.png" alt="archive_birthday_icon" class="side-icon" />
@@ -201,13 +151,12 @@
             </v-list-item>
           </v-list>
         </v-menu>
-        <v-list-item :title.attr="themeTitle" @click="switchTheme()">
+        <v-list-item
+          :title.attr="themeTitle"
+          @click="switchTheme()"
+          :prepend-icon="theme === 'default' ? 'mdi-weather-night' : 'mdi-weather-sunny'"
+        >
           <template #title>{{ themeTitle }}</template>
-          <template #prepend>
-            <v-icon>
-              {{ theme === "default" ? "mdi-weather-night" : "mdi-weather-sunny" }}
-            </v-icon>
-          </template>
         </v-list-item>
         <v-list-item :title.attr="'设置'" value="config" :link="true" href="/config">
           <template #title>设置</template>

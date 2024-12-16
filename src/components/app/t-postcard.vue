@@ -5,8 +5,8 @@
         <img :src="localCover" alt="cover" v-if="localCover" />
         <v-progress-circular color="primary" :indeterminate="true" v-else-if="card.cover !== ''" />
         <img src="/source/UI/defaultCover.webp" alt="cover" v-else />
-        <div v-if="isAct" class="tpc-act">
-          <div class="tpc-status">{{ card.status?.status }}</div>
+        <div v-if="card.status" class="tpc-act">
+          <div class="tpc-status">{{ card.status?.label }}</div>
           <div class="tpc-time">
             <v-icon>mdi-clock-time-four-outline</v-icon>
             <span>{{ card.subtitle }}</span>
@@ -77,15 +77,28 @@ import { createPost } from "@/utils/TGWindow.js";
 
 type TPostCardProps = { modelValue: TGApp.Plugins.Mys.Post.FullData; selectMode?: boolean };
 type TPostCardEmits = (e: "onSelected", v: string) => void;
+type TPostStatus = TGApp.Plugins.Mys.News.RenderStatus & { stat: ActStat };
 
+enum ActStat {
+  UNKNOWN,
+  STARTED,
+  FINISHED,
+  SELECTION,
+}
+
+const stats: Readonly<Array<TPostStatus>> = [
+  { stat: ActStat.UNKNOWN, label: "未知", color: "var(--tgc-od-red)" },
+  { stat: ActStat.STARTED, label: "进行中", color: "var(--tgc-od-green)" },
+  { stat: ActStat.FINISHED, label: "已结束", color: "var(--tgc-od-white)" },
+  { stat: ActStat.SELECTION, label: "评选中", color: "var(--tgc-od-orange)" },
+];
 const props = withDefaults(defineProps<TPostCardProps>(), { selectMode: false });
 const emits = defineEmits<TPostCardEmits>();
-const isAct = ref<boolean>(false);
 const card = shallowRef<TGApp.Plugins.Mys.News.RenderCard>();
 const localCover = ref<string>();
 
 const cardBg = computed<string>(() => {
-  if (card.value && card.value.status) return card.value.status.colorCss;
+  if (card.value && card.value.status) return card.value.status.color;
   return "none";
 });
 
@@ -114,52 +127,12 @@ onUnmounted(() => {
   }
 });
 
-// todo 优化结构
-/**
- * @description 活动状态
- * @since Alpha v0.2.1
- * @enum {TGApp.Plugins.Mys.News.RenderStatus}
- * @property {TGApp.Plugins.Mys.News.RenderStatus} STARTED 进行中
- * @property {TGApp.Plugins.Mys.News.RenderStatus} FINISHED 已结束
- * @property {TGApp.Plugins.Mys.News.RenderStatus} SELECTION 评选中
- * @return EnumStatus
- */
-const EnumStatus = {
-  STARTED: {
-    status: "进行中",
-    colorCss: "var(--tgc-od-green)",
-  },
-  FINISHED: {
-    status: "已结束",
-    colorCss: "var(--tgc-od-white)",
-  },
-  SELECTION: {
-    status: "评选中",
-    colorCss: "var(--tgc-od-orange)",
-  },
-  UNKNOWN: {
-    status: "未知",
-    colorCss: "var(--tgc-od-red)",
-  },
-};
-
-/**
- * @description 获取活动状态
- * @since Alpha
- * @param {number} status 活动状态码
- * @returns {string}
- */
 function getActivityStatus(status: number): TGApp.Plugins.Mys.News.RenderStatus {
-  switch (status) {
-    case 1:
-      return EnumStatus.STARTED;
-    case 2:
-      return EnumStatus.SELECTION;
-    case 3:
-      return EnumStatus.FINISHED;
-    default:
-      return EnumStatus.UNKNOWN;
+  if (status satisfies ActStat) {
+    const stat: ActStat = status;
+    return stats[stat];
   }
+  return stats[ActStat.UNKNOWN];
 }
 
 function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
@@ -179,26 +152,28 @@ function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
  * @returns {TGApp.Plugins.Mys.News.RenderCard} 渲染用咨讯列表项
  */
 function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.News.RenderCard {
+  let forumData: TGApp.Plugins.Mys.News.RenderForum | null = null;
+  let statData: TGApp.Plugins.Mys.News.RenderData | null = null;
+  if (item.forum !== null) {
+    forumData = { name: item.forum.name, icon: item.forum.icon, id: item.forum.id };
+  }
+  if (item.stat !== null) {
+    statData = {
+      mark: item.stat.bookmark_num,
+      forward: item.stat.forward_num,
+      like: item.stat.like_num,
+      reply: item.stat.reply_num,
+      view: item.stat.view_num,
+    };
+  }
   return {
     title: item.post.subject,
     cover: getPostCover(item),
     postId: Number(item.post.post_id),
     subtitle: item.post.post_id,
     user: item.user,
-    forum:
-      item.forum === null
-        ? null
-        : { name: item.forum.name, icon: item.forum.icon, id: item.forum.id },
-    data:
-      item.stat === null
-        ? null
-        : {
-            mark: item.stat.bookmark_num,
-            forward: item.stat.forward_num,
-            like: item.stat.like_num,
-            reply: item.stat.reply_num,
-            view: item.stat.view_num,
-          },
+    forum: forumData,
+    data: statData,
     topics: item.topics,
   };
 }
@@ -210,7 +185,6 @@ function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.N
     item.news_meta !== null &&
     item.news_meta.start_at_sec !== "0"
   ) {
-    isAct.value = true;
     const startTime = new Date(Number(item.news_meta.start_at_sec) * 1000).toLocaleDateString();
     const endTime = new Date(Number(item.news_meta.end_at_sec) * 1000).toLocaleDateString();
     const statusInfo = getActivityStatus(item.news_meta.activity_status);

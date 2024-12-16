@@ -1,4 +1,3 @@
-<!-- todo 调整逻辑 -->
 <template>
   <div class="tuc-do-box">
     <img :src="bg" alt="role" class="tuc-do-bg" />
@@ -7,7 +6,7 @@
         <div class="tuc-do-left">
           <div
             class="tuc-dol-item"
-            :style="`opacity: ${selected.pos === 0 ? '1' : '0.5'}`"
+            :class="{ selected: selected.pos === 0 }"
             @click="showDetail(props.modelValue.weapon, '武器', 0)"
           >
             <TucDetailItemBox
@@ -19,10 +18,7 @@
             v-for="(item, index) in relicList"
             :key="index"
             class="tuc-dol-item"
-            :style="{
-              cursor: item ? 'pointer' : 'default',
-              opacity: selected.pos === index + 1 ? '1' : item ? '0.5' : '1',
-            }"
+            :class="{ selected: selected.pos === index + 1 }"
             @click="showDetail(item, '圣遗物', index + 1)"
           >
             <TucDetailRelic :model-value="item" :pos="index + 1" />
@@ -35,9 +31,7 @@
               :key="item.pos"
               class="tuc-dor-item"
               :model-value="item"
-              :style="{
-                border: selected.pos === item.pos + 5 ? '2px solid var(--tgc-yellow-1)' : '',
-              }"
+              :class="{ selected: selected.pos === item.pos + 5 }"
               @click="showDetail(item, '命座', item.pos + 5)"
             />
           </div>
@@ -269,6 +263,28 @@ function switchBg(): void {
   border-radius: 5px;
   margin-top: 50px;
   cursor: pointer;
+
+  &:nth-child(1) {
+    opacity: 0.5;
+
+    &.selected {
+      opacity: 1;
+    }
+  }
+
+  &:nth-child(2),
+  &:nth-child(3),
+  &:nth-child(4),
+  &:nth-child(5),
+  &:nth-child(6) {
+    cursor: pointer;
+    opacity: 0.5;
+
+    &.selected {
+      cursor: default;
+      opacity: 1;
+    }
+  }
 }
 
 /* 右侧显示区域 */
@@ -280,7 +296,12 @@ function switchBg(): void {
 
 .tuc-dor-item {
   position: absolute;
+  border: unset;
   cursor: pointer;
+
+  &.selected {
+    border: 2px solid var(--tgc-yellow-1);
+  }
 }
 
 /* 环状排列6个命座 */

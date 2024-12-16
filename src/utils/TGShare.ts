@@ -156,9 +156,6 @@ export async function copyToClipboard(buffer: Uint8Array): Promise<void> {
   const blob = new Blob([buffer], { type: "image/png" });
   const url = URL.createObjectURL(blob);
   // todo mac 会报错: https://bugs.webkit.org/show_bug.cgi?id=222262
-  // NotAllowedError:
-  // The request is not allowed by the user agent or the platform in the current context,
-  // possibly because the user denied permission.
   await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
   URL.revokeObjectURL(url);
 }
