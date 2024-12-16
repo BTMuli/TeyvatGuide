@@ -81,7 +81,7 @@ const selectedItem = shallowRef<TGApp.App.Calendar.Item>(renderItems.value[0]);
 onMounted(() => {
   const dayNow = new Date().getDay() === 0 ? 7 : new Date().getDay();
   const week = btnText.find((item) => item.week === dayNow) ?? { text: "周日", week: 7 };
-  dateNow.value = `${timestampToDate(new Date().getTime())} ${week.text}`;
+  dateNow.value = `${timestampToDate(new Date().getTime()).split(" ")[0]} ${week.text}`;
   weekNow.value = dayNow;
   btnNow.value = dayNow;
   emits("success");
