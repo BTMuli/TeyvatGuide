@@ -278,7 +278,6 @@ async function deletePost(force: boolean = false): Promise<void> {
     showSnackbar.warn(`帖子 ${post} 操作失败`);
     await new Promise<void>((resolve) => setTimeout(resolve, 1500));
   }
-  await showLoading.end();
   showSnackbar.success(`成功${title} ${success} 条`);
   await load();
 }

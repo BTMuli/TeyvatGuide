@@ -10,7 +10,7 @@
       <img src="/source/UI/video_play.svg" alt="icon" class="tp-vod-icon" />
       <div class="tp-vod-time">
         <v-icon size="12">mdi-clock-time-four-outline</v-icon>
-        <span>{{ getVodTime() }}</span>
+        <span>{{ getVideoDuration(props.data.insert.vod.duration) }}</span>
       </div>
       <div class="tp-vod-view">
         <v-icon size="12">mdi-eye</v-icon>
@@ -26,6 +26,7 @@ import type { Option } from "artplayer/types/option.js";
 import { onMounted, ref, shallowRef, toRaw } from "vue";
 
 import { getImageBuffer, saveCanvasImg } from "@/utils/TGShare.js";
+import { getVideoDuration } from "@/utils/toolFunc.js";
 
 type TpVod = {
   insert: {
@@ -115,19 +116,6 @@ onMounted(async () => {
   container.value = new Artplayer(option);
   container.value?.on("fullscreen", async (s) => await getCurrentWindow().setFullscreen(s));
 });
-
-function getVodTime(): string {
-  const duration = props.data.insert.vod.duration;
-  const secTotal = Math.floor(duration / 1000);
-  const seconds = secTotal % 60;
-  const minutes = Math.floor(secTotal / 60) % 60;
-  const hours = Math.floor(secTotal / 3600);
-  let result = "";
-  if (hours > 0) result += `${hours.toString().padStart(2, "0")}:`;
-  result += `${minutes.toString().padStart(2, "0")}:`;
-  result += `${seconds.toString().padStart(2, "0")}`;
-  return result;
-}
 </script>
 <style lang="css" scoped>
 .tp-vod-box {
