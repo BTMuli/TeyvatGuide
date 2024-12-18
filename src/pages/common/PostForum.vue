@@ -218,6 +218,26 @@ function getSortLabel(value: number): string {
   return order ? order.text : "";
 }
 
+async function getCurrentPosts(
+  loadMore: boolean = false,
+): Promise<TGApp.Plugins.Mys.Forum.FullData> {
+  if (curSortType.value === 3) {
+    if (loadMore) {
+      return await Mys.Painter.getHotForumPostList(curForum.value, curGid.value, lastId.value);
+    }
+    return await Mys.Painter.getHotForumPostList(curForum.value, curGid.value);
+  }
+  if (loadMore) {
+    return await Mys.Painter.getRecentForumPostList(
+      curForum.value,
+      curGid.value,
+      curSortType.value,
+      lastId.value,
+    );
+  }
+  return await Mys.Painter.getRecentForumPostList(curForum.value, curGid.value, curSortType.value);
+}
+
 async function freshPostData(): Promise<void> {
   await showLoading.start(`正在刷新${getGameLabel(curGid.value)}帖子`);
   const gameLabel = getGameLabel(curGid.value);
@@ -228,7 +248,7 @@ async function freshPostData(): Promise<void> {
   );
   await showLoading.update(`版块：${forumLabel}，排序：${sortLabel}`);
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
-  const postsGet = await Mys.Post.getForumPostList(curForum.value, curSortType.value);
+  const postsGet = await getCurrentPosts();
   posts.value = postsGet.list;
   lastId.value = postsGet.last_id;
   isLast.value = postsGet.is_last;
@@ -242,7 +262,7 @@ async function loadMore(): Promise<void> {
     return;
   }
   await showLoading.start("正在加载更多帖子数据", `游戏：${getGameLabel(curGid.value)}`);
-  const postsGet = await Mys.Post.getForumPostList(curForum.value, curSortType.value, lastId.value);
+  const postsGet = await getCurrentPosts(true);
   await showLoading.update(
     `版块：${curForumLabel.value}，排序：${getSortLabel(curSortType.value)}，数量：${postsGet.list.length}`,
   );
