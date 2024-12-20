@@ -2,7 +2,9 @@
   <div class="ph-pool-card">
     <div class="top">
       <div class="main">
-        <div class="left"><img :src="props.position.icon" alt="icon" /></div>
+        <div class="left" @click="openPosition(props.position)">
+          <img :src="props.position.icon" alt="icon" />
+        </div>
         <div class="right">
           <div class="title">{{ props.position.title }}</div>
           <div class="sub">{{ props.position.abstract }}</div>
@@ -48,11 +50,15 @@ const props = defineProps<PhPositionCardProps>();
 
 async function openPosition(card: TGApp.Plugins.Mys.Position.RenderCard): Promise<void> {
   const res = await parseLink(card.link);
-  if (res === "post") await createPost(card.postId, card.title);
+  if (res === "post") {
+    await createPost(card.postId, card.title);
+    return;
+  }
   if (res === false) {
     showSnackbar.warn(`未知链接:${card.link}`, 3000);
     return;
   }
+  window.open(card.link);
 }
 </script>
 <style lang="css" scoped>

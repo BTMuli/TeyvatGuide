@@ -4,12 +4,6 @@
  * @since Beta v0.3.7
  */
 
-/**
- * @description 导航相关类型定义
- * @since Beta v0.3.7
- * @namespace TGApp.BBS.Navigator
- * @memberof TGApp.BBS
- */
 declare namespace TGApp.BBS.Navigator {
   /**
    * @description 导航列表返回响应类型
@@ -160,19 +154,16 @@ declare namespace TGApp.BBS.Navigator {
    * @property {number} data[].count.discuss - 热门话题讨论数
    * @return HotTopic
    */
-  interface HotTopic {
+  type HotTopic = {
     position: number;
     data: Array<{
       topic_id: number;
       image: string;
       topic_name: string;
       post_name: string;
-      count: {
-        view: number;
-        discuss: number;
-      };
+      count: { view: number; discuss: number };
     }>;
-  }
+  };
 
   /**
    * @description 游戏接待
@@ -214,7 +205,7 @@ declare namespace TGApp.BBS.Navigator {
    * @property {unknown} data.user_status - 游戏接待用户状态
    * @return GameReception
    */
-  interface GameReception {
+  type GameReception = {
     position: number;
     data: {
       config: {
@@ -224,10 +215,7 @@ declare namespace TGApp.BBS.Navigator {
         description: string;
         icon: string;
         status: string;
-        rules: {
-          game_level: number;
-          community_level: number;
-        };
+        rules: { game_level: number; community_level: number };
         questionnaire: {
           questionnaire_type: number;
           questionnaire_url: string;
@@ -246,15 +234,8 @@ declare namespace TGApp.BBS.Navigator {
           filename: string;
           pkg_version_name: string;
         };
-        detail_servlet: {
-          type: number;
-          normal_servlet: unknown;
-          customize_detail: unknown;
-        };
-        pre_register_count: {
-          show_count: boolean;
-          count: string;
-        };
+        detail_servlet: { type: number; normal_servlet: unknown; customize_detail: unknown };
+        pre_register_count: { show_count: boolean; count: string };
         is_top: boolean;
         last_update_time: string;
         app_store_switch: number;
@@ -263,7 +244,7 @@ declare namespace TGApp.BBS.Navigator {
       };
       user_status: unknown;
     };
-  }
+  };
 
   /**
    * @description 兑换码接口返回数据
@@ -273,11 +254,7 @@ declare namespace TGApp.BBS.Navigator {
    * @property {CodeData[]} data.code_list - 兑换码数据
    * @return CodeResponse
    */
-  interface CodeResponse extends TGApp.BBS.Response.BaseWithData {
-    data: {
-      code_list: CodeData[];
-    };
-  }
+  type CodeResponse = TGApp.BBS.Response.BaseWithData & { data: { code_list: Array<CodeData> } };
 
   /**
    * @description 兑换码数据
@@ -289,10 +266,5 @@ declare namespace TGApp.BBS.Navigator {
    * @property {string} to_get_time - 过期时间，时间戳（单位：秒）
    * @return CodeData
    */
-  interface CodeData {
-    title: string;
-    code: string;
-    img: string;
-    to_get_time: string;
-  }
+  type CodeData = { title: string; code: string; img: string; to_get_time: string };
 }

@@ -32,7 +32,7 @@ async function createAuthTicketByGameBiz(
     "x-rpc-client_type": "3",
     "x-rpc-app_id": "ddxf5dufpuyo",
   };
-  const resp = await TGHttp<TGApp.BBS.Response.getAuthTicketByGameBiz>(
+  const resp = await TGHttp<AuthTicketByGameBizResp>(
     `${pAbu}account/ma-cn-verifier/app/createAuthTicketByGameBiz`,
     { method: "POST", headers: headers, query: params },
   );
@@ -51,7 +51,7 @@ async function getCookieAccountInfoBySToken(
 ): Promise<string | TGApp.BBS.Response.Base> {
   const ck = { stoken: cookie.stoken, mid: cookie.mid };
   const params = { stoken: cookie.stoken };
-  const resp = await TGHttp<TGApp.BBS.Response.getCookieTokenBySToken | TGApp.BBS.Response.Base>(
+  const resp = await TGHttp<GetCookieTokenBySTokenResp | TGApp.BBS.Response.Base>(
     `${pAbu}account/auth/api/getCookieAccountInfoBySToken`,
     { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
   );
@@ -70,7 +70,7 @@ async function getLTokenBySToken(
 ): Promise<string | TGApp.BBS.Response.Base> {
   const ck = { mid: cookie.mid, stoken: cookie.stoken };
   const params = { stoken: cookie.stoken };
-  const resp = await TGHttp<TGApp.BBS.Response.getLTokenBySToken | TGApp.BBS.Response.Base>(
+  const resp = await TGHttp<GetLTokenBySTokenResp | TGApp.BBS.Response.Base>(
     `${pAbu}account/auth/api/getLTokenBySToken`,
     { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
   );
@@ -89,10 +89,11 @@ async function verifyLToken(
 ): Promise<string | TGApp.BBS.Response.Base> {
   const ck = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
   const data = { ltoken: cookie.ltoken };
-  const resp = await TGHttp<TGApp.BBS.Response.verifyUserInfoBySToken | TGApp.BBS.Response.Base>(
-    `${p4Abu}account/ma-cn-session/web/verifyLtoken`,
-    { method: "POST", headers: getRequestHeader(ck, "POST", data), body: JSON.stringify(data) },
-  );
+  const resp = await TGHttp<VerifyLtokenResp>(`${p4Abu}account/ma-cn-session/web/verifyLtoken`, {
+    method: "POST",
+    headers: getRequestHeader(ck, "POST", data),
+    body: JSON.stringify(data),
+  });
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data.user_info.mid;
 }
@@ -104,3 +105,34 @@ const PassportApi = {
 };
 
 export default PassportApi;
+
+/// 一些类型 ///
+type AuthTicketByGameBizResp = TGApp.BBS.Response.BaseWithData & { data: { ticket: string } };
+
+type GetCookieTokenBySTokenResp = TGApp.BBS.Response.BaseWithData & {
+  data: { uid: string; cookie_token: string };
+};
+
+type GetLTokenBySTokenResp = TGApp.BBS.Response.BaseWithData & { data: { ltoken: string } };
+
+type VerifyLtokenResp = TGApp.BBS.Response.BaseWithData & {
+  data: {
+    realname_info: unknown;
+    need_realperson: boolean;
+    user_info: {
+      aid: string;
+      mid: string;
+      account_name: string;
+      email: string;
+      is_email_verify: number;
+      area_code: string;
+      safe_mobile: string;
+      realname: string;
+      identity_code: string;
+      rebind_area_code: string;
+      rebind_mobile: string;
+      rebind_mobile_time: string;
+      links: Array<unknown>;
+    };
+  };
+};

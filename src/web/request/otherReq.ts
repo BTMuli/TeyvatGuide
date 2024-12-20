@@ -92,7 +92,7 @@ async function getDeviceFp(
     Referer: "https://webstatic.mihoyo.com/",
   };
   try {
-    const resp = await TGHttp<TGApp.BBS.Response.getDeviceFp>(
+    const resp = await TGHttp<DeviceFpResp>(
       "https://public-data-api.mihoyo.com/device-fp/api/getFp",
       { method: "POST", body: JSON.stringify(data), headers: header },
     );
@@ -125,3 +125,8 @@ async function refreshCode(
 const OtherApi = { code: refreshCode, fp: getDeviceFp };
 
 export default OtherApi;
+
+/// 一些类型 ///
+type DeviceFpResp = TGApp.BBS.Response.BaseWithData & {
+  data: { device_fp: string; code: number; msg: string };
+};
