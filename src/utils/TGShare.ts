@@ -1,7 +1,7 @@
 /**
  * @file utils/TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.6.4
+ * @since Beta v0.6.7
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -84,7 +84,7 @@ function getShareImgBgColor(): string {
 
 /**
  * @description 生成分享截图
- * @since Beta v0.6.4
+ * @since Beta v0.6.7
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
@@ -132,7 +132,7 @@ export async function generateShareImg(
     await saveCanvasImg(buffer, fileName);
     return;
   }
-  if (typeof shareDefaultFile.value === "number" && size > shareDefaultFile.value * 1000000) {
+  if (typeof shareDefaultFile.value === "number" && size > shareDefaultFile.value * 1024 * 1024) {
     await saveCanvasImg(buffer, fileName);
     return;
   }
