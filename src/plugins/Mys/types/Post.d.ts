@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/types/post.d.ts
  * @description Mys 插件帖子类型定义文件
- * @since Beta v0.6.3
+ * @since Beta v0.6.7
  */
 
 declare namespace TGApp.Plugins.Mys.Post {
@@ -13,15 +13,11 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {FullData} data.post 帖子数据
    * @return Response
    */
-  interface Response extends TGApp.BBS.Response.BaseWithData {
-    data: {
-      post: FullData;
-    };
-  }
+  type Response = TGApp.BBS.Response.BaseWithData & { data: { post: FullData } };
 
   /**
    * @description 帖子数据
-   * @since Beta v0.5.0
+   * @since Beta v0.6.7
    * @interface FullData
    * @property {Post} post  帖子信息
    * @property {Forum|null} forum  所属版块，可能为 null
@@ -42,7 +38,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {unknown[]} vod_list 视频列表，可能为空
    * @property {boolean} is_block_on 是否被屏蔽
    * @property {unknown} forum_rank_info 版块排行信息，可能为 null
-   * @property {unknown[]} link_card_list 链接卡片列表，可能为空
+   * @property {LinkCard[]} link_card_list 链接卡片列表，可能为空
    * @property {TGApp.Plugins.Mys.News.Meta} news_meta 咨讯元数据，可能为 null
    * @return FullData
    */
@@ -66,7 +62,7 @@ declare namespace TGApp.Plugins.Mys.Post {
     vod_list: Vod[];
     is_block_on: boolean;
     forum_rank_info: unknown | null;
-    link_card_list: unknown[];
+    link_card_list: LinkCard[];
     news_meta: TGApp.Plugins.Mys.News.Meta | null | undefined;
     recommend_reason: unknown | null;
     villa_card: unknown | null;
@@ -301,6 +297,45 @@ declare namespace TGApp.Plugins.Mys.Post {
     prev_post_view_type: number;
     next_post_view_type: number;
   }
+
+  /**
+   * @description 链接卡片信息
+   * @since Beta v0.6.7
+   * @interface LinkCard
+   * @property {string} button_text 按钮文本
+   * @property {string} card_id 卡片 ID
+   * @property {unknown} card_meta 卡片元数据
+   * @property {number} card_status 卡片状态
+   * @property {string} cover 封面图 URL
+   * @property {string} landing_url 落地页 URL
+   * @property {number} landing_url_type 落地页类型
+   * @property {number} link_type 链接类型
+   * @property {string} market_price 市场价
+   * @property {string} origin_url 原始 URL
+   * @property {string} origin_user_avatar 原始用户头像 URL
+   * @property {string} origin_user_avatar_url 原始用户头像 URL
+   * @property {string} origin_user_nickname 原始用户名
+   * @property {string} price 价格
+   * @property {string} title 标题
+   * @returns LinkCard
+   */
+  type LinkCard = {
+    button_text: string;
+    card_id: string;
+    card_meta: unknown;
+    card_status: number;
+    cover: string;
+    landing_url: string;
+    landing_url_type: number;
+    link_type: number;
+    market_price: string;
+    origin_url: string;
+    origin_user_avatar: string;
+    origin_user_avatar_url: string;
+    origin_user_nickname: string;
+    price: string;
+    title: string;
+  };
 
   /**
    * @description 视频信息

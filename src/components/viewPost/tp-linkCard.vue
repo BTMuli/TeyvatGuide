@@ -7,7 +7,12 @@
         {{ props.data.insert.link_card.price }}
       </div>
       <div @click="toLink()" class="tp-link-card-btn">
-        {{ props.data.insert.link_card.button_text ?? "详情" }} >
+        {{
+          props.data.insert.link_card.button_text === ""
+            ? "详情"
+            : props.data.insert.link_card.button_text
+        }}
+        >
       </div>
     </div>
   </div>

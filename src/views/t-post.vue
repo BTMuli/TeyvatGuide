@@ -6,7 +6,7 @@
   <VpBtnReply :gid="postData.post.game_id" :post-id="postData.post.post_id" v-if="postData" />
   <div class="tp-post-body" v-if="postData">
     <div class="tp-post-info">
-      <div class="tp-post-version">
+      <div class="tp-post-version" @click="openJson()">
         PostID：{{ postId }} | Render by TeyvatGuide v{{ appVersion }}
       </div>
       <div class="tp-post-meta">
@@ -38,7 +38,7 @@
       </div>
       <TpAvatar :data="postData.user" position="right" v-if="postData.user" />
     </div>
-    <div class="tp-post-title" @click="toPost()" title="点击查看评论">
+    <div class="tp-post-title" @click="toPost()">
       <span class="mpt-official" v-if="postData.post.post_status.is_official">官</span>
       <span>{{ postData.post.subject }}</span>
     </div>
@@ -100,9 +100,9 @@ import { onMounted, onUnmounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
 import { useAppStore } from "@/store/modules/app.js";
-import TGClient from "@/utils/TGClient.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { createTGWindow } from "@/utils/TGWindow.js";
+import { CHANNEL_LIST } from "@/web/constant/bbs.js";
 import TGConstant from "@/web/constant/TGConstant.js";
 
 const appVersion = ref<string>();
@@ -141,17 +141,13 @@ onMounted(async () => {
   }
   postData.value = resp;
   await showLoading.update("正在渲染数据");
-  renderPost.value = getRenderPost(postData.value);
+  renderPost.value = await getRenderPost(postData.value);
   await webviewWindow
     .getCurrentWebviewWindow()
     .setTitle(`Post_${postId} ${postData.value.post.subject}`);
   await TGLogger.Info(`[t-post][${postId}][onMounted] ${postData.value.post.subject}`);
   const isDev = useAppStore().devMode ?? false;
-  if (isDev) {
-    await showLoading.update("正在打开调试窗口");
-    await TGLogger.Info(`[t-post][${postId}][onMounted] 打开 JSON 窗口`);
-    await createPostJson(postId);
-  }
+  if (isDev) await openJson();
   if (shareTimer !== null) {
     clearInterval(shareTimer);
     shareTimer = null;
@@ -159,6 +155,12 @@ onMounted(async () => {
   shareTimer = setInterval(getShareTimer, 1000);
   await showLoading.end();
 });
+
+async function openJson(): Promise<void> {
+  // @ts-expect-error import.meta
+  if (import.meta.env.MODE === "production") return;
+  await createPostJson(postId);
+}
 
 function getShareTimer(): void {
   shareTime.value = Math.floor(Date.now() / 1000);
@@ -183,27 +185,30 @@ function getRepublishAuthorization(type: number): string {
   }
 }
 
-function getRenderPost(data: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.SctPost.Base[] {
+async function getRenderPost(
+  data: TGApp.Plugins.Mys.Post.FullData,
+): Promise<Array<TGApp.Plugins.Mys.SctPost.Base>> {
   const postContent = data.post.content;
   let jsonParse: string;
   if (postContent.startsWith("<")) {
     jsonParse = data.post.structured_content;
   } else {
     try {
-      jsonParse = parseContent(data.post.content);
+      jsonParse = await parseContent(data.post.content);
     } catch (e) {
-      if (e instanceof SyntaxError) TGLogger.Warn(`[t-post][${postId}] ${e.name}: ${e.message}`);
+      if (e instanceof SyntaxError) {
+        await TGLogger.Warn(`[t-post][${postId}] ${e.name}: ${e.message}`);
+      }
       jsonParse = data.post.structured_content;
     }
   }
   return JSON.parse(jsonParse);
 }
 
-function parseContent(content: string): string {
+async function parseContent(content: string): Promise<string> {
   const data: TGApp.Plugins.Mys.SctPost.Other = JSON.parse(content);
   const result: TGApp.Plugins.Mys.SctPost.Base[] = [];
-  const keys = Object.keys(data);
-  keys.forEach((key) => {
+  for (const key of Object.keys(data)) {
     switch (key) {
       case "describe":
         result.push({ insert: data.describe });
@@ -211,12 +216,22 @@ function parseContent(content: string): string {
       case "imgs":
         data.imgs.forEach((item) => result.push({ insert: { image: item } }));
         break;
+      case "link_card_ids":
+        if (!data.link_card_ids) break;
+        for (const item of data.link_card_ids) {
+          const dataFind = postData.value?.link_card_list.find((card) => card.card_id === item);
+          if (dataFind) result.push({ insert: { link_card: dataFind } });
+          else {
+            await TGLogger.Warn(`[t-post][${postId}][parseContent] link_card_ids: ${item} 未找到`);
+          }
+        }
+        break;
       default:
-        TGLogger.Warn(`[t-post][${postId}][parseContent] Unknown key: ${key}`);
+        await TGLogger.Warn(`[t-post][${postId}][parseContent] Unknown key: ${key}`);
         result.push({ insert: data[key] });
         break;
     }
-  });
+  }
   return JSON.stringify(result);
 }
 
@@ -226,9 +241,13 @@ async function createPostJson(postId: number): Promise<void> {
   await createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
 }
 
-async function toPost(): Promise<void> {
-  const url = `https://m.miyoushe.com/ys/#/article/${postId}`;
-  await TGClient.open("web_thin", url);
+function toPost(): void {
+  const channel = CHANNEL_LIST.find((item) => item.gid === postData.value?.post.game_id.toString());
+  if (channel) {
+    window.open(`https://miyoushe.com/${channel.mini}/#/article/${postId}`);
+  } else {
+    window.open(`https://miyoushe.com/ys/#/article/${postId}`);
+  }
 }
 
 async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
