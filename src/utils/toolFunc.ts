@@ -1,7 +1,7 @@
 /**
  * @file utils/toolFunc.ts
  * @description 一些工具函数
- * @since Beta v0.6.0
+ * @since Beta v0.6.7
  */
 
 import { path } from "@tauri-apps/api";
@@ -235,11 +235,12 @@ export function getZhElement(element: string): string {
 
 /**
  * @description 获取视频时长
- * @since Beta v0.5.7
- * @param {number} duration - 视频时长（秒）
+ * @since Beta v0.6.7
+ * @param {number} durationMill - 视频时长（毫秒）
  * @returns {string} 视频时长
  */
-export function getVideoDuration(duration: number): string {
+export function getVideoDuration(durationMill: number): string {
+  const duration = Math.floor(durationMill / 1000);
   const seconds = duration % 60;
   const minutes = Math.floor(duration / 60) % 60;
   const hours = Math.floor(duration / 3600);
