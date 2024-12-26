@@ -6,20 +6,13 @@
       <div v-if="props.data.insert.link_card.price" class="tp-link-card-price">
         {{ props.data.insert.link_card.price }}
       </div>
-      <div @click="toLink()" class="tp-link-card-btn">
-        {{
-          props.data.insert.link_card.button_text === ""
-            ? "详情"
-            : props.data.insert.link_card.button_text
-        }}
-        >
-      </div>
+      <div @click="toLink()" class="tp-link-card-btn">{{ btnText }} ></div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import { onMounted, onUnmounted, ref, toRaw } from "vue";
+import { computed, onMounted, onUnmounted, ref, toRaw } from "vue";
 import { useRouter } from "vue-router";
 
 import { parseLink, parsePost } from "@/utils/linkParser.js";
@@ -48,6 +41,12 @@ const props = defineProps<TpLinkCardProps>();
 const router = useRouter();
 
 const cover = ref<string>(props.data.insert.link_card.cover);
+const btnText = computed<string>(() => {
+  if (!props.data.insert.link_card.button_text || props.data.insert.link_card.button_text === "") {
+    return "详情";
+  }
+  return props.data.insert.link_card.button_text;
+});
 
 onMounted(async () => {
   if (!cover.value.startsWith("blob:")) {
