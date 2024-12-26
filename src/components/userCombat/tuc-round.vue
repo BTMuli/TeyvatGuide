@@ -7,7 +7,7 @@
     </div>
     <div class="tucr-content">
       <TucSub title="出演角色" class="main">
-        <TucAvatars :model-value="modelValue.avatars" />
+        <TucAvatars :model-value="modelValue.avatars" :detail="true" />
       </TucSub>
       <TucSub title="辉彩祝福" class="main">
         <TucBuffs :model-value="modelValue.splendour_buff" />

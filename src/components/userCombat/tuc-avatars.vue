@@ -1,21 +1,16 @@
 <template>
-  <div class="tuca-box">
+  <div class="tuca-box" :class="{ grid: props.detail }">
     <TItemBox v-for="(item, idx) in props.modelValue" :key="idx" :model-value="getItemBox(item)" />
   </div>
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
-import { computed } from "vue";
 
 import { getZhElement } from "@/utils/toolFunc.js";
 
-type TucAvatarsProps = { modelValue: Array<TGApp.Game.Combat.Avatar> };
+type TucAvatarsProps = { modelValue: Array<TGApp.Game.Combat.Avatar>; detail: boolean };
 
 const props = defineProps<TucAvatarsProps>();
-const columnCnt = computed<number>(() => {
-  if (props.modelValue.length % 2 === 1) return (props.modelValue.length + 1) / 2;
-  return props.modelValue.length / 2;
-});
 
 function getItemBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   return {
@@ -37,9 +32,17 @@ function getItemBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
 </script>
 <style lang="css" scoped>
 .tuca-box {
-  display: grid;
-  width: 100%;
-  grid-gap: 10px;
-  grid-template-columns: repeat(v-bind(columnCnt), 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+
+  &.grid {
+    display: grid;
+    width: 100%;
+    grid-gap: 10px;
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 </style>

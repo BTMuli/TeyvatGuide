@@ -98,13 +98,12 @@
               <img src="/source/UI/wikiWeapon.webp" alt="weaponIcon" class="side-icon-menu" />
             </template>
           </v-list-item>
-          <v-list-item
-            class="side-item-menu"
-            :link="true"
-            href="/wiki/nameCard"
-            prepend-icon="mdi-credit-card-outline"
-            title="名片图鉴"
-          />
+          <v-list-item class="side-item-menu" :link="true" href="/wiki/nameCard">
+            <template #default>
+              <v-icon size="20" color="var(--tgc-yellow-2)">mdi-credit-card-outline</v-icon>
+              <span style="margin-left: 10px; font-size: 0.8125rem">名片图鉴</span>
+            </template>
+          </v-list-item>
           <v-list-item class="side-item-menu" title="材料图鉴" :link="true" href="/wiki/material">
             <template #prepend>
               <img src="/source/UI/wikiGCG.webp" alt="gcgIcon" class="side-icon-menu" />
