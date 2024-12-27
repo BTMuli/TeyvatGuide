@@ -5,10 +5,11 @@ extends:
   - stylelint-config-standard-vue
   - stylelint-config-idiomatic-order
 plugins:
+  - stylelint-scss
   - stylelint-prettier
   - stylelint-order
 rules:
-  prettier/prettier: true
   property-no-vendor-prefix:
     - true
     - ignoreProperties: [backdrop-filter]
+  prettier/prettier: true

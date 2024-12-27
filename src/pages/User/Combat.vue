@@ -75,7 +75,7 @@
           <TSubLine>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</TSubLine>
           <TucOverview :data="item.stat" :fights="item.detail.fight_statisic" />
           <TSubLine>使用角色({{ item.detail.backup_avatars.length }}名)</TSubLine>
-          <TucAvatars :model-value="item.detail.backup_avatars" />
+          <TucAvatars :model-value="item.detail.backup_avatars" :detail="false" />
           <TSubLine>详情</TSubLine>
           <div class="ucw-rounds">
             <TucRound
@@ -139,6 +139,7 @@ onMounted(async () => {
   } else uidCur.value = "";
   await loadCombat();
   await showLoading.end();
+  console.log("UserCombat", localCombat.value);
 });
 
 watch(() => uidCur.value, loadCombat);

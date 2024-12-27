@@ -6,7 +6,7 @@
     :title="props.data.attributes?.link"
     :style="getTextStyle()"
   >
-    {{ props.data.insert }}
+    {{ decodeRegExp(props.data.insert) }}
   </span>
   <span v-else-if="mode == 'emoji'" class="tp-text-emoji">
     <img :src="getEmojiUrl()" :alt="getEmojiName()" :title="getEmojiName()" />
@@ -17,7 +17,7 @@
     :data="emoji"
     :key="indexE"
   />
-  <span v-else :style="getTextStyle()">{{ props.data.insert }}</span>
+  <span v-else :style="getTextStyle()">{{ decodeRegExp(props.data.insert) }}</span>
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
@@ -25,7 +25,7 @@ import { getEmojis } from "@Mys/request/getEmojis.js";
 import { onMounted, ref, shallowRef, StyleValue, toRaw } from "vue";
 
 import { parseLink, parsePost } from "@/utils/linkParser.js";
-import { isColorSimilar } from "@/utils/toolFunc.js";
+import { isColorSimilar, decodeRegExp } from "@/utils/toolFunc.js";
 
 export type TpText = {
   insert: string;

@@ -1,7 +1,7 @@
 /**
  * @file src/utils/linkParser.ts
  * @description 处理链接
- * @since Beta v0.6.5
+ * @since Beta v0.6.7
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -11,7 +11,7 @@ import { emit } from "@tauri-apps/api/event";
 import TGClient from "./TGClient.js";
 import { createPost } from "./TGWindow.js";
 
-import { getGameId } from "@/web/utils/tools.js";
+import { getGameId } from "@/utils/toolFunc.js";
 
 /**
  * @function parsePost

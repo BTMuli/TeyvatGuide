@@ -60,13 +60,13 @@ import { useRouter } from "vue-router";
 
 import { useAppStore } from "@/store/modules/app.js";
 import TGLogger from "@/utils/TGLogger.js";
+import { decodeRegExp } from "@/utils/toolFunc.js";
 import Hk4eApi, { type AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
 import { getAnnoCard } from "@/web/utils/getAnnoCard.js";
-import { decodeRegExp } from "@/web/utils/tools.js";
 
 type AnnoSelect = { text: string; value: string };
 type AnnoKey = keyof typeof AnnoType;
-type AnnoCard = { [key in AnnoKey]: TGApp.App.Announcement.ListCard[] };
+type AnnoCard = { [key in AnnoKey]: Array<TGApp.App.Announcement.ListCard> };
 
 const annoServerList: Array<AnnoSelect> = [
   { text: "国服-官方服", value: AnnoServer.CN_ISLAND },

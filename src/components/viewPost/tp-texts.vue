@@ -1,8 +1,8 @@
 <template>
   <div
-    :style="getLineStyle()"
     class="tp-texts"
     :class="{
+      'tp-inline': props.data.attributes === undefined || props.data.attributes.align === undefined,
       'tp-texts-header1': props.data.attributes && props.data.attributes.header === 1,
       'tp-texts-header2': props.data.attributes && props.data.attributes.header === 2,
       'tp-texts-header3': props.data.attributes && props.data.attributes.header === 3,
@@ -11,6 +11,7 @@
       'tp-texts-header6': props.data.attributes && props.data.attributes.header === 6,
     }"
     :title="getTitle()"
+    :style="{ textAlign: props.data.attributes?.align }"
   >
     <component
       :is="getComp(text)"
@@ -21,7 +22,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import type { Component, StyleValue } from "vue";
+import type { Component } from "vue";
 
 import TpImage from "./tp-image.vue";
 import TpMention, { type TpMention as TpMentionType } from "./tp-mention.vue";
@@ -44,51 +45,22 @@ function getTitle(): string {
   if (props.data.attributes.header) return `H${props.data.attributes.header}`;
   return "";
 }
-
-function getLineStyle(): StyleValue {
-  const ruleInline: StyleValue = "display: inline";
-  if (props.data.attributes === undefined) return ruleInline;
-  if (props.data.attributes.align === undefined) return ruleInline;
-  return `text-align: ${props.data.attributes.align};`;
-}
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tp-texts {
   line-break: anywhere;
   white-space: pre-wrap;
   word-break: break-all;
+
+  &.tp-inline {
+    display: inline;
+  }
 }
 
-.tp-texts-header1,
-.tp-texts-header2,
-.tp-texts-header3,
-.tp-texts-header4,
-.tp-texts-header5,
-.tp-texts-header6 {
-  font-family: var(--font-title);
-}
-
-.tp-texts-header1 {
-  font-size: 24px;
-}
-
-.tp-texts-header2 {
-  font-size: 20px;
-}
-
-.tp-texts-header3 {
-  font-size: 18px;
-}
-
-.tp-texts-header4 {
-  font-size: 16px;
-}
-
-.tp-texts-header5 {
-  font-size: 14px;
-}
-
-.tp-texts-header6 {
-  font-size: 12px;
+@for $i from 1 through 6 {
+  .tp-texts-header#{$i} {
+    font-family: var(--font-title);
+    font-size: calc(26px - $i * 2px);
+  }
 }
 </style>
