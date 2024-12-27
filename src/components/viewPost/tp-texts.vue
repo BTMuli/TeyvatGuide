@@ -48,8 +48,8 @@ function getTitle(): string {
 function getLineStyle(): StyleValue {
   const ruleInline: StyleValue = "display: inline";
   if (props.data.attributes === undefined) return ruleInline;
-  if (!props.data.attributes.align) return ruleInline;
-  return `textAlign: ${props.data.attributes.align}`;
+  if (props.data.attributes.align === undefined) return ruleInline;
+  return `text-align: ${props.data.attributes.align};`;
 }
 </script>
 <style lang="css" scoped>
