@@ -6,6 +6,10 @@
         <span>合集ID：{{ props.collection.collection_id }}</span>
       </div>
       <div class="tpoc-list" ref="postListRef">
+        <div class="tpoc-load" v-if="posts.length === 0">
+          <v-progress-circular indeterminate color="primary" size="24" />
+          <span>加载中...</span>
+        </div>
         <div
           class="tpoc-item"
           v-for="(item, index) in posts"
@@ -45,7 +49,7 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import Mys from "@Mys/index.js";
-import { computed, onMounted, shallowRef, useTemplateRef, watch } from "vue";
+import { computed, nextTick, onMounted, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import { timestampToDate } from "@/utils/toolFunc.js";
@@ -70,15 +74,15 @@ const visible = computed<boolean>({
   set: (v) => emits("update:modelValue", v),
 });
 watch(
-  () => visible.value,
-  async (value) => {
-    if (value) {
-      await new Promise<void>((resolve) => setTimeout(resolve, 500));
+  () => [visible.value, posts.value],
+  async () => {
+    if (visible.value && posts.value.length > 0) {
+      await nextTick();
       if (postListEl.value === null || props.collection.total < 5) return;
       let topNum: number;
       if (props.collection.total - props.collection.cur < 3) topNum = props.collection.total;
       else topNum = props.collection.cur - 3;
-      postListEl.value.scrollTo({ top: topNum * 69, behavior: "smooth" });
+      postListEl.value.scrollTo({ top: topNum * 87, behavior: "smooth" });
     }
   },
 );
@@ -141,6 +145,16 @@ async function toPost(postId: string, index: number): Promise<void> {
   padding-right: 10px;
   overflow-y: auto;
   row-gap: 5px;
+}
+
+.tpoc-load {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100px;
+  align-items: center;
+  justify-content: center;
+  column-gap: 5px;
 }
 
 .tpoc-item {
