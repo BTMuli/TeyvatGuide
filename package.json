@@ -19,7 +19,6 @@
     "lint:rust:fix": "cd src-tauri && cargo fmt",
     "prettier": "prettier . --write",
     "tauri": "tauri",
-    "tauri:icon": "tauri icon ./public/icon.png",
     "vite:dev": "vite dev",
     "vite:build": "vite build",
     "prepare": "husky"

@@ -27,6 +27,34 @@ async function getUserFullInfo(
 }
 
 /**
+ * @description 根据gid和id获取用户信息
+ * @since Beta v0.6.7
+ * @param {number} gid - gid
+ * @param {string} userId - 用户 id
+ * @returns {Promise<TGApp.BBS.Response.Base | TGApp.Plugins.Mys.User.Info>}
+ */
+async function getOtherUserInfo(
+  gid: number,
+  userId: string,
+): Promise<TGApp.BBS.Response.Base | TGApp.Plugins.Mys.User.Info> {
+  const params = { gids: gid.toString(), uid: userId };
+  const resp = await TGHttp<TGApp.Plugins.Mys.User.HomeResponse | TGApp.BBS.Response.Base>(
+    "https://bbs-api.miyoushe.com/user/wapi/getUserFullInfo",
+    { method: "GET", headers: getRequestHeader({}, "GET", params, "X4", true), query: params },
+  );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data.user_info;
+}
+
+/**
+ * @description 获取用户发布帖子
+ * @since Beta v0.6.7
+ * @param {string} uid - 用户 uid
+ * @param [string] offset - 偏移量
+ * @returns {Promise<TGApp.BBS.Collection.PostRespData|TGApp.BBS.Response.Base>} 用户发布帖子
+ */
+
+/**
  * @description 获取用户收藏帖子
  * @since Beta v0.6.3
  * @param {TGApp.App.Account.Cookie} cookie - 用户 cookie
@@ -49,6 +77,10 @@ async function userFavouritePost(
   return resp.data;
 }
 
-const BBSApi = { userInfo: getUserFullInfo, lovePost: userFavouritePost };
+const BBSApi = {
+  userInfo: getUserFullInfo,
+  otherUserInfo: getOtherUserInfo,
+  lovePost: userFavouritePost,
+};
 
 export default BBSApi;

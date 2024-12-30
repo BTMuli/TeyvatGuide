@@ -68,7 +68,7 @@ import { useRoute, useRouter } from "vue-router";
 import { type NewsType, NewsTypeEnum, useAppStore } from "@/store/modules/app.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
-import { getGameName } from "@/web/utils/tools.js";
+import { getGameName } from "@/utils/toolFunc.js";
 
 type PostData = { [key in NewsType]: Array<TGApp.Plugins.Mys.Post.FullData> };
 type RawData = { [key in NewsType]: { isLast: boolean; name: string; lastId: number } };

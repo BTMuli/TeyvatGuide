@@ -17,19 +17,20 @@ const tbAbu: Readonly<string> = "https://api-takumi.mihoyo.com/binding/api/";
  * @param {TGApp.App.Account.Cookie} cookie Cookie
  * @param {TGApp.Sqlite.Account.Game} user 用户
  * @param {string} actionType 动作类型
- * @returns {Promise<TGApp.BBS.Response.getActionTicketBySToken>}
+ * @returns {Promise<ActionTicketByStokenResp>}
  */
 async function getActionTicketBySToken(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
   actionType: string,
-): Promise<TGApp.BBS.Response.getActionTicketBySToken> {
+): Promise<ActionTicketByStokenResp> {
   const ck = { stoken: cookie.stoken, mid: cookie.mid };
   const params = { action_type: actionType, stoken: cookie.stoken, uid: user.gameUid };
-  return await TGHttp<TGApp.BBS.Response.getActionTicketBySToken>(
-    `${taAbu}getActionTicketBySToken`,
-    { method: "GET", headers: getRequestHeader(ck, "GET", params, "K2"), query: params },
-  );
+  return await TGHttp<ActionTicketByStokenResp>(`${taAbu}getActionTicketBySToken`, {
+    method: "GET",
+    headers: getRequestHeader(ck, "GET", params, "K2"),
+    query: params,
+  });
 }
 
 /**
@@ -91,10 +92,11 @@ async function getUserGameRolesByCookie(
 ): Promise<TGApp.BBS.Account.GameAccount[] | TGApp.BBS.Response.Base> {
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const params = { game_biz: "hk4e_cn" };
-  const resp = await TGHttp<TGApp.BBS.Response.getGameAccounts | TGApp.BBS.Response.Base>(
-    `${tbAbu}getUserGameRolesByCookie`,
-    { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
-  );
+  const resp = await TGHttp<GameAccountsResp>(`${tbAbu}getUserGameRolesByCookie`, {
+    method: "GET",
+    headers: getRequestHeader(ck, "GET", params),
+    query: params,
+  });
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data.list;
 }
@@ -105,3 +107,42 @@ const TakumiApi = {
 };
 
 export default TakumiApi;
+
+/// 一些类型 ///
+type ActionTicketByStokenResp = TGApp.BBS.Response.BaseWithData & {
+  data: {
+    ticket: string;
+    is_verified: boolean;
+    account_info: {
+      is_realname: boolean;
+      mobile: string;
+      safe_mobile: string;
+      account_id: string;
+      account_name: string;
+      email: string;
+      is_email_verify: boolean;
+      area_code: string;
+      safe_area_code: string;
+      real_name: string;
+      identity_code: string;
+      create_time: string;
+      create_ip: string;
+      change_pwd_time: string;
+      nickname: string;
+      user_icon_id: number;
+      safe_level: number;
+      black_endtime: string;
+      black_note: string;
+      gender: number;
+      real_stat: number;
+      apple_name: string;
+      sony_name: string;
+      tap_name: string;
+      reactivate_ticket: string;
+    };
+  };
+};
+
+type GameAccountsResp = TGApp.BBS.Response.BaseWithData & {
+  data: { list: Array<TGApp.BBS.Account.GameAccount> };
+};

@@ -23,7 +23,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import Mys from "@Mys/index.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
-import { getGameName } from "@/web/utils/tools.js";
+import { getGameName } from "@/utils/toolFunc.js";
 
 type ToPostSearchProps = { modelValue: boolean; gid: string; keyword?: string };
 type ToPostSearchEmits = (e: "update:modelValue", v: boolean) => void;
