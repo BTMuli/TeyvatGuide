@@ -7,14 +7,18 @@
 declare namespace TGApp.Plugins.Mys.SctPost {
   /**
    * @description 帖子结构化数据-基础类型
-   * @since Beta v0.4.5
+   * @since Beta v0.6.7
    * @interface Base
-   * @property {unknown} insert - 帖子内容
-   * @property {unknown} attributes - 帖子属性
+   * @property {string | Record<string, unknown>} insert - 帖子内容
+   * @property {Record<string, unknown>} attributes - 帖子属性
    * @property {Base[]} children - 子帖子
    * @return Base
    */
-  type Base = { insert: any; attributes?: any; children?: Base[] };
+  type Base = {
+    insert: string | Record<string, unknown>;
+    attributes?: Record<string, unknown>;
+    children?: Base[];
+  };
 
   /**
    * @description 帖子结构化数据-空类型

@@ -30,7 +30,6 @@
     <component :is="item" v-for="item in components" :key="item" @success="loadEnd(item)" />
   </div>
 </template>
-
 <script lang="ts" setup>
 import TGameNav from "@comp/app/t-gameNav.vue";
 import showLoading from "@comp/func/loading.js";
