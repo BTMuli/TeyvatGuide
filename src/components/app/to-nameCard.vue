@@ -3,7 +3,12 @@
     <div v-if="props.data" class="ton-container">
       <slot name="left"></slot>
       <div class="ton-box">
-        <img alt="bg" class="ton-bg" v-if="props.data" :src="props.data.profile" />
+        <img
+          alt="bg"
+          class="ton-bg"
+          v-if="props.data"
+          :src="`/WIKI/nameCard/profile/${props.data.name}.webp`"
+        />
         <div class="ton-content">
           <span>{{ props.data.name }}</span>
           <span>{{ parseNameCard(props.data.desc) }}</span>

@@ -5,7 +5,11 @@
         <span :title="props.data.desc">{{ props.data.desc }}</span>
       </template>
       <template #prepend>
-        <v-img width="80px" style="margin-right: 10px" :src="props.data.icon" />
+        <v-img
+          width="80px"
+          style="margin-right: 10px"
+          :src="`/WIKI/nameCard/icon/${props.data.name}.webp`"
+        />
       </template>
     </v-list-item>
   </v-list>
@@ -21,7 +25,7 @@ const emit = defineEmits<TopNameCardEmits>();
 
 const bgImage = computed<string>(() => {
   if (props.data.name === "原神·印象") return "none;";
-  return `url("${props.data.bg}")`;
+  return `url("/WIKI/nameCard/bg/${props.data.name}.webp")`;
 });
 </script>
 <style lang="css" scoped>
