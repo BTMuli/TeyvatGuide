@@ -1,7 +1,7 @@
 /**
  * @file router/modules/wiki.ts
  * @description wiki 路由模块
- * @since Beta v0.5.3
+ * @since Beta v0.6.7
  */
 import type { RouteRecordRaw } from "vue-router";
 
@@ -12,7 +12,7 @@ const wikiRoutes = (<const>[
     component: async () => await import("@/pages/WIKI/Abyss.vue"),
   },
   {
-    path: "/wiki/character/:id",
+    path: "/wiki/character/:id?",
     name: "角色图鉴",
     component: async () => await import("@/pages/WIKI/Character.vue"),
   },
@@ -27,7 +27,7 @@ const wikiRoutes = (<const>[
     component: async () => await import("@/pages/WIKI/Material.vue"),
   },
   {
-    path: "/wiki/weapon/:id",
+    path: "/wiki/weapon/:id?",
     name: "武器图鉴",
     component: async () => await import("@/pages/WIKI/Weapon.vue"),
   },
