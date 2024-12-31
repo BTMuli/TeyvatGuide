@@ -110,7 +110,7 @@ const skills = computed<Array<TGApp.Game.Avatar.Skill>>(() =>
 );
 const nameCard = computed<string>(() => {
   const cardFind = TSUserAvatar.getAvatarCard(props.modelValue.avatar.id);
-  return `/source/nameCard/profile/${cardFind}.webp`;
+  return `/WIKI/nameCard/profile/${cardFind}.webp`;
 });
 
 function getWeaponTitle(): string {

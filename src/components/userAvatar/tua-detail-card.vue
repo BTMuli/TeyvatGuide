@@ -99,7 +99,7 @@ const propMain = computed<Array<TGApp.Game.Avatar.PropMapItem | false>>(() =>
   props.modelValue.propSelected.map((item) => userStore.getProp(item.property_type)),
 );
 
-const bg = ref<string>("/source/nameCard/profile/原神·印象.webp");
+const bg = ref<string>("/WIKI/nameCard/profile/原神·印象.webp");
 const avatar = ref<string>(props.modelValue.avatar.image);
 const loading = ref<boolean>(false);
 
@@ -126,7 +126,7 @@ watch(
 
 async function loadData(): Promise<void> {
   const card = TSUserAvatar.getAvatarCard(props.modelValue.cid);
-  bg.value = `url("/source/nameCard/profile/${card}.webp")`;
+  bg.value = `url("/WIKI/nameCard/profile/${card}.webp")`;
   if (!avatar.value.startsWith("blob:")) {
     avatar.value = await saveImgLocal(props.modelValue.avatar.image);
   }

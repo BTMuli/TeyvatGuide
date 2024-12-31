@@ -81,7 +81,7 @@ watch(() => props.modelValue, loadData);
 
 function loadData(): void {
   const card = TSUserAvatar.getAvatarCard(props.modelValue.cid);
-  nameCard.value = `/source/nameCard/profile/${card}.webp`;
+  nameCard.value = `/WIKI/nameCard/profile/${card}.webp`;
 }
 
 async function share(): Promise<void> {

@@ -5,8 +5,8 @@
     </template>
     <template #content>
       <TucDetailItemBox
-        :icon="`/icon/bg/${modelValue.rarity}-Star.webp`"
-        :bg="`/WIKI/weapon/${modelValue.id}.webp`"
+        :bg="`/icon/bg/${modelValue.rarity}-Star.webp`"
+        :icon="`/WIKI/weapon/${modelValue.id}.webp`"
       />
       <div class="tuc-ddw-content">
         <div class="tuc-ddwc-top">
