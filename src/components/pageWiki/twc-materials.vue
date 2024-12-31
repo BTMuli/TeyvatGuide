@@ -7,8 +7,12 @@
       @click="checkData(item, index)"
     >
       <div class="twc-material-left">
-        <div class="twc-material-bg"><img :src="item.bg" alt="bg" /></div>
-        <div class="twc-material-icon"><img :src="item.icon" alt="icon" /></div>
+        <div class="twc-material-bg">
+          <img :src="`/icon/bg/${item.star}-Star.webp`" alt="bg" />
+        </div>
+        <div class="twc-material-icon">
+          <img :src="`/icon/material/${item.id}.webp`" alt="icon" />
+        </div>
       </div>
       <div class="twc-material-right">{{ item.name }}</div>
     </div>

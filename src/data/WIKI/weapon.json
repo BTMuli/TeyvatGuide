@@ -6,30 +6,9 @@
     "star": 1,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114003,
-        "name": "高塔孤王的断片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 112015,
-        "name": "黑铜号角",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112015.webp"
-      },
-      {
-        "id": 112012,
-        "name": "锐利的箭簇",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/112012.webp"
-      }
+      { "id": 114003, "name": "高塔孤王的断片", "star": 4 },
+      { "id": 112015, "name": "黑铜号角", "star": 3 },
+      { "id": 112012, "name": "锐利的箭簇", "star": 2 }
     ],
     "story": [
       "\r\n旅途中总是充满了相遇与别离。\r\n始终不会抛弃旅人的忠实旅伴，\r\n恐怕只有长剑与远行的梦想了。"
@@ -42,30 +21,9 @@
     "star": 2,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114003,
-        "name": "高塔孤王的断片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 112015,
-        "name": "黑铜号角",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112015.webp"
-      },
-      {
-        "id": 112012,
-        "name": "锐利的箭簇",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/112012.webp"
-      }
+      { "id": 114003, "name": "高塔孤王的断片", "star": 4 },
+      { "id": 112015, "name": "黑铜号角", "star": 3 },
+      { "id": 112012, "name": "锐利的箭簇", "star": 2 }
     ],
     "story": [
       "\r\n与民间信仰相悖，银其实不具有退魔的功效。\r\n心无杂念的执剑旅人，才是斩妖除魔的关键。"
@@ -78,30 +36,9 @@
     "star": 3,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "止水融冰",
@@ -139,54 +76,24 @@
     "star": 3,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "激励",
       "Descriptions": [
-        {
-          "Level": 0,
-          "Description": "生命值高于90%时，暴击率提升<color=#99FFFFFF>14%</color>。"
-        },
+        { "Level": 0, "Description": "生命值高于90%时，暴击率提升<color=#99FFFFFF>14%</color>。" },
         {
           "Level": 1,
           "Description": "生命值高于90%时，暴击率提升<color=#99FFFFFF>17.5%</color>。"
         },
-        {
-          "Level": 2,
-          "Description": "生命值高于90%时，暴击率提升<color=#99FFFFFF>21%</color>。"
-        },
+        { "Level": 2, "Description": "生命值高于90%时，暴击率提升<color=#99FFFFFF>21%</color>。" },
         {
           "Level": 3,
           "Description": "生命值高于90%时，暴击率提升<color=#99FFFFFF>24.5%</color>。"
         },
-        {
-          "Level": 4,
-          "Description": "生命值高于90%时，暴击率提升<color=#99FFFFFF>28%</color>。"
-        }
+        { "Level": 4, "Description": "生命值高于90%时，暴击率提升<color=#99FFFFFF>28%</color>。" }
       ]
     },
     "story": [
@@ -200,30 +107,9 @@
     "star": 3,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "旅程",
@@ -261,30 +147,9 @@
     "star": 3,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "过载",
@@ -322,30 +187,9 @@
     "star": 3,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "决",
@@ -383,30 +227,9 @@
     "star": 3,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "决心",
@@ -444,30 +267,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "顺风而行",
@@ -505,30 +307,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "和弦",
@@ -566,30 +347,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "气定神闲",
@@ -627,30 +387,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "专注",
@@ -688,30 +427,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "踏火息雷",
@@ -749,30 +467,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "碎石",
@@ -810,30 +507,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "注能之刺",
@@ -871,30 +547,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "乘胜追击",
@@ -932,30 +587,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "「正义」",
@@ -993,30 +627,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "街巷游侠",
@@ -1054,30 +667,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "降世",
@@ -1099,30 +691,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "无尽的渴慕",
@@ -1160,30 +731,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114028,
-        "name": "远海夷地的金枝",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114028.webp"
-      },
-      {
-        "id": 112049,
-        "name": "混沌真眼",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112049.webp"
-      },
-      {
-        "id": 112046,
-        "name": "名刀镡",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112046.webp"
-      }
+      { "id": 114028, "name": "远海夷地的金枝", "star": 5 },
+      { "id": 112049, "name": "混沌真眼", "star": 4 },
+      { "id": 112046, "name": "名刀镡", "star": 3 }
     ],
     "affix": {
       "Name": "岩藏之胤",
@@ -1221,30 +771,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "无垢之心",
@@ -1282,30 +811,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114036,
-        "name": "今昔剧画之鬼人",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114036.webp"
-      },
-      {
-        "id": 112019,
-        "name": "幽邃刻像",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112019.webp"
-      },
-      {
-        "id": 112055,
-        "name": "浮游晶化核",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112055.webp"
-      }
+      { "id": 114036, "name": "今昔剧画之鬼人", "star": 5 },
+      { "id": 112019, "name": "幽邃刻像", "star": 4 },
+      { "id": 112055, "name": "浮游晶化核", "star": 3 }
     ],
     "affix": {
       "Name": "澄澄一心传",
@@ -1327,30 +835,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114040,
-        "name": "谧林涓露的金符",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114040.webp"
-      },
-      {
-        "id": 112070,
-        "name": "混沌锚栓",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112070.webp"
-      },
-      {
-        "id": 112067,
-        "name": "织金红绸",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112067.webp"
-      }
+      { "id": 114040, "name": "谧林涓露的金符", "star": 5 },
+      { "id": 112070, "name": "混沌锚栓", "star": 4 },
+      { "id": 112067, "name": "织金红绸", "star": 3 }
     ],
     "affix": {
       "Name": "森林的瑞佑",
@@ -1388,30 +875,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114040,
-        "name": "谧林涓露的金符",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114040.webp"
-      },
-      {
-        "id": 112073,
-        "name": "辉光棱晶",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112073.webp"
-      },
-      {
-        "id": 112067,
-        "name": "织金红绸",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112067.webp"
-      }
+      { "id": 114040, "name": "谧林涓露的金符", "star": 5 },
+      { "id": 112073, "name": "辉光棱晶", "star": 4 },
+      { "id": 112067, "name": "织金红绸", "star": 3 }
     ],
     "affix": {
       "Name": "镇灵的低语",
@@ -1449,30 +915,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114032,
-        "name": "鸣神御灵的勇武",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114032.webp"
-      },
-      {
-        "id": 112073,
-        "name": "辉光棱晶",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112073.webp"
-      },
-      {
-        "id": 112046,
-        "name": "名刀镡",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112046.webp"
-      }
+      { "id": 114032, "name": "鸣神御灵的勇武", "star": 5 },
+      { "id": 112073, "name": "辉光棱晶", "star": 4 },
+      { "id": 112046, "name": "名刀镡", "star": 3 }
     ],
     "affix": {
       "Name": "怪谭·时雨心地一本足",
@@ -1510,30 +955,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "苍狼北风",
@@ -1571,30 +995,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114056,
-        "name": "纯圣露滴的真粹",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114056.webp"
-      },
-      {
-        "id": 112088,
-        "name": "初生的浊水幻灵",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112088.webp"
-      },
-      {
-        "id": 112046,
-        "name": "名刀镡",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112046.webp"
-      }
+      { "id": 114056, "name": "纯圣露滴的真粹", "star": 5 },
+      { "id": 112088, "name": "初生的浊水幻灵", "star": 4 },
+      { "id": 112046, "name": "名刀镡", "star": 3 }
     ],
     "affix": {
       "Name": "最终的崇高",
@@ -1632,30 +1035,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114052,
-        "name": "悠古弦音的回响",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114052.webp"
-      },
-      {
-        "id": 112088,
-        "name": "初生的浊水幻灵",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112088.webp"
-      },
-      {
-        "id": 112082,
-        "name": "异色结晶石",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112082.webp"
-      }
+      { "id": 114052, "name": "悠古弦音的回响", "star": 5 },
+      { "id": 112088, "name": "初生的浊水幻灵", "star": 4 },
+      { "id": 112082, "name": "异色结晶石", "star": 3 }
     ],
     "affix": {
       "Name": "铁骨",
@@ -1693,30 +1075,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114056,
-        "name": "纯圣露滴的真粹",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114056.webp"
-      },
-      {
-        "id": 112094,
-        "name": "役人的时时刻刻",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112094.webp"
-      },
-      {
-        "id": 112082,
-        "name": "异色结晶石",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112082.webp"
-      }
+      { "id": 114056, "name": "纯圣露滴的真粹", "star": 5 },
+      { "id": 112094, "name": "役人的时时刻刻", "star": 4 },
+      { "id": 112082, "name": "异色结晶石", "star": 3 }
     ],
     "affix": {
       "Name": "船工号子",
@@ -1754,30 +1115,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114052,
-        "name": "悠古弦音的回响",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114052.webp"
-      },
-      {
-        "id": 112094,
-        "name": "役人的时时刻刻",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112094.webp"
-      },
-      {
-        "id": 112082,
-        "name": "异色结晶石",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112082.webp"
-      }
+      { "id": 114052, "name": "悠古弦音的回响", "star": 5 },
+      { "id": 112094, "name": "役人的时时刻刻", "star": 4 },
+      { "id": 112082, "name": "异色结晶石", "star": 3 }
     ],
     "affix": {
       "Name": "勇者之剑",
@@ -1815,30 +1155,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114064,
-        "name": "贡祭炽心的荣膺",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114064.webp"
-      },
-      {
-        "id": 112109,
-        "name": "意志巡游的符像",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112109.webp"
-      },
-      {
-        "id": 112106,
-        "name": "龙冠武士的金哨",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112106.webp"
-      }
+      { "id": 114064, "name": "贡祭炽心的荣膺", "star": 5 },
+      { "id": 112109, "name": "意志巡游的符像", "star": 4 },
+      { "id": 112106, "name": "龙冠武士的金哨", "star": 3 }
     ],
     "affix": {
       "Name": "陷阵者的自矜",
@@ -1876,30 +1195,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114064,
-        "name": "贡祭炽心的荣膺",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114064.webp"
-      },
-      {
-        "id": 112100,
-        "name": "未熄的剑柄",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112100.webp"
-      },
-      {
-        "id": 112103,
-        "name": "横行霸者的利齿",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112103.webp"
-      }
+      { "id": 114064, "name": "贡祭炽心的荣膺", "star": 5 },
+      { "id": 112100, "name": "未熄的剑柄", "star": 4 },
+      { "id": 112103, "name": "横行霸者的利齿", "star": 3 }
     ],
     "affix": {
       "Name": "镜与烟色的隐谜",
@@ -1938,30 +1236,9 @@
     "star": 4,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114068,
-        "name": "谵妄圣主的神面",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114068.webp"
-      },
-      {
-        "id": 112118,
-        "name": "迷光的蜷叶之心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112118.webp"
-      },
-      {
-        "id": 112106,
-        "name": "龙冠武士的金哨",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112106.webp"
-      }
+      { "id": 114068, "name": "谵妄圣主的神面", "star": 5 },
+      { "id": 112118, "name": "迷光的蜷叶之心", "star": 4 },
+      { "id": 112106, "name": "龙冠武士的金哨", "star": 3 }
     ],
     "affix": {
       "Name": "弥漫的边界",
@@ -1999,30 +1276,9 @@
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "西风之鹰的抗争",
@@ -2060,30 +1316,9 @@
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "穿刺高天的利齿",
@@ -2121,30 +1356,9 @@
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "抗争的践行之歌",
@@ -2182,30 +1396,9 @@
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "金璋皇极",
@@ -2243,30 +1436,9 @@
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "护国的无垢之心",
@@ -2304,30 +1476,9 @@
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114028,
-        "name": "远海夷地的金枝",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114028.webp"
-      },
-      {
-        "id": 112049,
-        "name": "混沌真眼",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112049.webp"
-      },
-      {
-        "id": 112046,
-        "name": "名刀镡",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112046.webp"
-      }
+      { "id": 114028, "name": "远海夷地的金枝", "star": 5 },
+      { "id": 112049, "name": "混沌真眼", "star": 4 },
+      { "id": 112046, "name": "名刀镡", "star": 3 }
     ],
     "affix": {
       "Name": "雾切御腰物",
@@ -2365,30 +1516,9 @@
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114032,
-        "name": "鸣神御灵的勇武",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114032.webp"
-      },
-      {
-        "id": 112019,
-        "name": "幽邃刻像",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112019.webp"
-      },
-      {
-        "id": 112046,
-        "name": "名刀镡",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112046.webp"
-      }
+      { "id": 114032, "name": "鸣神御灵的勇武", "star": 5 },
+      { "id": 112019, "name": "幽邃刻像", "star": 4 },
+      { "id": 112046, "name": "名刀镡", "star": 3 }
     ],
     "affix": {
       "Name": "白刃流转",
@@ -2426,30 +1556,9 @@
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114040,
-        "name": "谧林涓露的金符",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114040.webp"
-      },
-      {
-        "id": 112073,
-        "name": "辉光棱晶",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112073.webp"
-      },
-      {
-        "id": 112067,
-        "name": "织金红绸",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112067.webp"
-      }
+      { "id": 114040, "name": "谧林涓露的金符", "star": 5 },
+      { "id": 112073, "name": "辉光棱晶", "star": 4 },
+      { "id": 112067, "name": "织金红绸", "star": 3 }
     ],
     "affix": {
       "Name": "沉入沙海的史诗",
@@ -2487,30 +1596,9 @@
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114040,
-        "name": "谧林涓露的金符",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114040.webp"
-      },
-      {
-        "id": 112076,
-        "name": "锲纹的横脊",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112076.webp"
-      },
-      {
-        "id": 112067,
-        "name": "织金红绸",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112067.webp"
-      }
+      { "id": 114040, "name": "谧林涓露的金符", "star": 5 },
+      { "id": 112076, "name": "锲纹的横脊", "star": 4 },
+      { "id": 112067, "name": "织金红绸", "star": 3 }
     ],
     "affix": {
       "Name": "白月枝芒",
@@ -2548,30 +1636,9 @@
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114056,
-        "name": "纯圣露滴的真粹",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114056.webp"
-      },
-      {
-        "id": 112088,
-        "name": "初生的浊水幻灵",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112088.webp"
-      },
-      {
-        "id": 112082,
-        "name": "异色结晶石",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112082.webp"
-      }
+      { "id": 114056, "name": "纯圣露滴的真粹", "star": 5 },
+      { "id": 112088, "name": "初生的浊水幻灵", "star": 4 },
+      { "id": 112082, "name": "异色结晶石", "star": 3 }
     ],
     "affix": {
       "Name": "湖光的朝与暮",
@@ -2610,30 +1677,9 @@
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114028,
-        "name": "远海夷地的金枝",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114028.webp"
-      },
-      {
-        "id": 112049,
-        "name": "混沌真眼",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112049.webp"
-      },
-      {
-        "id": 112046,
-        "name": "名刀镡",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112046.webp"
-      }
+      { "id": 114028, "name": "远海夷地的金枝", "star": 5 },
+      { "id": 112049, "name": "混沌真眼", "star": 4 },
+      { "id": 112046, "name": "名刀镡", "star": 3 }
     ],
     "affix": {
       "Name": "锦之花与龛中剑",
@@ -2671,30 +1717,9 @@
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114052,
-        "name": "悠古弦音的回响",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114052.webp"
-      },
-      {
-        "id": 112094,
-        "name": "役人的时时刻刻",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112094.webp"
-      },
-      {
-        "id": 112085,
-        "name": "奇械机芯齿轮",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112085.webp"
-      }
+      { "id": 114052, "name": "悠古弦音的回响", "star": 5 },
+      { "id": 112094, "name": "役人的时时刻刻", "star": 4 },
+      { "id": 112085, "name": "奇械机芯齿轮", "star": 3 }
     ],
     "affix": {
       "Name": "死之契",
@@ -2732,30 +1757,9 @@
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      {
-        "id": 114072,
-        "name": "神合秘烟的启示",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114072.webp"
-      },
-      {
-        "id": 112115,
-        "name": "秘源真芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112115.webp"
-      },
-      {
-        "id": 112103,
-        "name": "横行霸者的利齿",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112103.webp"
-      }
+      { "id": 114072, "name": "神合秘烟的启示", "star": 5 },
+      { "id": 112115, "name": "秘源真芯", "star": 4 },
+      { "id": 112103, "name": "横行霸者的利齿", "star": 3 }
     ],
     "affix": {
       "Name": "不凋的盛年",
@@ -2793,30 +1797,9 @@
     "star": 1,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114007,
-        "name": "凛风奔狼的断牙",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114007.webp"
-      },
-      {
-        "id": 112021,
-        "name": "地脉的枯叶",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112021.webp"
-      },
-      {
-        "id": 112003,
-        "name": "史莱姆清",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/112003.webp"
-      }
+      { "id": 114007, "name": "凛风奔狼的断牙", "star": 4 },
+      { "id": 112021, "name": "地脉的枯叶", "star": 3 },
+      { "id": 112003, "name": "史莱姆清", "star": 2 }
     ],
     "story": [
       "\r\n使用这种沉重、无锋双手大剑的人最清楚，\r\n兵器如何都无所谓，重要的是自己的力量。\r\n"
@@ -2829,30 +1812,9 @@
     "star": 2,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114007,
-        "name": "凛风奔狼的断牙",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114007.webp"
-      },
-      {
-        "id": 112021,
-        "name": "地脉的枯叶",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112021.webp"
-      },
-      {
-        "id": 112003,
-        "name": "史莱姆清",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/112003.webp"
-      }
+      { "id": 114007, "name": "凛风奔狼的断牙", "star": 4 },
+      { "id": 112021, "name": "地脉的枯叶", "star": 3 },
+      { "id": 112003, "name": "史莱姆清", "star": 2 }
     ],
     "story": [
       "\r\n他总会提起自己年轻时的冒险经历，\r\n都是令人生厌的老掉牙的夸张故事。\r\n但这把老旧的大剑似乎在无声地说，\r\n「是有点夸张没错。但当时我也在」"
@@ -2865,30 +1827,9 @@
     "star": 3,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "不屈",
@@ -2926,30 +1867,9 @@
     "star": 3,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "踏火息雷",
@@ -2987,54 +1907,18 @@
     "star": 3,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "收割",
       "Descriptions": [
-        {
-          "Level": 0,
-          "Description": "击败敌人时，恢复<color=#99FFFFFF>8%</color>生命值。"
-        },
-        {
-          "Level": 1,
-          "Description": "击败敌人时，恢复<color=#99FFFFFF>10%</color>生命值。"
-        },
-        {
-          "Level": 2,
-          "Description": "击败敌人时，恢复<color=#99FFFFFF>12%</color>生命值。"
-        },
-        {
-          "Level": 3,
-          "Description": "击败敌人时，恢复<color=#99FFFFFF>14%</color>生命值。"
-        },
-        {
-          "Level": 4,
-          "Description": "击败敌人时，恢复<color=#99FFFFFF>16%</color>生命值。"
-        }
+        { "Level": 0, "Description": "击败敌人时，恢复<color=#99FFFFFF>8%</color>生命值。" },
+        { "Level": 1, "Description": "击败敌人时，恢复<color=#99FFFFFF>10%</color>生命值。" },
+        { "Level": 2, "Description": "击败敌人时，恢复<color=#99FFFFFF>12%</color>生命值。" },
+        { "Level": 3, "Description": "击败敌人时，恢复<color=#99FFFFFF>14%</color>生命值。" },
+        { "Level": 4, "Description": "击败敌人时，恢复<color=#99FFFFFF>16%</color>生命值。" }
       ]
     },
     "story": [
@@ -3048,30 +1932,9 @@
     "star": 3,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "有话直说",
@@ -3109,30 +1972,9 @@
     "star": 3,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "勇气",
@@ -3170,30 +2012,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "顺风而行",
@@ -3231,30 +2052,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "叛逆的守护者",
@@ -3292,30 +2092,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "气定神闲",
@@ -3353,30 +2132,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "专注",
@@ -3414,30 +2172,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "止水息雷",
@@ -3475,30 +2212,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "粉碎",
@@ -3536,30 +2252,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "注能之锋",
@@ -3597,30 +2292,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "乘胜追击",
@@ -3658,30 +2332,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "破浪",
@@ -3719,30 +2372,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "千岩诀·同心",
@@ -3780,30 +2412,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "霜葬",
@@ -3841,30 +2452,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "海洋的胜利",
@@ -3902,30 +2492,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114032,
-        "name": "鸣神御灵的勇武",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114032.webp"
-      },
-      {
-        "id": 112049,
-        "name": "混沌真眼",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112049.webp"
-      },
-      {
-        "id": 112046,
-        "name": "名刀镡",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112046.webp"
-      }
+      { "id": 114032, "name": "鸣神御灵的勇武", "star": 5 },
+      { "id": 112049, "name": "混沌真眼", "star": 4 },
+      { "id": 112046, "name": "名刀镡", "star": 3 }
     ],
     "affix": {
       "Name": "名士振舞",
@@ -3963,30 +2532,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114048,
-        "name": "烈日威权的旧日",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114048.webp"
-      },
-      {
-        "id": 112070,
-        "name": "混沌锚栓",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112070.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114048, "name": "烈日威权的旧日", "star": 5 },
+      { "id": 112070, "name": "混沌锚栓", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "沙上楼阁",
@@ -4024,30 +2572,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114028,
-        "name": "远海夷地的金枝",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114028.webp"
-      },
-      {
-        "id": 112058,
-        "name": "隐兽鬼爪",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112058.webp"
-      },
-      {
-        "id": 112046,
-        "name": "名刀镡",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112046.webp"
-      }
+      { "id": 114028, "name": "远海夷地的金枝", "star": 5 },
+      { "id": 112058, "name": "隐兽鬼爪", "star": 4 },
+      { "id": 112046, "name": "名刀镡", "star": 3 }
     ],
     "affix": {
       "Name": "驭浪的海祇民",
@@ -4085,30 +2612,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114040,
-        "name": "谧林涓露的金符",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114040.webp"
-      },
-      {
-        "id": 112070,
-        "name": "混沌锚栓",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112070.webp"
-      },
-      {
-        "id": 112067,
-        "name": "织金红绸",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112067.webp"
-      }
+      { "id": 114040, "name": "谧林涓露的金符", "star": 5 },
+      { "id": 112070, "name": "混沌锚栓", "star": 4 },
+      { "id": 112067, "name": "织金红绸", "star": 3 }
     ],
     "affix": {
       "Name": "森林的瑞佑",
@@ -4146,30 +2652,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112076,
-        "name": "锲纹的横脊",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112076.webp"
-      },
-      {
-        "id": 112055,
-        "name": "浮游晶化核",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112055.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112076, "name": "锲纹的横脊", "star": 4 },
+      { "id": 112055, "name": "浮游晶化核", "star": 3 }
     ],
     "affix": {
       "Name": "风与花的密语",
@@ -4207,30 +2692,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114044,
-        "name": "绿洲花园的真谛",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114044.webp"
-      },
-      {
-        "id": 112076,
-        "name": "锲纹的横脊",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112076.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114044, "name": "绿洲花园的真谛", "star": 5 },
+      { "id": 112076, "name": "锲纹的横脊", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "「伶牙俐齿」",
@@ -4268,30 +2732,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114060,
-        "name": "无垢之海的金杯",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114060.webp"
-      },
-      {
-        "id": 112091,
-        "name": "异界生命核",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112091.webp"
-      },
-      {
-        "id": 112085,
-        "name": "奇械机芯齿轮",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112085.webp"
-      }
+      { "id": 114060, "name": "无垢之海的金杯", "star": 5 },
+      { "id": 112091, "name": "异界生命核", "star": 4 },
+      { "id": 112085, "name": "奇械机芯齿轮", "star": 3 }
     ],
     "affix": {
       "Name": "巡航的白浪",
@@ -4329,30 +2772,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114060,
-        "name": "无垢之海的金杯",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114060.webp"
-      },
-      {
-        "id": 112094,
-        "name": "役人的时时刻刻",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112094.webp"
-      },
-      {
-        "id": 112085,
-        "name": "奇械机芯齿轮",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112085.webp"
-      }
+      { "id": 114060, "name": "无垢之海的金杯", "star": 5 },
+      { "id": 112094, "name": "役人的时时刻刻", "star": 4 },
+      { "id": 112085, "name": "奇械机芯齿轮", "star": 3 }
     ],
     "affix": {
       "Name": "加油！",
@@ -4390,30 +2812,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114060,
-        "name": "无垢之海的金杯",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114060.webp"
-      },
-      {
-        "id": 112091,
-        "name": "异界生命核",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112091.webp"
-      },
-      {
-        "id": 112085,
-        "name": "奇械机芯齿轮",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112085.webp"
-      }
+      { "id": 114060, "name": "无垢之海的金杯", "star": 5 },
+      { "id": 112091, "name": "异界生命核", "star": 4 },
+      { "id": 112085, "name": "奇械机芯齿轮", "star": 3 }
     ],
     "affix": {
       "Name": "船工号子",
@@ -4451,30 +2852,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114072,
-        "name": "神合秘烟的启示",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114072.webp"
-      },
-      {
-        "id": 112115,
-        "name": "秘源真芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112115.webp"
-      },
-      {
-        "id": 112103,
-        "name": "横行霸者的利齿",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112103.webp"
-      }
+      { "id": 114072, "name": "神合秘烟的启示", "star": 5 },
+      { "id": 112115, "name": "秘源真芯", "star": 4 },
+      { "id": 112103, "name": "横行霸者的利齿", "star": 3 }
     ],
     "affix": {
       "Name": "坠枝之重",
@@ -4512,30 +2892,9 @@
     "star": 4,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114064,
-        "name": "贡祭炽心的荣膺",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114064.webp"
-      },
-      {
-        "id": 112112,
-        "name": "聚燃的游像眼",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112112.webp"
-      },
-      {
-        "id": 112106,
-        "name": "龙冠武士的金哨",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112106.webp"
-      }
+      { "id": 114064, "name": "贡祭炽心的荣膺", "star": 5 },
+      { "id": 112112, "name": "聚燃的游像眼", "star": 4 },
+      { "id": 112106, "name": "龙冠武士的金哨", "star": 3 }
     ],
     "affix": {
       "Name": "苍翠之路的誓言",
@@ -4574,30 +2933,9 @@
     "star": 5,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "斩裂晴空的龙脊",
@@ -4635,30 +2973,9 @@
     "star": 5,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "如狼般狩猎者",
@@ -4696,30 +3013,9 @@
     "star": 5,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "揭旗的叛逆之歌",
@@ -4757,30 +3053,9 @@
     "star": 5,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "金璋皇极",
@@ -4818,30 +3093,9 @@
     "star": 5,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114032,
-        "name": "鸣神御灵的勇武",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114032.webp"
-      },
-      {
-        "id": 112058,
-        "name": "隐兽鬼爪",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112058.webp"
-      },
-      {
-        "id": 112046,
-        "name": "名刀镡",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112046.webp"
-      }
+      { "id": 114032, "name": "鸣神御灵的勇武", "star": 5 },
+      { "id": 112058, "name": "隐兽鬼爪", "star": 4 },
+      { "id": 112046, "name": "名刀镡", "star": 3 }
     ],
     "affix": {
       "Name": "御伽大王御伽话",
@@ -4879,30 +3133,9 @@
     "star": 5,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114048,
-        "name": "烈日威权的旧日",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114048.webp"
-      },
-      {
-        "id": 112076,
-        "name": "锲纹的横脊",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112076.webp"
-      },
-      {
-        "id": 112067,
-        "name": "织金红绸",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112067.webp"
-      }
+      { "id": 114048, "name": "烈日威权的旧日", "star": 5 },
+      { "id": 112076, "name": "锲纹的横脊", "star": 4 },
+      { "id": 112067, "name": "织金红绸", "star": 3 }
     ],
     "affix": {
       "Name": "沙海守望",
@@ -4940,30 +3173,9 @@
     "star": 5,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114052,
-        "name": "悠古弦音的回响",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114052.webp"
-      },
-      {
-        "id": 112091,
-        "name": "异界生命核",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112091.webp"
-      },
-      {
-        "id": 112085,
-        "name": "奇械机芯齿轮",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112085.webp"
-      }
+      { "id": 114052, "name": "悠古弦音的回响", "star": 5 },
+      { "id": 112091, "name": "异界生命核", "star": 4 },
+      { "id": 112085, "name": "奇械机芯齿轮", "star": 3 }
     ],
     "affix": {
       "Name": "诸多朝与暮的誓约",
@@ -5001,30 +3213,9 @@
     "star": 5,
     "weapon": "双手剑",
     "materials": [
-      {
-        "id": 114068,
-        "name": "谵妄圣主的神面",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114068.webp"
-      },
-      {
-        "id": 112112,
-        "name": "聚燃的游像眼",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112112.webp"
-      },
-      {
-        "id": 112106,
-        "name": "龙冠武士的金哨",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112106.webp"
-      }
+      { "id": 114068, "name": "谵妄圣主的神面", "star": 5 },
+      { "id": 112112, "name": "聚燃的游像眼", "star": 4 },
+      { "id": 112106, "name": "龙冠武士的金哨", "star": 3 }
     ],
     "affix": {
       "Name": "绿松石之狩",
@@ -5062,30 +3253,9 @@
     "star": 1,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114011,
-        "name": "狮牙斗士的镣铐",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114011.webp"
-      },
-      {
-        "id": 112024,
-        "name": "混沌回路",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112024.webp"
-      },
-      {
-        "id": 112009,
-        "name": "封魔绘卷",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/112009.webp"
-      }
+      { "id": 114011, "name": "狮牙斗士的镣铐", "star": 4 },
+      { "id": 112024, "name": "混沌回路", "star": 3 },
+      { "id": 112009, "name": "封魔绘卷", "star": 2 }
     ],
     "story": [
       "\r\n在过去的蒙德，长枪是被贵族禁止的兵器。\r\n表面上说，剑术才是高尚之人的武术修为，\r\n据说实际是因为长枪可以填补训练的差距，\r\n让缺乏兵器与练习的平民拥有抗争的武装。"
@@ -5098,30 +3268,9 @@
     "star": 2,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114011,
-        "name": "狮牙斗士的镣铐",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114011.webp"
-      },
-      {
-        "id": 112024,
-        "name": "混沌回路",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112024.webp"
-      },
-      {
-        "id": 112009,
-        "name": "封魔绘卷",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/112009.webp"
-      }
+      { "id": 114011, "name": "狮牙斗士的镣铐", "star": 4 },
+      { "id": 112024, "name": "混沌回路", "star": 3 },
+      { "id": 112009, "name": "封魔绘卷", "star": 2 }
     ],
     "story": [
       "\r\n散发着些许威严感的简陋兵器。\r\n对于有着应当守护的事物的人，\r\n或是除却己身一无所有的旅者，\r\n再简陋的武器都能发挥十倍的力量吧。"
@@ -5134,54 +3283,18 @@
     "star": 3,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "锐利",
       "Descriptions": [
-        {
-          "Level": 0,
-          "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>24%</color>。"
-        },
-        {
-          "Level": 1,
-          "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>30%</color>。"
-        },
-        {
-          "Level": 2,
-          "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>36%</color>。"
-        },
-        {
-          "Level": 3,
-          "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>42%</color>。"
-        },
-        {
-          "Level": 4,
-          "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>48%</color>。"
-        }
+        { "Level": 0, "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>24%</color>。" },
+        { "Level": 1, "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>30%</color>。" },
+        { "Level": 2, "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>36%</color>。" },
+        { "Level": 3, "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>42%</color>。" },
+        { "Level": 4, "Description": "普通攻击造成的伤害提升<color=#99FFFFFF>48%</color>。" }
       ]
     },
     "story": [
@@ -5195,30 +3308,9 @@
     "star": 3,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "沉重",
@@ -5256,54 +3348,18 @@
     "star": 3,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "克柔",
       "Descriptions": [
-        {
-          "Level": 0,
-          "Description": "对史莱姆类敌人造成的伤害增加<color=#99FFFFFF>40%</color>。"
-        },
-        {
-          "Level": 1,
-          "Description": "对史莱姆类敌人造成的伤害增加<color=#99FFFFFF>50%</color>。"
-        },
-        {
-          "Level": 2,
-          "Description": "对史莱姆类敌人造成的伤害增加<color=#99FFFFFF>60%</color>。"
-        },
-        {
-          "Level": 3,
-          "Description": "对史莱姆类敌人造成的伤害增加<color=#99FFFFFF>70%</color>。"
-        },
-        {
-          "Level": 4,
-          "Description": "对史莱姆类敌人造成的伤害增加<color=#99FFFFFF>80%</color>。"
-        }
+        { "Level": 0, "Description": "对史莱姆类敌人造成的伤害增加<color=#99FFFFFF>40%</color>。" },
+        { "Level": 1, "Description": "对史莱姆类敌人造成的伤害增加<color=#99FFFFFF>50%</color>。" },
+        { "Level": 2, "Description": "对史莱姆类敌人造成的伤害增加<color=#99FFFFFF>60%</color>。" },
+        { "Level": 3, "Description": "对史莱姆类敌人造成的伤害增加<color=#99FFFFFF>70%</color>。" },
+        { "Level": 4, "Description": "对史莱姆类敌人造成的伤害增加<color=#99FFFFFF>80%</color>。" }
       ]
     },
     "story": [
@@ -5317,30 +3373,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "踏火止水",
@@ -5378,30 +3413,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "嗜魔",
@@ -5439,30 +3453,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "注能之针",
@@ -5500,30 +3493,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "乘胜追击",
@@ -5561,30 +3533,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "角斗士",
@@ -5622,30 +3573,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "千岩诀·同心",
@@ -5683,30 +3613,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "顺风而行",
@@ -5744,30 +3653,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "专注",
@@ -5805,30 +3693,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "霜葬",
@@ -5866,30 +3733,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114036,
-        "name": "今昔剧画之鬼人",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114036.webp"
-      },
-      {
-        "id": 112049,
-        "name": "混沌真眼",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112049.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114036, "name": "今昔剧画之鬼人", "star": 5 },
+      { "id": 112049, "name": "混沌真眼", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "名士振舞",
@@ -5927,30 +3773,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114036,
-        "name": "今昔剧画之鬼人",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114036.webp"
-      },
-      {
-        "id": 112049,
-        "name": "混沌真眼",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112049.webp"
-      },
-      {
-        "id": 112055,
-        "name": "浮游晶化核",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112055.webp"
-      }
+      { "id": 114036, "name": "今昔剧画之鬼人", "star": 5 },
+      { "id": 112049, "name": "混沌真眼", "star": 4 },
+      { "id": 112055, "name": "浮游晶化核", "star": 3 }
     ],
     "affix": {
       "Name": "船歌",
@@ -5988,30 +3813,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114036,
-        "name": "今昔剧画之鬼人",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114036.webp"
-      },
-      {
-        "id": 112058,
-        "name": "隐兽鬼爪",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112058.webp"
-      },
-      {
-        "id": 112046,
-        "name": "名刀镡",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112046.webp"
-      }
+      { "id": 114036, "name": "今昔剧画之鬼人", "star": 5 },
+      { "id": 112058, "name": "隐兽鬼爪", "star": 4 },
+      { "id": 112046, "name": "名刀镡", "star": 3 }
     ],
     "affix": {
       "Name": "驭浪的海祇民",
@@ -6049,30 +3853,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114044,
-        "name": "绿洲花园的真谛",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114044.webp"
-      },
-      {
-        "id": 112070,
-        "name": "混沌锚栓",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112070.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114044, "name": "绿洲花园的真谛", "star": 5 },
+      { "id": 112070, "name": "混沌锚栓", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "幽林月影",
@@ -6110,30 +3893,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112019,
-        "name": "幽邃刻像",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112019.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112019, "name": "幽邃刻像", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "不至之风",
@@ -6171,30 +3933,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114060,
-        "name": "无垢之海的金杯",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114060.webp"
-      },
-      {
-        "id": 112079,
-        "name": "漫游者的盛放之花",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112079.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114060, "name": "无垢之海的金杯", "star": 5 },
+      { "id": 112079, "name": "漫游者的盛放之花", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "冰原的诸多故事",
@@ -6232,30 +3973,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114060,
-        "name": "无垢之海的金杯",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114060.webp"
-      },
-      {
-        "id": 112091,
-        "name": "异界生命核",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112091.webp"
-      },
-      {
-        "id": 112085,
-        "name": "奇械机芯齿轮",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112085.webp"
-      }
+      { "id": 114060, "name": "无垢之海的金杯", "star": 5 },
+      { "id": 112091, "name": "异界生命核", "star": 4 },
+      { "id": 112085, "name": "奇械机芯齿轮", "star": 3 }
     ],
     "affix": {
       "Name": "枪尖一点",
@@ -6293,30 +4013,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114040,
-        "name": "谧林涓露的金符",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114040.webp"
-      },
-      {
-        "id": 112097,
-        "name": "渊光鳍翅",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112097.webp"
-      },
-      {
-        "id": 112055,
-        "name": "浮游晶化核",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112055.webp"
-      }
+      { "id": 114040, "name": "谧林涓露的金符", "star": 5 },
+      { "id": 112097, "name": "渊光鳍翅", "star": 4 },
+      { "id": 112055, "name": "浮游晶化核", "star": 3 }
     ],
     "affix": {
       "Name": "均衡的原理",
@@ -6354,30 +4053,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114052,
-        "name": "悠古弦音的回响",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114052.webp"
-      },
-      {
-        "id": 112094,
-        "name": "役人的时时刻刻",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112094.webp"
-      },
-      {
-        "id": 112085,
-        "name": "奇械机芯齿轮",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112085.webp"
-      }
+      { "id": 114052, "name": "悠古弦音的回响", "star": 5 },
+      { "id": 112094, "name": "役人的时时刻刻", "star": 4 },
+      { "id": 112085, "name": "奇械机芯齿轮", "star": 3 }
     ],
     "affix": {
       "Name": "石匠号子",
@@ -6415,30 +4093,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114068,
-        "name": "谵妄圣主的神面",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114068.webp"
-      },
-      {
-        "id": 112112,
-        "name": "聚燃的游像眼",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112112.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114068, "name": "谵妄圣主的神面", "star": 5 },
+      { "id": 112112, "name": "聚燃的游像眼", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "越峰之望",
@@ -6476,30 +4133,9 @@
     "star": 4,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114068,
-        "name": "谵妄圣主的神面",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114068.webp"
-      },
-      {
-        "id": 112115,
-        "name": "秘源真芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112115.webp"
-      },
-      {
-        "id": 112106,
-        "name": "龙冠武士的金哨",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112106.webp"
-      }
+      { "id": 114068, "name": "谵妄圣主的神面", "star": 5 },
+      { "id": 112115, "name": "秘源真芯", "star": 4 },
+      { "id": 112106, "name": "龙冠武士的金哨", "star": 3 }
     ],
     "affix": {
       "Name": "流水与泉的约定",
@@ -6538,30 +4174,9 @@
     "star": 5,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "无羁的朱赤之蝶",
@@ -6599,30 +4214,9 @@
     "star": 5,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "斫断黑翼的利齿",
@@ -6660,30 +4254,9 @@
     "star": 5,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "金璋皇极",
@@ -6721,30 +4294,9 @@
     "star": 5,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "昭理的鸢之枪",
@@ -6782,30 +4334,9 @@
     "star": 5,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "灭却之戒法",
@@ -6843,30 +4374,9 @@
     "star": 5,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114036,
-        "name": "今昔剧画之鬼人",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114036.webp"
-      },
-      {
-        "id": 112049,
-        "name": "混沌真眼",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112049.webp"
-      },
-      {
-        "id": 112046,
-        "name": "名刀镡",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112046.webp"
-      }
+      { "id": 114036, "name": "今昔剧画之鬼人", "star": 5 },
+      { "id": 112049, "name": "混沌真眼", "star": 4 },
+      { "id": 112046, "name": "名刀镡", "star": 3 }
     ],
     "affix": {
       "Name": "非时之梦·常世灶食",
@@ -6904,30 +4414,9 @@
     "star": 5,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114044,
-        "name": "绿洲花园的真谛",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114044.webp"
-      },
-      {
-        "id": 112070,
-        "name": "混沌锚栓",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112070.webp"
-      },
-      {
-        "id": 112061,
-        "name": "孢囊晶尘",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112061.webp"
-      }
+      { "id": 114044, "name": "绿洲花园的真谛", "star": 5 },
+      { "id": 112070, "name": "混沌锚栓", "star": 4 },
+      { "id": 112061, "name": "孢囊晶尘", "star": 3 }
     ],
     "affix": {
       "Name": "蜃气尽头的热梦",
@@ -6965,30 +4454,9 @@
     "star": 5,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114060,
-        "name": "无垢之海的金杯",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114060.webp"
-      },
-      {
-        "id": 112100,
-        "name": "未熄的剑柄",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112100.webp"
-      },
-      {
-        "id": 112085,
-        "name": "奇械机芯齿轮",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112085.webp"
-      }
+      { "id": 114060, "name": "无垢之海的金杯", "star": 5 },
+      { "id": 112100, "name": "未熄的剑柄", "star": 4 },
+      { "id": 112085, "name": "奇械机芯齿轮", "star": 3 }
     ],
     "affix": {
       "Name": "烬日之影",
@@ -7026,30 +4494,9 @@
     "star": 5,
     "weapon": "长柄武器",
     "materials": [
-      {
-        "id": 114060,
-        "name": "无垢之海的金杯",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114060.webp"
-      },
-      {
-        "id": 112100,
-        "name": "未熄的剑柄",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112100.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114060, "name": "无垢之海的金杯", "star": 5 },
+      { "id": 112100, "name": "未熄的剑柄", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "白晓的序曲",
@@ -7087,30 +4534,9 @@
     "star": 1,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114003,
-        "name": "高塔孤王的断片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 112015,
-        "name": "黑铜号角",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112015.webp"
-      },
-      {
-        "id": 112006,
-        "name": "污秽的面具",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/112006.webp"
-      }
+      { "id": 114003, "name": "高塔孤王的断片", "star": 4 },
+      { "id": 112015, "name": "黑铜号角", "star": 3 },
+      { "id": 112006, "name": "污秽的面具", "star": 2 }
     ],
     "story": ["\r\n用字句记录了学习、实验笔记与咒语，\r\n用字句之间的空白记录了学徒的努力。"]
   },
@@ -7121,30 +4547,9 @@
     "star": 2,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114003,
-        "name": "高塔孤王的断片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114003.webp"
-      },
-      {
-        "id": 112015,
-        "name": "黑铜号角",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112015.webp"
-      },
-      {
-        "id": 112006,
-        "name": "污秽的面具",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/112006.webp"
-      }
+      { "id": 114003, "name": "高塔孤王的断片", "star": 4 },
+      { "id": 112015, "name": "黑铜号角", "star": 3 },
+      { "id": 112006, "name": "污秽的面具", "star": 2 }
     ],
     "story": [
       "\r\n在学徒当中流行的魔导辅导书，可以装在口袋里的尺寸。\r\n略去了教科书中冗长的原理与习题，只留下会考的内容。\r\n目前因为《魔导绪论》第十二版的改动而变得不合时宜。"
@@ -7157,30 +4562,9 @@
     "star": 3,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "止水息雷",
@@ -7218,30 +4602,9 @@
     "star": 3,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "传承",
@@ -7279,30 +4642,9 @@
     "star": 3,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "能量沐浴",
@@ -7340,30 +4682,9 @@
     "star": 3,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "激流",
@@ -7401,30 +4722,9 @@
     "star": 3,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "奔袭战术",
@@ -7462,30 +4762,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "顺风而行",
@@ -7523,30 +4802,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "登场乐",
@@ -7584,30 +4842,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "气定神闲",
@@ -7645,30 +4882,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "专注",
@@ -7706,30 +4922,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "日月辉",
@@ -7767,30 +4962,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "炊金",
@@ -7828,30 +5002,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "注能之卷",
@@ -7889,30 +5042,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "乘胜追击",
@@ -7950,30 +5082,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "回响",
@@ -8011,30 +5122,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "变化万端",
@@ -8072,30 +5162,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "霜葬",
@@ -8133,30 +5202,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "嘟嘟！大冒险",
@@ -8194,30 +5242,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114028,
-        "name": "远海夷地的金枝",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114028.webp"
-      },
-      {
-        "id": 112052,
-        "name": "偏光棱镜",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112052.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114028, "name": "远海夷地的金枝", "star": 5 },
+      { "id": 112052, "name": "偏光棱镜", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "樱之斋宫",
@@ -8255,30 +5282,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114028,
-        "name": "远海夷地的金枝",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114028.webp"
-      },
-      {
-        "id": 112058,
-        "name": "隐兽鬼爪",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112058.webp"
-      },
-      {
-        "id": 112055,
-        "name": "浮游晶化核",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112055.webp"
-      }
+      { "id": 114028, "name": "远海夷地的金枝", "star": 5 },
+      { "id": 112058, "name": "隐兽鬼爪", "star": 4 },
+      { "id": 112055, "name": "浮游晶化核", "star": 3 }
     ],
     "affix": {
       "Name": "微光的海渊民",
@@ -8316,30 +5322,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114044,
-        "name": "绿洲花园的真谛",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114044.webp"
-      },
-      {
-        "id": 112064,
-        "name": "茁壮菌核",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112064.webp"
-      },
-      {
-        "id": 112061,
-        "name": "孢囊晶尘",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112061.webp"
-      }
+      { "id": 114044, "name": "绿洲花园的真谛", "star": 5 },
+      { "id": 112064, "name": "茁壮菌核", "star": 4 },
+      { "id": 112061, "name": "孢囊晶尘", "star": 3 }
     ],
     "affix": {
       "Name": "林野晚星",
@@ -8377,30 +5362,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114044,
-        "name": "绿洲花园的真谛",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114044.webp"
-      },
-      {
-        "id": 112019,
-        "name": "幽邃刻像",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112019.webp"
-      },
-      {
-        "id": 112061,
-        "name": "孢囊晶尘",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112061.webp"
-      }
+      { "id": 114044, "name": "绿洲花园的真谛", "star": 5 },
+      { "id": 112019, "name": "幽邃刻像", "star": 4 },
+      { "id": 112061, "name": "孢囊晶尘", "star": 3 }
     ],
     "affix": {
       "Name": "圆满之相",
@@ -8438,30 +5402,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "碧玉流转",
@@ -8499,30 +5442,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114056,
-        "name": "纯圣露滴的真粹",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114056.webp"
-      },
-      {
-        "id": 112091,
-        "name": "异界生命核",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112091.webp"
-      },
-      {
-        "id": 112082,
-        "name": "异色结晶石",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112082.webp"
-      }
+      { "id": 114056, "name": "纯圣露滴的真粹", "star": 5 },
+      { "id": 112091, "name": "异界生命核", "star": 4 },
+      { "id": 112082, "name": "异色结晶石", "star": 3 }
     ],
     "affix": {
       "Name": "未完的杰作",
@@ -8560,30 +5482,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "蔚蓝深空",
@@ -8621,30 +5522,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114072,
-        "name": "神合秘烟的启示",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114072.webp"
-      },
-      {
-        "id": 112115,
-        "name": "秘源真芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112115.webp"
-      },
-      {
-        "id": 112103,
-        "name": "横行霸者的利齿",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112103.webp"
-      }
+      { "id": 114072, "name": "神合秘烟的启示", "star": 5 },
+      { "id": 112115, "name": "秘源真芯", "star": 4 },
+      { "id": 112103, "name": "横行霸者的利齿", "star": 3 }
     ],
     "affix": {
       "Name": "图帕克之握",
@@ -8682,30 +5562,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114064,
-        "name": "贡祭炽心的荣膺",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114064.webp"
-      },
-      {
-        "id": 112109,
-        "name": "意志巡游的符像",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112109.webp"
-      },
-      {
-        "id": 112103,
-        "name": "横行霸者的利齿",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112103.webp"
-      }
+      { "id": 114064, "name": "贡祭炽心的荣膺", "star": 5 },
+      { "id": 112109, "name": "意志巡游的符像", "star": 4 },
+      { "id": 112103, "name": "横行霸者的利齿", "star": 3 }
     ],
     "affix": {
       "Name": "长牙飞去来",
@@ -8743,30 +5602,9 @@
     "star": 4,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114068,
-        "name": "谵妄圣主的神面",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114068.webp"
-      },
-      {
-        "id": 112109,
-        "name": "意志巡游的符像",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112109.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114068, "name": "谵妄圣主的神面", "star": 5 },
+      { "id": 112109, "name": "意志巡游的符像", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "丰沃之陆的回声",
@@ -8805,30 +5643,9 @@
     "star": 5,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "浮游四方的灵云",
@@ -8866,30 +5683,9 @@
     "star": 5,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "无边际的眷顾",
@@ -8927,30 +5723,9 @@
     "star": 5,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "金璋皇极",
@@ -8988,30 +5763,9 @@
     "star": 5,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112079,
-        "name": "漫游者的盛放之花",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112079.webp"
-      },
-      {
-        "id": 112061,
-        "name": "孢囊晶尘",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112061.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112079, "name": "漫游者的盛放之花", "star": 4 },
+      { "id": 112061, "name": "孢囊晶尘", "star": 3 }
     ],
     "affix": {
       "Name": "定土玉圭",
@@ -9049,30 +5803,9 @@
     "star": 5,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114028,
-        "name": "远海夷地的金枝",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114028.webp"
-      },
-      {
-        "id": 112052,
-        "name": "偏光棱镜",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112052.webp"
-      },
-      {
-        "id": 112055,
-        "name": "浮游晶化核",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112055.webp"
-      }
+      { "id": 114028, "name": "远海夷地的金枝", "star": 5 },
+      { "id": 112052, "name": "偏光棱镜", "star": 4 },
+      { "id": 112055, "name": "浮游晶化核", "star": 3 }
     ],
     "affix": {
       "Name": "白夜皓月",
@@ -9110,30 +5843,9 @@
     "star": 5,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114036,
-        "name": "今昔剧画之鬼人",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114036.webp"
-      },
-      {
-        "id": 112058,
-        "name": "隐兽鬼爪",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112058.webp"
-      },
-      {
-        "id": 112055,
-        "name": "浮游晶化核",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112055.webp"
-      }
+      { "id": 114036, "name": "今昔剧画之鬼人", "star": 5 },
+      { "id": 112058, "name": "隐兽鬼爪", "star": 4 },
+      { "id": 112055, "name": "浮游晶化核", "star": 3 }
     ],
     "affix": {
       "Name": "神樱神游神乐舞",
@@ -9171,30 +5883,9 @@
     "star": 5,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114044,
-        "name": "绿洲花园的真谛",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114044.webp"
-      },
-      {
-        "id": 112073,
-        "name": "辉光棱晶",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112073.webp"
-      },
-      {
-        "id": 112061,
-        "name": "孢囊晶尘",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112061.webp"
-      }
+      { "id": 114044, "name": "绿洲花园的真谛", "star": 5 },
+      { "id": 112073, "name": "辉光棱晶", "star": 4 },
+      { "id": 112061, "name": "孢囊晶尘", "star": 3 }
     ],
     "affix": {
       "Name": "千夜的曙歌",
@@ -9232,30 +5923,9 @@
     "star": 5,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114048,
-        "name": "烈日威权的旧日",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114048.webp"
-      },
-      {
-        "id": 112064,
-        "name": "茁壮菌核",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112064.webp"
-      },
-      {
-        "id": 112061,
-        "name": "孢囊晶尘",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112061.webp"
-      }
+      { "id": 114048, "name": "烈日威权的旧日", "star": 5 },
+      { "id": 112064, "name": "茁壮菌核", "star": 4 },
+      { "id": 112061, "name": "孢囊晶尘", "star": 3 }
     ],
     "affix": {
       "Name": "堙没的蓝宝石泪滴",
@@ -9293,30 +5963,9 @@
     "star": 5,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114060,
-        "name": "无垢之海的金杯",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114060.webp"
-      },
-      {
-        "id": 112094,
-        "name": "役人的时时刻刻",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112094.webp"
-      },
-      {
-        "id": 112082,
-        "name": "异色结晶石",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112082.webp"
-      }
+      { "id": 114060, "name": "无垢之海的金杯", "star": 5 },
+      { "id": 112094, "name": "役人的时时刻刻", "star": 4 },
+      { "id": 112082, "name": "异色结晶石", "star": 3 }
     ],
     "affix": {
       "Name": "黄金的血潮",
@@ -9354,30 +6003,9 @@
     "star": 5,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114056,
-        "name": "纯圣露滴的真粹",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114056.webp"
-      },
-      {
-        "id": 112091,
-        "name": "异界生命核",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112091.webp"
-      },
-      {
-        "id": 112085,
-        "name": "奇械机芯齿轮",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112085.webp"
-      }
+      { "id": 114056, "name": "纯圣露滴的真粹", "star": 5 },
+      { "id": 112091, "name": "异界生命核", "star": 4 },
+      { "id": 112085, "name": "奇械机芯齿轮", "star": 3 }
     ],
     "affix": {
       "Name": "万世的浪涛",
@@ -9415,30 +6043,9 @@
     "star": 5,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112097,
-        "name": "渊光鳍翅",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112097.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112097, "name": "渊光鳍翅", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "云笈降真要诀",
@@ -9476,30 +6083,9 @@
     "star": 5,
     "weapon": "法器",
     "materials": [
-      {
-        "id": 114064,
-        "name": "贡祭炽心的荣膺",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114064.webp"
-      },
-      {
-        "id": 112109,
-        "name": "意志巡游的符像",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112109.webp"
-      },
-      {
-        "id": 112103,
-        "name": "横行霸者的利齿",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112103.webp"
-      }
+      { "id": 114064, "name": "贡祭炽心的荣膺", "star": 5 },
+      { "id": 112109, "name": "意志巡游的符像", "star": 4 },
+      { "id": 112103, "name": "横行霸者的利齿", "star": 3 }
     ],
     "affix": {
       "Name": "水色回忆",
@@ -9537,30 +6123,9 @@
     "star": 1,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114007,
-        "name": "凛风奔狼的断牙",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114007.webp"
-      },
-      {
-        "id": 112021,
-        "name": "地脉的枯叶",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112021.webp"
-      },
-      {
-        "id": 112036,
-        "name": "藏银鸦印",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/112036.webp"
-      }
+      { "id": 114007, "name": "凛风奔狼的断牙", "star": 4 },
+      { "id": 112021, "name": "地脉的枯叶", "star": 3 },
+      { "id": 112036, "name": "藏银鸦印", "star": 2 }
     ],
     "story": [
       "\r\n传说过去在蒙德，曾经有利用弓弦奏乐，\r\n或者说利用乐器的琴弦放箭的流浪乐手。\r\n但那只不过是遥远古代的民间传说罢了。"
@@ -9573,30 +6138,9 @@
     "star": 2,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114007,
-        "name": "凛风奔狼的断牙",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/114007.webp"
-      },
-      {
-        "id": 112021,
-        "name": "地脉的枯叶",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112021.webp"
-      },
-      {
-        "id": 112036,
-        "name": "藏银鸦印",
-        "star": 2,
-        "starIcon": "/icon/star/2.webp",
-        "bg": "/icon/bg/2-Star.webp",
-        "icon": "/icon/material/112036.webp"
-      }
+      { "id": 114007, "name": "凛风奔狼的断牙", "star": 4 },
+      { "id": 112021, "name": "地脉的枯叶", "star": 3 },
+      { "id": 112036, "name": "藏银鸦印", "star": 2 }
     ],
     "story": [
       "\r\n猎手要永远处于下风处；避免直立行走在山脊上。\r\n无论狩猎的对象是野兽，是魔物或是恶人都一样。"
@@ -9609,30 +6153,9 @@
     "star": 3,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "踏火止水",
@@ -9670,54 +6193,18 @@
     "star": 3,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "精准",
       "Descriptions": [
-        {
-          "Level": 0,
-          "Description": "针对要害造成的伤害提升<color=#99FFFFFF>24%</color>。"
-        },
-        {
-          "Level": 1,
-          "Description": "针对要害造成的伤害提升<color=#99FFFFFF>30%</color>。"
-        },
-        {
-          "Level": 2,
-          "Description": "针对要害造成的伤害提升<color=#99FFFFFF>36%</color>。"
-        },
-        {
-          "Level": 3,
-          "Description": "针对要害造成的伤害提升<color=#99FFFFFF>42%</color>。"
-        },
-        {
-          "Level": 4,
-          "Description": "针对要害造成的伤害提升<color=#99FFFFFF>48%</color>。"
-        }
+        { "Level": 0, "Description": "针对要害造成的伤害提升<color=#99FFFFFF>24%</color>。" },
+        { "Level": 1, "Description": "针对要害造成的伤害提升<color=#99FFFFFF>30%</color>。" },
+        { "Level": 2, "Description": "针对要害造成的伤害提升<color=#99FFFFFF>36%</color>。" },
+        { "Level": 3, "Description": "针对要害造成的伤害提升<color=#99FFFFFF>42%</color>。" },
+        { "Level": 4, "Description": "针对要害造成的伤害提升<color=#99FFFFFF>48%</color>。" }
       ]
     },
     "story": [
@@ -9731,54 +6218,18 @@
     "star": 3,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "收割",
       "Descriptions": [
-        {
-          "Level": 0,
-          "Description": "击败敌人时，恢复<color=#99FFFFFF>8%</color>生命值。"
-        },
-        {
-          "Level": 1,
-          "Description": "击败敌人时，恢复<color=#99FFFFFF>10%</color>生命值。"
-        },
-        {
-          "Level": 2,
-          "Description": "击败敌人时，恢复<color=#99FFFFFF>12%</color>生命值。"
-        },
-        {
-          "Level": 3,
-          "Description": "击败敌人时，恢复<color=#99FFFFFF>14%</color>生命值。"
-        },
-        {
-          "Level": 4,
-          "Description": "击败敌人时，恢复<color=#99FFFFFF>16%</color>生命值。"
-        }
+        { "Level": 0, "Description": "击败敌人时，恢复<color=#99FFFFFF>8%</color>生命值。" },
+        { "Level": 1, "Description": "击败敌人时，恢复<color=#99FFFFFF>10%</color>生命值。" },
+        { "Level": 2, "Description": "击败敌人时，恢复<color=#99FFFFFF>12%</color>生命值。" },
+        { "Level": 3, "Description": "击败敌人时，恢复<color=#99FFFFFF>14%</color>生命值。" },
+        { "Level": 4, "Description": "击败敌人时，恢复<color=#99FFFFFF>16%</color>生命值。" }
       ]
     },
     "story": [
@@ -9792,30 +6243,9 @@
     "star": 3,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "弹弓",
@@ -9853,30 +6283,9 @@
     "star": 3,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "飞矢传书",
@@ -9914,30 +6323,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "顺风而行",
@@ -9975,54 +6363,18 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "无矢之歌",
       "Descriptions": [
-        {
-          "Level": 0,
-          "Description": "元素战技与元素爆发的伤害提高<color=#99FFFFFF>24%</color>。"
-        },
-        {
-          "Level": 1,
-          "Description": "元素战技与元素爆发的伤害提高<color=#99FFFFFF>30%</color>。"
-        },
-        {
-          "Level": 2,
-          "Description": "元素战技与元素爆发的伤害提高<color=#99FFFFFF>36%</color>。"
-        },
-        {
-          "Level": 3,
-          "Description": "元素战技与元素爆发的伤害提高<color=#99FFFFFF>42%</color>。"
-        },
-        {
-          "Level": 4,
-          "Description": "元素战技与元素爆发的伤害提高<color=#99FFFFFF>48%</color>。"
-        }
+        { "Level": 0, "Description": "元素战技与元素爆发的伤害提高<color=#99FFFFFF>24%</color>。" },
+        { "Level": 1, "Description": "元素战技与元素爆发的伤害提高<color=#99FFFFFF>30%</color>。" },
+        { "Level": 2, "Description": "元素战技与元素爆发的伤害提高<color=#99FFFFFF>36%</color>。" },
+        { "Level": 3, "Description": "元素战技与元素爆发的伤害提高<color=#99FFFFFF>42%</color>。" },
+        { "Level": 4, "Description": "元素战技与元素爆发的伤害提高<color=#99FFFFFF>48%</color>。" }
       ]
     },
     "story": [
@@ -10036,30 +6388,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "气定神闲",
@@ -10097,30 +6428,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "专注",
@@ -10158,30 +6468,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112007,
-        "name": "不祥的面具",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112007.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112007, "name": "不祥的面具", "star": 3 }
     ],
     "affix": {
       "Name": "速射弓斗",
@@ -10219,30 +6508,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114020,
-        "name": "雾海云间的转还",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114020.webp"
-      },
-      {
-        "id": 112028,
-        "name": "雾虚灯芯",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112028.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114020, "name": "雾海云间的转还", "star": 5 },
+      { "id": 112028, "name": "雾虚灯芯", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "离簇不归",
@@ -10280,30 +6548,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112043,
-        "name": "石化的骨片",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112043.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112043, "name": "石化的骨片", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "注能之矢",
@@ -10341,30 +6588,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "乘胜追击",
@@ -10402,30 +6628,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "苍翠之风",
@@ -10463,30 +6668,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "街巷伏击",
@@ -10524,30 +6708,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112031,
-        "name": "督察长祭刀",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112031.webp"
-      },
-      {
-        "id": 112010,
-        "name": "禁咒绘卷",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112010.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112031, "name": "督察长祭刀", "star": 4 },
+      { "id": 112010, "name": "禁咒绘卷", "star": 3 }
     ],
     "affix": {
       "Name": "渊中霞彩",
@@ -10585,30 +6748,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114004,
-        "name": "高塔孤王的碎梦",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114004.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112037,
-        "name": "攫金鸦印",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112037.webp"
-      }
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112037, "name": "攫金鸦印", "star": 3 }
     ],
     "affix": {
       "Name": "极夜二重奏",
@@ -10646,30 +6788,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112040,
-        "name": "原素花蜜",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112040.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112040, "name": "原素花蜜", "star": 3 }
     ],
     "affix": {
       "Name": "风花之愿",
@@ -10707,30 +6828,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114032,
-        "name": "鸣神御灵的勇武",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114032.webp"
-      },
-      {
-        "id": 112052,
-        "name": "偏光棱镜",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112052.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114032, "name": "鸣神御灵的勇武", "star": 5 },
+      { "id": 112052, "name": "偏光棱镜", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "浅濑之弭",
@@ -10768,30 +6868,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114032,
-        "name": "鸣神御灵的勇武",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114032.webp"
-      },
-      {
-        "id": 112052,
-        "name": "偏光棱镜",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112052.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114032, "name": "鸣神御灵的勇武", "star": 5 },
+      { "id": 112052, "name": "偏光棱镜", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "强力攻击",
@@ -10813,30 +6892,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114032,
-        "name": "鸣神御灵的勇武",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114032.webp"
-      },
-      {
-        "id": 112052,
-        "name": "偏光棱镜",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112052.webp"
-      },
-      {
-        "id": 112055,
-        "name": "浮游晶化核",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112055.webp"
-      }
+      { "id": 114032, "name": "鸣神御灵的勇武", "star": 5 },
+      { "id": 112052, "name": "偏光棱镜", "star": 4 },
+      { "id": 112055, "name": "浮游晶化核", "star": 3 }
     ],
     "affix": {
       "Name": "驭浪的海祇民",
@@ -10874,30 +6932,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114048,
-        "name": "烈日威权的旧日",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114048.webp"
-      },
-      {
-        "id": 112064,
-        "name": "茁壮菌核",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112064.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114048, "name": "烈日威权的旧日", "star": 5 },
+      { "id": 112064, "name": "茁壮菌核", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "迷宫之王的教导",
@@ -10935,30 +6972,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114048,
-        "name": "烈日威权的旧日",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114048.webp"
-      },
-      {
-        "id": 112064,
-        "name": "茁壮菌核",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112064.webp"
-      },
-      {
-        "id": 112061,
-        "name": "孢囊晶尘",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112061.webp"
-      }
+      { "id": 114048, "name": "烈日威权的旧日", "star": 5 },
+      { "id": 112064, "name": "茁壮菌核", "star": 4 },
+      { "id": 112061, "name": "孢囊晶尘", "star": 3 }
     ],
     "affix": {
       "Name": "网破",
@@ -10996,30 +7012,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114040,
-        "name": "谧林涓露的金符",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114040.webp"
-      },
-      {
-        "id": 112079,
-        "name": "漫游者的盛放之花",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112079.webp"
-      },
-      {
-        "id": 112067,
-        "name": "织金红绸",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112067.webp"
-      }
+      { "id": 114040, "name": "谧林涓露的金符", "star": 5 },
+      { "id": 112079, "name": "漫游者的盛放之花", "star": 4 },
+      { "id": 112067, "name": "织金红绸", "star": 3 }
     ],
     "affix": {
       "Name": "秘智之眸的青睐",
@@ -11057,30 +7052,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114048,
-        "name": "烈日威权的旧日",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114048.webp"
-      },
-      {
-        "id": 112079,
-        "name": "漫游者的盛放之花",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112079.webp"
-      },
-      {
-        "id": 112061,
-        "name": "孢囊晶尘",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112061.webp"
-      }
+      { "id": 114048, "name": "烈日威权的旧日", "star": 5 },
+      { "id": 112079, "name": "漫游者的盛放之花", "star": 4 },
+      { "id": 112061, "name": "孢囊晶尘", "star": 3 }
     ],
     "affix": {
       "Name": "阳炎古道",
@@ -11118,30 +7092,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114052,
-        "name": "悠古弦音的回响",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114052.webp"
-      },
-      {
-        "id": 112088,
-        "name": "初生的浊水幻灵",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112088.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114052, "name": "悠古弦音的回响", "star": 5 },
+      { "id": 112088, "name": "初生的浊水幻灵", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "深海弦振",
@@ -11179,30 +7132,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114024,
-        "name": "漆黑陨铁的一块",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114024.webp"
-      },
-      {
-        "id": 112100,
-        "name": "未熄的剑柄",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112100.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 },
+      { "id": 112100, "name": "未熄的剑柄", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "镌岩为坊",
@@ -11240,30 +7172,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114052,
-        "name": "悠古弦音的回响",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114052.webp"
-      },
-      {
-        "id": 112088,
-        "name": "初生的浊水幻灵",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112088.webp"
-      },
-      {
-        "id": 112082,
-        "name": "异色结晶石",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112082.webp"
-      }
+      { "id": 114052, "name": "悠古弦音的回响", "star": 5 },
+      { "id": 112088, "name": "初生的浊水幻灵", "star": 4 },
+      { "id": 112082, "name": "异色结晶石", "star": 3 }
     ],
     "affix": {
       "Name": "石匠号子",
@@ -11301,30 +7212,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114072,
-        "name": "神合秘烟的启示",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114072.webp"
-      },
-      {
-        "id": 112112,
-        "name": "聚燃的游像眼",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112112.webp"
-      },
-      {
-        "id": 112106,
-        "name": "龙冠武士的金哨",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112106.webp"
-      }
+      { "id": 114072, "name": "神合秘烟的启示", "star": 5 },
+      { "id": 112112, "name": "聚燃的游像眼", "star": 4 },
+      { "id": 112106, "name": "龙冠武士的金哨", "star": 3 }
     ],
     "affix": {
       "Name": "未至的花序",
@@ -11362,30 +7252,9 @@
     "star": 4,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114072,
-        "name": "神合秘烟的启示",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114072.webp"
-      },
-      {
-        "id": 112097,
-        "name": "渊光鳍翅",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112097.webp"
-      },
-      {
-        "id": 112103,
-        "name": "横行霸者的利齿",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112103.webp"
-      }
+      { "id": 114072, "name": "神合秘烟的启示", "star": 5 },
+      { "id": 112097, "name": "渊光鳍翅", "star": 4 },
+      { "id": 112103, "name": "横行霸者的利齿", "star": 3 }
     ],
     "affix": {
       "Name": "花与落羽的长歌",
@@ -11424,30 +7293,9 @@
     "star": 5,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112022,
-        "name": "地脉的新芽",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112022.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112022, "name": "地脉的新芽", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "回响长天的诗歌",
@@ -11485,30 +7333,9 @@
     "star": 5,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114012,
-        "name": "狮牙斗士的理想",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114012.webp"
-      },
-      {
-        "id": 112025,
-        "name": "混沌炉心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112025.webp"
-      },
-      {
-        "id": 112004,
-        "name": "史莱姆原浆",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112004.webp"
-      }
+      { "id": 114012, "name": "狮牙斗士的理想", "star": 5 },
+      { "id": 112025, "name": "混沌炉心", "star": 4 },
+      { "id": 112004, "name": "史莱姆原浆", "star": 3 }
     ],
     "affix": {
       "Name": "矢志不忘",
@@ -11546,30 +7373,9 @@
     "star": 5,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114008,
-        "name": "凛风奔狼的怀乡",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114008.webp"
-      },
-      {
-        "id": 112016,
-        "name": "黑晶号角",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112016.webp"
-      },
-      {
-        "id": 112034,
-        "name": "尉官的徽记",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112034.webp"
-      }
+      { "id": 114008, "name": "凛风奔狼的怀乡", "star": 5 },
+      { "id": 112016, "name": "黑晶号角", "star": 4 },
+      { "id": 112034, "name": "尉官的徽记", "star": 3 }
     ],
     "affix": {
       "Name": "别离的思念之歌",
@@ -11607,30 +7413,9 @@
     "star": 5,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114036,
-        "name": "今昔剧画之鬼人",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114036.webp"
-      },
-      {
-        "id": 112058,
-        "name": "隐兽鬼爪",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112058.webp"
-      },
-      {
-        "id": 112055,
-        "name": "浮游晶化核",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112055.webp"
-      }
+      { "id": 114036, "name": "今昔剧画之鬼人", "star": 5 },
+      { "id": 112058, "name": "隐兽鬼爪", "star": 4 },
+      { "id": 112055, "name": "浮游晶化核", "star": 3 }
     ],
     "affix": {
       "Name": "极昼的先兆者",
@@ -11668,30 +7453,9 @@
     "star": 5,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114016,
-        "name": "孤云寒林的神体",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114016.webp"
-      },
-      {
-        "id": 112019,
-        "name": "幽邃刻像",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112019.webp"
-      },
-      {
-        "id": 112055,
-        "name": "浮游晶化核",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112055.webp"
-      }
+      { "id": 114016, "name": "孤云寒林的神体", "star": 5 },
+      { "id": 112019, "name": "幽邃刻像", "star": 4 },
+      { "id": 112055, "name": "浮游晶化核", "star": 3 }
     ],
     "affix": {
       "Name": "洗濯诸类之形",
@@ -11729,30 +7493,9 @@
     "star": 5,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114032,
-        "name": "鸣神御灵的勇武",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114032.webp"
-      },
-      {
-        "id": 112052,
-        "name": "偏光棱镜",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112052.webp"
-      },
-      {
-        "id": 112013,
-        "name": "历战的箭簇",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112013.webp"
-      }
+      { "id": 114032, "name": "鸣神御灵的勇武", "star": 5 },
+      { "id": 112052, "name": "偏光棱镜", "star": 4 },
+      { "id": 112013, "name": "历战的箭簇", "star": 3 }
     ],
     "affix": {
       "Name": "飞雷御执",
@@ -11790,30 +7533,9 @@
     "star": 5,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114048,
-        "name": "烈日威权的旧日",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114048.webp"
-      },
-      {
-        "id": 112064,
-        "name": "茁壮菌核",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112064.webp"
-      },
-      {
-        "id": 112067,
-        "name": "织金红绸",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112067.webp"
-      }
+      { "id": 114048, "name": "烈日威权的旧日", "star": 5 },
+      { "id": 112064, "name": "茁壮菌核", "star": 4 },
+      { "id": 112067, "name": "织金红绸", "star": 3 }
     ],
     "affix": {
       "Name": "兽径的终点",
@@ -11851,30 +7573,9 @@
     "star": 5,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114052,
-        "name": "悠古弦音的回响",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114052.webp"
-      },
-      {
-        "id": 112088,
-        "name": "初生的浊水幻灵",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112088.webp"
-      },
-      {
-        "id": 112082,
-        "name": "异色结晶石",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112082.webp"
-      }
+      { "id": 114052, "name": "悠古弦音的回响", "star": 5 },
+      { "id": 112088, "name": "初生的浊水幻灵", "star": 4 },
+      { "id": 112082, "name": "异色结晶石", "star": 3 }
     ],
     "affix": {
       "Name": "伟大者帕西法尔",
@@ -11912,30 +7613,9 @@
     "star": 5,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114056,
-        "name": "纯圣露滴的真粹",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114056.webp"
-      },
-      {
-        "id": 112097,
-        "name": "渊光鳍翅",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112097.webp"
-      },
-      {
-        "id": 112082,
-        "name": "异色结晶石",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112082.webp"
-      }
+      { "id": 114056, "name": "纯圣露滴的真粹", "star": 5 },
+      { "id": 112097, "name": "渊光鳍翅", "star": 4 },
+      { "id": 112082, "name": "异色结晶石", "star": 3 }
     ],
     "affix": {
       "Name": "德吕阿的夜曲",
@@ -11973,30 +7653,9 @@
     "star": 5,
     "weapon": "弓",
     "materials": [
-      {
-        "id": 114072,
-        "name": "神合秘烟的启示",
-        "star": 5,
-        "starIcon": "/icon/star/5.webp",
-        "bg": "/icon/bg/5-Star.webp",
-        "icon": "/icon/material/114072.webp"
-      },
-      {
-        "id": 112118,
-        "name": "迷光的蜷叶之心",
-        "star": 4,
-        "starIcon": "/icon/star/4.webp",
-        "bg": "/icon/bg/4-Star.webp",
-        "icon": "/icon/material/112118.webp"
-      },
-      {
-        "id": 112106,
-        "name": "龙冠武士的金哨",
-        "star": 3,
-        "starIcon": "/icon/star/3.webp",
-        "bg": "/icon/bg/3-Star.webp",
-        "icon": "/icon/material/112106.webp"
-      }
+      { "id": 114072, "name": "神合秘烟的启示", "star": 5 },
+      { "id": 112118, "name": "迷光的蜷叶之心", "star": 4 },
+      { "id": 112106, "name": "龙冠武士的金哨", "star": 3 }
     ],
     "affix": {
       "Name": "眸中的月珥",

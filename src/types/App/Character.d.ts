@@ -78,7 +78,7 @@ declare namespace TGApp.App.Character {
    * @property {TGApp.Plugins.Hutao.Character.RhiFetter[]} stories 故事
    * @return WikiItem
    */
-  interface WikiItem {
+  type WikiItem = {
     id: number;
     name: string;
     title: string;
@@ -88,12 +88,7 @@ declare namespace TGApp.App.Character {
       camp: string;
       constellation: string;
       birth: string;
-      cv: {
-        cn: string;
-        jp: string;
-        en: string;
-        kr: string;
-      };
+      cv: { cn: string; jp: string; en: string; kr: string };
     };
     star: number;
     element: string;
@@ -103,5 +98,5 @@ declare namespace TGApp.App.Character {
     constellation: TGApp.Plugins.Hutao.Character.RhisdTalent[];
     talks: TGApp.Plugins.Hutao.Character.RhiFetter[];
     stories: TGApp.Plugins.Hutao.Character.RhiFetter[];
-  }
+  };
 }
