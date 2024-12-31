@@ -1,7 +1,7 @@
 <template>
   <div class="tuas-card" @click="selectSeries" v-if="data">
     <div class="tuas-version">v{{ data.version }}</div>
-    <img alt="icon" class="tuas-icon" :src="data.icon" />
+    <img alt="icon" class="tuas-icon" :src="`/icon/achievement/${data.icon}.webp`" />
     <div class="tuas-content">
       <span :title="data.name">{{ data.name }}</span>
       <span>{{ overview.fin }}/{{ overview.total }}</span>
