@@ -51,16 +51,18 @@ const visible = computed<boolean>({
   set: (v) => emits("update:modelValue", v),
 });
 const boxData = computed<TItemBoxData>(() => ({
-  bg: props.dataVal.bg,
-  icon: props.dataVal.icon,
+  bg: `/icon/bg/${props.dataVal.star}-Star.webp`,
+  icon: `/WIKI/${props.dataType}/${props.dataVal.id}.webp`,
   size: "100px",
   height: "100px",
   display: "inner",
   clickable: false,
-  lt: props.dataType === "character" ? (props.dataVal.elementIcon ?? "") : props.dataVal.weaponIcon,
+  lt: props.dataVal.element
+    ? `/icon/element/${props.dataVal.element}元素.webp`
+    : `/icon/weapon/${props.dataVal.weapon}.webp`,
   ltSize: "20px",
   innerHeight: 25,
-  innerIcon: props.dataType === "character" ? props.dataVal.weaponIcon : undefined,
+  innerIcon: props.dataVal.element ? `/icon/weapon/${props.dataVal.weapon}.webp` : undefined,
   innerText: props.dataVal.name,
 }));
 

@@ -1,10 +1,10 @@
 <template>
   <div class="tcm-box">
     <div class="tcm-left">
-      <div class="tcm-bg"><img :src="item.bg" alt="bg" /></div>
-      <div class="tcm-icon"><img :src="item.icon" alt="icon" /></div>
+      <div class="tcm-bg"><img :src="`/icon/bg/${item.star}-Star.webp`" alt="bg" /></div>
+      <div class="tcm-icon"><img :src="`/icon/material/${item.id}.webp`" alt="icon" /></div>
       <div class="tcm-star" v-if="item.star !== 0">
-        <img :src="item.starIcon" alt="element" />
+        <img :src="`/icon/star/${item.star}.webp`" alt="element" />
       </div>
     </div>
     <div class="tcm-right">{{ item.name }}</div>

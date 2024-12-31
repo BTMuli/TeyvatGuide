@@ -99,16 +99,18 @@ function selectItem(item: TGApp.App.Calendar.Item): void {
 
 function getBoxData(item: TGApp.App.Calendar.Item): TItemBoxData {
   return {
-    bg: item.bg,
-    icon: item.icon,
+    bg: `/icon/bg/${item.star}-Star.webp`,
+    icon: `/WIKI/${item.itemType}/${item.id}.webp`,
     size: "100px",
     height: "100px",
     display: "inner",
     clickable: true,
-    lt: selectedType.value === "weapon" ? item.weaponIcon : (item.elementIcon ?? ""),
+    lt: item.element
+      ? `/icon/element/${item.element}元素.webp`
+      : `/icon/weapon/${item.weapon}.webp`,
     ltSize: "20px",
     innerHeight: 25,
-    innerIcon: selectedType.value === "character" ? item.weaponIcon : undefined,
+    innerIcon: item.element ? `/icon/weapon/${item.weapon}.webp` : undefined,
     innerText: item.name,
   };
 }
