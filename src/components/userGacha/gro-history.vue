@@ -52,7 +52,6 @@
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
-import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { onMounted, ref, shallowRef } from "vue";
 import { useRouter } from "vue-router";
@@ -84,11 +83,6 @@ onMounted(() => {
 async function toWiki(id: number): Promise<void> {
   const cFind = AppCharacterData.find((item) => item.id === id);
   const wFind = AppWeaponData.find((item) => item.id === id);
-  const jumpCheck = await showDialog.check("是否跳转到对应图鉴界面？");
-  if (!jumpCheck) {
-    showSnackbar.cancel("已取消");
-    return;
-  }
   if (cFind) {
     await router.push({ name: "角色图鉴", params: { id: id.toString() } });
     return;
