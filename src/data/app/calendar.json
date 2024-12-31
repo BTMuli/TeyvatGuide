@@ -112,6 +112,22 @@
     "source": { "index": 5, "area": "枫丹", "name": "琅诵" }
   },
   {
+    "id": 10000107,
+    "contentId": 503612,
+    "dropDays": [2, 5, 7],
+    "name": "茜特菈莉",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "法器",
+    "element": "冰",
+    "materials": [
+      { "id": 104350, "name": "「焚燔」的教导", "star": 2 },
+      { "id": 104351, "name": "「焚燔」的指引", "star": 3 },
+      { "id": 104352, "name": "「焚燔」的哲学", "star": 4 }
+    ],
+    "source": { "index": 6, "area": "纳塔", "name": "空华" }
+  },
+  {
     "id": 10000038,
     "contentId": 1360,
     "dropDays": [3, 6, 7],
@@ -478,6 +494,22 @@
       { "id": 104346, "name": "「秩序」的哲学", "star": 4 }
     ],
     "source": { "index": 5, "area": "枫丹", "name": "琅诵" }
+  },
+  {
+    "id": 10000106,
+    "contentId": 503613,
+    "dropDays": [1, 4, 7],
+    "name": "玛薇卡",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "双手剑",
+    "element": "火",
+    "materials": [
+      { "id": 104347, "name": "「角逐」的教导", "star": 2 },
+      { "id": 104348, "name": "「角逐」的指引", "star": 3 },
+      { "id": 104349, "name": "「角逐」的哲学", "star": 4 }
+    ],
+    "source": { "index": 6, "area": "纳塔", "name": "转竟" }
   },
   {
     "id": 10000082,
@@ -1376,6 +1408,22 @@
     "source": { "index": 1, "area": "蒙德", "name": "霜凝祭坛" }
   },
   {
+    "id": 10000108,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "蓝砚",
+    "itemType": "character",
+    "star": 4,
+    "weapon": "法器",
+    "element": "风",
+    "materials": [
+      { "id": 104313, "name": "「勤劳」的教导", "star": 2 },
+      { "id": 104314, "name": "「勤劳」的指引", "star": 3 },
+      { "id": 104315, "name": "「勤劳」的哲学", "star": 4 }
+    ],
+    "source": { "index": 2, "area": "璃月", "name": "深炎之底" }
+  },
+  {
     "id": 10000053,
     "contentId": 2125,
     "dropDays": [3, 6, 7],
@@ -1776,6 +1824,22 @@
     "source": { "index": 6, "area": "纳塔", "name": "究观" }
   },
   {
+    "id": 12514,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "焚曜千阳",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "双手剑",
+    "materials": [
+      { "id": 114061, "name": "贡祭炽心的惶恐", "star": 2 },
+      { "id": 114062, "name": "贡祭炽心的踌躇", "star": 3 },
+      { "id": 114063, "name": "贡祭炽心的决绝", "star": 4 },
+      { "id": 114064, "name": "贡祭炽心的荣膺", "star": 5 }
+    ],
+    "source": { "index": 6, "area": "纳塔", "name": "冥见" }
+  },
+  {
     "id": 15501,
     "contentId": 323,
     "dropDays": [2, 5, 7],
@@ -2126,6 +2190,22 @@
       { "id": 114064, "name": "贡祭炽心的荣膺", "star": 5 }
     ],
     "source": { "index": 6, "area": "纳塔", "name": "冥见" }
+  },
+  {
+    "id": 14517,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "祭星者之望",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "法器",
+    "materials": [
+      { "id": 114065, "name": "谵妄圣主的朽败", "star": 2 },
+      { "id": 114066, "name": "谵妄圣主的余哀", "star": 3 },
+      { "id": 114067, "name": "谵妄圣主的容光", "star": 4 },
+      { "id": 114068, "name": "谵妄圣主的神面", "star": 5 }
+    ],
+    "source": { "index": 6, "area": "纳塔", "name": "究观" }
   },
   {
     "id": 13502,

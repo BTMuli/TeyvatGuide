@@ -1,5 +1,29 @@
 [
   {
+    "id": 10000107,
+    "contentId": 503612,
+    "name": "茜特菈莉",
+    "title": "白星黑曜",
+    "area": "纳塔",
+    "birthday": [1, 20],
+    "star": 5,
+    "element": "冰",
+    "weapon": "法器",
+    "nameCard": "茜特菈莉·白星"
+  },
+  {
+    "id": 10000106,
+    "contentId": 503613,
+    "name": "玛薇卡",
+    "title": "焚夜以炎",
+    "area": "纳塔",
+    "birthday": [8, 28],
+    "star": 5,
+    "element": "火",
+    "weapon": "双手剑",
+    "nameCard": "玛薇卡·日冕"
+  },
+  {
     "id": 10000104,
     "contentId": 502928,
     "name": "恰斯卡",
@@ -598,6 +622,18 @@
     "element": "冰",
     "weapon": "单手剑",
     "nameCard": "神里绫华·扇子"
+  },
+  {
+    "id": 10000108,
+    "contentId": 503614,
+    "name": "蓝砚",
+    "title": "翦玉编春",
+    "area": "璃月",
+    "birthday": [1, 6],
+    "star": 4,
+    "element": "风",
+    "weapon": "法器",
+    "nameCard": "蓝砚·银燕"
   },
   {
     "id": 10000105,
