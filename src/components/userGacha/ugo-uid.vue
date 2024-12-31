@@ -60,33 +60,26 @@ import TGLogger from "@/utils/TGLogger.js";
 import { timestampToDate } from "@/utils/toolFunc.js";
 import { getUigf4Header, getUigf4Item, readUigf4Data, verifyUigfData } from "@/utils/UIGF.js";
 
-type UgoUidProps =
-  | { modelValue: boolean; mode: "export" }
-  | { modelValue: boolean; mode: "import" };
-type UgoUidEmits = (e: "update:modelValue", v: boolean) => void;
+type UgoUidProps = { mode: "import" | "export" };
 type UgoUidItem = { uid: string; length: number; time: string };
 
 const props = defineProps<UgoUidProps>();
-const emits = defineEmits<UgoUidEmits>();
+const visible = defineModel<boolean>();
+const fp = ref<string>("未选择");
 const dataRaw = shallowRef<TGApp.Plugins.UIGF.Schema4>();
 const data = shallowRef<Array<UgoUidItem>>([]);
 const selectedData = shallowRef<Array<UgoUidItem>>([]);
 const title = computed<string>(() => (props.mode === "import" ? "导入" : "导出"));
-const fp = ref<string>("未选择");
-
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
 
 onMounted(async () => {
   if (props.mode === "export") fp.value = await getDefaultSavePath();
 });
 
 watch(
-  () => props.modelValue,
-  async (v) => (v ? await refreshData() : undefined),
-  { immediate: true },
+  () => visible.value,
+  async () => {
+    if (visible.value) await refreshData();
+  },
 );
 
 async function getDefaultSavePath(): Promise<string> {

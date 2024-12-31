@@ -21,24 +21,19 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { storeToRefs } from "pinia";
-import { computed } from "vue";
 import { useRouter } from "vue-router";
 
 import { type NewsType, useAppStore } from "@/store/modules/app.js";
 import type { ToChannelItem } from "@/web/constant/bbs.js";
 import TGConstant from "@/web/constant/TGConstant.js";
 
-type ToChannelProps = { gid?: string; curType?: string; modelValue: boolean };
-type ToChannelEmits = (e: "update:modelValue", v: boolean) => void;
+type ToChannelProps = { gid?: string; curType?: string };
+
 const router = useRouter();
-const props = withDefaults(defineProps<ToChannelProps>(), { modelValue: false });
-const emits = defineEmits<ToChannelEmits>();
 const { recentNewsType } = storeToRefs(useAppStore());
 const channelList = TGConstant.BBS.CHANNELS;
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
+const props = defineProps<ToChannelProps>();
+const visible = defineModel<boolean>({ default: false });
 
 async function toChannel(item: ToChannelItem): Promise<void> {
   if (props.gid === item.gid) {
@@ -106,25 +101,5 @@ async function toChannel(item: ToChannelItem): Promise<void> {
     font-family: var(--font-title);
     font-size: 16px;
   }
-}
-
-.toc-close {
-  display: flex;
-  width: 100%;
-  height: 60px;
-  align-items: center;
-  justify-content: center;
-}
-
-.toc-close-btn {
-  display: flex;
-  width: 30px;
-  height: 30px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: var(--box-bg-1);
-  color: var(--app-page-content);
-  cursor: pointer;
 }
 </style>

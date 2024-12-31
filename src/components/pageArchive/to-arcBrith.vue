@@ -36,32 +36,24 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { fetch } from "@tauri-apps/plugin-http";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 import { xml2json } from "xml-js";
 
 import TGLogger from "@/utils/TGLogger.js";
 import { copyToClipboard, getImageBuffer, saveCanvasImg } from "@/utils/TGShare.js";
 import { bytesToSize } from "@/utils/toolFunc.js";
 
-type ToArcBirthProps = {
-  modelValue: boolean;
-  data?: TGApp.Archive.Birth.DrawItem;
-  choice: boolean;
-};
-type ToArcBirthEmits = (e: "update:modelValue", v: boolean) => void;
+type ToArcBirthProps = { data?: TGApp.Archive.Birth.DrawItem; choice: boolean };
 type XmlKeyMap = { id: string; rel: string; group?: string; icon: string };
 type XmlTextList = { chara: string; img: string; text: string };
 type XmlTextParse = { name: string; icon?: string; text: string };
 
 const props = defineProps<ToArcBirthProps>();
-const emits = defineEmits<ToArcBirthEmits>();
+const visible = defineModel<boolean>();
 const showText = ref<boolean>(false);
 const buffer = shallowRef<Uint8Array | null>(null);
 const textParse = shallowRef<Array<XmlTextParse>>([]);
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
+
 onMounted(() => clearData());
 watch(() => props.data, clearData);
 watch(() => props.choice, clearData);

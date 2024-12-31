@@ -49,13 +49,12 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import Mys from "@Mys/index.js";
-import { computed, nextTick, onMounted, shallowRef, useTemplateRef, watch } from "vue";
+import { nextTick, onMounted, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import { timestampToDate } from "@/utils/toolFunc.js";
 
-type TpoCollectionProps = { collection: TGApp.Plugins.Mys.Post.Collection; modelValue: boolean };
-type TpoCollectionEmits = (e: "update:modelValue", v: boolean) => void;
+type TpoCollectionProps = { collection: TGApp.Plugins.Mys.Post.Collection };
 type TpoCollectionItem = {
   postId: string;
   title: string;
@@ -64,15 +63,14 @@ type TpoCollectionItem = {
   comments: number;
   likes: number;
 };
+
 const router = useRouter();
+
 const props = defineProps<TpoCollectionProps>();
-const emits = defineEmits<TpoCollectionEmits>();
-const postListEl = useTemplateRef<HTMLDivElement>("postListRef");
+const visible = defineModel<boolean>();
 const posts = shallowRef<Array<TpoCollectionItem>>([]);
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
+const postListEl = useTemplateRef<HTMLDivElement>("postListRef");
+
 watch(
   () => [visible.value, posts.value],
   async () => {

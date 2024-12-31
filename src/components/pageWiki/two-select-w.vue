@@ -36,17 +36,12 @@
 </template>
 <script setup lang="ts">
 import TOverlay from "@comp/app/t-overlay.vue";
-import { computed, ref, watch } from "vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import { ref, toRaw, watch } from "vue";
 
-export type SelectedWValue = { star: Array<number>; weapon: Array<string> };
-type TwoSelectWProps = { modelValue: boolean; reset: boolean };
-type TwoSelectWEmits = {
-  (e: "update:modelValue", value: boolean): void;
-  (e: "update:reset", value: boolean): void;
-  (e: "select-w", value: SelectedWValue): void;
-};
+export type SelectedWValue = { star: Array<number>; weapon: Array<string>; isReset: boolean };
+type TwoSelectWEmits = (e: "select-w", value: SelectedWValue) => void;
 
-const props = defineProps<TwoSelectWProps>();
 const emits = defineEmits<TwoSelectWEmits>();
 
 const selectStarList = [4, 5];
@@ -54,29 +49,31 @@ const selectWeaponList = ["单手剑", "双手剑", "弓", "法器", "长柄武�
 
 const selectedStar = ref<Array<number>>(selectStarList);
 const selectedWeapon = ref<Array<string>>(selectWeaponList);
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
-const reset = computed<boolean>({
-  get: () => props.reset,
-  set: (v) => emits("update:reset", v),
-});
+const visible = defineModel<boolean>();
+const resetModel = defineModel<boolean>("reset");
 
 watch(
-  () => props.reset,
-  (value) => {
-    if (value) {
+  () => resetModel.value,
+  () => {
+    if (resetModel.value) {
+      if (
+        toRaw(selectedStar.value) === selectStarList &&
+        toRaw(selectedWeapon.value) === selectWeaponList
+      ) {
+        showSnackbar.warn("无需重置");
+        resetModel.value = false;
+        return;
+      }
       selectedStar.value = selectStarList;
       selectedWeapon.value = selectWeaponList;
-      reset.value = false;
-      confirmSelect();
+      resetModel.value = false;
+      emits("select-w", { star: selectedStar.value, weapon: selectedWeapon.value, isReset: true });
     }
   },
 );
 
 function confirmSelect(): void {
-  emits("select-w", { star: selectedStar.value, weapon: selectedWeapon.value });
+  emits("select-w", { star: selectedStar.value, weapon: selectedWeapon.value, isReset: false });
   visible.value = false;
 }
 </script>

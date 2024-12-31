@@ -55,32 +55,22 @@ import { computed, ref, watch } from "vue";
 import TuaDetailCard from "./tua-detail-card.vue";
 
 type TuaDetailOverlayProps = {
-  modelValue: boolean;
   avatar: TGApp.Sqlite.Character.UserRole;
-  mode: "classic" | "card" | "dev";
   avatars: Array<TGApp.Sqlite.Character.UserRole>;
 };
 type TuaDetailOverlayEmits = {
-  (e: "update:modelValue", v: boolean): void;
-  (e: "update:mode", val: "classic" | "card" | "dev"): void;
   (e: "toNext", val: boolean): void;
   (e: "toAvatar", val: TGApp.Sqlite.Character.UserRole): void;
 };
 
 const props = defineProps<TuaDetailOverlayProps>();
 const emits = defineEmits<TuaDetailOverlayEmits>();
+const visible = defineModel<boolean>();
+const modeTab = defineModel<"classic" | "card" | "dev">("mode");
 const avatarTab = ref<number>();
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
-const modeTab = computed<"classic" | "card" | "dev">({
-  get: () => props.mode,
-  set: (v) => emits("update:mode", v),
-});
 
 const avatarsWidth = computed<string>(() => {
-  switch (props.mode) {
+  switch (modeTab.value) {
     case "classic":
       return "500px";
     case "card":

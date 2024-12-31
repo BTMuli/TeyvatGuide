@@ -45,20 +45,17 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import Mys from "@Mys/index.js";
-import { computed, onUnmounted, ref, shallowRef, watch } from "vue";
+import { onUnmounted, ref, shallowRef, watch } from "vue";
 
-type TpoLotteryProps = { modelValue: boolean; lottery: string | undefined };
-type TpoLotteryEmits = (e: "update:modelValue", v: boolean) => void;
+type TpoLotteryProps = { lottery: string | undefined };
+
 const props = defineProps<TpoLotteryProps>();
-const emits = defineEmits<TpoLotteryEmits>();
+const visible = defineModel<boolean>();
 const timeStatus = ref<string>("未知");
 const upWay = ref<string>("未知");
 const card = shallowRef<TGApp.Plugins.Mys.Lottery.RenderCard>();
 const jsonData = shallowRef<TGApp.Plugins.Mys.Lottery.FullData>();
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
+
 // eslint-disable-next-line no-undef
 let timer: NodeJS.Timeout | undefined = undefined;
 

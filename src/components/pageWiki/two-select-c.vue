@@ -66,7 +66,8 @@
 </template>
 <script setup lang="ts">
 import TOverlay from "@comp/app/t-overlay.vue";
-import { computed, ref, watch } from "vue";
+import showSnackbar from "@comp/func/snackbar.js";
+import { ref, toRaw, watch } from "vue";
 
 export type SelectedCValue = {
   star: Array<number>;
@@ -74,14 +75,8 @@ export type SelectedCValue = {
   elements: Array<string>;
   area: Array<string>;
 };
-type TwoSelectCProps = { modelValue: boolean; reset: boolean };
-type TwoSelectCEmits = {
-  (e: "update:modelValue", v: boolean): void;
-  (e: "update:reset", v: boolean): void;
-  (e: "select-c", v: SelectedCValue): void;
-};
+type TwoSelectCEmits = (e: "select-c", v: SelectedCValue) => void;
 
-const props = defineProps<TwoSelectCProps>();
 const emits = defineEmits<TwoSelectCEmits>();
 const selectStarList = [4, 5];
 const selectWeaponList = ["单手剑", "双手剑", "弓", "法器", "长柄武器"];
@@ -93,24 +88,29 @@ const selectedStar = ref<Array<number>>(selectStarList);
 const selectedWeapon = ref<Array<string>>(selectWeaponList);
 const selectedElements = ref<Array<string>>(selectElementList);
 const selectedArea = ref<Array<string>>(selectAreaList);
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
-const reset = computed<boolean>({
-  get: () => props.reset,
-  set: (v: boolean) => emits("update:reset", v),
-});
+const visible = defineModel<boolean>();
+const resetModel = defineModel<boolean>("reset");
 
 watch(
-  () => props.reset,
-  (value) => {
-    if (value) {
+  () => resetModel.value,
+  () => {
+    if (resetModel.value) {
+      if (
+        toRaw(selectedStar.value) === selectStarList &&
+        toRaw(selectedWeapon.value) === selectWeaponList &&
+        toRaw(selectedElements.value) === selectElementList &&
+        toRaw(selectedArea.value) === selectAreaList
+      ) {
+        showSnackbar.warn("无需重置");
+        resetModel.value = false;
+        return;
+      }
       selectedStar.value = selectStarList;
       selectedWeapon.value = selectWeaponList;
       selectedElements.value = selectElementList;
       selectedArea.value = selectAreaList;
-      reset.value = false;
+      resetModel.value = false;
+      showSnackbar.success("已重置");
     }
   },
 );

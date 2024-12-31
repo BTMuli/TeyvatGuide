@@ -54,25 +54,19 @@
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
-import { computed, ref } from "vue";
+import { ref } from "vue";
 
 import { AppAchievementSeriesData } from "@/data/index.js";
 import TGLogger from "@/utils/TGLogger.js";
 
-type ToAchiInfoProps = { modelValue: boolean; data: TGApp.Sqlite.Achievement.RenderAchi };
-type ToAchiInfoEmits = {
-  (e: "update:modelValue", v: boolean): void;
-  (e: "select-series", v: number): void;
-};
+type ToAchiInfoProps = { data: TGApp.Sqlite.Achievement.RenderAchi };
+type ToAchiInfoEmits = (e: "select-series", v: number) => void;
 
 const props = defineProps<ToAchiInfoProps>();
 const emits = defineEmits<ToAchiInfoEmits>();
+const visible = defineModel<boolean>();
 const showSearch = ref<boolean>(false);
 const search = ref<string>();
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
 
 async function searchDirect(word: string): Promise<void> {
   await TGLogger.Info(`[ToAchiInfo][${props.data.id}][Search] 查询 ${word}`);

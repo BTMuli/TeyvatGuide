@@ -48,10 +48,10 @@ enum ToNameCardTypeEnum {
 }
 
 type ToNameCardTypeMap = { [key in ToNameCardTypeEnum]: string };
-type ToNameCardProps = { modelValue: boolean; data?: TGApp.App.NameCard.Item };
-type ToNameCardEmits = (e: "update:modelValue", v: boolean) => void;
+type ToNameCardProps = { data?: TGApp.App.NameCard.Item };
+
 const props = defineProps<ToNameCardProps>();
-const emits = defineEmits<ToNameCardEmits>();
+const visible = defineModel<boolean>();
 const typeMap: ToNameCardTypeMap = {
   0: "其他",
   1: "成就",
@@ -61,10 +61,6 @@ const typeMap: ToNameCardTypeMap = {
   5: "未知",
 };
 const loading = ref<boolean>(false);
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
 const getType = computed<string>(() => {
   if (!props.data) return typeMap[ToNameCardTypeEnum.unknown];
   if (!(props.data.type satisfies ToNameCardTypeEnum)) return typeMap[5];

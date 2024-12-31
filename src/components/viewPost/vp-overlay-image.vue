@@ -32,17 +32,13 @@ import type { TpImage } from "./tp-image.vue";
 import { copyToClipboard, getImageBuffer, saveCanvasImg } from "@/utils/TGShare.js";
 import { bytesToSize } from "@/utils/toolFunc.js";
 
-type TpoImageProps = { image: TpImage; modelValue: boolean };
-type TpoImageEmits = (e: "update:modelValue", v: boolean) => void;
+type TpoImageProps = { image: TpImage };
+
 const props = defineProps<TpoImageProps>();
-const emits = defineEmits<TpoImageEmits>();
+const visible = defineModel<boolean>();
 const bgMode = ref<number>(0); // 0: transparent, 1: black, 2: white
 const isOriSize = ref<boolean>(false);
 const buffer = shallowRef<Uint8Array | null>(null);
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
 const format = computed<string>(() => {
   if (props.image.attributes?.ext) return props.image.attributes.ext;
   const imageFormat = props.image.insert.image.split(".").pop();

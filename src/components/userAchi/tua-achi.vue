@@ -38,14 +38,11 @@ import { AppAchievementSeriesData } from "@/data/index.js";
 import { timestampToDate } from "@/utils/toolFunc.js";
 
 type TuaAchiProps = { modelValue: TGApp.Sqlite.Achievement.RenderAchi };
-type TuaAchiEmits = {
-  (e: "update:modelValue", data: TGApp.Sqlite.Achievement.RenderAchi): void;
-  (e: "update:update", data: boolean): void;
-  (e: "select-achi", data: TGApp.Sqlite.Achievement.RenderAchi): void;
-};
+type TuaAchiEmits = (e: "select-achi", data: TGApp.Sqlite.Achievement.RenderAchi) => void;
 
 const props = defineProps<TuaAchiProps>();
 const emits = defineEmits<TuaAchiEmits>();
+const model = defineModel<TGApp.Sqlite.Achievement.RenderAchi>();
 const data = ref<TGApp.Sqlite.Achievement.RenderAchi>(toRaw(props.modelValue));
 
 watch(
@@ -69,7 +66,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
   if (!stat) {
     data.value.isCompleted = false;
     await TSUserAchi.updateAchi(data.value);
-    emits("update:modelValue", data.value);
+    model.value = data.value;
     await event.emit("updateAchi", data.value.series);
     showSnackbar.success(`已将成就 ${data.value.name}(${data.value.id}) 状态设为未完成`);
     return;
@@ -80,7 +77,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
     return;
   }
   if (progress === undefined) progress = data.value.progress.toString();
-  if (isNaN(Number(progress)) || progress === "0") {
+  if (isNaN(Number(progress))) {
     showSnackbar.warn("请输入有效数字！");
     return;
   }
@@ -90,7 +87,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
   await TSUserAchi.updateAchi(data.value);
   await event.emit("updateAchi", data.value.series);
   showSnackbar.success(`已将成就 ${data.value.name}(${data.value.id}) 状态设为已完成`);
-  emits("update:modelValue", data.value);
+  model.value = data.value;
 }
 </script>
 <style lang="css" scoped>

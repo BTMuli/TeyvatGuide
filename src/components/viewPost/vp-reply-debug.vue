@@ -17,23 +17,15 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readTextFile } from "@tauri-apps/plugin-fs";
-import { computed, ref, shallowRef } from "vue";
+import { ref, shallowRef } from "vue";
 
 import TprReply from "./vp-reply-item.vue";
 
 import TGLogger from "@/utils/TGLogger.js";
 
-type TprDebugProps = { modelValue: boolean };
-type TprDebugEmits = (e: "update:modelValue", v: boolean) => void;
-
-const props = defineProps<TprDebugProps>();
-const emits = defineEmits<TprDebugEmits>();
+const visible = defineModel<boolean>();
 const filePath = ref<string>("");
 const replyData = shallowRef<TGApp.Plugins.Mys.Reply.ReplyFull | null>(null);
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
 
 async function selectFile(): Promise<void> {
   const file = await open({

@@ -67,7 +67,7 @@ function switchW(item: TGApp.App.Weapon.WikiBriefInfo): void {
 }
 
 function handleSelectW(val: SelectedWValue) {
-  showSelect.value = true;
+  if (!val.isReset) showSelect.value = true;
   const filterW = AppWeaponData.filter((item) => {
     if (!val.star.includes(item.star)) return false;
     return val.weapon.includes(item.weapon);

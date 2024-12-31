@@ -21,39 +21,34 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import Mys from "@Mys/index.js";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 
 import { getGameName } from "@/utils/toolFunc.js";
 
-type ToPostSearchProps = { modelValue: boolean; gid: string; keyword?: string };
-type ToPostSearchEmits = (e: "update:modelValue", v: boolean) => void;
+type ToPostSearchProps = { gid: string; keyword?: string };
+
 const props = defineProps<ToPostSearchProps>();
-const emits = defineEmits<ToPostSearchEmits>();
+const visible = defineModel<boolean>();
 const search = ref<string>();
 const lastId = ref<string>("");
 const game = ref<string>("2");
 const isLast = ref<boolean>(false);
 const load = ref<boolean>(false);
 const results = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
 
 onMounted(async () => {
   game.value = props.gid;
   if (props.keyword && props.keyword !== "") search.value = props.keyword;
-  if (props.modelValue) await searchPosts();
+  if (visible.value) await searchPosts();
 });
 
 watch(
-  () => props.modelValue,
+  () => visible.value,
   async () => {
-    if (props.modelValue && results.value.length === 0) {
+    if (visible.value && results.value.length === 0) {
       await searchPosts();
       return;
     }
-    visible.value = props.modelValue;
   },
 );
 
@@ -69,7 +64,7 @@ watch(
       results.value = [];
       lastId.value = "";
       isLast.value = false;
-      if (props.modelValue) await searchPosts();
+      if (visible.value) await searchPosts();
     }
   },
 );

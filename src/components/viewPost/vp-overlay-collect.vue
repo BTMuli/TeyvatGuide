@@ -37,25 +37,24 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserCollection from "@Sqlite/modules/userCollect.js";
-import { computed, ref, shallowRef, watch } from "vue";
+import { ref, shallowRef, watch } from "vue";
 
-type ToPostCollectProps = { modelValue: boolean; post?: TGApp.Plugins.Mys.Post.FullData };
-type ToPostCollectEmits = { (e: "update:modelValue", v: boolean): void; (e: "submit"): void };
+type ToPostCollectProps = { post?: TGApp.Plugins.Mys.Post.FullData };
+type ToPostCollectEmits = (e: "submit") => void;
 
 const props = defineProps<ToPostCollectProps>();
 const emits = defineEmits<ToPostCollectEmits>();
+const visible = defineModel<boolean>();
 const submit = ref<boolean>(false);
 const collectList = shallowRef<Array<TGApp.Sqlite.UserCollection.UFCollection>>([]);
 const postCollect = shallowRef<Array<TGApp.Sqlite.UserCollection.UFMap>>([]);
 const selectList = shallowRef<Array<string>>([]);
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
 
 watch(
-  () => props.modelValue,
-  async (v) => (v ? await freshData() : null),
+  () => visible.value,
+  async () => {
+    if (visible.value) await freshData();
+  },
 );
 
 async function freshData(): Promise<void> {

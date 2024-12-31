@@ -45,26 +45,16 @@
 </template>
 <script setup lang="ts">
 import showSnackbar from "@comp/func/snackbar.js";
-import { computed } from "vue";
 
 import TOverlay from "./t-overlay.vue";
 
 import { generateShareImg } from "@/utils/TGShare.js";
 import { timestampToDate } from "@/utils/toolFunc.js";
 
-type ToLiveCodeProps = {
-  data: TGApp.BBS.Navigator.CodeData[];
-  actId: string | undefined;
-  modelValue: boolean;
-};
-type ToLiveCodeEmits = (e: "update:modelValue", v: boolean) => void;
+type ToLiveCodeProps = { data: Array<TGApp.BBS.Navigator.CodeData>; actId: string | undefined };
 
-const props = withDefaults(defineProps<ToLiveCodeProps>(), { modelValue: false });
-const emits = defineEmits<ToLiveCodeEmits>();
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
+const props = defineProps<ToLiveCodeProps>();
+const visible = defineModel<boolean>({ default: false });
 
 function copy(code: string): void {
   navigator.clipboard.writeText(code);

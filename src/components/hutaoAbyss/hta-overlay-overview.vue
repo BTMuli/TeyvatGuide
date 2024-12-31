@@ -55,7 +55,7 @@
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import { computed, ref } from "vue";
+import { ref } from "vue";
 
 import HtaOverviewLine from "./hta-overview-line.vue";
 
@@ -63,19 +63,11 @@ import type { AbyssDataItem } from "@/pages/WIKI/Abyss.vue";
 import { generateShareImg } from "@/utils/TGShare.js";
 import { timestampToDate } from "@/utils/toolFunc.js";
 
-type HtaOverlayOverviewProps = {
-  modelValue: boolean;
-  data: AbyssDataItem<TGApp.Plugins.Hutao.Abyss.OverviewData>;
-};
-type HtaOverlayOverviewEmits = (e: "update:modelValue", v: boolean) => void;
+type HtaOverlayOverviewProps = { data: AbyssDataItem<TGApp.Plugins.Hutao.Abyss.OverviewData> };
 
 const props = defineProps<HtaOverlayOverviewProps>();
-const emits = defineEmits<HtaOverlayOverviewEmits>();
+const visible = defineModel<boolean>();
 const loadShare = ref<boolean>(false);
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
 
 async function share(): Promise<void> {
   loadShare.value = true;

@@ -27,18 +27,10 @@ import { AppCharacterData } from "@/data/index.js";
 import { generateShareImg } from "@/utils/TGShare.js";
 import { timestampToDate } from "@/utils/toolFunc.js";
 
-type TucOverlayProps = {
-  modelValue: boolean;
-  data: TGApp.Plugins.Hutao.Combat.Data | undefined;
-};
-type TucOverlayEmits = (e: "update:modelValue", v: boolean) => void;
+type TucOverlayProps = { data: TGApp.Plugins.Hutao.Combat.Data | undefined };
 
 const props = defineProps<TucOverlayProps>();
-const emits = defineEmits<TucOverlayEmits>();
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
+const visible = defineModel<boolean>();
 const raw = computed<Array<TGApp.Plugins.Hutao.Base.Rate>>(() => {
   if (!props.data) return [];
   const res = props.data.BackupAvatarRates;

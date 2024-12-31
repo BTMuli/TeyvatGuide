@@ -36,20 +36,12 @@ import { useRouter } from "vue-router";
 
 import TibCalendarMaterial from "./ph-calendar-material.vue";
 
-type ToCalendarProps = {
-  modelValue: boolean;
-  dataType: "weapon" | "character";
-  dataVal: TGApp.App.Calendar.Item;
-};
-type ToCalendarEmits = (e: "update:modelValue", v: boolean) => void;
+type ToCalendarProps = { dataType: "weapon" | "character"; dataVal: TGApp.App.Calendar.Item };
+
+const router = useRouter();
 
 const props = defineProps<ToCalendarProps>();
-const emits = defineEmits<ToCalendarEmits>();
-const router = useRouter();
-const visible = computed<boolean>({
-  get: () => props.modelValue,
-  set: (v) => emits("update:modelValue", v),
-});
+const visible = defineModel<boolean>();
 const boxData = computed<TItemBoxData>(() => ({
   bg: `/icon/bg/${props.dataVal.star}-Star.webp`,
   icon: `/WIKI/${props.dataType}/${props.dataVal.id}.webp`,
