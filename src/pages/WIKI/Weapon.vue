@@ -45,9 +45,7 @@ const curItem = shallowRef<TGApp.App.Weapon.WikiBriefInfo>({
   contentId: 0,
   name: "",
   star: 0,
-  bg: "",
-  weaponIcon: "",
-  icon: "",
+  weapon: "",
 });
 
 onBeforeMount(() => {
@@ -70,12 +68,9 @@ function switchW(item: TGApp.App.Weapon.WikiBriefInfo): void {
 
 function handleSelectW(val: SelectedWValue) {
   showSelect.value = true;
-  const reg = /\/icon\/weapon\/(.+?)\.webp/;
   const filterW = AppWeaponData.filter((item) => {
     if (!val.star.includes(item.star)) return false;
-    const match = item.weaponIcon.match(reg);
-    if (match === null) return false;
-    return val.weapon.includes(match[1]);
+    return val.weapon.includes(item.weapon);
   });
   if (filterW.length === 0) {
     showSnackbar.warn("未找到符合条件的武器");
@@ -134,7 +129,10 @@ async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
 }
 
 .ww-detail {
+  position: relative;
+  height: calc(100vh - 40px);
   max-height: 100%;
+  box-sizing: border-box;
   flex: 1;
   padding: 10px;
   border-radius: 10px;

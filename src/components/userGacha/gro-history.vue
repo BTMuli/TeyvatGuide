@@ -147,7 +147,7 @@ function getBox(id: number): TItemBoxData {
       height: "80px",
       display: "inner",
       clickable: true,
-      lt: wFind.weaponIcon,
+      lt: `/icon/weapon/${wFind.weapon}.webp`,
       ltSize: "20px",
       innerHeight: 20,
       innerText: wFind.name,

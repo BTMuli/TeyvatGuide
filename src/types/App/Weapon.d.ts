@@ -1,21 +1,19 @@
 /**
  * @file types/App/Weapon.d.ts
  * @description 本应用的武器类型定义文件
- * @since Beta v0.4.1
+ * @since Beta v0.6.7
  */
 
 declare namespace TGApp.App.Weapon {
   /**
    * @description Wiki页的武器简略信息
-   * @since Alpha v0.1.5
+   * @since Beta v0.6.7
    * @interface WikiBriefInfo
    * @property {number} id - 武器 ID
    * @property {number} contentId - 观测枢 id
    * @property {string} name - 武器名称
    * @property {number} star - 武器星级
-   * @property {string} bg - 武器背景图
-   * @property {string} weaponIcon - 武器类型图标
-   * @property {string} icon - 武器图标
+   * @property {string} weapon - 武器类型图标
    * @return WikiBriefInfo
    */
   interface WikiBriefInfo {
@@ -23,9 +21,7 @@ declare namespace TGApp.App.Weapon {
     contentId: number;
     name: string;
     star: number;
-    bg: string;
-    weaponIcon: string;
-    icon: string;
+    weapon: string;
   }
 
   /**
