@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/userAbyss.ts
  * @description Sqlite-用户深渊模块
- * @since Beta v0.6.1
+ * @since Beta v0.6.8
  */
 
 import TGSqlite from "@Sqlite/index.js";
@@ -14,11 +14,12 @@ import { timestampToDate } from "@/utils/toolFunc.js";
 
 /**
  * @description 直接插入数据
- * @since Beta v0.6.0
- * @param {TGApp.Sqlite.Abyss.TableRaw} data - 数据
+ * @since Beta v0.6.8
+ * @param {TGApp.Sqlite.Abyss.TableRaw} tableData - 数据
  * @returns {string}
  */
-function getRestoreSql(data: TGApp.Sqlite.Abyss.TableRaw): string {
+function getRestoreSql(tableData: TGApp.Sqlite.Abyss.TableData): string {
+  const data = data2Raw(tableData);
   const timeNow = timestampToDate(new Date().getTime());
   return `
       INSERT INTO SpiralAbyss (uid, id, startTime, endTime, totalBattleTimes, totalWinTimes,
@@ -28,23 +29,23 @@ function getRestoreSql(data: TGApp.Sqlite.Abyss.TableRaw): string {
               ${data.totalWinTimes}, '${data.maxFloor}', ${data.totalStar},
               ${data.isUnlock}, '${data.revealRank}', '${data.defeatRank}', '${data.damageRank}',
               '${data.takeDamageRank}', '${data.normalSkillRank}', '${data.energySkillRank}', '${data.floors}',
-              '${timeNow}')
-      ON CONFLICT(uid, id) DO UPDATE
-          SET startTime        = '${data.startTime}',
-              endTime          = '${data.endTime}',
-              totalBattleTimes = ${data.totalBattleTimes},
-              totalWinTimes    = ${data.totalWinTimes},
-              maxFloor         = '${data.maxFloor}',
-              totalStar        = ${data.totalStar},
-              isUnlock         = ${data.isUnlock},
-              revealRank       = '${data.revealRank}',
-              defeatRank       = '${data.defeatRank}',
-              damageRank       = '${data.damageRank}',
-              takeDamageRank   = '${data.takeDamageRank}',
-              normalSkillRank  = '${data.normalSkillRank}',
-              energySkillRank  = '${data.energySkillRank}',
-              floors           = '${data.floors}',
-              updated          = '${timeNow}';
+              '${timeNow}') ON CONFLICT(uid, id) DO
+      UPDATE
+          SET startTime = '${data.startTime}',
+          endTime = '${data.endTime}',
+          totalBattleTimes = ${data.totalBattleTimes},
+          totalWinTimes = ${data.totalWinTimes},
+          maxFloor = '${data.maxFloor}',
+          totalStar = ${data.totalStar},
+          isUnlock = ${data.isUnlock},
+          revealRank = '${data.revealRank}',
+          defeatRank = '${data.defeatRank}',
+          damageRank = '${data.damageRank}',
+          takeDamageRank = '${data.takeDamageRank}',
+          normalSkillRank = '${data.normalSkillRank}',
+          energySkillRank = '${data.energySkillRank}',
+          floors = '${data.floors}',
+          updated = '${timeNow}';
   `;
 }
 
@@ -75,24 +76,24 @@ function getInsertSql(uid: string, data: TGApp.Game.Abyss.FullData): string {
       VALUES ('${uid}', ${data.schedule_id}, '${startTime}', '${endTime}', ${data.total_battle_times},
               ${data.total_win_times}, '${data.max_floor}', ${data.total_star}, ${isUnlock},
               '${revealRank}', '${defeatRank}', '${damageRank}', '${takeDamageRank}', '${normalSkillRank}',
-              '${energySkillRank}', '${floors}', '${skippedFloor}', '${timeNow}')
-      ON CONFLICT(uid, id) DO UPDATE
-          SET startTime        = '${startTime}',
-              endTime          = '${endTime}',
-              totalBattleTimes = ${data.total_battle_times},
-              totalWinTimes    = ${data.total_win_times},
-              maxFloor         = '${data.max_floor}',
-              totalStar        = ${data.total_star},
-              isUnlock         = ${isUnlock},
-              revealRank       = '${revealRank}',
-              defeatRank       = '${defeatRank}',
-              damageRank       = '${damageRank}',
-              takeDamageRank   = '${takeDamageRank}',
-              normalSkillRank  = '${normalSkillRank}',
-              energySkillRank  = '${energySkillRank}',
-              floors           = '${floors}',
-              skippedFloor     = '${skippedFloor}',
-              updated          = '${timeNow}';
+              '${energySkillRank}', '${floors}', '${skippedFloor}', '${timeNow}') ON CONFLICT(uid, id) DO
+      UPDATE
+          SET startTime = '${startTime}',
+          endTime = '${endTime}',
+          totalBattleTimes = ${data.total_battle_times},
+          totalWinTimes = ${data.total_win_times},
+          maxFloor = '${data.max_floor}',
+          totalStar = ${data.total_star},
+          isUnlock = ${isUnlock},
+          revealRank = '${revealRank}',
+          defeatRank = '${defeatRank}',
+          damageRank = '${damageRank}',
+          takeDamageRank = '${takeDamageRank}',
+          normalSkillRank = '${normalSkillRank}',
+          energySkillRank = '${energySkillRank}',
+          floors = '${floors}',
+          skippedFloor = '${skippedFloor}',
+          updated = '${timeNow}';
   `;
 }
 
@@ -120,6 +121,35 @@ function raw2Data(data: TGApp.Sqlite.Abyss.TableRaw): TGApp.Sqlite.Abyss.TableDa
     normalSkillRank: JSON.parse(data.normalSkillRank),
     energySkillRank: JSON.parse(data.energySkillRank),
     floors: JSON.parse(data.floors),
+    skippedFloor: data.skippedFloor,
+    updated: data.updated,
+  };
+}
+
+/**
+ * @description data数据转table数据
+ * @since Beta v0.6.8
+ * @param {TGApp.Sqlite.Abyss.TableData} data - 原始数据
+ * @returns {TGApp.Sqlite.Abyss.TableRaw}
+ */
+function data2Raw(data: TGApp.Sqlite.Abyss.TableData): TGApp.Sqlite.Abyss.TableRaw {
+  return {
+    uid: data.uid,
+    id: data.id,
+    startTime: data.startTime,
+    endTime: data.endTime,
+    totalBattleTimes: data.totalBattleTimes,
+    totalWinTimes: data.totalWinTimes,
+    maxFloor: data.maxFloor,
+    totalStar: data.totalStar,
+    isUnlock: data.isUnlock,
+    revealRank: JSON.stringify(data.revealRank),
+    defeatRank: JSON.stringify(data.defeatRank),
+    damageRank: JSON.stringify(data.damageRank),
+    takeDamageRank: JSON.stringify(data.takeDamageRank),
+    normalSkillRank: JSON.stringify(data.normalSkillRank),
+    energySkillRank: JSON.stringify(data.energySkillRank),
+    floors: JSON.stringify(data.floors),
     skippedFloor: data.skippedFloor,
     updated: data.updated,
   };
@@ -199,7 +229,7 @@ async function backupAbyss(dir: string): Promise<void> {
 
 /**
  * @description 恢复深渊数据
- * @since Beta v0.6.0
+ * @since Beta v0.6.8
  * @param {string} dir - 备份文件目录
  * @returns {Promise<boolean>}
  */
@@ -207,7 +237,7 @@ async function restoreAbyss(dir: string): Promise<boolean> {
   const filePath = `${dir}${path.sep()}abyss.json`;
   if (!(await exists(filePath))) return false;
   try {
-    const data: TGApp.Sqlite.Abyss.TableRaw[] = JSON.parse(await readTextFile(filePath));
+    const data: TGApp.Sqlite.Abyss.TableData[] = JSON.parse(await readTextFile(filePath));
     const db = await TGSqlite.getDB();
     for (const abyss of data) {
       await db.execute(getRestoreSql(abyss));
