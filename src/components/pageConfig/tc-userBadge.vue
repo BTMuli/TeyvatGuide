@@ -1,4 +1,5 @@
 <template>
+  <ToGameLogin v-model="showLoginQr" @success="tryGetTokens" />
   <v-card class="tcu-box">
     <template #prepend>
       <v-avatar :image="userInfo.avatar" />
@@ -36,12 +37,18 @@
     </template>
     <template #actions>
       <v-spacer />
-      <v-btn
-        variant="outlined"
-        @click="tryCaptchaLogin()"
-        icon="mdi-cellphone"
-        title="验证码登录"
-      />
+      <!--      <v-btn-->
+      <!--        variant="outlined"-->
+      <!--        @click="showLoginQr = true"-->
+      <!--        icon="mdi-qrcode-scan"-->
+      <!--        title="扫码登录"-->
+      <!--      />-->
+      <!--      <v-btn-->
+      <!--        variant="outlined"-->
+      <!--        @click="tryCaptchaLogin()"-->
+      <!--        icon="mdi-cellphone"-->
+      <!--        title="验证码登录"-->
+      <!--      />-->
       <v-btn
         variant="outlined"
         @click="confirmRefreshUser(uid!)"
@@ -62,6 +69,7 @@
             variant="outlined"
             icon="mdi-account-switch"
             title="切换账户"
+            :disabled="accounts.length === 0"
             @click="showMenu"
             v-bind="props"
           />
@@ -90,9 +98,24 @@
               />
             </template>
           </v-list-item>
+        </v-list>
+      </v-menu>
+      <v-menu location="start">
+        <template v-slot:activator="{ props }">
+          <v-btn variant="outlined" icon="mdi-login" title="登录" v-bind="props" />
+        </template>
+        <v-list>
           <v-list-item @click="addByCookie()" append-icon="mdi-account-plus">
             <v-list-item-title>手动添加</v-list-item-title>
             <v-list-item-subtitle>手动输入Cookie</v-list-item-subtitle>
+          </v-list-item>
+          <v-list-item @click="tryCaptchaLogin()" append-icon="mdi-cellphone">
+            <v-list-item-title>验证码登录</v-list-item-title>
+            <v-list-item-subtitle>使用手机号登录</v-list-item-subtitle>
+          </v-list-item>
+          <v-list-item @click="showLoginQr = true" append-icon="mdi-qrcode-scan">
+            <v-list-item-title>扫码登录</v-list-item-title>
+            <v-list-item-subtitle>使用米游社扫码登录</v-list-item-subtitle>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -104,10 +127,11 @@ import showDialog from "@comp/func/dialog.js";
 import showGeetest from "@comp/func/geetest.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import ToGameLogin from "@comp/pageConfig/tco-gameLogin.vue";
 import Mys from "@Mys/index.js";
 import TSUserAccount from "@Sqlite/modules/userAccount.js";
 import { storeToRefs } from "pinia";
-import { computed, shallowRef } from "vue";
+import { computed, ref, shallowRef } from "vue";
 
 import { useAppStore } from "@/store/modules/app.js";
 import { useUserStore } from "@/store/modules/user.js";
@@ -119,6 +143,7 @@ import TakumiApi from "@/web/request/takumiReq.js";
 const { isLogin } = storeToRefs(useAppStore());
 const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
 
+const showLoginQr = ref<boolean>(false);
 const accounts = shallowRef<Array<TGApp.App.Account.User>>([]);
 const gameAccounts = shallowRef<Array<TGApp.Sqlite.Account.Game>>([]);
 const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
@@ -131,37 +156,7 @@ const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
   };
 });
 
-async function tryCaptchaLogin(): Promise<void> {
-  const phone = await showDialog.input("请输入手机号", "+86");
-  if (!phone) {
-    showSnackbar.cancel("已取消验证码登录");
-    return;
-  }
-  const phoneReg = /^1[3-9]\d{9}$/;
-  if (!phoneReg.test(phone)) {
-    showSnackbar.warn("请输入正确的手机号");
-    return;
-  }
-  const actionType = await tryGetCaptcha(phone);
-  if (!actionType) return;
-  showSnackbar.success(`已发送验证码到 ${phone}`);
-  const captcha = await showDialog.input("请输入验证码", "验证码：", undefined, false);
-  if (!captcha) {
-    showSnackbar.warn("输入验证码为空");
-    return;
-  }
-  const loginResp = await tryLoginByCaptcha(phone, captcha, actionType);
-  if (!loginResp) return;
-  await showLoading.start("正在尝试登录...");
-  const ck: TGApp.App.Account.Cookie = {
-    account_id: loginResp.user_info.aid,
-    ltuid: loginResp.user_info.aid,
-    stuid: loginResp.user_info.aid,
-    mid: loginResp.user_info.mid,
-    cookie_token: "",
-    stoken: loginResp.token.token,
-    ltoken: "",
-  };
+async function tryGetTokens(ck: TGApp.App.Account.Cookie): Promise<void> {
   await showLoading.update("正在获取 LToken");
   const ltokenRes = await PassportApi.lToken.get(ck);
   if (typeof ltokenRes !== "string") {
@@ -229,6 +224,40 @@ async function tryCaptchaLogin(): Promise<void> {
   account.value = curAccount;
   await showLoading.end();
   showSnackbar.success("成功登录!");
+}
+
+async function tryCaptchaLogin(): Promise<void> {
+  const phone = await showDialog.input("请输入手机号", "+86");
+  if (!phone) {
+    showSnackbar.cancel("已取消验证码登录");
+    return;
+  }
+  const phoneReg = /^1[3-9]\d{9}$/;
+  if (!phoneReg.test(phone)) {
+    showSnackbar.warn("请输入正确的手机号");
+    return;
+  }
+  const actionType = await tryGetCaptcha(phone);
+  if (!actionType) return;
+  showSnackbar.success(`已发送验证码到 ${phone}`);
+  const captcha = await showDialog.input("请输入验证码", "验证码：", undefined, false);
+  if (!captcha) {
+    showSnackbar.warn("输入验证码为空");
+    return;
+  }
+  const loginResp = await tryLoginByCaptcha(phone, captcha, actionType);
+  if (!loginResp) return;
+  await showLoading.start("正在尝试登录...");
+  const ck: TGApp.App.Account.Cookie = {
+    account_id: loginResp.user_info.aid,
+    ltuid: loginResp.user_info.aid,
+    stuid: loginResp.user_info.aid,
+    mid: loginResp.user_info.mid,
+    cookie_token: "",
+    stoken: loginResp.token.token,
+    ltoken: "",
+  };
+  await tryGetTokens(ck);
 }
 
 async function refreshUser(uid: string) {
@@ -375,6 +404,7 @@ async function tryGetCaptcha(phone: string, aigis?: string): Promise<string | fa
       showSnackbar.error(`[${captchaResp.retcode}] ${captchaResp.message}`);
       return false;
     }
+    // @ts-expect-error type {} is not assignable to type string
     const aigisResp: TGApp.Plugins.Mys.CaptchaLogin.CaptchaAigis = JSON.parse(captchaResp.data);
     const resp = await showGeetest(JSON.parse(aigisResp.data));
     const aigisStr = `${aigisResp.session_id};${btoa(JSON.stringify(resp))}`;

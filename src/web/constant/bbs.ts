@@ -1,10 +1,10 @@
 /**
  * @file web/constant/bbs.ts
  * @description 常量-应用数据
- * @since Beta v0.6.7
+ * @since Beta v0.6.8
  */
 
-export const BBS_VERSION: Readonly<string> = "2.79.1";
+export const BBS_VERSION: Readonly<string> = "2.80.1";
 export const BBS_UA_MOBILE: Readonly<string> = `Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/${BBS_VERSION}`;
 
 /**

@@ -773,6 +773,11 @@
         "description": "Enables the reparent command without any pre-configured scope.",
         "commands": { "allow": ["reparent"], "deny": [] }
       },
+      "allow-set-webview-background-color": {
+        "identifier": "allow-set-webview-background-color",
+        "description": "Enables the set_webview_background_color command without any pre-configured scope.",
+        "commands": { "allow": ["set_webview_background_color"], "deny": [] }
+      },
       "allow-set-webview-focus": {
         "identifier": "allow-set-webview-focus",
         "description": "Enables the set_webview_focus command without any pre-configured scope.",
@@ -852,6 +857,11 @@
         "identifier": "deny-reparent",
         "description": "Denies the reparent command without any pre-configured scope.",
         "commands": { "allow": [], "deny": ["reparent"] }
+      },
+      "deny-set-webview-background-color": {
+        "identifier": "deny-set-webview-background-color",
+        "description": "Denies the set_webview_background_color command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["set_webview_background_color"] }
       },
       "deny-set-webview-focus": {
         "identifier": "deny-set-webview-focus",
@@ -1100,6 +1110,21 @@
         "description": "Enables the set_always_on_top command without any pre-configured scope.",
         "commands": { "allow": ["set_always_on_top"], "deny": [] }
       },
+      "allow-set-background-color": {
+        "identifier": "allow-set-background-color",
+        "description": "Enables the set_background_color command without any pre-configured scope.",
+        "commands": { "allow": ["set_background_color"], "deny": [] }
+      },
+      "allow-set-badge-count": {
+        "identifier": "allow-set-badge-count",
+        "description": "Enables the set_badge_count command without any pre-configured scope.",
+        "commands": { "allow": ["set_badge_count"], "deny": [] }
+      },
+      "allow-set-badge-label": {
+        "identifier": "allow-set-badge-label",
+        "description": "Enables the set_badge_label command without any pre-configured scope.",
+        "commands": { "allow": ["set_badge_label"], "deny": [] }
+      },
       "allow-set-closable": {
         "identifier": "allow-set-closable",
         "description": "Enables the set_closable command without any pre-configured scope.",
@@ -1184,6 +1209,11 @@
         "identifier": "allow-set-minimizable",
         "description": "Enables the set_minimizable command without any pre-configured scope.",
         "commands": { "allow": ["set_minimizable"], "deny": [] }
+      },
+      "allow-set-overlay-icon": {
+        "identifier": "allow-set-overlay-icon",
+        "description": "Enables the set_overlay_icon command without any pre-configured scope.",
+        "commands": { "allow": ["set_overlay_icon"], "deny": [] }
       },
       "allow-set-position": {
         "identifier": "allow-set-position",
@@ -1445,6 +1475,21 @@
         "description": "Denies the set_always_on_top command without any pre-configured scope.",
         "commands": { "allow": [], "deny": ["set_always_on_top"] }
       },
+      "deny-set-background-color": {
+        "identifier": "deny-set-background-color",
+        "description": "Denies the set_background_color command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["set_background_color"] }
+      },
+      "deny-set-badge-count": {
+        "identifier": "deny-set-badge-count",
+        "description": "Denies the set_badge_count command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["set_badge_count"] }
+      },
+      "deny-set-badge-label": {
+        "identifier": "deny-set-badge-label",
+        "description": "Denies the set_badge_label command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["set_badge_label"] }
+      },
       "deny-set-closable": {
         "identifier": "deny-set-closable",
         "description": "Denies the set_closable command without any pre-configured scope.",
@@ -1529,6 +1574,11 @@
         "identifier": "deny-set-minimizable",
         "description": "Denies the set_minimizable command without any pre-configured scope.",
         "commands": { "allow": [], "deny": ["set_minimizable"] }
+      },
+      "deny-set-overlay-icon": {
+        "identifier": "deny-set-overlay-icon",
+        "description": "Denies the set_overlay_icon command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["set_overlay_icon"] }
       },
       "deny-set-position": {
         "identifier": "deny-set-position",

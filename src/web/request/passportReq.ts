@@ -1,15 +1,18 @@
 /**
  * @file web/request/passportReq.ts
  * @description Passport 相关请求
- * @since Beta v0.6.3
+ * @since Beta v0.6.8
  */
 import TGHttp from "@/utils/TGHttp.js";
+import { getDeviceInfo } from "@/utils/toolFunc.js";
 import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
 
 // PassportApiBaseUrl => pAbu
 const pAbu: Readonly<string> = "https://passport-api.mihoyo.com/";
 // PassportV4ApiBaseUrl => p4Abu
 const p4Abu: Readonly<string> = "https://passport-api-v4.mihoyo.com/";
+// HoyoLauncherVersion
+const hlv: Readonly<string> = "1.3.3.182";
 
 /**
  * @description 获取登录ticket
@@ -38,6 +41,30 @@ async function createAuthTicketByGameBiz(
   );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data.ticket;
+}
+
+/**
+ * @description 创建登录二维码
+ * @since Beta v0.6.8
+ * @returns {Promise<TGApp.BBS.Response.Base|TGApp.BBS.GameLogin.GetLoginQrData>}
+ */
+async function createQrLogin(): Promise<
+  TGApp.BBS.Response.Base | TGApp.BBS.GameLogin.GetLoginQrData
+> {
+  const resp = await TGHttp<TGApp.BBS.GameLogin.GetLoginQrResponse>(
+    `${pAbu}account/ma-cn-passport/app/createQRLogin`,
+    {
+      method: "POST",
+      headers: {
+        "x-rpc-device_id": getDeviceInfo("device_id"),
+        "user-agent": `HYPContainer/${hlv}`,
+        "x-rpc-app_id": "ddxf5dufpuyo",
+        "x-rpc-client_type": "3",
+      },
+    },
+  );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
 }
 
 /**
@@ -79,6 +106,32 @@ async function getLTokenBySToken(
 }
 
 /**
+ * @description 获取登录状态
+ * @since Beta v0.6.8
+ * @param {string} ticket - 二维码 ticket
+ * @returns {Promise<TGApp.BBS.Response.Base|TGApp.BBS.GameLogin.GetLoginStatusData>}
+ */
+async function queryLoginStatus(
+  ticket: string,
+): Promise<TGApp.BBS.Response.Base | TGApp.BBS.GameLogin.GetLoginStatusData> {
+  const resp = await TGHttp<TGApp.BBS.GameLogin.GetLoginStatusResponse>(
+    `${pAbu}account/ma-cn-passport/app/queryQRLoginStatus`,
+    {
+      method: "POST",
+      headers: {
+        "x-rpc-device_id": getDeviceInfo("device_id"),
+        "user-agent": `HYPContainer/${hlv}`,
+        "x-rpc-app_id": "ddxf5dufpuyo",
+        "x-rpc-client_type": "3",
+      },
+      body: JSON.stringify({ ticket }),
+    },
+  );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
+}
+
+/**
  * @description 验证 ltoken 有效性，返回 mid
  * @since Beta v0.6.5
  * @param {TGApp.App.Account.Cookie} cookie - 账户 cookie
@@ -102,6 +155,7 @@ const PassportApi = {
   authTicket: createAuthTicketByGameBiz,
   cookieToken: getCookieAccountInfoBySToken,
   lToken: { get: getLTokenBySToken, verify: verifyLToken },
+  qrLogin: { create: createQrLogin, query: queryLoginStatus },
 };
 
 export default PassportApi;
