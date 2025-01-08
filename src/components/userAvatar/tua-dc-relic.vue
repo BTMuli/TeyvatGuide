@@ -35,6 +35,7 @@
             :src="propMain.icon"
             alt="propMain"
           />
+          <v-icon v-else class="icon" size="14">mdi-adjust</v-icon>
           <span :style="getPropMainStyle()">
             {{ propMain !== false ? propMain.name : "未知属性" }}
           </span>
@@ -44,6 +45,7 @@
       <div v-for="(prop, index) in propSubs" :key="index" class="tua-dcr-prop">
         <span class="tua-prop-sub">
           <img v-if="prop !== false && prop.icon !== ''" :src="prop.icon" alt="propSub" />
+          <v-icon v-else class="icon" size="14">mdi-information-outline</v-icon>
           <span :style="getPropSubStyle(prop, props.recommend.sub_property_list)">
             {{ prop !== false ? prop.name : "未知属性" }}
           </span>
@@ -142,6 +144,7 @@ function getPropSubStyle(
   background: rgb(0 0 0 / 20%);
   color: var(--tgc-white-1);
   font-size: 12px;
+  row-gap: 5px;
   text-shadow: 0 0 5px rgb(0 0 0 / 50%);
 }
 
@@ -235,6 +238,7 @@ function getPropSubStyle(
   width: 100%;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 1px solid rgb(255 255 255 / 20%);
   column-gap: 5px;
   font-family: var(--font-title);
 
@@ -242,6 +246,7 @@ function getPropSubStyle(
     display: flex;
     align-items: center;
     justify-content: center;
+    column-gap: 5px;
   }
 
   img {
@@ -268,6 +273,10 @@ function getPropSubStyle(
   img {
     width: 14px;
     height: 14px;
+  }
+
+  .icon {
+    opacity: 0.4;
   }
 }
 

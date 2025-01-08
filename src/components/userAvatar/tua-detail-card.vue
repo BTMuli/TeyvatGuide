@@ -18,6 +18,13 @@
         <span>{{ props.modelValue.avatar.name }}</span>
         <span>Lv.{{ props.modelValue.avatar.level }}</span>
         <span>好感{{ props.modelValue.avatar.fetter }}</span>
+        <v-icon
+          :title="`解锁衣装：${props.modelValue.costumes.map((i) => i.name).join(',')}`"
+          v-if="props.modelValue.costumes.length !== 0"
+          size="14"
+        >
+          mdi-tshirt-crew
+        </v-icon>
       </div>
       <div v-for="(prop, index) in props.modelValue.propSelected" :key="index">
         <div v-if="propMain[index] !== false" class="tua-dc-prop">

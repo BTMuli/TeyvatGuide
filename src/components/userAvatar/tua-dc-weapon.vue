@@ -150,6 +150,7 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+    column-gap: 5px;
   }
 }
 
