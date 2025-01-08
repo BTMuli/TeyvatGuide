@@ -28,6 +28,7 @@
       <div class="tua-prop-sub">
         <span>
           <img v-if="propSub !== false && propSub.icon !== ''" :src="propSub.icon" alt="propSub" />
+          <v-icon class="icon" v-else size="14">mdi-adjust</v-icon>
           <span>{{ propSub !== false ? propSub.name : "未知属性" }}</span>
         </span>
         <span>{{ props.modelValue.sub_property?.final }}</span>
@@ -131,6 +132,18 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+
+  span:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 5px;
+  }
+
+  img {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 .tua-prop-sub {
@@ -151,6 +164,10 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
     align-items: center;
     justify-content: center;
     column-gap: 5px;
+
+    .icon {
+      opacity: 0.4;
+    }
   }
 }
 

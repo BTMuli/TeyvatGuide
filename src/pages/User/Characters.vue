@@ -140,7 +140,9 @@ const uidList = shallowRef<Array<string>>([]);
 const roleList = shallowRef<Array<TGApp.Sqlite.Character.UserRole>>([]);
 const selectedList = shallowRef<Array<TGApp.Sqlite.Character.UserRole>>([]);
 const dataVal = shallowRef<TGApp.Sqlite.Character.UserRole>();
-const enableShare = computed<boolean>(() => (showOverlay.value ? true : showSelect.value));
+const enableShare = computed<boolean>(
+  () => showOverlay.value || showSelect.value || loadData.value,
+);
 
 onMounted(async () => {
   await showLoading.start("正在获取角色数据");
