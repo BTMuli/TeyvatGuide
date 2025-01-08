@@ -151,7 +151,7 @@ const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
   return {
     nickname: "未登录",
     uid: "-1",
-    desc: "请使用短信验证码登录",
+    desc: "请登录",
     avatar: "/source/UI/lumine.webp",
   };
 });

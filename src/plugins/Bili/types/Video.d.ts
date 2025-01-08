@@ -322,7 +322,7 @@ declare namespace TGApp.Plugins.Bili.Video {
   /**
    * @description Bili 视频支持格式
    * @since Beta v0.4.1
-   * @interface UrlFormats
+   * @interface UrlFormat
    * @property {number} quality 视频清晰度
    * @property {string} format 视频格式
    * @property {string} new_description 视频格式描述

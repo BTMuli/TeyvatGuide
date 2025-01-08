@@ -121,6 +121,6 @@ function getWidth(item: TpVoteData): string {
 .tp-vote-val {
   height: 100%;
   border-radius: 5px;
-  background: linear-gradient(to right, #fb7299, #00aeec);
+  background: linear-gradient(to right, #6cf, #f09199);
 }
 </style>
