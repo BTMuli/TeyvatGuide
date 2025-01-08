@@ -174,9 +174,11 @@ async function refreshGachaPool(
   let endId = "0";
   let reqId = "0";
   let gachaDataMap: Record<string, string[]> | undefined = undefined;
+  let page = 0;
   await showLoading.start(`正在刷新${label}数据`);
   if (!force) endId = (await TSUserGacha.getGachaCheck(account.value.gameUid, type)) ?? "0";
   while (true) {
+    page++;
     const gachaRes = await Hk4eApi.gacha(authkey.value, type, reqId);
     if (!Array.isArray(gachaRes)) {
       showSnackbar.error(`[${type}][${gachaRes.retcode}] ${gachaRes.message}`);
@@ -186,6 +188,7 @@ async function refreshGachaPool(
       await TGLogger.Error(
         `[UserGacha][${account.value.gameUid}][refreshGachaPool] ${gachaRes.retcode} ${gachaRes.message}`,
       );
+      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
       break;
     }
     if (gachaRes.length === 0) {
@@ -198,8 +201,11 @@ async function refreshGachaPool(
       break;
     }
     const uigfList: TGApp.Plugins.UIGF.GachaItem[] = [];
+    if (force) await showLoading.update(`[${label}] 第${page}页，${gachaRes.length}条`);
     for (const item of gachaRes) {
-      await showLoading.update(`[${item.item_type}][${item.time}] ${item.name}`);
+      if (!force) {
+        await showLoading.update(`[${item.item_type}][${item.time}] ${item.name}`);
+      }
       const tempItem: TGApp.Plugins.UIGF.GachaItem = {
         gacha_type: item.gacha_type,
         item_id: item.item_id,
@@ -228,6 +234,7 @@ async function refreshGachaPool(
     await TSUserGacha.mergeUIGF(account.value.gameUid, uigfList);
     if (!force && gachaRes.some((i) => i.id.toString() === endId.toString())) break;
     reqId = gachaRes[gachaRes.length - 1].id.toString();
+    if (force) await new Promise<void>((resolve) => setTimeout(resolve, 1000));
   }
 }
 
