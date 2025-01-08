@@ -70,13 +70,13 @@ async function cycleGetData() {
     clearInterval(cycleTimer);
     cycleTimer = null;
     const ck: TGApp.App.Account.Cookie = {
-      mid: res.user_info.mid,
-      stoken: res.tokens[0].token,
-      stuid: res.user_info.aid,
       account_id: res.user_info.aid,
+      ltuid: res.user_info.aid,
+      stuid: res.user_info.aid,
+      mid: res.user_info.mid,
       cookie_token: "",
+      stoken: res.tokens[0].token,
       ltoken: "",
-      ltuid: "",
     };
     emits("success", ck);
     model.value = false;

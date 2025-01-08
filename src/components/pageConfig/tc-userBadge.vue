@@ -69,7 +69,6 @@
             variant="outlined"
             icon="mdi-account-switch"
             title="切换账户"
-            :disabled="accounts.length === 0"
             @click="showMenu"
             v-bind="props"
           />
