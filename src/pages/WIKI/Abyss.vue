@@ -48,7 +48,7 @@ import HtaTabTeam from "@comp/hutaoAbyss/hta-tab-team.vue";
 import HtaTabUp from "@comp/hutaoAbyss/hta-tab-up.vue";
 import HtaTabUse from "@comp/hutaoAbyss/hta-tab-use.vue";
 import Hutao from "@Hutao/index.js";
-import { onMounted, ref, shallowRef, triggerRef, watch } from "vue";
+import { onMounted, reactive, type Ref, ref, shallowRef, watch } from "vue";
 
 import { timestampToDate } from "@/utils/toolFunc.js";
 
@@ -71,7 +71,7 @@ export type AbyssDataItemType<T extends AbyssTab> = T extends "use"
       : T extends "hold"
         ? AbyssDataItem<Array<TGApp.Plugins.Hutao.Abyss.AvatarHold>>
         : null;
-type AbyssData = { [key in AbyssTab]: AbyssDataItemType<key> | null };
+type AbyssData = { [key in AbyssTab]: Ref<AbyssDataItemType<key> | null> };
 
 const abyssList: Readonly<AbyssList> = [
   { label: AbyssTabEnum.use, value: "use" },
@@ -82,7 +82,12 @@ const abyssList: Readonly<AbyssList> = [
 const showDialog = ref<boolean>(false);
 const tab = shallowRef<AbyssTab>("use");
 const overview = shallowRef<AbyssDataItem<TGApp.Plugins.Hutao.Abyss.OverviewData>>();
-const abyssData = shallowRef<AbyssData>({ use: null, up: null, team: null, hold: null });
+const abyssData = reactive<AbyssData>({
+  use: shallowRef<AbyssDataItemType<"use"> | null>(null),
+  up: shallowRef<AbyssDataItemType<"up"> | null>(null),
+  team: shallowRef<AbyssDataItemType<"team"> | null>(null),
+  hold: shallowRef<AbyssDataItemType<"hold"> | null>(null),
+});
 
 watch(
   () => tab.value,
@@ -96,31 +101,26 @@ onMounted(async () => {
     last: await Hutao.Abyss.overview(true),
   };
   await showLoading.update("正在获取角色使用率数据");
-  const useData = <AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>>await getData("use");
-  abyssData.value = { use: useData, up: null, team: null, hold: null };
+  abyssData.use = <AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>>await getData("use");
   await showLoading.end();
 });
 
 async function refreshData(type: AbyssTab): Promise<void> {
-  if (abyssData.value && abyssData.value[type] !== null) return;
+  if (abyssData && abyssData[type] !== null) return;
   await showLoading.start("正在获取深渊数据", `正在获取 ${AbyssTabEnum[type]} 数据`);
   const data = await getData(type);
   switch (type) {
     case "use":
-      abyssData.value.use = <AbyssDataItemType<"use">>data;
-      triggerRef(abyssData);
+      abyssData.use = <AbyssDataItemType<"use">>data;
       break;
     case "up":
-      abyssData.value.up = <AbyssDataItemType<"up">>data;
-      triggerRef(abyssData);
+      abyssData.up = <AbyssDataItemType<"up">>data;
       break;
     case "team":
-      abyssData.value.team = <AbyssDataItemType<"team">>data;
-      triggerRef(abyssData);
+      abyssData.team = <AbyssDataItemType<"team">>data;
       break;
     case "hold":
-      abyssData.value.hold = <AbyssDataItemType<"hold">>data;
-      triggerRef(abyssData);
+      abyssData.hold = <AbyssDataItemType<"hold">>data;
       break;
   }
   await showLoading.end();
