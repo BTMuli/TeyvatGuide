@@ -1,7 +1,7 @@
 /**
  * @file utils/toolFunc.ts
  * @description 一些工具函数
- * @since Beta v0.6.7
+ * @since Beta v0.6.8
  */
 
 import { path } from "@tauri-apps/api";
@@ -11,6 +11,7 @@ import type { KEYWORD } from "color-convert/conversions.js";
 import { v4 } from "uuid";
 import { score } from "wcag-color";
 
+import { AppCharacterData, AppWeaponData } from "@/data/index.js";
 import TGConstant from "@/web/constant/TGConstant.js";
 
 /**
@@ -274,6 +275,7 @@ export function decodeRegExp(data: string): string {
 
 /**
  * @description 根据 gid 获取游戏名称
+ * @since Beta v0.6.7
  * @param {number} gid
  * @returns {string}
  */
@@ -284,10 +286,27 @@ export function getGameName(gid: number): string {
 
 /**
  * @description 获取游戏id
+ * @since Beta v0.6.7
  * @param {string} mini
  * @returns {string}
  */
 export function getGameId(mini: string): string {
   const game = TGConstant.BBS.CHANNELS.find((item) => item.mini === mini);
   return game ? game.gid : "0";
+}
+
+/**
+ * @description 根据id获取对应角色/武器数据
+ * @since Beta v0.6.8
+ * @param {number|string} id
+ * @returns {TGApp.App.Character.WikiBriefInfo|TGApp.App.Weapon.WikiBriefInfo}
+ */
+export function getWikiBrief(
+  id: number | string,
+): TGApp.App.Character.WikiBriefInfo | TGApp.App.Weapon.WikiBriefInfo | false {
+  const len = id.toString().length;
+  if (len === 5) {
+    return AppWeaponData.find((item) => item.id.toString() === id.toString()) ?? false;
+  }
+  return AppCharacterData.find((item) => item.id.toString() === id.toString()) ?? false;
 }

@@ -17,10 +17,10 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TSUserGacha from "@Sqlite/modules/userGacha.js";
 import { computed } from "vue";
 
 import { AppGachaData } from "@/data/index.js";
+import { getWikiBrief } from "@/utils/toolFunc.js";
 
 export type GroDataLineProps = { data: TGApp.Sqlite.GachaRecords.SingleTable; count: number };
 
@@ -28,10 +28,10 @@ const props = defineProps<GroDataLineProps>();
 const hint = getEndHint();
 
 function getIcon(): string {
-  const itemType = TSUserGacha.getGachaItemType(props.data.itemId);
-  if (itemType[0] === "角色") return `/WIKI/character/${props.data.itemId}.webp`;
-  if (itemType[0] === "武器") return `/WIKI/weapon/${props.data.itemId}.webp`;
-  return `/source/UI/paimon.webp`;
+  const find = getWikiBrief(props.data.itemId);
+  if (!find) return `/source/UI/paimon.webp`;
+  if (props.data.id.length === 5) return `/WIKI/weapon/${props.data.itemId}.webp`;
+  return `/WIKI/character/${props.data.itemId}.webp`;
 }
 
 function getEndHint(): string {

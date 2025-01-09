@@ -12,59 +12,22 @@
         :value="item.tab"
         class="gro-pools"
       >
-        <div v-for="pool in item.value" :key="pool.order" class="gro-pool">
-          <img
-            :src="pool.banner"
-            class="gro-banner"
-            alt="banner"
-            @click="createPost(pool.postId)"
-          />
-          <div class="gro-pool-info">
-            <div class="gro-pi-title">
-              <span>{{ pool.name }}</span>
-              <span class="gro-pi-tag">{{ pool.order === 1 ? "上半" : "下半" }}</span>
-              <span class="gro-pi-tag">{{ getType(pool.type) }}</span>
-            </div>
-            <div class="gro-pi-time">{{ getTimeStr(pool) }}</div>
-            <div class="gro-pi-sub">Up 五星</div>
-            <div class="gro-pool-up lv5">
-              <TItemBox
-                v-for="i in pool.up5List"
-                :key="i"
-                :model-value="getBox(i)"
-                @click="toWiki(i)"
-              />
-            </div>
-            <div class="gro-pi-sub">Up 四星</div>
-            <div class="gro-pool-up lv4">
-              <TItemBox
-                v-for="i in pool.up4List"
-                :key="i"
-                :model-value="getBox(i)"
-                @click="toWiki(i)"
-              />
-            </div>
-          </div>
-        </div>
+        <UgHisCard v-for="pool in item.value" :key="pool.order" :pool="pool" />
       </v-window-item>
     </v-window>
   </div>
 </template>
 <script lang="ts" setup>
-import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
-import showSnackbar from "@comp/func/snackbar.js";
 import { onMounted, ref, shallowRef } from "vue";
-import { useRouter } from "vue-router";
 
-import { AppCharacterData, AppGachaData, AppWeaponData } from "@/data/index.js";
-import { createPost } from "@/utils/TGWindow.js";
-import { timestampToDate } from "@/utils/toolFunc.js";
+import UgHisCard from "./ug-his-card.vue";
+
+import { AppGachaData } from "@/data/index.js";
 
 type GroHistoryMap = { tab: string; value: Array<TGApp.App.Gacha.PoolItem> };
 
 const historyTab = ref<string>("");
 const tabList = shallowRef<Array<GroHistoryMap>>([]);
-const router = useRouter();
 
 onMounted(() => {
   const res: Array<GroHistoryMap> = [];
@@ -79,87 +42,6 @@ onMounted(() => {
   tabList.value = res.reverse();
   historyTab.value = res[0].tab;
 });
-
-async function toWiki(id: number): Promise<void> {
-  const cFind = AppCharacterData.find((item) => item.id === id);
-  const wFind = AppWeaponData.find((item) => item.id === id);
-  if (cFind) {
-    await router.push({ name: "角色图鉴", params: { id: id.toString() } });
-    return;
-  }
-  if (wFind) {
-    await router.push({ name: "武器图鉴", params: { id: id.toString() } });
-    return;
-  }
-  showSnackbar.warn("未找到对应角色或武器");
-}
-
-function getType(type: TGApp.App.Gacha.WishType): string {
-  switch (type) {
-    case 301:
-      return "角色活动祈愿";
-    case 400:
-      return "角色活动祈愿2";
-    case 302:
-      return "武器活动祈愿";
-    case 500:
-      return "集录祈愿";
-    default:
-      return `未知类型 ${type}`;
-  }
-}
-
-function getTimeStr(pool: TGApp.App.Gacha.PoolItem): string {
-  const startTime = timestampToDate(Date.parse(pool.from));
-  const endTime = timestampToDate(Date.parse(pool.to));
-  return `${startTime} ~ ${endTime}`;
-}
-
-function getBox(id: number): TItemBoxData {
-  const cFind = AppCharacterData.find((item) => item.id === id);
-  const wFind = AppWeaponData.find((item) => item.id === id);
-  if (cFind) {
-    return {
-      bg: `/icon/bg/${cFind.star}-Star.webp`,
-      icon: `/WIKI/character/${cFind.id}.webp`,
-      size: "80px",
-      height: "80px",
-      display: "inner",
-      clickable: true,
-      lt: `/icon/element/${cFind.element}元素.webp`,
-      ltSize: "20px",
-      innerHeight: 20,
-      innerIcon: `/icon/weapon/${cFind.weapon}.webp`,
-      innerText: cFind.name,
-    };
-  }
-  if (wFind) {
-    return {
-      bg: `/icon/bg/${wFind.star}-Star.webp`,
-      icon: `/WIKI/weapon/${wFind.id}.webp`,
-      size: "80px",
-      height: "80px",
-      display: "inner",
-      clickable: true,
-      lt: `/icon/weapon/${wFind.weapon}.webp`,
-      ltSize: "20px",
-      innerHeight: 20,
-      innerText: wFind.name,
-    };
-  }
-  return {
-    bg: "/icon/bg/0-Star.webp",
-    icon: "/source/UI/empty/webp",
-    size: "80px",
-    height: "80px",
-    display: "inner",
-    clickable: false,
-    lt: "",
-    ltSize: "0",
-    innerHeight: 20,
-    innerText: "未找到对应角色或武器",
-  };
-}
 </script>
 <style lang="css" scoped>
 .gro-container {
@@ -206,82 +88,5 @@ function getBox(id: number): TItemBoxData {
   align-items: center;
   justify-content: center;
   row-gap: 10px;
-}
-
-.gro-pool {
-  position: relative;
-  display: flex;
-  width: 100%;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: 10px;
-  border-radius: 10px;
-  background: var(--box-bg-2);
-  column-gap: 10px;
-}
-
-.gro-banner {
-  width: 50vw;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: 0.5s ease-in-out;
-}
-
-.gro-banner:hover {
-  box-shadow: 0 0 10px 5px var(--box-bg-2);
-  scale: 0.95;
-  transition: 0.5s ease-in-out;
-}
-
-.gro-pool-info {
-  display: flex;
-  height: 100%;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-}
-
-.gro-pi-title {
-  display: flex;
-  column-gap: 10px;
-}
-
-.gro-pi-title :first-child {
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 20px;
-}
-
-.gro-pi-tag {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 5px;
-  border-radius: 5px;
-  background: var(--box-bg-1);
-  color: var(--box-text-5);
-  font-size: 16px;
-}
-
-.gro-pi-sub {
-  font-family: var(--font-title);
-  font-size: 18px;
-}
-
-.gro-pool-up {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  overflow-y: auto;
-}
-
-.gro-pool-up.lv5 {
-  max-height: 80px;
-}
-
-.gro-pool-up.lv4 {
-  max-height: 170px;
 }
 </style>
