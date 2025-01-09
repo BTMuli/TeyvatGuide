@@ -59,7 +59,7 @@
           />
         </template>
       </v-list-item>
-      <v-list-item title="分享设置">
+      <v-list-item title="分享设置" v-if="platform() === 'windows'">
         <template #subtitle>默认保存到剪贴板，超过{{ shareDefaultFile }}MB时保存到文件</template>
         <template #prepend>
           <div class="config-icon">
