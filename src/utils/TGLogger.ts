@@ -1,10 +1,10 @@
 /**
  * @file utils/TGLogger.ts
  * @description 日志工具
- * @since Beta v0.5.0
+ * @since Beta v0.6.8
  */
 
-import { attachConsole, error, info, warn } from "@tauri-apps/plugin-log";
+import { attachConsole, error, info, warn, debug } from "@tauri-apps/plugin-log";
 
 /**
  * @description 日志工具
@@ -22,6 +22,18 @@ class Logger {
   static getInstance(): Logger {
     if (this.instance === null) this.instance = new Logger();
     return this.instance;
+  }
+
+  /**
+   * @description 输出日志-调试
+   * @since Beta v0.6.8
+   * @param {string} message 日志信息
+   * @param {boolean} [write] 是否写入日志文件，默认为 true
+   * @returns {Promise<void>} 无返回值
+   */
+  async Debug(message: string, write: boolean = true): Promise<void> {
+    if (write) await debug(message);
+    console.debug(message);
   }
 
   /**

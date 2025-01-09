@@ -142,7 +142,8 @@ function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
   else if (item.post.images.length > 0) cover = item.post.images[0];
   if (cover === undefined) return "";
   if (cover.endsWith(".gif")) return cover;
-  return `${cover}?x-oss-process=image/format,png`;
+  // 裁剪图片格式为 png，比例为 36:13，进行缩放但是不拉伸
+  return `${cover}?x-oss-process=image/resize,m_fill,w_360,h_130,limit_0/format,png`;
 }
 
 /**

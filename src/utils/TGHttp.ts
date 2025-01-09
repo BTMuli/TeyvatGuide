@@ -1,10 +1,12 @@
 /**
  * @file utils/TGHttp.ts
  * @description 封装HTTP请求
- * @since Beta v0.5.1
+ * @since Beta v0.6.8
  */
 
 import { fetch } from "@tauri-apps/plugin-http";
+
+import TGLogger from "@/utils/TGLogger.js";
 
 /**
  * @description 请求参数
@@ -53,8 +55,12 @@ async function TGHttp<T>(
     const query = new URLSearchParams(options.query).toString();
     url += `?${query}`;
   }
-  console.log("fetch url: ", url);
-  console.log("fetch options: ", options);
+  if (options.isBlob) {
+    await TGLogger.Debug(`Fetch Image: ${url}`);
+  } else {
+    await TGLogger.Debug(`Fetch URL: ${url}`);
+    await TGLogger.Debug(`Fetch Options: ${JSON.stringify(options)}`);
+  }
   return await fetch(url, fetchOptions)
     .then((res) => {
       if (res.ok) {
