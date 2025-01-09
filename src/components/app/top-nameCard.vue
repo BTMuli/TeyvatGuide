@@ -2,7 +2,7 @@
   <v-list class="top-nc-box" @click="emit('selected', props.data)">
     <v-list-item :title="props.data.name">
       <template #subtitle>
-        <span :title="props.data.desc">{{ props.data.desc }}</span>
+        <span class="desc" :title="props.data.desc">{{ props.data.desc }}</span>
       </template>
       <template #prepend>
         <v-img
@@ -41,5 +41,9 @@ const bgImage = computed<string>(() => {
   background-repeat: no-repeat;
   cursor: pointer;
   font-family: var(--font-title);
+}
+
+.desc {
+  text-shadow: 1px 1px 1px #222;
 }
 </style>
