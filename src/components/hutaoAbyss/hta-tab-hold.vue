@@ -1,5 +1,4 @@
 <template>
-  <!-- todo fix typo err -->
   <v-data-table :headers="headers" fixed-header :items="holdData" height="calc(100vh - 160px)">
     <template v-slot:item="{ item }">
       <tr class="hta-th-tr">
@@ -53,7 +52,7 @@ type HtaTabHoldData = {
 const props = defineProps<HtaTabHoldProps>();
 const holdData = shallowRef<Array<HtaTabHoldData>>([]);
 
-const headers = [
+const headers = <const>[
   { title: "角色", align: "center", key: "AvatarId" },
   { title: "持有", align: "center", key: "HoldingRate.cur" },
   { title: "0命", align: "center", key: "Constellations[0].RateCur" },
