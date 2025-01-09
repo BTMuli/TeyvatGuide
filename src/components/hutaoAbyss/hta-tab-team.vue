@@ -66,7 +66,6 @@ onMounted(async () => {
   overflow: auto;
   width: 100%;
   height: 100%;
-  max-height: calc(100vh - 130px);
   overflow-x: hidden;
 }
 
@@ -102,7 +101,7 @@ onMounted(async () => {
 .hta-tuf-item {
   position: relative;
   width: 100%;
-  max-height: calc(100vh - 200px);
+  max-height: calc(100vh - 160px);
   border-radius: 5px;
   background: var(--box-bg-1);
 }
