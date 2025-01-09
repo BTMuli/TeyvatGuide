@@ -46,7 +46,8 @@
       </div>
       <div class="load-news">
         <v-btn class="post-news-btn" :rounded="true" :loading="loading" @click="loadMore(value)">
-          已加载：{{ rawData[value].lastId }}，加载更多
+          已加载：{{ rawData[value].lastId }}，
+          {{ rawData[value].isLast ? "已加载完毕" : "加载更多" }}
         </v-btn>
       </div>
     </v-window-item>
@@ -62,7 +63,8 @@ import ToChannel from "@comp/pageNews/to-channel.vue";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import Mys from "@Mys/index.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, shallowRef, triggerRef } from "vue";
+import type { Ref } from "vue";
+import { computed, onMounted, reactive, ref, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { type NewsType, NewsTypeEnum, useAppStore } from "@/store/modules/app.js";
@@ -70,8 +72,9 @@ import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
 import { getGameName } from "@/utils/toolFunc.js";
 
-type PostData = { [key in NewsType]: Array<TGApp.Plugins.Mys.Post.FullData> };
-type RawData = { [key in NewsType]: { isLast: boolean; name: string; lastId: number } };
+type PostData = { [key in NewsType]: Ref<Array<TGApp.Plugins.Mys.Post.FullData>> };
+type RawItem = { isLast: boolean; name: string; lastId: number };
+type RawData = { [key in NewsType]: Ref<RawItem> };
 
 const router = useRouter();
 const { recentNewsType } = storeToRefs(useAppStore());
@@ -82,11 +85,15 @@ const loading = ref<boolean>(false);
 const showList = ref<boolean>(false);
 const showSearch = ref<boolean>(false);
 const search = ref<string>("");
-const postData = shallowRef<PostData>({ notice: [], activity: [], news: [] });
-const rawData = shallowRef<RawData>({
-  notice: { isLast: false, name: "公告", lastId: 0 },
-  activity: { isLast: false, name: "活动", lastId: 0 },
-  news: { isLast: false, name: "咨讯", lastId: 0 },
+const postData = reactive<PostData>({
+  notice: shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]),
+  activity: shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]),
+  news: shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]),
+});
+const rawData = reactive<RawData>({
+  notice: shallowRef<RawItem>({ isLast: false, name: "公告", lastId: 0 }),
+  activity: shallowRef<RawItem>({ isLast: false, name: "活动", lastId: 0 }),
+  news: shallowRef<RawItem>({ isLast: false, name: "咨讯", lastId: 0 }),
 });
 const tab = computed<NewsType>({
   get: () => ((recentNewsType.value satisfies NewsType) ? recentNewsType.value : "notice"),
@@ -96,25 +103,20 @@ const tab = computed<NewsType>({
 onMounted(async () => await firstLoad(tab.value));
 
 async function firstLoad(key: NewsType, refresh: boolean = false): Promise<void> {
-  if (rawData.value[key].lastId !== 0) {
+  if (rawData[key].lastId !== 0) {
     if (!refresh) return;
-    postData.value[key] = [];
-    rawData.value[key].lastId = 0;
+    postData[key] = [];
+    rawData[key].lastId = 0;
   }
-  await showLoading.start(`正在获取${gameName}${rawData.value[key].name}数据`);
+  await showLoading.start(`正在获取${gameName}${rawData[key].name}数据`);
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
   const getData = await Mys.Painter.getNewsList(gid, NewsTypeEnum[key]);
   await showLoading.update(`数量：${getData.list.length}，是否最后一页：${getData.is_last}`);
-  rawData.value[key].isLast = getData.is_last;
-  rawData.value[key].lastId = getData.list.length;
-  postData.value[key] = getData.list;
-  triggerRef(postData);
-  triggerRef(rawData);
+  rawData[key] = { isLast: getData.is_last, name: rawData[key].name, lastId: getData.list.length };
+  postData[key] = getData.list;
   await showLoading.end();
-  await TGLogger.Info(`[News][${gid}][firstLoad] 获取${rawData.value[key].name}数据成功`);
-  showSnackbar.success(
-    `获取${gameName}${rawData.value[key].name}数据成功，共 ${getData.list.length} 条`,
-  );
+  await TGLogger.Info(`[News][${gid}][firstLoad] 获取${rawData[key].name}数据成功`);
+  showSnackbar.success(`获取${gameName}${rawData[key].name}数据成功，共 ${getData.list.length} 条`);
 }
 
 async function switchAnno(): Promise<void> {
@@ -125,25 +127,25 @@ async function switchAnno(): Promise<void> {
 // 加载更多
 async function loadMore(key: NewsType): Promise<void> {
   loading.value = true;
-  if (rawData.value[key].isLast) {
+  if (rawData[key].isLast) {
     showSnackbar.warn("已经是最后一页了");
     loading.value = false;
     return;
   }
-  await showLoading.start(`正在获取${gameName}${rawData.value[key].name}数据`);
+  await showLoading.start(`正在获取${gameName}${rawData[key].name}数据`);
+  const mod = rawData[key].lastId % 20;
+  const pageSize = mod === 0 ? 20 : 20 - mod;
   const getData = await Mys.Painter.getNewsList(
     gid,
     NewsTypeEnum[key],
-    20,
-    rawData.value[key].lastId,
+    pageSize,
+    rawData[key].lastId,
   );
   await showLoading.update(`数量：${getData.list.length}，是否最后一页：${getData.is_last}`);
-  rawData.value[key].lastId = rawData.value[key].lastId + getData.list.length;
-  rawData.value[key].isLast = getData.is_last;
-  postData.value[key] = postData.value[key].concat(getData.list);
-  triggerRef(postData);
-  triggerRef(rawData);
-  if (rawData.value[key].isLast) {
+  rawData[key].lastId = rawData[key].lastId + getData.list.length;
+  rawData[key].isLast = getData.is_last;
+  postData[key] = postData[key].concat(getData.list);
+  if (rawData[key].isLast) {
     await showLoading.end();
     showSnackbar.warn("已经是最后一页了");
     loading.value = false;

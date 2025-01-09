@@ -61,7 +61,8 @@
   </div>
   <div class="posts-load-more">
     <v-btn class="post-forum-btn" :rounded="true" @click="loadMore()">
-      已加载：{{ posts.length }}，加载更多
+      已加载：{{ posts.length }}，
+      {{ postRaw.isLast ? "已加载完毕" : "加载更多" }}
     </v-btn>
   </div>
   <VpOverlaySearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
@@ -81,6 +82,7 @@ import { createPost } from "@/utils/TGWindow.js";
 
 type SortSelect = { text: string; value: number };
 type SortSelectGame = { gid: number; forum: Array<SortSelect>; text: string };
+type PostRaw = { isLast: boolean; lastId: string; total: number };
 
 const sortOrderList: Array<SortSelect> = [
   { text: "最新回复", value: 1 },
@@ -147,11 +149,10 @@ const curGid = ref<number>(2);
 const curSortType = ref<number>(1);
 const curForum = ref<number>(26);
 const curForumLabel = ref<string>("");
-const lastId = ref<string>("");
-const isLast = ref<boolean>(false);
 const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 const firstLoad = ref<boolean>(false);
+const postRaw = shallowRef<PostRaw>({ isLast: false, lastId: "", total: 0 });
 const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
 
 onMounted(async () => {
@@ -221,9 +222,16 @@ function getSortLabel(value: number): string {
 async function getCurrentPosts(
   loadMore: boolean = false,
 ): Promise<TGApp.Plugins.Mys.Forum.FullData> {
+  const mod20 = postRaw.value.total % 20;
+  const pageSize = mod20 === 0 ? 20 : 20 - mod20;
   if (curSortType.value === 3) {
     if (loadMore) {
-      return await Mys.Painter.getHotForumPostList(curForum.value, curGid.value, lastId.value);
+      return await Mys.Painter.getHotForumPostList(
+        curForum.value,
+        curGid.value,
+        postRaw.value.lastId,
+        pageSize,
+      );
     }
     return await Mys.Painter.getHotForumPostList(curForum.value, curGid.value);
   }
@@ -232,7 +240,8 @@ async function getCurrentPosts(
       curForum.value,
       curGid.value,
       curSortType.value,
-      lastId.value,
+      postRaw.value.lastId,
+      pageSize,
     );
   }
   return await Mys.Painter.getRecentForumPostList(curForum.value, curGid.value, curSortType.value);
@@ -250,14 +259,17 @@ async function freshPostData(): Promise<void> {
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
   const postsGet = await getCurrentPosts();
   posts.value = postsGet.list;
-  lastId.value = postsGet.last_id;
-  isLast.value = postsGet.is_last;
+  postRaw.value = {
+    isLast: postsGet.is_last,
+    lastId: postsGet.last_id,
+    total: postsGet.list.length,
+  };
   showSnackbar.success(`刷新成功，共加载 ${postsGet.list.length} 条帖子`);
   await showLoading.end();
 }
 
 async function loadMore(): Promise<void> {
-  if (isLast.value) {
+  if (postRaw.value.isLast) {
     showSnackbar.warn("没有更多帖子了");
     return;
   }
@@ -267,8 +279,11 @@ async function loadMore(): Promise<void> {
     `版块：${curForumLabel.value}，排序：${getSortLabel(curSortType.value)}，数量：${postsGet.list.length}`,
   );
   posts.value = posts.value.concat(postsGet.list);
-  lastId.value = postsGet.last_id;
-  isLast.value = postsGet.is_last;
+  postRaw.value = {
+    isLast: postsGet.is_last,
+    lastId: postsGet.last_id,
+    total: postRaw.value.total + postsGet.list.length,
+  };
   showSnackbar.success(`加载成功，共加载 ${postsGet.list.length} 条帖子`);
   await showLoading.end();
 }

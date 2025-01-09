@@ -52,7 +52,8 @@
   </div>
   <div class="load-more">
     <v-btn class="post-topic-btn" @click="freshPostData()">
-      已加载：{{ posts.length }}，加载更多
+      已加载：{{ posts.length }}，
+      {{ postRaw.isLast ? "已加载完毕" : "加载更多" }}
     </v-btn>
   </div>
   <VpOverlaySearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
@@ -70,14 +71,14 @@ import { useRoute } from "vue-router";
 import { createPost } from "@/utils/TGWindow.js";
 
 type SortSelect = { text: string; value: number };
+type PostMiniData = { isLast: boolean; lastId: string; total: number };
 
 const { gid, topic } = <{ gid: string; topic: string }>useRoute().params;
 const showSearch = ref<boolean>(false);
 const curGid = ref<number>(Number(gid));
 const curSortType = ref<0 | 1 | 2>(0);
 const search = ref<string>("");
-const lastPostId = ref<string>();
-const isLastPage = ref<boolean>(false);
+const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 });
 const topicInfo = shallowRef<TGApp.Plugins.Mys.Topic.InfoData>();
 const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
 const curGame = shallowRef<TGApp.Plugins.Mys.Topic.GameInfo>();
@@ -134,24 +135,30 @@ async function firstLoad(): Promise<void> {
     return;
   }
   await showLoading.update(`数量：${postList.posts.length}，是否最后一页：${postList.is_last}`);
-  isLastPage.value = postList.is_last;
-  lastPostId.value = postList.last_id;
+  postRaw.value = {
+    isLast: postList.is_last,
+    lastId: postList.last_id,
+    total: postList.posts.length,
+  };
   posts.value = postList.posts;
   await showLoading.end();
   showSnackbar.success(`加载了 ${postList.posts.length} 条帖子`);
 }
 
 async function freshPostData(): Promise<void> {
-  if (isLastPage.value) {
+  if (postRaw.value.isLast) {
     showSnackbar.warn("已经到底了");
     return;
   }
   await showLoading.start(`正在刷新${topicInfo.value?.topic.name}帖子列表`);
+  const mod20 = postRaw.value.total % 20;
+  const pageSize = mod20 === 0 ? 20 : 20 - mod20;
   const postList = await Mys.Post.getTopicPostList(
     curGid.value,
     topic,
     curSortType.value,
-    lastPostId.value,
+    postRaw.value.lastId,
+    pageSize,
   );
   if ("retcode" in postList) {
     await showLoading.end();
@@ -159,8 +166,11 @@ async function freshPostData(): Promise<void> {
     return;
   }
   await showLoading.update(`数量：${postList.posts.length}，是否最后一页：${postList.is_last}`);
-  isLastPage.value = postList.is_last;
-  lastPostId.value = postList.last_id;
+  postRaw.value = {
+    isLast: postList.is_last,
+    lastId: postList.last_id,
+    total: postRaw.value.total + postList.posts.length,
+  };
   posts.value = posts.value.concat(postList.posts);
   await showLoading.end();
   showSnackbar.success(`加载了 ${postList.posts.length} 条帖子`);
