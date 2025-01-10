@@ -32,7 +32,7 @@ import Bili from "@Bili/index.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { onMounted, onUnmounted, ref, shallowRef } from "vue";
 
-import { getImageBuffer } from "@/utils/TGShare.js";
+import { saveImgLocal } from "@/utils/TGShare.js";
 import { getVideoDuration, timestampToDate } from "@/utils/toolFunc.js";
 
 type TpVideo = { insert: { video: string } };
@@ -42,7 +42,6 @@ const props = defineProps<TpVideoProps>();
 const videoAspectRatio = ref<number>(16 / 9);
 const videoCover = ref<string>();
 const videoData = shallowRef<TGApp.Plugins.Bili.Video.ViewData>();
-const coverBuffer = shallowRef<Uint8Array | null>(null);
 
 console.log("tpVideo", props.data.insert.video);
 
@@ -58,8 +57,7 @@ onMounted(async () => {
   const meta = videoData.value.dimension;
   if (meta.width > meta.height) videoAspectRatio.value = meta.width / meta.height;
   else videoAspectRatio.value = meta.height / meta.width;
-  coverBuffer.value = await getImageBuffer(videoData.value.pic);
-  videoCover.value = URL.createObjectURL(new Blob([coverBuffer.value], { type: "image/png" }));
+  videoCover.value = await saveImgLocal(videoData.value.pic);
 });
 
 onUnmounted(() => {

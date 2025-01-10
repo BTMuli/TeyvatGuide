@@ -2,7 +2,7 @@
   <div class="tp-image-box" @click="showOverlay = true" v-if="localUrl !== undefined">
     <img :src="localUrl" :alt="props.data.insert.image" :title="getImageTitle()" />
   </div>
-  <div v-else class="tp-image-load" :title="getImageUrl()">
+  <div v-else class="tp-image-load" :title="props.data.insert.image">
     <v-progress-circular :indeterminate="true" color="primary" size="small" />
     <span>加载中...</span>
   </div>
@@ -13,6 +13,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import VpOverlayImage from "./vp-overlay-image.vue";
 
+import { useAppStore } from "@/store/modules/app.js";
 import { saveImgLocal } from "@/utils/TGShare.js";
 import { bytesToSize } from "@/utils/toolFunc.js";
 
@@ -28,6 +29,7 @@ export type TpImage = {
 };
 type TpImageProps = { data: TpImage };
 
+const appStore = useAppStore();
 const props = defineProps<TpImageProps>();
 const showOverlay = ref<boolean>(false);
 const localUrl = ref<string>();
@@ -41,7 +43,7 @@ const imgWidth = computed<string>(() => {
 console.log("tp-image", props.data.insert.image, props.data.attributes);
 
 onMounted(async () => {
-  const link = getImageUrl();
+  const link = appStore.getImageUrl(props.data.insert.image);
   localUrl.value = await saveImgLocal(link);
 });
 
@@ -62,13 +64,6 @@ function getImageTitle(): string {
     res.push(`格式：${props.data.attributes.ext}`);
   }
   return res.join("\n");
-}
-
-function getImageUrl(): string {
-  const img = props.data.insert.image;
-  const append = "?x-oss-process=image/format,png";
-  if (img.endsWith(".gif")) return img;
-  return img + append;
 }
 </script>
 <style lang="css" scoped>

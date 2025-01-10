@@ -2,7 +2,7 @@
   <div class="config-box">
     <TcInfo />
     <v-list class="config-list">
-      <v-list-subheader :inset="true" class="config-header" title="设置" />
+      <v-list-subheader :inset="true" class="config-header" title="数据相关" />
       <v-divider :inset="true" class="border-opacity-75" />
       <v-list-item title="数据备份" @click="confirmBackup()">
         <template #prepend>
@@ -22,6 +22,43 @@
         <template #prepend>
           <div class="config-icon">
             <v-icon>mdi-database-arrow-up</v-icon>
+          </div>
+        </template>
+      </v-list-item>
+      <v-list-item>
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-refresh</v-icon>
+          </div>
+        </template>
+        <v-list-item-title @click="confirmUpdateDevice()">刷新设备信息</v-list-item-title>
+        <v-list-item-subtitle>
+          <!-- @ts-expect-error eslint-disable-next-line Deprecated symbol used -->
+          {{ deviceInfo.device_name }}({{ deviceInfo.product }}) - {{ deviceInfo.device_fp }}
+        </v-list-item-subtitle>
+        <template #append>
+          <v-icon @click="confirmUpdateDevice(true)">mdi-bug</v-icon>
+        </template>
+      </v-list-item>
+      <v-list-item title="清除缓存" @click="confirmDelCache">
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-database-remove</v-icon>
+          </div>
+        </template>
+        <template #append>{{ bytesToSize(cacheSize) }}</template>
+      </v-list-item>
+      <v-list-item v-show="showReset" title="重置数据库" @click="confirmResetDB()">
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-database-settings</v-icon>
+          </div>
+        </template>
+      </v-list-item>
+      <v-list-item title="恢复默认设置" @click="confirmResetApp">
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-cog-sync</v-icon>
           </div>
         </template>
       </v-list-item>
@@ -70,41 +107,15 @@
           <v-icon @click="confirmShare()">mdi-cog</v-icon>
         </template>
       </v-list-item>
-      <v-list-item>
+      <v-list-item title="图片质量调整">
+        <template #subtitle>当前图像质量：{{ imageQualityPercent }}%</template>
         <template #prepend>
           <div class="config-icon">
-            <v-icon>mdi-refresh</v-icon>
+            <v-icon>mdi-image-filter-vintage</v-icon>
           </div>
         </template>
-        <v-list-item-title @click="confirmUpdateDevice()">刷新设备信息</v-list-item-title>
-        <v-list-item-subtitle>
-          <!-- @ts-expect-error eslint-disable-next-line Deprecated symbol used -->
-          {{ deviceInfo.device_name }}({{ deviceInfo.product }}) - {{ deviceInfo.device_fp }}
-        </v-list-item-subtitle>
         <template #append>
-          <v-icon @click="confirmUpdateDevice(true)">mdi-bug</v-icon>
-        </template>
-      </v-list-item>
-      <v-list-item title="清除缓存" @click="confirmDelCache">
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-database-remove</v-icon>
-          </div>
-        </template>
-        <template #append>{{ bytesToSize(cacheSize) }}</template>
-      </v-list-item>
-      <v-list-item v-show="showReset" title="重置数据库" @click="confirmResetDB()">
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-database-settings</v-icon>
-          </div>
-        </template>
-      </v-list-item>
-      <v-list-item title="恢复默认设置" @click="confirmResetApp">
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-cog-sync</v-icon>
-          </div>
+          <v-icon @click="confirmImgQuality()">mdi-cog</v-icon>
         </template>
       </v-list-item>
     </v-list>
@@ -143,8 +154,15 @@ import TGLogger from "@/utils/TGLogger.js";
 import { bytesToSize, getCacheDir, getDeviceInfo, getRandomString } from "@/utils/toolFunc.js";
 import OtherApi from "@/web/request/otherReq.js";
 
-const { needResize, devMode, deviceInfo, shareDefaultFile, userDir, buildTime } =
-  storeToRefs(useAppStore());
+const {
+  needResize,
+  devMode,
+  deviceInfo,
+  shareDefaultFile,
+  userDir,
+  buildTime,
+  imageQualityPercent,
+} = storeToRefs(useAppStore());
 const appStore = useAppStore();
 const homeStore = useHomeStore();
 
@@ -279,6 +297,42 @@ async function confirmShare(): Promise<void> {
   }
   shareDefaultFile.value = Number(input);
   showSnackbar.success(`成功修改分享设置!新阈值为${input}MB`);
+}
+
+// 图片质量调整
+async function confirmImgQuality(): Promise<void> {
+  const input = await showDialog.input(
+    "请输入图片质量(1-100)",
+    "质量：",
+    imageQualityPercent.value.toString(),
+  );
+  if (input === undefined) {
+    showSnackbar.cancel("已取消修改图片质量");
+    return;
+  }
+  if (input === "") {
+    showSnackbar.error("质量不能为空!");
+    return;
+  }
+  if (isNaN(Number(input))) {
+    showSnackbar.error("质量必须为数字!");
+    return;
+  }
+  if (Number(input) === imageQualityPercent.value) {
+    showSnackbar.cancel("未修改图片质量");
+    return;
+  }
+  if (Number(input) > 100 || Number(input) < 1) {
+    showSnackbar.error("质量必须在1-100之间!");
+    return;
+  }
+  const check = await showDialog.check("确认修改图片质量吗？", `新质量为${input}`);
+  if (!check) {
+    showSnackbar.cancel("已取消修改图片质量");
+    return;
+  }
+  imageQualityPercent.value = Number(input);
+  showSnackbar.success(`成功修改图片质量!新质量为${input}`);
 }
 
 // 更新设备信息

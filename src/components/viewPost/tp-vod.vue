@@ -23,9 +23,10 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import Artplayer from "artplayer";
 import type { Option } from "artplayer/types/option.js";
-import { onMounted, ref, shallowRef, toRaw } from "vue";
+import { onMounted, onUnmounted, ref, shallowRef, toRaw } from "vue";
 
-import { getImageBuffer, saveCanvasImg } from "@/utils/TGShare.js";
+import { useAppStore } from "@/store/modules/app.js";
+import { getImageBuffer, saveCanvasImg, saveImgLocal } from "@/utils/TGShare.js";
 import { getVideoDuration } from "@/utils/toolFunc.js";
 
 type TpVod = {
@@ -52,10 +53,12 @@ type TpVod = {
 };
 type TpVodProps = { data: TpVod };
 
+const appStore = useAppStore();
 const props = defineProps<TpVodProps>();
-const container = shallowRef<Artplayer | null>(null);
+const coverUrl = ref<string>();
 const vodAspectRatio = ref<number>(16 / 9);
 const coverBuffer = shallowRef<Uint8Array | null>(null);
+const container = shallowRef<Artplayer | null>(null);
 
 console.log("tpVod", props.data.insert.vod.id, toRaw(props.data).insert.vod);
 
@@ -70,6 +73,8 @@ onMounted(async () => {
     if (width > height) vodAspectRatio.value = width / height;
     else vodAspectRatio.value = height / width;
   }
+  const localUrl = appStore.getImageUrl(props.data.insert.vod.cover);
+  coverUrl.value = await saveImgLocal(localUrl);
   const option: Option = {
     id: props.data.insert.vod.id,
     container: `#tp-vod-${props.data.insert.vod.id}`,
@@ -115,6 +120,16 @@ onMounted(async () => {
   };
   container.value = new Artplayer(option);
   container.value?.on("fullscreen", async (s) => await getCurrentWindow().setFullscreen(s));
+});
+
+onUnmounted(() => {
+  container.value?.destroy();
+  if (coverBuffer.value) {
+    coverBuffer.value = null;
+  }
+  if (coverUrl.value) {
+    URL.revokeObjectURL(coverUrl.value);
+  }
 });
 </script>
 <style lang="css" scoped>

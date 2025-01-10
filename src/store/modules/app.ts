@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.6.4
+ * @since Beta v0.6.8
  */
 
 import { path } from "@tauri-apps/api";
@@ -59,6 +59,8 @@ export const useAppStore = defineStore(
     const needResize = ref<string>("true");
     // 分享图生成默认设置，为0表示默认保存到文件，为数字表示当大小超过xMB时保存到文件，否则保存到剪贴板
     const shareDefaultFile = ref<number>(10);
+    // 图像压缩质量
+    const imageQualityPercent = ref<number>(80);
 
     // 初始化
     function init(): void {
@@ -72,6 +74,7 @@ export const useAppStore = defineStore(
       needResize.value = "true";
       gameDir.value = "未设置";
       shareDefaultFile.value = 10;
+      imageQualityPercent.value = 10;
       initDevice();
     }
 
@@ -82,6 +85,11 @@ export const useAppStore = defineStore(
 
     function initDevice(): void {
       deviceInfo.value = getInitDeviceInfo();
+    }
+
+    function getImageUrl(url: string): string {
+      if (url.endsWith(".gif")) return url;
+      return `${url}?x-oss-process=image/format,jpg/quality,Q_${imageQualityPercent.value}`;
     }
 
     return {
@@ -100,8 +108,10 @@ export const useAppStore = defineStore(
       needResize,
       gameDir,
       shareDefaultFile,
+      imageQualityPercent,
       init,
       changeTheme,
+      getImageUrl,
     };
   },
   {
@@ -114,7 +124,15 @@ export const useAppStore = defineStore(
       {
         key: "app",
         storage: window.localStorage,
-        pick: ["devMode", "loading", "buildTime", "isLogin", "needResize", "shareDefaultFile"],
+        pick: [
+          "devMode",
+          "loading",
+          "buildTime",
+          "isLogin",
+          "needResize",
+          "shareDefaultFile",
+          "imageQualityPercent",
+        ],
       },
       {
         key: "sidebar",

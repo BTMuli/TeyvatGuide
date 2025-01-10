@@ -25,7 +25,7 @@ type GroTableProps = { modelValue: Array<TGApp.Sqlite.GachaRecords.SingleTable> 
 
 const props = defineProps<GroTableProps>();
 
-const headers = [
+const headers = <const>[
   { title: "时间", align: "center", key: "time" },
   { title: "卡池", align: "center", key: "uigfType" },
   { title: "类型", align: "center", key: "type" },
