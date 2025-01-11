@@ -6,7 +6,7 @@
       :id="`tp-vod-${props.data.insert.vod.id}`"
     ></div>
     <div class="tp-vod-share">
-      <img alt="cover" :src="props.data.insert.vod.cover" class="tp-vod-cover" />
+      <img alt="cover" :src="coverUrl" class="tp-vod-cover" />
       <img src="/source/UI/video_play.svg" alt="icon" class="tp-vod-icon" />
       <div class="tp-vod-time">
         <v-icon size="12">mdi-clock-time-four-outline</v-icon>
@@ -20,6 +20,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showLoading from "@comp/func/loading.js";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import Artplayer from "artplayer";
 import type { Option } from "artplayer/types/option.js";
@@ -79,7 +80,7 @@ onMounted(async () => {
     id: props.data.insert.vod.id,
     container: `#tp-vod-${props.data.insert.vod.id}`,
     url: highestResolution.url,
-    poster: props.data.insert.vod.cover,
+    poster: coverUrl.value,
     type: highestResolution.format,
     playbackRate: true,
     aspectRatio: true,
@@ -110,10 +111,12 @@ onMounted(async () => {
         html: `<i class="mdi mdi-download"></i>`,
         tooltip: "下载封面",
         click: async () => {
+          await showLoading.start("正在下载封面");
           if (!coverBuffer.value) {
             coverBuffer.value = await getImageBuffer(props.data.insert.vod.cover);
           }
           await saveCanvasImg(coverBuffer.value, `vod-cover-${props.data.insert.vod.id}`);
+          await showLoading.end();
         },
       },
     ],

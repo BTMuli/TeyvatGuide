@@ -24,6 +24,7 @@
 </template>
 <script setup lang="ts">
 import TOverlay from "@comp/app/t-overlay.vue";
+import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
 
@@ -70,23 +71,25 @@ async function onCopy(): Promise<void> {
     showSnackbar.warn("GIF 图片不支持复制到剪贴板");
     return;
   }
+  await showLoading.start("正在复制图片到剪贴板");
   const image = props.image.insert.image;
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
   const size = bytesToSize(buffer.value.byteLength);
   await copyToClipboard(buffer.value);
+  await showLoading.end();
   showSnackbar.success(`图片已复制到剪贴板，大小：${size}`);
 }
 
 async function onDownload(): Promise<void> {
+  await showLoading.start("正在下载图片到本地");
   const image = props.image.insert.image;
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
-  const size = bytesToSize(buffer.value.byteLength);
   if (buffer.value.byteLength > 80000000) {
     showSnackbar.warn("图片过大，无法下载到本地");
     return;
   }
   await saveCanvasImg(buffer.value, Date.now().toString(), format.value);
-  showSnackbar.success(`图片已下载到本地，大小：${size}`);
+  await showLoading.end();
 }
 </script>
 <style lang="css" scoped>
