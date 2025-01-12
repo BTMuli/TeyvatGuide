@@ -2,7 +2,7 @@
   <TOverlay v-model="visible" blur-val="10px">
     <div class="tpoi-box">
       <div :class="{ 'tpoi-top-ori': isOriSize, 'tpoi-top': !isOriSize }">
-        <img :src="localCover" alt="图片" @click="isOriSize = !isOriSize" v-if="localCover" />
+        <img :src="localLink" alt="图片" @click="isOriSize = !isOriSize" />
       </div>
       <div class="tpoi-bottom">
         <div class="tpoi-info" v-if="props.image.attributes">
@@ -13,7 +13,10 @@
           <p>格式：{{ format }}</p>
         </div>
         <div class="tpoi-tools">
-          <v-icon @click="setBlackBg" title="切换背景色">mdi-format-color-fill</v-icon>
+          <v-icon @click="setBlackBg" title="切换背景色" v-if="showOri">
+            mdi-format-color-fill
+          </v-icon>
+          <v-icon @click="showOri = true" title="查看原图" v-else>mdi-magnify</v-icon>
           <v-icon @click="onCopy" title="复制到剪贴板">mdi-content-copy</v-icon>
           <v-icon @click="onDownload" title="下载到本地">mdi-download</v-icon>
           <v-icon @click="visible = false" title="关闭浮窗">mdi-close</v-icon>
@@ -26,38 +29,27 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
+import { computed, ref, shallowRef } from "vue";
 
 import type { TpImage } from "./tp-image.vue";
 
-import { useAppStore } from "@/store/modules/app.js";
-import { copyToClipboard, getImageBuffer, saveCanvasImg, saveImgLocal } from "@/utils/TGShare.js";
+import { copyToClipboard, getImageBuffer, saveCanvasImg } from "@/utils/TGShare.js";
 import { bytesToSize } from "@/utils/toolFunc.js";
 
 type TpoImageProps = { image: TpImage };
 
-const appStore = useAppStore();
 const props = defineProps<TpoImageProps>();
 const visible = defineModel<boolean>();
+const localLink = defineModel<string>("link");
+const showOri = defineModel<boolean>("ori");
 const bgMode = ref<number>(0); // 0: transparent, 1: black, 2: white
 const isOriSize = ref<boolean>(false);
-const localCover = ref<string>();
 const buffer = shallowRef<Uint8Array | null>(null);
 const format = computed<string>(() => {
   if (props.image.attributes?.ext) return props.image.attributes.ext;
   const imageFormat = props.image.insert.image.split(".").pop();
   if (imageFormat !== undefined) return imageFormat;
   return "png";
-});
-
-onMounted(async () => {
-  const link = appStore.getImageUrl(props.image.insert.image);
-  localCover.value = await saveImgLocal(link);
-});
-
-onUnmounted(() => {
-  if (localCover.value) URL.revokeObjectURL(localCover.value);
-  buffer.value = null;
 });
 
 function setBlackBg(): void {

@@ -1,15 +1,30 @@
 <template>
   <div class="tp-image-box" @click="showOverlay = true" v-if="localUrl !== undefined">
     <img :src="localUrl" :alt="props.data.insert.image" :title="getImageTitle()" />
+    <div
+      class="act"
+      @click.stop="showOri = true"
+      title="查看原图"
+      v-if="!showOri"
+      data-html2canvas-ignore
+    >
+      <v-icon size="16" color="white">mdi-magnify</v-icon>
+    </div>
   </div>
   <div v-else class="tp-image-load" :title="props.data.insert.image">
     <v-progress-circular :indeterminate="true" color="primary" size="small" />
     <span>加载中...</span>
   </div>
-  <VpOverlayImage :image="props.data" v-model="showOverlay" />
+  <VpOverlayImage
+    :image="props.data"
+    v-model="showOverlay"
+    v-model:link="localUrl"
+    v-model:ori="showOri"
+  />
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import showLoading from "@comp/func/loading.js";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import VpOverlayImage from "./vp-overlay-image.vue";
 
@@ -32,6 +47,7 @@ type TpImageProps = { data: TpImage };
 const appStore = useAppStore();
 const props = defineProps<TpImageProps>();
 const showOverlay = ref<boolean>(false);
+const showOri = ref<boolean>(props.data.insert.image.endsWith(".gif"));
 const localUrl = ref<string>();
 
 const imgWidth = computed<string>(() => {
@@ -46,6 +62,17 @@ onMounted(async () => {
   const link = appStore.getImageUrl(props.data.insert.image);
   localUrl.value = await saveImgLocal(link);
 });
+
+watch(
+  () => showOri.value,
+  async () => {
+    if (!showOri.value) return;
+    await showLoading.start("加载中...");
+    if (localUrl.value) URL.revokeObjectURL(localUrl.value);
+    localUrl.value = await saveImgLocal(props.data.insert.image);
+    await showLoading.end();
+  },
+);
 
 onUnmounted(() => {
   if (localUrl.value) URL.revokeObjectURL(localUrl.value);
@@ -68,6 +95,7 @@ function getImageTitle(): string {
 </script>
 <style lang="css" scoped>
 .tp-image-box {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,5 +116,21 @@ function getImageTitle(): string {
   justify-content: center;
   margin: 10px auto;
   column-gap: 5px;
+}
+
+.act {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  display: flex;
+  width: 25px;
+  height: 25px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--tgc-od-white);
+  box-shadow: 0 0 5px rgb(0 0 0 / 50%);
+  cursor: pointer;
 }
 </style>
