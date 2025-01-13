@@ -1,6 +1,6 @@
 <template>
   <div class="gro-echart">
-    <v-chart :option="getPoolData()" autoresize />
+    <v-chart :option="getPoolData()" autoresize :theme="echartsTheme" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -20,8 +20,11 @@ import { LabelLayout } from "echarts/features.js";
 // @ts-expect-error no-exported-member
 import { CanvasRenderer } from "echarts/renderers.js";
 import type { EChartsOption } from "echarts/types/dist/shared.js";
-import { provide } from "vue";
-import VChart, { THEME_KEY } from "vue-echarts";
+import { storeToRefs } from "pinia";
+import { computed } from "vue";
+import VChart from "vue-echarts";
+
+import { useAppStore } from "@/store/modules/app.js";
 
 // echarts
 use([
@@ -33,14 +36,14 @@ use([
   CanvasRenderer,
   LabelLayout,
 ]);
-// 获取当前主题
-provide(THEME_KEY, "dark");
 
 interface GachaOverviewEchartsProps {
   modelValue: TGApp.Sqlite.GachaRecords.SingleTable[];
 }
 
 const props = defineProps<GachaOverviewEchartsProps>();
+const { theme } = storeToRefs(useAppStore());
+const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
 // data
 const defaultOptions = <EChartsOption>{
