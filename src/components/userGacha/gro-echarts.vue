@@ -1,17 +1,42 @@
 <template>
-  <div class="gro-echart">
-    <v-chart :option="getPoolData()" autoresize :theme="echartsTheme" />
+  <div class="gro-chart">
+    <div class="gro-chart-options">
+      <v-select
+        class="gro-chart-select"
+        v-model="curChartType"
+        :items="chartTypes"
+        item-title="label"
+        item-value="value"
+        label="选择图表"
+        density="compact"
+        outlined
+        hide-details
+        width="200px"
+      />
+    </div>
+    <v-chart
+      :option="chartOptions"
+      autoresize
+      :theme="echartsTheme"
+      :init-options="{ locale: 'ZH' }"
+      v-if="chartOptions"
+    />
   </div>
 </template>
 <script lang="ts" setup>
 // about import err,see:https://github.com/apache/echarts/issues/19992
+import showLoading from "@comp/func/loading.js";
 // @ts-expect-error no-exported-member
-import { PieChart } from "echarts/charts.js";
+import { BarChart, HeatmapChart, PieChart } from "echarts/charts.js";
 import {
+  CalendarComponent,
+  DataZoomComponent,
+  GridComponent,
   LegendComponent,
   TitleComponent,
   ToolboxComponent,
   TooltipComponent,
+  VisualMapComponent,
 } from "echarts/components.js";
 // @ts-expect-error no-exported-member
 import { use } from "echarts/core.js";
@@ -21,223 +46,96 @@ import { LabelLayout } from "echarts/features.js";
 import { CanvasRenderer } from "echarts/renderers.js";
 import type { EChartsOption } from "echarts/types/dist/shared.js";
 import { storeToRefs } from "pinia";
-import { computed } from "vue";
+import { computed, ref, shallowRef, watch } from "vue";
 import VChart from "vue-echarts";
 
 import { useAppStore } from "@/store/modules/app.js";
+import TGachaCharts from "@/utils/gachaCharts.js";
 
 // echarts
 use([
-  TitleComponent,
-  TooltipComponent,
-  ToolboxComponent,
-  LegendComponent,
-  PieChart,
-  CanvasRenderer,
   LabelLayout,
+  CanvasRenderer,
+
+  BarChart,
+  HeatmapChart,
+  PieChart,
+
+  CalendarComponent,
+  DataZoomComponent,
+  GridComponent,
+  LegendComponent,
+  TitleComponent,
+  ToolboxComponent,
+  TooltipComponent,
+  VisualMapComponent,
 ]);
 
-interface GachaOverviewEchartsProps {
-  modelValue: TGApp.Sqlite.GachaRecords.SingleTable[];
-}
+type GachaOverviewEchartsProps = { uid: string; gachaType?: string };
+type ChartsType = "overview" | "calendar" | "stackBar";
+type ChartItem = { label: string; value: ChartsType };
 
 const props = defineProps<GachaOverviewEchartsProps>();
 const { theme } = storeToRefs(useAppStore());
+const chartTypes: Array<ChartItem> = [
+  { label: "祈愿分析", value: "overview" },
+  { label: "祈愿日历", value: "calendar" },
+  { label: "祈愿柱状图", value: "stackBar" },
+];
+
+const curChartType = ref<ChartsType>("overview");
+const chartOptions = shallowRef<EChartsOption>();
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
-// data
-const defaultOptions = <EChartsOption>{
-  title: [
-    {
-      text: ">> 祈愿系统大数据分析 <<",
-      left: "center",
-      top: "5%",
-    },
-    {
-      text: "卡池分布",
-      left: "17%",
-      top: "45%",
-    },
-    {
-      text: "星级分布",
-      left: "17%",
-      top: "90%",
-    },
-    {
-      text: "角色池分布",
-      left: "45%",
-      bottom: "10%",
-    },
-    {
-      text: "武器池分布",
-      right: "5%",
-      bottom: "10%",
-    },
-  ],
-  tooltip: { trigger: "item" },
-  legend: {
-    type: "scroll",
-    orient: "vertical",
-    left: 10,
-    top: 20,
-    bottom: 20,
+watch(
+  () => curChartType.value,
+  () => {
+    getOptions();
   },
-  toolbox: {
-    show: true,
-    feature: {
-      restore: {},
-      saveAsImage: {},
-    },
-  },
-  series: [
-    {
-      name: "卡池分布",
-      type: "pie",
-      radius: "50%",
-      data: [],
-      emphasis: {
-        itemStyle: {
-          shadowBlur: 10,
-          shadowOffsetX: 0,
-          shadowColor: "rgba(0, 0, 0, 0.5)",
-        },
-      },
-      right: "60%",
-      top: 0,
-      bottom: "50%",
-    },
-    {
-      name: "星级分布",
-      type: "pie",
-      radius: "50%",
-      data: [],
-      right: "60%",
-      top: "50%",
-      bottom: "0",
-    },
-    {
-      name: "角色池分布",
-      type: "pie",
-      radius: [30, 150],
-      center: ["50%", "50%"],
-      roseType: "area",
-      itemStyle: {
-        borderRadius: [2, 10],
-      },
-      data: [],
-      datasetIndex: 3,
-    },
-    {
-      name: "武器池分布",
-      type: "pie",
-      radius: [30, 100],
-      itemStyle: {
-        borderRadius: [3, 10],
-      },
-      data: [],
-      left: "70%",
-    },
-  ],
-};
+  { immediate: true },
+);
 
-// 获取卡池分布的数据
-// todo 重构以完善类型
-function getPoolData(): EChartsOption {
-  const data: EChartsOption = JSON.parse(JSON.stringify(defaultOptions));
-  if (data.title !== undefined && Array.isArray(data.title)) {
-    data.title[0].subtext = `共 ${props.modelValue.length} 条数据`;
+async function getOptions(): Promise<void> {
+  await showLoading.start("加载中...");
+  switch (curChartType.value) {
+    case "overview":
+      chartOptions.value = await TGachaCharts.overview(props.uid);
+      break;
+    case "calendar":
+      chartOptions.value = await TGachaCharts.calendar(props.uid, props.gachaType);
+      break;
+    case "stackBar":
+      chartOptions.value = await TGachaCharts.stackBar(props.uid, props.gachaType);
+      break;
   }
-  if (data.series !== undefined && Array.isArray(data.series)) {
-    data.series[0].data = [
-      {
-        value: props.modelValue.filter((item) => item.uigfType === "100").length,
-        name: "新手祈愿",
-      },
-      {
-        value: props.modelValue.filter((item) => item.uigfType === "200").length,
-        name: "常驻祈愿",
-      },
-      {
-        value: props.modelValue.filter((item) => item.uigfType === "301").length,
-        name: "角色活动祈愿",
-      },
-      {
-        value: props.modelValue.filter((item) => item.uigfType === "302").length,
-        name: "武器活动祈愿",
-      },
-      {
-        value: props.modelValue.filter((item) => item.uigfType === "500").length,
-        name: "集录祈愿",
-      },
-    ];
-    data.series[1].data = [
-      { value: props.modelValue.filter((item) => item.rank === "3").length, name: "3星" },
-      { value: props.modelValue.filter((item) => item.rank === "4").length, name: "4星" },
-      { value: props.modelValue.filter((item) => item.rank === "5").length, name: "5星" },
-    ];
-  }
-
-  const tempSet = new Set<string>();
-  const tempRecord = new Map<string, number>();
-  // 角色池分析
-  let tempList = props.modelValue.filter((item) => item.uigfType === "301");
-  let star3 = tempList.filter((item) => item.rank === "3").length;
-  if (data.title !== undefined && Array.isArray(data.title)) {
-    data.title[3].subtext = `共 ${tempList.length} 条数据, 其中三星武器 ${star3} 抽`;
-  }
-  tempList
-    .filter((item) => item.rank !== "3")
-    .forEach((item) => {
-      if (tempSet.has(item.name)) {
-        tempRecord.set(item.name, (tempRecord.get(item.name) ?? 0) + 1);
-      } else {
-        tempSet.add(item.name);
-        tempRecord.set(item.name, 1);
-      }
-    });
-  if (data.series !== undefined && Array.isArray(data.series)) {
-    data.series[2].data = Array.from(tempRecord).map((item) => {
-      return {
-        value: item[1],
-        name: item[0],
-      };
-    });
-  }
-  tempSet.clear();
-  tempRecord.clear();
-  // 武器池分析
-  tempList = props.modelValue.filter((item) => item.uigfType === "302");
-  star3 = tempList.filter((item) => item.rank === "3").length;
-  if (data.title !== undefined && Array.isArray(data.title)) {
-    data.title[4].subtext = `共 ${tempList.length} 条数据，其中三星武器 ${star3} 抽`;
-  }
-  tempList
-    .filter((item) => item.rank !== "3")
-    .forEach((item) => {
-      if (tempSet.has(item.name)) {
-        tempRecord.set(item.name, (tempRecord.get(item.name) ?? 0) + 1);
-      } else {
-        tempSet.add(item.name);
-        tempRecord.set(item.name, 1);
-      }
-    });
-  if (data.series !== undefined && Array.isArray(data.series)) {
-    data.series[3].data = Array.from(tempRecord).map((item) => {
-      return {
-        value: item[1],
-        name: item[0],
-      };
-    });
-  }
-  return data;
+  await showLoading.end();
 }
 </script>
 <style lang="css" scoped>
-.gro-echart {
+.gro-chart {
+  position: relative;
   display: flex;
   width: 100%;
   height: 100%;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.gro-chart-options {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: auto;
+  gap: 10px;
+}
+
+.gro-chart-select {
+  width: 150px;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
 }
 </style>

@@ -35,7 +35,7 @@
         <gro-overview v-model="gachaListCur" />
       </v-window-item>
       <v-window-item value="echarts" class="gacha-window-item">
-        <gro-echarts v-model="gachaListCur" />
+        <gro-echarts :uid="uidCur" v-if="uidCur" />
       </v-window-item>
       <v-window-item value="table" class="gacha-window-item">
         <gro-table v-model="gachaListCur" />

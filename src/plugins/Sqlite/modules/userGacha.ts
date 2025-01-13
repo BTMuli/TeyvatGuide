@@ -25,19 +25,19 @@ function getInsertSql(uid: string, gacha: TGApp.Plugins.UIGF.GachaItem): string 
       INSERT INTO GachaRecords (uid, gachaType, itemId, count, time, name, type, rank, id, uigfType, updated)
       VALUES ('${uid}', '${gacha.gacha_type}', '${gacha.item_id ?? null}', '${gacha.count ?? null}', '${gacha.time}',
               '${gacha.name}', '${gacha.item_type ?? null}', '${gacha.rank_type ?? null}', '${gacha.id}',
-              '${gacha.uigf_gacha_type}', datetime('now', 'localtime'))
-      ON CONFLICT (id)
-          DO UPDATE
-          SET uid       = '${uid}',
-              gachaType = '${gacha.gacha_type}',
-              uigfType  = '${gacha.uigf_gacha_type}',
-              time      = '${gacha.time}',
-              itemId    = '${gacha.item_id ?? null}',
-              count     = '${gacha.count ?? null}',
-              name      = '${gacha.name}',
-              type      = '${gacha.item_type ?? null}',
-              rank      = '${gacha.rank_type ?? null}',
-              updated   = datetime('now', 'localtime');
+              '${gacha.uigf_gacha_type}', datetime('now', 'localtime')) ON CONFLICT (id)
+          DO
+      UPDATE
+          SET uid = '${uid}',
+          gachaType = '${gacha.gacha_type}',
+          uigfType = '${gacha.uigf_gacha_type}',
+          time = '${gacha.time}',
+          itemId = '${gacha.item_id ?? null}',
+          count = '${gacha.count ?? null}',
+          name = '${gacha.name}',
+          type = '${gacha.item_type ?? null}',
+          rank = '${gacha.rank_type ?? null}',
+          updated = datetime('now', 'localtime');
   `;
 }
 
@@ -102,6 +102,40 @@ async function getGachaCheck(uid: string, type: string): Promise<string | undefi
 async function getGachaRecords(uid: string): Promise<TGApp.Sqlite.GachaRecords.SingleTable[]> {
   const db = await TGSqlite.getDB();
   return await db.select("SELECT * FROM GachaRecords WHERE uid = ?;", [uid]);
+}
+
+/**
+ * @description 获取用户祈愿记录，并按照日期进行分组排序
+ * @since Beta v0.6.8
+ * @param {string} uid - UID
+ * @param {string} type - 类型
+ * @return {Promise<Record<string, TGApp.Sqlite.GachaRecords.SingleTable[]>} 日期分组的祈愿记录
+ */
+async function getGachaRecordsGroupByDate(
+  uid: string,
+  type?: string,
+): Promise<Record<string, TGApp.Sqlite.GachaRecords.SingleTable[]>> {
+  const db = await TGSqlite.getDB();
+  type resType = Array<TGApp.Sqlite.GachaRecords.SingleTable>;
+  let res: resType;
+  if (type) {
+    res = await db.select<resType>(
+      "SELECT * FROM GachaRecords WHERE uid = ? AND gachaType = ? ORDER BY time;",
+      [uid, type],
+    );
+  } else {
+    res = await db.select<resType>("SELECT * FROM GachaRecords WHERE uid = ? ORDER BY time;", [
+      uid,
+    ]);
+  }
+  const map: Record<string, TGApp.Sqlite.GachaRecords.SingleTable[]> = {};
+  for (const item of res) {
+    // key 是 yyyy-MM-dd hh:mm:ss，按照日期分组
+    const key = item.time.split(" ")[0];
+    if (!map[key]) map[key] = [];
+    map[key].push(item);
+  }
+  return map;
 }
 
 /**
@@ -236,6 +270,7 @@ const TSUserGacha = {
   getUidList,
   getGachaCheck,
   getGachaRecords,
+  getGachaRecordsGroupByDate,
   deleteGachaRecords,
   cleanGachaRecords,
   mergeUIGF,
