@@ -24,6 +24,7 @@
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
+import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import VpOverlayImage from "./vp-overlay-image.vue";
@@ -45,9 +46,12 @@ export type TpImage = {
 type TpImageProps = { data: TpImage };
 
 const appStore = useAppStore();
+const { imageQualityPercent } = storeToRefs(appStore);
 const props = defineProps<TpImageProps>();
 const showOverlay = ref<boolean>(false);
-const showOri = ref<boolean>(props.data.insert.image.endsWith(".gif"));
+const showOri = ref<boolean>(
+  props.data.insert.image.endsWith(".gif") || imageQualityPercent.value === 100,
+);
 const localUrl = ref<string>();
 
 const imgWidth = computed<string>(() => {
