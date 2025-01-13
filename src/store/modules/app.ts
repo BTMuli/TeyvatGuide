@@ -88,7 +88,7 @@ export const useAppStore = defineStore(
     }
 
     function getImageUrl(url: string): string {
-      if (url.endsWith(".gif")) return url;
+      if (url.endsWith(".gif") || imageQualityPercent.value === 100) return url;
       return `${url}?x-oss-process=image/format,jpg/quality,Q_${imageQualityPercent.value}`;
     }
 
