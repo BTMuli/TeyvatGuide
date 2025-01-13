@@ -30,8 +30,8 @@ const hint = getEndHint();
 function getIcon(): string {
   const find = getWikiBrief(props.data.itemId);
   if (!find) return `/source/UI/paimon.webp`;
-  if (props.data.id.length === 5) return `/WIKI/weapon/${props.data.itemId}.webp`;
-  return `/WIKI/character/${props.data.itemId}.webp`;
+  if ("element" in find) return `/WIKI/character/${props.data.itemId}.webp`;
+  return `/WIKI/weapon/${props.data.itemId}.webp`;
 }
 
 function getEndHint(): string {
