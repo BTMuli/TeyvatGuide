@@ -5,7 +5,7 @@
       <div :title="getAuthorDesc()">{{ getAuthorDesc() }}</div>
     </div>
     <div class="tpa-img">
-      <img :src="props.data.avatar_url" alt="avatar" class="tpa-icon" />
+      <img :src="avatarUrl" alt="avatar" class="tpa-icon" v-if="avatarUrl" />
       <img
         :src="props.data.pendant"
         alt="pendant"
@@ -28,11 +28,26 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+
+import { useAppStore } from "@/store/modules/app.js";
+import { saveImgLocal } from "@/utils/TGShare.js";
 
 type TpAvatarProps = { data: TGApp.Plugins.Mys.User.Post; position: "left" | "right" };
 
 const props = defineProps<TpAvatarProps>();
+const appStore = useAppStore();
+const avatarUrl = ref<string>();
+const pendantUrl = ref<string>();
+
+onMounted(async () => {
+  avatarUrl.value = await saveImgLocal(appStore.getImageUrl(props.data.avatar_url));
+});
+
+onUnmounted(() => {
+  if (avatarUrl.value) URL.revokeObjectURL(avatarUrl.value);
+  if (pendantUrl.value) URL.revokeObjectURL(pendantUrl.value);
+});
 
 function getAuthorDesc(): string {
   if (props.data.certification.label !== "") return props.data.certification.label;

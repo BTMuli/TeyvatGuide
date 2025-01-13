@@ -1,6 +1,10 @@
 <template>
-  <div class="tp-emo-box" title="自定义表情" v-if="localUrl !== undefined">
-    <img :src="localUrl" :alt="props.data.insert.custom_emoticon.hash" />
+  <div class="tp-emo-box" title="自定义表情">
+    <TMiImg
+      :src="props.data.insert.custom_emoticon.url"
+      :alt="props.data.insert.custom_emoticon.hash"
+      :ori="true"
+    />
     <div
       class="tp-emo-info"
       v-if="props.data.insert.custom_emoticon.size.width > 100"
@@ -10,16 +14,13 @@
       自定义表情
     </div>
   </div>
-  <div v-else class="tp-emo-load" :title="getImageUrl()">
-    <v-progress-circular :indeterminate="true" color="primary" size="small" />
-    <span>加载中...</span>
-  </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import { onMounted, onUnmounted, ref, shallowRef } from "vue";
+import { shallowRef } from "vue";
 
-import { getImageBuffer, saveCanvasImg, saveImgLocal } from "@/utils/TGShare.js";
+import { getImageBuffer, saveCanvasImg } from "@/utils/TGShare.js";
 import { bytesToSize } from "@/utils/toolFunc.js";
 
 type TpCustomEmoticon = {
@@ -37,26 +38,9 @@ type TpCustomEmoticon = {
 type TpEmoticonProps = { data: TpCustomEmoticon };
 
 const props = defineProps<TpEmoticonProps>();
-const localUrl = ref<string>();
 const buffer = shallowRef<Uint8Array | null>(null);
 
 console.log("tp-emoticon", props.data.insert.custom_emoticon);
-
-onMounted(async () => {
-  const link = getImageUrl();
-  localUrl.value = await saveImgLocal(link);
-});
-
-onUnmounted(() => {
-  if (localUrl.value) URL.revokeObjectURL(localUrl.value);
-});
-
-function getImageUrl(): string {
-  const img = props.data.insert.custom_emoticon.url;
-  const append = "?x-oss-process=image/format,png";
-  if (img.endsWith(".gif")) return img;
-  return img + append;
-}
 
 async function download(): Promise<void> {
   const image = props.data.insert.custom_emoticon.url;

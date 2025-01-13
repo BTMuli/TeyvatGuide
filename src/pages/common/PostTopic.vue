@@ -2,7 +2,7 @@
   <v-app-bar>
     <template #prepend>
       <div class="post-topic-top" v-if="topicInfo">
-        <img :src="topicInfo.topic.cover" alt="cover" />
+        <TMiImg :src="topicInfo.topic.cover" alt="cover" :ori="true" />
         <div class="post-topic-info">
           <span>{{ topicInfo.topic.name }}({{ topic }})</span>
           <span :title="topicInfo.topic.desc">{{ topicInfo.topic.desc }}</span>
@@ -60,6 +60,7 @@
 </template>
 <script lang="ts" setup>
 import TGameNav from "@comp/app/t-gameNav.vue";
+import TMiImg from "@comp/app/t-mi-img.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";

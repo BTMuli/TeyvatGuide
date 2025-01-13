@@ -1,6 +1,6 @@
 <template>
   <div class="tp-link-card-box">
-    <img :src="cover" alt="cover" @click="toLink()" v-if="cover" />
+    <TMiImg :src="props.data.insert.link_card.cover" alt="cover" @click="toLink()" />
     <div class="tp-link-card-content">
       <span>{{ props.data.insert.link_card.title }}</span>
       <div v-if="props.data.insert.link_card.price" class="tp-link-card-price">
@@ -11,13 +11,12 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import { computed, onMounted, onUnmounted, ref, toRaw } from "vue";
+import { computed, toRaw } from "vue";
 import { useRouter } from "vue-router";
 
-import { useAppStore } from "@/store/modules/app.js";
 import { parseLink, parsePost } from "@/utils/linkParser.js";
-import { saveImgLocal } from "@/utils/TGShare.js";
 
 type TpLinkCard = {
   insert: {
@@ -40,23 +39,12 @@ type TpLinkCardProps = { data: TpLinkCard };
 
 const props = defineProps<TpLinkCardProps>();
 const router = useRouter();
-const appStore = useAppStore();
 
-const cover = ref<string>();
 const btnText = computed<string>(() => {
   if (!props.data.insert.link_card.button_text || props.data.insert.link_card.button_text === "") {
     return "详情";
   }
   return props.data.insert.link_card.button_text;
-});
-
-onMounted(async () => {
-  const coverLink = appStore.getImageUrl(props.data.insert.link_card.cover);
-  cover.value = await saveImgLocal(coverLink);
-});
-
-onUnmounted(() => {
-  if (cover.value) URL.revokeObjectURL(cover.value);
 });
 
 console.log("tpLinkCard", props.data.insert.link_card.card_id, toRaw(props.data).insert.link_card);

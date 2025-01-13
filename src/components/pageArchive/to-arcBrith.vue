@@ -2,11 +2,11 @@
   <TOverlay v-model="visible" blur-val="5px">
     <div class="toab-container" v-if="props.data">
       <div class="toab-img">
-        <img :src="props.data.take_picture[Number(props.choice)]" alt="顶部图像" />
+        <TMiImg :ori="true" :src="props.data.take_picture[Number(props.choice)]" alt="顶部图像" />
         <div class="toab-dialog" v-show="showText">
           <div v-for="(item, index) in textParse" :key="index" class="toab-dialog-item">
             <div class="toab-dialog-item-icon" v-if="item.icon" :title="item.name">
-              <img :src="item.icon" alt="对白头像" />
+              <TMiImg :src="item.icon" alt="对白头像" :ori="true" />
             </div>
             <div v-else-if="item.name !== '未知'" class="toab-dialog-item-name">
               {{ item.name }}
@@ -33,6 +33,7 @@
   </TOverlay>
 </template>
 <script setup lang="ts">
+import TMiImg from "@comp/app/t-mi-img.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { fetch } from "@tauri-apps/plugin-http";

@@ -6,20 +6,21 @@
     </div>
     <div class="tcb-top-active" v-else>
       <span>今天是</span>
-      <img
+      <TMiImg
         v-for="i in cur"
         :key="i.role_id"
         class="tcb-cur"
         :alt="i.name"
         :src="i.head_icon"
         :title="i.name"
+        :ori="true"
       />
       <span>的生日哦~</span>
       <img @click="toBirth(true)" src="/source/UI/act_birthday.png" alt="empty" class="active" />
     </div>
     <div>即将到来：{{ next[0].role_birthday }}</div>
     <div v-for="i in next" :key="i.role_id" class="tcb-item">
-      <img :src="i.head_icon" :alt="i.name" @click="toBirth(i)" :title="i.name" />
+      <TMiImg :src="i.head_icon" :alt="i.name" @click="toBirth(i)" :title="i.name" :ori="true" />
       <div class="tcb-item-info">
         <span>{{ i.name }} 所属：{{ i.belong === "" ? "未知" : i.belong }}</span>
         <span>{{ parseDesc(i.introduce) }}</span>
@@ -28,6 +29,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import TSAvatarBirth from "@Sqlite/modules/avatarBirth.js";
 import { storeToRefs } from "pinia";
 import { onBeforeMount, ref, shallowRef } from "vue";

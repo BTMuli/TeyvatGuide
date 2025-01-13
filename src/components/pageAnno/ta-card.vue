@@ -1,13 +1,7 @@
 <template>
   <div :id="`anno_card_${props.modelValue.id}`" class="anno-card">
     <div class="anno-cover" :title="props.modelValue.title" @click="createAnno">
-      <img :src="localBanner" alt="cover" v-if="localBanner" />
-      <v-progress-circular
-        color="primary"
-        :indeterminate="true"
-        v-else-if="props.modelValue.banner !== ''"
-      />
-      <img src="/source/UI/defaultCover.webp" alt="cover" v-else />
+      <TMiImg :src="props.modelValue.banner" alt="cover" :ori="true" />
       <div class="anno-info">
         <div class="anno-time">
           <v-icon>mdi-clock-time-four-outline</v-icon>
@@ -19,55 +13,22 @@
       {{ parseTitle(props.modelValue.subtitle) }}
     </div>
     <div class="anno-label" :title="`标签：${props.modelValue.tagLabel}`">
-      <img :src="localTag" alt="tag" v-if="localTag" />
-      <v-icon v-else>mdi-tag</v-icon>
+      <TMiImg :src="props.modelValue.tagIcon" alt="tag" :ori="true" />
       <span>{{ props.modelValue.tagLabel }}</span>
     </div>
     <div class="anno-id">{{ props.modelValue.id }}</div>
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import { onMounted, onUnmounted, ref, watch } from "vue";
 
 import TGLogger from "@/utils/TGLogger.js";
-import { generateShareImg, saveImgLocal } from "@/utils/TGShare.js";
+import { generateShareImg } from "@/utils/TGShare.js";
 import { createTGWindow } from "@/utils/TGWindow.js";
 
 type TAnnoCardProps = { region: string; modelValue: TGApp.App.Announcement.ListCard; lang: string };
 const props = defineProps<TAnnoCardProps>();
-const localBanner = ref<string>();
-const localTag = ref<string>();
-
-onMounted(async () => {
-  if (props.modelValue.banner !== "") {
-    localBanner.value = await saveImgLocal(props.modelValue.banner);
-  }
-  localTag.value = await saveImgLocal(props.modelValue.tagIcon);
-});
-
-watch(
-  () => props.modelValue,
-  async () => {
-    if (localBanner.value && localBanner.value.startsWith("blob:")) {
-      URL.revokeObjectURL(localBanner.value);
-      localBanner.value = undefined;
-    }
-    if (props.modelValue.banner !== "") {
-      localBanner.value = await saveImgLocal(props.modelValue.banner);
-    }
-    if (localTag.value && localTag.value.startsWith("blob:")) {
-      URL.revokeObjectURL(localTag.value);
-      localTag.value = undefined;
-    }
-    localTag.value = await saveImgLocal(props.modelValue.tagIcon);
-  },
-);
-
-onUnmounted(() => {
-  if (localBanner.value) URL.revokeObjectURL(localBanner.value);
-  if (localTag.value) URL.revokeObjectURL(localTag.value);
-});
 
 function parseTitle(title: string): string {
   const dom = new DOMParser().parseFromString(title, "text/html");

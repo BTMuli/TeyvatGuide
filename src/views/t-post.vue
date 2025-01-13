@@ -12,7 +12,7 @@
       <div class="tp-post-meta">
         <div class="mpm-forum" v-if="postData.forum" @click="toForum(postData.forum)">
           <img :src="getGameIcon(postData.forum.game_id)" alt="gameIcon" />
-          <img :src="postData.forum.icon" alt="forumIcon" />
+          <TMiImg :src="postData.forum.icon" alt="forumIcon" :ori="true" />
           <span>{{ postData.forum.name }}</span>
         </div>
         <div class="mpm-item" :title="`浏览数：${postData?.stat?.view_num}`">
@@ -83,6 +83,7 @@
   />
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import TPinWin from "@comp/app/t-pinWin.vue";
 import TShareBtn from "@comp/app/t-shareBtn.vue";
 import TSwitchTheme from "@comp/app/t-switchTheme.vue";

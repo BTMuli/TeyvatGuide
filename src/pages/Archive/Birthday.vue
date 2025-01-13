@@ -20,7 +20,7 @@
     <div class="ab-draw-grid">
       <div v-for="item in selectedItem" :key="item.op_id" class="ab-draw">
         <div class="ab-draw-cover" @click="showImg(item)">
-          <img :src="item.unread_picture[Number(isAether)]" :alt="item.word_text" />
+          <TMiImg :src="item.unread_picture[Number(isAether)]" :alt="item.word_text" />
           <div class="ab-draw-hide" />
           <v-icon class="ab-draw-icon">mdi-magnify</v-icon>
         </div>
@@ -33,6 +33,7 @@
   <ToArcBrith v-model="showOverlay" :data="current" :choice="isAether" />
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import ToArcBrith from "@comp/pageArchive/to-arcBrith.vue";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";

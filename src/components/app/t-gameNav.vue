@@ -1,7 +1,7 @@
 <template>
   <div class="tgn-container">
     <div v-for="navItem in nav" :key="navItem.id" class="tgn-nav" @click="toNav(navItem)">
-      <img alt="navIcon" :src="navItem.icon" />
+      <TMiImg alt="navIcon" :src="navItem.icon" :ori="true" />
       <span>{{ navItem.name }}</span>
     </div>
     <div v-if="props.modelValue === 2 && hasNav" class="tgn-nav">
@@ -11,6 +11,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import Mys from "@Mys/index.js";

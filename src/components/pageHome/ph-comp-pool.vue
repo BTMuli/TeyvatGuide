@@ -9,7 +9,7 @@
       <div class="pool-grid">
         <div v-for="pool in poolSelect" :key="pool.postId" class="pool-card">
           <div class="pool-cover" @click="createPost(pool.postId, pool.title)">
-            <img :src="pool.cover" alt="cover" />
+            <TMiImg :src="pool.cover" alt="cover" :ori="true" />
           </div>
           <div class="pool-bottom">
             <div class="pool-character">
@@ -25,7 +25,7 @@
                     v-if="character.info"
                     :model-value="getCBox(character.info)"
                   />
-                  <img v-else :src="character.icon" alt="character" />
+                  <TMiImg v-else :src="character.icon" alt="character" />
                 </div>
               </div>
             </div>
@@ -56,6 +56,7 @@
 </template>
 <script lang="ts" setup>
 import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import Mys from "@Mys/index.js";
 import { storeToRefs } from "pinia";
