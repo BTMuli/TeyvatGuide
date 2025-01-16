@@ -150,6 +150,7 @@ const postRaw = shallowRef<PostRaw>({ isLast: false, lastId: "", total: 0 });
 const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
 
 onMounted(async () => {
+  await showLoading.start("正在加载帖子数据");
   await loadForums();
   if (gid && typeof gid === "string") curGid.value = Number(gid);
   if (forum && typeof forum === "string") {
