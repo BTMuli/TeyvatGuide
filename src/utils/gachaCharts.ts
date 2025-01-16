@@ -18,47 +18,15 @@ async function getOverviewOptions(uid: string): Promise<EChartsOption> {
   const records = await TSUserGacha.getGachaRecords(uid);
   const data: EChartsOption = {
     title: [
-      {
-        text: ">> 祈愿系统大数据分析 <<",
-        left: "center",
-        top: "5%",
-      },
-      {
-        text: "卡池分布",
-        left: "17%",
-        top: "45%",
-      },
-      {
-        text: "星级分布",
-        left: "17%",
-        top: "90%",
-      },
-      {
-        text: "角色池分布",
-        left: "45%",
-        bottom: "10%",
-      },
-      {
-        text: "武器池分布",
-        right: "5%",
-        bottom: "10%",
-      },
+      { text: ">> 祈愿系统大数据分析 <<", left: "center", top: "5%" },
+      { text: "卡池分布", left: "17%", top: "45%" },
+      { text: "星级分布", left: "17%", top: "90%" },
+      { text: "角色池分布", left: "45%", bottom: "10%" },
+      { text: "武器池分布", right: "5%", bottom: "10%" },
     ],
     tooltip: { trigger: "item" },
-    legend: {
-      type: "scroll",
-      orient: "vertical",
-      left: 10,
-      top: 20,
-      bottom: 20,
-    },
-    toolbox: {
-      show: true,
-      feature: {
-        restore: {},
-        saveAsImage: {},
-      },
-    },
+    legend: { type: "scroll", orient: "vertical", left: 10, top: 20, bottom: 20 },
+    toolbox: { show: true, feature: { restore: {}, saveAsImage: {} } },
     series: [
       {
         name: "卡池分布",
@@ -66,11 +34,7 @@ async function getOverviewOptions(uid: string): Promise<EChartsOption> {
         radius: "50%",
         data: [],
         emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: "rgba(0, 0, 0, 0.5)",
-          },
+          itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: "rgba(0, 0, 0, 0.5)" },
         },
         right: "60%",
         top: 0,
@@ -247,7 +211,6 @@ async function getStackBarOptions(uid: string, gachaType?: string): Promise<ECha
       fontSize: 12,
       fontFamily: "var(--font-title)",
     },
-    // 间距
     axisPointer: { type: "shadow" },
   };
   const temp5 = [];

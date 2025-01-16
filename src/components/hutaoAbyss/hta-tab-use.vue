@@ -1,7 +1,6 @@
 <template>
   <div class="hta-tus-box">
     <v-tabs v-model="tab" direction="vertical" class="hta-tus-tab">
-      <v-tab :value="10">第10层</v-tab>
       <v-tab :value="11">第11层</v-tab>
       <v-tab :value="12">第12层</v-tab>
     </v-tabs>
@@ -29,7 +28,7 @@ type HtaTabUseProps = { data: AbyssDataItem<Array<TGApp.Plugins.Hutao.Abyss.Avat
 type HtaTabUseData = { Floor: number; Ranks: Array<AbyssDataItem<{ Item: number; Rate: number }>> };
 
 const props = defineProps<HtaTabUseProps>();
-const tab = ref<number>(10);
+const tab = ref<number>(11);
 const select = shallowRef<Array<HtaTabUseData>>([]);
 
 onMounted(async () => {
