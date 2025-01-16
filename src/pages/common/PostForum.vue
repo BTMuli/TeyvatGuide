@@ -29,7 +29,11 @@
           </div>
         </template>
         <template #item="{ props, item }">
-          <div v-bind="props" class="select-item sub">
+          <div
+            v-bind="props"
+            class="select-item sub"
+            :class="{ selected: item.raw.gid === curGid }"
+          >
             <img v-if="item.raw.icon" :src="item.raw.icon" :alt="item.raw.text" class="icon" />
             <span>{{ item.raw.text }}</span>
           </div>
@@ -55,7 +59,12 @@
           </div>
         </template>
         <template #item="{ props, item }">
-          <div v-bind="props" class="select-item sub" @click="selectedForum = item.raw">
+          <div
+            v-bind="props"
+            class="select-item sub"
+            @click="selectedForum = item.raw"
+            :class="{ selected: item.raw.value === selectedForum.value }"
+          >
             <TMiImg :src="item.raw.icon" :alt="item.raw.text" :ori="true" class="icon" />
             <span>{{ item.raw.text }}</span>
           </div>
@@ -116,8 +125,7 @@ import { useRoute } from "vue-router";
 
 import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
-import { getGameName } from "@/utils/toolFunc.js";
-import { CHANNEL_LIST } from "@/web/constant/bbs.js";
+import { getGameIcon, getGameName } from "@/utils/toolFunc.js";
 import ApiHubReq from "@/web/request/apiHubReq.js";
 
 type SortSelect = { text: string; value: number; icon: string };
@@ -187,10 +195,9 @@ async function loadForums(): Promise<void> {
   const allForums = await ApiHubReq.forum();
   const gameList: Array<SortSelectGame> = [];
   for (const gameForum of allForums) {
-    const miniFind = CHANNEL_LIST.find((i) => i.gid === gameForum.game_id.toString())?.mini;
     const gameItem: SortSelectGame = {
       gid: gameForum.game_id,
-      icon: miniFind ? `/platforms/mhy/${miniFind}.webp` : undefined,
+      icon: getGameIcon(gameForum.game_id),
       forum: gameForum.forums
         .sort((a, b) => a.order - b.order)
         .map((i) => ({ text: i.name, value: i.id, icon: i.icon_pure })),
@@ -388,8 +395,11 @@ function searchPost(): void {
     font-size: 16px;
 
     &:hover {
-      border-radius: 5px;
       background: var(--common-shadow-2);
+    }
+
+    &.selected:not(:hover) {
+      background: var(--common-shadow-1);
     }
   }
 

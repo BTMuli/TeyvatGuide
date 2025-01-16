@@ -21,7 +21,32 @@
         :item-value="(item) => item"
         variant="outlined"
         label="分区"
-      />
+      >
+        <template #selection="{ item }">
+          <div class="select-item main">
+            <img
+              v-if="getGameIcon(item.raw.id)"
+              :src="getGameIcon(item.raw.id)"
+              :alt="item.raw.name"
+              :title="item.raw.name"
+              class="icon"
+            />
+            <span>{{ item.raw.name }}</span>
+          </div>
+        </template>
+        <template #item="{ props, item }">
+          <div v-bind="props" class="select-item sub" :class="{ selected: item.raw.id === curGid }">
+            <img
+              v-if="getGameIcon(item.raw.id)"
+              :src="getGameIcon(item.raw.id)"
+              :alt="item.raw.name"
+              :title="item.raw.name"
+              class="icon"
+            />
+            <span>{{ item.raw.name }}</span>
+          </div>
+        </template>
+      </v-select>
       <v-select
         v-model="curSortType"
         class="post-switch-item"
@@ -70,6 +95,7 @@ import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import { createPost } from "@/utils/TGWindow.js";
+import { getGameIcon } from "@/utils/toolFunc.js";
 
 type SortSelect = { text: string; value: number };
 type PostMiniData = { isLast: boolean; lastId: string; total: number };
@@ -265,5 +291,39 @@ function searchPost(): void {
   margin: 10px;
   font-family: var(--font-title);
   transition: all 0.3s linear;
+}
+
+.select-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  column-gap: 4px;
+
+  &.main {
+    position: relative;
+    height: 24px;
+    font-family: var(--font-title);
+    font-size: 16px;
+  }
+
+  &.sub {
+    padding: 8px;
+    font-family: var(--font-title);
+    font-size: 16px;
+
+    &:hover {
+      background: var(--common-shadow-2);
+    }
+
+    &.selected:not(:hover) {
+      background: var(--common-shadow-1);
+    }
+  }
+
+  .icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+  }
 }
 </style>

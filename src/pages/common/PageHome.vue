@@ -11,7 +11,34 @@
           :hide-details="true"
           variant="outlined"
           label="分区"
-        />
+        >
+          <template #selection="{ item }">
+            <div class="select-item main">
+              <img
+                :src="item.raw.icon"
+                :alt="item.raw.title"
+                :title="item.raw.title"
+                class="icon"
+              />
+              <span>{{ item.raw.title }}</span>
+            </div>
+          </template>
+          <template #item="{ props, item }">
+            <div
+              v-bind="props"
+              class="select-item sub"
+              :class="{ selected: item.raw.gid === curGid }"
+            >
+              <img
+                :src="item.raw.icon"
+                :alt="item.raw.title"
+                :title="item.raw.title"
+                class="icon"
+              />
+              <span>{{ item.raw.title }}</span>
+            </div>
+          </template>
+        </v-select>
         <TGameNav :model-value="Number(curGid)" />
       </div>
       <div class="home-select">
@@ -60,15 +87,16 @@ const showItemsAll: Array<ShowItemEnum> = [
   ShowItemEnum.pool,
   ShowItemEnum.position,
 ];
+
+const gameSelectList = TGConstant.BBS.CHANNELS;
+const curGid = ref<string>(gameSelectList[0].gid);
+
+const loadItems = shallowRef<Array<ShowItemEnum>>([]);
+const components = shallowRef<Array<SFComp>>([]);
 const showItems = computed<Array<ShowItemEnum>>({
   get: () => homeStore.getShowItems(),
   set: (v: Array<ShowItemEnum>) => homeStore.setShowItems(v),
 });
-const loadItems = shallowRef<Array<ShowItemEnum>>([]);
-const components = shallowRef<Array<SFComp>>([]);
-
-const gameSelectList = TGConstant.BBS.CHANNELS;
-const curGid = ref<string>(gameSelectList[0].gid);
 
 onMounted(async () => {
   // @ts-expect-error-next-line The import.meta meta-property is not allowed in files which will build into CommonJS output.
@@ -178,5 +206,39 @@ async function loadEnd(item: SFComp): Promise<void> {
   height: 40px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
+}
+
+.select-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  column-gap: 4px;
+
+  &.main {
+    position: relative;
+    height: 24px;
+    font-family: var(--font-title);
+    font-size: 16px;
+  }
+
+  &.sub {
+    padding: 8px;
+    font-family: var(--font-title);
+    font-size: 16px;
+
+    &:hover {
+      background: var(--common-shadow-2);
+    }
+
+    &.selected:not(:hover) {
+      background: var(--common-shadow-1);
+    }
+  }
+
+  .icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+  }
 }
 </style>

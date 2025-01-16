@@ -296,6 +296,17 @@ export function getGameId(mini: string): string {
 }
 
 /**
+ * @description 根据id获取游戏图标
+ * @since Beta v0.6.8
+ * @param {number|string} gid
+ * @returns {string|undefined}
+ */
+export function getGameIcon(gid: number | string): string | undefined {
+  const game = TGConstant.BBS.CHANNELS.find((item) => item.gid === gid.toString());
+  return game ? game.icon : undefined;
+}
+
+/**
  * @description 根据id获取对应角色/武器数据
  * @since Beta v0.6.8
  * @param {number|string} id
