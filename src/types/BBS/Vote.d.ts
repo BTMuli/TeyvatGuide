@@ -1,43 +1,29 @@
 /**
- * @file plugins/Mys/types/Vote.d.ts
- * @description Mys 插件投票类型定义文件
- * @since Beta v0.3.9
+ * @file types/BBS/Vote.d.ts
+ * @description Mys 插件投票类型
+ * @since Beta v0.6.8
  */
 
-/**
- * @description Mys 插件投票类型
- * @since Beta v0.3.9
- * @namespace TGApp.Plugins.Mys.Vote
- * @memberof TGApp.Plugins.Mys
- */
-declare namespace TGApp.Plugins.Mys.Vote {
+declare namespace TGApp.BBS.Vote {
   /**
    * @description 投票信息返回
    * @since Beta v0.3.9
-   * @interface InfoResponse
+   * @interface InfoResp
    * @extends TGApp.BBS.Response.BaseWithData
    * @property {Info[]} data.data 投票信息
    * @return InfoResponse
    */
-  interface InfoResponse extends TGApp.BBS.Response.BaseWithData {
-    data: {
-      data: Info[];
-    };
-  }
+  type InfoResp = TGApp.BBS.Response.BaseWithData & { data: { data: Array<Info> } };
 
   /**
    * @description 投票结果返回
    * @since Beta v0.3.9
-   * @interface ResultResponse
+   * @interface ResultResp
    * @extends TGApp.BBS.Response.BaseWithData
    * @property {Result[]} data.data 投票结果
    * @return ResultResponse
    */
-  interface ResultResponse extends TGApp.BBS.Response.BaseWithData {
-    data: {
-      data: Result[];
-    };
-  }
+  type ResultResp = TGApp.BBS.Response.BaseWithData & { data: { data: Array<Result> } };
 
   /**
    * @description 投票信息

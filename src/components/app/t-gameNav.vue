@@ -14,7 +14,6 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import Mys from "@Mys/index.js";
 import { emit } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
@@ -25,6 +24,7 @@ import { useAppStore } from "@/store/modules/app.js";
 import TGClient from "@/utils/TGClient.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
+import ApiHubReq from "@/web/request/apiHubReq.js";
 import OtherApi from "@/web/request/otherReq.js";
 
 type TGameNavProps = { modelValue: number };
@@ -49,7 +49,7 @@ watch(
 );
 
 async function loadNav(): Promise<void> {
-  nav.value = await Mys.ApiHub.homeNew(props.modelValue);
+  nav.value = await ApiHubReq.home(props.modelValue);
 }
 
 async function tryGetCode(): Promise<void> {
@@ -79,7 +79,7 @@ async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
     return;
   }
   await TGLogger.Info(`[TGameNav][toNav] 打开网页活动 ${item.name}`);
-  await TGLogger.Info(`[TGameNav}][toNav] ${item.app_path}`);
+  await TGLogger.Info(`[TGameNav][toNav] ${item.app_path}`);
   const link = new URL(item.app_path);
   const mysList = [
     "https://act.mihoyo.com",
@@ -132,6 +132,7 @@ async function toBBS(link: URL): Promise<void> {
   showSnackbar.warn(`不支持的链接：${link.href}`);
 }
 
+// todo 动态获取版块列表
 function getLocalPath(forum?: string): string {
   if (!forum) return "";
   const forumLocalMap: Record<string, string> = {

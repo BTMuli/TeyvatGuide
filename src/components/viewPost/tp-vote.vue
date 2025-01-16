@@ -21,8 +21,9 @@
   </div>
 </template>
 <script lang="ts" setup>
-import Mys from "@Mys/index.js";
 import { onMounted, shallowRef } from "vue";
+
+import ApiHubReq from "@/web/request/apiHubReq.js";
 
 type TpVote = { insert: { vote: { id: string; uid: string } } };
 type TpVoteProps = { data: TpVote };
@@ -34,8 +35,8 @@ const votes = shallowRef<TpVoteInfo>();
 
 onMounted(async () => {
   const vote = props.data.insert.vote;
-  const voteInfo = await Mys.ApiHub.getVotes(vote.id, vote.uid);
-  const voteResult = await Mys.ApiHub.getVoteResult(vote.id, vote.uid);
+  const voteInfo = await ApiHubReq.vote.info(vote.id, vote.uid);
+  const voteResult = await ApiHubReq.vote.result(vote.id, vote.uid);
   votes.value = {
     title: voteInfo.title,
     count: voteResult.user_cnt,

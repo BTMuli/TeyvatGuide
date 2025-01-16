@@ -15,16 +15,52 @@
         item-value="gid"
         variant="outlined"
         label="分区"
-      />
+      >
+        <template #selection="{ item }">
+          <div class="select-item main">
+            <img
+              v-if="item.raw.icon"
+              :src="item.raw.icon"
+              :alt="item.raw.text"
+              :title="item.raw.text"
+              class="icon"
+            />
+            <span>{{ item.raw.text }}</span>
+          </div>
+        </template>
+        <template #item="{ props, item }">
+          <div v-bind="props" class="select-item sub">
+            <img v-if="item.raw.icon" :src="item.raw.icon" :alt="item.raw.text" class="icon" />
+            <span>{{ item.raw.text }}</span>
+          </div>
+        </template>
+      </v-select>
       <v-select
-        v-model="curForum"
+        v-model="selectedForum"
         class="post-switch-item"
         :items="getGameForums(curGid)"
-        item-title="text"
-        item-value="value"
         variant="outlined"
         label="版块"
-      />
+      >
+        <template #selection="{ item }">
+          <div class="select-item main">
+            <TMiImg
+              :src="item.raw.icon"
+              :alt="item.raw.text"
+              :ori="true"
+              :title="item.raw.text"
+              class="icon"
+            />
+            <span>{{ item.raw.text }}</span>
+          </div>
+        </template>
+        <template #item="{ props, item }">
+          <div v-bind="props" class="select-item sub" @click="selectedForum = item.raw">
+            <TMiImg :src="item.raw.icon" :alt="item.raw.text" :ori="true" class="icon" />
+            <span>{{ item.raw.text }}</span>
+          </div>
+        </template>
+      </v-select>
       <v-select
         v-model="curSortType"
         class="post-switch-item"
@@ -69,6 +105,7 @@
 </template>
 <script setup lang="ts">
 import TGameNav from "@comp/app/t-gameNav.vue";
+import TMiImg from "@comp/app/t-mi-img.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
@@ -79,112 +116,61 @@ import { useRoute } from "vue-router";
 
 import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
+import { getGameName } from "@/utils/toolFunc.js";
+import { CHANNEL_LIST } from "@/web/constant/bbs.js";
+import ApiHubReq from "@/web/request/apiHubReq.js";
 
-type SortSelect = { text: string; value: number };
-type SortSelectGame = { gid: number; forum: Array<SortSelect>; text: string };
+type SortSelect = { text: string; value: number; icon: string };
+type SortSelectGame = { gid: number; forum: Array<SortSelect>; text: string; icon?: string };
 type PostRaw = { isLast: boolean; lastId: string; total: number };
 
-const sortOrderList: Array<SortSelect> = [
+const sortOrderList: Array<Omit<SortSelect, "icon">> = [
   { text: "最新回复", value: 1 },
   { text: "最新发布", value: 2 },
   { text: "热门", value: 3 },
 ];
-const forumYsList: Array<SortSelect> = [
-  { text: "酒馆", value: 26 },
-  { text: "攻略", value: 43 },
-  { text: "同人图", value: 29 },
-  { text: "COS", value: 49 },
-  { text: "硬核", value: 50 },
-];
-const forumSrList: Array<SortSelect> = [
-  { text: "候车室", value: 52 },
-  { text: "攻略", value: 61 },
-  { text: "同人图", value: 56 },
-  { text: "COS", value: 62 },
-];
-const forumBh3List: Array<SortSelect> = [
-  { text: "甲板", value: 1 },
-  { text: "攻略", value: 14 },
-  { text: "同人图", value: 4 },
-  { text: "同人文", value: 41 },
-];
-const forumBh2List: Array<SortSelect> = [
-  { text: "学园", value: 30 },
-  { text: "攻略", value: 51 },
-  { text: "同人图", value: 40 },
-];
-const forumWdList: Array<SortSelect> = [
-  { text: "律所", value: 37 },
-  { text: "攻略", value: 60 },
-  { text: "同人文", value: 42 },
-  { text: "同人图", value: 38 },
-];
-const forumZzzList: Array<SortSelect> = [
-  { text: "咖啡馆", value: 57 },
-  { text: "攻略", value: 64 },
-  { text: "同人图", value: 59 },
-  { text: "COS", value: 65 },
-];
-const forumDbyList: Array<SortSelect> = [
-  { text: "校园", value: 54 },
-  { text: "ACG", value: 35 },
-  { text: "生活", value: 34 },
-  { text: "同人图", value: 39 },
-  { text: "COS", value: 47 },
-  { text: "脑洞", value: 48 },
-  { text: "科技", value: 55 },
-  { text: "公告", value: 36 },
-];
-const sortGameList: Readonly<Array<SortSelectGame>> = [
-  { gid: 2, forum: forumYsList, text: "原神" },
-  { gid: 6, forum: forumSrList, text: "崩坏：星穹铁道" },
-  { gid: 8, forum: forumZzzList, text: "绝区零" },
-  { gid: 1, forum: forumBh3List, text: "崩坏3" },
-  { gid: 3, forum: forumBh2List, text: "崩坏2" },
-  { gid: 4, forum: forumWdList, text: "未定事件簿" },
-  { gid: 5, forum: forumDbyList, text: "大别野" },
-];
+
 const { gid, forum } = useRoute().params;
 const curGid = ref<number>(2);
 const curSortType = ref<number>(1);
-const curForum = ref<number>(26);
-const curForumLabel = ref<string>("");
 const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 const firstLoad = ref<boolean>(false);
+const selectedForum = ref<SortSelect>();
+const sortGameList = shallowRef<Array<SortSelectGame>>([]);
 const postRaw = shallowRef<PostRaw>({ isLast: false, lastId: "", total: 0 });
 const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
 
 onMounted(async () => {
+  await loadForums();
   if (gid && typeof gid === "string") curGid.value = Number(gid);
-  if (forum && typeof forum === "string") curForum.value = Number(forum);
+  if (forum && typeof forum === "string") {
+    selectedForum.value = getForum(curGid.value, Number(forum));
+  } else {
+    selectedForum.value = getGameForums(curGid.value)[0];
+  }
   const gameLabel = getGameLabel(curGid.value);
-  const forumLabel = getForumLabel(curGid.value, curForum.value);
-  await TGLogger.Info(`[Posts][${gameLabel}][onMounted][${forumLabel}] 打开帖子列表`);
+  await TGLogger.Info(`[Posts][${gameLabel}][onMounted][${selectedForum.value.text}] 打开帖子列表`);
   await freshPostData();
-  curForumLabel.value = forumLabel;
   firstLoad.value = true;
 });
 watch(
   () => curGid.value,
   () => {
+    if (!selectedForum.value) return;
     const forums = getGameForums(curGid.value);
-    const forumFind = forums.find((item) => item.text === curForumLabel.value);
+    const forumFind = forums.find((item) => item.text === selectedForum.value?.text);
     if (!firstLoad.value) return;
-    if (forumFind) curForum.value = forumFind.value;
-    else curForum.value = forums[0].value;
+    selectedForum.value = forumFind ?? forums[0];
     showSnackbar.success(`已将分区切换到 ${getGameLabel(curGid.value)}`);
   },
 );
 watch(
-  () => curForum.value,
+  () => selectedForum.value,
   async () => {
+    if (!selectedForum.value) return;
     await freshPostData();
-    const oldForumLabel = JSON.parse(JSON.stringify(curForumLabel.value));
-    curForumLabel.value = getForumLabel(curGid.value, curForum.value);
-    if (oldForumLabel !== curForumLabel.value) {
-      showSnackbar.success(`已将版块切换到 ${curForumLabel.value}`);
-    }
+    showSnackbar.success(`已将版块切换到 ${selectedForum.value.text}`);
   },
 );
 watch(
@@ -196,22 +182,41 @@ watch(
   },
 );
 
+// 初始化
+async function loadForums(): Promise<void> {
+  const allForums = await ApiHubReq.forum();
+  const gameList: Array<SortSelectGame> = [];
+  for (const gameForum of allForums) {
+    const miniFind = CHANNEL_LIST.find((i) => i.gid === gameForum.game_id.toString())?.mini;
+    const gameItem: SortSelectGame = {
+      gid: gameForum.game_id,
+      icon: miniFind ? `/platforms/mhy/${miniFind}.webp` : undefined,
+      forum: gameForum.forums
+        .sort((a, b) => a.order - b.order)
+        .map((i) => ({ text: i.name, value: i.id, icon: i.icon_pure })),
+      text: getGameName(gameForum.game_id),
+    };
+    gameList.push(gameItem);
+  }
+  sortGameList.value = gameList;
+}
+
 function getGameForums(gid: number): SortSelect[] {
-  const game = sortGameList.find((item) => item.gid === gid);
+  const game = sortGameList.value.find((item) => item.gid === gid);
   if (game) return game.forum;
   return [];
 }
 
 function getGameLabel(gid: number): string {
-  const game = sortGameList.find((item) => item.gid === gid);
+  const game = sortGameList.value.find((item) => item.gid === gid);
   if (game) return game.text;
   return "";
 }
 
-function getForumLabel(gid: number, forum: number): string {
+function getForum(gid: number, forum: number): SortSelect {
   const forums = getGameForums(gid);
   const forumItem = forums.find((item) => item.value === forum);
-  return forumItem ? forumItem.text : "";
+  return forumItem ? forumItem : forums[0];
 }
 
 function getSortLabel(value: number): string {
@@ -221,43 +226,45 @@ function getSortLabel(value: number): string {
 
 async function getCurrentPosts(
   loadMore: boolean = false,
+  forum: number,
 ): Promise<TGApp.Plugins.Mys.Forum.FullData> {
   const mod20 = postRaw.value.total % 20;
   const pageSize = mod20 === 0 ? 20 : 20 - mod20;
   if (curSortType.value === 3) {
     if (loadMore) {
       return await Mys.Painter.getHotForumPostList(
-        curForum.value,
+        forum,
         curGid.value,
         postRaw.value.lastId,
         pageSize,
       );
     }
-    return await Mys.Painter.getHotForumPostList(curForum.value, curGid.value);
+    return await Mys.Painter.getHotForumPostList(forum, curGid.value);
   }
   if (loadMore) {
     return await Mys.Painter.getRecentForumPostList(
-      curForum.value,
+      forum,
       curGid.value,
       curSortType.value,
       postRaw.value.lastId,
       pageSize,
     );
   }
-  return await Mys.Painter.getRecentForumPostList(curForum.value, curGid.value, curSortType.value);
+  return await Mys.Painter.getRecentForumPostList(forum, curGid.value, curSortType.value);
 }
 
 async function freshPostData(): Promise<void> {
+  if (!selectedForum.value) return;
   await showLoading.start(`正在刷新${getGameLabel(curGid.value)}帖子`);
   const gameLabel = getGameLabel(curGid.value);
-  const forumLabel = getForumLabel(curGid.value, curForum.value);
+  const forumLabel = getForum(curGid.value, selectedForum.value.value).text;
   const sortLabel = getSortLabel(curSortType.value);
   await TGLogger.Info(
     `[Posts][${gameLabel}][freshPostData][${forumLabel}][${sortLabel}] 刷新帖子列表`,
   );
   await showLoading.update(`版块：${forumLabel}，排序：${sortLabel}`);
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
-  const postsGet = await getCurrentPosts();
+  const postsGet = await getCurrentPosts(false, selectedForum.value.value);
   posts.value = postsGet.list;
   postRaw.value = {
     isLast: postsGet.is_last,
@@ -269,14 +276,18 @@ async function freshPostData(): Promise<void> {
 }
 
 async function loadMore(): Promise<void> {
+  if (!selectedForum.value) {
+    showSnackbar.warn("请先选择一个版块");
+    return;
+  }
   if (postRaw.value.isLast) {
     showSnackbar.warn("没有更多帖子了");
     return;
   }
   await showLoading.start("正在加载更多帖子数据", `游戏：${getGameLabel(curGid.value)}`);
-  const postsGet = await getCurrentPosts(true);
+  const postsGet = await getCurrentPosts(true, selectedForum.value.value);
   await showLoading.update(
-    `版块：${curForumLabel.value}，排序：${getSortLabel(curSortType.value)}，数量：${postsGet.list.length}`,
+    `版块：${selectedForum.value.text}，排序：${getSortLabel(curSortType.value)}，数量：${postsGet.list.length}`,
   );
   posts.value = posts.value.concat(postsGet.list);
   postRaw.value = {
@@ -356,5 +367,36 @@ function searchPost(): void {
   margin: 10px;
   font-family: var(--font-title);
   transition: all 0.3s linear;
+}
+
+.select-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  column-gap: 4px;
+
+  &.main {
+    position: relative;
+    height: 24px;
+    font-family: var(--font-title);
+    font-size: 16px;
+  }
+
+  &.sub {
+    padding: 8px;
+    font-family: var(--font-title);
+    font-size: 16px;
+
+    &:hover {
+      border-radius: 5px;
+      background: var(--common-shadow-2);
+    }
+  }
+
+  .icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+  }
 }
 </style>

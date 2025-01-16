@@ -4,7 +4,6 @@
  * @since Beta v0.6.8
  */
 
-import * as ApiHub from "./request/apiHubReq.js";
 import { doCaptchaLogin, getCaptcha } from "./request/doCaptchaLogin.js";
 import { getGachaData, getPositionData } from "./request/obcReq.js";
 import * as Painter from "./request/painterReq.js";
@@ -16,7 +15,6 @@ import getPositionCard from "./utils/getPositionCard.js";
 const Mys = {
   Post,
   Painter,
-  ApiHub,
   Gacha: { get: getGachaData, card: getGachaCard },
   Position: { get: getPositionData, card: getPositionCard },
   Lottery: { get: Painter.lotteryUserShow, card: getLotteryCard },

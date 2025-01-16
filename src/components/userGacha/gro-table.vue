@@ -1,4 +1,4 @@
-<!-- todo 优化，增加筛选功能，调整 typo -->
+<!-- todo 优化，增加筛选功能 -->
 <template>
   <div class="ua-gt-box">
     <v-data-table
