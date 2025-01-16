@@ -15,7 +15,7 @@ const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 /**
  * @description 获取所有版块
  * @since Beta v0.6.8
- * @return {Promise<TGApp.Plugins.Mys.Forum.GamesResp>}
+ * @return {Promise<Array<TGApp.BBS.Forum.GameForum>>}
  */
 async function getAllGamesForums(): Promise<Array<TGApp.BBS.Forum.GameForum>> {
   return (
