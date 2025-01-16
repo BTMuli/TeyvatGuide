@@ -1,13 +1,14 @@
 /**
  * @file utils/TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.6.7
+ * @since Beta v0.6.8
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
 import { path } from "@tauri-apps/api";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
+import { platform } from "@tauri-apps/plugin-os";
 import html2canvas from "html2canvas";
 import { storeToRefs } from "pinia";
 
@@ -148,7 +149,7 @@ export async function generateShareImg(
 
 /**
  * @description 复制到剪贴板
- * @since Beta v0.6.2
+ * @since Beta v0.6.8
  * @param {Uint8Array} buffer - 图片数据
  * @returns {Promise<void>} 无返回值
  */
@@ -156,6 +157,14 @@ export async function copyToClipboard(buffer: Uint8Array): Promise<void> {
   const blob = new Blob([buffer], { type: "image/png" });
   const url = URL.createObjectURL(blob);
   // todo mac 会报错: https://bugs.webkit.org/show_bug.cgi?id=222262
+  if (platform() === "macos") {
+    // todo 待测试
+    navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]).then(
+      () => URL.revokeObjectURL(url),
+      (err) => TGLogger.Error(`[copyToClipboard] 复制到剪贴板失败: ${err}`),
+    );
+    return;
+  }
   await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
   URL.revokeObjectURL(url);
 }

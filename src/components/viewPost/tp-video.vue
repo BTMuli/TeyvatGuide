@@ -1,6 +1,5 @@
 <template>
   <div class="tp-video-box" v-if="videoData">
-    <!-- todo https://socialsisteryi.github.io/bilibili-API-collect/docs/video/videostream_url.html#%E8%A7%86%E9%A2%91%E4%BC%B4%E9%9F%B3%E9%9F%B3%E8%B4%A8%E4%BB%A3%E7%A0%81 -->
     <iframe
       class="tp-video-container"
       :src="props.data.insert.video"
