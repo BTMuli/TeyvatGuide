@@ -29,7 +29,7 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import { computed, ref, shallowRef } from "vue";
+import { computed, nextTick, ref, shallowRef } from "vue";
 
 import type { TpImage } from "./tp-image.vue";
 
@@ -63,6 +63,10 @@ async function onCopy(): Promise<void> {
     showSnackbar.warn("GIF 图片不支持复制到剪贴板");
     return;
   }
+  if (!showOri.value) {
+    showOri.value = true;
+    await nextTick();
+  }
   await showLoading.start("正在复制图片到剪贴板");
   const image = props.image.insert.image;
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
@@ -73,6 +77,10 @@ async function onCopy(): Promise<void> {
 }
 
 async function onDownload(): Promise<void> {
+  if (!showOri.value) {
+    showOri.value = true;
+    await nextTick();
+  }
   await showLoading.start("正在下载图片到本地");
   const image = props.image.insert.image;
   if (buffer.value === null) buffer.value = await getImageBuffer(image);

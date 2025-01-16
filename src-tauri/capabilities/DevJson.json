@@ -29,15 +29,9 @@
     {
       "identifier": "http:default",
       "allow": [
-        {
-          "url": "https://*.miyoushe.com/*"
-        },
-        {
-          "url": "https://*.mihoyo.com/*"
-        },
-        {
-          "url": "https://*.hoyoverse.com/*"
-        }
+        { "url": "https://*.miyoushe.com/*" },
+        { "url": "https://*.mihoyo.com/*" },
+        { "url": "https://*.hoyoverse.com/*" }
       ]
     }
   ],

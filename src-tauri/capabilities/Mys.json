@@ -14,74 +14,19 @@
     "core:window:default",
     "core:path:allow-resolve-directory",
     "core:path:default",
-    {
-      "identifier": "fs:allow-exists",
-      "allow": [
-        {
-          "path": "**"
-        }
-      ]
-    },
-    {
-      "identifier": "fs:allow-mkdir",
-      "allow": [
-        {
-          "path": "**"
-        }
-      ]
-    },
-    {
-      "identifier": "fs:allow-read-dir",
-      "allow": [
-        {
-          "path": "**"
-        }
-      ]
-    },
-    {
-      "identifier": "fs:allow-read-text-file",
-      "allow": [
-        {
-          "path": "**"
-        }
-      ]
-    },
-    {
-      "identifier": "fs:allow-remove",
-      "allow": [
-        {
-          "path": "**"
-        }
-      ]
-    },
-    {
-      "identifier": "fs:allow-write-file",
-      "allow": [
-        {
-          "path": "**"
-        }
-      ]
-    },
-    {
-      "identifier": "fs:allow-write-text-file",
-      "allow": [
-        {
-          "path": "**"
-        }
-      ]
-    },
+    { "identifier": "fs:allow-exists", "allow": [{ "path": "**" }] },
+    { "identifier": "fs:allow-mkdir", "allow": [{ "path": "**" }] },
+    { "identifier": "fs:allow-read-dir", "allow": [{ "path": "**" }] },
+    { "identifier": "fs:allow-read-text-file", "allow": [{ "path": "**" }] },
+    { "identifier": "fs:allow-remove", "allow": [{ "path": "**" }] },
+    { "identifier": "fs:allow-write-file", "allow": [{ "path": "**" }] },
+    { "identifier": "fs:allow-write-text-file", "allow": [{ "path": "**" }] },
     {
       "identifier": "http:default",
       "allow": [
-        {
-          "url": "https://*.miyoushe.com/*"
-        },
-        {
-          "url": "https://*.mihoyo.com/*"
-        },
-        {
-          "url": "https://*.genshinnet.com/*"
-        }
+        { "url": "https://*.miyoushe.com/*" },
+        { "url": "https://*.mihoyo.com/*" },
+        { "url": "https://*.genshinnet.com/*" }
       ]
     }
   ],
