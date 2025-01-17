@@ -1,33 +1,31 @@
 <template>
-  <TOverlay v-model="visible">
-    <div v-if="props.data" class="ton-container">
-      <slot name="left"></slot>
-      <div class="ton-box">
-        <img
-          alt="bg"
-          class="ton-bg"
-          v-if="props.data"
-          :src="`/WIKI/nameCard/profile/${props.data.name}.webp`"
-        />
-        <div class="ton-content">
-          <span>{{ props.data.name }}</span>
-          <span>{{ parseNameCard(props.data.desc) }}</span>
-          <span>获取途径：{{ props.data.source }}</span>
-        </div>
-        <div class="ton-type">{{ getType }}</div>
-        <v-btn
-          class="ton-share"
-          @click="shareNameCard"
-          variant="outlined"
-          :loading="loading"
-          data-html2canvas-ignore
-        >
-          <v-icon>mdi-share-variant</v-icon>
-          <span>分享</span>
-        </v-btn>
+  <TOverlay v-model="visible" v-if="props.data">
+    <slot name="left"></slot>
+    <div class="ton-box">
+      <img
+        alt="bg"
+        class="ton-bg"
+        v-if="props.data"
+        :src="`/WIKI/nameCard/profile/${props.data.name}.webp`"
+      />
+      <div class="ton-content">
+        <span>{{ props.data.name }}</span>
+        <span>{{ parseNameCard(props.data.desc) }}</span>
+        <span>获取途径：{{ props.data.source }}</span>
       </div>
-      <slot name="right"></slot>
+      <div class="ton-type">{{ getType }}</div>
+      <v-btn
+        class="ton-share"
+        @click="shareNameCard"
+        variant="outlined"
+        :loading="loading"
+        data-html2canvas-ignore
+      >
+        <v-icon>mdi-share-variant</v-icon>
+        <span>分享</span>
+      </v-btn>
     </div>
+    <slot name="right"></slot>
   </TOverlay>
 </template>
 <script setup lang="ts">
@@ -136,13 +134,6 @@ async function shareNameCard(): Promise<void> {
 }
 </script>
 <style lang="css" scoped>
-.ton-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  column-gap: 10px;
-}
-
 .ton-box {
   position: relative;
   overflow: hidden;
@@ -155,6 +146,7 @@ async function shareNameCard(): Promise<void> {
   position: absolute;
   width: 100%;
   height: 100%;
+  border-radius: 10px;
 }
 
 .ton-type {
@@ -172,12 +164,14 @@ async function shareNameCard(): Promise<void> {
   right: 0;
   left: 0;
   display: flex;
+  overflow: hidden;
   width: 100%;
   height: 100%;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-end;
   padding: 10px;
+  border-radius: 10px;
   backdrop-filter: blur(5px);
   background: rgb(0 0 0 / 25%);
   color: var(--tgc-white-1);
