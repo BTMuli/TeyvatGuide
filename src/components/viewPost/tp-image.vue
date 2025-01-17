@@ -71,7 +71,7 @@ watch(
   () => showOri.value,
   async () => {
     if (!showOri.value) return;
-    await showLoading.start("加载中...");
+    await showLoading.start("正在加载原图", props.data.insert.image);
     if (localUrl.value) URL.revokeObjectURL(localUrl.value);
     localUrl.value = await saveImgLocal(props.data.insert.image);
     await showLoading.end();
@@ -97,7 +97,7 @@ function getImageTitle(): string {
   return res.join("\n");
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tp-image-box {
   position: relative;
   display: flex;

@@ -159,10 +159,15 @@ defineExpose({ displayBox });
 }
 
 .loading-subtitle {
+  position: relative;
   width: 100%;
+  max-width: 100%;
   height: 25px;
+  box-sizing: border-box;
+  padding: 0 20px;
   font-size: 1rem;
   text-align: center;
+  word-break: break-all;
 }
 
 .loading-img {
