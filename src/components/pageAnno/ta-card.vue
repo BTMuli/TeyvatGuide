@@ -1,7 +1,13 @@
 <template>
   <div :id="`anno_card_${props.modelValue.id}`" class="anno-card">
     <div class="anno-cover" :title="props.modelValue.title" @click="createAnno">
-      <TMiImg :src="props.modelValue.banner" alt="cover" :ori="true" />
+      <TMiImg
+        :src="props.modelValue.banner"
+        alt="cover"
+        :ori="true"
+        v-if="props.modelValue.banner !== ''"
+      />
+      <img alt="cover" src="/source/UI/defaultCover.webp" v-else />
       <div class="anno-info">
         <div class="anno-time">
           <v-icon>mdi-clock-time-four-outline</v-icon>
