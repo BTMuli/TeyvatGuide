@@ -60,10 +60,11 @@
         </template>
         <template #item="{ props, item }">
           <div
+            :title.attr="item.raw.text"
             v-bind="props"
             class="select-item sub"
             @click="selectedForum = item.raw"
-            :class="{ selected: item.raw.value === selectedForum.value }"
+            :class="{ selected: item.raw.value === selectedForum?.value }"
           >
             <TMiImg :src="item.raw.icon" :alt="item.raw.text" :ori="true" class="icon" />
             <span>{{ item.raw.text }}</span>
