@@ -5,10 +5,9 @@
         <v-select
           v-model="curGid"
           class="home-tool-select"
-          :items="gameSelectList"
-          item-title="title"
-          item-value="gid"
+          :items="gameList"
           :hide-details="true"
+          item-value="gid"
           variant="outlined"
           label="分区"
         >
@@ -27,7 +26,7 @@
             <div
               v-bind="props"
               class="select-item sub"
-              :class="{ selected: item.raw.gid === curGid }"
+              :class="item.raw.gid === curGid ? 'selected' : ''"
             >
               <img
                 :src="item.raw.icon"
@@ -39,7 +38,7 @@
             </div>
           </template>
         </v-select>
-        <TGameNav :model-value="Number(curGid)" />
+        <TGameNav :model-value="curGid" />
       </div>
       <div class="home-select">
         <v-select
@@ -70,7 +69,7 @@ import { type Component, computed, onMounted, ref, shallowRef, watch } from "vue
 import { useAppStore } from "@/store/modules/app.js";
 import { ShowItemEnum, useHomeStore } from "@/store/modules/home.js";
 import TGLogger from "@/utils/TGLogger.js";
-import TGConstant from "@/web/constant/TGConstant.js";
+import apiHubReq from "@/web/request/apiHubReq.js";
 
 type SFComp = Component & {
   __file?: string;
@@ -78,6 +77,7 @@ type SFComp = Component & {
   __name?: string;
   __scopeId?: string;
 };
+type SelectItem = { icon: string; title: string; gid: number };
 
 const { devMode, isLogin } = storeToRefs(useAppStore());
 const homeStore = useHomeStore();
@@ -88,8 +88,8 @@ const showItemsAll: Array<ShowItemEnum> = [
   ShowItemEnum.position,
 ];
 
-const gameSelectList = TGConstant.BBS.CHANNELS;
-const curGid = ref<string>(gameSelectList[0].gid);
+const curGid = ref<number>(2);
+const gameList = shallowRef<Array<SelectItem>>();
 
 const loadItems = shallowRef<Array<ShowItemEnum>>([]);
 const components = shallowRef<Array<SFComp>>([]);
@@ -102,6 +102,11 @@ onMounted(async () => {
   // @ts-expect-error-next-line The import.meta meta-property is not allowed in files which will build into CommonJS output.
   const isProdEnv = import.meta.env.MODE === "production";
   if (isProdEnv && devMode.value) devMode.value = false;
+  if (isLogin.value) {
+    await showLoading.start("正在加载首页小部件");
+    const allGames = await apiHubReq.game();
+    gameList.value = allGames.map((i) => ({ icon: i.app_icon, title: i.name, gid: i.id }));
+  }
   await loadComp();
 });
 
@@ -190,8 +195,8 @@ async function loadEnd(item: SFComp): Promise<void> {
 }
 
 .home-tool-select {
-  width: 200px;
-  max-width: 200px;
+  width: 250px;
+  max-width: 250px;
 }
 
 .home-select {

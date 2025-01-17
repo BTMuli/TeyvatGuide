@@ -16,7 +16,7 @@ import { getDeviceInfo } from "./toolFunc.js";
 
 import { useAppStore } from "@/store/modules/app.js";
 import { useUserStore } from "@/store/modules/user.js";
-import TGConstant from "@/web/constant/TGConstant.js";
+import TGBbs from "@/utils/TGBbs.js";
 import BBSApi from "@/web/request/bbsReq.js";
 import OtherApi from "@/web/request/otherReq.js";
 import PassportApi from "@/web/request/passportReq.js";
@@ -623,10 +623,10 @@ class Client {
     let deviceInfo = useAppStore().deviceInfo;
     if (localFp === "0000000000000") deviceInfo = await OtherApi.fp(deviceInfo);
     const data = {
-      "user-agent": TGConstant.BBS.UA_MOBILE,
+      "user-agent": TGBbs.ua,
       "x-rpc-client_type": "2",
       "x-rpc-device_id": deviceInfo.device_id,
-      "x-rpc-app_version": TGConstant.BBS.VERSION,
+      "x-rpc-app_version": TGBbs.version,
       "x-rpc-device_fp": deviceInfo.device_fp,
     };
     await this.callback(arg.callback, data);

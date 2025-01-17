@@ -6,8 +6,8 @@
 
 import Md5 from "js-md5";
 
+import TGBbs from "@/utils/TGBbs.js";
 import { getDeviceInfo, getRandomString } from "@/utils/toolFunc.js";
-import { BBS_VERSION } from "@/web/constant/bbs.js";
 
 /**
  * @description salt 类型
@@ -34,7 +34,7 @@ const Salt: Readonly<Record<keyof typeof SaltType, string>> = {
   X6: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
   PROD: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
 };
-const UserAgent: Readonly<string> = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) miHoYoBBS/${BBS_VERSION}`;
+const UserAgent: Readonly<string> = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) miHoYoBBS/${TGBbs.version}`;
 
 /**
  * @description 获取随机数
@@ -126,7 +126,7 @@ export function getRequestHeader(
 ): Record<string, string> {
   return {
     "user-agent": UserAgent,
-    "x-rpc-app_version": BBS_VERSION,
+    "x-rpc-app_version": TGBbs.version,
     "x-rpc-client_type": "5",
     "x-requested-with": "com.mihoyo.hyperion",
     referer: "https://webstatic.mihoyo.com",

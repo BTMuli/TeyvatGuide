@@ -3,7 +3,7 @@
     <div class="tops-box">
       <div class="tops-top">查找：{{ search }}</div>
       <div class="tops-act">
-        <span>分区：{{ getGameName(Number(game)) }}</span>
+        <span>分区：{{ gameName }}</span>
         <v-btn :loading="load" size="small" class="tops-btn" @click="searchPosts()" rounded>
           加载更多({{ results.length }})
         </v-btn>
@@ -21,9 +21,9 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import Mys from "@Mys/index.js";
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
-import { getGameName } from "@/utils/toolFunc.js";
+import TGBbs from "@/utils/TGBbs.js";
 
 type ToPostSearchProps = { gid: string; keyword?: string };
 
@@ -35,6 +35,9 @@ const game = ref<string>("2");
 const isLast = ref<boolean>(false);
 const load = ref<boolean>(false);
 const results = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
+const gameName = computed<string>(
+  () => TGBbs.channels.find((v) => v.gid.toString() === game.value)?.title || "未知分区",
+);
 
 onMounted(async () => {
   game.value = props.gid;

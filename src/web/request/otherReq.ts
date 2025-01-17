@@ -1,13 +1,13 @@
 /**
  * @file web/request/otherReq.ts
  * @description Other API
- * @since Beta v0.6.3
+ * @since Beta v0.6.8
  */
 
+import TGBbs from "@/utils/TGBbs.js";
 import TGHttp from "@/utils/TGHttp.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { getInitDeviceInfo } from "@/utils/toolFunc.js";
-import TGConstant from "@/web/constant/TGConstant.js";
 
 /**
  * @description 获取设备指纹
@@ -85,8 +85,8 @@ async function getDeviceFp(
     device_fp: info.device_fp,
   };
   const header: Record<string, string> = {
-    "user-agent": TGConstant.BBS.UA_MOBILE,
-    "x-rpc-app_version": TGConstant.BBS.VERSION,
+    "user-agent": TGBbs.ua,
+    "x-rpc-app_version": TGBbs.version,
     "x-rpc-client_type": "5",
     "x-requested-with": "com.mihoyo.hyperion",
     Referer: "https://webstatic.mihoyo.com/",

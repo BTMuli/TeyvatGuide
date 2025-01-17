@@ -18,9 +18,10 @@
       >
         <template #selection="{ item }">
           <div class="select-item main">
-            <img
+            <TMiImg
               v-if="item.raw.icon"
               :src="item.raw.icon"
+              :ori="true"
               :alt="item.raw.text"
               :title="item.raw.text"
               class="icon"
@@ -34,7 +35,13 @@
             class="select-item sub"
             :class="{ selected: item.raw.gid === curGid }"
           >
-            <img v-if="item.raw.icon" :src="item.raw.icon" :alt="item.raw.text" class="icon" />
+            <TMiImg
+              v-if="item.raw.icon"
+              :src="item.raw.icon"
+              :alt="item.raw.text"
+              class="icon"
+              :ori="true"
+            />
             <span>{{ item.raw.text }}</span>
           </div>
         </template>
@@ -126,7 +133,6 @@ import { useRoute, useRouter } from "vue-router";
 
 import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
-import { getGameIcon, getGameName } from "@/utils/toolFunc.js";
 import ApiHubReq from "@/web/request/apiHubReq.js";
 
 type SortSelect = { text: string; value: number; icon: string };
@@ -198,16 +204,19 @@ watch(
 
 // 初始化
 async function loadForums(): Promise<void> {
+  const allGames = await ApiHubReq.game();
   const allForums = await ApiHubReq.forum();
   const gameList: Array<SortSelectGame> = [];
   for (const gameForum of allForums) {
+    const gameFind = allGames.find((i) => i.id === gameForum.game_id);
+    if (!gameFind) continue;
     const gameItem: SortSelectGame = {
       gid: gameForum.game_id,
-      icon: getGameIcon(gameForum.game_id),
+      icon: gameFind.app_icon,
       forum: gameForum.forums
         .sort((a, b) => a.order - b.order)
         .map((i) => ({ text: i.name, value: i.id, icon: i.icon_pure })),
-      text: getGameName(gameForum.game_id),
+      text: gameFind.name,
     };
     gameList.push(gameItem);
   }

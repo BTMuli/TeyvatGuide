@@ -7,10 +7,10 @@
           v-for="(item, index) in channelList"
           :key="index"
           class="toc-list-item"
-          :class="{ active: props.gid === item.gid }"
+          :class="props.gid === item.gid.toString() ? 'active' : ''"
           @click="toChannel(item)"
         >
-          <img :src="item.icon" alt="icon" />
+          <TMiImg :src="item.icon" alt="icon" :ori="true" />
           <span>{{ item.title }}</span>
         </div>
       </div>
@@ -18,25 +18,30 @@
   </TOverlay>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { storeToRefs } from "pinia";
-import { useRouter } from "vue-router";
+import { onMounted, shallowRef } from "vue";
 
 import { type NewsType, useAppStore } from "@/store/modules/app.js";
-import type { ToChannelItem } from "@/web/constant/bbs.js";
-import TGConstant from "@/web/constant/TGConstant.js";
+import apiHubReq from "@/web/request/apiHubReq.js";
 
+type ChannelItem = { icon: string; title: string; gid: number };
 type ToChannelProps = { gid?: string; curType?: string };
 
-const router = useRouter();
 const { recentNewsType } = storeToRefs(useAppStore());
-const channelList = TGConstant.BBS.CHANNELS;
+const channelList = shallowRef<Array<ChannelItem>>();
 const props = defineProps<ToChannelProps>();
 const visible = defineModel<boolean>({ default: false });
 
-async function toChannel(item: ToChannelItem): Promise<void> {
-  if (props.gid === item.gid) {
+onMounted(async () => {
+  const allGames = await apiHubReq.game();
+  channelList.value = allGames.map((i) => ({ icon: i.app_icon, title: i.name, gid: i.id }));
+});
+
+async function toChannel(item: ChannelItem): Promise<void> {
+  if (props.gid === item.gid.toString()) {
     showSnackbar.warn("当前已经在该频道");
     return;
   }
@@ -48,7 +53,7 @@ async function toChannel(item: ToChannelItem): Promise<void> {
     link = link.replace("{type}", "notice");
     recentNewsType.value = "notice";
   }
-  await router.push(link);
+  window.location.href = link;
 }
 </script>
 <style lang="css" scoped>

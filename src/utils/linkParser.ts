@@ -11,7 +11,7 @@ import { emit } from "@tauri-apps/api/event";
 import TGClient from "./TGClient.js";
 import { createPost } from "./TGWindow.js";
 
-import { getGameId } from "@/utils/toolFunc.js";
+import TGBbs from "@/utils/TGBbs.js";
 
 /**
  * @function parsePost
@@ -124,7 +124,7 @@ export async function parseLink(
       const result = url.pathname.match(regex);
       if (!result) return false;
       const [, game, topicId] = result;
-      const id = getGameId(game);
+      const id = TGBbs.channels.find((item) => item.mini === game)?.gid;
       await emit("active_deep_link", `router?path=/posts/topic/${id}/${topicId}`);
       return true;
     }

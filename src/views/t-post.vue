@@ -101,10 +101,9 @@ import { onMounted, onUnmounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
 import { useAppStore } from "@/store/modules/app.js";
+import TGBbs from "@/utils/TGBbs.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { createTGWindow } from "@/utils/TGWindow.js";
-import { CHANNEL_LIST } from "@/web/constant/bbs.js";
-import TGConstant from "@/web/constant/TGConstant.js";
 
 const appVersion = ref<string>();
 const postId = Number(useRoute().params.post_id);
@@ -117,8 +116,8 @@ const postData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
 let shareTimer: NodeJS.Timeout | null = null;
 
 function getGameIcon(gameId: number): string {
-  const find = TGConstant.BBS.CHANNELS.find((item) => item.gid === gameId.toString());
-  if (find) return find.icon;
+  const find = TGBbs.channels.find((item) => item.gid === gameId);
+  if (find) return `/platforms/mhy/${find.mini}.webp`;
   return "/platforms/mhy/mys.webp";
 }
 
@@ -229,6 +228,7 @@ async function parseContent(content: string): Promise<string> {
         break;
       default:
         await TGLogger.Warn(`[t-post][${postId}][parseContent] Unknown key: ${key}`);
+        // @ts-expect-error unknown key
         result.push({ insert: data[key] });
         break;
     }
@@ -243,7 +243,7 @@ async function createPostJson(postId: number): Promise<void> {
 }
 
 function toPost(): void {
-  const channel = CHANNEL_LIST.find((item) => item.gid === postData.value?.post.game_id.toString());
+  const channel = TGBbs.channels.find((item) => item.gid === postData.value?.post.game_id);
   if (channel) {
     window.open(`https://miyoushe.com/${channel.mini}/#/article/${postId}`);
   } else {

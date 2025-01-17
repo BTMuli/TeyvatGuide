@@ -27,6 +27,20 @@ async function getAllGamesForums(): Promise<Array<TGApp.BBS.Forum.GameForum>> {
 }
 
 /**
+ * @description 获取所有分区
+ * @since Beta v0.6.8
+ * @return {Promise<Array<TGApp.BBS.Game.Item>>}
+ */
+async function getGameList(): Promise<Array<TGApp.BBS.Game.Item>> {
+  return (
+    await TGHttp<TGApp.BBS.Game.ListResp>(`${Mahwbu}getGameList`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json", referer: Referer },
+    })
+  ).data.list;
+}
+
+/**
  * @description 获取投票信息
  * @since Beta v0.6.2
  * @param {string} id 投票 ID
@@ -80,6 +94,7 @@ const apiHubReq = {
   vote: { info: getVotes, result: getVoteResult },
   home: homeNew,
   forum: getAllGamesForums,
+  game: getGameList,
 };
 
 export default apiHubReq;

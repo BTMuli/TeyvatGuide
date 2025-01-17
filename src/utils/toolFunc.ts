@@ -12,7 +12,6 @@ import { v4 } from "uuid";
 import { score } from "wcag-color";
 
 import { AppCharacterData, AppWeaponData } from "@/data/index.js";
-import TGConstant from "@/web/constant/TGConstant.js";
 
 /**
  * @description 时间戳转换为时间字符串
@@ -271,39 +270,6 @@ export function decodeRegExp(data: string): string {
   res = res.replace(/&apos;/g, "'");
   res = res.replace(/&amp;/g, "&");
   return res;
-}
-
-/**
- * @description 根据 gid 获取游戏名称
- * @since Beta v0.6.7
- * @param {number} gid
- * @returns {string}
- */
-export function getGameName(gid: number): string {
-  const game = TGConstant.BBS.CHANNELS.find((item) => item.gid === gid.toString());
-  return game ? game.title : "未知游戏";
-}
-
-/**
- * @description 获取游戏id
- * @since Beta v0.6.7
- * @param {string} mini
- * @returns {string}
- */
-export function getGameId(mini: string): string {
-  const game = TGConstant.BBS.CHANNELS.find((item) => item.mini === mini);
-  return game ? game.gid : "0";
-}
-
-/**
- * @description 根据id获取游戏图标
- * @since Beta v0.6.8
- * @param {number|string} gid
- * @returns {string|undefined}
- */
-export function getGameIcon(gid: number | string): string | undefined {
-  const game = TGConstant.BBS.CHANNELS.find((item) => item.gid === gid.toString());
-  return game ? game.icon : undefined;
 }
 
 /**

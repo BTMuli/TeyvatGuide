@@ -16,7 +16,7 @@
       <v-select
         v-model="curGame"
         class="post-switch-item"
-        :items="topicInfo?.game_info_list"
+        :items="getGameList(topicInfo?.game_info_list)"
         item-title="name"
         :item-value="(item) => item"
         variant="outlined"
@@ -25,8 +25,8 @@
         <template #selection="{ item }">
           <div class="select-item main">
             <img
-              v-if="getGameIcon(item.raw.id)"
-              :src="getGameIcon(item.raw.id)"
+              v-if="item.raw.icon"
+              :src="item.raw.icon"
               :alt="item.raw.name"
               :title="item.raw.name"
               class="icon"
@@ -37,8 +37,8 @@
         <template #item="{ props, item }">
           <div v-bind="props" class="select-item sub" :class="{ selected: item.raw.id === curGid }">
             <img
-              v-if="getGameIcon(item.raw.id)"
-              :src="getGameIcon(item.raw.id)"
+              v-if="item.raw.icon"
+              :src="item.raw.icon"
               :alt="item.raw.name"
               :title="item.raw.name"
               class="icon"
@@ -95,10 +95,11 @@ import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { createPost } from "@/utils/TGWindow.js";
-import { getGameIcon } from "@/utils/toolFunc.js";
+import apiHubReq from "@/web/request/apiHubReq.js";
 
 type SortSelect = { text: string; value: number };
 type PostMiniData = { isLast: boolean; lastId: string; total: number };
+type GameList = TGApp.Plugins.Mys.Topic.GameInfo & { icon?: string };
 
 const route = useRoute();
 const router = useRouter();
@@ -107,10 +108,11 @@ const curGid = ref<number>(0);
 const curSortType = ref<0 | 1 | 2>(0);
 const search = ref<string>("");
 const curTopic = ref<string>("");
+const allGames = shallowRef<Array<TGApp.BBS.Game.Item>>([]);
 const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 });
 const topicInfo = shallowRef<TGApp.Plugins.Mys.Topic.InfoData>();
 const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
-const curGame = shallowRef<TGApp.Plugins.Mys.Topic.GameInfo>();
+const curGame = shallowRef<GameList>();
 const sortList = computed<Array<SortSelect>>(() => {
   if (!topicInfo.value) return [];
   if (!topicInfo.value.good_post_exist) {
@@ -135,6 +137,7 @@ onMounted(async () => {
   curGid.value = Number(gid);
   curTopic.value = topic;
   await showLoading.start(`正在加载话题${topic}信息`);
+  allGames.value = await apiHubReq.game();
   const info = await Mys.Post.getTopicFullInfo(gid, topic);
   if ("retcode" in info) {
     await showLoading.end();
@@ -142,10 +145,13 @@ onMounted(async () => {
     return;
   }
   topicInfo.value = info;
+  let tmpGame: GameList | undefined;
   if (curGame.value === undefined) {
-    curGame.value = info.game_info_list.find((i) => i.id === curGid.value);
+    tmpGame = info.game_info_list.find((i) => i.id === curGid.value);
   }
-  if (curGame.value === undefined) curGame.value = info.game_info_list[0];
+  if (tmpGame === undefined) tmpGame = info.game_info_list[0];
+  const gameFind = allGames.value.find((i) => i.id === tmpGame?.id);
+  curGame.value = { ...tmpGame, icon: gameFind?.app_icon };
   await firstLoad();
 });
 
@@ -225,6 +231,14 @@ function searchPost(): void {
   const numCheck = Number(search.value);
   if (isNaN(numCheck)) showSearch.value = true;
   else createPost(search.value);
+}
+
+function getGameList(gameList: TGApp.Plugins.Mys.Topic.GameInfo[] | undefined): GameList[] {
+  if (!gameList) return [];
+  return gameList.map((item) => {
+    const game = allGames.value.find((i) => i.id === item.id);
+    return { ...item, icon: game?.app_icon };
+  });
 }
 </script>
 <style lang="css" scoped>
@@ -337,7 +351,6 @@ function searchPost(): void {
   .icon {
     width: 28px;
     height: 28px;
-    border-radius: 4px;
   }
 }
 </style>

@@ -68,9 +68,9 @@ import { computed, onMounted, reactive, ref, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { type NewsType, NewsTypeEnum, useAppStore } from "@/store/modules/app.js";
+import TGBbs from "@/utils/TGBbs.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
-import { getGameName } from "@/utils/toolFunc.js";
 
 type PostData = { [key in NewsType]: Ref<Array<TGApp.Plugins.Mys.Post.FullData>> };
 type RawItem = { isLast: boolean; name: string; lastId: number };
@@ -78,9 +78,11 @@ type RawData = { [key in NewsType]: Ref<RawItem> };
 
 const router = useRouter();
 const { recentNewsType } = storeToRefs(useAppStore());
-const tabValues: Readonly<Array<NewsType>> = ["notice", "activity", "news"];
 const { gid } = <{ gid: string }>useRoute().params;
-const gameName = getGameName(Number(gid));
+
+const tabValues: Readonly<Array<NewsType>> = ["notice", "activity", "news"];
+const gameName = TGBbs.channels.find((v) => v.gid.toString() === gid)?.title || "未知分区";
+
 const loading = ref<boolean>(false);
 const showList = ref<boolean>(false);
 const showSearch = ref<boolean>(false);
