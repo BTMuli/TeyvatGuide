@@ -1,6 +1,6 @@
 <template>
   <div class="tur-hs-box">
-    <div class="bg"><img :src="data.bg" alt="bg" /></div>
+    <div class="bg"><img :src="data.bg" alt="bg" v-if="data.name !== '炽空境'" /></div>
     <div class="tur-hs-top">
       <div class="tur-hs-title">
         <img :src="data.comfortIcon" alt="comfort" />
@@ -41,7 +41,9 @@ defineProps<{ data: TGApp.Sqlite.Record.Home }>();
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
+  background: var(--box-bg-2);
 }
 
 .bg {
@@ -66,6 +68,7 @@ defineProps<{ data: TGApp.Sqlite.Record.Home }>();
   color: var(--tgc-white-1);
   font-family: var(--font-text);
   font-size: 16px;
+  text-shadow: 0 0 5px var(--tgc-yellow-1);
 }
 
 .tur-hs-title {
@@ -74,6 +77,7 @@ defineProps<{ data: TGApp.Sqlite.Record.Home }>();
   color: var(--tgc-white-1);
   font-family: var(--font-title);
   font-size: 20px;
+  text-shadow: 0 0 5px var(--tgc-yellow-1);
 }
 
 .tur-hs-title img {
