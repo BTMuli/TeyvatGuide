@@ -4,7 +4,7 @@
       <div class="post-topic-top" v-if="topicInfo">
         <TMiImg :src="topicInfo.topic.cover" alt="cover" :ori="true" />
         <div class="post-topic-info">
-          <span>{{ topicInfo.topic.name }}({{ topic }})</span>
+          <span>{{ topicInfo.topic.name }}({{ curTopic }})</span>
           <span :title="topicInfo.topic.desc">{{ topicInfo.topic.desc }}</span>
         </div>
       </div>
@@ -92,7 +92,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import Mys from "@Mys/index.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 import { createPost } from "@/utils/TGWindow.js";
 import { getGameIcon } from "@/utils/toolFunc.js";
@@ -100,11 +100,13 @@ import { getGameIcon } from "@/utils/toolFunc.js";
 type SortSelect = { text: string; value: number };
 type PostMiniData = { isLast: boolean; lastId: string; total: number };
 
-const { gid, topic } = <{ gid: string; topic: string }>useRoute().params;
+const route = useRoute();
+const router = useRouter();
 const showSearch = ref<boolean>(false);
-const curGid = ref<number>(Number(gid));
+const curGid = ref<number>(0);
 const curSortType = ref<0 | 1 | 2>(0);
 const search = ref<string>("");
+const curTopic = ref<string>("");
 const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 });
 const topicInfo = shallowRef<TGApp.Plugins.Mys.Topic.InfoData>();
 const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
@@ -125,6 +127,13 @@ const sortList = computed<Array<SortSelect>>(() => {
 });
 
 onMounted(async () => {
+  let { gid, topic } = route.query;
+  if (!gid) gid = route.params.gid;
+  if (!topic) topic = route.params.topic;
+  if (!gid || typeof gid !== "string") gid = "0";
+  if (!topic || typeof topic !== "string") topic = "0";
+  curGid.value = Number(gid);
+  curTopic.value = topic;
   await showLoading.start(`正在加载话题${topic}信息`);
   const info = await Mys.Post.getTopicFullInfo(gid, topic);
   if ("retcode" in info) {
@@ -154,8 +163,13 @@ watch(
 
 async function firstLoad(): Promise<void> {
   await showLoading.start(`正在加载话题${topicInfo.value?.topic.name}信息`);
+  await router.push({
+    name: "话题",
+    params: route.params,
+    query: { gid: curGid.value, topic: curTopic.value },
+  });
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
-  const postList = await Mys.Post.getTopicPostList(curGid.value, topic, curSortType.value);
+  const postList = await Mys.Post.getTopicPostList(curGid.value, curTopic.value, curSortType.value);
   if ("retcode" in postList) {
     await showLoading.end();
     showSnackbar.error(`[${postList.retcode}] ${postList.message}`);
@@ -182,7 +196,7 @@ async function freshPostData(): Promise<void> {
   const pageSize = mod20 === 0 ? 20 : 20 - mod20;
   const postList = await Mys.Post.getTopicPostList(
     curGid.value,
-    topic,
+    curTopic.value,
     curSortType.value,
     postRaw.value.lastId,
     pageSize,

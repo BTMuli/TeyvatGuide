@@ -122,7 +122,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import Mys from "@Mys/index.js";
 import { onMounted, ref, shallowRef, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
@@ -139,7 +139,8 @@ const sortOrderList: Array<Omit<SortSelect, "icon">> = [
   { text: "热门", value: 3 },
 ];
 
-const { gid, forum } = useRoute().params;
+const route = useRoute();
+const router = useRouter();
 const curGid = ref<number>(2);
 const curSortType = ref<number>(1);
 const search = ref<string>("");
@@ -153,6 +154,9 @@ const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
 onMounted(async () => {
   await showLoading.start("正在加载帖子数据");
   await loadForums();
+  let { gid, forum } = route.query;
+  if (!gid) gid = route.params.gid;
+  if (!forum) forum = route.params.forum;
   if (gid && typeof gid === "string") curGid.value = Number(gid);
   if (forum && typeof forum === "string") {
     selectedForum.value = getForum(curGid.value, Number(forum));
@@ -264,6 +268,11 @@ async function getCurrentPosts(
 
 async function freshPostData(): Promise<void> {
   if (!selectedForum.value) return;
+  await router.push({
+    name: "酒馆",
+    params: route.params,
+    query: { gid: curGid.value, forum: selectedForum.value.value },
+  });
   await showLoading.start(`正在刷新${getGameLabel(curGid.value)}帖子`);
   const gameLabel = getGameLabel(curGid.value);
   const forumLabel = getForum(curGid.value, selectedForum.value.value).text;
