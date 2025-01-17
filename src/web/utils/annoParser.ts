@@ -1,7 +1,7 @@
 /**
  * @file web/utils/annoParser.ts
  * @description 解析游戏内公告数据
- * @since Beta v0.6.7
+ * @since Beta v0.6.8
  */
 
 import TpText from "@comp/viewPost/tp-text.vue";
@@ -94,7 +94,7 @@ function parseAnnoContent(
 
 /**
  * @description 解析公告节点
- * @since Beta v0.6.0
+ * @since Beta v0.6.8
  * @param {Node} node - 节点
  * @param {Record<string, string>} attr - 属性
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
@@ -107,7 +107,9 @@ function parseAnnoNode(
     insert: { tag: node.nodeName, text: node.textContent, type: node.nodeType },
   };
   if (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) return [defaultRes];
-  if (node.nodeType === Node.TEXT_NODE) return [{ insert: node.textContent, attributes: attr }];
+  if (node.nodeType === Node.TEXT_NODE) {
+    return [{ insert: node.textContent ?? "", attributes: attr }];
+  }
   const element = <HTMLElement>node;
   defaultRes = {
     insert: {
@@ -170,7 +172,7 @@ function parseAnnoNode(
 
 /**
  * @description 解析公告段落
- * @since Beta v0.6.3
+ * @since Beta v0.6.8
  * @param {HTMLElement} p - 段落元素
  * @param {Record<string, string>} attr - 属性
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
@@ -189,7 +191,9 @@ function parseAnnoParagraph(
       childrenLength: p.childNodes.length,
     },
   };
-  if (p.childNodes.length === 0) return { insert: p.innerHTML === "" ? "\n" : p.textContent };
+  if (p.childNodes.length === 0) {
+    return { insert: p.innerHTML === "" ? "\n" : (p.textContent ?? "") };
+  }
   if (p.childNodes.length === 1) {
     if (
       p.childNodes[0].nodeType !== Node.ELEMENT_NODE &&
@@ -221,7 +225,7 @@ function parseAnnoParagraph(
   p.childNodes.forEach((child) => {
     let childRes: TGApp.Plugins.Mys.SctPost.Base;
     if (child.nodeType === Node.TEXT_NODE) {
-      childRes = { insert: child.textContent };
+      childRes = { insert: child.textContent ?? "" };
     } else if (child.nodeType === Node.ELEMENT_NODE) {
       const element = <HTMLElement>child;
       if (element.tagName === "SPAN") childRes = parseAnnoSpan(element);
@@ -247,7 +251,7 @@ function parseAnnoParagraph(
 
 /**
  * @description 解析公告 span
- * @since Beta v0.5.3
+ * @since Beta v0.6.8
  * @param {HTMLElement} span - span 元素
  * @param {Record<string, string>} attr - 属性
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
@@ -291,7 +295,7 @@ function parseAnnoSpan(
     const parse = decodeRegExp(span.innerHTML);
     if (parse.includes("</t>")) {
       const dom = new DOMParser().parseFromString(parse, "text/html");
-      return { insert: dom.body.textContent, attributes: spanAttrs };
+      return { insert: dom.body.textContent ?? "", attributes: spanAttrs };
     }
     return { insert: parse, attributes: spanAttrs };
   }
@@ -322,7 +326,7 @@ function parseAnnoImage(img: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
 
 /**
  * @description 解析公告锚点
- * @since Beta v0.5.3
+ * @since Beta v0.6.8
  * @param {HTMLElement} a - 锚点元素
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
  */
@@ -345,7 +349,7 @@ function parseAnnoAnchor(a: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
     const res = anchor.href.match(regex);
     if (res !== null && res.length > 2) link = res[2];
   }
-  return { insert: anchor.textContent, attributes: { link: link } };
+  return { insert: anchor.textContent ?? "", attributes: { link: link } };
 }
 
 /**
@@ -384,7 +388,7 @@ function parseAnnoDetails(details: HTMLElement): TGApp.Plugins.Mys.SctPost.Base 
 
 /**
  * @description 解析公告表格
- * @since Beta v0.5.3
+ * @since Beta v0.6.8
  * @param {HTMLElement} table - 表格元素
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
  */
@@ -411,10 +415,11 @@ function parseAnnoTable(table: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
         for (const cell of cellParsed) {
           if (cell.children && cell.children.length > 0) {
             for (const cellChild of cell.children) {
-              if (cellChild.attributes && JSON.stringify(cellChild.attributes === "{}")) {
+              if (cellChild.attributes && JSON.stringify(cellChild.attributes) === "{}") {
                 delete cellChild.attributes;
               }
               const cellSpan = document.createElement("span");
+              // @ts-expect-error No overload matches this call
               render(h(TpText, { data: cellChild }), cellSpan);
               span.appendChild(cellSpan);
             }
