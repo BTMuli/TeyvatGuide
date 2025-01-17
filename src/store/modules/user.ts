@@ -1,7 +1,7 @@
 /**
  * @file store/modules/user.ts
  * @description 用户信息模块
- * @since Beta v0.6.0
+ * @since Beta v0.6.8
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -33,6 +33,9 @@ export const useUserStore = defineStore(
     const uid = ref<string>();
     const cookie = ref<TGApp.App.Account.Cookie>();
     const propMap = ref<TGApp.Game.Avatar.PropMap>();
+
+    // 胡桃账号（邮箱），用于上传深渊记录
+    const hutaoEmail = ref<string>();
 
     function getProp(prop: number): TGApp.Game.Avatar.PropMapItem | false {
       if (!propMap.value) return false;
@@ -66,6 +69,7 @@ export const useUserStore = defineStore(
       briefInfo,
       account,
       propMap,
+      hutaoEmail,
       getProp,
       switchGameAccount,
     };
@@ -77,11 +81,8 @@ export const useUserStore = defineStore(
         storage: window.localStorage,
         pick: ["uid", "briefInfo", "cookie", "account"],
       },
-      {
-        key: "propMap",
-        storage: window.localStorage,
-        pick: ["propMap"],
-      },
+      { key: "propMap", storage: window.localStorage, pick: ["propMap"] },
+      { key: "hutaoAccount", storage: window.localStorage, pick: ["hutaoEmail"] },
     ],
   },
 );

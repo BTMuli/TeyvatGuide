@@ -26,7 +26,13 @@
       </div>
     </template>
     <template #append>
-      <div class="uat-right">
+      <div class="uat-hutao">
+        <span>胡桃云账号：</span>
+        <span @click="editHutaoEmail()">{{ hutaoEmail ?? "未设置" }}</span>
+      </div>
+    </template>
+    <template #extension>
+      <div class="uat-acts">
         <v-btn
           class="ua-btn"
           @click="shareAbyss()"
@@ -115,7 +121,7 @@ import { generateShareImg } from "@/utils/TGShare.js";
 import TakumiRecordGenshinApi from "@/web/request/recordReq.js";
 
 const router = useRouter();
-const { account, cookie } = storeToRefs(useUserStore());
+const { account, cookie, hutaoEmail } = storeToRefs(useUserStore());
 const userTab = ref<number>(0);
 const version = ref<string>();
 const uidCur = ref<string>();
@@ -146,6 +152,29 @@ async function toCombat(): Promise<void> {
 
 async function toWiki(): Promise<void> {
   await router.push({ name: "深渊数据库" });
+}
+
+async function editHutaoEmail(): Promise<void> {
+  if (hutaoEmail.value) {
+    const chgCheck = await showDialog.check("是否更改胡桃云账号", `当前账号：${hutaoEmail.value}`);
+    if (!chgCheck) {
+      showSnackbar.cancel("已取消更改胡桃云账号");
+      return;
+    }
+  }
+  const newEmail = await showDialog.input("请输入胡桃云账号", "胡桃云账号", hutaoEmail.value);
+  if (!newEmail) {
+    showSnackbar.cancel("已取消设置胡桃云账号");
+    return;
+  }
+  // 简单验证邮箱格式
+  const mailReg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+  if (!mailReg.test(newEmail)) {
+    showSnackbar.error("邮箱格式错误");
+    return;
+  }
+  hutaoEmail.value = newEmail;
+  showSnackbar.success("已设置胡桃云账号");
 }
 
 async function loadAbyss(): Promise<void> {
@@ -256,6 +285,7 @@ async function uploadAbyss(): Promise<void> {
   try {
     await showLoading.start(`正在上传${account.value.gameUid}的深渊数据`, `期数：${abyssData.id}`);
     const transAbyss = Hutao.Abyss.utils.transData(abyssData);
+    if (hutaoEmail.value) transAbyss.ReservedUserName = hutaoEmail.value;
     await showLoading.update("正在获取角色数据");
     const roles = await TSUserAvatar.getAvatars(Number(account.value.gameUid));
     if (!roles) {
@@ -329,9 +359,23 @@ async function deleteAbyss(): Promise<void> {
   }
 }
 
-.uat-right {
+.uat-hutao {
   display: flex;
-  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  font-family: var(--font-text);
+  font-size: 16px;
+
+  :last-child {
+    color: var(--tgc-pink-1);
+    cursor: pointer;
+    font-weight: bold;
+  }
+}
+
+.uat-acts {
+  display: flex;
   align-items: center;
   justify-content: center;
   padding: 10px;
