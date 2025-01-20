@@ -6,7 +6,7 @@
           <div class="loading-box">
             <div class="loading-title">
               <span>{{ data.title }}</span>
-              <div class="loading-circle" v-show="!empty">
+              <div class="loading-circle" v-show="!data.empty">
                 <div />
                 <div />
               </div>
@@ -15,7 +15,7 @@
               {{ data.subtitle }}
             </div>
             <div class="loading-img">
-              <img v-if="!empty" src="/source/UI/loading.webp" alt="loading" />
+              <img v-if="!data.empty" src="/source/UI/loading.webp" alt="loading" />
               <img v-else src="/source/UI/empty.webp" alt="empty" />
             </div>
           </div>
