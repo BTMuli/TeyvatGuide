@@ -6,21 +6,30 @@
     </div>
     <div class="tcb-top-active" v-else>
       <span>今天是</span>
-      <TMiImg
-        v-for="i in cur"
-        :key="i.role_id"
-        class="tcb-cur"
-        :alt="i.name"
-        :src="i.head_icon"
-        :title="i.name"
-        :ori="true"
-      />
+      <div v-for="i in cur" :key="i.role_id">
+        <TMiImg
+          :src="i.head_icon"
+          :alt="i.name"
+          :title="i.name"
+          :ori="true"
+          v-if="i.head_icon.startsWith('http')"
+        />
+        <img @click="toBirth(true)" :src="i.head_icon" alt="empty" class="tcb-cur" v-else />
+      </div>
       <span>的生日哦~</span>
       <img @click="toBirth(true)" src="/source/UI/act_birthday.png" alt="empty" class="active" />
     </div>
     <div>即将到来：{{ next[0].role_birthday }}</div>
     <div v-for="i in next" :key="i.role_id" class="tcb-item">
-      <TMiImg :src="i.head_icon" :alt="i.name" @click="toBirth(i)" :title="i.name" :ori="true" />
+      <TMiImg
+        v-if="i.head_icon.startsWith('http')"
+        :src="i.head_icon"
+        :alt="i.name"
+        @click="toBirth(i)"
+        :title="i.name"
+        :ori="true"
+      />
+      <img v-else :src="i.head_icon" alt="empty" @click="toBirth(i)" />
       <div class="tcb-item-info">
         <span>{{ i.name }} 所属：{{ i.belong === "" ? "未知" : i.belong }}</span>
         <span>{{ parseDesc(i.introduce) }}</span>
@@ -48,8 +57,10 @@ onBeforeMount(async () => {
   if (check.length !== 0) {
     isBirthday.value = true;
     cur.value = check;
+    console.log(cur.value);
   }
   next.value = TSAvatarBirth.getNextAvatarBirth();
+  console.log(next.value);
 });
 
 function toBirth(type: TGApp.Archive.Birth.RoleItem | true): void {
