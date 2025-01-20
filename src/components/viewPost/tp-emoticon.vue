@@ -1,16 +1,11 @@
 <template>
-  <div class="tp-emo-box" title="自定义表情">
+  <div class="tp-emo-box" title="自定义表情" @click="download()">
     <TMiImg
       :src="props.data.insert.custom_emoticon.url"
       :alt="props.data.insert.custom_emoticon.hash"
       :ori="true"
     />
-    <div
-      class="tp-emo-info"
-      v-if="props.data.insert.custom_emoticon.size.width > 100"
-      @click="download()"
-      title="点击下载到本地"
-    >
+    <div class="tp-emo-info" v-if="props.data.insert.custom_emoticon.size.width > 100">
       自定义表情
     </div>
   </div>
@@ -59,7 +54,7 @@ async function download(): Promise<void> {
   showSnackbar.success(`已保存${title}.${format}到本地，大小为${bytesToSize(size)}`);
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tp-emo-box {
   position: relative;
   display: flex;
@@ -67,6 +62,7 @@ async function download(): Promise<void> {
   align-items: center;
   justify-content: center;
   margin: 10px auto;
+  cursor: pointer;
 }
 
 .tp-emo-box img {
@@ -89,16 +85,7 @@ async function download(): Promise<void> {
   border-bottom-left-radius: 10px;
   border-top-right-radius: 10px;
   box-shadow: -1px 1px 3px var(--common-shadow-2);
-  cursor: pointer;
   font-family: var(--font-title);
   font-size: 12px;
-}
-
-.tp-emo-load {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 10px auto;
-  column-gap: 5px;
 }
 </style>

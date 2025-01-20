@@ -125,8 +125,9 @@ defineExpose({ displayBox });
 
 .loading-container {
   display: flex;
-  min-width: 800px;
+  width: 800px;
   min-height: 300px;
+  box-sizing: border-box;
   padding: 15px;
   border-radius: 15px;
   background: rgb(255 255 255 / 5%);
@@ -136,7 +137,7 @@ defineExpose({ displayBox });
 .loading-box {
   display: flex;
   width: 100%;
-  box-sizing: content-box;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: center;
   justify-content: center;

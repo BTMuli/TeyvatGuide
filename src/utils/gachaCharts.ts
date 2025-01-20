@@ -226,28 +226,17 @@ async function getStackBarOptions(uid: string, gachaType?: string): Promise<ECha
     temp3.push(star3);
   }
   const series: BarSeriesOption = [
-    { data: temp5, type: "bar", stack: "a", name: "五星数量", barWidth: "10px" },
-    { data: temp4, type: "bar", stack: "a", name: "四星数量", barWidth: "10px" },
-    { data: temp3, type: "bar", stack: "a", name: "三星数量", barWidth: "10px" },
+    { data: temp5, type: "bar", stack: "a", name: "五星数量" },
+    { data: temp4, type: "bar", stack: "a", name: "四星数量" },
+    { data: temp3, type: "bar", stack: "a", name: "三星数量" },
   ];
   return {
-    title: { text: "祈愿记录" },
     tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
     toolbox: { show: true, feature: { restore: {}, saveAsImage: {} } },
     legend: { data: ["三星数量", "四星数量", "五星数量"] },
     xAxis,
     yAxis: { type: "value" },
     series,
-    dataZoom: [
-      {
-        type: "inside",
-        show: true,
-        xAxisIndex: [0],
-        start: 0,
-        end: 100,
-        zoomOnMouseWheel: true,
-      },
-    ],
   };
 }
 
