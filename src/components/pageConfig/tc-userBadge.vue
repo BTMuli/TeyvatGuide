@@ -37,18 +37,6 @@
     </template>
     <template #actions>
       <v-spacer />
-      <!--      <v-btn-->
-      <!--        variant="outlined"-->
-      <!--        @click="showLoginQr = true"-->
-      <!--        icon="mdi-qrcode-scan"-->
-      <!--        title="扫码登录"-->
-      <!--      />-->
-      <!--      <v-btn-->
-      <!--        variant="outlined"-->
-      <!--        @click="tryCaptchaLogin()"-->
-      <!--        icon="mdi-cellphone"-->
-      <!--        title="验证码登录"-->
-      <!--      />-->
       <v-btn
         variant="outlined"
         @click="confirmRefreshUser(uid!)"
