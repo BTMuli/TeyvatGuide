@@ -1,9 +1,11 @@
 <template>
   <div class="tur-hs-box">
-    <div class="bg"><img :src="data.bg" alt="bg" v-if="data.name !== '炽空境'" /></div>
+    <div class="bg">
+      <TMiImg :src="data.bg" alt="bg" :ori="true" />
+    </div>
     <div class="tur-hs-top">
       <div class="tur-hs-title">
-        <img :src="data.comfortIcon" alt="comfort" />
+        <TMiImg :src="data.comfortIcon" alt="icon" :ori="true" />
         <span>{{ data.comfortName }}</span>
       </div>
       <div class="tur-hs-name">{{ data.name }}</div>
@@ -29,6 +31,8 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
+
 defineProps<{ data: TGApp.Sqlite.Record.Home }>();
 </script>
 <style lang="css" scoped>
@@ -87,6 +91,8 @@ defineProps<{ data: TGApp.Sqlite.Record.Home }>();
 }
 
 .tur-hs-text-grid {
+  position: relative;
+  z-index: 1;
   display: flex;
   width: 100%;
   justify-content: space-between;

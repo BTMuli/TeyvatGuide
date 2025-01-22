@@ -1,12 +1,16 @@
 <template>
   <div class="tur-ws-box">
-    <div class="tur-ws-bg"><img :src="data.bg" alt="bg" /></div>
-    <div class="tur-ws-icon"><img :src="icon" alt="icon" /></div>
+    <div class="tur-ws-bg">
+      <TMiImg :ori="true" :src="data.bg" alt="bg" />
+    </div>
+    <div class="tur-ws-icon">
+      <TMiImg :ori="true" :src="icon" alt="icon" />
+    </div>
     <div class="tur-ws-content">
       <div class="tur-ws-title">
         <span>{{ data.name }}</span>
         <span v-if="data.offering" class="tur-ws-sub">
-          <img :src="offer" alt="offer" />
+          <TMiImg :src="data.offering.icon" alt="offer" :ori="true" />
           <span>{{ data.offering.name }}等级：</span>
           <span>{{ data.offering.level }}</span>
           <span>级</span>
@@ -38,42 +42,25 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { event } from "@tauri-apps/api";
-import type { Event, UnlistenFn } from "@tauri-apps/api/event";
+import TMiImg from "@comp/app/t-mi-img.vue";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed } from "vue";
 
 import { useAppStore } from "@/store/modules/app.js";
 
 type TurWorldSubProps = { data: TGApp.Sqlite.Record.WorldExplore };
 
-let themeListener: UnlistenFn | null = null;
 const { theme } = storeToRefs(useAppStore());
 const props = defineProps<TurWorldSubProps>();
-const icon = ref<string>();
-const offer = ref<string>();
 
 const imgFilter = computed<string>(() => {
   if (props.data.name !== "纳塔") return "none";
   if (theme.value === "dark") return "none";
   return "invert(0.75)";
 });
-
-onMounted(async () => {
-  themeListener = await event.listen<string>("readTheme", (e: Event<string>) => {
-    if (e.payload === "dark") icon.value = props.data.iconLight;
-    else icon.value = props.data.iconDark;
-  });
-  if (props.data.offering) offer.value = props.data.offering.icon;
-  if (theme.value === "dark") icon.value = props.data.iconLight;
-  else icon.value = props.data.iconDark;
-});
-
-onUnmounted(() => {
-  if (themeListener !== null) {
-    themeListener();
-    themeListener = null;
-  }
+const icon = computed<string>(() => {
+  if (theme.value === "dark") return props.data.iconLight;
+  return props.data.iconDark;
 });
 </script>
 <style lang="css" scoped>

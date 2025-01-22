@@ -1,7 +1,7 @@
 <template>
   <div class="tur-ri-box">
     <div class="tur-ri-avatar">
-      <img :src="props.modelValue.avatar" alt="avatar" />
+      <TMiImg :ori="true" :src="props.modelValue.avatar" alt="avatar" />
     </div>
     <div class="tur-ri-content">
       <div class="tur-ri-title">
@@ -16,6 +16,8 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
+
 type TurRoleInfoProps = { uid: number; modelValue: TGApp.Sqlite.Record.Role };
 
 const props = defineProps<TurRoleInfoProps>();
