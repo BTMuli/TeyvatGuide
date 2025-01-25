@@ -36,9 +36,9 @@ const codeData = shallowRef<TGApp.BBS.Navigator.CodeData[]>([]);
 const showOverlay = ref<boolean>(false);
 const actId = ref<string>();
 
-const hasNav = computed<boolean>(() => {
-  if (props.modelValue !== 2) return false;
-  return nav.value.find((item) => item.name === "前瞻直播") !== undefined;
+const hasNav = computed<TGApp.BBS.Navigator.Navigator | undefined>(() => {
+  if (props.modelValue !== 2) return undefined;
+  return nav.value.find((item) => item.name === "前瞻直播" || item.name === "直播兑换码");
 });
 
 onMounted(async () => await loadNav());
@@ -54,9 +54,8 @@ async function loadNav(): Promise<void> {
 
 async function tryGetCode(): Promise<void> {
   if (props.modelValue !== 2) return;
-  const navFind = nav.value.find((item) => item.name === "前瞻直播");
-  if (!navFind) return;
-  const actIdFind = new URL(navFind.app_path).searchParams.get("act_id");
+  if (!hasNav.value) return;
+  const actIdFind = new URL(hasNav.value.app_path).searchParams.get("act_id");
   if (!actIdFind) {
     showSnackbar.warn("未找到活动ID");
     return;
