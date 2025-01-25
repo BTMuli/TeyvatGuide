@@ -14,7 +14,7 @@
       />
       <TurOverviewSub
         :text="modelValue.combatRole"
-        icon="/icon/material/201.webp"
+        icon="/source/UI/userCombat.webp"
         title="幻想真境剧诗"
       />
     </div>
