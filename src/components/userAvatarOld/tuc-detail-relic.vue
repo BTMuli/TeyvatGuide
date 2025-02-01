@@ -7,11 +7,13 @@
       <img :src="`/icon/bg/${modelValue.rarity}-Star.webp`" alt="bg" />
     </div>
     <div v-if="modelValue" class="tuc-dr-icon">
-      <img :src="modelValue.icon" alt="relic" />
+      <TMiImg :ori="true" :src="modelValue.icon" alt="relic" />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
+
 defineProps<{ modelValue: TGApp.Game.Avatar.Relic | false; pos: number }>();
 </script>
 <style lang="css" scoped>
@@ -45,8 +47,11 @@ defineProps<{ modelValue: TGApp.Game.Avatar.Relic | false; pos: number }>();
   position: absolute;
   top: 0;
   left: 0;
+  display: flex;
   width: 100%;
   height: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
 .tuc-dr-icon img {

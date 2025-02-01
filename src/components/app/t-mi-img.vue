@@ -7,7 +7,9 @@
     @click="emits('click')"
     :class="props.class"
   />
-  <v-progress-circular v-else indeterminate color="primary" size="25" />
+  <div class="progress" v-else>
+    <v-progress-circular indeterminate color="primary" size="25" />
+  </div>
 </template>
 <script lang="ts" setup>
 import { onMounted, onUnmounted, ref, watch } from "vue";
@@ -22,9 +24,7 @@ type TMiImgProps = {
   class?: string;
   ori?: boolean;
 };
-type TMiImgEmits = {
-  (e: "click"): void;
-};
+type TMiImgEmits = (e: "click") => void;
 const props = defineProps<TMiImgProps>();
 const emits = defineEmits<TMiImgEmits>();
 
@@ -42,6 +42,7 @@ watch(
   async () => {
     if (!props.src) return;
     if (localUrl.value) URL.revokeObjectURL(localUrl.value);
+    localUrl.value = undefined;
     const link = props.ori ? props.src : appStore.getImageUrl(props.src);
     localUrl.value = await saveImgLocal(link);
   },
@@ -51,3 +52,13 @@ onUnmounted(() => {
   if (localUrl.value) URL.revokeObjectURL(localUrl.value);
 });
 </script>
+<style lang="scss" scoped>
+.progress {
+  width: 25px;
+  height: 25px;
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+}
+</style>

@@ -1,6 +1,8 @@
 <template>
   <div class="tua-dc-container">
-    <img :src="avatar" class="tua-dc-avatar" alt="avatar" />
+    <div class="tua-dc-avatar">
+      <TMiImg :src="props.modelValue.avatar.image" :ori="true" alt="avatar" />
+    </div>
     <v-btn
       class="tua-dc-share"
       prepend-icon="mdi-share-variant"
@@ -73,9 +75,10 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAvatar from "@Sqlite/modules/userAvatar.js";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import TuaDcConstellations from "./tua-dc-constellations.vue";
 import TuaDcProp from "./tua-dc-prop.vue";
@@ -84,7 +87,7 @@ import TuaDcTalents from "./tua-dc-talents.vue";
 import TuaDcWeapon from "./tua-dc-weapon.vue";
 
 import { useUserStore } from "@/store/modules/user.js";
-import { generateShareImg, saveImgLocal } from "@/utils/TGShare.js";
+import { generateShareImg } from "@/utils/TGShare.js";
 
 type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
 type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
@@ -107,36 +110,13 @@ const propMain = computed<Array<TGApp.Game.Avatar.PropMapItem | false>>(() =>
 );
 
 const bg = ref<string>("/WIKI/nameCard/profile/原神·印象.webp");
-const avatar = ref<string>(props.modelValue.avatar.image);
 const loading = ref<boolean>(false);
 
-onMounted(async () => {
-  await loadData();
-});
-
-onUnmounted(() => {
-  if (avatar.value.startsWith("blob:")) {
-    URL.revokeObjectURL(avatar.value);
-  }
-});
-
-watch(
-  () => props.modelValue,
-  async () => {
-    if (avatar.value.startsWith("blob:")) {
-      URL.revokeObjectURL(avatar.value);
-    }
-    avatar.value = props.modelValue.avatar.image;
-    await loadData();
-  },
-);
+onMounted(async () => await loadData());
 
 async function loadData(): Promise<void> {
   const card = TSUserAvatar.getAvatarCard(props.modelValue.cid);
   bg.value = `url("/WIKI/nameCard/profile/${card}.webp")`;
-  if (!avatar.value.startsWith("blob:")) {
-    avatar.value = await saveImgLocal(props.modelValue.avatar.image);
-  }
 }
 
 async function share(): Promise<void> {
@@ -176,9 +156,18 @@ async function share(): Promise<void> {
 .tua-dc-avatar {
   position: absolute;
   top: 0;
-  left: -80px;
+  left: 0;
+  display: flex;
+  width: 300px;
   height: 100%;
+  align-items: center;
+  justify-content: center;
   object-fit: contain;
+
+  img {
+    height: 100%;
+    object-fit: contain;
+  }
 }
 
 .tua-dc-rt {

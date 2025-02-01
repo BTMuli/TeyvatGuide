@@ -1,6 +1,8 @@
 <template>
   <div class="tuc-do-box">
-    <img :src="bg" alt="role" class="tuc-do-bg" />
+    <div class="tuc-do-bg">
+      <TMiImg :ori="true" :src="bg" alt="role" />
+    </div>
     <div class="tuc-do-show">
       <div class="tuc-do-main">
         <div class="tuc-do-left">
@@ -72,6 +74,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import TucDetailConstellation from "./tuc-detail-constellation.vue";
@@ -160,12 +163,21 @@ function switchBg(): void {
   position: absolute;
   top: 0;
   left: 0;
+  display: flex;
   width: 100%;
   max-height: 100%;
+  align-items: center;
+  justify-content: center;
   border-radius: 5px;
   margin: 0 auto;
   object-fit: v-bind(bgFit);
   transform: translateY(v-bind(bgTransY));
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 }
 
 .tuc-do-costume {

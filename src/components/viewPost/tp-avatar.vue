@@ -2,11 +2,12 @@
   <div class="tp-avatar-box">
     <div v-if="props.position === 'right'" class="tpa-text">
       <div>{{ props.data.nickname }}</div>
-      <div :title="getAuthorDesc()">{{ getAuthorDesc() }}</div>
+      <div :title="authorDesc">{{ authorDesc }}</div>
     </div>
     <div class="tpa-img">
-      <img :src="avatarUrl" alt="avatar" class="tpa-icon" v-if="avatarUrl" />
-      <img
+      <TMiImg :ori="true" :src="props.data.avatar_url" alt="avatar" class="tpa-icon" />
+      <TMiImg
+        :ori="true"
         :src="props.data.pendant"
         alt="pendant"
         class="tpa-pendant"
@@ -23,36 +24,22 @@
     </div>
     <div v-if="props.position === 'left'" class="tpa-text">
       <div>{{ props.data.nickname }}</div>
-      <div :title="getAuthorDesc()">{{ getAuthorDesc() }}</div>
+      <div :title="authorDesc">{{ authorDesc }}</div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
-
-import { useAppStore } from "@/store/modules/app.js";
-import { saveImgLocal } from "@/utils/TGShare.js";
+import TMiImg from "@comp/app/t-mi-img.vue";
+import { computed } from "vue";
 
 type TpAvatarProps = { data: TGApp.Plugins.Mys.User.Post; position: "left" | "right" };
 
 const props = defineProps<TpAvatarProps>();
-const appStore = useAppStore();
-const avatarUrl = ref<string>();
-const pendantUrl = ref<string>();
 
-onMounted(async () => {
-  avatarUrl.value = await saveImgLocal(appStore.getImageUrl(props.data.avatar_url));
-});
-
-onUnmounted(() => {
-  if (avatarUrl.value) URL.revokeObjectURL(avatarUrl.value);
-  if (pendantUrl.value) URL.revokeObjectURL(pendantUrl.value);
-});
-
-function getAuthorDesc(): string {
+const authorDesc = computed<string>(() => {
   if (props.data.certification.label !== "") return props.data.certification.label;
   return props.data.introduce;
-}
+});
 
 const levelColor = computed<string>(() => {
   const level = props.data.level_exp.level;

@@ -1,7 +1,7 @@
 <template>
   <div class="duc-dolb-box">
     <div
-      v-for="constellation in constellations"
+      v-for="constellation in props.modelValue"
       :key="constellation.pos"
       :title="constellation.name"
       class="duc-dolb-item"
@@ -9,48 +9,18 @@
       <div v-if="!constellation.is_actived" class="duc-dolb-lock">
         <v-icon color="white">mdi-lock</v-icon>
       </div>
-      <img class="duc-dolb-icon" :src="constellation.icon" alt="constellation" />
+      <div class="duc-dolb-icon">
+        <TMiImg :ori="true" :src="constellation.icon" alt="constellation" />
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, onUnmounted, shallowRef, watch } from "vue";
-
-import { saveImgLocal } from "@/utils/TGShare.js";
+import TMiImg from "@comp/app/t-mi-img.vue";
 
 type DucDetailOlbProps = { modelValue: Array<TGApp.Game.Avatar.Constellation> };
 
 const props = defineProps<DucDetailOlbProps>();
-const constellations = shallowRef<Array<TGApp.Game.Avatar.Constellation>>([]);
-
-async function loadData() {
-  const tempConstellations = JSON.parse(JSON.stringify(props.modelValue));
-  for (const constellation of tempConstellations) {
-    if (constellation.icon.startsWith("blob:")) return;
-    constellation.icon = await saveImgLocal(constellation.icon);
-  }
-  constellations.value = tempConstellations;
-}
-
-onMounted(async () => await loadData());
-watch(
-  () => props.modelValue,
-  async () => {
-    for (const constellation of constellations.value) {
-      if (constellation.icon.startsWith("blob:")) {
-        URL.revokeObjectURL(constellation.icon);
-      }
-    }
-    await loadData();
-  },
-);
-onUnmounted(() => {
-  for (const constellation of constellations.value) {
-    if (constellation.icon.startsWith("blob:")) {
-      URL.revokeObjectURL(constellation.icon);
-    }
-  }
-});
 </script>
 <style>
 .duc-dolb-box {
@@ -75,6 +45,7 @@ onUnmounted(() => {
 
 .duc-dolb-lock {
   position: absolute;
+  z-index: 2;
   display: flex;
   width: 54px;
   height: 54px;
@@ -88,9 +59,20 @@ onUnmounted(() => {
 }
 
 .duc-dolb-icon {
+  position: relative;
+  z-index: 1;
+  display: flex;
   width: 50px;
   height: 50px;
+  align-items: center;
+  justify-content: center;
   padding: 5px;
   border-radius: 50%;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 }
 </style>

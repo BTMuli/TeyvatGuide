@@ -23,7 +23,7 @@
       </div>
       <div class="tua-abl-skills">
         <div v-for="skill in skills" :key="skill.skill_id" class="tua-abl-skill">
-          <img :src="skill.icon" alt="skill" />
+          <TMiImg :ori="true" :src="skill.icon" alt="skill" />
           <span>Lv.{{ skill.level }}</span>
         </div>
       </div>
@@ -46,6 +46,7 @@
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import TMiImg from "@comp/app/t-mi-img.vue";
 import TSUserAvatar from "@Sqlite/modules/userAvatar.js";
 import { computed } from "vue";
 

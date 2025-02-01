@@ -1,14 +1,16 @@
 <template>
   <div class="tuc-dc-box">
     <div v-if="!modelValue.is_actived" class="tuc-dc-lock">
-      <v-icon color="white"> mdi-lock </v-icon>
+      <v-icon color="white"> mdi-lock</v-icon>
     </div>
     <div class="tuc-dc-icon">
-      <img :src="modelValue.icon" alt="constellation" />
+      <TMiImg :ori="true" :src="modelValue.icon" alt="constellation" />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
+
 defineProps<{ modelValue: TGApp.Game.Avatar.Constellation }>();
 </script>
 <style lang="css" scoped>
@@ -34,8 +36,11 @@ defineProps<{ modelValue: TGApp.Game.Avatar.Constellation }>();
 }
 
 .tuc-dc-icon {
+  display: flex;
   width: 54px;
   height: 54px;
+  align-items: center;
+  justify-content: center;
   padding: 3px;
   border: 1px solid rgb(0 0 0/20%);
   border-radius: 50%;

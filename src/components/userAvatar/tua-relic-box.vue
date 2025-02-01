@@ -14,11 +14,13 @@
         v-if="props.modelValue === false"
         class="empty"
       />
-      <img :src="props.modelValue.icon" :alt="props.modelValue.name" v-else />
+      <TMiImg :ori="true" :src="props.modelValue.icon" :alt="props.modelValue.name" v-else />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
+
 import { useUserStore } from "@/store/modules/user.js";
 
 type TuaRelicBoxProps = { modelValue: TGApp.Game.Avatar.Relic | false; position: number };
@@ -71,8 +73,11 @@ function getRelicTitle(): string {
 
 .tua-relic-icon {
   position: relative;
+  display: flex;
   width: 100%;
   height: 100%;
+  align-items: center;
+  justify-content: center;
 
   img {
     width: 100%;

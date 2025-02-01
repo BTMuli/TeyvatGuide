@@ -7,7 +7,7 @@
       <img :src="`/icon/bg/${props.modelValue.rarity}-Star.webp`" alt="bg" />
     </div>
     <div v-if="props.modelValue" class="duc-dr-icon">
-      <img :src="props.modelValue.icon" alt="relic" />
+      <TMiImg :ori="true" :src="props.modelValue.icon" alt="relic" />
     </div>
     <div v-if="props.modelValue !== false" class="duc-dr-level">
       {{ props.modelValue.level }}
@@ -15,6 +15,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import { computed } from "vue";
 
 type ducDetailRelicProps = { modelValue: TGApp.Game.Avatar.Relic | false; pos: number };
@@ -61,8 +62,11 @@ const relicBg = computed<string>(() => {
   position: absolute;
   top: 0;
   left: 0;
+  display: flex;
   width: 100%;
   height: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
 .duc-dr-icon img {

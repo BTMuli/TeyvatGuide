@@ -16,7 +16,7 @@
             v-if="props.modelValue === false"
             class="empty"
           />
-          <img :src="props.modelValue.icon" :alt="props.modelValue.name" v-else />
+          <TMiImg :ori="true" :src="props.modelValue.icon" :alt="props.modelValue.name" v-else />
         </div>
       </div>
       <div class="tua-dcr-right">
@@ -59,6 +59,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import { computed } from "vue";
 
 import { useUserStore } from "@/store/modules/user.js";
@@ -188,8 +189,11 @@ function getPropSubStyle(
 
 .tua-dcr-icon {
   position: relative;
+  display: flex;
   width: 36px;
   height: 36px;
+  align-items: center;
+  justify-content: center;
 
   img {
     width: 100%;

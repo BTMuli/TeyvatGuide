@@ -2,54 +2,24 @@
   <div class="duc-dort-box">
     <div
       :title="talent.name"
-      v-for="talent in talents"
+      v-for="talent in props.modelValue"
       :key="talent.skill_id"
       class="duc-dort-item"
     >
       <span>{{ talent.name }}</span>
-      <img :src="talent.icon" alt="talent" />
+      <div class="duc-dort-icon">
+        <TMiImg :ori="true" :src="talent.icon" alt="talent" />
+      </div>
       <span>Lv.{{ talent.level === 0 ? 1 : talent.level }}</span>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, onUnmounted, shallowRef, watch } from "vue";
-
-import { saveImgLocal } from "@/utils/TGShare.js";
+import TMiImg from "@comp/app/t-mi-img.vue";
 
 type DucDetailOrtProps = { modelValue: Array<TGApp.Game.Avatar.Skill> };
 
 const props = defineProps<DucDetailOrtProps>();
-const talents = shallowRef<Array<TGApp.Game.Avatar.Skill>>([]);
-
-async function loadData(): Promise<void> {
-  const tempTalent = JSON.parse(JSON.stringify(props.modelValue));
-  for (const talent of tempTalent) {
-    if (talent.icon.startsWith("blob:")) return;
-    talent.icon = await saveImgLocal(talent.icon);
-  }
-  talents.value = tempTalent;
-}
-
-onMounted(async () => await loadData());
-watch(
-  () => props.modelValue,
-  async () => {
-    for (const talent of talents.value) {
-      if (talent.icon.startsWith("blob:")) {
-        URL.revokeObjectURL(talent.icon);
-      }
-    }
-    await loadData();
-  },
-);
-onUnmounted(() => {
-  for (const talent of talents.value) {
-    if (talent.icon.startsWith("blob:")) {
-      URL.revokeObjectURL(talent.icon);
-    }
-  }
-});
 </script>
 <style lang="css" scoped>
 .duc-dort-box {
@@ -61,17 +31,28 @@ onUnmounted(() => {
 .duc-dort-item {
   display: flex;
   justify-content: flex-end;
-  column-gap: 10px;
+  column-gap: 8px;
 }
 
-.duc-dort-item img {
-  width: 40px;
-  height: 40px;
-  padding: 5px;
+.duc-dort-icon {
+  position: relative;
+  display: flex;
+  width: 48px;
+  height: 48px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
   border-radius: 50%;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   background: rgba(0 0 0 /40%);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 }
 
 .duc-dort-item span {
@@ -82,10 +63,5 @@ onUnmounted(() => {
   font-family: var(--font-title);
   font-size: 16px;
   text-shadow: 0 0 5px rgba(0 0 0/40%);
-}
-
-.duc-dort-item :nth-last-child(1) {
-  width: 48px;
-  justify-content: flex-start;
 }
 </style>

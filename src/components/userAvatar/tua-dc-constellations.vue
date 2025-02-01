@@ -6,7 +6,7 @@
       class="tua-dcc-item"
       :title="`${constellation.pos}命-${constellation.name}`"
     >
-      <img :src="constellation.icon" alt="constellation" class="tua-dcc-icon" />
+      <TMiImg :ori="true" :src="constellation.icon" alt="constellation" class="tua-dcc-icon" />
       <div v-if="!constellation.is_actived" class="tua-dcc-lock">
         <v-icon size="10px" color="var(--tgc-od-white)">mdi-lock</v-icon>
       </div>
@@ -14,6 +14,8 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
+
 type TuaDcConstellationsProps = { modelValue: Array<TGApp.Game.Avatar.Constellation> };
 
 const props = defineProps<TuaDcConstellationsProps>();

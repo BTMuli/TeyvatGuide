@@ -6,7 +6,7 @@
       :title="skill.name"
       class="tua-dct-item"
     >
-      <img :src="skill.icon" alt="talent" class="tua-dct-icon" />
+      <TMiImg :ori="true" :src="skill.icon" alt="talent" class="tua-dct-icon" />
       <div v-if="!skill.is_unlock" class="tua-dct-lock">
         <v-icon size="10px" color="var(--tgc-od-white)">mdi-lock</v-icon>
       </div>
@@ -17,6 +17,8 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
+
 type TuaDcTalentsProps = { modelValue: Array<TGApp.Game.Avatar.Skill> };
 
 const props = defineProps<TuaDcTalentsProps>();
