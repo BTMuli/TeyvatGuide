@@ -3,7 +3,7 @@
     <div class="top">
       <div class="main">
         <div class="left" @click="openPosition(props.position)">
-          <TMiImg :src="props.position.icon" alt="icon" />
+          <img :src="props.position.icon" alt="icon" />
         </div>
         <div class="right">
           <div class="title">{{ props.position.title }}</div>
@@ -38,7 +38,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import type { PositionItem } from "@comp/pageHome/ph-comp-position.vue";
 

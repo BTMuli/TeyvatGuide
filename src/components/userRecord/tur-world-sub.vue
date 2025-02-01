@@ -1,16 +1,16 @@
 <template>
   <div class="tur-ws-box">
     <div class="tur-ws-bg">
-      <TMiImg :ori="true" :src="data.bg" alt="bg" />
+      <img :src="data.bg" alt="bg" />
     </div>
     <div class="tur-ws-icon">
-      <TMiImg :ori="true" :src="icon" alt="icon" />
+      <img :src="icon" alt="icon" />
     </div>
     <div class="tur-ws-content">
       <div class="tur-ws-title">
         <span>{{ data.name }}</span>
         <span v-if="data.offering" class="tur-ws-sub">
-          <TMiImg :src="data.offering.icon" alt="offer" :ori="true" />
+          <img :src="data.offering.icon" alt="offer" />
           <span>{{ data.offering.name }}等级：</span>
           <span>{{ data.offering.level }}</span>
           <span>级</span>
@@ -42,7 +42,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TMiImg from "@comp/app/t-mi-img.vue";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
 

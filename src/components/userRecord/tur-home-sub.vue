@@ -1,11 +1,11 @@
 <template>
   <div class="tur-hs-box">
     <div class="bg">
-      <TMiImg :src="data.bg" alt="bg" :ori="true" />
+      <img :src="data.bg" alt="bg" />
     </div>
     <div class="tur-hs-top">
       <div class="tur-hs-title">
-        <TMiImg :src="data.comfortIcon" alt="icon" :ori="true" />
+        <img :src="data.comfortIcon" alt="icon" />
         <span>{{ data.comfortName }}</span>
       </div>
       <div class="tur-hs-name">{{ data.name }}</div>
@@ -31,8 +31,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TMiImg from "@comp/app/t-mi-img.vue";
-
 defineProps<{ data: TGApp.Sqlite.Record.Home }>();
 </script>
 <style lang="css" scoped>
