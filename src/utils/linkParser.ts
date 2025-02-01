@@ -1,7 +1,7 @@
 /**
  * @file src/utils/linkParser.ts
  * @description 处理链接
- * @since Beta v0.6.7
+ * @since Beta v0.6.9
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -15,7 +15,7 @@ import TGBbs from "@/utils/TGBbs.js";
 
 /**
  * @function parsePost
- * @since Beta v0.5.5
+ * @since Beta v0.6.9
  * @description 处理帖子
  * @param {string} link
  * @returns {Promise<false|string>} - 处理情况，或者转换后的链接
@@ -24,17 +24,17 @@ export async function parsePost(link: string): Promise<false | string> {
   const url = new URL(link);
   if (url.protocol !== "https:" && url.protocol !== "http:") {
     if (url.protocol === "mihoyobbs:") {
-      if (url.pathname.startsWith("//article/")) {
+      if (url.hostname === "article") {
         const postId = url.pathname.split("/").pop();
         if (!postId) return false;
         return postId;
       }
-      if (url.pathname === "//webview" && url.search.startsWith("?link=")) {
+      if (url.hostname === "webview" && url.search.startsWith("?link=")) {
         const urlTransform = decodeURIComponent(url.search.replace("?link=", ""));
         return await parsePost(urlTransform);
       }
       // 不保证转换后的链接可用
-      if (url.pathname === "//openURL" && url.search.startsWith("?url=")) {
+      if (url.hostname === "openURL" && url.search.startsWith("?url=")) {
         const urlTransform = decodeURIComponent(url.search.replace("?url=", ""));
         return await parsePost(urlTransform);
       }
@@ -57,7 +57,7 @@ export async function parsePost(link: string): Promise<false | string> {
 
 /**
  * @function parseLink
- * @since Beta v0.6.5
+ * @since Beta v0.6.9
  * @description 处理链接
  * @param {string} link - 链接
  * @param {boolean} useInner - 是否采用内置 JSBridge 打开
@@ -70,30 +70,30 @@ export async function parseLink(
   const url = new URL(link);
   if (url.protocol !== "https:" && url.protocol !== "http:") {
     if (url.protocol === "mihoyobbs:") {
-      if (url.pathname.startsWith("//article/")) {
+      if (url.hostname === "article") {
         const postId = url.pathname.split("/").pop();
         if (!postId) return false;
         await createPost(postId);
         return true;
       }
-      if (url.pathname === "//webview" && url.search.startsWith("?link=")) {
+      if (url.hostname === "webview" && url.search.startsWith("?link=")) {
         const urlTransform = decodeURIComponent(url.search.replace("?link=", ""));
         return await parseLink(urlTransform, useInner);
       }
       // 不保证转换后的链接可用
-      if (url.pathname === "//openURL" && url.search.startsWith("?url=")) {
+      if (url.hostname === "openURL" && url.search.startsWith("?url=")) {
         const urlTransform = decodeURIComponent(url.search.replace("?url=", ""));
         return await parseLink(urlTransform, useInner);
       }
-      console.log(url.pathname, url.search);
+      console.log(url);
       // 处理特定路径
-      if (url.pathname.startsWith("//discussion")) {
+      if (url.hostname === "discussion") {
         const gid = url.pathname.split("/").pop();
         const forum = url.searchParams.get("forum_id");
         await emit("active_deep_link", `router?path=/posts/forum/${gid}/${forum}`);
         return true;
       }
-      if (url.pathname.startsWith("//homeForum")) {
+      if (url.hostname === "homeForum") {
         const game_id = url.searchParams.get("game_id");
         const tab_type = url.searchParams.get("tab_type");
         if (game_id && tab_type) {
