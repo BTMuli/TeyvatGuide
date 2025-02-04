@@ -5,14 +5,12 @@
       <div :title="authorDesc">{{ authorDesc }}</div>
     </div>
     <div class="tpa-img">
-      <TMiImg :ori="true" :src="props.data.avatar_url" alt="avatar" class="tpa-icon" />
-      <TMiImg
-        :ori="true"
-        :src="props.data.pendant"
-        alt="pendant"
-        class="tpa-pendant"
-        v-if="props.data.pendant !== ''"
-      />
+      <div class="tpa-icon">
+        <TMiImg :ori="true" :src="props.data.avatar_url" alt="avatar" />
+      </div>
+      <div v-if="props.data.pendant !== ''" class="tpa-pendant">
+        <TMiImg :ori="true" :src="props.data.pendant" alt="pendant" />
+      </div>
       <div
         :class="{
           'tpa-level-left': props.position === 'left',
@@ -97,18 +95,38 @@ const levelColor = computed<string>(() => {
   position: absolute;
   top: 5px;
   left: 5px;
+  display: flex;
   width: 40px;
   height: 40px;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   background: var(--common-shadow-1);
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: contain;
+  }
 }
 
 .tpa-pendant {
   position: absolute;
   top: 0;
   left: 0;
+  display: flex;
   width: 50px;
   height: 50px;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: contain;
+  }
 }
 
 .tpa-level-left,
