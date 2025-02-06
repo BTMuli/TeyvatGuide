@@ -3644,7 +3644,7 @@
   "process": {
     "default_permission": {
       "identifier": "default",
-      "description": "This permission set configures which\nprocess feeatures are by default exposed.\n\n#### Granted Permissions\n\nThis enables to quit via `allow-exit` and restart via `allow-restart`\nthe application.\n",
+      "description": "This permission set configures which\nprocess features are by default exposed.\n\n#### Granted Permissions\n\nThis enables to quit via `allow-exit` and restart via `allow-restart`\nthe application.\n",
       "permissions": ["allow-exit", "allow-restart"]
     },
     "permissions": {

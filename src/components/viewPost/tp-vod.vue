@@ -111,7 +111,7 @@ onMounted(async () => {
         html: `<i class="mdi mdi-download"></i>`,
         tooltip: "下载封面",
         click: async () => {
-          await showLoading.start("正在下载封面");
+          await showLoading.start("正在下载封面", props.data.insert.vod.cover);
           if (!coverBuffer.value) {
             coverBuffer.value = await getImageBuffer(props.data.insert.vod.cover);
           }
