@@ -49,9 +49,7 @@ async function download(): Promise<void> {
     return;
   }
   const format = image.split(".").pop();
-  const title = props.data.insert.custom_emoticon.hash;
   await saveCanvasImg(buffer.value, props.data.insert.custom_emoticon.hash, format);
-  showSnackbar.success(`已保存${title}.${format}到本地，大小为${bytesToSize(size)}`);
 }
 </script>
 <style lang="scss" scoped>
