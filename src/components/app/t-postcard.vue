@@ -293,7 +293,6 @@ async function toForum(forum: TGApp.Plugins.Mys.News.RenderForum): Promise<void>
   align-items: flex-start;
   justify-content: flex-start;
   color: var(--box-text-5);
-  cursor: pointer;
   font-size: 12px;
   gap: 5px;
 
@@ -310,6 +309,7 @@ async function toForum(forum: TGApp.Plugins.Mys.News.RenderForum): Promise<void>
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   background: var(--box-bg-2);
+  cursor: pointer;
   gap: 3px;
 }
 
