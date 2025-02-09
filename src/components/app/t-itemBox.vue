@@ -7,7 +7,9 @@
       <slot name="icon"><img :src="props.modelValue.icon" alt="icon" /></slot>
     </div>
     <div class="tib-cover">
-      <div class="tib-lt"><img :src="props.modelValue.lt" alt="lt" /></div>
+      <div class="tib-lt" v-show="props.modelValue.lt !== ''">
+        <img :src="props.modelValue.lt" alt="lt" />
+      </div>
       <div v-show="props.modelValue.rt" class="tib-rt">{{ props.modelValue.rt }}</div>
       <div class="tib-inner">
         <slot name="inner-icon">

@@ -6,22 +6,34 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 
-import { getZhElement } from "@/utils/toolFunc.js";
+import { getWikiBrief, getZhElement } from "@/utils/toolFunc.js";
 
 type TucAvatarsProps = { modelValue: Array<TGApp.Game.Combat.Avatar>; detail: boolean };
 
 const props = defineProps<TucAvatarsProps>();
 
 function getItemBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
+  const findAvatar = getWikiBrief(item.avatar_id);
+  let innerText = item.avatar_type === 2 ? "试用角色" : item.avatar_type === 3 ? "助演角色" : "";
+  let findWeapon;
+  if (findAvatar) {
+    findWeapon = findAvatar.weapon;
+    if (innerText === "") innerText = findAvatar.name;
+  }
   return {
     bg: `/icon/bg/${item.rarity === 105 ? 5 : item.rarity}-BGC.webp`,
     clickable: false,
     display: "inner",
     height: "80px",
     icon: `/WIKI/character/${item.avatar_id}.webp`,
-    innerHeight: item.avatar_type !== 1 ? 20 : 0,
-    innerText: item.avatar_type === 2 ? "试用角色" : item.avatar_type === 3 ? "助演角色" : "",
-    lt: `/icon/element/${getZhElement(item.element)}元素.webp`,
+    innerHeight: innerText === "" ? 0 : 20,
+    innerText: innerText,
+    lt:
+      item.element === "None"
+        ? findWeapon
+          ? `/icon/weapon/${findWeapon}.webp`
+          : ""
+        : `/icon/element/${getZhElement(item.element)}元素.webp`,
     ltSize: "20px",
     innerBlur: "5px",
     rt: "",
