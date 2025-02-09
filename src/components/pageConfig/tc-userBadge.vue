@@ -89,7 +89,7 @@
       </v-menu>
       <v-menu location="start">
         <template v-slot:activator="{ props }">
-          <v-btn variant="outlined" icon="mdi-login" title="登录" v-bind="props" />
+          <v-btn variant="outlined" icon="mdi-account-plus" title="添加账户" v-bind="props" />
         </template>
         <v-list>
           <v-list-item @click="addByCookie()" append-icon="mdi-account-plus">
