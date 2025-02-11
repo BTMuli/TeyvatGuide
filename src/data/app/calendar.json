@@ -768,6 +768,22 @@
     "source": { "index": 2, "area": "璃月", "name": "焚尽之环" }
   },
   {
+    "id": 10000109,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "梦见月瑞希",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "法器",
+    "element": "风",
+    "materials": [
+      { "id": 104320, "name": "「浮世」的教导", "star": 2 },
+      { "id": 104321, "name": "「浮世」的指引", "star": 3 },
+      { "id": 104322, "name": "「浮世」的哲学", "star": 4 }
+    ],
+    "source": { "index": 3, "area": "稻妻", "name": "菫染之国" }
+  },
+  {
     "id": 10000075,
     "contentId": 5494,
     "dropDays": [3, 6, 7],
@@ -1409,7 +1425,7 @@
   },
   {
     "id": 10000108,
-    "contentId": 0,
+    "contentId": 503614,
     "dropDays": [2, 5, 7],
     "name": "蓝砚",
     "itemType": "character",
@@ -1825,7 +1841,7 @@
   },
   {
     "id": 12514,
-    "contentId": 0,
+    "contentId": 503949,
     "dropDays": [1, 4, 7],
     "name": "焚曜千阳",
     "itemType": "weapon",
@@ -2112,6 +2128,22 @@
     "source": { "index": 3, "area": "稻妻", "name": "流沙之葬" }
   },
   {
+    "id": 14518,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "寝正月初晴",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "法器",
+    "materials": [
+      { "id": 114029, "name": "鸣神御灵的明惠", "star": 2 },
+      { "id": 114030, "name": "鸣神御灵的欢喜", "star": 3 },
+      { "id": 114031, "name": "鸣神御灵的亲爱", "star": 4 },
+      { "id": 114032, "name": "鸣神御灵的勇武", "star": 5 }
+    ],
+    "source": { "index": 3, "area": "稻妻", "name": "砂之祭场" }
+  },
+  {
     "id": 14511,
     "contentId": 5110,
     "dropDays": [2, 5, 7],
@@ -2193,7 +2225,7 @@
   },
   {
     "id": 14517,
-    "contentId": 0,
+    "contentId": 503948,
     "dropDays": [2, 5, 7],
     "name": "祭星者之望",
     "itemType": "weapon",
@@ -4084,6 +4116,22 @@
     "contentId": 3077,
     "dropDays": [3, 6, 7],
     "name": "断浪长鳍",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "长柄武器",
+    "materials": [
+      { "id": 114033, "name": "今昔剧画之恶尉", "star": 2 },
+      { "id": 114034, "name": "今昔剧画之虎啮", "star": 3 },
+      { "id": 114035, "name": "今昔剧画之一角", "star": 4 },
+      { "id": 114036, "name": "今昔剧画之鬼人", "star": 5 }
+    ],
+    "source": { "index": 3, "area": "稻妻", "name": "流沙之葬" }
+  },
+  {
+    "id": 13432,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "且住亭御咄",
     "itemType": "weapon",
     "star": 4,
     "weapon": "长柄武器",

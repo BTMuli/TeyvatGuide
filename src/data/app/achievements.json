@@ -3569,7 +3569,7 @@
     "description": "掌握「火」的元素力。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "ELEMENT_TYPE_CHANGE" }
   },
   {
     "id": 80365,
@@ -3579,7 +3579,7 @@
     "description": "集齐全套《灵濛山夜话》。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
   },
   {
     "id": 80366,
@@ -3589,7 +3589,7 @@
     "description": "集齐全套《哈南帕查记事》。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
   },
   {
     "id": 80367,
@@ -3599,17 +3599,17 @@
     "description": "集齐全套《隐玉之泉》。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
   },
   {
     "id": 80368,
     "series": 57,
     "order": 342,
     "name": "温泉诞生之日",
-    "description": "集齐全套《玛阿威和幻写灵》。",
+    "description": "集齐全套《玛阿威与幻写灵》。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
   },
   {
     "id": 80369,
@@ -3619,7 +3619,7 @@
     "description": "集齐全套《火山大王与缝影针》。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
   },
   {
     "id": 80370,
@@ -3629,7 +3629,7 @@
     "description": "集齐全套《秋暮之火》。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
   },
   {
     "id": 80371,
@@ -3639,7 +3639,7 @@
     "description": "获得「千音雅集」，成为自由的音乐人。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OBTAIN_ITEM_NUM" }
   },
   {
     "id": 80372,
@@ -3649,7 +3649,7 @@
     "description": "完成所有「千音雅集」的「入门练习」。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MUSIC_GAME_BOOK_FINISH_BEATMAP" }
   },
   {
     "id": 80373,
@@ -3659,7 +3659,7 @@
     "description": "在「千音藏品」中兑换1个谱面主题。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "BUY_SHOP_GOODS_COUNT" }
   },
   {
     "id": 80374,
@@ -3669,7 +3669,7 @@
     "description": "在「千音藏品」中兑换3个谱面主题。",
     "reward": 10,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "BUY_SHOP_GOODS_COUNT" }
   },
   {
     "id": 80375,
@@ -3679,7 +3679,7 @@
     "description": "在「千音藏品」中兑换5个谱面主题。",
     "reward": 20,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "BUY_SHOP_GOODS_COUNT" }
   },
   {
     "id": 80376,
@@ -3689,7 +3689,7 @@
     "description": "在官方曲谱的演奏挑战中，获得5次不同曲谱的「高遏行云」评价。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MUSIC_GAME_BOOK_FINISH_OFFICIAL_REACH_RATE" }
   },
   {
     "id": 80377,
@@ -3699,7 +3699,7 @@
     "description": "在官方曲谱的演奏挑战中，获得15次不同曲谱的「高遏行云」评价。",
     "reward": 10,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MUSIC_GAME_BOOK_FINISH_OFFICIAL_REACH_RATE" }
   },
   {
     "id": 80378,
@@ -3709,7 +3709,7 @@
     "description": "在官方曲谱的演奏挑战中，获得30次不同曲谱的「高遏行云」评价。",
     "reward": 20,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MUSIC_GAME_BOOK_FINISH_OFFICIAL_REACH_RATE" }
   },
   {
     "id": 80379,
@@ -3719,7 +3719,7 @@
     "description": "演奏其他玩家创作的曲谱时，获得5次不同曲谱的「高遏行云」评价。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MUSIC_GAME_BOOK_FINISH_UGC_REACH_RATE" }
   },
   {
     "id": 80380,
@@ -3729,7 +3729,7 @@
     "description": "演奏其他玩家创作的曲谱时，获得10次不同曲谱的「高遏行云」评价。",
     "reward": 10,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MUSIC_GAME_BOOK_FINISH_UGC_REACH_RATE" }
   },
   {
     "id": 80381,
@@ -3739,7 +3739,7 @@
     "description": "演奏其他玩家创作的曲谱时，获得20次不同曲谱的「高遏行云」评价。",
     "reward": 20,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MUSIC_GAME_BOOK_FINISH_UGC_REACH_RATE" }
   },
   {
     "id": 81000,
@@ -11792,7 +11792,7 @@
     "description": "在一次挑战中，破坏过两次金焰绒翼龙暴君发射出的「炽风翎羽」。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 82273,
@@ -11802,7 +11802,7 @@
     "description": "在一次挑战中，利用火榴果的爆炸对贪食匿叶龙山王触发融化反应。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 82274,
@@ -11812,7 +11812,7 @@
     "description": "利用火榴果的爆炸击败贪食匿叶龙山王。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 82275,
@@ -11822,7 +11822,7 @@
     "description": "在秘源机兵·构型械处于瘫痪状态时，将其击败。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 82276,
@@ -11832,7 +11832,7 @@
     "description": "分别在深邃摹结株复现古岩龙蜥、翠翎恐蕈以及千年珍珠骏麟的形象时，将其击败。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_MULTICOND_CONFIG_COMMON" }
   },
   {
     "id": 82277,
@@ -11842,7 +11842,7 @@
     "description": "在一次挑战中，累计破坏过灵觉隐修的迷者制造出的8个浮彩分身。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 82278,
@@ -11852,7 +11852,7 @@
     "description": "在战场被破坏至最小时，击败蚀灭的源焰之主。",
     "reward": 10,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 84000,
@@ -14201,7 +14201,10 @@
     "description": "隐藏在梦境中的，是过去与未来的回音。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 5022, "name": "地中残景", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84338,
@@ -14211,7 +14214,10 @@
     "description": "还有许多要与「同伴」一起经历。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 5023, "name": "正如日出日落", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84339,
@@ -14221,7 +14227,10 @@
     "description": "在长夜的尽头，终现名为「希望」的曙光。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 5024, "name": "星与火的征途", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84340,
@@ -14231,7 +14240,10 @@
     "description": "为纳塔夺取最终的胜利。",
     "reward": 5,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 5029, "name": "当一切镌刻成碑", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84341,
@@ -14241,7 +14253,10 @@
     "description": "完成「炽烈的还魂诗」。",
     "reward": 10,
     "version": "5.3",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 5029, "name": "当一切镌刻成碑", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84501,
