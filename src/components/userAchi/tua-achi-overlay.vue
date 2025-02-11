@@ -4,10 +4,12 @@
       <slot name="left"></slot>
       <div class="tua-ao-box">
         <div class="tua-ao-top">
-          <span class="tua-ao-click" @click="searchDirect(props.data.name)">
+          <span class="tua-ao-click" title="查询" @click="searchDirect(props.data.name)">
             {{ props.data.name }}
           </span>
-          <span>{{ props.data.description }}</span>
+          <span class="tua-ao-click" title="分享" @click="share()">
+            {{ props.data.description }}
+          </span>
         </div>
         <div class="tua-ao-mid-title">
           <span>所属系列：</span>
@@ -53,11 +55,13 @@
 </template>
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import { ref } from "vue";
 
 import { AppAchievementSeriesData } from "@/data/index.js";
 import TGLogger from "@/utils/TGLogger.js";
+import { generateShareImg } from "@/utils/TGShare.js";
 
 type ToAchiInfoProps = { data: TGApp.Sqlite.Achievement.RenderAchi };
 type ToAchiInfoEmits = (e: "select-series", v: number) => void;
@@ -72,6 +76,16 @@ async function searchDirect(word: string): Promise<void> {
   await TGLogger.Info(`[ToAchiInfo][${props.data.id}][Search] 查询 ${word}`);
   search.value = word;
   showSearch.value = true;
+}
+
+async function share(): Promise<void> {
+  const achiBox = document.querySelector<HTMLElement>(".tua-ao-box");
+  if (achiBox === null) {
+    showSnackbar.error("未找到成就详情");
+    return;
+  }
+  const fileName = `【成就详情】【${props.data.id}】-${props.data.name}`;
+  await generateShareImg(fileName, achiBox);
 }
 </script>
 <style lang="css" scoped>
