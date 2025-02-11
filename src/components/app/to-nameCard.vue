@@ -1,31 +1,33 @@
 <template>
   <TOverlay v-model="visible" v-if="props.data">
-    <slot name="left"></slot>
-    <div class="ton-box">
-      <img
-        alt="bg"
-        class="ton-bg"
-        v-if="props.data"
-        :src="`/WIKI/nameCard/profile/${props.data.name}.webp`"
-      />
-      <div class="ton-content">
-        <span>{{ props.data.name }}</span>
-        <span>{{ parseNameCard(props.data.desc) }}</span>
-        <span>获取途径：{{ props.data.source }}</span>
+    <div class="ton-container">
+      <slot name="left"></slot>
+      <div class="ton-box">
+        <img
+          alt="bg"
+          class="ton-bg"
+          v-if="props.data"
+          :src="`/WIKI/nameCard/profile/${props.data.name}.webp`"
+        />
+        <div class="ton-content">
+          <span>{{ props.data.name }}</span>
+          <span>{{ parseNameCard(props.data.desc) }}</span>
+          <span>获取途径：{{ props.data.source }}</span>
+        </div>
+        <div class="ton-type">{{ getType }}</div>
+        <v-btn
+          class="ton-share"
+          @click="shareNameCard"
+          variant="outlined"
+          :loading="loading"
+          data-html2canvas-ignore
+        >
+          <v-icon>mdi-share-variant</v-icon>
+          <span>分享</span>
+        </v-btn>
       </div>
-      <div class="ton-type">{{ getType }}</div>
-      <v-btn
-        class="ton-share"
-        @click="shareNameCard"
-        variant="outlined"
-        :loading="loading"
-        data-html2canvas-ignore
-      >
-        <v-icon>mdi-share-variant</v-icon>
-        <span>分享</span>
-      </v-btn>
+      <slot name="right"></slot>
     </div>
-    <slot name="right"></slot>
   </TOverlay>
 </template>
 <script setup lang="ts">
@@ -134,6 +136,14 @@ async function shareNameCard(): Promise<void> {
 }
 </script>
 <style lang="css" scoped>
+.ton-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 8px;
+}
+
 .ton-box {
   position: relative;
   overflow: hidden;
