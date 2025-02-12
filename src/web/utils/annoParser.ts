@@ -274,10 +274,7 @@ function parseAnnoSpan(
     return { insert: parse, attributes: spanAttrs };
   }
   // todo 优化处理
-  if (span.childNodes.length === 2) {
-    return { insert: span.textContent ?? "", attributes: spanAttrs };
-  }
-  return defaultRes;
+  return { insert: span.textContent ?? "", attributes: spanAttrs };
 }
 
 /**
