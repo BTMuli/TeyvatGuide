@@ -27,6 +27,7 @@ import type { Component } from "vue";
 import TpImage from "./tp-image.vue";
 import TpMention, { type TpMention as TpMentionType } from "./tp-mention.vue";
 import TpText, { type TpText as TpTextType } from "./tp-text.vue";
+import TpUnknown from "./tp-unknown.vue";
 
 type TpTexts = { children: Array<TpTextType | TpMentionType> } & TpTextType;
 type TpTextsProps = { data: TpTexts };
@@ -36,7 +37,8 @@ const props = defineProps<TpTextsProps>();
 function getComp(text: TpTextType | TpMentionType): Component {
   if (typeof text.insert === "string") return TpText;
   if ("image" in text.insert) return TpImage;
-  return TpMention;
+  if ("mention" in text.insert) return TpMention;
+  return TpUnknown;
 }
 
 function getTitle(): string {
