@@ -24,12 +24,12 @@ const enum SaltType {
 
 /**
  * @description salt 值
- * @version 2.80.1
- * @since Beta v0.6.7
+ * @version 2.81.1
+ * @since Beta v0.6.10
  */
 const Salt: Readonly<Record<keyof typeof SaltType, string>> = {
-  K2: "G1rXOpMLQS77VPWEGycOSxekCTZe2Q8M",
-  LK2: "sd1e1gQJuvqBfZxas1oeAACXzbim5cge",
+  K2: "QVu5OdwEWxkq9ygpYBgDprR5tI471HWQ",
+  LK2: "aquFmwOjyqev4CAL6GQ2v5mdkxpCVXCY",
   X4: "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs",
   X6: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
   PROD: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",

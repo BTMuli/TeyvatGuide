@@ -1,10 +1,10 @@
 /**
  * @file utils/TGBbs.ts
  * @description 关于 BBS 的工具函数
- * @since Beta v0.6.8
+ * @since Beta v0.6.10
  */
 
-const BBS_VERSION: Readonly<string> = "2.80.1";
+const BBS_VERSION: Readonly<string> = "2.81.1";
 const BBS_UA_MOBILE: Readonly<string> = `Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/${BBS_VERSION}`;
 
 /**
@@ -32,17 +32,6 @@ const CHANNEL_LIST: Readonly<Array<ChannelItem>> = [
   { title: "未定事件簿", gid: 4, mini: "wd" },
   { title: "大别野", gid: 5, mini: "dby" },
 ];
-
-/**
- * @description 获取游戏id
- * @since Beta v0.6.8
- * @param {string} mini
- * @returns {string}
- */
-export function getGameId(mini: string): number {
-  const game = CHANNEL_LIST.find((item) => item.mini === mini);
-  return game ? game.gid : 0;
-}
 
 const TGBbs = { version: BBS_VERSION, ua: BBS_UA_MOBILE, channels: CHANNEL_LIST };
 
