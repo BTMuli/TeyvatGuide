@@ -1,48 +1,13 @@
 /**
  * @file web/utils/annoParser.ts
  * @description 解析游戏内公告数据
- * @since Beta v0.6.8
+ * @since Beta v0.6.10
  */
 
 import TpText from "@comp/viewPost/tp-text.vue";
 import { h, render } from "vue";
 
 import { decodeRegExp } from "@/utils/toolFunc.js";
-
-/**
- * @description 预处理p
- * @since Beta v0.5.2
- * @param {HTMLParagraphElement} p p 元素
- * @returns {HTMLParagraphElement} 解析后的 p 元素
- */
-function handleAnnoP(p: HTMLParagraphElement): HTMLParagraphElement {
-  if (p.children.length === 0) p.innerHTML = decodeRegExp(p.innerHTML);
-  else {
-    p.querySelectorAll("*").forEach((child) => {
-      child.innerHTML = decodeRegExp(child.innerHTML);
-      child.querySelectorAll("span").forEach(handleAnnoSpan);
-    });
-  }
-  return p;
-}
-
-/**
- * @description 预处理 span
- * @since Beta v0.4.4
- * @param {HTMLSpanElement} span span 元素
- * @returns {HTMLSpanElement} 解析后的 span 元素
- */
-function handleAnnoSpan(span: HTMLSpanElement): HTMLSpanElement {
-  if (span.style.fontSize) span.style.fontSize = "";
-  if (span.children.length === 0) span.innerHTML = decodeRegExp(span.innerHTML);
-  else {
-    span.querySelectorAll("*").forEach((child) => {
-      if (child.children.length === 0) child.innerHTML = decodeRegExp(child.innerHTML);
-      if (child.tagName === "T") child.outerHTML = child.innerHTML;
-    });
-  }
-  return span;
-}
 
 /**
  * @description 预处理table
@@ -62,14 +27,12 @@ function handleAnnoTable(table: HTMLTableElement): HTMLTableElement {
 
 /**
  * @description 预处理公告内容
- * @since Beta v0.4.4
+ * @since Beta v0.6.10
  * @param {string} data 游戏内公告数据
  * @returns {string} 解析后的数据
  */
 function handleAnnoContent(data: string): string {
-  const htmlBase = new DOMParser().parseFromString(data, "text/html");
-  htmlBase.querySelectorAll("p").forEach(handleAnnoP);
-  htmlBase.querySelectorAll("span").forEach(handleAnnoSpan);
+  const htmlBase = new DOMParser().parseFromString(decodeRegExp(data), "text/html");
   htmlBase.querySelectorAll("table").forEach(handleAnnoTable);
   return htmlBase.body.innerHTML;
 }
@@ -94,7 +57,7 @@ function parseAnnoContent(
 
 /**
  * @description 解析公告节点
- * @since Beta v0.6.8
+ * @since Beta v0.6.10
  * @param {Node} node - 节点
  * @param {Record<string, string>} attr - 属性
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
@@ -104,7 +67,12 @@ function parseAnnoNode(
   attr?: Record<string, string>,
 ): Array<TGApp.Plugins.Mys.SctPost.Base> {
   let defaultRes: TGApp.Plugins.Mys.SctPost.Base = {
-    insert: { tag: node.nodeName, text: node.textContent, type: node.nodeType },
+    insert: {
+      tag: node.nodeName,
+      text: node.textContent,
+      type: node.nodeType,
+      func: "parseAnnoNode",
+    },
   };
   if (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE) return [defaultRes];
   if (node.nodeType === Node.TEXT_NODE) {
@@ -118,8 +86,10 @@ function parseAnnoNode(
       style: element.style.cssText,
       html: element.innerHTML,
       outerHtml: element.outerHTML,
+      func: "parseAnnoNode",
     },
   };
+  console.log(defaultRes);
   if (element.tagName === "P") {
     element.innerHTML = decodeRegExp(element.innerHTML);
     return [parseAnnoParagraph(element, attr)];
@@ -172,7 +142,7 @@ function parseAnnoNode(
 
 /**
  * @description 解析公告段落
- * @since Beta v0.6.8
+ * @since Beta v0.6.10
  * @param {HTMLElement} p - 段落元素
  * @param {Record<string, string>} attr - 属性
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
@@ -189,8 +159,10 @@ function parseAnnoParagraph(
       html: p.innerHTML,
       outerHtml: p.outerHTML,
       childrenLength: p.childNodes.length,
+      func: "parseAnnoParagraph",
     },
   };
+  console.log(defaultRes);
   if (p.childNodes.length === 0) {
     return { insert: p.innerHTML === "" ? "\n" : (p.textContent ?? "") };
   }
@@ -236,6 +208,7 @@ function parseAnnoParagraph(
         if (resS.length > 1) childRes = { insert: element.outerHTML };
         else childRes = resS[0];
       } else if (element.tagName === "T") {
+        console.log(element.outerHTML);
         element.innerHTML = element.outerHTML;
         const resE = parseAnnoNode(element);
         if (resE.length > 1) childRes = { insert: element.outerHTML };
@@ -251,7 +224,7 @@ function parseAnnoParagraph(
 
 /**
  * @description 解析公告 span
- * @since Beta v0.6.8
+ * @since Beta v0.6.10
  * @param {HTMLElement} span - span 元素
  * @param {Record<string, string>} attr - 属性
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
@@ -264,12 +237,16 @@ function parseAnnoSpan(
     insert: {
       tag: span.tagName,
       text: span.textContent,
-      style: span.style.cssText,
+      style: span.style?.cssText,
       html: span.innerHTML,
       outerHtml: span.outerHTML,
       childrenLength: span.childNodes.length,
+      func: "parseAnnoSpan",
     },
   };
+  let spanAttrs: Record<string, string> | undefined = attr;
+  if (!spanAttrs) spanAttrs = {};
+  if (span.style.color !== "") spanAttrs.color = span.style.color;
   if (span.childNodes.length === 0) {
     console.error(span.innerHTML);
     return {
@@ -289,9 +266,6 @@ function parseAnnoSpan(
       if (res.length > 1) return defaultRes;
       return res[0];
     }
-    let spanAttrs: Record<string, string> | undefined = attr;
-    if (!spanAttrs) spanAttrs = {};
-    if (span.style.color !== "") spanAttrs.color = span.style.color;
     const parse = decodeRegExp(span.innerHTML);
     if (parse.includes("</t>")) {
       const dom = new DOMParser().parseFromString(parse, "text/html");
@@ -299,12 +273,16 @@ function parseAnnoSpan(
     }
     return { insert: parse, attributes: spanAttrs };
   }
+  // todo 优化处理
+  if (span.childNodes.length === 2) {
+    return { insert: span.textContent ?? "", attributes: spanAttrs };
+  }
   return defaultRes;
 }
 
 /**
  * @description 解析公告图片
- * @since Beta v0.5.3
+ * @since Beta v0.6.10
  * @param {HTMLElement} img - 图片元素
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
  */
@@ -317,6 +295,7 @@ function parseAnnoImage(img: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
         style: img.style.cssText,
         html: img.innerHTML,
         outerHtml: img.outerHTML,
+        func: "parseAnnoImage",
       },
     };
   }
@@ -326,7 +305,7 @@ function parseAnnoImage(img: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
 
 /**
  * @description 解析公告锚点
- * @since Beta v0.6.8
+ * @since Beta v0.6.10
  * @param {HTMLElement} a - 锚点元素
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
  */
@@ -339,6 +318,7 @@ function parseAnnoAnchor(a: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
         style: a.style.cssText,
         html: a.innerHTML,
         outerHtml: a.outerHTML,
+        func: "parseAnnoAnchor",
       },
     };
   }
@@ -354,7 +334,7 @@ function parseAnnoAnchor(a: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
 
 /**
  * @description 解析公告详情
- * @since Beta v0.5.3
+ * @since Beta v0.6.10
  * @param {HTMLElement} details - 详情元素
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
  */
@@ -366,6 +346,7 @@ function parseAnnoDetails(details: HTMLElement): TGApp.Plugins.Mys.SctPost.Base 
       style: details.style.cssText,
       html: details.innerHTML,
       outerHtml: details.outerHTML,
+      func: "parseAnnoDetails",
     },
   };
   if (details.tagName !== "DETAILS") return defaultRes;
@@ -388,7 +369,7 @@ function parseAnnoDetails(details: HTMLElement): TGApp.Plugins.Mys.SctPost.Base 
 
 /**
  * @description 解析公告表格
- * @since Beta v0.6.8
+ * @since Beta v0.6.10
  * @param {HTMLElement} table - 表格元素
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
  */
@@ -400,6 +381,7 @@ function parseAnnoTable(table: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
       style: table.style.cssText,
       html: table.innerHTML,
       outerHtml: table.outerHTML,
+      func: "parseAnnoTable",
     },
   };
   if (table.tagName !== "TABLE") return defaultRes;
