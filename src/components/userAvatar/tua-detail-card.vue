@@ -78,7 +78,7 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAvatar from "@Sqlite/modules/userAvatar.js";
-import { computed, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 
 import TuaDcConstellations from "./tua-dc-constellations.vue";
 import TuaDcProp from "./tua-dc-prop.vue";
@@ -109,15 +109,11 @@ const propMain = computed<Array<TGApp.Game.Avatar.PropMapItem | false>>(() =>
   props.modelValue.propSelected.map((item) => userStore.getProp(item.property_type)),
 );
 
-const bg = ref<string>("/WIKI/nameCard/profile/原神·印象.webp");
-const loading = ref<boolean>(false);
-
-onMounted(async () => await loadData());
-
-async function loadData(): Promise<void> {
+const bg = computed<string>(() => {
   const card = TSUserAvatar.getAvatarCard(props.modelValue.cid);
-  bg.value = `url("/WIKI/nameCard/profile/${card}.webp")`;
-}
+  return `url("/WIKI/nameCard/profile/${card}.webp")`;
+});
+const loading = ref<boolean>(false);
 
 async function share(): Promise<void> {
   const shareBox = document.querySelector<HTMLElement>(".tua-dc-container");
