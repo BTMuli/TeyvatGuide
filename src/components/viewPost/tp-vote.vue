@@ -7,8 +7,8 @@
     <div class="tp-vote-list">
       <div v-for="(item, index) in votes?.data" :key="index" class="tp-vote-item">
         <div class="tp-vote-item-title">
-          <span>{{ item.title }}</span>
-          <span>
+          <span class="title">{{ item.title }}</span>
+          <span class="val">
             <span>{{ item.count }}票</span>
             <span>{{ item.percent.toFixed(2) }}%</span>
           </span>
@@ -90,25 +90,26 @@ function getWidth(item: TpVoteData): string {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
 
-.tp-vote-item-title :first-child {
-  font-size: 16px;
-  font-weight: bold;
-}
+  .title {
+    font-size: 16px;
+    font-weight: bold;
+  }
 
-.tp-vote-item-title :last-child {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
+  .val {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    white-space: nowrap;
 
-.tp-vote-item-title :last-child :first-child {
-  font-size: 12px;
-}
+    :first-child {
+      font-size: 12px;
+    }
 
-.tp-vote-item-title :last-child :last-child {
-  font-size: 10px;
+    :last-child {
+      font-size: 10px;
+    }
+  }
 }
 
 .tp-vote-progress {
