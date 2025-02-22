@@ -1,10 +1,10 @@
 /**
  * @file plugins/Sqlite/modules/avatarBirth.ts
  * @description 角色生日模块
- * @since Beta v0.4.6
+ * @since Beta v0.6.10
  */
 
-import { AppCharacterData, ArcBirCalendar, ArcBirRole } from "@/data/index.js";
+import { AppCharacterData, ArcBirCalendar, ArcBirRole, WikiCharacterData } from "@/data/index.js";
 
 /**
  * @description 判断今天是不是角色生日
@@ -32,44 +32,77 @@ function isAvatarBirth(): TGApp.Archive.Birth.CalendarItem[] {
 }
 
 /**
- * @description 获取角色生日
+ * @description 校验是否是闰年
  * @since Beta v0.4.6
- * @param {string} roleBirthday - 角色生日
- * @return {[number,number]} 角色生日
+ * @param {number} year - 年份
+ * @return {boolean} 是否是闰年
  */
-function getRoleBirth(roleBirthday: string): [number, number] {
-  const arr: string[] = roleBirthday.split("/");
-  return [Number(arr[0]), Number(arr[1])];
+function isLeapYear(year: number): boolean {
+  return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 }
 
 /**
  * @description 获取下一个角色生日
- * @since Beta v0.4.5
+ * @since Beta v0.6.10
  * @param {[number,number]} date - 日期
  * @return {TGApp.Archive.Birth.RoleItem[]} 下一个角色生日
  */
 function getNextAvatarBirth(date?: [number, number]): TGApp.Archive.Birth.RoleItem[] {
-  const year = new Date().getFullYear();
   let month, day;
   if (date) {
     month = date[0];
     day = date[1];
   } else {
-    const dateNow = new Date();
-    month = dateNow.getMonth() + 1;
-    day = dateNow.getDate();
+    month = new Date().getMonth() + 1;
+    day = new Date().getDate();
   }
-  const birthDateList: Date[] = [];
-  for (const item of ArcBirRole) {
-    const roleBirth = getRoleBirth(item.role_birthday);
-    if (roleBirth[0] < month || (roleBirth[0] === month && roleBirth[1] <= day)) {
-      birthDateList.push(new Date(year + 1, roleBirth[0] - 1, roleBirth[1]));
-    } else birthDateList.push(new Date(year, roleBirth[0] - 1, roleBirth[1]));
+  const sortList = AppCharacterData.sort((a, b) => {
+    if (a.birthday[0] === b.birthday[0]) return a.birthday[1] - b.birthday[1];
+    return a.birthday[0] - b.birthday[0];
+  });
+  let filterList = sortList.filter((i) => {
+    if (i.birthday[0] > month) return true;
+    return i.birthday[0] === month && i.birthday[1] > day;
+  });
+  if (filterList.length === 0) filterList = sortList;
+  let birthGet = filterList[0];
+  if (birthGet.id === 10000032 && !isLeapYear(new Date().getFullYear())) {
+    birthGet = filterList[1];
   }
-  birthDateList.sort((a, b) => a.getTime() - b.getTime());
-  const nextDateGet = birthDateList[0];
-  const nextDate = [nextDateGet.getMonth() + 1, nextDateGet.getDate()];
-  return ArcBirRole.filter((i) => i.role_birthday === `${nextDate[0]}/${nextDate[1]}`);
+  const dataGet = AppCharacterData.filter(
+    (i) => i.birthday.toString() === birthGet.birthday.toString(),
+  );
+  const res: TGApp.Archive.Birth.RoleItem[] = [];
+  for (const i of dataGet) {
+    const find = ArcBirRole.find((j) => j.role_id === i.id);
+    if (find) {
+      res.push(find);
+      continue;
+    }
+    const find2 = WikiCharacterData.find((j) => j.id === i.id);
+    if (!find2) continue;
+    // 只写了用到的字段
+    res.push({
+      belong: find2.brief.camp,
+      current_compensate_num: 0,
+      divine_type: "",
+      element: find2.element,
+      head_image: `/WIKI/character/${i.id}.webp`,
+      introduce: find2.description,
+      is_compensate_num: false,
+      is_finish_task: false,
+      is_god: false,
+      seat_life: "",
+      text: "",
+      year_compensate_num: 0,
+      role_id: i.id,
+      name: i.name,
+      role_birthday: `${i.birthday[0]}/${i.birthday[1]}`,
+      head_icon: `/WIKI/character/${i.id}.webp`,
+      is_subscribe: false,
+    });
+  }
+  return res;
 }
 
 const TSAvatarBirth = { isAvatarBirth, getNextAvatarBirth };

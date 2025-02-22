@@ -143,6 +143,7 @@ function parseDesc(intro: string): string {
 
 .tcb-item img {
   height: 100px;
+  border-radius: 50%;
   aspect-ratio: 1;
   cursor: pointer;
 }
