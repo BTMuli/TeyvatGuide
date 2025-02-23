@@ -19,7 +19,7 @@
             {{ text.text }}
           </v-btn>
         </div>
-        <v-pagination class="tc-page" v-model="page" :total-visible="visible" :length="length" />
+        <v-pagination class="tc-page" v-model="page" :total-visible="9" :length="length" />
       </div>
       <div class="tc-content">
         <TCalendarBirth />
