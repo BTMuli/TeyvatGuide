@@ -1,10 +1,10 @@
 /**
  * @file utils/TGBbs.ts
  * @description 关于 BBS 的工具函数
- * @since Beta v0.6.10
+ * @since Beta v0.6.10/v0.7.0
  */
 
-const BBS_VERSION: Readonly<string> = "2.81.1";
+const BBS_VERSION: Readonly<string> = "2.82.0";
 const BBS_UA_MOBILE: Readonly<string> = `Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/${BBS_VERSION}`;
 
 /**

@@ -103,12 +103,38 @@ async function homeNew(gid: number = 2): Promise<TGApp.BBS.Navigator.Navigator[]
   ).data.navigator;
 }
 
+/**
+ * @description 点赞
+ * @since Beta v0.6.10/v0.7.0
+ * @param {string} id 帖子 ID
+ * @param {Record<string,string>} cookie 用户 Cookie
+ * @param {boolean} cancel 是否取消点赞
+ * @return {Promise<TGApp.BBS.Response.Base>}
+ */
+async function upVotePost(
+  id: string,
+  cookie: Record<string, string>,
+  cancel: boolean = false,
+): Promise<TGApp.BBS.Response.Base> {
+  const data = { is_cancel: cancel, post_id: id };
+  const header = {
+    ...getRequestHeader(cookie, "POST", data, "K2", true),
+    "x-rpc-client_type": "2",
+  };
+  return await TGHttp<TGApp.BBS.Response.Base>(`${Mahbu}api/upvotePost`, {
+    method: "POST",
+    headers: header,
+    body: JSON.stringify(data),
+  });
+}
+
 const apiHubReq = {
   vote: { info: getVotes, result: getVoteResult },
   home: homeNew,
   forum: getAllGamesForums,
   game: getGameList,
   mission: getMissions,
+  post: { like: upVotePost },
 };
 
 export default apiHubReq;

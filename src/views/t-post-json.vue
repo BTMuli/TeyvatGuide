@@ -12,12 +12,15 @@ import TSwitchTheme from "@comp/app/t-switchTheme.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import Mys from "@Mys/index.js";
+import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef } from "vue";
 import JsonViewer from "vue-json-viewer";
 import { useRoute } from "vue-router";
 
+import { useUserStore } from "@/store/modules/user.js";
 import TGLogger from "@/utils/TGLogger.js";
 
+const { cookie } = storeToRefs(useUserStore());
 const postId = Number(useRoute().params.post_id);
 const isEmpty = ref<boolean>(false);
 const jsonData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
@@ -29,7 +32,9 @@ onMounted(async () => {
     await showLoading.empty("未获取到PostID");
     return;
   }
-  const resp = await Mys.Post.getPostFull(postId);
+  let ck: Record<string, string> | undefined = undefined;
+  if (cookie.value) ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  const resp = await Mys.Post.getPostFull(postId, ck);
   if ("retcode" in resp) {
     await showLoading.empty("获取数据失败", `[${resp.retcode}]${resp.message}`);
     showSnackbar.error(`[${resp.retcode}]${resp.message}`);

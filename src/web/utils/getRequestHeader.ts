@@ -1,7 +1,7 @@
 /**
  * @file web/utils/getRequestHeader.ts
  * @description 获取请求头
- * @since Beta v0.6.8
+ * @since Beta v0.6.10/v0.7.0
  */
 
 import Md5 from "js-md5";
@@ -24,12 +24,12 @@ const enum SaltType {
 
 /**
  * @description salt 值
- * @version 2.81.1
- * @since Beta v0.6.10
+ * @version 2.82.0
+ * @since Beta v0.6.10/v0.7.0
  */
 const Salt: Readonly<Record<keyof typeof SaltType, string>> = {
-  K2: "QVu5OdwEWxkq9ygpYBgDprR5tI471HWQ",
-  LK2: "aquFmwOjyqev4CAL6GQ2v5mdkxpCVXCY",
+  K2: "RGcLwIWYOQwTQPJ8Qw41kioel738ch3Z",
+  LK2: "1M69A7AaPUhTFCdH0D2iMatZ0MTiLmPf",
   X4: "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs",
   X6: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
   PROD: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",

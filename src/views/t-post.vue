@@ -27,7 +27,12 @@
           <v-icon>mdi-comment</v-icon>
           <span>{{ postData?.stat?.reply_num }}</span>
         </div>
-        <div class="mpm-item" :title="`点赞数：${postData?.stat?.like_num}`">
+        <div
+          class="mpm-item"
+          :title="`点赞数：${postData?.stat?.like_num}`"
+          @click="tryLike()"
+          :class="{ like: isLike }"
+        >
           <v-icon>mdi-thumb-up</v-icon>
           <span>{{ postData?.stat?.like_num }}</span>
         </div>
@@ -97,17 +102,22 @@ import VpOverlayCollection from "@comp/viewPost/vp-overlay-collection.vue";
 import Mys from "@Mys/index.js";
 import { app, webviewWindow } from "@tauri-apps/api";
 import { emit } from "@tauri-apps/api/event";
+import { storeToRefs } from "pinia";
 import { onMounted, onUnmounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
 import { useAppStore } from "@/store/modules/app.js";
+import { useUserStore } from "@/store/modules/user.js";
 import TGBbs from "@/utils/TGBbs.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { createTGWindow } from "@/utils/TGWindow.js";
+import apiHubReq from "@/web/request/apiHubReq.js";
 
+const { cookie } = storeToRefs(useUserStore());
 const appVersion = ref<string>();
 const postId = Number(useRoute().params.post_id);
 const showCollection = ref<boolean>(false);
+const isLike = ref<boolean>(false);
 const shareTime = ref<number>(Math.floor(Date.now() / 1000));
 const renderPost = shallowRef<Array<TGApp.Plugins.Mys.SctPost.Base>>([]);
 const postData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
@@ -131,7 +141,9 @@ onMounted(async () => {
     return;
   }
   await showLoading.update(`帖子ID: ${postId}`);
-  const resp = await Mys.Post.getPostFull(postId);
+  let ck: undefined | Record<string, string>;
+  if (cookie.value) ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  const resp = await Mys.Post.getPostFull(postId, ck);
   if ("retcode" in resp) {
     await showLoading.empty("数据加载失败", `[${resp.retcode}]${resp.message}`);
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
@@ -140,6 +152,7 @@ onMounted(async () => {
     return;
   }
   postData.value = resp;
+  isLike.value = postData.value.self_operation.upvote_type !== 0;
   await showLoading.update("正在渲染数据");
   renderPost.value = await getRenderPost(postData.value);
   await webviewWindow
@@ -240,6 +253,26 @@ async function createPostJson(postId: number): Promise<void> {
   const jsonPath = `/post_detail_json/${postId}`;
   const jsonTitle = `Post_${postId}_JSON`;
   await createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
+}
+
+async function tryLike(): Promise<void> {
+  if (!cookie.value) {
+    showSnackbar.error("请先登录");
+    return;
+  }
+  if (!postData.value) {
+    showSnackbar.error("数据未加载");
+    return;
+  }
+  const ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  const resp = await apiHubReq.post.like(postData.value.post.post_id, ck, isLike.value);
+  if (resp.retcode !== 0) {
+    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+    return;
+  }
+  isLike.value = !isLike.value;
+  postData.value.stat!.like_num += isLike.value ? 1 : -1;
+  showSnackbar.success(isLike.value ? "点赞成功" : "取消点赞成功");
 }
 
 function toPost(): void {
@@ -380,6 +413,10 @@ onUnmounted(() => {
   margin-left: 10px;
   column-gap: 2px;
   opacity: 0.8;
+
+  &.like {
+    color: var(--tgc-pink-1);
+  }
 }
 
 /* extra */
