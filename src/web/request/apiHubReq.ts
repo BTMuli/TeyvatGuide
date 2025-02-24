@@ -54,6 +54,29 @@ async function getMissions(cookie: Record<string, string>): Promise<TGApp.BBS.Mi
 }
 
 /**
+ * @description 获取分享配置
+ * @since Beta v0.6.10/v0.7.0
+ * @param {string} postId 帖子 ID
+ * @param {Record<string,string>} cookie 用户 Cookie
+ * @return {Promise<TGApp.BBS.Response.Base>}
+ */
+async function getShareConf(
+  postId: string,
+  cookie: Record<string, string>,
+): Promise<TGApp.BBS.Response.Base> {
+  const params = { entity_id: postId, entity_type: 1 };
+  const header = {
+    ...getRequestHeader(cookie, "GET", params, "K2", true),
+    "x-rpc-client_type": "2",
+  };
+  return await TGHttp<TGApp.BBS.Response.Base>(`${Mahbu}api/getShareConf`, {
+    method: "GET",
+    headers: header,
+    query: params,
+  });
+}
+
+/**
  * @description 获取投票信息
  * @since Beta v0.6.2
  * @param {string} id 投票 ID
