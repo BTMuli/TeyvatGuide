@@ -1,10 +1,11 @@
 /**
  * @file plugins/Mys/request/postReq.ts
  * @description 帖子相关的获取
- * @since Beta v0.6.7
+ * @since Beta v0.6.10/v0.7.0
  */
 
 import TGHttp from "@/utils/TGHttp.js";
+import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
 
 // MysPostApiBaseUrl => Mpabu
 const Mpabu: Readonly<string> = "https://bbs-api.mihoyo.com/post/wapi/";
@@ -14,17 +15,23 @@ const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 
 /**
  * @description 获取单个帖子信息
- * @since Beta v0.6.3
+ * @since Beta v0.6.10/v0.7.0
  * @param {number} postId 帖子 ID
+ * @param {Record<string, string>} cookie Cookie
  * @return {Promise<TGApp.Plugins.Mys.Post.FullData|TGApp.BBS.Response.Base>}
  */
 export async function getPostFull(
   postId: number,
+  cookie?: Record<string, string>,
 ): Promise<TGApp.Plugins.Mys.Post.FullData | TGApp.BBS.Response.Base> {
+  const param = { post_id: postId };
+  let header;
+  if (cookie) header = getRequestHeader(cookie, "GET", param);
+  else header = { referer: Referer };
   const resp = await TGHttp<TGApp.Plugins.Mys.Post.Response>(`${Mpabu}getPostFull`, {
     method: "GET",
-    headers: { referer: Referer },
-    query: { post_id: postId },
+    headers: header,
+    query: param,
   });
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data.post;
