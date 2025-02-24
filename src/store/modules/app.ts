@@ -61,6 +61,8 @@ export const useAppStore = defineStore(
     const shareDefaultFile = ref<number>(10);
     // 图像压缩质量
     const imageQualityPercent = ref<number>(80);
+    // 无痕浏览
+    const incognito = ref<boolean>(true);
 
     // 初始化
     function init(): void {
@@ -75,6 +77,7 @@ export const useAppStore = defineStore(
       gameDir.value = "未设置";
       shareDefaultFile.value = 10;
       imageQualityPercent.value = 10;
+      incognito.value = true;
       initDevice();
     }
 
@@ -109,6 +112,7 @@ export const useAppStore = defineStore(
       gameDir,
       shareDefaultFile,
       imageQualityPercent,
+      incognito,
       init,
       changeTheme,
       getImageUrl,
@@ -132,6 +136,7 @@ export const useAppStore = defineStore(
           "needResize",
           "shareDefaultFile",
           "imageQualityPercent",
+          "incognito",
         ],
       },
       {

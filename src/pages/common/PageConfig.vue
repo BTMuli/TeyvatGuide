@@ -76,6 +76,7 @@
             :label="devMode ? '开启' : '关闭'"
             :inset="true"
             color="#FAC51E"
+            class="config-switch"
             @click="submitDevMode"
           />
         </template>
@@ -92,7 +93,25 @@
             :label="isNeedResize ? '开启' : '关闭'"
             :inset="true"
             color="#FAC51E"
+            class="config-switch"
             @click="submitResize"
+          />
+        </template>
+      </v-list-item>
+      <v-list-item title="无痕浏览" subtitle="关闭后将记录帖子浏览记录">
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-incognito</v-icon>
+          </div>
+        </template>
+        <template #append>
+          <v-switch
+            v-model="appStore.incognito"
+            :label="appStore.incognito ? '开启' : '关闭'"
+            :inset="true"
+            class="config-switch"
+            color="#FAC51E"
+            @click="switchIncognito"
           />
         </template>
       </v-list-item>
@@ -491,6 +510,15 @@ function submitResize(): void {
   }
   showSnackbar.success("已开启窗口回正!");
 }
+
+// 开启无痕浏览
+async function switchIncognito(): Promise<void> {
+  if (appStore.incognito) {
+    showSnackbar.success("已关闭无痕浏览!");
+    return;
+  }
+  showSnackbar.success("已开启无痕浏览!");
+}
 </script>
 <style lang="css" scoped>
 .config-box {
@@ -527,6 +555,10 @@ function submitResize(): void {
   margin-right: 15px;
   background: var(--box-bg-2);
   color: var(--box-text-2);
+}
+
+.config-switch {
+  height: 40px;
 }
 
 .config-right {

@@ -115,6 +115,7 @@ import { createTGWindow } from "@/utils/TGWindow.js";
 import apiHubReq from "@/web/request/apiHubReq.js";
 
 const { cookie } = storeToRefs(useUserStore());
+const { incognito } = storeToRefs(useAppStore());
 const appVersion = ref<string>();
 const postId = Number(useRoute().params.post_id);
 const showCollection = ref<boolean>(false);
@@ -142,8 +143,10 @@ onMounted(async () => {
     return;
   }
   await showLoading.update(`帖子ID: ${postId}`);
-  let ck: undefined | Record<string, string>;
-  if (cookie.value) ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  let ck: undefined | Record<string, string> = undefined;
+  if (cookie.value && incognito.value === false) {
+    ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  }
   const resp = await Mys.Post.getPostFull(postId, ck);
   if ("retcode" in resp) {
     await showLoading.empty("数据加载失败", `[${resp.retcode}]${resp.message}`);
