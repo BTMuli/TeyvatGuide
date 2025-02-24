@@ -1,15 +1,14 @@
 /**
  * @file web/request/apiHubReq.ts
  * @description apiHub下的请求
- * @since Beta v0.6.8
+ * @since Beta v0.6.10/v0.7.0
  */
 
 import TGHttp from "@/utils/TGHttp.js";
+import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
 
-// MysApiHubApiBaseUrl => Mahabu
-const Mahabu: Readonly<string> = "https://bbs-api.miyoushe.com/apihub/api/";
-// MysApiHubWapiBaseUrl => Mahwbu
-const Mahwbu: Readonly<string> = "https://bbs-api.miyoushe.com/apihub/wapi/";
+// MysApiHubBaseUrl => Mahbu
+const Mahbu: Readonly<string> = "https://bbs-api.miyoushe.com/apihub/";
 const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 
 /**
@@ -19,7 +18,7 @@ const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
  */
 async function getAllGamesForums(): Promise<Array<TGApp.BBS.Forum.GameForum>> {
   return (
-    await TGHttp<TGApp.BBS.Forum.GameForumResp>(`${Mahwbu}getAllGamesForums`, {
+    await TGHttp<TGApp.BBS.Forum.GameForumResp>(`${Mahbu}wapi/getAllGamesForums`, {
       method: "GET",
       headers: { "Content-Type": "application/json", referer: Referer },
     })
@@ -33,11 +32,25 @@ async function getAllGamesForums(): Promise<Array<TGApp.BBS.Forum.GameForum>> {
  */
 async function getGameList(): Promise<Array<TGApp.BBS.Game.Item>> {
   return (
-    await TGHttp<TGApp.BBS.Game.ListResp>(`${Mahwbu}getGameList`, {
+    await TGHttp<TGApp.BBS.Game.ListResp>(`${Mahbu}wapi/getGameList`, {
       method: "GET",
       headers: { "Content-Type": "application/json", referer: Referer },
     })
   ).data.list;
+}
+
+/**
+ * @description 获取用户米游币任务完成情况
+ * @since Beta v0.6.10/v0.7.0
+ * @param {Record<string,string>} cookie 用户 Cookie
+ * @return {Promise<TGApp.BBS.Mission.InfoRes>}
+ */
+async function getMissions(cookie: Record<string, string>): Promise<TGApp.BBS.Mission.InfoResp> {
+  const header = getRequestHeader(cookie, "GET", {});
+  return await TGHttp<TGApp.BBS.Mission.InfoResp>(`${Mahbu}api/getMissions`, {
+    method: "GET",
+    headers: header,
+  });
 }
 
 /**
@@ -49,7 +62,7 @@ async function getGameList(): Promise<Array<TGApp.BBS.Game.Item>> {
  */
 async function getVotes(id: string, uid: string): Promise<TGApp.BBS.Vote.Info> {
   return (
-    await TGHttp<TGApp.BBS.Vote.InfoResp>(`${Mahabu}getVotes`, {
+    await TGHttp<TGApp.BBS.Vote.InfoResp>(`${Mahbu}api/getVotes`, {
       method: "GET",
       headers: { "Content-Type": "application/json", referer: Referer },
       query: { owner_uid: uid, vote_ids: id },
@@ -66,7 +79,7 @@ async function getVotes(id: string, uid: string): Promise<TGApp.BBS.Vote.Info> {
  */
 async function getVoteResult(id: string, uid: string): Promise<TGApp.BBS.Vote.Result> {
   return (
-    await TGHttp<TGApp.BBS.Vote.ResultResp>(`${Mahabu}getVotesResult`, {
+    await TGHttp<TGApp.BBS.Vote.ResultResp>(`${Mahbu}api/getVotesResult`, {
       method: "GET",
       headers: { "Content-Type": "application/json", referer: Referer },
       query: { owner_uid: uid, vote_ids: id },
@@ -82,7 +95,7 @@ async function getVoteResult(id: string, uid: string): Promise<TGApp.BBS.Vote.Re
  */
 async function homeNew(gid: number = 2): Promise<TGApp.BBS.Navigator.Navigator[]> {
   return (
-    await TGHttp<TGApp.BBS.Navigator.HomeResponse>(`${Mahabu}home/new`, {
+    await TGHttp<TGApp.BBS.Navigator.HomeResponse>(`${Mahbu}api/home/new`, {
       method: "GET",
       headers: { "x-rpc-client_type": "2" },
       query: { gids: gid },
@@ -95,6 +108,7 @@ const apiHubReq = {
   home: homeNew,
   forum: getAllGamesForums,
   game: getGameList,
+  mission: getMissions,
 };
 
 export default apiHubReq;
