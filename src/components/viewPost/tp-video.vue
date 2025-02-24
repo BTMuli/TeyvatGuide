@@ -10,7 +10,7 @@
     />
     <div class="tp-video-share">
       <img alt="cover" :src="videoCover" class="tp-video-cover" />
-      <img alt="icon" src="/source/UI/video_play_bili.png" class="tp-video-icon" />
+      <img alt="icon" src="/source/UI/video_play_bili.webp" class="tp-video-icon" />
       <div class="tp-video-info">
         <span>{{ videoData.bvid }}|{{ timestampToDate(videoData.ctime * 1000) }}</span>
         <span>{{ videoData.title }}</span>

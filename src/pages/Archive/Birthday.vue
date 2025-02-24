@@ -2,7 +2,7 @@
   <div class="ab-container">
     <div class="ab-draw-top">
       <div @click="toAct" class="ab-draw-act" title="前往网页活动">
-        <img src="/source/UI/act_birthday.png" alt="archive_birthday_icon" class="side-icon" />
+        <img src="/source/UI/act_birthday.webp" alt="archive_birthday_icon" class="side-icon" />
       </div>
       <v-switch class="ab-draw-switch" v-model="isAether" />
       <span>{{ isAether ? "空" : "荧" }}</span>

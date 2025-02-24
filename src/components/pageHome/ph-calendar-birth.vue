@@ -17,7 +17,7 @@
         <img @click="toBirth(true)" :src="i.head_icon" alt="empty" class="tcb-cur" v-else />
       </div>
       <span>的生日哦~</span>
-      <img @click="toBirth(true)" src="/source/UI/act_birthday.png" alt="empty" class="active" />
+      <img @click="toBirth(true)" src="/source/UI/act_birthday.webp" alt="empty" class="active" />
     </div>
     <div>即将到来：{{ next[0].role_birthday }}</div>
     <div v-for="i in next" :key="i.role_id" class="tcb-item">

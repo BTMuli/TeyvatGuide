@@ -28,7 +28,7 @@
       <v-list-item :title.attr="'帖子'" :link="true" href="/posts/forum">
         <template #title>帖子</template>
         <template #prepend>
-          <img src="/source/UI/posts.png" alt="posts" class="side-icon" />
+          <img src="/source/UI/posts.webp" alt="posts" class="side-icon" />
         </template>
       </v-list-item>
       <v-list-item :title.attr="'成就'" :link="true" href="/achievements">
@@ -114,7 +114,7 @@
       <v-list-item :title.attr="'留影叙佳期'" :link="true" href="/archive/birthday">
         <template #title>留影叙佳期</template>
         <template #prepend>
-          <img src="/source/UI/act_birthday.png" alt="archive_birthday_icon" class="side-icon" />
+          <img src="/source/UI/act_birthday.webp" alt="archive_birthday_icon" class="side-icon" />
         </template>
       </v-list-item>
       <div class="bottom-menu">
@@ -145,7 +145,7 @@
             </v-list-item>
             <v-list-item class="side-item-menu" title="收藏" :link="true" href="/collection">
               <template #prepend>
-                <img src="/source/UI/posts.png" alt="collect" class="side-icon-menu" />
+                <img src="/source/UI/posts.webp" alt="collect" class="side-icon-menu" />
               </template>
             </v-list-item>
           </v-list>
