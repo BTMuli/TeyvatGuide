@@ -36,7 +36,7 @@
           <v-icon>mdi-thumb-up</v-icon>
           <span>{{ postData?.stat?.like_num }}</span>
         </div>
-        <div class="mpm-item" :title="`转发数：${postData?.stat?.forward_num}`">
+        <div class="mpm-item" :title="`转发数：${postData?.stat?.forward_num}`" @click="tryShare()">
           <v-icon>mdi-share-variant</v-icon>
           <span>{{ postData?.stat?.forward_num }}</span>
         </div>
@@ -109,6 +109,7 @@ import { useRoute } from "vue-router";
 import { useAppStore } from "@/store/modules/app.js";
 import { useUserStore } from "@/store/modules/user.js";
 import TGBbs from "@/utils/TGBbs.js";
+import TGClient from "@/utils/TGClient.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { createTGWindow } from "@/utils/TGWindow.js";
 import apiHubReq from "@/web/request/apiHubReq.js";
@@ -275,13 +276,30 @@ async function tryLike(): Promise<void> {
   showSnackbar.success(isLike.value ? "点赞成功" : "取消点赞成功");
 }
 
-function toPost(): void {
-  const channel = TGBbs.channels.find((item) => item.gid === postData.value?.post.game_id);
-  if (channel) {
-    window.open(`https://miyoushe.com/${channel.mini}/#/article/${postId}`);
-  } else {
-    window.open(`https://miyoushe.com/ys/#/article/${postId}`);
+async function tryShare(): Promise<void> {
+  if (!cookie.value) {
+    showSnackbar.error("请先登录");
+    return;
   }
+  if (!postData.value) {
+    showSnackbar.error("数据未加载");
+    return;
+  }
+  const ck = { stoken: cookie.value.stoken, stuid: cookie.value.stuid, mid: cookie.value.mid };
+  const resp = await apiHubReq.post.share(postData.value.post.post_id, ck);
+  if (resp.retcode !== 0) {
+    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+    return;
+  }
+  console.log("share success", resp);
+}
+
+async function toPost(): Promise<void> {
+  const channel = TGBbs.channels.find((item) => item.gid === postData.value?.post.game_id);
+  const link = channel
+    ? `https://m.miyoushe.com/${channel.mini}/#/article/${postId}`
+    : `https://m.miyoushe.com/ys/#/article/${postId}`;
+  await TGClient.open("web_thin", link);
 }
 
 async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {

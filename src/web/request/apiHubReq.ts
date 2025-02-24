@@ -56,6 +56,7 @@ async function getMissions(cookie: Record<string, string>): Promise<TGApp.BBS.Mi
 /**
  * @description 获取分享配置
  * @since Beta v0.6.10/v0.7.0
+ * @todo 服务器正确返回数据但是米社没有记录
  * @param {string} postId 帖子 ID
  * @param {Record<string,string>} cookie 用户 Cookie
  * @return {Promise<TGApp.BBS.Response.Base>}
@@ -127,6 +128,33 @@ async function homeNew(gid: number = 2): Promise<TGApp.BBS.Navigator.Navigator[]
 }
 
 /**
+ * @description 签到
+ * @since Beta v0.6.10/v0.7.0
+ * @todo -100
+ * @param {Record<string,string>} cookie 用户 Cookie
+ * @param {string} gid
+ * @return {Promise<TGApp.BBS.Response.Base>}
+ */
+async function signIn(
+  cookie: Record<string, string>,
+  gid: number = 2,
+): Promise<TGApp.BBS.Response.Base> {
+  const data = { gids: gid.toString() };
+  const header = {
+    ...getRequestHeader(cookie, "POST", JSON.stringify(data), "X6"),
+    "x-rpc-client_type": "2",
+    referer: "https://app.mihoyo.com",
+  };
+  if ("x-requested-with" in header) delete header["x-requested-with"];
+  console.log(header);
+  return await TGHttp<TGApp.BBS.Response.Base>(`${Mahbu}app/api/signIn`, {
+    method: "POST",
+    headers: header,
+    body: JSON.stringify(data),
+  });
+}
+
+/**
  * @description 点赞
  * @since Beta v0.6.10/v0.7.0
  * @param {string} id 帖子 ID
@@ -157,6 +185,7 @@ const apiHubReq = {
   forum: getAllGamesForums,
   game: getGameList,
   mission: getMissions,
+  sign: signIn,
   post: { like: upVotePost, share: getShareConf },
 };
 

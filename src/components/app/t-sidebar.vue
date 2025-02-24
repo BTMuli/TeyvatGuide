@@ -56,10 +56,16 @@
           <img src="/source/UI/userAbyss.webp" alt="abyss" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'祈愿记录'" :link="true" href="/user/gacha">
+      <v-list-item title.attr="祈愿记录" :link="true" href="/user/gacha" v-show="isDevEnv">
         <template #title>祈愿记录</template>
         <template #prepend>
           <img src="/source/UI/userGacha.webp" alt="gacha" class="side-icon" />
+        </template>
+      </v-list-item>
+      <v-list-item :title.attr="'实用脚本'" :link="true" href="/user/scripts">
+        <template #title>实用脚本</template>
+        <template #prepend>
+          <img src="/source/UI/toolbox.webp" alt="scripts" class="side-icon" />
         </template>
       </v-list-item>
       <v-divider />
