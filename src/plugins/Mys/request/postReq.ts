@@ -24,10 +24,14 @@ export async function getPostFull(
   postId: number,
   cookie?: Record<string, string>,
 ): Promise<TGApp.Plugins.Mys.Post.FullData | TGApp.BBS.Response.Base> {
-  const param = { post_id: postId };
+  const param = { post_id: postId, read: 1 };
   let header;
-  if (cookie) header = getRequestHeader(cookie, "GET", param);
-  else header = { referer: Referer };
+  if (cookie) {
+    header = {
+      ...getRequestHeader(cookie, "GET", param, "K2", true),
+      "x-rpc-client_type": "2",
+    };
+  } else header = { referer: Referer };
   const resp = await TGHttp<TGApp.Plugins.Mys.Post.Response>(`${Mpabu}getPostFull`, {
     method: "GET",
     headers: header,

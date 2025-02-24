@@ -134,7 +134,7 @@ const apiHubReq = {
   forum: getAllGamesForums,
   game: getGameList,
   mission: getMissions,
-  post: { like: upVotePost },
+  post: { like: upVotePost, share: getShareConf },
 };
 
 export default apiHubReq;
