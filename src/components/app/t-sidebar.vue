@@ -56,7 +56,7 @@
           <img src="/source/UI/userAbyss.webp" alt="abyss" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item title.attr="祈愿记录" :link="true" href="/user/gacha" v-show="isDevEnv">
+      <v-list-item :title.attr="'祈愿记录'" :link="true" href="/user/gacha">
         <template #title>祈愿记录</template>
         <template #prepend>
           <img src="/source/UI/userGacha.webp" alt="gacha" class="side-icon" />

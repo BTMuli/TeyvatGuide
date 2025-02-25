@@ -1,10 +1,13 @@
 /**
  * @file utils/TGLogger.ts
  * @description 日志工具
- * @since Beta v0.6.8
+ * @since Beta v0.6.10/v0.7.0
  */
 
-import { attachConsole, error, info, warn, debug } from "@tauri-apps/plugin-log";
+import { event } from "@tauri-apps/api";
+import { attachConsole, debug, error, info, warn } from "@tauri-apps/plugin-log";
+
+import { timestampToDate } from "@/utils/toolFunc.js";
 
 /**
  * @description 日志工具
@@ -70,6 +73,32 @@ class Logger {
   async Error(message: string, write: boolean = true): Promise<void> {
     if (write) await error(message);
     console.error(message);
+  }
+
+  /**
+   * @description 输出日志-脚本
+   * @since Beta v0.6.10/v0.7.0
+   * @param {string} message 日志信息
+   * @returns {Promise<void>} 无返回值
+   */
+  async Script(message: string): Promise<void> {
+    const timeNow = timestampToDate(new Date().getTime());
+    const msg = `[${timeNow}]${message}`;
+    await event.emitTo("TeyvatGuide", "userScriptLog", msg);
+  }
+
+  /**
+   * @description 输出日志-脚本分隔符
+   * @since Beta v0.6.10/v0.7.0
+   * @param {string} label 标签
+   * @param {boolean} [start] 是否为开始，默认为 true
+   * @returns {Promise<void>} 无返回值
+   */
+  async ScriptSep(label: string, start: boolean = true): Promise<void> {
+    const midStr = `${label} ${start ? "START" : "END--"}`;
+    const msg = `//--------------------${midStr}--------------------//`;
+    await event.emitTo("TeyvatGuide", "userScriptLog", msg);
+    if (!start) await event.emitTo("TeyvatGuide", "userScriptLog", "");
   }
 }
 
