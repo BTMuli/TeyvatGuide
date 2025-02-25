@@ -153,8 +153,9 @@ async function tryAuto(): Promise<void> {
       if (shareResp.retcode === 0) {
         await TGLogger.Script("[米游币任务]分享成功");
         isShare = true;
+      } else {
+        await TGLogger.Script(`[米游币任务]分享失败：${shareResp.retcode} ${shareResp.message}`);
       }
-      await TGLogger.Script(`[米游币任务]分享失败：${shareResp.retcode} ${shareResp.message}`);
     }
     if (likeCnt < 5 || viewCnt < 3) {
       await TGLogger.Script(`[米游币任务]正在浏览帖子${post.post.post_id}`);
@@ -167,7 +168,7 @@ async function tryAuto(): Promise<void> {
       }
       viewCnt++;
       if (likeCnt < 5) {
-        const isLike = post.self_operation.upvote_type === 1;
+        const isLike = post.self_operation?.upvote_type === 1;
         if (isLike) {
           await TGLogger.Script(`[米游币任务]帖子${post.post.post_id}已点赞，跳过`);
           continue;
@@ -179,8 +180,10 @@ async function tryAuto(): Promise<void> {
           likeCnt++;
         } else {
           await TGLogger.Script(`[米游币任务]点赞失败：${likeResp.retcode} ${likeResp.message}`);
+          continue;
         }
         await TGLogger.Script(`[米游币任务]正在取消点赞帖子${post.post.post_id}`);
+        await new Promise<void>((resolve) => setTimeout(resolve, 1000));
         const unlikeResp = await apiHubReq.post.like(post.post.post_id, ckPost, true);
         if (unlikeResp.retcode === 0) {
           await TGLogger.Script("[米游币任务]取消点赞成功");
