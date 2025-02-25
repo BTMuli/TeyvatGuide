@@ -56,7 +56,7 @@ async function getMissions(cookie: Record<string, string>): Promise<TGApp.BBS.Mi
 /**
  * @description 获取分享配置
  * @since Beta v0.6.10/v0.7.0
- * @todo 服务器正确返回数据但是米社没有记录
+ * @description **需要验证码登录返回的 Cookie**
  * @param {string} postId 帖子 ID
  * @param {Record<string,string>} cookie 用户 Cookie
  * @return {Promise<TGApp.BBS.Response.Base>}
@@ -130,7 +130,7 @@ async function homeNew(gid: number = 2): Promise<TGApp.BBS.Navigator.Navigator[]
 /**
  * @description 签到
  * @since Beta v0.6.10/v0.7.0
- * @todo -100
+ * @description **需要验证码登录获取的 Cookie**
  * @param {Record<string,string>} cookie 用户 Cookie
  * @param {string} gid
  * @return {Promise<TGApp.BBS.Response.Base>}
@@ -139,14 +139,11 @@ async function signIn(
   cookie: Record<string, string>,
   gid: number = 2,
 ): Promise<TGApp.BBS.Response.Base> {
-  const data = { gids: gid.toString() };
+  const data = { gids: gid };
   const header = {
     ...getRequestHeader(cookie, "POST", JSON.stringify(data), "X6"),
     "x-rpc-client_type": "2",
-    referer: "https://app.mihoyo.com",
   };
-  if ("x-requested-with" in header) delete header["x-requested-with"];
-  console.log(header);
   return await TGHttp<TGApp.BBS.Response.Base>(`${Mahbu}app/api/signIn`, {
     method: "POST",
     headers: header,
