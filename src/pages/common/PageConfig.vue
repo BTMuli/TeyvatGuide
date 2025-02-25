@@ -513,7 +513,7 @@ function submitResize(): void {
 
 // 开启无痕浏览
 async function switchIncognito(): Promise<void> {
-  await event.emit("switchIncognito");
+  await event.emitTo("Sub_window", "switchIncognito");
   if (appStore.incognito) {
     showSnackbar.success("已关闭无痕浏览!");
     return;

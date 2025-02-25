@@ -36,7 +36,7 @@
           <v-icon>mdi-thumb-up</v-icon>
           <span>{{ postData?.stat?.like_num }}</span>
         </div>
-        <div class="mpm-item" :title="`转发数：${postData?.stat?.forward_num}`" @click="tryShare()">
+        <div class="mpm-item" :title="`转发数：${postData?.stat?.forward_num}`">
           <v-icon>mdi-share-variant</v-icon>
           <span>{{ postData?.stat?.forward_num }}</span>
         </div>
@@ -136,13 +136,6 @@ function getGameIcon(gameId: number): string {
 
 onBeforeMount(async () => {
   incognitoListener = await listen<void>("switchIncognito", () => window.location.reload());
-});
-
-onUnmounted(() => {
-  if (incognitoListener !== null) {
-    incognitoListener();
-    incognitoListener = null;
-  }
 });
 
 onMounted(async () => {
@@ -295,24 +288,6 @@ async function tryLike(): Promise<void> {
   showSnackbar.success(isLike.value ? "点赞成功" : "取消点赞成功");
 }
 
-async function tryShare(): Promise<void> {
-  if (!cookie.value) {
-    showSnackbar.error("请先登录");
-    return;
-  }
-  if (!postData.value) {
-    showSnackbar.error("数据未加载");
-    return;
-  }
-  const ck = { stoken: cookie.value.stoken, stuid: cookie.value.stuid, mid: cookie.value.mid };
-  const resp = await apiHubReq.post.share(postData.value.post.post_id, ck);
-  if (resp.retcode !== 0) {
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-    return;
-  }
-  console.log("share success", resp);
-}
-
 async function toPost(): Promise<void> {
   const channel = TGBbs.channels.find((item) => item.gid === postData.value?.post.game_id);
   const link = channel
@@ -334,6 +309,10 @@ onUnmounted(() => {
   if (shareTimer !== null) {
     clearInterval(shareTimer);
     shareTimer = null;
+  }
+  if (incognitoListener !== null) {
+    incognitoListener();
+    incognitoListener = null;
   }
 });
 </script>
