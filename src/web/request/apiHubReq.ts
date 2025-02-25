@@ -78,6 +78,23 @@ async function getShareConf(
 }
 
 /**
+ * @description 获取任务完成情况
+ * @since Beta v0.6.10/v0.7.0
+ * @description **需要验证码登录的 Cookie**
+ * @param {Record<string,string>} cookie 用户 Cookie
+ * @return {Promise<TGApp.BBS.Mission.StateResp>}
+ */
+async function getUserMissionsState(
+  cookie: Record<string, string>,
+): Promise<TGApp.BBS.Mission.StateResp> {
+  const header = getRequestHeader(cookie, "GET", {});
+  return await TGHttp<TGApp.BBS.Mission.StateResp>(`${Mahbu}sapi/getUserMissionsState`, {
+    method: "GET",
+    headers: header,
+  });
+}
+
+/**
  * @description 获取投票信息
  * @since Beta v0.6.2
  * @param {string} id 投票 ID
@@ -181,7 +198,7 @@ const apiHubReq = {
   home: homeNew,
   forum: getAllGamesForums,
   game: getGameList,
-  mission: getMissions,
+  mission: { list: getMissions, state: getUserMissionsState },
   sign: signIn,
   post: { like: upVotePost, share: getShareConf },
 };

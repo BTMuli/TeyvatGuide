@@ -59,4 +59,54 @@ declare namespace TGApp.BBS.Mission {
     next_points: number;
     mission_key: string;
   };
+
+  /**
+   * @description 任务状态返回
+   * @interface StateResp
+   * @extends TGApp.BBS.Response.BaseWithData
+   * @since Beta v0.6.10/v0.7.0
+   * @property {TGApp.BBS.Mission.StateRes} data 任务状态
+   * @return StateResp
+   */
+  type StateResp = TGApp.BBS.Response.BaseWithData<StateRes>;
+
+  /**
+   * @description 任务状态
+   * @interface StateRes
+   * @since Beta v0.6.10/v0.7.0
+   * @property {Array<StateItem>} states 任务状态列表
+   * @property {number} already_received_points 已领取的米游币
+   * @property {number} total_points 总米游币
+   * @property {number} today_total_points 今日总米游币
+   * @property {boolean} is_unclaimed 是否有未领取的奖励
+   * @property {number} can_get_points 可领取的米游币
+   * @return StateRes
+   */
+  type StateRes = {
+    states: Array<StateItem>;
+    already_received_points: number;
+    total_points: number;
+    today_total_points: number;
+    is_unclaimed: boolean;
+    can_get_points: number;
+  };
+
+  /**
+   * @description 任务状态项
+   * @interface StateItem
+   * @since Beta v0.6.10/v0.7.0
+   * @property {number} mission_id 任务 ID
+   * @property {number} process 任务进度 0：未完成，1：已完成
+   * @property {number} happened_times 发生次数
+   * @property {boolean} is_get_award 是否领取奖励
+   * @property {string} mission_key 任务 key
+   * @return StateItem
+   */
+  type StateItem = {
+    mission_id: number;
+    process: number;
+    happened_times: number;
+    is_get_award: boolean;
+    mission_key: string;
+  };
 }
