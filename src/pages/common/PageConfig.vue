@@ -157,7 +157,7 @@ import TcGameBadge from "@comp/pageConfig/tc-gameBadge.vue";
 import TcInfo from "@comp/pageConfig/tc-info.vue";
 import TcUserBadge from "@comp/pageConfig/tc-userBadge.vue";
 import TGSqlite from "@Sqlite/index.js";
-import { core } from "@tauri-apps/api";
+import { core, event } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { remove } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
@@ -513,6 +513,7 @@ function submitResize(): void {
 
 // 开启无痕浏览
 async function switchIncognito(): Promise<void> {
+  await event.emit("switchIncognito");
   if (appStore.incognito) {
     showSnackbar.success("已关闭无痕浏览!");
     return;

@@ -101,9 +101,9 @@ import VpBtnReply from "@comp/viewPost/vp-btn-reply.vue";
 import VpOverlayCollection from "@comp/viewPost/vp-overlay-collection.vue";
 import Mys from "@Mys/index.js";
 import { app, webviewWindow } from "@tauri-apps/api";
-import { emit } from "@tauri-apps/api/event";
+import { emit, listen, UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
-import { onMounted, onUnmounted, ref, shallowRef } from "vue";
+import { onBeforeMount, onMounted, onUnmounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
 import { useAppStore } from "@/store/modules/app.js";
@@ -126,12 +126,24 @@ const postData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
 
 // eslint-disable-next-line no-undef
 let shareTimer: NodeJS.Timeout | null = null;
+let incognitoListener: UnlistenFn | null = null;
 
 function getGameIcon(gameId: number): string {
   const find = TGBbs.channels.find((item) => item.gid === gameId);
   if (find) return `/platforms/mhy/${find.mini}.webp`;
   return "/platforms/mhy/mys.webp";
 }
+
+onBeforeMount(async () => {
+  incognitoListener = await listen<void>("switchIncognito", () => window.location.reload());
+});
+
+onUnmounted(() => {
+  if (incognitoListener !== null) {
+    incognitoListener();
+    incognitoListener = null;
+  }
+});
 
 onMounted(async () => {
   await showLoading.start(`正在加载帖子数据`);
@@ -266,6 +278,10 @@ async function tryLike(): Promise<void> {
   }
   if (!postData.value) {
     showSnackbar.error("数据未加载");
+    return;
+  }
+  if (!incognito.value) {
+    showSnackbar.error("无法在无痕浏览模式下操作");
     return;
   }
   const ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
