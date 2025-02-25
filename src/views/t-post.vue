@@ -280,7 +280,7 @@ async function tryLike(): Promise<void> {
     showSnackbar.error("数据未加载");
     return;
   }
-  if (!incognito.value) {
+  if (incognito.value) {
     showSnackbar.error("无法在无痕浏览模式下操作");
     return;
   }
