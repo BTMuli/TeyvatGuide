@@ -1,7 +1,7 @@
 /**
  * @file web/utils/annoParser.ts
  * @description 解析游戏内公告数据
- * @since Beta v0.6.10
+ * @since Beta v0.7.0
  */
 
 import TpText from "@comp/viewPost/tp-text.vue";
@@ -27,7 +27,7 @@ function handleAnnoTable(table: HTMLTableElement): HTMLTableElement {
 
 /**
  * @description 预处理公告内容
- * @since Beta v0.6.10
+ * @since Beta v0.7.0
  * @param {string} data 游戏内公告数据
  * @returns {string} 解析后的数据
  */
@@ -57,7 +57,7 @@ function parseAnnoContent(
 
 /**
  * @description 解析公告节点
- * @since Beta v0.6.10
+ * @since Beta v0.7.0
  * @param {Node} node - 节点
  * @param {Record<string, string>} attr - 属性
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
@@ -142,7 +142,7 @@ function parseAnnoNode(
 
 /**
  * @description 解析公告段落
- * @since Beta v0.6.10
+ * @since Beta v0.7.0
  * @param {HTMLElement} p - 段落元素
  * @param {Record<string, string>} attr - 属性
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
@@ -224,7 +224,7 @@ function parseAnnoParagraph(
 
 /**
  * @description 解析公告 span
- * @since Beta v0.6.10
+ * @since Beta v0.7.0
  * @param {HTMLElement} span - span 元素
  * @param {Record<string, string>} attr - 属性
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
@@ -279,7 +279,7 @@ function parseAnnoSpan(
 
 /**
  * @description 解析公告图片
- * @since Beta v0.6.10
+ * @since Beta v0.7.0
  * @param {HTMLElement} img - 图片元素
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
  */
@@ -302,7 +302,7 @@ function parseAnnoImage(img: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
 
 /**
  * @description 解析公告锚点
- * @since Beta v0.6.10
+ * @since Beta v0.7.0
  * @param {HTMLElement} a - 锚点元素
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
  */
@@ -331,7 +331,7 @@ function parseAnnoAnchor(a: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
 
 /**
  * @description 解析公告详情
- * @since Beta v0.6.10
+ * @since Beta v0.7.0
  * @param {HTMLElement} details - 详情元素
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
  */
@@ -366,7 +366,7 @@ function parseAnnoDetails(details: HTMLElement): TGApp.Plugins.Mys.SctPost.Base 
 
 /**
  * @description 解析公告表格
- * @since Beta v0.6.10
+ * @since Beta v0.7.0
  * @param {HTMLElement} table - 表格元素
  * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
  */

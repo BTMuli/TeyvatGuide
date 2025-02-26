@@ -1,7 +1,7 @@
 /**
  * @file utils/TGLogger.ts
  * @description 日志工具
- * @since Beta v0.6.10/v0.7.0
+ * @since Beta v0.7.0
  */
 
 import { event } from "@tauri-apps/api";
@@ -77,7 +77,7 @@ class Logger {
 
   /**
    * @description 输出日志-脚本
-   * @since Beta v0.6.10/v0.7.0
+   * @since Beta v0.7.0
    * @param {string} message 日志信息
    * @returns {Promise<void>} 无返回值
    */
@@ -89,7 +89,7 @@ class Logger {
 
   /**
    * @description 输出日志-脚本分隔符
-   * @since Beta v0.6.10/v0.7.0
+   * @since Beta v0.7.0
    * @param {string} label 标签
    * @param {boolean} [start] 是否为开始，默认为 true
    * @returns {Promise<void>} 无返回值

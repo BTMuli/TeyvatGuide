@@ -1,7 +1,7 @@
 /**
  * @file types/BBS/Mission.d.ts
  * @description BBS 任务相关类型定义文件
- * @since Beta v0.6.10/v0.7.0
+ * @since Beta v0.7.0
  */
 
 declare namespace TGApp.BBS.Mission {
@@ -9,7 +9,7 @@ declare namespace TGApp.BBS.Mission {
    * @description 任务信息返回
    * @interface InfoResp
    * @extends TGApp.BBS.Response.BaseWithData
-   * @since Beta v0.6.10/v0.7.0
+   * @since Beta v0.7.0
    * @property {TGApp.BBS.Mission.InfoRes} data 任务信息
    * @return InfoResp
    */
@@ -18,7 +18,7 @@ declare namespace TGApp.BBS.Mission {
   /**
    * @description 任务信息
    * @interface InfoRes
-   * @since Beta v0.6.10/v0.7.0
+   * @since Beta v0.7.0
    * @property {Array<MissionItem>} missions 任务列表
    * @property {Array<MissionItem>} more_missions 更多任务列表
    * @return InfoRes
@@ -28,7 +28,7 @@ declare namespace TGApp.BBS.Mission {
   /**
    * @description 任务项
    * @interface MissionItem
-   * @since Beta v0.6.10/v0.7.0
+   * @since Beta v0.7.0
    * @property {number} id 任务 ID
    * @property {string} name 任务名称
    * @property {string} desc 任务描述
@@ -64,7 +64,7 @@ declare namespace TGApp.BBS.Mission {
    * @description 任务状态返回
    * @interface StateResp
    * @extends TGApp.BBS.Response.BaseWithData
-   * @since Beta v0.6.10/v0.7.0
+   * @since Beta v0.7.0
    * @property {TGApp.BBS.Mission.StateRes} data 任务状态
    * @return StateResp
    */
@@ -73,7 +73,7 @@ declare namespace TGApp.BBS.Mission {
   /**
    * @description 任务状态
    * @interface StateRes
-   * @since Beta v0.6.10/v0.7.0
+   * @since Beta v0.7.0
    * @property {Array<StateItem>} states 任务状态列表
    * @property {number} already_received_points 已领取的米游币
    * @property {number} total_points 总米游币
@@ -94,7 +94,7 @@ declare namespace TGApp.BBS.Mission {
   /**
    * @description 任务状态项
    * @interface StateItem
-   * @since Beta v0.6.10/v0.7.0
+   * @since Beta v0.7.0
    * @property {number} mission_id 任务 ID
    * @property {number} process 任务进度 0：未完成，1：已完成
    * @property {number} happened_times 发生次数

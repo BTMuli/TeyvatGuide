@@ -1,7 +1,7 @@
 /**
  * @file web/request/apiHubReq.ts
  * @description apiHub下的请求
- * @since Beta v0.6.10/v0.7.0
+ * @since Beta v0.7.0
  */
 
 import TGHttp from "@/utils/TGHttp.js";
@@ -41,7 +41,7 @@ async function getGameList(): Promise<Array<TGApp.BBS.Game.Item>> {
 
 /**
  * @description 获取用户米游币任务完成情况
- * @since Beta v0.6.10/v0.7.0
+ * @since Beta v0.7.0
  * @param {Record<string,string>} cookie 用户 Cookie
  * @return {Promise<TGApp.BBS.Mission.InfoRes>}
  */
@@ -55,7 +55,7 @@ async function getMissions(cookie: Record<string, string>): Promise<TGApp.BBS.Mi
 
 /**
  * @description 获取分享配置
- * @since Beta v0.6.10/v0.7.0
+ * @since Beta v0.7.0
  * @description **需要验证码登录返回的 Cookie**
  * @param {string} postId 帖子 ID
  * @param {Record<string,string>} cookie 用户 Cookie
@@ -79,7 +79,7 @@ async function getShareConf(
 
 /**
  * @description 获取任务完成情况
- * @since Beta v0.6.10/v0.7.0
+ * @since Beta v0.7.0
  * @description **需要验证码登录的 Cookie**
  * @param {Record<string,string>} cookie 用户 Cookie
  * @return {Promise<TGApp.BBS.Mission.StateResp>}
@@ -146,7 +146,7 @@ async function homeNew(gid: number = 2): Promise<TGApp.BBS.Navigator.Navigator[]
 
 /**
  * @description 签到
- * @since Beta v0.6.10/v0.7.0
+ * @since Beta v0.7.0
  * @description **需要验证码登录获取的 Cookie**
  * @param {Record<string,string>} cookie 用户 Cookie
  * @param {string} gid
@@ -170,7 +170,7 @@ async function signIn(
 
 /**
  * @description 点赞
- * @since Beta v0.6.10/v0.7.0
+ * @since Beta v0.7.0
  * @param {string} id 帖子 ID
  * @param {Record<string,string>} cookie 用户 Cookie
  * @param {boolean} cancel 是否取消点赞

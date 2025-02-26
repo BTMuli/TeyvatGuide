@@ -1,7 +1,7 @@
 /**
  * @file utils/TGBbs.ts
  * @description 关于 BBS 的工具函数
- * @since Beta v0.6.10/v0.7.0
+ * @since Beta v0.7.0
  */
 
 const BBS_VERSION: Readonly<string> = "2.82.0";

@@ -1,7 +1,7 @@
 /**
  * @file web/utils/getRequestHeader.ts
  * @description 获取请求头
- * @since Beta v0.6.10/v0.7.0
+ * @since Beta v0.7.0
  */
 
 import Md5 from "js-md5";
@@ -25,7 +25,7 @@ const enum SaltType {
 /**
  * @description salt 值
  * @version 2.82.0
- * @since Beta v0.6.10/v0.7.0
+ * @since Beta v0.7.0
  */
 const Salt: Readonly<Record<keyof typeof SaltType, string>> = {
   K2: "RGcLwIWYOQwTQPJ8Qw41kioel738ch3Z",

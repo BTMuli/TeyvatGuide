@@ -1,6 +1,6 @@
 //! @file src/client/mod.rs
 //! @desc 客户端模块，负责操作米游社客户端
-//! @since Beta v0.6.10/v0.7.0
+//! @since Beta v0.7.0
 
 mod menu;
 mod utils;

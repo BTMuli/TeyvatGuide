@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/avatarBirth.ts
  * @description 角色生日模块
- * @since Beta v0.6.10
+ * @since Beta v0.7.0
  */
 
 import { AppCharacterData, ArcBirCalendar, ArcBirRole, WikiCharacterData } from "@/data/index.js";
@@ -43,7 +43,7 @@ function isLeapYear(year: number): boolean {
 
 /**
  * @description 获取下一个角色生日
- * @since Beta v0.6.10
+ * @since Beta v0.7.0
  * @param {[number,number]} date - 日期
  * @return {TGApp.Archive.Birth.RoleItem[]} 下一个角色生日
  */

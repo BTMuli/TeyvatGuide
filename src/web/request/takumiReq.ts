@@ -1,15 +1,13 @@
 /**
  * @file web/request/takumiReq.ts
  * @description Takumi 相关请求函数
- * @since Beta v0.6.3
+ * @since Beta v0.7.0
  */
 import TGHttp from "@/utils/TGHttp.js";
 import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
 
-// TakumiAuthApiBaseUrl => taAbu
-const taAbu: Readonly<string> = "https://api-takumi.mihoyo.com/auth/api/";
-// TakumiBingApiBaseUrl => tbAbu
-const tbAbu: Readonly<string> = "https://api-takumi.mihoyo.com/binding/api/";
+// TakumiApiBaseUrl => taBu
+const taBu: Readonly<string> = "https://api-takumi.mihoyo.com/";
 
 /**
  * @description 根据stoken获取action_ticket
@@ -26,7 +24,7 @@ async function getActionTicketBySToken(
 ): Promise<ActionTicketByStokenResp> {
   const ck = { stoken: cookie.stoken, mid: cookie.mid };
   const params = { action_type: actionType, stoken: cookie.stoken, uid: user.gameUid };
-  return await TGHttp<ActionTicketByStokenResp>(`${taAbu}getActionTicketBySToken`, {
+  return await TGHttp<ActionTicketByStokenResp>(`${taBu}auth/api/getActionTicketBySToken`, {
     method: "GET",
     headers: getRequestHeader(ck, "GET", params, "K2"),
     query: params,
@@ -52,7 +50,7 @@ async function genAuthKey(
     region: account.region,
   };
   const resp = await TGHttp<TGApp.Game.Gacha.AuthkeyResponse | TGApp.BBS.Response.Base>(
-    `${tbAbu}genAuthKey`,
+    `${taBu}binding/api/genAuthKey`,
     {
       method: "POST",
       headers: getRequestHeader(ck, "POST", JSON.stringify(data), "LK2", true),
@@ -74,7 +72,7 @@ async function genAuthKey2(
   cookie: Record<string, string>,
   payload: Record<string, string>,
 ): Promise<TGApp.BBS.Response.Base> {
-  return await TGHttp<TGApp.BBS.Response.Base>(`${tbAbu}genAuthKey`, {
+  return await TGHttp<TGApp.BBS.Response.Base>(`${taBu}binding/api/genAuthKey`, {
     method: "POST",
     headers: getRequestHeader(cookie, "POST", JSON.stringify(payload), "LK2", true),
     body: JSON.stringify(payload),
@@ -92,7 +90,7 @@ async function getUserGameRolesByCookie(
 ): Promise<TGApp.BBS.Account.GameAccount[] | TGApp.BBS.Response.Base> {
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const params = { game_biz: "hk4e_cn" };
-  const resp = await TGHttp<GameAccountsResp>(`${tbAbu}getUserGameRolesByCookie`, {
+  const resp = await TGHttp<GameAccountsResp>(`${taBu}binding/api/getUserGameRolesByCookie`, {
     method: "GET",
     headers: getRequestHeader(ck, "GET", params),
     query: params,

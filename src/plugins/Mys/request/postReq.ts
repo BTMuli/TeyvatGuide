@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/request/postReq.ts
  * @description 帖子相关的获取
- * @since Beta v0.6.10/v0.7.0
+ * @since Beta v0.7.0
  */
 
 import TGHttp from "@/utils/TGHttp.js";
@@ -15,7 +15,7 @@ const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 
 /**
  * @description 获取单个帖子信息
- * @since Beta v0.6.10/v0.7.0
+ * @since Beta v0.7.0
  * @param {number} postId 帖子 ID
  * @param {Record<string, string>} cookie Cookie
  * @return {Promise<TGApp.Plugins.Mys.Post.FullData|TGApp.BBS.Response.Base>}
