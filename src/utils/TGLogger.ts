@@ -85,6 +85,7 @@ class Logger {
     const timeNow = timestampToDate(new Date().getTime());
     const msg = `[${timeNow}]${message}`;
     await event.emitTo("TeyvatGuide", "userScriptLog", msg);
+    await info(message);
   }
 
   /**
@@ -99,6 +100,7 @@ class Logger {
     const msg = `//--------------------${midStr}--------------------//`;
     await event.emitTo("TeyvatGuide", "userScriptLog", msg);
     if (!start) await event.emitTo("TeyvatGuide", "userScriptLog", "");
+    await info(msg);
   }
 }
 
