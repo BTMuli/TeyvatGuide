@@ -47,16 +47,16 @@
       </div>
     </template>
     <template #append>
-      <span class="top-hint" @click="tryCkVerify()" title="点击验证"
-        >需要验证码登录所需cookie！！！</span
-      >
+      <span class="top-hint" @click="tryCkVerify()" title="点击验证">
+        需要验证码登录所需cookie！！！
+      </span>
     </template>
   </v-app-bar>
   <div class="us-page-container">
     <!-- 左侧脚本列表 -->
     <div class="us-scripts">
       <div class="us-title">脚本列表</div>
-      <TusMission />
+      <TusMission v-model="runScript" />
     </div>
     <!-- 右侧脚本输出 -->
     <TusOutput />
@@ -70,7 +70,7 @@ import TusMission from "@comp/userScripts/tus-mission.vue";
 import TusOutput from "@comp/userScripts/tus-output.vue";
 import TSUserAccount from "@Sqlite/modules/userAccount.js";
 import { storeToRefs } from "pinia";
-import { onMounted, shallowRef } from "vue";
+import { onMounted, ref, shallowRef } from "vue";
 
 import { useUserStore } from "@/store/modules/user.js";
 import apiHubReq from "@/web/request/apiHubReq.js";
@@ -78,6 +78,7 @@ import apiHubReq from "@/web/request/apiHubReq.js";
 const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
 const accounts = shallowRef<Array<TGApp.App.Account.User>>([]);
 const curAccount = shallowRef<TGApp.App.Account.User>();
+const runScript = ref<boolean>(false);
 
 onMounted(async () => {
   accounts.value = await TSUserAccount.account.getAllAccount();

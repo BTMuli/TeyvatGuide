@@ -3,8 +3,8 @@
     <div class="tusm-top">
       <div class="tusm-title">米游币任务({{ todayPoints }}/{{ totalPoints }})</div>
       <div class="tusm-acts">
-        <v-btn @click="tryRefresh()" class="tusm-btn">刷新</v-btn>
-        <v-btn @click="tryAuto()" class="tusm-btn">执行</v-btn>
+        <v-btn @click="tryRefresh()" class="tusm-btn" :loading="loadState">刷新</v-btn>
+        <v-btn @click="tryAuto()" class="tusm-btn" :loading="loadMission">执行</v-btn>
       </div>
     </div>
     <div class="tusm-content">
@@ -55,6 +55,9 @@ const parseMissions = shallowRef<Array<ParseMission>>([]);
 const missionList = shallowRef<Array<TGApp.BBS.Mission.MissionItem>>([]);
 const todayPoints = ref<number>(0);
 const totalPoints = ref<number>(0);
+const loadScript = defineModel<boolean>();
+const loadState = ref<boolean>(false);
+const loadMission = ref<boolean>(false);
 
 function mergeMission(
   list: Array<TGApp.BBS.Mission.MissionItem>,
@@ -90,6 +93,12 @@ function mergeMission(
 }
 
 async function tryRefresh(): Promise<void> {
+  if (loadScript.value) {
+    showSnackbar.warn("任务正在执行中，请稍后再试");
+    return;
+  }
+  loadScript.value = true;
+  loadState.value = true;
   await TGLogger.ScriptSep("米游币任务");
   await TGLogger.Script("[米游币任务]刷新任务状态");
   if (!cookie.value) {
@@ -105,9 +114,17 @@ async function tryRefresh(): Promise<void> {
   };
   await refreshState(ck);
   await TGLogger.ScriptSep("米游币任务", false);
+  loadScript.value = false;
+  loadState.value = false;
 }
 
 async function tryAuto(): Promise<void> {
+  if (loadScript.value) {
+    showSnackbar.warn("任务正在执行中，请稍后再试");
+    return;
+  }
+  loadScript.value = true;
+  loadMission.value = true;
   await TGLogger.ScriptSep("米游币任务");
   await TGLogger.Script("[米游币任务]开始执行任务");
   if (!cookie.value) {
@@ -133,6 +150,8 @@ async function tryAuto(): Promise<void> {
   if (postFilter.every((i) => i.status)) {
     await TGLogger.Script("[米游币任务]所有任务已完成");
     await TGLogger.ScriptSep("米游币任务", false);
+    loadScript.value = false;
+    loadMission.value = false;
     return;
   }
   let isShare = false;
@@ -202,6 +221,8 @@ async function tryAuto(): Promise<void> {
   await TGLogger.Script("[米游币任务]任务执行完毕，即将刷新任务状态");
   await refreshState(ck);
   await TGLogger.ScriptSep("米游币任务", false);
+  loadScript.value = false;
+  loadMission.value = false;
 }
 
 async function refreshState(ck: Record<string, string>): Promise<void> {
