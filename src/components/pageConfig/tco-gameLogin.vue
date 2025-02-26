@@ -6,9 +6,9 @@
       </div>
       <div class="tog-mid">
         <qrcode-vue
-          v-if="codeData"
+          v-if="codeUrl"
           class="tog-qr"
-          :value="codeData.url"
+          :value="codeUrl"
           render-as="svg"
           :background="'var(--box-bg-1)'"
           foreground="var(--box-text-1)"
@@ -19,11 +19,14 @@
 </template>
 <script setup lang="ts">
 import TOverlay from "@comp/app/t-overlay.vue";
+import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import QrcodeVue from "qrcode.vue";
-import { onUnmounted, shallowRef, watch } from "vue";
+import { computed, onUnmounted, ref, watch } from "vue";
 
+import hk4eReq from "@/web/request/hk4eReq.js";
 import PassportReq from "@/web/request/passportReq.js";
+import takumiReq from "@/web/request/takumiReq.js";
 
 type ToGameLoginEmits = (e: "success", data: TGApp.App.Account.Cookie) => void;
 
@@ -31,8 +34,14 @@ type ToGameLoginEmits = (e: "success", data: TGApp.App.Account.Cookie) => void;
 let cycleTimer: NodeJS.Timeout | null = null;
 
 const model = defineModel<boolean>({ default: false });
+const isLauncherCode = defineModel<boolean>("launcher", { default: false });
 const emits = defineEmits<ToGameLoginEmits>();
-const codeData = shallowRef<TGApp.BBS.GameLogin.GetLoginQrData>();
+const codeUrl = ref<string>();
+const codeTicket = computed<string>(() => {
+  if (!codeUrl.value) return "";
+  const url = new URL(codeUrl.value);
+  return url.searchParams.get("ticket") || "";
+});
 
 watch(model, async (value) => {
   if (value) {
@@ -42,24 +51,33 @@ watch(model, async (value) => {
 });
 
 async function freshQr(): Promise<void> {
-  const res = await PassportReq.qrLogin.create();
+  let res;
+  if (isLauncherCode.value) res = await PassportReq.qrLogin.create();
+  else res = await hk4eReq.loginQr.create();
+  console.log(res);
   if ("retcode" in res) {
     showSnackbar.error(`[${res.retcode}] ${res.message}`);
     return;
   }
-  codeData.value = res;
+  codeUrl.value = res.url;
 }
 
 async function cycleGetData() {
-  if (cycleTimer === null || !codeData.value) return;
-  const res = await PassportReq.qrLogin.query(codeData.value.ticket);
+  if (cycleTimer === null || codeTicket.value === "") return;
+  if (isLauncherCode.value) await cycleGetDataLauncher(cycleTimer);
+  else await cycleGetDataGame(cycleTimer);
+}
+
+// eslint-disable-next-line no-undef
+async function cycleGetDataLauncher(timer: NodeJS.Timeout): Promise<void> {
+  const res = await PassportReq.qrLogin.query(codeTicket.value);
   console.log(res);
   if ("retcode" in res) {
     showSnackbar.error(`[${res.retcode}] ${res.message}`);
     if (res.retcode === -106) {
       await freshQr();
     } else {
-      clearInterval(cycleTimer);
+      clearInterval(timer);
       cycleTimer = null;
       model.value = false;
     }
@@ -67,7 +85,7 @@ async function cycleGetData() {
   }
   if (res.status === "Created" || res.status === "Scanned") return;
   if (res.status === "Confirmed") {
-    clearInterval(cycleTimer);
+    clearInterval(timer);
     cycleTimer = null;
     const ck: TGApp.App.Account.Cookie = {
       account_id: res.user_info.aid,
@@ -79,6 +97,54 @@ async function cycleGetData() {
       ltoken: "",
     };
     emits("success", ck);
+    model.value = false;
+  }
+}
+
+// eslint-disable-next-line no-undef
+async function cycleGetDataGame(timer: NodeJS.Timeout): Promise<void> {
+  const res = await hk4eReq.loginQr.state(codeTicket.value);
+  console.log(res);
+  if ("retcode" in res) {
+    showSnackbar.error(`[${res.retcode}] ${res.message}`);
+    if (res.retcode === -106) {
+      await freshQr();
+    } else {
+      clearInterval(timer);
+      cycleTimer = null;
+      model.value = false;
+    }
+    return;
+  }
+  if (res.stat === "Init" || res.stat === "Scanned") return;
+  if (res.stat === "Confirmed") {
+    clearInterval(timer);
+    cycleTimer = null;
+    if (res.payload.proto === "Raw") {
+      showSnackbar.error(`返回数据异常：${res.payload}`);
+      model.value = false;
+      return;
+    }
+    const statusRaw: TGApp.Game.Login.StatusPayloadRaw = JSON.parse(res.payload.raw);
+    await showLoading.start("正在获取SToken");
+    const stResp = await takumiReq.game.stoken(statusRaw);
+    console.log(stResp);
+    await showLoading.end();
+    if ("retcode" in stResp) {
+      showSnackbar.error(`[${stResp.retcode}] ${stResp.message}`);
+      model.value = false;
+      return;
+    }
+    // const ck: TGApp.App.Account.Cookie = {
+    //   account_id: statusRaw.uid,
+    //   ltuid: statusRaw.uid,
+    //   stuid: statusRaw.uid,
+    //   mid: res.user_info.mid,
+    //   cookie_token: "",
+    //   stoken: res.tokens[0].token,
+    //   ltoken: "",
+    // };
+    // emits("success", ck);
     model.value = false;
   }
 }

@@ -1,5 +1,5 @@
 <template>
-  <ToGameLogin v-model="showLoginQr" @success="tryGetTokens" />
+  <ToGameLogin v-model="showLoginQr" @success="tryGetTokens" v-model:launcher="isLauncherQr" />
   <v-card class="tcu-box">
     <template #prepend>
       <v-avatar :image="userInfo.avatar" />
@@ -100,8 +100,15 @@
             <v-list-item-title>验证码登录</v-list-item-title>
             <v-list-item-subtitle>使用手机号登录</v-list-item-subtitle>
           </v-list-item>
-          <v-list-item @click="showLoginQr = true" append-icon="mdi-qrcode-scan">
-            <v-list-item-title>扫码登录</v-list-item-title>
+          <v-list-item @click="tryCodeLogin(true)">
+            <v-list-item-title>扫码登录(启动器)</v-list-item-title>
+            <v-list-item-subtitle>使用米游社扫码登录</v-list-item-subtitle>
+            <template #append>
+              <img src="/platforms/mhy/launcher.webp" alt="launcher" class="menu-icon" />
+            </template>
+          </v-list-item>
+          <v-list-item @click="tryCodeLogin(false)" append-icon="mdi-qrcode-scan" v-if="false">
+            <v-list-item-title>扫码登录(游戏)</v-list-item-title>
             <v-list-item-subtitle>使用米游社扫码登录</v-list-item-subtitle>
           </v-list-item>
         </v-list>
@@ -131,6 +138,7 @@ const { isLogin } = storeToRefs(useAppStore());
 const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
 
 const showLoginQr = ref<boolean>(false);
+const isLauncherQr = ref<boolean>(true);
 const accounts = shallowRef<Array<TGApp.App.Account.User>>([]);
 const gameAccounts = shallowRef<Array<TGApp.Sqlite.Account.Game>>([]);
 const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
@@ -245,6 +253,11 @@ async function tryCaptchaLogin(): Promise<void> {
     ltoken: "",
   };
   await tryGetTokens(ck);
+}
+
+async function tryCodeLogin(isLauncher: boolean): Promise<void> {
+  isLauncherQr.value = isLauncher;
+  showLoginQr.value = true;
 }
 
 async function refreshUser(uid: string) {
@@ -553,5 +566,10 @@ async function clearUser(user: TGApp.App.Account.User): Promise<void> {
 
 .tcu-btn {
   margin-left: 5px;
+}
+
+.menu-icon {
+  width: 24px;
+  height: 24px;
 }
 </style>

@@ -57,7 +57,7 @@ function getRandomNumber(min: number, max: number): number {
  * @param {boolean} isSign 是否为签名
  * @returns {string} ds
  */
-function getDS(
+export function getDS(
   method: string,
   data: string,
   saltType: keyof typeof SaltType,
