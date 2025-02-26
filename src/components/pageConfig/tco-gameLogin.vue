@@ -14,6 +14,10 @@
           foreground="var(--box-text-1)"
         />
       </div>
+      <div class="tog-bottom" @click="share()">
+        <img src="/platforms/mhy/launcher.webp" alt="icon" v-if="isLauncherCode" />
+        <img src="/platforms/mhy/mys.webp" alt="icon" v-else />
+      </div>
     </div>
   </TOverlay>
 </template>
@@ -24,6 +28,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import QrcodeVue from "qrcode.vue";
 import { computed, onUnmounted, ref, watch } from "vue";
 
+import { generateShareImg } from "@/utils/TGShare.js";
 import hk4eReq from "@/web/request/hk4eReq.js";
 import PassportReq from "@/web/request/passportReq.js";
 import takumiReq from "@/web/request/takumiReq.js";
@@ -49,6 +54,15 @@ watch(model, async (value) => {
     cycleTimer = setInterval(cycleGetData, 1000);
   }
 });
+
+async function share(): Promise<void> {
+  const shareDom = document.querySelector<HTMLDivElement>(".tog-box");
+  if (shareDom === null) {
+    showSnackbar.error("分享失败");
+    return;
+  }
+  await generateShareImg(`tco-gameLogin`, shareDom);
+}
 
 async function freshQr(): Promise<void> {
   let res;
@@ -191,5 +205,16 @@ onUnmounted(() => {
 .tog-qr {
   width: 256px;
   height: 256px;
+}
+
+.tog-bottom {
+  margin: 0 auto;
+  cursor: pointer;
+
+  img {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+  }
 }
 </style>
