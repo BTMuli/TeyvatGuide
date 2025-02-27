@@ -1,28 +1,96 @@
 <template>
   <TSwitchTheme />
-  <div class="anno-json">
-    <div class="anno-title">活动列表 JSON</div>
-    <JsonViewer :value="jsonList" copyable boxed />
-    <div class="anno-title">活动内容 JSON</div>
-    <JsonViewer :value="jsonContent" copyable boxed />
+  <div class="taj-page">
+    <v-expansion-panels>
+      <v-expansion-panel>
+        <template #title>
+          <div class="taj-title">活动列表 JSON</div>
+        </template>
+        <template #text>
+          <div class="taj-box">
+            <vue-json-pretty
+              :data="JSON.parse(JSON.stringify(jsonList))"
+              :show-icon="true"
+              :show-length="true"
+              :show-line="true"
+              :show-line-number="true"
+              :show-double-quotes="true"
+              :show-key-value-space="true"
+              :collapsed-on-click-brackets="true"
+              :deep="2"
+              :theme="jsonTheme"
+            />
+          </div>
+        </template>
+      </v-expansion-panel>
+      <v-expansion-panel>
+        <template #title>
+          <div class="taj-title">活动内容 JSON</div>
+        </template>
+        <template #text>
+          <div class="taj-box">
+            <vue-json-pretty
+              :data="JSON.parse(JSON.stringify(jsonContent))"
+              :show-icon="true"
+              :show-length="true"
+              :show-line="true"
+              :show-line-number="true"
+              :show-double-quotes="true"
+              :show-key-value-space="true"
+              :collapsed-on-click-brackets="true"
+              :deep="2"
+              :theme="jsonTheme"
+            />
+          </div>
+        </template>
+      </v-expansion-panel>
+      <v-expansion-panel>
+        <template #title>
+          <div class="taj-title">解析 JSON</div>
+        </template>
+        <template #text>
+          <div class="taj-box">
+            <vue-json-pretty
+              :data="JSON.parse(JSON.stringify(parsedJson))"
+              :show-icon="true"
+              :show-length="true"
+              :show-line="true"
+              :show-line-number="true"
+              :show-double-quotes="true"
+              :show-key-value-space="true"
+              :collapsed-on-click-brackets="true"
+              :deep="2"
+              :theme="jsonTheme"
+            />
+          </div>
+        </template>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </div>
 </template>
 <script lang="ts" setup>
 import TSwitchTheme from "@comp/app/t-switchTheme.vue";
 import showLoading from "@comp/func/loading.js";
-import { onMounted, shallowRef } from "vue";
-import JsonViewer from "vue-json-viewer";
+import { storeToRefs } from "pinia";
+import { computed, onMounted, shallowRef } from "vue";
+import VueJsonPretty from "vue-json-pretty";
+import "vue-json-pretty/lib/styles.css";
 import { useRoute } from "vue-router";
 
+import { useAppStore } from "@/store/modules/app.js";
 import Hk4eApi, { type AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
+import parseAnnoContent from "@/web/utils/annoParser.js";
 
 // 数据
 const route = useRoute();
 const annoId = Number(route.params.anno_id);
 const region = <AnnoServer>route.params.region;
 const lang = <AnnoLang>route.params.lang;
+const { theme } = storeToRefs(useAppStore());
 const jsonList = shallowRef<TGApp.BBS.Announcement.AnnoSingle>();
 const jsonContent = shallowRef<TGApp.BBS.Announcement.ContentItem>();
+const parsedJson = shallowRef<Array<TGApp.Plugins.Mys.SctPost.Base>>();
+const jsonTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
 onMounted(async () => {
   await showLoading.start("正在获取公告数据");
@@ -41,32 +109,30 @@ onMounted(async () => {
     }
   }
   jsonContent.value = await Hk4eApi.anno.content(annoId, region, lang);
+  parsedJson.value = parseAnnoContent(jsonContent.value);
   await showLoading.end();
 });
 </script>
-<style lang="css" scoped>
-.anno-json {
-  padding: 20px;
-  border-radius: 20px;
+<style lang="scss" scoped>
+.taj-page {
+  width: 800px;
+  margin: 0 auto;
   font-family: var(--font-text);
 }
 
-.anno-title {
-  width: 100%;
-  margin: 10px 0;
-  color: #546d8b;
+.taj-title {
+  color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
   font-weight: 600;
-  text-align: right;
 }
 
-.jv-container {
-  background: var(--box-bg-2) !important;
-}
-
-.jv-key,
-.jv-array {
-  color: var(--box-text-4) !important;
+.taj-box {
+  border-radius: 4px;
+  position: relative;
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 </style>

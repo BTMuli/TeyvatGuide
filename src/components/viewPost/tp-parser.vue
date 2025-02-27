@@ -45,7 +45,9 @@ function getParsedData(data: SctPostDataArr): SctPostDataArr {
       res.push(cur);
       continue;
     }
-    tp.insert = tp.insert.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    if (typeof tp.insert === "string") {
+      tp.insert = tp.insert.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    }
     if (tp.insert === "\n") {
       child.push(tp);
       cur = { insert: "", attributes: tp.attributes, children: child };
@@ -53,7 +55,7 @@ function getParsedData(data: SctPostDataArr): SctPostDataArr {
       child = [];
       continue;
     }
-    const parsedText = getParsedText(tp);
+    const parsedText = getParsedText(<TpTextType>tp);
     let check = 0;
     for (let i = 0; i < parsedText.length; i++) {
       const text = parsedText[i];

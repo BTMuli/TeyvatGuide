@@ -26,7 +26,6 @@
 <script lang="ts" setup>
 // about import err,see:https://github.com/apache/echarts/issues/19992
 import showLoading from "@comp/func/loading.js";
-// @ts-expect-error no-exported-member
 import { BarChart, HeatmapChart, PieChart } from "echarts/charts.js";
 import {
   CalendarComponent,
@@ -38,11 +37,8 @@ import {
   TooltipComponent,
   VisualMapComponent,
 } from "echarts/components.js";
-// @ts-expect-error no-exported-member
 import { use } from "echarts/core.js";
-// @ts-expect-error no-exported-member
 import { LabelLayout } from "echarts/features.js";
-// @ts-expect-error no-exported-member
 import { CanvasRenderer } from "echarts/renderers.js";
 import type { EChartsOption } from "echarts/types/dist/shared.js";
 import { storeToRefs } from "pinia";

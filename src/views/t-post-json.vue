@@ -1,10 +1,50 @@
 <template>
   <TSwitchTheme />
-  <div class="post-json">
-    <div class="post-title">帖子返回内容 JSON</div>
-    <JsonViewer :value="jsonData" copyable boxed />
-    <div class="post-title" v-show="!isEmpty">结构化内容解析</div>
-    <JsonViewer v-if="!isEmpty" :value="parseData" copyable boxed />
+  <div class="tpj-page">
+    <v-expansion-panels>
+      <v-expansion-panel>
+        <template #title>
+          <div class="tpj-title">帖子返回内容 JSON</div>
+        </template>
+        <template #text>
+          <div class="tpj-box">
+            <vue-json-pretty
+              :data="JSON.parse(JSON.stringify(jsonData))"
+              :show-icon="true"
+              :show-length="true"
+              :show-line="true"
+              :show-line-number="true"
+              :show-double-quotes="true"
+              :show-key-value-space="true"
+              :collapsed-on-click-brackets="true"
+              :deep="2"
+              :theme="jsonTheme"
+            />
+          </div>
+        </template>
+      </v-expansion-panel>
+      <v-expansion-panel>
+        <template #title>
+          <div class="tpj-title">帖子解析内容 JSON</div>
+        </template>
+        <template #text>
+          <div class="tpj-box">
+            <vue-json-pretty
+              :data="parseData"
+              :show-icon="true"
+              :show-length="true"
+              :show-line="true"
+              :show-line-number="true"
+              :show-double-quotes="true"
+              :show-key-value-space="true"
+              :collapsed-on-click-brackets="true"
+              :deep="2"
+              :theme="jsonTheme"
+            />
+          </div>
+        </template>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </div>
 </template>
 <script lang="ts" setup>
@@ -13,18 +53,22 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import Mys from "@Mys/index.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, shallowRef } from "vue";
-import JsonViewer from "vue-json-viewer";
+import { computed, onMounted, ref, shallowRef } from "vue";
+import VueJsonPretty from "vue-json-pretty";
+import "vue-json-pretty/lib/styles.css";
 import { useRoute } from "vue-router";
 
+import { useAppStore } from "@/store/modules/app.js";
 import { useUserStore } from "@/store/modules/user.js";
 import TGLogger from "@/utils/TGLogger.js";
 
+const { theme } = storeToRefs(useAppStore());
 const { cookie } = storeToRefs(useUserStore());
 const postId = Number(useRoute().params.post_id);
 const isEmpty = ref<boolean>(false);
 const jsonData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
 const parseData = shallowRef<Array<TGApp.Plugins.Mys.SctPost.Base>>();
+const jsonTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
 onMounted(async () => {
   await showLoading.start(`正在获取帖子数据`);
@@ -57,29 +101,27 @@ onMounted(async () => {
   await showLoading.end();
 });
 </script>
-<style lang="css" scoped>
-.post-json {
-  padding: 20px;
-  border-radius: 20px;
+<style lang="scss" scoped>
+.tpj-page {
+  width: 800px;
+  margin: 0 auto;
   font-family: var(--font-text);
 }
 
-.post-title {
-  width: 100%;
-  margin: 10px 0;
-  color: #546d8b;
+.tpj-title {
+  color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
   font-weight: 600;
-  text-align: right;
 }
 
-.jv-container {
-  background: var(--box-bg-2) !important;
-}
-
-.jv-key,
-.jv-array {
-  color: var(--box-text-4) !important;
+.tpj-box {
+  border-radius: 4px;
+  position: relative;
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  max-width: 100%;
+  background: var(--box-bg-1);
 }
 </style>

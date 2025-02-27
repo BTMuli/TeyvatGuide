@@ -11,7 +11,6 @@
       'tp-texts-header6': props.data.attributes && props.data.attributes.header === 6,
     }"
     :title="getTitle()"
-    :style="{ textAlign: props.data.attributes?.align }"
   >
     <component
       :is="getComp(text)"
@@ -53,6 +52,7 @@ function getTitle(): string {
   line-break: anywhere;
   white-space: pre-wrap;
   word-break: break-all;
+  text-align: v-bind("props.data.attributes?.align");
 
   &.tp-inline {
     display: inline;

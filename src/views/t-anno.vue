@@ -3,7 +3,9 @@
   <TPinWin />
   <TShareBtn selector=".anno-body" :title="`Anno_${route.params.anno_id}`" />
   <div class="anno-body" v-if="annoData">
-    <div class="anno-info">AnnoID: {{ annoId }} | Render by TeyvatGuide v{{ appVersion }}</div>
+    <div class="anno-info" @click="createAnnoJson">
+      AnnoID: {{ annoId }} | Render by TeyvatGuide v{{ appVersion }}
+    </div>
     <div class="anno-title">{{ annoData.title }}</div>
     <div class="anno-subtitle">{{ parseText(annoData.subtitle) }}</div>
     <div class="anno-content">
@@ -57,7 +59,7 @@ onMounted(async () => {
     return;
   }
   const isDev = useAppStore().devMode ?? false;
-  if (isDev) await createAnnoJson(annoId, region, lang);
+  if (isDev) await createAnnoJson();
   await showLoading.end();
 });
 
@@ -67,7 +69,7 @@ function parseText(title: string): string {
   return div.innerText;
 }
 
-async function createAnnoJson(annoId: number, region: AnnoServer, lang: AnnoLang): Promise<void> {
+async function createAnnoJson(): Promise<void> {
   const jsonPath = `/anno_detail_json/${region}/${annoId}/${lang}`;
   const jsonTitle = `Anno_${region}_${annoId}_${lang}_JSON`;
   await createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);

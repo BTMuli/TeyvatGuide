@@ -5,7 +5,6 @@
  */
 
 import TSUserGacha from "@Sqlite/modules/userGacha.js";
-// @ts-expect-error no-export-member
 import type { BarSeriesOption } from "echarts/charts.js";
 import type { EChartsOption, XAXisOption } from "echarts/types/dist/shared.js";
 
