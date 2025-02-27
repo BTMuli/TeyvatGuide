@@ -133,15 +133,14 @@ const levelColor = computed<string>(() => {
 .tpa-level-right {
   position: absolute;
   bottom: 0;
-  display: flex;
   width: 18px;
   height: 18px;
-  align-items: center;
-  justify-content: center;
   border-radius: 50%;
   background: v-bind(levelColor);
   color: var(--tgc-white-1);
   font-size: 10px;
+  line-height: 18px;
+  text-align: center;
 }
 
 .tpa-level-right {
