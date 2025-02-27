@@ -769,7 +769,7 @@
   },
   {
     "id": 10000109,
-    "contentId": 0,
+    "contentId": 504440,
     "dropDays": [1, 4, 7],
     "name": "梦见月瑞希",
     "itemType": "character",
@@ -2129,7 +2129,7 @@
   },
   {
     "id": 14518,
-    "contentId": 0,
+    "contentId": 504503,
     "dropDays": [2, 5, 7],
     "name": "寝正月初晴",
     "itemType": "weapon",
@@ -4129,7 +4129,7 @@
   },
   {
     "id": 13432,
-    "contentId": 0,
+    "contentId": 504502,
     "dropDays": [3, 6, 7],
     "name": "且住亭御咄",
     "itemType": "weapon",
