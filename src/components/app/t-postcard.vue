@@ -325,6 +325,7 @@ async function toForum(forum: TGApp.Plugins.Mys.News.RenderForum): Promise<void>
   backdrop-filter: blur(20px);
   background: var(--common-shadow-2);
   border-bottom-left-radius: 5px;
+  border-top-right-radius: 5px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   cursor: pointer;

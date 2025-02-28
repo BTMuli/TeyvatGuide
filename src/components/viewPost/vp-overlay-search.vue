@@ -8,10 +8,14 @@
           加载更多({{ results.length }})
         </v-btn>
       </div>
+      <div class="tops-divider" />
       <div class="tops-list">
-        <div v-for="item in results" :key="item.post.post_id">
-          <TPostCard :model-value="item" />
-        </div>
+        <TPostCard
+          class="tops-item"
+          :model-value="item"
+          v-for="item in results"
+          :key="item.post.post_id"
+        />
       </div>
     </div>
   </TOverlay>
@@ -113,13 +117,24 @@ async function searchPosts(): Promise<void> {
 </script>
 <style lang="css" scoped>
 .tops-box {
+  position: relative;
+  display: flex;
+  width: 400px;
+  height: 500px;
+  box-sizing: border-box;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
   padding: 10px;
   border-radius: 5px;
   background-color: var(--box-bg-1);
+  row-gap: 8px;
 }
 
 .tops-top {
+  position: relative;
   display: flex;
+  width: 100%;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
@@ -130,23 +145,36 @@ async function searchPosts(): Promise<void> {
 }
 
 .tops-act {
+  position: relative;
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 5px;
-  border-bottom: 1px solid var(--common-shadow-2);
-  margin-bottom: 10px;
+}
+
+.tops-divider {
+  position: relative;
+  width: 100%;
+  height: 1px;
+  background-color: var(--common-shadow-2);
 }
 
 .tops-list {
   position: relative;
   display: flex;
-  width: 400px;
-  max-height: 400px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
   flex-direction: column;
-  padding-right: 10px;
+  padding-right: 8px;
+  padding-bottom: 8px;
   overflow-y: auto;
   row-gap: 10px;
+}
+
+.tops-item {
+  height: fit-content;
+  flex-shrink: 0;
 }
 
 .tops-btn {
