@@ -7,7 +7,7 @@ Update: 2025-02-28
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2025-02-28 09:40:24`
+> 更新于 `2025-02-28 10:54:28`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -142,6 +142,8 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - [paimon-moe](https://github.com/MadeBaruna/paimon-moe)
 - [Adachi-BOT](https://github.com/Arondight/Adachi-BOT)
 - [amos-data](https://github.com/yuehaiteam/amos-data)
+- [MihoyoBBSTools](https://github.com/Womsxd/MihoyoBBSTools)
+- [nonebot-plugin-mystool](https://github.com/Ljzd-PRO/nonebot-plugin-mystool)
 
 感谢 JetBrains 提供的开源许可证。
 
