@@ -2,8 +2,7 @@
   <div v-if="card" :id="`post-card-${card.postId}`" class="tpc-card">
     <div class="tpc-top">
       <div class="tpc-cover" @click="createPost(card)">
-        <img :src="localCover" alt="cover" v-if="localCover" />
-        <v-progress-circular color="primary" :indeterminate="true" v-else-if="card.cover !== ''" />
+        <TMiImg :src="card.cover" alt="cover" :ori="true" v-if="card.cover !== ''" />
         <img src="/source/UI/defaultCover.webp" alt="cover" v-else />
         <div v-if="card.status" class="tpc-act">
           <div class="tpc-status">{{ card.status?.label }}</div>
@@ -67,12 +66,13 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import { emit } from "@tauri-apps/api/event";
-import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, shallowRef, watch } from "vue";
 
-import { generateShareImg, saveImgLocal } from "@/utils/TGShare.js";
+import { generateShareImg } from "@/utils/TGShare.js";
 import { createPost } from "@/utils/TGWindow.js";
 
 type TPostCardProps = { modelValue: TGApp.Plugins.Mys.Post.FullData; selectMode?: boolean };
@@ -95,37 +95,18 @@ const stats: Readonly<Array<TPostStatus>> = [
 const props = withDefaults(defineProps<TPostCardProps>(), { selectMode: false });
 const emits = defineEmits<TPostCardEmits>();
 const card = shallowRef<TGApp.Plugins.Mys.News.RenderCard>();
-const localCover = ref<string>();
 
 const cardBg = computed<string>(() => {
   if (card.value && card.value.status) return card.value.status.color;
   return "none";
 });
 
-onMounted(async () => await reload(props.modelValue));
+onMounted(async () => (card.value = getPostCard(props.modelValue)));
 
 watch(
   () => props.modelValue,
-  async () => await reload(props.modelValue),
+  async () => (card.value = getPostCard(props.modelValue)),
 );
-
-async function reload(data: TGApp.Plugins.Mys.Post.FullData): Promise<void> {
-  if (localCover.value) {
-    URL.revokeObjectURL(localCover.value);
-    localCover.value = undefined;
-  }
-  card.value = getPostCard(data);
-  if (card.value && card.value.cover !== "") {
-    localCover.value = await saveImgLocal(card.value.cover);
-  }
-}
-
-onUnmounted(() => {
-  if (localCover.value) {
-    URL.revokeObjectURL(localCover.value);
-    localCover.value = undefined;
-  }
-});
 
 function getActivityStatus(status: number): TGApp.Plugins.Mys.News.RenderStatus {
   if (status satisfies ActStat) {
@@ -142,7 +123,6 @@ function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
   else if (item.post.images.length > 0) cover = item.post.images[0];
   if (cover === undefined) return "";
   if (cover.endsWith(".gif")) return cover;
-  // return `${cover}?x-oss-process=image/resize,m_fill,w_360,h_130,limit_0/format,jpg/quality,Q_${imageQualityPercent.value}`;
   return `${cover}?x-oss-process=image/resize,m_fill,w_360,h_130,limit_0/format,png`;
 }
 
@@ -321,14 +301,13 @@ async function toForum(forum: TGApp.Plugins.Mys.News.RenderForum): Promise<void>
   align-items: center;
   justify-content: flex-start;
   padding: 5px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: var(--common-shadow-2);
+  background: var(--tgc-od-white);
   border-bottom-left-radius: 5px;
   border-top-right-radius: 5px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   cursor: pointer;
+  opacity: 0.8;
   text-shadow: 0 0 5px var(--tgc-dark-1);
 }
 
@@ -442,12 +421,13 @@ async function toForum(forum: TGApp.Plugins.Mys.News.RenderForum): Promise<void>
   padding: 0 5px;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  background: var(--common-shadow-1);
+  background: var(--tgc-od-orange);
   border-bottom-right-radius: 5px;
   border-top-left-radius: 5px;
   box-shadow: 2px 2px 5px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   font-size: 12px;
+  opacity: 0.8;
   text-shadow: 0 0 5px var(--tgc-dark-1);
 }
 </style>
