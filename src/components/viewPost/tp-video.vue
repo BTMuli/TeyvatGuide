@@ -21,7 +21,7 @@
       </div>
       <div class="tp-video-time">
         <v-icon size="12">mdi-clock-time-four-outline</v-icon>
-        <span>{{ getVideoDuration(videoData.duration) }}</span>
+        <span>{{ getVideoDuration(videoData.duration * 1000) }}</span>
       </div>
     </div>
   </div>
@@ -53,6 +53,7 @@ onMounted(async () => {
     showSnackbar.error(`获取B站视频信息失败：${props.data.insert.video}`);
     return;
   }
+  console.log(`videoData ${props.data.insert.video}`, videoData.value);
   const meta = videoData.value.dimension;
   if (meta.width > meta.height) videoAspectRatio.value = meta.width / meta.height;
   else videoAspectRatio.value = meta.height / meta.width;
