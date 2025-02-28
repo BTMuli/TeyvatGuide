@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2025-02-11
+Update: 2025-02-28
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2025-02-11 10:55:00`
+> 更新于 `2025-02-28 09:40:24`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -66,6 +66,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 真境剧诗数据获取
   - [x] 祈愿数据获取（近一年）
   - [x] 用户收藏帖子获取
+  - [x] 一键完成米游币每日任务 **需要验证码登录**
 
 - Wiki 功能：
 
@@ -97,8 +98,8 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 
 - Changelog: [CHANGELOG](CHANGELOG.md)
 - 资源来源：[项目资源说明](docs/项目资源说明.md)
-- UIAF：[UIAF v1.1](docs/UIAF.md)
-- UIGF：[UIGF v3.0](docs/UIGF3.md)，[UIGF v4.0](docs/UIGF.md)
+- UIAF：[UIAF v1.1](docs/standards/UIAF.md)
+- UIGF：[UIGF v3.0](docs/standards/UIGF3.md)，[UIGF v4.0](docs/standards/UIGF.md)
 - [macOS 平台门禁属性导致应用无法打开应用的修复指引](docs/macos-gatekeeper/README.md)
 
 ## 特定项目 / Special Project
