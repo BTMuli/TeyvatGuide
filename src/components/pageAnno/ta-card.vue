@@ -73,7 +73,7 @@ async function shareAnno(): Promise<void> {
   display: flex;
   overflow: hidden;
   width: 100%;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   aspect-ratio: 36 / 13;
   cursor: pointer;
@@ -129,12 +129,11 @@ async function shareAnno(): Promise<void> {
   align-items: center;
   justify-content: flex-start;
   padding: 5px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: var(--common-shadow-2);
+  background-color: var(--tgc-od-white);
   border-bottom-left-radius: 5px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
+  opacity: 0.8;
   text-shadow: 0 0 5px var(--tgc-dark-1);
 }
 
@@ -157,14 +156,13 @@ async function shareAnno(): Promise<void> {
   align-items: center;
   justify-content: center;
   padding: 0 5px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: var(--common-shadow-1);
+  background: var(--tgc-od-orange);
   border-bottom-right-radius: 5px;
   border-top-left-radius: 5px;
-  box-shadow: 2px 2px 5px var(--tgc-dark-1);
+  box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   font-size: 12px;
+  opacity: 0.8;
   text-shadow: 0 0 5px var(--tgc-dark-1);
 }
 </style>
