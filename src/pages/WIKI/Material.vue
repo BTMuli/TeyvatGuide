@@ -228,7 +228,7 @@ function searchMaterial(): void {
 .twm-item-right {
   position: relative;
   overflow: hidden;
-  max-width: 100%;
+  max-width: calc(100% - 50px);
   color: var(--box-text-2);
   font-size: 14px;
   text-overflow: ellipsis;

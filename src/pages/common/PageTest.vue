@@ -13,9 +13,27 @@
         </div>
       </div>
     </div>
+    <div class="btn-list">
+      <v-btn @click="test()" class="test-btn">测试</v-btn>
+    </div>
   </div>
 </template>
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
+
+import takumiReq from "@/web/request/takumiReq.js";
+
+const gameToken = "LCLQ2pYLnEDh7p03ogJVxL9dZqbeLtUE";
+const uid = "249066520";
+
+async function test(): Promise<void> {
+  const resp = await takumiReq.game.stoken({ uid: uid, token: gameToken });
+  if (resp.retcode !== 0) {
+    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+    return;
+  }
+}
+</script>
 <style lang="css" scoped>
 .test-box {
   display: flex;

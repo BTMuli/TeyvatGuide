@@ -20,7 +20,9 @@
     <div class="ab-draw-grid">
       <div v-for="item in selectedItem" :key="item.op_id" class="ab-draw">
         <div class="ab-draw-cover" @click="showImg(item)">
-          <TMiImg :src="item.unread_picture[Number(isAether)]" :alt="item.word_text" />
+          <div class="ab-draw-img">
+            <TMiImg :src="item.unread_picture[Number(isAether)]" :alt="item.word_text" />
+          </div>
           <div class="ab-draw-hide" />
           <v-icon class="ab-draw-icon">mdi-magnify</v-icon>
         </div>
@@ -156,6 +158,15 @@ function getItemProps(item: TGApp.Archive.Birth.RoleItem) {
   max-width: 100%;
   border-radius: 5px;
   aspect-ratio: 125 / 54;
+}
+
+.ab-draw-img {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
 .ab-draw-hide {

@@ -2,8 +2,8 @@
   <div class="wc-box">
     <div class="wc-left">
       <div class="wc-select">
-        <v-btn @click="showSelect = true">筛选角色</v-btn>
-        <v-btn @click="resetSelect = true">重置筛选</v-btn>
+        <v-btn @click="showSelect = true" class="wc-btn">筛选角色</v-btn>
+        <v-btn @click="resetSelect = true" class="wc-btn">重置筛选</v-btn>
       </div>
       <div class="wc-list">
         <TwcListItem
@@ -127,6 +127,16 @@ async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> 
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
+}
+
+.wc-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 5px;
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
 }
 
 .wc-list {

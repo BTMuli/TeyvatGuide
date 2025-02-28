@@ -1,24 +1,22 @@
 <!-- todo 优化，增加筛选功能 -->
 <template>
-  <div class="ua-gt-box">
-    <v-data-table
-      :headers="headers"
-      :items="props.modelValue"
-      height="500px"
-      fixed-header
-      fixed-footer
-    >
-      <template v-slot:item="{ item }">
-        <tr class="ua-gt-tr">
-          <td>{{ item.time }}</td>
-          <td>{{ getPool(item.uigfType) }}</td>
-          <td>{{ item.type }}</td>
-          <td>{{ item.name }}</td>
-          <td>{{ item.rank }}</td>
-        </tr>
-      </template>
-    </v-data-table>
-  </div>
+  <v-data-table
+    :headers="headers"
+    :items="props.modelValue"
+    fixed-header
+    fixed-footer
+    class="ua-gt-box"
+  >
+    <template v-slot:item="{ item }">
+      <tr class="ua-gt-tr">
+        <td>{{ item.time }}</td>
+        <td>{{ getPool(item.uigfType) }}</td>
+        <td>{{ item.type }}</td>
+        <td>{{ item.name }}</td>
+        <td>{{ item.rank }}</td>
+      </tr>
+    </template>
+  </v-data-table>
 </template>
 <script lang="ts" setup>
 type GroTableProps = { modelValue: Array<TGApp.Sqlite.GachaRecords.SingleTable> };
@@ -52,8 +50,7 @@ function getPool(type: string) {
 </script>
 <style lang="css" scoped>
 .ua-gt-box {
-  height: 100%;
-  max-height: calc(100vh - 120px);
+  height: calc(100vh - 200px);
   padding-right: 5px;
   border-radius: 5px;
   overflow-y: auto;

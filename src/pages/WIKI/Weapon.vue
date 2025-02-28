@@ -2,10 +2,8 @@
   <div class="ww-box">
     <div class="ww-left">
       <div class="ww-select">
-        <v-btn @click="showSelect = true">
-          <span>筛选武器</span>
-        </v-btn>
-        <v-btn @click="resetSelect = true">重置筛选</v-btn>
+        <v-btn @click="showSelect = true" class="ww-btn">筛选武器</v-btn>
+        <v-btn @click="resetSelect = true" class="ww-btn">重置筛选</v-btn>
       </div>
       <div class="ww-list">
         <TwcListItem
@@ -114,6 +112,16 @@ async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
+}
+
+.ww-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 5px;
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
 }
 
 .ww-list {

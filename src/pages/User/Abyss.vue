@@ -305,6 +305,7 @@ async function uploadAbyss(): Promise<void> {
     }
     showSnackbar.success(res.message ?? "上传深渊数据成功");
     await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据成功");
+    await TGLogger.Info(`[${res.retcode}] ${res.message}`);
   } catch (e) {
     if (e instanceof Error) {
       showSnackbar.error(e.message);
