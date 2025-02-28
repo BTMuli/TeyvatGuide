@@ -9,7 +9,7 @@
     </div>
     <div class="tpu-main">UID {{ props.data.insert.game_user_info.game_uid }}</div>
     <div class="tpu-sub">
-      <span>{{ props.data.insert.game_user_info.nickname }}</span>
+      <span>{{ nickname }}</span>
       <span>|</span>
       <span>{{ props.data.insert.game_user_info.region_name }}</span>
       <span>|</span>
@@ -19,6 +19,7 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import { computed } from "vue";
 
 type TpUid = {
   insert: {
@@ -35,6 +36,9 @@ type TpUid = {
 type TpUidProps = { data: TpUid };
 
 const props = defineProps<TpUidProps>();
+const nickname = computed<string>(() =>
+  decodeURIComponent(props.data.insert.game_user_info.nickname),
+);
 console.log("tpUid", props.data.insert.game_user_info);
 
 function copyUid(): void {
