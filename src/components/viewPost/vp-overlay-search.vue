@@ -24,10 +24,10 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import Mys from "@Mys/index.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import TGBbs from "@/utils/TGBbs.js";
+import postReq from "@/web/request/postReq.js";
 
 type ToPostSearchProps = { gid: string; keyword?: string };
 
@@ -106,7 +106,7 @@ async function searchPosts(): Promise<void> {
     load.value = false;
     return;
   }
-  const res = await Mys.Post.searchPosts(game.value, search.value, lastId.value);
+  const res = await postReq.search(game.value, search.value, lastId.value);
   if (lastId.value === "") results.value = res.posts;
   else results.value = results.value.concat(res.posts);
   lastId.value = res.last_id;

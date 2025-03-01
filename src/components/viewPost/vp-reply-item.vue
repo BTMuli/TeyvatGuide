@@ -103,7 +103,6 @@
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import Mys from "@Mys/index.js";
 import { event, path } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
@@ -114,10 +113,11 @@ import TpParser from "./tp-parser.vue";
 
 import { generateShareImg } from "@/utils/TGShare.js";
 import { timestampToDate } from "@/utils/toolFunc.js";
+import postReq from "@/web/request/postReq.js";
 
 type TprReplyProps =
-  | { mode: "sub"; modelValue: TGApp.Plugins.Mys.Reply.ReplyFull }
-  | { mode: "main"; modelValue: TGApp.Plugins.Mys.Reply.ReplyFull; pinId: string };
+  | { mode: "sub"; modelValue: TGApp.BBS.Reply.ReplyFull }
+  | { mode: "main"; modelValue: TGApp.BBS.Reply.ReplyFull; pinId: string };
 
 const props = defineProps<TprReplyProps>();
 const replyId = `reply_${props.modelValue.reply.post_id}_${props.modelValue.reply.floor_id}_${props.modelValue.reply.reply_id}`;
@@ -129,7 +129,7 @@ const showSub = ref<boolean>(false);
 const lastId = ref<string>();
 const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
-const subReplies = shallowRef<Array<TGApp.Plugins.Mys.Reply.ReplyFull>>([]);
+const subReplies = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
 const levelColor = computed<string>(() => {
   const level = props.modelValue.user.level_exp.level;
   if (level < 5) return "var(--tgc-od-green)";
@@ -189,7 +189,7 @@ async function showReply(): Promise<void> {
 
 async function loadSub(): Promise<void> {
   loading.value = true;
-  const resp = await Mys.Post.getSubReplies(
+  const resp = await postReq.reply.sub(
     props.modelValue.reply.floor_id,
     props.modelValue.reply.game_id,
     props.modelValue.reply.post_id,

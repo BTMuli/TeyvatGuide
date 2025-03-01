@@ -31,14 +31,14 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import { getRecentForumPostList } from "@Mys/request/painterReq.js";
-import { getPostFull } from "@Mys/request/postReq.js";
 import { storeToRefs } from "pinia";
 import { ref, shallowRef } from "vue";
 
 import { useUserStore } from "@/store/modules/user.js";
 import TGLogger from "@/utils/TGLogger.js";
 import apiHubReq from "@/web/request/apiHubReq.js";
+import painterReq from "@/web/request/painterReq.js";
+import postReq from "@/web/request/postReq.js";
 
 type ParseMission = {
   id: number;
@@ -164,7 +164,7 @@ async function tryAuto(): Promise<void> {
   const viewFind = postFilter.find((i) => i.key === "view_post_0");
   if (viewFind) viewCnt = viewFind.process;
   await TGLogger.Script("[米游币任务]获取帖子列表");
-  const listResp = await getRecentForumPostList(26, 2, 2, undefined, 20);
+  const listResp = await painterReq.forum.recent(26, 2, 2, undefined, 20);
   for (const post of listResp.list) {
     if (!isShare) {
       await TGLogger.Script(`[米游币任务]正在分享帖子${post.post.post_id}`);
@@ -178,7 +178,7 @@ async function tryAuto(): Promise<void> {
     }
     if (likeCnt < 5 || viewCnt < 3) {
       await TGLogger.Script(`[米游币任务]正在浏览帖子${post.post.post_id}`);
-      const detailResp = await getPostFull(Number(post.post.post_id), ckPost);
+      const detailResp = await postReq.post(post.post.post_id, ckPost);
       if ("retcode" in detailResp) {
         await TGLogger.Script(
           `[米游币任务]获取帖子${post.post.post_id}失败：${detailResp.retcode} ${detailResp.message}`,

@@ -62,7 +62,6 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import Mys from "@Mys/index.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef, watch } from "vue";
 
@@ -70,6 +69,7 @@ import VpReplyDebug from "./vp-reply-debug.vue";
 import VpReplyItem from "./vp-reply-item.vue";
 
 import { useAppStore } from "@/store/modules/app.js";
+import postReq from "@/web/request/postReq.js";
 
 type TprMainProps = { gid: number; postId: string };
 type SelectItem = { label: string; value: string };
@@ -90,7 +90,7 @@ const showOverlay = ref<boolean>(false);
 const showDebug = ref<boolean>(false);
 const onlyLz = ref<boolean>(false);
 const orderType = ref<"hot" | "latest" | "oldest">("hot");
-const reply = shallowRef<Array<TGApp.Plugins.Mys.Reply.ReplyFull>>([]);
+const reply = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
 const isHot = computed<boolean>(() => orderType.value === "hot");
 const replyOrder = computed<1 | 2 | undefined>(() => {
   if (orderType.value === "hot") return undefined;
@@ -121,7 +121,7 @@ async function reloadReply(): Promise<void> {
 
 async function loadReply(): Promise<void> {
   loading.value = true;
-  const resp = await Mys.Post.getPostReplies(
+  const resp = await postReq.reply.main(
     props.postId,
     props.gid,
     isHot.value,

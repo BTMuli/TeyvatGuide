@@ -48,11 +48,11 @@
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import Mys from "@Mys/index.js";
 import { nextTick, onMounted, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import { timestampToDate } from "@/utils/toolFunc.js";
+import postReq from "@/web/request/postReq.js";
 
 type TpoCollectionProps = { collection: TGApp.Plugins.Mys.Post.Collection };
 type TpoCollectionItem = {
@@ -86,7 +86,7 @@ watch(
 );
 
 onMounted(async () => {
-  const collectionPosts = await Mys.Post.getPostFullInCollection(props.collection.collection_id);
+  const collectionPosts = await postReq.collection(props.collection.collection_id);
   const tempArr: Array<TpoCollectionItem> = [];
   for (const postItem of collectionPosts) {
     const post: TpoCollectionItem = {
@@ -107,7 +107,7 @@ async function toPost(postId: string, index: number): Promise<void> {
     showSnackbar.warn("已经在当前帖子");
     return;
   }
-  await router.push({ name: "帖子详情", params: { post_id: postId } });
+  router.push({ name: "帖子详情", params: { post_id: postId } });
 }
 </script>
 <style lang="css" scoped>

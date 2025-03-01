@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/types/post.d.ts
  * @description Mys 插件帖子类型定义文件
- * @since Beta v0.6.7
+ * @since Beta v0.7.1
  */
 
 declare namespace TGApp.Plugins.Mys.Post {
@@ -21,7 +21,7 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @interface FullData
    * @property {Post} post  帖子信息
    * @property {Forum|null} forum  所属版块，可能为 null
-   * @property {Topic[]} topics 所属话题
+   * @property {Array<TGApp.BBS.Topic.Info>} topics 所属话题
    * @property {TGApp.Plugins.Mys.User.Post|null} user 发帖人，可能为 null
    * @property {TGApp.Plugins.Mys.User.SelfOperation} self_operation 当前用户操作
    * @property {Stat|null} stat 帖子统计，可能为 null
@@ -39,13 +39,13 @@ declare namespace TGApp.Plugins.Mys.Post {
    * @property {boolean} is_block_on 是否被屏蔽
    * @property {unknown} forum_rank_info 版块排行信息，可能为 null
    * @property {LinkCard[]} link_card_list 链接卡片列表，可能为空
-   * @property {TGApp.Plugins.Mys.News.Meta} news_meta 咨讯元数据，可能为 null
+   * @property {NewsMeta} news_meta 咨讯元数据，可能为 null
    * @return FullData
    */
   interface FullData {
     post: Post;
     forum: Forum | null;
-    topics: TGApp.Plugins.Mys.Topic.Info[];
+    topics: Array<TGApp.BBS.Topic.Info>;
     user: TGApp.Plugins.Mys.User.Post | null;
     self_operation: TGApp.Plugins.Mys.User.SelfOperation;
     stat: Stat | null;
@@ -63,7 +63,7 @@ declare namespace TGApp.Plugins.Mys.Post {
     is_block_on: boolean;
     forum_rank_info: unknown | null;
     link_card_list: LinkCard[];
-    news_meta: TGApp.Plugins.Mys.News.Meta | null | undefined;
+    news_meta?: NewsMeta | null;
     recommend_reason: unknown | null;
     villa_card: unknown | null;
     is_mentor: boolean;
@@ -377,6 +377,17 @@ declare namespace TGApp.Plugins.Mys.Post {
     review_status: number;
     brief_info: string;
   }
+
+  /**
+   * @description 咨讯元数据，只有活动咨讯才有
+   * @since Beta v0.7.1
+   * @interface NewsMeta
+   * @property {number} activity_status 活动状态 // ActivityStatus
+   * @property {string} start_at_sec 活动开始时间戳，单位秒
+   * @property {string} end_at_sec 活动结束时间戳，单位秒
+   * @return NewsMeta
+   */
+  type NewsMeta = { activity_status: number; start_at_sec: string; end_at_sec: string };
 
   /**
    * @description 推荐理由

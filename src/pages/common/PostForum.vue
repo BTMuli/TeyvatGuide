@@ -127,13 +127,13 @@ import TPostCard from "@comp/app/t-postcard.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
-import Mys from "@Mys/index.js";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
 import ApiHubReq from "@/web/request/apiHubReq.js";
+import painterReq from "@/web/request/painterReq.js";
 
 type SortSelect = { text: string; value: number; icon: string };
 type SortSelectGame = { gid: number; forum: Array<SortSelect>; text: string; icon?: string };
@@ -249,22 +249,17 @@ function getSortLabel(value: number): string {
 async function getCurrentPosts(
   loadMore: boolean = false,
   forum: number,
-): Promise<TGApp.Plugins.Mys.Forum.FullData> {
+): Promise<TGApp.BBS.Forum.PostForumRes> {
   const mod20 = postRaw.value.total % 20;
   const pageSize = mod20 === 0 ? 20 : 20 - mod20;
   if (curSortType.value === 3) {
     if (loadMore) {
-      return await Mys.Painter.getHotForumPostList(
-        forum,
-        curGid.value,
-        postRaw.value.lastId,
-        pageSize,
-      );
+      return await painterReq.forum.hot(forum, curGid.value, postRaw.value.lastId, pageSize);
     }
-    return await Mys.Painter.getHotForumPostList(forum, curGid.value);
+    return await painterReq.forum.hot(forum, curGid.value);
   }
   if (loadMore) {
-    return await Mys.Painter.getRecentForumPostList(
+    return await painterReq.forum.recent(
       forum,
       curGid.value,
       curSortType.value,
@@ -272,12 +267,12 @@ async function getCurrentPosts(
       pageSize,
     );
   }
-  return await Mys.Painter.getRecentForumPostList(forum, curGid.value, curSortType.value);
+  return await painterReq.forum.recent(forum, curGid.value, curSortType.value);
 }
 
 async function freshPostData(): Promise<void> {
   if (!selectedForum.value) return;
-  await router.push({
+  router.push({
     name: "酒馆",
     params: route.params,
     query: { gid: curGid.value, forum: selectedForum.value.value },

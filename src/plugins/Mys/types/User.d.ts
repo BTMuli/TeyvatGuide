@@ -4,12 +4,6 @@
  * @since Beta v0.5.5
  */
 
-/**
- * @description Mys 插件用户类型
- * @since Beta v0.5.5
- * @namespace TGApp.Plugins.Mys.User
- * @memberof TGApp.Plugins.Mys
- */
 declare namespace TGApp.Plugins.Mys.User {
   /**
    * @description 主页用户信息返回
@@ -312,35 +306,6 @@ declare namespace TGApp.Plugins.Mys.User {
   }
 
   /**
-   * @description collection中的用户信息
-   * @since Beta v0.3.9
-   * @interface Collection
-   * @property {string} avatar 用户头像
-   * @property {string} avatar_url 用户头像链接
-   * @property {Certification} certification 用户认证信息
-   * @property {number} gender 用户性别
-   * @property {string} introduce 用户简介
-   * @property {boolean} is_followed 是否被关注
-   * @property {boolean} is_following 是否关注
-   * @property {string} nickname 用户昵称
-   * @property {string} pendant 用户挂件 URL，可能为 ""
-   * @property {number} uid 用户 ID
-   * @return Collection
-   */
-  interface Collection {
-    avatar: string;
-    avatar_url: string;
-    certification: Certification;
-    gender: number;
-    introduce: string;
-    is_followed: boolean;
-    is_following: boolean;
-    nickname: string;
-    pendant: string;
-    uid: string;
-  }
-
-  /**
    * @description 帖子回复中的用户信息
    * @since Beta v0.5.5
    * @interface Reply
@@ -358,7 +323,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {boolean} is_followed 是否被关注
    * @property {AvatarExt} avatar_ext 用户头像扩展信息
    * @property {boolean} is_super_fan 是否是铁粉
-   * @property {TGApp.Plugins.Mys.Reply.ReplyBubble} reply_bubble 回复气泡，可能为 null
+   * @property {TGApp.BBS.Reply.Bubble} reply_bubble 回复气泡，可能为 null
    * @return Reply
    */
   interface Reply {
@@ -376,6 +341,6 @@ declare namespace TGApp.Plugins.Mys.User {
     is_followed: boolean;
     avatar_ext: AvatarExt;
     is_super_fan: boolean;
-    reply_bubble: TGApp.Plugins.Mys.Reply.ReplyBubble | null;
+    reply_bubble: TGApp.BBS.Reply.Bubble | null;
   }
 }

@@ -1,7 +1,7 @@
 /**
  * @file types/BBS/Forum.d.ts
  * @description BBS 版块类型定义
- * @since Beta v0.6.8
+ * @since Beta v0.7.1
  */
 
 declare namespace TGApp.BBS.Forum {
@@ -16,11 +16,21 @@ declare namespace TGApp.BBS.Forum {
   type GameForumResp = TGApp.BBS.Response.BaseWithData & { data: { list: Array<GameForum> } };
 
   /**
+   * @description 获取版块帖子列表返回
+   * @since Beta v0.7.1
+   * @interface PostForumResp
+   * @extends TGApp.BBS.Response.BaseWithData
+   * @property {PostForumRes} data 版块帖子列表
+   * @return PostForumResp
+   */
+  type PostForumResp = TGApp.BBS.Response.BaseWithData<PostForumRes>;
+
+  /**
    * @description 分区版块信息
    * @since Beta v0.6.8
    * @interface GameForum
    * @property {number} game_id 游戏 ID
-   * @property {List<GameForumItem>} forums 版块信息
+   * @property {Array<GameForumItem>} forums 版块信息
    * @return GameForum
    */
   type GameForum = { game_id: number; forums: Array<GameForumItem> };
@@ -100,4 +110,25 @@ declare namespace TGApp.BBS.Forum {
    * @return ForumCat
    */
   type ForumCat = { id: number; name: string; forum_id: number; desc: string; remark: string };
+
+  /**
+   * @description 版块帖子列表
+   * @since Beta v0.7.1
+   * @interface PostForumRes
+   * @property {string} last_id 最后一条帖子 ID
+   * @property {boolean} is_last 是否最后一页
+   * @property {boolean} is_origin 是否原创
+   * @property {number} page 页码
+   * @property {unknown} databox 数据盒子
+   * @property {Array<TGApp.Plugins.Mys.Post.FullData>} list 帖子列表
+   * @return PostForumRes
+   */
+  type PostForumRes = {
+    last_id: string;
+    is_last: boolean;
+    is_origin: boolean;
+    page: number;
+    databox: unknown;
+    list: TGApp.Plugins.Mys.Post.FullData[];
+  };
 }

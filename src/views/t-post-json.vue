@@ -51,7 +51,6 @@
 import TSwitchTheme from "@comp/app/t-switchTheme.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import Mys from "@Mys/index.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef } from "vue";
 import VueJsonPretty from "vue-json-pretty";
@@ -61,6 +60,7 @@ import { useRoute } from "vue-router";
 import { useAppStore } from "@/store/modules/app.js";
 import { useUserStore } from "@/store/modules/user.js";
 import TGLogger from "@/utils/TGLogger.js";
+import postReq from "@/web/request/postReq.js";
 
 const { theme } = storeToRefs(useAppStore());
 const { cookie } = storeToRefs(useUserStore());
@@ -78,7 +78,7 @@ onMounted(async () => {
   }
   let ck: Record<string, string> | undefined = undefined;
   if (cookie.value) ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
-  const resp = await Mys.Post.getPostFull(postId, ck);
+  const resp = await postReq.post(postId, ck);
   if ("retcode" in resp) {
     await showLoading.empty("获取数据失败", `[${resp.retcode}]${resp.message}`);
     showSnackbar.error(`[${resp.retcode}]${resp.message}`);

@@ -107,7 +107,7 @@ import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 
 import { useUserStore } from "@/store/modules/user.js";
 import TGLogger from "@/utils/TGLogger.js";
-import BBSApi from "@/web/request/bbsReq.js";
+import postReq from "@/web/request/postReq.js";
 
 const { cookie, briefInfo } = storeToRefs(useUserStore());
 let collectListener: UnlistenFn | null = null;
@@ -351,7 +351,7 @@ async function freshUser(uid?: string): Promise<void> {
   }
   const uidReal = uid || briefInfo.value.uid;
   await showLoading.start(`[${uidReal}]获取用户收藏`);
-  let res = await BBSApi.lovePost(cookie.value, uidReal);
+  let res = await postReq.userFavourite(cookie.value, uidReal);
   while (true) {
     if ("retcode" in res) {
       await showLoading.end();
@@ -363,7 +363,7 @@ async function freshUser(uid?: string): Promise<void> {
     await mergePosts(posts, uid || briefInfo.value.uid);
     if (res.is_last) break;
     await showLoading.update(`[offset]${res.next_offset} [is_last]${res.is_last}`);
-    res = await BBSApi.lovePost(cookie.value, uid || briefInfo.value.uid, res.next_offset);
+    res = await postReq.userFavourite(cookie.value, uid || briefInfo.value.uid, res.next_offset);
   }
   await showLoading.end();
   showSnackbar.success("获取用户收藏成功，即将刷新页面");

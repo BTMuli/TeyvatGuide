@@ -99,7 +99,6 @@ import TpParser from "@comp/viewPost/tp-parser.vue";
 import VpBtnCollect from "@comp/viewPost/vp-btn-collect.vue";
 import VpBtnReply from "@comp/viewPost/vp-btn-reply.vue";
 import VpOverlayCollection from "@comp/viewPost/vp-overlay-collection.vue";
-import Mys from "@Mys/index.js";
 import { app, webviewWindow } from "@tauri-apps/api";
 import { emit, listen, UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
@@ -113,6 +112,7 @@ import TGClient from "@/utils/TGClient.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { createTGWindow } from "@/utils/TGWindow.js";
 import apiHubReq from "@/web/request/apiHubReq.js";
+import postReq from "@/web/request/postReq.js";
 
 const { cookie } = storeToRefs(useUserStore());
 const { incognito } = storeToRefs(useAppStore());
@@ -152,7 +152,7 @@ onMounted(async () => {
   if (cookie.value && incognito.value === false) {
     ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
   }
-  const resp = await Mys.Post.getPostFull(postId, ck);
+  const resp = await postReq.post(postId, ck);
   if ("retcode" in resp) {
     await showLoading.empty("数据加载失败", `[${resp.retcode}]${resp.message}`);
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
@@ -296,7 +296,7 @@ async function toPost(): Promise<void> {
   await TGClient.open("web_thin", link);
 }
 
-async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
+async function toTopic(topic: TGApp.BBS.Topic.Info): Promise<void> {
   const gid = postData.value?.post.game_id ?? topic.game_id;
   await emit("active_deep_link", `router?path=/posts/topic/${gid}/${topic.id}`);
 }

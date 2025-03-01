@@ -5,9 +5,9 @@
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
-import { getPostFull } from "@Mys/request/postReq.js";
 
 import { AppCharacterData } from "@/data/index.js";
+import postReq from "@/web/request/postReq.js";
 
 /**
  * @description 根据单个卡池信息转为渲染用的卡池信息
@@ -26,7 +26,7 @@ async function getGachaItemCard(
   if (poolCover !== undefined) {
     cover = poolCover;
   } else {
-    const postResp = await getPostFull(postId);
+    const postResp = await postReq.post(postId);
     if ("retcode" in postResp) {
       showSnackbar.error(`[${postResp.retcode}] ${postResp.message}`);
       return null;

@@ -25,7 +25,7 @@ import TGLogger from "@/utils/TGLogger.js";
 
 const visible = defineModel<boolean>();
 const filePath = ref<string>("");
-const replyData = shallowRef<TGApp.Plugins.Mys.Reply.ReplyFull | null>(null);
+const replyData = shallowRef<TGApp.BBS.Reply.ReplyFull | null>(null);
 
 async function selectFile(): Promise<void> {
   const file = await open({

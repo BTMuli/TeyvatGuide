@@ -77,7 +77,21 @@ import { createPost } from "@/utils/TGWindow.js";
 
 type TPostCardProps = { modelValue: TGApp.Plugins.Mys.Post.FullData; selectMode?: boolean };
 type TPostCardEmits = (e: "onSelected", v: string) => void;
-type TPostStatus = TGApp.Plugins.Mys.News.RenderStatus & { stat: ActStat };
+type TPostStatus = RenderStatus & { stat: ActStat };
+type RenderForum = { name: string; icon: string; id: number };
+type RenderStatus = { stat: number; label: string; color: string };
+type RenderData = { mark: number; forward: number; like: number; reply: number; view: number };
+export type RenderCard = {
+  title: string;
+  cover: string;
+  postId: number;
+  subtitle: string;
+  user: TGApp.Plugins.Mys.User.Post | null;
+  forum: RenderForum | null;
+  data: RenderData | null;
+  status?: RenderStatus;
+  topics: Array<TGApp.BBS.Topic.Info>;
+};
 
 enum ActStat {
   UNKNOWN,
@@ -94,7 +108,7 @@ const stats: Readonly<Array<TPostStatus>> = [
 ];
 const props = withDefaults(defineProps<TPostCardProps>(), { selectMode: false });
 const emits = defineEmits<TPostCardEmits>();
-const card = shallowRef<TGApp.Plugins.Mys.News.RenderCard>();
+const card = shallowRef<RenderCard>();
 
 const cardBg = computed<string>(() => {
   if (card.value && card.value.status) return card.value.status.color;
@@ -108,7 +122,7 @@ watch(
   async () => (card.value = getPostCard(props.modelValue)),
 );
 
-function getActivityStatus(status: number): TGApp.Plugins.Mys.News.RenderStatus {
+function getActivityStatus(status: number): RenderStatus {
   if (status satisfies ActStat) {
     const stat: ActStat = status;
     return stats[stat];
@@ -126,15 +140,9 @@ function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
   return `${cover}?x-oss-process=image/resize,m_fill,w_360,h_130,limit_0/format,png`;
 }
 
-/**
- * @description 获取公共属性
- * @since Beta v0.6.1
- * @param {TGApp.Plugins.Mys.Post.FullData} item 咨讯列表项
- * @returns {TGApp.Plugins.Mys.News.RenderCard} 渲染用咨讯列表项
- */
-function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.News.RenderCard {
-  let forumData: TGApp.Plugins.Mys.News.RenderForum | null = null;
-  let statData: TGApp.Plugins.Mys.News.RenderData | null = null;
+function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): RenderCard {
+  let forumData: RenderForum | null = null;
+  let statData: RenderData | null = null;
   if (item.forum !== null) {
     forumData = { name: item.forum.name, icon: item.forum.icon, id: item.forum.id };
   }
@@ -159,7 +167,7 @@ function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys
   };
 }
 
-function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): TGApp.Plugins.Mys.News.RenderCard {
+function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): RenderCard {
   const commonCard = getCommonCard(item);
   if (
     item.news_meta !== undefined &&
@@ -186,12 +194,12 @@ async function shareCard(): Promise<void> {
   await generateShareImg(fileName, shareDom, 2.5);
 }
 
-async function toTopic(topic: TGApp.Plugins.Mys.Topic.Info): Promise<void> {
+async function toTopic(topic: TGApp.BBS.Topic.Info): Promise<void> {
   const gid = props.modelValue.post.game_id;
   await emit("active_deep_link", `router?path=/posts/topic/${gid}/${topic.id}`);
 }
 
-async function toForum(forum: TGApp.Plugins.Mys.News.RenderForum): Promise<void> {
+async function toForum(forum: RenderForum): Promise<void> {
   const gid = props.modelValue.post.game_id;
   await emit("active_deep_link", `router?path=/posts/forum/${gid}/${forum.id}`);
 }

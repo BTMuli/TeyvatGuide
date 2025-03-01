@@ -1,81 +1,77 @@
 /**
- * @file plugins/Mys/types/Topic.d.ts
- * @description Mys 插件话题类型定义文件
- * @since Beta v0.6.3
+ * @file types/BBS/Topic.d.ts
+ * @description 米游社话题类型声明
+ * @since Beta v0.7.1
  */
 
-declare namespace TGApp.Plugins.Mys.Topic {
+declare namespace TGApp.BBS.Topic {
   /**
    * @description 特定话题返回数据-话题信息
-   * @since Beta v0.6.3
-   * @interface InfoResponse
+   * @since Beta v0.7.1
+   * @interface InfoResp
    * @extends TGApp.BBS.Response.BaseWithData
-   * @property {InfoData} data 特定话题数据
-   * @return InfoResponse
+   * @property {InfoRes} data 特定话题数据
+   * @return InfoResp
    */
-  interface InfoResponse extends TGApp.BBS.Response.BaseWithData {
-    data: InfoData;
-  }
+  type InfoResp = TGApp.BBS.Response.BaseWithData<InfoRes>;
 
   /**
    * @description 特定话题返回数据-帖子列表
-   * @since Beta v0.6.3
-   * @interface PostResponse
+   * @since Beta v0.7.1
+   * @interface PostResp
    * @extends TGApp.BBS.Response.BaseWithData
-   * @property {PostData} data 特定话题帖子列表数据
-   * @return PostResponse
+   * @property {PostRes} data 特定话题帖子列表数据
+   * @return PostResp
    */
-  interface PostResponse extends TGApp.BBS.Response.BaseWithData {
-    data: PostData;
-  }
+  type PostResp = TGApp.BBS.Response.BaseWithData<PostRes>;
 
   /**
    * @description 特定话题数据
-   * @since Beta v0.6.3
-   * @interface InfoData
-   * @property {GameInfo[]} game_info_list 游戏信息列表
+   * @since Beta v0.7.1
+   * @interface InfoRes
+   * @property {Array<GameInfo>} game_info_list 游戏信息列表
    * @property {boolean} good_exist 是否有精华帖
    * @property {number} good_post_cnt 精华帖数量
    * @property {boolean} good_post_exist 是否有精华帖
    * @property {number} hot_post_cnt 热帖数量
-   * @property {unknown[]} related_forums 相关版块
-   * @property {unknown[]} related_topics 相关话题
-   * @property {unknown[]} top_posts 置顶帖
+   * @property {Array<unknown>} related_forums 相关版块
+   * @property {Array<unknown>} related_topics 相关话题
+   * @property {Array<unknown>} top_posts 置顶帖
    * @property {Info} topic 话题信息
-   * @return InfoData
+   * @return InfoRes
    */
-  interface InfoData {
-    game_info_list: GameInfo[];
+  type InfoRes = {
+    game_info_list: Array<GameInfo>;
     good_exist: boolean;
     good_post_cnt: number;
     good_post_exist: boolean;
     hot_post_cnt: number;
-    related_forums: unknown[];
-    related_topics: unknown[];
-    top_posts: unknown[];
+    related_forums: Array<unknown>;
+    related_topics: Array<unknown>;
+    top_posts: Array<unknown>;
     topic: Info;
-  }
+  };
 
   /**
    * @description 特定话题帖子列表数据
-   * @since Beta v0.6.3
-   * @interface PostData
+   * @since Beta v0.7.1
+   * @interface PostRes
    * @property {boolean} is_last 是否最后一页
    * @property {boolean} is_origin 是否原创
    * @property {string} last_id 最后一条帖子 ID
-   * @property {TGApp.Plugins.Mys.Post.FullData[]} posts 帖子列表
-   * @return PostData
+   * @property {Array<TGApp.Plugins.Mys.Post.FullData>} posts 帖子列表
+   * @return PostRes
    */
-  interface PostData {
+  type PostRes = {
     is_last: boolean;
     is_origin: boolean;
     last_id: string;
-    posts: TGApp.Plugins.Mys.Post.FullData[];
-  }
+    posts: Array<TGApp.Plugins.Mys.Post.FullData>;
+  };
 
   /**
    * @description 游戏信息
-   * @since Beta v0.6.3
+   * @since Beta v0.7.1
    * @interface GameInfo
    * @property {number} id 游戏 ID
    * @property {string} name 游戏名称
@@ -83,18 +79,13 @@ declare namespace TGApp.Plugins.Mys.Topic {
    * @property {boolean} has_hot 是否有热帖
    * @return GameInfo
    */
-  interface GameInfo {
-    id: number;
-    name: string;
-    has_good: boolean;
-    has_hot: boolean;
-  }
+  type GameInfo = { id: number; name: string; has_good: boolean; has_hot: boolean };
 
   /**
    * @description 话题信息
-   * @since Beta v0.6.3
+   * @since Beta v0.7.1
    * @interface Info
-   * @property {string[]} alias 话题别名
+   * @property {Array<string>} alias 话题别名
    * @property {number} content_type 内容类型
    * @property {string} cover 封面图片 URL
    * @property {number} created_at 创建时间(秒级时间戳)
@@ -112,14 +103,14 @@ declare namespace TGApp.Plugins.Mys.Topic {
    * @property {number} order 排序
    * @property {unknown} related_forum_ids 相关版块 ID
    * @property {unknown} stat 话题统计-可能为null
-   * @property {SortConfig[]} topic_sort_config 话题排序配置
+   * @property {Array<SortConfig>} topic_sort_config 话题排序配置
    * @property {number} topic_type 话题类型
    * @property {string} updated_at 更新时间(秒级时间戳)
-   * @property {number[]} view_type 查看类型
+   * @property {Array<number>} view_type 查看类型
    * @return Info
    */
-  interface Info {
-    alias: string[];
+  type Info = {
+    alias: Array<string>;
     content_type: number;
     cover: string;
     created_at: number;
@@ -137,15 +128,15 @@ declare namespace TGApp.Plugins.Mys.Topic {
     order: number;
     related_forum_ids: unknown;
     stat: unknown;
-    topic_sort_config: SortConfig[];
+    topic_sort_config: Array<SortConfig>;
     topic_type: number;
     updated_at: string;
-    view_type: number[];
-  }
+    view_type: Array<number>;
+  };
 
   /**
    * @description 话题排序配置
-   * @since Beta v0.6.3
+   * @since Beta v0.7.1
    * @interface SortConfig
    * @property {string} name 排序名称
    * @property {number} type 排序类型
@@ -154,11 +145,11 @@ declare namespace TGApp.Plugins.Mys.Topic {
    * @property {string} data_report_name 数据报告名称
    * @return SortConfig
    */
-  interface SortConfig {
+  type SortConfig = {
     name: string;
     type: number;
     url: string;
     show_sort: number;
     data_report_name: string;
-  }
+  };
 }

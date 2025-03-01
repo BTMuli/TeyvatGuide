@@ -4,6 +4,7 @@
  * @since Beta v0.6.2
  */
 
+import type { RenderCard } from "@comp/app/t-postcard.vue";
 import { core, window as TauriWindow } from "@tauri-apps/api";
 import type { WindowOptions } from "@tauri-apps/api/window";
 
@@ -46,12 +47,12 @@ export async function createTGWindow(
 /**
  * @description 打开帖子
  * @since Beta v0.4.2
- * @param {TGApp.Plugins.Mys.News.RenderCard | string | number | TGApp.Plugins.Mys.Forum.RenderCard} item 帖子内容或ID
+ * @param {RenderCard | string | number} item 帖子内容或ID
  * @param {string} title 帖子标题
  * @returns {Promise<void>}
  */
 export async function createPost(
-  item: TGApp.Plugins.Mys.News.RenderCard | string | number | TGApp.Plugins.Mys.Forum.RenderCard,
+  item: RenderCard | string | number,
   title?: string,
 ): Promise<void> {
   let postId: string, postTitle: string;

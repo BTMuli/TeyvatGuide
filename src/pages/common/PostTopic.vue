@@ -90,16 +90,16 @@ import TPostCard from "@comp/app/t-postcard.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
-import Mys from "@Mys/index.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { createPost } from "@/utils/TGWindow.js";
 import apiHubReq from "@/web/request/apiHubReq.js";
+import topicReq from "@/web/request/topicReq.js";
 
 type SortSelect = { text: string; value: number };
 type PostMiniData = { isLast: boolean; lastId: string; total: number };
-type GameList = TGApp.Plugins.Mys.Topic.GameInfo & { icon?: string };
+type GameList = TGApp.BBS.Topic.GameInfo & { icon?: string };
 
 const route = useRoute();
 const router = useRouter();
@@ -110,7 +110,7 @@ const search = ref<string>("");
 const curTopic = ref<string>("");
 const allGames = shallowRef<Array<TGApp.BBS.Game.Item>>([]);
 const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 });
-const topicInfo = shallowRef<TGApp.Plugins.Mys.Topic.InfoData>();
+const topicInfo = shallowRef<TGApp.BBS.Topic.InfoRes>();
 const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
 const curGame = shallowRef<GameList>();
 const sortList = computed<Array<SortSelect>>(() => {
@@ -138,7 +138,7 @@ onMounted(async () => {
   curTopic.value = topic;
   await showLoading.start(`正在加载话题${topic}信息`);
   allGames.value = await apiHubReq.game();
-  const info = await Mys.Post.getTopicFullInfo(gid, topic);
+  const info = await topicReq.info(gid, topic);
   if ("retcode" in info) {
     await showLoading.end();
     showSnackbar.error(`[${info.retcode}] ${info.message}`);
@@ -169,13 +169,13 @@ watch(
 
 async function firstLoad(): Promise<void> {
   await showLoading.start(`正在加载话题${topicInfo.value?.topic.name}信息`);
-  await router.push({
+  router.push({
     name: "话题",
     params: route.params,
     query: { gid: curGid.value, topic: curTopic.value },
   });
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
-  const postList = await Mys.Post.getTopicPostList(curGid.value, curTopic.value, curSortType.value);
+  const postList = await topicReq.posts(curGid.value, curTopic.value, curSortType.value);
   if ("retcode" in postList) {
     await showLoading.end();
     showSnackbar.error(`[${postList.retcode}] ${postList.message}`);
@@ -200,7 +200,7 @@ async function freshPostData(): Promise<void> {
   await showLoading.start(`正在刷新${topicInfo.value?.topic.name}帖子列表`);
   const mod20 = postRaw.value.total % 20;
   const pageSize = mod20 === 0 ? 20 : 20 - mod20;
-  const postList = await Mys.Post.getTopicPostList(
+  const postList = await topicReq.posts(
     curGid.value,
     curTopic.value,
     curSortType.value,
@@ -233,7 +233,7 @@ function searchPost(): void {
   else createPost(search.value);
 }
 
-function getGameList(gameList: TGApp.Plugins.Mys.Topic.GameInfo[] | undefined): GameList[] {
+function getGameList(gameList: Array<TGApp.BBS.Topic.GameInfo> | undefined): Array<GameList> {
   if (!gameList) return [];
   return gameList.map((item) => {
     const game = allGames.value.find((i) => i.id === item.id);
