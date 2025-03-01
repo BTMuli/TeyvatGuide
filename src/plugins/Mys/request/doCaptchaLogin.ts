@@ -1,7 +1,7 @@
 /**
  * @file plugins/Mys/request/doCaptchaLogin.ts
  * @description 通过短信验证码登录账号获取 stoken
- * @since Beta v0.5.1
+ * @since Beta v0.7.1
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -36,7 +36,7 @@ function rsaEncrypt(data: string): string {
 
 /**
  * @description 获取短信验证码
- * @since Beta v0.5.1
+ * @since Beta v0.7.1
  * @param {string} phone - 手机号
  * @param {string} [aigis] - 验证数据
  * @returns {Promise<TGApp.Plugins.Mys.CaptchaLogin.CaptchaData | TGApp.BBS.Response.Base>}
@@ -44,7 +44,7 @@ function rsaEncrypt(data: string): string {
 export async function getCaptcha(
   phone: string,
   aigis?: string,
-): Promise<TGApp.Plugins.Mys.CaptchaLogin.CaptchaData | TGApp.BBS.Response.BaseWithData> {
+): Promise<TGApp.Plugins.Mys.CaptchaLogin.CaptchaData | TGApp.BBS.Response.BaseWithData<string>> {
   const url = "https://passport-api.mihoyo.com/account/ma-cn-verifier/verifier/createLoginCaptcha";
   const device_fp = getDeviceInfo("device_fp");
   const device_name = getDeviceInfo("device_name");
@@ -78,7 +78,7 @@ export async function getCaptcha(
   );
   const data = await resp.data;
   if (data.retcode !== 0) {
-    return <TGApp.BBS.Response.BaseWithData>{
+    return <TGApp.BBS.Response.BaseWithData<string>>{
       retcode: data.retcode,
       message: data.message,
       data: resp.resp.headers.get("x-rpc-aigis"),

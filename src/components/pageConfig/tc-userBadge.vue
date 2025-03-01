@@ -404,7 +404,6 @@ async function tryGetCaptcha(phone: string, aigis?: string): Promise<string | fa
       showSnackbar.error(`[${captchaResp.retcode}] ${captchaResp.message}`);
       return false;
     }
-    // @ts-expect-error type {} is not assignable to type string
     const aigisResp: TGApp.Plugins.Mys.CaptchaLogin.CaptchaAigis = JSON.parse(captchaResp.data);
     const resp = await showGeetest(JSON.parse(aigisResp.data));
     const aigisStr = `${aigisResp.session_id};${btoa(JSON.stringify(resp))}`;
