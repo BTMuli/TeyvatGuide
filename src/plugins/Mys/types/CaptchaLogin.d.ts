@@ -44,7 +44,7 @@ declare namespace TGApp.Plugins.Mys.CaptchaLogin {
    * @interface CaptchaAigis
    * @property {string} session_id 会话 id
    * @property {number} mmt_type mmt 类型
-   * @see TGApp.Plugins.Mys.Geetest.validateResp
+   * @see TGApp.BBS.Geetest.GeetestVerifyRes
    * @property {string} data 数据，为上面的序列化数据
    * @return CaptchaBody
    */

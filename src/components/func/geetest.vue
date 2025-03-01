@@ -40,14 +40,14 @@ watch(
 );
 
 declare function initGeetest(
-  params: TGApp.Plugins.Mys.Geetest.InitGeetestParams,
-  callback: (captchaObj: TGApp.Plugins.Mys.Geetest.GeetestCaptcha) => void,
+  params: TGApp.BBS.Geetest.InitGeetestParams,
+  callback: (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => void,
 ): void;
 
 async function displayBox(
-  props: TGApp.Plugins.Mys.Geetest.reqResp,
-): Promise<TGApp.Plugins.Mys.Geetest.validateResp | false> {
-  return await new Promise<TGApp.Plugins.Mys.Geetest.validateResp>((resolve) => {
+  props: TGApp.BBS.Geetest.CreateRes,
+): Promise<TGApp.BBS.Geetest.GeetestVerifyRes | false> {
+  return await new Promise<TGApp.BBS.Geetest.GeetestVerifyRes>((resolve) => {
     initGeetest(
       {
         gt: props.gt,
@@ -58,7 +58,7 @@ async function displayBox(
         area: "#verify",
         width: "250px",
       },
-      (captchaObj: TGApp.Plugins.Mys.Geetest.GeetestCaptcha) => {
+      (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => {
         if (geetestEl.value === null) return;
         geetestEl.value.innerHTML = "";
         captchaObj.appendTo("#geetest");

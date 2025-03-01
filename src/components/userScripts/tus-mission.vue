@@ -37,6 +37,7 @@ import { ref, shallowRef } from "vue";
 import { useUserStore } from "@/store/modules/user.js";
 import TGLogger from "@/utils/TGLogger.js";
 import apiHubReq from "@/web/request/apiHubReq.js";
+import miscReq from "@/web/request/miscReq.js";
 import painterReq from "@/web/request/painterReq.js";
 import postReq from "@/web/request/postReq.js";
 
@@ -259,7 +260,7 @@ async function refreshState(ck: Record<string, string>): Promise<void> {
   await TGLogger.Script("[米游币任务]任务数据合并完成");
 }
 
-async function autoSign(ck: Record<string, string>): Promise<void> {
+async function autoSign(ck: Record<string, string>, ch?: string): Promise<void> {
   const signFind = parseMissions.value.find((i) => i.key === "continuous_sign");
   if (!signFind) {
     await TGLogger.Script("[米游币任务]未找到打卡任务");
@@ -270,10 +271,20 @@ async function autoSign(ck: Record<string, string>): Promise<void> {
     return;
   }
   await TGLogger.Script("[米游币任务]正在执行打卡");
-  const resp = await apiHubReq.sign(ck);
+  const resp = await apiHubReq.sign(ck, 2, ch);
   if (resp.retcode !== 0) {
-    await TGLogger.Script(`[米游币任务]打卡失败：${resp.retcode} ${resp.message}`);
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+    if (resp.retcode !== 1034) {
+      await TGLogger.Script(`[米游币任务]打卡失败：${resp.retcode} ${resp.message}`);
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      return;
+    }
+    await TGLogger.Script(`[米游币任务]社区签到触发验证码，正在尝试验证`);
+    const challenge = await miscReq.challenge(ck);
+    if (challenge === false) {
+      await TGLogger.Script(`[米游币任务]验证失败`);
+      return;
+    }
+    await autoSign(ck, challenge);
     return;
   }
   await TGLogger.Script("[米游币任务]打卡成功");

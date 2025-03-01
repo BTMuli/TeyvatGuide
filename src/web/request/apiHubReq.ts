@@ -146,21 +146,24 @@ async function homeNew(gid: number = 2): Promise<TGApp.BBS.Navigator.Navigator[]
 
 /**
  * @description 签到
- * @since Beta v0.7.0
+ * @since Beta v0.7.1
  * @description **需要验证码登录获取的 Cookie**
  * @param {Record<string,string>} cookie 用户 Cookie
  * @param {string} gid
+ * @param {string} challenge
  * @return {Promise<TGApp.BBS.Response.Base>}
  */
 async function signIn(
   cookie: Record<string, string>,
   gid: number = 2,
+  challenge?: string,
 ): Promise<TGApp.BBS.Response.Base> {
   const data = { gids: gid };
-  const header = {
+  let header: Record<string, string> = {
     ...getRequestHeader(cookie, "POST", JSON.stringify(data), "X6"),
     "x-rpc-client_type": "2",
   };
+  if (challenge) header = { ...header, "x-rpc-challenge": challenge };
   return await TGHttp<TGApp.BBS.Response.Base>(`${Mahbu}app/api/signIn`, {
     method: "POST",
     headers: header,

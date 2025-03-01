@@ -19,19 +19,36 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showGeetest from "@comp/func/geetest.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import { storeToRefs } from "pinia";
 
-import takumiReq from "@/web/request/takumiReq.js";
+import { useUserStore } from "@/store/modules/user.js";
+import miscReq from "@/web/request/miscReq.js";
 
-const gameToken = "LCLQ2pYLnEDh7p03ogJVxL9dZqbeLtUE";
-const uid = "249066520";
+const { cookie } = storeToRefs(useUserStore());
 
 async function test(): Promise<void> {
-  const resp = await takumiReq.game.stoken({ uid: uid, token: gameToken });
-  if (resp.retcode !== 0) {
+  if (!cookie.value) return;
+  const ck: Record<string, string> = {
+    stoken: cookie.value.stoken,
+    stuid: cookie.value.stuid,
+    mid: cookie.value.mid,
+  };
+  const resp = await miscReq.create(ck);
+  if ("retcode" in resp) {
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     return;
   }
+  const gtRes = await showGeetest(resp);
+  console.log(gtRes);
+  if (gtRes === false) return;
+  const verifyResp = await miscReq.verify(gtRes, ck);
+  if ("retcode" in verifyResp) {
+    showSnackbar.error(`[${verifyResp.retcode}] ${verifyResp.message}`);
+    return;
+  }
+  showSnackbar.success("验证成功");
 }
 </script>
 <style lang="css" scoped>
