@@ -103,13 +103,16 @@ defineExpose({ displayBox });
 .func-snackbar {
   display: flex;
   min-width: 200px;
-  height: 40px;
+  max-width: calc(100% - 40px);
+  min-height: 40px;
+  box-sizing: border-box;
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
   border-radius: 5px;
   background-color: v-bind(bgColor);
   box-shadow: 0 0 10px rgb(0 0 0 / 20%);
+  word-break: break-all;
 }
 
 .func-snackbar-text {

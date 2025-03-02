@@ -1,7 +1,7 @@
 /**
  * @file utils/TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.6.8
+ * @since Beta v0.7.1
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -85,7 +85,7 @@ function getShareImgBgColor(): string {
 
 /**
  * @description 生成分享截图
- * @since Beta v0.6.7
+ * @since Beta v0.7.1
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
@@ -117,8 +117,15 @@ export async function generateShareImg(
     y: -15,
     dpi: 350,
   };
-  // @ts-expect-error This expression is not callable.
-  const canvasData = await html2canvas(element, opts);
+  let canvasData;
+  try {
+    // @ts-expect-error This expression is not callable.
+    canvasData = await html2canvas(element, opts);
+  } catch (e) {
+    await TGLogger.Error(`[generateShareImg][${fileName}] 生成分享截图失败 ${e}`);
+    showSnackbar.error(`生成分享截图失败: ${e}`);
+    return;
+  }
   if (scrollable) element.style.maxHeight = maxHeight;
   const buffer = new Uint8Array(
     atob(canvasData.toDataURL("image/png").split(",")[1])
