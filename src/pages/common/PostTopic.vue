@@ -95,6 +95,7 @@ import { useRoute, useRouter } from "vue-router";
 
 import { createPost } from "@/utils/TGWindow.js";
 import apiHubReq from "@/web/request/apiHubReq.js";
+import postReq from "@/web/request/postReq.js";
 import topicReq from "@/web/request/topicReq.js";
 
 type SortSelect = { text: string; value: number };
@@ -169,13 +170,13 @@ watch(
 
 async function firstLoad(): Promise<void> {
   await showLoading.start(`正在加载话题${topicInfo.value?.topic.name}信息`);
-  router.push({
+  await router.push({
     name: "话题",
     params: route.params,
     query: { gid: curGid.value, topic: curTopic.value },
   });
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
-  const postList = await topicReq.posts(curGid.value, curTopic.value, curSortType.value);
+  const postList = await postReq.topic(curGid.value, curTopic.value, curSortType.value);
   if ("retcode" in postList) {
     await showLoading.end();
     showSnackbar.error(`[${postList.retcode}] ${postList.message}`);
@@ -200,7 +201,7 @@ async function freshPostData(): Promise<void> {
   await showLoading.start(`正在刷新${topicInfo.value?.topic.name}帖子列表`);
   const mod20 = postRaw.value.total % 20;
   const pageSize = mod20 === 0 ? 20 : 20 - mod20;
-  const postList = await topicReq.posts(
+  const postList = await postReq.topic(
     curGid.value,
     curTopic.value,
     curSortType.value,
