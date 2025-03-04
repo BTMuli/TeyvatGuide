@@ -63,7 +63,7 @@ onBeforeMount(async () => {
   console.log(next.value);
 });
 
-function toBirth(type: TGApp.Archive.Birth.RoleItem | true): void {
+async function toBirth(type: TGApp.Archive.Birth.RoleItem | true): Promise<void> {
   let dateStr;
   if (type === true) {
     const date = new Date();
@@ -74,15 +74,15 @@ function toBirth(type: TGApp.Archive.Birth.RoleItem | true): void {
     dateStr = type.role_birthday;
   }
   if (type !== true) {
-    router.push({ name: "留影叙佳期", params: { date: dateStr } });
+    await router.push({ name: "留影叙佳期", params: { date: dateStr } });
     return;
   }
   if (cur.value.length > 0 && !cur.value[0].is_subscribe) {
     recentNewsType.value = "news";
-    router.push("/news/2/news");
+    await router.push("/news/2/news");
     return;
   }
-  router.push({ name: "留影叙佳期", params: { date: dateStr } });
+  await router.push({ name: "留影叙佳期", params: { date: dateStr } });
 }
 
 function parseDesc(intro: string): string {

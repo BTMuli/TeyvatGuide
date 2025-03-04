@@ -123,7 +123,7 @@ async function firstLoad(key: NewsType, refresh: boolean = false): Promise<void>
 
 async function switchAnno(): Promise<void> {
   await TGLogger.Info(`[News][${gid}][switchAnno] 切换公告`);
-  router.push("/announcements");
+  await router.push("/announcements");
 }
 
 // 加载更多

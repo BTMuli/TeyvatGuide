@@ -107,7 +107,7 @@ async function toPost(postId: string, index: number): Promise<void> {
     showSnackbar.warn("已经在当前帖子");
     return;
   }
-  router.push({ name: "帖子详情", params: { post_id: postId } });
+  await router.push({ name: "帖子详情", params: { post_id: postId } });
 }
 </script>
 <style lang="css" scoped>
