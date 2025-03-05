@@ -33,6 +33,10 @@ const localUrl = ref<string>();
 
 onMounted(async () => {
   if (!props.src) return;
+  if (!props.src.startsWith("http")) {
+    localUrl.value = props.src;
+    return;
+  }
   const link = props.ori ? props.src : appStore.getImageUrl(props.src);
   localUrl.value = await saveImgLocal(link);
 });

@@ -13,7 +13,8 @@
         >
           <template #selection="{ item }">
             <div class="select-item main">
-              <img
+              <TMiImg
+                :ori="true"
                 :src="item.raw.icon"
                 :alt="item.raw.title"
                 :title="item.raw.title"
@@ -58,6 +59,7 @@
 </template>
 <script lang="ts" setup>
 import TGameNav from "@comp/app/t-gameNav.vue";
+import TMiImg from "@comp/app/t-mi-img.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import PhCompCalendar from "@comp/pageHome/ph-comp-calendar.vue";

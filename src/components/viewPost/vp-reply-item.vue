@@ -5,17 +5,16 @@
       v-if="props.modelValue.user.reply_bubble !== null"
       :title="props.modelValue.user.reply_bubble.name"
     >
-      <img :src="props.modelValue.user.reply_bubble.url" alt="bubble" />
+      <TMiImg :ori="true" :src="props.modelValue.user.reply_bubble.url" alt="bubble" />
     </div>
     <div class="tpr-user">
       <div class="tpru-left">
-        <img :src="props.modelValue.user.avatar_url" alt="avatar" class="avatar" />
-        <img
-          :src="props.modelValue.user.pendant"
-          v-if="props.modelValue.user.pendant !== ''"
-          alt="pendant"
-          class="pendant"
-        />
+        <div class="avatar">
+          <TMiImg :ori="true" :src="props.modelValue.user.avatar_url" alt="avatar" />
+        </div>
+        <div class="pendant" v-if="props.modelValue.user.pendant !== ''">
+          <TMiImg :ori="true" :src="props.modelValue.user.pendant" alt="pendant" />
+        </div>
       </div>
       <div class="tpru-right" :title="props.modelValue.user.nickname">
         <span>{{ props.modelValue.user.nickname }}</span>
@@ -101,6 +100,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { event, path } from "@tauri-apps/api";
@@ -277,19 +277,36 @@ async function exportData(): Promise<void> {
 }
 
 .avatar {
+  position: relative;
+  display: flex;
   width: 30px;
   height: 30px;
-  border-radius: 50%;
-  object-fit: cover;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+  }
 }
 
 .pendant {
   position: absolute;
   top: 0;
   left: 0;
+  display: flex;
   width: 40px;
   height: 40px;
-  object-fit: cover;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .level {
