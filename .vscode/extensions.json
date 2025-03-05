@@ -5,6 +5,6 @@
 		"stylelint.vscode-stylelint",
 		"tauri-apps.tauri-vscode",
 		"Vue.vscode-typescript-vue-plugin",
-		"Vue.volar"
+		"Vue.vue-official"
 	]
 }
