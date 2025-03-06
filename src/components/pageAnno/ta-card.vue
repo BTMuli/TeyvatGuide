@@ -19,7 +19,7 @@
       {{ parseTitle(props.modelValue.subtitle) }}
     </div>
     <div class="anno-label" :title="`标签：${props.modelValue.tagLabel}`">
-      <TMiImg :src="props.modelValue.tagIcon" alt="tag" :ori="true" />
+      <img :src="props.modelValue.tagIcon" alt="tag" />
       <span>{{ props.modelValue.tagLabel }}</span>
     </div>
     <div class="anno-id">{{ props.modelValue.id }}</div>

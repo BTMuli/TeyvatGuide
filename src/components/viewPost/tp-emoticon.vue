@@ -85,5 +85,6 @@ async function download(): Promise<void> {
   box-shadow: -1px 1px 3px var(--common-shadow-2);
   font-family: var(--font-title);
   font-size: 12px;
+  white-space: nowrap;
 }
 </style>
