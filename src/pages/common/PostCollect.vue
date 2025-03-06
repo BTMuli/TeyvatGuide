@@ -434,6 +434,7 @@ async function mergePosts(
 
 .pc-posts {
   display: grid;
+  grid-auto-rows: auto;
   grid-gap: 10px;
   grid-template-columns: repeat(4, minmax(320px, 1fr));
 }
