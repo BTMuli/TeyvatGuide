@@ -99,7 +99,7 @@ onMounted(async () => {
   const lastData = await Hutao.Abyss.overview(true);
   await showLoading.update("正在获取本期深渊概览");
   const curData = await Hutao.Abyss.overview();
-  overview.value = { scur: curData, last: lastData };
+  overview.value = { cur: curData, last: lastData };
   await showLoading.update("正在获取角色使用率数据");
   abyssData.use = <AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>>await getData("use");
   await showLoading.end();
