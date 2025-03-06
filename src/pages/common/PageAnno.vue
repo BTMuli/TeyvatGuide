@@ -16,6 +16,7 @@
           label="服务器"
           width="200px"
           density="compact"
+          :disabled="isReq"
         />
         <v-select
           class="anno-select"
@@ -26,6 +27,7 @@
           label="语言"
           width="200px"
           density="compact"
+          :disabled="isReq"
         />
       </div>
     </template>
@@ -93,6 +95,7 @@ const router = useRouter();
 const tabValues: Readonly<Array<AnnoKey>> = ["activity", "game"];
 const tab = ref<AnnoKey>("activity");
 const annoCards = shallowRef<AnnoCard>({ activity: [], game: [] });
+const isReq = ref<boolean>(false);
 
 watch(
   () => server.value,
@@ -120,6 +123,8 @@ onMounted(async () => {
 });
 
 async function loadData(): Promise<void> {
+  if (isReq.value) return;
+  isReq.value = true;
   await showLoading.start(
     "正在获取公告数据",
     `服务器：${getRegionName(server.value)}，语言：${getLangName(lang.value)}`,
@@ -139,6 +144,7 @@ async function loadData(): Promise<void> {
     game: listCards.filter((item) => item.typeLabel === AnnoType.game),
   };
   await showLoading.end();
+  isReq.value = false;
 }
 
 function getRegionName(value: AnnoServer): string {

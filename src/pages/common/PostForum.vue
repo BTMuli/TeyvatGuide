@@ -15,6 +15,7 @@
         item-value="gid"
         variant="outlined"
         label="分区"
+        :disabled="isReq"
       >
         <template #selection="{ item }">
           <div class="select-item main">
@@ -52,6 +53,7 @@
         :items="getGameForums(curGid)"
         variant="outlined"
         label="版块"
+        :disabled="isReq"
       >
         <template #selection="{ item }">
           <div class="select-item main">
@@ -86,6 +88,7 @@
         item-value="value"
         variant="outlined"
         label="排序"
+        :disabled="isReq"
       />
       <v-text-field
         v-model="search"
@@ -152,7 +155,8 @@ const curSortType = ref<number>(1);
 const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 const firstLoad = ref<boolean>(false);
-const selectedForum = ref<SortSelect>();
+const isReq = ref<boolean>(false);
+const selectedForum = shallowRef<SortSelect>();
 const sortGameList = shallowRef<Array<SortSelectGame>>([]);
 const postRaw = shallowRef<PostRaw>({ isLast: false, lastId: "", total: 0 });
 const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
@@ -271,12 +275,13 @@ async function getCurrentPosts(
 }
 
 async function freshPostData(): Promise<void> {
-  if (!selectedForum.value) return;
+  if (!selectedForum.value || isReq.value) return;
   await router.push({
     name: "酒馆",
     params: route.params,
     query: { gid: curGid.value, forum: selectedForum.value.value },
   });
+  isReq.value = true;
   await showLoading.start(`正在刷新${getGameLabel(curGid.value)}帖子`);
   const gameLabel = getGameLabel(curGid.value);
   const forumLabel = getForum(curGid.value, selectedForum.value.value).text;
@@ -295,6 +300,7 @@ async function freshPostData(): Promise<void> {
   };
   showSnackbar.success(`刷新成功，共加载 ${postsGet.list.length} 条帖子`);
   await showLoading.end();
+  isReq.value = false;
 }
 
 async function loadMore(): Promise<void> {
@@ -306,6 +312,8 @@ async function loadMore(): Promise<void> {
     showSnackbar.warn("没有更多帖子了");
     return;
   }
+  if (isReq.value) return;
+  isReq.value = true;
   await showLoading.start("正在加载更多帖子数据", `游戏：${getGameLabel(curGid.value)}`);
   const postsGet = await getCurrentPosts(true, selectedForum.value.value);
   await showLoading.update(
@@ -319,6 +327,7 @@ async function loadMore(): Promise<void> {
   };
   showSnackbar.success(`加载成功，共加载 ${postsGet.list.length} 条帖子`);
   await showLoading.end();
+  isReq.value = false;
 }
 
 function searchPost(): void {

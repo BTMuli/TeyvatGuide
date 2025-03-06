@@ -21,6 +21,7 @@
         :item-value="(item) => item"
         variant="outlined"
         label="分区"
+        :disabled="isReq"
       >
         <template #selection="{ item }">
           <div class="select-item main">
@@ -55,6 +56,7 @@
         item-value="value"
         variant="outlined"
         label="排序"
+        :disabled="isReq"
       />
       <v-text-field
         v-model="search"
@@ -109,6 +111,7 @@ const curGid = ref<number>(0);
 const curSortType = ref<0 | 1 | 2>(0);
 const search = ref<string>("");
 const curTopic = ref<string>("");
+const isReq = ref<boolean>(false);
 const allGames = shallowRef<Array<TGApp.BBS.Game.Item>>([]);
 const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 });
 const topicInfo = shallowRef<TGApp.BBS.Topic.InfoRes>();
@@ -169,6 +172,8 @@ watch(
 );
 
 async function firstLoad(): Promise<void> {
+  if (isReq.value) return;
+  isReq.value = true;
   await showLoading.start(`正在加载话题${topicInfo.value?.topic.name}信息`);
   await router.push({
     name: "话题",
@@ -190,10 +195,13 @@ async function firstLoad(): Promise<void> {
   };
   posts.value = postList.posts;
   await showLoading.end();
+  isReq.value = false;
   showSnackbar.success(`加载了 ${postList.posts.length} 条帖子`);
 }
 
 async function freshPostData(): Promise<void> {
+  if (isReq.value) return;
+  isReq.value = true;
   if (postRaw.value.isLast) {
     showSnackbar.warn("已经到底了");
     return;
@@ -201,27 +209,29 @@ async function freshPostData(): Promise<void> {
   await showLoading.start(`正在刷新${topicInfo.value?.topic.name}帖子列表`);
   const mod20 = postRaw.value.total % 20;
   const pageSize = mod20 === 0 ? 20 : 20 - mod20;
-  const postList = await postReq.topic(
+  const resp = await postReq.topic(
     curGid.value,
     curTopic.value,
     curSortType.value,
     postRaw.value.lastId,
     pageSize,
   );
-  if ("retcode" in postList) {
+  if ("retcode" in resp) {
     await showLoading.end();
-    showSnackbar.error(`[${postList.retcode}] ${postList.message}`);
+    isReq.value = false;
+    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     return;
   }
-  await showLoading.update(`数量：${postList.posts.length}，是否最后一页：${postList.is_last}`);
+  await showLoading.update(`数量：${resp.posts.length}，是否最后一页：${resp.is_last}`);
   postRaw.value = {
-    isLast: postList.is_last,
-    lastId: postList.last_id,
-    total: postRaw.value.total + postList.posts.length,
+    isLast: resp.is_last,
+    lastId: resp.last_id,
+    total: postRaw.value.total + resp.posts.length,
   };
-  posts.value = posts.value.concat(postList.posts);
+  posts.value = posts.value.concat(resp.posts);
   await showLoading.end();
-  showSnackbar.success(`加载了 ${postList.posts.length} 条帖子`);
+  isReq.value = false;
+  showSnackbar.success(`加载了 ${resp.posts.length} 条帖子`);
 }
 
 function searchPost(): void {
