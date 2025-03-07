@@ -1,7 +1,7 @@
 /**
  * @file web/request/apiHubReq.ts
  * @description apiHub下的请求
- * @since Beta v0.7.0
+ * @since Beta v0.7.2
  */
 
 import TGHttp from "@/utils/TGHttp.js";
@@ -41,15 +41,17 @@ async function getGameList(): Promise<Array<TGApp.BBS.Game.Item>> {
 
 /**
  * @description 获取用户米游币任务完成情况
- * @since Beta v0.7.0
+ * @since Beta v0.7.2
  * @param {Record<string,string>} cookie 用户 Cookie
  * @return {Promise<TGApp.BBS.Mission.InfoRes>}
  */
 async function getMissions(cookie: Record<string, string>): Promise<TGApp.BBS.Mission.InfoResp> {
-  const header = getRequestHeader(cookie, "GET", {});
-  return await TGHttp<TGApp.BBS.Mission.InfoResp>(`${Mahbu}api/getMissions`, {
+  const param = { point_sn: "myb" };
+  const header = getRequestHeader(cookie, "GET", param);
+  return await TGHttp<TGApp.BBS.Mission.InfoResp>(`${Mahbu}wapi/getMissions`, {
     method: "GET",
     headers: header,
+    query: param,
   });
 }
 
@@ -79,7 +81,7 @@ async function getShareConf(
 
 /**
  * @description 获取任务完成情况
- * @since Beta v0.7.0
+ * @since Beta v0.7.2
  * @description **需要验证码登录的 Cookie**
  * @param {Record<string,string>} cookie 用户 Cookie
  * @return {Promise<TGApp.BBS.Mission.StateResp>}
@@ -87,10 +89,12 @@ async function getShareConf(
 async function getUserMissionsState(
   cookie: Record<string, string>,
 ): Promise<TGApp.BBS.Mission.StateResp> {
-  const header = getRequestHeader(cookie, "GET", {});
-  return await TGHttp<TGApp.BBS.Mission.StateResp>(`${Mahbu}sapi/getUserMissionsState`, {
+  const param = { point_sn: "myb" };
+  const header = getRequestHeader(cookie, "GET", param);
+  return await TGHttp<TGApp.BBS.Mission.StateResp>(`${Mahbu}wapi/getUserMissionsState`, {
     method: "GET",
     headers: header,
+    query: param,
   });
 }
 
