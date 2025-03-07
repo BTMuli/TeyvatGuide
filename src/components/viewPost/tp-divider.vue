@@ -6,7 +6,7 @@
       :title="props.data.insert.divider"
     />
   </div>
-  <TpUnknown v-else :data="<TGApp.Plugins.Mys.SctPost.Empty>props.data" />
+  <TpUnknown v-else :data="<TGApp.BBS.SctPost.Empty>props.data" />
 </template>
 <script lang="ts" setup>
 import { computed } from "vue";

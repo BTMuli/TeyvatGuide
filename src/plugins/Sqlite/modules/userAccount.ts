@@ -15,10 +15,10 @@ import { timestampToDate } from "@/utils/toolFunc.js";
  * @description 获取插入游戏账号数据的sql
  * @since Beta v0.6.0
  * @param {string} uid - 米社UID
- * @param {TGApp.BBS.Account.GameAccount} data - 游戏账号数据
+ * @param {TGApp.BBS.Game.Account} data - 游戏账号数据
  * @return {string}
  */
-function getInsertGameAccountSql(uid: string, data: TGApp.BBS.Account.GameAccount): string {
+function getInsertGameAccountSql(uid: string, data: TGApp.BBS.Game.Account): string {
   const isChosen = data.is_chosen ? 1 : 0;
   const isOfficial = data.is_official ? 1 : 0;
   const timeNow = timestampToDate(new Date().getTime());
@@ -265,12 +265,12 @@ async function getCurGameAccount(uid: string): Promise<TGApp.Sqlite.Account.Game
  * @description 保存游戏账户数据
  * @since Beta v0.6.0
  * @param {string} uid - 米社UID
- * @param {TGApp.BBS.Account.GameAccount[]} accounts - 账户数据
+ * @param {Array<TGApp.BBS.Game.Account>} accounts - 账户数据
  * @return {Promise<void>}
  */
 async function saveGameAccount(
   uid: string,
-  accounts: TGApp.BBS.Account.GameAccount[],
+  accounts: Array<TGApp.BBS.Game.Account>,
 ): Promise<void> {
   const db = await TGSqlite.getDB();
   for (const account of accounts) {

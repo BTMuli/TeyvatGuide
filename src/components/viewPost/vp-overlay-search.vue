@@ -38,7 +38,7 @@ const lastId = ref<string>("");
 const game = ref<string>("2");
 const isLast = ref<boolean>(false);
 const load = ref<boolean>(false);
-const results = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
+const results = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
 const gameName = computed<string>(
   () => TGBbs.channels.find((v) => v.gid.toString() === game.value)?.title || "未知分区",
 );

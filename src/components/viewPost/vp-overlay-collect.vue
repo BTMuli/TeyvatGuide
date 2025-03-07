@@ -39,7 +39,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TSUserCollection from "@Sqlite/modules/userCollect.js";
 import { ref, shallowRef, watch } from "vue";
 
-type ToPostCollectProps = { post?: TGApp.Plugins.Mys.Post.FullData };
+type ToPostCollectProps = { post?: TGApp.BBS.Post.FullData };
 type ToPostCollectEmits = (e: "submit") => void;
 
 const props = defineProps<ToPostCollectProps>();

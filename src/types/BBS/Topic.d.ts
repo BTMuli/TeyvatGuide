@@ -59,14 +59,14 @@ declare namespace TGApp.BBS.Topic {
    * @property {boolean} is_last 是否最后一页
    * @property {boolean} is_origin 是否原创
    * @property {string} last_id 最后一条帖子 ID
-   * @property {Array<TGApp.Plugins.Mys.Post.FullData>} posts 帖子列表
+   * @property {Array<TGApp.BBS.Post.FullData>} posts 帖子列表
    * @return PostRes
    */
   type PostRes = {
     is_last: boolean;
     is_origin: boolean;
     last_id: string;
-    posts: Array<TGApp.Plugins.Mys.Post.FullData>;
+    posts: Array<TGApp.BBS.Post.FullData>;
   };
 
   /**

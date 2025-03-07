@@ -30,7 +30,7 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import { computed } from "vue";
 
-type TpAvatarProps = { data: TGApp.Plugins.Mys.User.Post; position: "left" | "right" };
+type TpAvatarProps = { data: TGApp.BBS.Post.User; position: "left" | "right" };
 
 const props = defineProps<TpAvatarProps>();
 

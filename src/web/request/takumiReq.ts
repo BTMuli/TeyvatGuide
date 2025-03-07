@@ -129,15 +129,14 @@ async function genAuthKey2(
  * @description 通过cookie获取游戏账号
  * @since Beta v0.7.2
  * @param {TGApp.App.Account.Cookie} cookie cookie
- * @returns {Promise<TGApp.BBS.Account.GameAccount[]|TGApp.BBS.Response.Base>}
+ * @returns {Promise<Array<TGApp.BBS.Game.Account>|TGApp.BBS.Response.Base>}
  */
 async function getUserGameRolesByCookie(
   cookie: TGApp.App.Account.Cookie,
-): Promise<TGApp.BBS.Account.GameAccount[] | TGApp.BBS.Response.Base> {
+): Promise<Array<TGApp.BBS.Game.Account> | TGApp.BBS.Response.Base> {
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const params = { game_biz: "hk4e_cn" };
-  type ResType = { list: Array<TGApp.BBS.Account.GameAccount> };
-  const resp = await TGHttp<TGApp.BBS.Response.BaseWithData<ResType>>(
+  const resp = await TGHttp<TGApp.BBS.Game.AccountResp>(
     `${taBu}binding/api/getUserGameRolesByCookie`,
     {
       method: "GET",

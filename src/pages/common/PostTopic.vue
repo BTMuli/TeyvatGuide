@@ -115,7 +115,7 @@ const isReq = ref<boolean>(false);
 const allGames = shallowRef<Array<TGApp.BBS.Game.Item>>([]);
 const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 });
 const topicInfo = shallowRef<TGApp.BBS.Topic.InfoRes>();
-const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
+const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
 const curGame = shallowRef<GameList>();
 const sortList = computed<Array<SortSelect>>(() => {
   if (!topicInfo.value) return [];

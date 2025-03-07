@@ -147,14 +147,14 @@ async function updateCollect(title: string, newTitle: string, newDesc: string): 
  * @description 添加收藏
  * @since Beta v0.4.5
  * @param {string} postId 文章 id
- * @param {TGApp.Plugins.Mys.Post.FullData} post 文章信息
+ * @param {TGApp.BBS.Post.FullData} post 文章信息
  * @param {string} collection 收藏合集标题，可能为 undefined
  * @param {boolean} recursive 是否递归添加
  * @return {Promise<boolean>} 返回是否添加成功
  */
 async function addCollect(
   postId: string,
-  post: TGApp.Plugins.Mys.Post.FullData,
+  post: TGApp.BBS.Post.FullData,
   collection: string | undefined = undefined,
   recursive: boolean = false,
 ): Promise<boolean> {
@@ -219,13 +219,10 @@ async function addCollect(
  * @description 更新帖子信息
  * @since Beta v0.4.5
  * @param {string} postId 文章 id
- * @param {TGApp.Plugins.Mys.Post.FullData} post 文章信息
+ * @param {TGApp.BBS.Post.FullData} post 文章信息
  * @return {Promise<boolean>} 返回是否更新成功
  */
-async function updatePostInfo(
-  postId: string,
-  post: TGApp.Plugins.Mys.Post.FullData,
-): Promise<boolean> {
+async function updatePostInfo(postId: string, post: TGApp.BBS.Post.FullData): Promise<boolean> {
   const db = await TGSqlite.getDB();
   const sql = "SELECT id FROM UFPost WHERE id = ?";
   const res: Array<{ id: number }> = await db.select(sql, [postId]);

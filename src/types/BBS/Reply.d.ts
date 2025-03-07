@@ -1,7 +1,7 @@
 /**
  * @file types/BBS/Reply.d.ts
  * @description 回复数据类型定义文件
- * @since Beta v0.7.1
+ * @since Beta v0.7.2
  */
 
 declare namespace TGApp.BBS.Reply {
@@ -39,11 +39,11 @@ declare namespace TGApp.BBS.Reply {
    * @description 子回复数据类型
    * @since Beta v0.7.1
    * @interface SubRootRes
-   * @property {TGApp.Plugins.Mys.Post.FullData} post - 帖子数据
+   * @property {TGApp.BBS.Post.FullData} post - 帖子数据
    * @property {ReplyFull} reply - 回复数据
    * @return SubRootRes
    */
-  type SubRootRes = { post: TGApp.Plugins.Mys.Post.FullData; reply: ReplyFull };
+  type SubRootRes = { post: TGApp.BBS.Post.FullData; reply: ReplyFull };
 
   /**
    * @description 回复数据类型
@@ -87,18 +87,18 @@ declare namespace TGApp.BBS.Reply {
 
   /**
    * @description 回复数据类型
-   * @since Beta v0.7.1
+   * @since Beta v0.7.2
    * @interface ReplyFull
    * @property {Reply} reply - 回复数据
    * @property {User} user - 用户数据
    * @property {Stat} stat - 点赞数据
-   * @property {SelfOperation} self_operation - 自身操作数据
+   * @property {TGApp.BBS.User.SelfOperation} self_operation - 自身操作数据
    * @property {MasterStatus} master_status - 主楼状态数据
-   * @property {Array<TGApp.Plugins.Mys.Post.Image>} images - 图片数据
+   * @property {Array<TGApp.BBS.Post.Image>} images - 图片数据
    * @property {Array<ReplyFull>} sub_replies - 子回复数据
    * @property {boolean} is_lz - 是否楼主
    * @property {number} sub_reply_count - 子回复数量
-   * @property {TGApp.Plugins.Mys.User.Reply} r_user - 回复用户数据
+   * @property {User} r_user - 回复用户数据
    * @property {unknown} r_reply - 未知数据
    * @property {unknown} r_post - 未知数据
    * @property {unknown} user_game_info - 未知数据
@@ -106,15 +106,15 @@ declare namespace TGApp.BBS.Reply {
    */
   type ReplyFull = {
     reply: Reply;
-    user: TGApp.Plugins.Mys.User.Reply;
+    user: User;
     stat: Stat;
-    self_operation: SelfOperation;
+    self_operation: TGApp.BBS.User.SelfOperation;
     master_status: MasterStatus;
-    images: Array<TGApp.Plugins.Mys.Post.Image>;
+    images: Array<TGApp.BBS.Post.Image>;
     sub_replies: Array<ReplyFull>;
     is_lz: boolean;
     sub_reply_count: number;
-    r_user: TGApp.Plugins.Mys.User.Reply | null;
+    r_user: User | null;
     r_reply: unknown;
     r_post: unknown;
     user_game_info: unknown;
@@ -176,6 +176,45 @@ declare namespace TGApp.BBS.Reply {
   };
 
   /**
+   * @description 帖子回复中的用户信息
+   * @since Beta v0.7.2
+   * @interface User
+   * @property {string} uid 用户 ID
+   * @property {string} nickname 用户昵称
+   * @property {string} introduce 用户简介
+   * @property {string} avatar 用户头像
+   * @property {number} gender 用户性别
+   * @property {TGApp.BBS.User.Certification} certification 用户认证信息
+   * @property {TGApp.BBS.User.LevelExp} level_exp 用户等级经验
+   * @property {string} avatar_url 用户头像链接
+   * @property {string} pendant 用户挂件 URL，可能为 ""
+   * @property {string} ip_region 用户 IP 地区
+   * @property {boolean} is_following 是否关注
+   * @property {boolean} is_followed 是否被关注
+   * @property {TGApp.BBS.User.AvatarExt} avatar_ext 用户头像扩展信息
+   * @property {boolean} is_super_fan 是否是铁粉
+   * @property {Bubble} reply_bubble 回复气泡，可能为 null
+   * @return User
+   */
+  type User = {
+    uid: string;
+    nickname: string;
+    introduce: string;
+    avatar: string;
+    gender: number;
+    certification: TGApp.BBS.User.Certification;
+    level_exp: TGApp.BBS.User.LevelExp;
+    avatar_url: string;
+    pendant: string;
+    ip_region: string;
+    is_following: boolean;
+    is_followed: boolean;
+    avatar_ext: TGApp.BBS.User.AvatarExt;
+    is_super_fan: boolean;
+    reply_bubble: Bubble | null;
+  };
+
+  /**
    * @description 回复气泡数据类型
    * @since Beta v0.7.1
    * @interface Bubble
@@ -198,16 +237,6 @@ declare namespace TGApp.BBS.Reply {
    * @return Stat
    */
   type Stat = { reply_num: number; like_num: number; sub_num: number; dislike_num: number };
-
-  /**
-   * @description 自身操作数据类型
-   * @since Beta v0.7.1
-   * @interface SelfOperation
-   * @property {number} attitude - 操作态度
-   * @property {number} reply_vote_attitude - 回复投票态度
-   * @return SelfOperation
-   */
-  type SelfOperation = { attitude: number; reply_vote_attitude: number };
 
   /**
    * @description 主楼状态数据类型

@@ -21,7 +21,7 @@ import parseAnnoContent from "@/web/utils/annoParser.js";
 type TaParserProps = { data: TGApp.BBS.Announcement.ContentItem };
 const props = defineProps<TaParserProps>();
 
-function getTaName(ta: TGApp.Plugins.Mys.SctPost.Base): Component {
+function getTaName(ta: TGApp.BBS.SctPost.Base): Component {
   if (ta.children) return TpTexts;
   if (typeof ta.insert === "string") return TpText;
   if ("image" in ta.insert) return TpImage;

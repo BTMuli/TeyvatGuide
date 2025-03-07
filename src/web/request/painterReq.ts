@@ -15,16 +15,16 @@ const bapBu: Readonly<string> = "https://bbs-api.miyoushe.com/painter/wapi/";
  * @param {string} newsType 咨讯类型: 1 为公告，2 为活动，3 为咨讯
  * @param {number} pageSize 返回数量
  * @param {number} lastId 上一次请求的最后一条数据的 id
- * @return {Promise<TGApp.BBS.News.Res>}
+ * @return {Promise<TGApp.BBS.Post.NewsRes>}
  */
 async function getNewsList(
   gid: string = "2",
   newsType: string = "1",
   pageSize: number = 20,
   lastId: number = 0,
-): Promise<TGApp.BBS.News.Res> {
+): Promise<TGApp.BBS.Post.NewsRes> {
   return (
-    await TGHttp<TGApp.BBS.News.Resp>(`${bapBu}getNewsList`, {
+    await TGHttp<TGApp.BBS.Post.NewsResp>(`${bapBu}getNewsList`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       query: { gids: gid, page_size: pageSize, type: newsType, last_id: lastId },

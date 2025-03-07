@@ -17,7 +17,7 @@ declare namespace TGApp.Sqlite.UserCollection {
    * @interface UFPost
    * @property {string} id - 帖子 ID
    * @property {string} title - 标题
-   * @description 反序列化后是 TGApp.Plugins.Mys.Post.FullData
+   * @description 反序列化后是 TGApp.BBS.Post.FullData
    * @property {string} content - 内容
    * @property {string} updated - 更新时间
    * @return UFPost

@@ -15,12 +15,12 @@ const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
  * @since Beta v0.7.1
  * @param {number|string} postId 帖子 ID
  * @param {Record<string, string>} cookie Cookie
- * @return {Promise<TGApp.Plugins.Mys.Post.FullData|TGApp.BBS.Response.Base>}
+ * @return {Promise<TGApp.BBS.Post.FullData | TGApp.BBS.Response.Base>}
  */
 async function getPostFull(
   postId: number | string,
   cookie?: Record<string, string>,
-): Promise<TGApp.Plugins.Mys.Post.FullData | TGApp.BBS.Response.Base> {
+): Promise<TGApp.BBS.Post.FullData | TGApp.BBS.Response.Base> {
   const param = { post_id: postId, read: 1 };
   let header;
   if (cookie) {
@@ -29,7 +29,7 @@ async function getPostFull(
       "x-rpc-client_type": "2",
     };
   } else header = { referer: Referer };
-  const resp = await TGHttp<TGApp.Plugins.Mys.Post.Response>(`${bapBu}getPostFull`, {
+  const resp = await TGHttp<TGApp.BBS.Post.FullResp>(`${bapBu}getPostFull`, {
     method: "GET",
     headers: header,
     query: param,
@@ -42,11 +42,11 @@ async function getPostFull(
  * @description 获取合集帖子
  * @since Beta v0.7.1
  * @param {string} collectionId 合集 ID
- * @returns {Promise<TGApp.Plugins.Mys.Post.FullData[]>}
+ * @returns {Promise<Array<TGApp.BBS.Post.FullData>>}
  */
 async function getPostFullInCollection(
   collectionId: string,
-): Promise<Array<TGApp.Plugins.Mys.Post.FullData>> {
+): Promise<Array<TGApp.BBS.Post.FullData>> {
   return (
     await TGHttp<TGApp.BBS.Collection.PostsResp>(`${bapBu}getPostFullInCollection`, {
       method: "GET",
@@ -177,15 +177,15 @@ async function getTopicPostList(
  * @param {string} gid 游戏分区 ID
  * @param {string} keyword 关键词
  * @param {string} lastId 最后一条帖子 ID
- * @return {Promise<TGApp.BBS.Search.PostsRes>} 返回帖子列表
+ * @return {Promise<TGApp.BBS.Post.SearchRes>} 返回帖子列表
  */
 async function searchPosts(
   gid: string = "2",
   keyword: string,
   lastId: string,
-): Promise<TGApp.BBS.Search.PostsRes> {
+): Promise<TGApp.BBS.Post.SearchRes> {
   return (
-    await TGHttp<TGApp.BBS.Search.PostsResp>(`${bapBu}searchPosts`, {
+    await TGHttp<TGApp.BBS.Post.SearchResp>(`${bapBu}searchPosts`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       query: { gids: gid, keyword, last_id: lastId, size: 20 },

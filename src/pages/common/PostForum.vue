@@ -159,7 +159,7 @@ const isReq = ref<boolean>(false);
 const selectedForum = shallowRef<SortSelect>();
 const sortGameList = shallowRef<Array<SortSelectGame>>([]);
 const postRaw = shallowRef<PostRaw>({ isLast: false, lastId: "", total: 0 });
-const posts = shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]);
+const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
 
 onMounted(async () => {
   await showLoading.start("正在加载帖子数据");

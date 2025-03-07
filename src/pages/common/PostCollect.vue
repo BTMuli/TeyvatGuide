@@ -122,7 +122,7 @@ const collections = shallowRef<Array<TGApp.Sqlite.UserCollection.UFCollection>>(
 const selected = shallowRef<Array<TGApp.Sqlite.UserCollection.UFPost>>([]);
 const length = computed<number>(() => Math.ceil(selected.value.length / 12));
 const view = computed<number>(() => (length.value === 1 ? 1 : length.value > 5 ? 5 : length.value));
-const curPosts = computed<Array<TGApp.Plugins.Mys.Post.FullData>>(() =>
+const curPosts = computed<Array<TGApp.BBS.Post.FullData>>(() =>
   selected.value.slice((page.value - 1) * 12, page.value * 12).map((i) => JSON.parse(i.content)),
 );
 
@@ -372,10 +372,7 @@ async function freshUser(uid?: string): Promise<void> {
 }
 
 // 合并收藏帖子
-async function mergePosts(
-  posts: Array<TGApp.Plugins.Mys.Post.FullData>,
-  collect: string,
-): Promise<void> {
+async function mergePosts(posts: Array<TGApp.BBS.Post.FullData>, collect: string): Promise<void> {
   const title = `用户收藏-${collect}`;
   for (const post of posts) {
     await showLoading.update(`[POST]${post.post.subject} [collection]${title}`);

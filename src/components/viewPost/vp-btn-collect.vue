@@ -22,7 +22,7 @@ import VpOverlayCollect from "./vp-overlay-collect.vue";
 
 import TGLogger from "@/utils/TGLogger.js";
 
-type TbCollectProps = { modelValue: number; data?: TGApp.Plugins.Mys.Post.FullData };
+type TbCollectProps = { modelValue: number; data?: TGApp.BBS.Post.FullData };
 
 const props = defineProps<TbCollectProps>();
 const isCollected = ref<boolean>(false);

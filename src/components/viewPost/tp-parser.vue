@@ -24,7 +24,7 @@ import TpVillaCard from "./tp-villaCard.vue";
 import TpVod from "./tp-vod.vue";
 import TpVote from "./tp-vote.vue";
 
-type SctPostDataArr = Array<TGApp.Plugins.Mys.SctPost.Base>;
+type SctPostDataArr = Array<TGApp.BBS.SctPost.Base>;
 type TpParserProps = { data: SctPostDataArr };
 
 const props = defineProps<TpParserProps>();
@@ -32,7 +32,7 @@ const props = defineProps<TpParserProps>();
 function getParsedData(data: SctPostDataArr): SctPostDataArr {
   const res: SctPostDataArr = [];
   let child: SctPostDataArr = [];
-  let cur: TGApp.Plugins.Mys.SctPost.Base | undefined;
+  let cur: TGApp.BBS.SctPost.Base | undefined;
   for (const tp of data) {
     const tpName = getTpName(tp);
     // 单独处理 TpMention
@@ -90,7 +90,7 @@ function getParsedText(data: TpTextType): Array<TpTextType> {
   return [data];
 }
 
-function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base): Component {
+function getTpName(tp: TGApp.BBS.SctPost.Base): Component {
   if (tp.children) return TpTexts;
   if (typeof tp.insert === "string") return TpText;
   if ("backup_text" in tp.insert) return TpBackupText;

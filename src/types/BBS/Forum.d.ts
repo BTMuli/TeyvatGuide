@@ -64,8 +64,8 @@ declare namespace TGApp.BBS.Forum {
    * @property {number} show_type 显示类型
    * @property {number} default_tab 默认标签
    * @property {string} read_me 说明
-   * @property {Array<ForumCat>} forum_cate_list 分类列表
-   * @property {Array<ForumCat>} video_cat_list 视频分类列表
+   * @property {Array<ForumCate>} forum_cate_list 分类列表
+   * @property {Array<ForumCate>} video_cat_list 视频分类列表
    * @return GameForumItem
    */
   type GameForumItem = {
@@ -94,33 +94,33 @@ declare namespace TGApp.BBS.Forum {
     show_type: number;
     default_tab: number;
     read_me: string;
-    forum_cate_list: Array<ForumCat>;
-    video_cat_list: Array<ForumCat>;
+    forum_cate_list: Array<ForumCate>;
+    video_cat_list: Array<ForumCate>;
   };
 
   /**
    * @description 视频分类
    * @since Beta v0.6.8
-   * @interface ForumCat
+   * @interface ForumCate
    * @property {number} id 分类 ID
    * @property {string} name 分类名称
    * @property {number} forum_id 版块 ID
    * @property {string} desc 描述
    * @property {string} remark 备注
-   * @return ForumCat
+   * @return ForumCate
    */
-  type ForumCat = { id: number; name: string; forum_id: number; desc: string; remark: string };
+  type ForumCate = { id: number; name: string; forum_id: number; desc: string; remark: string };
 
   /**
    * @description 版块帖子列表
-   * @since Beta v0.7.1
+   * @since Beta v0.7.2
    * @interface PostForumRes
    * @property {string} last_id 最后一条帖子 ID
    * @property {boolean} is_last 是否最后一页
    * @property {boolean} is_origin 是否原创
    * @property {number} page 页码
    * @property {unknown} databox 数据盒子
-   * @property {Array<TGApp.Plugins.Mys.Post.FullData>} list 帖子列表
+   * @property {Array<TGApp.BBS.Post.FullData>} list 帖子列表
    * @return PostForumRes
    */
   type PostForumRes = {
@@ -129,6 +129,6 @@ declare namespace TGApp.BBS.Forum {
     is_origin: boolean;
     page: number;
     databox: unknown;
-    list: TGApp.Plugins.Mys.Post.FullData[];
+    list: Array<TGApp.BBS.Post.FullData>;
   };
 }

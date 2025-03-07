@@ -22,7 +22,7 @@
       <TpParser :data="JSON.parse(props.data.insert.fold.content)" />
     </div>
   </details>
-  <TpUnknown v-else :data="<TGApp.Plugins.Mys.SctPost.Empty>props.data" />
+  <TpUnknown v-else :data="<TGApp.BBS.SctPost.Empty>props.data" />
 </template>
 <script lang="ts" setup>
 import { ref, toRaw } from "vue";

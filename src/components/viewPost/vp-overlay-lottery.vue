@@ -53,7 +53,7 @@ type RenderCard = {
   id: string;
   upWay: string;
   status: string;
-  creator: TGApp.Plugins.Mys.User.Post;
+  creator: TGApp.BBS.Post.User;
   drawTime: string;
   rewards: Array<RenderReward>;
 };
@@ -61,7 +61,7 @@ type RenderReward = {
   name: string;
   win: number;
   goal: number;
-  users: TGApp.Plugins.Mys.User.Post[];
+  users: Array<TGApp.BBS.Post.User>;
 };
 
 const props = defineProps<TpoLotteryProps>();

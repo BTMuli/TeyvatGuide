@@ -75,7 +75,7 @@ import { computed, onMounted, shallowRef, watch } from "vue";
 import { generateShareImg } from "@/utils/TGShare.js";
 import { createPost } from "@/utils/TGWindow.js";
 
-type TPostCardProps = { modelValue: TGApp.Plugins.Mys.Post.FullData; selectMode?: boolean };
+type TPostCardProps = { modelValue: TGApp.BBS.Post.FullData; selectMode?: boolean };
 type TPostCardEmits = (e: "onSelected", v: string) => void;
 type TPostStatus = RenderStatus & { stat: ActStat };
 type RenderForum = { name: string; icon: string; id: number };
@@ -86,7 +86,7 @@ export type RenderCard = {
   cover: string;
   postId: number;
   subtitle: string;
-  user: TGApp.Plugins.Mys.User.Post | null;
+  user: TGApp.BBS.Post.User | null;
   forum: RenderForum | null;
   data: RenderData | null;
   status?: RenderStatus;
@@ -130,7 +130,7 @@ function getActivityStatus(status: number): RenderStatus {
   return stats[ActStat.UNKNOWN];
 }
 
-function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
+function getPostCover(item: TGApp.BBS.Post.FullData): string {
   let cover;
   if (item.cover) cover = item.cover.url;
   else if (item.post.cover) cover = item.post.cover;
@@ -140,7 +140,7 @@ function getPostCover(item: TGApp.Plugins.Mys.Post.FullData): string {
   return `${cover}?x-oss-process=image/resize,m_fill,w_360,h_130,limit_0/format,png`;
 }
 
-function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): RenderCard {
+function getCommonCard(item: TGApp.BBS.Post.FullData): RenderCard {
   let forumData: RenderForum | null = null;
   let statData: RenderData | null = null;
   if (item.forum !== null) {
@@ -167,7 +167,7 @@ function getCommonCard(item: TGApp.Plugins.Mys.Post.FullData): RenderCard {
   };
 }
 
-function getPostCard(item: TGApp.Plugins.Mys.Post.FullData): RenderCard {
+function getPostCard(item: TGApp.BBS.Post.FullData): RenderCard {
   const commonCard = getCommonCard(item);
   if (
     item.news_meta !== undefined &&

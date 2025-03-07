@@ -41,15 +41,13 @@ function handleAnnoContent(data: string): string {
  * @description 解析公告内容，转换为结构化数据
  * @since Beta v0.5.3
  * @param {TGApp.BBS.Announcement.ContentItem} anno - 公告内容
- * @returns {TGApp.Plugins.Mys.SctPost.Base[]} 结构化数据
+ * @returns {TGApp.BBS.SctPost.Base[]} 结构化数据
  */
-function parseAnnoContent(
-  anno: TGApp.BBS.Announcement.ContentItem,
-): Array<TGApp.Plugins.Mys.SctPost.Base> {
+function parseAnnoContent(anno: TGApp.BBS.Announcement.ContentItem): Array<TGApp.BBS.SctPost.Base> {
   const parser = new DOMParser();
   const first = handleAnnoContent(anno.content);
   const doc = parser.parseFromString(first, "text/html");
-  const children: Array<TGApp.Plugins.Mys.SctPost.Base> = [];
+  const children: Array<TGApp.BBS.SctPost.Base> = [];
   if (anno.banner !== "") children.push({ insert: { image: anno.banner } });
   doc.body.childNodes.forEach((child) => children.push(...parseAnnoNode(child)));
   return children;
@@ -60,13 +58,10 @@ function parseAnnoContent(
  * @since Beta v0.7.0
  * @param {Node} node - 节点
  * @param {Record<string, string>} attr - 属性
- * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
+ * @returns {TGApp.BBS.SctPost.Base} 结构化数据
  */
-function parseAnnoNode(
-  node: Node,
-  attr?: Record<string, string>,
-): Array<TGApp.Plugins.Mys.SctPost.Base> {
-  let defaultRes: TGApp.Plugins.Mys.SctPost.Base = {
+function parseAnnoNode(node: Node, attr?: Record<string, string>): Array<TGApp.BBS.SctPost.Base> {
+  let defaultRes: TGApp.BBS.SctPost.Base = {
     insert: {
       tag: node.nodeName,
       text: node.textContent,
@@ -95,7 +90,7 @@ function parseAnnoNode(
     return [parseAnnoParagraph(element, attr)];
   }
   if (element.tagName === "OL" || element.tagName === "LI" || element.tagName === "UL") {
-    const res: Array<TGApp.Plugins.Mys.SctPost.Base> = [];
+    const res: Array<TGApp.BBS.SctPost.Base> = [];
     Array.from(element.children).forEach((child) => res.push(...parseAnnoNode(child, attr)));
     for (const comp of res) {
       if (comp.children) {
@@ -112,7 +107,7 @@ function parseAnnoNode(
   if (element.tagName === "TABLE") return [parseAnnoTable(element)];
   if (element.tagName === "DIV") {
     if (element.childNodes.length > 1) {
-      const res: Array<TGApp.Plugins.Mys.SctPost.Base> = [];
+      const res: Array<TGApp.BBS.SctPost.Base> = [];
       element.childNodes.forEach((child) => res.push(...parseAnnoNode(child, attr)));
       return res;
     }
@@ -128,12 +123,12 @@ function parseAnnoNode(
   }
   if (element.tagName === "SPAN") return [parseAnnoSpan(element, attr)];
   if (element.tagName === "STRONG") {
-    const res: Array<TGApp.Plugins.Mys.SctPost.Base> = [];
+    const res: Array<TGApp.BBS.SctPost.Base> = [];
     element.childNodes.forEach((child) => res.push(...parseAnnoNode(child, { bold: "true" })));
     return res;
   }
   if (element.tagName === "T") {
-    const res: Array<TGApp.Plugins.Mys.SctPost.Base> = [];
+    const res: Array<TGApp.BBS.SctPost.Base> = [];
     element.childNodes.forEach((child) => res.push(...parseAnnoNode(child, attr)));
     return res;
   }
@@ -145,12 +140,9 @@ function parseAnnoNode(
  * @since Beta v0.7.0
  * @param {HTMLElement} p - 段落元素
  * @param {Record<string, string>} attr - 属性
- * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
+ * @returns {TGApp.BBS.SctPost.Base} 结构化数据
  */
-function parseAnnoParagraph(
-  p: HTMLElement,
-  attr?: Record<string, string>,
-): TGApp.Plugins.Mys.SctPost.Base {
+function parseAnnoParagraph(p: HTMLElement, attr?: Record<string, string>): TGApp.BBS.SctPost.Base {
   const defaultRes = {
     insert: {
       tag: p.tagName,
@@ -193,9 +185,9 @@ function parseAnnoParagraph(
     if (child.tagName === "T") return { insert: "", children: parseAnnoNode(child) };
     return defaultRes;
   }
-  const res: TGApp.Plugins.Mys.SctPost.Base = { insert: "", children: [] };
+  const res: TGApp.BBS.SctPost.Base = { insert: "", children: [] };
   p.childNodes.forEach((child) => {
-    let childRes: TGApp.Plugins.Mys.SctPost.Base;
+    let childRes: TGApp.BBS.SctPost.Base;
     if (child.nodeType === Node.TEXT_NODE) {
       childRes = { insert: child.textContent ?? "" };
     } else if (child.nodeType === Node.ELEMENT_NODE) {
@@ -227,12 +219,9 @@ function parseAnnoParagraph(
  * @since Beta v0.7.0
  * @param {HTMLElement} span - span 元素
  * @param {Record<string, string>} attr - 属性
- * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
+ * @returns {TGApp.BBS.SctPost.Base} 结构化数据
  */
-function parseAnnoSpan(
-  span: HTMLElement,
-  attr?: Record<string, string>,
-): TGApp.Plugins.Mys.SctPost.Base {
+function parseAnnoSpan(span: HTMLElement, attr?: Record<string, string>): TGApp.BBS.SctPost.Base {
   const defaultRes = {
     insert: {
       tag: span.tagName,
@@ -281,9 +270,9 @@ function parseAnnoSpan(
  * @description 解析公告图片
  * @since Beta v0.7.0
  * @param {HTMLElement} img - 图片元素
- * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
+ * @returns {TGApp.BBS.SctPost.Base} 结构化数据
  */
-function parseAnnoImage(img: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
+function parseAnnoImage(img: HTMLElement): TGApp.BBS.SctPost.Base {
   if (img.tagName !== "IMG") {
     return {
       insert: {
@@ -304,9 +293,9 @@ function parseAnnoImage(img: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
  * @description 解析公告锚点
  * @since Beta v0.7.0
  * @param {HTMLElement} a - 锚点元素
- * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
+ * @returns {TGApp.BBS.SctPost.Base} 结构化数据
  */
-function parseAnnoAnchor(a: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
+function parseAnnoAnchor(a: HTMLElement): TGApp.BBS.SctPost.Base {
   if (a.tagName !== "A") {
     return {
       insert: {
@@ -333,9 +322,9 @@ function parseAnnoAnchor(a: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
  * @description 解析公告详情
  * @since Beta v0.7.0
  * @param {HTMLElement} details - 详情元素
- * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
+ * @returns {TGApp.BBS.SctPost.Base} 结构化数据
  */
-function parseAnnoDetails(details: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
+function parseAnnoDetails(details: HTMLElement): TGApp.BBS.SctPost.Base {
   const defaultRes = {
     insert: {
       tag: details.tagName,
@@ -368,9 +357,9 @@ function parseAnnoDetails(details: HTMLElement): TGApp.Plugins.Mys.SctPost.Base 
  * @description 解析公告表格
  * @since Beta v0.7.0
  * @param {HTMLElement} table - 表格元素
- * @returns {TGApp.Plugins.Mys.SctPost.Base} 结构化数据
+ * @returns {TGApp.BBS.SctPost.Base} 结构化数据
  */
-function parseAnnoTable(table: HTMLElement): TGApp.Plugins.Mys.SctPost.Base {
+function parseAnnoTable(table: HTMLElement): TGApp.BBS.SctPost.Base {
   const defaultRes = {
     insert: {
       tag: table.tagName,

@@ -66,8 +66,8 @@ const { theme } = storeToRefs(useAppStore());
 const { cookie } = storeToRefs(useUserStore());
 const postId = Number(useRoute().params.post_id);
 const isEmpty = ref<boolean>(false);
-const jsonData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
-const parseData = shallowRef<Array<TGApp.Plugins.Mys.SctPost.Base>>();
+const jsonData = shallowRef<TGApp.BBS.Post.FullData>();
+const parseData = shallowRef<Array<TGApp.BBS.SctPost.Base>>();
 const jsonTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
 onMounted(async () => {

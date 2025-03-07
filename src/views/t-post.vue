@@ -121,8 +121,8 @@ const postId = Number(useRoute().params.post_id);
 const showCollection = ref<boolean>(false);
 const isLike = ref<boolean>(false);
 const shareTime = ref<number>(Math.floor(Date.now() / 1000));
-const renderPost = shallowRef<Array<TGApp.Plugins.Mys.SctPost.Base>>([]);
-const postData = shallowRef<TGApp.Plugins.Mys.Post.FullData>();
+const renderPost = shallowRef<Array<TGApp.BBS.SctPost.Base>>([]);
+const postData = shallowRef<TGApp.BBS.Post.FullData>();
 
 // eslint-disable-next-line no-undef
 let shareTimer: NodeJS.Timeout | null = null;
@@ -208,8 +208,8 @@ function getRepublishAuthorization(type: number): string {
 }
 
 async function getRenderPost(
-  data: TGApp.Plugins.Mys.Post.FullData,
-): Promise<Array<TGApp.Plugins.Mys.SctPost.Base>> {
+  data: TGApp.BBS.Post.FullData,
+): Promise<Array<TGApp.BBS.SctPost.Base>> {
   const postContent = data.post.content;
   let jsonParse: string;
   if (postContent.startsWith("<")) {
@@ -228,8 +228,8 @@ async function getRenderPost(
 }
 
 async function parseContent(content: string): Promise<string> {
-  const data: TGApp.Plugins.Mys.SctPost.Other = JSON.parse(content);
-  const result: TGApp.Plugins.Mys.SctPost.Base[] = [];
+  const data: TGApp.BBS.SctPost.Other = JSON.parse(content);
+  const result: TGApp.BBS.SctPost.Base[] = [];
   for (const key of Object.keys(data)) {
     switch (key) {
       case "describe":
@@ -301,7 +301,7 @@ async function toTopic(topic: TGApp.BBS.Topic.Info): Promise<void> {
   await emit("active_deep_link", `router?path=/posts/topic/${gid}/${topic.id}`);
 }
 
-async function toForum(forum: TGApp.Plugins.Mys.Post.Forum): Promise<void> {
+async function toForum(forum: TGApp.BBS.Post.Forum): Promise<void> {
   await emit("active_deep_link", `router?path=/posts/forum/${forum.game_id}/${forum.id}`);
 }
 

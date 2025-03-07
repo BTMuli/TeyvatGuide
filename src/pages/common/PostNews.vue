@@ -72,7 +72,7 @@ import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
 import painterReq from "@/web/request/painterReq.js";
 
-type PostData = { [key in NewsType]: Ref<Array<TGApp.Plugins.Mys.Post.FullData>> };
+type PostData = { [key in NewsType]: Ref<Array<TGApp.BBS.Post.FullData>> };
 type RawItem = { isLast: boolean; name: string; lastId: number };
 type RawData = { [key in NewsType]: Ref<RawItem> };
 
@@ -88,9 +88,9 @@ const showList = ref<boolean>(false);
 const showSearch = ref<boolean>(false);
 const search = ref<string>("");
 const postData = reactive<PostData>({
-  notice: shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]),
-  activity: shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]),
-  news: shallowRef<Array<TGApp.Plugins.Mys.Post.FullData>>([]),
+  notice: shallowRef<Array<TGApp.BBS.Post.FullData>>([]),
+  activity: shallowRef<Array<TGApp.BBS.Post.FullData>>([]),
+  news: shallowRef<Array<TGApp.BBS.Post.FullData>>([]),
 });
 const rawData = reactive<RawData>({
   notice: shallowRef<RawItem>({ isLast: false, name: "公告", lastId: 0 }),

@@ -31,14 +31,14 @@ async function getEmoticonSet(): Promise<Record<string, string> | TGApp.BBS.Resp
  * @description 根据 cookie 获取用户信息
  * @since Beta v0.5.0
  * @param {TGApp.App.Account.Cookie} cookie - 账户 cookie
- * @returns {Promise<TGApp.BBS.Response.Base | TGApp.Plugins.Mys.User.Info>}
+ * @returns {Promise<TGApp.BBS.Response.Base | TGApp.BBS.User.Info>}
  */
 async function getUserFullInfo(
   cookie: TGApp.App.Account.Cookie,
-): Promise<TGApp.BBS.Response.Base | TGApp.Plugins.Mys.User.Info> {
+): Promise<TGApp.BBS.Response.Base | TGApp.BBS.User.Info> {
   const ck = { cookie_token: cookie.cookie_token, account_id: cookie.account_id };
   const params = { gids: "2" };
-  const resp = await TGHttp<TGApp.Plugins.Mys.User.HomeResponse | TGApp.BBS.Response.Base>(
+  const resp = await TGHttp<TGApp.BBS.User.InfoResp>(
     "https://bbs-api.miyoushe.com/user/wapi/getUserFullInfo",
     { method: "GET", headers: getRequestHeader(ck, "GET", params, "X4", true), query: params },
   );
@@ -51,14 +51,14 @@ async function getUserFullInfo(
  * @since Beta v0.7.1
  * @param {number} gid - gid
  * @param {string} userId - 用户 id
- * @returns {Promise<TGApp.BBS.Response.Base | TGApp.Plugins.Mys.User.Info>}
+ * @returns {Promise<TGApp.BBS.Response.Base | TGApp.BBS.User.Info>}
  */
 async function getOtherUserInfo(
   gid: number,
   userId: string,
-): Promise<TGApp.BBS.Response.Base | TGApp.Plugins.Mys.User.Info> {
+): Promise<TGApp.BBS.Response.Base | TGApp.BBS.User.Info> {
   const params = { gids: gid.toString(), uid: userId };
-  const resp = await TGHttp<TGApp.Plugins.Mys.User.HomeResponse | TGApp.BBS.Response.Base>(
+  const resp = await TGHttp<TGApp.BBS.User.InfoResp>(
     "https://bbs-api.miyoushe.com/user/wapi/getUserFullInfo",
     { method: "GET", headers: getRequestHeader({}, "GET", params, "X4", true), query: params },
   );

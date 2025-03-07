@@ -1,26 +1,24 @@
 /**
- * @file plugins/Mys/types/user.ts
- * @description Mys 插件用户类型定义文件
- * @since Beta v0.5.5
+ * @file types/BBS/User.d.ts
+ * @description 用户类型定义文件
+ * @since Beta v0.7.2
  */
 
-declare namespace TGApp.Plugins.Mys.User {
+declare namespace TGApp.BBS.User {
   /**
-   * @description 主页用户信息返回
-   * @since Alpha v0.2.1
-   * @interface HomeResponse
+   * @description 用户信息返回
+   * @since Beta v0.7.2
+   * @interface InfoResp
    * @extends TGApp.BBS.Response.BaseWithData
-   * @property {Home} data 用户信息
-   * @return HomeResponse
+   * @property {InfoRes} data 用户信息
+   * @return InfoResp
    */
-  interface HomeResponse extends TGApp.BBS.Response.BaseWithData {
-    data: Home;
-  }
+  type InfoResp = TGApp.BBS.Response.BaseWithData<InfoRes>;
 
   /**
    * @description 主页用户信息
-   * @since Alpha v0.2.1
-   * @interface Home 用户信息
+   * @since Beta v0.7.2
+   * @interface InfoRes 用户信息
    * @property {Info} user_info 用户信息
    * @property {unknown} follow_relation 关注关系
    * @property {unknown[]} auth_relations 认证关系
@@ -36,12 +34,12 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {boolean} audit_info.is_introduce_in_audit 是否在简介审核中
    * @property {string} audit_info.introduce 审核中的简介
    * @property {number} audit_info.nickname_status 昵称审核状态
-   * @return Home
+   * @return InfoRes
    */
-  interface Home {
+  type InfoRes = {
     user_info: Info;
     follow_relation: unknown;
-    auth_relations: unknown[];
+    auth_relations: Array<unknown>;
     is_in_blacklist: boolean;
     is_has_collection: boolean;
     is_creator: boolean;
@@ -56,11 +54,11 @@ declare namespace TGApp.Plugins.Mys.User {
       introduce: string;
       nickname_status: number;
     };
-  }
+  };
 
   /**
    * @description 主页用户信息-二级
-   * @since Alpha v0.2.1
+   * @since Beta v0.7.2
    * @interface Info
    * @property {string} uid 用户 ID
    * @property {string} nickname 用户昵称
@@ -79,23 +77,23 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {string} ip_region 用户 IP 地区
    * @return Info
    */
-  interface Info {
+  type Info = {
     uid: string;
     nickname: string;
     introduce: string;
     avatar: string;
     gender: number;
     certification: Certification;
-    level_exps: LevelExp[];
+    level_exps: Array<LevelExp>;
     archive: Archive;
     community_info: Community;
     avatar_url: string;
-    certifications: Certification[];
+    certifications: Array<Certification>;
     level_exp: LevelExp;
     pendant: string;
     is_logoff: boolean;
     ip_region: string;
-  }
+  };
 
   /**
    * @description 用户认证信息
@@ -105,25 +103,46 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {string} label 认证标签
    * @return Certification
    */
-  interface Certification {
-    type: number;
-    label: string;
-  }
+  type Certification = { type: number; label: string };
 
   /**
    * @description 用户等级经验
-   * @since Alpha v0.2.1
+   * @since Beta v0.7.2
    * @interface LevelExp
    * @property {number} level 用户等级
    * @property {number} exp 用户经验
    * @property {number} game_id 游戏 ID
    * @return LevelExp
    */
-  interface LevelExp {
-    level: number;
-    exp: number;
-    game_id: number;
-  }
+  type LevelExp = { level: number; exp: number; game_id?: number };
+
+  /**
+   * @description 用户操作
+   * @since Beta v0.7.2
+   * @interface SelfOperation
+   * @property {number} attitude 操作类型
+   * @property {boolean} is_collected 是否收藏
+   * @property {number} upvote_type 互动类型
+   * @returns {SelfOperation}
+   */
+  type SelfOperation = { attitude: number; is_collected: boolean; upvote_type: number };
+
+  /**
+   * @description 用户头像扩展信息
+   * @since Beta v0.7.2
+   * @interface AvatarExt
+   * @property {number} avatar_type 头像类型
+   * @property {string} avatar_assets_id 头像资源 ID
+   * @property {Array<unknown>} resources 资源
+   * @property {Array<unknown>} hd_resources 高清资源
+   * @return AvatarExt
+   */
+  type AvatarExt = {
+    avatar_type: number;
+    avatar_assets_id: string;
+    resources: Array<unknown>;
+    hd_resources: Array<unknown>;
+  };
 
   /**
    * @description 用户档案
@@ -140,7 +159,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {string} follow_collection_cnt 收藏数
    * @return Archive
    */
-  interface Archive {
+  type Archive = {
     like_num: string;
     post_num: string;
     replypost_num: string;
@@ -150,11 +169,11 @@ declare namespace TGApp.Plugins.Mys.User {
     new_follower_num: string;
     good_post_num: string;
     follow_collection_cnt: string;
-  }
+  };
 
   /**
    * @description 用户社区信息
-   * @since Alpha v0.2.1
+   * @since Beta v0.7.2
    * @interface Community
    * @property {boolean} is_realname 是否实名
    * @property {boolean} agree_status 是否同意协议
@@ -185,7 +204,7 @@ declare namespace TGApp.Plugins.Mys.User {
    * @property {number} created_at 创建时间
    * @return Community
    */
-  interface Community {
+  type Community = {
     is_realname: boolean;
     agree_status: boolean;
     silent_end_time: number;
@@ -216,131 +235,5 @@ declare namespace TGApp.Plugins.Mys.User {
     last_login_ip: string;
     last_login_time: number;
     created_at: number;
-  }
-
-  /**
-   * @description post中的用户信息
-   * @since Beta v0.3.7
-   * @interface Post
-   * @property {string} uid 用户 ID
-   * @property {string} nickname 用户昵称
-   * @property {string} introduce 用户简介
-   * @property {string} avatar 用户头像
-   * @property {number} gender 用户性别
-   * @property {Certification} certification 用户认证信息
-   * @property level_exp 用户等级经验
-   * @property {number} level_exp.level 用户等级
-   * @property {number} level_exp.exp 用户经验
-   * @property {boolean} is_following 是否关注
-   * @property {boolean} is_followed 是否被关注
-   * @property {string} avatar_url 用户头像链接
-   * @property {string} pendant 用户挂件 URL，可能为 ""
-   * @property {boolean} is_creator 是否是创作者
-   * @property {AvatarExt} avatar_ext 用户头像扩展信息
-   * @return Post
-   */
-  interface Post {
-    uid: string;
-    nickname: string;
-    introduce: string;
-    avatar: string;
-    gender: number;
-    certification: Certification;
-    level_exp: {
-      level: number;
-      exp: number;
-    };
-    is_following: boolean;
-    is_followed: boolean;
-    avatar_url: string;
-    pendant: string;
-    is_creator: boolean;
-    avatar_ext: AvatarExt;
-  }
-
-  /**
-   * @description 用户操作
-   * @since Beta v0.3.7
-   * @interface SelfOperation
-   * @property {number} attitude 操作类型
-   * @property {boolean} is_collected 是否收藏
-   * @property {number} upvote_type 互动类型
-   * @returns {SelfOperation}
-   */
-  interface SelfOperation {
-    attitude: number;
-    is_collected: boolean;
-    upvote_type: number;
-  }
-
-  /**
-   * @description 用户头像扩展信息
-   * @since Beta v0.3.7
-   * @interface AvatarExt
-   * @property {number} avatar_type 头像类型
-   * @property {string} avatar_assets_id 头像资源 ID
-   * @property {unknown[]} resources 资源
-   * @property {unknown[]} hd_resources 高清资源
-   * @return AvatarExt
-   */
-  interface AvatarExt {
-    avatar_type: number;
-    avatar_assets_id: string;
-    resources: unknown[];
-    hd_resources: unknown[];
-  }
-
-  /**
-   * @description post.challenge 用户挑战信息
-   * @since Beta v0.3.7
-   * @interface Challenge
-   * @property {string} uid 用户 ID
-   * @property {string} nickname 用户昵称
-   * @property {string} avatar_url 用户头像链接
-   * @return Challenge
-   */
-  interface Challenge {
-    uid: string;
-    nickname: string;
-    avatar_url: string;
-  }
-
-  /**
-   * @description 帖子回复中的用户信息
-   * @since Beta v0.5.5
-   * @interface Reply
-   * @property {string} uid 用户 ID
-   * @property {string} nickname 用户昵称
-   * @property {string} introduce 用户简介
-   * @property {string} avatar 用户头像
-   * @property {number} gender 用户性别
-   * @property {Certification} certification 用户认证信息
-   * @property {LevelExp} level_exp 用户等级经验
-   * @property {string} avatar_url 用户头像链接
-   * @property {string} pendant 用户挂件 URL，可能为 ""
-   * @property {string} ip_region 用户 IP 地区
-   * @property {boolean} is_following 是否关注
-   * @property {boolean} is_followed 是否被关注
-   * @property {AvatarExt} avatar_ext 用户头像扩展信息
-   * @property {boolean} is_super_fan 是否是铁粉
-   * @property {TGApp.BBS.Reply.Bubble} reply_bubble 回复气泡，可能为 null
-   * @return Reply
-   */
-  interface Reply {
-    uid: string;
-    nickname: string;
-    introduce: string;
-    avatar: string;
-    gender: number;
-    certification: Certification;
-    level_exp: LevelExp;
-    avatar_url: string;
-    pendant: string;
-    ip_region: string;
-    is_following: boolean;
-    is_followed: boolean;
-    avatar_ext: AvatarExt;
-    is_super_fan: boolean;
-    reply_bubble: TGApp.BBS.Reply.Bubble | null;
-  }
+  };
 }

@@ -54,7 +54,7 @@ import { useRouter } from "vue-router";
 import { timestampToDate } from "@/utils/toolFunc.js";
 import postReq from "@/web/request/postReq.js";
 
-type TpoCollectionProps = { collection: TGApp.Plugins.Mys.Post.Collection };
+type TpoCollectionProps = { collection: TGApp.BBS.Post.Collection };
 type TpoCollectionItem = {
   postId: string;
   title: string;

@@ -1,7 +1,7 @@
 /**
  * @file types/BBS/Lottery.d.ts
  * @description 米游社抽奖类型
- * @since Beta v0.7.1
+ * @since Beta v0.7.2
  */
 
 declare namespace TGApp.BBS.Lottery {
@@ -17,10 +17,10 @@ declare namespace TGApp.BBS.Lottery {
 
   /**
    * @description 抽奖数据
-   * @since Beta v0.7.1
+   * @since Beta v0.7.2
    * @interface FullData
    * @property {string} id 抽奖 ID
-   * @property {TGApp.Plugins.Mys.User.Post} creator 创建者
+   * @property {TGApp.BBS.Post.User} creator 创建者
    * @property {string} draw_time 抽奖时间
    * @property {string} participant_way 参与方式 // Forward: 转发
    * @property {boolean} is_expect_unfocus_user 是否限制未关注用户
@@ -38,7 +38,7 @@ declare namespace TGApp.BBS.Lottery {
    */
   type FullData = {
     id: string;
-    creator: TGApp.Plugins.Mys.User.Post;
+    creator: TGApp.BBS.Post.User;
     draw_time: string;
     participant_way: string;
     is_expect_unfocus_user: boolean;
@@ -56,13 +56,13 @@ declare namespace TGApp.BBS.Lottery {
 
   /**
    * @description 抽奖奖励
-   * @since Beta v0.7.1
+   * @since Beta v0.7.2
    * @interface Reward
    * @property {string} reward_name 奖励名称
    * @property {number} winner_number 获奖人数
    * @property {number} scheduled_winner_number 预计获奖人数
    * @property {boolean} is_send_by_post 是否通过帖子发放
-   * @property {Array<>TGApp.Plugins.Mys.User.Post>} users 用户列表
+   * @property {Array<TGApp.BBS.Post.User>} users 用户列表
    * @property {string} id 奖励 ID
    * @return Reward
    */
@@ -71,7 +71,7 @@ declare namespace TGApp.BBS.Lottery {
     winner_number: number;
     scheduled_winner_number: number;
     is_send_by_post: boolean;
-    users: Array<TGApp.Plugins.Mys.User.Post>;
+    users: Array<TGApp.BBS.Post.User>;
     id: string;
   };
 }

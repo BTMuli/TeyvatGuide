@@ -8,7 +8,7 @@ import { onMounted, toRaw } from "vue";
 
 import TGLogger from "@/utils/TGLogger.js";
 
-type TpUnknownProps = { data: TGApp.Plugins.Mys.SctPost.Empty };
+type TpUnknownProps = { data: TGApp.BBS.SctPost.Empty };
 
 const props = defineProps<TpUnknownProps>();
 

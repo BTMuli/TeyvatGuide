@@ -89,7 +89,7 @@ const lang = <AnnoLang>route.params.lang;
 const { theme } = storeToRefs(useAppStore());
 const jsonList = shallowRef<TGApp.BBS.Announcement.AnnoSingle>();
 const jsonContent = shallowRef<TGApp.BBS.Announcement.ContentItem>();
-const parsedJson = shallowRef<Array<TGApp.Plugins.Mys.SctPost.Base>>();
+const parsedJson = shallowRef<Array<TGApp.BBS.SctPost.Base>>();
 const jsonTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
 onMounted(async () => {
