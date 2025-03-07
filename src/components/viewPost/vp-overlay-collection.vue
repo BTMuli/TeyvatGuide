@@ -76,11 +76,11 @@ watch(
   async () => {
     if (visible.value && posts.value.length > 0) {
       await nextTick();
-      if (postListEl.value === null || props.collection.total < 5) return;
-      let topNum: number;
-      if (props.collection.total - props.collection.cur < 3) topNum = props.collection.total;
-      else topNum = props.collection.cur - 3;
-      postListEl.value.scrollTo({ top: topNum * 87, behavior: "smooth" });
+      if (postListEl.value === null) return;
+      const selectedEl = document.querySelector<HTMLDivElement>(".tpoc-item.selected");
+      if (selectedEl === null) return;
+      const scrollHeight = selectedEl.offsetTop - postListEl.value.offsetTop;
+      postListEl.value.scrollTo({ top: scrollHeight, behavior: "smooth" });
     }
   },
 );
