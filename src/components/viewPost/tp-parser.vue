@@ -20,6 +20,7 @@ import TpTexts from "./tp-texts.vue";
 import TpUid from "./tp-uid.vue";
 import TpUnknown from "./tp-unknown.vue";
 import TpVideo from "./tp-video.vue";
+import TpVillaCard from "./tp-villaCard.vue";
 import TpVod from "./tp-vod.vue";
 import TpVote from "./tp-vote.vue";
 
@@ -92,15 +93,16 @@ function getParsedText(data: TpTextType): Array<TpTextType> {
 function getTpName(tp: TGApp.Plugins.Mys.SctPost.Base): Component {
   if (tp.children) return TpTexts;
   if (typeof tp.insert === "string") return TpText;
-  if ("image" in tp.insert) return TpImage;
-  if ("vod" in tp.insert) return TpVod;
-  if ("video" in tp.insert) return TpVideo;
-  if ("game_user_info" in tp.insert) return TpUid;
-  if ("custom_emoticon" in tp.insert) return TpEmoticon;
   if ("backup_text" in tp.insert) return TpBackupText;
-  if ("link_card" in tp.insert) return TpLinkCard;
+  if ("custom_emoticon" in tp.insert) return TpEmoticon;
   if ("divider" in tp.insert) return TpDivider;
+  if ("game_user_info" in tp.insert) return TpUid;
+  if ("image" in tp.insert) return TpImage;
+  if ("link_card" in tp.insert) return TpLinkCard;
   if ("mention" in tp.insert) return TpMention;
+  if ("video" in tp.insert) return TpVideo;
+  if ("villa_card" in tp.insert) return TpVillaCard;
+  if ("vod" in tp.insert) return TpVod;
   if ("vote" in tp.insert) return TpVote;
   return TpUnknown;
 }
