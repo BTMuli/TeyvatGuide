@@ -21,11 +21,11 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import { getEmojis } from "@Mys/request/getEmojis.js";
 import { onMounted, ref, shallowRef, StyleValue, toRaw } from "vue";
 
 import { parseLink, parsePost } from "@/utils/linkParser.js";
 import { isColorSimilar, decodeRegExp } from "@/utils/toolFunc.js";
+import bbsReq from "@/web/request/bbsReq.js";
 
 export type TpText = {
   insert: string;
@@ -114,7 +114,7 @@ async function toLink(): Promise<void> {
 function getEmojiUrl(): string {
   if (localEmojis.value === null || !JSON.parse(localEmojis.value)[getEmojiName()]) {
     console.warn("tpEmoji unknown", getEmojiName());
-    getEmojis().then((res) => {
+    bbsReq.emojis().then((res) => {
       if ("retcode" in res) {
         console.error(res);
         showSnackbar.error("获取表情包失败！");

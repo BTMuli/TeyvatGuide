@@ -1,46 +1,34 @@
 /**
- * @file plugins/Mys/types/CaptchaLogin.d.ts
- * @description Mys 插件 Captcha 登录类型定义文件
- * @since Beta v0.5.1
+ * @file types/BBS/CaptchaLogin.d.ts
+ * @description 验证码登录类型声明
+ * @since Beta v0.7.2
  */
 
-/**
- * @description Mys 插件 Captcha 登录类型
- * @since Beta v0.5.1
- * @namespace TGApp.Plugins.Mys.CaptchaLogin
- * @memberof TGApp.Plugins.Mys
- */
-declare namespace TGApp.Plugins.Mys.CaptchaLogin {
+declare namespace TGApp.BBS.CaptchaLogin {
   /**
    * @description 获取短信验证码返回数据
-   * @since Beta v0.5.1
-   * @interface CaptchaResponse
+   * @since Beta v0.7.2
+   * @interface CaptchaResp
    * @extends TGApp.BBS.Response.BaseWithData
-   * @property {CaptchaData} data 数据
+   * @property {CaptchaRes} data 数据
    * @return GetCaptchaResponse
    */
-  interface CaptchaResponse extends TGApp.BBS.Response.BaseWithData {
-    data: CaptchaData;
-  }
+  type CaptchaResp = TGApp.BBS.Response.BaseWithData<CaptchaRes>;
 
   /**
    * @description 获取短信验证码返回数据
-   * @since Beta v0.5.1
-   * @interface CaptchaData
+   * @since Beta v0.7.2
+   * @interface CaptchaRes
    * @property {string} sent_new 是否发送新验证码
    * @property {string} countdown 倒计时
    * @property {string} action_type 操作类型
-   * @return CaptchaData
+   * @return CaptchaRes
    */
-  interface CaptchaData {
-    sent_new: string;
-    countdown: string;
-    action_type: string;
-  }
+  type CaptchaRes = { sent_new: string; countdown: string; action_type: string };
 
   /**
    * @description 触发验证的序列化数据
-   * @since Beta v0.5.1
+   * @since Beta v0.7.2
    * @interface CaptchaAigis
    * @property {string} session_id 会话 id
    * @property {number} mmt_type mmt 类型
@@ -48,28 +36,22 @@ declare namespace TGApp.Plugins.Mys.CaptchaLogin {
    * @property {string} data 数据，为上面的序列化数据
    * @return CaptchaBody
    */
-  interface CaptchaAigis {
-    session_id: string;
-    mmt_type: number;
-    data: string;
-  }
+  type CaptchaAigis = { session_id: string; mmt_type: number; data: string };
 
   /**
    * @description 短信验证码登录返回数据
-   * @since Beta v0.5.1
-   * @interface LoginResponse
+   * @since Beta v0.7.2
+   * @interface LoginResp
    * @extends TGApp.BBS.Response.BaseWithData
-   * @property {LoginData} data 数据
-   * @return LoginResponse
+   * @property {LoginRes} data 数据
+   * @return LoginResp
    */
-  interface LoginResponse extends TGApp.BBS.Response.BaseWithData {
-    data: LoginData;
-  }
+  type LoginResp = TGApp.BBS.Response.BaseWithData<LoginRes>;
 
   /**
    * @description 短信验证码登录返回数据
-   * @since Beta v0.5.1
-   * @interface LoginData
+   * @since Beta v0.7.2
+   * @interface LoginRes
    * @property {Token} token token数据
    * @property {UserInfo} user_info 用户信息
    * @property {ReactivateInfo} reactivate_info 重新激活信息
@@ -78,9 +60,9 @@ declare namespace TGApp.Plugins.Mys.CaptchaLogin {
    * @property {RealnameInfo} realname_info 实名信息
    * @property {boolean} need_realperson 是否需要实名认证
    * @property {string} oauth_hw_open_id 华为 open id
-   * @return LoginData
+   * @return LoginRes
    */
-  interface LoginData {
+  type LoginRes = {
     token: Token;
     user_info: UserInfo;
     reactivate_info: ReactivateInfo;
@@ -89,24 +71,21 @@ declare namespace TGApp.Plugins.Mys.CaptchaLogin {
     realname_info: RealnameInfo;
     need_realperson: boolean;
     oauth_hw_open_id: string;
-  }
+  };
 
   /**
    * @description token 数据
-   * @since Beta v0.5.1
+   * @since Beta v0.7.2
    * @interface Token
    * @property {number} token_type token 类型
    * @property {string} token token
    * @return Token
    */
-  interface Token {
-    token_type: number;
-    token: string;
-  }
+  type Token = { token_type: number; token: string };
 
   /**
    * @description 用户信息
-   * @since Beta v0.5.1
+   * @since Beta v0.7.2
    * @interface UserInfo
    * @property {string} aid 账号 id
    * @property {string} mid mid
@@ -128,7 +107,7 @@ declare namespace TGApp.Plugins.Mys.CaptchaLogin {
    * @property {number} unmasked_email_type 邮箱类型
    * @return UserInfo
    */
-  interface UserInfo {
+  type UserInfo = {
     aid: string;
     mid: string;
     account_name: string;
@@ -147,33 +126,26 @@ declare namespace TGApp.Plugins.Mys.CaptchaLogin {
     country: string;
     unmasked_email: string;
     unmasked_email_type: number;
-  }
+  };
 
   /**
    * @description 重新激活信息
-   * @since Beta v0.5.1
+   * @since Beta v0.7.2
    * @interface ReactivateInfo
    * @property {boolean} required 是否需要重新激活
    * @property {string} ticket 重新激活 ticket
    * @return ReactivateInfo
    */
-  interface ReactivateInfo {
-    required: boolean;
-    ticket: string;
-  }
+  type ReactivateInfo = { required: boolean; ticket: string };
 
   /**
    * @description 实名信息
-   * @since Beta v0.5.1
+   * @since Beta v0.7.2
    * @interface RealnameInfo
    * @property {boolean} required 是否需要实名认证
    * @property {string} action_type 操作类型
    * @property {string} action_ticket 操作 ticket
    * @return RealnameInfo
    */
-  interface RealnameInfo {
-    required: boolean;
-    action_type: string;
-    action_ticket: string;
-  }
+  type RealnameInfo = { required: boolean; action_type: string; action_ticket: string };
 }

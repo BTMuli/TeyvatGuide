@@ -1,7 +1,7 @@
 /**
  * @file web/request/otherReq.ts
  * @description Other API
- * @since Beta v0.6.8
+ * @since Beta v0.7.2
  */
 
 import TGBbs from "@/utils/TGBbs.js";
@@ -11,7 +11,7 @@ import { getInitDeviceInfo } from "@/utils/toolFunc.js";
 
 /**
  * @description 获取设备指纹
- * @since Beta v0.5.5
+ * @since Beta v0.7.2
  * @param {TGApp.App.Device.DeviceInfo} Info - 设备信息
  * @returns {Promise<TGApp.App.Device.DeviceInfo>} 设备指纹
  */
@@ -91,8 +91,9 @@ async function getDeviceFp(
     "x-requested-with": "com.mihoyo.hyperion",
     Referer: "https://webstatic.mihoyo.com/",
   };
+  type ResType = { device_fp: string; code: number; msg: string };
   try {
-    const resp = await TGHttp<DeviceFpResp>(
+    const resp = await TGHttp<TGApp.BBS.Response.BaseWithData<ResType>>(
       "https://public-data-api.mihoyo.com/device-fp/api/getFp",
       { method: "POST", body: JSON.stringify(data), headers: header },
     );
@@ -125,8 +126,3 @@ async function refreshCode(
 const OtherApi = { code: refreshCode, fp: getDeviceFp };
 
 export default OtherApi;
-
-/// 一些类型 ///
-type DeviceFpResp = TGApp.BBS.Response.BaseWithData & {
-  data: { device_fp: string; code: number; msg: string };
-};

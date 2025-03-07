@@ -1,7 +1,7 @@
 /**
  * @file web/request/takumiReq.ts
  * @description Takumi 相关请求函数
- * @since Beta v0.7.0
+ * @since Beta v0.7.2
  */
 import TGBbs from "@/utils/TGBbs.js";
 import TGHttp from "@/utils/TGHttp.js";
@@ -57,20 +57,20 @@ async function getSTokenByGameToken(
 
 /**
  * @description 根据stoken获取action_ticket
- * @since Beta v0.6.3
+ * @since Beta v0.7.2
  * @param {TGApp.App.Account.Cookie} cookie Cookie
  * @param {TGApp.Sqlite.Account.Game} user 用户
  * @param {string} actionType 动作类型
- * @returns {Promise<ActionTicketByStokenResp>}
+ * @returns {Promise<TGApp.BBS.Response.Base>}
  */
 async function getActionTicketBySToken(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
   actionType: string,
-): Promise<ActionTicketByStokenResp> {
+): Promise<TGApp.BBS.Response.Base> {
   const ck = { stoken: cookie.stoken, mid: cookie.mid };
   const params = { action_type: actionType, stoken: cookie.stoken, uid: user.gameUid };
-  return await TGHttp<ActionTicketByStokenResp>(`${taBu}auth/api/getActionTicketBySToken`, {
+  return await TGHttp<TGApp.BBS.Response.Base>(`${taBu}auth/api/getActionTicketBySToken`, {
     method: "GET",
     headers: getRequestHeader(ck, "GET", params, "K2"),
     query: params,
@@ -127,7 +127,7 @@ async function genAuthKey2(
 
 /**
  * @description 通过cookie获取游戏账号
- * @since Beta v0.6.5
+ * @since Beta v0.7.2
  * @param {TGApp.App.Account.Cookie} cookie cookie
  * @returns {Promise<TGApp.BBS.Account.GameAccount[]|TGApp.BBS.Response.Base>}
  */
@@ -136,58 +136,76 @@ async function getUserGameRolesByCookie(
 ): Promise<TGApp.BBS.Account.GameAccount[] | TGApp.BBS.Response.Base> {
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const params = { game_biz: "hk4e_cn" };
-  const resp = await TGHttp<GameAccountsResp>(`${taBu}binding/api/getUserGameRolesByCookie`, {
-    method: "GET",
-    headers: getRequestHeader(ck, "GET", params),
-    query: params,
-  });
+  type ResType = { list: Array<TGApp.BBS.Account.GameAccount> };
+  const resp = await TGHttp<TGApp.BBS.Response.BaseWithData<ResType>>(
+    `${taBu}binding/api/getUserGameRolesByCookie`,
+    {
+      method: "GET",
+      headers: getRequestHeader(ck, "GET", params),
+      query: params,
+    },
+  );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data.list;
+}
+
+/**
+ * @description 获取卡池信息
+ * @since Beta v0.7.2
+ * @return {Promise<Array<TGApp.BBS.Obc.GachaItem>>}
+ */
+async function getObcGachaPool(): Promise<Array<TGApp.BBS.Obc.GachaItem>> {
+  const resp = await TGHttp<TGApp.BBS.Obc.GachaResp>(
+    `${taBu}common/blackboard/ys_obc/v1/gacha_pool`,
+    {
+      method: "GET",
+      query: { app_sn: "ys_obc" },
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+  return resp.data.list;
+}
+
+/**
+ * @description 深度优先遍历
+ * @since Beta v0.7.2
+ * @param {Array<TGApp.BBS.Obc.ObcItem<TGApp.BBS.Obc.PositionItem>>} list 列表
+ * @returns {Array<TGApp.BBS.Obc.PositionItem>} 返回列表
+ */
+function DfsObc(
+  list: Array<TGApp.BBS.Obc.ObcItem<TGApp.BBS.Obc.PositionItem>>,
+): Array<TGApp.BBS.Obc.PositionItem> {
+  const res: Array<TGApp.BBS.Obc.PositionItem> = [];
+  for (const item of list) {
+    if (item.name === "近期活动") res.push(...item.list);
+    if (item.children) res.push(...DfsObc(item.children));
+  }
+  return res;
+}
+
+/**
+ * @description 获取热点追踪信息
+ * @since Beta v0.7.2
+ * @return {Promise<Array<TGApp.BBS.Obc.PositionItem>>}
+ */
+async function getObcHomePosition(): Promise<Array<TGApp.BBS.Obc.PositionItem>> {
+  const resp = await TGHttp<TGApp.BBS.Obc.PositionResp>(
+    `${taBu}common/blackboard/ys_obc/v1/home/position`,
+    {
+      method: "GET",
+      query: { app_sn: "ys_obc" },
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+  const data = resp.data.list;
+  return DfsObc(data);
 }
 
 const TakumiApi = {
   auth: { actionTicket: getActionTicketBySToken },
   bind: { authKey: genAuthKey, authKey2: genAuthKey2, gameRoles: getUserGameRolesByCookie },
   game: { stoken: getSTokenByGameToken },
+  obc: { gacha: getObcGachaPool, position: getObcHomePosition },
 };
 
 export default TakumiApi;
-
-/// 一些类型 ///
-type ActionTicketByStokenResp = TGApp.BBS.Response.BaseWithData & {
-  data: {
-    ticket: string;
-    is_verified: boolean;
-    account_info: {
-      is_realname: boolean;
-      mobile: string;
-      safe_mobile: string;
-      account_id: string;
-      account_name: string;
-      email: string;
-      is_email_verify: boolean;
-      area_code: string;
-      safe_area_code: string;
-      real_name: string;
-      identity_code: string;
-      create_time: string;
-      create_ip: string;
-      change_pwd_time: string;
-      nickname: string;
-      user_icon_id: number;
-      safe_level: number;
-      black_endtime: string;
-      black_note: string;
-      gender: number;
-      real_stat: number;
-      apple_name: string;
-      sony_name: string;
-      tap_name: string;
-      reactivate_ticket: string;
-    };
-  };
-};
-
-type GameAccountsResp = TGApp.BBS.Response.BaseWithData & {
-  data: { list: Array<TGApp.BBS.Account.GameAccount> };
-};

@@ -1,8 +1,11 @@
 /**
  * @file web/request/passportReq.ts
  * @description Passport 相关请求
- * @since Beta v0.6.8
+ * @since Beta v0.7.2
  */
+import { JSEncrypt } from "jsencrypt";
+
+import TGBbs from "@/utils/TGBbs.js";
 import TGHttp from "@/utils/TGHttp.js";
 import { getDeviceInfo } from "@/utils/toolFunc.js";
 import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
@@ -13,6 +16,26 @@ const pAbu: Readonly<string> = "https://passport-api.mihoyo.com/";
 const p4Abu: Readonly<string> = "https://passport-api-v4.mihoyo.com/";
 // HoyoLauncherVersion
 const hlv: Readonly<string> = "1.3.3.182";
+// 加密密钥
+const PUB_KEY_STR: Readonly<string> = `-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDvekdPMHN3AYhm/vktJT+YJr7cI5DcsNKqdsx5DZX0gDuWFuIjzdwButrIYPNmRJ1G8ybDIF7oDW2eEpm5sMbL9zs
+9ExXCdvqrn51qELbqj0XxtMTIpaCHFSI50PfPpTFV9Xt/hmyVwokoOXFlAEgCn+Q
+CgGs52bFoYMtyi+xEQIDAQAB
+-----END PUBLIC KEY-----`;
+const encrypt = new JSEncrypt();
+encrypt.setPublicKey(PUB_KEY_STR);
+
+/**
+ * @description rsa 加密
+ * @since Beta v0.5.1
+ * @param {string} data - 待加密数据
+ * @returns {string} 加密后数据
+ */
+function rsaEncrypt(data: string): string {
+  const res = encrypt.encrypt(data.toString());
+  if (res === false) return "";
+  return res;
+}
 
 /**
  * @description 获取登录ticket
@@ -35,12 +58,55 @@ async function createAuthTicketByGameBiz(
     "x-rpc-client_type": "3",
     "x-rpc-app_id": "ddxf5dufpuyo",
   };
-  const resp = await TGHttp<AuthTicketByGameBizResp>(
+  type ResType = { ticket: string };
+  const resp = await TGHttp<TGApp.BBS.Response.BaseWithData<ResType>>(
     `${pAbu}account/ma-cn-verifier/app/createAuthTicketByGameBiz`,
     { method: "POST", headers: headers, query: params },
   );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data.ticket;
+}
+
+/**
+ * @description 获取短信验证码
+ * @since Beta v0.7.2
+ * @param {string} phone - 手机号
+ * @param {string} [aigis] - 验证数据
+ * @returns {Promise<TGApp.BBS.CaptchaLogin.CaptchaRes | TGApp.BBS.Response.BaseWithData<string>>}
+ */
+async function createLoginCaptcha(
+  phone: string,
+  aigis?: string,
+): Promise<TGApp.BBS.CaptchaLogin.CaptchaRes | TGApp.BBS.Response.BaseWithData<string>> {
+  const body = { area_code: rsaEncrypt("+86"), mobile: rsaEncrypt(phone) };
+  const header: Record<string, string> = {
+    "x-rpc-aigis": aigis || "",
+    "x-rpc-app_version": TGBbs.version,
+    "x-rpc-client_type": "2",
+    "x-rpc-app_id": "bll8iq97cem8",
+    "x-rpc-device_fp": getDeviceInfo("device_fp"),
+    "x-rpc-device_name": getDeviceInfo("device_name"),
+    "x-rpc-device_id": getDeviceInfo("device_id"),
+    "x-rpc-device_model": getDeviceInfo("product"),
+    "user-agent": TGBbs.ua,
+    "content-type": "application/json",
+    referer: "https://user.miyoushe.com/",
+    "x-rpc-game_biz": "hk4e_cn",
+  };
+  const resp = await TGHttp<TGApp.BBS.CaptchaLogin.CaptchaResp>(
+    `${pAbu}account/ma-cn-verifier/verifier/createLoginCaptcha`,
+    { method: "POST", headers: header, body: JSON.stringify(body) },
+    true,
+  );
+  const data = await resp.data;
+  if (data.retcode !== 0) {
+    return <TGApp.BBS.Response.BaseWithData<string>>{
+      retcode: data.retcode,
+      message: data.message,
+      data: resp.resp.headers.get("x-rpc-aigis"),
+    };
+  }
+  return <TGApp.BBS.CaptchaLogin.CaptchaRes>data.data;
 }
 
 /**
@@ -78,7 +144,8 @@ async function getCookieAccountInfoBySToken(
 ): Promise<string | TGApp.BBS.Response.Base> {
   const ck = { stoken: cookie.stoken, mid: cookie.mid };
   const params = { stoken: cookie.stoken };
-  const resp = await TGHttp<GetCookieTokenBySTokenResp | TGApp.BBS.Response.Base>(
+  type ResType = { uid: string; cookie_token: string };
+  const resp = await TGHttp<TGApp.BBS.Response.BaseWithData<ResType>>(
     `${pAbu}account/auth/api/getCookieAccountInfoBySToken`,
     { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
   );
@@ -97,12 +164,53 @@ async function getLTokenBySToken(
 ): Promise<string | TGApp.BBS.Response.Base> {
   const ck = { mid: cookie.mid, stoken: cookie.stoken };
   const params = { stoken: cookie.stoken };
-  const resp = await TGHttp<GetLTokenBySTokenResp | TGApp.BBS.Response.Base>(
+  type ResType = { ltoken: string };
+  const resp = await TGHttp<TGApp.BBS.Response.BaseWithData<ResType>>(
     `${pAbu}account/auth/api/getLTokenBySToken`,
     { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
   );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data.ltoken;
+}
+
+/**
+ * @description 通过短信验证码登录
+ * @since Beta v0.5.1
+ * @param {string} phone - 手机号
+ * @param {string} captcha - 验证码
+ * @param {string} action_type - 操作类型
+ * @param {string} [aigis] - 验证数据
+ * @returns {Promise<TGApp.BBS.CaptchaLogin.LoginRes | TGApp.BBS.Response.Base>}
+ */
+async function loginByMobileCaptcha(
+  phone: string,
+  captcha: string,
+  action_type: string,
+  aigis?: string,
+): Promise<TGApp.BBS.CaptchaLogin.LoginRes | TGApp.BBS.Response.Base> {
+  const body = {
+    area_code: rsaEncrypt("+86"),
+    mobile: rsaEncrypt(phone),
+    action_type,
+    captcha,
+  };
+  const header = {
+    "x-rpc-aigis": aigis || "",
+    "x-rpc-app_version": TGBbs.version,
+    "x-rpc-client_type": "2",
+    "x-rpc-app_id": "bll8iq97cem8",
+    "x-rpc-device_fp": getDeviceInfo("device_fp"),
+    "x-rpc-device_name": getDeviceInfo("device_name"),
+    "x-rpc-device_id": getDeviceInfo("device_id"),
+    "x-rpc-device_model": getDeviceInfo("product"),
+    "user-agent": TGBbs.ua,
+  };
+  const resp = await TGHttp<TGApp.BBS.CaptchaLogin.LoginResp>(
+    `${pAbu}account/ma-cn-passport/app/loginByMobileCaptcha`,
+    { method: "POST", headers: header, body: JSON.stringify(body) },
+  );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
 }
 
 /**
@@ -142,35 +250,7 @@ async function verifyLToken(
 ): Promise<string | TGApp.BBS.Response.Base> {
   const ck = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
   const data = { ltoken: cookie.ltoken };
-  const resp = await TGHttp<VerifyLtokenResp>(`${p4Abu}account/ma-cn-session/web/verifyLtoken`, {
-    method: "POST",
-    headers: getRequestHeader(ck, "POST", data),
-    body: JSON.stringify(data),
-  });
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  return resp.data.user_info.mid;
-}
-
-const PassportApi = {
-  authTicket: createAuthTicketByGameBiz,
-  cookieToken: getCookieAccountInfoBySToken,
-  lToken: { get: getLTokenBySToken, verify: verifyLToken },
-  qrLogin: { create: createQrLogin, query: queryLoginStatus },
-};
-
-export default PassportApi;
-
-/// 一些类型 ///
-type AuthTicketByGameBizResp = TGApp.BBS.Response.BaseWithData & { data: { ticket: string } };
-
-type GetCookieTokenBySTokenResp = TGApp.BBS.Response.BaseWithData & {
-  data: { uid: string; cookie_token: string };
-};
-
-type GetLTokenBySTokenResp = TGApp.BBS.Response.BaseWithData & { data: { ltoken: string } };
-
-type VerifyLtokenResp = TGApp.BBS.Response.BaseWithData & {
-  data: {
+  type ResType = {
     realname_info: unknown;
     need_realperson: boolean;
     user_info: {
@@ -189,4 +269,24 @@ type VerifyLtokenResp = TGApp.BBS.Response.BaseWithData & {
       links: Array<unknown>;
     };
   };
+  const resp = await TGHttp<TGApp.BBS.Response.BaseWithData<ResType>>(
+    `${p4Abu}account/ma-cn-session/web/verifyLtoken`,
+    {
+      method: "POST",
+      headers: getRequestHeader(ck, "POST", data),
+      body: JSON.stringify(data),
+    },
+  );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data.user_info.mid;
+}
+
+const PassportApi = {
+  authTicket: createAuthTicketByGameBiz,
+  cookieToken: getCookieAccountInfoBySToken,
+  lToken: { get: getLTokenBySToken, verify: verifyLToken },
+  qrLogin: { create: createQrLogin, query: queryLoginStatus },
+  captcha: { create: createLoginCaptcha, login: loginByMobileCaptcha },
 };
+
+export default PassportApi;

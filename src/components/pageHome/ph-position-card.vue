@@ -40,16 +40,16 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import type { PositionItem } from "@comp/pageHome/ph-comp-position.vue";
+import type { PositionCard } from "@comp/pageHome/ph-comp-position.vue";
 
 import { parseLink } from "@/utils/linkParser.js";
 import { createPost } from "@/utils/TGWindow.js";
 import { stamp2LastTime, timestampToDate } from "@/utils/toolFunc.js";
 
-type PhPositionCardProps = { position: PositionItem };
+type PhPositionCardProps = { position: PositionCard };
 const props = defineProps<PhPositionCardProps>();
 
-async function openPosition(card: TGApp.Plugins.Mys.Position.RenderCard): Promise<void> {
+async function openPosition(card: PositionCard): Promise<void> {
   const res = await parseLink(card.link);
   if (res === "post") {
     await createPost(card.postId, card.title);

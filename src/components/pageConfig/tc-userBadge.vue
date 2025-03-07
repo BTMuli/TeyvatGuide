@@ -122,7 +122,6 @@ import showGeetest from "@comp/func/geetest.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import ToGameLogin from "@comp/pageConfig/tco-gameLogin.vue";
-import Mys from "@Mys/index.js";
 import TSUserAccount from "@Sqlite/modules/userAccount.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef } from "vue";
@@ -132,6 +131,7 @@ import { useUserStore } from "@/store/modules/user.js";
 import TGLogger from "@/utils/TGLogger.js";
 import BBSApi from "@/web/request/bbsReq.js";
 import PassportApi from "@/web/request/passportReq.js";
+import passportReq from "@/web/request/passportReq.js";
 import TakumiApi from "@/web/request/takumiReq.js";
 
 const { isLogin } = storeToRefs(useAppStore());
@@ -398,13 +398,13 @@ async function confirmCopyCookie(): Promise<void> {
 }
 
 async function tryGetCaptcha(phone: string, aigis?: string): Promise<string | false> {
-  const captchaResp = await Mys.User.getCaptcha(phone, aigis);
+  const captchaResp = await passportReq.captcha.create(phone, aigis);
   if ("retcode" in captchaResp) {
     if (!captchaResp.data || captchaResp.data === "") {
       showSnackbar.error(`[${captchaResp.retcode}] ${captchaResp.message}`);
       return false;
     }
-    const aigisResp: TGApp.Plugins.Mys.CaptchaLogin.CaptchaAigis = JSON.parse(captchaResp.data);
+    const aigisResp: TGApp.BBS.CaptchaLogin.CaptchaAigis = JSON.parse(captchaResp.data);
     const resp = await showGeetest(JSON.parse(aigisResp.data));
     const aigisStr = `${aigisResp.session_id};${btoa(JSON.stringify(resp))}`;
     return await tryGetCaptcha(phone, aigisStr);
@@ -417,14 +417,14 @@ async function tryLoginByCaptcha(
   captcha: string,
   actionType: string,
   aigis?: string,
-): Promise<TGApp.Plugins.Mys.CaptchaLogin.LoginData | false> {
-  const loginResp = await Mys.User.login(phone, captcha, actionType, aigis);
+): Promise<TGApp.BBS.CaptchaLogin.LoginRes | false> {
+  const loginResp = await passportReq.captcha.login(phone, captcha, actionType, aigis);
   if ("retcode" in loginResp) {
     if (!loginResp.data || loginResp.data === "") {
       showSnackbar.error(`[${loginResp.retcode}] ${loginResp.message}`);
       return false;
     }
-    const aigisResp: TGApp.Plugins.Mys.CaptchaLogin.CaptchaAigis = JSON.parse(loginResp.data);
+    const aigisResp: TGApp.BBS.CaptchaLogin.CaptchaAigis = JSON.parse(loginResp.data);
     const resp = await showGeetest(JSON.parse(aigisResp.data));
     const aigisStr = `${aigisResp.session_id};${btoa(JSON.stringify(resp))}`;
     return await tryLoginByCaptcha(phone, captcha, actionType, aigisStr);

@@ -6,6 +6,7 @@
       <span>{{ showNew ? "查看当前祈愿" : "查看后续祈愿" }}</span>
     </template>
     <template #default>
+      <!-- todo 组件化 -->
       <div class="pool-grid">
         <div v-for="pool in poolSelect" :key="pool.postId" class="pool-card">
           <div class="pool-cover" @click="createPost(pool.postId, pool.title)">
@@ -58,20 +59,41 @@
 import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import Mys from "@Mys/index.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import THomeCard from "./ph-comp-card.vue";
 
+import { AppCharacterData } from "@/data/index.js";
 import { useHomeStore } from "@/store/modules/home.js";
 import { createPost, createTGWindow } from "@/utils/TGWindow.js";
 import { stamp2LastTime } from "@/utils/toolFunc.js";
+import postReq from "@/web/request/postReq.js";
+import takumiReq from "@/web/request/takumiReq.js";
 
 type TPoolEmits = (e: "success") => void;
 type PoolStat = "future" | "now" | "past"; // 未开始 | 进行中 | 已结束
-type PoolItem = TGApp.Plugins.Mys.Gacha.RenderCard & { timeRest: number; stat: PoolStat };
+type AvatarRender = {
+  icon: string;
+  url: string;
+  info?: TGApp.App.Character.WikiBriefInfo;
+};
+type PoolCard = {
+  id: number;
+  title: string;
+  cover: string;
+  postId: number;
+  characters: Array<AvatarRender>;
+  time: {
+    str: string;
+    startStamp: number;
+    endStamp: number;
+    totalStamp: number;
+  };
+  timeRest: number;
+  stat: PoolStat;
+};
 
 const emits = defineEmits<TPoolEmits>();
 const { poolCover } = storeToRefs(useHomeStore());
@@ -80,42 +102,90 @@ const router = useRouter();
 let timer: NodeJS.Timeout | null = null;
 
 const showNew = ref<boolean>(false);
-const poolCards = ref<Array<PoolItem>>([]);
+const poolCards = ref<Array<PoolCard>>([]);
 const hasNew = computed<boolean>(
   () => poolCards.value.find((pool) => pool.stat === "future") !== undefined,
 );
-const poolSelect = computed<Array<PoolItem>>(() => {
+const poolSelect = computed<Array<PoolCard>>(() => {
   if (!hasNew.value) return poolCards.value;
   if (showNew.value) return poolCards.value.filter((pool) => pool.stat === "future");
   return poolCards.value.filter((pool) => pool.stat !== "future");
 });
 
 onMounted(async () => {
-  const gachaData = await Mys.Gacha.get();
-  let cards: Array<TGApp.Plugins.Mys.Gacha.RenderCard>;
-  if (!checkCover(gachaData)) {
-    cards = await Mys.Gacha.card(gachaData);
-    const coverData: Record<string, string> = {};
-    poolCards.value.map((pool) => {
-      coverData[pool.id] = pool.cover;
-      return pool;
-    });
-    poolCover.value = coverData;
+  const gachaData = await takumiReq.obc.gacha();
+  if (checkCover(gachaData)) {
+    poolCards.value = await getGachaCard(gachaData, poolCover.value);
   } else {
-    cards = await Mys.Gacha.card(gachaData, poolCover.value);
-  }
-  for (const pool of cards) {
-    const timeRest = pool.time.endStamp - Date.now();
-    poolCards.value.push({
-      ...pool,
-      stat: timeRest > pool.time.totalStamp ? "future" : timeRest > 0 ? "now" : "past",
-      timeRest: timeRest,
-    });
+    poolCards.value = await getGachaCard(gachaData);
+    const coverData: Record<string, string> = {};
+    for (const pool of poolCards.value) coverData[pool.id] = pool.cover;
+    poolCover.value = coverData;
   }
   if (timer !== null) clearInterval(timer);
   timer = setInterval(poolTimeout, 1000);
   emits("success");
 });
+
+async function getGachaItemCard(
+  data: TGApp.BBS.Obc.GachaItem,
+  poolCover?: string,
+): Promise<PoolCard | null> {
+  let cover = "/source/UI/empty.webp";
+  const postId: number | undefined = Number(data.activity_url.split("/").pop()) || undefined;
+  if (postId === undefined || isNaN(postId)) return null;
+  if (poolCover !== undefined) {
+    cover = poolCover;
+  } else {
+    const postResp = await postReq.post(postId);
+    if ("retcode" in postResp) {
+      showSnackbar.error(`[${postResp.retcode}] ${postResp.message}`);
+      return null;
+    }
+    cover = postResp.cover?.url ?? postResp.post.images[0];
+  }
+  const timeStr = `${data.start_time} ~ ${data.end_time}`;
+  const characters: Array<AvatarRender> = [];
+  for (const character of data.pool) {
+    const item: AvatarRender = { icon: character.icon, url: character.url };
+    const contentId = character.url.match(/(?<=content\/)\d+/)?.[0];
+    if (contentId) {
+      const itemF = AppCharacterData.find((item) => item.contentId.toString() === contentId);
+      if (itemF) item.info = itemF;
+    }
+    characters.push(item);
+  }
+  const endTs = new Date(data.end_time).getTime();
+  const totalTs = endTs - new Date(data.start_time).getTime();
+  const restTs = endTs - Date.now();
+  return {
+    id: data.id,
+    title: data.title,
+    cover,
+    postId,
+    characters,
+    time: {
+      str: timeStr,
+      startStamp: new Date(data.start_time).getTime(),
+      endStamp: endTs,
+      totalStamp: totalTs,
+    },
+    timeRest: restTs,
+    stat: restTs > totalTs ? "future" : restTs > 0 ? "now" : "past",
+  };
+}
+
+async function getGachaCard(
+  gachaData: Array<TGApp.BBS.Obc.GachaItem>,
+  poolCover?: Record<number, string>,
+): Promise<Array<PoolCard>> {
+  const gachaCard: Array<PoolCard> = [];
+  for (const data of gachaData) {
+    const item = await getGachaItemCard(data, poolCover?.[Number(data.id)]);
+    if (item !== null) gachaCard.push(item);
+  }
+  return gachaCard;
+}
 
 function poolTimeout(): void {
   for (const pool of poolCards.value) {
@@ -139,7 +209,7 @@ function poolTimeout(): void {
   }
 }
 
-function checkCover(data: Array<TGApp.Plugins.Mys.Gacha.Data>): boolean {
+function checkCover(data: Array<TGApp.BBS.Obc.GachaItem>): boolean {
   if (poolCover.value === undefined || Object.keys(poolCover.value).length === 0) return false;
   let checkList = data.length;
   Object.entries(poolCover.value).forEach(([key, value]: [string, unknown]) => {
@@ -149,10 +219,7 @@ function checkCover(data: Array<TGApp.Plugins.Mys.Gacha.Data>): boolean {
   return checkList === 0;
 }
 
-async function toOuter(
-  character: TGApp.Plugins.Mys.Gacha.RenderItem,
-  title: string,
-): Promise<void> {
+async function toOuter(character: AvatarRender, title: string): Promise<void> {
   if (character.info !== undefined) {
     await router.push({ name: "角色图鉴", params: { id: character.info.id } });
     return;
