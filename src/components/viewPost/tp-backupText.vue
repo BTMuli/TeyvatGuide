@@ -1,13 +1,13 @@
 <template>
-  <div
+  <span
     v-if="props.data.insert.lottery"
     @click="showLottery = !showLottery"
     class="tp-backup-lottery"
     :title="`ID: ${props.data.insert.lottery.id}`"
   >
-    <v-icon size="small">mdi-gift</v-icon>
+    <v-icon size="16">mdi-gift</v-icon>
     <span>{{ props.data.insert.lottery.toast }}</span>
-  </div>
+  </span>
   <VpOverlayLottery
     v-if="props.data.insert.lottery"
     v-model="showLottery"
@@ -47,12 +47,13 @@ console.log("tpBackupText", props.data.insert.backup_text, toRaw(props.data));
 </script>
 <style lang="css" scoped>
 .tp-backup-lottery {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  margin-right: 4px;
   color: #00c3ff;
-  column-gap: 5px;
   cursor: pointer;
+
+  :first-child {
+    margin-right: 2px;
+  }
 }
 
 .tp-backup-fold {

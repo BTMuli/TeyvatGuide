@@ -12,6 +12,7 @@
         <TMiImg :ori="true" :src="props.data.pendant" alt="pendant" />
       </div>
       <div
+        v-if="props.data.level_exp"
         :class="{
           'tpa-level-left': props.position === 'left',
           'tpa-level-right': props.position === 'right',
@@ -40,6 +41,7 @@ const authorDesc = computed<string>(() => {
 });
 
 const levelColor = computed<string>(() => {
+  if (!props.data.level_exp) return "var(--tgc-od-white)";
   const level = props.data.level_exp.level;
   if (level < 5) return "var(--tgc-od-green)";
   if (level < 9) return "var(--tgc-od-blue)";

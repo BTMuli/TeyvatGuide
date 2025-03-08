@@ -161,9 +161,7 @@ declare namespace TGApp.BBS.Post {
    * @property {string} avatar 用户头像
    * @property {number} gender 用户性别
    * @property {TGApp.BBS.User.Certification} certification 用户认证信息
-   * @property level_exp 用户等级经验
-   * @property {number} level_exp.level 用户等级
-   * @property {number} level_exp.exp 用户经验
+   * @property {TGApp.BBS.User.LevelExp|null} level_exp 用户经验
    * @property {boolean} is_following 是否关注
    * @property {boolean} is_followed 是否被关注
    * @property {string} avatar_url 用户头像链接
@@ -180,7 +178,7 @@ declare namespace TGApp.BBS.Post {
     avatar: string;
     gender: number;
     certification: TGApp.BBS.User.Certification;
-    level_exp: TGApp.BBS.User.LevelExp;
+    level_exp: TGApp.BBS.User.LevelExp | null;
     is_following: boolean;
     is_followed: boolean;
     avatar_url: string;

@@ -6,13 +6,7 @@
         <span class="tpol-time">{{ timeStatus }}</span>
       </div>
       <div class="tpol-list">
-        <v-list-item :title="card.creator.nickname" :subtitle="card.creator.introduce">
-          <template #prepend>
-            <v-avatar>
-              <v-img :src="card.creator.avatar_url" />
-            </v-avatar>
-          </template>
-        </v-list-item>
+        <TpAvatar :data="card.creator" position="left" />
         <div class="tpolr-title">参与方式：{{ upWay }}</div>
         <div class="tpolr-title">
           <span>奖品详情</span>
@@ -26,14 +20,13 @@
         <div v-for="reward in card.rewards" :key="reward.name" class="tpol-list">
           <div class="tpolr-title">{{ reward.name }} {{ reward.win }}/{{ reward.goal }}</div>
           <div class="tpol-grid">
-            <div v-for="user in reward.users" :key="user.uid" class="lottery-sub-list">
-              <div class="tpol-avatar">
-                <img :src="user.avatar_url" alt="avatar" />
-              </div>
-              <div class="tpol-nickname" :title="user.nickname">
-                {{ user.nickname }}
-              </div>
-            </div>
+            <TpAvatar
+              v-for="user in reward.users"
+              :key="user.uid"
+              :data="user"
+              position="left"
+              class="lottery-sub-list"
+            />
           </div>
         </div>
       </div>
@@ -44,6 +37,7 @@
 <script setup lang="ts">
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import { onUnmounted, ref, shallowRef, watch } from "vue";
 
 import painterReq from "@/web/request/painterReq.js";
@@ -105,6 +99,8 @@ function getUpWay(upWay: string): string {
   switch (upWay) {
     case "Forward":
       return "转发";
+    case "Reply":
+      return "回复";
     default:
       return upWay;
   }
@@ -163,11 +159,11 @@ onUnmounted(() => {
   max-width: 800px;
   max-height: 50vh;
   flex-direction: column;
-  padding: 10px;
-  border-radius: 10px;
+  padding: 8px;
+  border-radius: 8px;
   background: var(--box-bg-1);
   overflow-y: auto;
-  row-gap: 10px;
+  row-gap: 8px;
 }
 
 .tpol-title {
@@ -177,19 +173,19 @@ onUnmounted(() => {
 }
 
 .tpol-time {
-  margin-left: 10px;
+  margin-left: 8px;
   color: var(--tgc-red-1);
 }
 
 .tpol-list {
-  padding: 5px;
-  border-radius: 5px;
+  padding: 4px;
+  border-radius: 4px;
   background: var(--box-bg-2);
 }
 
 .tpolr-title {
   margin-bottom: 10px;
-  margin-left: 5px;
+  margin-left: 4px;
   font-size: 16px;
 }
 
@@ -200,41 +196,18 @@ onUnmounted(() => {
 
 .tpol-grid {
   display: grid;
-  border-radius: 10px;
-  gap: 5px;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 4px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 }
 
 .lottery-sub-list {
-  display: flex;
-  height: 40px;
-  align-items: center;
-  border-radius: 40px;
-  background: var(--box-bg-3);
-}
-
-.tpol-avatar {
-  display: inline-block;
-  overflow: hidden;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  margin: 5px;
-}
-
-.tpol-avatar img {
+  position: relative;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.tpol-nickname {
-  overflow: hidden;
-  max-width: 120px;
-  color: var(--box-text-4);
-  font-size: 14px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  height: 50px;
+  box-sizing: border-box;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 30px 4px 4px 30px;
+  background: var(--box-bg-3);
 }
 
 .tpol-id {
