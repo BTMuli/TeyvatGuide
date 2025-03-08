@@ -13,6 +13,7 @@
           <v-icon v-if="!mission.status" color="var(--tgc-od-grey)">mdi-circle</v-icon>
           <v-icon v-else color="var(--tgc-od-green)">mdi-check-circle</v-icon>
           <span>{{ mission.name }} - {{ mission.reward }}米游币</span>
+          <span v-if="mission.cycleTimes"> - Day{{ mission.cycleTimes }}</span>
         </div>
         <div class="right">
           <span>
@@ -49,6 +50,7 @@ type ParseMission = {
   total: number;
   status: boolean;
   reward: number;
+  cycleTimes?: number;
 };
 
 const { cookie } = storeToRefs(useUserStore());
@@ -76,6 +78,7 @@ function mergeMission(
         total: item.threshold,
         status: false,
         reward: item.points,
+        cycleTimes: item.continuous_cycle_times === 0 ? undefined : item.continuous_cycle_times,
       });
       continue;
     }
@@ -87,6 +90,7 @@ function mergeMission(
       process: stateFind.happened_times,
       status: stateFind.process === 1,
       reward: item.points,
+      cycleTimes: item.continuous_cycle_times === 0 ? undefined : item.continuous_cycle_times,
     });
   }
   res.sort((a, b) => a.id - b.id);

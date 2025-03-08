@@ -57,6 +57,7 @@
     <div class="us-scripts">
       <div class="us-title">脚本列表</div>
       <TusMission v-model="runScript" />
+      <!-- todo 签到 -->
     </div>
     <!-- 右侧脚本输出 -->
     <TusOutput />
