@@ -37,7 +37,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import { parseLink } from "@/utils/linkParser.js";
-import { createPost } from "@/utils/TGWindow.js";
+import { createObc, createPost } from "@/utils/TGWindow.js";
 import { stamp2LastTime, timestampToDate } from "@/utils/toolFunc.js";
 
 type PhPositionCardProps = { pos: TGApp.BBS.Obc.PositionItem };
@@ -72,9 +72,7 @@ function handlePosition(): void {
 
 async function openPosition(): Promise<void> {
   if (props.pos.url === "" && props.pos.content_id !== 0) {
-    window.open(
-      `https://bbs.mihoyo.com/ys/obc/content/${props.pos.content_id}/detail?bbs_presentation_style=no_header`,
-    );
+    await createObc(props.pos.content_id, props.pos.title);
     return;
   }
   const res = await parseLink(props.pos.url);
@@ -107,7 +105,7 @@ onUnmounted(() => {
   color: var(--box-text-1);
 }
 
-.dark .ph-pool-card {
+.dark .ph-position-card {
   border: 1px solid var(--common-shadow-1);
   box-shadow: unset;
 }

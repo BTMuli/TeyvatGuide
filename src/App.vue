@@ -18,9 +18,8 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TGSqlite from "@Sqlite/index.js";
 import TSUserAccount from "@Sqlite/modules/userAccount.js";
 import { app, core, event, webviewWindow } from "@tauri-apps/api";
-import { PhysicalSize } from "@tauri-apps/api/dpi";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
-import { currentMonitor, getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref } from "vue";
@@ -30,6 +29,7 @@ import { useAppStore } from "@/store/modules/app.js";
 import { useUserStore } from "@/store/modules/user.js";
 import { getBuildTime } from "@/utils/TGBuild.js";
 import TGLogger from "@/utils/TGLogger.js";
+import { getWindowSize, resizeWindow } from "@/utils/TGWindow.js";
 import OtherApi from "@/web/request/otherReq.js";
 
 const router = useRouter();
@@ -40,6 +40,7 @@ const vuetifyTheme = computed<string>(() => (theme.value === "dark" ? "dark" : "
 
 let themeListener: UnlistenFn | null = null;
 let urlListener: UnlistenFn | null = null;
+let resizeListener: UnlistenFn | null = null;
 
 onMounted(async () => {
   const win = getCurrentWindow();
@@ -51,42 +52,27 @@ onMounted(async () => {
     await core.invoke("init_app");
     urlListener = await getDeepLink();
   }
-  if (needResize.value !== "false") await checkResize();
+  if (needResize.value !== "false") await resizeWindow();
   document.documentElement.className = theme.value;
   themeListener = await event.listen<string>("readTheme", (e: Event<string>) => {
     theme.value = e.payload;
     document.documentElement.className = theme.value;
   });
+  resizeListener = await event.listen<string>("needResize", async (e: Event<string>) => {
+    console.log(needResize);
+    const windowCur = webviewWindow.getCurrentWebviewWindow();
+    if (e.payload !== "false") {
+      await resizeWindow();
+    } else {
+      const size = getWindowSize(windowCur.label);
+      await windowCur.setSize(new LogicalSize(size.width, size.height));
+      await windowCur.setZoom(1);
+    }
+    await windowCur.center();
+  });
   await getCurrentWindow().show();
+  await getCurrentWindow().center();
 });
-
-async function checkResize(): Promise<void> {
-  const screen = await currentMonitor();
-  if (screen === null) {
-    showSnackbar.error("获取屏幕信息失败！", 3000);
-    return;
-  }
-  const windowCur = webviewWindow.getCurrentWebviewWindow();
-  if (await windowCur.isMaximized()) return;
-  const designSize = getSize(windowCur.label);
-  const widthScale = screen.size.width / 1920;
-  const heightScale = screen.size.height / 1080;
-  await windowCur.setSize(
-    new PhysicalSize(
-      Math.round(designSize.width * widthScale),
-      Math.round(designSize.height * heightScale),
-    ),
-  );
-  await windowCur.setZoom((1 / screen.scaleFactor) * Math.min(widthScale, heightScale));
-  await windowCur.setFocus();
-  return;
-}
-
-function getSize(label: string): PhysicalSize {
-  if (label === "TeyvatGuide") return new PhysicalSize(1600, 900);
-  if (label === "Sub_window" || label === "Dev_JSON") return new PhysicalSize(960, 720);
-  return new PhysicalSize(1280, 720);
-}
 
 // 启动后只执行一次的监听
 async function listenOnInit(): Promise<void> {
@@ -260,6 +246,10 @@ onUnmounted(() => {
   if (urlListener !== null) {
     urlListener();
     urlListener = null;
+  }
+  if (resizeListener !== null) {
+    resizeListener();
+    resizeListener = null;
   }
 });
 </script>

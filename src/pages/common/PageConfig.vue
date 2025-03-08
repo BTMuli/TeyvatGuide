@@ -158,6 +158,7 @@ import TcInfo from "@comp/pageConfig/tc-info.vue";
 import TcUserBadge from "@comp/pageConfig/tc-userBadge.vue";
 import TGSqlite from "@Sqlite/index.js";
 import { core, event } from "@tauri-apps/api";
+import { emit } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
 import { remove } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
@@ -502,13 +503,11 @@ function submitDevMode(): void {
 }
 
 // 开启窗口回正
-function submitResize(): void {
-  appStore.needResize = (!isNeedResize.value).toString();
-  if (isNeedResize.value) {
-    showSnackbar.success("已关闭窗口回正!");
-    return;
-  }
-  showSnackbar.success("已开启窗口回正!");
+async function submitResize(): Promise<void> {
+  needResize.value = (!isNeedResize.value).toString();
+  if (isNeedResize.value) showSnackbar.success("已关闭窗口回正!");
+  else showSnackbar.success("已开启窗口回正!");
+  await emit("needResize", needResize.value);
 }
 
 // 开启无痕浏览
