@@ -408,18 +408,9 @@ async function confirmDelCache(): Promise<void> {
     showSnackbar.error("不支持的平台!");
     return;
   }
-  let cacheBSize: number = 0;
-  await showLoading.start("正在检测缓存");
-  for (const dir of CacheDir) {
-    const size: number = await core.invoke("get_dir_size", { path: dir });
-    cacheBSize += size;
-  }
-  await showLoading.update(`缓存大小：${bytesToSize(cacheBSize)}`);
-  cacheSize.value = cacheBSize;
-  await showLoading.end();
   const delCheck = await showDialog.check(
     "确认清除缓存吗？",
-    `当前缓存大小为 ${bytesToSize(cacheBSize)}`,
+    `当前缓存大小为 ${bytesToSize(cacheSize.value)}`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消清除缓存");

@@ -7,6 +7,7 @@
           :key="index"
           :value="value"
           @click="firstLoad(value)"
+          :disabled="loading"
         >
           {{ rawData[value].name }}
         </v-tab>
@@ -25,7 +26,12 @@
       />
     </template>
     <template #append>
-      <v-btn class="post-news-btn" @click="firstLoad(tab, true)" icon="mdi-refresh" />
+      <v-btn
+        class="post-news-btn"
+        :loading="loading"
+        @click="firstLoad(tab, true)"
+        icon="mdi-refresh"
+      />
       <v-btn class="post-news-btn" @click="showList = true" icon="mdi-view-list" />
       <v-btn
         class="post-news-btn"
@@ -105,8 +111,13 @@ const tab = computed<NewsType>({
 onMounted(async () => await firstLoad(tab.value));
 
 async function firstLoad(key: NewsType, refresh: boolean = false): Promise<void> {
+  if (loading.value) return;
+  loading.value = true;
   if (rawData[key].lastId !== 0) {
-    if (!refresh) return;
+    if (!refresh) {
+      loading.value = false;
+      return;
+    }
     postData[key] = [];
     rawData[key].lastId = 0;
   }
@@ -119,6 +130,7 @@ async function firstLoad(key: NewsType, refresh: boolean = false): Promise<void>
   await showLoading.end();
   await TGLogger.Info(`[News][${gid}][firstLoad] 获取${rawData[key].name}数据成功`);
   showSnackbar.success(`获取${gameName}${rawData[key].name}数据成功，共 ${getData.list.length} 条`);
+  loading.value = false;
 }
 
 async function switchAnno(): Promise<void> {
@@ -128,6 +140,7 @@ async function switchAnno(): Promise<void> {
 
 // 加载更多
 async function loadMore(key: NewsType): Promise<void> {
+  if (loading.value) return;
   loading.value = true;
   if (rawData[key].isLast) {
     showSnackbar.warn("已经是最后一页了");

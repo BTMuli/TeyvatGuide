@@ -101,7 +101,7 @@
         @click:append="searchPost"
         @keyup.enter="searchPost"
       />
-      <v-btn :rounded="true" class="post-forum-btn" @click="freshPostData()">
+      <v-btn :rounded="true" class="post-forum-btn" @click="freshPostData()" :loading="isReq">
         <v-icon>mdi-refresh</v-icon>
         <span>刷新</span>
       </v-btn>
