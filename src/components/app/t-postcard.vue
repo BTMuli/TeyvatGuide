@@ -222,10 +222,10 @@ async function toForum(forum: RenderForum): Promise<void> {
   align-items: center;
   justify-content: space-between;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--box-bg-1);
-  box-shadow: 2px 2px 5px var(--common-shadow-2);
-  row-gap: 10px;
+  box-shadow: 2px 2px 4px var(--common-shadow-2);
+  row-gap: 8px;
 }
 
 .tpc-top {
@@ -234,7 +234,7 @@ async function toForum(forum: RenderForum): Promise<void> {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  row-gap: 5px;
+  row-gap: 4px;
 }
 
 .tpc-cover {
@@ -267,19 +267,17 @@ async function toForum(forum: RenderForum): Promise<void> {
   display: flex;
   width: 100%;
   flex-direction: column;
-  padding: 5px 10px;
-  row-gap: 5px;
+  padding: 4px 8px;
+  row-gap: 4px;
 }
 
 .tpc-title {
-  overflow: hidden;
+  position: relative;
   width: 100%;
-  padding: 5px 10px;
+  padding: 4px 8px;
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 18px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .tpc-tags {
@@ -288,20 +286,20 @@ async function toForum(forum: RenderForum): Promise<void> {
   align-items: flex-start;
   justify-content: flex-start;
   font-size: 12px;
-  gap: 5px;
+  gap: 4px;
 }
 
 .tpc-tag {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 3px;
+  padding: 0 4px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--box-bg-2);
   color: var(--box-text-5);
   cursor: pointer;
-  gap: 3px;
+  gap: 4px;
 
   &:hover {
     color: var(--box-text-3);
@@ -312,12 +310,12 @@ async function toForum(forum: RenderForum): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 3px;
+  padding: 0 4px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--box-bg-2);
   color: var(--tgc-od-orange);
-  gap: 3px;
+  gap: 4px;
 }
 
 .tpc-forum {
@@ -327,15 +325,15 @@ async function toForum(forum: RenderForum): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 5px;
+  padding: 4px;
   background: var(--tgc-od-white);
-  border-bottom-left-radius: 5px;
-  border-top-right-radius: 5px;
+  border-bottom-left-radius: 4px;
+  border-top-right-radius: 4px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   cursor: pointer;
   opacity: 0.8;
-  text-shadow: 0 0 5px var(--tgc-dark-1);
+  text-shadow: 0 0 4px var(--tgc-dark-1);
 }
 
 .tpc-select {
@@ -372,8 +370,8 @@ async function toForum(forum: RenderForum): Promise<void> {
   height: 20px;
   align-items: center;
   justify-content: flex-end;
-  padding: 5px;
-  column-gap: 10px;
+  padding: 4px;
+  column-gap: 8px;
 }
 
 .tpc-info-item {
@@ -382,7 +380,7 @@ async function toForum(forum: RenderForum): Promise<void> {
   justify-content: flex-start;
   color: var(--box-text-7);
   font-size: 12px;
-  gap: 5px;
+  gap: 4px;
   opacity: 0.6;
 }
 
@@ -405,7 +403,7 @@ async function toForum(forum: RenderForum): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 5px 30px 5px 5px;
+  padding: 4px 30px 4px 4px;
   background-color: v-bind(cardBg);
   clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
   color: var(--tgc-white-1);
@@ -432,9 +430,9 @@ async function toForum(forum: RenderForum): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin: 5px;
+  margin: 4px;
   color: var(--tgc-white-1);
-  gap: 5px;
+  gap: 4px;
   opacity: 0.8;
 }
 
@@ -445,16 +443,16 @@ async function toForum(forum: RenderForum): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 5px;
+  padding: 0 4px;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   background: var(--tgc-od-orange);
-  border-bottom-right-radius: 5px;
-  border-top-left-radius: 5px;
-  box-shadow: 2px 2px 5px var(--tgc-dark-1);
+  border-bottom-right-radius: 4px;
+  border-top-left-radius: 4px;
+  box-shadow: 2px 2px 4px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   font-size: 12px;
   opacity: 0.8;
-  text-shadow: 0 0 5px var(--tgc-dark-1);
+  text-shadow: 0 0 4px var(--tgc-dark-1);
 }
 </style>
