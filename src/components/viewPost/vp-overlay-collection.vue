@@ -14,7 +14,6 @@
           class="tpoc-item"
           v-for="(item, index) in postList"
           :key="index"
-          @click="toPost(item.post.post_id, index)"
           :model-value="item"
           :class="{ selected: index === props.collection.cur - 1 }"
         />
@@ -25,16 +24,12 @@
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostcard from "@comp/app/t-postcard.vue";
-import showSnackbar from "@comp/func/snackbar.js";
 import { nextTick, onMounted, shallowRef, useTemplateRef, watch } from "vue";
-import { useRouter } from "vue-router";
 
 // import bbsReq from "@/web/request/bbsReq.js";
 import postReq from "@/web/request/postReq.js";
 
 type TpoCollectionProps = { collection: TGApp.BBS.Post.Collection; gid: number };
-
-const router = useRouter();
 
 const props = defineProps<TpoCollectionProps>();
 const visible = defineModel<boolean>();
@@ -57,14 +52,6 @@ watch(
 onMounted(async () => {
   postList.value = await postReq.collection(props.collection.collection_id);
 });
-
-async function toPost(postId: string, index: number): Promise<void> {
-  if (index === props.collection.cur - 1) {
-    showSnackbar.warn("已经在当前帖子");
-    return;
-  }
-  await router.push({ name: "帖子详情", params: { post_id: postId } });
-}
 </script>
 <style lang="css" scoped>
 .tpoc-box {

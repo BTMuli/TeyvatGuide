@@ -1,7 +1,7 @@
 <template>
   <div v-if="card" :id="`post-card-${card.postId}`" class="tpc-card">
     <div class="tpc-top">
-      <div class="tpc-cover" @click="createPost(card)">
+      <div class="tpc-cover" @click="toPost()">
         <TMiImg :src="card.cover" alt="cover" :ori="true" v-if="card.cover !== ''" />
         <img src="/source/UI/defaultCover.webp" alt="cover" v-else />
         <div v-if="card.status" class="tpc-act">
@@ -75,6 +75,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import { emit } from "@tauri-apps/api/event";
 import { computed, onMounted, shallowRef, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 import { generateShareImg } from "@/utils/TGShare.js";
 import { createPost } from "@/utils/TGWindow.js";
@@ -111,6 +112,8 @@ const stats: Readonly<Array<TPostStatus>> = [
   { stat: ActStat.FINISHED, label: "已结束", color: "var(--tgc-od-white)" },
   { stat: ActStat.SELECTION, label: "评选中", color: "var(--tgc-od-orange)" },
 ];
+const route = useRoute();
+const router = useRouter();
 const props = withDefaults(defineProps<TPostCardProps>(), { selectMode: false });
 const emits = defineEmits<TPostCardEmits>();
 const card = shallowRef<RenderCard>();
@@ -126,6 +129,16 @@ watch(
   () => props.modelValue,
   async () => (card.value = getPostCard(props.modelValue)),
 );
+
+async function toPost(): Promise<void> {
+  if (!card.value) return;
+  if (route.name !== "帖子详情") await createPost(card.value);
+  if (route.params.post_id.toString() === card.value.postId.toString()) {
+    showSnackbar.warn("当前已在该帖子详情页", 3000);
+    return;
+  }
+  await router.push({ name: "帖子详情", params: { post_id: card.value.postId.toString() } });
+}
 
 function getActivityStatus(status: number): RenderStatus {
   if (status satisfies ActStat) {

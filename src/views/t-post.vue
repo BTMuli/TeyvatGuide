@@ -416,14 +416,13 @@ onUnmounted(() => {
 }
 
 .mpm-forum img {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   object-fit: cover;
 }
 
 .mpm-forum img:first-child {
-  border-radius: 5px;
-  margin-right: 5px;
+  border-radius: 4px;
 }
 
 .mpm-forum span {
@@ -467,6 +466,10 @@ onUnmounted(() => {
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 12px;
+
+  &:hover {
+    color: var(--tgc-od-green);
+  }
 }
 
 /* topic */
