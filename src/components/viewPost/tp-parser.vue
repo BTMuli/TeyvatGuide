@@ -93,10 +93,11 @@ function getParsedText(data: TpTextType): Array<TpTextType> {
 function getTpName(tp: TGApp.BBS.SctPost.Base): Component {
   if (tp.children) return TpTexts;
   if (typeof tp.insert === "string") return TpText;
+  // game_user_info属于backup_text的一种，必须放在backup_text判断的前面
+  if ("game_user_info" in tp.insert) return TpUid;
   if ("backup_text" in tp.insert) return TpBackupText;
   if ("custom_emoticon" in tp.insert) return TpEmoticon;
   if ("divider" in tp.insert) return TpDivider;
-  if ("game_user_info" in tp.insert) return TpUid;
   if ("image" in tp.insert) return TpImage;
   if ("link_card" in tp.insert) return TpLinkCard;
   if ("mention" in tp.insert) return TpMention;
