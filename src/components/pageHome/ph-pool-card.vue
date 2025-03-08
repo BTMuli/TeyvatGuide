@@ -221,7 +221,6 @@ function getBox(info: TGApp.App.Character.WikiBriefInfo): TItemBoxData {
   gap: 8px;
 
   &::-webkit-scrollbar-thumb {
-    border-radius: 8px;
     background: var(--common-shadow-t-4);
   }
 }

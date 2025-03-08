@@ -101,14 +101,6 @@ async function toPost(postId: string, index: number): Promise<void> {
   padding-right: 8px;
   overflow-y: auto;
   row-gap: 12px;
-
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    min-height: 40px;
-  }
 }
 
 .tpoc-load {
