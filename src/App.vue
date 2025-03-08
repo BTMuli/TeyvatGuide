@@ -71,7 +71,6 @@ onMounted(async () => {
     await windowCur.center();
   });
   await getCurrentWindow().show();
-  await getCurrentWindow().center();
 });
 
 // 启动后只执行一次的监听
