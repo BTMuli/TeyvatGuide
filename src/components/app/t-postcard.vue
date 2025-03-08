@@ -290,8 +290,10 @@ async function toForum(forum: RenderForum): Promise<void> {
 
 .tpc-title {
   position: relative;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   padding: 4px 8px;
+  margin-right: auto;
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 18px;
