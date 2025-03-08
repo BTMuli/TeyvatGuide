@@ -6,103 +6,56 @@
         <span>合集ID：{{ props.collection.collection_id }}</span>
       </div>
       <div class="tpoc-list" ref="postListRef">
-        <div class="tpoc-load" v-if="posts.length === 0">
+        <div class="tpoc-load" v-if="postList.length === 0">
           <v-progress-circular indeterminate color="primary" size="24" />
           <span>加载中...</span>
         </div>
-        <div
+        <TPostcard
           class="tpoc-item"
-          v-for="(item, index) in posts"
+          v-for="(item, index) in postList"
           :key="index"
-          @click="toPost(item.postId, index)"
+          @click="toPost(item.post.post_id, index)"
+          :model-value="item"
           :class="{ selected: index === props.collection.cur - 1 }"
-        >
-          <div class="tpoc-item-title" :title="item.title">{{ item.title }}</div>
-          <div class="tpoc-item-info">
-            <div class="tpoc-iii time">
-              <span title="创建时间">
-                <v-icon size="12">mdi-clock-time-four-outline</v-icon>
-                <span>{{ timestampToDate(item.created * 1000) }}</span>
-              </span>
-              <span title="最后更新时间">
-                <v-icon size="12">mdi-clock-time-four-outline</v-icon>
-                <span>{{ timestampToDate(item.updated * 1000) }}</span>
-              </span>
-            </div>
-            <div class="tpoc-iii">
-              <span title="评论数">
-                <v-icon size="12">mdi-comment</v-icon>
-                <span>{{ item.comments }}</span>
-              </span>
-              <span title="点赞数">
-                <v-icon size="12">mdi-thumb-up</v-icon>
-                <span>{{ item.likes }}</span>
-              </span>
-            </div>
-          </div>
-        </div>
+        />
       </div>
     </div>
   </TOverlay>
 </template>
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
+import TPostcard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { nextTick, onMounted, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
-import { timestampToDate } from "@/utils/toolFunc.js";
 // import bbsReq from "@/web/request/bbsReq.js";
 import postReq from "@/web/request/postReq.js";
 
 type TpoCollectionProps = { collection: TGApp.BBS.Post.Collection; gid: number };
-type TpoCollectionItem = {
-  postId: string;
-  title: string;
-  created: number;
-  updated: number;
-  comments: number;
-  likes: number;
-};
 
 const router = useRouter();
 
 const props = defineProps<TpoCollectionProps>();
 const visible = defineModel<boolean>();
-const posts = shallowRef<Array<TpoCollectionItem>>([]);
+const postList = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
 const postListEl = useTemplateRef<HTMLDivElement>("postListRef");
 
 watch(
-  () => [visible.value, posts.value],
+  () => [visible.value, postList.value],
   async () => {
-    if (visible.value && posts.value.length > 0) {
+    if (visible.value && postList.value.length > 0) {
       await nextTick();
       if (postListEl.value === null) return;
       const selectedEl = document.querySelector<HTMLDivElement>(".tpoc-item.selected");
       if (selectedEl === null) return;
-      const scrollHeight = selectedEl.offsetTop - postListEl.value.offsetTop;
-      postListEl.value.scrollTo({ top: scrollHeight, behavior: "smooth" });
+      postListEl.value.scrollTo({ top: selectedEl.offsetTop, behavior: "smooth" });
     }
   },
 );
 
 onMounted(async () => {
-  const resp = await postReq.collection(props.collection.collection_id);
-  // const resp2 = await bbsReq.collection(props.collection.collection_id, props.gid);
-  // console.log(resp2);
-  const tempArr: Array<TpoCollectionItem> = [];
-  for (const postItem of resp) {
-    const post: TpoCollectionItem = {
-      postId: postItem.post.post_id,
-      title: postItem.post.subject,
-      created: postItem.post.created_at,
-      updated: postItem.post.updated_at,
-      comments: postItem.stat === null ? 0 : postItem.stat.reply_num,
-      likes: postItem.stat === null ? 0 : postItem.stat.like_num,
-    };
-    tempArr.push(post);
-  }
-  posts.value = tempArr;
+  postList.value = await postReq.collection(props.collection.collection_id);
 });
 
 async function toPost(postId: string, index: number): Promise<void> {
@@ -139,13 +92,23 @@ async function toPost(postId: string, index: number): Promise<void> {
 }
 
 .tpoc-list {
+  position: relative;
   display: flex;
   width: 400px;
   max-height: 400px;
+  box-sizing: border-box;
   flex-direction: column;
-  padding-right: 10px;
+  padding-right: 8px;
   overflow-y: auto;
-  row-gap: 5px;
+  row-gap: 12px;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    min-height: 40px;
+  }
 }
 
 .tpoc-load {
@@ -159,64 +122,13 @@ async function toPost(postId: string, index: number): Promise<void> {
 }
 
 .tpoc-item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 10px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 5px;
-  background-color: var(--box-bg-1);
-  color: var(--box-text-1);
-  cursor: pointer;
+  height: fit-content;
+  flex-shrink: 0;
 
   &.selected {
     background-color: var(--box-bg-2);
     color: var(--box-text-2);
     cursor: default;
-  }
-}
-
-.tpoc-item-title {
-  width: 100%;
-  max-width: 100%;
-  font-family: var(--font-title);
-  font-size: 16px;
-  word-break: break-all;
-}
-
-.tpoc-item-info {
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-.tpoc-iii {
-  position: relative;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: flex-start;
-  column-gap: 5px;
-
-  span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    column-gap: 2px;
-    white-space: nowrap;
-  }
-
-  &.time span :first-child {
-    color: var(--tgc-od-green);
-  }
-
-  &:last-child {
-    justify-content: flex-end;
   }
 }
 </style>
