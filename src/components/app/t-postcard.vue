@@ -241,6 +241,10 @@ async function toForum(forum: RenderForum): Promise<void> {
   row-gap: 8px;
 }
 
+.dark .tpc-card {
+  box-shadow: unset;
+}
+
 .tpc-top {
   display: flex;
   width: 100%;
