@@ -1,37 +1,31 @@
 <template>
-  <div class="ph-pool-card">
+  <div class="ph-position-card">
     <div class="top">
       <div class="main">
-        <div class="left" @click="openPosition(props.position)">
-          <TMiImg :ori="true" :src="props.position.icon" alt="icon" />
+        <div class="left" @click="openPosition()">
+          <TMiImg :ori="true" :src="props.pos.icon" alt="icon" />
         </div>
         <div class="right">
-          <div class="title">{{ props.position.title }}</div>
-          <div class="sub">{{ props.position.abstract }}</div>
+          <div class="title">{{ props.pos.title }}</div>
+          <div class="sub">{{ props.pos.abstract }}</div>
         </div>
       </div>
-      <v-btn class="btn" @click="openPosition(props.position)">查看</v-btn>
+      <v-btn class="btn" @click="openPosition()">查看</v-btn>
     </div>
     <div class="bottom">
       <div class="period">
         <v-icon>mdi-calendar-clock</v-icon>
         <span class="time">
-          {{ timestampToDate(props.position.time.startStamp) }}
+          {{ props.pos.create_time }}
           ~
-          {{
-            props.position.time.endStamp === 0
-              ? "未知"
-              : timestampToDate(props.position.time.endStamp)
-          }}
+          {{ endTs === 0 ? "未知" : timestampToDate(endTs) }}
         </span>
       </div>
       <div class="rest">
         <v-icon>mdi-clock-outline</v-icon>
-        <span v-if="props.position.stat === 'past'">已结束</span>
-        <span v-else-if="props.position.stat === 'unknown'">未知</span>
-        <span v-else-if="props.position.stat === 'now'">
-          剩余时间：{{ stamp2LastTime(props.position.timeRest) }}
-        </span>
+        <span v-if="!hasEndTime">未知</span>
+        <span v-else-if="restTs === 0">已结束</span>
+        <span v-else-if="restTs < durationTs">剩余时间：{{ stamp2LastTime(restTs) }}</span>
         <span v-else>未开始</span>
       </div>
     </div>
@@ -40,30 +34,68 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import type { PositionCard } from "@comp/pageHome/ph-comp-position.vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import { parseLink } from "@/utils/linkParser.js";
 import { createPost } from "@/utils/TGWindow.js";
 import { stamp2LastTime, timestampToDate } from "@/utils/toolFunc.js";
 
-type PhPositionCardProps = { position: PositionCard };
-const props = defineProps<PhPositionCardProps>();
+type PhPositionCardProps = { pos: TGApp.BBS.Obc.PositionItem };
 
-async function openPosition(card: PositionCard): Promise<void> {
-  const res = await parseLink(card.link);
+// eslint-disable-next-line no-undef
+let timer: NodeJS.Timeout | null = null;
+const props = defineProps<PhPositionCardProps>();
+const endTs = ref<number>(0);
+const restTs = ref<number>(0);
+const durationTs = ref<number>(0);
+const hasEndTime = computed<boolean>(() => endTs.value !== 0);
+
+onMounted(() => {
+  endTs.value = Number(props.pos.end_time);
+  restTs.value = endTs.value === 0 ? 0 : endTs.value - Date.now();
+  if (restTs.value > 0) {
+    durationTs.value = endTs.value - new Date(props.pos.create_time).getTime();
+  }
+  if (timer !== null) clearInterval(timer);
+  timer = setInterval(handlePosition, 1000);
+});
+
+function handlePosition(): void {
+  if (restTs.value < 1) {
+    if (timer !== null) clearInterval(timer);
+    timer = null;
+    restTs.value = 0;
+    return;
+  }
+  restTs.value = endTs.value - Date.now();
+}
+
+async function openPosition(): Promise<void> {
+  if (props.pos.url === "" && props.pos.content_id !== 0) {
+    window.open(
+      `https://bbs.mihoyo.com/ys/obc/content/${props.pos.content_id}/detail?bbs_presentation_style=no_header`,
+    );
+    return;
+  }
+  const res = await parseLink(props.pos.url);
   if (res === "post") {
-    await createPost(card.postId, card.title);
+    const postId = Number(props.pos.url.split("/").pop());
+    await createPost(postId, props.pos.title);
     return;
   }
   if (res === false) {
-    showSnackbar.warn(`未知链接:${card.link}`, 3000);
+    showSnackbar.warn(`未知链接:${props.pos.url}`, 3000);
     return;
   }
-  window.open(card.link);
+  window.open(props.pos.url);
 }
+
+onUnmounted(() => {
+  if (timer !== null) clearInterval(timer);
+});
 </script>
 <style lang="css" scoped>
-.ph-pool-card {
+.ph-position-card {
   position: relative;
   display: flex;
   flex-direction: column;

@@ -153,7 +153,9 @@ async function getUserGameRolesByCookie(
  * @since Beta v0.7.2
  * @return {Promise<Array<TGApp.BBS.Obc.GachaItem>>}
  */
-async function getObcGachaPool(): Promise<Array<TGApp.BBS.Obc.GachaItem>> {
+async function getObcGachaPool(): Promise<
+  Array<TGApp.BBS.Obc.GachaItem> | TGApp.BBS.Response.Base
+> {
   const resp = await TGHttp<TGApp.BBS.Obc.GachaResp>(
     `${taBu}common/blackboard/ys_obc/v1/gacha_pool`,
     {
@@ -162,6 +164,7 @@ async function getObcGachaPool(): Promise<Array<TGApp.BBS.Obc.GachaItem>> {
       headers: { "Content-Type": "application/json" },
     },
   );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data.list;
 }
 
@@ -187,7 +190,9 @@ function DfsObc(
  * @since Beta v0.7.2
  * @return {Promise<Array<TGApp.BBS.Obc.PositionItem>>}
  */
-async function getObcHomePosition(): Promise<Array<TGApp.BBS.Obc.PositionItem>> {
+async function getObcHomePosition(): Promise<
+  Array<TGApp.BBS.Obc.PositionItem> | TGApp.BBS.Response.Base
+> {
   const resp = await TGHttp<TGApp.BBS.Obc.PositionResp>(
     `${taBu}common/blackboard/ys_obc/v1/home/position`,
     {
@@ -196,6 +201,7 @@ async function getObcHomePosition(): Promise<Array<TGApp.BBS.Obc.PositionItem>> 
       headers: { "Content-Type": "application/json" },
     },
   );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   const data = resp.data.list;
   return DfsObc(data);
 }

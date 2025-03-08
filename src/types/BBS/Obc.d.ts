@@ -112,6 +112,7 @@ declare namespace TGApp.BBS.Obc {
    * @interface PositionItem
    * @property {number} recommend_id 推荐ID
    * @property {number} content_id 内容ID
+   * @property {string} corner_mark 角标
    * @property {string} title 标题
    * @property {string} ext 扩展信息
    * @property {number} type 类型
@@ -128,6 +129,7 @@ declare namespace TGApp.BBS.Obc {
   type PositionItem = {
     recommend_id: number;
     content_id: number;
+    corner_mark: string;
     title: string;
     ext: string;
     type: number;
