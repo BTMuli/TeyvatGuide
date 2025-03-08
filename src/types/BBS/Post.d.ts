@@ -80,7 +80,7 @@ declare namespace TGApp.BBS.Post {
    * @interface FullData
    * @property {Post} post  帖子信息
    * @property {Forum|null} forum  所属版块，可能为 null
-   * @property {Array<TGApp.BBS.Topic.Info>} topics 所属话题
+   * @property {Array<Topic>} topics 所属话题
    * @property {User|null} user 发帖人，可能为 null
    * @property {TGApp.BBS.User.SelfOperation} self_operation 当前用户操作
    * @property {Stat|null} stat 帖子统计，可能为 null
@@ -107,12 +107,17 @@ declare namespace TGApp.BBS.Post {
    * @property {unknown} challenge 挑战，可能为 null
    * @property {Array<unknown>} hot_reply_list 热门回复列表
    * @property {Array<unknown>} villa_msg_image_list 未知数据列表
+   * @property {unknown} contribution_act 未知数据，可能为 null
+   * @property {boolean} is_has_vote 是否有投票
+   * @property {boolean} is_has_lottery 是否有抽奖
+   * @property {string} release_time_type 发布时间类型
+   * @property {number} future_release_time 未来发布时间
    * @return FullData
    */
   type FullData = {
     post: Post;
     forum: Forum | null;
-    topics: Array<TGApp.BBS.Topic.Info>;
+    topics: Array<Topic>;
     user: User | null;
     self_operation: TGApp.BBS.User.SelfOperation;
     stat: Stat | null;
@@ -139,6 +144,11 @@ declare namespace TGApp.BBS.Post {
     challenge: unknown | null;
     hot_reply_list: Array<unknown>;
     villa_msg_image_list: Array<unknown>;
+    contribution_act: unknown | null;
+    is_has_vote: boolean;
+    is_has_lottery: boolean;
+    release_time_type: string;
+    future_release_time: number;
   };
 
   /**
@@ -158,6 +168,7 @@ declare namespace TGApp.BBS.Post {
    * @property {boolean} is_followed 是否被关注
    * @property {string} avatar_url 用户头像链接
    * @property {string} pendant 用户挂件 URL，可能为 ""
+   * @property {Array<TGApp.BBS.User.Certification>} certifications 用户认证信息列表
    * @property {boolean} is_creator 是否是创作者
    * @property {TGApp.BBS.User.AvatarExt} avatar_ext 用户头像扩展信息
    * @return User
@@ -174,6 +185,7 @@ declare namespace TGApp.BBS.Post {
     is_followed: boolean;
     avatar_url: string;
     pendant: string;
+    certifications: Array<TGApp.BBS.User.Certification>;
     is_creator: boolean;
     avatar_ext: TGApp.BBS.User.AvatarExt;
   };
@@ -290,6 +302,31 @@ declare namespace TGApp.BBS.Post {
     icon: string;
     game_id: number;
     forum_cate: TGApp.BBS.Forum.ForumCate | null;
+  };
+
+  /**
+   * @description 话题信息
+   * @since Beta v0.7.2
+   * @interface Topic
+   * @property {number} id 话题 ID
+   * @property {string} name 话题名称
+   * @property {string} cover 话题封面图 URL
+   * @property {boolean} is_top 是否置顶
+   * @property {boolean} is_good 是否加精
+   * @property {boolean} is_interactive 是否互动
+   * @property {number} game_id 游戏 ID
+   * @property {number} content_type 内容类型
+   * @return Topic
+   */
+  type Topic = {
+    id: number;
+    name: string;
+    cover: string;
+    is_top: boolean;
+    is_good: boolean;
+    is_interactive: boolean;
+    game_id: number;
+    content_type: number;
   };
 
   /**
@@ -431,21 +468,21 @@ declare namespace TGApp.BBS.Post {
    * @returns LinkCard
    */
   type LinkCard = {
-    button_text: string;
-    card_id: string;
-    card_meta: unknown;
-    card_status: number;
-    cover: string;
-    landing_url: string;
-    landing_url_type: number;
     link_type: number;
-    market_price: string;
     origin_url: string;
-    origin_user_avatar: string;
-    origin_user_avatar_url: string;
-    origin_user_nickname: string;
-    price: string;
+    landing_url: string;
+    cover: string;
     title: string;
+    origin_user_avatar: string;
+    origin_user_nickname: string;
+    card_id: string;
+    card_status: number;
+    market_price: string;
+    price: string;
+    button_text: string;
+    landing_url_type: number;
+    card_meta: unknown;
+    origin_user_avatar_url: string;
   };
 
   /**
@@ -513,9 +550,27 @@ declare namespace TGApp.BBS.Post {
    * @description 推荐理由
    * @since Beta v0.7.2
    * @interface RecommendReason
-   * @property {Array<string>} tags 标签
+   * @property {boolean} is_following 是否关注
+   * @property {unknown|null} lottery 抽奖信息，可能为 null
+   * @property {Array<RecommendTags>} tags 标签
    * @property {boolean} is_mentor_rec_block 是否为导师推荐
    * @return RecommendReason
    */
-  type RecommendReason = { tags: Array<string>; is_mentor_rec_block: boolean };
+  type RecommendReason = {
+    is_following?: boolean;
+    lottery?: unknown | null;
+    tags: Array<RecommendTags>;
+    is_mentor_rec_block: boolean;
+  };
+
+  /**
+   * @description 推荐标签
+   * @since Beta v0.7.2
+   * @interface RecommendTags
+   * @property {string} text 标签文本
+   * @property {string} type 标签类型
+   * @property {string} deep_link 深度链接
+   * @return RecommendTags
+   */
+  type RecommendTags = { text: string; type: string; deep_link: string };
 }

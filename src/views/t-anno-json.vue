@@ -1,5 +1,6 @@
 <template>
   <TSwitchTheme />
+  <TPinWin />
   <div class="taj-page">
     <v-expansion-panels>
       <v-expansion-panel>
@@ -69,6 +70,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TPinWin from "@comp/app/t-pinWin.vue";
 import TSwitchTheme from "@comp/app/t-switchTheme.vue";
 import showLoading from "@comp/func/loading.js";
 import { storeToRefs } from "pinia";

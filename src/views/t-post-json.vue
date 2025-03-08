@@ -1,5 +1,6 @@
 <template>
   <TSwitchTheme />
+  <TPinWin />
   <div class="tpj-page">
     <v-expansion-panels>
       <v-expansion-panel>
@@ -48,6 +49,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TPinWin from "@comp/app/t-pinWin.vue";
 import TSwitchTheme from "@comp/app/t-switchTheme.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";

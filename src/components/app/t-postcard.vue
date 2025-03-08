@@ -19,6 +19,10 @@
     </div>
     <div class="tpc-bottom" v-if="card.data !== null">
       <div class="tpc-tags">
+        <div v-for="(reason, idx) in card.reasons" :key="idx" class="tpc-reason" title="推荐理由">
+          <v-icon size="10">mdi-lightbulb-on</v-icon>
+          <span>{{ reason.text }}</span>
+        </div>
         <div v-for="topic in card.topics" :key="topic.id" class="tpc-tag" @click="toTopic(topic)">
           <v-icon size="10">mdi-tag</v-icon>
           <span>{{ topic.name }}</span>
@@ -90,7 +94,8 @@ export type RenderCard = {
   forum: RenderForum | null;
   data: RenderData | null;
   status?: RenderStatus;
-  topics: Array<TGApp.BBS.Topic.Info>;
+  topics: Array<TGApp.BBS.Post.Topic>;
+  reasons: Array<TGApp.BBS.Post.RecommendTags>;
 };
 
 enum ActStat {
@@ -164,6 +169,7 @@ function getCommonCard(item: TGApp.BBS.Post.FullData): RenderCard {
     forum: forumData,
     data: statData,
     topics: item.topics,
+    reasons: item.recommend_reason?.tags ?? [],
   };
 }
 
@@ -184,6 +190,7 @@ function getPostCard(item: TGApp.BBS.Post.FullData): RenderCard {
 }
 
 async function shareCard(): Promise<void> {
+  console.log(props.modelValue);
   if (!card.value) return;
   const shareDom = document.querySelector<HTMLDivElement>(`#post-card-${card.value.postId}`);
   if (shareDom === null) {
@@ -194,7 +201,7 @@ async function shareCard(): Promise<void> {
   await generateShareImg(fileName, shareDom, 2.5);
 }
 
-async function toTopic(topic: TGApp.BBS.Topic.Info): Promise<void> {
+async function toTopic(topic: TGApp.BBS.Post.Topic): Promise<void> {
   const gid = props.modelValue.post.game_id;
   await emit("active_deep_link", `router?path=/posts/topic/${gid}/${topic.id}`);
 }
@@ -280,13 +287,8 @@ async function toForum(forum: RenderForum): Promise<void> {
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: flex-start;
-  color: var(--box-text-5);
   font-size: 12px;
   gap: 5px;
-
-  :hover {
-    color: var(--box-text-3);
-  }
 }
 
 .tpc-tag {
@@ -297,7 +299,24 @@ async function toForum(forum: RenderForum): Promise<void> {
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   background: var(--box-bg-2);
+  color: var(--box-text-5);
   cursor: pointer;
+  gap: 3px;
+
+  &:hover {
+    color: var(--box-text-3);
+  }
+}
+
+.tpc-reason {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 5px;
+  background: var(--box-bg-2);
+  color: var(--tgc-od-orange);
   gap: 3px;
 }
 

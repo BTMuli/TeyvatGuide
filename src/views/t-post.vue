@@ -60,6 +60,15 @@
         <span>{{ postData.collection.cur }}/{{ postData.collection.total }}</span>
       </div>
       <div
+        v-for="(tag, idx) in postData.recommend_reason?.tags"
+        :key="idx"
+        class="tp-post-reason"
+        title="推荐理由"
+      >
+        <v-icon size="12">mdi-lightbulb-on</v-icon>
+        <span>{{ tag.text }}</span>
+      </div>
+      <div
         v-for="topic in postData.topics"
         :key="topic.id"
         class="tp-post-topic"
@@ -296,7 +305,7 @@ async function toPost(): Promise<void> {
   await TGClient.open("web_thin", link);
 }
 
-async function toTopic(topic: TGApp.BBS.Topic.Info): Promise<void> {
+async function toTopic(topic: TGApp.BBS.Post.Topic): Promise<void> {
   const gid = postData.value?.post.game_id ?? topic.game_id;
   await emit("active_deep_link", `router?path=/posts/topic/${gid}/${topic.id}`);
 }
@@ -472,5 +481,15 @@ onUnmounted(() => {
   &:hover {
     color: var(--box-text-3);
   }
+}
+
+/* reason */
+.tp-post-reason {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tgc-od-orange);
+  font-family: var(--font-title);
+  font-size: 12px;
 }
 </style>
