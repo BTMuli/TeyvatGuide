@@ -66,7 +66,33 @@ async function getOtherUserInfo(
   return resp.data.user_info;
 }
 
+/**
+ * @description 获取合集信息
+ * @since Beta v0.7.2
+ * @todo invalid request
+ * @param {number} gid - gid
+ * @param {string} cid - 合集 id
+ * @returns {Promise<TGApp.BBS.Collection.InfoRes|TGApp.BBS.Response.Base>}
+ */
+async function getCollectionDetail(
+  cid: string,
+  gid: number,
+): Promise<TGApp.BBS.Collection.InfoRes | TGApp.BBS.Response.Base> {
+  const params = { gids: gid, id: cid };
+  const resp = await TGHttp<TGApp.BBS.Collection.InfoResp>(
+    "https://bbs-api.miyoushe.com/collection/wapi/collection/detail",
+    {
+      method: "GET",
+      headers: getRequestHeader({}, "GET", params, "X4", true),
+      query: params,
+    },
+  );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
+}
+
 const BBSApi = {
+  collection: getCollectionDetail,
   emojis: getEmoticonSet,
   userInfo: getUserFullInfo,
   otherUserInfo: getOtherUserInfo,

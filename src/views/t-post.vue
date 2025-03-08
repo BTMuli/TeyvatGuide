@@ -93,7 +93,8 @@
   <VpOverlayCollection
     v-model="showCollection"
     :collection="postData.collection"
-    v-if="postData?.collection"
+    :gid="postData.post.game_id"
+    v-if="postData?.collection && postData"
   />
 </template>
 <script lang="ts" setup>

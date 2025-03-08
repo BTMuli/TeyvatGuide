@@ -52,9 +52,10 @@ import { nextTick, onMounted, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import { timestampToDate } from "@/utils/toolFunc.js";
+// import bbsReq from "@/web/request/bbsReq.js";
 import postReq from "@/web/request/postReq.js";
 
-type TpoCollectionProps = { collection: TGApp.BBS.Post.Collection };
+type TpoCollectionProps = { collection: TGApp.BBS.Post.Collection; gid: number };
 type TpoCollectionItem = {
   postId: string;
   title: string;
@@ -86,9 +87,11 @@ watch(
 );
 
 onMounted(async () => {
-  const collectionPosts = await postReq.collection(props.collection.collection_id);
+  const resp = await postReq.collection(props.collection.collection_id);
+  // const resp2 = await bbsReq.collection(props.collection.collection_id, props.gid);
+  // console.log(resp2);
   const tempArr: Array<TpoCollectionItem> = [];
-  for (const postItem of collectionPosts) {
+  for (const postItem of resp) {
     const post: TpoCollectionItem = {
       postId: postItem.post.post_id,
       title: postItem.post.subject,
