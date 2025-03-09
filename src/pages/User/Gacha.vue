@@ -67,7 +67,7 @@ import { useUserStore } from "@/store/modules/user.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { exportUigfData, readUigfData, verifyUigfData } from "@/utils/UIGF.js";
 import Hk4eApi from "@/web/request/hk4eReq.js";
-import TakumiApi from "@/web/request/takumiReq.js";
+import takumiReq from "@/web/request/takumiReq.js";
 
 const { account, cookie } = storeToRefs(useUserStore());
 const authkey = ref<string>("");
@@ -139,7 +139,7 @@ async function confirmRefresh(force: boolean): Promise<void> {
     }
   }
   await showLoading.start(`正在刷新祈愿数据`, `UID:${account.value.gameUid},正在获取 authkey`);
-  const authkeyRes = await TakumiApi.bind.authKey(cookie.value, account.value);
+  const authkeyRes = await takumiReq.bind.authKey(cookie.value, account.value);
   if (typeof authkeyRes === "string") {
     authkey.value = authkeyRes;
     await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 成功获取 authkey`);

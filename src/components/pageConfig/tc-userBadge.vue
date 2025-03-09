@@ -132,7 +132,7 @@ import TGLogger from "@/utils/TGLogger.js";
 import BBSApi from "@/web/request/bbsReq.js";
 import PassportApi from "@/web/request/passportReq.js";
 import passportReq from "@/web/request/passportReq.js";
-import TakumiApi from "@/web/request/takumiReq.js";
+import takumiReq from "@/web/request/takumiReq.js";
 
 const { isLogin } = storeToRefs(useAppStore());
 const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
@@ -201,7 +201,7 @@ async function tryGetTokens(ck: TGApp.App.Account.Cookie): Promise<void> {
   cookie.value = ck;
   isLogin.value = true;
   await showLoading.update("正在获取游戏账号");
-  const gameRes = await TakumiApi.bind.gameRoles(cookie.value);
+  const gameRes = await takumiReq.bind.gameRoles(cookie.value);
   if (!Array.isArray(gameRes)) {
     await showLoading.end();
     showSnackbar.error(`[${gameRes.retcode}]${gameRes.message}`);
@@ -328,7 +328,7 @@ async function refreshUser(uid: string) {
   }
   await TSUserAccount.account.saveAccount(account);
   await showLoading.update("正在获取账号信息");
-  const accountRes = await TakumiApi.bind.gameRoles(ck);
+  const accountRes = await takumiReq.bind.gameRoles(ck);
   if (Array.isArray(accountRes)) {
     await showLoading.update("获取账号信息成功");
     await TGLogger.Info("[tc-userBadge][refreshUserInfo] 获取账号信息成功");
@@ -522,7 +522,7 @@ async function addByCookie(): Promise<void> {
     updated: "",
   });
   await showLoading.update("正在获取游戏账号");
-  const gameRes = await TakumiApi.bind.gameRoles(ck);
+  const gameRes = await takumiReq.bind.gameRoles(ck);
   if (!Array.isArray(gameRes)) {
     await showLoading.end();
     showSnackbar.error(`[${gameRes.retcode}]${gameRes.message}`);

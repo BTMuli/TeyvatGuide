@@ -206,11 +206,11 @@ async function getObcHomePosition(): Promise<
   return DfsObc(data);
 }
 
-const TakumiApi = {
+const takumiReq = {
   auth: { actionTicket: getActionTicketBySToken },
   bind: { authKey: genAuthKey, authKey2: genAuthKey2, gameRoles: getUserGameRolesByCookie },
   game: { stoken: getSTokenByGameToken },
   obc: { gacha: getObcGachaPool, position: getObcHomePosition },
 };
 
-export default TakumiApi;
+export default takumiReq;

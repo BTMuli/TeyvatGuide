@@ -20,7 +20,7 @@ import TGBbs from "@/utils/TGBbs.js";
 import BBSApi from "@/web/request/bbsReq.js";
 import OtherApi from "@/web/request/otherReq.js";
 import PassportApi from "@/web/request/passportReq.js";
-import TakumiApi from "@/web/request/takumiReq.js";
+import takumiReq from "@/web/request/takumiReq.js";
 import { getDS4JS } from "@/web/utils/getRequestHeader.js";
 
 // invoke 参数
@@ -509,7 +509,7 @@ class Client {
     const userStore = useUserStore();
     if (!userStore.cookie) return;
     const cookie = { mid: userStore.cookie.mid, stoken: userStore.cookie.stoken };
-    const res = await TakumiApi.bind.authKey2(cookie, arg.payload);
+    const res = await takumiReq.bind.authKey2(cookie, arg.payload);
     await this.callback(arg.callback, res.data);
   }
 
@@ -525,7 +525,7 @@ class Client {
   ): Promise<void> {
     const userStore = useUserStore();
     if (!userStore.cookie) return;
-    const ActionTicket = await TakumiApi.auth.actionTicket(
+    const ActionTicket = await takumiReq.auth.actionTicket(
       userStore.cookie,
       userStore.account,
       arg.payload.action_type,
