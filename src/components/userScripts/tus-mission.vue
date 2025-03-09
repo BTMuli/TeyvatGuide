@@ -149,6 +149,12 @@ async function tryAuto(): Promise<void> {
     return;
   }
   await refreshState(cookie.value);
+  if (parseMissions.value.length === 0 || missionList.value.length === 0) {
+    await TGLogger.ScriptSep("米游币任务", false);
+    loadScript.value = false;
+    loadMission.value = false;
+    return;
+  }
   await autoSign(cookie.value);
   const postFilter = parseMissions.value.filter((i) => i.key !== "continuous_sign");
   if (postFilter.every((i) => i.status)) {
@@ -242,7 +248,6 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
         `[米游币任务]获取任务列表失败：${listResp.retcode} ${listResp.message}`,
       );
       showSnackbar.error(`[${listResp.retcode}] ${listResp.message}`);
-      await TGLogger.ScriptSep("米游币任务", false);
       return;
     }
     missionList.value = listResp.data.missions;
@@ -255,7 +260,6 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
       `[米游币任务]获取任务状态失败：${stateResp.retcode} ${stateResp.message}`,
     );
     showSnackbar.error(`[${stateResp.retcode}] ${stateResp.message}`);
-    await TGLogger.ScriptSep("米游币任务", false);
     return;
   }
   await TGLogger.Script("[米游币任务]获取任务状态成功");
@@ -327,7 +331,7 @@ async function autoSign(ck: TGApp.App.Account.Cookie, ch?: string): Promise<void
 
 .tusm-acts {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .tusm-btn {
