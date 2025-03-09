@@ -1,7 +1,7 @@
 /**
  * @file store/modules/user.ts
  * @description 用户信息模块
- * @since Beta v0.6.8
+ * @since Beta v0.7.2
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -52,7 +52,7 @@ export const useUserStore = defineStore(
         return false;
       }
       const gameAccounts = await TSUserAccount.game.getAccount(uid.value);
-      const accountFind = gameAccounts.find((a) => a.gameUid === uidG);
+      const accountFind = gameAccounts.find((a) => a.gameUid === uidG && a.gameBiz === "hk4e_cn");
       if (!accountFind) {
         showSnackbar.warn("未找到账户绑定的游戏账户");
         return false;

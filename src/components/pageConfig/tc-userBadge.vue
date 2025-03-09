@@ -441,7 +441,8 @@ async function showAccounts(): Promise<void> {
     showSnackbar.warn("未登录!");
     return;
   }
-  gameAccounts.value = await TSUserAccount.game.getAccount(uid.value);
+  const accountsGet = await TSUserAccount.game.getAccount(uid.value);
+  gameAccounts.value = accountsGet.filter((a) => a.gameBiz === "hk4e_cn");
   if (gameAccounts.value.length === 0) {
     showSnackbar.warn("未找到账户的游戏数据，请尝试刷新!");
     return;

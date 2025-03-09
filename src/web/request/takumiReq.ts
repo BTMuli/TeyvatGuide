@@ -135,13 +135,11 @@ async function getUserGameRolesByCookie(
   cookie: TGApp.App.Account.Cookie,
 ): Promise<Array<TGApp.BBS.Game.Account> | TGApp.BBS.Response.Base> {
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
-  const params = { game_biz: "hk4e_cn" };
   const resp = await TGHttp<TGApp.BBS.Game.AccountResp>(
     `${taBu}binding/api/getUserGameRolesByCookie`,
     {
       method: "GET",
-      headers: getRequestHeader(ck, "GET", params),
-      query: params,
+      headers: getRequestHeader(ck, "GET", {}),
     },
   );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
