@@ -56,7 +56,7 @@
     <!-- 左侧脚本列表 -->
     <div class="us-scripts">
       <div class="us-title">脚本列表</div>
-      <TusMission v-model="runScript" />
+      <TusMission v-model="runScript" :account="curAccount" />
       <!-- todo 签到 -->
     </div>
     <!-- 右侧脚本输出 -->

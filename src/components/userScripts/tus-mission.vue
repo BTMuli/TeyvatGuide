@@ -33,7 +33,7 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import { storeToRefs } from "pinia";
-import { ref, shallowRef } from "vue";
+import { ref, shallowRef, watch } from "vue";
 
 import { useUserStore } from "@/store/modules/user.js";
 import TGLogger from "@/utils/TGLogger.js";
@@ -42,6 +42,7 @@ import miscReq from "@/web/request/miscReq.js";
 import painterReq from "@/web/request/painterReq.js";
 import postReq from "@/web/request/postReq.js";
 
+type TusMissionProps = { account?: TGApp.App.Account.User };
 type ParseMission = {
   id: number;
   key: string;
@@ -54,13 +55,27 @@ type ParseMission = {
 };
 
 const { cookie } = storeToRefs(useUserStore());
-const parseMissions = shallowRef<Array<ParseMission>>([]);
-const missionList = shallowRef<Array<TGApp.BBS.Mission.MissionItem>>([]);
+const props = defineProps<TusMissionProps>();
+const loadScript = defineModel<boolean>();
 const todayPoints = ref<number>(0);
 const totalPoints = ref<number>(0);
-const loadScript = defineModel<boolean>();
 const loadState = ref<boolean>(false);
 const loadMission = ref<boolean>(false);
+const parseMissions = shallowRef<Array<ParseMission>>([]);
+const missionList = shallowRef<Array<TGApp.BBS.Mission.MissionItem>>([]);
+
+watch(
+  () => props.account,
+  (val) => {
+    console.log(val);
+    todayPoints.value = 0;
+    totalPoints.value = 0;
+    loadState.value = false;
+    loadMission.value = false;
+    parseMissions.value = [];
+    missionList.value = [];
+  },
+);
 
 function mergeMission(
   list: Array<TGApp.BBS.Mission.MissionItem>,
