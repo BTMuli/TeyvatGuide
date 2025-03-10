@@ -132,7 +132,10 @@ watch(
 
 async function toPost(): Promise<void> {
   if (!card.value) return;
-  if (route.name !== "帖子详情") await createPost(card.value);
+  if (route.name !== "帖子详情") {
+    await createPost(card.value);
+    return;
+  }
   if (route.params.post_id.toString() === card.value.postId.toString()) {
     showSnackbar.warn("当前已在该帖子详情页", 3000);
     return;
