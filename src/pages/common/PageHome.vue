@@ -14,6 +14,7 @@
           <template #selection="{ item }">
             <div class="select-item main">
               <TMiImg
+                v-if="item.raw.icon"
                 :ori="true"
                 :src="item.raw.icon"
                 :alt="item.raw.title"
@@ -29,7 +30,8 @@
               class="select-item sub"
               :class="item.raw.gid === curGid ? 'selected' : ''"
             >
-              <img
+              <TMiImg
+                v-if="item.raw.icon"
                 :src="item.raw.icon"
                 :alt="item.raw.title"
                 :title="item.raw.title"
