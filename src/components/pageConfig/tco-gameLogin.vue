@@ -26,11 +26,12 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import QrcodeVue from "qrcode.vue";
-import { computed, onUnmounted, ref, watch } from "vue";
+import { onUnmounted, ref, watch } from "vue";
 
 import { generateShareImg } from "@/utils/TGShare.js";
 import hk4eReq from "@/web/request/hk4eReq.js";
 import PassportReq from "@/web/request/passportReq.js";
+import passportReq from "@/web/request/passportReq.js";
 import takumiReq from "@/web/request/takumiReq.js";
 
 type ToGameLoginEmits = (e: "success", data: TGApp.App.Account.Cookie) => void;
@@ -39,21 +40,28 @@ type ToGameLoginEmits = (e: "success", data: TGApp.App.Account.Cookie) => void;
 let cycleTimer: NodeJS.Timeout | null = null;
 
 const model = defineModel<boolean>({ default: false });
-const isLauncherCode = defineModel<boolean>("launcher", { default: false });
+const isLauncherCode = defineModel<boolean>("launcher", { default: true });
 const emits = defineEmits<ToGameLoginEmits>();
 const codeUrl = ref<string>();
-const codeTicket = computed<string>(() => {
-  if (!codeUrl.value) return "";
-  const url = new URL(codeUrl.value);
-  return url.searchParams.get("ticket") || "";
-});
+const codeTicket = ref<string>("");
 
-watch(model, async (value) => {
-  if (value) {
-    await freshQr();
-    cycleTimer = setInterval(cycleGetData, 1000);
-  }
-});
+watch(
+  () => model.value,
+  async () => {
+    if (model.value) {
+      await freshQr();
+      if (cycleTimer) {
+        clearInterval(cycleTimer);
+        cycleTimer = null;
+      }
+      if (isLauncherCode.value) cycleTimer = setInterval(cycleGetDataLauncher, 1000);
+      else cycleTimer = setInterval(cycleGetDataGame, 5000);
+    } else {
+      if (cycleTimer) clearInterval(cycleTimer);
+      cycleTimer = null;
+    }
+  },
+);
 
 async function share(): Promise<void> {
   const shareDom = document.querySelector<HTMLDivElement>(".tog-box");
@@ -65,25 +73,26 @@ async function share(): Promise<void> {
 }
 
 async function freshQr(): Promise<void> {
-  let res;
-  if (isLauncherCode.value) res = await PassportReq.qrLogin.create();
-  else res = await hk4eReq.loginQr.create();
-  console.log(res);
-  if ("retcode" in res) {
-    showSnackbar.error(`[${res.retcode}] ${res.message}`);
+  if (isLauncherCode.value) {
+    const resp = await passportReq.qrLogin.create();
+    if ("retcode" in resp) {
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      return;
+    }
+    codeUrl.value = resp.url;
+    codeTicket.value = resp.ticket;
     return;
   }
-  codeUrl.value = res.url;
+  const resp = await hk4eReq.loginQr.create();
+  if ("retcode" in resp) {
+    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+    return;
+  }
+  codeUrl.value = resp.url;
+  codeTicket.value = new URL(codeUrl.value).searchParams.get("ticket") || "";
 }
 
-async function cycleGetData() {
-  if (cycleTimer === null || codeTicket.value === "") return;
-  if (isLauncherCode.value) await cycleGetDataLauncher(cycleTimer);
-  else await cycleGetDataGame(cycleTimer);
-}
-
-// eslint-disable-next-line no-undef
-async function cycleGetDataLauncher(timer: NodeJS.Timeout): Promise<void> {
+async function cycleGetDataLauncher(): Promise<void> {
   const res = await PassportReq.qrLogin.query(codeTicket.value);
   console.log(res);
   if ("retcode" in res) {
@@ -91,7 +100,7 @@ async function cycleGetDataLauncher(timer: NodeJS.Timeout): Promise<void> {
     if (res.retcode === -106) {
       await freshQr();
     } else {
-      clearInterval(timer);
+      if (cycleTimer) clearInterval(cycleTimer);
       cycleTimer = null;
       model.value = false;
     }
@@ -99,7 +108,7 @@ async function cycleGetDataLauncher(timer: NodeJS.Timeout): Promise<void> {
   }
   if (res.status === "Created" || res.status === "Scanned") return;
   if (res.status === "Confirmed") {
-    clearInterval(timer);
+    if (cycleTimer) clearInterval(cycleTimer);
     cycleTimer = null;
     const ck: TGApp.App.Account.Cookie = {
       account_id: res.user_info.aid,
@@ -115,8 +124,7 @@ async function cycleGetDataLauncher(timer: NodeJS.Timeout): Promise<void> {
   }
 }
 
-// eslint-disable-next-line no-undef
-async function cycleGetDataGame(timer: NodeJS.Timeout): Promise<void> {
+async function cycleGetDataGame(): Promise<void> {
   const res = await hk4eReq.loginQr.state(codeTicket.value);
   console.log(res);
   if ("retcode" in res) {
@@ -124,7 +132,7 @@ async function cycleGetDataGame(timer: NodeJS.Timeout): Promise<void> {
     if (res.retcode === -106) {
       await freshQr();
     } else {
-      clearInterval(timer);
+      if (cycleTimer) clearInterval(cycleTimer);
       cycleTimer = null;
       model.value = false;
     }
@@ -132,7 +140,7 @@ async function cycleGetDataGame(timer: NodeJS.Timeout): Promise<void> {
   }
   if (res.stat === "Init" || res.stat === "Scanned") return;
   if (res.stat === "Confirmed") {
-    clearInterval(timer);
+    if (cycleTimer) clearInterval(cycleTimer);
     cycleTimer = null;
     if (res.payload.proto === "Raw") {
       showSnackbar.error(`返回数据异常：${res.payload}`);
