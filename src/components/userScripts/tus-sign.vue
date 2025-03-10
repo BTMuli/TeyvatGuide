@@ -32,7 +32,9 @@
             <TMiImg :src="item.reward.icon" alt="icon" :ori="true" />
             <span>{{ item.reward.cnt }}</span>
           </div>
-          <v-icon v-if="item.stat?.is_sign" color="green" title="已签到">mdi-check-circle</v-icon>
+          <v-icon v-if="item.stat?.is_sign" color="var(--tgc-od-green)" title="已签到">
+            mdi-checkbox-marked-circle-outline
+          </v-icon>
           <v-icon v-else color="var(--tgc-od-white)" title="未签到">mdi-circle</v-icon>
         </div>
       </div>

@@ -11,7 +11,7 @@
       <div v-for="mission in parseMissions" :key="mission.id" class="mission-item">
         <div class="left">
           <v-icon v-if="!mission.status" color="var(--tgc-od-white)">mdi-circle</v-icon>
-          <v-icon v-else color="var(--tgc-od-green)">mdi-check-circle</v-icon>
+          <v-icon v-else color="var(--tgc-od-green)">mdi-checkbox-marked-circle-outline</v-icon>
           <span>{{ mission.name }} - {{ mission.reward }}米游币</span>
           <span v-if="mission.cycleTimes"> - Day{{ mission.cycleTimes }}</span>
         </div>
