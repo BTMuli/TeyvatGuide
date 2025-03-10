@@ -50,7 +50,7 @@
       <v-select
         v-model="selectedForum"
         class="post-switch-item"
-        :items="getGameForums(curGid)"
+        :items="curForums"
         variant="outlined"
         label="版块"
         :disabled="isReq"
@@ -130,7 +130,7 @@ import TPostCard from "@comp/app/t-postcard.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import TGLogger from "@/utils/TGLogger.js";
@@ -160,6 +160,12 @@ const selectedForum = shallowRef<SortSelect>();
 const sortGameList = shallowRef<Array<SortSelectGame>>([]);
 const postRaw = shallowRef<PostRaw>({ isLast: false, lastId: "", total: 0 });
 const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
+const curGame = computed<SortSelectGame | undefined>(() => {
+  return sortGameList.value.find((item) => item.gid === curGid.value);
+});
+const curForums = computed<Array<SortSelect>>(() => {
+  return curGame.value?.forum ?? [];
+});
 
 onMounted(async () => {
   await showLoading.start("正在加载帖子数据");
@@ -169,11 +175,11 @@ onMounted(async () => {
   if (!forum) forum = route.params.forum;
   if (gid && typeof gid === "string") curGid.value = Number(gid);
   if (forum && typeof forum === "string") {
-    selectedForum.value = getForum(curGid.value, Number(forum));
+    selectedForum.value = getForum(Number(forum));
   } else {
-    selectedForum.value = getGameForums(curGid.value)[0];
+    selectedForum.value = curForums.value[0];
   }
-  const gameLabel = getGameLabel(curGid.value);
+  const gameLabel = curGame.value?.text ?? "";
   await TGLogger.Info(`[Posts][${gameLabel}][onMounted][${selectedForum.value.text}] 打开帖子列表`);
   await freshPostData();
   firstLoad.value = true;
@@ -182,11 +188,10 @@ watch(
   () => curGid.value,
   () => {
     if (!selectedForum.value) return;
-    const forums = getGameForums(curGid.value);
-    const forumFind = forums.find((item) => item.text === selectedForum.value?.text);
+    const forumFind = curForums.value.find((item) => item.text === selectedForum.value?.text);
     if (!firstLoad.value) return;
-    selectedForum.value = forumFind ?? forums[0];
-    showSnackbar.success(`已将分区切换到 ${getGameLabel(curGid.value)}`);
+    selectedForum.value = forumFind ?? curForums.value[0];
+    showSnackbar.success(`已将分区切换到 ${curGame.value?.text}`);
   },
 );
 watch(
@@ -227,22 +232,9 @@ async function loadForums(): Promise<void> {
   sortGameList.value = gameList;
 }
 
-function getGameForums(gid: number): SortSelect[] {
-  const game = sortGameList.value.find((item) => item.gid === gid);
-  if (game) return game.forum;
-  return [];
-}
-
-function getGameLabel(gid: number): string {
-  const game = sortGameList.value.find((item) => item.gid === gid);
-  if (game) return game.text;
-  return "";
-}
-
-function getForum(gid: number, forum: number): SortSelect {
-  const forums = getGameForums(gid);
-  const forumItem = forums.find((item) => item.value === forum);
-  return forumItem ? forumItem : forums[0];
+function getForum(forum: number): SortSelect {
+  const forumItem = curForums.value.find((item) => item.value === forum);
+  return forumItem ? forumItem : curForums.value[0];
 }
 
 function getSortLabel(value: number): string {
@@ -282,9 +274,9 @@ async function freshPostData(): Promise<void> {
     query: { gid: curGid.value, forum: selectedForum.value.value },
   });
   isReq.value = true;
-  await showLoading.start(`正在刷新${getGameLabel(curGid.value)}帖子`);
-  const gameLabel = getGameLabel(curGid.value);
-  const forumLabel = getForum(curGid.value, selectedForum.value.value).text;
+  const gameLabel = curGame.value?.text ?? "";
+  await showLoading.start(`正在刷新${gameLabel}帖子`);
+  const forumLabel = getForum(selectedForum.value.value).text;
   const sortLabel = getSortLabel(curSortType.value);
   await TGLogger.Info(
     `[Posts][${gameLabel}][freshPostData][${forumLabel}][${sortLabel}] 刷新帖子列表`,
@@ -314,7 +306,7 @@ async function loadMore(): Promise<void> {
   }
   if (isReq.value) return;
   isReq.value = true;
-  await showLoading.start("正在加载更多帖子数据", `游戏：${getGameLabel(curGid.value)}`);
+  await showLoading.start("正在加载更多帖子数据", `游戏：${curGame.value?.text}`);
   const postsGet = await getCurrentPosts(true, selectedForum.value.value);
   await showLoading.update(
     `版块：${selectedForum.value.text}，排序：${getSortLabel(curSortType.value)}，数量：${postsGet.list.length}`,

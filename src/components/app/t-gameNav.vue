@@ -112,52 +112,19 @@ async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
 // 处理 protocol
 async function toBBS(link: URL): Promise<void> {
   if (link.protocol == "mihoyobbs:") {
-    if (link.pathname.startsWith("//article")) {
+    if (link.hostname === "article") {
       const postId = link.pathname.split("/").pop();
       await createPost(<string>postId);
       return;
     }
-    if (link.pathname.startsWith("//forum")) {
+    if (link.hostname === "forum") {
       const forumId = link.pathname.split("/").pop();
-      const localPath = getLocalPath(forumId);
-      if (localPath === "") {
-        showSnackbar.warn(`不支持的链接：${link.href}`);
-        return;
-      }
+      const localPath = `/posts/forum/${props.modelValue}/${forumId}`;
       await emit("active_deep_link", `router?path=${localPath}`);
       return;
     }
   }
   showSnackbar.warn(`不支持的链接：${link.href}`);
-}
-
-// todo 动态获取版块列表
-function getLocalPath(forum?: string): string {
-  if (!forum) return "";
-  const forumLocalMap: Record<string, string> = {
-    "31": "/news/3", // 崩坏2 官方
-    "6": "/news/1", // 崩坏3 官方
-    "28": "/news/2", // 原神官方
-    "33": "/news/4", // 未定官方
-    "58": "/news/8", // 绝区零官方
-    "36": "/news/5", // 大别野公告
-  };
-  if (forumLocalMap[forum]) return forumLocalMap[forum];
-  const ysForums = ["26", "43", "29", "49", "50"];
-  const srForums = ["52", "61", "56", "62"];
-  const bh3Forums = ["1", "14", "4", "41"];
-  const bh2Forums = ["30", "51", "40"];
-  const wdForums = ["37", "60", "42", "38"];
-  const zzzForums = ["57", "59", "64", "65"];
-  const dbyForums = ["54", "35", "34", "39", "47", "48", "55", "36"];
-  if (ysForums.includes(forum)) return `/posts/forum/2/${forum}`;
-  if (srForums.includes(forum)) return `/posts/forum/6/${forum}`;
-  if (bh3Forums.includes(forum)) return `/posts/forum/1/${forum}`;
-  if (bh2Forums.includes(forum)) return `/posts/forum/3/${forum}`;
-  if (wdForums.includes(forum)) return `/posts/forum/4/${forum}`;
-  if (zzzForums.includes(forum)) return `/posts/forum/8/${forum}`;
-  if (dbyForums.includes(forum)) return `/posts/forum/5/${forum}`;
-  return "";
 }
 </script>
 <style lang="css" scoped>

@@ -23,8 +23,8 @@
         </template>
         <template #prepend>
           <div class="tolc-icon">
-            <TMiImg :src="item.img" v-if="item.img !== ''" alt="award" />
-            <img v-else src="/source/UI/empty.webp" alt="empty" />
+            <img v-if="item.img === ''" src="/source/UI/empty.webp" alt="empty" />
+            <TMiImg :src="item.img" v-else alt="award" />
           </div>
         </template>
         <template #append>
