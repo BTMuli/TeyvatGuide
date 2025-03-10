@@ -1,7 +1,7 @@
 /**
  * @file src/utils/linkParser.ts
  * @description 处理链接
- * @since Beta v0.6.9
+ * @since Beta v0.7.2
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -57,7 +57,7 @@ export async function parsePost(link: string): Promise<false | string> {
 
 /**
  * @function parseLink
- * @since Beta v0.6.9
+ * @since Beta v0.7.2
  * @description 处理链接
  * @param {string} link - 链接
  * @param {boolean} useInner - 是否采用内置 JSBridge 打开
@@ -144,6 +144,7 @@ export async function parseLink(
   const prefix = [
     "m.miyoushe.com",
     "act.mihoyo.com",
+    "ys.mihoyo.com",
     "mhyurl.cn",
     "webstatic.mihoyo.com",
     "webstatic.miyoushe.com",
