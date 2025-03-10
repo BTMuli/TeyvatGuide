@@ -252,11 +252,18 @@ async function tryCkVerify(): Promise<void> {
   align-items: center;
   justify-content: flex-start;
   overflow-y: auto;
-  row-gap: 4px;
+  row-gap: 8px;
+  max-height: 100%;
+  padding-right: 8px;
+  box-sizing: border-box;
 }
 
 .us-title {
-  position: relative;
+  position: sticky;
+  width: 100%;
+  background: var(--app-page-bg);
+  top: 0;
+  z-index: 2;
   margin-right: auto;
   color: var(--common-text-title);
   font-family: var(--font-title);

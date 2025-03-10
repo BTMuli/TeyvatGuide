@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/userAccounts.ts
  * @description 用户账户模块
- * @since Beta v0.6.1
+ * @since Beta v0.7.2
  */
 
 import TGSqlite from "@Sqlite/index.js";
@@ -216,15 +216,16 @@ function copyCookie(cookie: TGApp.App.Account.Cookie): string {
 
 /**
  * @description 获取指定用户账号
- * @since Beta v0.6.0
+ * @since Beta v0.7.2
  * @param {string} uid - 用户UID
  * @returns {Promise<TGApp.Sqlite.Account.Game[]>}
  */
 async function getGameAccount(uid: string): Promise<TGApp.Sqlite.Account.Game[]> {
   const db = await TGSqlite.getDB();
-  return await db.select<TGApp.Sqlite.Account.Game[]>("SELECT * FROM GameAccount WHERE uid = ?;", [
-    uid,
-  ]);
+  return await db.select<TGApp.Sqlite.Account.Game[]>(
+    "SELECT * FROM GameAccount WHERE uid = ? ORDER BY region, gameUid;",
+    [uid],
+  );
 }
 
 /**
@@ -263,7 +264,7 @@ async function getCurGameAccount(uid: string): Promise<TGApp.Sqlite.Account.Game
 
 /**
  * @description 保存游戏账户数据
- * @since Beta v0.6.0
+ * @since Beta v0.7.2
  * @param {string} uid - 米社UID
  * @param {Array<TGApp.BBS.Game.Account>} accounts - 账户数据
  * @return {Promise<void>}
@@ -273,9 +274,7 @@ async function saveGameAccount(
   accounts: Array<TGApp.BBS.Game.Account>,
 ): Promise<void> {
   const db = await TGSqlite.getDB();
-  for (const account of accounts) {
-    await db.execute(getInsertGameAccountSql(uid, account));
-  }
+  await Promise.all(accounts.map((account) => db.execute(getInsertGameAccountSql(uid, account))));
 }
 
 /**

@@ -22,11 +22,10 @@
           <span title="开放时间">{{ timestampToDate(Number(item.to_get_time) * 1000) }}</span>
         </template>
         <template #prepend>
-          <img
-            :src="item.img === '' ? '/source/UI/empty.webp' : item.img"
-            alt="icon"
-            class="tolc-icon"
-          />
+          <div class="tolc-icon">
+            <TMiImg :src="item.img" v-if="item.img !== ''" alt="award" />
+            <img v-else src="/source/UI/empty.webp" alt="empty" />
+          </div>
         </template>
         <template #append>
           <v-btn
@@ -46,6 +45,7 @@
 <script setup lang="ts">
 import showSnackbar from "@comp/func/snackbar.js";
 
+import TMiImg from "./t-mi-img.vue";
 import TOverlay from "./t-overlay.vue";
 
 import { generateShareImg } from "@/utils/TGShare.js";
@@ -105,9 +105,19 @@ async function shareImg(): Promise<void> {
 }
 
 .tolc-icon {
+  position: relative;
+  display: flex;
   width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
   margin-right: 10px;
-  aspect-ratio: 1;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .tolc-btn {

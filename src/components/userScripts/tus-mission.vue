@@ -10,7 +10,7 @@
     <div class="tusm-content">
       <div v-for="mission in parseMissions" :key="mission.id" class="mission-item">
         <div class="left">
-          <v-icon v-if="!mission.status" color="var(--tgc-od-grey)">mdi-circle</v-icon>
+          <v-icon v-if="!mission.status" color="var(--tgc-od-white)">mdi-circle</v-icon>
           <v-icon v-else color="var(--tgc-od-green)">mdi-check-circle</v-icon>
           <span>{{ mission.name }} - {{ mission.reward }}米游币</span>
           <span v-if="mission.cycleTimes"> - Day{{ mission.cycleTimes }}</span>
@@ -42,7 +42,6 @@ import miscReq from "@/web/request/miscReq.js";
 import painterReq from "@/web/request/painterReq.js";
 import postReq from "@/web/request/postReq.js";
 
-type TusMissionProps = { account?: TGApp.App.Account.User };
 type ParseMission = {
   id: number;
   key: string;
@@ -54,8 +53,7 @@ type ParseMission = {
   cycleTimes?: number;
 };
 
-const { cookie } = storeToRefs(useUserStore());
-const props = defineProps<TusMissionProps>();
+const { cookie, uid } = storeToRefs(useUserStore());
 const loadScript = defineModel<boolean>();
 const todayPoints = ref<number>(0);
 const totalPoints = ref<number>(0);
@@ -65,13 +63,10 @@ const parseMissions = shallowRef<Array<ParseMission>>([]);
 const missionList = shallowRef<Array<TGApp.BBS.Mission.MissionItem>>([]);
 
 watch(
-  () => props.account,
-  (val) => {
-    console.log(val);
+  () => uid.value,
+  () => {
     todayPoints.value = 0;
     totalPoints.value = 0;
-    loadState.value = false;
-    loadMission.value = false;
     parseMissions.value = [];
     missionList.value = [];
   },

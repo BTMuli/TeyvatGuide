@@ -4,7 +4,7 @@
       <TMiImg alt="navIcon" :src="navItem.icon" :ori="true" />
       <span>{{ navItem.name }}</span>
     </div>
-    <div v-if="props.modelValue === 2 && hasNav" class="tgn-nav">
+    <div v-if="hasNav" class="tgn-nav">
       <v-btn size="25" @click="tryGetCode" title="查看兑换码" icon="mdi-code-tags-check"></v-btn>
     </div>
     <ToLivecode v-model="showOverlay" :data="codeData" v-model:actId="actId" />
@@ -37,7 +37,6 @@ const showOverlay = ref<boolean>(false);
 const actId = ref<string>();
 
 const hasNav = computed<TGApp.BBS.Navigator.Navigator | undefined>(() => {
-  if (props.modelValue !== 2) return undefined;
   return nav.value.find((item) => item.name === "前瞻直播" || item.name === "直播兑换码");
 });
 
@@ -81,6 +80,7 @@ async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
   await TGLogger.Info(`[TGameNav][toNav] ${item.app_path}`);
   const link = new URL(item.app_path);
   const mysList = [
+    "https://ys.mihoyo.com",
     "https://act.mihoyo.com",
     "https://webstatic.mihoyo.com",
     "https://bbs.mihoyo.com",
@@ -96,7 +96,7 @@ async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
     window.open(item.app_path);
     return;
   }
-  if (item.name === "签到福利") {
+  if (item.name === "签到福利" || item.name === "每日签到") {
     await TGClient.open("web_act_thin", item.app_path);
     return;
   }
