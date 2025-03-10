@@ -56,8 +56,8 @@
     <!-- 左侧脚本列表 -->
     <div class="us-scripts">
       <div class="us-title">脚本列表</div>
-      <TusMission v-model="runScript" :account="curAccount" />
-      <!-- todo 签到 -->
+      <TusMission v-model="runScript" />
+      <TusSign v-model="runScript" />
     </div>
     <!-- 右侧脚本输出 -->
     <TusOutput />
@@ -69,6 +69,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TusMission from "@comp/userScripts/tus-mission.vue";
 import TusOutput from "@comp/userScripts/tus-output.vue";
+import TusSign from "@comp/userScripts/tus-sign.vue";
 import TSUserAccount from "@Sqlite/modules/userAccount.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef } from "vue";
