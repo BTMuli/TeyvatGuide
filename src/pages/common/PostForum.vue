@@ -51,6 +51,7 @@
         v-model="selectedForum"
         class="post-switch-item"
         :items="curForums"
+        item-title="text"
         variant="outlined"
         label="版块"
         :disabled="isReq"
@@ -69,7 +70,6 @@
         </template>
         <template #item="{ props, item }">
           <div
-            :title.attr="item.raw.text"
             v-bind="props"
             class="select-item sub"
             @click="selectedForum = item.raw"
