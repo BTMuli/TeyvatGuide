@@ -21,7 +21,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, shallowRef } from "vue";
+import { onMounted, ref, shallowRef } from "vue";
 
 import ApiHubReq from "@/web/request/apiHubReq.js";
 
@@ -32,6 +32,7 @@ type TpVoteInfo = { title: string; count: number; is_over: boolean; data: Array<
 
 const props = defineProps<TpVoteProps>();
 const votes = shallowRef<TpVoteInfo>();
+const maxCnt = ref<number>(0);
 
 onMounted(async () => {
   const vote = props.data.insert.vote;
@@ -47,10 +48,12 @@ onMounted(async () => {
       percent: ((voteResult.option_stats[index] ?? 0) / voteResult.user_cnt) * 100,
     })),
   };
+  maxCnt.value = Math.max(...votes.value.data.map((item) => item.count));
 });
 
 function getWidth(item: TpVoteData): string {
-  return `width: ${item.percent}%;`;
+  if (maxCnt.value === 0) return "width: 0%;";
+  return `width: ${(item.count / maxCnt.value) * 100}%;`;
 }
 </script>
 <style lang="css" scoped>
@@ -123,6 +126,6 @@ function getWidth(item: TpVoteData): string {
 .tp-vote-val {
   height: 100%;
   border-radius: 5px;
-  background: linear-gradient(to right, #6cf, #f09199);
+  background: linear-gradient(to right, #6cf 0, #f09199 360px);
 }
 </style>
