@@ -1,12 +1,12 @@
 /**
  * @file plugins/Sqlite/sql/initData.ts
  * @description Sqlite 初始化数据 sql 语句
- * @since Beta v0.6.0
+ * @since Beta v0.7.2
  */
 
 import { app } from "@tauri-apps/api";
 
-import initTableSql from "./initTable.js";
+import createTable from "./createTable.sql?raw";
 
 import { getBuildTime } from "@/utils/TGBuild.js";
 
@@ -41,12 +41,12 @@ async function initAppData(): Promise<string[]> {
 
 /**
  * @description 初始化数据
- * @since Beta v0.4.5
+ * @since Beta v0.7.2
  * @returns {Promise<string[]>} sql
  */
 async function initDataSql(): Promise<string[]> {
   const sqlRes: string[] = [];
-  sqlRes.push(...initTableSql());
+  sqlRes.push(createTable);
   sqlRes.push(...(await initAppData()));
   return sqlRes;
 }
