@@ -207,7 +207,6 @@ async function tryAuto(): Promise<void> {
 
 async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
   if (uid.value === undefined) return;
-  await TGLogger.Script("[签到任务]刷新签到状态");
   if (signAccounts.value.length === 0) {
     await TGLogger.Script("[签到任务]未检测到游戏账户，正在获取");
     const gameResp = await takumiReq.bind.gameRoles(ck);
@@ -230,6 +229,7 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
   const cookie = { cookie_token: ck.cookie_token, account_id: ck.account_id };
   const dayNow = new Date().getDate();
   for (const item of signAccounts.value) {
+    if (item.reward && item.stat?.is_sign) continue;
     await TGLogger.Script(
       `[签到任务]刷新${item.info.title}-${item.account.regionName}-${item.account.gameUid}`,
     );
