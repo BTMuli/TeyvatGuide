@@ -1,6 +1,6 @@
 -- @file plugins/Sqlite/sql/createTable.sql
 -- @brief sqlite数据库创建表语句
--- @since Beta v0.6.3
+-- @since Beta v0.7.2
 
 -- @brief 创建成就数据表
 create table if not exists Achievements
@@ -31,6 +31,7 @@ create table if not exists UserAccount
     updated text
 );
 
+drop table if exists GameAccount;
 -- @brief 创建游戏账号数据表
 create table if not exists GameAccount
 (
@@ -44,7 +45,7 @@ create table if not exists GameAccount
     region     text,
     regionName text,
     updated    text,
-    primary key (uid, gameUid)
+    primary key (uid, gameBiz, gameUid)
 );
 
 -- @brief 创建深渊数据表

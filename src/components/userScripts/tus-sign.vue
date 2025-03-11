@@ -20,7 +20,17 @@
         </v-icon>
         <v-icon v-else color="var(--tgc-od-white)">mdi-checkbox-blank-outline</v-icon>
         <div class="tuss-account">
-          <img :src="item.info.icon" alt="icon" />
+          <div class="tuss-icon">
+            <img :src="item.info.icon" alt="icon" />
+            <div
+              class="delete"
+              v-if="item.account.gameBiz !== 'hk4e_cn'"
+              @click.stop="deleteAccount(item)"
+              title="删除账户"
+            >
+              <v-icon size="12" color="var(--tgc-od-red)">mdi-delete</v-icon>
+            </div>
+          </div>
           <span>{{ item.account.gameUid }} {{ item.account.regionName }}</span>
         </div>
         <div class="tuss-stat">
@@ -43,6 +53,7 @@
 </template>
 <script setup lang="ts">
 import TMiImg from "@comp/app/t-mi-img.vue";
+import showDialog from "@comp/func/dialog.js";
 import showGeetest from "@comp/func/geetest.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAccount from "@Sqlite/modules/userAccount.js";
@@ -112,6 +123,24 @@ async function loadData(): Promise<void> {
     const info = getGameInfo(ac.gameBiz);
     signAccounts.value.push({ selected: true, account: ac, info });
   }
+}
+
+async function deleteAccount(item: SignAccount): Promise<void> {
+  if (item.account.gameBiz === "hk4e_cn") {
+    showSnackbar.warn("原神账户不可删除");
+    return;
+  }
+  const idx = signAccounts.value.findIndex((i) => i === item);
+  if (idx === -1) return;
+  const infoStr = `${item.info.title}-${item.account.regionName}-${item.account.gameUid}`;
+  const check = await showDialog.check(`确定删除?`, `${infoStr}\n删除后仅能通过刷新游戏账号恢复`);
+  if (!check) {
+    showSnackbar.cancel(`已取消删除${infoStr}`);
+    return;
+  }
+  await TSUserAccount.game.deleteAccount(item.account);
+  signAccounts.value.splice(idx, 1);
+  showSnackbar.success(`已删除${infoStr}`);
 }
 
 async function tryRefresh(): Promise<void> {
@@ -231,9 +260,6 @@ async function trySign(ac: SignAccount[], ck: TGApp.App.Account.Cookie): Promise
       );
       continue;
     }
-    await TGLogger.Script(
-      `[签到任务]${item.info.title}-${item.account.regionName}-${item.account.gameUid}签到`,
-    );
     let check = false;
     let challenge: string | undefined = undefined;
     while (!check) {
@@ -354,11 +380,33 @@ async function trySign(ac: SignAccount[], ck: TGApp.App.Account.Cookie): Promise
   align-items: center;
   justify-content: center;
   column-gap: 4px;
+}
+
+.tuss-icon {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  overflow: hidden;
 
   img {
     border-radius: 4px;
-    width: 48px;
-    height: 48px;
+    width: 100%;
+    height: 100%;
+  }
+
+  .delete {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    border-top-right-radius: 8px;
+    cursor: pointer;
   }
 }
 

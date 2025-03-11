@@ -252,7 +252,7 @@ defineExpose({ displayInputBox, displayCheckBox });
   font-size: 20px;
   text-align: center;
   text-overflow: ellipsis;
-  white-space: normal;
+  white-space: pre-wrap;
   word-break: break-all;
 }
 

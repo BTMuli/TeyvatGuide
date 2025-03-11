@@ -13,7 +13,7 @@ import { timestampToDate } from "@/utils/toolFunc.js";
 
 /**
  * @description 获取插入游戏账号数据的sql
- * @since Beta v0.6.0
+ * @since Beta v0.7.2
  * @param {string} uid - 米社UID
  * @param {TGApp.BBS.Game.Account} data - 游戏账号数据
  * @return {string}
@@ -26,9 +26,8 @@ function getInsertGameAccountSql(uid: string, data: TGApp.BBS.Game.Account): str
       INSERT INTO GameAccount(uid, gameBiz, gameUid, isChosen, isOfficial, level, nickname, region, regionName, updated)
       VALUES ('${uid}', '${data.game_biz}', '${data.game_uid}', ${isChosen}, ${isOfficial}, ${data.level},
               '${data.nickname}', '${data.region}', '${data.region_name}', '${timeNow}')
-      ON CONFLICT(uid, gameUid) DO UPDATE
-          SET gameBiz    = '${data.game_biz}',
-              isChosen   = ${isChosen},
+      ON CONFLICT(uid, gameUid, gameBiz) DO UPDATE
+          SET isChosen   = ${isChosen},
               isOfficial = ${isOfficial},
               level      = ${data.level},
               nickname   = '${data.nickname}',
@@ -278,6 +277,21 @@ async function saveGameAccount(
 }
 
 /**
+ * @description 删除指定游戏账户
+ * @since Beta v0.7.2
+ * @param {TGApp.Sqlite.Account.Game} account - 游戏账户
+ * @return {Promise<void>}
+ */
+async function deleteGameAccount(account: TGApp.Sqlite.Account.Game): Promise<void> {
+  const db = await TGSqlite.getDB();
+  await db.execute("DELETE FROM GameAccount WHERE uid = ? AND gameUid = ? AND gameBiz = ?;", [
+    account.uid,
+    account.gameUid,
+    account.gameBiz,
+  ]);
+}
+
+/**
  * @description 删除游戏账户数据
  * @since Beta v0.6.0
  * @param {string} uid - 米社UID
@@ -305,6 +319,7 @@ const TSUserAccount = {
     switchAccount: switchGameAccount,
     getCurAccount: getCurGameAccount,
     saveAccounts: saveGameAccount,
+    deleteAccount: deleteGameAccount,
   },
 };
 
