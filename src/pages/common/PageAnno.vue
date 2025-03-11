@@ -64,11 +64,20 @@ import { useAppStore } from "@/store/modules/app.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { decodeRegExp } from "@/utils/toolFunc.js";
 import Hk4eApi, { type AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
-import { getAnnoCard } from "@/web/utils/getAnnoCard.js";
 
 type AnnoSelect = { text: string; value: string };
 type AnnoKey = keyof typeof AnnoType;
-type AnnoCard = { [key in AnnoKey]: Array<TGApp.App.Announcement.ListCard> };
+type AnnoCard = {
+  id: number;
+  title: string;
+  subtitle: string;
+  banner: string;
+  typeLabel: string;
+  tagIcon: string;
+  tagLabel: string;
+  timeStr: string;
+};
+type AnnoList = { [key in AnnoKey]: Array<AnnoCard> };
 
 const annoServerList: Array<AnnoSelect> = [
   { text: "国服-官方服", value: AnnoServer.CN_ISLAND },
@@ -94,7 +103,7 @@ const { server, lang } = storeToRefs(useAppStore());
 const router = useRouter();
 const tabValues: Readonly<Array<AnnoKey>> = ["activity", "game"];
 const tab = ref<AnnoKey>("activity");
-const annoCards = shallowRef<AnnoCard>({ activity: [], game: [] });
+const annoCards = shallowRef<AnnoList>({ activity: [], game: [] });
 const isReq = ref<boolean>(false);
 
 watch(
@@ -130,7 +139,7 @@ async function loadData(): Promise<void> {
     `服务器：${getRegionName(server.value)}，语言：${getLangName(lang.value)}`,
   );
   const annoData = await Hk4eApi.anno.list(server.value, lang.value);
-  const listCards = getAnnoCard(annoData);
+  const listCards = annoData.list.map((list) => list.list.map((anno) => getAnnoCard(anno))).flat();
   await showLoading.update("", { title: "正在解析游戏内公告时间" });
   for (const item of listCards) {
     if (item.typeLabel === AnnoType.game) continue;
@@ -145,6 +154,38 @@ async function loadData(): Promise<void> {
   };
   await showLoading.end();
   isReq.value = false;
+}
+
+function getAnnoTag(tag: string): string {
+  switch (tag) {
+    case "1":
+    case "11":
+    case "重要":
+      return "公告";
+    case "2":
+    case "扭蛋":
+      return "祈愿";
+    case "3":
+      return "活动";
+    default:
+      return tag;
+  }
+}
+
+function getAnnoCard(anno: TGApp.BBS.Announcement.AnnoSingle): AnnoCard {
+  const timeStart = anno.start_time.split(" ")[0];
+  const timeEnd = anno.end_time.split(" ")[0];
+  const time = `${timeStart} ~ ${timeEnd}`;
+  return {
+    id: anno.ann_id,
+    title: anno.title,
+    subtitle: anno.subtitle.replace(/<br \/>/g, " "),
+    banner: anno.banner,
+    typeLabel: anno.type === 2 ? "游戏公告" : "活动公告",
+    tagIcon: anno.tag_icon,
+    tagLabel: getAnnoTag(anno.tag_label),
+    timeStr: time,
+  };
 }
 
 function getRegionName(value: AnnoServer): string {
