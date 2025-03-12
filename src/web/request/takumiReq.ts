@@ -3,46 +3,30 @@
  * @description Takumi 相关请求函数
  * @since Beta v0.7.2
  */
-import TGBbs from "@/utils/TGBbs.js";
 import TGHttp from "@/utils/TGHttp.js";
-import { getDeviceInfo } from "@/utils/toolFunc.js";
-import { getDS, getRequestHeader } from "@/web/utils/getRequestHeader.js";
+import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
 
 // TakumiApiBaseUrl => taBu
 const taBu: Readonly<string> = "https://api-takumi.mihoyo.com/";
 
 /**
  * @description 根据gameToken获取stoken
- * @todo -100
+ * @since Beta v0.7.2
  * @param {TGApp.Game.Login.StatusPayloadRaw} raw 状态数据
  * @returns {Promise<TGApp.BBS.Response.Base|string>}
  */
 async function getSTokenByGameToken(
   raw: TGApp.Game.Login.StatusPayloadRaw,
-): Promise<TGApp.BBS.Response.Base> {
-  const data = { account_id: raw.uid, game_token: raw.token };
-  // const header = {
-  //   ...getRequestHeader(ck, "POST", JSON.stringify(data), "X6"),
-  //   "x-rpc-client_type": "4",
-  //   "x-rpc-app_id": "bll8iq97cem8",
-  //   "x-rpc-game_biz": "bbs_cn",
-  // };
+): Promise<TGApp.BBS.Response.Base | TGApp.Game.Login.StRes> {
+  const data = { account_id: Number(raw.uid), game_token: raw.token };
   const header = {
-    "x-rpc-app_version": TGBbs.version,
-    "x-rpc-aigis": "",
-    "Content-Type": "application/json",
+    ...getRequestHeader({}, "POST", JSON.stringify(data), "X6"),
+    "x-rpc-client_type": "4",
+    "x-rpc-app_id": "bll8iq97cem8",
     "x-rpc-game_biz": "bbs_cn",
     "x-rpc-sys_version": "12",
-    "x-rpc-device_id": getDeviceInfo("device_id"),
-    "x-rpc-device_name": getDeviceInfo("device_name"),
-    "x-rpc-device_model": getDeviceInfo("product"),
-    "x-rpc-app_id": "bll8iq97cem8",
-    "x-rpc-client_type": "4",
-    "User-Agent": "okhttp/4.9.3",
-    ds: getDS("POST", JSON.stringify(data), "X6", false),
-    cookie: `account_id=${raw.uid};ltuid=${raw.uid};stuid=${raw.uid};game_token=${raw.token};`,
   };
-  const resp = await TGHttp<TGApp.BBS.Response.Base>(
+  const resp = await TGHttp<TGApp.Game.Login.StResp>(
     `${taBu}account/ma-cn-session/app/getTokenByGameToken`,
     {
       method: "POST",
@@ -51,8 +35,7 @@ async function getSTokenByGameToken(
     },
   );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  console.log(resp);
-  return resp;
+  return resp.data;
 }
 
 /**

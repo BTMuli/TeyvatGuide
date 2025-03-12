@@ -48,7 +48,7 @@
     </template>
     <template #append>
       <span class="top-hint" @click="tryCkVerify()" title="点击验证">
-        需要验证码登录所需cookie！！！
+        需要验证码登录/游戏扫码登录所需cookie！！！
       </span>
     </template>
   </v-app-bar>
@@ -76,6 +76,7 @@ import { onMounted, ref, shallowRef } from "vue";
 
 import { useUserStore } from "@/store/modules/user.js";
 import apiHubReq from "@/web/request/apiHubReq.js";
+import miscReq from "@/web/request/miscReq.js";
 
 const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
 const accounts = shallowRef<Array<TGApp.App.Account.User>>([]);
@@ -119,21 +120,31 @@ async function tryCkVerify(): Promise<void> {
     showSnackbar.cancel("已取消验证");
     return;
   }
-  await showLoading.start("正在验证CK有效性");
   const ck = {
     stoken: cookie.value.stoken,
     stuid: cookie.value.stuid,
     mid: cookie.value.mid,
   };
-  const resp = await apiHubReq.sign(ck);
-  await showLoading.update(`[${resp.retcode}] ${resp.message}`);
-  if (resp.retcode === -100) {
-    showSnackbar.error("CK验证失败，请通过验证码登录重新获取CK");
-    await showLoading.end();
-    return;
+  let flag = false;
+  let challenge;
+  while (!flag) {
+    await showLoading.start("正在验证CK有效性");
+    const resp = await apiHubReq.sign(ck, 2, challenge);
+    await showLoading.update(`[${resp.retcode}] ${resp.message}`);
+    if (resp.retcode === -100) {
+      await showLoading.end();
+      break;
+    } else if (resp.retcode === 1034) {
+      await showLoading.end();
+      const cGet = await miscReq.challenge(ck);
+      if (cGet !== false) challenge = cGet;
+    } else {
+      flag = true;
+      await showLoading.end();
+    }
   }
-  await showLoading.end();
-  showSnackbar.success("CK验证成功");
+  if (!flag) showSnackbar.error("CK验证失败，请通过验证码登录重新获取CK");
+  else showSnackbar.success("CK验证成功");
 }
 </script>
 <style lang="scss" scoped>

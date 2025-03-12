@@ -72,4 +72,31 @@ declare namespace TGApp.Game.Login {
    * @return StatusPayloadRaw
    */
   type StatusPayloadRaw = { uid: string; token: string };
+
+  /**
+   * @description GameToken获取Stoken返回
+   * @since Beta v0.7.2
+   * @interface StResp
+   * @extends TGApp.BBS.Response.BaseWithData
+   * @property {StRes} data 数据
+   * @return StResp
+   */
+  type StResp = TGApp.BBS.Response.BaseWithData<StRes>;
+
+  /**
+   * @description GameToken获取Stoken返回数据
+   * @since Beta v0.7.2
+   * @interface StRes
+   * @property {TGApp.BBS.GameLogin.GetLoginStatusDataToken} token token
+   * @property {TGApp.BBS.GameLogin.GetLoginStatusDataUserInfo} user_info 用户信息
+   * @property {unknown} realname_info 未知
+   * @property {boolean} need_realperson 是否需要真人验证
+   * @return StRes
+   */
+  type StRes = {
+    token: TGApp.BBS.GameLogin.GetLoginStatusDataToken;
+    user_info: TGApp.BBS.GameLogin.GetLoginStatusDataUserInfo;
+    realname_info: unknown;
+    need_realperson: boolean;
+  };
 }

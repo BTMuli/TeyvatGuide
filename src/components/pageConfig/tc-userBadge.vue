@@ -107,9 +107,12 @@
               <img src="/platforms/mhy/launcher.webp" alt="launcher" class="menu-icon" />
             </template>
           </v-list-item>
-          <v-list-item @click="tryCodeLogin(false)" append-icon="mdi-qrcode-scan" v-if="false">
+          <v-list-item @click="tryCodeLogin(false)">
             <v-list-item-title>扫码登录(游戏)</v-list-item-title>
             <v-list-item-subtitle>使用米游社扫码登录</v-list-item-subtitle>
+            <template #append>
+              <img src="/platforms/mhy/mys.webp" alt="launcher" class="menu-icon" />
+            </template>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -571,5 +574,6 @@ async function clearUser(user: TGApp.App.Account.User): Promise<void> {
 .menu-icon {
   width: 24px;
   height: 24px;
+  border-radius: 4px;
 }
 </style>

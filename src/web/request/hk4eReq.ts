@@ -141,12 +141,12 @@ async function getGachaLog(
 
 /**
  * @description 获取登录二维码
- * @since Beta v0.7.0
+ * @since Beta v0.7.2
  * @param {string} appId 应用 ID // 目前只有2/7能用
  * @returns {Promise<TGApp.Game.Login.QrRes|TGApp.BBS.Response.Base>}
  */
 async function fetchPandaQr(
-  appId: string = "2",
+  appId: number,
 ): Promise<TGApp.Game.Login.QrRes | TGApp.BBS.Response.Base> {
   const data = { app_id: appId, device: getDeviceInfo("device_id") };
   const resp = await TGHttp<TGApp.Game.Login.QrResp>(`${SdkApi}combo/panda/qrcode/fetch`, {
@@ -159,14 +159,14 @@ async function fetchPandaQr(
 
 /**
  * @description 获取登录状态
- * @since Beta v0.7.0
+ * @since Beta v0.7.2
  * @param {string} ticket 二维码 ticket
  * @param {string} appId 应用 ID
  * @returns {Promise<TGApp.BBS.Response.Base|TGApp.Game.Login.StatusRes>}
  */
 async function queryPandaQr(
   ticket: string,
-  appId: string = "2",
+  appId: number,
 ): Promise<TGApp.BBS.Response.Base | TGApp.Game.Login.StatusRes> {
   const data = { app_id: appId, ticket, device: getDeviceInfo("device_id") };
   const resp = await TGHttp<TGApp.Game.Login.StatusResp>(`${SdkApi}combo/panda/qrcode/query`, {

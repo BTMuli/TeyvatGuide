@@ -3,7 +3,20 @@
     <div class="tog-box">
       <div class="tog-top">
         <div class="tog-title">请使用米游社进行扫码操作</div>
+        <div class="tog-select" v-if="!isLauncherCode">
+          <div
+            class="tog-select-item"
+            v-for="item in selects"
+            :key="item.value"
+            :class="{ active: codeGid === item.value }"
+            @click="codeGid = item.value"
+            :title="item.title"
+          >
+            <img :src="item.icon" alt="icon" />
+          </div>
+        </div>
       </div>
+      <div class="tog-divider" />
       <div class="tog-mid">
         <qrcode-vue
           v-if="codeUrl"
@@ -35,6 +48,20 @@ import passportReq from "@/web/request/passportReq.js";
 import takumiReq from "@/web/request/takumiReq.js";
 
 type ToGameLoginEmits = (e: "success", data: TGApp.App.Account.Cookie) => void;
+type ToGameLoginSelect = { title: string; value: number; icon: string };
+
+const selects: Array<ToGameLoginSelect> = [
+  {
+    title: "未定事件簿",
+    value: 2,
+    icon: "/platforms/mhy/wd.webp",
+  },
+  {
+    title: "崩坏学园2",
+    value: 7,
+    icon: "/platforms/mhy/bh2.webp",
+  },
+];
 
 // eslint-disable-next-line no-undef
 let cycleTimer: NodeJS.Timeout | null = null;
@@ -42,6 +69,7 @@ let cycleTimer: NodeJS.Timeout | null = null;
 const model = defineModel<boolean>({ default: false });
 const isLauncherCode = defineModel<boolean>("launcher", { default: true });
 const emits = defineEmits<ToGameLoginEmits>();
+const codeGid = ref<number>(7);
 const codeUrl = ref<string>();
 const codeTicket = ref<string>("");
 
@@ -55,11 +83,21 @@ watch(
         cycleTimer = null;
       }
       if (isLauncherCode.value) cycleTimer = setInterval(cycleGetDataLauncher, 1000);
-      else cycleTimer = setInterval(cycleGetDataGame, 5000);
+      else cycleTimer = setInterval(cycleGetDataGame, 1000);
     } else {
       if (cycleTimer) clearInterval(cycleTimer);
       cycleTimer = null;
     }
+  },
+);
+
+watch(
+  () => codeGid.value,
+  async () => {
+    if (isLauncherCode.value) return;
+    await freshQr();
+    if (cycleTimer) clearInterval(cycleTimer);
+    cycleTimer = setInterval(cycleGetDataGame, 1000);
   },
 );
 
@@ -83,7 +121,7 @@ async function freshQr(): Promise<void> {
     codeTicket.value = resp.ticket;
     return;
   }
-  const resp = await hk4eReq.loginQr.create();
+  const resp = await hk4eReq.loginQr.create(codeGid.value);
   if ("retcode" in resp) {
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     return;
@@ -125,7 +163,7 @@ async function cycleGetDataLauncher(): Promise<void> {
 }
 
 async function cycleGetDataGame(): Promise<void> {
-  const res = await hk4eReq.loginQr.state(codeTicket.value);
+  const res = await hk4eReq.loginQr.state(codeTicket.value, codeGid.value);
   console.log(res);
   if ("retcode" in res) {
     showSnackbar.error(`[${res.retcode}] ${res.message}`);
@@ -150,23 +188,22 @@ async function cycleGetDataGame(): Promise<void> {
     const statusRaw: TGApp.Game.Login.StatusPayloadRaw = JSON.parse(res.payload.raw);
     await showLoading.start("正在获取SToken");
     const stResp = await takumiReq.game.stoken(statusRaw);
-    console.log(stResp);
     await showLoading.end();
     if ("retcode" in stResp) {
       showSnackbar.error(`[${stResp.retcode}] ${stResp.message}`);
       model.value = false;
       return;
     }
-    // const ck: TGApp.App.Account.Cookie = {
-    //   account_id: statusRaw.uid,
-    //   ltuid: statusRaw.uid,
-    //   stuid: statusRaw.uid,
-    //   mid: res.user_info.mid,
-    //   cookie_token: "",
-    //   stoken: res.tokens[0].token,
-    //   ltoken: "",
-    // };
-    // emits("success", ck);
+    const ck: TGApp.App.Account.Cookie = {
+      account_id: statusRaw.uid,
+      ltuid: statusRaw.uid,
+      stuid: statusRaw.uid,
+      mid: stResp.user_info.mid,
+      cookie_token: "",
+      stoken: stResp.token.token,
+      ltoken: "",
+    };
+    emits("success", ck);
     model.value = false;
   }
 }
@@ -188,14 +225,54 @@ onUnmounted(() => {
 }
 
 .tog-top {
-  border-bottom: 1px solid var(--common-shadow-4);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-title);
+  row-gap: 4px;
   text-align: center;
 }
 
 .tog-title {
   color: var(--common-text-title);
   font-size: 20px;
+}
+
+.tog-select {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 4px;
+}
+
+.tog-select-item {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &.active {
+    border: 3px solid var(--tgc-od-orange);
+    cursor: default;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    object-fit: contain;
+  }
+}
+
+.tog-divider {
+  width: 100%;
+  height: 1px;
+  background-color: var(--common-shadow-2);
 }
 
 .tog-mid {
