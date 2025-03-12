@@ -1,6 +1,6 @@
 <template>
   <div class="ph-pool-card">
-    <div class="ph-pool-cover">
+    <div class="ph-pool-cover" @click="toPool()">
       <TMiImg v-if="cover" :src="cover" alt="cover" :ori="true" />
       <img src="/source/UI/empty.webp" class="empty" v-else alt="empty" />
     </div>
@@ -46,7 +46,7 @@ import { useRouter } from "vue-router";
 import { AppCharacterData } from "@/data/index.js";
 import { useHomeStore } from "@/store/modules/home.js";
 import TGLogger from "@/utils/TGLogger.js";
-import { createTGWindow } from "@/utils/TGWindow.js";
+import { createPost, createTGWindow } from "@/utils/TGWindow.js";
 import { stamp2LastTime } from "@/utils/toolFunc.js";
 import postReq from "@/web/request/postReq.js";
 
@@ -147,6 +147,15 @@ function getBox(info: TGApp.App.Character.WikiBriefInfo): TItemBoxData {
     innerIcon: `/icon/weapon/${info.weapon}.webp`,
     innerText: info.name,
   };
+}
+
+async function toPool(): Promise<void> {
+  const postId = Number(props.pool.activity_url.split("/").pop());
+  if (isNaN(postId)) {
+    showSnackbar.error(`未知的活动链接:${props.pool.activity_url}`);
+    return;
+  }
+  await createPost(postId, props.pool.title);
 }
 </script>
 <style lang="scss" scoped>
