@@ -15,7 +15,7 @@
       <div class="tpc-title" :title="card.title" @click="shareCard">{{ card.title }}</div>
     </div>
     <div class="tpc-mid" v-if="card.user !== null">
-      <TpAvatar :data="card.user" position="left" />
+      <TpAvatar :data="card.user" position="left" @click="onUserClick()" />
     </div>
     <div class="tpc-bottom" v-if="card.data !== null">
       <div class="tpc-tags">
@@ -80,8 +80,15 @@ import { useRoute, useRouter } from "vue-router";
 import { generateShareImg } from "@/utils/TGShare.js";
 import { createPost } from "@/utils/TGWindow.js";
 
-type TPostCardProps = { modelValue: TGApp.BBS.Post.FullData; selectMode?: boolean };
-type TPostCardEmits = (e: "onSelected", v: string) => void;
+type TPostCardProps = {
+  modelValue: TGApp.BBS.Post.FullData;
+  selectMode?: boolean;
+  userClick?: boolean;
+};
+type TPostCardEmits = {
+  (e: "onSelected", v: string): void;
+  (e: "onUserClick", v: TGApp.BBS.Post.User): void;
+};
 type TPostStatus = RenderStatus & { stat: ActStat };
 type RenderForum = { name: string; icon: string; id: number };
 type RenderStatus = { stat: number; label: string; color: string };
@@ -226,6 +233,11 @@ async function toForum(forum: RenderForum): Promise<void> {
   const gid = props.modelValue.post.game_id;
   await emit("active_deep_link", `router?path=/posts/forum/${gid}/${forum.id}`);
 }
+
+function onUserClick(): void {
+  if (!card.value || card.value.user === null) return;
+  emits("onUserClick", card.value.user);
+}
 </script>
 <style lang="css" scoped>
 .tpc-card {
@@ -280,6 +292,7 @@ async function toForum(forum: RenderForum): Promise<void> {
   position: relative;
   width: 100%;
   padding: 0 10px;
+  cursor: v-bind("props.userClick ? 'pointer' : 'default'");
 }
 
 .tpc-bottom {

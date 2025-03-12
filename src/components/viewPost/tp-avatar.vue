@@ -89,17 +89,20 @@ const levelColor = computed<string>(() => {
 
 .tpa-img {
   position: relative;
+  display: flex;
   width: 50px;
   height: 50px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
 }
 
 .tpa-icon {
-  position: absolute;
-  top: 5px;
-  left: 5px;
+  position: relative;
   display: flex;
-  width: 40px;
-  height: 40px;
+  width: 100%;
+  height: 100%;
   align-items: center;
   justify-content: center;
   border-radius: 50%;

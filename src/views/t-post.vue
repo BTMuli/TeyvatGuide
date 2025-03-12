@@ -41,7 +41,13 @@
           <span>{{ postData?.stat?.forward_num }}</span>
         </div>
       </div>
-      <TpAvatar :data="postData.user" position="right" v-if="postData.user" />
+      <TpAvatar
+        :data="postData.user"
+        position="right"
+        style="cursor: pointer"
+        v-if="postData.user"
+        @click="handleUser(postData.user)"
+      />
     </div>
     <div class="tp-post-title" @click="toPost()">
       <span class="mpt-official" v-if="postData.post.post_status.is_official">官</span>
@@ -96,6 +102,7 @@
     :gid="postData.post.game_id"
     v-if="postData?.collection && postData"
   />
+  <VpOverlayUser v-if="postData" :gid="postData.post.game_id" :uid="curUid" v-model="showUser" />
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
@@ -109,8 +116,9 @@ import TpParser from "@comp/viewPost/tp-parser.vue";
 import VpBtnCollect from "@comp/viewPost/vp-btn-collect.vue";
 import VpBtnReply from "@comp/viewPost/vp-btn-reply.vue";
 import VpOverlayCollection from "@comp/viewPost/vp-overlay-collection.vue";
+import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import { app, webviewWindow } from "@tauri-apps/api";
-import { emit, listen, UnlistenFn } from "@tauri-apps/api/event";
+import { emit, type Event, listen, UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
 import { onBeforeMount, onMounted, onUnmounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
@@ -131,12 +139,15 @@ const postId = Number(useRoute().params.post_id);
 const showCollection = ref<boolean>(false);
 const isLike = ref<boolean>(false);
 const shareTime = ref<number>(Math.floor(Date.now() / 1000));
+const curUid = ref<string>("");
+const showUser = ref<boolean>(false);
 const renderPost = shallowRef<Array<TGApp.BBS.SctPost.Base>>([]);
 const postData = shallowRef<TGApp.BBS.Post.FullData>();
 
 // eslint-disable-next-line no-undef
 let shareTimer: NodeJS.Timeout | null = null;
 let incognitoListener: UnlistenFn | null = null;
+let userListener: UnlistenFn | null = null;
 
 function getGameIcon(gameId: number): string {
   const find = TGBbs.channels.find((item) => item.gid === gameId);
@@ -146,6 +157,11 @@ function getGameIcon(gameId: number): string {
 
 onBeforeMount(async () => {
   incognitoListener = await listen<void>("switchIncognito", () => window.location.reload());
+  userListener = await listen<string>("userMention", (e: Event<string>) => {
+    if (e.payload !== curUid.value) curUid.value = e.payload;
+    if (showCollection.value) showCollection.value = false;
+    showUser.value = true;
+  });
 });
 
 onMounted(async () => {
@@ -188,6 +204,21 @@ onMounted(async () => {
   await showLoading.end();
 });
 
+onUnmounted(() => {
+  if (shareTimer !== null) {
+    clearInterval(shareTimer);
+    shareTimer = null;
+  }
+  if (incognitoListener !== null) {
+    incognitoListener();
+    incognitoListener = null;
+  }
+  if (userListener !== null) {
+    userListener();
+    userListener = null;
+  }
+});
+
 async function openJson(): Promise<void> {
   // @ts-expect-error import.meta
   if (import.meta.env.MODE === "production") return;
@@ -199,6 +230,7 @@ function getShareTimer(): void {
 }
 
 function showOverlayC() {
+  if (showUser.value) showUser.value = false;
   showCollection.value = true;
 }
 
@@ -315,16 +347,11 @@ async function toForum(forum: TGApp.BBS.Post.Forum): Promise<void> {
   await emit("active_deep_link", `router?path=/posts/forum/${forum.game_id}/${forum.id}`);
 }
 
-onUnmounted(() => {
-  if (shareTimer !== null) {
-    clearInterval(shareTimer);
-    shareTimer = null;
-  }
-  if (incognitoListener !== null) {
-    incognitoListener();
-    incognitoListener = null;
-  }
-});
+function handleUser(user: TGApp.BBS.Post.User): void {
+  curUid.value = user.uid;
+  if (showCollection.value) showCollection.value = false;
+  showUser.value = true;
+}
 </script>
 <style lang="css" scoped>
 .tp-post-body {

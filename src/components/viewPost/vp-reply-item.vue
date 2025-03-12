@@ -7,7 +7,7 @@
     >
       <TMiImg :ori="true" :src="props.modelValue.user.reply_bubble.url" alt="bubble" />
     </div>
-    <div class="tpr-user">
+    <div class="tpr-user" @click="handleUser()">
       <div class="tpru-left">
         <div class="avatar">
           <TMiImg :ori="true" :src="props.modelValue.user.avatar_url" alt="avatar" />
@@ -104,7 +104,7 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { event, path } from "@tauri-apps/api";
-import type { Event, UnlistenFn } from "@tauri-apps/api/event";
+import { emit, Event, UnlistenFn } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { computed, onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from "vue";
@@ -226,6 +226,11 @@ async function exportData(): Promise<void> {
   await writeTextFile(savePath, data);
   showSnackbar.success("导出成功");
 }
+
+async function handleUser(): Promise<void> {
+  const uid = props.modelValue.user.uid;
+  await emit("userMention", uid);
+}
 </script>
 <style lang="css" scoped>
 .tpr-reply-box {
@@ -264,6 +269,7 @@ async function exportData(): Promise<void> {
   height: 40px;
   align-items: center;
   justify-content: flex-start;
+  cursor: pointer;
   gap: 5px;
 }
 

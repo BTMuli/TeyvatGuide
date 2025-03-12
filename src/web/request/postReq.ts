@@ -172,6 +172,29 @@ async function getTopicPostList(
 }
 
 /**
+ * @description 获取用户发布帖子
+ * @since Beta v0.7.2
+ * @param {string} uid 用户 ID
+ * @param {number} gid 社区 ID
+ * @param {string} offset 偏移量
+ * @returns {Promise<TGApp.BBS.Post.UserPostRes|TGApp.BBS.Response.Base>}
+ */
+async function getUserPost(
+  uid: string,
+  gid: number,
+  offset?: string,
+): Promise<TGApp.BBS.Post.UserPostRes | TGApp.BBS.Response.Base> {
+  const params = offset ? { uid, gids: gid, offset, size: 20 } : { uid, gids: gid, size: 20 };
+  const resp = await TGHttp<TGApp.BBS.Post.UserPostResp>(`${bapBu}userPost`, {
+    method: "GET",
+    headers: { referer: Referer },
+    query: params,
+  });
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
+}
+
+/**
  * @description 搜索帖子
  * @since Beta v0.7.1
  * @param {string} gid 游戏分区 ID
@@ -222,7 +245,7 @@ const postReq = {
   topic: getTopicPostList,
   reply: { main: getPostReplies, sub: getSubReplies },
   search: searchPosts,
-  userFavourite: userFavouritePost,
+  user: { post: getUserPost, collect: userFavouritePost },
 };
 
 export default postReq;

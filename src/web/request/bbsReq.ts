@@ -48,13 +48,13 @@ async function getUserFullInfo(
 
 /**
  * @description 根据gid和id获取用户信息
- * @since Beta v0.7.1
- * @param {number} gid - gid
+ * @since Beta v0.7.2
+ * @param {string} gid - gid
  * @param {string} userId - 用户 id
  * @returns {Promise<TGApp.BBS.Response.Base | TGApp.BBS.User.Info>}
  */
 async function getOtherUserInfo(
-  gid: number,
+  gid: string,
   userId: string,
 ): Promise<TGApp.BBS.Response.Base | TGApp.BBS.User.Info> {
   const params = { gids: gid.toString(), uid: userId };

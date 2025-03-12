@@ -112,7 +112,7 @@
   </v-app-bar>
   <div class="posts-grid">
     <div v-for="post in posts" :key="post.post.post_id">
-      <TPostCard :model-value="post" v-if="post" />
+      <TPostCard :model-value="post" :user-click="true" @onUserClick="handleUserClick" />
     </div>
   </div>
   <div class="posts-load-more">
@@ -122,6 +122,7 @@
     </v-btn>
   </div>
   <VpOverlaySearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
+  <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
 </template>
 <script setup lang="ts">
 import TGameNav from "@comp/app/t-gameNav.vue";
@@ -130,6 +131,7 @@ import TPostCard from "@comp/app/t-postcard.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
+import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -152,10 +154,14 @@ const route = useRoute();
 const router = useRouter();
 const curGid = ref<number>(2);
 const curSortType = ref<number>(1);
-const search = ref<string>("");
-const showSearch = ref<boolean>(false);
 const firstLoad = ref<boolean>(false);
 const isReq = ref<boolean>(false);
+
+const search = ref<string>("");
+const showSearch = ref<boolean>(false);
+const curUid = ref<string>("");
+const showUser = ref<boolean>(false);
+
 const selectedForum = shallowRef<SortSelect>();
 const sortGameList = shallowRef<Array<SortSelectGame>>([]);
 const postRaw = shallowRef<PostRaw>({ isLast: false, lastId: "", total: 0 });
@@ -274,6 +280,8 @@ async function freshPostData(): Promise<void> {
     query: { gid: curGid.value, forum: selectedForum.value.value },
   });
   isReq.value = true;
+  if (showSearch.value) showSearch.value = false;
+  if (showUser.value) showUser.value = false;
   const gameLabel = curGame.value?.text ?? "";
   await showLoading.start(`正在刷新${gameLabel}帖子`);
   const forumLabel = getForum(selectedForum.value.value).text;
@@ -328,8 +336,16 @@ function searchPost(): void {
     return;
   }
   const numCheck = Number(search.value);
-  if (isNaN(numCheck)) showSearch.value = true;
-  else createPost(search.value);
+  if (isNaN(numCheck)) {
+    if (showUser.value) showUser.value = false;
+    showSearch.value = true;
+  } else createPost(search.value);
+}
+
+function handleUserClick(user: TGApp.BBS.Post.User): void {
+  if (showSearch.value) showSearch.value = false;
+  curUid.value = user.uid;
+  showUser.value = true;
 }
 </script>
 <style lang="css" scoped>

@@ -75,6 +75,27 @@ declare namespace TGApp.BBS.Post {
   type NewsRes = { list: Array<FullData>; last_id: string; is_last: boolean };
 
   /**
+   * @description 用户发布帖子返回
+   * @since Beta v0.7.2
+   * @interface UserPostResp
+   * @extends TGApp.BBS.Response.BaseWithData
+   * @property {UserPostRes} data 返回数据
+   * @return UserPostResp
+   */
+  type UserPostResp = TGApp.BBS.Response.BaseWithData<UserPostRes>;
+
+  /**
+   * @description 用户发布帖子数据
+   * @since Beta v0.7.2
+   * @interface UserPostRes
+   * @property {Array<FullData>} list 帖子列表
+   * @property {boolean} is_last 是否最后一页
+   * @property {string} next_offset 下一页偏移量
+   * @return UserPostRes
+   */
+  type UserPostRes = { list: Array<FullData>; is_last: boolean; next_offset: string };
+
+  /**
    * @description 帖子数据
    * @since Beta v0.7.2
    * @interface FullData

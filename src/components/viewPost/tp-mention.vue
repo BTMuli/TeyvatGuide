@@ -5,6 +5,7 @@
   </span>
 </template>
 <script lang="ts" setup>
+import { emit } from "@tauri-apps/api/event";
 import { toRaw } from "vue";
 
 export type TpMention = { insert: { mention: { uid: string; nickname: string } } };
@@ -14,11 +15,9 @@ const props = defineProps<TpMentionProps>();
 
 console.log("tpMention", props.data.insert.mention.uid, toRaw(props.data).insert.mention);
 
-// todo 个人主页
-function toLink(): void {
+async function toLink(): Promise<void> {
   const uid = props.data.insert.mention.uid;
-  const link = `https://www.miyoushe.com/ys/accountCenter/postList?id=${uid}`;
-  window.open(link);
+  await emit("userMention", uid);
 }
 </script>
 <style lang="css" scoped>

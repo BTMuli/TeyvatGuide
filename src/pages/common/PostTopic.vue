@@ -74,7 +74,7 @@
   </v-app-bar>
   <div class="post-topic-grid">
     <div v-for="post in posts" :key="post.post.post_id">
-      <TPostCard :model-value="post" v-if="post" />
+      <TPostCard :model-value="post" :user-click="true" @onUserClick="handleUserClick" />
     </div>
   </div>
   <div class="load-more">
@@ -84,6 +84,7 @@
     </v-btn>
   </div>
   <VpOverlaySearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
+  <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
 </template>
 <script lang="ts" setup>
 import TGameNav from "@comp/app/t-gameNav.vue";
@@ -92,6 +93,7 @@ import TPostCard from "@comp/app/t-postcard.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
+import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -106,11 +108,16 @@ type GameList = TGApp.BBS.Topic.GameInfo & { icon?: string };
 
 const route = useRoute();
 const router = useRouter();
-const showSearch = ref<boolean>(false);
+
 const curGid = ref<number>(0);
 const curSortType = ref<0 | 1 | 2>(0);
-const search = ref<string>("");
 const curTopic = ref<string>("");
+
+const search = ref<string>("");
+const showSearch = ref<boolean>(false);
+const curUid = ref<string>("");
+const showUser = ref<boolean>(false);
+
 const isReq = ref<boolean>(false);
 const allGames = shallowRef<Array<TGApp.BBS.Game.Item>>([]);
 const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 });
@@ -202,6 +209,8 @@ async function firstLoad(): Promise<void> {
 async function freshPostData(): Promise<void> {
   if (isReq.value) return;
   isReq.value = true;
+  if (showSearch.value) showSearch.value = false;
+  if (showUser.value) showUser.value = false;
   if (postRaw.value.isLast) {
     showSnackbar.warn("已经到底了");
     return;
@@ -240,8 +249,10 @@ function searchPost(): void {
     return;
   }
   const numCheck = Number(search.value);
-  if (isNaN(numCheck)) showSearch.value = true;
-  else createPost(search.value);
+  if (isNaN(numCheck)) {
+    if (showUser.value) showUser.value = false;
+    showSearch.value = true;
+  } else createPost(search.value);
 }
 
 function getGameList(gameList: Array<TGApp.BBS.Topic.GameInfo> | undefined): Array<GameList> {
@@ -250,6 +261,12 @@ function getGameList(gameList: Array<TGApp.BBS.Topic.GameInfo> | undefined): Arr
     const game = allGames.value.find((i) => i.id === item.id);
     return { ...item, icon: game?.app_icon };
   });
+}
+
+function handleUserClick(user: TGApp.BBS.Post.User): void {
+  if (showSearch.value) showSearch.value = false;
+  curUid.value = user.uid;
+  showUser.value = true;
 }
 </script>
 <style lang="css" scoped>
