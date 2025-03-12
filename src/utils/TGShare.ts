@@ -165,7 +165,6 @@ export async function copyToClipboard(buffer: Uint8Array): Promise<void> {
   const url = URL.createObjectURL(blob);
   // todo mac 会报错: https://bugs.webkit.org/show_bug.cgi?id=222262
   if (platform() === "macos") {
-    // todo 待测试
     navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]).then(
       () => URL.revokeObjectURL(url),
       (err) => TGLogger.Error(`[copyToClipboard] 复制到剪贴板失败: ${err}`),

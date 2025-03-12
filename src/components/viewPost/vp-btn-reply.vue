@@ -22,7 +22,7 @@
       </template>
       <div class="tpr-main-reply">
         <div class="tpr-main-filter">
-          <v-chip color="primary" label @click="handleDebug">回复列表</v-chip>
+          <div class="tpr-title" @click="handleDebug">回复列表</div>
           <v-switch
             v-model="onlyLz"
             color="primary"
@@ -39,7 +39,7 @@
             item-value="value"
             title="排序方式"
           />
-          <v-btn @click="showOverlay = false" icon="mdi-close" class="tpr-btn-close" size="small" />
+          <v-btn @click="showOverlay = false" icon="mdi-close" class="tpr-btn-close" size="32" />
         </div>
         <v-list class="tpr-reply-list">
           <VpReplyItem
@@ -176,7 +176,8 @@ async function handleDebug(): Promise<void> {
 }
 
 .tpr-btn-close {
-  border: 1px solid var(--common-shadow-4);
+  border: 1px solid var(--common-shadow-2);
+  margin-left: auto;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
 }
@@ -186,16 +187,17 @@ async function handleDebug(): Promise<void> {
   display: flex;
   width: 300px;
   height: 400px;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 5px;
+  padding: 8px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--app-page-bg);
-  box-shadow: 5px 5px 8px var(--common-shadow-4);
+  box-shadow: 2px 2px 8px var(--common-shadow-4);
   overflow-y: auto;
-  row-gap: 10px;
+  row-gap: 8px;
 }
 
 .tpr-main-filter {
@@ -203,12 +205,25 @@ async function handleDebug(): Promise<void> {
   width: 100%;
   height: 40px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   color: var(--app-page-content);
-  column-gap: 10px;
+  column-gap: 4px;
+}
+
+.tpr-title {
+  position: relative;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background: var(--tgc-od-blue);
+  color: var(--tgc-white-1);
+  cursor: pointer;
+  font-family: var(--font-title);
+  white-space: nowrap;
 }
 
 .tpr-select {
+  position: relative;
+  max-width: 100px;
   height: 40px;
   font-size: 12px;
 }
@@ -218,13 +233,15 @@ async function handleDebug(): Promise<void> {
   display: flex;
   width: 100%;
   height: 360px;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 0 5px;
+  padding-top: 0;
+  padding-right: 4px;
   background: var(--app-page-bg);
-  overflow-y: auto;
-  row-gap: 5px;
+  overflow: hidden auto;
+  row-gap: 8px;
 }
 
 .tpr-list-item {

@@ -103,14 +103,14 @@ function getImageTitle(): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 10px auto;
+  margin: 8px auto;
 }
 
 .tp-image-box img {
   width: v-bind(imgWidth);
   max-width: 100%;
   height: auto;
-  border-radius: 10px;
+  border-radius: 4px;
   cursor: pointer;
 }
 
@@ -118,14 +118,14 @@ function getImageTitle(): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 10px auto;
-  column-gap: 5px;
+  margin: 8px auto;
+  column-gap: 4px;
 }
 
 .act {
   position: absolute;
-  right: 5px;
-  bottom: 5px;
+  right: 4px;
+  bottom: 4px;
   display: flex;
   width: 25px;
   height: 25px;
@@ -134,7 +134,7 @@ function getImageTitle(): string {
   justify-content: center;
   border-radius: 50%;
   background: var(--tgc-od-white);
-  box-shadow: 0 0 5px rgb(0 0 0 / 50%);
+  box-shadow: 0 0 4px rgb(0 0 0 / 50%);
   cursor: pointer;
 }
 </style>

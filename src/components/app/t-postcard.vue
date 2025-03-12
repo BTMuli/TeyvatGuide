@@ -15,7 +15,12 @@
       <div class="tpc-title" :title="card.title" @click="shareCard">{{ card.title }}</div>
     </div>
     <div class="tpc-mid" v-if="card.user !== null">
-      <TpAvatar :data="card.user" position="left" @click="onUserClick()" />
+      <TpAvatar
+        :data="card.user"
+        position="left"
+        :style="{ cursor: props.userClick ? 'pointer' : 'default' }"
+        @click="onUserClick()"
+      />
     </div>
     <div class="tpc-bottom" v-if="card.data !== null">
       <div class="tpc-tags">
@@ -290,9 +295,11 @@ function onUserClick(): void {
 
 .tpc-mid {
   position: relative;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 0 10px;
-  cursor: v-bind("props.userClick ? 'pointer' : 'default'");
+  margin-right: auto;
 }
 
 .tpc-bottom {
@@ -317,6 +324,8 @@ function onUserClick(): void {
 
 .tpc-tags {
   display: flex;
+  width: fit-content;
+  max-width: 100%;
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: flex-start;
@@ -401,11 +410,13 @@ function onUserClick(): void {
 
 .tpc-data {
   display: flex;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   height: 20px;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   padding: 4px;
+  margin-left: auto;
   column-gap: 8px;
 }
 

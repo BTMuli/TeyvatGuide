@@ -69,18 +69,19 @@ async function toLink(): Promise<void> {
 .tp-link-card-box {
   display: flex;
   width: 100%;
-  padding: 10px;
+  box-sizing: border-box;
+  padding: 8px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 10px;
-  margin-bottom: 10px;
+  border-radius: 4px;
+  margin-bottom: 8px;
   background: var(--app-side-bg);
-  column-gap: 10px;
+  column-gap: 8px;
 }
 
 .tp-link-card-box img {
   max-width: 50%;
   max-height: 180px;
-  border-radius: 10px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.5s;
 }

@@ -148,12 +148,12 @@ function getEmojiName(): string {
   display: inline-flex;
   align-items: flex-end;
   justify-content: center;
-  transform: translateY(5px);
+  margin: 0 4px;
+  transform: translateY(2px);
 }
 
 .tp-text-emoji img {
-  width: 45px;
-  height: 45px;
-  margin: 0 5px;
+  height: 32px;
+  object-fit: contain;
 }
 </style>

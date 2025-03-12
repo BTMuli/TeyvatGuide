@@ -71,6 +71,9 @@
       </div>
     </div>
     <div class="tpr-extra" :title="`ID:${props.modelValue.reply.reply_id}`">
+      <div class="tpr-share" @click="share" data-html2canvas-ignore title="分享">
+        <v-icon size="small">mdi-share-variant</v-icon>
+      </div>
       <span
         class="tpr-pin"
         v-if="props.mode === 'main' && props.modelValue.reply.reply_id === props.pinId"
@@ -88,9 +91,6 @@
       <span v-if="props.mode === 'main'" class="tpr-floor">
         {{ props.modelValue.reply.floor_id }}F
       </span>
-    </div>
-    <div class="tpr-share" @click="share" data-html2canvas-ignore title="分享">
-      <v-icon size="small">mdi-share-variant</v-icon>
     </div>
     <div class="tpr-share-info bottom">
       <span>{{ props.modelValue.reply.post_id }}</span>
@@ -237,14 +237,14 @@ async function handleUser(): Promise<void> {
   position: relative;
   display: flex;
   width: 100%;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  padding: 5px;
+  padding: 8px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--box-bg-1);
-  row-gap: 5px;
   word-break: break-all;
 }
 
@@ -265,12 +265,11 @@ async function handleUser(): Promise<void> {
 .tpr-user {
   position: relative;
   display: flex;
-  width: 100%;
+  max-width: 100%;
   height: 40px;
   align-items: center;
   justify-content: flex-start;
   cursor: pointer;
-  gap: 5px;
 }
 
 .tpru-left {
@@ -331,7 +330,7 @@ async function handleUser(): Promise<void> {
   overflow: hidden;
   align-items: center;
   justify-content: center;
-  column-gap: 5px;
+  column-gap: 4px;
   font-family: var(--font-title);
   font-size: 16px;
   text-overflow: ellipsis;
@@ -350,17 +349,19 @@ async function handleUser(): Promise<void> {
   padding: 0 2px;
   border-radius: 2px;
   background: var(--tgc-od-blue);
+  color: var(--tgc-white-1);
   font-size: 12px;
 }
 
 .tpr-content {
-  width: 100%;
+  position: relative;
+  max-width: 100%;
 }
 
 .tpr-info {
   display: flex;
   width: 100%;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   opacity: 0.5;
 }
@@ -369,21 +370,22 @@ async function handleUser(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  font-size: 12px;
+  gap: 4px;
 }
 
 .tpri-right {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .tpr-like {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .tpr-reply {
@@ -391,7 +393,7 @@ async function handleUser(): Promise<void> {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  gap: 5px;
+  gap: 4px;
 }
 
 .tpr-extra {
@@ -400,7 +402,7 @@ async function handleUser(): Promise<void> {
   align-items: center;
   justify-content: flex-end;
   font-size: 12px;
-  gap: 5px;
+  gap: 4px;
 }
 
 .tpr-pin {
@@ -422,7 +424,7 @@ async function handleUser(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
   opacity: 0.3;
 
   :last-child {
@@ -442,21 +444,24 @@ async function handleUser(): Promise<void> {
 .tpr-reply-sub {
   position: relative;
   display: flex;
-  width: 100%;
-  max-height: 360px;
+  width: 300px;
+  max-height: 400px;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 5px;
+  padding: 8px;
+  border-radius: 4px;
   background: var(--app-page-bg);
   overflow-y: auto;
-  row-gap: 5px;
+  row-gap: 8px;
+
+  &.v-list {
+    box-shadow: -4px 0 8px var(--common-shadow-4);
+  }
 }
 
 .tpr-share {
-  position: absolute;
-  bottom: 5px;
-  left: 5px;
   cursor: pointer;
   opacity: 0.3;
 }
@@ -469,17 +474,17 @@ async function handleUser(): Promise<void> {
   justify-content: center;
   color: var(--tgc-od-white);
   font-size: 12px;
-  gap: 5px;
+  gap: 4px;
   text-shadow: 1px 1px 1px var(--tgc-dark-1);
 }
 
 .tpr-share-info.top {
   top: 0;
-  right: 5px;
+  right: 4px;
 }
 
 .tpr-share-info.bottom {
-  bottom: 5px;
-  left: 5px;
+  bottom: 4px;
+  left: 4px;
 }
 </style>

@@ -262,7 +262,6 @@ function parseAnnoSpan(span: HTMLElement, attr?: Record<string, string>): TGApp.
     }
     return { insert: parse, attributes: spanAttrs };
   }
-  // todo 优化处理
   return { insert: span.textContent ?? "", attributes: spanAttrs };
 }
 

@@ -49,6 +49,7 @@
         @click="handleUser(postData.user)"
       />
     </div>
+    <div class="tp-post-divider" />
     <div class="tp-post-title" @click="toPost()">
       <span class="mpt-official" v-if="postData.post.post_status.is_official">官</span>
       <span>{{ postData.post.subject }}</span>
@@ -367,18 +368,18 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   align-items: center;
   justify-content: start;
   color: var(--common-text-title);
+  column-gap: 4px;
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 20px;
 }
 
 .mpt-official {
-  display: inline-block;
-  width: 24px;
+  position: relative;
   align-items: center;
   justify-content: center;
-  border-radius: 5px;
-  margin-right: 2px;
+  padding: 0 4px;
+  border-radius: 4px;
   background: var(--common-shadow-1);
   color: var(--box-text-5);
   font-size: 16px;
@@ -387,10 +388,12 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 
 /* subtitle */
 .tp-post-subtitle {
+  position: relative;
   display: flex;
+  width: fit-content;
   align-items: center;
   justify-content: flex-start;
-  column-gap: 10px;
+  column-gap: 8px;
   font-size: 16px;
   opacity: 0.6;
 }
@@ -400,7 +403,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   align-items: center;
   justify-content: center;
   color: var(--common-text-title);
-  column-gap: 5px;
+  column-gap: 4px;
   font-family: var(--font-title);
 }
 
@@ -410,9 +413,17 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   display: flex;
   align-items: end;
   justify-content: space-between;
-  padding-bottom: 10px;
-  border-bottom: 1px dashed var(--common-shadow-2);
-  margin-bottom: 10px;
+}
+
+.tp-post-divider {
+  position: relative;
+  width: 100%;
+  height: 1px;
+  box-sizing: border-box;
+  border: 1px dashed var(--common-shadow-2);
+  border-radius: 1px;
+  margin: 8px 0;
+  background: transparent;
 }
 
 .tp-post-version {
@@ -431,7 +442,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   align-items: center;
   justify-content: start;
   color: var(--box-text-4);
-  column-gap: 10px;
+  column-gap: 8px;
   font-size: 14px;
 }
 
@@ -462,7 +473,6 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 10px;
   column-gap: 2px;
   opacity: 0.8;
 
@@ -473,11 +483,14 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 
 /* extra */
 .tp-post-extra {
+  position: relative;
   display: flex;
+  width: fit-content;
+  max-width: 100%;
   flex-wrap: wrap;
   align-items: center;
   justify-content: start;
-  gap: 5px 10px;
+  gap: 4px 8px;
 }
 
 /* collection */
@@ -485,11 +498,11 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 5px;
+  padding: 0 4px;
   border: 1px solid var(--common-shadow-2);
-  border-radius: 5px;
+  border-radius: 4px;
   color: var(--box-text-3);
-  column-gap: 5px;
+  column-gap: 4px;
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 12px;

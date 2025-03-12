@@ -101,7 +101,7 @@ async function onDownload(): Promise<void> {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  row-gap: 20px;
+  row-gap: 12px;
   transition: all 0.5s;
 }
 
@@ -110,9 +110,11 @@ async function onDownload(): Promise<void> {
   display: flex;
   width: 100%;
   max-height: 70%;
+  box-sizing: border-box;
   align-items: flex-start;
   justify-content: center;
-  border-radius: 10px;
+  border: 1px solid var(--tgc-od-white);
+  border-radius: 4px;
   background: v-bind("bgMode === 1 ? 'black' : bgMode === 2 ? 'white' : 'transparent'");
   cursor: zoom-in;
   overflow-y: auto;
@@ -129,7 +131,7 @@ async function onDownload(): Promise<void> {
 .tpoi-top img {
   max-width: 100%;
   max-height: 100%;
-  border-radius: 10px;
+  border-radius: 4px;
   object-fit: contain;
 }
 
@@ -138,23 +140,25 @@ async function onDownload(): Promise<void> {
   width: 100%;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
 .tpoi-info {
-  padding: 10px;
-  border-radius: 10px;
+  padding: 8px;
+  border: 1px solid var(--tgc-od-white);
+  border-radius: 4px;
   background-color: var(--common-shadow-2);
   color: white;
 }
 
 .tpoi-tools {
   display: flex;
-  padding: 10px;
-  border-radius: 10px;
+  padding: 8px;
+  border: 1px solid var(--tgc-od-white);
+  border-radius: 4px;
   background-color: var(--common-shadow-2);
   color: white;
-  gap: 10px;
+  gap: 4px;
 }
 
 .tpoi-tools v-icon {

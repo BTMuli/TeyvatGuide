@@ -78,7 +78,7 @@ const levelColor = computed<string>(() => {
   width: 100%;
   max-width: 100%;
   height: 26px;
-  border-top: 2px solid var(--common-shadow-2);
+  border-top: 1px dotted var(--common-shadow-4);
   font-size: 14px;
   opacity: 0.7;
   text-align: v-bind("props.position");
