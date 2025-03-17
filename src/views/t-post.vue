@@ -355,7 +355,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 }
 </script>
 <style lang="scss" scoped>
-@import "@styles/github.styles.scss";
+@use "@styles/github.styles.scss" as github-styles;
 
 .tp-post-body {
   width: 800px;
@@ -513,27 +513,27 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 
 /* collection */
 .tp-post-collection {
-  @include github-tag-dark-gen(#3572a5);
+  @include github-styles.github-tag-dark-gen(#3572a5);
   cursor: pointer;
 
   &:hover {
-    @include github-tag-dark-gen(#98c379);
+    @include github-styles.github-tag-dark-gen(#98c379);
   }
 }
 
 /* topic */
 .tp-post-topic {
-  @include github-tag-dark-gen(#e06c63);
+  @include github-styles.github-tag-dark-gen(#e06c63);
 
   cursor: pointer;
 
   &:hover {
-    @include github-tag-dark-gen(#00aeec);
+    @include github-styles.github-tag-dark-gen(#00aeec);
   }
 }
 
 /* reason */
 .tp-post-reason {
-  @include github-tag-dark-gen(#d19a66);
+  @include github-styles.github-tag-dark-gen(#d19a66);
 }
 </style>

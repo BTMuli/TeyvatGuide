@@ -128,7 +128,7 @@ async function toBBS(link: URL): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
-@import "@styles/github.styles.scss";
+@use "@styles/github.styles.scss" as github-styles;
 
 .tgn-container {
   position: relative;
@@ -138,7 +138,7 @@ async function toBBS(link: URL): Promise<void> {
 }
 
 .tgn-nav {
-  @include github-card();
+  @include github-styles.github-card();
   display: flex;
   align-items: center;
   justify-content: center;
@@ -149,7 +149,7 @@ async function toBBS(link: URL): Promise<void> {
 }
 
 .dark .tgn-nav {
-  @include github-card("dark");
+  @include github-styles.github-card("dark");
 }
 
 .tgn-nav img {

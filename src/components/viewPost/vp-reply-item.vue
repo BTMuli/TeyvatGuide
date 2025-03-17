@@ -28,7 +28,7 @@
     <div class="tpr-info">
       <div class="tpri-left">
         <span :title="timestampToDate(props.modelValue.reply.created_at * 1000)">
-          {{ getTime() }}
+          {{ getNearTime(props.modelValue.reply.created_at) }}
         </span>
         <span>{{ props.modelValue.user.ip_region }}</span>
       </div>
@@ -112,7 +112,7 @@ import { computed, onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from 
 import TpParser from "./tp-parser.vue";
 
 import { generateShareImg } from "@/utils/TGShare.js";
-import { timestampToDate } from "@/utils/toolFunc.js";
+import { getNearTime, timestampToDate } from "@/utils/toolFunc.js";
 import postReq from "@/web/request/postReq.js";
 
 type TprReplyProps =
@@ -164,21 +164,6 @@ async function share(): Promise<void> {
   const replyDom = document.querySelector<HTMLElement>(`#${replyId}`);
   if (replyDom === null) return;
   await generateShareImg(replyId, replyDom, 3);
-}
-
-function getTime(): string {
-  const time = new Date(props.modelValue.reply.created_at * 1000);
-  const now = new Date();
-  // 如果是今天，只显示 hh:mm
-  if (time.toDateString() === now.toDateString()) {
-    return time.toLocaleTimeString();
-  }
-  // 如果是今年，显示 MM-dd
-  if (time.getFullYear() === now.getFullYear()) {
-    return time.toLocaleDateString().slice(5).replace(/\//g, "-");
-  }
-  // 否则显示 yyyy-MM-dd
-  return time.toLocaleDateString().replace(/\//g, "-");
 }
 
 async function showReply(): Promise<void> {

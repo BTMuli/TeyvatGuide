@@ -60,10 +60,10 @@ async function shareAnno(): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
-@import "@styles/github.styles.scss";
+@use "@styles/github.styles.scss" as github-styles;
 
 .anno-card {
-  @include github-card();
+  @include github-styles.github-card();
   position: relative;
   overflow: hidden;
   width: 100%;
@@ -72,7 +72,7 @@ async function shareAnno(): Promise<void> {
 }
 
 .dark .anno-card {
-  @include github-card("dark");
+  @include github-styles.github-card("dark");
 }
 
 .anno-cover {

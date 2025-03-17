@@ -15,10 +15,10 @@
 defineProps<{ append?: boolean }>();
 </script>
 <style lang="scss" scoped>
-@import "@styles/github.styles.scss";
+@use "@styles/github.styles.scss" as github-styles;
 
 .thc-container {
-  @include github-card();
+  @include github-styles.github-card();
 
   position: relative;
   min-height: 100px;
@@ -29,7 +29,7 @@ defineProps<{ append?: boolean }>();
 }
 
 .dark .thc-container {
-  @include github-card("dark");
+  @include github-styles.github-card("dark");
 }
 
 .thc-title,

@@ -93,8 +93,6 @@ onUnmounted(() => {
 });
 </script>
 <style lang="scss" scoped>
-@import "@styles/github.styles.scss";
-
 .ph-position-card {
   position: relative;
   display: flex;

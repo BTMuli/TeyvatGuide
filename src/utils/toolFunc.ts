@@ -1,7 +1,7 @@
 /**
  * @file utils/toolFunc.ts
  * @description 一些工具函数
- * @since Beta v0.6.8
+ * @since Beta v0.7.2
  */
 
 import { path } from "@tauri-apps/api";
@@ -43,6 +43,34 @@ export function timestampToDate(timestamp: number): string {
   const minute = String(date.getMinutes()).padStart(2, "0");
   const second = String(date.getSeconds()).padStart(2, "0");
   return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+}
+
+/**
+ * @description 获取相近时间
+ * @description 如果是今天，只显示 hh:mm
+ * @description 如果是今年，显示 MM-dd
+ * @description 否则显示 yyyy-MM-dd
+ * @since Beta v0.7.2
+ * @param {number} timestamp - 时间戳（秒）
+ * @returns {string} 相近时间
+ */
+export function getNearTime(timestamp: number): string {
+  const date = new Date(timestamp * 1000);
+  const now = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+  if (
+    now.getFullYear() === year &&
+    now.getMonth() === date.getMonth() &&
+    now.getDate() === date.getDate()
+  ) {
+    return `${hour}:${minute}`;
+  }
+  if (now.getFullYear() === year) return `${month}-${day}`;
+  return `${year}-${month}-${day}`;
 }
 
 /**
