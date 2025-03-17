@@ -38,21 +38,11 @@ import TOverlay from "./t-overlay.vue";
 
 import { generateShareImg } from "@/utils/TGShare.js";
 
-enum ToNameCardTypeEnum {
-  other,
-  achievement,
-  role,
-  record,
-  activity,
-  unknown,
-}
-
-type ToNameCardTypeMap = { [key in ToNameCardTypeEnum]: string };
 type ToNameCardProps = { data?: TGApp.App.NameCard.Item };
 
 const props = defineProps<ToNameCardProps>();
 const visible = defineModel<boolean>();
-const typeMap: ToNameCardTypeMap = {
+const typeMap: Record<number, string> = {
   0: "其他",
   1: "成就",
   2: "角色",
@@ -62,10 +52,9 @@ const typeMap: ToNameCardTypeMap = {
 };
 const loading = ref<boolean>(false);
 const getType = computed<string>(() => {
-  if (!props.data) return typeMap[ToNameCardTypeEnum.unknown];
-  if (!(props.data.type satisfies ToNameCardTypeEnum)) return typeMap[5];
-  const type: ToNameCardTypeEnum = props.data.type;
-  return typeMap[type];
+  if (!props.data) return typeMap[0];
+  if (!(props.data.type in typeMap)) return typeMap[5];
+  return typeMap[props.data.type];
 });
 
 function parseNameCard(desc: string): string {

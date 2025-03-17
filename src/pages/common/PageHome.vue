@@ -72,7 +72,7 @@ import { storeToRefs } from "pinia";
 import { type Component, computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import { useAppStore } from "@/store/modules/app.js";
-import { ShowItemEnum, useHomeStore } from "@/store/modules/home.js";
+import { useHomeStore } from "@/store/modules/home.js";
 import TGLogger from "@/utils/TGLogger.js";
 import apiHubReq from "@/web/request/apiHubReq.js";
 
@@ -87,20 +87,16 @@ type SelectItem = { icon: string; title: string; gid: number };
 const { devMode, isLogin } = storeToRefs(useAppStore());
 const homeStore = useHomeStore();
 
-const showItemsAll: Array<ShowItemEnum> = [
-  ShowItemEnum.calendar,
-  ShowItemEnum.pool,
-  ShowItemEnum.position,
-];
+const showItemsAll: Array<string> = ["素材日历", "限时祈愿", "近期活动"];
 
 const curGid = ref<number>(2);
 const gameList = shallowRef<Array<SelectItem>>();
 
-const loadItems = shallowRef<Array<ShowItemEnum>>([]);
+const loadItems = shallowRef<Array<string>>([]);
 const components = shallowRef<Array<SFComp>>([]);
-const showItems = computed<Array<ShowItemEnum>>({
+const showItems = computed<Array<string>>({
   get: () => homeStore.getShowItems(),
-  set: (v: Array<ShowItemEnum>) => homeStore.setShowItems(v),
+  set: (v: Array<string>) => homeStore.setShowItems(v),
 });
 
 onMounted(async () => {
@@ -154,14 +150,14 @@ async function submitHome(): Promise<void> {
   await loadComp();
 }
 
-function getName(name: string): ShowItemEnum | undefined {
+function getName(name: string): string | undefined {
   switch (name) {
     case "ph-comp-pool":
-      return ShowItemEnum.pool;
+      return "限时祈愿";
     case "ph-comp-position":
-      return ShowItemEnum.position;
+      return "近期活动";
     case "ph-comp-calendar":
-      return ShowItemEnum.calendar;
+      return "素材日历";
     default:
       return undefined;
   }

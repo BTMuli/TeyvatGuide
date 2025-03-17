@@ -16,6 +16,7 @@
     "types": ["vite/client", "node", "color-convert", "js-md5", "uuid"],
     "allowSyntheticDefaultImports": true,
     "composite": true,
+    "erasableSyntaxOnly": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],

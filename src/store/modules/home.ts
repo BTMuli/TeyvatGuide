@@ -1,29 +1,23 @@
 /**
  * @file store/modules/home.ts
  * @description Home store module
- * @since Beta v0.6.5
+ * @since Beta v0.7.2
  */
 
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export const enum ShowItemEnum {
-  calendar = "素材日历",
-  pool = "限时祈愿",
-  position = "近期活动",
-}
-
-export type ShowItem = { show: boolean; order: number; label: ShowItemEnum };
+export type ShowItem = { show: boolean; order: number; label: string };
 
 export const useHomeStore = defineStore("home", () => {
   const homeShow = ref<Array<ShowItem>>([
-    { show: true, order: 1, label: ShowItemEnum.pool },
-    { show: true, order: 2, label: ShowItemEnum.position },
-    { show: true, order: 3, label: ShowItemEnum.calendar },
+    { show: true, order: 1, label: "限时祈愿" },
+    { show: true, order: 2, label: "近期活动" },
+    { show: true, order: 3, label: "素材日历" },
   ]);
   const poolCover = ref<Record<number, string>>();
 
-  function getShowItems(): Array<ShowItemEnum> {
+  function getShowItems(): Array<string> {
     const homeShowLocal = localStorage.getItem("homeShow");
     if (homeShowLocal === null || !Array.isArray(JSON.parse(homeShowLocal))) {
       localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
@@ -37,14 +31,14 @@ export const useHomeStore = defineStore("home", () => {
 
   function init(): void {
     homeShow.value = [
-      { show: true, order: 1, label: ShowItemEnum.pool },
-      { show: true, order: 2, label: ShowItemEnum.position },
-      { show: true, order: 3, label: ShowItemEnum.calendar },
+      { show: true, order: 1, label: "限时祈愿" },
+      { show: true, order: 2, label: "近期活动" },
+      { show: true, order: 3, label: "素材日历" },
     ];
     localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
   }
 
-  function setShowItems(items: Array<ShowItemEnum>): void {
+  function setShowItems(items: Array<string>): void {
     let order = 1;
     for (const item of items) {
       const findIdx = homeShow.value.findIndex((i) => i.label === item);

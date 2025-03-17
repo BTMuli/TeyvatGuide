@@ -18,13 +18,7 @@ const dbDataPath: Readonly<string> = `${await path.appConfigDir()}${path.sep()}T
 // 用于存放日志的路径
 const logDataDir: Readonly<string> = await path.appLogDir();
 
-export enum NewsTypeEnum {
-  notice = "1",
-  activity = "2",
-  news = "3",
-}
-
-export type NewsType = keyof typeof NewsTypeEnum;
+export type NewsType = "notice" | "activity" | "news";
 
 export const useAppStore = defineStore(
   "app",

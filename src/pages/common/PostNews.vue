@@ -72,7 +72,7 @@ import type { Ref } from "vue";
 import { computed, onMounted, reactive, ref, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import { type NewsType, NewsTypeEnum, useAppStore } from "@/store/modules/app.js";
+import { type NewsType, useAppStore } from "@/store/modules/app.js";
 import TGBbs from "@/utils/TGBbs.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
@@ -87,6 +87,7 @@ const { recentNewsType } = storeToRefs(useAppStore());
 const { gid } = <{ gid: string }>useRoute().params;
 
 const tabValues: Readonly<Array<NewsType>> = ["notice", "activity", "news"];
+const tabMap: Readonly<Record<NewsType, string>> = { notice: "1", activity: "2", news: "3" };
 const gameName = TGBbs.channels.find((v) => v.gid.toString() === gid)?.title || "未知分区";
 
 const loading = ref<boolean>(false);
@@ -123,7 +124,7 @@ async function firstLoad(key: NewsType, refresh: boolean = false): Promise<void>
   }
   await showLoading.start(`正在获取${gameName}${rawData[key].name}数据`);
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
-  const getData = await painterReq.news(gid, NewsTypeEnum[key]);
+  const getData = await painterReq.news(gid, tabMap[key]);
   await showLoading.update(`数量：${getData.list.length}，是否最后一页：${getData.is_last}`);
   rawData[key] = { isLast: getData.is_last, name: rawData[key].name, lastId: getData.list.length };
   postData[key] = getData.list;
@@ -150,7 +151,7 @@ async function loadMore(key: NewsType): Promise<void> {
   await showLoading.start(`正在获取${gameName}${rawData[key].name}数据`);
   const mod = rawData[key].lastId % 20;
   const pageSize = mod === 0 ? 20 : 20 - mod;
-  const getData = await painterReq.news(gid, NewsTypeEnum[key], pageSize, rawData[key].lastId);
+  const getData = await painterReq.news(gid, tabMap[key], pageSize, rawData[key].lastId);
   await showLoading.update(`数量：${getData.list.length}，是否最后一页：${getData.is_last}`);
   rawData[key].lastId = rawData[key].lastId + getData.list.length;
   rawData[key].isLast = getData.is_last;

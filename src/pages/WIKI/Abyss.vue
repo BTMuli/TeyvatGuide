@@ -52,15 +52,8 @@ import { onMounted, reactive, type Ref, ref, shallowRef, watch } from "vue";
 
 import { timestampToDate } from "@/utils/toolFunc.js";
 
-enum AbyssTabEnum {
-  use = "角色使用",
-  up = "角色出场",
-  team = "队伍出场",
-  hold = "角色持有",
-}
-
-type AbyssTab = keyof typeof AbyssTabEnum;
-type AbyssList = Array<{ label: AbyssTabEnum; value: AbyssTab }>;
+type AbyssTab = "use" | "up" | "team" | "hold";
+type AbyssList = Array<{ label: string; value: AbyssTab }>;
 export type AbyssDataItem<T> = { cur: T; last: T };
 export type AbyssDataItemType<T extends AbyssTab> = T extends "use"
   ? AbyssDataItem<Array<TGApp.Plugins.Hutao.Abyss.AvatarUse>>
@@ -74,11 +67,17 @@ export type AbyssDataItemType<T extends AbyssTab> = T extends "use"
 type AbyssData = { [key in AbyssTab]: Ref<AbyssDataItemType<key> | null> };
 
 const abyssList: Readonly<AbyssList> = [
-  { label: AbyssTabEnum.use, value: "use" },
-  { label: AbyssTabEnum.up, value: "up" },
-  { label: AbyssTabEnum.team, value: "team" },
-  { label: AbyssTabEnum.hold, value: "hold" },
+  { label: "角色使用", value: "use" },
+  { label: "角色出场", value: "up" },
+  { label: "队伍出场", value: "team" },
+  { label: "角色持有", value: "hold" },
 ];
+const abyssMap: Readonly<Record<AbyssTab, string>> = {
+  use: "角色使用率",
+  up: "角色出场率",
+  team: "队伍出场率",
+  hold: "角色持有率",
+};
 const showDialog = ref<boolean>(false);
 const tab = shallowRef<AbyssTab>("use");
 const overview = shallowRef<AbyssDataItem<TGApp.Plugins.Hutao.Abyss.OverviewData>>();
@@ -107,7 +106,7 @@ onMounted(async () => {
 
 async function refreshData(type: AbyssTab): Promise<void> {
   if (abyssData && abyssData[type] !== null) return;
-  await showLoading.start("正在获取深渊数据", `正在获取 ${AbyssTabEnum[type]} 数据`);
+  await showLoading.start("正在获取深渊数据", `正在获取 ${abyssMap[type]} 数据`);
   const data = await getData(type);
   switch (type) {
     case "use":
