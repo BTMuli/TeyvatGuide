@@ -17,7 +17,9 @@
             mdi-format-color-fill
           </v-icon>
           <v-icon @click="showOri = true" title="查看原图" v-else>mdi-magnify</v-icon>
-          <v-icon @click="onCopy" title="复制到剪贴板">mdi-content-copy</v-icon>
+          <v-icon @click="onCopy" title="复制到剪贴板" v-if="format !== 'gif'"
+            >mdi-content-copy</v-icon
+          >
           <v-icon @click="onDownload" title="下载到本地">mdi-download</v-icon>
           <v-icon @click="visible = false" title="关闭浮窗">mdi-close</v-icon>
         </div>
@@ -59,10 +61,6 @@ function setBlackBg(): void {
 }
 
 async function onCopy(): Promise<void> {
-  if (format.value === "gif") {
-    showSnackbar.warn("GIF 图片不支持复制到剪贴板");
-    return;
-  }
   if (!showOri.value) {
     showOri.value = true;
     await nextTick();
