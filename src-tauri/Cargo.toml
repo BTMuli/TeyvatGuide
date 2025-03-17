@@ -29,6 +29,10 @@ tauri-utils = "2.2.0"
 url = "2.5.4"
 walkdir = "2.5.0"
 
+# 锁定wry版本避免出现白屏问题,见 https://github.com/tauri-apps/tauri/issues/12975
+[dependencies.wry]
+version = "=0.50.3"
+
 # deep link 插件
 [dependencies.tauri-plugin-deep-link]
 git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
