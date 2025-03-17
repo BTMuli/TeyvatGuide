@@ -1,7 +1,7 @@
 /**
  * @file assets/themes/dark.css
  * @description 主题样式文件-深色主题
- * @since Beta v0.4.5
+ * @since Beta v0.7.2
  */
 
 /* dark mode */
@@ -33,8 +33,6 @@ html.dark {
 
   /* button */
   --btn-text: var(--tgc-yellow-1);
-  --btn-bg-1: var(--tgc-dark-5);
-  --btn-text-1: var(--tgc-yellow-1);
 
   /* box-shadow */
   --common-shadow-1: rgb(255 255 255 / 10%);

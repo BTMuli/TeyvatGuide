@@ -1,7 +1,7 @@
 /**
  * @file main.ts
  * @description 应用入口
- * @since Beta v0.4.0
+ * @since Beta v0.7.2
  */
 
 import { createApp } from "vue";
@@ -14,6 +14,6 @@ import "https://static.geetest.com/static/js/gt.0.4.9.js";
 
 import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";
-import "./assets/index.css";
+import "./assets/index.scss";
 
 createApp(App).use(router).use(store).use(createVuetify()).mount("#app");

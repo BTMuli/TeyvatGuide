@@ -424,15 +424,15 @@ async function mergePosts(posts: Array<TGApp.BBS.Post.FullData>, collect: string
 .pc-btn {
   height: 40px;
   border: 1px solid var(--common-shadow-4);
-  background: var(--btn-bg-1);
-  color: var(--btn-text-1);
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
   font-family: var(--font-title);
 }
 
 .pc-posts {
   display: grid;
   grid-auto-rows: auto;
-  grid-gap: 10px;
+  grid-gap: 8px;
   grid-template-columns: repeat(4, minmax(320px, 1fr));
 }
 </style>

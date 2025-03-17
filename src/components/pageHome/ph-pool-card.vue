@@ -165,7 +165,7 @@ async function toPool(): Promise<void> {
   width: 100%;
   border-radius: 4px;
   aspect-ratio: 69 / 32;
-  box-shadow: 2px 2px 4px var(--common-shadow-2);
+  box-shadow: 0 2px 4px var(--common-shadow-2);
 }
 
 .ph-pool-cover {

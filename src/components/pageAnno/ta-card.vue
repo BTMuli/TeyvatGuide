@@ -1,13 +1,13 @@
 <template>
   <div :id="`anno_card_${props.modelValue.id}`" class="anno-card">
-    <div class="anno-cover" :title="props.modelValue.title" @click="createAnno">
+    <div :title="props.modelValue.title" class="anno-cover" @click="createAnno">
       <TMiImg
+        v-if="props.modelValue.banner !== ''"
+        :ori="true"
         :src="props.modelValue.banner"
         alt="cover"
-        :ori="true"
-        v-if="props.modelValue.banner !== ''"
       />
-      <img alt="cover" src="/source/UI/defaultCover.webp" v-else />
+      <img v-else alt="cover" src="/source/UI/defaultCover.webp" />
       <div class="anno-info">
         <div class="anno-time">
           <v-icon>mdi-clock-time-four-outline</v-icon>
@@ -15,10 +15,10 @@
         </div>
       </div>
     </div>
-    <div class="anno-title" :title="props.modelValue.title" @click="shareAnno">
+    <div :title="props.modelValue.title" class="anno-title" @click="shareAnno">
       {{ parseTitle(props.modelValue.subtitle) }}
     </div>
-    <div class="anno-label" :title="`标签：${props.modelValue.tagLabel}`">
+    <div :title="`标签：${props.modelValue.tagLabel}`" class="anno-label">
       <img :src="props.modelValue.tagIcon" alt="tag" />
       <span>{{ props.modelValue.tagLabel }}</span>
     </div>
@@ -29,11 +29,12 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 
+import type { AnnoCard } from "@/pages/common/PageAnno.vue";
 import TGLogger from "@/utils/TGLogger.js";
 import { generateShareImg } from "@/utils/TGShare.js";
 import { createTGWindow } from "@/utils/TGWindow.js";
 
-type TAnnoCardProps = { region: string; modelValue: TGApp.App.Announcement.ListCard; lang: string };
+type TAnnoCardProps = { region: string; modelValue: AnnoCard; lang: string };
 const props = defineProps<TAnnoCardProps>();
 
 function parseTitle(title: string): string {
@@ -58,14 +59,20 @@ async function shareAnno(): Promise<void> {
   await generateShareImg(fileName, element, 2.5);
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@import "@styles/github.styles.scss";
+
 .anno-card {
+  @include github-card();
   position: relative;
   overflow: hidden;
   width: 100%;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
-  box-shadow: 2px 2px 5px var(--common-shadow-2);
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.dark .anno-card {
+  @include github-card("dark");
 }
 
 .anno-cover {
@@ -89,13 +96,15 @@ async function shareAnno(): Promise<void> {
 .anno-title {
   position: relative;
   overflow: hidden;
-  width: 100%;
-  padding: 5px;
+  max-width: 100%;
+  width: fit-content;
+  padding: 4px;
   cursor: pointer;
   font-size: 18px;
-  text-align: right;
+  margin-left: auto;
   text-overflow: ellipsis;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .anno-info {
@@ -116,9 +125,9 @@ async function shareAnno(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin: 5px;
+  margin: 4px;
   color: var(--tgc-white-1);
-  gap: 5px;
+  gap: 4px;
 }
 
 .anno-label {
@@ -128,19 +137,19 @@ async function shareAnno(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 5px;
+  padding: 4px;
   background-color: var(--tgc-od-white);
-  border-bottom-left-radius: 5px;
+  border-bottom-left-radius: 6px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   opacity: 0.8;
-  text-shadow: 0 0 5px var(--tgc-dark-1);
+  text-shadow: 0 0 4px var(--tgc-dark-1);
 }
 
 .anno-label img {
   width: 20px;
   height: 20px;
-  margin-right: 5px;
+  margin-right: 4px;
 }
 
 .anno-cover img:hover {
@@ -155,14 +164,14 @@ async function shareAnno(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 5px;
+  padding: 0 4px;
   background: var(--tgc-od-orange);
-  border-bottom-right-radius: 5px;
-  border-top-left-radius: 5px;
-  box-shadow: 0 0 10px var(--tgc-dark-1);
+  border-bottom-right-radius: 6px;
+  border-top-left-radius: 6px;
+  box-shadow: 0 0 8px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   font-size: 12px;
   opacity: 0.8;
-  text-shadow: 0 0 5px var(--tgc-dark-1);
+  text-shadow: 0 0 4px var(--tgc-dark-1);
 }
 </style>

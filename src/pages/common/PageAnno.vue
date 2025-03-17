@@ -67,7 +67,7 @@ import Hk4eApi, { type AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
 
 type AnnoSelect = { text: string; value: string };
 type AnnoKey = keyof typeof AnnoType;
-type AnnoCard = {
+export type AnnoCard = {
   id: number;
   title: string;
   subtitle: string;
@@ -280,21 +280,17 @@ async function switchNews(): Promise<void> {
 
 .anno-switch-btn {
   height: 40px;
-  background: var(--btn-bg-1);
-  color: var(--btn-text-1);
+  margin-right: 15px;
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
   font-family: var(--font-title);
-}
-
-.dark .anno-switch-btn {
-  border: 1px solid var(--common-shadow-2);
 }
 
 .anno-grid {
   display: grid;
-  padding: 5px;
   font-family: var(--font-title);
   grid-auto-rows: auto;
-  grid-gap: 10px;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 }
 </style>

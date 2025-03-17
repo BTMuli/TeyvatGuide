@@ -290,8 +290,8 @@ onUnmounted(async () => {
   height: 40px;
   border: 1px solid var(--common-shadow-2);
   margin-left: 15px;
-  background: var(--btn-bg-1);
-  color: var(--btn-text-1);
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
   font-family: var(--font-title);
 }
 

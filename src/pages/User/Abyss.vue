@@ -243,6 +243,7 @@ async function refreshAbyss(): Promise<void> {
   uidCur.value = account.value.gameUid;
   await loadAbyss();
   await showLoading.end();
+  showSnackbar.success(`已加载${account.value.gameUid}的${localAbyss.value.length}条深渊数据`);
 }
 
 async function shareAbyss(): Promise<void> {

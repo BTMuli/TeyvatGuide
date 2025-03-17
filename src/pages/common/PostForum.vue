@@ -382,8 +382,8 @@ function handleUserClick(user: TGApp.BBS.Post.User): void {
 
 .post-forum-btn {
   height: 40px;
-  background: var(--btn-bg-1);
-  color: var(--btn-text-1);
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
   font-family: var(--font-title);
 }
 
@@ -393,10 +393,9 @@ function handleUserClick(user: TGApp.BBS.Post.User): void {
 
 .posts-grid {
   display: grid;
-  padding: 5px;
   font-family: var(--font-title);
   grid-auto-rows: auto;
-  grid-gap: 10px;
+  grid-gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 }
 

@@ -95,14 +95,15 @@ function parseDesc(intro: string): string {
   display: flex;
   width: 100%;
   height: 100%;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 5px;
-  border-radius: 5px;
-  box-shadow: 0 0 5px inset var(--common-shadow-1);
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-1);
   overflow-y: auto;
-  row-gap: 5px;
+  row-gap: 4px;
 }
 
 .tcb-top-none,
@@ -136,15 +137,17 @@ function parseDesc(intro: string): string {
   width: 100%;
   align-items: center;
   justify-content: flex-start;
-  padding: 5px;
-  border-radius: 10px;
-  background: var(--box-bg-1);
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-2);
 }
 
 .tcb-item img {
-  height: 100px;
+  height: 80px;
   border-radius: 50%;
   aspect-ratio: 1;
+  background: var(--box-bg-3);
   cursor: pointer;
 }
 

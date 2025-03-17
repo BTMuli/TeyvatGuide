@@ -152,6 +152,7 @@ async function refreshRecord(): Promise<void> {
   await loadUid();
   await loadRecord();
   await showLoading.end();
+  showSnackbar.success(`成功刷新${account.value.gameUid}的战绩数据`);
 }
 
 async function shareRecord(): Promise<void> {
@@ -210,6 +211,7 @@ async function deleteRecord(): Promise<void> {
 
 .ur-top-btns {
   display: flex;
+  margin-right: 15px;
   gap: 15px;
 }
 

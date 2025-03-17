@@ -120,7 +120,7 @@ function getBoxData(item: TGApp.App.Calendar.Item): TItemBoxData {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-family: var(--font-title);
   font-size: 20px;
 }
@@ -130,14 +130,14 @@ function getBoxData(item: TGApp.App.Calendar.Item): TItemBoxData {
   height: 36px;
   align-items: center;
   justify-content: center;
-  margin-right: 5px;
+  margin-right: 4px;
 }
 
 .tc-btn-list {
   display: flex;
   align-items: center;
   justify-content: center;
-  column-gap: 5px;
+  column-gap: 8px;
 }
 
 .tc-btn {
@@ -162,16 +162,16 @@ function getBoxData(item: TGApp.App.Calendar.Item): TItemBoxData {
 .tc-content {
   position: relative;
   display: flex;
-  height: 210px;
+  height: 208px;
   align-items: center;
   justify-content: space-between;
-  column-gap: 10px;
+  column-gap: 8px;
 }
 
 .calendar-grid {
   display: grid;
   height: 100%;
-  grid-gap: 10px;
+  grid-gap: 8px;
   grid-template-columns: repeat(8, 100px);
   place-items: flex-start flex-start;
 }

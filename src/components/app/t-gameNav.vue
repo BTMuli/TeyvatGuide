@@ -127,30 +127,34 @@ async function toBBS(link: URL): Promise<void> {
   showSnackbar.warn(`不支持的链接：${link.href}`);
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@import "@styles/github.styles.scss";
+
 .tgn-container {
+  position: relative;
   display: flex;
-  padding: 5px;
-  gap: 10px;
+  padding: 8px;
+  gap: 8px;
 }
 
 .tgn-nav {
+  @include github-card();
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px;
-  border-radius: 5px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  background: var(--common-shadow-t-4);
-  box-shadow: 0 0 5px var(--common-shadow-4);
+  padding: 4px;
+  border-radius: 4px;
   color: var(--tgc-white-1);
   cursor: pointer;
 }
 
+.dark .tgn-nav {
+  @include github-card("dark");
+}
+
 .tgn-nav img {
-  width: 25px;
-  height: 25px;
+  width: 28px;
+  height: 28px;
 }
 
 .tgn-nav span {

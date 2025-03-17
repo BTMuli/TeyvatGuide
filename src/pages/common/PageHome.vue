@@ -45,6 +45,7 @@
       </div>
       <div class="home-select">
         <v-select
+          width="300px"
           variant="outlined"
           v-model="showItems"
           :items="showItemsAll"
@@ -176,11 +177,12 @@ async function loadEnd(item: SFComp): Promise<void> {
   if (loadItems.value.length === components.value.length) await showLoading.end();
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .home-container {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .home-top {
@@ -195,7 +197,6 @@ async function loadEnd(item: SFComp): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
 }
 
 .home-tool-select {

@@ -61,6 +61,11 @@ const selects: Array<ToGameLoginSelect> = [
     value: 7,
     icon: "/platforms/mhy/bh2.webp",
   },
+  // {
+  //   title: "星布谷地",
+  //   value: 13,
+  //   icon: "/platforms/mhy/xbgd.webp",
+  // },
 ];
 
 // eslint-disable-next-line no-undef
@@ -245,20 +250,21 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  column-gap: 4px;
+  column-gap: 8px;
 }
 
 .tog-select-item {
   position: relative;
   width: 36px;
   height: 36px;
-  box-sizing: border-box;
   border-radius: 4px;
   cursor: pointer;
+  opacity: 0.6;
 
   &.active {
-    border: 3px solid var(--tgc-od-orange);
+    border: 2px solid var(--tgc-od-orange);
     cursor: default;
+    opacity: 1;
   }
 
   img {

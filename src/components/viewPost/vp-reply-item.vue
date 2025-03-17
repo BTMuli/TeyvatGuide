@@ -252,7 +252,11 @@ async function handleUser(): Promise<void> {
   position: absolute;
   top: 0;
   right: 0;
+  overflow: hidden;
+  border-top: 1px inset var(--common-shadow-1);
+  border-right: 1px inset var(--common-shadow-1);
   background-color: v-bind("props.modelValue.user.reply_bubble?.bg_color");
+  border-top-right-radius: 4px;
   opacity: 0.5;
 }
 

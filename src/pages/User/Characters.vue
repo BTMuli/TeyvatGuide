@@ -4,36 +4,33 @@
       <div class="uc-top-title">
         <img alt="icon" src="/source/UI/userAvatar.webp" />
         <span>我的角色</span>
-        <v-btn variant="outlined" @click="showSelect = true">筛选角色</v-btn>
-        <v-btn variant="outlined" @click="resetSelect = true">重置筛选</v-btn>
+        <v-btn class="uc-top-btn" @click="showSelect = true">筛选角色</v-btn>
+        <v-btn class="uc-top-btn" @click="resetSelect = true">重置筛选</v-btn>
       </div>
     </template>
     <template #append>
       <div class="uc-top-btns">
         <v-btn
+          class="uc-top-btn"
           prepend-icon="mdi-refresh"
           @click="refresh()"
-          :rounded="true"
-          variant="outlined"
           v-model:loading="loadData"
         >
           刷新
         </v-btn>
         <v-btn
+          class="uc-top-btn"
           prepend-icon="mdi-share"
           :disabled="enableShare"
           @click="share()"
-          :rounded="true"
-          variant="outlined"
           v-model:loading="loadShare"
         >
           分享
         </v-btn>
         <v-btn
+          class="uc-top-btn"
           prepend-icon="mdi-delete"
           @click="deleteUid()"
-          :rounded="true"
-          variant="outlined"
           :disabled="uidCur === undefined"
           v-model:loading="loadDel"
         >
@@ -463,6 +460,13 @@ function handleSwitch(next: boolean): void {
   align-content: center;
   margin: 0 10px;
   column-gap: 10px;
+}
+
+.uc-top-btn {
+  border-radius: 5px;
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
+  font-family: var(--font-text);
 }
 
 .uc-grid {

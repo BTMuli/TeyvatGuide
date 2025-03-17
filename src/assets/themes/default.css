@@ -1,7 +1,7 @@
 /**
  * @file assets/themes/default.css
  * @description 主题样式文件-默认（浅色）主题
- * @since Beta v0.4.5
+ * @since Beta v0.7.2
  */
 
 /* default(light) theme */
@@ -33,8 +33,6 @@ html.default {
 
   /* button */
   --btn-text: var(--tgc-yellow-2); /* with tgc-btn-1 */
-  --btn-bg-1: var(--tgc-yellow-1);
-  --btn-text-1: var(--tgc-blue-1);
 
   /* box-shadow */
   --common-shadow-1: rgb(0 0 0 / 10%);

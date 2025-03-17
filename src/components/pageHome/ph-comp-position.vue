@@ -32,12 +32,10 @@ onMounted(async () => {
   emits("success");
 });
 </script>
-
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .position-grid {
   display: grid;
-  margin-top: 10px;
-  grid-gap: 20px;
-  grid-template-columns: repeat(auto-fill, minmax(calc(400px + 2rem), 0.5fr));
+  grid-gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(calc(400px), 0.5fr));
 }
 </style>

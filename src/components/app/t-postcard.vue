@@ -244,8 +244,11 @@ function onUserClick(): void {
   emits("onUserClick", card.value.user);
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@import "@styles/github.styles.scss";
+
 .tpc-card {
+  @include github-card();
   position: relative;
   display: flex;
   overflow: hidden;
@@ -254,15 +257,12 @@ function onUserClick(): void {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
-  background: var(--box-bg-1);
-  box-shadow: 2px 2px 4px var(--common-shadow-2);
   row-gap: 8px;
 }
 
 .dark .tpc-card {
-  box-shadow: unset;
+  @include github-card("dark");
 }
 
 .tpc-top {
@@ -334,31 +334,28 @@ function onUserClick(): void {
 }
 
 .tpc-tag {
+  @include github-tag-dark-gen(#e06c63);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
-  background: var(--box-bg-2);
-  color: var(--box-text-5);
   cursor: pointer;
   gap: 4px;
 
   &:hover {
-    color: var(--box-text-3);
+    @include github-tag-dark-gen(#00aeec);
   }
 }
 
 .tpc-reason {
+  @include github-tag-dark-gen(#d19a66);
+
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
-  background: var(--box-bg-2);
-  color: var(--tgc-od-orange);
   gap: 4px;
 }
 

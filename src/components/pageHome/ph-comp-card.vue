@@ -1,51 +1,61 @@
 <template>
   <div class="thc-container">
     <div class="thc-title">
-      <slot name="title"></slot>
+      <slot name="title" />
     </div>
     <div v-if="append" class="thc-append">
-      <slot name="title-append"></slot>
+      <slot name="title-append" />
     </div>
     <div class="thc-box">
-      <slot name="default"></slot>
+      <slot name="default" />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 defineProps<{ append?: boolean }>();
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@import "@styles/github.styles.scss";
+
 .thc-container {
+  @include github-card();
+
   position: relative;
   min-height: 100px;
-  padding: 20px 10px 10px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 5px;
-  margin-top: 30px;
-  box-shadow: 2px 2px 5px var(--common-shadow-1);
+  padding: 24px 8px 8px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  margin-top: 24px;
+}
+
+.dark .thc-container {
+  @include github-card("dark");
 }
 
 .thc-title,
 .thc-append {
   position: absolute;
-  top: -20px;
+  top: -16px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 10px;
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--tgc-od-blue);
   font-family: var(--font-title);
+  border: 1px solid var(--tgc-od-white);
+  box-sizing: border-box;
 }
 
 .thc-title {
-  left: 10px;
-  color: var(--tgc-white-4);
+  left: 8px;
+  color: var(--tgc-white-1);
   font-size: 20px;
 }
 
 .thc-append {
-  right: 10px;
+  right: 8px;
   color: var(--tgc-white-1);
   font-size: 16px;
 }

@@ -24,6 +24,7 @@ export default defineConfig({
       "@Mys/": "/src/plugins/Mys/",
       "@Sqlite/": "/src/plugins/Sqlite/",
       "@Bili/": "/src/plugins/Bili/",
+      "@styles/": "/src/assets/styles/",
     },
   },
   server: {

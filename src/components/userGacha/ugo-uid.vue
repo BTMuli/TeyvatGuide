@@ -319,8 +319,8 @@ async function handleExport(): Promise<void> {
 .ugo-item-btn {
   height: 40px;
   border: 1px solid var(--common-shadow-2);
-  background: var(--btn-bg-1);
-  color: var(--btn-text-1);
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
   font-family: var(--font-title);
 
   &.active {

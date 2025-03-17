@@ -133,8 +133,8 @@ async function freshData(): Promise<void> {
 }
 
 .tocp-btn {
-  background: var(--btn-bg-1);
-  color: var(--btn-text-1);
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
   font-family: var(--font-title);
 }
 

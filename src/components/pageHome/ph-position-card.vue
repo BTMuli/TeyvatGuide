@@ -92,7 +92,9 @@ onUnmounted(() => {
   if (timer !== null) clearInterval(timer);
 });
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@import "@styles/github.styles.scss";
+
 .ph-position-card {
   position: relative;
   display: flex;
@@ -101,13 +103,8 @@ onUnmounted(() => {
   justify-content: flex-start;
   border-radius: 4px;
   background: var(--box-bg-1);
-  box-shadow: 0 0 5px var(--common-shadow-2);
   color: var(--box-text-1);
-}
-
-.dark .ph-position-card {
   border: 1px solid var(--common-shadow-1);
-  box-shadow: unset;
 }
 
 .top {
@@ -118,7 +115,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 8px;
-  border-bottom: 2px solid var(--common-shadow-2);
+  border-bottom: 1px solid var(--common-shadow-2);
 
   .main {
     position: relative;

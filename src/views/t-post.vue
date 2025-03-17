@@ -62,7 +62,7 @@
         v-if="postData.collection"
         @click="showOverlayC()"
       >
-        <v-icon size="12">mdi-widgets</v-icon>
+        <v-icon size="10">mdi-widgets</v-icon>
         <span>{{ postData.collection.collection_title }}</span>
         <span>{{ postData.collection.cur }}/{{ postData.collection.total }}</span>
       </div>
@@ -72,7 +72,7 @@
         class="tp-post-reason"
         title="推荐理由"
       >
-        <v-icon size="12">mdi-lightbulb-on</v-icon>
+        <v-icon size="10">mdi-lightbulb-on</v-icon>
         <span>{{ tag.text }}</span>
       </div>
       <div
@@ -81,7 +81,7 @@
         class="tp-post-topic"
         @click="toTopic(topic)"
       >
-        <v-icon size="12">mdi-tag</v-icon>
+        <v-icon size="10">mdi-tag</v-icon>
         <span>{{ topic.name }}</span>
       </div>
     </div>
@@ -354,7 +354,9 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   showUser.value = true;
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@import "@styles/github.styles.scss";
+
 .tp-post-body {
   width: 800px;
   margin: 0 auto;
@@ -490,50 +492,48 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   flex-wrap: wrap;
   align-items: center;
   justify-content: start;
-  gap: 4px 8px;
+  column-gap: 4px;
+  row-gap: 8px;
 }
 
-/* collection */
-.tp-post-collection {
+.tp-post-collection,
+.tp-post-topic,
+.tp-post-reason {
+  height: 20px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  border: 1px solid var(--common-shadow-2);
   border-radius: 4px;
-  color: var(--box-text-3);
-  column-gap: 4px;
-  cursor: pointer;
+  column-gap: 2px;
   font-family: var(--font-title);
   font-size: 12px;
+}
+
+/* collection */
+.tp-post-collection {
+  @include github-tag-dark-gen(#3572a5);
+  cursor: pointer;
 
   &:hover {
-    color: var(--tgc-od-green);
+    @include github-tag-dark-gen(#98c379);
   }
 }
 
 /* topic */
 .tp-post-topic {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--box-text-5);
+  @include github-tag-dark-gen(#e06c63);
+
   cursor: pointer;
-  font-family: var(--font-title);
-  font-size: 12px;
 
   &:hover {
-    color: var(--box-text-3);
+    @include github-tag-dark-gen(#00aeec);
   }
 }
 
 /* reason */
 .tp-post-reason {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--tgc-od-orange);
-  font-family: var(--font-title);
-  font-size: 12px;
+  @include github-tag-dark-gen(#d19a66);
 }
 </style>
