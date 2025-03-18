@@ -1,13 +1,14 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.6.3
+ * @since Beta v0.7.2
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
 import TGSqlite from "@Sqlite/index.js";
 import { core, event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { parseLink } from "./linkParser.js";
 import TGLogger from "./TGLogger.js";
@@ -709,7 +710,7 @@ class Client {
   ): Promise<void> {
     console.log(`[openSystemBrowser] ${JSON.stringify(arg)}`);
     const url = arg.payload.open_url;
-    window.open(url);
+    await openUrl(url);
   }
 
   /**

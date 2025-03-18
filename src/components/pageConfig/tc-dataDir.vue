@@ -11,7 +11,7 @@
       <template #append>
         <div class="config-opers">
           <v-icon @click="confirmCUD()" title="修改用户数据目录"> mdi-pencil</v-icon>
-          <v-icon @click="openPath('user')" title="打开用户数据目录"> mdi-folder-open</v-icon>
+          <v-icon @click="openDataPath('user')" title="打开用户数据目录"> mdi-folder-open</v-icon>
           <v-icon @click="copyPath('user')" title="复制用户数据目录路径"> mdi-content-copy</v-icon>
         </div>
       </template>
@@ -24,7 +24,7 @@
       </template>
       <template #append>
         <div class="config-opers">
-          <v-icon @click="openPath('db')" title="打开数据库目录"> mdi-folder-open</v-icon>
+          <v-icon @click="openDataPath('db')" title="打开数据库目录"> mdi-folder-open</v-icon>
           <v-icon @click="copyPath('db')" title="复制数据库目录路径"> mdi-content-copy</v-icon>
         </div>
       </template>
@@ -38,7 +38,7 @@
       <template #append>
         <div class="config-opers">
           <v-icon @click="confirmCGD()" title="修改游戏安装目录"> mdi-pencil</v-icon>
-          <v-icon @click="openPath('game')" title="打开游戏安装目录"> mdi-folder-open</v-icon>
+          <v-icon @click="openDataPath('game')" title="打开游戏安装目录"> mdi-folder-open</v-icon>
           <v-icon @click="copyPath('game')" title="复制游戏安装目录"> mdi-content-copy</v-icon>
         </div>
       </template>
@@ -52,7 +52,7 @@
       <template #append>
         <div class="config-opers">
           <v-icon @click="confirmCLD()" title="清理日志文件"> mdi-delete</v-icon>
-          <v-icon @click="openPath('log')" title="打开日志目录"> mdi-folder-open</v-icon>
+          <v-icon @click="openDataPath('log')" title="打开日志目录"> mdi-folder-open</v-icon>
           <v-icon @click="copyPath('log')" title="复制日志目录路径"> mdi-content-copy</v-icon>
         </div>
       </template>
@@ -68,13 +68,13 @@ import { path } from "@tauri-apps/api";
 import { sep } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { exists, readDir, remove } from "@tauri-apps/plugin-fs";
+import { openPath } from "@tauri-apps/plugin-opener";
 import { platform } from "@tauri-apps/plugin-os";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 
 import { useAppStore } from "@/store/modules/app.js";
 import { backUpUserData } from "@/utils/dataBS.js";
-import TGShell from "@/utils/TGShell.js";
 
 const { dbPath, logDir, userDir, gameDir } = storeToRefs(useAppStore());
 
@@ -225,7 +225,7 @@ function copyPath(type: "db" | "user" | "log" | "game"): void {
   showSnackbar.success(`${targetName}路径已复制!`);
 }
 
-async function openPath(type: "db" | "user" | "log" | "game"): Promise<void> {
+async function openDataPath(type: "db" | "user" | "log" | "game"): Promise<void> {
   let targetPath: string;
   switch (type) {
     case "db":
@@ -245,7 +245,7 @@ async function openPath(type: "db" | "user" | "log" | "game"): Promise<void> {
       targetPath = gameDir.value;
       break;
   }
-  await TGShell.openPath(targetPath);
+  await openPath(targetPath);
 }
 </script>
 <style lang="css" scoped>

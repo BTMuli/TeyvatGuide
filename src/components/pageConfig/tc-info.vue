@@ -2,7 +2,7 @@
   <v-list class="config-list">
     <v-list-subheader :inset="true" class="config-header" title="相关信息" />
     <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item title="Tauri 版本" @click="toOuter('https://v2.tauri.app/')">
+    <v-list-item title="Tauri 版本" @click="openUrl('https://v2.tauri.app/')">
       <template #prepend>
         <v-img class="config-icon" src="/platforms/tauri.webp" alt="Tauri" />
       </template>
@@ -77,6 +77,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TGSqlite from "@Sqlite/index.js";
 import TSUserAchi from "@Sqlite/modules/userAchi.js";
 import { app } from "@tauri-apps/api";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { platform, version } from "@tauri-apps/plugin-os";
 import { onMounted, ref, shallowRef } from "vue";
 
@@ -123,10 +124,6 @@ onMounted(async () => {
     await TGLogger.Error(`加载数据库错误: ${e}`);
   }
 });
-
-function toOuter(url: string): void {
-  window.open(url);
-}
 </script>
 <style lang="css" scoped>
 .config-header {

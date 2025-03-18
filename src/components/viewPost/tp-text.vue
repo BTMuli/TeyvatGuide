@@ -21,6 +21,7 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { onMounted, ref, shallowRef, StyleValue, toRaw } from "vue";
 
 import { parseLink, parsePost } from "@/utils/linkParser.js";
@@ -107,7 +108,7 @@ async function toLink(): Promise<void> {
     showSnackbar.error(`未知链接:${link}`, 3000);
     return;
   }
-  window.open(res);
+  await openUrl(res);
 }
 
 // 解析表情链接

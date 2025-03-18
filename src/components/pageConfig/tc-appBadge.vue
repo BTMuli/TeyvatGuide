@@ -23,6 +23,7 @@
 </template>
 <script lang="ts" setup>
 import { app } from "@tauri-apps/api";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 
@@ -33,24 +34,24 @@ const versionApp = ref<string>();
 
 onMounted(async () => (versionApp.value = await app.getVersion()));
 
-function toRelease(): void {
-  window.open("https://github.com/BTMuli/TeyvatGuide/releases/latest");
+async function toRelease(): Promise<void> {
+  await openUrl("https://github.com/BTMuli/TeyvatGuide/releases/latest");
 }
 
-function toGroup(): void {
-  window.open("https://h5.qun.qq.com/s/3cgX0hJ4GA");
+async function toGroup(): Promise<void> {
+  await openUrl("https://h5.qun.qq.com/s/3cgX0hJ4GA");
 }
 
-function toGithub(): void {
-  window.open("https://github.com/BTMuli/TeyvatGuide");
+async function toGithub(): Promise<void> {
+  await openUrl("https://github.com/BTMuli/TeyvatGuide");
 }
 
-function toStore(): void {
-  window.open("https://www.microsoft.com/store/productId/9NLBNNNBNSJN");
+async function toStore(): Promise<void> {
+  await openUrl("https://www.microsoft.com/store/productId/9NLBNNNBNSJN");
 }
 
-function toSite(): void {
-  window.open("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");
+async function toSite(): Promise<void> {
+  await openUrl("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");
 }
 </script>
 <style lang="css" scoped>

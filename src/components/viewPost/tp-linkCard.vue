@@ -13,6 +13,7 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { computed, toRaw } from "vue";
 import { useRouter } from "vue-router";
 
@@ -62,7 +63,7 @@ async function toLink(): Promise<void> {
     showSnackbar.error(`未知链接:${link}`, 3000);
     return;
   }
-  window.open(res);
+  await openUrl(res);
 }
 </script>
 <style lang="css" scoped>

@@ -34,6 +34,7 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import { parseLink } from "@/utils/linkParser.js";
@@ -85,7 +86,7 @@ async function openPosition(): Promise<void> {
     showSnackbar.warn(`未知链接:${props.pos.url}`, 3000);
     return;
   }
-  window.open(props.pos.url);
+  await openUrl(props.pos.url);
 }
 
 onUnmounted(() => {

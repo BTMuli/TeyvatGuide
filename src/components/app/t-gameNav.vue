@@ -15,6 +15,7 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { emit } from "@tauri-apps/api/event";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
@@ -93,7 +94,7 @@ async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
   }
   // 如果不在上面的域名里面，就直接打开
   if (!mysList.includes(link.origin)) {
-    window.open(item.app_path);
+    await openUrl(item.app_path);
     return;
   }
   if (item.name === "签到福利" || item.name === "每日签到") {

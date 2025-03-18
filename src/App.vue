@@ -21,6 +21,7 @@ import { app, core, event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import { mkdir } from "@tauri-apps/plugin-fs";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -233,7 +234,7 @@ async function checkUpdate(): Promise<void> {
     buildTime.value = getBuildTime();
     await TGSqlite.update();
     showSnackbar.success("数据库已更新！", 3000);
-    window.open("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");
+    await openUrl("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");
   }
 }
 
