@@ -1,7 +1,7 @@
 /**
  * @file web/utils/getRequestHeader.ts
  * @description 获取请求头
- * @since Beta v0.7.0
+ * @since Beta v0.7.2
  */
 
 import Md5 from "js-md5";
@@ -11,23 +11,16 @@ import { getDeviceInfo, getRandomString } from "@/utils/toolFunc.js";
 
 /**
  * @description salt 类型
- * @since Beta v0.6.5
- * @enum {number}
+ * @since Beta v0.7.2
  */
-const enum SaltType {
-  K2,
-  LK2,
-  X4,
-  X6,
-  PROD,
-}
+type SaltKey = "K2" | "LK2" | "X4" | "X6" | "PROD";
 
 /**
  * @description salt 值
  * @version 2.82.0
  * @since Beta v0.7.0
  */
-const Salt: Readonly<Record<keyof typeof SaltType, string>> = {
+const Salt: Readonly<Record<SaltKey, string>> = {
   K2: "RGcLwIWYOQwTQPJ8Qw41kioel738ch3Z",
   LK2: "1M69A7AaPUhTFCdH0D2iMatZ0MTiLmPf",
   X4: "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs",
@@ -53,16 +46,11 @@ function getRandomNumber(min: number, max: number): number {
  * @version 2.50.1
  * @param {string} method 请求方法
  * @param {string} data 请求数据
- * @param {SaltType} saltType salt 类型
+ * @param {SaltKey} saltType salt 类型
  * @param {boolean} isSign 是否为签名
  * @returns {string} ds
  */
-function getDS(
-  method: string,
-  data: string,
-  saltType: keyof typeof SaltType,
-  isSign: boolean,
-): string {
+function getDS(method: string, data: string, saltType: SaltKey, isSign: boolean): string {
   const salt = Salt[saltType];
   const time = Math.floor(Date.now() / 1000).toString();
   let random = getRandomNumber(100000, 200000).toString();
@@ -113,7 +101,7 @@ function transCookie(cookie: Record<string, string>): string {
  * @param {Record<string, string>} cookie cookie
  * @param {string} method 请求方法
  * @param {Record<string, string | number | boolean | Array<string>> | string} data 请求数据
- * @param {keyof typeof SaltType} saltType salt 类型
+ * @param {SaltKey} saltType salt 类型
  * @param {boolean} isSign 是否为签名
  * @returns {Record<string, string>} 请求头
  */
@@ -121,7 +109,7 @@ export function getRequestHeader(
   cookie: Record<string, string>,
   method: string,
   data: Record<string, string | number | boolean | Array<string>> | string,
-  saltType: keyof typeof SaltType = "X4",
+  saltType: SaltKey = "X4",
   isSign: boolean = false,
 ): Record<string, string> {
   return {
@@ -140,26 +128,21 @@ export function getRequestHeader(
 /**
  * @description 获取 DS
  * @since Beta v0.3.9
- * @param {keyof typeof SaltType} saltType salt 类型
+ * @param {SaltKey} saltType salt 类型
  * @param {number} dsType ds 类型
  * @param {Record<string, string|number>|string} body
  * @param {Record<string, string|number>|string} query
  * @returns {string} DS
  */
+export function getDS4JS(saltType: SaltKey, dsType: 1, body: undefined, query: undefined): string;
 export function getDS4JS(
-  saltType: keyof typeof SaltType,
-  dsType: 1,
-  body: undefined,
-  query: undefined,
-): string;
-export function getDS4JS(
-  saltType: keyof typeof SaltType,
+  saltType: SaltKey,
   dsType: 2,
   body: Record<string, string | number> | string,
   query: Record<string, string | number> | string,
 ): string;
 export function getDS4JS(
-  saltType: keyof typeof SaltType,
+  saltType: SaltKey,
   dsType: 1 | 2,
   body?: Record<string, string | number> | string,
   query?: Record<string, string | number> | string,

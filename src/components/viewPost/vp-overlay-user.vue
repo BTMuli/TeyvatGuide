@@ -91,7 +91,7 @@ watch(
 );
 
 async function loadUser(): Promise<void> {
-  const resp = await bbsReq.otherUserInfo(props.gid, props.uid);
+  const resp = await bbsReq.otherUserInfo(props.gid.toString(), props.uid);
   if ("retcode" in resp) {
     showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
     return;

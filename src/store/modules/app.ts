@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.6.8
+ * @since Beta v0.7.2
  */
 
 import { path } from "@tauri-apps/api";
@@ -9,7 +9,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 import { getInitDeviceInfo } from "@/utils/toolFunc.js";
-import { type AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
+import type { AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
 
 // 用于存储用户数据的路径
 const userDataDir: Readonly<string> = `${await path.appLocalDataDir()}${path.sep()}userData`;
@@ -44,7 +44,7 @@ export const useAppStore = defineStore(
     // 设备信息
     const deviceInfo = ref<TGApp.App.Device.DeviceInfo>(getInitDeviceInfo());
     // 服务器
-    const server = ref<AnnoServer>(AnnoServer.CN_ISLAND);
+    const server = ref<AnnoServer>("cn_gf01");
     // 语言
     const lang = ref<AnnoLang>("zh-cn");
     // 最近的咨讯类型
@@ -64,7 +64,7 @@ export const useAppStore = defineStore(
       theme.value = "default";
       isLogin.value = false;
       sidebar.value.collapse = true;
-      server.value = AnnoServer.CN_ISLAND;
+      server.value = "cn_gf01";
       lang.value = "zh-cn";
       recentNewsType.value = "notice";
       needResize.value = "true";

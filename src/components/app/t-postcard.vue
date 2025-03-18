@@ -94,7 +94,6 @@ type TPostCardEmits = {
   (e: "onSelected", v: string): void;
   (e: "onUserClick", v: TGApp.BBS.Post.User): void;
 };
-type TPostStatus = RenderStatus & { stat: ActStat };
 type RenderForum = { name: string; icon: string; id: number };
 type RenderStatus = { stat: number; label: string; color: string };
 type RenderData = { mark: number; forward: number; like: number; reply: number; view: number };
@@ -111,18 +110,11 @@ export type RenderCard = {
   reasons: Array<TGApp.BBS.Post.RecommendTags>;
 };
 
-enum ActStat {
-  UNKNOWN,
-  STARTED,
-  FINISHED,
-  SELECTION,
-}
-
-const stats: Readonly<Array<TPostStatus>> = [
-  { stat: ActStat.UNKNOWN, label: "未知", color: "var(--tgc-od-red)" },
-  { stat: ActStat.STARTED, label: "进行中", color: "var(--tgc-od-green)" },
-  { stat: ActStat.FINISHED, label: "已结束", color: "var(--tgc-od-white)" },
-  { stat: ActStat.SELECTION, label: "评选中", color: "var(--tgc-od-orange)" },
+const stats: Readonly<Array<RenderStatus>> = [
+  { stat: 0, label: "未知", color: "var(--tgc-od-red)" },
+  { stat: 1, label: "进行中", color: "var(--tgc-od-green)" },
+  { stat: 2, label: "已结束", color: "var(--tgc-od-white)" },
+  { stat: 3, label: "评选中", color: "var(--tgc-od-orange)" },
 ];
 const route = useRoute();
 const router = useRouter();
@@ -156,11 +148,9 @@ async function toPost(): Promise<void> {
 }
 
 function getActivityStatus(status: number): RenderStatus {
-  if (status satisfies ActStat) {
-    const stat: ActStat = status;
-    return stats[stat];
-  }
-  return stats[ActStat.UNKNOWN];
+  let idx = stats.findIndex((v) => v.stat === status);
+  if (idx === -1) idx = 0;
+  return stats[idx];
 }
 
 function getPostCover(item: TGApp.BBS.Post.FullData): string {

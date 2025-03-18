@@ -1,21 +1,13 @@
 /**
  * @file web/request/hk4eReq.ts
  * @description Hk4eApi 请求模块
- * @since Beta v0.7.0
+ * @since Beta v0.7.2
  */
 
 import TGHttp from "@/utils/TGHttp.js";
 import { getDeviceInfo } from "@/utils/toolFunc.js";
 
-export enum AnnoServer {
-  CN_ISLAND = "cn_gf01",
-  CN_TREE = "cn_qd01",
-  OS_USA = "os_usa",
-  OS_EURO = "os_euro",
-  OS_ASIA = "os_asia",
-  OS_CHT = "os_cht",
-}
-
+export type AnnoServer = "cn_gf01" | "cn_qd01" | "os_usa" | "os_euro" | "os_asia" | "os_cht";
 export type AnnoLang = "zh-cn" | "zh-tw" | "en" | "ja";
 
 const AnnoApi: Readonly<string> = "https://hk4e-ann-api.mihoyo.com/common/hk4e_cn/announcement/api";
@@ -25,12 +17,12 @@ const SdkApi: Readonly<string> = "https://hk4e-sdk.mihoyo.com/hk4e_cn/";
 
 /**
  * @description 判断是否为国内服务器
- * @since Beta v0.6.5
+ * @since Beta v0.7.2
  * @param {AnnoServer} region 服务器
  * @returns {boolean} 是否为国内服务器
  */
 function isCN(region: AnnoServer): boolean {
-  return region === AnnoServer.CN_ISLAND || region === AnnoServer.CN_TREE;
+  return region.startsWith("cn");
 }
 
 /**
@@ -45,13 +37,13 @@ function getAnnoApi(region: AnnoServer): string {
 
 /**
  * @description 获取游戏内公告参数
- * @since Beta v0.4.4
+ * @since Beta v0.7.2
  * @param {AnnoServer} region 服务器
  * @param {string} lang 语言
  * @returns {TGApp.BBS.Announcement.Params}
  */
 function getAnnoParams(
-  region: AnnoServer = AnnoServer.CN_ISLAND,
+  region: AnnoServer = "cn_gf01",
   lang: AnnoLang = "zh-cn",
 ): TGApp.BBS.Announcement.Params {
   return {
@@ -74,7 +66,7 @@ function getAnnoParams(
  * @returns {Promise<TGApp.BBS.Announcement.ListData>}
  */
 async function getAnnoList(
-  region: AnnoServer = AnnoServer.CN_ISLAND,
+  region: AnnoServer = "cn_gf01",
   lang: AnnoLang = "zh-cn",
 ): Promise<TGApp.BBS.Announcement.ListData> {
   const resp = await TGHttp<TGApp.BBS.Announcement.ListResponse>(
@@ -94,7 +86,7 @@ async function getAnnoList(
  */
 async function getAnnoContent(
   annId: number,
-  region: AnnoServer = AnnoServer.CN_ISLAND,
+  region: AnnoServer = "cn_gf01",
   lang: AnnoLang = "zh-cn",
 ): Promise<TGApp.BBS.Announcement.ContentItem> {
   const annoResp = await TGHttp<TGApp.BBS.Announcement.ContentResponse>(

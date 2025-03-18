@@ -3,7 +3,7 @@
     <template #prepend>
       <v-tabs v-model="tab" align-tabs="start" class="anno-tab">
         <v-tab v-for="(value, index) in tabValues" :key="index" :value="value">
-          {{ AnnoType[value] }}
+          {{ annoMap[value] }}
         </v-tab>
       </v-tabs>
       <div class="anno-selects">
@@ -63,10 +63,10 @@ import { useRouter } from "vue-router";
 import { useAppStore } from "@/store/modules/app.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { decodeRegExp } from "@/utils/toolFunc.js";
-import Hk4eApi, { type AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
+import Hk4eApi, { type AnnoLang, type AnnoServer } from "@/web/request/hk4eReq.js";
 
-type AnnoSelect = { text: string; value: string };
-type AnnoKey = keyof typeof AnnoType;
+type AnnoSelect<T = string> = { text: string; value: T };
+type AnnoKey = "activity" | "game";
 export type AnnoCard = {
   id: number;
   title: string;
@@ -79,13 +79,13 @@ export type AnnoCard = {
 };
 type AnnoList = { [key in AnnoKey]: Array<AnnoCard> };
 
-const annoServerList: Array<AnnoSelect> = [
-  { text: "国服-官方服", value: AnnoServer.CN_ISLAND },
-  { text: "国服-渠道服", value: AnnoServer.CN_TREE },
-  { text: "国际服-亚服", value: AnnoServer.OS_ASIA },
-  { text: "国际服-欧服", value: AnnoServer.OS_EURO },
-  { text: "国际服-美服", value: AnnoServer.OS_USA },
-  { text: "国际服-港澳台服", value: AnnoServer.OS_CHT },
+const annoServerList: Array<AnnoSelect<AnnoServer>> = [
+  { text: "国服-官方服", value: "cn_gf01" },
+  { text: "国服-渠道服", value: "cn_qd01" },
+  { text: "国际服-亚服", value: "os_asia" },
+  { text: "国际服-欧服", value: "os_euro" },
+  { text: "国际服-美服", value: "os_usa" },
+  { text: "国际服-港澳台服", value: "os_cht" },
 ];
 const annoLangList: Array<AnnoSelect> = [
   { text: "简体中文", value: "zh-cn" },
@@ -93,11 +93,7 @@ const annoLangList: Array<AnnoSelect> = [
   { text: "English", value: "en" },
   { text: "日本語", value: "ja" },
 ];
-
-enum AnnoType {
-  activity = "活动公告",
-  game = "游戏公告",
-}
+const annoMap: Readonly<Record<AnnoKey, string>> = { activity: "活动公告", game: "游戏公告" };
 
 const { server, lang } = storeToRefs(useAppStore());
 const router = useRouter();
@@ -142,15 +138,15 @@ async function loadData(): Promise<void> {
   const listCards = annoData.list.map((list) => list.list.map((anno) => getAnnoCard(anno))).flat();
   await showLoading.update("", { title: "正在解析游戏内公告时间" });
   for (const item of listCards) {
-    if (item.typeLabel === AnnoType.game) continue;
+    if (item.typeLabel === "game") continue;
     const detail = await Hk4eApi.anno.content(item.id, server.value, "zh-cn");
     const timeStr = getAnnoTime(detail.content);
     if (timeStr !== false) item.timeStr = timeStr;
     await showLoading.update(`[${item.id}]${item.subtitle}:${item.timeStr}`);
   }
   annoCards.value = {
-    activity: listCards.filter((item) => item.typeLabel === AnnoType.activity),
-    game: listCards.filter((item) => item.typeLabel === AnnoType.game),
+    activity: listCards.filter((item) => item.typeLabel === "activity"),
+    game: listCards.filter((item) => item.typeLabel === "game"),
   };
   await showLoading.end();
   isReq.value = false;
@@ -181,7 +177,7 @@ function getAnnoCard(anno: TGApp.BBS.Announcement.AnnoSingle): AnnoCard {
     title: anno.title,
     subtitle: anno.subtitle.replace(/<br \/>/g, " "),
     banner: anno.banner,
-    typeLabel: anno.type === 2 ? "游戏公告" : "活动公告",
+    typeLabel: anno.type === 2 ? "game" : "activity",
     tagIcon: anno.tag_icon,
     tagLabel: getAnnoTag(anno.tag_label),
     timeStr: time,
