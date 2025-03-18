@@ -1,7 +1,7 @@
 /**
  * @file types/BBS/Geetest.d.ts
  * @description 米游社Geetest 类型定义文件
- * @since Beta v0.7.1
+ * @since Beta v0.7.2
  */
 
 declare namespace TGApp.BBS.Geetest {
@@ -72,7 +72,7 @@ declare namespace TGApp.BBS.Geetest {
 
   /**
    * @description Geetest 插件 captchaObj
-   * @since Beta v0.7.1
+   * @since Beta v0.7.2
    * @interface GeetestCaptcha
    * @property {Function} appendTo
    * @property {Function} getValidate
@@ -83,7 +83,7 @@ declare namespace TGApp.BBS.Geetest {
    */
   type GeetestCaptcha = {
     appendTo: (selector: string) => void;
-    getValidate: () => validateResp;
+    getValidate: () => GeetestVerifyRes;
     onSuccess: (callback: () => void) => void;
     onClose: (callback: () => void) => void;
     onReady: (callback: () => void) => void;
