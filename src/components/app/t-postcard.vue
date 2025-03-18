@@ -25,34 +25,44 @@
     <div class="tpc-bottom" v-if="card.data !== null">
       <div class="tpc-tags">
         <div v-for="(reason, idx) in card.reasons" :key="idx" class="tpc-reason" title="推荐理由">
-          <v-icon size="10">mdi-lightbulb-on</v-icon>
+          <v-icon size="12">mdi-lightbulb-on</v-icon>
           <span>{{ reason.text }}</span>
         </div>
         <div v-for="topic in card.topics" :key="topic.id" class="tpc-tag" @click="toTopic(topic)">
-          <v-icon size="10">mdi-tag</v-icon>
+          <v-icon size="12">mdi-tag</v-icon>
           <span>{{ topic.name }}</span>
         </div>
       </div>
       <div class="tpc-data">
         <div class="tpc-info-item" :title="`浏览数：${card.data.view}`">
-          <v-icon>mdi-eye</v-icon>
+          <v-icon size="12">mdi-eye</v-icon>
           <span>{{ card.data.view }}</span>
         </div>
         <div class="tpc-info-item" :title="`收藏数：${card.data.mark}`">
-          <v-icon>mdi-star</v-icon>
+          <v-icon size="12">mdi-star</v-icon>
           <span>{{ card.data.mark }}</span>
         </div>
         <div class="tpc-info-item" :title="`回复数：${card.data.reply}`">
-          <v-icon>mdi-comment</v-icon>
+          <v-icon size="12">mdi-comment</v-icon>
           <span>{{ card.data.reply }}</span>
         </div>
         <div class="tpc-info-item" :title="`点赞数：${card.data.like}`">
-          <v-icon>mdi-thumb-up</v-icon>
+          <v-icon size="12">mdi-thumb-up</v-icon>
           <span>{{ card.data.like }}</span>
         </div>
         <div class="tpc-info-item" :title="`转发数：${card.data.forward}`">
-          <v-icon>mdi-share-variant</v-icon>
+          <v-icon size="12">mdi-share-variant</v-icon>
           <span>{{ card.data.forward }}</span>
+        </div>
+      </div>
+      <div class="tpc-data">
+        <div class="tpc-info-item" :title="`创建时间: ${card.meta.create_time}`">
+          <v-icon size="12">mdi-calendar-clock</v-icon>
+          <span>{{ card.meta.create_time }}</span>
+        </div>
+        <div class="tpc-info-item" :title="`更新时间: ${card.meta.update_time}`">
+          <v-icon size="12">mdi-calendar-edit</v-icon>
+          <span>{{ card.meta.update_time }}</span>
         </div>
       </div>
     </div>
@@ -84,6 +94,7 @@ import { useRoute, useRouter } from "vue-router";
 
 import { generateShareImg } from "@/utils/TGShare.js";
 import { createPost } from "@/utils/TGWindow.js";
+import { timestampToDate } from "@/utils/toolFunc.js";
 
 type TPostCardProps = {
   modelValue: TGApp.BBS.Post.FullData;
@@ -97,6 +108,7 @@ type TPostCardEmits = {
 type RenderForum = { name: string; icon: string; id: number };
 type RenderStatus = { stat: number; label: string; color: string };
 type RenderData = { mark: number; forward: number; like: number; reply: number; view: number };
+type RenderMeta = { create_time: string; update_time: string };
 export type RenderCard = {
   title: string;
   cover: string;
@@ -105,6 +117,7 @@ export type RenderCard = {
   user: TGApp.BBS.Post.User | null;
   forum: RenderForum | null;
   data: RenderData | null;
+  meta: RenderMeta;
   status?: RenderStatus;
   topics: Array<TGApp.BBS.Post.Topic>;
   reasons: Array<TGApp.BBS.Post.RecommendTags>;
@@ -178,6 +191,10 @@ function getCommonCard(item: TGApp.BBS.Post.FullData): RenderCard {
       view: item.stat.view_num,
     };
   }
+  const metaData: RenderMeta = {
+    create_time: timestampToDate(Number(item.post.created_at) * 1000),
+    update_time: timestampToDate(Number(item.post.updated_at) * 1000),
+  };
   return {
     title: item.post.subject,
     cover: getPostCover(item),
@@ -186,6 +203,7 @@ function getCommonCard(item: TGApp.BBS.Post.FullData): RenderCard {
     user: item.user,
     forum: forumData,
     data: statData,
+    meta: metaData,
     topics: item.topics,
     reasons: item.recommend_reason?.tags ?? [],
   };
@@ -298,7 +316,6 @@ function onUserClick(): void {
   width: 100%;
   flex-direction: column;
   padding: 4px 8px;
-  row-gap: 4px;
 }
 
 .tpc-title {
@@ -402,7 +419,6 @@ function onUserClick(): void {
   height: 20px;
   align-items: center;
   justify-content: center;
-  padding: 4px;
   margin-left: auto;
   column-gap: 8px;
 }
@@ -413,7 +429,8 @@ function onUserClick(): void {
   justify-content: flex-start;
   color: var(--box-text-7);
   font-size: 12px;
-  gap: 4px;
+  gap: 2px;
+  white-space: nowrap;
   opacity: 0.6;
 }
 
