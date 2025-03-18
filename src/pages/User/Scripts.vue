@@ -126,7 +126,7 @@ async function tryCkVerify(): Promise<void> {
     mid: cookie.value.mid,
   };
   let flag = false;
-  let challenge;
+  let challenge: string | undefined = undefined;
   while (!flag) {
     await showLoading.start("正在验证CK有效性");
     const resp = await apiHubReq.sign(ck, 2, challenge);
