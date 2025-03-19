@@ -10,7 +10,7 @@
       </div>
     </template>
     <template #extension>
-      <TGameNav :model-value="curGid" v-if="curGid !== 0" />
+      <TGameNav :model-value="curGid" v-if="curGid !== 0" style="margin-left: 8px" />
     </template>
     <div class="post-topic-switch">
       <v-select
@@ -276,10 +276,11 @@ function handleUserClick(user: TGApp.BBS.Post.User): void {
   overflow: hidden;
   align-items: center;
   justify-content: center;
-  padding-right: 5px;
-  border-radius: 5px;
+  padding-right: 4px;
+  border-radius: 4px;
+  margin-left: 12px;
   background: var(--box-bg-2);
-  gap: 5px;
+  gap: 4px;
 
   img {
     width: 64px;
@@ -290,7 +291,7 @@ function handleUserClick(user: TGApp.BBS.Post.User): void {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
 
     :first-child {
       color: var(--common-text-title);
@@ -312,8 +313,8 @@ function handleUserClick(user: TGApp.BBS.Post.User): void {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  margin: 0 10px;
-  gap: 10px;
+  margin-right: 16px;
+  gap: 8px;
 }
 
 .post-switch-item {

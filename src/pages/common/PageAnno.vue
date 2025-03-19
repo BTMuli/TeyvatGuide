@@ -276,10 +276,14 @@ async function switchNews(): Promise<void> {
 
 .anno-switch-btn {
   height: 40px;
-  margin-right: 15px;
+  margin-right: 16px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
+}
+
+.dark .anno-switch-btn {
+  border: 1px solid var(--common-shadow-2);
 }
 
 .anno-grid {

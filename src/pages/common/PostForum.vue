@@ -107,7 +107,7 @@
       </v-btn>
     </div>
     <template #extension>
-      <TGameNav :model-value="curGid" />
+      <TGameNav :model-value="curGid" style="margin-left: 8px" />
     </template>
   </v-app-bar>
   <div class="posts-grid">
@@ -353,7 +353,8 @@ function handleUserClick(user: TGApp.BBS.Post.User): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  margin-left: 12px;
+  gap: 8px;
 
   img {
     width: 32px;
@@ -371,8 +372,8 @@ function handleUserClick(user: TGApp.BBS.Post.User): void {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  margin: 0 10px;
-  gap: 10px;
+  margin-right: 16px;
+  gap: 8px;
 }
 
 .post-switch-item {

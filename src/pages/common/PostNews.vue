@@ -191,10 +191,17 @@ async function searchPost(): Promise<void> {
 .post-news-btn {
   height: 40px;
   border-radius: 3px;
-  margin-left: 15px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
+
+  &:last-child {
+    margin-right: 16px;
+  }
+}
+
+.post-news-btn + .post-news-btn {
+  margin-left: 8px;
 }
 
 .dark .post-news-btn {
