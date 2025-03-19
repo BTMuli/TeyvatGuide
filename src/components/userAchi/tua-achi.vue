@@ -90,32 +90,38 @@ async function setAchiStat(stat: boolean): Promise<void> {
   model.value = data.value;
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .achi-container {
+  @include github-styles.github-card();
+
   position: relative;
   display: flex;
   height: 60px;
+  box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  background: var(--box-bg-1);
-  color: var(--box-text-7);
+  padding: 8px;
+  border-radius: 4px;
   cursor: pointer;
 }
 
+.dark .achi-container {
+  @include github-styles.github-card("dark");
+}
+
 .achi-version {
+  @include github-styles.github-tag-dark-gen(#fb7299);
+
   position: absolute;
   top: 0;
   left: 0;
-  width: 50px;
-  border-right: 1px solid var(--common-shadow-1);
-  border-bottom: 1px solid var(--common-shadow-1);
-  background: var(--box-bg-2);
+  width: 48px;
+  border-left: unset;
+  border-top: unset;
   border-bottom-right-radius: 20px;
-  border-top-left-radius: 10px;
-  color: var(--tgc-pink-1);
+  border-top-left-radius: 4px;
   font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
@@ -125,7 +131,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  column-gap: 10px;
+  column-gap: 8px;
 }
 
 .achi-pre-icon {
@@ -154,7 +160,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
 .achi-pre-info :nth-child(1) {
   display: flex;
   align-items: flex-end;
-  column-gap: 5px;
+  column-gap: 4px;
   font-family: var(--font-title);
   font-size: 14px;
 }
@@ -179,8 +185,8 @@ async function setAchiStat(stat: boolean): Promise<void> {
   align-items: center;
   justify-content: center;
   background: rgb(0 0 0 / 50%);
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
   color: var(--tgc-white-1);
   font-size: 8px;
 }
@@ -202,7 +208,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
   position: relative;
   width: 40px;
   height: 40px;
-  border-radius: 5px;
+  border-radius: 4px;
   background-image: url("/icon/bg/5-Star.webp");
   background-size: cover;
 }

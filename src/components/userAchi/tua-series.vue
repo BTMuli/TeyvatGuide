@@ -1,7 +1,20 @@
 <template>
-  <div class="tuas-card" @click="selectSeries" v-if="data">
+  <div
+    class="tuas-card"
+    @click="selectSeries"
+    v-if="data"
+    :class="{ 'tuas-selected': props.cur === props.series }"
+  >
     <div class="tuas-version">v{{ data.version }}</div>
-    <img alt="icon" class="tuas-icon" :src="`/icon/achievement/${data.icon}.webp`" />
+    <div class="tuas-icon">
+      <img alt="icon" :src="`/icon/achievement/${data.icon}.webp`" />
+      <v-progress-circular
+        class="progress"
+        bg-color="var(--tgc-od-white)"
+        color="var(--tgc-yellow-2)"
+        :model-value="`${(overview.fin / overview.total) * 100}`"
+      />
+    </div>
     <div class="tuas-content">
       <span :title="data.name">{{ data.name }}</span>
       <span>{{ overview.fin }}/{{ overview.total }}</span>
@@ -63,44 +76,75 @@ function selectSeries(): void {
   emits("selectSeries", props.series);
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .tuas-card {
+  @include github-styles.github-card();
+
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  background: var(--box-bg-1);
+  justify-content: flex-start;
+  padding: 8px;
+  height: 60px;
+  border-radius: 4px;
   color: var(--box-text-1);
-  column-gap: 10px;
+  column-gap: 8px;
   cursor: pointer;
+  overflow: hidden;
+
+  &.tuas-selected {
+    background: var(--box-bg-1);
+  }
+}
+
+.dark .tuas-card {
+  @include github-styles.github-card("dark");
+
+  &.tuas-selected {
+    background: var(--box-bg-1);
+  }
 }
 
 .tuas-version {
+  @include github-styles.github-tag-dark-gen(#ffa726);
+
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 80px;
-  border-top: 1px solid var(--common-shadow-1);
-  border-left: 1px solid var(--common-shadow-1);
-  background: var(--box-bg-2);
-  border-bottom-right-radius: 10px;
+  width: 64px;
+  border-right: unset;
+  border-bottom: unset;
   border-top-left-radius: 20px;
-  color: var(--tgc-yellow-1);
   font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
-  text-shadow: 1px 1px 1px var(--common-shadow-1);
 }
 
 .tuas-icon {
+  position: relative;
+  flex-shrink: 0;
   width: 40px;
   height: 40px;
   padding: 5px;
   border-radius: 50%;
+  box-sizing: border-box;
   background: var(--tgc-dark-7);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+  }
 }
 
 .tuas-content {

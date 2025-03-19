@@ -41,6 +41,7 @@
     <v-virtual-scroll :items="seriesList" class="left-wrap" item-height="60">
       <template #default="{ item }">
         <TuaSeries
+          class="left-item"
           v-model:cur="selectedSeries"
           :series="item"
           :uid="uidCur"
@@ -324,14 +325,21 @@ onUnmounted(async () => {
 
 .wrap {
   display: flex;
-  height: calc(100vh - 150px);
-  column-gap: 10px;
+  height: calc(100vh - 144px);
+  column-gap: 8px;
 }
 
 .left-wrap {
-  width: 400px;
+  position: relative;
+  box-sizing: border-box;
+  width: 332px;
   height: 100%;
-  padding-right: 10px;
+  padding-right: 8px;
+  flex-shrink: 0;
   overflow-y: auto;
+}
+
+:deep(.v-virtual-scroll__item + .v-virtual-scroll__item) {
+  margin-top: 8px;
 }
 </style>

@@ -7,7 +7,7 @@
       <template #prepend>
         <v-img
           width="80px"
-          style="margin-right: 10px"
+          style="margin-right: 8px"
           :src="`/WIKI/nameCard/icon/${props.data.name}.webp`"
         />
       </template>
@@ -28,13 +28,17 @@ const bgImage = computed<string>(() => {
   return `url("/WIKI/nameCard/bg/${props.data.name}.webp")`;
 });
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .top-nc-box {
+  @include github-styles.github-card-shadow();
+
   width: 100%;
   height: 80px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 10px 50px 50px 10px;
-  margin-bottom: 10px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px 50px 50px 4px;
+  margin-bottom: 8px;
   background-color: var(--box-bg-1);
   background-image: v-bind(bgImage);
   background-position: right;
@@ -43,7 +47,11 @@ const bgImage = computed<string>(() => {
   font-family: var(--font-title);
 }
 
+.dark .top-nc-box {
+  @include github-styles.github-card-shadow("dark");
+}
+
 .desc {
-  text-shadow: 1px 1px 1px #222;
+  text-shadow: 0 0 2px var(--common-shadow-8);
 }
 </style>

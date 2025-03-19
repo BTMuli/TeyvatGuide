@@ -6,13 +6,22 @@
 
 /* Card，传入theme参数 */
 @mixin github-card($theme: 'default') {
+  @include github-card-shadow($theme);
+
   @if $theme == 'default' {
     background: #ffffff;
     border: 1px solid #d1d9e0;
-    box-shadow: rgba(31, 35, 40, 0.06) 0 1px 1px 0, rgba(31, 35, 40, 0.06) 0 1px 3px 0;
   } @else {
     background: #0d1117;
     border: 1px solid #3d444d;
+  }
+}
+
+/* CardShadow，传入theme参数 */
+@mixin github-card-shadow($theme: 'default') {
+  @if $theme == 'default' {
+    box-shadow: rgba(31, 35, 40, 0.06) 0 1px 1px 0, rgba(31, 35, 40, 0.06) 0 1px 3px 0;
+  } @else {
     box-shadow: rgba(1, 4, 9, 0.6) 0 1px 1px 0, rgba(1, 4, 9, 0.6) 0 1px 3px 0;
   }
 }
