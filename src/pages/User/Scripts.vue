@@ -5,13 +5,14 @@
         <img alt="icon" src="/source/UI/toolbox.webp" />
         <span>实用脚本</span>
         <v-select
+          density="compact"
           class="us-top-select"
           variant="outlined"
           v-model="curAccount"
           :items="accounts"
           item-title="uid"
           :hide-details="true"
-          title="账号UID"
+          label="账号"
         >
           <template #selection="{ item }">
             <div class="select-main">

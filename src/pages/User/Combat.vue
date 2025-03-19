@@ -5,11 +5,12 @@
         <img alt="icon" src="/source/UI/userCombat.webp" />
         <span>幻想真境剧诗</span>
         <v-select
+          density="compact"
           variant="outlined"
           v-model="uidCur"
           :items="uidList"
           :hide-details="true"
-          title="游戏UID"
+          label="游戏UID"
         />
         <v-btn :rounded="true" class="uc-btn" @click="toAbyss()">
           <template #prepend><img src="/source/UI/userAbyss.webp" alt="abyss" /></template>

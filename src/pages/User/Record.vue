@@ -5,6 +5,7 @@
         <img alt="icon" src="/source/UI/userRecord.webp" />
         <span>原神战绩</span>
         <v-select
+          density="compact"
           variant="outlined"
           v-model="uidCur"
           :items="uidList"

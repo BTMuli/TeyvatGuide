@@ -1,33 +1,40 @@
 <template>
   <v-app-bar>
-    <div class="top-title" @click="switchHideFin">{{ title }}</div>
-    <template #append>
-      <div class="achi-search">
-        <v-text-field
-          v-model="search"
-          :hide-details="true"
-          :single-line="true"
-          append-icon="mdi-magnify"
-          label="搜索"
-          @keydown.enter="isSearch = true"
-        />
-      </div>
-    </template>
-    <template #extension>
-      <v-btn class="top-btn" prepend-icon="mdi-import" @click="importJson()">导入</v-btn>
-      <v-btn class="top-btn" prepend-icon="mdi-export" @click="exportJson()">导出</v-btn>
-      <div class="uid-select">
+    <template #prepend>
+      <div class="achi-prepend">
+        <img alt="icon" src="../../assets/icons/achievements.svg" />
+        <span @click="switchHideFin">我的成就</span>
         <v-select
+          density="compact"
           v-model="uidCur"
           :hide-details="true"
           :items="uidList"
           label="存档UID"
           variant="outlined"
         />
+        <span>{{ title }}</span>
       </div>
-      <v-btn class="top-btn" prepend-icon="mdi-plus" @click="createUid()">新建存档</v-btn>
-      <v-btn class="top-btn" prepend-icon="mdi-delete" @click="deleteUid()">删除存档</v-btn>
-      <v-spacer />
+    </template>
+    <template #append>
+      <div class="achi-append">
+        <v-text-field
+          density="compact"
+          v-model="search"
+          :hide-details="true"
+          :single-line="true"
+          append-inner-icon="mdi-magnify"
+          label="搜索"
+          @keydown.enter="isSearch = true"
+        />
+      </div>
+    </template>
+    <template #extension>
+      <div class="top-extension">
+        <v-btn class="top-btn" prepend-icon="mdi-import" @click="importJson()">导入</v-btn>
+        <v-btn class="top-btn" prepend-icon="mdi-export" @click="exportJson()">导出</v-btn>
+        <v-btn class="top-btn" prepend-icon="mdi-plus" @click="createUid()">新建存档</v-btn>
+        <v-btn class="top-btn" prepend-icon="mdi-delete" @click="deleteUid()">删除存档</v-btn>
+      </div>
     </template>
   </v-app-bar>
   <div class="wrap">
@@ -265,8 +272,28 @@ onUnmounted(async () => {
   }
 });
 </script>
-<style lang="css" scoped>
-.achi-search {
+<style lang="scss" scoped>
+.achi-prepend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  gap: 8px;
+
+  img {
+    width: 32px;
+    height: 32px;
+  }
+
+  span {
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 20px;
+    cursor: pointer;
+  }
+}
+
+.achi-append {
   position: relative;
   display: flex;
   width: 400px;
@@ -278,30 +305,21 @@ onUnmounted(async () => {
   color: var(--box-text-1);
 }
 
-.top-title {
-  margin-left: 15px;
-  color: var(--common-text-title);
-  cursor: pointer;
-  font-family: var(--font-title);
-  font-size: 18px;
+.top-extension {
+  position: relative;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 8px;
 }
 
 .top-btn {
   height: 40px;
   border: 1px solid var(--common-shadow-2);
-  margin-left: 15px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
-}
-
-.uid-select {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 15px;
-  margin-left: 15px;
-  gap: 10px;
 }
 
 .wrap {

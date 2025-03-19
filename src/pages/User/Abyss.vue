@@ -5,11 +5,12 @@
         <img alt="icon" src="/source/UI/userAbyss.webp" />
         <span>深境螺旋</span>
         <v-select
+          density="compact"
           variant="outlined"
           v-model="uidCur"
           :items="uidList"
           :hide-details="true"
-          title="游戏UID"
+          label="游戏UID"
         />
         <v-btn :rounded="true" class="ua-btn" @click="toCombat()">
           <template #prepend>
