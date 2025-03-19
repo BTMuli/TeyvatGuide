@@ -22,7 +22,7 @@
         @click="onUserClick()"
       />
     </div>
-    <div class="tpc-bottom" v-if="card.data !== null">
+    <div class="tpc-bottom">
       <div class="tpc-tags">
         <div v-for="(reason, idx) in card.reasons" :key="idx" class="tpc-reason" title="推荐理由">
           <v-icon size="12">mdi-lightbulb-on</v-icon>
@@ -33,7 +33,7 @@
           <span>{{ topic.name }}</span>
         </div>
       </div>
-      <div class="tpc-data">
+      <div class="tpc-data" v-if="card.data !== null">
         <div class="tpc-info-item" :title="`浏览数：${card.data.view}`">
           <v-icon size="12">mdi-eye</v-icon>
           <span>{{ card.data.view }}</span>
@@ -60,7 +60,11 @@
           <v-icon size="12">mdi-calendar-clock</v-icon>
           <span>{{ card.meta.create_time }}</span>
         </div>
-        <div class="tpc-info-item" :title="`更新时间: ${card.meta.update_time}`">
+        <div
+          v-if="card.meta.update_time"
+          class="tpc-info-item"
+          :title="`更新时间: ${card.meta.update_time}`"
+        >
           <v-icon size="12">mdi-calendar-edit</v-icon>
           <span>{{ card.meta.update_time }}</span>
         </div>
@@ -108,7 +112,7 @@ type TPostCardEmits = {
 type RenderForum = { name: string; icon: string; id: number };
 type RenderStatus = { stat: number; label: string; color: string };
 type RenderData = { mark: number; forward: number; like: number; reply: number; view: number };
-type RenderMeta = { create_time: string; update_time: string };
+type RenderMeta = { create_time: string; update_time?: string };
 export type RenderCard = {
   title: string;
   cover: string;
@@ -173,7 +177,7 @@ function getPostCover(item: TGApp.BBS.Post.FullData): string {
   else if (item.post.images.length > 0) cover = item.post.images[0];
   if (cover === undefined) return "";
   if (cover.endsWith(".gif")) return cover;
-  return `${cover}?x-oss-process=image/resize,m_fill,w_360,h_130,limit_0/format,png`;
+  return `${cover}?x-oss-process=image/resize,m_fill,w_690,h_320,limit_0/format,png`;
 }
 
 function getCommonCard(item: TGApp.BBS.Post.FullData): RenderCard {
@@ -193,7 +197,8 @@ function getCommonCard(item: TGApp.BBS.Post.FullData): RenderCard {
   }
   const metaData: RenderMeta = {
     create_time: timestampToDate(Number(item.post.created_at) * 1000),
-    update_time: timestampToDate(Number(item.post.updated_at) * 1000),
+    update_time:
+      item.post.updated_at === 0 ? undefined : timestampToDate(Number(item.post.updated_at) * 1000),
   };
   return {
     title: item.post.subject,
@@ -289,7 +294,7 @@ function onUserClick(): void {
   width: 100%;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 36 / 13;
+  aspect-ratio: 69 / 32;
   background: var(--common-shadow-2);
   cursor: pointer;
 }

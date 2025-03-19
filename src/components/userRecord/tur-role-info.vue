@@ -1,11 +1,11 @@
 <template>
   <div class="tur-ri-box">
+    <div class="tur-ri-avatar">
+      <TMiImg :ori="true" :src="role.avatar" alt="avatar" />
+    </div>
     <div class="tur-ri-content">
       <div class="tur-ri-title">{{ role.nickname }}({{ uid }})</div>
       <div class="tur-ri-subtitle">Lv.{{ role.level }} {{ role.region }}</div>
-    </div>
-    <div class="tur-ri-avatar">
-      <TMiImg :ori="true" :src="role.avatar" alt="avatar" />
     </div>
   </div>
 </template>
@@ -28,8 +28,8 @@ defineProps<TurRoleInfoProps>();
   align-items: center;
   justify-content: center;
   column-gap: 4px;
-  padding: 4px;
-  border-radius: 4px 24px 24px 4px;
+  border-radius: 24px;
+  padding: 4px 12px 4px 4px;
   box-sizing: border-box;
 }
 
@@ -56,7 +56,7 @@ defineProps<TurRoleInfoProps>();
 .tur-ri-content {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
 }
 

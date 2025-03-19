@@ -227,7 +227,8 @@ function getWeaponTitle(): string {
   width: 100%;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
+  row-gap: 4px;
   border-radius: 4px;
   aspect-ratio: 21/10;
 }
@@ -273,11 +274,11 @@ function getWeaponTitle(): string {
   :first-child {
     position: relative;
     display: flex;
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     align-items: center;
     justify-content: center;
-    padding: 4px;
+    padding: 5px;
     box-sizing: border-box;
     border: 1px solid var(--box-bg-4);
     border-radius: 50%;

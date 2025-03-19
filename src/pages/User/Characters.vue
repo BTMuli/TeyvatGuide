@@ -470,6 +470,10 @@ function handleSwitch(next: boolean): void {
   font-family: var(--font-text);
 }
 
+.dark .uc-top-btn {
+  border: 1px solid var(--common-shadow-2);
+}
+
 .uc-grid {
   display: grid;
   grid-gap: 8px;
