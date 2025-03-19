@@ -37,7 +37,7 @@
           {{ deviceInfo.device_name }}({{ deviceInfo.product }}) - {{ deviceInfo.device_fp }}
         </v-list-item-subtitle>
         <template #append>
-          <v-icon @click="confirmUpdateDevice(true)">mdi-bug</v-icon>
+          <v-icon @click="confirmUpdateDevice(true)" title="强制刷新设备信息">mdi-bug</v-icon>
         </template>
       </v-list-item>
       <v-list-item title="清除缓存" @click="confirmDelCache">
