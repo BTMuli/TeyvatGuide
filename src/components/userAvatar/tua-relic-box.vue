@@ -66,7 +66,7 @@ function getRelicTitle(): string {
   position: relative;
   width: 30px;
   height: 30px;
-  border-radius: 5px;
+  border-radius: 2px;
 }
 
 .tua-relic-icon {
@@ -84,7 +84,7 @@ function getRelicTitle(): string {
   }
 
   .empty {
-    padding: 5px;
+    padding: 2px;
   }
 }
 
@@ -97,13 +97,13 @@ function getRelicTitle(): string {
   height: 100%;
   align-items: center;
   justify-content: center;
-  border-radius: 5px;
+  border-radius: 2px;
   background: var(--box-bg-3);
 
   img {
     width: 100%;
     height: 100%;
-    border-radius: 5px;
+    border-radius: 2px;
     object-fit: cover;
   }
 }

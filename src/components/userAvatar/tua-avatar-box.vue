@@ -22,21 +22,29 @@
         <img v-if="isFetterMax" :src="nameCard" alt="nameCard" />
       </div>
       <div class="tua-abl-skills">
-        <div v-for="skill in skills" :key="skill.skill_id" class="tua-abl-skill">
+        <div
+          v-for="skill in skills"
+          :key="skill.skill_id"
+          class="tua-abl-skill"
+          :title="`${skill.name} Lv.${skill.level}`"
+        >
           <img :src="skill.icon" alt="skill" />
           <span>Lv.{{ skill.level }}</span>
         </div>
       </div>
       <div class="tua-abl-bottom">
-        <div class="tua-abl-fetter">
+        <div class="tua-abl-fetter" :title="`好感度：${props.modelValue.avatar.fetter}`">
           <img src="/icon/material/105.webp" alt="fetter" />
           <span>{{ props.modelValue.avatar.fetter }}</span>
         </div>
         <div class="tua-abl-other">
-          <span v-if="!isFetterMax">
+          <span v-if="!isFetterMax" title="好感度未满">
             <v-icon>mdi-lock-outline</v-icon>
           </span>
-          <span v-if="props.modelValue.costumes.length > 0">
+          <span
+            v-if="props.modelValue.costumes.length > 0"
+            :title="`衣装: ${props.modelValue.costumes.map((i) => i.name).join(', ')}`"
+          >
             <v-icon>mdi-tshirt-crew-outline</v-icon>
           </span>
         </div>
@@ -127,26 +135,30 @@ function getWeaponTitle(): string {
   return title.join("\n");
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .tua-ab-box {
+  @include github-styles.github-card();
+
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 5px;
-  border: 1px inset var(--common-shadow-2);
-  border-radius: 5px;
-  background: var(--box-bg-2);
-  color: var(--tgc-white-1);
+  padding: 4px;
+  border-radius: 4px;
   cursor: pointer;
-  row-gap: 5px;
+  row-gap: 4px;
+}
+
+.dark .tua-ab-box {
+  @include github-styles.github-card("dark");
 }
 
 .tua-ab-top {
   display: flex;
-  width: 100%;
   align-items: center;
   justify-content: center;
-  column-gap: 10px;
+  column-gap: 4px;
 }
 
 .tua-abt-right {
@@ -154,14 +166,14 @@ function getWeaponTitle(): string {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  row-gap: 5px;
+  row-gap: 4px;
 }
 
 .tua-abt-rt {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  column-gap: 5px;
+  column-gap: 4px;
 }
 
 .tua-abt-rtr {
@@ -169,14 +181,14 @@ function getWeaponTitle(): string {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  row-gap: 5px;
+  row-gap: 4px;
 }
 
 .tua-abt-rb {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  column-gap: 5px;
+  column-gap: 4px;
 }
 
 .tua-abl-bottom {
@@ -185,20 +197,21 @@ function getWeaponTitle(): string {
   width: 100%;
   align-items: center;
   justify-content: space-between;
-  padding: 5px;
+  padding: 4px;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   background: rgb(0 0 0 / 40%);
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
   font-family: var(--font-title);
+  color: var(--tgc-white-1);
 }
 
 .tua-abl-fetter {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 5px;
+  gap: 4px;
 
   img {
     width: 20px;
@@ -215,7 +228,7 @@ function getWeaponTitle(): string {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  border-radius: 5px;
+  border-radius: 4px;
   aspect-ratio: 21/10;
 }
 
@@ -227,7 +240,7 @@ function getWeaponTitle(): string {
   width: 100%;
   align-items: center;
   justify-content: center;
-  border-radius: 5px;
+  border-radius: 4px;
   aspect-ratio: 21/10;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
@@ -236,7 +249,7 @@ function getWeaponTitle(): string {
   img {
     width: 100%;
     height: 100%;
-    border-radius: 5px;
+    border-radius: 4px;
   }
 }
 
@@ -245,27 +258,27 @@ function getWeaponTitle(): string {
   display: flex;
   width: 100%;
   align-items: center;
-  justify-content: space-between;
-  padding: 5px;
-  border-radius: 5px;
+  justify-content: space-evenly;
+  padding: 4px;
 }
 
 .tua-abl-skill {
   display: flex;
-  width: 50px;
+  width: 48px;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  row-gap: 5px;
+  row-gap: 4px;
 
   :first-child {
     position: relative;
     display: flex;
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     align-items: center;
     justify-content: center;
-    padding: 5px;
+    padding: 4px;
+    box-sizing: border-box;
     border: 1px solid var(--box-bg-4);
     border-radius: 50%;
     background: var(--tgc-dark-7);
@@ -276,8 +289,7 @@ function getWeaponTitle(): string {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-right: 5px;
-    padding-left: 5px;
+    width: 48px;
     border-radius: 5px;
     background: var(--box-bg-4);
     color: var(--box-text-4);

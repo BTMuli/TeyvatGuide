@@ -396,8 +396,8 @@ function handleSwitch(next: boolean): void {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin: 0 10px;
-  gap: 10px;
+  margin-left: 16px;
+  gap: 8px;
 }
 
 .uc-select-btn {
@@ -413,11 +413,11 @@ function handleSwitch(next: boolean): void {
 .uc-box {
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  padding: 8px;
   border: 1px solid var(--common-shadow-2);
-  border-radius: 5px;
-  background: var(--box-bg-1);
-  gap: 10px;
+  border-radius: 4px;
+  background: var(--app-page-bg);
+  gap: 8px;
 }
 
 .uc-top {
@@ -434,8 +434,9 @@ function handleSwitch(next: boolean): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  gap: 10px;
+  padding: 8px;
+  margin-left: 8px;
+  gap: 8px;
 
   img {
     width: 32px;
@@ -458,8 +459,8 @@ function handleSwitch(next: boolean): void {
 .uc-top-btns {
   display: flex;
   align-content: center;
-  margin: 0 10px;
-  column-gap: 10px;
+  margin-right: 16px;
+  column-gap: 8px;
 }
 
 .uc-top-btn {
@@ -471,7 +472,7 @@ function handleSwitch(next: boolean): void {
 
 .uc-grid {
   display: grid;
-  grid-gap: 15px;
+  grid-gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(210px, 0.2fr));
 }
 
