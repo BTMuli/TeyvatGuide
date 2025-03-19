@@ -43,8 +43,7 @@ function getTitle(avatar: TGApp.Sqlite.Record.Avatar): string {
 <style lang="css" scoped>
 .tur-ag-box {
   display: grid;
-  margin-bottom: 10px;
-  grid-gap: 10px;
+  grid-gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
 }
 </style>

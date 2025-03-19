@@ -33,9 +33,9 @@
         <template #icon>
           <img
             alt="achievement-icon"
-            height="25px"
+            height="20px"
             src="@/assets/icons/achievements.svg"
-            width="25px"
+            width="20px"
           />
         </template>
       </TurOverviewSub>
@@ -92,15 +92,15 @@ defineProps<{ modelValue: TGApp.Sqlite.Record.Stats }>();
 .tur-og-box {
   display: grid;
   width: 100%;
-  grid-gap: 10px;
+  grid-gap: 8px;
   grid-template-columns: repeat(4, 0.25fr);
 }
 
 .tur-og-box-3 {
   display: grid;
   width: 100%;
-  margin-bottom: 10px;
-  grid-gap: 10px;
+  margin-bottom: 8px;
+  grid-gap: 8px;
   grid-template-columns: repeat(3, 1fr);
 }
 </style>

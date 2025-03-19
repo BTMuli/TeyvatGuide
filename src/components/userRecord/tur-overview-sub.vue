@@ -1,17 +1,21 @@
 <template>
   <div class="tur-os-box">
-    <div class="tur-os-title">
-      <slot name="title">{{ props.title }}</slot>
-    </div>
     <div class="tur-os-text">
       <div v-if="props.icon !== undefined" class="tur-os-icon">
-        <slot name="icon"><img :src="props.icon" alt="icon" /></slot>
+        <slot name="icon">
+          <TMiImg :ori="true" :src="props.icon" alt="icon" />
+        </slot>
       </div>
       <slot name="val-text">{{ props.text }}</slot>
+    </div>
+    <div class="tur-os-title">
+      <slot name="title">{{ props.title }}</slot>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
+
 type TAOProps = { title: string; text: string | number | undefined; icon?: string | undefined };
 
 const props = defineProps<TAOProps>();
@@ -24,26 +28,26 @@ const props = defineProps<TAOProps>();
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 5px;
-  border-radius: 5px;
-  background: var(--box-bg-2);
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-1);
 }
 
 .tur-os-title {
   color: var(--box-text-4);
   font-family: var(--font-title);
-  font-size: 20px;
 }
 
 .tur-os-text {
   display: flex;
-  width: 100%;
   align-items: center;
   justify-content: center;
   color: var(--tgc-yellow-1);
+  column-gap: 4px;
   font-family: var(--font-text);
-  font-size: 20px;
-  gap: 5px;
+  font-size: 18px;
+  line-height: 24px;
 }
 
 .dark .tur-os-text {
@@ -52,8 +56,12 @@ const props = defineProps<TAOProps>();
 }
 
 .tur-os-icon {
-  width: 25px;
-  height: 25px;
+  position: relative;
+  display: flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
 
   img {
     width: 100%;

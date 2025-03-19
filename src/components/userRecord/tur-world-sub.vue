@@ -1,7 +1,7 @@
 <template>
   <div class="tur-ws-box">
     <div class="tur-ws-bg">
-      <img :src="data.bg" alt="bg" />
+      <TMiImg :ori="true" :src="data.bg" alt="bg" />
     </div>
     <div class="tur-ws-icon">
       <img :src="icon" alt="icon" />
@@ -11,7 +11,7 @@
         <span>{{ data.name }}</span>
         <span v-if="data.offering" class="tur-ws-sub">
           <img :src="data.offering.icon" alt="offer" />
-          <span>{{ data.offering.name }}等级：</span>
+          <span>{{ data.offering.name }}-</span>
           <span>{{ data.offering.level }}</span>
           <span>级</span>
         </span>
@@ -42,6 +42,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
 
@@ -62,15 +63,18 @@ const icon = computed<string>(() => {
   return props.data.iconDark;
 });
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tur-ws-box {
   position: relative;
   display: flex;
   overflow: hidden;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 8px;
+  border-radius: 4px;
+  column-gap: 4px;
+  background: var(--box-bg-1);
+  border: 1px solid var(--common-shadow-1);
 }
 
 .tur-ws-bg {
@@ -83,9 +87,8 @@ const icon = computed<string>(() => {
 
 .tur-ws-icon {
   z-index: 1;
-  width: 60px;
-  height: 60px;
-  padding: 5px;
+  width: 64px;
+  height: 64px;
 }
 
 .tur-ws-icon img {
@@ -96,7 +99,7 @@ const icon = computed<string>(() => {
 
 .tur-ws-content {
   z-index: 1;
-  width: calc(100% - 60px);
+  width: calc(100% - 68px);
   height: 100%;
   color: var(--box-text-4);
 }
@@ -107,7 +110,7 @@ const icon = computed<string>(() => {
   justify-content: space-between;
   border-bottom: 1px inset var(--common-shadow-8);
   font-family: var(--font-title);
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .tur-ws-sub {
@@ -119,13 +122,13 @@ const icon = computed<string>(() => {
 }
 
 .tur-ws-sub img {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
+  width: 24px;
+  height: 24px;
 }
 
 .tur-ws-sub :nth-last-child(2) {
   color: var(--tgc-yellow-1);
   font-family: var(--font-title);
+  text-shadow: 0 0 2px #0d1117;
 }
 </style>

@@ -1,15 +1,9 @@
 /**
  * @file types/Game/Record.d.ts
  * @description 原神战绩相关类型定义文件
- * @since Beta v0.5.5
+ * @since Beta v0.7.2
  */
 
-/**
- * @description 原神战绩相关类型定义命名空间
- * @since Beta v0.5.5
- * @namespace TGApp.Game.Record
- * @memberof TGApp.Game
- */
 declare namespace TGApp.Game.Record {
   /**
    * @description 原神战绩数据返回类型
@@ -19,30 +13,32 @@ declare namespace TGApp.Game.Record {
    * @property {FullData} data - 原神战绩数据
    * @return Response
    */
-  interface Response extends TGApp.BBS.Response.BaseWithData {
-    data: FullData;
-  }
+  type Response = TGApp.BBS.Response.BaseWithData<FullData>;
 
   /**
    * @description 原神战绩数据类型
    * @interface FullData
-   * @since Alpha v0.2.0
+   * @since Beta v0.7.2
    * @property {Role} role - 角色信息
-   * @property {Avatar[]} avatars - 角色列表
+   * @property {Array<Avatar>} avatars - 角色列表
    * @property {Stats} stats - 统计信息
-   * @property {unknown[]} city_explorations - 城市探索信息
-   * @property {WorldExplore[]} world_explorations - 世界探索信息
-   * @property {Home[]} homes - 尘歌壶信息
+   * @property {Array<unknown>} city_explorations - 城市探索信息
+   * @property {Array<WorldExplore>} world_explorations - 世界探索信息
+   * @property {Array<Home>} homes - 尘歌壶信息
+   * @property {string} query_tool_link - 查询工具链接
+   * @property {string} query_tool_image - 查询工具图片
    * @return FullData
    */
-  interface FullData {
+  type FullData = {
     role: Role;
-    avatars: Avatar[];
+    avatars: Array<Avatar>;
     stats: Stats;
-    city_explorations: unknown[];
-    world_explorations: WorldExplore[];
-    homes: Home[];
-  }
+    city_explorations: Array<unknown>;
+    world_explorations: Array<WorldExplore>;
+    homes: Array<Home>;
+    query_tool_link: string;
+    query_tool_image: string;
+  };
 
   /**
    * @description 角色信息类型
@@ -55,18 +51,18 @@ declare namespace TGApp.Game.Record {
    * @property {string} game_head_icon - 游戏头像
    * @return Role
    */
-  interface Role {
+  type Role = {
     AvatarUrl: string;
     nickname: string;
     region: string;
     level: number;
     game_head_icon: string;
-  }
+  };
 
   /**
    * @description 角色列表类型
    * @interface Avatar
-   * @since Alpha v0.2.0
+   * @since Beta v0.7.2
    * @property {number} id - 角色 ID
    * @property {string} image - 角色头像
    * @property {string} name - 角色名称
@@ -77,9 +73,11 @@ declare namespace TGApp.Game.Record {
    * @property {number} actived_constellation_num - 角色已激活命座数量
    * @property {number} card_image - 角色卡片图片
    * @property {boolean} is_chosen - 角色是否展示
+   * @property {unknown} weapon - 角色武器 // null
+   * @property {Array<unknown>} relics - 角色圣遗物 // []
    * @return Avatar
    */
-  interface Avatar {
+  type Avatar = {
     id: number;
     image: string;
     name: string;
@@ -90,7 +88,9 @@ declare namespace TGApp.Game.Record {
     actived_constellation_num: number;
     card_image: number;
     is_chosen: boolean;
-  }
+    weapon: unknown;
+    relics: Array<unknown>;
+  };
 
   /**
    * @description 统计信息类型
@@ -118,7 +118,7 @@ declare namespace TGApp.Game.Record {
    * @property {number} full_fetter_avatar_num - 满好感角色数
    * @return Stats
    */
-  interface Stats {
+  type Stats = {
     active_day_number: number;
     achievement_number: number;
     anemoculus_number: number;
@@ -139,7 +139,7 @@ declare namespace TGApp.Game.Record {
     field_ext_map: unknown;
     role_combat: CombatStats;
     full_fetter_avatar_num: number;
-  }
+  };
 
   /**
    * @description 幻想真境剧诗数据类型
@@ -151,17 +151,17 @@ declare namespace TGApp.Game.Record {
    * @property {boolean} has_detail_data - 是否有详细数据
    * @return CombatStats
    */
-  interface CombatStats {
+  type CombatStats = {
     is_unlock: boolean;
     max_round_id: number;
     has_data: boolean;
     has_detail_data: boolean;
-  }
+  };
 
   /**
    * @description 世界探索信息类型
    * @interface WorldExplore
-   * @since Alpha v0.2.0
+   * @since Beta 0.7.2
    * @property {number} level - 声望等级
    * @property {number} exploration_percentage - 探索千分比
    * @property {string} icon - 图标
@@ -175,15 +175,23 @@ declare namespace TGApp.Game.Record {
    * @property {string} background_image - 背景图片 URL
    * @property {string} inner_icon - 内部图标 URL
    * @property {string} cover - 封面 URL
+   * @property {Array<unknown>} area_exploration_list - 区域探索列表
+   * @property {Array<unknown>} boss_list - Boss 列表
+   * @property {boolean} is_hot - 是否热门
+   * @property {boolean} index_active - 索引激活
+   * @property {boolean} detail_active - 详细激活
+   * @property {number} seven_status_level - 七天神像等级
+   * @property {NataReputation[] | null} nata_reputation - 纳塔声望
+   * @property {number} world_type - 世界类型
    * @return WorldExplore
    */
-  interface WorldExplore {
+  type WorldExplore = {
     level: number;
     exploration_percentage: number;
     icon: string;
     name: string;
     type: string;
-    offerings: WorldOffering[];
+    offerings: Array<WorldOffering>;
     id: number;
     parent_id: number;
     map_url: string;
@@ -191,7 +199,15 @@ declare namespace TGApp.Game.Record {
     background_image: string;
     inner_icon: string;
     cover: string;
-  }
+    area_exploration_list: Array<unknown>;
+    boss_list: Array<unknown>;
+    is_hot: boolean;
+    index_active: boolean;
+    detail_active: boolean;
+    seven_status_level: number;
+    nata_reputation: NataReputation | null;
+    world_type: number;
+  };
 
   /**
    * @description 奉献物品类型
@@ -202,11 +218,26 @@ declare namespace TGApp.Game.Record {
    * @property {string} icon - 图标
    * @return WorldOffering
    */
-  interface WorldOffering {
-    name: string;
-    level: number;
-    icon: string;
-  }
+  type WorldOffering = { name: string; level: number; icon: string };
+
+  /**
+   * @description 纳塔声望类型
+   * @interface NataReputation
+   * @since Beta v0.7.2
+   * @property {Array<NataOffering>} tribal_list - 部落列表
+   * @returns NataReputation
+   */
+  type NataReputation = { tribal_list: Array<NataOffering> };
+
+  /**
+   * @description 部落列表类型
+   * @interface NataOffering
+   * @extends WorldOffering
+   * @property {number} id - ID
+   * @property {string} image - 图片
+   * @returns NataOffering
+   */
+  type NataOffering = WorldOffering & { id: number; image: string };
 
   /**
    * @description 尘歌壶信息类型
@@ -222,7 +253,7 @@ declare namespace TGApp.Game.Record {
    * @property {string} comfort_level_icon - 洞天仙力等级图标
    * @return Home
    */
-  interface Home {
+  type Home = {
     level: number;
     visit_num: number;
     comfort_num: number;
@@ -231,5 +262,5 @@ declare namespace TGApp.Game.Record {
     icon: string;
     comfort_level_name: string;
     comfort_level_icon: string;
-  }
+  };
 }

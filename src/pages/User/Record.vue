@@ -10,7 +10,7 @@
           v-model="uidCur"
           :items="uidList"
           :hide-details="true"
-          title="游戏UID"
+          label="游戏UID"
         />
       </div>
     </template>
@@ -38,17 +38,27 @@
   </v-app-bar>
   <div class="ur-box" v-if="recordData">
     <div class="ur-box-title">
-      <TurRoleInfo :model-value="recordData.role" :uid="uidCur ?? 0" />
-      <span>原神战绩|Render by TeyvatGuide v{{ version }}|更新于 {{ recordData.updated }}</span>
+      <TurRoleInfo :role="recordData.role" :uid="uidCur ?? 0" />
+      <span class="sign">
+        原神战绩|Render by TeyvatGuide v{{ version }}|更新于 {{ recordData.updated }}
+      </span>
     </div>
-    <TSubLine>数据总览</TSubLine>
-    <TurOverviewGrid :model-value="recordData.stats" />
-    <TSubLine>角色信息</TSubLine>
-    <TurAvatarGrid :model-value="recordData.avatars" />
-    <TSubLine>世界探索</TSubLine>
-    <TurWorldGrid :model-value="recordData.worldExplore" />
-    <TSubLine>尘歌壶</TSubLine>
-    <TurHomeGrid :model-value="recordData.homes" />
+    <PhCompCard>
+      <template #title>数据总览</template>
+      <TurOverviewGrid :model-value="recordData.stats" />
+    </PhCompCard>
+    <PhCompCard>
+      <template #title>角色信息</template>
+      <TurAvatarGrid :model-value="recordData.avatars" />
+    </PhCompCard>
+    <PhCompCard>
+      <template #title>世界探索</template>
+      <TurWorldGrid :model-value="recordData.worldExplore" />
+    </PhCompCard>
+    <PhCompCard>
+      <template #title>尘歌壶</template>
+      <TurHomeGrid :model-value="recordData.homes" />
+    </PhCompCard>
   </div>
   <div class="ur-empty" v-else>
     <img alt="empty" src="/source/UI/empty.webp" />
@@ -56,10 +66,10 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TSubLine from "@comp/app/t-subline.vue";
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import PhCompCard from "@comp/pageHome/ph-comp-card.vue";
 import TurAvatarGrid from "@comp/userRecord/tur-avatar-grid.vue";
 import TurHomeGrid from "@comp/userRecord/tur-home-grid.vue";
 import TurOverviewGrid from "@comp/userRecord/tur-overview-grid.vue";
@@ -190,13 +200,17 @@ async function deleteRecord(): Promise<void> {
   await loadRecord();
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .ur-top-title {
+  position: relative;
+  margin-left: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  gap: 10px;
+  padding: 8px;
+  gap: 8px;
 
   img {
     width: 32px;
@@ -211,35 +225,45 @@ async function deleteRecord(): Promise<void> {
 }
 
 .ur-top-btns {
+  position: relative;
   display: flex;
-  margin-right: 15px;
-  gap: 15px;
+  margin-right: 16px;
+  gap: 8px;
 }
 
 .ur-top-btn {
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-text);
 }
 
 .ur-box {
+  @include github-styles.github-card-shadow();
+
+  position: relative;
   display: flex;
   flex-direction: column;
-  padding: 10px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
-  background: var(--box-bg-1);
-  row-gap: 5px;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  row-gap: 4px;
+  background: var(--app-page-bg);
+}
+
+.dark .ur-box {
+  @include github-styles.github-card-shadow("dark");
 }
 
 .ur-box-title {
+  position: relative;
   display: flex;
   width: 100%;
   align-items: flex-end;
   justify-content: space-between;
 
-  :last-child {
+  .sign {
     z-index: -1;
     font-size: 14px;
     opacity: 0.8;

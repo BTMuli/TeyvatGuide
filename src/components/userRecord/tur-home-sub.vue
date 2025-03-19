@@ -44,7 +44,7 @@ defineProps<{ data: TGApp.Sqlite.Record.Home }>();
   align-items: center;
   justify-content: space-between;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--box-bg-2);
 }
 
@@ -63,14 +63,14 @@ defineProps<{ data: TGApp.Sqlite.Record.Home }>();
   box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
+  padding: 8px;
 }
 
 .tur-hs-name {
   color: var(--tgc-white-1);
   font-family: var(--font-text);
   font-size: 16px;
-  text-shadow: 0 0 5px var(--tgc-yellow-1);
+  text-shadow: 0 0 4px var(--tgc-yellow-1);
 }
 
 .tur-hs-title {
@@ -78,14 +78,14 @@ defineProps<{ data: TGApp.Sqlite.Record.Home }>();
   align-items: center;
   color: var(--tgc-white-1);
   font-family: var(--font-title);
-  font-size: 20px;
-  text-shadow: 0 0 5px var(--tgc-yellow-1);
+  font-size: 18px;
+  text-shadow: 0 0 4px var(--tgc-yellow-1);
 }
 
 .tur-hs-title img {
-  width: 30px;
-  height: 30px;
-  margin-right: 5px;
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
 }
 
 .tur-hs-text-grid {
@@ -94,12 +94,12 @@ defineProps<{ data: TGApp.Sqlite.Record.Home }>();
   display: flex;
   width: 100%;
   justify-content: space-between;
-  padding: 10px;
+  padding: 8px;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   background: rgb(0 0 0 / 40%);
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
   color: var(--tgc-white-1);
   text-align: center;
 }
