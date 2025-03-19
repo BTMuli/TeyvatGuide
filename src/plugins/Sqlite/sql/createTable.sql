@@ -31,7 +31,6 @@ create table if not exists UserAccount
     updated text
 );
 
-drop table if exists GameAccount;
 -- @brief 创建游戏账号数据表
 create table if not exists GameAccount
 (
@@ -47,6 +46,27 @@ create table if not exists GameAccount
     updated    text,
     primary key (uid, gameBiz, gameUid)
 );
+
+-- @brief 创建临时游戏账号数据表用于迁移数据
+create table GameAccountTemp
+(
+    uid        text,
+    gameBiz    text,
+    gameUid    text,
+    isChosen   boolean,
+    isOfficial boolean,
+    level      integer,
+    nickname   text,
+    region     text,
+    regionName text,
+    updated    text,
+    primary key (uid, gameBiz, gameUid)
+);
+
+--- @brief 迁移数据
+insert into GameAccountTemp select * from GameAccount;
+drop table GameAccount;
+alter table GameAccountTemp rename to GameAccount;
 
 -- @brief 创建深渊数据表
 create table if not exists SpiralAbyss
