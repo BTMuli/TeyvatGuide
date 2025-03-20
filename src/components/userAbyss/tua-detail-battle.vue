@@ -54,7 +54,7 @@ function getBoxData(avatar: TGApp.Sqlite.Abyss.CharacterInfo): TItemBoxData {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  gap: 10px;
+  gap: 12px;
 }
 
 .tud-db-time {

@@ -70,6 +70,7 @@ function getBoxData(avatar: TGApp.Sqlite.Abyss.Character): TItemBoxData {
   color: var(--tgc-yellow-1);
   font-family: var(--font-text);
   font-size: 20px;
+  font-weight: bold;
 }
 
 .tuao-val-icons {

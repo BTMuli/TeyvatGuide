@@ -46,7 +46,7 @@ function getTime(): string {
 .tuco-box {
   display: grid;
   width: 100%;
-  grid-gap: 10px;
+  grid-gap: 8px;
   grid-template-columns: repeat(3, 1fr);
 }
 </style>

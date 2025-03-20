@@ -77,7 +77,6 @@
           <TucOverview :data="item.stat" :fights="item.detail.fight_statisic" />
           <TSubLine>使用角色({{ item.detail.backup_avatars.length }}名)</TSubLine>
           <TucAvatars :model-value="item.detail.backup_avatars" :detail="false" />
-          <TSubLine>详情</TSubLine>
           <div class="ucw-rounds">
             <TucRound
               v-for="(round, idx) in item.detail.rounds_data"
@@ -300,11 +299,10 @@ async function deleteCombat(): Promise<void> {
 <style lang="css" scoped>
 .uct-left {
   display: flex;
-  width: 100%;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  gap: 10px;
+  margin-left: 12px;
+  gap: 8px;
 
   img {
     width: 32px;
@@ -323,11 +321,10 @@ async function deleteCombat(): Promise<void> {
 
 .uct-right {
   display: flex;
-  width: 100%;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  gap: 10px;
+  margin-right: 12px;
+  gap: 8px;
 }
 
 .uc-btn {
@@ -336,13 +333,18 @@ async function deleteCombat(): Promise<void> {
   font-family: var(--font-text);
 }
 
+.dark .uc-btn {
+  border: 1px solid var(--common-shadow-2);
+}
+
 .uc-box {
   display: flex;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 96px);
   align-items: flex-start;
   justify-content: center;
-  border: 1px solid var(--common-shadow-4);
-  border-radius: 5px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--box-bg-1);
 }
 
 .uc-tabs-box {
@@ -352,22 +354,24 @@ async function deleteCombat(): Promise<void> {
 
 .uc-window {
   overflow: hidden;
-  width: calc(100% - 100px);
+  width: 100%;
   height: 100%;
-  padding: 10px;
+  padding: 8px;
+  background: var(--app-page-bg);
+  border-bottom-right-radius: 4px;
+  border-top-right-radius: 4px;
 }
 
 .uc-window-item {
   height: 100%;
-  padding: 10px;
-  border-radius: 5px;
+  padding-right: 8px;
   overflow-y: auto;
 }
 
 .ucw-i-ref {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 8px;
 }
 
 .ucw-top {
@@ -381,13 +385,12 @@ async function deleteCombat(): Promise<void> {
   display: flex;
   align-items: center;
   color: var(--common-text-title);
+  column-gap: 4px;
   font-family: var(--font-title);
   font-size: 20px;
 }
 
 .ucw-title :nth-child(2n) {
-  margin-right: 10px;
-  margin-left: 10px;
   color: var(--tgc-yellow-1);
 }
 
@@ -416,7 +419,7 @@ async function deleteCombat(): Promise<void> {
 
 .ucw-rounds {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   grid-template-columns: repeat(2, 1fr);
 }
 </style>

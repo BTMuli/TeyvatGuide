@@ -28,11 +28,13 @@ const props = defineProps<TuaDetailLevelProps>();
 <style lang="css" scoped>
 .tua-dl-box {
   display: flex;
+  box-sizing: border-box;
   flex-direction: column;
-  padding: 10px;
-  border-radius: 5px;
-  margin-top: 10px;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  margin-top: 8px;
   background: var(--box-bg-2);
-  gap: 10px;
+  gap: 8px;
 }
 </style>

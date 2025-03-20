@@ -24,15 +24,15 @@ const props = defineProps<TuaDetailProps>();
 </script>
 <style lang="css" scoped>
 .tuad-box {
-  padding: 10px;
-  border-radius: 5px;
+  padding: 8px;
+  border-radius: 4px;
   background: var(--box-bg-1);
 }
 
 .tuad-index-box {
   display: grid;
   width: 100%;
-  grid-gap: 10px;
+  grid-gap: 8px;
   grid-template-columns: repeat(3, 1fr);
 }
 </style>

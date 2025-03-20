@@ -238,6 +238,10 @@ async function deleteRecord(): Promise<void> {
   font-family: var(--font-text);
 }
 
+.dark .ur-top-btn {
+  border: 1px solid var(--common-shadow-2);
+}
+
 .ur-box {
   @include github-styles.github-card-shadow();
 

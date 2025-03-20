@@ -48,12 +48,12 @@ function getItemBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
+  gap: 4px;
 
   &.grid {
     display: grid;
     width: 100%;
-    grid-gap: 10px;
+    grid-gap: 4px;
     grid-template-columns: repeat(2, 1fr);
   }
 }

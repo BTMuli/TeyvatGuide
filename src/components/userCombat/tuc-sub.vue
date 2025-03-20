@@ -11,12 +11,14 @@ defineProps<{ title: string }>();
 .tuc-sub-box {
   position: relative;
   display: flex;
-  height: 200px;
+  height: 205px;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 5px;
-  border-radius: 5px;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
   background: var(--box-bg-2);
 }
 

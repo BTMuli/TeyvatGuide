@@ -279,7 +279,7 @@ onUnmounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  margin-left: 8px;
   gap: 8px;
 
   img {
@@ -310,6 +310,7 @@ onUnmounted(async () => {
 .top-extension {
   position: relative;
   padding: 8px;
+  margin-left: 8px;
   display: flex;
   align-items: center;
   justify-content: center;

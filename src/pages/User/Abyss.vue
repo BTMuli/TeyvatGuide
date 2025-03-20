@@ -88,7 +88,6 @@
             <TuaOverview title="出战次数" :val-icons="item.revealRank" :multi4="true" />
             <TuaOverview title="元素爆发" :val-icons="item.energySkillRank" />
           </div>
-          <TSubLine>详情</TSubLine>
           <div class="uaw-d-box">
             <TuaDetail v-for="floor in item.floors" :key="floor.id" :model-value="floor" />
           </div>
@@ -341,11 +340,10 @@ async function deleteAbyss(): Promise<void> {
 <style lang="css" scoped>
 .uat-left {
   display: flex;
-  width: 100%;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  gap: 10px;
+  margin-left: 8px;
+  gap: 8px;
 
   img {
     width: 32px;
@@ -366,7 +364,7 @@ async function deleteAbyss(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
+  margin-right: 12px;
   font-family: var(--font-text);
   font-size: 16px;
 
@@ -381,8 +379,9 @@ async function deleteAbyss(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  gap: 10px;
+  padding: 8px;
+  margin-left: 8px;
+  gap: 8px;
 }
 
 .ua-btn {
@@ -391,13 +390,19 @@ async function deleteAbyss(): Promise<void> {
   font-family: var(--font-text);
 }
 
+.dark .ua-btn {
+  border: 1px solid var(--common-shadow-2);
+}
+
 .ua-box {
   display: flex;
-  height: calc(100vh - 150px);
+  height: calc(100vh - 144px);
   align-items: flex-start;
   justify-content: center;
-  border: 1px solid var(--common-shadow-4);
-  border-radius: 5px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  color: var(--box-text-1);
 }
 
 .ua-tabs-box {
@@ -407,22 +412,25 @@ async function deleteAbyss(): Promise<void> {
 
 .ua-window {
   overflow: hidden;
-  width: calc(100% - 100px);
+  width: 100%;
   height: 100%;
-  padding: 10px;
+  padding: 8px;
+  background: var(--app-page-bg);
+  border-bottom-right-radius: 4px;
+  border-top-right-radius: 4px;
 }
 
 .ua-window-item {
   height: 100%;
-  padding: 10px;
-  border-radius: 5px;
+  box-sizing: border-box;
+  padding-right: 8px;
   overflow-y: auto;
 }
 
 .uaw-i-ref {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 8px;
 }
 
 .uaw-top {
@@ -436,13 +444,12 @@ async function deleteAbyss(): Promise<void> {
   display: flex;
   align-items: center;
   color: var(--common-text-title);
+  column-gap: 4px;
   font-family: var(--font-title);
   font-size: 20px;
 }
 
 .uaw-title :nth-child(2n) {
-  margin-right: 10px;
-  margin-left: 10px;
   color: var(--tgc-yellow-1);
 }
 
@@ -455,14 +462,14 @@ async function deleteAbyss(): Promise<void> {
 .uaw-o-box {
   display: grid;
   width: 100%;
-  grid-gap: 10px;
+  grid-gap: 8px;
   grid-template-columns: repeat(3, 1fr);
 }
 
 .uaw-d-box {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .user-empty {
@@ -474,7 +481,7 @@ async function deleteAbyss(): Promise<void> {
   height: 400px;
   flex-direction: column;
   align-items: center;
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--common-shadow-t-2);
   box-shadow: 0 0 5px var(--common-shadow-2);
   color: var(--common-text-title);

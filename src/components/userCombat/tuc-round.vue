@@ -35,10 +35,10 @@ defineProps<{ modelValue: TGApp.Game.Combat.RoundData }>();
   height: fit-content;
   flex-direction: column;
   align-items: center;
-  padding: 5px;
-  border-radius: 5px;
+  padding: 8px;
+  border-radius: 4px;
   background: var(--box-bg-1);
-  row-gap: 5px;
+  row-gap: 4px;
 }
 
 .tucr-title {
@@ -46,7 +46,7 @@ defineProps<{ modelValue: TGApp.Game.Combat.RoundData }>();
   align-items: flex-end;
   justify-content: center;
   margin-right: auto;
-  column-gap: 5px;
+  column-gap: 4px;
 
   img {
     width: 30px;
@@ -67,13 +67,10 @@ defineProps<{ modelValue: TGApp.Game.Combat.RoundData }>();
 .tucr-content {
   display: flex;
   width: 100%;
+  flex-shrink: 0;
   align-items: flex-start;
   justify-content: flex-start;
-  column-gap: 10px;
-
-  .main {
-    width: 180px;
-  }
+  column-gap: 8px;
 
   .sub {
     width: 100%;

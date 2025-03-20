@@ -22,8 +22,8 @@ defineProps<{ title: string; val: string | number | Array<number> }>();
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 8px;
+  border-radius: 4px;
   background: var(--box-bg-1);
 }
 
@@ -37,6 +37,7 @@ defineProps<{ title: string; val: string | number | Array<number> }>();
   color: var(--tgc-yellow-1);
   font-family: var(--font-text);
   font-size: 20px;
+  font-weight: bold;
 }
 
 .tuct-icons {

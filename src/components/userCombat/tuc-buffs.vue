@@ -31,7 +31,7 @@ const columnCnt = computed<number>(() => {
 .tuc-buff-box {
   display: grid;
   width: 100%;
-  grid-gap: 5px;
+  grid-gap: 4px;
   grid-template-columns: repeat(v-bind(columnCnt), 1fr);
 }
 
@@ -42,8 +42,8 @@ const columnCnt = computed<number>(() => {
   height: 80px;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 8px;
+  border-radius: 4px;
   background-color: var(--box-bg-3);
 
   img {
@@ -56,14 +56,14 @@ const columnCnt = computed<number>(() => {
     position: absolute;
     right: 0;
     bottom: 0;
-    padding: 0 5px;
+    padding: 0 4px;
     background: var(--common-shadow-2);
-    border-bottom-right-radius: 5px;
-    border-top-left-radius: 5px;
+    border-bottom-right-radius: 4px;
+    border-top-left-radius: 4px;
     color: var(--tgc-white-2);
     font-family: var(--font-title);
     font-size: 14px;
-    text-shadow: 0 0 5px rgb(0 0 0 / 20%);
+    text-shadow: 0 0 4px rgb(0 0 0 / 20%);
   }
 }
 </style>
