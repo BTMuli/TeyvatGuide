@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" blur-val="0">
+  <TOverlay v-model="visible" blur-val="5px">
     <div class="tua-ao-container" v-if="props.data">
       <slot name="left"></slot>
       <div class="tua-ao-box">
@@ -11,26 +11,32 @@
             {{ props.data.description }}
           </span>
         </div>
-        <div class="tua-ao-mid-title">
-          <span>所属系列：</span>
-          <span class="tua-ao-click" @click="emits('select-series', props.data.series)">
-            {{ AppAchievementSeriesData.find((s) => s.id === props.data?.series)?.name ?? "未知" }}
-          </span>
+        <div class="tua-ao-mid">
+          <div class="tua-ao-mid-title">
+            <span>所属系列：</span>
+            <span class="tua-ao-click" @click="emits('select-series', props.data.series)">
+              {{
+                AppAchievementSeriesData.find((s) => s.id === props.data?.series)?.name ?? "未知"
+              }}
+            </span>
+          </div>
+          <div class="tua-ao-mid-title">
+            <span>原石奖励：</span>
+            <span>{{ props.data.reward }}</span>
+          </div>
+          <div class="tua-ao-mid-title">
+            <span>触发方式：</span>
+            <span>{{
+              props.data.trigger.task ? "完成以下所有任务" : props.data.trigger.type
+            }}</span>
+          </div>
+          <div class="tua-ao-mid-item" v-for="item in props.data.trigger.task" :key="item.questId">
+            <v-icon>mdi-alert-decagram</v-icon>
+            <span class="tua-ao-click" @click="searchDirect(item.name)">{{ item.name }}</span>
+            <span>（{{ item.type }}）</span>
+          </div>
         </div>
-        <div class="tua-ao-mid-title">
-          <span>原石奖励：</span>
-          <span>{{ props.data.reward }}</span>
-        </div>
-        <div class="tua-ao-mid-title">
-          <span>触发方式：</span>
-          <span>{{ props.data.trigger.task ? "完成以下所有任务" : props.data.trigger.type }}</span>
-        </div>
-        <div class="tua-ao-mid-item" v-for="item in props.data.trigger.task" :key="item.questId">
-          <v-icon>mdi-alert-decagram</v-icon>
-          <span class="tua-ao-click" @click="searchDirect(item.name)">{{ item.name }}</span>
-          <span>（{{ item.type }}）</span>
-        </div>
-        <div>
+        <div class="tua-ao-bottom">
           <div class="tua-ao-bottom-title">
             <span>是否完成：</span>
             <span>{{ props.data.isCompleted ? "是" : "否" }}</span>
@@ -93,7 +99,7 @@ async function share(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  column-gap: 10px;
+  column-gap: 8px;
 }
 
 .tua-ao-box {
@@ -103,10 +109,10 @@ async function share(): Promise<void> {
   width: 600px;
   flex-direction: column;
   align-items: flex-start;
-  padding: 10px;
-  border-radius: 10px;
+  padding: 8px;
+  border-radius: 4px;
   background: var(--box-bg-1);
-  row-gap: 10px;
+  row-gap: 8px;
 }
 
 .tua-ao-top {
@@ -121,14 +127,6 @@ async function share(): Promise<void> {
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 24px;
-}
-
-.tua-ao-top-main :last-child {
-  padding: 0 5px;
-  border-radius: 5px;
-  background: var(--box-bg-2);
-  color: var(--box-text-5);
-  font-family: var(--font-title);
 }
 
 .tua-ao-mid-title,

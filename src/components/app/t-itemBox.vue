@@ -68,8 +68,8 @@ const props = defineProps<TItemBoxProps>();
   left: 0;
   overflow: hidden;
   width: v-bind("props.modelValue.size");
-  border-radius: 5px;
-  aspect-ratio: 1;
+  height: v-bind("props.modelValue.height");
+  border-radius: 4px;
 }
 
 .tib-bg img {
@@ -82,8 +82,8 @@ const props = defineProps<TItemBoxProps>();
   position: relative;
   overflow: hidden;
   width: v-bind("props.modelValue.size");
-  border-radius: 5px;
-  aspect-ratio: 1;
+  height: v-bind("props.modelValue.height");
+  border-radius: 4px;
 }
 
 .tib-icon img {
@@ -98,11 +98,11 @@ const props = defineProps<TItemBoxProps>();
   left: 0;
   display: flex;
   width: v-bind("props.modelValue.size");
+  height: v-bind("props.modelValue.height");
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 5px;
-  aspect-ratio: 1;
+  border-radius: 4px;
 }
 
 .tib-lt {
@@ -111,9 +111,9 @@ const props = defineProps<TItemBoxProps>();
   left: 3%;
   display: flex;
   width: v-bind("props.modelValue.ltSize");
+  height: v-bind("props.modelValue.ltSize");
   align-items: center;
   justify-content: center;
-  aspect-ratio: 1;
 }
 
 .tib-lt img {
@@ -128,12 +128,12 @@ const props = defineProps<TItemBoxProps>();
   right: 0;
   display: flex;
   width: v-bind("props.modelValue.rtSize");
+  height: v-bind("props.modelValue.rtSize");
   align-items: center;
   justify-content: center;
-  aspect-ratio: 1;
   background: rgb(0 0 0 / 40%);
-  border-bottom-left-radius: 5px;
-  border-top-right-radius: 5px;
+  border-bottom-left-radius: 4px;
+  border-top-right-radius: 4px;
   color: var(--tgc-white-1);
   font-family: var(--font-title);
 }
@@ -150,8 +150,8 @@ const props = defineProps<TItemBoxProps>();
   -webkit-backdrop-filter: blur(v-bind("props.modelValue.innerBlur ?? 0"));
   backdrop-filter: blur(v-bind("props.modelValue.innerBlur ?? 0"));
   background: rgb(20 20 20 / 40%);
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
   color: var(--tgc-white-1);
   font-family: var(--font-title);
   font-size: v-bind("((props.modelValue.innerHeight ?? 0) / 2).toString() + 'px'");
@@ -159,8 +159,8 @@ const props = defineProps<TItemBoxProps>();
 
 .tib-inner img {
   width: v-bind("(props.modelValue.innerHeight ?? 0).toString() + 'px'");
+  height: v-bind("(props.modelValue.innerHeight ?? 0).toString() + 'px'");
   padding: 1px;
-  aspect-ratio: 1;
 }
 
 .tib-inner span {

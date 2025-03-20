@@ -138,23 +138,23 @@ async function shareNameCard(): Promise<void> {
   overflow: hidden;
   width: 800px;
   height: 400px;
-  border-radius: 10px;
+  border-radius: 4px;
 }
 
 .ton-bg {
   position: absolute;
   width: 100%;
   height: 100%;
-  border-radius: 10px;
+  border-radius: 4px;
 }
 
 .ton-type {
   position: absolute;
   top: 10px;
   left: 10px;
-  padding: 0 5px;
+  padding: 0 4px;
   border: 1px solid var(--tgc-white-1);
-  border-radius: 5px;
+  border-radius: 4px;
   color: var(--tgc-white-1);
 }
 
@@ -169,8 +169,8 @@ async function shareNameCard(): Promise<void> {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-end;
-  padding: 10px;
-  border-radius: 10px;
+  padding: 8px;
+  border-radius: 4px;
   backdrop-filter: blur(5px);
   background: rgb(0 0 0 / 25%);
   color: var(--tgc-white-1);
@@ -202,7 +202,7 @@ async function shareNameCard(): Promise<void> {
   right: 10px;
   bottom: 10px;
   border: 1px solid var(--tgc-white-1);
-  border-radius: 5px;
+  border-radius: 4px;
   color: var(--tgc-white-1);
 }
 </style>

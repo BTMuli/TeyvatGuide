@@ -11,6 +11,7 @@
           :items="uidList"
           label="存档UID"
           variant="outlined"
+          width="200px"
         />
         <span>{{ title }}</span>
       </div>
