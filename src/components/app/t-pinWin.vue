@@ -14,11 +14,7 @@ import { onMounted, ref } from "vue";
 
 const isPined = ref<boolean>(false);
 
-onMounted(async () => {
-  // 因为无法获取窗口是否置顶，这边手动取消置顶
-  // 详见：https://github.com/tauri-apps/tauri/issues/11078
-  await getCurrentWindow().setAlwaysOnTop(false);
-});
+onMounted(async () => (isPined.value = await getCurrentWindow().isAlwaysOnTop()));
 
 async function switchPin(): Promise<void> {
   isPined.value = !isPined.value;

@@ -39,6 +39,7 @@ pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
     .title("米游社")
     .center()
     .user_agent(&win_ua)
+    .additional_browser_args("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required")
     // todo mac环境下没看到menu
     .menu(menu::create_mhy_menu(handle.clone()))
     .on_menu_event(move |app, event| menu::handle_menu_event(app, event))

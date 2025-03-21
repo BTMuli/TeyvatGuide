@@ -1,6 +1,6 @@
 //! @file src/commands.rs
 //! @desc 命令模块，负责处理命令
-//! @since Beta v0.5.1
+//! @since Beta v0.7.2
 
 use tauri::{AppHandle, Emitter, Manager, WebviewWindowBuilder};
 use tauri_utils::config::{WebviewUrl, WindowConfig};
@@ -42,6 +42,7 @@ pub async fn create_window(
     .visible(option.visible)
     .title(option.title)
     .center()
+    .additional_browser_args("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required")
     .build()
     .unwrap();
 }

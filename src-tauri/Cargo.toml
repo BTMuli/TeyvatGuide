@@ -17,21 +17,17 @@ name = "teyvat_guide_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2.0.6", features = [] }
+tauri-build = { version = "2.1.0", features = [] }
 
 [dependencies]
 chrono = "0.4.40"
 log = "0.4.26"
-serde = { version = "1.0.218", features = ["derive"] }
-serde_json = "1.0.139"
-tauri = { version = "2.3.1", features = [] }
-tauri-utils = "2.2.0"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+tauri = { version = "2.4.0", features = [] }
+tauri-utils = "2.3.0"
 url = "2.5.4"
 walkdir = "2.5.0"
-
-# 锁定wry版本避免出现白屏问题,见 https://github.com/tauri-apps/tauri/issues/12975
-[dependencies.wry]
-version = "=0.50.3"
 
 # deep link 插件
 [dependencies.tauri-plugin-deep-link]
