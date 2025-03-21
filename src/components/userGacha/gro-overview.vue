@@ -49,16 +49,14 @@ function getCnCols(): string {
 // 监听数据变化
 watch(
   () => props.modelValue,
-  () => {
-    cnCols.value = getCnCols();
-  },
+  () => (cnCols.value = getCnCols()),
 );
 </script>
 <style lang="css" scoped>
 .gro-o-container {
   display: grid;
   height: 100%;
-  grid-column-gap: 10px;
+  grid-column-gap: 8px;
   grid-template-columns: v-bind(cnCols);
 }
 </style>

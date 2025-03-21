@@ -34,26 +34,24 @@
     </div>
     <!-- 这边放具体物品的列表 -->
     <div class="gro-bottom">
-      <v-tabs v-model="tab">
+      <v-tabs v-model="tab" density="compact">
         <v-tab value="5">5☆</v-tab>
         <v-tab value="4">4☆</v-tab>
       </v-tabs>
       <v-window v-model="tab" class="gro-bottom-window">
         <v-window-item value="5" class="gro-b-window-item">
-          <GroDataLine
-            v-for="(item, index) in star5List"
-            :key="index"
-            :data="item.data"
-            :count="item.count"
-          />
+          <v-virtual-scroll :items="star5List" :item-height="48">
+            <template #default="{ item }">
+              <GroDataLine :data="item.data" :count="item.count" />
+            </template>
+          </v-virtual-scroll>
         </v-window-item>
         <v-window-item value="4" class="gro-b-window-item">
-          <GroDataLine
-            v-for="(item, index) in star4List"
-            :key="index"
-            :data="item.data"
-            :count="item.count"
-          />
+          <v-virtual-scroll :items="star4List" :item-height="48">
+            <template #default="{ item }">
+              <GroDataLine :data="item.data" :count="item.count" />
+            </template>
+          </v-virtual-scroll>
         </v-window-item>
       </v-window>
     </div>
@@ -178,9 +176,10 @@ watch(
 <style lang="css" scoped>
 .gro-dv-container {
   height: 100%;
-  padding: 10px;
-  border-radius: 5px;
-  background: var(--box-bg-2);
+  box-sizing: border-box;
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-1);
 }
 
 .gro-dvt-title {
@@ -190,7 +189,7 @@ watch(
   justify-content: space-between;
   color: var(--common-text-title);
   font-family: var(--font-title);
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .gro-dvt-subtitle {
@@ -201,8 +200,8 @@ watch(
 }
 
 .gro-mid-list {
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding-top: 4px;
+  padding-bottom: 4px;
   border-top: 1px solid var(--common-shadow-4);
   color: var(--box-text-7);
 }
@@ -217,18 +216,30 @@ watch(
 }
 
 .gro-bottom {
+  position: relative;
+  display: flex;
   width: 100%;
+  height: calc(100% - 150px);
+  box-sizing: border-box;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .gro-bottom-window {
-  height: calc(100vh - 440px);
+  position: relative;
+  height: calc(100vh - 428px);
+  overflow-y: auto;
 }
 
 .gro-b-window-item {
-  display: flex;
-  flex-direction: column;
-  margin-top: 10px;
-  gap: 5px;
-  overflow-y: auto;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 4px;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+:deep(.v-virtual-scroll__item + .v-virtual-scroll__item) {
+  margin-top: 8px;
 }
 </style>

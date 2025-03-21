@@ -127,26 +127,29 @@ function getBox(id: number): TItemBoxData {
 }
 </script>
 <style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .user-gacha-history-card-comp {
   position: relative;
   display: flex;
   width: 100%;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 10px;
-  border-radius: 10px;
-  background: var(--box-bg-2);
-  column-gap: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  column-gap: 8px;
 }
 
 .ug-his-banner {
+  @include github-styles.github-card-shadow();
+
   width: 50vw;
-  border-radius: 10px;
+  border-radius: 4px;
   cursor: pointer;
   transition: 0.5s ease-in-out;
 
   &:hover {
-    box-shadow: 0 0 10px 5px var(--box-bg-2);
     scale: 0.95;
     transition: 0.5s ease-in-out;
   }
@@ -162,7 +165,9 @@ function getBox(id: number): TItemBoxData {
 
 .ug-his-title {
   display: flex;
-  column-gap: 10px;
+  column-gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
 
   :first-child {
     color: var(--common-text-title);
@@ -172,13 +177,14 @@ function getBox(id: number): TItemBoxData {
 }
 
 .ug-his-tag {
+  @include github-styles.github-tag-dark-gen(#e06c63);
+
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 5px;
-  border-radius: 5px;
-  background: var(--box-bg-1);
-  color: var(--box-text-5);
+  padding: 0 8px;
+  height: fit-content;
+  border-radius: 4px;
   font-size: 16px;
 }
 
@@ -192,7 +198,7 @@ function getBox(id: number): TItemBoxData {
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
+  gap: 8px;
   overflow-y: auto;
 
   &.lv5 {
@@ -200,7 +206,7 @@ function getBox(id: number): TItemBoxData {
   }
 
   &.lv4 {
-    max-height: 170px;
+    max-height: 168px;
   }
 }
 </style>

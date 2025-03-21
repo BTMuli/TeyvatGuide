@@ -344,7 +344,7 @@ async function handleUser(): Promise<void> {
 
 .tpr-content {
   position: relative;
-  max-width: 100%;
+  width: 100%;
 }
 
 .tpr-info {

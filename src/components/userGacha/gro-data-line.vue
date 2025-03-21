@@ -4,15 +4,13 @@
     <div class="gro-dl-icon">
       <img :alt="props.data.name" :src="getIcon()" />
     </div>
-    <div class="gro-dl-line">
-      <div class="gro-dl-base">
-        <div class="gro-dl-name">{{ props.data.name }}</div>
-        <div class="gro-dl-time">{{ props.data.time }}</div>
-      </div>
-      <div class="gro-dl-info">
-        <div class="gro-dl-cnt">{{ props.count }}</div>
-        <div class="gro-dl-hint" v-if="hint !== ''">{{ hint }}</div>
-      </div>
+    <div class="gro-dl-base">
+      <div class="gro-dl-name">{{ props.data.name }}</div>
+      <div class="gro-dl-time">{{ props.data.time }}</div>
+    </div>
+    <div class="gro-dl-info">
+      <div class="gro-dl-cnt">{{ props.count }}</div>
+      <div class="gro-dl-hint" v-if="hint !== ''">{{ hint }}</div>
     </div>
   </div>
 </template>
@@ -57,10 +55,10 @@ function getEndHint(): string {
 }
 
 const progressColor = computed<string>(() => {
-  if (hint === "UP" && props.data.rank === "5") return "var(--tgc-od-orange)";
-  if (hint === "UP" && props.data.rank === "4") return "var(--tgc-od-purple)";
-  if (hint === "歪") return "var(--tgc-od-red)";
-  return "var(--tgc-od-blue)";
+  if (hint === "UP" && props.data.rank === "5") return "#d19a66";
+  if (hint === "UP" && props.data.rank === "4") return "#c678dd";
+  if (hint === "歪") return "#e06c75";
+  return "#61afef";
 });
 const progressWidth = computed<string>(() => {
   let final = 10;
@@ -72,19 +70,20 @@ const progressWidth = computed<string>(() => {
   return ((props.count / final) * 100).toFixed(2) + "%";
 });
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .gro-dl-box {
   position: relative;
   display: flex;
-  width: calc(100% - 10px);
-  height: 40px;
+  width: 100%;
+  box-sizing: border-box;
   align-items: center;
   justify-content: flex-start;
-  padding: 5px;
-  border-radius: 5px;
-  margin: 0 5px;
-  background: var(--box-bg-3);
-  column-gap: 5px;
+  padding: 8px;
+  height: 48px;
+  border-radius: 4px;
+  background: var(--box-bg-2);
+  border: 1px solid var(--common-shadow-1);
+  column-gap: 4px;
 }
 
 .gro-dl-progress {
@@ -93,16 +92,16 @@ const progressWidth = computed<string>(() => {
   left: 0;
   width: v-bind(progressWidth);
   max-width: 100%;
-  height: 5px;
-  border-radius: 5px;
+  height: 4px;
+  border-radius: 4px;
   background: v-bind(progressColor);
-  transition: width 0.5s;
 }
 
 .gro-dl-icon {
   display: flex;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
 
@@ -110,13 +109,6 @@ const progressWidth = computed<string>(() => {
     width: 100%;
     height: 100%;
   }
-}
-
-.gro-dl-line {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
 }
 
 .gro-dl-base {
@@ -127,23 +119,24 @@ const progressWidth = computed<string>(() => {
 }
 
 .gro-dl-name {
-  height: 16px;
+  line-height: 18px;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 14px;
 }
 
 .gro-dl-time {
-  height: 14px;
+  line-height: 14px;
   color: var(--box-text-7);
   font-size: 12px;
 }
 
 .gro-dl-info {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  column-gap: 5px;
+  margin-left: auto;
+  column-gap: 4px;
 }
 
 .gro-dl-cnt {
@@ -153,13 +146,13 @@ const progressWidth = computed<string>(() => {
 
 .gro-dl-hint {
   display: flex;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   align-items: center;
   justify-content: center;
-  padding: 5px;
+  padding: 4px;
   border-radius: 50%;
-  background: var(--box-bg-1);
+  background: var(--box-bg-3);
   color: v-bind(progressColor);
   font-family: var(--font-title);
   transform: rotate(25deg);

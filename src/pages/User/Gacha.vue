@@ -1,30 +1,41 @@
 <template>
-  <div class="gacha-top-bar">
-    <div class="gacha-top-title">
-      <img src="/source/UI/userGacha.webp" alt="gacha" />
-      <span>祈愿记录</span>
-    </div>
-    <v-select v-model="uidCur" class="gacha-top-select" :items="selectItem" variant="outlined" />
-    <div class="gacha-top-btns">
-      <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(false)">
-        增量刷新
-      </v-btn>
-      <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(true)">
-        全量刷新
-      </v-btn>
-      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="importUigf()">导入</v-btn>
-      <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="importUigf4()">
-        导入(v4)
-      </v-btn>
-      <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="exportUigf()">导出</v-btn>
-      <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="exportUigf4()">
-        导出(v4)
-      </v-btn>
-      <v-btn prepend-icon="mdi-delete" class="gacha-top-btn" @click="deleteGacha()">删除</v-btn>
-    </div>
-  </div>
+  <v-app-bar>
+    <template #prepend>
+      <div class="gacha-top-title">
+        <img src="/source/UI/userGacha.webp" alt="gacha" />
+        <span>祈愿记录</span>
+        <v-select
+          :hide-details="true"
+          density="compact"
+          v-model="uidCur"
+          :items="selectItem"
+          variant="outlined"
+          label="游戏UID"
+        />
+      </div>
+    </template>
+    <template #extension>
+      <div class="gacha-top-btns">
+        <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(false)">
+          增量刷新
+        </v-btn>
+        <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(true)">
+          全量刷新
+        </v-btn>
+        <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="importUigf()">导入</v-btn>
+        <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="importUigf4()">
+          导入(v4)
+        </v-btn>
+        <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="exportUigf()">导出</v-btn>
+        <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="exportUigf4()">
+          导出(v4)
+        </v-btn>
+        <v-btn prepend-icon="mdi-delete" class="gacha-top-btn" @click="deleteGacha()">删除</v-btn>
+      </div>
+    </template>
+  </v-app-bar>
   <div class="gacha-container">
-    <v-tabs v-model="tab" align-tabs="start" class="gacha-tab">
+    <v-tabs v-model="tab" align-tabs="start" class="gacha-tab" density="compact">
       <v-tab value="overview">数据概览</v-tab>
       <v-tab value="echarts">图表概览</v-tab>
       <v-tab value="table">数据表格</v-tab>
@@ -355,27 +366,12 @@ async function deleteGacha(): Promise<void> {
 }
 </script>
 <style lang="css" scoped>
-.gacha-top-bar {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
-  margin-bottom: 10px;
-  background: var(--box-bg-1);
-  column-gap: 50px;
-  font-family: var(--font-title);
-  font-size: 20px;
-}
-
 .gacha-top-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  gap: 10px;
+  margin-left: 12px;
+  column-gap: 8px;
 
   img {
     width: 32px;
@@ -389,13 +385,10 @@ async function deleteGacha(): Promise<void> {
   }
 }
 
-.gacha-top-select {
-  height: 60px;
-}
-
 .gacha-top-btns {
   display: flex;
-  column-gap: 10px;
+  margin-left: 16px;
+  column-gap: 8px;
 }
 
 .gacha-top-btn {
@@ -404,19 +397,23 @@ async function deleteGacha(): Promise<void> {
   color: var(--btn-text);
 }
 
+.dark .gacha-top-btn {
+  border: 1px solid var(--common-shadow-2);
+}
+
 .gacha-container {
   display: flex;
-  height: calc(100vh - 130px);
+  height: calc(100vh - 144px);
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
-  background: var(--box-bg-1);
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--app-page-bg);
 }
 
 .gacha-tab {
-  height: 50px;
+  height: 40px;
   color: var(--box-text-4);
   font-family: var(--font-title);
 }
@@ -424,11 +421,10 @@ async function deleteGacha(): Promise<void> {
 .gacha-window {
   width: 100%;
   height: 100%;
-  padding: 10px;
+  padding: 8px;
 }
 
 .gacha-window-item {
   height: 100%;
-  border-radius: 5px;
 }
 </style>

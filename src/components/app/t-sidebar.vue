@@ -79,7 +79,7 @@
         <template #title>测试页面</template>
       </v-list-item>
       <v-divider v-show="isDevEnv" />
-      <v-menu :open-on-click="true" location="end">
+      <v-menu :open-on-click="true" location="end" :offset="[8, 0]">
         <template #activator="{ props }">
           <v-list-item :title.attr="'图鉴'" v-bind="props">
             <template #title>图鉴</template>
@@ -88,7 +88,7 @@
             </template>
           </v-list-item>
         </template>
-        <v-list class="side-list-menu wiki" density="compact" :nav="true">
+        <v-list class="side-list-menu sub" density="compact" :nav="true">
           <v-list-item class="side-item-menu" title="深渊数据库" :link="true" href="/wiki/abyss">
             <template #prepend>
               <img src="/source/UI/wikiAbyss.webp" alt="abyssIcon" class="side-icon-menu" />
@@ -133,7 +133,7 @@
               </template>
             </v-list-item>
           </template>
-          <v-list class="side-list-menu" density="compact" :nav="true">
+          <v-list class="side-list-menu sub" density="compact" :nav="true">
             <v-list-item class="side-item-menu" title="签到" @click="openClient('sign_in')">
               <template #prepend>
                 <img src="/source/UI/userGacha.webp" class="side-icon-menu" alt="sing_in" />
@@ -260,8 +260,8 @@ onUnmounted(() => {
   font-family: var(--font-title);
 }
 
-.side-list-menu.wiki {
-  margin-left: 10px;
+.side-list-menu.sub {
+  box-shadow: -2px 0 4px var(--common-shadow-2) !important;
 }
 
 .side-item-menu {

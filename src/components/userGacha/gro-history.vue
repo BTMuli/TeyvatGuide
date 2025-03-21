@@ -50,7 +50,6 @@ onMounted(() => {
   height: 100%;
   align-items: center;
   justify-content: space-between;
-  column-gap: 10px;
 }
 
 .gro-tabs {
@@ -71,7 +70,7 @@ onMounted(() => {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding-right: 10px;
+  padding-right: 8px;
   overflow-y: scroll;
 }
 
@@ -87,6 +86,6 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  row-gap: 10px;
+  row-gap: 8px;
 }
 </style>

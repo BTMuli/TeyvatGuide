@@ -6,6 +6,8 @@
         <span>收藏</span>
       </div>
       <v-select
+        :hide-details="true"
+        density="compact"
         v-model="curSelect"
         class="pc-select"
         :items="collections"
@@ -384,17 +386,15 @@ async function mergePosts(posts: Array<TGApp.BBS.Post.FullData>, collect: string
 <style lang="css" scoped>
 .pc-top {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  padding: 0 10px;
-  gap: 10px;
+  margin-left: 12px;
+  gap: 8px;
 }
 
 .pc-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
 
   img {
     width: 32px;
@@ -409,24 +409,26 @@ async function mergePosts(posts: Array<TGApp.BBS.Post.FullData>, collect: string
 }
 
 .pc-select {
-  max-width: 400px;
-  height: 50px;
+  min-width: 150px;
 }
 
 .pc-btns {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 10px;
-  gap: 10px;
+  margin-left: 16px;
+  gap: 8px;
 }
 
 .pc-btn {
   height: 40px;
-  border: 1px solid var(--common-shadow-4);
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
+}
+
+.dark .pc-btn {
+  border: 1px solid var(--common-shadow-2);
 }
 
 .pc-posts {

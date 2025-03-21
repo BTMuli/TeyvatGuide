@@ -145,6 +145,7 @@ const props = defineProps<TItemBoxProps>();
   display: flex;
   width: 100%;
   height: v-bind("props.modelValue.innerHeight ?? 0") px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   -webkit-backdrop-filter: blur(v-bind("props.modelValue.innerBlur ?? 0"));
