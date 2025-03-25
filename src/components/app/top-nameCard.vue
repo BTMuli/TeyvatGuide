@@ -52,6 +52,6 @@ const bgImage = computed<string>(() => {
 }
 
 .desc {
-  text-shadow: 0 0 2px var(--common-shadow-8);
+  text-shadow: 0 0 2px var(--common-shadow-t-8);
 }
 </style>

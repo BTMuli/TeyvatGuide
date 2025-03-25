@@ -6,20 +6,27 @@
       </div>
       <div class="tpoi-bottom">
         <div class="tpoi-info" v-if="props.image.attributes">
-          <p v-if="props.image.attributes.size">
-            大小：{{ bytesToSize(props.image.attributes.size ?? 0) }}
+          <p v-if="props.image.attributes.size" class="tpoi-info-item">
+            <span>大小：</span>
+            <span>{{ bytesToSize(props.image.attributes.size ?? 0) }}</span>
           </p>
-          <p>尺寸：{{ props.image.attributes.width }}x{{ props.image.attributes.height }}</p>
-          <p>格式：{{ format }}</p>
+          <p class="tpoi-info-item">
+            <span>尺寸：</span>
+            <span>{{ props.image.attributes.width }}x{{ props.image.attributes.height }}</span>
+          </p>
+          <p class="tpoi-info-item">
+            <span>格式：</span>
+            <span>{{ format }}</span>
+          </p>
         </div>
         <div class="tpoi-tools">
           <v-icon @click="setBlackBg" title="切换背景色" v-if="showOri">
             mdi-format-color-fill
           </v-icon>
           <v-icon @click="showOri = true" title="查看原图" v-else>mdi-magnify</v-icon>
-          <v-icon @click="onCopy" title="复制到剪贴板" v-if="format !== 'gif'"
-            >mdi-content-copy</v-icon
-          >
+          <v-icon @click="onCopy" title="复制到剪贴板" v-if="format !== 'gif'">
+            mdi-content-copy
+          </v-icon>
           <v-icon @click="onDownload" title="下载到本地">mdi-download</v-icon>
           <v-icon @click="visible = false" title="关闭浮窗">mdi-close</v-icon>
         </div>
@@ -147,6 +154,12 @@ async function onDownload(): Promise<void> {
   border-radius: 4px;
   background-color: var(--common-shadow-2);
   color: white;
+}
+
+.tpoi-info-item {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .tpoi-tools {
