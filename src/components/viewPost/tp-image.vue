@@ -1,6 +1,11 @@
 <template>
-  <div class="tp-image-box" @click="showOverlay = true" v-if="localUrl !== undefined">
-    <img :src="localUrl" :alt="props.data.insert.image" :title="getImageTitle()" />
+  <div class="tp-image-box" v-if="localUrl !== undefined">
+    <img
+      :src="localUrl"
+      @click="showOverlay = true"
+      :alt="props.data.insert.image"
+      :title="getImageTitle()"
+    />
     <div
       class="act"
       @click.stop="showOri = true"
