@@ -122,7 +122,7 @@ async function getTimelineList(
   cookie: TGApp.App.Account.Cookie,
   offset?: number,
 ): Promise<TGApp.BBS.Response.Base | TGApp.BBS.Post.FollowPostRes> {
-  let param: Record<string, number> = { gids: 2, size: 20 };
+  let param: Record<string, number> = { gids: 0, size: 20 };
   if (offset) param = { ...param, offset };
   const ck = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
   const header = getRequestHeader(ck, "GET", param, "X4", true);

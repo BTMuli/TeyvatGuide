@@ -76,7 +76,7 @@
       :title="`频道: ${card.forum.name}`"
       @click="toForum(card.forum)"
     >
-      <img :src="card.forum.icon" :alt="card.forum.name" />
+      <img v-if="card.forum.icon !== ''" :src="card.forum.icon" :alt="card.forum.name" />
       <span>{{ card.forum.name }}</span>
     </div>
     <v-checkbox-btn

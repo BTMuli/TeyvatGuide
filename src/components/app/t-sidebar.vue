@@ -154,6 +154,11 @@
                 <img src="/source/UI/posts.webp" alt="collect" class="side-icon-menu" />
               </template>
             </v-list-item>
+            <v-list-item class="side-item-menu" title="关注" @click="showFollow = true">
+              <template #prepend>
+                <img src="/platforms/mhy/mys.webp" alt="follow" class="side-icon-menu" />
+              </template>
+            </v-list-item>
           </v-list>
         </v-menu>
         <v-list-item
@@ -172,13 +177,15 @@
       </div>
     </v-list>
   </v-navigation-drawer>
+  <vp-overlay-follow v-model="showFollow" />
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import VpOverlayFollow from "@comp/viewPost/vp-overlay-follow.vue";
 import { event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import { useAppStore } from "@/store/modules/app.js";
 import { useUserStore } from "@/store/modules/user.js";
@@ -189,6 +196,7 @@ const { briefInfo } = storeToRefs(useUserStore());
 let themeListener: UnlistenFn | null = null;
 // @ts-expect-error The import.meta meta-property is not allowed in files which will build into CommonJS output.
 const isDevEnv = import.meta.env.MODE === "development";
+const showFollow = ref<boolean>();
 const rail = computed<boolean>({
   get: () => sidebar.value.collapse,
   set: (v) => (sidebar.value.collapse = v),
