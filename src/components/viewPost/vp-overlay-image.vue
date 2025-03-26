@@ -86,7 +86,7 @@ async function onDownload(): Promise<void> {
     showOri.value = true;
     await nextTick();
   }
-  await showLoading.start("正在下载图片到本地");
+  await showLoading.start("正在下载图片到本地", props.image.insert.image);
   const image = props.image.insert.image;
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
   if (buffer.value.byteLength > 80000000) {
