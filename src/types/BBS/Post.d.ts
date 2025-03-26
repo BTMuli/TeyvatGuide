@@ -96,6 +96,33 @@ declare namespace TGApp.BBS.Post {
   type UserPostRes = { list: Array<FullData>; is_last: boolean; next_offset: string };
 
   /**
+   * @description 关注动态返回
+   * @since Beta v0.7.2
+   * @interface FollowPostResp
+   * @extends TGApp.BBS.Response.BaseWithData
+   * @property {FollowPostRes} data 返回数据
+   * @return FollowPostResp
+   */
+  type FollowPostResp = TGApp.BBS.Response.BaseWithData<FollowPostRes>;
+
+  /**
+   * @description 关注动态返回数据
+   * @since Beta v0.7.2
+   * @interface FollowPostRes
+   * @property {boolean} has_follow_users 是否有关注用户
+   * @property {boolean} is_last 是否最后一页
+   * @property {Array<FullData>} list 帖子列表
+   * @property {number} next_offset 下一页偏移量
+   * @return FollowPostRes
+   */
+  type FollowPostRes = {
+    has_follow_users: boolean;
+    is_last: boolean;
+    list: Array<FullData>;
+    next_offset: number;
+  };
+
+  /**
    * @description 帖子数据
    * @since Beta v0.7.2
    * @interface FullData

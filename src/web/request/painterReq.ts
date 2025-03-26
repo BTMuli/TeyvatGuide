@@ -1,9 +1,10 @@
 /**
  * @file web/request/painterReq.ts
  * @description painter 下的请求
- * @since Beta v0.7.1
+ * @since Beta v0.7.2
  */
 import TGHttp from "@/utils/TGHttp.js";
+import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
 
 // BBSApiPainterBaseUrl => bapBu
 const bapBu: Readonly<string> = "https://bbs-api.miyoushe.com/painter/wapi/";
@@ -111,6 +112,33 @@ async function getRecentForumPostList(
 }
 
 /**
+ * @description 获取关注动态帖子
+ * @since Beta v0.7.2
+ * @param {TGApp.App.Account.Cookie} cookie 用户 Cookie
+ * @param {number} offset
+ * @return {Promise<TGApp.BBS.Response.Base|TGApp.BBS.Post.FollowPostRes>}
+ */
+async function getTimelineList(
+  cookie: TGApp.App.Account.Cookie,
+  offset?: number,
+): Promise<TGApp.BBS.Response.Base | TGApp.BBS.Post.FollowPostRes> {
+  let param: Record<string, number> = { gids: 2, size: 20 };
+  if (offset) param = { ...param, offset };
+  const ck = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
+  const header = getRequestHeader(ck, "GET", param, "X4", true);
+  const resp = await TGHttp<TGApp.BBS.Response.Base | TGApp.BBS.Post.FollowPostResp>(
+    `${bapBu}timeline/list`,
+    {
+      method: "GET",
+      headers: header,
+      query: param,
+    },
+  );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
+}
+
+/**
  * @description 获取抽奖信息
  * @since Beta v0.7.1
  * @param {string} lotteryId 抽奖 ID
@@ -136,6 +164,7 @@ const painterReq = {
     hot: getHotForumPostList,
     recent: getRecentForumPostList,
   },
+  follow: getTimelineList,
   lottery: lotteryUserShow,
   news: getNewsList,
 };
