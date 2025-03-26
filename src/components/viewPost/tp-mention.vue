@@ -25,12 +25,11 @@ async function toLink(): Promise<void> {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 5px;
+  padding: 0 4px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
-  margin: 0 2px;
+  border-radius: 4px;
+  margin: 2px;
   color: #00c3ff;
   cursor: pointer;
-  transform: translateY(2px);
 }
 </style>
