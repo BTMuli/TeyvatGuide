@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/utils/transUserRecord.ts
  * @description Sqlite 数据转换 用户战绩数据转换模块
- * @since Beta v0.6.0
+ * @since Beta v0.7.2
  */
 
 import { getZhElement } from "@/utils/toolFunc.js";
@@ -94,7 +94,7 @@ function transStat(data: TGApp.Game.Record.Stats): TGApp.Sqlite.Record.Stats {
 
 /**
  * @description 将探索信息转换为数据库中的数据
- * @since Beta v0.5.5
+ * @since Beta v0.7.2
  * @param {TGApp.Game.Record.WorldExplore[]} data 城市探索信息
  * @returns {TGApp.Sqlite.Record.WorldExplore[]} 转换后的城市探索信息
  */
@@ -108,7 +108,7 @@ function transWorld(data: TGApp.Game.Record.WorldExplore[]): TGApp.Sqlite.Record
       id: area.id,
       name: area.name,
       iconLight: area.icon,
-      iconDark: area.inner_icon,
+      icon: area.icon,
       bg: area.background_image,
       cover: area.cover,
       exploration: area.exploration_percentage,
@@ -124,12 +124,18 @@ function transWorld(data: TGApp.Game.Record.WorldExplore[]): TGApp.Sqlite.Record
     }
     // 对纳塔的特殊处理
     if (area.name === "纳塔") {
-      world.iconLight =
+      world.icon =
         "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-15.fd274778.png";
-      world.iconDark =
-        "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-15.fd274778.png";
+      world.iconLight = world.icon;
       world.bg =
         "https://fastcdn.mihoyo.com/static-resource-v2/2024/08/19/8856eafed39be791276a21a6d522426b_6903333123294722705.png";
+      // 对远古圣山的特殊处理
+    } else if (area.name === "远古圣山") {
+      world.icon =
+        "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-16.1c751ac9.png";
+      world.iconLight = world.icon;
+      world.bg =
+        "https://fastcdn.mihoyo.com/static-resource-v2/2025/03/17/8ee1648101a8b292ffb37eb49559032e_6583057448168798147.png";
     }
     const children = areaChild.filter((i) => i.parent_id === area.id);
     for (const child of children) {

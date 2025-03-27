@@ -1,15 +1,9 @@
 /**
  * @file types/Sqlite/Record.d.ts
  * @description Sqlite 原神战绩相关类型定义文件
- * @since Beta v0.6.0
+ * @since Beta v0.7.2
  */
 
-/**
- * @description Sqlite 原神战绩相关类型定义命名空间
- * @since Beta v0.6.0
- * @namespace Record
- * @memberof TGApp.Sqlite
- */
 declare namespace TGApp.Sqlite.Record {
   /**
    * @description 原神战绩数据表
@@ -24,7 +18,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {string} updated - 更新时间
    * @return SingleTable
    */
-  interface SingleTable {
+  type SingleTable = {
     uid: number;
     role: string;
     avatars: string;
@@ -32,7 +26,7 @@ declare namespace TGApp.Sqlite.Record {
     worldExplore: string;
     homes: string;
     updated: string;
-  }
+  };
 
   /**
    * @description 渲染用数据
@@ -47,7 +41,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {string} updated - 更新时间
    * @returns RenderData
    */
-  interface RenderData {
+  type RenderData = {
     uid: number;
     role: Role;
     avatars: Avatar[];
@@ -55,7 +49,7 @@ declare namespace TGApp.Sqlite.Record {
     worldExplore: WorldExplore[];
     homes: Home[];
     updated: string;
-  }
+  };
 
   /**
    * @description 角色信息类型
@@ -67,12 +61,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {string} avatar - 头像
    * @return Role
    */
-  interface Role {
-    nickname: string;
-    region: string;
-    level: number;
-    avatar: string;
-  }
+  type Role = { nickname: string; region: string; level: number; avatar: string };
 
   /**
    * @description 角色列表类型
@@ -88,7 +77,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {boolean} isShow - 角色是否展示
    * @return Avatar
    */
-  interface Avatar {
+  type Avatar = {
     id: number;
     name: string;
     element: string;
@@ -97,7 +86,7 @@ declare namespace TGApp.Sqlite.Record {
     star: number;
     constellation: number;
     isShow: 0 | 1;
-  }
+  };
 
   /**
    * @description 统计信息类型
@@ -124,7 +113,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {number} magicChest - 奇馈宝箱数
    * @return Stats
    */
-  interface Stats {
+  type Stats = {
     activeDays: number;
     achievementNumber: number;
     avatarNumber: number;
@@ -144,16 +133,15 @@ declare namespace TGApp.Sqlite.Record {
     exquisiteChest: number;
     commonChest: number;
     magicChest: number;
-  }
+  };
 
   /**
    * @description 世界探索信息类型
    * @interface WorldExplore
-   * @since Beta v0.4.3
+   * @since Beta v0.7.2
    * @property {number} id - 地区 ID
    * @property {string} name - 地区名称
    * @property {string} iconLight - 地区图标（亮）
-   * @property {string} iconDark - 地区图标（暗）
    * @property {string} bg - 背景
    * @property {string} cover - 封面
    * @property {number} reputation - 地区声望等级
@@ -162,18 +150,18 @@ declare namespace TGApp.Sqlite.Record {
    * @property {WorldChild[]} children - 子地区
    * @return WorldExplore
    */
-  interface WorldExplore {
+  type WorldExplore = {
     id: number;
     name: string;
     iconLight: string;
-    iconDark: string;
+    icon?: string;
     bg: string;
     cover: string;
     reputation?: number;
     offering?: WorldOffering;
     exploration: number;
     children: WorldChild[];
-  }
+  };
 
   /**
    * @description 祭祀物类型
@@ -184,11 +172,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {string} icon - 图标
    * @return WorldOffering
    */
-  interface WorldOffering {
-    name: string;
-    level: number;
-    icon: string;
-  }
+  type WorldOffering = { name: string; level: number; icon: string };
 
   /**
    * @description 子地区类型
@@ -199,11 +183,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {number} exploration - 子地区探索进度
    * @return WorldChild
    */
-  interface WorldChild {
-    id: number;
-    name: string;
-    exploration: number;
-  }
+  type WorldChild = { id: number; name: string; exploration: number };
 
   /**
    * @description 尘歌壶信息类型
@@ -219,7 +199,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {string} bg - 背景
    * @return Home
    */
-  interface Home {
+  type Home = {
     comfortIcon: string;
     comfortName: string;
     name: string;
@@ -228,5 +208,5 @@ declare namespace TGApp.Sqlite.Record {
     furniture: number;
     visit: number;
     bg: string;
-  }
+  };
 }

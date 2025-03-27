@@ -85,7 +85,8 @@ import TGLogger from "@/utils/TGLogger.js";
 import { generateShareImg } from "@/utils/TGShare.js";
 import TakumiRecordGenshinApi from "@/web/request/recordReq.js";
 
-const { account, cookie } = storeToRefs(useUserStore());
+const userStore = useUserStore();
+const { account, cookie } = storeToRefs(userStore);
 const uidCur = ref<number>();
 const version = ref<string>();
 const uidList = shallowRef<Array<number>>([]);
@@ -129,7 +130,7 @@ async function refreshRecord(): Promise<void> {
       `确认则尝试切换至${uidCur.value}`,
     );
     if (switchCheck) {
-      await useUserStore().switchGameAccount(uidCur.value.toString());
+      await userStore.switchGameAccount(uidCur.value.toString());
       await refreshRecord();
       return;
     }

@@ -4,7 +4,7 @@
       <TMiImg :ori="true" :src="data.bg" alt="bg" />
     </div>
     <div class="tur-ws-icon">
-      <img :src="icon" alt="icon" />
+      <TMiImg :src="icon" :ori="true" alt="icon" />
     </div>
     <div class="tur-ws-content">
       <div class="tur-ws-title">
@@ -54,13 +54,12 @@ const { theme } = storeToRefs(useAppStore());
 const props = defineProps<TurWorldSubProps>();
 
 const imgFilter = computed<string>(() => {
-  if (props.data.name !== "纳塔") return "none";
   if (theme.value === "dark") return "none";
   return "invert(0.75)";
 });
 const icon = computed<string>(() => {
-  if (theme.value === "dark") return props.data.iconLight;
-  return props.data.iconDark;
+  if (props.data.icon) return props.data.icon;
+  return props.data.iconLight;
 });
 </script>
 <style lang="scss" scoped>
