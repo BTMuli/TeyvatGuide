@@ -688,6 +688,22 @@
     "source": { "index": 5, "area": "枫丹", "name": "箴铭" }
   },
   {
+    "id": 10000111,
+    "contentId": 504570,
+    "dropDays": [3, 6, 7],
+    "name": "瓦雷莎",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "法器",
+    "element": "雷",
+    "materials": [
+      { "id": 104353, "name": "「纷争」的教导", "star": 2 },
+      { "id": 104354, "name": "「纷争」的指引", "star": 3 },
+      { "id": 104355, "name": "「纷争」的哲学", "star": 4 }
+    ],
+    "source": { "index": 6, "area": "纳塔", "name": "旋复" }
+  },
+  {
     "id": 10000003,
     "contentId": 59,
     "dropDays": [2, 5, 7],
@@ -1406,6 +1422,22 @@
       { "id": 104352, "name": "「焚燔」的哲学", "star": 4 }
     ],
     "source": { "index": 6, "area": "纳塔", "name": "空华" }
+  },
+  {
+    "id": 10000110,
+    "contentId": 504621,
+    "dropDays": [1, 4, 7],
+    "name": "伊安珊",
+    "itemType": "character",
+    "star": 4,
+    "weapon": "长柄武器",
+    "element": "雷",
+    "materials": [
+      { "id": 104347, "name": "「角逐」的教导", "star": 2 },
+      { "id": 104348, "name": "「角逐」的指引", "star": 3 },
+      { "id": 104349, "name": "「角逐」的哲学", "star": 4 }
+    ],
+    "source": { "index": 6, "area": "纳塔", "name": "转竟" }
   },
   {
     "id": 10000043,
@@ -2228,6 +2260,22 @@
     "contentId": 503948,
     "dropDays": [2, 5, 7],
     "name": "祭星者之望",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "法器",
+    "materials": [
+      { "id": 114065, "name": "谵妄圣主的朽败", "star": 2 },
+      { "id": 114066, "name": "谵妄圣主的余哀", "star": 3 },
+      { "id": 114067, "name": "谵妄圣主的容光", "star": 4 },
+      { "id": 114068, "name": "谵妄圣主的神面", "star": 5 }
+    ],
+    "source": { "index": 6, "area": "纳塔", "name": "究观" }
+  },
+  {
+    "id": 14519,
+    "contentId": 504739,
+    "dropDays": [2, 5, 7],
+    "name": "溢彩心念",
     "itemType": "weapon",
     "star": 5,
     "weapon": "法器",

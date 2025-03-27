@@ -52,21 +52,21 @@
         "Icon": "Skill_E_Ayaka"
       },
       {
-        "GroupId": 0,
+        "GroupId": 221,
         "Id": 22101,
         "Name": "天罪国罪镇词",
         "Description": "施放<color=#FFD780FF>神里流·冰华</color>后的6秒内，神里绫华的普通攻击与重击造成的伤害提升30%。",
         "Icon": "UI_Talent_S_Ayaka_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 222,
         "Id": 22201,
         "Name": "寒天宣命祝词",
         "Description": "<color=#FFD780FF>神里流·霰步</color>结束时释放的寒冰命中了敌人时，神里绫华将获得如下效果：\n·恢复10点体力；\n·获得18%<color=#99FFFFFF>冰元素伤害加成</color>，持续10秒。",
         "Icon": "UI_Talent_S_Ayaka_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 223,
         "Id": 22301,
         "Name": "鉴查心得",
         "Description": "合成武器突破素材时，有10%概率获得2倍产出。",
@@ -369,21 +369,21 @@
         "Icon": "Skill_E_Qin_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 321,
         "Id": 32101,
         "Name": "顺风而行",
         "Description": "琴的普通攻击命中时，有50%的几率为队伍中所有角色恢复等同于琴攻击力15%的生命值。",
         "Icon": "UI_Talent_S_Qin_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 322,
         "Id": 32201,
         "Name": "听凭风引",
         "Description": "使用<color=#FFD780FF>蒲公英之风</color>后，恢复20%元素能量。",
         "Icon": "UI_Talent_S_Qin_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 323,
         "Id": 32301,
         "Name": "引领之风",
         "Description": "完美烹饪恢复类食物时，有12%概率获得2倍产出。",
@@ -681,21 +681,21 @@
         "Icon": "Skill_E_Lisa_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 421,
         "Id": 42101,
         "Name": "电感余震",
         "Description": "重击命中时，会为敌人附加<color=#FFD780FF>苍雷</color>的引雷效果。",
         "Icon": "UI_Talent_S_Lisa_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 422,
         "Id": 42201,
         "Name": "静电场力",
         "Description": "敌人受到<color=#FFD780FF>蔷薇的雷光</color>攻击后，降低15%防御力，持续10秒。",
         "Icon": "UI_Talent_S_Lisa_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 423,
         "Id": 42301,
         "Name": "药剂通识",
         "Description": "合成药剂时，有20%概率返还部分合成材料。",
@@ -995,21 +995,21 @@
         "Icon": "Skill_E_Barbara_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 1421,
         "Id": 142101,
         "Name": "光辉的季节",
         "Description": "角色在<color=#FFD780FF>演唱，开始♪</color>的歌声之环中时，体力消耗降低12%。",
         "Icon": "UI_Talent_S_Barbara_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 1422,
         "Id": 142201,
         "Name": "安可",
         "Description": "当前场上自己的角色获得元素晶球或元素微粒时，延长<color=#FFD780FF>演唱，开始♪</color>歌声之环持续时间1秒。\n通过这种方式，至多延长5秒。",
         "Icon": "UI_Talent_S_Barbara_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 1423,
         "Id": 142301,
         "Name": "心意♪注入",
         "Description": "完美烹饪恢复类食物时，有12%概率获得2倍产出。",
@@ -1287,21 +1287,21 @@
         "Icon": "Skill_E_Kaeya_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 1521,
         "Id": 152101,
         "Name": "冷血之剑",
         "Description": "<color=#FFD780FF>霜袭</color>每击中一个单位，便为凯亚恢复等同于攻击力15%的生命值。",
         "Icon": "UI_Talent_S_Kaeya_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 1522,
         "Id": 152201,
         "Name": "冰渊之心",
         "Description": "<color=#FFD780FF>霜袭</color>使敌人<color=#99FFFFFF>冻结</color>时，被冻结的敌人会掉落额外的元素微粒。\n一次霜袭至多因此产生2个额外元素微粒。",
         "Icon": "UI_Talent_S_Kaeya_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 1523,
         "Id": 152301,
         "Name": "隐藏的实力",
         "Description": "队伍中自己的角色冲刺消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
@@ -1592,21 +1592,21 @@
         "Icon": "Skill_E_Diluc_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 1621,
         "Id": 162101,
         "Name": "永不休止",
         "Description": "迪卢克的重击体力消耗降低50%，最大持续时间增加3秒。",
         "Icon": "UI_Talent_S_Diluc_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 1622,
         "Id": 162201,
         "Name": "熔毁之翼",
         "Description": "<color=#FFD780FF>黎明</color>提供的<color=#FF9999FF>火元素附魔</color>持续时间延长4秒；此外，在效果持续期间，迪卢克获得20%<color=#FF9999FF>火元素伤害加成</color>。",
         "Icon": "UI_Talent_S_Diluc_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 1623,
         "Id": 162301,
         "Name": "晨曦的传统",
         "Description": "锻造双手剑类武器时，返还15%消耗的矿石。",
@@ -1872,21 +1872,21 @@
         "Icon": "Skill_E_Razor_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2021,
         "Id": 202101,
         "Name": "觉醒",
         "Description": "<color=#FFD780FF>利爪与苍雷</color>的冷却时间减少18%。\n施放<color=#FFD780FF>雷牙</color>时，重置<color=#FFD780FF>利爪与苍雷</color>的冷却时间。",
         "Icon": "UI_Talent_S_Razor_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2022,
         "Id": 202201,
         "Name": "饥饿",
         "Description": "雷泽的元素能量在50%以下时，元素充能效率提高30%。",
         "Icon": "UI_Talent_S_Razor_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2023,
         "Id": 202301,
         "Name": "奔狼",
         "Description": "队伍中自己的角色冲刺消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
@@ -2103,21 +2103,21 @@
         "Icon": "Skill_E_Ambor"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2121,
         "Id": 212101,
         "Name": "百发百中！",
         "Description": "<color=#FFD780FF>箭雨</color>的暴击率提高10%，影响范围扩大30%。",
         "Icon": "UI_Talent_S_Ambor_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2122,
         "Id": 212201,
         "Name": "压制射击",
         "Description": "瞄准射击命中弱点时，攻击力提高15%，持续10秒。",
         "Icon": "UI_Talent_S_Ambor_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2123,
         "Id": 212301,
         "Name": "飞行冠军",
         "Description": "队伍中自己的角色滑翔消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
@@ -2392,21 +2392,21 @@
         "Icon": "Skill_E_Venti_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2221,
         "Id": 222101,
         "Name": "绪风之拥",
         "Description": "长按<color=#FFD780FF>高天之歌</color>后，会产生上升气流，持续20秒。",
         "Icon": "UI_Talent_S_Venti_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2222,
         "Id": 222201,
         "Name": "暴风之眼",
         "Description": "<color=#FFD780FF>风神之诗</color>效果结束后，会为温迪恢复15点元素能量；\n若产生了元素转化，则同样为队伍中所有对应元素的角色恢复15点元素能量。",
         "Icon": "UI_Talent_S_Venti_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2223,
         "Id": 222301,
         "Name": "恒风随行",
         "Description": "队伍中自己的角色滑翔消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
@@ -2551,6 +2551,10 @@
       {
         "Title": "关于芙宁娜…",
         "Context": "吟游诗人所擅长的，多是弹奏与演唱，可一位戏剧表演者所需要具备的能力，还远远不止这些…下次风花节把芙宁娜请过来一起表演怎么样？嗯？你想让我聊聊她拯救枫丹的事？有这样艺术才华的人就算拯救了整个世界，也毫不奇怪吧？"
+      },
+      {
+        "Title": "关于赫布里穆…",
+        "Context": "需要一个又一个的人类成为柴薪去对抗漆黑的威胁，这个世界还真是不讲情面。但在玛薇卡的带领下，他们创造了堪比魔神的成就…嘿嘿，从「她」开始，纳塔人似乎一直就是这样呢。对了，我听说玛薇卡很喜欢喝酒对吧？要不然…"
       },
       { "Title": "想要了解温迪·其一", "Context": "来得正好，旅行者。我想听听，你的愿望是什么？" },
       {
@@ -2708,21 +2712,21 @@
         "Icon": "Skill_E_Xiangling_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2321,
         "Id": 232101,
         "Name": "交叉火力",
         "Description": "锅巴的喷火距离提高20%。",
         "Icon": "UI_Talent_S_Xiangling_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2322,
         "Id": 232201,
         "Name": "绝云朝天椒",
         "Description": "<color=#FFD780FF>锅巴出击</color>效果结束时，锅巴会在消失的位置留下辣椒。拾取辣椒会提高10%攻击力，持续10秒。",
         "Icon": "UI_Talent_S_Xiangling_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2323,
         "Id": 232301,
         "Name": "万民堂大厨",
         "Description": "完美烹饪攻击类食物时，有12%概率获得2倍产出。",
@@ -2865,6 +2869,10 @@
       {
         "Title": "关于嘉明…",
         "Context": "哎呀，知道嘉明要来，我就会早早备上一大壶茶水，方便他涮辣菜。我提议说给他做一份不辣的，但他却摆着手说就喜欢原汁原味的配方…不会错的，那不是客套话，我能分辨出真正食客的眼神！嘿嘿，那我当然也不能让他失望啦！"
+      },
+      {
+        "Title": "关于蓝砚…",
+        "Context": "锅巴很喜欢她！第一天见面就不停地跟她握手，不知道的还以为他们认识了很久呢哈哈！我已经跟蓝师傅约好啦，让她带我去抓昆虫，采野蕈…嘻嘻，等我的新菜创作出来之后，你们都要来吃哦！"
       },
       {
         "Title": "想要了解香菱·其一",
@@ -3023,21 +3031,21 @@
         "Icon": "Skill_E_Beidou_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2421,
         "Id": 242101,
         "Name": "遍宇灵光",
         "Description": "在被攻击瞬间施放的<color=#FFD780FF>捉浪</color>反击，拥有最高伤害加成。",
         "Icon": "UI_Talent_S_Beidou_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2422,
         "Id": 242201,
         "Name": "霹雳连霄",
         "Description": "施放拥有最高伤害加成的<color=#FFD780FF>捉浪</color>后的10秒内，获得如下效果：\n·普通攻击与重击造成的伤害提高15%，攻击速度提高15%；\n·大幅减少重击需要的准备时间。",
         "Icon": "UI_Talent_S_Beidou_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2423,
         "Id": 242301,
         "Name": "拥涛踏潮",
         "Description": "队伍中自己的角色游泳消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
@@ -3334,21 +3342,21 @@
         "Icon": "Skill_E_Xingqiu_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2521,
         "Id": 252101,
         "Name": "生水要诀",
         "Description": "雨帘剑受击破碎时或持续时间结束时，基于行秋最大生命值的6%，恢复当前角色的生命值。",
         "Icon": "UI_Talent_S_Xingqiu_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2522,
         "Id": 252201,
         "Name": "虚实工笔",
         "Description": "行秋获得20%<color=#80C0FFFF>水元素伤害加成</color>。",
         "Icon": "UI_Talent_S_Xingqiu_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2523,
         "Id": 252301,
         "Name": "灵光乍现",
         "Description": "合成角色天赋素材时，有25%概率返还部分合成材料。",
@@ -3678,21 +3686,21 @@
         "Icon": "Skill_E_Xiao_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2621,
         "Id": 262101,
         "Name": "降魔·平妖大圣",
         "Description": "在<color=#FFD780FF>靖妖傩舞</color>状态下，魈造成的所有伤害提高5%。此后，在技能持续时间内，每经过3秒，造成的伤害再额外提高5%。\n至多获得25%伤害加成。",
         "Icon": "UI_Talent_S_Xiao_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2622,
         "Id": 262201,
         "Name": "坏劫·国土碾尘",
         "Description": "施放<color=#FFD780FF>风轮两立</color>会使之后7秒内的风轮两立造成的伤害提高15%。\n该效果持续7秒，最多叠加3次，叠加时刷新持续时间。",
         "Icon": "UI_Talent_S_Xiao_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2623,
         "Id": 262301,
         "Name": "神通·空中自在法",
         "Description": "队伍中自己的角色攀爬消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
@@ -3972,21 +3980,21 @@
         "Icon": "Skill_E_Ningguang_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2721,
         "Id": 272101,
         "Name": "星移势转",
         "Description": "拥有星璇时，凝光的重击不会消耗体力。",
         "Icon": "UI_Talent_S_Ningguang_02"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2722,
         "Id": 272201,
         "Name": "储之千日，用之一刻",
         "Description": "穿过<color=#FFD780FF>璇玑屏</color>的角色会获得12%<color=#FFE699FF>岩元素伤害加成</color>，持续10秒。",
         "Icon": "UI_Talent_S_Ningguang_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2723,
         "Id": 272301,
         "Name": "奇石珠宝录",
         "Description": "在小地图上显示周围能产出<color=#FFD780FF>锻造用矿石的矿脉</color>位置。",
@@ -4308,21 +4316,21 @@
         "Icon": "Skill_E_Klee_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2921,
         "Id": 292101,
         "Name": "砰砰礼物",
         "Description": "<color=#FFD780FF>蹦蹦炸弹</color>与普通攻击造成伤害时，有50%的几率赋予可莉一朵爆裂火花。\n施放重击时将消耗爆裂火花，使本次重击不消耗体力，造成的伤害提升50%。",
         "Icon": "UI_Talent_S_Klee_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2922,
         "Id": 292201,
         "Name": "火花无限",
         "Description": "可莉的重击造成暴击后，为队伍中所有角色恢复2点元素能量。",
         "Icon": "UI_Talent_S_Klee_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 2923,
         "Id": 292301,
         "Name": "全是宝藏",
         "Description": "在小地图上显示周围的<color=#FFD780FF>蒙德区域特产</color>的位置。",
@@ -4631,21 +4639,21 @@
         "Icon": "Skill_E_Zhongli_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3021,
         "Id": 302101,
         "Name": "悬岩宸断",
         "Description": "玉璋护盾受到伤害时，会产生坚璧效果：\n·处于玉璋护盾庇护下的角色，护盾强效提升5%；\n·该效果至多叠加5次，持续直到玉璋护盾消失。",
         "Icon": "UI_Talent_S_Zhongli_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3022,
         "Id": 302201,
         "Name": "炊金馔玉",
         "Description": "基于生命值上限，钟离的以下攻击造成的伤害提高：\n·普通攻击、重击与下落攻击伤害提高值：生命值上限的1.39%\n·<color=#FFD780FF>地心</color>的岩脊、共鸣伤害与长按伤害提高值：生命值上限的1.9%\n·<color=#FFD780FF>天星</color>伤害提高值：生命值上限的33%",
         "Icon": "UI_Talent_S_Zhongli_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3023,
         "Id": 302301,
         "Name": "晶石命理",
         "Description": "锻造长柄武器时，返还15%消耗的矿石。",
@@ -4800,6 +4808,10 @@
       {
         "Title": "关于闲云…",
         "Context": "我听不少商人聊起过「闲云」的逸闻。说是这位女子看似倨傲，不喜言谈，交谈一番却发现她性格耿直，作风正派，是位值得结交的良友。我为她高兴。但「出手阔绰」这条评价，嗯，也有不少人对我说过…"
+      },
+      {
+        "Title": "关于赫布里穆…",
+        "Context": "纳塔将悠久的抗争历史谱写成诗，激励无数战士前仆后继，由此得以跨越深渊与宿命的威胁，创造出新的未来。而率领他们的，是一位将时间与历史化作武器的人类战士，她足以与神明比肩的实力，令人叹服。"
       },
       {
         "Title": "想要了解钟离·其一",
@@ -4969,21 +4981,21 @@
         "Icon": "Skill_E_Fischl_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3121,
         "Id": 312101,
         "Name": "噬星魔鸦",
         "Description": "菲谢尔以蓄力完成的瞄准射击命中奥兹时，奥兹会对附近敌人降下圣裁之雷，造成等同射击伤害152.7%的<color=#FFACFFFF>雷元素范围伤害</color>。",
         "Icon": "UI_Talent_S_Fischl_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3122,
         "Id": 312201,
         "Name": "断罪雷影",
         "Description": "奥兹在场时，若当前场上自己的角色攻击敌人时触发了<color=#FFACFFFF>雷元素相关反应</color>，则会对敌人降下圣裁之雷，造成菲谢尔80%攻击力的<color=#FFACFFFF>雷元素伤害</color>。",
         "Icon": "UI_Talent_S_Fischl_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3123,
         "Id": 312301,
         "Name": "吾之后花园",
         "Description": "在蒙德执行探索派遣任务时，消耗的时间缩短25%。",
@@ -5304,21 +5316,21 @@
         "Icon": "Skill_E_Bennett_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3221,
         "Id": 322101,
         "Name": "热情复燃",
         "Description": "<color=#FFD780FF>热情过载</color>的冷却时间减少20%。",
         "Icon": "UI_Talent_S_Bennett_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3222,
         "Id": 322201,
         "Name": "无畏的热血",
         "Description": "在<color=#FFD780FF>美妙旅程</color>领域内，<color=#FFD780FF>热情过载</color>具有如下效果：\n·冷却时间减少50%；\n·二段蓄力不会将班尼特自身击飞。",
         "Icon": "UI_Talent_S_Bennett_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3223,
         "Id": 322301,
         "Name": "应该安全",
         "Description": "在蒙德执行探索派遣任务时，消耗的时间缩短25%。",
@@ -5617,21 +5629,21 @@
         "Icon": "Skill_E_Tartaglia_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3321,
         "Id": 332101,
         "Name": "永无谢幕",
         "Description": "断流效果的持续时间延长8秒。",
         "Icon": "UI_Talent_S_Tartaglia_03"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3322,
         "Id": 332201,
         "Name": "水形剑",
         "Description": "处于<color=#FFD780FF>魔王武装·狂澜</color>的近战状态时，普通攻击与重击在造成暴击时，会为命中的敌人施加断流效果。",
         "Icon": "UI_Talent_S_Tartaglia_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3323,
         "Id": 332301,
         "Name": "诸武精通",
         "Description": "队伍中自己的角色<color=#FFD780FF>普通攻击</color>等级提高1级。",
@@ -5966,21 +5978,21 @@
         "Icon": "Skill_E_Noel_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3421,
         "Id": 342101,
         "Name": "全心全意",
         "Description": "诺艾尔处于队伍后台，且当前场上自己的角色的生命值低于30%时自动触发：\n为当前场上自己的角色生成一个伤害吸收量等同于诺艾尔防御力400%的护盾，持续20秒。\n·对所有元素伤害与物理伤害有150%的吸收效果。\n该效果60秒内只能触发一次。",
         "Icon": "UI_Talent_S_Noel_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3422,
         "Id": 342201,
         "Name": "干净利落",
         "Description": "诺艾尔的普通攻击或重击累计命中敌人4次，会减少<color=#FFD780FF>护心铠</color>1秒的冷却。\n每0.1秒至多计数一次。",
         "Icon": "UI_Talent_S_Noel_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3423,
         "Id": 342301,
         "Name": "女仆的态度",
         "Description": "完美烹饪防御类食物时，有12%概率获得2倍产出。",
@@ -6308,21 +6320,21 @@
         "Icon": "Skill_E_Qiqi_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3521,
         "Id": 352101,
         "Name": "延命妙法",
         "Description": "处于<color=#FFD780FF>仙法·寒病鬼差</color>状态下的角色触发元素反应时，受治疗加成提升20%，持续8秒。",
         "Icon": "UI_Talent_S_Qiqi_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3522,
         "Id": 352201,
         "Name": "玉签偶开",
         "Description": "七七的普通攻击与重击命中敌人时，有50%的几率为敌人添加一枚度厄真符，持续6秒。该效果每30秒只能触发一次。",
         "Icon": "UI_Talent_S_Qiqi_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3523,
         "Id": 352301,
         "Name": "前尘旧忆",
         "Description": "在小地图上显示周围的<color=#FFD780FF>璃月区域特产</color>的位置。",
@@ -6548,21 +6560,21 @@
         "Icon": "Skill_E_Chongyun_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3621,
         "Id": 362101,
         "Name": "吐纳真定",
         "Description": "处在<color=#FFD780FF>灵刃·重华叠霜</color>领域内的单手剑、双手剑、长柄武器角色，普通攻击的攻击速度提升8%。",
         "Icon": "UI_Talent_S_Chongyun_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3622,
         "Id": 362201,
         "Name": "追冰剑诀",
         "Description": "<color=#FFD780FF>灵刃·重华叠霜</color>领域消失时，会唤出一柄灵刃自动攻击附近的敌人，造成相当于灵刃·重华叠霜技能伤害100%的<color=#99FFFFFF>冰元素范围伤害</color>。被击中的敌人<color=#99FFFFFF>冰元素抗性</color>降低10%，持续8秒。",
         "Icon": "UI_Talent_S_Chongyun_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3623,
         "Id": 362301,
         "Name": "云游山海",
         "Description": "在璃月执行探索派遣任务时，消耗的时间缩短25%。",
@@ -6861,21 +6873,21 @@
         "Icon": "Skill_E_Ganyu_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3721,
         "Id": 372101,
         "Name": "唯此一心",
         "Description": "霜华矢发射后的5秒内，会使接下来的发射的霜华矢与这些霜华矢引发的霜华绽发的暴击率提高20%。",
         "Icon": "UI_Talent_S_Ganyu_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3722,
         "Id": 372201,
         "Name": "天地交泰",
         "Description": "<color=#FFD780FF>降众天华</color>领域内的队伍中当前场上角色获得20%<color=#99FFFFFF>冰元素伤害加成</color>。",
         "Icon": "UI_Talent_S_Ganyu_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3723,
         "Id": 372301,
         "Name": "藏弓待用",
         "Description": "锻造弓类武器时，返还15%消耗的矿石。",
@@ -7194,21 +7206,21 @@
         "Icon": "Skill_E_Albedo_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3821,
         "Id": 382101,
         "Name": "白垩色的威压",
         "Description": "<color=#FFD780FF>创生法·拟造阳华</color>的刹那之花对生命值低于50%的敌人造成的伤害提高25%。",
         "Icon": "UI_Talent_S_Albedo_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3822,
         "Id": 382201,
         "Name": "瓶中人的天慧",
         "Description": "施放<color=#FFD780FF>诞生式·大地之潮</color>时，使附近的队伍中角色的元素精通提高125点，持续10秒。",
         "Icon": "UI_Talent_S_Albedo_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3823,
         "Id": 382301,
         "Name": "天才的发现",
         "Description": "合成武器突破素材时，有10%概率获得2倍产出。",
@@ -7502,21 +7514,21 @@
         "Icon": "Skill_E_Diona_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3921,
         "Id": 392101,
         "Name": "猫尾隐藏菜单",
         "Description": "处于<color=#FFD780FF>猫爪冻冻</color>的护盾保护下的角色，移动速度提升10%，体力消耗降低10%。",
         "Icon": "UI_Talent_S_Diona_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3922,
         "Id": 392201,
         "Name": "滑稽百出的醉相",
         "Description": "敌人进入<color=#FFD780FF>最烈特调</color>的领域后的15秒内，攻击力降低10%。",
         "Icon": "UI_Talent_S_Diona_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 3923,
         "Id": 392301,
         "Name": "附赠的下酒菜",
         "Description": "完美烹饪恢复类食物时，有12%概率获得2倍产出。",
@@ -7850,21 +7862,21 @@
         "Icon": "Skill_E_Mona_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4121,
         "Id": 412101,
         "Name": "「老太婆来抓我啊！」",
         "Description": "进入<color=#FFD780FF>虚实流动</color>状态2秒后，如果周围存在敌人，则自动凝聚一个虚影。\n通过这种方式产生的虚影持续2秒，造成的破裂伤害相当于<color=#FFD780FF>水中幻愿</color>伤害的50%。",
         "Icon": "UI_Talent_S_Mona_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4122,
         "Id": 412201,
         "Name": "「托付于命运吧！」",
         "Description": "莫娜的<color=#80C0FFFF>水元素伤害加成</color>获得额外提升，提升程度相当于她的元素充能效率的20%。",
         "Icon": "UI_Talent_S_Mona_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4123,
         "Id": 412301,
         "Name": "运行原理",
         "Description": "合成武器突破素材时，有25%概率返还部分合成材料。",
@@ -8157,21 +8169,21 @@
         "Icon": "Skill_E_Keqing_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4221,
         "Id": 422101,
         "Name": "抵天雷罚",
         "Description": "雷楔存在期间再次施放<color=#FFD780FF>星斗归位</color>后的5秒内，刻晴获得<color=#FFACFFFF>雷元素附魔</color>。",
         "Icon": "UI_Talent_S_Keqing_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4222,
         "Id": 422201,
         "Name": "玉衡之贵",
         "Description": "施放<color=#FFD780FF>天街巡游</color>时，刻晴的暴击率提升15%，元素充能效率提升15%，持续8秒。",
         "Icon": "UI_Talent_S_Keqing_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4223,
         "Id": 422301,
         "Name": "总务土地",
         "Description": "在璃月执行探索派遣任务时，消耗的时间缩短25%。",
@@ -8359,6 +8371,10 @@
         "Context": "夜兰小姐的祖辈曾为七星效力，我的祖父也曾与她的家族有过学术合作。总体来说，她办事可靠，干净利落，时常为总务司提供重要的情报。虽然我也不清楚，夜兰小姐究竟是从哪听说这些消息的。"
       },
       {
+        "Title": "关于蓝砚…",
+        "Context": "蓝师傅为人谦和，手艺精湛，往后总务司或有更多推广民间工艺的筹划，还要仰赖像她这样的手工大师支持。欸…抛开工作不谈？那自然也很欢迎她多来璃月港玩，我们应该挺聊得来的。"
+      },
+      {
         "Title": "想要了解刻晴·其一",
         "Context": "想要了解我？好啊，那我先把「玉衡」的工作原则讲给你听，等你熟记了这一百多条关键条目，就一定对我的理想了如指掌了！"
       },
@@ -8519,21 +8535,21 @@
         "Icon": "Skill_E_Sucrose_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4321,
         "Id": 432101,
         "Name": "触媒置换术",
         "Description": "砂糖触发扩散反应时，使队伍中所有对应元素类型的角色（不包括砂糖自己）元素精通提升50，持续8秒。",
         "Icon": "UI_Talent_S_Sucrose_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4322,
         "Id": 432201,
         "Name": "小小的慧风",
         "Description": "<color=#FFD780FF>风灵作成·陆叁零捌</color>或<color=#FFD780FF>禁·风灵作成·柒伍同构贰型</color>命中敌人时，基于砂糖元素精通的20%，为队伍中所有角色（不包括砂糖自己）提供元素精通加成，持续8秒。",
         "Icon": "UI_Talent_S_Sucrose_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4323,
         "Id": 432301,
         "Name": "不稳定发现",
         "Description": "合成角色与武器培养素材时，有10%概率获得2倍产出。",
@@ -8853,21 +8869,21 @@
         "Icon": "Skill_E_Xinyan_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4421,
         "Id": 442101,
         "Name": "「没听众也要演奏…」",
         "Description": "减少<color=#FFD780FF>热情拂扫</color>的护盾所需的命中敌人数量：\n·二级护盾·歌头节拍：命中一名敌人；\n·三级护盾·舞遍节拍：命中二名或更多敌人。",
         "Icon": "UI_Talent_S_Xinyan_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4422,
         "Id": 442201,
         "Name": "「…这才是摇滚！」",
         "Description": "处于<color=#FFD780FF>热情拂扫</color>的护盾保护下的角色造成的物理伤害提高15%。",
         "Icon": "UI_Talent_S_Xinyan_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4423,
         "Id": 442301,
         "Name": "摇滚的食谱",
         "Description": "完美烹饪防御类食物时，有12%概率获得2倍产出。",
@@ -9165,21 +9181,21 @@
         "Icon": "Skill_E_Rosaria_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4521,
         "Id": 452101,
         "Name": "聆听忏悔的幽影",
         "Description": "<color=#FFD780FF>噬罪的告解</color>从技能目标的背后攻击时，罗莎莉亚的暴击率提升12%，持续5秒。",
         "Icon": "UI_Talent_S_Rosaria_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4522,
         "Id": 452201,
         "Name": "暗中支援的黯色",
         "Description": "施放<color=#FFD780FF>终命的圣礼</color>时，基于自身暴击率的15%，提高附近的队伍中所有角色（不包括罗莎莉亚自己）的暴击率，持续10秒。\n通过这种方式获得的暴击率提升，无法超过15%。",
         "Icon": "UI_Talent_S_Rosaria_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4523,
         "Id": 452301,
         "Name": "夜行",
         "Description": "在夜间（18时至6时），队伍中自己的角色获得迅行效果：移动速度提高10%。\n该效果在秘境、征讨领域、深境螺旋中无效，迅行效果无法叠加。",
@@ -9450,21 +9466,21 @@
         "Icon": "Skill_E_Hutao_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4621,
         "Id": 462101,
         "Name": "蝶隐之时",
         "Description": "<color=#FFD780FF>蝶引来生</color>施加的<color=#FFD780FF>彼岸蝶舞</color>状态结束后，队伍中所有角色（不包括胡桃自己）的暴击率提高12%，持续8秒。",
         "Icon": "UI_Talent_S_Hutao_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4622,
         "Id": 462201,
         "Name": "血之灶火",
         "Description": "胡桃的生命值低于或等于50%时，获得33%<color=#FF9999FF>火元素伤害加成</color>。",
         "Icon": "UI_Talent_S_Hutao_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4623,
         "Id": 462301,
         "Name": "多多益善",
         "Description": "完美烹饪食物时，有18%概率额外获得一个「奇怪的」品质的同种料理。",
@@ -9602,6 +9618,10 @@
       {
         "Title": "关于申鹤…",
         "Context": "她可真是个有意思的人呐，跟别人都不一样。你说，要是我从现在开始天天吃仙草、喝山露，会不会也变成她那么不染红尘的样子？嘿嘿…"
+      },
+      {
+        "Title": "关于蓝砚…",
+        "Context": "蓝姑娘啊…她实力不俗，可不仅仅是「皮毛」这么简单。奇门秘术可真了不得，病气死气都被搬走啦。哎呀，可谓是——世风日上，身强力壮，往生堂的生意越来越难做喽。"
       },
       {
         "Title": "想要了解胡桃·其一",
@@ -9748,21 +9768,21 @@
         "Icon": "Skill_E_Kazuha_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4721,
         "Id": 472101,
         "Name": "相闻之剑法",
         "Description": "<color=#FFD780FF>千早振</color>在施放时，如果接触了<color=#80C0FFFF>水元素</color>/<color=#FF9999FF>火元素</color>/<color=#99FFFFFF>冰元素</color>/<color=#FFACFFFF>雷元素</color>，则会使这次<color=#FFD780FF>千早振</color>的下落攻击·乱岚拨止，发生元素转化，将附加200%攻击力的对应元素伤害，该伤害视为下落攻击伤害。每次<color=#FFD780FF>千早振</color>的技能效果中，元素转化仅会发生一次。",
         "Icon": "UI_Talent_S_Kazuha_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4722,
         "Id": 472201,
         "Name": "风物之诗咏",
         "Description": "枫原万叶触发扩散反应后，枫原万叶的每点元素精通，会为队伍中所有角色提供0.04%对应元素伤害加成，持续8秒。通过这种方式获得的不同元素伤害加成可以共存。",
         "Icon": "UI_Talent_S_Kazuha_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4723,
         "Id": 472301,
         "Name": "松风霞立",
         "Description": "队伍中自己的角色冲刺消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
@@ -10061,21 +10081,21 @@
         "Icon": "Skill_E_Feiyan_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4821,
         "Id": 482101,
         "Name": "关联条款",
         "Description": "烟绯通过重击消耗丹火印时，每枚丹火印会提升烟绯5%的<color=#FF9999FF>火元素伤害加成</color>，持续6秒。在该效果的持续时间内再次施放重击时，会先移除原有的效果。",
         "Icon": "UI_Talent_S_Feiyan_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4822,
         "Id": 482201,
         "Name": "法兽灼眼",
         "Description": "烟绯主动施放的重击对敌人造成暴击时，会额外造成一次80%攻击力的<color=#FF9999FF>火元素范围伤害</color>。该伤害视为重击伤害。",
         "Icon": "UI_Talent_S_Feiyan_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4823,
         "Id": 482301,
         "Name": "博闻强记",
         "Description": "在小地图上显示周围的<color=#FFD780FF>璃月区域特产</color>的位置。",
@@ -10389,21 +10409,21 @@
         "Icon": "Skill_E_Yoimiya_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4921,
         "Id": 492101,
         "Name": "袖火百景图",
         "Description": "在<color=#FFD780FF>焰硝庭火舞</color>的持续期间内，宵宫的普通攻击命中后，将为宵宫提供2%<color=#FF9999FF>火元素伤害加成</color>。该效果持续3秒，至多叠加10次。",
         "Icon": "UI_Talent_S_Yoimiya_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4922,
         "Id": 492201,
         "Name": "炎昼风物诗",
         "Description": "施放<color=#FFD780FF>琉金云间草</color>后的15秒内，附近的队伍中所有其他角色（不包括宵宫自己）攻击力提高10%。此外，依据宵宫自己施放<color=#FFD780FF>琉金云间草</color>时固有天赋「袖火百景图」的叠加层数，将额外提升上述的攻击力效果，每层提升1%攻击力。",
         "Icon": "UI_Talent_S_Yoimiya_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 4923,
         "Id": 492301,
         "Name": "炎色配比法",
         "Description": "制作装潢、摆件、景观类摆设时，有100%概率返还部分材料。",
@@ -10725,21 +10745,21 @@
         "Icon": "Skill_E_Tohma_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5021,
         "Id": 502101,
         "Name": "甲衣交叠",
         "Description": "当前场上自己的角色获取或刷新<color=#FFD780FF>烈烧佑命护盾</color>时，护盾强效提升5%，持续时间6秒。\n此效果每0.3秒至多触发一次，至多叠加5次。",
         "Icon": "UI_Talent_S_Tohma_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5022,
         "Id": 502201,
         "Name": "烈火攻燔",
         "Description": "<color=#FFD780FF>真红炽火之大铠</color>的炽火崩破造成的伤害提高，提高值相当于托马生命值上限的2.2%。",
         "Icon": "UI_Talent_S_Tohma_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5023,
         "Id": 502301,
         "Name": "悬鲷狩",
         "Description": "旅行者在稻妻成功<color=#FFD780FF>钓鱼</color>时，因为托马的帮助，有20%概率获得2倍产出。",
@@ -11058,21 +11078,21 @@
         "Icon": "Skill_E_Eula_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5121,
         "Id": 512101,
         "Name": "潮卷冰削",
         "Description": "长按施放<color=#FFD780FF>冰潮的涡旋</color>时，若一次性消耗了2层冷酷之心效果，则创造会立即爆发的残缺光降之剑，造成相当于<color=#FFD780FF>凝浪之光剑</color>的光降之剑基础伤害50%的物理伤害。",
         "Icon": "UI_Talent_S_Eula_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5122,
         "Id": 512201,
         "Name": "战欲涌现",
         "Description": "施放<color=#FFD780FF>凝浪之光剑</color>时，重置<color=#FFD780FF>冰潮的涡旋</color>的冷却时间，并为优菈赋予一层冷酷之心效果。",
         "Icon": "UI_Talent_S_Eula_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5123,
         "Id": 512301,
         "Name": "贵族的自省",
         "Description": "合成角色天赋素材时，有10%概率获得2倍产出。",
@@ -11419,21 +11439,21 @@
         "Icon": "Skill_E_Shougun_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5221,
         "Id": 522101,
         "Name": "万千的愿望",
         "Description": "队伍中附近的角色获得元素晶球或元素微粒时，会为<color=#FFD780FF>诸愿百眼之轮</color>积攒2层愿力。\n该效果每3秒至多触发一次。",
         "Icon": "UI_Talent_S_Shougun_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5222,
         "Id": 522201,
         "Name": "殊胜之御体",
         "Description": "基于元素充能效率超过100%的部分，每1%使雷电将军获得下列效果：\n·<color=#FFD780FF>梦想一心</color>状态提供的元素能量恢复提高0.6%；\n·<color=#FFACFFFF>雷元素伤害加成</color>提升0.4%。",
         "Icon": "UI_Talent_S_Shougun_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5225,
         "Id": 522501,
         "Name": "天下名物狩",
         "Description": "突破单手剑和长柄武器时，消耗的摩拉数量减少50%。",
@@ -11591,6 +11611,14 @@
       {
         "Title": "关于芙宁娜…",
         "Context": "「雷电将军」曾与我在意识世界中进行数百年的决斗，以确定我的意志不曾动摇。而你所说的这位芙宁娜，虽是人类之躯，但五百年间的表演也无异于每时每刻都在进行精神上的「实战」。我认可她，此等意志，可谓已臻神境。"
+      },
+      {
+        "Title": "关于赫布里穆…",
+        "Context": "五百年前我抵达坎瑞亚之时，曾在战场上见过不亚于无想刃狭间的大片焦土，我听闻那就是火神的愤怒。时至今日，我竟然还有和这样一位人类见面的机会…可否为我引荐一番呢？作为「武人」，我想前往合适的空旷之地，与她交流一些心得。"
+      },
+      {
+        "Title": "关于梦见月瑞希…",
+        "Context": "梦见月瑞希是神子的旧识，不过，我有些看不明白她们两位的关系…既是彼此无可替代的友人，又不愿将感情置于台面。总是为某些计划相持不下，想要决出高低…鉴于这些计划的核心都是帮助民众享受生活，我便不多说什么了。"
       },
       { "Title": "想要了解雷电将军·其一", "Context": "有什么事情，说来便是。" },
       {
@@ -11750,21 +11778,21 @@
         "Icon": "Skill_E_Sayu_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5321,
         "Id": 532101,
         "Name": "更加合适的人选",
         "Description": "早柚在场上触发扩散反应时，为队伍中自己的角色以及附近的友方角色恢复300点生命值。除此之外，早柚的每点元素精通将额外恢复1.2点生命值。\n该效果每2秒只能触发一次。",
         "Icon": "UI_Talent_S_Sayu_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5322,
         "Id": 532201,
         "Name": "早柚不用工作啦",
         "Description": "<color=#FFD780FF>呜呼流·影貉缭乱</color>的不倒貉貉获得如下效果：\n·为角色恢复生命值时，将为该角色身边的其他场上角色恢复相当于回复量20%的生命值；\n·攻击敌人时，扩大造成伤害的范围。",
         "Icon": "UI_Talent_S_Sayu_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5323,
         "Id": 532301,
         "Name": "呜呼流·屏息秘传",
         "Description": "早柚在队伍中时，队伍中自己的角色接近晶蝶等部分生物时，不会惊动它们。\n有效对象可参考图鉴中「生物志 / 野生动物」的「其他」分类。",
@@ -11929,6 +11957,10 @@
         "Title": "关于绮良良…",
         "Context": "有次我午觉睡醒，感觉身后暖和和的，一转头就看见有只猫正蜷着睡觉，关键是有一对毛茸茸的尾巴！吓得我差点从树枝上掉下去。这，这也是变身术吗？"
       },
+      {
+        "Title": "关于梦见月瑞希…",
+        "Context": "奇怪的紫色妖怪…被她盯着的时候，感觉好像要被吃掉一样…唔！惹不起，我还是躲着她走吧！"
+      },
       { "Title": "想要了解早柚·其一", "Context": "呼——" },
       {
         "Title": "想要了解早柚·其二",
@@ -12069,28 +12101,28 @@
         "Icon": "Skill_E_Kokomi_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5421,
         "Id": 542101,
         "Name": "匣中玉栉",
         "Description": "施放<color=#FFD780FF>海人化羽</color>时，若场上有珊瑚宫心海自己的化海月，则重置化海月的存在时间。",
         "Icon": "UI_Talent_S_Kokomi_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5422,
         "Id": 542201,
         "Name": "真珠御呗",
         "Description": "处于<color=#FFD780FF>海人化羽</color>的仪来羽衣状态下时，珊瑚宫心海的普通攻击与重击基于生命值上限造成的伤害获得额外提升，提升程度相当于她的治疗加成的15%。",
         "Icon": "UI_Talent_S_Kokomi_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5423,
         "Id": 542301,
         "Name": "海祇姬君",
         "Description": "队伍中自己的角色游泳消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
         "Icon": "UI_Talent_Explosion_Swim"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5425,
         "Id": 542501,
         "Name": "庙算无遗",
         "Description": "珊瑚宫心海的治疗加成提升25%，暴击率降低100%。",
@@ -12218,6 +12250,10 @@
       {
         "Title": "关于鹿野院平藏…",
         "Context": "刚开始的时候，我非常诧异有人公开穿着天领奉行的制服来海祇岛。如果他是天领奉行的武士，就不该这么鲁莽；如果他是天领奉行的间谍，又不该这么招摇。不过接触过一段时间之后，我发现这位自称是「侦探」的鹿野院先生，对海祇岛的军事布防、政务商贸都不感兴趣，倒像是来旅游的。所以我只是加派了一些人手盯着他，并没有赶他离开。如果你见到他的话，倒是可以跟他聊上几句。"
+      },
+      {
+        "Title": "关于梦见月瑞希…",
+        "Context": "瑞希小姐的能力与才艺有目共睹。我曾想请她出任顾问，协力我一同发展海祇岛的各式文化项目。但几次交谈过后，我便明白，瑞希小姐的目光放眼在整个稻妻。我期待能够早日见证她的成就。如有任何需要，海祇岛也随时欢迎她的到来。"
       },
       {
         "Title": "想要了解珊瑚宫心海·其一",
@@ -12381,21 +12417,21 @@
         "Icon": "Skill_E_Gorou_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5521,
         "Id": 552101,
         "Name": "不畏风雨",
         "Description": "施放<color=#FFD780FF>兽牙逐突形胜战法</color>后的12秒内，附近的队伍中所有角色的防御力提升25%。",
         "Icon": "UI_Talent_S_Gorou_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5522,
         "Id": 552201,
         "Name": "报恩之守",
         "Description": "基于防御力，五郎的以下攻击造成的伤害提高：\n·<color=#FFD780FF>犬坂吠吠方圆阵</color>的技能伤害提高值：防御力的156%；\n·<color=#FFD780FF>兽牙逐突形胜战法</color>的技能伤害与岩晶崩破伤害提高值：防御力的15.6%。",
         "Icon": "UI_Talent_S_Gorou_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5523,
         "Id": 552301,
         "Name": "亮晶晶发现术",
         "Description": "在小地图上显示周围的<color=#FFD780FF>稻妻区域特产</color>的位置。",
@@ -12701,21 +12737,21 @@
         "Icon": "Skill_E_Sara_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5621,
         "Id": 562101,
         "Name": "不动心",
         "Description": "处于<color=#FFD780FF>鸦羽天狗霆雷召咒</color>的「乌羽护持」状态下时，瞄准射击的所需的蓄力时间减少60%。",
         "Icon": "UI_Talent_S_Sara_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5622,
         "Id": 562201,
         "Name": "御公仪",
         "Description": "天狗咒雷·伏命中敌人后，将基于九条裟罗的元素充能效率，每100%为队伍中所有角色恢复1.2点元素能量。该效果每3秒至多触发一次。",
         "Icon": "UI_Talent_S_Sara_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5623,
         "Id": 562301,
         "Name": "检地",
         "Description": "在稻妻执行探索派遣任务时，消耗的时间缩短25%。",
@@ -13024,21 +13060,21 @@
         "Icon": "Skill_E_Itto_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5721,
         "Id": 572101,
         "Name": "荒泷第一",
         "Description": "荒泷一斗施展连续的「荒泷逆袈裟」时，获得以下效果：\n·每次斩击都将使接下来的斩击攻击速度提升10%，通过这种方法至多提升30%；\n·提升抗打断能力。\n\n这些效果将在连续施展结束时消失。",
         "Icon": "UI_Talent_S_Itto_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5722,
         "Id": 572201,
         "Name": "赤鬼之血",
         "Description": "「荒泷逆袈裟」造成的伤害提高，伤害提高值基于荒泷一斗防御力的35%。",
         "Icon": "UI_Talent_S_Itto_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5723,
         "Id": 572301,
         "Name": "干裂枝碎",
         "Description": "队伍中自己的角色通过攻击树木获取木材时，有25%的几率获得额外的木材。",
@@ -13346,21 +13382,21 @@
         "Icon": "Skill_E_Yae_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5821,
         "Id": 582101,
         "Name": "神篱之御荫",
         "Description": "施放<color=#FFD780FF>大密法·天狐显真</color>时，每摧毁一株杀生樱，就会重置一次<color=#FFD780FF>野干役咒·杀生樱</color>的冷却时间。",
         "Icon": "UI_Talent_S_Yae_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5822,
         "Id": 582201,
         "Name": "启蜇之祝词",
         "Description": "八重神子的每点元素精通，能使<color=#FFD780FF>杀生樱</color>造成的伤害提升0.15%。",
         "Icon": "UI_Talent_S_Yae_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5823,
         "Id": 582301,
         "Name": "野狐说禅",
         "Description": "合成角色天赋素材时，有25%概率额外产生一份地区相同的其他随机天赋素材，等阶与合成所消耗的素材相同。",
@@ -13507,7 +13543,7 @@
         "Title": "关于荒泷一斗…",
         "Context": "他呀，鬼族的奇怪小子，呵，听说他找了九条家不少的麻烦。天领奉行的人想要以有伤风化为由将他写于街上的留言擦掉，是我找人保留的，呵，这么有趣的小鬼，这些年可是难能一见了。"
       },
-      { "Title": "关于五郎…", "Context": "五郎尾巴的色泽很漂亮，不过…还是我的更柔软一些。呵…" },
+      { "Title": "关于五郎…", "Context": "五郎的尾巴色泽很漂亮，不过…还是我的更柔软一些。呵…" },
       {
         "Title": "关于早柚…",
         "Context": "这个子小小的孩子，躲倒是挺会躲的，鹿野奈奈经常向我抱怨，得花很多时间找她，连看小说的时间都变少了。要我说啊，或许是有人在暗中帮助早柚呢？"
@@ -13519,6 +13555,14 @@
       {
         "Title": "关于绮良良…",
         "Context": "最近对人类社会感兴趣的妖怪真是越来越多了。这种趋势，该说是好事吗？我的态度？哎呀，当然是劝大家及时行乐啦。再说，乖乖掏钱请客吃饭的小后辈，谁会不喜欢呢？"
+      },
+      {
+        "Title": "关于梦见月瑞希·产业竞争",
+        "Context": "「焦虑劳累之人根本读不进小说」？唉，我们「八重堂」真是失败啊，旗下的小说还是趣味性不足，到现在为止，还没能推出足够获得瑞希小姐认可的小说。再给我的编辑和作家一点时间吧，要是接下来的作品还是没法让瑞希店长点头，我这个没用的主编，就只能亲自给瑞希小姐写一本小说咯，名字…就叫「梦貘记」好了。"
+      },
+      {
+        "Title": "关于梦见月瑞希·重遇",
+        "Context": "瑞希刚回来稻妻那一会，总是一副揣着心事的样子，明明在路上看见了我，却还要把目光撇开…我？我当然没有主动搭讪她。还想多看一阵她那副别扭的模样呢。如果我没想错，等我们俩擦肩而过之后，她还要扭过头，瞪着眼睛瞅我两眼…要是我这时候再回头看她，只怕瑞希要被我吓得露出原形，捂着耳朵飘走了。\n不过现在嘛…她都已经会在闲事月刊的读者来信里给我挑刺了。食梦貘的成长，真是迅速哪。"
       },
       {
         "Title": "想要了解八重神子·其一",
@@ -13682,21 +13726,21 @@
         "Icon": "Skill_E_Heizo_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5921,
         "Id": 592101,
         "Name": "反论稽古",
         "Description": "鹿野院平藏在场上触发扩散反应时，将获得1层<color=#FFD780FF>勠心拳</color>的「变格」效果，该效果每0.1秒至多触发一次。",
         "Icon": "UI_Talent_S_Heizo_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5922,
         "Id": 592201,
         "Name": "因由勘破",
         "Description": "<color=#FFD780FF>勠心拳</color>命中敌人后，队伍中所有角色（不包括鹿野院平藏自己）的元素精通提升80点，持续10秒。",
         "Icon": "UI_Talent_S_Heizo_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 5923,
         "Id": 592301,
         "Name": "在罪之先",
         "Description": "队伍中自己的角色冲刺消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
@@ -13996,21 +14040,21 @@
         "Icon": "Skill_E_Yelan_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6021,
         "Id": 602101,
         "Name": "猜先有方",
         "Description": "队伍存在1/2/3/4种元素类型的角色时，夜兰的生命值上限提升6%/12%/18%/30%。",
         "Icon": "UI_Talent_S_Yelan_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6022,
         "Id": 602201,
         "Name": "妙转随心",
         "Description": "<color=#FFD780FF>「玄掷玲珑」</color>存在期间，能使队伍中自己的当前场上角色造成的伤害提高1%，并且每1秒进一步提高3.5%，至多使角色造成的伤害提高50%。\n效果存在期间重新施放渊图玲珑骰，将移除原有的上述效果。",
         "Icon": "UI_Talent_S_Yelan_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6023,
         "Id": 602301,
         "Name": "长考一着",
         "Description": "在璃月执行时长为20小时的探索派遣任务时，获得的奖励增加25%。",
@@ -14328,21 +14372,21 @@
         "Icon": "Skill_E_Momoka_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6121,
         "Id": 612101,
         "Name": "妖说歧尾之变",
         "Description": "绮良良处于<color=#FFD780FF>呜喵町飞足</color>的猫箱急件状态下时，每次冲撞触及敌人，都将获得一层<color=#FFD780FF>加固包装</color>，此效果每0.5秒对每个敌人至多触发一次，至多叠加3层。猫箱急件状态结束时，每层加固包装都将为绮良良生成一个安全运输护盾，通过这种方式生成的护盾的伤害吸收量相当于<color=#FFD780FF>呜喵町飞足</color>生成的安全运输护盾的20%，若绮良良已处于呜喵町飞足的安全运输护盾的庇护下，剩余的伤害吸收量将叠加，并刷新持续时间。",
         "Icon": "UI_Talent_S_Momoka_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6122,
         "Id": 612201,
         "Name": "应时惑目之灵",
         "Description": "基于绮良良的生命值上限，每1000点生命值上限将使<color=#FFD780FF>呜喵町飞足</color>造成的伤害提升0.4%，<color=#FFD780FF>秘法·惊喜特派</color>造成的伤害提升0.3%。",
         "Icon": "UI_Talent_S_Momoka_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6123,
         "Id": 612301,
         "Name": "祟祟猫步",
         "Description": "绮良良在队伍中时，队伍中自己的角色接近产出禽肉、兽肉与冷鲜肉的小动物时，不会轻易惊动它们。",
@@ -14644,21 +14688,21 @@
         "Icon": "Skill_E_Aloy_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6221,
         "Id": 622101,
         "Name": "战斗覆盖",
         "Description": "埃洛伊获得<color=#FFD780FF>冰尘雪野</color>的线圈效果时，埃洛伊的攻击力提升16%，队伍中附近的其他角色的攻击力提升8%，持续10秒。",
         "Icon": "UI_Talent_S_Aloy_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6222,
         "Id": 622201,
         "Name": "强力攻击",
         "Description": "埃洛伊处于<color=#FFD780FF>冰尘雪野</color>的冰驰状态下时，每1秒提升3.5%<color=#99FFFFFF>冰元素伤害加成</color>，通过这种方式至多获得35%<color=#99FFFFFF>冰元素伤害加成</color>。",
         "Icon": "UI_Talent_S_Aloy_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6223,
         "Id": 622301,
         "Name": "荒野猎手",
         "Description": "埃洛伊在队伍中时，队伍中自己的角色接近产出禽肉、兽肉与冷鲜肉的小动物时，不会轻易惊动它们。",
@@ -14889,21 +14933,21 @@
         "Icon": "Skill_E_Shenhe_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6321,
         "Id": 632101,
         "Name": "大洞弥罗尊法",
         "Description": "处于<color=#FFD780FF>神女遣灵真诀</color>的领域中的当前场上角色，<color=#99FFFFFF>冰元素伤害加成</color>提高15%。",
         "Icon": "UI_Talent_S_Shenhe_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6322,
         "Id": 632201,
         "Name": "缚灵通真法印",
         "Description": "申鹤施放<color=#FFD780FF>仰灵威召将役咒</color>后，将使附近的队伍中所有角色获得如下效果：\n·点按：元素战技和元素爆发造成的伤害提高15%，持续10秒；\n·长按：普通攻击、重击和下落攻击造成的伤害提高15%，持续15秒。",
         "Icon": "UI_Talent_S_Shenhe_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6323,
         "Id": 632301,
         "Name": "来复知时",
         "Description": "在璃月执行时长为20小时的探索派遣任务时，获得的奖励增加25%。",
@@ -15213,21 +15257,21 @@
         "Icon": "Skill_E_Yunjin_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6421,
         "Id": 642101,
         "Name": "务守本真",
         "Description": "在被攻击瞬间施放的<color=#FFD780FF>旋云开相</color>，会以长按二段蓄力的形式施放。",
         "Icon": "UI_Talent_S_Yunjin_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6422,
         "Id": 642201,
         "Name": "莫从恒蹊",
         "Description": "<color=#FFD780FF>「飞云旗阵」</color>提供的普通攻击伤害提高，当队伍中存在1/2/3/4种元素类型的角色时，数值上进一步追加云堇防御力的2.5%/5%/7.5%/11.5%。",
         "Icon": "UI_Talent_S_Yunjin_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6423,
         "Id": 642301,
         "Name": "清食养性",
         "Description": "完美烹饪冒险类食物时，有12%概率获得2倍产出。",
@@ -15513,21 +15557,21 @@
         "Icon": "Skill_E_Shinobu_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6521,
         "Id": 652101,
         "Name": "破笼之志",
         "Description": "久岐忍的生命值不高于50%时，治疗加成提升15%。",
         "Icon": "UI_Talent_S_Shinobu_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6522,
         "Id": 652201,
         "Name": "安心之所",
         "Description": "基于久岐忍的元素精通，<color=#FFD780FF>越祓雷草之轮</color>获得以下提升：\n·治疗量提升值：元素精通的75%；\n·伤害提升值：元素精通的25%。",
         "Icon": "UI_Talent_S_Shinobu_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6523,
         "Id": 652301,
         "Name": "久时的祝祷",
         "Description": "在稻妻执行时长为20小时的探索派遣任务时，获得的奖励增加25%。",
@@ -15814,21 +15858,21 @@
         "Icon": "Skill_E_Ayato_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6621,
         "Id": 662101,
         "Name": "神里流·清泷绕峰",
         "Description": "<color=#FFD780FF>神里流·镜花</color>具有如下效果：\n·施放后，神里绫人会获得2层浪闪效果；\n·水影破裂后，神里绫人将获得等同于叠加上限层数的浪闪效果。",
         "Icon": "UI_Talent_S_Ayato_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6622,
         "Id": 662201,
         "Name": "神里流·破月渐盈",
         "Description": "神里绫人处于队伍后台时，若元素能量低于40点，每1秒为自己恢复2点元素能量。",
         "Icon": "UI_Talent_S_Ayato_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6623,
         "Id": 662301,
         "Name": "神里流·日常茶饭",
         "Description": "完美烹饪食物时，有18%概率额外获得一个「奇怪的」品质的同种料理。",
@@ -16139,21 +16183,21 @@
         "Icon": "Skill_E_Collei_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6721,
         "Id": 672101,
         "Name": "飞叶迴斜",
         "Description": "在<color=#FFD780FF>飞叶轮</color>返回前，如果队伍中自己的角色触发了燃烧、原激化、超激化、蔓激化、绽放、超绽放或烈绽放反应，则会在返回时为角色赋予「新叶」状态，持续对身边的敌人造成相当于柯莱攻击力40%的<color=#99FF88FF>草元素伤害</color>，持续3秒。\n新叶效果持续期间再次产生新叶效果时，将移除原有的效果。新叶效果造成的伤害视为元素战技伤害。",
         "Icon": "UI_Talent_S_Collei_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6722,
         "Id": 672201,
         "Name": "徐如旷林",
         "Description": "<color=#FFD780FF>柯里安巴领域</color>中的角色触发燃烧、原激化、超激化、蔓激化、绽放、超绽放或烈绽放反应时，将使领域的持续时间延长1秒。\n一次<color=#FFD780FF>猫猫秘宝</color>中，至多通过这种方式延长3次持续时间。",
         "Icon": "UI_Talent_S_Collei_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6723,
         "Id": 672301,
         "Name": "「须弥飞行冠军」",
         "Description": "队伍中自己的角色滑翔消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
@@ -16458,21 +16502,21 @@
         "Icon": "Skill_E_Dori_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6821,
         "Id": 682101,
         "Name": "披沙沥金",
         "Description": "与<color=#FFD780FF>灯中幽精</color>相连的角色在触发感电、超导、超载、原激化、超激化、超绽放、雷元素扩散或雷元素结晶反应后，<color=#FFD780FF>镇灵之灯·烦恼解决炮</color>的冷却时间缩短1秒。\n该效果每3秒至多触发一次。",
         "Icon": "UI_Talent_S_Dori_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6822,
         "Id": 682201,
         "Name": "利上加利",
         "Description": "<color=#FFD780FF>镇灵之灯·烦恼解决炮</color>的断除烦恼炮或售后服务弹命中敌人时，基于多莉的元素充能效率，每100%为多莉恢复5点元素能量。\n每次施放镇灵之灯·烦恼解决炮只能通过这种方式恢复一次元素能量，并至多恢复15点元素能量。",
         "Icon": "UI_Talent_S_Dori_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6823,
         "Id": 682301,
         "Name": "意外订单",
         "Description": "合成角色与武器培养素材时，有25%的概率返还部分合成材料。",
@@ -16634,6 +16678,10 @@
         "Context": "在我跨国收购物资的时候，她为我送过好几次货。服务又好，收费还便宜。哦，对了，她很喜欢各种漂亮的小饰品，我这刚好进了一些，须弥特色，纯手工制品，可精致了。怎么样，要不要买来送给她呀？我给你打折。"
       },
       {
+        "Title": "关于瓦雷莎…",
+        "Context": "哎呀，我知道你说的是谁了，单纯可爱的水果领主…她家的作物啊，品质顶呱呱！人也非常好说话，我面无表情托腮思考，都会让她紧张，怀疑自己的货品质量欠佳，主动提出降点价…嘿嘿，这样的性格，做生意可是要吃亏的！我希望她只对我展现出来，以免便宜了别家！"
+      },
+      {
         "Title": "想要了解多莉·其一",
         "Context": "想听故事？那就…给我一百万摩拉。嗯…看在我们交情的份上，给你打个九点九折好了，九十九万摩拉。怎么样？很划算吧！"
       },
@@ -16789,21 +16837,21 @@
         "Icon": "Skill_E_Tighnari_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6921,
         "Id": 692101,
         "Name": "眼识殊明",
         "Description": "提纳里发射<color=#FFD780FF>花筥箭</color>后，元素精通提升50点，持续4秒。",
         "Icon": "UI_Talent_S_Tighnari_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6922,
         "Id": 692201,
         "Name": "诸叶辨通",
         "Description": "提纳里的每点元素精通，都会使其重击与<color=#FFD780FF>造生缠藤箭</color>造成的伤害提升0.06%。\n通过这种方式，至多使上述攻击造成的伤害提升60%。",
         "Icon": "UI_Talent_S_Tighnari_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 6923,
         "Id": 692301,
         "Name": "闳览博物",
         "Description": "在小地图上显示周围的<color=#FFD780FF>须弥区域特产</color>的位置。",
@@ -17117,21 +17165,21 @@
         "Icon": "Skill_E_Nilou_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7021,
         "Id": 702101,
         "Name": "折旋落英之庭",
         "Description": "队伍中所有角色的元素类型均为<color=#99FF88FF>草元素</color>与<color=#80C0FFFF>水元素</color>，并且至少有一名草元素角色、一名水元素角色时：\n妮露完成<color=#FFD780FF>七域舞步</color>的第三段舞步会为附近的所有角色赋予持续30秒的「金杯的丰馈」状态。\n处于金杯的丰馈状态下的角色受到<color=#99FF88FF>草元素攻击</color>会使附近的所有角色元素精通提升100点，持续10秒；此外，触发绽放反应时，将取代草原核产生「丰穰之核」。\n相比草原核，丰穰之核在产生后将迅速迸发，并且具有更大的影响范围。\n丰穰之核无法触发超绽放与烈绽放反应，与草原核共享数量上限。丰穰之核的攻击视为绽放反应的草原核的攻击。\n当队伍中角色的元素类型不满足本固有天赋的条件时，将移除已有的金杯的丰馈效果。",
         "Icon": "UI_Talent_S_Nilou_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7022,
         "Id": 702201,
         "Name": "翩舞永世之梦",
         "Description": "基于妮露生命值上限超过30000的部分，每1000点生命值上限将使处于「金杯的丰馈」状态下的角色触发的丰穰之核造成的伤害提升9%。\n通过这种方式至多使丰穰之核造成的伤害提升400%。",
         "Icon": "UI_Talent_S_Nilou_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7023,
         "Id": 702301,
         "Name": "白玉莲盏",
         "Description": "完美烹饪冒险类食物时，有12%概率获得2倍产出。",
@@ -17430,21 +17478,21 @@
         "Icon": "Skill_E_Cyno_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7121,
         "Id": 712101,
         "Name": "落羽的裁择",
         "Description": "在<color=#FFD780FF>圣仪·煟煌随狼行</color>的启途誓使状态下时，赛诺将间歇性处于「末途真眼」状态下。在该状态期间施放<color=#FFD780FF>秘仪·律渊渡魂</color>时，将触发「裁定」效果，使此次秘仪·律渊渡魂造成的伤害提升35%，并向前方发射3道渡荒之雷，造成等同于赛诺攻击力100%的<color=#FFACFFFF>雷元素伤害</color>。\n渡荒之雷造成的伤害视为元素战技伤害。",
         "Icon": "UI_Talent_S_Cyno_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7122,
         "Id": 712201,
         "Name": "九弓的执命",
         "Description": "基于赛诺的元素精通，提高自身以下攻击造成的伤害值：\n·启途誓使状态下的普通攻击：元素精通的150%；\n·固有天赋「落羽的裁择」的渡荒之雷：元素精通的250%。",
         "Icon": "UI_Talent_S_Cyno_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7123,
         "Id": 712301,
         "Name": "缄默的惠赐",
         "Description": "在须弥执行时长为20小时的探索派遣任务时，获得的奖励增加25%。",
@@ -17746,21 +17794,21 @@
         "Icon": "Skill_E_Candace_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7221,
         "Id": 722101,
         "Name": "流羽交护",
         "Description": "若坎蒂丝在<color=#FFD780FF>圣仪·苍鹭庇卫</color>长按期间受到攻击，会立即完成蓄力。",
         "Icon": "UI_Talent_S_Candace_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7222,
         "Id": 722201,
         "Name": "漫沙陨穹",
         "Description": "处于<color=#FFD780FF>圣仪·灰鸰衒潮</color>的赤冕祝祷状态下的角色，普通攻击对敌人造成元素伤害时，坎蒂丝每1000点生命值上限会使这次伤害提高0.5%。",
         "Icon": "UI_Talent_S_Candace_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7223,
         "Id": 722301,
         "Name": "向拂晓的初光",
         "Description": "队伍中自己的角色攀爬消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
@@ -18065,21 +18113,21 @@
         "Icon": "Skill_E_Nahida_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7321,
         "Id": 732101,
         "Name": "净善摄受明论",
         "Description": "施放<color=#FFD780FF>心景幻成</color>时，摩耶之殿将获得以下效果：\n依据队伍中元素精通最高的角色的元素精通数值的25%，提高领域内当前场上角色的元素精通。\n通过这种方式，至多提升250点元素精通。",
         "Icon": "UI_Talent_S_Nahida_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7322,
         "Id": 732201,
         "Name": "慧明缘觉智论",
         "Description": "基于纳西妲元素精通超过200点的部分，每1点元素精通能使<color=#FFD780FF>所闻遍计</color>的灭净三业造成的伤害提升0.1%，暴击率提升0.03%。\n通过这种方式，至多使灭净三业造成的伤害提升80%，暴击率提升24%。",
         "Icon": "UI_Talent_S_Nahida_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7323,
         "Id": 732301,
         "Name": "诸相随念净行",
         "Description": "纳西妲能够通过<color=#FFD780FF>所闻遍计</color>，与一定范围内的部分采集物进行交互。\n或许还有其他的效果…",
@@ -18234,6 +18282,10 @@
       {
         "Title": "关于芙宁娜…",
         "Context": "人们常说，智慧并不取决于知道些什么，而是取决于可以改变些什么。毫无疑问，那个「预言」早就刻写在了世界树中…明明好像一切都没改变一样，但又好像什么都已经改变了。你我都知道，她是聪明到可以扭转世界命运的人呀。"
+      },
+      {
+        "Title": "关于赫布里穆…",
+        "Context": "深渊会以最致命的形态在提瓦特显化，在须弥是「禁忌知识」，在纳塔则是魔物，正因如此，须弥的诸多经验也无法帮助到她，对此我有些愧疚。所幸现在危机已经化解，她说会有很多纳塔人到须弥游玩，我很欢迎他们，而且已经做好准备啦。"
       },
       {
         "Title": "想要了解纳西妲·其一",
@@ -18392,21 +18444,21 @@
         "Icon": "Skill_E_Layla_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7421,
         "Id": 742101,
         "Name": "如光骤现",
         "Description": "<color=#FFD780FF>安眠帷幕护盾</color>在存在期间，每获得一枚晚星时，将产生深眠效果：\n·处于安眠帷幕护盾庇护下的角色，护盾强效提升6%；\n·该效果至多叠加4次，持续直到安眠帷幕护盾消失。",
         "Icon": "UI_Talent_S_Layla_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7422,
         "Id": 742201,
         "Name": "勿扰沉眠",
         "Description": "<color=#FFD780FF>垂裳端凝之夜</color>发射的飞星造成的伤害提高，提高值相当于莱依拉生命值上限的1.5%。",
         "Icon": "UI_Talent_S_Layla_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7423,
         "Id": 742301,
         "Name": "叠影的梦兆",
         "Description": "合成角色天赋素材时，有10%概率获得2倍产出。",
@@ -18704,21 +18756,21 @@
         "Icon": "Skill_E_Wanderer_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7521,
         "Id": 752101,
         "Name": "拾玉得花",
         "Description": "施放<color=#FFD780FF>羽画·风姿华歌</color>时，若接触了<color=#80C0FFFF>水元素</color>/<color=#FF9999FF>火元素</color>/<color=#99FFFFFF>冰元素</color>/<color=#FFACFFFF>雷元素</color>，则会依据触及的元素，在此次优风倾姿状态下获得对应的强化效果：\n·<color=#80C0FFFF>水元素</color>：空居力上限提升20点；\n·<color=#FF9999FF>火元素</color>：攻击力提升30%；\n·<color=#99FFFFFF>冰元素</color>：暴击率提升20%；\n·<color=#FFACFFFF>雷元素</color>：普通攻击与重击命中敌人后，恢复0.8点元素能量，每0.2秒至多通过上述方式恢复一次元素能量。\n\n同时至多获得2种元素对应的强化效果。",
         "Icon": "UI_Talent_S_Wanderer_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7522,
         "Id": 752201,
         "Name": "梦迹一风",
         "Description": "在<color=#FFD780FF>优风倾姿</color>状态下，流浪者的空居·不生断或空居·刀风界命中敌人时，有16%几率获得「倾落」效果：流浪者在本次优风倾姿的状态下进行空中加速时，将移除倾落效果，使此次空中加速不消耗空居力，并发射4枚风矢，分别造成35%攻击力的<color=#80FFD7FF>风元素伤害</color>。\n空居·不生断与空居·刀风界未产生倾落效果时，会使下次产生概率提升12%；0.1秒内至多判定1次是否产生倾落效果。",
         "Icon": "UI_Talent_S_Wanderer_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7523,
         "Id": 752301,
         "Name": "廻色云弦",
         "Description": "突破弓与法器时，消耗的摩拉数量减少50%。",
@@ -19031,21 +19083,21 @@
         "Icon": "Skill_E_Faruzan_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7621,
         "Id": 762101,
         "Name": "迅捷流风",
         "Description": "珐露珊处于<color=#FFD780FF>非想风天</color>的「疾风示现」状态下时，瞄准射击所需的蓄力时间减少60%；并能对「风压坍陷」效果产生的风涡命中的敌人施加<color=#FFD780FF>抟风秘道</color>的「诡风之祸」效果。",
         "Icon": "UI_Talent_S_Faruzan_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7622,
         "Id": 762201,
         "Name": "七窟遗智",
         "Description": "处于<color=#FFD780FF>抟风秘道</color>的「祈风之赐」效果下的角色的普通攻击、重击、下落攻击、元素战技或元素爆发对敌人造成<color=#80FFD7FF>风元素伤害</color>时，会产生烈风护持效果：基于珐露珊基础攻击力的32%，提高造成的伤害。每0.8秒至多产生一次烈风护持效果，该效果将在「祈风之赐」持续时间结束或生效1次后消失。",
         "Icon": "UI_Talent_S_Faruzan_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7623,
         "Id": 762301,
         "Name": "千书曜迹",
         "Description": "在须弥执行时长为20小时的探索派遣任务时，获得的奖励增加25%。",
@@ -19339,21 +19391,21 @@
         "Icon": "Skill_E_Yaoyao_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7721,
         "Id": 772101,
         "Name": "天星漫散",
         "Description": "处于<color=#FFD780FF>玉颗珊珊月中落</color>的桂子仙机状态下时，当瑶瑶进行冲刺、跳跃或处于奔跑状态下时，将不断向附近的敌人投掷白玉萝卜。每0.6秒至多通过这种方式投掷1枚白玉萝卜。",
         "Icon": "UI_Talent_S_Yaoyao_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7722,
         "Id": 772201,
         "Name": "推己及人",
         "Description": "<color=#FFD780FF>白玉萝卜</color>炸裂时，处在其影响范围内的当前场上角色将每1秒恢复一次生命值，回复量基于瑶瑶生命值上限的0.8%，持续5秒。",
         "Icon": "UI_Talent_S_Yaoyao_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7723,
         "Id": 772301,
         "Name": "踮脚·蹑影轻踪",
         "Description": "瑶瑶在队伍中时，队伍中自己的角色接近晶蝶等部分生物时，不会惊动它们。\n有效对象可参考图鉴中「生物志 / 野生动物」的「其他」分类。",
@@ -19673,21 +19725,21 @@
         "Icon": "Skill_E_Alhatham_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7821,
         "Id": 782101,
         "Name": "四因订顽",
         "Description": "艾尔海森的重击或下落攻击命中敌人时，将产生一枚琢光镜。该效果每12秒至多触发一次。",
         "Icon": "UI_Talent_S_Alhatham_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7822,
         "Id": 782201,
         "Name": "谜林道破",
         "Description": "艾尔海森的每点元素精通，都会使光幕伤害与<color=#FFD780FF>殊境·显象缚结</color>造成的伤害提升0.1%。\n通过这种方式，至多使光幕伤害与殊境·显象缚结造成的伤害提升100%。",
         "Icon": "UI_Talent_S_Alhatham_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7823,
         "Id": 782301,
         "Name": "超定归约律",
         "Description": "合成武器突破素材时，有10%概率获得2倍产出。",
@@ -19962,21 +20014,21 @@
         "Icon": "Skill_E_Dehya_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7921,
         "Id": 792101,
         "Name": "不吝佑助",
         "Description": "迪希雅通过<color=#FFD780FF>熔铁流狱·剑域炽焰</color>或<color=#FFD780FF>炎啸狮子咬</color>回收净焰剑狱后的6秒内，迪希雅承担来自赤鬃之血的伤害时，受到的伤害降低60%。该效果每2秒至多触发一次。\n此外，迪希雅施放<color=#FFD780FF>熔铁流狱·净焰昂藏</color>后的9秒内，将为队伍中所有角色赋予「熔金铸躯」状态。处于熔金铸躯状态下的角色处于净焰剑狱领域中时，将获得额外的抗打断能力。每18秒至多产生一次熔金铸躯状态。",
         "Icon": "UI_Talent_S_Dehya_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7922,
         "Id": 792201,
         "Name": "崇诚之真",
         "Description": "生命值低于40%时，迪希雅将基于生命值上限的20%恢复生命值，并在接下来的10秒内，每2秒基于生命值上限的6%为迪希雅恢复生命值。该效果每20秒至多触发一次。",
         "Icon": "UI_Talent_S_Dehya_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 7923,
         "Id": 792301,
         "Name": "日照的正途",
         "Description": "在白天（6时至18时），队伍中自己的角色获得迅行效果：移动速度提高10%。\n该效果在秘境、征讨领域、深境螺旋中无效，迅行效果无法叠加。",
@@ -20274,21 +20326,21 @@
         "Icon": "Skill_E_Mika_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8021,
         "Id": 802101,
         "Name": "速射牵制",
         "Description": "在下列情况下，<color=#FFD780FF>星霜的流旋</color>的灵风状态将获得侦明效果强化，使角色处于场上时，造成的物理伤害提升10%：\n·霜流矢命中超过1名敌人时，每额外命中1名敌人就产生1层侦明效果；\n·冰星破片命中敌人时，将产生1层侦明效果。每枚冰星破片只能触发1次。\n\n灵风状态的侦明效果至多叠加3层，在持续期间内重复施放星霜的流旋时，将移除原有的灵风状态与其侦明效果。",
         "Icon": "UI_Talent_S_Mika_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8022,
         "Id": 802201,
         "Name": "地貌测绘",
         "Description": "同时处于<color=#FFD780FF>苍翎的颂愿</color>的鹰翎状态与<color=#FFD780FF>星霜的流旋</color>的灵风状态下的当前场上角色，在攻击造成暴击时，灵风状态将产生1层固有天赋「速射牵制」的侦明效果。在一次灵风状态的持续期间内，通过这种方式至多产生1层侦明效果。\n此外，灵风状态下侦明效果叠加层数上限提升1层。\n需要解锁固有天赋「速射牵制」。",
         "Icon": "UI_Talent_S_Mika_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8023,
         "Id": 802301,
         "Name": "勘界定标",
         "Description": "在小地图上显示周围的<color=#FFD780FF>蒙德区域特产</color>的位置。",
@@ -20617,21 +20669,21 @@
         "Icon": "Skill_E_Kaveh_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8121,
         "Id": 812101,
         "Name": "营造者的担当",
         "Description": "草原核造成的伤害（包含烈绽放、超绽放）命中卡维时，卡维将恢复生命值，回复量相当于卡维元素精通的300%。该效果每0.5秒至多触发一次。",
         "Icon": "UI_Talent_S_Kaveh_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8122,
         "Id": 812201,
         "Name": "工艺家的奇想",
         "Description": "在<color=#FFD780FF>繁绘隅穹</color>持续期间，卡维在普通攻击、重击或下落攻击命中敌人后，元素精通将提升25点。该效果每0.1秒至多触发一次，至多叠加4层。\n在繁绘隅穹效果结束时，该效果将被移除。",
         "Icon": "UI_Talent_S_Kaveh_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8123,
         "Id": 812301,
         "Name": "预算师的技艺",
         "Description": "制作景观、建筑、庭院类摆设时，有100%概率返还部分材料。",
@@ -20924,21 +20976,21 @@
         "Icon": "Skill_E_Baizhuer_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8221,
         "Id": 822101,
         "Name": "五运终天",
         "Description": "依据队伍中自己的当前场上角色的生命值，白术将获得不同的效果：\n·生命值低于50%时，白术获得20%治疗加成；\n·生命值高于或等于50%时，白术获得25%<color=#99FF88FF>草元素伤害加成</color>。",
         "Icon": "UI_Talent_S_Baizhuer_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8222,
         "Id": 822201,
         "Name": "在地为化",
         "Description": "受到<color=#FFD780FF>无郤气护盾</color>治疗的角色，将获得「木运之岁」效果：基于白术生命值上限不超过50000点的部分，每1000点将使该角色触发的燃烧、绽放、超绽放、烈绽放反应造成的伤害提升2%，超激化、蔓激化反应带来的伤害提升提高0.8%，持续6秒。",
         "Icon": "UI_Talent_S_Baizhuer_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8223,
         "Id": 822301,
         "Name": "味草之滋",
         "Description": "白术处于队伍中时，与部分采集物交互能够为队伍中自己的当前场上角色恢复生命值，回复量基于白术生命值上限的2.5%。",
@@ -21253,21 +21305,21 @@
         "Icon": "Skill_E_Linette_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8321,
         "Id": 832101,
         "Name": "巧施协同",
         "Description": "施放<color=#FFD780FF>魔术·运变惊奇</color>后的10秒内，队伍中分别存在1/2/3/4种元素类型的角色时，队伍中所有角色的攻击力分别提升8%/12%/16%/20%。",
         "Icon": "UI_Talent_S_Linette_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8322,
         "Id": 832201,
         "Name": "道具完备",
         "Description": "<color=#FFD780FF>魔术·运变惊奇</color>召唤的惊奇猫猫盒发生了元素转化后，琳妮特元素爆发造成的伤害提升15%，效果持续至该惊奇猫猫盒持续时间结束。",
         "Icon": "UI_Talent_S_Linette_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8323,
         "Id": 832301,
         "Name": "点位记忆法",
         "Description": "在小地图上显示周围<color=#FFD780FF>复苏水团</color>的位置，并使接触复苏水团时恢复的水中耐力与生命值提升25%。",
@@ -21561,21 +21613,21 @@
         "Icon": "Skill_E_Liney_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8421,
         "Id": 842101,
         "Name": "惊险演出",
         "Description": "如果林尼通过发射<color=#FFD780FF>隐具魔术箭</color>消耗了生命值，该隐具魔术箭召唤的怪笑猫猫帽命中敌人时会为林尼恢复3点元素能量，并且基于攻击力的80%提高造成的伤害。",
         "Icon": "UI_Talent_S_Liney_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8422,
         "Id": 842201,
         "Name": "完场喝彩",
         "Description": "林尼对处于<color=#FF9999FF>火元素</color>影响下的敌人造成的伤害，将以以下方式提升：\n·基础提升60%；\n·队伍中林尼以外每个元素类型为<color=#FF9999FF>火元素</color>的角色，提升20%。\n通过上述方式，至多使林尼对处于<color=#FF9999FF>火元素</color>影响下的敌人造成的伤害提升100%。",
         "Icon": "UI_Talent_S_Liney_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8423,
         "Id": 842301,
         "Name": "琐碎观察术",
         "Description": "在小地图上显示周围的<color=#FFD780FF>枫丹区域特产</color>的位置。",
@@ -21906,21 +21958,21 @@
         "Icon": "Skill_E_Freminet_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8521,
         "Id": 852101,
         "Name": "饱和深潜",
         "Description": "施放<color=#FFD780FF>浮冰增压·高压粉碎</color>时，如果佩伊刻计的压力阶级小于四阶，浮冰增压的冷却时间缩短1秒。",
         "Icon": "UI_Talent_S_Freminet_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8522,
         "Id": 852201,
         "Name": "并流式冷凝机关",
         "Description": "菲米尼对敌人触发碎冰反应后，会使<color=#FFD780FF>浮冰增压·高压粉碎</color>造成的伤害提高40%，持续5秒。",
         "Icon": "UI_Talent_S_Freminet_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8523,
         "Id": 852301,
         "Name": "深水引航",
         "Description": "队伍中自己的角色水中耐力消耗降低35%。\n无法与效果完全相同的固有天赋叠加。",
@@ -22236,21 +22288,21 @@
         "Icon": "Skill_E_Wriothesley_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8621,
         "Id": 862101,
         "Name": "公理终有辩诉之日",
         "Description": "莱欧斯利的生命值低于60%时，将获得「恩典之诫」，使下次<color=#FFD780FF>普通攻击·迅烈倾霜拳</color>的重击强化为惩戒·凌跃拳：不消耗体力，造成的伤害提升50%，并在命中后为莱欧斯利恢复生命值，回复量相当于莱欧斯利生命值上限的30%。\n每5秒至多通过这种方式获得一次「恩典之诫」效果。",
         "Icon": "UI_Talent_S_Wriothesley_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8622,
         "Id": 862201,
         "Name": "罪业终有报偿之时",
         "Description": "莱欧斯利的当前生命值提升或降低时，若莱欧斯利处于<color=#FFD780FF>冰牙突驰</color>的寒烈的惩裁状态下，寒烈的惩裁将获得一层「检偿之敕」效果，该效果至多叠加至5层，每层使莱欧斯利的攻击力提升6%。",
         "Icon": "UI_Talent_S_Wriothesley_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8623,
         "Id": 862301,
         "Name": "公爵的恩馈",
         "Description": "合成武器突破素材时，有10%概率获得2倍产出。",
@@ -22518,21 +22570,21 @@
         "Icon": "Skill_E_Neuvillette_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8721,
         "Id": 872101,
         "Name": "古海孑遗的权柄",
         "Description": "队伍中的角色对敌人触发蒸发、冻结、感电、绽放、水元素扩散或水元素结晶反应时，将为那维莱特产生持续30秒，至多叠加3层的「遗龙之荣」效果，使重击·衡平推裁造成原本110%/125%/160%的伤害。\n每种元素反应产生的「遗龙之荣」分别独立存在。",
         "Icon": "UI_Talent_S_Neuvillette_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8722,
         "Id": 872201,
         "Name": "至高仲裁的纪律",
         "Description": "基于当前生命值超出生命值上限30%的部分，每1%使那维莱特获得0.6%<color=#80C0FFFF>水元素伤害加成</color>，通过这种方式，至多提升30%。",
         "Icon": "UI_Talent_S_Neuvillette_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8723,
         "Id": 872301,
         "Name": "汇聚如浪潮一般",
         "Description": "队伍中自己的角色进行水下冲刺时，移动速度提升15%。\n无法与效果完全相同的固有天赋叠加。",
@@ -22700,6 +22752,10 @@
         "Context": "虽然这么说很对不起她，但无论是当时无意的触怒她、接受她的道歉还是我此时感受到的内疚，全部有种疏离的感觉，仿佛沉卧湖底看星星。我并不是有意的，我也知道很难有机会弥补。情绪并不像是水，能迅速地修复自己，恢复平静。"
       },
       {
+        "Title": "关于火之神…",
+        "Context": "以规则与传承击退深渊，此为值得称颂之义举，然权柄乃是从龙类手中夺得，亦是罪无可逭。只不过纳塔元气大伤，确实也不必急于前往。嗯，你说根据史料那一战应该判定为正式决斗，并且希巴拉克也善待了被害者家属？虽然乱七八糟的，但是也有些道理…"
+      },
+      {
         "Title": "想要了解那维莱特·其一",
         "Context": "我会尽量避免与他人有私交以及有流程外的协作。不过阁下的品行值得信任，与枫丹的势力也没有什么纠缠。很乐意与你同行。"
       },
@@ -22865,21 +22921,21 @@
         "Icon": "Skill_E_Charlotte_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8821,
         "Id": 882101,
         "Name": "冲击力瞬间",
         "Description": "带有「聚焦印象」印记的敌人被击败时，<color=#FFD780FF>取景·冰点构图法</color>的冷却时间减少2秒。每12秒至多通过这种方式减少4次元素战技的冷却时间。",
         "Icon": "UI_Talent_S_Charlotte_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8822,
         "Id": 882201,
         "Name": "多样性调查",
         "Description": "除夏洛蒂自己以外，队伍中每存在1/2/3位枫丹角色，夏洛蒂自己获得5%/10%/15%治疗加成；队伍中每存在1/2/3位非枫丹的角色，都将使夏洛蒂自己获得5%/10%/15%冰元素伤害加成。",
         "Icon": "UI_Talent_S_Charlotte_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8823,
         "Id": 882301,
         "Name": "第一人称快门",
         "Description": "夏洛蒂在启用「特殊分析变焦镜头」后，元素战技「取景·冰点构图法」的长按无法造成原本的效果，转而能以较为特别的方式进行留影…",
@@ -23185,21 +23241,21 @@
         "Icon": "Skill_E_Furina_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8921,
         "Id": 892101,
         "Name": "停不了的圆舞",
         "Description": "队伍中当前场上的角色受到治疗时，若这次治疗的来源不是芙宁娜自己并且治疗回复量溢出，在接下来的4秒内，芙宁娜每2秒将为队伍中附近的角色恢复一次生命值，回复量相当于角色各自生命值上限的2%。",
         "Icon": "UI_Talent_S_Furina_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8922,
         "Id": 892201,
         "Name": "无人听的自白",
         "Description": "每1000点生命值上限都将使处于不同始基力属性下的芙宁娜的<color=#FFD780FF>孤心沙龙</color>获得相应的增益效果：\n「沙龙成员」造成的伤害提升0.7%，通过这种方式至多使「沙龙成员」造成的伤害提升28%；\n「众水的歌者」为周围的当前场上角色恢复生命值的间隔降低0.4%，通过这种方式至多使「众水的歌者」为周围的当前场上角色恢复生命值的间隔降低16%。",
         "Icon": "UI_Talent_S_Furina_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 8923,
         "Id": 892301,
         "Name": "瀚海亦舞台",
         "Description": "异色原海异种能力的冷却时间降低30%。",
@@ -23504,21 +23560,21 @@
         "Icon": "Skill_E_Chevreuse_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9021,
         "Id": 902101,
         "Name": "尖兵协同战法",
         "Description": "队伍中所有角色的元素类型均为<color=#FF9999FF>火元素</color>与<color=#FFACFFFF>雷元素</color>，并且至少有一名火元素角色、一名雷元素角色时：\n夏沃蕾将为队伍中附近的角色施加「协同战法」：角色触发超载反应后，受本次反应影响的敌人的<color=#FF9999FF>火元素</color>与<color=#FFACFFFF>雷元素</color>抗性降低40%，持续6秒。\n当队伍中角色的元素类型不满足本固有天赋的条件时，将移除已有的协同战法效果。",
         "Icon": "UI_Talent_S_Chevreuse_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9022,
         "Id": 902201,
         "Name": "纵阵武力统筹",
         "Description": "夏沃蕾发射<color=#FFD780FF>近迫式急促拦射</color>的「超量装药弹头」后，基于夏沃蕾的生命值上限，每1000点生命值上限都将使队伍中附近的所有<color=#FF9999FF>火元素</color>与<color=#FFACFFFF>雷元素</color>角色的攻击力提升1%，持续30秒，至多通过这种方式提升40%攻击力。",
         "Icon": "UI_Talent_S_Chevreuse_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9023,
         "Id": 902301,
         "Name": "迅捷行军策略",
         "Description": "队伍中自己的角色冲刺消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
@@ -23829,21 +23885,21 @@
         "Icon": "Skill_E_Navia_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9121,
         "Id": 912101,
         "Name": "不明流通渠道",
         "Description": "施放<color=#FFD780FF>典仪式晶火</color>后的4秒内，娜维娅的普通攻击、重击与下落攻击造成的伤害转为无法被附魔覆盖的<color=#FFE699FF>岩元素伤害</color>，且娜维娅的普通攻击、重击与下落攻击造成的伤害提升40%。",
         "Icon": "UI_Talent_S_Navia_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9122,
         "Id": 912201,
         "Name": "互助关系网",
         "Description": "队伍中每存在一位<color=#FF9999FF>火元素</color>/<color=#FFACFFFF>雷元素</color>/<color=#99FFFFFF>冰元素</color>/<color=#80C0FFFF>水元素</color>角色，娜维娅的攻击力提升20%，此效果至多叠加2层。",
         "Icon": "UI_Talent_S_Navia_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9123,
         "Id": 912301,
         "Name": "流程细致的交易",
         "Description": "在枫丹执行时长为20小时的探索派遣任务时，获得的奖励增加25%。",
@@ -24155,21 +24211,21 @@
         "Icon": "Skill_E_Gaming_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9221,
         "Id": 922101,
         "Name": "舞起升平",
         "Description": "<color=#FFD780FF>瑞兽登高楼</color>的下落攻击·踏云献瑞命中敌人后，嘉明每0.2秒恢复一次生命值，回复量基于嘉明生命值上限的1.5%，持续0.8秒。",
         "Icon": "UI_Talent_S_Gaming_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9222,
         "Id": 922201,
         "Name": "祥烟瑞气",
         "Description": "嘉明的生命值低于50%时，获得20%受治疗加成。嘉明的生命值高于或等于50%时，下落攻击·踏云献瑞造成的伤害提升20%。",
         "Icon": "UI_Talent_S_Gaming_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9223,
         "Id": 922301,
         "Name": "醒兽锐行",
         "Description": "在白天（6时至18时），队伍中自己的角色获得迅行效果：移动速度提高10%。\n该效果在秘境、征讨领域、深境螺旋中无效，迅行效果无法叠加。",
@@ -24313,6 +24369,10 @@
       {
         "Title": "关于夏洛蒂…",
         "Context": "哦，那位记者小姐啊嘛！我知道她！遗珑埠的枫丹人都喜欢看蒸汽鸟报，我也经常蹭着看看，有很多不得了的新闻都是她写的喔！哦！我记得你还上过头条啊！是不是？"
+      },
+      {
+        "Title": "关于蓝砚…",
+        "Context": "认识她，你有食神啦！你让蓝砚带你去山里吃农家菜，点名要去可以自带食材加工的农庄，你说是嘉明指定那家，她就知道了。那条山路特别难走，没有她这样有经验的本地人带路，我怕你走到天黑都找不到。你们尽管去吃，报我名字就行，老板认识我的，吃完入我数！"
       },
       {
         "Title": "想要了解嘉明·其一",
@@ -24483,21 +24543,21 @@
         "Icon": "Skill_E_Liuyun_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9321,
         "Id": 932101,
         "Name": "霜翎高逐祥风势",
         "Description": "<color=#FFD780FF>朝起鹤云</color>的闲云冲击波每命中一个敌人，都将为队伍中附近的所有角色产生一层持续20秒，至多叠加4层的「风翎」效果，使角色的下落攻击的暴击率提升4%/6%/8%/10%。\n每次命中敌人产生的「风翎」的持续时间独立计算。",
         "Icon": "UI_Talent_S_Liuyun_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9322,
         "Id": 932201,
         "Name": "细想应是洞中仙",
         "Description": "<color=#FFD780FF>暮集竹星</color>的竹星拥有仙力助推时，附近的当前场上角色的下落攻击坠地冲击造成的伤害提升，提升值相当于闲云的攻击力的200%。通过这种方式，至多使附近的当前场上角色的下落攻击坠地冲击伤害提升9000。\n一次下落攻击坠地冲击伤害中，只会对一名敌人造成上述伤害提升效果，每个角色每0.4秒至多触发一次。",
         "Icon": "UI_Talent_S_Liuyun_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9323,
         "Id": 932301,
         "Name": "身形如鹤",
         "Description": "队伍中自己的角色滑翔时移动速度提高15%。\n无法与效果完全相同的固有天赋叠加。",
@@ -24801,21 +24861,21 @@
         "Icon": "Skill_E_Chiori_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9421,
         "Id": 942101,
         "Name": "量体裁衣",
         "Description": "施放<color=#FFD780FF>羽袖一触</color>的上挑攻击后的短暂时间内，依据不同的后续操作，产生不同的效果：点按元素战技将触发「织锦」；点按普通攻击则触发「裁锦」。\n\n<color=#FFD780FF>织锦</color>\n·切换角色，使队伍中下一名自己的角色登场；\n·为队伍中所有自己的角色施加「当意即妙」：队伍中自己的当前场上角色的普通攻击、重击和下落攻击命中附近的敌人时，袖将进行协同攻击，在敌人的位置造成相当于羽袖一触的上挑攻击伤害100%的<color=#FFE699FF>岩元素范围伤害</color>，通过这种方式造成的伤害视为元素战技伤害；\n·「当意即妙」持续8秒，每2秒至多触发一次袖的协同攻击，一次「当意即妙」持续期间，至多触发2次协同攻击。\n\n<color=#FFD780FF>裁锦</color>\n·千织获得<color=#FFE699FF>岩元素附魔</color>，持续5秒。\n\n千织在场上时，如果施放羽袖一触的上挑攻击后的短暂时间内没有再次点按元素战技或点按普通攻击，将触发后续效果「裁锦」。",
         "Icon": "UI_Talent_S_Chiori_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9422,
         "Id": 942201,
         "Name": "锦上添花",
         "Description": "队伍中附近的角色创造<color=#FFE699FF>岩元素创造物</color>时，千织获得20%<color=#FFE699FF>岩元素伤害加成</color>，持续20秒。",
         "Icon": "UI_Talent_S_Chiori_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9423,
         "Id": 942301,
         "Name": "衣香襟影",
         "Description": "队伍中任意自己的角色装备了默认衣装以外的衣装，或初始之翼以外的风之翼时，队伍中自己的角色获得迅行效果：移动速度提升10%。\n该效果在秘境、征讨领域、深境螺旋中无效，迅行效果无法叠加。",
@@ -25115,21 +25175,21 @@
         "Icon": "Skill_E_Sigewinne_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9521,
         "Id": 952101,
         "Name": "应有适当的休憩",
         "Description": "施放<color=#FFD780FF>弹跳水疗法</color>时，希格雯将为自己施加持续18秒的「半强制静养」效果：持续期间，希格雯获得8%<color=#80C0FFFF>水元素伤害加成</color>与10层静养计数，除希格雯外附近队伍中处于后台的角色的元素战技造成伤害时，将消耗1层静养计数，提升此次元素战技造成的伤害值：希格雯的生命值上限超过30000的部分，每1000点生命值上限将提升80点伤害，通过这种方式，至多使本次元素战技造成的伤害提升2800点。",
         "Icon": "UI_Talent_S_Sigewinne_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9522,
         "Id": 952201,
         "Name": "细致入微的诊疗",
         "Description": "希格雯进行治疗时，将基于队伍中所有角色当前生命之契的总和，提升本次治疗量：每1000点生命之契都将提升3%治疗量，至多通过这种方式提升30%治疗量。",
         "Icon": "UI_Talent_S_Sigewinne_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9523,
         "Id": 952301,
         "Name": "急性剂量",
         "Description": "在水下时，当前场上自己的角色的生命值降低至50%以下时，将在2.5秒内为其持续恢复生命值，总回复量相当于其生命值上限的50%，并在10秒内使该角色的所有元素抗性和物理抗性下降10%。该效果每20秒最多触发一次。",
@@ -25460,21 +25520,21 @@
         "Icon": "Skill_E_Arlecchino_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9621,
         "Id": 962101,
         "Name": "唯苦痛可偿还",
         "Description": "<color=#FFD780FF>血偿勒令</color>具有如下性质：\n·具有阿蕾奇诺自己施加的血偿勒令的敌人被击败时，将为她赋予生命值上限130%的生命之契；\n·在施加的5秒后，会升级为血偿勒令·结，在回收时转而为阿蕾奇诺提供130%生命之契。\n上述方式赋予生命之契时，赋予的生命之契数值上限无法超过<color=#FFD780FF>万相化灰</color>原本的限制。",
         "Icon": "UI_Talent_S_Arlecchino_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9622,
         "Id": 962201,
         "Name": "唯力量可守护",
         "Description": "基于阿蕾奇诺的攻击力超过1000的部分，每100点攻击力都将使阿蕾奇诺获得1%所有元素抗性与物理抗性。通过这种方式，阿蕾奇诺的所有元素抗性与物理抗性至多提升20%。",
         "Icon": "UI_Talent_S_Arlecchino_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9623,
         "Id": 962301,
         "Name": "唯厄月可知晓",
         "Description": "在战斗状态下，阿蕾奇诺获得40%<color=#FF9999FF>火元素伤害加成</color>，并且仅能通过<color=#FFD780FF>厄月将升</color>恢复生命值。",
@@ -25792,21 +25852,21 @@
         "Icon": "Skill_E_Sethos_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9721,
         "Id": 972101,
         "Name": "黑鸢的密喻",
         "Description": "瞄准射击时，赛索斯每1点当前元素能量都将使蓄力时间减少0.285秒，通过这种方式，至多使蓄力时间降低至0.3秒并计入20点元素能量；发射时，若发射的是<color=#FFD780FF>贯影箭</color>，将消耗计入的元素能量；如果发射的是一段蓄力的箭矢，则消耗计入元素能量的50%。",
         "Icon": "UI_Talent_S_Sethos_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9722,
         "Id": 972201,
         "Name": "砂王的赐礼",
         "Description": "赛索斯获得「热砂炫影」效果，使<color=#FFD780FF>贯影箭</color>造成的伤害值提升，提升值相当于赛索斯的元素精通的700%。\n热砂炫影期间满足以下任意条件时效果将被移除：\n·贯影箭首次命中敌人5秒后；\n·4枚贯影箭命中敌人后。\n\n热砂炫影效果下的贯影箭首次命中敌人15秒后将重新获得热砂炫影效果。",
         "Icon": "UI_Talent_S_Sethos_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9723,
         "Id": 972301,
         "Name": "猿月的显迹",
         "Description": "在小地图上显示周围的<color=#FFD780FF>须弥区域特产</color>的位置。",
@@ -26098,21 +26158,21 @@
         "Icon": "Skill_E_Clorinde_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9821,
         "Id": 982101,
         "Name": "破夜的明焰",
         "Description": "队伍中附近的角色对敌人触发<color=#FFACFFFF>雷元素相关反应</color>后，将基于克洛琳德攻击力的20%，提升克洛琳德的普通攻击与<color=#FFD780FF>残光将终</color>造成的<color=#FFACFFFF>雷元素伤害</color>。此效果持续15秒，至多叠加3层，每层独立计时。通过这种方式至多使克洛琳德的上述攻击造成的伤害提升1800。",
         "Icon": "UI_Talent_S_Clorinde_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9822,
         "Id": 982201,
         "Name": "契令的酬偿",
         "Description": "如果克洛琳德的生命之契大于或等于生命值上限的100%，生命之契的数值提升或降低时，克洛琳德的暴击率提升10%，此效果持续15秒，至多叠加2层，每层独立计时。\n此外，<color=#FFD780FF>狩夜之巡</color>的夜巡状态获得强化：持续期间，治疗回复量转化为生命之契的比例提升至100%。",
         "Icon": "UI_Talent_S_Clorinde_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9823,
         "Id": 982301,
         "Name": "夜巡之获",
         "Description": "在小地图上显示周围的<color=#FFD780FF>枫丹区域特产</color>的位置。",
@@ -26426,21 +26486,21 @@
         "Icon": "Skill_E_Emilie_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9921,
         "Id": 992101,
         "Name": "余薰",
         "Description": "每萃集两枚<color=#FFD780FF>香韵</color>，柔灯之匣·二阶将消耗香韵，并浸析出「清露香氛」，对敌人造成相当于艾梅莉埃攻击力600%的<color=#99FF88FF>草元素范围伤害</color>。该伤害不被视为元素战技伤害。",
         "Icon": "UI_Talent_S_Emilie_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9922,
         "Id": 992201,
         "Name": "精馏",
         "Description": "基于艾梅莉埃的攻击力，提升艾梅莉埃对处于燃烧状态下的敌人造成的伤害：每1000点攻击力都将提升15%伤害，至多通过这种方式提升36%伤害。",
         "Icon": "UI_Talent_S_Emilie_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 9923,
         "Id": 992301,
         "Name": "顶空集香",
         "Description": "场上存在艾梅莉埃自己创造的柔灯之匣时，队伍中附近的所有角色对燃烧伤害的<color=#FF9999FF>火元素抗性</color>提升85%。",
@@ -26672,7 +26732,7 @@
       },
       {
         "Title": "角色故事4",
-        "Context": "生活是不公的，不是所有人都有享受爱好的余裕。艾梅莉埃格外珍惜这样的机会。\n收藏香水曾是母亲的爱好，但工作让她不能经常喷涂，那些置之高阁的香水后来都成了艾梅莉埃的宝藏。她喜欢亮晶晶的瓶子和里面澄澈的液体，享受香味交织的神奇反应。\n后来，因为调香这项爱好，她又迷上了到各地采风旅行。\n她登上过罕无人迹的雪山，也挤过气味繁杂的异国集市。气味是无形的，总是被人忽略，但它们是构成一个人生活环境的必要因素。人们对香味的喜好倾向总是类似，但艾梅莉埃却将它们全部接纳。或好的，或坏的，或简单的，或复杂的，艾梅莉埃将它们在心中细细分类，搭成她认识世界的桥梁。\n这样看来，香味并不是奢侈品，是人们自然而然可以享受到的东西，那么香水也不应当是。\n但这明显有违市场倾向。那些晶莹剔透、如宝石一般的作品，似乎理应被放进灯光聚焦的展柜，卖出更高的价格。\n艾梅莉埃终究是只是个爱好者，无法以一己之力改变这种趋势。因此，她的很多作品并没有登上货架的机会。她为室外工作者设计过驱虫止汗的香水，但这明显听起来不够浪漫；她为美露莘们调制过她们喜欢味道，但人类似乎并不愿意买账。\n对此，艾梅莉埃倒不觉得遗憾。她将这些作品直接送到需要的对象手中，就已经得到满意的结果。\n当然，也有一些遗憾的事情。比如她不能冒着小动物打翻或者误食化学品的风险满足自己的心理需求，所以无法在家中饲养宠物，只能在公园散步时和其他人家的小狗玩耍。\n去见狗狗们的时候她自然也是不涂香水的。小动物们的鼻子都很敏感，她希望能和它们成为好朋友。"
+        "Context": "生活是不公的，不是所有人都有享受爱好的余裕。艾梅莉埃格外珍惜这样的机会。\n收藏香水曾是母亲的爱好，但工作让她不能经常喷涂，那些置之高阁的香水后来都成了艾梅莉埃的宝藏。她喜欢亮晶晶的瓶子和里面澄澈的液体，享受香味交织的神奇反应。\n后来，因为调香这项爱好，她又迷上了到各地采风旅行。\n她登上过罕无人迹的雪山，也挤过气味繁杂的异国集市。气味是无形的，总是被人忽略，但它们是构成一个人生活环境的必要因素。人们对香味的喜好倾向总是类似，但艾梅莉埃却将它们全部接纳。或好的，或坏的，或简单的，或复杂的，艾梅莉埃将它们在心中细细分类，搭成她认识世界的桥梁。\n这样看来，香味并不是奢侈品，是人们自然而然可以享受到的东西，那么香水也不应当是。\n但这明显有违市场倾向。那些晶莹剔透、如宝石一般的作品，似乎理应被放进灯光聚焦的展柜，卖出更高的价格。\n艾梅莉埃终究是只是个爱好者，无法以一己之力改变这种趋势。因此，她的很多作品并没有登上货架的机会。她为室外工作者设计过驱虫止汗的香水，但这明显听起来不够浪漫；她为美露莘们调制过她们喜欢的味道，但人类似乎并不愿意买账。\n对此，艾梅莉埃倒不觉得遗憾。她将这些作品直接送到需要的对象手中，就已经得到满意的结果。\n当然，也有一些遗憾的事情。比如她不能冒着小动物打翻或者误食化学品的风险满足自己的心理需求，所以无法在家中饲养宠物，只能在公园散步时和其他人家的小狗玩耍。\n去见狗狗们的时候她自然也是不涂香水的。小动物们的鼻子都很敏感，她希望能和它们成为好朋友。"
       },
       {
         "Title": "角色故事5",
@@ -26734,28 +26794,28 @@
         "Icon": "Skill_E_Kachina_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10021,
         "Id": 1002101,
         "Name": "山的回声",
         "Description": "队伍中的附近的角色触发「夜魂迸发」后，卡齐娜的<color=#FFE699FF>岩元素伤害加成</color>提升20%，持续12秒。",
         "Icon": "UI_Talent_S_Kachina_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10022,
         "Id": 1002201,
         "Name": "坚岩之重",
         "Description": "<color=#FFD780FF>冲天转转</color>造成的伤害提升，提升值相当于卡齐娜的防御力的20%。",
         "Icon": "UI_Talent_S_Kachina_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10023,
         "Id": 1002301,
         "Name": "夜域赐礼·团结炉心",
         "Description": "在夜魂值耗竭后，卡齐娜将会转而消耗燃素来维持夜魂加持。\n在纳塔存在燃素机制的区域时，能够进行夜魂传递·卡齐娜。当前场上角色处于冲刺、攀爬或是特定天赋赋予的移动状态下，或是位于一定高度的空中时，切换卡齐娜登场时触发：卡齐娜将进入夜魂加持状态，搭乘<color=#FFD780FF>冲天转转</color>登场，并获得30点夜魂值。自己的队伍每10秒能触发一次夜魂传递。\n\n此外，位于纳塔地区时，卡齐娜搭乘<color=#FFD780FF>冲天转转</color>时攀爬消耗的体力降低90%。",
         "Icon": "UI_Talent_S_Kachina_07"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10025,
         "Id": 1002501,
         "Name": "晶焰之祝",
         "Description": "在纳塔存在燃素机制的区域时，与部分采集物交互能恢复20点体力。此外，在小地图上显示周围的<color=#FFD780FF>纳塔区域特产</color>的位置。",
@@ -26887,7 +26947,10 @@
         "Title": "关于伊安珊…",
         "Context": "之前为了变强，我拜托伊安珊带我训练。她安排了各种各样高强度的锻炼方式，我常常需要咬紧牙关才能坚持下去。好在她给我安排的训练量非常精准，每次结束后都留出了供我走回家的体力…我还是很感谢她的。"
       },
-      { "Title": "关于茜特菈莉…", "Context": "？？？" },
+      {
+        "Title": "关于茜特菈莉…",
+        "Context": "玛拉妮和我说了，你们能救出我，还多亏了她的发明。「灵觉髓石」坏掉了，我也有不可推脱的责任…后来我鼓起勇气去找她道歉了，并且让她在我收藏的石头里挑几块，她挠着头说：「这，我不挑一个是不是很麻烦啊。拿个差不多的我们就两清，是吧？」最后只拿走了最不起眼的一块黑曜石，就摆了摆手让我走了。你说，我要不要再帮她找点什么？她喜欢什么，你知道吗？"
+      },
       {
         "Title": "关于希诺宁…",
         "Context": "在我获得古名后，帕加尔叔叔带我去找了希诺宁姐姐，请她帮我打造了冲天转转，她的手艺简直出神入化。\n后来，我们交流过宝石收藏与存储的经验，还欣赏了彼此的珍品。她的收藏品状态非常好，肯定照顾得十分细致。但她自己的生活…似乎要更加随性？有一次我找了她很久都没找到，最后发现她在一棵大树上晒着太阳睡着了…"
@@ -27025,7 +27088,7 @@
       },
       {
         "Title": "神之眼",
-        "Context": "那是第一次「归火圣夜巡礼」结束后的事。卡齐娜的第一次巡礼以失败告终，赛前的巨大期待落空，她的能力被旁人怀疑，更痛苦的是，她开始难以抑制地怀疑自己。\n说不定大灵也有看错人的时候？自己果真能像诗中所言「熔蚀卑琐」吗？又或者自己才是该被熔蚀的那种平庸小孩吧。\n就是在这时，卡齐娜重新发现了挖掘这件事对她的意义。\n她一直都喜欢钻入山峦深处，寻找那些有价值的事物，但这次，她不再是为某种目标而挖。她顶着钻子一直往前，就好像只要这样下去，失落和悲哀就不会在她的心上钻孔，而是变成她手里的钻子，一路钻进山的心脏。\n她感觉自己可以这样一直在黑暗中前进，有时甚至还会挖到好东西，比忍受怀疑和失败幸福多了。但在地上的世界，那场巡礼不会被抹去，失败随着时间一同前进，是卡齐娜身上抹不掉的戳。无论是躲在黑暗中，还是站在阳光都很沮丧，一定要相比的话，前者更痛苦。因为失败这两个字一直回荡在脑海中，比为「归火圣夜巡礼」训练而流泪流汗更令人难过。\n纳塔人之间有这么一种说法，回声之子是一群固执的人，他们一生都要像嵴锋龙头顶的角，柔软却尖锐，永远向前撞。就像这句话说的那样，卡齐娜的脑海中似乎没有停滞不前的选项，她只懂得前进。\n或许天注定自己无法成为高大伟岸的英雄，只能以缓慢的脚步一次又一次尝试挪动着前行吧。\n当然她还不理解的是，挺胸抬头、高喊着必胜向前冲固然是令人向往的姿态，绷紧面孔、咬起牙关迈着沉重的步伐一点点挪动也是了不起的姿态。\n在地下的那些时间里，她在想的就是这样的事。\n与此同时，她时不时会挖到一些有趣的东西。\n比如神之眼。\n得到属于自己的神之眼时，她当然是喜悦的，不过类似的激动她已经历过一次，就在得到「乌沙博蒂」这个古名的时候。\n神明或者大灵的认可不代表她一定会成就什么宏伟的事业，这一点她已经从现实中学到了，不过她还没有学到的是：\n在英雄们的传说初具雏形的阶段，它毫不起眼，颜色晦暗，更不用提激励人心，不过成就伟大所需的原初动力已经蓄满，只要主角们继续前行，未来将为他们而闪烁。\n但故事里的人永远不会提前知道结局，所以他们不计前途、奋力奔跑时的眼泪最美丽。"
+        "Context": "那是第一次「归火圣夜巡礼」结束后的事。卡齐娜的第一次巡礼以失败告终，赛前的巨大期待落空，她的能力被旁人怀疑，更痛苦的是，她开始难以抑制地怀疑自己。\n说不定大灵也有看错人的时候？自己果真能像诗中所言「熔蚀卑琐」吗？又或者自己才是该被熔蚀的那种平庸小孩吧。\n就是在这时，卡齐娜重新发现了挖掘这件事对她的意义。\n她一直都喜欢钻入山峦深处，寻找那些有价值的事物，但这次，她不再是为某种目标而挖。她顶着钻子一直往前，就好像只要这样下去，失落和悲哀就不会在她的心上钻孔，而是变成她手里的钻子，一路钻进山的心脏。\n她感觉自己可以这样一直在黑暗中前进，有时甚至还会挖到好东西，比忍受怀疑和失败幸福多了。但在地上的世界，那场巡礼不会被抹去，失败随着时间一同前进，是卡齐娜身上抹不掉的戳。无论是躲在黑暗中，还是站在阳光下都很沮丧，一定要相比的话，前者更痛苦。因为失败这两个字一直回荡在脑海中，比为「归火圣夜巡礼」训练而流泪流汗更令人难过。\n纳塔人之间有这么一种说法，回声之子是一群固执的人，他们一生都要像嵴锋龙头顶的角，柔软却尖锐，永远向前撞。就像这句话说的那样，卡齐娜的脑海中似乎没有停滞不前的选项，她只懂得前进。\n或许天注定自己无法成为高大伟岸的英雄，只能以缓慢的脚步一次又一次尝试挪动着前行吧。\n当然她还不理解的是，挺胸抬头、高喊着必胜向前冲固然是令人向往的姿态，绷紧面孔、咬起牙关迈着沉重的步伐一点点挪动也是了不起的姿态。\n在地下的那些时间里，她在想的就是这样的事。\n与此同时，她时不时会挖到一些有趣的东西。\n比如神之眼。\n得到属于自己的神之眼时，她当然是喜悦的，不过类似的激动她已经历过一次，就在得到「乌沙博蒂」这个古名的时候。\n神明或者大灵的认可不代表她一定会成就什么宏伟的事业，这一点她已经从现实中学到了，不过她还没有学到的是：\n在英雄们的传说初具雏形的阶段，它毫不起眼，颜色晦暗，更不用提激励人心，不过成就伟大所需的原初动力已经蓄满，只要主角们继续前行，未来将为他们而闪烁。\n但故事里的人永远不会提前知道结局，所以他们不计前途、奋力奔跑时的眼泪最美丽。"
       }
     ]
   },
@@ -27039,7 +27102,12 @@
       "camp": "维茨特兰",
       "constellation": "幻瑞兽座",
       "birth": "11月11日",
-      "cv": { "cn": "斑马&弭洋", "jp": "杉山纪彰", "en": "约翰·帕特诺德", "kr": "姜声宇" }
+      "cv": {
+        "cn": "斑马&弭洋",
+        "jp": "杉山纪彰&竹内顺子",
+        "en": "雅各布·高梨&约翰·帕特诺德&阿比·埃斯皮里图",
+        "kr": "姜声宇&朴利娜"
+      }
     },
     "star": 5,
     "element": "草",
@@ -27075,28 +27143,28 @@
         "Icon": "Skill_E_Kinich_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10121,
         "Id": 1012101,
         "Name": "噩地的代价",
         "Description": "处于夜魂加持状态下时，基尼奇的元素战技命中的敌人，将陷入「噩地」状态，在受到燃烧反应或烈绽放反应伤害时，为基尼奇产生7点夜魂值，每0.8秒至多通过这种方式产生一次夜魂值。噩地状态持续直至基尼奇此次夜魂加持状态结束。",
         "Icon": "UI_Talent_S_Kinich_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10122,
         "Id": 1012201,
         "Name": "焰灵的契约",
         "Description": "队伍中的附近的角色触发「夜魂迸发」后，将为基尼奇赋予一层「猎人心得」，持续15秒，至多叠加2层。基尼奇在施放<color=#FFD780FF>悬猎·游骋高狩</color>的迴猎贯鳞炮时，将消耗所有的「猎人心得」，并依据消耗的层数，每层使本次迴猎贯鳞炮造成的伤害基于基尼奇攻击力的320%提高。",
         "Icon": "UI_Talent_S_Kinich_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10123,
         "Id": 1012301,
         "Name": "夜域赐礼·索报皆偿",
         "Description": "通过<color=#FFD780FF>悬猎·游骋高狩</color>，基尼奇进行空中摆荡后处于空中时，能够消耗10点燃素以再次进行空中摆荡。\n在纳塔存在燃素机制的区域时，能够进行夜魂传递·基尼奇。当前场上角色处于冲刺状态、特定天赋赋予的移动状态下，或是位于空中时，切换基尼奇登场时，基尼奇将依照条件，进行以下行动之一：\n·朝向可以交互的卷叶符印时：向它发射钩索以进行移动；\n·身边有敌人并处于战斗状态时：向该敌人施放悬猎·游骋高狩；\n否则，发射钩索，进行空中摆荡。基尼奇将优先以符合条件的卷叶符印为发射钩索的目标。\n自己的队伍每10秒能触发一次夜魂传递。\n\n在与卷叶符印等能够与匿叶龙交互的物件互动时，悬猎·游骋高狩将被替换为「匿叶仿生」，通过匿叶仿生与这些物件交互时，这些物件的交互规则沿袭匿叶龙的交互规则，并且不会使悬猎·游骋高狩进入冷却。",
         "Icon": "UI_Talent_S_Kinich_08"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10125,
         "Id": 1012501,
         "Name": "疾行的使令",
         "Description": "在纳塔存在燃素机制的区域时，与部分采集物交互能够使队伍中自己的角色移动速度提高15%，持续10秒。此外，在小地图上显示周围的<color=#FFD780FF>纳塔区域特产</color>的位置。",
@@ -27241,6 +27309,10 @@
       {
         "Title": "关于伊法…",
         "Context": "<color=#37FFFF>基尼奇：</color>我委托过他。有次阿乔说自己「病」了，大哭大闹不肯停下。既然如此，理应送它去看最好的龙医生。他医术的确不错，阿乔被请进诊所后没一会儿就痊愈了。\n<color=#37FFFF>阿乔：</color>你…你知道什么啊你！他就是个庸医，庸医！…你、你都不知道他说了什么你都！"
+      },
+      {
+        "Title": "关于瓦雷莎…",
+        "Context": "<color=#37FFFF>基尼奇：</color>在几次清剿危险魔物的委托中，她恰好从旁经过，却主动向我提供了帮助。客气点讲，她的战斗技巧很单纯，主要靠速度和力量上的优势撞翻对手…不客气点讲，单纯过度了。\n<color=#37FFFF>阿乔：</color>怎么不说下去？呵呵。基尼奇这小子为表感谢，请她来吃「悬木人」的特色菜。结果她一个人就点了三十多份「咚咚嘭嘭」，三十多份啊！还全吃下去了。你没看见，当时这只吝啬鬼基尼奇的脸都要急绿了，哈哈哈哈。"
       },
       {
         "Title": "想要了解基尼奇·其一",
@@ -27435,28 +27507,28 @@
         "Icon": "Skill_E_Mualani_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10221,
         "Id": 1022101,
         "Name": "耐热型淡水豚豚",
         "Description": "巨浪鲨鲨撕咬命中敌人时，将在附近产生一个豚豚球。获得豚豚球时，玛拉妮自己将恢复20点夜魂值。一次夜魂加持期间，至多通过这种方式产生2个豚豚球。",
         "Icon": "UI_Talent_S_Mualani_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10222,
         "Id": 1022201,
         "Name": "纳塔最好的向导",
         "Description": "队伍中的附近的角色触发「夜魂迸发」后，玛拉妮将获得一层持续20秒、至多叠加3层的逐浪心得。施放<color=#FFD780FF>爆瀑飞弹</color>时，玛拉妮将清除所有逐浪心得，并基于清除的层数，基于生命值上限的15%/30%/45%提高本次爆瀑飞弹造成的伤害。",
         "Icon": "UI_Talent_S_Mualani_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10223,
         "Id": 1022301,
         "Name": "夜域赐礼·波涛顶底",
         "Description": "在夜魂值耗竭后，玛拉妮将会转而消耗燃素来维持夜魂加持。\n在纳塔存在燃素机制的区域时，能够进行夜魂传递·玛拉妮。当前场上角色处于冲刺、游泳或是特定天赋赋予的移动状态下，或是位于一定高度的空中时，切换玛拉妮登场时触发：玛拉妮将进入夜魂加持状态，并获得40点夜魂值。自己的队伍每10秒能触发一次夜魂传递。\n\n此外，玛拉妮在夜魂加持状态下在水面与液态燃素上移动时：在纳塔地区时消耗的夜魂值或燃素降低75%，在纳塔地区外消耗的夜魂值降低35%。",
         "Icon": "UI_Talent_S_Mualani_07"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10225,
         "Id": 1022501,
         "Name": "要诀是保持笑容！",
         "Description": "在纳塔存在燃素机制的区域时，与部分采集物交互能够恢复15点燃素。此外，在小地图上显示周围的<color=#FFD780FF>纳塔区域特产</color>的位置。",
@@ -27597,6 +27669,14 @@
         "Context": "伊法这个人可上道了！无论叫他出来玩什么他都乐呵呵的，而且做什么都又快又利索。要不是因为他已经干了医生这一行，我倒是挺希望他能来当水上运动教练。部族差异？小意思啦，根本不成问题！"
       },
       {
+        "Title": "关于梦见月瑞希…",
+        "Context": "你的人脉还挺广嘛！瑞希是我们「流泉之众」的朋友，虽然模样看起来文静，但她有可多话能聊啦。无论什么话题，她都能轻松接住话头，然后和人一直聊下去…嘿嘿，有时候，和她聊着聊着都会忘记时间…\n噢对了！她在我们这儿的分店铺最近要开张了，有空的话，也来给她的店捧捧场吧？我给她带了紫色的豚豚球作为开业礼物，希望她喜欢！"
+      },
+      {
+        "Title": "关于瓦雷莎…",
+        "Context": "瓦雷莎…哦！瓦雷莎！那个力气超大，但却不擅长比赛的好妹妹？之前伊安珊还带她来我们这儿游泳特训呢！她休息的时候喜欢躺在沙滩上看漫画织卷，我也跟着蹭了几本！她能数出很多古代勇士的名号，包括我们「流泉之众」的战士，有的连我都记不太清了！真厉害啊！"
+      },
+      {
         "Title": "想要了解玛拉妮·其一",
         "Context": "你有空吗？来我家边坐边聊？边泡温泉边聊也不错！还是说你有想去的地方？我都可以。机会难得，留影机我都带上了，动作我也可以先做示范，放心，今天我们一定能拍出有趣的合影！"
       },
@@ -27703,7 +27783,7 @@
       },
       {
         "Title": "角色故事4",
-        "Context": "「拜托你了，请务必帮我算算这次出行的运势！」玛拉妮全身抵着门喊道：「我给钱！」\n「你另寻他人吧！」茜特菈莉——「烟谜主」部族离群索居的大祭司也同样在家内一侧抵着门：「出门带路而已，小丫头别瞎想，哪有这么多危险！」\n两人隔着茜特菈莉的家门展开了角力，最后玛拉妮听到茜特菈莉威胁说，门坏了要全价赔偿才停下来。\n玛拉妮当然不会灰心，第二次就提着满满当当的食盒登门拜访。\n炸虾豆球、火焰炖肉、龙龙饼干…茜特菈莉虽然不想见客——主要是懒得收拾屋子——可看在食物的面子上还是开门把她放了进来。\n待到茜特拉莉酒足饭饱后，心情舒畅之时，玛拉妮又是趁机一番请求，再加上一招必杀技：\n「奶奶您知道吗，《蜃楼战记》要出新一卷了哦！」\n茜特菈莉不动声色：「作为活字典级别的忠实读者，我当然知道了。」\n「下回找我当向导的是来纳塔采风的八重堂编辑、作者，哎呀，说不定能提前弄到书呢。」\n「咳咳，纳塔的土地充满了未知和神秘，我们都需要敬畏夜与火。我就破例帮你算一次吧。」\n……\n「如果遇到岔路口一定要朝右手边走。」这是茜特菈莉在冥想中吹开未来的迷烟，得到的启示，「还好小丫头你信得过我，这件事要是没预知到，怕是会出大事。」\n出行之前，玛拉妮确认了地图，这次的目的地应该只有一条主道。可玛拉妮一行人走到火山内部时，前方却出现了地图上未曾标注的岔路。看起来，活跃的火山活动已经改变了附近的地形。\n她按照茜特菈莉的说法，果真顺利地带领众人走到了原定的目的地。\n自此，玛拉妮尊敬地称茜特菈莉为「大前辈」，常常带着各类礼物找她寻求一些「人生建议」。玛拉妮嘴里关于「幸运」「厄运」的说辞，从那时候开始也与日俱增。\n时至今日，她们两个人仍在以茜特菈莉家的门板为界进行角力。如果茜特拉莉不慎落于下风，玛拉妮就要再一次从门缝里挤进她家了。"
+        "Context": "「拜托你了，请务必帮我算算这次出行的运势！」玛拉妮全身抵着门喊道：「我给钱！」\n「你另寻他人吧！」茜特菈莉——「烟谜主」部落离群索居的大祭司也同样在家内一侧抵着门：「出门带路而已，小丫头别瞎想，哪有这么多危险！」\n两人隔着茜特菈莉的家门展开了角力，最后玛拉妮听到茜特菈莉威胁说，门坏了要全价赔偿才停下来。\n玛拉妮当然不会灰心，第二次就提着满满当当的食盒登门拜访。\n炸虾豆球、火焰炖肉、龙龙饼干…茜特菈莉虽然不想见客——主要是懒得收拾屋子——可看在食物的面子上还是开门把她放了进来。\n待到茜特菈莉酒足饭饱后，心情舒畅之时，玛拉妮又是趁机一番请求，再加上一招必杀技：\n「奶奶您知道吗，《蜃楼战记》要出新一卷了哦！」\n茜特菈莉不动声色：「作为活字典级别的忠实读者，我当然知道了。」\n「下回找我当向导的是来纳塔采风的八重堂编辑、作者，哎呀，说不定能提前弄到书呢。」\n「咳咳，纳塔的土地充满了未知和神秘，我们都需要敬畏夜与火。我就破例帮你算一次吧。」\n……\n「如果遇到岔路口一定要朝右手边走。」这是茜特菈莉在冥想中吹开未来的迷烟，得到的启示，「还好小丫头你信得过我，这件事要是没预知到，怕是会出大事。」\n出行之前，玛拉妮确认了地图，这次的目的地应该只有一条主道。可玛拉妮一行人走到火山内部时，前方却出现了地图上未曾标注的岔路。看起来，活跃的火山活动已经改变了附近的地形。\n她按照茜特菈莉的说法，果真顺利地带领众人走到了原定的目的地。\n自此，玛拉妮尊敬地称茜特菈莉为「大前辈」，常常带着各类礼物找她寻求一些「人生建议」。玛拉妮嘴里关于「幸运」「厄运」的说辞，从那时候开始也与日俱增。\n时至今日，她们两个人仍在以茜特菈莉家的门板为界进行角力。如果茜特菈莉不慎落于下风，玛拉妮就要再一次从门缝里挤进她家了。"
       },
       {
         "Title": "角色故事5",
@@ -27715,7 +27795,7 @@
       },
       {
         "Title": "神之眼",
-        "Context": "后来的玛拉妮无比清晰「沃摩延」这个古名所具备的意义，而对此的切身感知，其实是始于多年以前那一个原本风平浪静的夜晚。\n那天晚上，当玛拉妮和她的朋友们结束了热闹的温泉聚会，已经是午夜时分。众人沉浸在欢乐的余韵中，直到远处一声不合时宜的巨响，在安静的夜晚格外清晰。\n人们面面相觑，没有人知道发生了什么。正在巡查的阿伽娅着急地跑来：「你们所有人，快去避难！深渊来袭了！」\n现场开始骚动，众人准备往外撤离，而玛拉妮则高举手臂：「阿加娅阿姨，我想留下来帮忙！」\n玛拉妮开了个头之后，其他人也陆陆续续地站出来，希望能出一份力。\n「不行，你们没有实战经验，留在这里太危险了。战斗可不是开玩笑的事。」\n但玛拉妮的决心也不是开玩笑的。作为部族的一份子，玛拉妮并不认为自己应该置身事外。\n「除了战斗之外，应该还有我们能做的事。」\n玛拉妮说着，回头看向那些同样选择留下来的熟悉的伙伴们——\n伊拉帕脚下带风，跑得飞快，正好去通知附近的居民。奥兰塔体格壮硕，眼神又好，帮忙巡逻正合适。还有雅娜，她曾经担任过救生员，懂不少急救技术，能够担任后援…\n「至于我嘛」，玛拉妮踏上她引以为傲的冲浪板，「我的速度是数一数二的。哪里需要我就去哪里！」\n伙伴们都认可玛拉妮的说法，阿加娅也不便阻拦，就嘱咐大家一定要互相照应，安全第一。\n「既然如此，玛拉妮，你跟我一起去找『深渊界门』吧。」\n……\n玛拉妮顺着游隙灵道快速地侦察部族周边的情况，确认「深渊界门」的位置。每找到一处，就和正在作战的守卫们同步信息。\n其中一处界门涌出的魔物尤其多，众人陷入了苦战。等玛拉妮好不容易找来救援，战场已经遍布焦土与黑火。\n阿加娅挥出一剑，利刃深深地嵌进了魔物的躯体，而她身后的另一只魔兽正在蓄势，准备发动袭击。\n「小心！」玛拉妮高喊着，踩着冲浪板加速冲向魔兽，将它从空中撞翻，而她自己也不慎露出破绽。\n受到挑衅的魔物转而对着玛拉妮举起利爪，她缩起身体，攻击却并未到来，温热的血液溅到了脸上，魔兽的心脏已被阿加娅的利刃击穿。\n……\n艰难的战斗持续到了天明。当他们确认完所有的「深渊界门」都被封锁，玛拉妮跟在阿加娅和守卫们的身后，浑身疲惫地回到部族。\n玛拉妮注意到大家身上都有或大或小的伤痕，有人做了紧急处理，伤口缠着绷带。相比之下，被众人保护着的她，身上只有浅浅的擦伤。\n玛拉妮心中萌生出了从未有过的，混合了不甘与后悔的感情。「如果我能够更快、更有效地提供支援就好了。」\n玛拉妮握紧拳头，暗下决心，要找部族里的战士训练战斗技巧。\n阿加娅将玛拉妮送回了家，焦急已久的家人这才知道玛拉妮刚从战场回来。\n「她真是个非常勇敢的孩子。」临别之前，阿加娅拍了拍她的脑袋。\n……\n那天，玛拉妮做了一个很长的梦。如果不是她在翻身的时候，脸压到了一块硬物，她或许还能睡得更久。\n她睁开眼，将硬物拿到手里，竟然是一颗晶莹剔透的神之眼。\n顺着窗外照进来的阳光，她来回摩挲，反复观察，确认这并不是家里人买来的玩具。\n「这算是初战告捷的战利品吗？还挺吉利的嘛。」"
+        "Context": "后来的玛拉妮无比清晰「沃摩延」这个古名所具备的意义，而对此的切身感知，其实是始于多年以前那一个原本风平浪静的夜晚。\n那天晚上，当玛拉妮和她的朋友们结束了热闹的温泉聚会，已经是午夜时分。众人沉浸在欢乐的余韵中，直到远处一声不合时宜的巨响，在安静的夜晚格外清晰。\n人们面面相觑，没有人知道发生了什么。正在巡查的阿伽娅着急地跑来：「你们所有人，快去避难！深渊来袭了！」\n现场开始骚动，众人准备往外撤离，而玛拉妮则高举手臂：「阿伽娅阿姨，我想留下来帮忙！」\n玛拉妮开了个头之后，其他人也陆陆续续地站出来，希望能出一份力。\n「不行，你们没有实战经验，留在这里太危险了。战斗可不是开玩笑的事。」\n但玛拉妮的决心也不是开玩笑的。作为部族的一份子，玛拉妮并不认为自己应该置身事外。\n「除了战斗之外，应该还有我们能做的事。」\n玛拉妮说着，回头看向那些同样选择留下来的熟悉的伙伴们——\n伊拉帕脚下带风，跑得飞快，正好去通知附近的居民。奥兰塔体格壮硕，眼神又好，帮忙巡逻正合适。还有雅娜，她曾经担任过救生员，懂不少急救技术，能够担任后援…\n「至于我嘛」，玛拉妮踏上她引以为傲的冲浪板，「我的速度是数一数二的。哪里需要我就去哪里！」\n伙伴们都认可玛拉妮的说法，阿伽娅也不便阻拦，就嘱咐大家一定要互相照应，安全第一。\n「既然如此，玛拉妮，你跟我一起去找『深渊界门』吧。」\n……\n玛拉妮顺着游隙灵道快速地侦察部族周边的情况，确认「深渊界门」的位置。每找到一处，就和正在作战的守卫们同步信息。\n其中一处界门涌出的魔物尤其多，众人陷入了苦战。等玛拉妮好不容易找来救援，战场已经遍布焦土与黑火。\n阿伽娅挥出一剑，利刃深深地嵌进了魔物的躯体，而她身后的另一只魔兽正在蓄势，准备发动袭击。\n「小心！」玛拉妮高喊着，踩着冲浪板加速冲向魔兽，将它从空中撞翻，而她自己也不慎露出破绽。\n受到挑衅的魔物转而对着玛拉妮举起利爪，她缩起身体，攻击却并未到来，温热的血液溅到了脸上，魔兽的心脏已被阿伽娅的利刃击穿。\n……\n艰难的战斗持续到了天明。当他们确认完所有的「深渊界门」都被封锁，玛拉妮跟在阿伽娅和守卫们的身后，浑身疲惫地回到部族。\n玛拉妮注意到大家身上都有或大或小的伤痕，有人做了紧急处理，伤口缠着绷带。相比之下，被众人保护着的她，身上只有浅浅的擦伤。\n玛拉妮心中萌生出了从未有过的，混合了不甘与后悔的感情。「如果我能够更快、更有效地提供支援就好了。」\n玛拉妮握紧拳头，暗下决心，要找部族里的战士训练战斗技巧。\n阿伽娅将玛拉妮送回了家，焦急已久的家人这才知道玛拉妮刚从战场回来。\n「她真是个非常勇敢的孩子。」临别之前，阿伽娅拍了拍她的脑袋。\n……\n那天，玛拉妮做了一个很长的梦。如果不是她在翻身的时候，脸压到了一块硬物，她或许还能睡得更久。\n她睁开眼，将硬物拿到手里，竟然是一颗晶莹剔透的神之眼。\n顺着窗外照进来的阳光，她来回摩挲，反复观察，确认这并不是家里人买来的玩具。\n「这算是初战告捷的战利品吗？还挺吉利的嘛。」"
       }
     ]
   },
@@ -27765,28 +27845,28 @@
         "Icon": "Skill_E_Xilonen_01"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10321,
         "Id": 1032101,
         "Name": "四境四象回声",
         "Description": "在夜魂加持状态下：\n·若希诺宁拥有至少两枚经过元素转化的「源音采样」，在普通攻击与下落攻击命中敌人时，将获得35点夜魂值，该效果每0.1秒至多触发一次；\n·若希诺宁拥有少于两枚经过元素转化的「源音采样」，普通攻击与下落攻击造成的伤害提升30%。",
         "Icon": "UI_Talent_S_Xilonen_05"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10322,
         "Id": 1032201,
         "Name": "便携铠装护层",
         "Description": "在夜魂加持状态下，希诺宁的夜魂值达到上限时，将触发一次等同于「夜魂迸发」的效果，该效果每14秒至多触发一次。\n此外，队伍中的附近的角色触发「夜魂迸发」时，希诺宁的防御力提升20%，持续15秒。",
         "Icon": "UI_Talent_S_Xilonen_06"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10323,
         "Id": 1032301,
         "Name": "夜域赐礼·锻火之祝",
         "Description": "在夜魂值耗竭后，希诺宁将会转而消耗燃素来维持夜魂加持。\n在纳塔存在燃素机制的区域时，能够进行夜魂传递·希诺宁。当前场上角色处于冲刺、攀爬或是特定天赋赋予的移动状态下，或是位于一定高度的空中时，切换希诺宁登场时触发：希诺宁将进入夜魂加持状态，并获得20点夜魂值。在这种情况下，希诺宁的夜魂值有4秒的时间限制，超过时间限制后，希诺宁的夜魂值将立刻耗竭，在时间限制内施放<color=#FFD780FF>音火锻淬</color>后，夜魂值的时间限制将延长9秒。自己的队伍每10秒可以触发一次夜魂传递。\n\n此外，位于纳塔地区时，在夜魂加持状态下，希诺宁攀爬将不再消耗体力。",
         "Icon": "UI_Talent_S_Xilonen_07"
       },
       {
-        "GroupId": 0,
+        "GroupId": 10325,
         "Id": 1032501,
         "Name": "丛山锻火驰行",
         "Description": "触发夜魂传递时，恢复15点燃素。",
@@ -27810,7 +27890,8 @@
         "Id": 1033,
         "Name": "献予日炎的巡行式",
         "Description": "<color=#FFD780FF>音火锻淬</color>的技能等级提高3级。\n至多提升至15级。",
-        "Icon": "UI_Talent_U_Xilonen_01"
+        "Icon": "UI_Talent_U_Xilonen_01",
+        "ExtraLevel": { "Index": 2, "Level": 3 }
       },
       {
         "Id": 1034,
@@ -27822,7 +27903,8 @@
         "Id": 1035,
         "Name": "献予夕暮的转格调",
         "Description": "<color=#FFD780FF>豹烈律动！</color>的技能等级提高3级。\n至多提升至15级。",
-        "Icon": "UI_Talent_U_Xilonen_02"
+        "Icon": "UI_Talent_U_Xilonen_02",
+        "ExtraLevel": { "Index": 9, "Level": 3 }
       },
       {
         "Id": 1036,
@@ -27871,7 +27953,10 @@
         "Title": "关于我们·锻造之用",
         "Context": "无论是锻造什么东西，炉子内火焰的温度都至关重要。太低的话，就无法软化——或者融化——原材料，也无法剔除各类杂质。太高的话，又会让某些原材料无法发挥作用。\n工匠们调控炉内火焰的方法，就是炉内温度高了就抽薪，温度低了就加柴。\n至于我嘛，一般会使用含有燃素的宝石来直接调控炉内温度，用燃素助燃的火焰，比一般的火焰可厉害多了…\n啊？燃素用完之后的宝石怎么办？就只能找个地方堆起来喽。燃素都没了，它们唯一的作用就只有好看。你想要的话，就去挑几块吧。"
       },
-      { "Title": "关于我们·祝福", "Context": "好感等级达到6后开启" },
+      {
+        "Title": "关于我们·祝福",
+        "Context": "特拉佐莉婶婶之前说，要给你们打造一枚「燃晶名刻」做礼物，对吧？看现在的情况，她是没这个功夫了。\n所以这份工作现在就由我代劳。就当作是你们帮我救了妮佩卡的谢礼吧。\n我已经给你们做过一枚「古名」了？\n哈哈哈，那不算。那枚「古名」里包含的是大家对你的「祝福」，这枚「名刻」则是我个人对你的「祝福」。\n别客气了，做好了之后我告诉你。至于上面刻什么字…到时候就由你自己决定吧。"
+      },
       {
         "Title": "关于「神之眼」…",
         "Context": "你说「神之眼」啊，还挺好用的。有了它之后，我可以更准确地判断矿石中「岩」元素的含量与分布情况，从而快速地筛选出好矿与废矿。\n意义？嗯…我倒是没想那么多，它能派上用场就行，其余的我不在意。"
@@ -27896,7 +27981,10 @@
         "Title": "关于恰斯卡…",
         "Context": "为了能飞上天，恰斯卡的「枪」可费了我不少功夫。首先要尽可能保证枪体在高速机动中的稳定性，其次就是要特制出适应高空作战的普通弹药和特种弹药，最后，还要考虑到空中开火的后坐力和瞄准问题…\n但恰斯卡对我说，最后两个问题不用担心，我只需要在枪上装载最基础的机械瞄具，剩下的她会靠自己的能力解决。\n事实证明，恰斯卡确实把她的「枪」驾驭得很好，真不愧是「花羽会」的空中王牌。"
       },
-      { "Title": "关于玛薇卡…", "Context": "好感等级达到4后开启" },
+      {
+        "Title": "关于玛薇卡…",
+        "Context": "玛薇卡向我提出过不少异想天开的委托。\n比如，要我打造一柄耐热的剑，剑的整体都要耐得住她的火焰，不至于她一发力，整柄剑都会在她手里融化；还有拜托我打造一副特制的墨镜，这样她操纵火焰战斗的时候，能更好地看清周围的敌人…\n最莫名其妙的还是那台驰轮车。那段时间她天天跑到我的工坊里念叨，非要我给她做一台用燃素驱动的代步驾具，还塞给我了一大堆不知道从哪弄来的设计图…最后我实在受不了了，花了整整三个月，帮她做好了那台驰轮车。结果我听说，这家伙天天开着驰轮车在纳塔的野外到处狂奔，还没人能去管她…\n…比起这些事，为一位外来的旅行者打造「古名」，反倒像是一件相对来说比较靠谱的事务了。"
+      },
       {
         "Title": "关于基尼奇…",
         "Context": "基尼奇人还不错，但那个阿乔实在让人喜欢不起来。\n话说回来，阿乔到底是从哪出现的？要是它来源于某台仪器，那我也许还真能让它永远闭嘴。唔，要不然我挑个时间，去和基尼奇说说吧…"
@@ -28016,7 +28104,7 @@
       },
       {
         "Title": "角色故事5",
-        "Context": "泰伊吉婆婆的葬礼在部族外的一座矮山上举行。这位铸名师的离去，其实已经在大家的意料之内。\n她已经老了，时常和照顾她的人说，能听见大灵在梦里对自己低语。\n但她还不能离开，还有话要找一个合适的人留下。在那之前，她不能回应大灵的召唤。\n「…山之血，壑之眼。」\n「炙浊焚秽，魂聚火渊。」\n火把从希诺宁手里投下，柴堆燃起。\n她在这里等上了一整晚，到了次日早晨，再将婆婆的骨灰收整进瓮，安置在婆婆一直念叨的那个岩窟里。\n但在岩窟之外，泰伊吉婆婆的故事却如同山谷里的狂风一般凌乱了起来。\n有人说，泰伊吉把打造古名的真正技艺传给了自己，他手里有泰伊吉签名的典籍为证；有人说，泰伊吉把自己的工坊留给了自己，自己拿着那个工坊的钥匙…这些事关利益的撕咬并不值得希诺宁留意。真正让她在意的，是某些更为狡诈的谎言。\n「我听说，泰伊吉在授课的时候，有时候会质疑那些英雄故事的真实性啊…」\n「你也这么听说了？我也…唉，虽然这只是学术上的问题，但这样会不会带偏孩子呢？」\n「是啊是啊，我之前听说，泰伊吉年轻时候一直专注于纯技术研究，这样的人来教授铸造古名…嗯…」\n在口耳传递中，泰伊吉婆婆的故事扭曲讹变，她时而伟大无私，时而别有目的，在一个人嘴里变成英雄人物，转眼又变成了卑劣小人。\n人们没法抓住风，就想尽办法做出了各种各样的盒子，对外谎称风的形状就是这样。\n但，真实的故事永远只会是——只能是——那块沉甸甸，黑漆漆的石头。\n第二天，部族里的人惊讶地发现，平时懒懒散散的希诺宁仿佛换了个人，她就像是有着无穷的精力一般，走遍了整个「回声之子」，采访了所有和泰伊吉婆婆有关的人，查阅了所有和泰伊吉婆婆有关的资料。这样还不能使希诺宁止步，她走出了部族，询问「悬木人」的讯使，拜访「流泉之众」的乐师，请求「烟谜主」让自己查阅织卷，爬上了「花羽会」的高崖，踏入了「沃陆之邦」的大门…泰伊吉婆婆在世界上留下的每一道痕迹，都被她尽收笔下。\n这些资料，足够希诺宁驳倒任何一条对泰伊吉婆婆的污蔑和恶谣，也能让她踢开某些冠给泰伊吉婆婆的怪异名号。\n希诺宁想要留下的，是一个真实无差的泰伊吉婆婆。\n只有毫无裂隙，拥有最坚实力量的矿石，才能淬火受锻，久炼成材。\n……\n「希诺宁姐姐，你为什么要做铸名师呢？看起来好累喔…」\n锻锤震响，旁边观看希诺宁锻造的学徒们托着下巴问道。\n希诺宁停下锻打，抹了把汗水。\n「我也不想做铸名师，谁叫我爸我妈我婆婆都做过呢？」\n「而且…」\n希诺宁再次举起了锻锤。\n「总要有人，担起讲故事的责任吧。」"
+        "Context": "泰伊吉婆婆的葬礼在部族外的一座矮山上举行。这位铸名师的离去，其实已经在大家的意料之内。\n她已经老了，时常和照顾她的人说，能听见大灵在梦里对自己低语。\n但她还不能离开，还有话要找一个合适的人留下。在那之前，她不能回应大灵的召唤。\n「…山之血，壑之眼。」\n「炙浊焚秽，魂聚火渊。」\n火把从希诺宁手里投下，柴堆燃起。\n她在这里等上了一整晚，到了次日早晨，再将婆婆的骨灰收整进瓮，安置在婆婆一直念叨的那个岩窟里。\n但在岩窟之外，泰伊吉婆婆的故事却如同山谷里的狂风一般凌乱了起来。\n有人说，泰伊吉把打造古名的真正技艺传给了自己，他手里有泰伊吉签名的典籍为证；有人说，泰伊吉把工坊留给了自己，自己拿着那个工坊的钥匙…这些事关利益的撕咬并不值得希诺宁留意。真正让她在意的，是某些更为狡诈的谎言。\n「我听说，泰伊吉在授课的时候，有时候会质疑那些英雄故事的真实性啊…」\n「你也这么听说了？我也…唉，虽然这只是学术上的问题，但这样会不会带偏孩子呢？」\n「是啊是啊，我之前听说，泰伊吉年轻时候一直专注于纯技术研究，这样的人来教授铸造古名…嗯…」\n在口耳传递中，泰伊吉婆婆的故事扭曲讹变，她时而伟大无私，时而别有目的，在一个人嘴里变成英雄人物，转眼又变成了卑劣小人。\n人们没法抓住风，就想尽办法做出了各种各样的盒子，对外谎称风的形状就是这样。\n但，真实的故事永远只会是——只能是——那块沉甸甸，黑漆漆的石头。\n第二天，部族里的人惊讶地发现，平时懒懒散散的希诺宁仿佛换了个人，她就像是有着无穷的精力一般，走遍了整个「回声之子」，采访了所有和泰伊吉婆婆有关的人，查阅了所有和泰伊吉婆婆有关的资料。这样还不能使希诺宁止步，她走出了部族，询问「悬木人」的讯使，拜访「流泉之众」的乐师，请求「烟谜主」让自己查阅织卷，爬上了「花羽会」的高崖，踏入了「沃陆之邦」的大门…泰伊吉婆婆在世界上留下的每一道痕迹，都被她尽收笔下。\n这些资料，足够希诺宁驳倒任何一条对泰伊吉婆婆的污蔑和恶谣，也能让她踢开某些冠给泰伊吉婆婆的怪异名号。\n希诺宁想要留下的，是一个真实无差的泰伊吉婆婆。\n只有毫无裂隙，拥有最坚实力量的矿石，才能淬火受锻，久炼成材。\n……\n「希诺宁姐姐，你为什么要做铸名师呢？看起来好累喔…」\n锻锤震响，旁边观看希诺宁锻造的学徒们托着下巴问道。\n希诺宁停下锻打，抹了把汗水。\n「我也不想做铸名师，谁叫我爸我妈我婆婆都做过呢？」\n「而且…」\n希诺宁再次举起了锻锤。\n「总要有人，担起讲故事的责任吧。」"
       },
       {
         "Title": "「热舞乐台」",
@@ -28119,7 +28207,8 @@
         "Id": 1043,
         "Name": "笼绳，缜密的掌控",
         "Description": "元素战技<color=#FFD780FF>灵缰追影</color>的技能等级提高3级。\n至多提升至15级。",
-        "Icon": "UI_Talent_U_Chasca_01"
+        "Icon": "UI_Talent_U_Chasca_01",
+        "ExtraLevel": { "Index": 2, "Level": 3 }
       },
       {
         "Id": 1044,
@@ -28131,7 +28220,8 @@
         "Id": 1045,
         "Name": "帽檐，沙影的轮廓",
         "Description": "元素爆发<color=#FFD780FF>索魂命袭</color>的技能等级提高3级。\n至多提升至15级。",
-        "Icon": "UI_Talent_U_Chasca_02"
+        "Icon": "UI_Talent_U_Chasca_02",
+        "ExtraLevel": { "Index": 9, "Level": 3 }
       },
       {
         "Id": 1046,
@@ -28317,7 +28407,7 @@
       },
       {
         "Title": "角色故事1",
-        "Context": "在恰斯卡记事之初，她就一直和绒翼龙生活在一起。\n起初她以为自己是龙，但是她并没有长出妈妈和姐姐都有的钩喙和利爪，她不能飞上天空，也不能一口气跳上树顶。\n妈妈像爱护自己的亲生女儿那样爱护恰斯卡，狩猎归来的她会先将女儿们喂饱，再将剩下的留给自己。\n然而，恰斯卡并不满足于当一只嗷嗷待哺的雏鸟。\n当她能飞快地跑过山坡，越过河流之后，她就常常离开巢穴，去看妈妈和姐姐捕猎。\n她记下她们战斗的姿态，将其化为己用。无法振翅翱翔，就在树梢间腾跃；没有钩喙利爪，就用捡拾石头替代。\n她跃跃欲试，在森林里逡巡，终于迎来了自己的第一个劲敌——一只外出觅食的林猪。\n她学着绒翼龙的动作，向林猪飞扑袭击，却反过来被它的猛冲撞翻在地。\n她翻滚起身，顺手捡起手边的石头往它丢出，却被它灵活地一一避开。\n最终，这场激战的结局是，恰斯卡一身破破烂烂，身上各处都被磨出伤口，空手而归。\n妈妈衔来药草为她疗伤，姐姐激烈地反对她再去捕猎。\n恰斯卡答应好好在巢穴里养伤。可是等伤口愈合之后，她又一头钻进了山里。\n她在树林和溪水间穿梭，收集能够加以利用的小玩意。棱角锋利的石片，坚硬的树枝，黏糊糊的汁液，死去动物的皮毛…\n妈妈与姐姐不太理解这些「废品」的用途，不过恰斯卡有了新的兴趣，倒是一件好事。\n没想到的是，恰斯卡利用它们，制造出了新的武器——用树枝和皮革制成的弹弓，可以将石头发射得更快更远。\n……\n当林猪将一只松鼠逼入绝境的时候，它不会想到，自己也踏入了其他人的捕猎场。\n蹄子突然沾上了黏糊糊的东西，怎么也挣脱不掉。随之而来的是，脑壳被坚硬的飞来之物哐哐哐地连续砸中。林猪嘶吼一声，原地昏倒过去。\n恰斯卡这才从树丛里走出，兴冲冲地将战利品拖回了巢穴。\n妈妈和姐姐都以为恰斯卡从此会成为高明的猎手，没想到事情的发展再度超出她的预料。\n恰斯卡琢磨出了越来越多的战斗技巧，就仿佛冥冥中一直有个声音，指引着她去学会更多争斗的手段。\n然而越是顺从这声音，就越是不愿躲在暗处。她痴迷于主动出击，和山林里的鸟兽一较高下。\n从棕鹿到飞鼯再到戟冠鸟，她兴致勃勃，逐一挑战。比起暗中潜伏一击致命的猎手，更像主动迎战不死不休的斗士。\n可是她越沉迷于打架的乐趣，得到的猎物反而就更少——鸟兽通常都很机警，发现对手不好对付，自然是早早选择逃之夭夭。\n看来，世事常常两难全——争斗的快感，和饱腹的满足，只能择其一。\n对于小恰斯卡来说，实在是过于艰难的抉择。"
+        "Context": "在恰斯卡记事之初，她就一直和绒翼龙生活在一起。\n起初她以为自己是龙，但是她并没有长出妈妈和姐姐都有的钩喙和利爪，她不能飞上天空，也不能一口气跳上树顶。\n妈妈像爱护自己的亲生女儿那样爱护恰斯卡，狩猎归来的她会先将女儿们喂饱，再将剩下的留给自己。\n然而，恰斯卡并不满足于当一只嗷嗷待哺的雏鸟。\n当她能飞快地跑过山坡，越过河流之后，她就常常离开巢穴，去看妈妈和姐姐捕猎。\n她记下她们战斗的姿态，将其化为己用。无法振翅翱翔，就在树梢间腾跃；没有钩喙利爪，就用捡拾石头替代。\n她跃跃欲试，在森林里逡巡，终于迎来了自己的第一个劲敌——一只外出觅食的林猪。\n她学着绒翼龙的动作，向林猪飞扑袭击，却反过来被它的猛冲撞翻在地。\n她翻滚起身，顺手捡起手边的石头往它丢出，却被它灵活地一一避开。\n最终，这场激战的结局是，恰斯卡一身破破烂烂，身上各处都被磨出伤口，空手而归。\n妈妈衔来药草为她疗伤，姐姐激烈地反对她再去捕猎。\n恰斯卡答应好好在巢穴里养伤。可是等伤口愈合之后，她又一头钻进了山里。\n她在树林和溪水间穿梭，收集能够加以利用的小玩意。棱角锋利的石片，坚硬的树枝，黏糊糊的汁液，死去动物的皮毛…\n妈妈与姐姐不太理解这些「废品」的用途，不过恰斯卡有了新的兴趣，倒是一件好事。\n没想到的是，恰斯卡利用它们，制造出了新的武器——用树枝和皮革制成的弹弓，可以将石头发射得更快更远。\n……\n当林猪将一只松鼠逼入绝境的时候，它不会想到，自己也踏入了其他人的捕猎场。\n蹄子突然沾上了黏糊糊的东西，怎么也挣脱不掉。随之而来的是，脑壳被坚硬的飞来之物哐哐哐地连续砸中。林猪嘶吼一声，原地昏倒过去。\n恰斯卡这才从树丛里走出，兴冲冲地将战利品拖回了巢穴。\n妈妈和姐姐都以为恰斯卡从此会成为高明的猎手，没想到事情的发展再度超出她们的预料。\n恰斯卡琢磨出了越来越多的战斗技巧，就仿佛冥冥中一直有个声音，指引着她去学会更多争斗的手段。\n然而越是顺从这声音，就越是不愿躲在暗处。她痴迷于主动出击，和山林里的鸟兽一较高下。\n从棕鹿到飞鼯再到戟冠鸟，她兴致勃勃，逐一挑战。比起暗中潜伏一击致命的猎手，更像主动迎战不死不休的斗士。\n可是她越沉迷于打架的乐趣，得到的猎物反而就更少——鸟兽通常都很机警，发现对手不好对付，自然是早早选择逃之夭夭。\n看来，世事常常两难全——争斗的快感，和饱腹的满足，只能择其一。\n对于小恰斯卡来说，实在是过于艰难的抉择。"
       },
       {
         "Title": "角色故事2",
@@ -28333,7 +28423,7 @@
       },
       {
         "Title": "角色故事5",
-        "Context": "为什么呢？这里明明也不是我的巢。\n我是被那个什么「长老」强逼着住进了新的巢里。\n我是被那些人类硬塞了吃的，硬套了穿的，硬是一起渡过了几个不那么冷的夜。\n我随时都可以回自己的巢。没错，我要回自己的巢了。\n就算「妈妈」再赶我一次也好，「姐姐」一定会帮我说话的。\n就算「病」得再怎么痛也好，也不需要让人类来「治」我了。\n混乱的思绪在恰斯卡的脑海里纠缠着。\n她熟练地穿梭在树梢之间，呼吸着熟悉的山风与树叶的清香，心中却忘不掉部族里那团摇曳的烛火。\n我不需要生火来取暖，也不需要火光来照夜，反正「妈妈」和「姐姐」都是这么过来的。\n那不过是弱小的人类畏惧寒冷的黑夜才点起的火，高傲而强大的龙从不需要。\n…可那烛火真的很温暖啊。\n怯懦的念头悄然钻进脑海，紧接着那道声音突然开始回响，恰斯卡瞬间头疼欲裂，身形一滞，跌下树来。\n——「它」又来了。\n恰斯卡紧咬牙关，扶着树起身，颤抖的手指在树干上钳出血印。\n争斗吧、撕咬吧、破坏吧——这样就能忘掉所有不愉快了。\n忘掉这段生活强加于你的怯懦，忘掉人类世界里条条框框的束缚，万物生来就是野兽！\n她自小就能听到这个声音，初时不过是指引着她去猎杀、去啃咬她的猎物，而后越发频繁，每每响起就让人头晕目眩，唯有顺从其意大闹一番才得缓解。\n「妈妈」送我去人类那儿…也是希望人类能治好我吧？\n但是不行啊，人类的世界比龙巢里还要聒噪。人们各执己见争斗终日，数不尽的矛盾永不休地上演。而「它」的声音也在其间越发清晰、越发诱人。\n——姐姐，我也不想让妈妈失望，但是…\n恰斯卡几次偷偷去找姐姐诉苦，但人类的喉舌发不出绒翼龙的声音。\n——你们，我知道你们不想我打架，但是…\n恰斯卡几次想跟库斯可夫妇交流，但绒翼龙的孩子编不出人类的话语。\n——他们该打！他们骂了我，还骂了你们！\n恰斯卡想向葵可解释，嘴里却只能蹦出支离破碎的「混蛋」。\n没关系，你的声音只有我能听懂就够了，你只要能听懂我的话就够了！\n没必要解释，没必要理解！不顺心的统统打坏就好！不想见的统统撕碎就好！\n此时此刻「它」仍盘踞在心头叫嚣。\n——够了！你才是我最看不爽的！你这家伙才是最大最坏最可恨的混蛋！！\n恰斯卡在心中回以咆哮，一拳一拳地砸在树上，像是想把那声音抓出来打成渣滓！\n树皮与树叶胡乱纷飞，「它」却笑得越发猖獗。\n……\n月光照进树隙，斑驳地映着恰斯卡苍白的脸色。\n她倒在地上，拳头上皮开肉绽，露出森森白骨。\n身体痛得动弹不得，眼皮重得沉沉欲睡，连心里的声音都没力气鼓噪了。\n是啊，因为「它」就快死了，因为「它」就是我。\n这里离人类的部族不算远，头顶还有树林遮蔽，妈妈和姐姐应该都找不到吧？\n库斯可夫妻俩都外出了，他们这一次也来不及去找离家出走的人了。\n没有谁会发现，恰斯卡要死在这了。\n挺好的，世上从此要少一个大混蛋，和她心里那个更大的混蛋。恰斯卡倔强地想着。\n…就是这月光，太冷了一点。\n……\n恍惚间好像有脸上有些暖意。像「妈妈」轻覆的羽翼，像人类点起的烛火。恰斯卡缓缓睁开眼。\n眼前是堆简陋的篝火，篝火旁蹲着一名正小心翼翼扒拉着火堆的女孩，是葵可。\n「…啊！」发现恰斯卡醒来，葵可连忙把手藏到背后。借着火光恰斯卡发现她的手似乎有些灼伤。\n「…你的手没事了吧？」葵可顾左右而言他。\n恰斯卡这才发现自己的手上结结实实缠满了绷带，手法虽然笨拙，但好歹止住了血。\n「…我拖不动你，只能在这随便处理下了…不过我点了火，部族里的大人们很快就能找过来。」\n恰斯卡没有回应，但眼神像是在询问。\n「…你要是出事了，爸爸妈妈会难过的。」\n「……」\n「还有…谢谢你帮我出头，什么都没问就吼了你是我不对。」\n「……」\n「总之…回家吧。」\n「…家…」恰斯卡终于不再沉默，低吟着这新学的词，点了点头，「…我们『回家』。」"
+        "Context": "为什么呢？这里明明也不是我的巢。\n我是被那个什么「长老」强逼着住进了新的巢里。\n我是被那些人类硬塞了吃的，硬套了穿的，硬是一起渡过了几个不那么冷的夜。\n我随时都可以回自己的巢。没错，我要回自己的巢了。\n就算「妈妈」再赶我一次也好，「姐姐」一定会帮我说话的。\n就算「病」得再怎么痛也好，也不需要让人类来「治」我了。\n混乱的思绪在恰斯卡的脑海里纠缠着。\n她熟练地穿梭在树梢之间，呼吸着熟悉的山风与树叶的清香，心中却忘不掉部族里那团摇曳的烛火。\n我不需要生火来取暖，也不需要火光来照夜，反正「妈妈」和「姐姐」都是这么过来的。\n那不过是弱小的人类畏惧寒冷的黑夜才点起的火，高傲而强大的龙从不需要。\n…可那烛火真的很温暖啊。\n怯懦的念头悄然钻进脑海，紧接着那道声音突然开始回响，恰斯卡瞬间头疼欲裂，身形一滞，跌下树来。\n——「它」又来了。\n恰斯卡紧咬牙关，扶着树起身，颤抖的手指在树干上钳出血印。\n争斗吧、撕咬吧、破坏吧——这样就能忘掉所有不愉快了。\n忘掉这段生活强加于你的怯懦，忘掉人类世界里条条框框的束缚，万物生来就是野兽！\n她自小就能听到这个声音，初时不过是指引着她去猎杀、去啃咬她的猎物，而后越发频繁，每每响起就让人头晕目眩，唯有顺从其意大闹一番才得缓解。\n「妈妈」送我去人类那儿…也是希望人类能治好我吧？\n但是不行啊，人类的世界比龙巢里还要聒噪。人们各执己见争斗终日，数不尽的矛盾永不休地上演。而「它」的声音也在其间越发清晰、越发诱人。\n——姐姐，我也不想让妈妈失望，但是…\n恰斯卡几次偷偷去找姐姐诉苦，但人类的喉舌发不出绒翼龙的声音。\n——你们，我知道你们不想我打架，但是…\n恰斯卡几次想跟库斯可夫妇交流，但绒翼龙的孩子编不出人类的话语。\n——他们该打！他们骂了我，还骂了你们！\n恰斯卡想向葵可解释，嘴里却只能蹦出支离破碎的「混蛋」。\n没关系，你的声音只有我能听懂就够了，你只要能听懂我的话就够了！\n没必要解释，没必要理解！不顺心的统统打坏就好！不想见的统统撕碎就好！\n此时此刻「它」仍盘踞在心头叫嚣。\n——够了！你才是我最看不爽的！你这家伙才是最大最坏最可恨的混蛋！！\n恰斯卡在心中回以咆哮，一拳一拳地砸在树上，像是想把那声音抓出来打成渣滓！\n树皮与树叶胡乱纷飞，「它」却笑得越发猖獗。\n……\n月光照进树隙，斑驳地映着恰斯卡苍白的脸色。\n她倒在地上，拳头上皮开肉绽，露出森森白骨。\n身体痛得动弹不得，眼皮重得沉沉欲睡，连心里的声音都没力气鼓噪了。\n是啊，因为「它」就快死了，因为「它」就是我。\n这里离人类的部族不算远，头顶还有树林遮蔽，妈妈和姐姐应该都找不到吧？\n库斯可夫妻俩都外出了，他们这一次也来不及去找离家出走的人了。\n没有谁会发现，恰斯卡要死在这了。\n挺好的，世上从此要少一个大混蛋，和她心里那个更大的混蛋。恰斯卡倔强地想着。\n…就是这月光，太冷了一点。\n……\n恍惚间好像脸上有些暖意。像「妈妈」轻覆的羽翼，像人类点起的烛火。恰斯卡缓缓睁开眼。\n眼前是堆简陋的篝火，篝火旁蹲着一名正小心翼翼扒拉着火堆的女孩，是葵可。\n「…啊！」发现恰斯卡醒来，葵可连忙把手藏到背后。借着火光恰斯卡发现她的手似乎有些灼伤。\n「…你的手没事了吧？」葵可顾左右而言他。\n恰斯卡这才发现自己的手上结结实实缠满了绷带，手法虽然笨拙，但好歹止住了血。\n「…我拖不动你，只能在这随便处理下了…不过我点了火，部族里的大人们很快就能找过来。」\n恰斯卡没有回应，但眼神像是在询问。\n「…你要是出事了，爸爸妈妈会难过的。」\n「……」\n「还有…谢谢你帮我出头，什么都没问就吼了你是我不对。」\n「……」\n「总之…回家吧。」\n「…家…」恰斯卡终于不再沉默，低吟着这新学的词，点了点头，「…我们『回家』。」"
       },
       {
         "Title": "「和平缔造者」",
@@ -28436,7 +28526,8 @@
         "Id": 1053,
         "Name": "栖地蝠的灵笼",
         "Description": "元素爆发<color=#FFD780FF>黯声回响</color>的技能等级提高3级。\n至多提升至15级。",
-        "Icon": "UI_Talent_U_Olorun_01"
+        "Icon": "UI_Talent_U_Olorun_01",
+        "ExtraLevel": { "Index": 9, "Level": 3 }
       },
       {
         "Id": 1054,
@@ -28448,7 +28539,8 @@
         "Id": 1055,
         "Name": "为心魂的献礼",
         "Description": "元素战技<color=#FFD780FF>暝色缒索</color>的技能等级提高3级。\n至多提升至15级。",
-        "Icon": "UI_Talent_U_Olorun_02"
+        "Icon": "UI_Talent_U_Olorun_02",
+        "ExtraLevel": { "Index": 2, "Level": 3 }
       },
       {
         "Id": 1056,
@@ -28551,7 +28643,10 @@
         "Title": "关于玛薇卡…",
         "Context": "我之前并不认识火神大人。\n我的意思是，我当然知道火神是谁，但并不像当面对过话的那种「认识」。在这之前，火神大人对我来说更像一种刻写着力量的图腾，一个象征着掌控全局的标志。这在我心中并不算切实的了解，所以我产生了疑问。\n现在疑问消失了不少，我很开心，也有些心虚和羞愧…她似乎从不迷茫，知道火焰为何长燃，所以无论如何不能让其熄灭。我希望…希望自己能成为帮得上纳塔的人。\n当然，关于她我还有一些思考…上次在宴会上见到她吃了很多很多绿叶蔬菜，我们还聊了这件事，她说她很喜欢营养均衡的感觉。总觉得，是比想象中更细致的人。"
       },
-      { "Title": "关于「队长」…", "Context": "好感等级达到4后开启" },
+      {
+        "Title": "关于「队长」…",
+        "Context": "真是一段奇异又仓促的缘分。\n都说烟谜主的人擅长预知未来，但我在路边遇到「队长」时，从没想过事情会变得这样复杂。在你看来，人情是可以简单两清的吗？如果是，我心中为何仍保留感激与亏欠？\n…又或许是我考虑得太多了。无论之前发生了什么，他帮助拯救了纳塔岌岌可危的地脉，是一位值得尊敬的英雄。我会一直记得他的。"
+      },
       {
         "Title": "想要了解欧洛伦·其一",
         "Context": "你好。要握手吗？纳塔人打招呼一般不会这样正式，但你想要也可以。其实在远处喊一声就够了，我听力很好，会察觉到的。"
@@ -28635,7 +28730,7 @@
       },
       {
         "Title": "角色故事1",
-        "Context": "因为有古名的存在，所以连带着纳塔人都很看中名字这件事。欧洛伦也受成长环境的影响，喜欢给身边的各种东西——无论喘气的还是不喘气的——起名字。\n有些名字会跟随那些事物一辈子：花会凋谢，杯子会打碎，它们的名字陪伴了它们或短暂或漫长的一生，哪怕只有一分钟的效用，也已物有所值。\n而有些名字会中途变更。不是欧洛伦的心情变了，而是名字的主人因为经历了一些事情改变，自然而然会需要更适合它们的名字。比如一条龙如果越长越胖，你就不能再叫他「小纸条」了，对吧？\n不过他倒也不是很在意名字的含义。因为第一，他起的名字都很直白，一眼就能看出是什么意思。第二，他起名只是为了方便指代，并无其他用意，也就不存在专门为了寄托某种情感而存在的名字——名字都很宝贵，是中性的、平等的，让沟通更加便利。\n即使是他自己的名字，他也如此对待。唯一不同的是，他的确不清楚自己的名字是什么意思。\n欧洛伦这个名字是在他被人发现时就写在他襁褓内侧的。他查了些古书，又问了几位长辈，都没人知道同样的名字，更不用提含义。\n难不成是奶奶年纪大，布料上的字又模糊，所以看错了？\n但这个问题就只能自己想想，不可直接去问了，不然会吃奶奶送的脑瓜崩。"
+        "Context": "因为有古名的存在，所以连带着纳塔人都很看重名字这件事。欧洛伦也受成长环境的影响，喜欢给身边的各种东西——无论喘气的还是不喘气的——起名字。\n有些名字会跟随那些事物一辈子：花会凋谢，杯子会打碎，它们的名字陪伴了它们或短暂或漫长的一生，哪怕只有一分钟的效用，也已物有所值。\n而有些名字会中途变更。不是欧洛伦的心情变了，而是名字的主人因为经历了一些事情改变，自然而然会需要更适合它们的名字。比如一条龙如果越长越胖，你就不能再叫他「小纸条」了，对吧？\n不过他倒也不是很在意名字的含义。因为第一，他起的名字都很直白，一眼就能看出是什么意思。第二，他起名只是为了方便指代，并无其他用意，也就不存在专门为了寄托某种情感而存在的名字——名字都很宝贵，是中性的、平等的，让沟通更加便利。\n即使是他自己的名字，他也如此对待。唯一不同的是，他的确不清楚自己的名字是什么意思。\n欧洛伦这个名字是在他被人发现时就写在他襁褓内侧的。他查了些古书，又问了几位长辈，都没人知道同样的名字，更不用提含义。\n难不成是奶奶年纪大，布料上的字又模糊，所以看错了？\n但这个问题就只能自己想想，不可直接去问了，不然会吃奶奶送的脑瓜崩。"
       },
       {
         "Title": "角色故事2",
@@ -28655,7 +28750,7 @@
       },
       {
         "Title": "零食盒",
-        "Context": "不是给人，而是给野生动物准备的零食。按照不同动物的喜好，分门别类放在有隔间的盒子里。\n动物们大多很聪明，而且就欧洛伦的观察，它们和人类的智商差距并没有很多人想象中的大。不少人类能顺利生活只是因为继承了前辈们的智慧，而那些在险恶环境中找到生存之道的动物，反而要更厉害一些吧。\n找人寻求帮助，也是动物们在和人类共生的时候学会的一种捷径。有时欧洛伦只是普通地走在路上，就会突然背后一沉。反应稍微慢一些，披风上就多上几道飞鼯的抓痕。\n欧洛伦坚信，在动物之间，一定也有着固定的通讯网络。动物中的讯使搞不好比人要厉害得多，因为它们不仅飞天入地，还得会各种不同动物的语言——一想到纳塔各种动物的语言里都会有一句「欧洛伦口袋里有好吃的！」，他脸上不禁泛起笑容。\n所以对于不请自来的食客，欧洛伦即便有打发它们的办法，也不会真地使用。无论走到哪都被动物当作自己人，可不是谁都有此殊荣。\n当然，动物们也会有不同的性格，因此表达谢意的方式也多种多样。\n比如基尼奇的阿乔就很怪。它老是一副「这是吾应得的！」的态度，但实际上又一副离不开人的样子。欧洛伦一般会忽视它的用词，把食物在它面前晃来晃去，看阿乔的眼睛在墨镜后面随之摆动（那对亮光是眼睛吗？是的吧？）。如果阿乔不适时说点好话，那在它获得食物之前，基尼奇会先剥夺它张嘴的自由。\n与之相对的，咔库库就非常能说好话。虽然它会说的人话不多，但总能从中听出饱满的情绪：「还是你最好，哥们！」"
+        "Context": "不是给人，而是给野生动物准备的零食。按照不同动物的喜好，分门别类放在有隔间的盒子里。\n动物们大多很聪明，而且就欧洛伦的观察，它们和人类的智商差距并没有很多人想象中的大。不少人类能顺利生活只是因为继承了前辈们的智慧，而那些在险恶环境中找到生存之道的动物，反而要更厉害一些吧。\n找人寻求帮助，也是动物们在和人类共生的时候学会的一种捷径。有时欧洛伦只是普通地走在路上，就会突然背后一沉。反应稍微慢一些，披风上就多上几道飞鼯的抓痕。\n欧洛伦坚信，在动物之间，一定也有着固定的通讯网络。动物中的讯使搞不好比人要厉害得多，因为它们不仅飞天入地，还得会各种不同动物的语言——一想到纳塔各种动物的语言里都会有一句「欧洛伦口袋里有好吃的！」，他脸上不禁泛起笑容。\n所以对于不请自来的食客，欧洛伦即便有打发它们的办法，也不会真的使用。无论走到哪都被动物当作自己人，可不是谁都有此殊荣。\n当然，动物们也会有不同的性格，因此表达谢意的方式也多种多样。\n比如基尼奇的阿乔就很怪。它老是一副「这是吾应得的！」的态度，但实际上又一副离不开人的样子。欧洛伦一般会忽视它的用词，把食物在它面前晃来晃去，看阿乔的眼睛在墨镜后面随之摆动（那对亮光是眼睛吗？是的吧？）。如果阿乔不适时说点好话，那在它获得食物之前，基尼奇会先剥夺它张嘴的自由。\n与之相对的，咔库库就非常能说好话。虽然它会说的人话不多，但总能从中听出饱满的情绪：「还是你最好，哥们！」"
       },
       {
         "Title": "神之眼",
@@ -28754,7 +28849,8 @@
         "Id": 1063,
         "Name": "燃烧的太阳",
         "Description": "元素爆发<color=#FFD780FF>燔天之时</color>的技能等级提高3级。\n至多提升至15级。",
-        "Icon": "UI_Talent_U_Mavuika_01"
+        "Icon": "UI_Talent_U_Mavuika_01",
+        "ExtraLevel": { "Index": 9, "Level": 3 }
       },
       {
         "Id": 1064,
@@ -28766,7 +28862,8 @@
         "Id": 1065,
         "Name": "真实的含义",
         "Description": "元素战技<color=#FFD780FF>称名之刻</color>的技能等级提高3级。\n至多提升至15级。",
-        "Icon": "UI_Talent_U_Mavuika_02"
+        "Icon": "UI_Talent_U_Mavuika_02",
+        "ExtraLevel": { "Index": 2, "Level": 3 }
       },
       {
         "Id": 1066,
@@ -28890,6 +28987,10 @@
         "Context": "很遗憾，我对他们的了解甚至还不如你多，但我相信只有最优秀的领导者，才能让国度存续至今并且向前发展。在纳塔抗击深渊的历史告一段落之后，我也打算和其他国家建立更多联系，并为纳塔接下来的发展做好准备。"
       },
       {
+        "Title": "关于梦见月瑞希…",
+        "Context": "我对这位稻妻客人印象不错。听说她初来纳塔的时候，对「流泉之众」那边的温泉颇为上心，还四处打听和温泉有关的技艺。但她的钻研不为谋利，而是旨在改善人们的精神状态。如此纯粹的目的，理应获得我们的敬重与帮助。\n说起来…稻妻的现任执政也喜欢泡温泉吗？要是此事属实，我似乎知道该如何和她拉近关系了。"
+      },
+      {
         "Title": "想要了解玛薇卡·其一",
         "Context": "哦？没问题，我还挺喜欢讲故事的，只不过就这么讲未免单调了点，我们先去来上两杯吧。"
       },
@@ -28982,7 +29083,7 @@
       },
       {
         "Title": "角色故事3",
-        "Context": "玛薇卡出生在「悬木人」一个非常普通的家庭之中，她的母亲热情勇敢却欠缺谨慎，她的父亲见多识广却寡言少语，两人自结婚起便摩擦不断。\n孩子的降生改变了这一切——玛薇卡就像是永远热力四射，炽热且纯净的小太阳，以横冲直撞的方式扫清了亲人间的隔阂与阴霾。\n年幼的玛薇卡对这个世界的任何事物都充满好奇，而她的父亲每次解答了她提出的问题，总能收获崇拜的眼神和爽朗的笑容。长此以往，她的父亲逐渐感受到了和他人交流，分享心中想法的乐趣所在。\n从父亲这里学到了知识，玛薇卡又缠住了母亲，每天都想要出门冒险。勇敢的她总是冲在最前面，时常惊出母亲一声冷汗。如此反复，她的母亲逐渐意识到在旁观者眼中，鲁莽的行动确实有所不妥。\n玛薇卡的成长比任何同龄的孩童都要快，很快她就能用从父亲那里学到的知识去指出母亲有些草率，又用从母亲那里收获的阅历去指出父亲过于理想化。\n她就像是桥梁一样架在了两个原本沟通不畅的人中间，多年积累的矛盾与误会就像春雪般逐渐融化，在父亲教导玛薇卡武艺的时候，母亲也会在一旁指点，在母亲带玛薇卡驯龙的时候，父亲也会同行。\n但再度让玛薇卡向前迈步的，还是后来降临在家中的另一位天使——她的妹妹伊妮。\n或许是因为玛薇卡本来就在家庭关系中承担了重要的责任，她很快就适应了姐姐这一身份，逐步将她从父母那里学到的东西悉数传授给伊妮。\n伊妮并不是一个省心的孩子，时而调皮，时而安静，不怎么听话，经常会让家中另外三个成员一齐坐在桌边扶额叹气，但这也是生活的温馨片段。\n某次，父亲和玛薇卡正在给伊妮上课的时候，伊妮提出了一个问题：\n「火神都只是普通人，怎么保证每个当火神的人都愿意保护大家呢？」\n「正因为都是普通人，才不需要这种保证。」\n「爸爸你又在讲谜语了，伊妮听不懂。」\n「问你姐姐吧，她一定早就明白了。」\n玛薇卡只是笑着抱住伊妮，摸摸她的脑袋，不再言语。"
+        "Context": "玛薇卡出生在「悬木人」一个非常普通的家庭之中，她的母亲热情勇敢却欠缺谨慎，她的父亲见多识广却寡言少语，两人自结婚起便摩擦不断。\n孩子的降生改变了这一切——玛薇卡就像是永远热力四射，炽热且纯净的小太阳，以横冲直撞的方式扫清了亲人间的隔阂与阴霾。\n年幼的玛薇卡对这个世界的任何事物都充满好奇，而她的父亲每次解答了她提出的问题，总能收获崇拜的眼神和爽朗的笑容。长此以往，她的父亲逐渐感受到了和他人交流，分享心中想法的乐趣所在。\n从父亲这里学到了知识，玛薇卡又缠住了母亲，每天都想要出门冒险。勇敢的她总是冲在最前面，时常惊出母亲一身冷汗。如此反复，她的母亲逐渐意识到在旁观者眼中，鲁莽的行动确实有所不妥。\n玛薇卡的成长比任何同龄的孩童都要快，很快她就能用从父亲那里学到的知识去指出母亲有些草率，又用从母亲那里收获的阅历去指出父亲过于理想化。\n她就像是桥梁一样架在了两个原本沟通不畅的人中间，多年积累的矛盾与误会就像春雪般逐渐融化，在父亲教导玛薇卡武艺的时候，母亲也会在一旁指点，在母亲带玛薇卡驯龙的时候，父亲也会同行。\n但再度让玛薇卡向前迈步的，还是后来降临在家中的另一位天使——她的妹妹伊妮。\n或许是因为玛薇卡本来就在家庭关系中承担了重要的责任，她很快就适应了姐姐这一身份，逐步将她从父母那里学到的东西悉数传授给伊妮。\n伊妮并不是一个省心的孩子，时而调皮，时而安静，不怎么听话，经常会让家中另外三个成员一齐坐在桌边扶额叹气，但这也是生活的温馨片段。\n某次，父亲和玛薇卡正在给伊妮上课的时候，伊妮提出了一个问题：\n「火神都只是普通人，怎么保证每个当火神的人都愿意保护大家呢？」\n「正因为都是普通人，才不需要这种保证。」\n「爸爸你又在讲谜语了，伊妮听不懂。」\n「问你姐姐吧，她一定早就明白了。」\n玛薇卡只是笑着抱住伊妮，摸摸她的脑袋，不再言语。"
       },
       {
         "Title": "角色故事4",
@@ -29093,7 +29194,8 @@
         "Id": 1073,
         "Name": "云中蛇的羽冠",
         "Description": "元素战技<color=#FFD780FF>霜昼黑星</color>的技能等级提高3级。\n至多提升至15级。",
-        "Icon": "UI_Talent_U_Citlali_01"
+        "Icon": "UI_Talent_U_Citlali_01",
+        "ExtraLevel": { "Index": 2, "Level": 3 }
       },
       {
         "Id": 1074,
@@ -29105,7 +29207,8 @@
         "Id": 1075,
         "Name": "五恶曜的咒缚",
         "Description": "元素爆发<color=#FFD780FF>诸曜饬令</color>的技能等级提高3级。\n至多提升至15级。",
-        "Icon": "UI_Talent_U_Citlali_02"
+        "Icon": "UI_Talent_U_Citlali_02",
+        "ExtraLevel": { "Index": 9, "Level": 3 }
       },
       {
         "Id": 1076,
@@ -29200,6 +29303,10 @@
       {
         "Title": "关于伊安珊…",
         "Context": "好像对她没什么更深了解。不过根据八重堂小说的套路来看，这人能力这么强，个子这么小，是不是遇到紧急情况会有一个两米三的百分之二百出力模式啊？"
+      },
+      {
+        "Title": "关于瓦雷莎…",
+        "Context": "带上面具的战士会被认为是「英雄」、「自然」、「神灵」的化身。曾经就有一个大家喜闻乐见的英雄扛着被酒打败的巫婆耀武扬威的故事，还是在半夜足足敲了一百户人家的门。我倒是也不剩什么好名声了，所以没有很在意。嗯，没有。为了她饮食健康，我要给她下连吃十天蘑菇的诅…呃，祝福！"
       },
       {
         "Title": "想要了解茜特菈莉·其一",
@@ -29411,7 +29518,8 @@
         "Id": 1083,
         "Name": "「乘白凤兮翦雾縠」",
         "Description": "元素战技<color=#FFD780FF>凤缕随翦舞</color>的技能等级提高3级。\n至多提升至15级。",
-        "Icon": "UI_Talent_U_Lanyan_01"
+        "Icon": "UI_Talent_U_Lanyan_01",
+        "ExtraLevel": { "Index": 2, "Level": 3 }
       },
       {
         "Id": 1084,
@@ -29423,7 +29531,8 @@
         "Id": 1085,
         "Name": "「既见君兮予所欢」",
         "Description": "元素爆发<color=#FFD780FF>鹍弦踏月出</color>的技能等级提高3级。\n至多提升至15级。",
-        "Icon": "UI_Talent_U_Lanyan_02"
+        "Icon": "UI_Talent_U_Lanyan_02",
+        "ExtraLevel": { "Index": 9, "Level": 3 }
       },
       {
         "Id": 1086,
@@ -29448,7 +29557,7 @@
       { "Title": "闲聊·燕子", "Context": "天暖燕子么搭窝窝，升雷扯闪么我家躲。" },
       { "Title": "下雨的时候…", "Context": "赶不及躲雨了，那——安心淋雨吧，还省了跑步的力气。" },
       { "Title": "打雷的时候…", "Context": "呜哇！借、借你手握一会！" },
-      { "Title": "阳光很好…", "Context": "看，阳光扫到的地方都镀上了一层金欸" },
+      { "Title": "阳光很好…", "Context": "看，阳光扫到的地方都镀上了一层金欸。" },
       { "Title": "起风的时候…", "Context": "听见吗？我头上的银饰叮铃…叮铃…风很温柔呢！" },
       { "Title": "刮大风了…", "Context": "叮叮叮叮叮——风有点生气了啊。" },
       {
@@ -29618,7 +29727,7 @@
       },
       {
         "Title": "角色故事2",
-        "Context": "蓝砚觉得编藤的工序并不复杂。\n首先她需要采集足够数量的藤枝。\n清晨山中的阳光最纯净，一些晚起的鸟儿会在太阳完全升起后才开始歌唱，蓝砚往往会在这时候带着竹筐和砍刀，进山采藤。\n藤类喜好在湿润的环境中生长，有些藤喜阳，有些藤耐阴，就像人的脾气一样千奇百怪。\n不同的藤适合用来编不同的器皿。编屏风用的藤需要硬挺一些，蓝砚会去古老的树林中寻找，那里的树木长得高大，攀附在树木上的藤也生得更有骨气。\n编花篮得藤需要柔软一些，蓝砚会去水边寻找，那里的藤会伸出无数柔软的枝桠，在地面上铺展开薄薄一层网，这种藤枝条柔韧，易弯不折。\n采集完毕后就该回家处理藤枝了。\n藤芯和去了皮的藤枝用来塑形，藤皮编出的块面用来维形，都得先洗后晒。\n蓝砚喜欢边唱歌边搅和大缸里的藤条，再把它们一把把捞出来，铺在院子里干燥的地上。有时候蓝砚的爸爸妈妈也会来帮忙，一边聊些家常一边帮忙晒藤。这个步骤中的笑声最多，也最简单。\n初步处理好藤枝与藤皮之后，来到了最重要的编织步骤。\n编藤是一个需要高度集中的步骤，在一经一纬、一横一竖的织造中，一个本无骨骼、也不具形貌的器皿在她的手下诞生。\n蓝砚并不仅仅把它们当作自己的作品，而是从自己手下诞生的新生命。\n即便它们形制完全相同，外人眼中根本看不出区别，但她自己知道，在编织时她下手轻重不同，先编了某一面后编了另一面，编这一只腰包时心里欢欣，编那一只时心里沉静，都会使这些新生命有不同的气质。\n这时候的蓝砚不常与家人闲聊，只是专心编藤，邻居家来串门的猫儿、狗儿还有过路的燕子都无法让她分心。偶尔她也会带上工具与原料，去自己熟悉的山头上安安静静坐着编藤。\n山上的花鸟鱼虫自由得很，并不会像她的家人一样自觉给蓝砚留出安静的空间。\n最调皮的是小狐狸，经常有那么几只好奇的狐狸过来瞧蓝砚做活，小狐狸们到处嗅探、用爪子推搡她带上山的瓶瓶罐罐，弄得蓝砚带来的清漆被洒得到处都是，本来这些漆是要被刷到器皿上用以防水的，现在它们全都被沾到了小狐狸们的爪子上了。\n被吓坏的小狐狸们惊恐地把爪子按到了她刚编好的花篮上，给花篮表面留下了几个亮晶晶的爪印，反而显得野趣盎然，后来成为了蓝砚最喜欢的作品之一。\n编藤就是这样一件简单有趣的事，也是蓝砚至今的生命中最快乐的事之一。"
+        "Context": "蓝砚觉得编藤的工序并不复杂。\n首先她需要采集足够数量的藤枝。\n清晨山中的阳光最纯净，一些晚起的鸟儿会在太阳完全升起后才开始歌唱，蓝砚往往会在这时候带着竹筐和砍刀，进山采藤。\n藤类喜好在湿润的环境中生长，有些藤喜阳，有些藤耐阴，就像人的脾气一样千奇百怪。\n不同的藤适合用来编不同的器皿。编屏风用的藤需要硬挺一些，蓝砚会去古老的树林中寻找，那里的树木长得高大，攀附在树木上的藤也生得更有骨气。\n编花篮的藤需要柔软一些，蓝砚会去水边寻找，那里的藤会伸出无数柔软的枝桠，在地面上铺展开薄薄一层网，这种藤枝条柔韧，易弯不折。\n采集完毕后就该回家处理藤枝了。\n藤芯和去了皮的藤枝用来塑形，藤皮编出的块面用来维形，都得先洗后晒。\n蓝砚喜欢边唱歌边搅和大缸里的藤条，再把它们一把把捞出来，铺在院子里干燥的地上。有时候蓝砚的爸爸妈妈也会来帮忙，一边聊些家常一边帮忙晒藤。这个步骤中的笑声最多，也最简单。\n初步处理好藤枝与藤皮之后，来到了最重要的编织步骤。\n编藤是一个需要高度集中的步骤，在一经一纬、一横一竖的织造中，一个本无骨骼、也不具形貌的器皿在她的手下诞生。\n蓝砚并不仅仅把它们当作自己的作品，而是从自己手下诞生的新生命。\n即便它们形制完全相同，外人眼中根本看不出区别，但她自己知道，在编织时她下手轻重不同，先编了某一面后编了另一面，编这一只腰包时心里欢欣，编那一只时心里沉静，都会使这些新生命有不同的气质。\n这时候的蓝砚不常与家人闲聊，只是专心编藤，邻居家来串门的猫儿、狗儿还有过路的燕子都无法让她分心。偶尔她也会带上工具与原料，去自己熟悉的山头上安安静静坐着编藤。\n山上的花鸟鱼虫自由得很，并不会像她的家人一样自觉给蓝砚留出安静的空间。\n最调皮的是小狐狸，经常有那么几只好奇的狐狸过来瞧蓝砚做活，小狐狸们到处嗅探、用爪子推搡她带上山的瓶瓶罐罐，弄得蓝砚带来的清漆被洒得到处都是，本来这些漆是要被刷到器皿上用以防水的，现在它们全都被沾到了小狐狸们的爪子上了。\n被吓坏的小狐狸们惊恐地把爪子按到了她刚编好的花篮上，给花篮表面留下了几个亮晶晶的爪印，反而显得野趣盎然，后来成为了蓝砚最喜欢的作品之一。\n编藤就是这样一件简单有趣的事，也是蓝砚至今的生命中最快乐的事之一。"
       },
       {
         "Title": "角色故事3",
@@ -29843,7 +29952,7 @@
       },
       {
         "Title": "关于玛薇卡…",
-        "Context": "火神玛薇卡女士？怎么说呢…她是那种，光是看一眼都会让人觉得想要戴上墨镜的人。她就像是真正的太阳那样，只要她握住你的手，你心中所有阴霾和忧郁都会在一瞬间被燃烧殆尽。\n尝、尝过梦境的味道没有？没有没有没有没有，我可不敢细致地尝，之前玛薇卡女士亲切地邀请我，但我一踏进她的梦里，就和跳进了火山一样，烫得我直咳嗽…\n可能是我的妖力还不够吧…"
+        "Context": "火神玛薇卡女士？怎么说呢…她是那种，光是看一眼都会让人觉得想要戴上墨镜的人。她就像是真正的太阳那样，只要她握住你的手，你心中所有阴霾和忧郁都会在一瞬间被燃烧殆尽。\n尝、尝过梦境的味道没有？没有没有没有没有没有，我可不敢细致地尝，之前玛薇卡女士亲切地邀请我，但我一踏进她的梦里，就和跳进了火山一样，烫得我直咳嗽…\n可能是我的妖力还不够吧…"
       },
       {
         "Title": "关于玛拉妮…",
@@ -29953,7 +30062,7 @@
       },
       {
         "Title": "角色故事1",
-        "Context": "相比坐拥万千传说的狐妖、形姿飒爽的天狗、或是令人生畏的鬼族，「食梦貘」的名号不至于无人听闻，但也远远谈不上响亮。\n在「百物语大会」之上，食梦貘一族只是席间不起眼的点缀，或于僻静的角落安心品茶，或同其他小妖静听大能们的状语豪言，或扮演侍者，为有乐斋这样的雅士斟酒倒茶。\n彼时，还是小小梦貘的梦见月瑞希参与宴席的全部乐趣，便在于欣赏自己的好友——幼狐身形的八重神子，一展其冰雪聪明的才智。\n看着神子趴在邻家的狐斋宫姐姐肩头，与有乐斋智辩三百回合，瑞希总能吃下平常数倍的点心；品味神子挑出对方破绽的逻辑，瑞希往往为她敏捷的思维连连点头，甚至将好友精彩的发言一一背诵。\n待到次日天明，见到轻轻打着呵欠的神子时，瑞希总会带着精心准备的油豆腐热切地凑上来，和她讨论昨晚未完的话题。\n几近崇拜的热情令神子都有些难以招架，只能摇动蓬松的尾巴，优雅地遮住半张小脸，支开话题说，「我们去吃拉面吧」。\n在乌鸦师傅的拉面摊前，在影向山南最为茁壮的樱树枝头，在夕阳映照的海滩上，幼狐和小小梦貘形影不离，无话不聊。\n甚至连梦境深处的秘密，都成了双方彼此分享的宝物。\n不过，神子毕竟贵为「白辰狐王血脉」的继承者，责任等待着她，成长二字背后的任务过于繁重。\n随着神子和瑞希先后习得化为人形的神通，她们也如凡人那般，被生活的洪流分划，送往了不同的水域。\n神子在狐斋宫的监督下修习高深莫测的妖术，在鸣神大社众巫女簇拥下攻读宫司的八百八十条守则，在众大妖之间穿行，作为白辰一脉的新星，巩固着族裔在众妖之中的地位。\n她的世界就像与瑞希一同眺望的远海，波澜壮阔，变化莫测，深藏危险和挑战，也时刻涌现着无尽的变数和机遇。\n而默默无闻的瑞希，则步入了稳定的生活：与族裔一同务农或纺织，维持生计，在固定的时间出巡，为寻求帮助的人们吞食噩梦…\n就像小溪汇入的湖泊，平静得有些无趣。\n两人共同出游的时间不断减少，最后，连一月一会的约定都难以维系。\n对此，瑞希并无遗憾。\n毕竟每天早晨，她依旧会和神子同时出门，神子接过她准备的那碗油豆腐时，依旧会对她投以「挚友限定」的真诚笑容。\n她自认为承担不了神子十分之一的重任，甚至与神子并肩前行时，都会被四面八方来的压力击垮。\n她只需要一直扮演清静的小角色，在神子需要时，为神子提供一份安宁。"
+        "Context": "相比坐拥万千传说的狐妖、形姿飒爽的天狗、或是令人生畏的鬼族，「食梦貘」的名号不至于无人听闻，但也远远谈不上响亮。\n在「百物语大会」之上，食梦貘一族只是席间不起眼的点缀，或于僻静的角落安心品茶，或同其他小妖静听大能们的壮语豪言，或扮演侍者，为有乐斋这样的雅士斟酒倒茶。\n彼时，还是小小梦貘的梦见月瑞希参与宴席的全部乐趣，便在于欣赏自己的好友——幼狐身形的八重神子，一展其冰雪聪明的才智。\n看着神子趴在邻家的狐斋宫姐姐肩头，与有乐斋智辩三百回合，瑞希总能吃下平常数倍的点心；品味神子挑出对方破绽的逻辑，瑞希往往为她敏捷的思维连连点头，甚至将好友精彩的发言一一背诵。\n待到次日天明，见到轻轻打着呵欠的神子时，瑞希总会带着精心准备的油豆腐热切地凑上来，和她讨论昨晚未完的话题。\n几近崇拜的热情令神子都有些难以招架，只能摇动蓬松的尾巴，优雅地遮住半张小脸，支开话题说，「我们去吃拉面吧」。\n在乌鸦师傅的拉面摊前，在影向山南最为茁壮的樱树枝头，在夕阳映照的海滩上，幼狐和小小梦貘形影不离，无话不聊。\n甚至连梦境深处的秘密，都成了双方彼此分享的宝物。\n不过，神子毕竟贵为「白辰狐王血脉」的继承者，责任等待着她，成长二字背后的任务过于繁重。\n随着神子和瑞希先后习得化为人形的神通，她们也如凡人那般，被生活的洪流分划，送往了不同的水域。\n神子在狐斋宫的监督下修习高深莫测的妖术，在鸣神大社众巫女簇拥下攻读宫司的八百八十条守则，在众大妖之间穿行，作为白辰一脉的新星，巩固着族裔在众妖之中的地位。\n她的世界就像与瑞希一同眺望的远海，波澜壮阔，变化莫测，深藏危险和挑战，也时刻涌现着无尽的变数和机遇。\n而默默无闻的瑞希，则步入了稳定的生活：与族裔一同务农或纺织，维持生计，在固定的时间出巡，为寻求帮助的人们吞食噩梦…\n就像小溪汇入的湖泊，平静得有些无趣。\n两人共同出游的时间不断减少，最后，连一月一会的约定都难以维系。\n对此，瑞希并无遗憾。\n毕竟每天早晨，她依旧会和神子同时出门，神子接过她准备的那碗油豆腐时，依旧会对她投以「挚友限定」的真诚笑容。\n她自认为承担不了神子十分之一的重任，甚至与神子并肩前行时，都会被四面八方来的压力击垮。\n她只需要一直扮演清静的小角色，在神子需要时，为神子提供一份安宁。"
       },
       {
         "Title": "角色故事2",
@@ -29978,6 +30087,690 @@
       {
         "Title": "神之眼",
         "Context": "就算是无比可口的料理，一日三餐重复不变，吃上百遍千遍，也会令普通人难以忍受。\n而在瑞希的味觉世界中，品尝寡淡的噩梦，已是一种幸运。\n有些人的噩梦就如厨房爆炸后的产物，各种调料混杂其中，还有木炭烟熏的苦味，甚至锈味和强酸。\n那美梦呢？\n鲜有食梦貘知道美梦的味道，因为食梦貘一族有着不成文的规矩：「未经允许，不得吞食他人的美梦。」\n成为心理诊疗师后的第十年，瑞希才有幸品尝到宝贵的美梦。\n一位接受了瑞希诊疗，完美痊愈的女孩带着礼物前来感谢她。闲聊之时，女孩突发奇想，要与瑞希分享自己色彩斑斓的好梦。\n饱含童真、活力与绮灿幻想的梦境，味道实在惬意、温暖细腻的清甜令瑞希完全沉浸其中。\n从那以后，瑞希就爱上了各种甜品，心底更是萌生了一个大胆的想法。\n妙不可言的美梦或许本身就是一种解药，足以消融人们的负面情绪？\n若是能够用妖力制造美梦，作为一剂良药，对病患的情绪想来大有裨益。\n而且…也能将其作为珍藏的美食，偶尔给自己一点调剂？\n不过，食梦貘毕竟没有造物的权柄。某种程度上，美梦是愿望投影在人们心中的产物，无比明净，难以用外力重现，凭空捏造更是一种奢求…\n每个人的愿望都有所不同，自然不能用笼统的「配方」调制万能的美梦。若是为了了解人们的真实想法，探寻人们内心深处的秘密，本身又可能成为越界的行为，加重人们的紧张和不安…\n结果略有遗憾，瑞希没能参悟解药之梦的制作方法。\n好在，上万个日夜的探寻与钻研也没有白费，瑞希的心意终究得到了回应——\n某个疲惫而充实的夜里，瑞希梦见自己变回了小小的梦貘，与挚友在拉面摊前享用料理。\n这梦境呈现出轻烟与柔风般的质感，似乎隐含着诸多美梦之间富有共性的轮廓。\n脱离束缚，自由自在，悠悠哉哉…\n梦境行至此处，一枚玲珑剔透的神之眼悄然出现在瑞希的枕边…\n此后，瑞希似乎得到了启发，换了个思路。\n她要将人们引向松弛与舒然的梦，唤起人们心中对宝贵事物的回忆。\n相信人们心底珍藏的美好，必定会在关键的时刻苏醒，为梦境着色，将其装点成最瑰丽的模样。"
+      }
+    ]
+  },
+  {
+    "id": 10000110,
+    "name": "伊安珊",
+    "title": "熔石百炼",
+    "description": "沃陆之邦健身俱乐部的总教练，闻名纳塔的营养师。",
+    "area": "纳塔",
+    "brief": {
+      "camp": "特特奥坎",
+      "constellation": "牨龙座",
+      "birth": "8月8日",
+      "cv": { "cn": "真理", "jp": "大桥彩香", "en": "卡特里娜·索尔兹伯里", "kr": "李在岘" }
+    },
+    "star": 4,
+    "element": "雷",
+    "weapon": "长柄武器",
+    "materials": [
+      { "id": 104144, "name": "最胜紫晶", "star": 5 },
+      { "id": 113067, "name": "深邃纠缠的凝视", "star": 4 },
+      { "id": 101255, "name": "琉鳞石", "star": 0 },
+      { "id": 112106, "name": "龙冠武士的金哨", "star": 3 },
+      { "id": 104349, "name": "「角逐」的哲学", "star": 4 },
+      { "id": 113062, "name": "否定裁断", "star": 5 }
+    ],
+    "skills": [
+      {
+        "GroupId": 11031,
+        "Id": 11101,
+        "Name": "普通攻击·负重锥击",
+        "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多三段的连续枪击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，向前方突进，对路径上的敌人造成伤害。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。\n\n<color=#FFD780FF>夜魂状态·雷霆飞缒</color>\n在夜魂加持状态下，伊安珊的重击将转为施展豪烈的「雷霆飞缒」，消耗一定体力向前方猛踏，造成具有夜魂性质的<color=#FFACFFFF>雷元素范围伤害</color>。",
+        "Icon": "Skill_A_03"
+      },
+      {
+        "GroupId": 11032,
+        "Id": 11102,
+        "Name": "电掣雷驰",
+        "Description": "伊安珊向前突进一段距离，对路径上的敌人造成具有夜魂性质的<color=#FFACFFFF>雷元素伤害</color>。\n施放后，伊安珊将恢复54点夜魂值，并进入夜魂加持状态。并且在突进结束后的5秒内，点按普通攻击时，伊安珊将快速施放一次不消耗体力的「雷霆飞缒」踏击。\n\n<color=#FFD780FF>夜魂加持·伊安珊</color>\n持续消耗夜魂值。夜魂值耗尽时，或是再次施放时，伊安珊的夜魂加持将会结束。夜魂加持状态具有如下特性：\n·提升伊安珊的移动速度；\n·长按冲刺会切换至「雷驰电掣」模式，短时间内大幅提升伊安珊的移动速度；在这种状态下伊安珊可以利用地形差进行飞跃，或额外消耗夜魂值在水面与液态燃素上移动，并免疫液态燃素的伤害。\n\n<i>「更快，更强！平时的不懈努力就是为了这一刻。」</i>",
+        "Icon": "Skill_S_Iansan_01"
+      },
+      {
+        "GroupId": 11039,
+        "Id": 11105,
+        "Name": "力的三原理",
+        "Description": "以「力量」之名踏破大地，造成具有夜魂性质的<color=#FFACFFFF>雷元素范围伤害</color>，并取出珍藏的限定版动能标示（健身用）。\n施放时，伊安珊将获得15点夜魂值，并进入夜魂加持状态。\n动能标示退场时，伊安珊的夜魂加持将会结束。\n\n<color=#FFD780FF>动能标示</color>\n动能标示将跟随角色行动，并根据伊安珊的夜魂值，以不同的方式使队伍中自己的当前场上角色的攻击力提升：\n·若伊安珊的夜魂值少于42点，将基于伊安珊的夜魂值与攻击力，获得攻击力加成；\n·若伊安珊拥有至少42点夜魂值，动能标示将切换至「炽烈声援！」模式，基于伊安珊的攻击力，获得更高的攻击力加成。\n此外，动能标示存在期间，将记录除伊安珊外的队伍中自己的当前场上角色的移动距离；每秒都将基于上一秒记录的移动距离，为伊安珊恢复夜魂值。\n动能标示将在伊安珊的夜魂加持结束时消失。不处于战斗状态下时，动能标示将在1秒后消失。动能标示存在期间，伊安珊处于后台时，夜魂加持也不会结束。\n\n<i>「力量并非天生的馈赠，力量源于不懈的努力，力量需要正确的方法。」</i>",
+        "Icon": "Skill_E_Iansan_01"
+      },
+      {
+        "GroupId": 11021,
+        "Id": 1102101,
+        "Name": "强化抗阻练习",
+        "Description": "「雷霆飞缒」命中敌人后，伊安珊将获得「标准动作」效果，持续15秒。\n持续期间，伊安珊的攻击力提升20%，通过元素爆发<color=#FFD780FF>力的三原理</color>中的动能标示恢复夜魂值时，还会额外恢复1点夜魂值；此外，队伍中自己的当前场上角色消耗或恢复夜魂值后，伊安珊下一次通过动能标示恢复夜魂值时，额外恢复的夜魂值提升至4点，该效果每2.8秒至多触发一次。\n「标准动作」效果将在伊安珊的夜魂加持结束时消失。",
+        "Icon": "UI_Talent_S_Iansan_05"
+      },
+      {
+        "GroupId": 11022,
+        "Id": 1102201,
+        "Name": "动能梯度测验",
+        "Description": "队伍中的附近的角色触发「夜魂迸发」时，伊安珊将获得「热身效应」，持续10秒。\n持续期间，伊安珊恢复至少1点夜魂值时，会为当前场上自己的角色恢复生命值，回复量相当于伊安珊攻击力的60%，该效果每2.8秒至多触发一次。",
+        "Icon": "UI_Talent_S_Iansan_06"
+      },
+      {
+        "GroupId": 11023,
+        "Id": 1102301,
+        "Name": "夜域赐礼·勉力传动",
+        "Description": "在夜魂值耗竭后，伊安珊在场上时，将会转而消耗燃素来维持夜魂加持。\n在纳塔存在燃素机制的区域时，能够进行夜魂传递·伊安珊。当前场上角色处于冲刺或是特定天赋赋予的移动状态下时，或是位于一定高度的空中时，切换伊安珊登场时触发：伊安珊将进入夜魂加持状态，并获得25点夜魂值。自己的队伍每10秒可以触发一次夜魂传递。\n此外，在纳塔存在燃素机制的区域时，伊安珊利用地形差进行飞跃时，不会承受坠落伤害。",
+        "Icon": "UI_Talent_S_Varesa_07"
+      },
+      {
+        "GroupId": 11025,
+        "Id": 1102501,
+        "Name": "热量均衡计划",
+        "Description": "在纳塔存在燃素机制的区域时，当燃素从50%以上降低至50%以下时能恢复10点燃素，该效果每10秒至多触发一次。",
+        "Icon": "UI_Talent_S_Iansan_08"
+      }
+    ],
+    "constellation": [
+      {
+        "Id": 1101,
+        "Name": "万事从来开头难",
+        "Description": "在战斗中，伊安珊处于夜魂加持状态下时，每消耗6点夜魂值，将为伊安珊自己恢复15点元素能量，该效果每18秒至多触发一次。",
+        "Icon": "UI_Talent_S_Iansan_01"
+      },
+      {
+        "Id": 1102,
+        "Name": "偷懒是健身大忌!",
+        "Description": "施放元素爆发<color=#FFD780FF>力的三原理</color>时，伊安珊也会获得固有天赋「强化抗阻练习」中的「标准动作」效果，持续15秒；此外，「标准动作」效果持续期间，若伊安珊处于队伍后台，还会使队伍中自己的当前场上角色的攻击力提升30%。该效果需要解锁固有天赋「强化抗阻练习」。",
+        "Icon": "UI_Talent_S_Iansan_02"
+      },
+      {
+        "Id": 1103,
+        "Name": "科学的饮食规划",
+        "Description": "元素战技<color=#FFD780FF>电掣雷驰</color>的技能等级提高3级。\n至多提升至15级。",
+        "Icon": "UI_Talent_U_Iansan_01"
+      },
+      {
+        "Id": 1104,
+        "Name": "循序渐进是关键",
+        "Description": "动能标示存在期间，除伊安珊外的队伍中自己的当前场上角色施放元素爆发后，伊安珊将获得两层「原力激扬」，持续至动能标示退场，每次召唤动能标示至多触发一次该效果；伊安珊通过动能标示恢复夜魂值时，将消耗一层「原力激扬」，为伊安珊额外恢复4点夜魂值。\n此外，若动能标示的夜魂值恢复量溢出，伊安珊下一次通过动能标示恢复夜魂值时，还会额外恢复相当于本次溢出量50%的夜魂值。",
+        "Icon": "UI_Talent_S_Iansan_03"
+      },
+      {
+        "Id": 1105,
+        "Name": "还没有到极限呢！",
+        "Description": "元素爆发<color=#FFD780FF>力的三原理</color>的技能等级提高3级。\n至多提升至15级。",
+        "Icon": "UI_Talent_U_Iansan_02"
+      },
+      {
+        "Id": 1106,
+        "Name": "「沃陆之邦」的训教",
+        "Description": "动能标示的持续时间延长3秒。\n此外，伊安珊触发恢复夜魂值的效果时，若夜魂值恢复量溢出，将获得「极限发力」效果，使队伍中自己的当前场上角色造成的伤害提升25%，持续3秒。",
+        "Icon": "UI_Talent_S_Iansan_04"
+      }
+    ],
+    "talks": [
+      {
+        "Title": "初次见面…",
+        "Context": "叫我伊安珊就好，我来自沃陆之邦，是那里最有名的健身教练。看你体格还不错，对健身感兴趣吗？"
+      },
+      { "Title": "闲聊·举铁", "Context": "今天的指标还不够，再做一组吧。" },
+      { "Title": "闲聊·饮食规划", "Context": "考虑到之前摄入的热量…晚餐得重新规划一下。" },
+      {
+        "Title": "闲聊·力量",
+        "Context": "总有人认为我是天生神力，其实我从血脉中继承到的只有永远长不高的个子。我所有的力量都是通过合理的健身计划获得的，只要付出相同的努力，你也可以拥有。"
+      },
+      { "Title": "下雨的时候…", "Context": "赶紧找个地方躲雨吧，感冒了对身体不好。" },
+      { "Title": "雨过天晴…", "Context": "该出来晒晒太阳了，集合！" },
+      { "Title": "阳光很好…", "Context": "这种天气很适合拉练。" },
+      { "Title": "刮大风了…", "Context": "逆风奔跑，也算是一种负重训练吧。" },
+      { "Title": "在沙漠的时候…", "Context": "这里不太适合搞拉练…" },
+      {
+        "Title": "早上好…",
+        "Context": "嗨，早上好啊。如果想要锻炼自己的意志，早起是最基础的项目之一。从床上爬起来都做不到的人，肯定也无法将任何计划坚持下去。话说回来，这个时间很适合晨跑，要不要一起？"
+      },
+      {
+        "Title": "中午好…",
+        "Context": "中午好啊，有好好吃午餐吧？在我看来，午餐是一日三餐中最重要的一餐，不仅担负着补充能量的重任，还是平衡营养的关键一环。如果不知道该怎么吃，我可以提供一些建议。"
+      },
+      {
+        "Title": "晚上好…",
+        "Context": "晚上好，你对夜间运动感不感兴趣？刚入夜的这段时间很适合到户外做一些运动。这个时间没有阳光暴晒，可以减少水分消耗，适当运动后获得的疲惫感还可以增加睡眠质量，要不要试试？"
+      },
+      { "Title": "晚安…", "Context": "该休息咯，熬夜可是健身的大忌。" },
+      {
+        "Title": "关于伊安珊自己·健身教练",
+        "Context": "健身算是我们沃陆之邦的一项传统，年轻人都喜欢互相秀肌肉以示友好。想要在这样的部族里当健身教练，只有嘴上的功夫可不行，必须有拿得出手的本事。至于我嘛，其实我一开始没有当教练的心思，只是默默执行着自己的健身计划。不知从何时起，旁观的人脸上只剩下目瞪口呆的表情，而向我请教健身技巧的人也越来越多，我就自然而然地成为了教练。"
+      },
+      {
+        "Title": "关于伊安珊自己·身高",
+        "Context": "不要把我当小孩子，我只是长不高。我祖先也都这样，这好像是某种遗传…不过不必担心，对肌肉力量没有影响。"
+      },
+      {
+        "Title": "关于我们·见闻",
+        "Context": "我听说你周游各国，踏足过很多人迹罕至的秘境，真是了不起。有时间的话，能不能跟我讲讲你的见闻？我偶尔也需要向学员们提供一些精神上的激励，而冒险者战胜困难的故事绝对是上好的素材。"
+      },
+      {
+        "Title": "关于我们·共勉",
+        "Context": "作为教练，我经常需要向别人提供指导，但其实我更喜欢能与我共勉的人。健身也是一种修行，如果总是独自坚持，即便是我也不免会身心疲惫。所以，你能作为朋友向我提供鞭策吗？如果哪一天我被懒惰和糖分诱惑了，必须有人敢于点醒我啊。"
+      },
+      {
+        "Title": "关于「神之眼」…",
+        "Context": "刚获得神之眼的那段时间，我制作了一份详细的计划表，用来测试这枚神之眼的各项性能。我认为使用神之眼就和健身差不多，自己具体能举多重，能跳多远，都必须详加了解，否则一不小心就会受伤。"
+      },
+      {
+        "Title": "有什么想要分享·健身器材",
+        "Context": "我经常会尝试设计一些新式的健身器材。如果你在俱乐部看到了一些奇奇怪怪的东西，八成就是我的作品。倒不是我喜欢标新立异，而是我明白每个人的最佳健身方式各不相同，不是所有人都适合天天举铁。所以我想从器材入手，让那些被普通器材吓退的人也能享受到健身的乐趣。"
+      },
+      {
+        "Title": "有什么想要分享·体格",
+        "Context": "沃陆之邦的族民大多体格健硕，我这样的小个子可不常见。小时候，周围的人都默认我是需要被保护的对象。后来我不顾长辈的阻拦加入了健身俱乐部，那段时间没少受伤…一路坚持下来，或许是为了践行我的古名，或许也是因为我不喜欢他人眼中的怜悯。"
+      },
+      {
+        "Title": "感兴趣的见闻…",
+        "Context": "沃陆之邦的族民们喜欢和突角龙比力气，别看它们平时看起来温顺，就算被掀翻，好像也不会生气，但其实它们非常危险，一旦被惹怒，就会横冲直撞，在耗尽力气之前不会停下来。仅仅一头发怒的突角龙，就能拆完整座村落…至于如何与突角龙相处才能避免惹怒它们，就是一件很专业的事了，我还专门为此开设过培训课程呢。"
+      },
+      {
+        "Title": "关于茜特菈莉…",
+        "Context": "黑曜石奶奶确实是一位了不起的人物，但是…她的生活习惯我实在不敢苟同。我晨跑时偶尔会遇到她，本以为她也有早起的好习惯，后来才知道她是熬了通宵后正要回家睡觉…能这样生活两百多年还没有把身体搞垮，烟谜主的萨满真是一种神秘的存在。"
+      },
+      {
+        "Title": "关于玛拉妮…",
+        "Context": "玛拉妮一直是个让我惊叹的人，她的体态和力量比我的绝大多数学员都要好，但她从来没有接受过任何正规的健身训练。之前她报过我的培训班，但最后也没来。或许，是因为水上运动对肌肉的锻炼更全面？不过我能看出来，她从来没有为了保持身材刻意做过什么，难道这样的心态才是关键？"
+      },
+      {
+        "Title": "关于希诺宁…",
+        "Context": "希诺宁是我在回声之子第一个认识的朋友。我设计健身器材的时候总有很多新点子，而她是少有的能实现这些点子的工匠之一，且成品的质量绝对有保证。不过，我提出的交付日期总会被她延后，或许这就是「慢工出细活」？"
+      },
+      {
+        "Title": "关于玛薇卡…",
+        "Context": "或许是因为小时候的经历，我一贯不喜欢依赖别人，或者成为被保护的对象。但玛薇卡在场的话，即便是我也会安心地站在她的身后。我并非是被她作为领导者的威严所慑服，恰恰相反，我一直把她当作一位贴心朋友。而跟随她的感觉，更像是一种身处黑暗中追随火光的本能。"
+      },
+      {
+        "Title": "关于卡齐娜…",
+        "Context": "卡齐娜是一个很特殊的学员，主要就特殊在参加培训的次数最多…我一次次看着她紧张地走进竞技场，再失落地走出来。明明是我没有实现宣传广告上的豪言，她却会主动向我道歉。后来，我免除了她的报名费，并承诺她随时可以找我训练。我能看出她的潜力很不错，问题出在其他方面…作为教练，我把能做的都做了，而她的突破将由她亲自实现。"
+      },
+      {
+        "Title": "关于基尼奇…",
+        "Context": "基尼奇会将瓦雷莎果园里的水果精挑细选，替我省了不少精力。不过，他身边那个阿乔总是把每次合作都搅得很不愉快，那张嘴真是缺少严厉的管教。我曾建议基尼奇安排这个阿乔参加我的培训班，本教练肯定能让它学会礼貌。不过基尼奇还是拒绝了，他似乎自有教训阿乔的方法。"
+      },
+      {
+        "Title": "关于瓦雷莎·态度",
+        "Context": "我最最特别，也是最让我为之自豪的弟子瓦雷莎，希望她没有给你添麻烦…不，不是指战斗上拖后腿，也不是日常生活中冒冒失失之类的事，而是她的松弛感…如果不是我反复叮嘱，强调她一定要抓紧时间，她每次出门都悠悠哉哉，好像是郊游，走着走着，注意力就被各种食物吸引走了，一次两次没关系，严肃的冒险中总这样可不好，我已经让她自省了！另外，她的食量构成了巨大的负担，毕竟我们不可能背着半只突角龙那么大的…装满食物的背包，去翻山越岭吧？"
+      },
+      {
+        "Title": "关于瓦雷莎·节制",
+        "Context": "目前让我烦恼的是，瓦雷莎对力量的控制太过粗放。她的身体似乎长期处于一种高消耗的状态，白白浪费了很多能量，她那惊人的胃口大概就来源于此。我希望她更加了解自己的情况，合理分配力气，这样她也不用总是大吃特吃了…看她吃得满足，我是替她开心，但还是要提醒她注意饮食健康，不能暴饮暴食，不能营养失衡，不能摄入过量的油脂和糖分！要不然，吃出什么病来，麻烦可就大了。"
+      },
+      {
+        "Title": "想要了解伊安珊·其一",
+        "Context": "你听说过「归火圣夜巡礼优胜者培训班」吗？是我办的。之前我连续好几次获得优胜者资格，很多人都以为我拥有某种常人无法奢望的神秘力量，毕竟一个小个子打穿竞技场的事可不常见。但我想要告诉他们，我的力量并不神秘，而是规划与坚持的结果。为了证明这一点，我就办了这个培训班。不过让我奇怪的是，这个培训班最初是免费的，但被好多人举报诈骗，后来我听玛薇卡的建议设置了报名费，报名的人反倒络绎不绝…"
+      },
+      {
+        "Title": "想要了解伊安珊·其二",
+        "Context": "正常的杠铃对我来说还是太大了，举起来的时候遮挡视线，甚至看不到附近的人，差点伤到一名学员。所以我找希诺宁专门定制了一副杠铃，这副杠铃用的材料十分特殊，分量很足，但个头不大，操练起来很方便。唯一的缺点可能就是迷惑性很大，很容易让别人误以为这是个玩具模型。有次我把它落在俱乐部，被一帮新人看到。一个人想抓起这副杠铃打闹一下，结果一发力，杠铃纹丝不动，他自己倒闪了腰。其他人不信，然后一个个都闪了腰…那之后，我就一直随身携带这副杠铃了。"
+      },
+      {
+        "Title": "想要了解伊安珊·其三",
+        "Context": "我是在一次养伤期间接触到营养学的，那时大家对于健身期间该怎么吃都没有明确的概念，只觉得多吃肉就行。俱乐部的其他成员一顿就能吃完半张桌子那么大的烤肉，而我的体型可撑不起那么大的胃口，所以就想寻找获取营养更高效的方式。受伤期间无法出门，我就借来介绍食材的织卷，尝试烹饪健身餐。失败了很多次之后，真让我找到了一种合适的配方。借助这种健身餐，我不但很快痊愈，还突破了上次的卧推记录。唯一遗憾的是，虽然我把配方分享了出去，但在健身俱乐部之外的推广情况一直不太好。"
+      },
+      {
+        "Title": "想要了解伊安珊·其四",
+        "Context": "我成为总教练之后，加入俱乐部的新人都要先完成一项挑战——任选一个健身项目与我进行比试。当然，绝大部分挑战者筋疲力竭地倒下后，我还能捡起他们丢下的器材再做十几组标准动作。但这样的考验并不全是为了确立教练的威严，也是为了抚平年轻人内心的浮躁。很多新人学习健身的初衷就是为了炫耀，而我必须告诉他们，健身的本质是一种苦修。"
+      },
+      {
+        "Title": "想要了解伊安珊·其五",
+        "Context": "沃陆之邦有个习俗，就是找突角龙角力，并将这种比赛的胜利视为荣耀。我健身一段时间后，尝试过几次，但都没有成功，一度以为自己的健身策略是错误的。后来突角龙族群的首领突然失控，闯进部族驻地横冲直撞，为了救下一个来不及逃走的女孩，我正面拦下了它。角力过程中，意识到身后有需要保护的人，我竟然爆发出了之前从未察觉到的力量，成功掀翻了它。从那时起我才明白，我的选择是正确的。健身是一个积蓄力量的过程，但把这份力量完全发挥出来所需要的呐喊声，必须来自心灵深处。"
+      },
+      {
+        "Title": "伊安珊的爱好…",
+        "Context": "研究健身方法，设计健身器材，搭配健身餐饮…总的来说，就是健身吧。"
+      },
+      {
+        "Title": "伊安珊的烦恼…",
+        "Context": "个子矮是最让我烦心的事，倒不是我对高大健硕的形象有什么追求，主要是不方便。每次给学员们讲解的时候，我都得摆个凳子站上去。不然的话，站在后面的人根本看不到我的演示动作。"
+      },
+      {
+        "Title": "喜欢的食物…",
+        "Context": "我最喜欢的食物…没什么喜欢不喜欢的，我更关注热量是否超标，营养是否均衡，口味倒在其次。"
+      },
+      {
+        "Title": "讨厌的食物…",
+        "Context": "油炸和过度加工食物…我知道，这世界上可能有一半的「美食」都是这样制作出来的。我并非想指摘它们的口味，只是想强调一下，这类食物的热量控制和营养分配都很糟糕。"
+      },
+      {
+        "Title": "收到赠礼·其一",
+        "Context": "很有眼光嘛，我健身的时候就经常吃这种菜肴，热量适中，营养均衡。我还有改良版的配方，如果你感兴趣的话可以来尝尝。"
+      },
+      {
+        "Title": "收到赠礼·其二",
+        "Context": "哦，谢啦。这确实是大家都喜欢的口味，不过我就算了，热量有些超标…不好意思，严格执行饮食计划是健身流程中不可或缺的一环。"
+      },
+      {
+        "Title": "收到赠礼·其三",
+        "Context": "唔，这种热量炸弹…这已经不是健身不健身的问题了，这是健康不健康的问题！"
+      },
+      {
+        "Title": "生日…",
+        "Context": "生日快乐！要不要尝尝我专门订制的健身蛋糕？没有热量超标的奶油和糖霜，还特别加入了用来补充营养的谷物和蔬菜。人们平常吃的蛋糕可是一种非常危险的东西，稍不留意，脂肪就要随着年龄一起增长咯。"
+      },
+      {
+        "Title": "突破的感受·起",
+        "Context": "健身最重要的是正确的「方法」，是合理的训练梯度和科学的营养搭配。"
+      },
+      {
+        "Title": "突破的感受·承",
+        "Context": "盲信「毅力」的健身者早晚会把自己练到病床上去，就像最初的我那样。事实证明，强行挑战高难项目的结果就是双臂骨折再加上一个月的禁闭修养。「毅力」最合适的用途，就是执行正确的「方法」。"
+      },
+      {
+        "Title": "突破的感受·转",
+        "Context": "现在的我很少像最初那样因为多做一个俯卧撑就欢欣雀跃了，因为我明白，只要坚持下去，变强就是一件理所当然的事。"
+      },
+      {
+        "Title": "突破的感受·合",
+        "Context": "或许这一切就是继承古名所必须经历的试炼，而我也早已领悟到了祖先想传达给我的话：「力量无须与生俱来，力量无法不劳而获。」"
+      },
+      { "Title": "元素战技·其一", "Context": "风驰电掣！" },
+      { "Title": "元素战技·其二", "Context": "更快，更强！" },
+      { "Title": "元素战技·其三", "Context": "调整呼吸！" },
+      { "Title": "元素爆发·其一", "Context": "动起来！" },
+      { "Title": "元素爆发·其二", "Context": "计时开始！" },
+      { "Title": "元素爆发·其三", "Context": "听我的口号！" },
+      { "Title": "打开宝箱·其一", "Context": "天道酬勤。" },
+      { "Title": "打开宝箱·其二", "Context": "我会把这东西摆到山尖上，这样攀岩的时候更有目标感。" },
+      { "Title": "打开宝箱·其三", "Context": "要不整箱扛走？" },
+      { "Title": "生命值低·其一", "Context": "还行，再咬咬牙！" },
+      { "Title": "生命值低·其二", "Context": "快到极限了吗？" },
+      { "Title": "生命值低·其三", "Context": "得留意下肌肉的承受能力了…" },
+      { "Title": "同伴生命值低·其一", "Context": "悠着点！" },
+      { "Title": "同伴生命值低·其二", "Context": "小心肌肉拉伤！" },
+      { "Title": "倒下·其一", "Context": "又得去找医生了…" },
+      { "Title": "倒下·其二", "Context": "这下练出事了…" },
+      { "Title": "倒下·其三", "Context": "这次要在床上躺多久？" },
+      { "Title": "普通受击·其一", "Context": "凑活。" },
+      { "Title": "重受击·其一", "Context": "这还像回事…" },
+      { "Title": "加入队伍·其一", "Context": "热身完毕！" },
+      { "Title": "加入队伍·其二", "Context": "有谁需要指导？" },
+      { "Title": "加入队伍·其三", "Context": "开练！" }
+    ],
+    "stories": [
+      {
+        "Title": "角色详细",
+        "Context": "纳塔人谈起沃陆之邦这个部族，总会首先想起他们的健身习俗，脑海中浮现出属于健身者的种种形象，或是高大的体型，或是壮硕的肌肉…\n然而，许多初到沃陆之邦的外族人都会很快了解到一个令他们震惊的事实——沃陆之邦健身界当下的掌舵人与上述画面毫无关联，她只有孩童般的身高，比起沃陆之邦的绝大部分族民，她的四肢就像是纤细的枝条。\n这位看上去弱不禁风的少女，就是沃陆之邦健身俱乐部的总教练伊安珊。\n起初，大家都以为这只是一个用来捉弄外族人的玩笑。\n后来，真的有人看到伊安珊带队拉练。身后的学员全部累倒之后，她仍然健步如飞。\n最终，伊安珊在全纳塔人的见证下，创造了归火圣夜巡礼的全胜记录。\n然后到今天，伊安珊已经成为全纳塔公认的金牌导师。她甚至还开设了一个培训班，专门传授归火圣夜巡礼的优胜技巧。\n人们惊叹于伊安珊的强大，也好奇她的这份强大来自何处。有种传言说伊安珊的血统很特殊，拥有这种血统的人无法长高，但可以获得远超常人的力量。\n不过，当某些好奇的外族人尝试向沃陆之邦的族民确认这种说法时，却会遭到对方的冷眼相待。\n「哼，欠练了。」\n沃陆之邦的族民往往会丢下这样一句话，然后继续在健身活动中挥洒汗水，留下一众疑惑的外族人，思考着自己到底在什么地方冒犯到了他们。\n于是又有新的传言开始在人群中流动，大家开始以为伊安珊掌握的力量是沃陆之邦的秘密武器，因此他们才对外人讳莫如深。\n然而就在这样的传言流传开来时，伊安珊主动找上了这些好奇的人。\n「我的力量你也可以拥有哦，来参加我的培训班吧，包教包会！」\n震惊之余，大多数人还是拒绝了伊安珊的邀请。或许是因为不相信伊安珊的承诺，又或许是因为了解伊安珊的培训课程有多么恐怖。\n之后，关于伊安珊的种种传言依旧层出不穷。在训练之余的休息时间，她偶尔也会对此发表感叹。\n「都说了是健身的成果，怎么就不信呢？」"
+      },
+      {
+        "Title": "角色故事1",
+        "Context": "从懂事起，伊安珊就明白自己今生都无法长得更高了。\n她来自一个流淌着「沃贡贡之血」的家族，她的祖辈直到去世都只有孩童般的身高。\n沃陆之邦是全纳塔最强壮的部族，而伊安珊的家族完全是部族内的一个异类。伊安珊的祖辈也曾渴望过变得和其他族民一样强壮，然而他们的血统否定了这种可能，同时也没有提供任何能够被称为增益的特征。比起这种血统，童话故事里那些诱使冒险者牺牲珍视之物换取力量的巫师都显得公正了许多。\n好在沃陆之邦的族民大多古道热肠，他们接纳了伊安珊的家族后并没有表现出任何歧视，而是将其视为需要保护的对象。每当战事发生，伊安珊的家族都会被安排到后方，负责一些治伤和煮饭的杂活。他们不像部族战士那样勇武和机敏，而是在日复一日的日常工作中养成了按部就班，严格按照计划办事的习惯。\n伊安珊从记事起就跟着父母一起忙碌，很快就成为一名得力的助手。但是比起勤劳稳重的父母，伊安珊身上多了一份指向战场的不安定感。忙碌之余，她总会跑到战场附近，向战士归来的方向张望。这种张望一直没有什么结果，富有责任心的部族战士们很快就会把她送回到父母身边。她似乎也注定要像父母那样，延续「沃贡贡之血」为这个家族圈定好的生活。\n直到某一天，一场令整个部族都没有想到的变故降临在伊安珊身上——名为「力量」的古名选择了她作为继承人。\n族民们和伊安珊本人一样惊讶，然而古名上的铭文十分清晰，容不得半点质疑。伊安珊随之成为了整个部族的焦点人物，只是聚集在她身上的目光大多不太友善。「力量」这个古名对于沃陆之邦来说意义重大，它是无上的荣耀，也是沉重的责任。无论从心态出发还是从身高出发，大多数族民都俯视着伊安珊，既质疑她是否拥有获得荣耀的资格，也担心她是否拥有承担责任的能力。\n而最为此事劳心的，还得是伊安珊的父母。这对父母辛劳勤恳，但也循规蹈矩，他们深知自己无法在这件事上提供有用的建议，只能在女儿面前长久地保持沉默。但是漫长的沉默过后，父母几乎同时发言，表示愿意无条件支持伊安珊的决定。\n于是数天之后，伊安珊来到时任部族首领兼健身俱乐部总教练的阿卡特跟前。\n「教练，我想健身！」"
+      },
+      {
+        "Title": "角色故事2",
+        "Context": "在沃陆之邦，健身是在神圣性上仅次于归火圣夜巡礼的活动。沃陆之邦的族民们提倡所有人都参加健身，并以自己的健身成果为傲。\n不过，当伊安珊也出现在健身场地时，其他人还是或多或少地出现了「这个孩子应该尽早退出」的想法。毕竟在当时的大家看来，健身对于伊安珊来说已经不是合不合适的问题，而是安不安全的问题，毕竟大家常用的某些健身器材比伊安珊整个人都要重。\n于是大家将新手入门用的器材摆到伊安珊跟前，并声称这是加入俱乐部的门槛，旨在将其作为一种劝退的手段。伊安珊没有退缩，她选中了一副小号的杠铃，使出全身的力气向它发起了挑战。然而杠铃刚尚未离开地面时，周围的人就听见了几声骨骼的脆响，急忙出手制止了伊安珊…\n伊安珊能够重新下床走路已经是半个月之后，这还要得益于她的父亲是个治伤好手，让她免于因为严重的骨伤而卧床数月之久。听说伊安珊伤势好转后，阿卡特前来慰问。这段时间，阿卡特因为当初没有劝阻伊安珊的事而受到了很多人的指责，这次前来恐怕是要亲自劝退她。因此，面对这次来访，伊安珊十分不安。\n「所以，健身是有门槛的？」\n「但健身不是一种资格，健身是一种选择。」\n阿卡特抚平了伊安珊的不安，开始讲述俱乐部创建者的故事。\n那位名为梅兹卡拉的勇士也担任过沃陆之邦的部族首领，他的体格十分强壮，是古今罕见的大力士。在他生活的年代，沃陆之邦自创建起刚刚经历了几代人的变迁，尚未在圣山下站稳脚跟。他依靠自身强壮的体格抗击猛兽和岩浆，日夜守护着族民们，宛若部族的守护神。然而彼时的圣山忽然进入了一段活跃期，随着岩浆活动的日益加剧，强壮如梅兹卡拉也开始感受到疲惫。面对越来越多祈求庇护的族民，他明白自己独木难支，但他并没有逃避。\n「那就让你们成为我，你们都可以选择成为我！」\n他将族民们当成了自己的学生，将自己的锻炼方法倾囊相授，带领他们一起面对部族的威胁。在一次次的历练中，这些族民渐渐发现，他们真的也可以拥有保护家乡的力量。等到梅兹卡拉垂垂老矣，无力再对抗岁月时，他的许多学生早已超越了他，成为了沃陆之邦新的城墙。最终，沃陆之邦站稳了脚跟，在圣山之下安居乐业。\n「那就是健身俱乐部的源起，而我刚刚跟你说的话，就是梅兹卡拉留给后人的告诫。如果你要说健身有门槛，他首先就不会答应吧？」\n「伊安珊，你连最基础的健身器材都无法使用的事我已经听说了。但这不代表你没有健身的资格，而是代表没有人能向你提供指导，因为你的身体条件已经脱离了绝大多数健身者的经验范畴。因此，我有义务向你说明，健身对你来说注定是一个非常艰巨的选择。」\n「不过，最终还是要由你来做选择。」\n阿卡特离开后，伊安珊又沉寂了很多天，就像最初得知自己的古名时那样。最终，伊安珊再次来到阿卡特跟前。\n「教练，我想健身！」\n于是伊安珊重新回到健身场地，俱乐部的成员没有再次进行之前那种劝退仪式，而是将伊安珊带领到一片新开辟的场地。这里远离大个子们挥舞健身器材的危险区域，还特地安置了单独的休息设施，明显是专门为伊安珊个人准备的健身场所。\n这一次，大家看向她的眼神中除了担忧之外还多出了些许敬佩——他们都知道，这个女孩儿主动选择了踏上一条孤单的修行之路。"
+      },
+      {
+        "Title": "角色故事3",
+        "Context": "最初加入俱乐部的那段日子，伊安珊通过健身变强的决心从未动摇过，然而每隔几天就到来的伤痛并没有因为她的主观意志而减轻分毫。\n彼时的健身俱乐部崇尚一种比拼毅力的健身模式，大多数成员都将肌肉的酸痛感作为衡量健身成果的标准，有不少成员还喜欢挑战自己的极限以寻求突破。\n而伊安珊的绝大部分伤病都来源于对这种健身方式的模仿。\n某一次养伤期间，伊安珊拄着拐路过族人聚集的健身场所，望着那里的器材发呆。她忽然发现，自己看向这些器材时已经感受不到挑战带来的兴奋和悸动，只能感受到不久前脱臼的关节又在隐隐作痛。\n在那段时间，伊安珊第一次产生了健身不适合她的想法。\n在伊安珊闭门不出一个星期后，母亲看出了伊安珊的犹豫。比较心软的她看不得伊安珊经受这样的折磨，于是尝试鼓舞自己的女儿。\n「我们跟其他人自然是没法比的，但我们也有自己擅长的事，比如…比如治伤和煮饭…」\n母亲最终还是沉默了，俱乐部的那些前辈都无法为伊安珊提供有效的指导，又何况是她这位从来没有接触过健身的母亲。但令母亲意外的是，伊安珊那沉寂许久的眼眸中重新燃起了某种火光。\n「对啊，我们擅长治伤和煮饭！」\n一个月的修养结束后，伊安珊再次回到健身场地。这次她既没有前去参观前辈们互秀肌肉的表演，也没有继续与那些健身器材较劲，而是架起一口锅，运动、记录、煮饭。\n她似乎十分悠闲，每天只是按部就班地完成固定的几套动作。她又似乎十分忙碌，几乎每天的每个小时都有安排。她对自己提出的要求似乎十分宽松，很少像其他人那样挑战自己的极限。她对自己的要求又似乎十分严苛，几乎从不缺席每天的健身，并且三餐都亲自准备，还严格控制食材。\n这一连数周的怪异举动最终引起了大家的注意，有小道消息说伊安珊已经找到了能够突破血统的健身方式，于是就像围观其他人展示创意动作那样，大家也前来围观伊安珊的「创意」——\n「简单来说，就是规划运动时间，控制热量摄入，补充营养物质。」\n一番交流后，被好奇心驱使而来的众人又失望地散开。伊安珊所描述的一切在他们看来根本没有任何难度，他们不明白这样的方法如何能帮助伊安珊突破自我。\n不过众人没有留意到的是，自从改变健身方法后，伊安珊的各项指标确实都有所提升，从多做五个俯卧撑，到多跑五百米。只是这些数据在其他成员眼中是如此微小，根本吸引不了他们的目光。只有伊安珊本人能真切地感受到，这些提升坚实且稳定，就像百炼钢表面上那些细密的花纹，隐隐指向了某种质变的可能。\n而彼时的伊安珊尚不知道她已经创立了纳塔的营养学，只是觉得终于找到了适合自己的健身方法。"
+      },
+      {
+        "Title": "角色故事4",
+        "Context": "伊安珊与龙伙伴的相识源自沃陆之邦的一个习俗——那里的族民喜欢与突角龙角力，并将获得这种比试的胜利视为一种荣耀。伊安珊加入俱乐部一段时间后，也开始尝试这种比试。然而彼时的她即便使出全身的力气，也无法撼动任何一头成年突角龙。那段时间，伊安珊因为健身器材受伤的事经常发生，大家都担心这种比试对于伊安珊来说也会是一种危险。于是在前辈的安排下，伊安珊结识了伊莫拉。当时的伊莫拉刚出生不久，但已经不幸地失去了双亲，被族民们收养。它作为一头幼年突角龙，对于伊安珊来说自然是一个更合适的对手。\n不过，一个缺少呵护的孩子和一个被过度呵护的孩子之间似乎天然存在着某种竞争，明确互为彼此的对手后，双方的求胜心更上一层。第一次对决，伊安珊和伊莫拉便都使出全力，一个懊悔于没有保护爸爸妈妈的力量，一个渴求着拥有保护爸爸妈妈的力量。最后双双累倒在地，不分胜负。\n从那时起，这场竞争便正式开始了。\n伊安珊找到适合自己的健身方法后，虽然进步缓慢，但也终于突破了自我。那段时间，伊安珊是跑在前面的那一个。\n而伊莫拉似乎迅速走出了失去双亲的阴影，它飞速成长着，直到某一天，反将伊安珊甩到身后。\n伊安珊的进步逐渐获得了整个部族的瞩目，她甚至在某次突发事件中爆发力量战胜了突角龙族群的首领，最终接任阿卡特成为了健身俱乐部的总教练。\n伊莫拉的成长也愈发超出大家的预期，它的体型很早就冠绝了整个族群，并最终成为了新的首领。\n而这场竞争仍在继续，双方似乎都极力想冲得更靠前一些，好把对方甩在身后。\n只是在比拼速度和力量之余，伊莫拉开始允许伊安珊骑到自己背上，载着她一起去眺望远处的原野…\n抗击深渊入侵的战争结束后，伊安珊在学员的带领下来到埋葬伊莫拉的地方。对于没能让伊安珊见到伊莫拉最后一面这件事，学员们都很自责。\n「当时有那么多敌人，冲过去的话肯定回不来，但它还是…如果教练在的话，肯定能拦住它…」\n「不，如果我在的话，我会一起冲过去，还要争取比它更快。」\n伊安珊献上了祭奠故友的花朵，同时说出了那个她和伊莫拉彼此都心照不宣，却从未向他人提起的竞争规则——\n「必须冲得更靠前一些，才能把想保护的人护在身后啊。」"
+      },
+      {
+        "Title": "角色故事5",
+        "Context": "随着归火圣夜巡礼的号角声再次响起，伊安珊又一次来到圣火竞技场中央，创造了新的连胜记录。\n不再有人质疑她身为总教练的资格，也不再有人敢于嘲笑她那矮小的体格。大家的惊叹于伊安珊的成绩，但这些惊叹并没有让伊安珊动摇，她继续更新着自己的健身计划表和营养食谱，没有停下践行理念的脚步。\n然而令伊安珊感到意外的是，大家忽然开始讨论她的血统，羡慕她的「天赋」。其他部族的人大多并不了解过伊安珊的家族，也没有亲眼见证过伊安珊所付出的努力。他们震惊于伊安珊展示出的力量，纷纷开始了自己的猜测。在众人的传言中，「沃贡贡之血」成为了一种天生神力的标志，伊安珊以永远长不高为代价，获得了常人无法企及的力量。\n于是伊安珊收获了更多的惊叹，曾经的输给伊安珊的对手们也纷纷接受了「天赋」上的差距，一边加入对伊安珊的赞叹，一边也为自己的失败找到了理由。\n只有伊安珊沉默着，这些原本并不让她在意的惊叹开始锁紧她的眉头。\n不久之后，沃陆之邦健身俱乐部的学员忽然开始在圣火竞技场分发传单。刚刚收到传单的人还以为这是某种部族活动的邀请函，然后就被传单上内容惊掉了下巴——\n「归火圣夜巡礼优胜者培训班正式开始招收学员，不限部族，不限性别，不限年龄，你也可以成为连胜记录的保持者！」\n多次确认这些传单的发布者就是伊安珊本人后，大家由惊讶变得疑惑。「沃贡贡之血」的传闻早已深入人心，大家都不明白什么样的培训才能让他们跨越血统带来的差距，只能猜测这是伊安珊开的一个玩笑。\n然而伊安珊否认了所有猜测，还亲自参加了分发传单的工作。一些好奇的人悄悄前往了传单给出的报名地点，发现伊安珊甚至已经把健身俱乐部的训练场由部族内部远远地迁到了更靠近圣火竞技场的地方，似乎已经做好准备要招收其他部族的学员。\n大多数人都持观望态度，但也有少数人抱着试一试的态度来到了伊安珊的训练场。这些人大多受困于自己的弱小，渴望着变得更强，一如当初的伊安珊那样。但不同于伊安珊的的是，这些人因为自身的迷茫而犹豫不前。而伊安珊的训导则为他们提供了前进的动力，也为他们指明了前进的方向。\n「是的，天赋很重要，它决定了我们前进的速度，连我也无法否认这一点——但它无法决定我们能走多远。」\n经过一年的沉寂后，真的如同伊安珊最初宣传的那样，这些人纷纷成为了新一届归火圣夜巡礼中的佼佼者。在伊安珊的努力之下，许多学员都在她这里取得了突破，其中不乏一些青出于蓝而胜于蓝的后辈。\n然而即便如此，持怀疑态度的人还是占了绝大多数。但伊安珊并不担心，因为她看到前来报名的学员也越来越多。在第二届培训班即将开始招生时，伊安珊在传单上添了一句话：\n「力量无须与生俱来，力量无法不劳而获。」\n伊安珊明白，她在突破自我时便已完成了对古名的践行，但她想走得更远一些，而这句话正是她想为「力量」这个古名添加的新注解。终有一天她会向整个纳塔证明自己的理念，就像她折服整个沃陆之邦时那样。"
+      },
+      {
+        "Title": "阿雷",
+        "Context": "在很久之前，那枚覆盖着花纹的颅骨就成为了伊安珊的标志性配饰。据说这枚颅骨来自一头不幸夭折的幼年突角龙，伊安珊留下这枚颅骨，或许就是为了纪念这个可怜的孩子。\n直到有一天，几名学员远远地看到了正在独自训练的伊安珊，惊讶地发现那枚颅骨正在发出突角龙特有的叫声，似乎是在帮伊安珊喊号子。\n「所以，它是还没死吗？」\n「哦，之前一直没机会向你们介绍它。它叫阿雷，算是我的训练助手吧。只是它太怕生了，有其他人在的时候总是不说话。」\n面对惊讶的学员们，伊安珊第一次讲起这枚颅骨的来历。某一天，伊安珊的龙伙伴伊莫拉突然来向她求助。原来伊莫拉发现一头幼年突角龙的灵魂一直在它的遗骨附近徘徊，迟迟不肯前往夜神之国。伊安珊找到了烟谜主的大萨满茜特菈莉，委托她使用一种与制作星魔类似的法术处理了这头突角龙的遗骨，这才将它的灵魂留在它的颅骨中，免于在长久的徘徊中迷失和消散。\n说完这一切，伊安珊轻轻抚摸那枚颅骨，仿佛在安抚着什么。\n「在我健身的时候，它总是会为我加油打气。它肯定也很想成为和同伴一样帅气、强壮的成年突角龙吧，所以才不肯离去呢。」"
+      },
+      {
+        "Title": "神之眼",
+        "Context": "在伊安珊尚未成为总教练之前，俱乐部的训练场中央一直摆放着一副沉重的杠铃。\n据说它是健身俱乐部的创建者留下的，只有在健身造诣上登峰造极的人才能把它举起来，此举也将象征着他成为纳塔健身界新的领路人。因此，这副杠铃是所有健身者共同的挑战对象，只是从来没有人成功过。\n于是，每当有新的挑战者来到这副杠铃跟前，附近的人都会前来围观，并为本次的挑战结果争论、打赌。在沃陆之邦的族人看来，举起这副杠铃是对健身成果的终极证明。大家都想成为证明自己的那个人，大家也都好奇那个人最终会是谁。\n直到某一天，伊安珊也来到这副杠铃附近，看着它思考。而附近的人看出她眼中的某种渴望后，纷纷加以劝阻。\n「你知道举起这副杠铃需要什么样的力量吗？」\n旁人的话语中有质疑，但更多的还是关切。大家都知道，如果伊安珊向这副杠铃发起挑战的话，她受的伤恐怕要比刚开始健身时还严重。\n「就用『一千天的力量』把它举起来好了！」\n而伊安珊则如此回答。\n众人面面相觑，他们并不了解这「一千天的力量」意味着什么，只是觉得伊安珊又开始钻研某种古怪的健身方法。在确认伊安珊并没有做出任何可能伤害到自己的举动后，众人再次散去。然而没有人留意到，伊安珊眼中闪烁的不再是某种渴望，而是某种决心。\n第一个一百天，伊安珊一如往常那样，按照她自行设计的一套动作反复锻炼。这种「健身」是如此平淡、无聊，吸引不了任何目光。但她每天都坚持如此，就像她的祖辈一板一眼地劳作时那样。而当初劝阻她的那些人早就忘掉了她的豪言，俱乐部的一切都恢复了以往的样子，仿佛什么都没有改变。\n第三个一百天，伊安珊的健身动作终于有了一些变化，或许是因为强度的上升，伊安珊又开始被伤病困扰，但她总是能很快恢复。这或许是因为她从父母那里学来的治伤手段，又或许是因为她每天亲自为自己烹饪的古怪料理。那套枯燥的健身动作仍被伊安珊坚持着，比起那些刚有些成果就拿去向旁人展示的俱乐部成员，她就像是一面沉默的磨盘。在众人目光没有触及的角落里，她缓慢而又重复地转动着，日复一日，仿佛想碾碎某些东西。\n第五个一百天，俱乐部的成员一如往常那样互相秀着肌肉，顺便谈论着某些成员因为一时松懈而不得不重新练起的事。这种事在俱乐部时常发生，不过俱乐部的绝大多数成员都熟练掌握着「一个月腹肌速成」之类的绝技，所以短时间的身材走样并不会让多少人在意。\n第七个一百天，某些心思细腻的人察觉到了某种变化，却无法言明这种变化来自何处，直到某位离开部族一年多的成员重新归来后，大家才从他的惊呼声中发现了那个令所有人震惊的事实——伊安珊已经开始和其他成员使用相同分量的健身器材。这种变化在五百天的时间里悄然进行着，缓慢却又坚实，以至于旁人难以察觉。\n第九个一百天，终于有人发现了伊安珊为自己制定的健身计划，并重新想起了她在很久之前给出的那个回答。而这一次，最初本能想要劝阻伊安珊的那些人却都犹豫起来。伊安珊这面磨盘沉默地转动了很久，似乎早已把他们心里的某些东西碾碎了。\n最后一个一百天，专属于伊安珊的那片健身场地成为了众人视线的聚焦之处。不知从何时起，伊安珊成为了向大家展示健身成果的那个人。众人聚集在她的周围，赞叹着不久前她独自面对突角龙首领的事迹。而她自己似乎并不在乎这一切，只是继续执行着她在无人关注时就制定好的那份计划，按部就班，不急也不慢。\n第一千天终于到来，时隔将近三年后，伊安珊终于再次站到那副杠铃跟前。部族里的健身者全都聚集到了伊安珊周围，兴奋地等待见证她创造的奇迹。不同以往的是，这次没有人争论挑战者是否会成功——见证了之前的九百九十九天之后，在他们看来，这个「奇迹」已经成为了伊安珊自然而然就能办到的事。\n伊安珊走到那副杠铃跟前，意外地发现，一枚闪亮的神之眼不知何时被挂在了杠铃的横杆上。\n伊安珊明白，这意味着她正在直面自己的「愿望」。然而在她看来，她面对的只是一个写在健身计划表上的「目标」。不过她没有疑惑太久，或许对于她来说，这两者并没有本质上的区别。\n伊安珊摘下神之眼，而后，就像这之前每天按计划健身时那样，把这副杠铃举了起来。"
+      }
+    ]
+  },
+  {
+    "id": 10000111,
+    "name": "瓦雷莎",
+    "title": "悠暇豪劲",
+    "description": "悠悠哉哉，无比松弛的「沃陆之邦」战士兼果园主，喜欢充满力量的英雄，还有巨量美食！",
+    "area": "纳塔",
+    "brief": {
+      "camp": "特特奥坎",
+      "constellation": "斗士假面座",
+      "birth": "11月15日",
+      "cv": { "cn": "乔苏", "jp": "M・A・O", "en": "简·杰克逊", "kr": "金叡临" }
+    },
+    "star": 5,
+    "element": "雷",
+    "weapon": "法器",
+    "materials": [
+      { "id": 104144, "name": "最胜紫晶", "star": 5 },
+      { "id": 113072, "name": "龙像的无智核", "star": 4 },
+      { "id": 101254, "name": "云岩裂叶", "star": 0 },
+      { "id": 112103, "name": "横行霸者的利齿", "star": 3 },
+      { "id": 104355, "name": "「纷争」的哲学", "star": 4 },
+      { "id": 113070, "name": "蚀灭的鳞羽", "star": 5 }
+    ],
+    "skills": [
+      {
+        "GroupId": 11131,
+        "Id": 11111,
+        "Name": "普通攻击·角力搏摔",
+        "Description": "<color=#FFD780FF>普通攻击</color>\n要…要努力像厉害的摔角冠军那样战斗！进行至多三段的搏击，造成<color=#FFACFFFF>雷元素伤害</color>。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，以头槌向前撞击敌人，造成具有夜魂性质的<color=#FFACFFFF>雷元素伤害</color>，并借势腾跃而起。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成具有夜魂性质的<color=#FFACFFFF>雷元素范围伤害</color>；若此时瓦雷莎处于战斗状态，或本次坠地冲击命中了敌人，则瓦雷莎获得25点夜魂值；通过这种方式使夜魂值达到上限时，瓦雷莎将进入「炽热激情」状态。\n\n<color=#FFD780FF>炽热激情</color>\n在这种状态下，瓦雷莎的普通攻击、重击和下落攻击将得到对应的强化：\n\n<color=#FFD780FF>普通攻击</color>\n如同明星摔角冠军那样无畏战斗！进行至多三段的猛烈搏击，造成伤害更高的<color=#FFACFFFF>雷元素伤害</color>。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，猛烈前冲撞击敌人，造成伤害更高的、具有夜魂性质的<color=#FFACFFFF>雷元素伤害</color>，并借势腾跃而起。\n\n<color=#FFD780FF>下落攻击</color>\n消耗全部夜魂值，从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成伤害更高的、具有夜魂性质的<color=#FFACFFFF>雷元素范围伤害</color>。",
+        "Icon": "Skill_A_Catalyst_MD"
+      },
+      {
+        "GroupId": 11132,
+        "Id": 11112,
+        "Name": "夜虹逐跃",
+        "Description": "以迅捷如电、豪烈如雷的步法，展现摔角的真意。瓦雷莎向前方突进一段距离，对路径上的敌人造成具有夜魂性质的<color=#FFACFFFF>雷元素伤害</color>。\n施放后，瓦雷莎将获得20点夜魂值，并获得「逐击」效果：持续期间，瓦雷莎的抗打断能力提高，点按普通攻击时，瓦雷莎将快速进行重击，并且该次重击不会消耗体力；「逐击」效果将在进行重击后消除。\n依据点按、长按，以不同的方式展现摔角的风格。\n\n<color=#FFD780FF>点按</color>\n向前方迅速突进一段距离。 \n\n<color=#FFD780FF>长按</color>\n瓦雷莎进入夜魂加持状态，并切换至「突驰烈进」模式。\n\n<color=#FFD780FF>突驰烈进</color>\n持续消耗夜魂值。在这种状态下，瓦雷莎的移动速度与抗打断能力提高，并且可以利用地形差进行飞跃，或额外消耗夜魂值在水面与液态燃素上移动，并免疫液态燃素的伤害。\n\n<color=#FFD780FF>夜魂加持·瓦雷莎</color>\n夜魂值耗尽时，瓦雷莎的夜魂加持将会结束。瓦雷莎在突驰烈进模式或炽热激情状态下时，将始终视为处于夜魂加持状态。\n\n拥有2次可使用次数。当瓦雷莎进入炽热激情状态时，将额外获得一次短按施放的元素战技可用次数，并提高元素战技造成的伤害。\n\n<color=#FFD780FF>炽热激情</color>\n·不处于炽热激情状态下时，瓦雷莎可以通过下落攻击恢复夜魂值；通过这种方式使夜魂值达到上限时，或是施放元素爆发<color=#FFD780FF>闪烈降临！</color>时，瓦雷莎将进入炽热激情状态。\n·在炽热激情状态下，瓦雷莎的普通攻击、元素战技和元素爆发会分别得到对应的强化，并能在进行下落攻击后的短暂时间内，施放特殊的元素爆发。\n·炽热激情状态至多持续15秒，并将在消耗夜魂值后、或是脱离战斗状态一段时间后结束。\n\n<i>「现在，我便是我的英雄。」</i>",
+        "Icon": "Skill_S_Varesa_01"
+      },
+      {
+        "GroupId": 11139,
+        "Id": 11115,
+        "Name": "闪烈降临！",
+        "Description": "如同面向孩子们的织卷中描绘的正义英雄那般，腾跃至高空，并借助下落的冲击力使出强力的飞踢，对敌人造成具有夜魂性质的<color=#FFACFFFF>雷元素范围伤害</color>。\n施放后，瓦雷莎将恢复夜魂值至上限，并进入炽热激情状态。\n\n在炽热激情状态下，瓦雷莎的元素爆发将转为对敌人造成伤害更高的、具有夜魂性质的<color=#FFACFFFF>雷元素范围伤害</color>。\n\n此外，瓦雷莎在炽热激情状态下进行下落攻击后，将在短暂时间内进入「极限驱动」状态。\n\n<color=#FFD780FF>极限驱动</color>\n提高瓦雷莎的抗打断能力。在这种状态下，瓦雷莎将能够无视元素爆发的冷却时间，消耗更少的元素能量，施放特殊的元素爆发「闪烈降临·大火山崩落」：进行格外强力的下落攻击·大火山狂雷怒卷，在落地时造成具有夜魂性质的<color=#FFACFFFF>雷元素范围伤害</color>，并退出极限驱动状态。该伤害视为下落攻击伤害。\n施放元素战技后，将会退出极限驱动状态。\n\n<i>其实瓦雷莎一开始给这一招起的名字是「最终超必杀绝技·闪电空烈正义英雄降临究极无敌音速爆裂飞踢」，只是这个名字实在是太长了，而她就算戴上面具，也不太好意思在大庭广众之下大声喊出这个名字，所以最后还是选用了现在的叫法。</i>",
+        "Icon": "Skill_E_Varesa_01"
+      },
+      {
+        "GroupId": 11121,
+        "Id": 1112101,
+        "Name": "连势，三重腾跃！",
+        "Description": "施放元素战技<color=#FFD780FF>夜虹逐跃</color>后，瓦雷莎获得「虹色坠击」，持续5秒。\n持续期间，瓦雷莎进行下落攻击时，坠地冲击能额外造成50%攻击力的伤害；若瓦雷莎处于炽热激情状态，则坠地冲击改为能额外造成180%攻击力的伤害。\n\n「虹色坠击」效果将在坠地冲击命中敌人或持续时间结束时解除。",
+        "Icon": "UI_Talent_S_Varesa_05"
+      },
+      {
+        "GroupId": 11122,
+        "Id": 1112201,
+        "Name": "英雄，二度归来！",
+        "Description": "队伍中的附近的角色触发「夜魂迸发」时，瓦雷莎的攻击力提升35%，持续12秒。该效果至多叠加两层，每层独立计算持续时间。",
+        "Icon": "UI_Talent_S_Varesa_06"
+      },
+      {
+        "GroupId": 11123,
+        "Id": 1112301,
+        "Name": "夜域赐礼·炬照焚恶",
+        "Description": "在夜魂值耗竭后，瓦雷莎将会转而消耗燃素来维持夜魂加持状态下的「突驰烈进」模式。\n在纳塔存在燃素机制的区域时，能够进行夜魂传递·瓦雷莎。当前场上角色处于冲刺或是特定天赋赋予的移动状态下，或是位于一定高度的空中时，切换瓦雷莎登场时触发：瓦雷莎将进入夜魂加持状态，切换至「突驰烈进」模式，并获得20点夜魂值。自己的队伍每10秒可以触发一次夜魂传递。\n此外，在纳塔存在燃素机制的区域时，瓦雷莎利用地形差进行飞跃时，不会承受坠落伤害。",
+        "Icon": "UI_Talent_S_Varesa_07"
+      },
+      {
+        "GroupId": 11125,
+        "Id": 1112501,
+        "Name": "炽心，一往直前！",
+        "Description": "瓦雷莎的冲刺速度获得提升，不处于战斗状态下时，冲刺消耗的体力也会提升。\n此外，在纳塔存在燃素机制的区域时，队伍中自己的角色使用食物能恢复20点燃素，该效果每10秒至多触发一次，在秘境、征讨领域、深境螺旋中无效。",
+        "Icon": "UI_Talent_S_Varesa_08"
+      }
+    ],
+    "constellation": [
+      {
+        "Id": 1111,
+        "Name": "终始不熄的热诚",
+        "Description": "固有天赋「连势，三重腾跃！」的效果获得强化：\n进行特殊下落攻击·大火山狂雷怒卷时，瓦雷莎也会获得「虹色坠击」，持续5秒；\n「虹色坠击」持续期间，无论瓦雷莎是否处于炽热激情状态，进行下落攻击时，坠地冲击都会改为额外造成180%攻击力的伤害。该效果需要解锁固有天赋「连势，三重腾跃！」。\n\n此外，当瓦雷莎处于夜魂加持状态下的「突驰烈进」模式时，消耗的夜魂值或燃素降低30%。",
+        "Icon": "UI_Talent_S_Varesa_01"
+      },
+      {
+        "Id": 1112,
+        "Name": "逾越天光的极限",
+        "Description": "无论是否处于炽热激情状态，瓦雷莎进行下落攻击后，都会进入极限驱动状态。\n处于极限驱动状态下时，瓦雷莎的抗打断能力还会进一步提升。\n此外，瓦雷莎进行下落攻击时的坠地冲击命中敌人时，会为瓦雷莎恢复11.5点元素能量。",
+        "Icon": "UI_Talent_S_Varesa_02"
+      },
+      {
+        "Id": 1113,
+        "Name": "百折不摧的决意",
+        "Description": "元素爆发<color=#FFD780FF>闪烈降临！</color>的技能等级提高3级。\n至多提升至15级。",
+        "Icon": "UI_Talent_U_Varesa_01"
+      },
+      {
+        "Id": 1114,
+        "Name": "直面前路的勇气",
+        "Description": "施放元素爆发<color=#FFD780FF>闪烈降临！</color>时，依据瓦雷莎的状态，将分别产生对应的强化效果。若瓦雷莎：\n·不处于炽热激情状态或极限驱动状态：瓦雷莎获得「精进勇猛」效果，持续15秒，基于瓦雷莎攻击力的500%，提升瓦雷莎进行下落攻击时坠地冲击造成的伤害，至多通过这种方式提升20000；该效果将在坠地冲击命中敌人或持续时间结束时解除。\n·处于炽热激情状态或极限驱动状态：本次元素爆发<color=#FFD780FF>闪烈降临！</color>造成的伤害提升100%。",
+        "Icon": "UI_Talent_S_Varesa_03"
+      },
+      {
+        "Id": 1115,
+        "Name": "暖风浮漾的心念",
+        "Description": "<color=#FFD780FF>普通攻击·角力搏摔</color>的技能等级提高3级。\n至多提升至15级。",
+        "Icon": "UI_Talent_U_Varesa_02"
+      },
+      {
+        "Id": 1116,
+        "Name": "正义英雄的凯旋",
+        "Description": "进入极限驱动状态时，将为瓦雷莎恢复30点元素能量。\n瓦雷莎的下落攻击与元素爆发<color=#FFD780FF>闪烈降临！</color>的暴击率提升10%，暴击伤害提升100%。\n此外，瓦雷莎长按施放元素战技<color=#FFD780FF>夜虹逐跃</color>时，或是在「突驰烈进」模式下点按施放元素战技时，瓦雷莎将恢复夜魂值至上限。",
+        "Icon": "UI_Talent_S_Varesa_04"
+      }
+    ],
+    "talks": [
+      {
+        "Title": "初次见面…",
+        "Context": "你…你好！我叫瓦雷莎，是「沃陆之邦」的战士，经营着一间果园…如果你喜欢美食，想一车一车买水果，或者…对「英雄们的故事」感兴趣，都可以来找我！我会把所有好吃的、「沃陆之邦」品质最好的水果，还有最最重要的，厉害的英雄传说，全部分享给你！"
+      },
+      {
+        "Title": "闲聊·吃东西",
+        "Context": "爸爸妈妈都说，不管有多忙，饿了的时候都要开开心心吃个饱！所以我喜欢把吃的叠高高，「呼」一下，压在一起。既能吃得心满意足，又不怎么花时间。"
+      },
+      {
+        "Title": "闲聊·力量训练",
+        "Context": "力气这种东西，不经常用出来的话，就会从身体里逃走哦！…要不要和我一起练习？"
+      },
+      {
+        "Title": "闲聊·经营果园",
+        "Context": "种水果要考虑很多事，及时浇水除草，配好矿石粉末，补充土壤养分，保持温度不冷不热..不过最重要的，还是要照顾好水果们的心情，嗯！"
+      },
+      {
+        "Title": "下雨的时候…",
+        "Context": "嘿嘿嘿，果园里的作物应该很开心，龙龙们今天也可以不用忙着浇水了。"
+      },
+      {
+        "Title": "打雷的时候…",
+        "Context": "咿！书里说，菲耶蒂娜可以把落雷撞回天上！我也不能怕…咿！"
+      },
+      { "Title": "下雪的时候…", "Context": "白白的，冷冷的，好少见…可以吃吗？" },
+      { "Title": "阳光很好…", "Context": "好暖和…吃饱了以后，被暖暖的阳光照到，就想…睡个午觉…呼…" },
+      { "Title": "刮大风了…", "Context": "顺着风跑的话，会更快吗…唔，不能想着偷懒！" },
+      {
+        "Title": "早上好…",
+        "Context": "呼啊…早上好…有点想睡个回笼觉…不行！还是先做一百个俯卧撑提提神！"
+      },
+      { "Title": "中午好…", "Context": "中饭时间到，要吃得饱饱的，才能充满力气！" },
+      {
+        "Title": "晚上好…",
+        "Context": "英雄名言：「如果到了晚上，你觉得非常劳累，说明你今天没有消极怠惰，发挥出了身体全部的力量。」所以，有时疲惫也是荣耀之证！"
+      },
+      {
+        "Title": "晚安…",
+        "Context": "唔…虽然没有用掉多少力气，但到了这个点还是困了…你也找个软软的枕头，早点睡吧？用晒干的颗粒果叶片做的枕头最好了…下次我帮你…做一个…呼…"
+      },
+      {
+        "Title": "关于瓦雷莎自己·吃饱和力气",
+        "Context": "按理来说，只要不是光吃不锻炼的大懒虫，吃得越多，力气就该变得越大！但我好像反过来了…我的力气一直很大，代价是怎么吃都吃不饱。开始帮爸爸妈妈打理果园后，我稍微工作几小时，就会饿得头晕眼花，所以我吃东西的量…看起来会有那么一点夸张…"
+      },
+      {
+        "Title": "关于瓦雷莎自己·英雄故事",
+        "Context": "从小时候起，我就爱听英雄们的故事，有他们曾经的奋战，现在的我才能吃到喜欢的饭菜，安安心心睡觉。我们部族有一位名叫「菲耶蒂娜」的英雄，她奔跑的速度很快，还能用飒爽的飞踢撕开山脉！有人说，我认真起来战斗的风格和她有点像，这个评价让我高兴了好久好久…"
+      },
+      {
+        "Title": "关于我们·特别形象",
+        "Context": "我从朋友们那里听说了你以前的事迹！你打败过好多厉害的对手，也有许多特别威风的称号！我觉得，应该请那些擅长涂鸦的人制作一本画册，为你的每个称号设计一套帅气夺目的形象！这样，以后就会有很多孩子读着你的故事长大，被你鼓舞，成为各种各样厉害的人！"
+      },
+      {
+        "Title": "关于我们·并肩前进",
+        "Context": "现在，你是全纳塔的骄傲「杜麦尼」，是这个时代最伟大的英雄！好奇妙…待在你身边，我完全不会紧张，也不会有那种…仰望你的…敬畏的感觉？是因为你也给了我最随和，最亲切的印象吗？我真想待在你身边，在你任何有需要的时候，为你献出全部的力量，就像和古代英雄们并肩前进的战士们一样！"
+      },
+      {
+        "Title": "关于「神之眼」…",
+        "Context": "织卷里的说法是，「神之眼」会在非常重要的时刻，带着命运注定般的光芒，慢慢降临到特别之人的手中，可我完全不记得拿到神之眼的细节了…好像，有天做了个特别可怕的噩梦…梦里我一直在部族的正门和魔物战斗，差点死掉，醒来的时候，神之眼就放在我的额头上了…难道我在梦里被哪一位英雄祝福了吗？"
+      },
+      {
+        "Title": "有什么想要分享…",
+        "Context": "我去过几次「回声之子」后，跟着那里的工匠学会了一点手艺，做出了我的面具！我凭直觉参考了菲耶蒂娜第二次参与「巡夜者战争」时的面具款式，那时的她还没有成为「无畏的山岩」，但她挺过了恐惧，战胜了所有强敌！我相信那个面具会带给我无尽的勇气，后来证明，我的直觉确实没有错！"
+      },
+      {
+        "Title": "感兴趣的见闻…",
+        "Context": "有人说，冒险家协会的成员可以在提瓦特各地旅行，那岂不是…不用考虑水果的腐烂时间，不用赶着做生意，不局限于特定地区，而是能去任何一个国家品尝美食了？唔…我有家里的果园要打理，不能长期出远门，不知道冒险家协会接不接兼职…"
+      },
+      {
+        "Title": "关于伊安珊·老师与长官",
+        "Context": "伊安珊是我的老师，我最尊敬的人！她指引我发掘自己的力量，教了我许多战斗的本领，还引荐我去「沃陆之邦」的巡逻队就职！她在巡逻队里说话也响当当，我经常听她指挥，去需要我的地方战斗！这样看来，她也算是我的长官！"
+      },
+      {
+        "Title": "关于伊安珊·持续训练",
+        "Context": "伊安珊老师说，虽然我能轻松打败一般的魔物，但为了战胜「英雄们齐心协力才能对付的对手」，我还有不少需要精进的地方。我每天都在按照她的计划好好锻炼。只是…控制饮食也是训练的一部分。在伊安珊老师看得到的地方，我就不能随意吃油炸的、或者糖和奶油太多的零食了，它们好像不怎么健康，但味道真的让人忘不掉…实在没办法，我就找了个秘密的野营地，偷偷躲起来吃东西…如果哪天，我们一起去吃了大餐，也请你帮我保密！"
+      },
+      {
+        "Title": "关于玛薇卡…",
+        "Context": "听说，玛薇卡大人训练用的杠铃片，每个都有她那辆「驰轮车」的五倍重！起步就得加上十片…也有人说过，她用两根指头能举起长颈角犀那么大的石头！这么勇猛的力量，放在其他强者的身上，我可能都不好意思在对方面前举起杠铃…不过，玛薇卡大人不一样，她的声音让我安心。她的目光就是对我的激励。我每天都会拿出十二分的力量练习，就算追不上她，也不可以看轻自己，自暴自弃！"
+      },
+      {
+        "Title": "关于玛拉妮…",
+        "Context": "有段时间，伊安珊老师测出我的体重超标了，需要减减肥，而游泳是特别有效的减肥方法。于是我就被安排在「流泉之众」特训。玛拉妮姐姐踩着她的鲨鲨冲浪板，牵一根绳，拽着救生圈里的伊安珊老师，监督我来回游泳，每天要游的距离和三万步的往返跑差不多！唔呃…要不是玛拉妮姐姐悄悄给我塞糖果补充体力，我根本撑不下来，太感谢她了…"
+      },
+      {
+        "Title": "关于基尼奇…",
+        "Context": "我参加「归火圣夜巡礼」的次数不多…其中有一次，我在团体赛里就对上了基尼奇…他的身手好敏捷，总是能躲开我的冲撞，最后我的力气完全用光了，被他一招就敲晕了过去…等我晃晃悠悠地想到该喊队友来帮忙牵制他的时候…圣火早就被拿走了。"
+      },
+      {
+        "Title": "关于希诺宁…",
+        "Context": "我在「回声之子」学手艺的地方叫「穆胡鲁宝石铺」，那里的工匠们经常提起希诺宁女士的名字！不过，我只见过她一两次，没和她说上过话…倒是听过她推荐给店里的音乐！那些音乐很有意思，咚咚锵锵的，适合跑步的时候听，听着听着，比平常多跑几个来回都不累了！"
+      },
+      {
+        "Title": "关于茜特菈莉…",
+        "Context": "我在漫画的读者来信栏里见到过，「黑曜石奶奶」是「烟谜主」现在最厉害的英雄，特别受尊敬！不过，我刚开始不知道「黑曜石奶奶」看起来那么年轻…在酒馆里发现她醉倒了，没带钱，又说着「烟谜主」之类的词，我不知道该怎么办，就先帮她付了钱，扛着她去「烟谜主」找「黑曜石奶奶」。结果路上的人听了我的话，看着我肩上的人，脸色都变得非常恐慌，我才慢慢意识到不对劲…"
+      },
+      {
+        "Title": "关于多莉…",
+        "Context": "那位个子小小，但是钱包深不见底的大老板吗？呜呜…她好会砍价…每次卖她水果，都要被砍掉三四成…甚至更多钱！幸好她买的量很夸张，会把整车整车的水果包下来，还会给我摸她的牦牦驮兽。好绒好绒，好乖好乖。"
+      },
+      {
+        "Title": "关于爱可菲…",
+        "Context": "爱可菲小姐好严格…她餐厅批量进购我的水果前，每次都要抽出几个，去做什么…「采样分析」，甜度和风味物质差一丝丝，她都不会点头…不过，她做的菜肴真好吃啊，真好吃啊…欸嘿嘿…要是能每天吃到就好了！那应该是，神明级别的待遇？"
+      },
+      {
+        "Title": "想要了解瓦雷莎·其一",
+        "Context": "我觉得，世界上的好人远远远远比坏人多。大家造的房子和家具很舒服，饭菜特别好吃，音乐和玩的东西也超有趣…就算我卖水果的时候不小心少算了钱，好心的客人也不会贪这个便宜。起码，我没遇见过真正讨厌的「坏人」，会让我真真正正生气的，只有不知道在想什么的魔物…特别是又恐怖又狡猾的深渊！"
+      },
+      {
+        "Title": "想要了解瓦雷莎·其二",
+        "Context": "我很小的时候，深渊就袭击过「沃陆之邦」，好多我认识的人受伤了…我和爸爸妈妈只能躲在很远很偏的地窖里，把门堵得死死的。魔物把门砸得哐哐作响，我连哭都不敢哭得大声…好在部族的巡逻队赶了过来，我们才脱险…那时我想，就算以前的英雄们能永生不死，关键时刻也忙不过来，不可能长出三头六臂保护世界上的每个角落。如果我自己也好好锻炼，变得更能打，遇上危险至少有力气对付坏家伙，这样才比较好！"
+      },
+      {
+        "Title": "想要了解瓦雷莎·其三",
+        "Context": "刚刚学会战斗的那段时间，我一站到魔物对面，腿就开始发抖了。那时我想…只要把坏东西都赶走，就能继续开开心心地生活！于是我戴上面具，想象自己是故事里的英雄，闭着眼睛埋头乱撞…还总能撞飞那些张牙舞爪的魔物。有一次，一只丘丘人手里的棍子呼呼转着飞了很远，打到了伊安珊老师的脑袋。她才注意到我，觉得我很有天赋，开始带着我练习…"
+      },
+      {
+        "Title": "想要了解瓦雷莎·其四",
+        "Context": "没想到的是，好好锻炼了几个月后，大家夸我是少见的力量奇才，推荐我去参加「归火圣夜巡礼」…但我想象中的对手一直是魔物，要和其他部族的好人，甚至是买过我水果的朋友战斗，根本把握不好力道，我特别害怕下手过重伤到他们…结果当然是，每次比赛，我都早早被淘汰…连着输了几次以后，我说不敢再参赛，也没人鼓励我再试试了…"
+      },
+      {
+        "Title": "想要了解瓦雷莎·其五",
+        "Context": "其实，我也明白我的问题。我只有戴上面具，想象自己成为了某个英雄，才能拿出气势去击败对手。这属于…一种逃避。如果真想突破自我，我得像把握水果的重量一样，准准地控制每一个动作，认真仔细地战斗…以自己的身份战斗！说起来…你有和神明一样强大的力量，而你从来不会让这股力量失控，不管遇见什么事情，都能把握住那种…恰到好处的力度。我的英雄大人，能请你教教我吗？"
+      },
+      {
+        "Title": "瓦雷莎的爱好…",
+        "Context": "嘿嘿，我喜欢在风景好的地方野营！我家车队常走的路线附近，有几个非常不错的观景点。扎好帐篷，架一张躺椅，支好锅，在暖洋洋的篝火旁边唱歌，看夜景和星星，吃热腾腾的饭菜…好惬意…"
+      },
+      {
+        "Title": "瓦雷莎的烦恼…",
+        "Context": "想不明白，伊安珊老师看的那些书上都是怎么说的？须弥和枫丹人研究出来的「科学健身」好复杂…因为一个叫做…「体脂率」…的数字太高？伊安珊老师就不许我吃甜食吃到饱，还要我把饭菜里的蔬菜比例翻倍…对我来说太难了嘛…"
+      },
+      {
+        "Title": "喜欢的食物…",
+        "Context": "吃饭就要吃得心满意足，浑身充满力量！味道丰富的料理，我都很喜欢！酱汁够多很重要，糖分充足也是美味的关键，就像「火焰炖肉」和「温泉时光」，每口下去都是幸福的感觉…呜…不能有心理负担！"
+      },
+      {
+        "Title": "讨厌的食物…",
+        "Context": "焦黑的，变质的，或者没熟的料理，我很少吃…就算忍受住了味道，也没法从这种饭菜里获得力气。哎…我还是远远不如菲耶蒂娜，传说她在战场上最艰难那几天，吃的都是发霉的塔塔可，被火烧得快变成炭的肉，还要坚持抗击敌人…到底是怎么做到的呢？"
+      },
+      {
+        "Title": "收到赠礼·其一",
+        "Context": "好吃，唔唔…太好吃了，太开心了…呜…你是…超级大厨！如果…如果「豪宴热斗」请你去做菜，绝对不会有人剩下食物！说不定，还会出现很多厉害的对手，我拿出全力都很难卫冕！"
+      },
+      {
+        "Title": "收到赠礼·其二",
+        "Context": "这个味道，好满足…感觉吃一百份都吃不腻！啊，不是要你真的做一百份的意思，不能那么麻烦你…我只是，确实还想再吃一点…"
+      },
+      {
+        "Title": "收到赠礼·其三",
+        "Context": "吃起来没有那么顺口…是因为我没吃别的开胃菜吗？我能感觉到，这道菜里有一种…英雄战斗时的波折？对，「战场的味道」，好厉害！我要认认真真地吃！"
+      },
+      {
+        "Title": "生日…",
+        "Context": "欸嘿嘿…今天是你的生日，我也好开心好开心！按照「沃陆之邦」的传统，我们会邀请亲朋好友，为寿星办一场篝火宴会，寿星会跟每个人碰杯畅饮！但我感觉，以你的名气，办篝火宴会的话，至少要喝几千杯酒，开心是开心，就是太伤身了，而且也会很累…要不然，我们就去我的秘密野营地，来一次悠闲的庆祝会？"
+      },
+      {
+        "Title": "突破的感受·起",
+        "Context": "唔…训练的效果显现出来了，我现在超有干劲，想要快快冲刺，高高起跳，把所有挡路的障碍都撞开！"
+      },
+      {
+        "Title": "突破的感受·承",
+        "Context": "嗯！能量超强，好像吃了一千份火焰炖肉！我的冲撞和飞踢也像爆发的火山一样充满力量！"
+      },
+      {
+        "Title": "突破的感受·转",
+        "Context": "目标是…成为像英雄一样强大的战士，维护最重要的正义——每个人都能开开心心轻轻松松地生活，不受一切坏人坏东西的影响！"
+      },
+      {
+        "Title": "突破的感受·合",
+        "Context": "我希望，我的信心和勇气，也要像不断变强的力量！总有一天，就算不佩戴任何英雄的面具，也能像英雄们那样信心满满！"
+      },
+      { "Title": "元素战技·其一", "Context": "撞！" },
+      { "Title": "元素战技·其二", "Context": "头槌！" },
+      { "Title": "元素战技·其三", "Context": "嘿——！" },
+      { "Title": "元素战技·其四", "Context": "冲锋！" },
+      { "Title": "元素战技·其五", "Context": "正义昭告！" },
+      { "Title": "元素战技·其六", "Context": "英雄登场！" },
+      { "Title": "元素战技·其七", "Context": "不能迟到…" },
+      { "Title": "元素战技·其八", "Context": "注意时间哇…" },
+      { "Title": "元素战技·其九", "Context": "开始快跑！" },
+      { "Title": "元素爆发·其一", "Context": "你该认输了！" },
+      { "Title": "元素爆发·其二", "Context": "准备，全力一击！" },
+      { "Title": "元素爆发·其三", "Context": "菲耶蒂娜，赐我力量！" },
+      { "Title": "元素爆发·其四", "Context": "「炬照我名，焚灭恶夜！」" },
+      { "Title": "元素爆发·其五", "Context": "力量啊！爆开吧！" },
+      { "Title": "元素爆发·其六", "Context": "绝技！英雄飞踢！" },
+      { "Title": "打开宝箱·其一", "Context": "嘿嘿，亮闪闪的…" },
+      { "Title": "打开宝箱·其二", "Context": "能…能吃吗？" },
+      { "Title": "打开宝箱·其三", "Context": "是…地里长出来的？" },
+      { "Title": "生命值低·其一", "Context": "我要生气了！" },
+      { "Title": "生命值低·其二", "Context": "被你偷袭而已…" },
+      { "Title": "生命值低·其三", "Context": "你有点难对付…" },
+      { "Title": "同伴生命值低·其一", "Context": "我来帮你！" },
+      { "Title": "同伴生命值低·其二", "Context": "糟了糟了…" },
+      { "Title": "倒下·其一", "Context": "我不想…认输…" },
+      { "Title": "倒下·其二", "Context": "呜哇…" },
+      { "Title": "倒下·其三", "Context": "真的…没力气了…" },
+      { "Title": "普通受击·其一", "Context": "被打了！" },
+      { "Title": "重受击·其一", "Context": "疼疼疼！" },
+      { "Title": "重受击·其二", "Context": "你这么凶！" },
+      { "Title": "加入队伍·其一", "Context": "要出远门吗？还是…去比赛？" },
+      { "Title": "加入队伍·其二", "Context": "开心起来了！" },
+      { "Title": "加入队伍·其三", "Context": "吃的够不够？我也带了哦！" }
+    ],
+    "stories": [
+      {
+        "Title": "角色详细",
+        "Context": "「该训练了，瓦雷莎！」\n每天清晨，教练的高呼如轰雷般炸响时，果园的方向定会卷起滚滚烟尘。\n片刻后，「沃陆之邦」巡逻队的核心成员，高人气果园的管理者——今天也懒觉睡过头的瓦雷莎，便咬着蘸满果酱的面包片，踉踉跄跄地撞进健身区。\n此时的瓦雷莎睡眼惺忪，表情茫然，呆呆地等待教练的指示，老老实实开始热身，按部就班地唤醒力量…\n偶尔会被教练指出，面包上的果酱糖分太高，该罚！这才猛然意识到，自己还没睡醒，出门太急，又一次选上了自己最喜欢的而不是最健康的配料。\n这种情况下，瓦雷莎只能沮丧着脸，在其他摔角手们或尊敬或羡慕，或百思不得其解的目光中，走向尺寸最为夸张的那具杠铃架，用普通人挑战极限的重量、足以腰酸背痛半个月的夸张组数…简单活动筋骨，准备迎接此后，对于精锐战士也堪称「致死量」的加练。\n可在近乎疯狂的训练中，瓦雷莎反而逐渐提起精神，双眼中的光芒不断升温，最后开心地笑起来。\n因此，在不断冲击强壮之巅的「沃陆之邦」，即便最不服输的壮汉，也不敢向瓦雷莎发起挑战。\n但若是探访瓦雷莎，试图调查她那强大力量的来源，就会发现，她的日常生活过于悠哉。\n与龙伙伴瓦娜娜一同打理果园、踏踏实实地劳作，等到丰收时，就简简单单摆个摊，不紧不慢地卖水果，生活节奏慢得令人发困，根本没有什么奥秘可言。\n无论怎么看，都和邻居家普普通通的女孩没有差别？\n唯一特别的地方在于瓦雷莎的食量。\n多点硬菜！调料管够的硬菜！分量越大越好的硬菜！\n轻松解决三五十人份的饭菜，已是瓦雷莎的常态，她的胃口之好，就连「豪宴热斗」这样的大胃王比赛都要替她单开赛区…\n不免让人心生疑惑——\n「难道说…对于天赋型选手而言，吃得多，力量就会源源不断了吗？」"
+      },
+      {
+        "Title": "角色故事1",
+        "Context": "瓦雷莎每天都很开心。\n父母常说，「这孩子出生前后好久好久，图兰火山都没有喷发」。\n瓦雷莎不是什么魔神般的传奇角色，当然没法影响图兰火山的心情，「好久好久」也是一个艺术化的说法。\n不过，单凭「降生时避开了自然灾害期」这一点，也足见她的幸运。\n在富饶的「沃陆之邦」中，瓦雷莎家的经济条件还算不错，她从未经历过物质匮乏的烦扰，在饱食与温暖中成长。父母对瓦雷莎也没有什么高远的期许，只希望她快快乐乐，健健康康，长大懂事后，安安稳稳地继承果园。\n于是，父亲打理果园时，母亲就将小瓦雷莎放在小龙瓦娜娜的背上，跟在一边打下手。若是有果子从父亲手中滑落，小瓦雷莎总能眼疾手快地接住，收获父母的夸夸和小瓦娜娜的蹭蹭；\n出门摆摊卖水果时，母亲就抱着瓦雷莎坐在父亲旁边，摊开织卷，给小瓦雷莎讲故事。从温馨的龙龙童话，到古代英雄们的传奇，轻松与热血结合，节奏张弛有度。小瓦雷莎边吃边听，无比入神，有时干掉一整筐青蜜莓都毫无知觉，让父亲无奈失笑。\n无忧无虑的童年带给瓦雷莎的礼物，便是平静温和、乐于分享的性格。\n在「沃陆之邦」，力量是人们的名片之一，孩子们也不例外，高大强壮者总能获得崇拜和簇拥。\n体格毫不起眼的瓦雷莎加入孩子们的团体后，却能将原本的老大连着他引以为傲的少年杠铃一同举高高，抛高高。\n理论上，瓦雷莎是同期无可争议的「孩子王」，但瓦雷莎不觉得老大的位置有什么意思。\n像英雄那样维持好秩序，让大家吃得饱饱，玩得尽兴，才是正确的做法！\n家里有什么美味，就拿出来一起吃！买到了有意思的东西，就一起玩！\n欺负别人的，拎起来！独占玩具和漫画织卷的，先拖走！\n至于不安好心，故意恶作剧搞破坏的，揍一拳…\n…不行不行，人家挨一拳就会昏迷大半个月，有点过火，还是轻轻弹一下对方的脑门好了。\n总之，大家都要和和气气，好好相处，不能因为小事吵架，更不能任性、有意给别人添麻烦！\n瓦雷莎的天赋也在这一时期展现无遗，甚至略有失控——\n体弱的朋友说，部族北面有一颗野生果树，结的果子酸甜得奇妙。\n小瓦雷莎听过以后，就将那颗果树连根拔起，扛回朋友家的门口。\n事后妈妈温柔地教导了小瓦雷莎，不能伤害果树，还有一切和平生活的生命，两人一起将那颗果树细心栽回了原位…\n首领说，最近部族周边的滚石多得有点反常，大家出门千万要当心。\n小瓦雷莎听过以后，就在附近找了个制高点，叉着腰认认真真站岗。一看见滚石，就远远跳过去飞踢，让它改道！\n事后父亲带着小瓦雷莎攀高，找到了那批滚石的来源，一起填土挖坑，将它们好好处理，暂时杜绝了后患…\n每次，人们都会感到疑惑——这孩子的力气，是不是有点夸张了？\n不过，看着小瓦雷莎软软的笑脸，还有在她引导下，孩子们之间和谐松弛的秩序，大人们并不担心小瓦雷莎的力量会失控。"
+      },
+      {
+        "Title": "角色故事2",
+        "Context": "大家的判断没有问题，失控的只有小瓦雷莎的食量。\n似乎是对那股超凡力量的「还债」，小瓦雷莎刚刚学会走路时，食量就与健硕的少年相当了。头顶还和父亲的膝盖一样高时，她一人一顿饭，就能干掉父母与瓦娜娜一天食物的总和。\n但小瓦雷莎使出力量的场景相当有限，长此以往，她一度「远看像颗落落莓」，踏到了高危肥胖线上，令父母有些担忧。\n为了小瓦雷莎的健康，也是为了她今后能更早适应工作，父母早早就让她一同开始打理果园，用劳作消耗过多的能量。\n来到果园后，小瓦雷莎也意识到了自己的不好——\n「爸爸妈妈和瓦娜娜每天做这么多事情，却只吃了那么一点饭菜，我干的活根本没多少，却在大吃大喝…」\n「干多少活吃多少饭，我要先好好劳动，然后再想吃饭的事！」\n不负父母的期待，小瓦雷莎迅速进入了状态。\n起初她带头多干活，拿出青年突角龙力量，轻轻松松搬运货品、农具与杂物，体力活对她来说完全不是问题，就像饭后散步，消耗过度充盈的体能。\n随后又在母亲的引导下，静下心来观察细节，对于土壤处理、养料调配和水分管理等相对复杂的任务，学得有模有样。\n身为果园未来的主人，她每天的工作总量却远远超过了每位龙员工。\n除了不太擅长阅读织卷，搞清技术原理，还有应付算账这种纸面和数字的工作…刚刚学会出门买调料不久的瓦雷莎已经能独当一面，将果园打理得井然有序了，不输许多大人！\n她过度肥胖的危险也逐步解除，体格稳定在一个「不算均衡，但问题不算严重」的状态。\n只不过，就算主动压制了暴饮暴食的本能，以节制的态度面对生活…小瓦雷莎的饭量依然非常夸张。\n为此，父母早就带着小瓦雷莎寻找医生，专门进行过诊断，结果只是被医生夸赞「身体真棒，吃什么都香才好」，一直没搞清楚原因。\n反而是部族首领阿卡特观察小瓦雷莎许久后，给出了很有道理的判断：\n「特特奥坎」丰沃的土壤既能催生出卓越的作物，又能养育力大无穷的战士，但由于体质的区别，并不是所有战士都能将食物中蕴含的能量完全运用出来。同样吃掉一份午餐，有的人或许只能卧推十组杠铃，有的人却能带着同样重量的杠铃登上山巅，再跳个战舞。\n而在某则冷门的传说中，每隔一段时间，「特特奥坎」就会出现体质特殊的战士。必要时，他们的身体能将食物中蕴含的能量近乎完全运用出来，因而展现出极为优异的力量，以及不可理喻的食量，瓦雷莎或许就属于这种体质。\n这些战士未必各个都能成为古名的继承者或惊天动地的英雄，但就像船舶的龙骨，建筑的地基，一直作为中坚力量，在人们不常关注的地方发挥着光热，机会降临时，他们也能书写辉煌的故事，说是「预备英雄」也不为过。\n父母听过首领的推断后，总算放下了心，至少确定了，自己的女儿没有重大的健康问题。\n而刚刚懂事的小瓦雷莎只听进去了那个特别的称号…\n「所以说，我也是『预备英雄』吗？」"
+      },
+      {
+        "Title": "角色故事3",
+        "Context": "「预备英雄」的说法始终盘旋在小瓦雷莎的思绪中，年幼的她早早就产生了更有志气的想法——\n「既然我很特别，那我能不能加把劲，成为真正的英雄呢？」\n只是，英雄这两个字的分量，超出了小瓦雷莎一开始的想象——\n故事中的英雄们打败敌人时，只有轻飘飘的几段文字，背后隐藏的血与泪，常被童话故事和漫画织卷美化…\n敌人和魔物嘶吼着攻来，你死我活的拼杀场面，恐怖程度远远超过瓦雷莎观看过的摔角比赛。\n首次经历深渊袭击时，瓦雷莎才刚刚五岁，虽说她依靠本能，在惊叫中踹飞了闯入果园的第一只魔物，但看见远处河流般涌来的黑潮时，小瓦雷莎直接吓得腿软瘫倒，哇哇大哭起来。\n好在父亲反应及时，拼命击退近处的敌人，扛着瓦雷莎和母亲，带着瓦娜娜一同躲进偏僻的地窖，牢牢堵死大门，并耐心安慰小瓦雷莎，压低她哭泣的音量，他们一家才支撑到巡逻队赶来。\n看着一片狼藉的果园，还有不幸受伤昏迷的部族战士，小瓦雷莎的眼泪止住了，小小的拳头紧紧攥住，指甲刺进肉里，她都没有察觉。\n小瓦雷莎不明白对方的意图，也不打算去了解，她只知道，自己的家被这些家伙夷为了平地，总来买自家水果的叔叔阿姨们被它们打伤，甚至有醒不过来的危险…她多希望，自己能像故事里的英雄们那样，在深渊魔物进入视线的第一刻，就将对方清剿一空。\n与父母一同搬迁果园，完成了辛苦的重建工作后，瓦雷莎便不再是以前那个无忧无虑的孩子了。\n征得爸爸妈妈的同意后，瓦雷莎戴上了小小的面具，拖着健身区最重的杠铃，撑开了摔角场战备屋厚重的石质大门，向在场的摔角手们提出请求，希望跟着他们学习格斗技巧。\n作为「预备英雄」的瓦雷莎要正视自己的软弱和脆弱，要将自己的蛮力化为屏护部族的力量。\n有些心高气傲的摔角手认为瓦雷莎还是个小鬼，不耐烦地驱赶她。瓦雷莎也不废话，拎住这些战士的腿，将他们拖上擂台，让他们表情凝固，再把他们轻轻一推，叫他们完全失去平衡，咕噜噜滚下台去，证明自己的力量根本不输他们这些大人。\n在场的斗士与闻讯赶来的首领阿卡特目睹此景，稍加讨论，便全票通过了瓦雷莎的要求。\n在勇武的「沃陆之邦」，拿出了超越成年人的力量，瓦雷莎便能被视为部族中的大人。\n自此往后，瓦雷莎就成了多位斗士共同教导的学员。她不知自己适合怎样的战斗风格，只能凭借对英雄们的印象，一种种尝试技巧，寻找适合自己的最优解。\n这一练就是好几年，理论训练与实战环节对半开。不知是紧张还是生涩，真正面对敌人时，瓦雷莎还是会凭借本能的冲撞，以及早早刻在记忆中的飞踢招式，拳拳到肉地痛击敌人。刀剑枪斧在她手中最常扮演的，全都是牵制敌人的投掷武器…\n以至于个别丘丘人都开始用抛掷兵器来回应瓦雷莎的冲撞，误伤了前来支援的伊安珊…让金牌教练伊安珊重点关注这位特别的后辈，完全接过了引导她的职责。\n为了完全发掘瓦雷莎的潜能，伊安珊专门制定了准狠高效的训练科目，此后她讶异地发现，瓦雷莎的天赋在她的所有学员中位居断层式的第一，凭借直觉就能发挥出许多「方法派」学员潜心锻炼后的力量。\n伊安珊甚至认为，瓦雷莎以后的力量定然会超越自己，满怀期待地向瓦雷莎发出了「我不会输给你」的宣言，让瓦雷莎茫然失措，惊慌不已。\n不过，训练期间，瓦雷莎击退了四位数的魔物，但也砸坏了三位数的兵器，让两位数的部族战士摇头扶额，最终由伊安珊得出一个结论：\n瓦雷莎是个蛮力奇才，但也正因为力量过度汹涌，不宜使用常见的近战武器，更应该采用摔跤斗士的徒手格斗流派，充分发挥自己的特长。\n在伊安珊的引荐下，瓦雷莎也正式加入了部族的巡逻队，开始频繁出勤于各条战线，不断巩固搏击的技巧。\n而在加入巡逻队后第二个月，瓦雷莎就再次经历了严酷的考验。\n魔物的黑色浪潮重新涌来，接连三天的波状攻势令所有战士疲惫不堪，瓦雷莎险些遭遇不测…\n也正是在这场战斗中，瓦雷莎因祸得福，获授殊荣，让她的搏击攻势愈发锐不可当…"
+      },
+      {
+        "Title": "角色故事4",
+        "Context": "自从经历了严酷战斗的考验，瓦雷莎的心态逐渐归于平和，战场经验日趋丰富的情况下，很少被危险状况打得措手不及。\n从父母手里接过家中产业后，她的生活节奏也重回童年般的松弛。\n毕竟在骨子里，她一直是个悠悠哉哉的女孩，按她自己的话来说，「开开心心、轻轻松松的生活最重要」。\n平日慢慢打理果园，照顾好瓦娜娜的生活起居，再拉着货车去各个部族售卖上好的果蔬，顺带换换午饭晚饭的口味，要是遇上了争夺「燃火大胃尊者」之名的「豪宴热斗」比赛，再好不过了，可以吃个爽快！\n每天按照伊安珊教练的计划，练够十八种器械，做完三种三组三百个的徒手健身项目，再来三个三万步的往返跑…至于时间嘛，不用卡得那么严，早上晚上都能练，只需留个心眼，避免惊吓到夜行的路人…\n收到集结信号，参与巡逻队的出勤时，就背上满满一行囊的食物，出门郊游般跟着转悠，正好寻找露营的新去处。遇见一般的魔物就戴上面具，以热身的力道给它们几轮飞踢，通常都能快速解决战斗！\n唯有面对棘手的深渊时，瓦雷莎才会点燃斗志，完全施放战意。\n这样的性格也使瓦雷莎在某些场合吃足了亏，最重要的便是「归火圣夜巡礼」。\n作为「沃陆之邦」有名的战士，瓦雷莎被寄予厚望，大家都希望她在「归火圣夜巡礼」中斩获漂亮的名次。\n可瓦雷莎从学习战斗的第一刻开始，就未曾将其他部族战士列为假想中的敌人，面对纳塔的同胞，她完全无法施展本领，以至于比赛中的表现…像是场内的气氛组。\n「塞提阿德的砂刃」曾利用兵器，弹开瓦雷莎犹豫不决的冲刺，导致她一头撞进山内的洞窟，迷失方向，直到团体赛结束，才在一只小匿叶龙的引导下回到赛场；\n「花羽会」的老兵努斯妲曾在瓦雷莎面前大秀滞空拳法，让瓦雷莎看得一惊一乍，连连拍手叫好，结果忘了顾及身后，连努斯妲的队友悄悄取走圣火都毫不知情，回过神来时一切都晚了；\n最强力的对手当属「马力卜」的基尼奇，他的瞬时速度不及瓦雷莎，但变向能力有着明显优势。凭借复杂的三维机动，基尼奇让瓦雷莎的攻势屡屡落空，将其气劲耗尽，进而夺走了瓦雷莎小队持有的圣火…\n总计五次出战，瓦雷莎全都止步于团体赛阶段。\n对此，教练伊安珊和部族首领阿卡特只能无奈耸肩。父母和朋友则并无遗憾，每回都为一脸沮丧的瓦雷莎准备一顿犒劳大餐。\n换成别人，身怀绝技却屡次被如此轻松地淘汰，必定会在部族内遭受非议。但了解瓦雷莎为人的「沃陆之邦」成员，甚至是与她对阵过的其他部族战士，都对瓦雷莎的表现表示理解。\n购买瓦雷莎的水果时，大家都曾与瓦雷莎闲聊。瓦雷莎的常态便是不紧不慢、舒缓平和，会将每个出现在面前的人当成朋友。对于付钱略少、暂时赊账、因故退换等状况，瓦雷莎也从未表现出半点不耐烦，她的和蔼与松弛，能将安逸的情绪传递给所有与她交流过的人。\n可以说，面对同胞，瓦雷莎怎么也没法动气。\n如果瓦雷莎在战斗中驱动全力，要燃烧她的愤怒，这宝贵的燃料，还是留给她最重视的战斗吧——作为部族巡逻队的中坚力量，瓦雷莎可谓恪尽职守，从入役到今天未尝败绩，成功抵挡了每一次深渊的攻势，稳稳守住了「沃陆之邦」的关键区。\n但瓦雷莎自己呢？这样真的就足够了吗？\n参与「巡夜者战争」，直面深渊的主力，是瓦雷莎英雄生涯中不可或缺的里程碑。\n邪恶之物从未停止蠢动，只在敌方攻来之时予以拦截，也未必是种妥当的做法。\n瓦雷莎明白，若是不能战胜自己的缺点，将释放力量与燃烧怒意两种行为精准分离，那么她永远不可能达到英雄的境界…"
+      },
+      {
+        "Title": "角色故事5",
+        "Context": "坐在露营的帐篷边，注视着燃烧的篝火时，瓦雷莎曾多次思考，「英雄」对于自己的意义究竟是什么？\n踏上战场之初，瓦雷莎曾被惊惧和胆怯困扰，那时，她选择戴上面具，喊出那句「炬照我名，焚灭恶夜」，便可鼓动热血，点燃怒火，战胜软弱。\n这种做法似乎成为了战斗中的固定环节，只要借助面具进入那种特殊的情绪，就能以英雄的身份无所顾忌地战斗。\n可是，就算自己的一言一行都与传说中的英雄相同，自己就真的成为了她吗？\n更重要的是，为什么要完全成为其他的英雄？\n是想像英雄们一样帅气，留下令人传颂的战功，享受万人敬仰的感觉吗？\n或是与那些狂烈的斗士平分怒火，以使自己战斗时的每拳每脚都加倍有力？\n在至大的危机尘埃落定，至为辉煌的胜利被纳塔攻夺后，听闻「杜麦尼」的事迹后，瓦雷莎慢慢想通了许多事…\n她慢慢想通了，自己并没有那么看重荣誉，也远不是被复仇支配，始终需要一种「敌人」来驱动自己的狂徒。\n她更向往英雄们的进取和锐意，还有对深渊作战时的果断勇武。\n她只想借英雄们的信念鼓舞自己，贯彻自己的正义——守护平静的生活，让所有人都能开开心心、无忧无虑。\n她应当作为独一无二的「瓦雷莎」去战斗，而非长久躲藏在面具之下。\n当务之急是正视自己的软弱，抑制自己粗放的习惯。\n为此，瓦雷莎一面认真跟随伊安珊开展「强化控制训练」，一面更为严苛地挑战自我——尽量在战斗中避免佩戴面具，进而避免将自己想象成特定的英雄。\n起初，以脸上空空荡荡的状态面对敌人，瓦雷莎的感官有了本质的变化，让她回想起新兵时期的慌乱，甚至忘记了很多战斗的要领。\n好在，难以计量的鏖战将大量技巧刻入了瓦雷莎的肌肉记忆，虽说无法自如地释放力量，搏击的动作也略显笨拙，甚至有时会因为不够自信，犯下敌前摔倒这样的错误…\n但敌前摔倒的问题也不大，甚至能借助绝对力量的优势，将对方震得踉踉跄跄…也不失为一种战斗方式？\n瓦雷莎的确在慢慢适应，找准状态，以自己的身份融入战场，打出她心中最为帅气的战斗风格。\n努力将基于「怒火」的战意转为堂堂正正的「勇气」，坦坦荡荡地面对敌人，在最为热烈的时刻，以过往英雄的华彩为战斗增色，进而夺取辉煌的胜果，才是战士瓦雷莎的完美形态！"
+      },
+      {
+        "Title": "英雄的面具",
+        "Context": "瓦雷莎记忆中的第一位英雄，亦是对她影响最大的历史人物，名为菲耶蒂娜。\n在艺术作品的记载中，菲耶蒂娜喜欢头戴赤红的面具战斗，以卓越的冲刺速度和华丽的近身搏击技巧闻名，风格独树一帜。\n出身「沃陆之邦」的菲耶蒂娜屡立战功，不仅守护了家乡的安宁，更是上百次驰援其他部族。菲耶蒂娜与「花羽会」的战士相爱，并嫁入「花羽会」后，她与她的丈夫更是显著强化了两个部族间的友好关系。\n总体上，虽说菲耶蒂娜不如六大古名的英雄那般惊天动地，但也是人们尊敬的传奇。\n随着纳塔的涂鸦文化与海外的流行作品相结合，英雄故事不断推陈出新，瓦雷莎喜欢的「漫画织卷」中，便有不少艺术化表现极为夸张，令人热血沸腾的佳作。菲耶蒂娜因其特别的经历，成为了极为热门的角色。\n菲耶蒂娜登场的「漫画织卷」共有十二部，形象则有五个不同的版本。\n每次造访「回声之子」时，瓦雷莎都会跟着工匠们学习简单的锻造本领，凭借学来的技巧，她亲手制作了菲耶蒂娜佩戴过的五种面具。\n其中四个版本被瓦雷莎当作收藏，而「第二次参与巡夜者战争」的版本最为特别。\n这个版本的面具有着最为惊心动魄的背景故事，但碍于多人大场面的战斗过于难画，菲耶蒂娜只展现过几个侧影，正面的设定图也无从考据。\n于是瓦雷莎凭借自己的直觉，自行补全了这一款面具上的图案，并将其作为自己全力战斗时的标志。\n其实，经过瓦雷莎的自由发挥，她的面具与菲耶蒂娜脸上原本的那款，已经存在不少差异了。\n以至于每次人们看见瓦雷莎的面具时，往往联想不到菲耶蒂娜，而是瓦雷莎本人。\n得到大家一致的反馈之初，瓦雷莎有些遗憾，甚至失落。\n不过，每当瓦雷莎妥善完成巡逻队的任务，稳稳守护「沃陆之邦」与周边地区的安宁后，都会有人前来答谢她。\n人们送来的礼物有瓦雷莎喜欢的美食，有漂亮的手工装饰品，\n为了强调答谢瓦雷莎，大家不约而同地在附带的信件中，画上了小小的面具符号，慢慢将那副面具认定成了瓦雷莎自己的标识。\n对此，教练伊安珊满意地点头：\n「菲耶蒂娜的事迹会被人们永远铭记，而昨天今天与明天的漂亮战果，是属于你的全新杰作。认可大家的习惯吧，这是对你最真诚的赞赏！」\n听闻教练的话，瓦雷莎似乎也下定了决心，给自己定下了一个远大的目标：\n「要是将来哪天…我也成为所有人都认可的英雄，被大家写进这样那样的故事，甚至有了我当主角的漫画织卷…就把这副面具正式当成『瓦雷莎的面具』吧！」"
+      },
+      {
+        "Title": "神之眼",
+        "Context": "瓦雷莎常说，自己做过一个噩梦，梦中她与深渊不停地战斗，但对方似乎无穷无尽，无论击败多少敌人，攻势都不见减弱。\n而部族中的诸多战士知道，那是确确实实发生过的恶战。\n彼时，狡诈的深渊咬准了图兰火山的活跃期，从三个不同的方向对「沃陆之邦」发起波状袭击，试图逼迫部族战士们分兵，再将其逐一击破。\n事发突然，全速赶来的支援力量仅有「悬木人」的一批信使，「沃陆之邦」几乎只能依靠自己的力量迎战。\n有限的兵力延展至漫长的战线上时，每一处防御都显得尤为薄弱。部族要员们谨慎商议后，决定将防线分散分层，极限部署至最远处，留下足够的缓冲距离。「悬木人」的少量援兵绝不能直接参与战斗，而是要利用自身善于攀高的优势，尽可能占领制高点。\n同时，「沃陆之邦」抽调一部分精锐的战士，作为机动待命的反攻力量。\n多层防线上的「沃陆之邦」战士负责迟滞深渊的力量，他们未必能拦住深渊的大军，却能迫使对方提前展开，不断拖慢其行动的步伐。\n待到对方进攻的势头耗尽，调整对策，负责指挥的魔物头目就会被「悬木人」信使们准确查明，牢牢定位。\n此时，反攻力量就会从后方铆足势头，一鼓作气打进对方阵中，斩落魔物头目。失去头目的指挥后，余下的敌人便可慢慢对付，稳重地将其围剿…\n刚刚加入巡逻队不久的瓦雷莎听说，加入反攻部队便能直接和对方的头目对决，果断举手报名。\n阿卡特和伊安珊曾有顾虑，但考虑到兵力实在紧缺，瓦雷莎又有着明显的优势，最终还是同意了她的请求。\n战术是清晰的，实现起来却并不轻松。\n第一次反攻，能够突入敌阵的战士尚有十余人，瓦雷莎与他们完美配合，将头目利落地撞翻碾碎；\n第二次反攻，仅有瓦雷莎在内的六名战士来到头目跟前，以往战士们拿来开玩笑的暴徒巨斧，竟显得有些难以躲闪；\n最后一次反攻，作为防线骨干的伊安珊全力拼搏，为反攻部队打开了直取纵深的缺口，转头时，却发现仅有瓦雷莎按时抵达了阵位…\n遍体鳞伤的瓦雷莎蹒跚而来，右手拖着全身骨折的丘丘暴徒，将其甩进敌阵，砸起一阵魔物的浪花，左肩则扛着力竭的前辈，将其转交给伊安珊。\n瓦雷莎的双目略显空洞，意识已然模糊，可她的身体仍在愤怒和责任的驱动下全力运转。\n她从口袋中取出破破烂烂的面具，颤抖着戴在脸上，低声自言自语。\n「我不是那个胆小的孩子了，我要像英雄一样战斗。」\n话音落定，不等伊安珊劝阻，瓦雷莎便踏碎山石，化为茜红流光，切开敌阵，直刺最后的头目。\n片刻过后，魔物浪潮的深处，炽亮的轰雷骤然爆发，头目的残骸划出一道醒目的弧线，高高飞散至半空中…\n待到一切尘埃落定，伊安珊奋力挖掘，终于在坍塌的战场深处找到了沉沉睡去的瓦雷莎。神之眼的强光仍在闪烁，她的身体周围依旧腾跃着危险的雷电。\n瓦雷莎足足昏迷了半个月，似乎是因为过度劳累，苏醒后，她完全不记得之前的那场苦战，身体的伤势却已奇迹般恢复，并无大碍。\n听着周围人对自己的赞许，看着蓦然获得的神之眼，以及犒劳自己的盛宴，瓦雷莎只知道，自己在这场大觉之前做得还算不错…至少没有让大家失望。\n那就先不追问了！当务之急是美美地饱餐一顿！"
       }
     ]
   }

@@ -1,5 +1,17 @@
 [
   {
+    "id": 10000111,
+    "contentId": 504570,
+    "name": "瓦雷莎",
+    "title": "悠暇豪劲",
+    "area": "纳塔",
+    "birthday": [11, 15],
+    "star": 5,
+    "element": "雷",
+    "weapon": "法器",
+    "nameCard": "瓦雷莎·力源"
+  },
+  {
     "id": 10000109,
     "contentId": 504440,
     "name": "梦见月瑞希",
@@ -634,6 +646,18 @@
     "element": "冰",
     "weapon": "单手剑",
     "nameCard": "神里绫华·扇子"
+  },
+  {
+    "id": 10000110,
+    "contentId": 504621,
+    "name": "伊安珊",
+    "title": "熔石百炼",
+    "area": "纳塔",
+    "birthday": [8, 8],
+    "star": 4,
+    "element": "雷",
+    "weapon": "长柄武器",
+    "nameCard": "伊安珊·不懈"
   },
   {
     "id": 10000108,
