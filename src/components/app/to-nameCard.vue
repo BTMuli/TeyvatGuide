@@ -14,7 +14,7 @@
           <span>{{ parseNameCard(props.data.desc) }}</span>
           <span>获取途径：{{ props.data.source }}</span>
         </div>
-        <div class="ton-type">{{ getType }}</div>
+        <div class="ton-type">{{ props.data.type }}</div>
         <v-btn
           class="ton-share"
           @click="shareNameCard"
@@ -32,7 +32,7 @@
 </template>
 <script setup lang="ts">
 import showSnackbar from "@comp/func/snackbar.js";
-import { computed, ref } from "vue";
+import { ref } from "vue";
 
 import TOverlay from "./t-overlay.vue";
 
@@ -42,20 +42,7 @@ type ToNameCardProps = { data?: TGApp.App.NameCard.Item };
 
 const props = defineProps<ToNameCardProps>();
 const visible = defineModel<boolean>();
-const typeMap: Record<number, string> = {
-  0: "其他",
-  1: "成就",
-  2: "角色",
-  3: "纪行",
-  4: "活动",
-  5: "未知",
-};
 const loading = ref<boolean>(false);
-const getType = computed<string>(() => {
-  if (!props.data) return typeMap[0];
-  if (!(props.data.type in typeMap)) return typeMap[5];
-  return typeMap[props.data.type];
-});
 
 function parseNameCard(desc: string): string {
   let array = [];
@@ -89,7 +76,7 @@ function parseNameCard(desc: string): string {
 function parseDesc(desc: string, inQuote: boolean = false): string[] {
   let res = desc.replace(/。/g, "。\n");
   res = res.replace(/；/g, "；\n");
-  if (props?.data?.index !== 187) {
+  if (props?.data?.id !== 210187) {
     res = res.replace(/：/g, "：\n");
     res = res.replace(/？/g, "？\n");
   } else {
@@ -118,7 +105,7 @@ async function shareNameCard(): Promise<void> {
     showSnackbar.error("未找到名片内容");
     return;
   }
-  const fileName = `【${getType.value}名片】-${props.data?.name}`;
+  const fileName = `【${props.data?.type}名片】-${props.data?.name}`;
   loading.value = true;
   await generateShareImg(fileName, nameCardBox);
   loading.value = false;

@@ -48,7 +48,7 @@ const sortNameCardsData = shallowRef<Array<TGApp.App.NameCard.Item>>([]);
 onMounted(() => sortData(AppNameCardsData));
 
 function sortData(data: TGApp.App.NameCard.Item[]): void {
-  sortNameCardsData.value = data.sort((a, b) => a.type - b.type || a.index - b.index);
+  sortNameCardsData.value = data.sort((a, b) => a.type.localeCompare(b.type) || a.id - b.id);
   curIndex.value = 0;
   total.value = sortNameCardsData.value.length;
   curNameCard.value = sortNameCardsData.value[curIndex.value];
