@@ -3742,6 +3742,162 @@
     "trigger": { "type": "MUSIC_GAME_BOOK_FINISH_UGC_REACH_RATE" }
   },
   {
+    "id": 80382,
+    "series": 60,
+    "order": 345,
+    "name": "丰饶之地的奔行",
+    "description": "点亮纳塔区域中，安饶之野的地图。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "UNLOCK_AREA" }
+  },
+  {
+    "id": 80383,
+    "series": 60,
+    "order": 346,
+    "name": "与圣墟的相会",
+    "description": "点亮纳塔区域中，远古圣山的地图。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 75149, "name": "冷薪与重燃之地", "type": "世界任务" }]
+    }
+  },
+  {
+    "id": 80384,
+    "series": 60,
+    "order": 347,
+    "name": "圣山引路人",
+    "description": "解锁纳塔区域中，远古圣山、安饶之野所有传送锚点。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "UNLOCK_TRANS_POINT" }
+  },
+  {
+    "id": 80385,
+    "series": 60,
+    "order": 348,
+    "name": "圣龛巡礼·丰沃烬落之野",
+    "description": "解除纳塔区域中，安饶之野所有地灵龛的封印。",
+    "reward": 10,
+    "version": "5.5",
+    "trigger": { "type": "UNLOCK_GATE_TEMPLE" }
+  },
+  {
+    "id": 80386,
+    "series": 60,
+    "order": 349,
+    "name": "夜馈寻迹·丰沃烬落之野",
+    "description": "解除纳塔区域中，安饶之野所有部族秘藏之所的封印。",
+    "reward": 10,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 80387,
+    "series": 60,
+    "order": 350,
+    "name": "为你，我们来欢饮一杯",
+    "description": "在远古圣山、安饶之野追随3个挑逗幻写灵，并完成涂鸦。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 80388,
+    "series": 60,
+    "order": 351,
+    "name": "为你，我们来欢饮一杯",
+    "description": "在远古圣山、安饶之野追随6个挑逗幻写灵，并完成涂鸦。",
+    "reward": 10,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 80389,
+    "series": 60,
+    "order": 352,
+    "name": "为你，我们来欢饮一杯",
+    "description": "在远古圣山、安饶之野追随9个挑逗幻写灵，并完成涂鸦。",
+    "reward": 20,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 80390,
+    "series": 60,
+    "order": 353,
+    "name": "沃灰的寻宝者",
+    "description": "在远古圣山、安饶之野开启40个宝箱。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
+  },
+  {
+    "id": 80391,
+    "series": 60,
+    "order": 354,
+    "name": "沃灰的寻宝者",
+    "description": "在远古圣山、安饶之野开启80个宝箱。",
+    "reward": 10,
+    "version": "5.5",
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
+  },
+  {
+    "id": 80392,
+    "series": 60,
+    "order": 355,
+    "name": "沃灰的寻宝者",
+    "description": "在远古圣山、安饶之野开启160个宝箱。",
+    "reward": 20,
+    "version": "5.5",
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
+  },
+  {
+    "id": 80393,
+    "series": 60,
+    "order": 356,
+    "name": "沃灰的冒险家",
+    "description": "在远古圣山、安饶之野完成3个大世界限时挑战。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 80394,
+    "series": 60,
+    "order": 357,
+    "name": "沃灰的冒险家",
+    "description": "在远古圣山、安饶之野完成6个大世界限时挑战。",
+    "reward": 10,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 80395,
+    "series": 60,
+    "order": 358,
+    "name": "沃灰的冒险家",
+    "description": "在远古圣山、安饶之野完成9个大世界限时挑战。",
+    "reward": 20,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 80396,
+    "series": 60,
+    "order": 359,
+    "name": "献给某人的花束",
+    "description": "或许比起曾触手可得的整个世界，对它来说，有其他更为重要的东西。",
+    "reward": 10,
+    "version": "5.5",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 75151, "name": "毁灭预兆与最后的通牒", "type": "世界任务" }]
+    }
+  },
+  {
     "id": 81000,
     "series": 0,
     "order": 1000,
@@ -9225,6 +9381,218 @@
     "trigger": { "type": "FINISH_QUEST_AND", "task": [] }
   },
   {
+    "id": 81558,
+    "series": 0,
+    "order": 1553,
+    "name": "总是雕像机关",
+    "description": "将秘源龙仆放置回了为它空出的位置。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81559,
+    "series": 0,
+    "order": 1554,
+    "name": "喷发的光珥",
+    "description": "见证了产生游隙灵道的巨大火山喷发。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "FINISH_PARENT_QUEST_AND", "task": [] }
+  },
+  {
+    "id": 81560,
+    "series": 0,
+    "order": 1555,
+    "name": "新火的祭台",
+    "description": "到达图兰大火山的最高处。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81561,
+    "series": 0,
+    "order": 1556,
+    "name": "天轴轮转",
+    "description": "启动「天轴」，前往远古圣城的深处。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 75149, "name": "冷薪与重燃之地", "type": "世界任务" }]
+    }
+  },
+  {
+    "id": 81562,
+    "series": 0,
+    "order": 1557,
+    "name": "天鹰座裂隙之外",
+    "description": "辉煌不过是往日残留的幻觉…",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81563,
+    "series": 0,
+    "order": 1558,
+    "name": "叩问众火之心",
+    "description": "打开前往「圣山之心」的道路。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81564,
+    "series": 0,
+    "order": 1559,
+    "name": "如入巨龙的眼瞳",
+    "description": "清除「圣山之心」的深渊影响，展露出其真实的样貌。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 75166, "name": "如烈日彻照阴霾", "type": "世界任务" }]
+    }
+  },
+  {
+    "id": 81565,
+    "series": 0,
+    "order": 1560,
+    "name": "创造朝向所想之路",
+    "description": "选择了自己认为的更想前往的一方。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 75151, "name": "毁灭预兆与最后的通牒", "type": "世界任务" }]
+    }
+  },
+  {
+    "id": 81566,
+    "series": 0,
+    "order": 1561,
+    "name": "往后你可自由地…",
+    "description": "与龙伙伴告别。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 75177, "name": "终有独行之日", "type": "世界任务" }]
+    }
+  },
+  {
+    "id": 81567,
+    "series": 0,
+    "order": 1562,
+    "name": "勇者之证",
+    "description": "吹响英勇号角的曲调。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81568,
+    "series": 0,
+    "order": 1563,
+    "name": "凶手就是你！",
+    "description": "找到了在「沃陆之邦」部族里四处惹祸的捣蛋鬼。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "FINISH_PARENT_QUEST_AND", "task": [] }
+  },
+  {
+    "id": 81570,
+    "series": 0,
+    "order": 1565,
+    "name": "孤独的坚守",
+    "description": "成功帮助秘源龙仆从被废弃的试验场中脱困。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81571,
+    "series": 0,
+    "order": 1566,
+    "name": "极品飞龙",
+    "description": "完成全部的「沃陆之邦」勇士挑战并获得最高等级的评价。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81572,
+    "series": 0,
+    "order": 1567,
+    "name": "最纯粹的「热度」",
+    "description": "使温泉的「热度」恢复如初。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81573,
+    "series": 0,
+    "order": 1568,
+    "name": "重量级选手",
+    "description": "面对三倍以上的体重差时，「技术」亦会失效。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81574,
+    "series": 0,
+    "order": 1569,
+    "name": "炽热的大脚",
+    "description": "发现了「生物火雨」的真面目。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81575,
+    "series": 0,
+    "order": 1570,
+    "name": "巨像之影",
+    "description": "完成所有的挑战，击败失落在外的秘源龙像。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81577,
+    "series": 0,
+    "order": 1572,
+    "name": "没有第三只吗？",
+    "description": "击败炉壳山鼬三…两兄弟。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81578,
+    "series": 0,
+    "order": 1573,
+    "name": "我曾见她缀饰荧光的裙裾",
+    "description": "完成纳塔所有的夜魂图腾挑战。",
+    "reward": 20,
+    "version": "5.5",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81579,
+    "series": 0,
+    "order": 1574,
+    "name": "「速度，我就是速度！」",
+    "description": "完成奔驰的挑战并登上领奖台。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "QUEST_GLOBAL_VAR_EQUAL" }
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
@@ -11855,6 +12223,176 @@
     "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
+    "id": 82279,
+    "series": 61,
+    "order": 2279,
+    "name": "「尖峰」",
+    "description": "战胜地方传奇·尖峰。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82280,
+    "series": 61,
+    "order": 2280,
+    "name": "「尖峰」",
+    "description": "击败处于虚弱状态的尖峰。",
+    "reward": 10,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82281,
+    "series": 61,
+    "order": 2281,
+    "name": "「尖峰」",
+    "description": "在完成一次挑战的过程中，从未让尖峰成功释放过熔岩践踏。",
+    "reward": 20,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82282,
+    "series": 61,
+    "order": 2282,
+    "name": "「战羊」与「铁爪」",
+    "description": "战胜地方传奇「战羊」与「铁爪」。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82283,
+    "series": 61,
+    "order": 2283,
+    "name": "「战羊」与「铁爪」",
+    "description": "在完成一次挑战的过程中，使「战羊」的蛮骑突击与「铁爪」的头鸟坚壁相撞2次。",
+    "reward": 10,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82284,
+    "series": 61,
+    "order": 2284,
+    "name": "「战羊」与「铁爪」",
+    "description": "利用蛮骑突击与头鸟坚壁的撞击，使「战羊」与「铁爪」同归于尽。",
+    "reward": 20,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82285,
+    "series": 61,
+    "order": 2285,
+    "name": "「微末」",
+    "description": "战胜地方传奇「微末」。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82286,
+    "series": 61,
+    "order": 2286,
+    "name": "「微末」",
+    "description": "在完成一次挑战的过程中，从未被「微末」的撼地猛击命中。",
+    "reward": 10,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82287,
+    "series": 61,
+    "order": 2287,
+    "name": "「微末」",
+    "description": "在「微末」首次陷入虚耗状态时，将其击败。",
+    "reward": 20,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82288,
+    "series": 61,
+    "order": 2288,
+    "name": "「雷吉」",
+    "description": "战胜地方传奇·雷吉。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82289,
+    "series": 61,
+    "order": 2289,
+    "name": "「雷吉」",
+    "description": "在完成一次挑战的过程中，角色被来自雷吉的攻击命中时均处于护盾庇护下，且护盾从未被攻击破坏。",
+    "reward": 10,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82290,
+    "series": 61,
+    "order": 2290,
+    "name": "「雷吉」",
+    "description": "在完成一次挑战的过程中，曾于短时间内连续弹回4枚子弹。",
+    "reward": 20,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82291,
+    "series": 61,
+    "order": 2291,
+    "name": "「图普的繁茂」",
+    "description": "战胜地方传奇「图普的繁茂」。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82292,
+    "series": 61,
+    "order": 2292,
+    "name": "「图普的繁茂」",
+    "description": "在完成一次挑战的过程中，没有角色倒下。",
+    "reward": 10,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82293,
+    "series": 61,
+    "order": 2293,
+    "name": "「图普的繁茂」",
+    "description": "在完成一次挑战的过程中，从未使「图普的繁茂」生成的雷元素护罩达到护罩最大值的一半及以上。",
+    "reward": 20,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82294,
+    "series": 0,
+    "order": 2294,
+    "name": "按下自爆按钮！",
+    "description": "通过持续的火元素攻击，使熔岩辉龙像熔化崩解。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82295,
+    "series": 0,
+    "order": 2295,
+    "name": "当那突角龙杀到",
+    "description": "利用突角龙或「沃陆之邦」的部族成员的冲刺，中断炉壳山鼬的冲撞。",
+    "reward": 5,
+    "version": "5.5",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
     "id": 84000,
     "series": 0,
     "order": 4001,
@@ -14088,6 +14626,16 @@
       "type": "FINISH_PARENT_QUEST_AND",
       "task": [{ "questId": 5002, "name": "温泉之乡", "type": "魔神任务" }]
     }
+  },
+  {
+    "id": 84328,
+    "series": 0,
+    "order": 5107,
+    "name": "「杜麦尼」的诗篇",
+    "description": "记忆填满圣夜旅织，而纳塔的故事还在继续…",
+    "reward": 20,
+    "version": "5.5",
+    "trigger": { "type": "NATLAN_RELATION_COMPLETE" }
   },
   {
     "id": 84329,

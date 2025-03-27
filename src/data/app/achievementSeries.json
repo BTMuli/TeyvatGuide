@@ -3,7 +3,7 @@
     "id": 0,
     "order": 1,
     "name": "天地万象",
-    "version": "5.3",
+    "version": "5.5",
     "card": "",
     "icon": "UI_AchievementIcon_O001"
   },
@@ -472,11 +472,27 @@
     "icon": "UI_AchievementIcon_B007_Part2"
   },
   {
-    "id": 58,
+    "id": 61,
     "order": 60,
+    "name": "对决者·第三辑",
+    "version": "5.5",
+    "card": "成就·寂宁",
+    "icon": "UI_AchievementIcon_B007_Part3"
+  },
+  {
+    "id": 58,
+    "order": 61,
     "name": "千音雅集",
     "version": "5.3",
     "card": "成就·乐集",
     "icon": "UI_AchievementIcon_A020"
+  },
+  {
+    "id": 60,
+    "order": 62,
+    "name": "圣山残辉",
+    "version": "5.5",
+    "card": "纳塔·眬瞳",
+    "icon": "UI_AchievementIcon_A021"
   }
 ]
