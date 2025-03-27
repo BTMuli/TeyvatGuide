@@ -82,11 +82,13 @@ async function searchAchi(): Promise<void> {
   achievements.value = await TSUserAchi.searchAchi(props.uid, props.search);
   if (achievements.value.length > 0) {
     showSnackbar.success(`成功获取${achievements.value.length}条成就`);
+    emits("update:series", -1);
   }
   emits("update:isSearch", false);
 }
 
 async function loadAchi(): Promise<void> {
+  if (props.isSearch) return;
   achievements.value = await TSUserAchi.getAchievements(props.uid, props.series);
   if (!selectedAchi.value && achievements.value.length > 0) {
     selectedAchi.value = achievements.value[0];
