@@ -2,12 +2,36 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2025-03-06
+Update: 2025-03-27
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2025-03-06 10:01:22`
+> 更新于 `2025-03-27 14:45:54`
+
+## [0.7.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.2) (2025-03-27)
+
+- 🍱 更新5.5资源 [`#147`](https://github.com/BTMuli/TeyvatGuide/issues/147)
+- ✨ 新增游戏签到脚本
+- ✨ 扫码登录新增游戏登录方式
+- ✨ 获取登录用户关注帖子
+- 🐛 修复获取深渊数据概览异常
+- 🐛 修复扫码登录异常
+- ♻️ 首页卡池&活动组件重构
+- ♻️ 重构游戏账号数据库
+- ♻️ 调用浏览器而非webview2打开外部链接
+- 💄 帖子卡片UI调整，增加时间&推荐理由数据
+- 💄 调整整体滚动条样式
+- 💄 调整抽奖UI
+- 💄 米游币脚本显示连续执行天数
+- 💄 帖子投票组件进度条显示相对进度（以最高数为基准）
+- 💄 调整多页面UI
+- 🎨 重构合集浮窗滚动高度计算
+- 🎨 调整帖子卡片点击处理
+- 🚸 处理下线villaCard渲染
+- 🚸 即时响应页面适配
+- 🚸 完善部分请求防抖处理
+- 🚸 链接识别`ys.mihoyo.com`
 
 ## [0.7.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.1) (2025-03-06)
 
