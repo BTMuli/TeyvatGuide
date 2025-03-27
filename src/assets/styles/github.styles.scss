@@ -5,41 +5,45 @@
  */
 
 /* Card，传入theme参数 */
-@mixin github-card($theme: 'default') {
+@mixin github-card($theme: "default") {
   @include github-card-shadow($theme);
 
-  @if $theme == 'default' {
-    background: #ffffff;
+  @if $theme == "default" {
     border: 1px solid #d1d9e0;
+    background: #ffffff;
   } @else {
-    background: #0d1117;
     border: 1px solid #3d444d;
+    background: #0d1117;
   }
 }
 
 /* CardShadow，传入theme参数 */
-@mixin github-card-shadow($theme: 'default') {
-  @if $theme == 'default' {
-    box-shadow: rgba(31, 35, 40, 0.06) 0 1px 1px 0, rgba(31, 35, 40, 0.06) 0 1px 3px 0;
+@mixin github-card-shadow($theme: "default") {
+  @if $theme == "default" {
+    box-shadow:
+      rgba(31, 35, 40, 0.06) 0 1px 1px 0,
+      rgba(31, 35, 40, 0.06) 0 1px 3px 0;
   } @else {
-    box-shadow: rgba(1, 4, 9, 0.6) 0 1px 1px 0, rgba(1, 4, 9, 0.6) 0 1px 3px 0;
+    box-shadow:
+      rgba(1, 4, 9, 0.6) 0 1px 1px 0,
+      rgba(1, 4, 9, 0.6) 0 1px 3px 0;
   }
 }
 
 /* Btn，传入theme参数 */
-@mixin github-btn($theme: 'default') {
-  @if $theme == 'default' {
-    background: #f6f8fa;
+@mixin github-btn($theme: "default") {
+  @if $theme == "default" {
     border: 1px solid #d1d9e0;
+    background: #f6f8fa;
   } @else {
-    background: #212830;
     border: 1px solid #3d444d;
+    background: #212830;
   }
 }
 
 /* tags，深色主题 */
 @mixin github-tag-dark-gen($color: #548af7) {
-  background: rgba($color, .18);
-  border: 1px solid rgba($color, .3);
+  border: 1px solid rgba($color, 0.3);
+  background: rgba($color, 0.18);
   color: $color;
 }

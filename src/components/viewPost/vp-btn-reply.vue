@@ -231,6 +231,7 @@ async function handleDebug(): Promise<void> {
 .tpr-reply-list {
   position: relative;
   display: flex;
+  overflow: hidden auto;
   width: 100%;
   height: 360px;
   box-sizing: border-box;
@@ -240,7 +241,6 @@ async function handleDebug(): Promise<void> {
   padding-top: 0;
   padding-right: 4px;
   background: var(--app-page-bg);
-  overflow: hidden auto;
   row-gap: 8px;
 }
 
