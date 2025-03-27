@@ -1,11 +1,12 @@
 /**
  * @file utils/TGShare.ts
  * @description 生成分享截图并保存到本地
- * @since Beta v0.7.1
+ * @since Beta v0.7.2
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
 import { path } from "@tauri-apps/api";
+import { sep } from "@tauri-apps/api/path";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
@@ -20,7 +21,7 @@ import { useAppStore } from "@/store/modules/app.js";
 
 /**
  * @description 保存图片-canvas
- * @since Beta v0.6.4
+ * @since Beta v0.7.2
  * @param {Uint8Array} buffer - 图片数据
  * @param {string} filename - 文件名
  * @param {string} format - 文件格式
@@ -43,8 +44,9 @@ export async function saveCanvasImg(
     return;
   }
   await writeFile(res, buffer);
-  await TGLogger.Info(`[saveCanvasImg][${filename}] 已将图像保存到本地`);
-  showSnackbar.success(`已将 ${filename} 保存到本地，大小为 ${bytesToSize(buffer.length)}`);
+  const realName = res.split(sep()).pop();
+  await TGLogger.Info(`[saveCanvasImg][${realName}] 已将图像保存到本地`);
+  showSnackbar.success(`已将 ${realName} 保存到本地，大小为 ${bytesToSize(buffer.length)}`);
 }
 
 /**

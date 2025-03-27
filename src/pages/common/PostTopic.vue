@@ -69,7 +69,9 @@
         @click:append="searchPost"
         @keyup.enter="searchPost"
       />
-      <v-btn class="post-topic-btn" @click="firstLoad()" prepend-icon="mdi-refresh">刷新</v-btn>
+      <v-btn :loading="isReq" class="post-topic-btn" @click="firstLoad()" prepend-icon="mdi-refresh"
+        >刷新</v-btn
+      >
     </div>
   </v-app-bar>
   <div class="post-topic-grid">
