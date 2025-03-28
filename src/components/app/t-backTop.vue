@@ -42,6 +42,7 @@ onUnmounted(() => window.removeEventListener("scroll", handleScroll));
 <style lang="css" scoped>
 .back-top {
   position: fixed;
+  z-index: 1;
   right: 10px;
   bottom: 10px;
   width: 40px;
