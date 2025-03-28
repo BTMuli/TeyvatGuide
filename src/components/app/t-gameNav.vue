@@ -38,7 +38,8 @@ const showOverlay = ref<boolean>(false);
 const actId = ref<string>();
 
 const hasNav = computed<TGApp.BBS.Navigator.Navigator | undefined>(() => {
-  return nav.value.find((item) => item.name === "前瞻直播" || item.name === "直播兑换码");
+  const liveNames = ["前瞻直播", "前瞻节目", "直播兑换码"];
+  return nav.value.find((item) => liveNames.includes(item.name));
 });
 
 onMounted(async () => await loadNav());
@@ -53,7 +54,6 @@ async function loadNav(): Promise<void> {
 }
 
 async function tryGetCode(): Promise<void> {
-  if (props.modelValue !== 2) return;
   if (!hasNav.value) return;
   const actIdFind = new URL(hasNav.value.app_path).searchParams.get("act_id");
   if (!actIdFind) {
