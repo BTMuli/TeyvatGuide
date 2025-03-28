@@ -58,35 +58,38 @@ console.log("tpBackupText", props.data.insert.backup_text, toRaw(props.data));
 
 .tp-backup-fold {
   position: relative;
-  padding: 10px;
+  overflow: hidden;
   border: 1px solid var(--common-shadow-2);
-  border-radius: 10px;
-  margin: 10px auto;
-}
-
-.tp-backup-fold summary {
-  list-style: none;
-}
-
-.tp-backup-fold ::marker {
-  color: var(--common-shadow-4);
-  content: "";
+  border-radius: 4px;
+  margin: 8px auto;
 }
 
 .tp-backup-summary {
+  position: relative;
   display: flex;
-  margin-left: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px;
+  background: var(--box-bg-1);
+  cursor: pointer;
   font-family: var(--font-title);
 }
 
 .tp-backup-marker {
   position: relative;
   display: inline;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
 }
 
 .tp-backup-details {
-  padding-left: 20px;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 8px 8px 24px;
+  border-top: 1px solid var(--common-shadow-1);
 }
 </style>
