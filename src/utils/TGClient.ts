@@ -1,7 +1,7 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.7.2
+ * @since Beta v0.7.3
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -586,13 +586,13 @@ class Client {
 
   /**
    * @func getDS
-   * @since Beta v0.3.9
+   * @since Beta v0.7.3
    * @desc 获取米游社客户端的 DS 参数
    * @param {TGApp.Plugins.JSBridge.NullArg} arg - 方法参数
    * @returns {void} - 无返回值
    */
   async getDS(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
-    const data = { DS: getDS4JS("LK2", 1, undefined, undefined) };
+    const data = { DS: getDS4JS("LK2", 1) };
     await this.callback(arg.callback, data);
   }
 

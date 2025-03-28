@@ -127,19 +127,19 @@ export function getRequestHeader(
 
 /**
  * @description 获取 DS
- * @since Beta v0.3.9
+ * @since Beta v0.7.3
  * @param {SaltKey} saltType salt 类型
  * @param {number} dsType ds 类型
  * @param {Record<string, string|number>|string} body
  * @param {Record<string, string|number>|string} query
  * @returns {string} DS
  */
-export function getDS4JS(saltType: SaltKey, dsType: 1, body: undefined, query: undefined): string;
+export function getDS4JS(saltType: SaltKey, dsType: 1, body?: never, query?: never): string;
 export function getDS4JS(
   saltType: SaltKey,
   dsType: 2,
-  body: Record<string, string | number> | string,
-  query: Record<string, string | number> | string,
+  body?: Record<string, string | number> | string,
+  query?: Record<string, string | number> | string,
 ): string;
 export function getDS4JS(
   saltType: SaltKey,

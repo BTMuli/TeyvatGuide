@@ -26,13 +26,14 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import TPostcard from "@comp/app/t-postcard.vue";
 import { nextTick, onMounted, shallowRef, useTemplateRef, watch } from "vue";
 
-// import bbsReq from "@/web/request/bbsReq.js";
+import bbsReq from "@/web/request/bbsReq.js";
 import postReq from "@/web/request/postReq.js";
 
 type TpoCollectionProps = { collection: TGApp.BBS.Post.Collection; gid: number };
 
 const props = defineProps<TpoCollectionProps>();
 const visible = defineModel<boolean>();
+const info = shallowRef<TGApp.BBS.Collection.InfoRes>();
 const postList = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
 const postListEl = useTemplateRef<HTMLDivElement>("postListRef");
 
@@ -49,11 +50,23 @@ watch(
   },
 );
 
-onMounted(async () => {
+onMounted(async () => await Promise.all([refreshInfo(), refreshPosts()]));
+
+async function refreshInfo(): Promise<void> {
+  const infoResp = await bbsReq.collection(props.collection.collection_id, props.gid);
+  if ("retcode" in infoResp) {
+    // showSnackbar.warn(`[合集信息][${infoResp.retcode}] ${infoResp.message}`);
+    return;
+  }
+  info.value = infoResp;
+  console.log(info.value);
+}
+
+async function refreshPosts(): Promise<void> {
   postList.value = await postReq.collection(props.collection.collection_id);
-});
+}
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tpoc-box {
   padding: 10px;
   border-radius: 5px;

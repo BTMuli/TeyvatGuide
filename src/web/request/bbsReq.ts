@@ -1,22 +1,24 @@
 /**
  * @file web/request/bbsReq.ts
  * @description BBS 请求模块
- * @since Beta v0.7.2
+ * @since Beta v0.7.3
  */
 
 import TGHttp from "@/utils/TGHttp.js";
 import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
 
+// MysBBSBaseUrl => mbBu
+const mbBu: Readonly<string> = "https://bbs-api.miyoushe.com/";
+
 /**
  * @description 获取表情包列表
- * @since Beta v0.7.2
+ * @since Beta v0.7.3
  * @return {Promise<Record<string,string>|TGApp.BBS.Response.Base>}
  */
 async function getEmoticonSet(): Promise<Record<string, string> | TGApp.BBS.Response.Base> {
-  const resp = await TGHttp<TGApp.BBS.Emoji.Resp>(
-    "https://bbs-api-static.miyoushe.com/misc/api/emoticon_set",
-    { method: "GET" },
-  );
+  const resp = await TGHttp<TGApp.BBS.Emoji.Resp>(`${mbBu}misc/api/emoticon_set`, {
+    method: "GET",
+  });
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   const emojis: Record<string, string> = {};
   for (const series of resp.data.list) {
@@ -38,10 +40,11 @@ async function getUserFullInfo(
 ): Promise<TGApp.BBS.Response.Base | TGApp.BBS.User.Info> {
   const ck = { cookie_token: cookie.cookie_token, account_id: cookie.account_id };
   const params = { gids: "2" };
-  const resp = await TGHttp<TGApp.BBS.User.InfoResp>(
-    "https://bbs-api.miyoushe.com/user/wapi/getUserFullInfo",
-    { method: "GET", headers: getRequestHeader(ck, "GET", params, "X4", true), query: params },
-  );
+  const resp = await TGHttp<TGApp.BBS.User.InfoResp>(`${mbBu}user/wapi/getUserFullInfo`, {
+    method: "GET",
+    headers: getRequestHeader(ck, "GET", params, "X4", true),
+    query: params,
+  });
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data.user_info;
 }
@@ -58,20 +61,21 @@ async function getOtherUserInfo(
   userId: string,
 ): Promise<TGApp.BBS.Response.Base | TGApp.BBS.User.Info> {
   const params = { gids: gid.toString(), uid: userId };
-  const resp = await TGHttp<TGApp.BBS.User.InfoResp>(
-    "https://bbs-api.miyoushe.com/user/wapi/getUserFullInfo",
-    { method: "GET", headers: getRequestHeader({}, "GET", params, "X4", true), query: params },
-  );
+  const resp = await TGHttp<TGApp.BBS.User.InfoResp>(`${mbBu}user/wapi/getUserFullInfo`, {
+    method: "GET",
+    headers: getRequestHeader({}, "GET", params, "X4", true),
+    query: params,
+  });
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data.user_info;
 }
 
 /**
  * @description 获取合集信息
- * @since Beta v0.7.2
- * @todo invalid request
- * @param {number} gid - gid
+ * @since Beta v0.7.3
+ * @todo salt计算异常
  * @param {string} cid - 合集 id
+ * @param {number} gid - gid
  * @returns {Promise<TGApp.BBS.Collection.InfoRes|TGApp.BBS.Response.Base>}
  */
 async function getCollectionDetail(
@@ -80,7 +84,7 @@ async function getCollectionDetail(
 ): Promise<TGApp.BBS.Collection.InfoRes | TGApp.BBS.Response.Base> {
   const params = { gids: gid, id: cid };
   const resp = await TGHttp<TGApp.BBS.Collection.InfoResp>(
-    "https://bbs-api.miyoushe.com/collection/wapi/collection/detail",
+    `${mbBu}collection/wapi/collection/detail`,
     {
       method: "GET",
       headers: getRequestHeader({}, "GET", params, "X4", true),
