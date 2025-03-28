@@ -205,7 +205,7 @@ const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
   if (briefInfo.value && briefInfo.value.nickname) return briefInfo.value;
   return { nickname: "未登录", uid: "-1", desc: "请扫码登录", avatar: "/source/UI/lumine.webp" };
 });
-const themeTitle = computed<string>(() => (theme.value === "default" ? "夜间模式" : "日间模式"));
+const themeTitle = computed<string>(() => (theme.value === "default" ? "深色模式" : "浅色模式"));
 
 onMounted(async () => {
   themeListener = await event.listen<string>("readTheme", (e: Event<string>) => {
