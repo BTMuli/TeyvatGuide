@@ -22,24 +22,31 @@
       </template>
       <div class="tpr-main-reply">
         <div class="tpr-main-filter">
-          <div class="tpr-title" @click="handleDebug">回复列表</div>
-          <v-switch
-            v-model="onlyLz"
-            color="primary"
-            :hide-details="true"
-            title="只看楼主"
-            @change="reloadReply"
-          />
-          <v-select
-            class="tpr-select"
-            density="compact"
-            v-model="orderType"
-            :items="orderList"
-            item-title="label"
-            item-value="value"
-            title="排序方式"
-          />
-          <v-btn @click="showOverlay = false" icon="mdi-close" class="tpr-btn-close" size="32" />
+          <div class="tpr-title">
+            <span title="刷新" @click="handleDebug">回复列表</span>
+            <v-btn @click="showOverlay = false" icon="mdi-close" class="tpr-btn-close" size="32" />
+          </div>
+          <div class="tpr-subtitle">
+            <div class="tpr-switch" @click="switchOnlyLz()">
+              <v-icon v-if="onlyLz" color="var(--tgc-od-green)">
+                mdi-checkbox-marked-circle-outline
+              </v-icon>
+              <v-icon v-else color="var(--tgc-od-white)">mdi-circle</v-icon>
+              <span>只看楼主</span>
+            </div>
+            <div class="tpr-select">
+              <v-select
+                :hide-details="true"
+                variant="outlined"
+                density="compact"
+                v-model="orderType"
+                :items="orderList"
+                item-title="label"
+                item-value="value"
+                label="排序方式"
+              />
+            </div>
+          </div>
         </div>
         <v-list class="tpr-reply-list">
           <VpReplyItem
@@ -114,6 +121,11 @@ async function showReply(): Promise<void> {
   await loadReply();
 }
 
+async function switchOnlyLz(): Promise<void> {
+  onlyLz.value = !onlyLz.value;
+  await reloadReply();
+}
+
 async function reloadReply(): Promise<void> {
   lastId.value = undefined;
   reply.value = [];
@@ -155,7 +167,7 @@ async function handleDebug(): Promise<void> {
   await reloadReply();
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tpr-main-box {
   position: fixed;
   bottom: 20px;
@@ -169,17 +181,10 @@ async function handleDebug(): Promise<void> {
   align-items: center;
   justify-content: center;
   border: 2px solid var(--common-shadow-8);
-}
 
-.tpr-btn:hover {
-  opacity: 0.8;
-}
-
-.tpr-btn-close {
-  border: 1px solid var(--common-shadow-2);
-  margin-left: auto;
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
+  &:hover {
+    opacity: 0.8;
+  }
 }
 
 .tpr-main-reply {
@@ -201,31 +206,62 @@ async function handleDebug(): Promise<void> {
 }
 
 .tpr-main-filter {
+  position: relative;
   display: flex;
+  flex-direction: column;
   width: 100%;
-  height: 40px;
-  align-items: center;
-  justify-content: flex-start;
+  align-items: flex-start;
+  justify-content: center;
   color: var(--app-page-content);
-  column-gap: 4px;
+  row-gap: 4px;
 }
 
 .tpr-title {
   position: relative;
-  padding: 2px 4px;
-  border-radius: 4px;
-  background: var(--tgc-od-blue);
-  color: var(--tgc-white-1);
-  cursor: pointer;
-  font-family: var(--font-title);
-  white-space: nowrap;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  span {
+    padding: 2px 4px;
+    border-radius: 4px;
+    background: var(--tgc-od-blue);
+    color: var(--tgc-white-1);
+    cursor: pointer;
+    font-family: var(--font-title);
+    white-space: nowrap;
+  }
+}
+
+.tpr-btn-close {
+  border: 1px solid var(--common-shadow-2);
+  margin-left: auto;
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
+}
+
+.tpr-subtitle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .tpr-select {
   position: relative;
-  max-width: 100px;
-  height: 40px;
-  font-size: 12px;
+  width: 120px;
+}
+
+.tpr-switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-family: var(--font-title);
 }
 
 .tpr-reply-list {
