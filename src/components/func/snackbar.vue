@@ -90,7 +90,7 @@ defineExpose({ displayBox });
 
 .func-snackbar-container {
   position: fixed;
-  z-index: 999;
+  z-index: 9999;
   bottom: 0;
   left: 0;
   display: flex;
