@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.7.2
+ * @since Beta v0.7.3
  */
 
 import { path } from "@tauri-apps/api";
@@ -131,12 +131,8 @@ export const useAppStore = defineStore(
           "shareDefaultFile",
           "imageQualityPercent",
           "incognito",
+          "sidebar",
         ],
-      },
-      {
-        key: "sidebar",
-        storage: window.localStorage,
-        pick: ["sidebar"],
       },
       {
         key: "theme",

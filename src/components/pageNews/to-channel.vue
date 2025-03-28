@@ -25,19 +25,21 @@ import { storeToRefs } from "pinia";
 import { onMounted, shallowRef } from "vue";
 
 import { type NewsType, useAppStore } from "@/store/modules/app.js";
-import apiHubReq from "@/web/request/apiHubReq.js";
+import useBBSStore from "@/store/modules/bbs.js";
 
 type ChannelItem = { icon: string; title: string; gid: number };
 type ToChannelProps = { gid?: string; curType?: string };
 
+const bbsStore = useBBSStore();
 const { recentNewsType } = storeToRefs(useAppStore());
+const { gameList } = storeToRefs(bbsStore);
 const channelList = shallowRef<Array<ChannelItem>>();
 const props = defineProps<ToChannelProps>();
 const visible = defineModel<boolean>({ default: false });
 
 onMounted(async () => {
-  const allGames = await apiHubReq.game();
-  channelList.value = allGames.map((i) => ({ icon: i.app_icon, title: i.name, gid: i.id }));
+  if (gameList.value.length === 0) await bbsStore.refreshGameList();
+  channelList.value = gameList.value.map((i) => ({ icon: i.app_icon, title: i.name, gid: i.id }));
 });
 
 async function toChannel(item: ChannelItem): Promise<void> {

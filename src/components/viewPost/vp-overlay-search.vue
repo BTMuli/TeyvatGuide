@@ -3,7 +3,7 @@
     <div class="tops-box">
       <div class="tops-top">查找：{{ search }}</div>
       <div class="tops-act">
-        <span>分区：{{ gameName }}</span>
+        <span>分区：{{ label }}</span>
         <v-btn :loading="load" size="small" class="tops-btn" @click="searchPosts()" rounded>
           加载更多({{ results.length }})
         </v-btn>
@@ -24,27 +24,33 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
-import TGBbs from "@/utils/TGBbs.js";
+import useBBSStore from "@/store/modules/bbs.js";
 import postReq from "@/web/request/postReq.js";
 
 type ToPostSearchProps = { gid: string; keyword?: string };
 
+const { gameList } = storeToRefs(useBBSStore());
+
 const props = defineProps<ToPostSearchProps>();
 const visible = defineModel<boolean>();
+
 const search = ref<string>();
 const lastId = ref<string>("");
-const game = ref<string>("2");
+const gameId = ref<string>("2");
 const isLast = ref<boolean>(false);
 const load = ref<boolean>(false);
 const results = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
-const gameName = computed<string>(
-  () => TGBbs.channels.find((v) => v.gid.toString() === game.value)?.title || "未知分区",
-);
+const label = computed<string>(() => {
+  const gameFind = gameList.value.find((v) => v.id.toString() === gameId.value);
+  if (gameFind === undefined) return "未知分区";
+  return gameFind.name;
+});
 
 onMounted(async () => {
-  game.value = props.gid;
+  gameId.value = props.gid;
   if (props.keyword && props.keyword !== "") search.value = props.keyword;
   if (visible.value) await searchPosts();
 });
@@ -79,8 +85,8 @@ watch(
 watch(
   () => props.gid,
   async () => {
-    if (game.value !== props.gid) {
-      game.value = props.gid;
+    if (gameId.value !== props.gid) {
+      gameId.value = props.gid;
       results.value = [];
       lastId.value = "";
       isLast.value = false;
@@ -106,7 +112,7 @@ async function searchPosts(): Promise<void> {
     load.value = false;
     return;
   }
-  const res = await postReq.search(game.value, search.value, lastId.value);
+  const res = await postReq.search(gameId.value, search.value, lastId.value);
   if (lastId.value === "") results.value = res.posts;
   else results.value = results.value.concat(res.posts);
   lastId.value = res.last_id;

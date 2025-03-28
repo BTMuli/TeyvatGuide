@@ -5,7 +5,7 @@
         <v-select
           v-model="curGid"
           class="home-tool-select"
-          :items="gameList"
+          :items="games"
           :hide-details="true"
           item-value="gid"
           variant="outlined"
@@ -72,9 +72,9 @@ import { storeToRefs } from "pinia";
 import { type Component, computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import { useAppStore } from "@/store/modules/app.js";
+import useBBSStore from "@/store/modules/bbs.js";
 import { useHomeStore } from "@/store/modules/home.js";
 import TGLogger from "@/utils/TGLogger.js";
-import apiHubReq from "@/web/request/apiHubReq.js";
 
 type SFComp = Component & {
   __file?: string;
@@ -84,14 +84,16 @@ type SFComp = Component & {
 };
 type SelectItem = { icon: string; title: string; gid: number };
 
+const bbsStore = useBBSStore();
 const { devMode, isLogin } = storeToRefs(useAppStore());
+const { gameList } = storeToRefs(bbsStore);
 const homeStore = useHomeStore();
 
 const showItemsAll: Array<string> = ["素材日历", "限时祈愿", "近期活动"];
 
 const curGid = ref<number>(2);
-const gameList = shallowRef<Array<SelectItem>>();
 
+const games = shallowRef<Array<SelectItem>>();
 const loadItems = shallowRef<Array<string>>([]);
 const components = shallowRef<Array<SFComp>>([]);
 const showItems = computed<Array<string>>({
@@ -100,13 +102,13 @@ const showItems = computed<Array<string>>({
 });
 
 onMounted(async () => {
+  await bbsStore.refreshGameList();
   // @ts-expect-error-next-line The import.meta meta-property is not allowed in files which will build into CommonJS output.
   const isProdEnv = import.meta.env.MODE === "production";
   if (isProdEnv && devMode.value) devMode.value = false;
   if (isLogin.value) {
     await showLoading.start("正在加载首页小部件");
-    const allGames = await apiHubReq.game();
-    gameList.value = allGames.map((i) => ({ icon: i.app_icon, title: i.name, gid: i.id }));
+    games.value = gameList.value.map((i) => ({ icon: i.app_icon, title: i.name, gid: i.id }));
   }
   await loadComp();
 });

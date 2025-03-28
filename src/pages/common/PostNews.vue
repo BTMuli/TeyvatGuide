@@ -68,12 +68,11 @@ import showSnackbar from "@comp/func/snackbar.js";
 import ToChannel from "@comp/pageNews/to-channel.vue";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import { storeToRefs } from "pinia";
-import type { Ref } from "vue";
-import { computed, onMounted, reactive, ref, shallowRef } from "vue";
+import { computed, onMounted, reactive, Ref, ref, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { type NewsType, useAppStore } from "@/store/modules/app.js";
-import TGBbs from "@/utils/TGBbs.js";
+import useBBSStore from "@/store/modules/bbs.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
 import painterReq from "@/web/request/painterReq.js";
@@ -84,11 +83,15 @@ type RawData = { [key in NewsType]: Ref<RawItem> };
 
 const router = useRouter();
 const { recentNewsType } = storeToRefs(useAppStore());
+const { gameList } = storeToRefs(useBBSStore());
 const { gid } = <{ gid: string }>useRoute().params;
 
 const tabValues: Readonly<Array<NewsType>> = ["notice", "activity", "news"];
 const tabMap: Readonly<Record<NewsType, string>> = { notice: "1", activity: "2", news: "3" };
-const gameName = TGBbs.channels.find((v) => v.gid.toString() === gid)?.title || "未知分区";
+const label = computed<string>(() => {
+  const game = gameList.value.find((v) => v.id.toString() === gid);
+  return game?.name || "未知分区";
+});
 
 const loading = ref<boolean>(false);
 const showList = ref<boolean>(false);
@@ -117,20 +120,22 @@ async function firstLoad(key: NewsType, refresh: boolean = false): Promise<void>
   if (rawData[key].lastId !== 0) {
     if (!refresh) {
       loading.value = false;
+      document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
     postData[key] = [];
     rawData[key].lastId = 0;
   }
-  await showLoading.start(`正在获取${gameName}${rawData[key].name}数据`);
-  document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
+  await showLoading.start(`正在获取${label.value}${rawData[key].name}数据`);
   const getData = await painterReq.news(gid, tabMap[key]);
   await showLoading.update(`数量：${getData.list.length}，是否最后一页：${getData.is_last}`);
   rawData[key] = { isLast: getData.is_last, name: rawData[key].name, lastId: getData.list.length };
   postData[key] = getData.list;
   await showLoading.end();
   await TGLogger.Info(`[News][${gid}][firstLoad] 获取${rawData[key].name}数据成功`);
-  showSnackbar.success(`获取${gameName}${rawData[key].name}数据成功，共 ${getData.list.length} 条`);
+  showSnackbar.success(
+    `获取${label.value}${rawData[key].name}数据成功，共 ${getData.list.length} 条`,
+  );
   loading.value = false;
 }
 
@@ -148,7 +153,7 @@ async function loadMore(key: NewsType): Promise<void> {
     loading.value = false;
     return;
   }
-  await showLoading.start(`正在获取${gameName}${rawData[key].name}数据`);
+  await showLoading.start(`正在获取${label.value}${rawData[key].name}数据`);
   const mod = rawData[key].lastId % 20;
   const pageSize = mod === 0 ? 20 : 20 - mod;
   const getData = await painterReq.news(gid, tabMap[key], pageSize, rawData[key].lastId);

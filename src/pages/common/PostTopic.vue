@@ -69,9 +69,14 @@
         @click:append="searchPost"
         @keyup.enter="searchPost"
       />
-      <v-btn :loading="isReq" class="post-topic-btn" @click="firstLoad()" prepend-icon="mdi-refresh"
-        >刷新</v-btn
+      <v-btn
+        :loading="isReq"
+        class="post-topic-btn"
+        @click="firstLoad()"
+        prepend-icon="mdi-refresh"
       >
+        刷新
+      </v-btn>
     </div>
   </v-app-bar>
   <div class="post-topic-grid">
@@ -96,11 +101,12 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
+import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+import useBBSStore from "@/store/modules/bbs.js";
 import { createPost } from "@/utils/TGWindow.js";
-import apiHubReq from "@/web/request/apiHubReq.js";
 import postReq from "@/web/request/postReq.js";
 import topicReq from "@/web/request/topicReq.js";
 
@@ -121,7 +127,7 @@ const curUid = ref<string>("");
 const showUser = ref<boolean>(false);
 
 const isReq = ref<boolean>(false);
-const allGames = shallowRef<Array<TGApp.BBS.Game.Item>>([]);
+const { gameList } = storeToRefs(useBBSStore());
 const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 });
 const topicInfo = shallowRef<TGApp.BBS.Topic.InfoRes>();
 const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
@@ -150,7 +156,6 @@ onMounted(async () => {
   curGid.value = Number(gid);
   curTopic.value = topic;
   await showLoading.start(`正在加载话题${topic}信息`);
-  allGames.value = await apiHubReq.game();
   const info = await topicReq.info(gid, topic);
   if ("retcode" in info) {
     await showLoading.end();
@@ -163,7 +168,7 @@ onMounted(async () => {
     tmpGame = info.game_info_list.find((i) => i.id === curGid.value);
   }
   if (tmpGame === undefined) tmpGame = info.game_info_list[0];
-  const gameFind = allGames.value.find((i) => i.id === tmpGame?.id);
+  const gameFind = gameList.value.find((i) => i.id === tmpGame?.id);
   curGame.value = { ...tmpGame, icon: gameFind?.app_icon };
   await firstLoad();
 });
@@ -257,10 +262,10 @@ function searchPost(): void {
   } else createPost(search.value);
 }
 
-function getGameList(gameList: Array<TGApp.BBS.Topic.GameInfo> | undefined): Array<GameList> {
-  if (!gameList) return [];
-  return gameList.map((item) => {
-    const game = allGames.value.find((i) => i.id === item.id);
+function getGameList(list: Array<TGApp.BBS.Topic.GameInfo> | undefined): Array<GameList> {
+  if (!list) return [];
+  return list.map((item) => {
+    const game = gameList.value.find((i) => i.id === item.id);
     return { ...item, icon: game?.app_icon };
   });
 }

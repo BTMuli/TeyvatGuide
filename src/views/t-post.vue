@@ -11,7 +11,7 @@
       </div>
       <div class="tp-post-meta">
         <div class="mpm-forum" v-if="postData.forum" @click="toForum(postData.forum)">
-          <img :src="getGameIcon(postData.forum.game_id)" alt="gameIcon" />
+          <TMiImg :src="getGameIcon(postData.forum.game_id)" alt="gameIcon" />
           <TMiImg :src="postData.forum.icon" alt="forumIcon" :ori="true" />
           <span>{{ postData.forum.name }}</span>
         </div>
@@ -125,16 +125,18 @@ import { onBeforeMount, onMounted, onUnmounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
 import { useAppStore } from "@/store/modules/app.js";
+import useBBSStore from "@/store/modules/bbs.js";
 import { useUserStore } from "@/store/modules/user.js";
-import TGBbs from "@/utils/TGBbs.js";
 import TGClient from "@/utils/TGClient.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { createTGWindow } from "@/utils/TGWindow.js";
 import apiHubReq from "@/web/request/apiHubReq.js";
 import postReq from "@/web/request/postReq.js";
 
-const { cookie } = storeToRefs(useUserStore());
 const { incognito } = storeToRefs(useAppStore());
+const { gameList } = storeToRefs(useBBSStore());
+const { cookie } = storeToRefs(useUserStore());
+
 const appVersion = ref<string>();
 const postId = Number(useRoute().params.post_id);
 const showCollection = ref<boolean>(false);
@@ -151,8 +153,8 @@ let incognitoListener: UnlistenFn | null = null;
 let userListener: UnlistenFn | null = null;
 
 function getGameIcon(gameId: number): string {
-  const find = TGBbs.channels.find((item) => item.gid === gameId);
-  if (find) return `/platforms/mhy/${find.mini}.webp`;
+  const find = gameList.value.find((item) => item.id === gameId);
+  if (find) return find.app_icon;
   return "/platforms/mhy/mys.webp";
 }
 
@@ -332,9 +334,9 @@ async function tryLike(): Promise<void> {
 }
 
 async function toPost(): Promise<void> {
-  const channel = TGBbs.channels.find((item) => item.gid === postData.value?.post.game_id);
+  const channel = gameList.value.find((item) => item.id === postData.value?.post.game_id);
   const link = channel
-    ? `https://m.miyoushe.com/${channel.mini}/#/article/${postId}`
+    ? `https://m.miyoushe.com/${channel.en_name}/#/article/${postId}`
     : `https://m.miyoushe.com/ys/#/article/${postId}`;
   await TGClient.open("web_thin", link);
 }

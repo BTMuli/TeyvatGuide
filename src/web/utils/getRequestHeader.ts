@@ -6,28 +6,8 @@
 
 import Md5 from "js-md5";
 
-import TGBbs from "@/utils/TGBbs.js";
+import TGBbs, { type SaltKey } from "@/utils/TGBbs.js";
 import { getDeviceInfo, getRandomString } from "@/utils/toolFunc.js";
-
-/**
- * @description salt 类型
- * @since Beta v0.7.3
- */
-type SaltKey = "K2" | "LK2" | "X4" | "X6" | "PROD";
-
-/**
- * @description salt 值
- * @version 2.85.1
- * @since Beta v0.7.3
- */
-const Salt: Readonly<Record<SaltKey, string>> = {
-  K2: "ss6ZUzUlaWv6iDe0SHPSdCZYr0RSKPdi",
-  LK2: "gW20AtTxpc0V5GR3SmsytCLhVBgXtW6I",
-  X4: "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs",
-  X6: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
-  PROD: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
-};
-const UserAgent: Readonly<string> = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) miHoYoBBS/${TGBbs.version}`;
 
 /**
  * @description 获取随机数
@@ -42,8 +22,7 @@ function getRandomNumber(min: number, max: number): number {
 
 /**
  * @description 获取 ds
- * @since Beta v0.3.3
- * @version 2.50.1
+ * @since Beta v0.7.3
  * @param {string} method 请求方法
  * @param {string} data 请求数据
  * @param {SaltKey} saltType salt 类型
@@ -51,7 +30,7 @@ function getRandomNumber(min: number, max: number): number {
  * @returns {string} ds
  */
 function getDS(method: string, data: string, saltType: SaltKey, isSign: boolean): string {
-  const salt = Salt[saltType];
+  const salt = TGBbs.salt[saltType];
   const time = Math.floor(Date.now() / 1000).toString();
   let random = getRandomNumber(100000, 200000).toString();
   if (isSign) random = getRandomString(6);
@@ -97,7 +76,7 @@ function transCookie(cookie: Record<string, string>): string {
 
 /**
  * @description 获取请求头
- * @since Beta v0.6.5
+ * @since Beta v0.7.3
  * @param {Record<string, string>} cookie cookie
  * @param {string} method 请求方法
  * @param {Record<string, string | number | boolean | Array<string>> | string} data 请求数据
@@ -113,7 +92,7 @@ export function getRequestHeader(
   isSign: boolean = false,
 ): Record<string, string> {
   return {
-    "user-agent": UserAgent,
+    "user-agent": TGBbs.uap,
     "x-rpc-app_version": TGBbs.version,
     "x-rpc-client_type": "5",
     "x-requested-with": "com.mihoyo.hyperion",
@@ -147,7 +126,7 @@ export function getDS4JS(
   body?: Record<string, string | number> | string,
   query?: Record<string, string | number> | string,
 ): string {
-  const salt = Salt[saltType];
+  const salt = TGBbs.salt[saltType];
   const time = Math.floor(Date.now() / 1000).toString();
   let random = getRandomNumber(100000, 200000).toString();
   let hashStr: string;

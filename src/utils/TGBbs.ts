@@ -4,35 +4,29 @@
  * @since Beta v0.7.3
  */
 
+/**
+ * @description salt 类型
+ * @since Beta v0.7.3
+ */
+export type SaltKey = "K2" | "LK2" | "X4" | "X6" | "PROD";
+
 const BBS_VERSION: Readonly<string> = "2.85.1";
 const BBS_UA_MOBILE: Readonly<string> = `Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/${BBS_VERSION}`;
+const BBS_UA_PC: Readonly<string> = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) miHoYoBBS/${BBS_VERSION}`;
 
 /**
- * @description 频道列表
- * @since Beta v0.6.8
- * @interface ChannelItem
- * @property {string} title - 频道名称
- * @property {number} gid - 频道 gid
- * @property {string} mini - 频道简称
- * @return ToChannelItem
+ * @description salt 值
+ * @version 2.85.1
+ * @since Beta v0.7.3
  */
-type ChannelItem = { title: string; gid: number; mini: string };
+const BBS_SALT: Readonly<Record<SaltKey, string>> = {
+  K2: "ss6ZUzUlaWv6iDe0SHPSdCZYr0RSKPdi",
+  LK2: "gW20AtTxpc0V5GR3SmsytCLhVBgXtW6I",
+  X4: "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs",
+  X6: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
+  PROD: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
+};
 
-/**
- * @description 渠道列表
- * @since Beta v0.6.8
- * @type {Array<ChannelItem>}
- */
-const CHANNEL_LIST: Readonly<Array<ChannelItem>> = [
-  { title: "原神", gid: 2, mini: "ys" },
-  { title: "崩坏：星穹铁道", gid: 6, mini: "sr" },
-  { title: "绝区零", gid: 8, mini: "zzz" },
-  { title: "崩坏3", gid: 1, mini: "bh3" },
-  { title: "崩坏2", gid: 3, mini: "bh2" },
-  { title: "未定事件簿", gid: 4, mini: "wd" },
-  { title: "大别野", gid: 5, mini: "dby" },
-];
-
-const TGBbs = { version: BBS_VERSION, ua: BBS_UA_MOBILE, channels: CHANNEL_LIST };
+const TGBbs = { version: BBS_VERSION, ua: BBS_UA_MOBILE, uap: BBS_UA_PC, salt: BBS_SALT };
 
 export default TGBbs;

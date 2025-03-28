@@ -1,7 +1,7 @@
 /**
  * @file src/utils/linkParser.ts
  * @description 处理链接
- * @since Beta v0.7.2
+ * @since Beta v0.7.3
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -10,8 +10,6 @@ import { emit } from "@tauri-apps/api/event";
 
 import TGClient from "./TGClient.js";
 import { createPost } from "./TGWindow.js";
-
-import TGBbs from "@/utils/TGBbs.js";
 
 /**
  * @function parsePost
@@ -114,17 +112,19 @@ export async function parseLink(
     if (url.pathname.includes("/article/")) {
       const postId = url.pathname.split("/").pop();
       if (typeof postId !== "string") return false;
-      if (!useInner) {
-        return "post";
-      }
+      if (!useInner) return "post";
       await createPost(postId);
       return true;
-    } else if (url.pathname.includes("/topicDetail/")) {
+    }
+    if (url.pathname.includes("/topicDetail/")) {
       const regex = /\/(\w+)\/topicDetail\/(\d+)/;
       const result = url.pathname.match(regex);
       if (!result) return false;
       const [, game, topicId] = result;
-      const id = TGBbs.channels.find((item) => item.mini === game)?.gid;
+      const bbsStore = localStorage.getItem("bbs");
+      if (!bbsStore) return false;
+      const gameList: Array<TGApp.BBS.Game.Item> = JSON.parse(bbsStore)["gameList"];
+      const id = gameList.find((item) => item.en_name === game)?.id;
       await emit("active_deep_link", `router?path=/posts/topic/${id}/${topicId}`);
       return true;
     }

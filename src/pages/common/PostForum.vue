@@ -132,9 +132,11 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+import useBBSStore from "@/store/modules/bbs.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { createPost } from "@/utils/TGWindow.js";
 import ApiHubReq from "@/web/request/apiHubReq.js";
@@ -162,6 +164,7 @@ const showSearch = ref<boolean>(false);
 const curUid = ref<string>("");
 const showUser = ref<boolean>(false);
 
+const { gameList } = storeToRefs(useBBSStore());
 const selectedForum = shallowRef<SortSelect>();
 const sortGameList = shallowRef<Array<SortSelectGame>>([]);
 const postRaw = shallowRef<PostRaw>({ isLast: false, lastId: "", total: 0 });
@@ -176,6 +179,7 @@ const curForums = computed<Array<SortSelect>>(() => {
 onMounted(async () => {
   await showLoading.start("正在加载帖子数据");
   await loadForums();
+  await nextTick();
   let { gid, forum } = route.query;
   if (!gid) gid = route.params.gid;
   if (!forum) forum = route.params.forum;
@@ -219,11 +223,10 @@ watch(
 
 // 初始化
 async function loadForums(): Promise<void> {
-  const allGames = await ApiHubReq.game();
   const allForums = await ApiHubReq.forum();
-  const gameList: Array<SortSelectGame> = [];
+  const list: Array<SortSelectGame> = [];
   for (const gameForum of allForums) {
-    const gameFind = allGames.find((i) => i.id === gameForum.game_id);
+    const gameFind = gameList.value.find((i) => i.id === gameForum.game_id);
     if (!gameFind) continue;
     const gameItem: SortSelectGame = {
       gid: gameForum.game_id,
@@ -233,9 +236,9 @@ async function loadForums(): Promise<void> {
         .map((i) => ({ text: i.name, value: i.id, icon: i.icon_pure })),
       text: gameFind.name,
     };
-    gameList.push(gameItem);
+    list.push(gameItem);
   }
-  sortGameList.value = gameList;
+  sortGameList.value = list;
 }
 
 function getForum(forum: number): SortSelect {
