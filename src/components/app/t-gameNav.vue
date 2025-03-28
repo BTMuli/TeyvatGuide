@@ -5,7 +5,7 @@
       <span>{{ navItem.name }}</span>
     </div>
     <div v-if="hasNav" class="tgn-nav">
-      <v-btn size="25" @click="tryGetCode" title="查看兑换码" icon="mdi-code-tags-check"></v-btn>
+      <v-icon size="25" @click="tryGetCode" title="查看兑换码">mdi-code-tags-check</v-icon>
     </div>
     <ToLivecode v-model="showOverlay" :data="codeData" v-model:actId="actId" />
   </div>
