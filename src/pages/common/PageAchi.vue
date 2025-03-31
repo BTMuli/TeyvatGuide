@@ -3,7 +3,7 @@
     <template #prepend>
       <div class="achi-prepend">
         <img alt="icon" src="../../assets/icons/achievements.svg" />
-        <span @click="switchHideFin">我的成就</span>
+        <span>我的成就</span>
         <v-select
           density="compact"
           v-model="uidCur"
@@ -35,6 +35,13 @@
         <v-btn class="top-btn" prepend-icon="mdi-export" @click="exportJson()">导出</v-btn>
         <v-btn class="top-btn" prepend-icon="mdi-plus" @click="createUid()">新建存档</v-btn>
         <v-btn class="top-btn" prepend-icon="mdi-delete" @click="deleteUid()">删除存档</v-btn>
+        <div class="top-switch" @click="switchHideFin">
+          <v-icon v-if="hideFin" color="var(--tgc-od-green)">
+            mdi-checkbox-marked-circle-outline
+          </v-icon>
+          <v-icon v-else color="var(--tgc-od-white)">mdi-circle</v-icon>
+          <span>隐藏已完成</span>
+        </div>
       </div>
     </template>
   </v-app-bar>
@@ -291,7 +298,6 @@ onUnmounted(async () => {
     color: var(--common-text-title);
     font-family: var(--font-title);
     font-size: 20px;
-    cursor: pointer;
   }
 }
 
@@ -322,6 +328,16 @@ onUnmounted(async () => {
   border: 1px solid var(--common-shadow-2);
   background: var(--tgc-btn-1);
   color: var(--btn-text);
+  font-family: var(--font-title);
+}
+
+.top-switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
   font-family: var(--font-title);
 }
 
