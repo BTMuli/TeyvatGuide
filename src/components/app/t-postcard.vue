@@ -1,5 +1,11 @@
 <template>
-  <div v-if="card" :id="`post-card-${card.postId}`" class="tpc-card">
+  <div
+    v-if="card"
+    :id="`post-card-${card.postId}`"
+    class="tpc-card"
+    :class="{ 'select-mode': props.selectMode }"
+    @click="trySelect()"
+  >
     <div class="tpc-top">
       <div class="tpc-cover" @click="toPost()">
         <TMiImg :src="card.cover" alt="cover" :ori="true" v-if="card.cover !== ''" />
@@ -12,7 +18,7 @@
           </div>
         </div>
       </div>
-      <div class="tpc-title" :title="card.title" @click="shareCard">{{ card.title }}</div>
+      <div class="tpc-title" :title="card.title" @click="shareCard()">{{ card.title }}</div>
     </div>
     <div class="tpc-mid" v-if="card.user !== null">
       <TpAvatar
@@ -80,9 +86,10 @@
       <span>{{ card.forum.name }}</span>
     </div>
     <v-checkbox-btn
+      v-model="isSelected"
       v-if="props.selectMode"
       class="tpc-select"
-      @click="emits('onSelected', props.modelValue.post.post_id)"
+      @click.stop="trySelect()"
       data-html2canvas-ignore
     />
     <div class="tpc-info-id" v-else>{{ props.modelValue.post.post_id }}</div>
@@ -93,7 +100,7 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import { emit } from "@tauri-apps/api/event";
-import { computed, onMounted, shallowRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { generateShareImg } from "@/utils/TGShare.js";
@@ -136,6 +143,7 @@ const stats: Readonly<Array<RenderStatus>> = [
 const route = useRoute();
 const router = useRouter();
 const props = withDefaults(defineProps<TPostCardProps>(), { selectMode: false });
+const isSelected = ref<boolean>(false);
 const emits = defineEmits<TPostCardEmits>();
 const card = shallowRef<RenderCard>();
 
@@ -151,7 +159,13 @@ watch(
   async () => (card.value = getPostCard(props.modelValue)),
 );
 
+function trySelect(): void {
+  if (props.selectMode) emits("onSelected", props.modelValue.post.post_id);
+  isSelected.value = !isSelected.value;
+}
+
 async function toPost(): Promise<void> {
+  if (props.selectMode) return;
   if (!card.value) return;
   if (route.name !== "帖子详情") {
     await createPost(card.value);
@@ -231,7 +245,7 @@ function getPostCard(item: TGApp.BBS.Post.FullData): RenderCard {
 }
 
 async function shareCard(): Promise<void> {
-  console.log(props.modelValue);
+  if (props.selectMode) return;
   if (!card.value) return;
   const shareDom = document.querySelector<HTMLDivElement>(`#post-card-${card.value.postId}`);
   if (shareDom === null) {
@@ -243,16 +257,19 @@ async function shareCard(): Promise<void> {
 }
 
 async function toTopic(topic: TGApp.BBS.Post.Topic): Promise<void> {
+  if (props.selectMode) return;
   const gid = props.modelValue.post.game_id;
   await emit("active_deep_link", `router?path=/posts/topic/${gid}/${topic.id}`);
 }
 
 async function toForum(forum: RenderForum): Promise<void> {
+  if (props.selectMode) return;
   const gid = props.modelValue.post.game_id;
   await emit("active_deep_link", `router?path=/posts/forum/${gid}/${forum.id}`);
 }
 
 function onUserClick(): void {
+  if (props.selectMode) return;
   if (!card.value || card.value.user === null) return;
   emits("onUserClick", card.value.user);
 }
@@ -272,6 +289,10 @@ function onUserClick(): void {
   justify-content: space-between;
   border-radius: 4px;
   row-gap: 8px;
+
+  &.select-mode {
+    cursor: pointer;
+  }
 }
 
 .dark .tpc-card {
