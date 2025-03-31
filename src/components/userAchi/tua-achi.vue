@@ -1,16 +1,16 @@
 <template>
-  <div class="achi-container" :title="getAchiTitle()">
+  <div class="achi-container" :title="getAchiTitle()" @click="selectAchi()">
     <div class="achi-version">v{{ data.version }}</div>
     <div class="achi-pre">
       <div class="achi-pre-icon">
-        <v-icon v-if="!data.isCompleted" color="var(--tgc-blue-3)" @click="setAchiStat(true)">
+        <v-icon v-if="!data.isCompleted" color="var(--tgc-blue-3)" @click.stop="setAchiStat(true)">
           mdi-circle
         </v-icon>
-        <v-icon v-else class="achi-finish" @click="setAchiStat(false)">
+        <v-icon v-else class="achi-finish" @click.stop="setAchiStat(false)">
           <img alt="finish" src="/source/UI/finish.webp" />
         </v-icon>
       </div>
-      <div class="achi-pre-info" @click="selectAchi()">
+      <div class="achi-pre-info">
         <span>
           <span>{{ data.name }}</span>
           <span v-if="data.progress !== 0">{{ data.progress }}</span>
