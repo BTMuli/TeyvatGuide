@@ -43,6 +43,9 @@
           <span>隐藏已完成</span>
         </div>
       </div>
+      <div class="top-link" title="使用Yae导入" @click="toYae()">
+        <v-icon>mdi-comment-question-outline</v-icon>
+      </div>
     </template>
   </v-app-bar>
   <div class="wrap">
@@ -78,6 +81,7 @@ import { path } from "@tauri-apps/api";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -274,6 +278,10 @@ async function deleteUid(): Promise<void> {
   uidCur.value = uidList.value[0];
 }
 
+async function toYae(): Promise<void> {
+  await openUrl("https://github.com/HolographicHat/Yae");
+}
+
 onUnmounted(async () => {
   if (achiListener !== null) {
     achiListener();
@@ -339,6 +347,17 @@ onUnmounted(async () => {
   cursor: pointer;
   font-size: 18px;
   font-family: var(--font-title);
+}
+
+.top-link {
+  margin-left: auto;
+  margin-right: 16px;
+  cursor: pointer;
+  color: var(--tgc-od-white);
+
+  &:hover {
+    color: var(--tgc-od-orange);
+  }
 }
 
 .wrap {
