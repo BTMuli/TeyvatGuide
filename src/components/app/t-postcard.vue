@@ -114,7 +114,7 @@ type TPostCardProps = {
 };
 type TPostCardEmits = {
   (e: "onSelected", v: string): void;
-  (e: "onUserClick", v: TGApp.BBS.Post.User): void;
+  (e: "onUserClick", u: TGApp.BBS.Post.User, g: number): void;
 };
 type RenderForum = { name: string; icon: string; id: number };
 type RenderStatus = { stat: number; label: string; color: string };
@@ -271,7 +271,7 @@ async function toForum(forum: RenderForum): Promise<void> {
 function onUserClick(): void {
   if (props.selectMode) return;
   if (!card.value || card.value.user === null) return;
-  emits("onUserClick", card.value.user);
+  emits("onUserClick", card.value.user, props.modelValue.post.game_id);
 }
 </script>
 <style lang="scss" scoped>

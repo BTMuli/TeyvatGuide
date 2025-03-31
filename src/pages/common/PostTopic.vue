@@ -270,8 +270,9 @@ function getGameList(list: Array<TGApp.BBS.Topic.GameInfo> | undefined): Array<G
   });
 }
 
-function handleUserClick(user: TGApp.BBS.Post.User): void {
+function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   if (showSearch.value) showSearch.value = false;
+  curGid.value = gid;
   curUid.value = user.uid;
   showUser.value = true;
 }

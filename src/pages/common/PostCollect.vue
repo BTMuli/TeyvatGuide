@@ -90,10 +90,17 @@
   </v-app-bar>
   <div class="pc-posts">
     <div v-for="item in curPosts" :key="item.post.post_id">
-      <TPostCard @onSelected="handleSelected" :model-value="item" :select-mode="selectedMode" />
+      <TPostCard
+        @onSelected="handleSelected"
+        :model-value="item"
+        :select-mode="selectedMode"
+        :user-click="true"
+        @onUserClick="handleUserClick"
+      />
     </div>
   </div>
-  <ToCollectPost @submit="load" :post="selectedPost" v-model="showOverlay" />
+  <ToCollectPost @submit="load" :post="selectedPost" v-model="showCollect" />
+  <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
 </template>
 <script lang="ts" setup>
 import TPostCard from "@comp/app/t-postcard.vue";
@@ -101,6 +108,7 @@ import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import ToCollectPost from "@comp/pageCollect/to-collectPost.vue";
+import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import TSUserCollection from "@Sqlite/modules/userCollect.js";
 import { event } from "@tauri-apps/api";
 import type { UnlistenFn } from "@tauri-apps/api/event";
@@ -116,12 +124,17 @@ let collectListener: UnlistenFn | null = null;
 
 const curSelect = ref<string>("未分类");
 const page = ref<number>(1);
+const curUid = ref<string>("");
+const curGid = ref<number>(2);
 const selectedMode = ref<boolean>(false);
-const showOverlay = ref<boolean>(false);
+const showUser = ref<boolean>(false);
+const showCollect = ref<boolean>(false);
 const sortId = ref<boolean>(false);
+
 const selectedPost = shallowRef<Array<string>>([]);
 const collections = shallowRef<Array<TGApp.Sqlite.UserCollection.UFCollection>>([]);
 const selected = shallowRef<Array<TGApp.Sqlite.UserCollection.UFPost>>([]);
+
 const length = computed<number>(() => Math.ceil(selected.value.length / 12));
 const view = computed<number>(() => (length.value === 1 ? 1 : length.value > 5 ? 5 : length.value));
 const curPosts = computed<Array<TGApp.BBS.Post.FullData>>(() =>
@@ -178,10 +191,11 @@ async function load(): Promise<void> {
 }
 
 function toSelect(): void {
+  if (showUser.value) showUser.value = false;
   if (selectedMode.value) {
     selectedMode.value = false;
     if (selectedPost.value.length === 0) return;
-    showOverlay.value = true;
+    showCollect.value = true;
     return;
   }
   selectedPost.value = [];
@@ -381,6 +395,13 @@ async function mergePosts(posts: Array<TGApp.BBS.Post.FullData>, collect: string
     const res = await TSUserCollection.addCollect(post.post.post_id, post, title, true);
     if (!res) await TGLogger.Error(`[PostCollect] mergePosts [${post.post.post_id}]`);
   }
+}
+
+function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
+  if (showCollect.value) showCollect.value = false;
+  curGid.value = gid;
+  curUid.value = user.uid;
+  showUser.value = true;
 }
 </script>
 <style lang="css" scoped>

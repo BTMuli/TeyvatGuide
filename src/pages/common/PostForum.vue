@@ -345,8 +345,9 @@ function searchPost(): void {
   } else createPost(search.value);
 }
 
-function handleUserClick(user: TGApp.BBS.Post.User): void {
+function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   if (showSearch.value) showSearch.value = false;
+  curGid.value = gid;
   curUid.value = user.uid;
   showUser.value = true;
 }

@@ -108,7 +108,7 @@ async function loadPosts(): Promise<void> {
     load.value = false;
     return;
   }
-  const resp = await postReq.user.post(props.uid, props.gid, offset.value);
+  const resp = await postReq.user.post(props.uid, 0, offset.value);
   if ("retcode" in resp) {
     showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
     load.value = false;
