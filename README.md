@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2025-03-27
+Update: 2025-03-31
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2025-03-27 14:45:50`
+> 更新于 `2025-03-31 15:53:10`
 
 ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide?style=for-the-badge) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases&style=for-the-badge)
 
@@ -50,7 +50,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 米游社官方帖获取（支持通过 ID 获取）
   - [x] 米游社各分区帖子获取（支持通过 ID 获取）
   - [x] 米游社话题帖子获取（通过话题点击跳转）
-  - [x] 成就管理（UIAF v1.1），支持 [`YaeAchievement`](https://github.com/HolographicHat/YaeAchievement) 导入
+  - [x] 成就管理（UIAF v1.1），支持 [`Yae`](https://github.com/HolographicHat/Yae) 导入
   - [x] 祈愿管理（UIGF v3.0，UIGF v4.0）
   - [x] 留影叙佳期画片查看
   - [x] 帖子收藏
@@ -79,6 +79,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 材料图鉴
 
 - 应用功能：
+
   - [x] 浅色/深色主题切换
   - [x] 米游社 JSBridge
 
