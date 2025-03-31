@@ -64,9 +64,20 @@
     </template>
   </v-app-bar>
   <div class="uc-box">
-    <div class="uc-top">
-      <div class="uc-top-title">UID：{{ uidCur }}</div>
-      <div class="uc-top-info">
+    <div class="uc-box-top">
+      <div class="uc-box-title">
+        <span class="uc-box-uid">UID：{{ uidCur }}</span>
+        <span
+          class="uc-ov-item"
+          v-for="(item, index) in roleOverview"
+          :key="index"
+          :title="`${item.label}：${item.cnt}`"
+        >
+          <img :src="`/icon/element/${item.label}.webp`" alt="element" />
+          <span>{{ item.cnt }}</span>
+        </span>
+      </div>
+      <div class="uc-box-info">
         <span>角色详情</span>
         <span>|Render by TeyvatGuide v{{ version }}|</span>
         <span>更新于 {{ getUpdateTime() }}</span>
@@ -111,10 +122,11 @@ import { AppCharacterData } from "@/data/index.js";
 import { useUserStore } from "@/store/modules/user.js";
 import TGLogger from "@/utils/TGLogger.js";
 import { generateShareImg } from "@/utils/TGShare.js";
-import { timestampToDate } from "@/utils/toolFunc.js";
+import { getZhElement, timestampToDate } from "@/utils/toolFunc.js";
 import TakumiRecordGenshinApi from "@/web/request/recordReq.js";
 
 type TabItem = { label: string; value: string };
+type OverviewItem = { element: string; cnt: number; label: string };
 
 const modeList: Readonly<Array<TabItem>> = [
   { label: "经典视图", value: "classic" },
@@ -134,6 +146,7 @@ const showMode = ref<"classic" | "card" | "dev">("dev");
 const resetSelect = ref<boolean>(false);
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>([]);
+const roleOverview = shallowRef<Array<OverviewItem>>([]);
 const roleList = shallowRef<Array<TGApp.Sqlite.Character.UserRole>>([]);
 const selectedList = shallowRef<Array<TGApp.Sqlite.Character.UserRole>>([]);
 const dataVal = shallowRef<TGApp.Sqlite.Character.UserRole>();
@@ -194,6 +207,20 @@ function getOrderedList(
   });
 }
 
+function getOverview(data: Array<TGApp.Sqlite.Character.UserRole>): Array<OverviewItem> {
+  const overview: Array<OverviewItem> = [];
+  for (const role of data) {
+    const element = role.avatar.element;
+    const index = overview.findIndex((item) => item.element === element);
+    if (index === -1) {
+      overview.push({ element, cnt: 1, label: `${getZhElement(element)}元素` });
+    } else {
+      overview[index].cnt += 1;
+    }
+  }
+  return overview.sort((a, b) => b.cnt - a.cnt);
+}
+
 async function loadUid(): Promise<void> {
   uidList.value = await TSUserAvatar.getAllUid();
   if (uidList.value.length === 0) uidList.value = [account.value.gameUid];
@@ -209,6 +236,7 @@ async function loadRole(): Promise<void> {
   roleList.value = [];
   const roleData = await TSUserAvatar.getAvatars(Number(uidCur.value));
   roleList.value = getOrderedList(roleData);
+  roleOverview.value = getOverview(roleData);
   selectedList.value = roleList.value;
   dataVal.value = roleData[selectIndex.value];
   isEmpty.value = roleList.value.length === 0;
@@ -391,7 +419,29 @@ function handleSwitch(next: boolean): void {
   dataVal.value = selectedList.value[selectIndex.value];
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
+.uc-top-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  margin-left: 8px;
+  gap: 8px;
+
+  img {
+    width: 32px;
+    height: 32px;
+  }
+
+  span {
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 20px;
+  }
+}
+
 .uc-select {
   display: flex;
   align-items: center;
@@ -420,37 +470,45 @@ function handleSwitch(next: boolean): void {
   gap: 8px;
 }
 
-.uc-top {
+.uc-box-top {
   display: flex;
   width: 100%;
-  height: 50px;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  padding: 10px;
+  padding: 8px 0;
   border-bottom: 1px solid var(--common-shadow-2);
 }
 
-.uc-top-title {
+.uc-box-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  margin-left: 8px;
   gap: 8px;
+}
+
+.uc-box-uid {
+  @include github-styles.github-tag-dark-gen(#ffcd0c);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.uc-ov-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 4px;
+  font-family: var(--font-title);
+  font-size: 18px;
 
   img {
-    width: 32px;
-    height: 32px;
-  }
-
-  span {
-    color: var(--common-text-title);
-    font-family: var(--font-title);
-    font-size: 20px;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
   }
 }
 
-.uc-top-info {
+.uc-box-info {
   z-index: -1;
   font-size: 14px;
   opacity: 0.8;
