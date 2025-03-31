@@ -49,9 +49,14 @@ const isGrey = computed<boolean>(() => {
   background-repeat: no-repeat;
   cursor: pointer;
   font-family: var(--font-title);
+  transition: filter 0.5s ease-in-out;
 
   &.grey {
     filter: grayscale(1);
+  }
+
+  &.grey:hover {
+    filter: grayscale(0);
   }
 }
 

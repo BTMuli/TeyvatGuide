@@ -148,6 +148,10 @@ function getWeaponTitle(): string {
   border-radius: 4px;
   cursor: pointer;
   row-gap: 4px;
+
+  &:hover .tua-abl-bg {
+    filter: grayscale(0);
+  }
 }
 
 .dark .tua-ab-box {
@@ -247,6 +251,7 @@ function getWeaponTitle(): string {
   backdrop-filter: blur(5px);
   background: var(--box-bg-3);
   filter: grayscale(1);
+  transition: filter 0.5s ease-in-out;
 
   &.ori {
     filter: unset;

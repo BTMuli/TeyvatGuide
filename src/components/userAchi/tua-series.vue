@@ -3,13 +3,14 @@
     class="tuas-card"
     @click="selectSeries"
     v-if="data"
+    :title="data.name"
     :class="{
       'tuas-selected': props.cur === props.series,
-      'tuas-finish': showCard,
+      'tuas-radius': showCard,
     }"
   >
     <div class="tuas-version">v{{ data.version }}</div>
-    <div class="tuas-reward" v-if="showCard" :title="data.card">
+    <div class="tuas-reward" v-if="showCard">
       <img
         :class="{ finish: progress === 100 }"
         alt="card"
@@ -116,9 +117,17 @@ function selectSeries(): void {
     background: var(--box-bg-1);
   }
 
-  &.tuas-finish {
+  &.tuas-radius {
     border-top-right-radius: 30px;
     border-bottom-right-radius: 30px;
+  }
+
+  &:hover {
+    .tuas-reward {
+      img {
+        filter: unset;
+      }
+    }
   }
 }
 
@@ -158,6 +167,7 @@ function selectSeries(): void {
     object-fit: contain;
     opacity: 0.3;
     filter: grayscale(1);
+    transition: filter 0.5s ease-in-out;
 
     &.finish {
       filter: unset;
