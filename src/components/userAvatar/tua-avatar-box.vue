@@ -18,8 +18,8 @@
       </div>
     </div>
     <div class="tua-abl-mid">
-      <div class="tua-abl-bg">
-        <img v-if="isFetterMax" :src="nameCard" alt="nameCard" />
+      <div class="tua-abl-bg" :class="{ ori: isFetterMax }">
+        <img :src="nameCard" alt="nameCard" />
       </div>
       <div class="tua-abl-skills">
         <div
@@ -246,6 +246,11 @@ function getWeaponTitle(): string {
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   background: var(--box-bg-3);
+  filter: grayscale(1);
+
+  &.ori {
+    filter: unset;
+  }
 
   img {
     width: 100%;
