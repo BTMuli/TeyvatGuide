@@ -1,5 +1,5 @@
 <template>
-  <v-list class="top-nc-box" @click="emit('selected', props.data)">
+  <v-list class="top-nc-box" @click="emit('selected', props.data)" :class="{ grey: isGrey }">
     <v-list-item :title="props.data.name">
       <template #subtitle>
         <span class="desc" :title="props.data.desc">{{ props.data.desc }}</span>
@@ -17,7 +17,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-type TopNameCardProps = { data: TGApp.App.NameCard.Item };
+type TopNameCardProps = { data: TGApp.App.NameCard.Item; finish?: boolean };
 type TopNameCardEmits = (e: "selected", v: TGApp.App.NameCard.Item) => void;
 
 const props = defineProps<TopNameCardProps>();
@@ -26,6 +26,10 @@ const emit = defineEmits<TopNameCardEmits>();
 const bgImage = computed<string>(() => {
   if (props.data.name === "原神·印象") return "none;";
   return `url("/WIKI/nameCard/bg/${props.data.name}.webp")`;
+});
+const isGrey = computed<boolean>(() => {
+  if (props.finish === undefined) return false;
+  return !props.finish;
 });
 </script>
 <style lang="scss" scoped>
@@ -45,6 +49,10 @@ const bgImage = computed<string>(() => {
   background-repeat: no-repeat;
   cursor: pointer;
   font-family: var(--font-title);
+
+  &.grey {
+    filter: grayscale(1);
+  }
 }
 
 .dark .top-nc-box {

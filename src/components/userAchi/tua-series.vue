@@ -3,16 +3,26 @@
     class="tuas-card"
     @click="selectSeries"
     v-if="data"
-    :class="{ 'tuas-selected': props.cur === props.series }"
+    :class="{
+      'tuas-selected': props.cur === props.series,
+      'tuas-finish': showCard,
+    }"
   >
     <div class="tuas-version">v{{ data.version }}</div>
+    <div class="tuas-reward" v-if="showCard" :title="data.card">
+      <img
+        :class="{ finish: progress === 100 }"
+        alt="card"
+        :src="`/WIKI/nameCard/bg/${data.card}.webp`"
+      />
+    </div>
     <div class="tuas-icon">
       <img alt="icon" :src="`/icon/achievement/${data.icon}.webp`" />
       <v-progress-circular
         class="progress"
         bg-color="var(--tgc-od-white)"
         color="var(--tgc-yellow-2)"
-        :model-value="`${(overview.fin / overview.total) * 100}`"
+        :model-value="progress"
       />
     </div>
     <div class="tuas-content">
@@ -32,6 +42,7 @@ import { AppAchievementSeriesData } from "@/data/index.js";
 type TuaSeriesProps = { uid: number; series: number; cur: number };
 type TuaSeriesEmits = (e: "selectSeries", v: number) => void;
 
+let achiListener: UnlistenFn | null = null;
 const props = defineProps<TuaSeriesProps>();
 const emits = defineEmits<TuaSeriesEmits>();
 
@@ -39,7 +50,14 @@ const overview = shallowRef<TGApp.Sqlite.Achievement.Overview>({ fin: 0, total: 
 const data = computed<TGApp.App.Achievement.Series | undefined>(() =>
   AppAchievementSeriesData.find((s) => s.id === props.series),
 );
-let achiListener: UnlistenFn | null = null;
+const progress = computed<number>(() => {
+  if (overview.value.total === 0) return 0;
+  return Math.round((overview.value.fin / overview.value.total) * 100);
+});
+const showCard = computed<boolean>(() => {
+  if (data.value === undefined) return false;
+  return data.value.card !== "";
+});
 
 onMounted(async () => {
   await refreshOverview();
@@ -97,6 +115,11 @@ function selectSeries(): void {
   &.tuas-selected {
     background: var(--box-bg-1);
   }
+
+  &.tuas-finish {
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+  }
 }
 
 .dark .tuas-card {
@@ -120,6 +143,26 @@ function selectSeries(): void {
   font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
+  z-index: 3;
+}
+
+.tuas-reward {
+  position: absolute;
+  top: -1px;
+  right: -2px;
+  height: 62px;
+  z-index: 0;
+
+  img {
+    height: 100%;
+    object-fit: contain;
+    opacity: 0.3;
+    filter: grayscale(1);
+
+    &.finish {
+      filter: unset;
+    }
+  }
 }
 
 .tuas-icon {
@@ -131,6 +174,7 @@ function selectSeries(): void {
   border-radius: 50%;
   box-sizing: border-box;
   background: var(--tgc-dark-7);
+  z-index: 1;
 
   img {
     width: 100%;
@@ -148,6 +192,8 @@ function selectSeries(): void {
 }
 
 .tuas-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   width: 100%;
   flex-flow: column wrap;

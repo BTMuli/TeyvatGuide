@@ -1,7 +1,7 @@
 <template>
   <div class="tua-al-container">
     <div v-if="ncData !== undefined">
-      <TopNameCard :data="ncData" @selected="showNc = true" />
+      <TopNameCard :data="ncData" @selected="showNc = true" :finish="isFinish" />
     </div>
     <v-virtual-scroll :items="renderAchi" :item-height="60" class="tua-al-list">
       <template #default="{ item }">
@@ -57,6 +57,7 @@ const emits = defineEmits<TuaAchiListEmits>();
 const nameCard = ref<string>();
 const showNc = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
+const isFinish = ref<boolean>(false);
 const ncData = shallowRef<TGApp.App.NameCard.Item>();
 const achievements = shallowRef<Array<TGApp.Sqlite.Achievement.RenderAchi>>([]);
 const selectedAchi = shallowRef<TGApp.Sqlite.Achievement.RenderAchi>();
@@ -90,6 +91,8 @@ async function searchAchi(): Promise<void> {
 async function loadAchi(): Promise<void> {
   if (props.isSearch) return;
   achievements.value = await TSUserAchi.getAchievements(props.uid, props.series);
+  const ov = await TSUserAchi.getOverview(props.uid, props.series);
+  isFinish.value = ov.fin === ov.total;
   if (!selectedAchi.value && achievements.value.length > 0) {
     selectedAchi.value = achievements.value[0];
   } else if (selectedAchi.value !== undefined && achievements.value.length > 0) {
@@ -180,5 +183,9 @@ function switchAchiInfo(next: boolean): void {
 
 .dark .card-arrow {
   filter: invert(11%) sepia(73%) saturate(11%) hue-rotate(139deg) brightness(97%) contrast(81%);
+}
+
+.unfinish {
+  filter: grayscale(1);
 }
 </style>
