@@ -17,6 +17,14 @@
             <span>{{ card.subtitle }}</span>
           </div>
         </div>
+        <div
+          v-else-if="props.modelValue.post.images.length > 1"
+          class="tpc-image-cnt"
+          :title="`图片数：${props.modelValue.post.images.length}`"
+        >
+          <v-icon size="10">mdi-folder-multiple-image</v-icon>
+          <span>{{ props.modelValue.post.images.length }}</span>
+        </div>
       </div>
       <div class="tpc-title" :title="card.title" @click="shareCard()">{{ card.title }}</div>
     </div>
@@ -473,6 +481,23 @@ function onUserClick(): void {
   backdrop-filter: blur(20px);
   background: rgb(0 0 0/50%);
   font-size: 12px;
+}
+
+.tpc-image-cnt {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border-top-left-radius: 12px;
+  column-gap: 2px;
+  font-size: 12px;
+  color: var(--tgc-white-1);
+  background: var(--tgc-od-blue);
+  opacity: 0.8;
+  box-shadow: -2px -2px 8px var(--tgc-dark-1);
 }
 
 .tpc-status {
