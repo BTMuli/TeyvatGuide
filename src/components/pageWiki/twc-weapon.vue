@@ -5,7 +5,13 @@
       <div class="tww-brief-info">
         <div class="tww-brief-title">
           <span>{{ data.name }}</span>
-          <span @click="toWiki()"><v-icon>mdi-link</v-icon></span>
+          <img
+            title="前往观测枢"
+            alt="observer"
+            @click="toWiki()"
+            v-if="props.item.contentId !== 0"
+            src="/platforms/mhy/observer.webp"
+          />
         </div>
         <v-rating
           v-if="data.affix"
@@ -105,7 +111,11 @@ async function toWiki(): Promise<void> {
   await createObc(props.item.contentId, props.item.name);
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+:deep(.v-expansion-panel-title) {
+  background: var(--common-shadow-1);
+}
+
 .tww-box {
   display: flex;
   flex-direction: column;
@@ -126,12 +136,21 @@ async function toWiki(): Promise<void> {
 }
 
 .tww-brief-title {
+  width: fit-content;
   display: flex;
   align-items: center;
+  justify-content: center;
   color: var(--common-text-title);
-  column-gap: 10px;
+  column-gap: 8px;
   font-family: var(--font-title);
   font-size: 20px;
+
+  img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    cursor: pointer;
+  }
 }
 
 .tww-brief-info :last-child {

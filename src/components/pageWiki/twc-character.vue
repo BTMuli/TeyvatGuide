@@ -7,7 +7,13 @@
           <div class="twc-bi-title">
             <span>{{ data.name }}</span>
             <span>{{ data.title }}</span>
-            <span @click="toWiki()"><v-icon>mdi-link</v-icon></span>
+            <img
+              title="前往观测枢"
+              alt="observer"
+              @click="toWiki()"
+              v-if="props.item.contentId !== 0"
+              src="/platforms/mhy/observer.webp"
+            />
           </div>
           <div class="twc-bi-desc">{{ data.description }}</div>
         </div>
@@ -168,6 +174,10 @@ async function toBirth(date: string): Promise<void> {
 }
 </script>
 <style lang="css" scoped>
+:deep(.v-expansion-panel-title) {
+  background: var(--common-shadow-1);
+}
+
 .twc-box {
   display: flex;
   flex-direction: column;
@@ -194,11 +204,20 @@ async function toBirth(date: string): Promise<void> {
 
 .twc-bi-title {
   display: flex;
+  width: fit-content;
   align-items: center;
+  justify-content: center;
   color: var(--common-text-title);
-  column-gap: 10px;
+  column-gap: 8px;
   font-family: var(--font-title);
   font-size: 20px;
+
+  img {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    object-fit: contain;
+  }
 }
 
 .twc-bi-title :last-child {

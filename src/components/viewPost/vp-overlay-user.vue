@@ -97,7 +97,6 @@ async function loadUser(): Promise<void> {
     return;
   }
   userInfo.value = resp;
-  console.log(userInfo.value);
 }
 
 async function loadPosts(): Promise<void> {

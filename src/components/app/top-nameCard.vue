@@ -22,7 +22,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-type TopNameCardProps = { data: TGApp.App.NameCard.Item; finish: boolean };
+type TopNameCardProps = { data: TGApp.App.NameCard.Item; finish?: boolean };
 type TopNameCardEmits = (e: "selected", v: TGApp.App.NameCard.Item) => void;
 
 const props = withDefaults(defineProps<TopNameCardProps>(), {
