@@ -1,7 +1,7 @@
 /**
  * @file vite.config.ts
  * @description vite 配置文件
- * @since Beta v0.7.2
+ * @since Beta v0.7.3
  */
 
 import vue from "@vitejs/plugin-vue";
@@ -35,5 +35,5 @@ export default defineConfig({
     watch: { ignored: ["**/src-tauri/**"] },
   },
   esbuild: { supported: { "top-level-await": true } },
-  build: { chunkSizeWarningLimit: 4096 },
+  build: { chunkSizeWarningLimit: 8192 },
 });

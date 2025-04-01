@@ -86,14 +86,16 @@ async function onDownload(): Promise<void> {
     showOri.value = true;
     await nextTick();
   }
-  await showLoading.start("正在下载图片到本地", props.image.insert.image);
   const image = props.image.insert.image;
+  await showLoading.start("正在下载图片到本地", image);
   if (buffer.value === null) buffer.value = await getImageBuffer(image);
   if (buffer.value.byteLength > 80000000) {
     showSnackbar.warn("图片过大，无法下载到本地");
     return;
   }
-  await saveCanvasImg(buffer.value, Date.now().toString(), format.value);
+  let fileName = image.split("/").pop()?.split(".")[0];
+  if (fileName === undefined) fileName = Date.now().toString();
+  await saveCanvasImg(buffer.value, fileName, format.value);
   await showLoading.end();
 }
 </script>
