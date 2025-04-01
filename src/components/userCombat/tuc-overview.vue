@@ -23,6 +23,8 @@ const props = defineProps<TucOverviewProps>();
 
 function getTitle(): string {
   switch (props.data.difficulty_id) {
+    case 0:
+      return "未选择";
     case 1:
       return "轻简模式";
     case 2:

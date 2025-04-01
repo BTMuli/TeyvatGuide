@@ -11,11 +11,13 @@
         </v-icon>
       </div>
       <div class="achi-pre-info">
-        <span>
+        <div class="achi-pre-info__title">
           <span>{{ data.name }}</span>
-          <span v-if="data.progress !== 0">{{ data.progress }}</span>
-        </span>
-        <span>{{ data.description }}</span>
+          <span v-if="data.progress !== 0" class="achi-pre-info__progress">
+            {{ data.progress }}
+          </span>
+        </div>
+        <div class="achi-pre-info__desc">{{ data.description }}</div>
       </div>
     </div>
     <div class="achi-append">
@@ -155,24 +157,30 @@ async function setAchiStat(stat: boolean): Promise<void> {
   align-items: flex-start;
   justify-content: center;
   text-align: left;
-}
 
-.achi-pre-info :nth-child(1) {
-  display: flex;
-  align-items: flex-end;
-  column-gap: 4px;
-  font-family: var(--font-title);
-  font-size: 14px;
-}
+  &__title {
+    display: flex;
+    align-items: flex-end;
+    column-gap: 4px;
+    font-family: var(--font-title);
+    font-size: 14px;
+  }
 
-.achi-pre-info :nth-child(1) :nth-child(2) {
-  color: var(--tgc-blue-2);
-  font-size: 12px;
-}
+  &__desc {
+    font-size: 12px;
+    opacity: 0.8;
+  }
 
-.achi-pre-info :nth-child(2) {
-  font-size: 12px;
-  opacity: 0.8;
+  &__progress {
+    @include github-styles.github-tag-dark-gen(#00aeec);
+    padding: 0 4px;
+    border-radius: 4px;
+    height: 21px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
 }
 
 .achi-append-icon span {

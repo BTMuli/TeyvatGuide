@@ -54,13 +54,16 @@ type TuaAchiListEmits = {
 
 const props = defineProps<TuaAchiListProps>();
 const emits = defineEmits<TuaAchiListEmits>();
+
 const nameCard = ref<string>();
 const showNc = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
 const isFinish = ref<boolean>(false);
+
 const ncData = shallowRef<TGApp.App.NameCard.Item>();
 const achievements = shallowRef<Array<TGApp.Sqlite.Achievement.RenderAchi>>([]);
 const selectedAchi = shallowRef<TGApp.Sqlite.Achievement.RenderAchi>();
+
 const renderAchi = computed<Array<TGApp.Sqlite.Achievement.RenderAchi>>(() => {
   if (props.hideFin) return achievements.value.filter((a) => !a.isCompleted);
   return achievements.value;
@@ -182,9 +185,5 @@ function switchAchiInfo(next: boolean): void {
 
 .dark .card-arrow {
   filter: invert(11%) sepia(73%) saturate(11%) hue-rotate(139deg) brightness(97%) contrast(81%);
-}
-
-.unfinish {
-  filter: grayscale(1);
 }
 </style>
