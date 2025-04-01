@@ -51,6 +51,7 @@ const props = defineProps<TpoImageProps>();
 const visible = defineModel<boolean>();
 const localLink = defineModel<string>("link");
 const showOri = defineModel<boolean>("ori");
+const bgColor = defineModel<string>("bgColor", { default: "transparent" });
 const bgMode = ref<number>(0); // 0: transparent, 1: black, 2: white
 const isOriSize = ref<boolean>(false);
 const buffer = shallowRef<Uint8Array | null>(null);
@@ -65,6 +66,13 @@ function setBlackBg(): void {
   bgMode.value = (bgMode.value + 1) % 3;
   const bgLabelList = ["透明", "黑色", "白色"];
   showSnackbar.success(`背景已切换为${bgLabelList[bgMode.value]}`);
+  if (bgMode.value === 0) {
+    bgColor.value = "transparent";
+  } else if (bgMode.value === 1) {
+    bgColor.value = "black";
+  } else {
+    bgColor.value = "white";
+  }
 }
 
 async function onCopy(): Promise<void> {
@@ -122,9 +130,16 @@ async function onDownload(): Promise<void> {
   justify-content: center;
   border: 1px solid var(--tgc-od-white);
   border-radius: 4px;
-  background: v-bind("bgMode === 1 ? 'black' : bgMode === 2 ? 'white' : 'transparent'");
   cursor: zoom-in;
   overflow-y: auto;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 4px;
+    background: v-bind(bgColor);
+    object-fit: contain;
+  }
 }
 
 .tpoi-top-ori {
@@ -133,13 +148,10 @@ async function onDownload(): Promise<void> {
   max-width: 100%;
   max-height: 70%;
   cursor: zoom-out;
-}
 
-.tpoi-top img {
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: 4px;
-  object-fit: contain;
+  img {
+    background: v-bind(bgColor);
+  }
 }
 
 .tpoi-bottom {

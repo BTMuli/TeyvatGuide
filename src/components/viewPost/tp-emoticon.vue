@@ -13,7 +13,13 @@
     <v-progress-circular :indeterminate="true" color="primary" size="small" />
     <span>加载中...</span>
   </div>
-  <VpOverlayImage :image="image" v-model="showOverlay" v-model:link="localUrl" :ori="true" />
+  <VpOverlayImage
+    :image="image"
+    v-model="showOverlay"
+    v-model:link="localUrl"
+    :ori="true"
+    v-model:bgColor="bgColor"
+  />
 </template>
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
@@ -40,6 +46,7 @@ type TpEmoticonProps = { data: TpCustomEmoticon };
 const props = defineProps<TpEmoticonProps>();
 const localUrl = ref<string>();
 const showOverlay = ref<boolean>(false);
+const bgColor = ref<string>("transparent");
 const image = computed<TpImage>(() => {
   return {
     insert: { image: props.data.insert.custom_emoticon.url },
@@ -77,6 +84,7 @@ onUnmounted(() => {
   max-width: 100%;
   height: auto;
   border-radius: 4px;
+  background: v-bind(bgColor);
 }
 
 .tp-emo-info {

@@ -25,6 +25,7 @@
     v-model="showOverlay"
     v-model:link="localUrl"
     v-model:ori="showOri"
+    v-model:bgColor="bgColor"
   />
 </template>
 <script lang="ts" setup>
@@ -58,6 +59,7 @@ const showOri = ref<boolean>(
   props.data.insert.image.endsWith(".gif") || imageQualityPercent.value === 100,
 );
 const localUrl = ref<string>();
+const bgColor = ref<string>("transparent");
 
 const imgWidth = computed<string>(() => {
   if (props.data.attributes === undefined) return "auto";
@@ -117,6 +119,7 @@ function getImageTitle(): string {
   height: auto;
   border-radius: 4px;
   cursor: pointer;
+  background: v-bind(bgColor);
 }
 
 .tp-image-load {
