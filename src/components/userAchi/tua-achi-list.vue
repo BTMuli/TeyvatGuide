@@ -89,7 +89,7 @@ async function searchAchi(): Promise<void> {
 }
 
 async function loadAchi(): Promise<void> {
-  if (props.isSearch) return;
+  if (props.isSearch || props.series === -1) return;
   achievements.value = await TSUserAchi.getAchievements(props.uid, props.series);
   const ov = await TSUserAchi.getOverview(props.uid, props.series);
   isFinish.value = ov.fin === ov.total;
@@ -152,7 +152,6 @@ function switchAchiInfo(next: boolean): void {
 .tua-al-container {
   display: flex;
   width: 100%;
-  height: fit-content;
   max-height: 100%;
   flex-direction: column;
   overflow-y: auto;
