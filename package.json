@@ -79,7 +79,7 @@
     "@tauri-apps/plugin-opener": "^2.2.6",
     "@tauri-apps/plugin-os": "^2.2.1",
     "@tauri-apps/plugin-process": "^2.2.0",
-    "@tauri-apps/plugin-shell": "^2.2.0",
+    "@tauri-apps/plugin-shell": "^2.2.1",
     "@tauri-apps/plugin-sql": "^2.2.0",
     "ajv": "^8.17.1",
     "artplayer": "^5.2.2",
