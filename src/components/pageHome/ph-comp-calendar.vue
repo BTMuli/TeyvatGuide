@@ -14,7 +14,7 @@
             rounded
             class="tc-btn"
             :class="{ selected: text.week === btnNow, today: text.week === weekNow }"
-            @click="btnNow = text.week"
+            @click="switchDay(text.week)"
           >
             {{ text.text }}
           </v-btn>
@@ -86,6 +86,11 @@ onMounted(() => {
   btnNow.value = dayNow;
   emits("success");
 });
+
+function switchDay(day: number): void {
+  btnNow.value = day;
+  page.value = 1;
+}
 
 function switchType(): void {
   selectedType.value = selectedType.value === "character" ? "weapon" : "character";
