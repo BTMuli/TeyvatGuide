@@ -1,9 +1,5 @@
 <template>
   <div class="tp-avatar-box">
-    <div v-if="props.position === 'right'" class="tpa-text">
-      <div>{{ props.data.nickname }}</div>
-      <div :title="authorDesc">{{ authorDesc }}</div>
-    </div>
     <div class="tpa-img">
       <div class="tpa-icon">
         <TMiImg :ori="true" :src="props.data.avatar_url" alt="avatar" />
@@ -21,7 +17,7 @@
         {{ props.data.level_exp.level }}
       </div>
     </div>
-    <div v-if="props.position === 'left'" class="tpa-text">
+    <div class="tpa-text">
       <div>{{ props.data.nickname }}</div>
       <div :title="authorDesc">{{ authorDesc }}</div>
     </div>
@@ -56,6 +52,9 @@ const levelColor = computed<string>(() => {
   overflow: hidden;
   width: fit-content;
   max-width: 100%;
+  flex-direction: v-bind("props.position === 'left' ? 'row' : 'row-reverse'");
+  align-items: center;
+  justify-content: v-bind("props.position === 'left' ? 'flex-start' : 'flex-end'");
 }
 
 .tpa-text {
