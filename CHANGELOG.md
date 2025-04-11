@@ -2,12 +2,28 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2025-03-27
+Update: 2025-04-11
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2025-03-27 14:45:54`
+> 更新于 `2025-04-11 22:18:50`
+
+## [0.7.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.3) (2025-04-11)
+
+- 🍱 更新下半卡池信息
+- 💄 兑换码浮窗样式迭代
+- 💄 帖子卡片添加图片数数据
+- 💄 优化成就信息展示和样式
+- 💄 帖子图片浮窗背景色同步
+- 💄 调整通用backupText组件样式
+- 💄 调整回复浮窗样式
+- 💄 角色详情调整满好感区分
+- 💄 优化角色武器Wiki样式
+- 🚸 重构素材日历日期切换逻辑
+- 🚸 优化图片下载路径&提示
+- 🚸 支持其他分区兑换码获取
+- 🚸 收藏页select-mode下阻止所有点击
 
 ## [0.7.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.2) (2025-03-27)
 
