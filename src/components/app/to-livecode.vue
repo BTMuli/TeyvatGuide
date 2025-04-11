@@ -13,32 +13,27 @@
         />
       </div>
       <div class="tolc-info">ActID:{{ props.actId }}</div>
-      <v-list-item v-for="(item, index) in props.data" :key="index">
-        <template #title>
-          {{ item.code === "" ? "暂无兑换码" : item.code }}
-        </template>
-        <template #subtitle>
-          <div v-html="item.title"></div>
+      <div v-for="(item, index) in props.data" :key="index" class="tolc-list-box">
+        <div class="tolc-list-icon">
+          <img v-if="item.img === ''" src="/source/UI/empty.webp" alt="empty" />
+          <TMiImg :src="item.img" :ori="true" v-else alt="award" />
+        </div>
+        <div class="tolc-list-info">
+          <span>{{ item.code === "" ? "暂无兑换码" : item.code }}</span>
+          <span v-html="item.title" />
           <span title="开放时间">{{ timestampToDate(Number(item.to_get_time) * 1000) }}</span>
-        </template>
-        <template #prepend>
-          <div class="tolc-icon">
-            <img v-if="item.img === ''" src="/source/UI/empty.webp" alt="empty" />
-            <TMiImg :src="item.img" :ori="true" v-else alt="award" />
-          </div>
-        </template>
-        <template #append>
+        </div>
+        <div class="tolc-list-btn">
           <v-btn
             size="small"
             :disabled="item.code === ''"
             @click="copy(item.code)"
             icon="mdi-content-copy"
             variant="outlined"
-            class="tolc-btn"
             data-html2canvas-ignore
           />
-        </template>
-      </v-list-item>
+        </div>
+      </div>
     </div>
   </TOverlay>
 </template>
@@ -78,11 +73,16 @@ async function shareImg(): Promise<void> {
 
 .tolc-box {
   position: relative;
+  display: flex;
   width: 340px;
-  padding: 10px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 10px 20px;
   border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   background: var(--app-page-bg);
+  row-gap: 12px;
 }
 
 .tolc-title {
@@ -104,14 +104,29 @@ async function shareImg(): Promise<void> {
   font-size: 10px;
 }
 
-.tolc-icon {
+.tolc-list-box {
+  position: relative;
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  color: var(--box-text-1);
+  column-gap: 12px;
+}
+
+.tolc-list-icon {
   position: relative;
   display: flex;
   width: 40px;
   height: 40px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  margin-right: 10px;
 
   img {
     width: 100%;
@@ -120,7 +135,23 @@ async function shareImg(): Promise<void> {
   }
 }
 
-.tolc-btn {
-  margin-left: 10px;
+.tolc-list-info {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+
+  :first-child {
+    font-family: var(--font-title);
+  }
+
+  :last-child {
+    font-size: 12px;
+  }
+}
+
+.tolc-list-btn {
+  margin-left: auto;
 }
 </style>
