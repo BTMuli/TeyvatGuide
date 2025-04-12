@@ -47,7 +47,7 @@ async function toGithub(): Promise<void> {
 }
 
 async function toStore(): Promise<void> {
-  await openUrl("https://www.microsoft.com/store/productId/9NLBNNNBNSJN");
+  await openUrl("https://apps.microsoft.com/detail/9NLBNNNBNSJN");
 }
 
 async function toSite(): Promise<void> {
