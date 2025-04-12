@@ -1,7 +1,7 @@
 /**
  * @file web/request/postReq.ts
  * @description 帖子相关的请求
- * @since Beta v0.7.1
+ * @since Beta v0.7.4
  */
 import TGHttp from "@/utils/TGHttp.js";
 import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
@@ -218,7 +218,7 @@ async function searchPosts(
 
 /**
  * @description 获取用户收藏帖子
- * @since Beta v0.6.3
+ * @since Beta v0.7.4
  * @param {TGApp.App.Account.Cookie} cookie - 用户 cookie
  * @param {string} uid - 用户 uid
  * @param {string} offset - 偏移量
@@ -232,7 +232,7 @@ async function userFavouritePost(
   const ck = { cookie_token: cookie.cookie_token, account_id: cookie.account_id };
   const params = { size: "20", uid, offset };
   const resp = await TGHttp<TGApp.BBS.Collection.UserPostResp | TGApp.BBS.Response.Base>(
-    `${bapBu}/userFavouritePost`,
+    `${bapBu}userFavouritePost`,
     { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
   );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
