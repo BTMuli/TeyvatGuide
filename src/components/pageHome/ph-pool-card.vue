@@ -95,7 +95,7 @@ onMounted(async () => {
 async function loadCover(): Promise<void> {
   const postId: number | undefined = Number(props.pool.activity_url.split("/").pop()) || undefined;
   if (postId === undefined || isNaN(postId)) return;
-  if (poolCover.value && poolCover.value[postId]) {
+  if (poolCover.value && postId in poolCover.value && poolCover.value[postId] !== "") {
     cover.value = poolCover.value[postId];
     return;
   }
@@ -105,7 +105,12 @@ async function loadCover(): Promise<void> {
     await TGLogger.Error(`[PhPoolCard][${resp.retcode}] ${resp.message}`);
     return;
   }
-  cover.value = resp.post.cover;
+  let coverGet;
+  if (resp.cover) coverGet = resp.cover.url;
+  else if (resp.post.cover && resp.post.cover !== "") coverGet = resp.post.cover;
+  else if (resp.post.images.length > 0) coverGet = resp.post.images[0];
+  else coverGet = "";
+  cover.value = coverGet;
   if (!poolCover.value) poolCover.value = { [postId]: resp.post.cover };
   else poolCover.value[postId] = resp.post.cover;
 }
