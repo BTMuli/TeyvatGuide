@@ -70,6 +70,8 @@ function parseText(title: string): string {
 }
 
 async function createAnnoJson(): Promise<void> {
+  // @ts-expect-error import.meta
+  if (import.meta.env.MODE === "production") return;
   const jsonPath = `/anno_detail_json/${region}/${annoId}/${lang}`;
   const jsonTitle = `Anno_${region}_${annoId}_${lang}_JSON`;
   await createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
