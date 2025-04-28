@@ -32,7 +32,7 @@
         @click="firstLoad(tab, true)"
         icon="mdi-refresh"
       />
-      <v-btn class="post-news-btn" @click="showList = true" icon="mdi-view-list" />
+      <v-btn class="post-news-btn" @click="handleList()" icon="mdi-view-list" />
       <v-btn
         class="post-news-btn"
         @click="switchAnno"
@@ -144,6 +144,11 @@ async function switchAnno(): Promise<void> {
   await router.push("/announcements");
 }
 
+function handleList(): void {
+  if (showSearch.value === true) showSearch.value = false;
+  showList.value = true;
+}
+
 // 加载更多
 async function loadMore(key: NewsType): Promise<void> {
   if (loading.value) return;
@@ -179,6 +184,7 @@ async function searchPost(): Promise<void> {
   }
   const numCheck = Number(search.value);
   if (isNaN(numCheck)) {
+    if (showList.value === true) showList.value = false;
     showSearch.value = true;
     return;
   }
