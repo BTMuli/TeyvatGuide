@@ -220,6 +220,7 @@ async function freshPostData(): Promise<void> {
   if (showUser.value) showUser.value = false;
   if (postRaw.value.isLast) {
     showSnackbar.warn("已经到底了");
+    isReq.value = false;
     return;
   }
   await showLoading.start(`正在刷新${topicInfo.value?.topic.name}帖子列表`);
