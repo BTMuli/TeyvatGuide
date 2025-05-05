@@ -1,6 +1,6 @@
 //! @file src/commands.rs
 //! @desc 命令模块，负责处理命令
-//! @since Beta v0.7.2
+//! @since Beta v0.7.4
 
 use tauri::{AppHandle, Emitter, Manager, WebviewWindowBuilder};
 use tauri_utils::config::{WebviewUrl, WindowConfig};
@@ -52,7 +52,7 @@ pub async fn create_window(
 pub async fn execute_js(app_handle: AppHandle, label: String, js: String) {
   let window = app_handle.get_webview_window(&label);
   if window.is_some() {
-    window.unwrap().eval(&js).unwrap();
+    window.unwrap().eval(js).unwrap();
   }
 }
 

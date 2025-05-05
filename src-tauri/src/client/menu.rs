@@ -1,6 +1,6 @@
 //! @file src/client/menu.rs
 //! @desc 客户端菜单模块，负责操作米游社客户端菜单
-//! @since Beta v0.5.2
+//! @since Beta v0.7.4
 
 use crate::client::utils;
 use tauri::menu::{Menu, MenuBuilder, MenuEvent, MenuItemBuilder, Submenu, SubmenuBuilder};
@@ -124,7 +124,7 @@ fn handle_menu_open_post(app_handle: &Window) {
     await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
   })()"#;
   if window.is_some() {
-    window.unwrap().eval(&execute_js).ok().unwrap();
+    window.unwrap().eval(execute_js).ok().unwrap();
   }
 }
 
@@ -139,7 +139,7 @@ fn handle_menu_retry(app_handle: &Window) {
     await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
   })()"#;
   if window.is_some() {
-    window.unwrap().eval(&execute_js).ok().unwrap();
+    window.unwrap().eval(execute_js).ok().unwrap();
   }
 }
 
@@ -154,7 +154,7 @@ fn handle_menu_mock_touch(app_handle: &Window) {
     await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
   })()"#;
   if window.is_some() {
-    window.unwrap().eval(&execute_js).ok().unwrap();
+    window.unwrap().eval(execute_js).ok().unwrap();
   }
 }
 
@@ -169,7 +169,7 @@ fn handle_menu_remove_overlay(app_handle: &Window) {
     await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
   })()"#;
   if window.is_some() {
-    window.unwrap().eval(&execute_js).ok().unwrap();
+    window.unwrap().eval(execute_js).ok().unwrap();
   }
 }
 
