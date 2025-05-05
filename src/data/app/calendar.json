@@ -112,6 +112,22 @@
     "source": { "index": 5, "area": "枫丹", "name": "琅诵" }
   },
   {
+    "id": 10000112,
+    "contentId": 504976,
+    "dropDays": [2, 5, 7],
+    "name": "爱可菲",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "长柄武器",
+    "element": "冰",
+    "materials": [
+      { "id": 104341, "name": "「正义」的教导", "star": 2 },
+      { "id": 104342, "name": "「正义」的指引", "star": 3 },
+      { "id": 104343, "name": "「正义」的哲学", "star": 4 }
+    ],
+    "source": { "index": 5, "area": "枫丹", "name": "箴铭" }
+  },
+  {
     "id": 10000107,
     "contentId": 503612,
     "dropDays": [2, 5, 7],
@@ -1536,6 +1552,22 @@
     "source": { "index": 5, "area": "枫丹", "name": "琅诵" }
   },
   {
+    "id": 10000113,
+    "contentId": 504977,
+    "dropDays": [3, 6, 7],
+    "name": "伊法",
+    "itemType": "character",
+    "star": 4,
+    "weapon": "法器",
+    "element": "风",
+    "materials": [
+      { "id": 104353, "name": "「纷争」的教导", "star": 2 },
+      { "id": 104354, "name": "「纷争」的指引", "star": 3 },
+      { "id": 104355, "name": "「纷争」的哲学", "star": 4 }
+    ],
+    "source": { "index": 6, "area": "纳塔", "name": "旋复" }
+  },
+  {
     "id": 11501,
     "contentId": 293,
     "dropDays": [1, 4, 7],
@@ -2430,6 +2462,22 @@
       { "id": 114060, "name": "无垢之海的金杯", "star": 5 }
     ],
     "source": { "index": 5, "area": "枫丹", "name": "奇械" }
+  },
+  {
+    "id": 13514,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "香韵奏者",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "长柄武器",
+    "materials": [
+      { "id": 114053, "name": "纯圣露滴的滤渣", "star": 2 },
+      { "id": 114054, "name": "纯圣露滴的凝华", "star": 3 },
+      { "id": 114055, "name": "纯圣露滴的醴泉", "star": 4 },
+      { "id": 114056, "name": "纯圣露滴的真粹", "star": 5 }
+    ],
+    "source": { "index": 5, "area": "枫丹", "name": "匠理" }
   },
   {
     "id": 11401,
@@ -3572,6 +3620,22 @@
     "contentId": 7406,
     "dropDays": [1, 4, 7],
     "name": "测距规",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "弓",
+    "materials": [
+      { "id": 114049, "name": "悠古弦音的残章", "star": 2 },
+      { "id": 114050, "name": "悠古弦音的断章", "star": 3 },
+      { "id": 114051, "name": "悠古弦音的乐章", "star": 4 },
+      { "id": 114052, "name": "悠古弦音的回响", "star": 5 }
+    ],
+    "source": { "index": 5, "area": "枫丹", "name": "机思" }
+  },
+  {
+    "id": 15432,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "冷寂迸音",
     "itemType": "weapon",
     "star": 4,
     "weapon": "弓",

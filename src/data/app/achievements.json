@@ -5069,7 +5069,7 @@
     "series": 0,
     "order": 1122,
     "name": "「…腐肉朽处花争妍。」",
-    "description": "终结十位已歿武士的怨念。",
+    "description": "终结十位已殁武士的怨念。",
     "reward": 5,
     "version": "2.0",
     "trigger": { "type": "GROUP_NOTIFY" }
@@ -12393,6 +12393,26 @@
     "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
+    "id": 82296,
+    "series": 0,
+    "order": 2296,
+    "name": "「深蓝」",
+    "description": "解开弈局中的所有谜题。",
+    "reward": 5,
+    "version": "5.6",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 82297,
+    "series": 0,
+    "order": 2297,
+    "name": "液流冰结",
+    "description": "连续使用冰元素进行攻击，阻碍「液流动量」的积累。",
+    "reward": 5,
+    "version": "5.6",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 84000,
     "series": 0,
     "order": 4001,
@@ -14805,6 +14825,36 @@
       "type": "FINISH_QUEST_AND",
       "task": [{ "questId": 5029, "name": "当一切镌刻成碑", "type": "魔神任务" }]
     }
+  },
+  {
+    "id": 84342,
+    "series": 0,
+    "order": 5121,
+    "name": "如孩童的躁动般",
+    "description": "与伙伴们一同抵御自雪山而来的魔物。",
+    "reward": 5,
+    "version": "5.6",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84343,
+    "series": 0,
+    "order": 5122,
+    "name": "瓦尔普吉斯的游戏",
+    "description": "通过魔女会设下的试炼。",
+    "reward": 5,
+    "version": "5.6",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84344,
+    "series": 0,
+    "order": 5123,
+    "name": "悖理",
+    "description": "完成「悖理」。",
+    "reward": 5,
+    "version": "5.6",
+    "trigger": { "type": "Unknown" }
   },
   {
     "id": 84501,
