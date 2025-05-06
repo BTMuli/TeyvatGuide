@@ -2,12 +2,22 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2025-04-11
+Update: 2025-05-06
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2025-04-11 22:18:50`
+> 更新于 `2025-05-06 13:52:36`
+
+## [0.7.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.4) (2025-05-06)
+
+- 🍱 更新5.6资源
+- 🐛 修正首页卡池组件封面判断逻辑
+- 🐛 修正主窗口尺寸计算
+- 🐛 修正用户收藏帖子获取API链接
+- 🐛 修复帖子列表刷新时的请求状态异常
+- 🚸 调整咨讯页浮窗显示逻辑
+- 🚸 移除正式环境下公告页标题点击产生的JSON子窗口
 
 ## [0.7.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.3) (2025-04-11)
 

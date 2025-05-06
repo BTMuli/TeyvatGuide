@@ -16,7 +16,7 @@ jobs:
       - name: setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 10.7.0
+          version: 10.10.0
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
       - name: "Qodana Scan"
