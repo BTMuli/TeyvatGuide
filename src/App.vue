@@ -60,7 +60,7 @@ onMounted(async () => {
     document.documentElement.className = theme.value;
   });
   resizeListener = await event.listen<string>("needResize", async (e: Event<string>) => {
-    console.log(needResize);
+    console.log(needResize.value);
     const windowCur = webviewWindow.getCurrentWebviewWindow();
     if (e.payload !== "false") {
       await resizeWindow();
