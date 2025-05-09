@@ -20,11 +20,11 @@ jobs:
             target: "windows"
             bundlePath: msi/
           - platform: macos-latest
-            args: "--target x86_64-apple-darwin"
+            args: "x86_64-apple-darwin"
             target: "macos-intel"
             bundlePath: macos/TeyvatGuide.app
           - platform: macos-latest
-            args: "--target aarch64-apple-darwin"
+            args: "aarch64-apple-darwin"
             target: "macos-arm"
             bundlePath: macos/TeyvatGuide.app
     runs-on: ${{ matrix.settings.platform }}
@@ -61,10 +61,10 @@ jobs:
       - name: Update version
         run: pnpm upv ${{ github.event.inputs.version }}
       - name: Build app
-        run: pnpm build ${{ matrix.settings.args }}
+        run: pnpm build --target ${{ matrix.settings.args }}
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: TeyvatGuide_v${{ github.event.inputs.version }}_${{ matrix.settings.target }}
-          path: src-tauri/target/release/bundle/${{ matrix.settings.bundlePath }}
+          path: src-tauri/target/${{ matrix.settings.args }}/release/bundle/${{ matrix.settings.bundlePath }}
           if-no-files-found: error
