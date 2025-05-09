@@ -2,12 +2,16 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2025-05-06
+Update: 2025-05-09
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2025-05-06 13:52:36`
+> 更新于 `2025-05-09 12:06:20`
+
+## [0.7.5](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.5) (2025-05-09)
+
+- 🐛 处理UIGF时区异常 [`#155`](https://github.com/BTMuli/TeyvatGuide/issues/155)
 
 ## [0.7.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.4) (2025-05-06)
 
