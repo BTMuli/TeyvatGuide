@@ -19,7 +19,8 @@ pub fn get_window_size2(monitor: Monitor, width: f64, height: f64) -> (f64, f64)
   let height_scale = monitor_height / 1080.0;
   let mut get_width: f64 = 0.0;
   let mut get_height: f64 = 0.0;
-  dbg!(get_width, get_height); // 防止never read
+  // 忽略未使用
+  println!("{} {}", get_width, get_height);
   get_width = (width * width_scale / monitor_scale).round();
   get_height = (height * height_scale / monitor_scale).round();
   #[cfg(target_os = "macos")]
