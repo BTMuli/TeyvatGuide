@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/userGacha.ts
  * @description 用户祈愿模块
- * @since Beta v0.6.8
+ * @since Beta v0.7.5
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -10,7 +10,7 @@ import { path } from "@tauri-apps/api";
 import { exists, mkdir, readDir } from "@tauri-apps/plugin-fs";
 
 import TGLogger from "@/utils/TGLogger.js";
-import { getWikiBrief } from "@/utils/toolFunc.js";
+import { getWikiBrief, timestampToDate } from "@/utils/toolFunc.js";
 import { exportUigfData, readUigfData, verifyUigfData } from "@/utils/UIGF.js";
 
 /**
@@ -42,19 +42,37 @@ function getInsertSql(uid: string, gacha: TGApp.Plugins.UIGF.GachaItem): string 
 }
 
 /**
+ * @description 传入时间字符串跟对应时区，转成utc8时间字符串
+ * @since Beta v0.7.5
+ * @param {string} time - 时间字符串
+ * @param {number} timezone - 时区
+ * @return {string} 转换后的时间戳
+ */
+function getUtc8Time(time: string, timezone: number): string {
+  const date = new Date(time);
+  const diffTimezone = -timezone + 8;
+  const realDate = new Date(date.getTime() + diffTimezone * 60 * 60 * 1000);
+  return timestampToDate(realDate.getTime());
+}
+
+/**
  * @description 转换祈愿数据，防止多语言
- * @since Beta v0.6.8
+ * @since Beta v0.7.5
  * @param {TGApp.Plugins.UIGF.GachaItem} gacha - UIGF数据
+ * @param {number} timezone - 时区
  * @return {TGApp.Plugins.UIGF.GachaItem} 转换后的数据
  */
-function transGacha(gacha: TGApp.Plugins.UIGF.GachaItem): TGApp.Plugins.UIGF.GachaItem {
+function transGacha(
+  gacha: TGApp.Plugins.UIGF.GachaItem,
+  timezone: number = 8,
+): TGApp.Plugins.UIGF.GachaItem {
   const find = getWikiBrief(gacha.item_id);
   if (!find) return gacha;
   return {
     gacha_type: gacha.gacha_type,
     item_id: gacha.item_id,
     count: gacha.count ?? "1",
-    time: gacha.time,
+    time: getUtc8Time(gacha.time, timezone),
     name: find.name,
     item_type: "element" in find ? "角色" : "武器",
     rank_type: find.star.toString(),
@@ -204,7 +222,7 @@ async function mergeUIGF(uid: string, data: TGApp.Plugins.UIGF.GachaItem[]): Pro
 async function mergeUIGF4(data: TGApp.Plugins.UIGF.GachaHk4e): Promise<void> {
   const db = await TGSqlite.getDB();
   for (const gacha of data.list) {
-    const trans = transGacha(gacha);
+    const trans = transGacha(gacha, data.timezone);
     const sql = getInsertSql(data.uid.toString(), trans);
     await db.execute(sql);
   }

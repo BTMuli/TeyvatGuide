@@ -1,7 +1,7 @@
 /**
  * @file utils/UIGF.ts
  * @description UIGF工具类
- * @since Beta v0.6.5
+ * @since Beta v0.7.5
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -29,12 +29,27 @@ function getUigfTimeZone(uid: string): number {
 }
 
 /**
+ * @description 传入utc8时间字符串跟目标时区，转成目标时区时间字符串
+ * @since Beta v0.7.5
+ * @param {string} time - 时间字符串
+ * @param {number} timezone - 时区
+ * @return {string} 转换后的时间字符串
+ */
+function getExportTime(time: string, timezone: number): string {
+  const date = new Date(time);
+  const diffTimezone = -8 + timezone;
+  const realDate = new Date(date.getTime() + diffTimezone * 60 * 60 * 1000);
+  return timestampToDate(realDate.getTime());
+}
+
+/**
  * @description 获取 UIGF 头部信息
- * @since Beta v0.4.4
+ * @since Beta v0.7.5
  * @param {string} uid - UID
+ * @param {number} timezone - 时区
  * @returns {Promise<TGApp.Plugins.UIGF.Info>}
  */
-async function getUigfHeader(uid: string): Promise<TGApp.Plugins.UIGF.Info> {
+async function getUigfHeader(uid: string, timezone: number): Promise<TGApp.Plugins.UIGF.Info> {
   const stamp = Date.now();
   return {
     uid,
@@ -44,7 +59,7 @@ async function getUigfHeader(uid: string): Promise<TGApp.Plugins.UIGF.Info> {
     export_time: timestampToDate(stamp),
     export_app: "TeyvatGuide",
     export_app_version: await app.getVersion(),
-    region_time_zone: getUigfTimeZone(uid),
+    region_time_zone: timezone,
   };
 }
 
@@ -66,19 +81,21 @@ export async function getUigf4Header(): Promise<TGApp.Plugins.UIGF.Info4> {
 
 /**
  * @description 数据转换-数据库到 UIGF
- * @since Alpha v0.2.3
+ * @since Beta v0.7.5
  * @param {TGApp.Sqlite.GachaRecords.SingleTable[]} data - 数据库数据
+ * @param {number} timezone - 时区
  * @returns {TGApp.Plugins.UIGF.GachaItem[]} UIGF 数据
  */
 function convertDataToUigf(
   data: TGApp.Sqlite.GachaRecords.SingleTable[],
+  timezone: number,
 ): TGApp.Plugins.UIGF.GachaItem[] {
   return data.map((gacha) => {
     return {
       gacha_type: gacha.gachaType,
       item_id: gacha.itemId,
       count: gacha.count,
-      time: gacha.time,
+      time: getExportTime(gacha.time, timezone),
       name: gacha.name,
       item_type: gacha.type,
       rank_type: gacha.rank,
@@ -172,7 +189,7 @@ export async function readUigf4Data(userPath: string): Promise<TGApp.Plugins.UIG
 
 /**
  * @description 导出 UIGF 数据
- * @since Beta v0.5.0
+ * @since Beta v0.7.5
  * @param {string} uid - UID
  * @param {TGApp.Sqlite.GachaRecords.SingleTable[]} gachaList - 祈愿列表
  * @param {string} savePath - 保存路径
@@ -183,21 +200,23 @@ export async function exportUigfData(
   gachaList: TGApp.Sqlite.GachaRecords.SingleTable[],
   savePath?: string,
 ): Promise<void> {
-  const UigfData = { info: await getUigfHeader(uid), list: convertDataToUigf(gachaList) };
+  const timezone = getUigfTimeZone(uid);
+  const UigfData = {
+    info: await getUigfHeader(uid, timezone),
+    list: convertDataToUigf(gachaList, timezone),
+  };
   const filePath = savePath ?? `${await path.appLocalDataDir()}userData\\UIGF_${uid}.json`;
   await writeTextFile(filePath, JSON.stringify(UigfData));
 }
 
 /**
  * @description 获取单项UID的UIGF4.0数据
+ * @since Beta v0.7.5
  * @param {string} uid - UID
  * @returns {Promise<TGApp.Plugins.UIGF.GachaHk4e>}
  */
 export async function getUigf4Item(uid: string): Promise<TGApp.Plugins.UIGF.GachaHk4e> {
   const gachaList = await TSUserGacha.getGachaRecords(uid);
-  return {
-    uid: uid,
-    timezone: getUigfTimeZone(uid),
-    list: convertDataToUigf(gachaList),
-  };
+  const timezone = getUigfTimeZone(uid);
+  return { uid: uid, timezone: timezone, list: convertDataToUigf(gachaList, timezone) };
 }
