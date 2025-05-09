@@ -42,12 +42,14 @@ jobs:
         run: ssh -T git@github.com || true
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
+
       - name: Add Rust targets(macOS Intel)
         if: matrix.settings.target == 'macos-intel'
         run: rustup target add x86_64-apple-darwin
       - name: Add Rust targets(macOS ARM)
         if: matrix.settings.target == 'macos-arm'
         run: rustup target add aarch64-apple-darwin
+
       - name: setup node
         uses: actions/setup-node@v3
         with:
@@ -60,8 +62,14 @@ jobs:
         run: pnpm install
       - name: Update version
         run: pnpm upv ${{ github.event.inputs.version }}
+
       - name: Build app
         run: pnpm build --target ${{ matrix.settings.args }}
+        if: matrix.settings.args != ''
+      - name: Build app (no target)
+        run: pnpm build
+        if: matrix.settings.args == ''
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
