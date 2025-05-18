@@ -68,7 +68,7 @@ const props = defineProps<TItemBoxProps>();
   left: 0;
   overflow: hidden;
   width: v-bind("props.modelValue.size");
-  height: v-bind("props.modelValue.height");
+  height: v-bind("props.modelValue.size");
   border-radius: 4px;
 }
 
@@ -82,7 +82,7 @@ const props = defineProps<TItemBoxProps>();
   position: relative;
   overflow: hidden;
   width: v-bind("props.modelValue.size");
-  height: v-bind("props.modelValue.height");
+  height: v-bind("props.modelValue.size");
   border-radius: 4px;
 }
 
@@ -98,7 +98,7 @@ const props = defineProps<TItemBoxProps>();
   left: 0;
   display: flex;
   width: v-bind("props.modelValue.size");
-  height: v-bind("props.modelValue.height");
+  height: v-bind("props.modelValue.size");
   flex-direction: column;
   align-items: center;
   justify-content: center;
