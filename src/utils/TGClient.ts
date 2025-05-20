@@ -1,7 +1,7 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.7.3
+ * @since Beta v0.7.6
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -242,7 +242,7 @@ class Client {
 
   /**
    * @func handleCustomCallback
-   * @since Beta v0.5.0
+   * @since Beta v0.7.6
    * @desc 处理自定义的 callback
    * @param {TGApp.Plugins.JSBridge.Arg<any>} arg - 事件参数
    * @returns {Promise<void>} - 返回值
@@ -262,10 +262,6 @@ class Client {
         })();`;
         await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
         await this.loadJSBridge();
-        break;
-      }
-      case "teyvat_sign_in": {
-        await event.emit("config_user_sign", arg.payload);
         break;
       }
       case "teyvat_touch": {
@@ -349,6 +345,9 @@ class Client {
         await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
         break;
       }
+      case "teyvat_open_webview":
+        window.open(arg.payload);
+        break;
       default:
         console.warn(`[customCallback] ${arg.method}`);
     }

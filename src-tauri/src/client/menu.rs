@@ -1,6 +1,6 @@
 //! @file src/client/menu.rs
 //! @desc 客户端菜单模块，负责操作米游社客户端菜单
-//! @since Beta v0.7.4
+//! @since Beta v0.7.6
 
 use crate::client::utils;
 use tauri::menu::{Menu, MenuBuilder, MenuEvent, MenuItemBuilder, Submenu, SubmenuBuilder};
@@ -33,11 +33,14 @@ fn create_utils_menu(app: AppHandle) -> Submenu<Wry> {
     MenuItemBuilder::with_id("remove_overlay", "移除遮罩").build(&app).unwrap();
   let rotate_window_submenu =
     MenuItemBuilder::with_id("rotate_window", "旋转窗口").build(&app).unwrap();
+  let open_with_webview_submenu =
+    MenuItemBuilder::with_id("open_with_webview", "外部打开").build(&app).unwrap();
   let utils_menu = SubmenuBuilder::new(&app, "工具")
     .item(&retry_bridge_submenu)
     .item(&mock_touch_submenu)
     .item(&remove_overlay_submenu)
     .item(&rotate_window_submenu)
+    .item(&open_with_webview_submenu)
     .build()
     .expect("failed to create utils_menu");
   utils_menu
@@ -68,6 +71,7 @@ pub fn handle_menu_event(window: &Window, event: MenuEvent) {
     "mock_touch" => handle_menu_mock_touch(window),
     "remove_overlay" => handle_menu_remove_overlay(window),
     "rotate_window" => handle_menu_rotate_window(window),
+    "open_with_webview" => handle_menu_open_with_webview(window),
     _ => {}
   }
 }
@@ -196,4 +200,21 @@ fn handle_menu_rotate_window(app_handle: &Window) {
   }
   window.center().unwrap();
   window.set_focus().unwrap();
+}
+
+// 处理使用 WebView 打开菜单
+fn handle_menu_open_with_webview(app_handle: &Window) {
+  let window = app_handle.get_webview_window("mhy_client");
+  let execute_js = r#"
+    javascript:(async function(){
+      const url = window.location.href;
+      const arg = {
+        method: 'teyvat_open_webview',
+        payload: url,
+      }
+      await window.__TAURI__.event.emit('post_mhy_client',JSON.stringify(arg));
+    })()"#;
+  if window.is_some() {
+    window.unwrap().eval(execute_js).ok().unwrap();
+  }
 }
