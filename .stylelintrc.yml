@@ -8,9 +8,13 @@ plugins:
   - stylelint-scss
   - stylelint-prettier
   - stylelint-order
+  - "@btmuli/stylelint-plugin-color"
 rules:
   property-no-vendor-prefix:
     - true
     - ignoreProperties: [backdrop-filter]
   color-hex-length: long
   prettier/prettier: true
+  color/format:
+    - true
+    - hexa

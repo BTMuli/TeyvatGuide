@@ -103,6 +103,7 @@
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
+    "@btmuli/stylelint-plugin-color": "^0.1.0",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.26.0",
     "@tauri-apps/cli": "2.5.0",

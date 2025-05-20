@@ -105,6 +105,9 @@ importers:
         specifier: ^1.6.11
         version: 1.6.11
     devDependencies:
+      '@btmuli/stylelint-plugin-color':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@eslint/eslintrc':
         specifier: ^3.3.1
         version: 3.3.1
@@ -373,6 +376,9 @@ packages:
   '@babel/types@7.27.1':
     resolution: {integrity: sha512-+EzkxvLNfiUeKMgy/3luqfsCWFRXLb7U6wNQTk60tovuckwB15B191tJWvpp4HjiQWdJkCxO3Wbvc6jlk3Xb2Q==}
     engines: {node: '>=6.9.0'}
+
+  '@btmuli/stylelint-plugin-color@0.1.0':
+    resolution: {integrity: sha512-XAjqeFQafsr0S5h2XPnPlFFP4zPluMH2nZ7+D7SG6eLQOYdojvmLGiSaBikWFE0OA0wqxcxzhAYSVXN9SDgiig==}
 
   '@bufbuild/protobuf@2.3.0':
     resolution: {integrity: sha512-WK6zH4MtBp/uesX8KGCnwDDRVnEVHUvwjsigKXcSR57Oo8Oyv1vRS9qyUlSP+6KWRl5z8tNAU5qpf3QodeVYxA==}
@@ -3949,6 +3955,8 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
+
+  '@btmuli/stylelint-plugin-color@0.1.0': {}
 
   '@bufbuild/protobuf@2.3.0': {}
 
