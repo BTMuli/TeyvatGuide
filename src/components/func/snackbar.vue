@@ -116,7 +116,7 @@ defineExpose({ displayBox });
 }
 
 .func-snackbar-text {
-  color: #fff;
+  color: #ffffff;
   font-size: 16px;
   font-weight: 500;
 }

@@ -12,4 +12,5 @@ rules:
   property-no-vendor-prefix:
     - true
     - ignoreProperties: [backdrop-filter]
+  color-hex-length: long
   prettier/prettier: true

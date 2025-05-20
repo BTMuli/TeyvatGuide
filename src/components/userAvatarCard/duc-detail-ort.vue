@@ -46,7 +46,7 @@ const props = defineProps<DucDetailOrtProps>();
   border-radius: 50%;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
-  background: rgba(0 0 0 /40%);
+  background: rgb(0 0 0 / 40%);
 
   img {
     width: 100%;
@@ -62,6 +62,6 @@ const props = defineProps<DucDetailOrtProps>();
   color: var(--tgc-white-1);
   font-family: var(--font-title);
   font-size: 16px;
-  text-shadow: 0 0 5px rgba(0 0 0/40%);
+  text-shadow: 0 0 5px rgb(0 0 0 / 40%);
 }
 </style>
