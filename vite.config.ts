@@ -1,7 +1,7 @@
 /**
  * @file vite.config.ts
  * @description vite 配置文件
- * @since Beta v0.7.3
+ * @since Beta v0.7.6
  */
 
 import vue from "@vitejs/plugin-vue";
@@ -19,12 +19,16 @@ export default defineConfig({
   resolve: {
     alias: {
       "@/": "/src/",
+      "@styles/": "/src/assets/styles/",
       "@comp/": "/src/components/",
+      "@Bili/": "/src/plugins/Bili/",
       "@Hutao/": "/src/plugins/Hutao/",
       "@Mys/": "/src/plugins/Mys/",
-      "@Sqlite/": "/src/plugins/Sqlite/",
-      "@Bili/": "/src/plugins/Bili/",
-      "@styles/": "/src/assets/styles/",
+      "@Sql/": "/src/plugins/Sqlite/",
+      "@Sqlm/": "/src/plugins/Sqlite/modules/",
+      "@store/": "/src/store/modules/",
+      "@utils/": "/src/utils/",
+      "@req/": "/src/web/request/",
     },
   },
   server: {

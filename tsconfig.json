@@ -20,12 +20,16 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@styles/*": ["src/assets/styles/*"],
       "@comp/*": ["src/components/*"],
+      "@Bili/*": ["src/plugins/Bili/*"],
       "@Hutao/*": ["src/plugins/Hutao/*"],
       "@Mys/*": ["src/plugins/Mys/*"],
-      "@Sqlite/*": ["src/plugins/Sqlite/*"],
-      "@Bili/*": ["src/plugins/Bili/*"],
-      "@styles/*": ["src/assets/styles/*"]
+      "@Sql/*": ["src/plugins/Sqlite/*"],
+      "@Sqlm/*": ["src/plugins/Sqlite/modules/*"],
+      "@utils/*": ["src/utils/*"],
+      "@store/*": ["src/store/modules/*"],
+      "@req/*": ["src/web/request/*"]
     }
   },
   "include": [
