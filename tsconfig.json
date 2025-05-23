@@ -29,7 +29,7 @@
       "@Sqlm/*": ["src/plugins/Sqlite/modules/*"],
       "@utils/*": ["src/utils/*"],
       "@store/*": ["src/store/modules/*"],
-      "@req/*": ["src/web/request/*"]
+      "@req/*": ["src/request/*"]
     }
   },
   "include": [

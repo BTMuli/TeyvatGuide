@@ -7,7 +7,7 @@
 import { event } from "@tauri-apps/api";
 import { attachConsole, debug, error, info, warn } from "@tauri-apps/plugin-log";
 
-import { timestampToDate } from "@/utils/toolFunc.js";
+import { timestampToDate } from "./toolFunc.js";
 
 /**
  * @description 日志工具

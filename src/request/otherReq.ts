@@ -1,13 +1,13 @@
 /**
- * @file web/request/otherReq.ts
+ * @file request/otherReq.ts
  * @description Other API
  * @since Beta v0.7.2
  */
 
-import TGBbs from "@/utils/TGBbs.js";
-import TGHttp from "@/utils/TGHttp.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { getInitDeviceInfo } from "@/utils/toolFunc.js";
+import TGBbs from "@utils/TGBbs.js";
+import TGHttp from "@utils/TGHttp.js";
+import TGLogger from "@utils/TGLogger.js";
+import { getInitDeviceInfo } from "@utils/toolFunc.js";
 
 /**
  * @description 获取设备指纹

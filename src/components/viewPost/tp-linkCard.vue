@@ -14,10 +14,9 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { parseLink, parsePost } from "@utils/linkParser.js";
 import { computed, toRaw } from "vue";
 import { useRouter } from "vue-router";
-
-import { parseLink, parsePost } from "@/utils/linkParser.js";
 
 type TpLinkCard = {
   insert: {

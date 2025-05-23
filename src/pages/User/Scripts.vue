@@ -71,13 +71,12 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TusMission from "@comp/userScripts/tus-mission.vue";
 import TusOutput from "@comp/userScripts/tus-output.vue";
 import TusSign from "@comp/userScripts/tus-sign.vue";
-import TSUserAccount from "@Sqlite/modules/userAccount.js";
+import apiHubReq from "@req/apiHubReq.js";
+import miscReq from "@req/miscReq.js";
+import TSUserAccount from "@Sqlm/userAccount.js";
+import useUserStore from "@store/user.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef } from "vue";
-
-import { useUserStore } from "@/store/modules/user.js";
-import apiHubReq from "@/web/request/apiHubReq.js";
-import miscReq from "@/web/request/miscReq.js";
 
 const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
 const accounts = shallowRef<Array<TGApp.App.Account.User>>([]);

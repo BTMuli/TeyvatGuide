@@ -28,11 +28,11 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TwcCharacter from "@comp/pageWiki/twc-character.vue";
 import TwcListItem from "@comp/pageWiki/twc-list-item.vue";
 import TwoSelectC, { type SelectedCValue } from "@comp/pageWiki/two-select-c.vue";
+import { createObc } from "@utils/TGWindow.js";
 import { onBeforeMount, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import { AppCharacterData } from "@/data/index.js";
-import { createObc } from "@/utils/TGWindow.js";
 
 const id = useRoute().params.id.toString() ?? "0";
 const showSelect = ref<boolean>(false);

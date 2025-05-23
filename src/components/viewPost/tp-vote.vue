@@ -21,9 +21,8 @@
   </div>
 </template>
 <script lang="ts" setup>
+import ApiHubReq from "@req/apiHubReq.js";
 import { onMounted, ref, shallowRef } from "vue";
-
-import ApiHubReq from "@/web/request/apiHubReq.js";
 
 type TpVote = { insert: { vote: { id: string; uid: string } } };
 type TpVoteProps = { data: TpVote };

@@ -1,13 +1,12 @@
 /**
- * @file web/request/miscReq.ts
+ * @file request/miscReq.ts
  * @description 杂项请求
  * @since Beta v0.7.1
  */
 import showGeetest from "@comp/func/geetest.js";
 import showSnackbar from "@comp/func/snackbar.js";
-
-import TGHttp from "@/utils/TGHttp.js";
-import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
+import { getRequestHeader } from "@utils/getRequestHeader.js";
+import TGHttp from "@utils/TGHttp.js";
 
 // BBSApiMiscBaseUrl => bamBu
 const bamBu: Readonly<string> = "https://bbs-api.miyoushe.com/misc/api/";

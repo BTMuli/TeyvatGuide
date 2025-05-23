@@ -4,7 +4,7 @@
  * @since Beta v0.5.5
  */
 
-import TGSqlite from "@Sqlite/index.js";
+import TGSqlite from "../index.js";
 
 /**
  * @description 获取单个帖子的收藏信息

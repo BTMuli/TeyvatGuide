@@ -28,7 +28,7 @@ export default defineConfig({
       "@Sqlm/": "/src/plugins/Sqlite/modules/",
       "@store/": "/src/store/modules/",
       "@utils/": "/src/utils/",
-      "@req/": "/src/web/request/",
+      "@req/": "/src/request/",
     },
   },
   server: {

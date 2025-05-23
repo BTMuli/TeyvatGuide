@@ -5,24 +5,23 @@
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
-import TGSqlite from "@Sqlite/index.js";
+import BBSApi from "@req/bbsReq.js";
+import OtherApi from "@req/otherReq.js";
+import PassportApi from "@req/passportReq.js";
+import takumiReq from "@req/takumiReq.js";
+import TGSqlite from "@Sql/index.js";
+import useAppStore from "@store/app.js";
+import useUserStore from "@store/user.js";
 import { core, event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { getDS4JS } from "@utils/getRequestHeader.js";
 
 import { parseLink } from "./linkParser.js";
+import TGBbs from "./TGBbs.js";
 import TGLogger from "./TGLogger.js";
 import { createPost } from "./TGWindow.js";
 import { getDeviceInfo } from "./toolFunc.js";
-
-import { useAppStore } from "@/store/modules/app.js";
-import { useUserStore } from "@/store/modules/user.js";
-import TGBbs from "@/utils/TGBbs.js";
-import BBSApi from "@/web/request/bbsReq.js";
-import OtherApi from "@/web/request/otherReq.js";
-import PassportApi from "@/web/request/passportReq.js";
-import takumiReq from "@/web/request/takumiReq.js";
-import { getDS4JS } from "@/web/utils/getRequestHeader.js";
 
 // invoke 参数
 type InvokeArg = { func: string };

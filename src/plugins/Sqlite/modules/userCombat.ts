@@ -4,13 +4,13 @@
  * @since Beta v0.6.3
  */
 
-import TGSqlite from "@Sqlite/index.js";
-import { transUserCombat } from "@Sqlite/utils/transUserCombat.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import TGLogger from "@utils/TGLogger.js";
+import { timestampToDate } from "@utils/toolFunc.js";
 
-import TGLogger from "@/utils/TGLogger.js";
-import { timestampToDate } from "@/utils/toolFunc.js";
+import TGSqlite from "../index.js";
+import { transUserCombat } from "../utils/transUserCombat.js";
 
 /**
  * @description 直接插入数据

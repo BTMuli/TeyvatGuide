@@ -108,17 +108,16 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TuaDetail from "@comp/userAbyss/tua-detail.vue";
 import TuaOverview from "@comp/userAbyss/tua-overview.vue";
 import Hutao from "@Hutao/index.js";
-import TSUserAbyss from "@Sqlite/modules/userAbyss.js";
-import TSUserAvatar from "@Sqlite/modules/userAvatar.js";
+import recordReq from "@req/recordReq.js";
+import TSUserAbyss from "@Sqlm/userAbyss.js";
+import TSUserAvatar from "@Sqlm/userAvatar.js";
+import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
+import TGLogger from "@utils/TGLogger.js";
+import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
-
-import { useUserStore } from "@/store/modules/user.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { generateShareImg } from "@/utils/TGShare.js";
-import TakumiRecordGenshinApi from "@/web/request/recordReq.js";
 
 const router = useRouter();
 const { account, cookie, hutaoEmail } = storeToRefs(useUserStore());
@@ -211,7 +210,7 @@ async function refreshAbyss(): Promise<void> {
   }
   await TGLogger.Info("[UserAbyss][getAbyssData] 更新深渊数据");
   await showLoading.start(`正在获取${account.value.gameUid}的深渊数据`, "正在获取上期数据");
-  const resP = await TakumiRecordGenshinApi.spiralAbyss(cookie.value, account.value, "2");
+  const resP = await recordReq.spiralAbyss(cookie.value, account.value, "2");
   if ("retcode" in resP) {
     await showLoading.end();
     showSnackbar.error(`[${resP.retcode}]${resP.message}`);
@@ -225,7 +224,7 @@ async function refreshAbyss(): Promise<void> {
   await showLoading.update("正在保存上期深渊数据");
   await TSUserAbyss.saveAbyss(account.value.gameUid, resP);
   await showLoading.update("正在获取本期深渊数据");
-  const res = await TakumiRecordGenshinApi.spiralAbyss(cookie.value, account.value, "1");
+  const res = await recordReq.spiralAbyss(cookie.value, account.value, "1");
   if ("retcode" in res) {
     await showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);

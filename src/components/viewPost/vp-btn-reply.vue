@@ -70,14 +70,13 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import postReq from "@req/postReq.js";
+import useAppStore from "@store/app.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef, watch } from "vue";
 
 import VpReplyDebug from "./vp-reply-debug.vue";
 import VpReplyItem from "./vp-reply-item.vue";
-
-import { useAppStore } from "@/store/modules/app.js";
-import postReq from "@/web/request/postReq.js";
 
 type TprMainProps = { gid: number; postId: string };
 type SelectItem = { label: string; value: string };

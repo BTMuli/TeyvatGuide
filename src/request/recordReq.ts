@@ -1,11 +1,11 @@
 /**
- * @file web/request/record/genshinReq.ts
+ * @file request/recordReq.ts
  * @description TakumiRecordGenshinApi 相关请求
  * @since Beta v0.6.3
  */
 
-import TGHttp from "@/utils/TGHttp.js";
-import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
+import { getRequestHeader } from "@utils/getRequestHeader.js";
+import TGHttp from "@utils/TGHttp.js";
 
 // TakumiRecordGenshinApiBaseUrl => trgAbu
 const trgAbu: Readonly<string> =
@@ -133,11 +133,11 @@ async function spiralAbyss(
   return resp.data;
 }
 
-const TakumiRecordGenshinApi = {
+const recordReq = {
   index: index,
   character: { list: characterList, detail: characterDetail },
   roleCombat: roleCombat,
   spiralAbyss: spiralAbyss,
 };
 
-export default TakumiRecordGenshinApi;
+export default recordReq;

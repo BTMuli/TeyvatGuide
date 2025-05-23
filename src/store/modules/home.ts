@@ -1,7 +1,7 @@
 /**
  * @file store/modules/home.ts
  * @description Home store module
- * @since Beta v0.7.2
+ * @since Beta v0.7.6
  */
 
 import { defineStore } from "pinia";
@@ -9,7 +9,7 @@ import { ref } from "vue";
 
 export type ShowItem = { show: boolean; order: number; label: string };
 
-export const useHomeStore = defineStore("home", () => {
+const useHomeStore = defineStore("home", () => {
   const homeShow = ref<Array<ShowItem>>([
     { show: true, order: 1, label: "限时祈愿" },
     { show: true, order: 2, label: "近期活动" },
@@ -52,3 +52,5 @@ export const useHomeStore = defineStore("home", () => {
 
   return { poolCover, getShowItems, setShowItems, init };
 });
+
+export default useHomeStore;

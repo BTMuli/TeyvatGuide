@@ -5,7 +5,7 @@
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
-import TSUserGacha from "@Sqlite/modules/userGacha.js";
+import TSUserGacha from "@Sqlm/userGacha.js";
 import { app, path } from "@tauri-apps/api";
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { Ajv } from "ajv";

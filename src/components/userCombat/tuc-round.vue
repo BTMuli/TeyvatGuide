@@ -19,12 +19,12 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { timestampToDate } from "@utils/toolFunc.js";
+
 import TucAvatars from "./tuc-avatars.vue";
 import TucBuffs from "./tuc-buffs.vue";
 import TucCards from "./tuc-cards.vue";
 import TucSub from "./tuc-sub.vue";
-
-import { timestampToDate } from "@/utils/toolFunc.js";
 
 defineProps<{ modelValue: TGApp.Game.Combat.RoundData }>();
 </script>

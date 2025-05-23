@@ -38,9 +38,8 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
+import painterReq from "@req/painterReq.js";
 import { onUnmounted, ref, shallowRef, watch } from "vue";
-
-import painterReq from "@/web/request/painterReq.js";
 
 type TpoLotteryProps = { lottery: string | undefined };
 type RenderCard = {

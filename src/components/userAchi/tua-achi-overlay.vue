@@ -63,11 +63,11 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
+import TGLogger from "@utils/TGLogger.js";
+import { generateShareImg } from "@utils/TGShare.js";
 import { ref } from "vue";
 
 import { AppAchievementSeriesData } from "@/data/index.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { generateShareImg } from "@/utils/TGShare.js";
 
 type ToAchiInfoProps = { data: TGApp.Sqlite.Achievement.RenderAchi };
 type ToAchiInfoEmits = (e: "select-series", v: number) => void;

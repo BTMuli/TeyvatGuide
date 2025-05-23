@@ -5,8 +5,7 @@
  */
 
 import headerBili from "@Bili/utils/getHeader.js";
-
-import TGHttp from "@/utils/TGHttp.js";
+import TGHttp from "@utils/TGHttp.js";
 
 /**
  * @description Bili 插件导航请求

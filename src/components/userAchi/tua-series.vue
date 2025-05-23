@@ -34,7 +34,7 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import TSUserAchi from "@Sqlite/modules/userAchi.js";
+import TSUserAchi from "@Sqlm/userAchi.js";
 import { type Event, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { computed, onMounted, onUnmounted, shallowRef, watch } from "vue";
 

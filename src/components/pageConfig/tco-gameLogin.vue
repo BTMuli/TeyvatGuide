@@ -38,14 +38,13 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import hk4eReq from "@req/hk4eReq.js";
+import PassportReq from "@req/passportReq.js";
+import passportReq from "@req/passportReq.js";
+import takumiReq from "@req/takumiReq.js";
+import { generateShareImg } from "@utils/TGShare.js";
 import QrcodeVue from "qrcode.vue";
 import { onUnmounted, ref, watch } from "vue";
-
-import { generateShareImg } from "@/utils/TGShare.js";
-import hk4eReq from "@/web/request/hk4eReq.js";
-import PassportReq from "@/web/request/passportReq.js";
-import passportReq from "@/web/request/passportReq.js";
-import takumiReq from "@/web/request/takumiReq.js";
 
 type ToGameLoginEmits = (e: "success", data: TGApp.App.Account.Cookie) => void;
 type ToGameLoginSelect = { title: string; value: number; icon: string };

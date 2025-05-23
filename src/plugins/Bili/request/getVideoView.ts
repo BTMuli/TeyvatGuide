@@ -6,9 +6,8 @@
 
 import headerBili from "@Bili/utils/getHeader.js";
 import getWrid from "@Bili/utils/getWrid.js";
-
-import TGHttp from "@/utils/TGHttp.js";
-import TGLogger from "@/utils/TGLogger.js";
+import TGHttp from "@utils/TGHttp.js";
+import TGLogger from "@utils/TGLogger.js";
 
 /**
  * @description 获取视频基本信息

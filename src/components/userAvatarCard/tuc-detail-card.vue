@@ -42,16 +42,15 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import TSUserAvatar from "@Sqlite/modules/userAvatar.js";
+import TSUserAvatar from "@Sqlm/userAvatar.js";
 import { app } from "@tauri-apps/api";
+import { generateShareImg } from "@utils/TGShare.js";
 import { computed, onMounted, ref, watch } from "vue";
 
 import DucDetailOlb from "./duc-detail-olb.vue";
 import DucDetailOlt from "./duc-detail-olt.vue";
 import DucDetailOrt from "./duc-detail-ort.vue";
 import DucDetailRelic from "./duc-detail-relic.vue";
-
-import { generateShareImg } from "@/utils/TGShare.js";
 
 type DucDetailOverlayProps = { modelValue: TGApp.Sqlite.Character.UserRole };
 type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };

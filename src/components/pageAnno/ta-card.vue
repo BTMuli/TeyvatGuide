@@ -28,11 +28,11 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import TGLogger from "@utils/TGLogger.js";
+import { generateShareImg } from "@utils/TGShare.js";
+import { createTGWindow } from "@utils/TGWindow.js";
 
 import type { AnnoCard } from "@/pages/common/PageAnno.vue";
-import TGLogger from "@/utils/TGLogger.js";
-import { generateShareImg } from "@/utils/TGShare.js";
-import { createTGWindow } from "@/utils/TGWindow.js";
 
 type TAnnoCardProps = { region: string; modelValue: AnnoCard; lang: string };
 const props = defineProps<TAnnoCardProps>();

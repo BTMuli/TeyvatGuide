@@ -3,7 +3,7 @@
  * @description 话题相关的请求
  * @since Beta v0.7.1
  */
-import TGHttp from "@/utils/TGHttp.js";
+import TGHttp from "@utils/TGHttp.js";
 
 // BBSApiTopicBaseUrl => batBu
 const batBu: Readonly<string> = "https://bbs-api.miyoushe.com/topic/wapi/";

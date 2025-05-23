@@ -32,12 +32,12 @@
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import TSUserAchi from "@Sqlite/modules/userAchi.js";
+import TSUserAchi from "@Sqlm/userAchi.js";
 import { event } from "@tauri-apps/api";
+import { timestampToDate } from "@utils/toolFunc.js";
 import { ref, toRaw, watch } from "vue";
 
 import { AppAchievementSeriesData } from "@/data/index.js";
-import { timestampToDate } from "@/utils/toolFunc.js";
 
 type TuaAchiProps = { modelValue: TGApp.Sqlite.Achievement.RenderAchi };
 type TuaAchiEmits = (e: "select-achi", data: TGApp.Sqlite.Achievement.RenderAchi) => void;

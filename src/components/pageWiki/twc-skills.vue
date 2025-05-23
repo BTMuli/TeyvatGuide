@@ -23,9 +23,8 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { parseHtmlText } from "@utils/toolFunc.js";
 import { onMounted, ref, shallowRef, watch } from "vue";
-
-import { parseHtmlText } from "@/utils/toolFunc.js";
 
 type TwcSkillsProps = { data: Array<TGApp.App.Character.WikiSkill> };
 type TabItem = { name: string; icon: string };

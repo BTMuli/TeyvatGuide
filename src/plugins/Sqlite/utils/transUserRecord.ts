@@ -4,7 +4,7 @@
  * @since Beta v0.7.2
  */
 
-import { getZhElement } from "@/utils/toolFunc.js";
+import { getZhElement } from "@utils/toolFunc.js";
 
 /**
  * @description 将通过 api 获取到的用户战绩数据转换为渲染用的数据

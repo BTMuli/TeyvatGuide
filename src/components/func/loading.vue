@@ -184,9 +184,8 @@ defineExpose({ displayBox });
     border-radius: 5px;
   }
 }
-</style>
-<!-- loading -->
-<style lang="css" scoped>
+
+/* loading */
 .loading-circle,
 .loading-circle > div {
   position: relative;

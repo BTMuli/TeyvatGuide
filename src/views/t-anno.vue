@@ -19,14 +19,13 @@ import TShareBtn from "@comp/app/t-shareBtn.vue";
 import TSwitchTheme from "@comp/app/t-switchTheme.vue";
 import showLoading from "@comp/func/loading.js";
 import TaParser from "@comp/pageAnno/ta-parser.vue";
+import Hk4eApi, { type AnnoLang, AnnoServer } from "@req/hk4eReq.js";
+import useAppStore from "@store/app.js";
 import { app, webviewWindow } from "@tauri-apps/api";
+import TGLogger from "@utils/TGLogger.js";
+import { createTGWindow } from "@utils/TGWindow.js";
 import { onMounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
-
-import { useAppStore } from "@/store/modules/app.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { createTGWindow } from "@/utils/TGWindow.js";
-import Hk4eApi, { type AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
 
 const route = useRoute();
 const annoId = Number(route.params.anno_id);

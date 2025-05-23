@@ -4,7 +4,7 @@
  * @since Beta v0.6.3
  */
 
-import { timestampToDate } from "@/utils/toolFunc.js";
+import { timestampToDate } from "@utils/toolFunc.js";
 
 /**
  * @description 将通过 api 获取到的数据转换为数据库中的数据

@@ -1,13 +1,13 @@
 /**
  * @file web/utils/getRequestHeader.ts
  * @description 获取请求头
- * @since Beta v0.7.3
+ * @since Beta v0.7.6
  */
 
 import Md5 from "js-md5";
 
-import TGBbs, { type SaltKey } from "@/utils/TGBbs.js";
-import { getDeviceInfo, getRandomString } from "@/utils/toolFunc.js";
+import TGBbs, { type SaltKey } from "./TGBbs.js";
+import { getDeviceInfo, getRandomString } from "./toolFunc.js";
 
 /**
  * @description 获取随机数

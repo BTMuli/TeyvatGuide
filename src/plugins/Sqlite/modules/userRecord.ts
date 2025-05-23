@@ -4,10 +4,10 @@
  * @since Beta v0.6.0
  */
 
-import TGSqlite from "@Sqlite/index.js";
-import { transUserRecord } from "@Sqlite/utils/transUserRecord.js";
+import { timestampToDate } from "@utils/toolFunc.js";
 
-import { timestampToDate } from "@/utils/toolFunc.js";
+import TGSqlite from "../index.js";
+import { transUserRecord } from "../utils/transUserRecord.js";
 
 /**
  * @description 获取插入Sql

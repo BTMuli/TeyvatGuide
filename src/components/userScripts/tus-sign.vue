@@ -56,15 +56,14 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showGeetest from "@comp/func/geetest.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import TSUserAccount from "@Sqlite/modules/userAccount.js";
+import lunaReq from "@req/lunaReq.js";
+import miscReq from "@req/miscReq.js";
+import takumiReq from "@req/takumiReq.js";
+import TSUserAccount from "@Sqlm/userAccount.js";
+import useUserStore from "@store/user.js";
+import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
-
-import { useUserStore } from "@/store/modules/user.js";
-import TGLogger from "@/utils/TGLogger.js";
-import lunaReq from "@/web/request/lunaReq.js";
-import miscReq from "@/web/request/miscReq.js";
-import takumiReq from "@/web/request/takumiReq.js";
 
 type SignGameInfo = { title: string; icon: string; gid: number };
 type SignAccount = {

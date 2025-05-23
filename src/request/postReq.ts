@@ -1,10 +1,10 @@
 /**
- * @file web/request/postReq.ts
+ * @file request/postReq.ts
  * @description 帖子相关的请求
  * @since Beta v0.7.4
  */
-import TGHttp from "@/utils/TGHttp.js";
-import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
+import { getRequestHeader } from "@utils/getRequestHeader.js";
+import TGHttp from "@utils/TGHttp.js";
 
 // BBSApiPostBaseUrl => bapBu
 const bapBu: Readonly<string> = "https://bbs-api.miyoushe.com/post/wapi/";

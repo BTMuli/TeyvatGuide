@@ -24,11 +24,10 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import postReq from "@req/postReq.js";
+import useBBSStore from "@store/bbs.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
-
-import useBBSStore from "@/store/modules/bbs.js";
-import postReq from "@/web/request/postReq.js";
 
 type ToPostSearchProps = { gid: string; keyword?: string };
 

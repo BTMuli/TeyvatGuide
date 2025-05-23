@@ -21,14 +21,13 @@
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
+import useAppStore from "@store/app.js";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getImageBuffer, saveCanvasImg, saveImgLocal } from "@utils/TGShare.js";
+import { getVideoDuration } from "@utils/toolFunc.js";
 import Artplayer from "artplayer";
 import type { Option } from "artplayer/types/option.js";
 import { onMounted, onUnmounted, ref, shallowRef, toRaw } from "vue";
-
-import { useAppStore } from "@/store/modules/app.js";
-import { getImageBuffer, saveCanvasImg, saveImgLocal } from "@/utils/TGShare.js";
-import { getVideoDuration } from "@/utils/toolFunc.js";
 
 type TpVod = {
   insert: {

@@ -24,10 +24,9 @@
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostcard from "@comp/app/t-postcard.vue";
+import bbsReq from "@req/bbsReq.js";
+import postReq from "@req/postReq.js";
 import { nextTick, onMounted, shallowRef, useTemplateRef, watch } from "vue";
-
-import bbsReq from "@/web/request/bbsReq.js";
-import postReq from "@/web/request/postReq.js";
 
 type TpoCollectionProps = { collection: TGApp.BBS.Post.Collection; gid: number };
 

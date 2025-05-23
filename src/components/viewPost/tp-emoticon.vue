@@ -22,12 +22,11 @@
   />
 </template>
 <script lang="ts" setup>
+import { saveImgLocal } from "@utils/TGShare.js";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import type { TpImage } from "./tp-image.vue";
 import VpOverlayImage from "./vp-overlay-image.vue";
-
-import { saveImgLocal } from "@/utils/TGShare.js";
 
 type TpCustomEmoticon = {
   insert: {

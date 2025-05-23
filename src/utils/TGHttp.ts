@@ -6,7 +6,7 @@
 
 import { fetch } from "@tauri-apps/plugin-http";
 
-import TGLogger from "@/utils/TGLogger.js";
+import TGLogger from "./TGLogger.js";
 
 /**
  * @description 请求参数

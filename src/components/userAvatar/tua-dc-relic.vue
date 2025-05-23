@@ -60,9 +60,8 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
+import useUserStore from "@store/user.js";
 import { computed } from "vue";
-
-import { useUserStore } from "@/store/modules/user.js";
 
 type TuaDcRelicProps = {
   modelValue: TGApp.Game.Avatar.Relic | false;

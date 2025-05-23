@@ -20,11 +20,10 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import painterReq from "@req/painterReq.js";
+import useUserStore from "@store/user.js";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
-
-import { useUserStore } from "@/store/modules/user.js";
-import painterReq from "@/web/request/painterReq.js";
 
 const { cookie } = storeToRefs(useUserStore());
 const offset = ref<number>();

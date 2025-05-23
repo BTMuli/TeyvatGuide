@@ -3,7 +3,7 @@
  * @description 深渊相关请求
  * @since Beta v0.6.3
  */
-import TGHttp from "@/utils/TGHttp.js";
+import TGHttp from "@utils/TGHttp.js";
 
 const AbyssUrl: Readonly<string> = `https://homa.snapgenshin.com/Statistics/`;
 

@@ -69,30 +69,29 @@
     />
   </div>
 </template>
-
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TuaAchiList from "@comp/userAchi/tua-achi-list.vue";
 import TuaSeries from "@comp/userAchi/tua-series.vue";
-import TSUserAchi from "@Sqlite/modules/userAchi.js";
+import TSUserAchi from "@Sqlm/userAchi.js";
 import { path } from "@tauri-apps/api";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-
-import { AppAchievementSeriesData } from "@/data/index.js";
-import TGLogger from "@/utils/TGLogger.js";
+import TGLogger from "@utils/TGLogger.js";
 import {
   getUiafHeader,
   readUiafData,
   verifyUiafData,
   verifyUiafDataClipboard,
-} from "@/utils/UIAF.js";
+} from "@utils/UIAF.js";
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+
+import { AppAchievementSeriesData } from "@/data/index.js";
 
 const seriesList = AppAchievementSeriesData.sort((a, b) => a.order - b.order).map((s) => s.id);
 const route = useRoute();

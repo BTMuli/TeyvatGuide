@@ -15,10 +15,10 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { getWikiBrief } from "@utils/toolFunc.js";
 import { computed } from "vue";
 
 import { AppGachaData } from "@/data/index.js";
-import { getWikiBrief } from "@/utils/toolFunc.js";
 
 export type GroDataLineProps = { data: TGApp.Sqlite.GachaRecords.SingleTable; count: number };
 

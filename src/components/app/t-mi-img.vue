@@ -12,9 +12,9 @@
   </div>
 </template>
 <script lang="ts" setup>
+import useAppStore from "@store/app.js";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
-import { useAppStore } from "@/store/modules/app.js";
 import { saveImgLocal } from "@/utils/TGShare.js";
 
 type TMiImgProps = {

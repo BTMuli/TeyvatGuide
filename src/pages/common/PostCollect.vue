@@ -109,15 +109,14 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import ToCollectPost from "@comp/pageCollect/to-collectPost.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
-import TSUserCollection from "@Sqlite/modules/userCollect.js";
+import postReq from "@req/postReq.js";
+import TSUserCollection from "@Sqlm/userCollect.js";
+import useUserStore from "@store/user.js";
 import { event } from "@tauri-apps/api";
 import type { UnlistenFn } from "@tauri-apps/api/event";
+import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
-
-import { useUserStore } from "@/store/modules/user.js";
-import TGLogger from "@/utils/TGLogger.js";
-import postReq from "@/web/request/postReq.js";
 
 const { cookie, briefInfo } = storeToRefs(useUserStore());
 let collectListener: UnlistenFn | null = null;

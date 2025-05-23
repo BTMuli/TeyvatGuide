@@ -1,15 +1,15 @@
 /**
  * @file vite-env.d.ts
  * @description 全局类型定义文件
- * @since Beta v0.5.1
+ * @since Beta v0.7.6
  */
 
 /**
  * @description vue 文件类型声明
  */
 declare module "*.vue" {
-  import type { DefineComponent } from "vue";
-  const component: DefineComponent<object, object, any>;
+  import type { defineComponent } from "vue";
+  const component: ReturnType<typeof defineComponent>;
   export default component;
 }
 

@@ -6,11 +6,10 @@
 
 import { app } from "@tauri-apps/api";
 import Database from "@tauri-apps/plugin-sql";
+import TGLogger from "@utils/TGLogger.js";
 
 import initDataSql from "./sql/initData.js";
 import { insertAppData } from "./sql/insertData.js";
-
-import TGLogger from "@/utils/TGLogger.js";
 
 class Sqlite {
   private readonly dbPath: string = "sqlite:TeyvatGuide.db";

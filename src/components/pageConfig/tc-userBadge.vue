@@ -125,17 +125,16 @@ import showGeetest from "@comp/func/geetest.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import ToGameLogin from "@comp/pageConfig/tco-gameLogin.vue";
-import TSUserAccount from "@Sqlite/modules/userAccount.js";
+import BBSApi from "@req/bbsReq.js";
+import PassportApi from "@req/passportReq.js";
+import passportReq from "@req/passportReq.js";
+import takumiReq from "@req/takumiReq.js";
+import TSUserAccount from "@Sqlm/userAccount.js";
+import useAppStore from "@store/app.js";
+import useUserStore from "@store/user.js";
+import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef } from "vue";
-
-import { useAppStore } from "@/store/modules/app.js";
-import { useUserStore } from "@/store/modules/user.js";
-import TGLogger from "@/utils/TGLogger.js";
-import BBSApi from "@/web/request/bbsReq.js";
-import PassportApi from "@/web/request/passportReq.js";
-import passportReq from "@/web/request/passportReq.js";
-import takumiReq from "@/web/request/takumiReq.js";
 
 const { isLogin } = storeToRefs(useAppStore());
 const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());

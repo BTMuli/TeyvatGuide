@@ -12,11 +12,10 @@ import TpImage from "@comp/viewPost/tp-image.vue";
 import TpText from "@comp/viewPost/tp-text.vue";
 import TpTexts from "@comp/viewPost/tp-texts.vue";
 import TpUnknown from "@comp/viewPost/tp-unknown.vue";
+import parseAnnoContent from "@utils/annoParser.js";
 import type { Component } from "vue";
 
 import TaTable from "./ta-table.vue";
-
-import parseAnnoContent from "@/web/utils/annoParser.js";
 
 type TaParserProps = { data: TGApp.BBS.Announcement.ContentItem };
 const props = defineProps<TaParserProps>();

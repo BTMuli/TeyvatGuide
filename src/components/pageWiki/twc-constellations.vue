@@ -26,9 +26,8 @@
   </div>
 </template>
 <script setup lang="ts">
+import { parseHtmlText } from "@utils/toolFunc.js";
 import { onMounted, ref, watch } from "vue";
-
-import { parseHtmlText } from "@/utils/toolFunc.js";
 
 type TwcConstellationProps = { data: Array<TGApp.Plugins.Hutao.Character.RhisdTalent> };
 

@@ -19,7 +19,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { useUserStore } from "@/store/modules/user.js";
+import useUserStore from "@store/user.js";
 
 type TuaRelicBoxProps = { modelValue: TGApp.Game.Avatar.Relic | false; position: number };
 

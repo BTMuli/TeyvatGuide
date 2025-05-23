@@ -21,12 +21,11 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import bbsReq from "@req/bbsReq.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { parseLink, parsePost } from "@utils/linkParser.js";
+import { isColorSimilar, decodeRegExp } from "@utils/toolFunc.js";
 import { onMounted, ref, shallowRef, StyleValue, toRaw } from "vue";
-
-import { parseLink, parsePost } from "@/utils/linkParser.js";
-import { isColorSimilar, decodeRegExp } from "@/utils/toolFunc.js";
-import bbsReq from "@/web/request/bbsReq.js";
 
 export type TpText = {
   insert: string;

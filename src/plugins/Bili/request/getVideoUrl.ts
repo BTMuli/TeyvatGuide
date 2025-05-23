@@ -6,8 +6,7 @@
 
 import headerBili from "@Bili/utils/getHeader.js";
 import getWrid from "@Bili/utils/getWrid.js";
-
-import TGHttp from "@/utils/TGHttp.js";
+import TGHttp from "@utils/TGHttp.js";
 
 /**
  * @description 获取视频播放地址

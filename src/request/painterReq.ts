@@ -1,10 +1,10 @@
 /**
- * @file web/request/painterReq.ts
+ * @file request/painterReq.ts
  * @description painter 下的请求
  * @since Beta v0.7.2
  */
-import TGHttp from "@/utils/TGHttp.js";
-import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
+import { getRequestHeader } from "@utils/getRequestHeader.js";
+import TGHttp from "@utils/TGHttp.js";
 
 // BBSApiPainterBaseUrl => bapBu
 const bapBu: Readonly<string> = "https://bbs-api.miyoushe.com/painter/wapi/";

@@ -29,10 +29,9 @@
 <script lang="ts" setup>
 import Bili from "@Bili/index.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import { saveImgLocal } from "@utils/TGShare.js";
+import { getVideoDuration, timestampToDate } from "@utils/toolFunc.js";
 import { onMounted, onUnmounted, ref, shallowRef } from "vue";
-
-import { saveImgLocal } from "@/utils/TGShare.js";
-import { getVideoDuration, timestampToDate } from "@/utils/toolFunc.js";
 
 type TpVideo = { insert: { video: string } };
 type TpVideoProps = { data: TpVideo };

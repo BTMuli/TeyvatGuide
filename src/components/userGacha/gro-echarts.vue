@@ -26,6 +26,8 @@
 <script lang="ts" setup>
 // about import err,see:https://github.com/apache/echarts/issues/19992
 import showLoading from "@comp/func/loading.js";
+import useAppStore from "@store/app.js";
+import TGachaCharts from "@utils/gachaCharts.js";
 import { BarChart, HeatmapChart, PieChart } from "echarts/charts.js";
 import {
   CalendarComponent,
@@ -44,9 +46,6 @@ import type { EChartsOption } from "echarts/types/dist/shared.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef, watch } from "vue";
 import VChart from "vue-echarts";
-
-import { useAppStore } from "@/store/modules/app.js";
-import TGachaCharts from "@/utils/gachaCharts.js";
 
 // echarts
 use([

@@ -4,12 +4,12 @@
  * @since Beta v0.7.2
  */
 
-import TGSqlite from "@Sqlite/index.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import TGLogger from "@utils/TGLogger.js";
+import { timestampToDate } from "@utils/toolFunc.js";
 
-import TGLogger from "@/utils/TGLogger.js";
-import { timestampToDate } from "@/utils/toolFunc.js";
+import TGSqlite from "../index.js";
 
 /**
  * @description 获取插入游戏账号数据的sql

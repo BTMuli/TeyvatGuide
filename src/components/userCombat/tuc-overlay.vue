@@ -21,11 +21,11 @@ import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import { generateShareImg } from "@utils/TGShare.js";
+import { timestampToDate } from "@utils/toolFunc.js";
 import { computed } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";
-import { generateShareImg } from "@/utils/TGShare.js";
-import { timestampToDate } from "@/utils/toolFunc.js";
 
 type TucOverlayProps = { data: TGApp.Plugins.Hutao.Combat.Data | undefined };
 

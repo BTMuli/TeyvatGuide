@@ -74,6 +74,7 @@ export async function createPost(
 /**
  * @description 打开观测枢
  * @since Beta 0.6.2
+ * @deprecated 该方法已弃用，使用 openPath 替代
  * @param {string} contentId
  * @param {string} label
  * @returns {Promise<void>}

@@ -108,12 +108,11 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import { emit } from "@tauri-apps/api/event";
+import { generateShareImg } from "@utils/TGShare.js";
+import { createPost } from "@utils/TGWindow.js";
+import { timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-
-import { generateShareImg } from "@/utils/TGShare.js";
-import { createPost } from "@/utils/TGWindow.js";
-import { timestampToDate } from "@/utils/toolFunc.js";
 
 type TPostCardProps = {
   modelValue: TGApp.BBS.Post.FullData;

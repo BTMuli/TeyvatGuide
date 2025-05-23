@@ -39,12 +39,11 @@
 </template>
 <script setup lang="ts">
 import showSnackbar from "@comp/func/snackbar.js";
+import { generateShareImg } from "@utils/TGShare.js";
+import { timestampToDate } from "@utils/toolFunc.js";
 
 import TMiImg from "./t-mi-img.vue";
 import TOverlay from "./t-overlay.vue";
-
-import { generateShareImg } from "@/utils/TGShare.js";
-import { timestampToDate } from "@/utils/toolFunc.js";
 
 type ToLiveCodeProps = { data: Array<TGApp.BBS.Navigator.CodeData>; actId: string | undefined };
 

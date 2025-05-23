@@ -132,15 +132,14 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
+import ApiHubReq from "@req/apiHubReq.js";
+import painterReq from "@req/painterReq.js";
+import useBBSStore from "@store/bbs.js";
+import TGLogger from "@utils/TGLogger.js";
+import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-
-import useBBSStore from "@/store/modules/bbs.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { createPost } from "@/utils/TGWindow.js";
-import ApiHubReq from "@/web/request/apiHubReq.js";
-import painterReq from "@/web/request/painterReq.js";
 
 type SortSelect = { text: string; value: number; icon: string };
 type SortSelectGame = { gid: number; forum: Array<SortSelect>; text: string; icon?: string };

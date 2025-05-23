@@ -182,14 +182,13 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlayFollow from "@comp/viewPost/vp-overlay-follow.vue";
+import useAppStore from "@store/app.js";
+import useUserStore from "@store/user.js";
 import { event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
+import mhyClient from "@utils/TGClient.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref } from "vue";
-
-import { useAppStore } from "@/store/modules/app.js";
-import { useUserStore } from "@/store/modules/user.js";
-import mhyClient from "@/utils/TGClient.js";
 
 const { sidebar, theme, isLogin, recentNewsType } = storeToRefs(useAppStore());
 const { briefInfo } = storeToRefs(useUserStore());

@@ -67,18 +67,18 @@ import GroHistory from "@comp/userGacha/gro-history.vue";
 import GroOverview from "@comp/userGacha/gro-overview.vue";
 import GroTable from "@comp/userGacha/gro-table.vue";
 import UgoUid from "@comp/userGacha/ugo-uid.vue";
-import TSUserGacha from "@Sqlite/modules/userGacha.js";
+import Hk4eApi from "@req/hk4eReq.js";
+import takumiReq from "@req/takumiReq.js";
+import TSUserGacha from "@Sqlm/userGacha.js";
+import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
+import TGLogger from "@utils/TGLogger.js";
+import { exportUigfData, readUigfData, verifyUigfData } from "@utils/UIGF.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
 import { AppCharacterData, AppWeaponData } from "@/data/index.js";
-import { useUserStore } from "@/store/modules/user.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { exportUigfData, readUigfData, verifyUigfData } from "@/utils/UIGF.js";
-import Hk4eApi from "@/web/request/hk4eReq.js";
-import takumiReq from "@/web/request/takumiReq.js";
 
 const { account, cookie } = storeToRefs(useUserStore());
 const authkey = ref<string>("");

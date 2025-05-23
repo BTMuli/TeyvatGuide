@@ -29,7 +29,6 @@
     </div>
   </transition>
 </template>
-
 <script lang="ts" setup>
 import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 

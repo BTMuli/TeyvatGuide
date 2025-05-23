@@ -32,11 +32,10 @@
 </template>
 <script setup lang="ts">
 import showSnackbar from "@comp/func/snackbar.js";
+import { generateShareImg } from "@utils/TGShare.js";
 import { ref } from "vue";
 
 import TOverlay from "./t-overlay.vue";
-
-import { generateShareImg } from "@/utils/TGShare.js";
 
 type ToNameCardProps = { data?: TGApp.App.NameCard.Item };
 

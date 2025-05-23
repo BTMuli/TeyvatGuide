@@ -17,11 +17,10 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readTextFile } from "@tauri-apps/plugin-fs";
+import TGLogger from "@utils/TGLogger.js";
 import { ref, shallowRef } from "vue";
 
 import TprReply from "./vp-reply-item.vue";
-
-import TGLogger from "@/utils/TGLogger.js";
 
 const visible = defineModel<boolean>();
 const filePath = ref<string>("");

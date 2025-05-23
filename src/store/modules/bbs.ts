@@ -3,10 +3,9 @@
  * @description BBS 模块状态管理
  * @since Beta v0.7.3
  */
+import apiHubReq from "@req/apiHubReq.js";
 import { defineStore } from "pinia";
 import { shallowRef } from "vue";
-
-import apiHubReq from "@/web/request/apiHubReq.js";
 
 const useBBSStore = defineStore(
   "bbs",

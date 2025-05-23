@@ -5,10 +5,9 @@
  */
 
 import { app } from "@tauri-apps/api";
+import { getBuildTime } from "@utils/TGBuild.js";
 
 import createTable from "./createTable.sql?raw";
-
-import { getBuildTime } from "@/utils/TGBuild.js";
 
 /**
  * @description 初始化应用表数据

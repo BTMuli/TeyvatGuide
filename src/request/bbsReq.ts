@@ -1,11 +1,11 @@
 /**
- * @file web/request/bbsReq.ts
+ * @file request/bbsReq.ts
  * @description BBS 请求模块
  * @since Beta v0.7.3
  */
 
-import TGHttp from "@/utils/TGHttp.js";
-import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
+import { getRequestHeader } from "@utils/getRequestHeader.js";
+import TGHttp from "@utils/TGHttp.js";
 
 // MysBBSBaseUrl => mbBu
 const mbBu: Readonly<string> = "https://bbs-api.miyoushe.com/";

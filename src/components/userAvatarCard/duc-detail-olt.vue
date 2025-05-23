@@ -12,9 +12,8 @@
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import { getZhElement } from "@utils/toolFunc.js";
 import { computed } from "vue";
-
-import { getZhElement } from "@/utils/toolFunc.js";
 
 type DucDetailOltProps =
   | {

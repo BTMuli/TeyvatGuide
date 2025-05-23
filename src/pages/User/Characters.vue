@@ -113,17 +113,17 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TwoSelectC, { type SelectedCValue } from "@comp/pageWiki/two-select-c.vue";
 import TuaAvatarBox from "@comp/userAvatar/tua-avatar-box.vue";
 import TuaDetailOverlay from "@comp/userAvatar/tua-detail-overlay.vue";
-import TSUserAvatar from "@Sqlite/modules/userAvatar.js";
+import recordReq from "@req/recordReq.js";
+import TSUserAvatar from "@Sqlm/userAvatar.js";
+import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
+import TGLogger from "@utils/TGLogger.js";
+import { generateShareImg } from "@utils/TGShare.js";
+import { getZhElement, timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";
-import { useUserStore } from "@/store/modules/user.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { generateShareImg } from "@/utils/TGShare.js";
-import { getZhElement, timestampToDate } from "@/utils/toolFunc.js";
-import TakumiRecordGenshinApi from "@/web/request/recordReq.js";
 
 type TabItem = { label: string; value: string };
 type OverviewItem = { element: string; cnt: number; label: string };
@@ -286,7 +286,7 @@ async function refresh(): Promise<void> {
   await showLoading.start(`正在更新${account.value.gameUid}的角色数据`);
   loadData.value = true;
   await showLoading.update("正在刷新首页数据");
-  const indexRes = await TakumiRecordGenshinApi.index(cookie.value, account.value, 1);
+  const indexRes = await recordReq.index(cookie.value, account.value, 1);
   if ("retcode" in indexRes) {
     showSnackbar.error(`[${indexRes.retcode}] ${indexRes.message}`);
     await TGLogger.Error(JSON.stringify(indexRes.message));
@@ -295,7 +295,7 @@ async function refresh(): Promise<void> {
     return;
   }
   await showLoading.update("正在获取角色列表");
-  const listRes = await TakumiRecordGenshinApi.character.list(cookie.value, account.value);
+  const listRes = await recordReq.character.list(cookie.value, account.value);
   if (!Array.isArray(listRes)) {
     showSnackbar.error(`[${listRes.retcode}] ${listRes.message}`);
     await TGLogger.Error(`[Character][refreshRoles][${account.value.gameUid}] 获取角色列表失败`);
@@ -308,7 +308,7 @@ async function refresh(): Promise<void> {
   }
   const idList = listRes.map((i) => i.id.toString());
   await showLoading.update(`共${idList.length}个角色`);
-  const res = await TakumiRecordGenshinApi.character.detail(cookie.value, account.value, idList);
+  const res = await recordReq.character.detail(cookie.value, account.value, idList);
   if ("retcode" in res) {
     showSnackbar.error(`[${res.retcode}] ${res.message}`);
     await TGLogger.Error(`[Character][refreshRoles][${account.value.gameUid}] 获取角色数据失败`);

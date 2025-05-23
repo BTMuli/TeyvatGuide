@@ -30,14 +30,13 @@
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
+import useAppStore from "@store/app.js";
+import { saveImgLocal } from "@utils/TGShare.js";
+import { bytesToSize } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import VpOverlayImage from "./vp-overlay-image.vue";
-
-import { useAppStore } from "@/store/modules/app.js";
-import { saveImgLocal } from "@/utils/TGShare.js";
-import { bytesToSize } from "@/utils/toolFunc.js";
 
 export type TpImage = {
   insert: { image: string };

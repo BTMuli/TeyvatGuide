@@ -4,13 +4,14 @@
  * @since Beta v0.6.0
  */
 
-import TGSqlite from "@Sqlite/index.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import TGLogger from "@utils/TGLogger.js";
+import { timestampToDate } from "@utils/toolFunc.js";
+
+import TGSqlite from "../index.js";
 
 import { AppAchievementsData, AppAchievementSeriesData } from "@/data/index.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { timestampToDate } from "@/utils/toolFunc.js";
 
 /**
  * @description 根据 completed 跟 progress 获取 status

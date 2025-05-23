@@ -14,19 +14,18 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import ApiHubReq from "@req/apiHubReq.js";
+import OtherApi from "@req/otherReq.js";
+import useAppStore from "@store/app.js";
 import { emit } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import TGClient from "@utils/TGClient.js";
+import TGLogger from "@utils/TGLogger.js";
+import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import ToLivecode from "./to-livecode.vue";
-
-import { useAppStore } from "@/store/modules/app.js";
-import TGClient from "@/utils/TGClient.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { createPost } from "@/utils/TGWindow.js";
-import ApiHubReq from "@/web/request/apiHubReq.js";
-import OtherApi from "@/web/request/otherReq.js";
 
 type TGameNavProps = { modelValue: number };
 const props = withDefaults(defineProps<TGameNavProps>(), { modelValue: 2 });

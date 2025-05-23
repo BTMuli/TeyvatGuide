@@ -42,10 +42,9 @@
   </div>
 </template>
 <script lang="ts" setup>
+import useUserStore from "@store/user.js";
 import { app } from "@tauri-apps/api";
 import { computed, onMounted, ref } from "vue";
-
-import { useUserStore } from "@/store/modules/user.js";
 
 type TuaDcWeaponProps = {
   modelValue: TGApp.Game.Avatar.WeaponDetail;

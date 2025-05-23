@@ -107,6 +107,8 @@ import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import ToNameCard from "@comp/app/to-nameCard.vue";
 import TopNameCard from "@comp/app/top-nameCard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import { createObc } from "@utils/TGWindow.js";
+import { parseHtmlText } from "@utils/toolFunc.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
@@ -115,8 +117,6 @@ import TwcMaterials from "./twc-materials.vue";
 import TwcSkills from "./twc-skills.vue";
 
 import { AppCharacterData, AppNameCardsData, WikiCharacterData } from "@/data/index.js";
-import { createObc } from "@/utils/TGWindow.js";
-import { parseHtmlText } from "@/utils/toolFunc.js";
 
 type TwcCharacterProps = { item: TGApp.App.Character.WikiBriefInfo };
 

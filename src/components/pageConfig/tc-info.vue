@@ -74,14 +74,13 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import TGSqlite from "@Sqlite/index.js";
-import TSUserAchi from "@Sqlite/modules/userAchi.js";
+import TGSqlite from "@Sql/index.js";
+import TSUserAchi from "@Sqlm/userAchi.js";
 import { app } from "@tauri-apps/api";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { platform, version } from "@tauri-apps/plugin-os";
+import TGLogger from "@utils/TGLogger.js";
 import { onMounted, ref, shallowRef } from "vue";
-
-import TGLogger from "@/utils/TGLogger.js";
 
 const latestAchiVersion = TSUserAchi.getLatestAchiVersion();
 const osPlatform = platform();

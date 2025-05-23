@@ -1,13 +1,13 @@
 /**
- * @file web/utils/annoParser.ts
+ * @file src/utils/annoParser.ts
  * @description 解析游戏内公告数据
- * @since Beta v0.7.0
+ * @since Beta v0.7.6
  */
 
 import TpText from "@comp/viewPost/tp-text.vue";
 import { h, render } from "vue";
 
-import { decodeRegExp } from "@/utils/toolFunc.js";
+import { decodeRegExp } from "./toolFunc.js";
 
 /**
  * @description 预处理table

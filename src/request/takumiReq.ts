@@ -1,10 +1,10 @@
 /**
- * @file web/request/takumiReq.ts
+ * @file request/takumiReq.ts
  * @description Takumi 相关请求函数
  * @since Beta v0.7.2
  */
-import TGHttp from "@/utils/TGHttp.js";
-import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
+import { getRequestHeader } from "@utils/getRequestHeader.js";
+import TGHttp from "@utils/TGHttp.js";
 
 // TakumiApiBaseUrl => taBu
 const taBu: Readonly<string> = "https://api-takumi.mihoyo.com/";

@@ -38,12 +38,11 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import { copyToClipboard, getImageBuffer, saveCanvasImg } from "@utils/TGShare.js";
+import { bytesToSize } from "@utils/toolFunc.js";
 import { computed, nextTick, ref, shallowRef } from "vue";
 
 import type { TpImage } from "./tp-image.vue";
-
-import { copyToClipboard, getImageBuffer, saveCanvasImg } from "@/utils/TGShare.js";
-import { bytesToSize } from "@/utils/toolFunc.js";
 
 type TpoImageProps = { image: TpImage };
 
@@ -167,7 +166,7 @@ async function onDownload(): Promise<void> {
   border: 1px solid var(--tgc-od-white);
   border-radius: 4px;
   background-color: var(--common-shadow-2);
-  color: white;
+  color: #ffffff;
 }
 
 .tpoi-info-item {

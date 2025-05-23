@@ -56,14 +56,13 @@
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TaCard from "@comp/pageAnno/ta-card.vue";
+import Hk4eApi, { type AnnoLang, type AnnoServer } from "@req/hk4eReq.js";
+import useAppStore from "@store/app.js";
+import TGLogger from "@utils/TGLogger.js";
+import { decodeRegExp } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
-
-import { useAppStore } from "@/store/modules/app.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { decodeRegExp } from "@/utils/toolFunc.js";
-import Hk4eApi, { type AnnoLang, type AnnoServer } from "@/web/request/hk4eReq.js";
 
 type AnnoSelect<T = string> = { text: string; value: T };
 type AnnoKey = "activity" | "game";

@@ -1,15 +1,14 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.7.3
+ * @since Beta v0.7.6
  */
 
+import type { AnnoLang, AnnoServer } from "@req/hk4eReq.js";
 import { path } from "@tauri-apps/api";
+import { getInitDeviceInfo } from "@utils/toolFunc.js";
 import { defineStore } from "pinia";
 import { ref } from "vue";
-
-import { getInitDeviceInfo } from "@/utils/toolFunc.js";
-import type { AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
 
 // 用于存储用户数据的路径
 const userDataDir: Readonly<string> = `${await path.appLocalDataDir()}${path.sep()}userData`;
@@ -20,7 +19,7 @@ const logDataDir: Readonly<string> = await path.appLogDir();
 
 export type NewsType = "notice" | "activity" | "news";
 
-export const useAppStore = defineStore(
+const useAppStore = defineStore(
   "app",
   () => {
     // 应用打包时间
@@ -147,3 +146,5 @@ export const useAppStore = defineStore(
     ],
   },
 );
+
+export default useAppStore;

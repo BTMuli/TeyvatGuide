@@ -5,11 +5,11 @@
  */
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import TSUserAbyss from "@Sqlite/modules/userAbyss.js";
-import TSUserAccount from "@Sqlite/modules/userAccount.js";
-import TSUserAchi from "@Sqlite/modules/userAchi.js";
-import TSUserCombat from "@Sqlite/modules/userCombat.js";
-import TSUserGacha from "@Sqlite/modules/userGacha.js";
+import TSUserAbyss from "@Sqlm/userAbyss.js";
+import TSUserAccount from "@Sqlm/userAccount.js";
+import TSUserAchi from "@Sqlm/userAchi.js";
+import TSUserCombat from "@Sqlm/userCombat.js";
+import TSUserGacha from "@Sqlm/userGacha.js";
 import { exists, mkdir } from "@tauri-apps/plugin-fs";
 
 import TGLogger from "./TGLogger.js";

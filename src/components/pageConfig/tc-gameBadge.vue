@@ -17,15 +17,14 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import PassportApi from "@req/passportReq.js";
+import useAppStore from "@store/app.js";
+import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { exists } from "@tauri-apps/plugin-fs";
 import { Command } from "@tauri-apps/plugin-shell";
+import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-
-import { useAppStore } from "@/store/modules/app.js";
-import { useUserStore } from "@/store/modules/user.js";
-import TGLogger from "@/utils/TGLogger.js";
-import PassportApi from "@/web/request/passportReq.js";
 
 const { gameDir } = storeToRefs(useAppStore());
 const { account, uid, cookie } = storeToRefs(useUserStore());

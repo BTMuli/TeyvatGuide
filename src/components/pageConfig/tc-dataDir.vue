@@ -63,18 +63,17 @@
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import TGSqlite from "@Sqlite/index.js";
+import TGSqlite from "@Sql/index.js";
+import useAppStore from "@store/app.js";
 import { path } from "@tauri-apps/api";
 import { sep } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { exists, readDir, remove } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { platform } from "@tauri-apps/plugin-os";
+import { backUpUserData } from "@utils/dataBS.js";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
-
-import { useAppStore } from "@/store/modules/app.js";
-import { backUpUserData } from "@/utils/dataBS.js";
 
 const { dbPath, logDir, userDir, gameDir } = storeToRefs(useAppStore());
 

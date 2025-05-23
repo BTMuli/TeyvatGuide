@@ -27,10 +27,10 @@
   </TucDetailDesc>
 </template>
 <script lang="ts" setup>
+import { parseHtmlText } from "@utils/toolFunc.js";
+
 import TucDetailDesc from "./tuc-detail-desc.vue";
 import TucDetailItemBox from "./tuc-detail-itembox.vue";
-
-import { parseHtmlText } from "@/utils/toolFunc.js";
 
 defineProps<{ modelValue: TGApp.Game.Avatar.WeaponDetail }>();
 </script>

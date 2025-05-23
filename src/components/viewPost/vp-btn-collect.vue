@@ -14,13 +14,12 @@
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import TSUserCollection from "@Sqlite/modules/userCollect.js";
+import TSUserCollection from "@Sqlm/userCollect.js";
 import { event } from "@tauri-apps/api";
+import TGLogger from "@utils/TGLogger.js";
 import { onBeforeMount, ref, shallowRef, watch } from "vue";
 
 import VpOverlayCollect from "./vp-overlay-collect.vue";
-
-import TGLogger from "@/utils/TGLogger.js";
 
 type TbCollectProps = { modelValue: number; data?: TGApp.BBS.Post.FullData };
 

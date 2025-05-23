@@ -37,12 +37,11 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { fetch } from "@tauri-apps/plugin-http";
+import TGLogger from "@utils/TGLogger.js";
+import { copyToClipboard, getImageBuffer, saveCanvasImg } from "@utils/TGShare.js";
+import { bytesToSize } from "@utils/toolFunc.js";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { xml2json } from "xml-js";
-
-import TGLogger from "@/utils/TGLogger.js";
-import { copyToClipboard, getImageBuffer, saveCanvasImg } from "@/utils/TGShare.js";
-import { bytesToSize } from "@/utils/toolFunc.js";
 
 type ToArcBirthProps = { data?: TGApp.Archive.Birth.DrawItem; choice: boolean };
 type XmlKeyMap = { id: string; rel: string; group?: string; icon: string };

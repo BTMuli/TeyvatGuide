@@ -68,13 +68,12 @@ import showSnackbar from "@comp/func/snackbar.js";
 import PhCompCalendar from "@comp/pageHome/ph-comp-calendar.vue";
 import PhCompPool from "@comp/pageHome/ph-comp-pool.vue";
 import PhCompPosition from "@comp/pageHome/ph-comp-position.vue";
+import useAppStore from "@store/app.js";
+import useBBSStore from "@store/bbs.js";
+import useHomeStore from "@store/home.js";
+import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { type Component, computed, onMounted, ref, shallowRef, watch } from "vue";
-
-import { useAppStore } from "@/store/modules/app.js";
-import useBBSStore from "@/store/modules/bbs.js";
-import { useHomeStore } from "@/store/modules/home.js";
-import TGLogger from "@/utils/TGLogger.js";
 
 type SFComp = Component & {
   __file?: string;

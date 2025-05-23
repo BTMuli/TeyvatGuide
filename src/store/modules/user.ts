@@ -1,15 +1,15 @@
 /**
  * @file store/modules/user.ts
  * @description 用户信息模块
- * @since Beta v0.7.2
+ * @since Beta v0.7.6
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
-import TSUserAccount from "@Sqlite/modules/userAccount.js";
+import TSUserAccount from "@Sqlm/userAccount.js";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export const useUserStore = defineStore(
+const useUserStore = defineStore(
   "user",
   () => {
     const briefInfo = ref<TGApp.App.Account.BriefInfo>({
@@ -86,3 +86,5 @@ export const useUserStore = defineStore(
     ],
   },
 );
+
+export default useUserStore;

@@ -1,14 +1,13 @@
 /**
- * @file web/request/passportReq.ts
+ * @file request/passportReq.ts
  * @description Passport 相关请求
  * @since Beta v0.7.2
  */
+import { getRequestHeader } from "@utils/getRequestHeader.js";
+import TGBbs from "@utils/TGBbs.js";
+import TGHttp from "@utils/TGHttp.js";
+import { getDeviceInfo } from "@utils/toolFunc.js";
 import { JSEncrypt } from "jsencrypt";
-
-import TGBbs from "@/utils/TGBbs.js";
-import TGHttp from "@/utils/TGHttp.js";
-import { getDeviceInfo } from "@/utils/toolFunc.js";
-import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
 
 // PassportApiBaseUrl => pAbu
 const pAbu: Readonly<string> = "https://passport-api.mihoyo.com/";

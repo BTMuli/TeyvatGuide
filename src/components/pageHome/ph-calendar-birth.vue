@@ -39,12 +39,11 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import TSAvatarBirth from "@Sqlite/modules/avatarBirth.js";
+import TSAvatarBirth from "@Sqlm/avatarBirth.js";
+import useAppStore from "@store/app.js";
 import { storeToRefs } from "pinia";
 import { onBeforeMount, ref, shallowRef } from "vue";
 import { useRouter } from "vue-router";
-
-import { useAppStore } from "@/store/modules/app.js";
 
 const router = useRouter();
 const { recentNewsType } = storeToRefs(useAppStore());

@@ -75,15 +75,14 @@ import TurHomeGrid from "@comp/userRecord/tur-home-grid.vue";
 import TurOverviewGrid from "@comp/userRecord/tur-overview-grid.vue";
 import TurRoleInfo from "@comp/userRecord/tur-role-info.vue";
 import TurWorldGrid from "@comp/userRecord/tur-world-grid.vue";
-import TSUserRecord from "@Sqlite/modules/userRecord.js";
+import recordReq from "@req/recordReq.js";
+import TSUserRecord from "@Sqlm/userRecord.js";
+import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
+import TGLogger from "@utils/TGLogger.js";
+import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
-
-import { useUserStore } from "@/store/modules/user.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { generateShareImg } from "@/utils/TGShare.js";
-import TakumiRecordGenshinApi from "@/web/request/recordReq.js";
 
 const userStore = useUserStore();
 const { account, cookie } = storeToRefs(userStore);
@@ -145,7 +144,7 @@ async function refreshRecord(): Promise<void> {
   }
   await showLoading.start(`正在刷新${account.value.gameUid}的战绩数据`);
   await TGLogger.Info(`[UserRecord][refresh][${account.value.gameUid}] 刷新战绩数据`);
-  const res = await TakumiRecordGenshinApi.index(cookie.value, account.value);
+  const res = await recordReq.index(cookie.value, account.value);
   if ("retcode" in res) {
     await showLoading.end();
     showSnackbar.error(`[${res.retcode}] ${res.message}`);

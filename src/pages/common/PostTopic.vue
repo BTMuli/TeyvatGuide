@@ -101,14 +101,13 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
+import postReq from "@req/postReq.js";
+import topicReq from "@req/topicReq.js";
+import useBBSStore from "@store/bbs.js";
+import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-
-import useBBSStore from "@/store/modules/bbs.js";
-import { createPost } from "@/utils/TGWindow.js";
-import postReq from "@/web/request/postReq.js";
-import topicReq from "@/web/request/topicReq.js";
 
 type SortSelect = { text: string; value: number };
 type PostMiniData = { isLast: boolean; lastId: string; total: number };

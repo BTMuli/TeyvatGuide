@@ -104,16 +104,15 @@ import TucOverlay from "@comp/userCombat/tuc-overlay.vue";
 import TucOverview from "@comp/userCombat/tuc-overview.vue";
 import TucRound from "@comp/userCombat/tuc-round.vue";
 import Hutao from "@Hutao/index.js";
-import TSUserCombat from "@Sqlite/modules/userCombat.js";
+import recordReq from "@req/recordReq.js";
+import TSUserCombat from "@Sqlm/userCombat.js";
+import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
+import TGLogger from "@utils/TGLogger.js";
+import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
-
-import { useUserStore } from "@/store/modules/user.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { generateShareImg } from "@/utils/TGShare.js";
-import TakumiRecordGenshinApi from "@/web/request/recordReq.js";
 
 const router = useRouter();
 const { account, cookie } = storeToRefs(useUserStore());
@@ -192,7 +191,7 @@ async function refreshCombat(): Promise<void> {
   }
   await TGLogger.Info("[UserCombat][getCombatData] 更新剧诗数据");
   await showLoading.start(`正在获取${account.value.gameUid}的剧诗数据`);
-  const res = await TakumiRecordGenshinApi.roleCombat(cookie.value, account.value);
+  const res = await recordReq.roleCombat(cookie.value, account.value);
   if (res === false) {
     await showLoading.end();
     showSnackbar.warn("用户未解锁幻想真境剧诗");

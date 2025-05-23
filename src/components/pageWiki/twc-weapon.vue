@@ -59,13 +59,13 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import { createObc } from "@utils/TGWindow.js";
+import { parseHtmlText } from "@utils/toolFunc.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import TwcMaterials from "./twc-materials.vue";
 
 import { WikiWeaponData } from "@/data/index.js";
-import { createObc } from "@/utils/TGWindow.js";
-import { parseHtmlText } from "@/utils/toolFunc.js";
 
 type TwcWeaponProps = { item: TGApp.App.Weapon.WikiBriefInfo };
 

@@ -11,12 +11,11 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import PhPoolCard from "@comp/pageHome/ph-pool-card.vue";
+import takumiReq from "@req/takumiReq.js";
+import TGLogger from "@utils/TGLogger.js";
 import { onMounted, shallowRef } from "vue";
 
 import THomeCard from "./ph-comp-card.vue";
-
-import TGLogger from "@/utils/TGLogger.js";
-import takumiReq from "@/web/request/takumiReq.js";
 
 type TPoolEmits = (e: "success") => void;
 

@@ -146,7 +146,6 @@
     <TcGameBadge v-if="platform() === 'windows'" />
   </div>
 </template>
-
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
@@ -156,23 +155,22 @@ import TcDataDir from "@comp/pageConfig/tc-dataDir.vue";
 import TcGameBadge from "@comp/pageConfig/tc-gameBadge.vue";
 import TcInfo from "@comp/pageConfig/tc-info.vue";
 import TcUserBadge from "@comp/pageConfig/tc-userBadge.vue";
-import TGSqlite from "@Sqlite/index.js";
+import OtherApi from "@req/otherReq.js";
+import TGSqlite from "@Sql/index.js";
+import useAppStore from "@store/app.js";
+import useHomeStore from "@store/home.js";
 import { core, event } from "@tauri-apps/api";
 import { emit } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
 import { remove } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import { exit } from "@tauri-apps/plugin-process";
+import { backUpUserData, restoreUserData } from "@utils/dataBS.js";
+import { getBuildTime } from "@utils/TGBuild.js";
+import TGLogger from "@utils/TGLogger.js";
+import { bytesToSize, getCacheDir, getDeviceInfo, getRandomString } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
-
-import { useAppStore } from "@/store/modules/app.js";
-import { useHomeStore } from "@/store/modules/home.js";
-import { backUpUserData, restoreUserData } from "@/utils/dataBS.js";
-import { getBuildTime } from "@/utils/TGBuild.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { bytesToSize, getCacheDir, getDeviceInfo, getRandomString } from "@/utils/toolFunc.js";
-import OtherApi from "@/web/request/otherReq.js";
 
 const {
   needResize,

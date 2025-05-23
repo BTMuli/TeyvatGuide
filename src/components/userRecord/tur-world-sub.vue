@@ -43,10 +43,9 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
+import useAppStore from "@store/app.js";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
-
-import { useAppStore } from "@/store/modules/app.js";
 
 type TurWorldSubProps = { data: TGApp.Sqlite.Record.WorldExplore };
 

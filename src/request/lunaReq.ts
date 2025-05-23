@@ -1,11 +1,11 @@
 /**
- * @file web/request/lunaReq.ts
+ * @file request/lunaReq.ts
  * @description 签到模块请求
  * @since Beta v0.7.2
  */
-import TGBbs from "@/utils/TGBbs.js";
-import TGHttp from "@/utils/TGHttp.js";
-import { getRequestHeader } from "@/web/utils/getRequestHeader.js";
+import { getRequestHeader } from "@utils/getRequestHeader.js";
+import TGBbs from "@utils/TGBbs.js";
+import TGHttp from "@utils/TGHttp.js";
 
 // takumiEventLunaApiBaseUrl => telaBu
 const telaBu: Readonly<string> = "https://api-takumi.mihoyo.com/event/luna/";

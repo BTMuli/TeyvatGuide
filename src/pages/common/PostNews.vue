@@ -67,15 +67,14 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import ToChannel from "@comp/pageNews/to-channel.vue";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
+import painterReq from "@req/painterReq.js";
+import useAppStore, { type NewsType } from "@store/app.js";
+import useBBSStore from "@store/bbs.js";
+import TGLogger from "@utils/TGLogger.js";
+import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, reactive, Ref, ref, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
-
-import { type NewsType, useAppStore } from "@/store/modules/app.js";
-import useBBSStore from "@/store/modules/bbs.js";
-import TGLogger from "@/utils/TGLogger.js";
-import { createPost } from "@/utils/TGWindow.js";
-import painterReq from "@/web/request/painterReq.js";
 
 type PostData = { [key in NewsType]: Ref<Array<TGApp.BBS.Post.FullData>> };
 type RawItem = { isLast: boolean; name: string; lastId: number };

@@ -53,16 +53,15 @@ import TPinWin from "@comp/app/t-pinWin.vue";
 import TSwitchTheme from "@comp/app/t-switchTheme.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import postReq from "@req/postReq.js";
+import useAppStore from "@store/app.js";
+import useUserStore from "@store/user.js";
+import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef } from "vue";
 import VueJsonPretty from "vue-json-pretty";
 import "vue-json-pretty/lib/styles.css";
 import { useRoute } from "vue-router";
-
-import { useAppStore } from "@/store/modules/app.js";
-import { useUserStore } from "@/store/modules/user.js";
-import TGLogger from "@/utils/TGLogger.js";
-import postReq from "@/web/request/postReq.js";
 
 const { theme } = storeToRefs(useAppStore());
 const { cookie } = storeToRefs(useUserStore());

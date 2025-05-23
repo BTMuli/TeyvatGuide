@@ -4,10 +4,11 @@
  * @since Beta v0.6.0
  */
 
-import TGSqlite from "@Sqlite/index.js";
+import { timestampToDate } from "@utils/toolFunc.js";
+
+import TGSqlite from "../index.js";
 
 import { AppCharacterData } from "@/data/index.js";
-import { timestampToDate } from "@/utils/toolFunc.js";
 
 /**
  * @description 获取角色插入Sql

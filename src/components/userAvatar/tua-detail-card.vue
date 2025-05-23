@@ -77,7 +77,9 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import TSUserAvatar from "@Sqlite/modules/userAvatar.js";
+import TSUserAvatar from "@Sqlm/userAvatar.js";
+import useUserStore from "@store/user.js";
+import { generateShareImg } from "@utils/TGShare.js";
 import { computed, ref } from "vue";
 
 import TuaDcConstellations from "./tua-dc-constellations.vue";
@@ -85,9 +87,6 @@ import TuaDcProp from "./tua-dc-prop.vue";
 import TuaDcRelic from "./tua-dc-relic.vue";
 import TuaDcTalents from "./tua-dc-talents.vue";
 import TuaDcWeapon from "./tua-dc-weapon.vue";
-
-import { useUserStore } from "@/store/modules/user.js";
-import { generateShareImg } from "@/utils/TGShare.js";
 
 type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
 type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;

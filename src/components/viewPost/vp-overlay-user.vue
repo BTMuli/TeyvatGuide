@@ -46,10 +46,9 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import bbsReq from "@req/bbsReq.js";
+import postReq from "@req/postReq.js";
 import { computed, ref, shallowRef, watch } from "vue";
-
-import bbsReq from "@/web/request/bbsReq.js";
-import postReq from "@/web/request/postReq.js";
 
 type ToPostUserProps = { gid: number; uid: string; postId?: string };
 

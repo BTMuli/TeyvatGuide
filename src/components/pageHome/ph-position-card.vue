@@ -35,11 +35,10 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { parseLink } from "@utils/linkParser.js";
+import { createObc, createPost } from "@utils/TGWindow.js";
+import { stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, onUnmounted, ref } from "vue";
-
-import { parseLink } from "@/utils/linkParser.js";
-import { createObc, createPost } from "@/utils/TGWindow.js";
-import { stamp2LastTime, timestampToDate } from "@/utils/toolFunc.js";
 
 type PhPositionCardProps = { pos: TGApp.BBS.Obc.PositionItem };
 

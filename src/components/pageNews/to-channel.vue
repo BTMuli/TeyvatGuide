@@ -21,11 +21,10 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import useAppStore, { type NewsType } from "@store/app.js";
+import useBBSStore from "@store/bbs.js";
 import { storeToRefs } from "pinia";
 import { onMounted, shallowRef } from "vue";
-
-import { type NewsType, useAppStore } from "@/store/modules/app.js";
-import useBBSStore from "@/store/modules/bbs.js";
 
 type ChannelItem = { icon: string; title: string; gid: number };
 type ToChannelProps = { gid?: string; curType?: string };

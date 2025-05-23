@@ -5,6 +5,7 @@
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
+import useAppStore from "@store/app.js";
 import { path } from "@tauri-apps/api";
 import { sep } from "@tauri-apps/api/path";
 import { save } from "@tauri-apps/plugin-dialog";
@@ -16,8 +17,6 @@ import { storeToRefs } from "pinia";
 import TGHttp from "./TGHttp.js";
 import TGLogger from "./TGLogger.js";
 import { bytesToSize } from "./toolFunc.js";
-
-import { useAppStore } from "@/store/modules/app.js";
 
 /**
  * @description 保存图片-canvas

@@ -5,13 +5,13 @@
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
-import TGSqlite from "@Sqlite/index.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readDir } from "@tauri-apps/plugin-fs";
+import TGLogger from "@utils/TGLogger.js";
+import { getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
+import { exportUigfData, readUigfData, verifyUigfData } from "@utils/UIGF.js";
 
-import TGLogger from "@/utils/TGLogger.js";
-import { getWikiBrief, timestampToDate } from "@/utils/toolFunc.js";
-import { exportUigfData, readUigfData, verifyUigfData } from "@/utils/UIGF.js";
+import TGSqlite from "../index.js";
 
 /**
  * @description 获取导入 Sql

@@ -27,11 +27,10 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostcard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import painterReq from "@req/painterReq.js";
+import useUserStore from "@store/user.js";
 import { storeToRefs } from "pinia";
 import { ref, shallowRef, watch } from "vue";
-
-import { useUserStore } from "@/store/modules/user.js";
-import painterReq from "@/web/request/painterReq.js";
 
 const { cookie } = storeToRefs(useUserStore());
 const visible = defineModel<boolean>();

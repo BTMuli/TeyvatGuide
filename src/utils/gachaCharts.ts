@@ -4,7 +4,7 @@
  * @since Beta v0.6.8
  */
 
-import TSUserGacha from "@Sqlite/modules/userGacha.js";
+import TSUserGacha from "@Sqlm/userGacha.js";
 import type { BarSeriesOption } from "echarts/charts.js";
 import type { EChartsOption, XAXisOption } from "echarts/types/dist/shared.js";
 

@@ -103,17 +103,16 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import postReq from "@req/postReq.js";
 import { event, path } from "@tauri-apps/api";
-import { emit, Event, UnlistenFn } from "@tauri-apps/api/event";
+import { emit, type Event, type UnlistenFn } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
+import { generateShareImg } from "@utils/TGShare.js";
+import { getNearTime, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from "vue";
 
 import TpParser from "./tp-parser.vue";
-
-import { generateShareImg } from "@/utils/TGShare.js";
-import { getNearTime, timestampToDate } from "@/utils/toolFunc.js";
-import postReq from "@/web/request/postReq.js";
 
 type TprReplyProps =
   | { mode: "sub"; modelValue: TGApp.BBS.Reply.ReplyFull }

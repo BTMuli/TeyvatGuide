@@ -25,7 +25,7 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import TSUserCollection from "@Sqlite/modules/userCollect.js";
+import TSUserCollection from "@Sqlm/userCollect.js";
 import { ref, shallowRef, watch } from "vue";
 
 type ToPostCollectProps = { post: Array<string> };

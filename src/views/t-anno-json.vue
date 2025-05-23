@@ -73,15 +73,14 @@
 import TPinWin from "@comp/app/t-pinWin.vue";
 import TSwitchTheme from "@comp/app/t-switchTheme.vue";
 import showLoading from "@comp/func/loading.js";
+import Hk4eApi, { type AnnoLang, AnnoServer } from "@req/hk4eReq.js";
+import useAppStore from "@store/app.js";
+import parseAnnoContent from "@utils/annoParser.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, shallowRef } from "vue";
 import VueJsonPretty from "vue-json-pretty";
 import "vue-json-pretty/lib/styles.css";
 import { useRoute } from "vue-router";
-
-import { useAppStore } from "@/store/modules/app.js";
-import Hk4eApi, { type AnnoLang, AnnoServer } from "@/web/request/hk4eReq.js";
-import parseAnnoContent from "@/web/utils/annoParser.js";
 
 // 数据
 const route = useRoute();

@@ -50,15 +50,14 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import TSUserGacha from "@Sqlite/modules/userGacha.js";
+import TSUserGacha from "@Sqlm/userGacha.js";
 import { path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
+import TGLogger from "@utils/TGLogger.js";
+import { timestampToDate } from "@utils/toolFunc.js";
+import { getUigf4Header, getUigf4Item, readUigf4Data, verifyUigfData } from "@utils/UIGF.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
-
-import TGLogger from "@/utils/TGLogger.js";
-import { timestampToDate } from "@/utils/toolFunc.js";
-import { getUigf4Header, getUigf4Item, readUigf4Data, verifyUigfData } from "@/utils/UIGF.js";
 
 type UgoUidProps = { mode: "import" | "export" };
 type UgoUidItem = { uid: string; length: number; time: string };

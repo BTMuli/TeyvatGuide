@@ -37,10 +37,9 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import { createPost } from "@utils/TGWindow.js";
+import { getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
 import { useRouter } from "vue-router";
-
-import { createPost } from "@/utils/TGWindow.js";
-import { getWikiBrief, timestampToDate } from "@/utils/toolFunc.js";
 
 type UgHisCardProps = { pool: TGApp.App.Gacha.PoolItem };
 

@@ -48,9 +48,8 @@ import HtaTabTeam from "@comp/hutaoAbyss/hta-tab-team.vue";
 import HtaTabUp from "@comp/hutaoAbyss/hta-tab-up.vue";
 import HtaTabUse from "@comp/hutaoAbyss/hta-tab-use.vue";
 import Hutao from "@Hutao/index.js";
-import { onMounted, reactive, type Ref, ref, shallowRef, watch } from "vue";
-
-import { timestampToDate } from "@/utils/toolFunc.js";
+import { timestampToDate } from "@utils/toolFunc.js";
+import { onMounted, reactive, ref, type ShallowRef, shallowRef, watch } from "vue";
 
 type AbyssTab = "use" | "up" | "team" | "hold";
 type AbyssList = Array<{ label: string; value: AbyssTab }>;
@@ -64,7 +63,7 @@ export type AbyssDataItemType<T extends AbyssTab> = T extends "use"
       : T extends "hold"
         ? AbyssDataItem<Array<TGApp.Plugins.Hutao.Abyss.AvatarHold>>
         : null;
-type AbyssData = { [key in AbyssTab]: Ref<AbyssDataItemType<key> | null> };
+type AbyssData = { [key in AbyssTab]: ShallowRef<AbyssDataItemType<key> | null> };
 
 const abyssList: Readonly<AbyssList> = [
   { label: "角色使用", value: "use" },

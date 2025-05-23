@@ -1,11 +1,11 @@
 /**
- * @file web/request/hk4eReq.ts
+ * @file request/hk4eReq.ts
  * @description Hk4eApi 请求模块
  * @since Beta v0.7.2
  */
 
-import TGHttp from "@/utils/TGHttp.js";
-import { getDeviceInfo } from "@/utils/toolFunc.js";
+import TGHttp from "@utils/TGHttp.js";
+import { getDeviceInfo } from "@utils/toolFunc.js";
 
 export type AnnoServer = "cn_gf01" | "cn_qd01" | "os_usa" | "os_euro" | "os_asia" | "os_cht";
 export type AnnoLang = "zh-cn" | "zh-tw" | "en" | "ja";

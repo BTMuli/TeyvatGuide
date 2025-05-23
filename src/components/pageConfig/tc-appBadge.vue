@@ -22,12 +22,11 @@
   </div>
 </template>
 <script lang="ts" setup>
+import useAppStore from "@store/app.js";
 import { app } from "@tauri-apps/api";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
-
-import { useAppStore } from "@/store/modules/app.js";
 
 const { buildTime } = storeToRefs(useAppStore());
 const versionApp = ref<string>();

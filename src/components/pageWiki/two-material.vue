@@ -29,13 +29,12 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { getVersion } from "@tauri-apps/api/app";
+import { generateShareImg } from "@utils/TGShare.js";
+import { parseHtmlText } from "@utils/toolFunc.js";
 import { onMounted, ref } from "vue";
 
 import TwoConvert from "./two-convert.vue";
 import TwoSource from "./two-source.vue";
-
-import { generateShareImg } from "@/utils/TGShare.js";
-import { parseHtmlText } from "@/utils/toolFunc.js";
 
 type TwoMaterialProps = { data: TGApp.App.Material.WikiItem };
 

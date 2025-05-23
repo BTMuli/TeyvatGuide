@@ -37,11 +37,11 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import ToArcBrith from "@comp/pageArchive/to-arcBrith.vue";
+import TGClient from "@utils/TGClient.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import { ArcBirDraw, ArcBirRole } from "@/data/index.js";
-import TGClient from "@/utils/TGClient.js";
 
 const route = useRoute();
 

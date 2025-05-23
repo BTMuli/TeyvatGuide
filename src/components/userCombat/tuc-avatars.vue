@@ -5,8 +5,7 @@
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
-
-import { getWikiBrief, getZhElement } from "@/utils/toolFunc.js";
+import { getWikiBrief, getZhElement } from "@utils/toolFunc.js";
 
 type TucAvatarsProps = { modelValue: Array<TGApp.Game.Combat.Avatar>; detail: boolean };
 

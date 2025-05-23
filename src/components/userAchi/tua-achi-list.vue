@@ -32,7 +32,7 @@
 import ToNameCard from "@comp/app/to-nameCard.vue";
 import TopNameCard from "@comp/app/top-nameCard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import TSUserAchi from "@Sqlite/modules/userAchi.js";
+import TSUserAchi from "@Sqlm/userAchi.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import ToAchiInfo from "./tua-achi-overlay.vue";
