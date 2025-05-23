@@ -9,6 +9,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { core, webviewWindow, window as TauriWindow } from "@tauri-apps/api";
 import { PhysicalSize } from "@tauri-apps/api/dpi";
 import { currentMonitor, WindowOptions } from "@tauri-apps/api/window";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { type } from "@tauri-apps/plugin-os";
 
 import TGLogger from "./TGLogger.js";
@@ -73,15 +74,13 @@ export async function createPost(
 
 /**
  * @description 打开观测枢
- * @since Beta 0.6.2
- * @deprecated 该方法已弃用，使用 openPath 替代
+ * @since Beta 0.7.6
  * @param {string} contentId
- * @param {string} label
  * @returns {Promise<void>}
  */
-export async function createObc(contentId: number, label: string): Promise<void> {
+export async function toObcPage(contentId: number): Promise<void> {
   const obcUrl = `https://bbs.mihoyo.com/ys/obc/content/${contentId}/detail?bbs_presentation_style=no_header`;
-  await createTGWindow(obcUrl, "Sub_window", `Content_${contentId}_${label}`, 1200, 800, true);
+  await openUrl(obcUrl);
 }
 
 /**

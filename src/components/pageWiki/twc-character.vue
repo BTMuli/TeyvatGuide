@@ -107,7 +107,7 @@ import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import ToNameCard from "@comp/app/to-nameCard.vue";
 import TopNameCard from "@comp/app/top-nameCard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import { createObc } from "@utils/TGWindow.js";
+import { toObcPage } from "@utils/TGWindow.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -165,7 +165,7 @@ async function toWiki(): Promise<void> {
     showSnackbar.warn(`角色 ${props.item.name} 暂无详情`);
     return;
   }
-  await createObc(props.item.contentId, props.item.name);
+  await toObcPage(props.item.contentId);
 }
 
 async function toBirth(date: string): Promise<void> {

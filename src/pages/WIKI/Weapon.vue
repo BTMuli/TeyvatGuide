@@ -28,7 +28,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TwcListItem from "@comp/pageWiki/twc-list-item.vue";
 import TwcWeapon from "@comp/pageWiki/twc-weapon.vue";
 import TwoSelectW, { type SelectedWValue } from "@comp/pageWiki/two-select-w.vue";
-import { createObc } from "@utils/TGWindow.js";
+import { toObcPage } from "@utils/TGWindow.js";
 import { onBeforeMount, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
@@ -89,7 +89,7 @@ async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
     showSnackbar.cancel("已取消打开观测枢页面");
     return;
   }
-  await createObc(item.contentId, item.name);
+  await toObcPage(item.contentId);
 }
 </script>
 <style lang="css" scoped>

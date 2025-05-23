@@ -36,7 +36,7 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { parseLink } from "@utils/linkParser.js";
-import { createObc, createPost } from "@utils/TGWindow.js";
+import { toObcPage, createPost } from "@utils/TGWindow.js";
 import { stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
@@ -72,7 +72,7 @@ function handlePosition(): void {
 
 async function openPosition(): Promise<void> {
   if (props.pos.url === "" && props.pos.content_id !== 0) {
-    await createObc(props.pos.content_id, props.pos.title);
+    await toObcPage(props.pos.content_id);
     return;
   }
   const res = await parseLink(props.pos.url);

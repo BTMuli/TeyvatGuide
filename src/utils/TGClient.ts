@@ -345,7 +345,7 @@ class Client {
         break;
       }
       case "teyvat_open_webview":
-        window.open(arg.payload);
+        await openUrl(arg.payload);
         break;
       default:
         console.warn(`[customCallback] ${arg.method}`);

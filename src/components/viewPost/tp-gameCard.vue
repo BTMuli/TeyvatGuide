@@ -14,7 +14,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { openPath } from "@tauri-apps/plugin-opener";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 type TpGameCard = {
   insert: {
@@ -55,7 +55,7 @@ type TpGameCardProps = { data: TpGameCard };
 const props = defineProps<TpGameCardProps>();
 
 async function toGame(): Promise<void> {
-  await openPath(`https://www.miyoushe.com/ys/gameCenter/${props.data.insert.reception_card.id}`);
+  await openUrl(`https://www.miyoushe.com/ys/gameCenter/${props.data.insert.reception_card.id}`);
 }
 </script>
 <style lang="scss" scoped>
