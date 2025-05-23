@@ -12,6 +12,7 @@ import type { Component } from "vue";
 import TpBackupText from "./tp-backupText.vue";
 import TpDivider from "./tp-divider.vue";
 import TpEmoticon from "./tp-emoticon.vue";
+import TpGameCard from "./tp-gameCard.vue";
 import TpImage from "./tp-image.vue";
 import TpLinkCard from "./tp-linkCard.vue";
 import TpMention from "./tp-mention.vue";
@@ -97,7 +98,10 @@ function getTpName(tp: TGApp.BBS.SctPost.Base): Component {
   if ("custom_emoticon" in tp.insert) return TpEmoticon;
   // game_user_info属于backup_text的一种，必须放在backup_text判断的前面
   if ("game_user_info" in tp.insert) return TpUid;
-  if ("backup_text" in tp.insert) return TpBackupText;
+  if ("backup_text" in tp.insert) {
+    if (tp.insert.backup_text === "[游戏卡片]") return TpGameCard;
+    return TpBackupText;
+  }
   if ("divider" in tp.insert) return TpDivider;
   if ("image" in tp.insert) return TpImage;
   if ("link_card" in tp.insert) return TpLinkCard;
