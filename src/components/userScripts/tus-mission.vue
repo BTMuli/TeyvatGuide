@@ -61,6 +61,8 @@ const loadMission = ref<boolean>(false);
 const parseMissions = shallowRef<Array<ParseMission>>([]);
 const missionList = shallowRef<Array<TGApp.BBS.Mission.MissionItem>>([]);
 
+defineExpose({ tryAuto });
+
 watch(
   () => uid.value,
   () => {

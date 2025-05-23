@@ -56,9 +56,12 @@
   <div class="us-page-container">
     <!-- 左侧脚本列表 -->
     <div class="us-scripts">
-      <div class="us-title">脚本列表</div>
-      <TusMission v-model="runScript" />
-      <TusSign v-model="runScript" />
+      <div class="us-title">
+        <span>脚本列表</span>
+        <v-btn @click="tryExecAll()" class="btn" :loading="runAll">一键执行</v-btn>
+      </div>
+      <TusMission ref="mission" v-model="runScript" />
+      <TusSign ref="sign" v-model="runScript" />
     </div>
     <!-- 右侧脚本输出 -->
     <TusOutput />
@@ -76,12 +79,15 @@ import miscReq from "@req/miscReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useUserStore from "@store/user.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, shallowRef } from "vue";
+import { onMounted, ref, shallowRef, useTemplateRef } from "vue";
 
 const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
 const accounts = shallowRef<Array<TGApp.App.Account.User>>([]);
 const curAccount = shallowRef<TGApp.App.Account.User>();
 const runScript = ref<boolean>(false);
+const runAll = ref<boolean>(false);
+const missionEl = useTemplateRef("mission");
+const signEl = useTemplateRef("sign");
 
 onMounted(async () => {
   accounts.value = await TSUserAccount.account.getAllAccount();
@@ -145,6 +151,25 @@ async function tryCkVerify(): Promise<void> {
   }
   if (!flag) showSnackbar.error("CK验证失败，请通过验证码登录重新获取CK");
   else showSnackbar.success("CK验证成功");
+}
+
+async function tryExecAll(): Promise<void> {
+  if (!cookie.value) {
+    showSnackbar.warn("当前账号未登录，请先登录");
+    return;
+  }
+  if (!curAccount.value) {
+    showSnackbar.warn("当前账号未选择，请先选择账号");
+    return;
+  }
+  if (runScript.value || runAll.value) {
+    showSnackbar.warn("脚本正在执行，请稍后");
+    return;
+  }
+  runAll.value = true;
+  await missionEl.value?.tryAuto();
+  await signEl.value?.tryAuto();
+  runAll.value = false;
 }
 </script>
 <style lang="scss" scoped>
@@ -276,9 +301,19 @@ async function tryCkVerify(): Promise<void> {
   background: var(--app-page-bg);
   top: 0;
   z-index: 2;
-  margin-right: auto;
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  span {
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 24px;
+  }
+
+  .btn {
+    background: var(--tgc-btn-1);
+    color: var(--btn-text);
+  }
 }
 </style>

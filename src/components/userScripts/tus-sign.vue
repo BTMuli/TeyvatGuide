@@ -81,6 +81,8 @@ const loadSign = ref<boolean>(false);
 const signAccounts = ref<Array<SignAccount>>([]);
 const gameAccounts = shallowRef<Array<TGApp.Sqlite.Account.Game>>([]);
 
+defineExpose({ tryAuto });
+
 watch(
   () => uid.value,
   async () => await loadData(),
