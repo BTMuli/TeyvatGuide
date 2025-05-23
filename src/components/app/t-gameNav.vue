@@ -38,7 +38,9 @@ const actId = ref<string>();
 
 const hasNav = computed<TGApp.BBS.Navigator.Navigator | undefined>(() => {
   const liveNames = ["前瞻直播", "前瞻节目", "直播兑换码"];
-  return nav.value.find((item) => liveNames.includes(item.name));
+  const find = nav.value.find((item) => liveNames.includes(item.name));
+  if (find) return find;
+  return nav.value.find((item) => item.name.includes("前瞻"));
 });
 
 onMounted(async () => await loadNav());
