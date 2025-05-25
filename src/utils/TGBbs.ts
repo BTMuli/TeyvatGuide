@@ -1,7 +1,7 @@
 /**
  * @file utils/TGBbs.ts
  * @description 关于 BBS 的工具函数
- * @since Beta v0.7.4
+ * @since Beta v0.7.7
  */
 
 /**
@@ -16,12 +16,12 @@ const BBS_UA_PC: Readonly<string> = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) m
 
 /**
  * @description salt 值
- * @version 2.86.0
- * @since Beta v0.7.4
+ * @version 2.87.0
+ * @since Beta v0.7.7
  */
 const BBS_SALT: Readonly<Record<SaltKey, string>> = {
-  K2: "VXv8qbUf8WkYv9o3geqPOlZWKQHQ64KX",
-  LK2: "0y3QaJ0D4L4dCyF4hvcTeRhAM5rdxCzB",
+  K2: "pleAwRHEIvtzvECEdmdTsEhqlbWLDrRR",
+  LK2: "XixTFUuRvcKZzgzqHPPoBVzUgYufetsa",
   X4: "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs",
   X6: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
   PROD: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
