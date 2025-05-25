@@ -59,10 +59,12 @@ function getWidth(item: TpVoteData): string {
 .tp-vote-box {
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  padding: 8px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
-  row-gap: 10px;
+  border-radius: 4px;
+  margin: 12px 0;
+  background: var(--box-bg-1);
+  row-gap: 8px;
 }
 
 .tp-vote-info {
@@ -78,19 +80,19 @@ function getWidth(item: TpVoteData): string {
 
 .tp-vote-list {
   display: grid;
-  gap: 10px 20px;
+  gap: 12px 16px;
   grid-template-columns: repeat(2, 1fr);
 }
 
 .tp-vote-item {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
 
 .tp-vote-item-title {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
 
   .title {
@@ -101,7 +103,7 @@ function getWidth(item: TpVoteData): string {
   .val {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
     white-space: nowrap;
 
     :first-child {
@@ -117,14 +119,14 @@ function getWidth(item: TpVoteData): string {
 .tp-vote-progress {
   overflow: hidden;
   width: 100%;
-  height: 10px;
-  border-radius: 5px;
+  height: 8px;
+  border-radius: 4px;
   background: var(--common-shadow-1);
 }
 
 .tp-vote-val {
   height: 100%;
-  border-radius: 5px;
+  border-radius: 4px;
   background: linear-gradient(to right, #66ccff 0, #f09199 360px);
 }
 </style>
