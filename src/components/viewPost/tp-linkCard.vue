@@ -74,7 +74,7 @@ async function toLink(): Promise<void> {
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   margin-bottom: 8px;
-  background: var(--app-side-bg);
+  background: var(--box-bg-1);
   column-gap: 8px;
 }
 
