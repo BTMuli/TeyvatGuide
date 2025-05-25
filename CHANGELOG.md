@@ -2,12 +2,21 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2025-05-09
+Update: 2025-05-25
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2025-05-09 12:06:20`
+> 更新于 `2025-05-25 14:28:57`
+
+## [0.7.6](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.6) (2025-05-25)
+
+- 🍱 更新下半资源
+- 🐛 修正macOS平台的窗口大小适配逻辑
+- 🚸 子窗口添加外部打开菜单项
+- ✨ 添加游戏卡片类型组件
+- ♻️ 部分跳转改为外部浏览器打开
+- ✨ 脚本支持“一键执行”
 
 ## [0.7.5](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.5) (2025-05-09)
 
