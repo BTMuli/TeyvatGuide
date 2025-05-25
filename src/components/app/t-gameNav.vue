@@ -27,8 +27,7 @@ import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import ToLivecode from "./to-livecode.vue";
 
-type TGameNavProps = { modelValue: number };
-const props = withDefaults(defineProps<TGameNavProps>(), { modelValue: 2 });
+const model = defineModel<number>({ default: 2 });
 
 const { isLogin } = storeToRefs(useAppStore());
 const nav = shallowRef<TGApp.BBS.Navigator.Navigator[]>([]);
@@ -46,12 +45,12 @@ const hasNav = computed<TGApp.BBS.Navigator.Navigator | undefined>(() => {
 onMounted(async () => await loadNav());
 
 watch(
-  () => props.modelValue,
+  () => model.value,
   async () => await loadNav(),
 );
 
 async function loadNav(): Promise<void> {
-  nav.value = await ApiHubReq.home(props.modelValue);
+  nav.value = await ApiHubReq.home(model.value);
 }
 
 async function tryGetCode(): Promise<void> {
@@ -121,7 +120,7 @@ async function toBBS(link: URL): Promise<void> {
     }
     if (link.hostname === "forum") {
       const forumId = link.pathname.split("/").pop();
-      const localPath = `/posts/forum/${props.modelValue}/${forumId}`;
+      const localPath = `/posts/forum/${model.value}/${forumId}`;
       await emit("active_deep_link", `router?path=${localPath}`);
       return;
     }
