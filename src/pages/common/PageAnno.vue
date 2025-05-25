@@ -290,6 +290,6 @@ async function switchNews(): Promise<void> {
   font-family: var(--font-title);
   grid-auto-rows: auto;
   grid-gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
 }
 </style>
