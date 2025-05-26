@@ -10,7 +10,7 @@
  */
 export type SaltKey = "K2" | "LK2" | "X4" | "X6" | "PROD";
 
-const BBS_VERSION: Readonly<string> = "2.86.0";
+const BBS_VERSION: Readonly<string> = "2.87.0";
 const BBS_UA_MOBILE: Readonly<string> = `Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/${BBS_VERSION}`;
 const BBS_UA_PC: Readonly<string> = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) miHoYoBBS/${BBS_VERSION}`;
 
