@@ -114,9 +114,9 @@ function loadData(): void {
         reset5count.value = 1;
       }
     });
-  star5avg.value = getStar5Avg();
   star5List.value = temp5Data.reverse();
   star4List.value = temp4Data.reverse();
+  star5avg.value = getStar5Avg();
 }
 
 // 获取标题
