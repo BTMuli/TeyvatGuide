@@ -338,7 +338,7 @@ function searchPost(): void {
     return;
   }
   const numCheck = Number(search.value);
-  if (isNaN(numCheck)) {
+  if (isNaN(numCheck) || numCheck % 1 !== 0) {
     if (showUser.value) showUser.value = false;
     showSearch.value = true;
   } else createPost(search.value);

@@ -182,7 +182,7 @@ async function searchPost(): Promise<void> {
     return;
   }
   const numCheck = Number(search.value);
-  if (isNaN(numCheck)) {
+  if (isNaN(numCheck) || numCheck % 1 !== 0) {
     if (showList.value === true) showList.value = false;
     showSearch.value = true;
     return;
