@@ -1,8 +1,8 @@
-semi: true
-singleQuote: false
-printWidth: 100
-useTabs: false
-tabWidth: 2
 bracketSpacing: true
 endOfLine: auto
+printWidth: 100
+semi: true
+singleQuote: false
+tabWidth: 2
 trailingComma: all
+useTabs: false

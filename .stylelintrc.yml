@@ -1,20 +1,42 @@
+customSyntax: postcss-html
 extends:
   - stylelint-high-performance-animation
   - stylelint-order
   - stylelint-declaration-block-no-ignored-properties
   - stylelint-config-standard-vue
+  - stylelint-config-standard-scss
   - stylelint-config-idiomatic-order
+overrides:
+  - customSyntax: postcss-scss
+    files:
+      - "*.scss"
 plugins:
   - stylelint-scss
   - stylelint-prettier
   - stylelint-order
   - "@btmuli/stylelint-plugin-color"
 rules:
-  property-no-vendor-prefix:
-    - true
-    - ignoreProperties: [backdrop-filter]
   color-hex-length: long
-  prettier/prettier: true
   color/format:
     - true
     - hexa
+  import-notation: string
+  no-descending-specificity:
+    - true
+    - severity: warning
+  order/order:
+    - custom-properties
+    - declarations
+    - rules
+    - at-rules
+  prettier/prettier: true
+  property-no-vendor-prefix:
+    - true
+    - ignoreProperties: [backdrop-filter]
+  rule-empty-line-before:
+    - always
+    - except: ["first-nested"]
+  selector-class-pattern: null
+  selector-pseudo-class-no-unknown:
+    - true
+    - ignorePseudoClasses: ["deep"]

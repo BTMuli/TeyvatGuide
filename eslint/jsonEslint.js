@@ -1,3 +1,9 @@
+/**
+ * @file eslint/jsonEslint.js
+ * @description JSON相关的ESLint配置
+ * @since Beta v0.7.7
+ */
+
 import pluginJsonc from "eslint-plugin-jsonc";
 import parserJsonc from "jsonc-eslint-parser";
 
@@ -66,4 +72,6 @@ const jsoncConfig = {
   },
 };
 
-export const jsonEslintConfig = [pkgJsonConfig, tscJsonConfig, jsoncConfig];
+const eslintConfigJson = [pkgJsonConfig, tscJsonConfig, jsoncConfig];
+
+export default eslintConfigJson;

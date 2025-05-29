@@ -1,22 +1,12 @@
 {
-	"editor.tabSize": 2,
-	"eslint.format.enable": true,
-	"eslint.quiet": false,
-	"eslint.lintTask.enable": true,
-	"eslint.validate": ["typescript", "vue"],
-	"stylelint.enable": true,
-	"stylelint.validate": ["css", "less", "postcss"],
-	"css.validate": false,
-	"less.validate": false,
-	"scss.validate": false,
-	"[vue]": {
-		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
-	},
 	"[javascript]": {
 		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
 	},
 	"[javascriptreact]": {
 		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
+	},
+	"[scss]": {
+		"editor.defaultFormatter": "stylelint.vscode-stylelint"
 	},
 	"[typescript]": {
 		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
@@ -24,10 +14,20 @@
 	"[typescriptreact]": {
 		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
 	},
-	"[scss]": {
-		"editor.defaultFormatter": "stylelint.vscode-stylelint"
+	"[vue]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
 	},
+	"css.validate": false,
 	"editor.rulers": [80, 120],
+	"editor.tabSize": 2,
+	"eslint.format.enable": true,
+	"eslint.lintTask.enable": true,
+	"eslint.quiet": false,
+	"eslint.validate": ["typescript", "vue"],
+	"less.validate": false,
+	"scss.validate": false,
+	"stylelint.enable": true,
+	"stylelint.validate": ["css", "less", "postcss"],
 	"typescript.tsdk": "node_modules/typescript/lib",
 	"vue.features.codeActions.enable": false
 }

@@ -1,3 +1,8 @@
+/**
+ * @file eslint/vueEslint.js
+ * @description Vue相关的ESLint配置
+ * @since Beta v0.7.7
+ */
 import pluginImport from "eslint-plugin-import";
 import pluginPrettier from "eslint-plugin-prettier";
 import pluginVue from "eslint-plugin-vue";
@@ -49,4 +54,7 @@ const vueConfig = {
   rules: { ...tsConfigRules, "vue/multi-word-component-names": "off" },
 };
 
-export const vueEslintConfig = [tsConfig, vueConfig];
+const eslintConfigVue = [tsConfig, vueConfig];
+
+export default eslintConfigVue;
+

@@ -1,20 +1,25 @@
-import eslint_jsonc from "eslint-plugin-jsonc";
-import eslint_js from "@eslint/js";
-import eslint_ts from "typescript-eslint";
-import eslint_vue from "eslint-plugin-vue";
+/**
+ * @file eslint.config.mjs
+ * @description ESLint配置文件
+ * @since 2025-05-29
+ */
+import eslintPluginJsonc from "eslint-plugin-jsonc";
+import eslintPluginJs from "@eslint/js";
+import eslintPluginTs from "typescript-eslint";
+import eslintPluginVue from "eslint-plugin-vue";
 
-import { jsonEslintConfig } from "./eslint/jsonEslint.js";
-import { vueEslintConfig } from "./eslint/vueEslint.js";
-import ymlEslintConfig from "./eslint/ymlEslint.js";
+import eslintConfigJson from "./eslint/jsonEslint.js";
+import eslintConfigVue from "./eslint/vueEslint.js";
+import eslintConfigYml from "./eslint/ymlEslint.js";
 
 export default [
-  eslint_js.configs.recommended,
-  ...eslint_jsonc.configs["flat/recommended-with-jsonc"],
-  ...eslint_ts.configs.recommended,
-  ...eslint_vue.configs["flat/essential"],
-  ...jsonEslintConfig,
-  ...vueEslintConfig,
-  ymlEslintConfig,
+  eslintPluginJs.configs.recommended,
+  ...eslintPluginJsonc.configs["flat/recommended-with-jsonc"],
+  ...eslintPluginTs.configs.recommended,
+  ...eslintPluginVue.configs["flat/essential"],
+  ...eslintConfigJson,
+  ...eslintConfigVue,
+  eslintConfigYml,
   {
     ignores: [
       "dist",
@@ -24,10 +29,7 @@ export default [
       "src-tauri/tauri.conf.json",
       "src-tauri/**/*.json",
       "qodana.yaml",
-      ".github",
-      ".vscode",
-      ".prettierrc.yml",
-      ".stylelintrc.yml",
+      ".github"
     ],
   },
 ];

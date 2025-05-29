@@ -1,7 +1,12 @@
+/**
+ * @file eslint/ymlEslint.js
+ * @description YAML相关的ESLint配置
+ * @since Beta v0.7.7
+ */
 import pluginYml from "eslint-plugin-yml";
 import parserYml from "yaml-eslint-parser";
 
-const ymlEslintConfig = {
+const eslintConfigYml = {
   files: ["**/*.yml", "**/*.yaml"],
   plugins: { yml: pluginYml },
   languageOptions: {
@@ -16,4 +21,4 @@ const ymlEslintConfig = {
   },
 };
 
-export default ymlEslintConfig;
+export default eslintConfigYml;

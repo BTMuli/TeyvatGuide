@@ -45,7 +45,9 @@
     "scripts/*.ts",
     "tsconfig.json",
     "vite.config.ts",
-    "eslint.config.mjs"
-  ],
-  "exclude": ["node_modules"]
+    "eslint.config.mjs",
+    ".prettierrc.yml",
+    ".stylelintrc.yml",
+    "eslint/*.js"
+  ]
 }
