@@ -193,7 +193,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
   height: 10px;
   align-items: center;
   justify-content: center;
-  background: rgb(0 0 0 / 50%);
+  background: #00000080;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
   color: var(--tgc-white-1);

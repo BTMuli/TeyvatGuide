@@ -141,7 +141,7 @@ async function share(): Promise<void> {
   position: absolute;
   top: 5px;
   left: 5px;
-  border: 1px solid rgb(255 255 255 / 20%);
+  border: 1px solid #ffffff33;
   border-radius: 5px;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
@@ -176,11 +176,11 @@ async function share(): Promise<void> {
   align-items: center;
   justify-content: flex-end;
   padding: 5px;
-  border: 1px solid rgb(255 255 255 / 20%);
+  border: 1px solid #ffffff33;
   border-radius: 5px;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  background: rgb(0 0 0 / 20%);
+  background: #00000033;
   gap: 0;
 }
 
@@ -195,7 +195,7 @@ async function share(): Promise<void> {
   column-gap: 10px;
   font-family: var(--font-title);
   font-size: 14px;
-  text-shadow: 0 0 5px rgb(0 0 0 / 50%);
+  text-shadow: 0 0 5px #00000080;
 }
 
 .tua-dc-detail {

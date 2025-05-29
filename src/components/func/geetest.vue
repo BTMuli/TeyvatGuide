@@ -124,7 +124,7 @@ defineExpose({ displayBox });
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(20px);
-  background: rgb(0 0 0 / 50%);
+  background: #00000080;
 }
 
 .geetest-box {

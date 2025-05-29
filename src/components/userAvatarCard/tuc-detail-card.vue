@@ -119,7 +119,7 @@ async function share(): Promise<void> {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgb(0 0 0 / 20%);
+  background: #00000033;
 }
 
 .duc-doc-lt {

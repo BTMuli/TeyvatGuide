@@ -7,16 +7,16 @@
 /* dark mode */
 html.dark {
   /* app container */
-  --app-page-bg: #1e1e1e; /* (0, 0, 0) */
-  --app-page-content: #d0d0d0;
-  --app-side-bg: #151c26;
-  --app-side-content: #dddddd;
+  --app-page-bg: #1e1e1eff; /* (0, 0, 0) */
+  --app-page-content: #d0d0d0ff;
+  --app-side-bg: #151c26ff;
+  --app-side-content: #ddddddff;
 
   /* box container */
-  --box-bg-1: #21252b;
-  --box-bg-2: #323844;
-  --box-bg-3: #282c34;
-  --box-bg-4: #3d424b;
+  --box-bg-1: #21252bff;
+  --box-bg-2: #323844ff;
+  --box-bg-3: #282c34ff;
+  --box-bg-4: #3d424bff;
 
   --box-bg-blue: var(--tgc-blue-1);
 
@@ -35,16 +35,16 @@ html.dark {
   --btn-text: var(--tgc-yellow-1);
 
   /* box-shadow */
-  --common-shadow-1: rgb(255 255 255 / 10%);
-  --common-shadow-2: rgb(255 255 255 / 20%);
-  --common-shadow-4: rgb(255 255 255 / 40%);
-  --common-shadow-8: rgb(255 255 255 / 80%);
+  --common-shadow-1: #FFFFFF1A;
+  --common-shadow-2: #FFFFFF33;
+  --common-shadow-4: #FFFFFF66;
+  --common-shadow-8: #FFFFFFCC;
 
   /* box-shadow-transparent */
-  --common-shadow-t-1: rgb(0 0 0 / 10%);
-  --common-shadow-t-2: rgb(0 0 0 / 20%);
-  --common-shadow-t-4: rgb(0 0 0 / 40%);
-  --common-shadow-t-8: rgb(0 0 0 / 80%);
+  --common-shadow-t-1: #0000001a;
+  --common-shadow-t-2: #00000033;
+  --common-shadow-t-4: #00000066;
+  --common-shadow-t-8: #000000cc;
 
   /* text */
   --common-text-title: var(--tgc-yellow-2); /* title，米色 */

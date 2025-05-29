@@ -75,14 +75,14 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   align-items: center;
   justify-content: flex-start;
   padding: 5px;
-  border: 1px solid rgb(255 255 255 / 20%);
+  border: 1px solid #ffffff33;
   border-radius: 5px;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  background: rgb(0 0 0 / 20%);
+  background: #00000033;
   color: var(--tgc-white-1);
   font-size: 12px;
-  text-shadow: 0 0 5px rgb(0 0 0 / 50%);
+  text-shadow: 0 0 5px #00000080;
 }
 
 .tua-dcw-main {
@@ -151,7 +151,7 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgb(255 255 255 / 20%);
+  border-bottom: 1px solid #ffffff33;
 
   img {
     width: 14px;

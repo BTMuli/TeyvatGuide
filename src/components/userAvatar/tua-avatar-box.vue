@@ -146,10 +146,6 @@ function getWeaponTitle(): string {
   cursor: pointer;
   row-gap: 4px;
 
-  &:hover .tua-abl-bg {
-    filter: grayscale(0);
-  }
-
   @include github-styles.github-card;
 }
 
@@ -203,7 +199,7 @@ function getWeaponTitle(): string {
   padding: 4px;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
-  background: rgb(0 0 0 / 40%);
+  background: #00000066;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
   color: var(--tgc-white-1);
@@ -261,6 +257,10 @@ function getWeaponTitle(): string {
     height: 100%;
     border-radius: 4px;
   }
+}
+
+.tua-ab-box:hover .tua-abl-bg {
+  filter: grayscale(0);
 }
 
 .tua-abl-skills {

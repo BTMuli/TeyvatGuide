@@ -120,7 +120,7 @@ defineExpose({ displayBox });
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(10px);
-  background: rgb(0 0 0 / 50%);
+  background: #00000080;
 }
 
 .loading-container {
@@ -130,8 +130,8 @@ defineExpose({ displayBox });
   box-sizing: border-box;
   padding: 15px;
   border-radius: 15px;
-  background: rgb(255 255 255 / 5%);
-  box-shadow: 0 0 10px rgb(0 0 0 / 50%);
+  background: #ffffff0d;
+  box-shadow: 0 0 10px #00000080;
 }
 
 .loading-box {

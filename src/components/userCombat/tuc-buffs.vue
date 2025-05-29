@@ -65,7 +65,7 @@ const columnCnt = computed<number>(() => {
     color: var(--tgc-white-2);
     font-family: var(--font-title);
     font-size: 14px;
-    text-shadow: 0 0 4px rgb(0 0 0 / 20%);
+    text-shadow: 0 0 4px #00000033;
   }
 }
 </style>

@@ -4,9 +4,9 @@
  * @since Beta v0.7.2
  */
 
-@import "fonts/index.css";
-@import "themes/default.css";
-@import "themes/dark.css";
+@import "fonts/index.scss";
+@import "themes/default.scss";
+@import "themes/dark.scss";
 
 :root {
   /* font */
@@ -14,36 +14,36 @@
   --font-title: "JetBrians mono Bold", "Genshin", serif;
 
   /* color white */
-  --tgc-white-1: #ffffff; /* normal white */
-  --tgc-white-2: #f0f1f6; /* Github mobile bg */
-  --tgc-white-3: #f6f8fa; /* Github web bg */
-  --tgc-white-4: #faf7e8; /* Genshin text */
-  --tgc-white-5: #ece5d8; /* Genshin text */
+  --tgc-white-1: #ffffffff; /* normal white */
+  --tgc-white-2: #f0f1f6ff; /* Github mobile bg */
+  --tgc-white-3: #f6f8faff; /* Github web bg */
+  --tgc-white-4: #faf7e8ff; /* Genshin text */
+  --tgc-white-5: #ece5d8ff; /* Genshin text */
 
   /* color dark */
-  --tgc-dark-1: #000000; /* normal dark */
-  --tgc-dark-2: #202020; /* Tauri app nav */
-  --tgc-dark-5: #161b22; /* Github web list nav */
-  --tgc-dark-7: #393b40; /* Genshin btn bg */
-  --tgc-dark-8: #121212; /* Github web bg */
+  --tgc-dark-1: #000000ff; /* normal dark */
+  --tgc-dark-2: #202020ff; /* Tauri app nav */
+  --tgc-dark-5: #161b22ff; /* Github web list nav */
+  --tgc-dark-7: #393b40ff; /* Genshin btn bg */
+  --tgc-dark-8: #121212ff; /* Github web bg */
 
   /* color other */
-  --tgc-blue-1: #3572a5; /* Github web lang bar */
-  --tgc-blue-2: #00aeec; /* Bilibili btn bg */
-  --tgc-blue-3: #4b5466; /* Genshin icon bg */
-  --tgc-pink-1: #fb7299; /* Bilibili btn bg */
-  --tgc-red-1: #e06c63; /* Mys bbs color */
-  --tgc-yellow-1: #ffcd0c; /* Genshin btn bg */
-  --tgc-yellow-2: #f4d8a8; /* Genshin confirm text */
-  --tgc-yellow-3: #e0c06b; /* Genshin btn border */
+  --tgc-blue-1: #3572a5ff; /* Github web lang bar */
+  --tgc-blue-2: #00aeecff; /* Bilibili btn bg */
+  --tgc-blue-3: #4b5466ff; /* Genshin icon bg */
+  --tgc-pink-1: #fb7299ff; /* Bilibili btn bg */
+  --tgc-red-1: #e06c63ff; /* Mys bbs color */
+  --tgc-yellow-1: #ffcd0cff; /* Genshin btn bg */
+  --tgc-yellow-2: #f4d8a8ff; /* Genshin confirm text */
+  --tgc-yellow-3: #e0c06bff; /* Genshin btn border */
 
   /* color one-dark */
-  --tgc-od-blue: #61afef; /* one-dark blue */
-  --tgc-od-green: #98c379; /* one-dark green */
-  --tgc-od-orange: #d19a66; /* one-dark orange */
-  --tgc-od-white: #abb2bf; /* one-dark white */
-  --tgc-od-red: #e06c75; /* one-dark red */
-  --tgc-od-purple: #c678dd; /* one-dark purple */
+  --tgc-od-blue: #61afefff; /* one-dark blue */
+  --tgc-od-green: #98c379ff; /* one-dark green */
+  --tgc-od-orange: #d19a66ff; /* one-dark orange */
+  --tgc-od-white: #abb2bfff; /* one-dark white */
+  --tgc-od-red: #e06c75ff; /* one-dark red */
+  --tgc-od-purple: #c678ddff; /* one-dark purple */
 
   /* some css same in dark and default theme */
   --tgc-btn-1: var(--tgc-dark-7); /* button bg */

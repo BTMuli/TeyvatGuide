@@ -40,11 +40,11 @@ const props = defineProps<TuaDcTalentsProps>();
   align-items: center;
   justify-content: center;
   padding: 2px;
-  border: 1px solid rgb(255 255 255 / 20%);
+  border: 1px solid #ffffff33;
   border-radius: 50%;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  background: rgb(0 0 0 / 20%);
+  background: #00000033;
 }
 
 .tua-dct-icon {
@@ -63,7 +63,7 @@ const props = defineProps<TuaDcTalentsProps>();
   justify-content: center;
   padding: 5px;
   border-radius: 50%;
-  background: rgb(0 0 0 / 50%);
+  background: #00000080;
 }
 
 .tua-dct-lock v-icon {
@@ -82,9 +82,9 @@ const props = defineProps<TuaDcTalentsProps>();
   border-radius: 4px;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  background: rgb(0 0 0 / 50%);
+  background: #00000080;
   color: var(--tgc-white-1);
   font-size: 8px;
-  text-shadow: 0 0 5px rgb(0 0 0 / 50%);
+  text-shadow: 0 0 5px #00000080;
 }
 </style>

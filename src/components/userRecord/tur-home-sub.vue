@@ -97,7 +97,7 @@ defineProps<{ data: TGApp.Sqlite.Record.Home }>();
   padding: 8px;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
-  background: rgb(0 0 0 / 40%);
+  background: #00000066;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
   color: var(--tgc-white-1);

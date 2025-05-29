@@ -75,7 +75,7 @@ async function toSite(): Promise<void> {
   font-family: var(--font-title);
   font-size: 14px;
   text-align: center;
-  text-shadow: 0 0 2px rgb(19 84 122 / 80%);
+  text-shadow: 0 0 2px #13547acc;
 }
 
 .tab-info.click {

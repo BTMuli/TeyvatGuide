@@ -7,18 +7,18 @@
 /* default(light) theme */
 html.default {
   /* app container */
-  --app-page-bg: #ffffff;
-  --app-page-content: #2f2f2f;
-  --app-side-bg: #f2f2f2;
-  --app-side-content: #222222;
+  --app-page-bg: #ffffffff;
+  --app-page-content: #2f2f2fff;
+  --app-side-bg: #f2f2f2ff;
+  --app-side-content: #222222ff;
 
   /* box container */
-  --box-bg-1: #f9f6f2;
-  --box-bg-2: #f2f9f6;
-  --box-bg-3: #dee4e9;
-  --box-bg-4: #f5f5f5;
+  --box-bg-1: #f9f6f2ff;
+  --box-bg-2: #f2f9f6ff;
+  --box-bg-3: #dee4e9ff;
+  --box-bg-4: #f5f5f5ff;
 
-  --box-bg-blue: #249ffd;
+  --box-bg-blue: #249ffdff;
 
   /* box bg transparent */
   --box-bg-t-1: var(--tgc-dark-5);
@@ -35,16 +35,16 @@ html.default {
   --btn-text: var(--tgc-yellow-2); /* with tgc-btn-1 */
 
   /* box-shadow */
-  --common-shadow-1: rgb(0 0 0 / 10%);
-  --common-shadow-2: rgb(0 0 0 / 20%);
-  --common-shadow-4: rgb(0 0 0 / 40%);
-  --common-shadow-8: rgb(0 0 0 / 80%);
+  --common-shadow-1: #0000001a;
+  --common-shadow-2: #00000033;
+  --common-shadow-4: #00000066;
+  --common-shadow-8: #000000cc;
 
   /* box-shadow-transparent */
-  --common-shadow-t-1: rgb(255 255 255 / 10%);
-  --common-shadow-t-2: rgb(255 255 255 / 20%);
-  --common-shadow-t-4: rgb(255 255 255 / 40%);
-  --common-shadow-t-8: rgb(255 255 255 / 80%);
+  --common-shadow-t-1: #FFFFFF1A;
+  --common-shadow-t-2: #FFFFFF33;
+  --common-shadow-t-4: #FFFFFF66;
+  --common-shadow-t-8: #FFFFFFCC;
 
   /* common text color */
   --common-text-title: var(--tgc-dark-8); /* title */
