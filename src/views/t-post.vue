@@ -356,6 +356,8 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 }
 </script>
 <style lang="scss" scoped>
+
+
 .tp-post-body {
   width: 800px;
   margin: 0 auto;
