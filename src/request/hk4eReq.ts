@@ -1,7 +1,7 @@
 /**
  * @file request/hk4eReq.ts
  * @description Hk4eApi 请求模块
- * @since Beta v0.7.2
+ * @since Beta v0.7.7
  */
 
 import TGHttp from "@utils/TGHttp.js";
@@ -169,10 +169,10 @@ async function queryPandaQr(
   return resp.data;
 }
 
-const Hk4eApi = {
+const hk4eReq = {
   anno: { list: getAnnoList, content: getAnnoContent },
   gacha: getGachaLog,
   loginQr: { create: fetchPandaQr, state: queryPandaQr },
 };
 
-export default Hk4eApi;
+export default hk4eReq;

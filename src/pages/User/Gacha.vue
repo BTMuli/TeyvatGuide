@@ -67,7 +67,7 @@ import GroHistory from "@comp/userGacha/gro-history.vue";
 import GroOverview from "@comp/userGacha/gro-overview.vue";
 import GroTable from "@comp/userGacha/gro-table.vue";
 import UgoUid from "@comp/userGacha/ugo-uid.vue";
-import Hk4eApi from "@req/hk4eReq.js";
+import hk4eReq from "@req/hk4eReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useUserStore from "@store/user.js";
@@ -190,7 +190,7 @@ async function refreshGachaPool(
   if (!force) endId = (await TSUserGacha.getGachaCheck(account.value.gameUid, type)) ?? "0";
   while (true) {
     page++;
-    const gachaRes = await Hk4eApi.gacha(authkey.value, type, reqId);
+    const gachaRes = await hk4eReq.gacha(authkey.value, type, reqId);
     if (!Array.isArray(gachaRes)) {
       showSnackbar.error(`[${type}][${gachaRes.retcode}] ${gachaRes.message}`);
       await TGLogger.Error(

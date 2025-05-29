@@ -1,25 +1,25 @@
 /*
  * @file assets/fonts/index.scss
  * @description 字体样式文件
- * @since v0.2.0-Alpha
+ * @since v0.7.7-beta
  */
 
 @font-face {
   font-family: "Genshin";
-  src: url("./汉仪文黑-85W.ttf") format("truetype");
+  src: url("@/assets/fonts/汉仪文黑-85W.ttf") format("truetype");
 }
 
 @font-face {
   font-family: "Genshin-Light";
-  src: url("./汉仪文黑-55W.ttf") format("truetype");
+  src: url("@/assets/fonts/汉仪文黑-55W.ttf") format("truetype");
 }
 
 @font-face {
   font-family: "JetBrians mono";
-  src: url("./JetBrainsMono-Regular.ttf") format("truetype");
+  src: url("@/assets/fonts/JetBrainsMono-Regular.ttf") format("truetype");
 }
 
 @font-face {
   font-family: "JetBrians mono Bold";
-  src: url("./JetBrainsMono-Bold.ttf") format("truetype");
+  src: url("@/assets/fonts/JetBrainsMono-Bold.ttf") format("truetype");
 }

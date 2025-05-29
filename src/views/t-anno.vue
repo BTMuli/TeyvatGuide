@@ -19,7 +19,7 @@ import TShareBtn from "@comp/app/t-shareBtn.vue";
 import TSwitchTheme from "@comp/app/t-switchTheme.vue";
 import showLoading from "@comp/func/loading.js";
 import TaParser from "@comp/pageAnno/ta-parser.vue";
-import Hk4eApi, { type AnnoLang, AnnoServer } from "@req/hk4eReq.js";
+import hk4eReq, { type AnnoLang, AnnoServer } from "@req/hk4eReq.js";
 import useAppStore from "@store/app.js";
 import { app, webviewWindow } from "@tauri-apps/api";
 import TGLogger from "@utils/TGLogger.js";
@@ -44,7 +44,7 @@ onMounted(async () => {
   }
   await showLoading.update("正在获取数据");
   try {
-    annoData.value = await Hk4eApi.anno.content(annoId, region, lang);
+    annoData.value = await hk4eReq.anno.content(annoId, region, lang);
     await showLoading.update("正在渲染数据");
     await webviewWindow
       .getCurrentWebviewWindow()

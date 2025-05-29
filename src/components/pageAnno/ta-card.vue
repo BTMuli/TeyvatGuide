@@ -1,41 +1,55 @@
 <template>
-  <div :id="`anno_card_${props.modelValue.id}`" class="anno-card">
-    <div :title="props.modelValue.title" class="anno-cover" @click="createAnno">
-      <TMiImg
-        v-if="props.modelValue.banner !== ''"
-        :ori="true"
-        :src="props.modelValue.banner"
-        alt="cover"
-      />
+  <div :id="`anno_card_${model.id}`" class="anno-card">
+    <div :title="model.title" class="anno-cover" @click="createAnno">
+      <TMiImg v-if="model.banner !== ''" :ori="true" :src="model.banner" alt="cover" />
       <img v-else alt="cover" src="/source/UI/defaultCover.webp" />
       <div class="anno-info">
         <div class="anno-time">
           <v-icon>mdi-clock-time-four-outline</v-icon>
-          <span>{{ props.modelValue.timeStr }}</span>
+          <span>{{ timeStr }}</span>
         </div>
       </div>
     </div>
-    <div :title="props.modelValue.title" class="anno-title" @click="shareAnno">
-      {{ parseTitle(props.modelValue.subtitle) }}
+    <div :title="model.title" class="anno-title" @click="shareAnno">
+      {{ parseTitle(model.subtitle) }}
     </div>
-    <div :title="`标签：${props.modelValue.tagLabel}`" class="anno-label">
-      <img :src="props.modelValue.tagIcon" alt="tag" />
-      <span>{{ props.modelValue.tagLabel }}</span>
+    <div :title="`标签：${model.tagLabel}`" class="anno-label">
+      <img :src="model.tagIcon" alt="tag" />
+      <span>{{ model.tagLabel }}</span>
     </div>
-    <div class="anno-id">{{ props.modelValue.id }}</div>
+    <div class="anno-id">{{ model.id }}</div>
   </div>
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import hk4eReq from "@req/hk4eReq.js";
+import useAppStore from "@store/app.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { createTGWindow } from "@utils/TGWindow.js";
+import { decodeRegExp } from "@utils/toolFunc.js";
+import { storeToRefs } from "pinia";
+import { onMounted, ref, watch } from "vue";
 
 import type { AnnoCard } from "@/pages/common/PageAnno.vue";
 
-type TAnnoCardProps = { region: string; modelValue: AnnoCard; lang: string };
+const { server } = storeToRefs(useAppStore());
+type TAnnoCardProps = { region: string; lang: string };
 const props = defineProps<TAnnoCardProps>();
+const model = defineModel<AnnoCard>({ required: true });
+const timeStr = ref<string>(model.value.timeStr);
+
+onMounted(async () => await refreshAnnoTime());
+watch(
+  () => model.value,
+  async (newVal, oldVal) => {
+    if (newVal.id !== oldVal.id) {
+      timeStr.value = newVal.timeStr;
+      await refreshAnnoTime();
+    }
+  },
+);
 
 function parseTitle(title: string): string {
   const dom = new DOMParser().parseFromString(title, "text/html");
@@ -43,20 +57,81 @@ function parseTitle(title: string): string {
 }
 
 async function createAnno(): Promise<void> {
-  const annoPath = `/anno_detail/${props.region}/${props.modelValue.id}/${props.lang}`;
-  const annoTitle = `Anno_${props.modelValue.id} ${props.modelValue.title}`;
-  await TGLogger.Info(`[Announcements][createAnno][${props.modelValue.id}] 打开公告窗口`);
+  const annoPath = `/anno_detail/${props.region}/${model.value.id}/${props.lang}`;
+  const annoTitle = `Anno_${model.value.id} ${model.value.title}`;
+  await TGLogger.Info(`[Announcements][createAnno][${model.value.id}] 打开公告窗口`);
   await createTGWindow(annoPath, "Sub_window", annoTitle, 960, 720, false, false);
 }
 
 async function shareAnno(): Promise<void> {
-  const fileName = `AnnoCard_${props.modelValue.id}_${props.modelValue.subtitle}`;
-  const element = document.querySelector<HTMLElement>(`#anno_card_${props.modelValue.id}`);
+  const fileName = `AnnoCard_${model.value.id}_${model.value.subtitle}`;
+  const element = document.querySelector<HTMLElement>(`#anno_card_${model.value.id}`);
   if (element === null) {
     showSnackbar.error("分享失败，未找到分享元素");
     return;
   }
   await generateShareImg(fileName, element, 2.5);
+}
+
+async function refreshAnnoTime(): Promise<void> {
+  const detail = await hk4eReq.anno.content(model.value.id, server.value, "zh-cn");
+  const strGet = getAnnoTime(detail.content);
+  if (strGet !== false) timeStr.value = strGet;
+}
+
+function getAnnoTime(content: string): string | false {
+  const regexes = [
+    /〓活动时间〓.*?\d\.\d版本期间持续开放/,
+    /(?:〓活动时间〓|〓任务开放时间〓).*?(?:(\d\.\d)版本更新(?:完成|)|&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt; *?)后永久开放/s,
+    /(?:〓活动时间〓|祈愿时间|【上架时间】|〓折扣时间〓|〓获取奖励时限〓).*?(\d\.\d)版本更新后.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/s,
+    /(?:〓(?:活动|折扣)时间〓|祈愿时间|【上架时间】).*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/s,
+    // /〓活动时间〓.*?(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}).*?(\d\.\d版本结束)/
+    /〓活动时间〓.*?(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}).*?(\d\.\d版本结束)/s,
+  ];
+  if (content.match(regexes[0])) {
+    const res = content.match(regexes[0]);
+    return res?.[0].replace(/.*?(\d\.\d版本期间持续开放)/, "$1") ?? false;
+  }
+  if (content.match(regexes[1])) {
+    const res = content.match(regexes[1]);
+    if (res === null) return false;
+    const regex2 = /\d\.\d版本更新(?:完成|)后永久开放/;
+    const regex3 = /\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}/;
+    const res2 = res[0].match(regex2);
+    if (res2 !== null) return res2[0];
+    const res3 = res[0].match(regex3);
+    return res3 === null ? false : `${res3[0]} 后永久开放`;
+  }
+  if (content.match(regexes[2])) {
+    const res = content.match(regexes[2]);
+    if (res?.[1]?.match(/\d\.\d/)) {
+      const parser = new DOMParser().parseFromString(decodeRegExp(res[2]), "text/html");
+      return `${res?.[1]}版本更新后 ~ ${parser.body.innerText}`;
+    }
+    return `${res?.[1]} ~ ${res?.[2]}`;
+  }
+  if (content.match(regexes[3])) {
+    const res = content.match(regexes[3]);
+    try {
+      const span1 = document.createElement("span");
+      span1.innerHTML = res?.[1] ?? "";
+      const span2 = document.createElement("span");
+      span2.innerHTML = res?.[2] ?? "";
+      return `${span1.innerText} ~ ${span2.innerText}`;
+    } catch (e) {
+      console.error(e);
+    }
+    return `${res?.[1]} ~ ${res?.[2]}`;
+  }
+  if (content.match(regexes[4])) {
+    const res = content.match(regexes[4]);
+    if (res !== null) {
+      const cnt = res[0].match(/〓/g);
+      if (cnt && cnt.length > 2) return false;
+    }
+    return `${res?.[1]} ~ ${res?.[2]}`;
+  }
+  return false;
 }
 </script>
 <style lang="scss" scoped>

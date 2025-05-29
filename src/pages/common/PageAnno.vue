@@ -56,10 +56,9 @@
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TaCard from "@comp/pageAnno/ta-card.vue";
-import Hk4eApi, { type AnnoLang, type AnnoServer } from "@req/hk4eReq.js";
+import hk4eReq, { type AnnoLang, type AnnoServer } from "@req/hk4eReq.js";
 import useAppStore from "@store/app.js";
 import TGLogger from "@utils/TGLogger.js";
-import { decodeRegExp } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -133,16 +132,8 @@ async function loadData(): Promise<void> {
     "正在获取公告数据",
     `服务器：${getRegionName(server.value)}，语言：${getLangName(lang.value)}`,
   );
-  const annoData = await Hk4eApi.anno.list(server.value, lang.value);
+  const annoData = await hk4eReq.anno.list(server.value, lang.value);
   const listCards = annoData.list.map((list) => list.list.map((anno) => getAnnoCard(anno))).flat();
-  await showLoading.update("", { title: "正在解析游戏内公告时间" });
-  for (const item of listCards) {
-    if (item.typeLabel === "game") continue;
-    const detail = await Hk4eApi.anno.content(item.id, server.value, "zh-cn");
-    const timeStr = getAnnoTime(detail.content);
-    if (timeStr !== false) item.timeStr = timeStr;
-    await showLoading.update(`[${item.id}]${item.subtitle}:${item.timeStr}`);
-  }
   annoCards.value = {
     activity: listCards.filter((item) => item.typeLabel === "activity"),
     game: listCards.filter((item) => item.typeLabel === "game"),
@@ -189,61 +180,6 @@ function getRegionName(value: AnnoServer): string {
 
 function getLangName(value: AnnoLang): string {
   return annoLangList.find((item) => item.value === value)?.text ?? annoLangList[0].text;
-}
-
-function getAnnoTime(content: string): string | false {
-  const regexes = [
-    /〓活动时间〓.*?\d\.\d版本期间持续开放/,
-    /(?:〓活动时间〓|〓任务开放时间〓).*?(?:(\d\.\d)版本更新(?:完成|)|&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt; *?)后永久开放/s,
-    /(?:〓活动时间〓|祈愿时间|【上架时间】|〓折扣时间〓|〓获取奖励时限〓).*?(\d\.\d)版本更新后.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/s,
-    /(?:〓(?:活动|折扣)时间〓|祈愿时间|【上架时间】).*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/s,
-    // /〓活动时间〓.*?(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}).*?(\d\.\d版本结束)/
-    /〓活动时间〓.*?(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}).*?(\d\.\d版本结束)/s,
-  ];
-  if (content.match(regexes[0])) {
-    const res = content.match(regexes[0]);
-    return res?.[0].replace(/.*?(\d\.\d版本期间持续开放)/, "$1") ?? false;
-  }
-  if (content.match(regexes[1])) {
-    const res = content.match(regexes[1]);
-    if (res === null) return false;
-    const regex2 = /\d\.\d版本更新(?:完成|)后永久开放/;
-    const regex3 = /\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}/;
-    const res2 = res[0].match(regex2);
-    if (res2 !== null) return res2[0];
-    const res3 = res[0].match(regex3);
-    return res3 === null ? false : `${res3[0]} 后永久开放`;
-  }
-  if (content.match(regexes[2])) {
-    const res = content.match(regexes[2]);
-    if (res?.[1]?.match(/\d\.\d/)) {
-      const parser = new DOMParser().parseFromString(decodeRegExp(res[2]), "text/html");
-      return `${res?.[1]}版本更新后 ~ ${parser.body.innerText}`;
-    }
-    return `${res?.[1]} ~ ${res?.[2]}`;
-  }
-  if (content.match(regexes[3])) {
-    const res = content.match(regexes[3]);
-    try {
-      const span1 = document.createElement("span");
-      span1.innerHTML = res?.[1] ?? "";
-      const span2 = document.createElement("span");
-      span2.innerHTML = res?.[2] ?? "";
-      return `${span1.innerText} ~ ${span2.innerText}`;
-    } catch (e) {
-      console.error(e);
-    }
-    return `${res?.[1]} ~ ${res?.[2]}`;
-  }
-  if (content.match(regexes[4])) {
-    const res = content.match(regexes[4]);
-    if (res !== null) {
-      const cnt = res[0].match(/〓/g);
-      if (cnt && cnt.length > 2) return false;
-    }
-    return `${res?.[1]} ~ ${res?.[2]}`;
-  }
-  return false;
 }
 
 async function switchNews(): Promise<void> {

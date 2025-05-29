@@ -1,12 +1,12 @@
 /*
  * @file assets/index.css
  * @description 全局样式文件
- * @since Beta v0.7.2
+ * @since Beta v0.7.7
  */
 
-@import "fonts/index.scss";
-@import "themes/default.scss";
-@import "themes/dark.scss";
+@use "fonts/index.scss";
+@use "themes/default.scss";
+@use "themes/dark.scss";
 
 :root {
   /* font */

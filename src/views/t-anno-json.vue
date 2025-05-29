@@ -73,7 +73,7 @@
 import TPinWin from "@comp/app/t-pinWin.vue";
 import TSwitchTheme from "@comp/app/t-switchTheme.vue";
 import showLoading from "@comp/func/loading.js";
-import Hk4eApi, { type AnnoLang, AnnoServer } from "@req/hk4eReq.js";
+import hk4eReq, { type AnnoLang, AnnoServer } from "@req/hk4eReq.js";
 import useAppStore from "@store/app.js";
 import parseAnnoContent from "@utils/annoParser.js";
 import { storeToRefs } from "pinia";
@@ -100,7 +100,7 @@ onMounted(async () => {
     return;
   }
   await showLoading.update(`公告ID: ${annoId}`);
-  const listData = await Hk4eApi.anno.list(region, lang);
+  const listData = await hk4eReq.anno.list(region, lang);
   for (const listItem of listData.list) {
     for (const single of listItem.list) {
       if (single.ann_id === annoId) {
@@ -109,7 +109,7 @@ onMounted(async () => {
       }
     }
   }
-  jsonContent.value = await Hk4eApi.anno.content(annoId, region, lang);
+  jsonContent.value = await hk4eReq.anno.content(annoId, region, lang);
   parsedJson.value = parseAnnoContent(jsonContent.value);
   await showLoading.end();
 });

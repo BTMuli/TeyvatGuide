@@ -40,6 +40,7 @@
     "src/**/*.d.ts",
     "src/**/*.ts",
     "src/**/*.vue",
+    "src/**/*.scss",
     "src/App.vue",
     "src/data/**/*.json",
     "scripts/*.ts",
