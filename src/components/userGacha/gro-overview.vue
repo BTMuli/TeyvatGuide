@@ -57,6 +57,6 @@ watch(
   display: grid;
   height: 100%;
   grid-column-gap: 8px;
-  grid-template-columns: v-bind(cnCols);
+  grid-template-columns: v-bind(cnCols); /* stylelint-disable-line value-keyword-case */
 }
 </style>

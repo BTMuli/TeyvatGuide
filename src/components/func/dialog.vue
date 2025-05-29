@@ -197,6 +197,10 @@ defineExpose({ displayInputBox, displayCheckBox });
 }
 
 .dialog-overlay {
+  /* 颜色变量 */
+  --dialog-title: var(--tgc-dark-7);
+  --dialog-bg: var(--tgc-white-1);
+
   position: fixed;
   z-index: 100;
   top: 0;
@@ -208,13 +212,10 @@ defineExpose({ displayInputBox, displayCheckBox });
   justify-content: center;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-
-  /* 颜色变量 */
-  --dialog-title: var(--tgc-dark-7);
-  --dialog-bg: var(--tgc-white-1);
 }
 
 /* 深色模式 */
+
 .dark .dialog-overlay {
   --dialog-title: var(--tgc-white-1);
   --dialog-bg: var(--tgc-dark-7);

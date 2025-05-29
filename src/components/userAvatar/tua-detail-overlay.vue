@@ -106,10 +106,11 @@ function handleClick(pos: "left" | "right"): void {
 
 .tdo-avatars-container {
   position: relative;
-  width: v-bind(avatarsWidth);
+  width: v-bind(avatarsWidth); /* stylelint-disable-line value-keyword-case */
 }
 
 /* stylelint-disable selector-class-pattern */
+
 .tdo-avatars-container :deep(.v-slide-group__next),
 .tdo-avatars-container :deep(.v-slide-group__prev) {
   color: var(--tgc-od-white);

@@ -228,10 +228,10 @@ async function toPool(): Promise<void> {
   width: auto;
   max-width: 280px;
   height: 60px;
-  margin: 8px;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
+  margin: 8px;
   gap: 8px;
 
   &::-webkit-scrollbar-thumb {

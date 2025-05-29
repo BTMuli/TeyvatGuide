@@ -42,26 +42,26 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .tuso-box {
   position: relative;
-  height: 100%;
-  box-sizing: border-box;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-left: auto;
   width: 800px;
   min-width: 800px;
+  height: 100%;
+  box-sizing: border-box;
+  flex-direction: column;
   padding: 12px;
-  background: var(--box-bg-1);
-  border-radius: 4px;
   border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  margin-left: auto;
+  background: var(--box-bg-1);
+  gap: 4px;
 }
 
 .tuso-top {
   position: relative;
-  width: 100%;
   display: flex;
-  justify-content: space-between;
+  width: 100%;
   align-items: flex-end;
+  justify-content: space-between;
 }
 
 .tuso-title {
@@ -83,12 +83,12 @@ onUnmounted(() => {
 .tuso-mid {
   position: relative;
   display: flex;
-  flex-direction: column;
   height: 100%;
-  background: var(--box-bg-2);
-  border-radius: 4px;
-  padding: 8px;
   box-sizing: border-box;
+  flex-direction: column;
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-2);
   overflow-y: auto;
 }
 

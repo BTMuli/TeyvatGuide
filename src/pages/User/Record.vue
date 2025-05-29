@@ -205,11 +205,11 @@ async function deleteRecord(): Promise<void> {
 
 .ur-top-title {
   position: relative;
-  margin-left: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 8px;
+  margin-left: 8px;
   gap: 8px;
 
   img {
@@ -243,17 +243,17 @@ async function deleteRecord(): Promise<void> {
 }
 
 .ur-box {
-  @include github-styles.github-card-shadow();
-
   position: relative;
   display: flex;
+  box-sizing: border-box;
   flex-direction: column;
   padding: 8px;
-  box-sizing: border-box;
   border: 1px solid var(--common-shadow-2);
   border-radius: 4px;
-  row-gap: 4px;
   background: var(--app-page-bg);
+  row-gap: 4px;
+
+  @include github-styles.github-card-shadow;
 }
 
 .dark .ur-box {

@@ -40,7 +40,7 @@ const props = defineProps<DucDetailOlbProps>();
   border-radius: 50%;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
-  background: rgb(0 0 0/40%);
+  background: #00000066;
 }
 
 .duc-dolb-lock {
@@ -55,7 +55,7 @@ const props = defineProps<DucDetailOlbProps>();
   border-radius: 50%;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
-  background-color: rgb(0 0 0 / 40%);
+  background-color: #00000066;
 }
 
 .duc-dolb-icon {

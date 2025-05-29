@@ -285,7 +285,6 @@ function onUserClick(): void {
 @use "@styles/github.styles.scss" as github-styles;
 
 .tpc-card {
-  @include github-styles.github-card();
   position: relative;
   display: flex;
   overflow: hidden;
@@ -300,6 +299,8 @@ function onUserClick(): void {
   &.select-mode {
     cursor: pointer;
   }
+
+  @include github-styles.github-card;
 }
 
 .dark .tpc-card {
@@ -375,7 +376,6 @@ function onUserClick(): void {
 }
 
 .tpc-tag {
-  @include github-styles.github-tag-dark-gen(#e06c63);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -387,17 +387,19 @@ function onUserClick(): void {
   &:hover {
     @include github-styles.github-tag-dark-gen(#00aeec);
   }
+
+  @include github-styles.github-tag-dark-gen(#e06c63);
 }
 
 .tpc-reason {
-  @include github-styles.github-tag-dark-gen(#d19a66);
-
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
   border-radius: 4px;
   gap: 4px;
+
+  @include github-styles.github-tag-dark-gen(#d19a66);
 }
 
 .tpc-forum {
@@ -464,8 +466,8 @@ function onUserClick(): void {
   color: var(--box-text-7);
   font-size: 12px;
   gap: 2px;
-  white-space: nowrap;
   opacity: 0.6;
+  white-space: nowrap;
 }
 
 .tpc-act {
@@ -478,25 +480,25 @@ function onUserClick(): void {
   justify-content: space-between;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  background: rgb(0 0 0/50%);
+  background: #00000080;
   font-size: 12px;
 }
 
 .tpc-image-cnt {
   position: absolute;
-  bottom: 0;
   right: 0;
+  bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 8px;
+  background: var(--tgc-od-blue);
   border-top-left-radius: 12px;
+  box-shadow: -2px -2px 8px var(--tgc-dark-1);
+  color: var(--tgc-white-1);
   column-gap: 2px;
   font-size: 12px;
-  color: var(--tgc-white-1);
-  background: var(--tgc-od-blue);
   opacity: 0.8;
-  box-shadow: -2px -2px 8px var(--tgc-dark-1);
 }
 
 .tpc-status {
@@ -505,7 +507,7 @@ function onUserClick(): void {
   align-items: center;
   justify-content: flex-start;
   padding: 4px 30px 4px 4px;
-  background-color: v-bind(cardBg);
+  background-color: v-bind(cardBg); /* stylelint-disable-line value-keyword-case */
   clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
   color: var(--tgc-white-1);
 
@@ -515,7 +517,7 @@ function onUserClick(): void {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgb(255 255 255/40%);
+    background: #ffffff66;
     clip-path: polygon(
       calc(100% - 25px) 0,
       100% 0,

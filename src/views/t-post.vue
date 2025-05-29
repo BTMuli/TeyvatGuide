@@ -356,8 +356,6 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 }
 </script>
 <style lang="scss" scoped>
-@use "@styles/github.styles.scss" as github-styles;
-
 .tp-post-body {
   width: 800px;
   margin: 0 auto;
@@ -365,6 +363,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 }
 
 /* title */
+
 .tp-post-title {
   display: flex;
   width: fit-content;
@@ -390,6 +389,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 }
 
 /* subtitle */
+
 .tp-post-subtitle {
   position: relative;
   display: flex;
@@ -411,6 +411,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 }
 
 /* info */
+
 .tp-post-info {
   position: relative;
   display: flex;
@@ -440,6 +441,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 }
 
 /* meta */
+
 .tp-post-meta {
   display: flex;
   align-items: center;
@@ -485,6 +487,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 }
 
 /* extra */
+
 .tp-post-extra {
   position: relative;
   display: flex;
@@ -493,16 +496,15 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   flex-wrap: wrap;
   align-items: center;
   justify-content: start;
-  column-gap: 4px;
-  row-gap: 8px;
+  gap: 8px 4px;
 }
 
 .tp-post-collection,
 .tp-post-topic,
 .tp-post-reason {
+  display: flex;
   height: 20px;
   box-sizing: border-box;
-  display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
@@ -513,28 +515,34 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 }
 
 /* collection */
+
 .tp-post-collection {
-  @include github-styles.github-tag-dark-gen(#3572a5);
   cursor: pointer;
 
   &:hover {
     @include github-styles.github-tag-dark-gen(#98c379);
   }
+
+  @include github-styles.github-tag-dark-gen(#3572a5);
 }
 
 /* topic */
-.tp-post-topic {
-  @include github-styles.github-tag-dark-gen(#e06c63);
 
+.tp-post-topic {
   cursor: pointer;
 
   &:hover {
     @include github-styles.github-tag-dark-gen(#00aeec);
   }
+
+  @include github-styles.github-tag-dark-gen(#e06c63);
 }
 
 /* reason */
+
 .tp-post-reason {
   @include github-styles.github-tag-dark-gen(#d19a66);
 }
+
+@use "@styles/github.styles.scss" as github-styles;
 </style>

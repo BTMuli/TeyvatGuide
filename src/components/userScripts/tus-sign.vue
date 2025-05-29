@@ -312,24 +312,24 @@ async function trySign(ac: SignAccount[], ck: TGApp.App.Account.Cookie): Promise
 <style lang="scss" scoped>
 .tuss-box {
   position: relative;
+  display: flex;
   width: 100%;
   box-sizing: border-box;
-  padding: 12px;
-  background: var(--box-bg-1);
-  border-radius: 4px;
-  border: 1px solid var(--common-shadow-2);
-  display: flex;
   flex-direction: column;
-  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--box-bg-1);
   color: var(--box-text-1);
+  gap: 8px;
 }
 
 .tuss-top {
   position: relative;
-  width: 100%;
   display: flex;
-  justify-content: space-between;
+  width: 100%;
   align-items: center;
+  justify-content: space-between;
 }
 
 .tuss-title {
@@ -355,23 +355,23 @@ async function trySign(ac: SignAccount[], ck: TGApp.App.Account.Cookie): Promise
 
 .tuss-item {
   position: relative;
-  width: 100%;
-  box-sizing: border-box;
   display: flex;
+  width: 100%;
+  height: 80px;
+  box-sizing: border-box;
   align-items: center;
   justify-content: flex-start;
-  column-gap: 8px;
   padding: 10px;
-  background: var(--box-bg-2);
   border-radius: 4px;
+  background: var(--box-bg-2);
   color: var(--box-text-2);
-  height: 80px;
+  column-gap: 8px;
   cursor: pointer;
   user-select: none;
 
   &:hover {
-    background: var(--box-bg-3);
     border: 1px solid var(--common-shadow-1);
+    background: var(--box-bg-3);
   }
 }
 
@@ -385,24 +385,24 @@ async function trySign(ac: SignAccount[], ck: TGApp.App.Account.Cookie): Promise
 
 .tuss-icon {
   position: relative;
+  overflow: hidden;
   width: 48px;
   height: 48px;
   border-radius: 4px;
-  overflow: hidden;
 
   img {
-    border-radius: 4px;
     width: 100%;
     height: 100%;
+    border-radius: 4px;
   }
 
   .delete {
     position: absolute;
     bottom: 0;
     left: 0;
+    display: flex;
     width: 16px;
     height: 16px;
-    display: flex;
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(5px);
@@ -413,30 +413,30 @@ async function trySign(ac: SignAccount[], ck: TGApp.App.Account.Cookie): Promise
 
 .tuss-stat {
   position: relative;
-  margin-left: auto;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-left: auto;
   column-gap: 4px;
 }
 
 .tuss-reward {
   position: relative;
   display: flex;
-  align-items: center;
-  justify-content: center;
   width: 48px;
   height: 48px;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   background: var(--box-bg-4);
 
   img {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
-    padding: 10px;
     box-sizing: border-box;
+    padding: 10px;
     border: 1px solid var(--common-shadow-1);
+    border-radius: 50%;
   }
 
   span {
@@ -445,11 +445,11 @@ async function trySign(ac: SignAccount[], ck: TGApp.App.Account.Cookie): Promise
     width: fit-content;
     min-width: 48px;
     padding: 0 4px;
+    border: 1px solid var(--common-shadow-1);
     border-radius: 12px;
+    background: var(--app-page-bg);
     font-size: 8px;
     text-align: center;
-    background: var(--app-page-bg);
-    border: 1px solid var(--common-shadow-1);
   }
 }
 </style>

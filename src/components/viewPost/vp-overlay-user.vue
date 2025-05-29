@@ -138,29 +138,29 @@ async function loadPosts(): Promise<void> {
 .vp-ou-user {
   position: relative;
   display: flex;
+  max-width: 100%;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
   row-gap: 4px;
-  max-width: 100%;
 }
 
 .vp-ouu-info {
   position: relative;
   display: flex;
+  max-width: 100%;
   align-items: center;
   justify-content: center;
-  max-width: 100%;
 
   .left {
     position: relative;
+    display: flex;
     width: 50px;
     height: 50px;
     box-sizing: border-box;
-    padding: 5px;
-    display: flex;
     align-items: center;
     justify-content: center;
+    padding: 5px;
 
     .avatar {
       position: relative;
@@ -230,7 +230,7 @@ async function loadPosts(): Promise<void> {
         justify-content: center;
         padding: 0 2px;
         border-radius: 2px;
-        background: v-bind(levelColor);
+        background: v-bind(levelColor); /* stylelint-disable-line value-keyword-case */
         color: var(--tgc-white-1);
         font-size: 12px;
       }
@@ -271,9 +271,9 @@ async function loadPosts(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--box-text-4);
   column-gap: 8px;
   font-size: 12px;
-  color: var(--box-text-4);
   opacity: 0.6;
 }
 

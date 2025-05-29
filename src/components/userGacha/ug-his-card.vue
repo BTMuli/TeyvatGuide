@@ -141,8 +141,6 @@ function getBox(id: number): TItemBoxData {
 }
 
 .ug-his-banner {
-  @include github-styles.github-card-shadow();
-
   width: 50vw;
   border-radius: 4px;
   cursor: pointer;
@@ -152,6 +150,8 @@ function getBox(id: number): TItemBoxData {
     scale: 0.95;
     transition: 0.5s ease-in-out;
   }
+
+  @include github-styles.github-card-shadow;
 }
 
 .ug-his-info {
@@ -164,9 +164,9 @@ function getBox(id: number): TItemBoxData {
 
 .ug-his-title {
   display: flex;
-  column-gap: 8px;
   align-items: center;
   justify-content: flex-start;
+  column-gap: 8px;
 
   :first-child {
     color: var(--common-text-title);
@@ -176,15 +176,15 @@ function getBox(id: number): TItemBoxData {
 }
 
 .ug-his-tag {
-  @include github-styles.github-tag-dark-gen(#e06c63);
-
   display: flex;
+  height: fit-content;
   align-items: center;
   justify-content: center;
   padding: 0 8px;
-  height: fit-content;
   border-radius: 4px;
   font-size: 16px;
+
+  @include github-styles.github-tag-dark-gen(#e06c63);
 }
 
 .ug-his-sub {

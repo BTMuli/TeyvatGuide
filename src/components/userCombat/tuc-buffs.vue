@@ -32,7 +32,9 @@ const columnCnt = computed<number>(() => {
   display: grid;
   width: 100%;
   grid-gap: 4px;
+  /* stylelint-disable value-keyword-case */
   grid-template-columns: repeat(v-bind(columnCnt), 1fr);
+  /* stylelint-enable value-keyword-case */
 }
 
 .tuc-buff-item {

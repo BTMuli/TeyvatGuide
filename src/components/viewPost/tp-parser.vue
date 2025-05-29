@@ -94,12 +94,13 @@ function getParsedText(data: TpTextType): Array<TpTextType> {
 function getTpName(tp: TGApp.BBS.SctPost.Base): Component {
   if (tp.children) return TpTexts;
   if (typeof tp.insert === "string") return TpText;
-  // custom_emoticon属于backup_text的一种，必须放在backup_text判断的前面
-  if ("custom_emoticon" in tp.insert) return TpEmoticon;
   // game_user_info属于backup_text的一种，必须放在backup_text判断的前面
   if ("game_user_info" in tp.insert) return TpUid;
   if ("backup_text" in tp.insert) {
-    if (tp.insert.backup_text === "[游戏卡片]") return TpGameCard;
+    if (tp.insert.backup_text === "[游戏卡片]" && "reception_card" in tp.insert) return TpGameCard;
+    if (tp.insert.backup_text === "[自定义表情]" && "custom_emoticon" in tp.insert) {
+      return TpEmoticon;
+    }
     return TpBackupText;
   }
   if ("divider" in tp.insert) return TpDivider;

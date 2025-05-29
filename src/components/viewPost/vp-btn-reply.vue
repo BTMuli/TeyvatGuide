@@ -207,8 +207,8 @@ async function handleDebug(): Promise<void> {
 .tpr-main-filter {
   position: relative;
   display: flex;
-  flex-direction: column;
   width: 100%;
+  flex-direction: column;
   align-items: flex-start;
   justify-content: center;
   color: var(--app-page-content);
@@ -217,9 +217,9 @@ async function handleDebug(): Promise<void> {
 
 .tpr-title {
   position: relative;
+  display: flex;
   width: 100%;
   box-sizing: border-box;
-  display: flex;
   align-items: center;
   justify-content: space-between;
 
@@ -242,8 +242,8 @@ async function handleDebug(): Promise<void> {
 }
 
 .tpr-subtitle {
-  width: 100%;
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
 }
@@ -259,8 +259,8 @@ async function handleDebug(): Promise<void> {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 18px;
   font-family: var(--font-title);
+  font-size: 18px;
 }
 
 .tpr-reply-list {

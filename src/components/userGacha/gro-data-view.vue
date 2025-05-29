@@ -238,8 +238,10 @@ watch(
   padding-right: 4px;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
+/* stylelint-disable selector-class-pattern */
+
 :deep(.v-virtual-scroll__item + .v-virtual-scroll__item) {
   margin-top: 8px;
 }
+/* stylelint-enable selector-class-pattern */
 </style>

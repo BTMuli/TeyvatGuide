@@ -75,14 +75,14 @@ const progressWidth = computed<string>(() => {
   position: relative;
   display: flex;
   width: 100%;
+  height: 48px;
   box-sizing: border-box;
   align-items: center;
   justify-content: flex-start;
   padding: 8px;
-  height: 48px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   background: var(--box-bg-2);
-  border: 1px solid var(--common-shadow-1);
   column-gap: 4px;
 }
 
@@ -90,11 +90,11 @@ const progressWidth = computed<string>(() => {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: v-bind(progressWidth);
+  width: v-bind(progressWidth); /* stylelint-disable-line value-keyword-case */
   max-width: 100%;
   height: 4px;
   border-radius: 4px;
-  background: v-bind(progressColor);
+  background: v-bind(progressColor); /* stylelint-disable-line value-keyword-case */
 }
 
 .gro-dl-icon {
@@ -119,16 +119,16 @@ const progressWidth = computed<string>(() => {
 }
 
 .gro-dl-name {
-  line-height: 18px;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 14px;
+  line-height: 18px;
 }
 
 .gro-dl-time {
-  line-height: 14px;
   color: var(--box-text-7);
   font-size: 12px;
+  line-height: 14px;
 }
 
 .gro-dl-info {
@@ -153,7 +153,7 @@ const progressWidth = computed<string>(() => {
   padding: 4px;
   border-radius: 50%;
   background: var(--box-bg-3);
-  color: v-bind(progressColor);
+  color: v-bind(progressColor); /* stylelint-disable-line value-keyword-case */
   font-family: var(--font-title);
   transform: rotate(25deg);
 }

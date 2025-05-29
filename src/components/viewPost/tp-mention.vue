@@ -29,7 +29,7 @@ async function toLink(): Promise<void> {
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   margin: 2px;
-  color: #00c3ff;
+  color: #00c3ffff;
   cursor: pointer;
 }
 </style>

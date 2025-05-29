@@ -22,7 +22,7 @@ defineProps<{ modelValue: TGApp.Game.Avatar.Relic | false; pos: number }>();
   width: 60px;
   height: 60px;
   border-radius: 5px;
-  background: rgb(50 56 68/50%);
+  background: #32384480;
 }
 
 .tuc-dr-bg {

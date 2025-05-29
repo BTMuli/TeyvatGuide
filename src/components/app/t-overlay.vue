@@ -88,8 +88,8 @@ function toClick(): void {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  -webkit-backdrop-filter: blur(v-bind(blurVal));
-  backdrop-filter: blur(v-bind(blurVal));
-  background: rgb(0 0 0 / 50%);
+  -webkit-backdrop-filter: blur(v-bind(blurVal)); /* stylelint-disable-line value-keyword-case */
+  backdrop-filter: blur(v-bind(blurVal)); /* stylelint-disable-line value-keyword-case */
+  background: #00000080;
 }
 </style>

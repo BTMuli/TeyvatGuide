@@ -58,11 +58,11 @@ onUnmounted(() => {
 </script>
 <style lang="scss" scoped>
 .progress {
+  position: relative;
+  display: flex;
   width: 25px;
   height: 25px;
-  display: flex;
-  position: relative;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 </style>

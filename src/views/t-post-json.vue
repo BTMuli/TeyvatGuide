@@ -117,12 +117,12 @@ onMounted(async () => {
 }
 
 .tpj-box {
-  border-radius: 4px;
   position: relative;
   width: 100%;
-  padding: 12px;
-  box-sizing: border-box;
   max-width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 4px;
   background: var(--box-bg-1);
 }
 </style>

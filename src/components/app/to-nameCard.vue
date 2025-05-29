@@ -158,23 +158,23 @@ async function shareNameCard(): Promise<void> {
   padding: 8px;
   border-radius: 4px;
   backdrop-filter: blur(5px);
-  background: rgb(0 0 0 / 25%);
+  background: #00000040;
   color: var(--tgc-white-1);
 }
 
 .dark .ton-content {
-  background: rgb(0 0 0/ 50%);
+  background: #00000080;
 }
 
 .ton-content :first-child {
   font-family: var(--font-title);
   font-size: 20px;
-  text-shadow: 0 0 5px rgb(0 0 0/80%);
+  text-shadow: 0 0 5px #000000cc;
 }
 
 .ton-content :nth-child(2) {
   border-bottom: 1px dotted var(--tgc-white-1);
-  text-shadow: 0 0 2px rgb(0 0 0/80%);
+  text-shadow: 0 0 2px #000000cc;
   white-space: pre-wrap;
 }
 

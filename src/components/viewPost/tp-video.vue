@@ -68,7 +68,7 @@ onUnmounted(() => {
   position: relative;
   max-width: 100%;
   margin: 10px auto;
-  aspect-ratio: v-bind(videoAspectRatio);
+  aspect-ratio: v-bind(videoAspectRatio); /* stylelint-disable-line value-keyword-case */
 }
 
 .tp-video-container {
@@ -79,7 +79,7 @@ onUnmounted(() => {
   max-width: 100%;
   border: none;
   border-radius: 10px;
-  aspect-ratio: v-bind(videoAspectRatio);
+  aspect-ratio: v-bind(videoAspectRatio); /* stylelint-disable-line value-keyword-case */
 }
 
 .tp-video-share {
@@ -93,7 +93,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  aspect-ratio: v-bind(videoAspectRatio);
+  aspect-ratio: v-bind(videoAspectRatio); /* stylelint-disable-line value-keyword-case */
 }
 
 .tp-video-cover {
@@ -119,7 +119,7 @@ onUnmounted(() => {
   align-items: center;
   padding: 2px 5px;
   border-radius: 5px;
-  background: rgb(0 0 0/50%);
+  background: #00000080;
   color: var(--tgc-white-4);
   font-family: var(--font-title);
   font-size: 12px;
@@ -136,7 +136,7 @@ onUnmounted(() => {
   justify-content: center;
   padding: 5px;
   border-radius: 5px;
-  background: rgb(0 0 0 / 50%);
+  background: #00000080;
   color: var(--tgc-white-1);
   font-family: var(--font-title);
   font-size: 12px;
@@ -150,7 +150,7 @@ onUnmounted(() => {
   align-items: center;
   padding: 2px 5px;
   border-radius: 5px;
-  background: rgb(0 0 0/50%);
+  background: #00000080;
   color: var(--tgc-white-4);
   font-family: var(--font-title);
   font-size: 12px;

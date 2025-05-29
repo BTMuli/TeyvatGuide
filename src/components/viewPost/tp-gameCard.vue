@@ -61,25 +61,25 @@ async function toGame(): Promise<void> {
 <style lang="scss" scoped>
 .tp-game-card-box {
   position: relative;
-  margin: 12px 0;
+  display: flex;
   width: 100%;
   box-sizing: border-box;
-  display: flex;
   align-items: center;
   justify-content: flex-start;
-  column-gap: 12px;
   padding: 8px 16px;
-  border-radius: 4px;
-  background: var(--box-bg-1);
   border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  margin: 12px 0;
+  background: var(--box-bg-1);
+  column-gap: 12px;
 }
 
 .icon {
   position: relative;
-  flex-shrink: 0;
+  overflow: hidden;
   width: 80px;
   height: 80px;
-  overflow: hidden;
+  flex-shrink: 0;
 
   img {
     width: 100%;
@@ -97,8 +97,8 @@ async function toGame(): Promise<void> {
 
   span {
     &:first-child {
-      font-family: var(--font-title);
       color: var(--common-text-title);
+      font-family: var(--font-title);
       font-size: 20px;
     }
 
@@ -110,10 +110,10 @@ async function toGame(): Promise<void> {
 
 .act {
   height: 40px;
+  margin-left: auto;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
-  margin-left: auto;
 }
 
 .dark .act {

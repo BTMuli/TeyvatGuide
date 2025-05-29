@@ -68,12 +68,12 @@ function getGameName(): string {
   padding: 5px;
   border: 1px solid var(--common-shadow-2);
   border-radius: 3px;
-  background-color: #f4efe9;
+  background-color: #f4efe9ff;
   background-image: url("/source/post/tp_uid_bg.webp");
   background-position: right bottom;
   background-repeat: no-repeat;
   background-size: contain;
-  color: #a17a58;
+  color: #a17a58ff;
 }
 
 .tpu-top {
@@ -111,7 +111,7 @@ function getGameName(): string {
   align-items: center;
   justify-content: center;
   padding: 0 5px;
-  border: 1px solid rgb(161 122 88 / 30%);
+  border: 1px solid #a17a584d;
   border-radius: 3px;
   font-size: 12px;
   opacity: 0.7;

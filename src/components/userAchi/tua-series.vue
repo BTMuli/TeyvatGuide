@@ -99,27 +99,25 @@ function selectSeries(): void {
 @use "@styles/github.styles.scss" as github-styles;
 
 .tuas-card {
-  @include github-styles.github-card();
-
   position: relative;
   display: flex;
+  overflow: hidden;
+  height: 60px;
   align-items: center;
   justify-content: flex-start;
   padding: 8px;
-  height: 60px;
   border-radius: 4px;
   color: var(--box-text-1);
   column-gap: 8px;
   cursor: pointer;
-  overflow: hidden;
 
   &.tuas-selected {
     background: var(--box-bg-1);
   }
 
   &.tuas-radius {
-    border-top-right-radius: 30px;
     border-bottom-right-radius: 30px;
+    border-top-right-radius: 30px;
   }
 
   &:hover {
@@ -129,20 +127,21 @@ function selectSeries(): void {
       }
     }
   }
+
+  @include github-styles.github-card;
 }
 
 .dark .tuas-card {
-  @include github-styles.github-card("dark");
-
   &.tuas-selected {
     background: var(--box-bg-1);
   }
+
+  @include github-styles.github-card("dark");
 }
 
 .tuas-version {
-  @include github-styles.github-tag-dark-gen(#ffa726);
-
   position: absolute;
+  z-index: 3;
   right: 0;
   bottom: 0;
   width: 64px;
@@ -152,21 +151,22 @@ function selectSeries(): void {
   font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
-  z-index: 3;
+
+  @include github-styles.github-tag-dark-gen(#ffa726);
 }
 
 .tuas-reward {
   position: absolute;
+  z-index: 0;
   top: -1px;
   right: -2px;
   height: 62px;
-  z-index: 0;
 
   img {
     height: 100%;
+    filter: grayscale(1);
     object-fit: contain;
     opacity: 0.3;
-    filter: grayscale(1);
     transition: filter 0.5s ease-in-out;
 
     &.finish {
@@ -177,14 +177,14 @@ function selectSeries(): void {
 
 .tuas-icon {
   position: relative;
-  flex-shrink: 0;
+  z-index: 1;
   width: 40px;
   height: 40px;
+  box-sizing: border-box;
+  flex-shrink: 0;
   padding: 5px;
   border-radius: 50%;
-  box-sizing: border-box;
   background: var(--tgc-dark-7);
-  z-index: 1;
 
   img {
     width: 100%;

@@ -37,7 +37,7 @@ const relicBg = computed<string>(() => {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: rgb(50 56 68/50%);
+  background: #32384480;
 }
 
 .duc-dr-bg {
@@ -86,7 +86,7 @@ const relicBg = computed<string>(() => {
   justify-content: center;
   border: 2px solid var(--tgc-od-red);
   border-radius: 50%;
-  background: v-bind(relicBg);
+  background: v-bind(relicBg); /* stylelint-disable-line value-keyword-case */
   color: var(--tgc-white-1);
   font-family: var(--font-title);
   font-size: 12px;

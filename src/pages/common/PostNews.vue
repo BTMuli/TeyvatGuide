@@ -232,6 +232,7 @@ async function searchPost(): Promise<void> {
 }
 
 /* load more */
+
 .load-news {
   display: flex;
   align-items: center;

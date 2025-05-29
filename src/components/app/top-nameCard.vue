@@ -39,15 +39,13 @@ const bgImage = computed<string>(() => {
 @use "@styles/github.styles.scss" as github-styles;
 
 .top-nc-box {
-  @include github-styles.github-card-shadow();
-
   width: 100%;
   height: 80px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px 50px 50px 4px;
   margin-bottom: 8px;
   background-color: var(--box-bg-1);
-  background-image: v-bind(bgImage);
+  background-image: v-bind(bgImage); /* stylelint-disable-line value-keyword-case */
   background-position: right;
   background-repeat: no-repeat;
   cursor: pointer;
@@ -61,6 +59,8 @@ const bgImage = computed<string>(() => {
   &.grey:hover {
     filter: grayscale(0);
   }
+
+  @include github-styles.github-card-shadow;
 }
 
 .dark .top-nc-box {

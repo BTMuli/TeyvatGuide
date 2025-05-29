@@ -30,7 +30,7 @@ function getRightTitle(): string {
 .tua-dcp-box {
   position: relative;
   display: flex;
-  width: v-bind(getWidth);
+  width: v-bind(getWidth); /* stylelint-disable-line value-keyword-case */
   height: 20px;
   align-items: center;
   justify-content: space-between;

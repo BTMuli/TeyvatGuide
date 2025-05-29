@@ -136,8 +136,8 @@ async function toWiki(): Promise<void> {
 }
 
 .tww-brief-title {
-  width: fit-content;
   display: flex;
+  width: fit-content;
   align-items: center;
   justify-content: center;
   color: var(--common-text-title);
@@ -148,8 +148,8 @@ async function toWiki(): Promise<void> {
   img {
     width: 20px;
     height: 20px;
-    object-fit: contain;
     cursor: pointer;
+    object-fit: contain;
   }
 }
 

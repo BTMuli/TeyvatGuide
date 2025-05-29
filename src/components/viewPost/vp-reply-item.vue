@@ -216,7 +216,7 @@ async function handleUser(): Promise<void> {
   await emit("userMention", uid);
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tpr-reply-box {
   position: relative;
   display: flex;
@@ -308,7 +308,7 @@ async function handleUser(): Promise<void> {
   justify-content: center;
   padding: 0 2px;
   border-radius: 2px;
-  background: v-bind(levelColor);
+  background: v-bind(levelColor); /* stylelint-disable-line value-keyword-case */
   color: var(--tgc-white-1);
   font-size: 12px;
 }
@@ -416,8 +416,8 @@ async function handleUser(): Promise<void> {
   opacity: 0.3;
 
   :last-child {
-    color: #00c3ff;
-    text-decoration: underline solid #00c3ff;
+    color: #00c3ffff;
+    text-decoration: underline solid #00c3ffff;
     text-underline-position: under;
   }
 }

@@ -322,11 +322,11 @@ onUnmounted(async () => {
 
 .top-extension {
   position: relative;
-  padding: 8px;
-  margin-left: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 8px;
+  margin-left: 8px;
   column-gap: 8px;
 }
 
@@ -344,15 +344,15 @@ onUnmounted(async () => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 18px;
   font-family: var(--font-title);
+  font-size: 18px;
 }
 
 .top-link {
-  margin-left: auto;
   margin-right: 16px;
-  cursor: pointer;
+  margin-left: auto;
   color: var(--tgc-od-white);
+  cursor: pointer;
 
   &:hover {
     color: var(--tgc-od-orange);
@@ -367,11 +367,11 @@ onUnmounted(async () => {
 
 .left-wrap {
   position: relative;
-  box-sizing: border-box;
   width: 332px;
   height: 100%;
-  padding-right: 8px;
+  box-sizing: border-box;
   flex-shrink: 0;
+  padding-right: 8px;
   overflow-y: auto;
 }
 

@@ -53,6 +53,7 @@
  * @description 根 html 样式
  * @since Beta v0.3.0
  */
+
 html {
   overflow: auto;
   background: var(--app-page-bg);
@@ -64,6 +65,7 @@ html {
  * @description 侧边滚动条样式
  * @since Beta v0.7.2
  */
+
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;

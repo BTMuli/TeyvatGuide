@@ -69,10 +69,10 @@ const icon = computed<string>(() => {
   align-items: flex-start;
   justify-content: center;
   padding: 8px;
-  border-radius: 4px;
-  column-gap: 4px;
-  background: var(--box-bg-1);
   border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  column-gap: 4px;
 }
 
 .tur-ws-bg {
@@ -92,7 +92,7 @@ const icon = computed<string>(() => {
 .tur-ws-icon img {
   width: 100%;
   height: 100%;
-  filter: v-bind(imgFilter);
+  filter: v-bind(imgFilter); /* stylelint-disable-line value-keyword-case */
 }
 
 .tur-ws-content {

@@ -110,13 +110,13 @@ defineExpose({ displayBox });
   justify-content: center;
   padding: 10px 20px;
   border-radius: 5px;
-  background-color: v-bind(bgColor);
-  box-shadow: 0 0 10px rgb(0 0 0 / 20%);
+  background-color: v-bind(bgColor); /* stylelint-disable-line value-keyword-case */
+  box-shadow: 0 0 10px #00000033;
   word-break: break-all;
 }
 
 .func-snackbar-text {
-  color: #ffffff;
+  color: #ffffffff;
   font-size: 16px;
   font-weight: 500;
 }

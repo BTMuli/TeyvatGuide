@@ -113,12 +113,12 @@ function getImageTitle(): string {
 }
 
 .tp-image-box img {
-  width: v-bind(imgWidth);
+  width: v-bind(imgWidth); /* stylelint-disable-line value-keyword-case */
   max-width: 100%;
   height: auto;
   border-radius: 4px;
+  background: v-bind(bgColor); /* stylelint-disable-line value-keyword-case */
   cursor: pointer;
-  background: v-bind(bgColor);
 }
 
 .tp-image-load {
@@ -141,7 +141,7 @@ function getImageTitle(): string {
   justify-content: center;
   border-radius: 50%;
   background: var(--tgc-od-white);
-  box-shadow: 0 0 4px rgb(0 0 0 / 50%);
+  box-shadow: 0 0 4px #00000080;
   cursor: pointer;
 }
 </style>

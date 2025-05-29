@@ -139,14 +139,14 @@ onUnmounted(() => {
   position: relative;
   max-width: 100%;
   margin: 10px auto;
-  aspect-ratio: v-bind(vodAspectRatio);
+  aspect-ratio: v-bind(vodAspectRatio); /* stylelint-disable-line value-keyword-case */
 }
 
 .tp-vod-container {
   overflow: hidden;
   max-width: 100%;
   border-radius: 10px;
-  aspect-ratio: v-bind(vodAspectRatio);
+  aspect-ratio: v-bind(vodAspectRatio); /* stylelint-disable-line value-keyword-case */
 }
 
 .tp-vod-share {
@@ -160,7 +160,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  aspect-ratio: v-bind(vodAspectRatio);
+  aspect-ratio: v-bind(vodAspectRatio); /* stylelint-disable-line value-keyword-case */
 }
 
 .tp-vod-cover {
@@ -187,7 +187,7 @@ onUnmounted(() => {
   align-items: center;
   padding: 2px 5px;
   border-radius: 5px;
-  background: rgb(0 0 0/50%);
+  background: #00000080;
   color: var(--tgc-white-4);
   font-family: var(--font-title);
   font-size: 12px;
@@ -202,7 +202,7 @@ onUnmounted(() => {
   align-items: center;
   padding: 2px 5px;
   border-radius: 5px;
-  background: rgb(0 0 0/50%);
+  background: #00000080;
   color: var(--tgc-white-4);
   font-family: var(--font-title);
   font-size: 12px;

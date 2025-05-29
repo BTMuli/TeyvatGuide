@@ -138,8 +138,6 @@ function getWeaponTitle(): string {
 @use "@styles/github.styles.scss" as github-styles;
 
 .tua-ab-box {
-  @include github-styles.github-card();
-
   position: relative;
   display: flex;
   flex-direction: column;
@@ -151,6 +149,8 @@ function getWeaponTitle(): string {
   &:hover .tua-abl-bg {
     filter: grayscale(0);
   }
+
+  @include github-styles.github-card;
 }
 
 .dark .tua-ab-box {
@@ -206,8 +206,8 @@ function getWeaponTitle(): string {
   background: rgb(0 0 0 / 40%);
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
-  font-family: var(--font-title);
   color: var(--tgc-white-1);
+  font-family: var(--font-title);
 }
 
 .tua-abl-fetter {
@@ -231,9 +231,9 @@ function getWeaponTitle(): string {
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  row-gap: 4px;
   border-radius: 4px;
   aspect-ratio: 21/10;
+  row-gap: 4px;
 }
 
 .tua-abl-bg {
@@ -285,10 +285,10 @@ function getWeaponTitle(): string {
     display: flex;
     width: 40px;
     height: 40px;
+    box-sizing: border-box;
     align-items: center;
     justify-content: center;
     padding: 5px;
-    box-sizing: border-box;
     border: 1px solid var(--box-bg-4);
     border-radius: 50%;
     background: var(--tgc-dark-7);
@@ -297,9 +297,9 @@ function getWeaponTitle(): string {
 
   :last-child {
     display: flex;
+    width: 48px;
     align-items: center;
     justify-content: center;
-    width: 48px;
     border-radius: 5px;
     background: var(--box-bg-4);
     color: var(--box-text-4);

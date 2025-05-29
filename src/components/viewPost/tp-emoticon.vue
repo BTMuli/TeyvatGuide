@@ -83,7 +83,7 @@ onUnmounted(() => {
   max-width: 100%;
   height: auto;
   border-radius: 4px;
-  background: v-bind(bgColor);
+  background: v-bind(bgColor); /* stylelint-disable-line value-keyword-case */
 }
 
 .tp-emo-info {
@@ -99,9 +99,9 @@ onUnmounted(() => {
   border-bottom-left-radius: 4px;
   border-top-right-radius: 4px;
   box-shadow: -1px 1px 4px var(--common-shadow-2);
+  cursor: default;
   font-family: var(--font-title);
   font-size: 12px;
-  cursor: default;
   white-space: nowrap;
 }
 </style>

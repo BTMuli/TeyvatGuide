@@ -32,7 +32,7 @@ defineProps<{ modelValue: TGApp.Game.Avatar.Constellation }>();
   justify-content: center;
   padding: 3px;
   border-radius: 50%;
-  background-color: rgb(0 0 0 / 50%);
+  background-color: #00000080;
 }
 
 .tuc-dc-icon {
@@ -42,9 +42,9 @@ defineProps<{ modelValue: TGApp.Game.Avatar.Constellation }>();
   align-items: center;
   justify-content: center;
   padding: 3px;
-  border: 1px solid rgb(0 0 0/20%);
+  border: 1px solid #00000033;
   border-radius: 50%;
-  background: rgb(50 56 68/50%);
+  background: #32384480;
 }
 
 .tuc-dc-icon img {

@@ -20,17 +20,17 @@ defineProps<TurRoleInfoProps>();
 @use "@styles/github.styles.scss" as github-styles;
 
 .tur-ri-box {
-  @include github-styles.github-card();
-
   position: relative;
   display: flex;
   height: 48px;
+  box-sizing: border-box;
   align-items: center;
   justify-content: center;
-  column-gap: 4px;
-  border-radius: 24px;
   padding: 4px 12px 4px 4px;
-  box-sizing: border-box;
+  border-radius: 24px;
+  column-gap: 4px;
+
+  @include github-styles.github-card;
 }
 
 .dark .tur-ri-box {
@@ -64,20 +64,20 @@ defineProps<TurRoleInfoProps>();
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  color: var(--common-text-title);
   column-gap: 4px;
   font-family: var(--font-title);
-  color: var(--common-text-title);
   font-size: 16px;
   line-height: 20px;
 }
 
 .tur-ri-subtitle {
   display: flex;
-  font-size: 14px;
-  line-height: 16px;
   align-items: center;
   justify-content: flex-start;
-  column-gap: 10px;
   color: var(--box-text-1);
+  column-gap: 10px;
+  font-size: 14px;
+  line-height: 16px;
 }
 </style>

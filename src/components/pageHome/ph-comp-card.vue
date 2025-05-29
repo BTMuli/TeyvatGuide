@@ -18,14 +18,14 @@ defineProps<{ append?: boolean }>();
 @use "@styles/github.styles.scss" as github-styles;
 
 .thc-container {
-  @include github-styles.github-card();
-
   position: relative;
   min-height: 100px;
-  padding: 24px 8px 8px;
   box-sizing: border-box;
+  padding: 24px 8px 8px;
   border-radius: 4px;
   margin-top: 24px;
+
+  @include github-styles.github-card;
 }
 
 .dark .thc-container {
@@ -36,16 +36,16 @@ defineProps<{ append?: boolean }>();
 .thc-append {
   position: absolute;
   top: -16px;
-  height: 32px;
   display: flex;
+  height: 32px;
+  box-sizing: border-box;
   align-items: center;
   justify-content: center;
   padding: 0 10px;
+  border: 1px solid var(--tgc-od-white);
   border-radius: 4px;
   background: var(--tgc-od-blue);
   font-family: var(--font-title);
-  border: 1px solid var(--tgc-od-white);
-  box-sizing: border-box;
 }
 
 .thc-title {

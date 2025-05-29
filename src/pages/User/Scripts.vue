@@ -200,10 +200,10 @@ async function tryExecAll(): Promise<void> {
 .select-main {
   position: relative;
   display: flex;
+  height: 24px;
   align-items: center;
   justify-content: center;
   column-gap: 4px;
-  height: 24px;
 
   img {
     width: 24px;
@@ -228,13 +228,13 @@ async function tryExecAll(): Promise<void> {
 
 .select-item {
   position: relative;
-  width: 100%;
   display: flex;
+  width: 100%;
+  box-sizing: border-box;
   align-items: center;
   justify-content: flex-start;
-  column-gap: 4px;
   padding: 8px;
-  box-sizing: border-box;
+  column-gap: 4px;
 
   img {
     width: 24px;
@@ -267,10 +267,10 @@ async function tryExecAll(): Promise<void> {
 .top-hint {
   position: relative;
   padding: 8px;
-  font-size: 20px;
   color: var(--tgc-pink-1);
-  font-family: var(--font-title);
   cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 20px;
 }
 
 .us-page-container {
@@ -283,27 +283,27 @@ async function tryExecAll(): Promise<void> {
 
 .us-scripts {
   position: relative;
-  width: 100%;
   display: flex;
+  width: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  padding-right: 8px;
   overflow-y: auto;
   row-gap: 8px;
-  max-height: 100%;
-  padding-right: 8px;
-  box-sizing: border-box;
 }
 
 .us-title {
   position: sticky;
-  width: 100%;
-  background: var(--app-page-bg);
-  top: 0;
   z-index: 2;
+  top: 0;
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
+  background: var(--app-page-bg);
 
   span {
     color: var(--common-text-title);

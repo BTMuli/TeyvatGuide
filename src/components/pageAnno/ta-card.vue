@@ -63,12 +63,13 @@ async function shareAnno(): Promise<void> {
 @use "@styles/github.styles.scss" as github-styles;
 
 .anno-card {
-  @include github-styles.github-card();
   position: relative;
   overflow: hidden;
   width: 100%;
-  border-radius: 6px;
   box-sizing: border-box;
+  border-radius: 6px;
+
+  @include github-styles.github-card;
 }
 
 .dark .anno-card {
@@ -96,15 +97,15 @@ async function shareAnno(): Promise<void> {
 .anno-title {
   position: relative;
   overflow: hidden;
-  max-width: 100%;
   width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 4px;
+  margin-left: auto;
   cursor: pointer;
   font-size: 18px;
-  margin-left: auto;
   text-overflow: ellipsis;
   white-space: nowrap;
-  box-sizing: border-box;
 }
 
 .anno-info {
@@ -117,7 +118,7 @@ async function shareAnno(): Promise<void> {
   justify-content: space-between;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  background: rgb(0 0 0/50%);
+  background: #00000080;
   font-size: 12px;
 }
 

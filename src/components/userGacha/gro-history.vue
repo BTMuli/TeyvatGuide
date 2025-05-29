@@ -57,10 +57,12 @@ onMounted(() => {
   height: 100%;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
+/* stylelint-disable selector-class-pattern */
+
 .gro-container :deep(.v-tabs.v-slide-group--vertical) {
   max-height: 100%;
 }
+/* stylelint-enable selector-class-pattern */
 
 .gro-window {
   position: relative;
@@ -74,10 +76,12 @@ onMounted(() => {
   overflow-y: scroll;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
+/* stylelint-disable selector-class-pattern */
+
 .gro-window :deep(.v-window__container) {
   width: 100%;
 }
+/* stylelint-enable selector-class-pattern */
 
 .gro-pools {
   position: relative;

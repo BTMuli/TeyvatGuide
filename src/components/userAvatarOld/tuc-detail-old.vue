@@ -170,8 +170,8 @@ function switchBg(): void {
   justify-content: center;
   border-radius: 5px;
   margin: 0 auto;
-  object-fit: v-bind(bgFit);
-  transform: translateY(v-bind(bgTransY));
+  object-fit: v-bind(bgFit); /* stylelint-disable-line value-keyword-case */
+  transform: translateY(v-bind(bgTransY)); /* stylelint-disable-line value-keyword-case */
 
   img {
     width: 100%;
@@ -270,6 +270,7 @@ function switchBg(): void {
 }
 
 /* 左侧显示区域 */
+
 .tuc-dol-item {
   position: relative;
   border-radius: 5px;
@@ -300,6 +301,7 @@ function switchBg(): void {
 }
 
 /* 右侧显示区域 */
+
 .tuc-dor-box {
   position: relative;
   width: 100%;
@@ -317,6 +319,7 @@ function switchBg(): void {
 }
 
 /* 环状排列6个命座 */
+
 .tuc-dor-item:nth-child(1) {
   top: 10px;
   left: 10px;

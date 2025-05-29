@@ -139,7 +139,7 @@ const levelColor = computed<string>(() => {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: v-bind(levelColor);
+  background: v-bind(levelColor); /* stylelint-disable-line value-keyword-case */
   color: var(--tgc-white-1);
   font-size: 10px;
   line-height: 18px;

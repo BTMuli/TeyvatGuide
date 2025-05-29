@@ -50,9 +50,9 @@ function getTitle(): string {
 <style lang="scss" scoped>
 .tp-texts {
   line-break: anywhere;
+  text-align: v-bind("props.data.attributes?.align");
   white-space: pre-wrap;
   word-break: break-all;
-  text-align: v-bind("props.data.attributes?.align");
 
   &.tp-inline {
     display: inline;

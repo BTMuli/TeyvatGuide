@@ -108,14 +108,14 @@ async function toLink(): Promise<void> {
 
 .tp-link-card-price {
   display: inline-block;
-  color: #ff6d6d;
+  color: #ff6d6dff;
   font-size: 20px;
 }
 
 .tp-link-card-btn {
   display: inline-block;
   margin-left: auto;
-  color: #00c3ff;
+  color: #00c3ffff;
   cursor: pointer;
   text-align: right;
 }

@@ -138,9 +138,9 @@ function getEmojiName(): string {
 </script>
 <style lang="css" scoped>
 .tp-text-link {
-  color: #00c3ff;
+  color: #00c3ffff;
   cursor: pointer;
-  text-decoration: underline solid #00c3ff;
+  text-decoration: underline solid #00c3ffff;
   text-underline-position: under;
 }
 

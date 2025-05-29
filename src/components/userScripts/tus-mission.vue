@@ -300,24 +300,24 @@ async function autoSign(ck: TGApp.App.Account.Cookie, ch?: string): Promise<void
 <style lang="scss" scoped>
 .tusm-box {
   position: relative;
+  display: flex;
   width: 100%;
   box-sizing: border-box;
-  padding: 12px;
-  background: var(--box-bg-1);
-  border-radius: 4px;
-  border: 1px solid var(--common-shadow-2);
-  display: flex;
   flex-direction: column;
-  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--box-bg-1);
   color: var(--box-text-1);
+  gap: 8px;
 }
 
 .tusm-top {
   position: relative;
-  width: 100%;
   display: flex;
-  justify-content: space-between;
+  width: 100%;
   align-items: center;
+  justify-content: space-between;
 }
 
 .tusm-title {
@@ -343,14 +343,14 @@ async function autoSign(ck: TGApp.App.Account.Cookie, ch?: string): Promise<void
 
 .mission-item {
   position: relative;
+  display: flex;
   width: 100%;
   box-sizing: border-box;
-  display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px;
-  background: var(--box-bg-2);
   border-radius: 4px;
+  background: var(--box-bg-2);
   color: var(--box-text-2);
 
   .left {

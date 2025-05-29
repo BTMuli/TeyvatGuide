@@ -102,10 +102,10 @@ async function loadMore(refresh: boolean = false): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 20px;
+  gap: 4px;
 
   img {
     width: 32px;

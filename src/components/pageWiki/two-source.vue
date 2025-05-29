@@ -24,7 +24,7 @@ const textColor = computed<string>(() => {
   display: flex;
   width: fit-content;
   align-items: center;
-  color: v-bind(textColor);
+  color: v-bind(textColor); /* stylelint-disable-line value-keyword-case */
   column-gap: 5px;
 }
 </style>

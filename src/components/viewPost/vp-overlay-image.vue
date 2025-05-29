@@ -136,7 +136,7 @@ async function onDownload(): Promise<void> {
     max-width: 100%;
     max-height: 100%;
     border-radius: 4px;
-    background: v-bind(bgColor);
+    background: v-bind(bgColor); /* stylelint-disable-line value-keyword-case */
     object-fit: contain;
   }
 }
@@ -149,7 +149,7 @@ async function onDownload(): Promise<void> {
   cursor: zoom-out;
 
   img {
-    background: v-bind(bgColor);
+    background: v-bind(bgColor); /* stylelint-disable-line value-keyword-case */
   }
 }
 
@@ -166,7 +166,7 @@ async function onDownload(): Promise<void> {
   border: 1px solid var(--tgc-od-white);
   border-radius: 4px;
   background-color: var(--common-shadow-2);
-  color: #ffffff;
+  color: #ffffffff;
 }
 
 .tpoi-info-item {

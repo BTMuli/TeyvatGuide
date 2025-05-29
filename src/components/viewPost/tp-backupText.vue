@@ -48,7 +48,7 @@ console.log("tpBackupText", props.data.insert.backup_text, toRaw(props.data));
 <style lang="css" scoped>
 .tp-backup-lottery {
   margin-right: 4px;
-  color: #00c3ff;
+  color: #00c3ffff;
   cursor: pointer;
 
   :first-child {
