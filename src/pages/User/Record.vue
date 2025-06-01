@@ -243,6 +243,8 @@ async function deleteRecord(): Promise<void> {
 }
 
 .ur-box {
+  @include github-styles.github-card-shadow;
+
   position: relative;
   display: flex;
   box-sizing: border-box;
@@ -252,8 +254,6 @@ async function deleteRecord(): Promise<void> {
   border-radius: 4px;
   background: var(--app-page-bg);
   row-gap: 4px;
-
-  @include github-styles.github-card-shadow;
 }
 
 .dark .ur-box {

@@ -39,6 +39,8 @@ const bgImage = computed<string>(() => {
 @use "@styles/github.styles.scss" as github-styles;
 
 .top-nc-box {
+  @include github-styles.github-card-shadow;
+
   width: 100%;
   height: 80px;
   border: 1px solid var(--common-shadow-1);
@@ -59,8 +61,6 @@ const bgImage = computed<string>(() => {
   &.grey:hover {
     filter: grayscale(0);
   }
-
-  @include github-styles.github-card-shadow;
 }
 
 .dark .top-nc-box {

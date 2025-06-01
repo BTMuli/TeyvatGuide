@@ -356,15 +356,13 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 }
 </script>
 <style lang="scss" scoped>
-
+@use "@styles/github.styles.scss" as github-styles;
 
 .tp-post-body {
   width: 800px;
   margin: 0 auto;
   font-family: var(--font-text);
 }
-
-/* title */
 
 .tp-post-title {
   display: flex;
@@ -390,8 +388,6 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   text-align: center;
 }
 
-/* subtitle */
-
 .tp-post-subtitle {
   position: relative;
   display: flex;
@@ -411,8 +407,6 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   column-gap: 4px;
   font-family: var(--font-title);
 }
-
-/* info */
 
 .tp-post-info {
   position: relative;
@@ -442,8 +436,6 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   opacity: 0.6;
 }
 
-/* meta */
-
 .tp-post-meta {
   display: flex;
   align-items: center;
@@ -458,22 +450,22 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-}
 
-.mpm-forum img {
-  width: 28px;
-  height: 28px;
-  object-fit: cover;
-}
+  img {
+    width: 28px;
+    height: 28px;
+    object-fit: cover;
 
-.mpm-forum img:first-child {
-  border-radius: 4px;
-}
+    &:first-child {
+      border-radius: 4px;
+    }
+  }
 
-.mpm-forum span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .mpm-item {
@@ -487,8 +479,6 @@ function handleUser(user: TGApp.BBS.Post.User): void {
     color: var(--tgc-pink-1);
   }
 }
-
-/* extra */
 
 .tp-post-extra {
   position: relative;
@@ -516,35 +506,27 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   font-size: 12px;
 }
 
-/* collection */
-
 .tp-post-collection {
+  @include github-styles.github-tag-dark-gen(#3572a5);
+
   cursor: pointer;
 
   &:hover {
     @include github-styles.github-tag-dark-gen(#98c379);
   }
-
-  @include github-styles.github-tag-dark-gen(#3572a5);
 }
 
-/* topic */
-
 .tp-post-topic {
+  @include github-styles.github-tag-dark-gen(#e06c63);
+
   cursor: pointer;
 
   &:hover {
     @include github-styles.github-tag-dark-gen(#00aeec);
   }
-
-  @include github-styles.github-tag-dark-gen(#e06c63);
 }
-
-/* reason */
 
 .tp-post-reason {
   @include github-styles.github-tag-dark-gen(#d19a66);
 }
-
-@use "@styles/github.styles.scss" as github-styles;
 </style>

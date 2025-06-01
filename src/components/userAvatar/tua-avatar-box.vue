@@ -138,6 +138,8 @@ function getWeaponTitle(): string {
 @use "@styles/github.styles.scss" as github-styles;
 
 .tua-ab-box {
+  @include github-styles.github-card;
+
   position: relative;
   display: flex;
   flex-direction: column;
@@ -145,8 +147,6 @@ function getWeaponTitle(): string {
   border-radius: 4px;
   cursor: pointer;
   row-gap: 4px;
-
-  @include github-styles.github-card;
 }
 
 .dark .tua-ab-box {

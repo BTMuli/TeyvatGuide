@@ -18,14 +18,14 @@ defineProps<{ append?: boolean }>();
 @use "@styles/github.styles.scss" as github-styles;
 
 .thc-container {
+  @include github-styles.github-card;
+
   position: relative;
   min-height: 100px;
   box-sizing: border-box;
   padding: 24px 8px 8px;
   border-radius: 4px;
   margin-top: 24px;
-
-  @include github-styles.github-card;
 }
 
 .dark .thc-container {

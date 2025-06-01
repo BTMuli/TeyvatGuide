@@ -99,6 +99,8 @@ function selectSeries(): void {
 @use "@styles/github.styles.scss" as github-styles;
 
 .tuas-card {
+  @include github-styles.github-card;
+
   position: relative;
   display: flex;
   overflow: hidden;
@@ -127,19 +129,19 @@ function selectSeries(): void {
       }
     }
   }
-
-  @include github-styles.github-card;
 }
 
 .dark .tuas-card {
+  @include github-styles.github-card("dark");
+
   &.tuas-selected {
     background: var(--box-bg-1);
   }
-
-  @include github-styles.github-card("dark");
 }
 
 .tuas-version {
+  @include github-styles.github-tag-dark-gen(#ffa726);
+
   position: absolute;
   z-index: 3;
   right: 0;
@@ -151,8 +153,6 @@ function selectSeries(): void {
   font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
-
-  @include github-styles.github-tag-dark-gen(#ffa726);
 }
 
 .tuas-reward {

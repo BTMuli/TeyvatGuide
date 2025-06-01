@@ -73,6 +73,33 @@ async function displayBox(params: LoadingParams): Promise<void> {
 defineExpose({ displayBox });
 </script>
 <style lang="css" scoped>
+@keyframes ball-clip-rotate-pulse-rotate {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) rotate(180deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes ball-clip-rotate-pulse-scale {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  30% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(0.15);
+  }
+}
+
 .func-loading-outer-enter-active,
 .func-loading-outer-leave-active,
 .func-loading-inner-enter-active {
@@ -228,32 +255,5 @@ defineExpose({ displayBox });
   width: 16px;
   height: 16px;
   animation: ball-clip-rotate-pulse-scale 1s cubic-bezier(0.09, 0.57, 0.49, 0.9) infinite;
-}
-
-@keyframes ball-clip-rotate-pulse-rotate {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-
-  50% {
-    transform: translate(-50%, -50%) rotate(180deg);
-  }
-
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
-
-@keyframes ball-clip-rotate-pulse-scale {
-  0%,
-  100% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  30% {
-    opacity: 0.3;
-    transform: translate(-50%, -50%) scale(0.15);
-  }
 }
 </style>

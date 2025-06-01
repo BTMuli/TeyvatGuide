@@ -96,6 +96,8 @@ async function setAchiStat(stat: boolean): Promise<void> {
 @use "@styles/github.styles.scss" as github-styles;
 
 .achi-container {
+  @include github-styles.github-card;
+
   position: relative;
   display: flex;
   height: 60px;
@@ -105,8 +107,6 @@ async function setAchiStat(stat: boolean): Promise<void> {
   padding: 8px;
   border-radius: 4px;
   cursor: pointer;
-
-  @include github-styles.github-card;
 }
 
 .dark .achi-container {
@@ -114,6 +114,8 @@ async function setAchiStat(stat: boolean): Promise<void> {
 }
 
 .achi-version {
+  @include github-styles.github-tag-dark-gen(#fb7299);
+
   position: absolute;
   top: 0;
   left: 0;
@@ -125,8 +127,6 @@ async function setAchiStat(stat: boolean): Promise<void> {
   font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
-
-  @include github-styles.github-tag-dark-gen(#fb7299);
 }
 
 .achi-pre {
@@ -172,6 +172,8 @@ async function setAchiStat(stat: boolean): Promise<void> {
   }
 
   &__progress {
+    @include github-styles.github-tag-dark-gen(#00aeec);
+
     display: flex;
     height: 21px;
     align-items: center;
@@ -179,8 +181,6 @@ async function setAchiStat(stat: boolean): Promise<void> {
     padding: 0 4px;
     border-radius: 4px;
     font-size: 12px;
-
-    @include github-styles.github-tag-dark-gen(#00aeec);
   }
 }
 

@@ -133,13 +133,13 @@ function getAnnoTime(content: string): string | false {
 @use "@styles/github.styles.scss" as github-styles;
 
 .anno-card {
+  @include github-styles.github-card;
+
   position: relative;
   overflow: hidden;
   width: 100%;
   box-sizing: border-box;
   border-radius: 6px;
-
-  @include github-styles.github-card;
 }
 
 .dark .anno-card {

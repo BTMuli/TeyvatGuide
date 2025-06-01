@@ -139,6 +139,8 @@ async function toBBS(link: URL): Promise<void> {
 }
 
 .tgn-nav {
+  @include github-styles.github-card;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -146,8 +148,6 @@ async function toBBS(link: URL): Promise<void> {
   border-radius: 4px;
   color: var(--tgc-white-1);
   cursor: pointer;
-
-  @include github-styles.github-card;
 }
 
 .dark .tgn-nav {

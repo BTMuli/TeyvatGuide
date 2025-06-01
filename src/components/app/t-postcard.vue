@@ -285,6 +285,8 @@ function onUserClick(): void {
 @use "@styles/github.styles.scss" as github-styles;
 
 .tpc-card {
+  @include github-styles.github-card;
+
   position: relative;
   display: flex;
   overflow: hidden;
@@ -299,8 +301,6 @@ function onUserClick(): void {
   &.select-mode {
     cursor: pointer;
   }
-
-  @include github-styles.github-card;
 }
 
 .dark .tpc-card {
@@ -376,6 +376,8 @@ function onUserClick(): void {
 }
 
 .tpc-tag {
+  @include github-styles.github-tag-dark-gen(#e06c63);
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -387,19 +389,17 @@ function onUserClick(): void {
   &:hover {
     @include github-styles.github-tag-dark-gen(#00aeec);
   }
-
-  @include github-styles.github-tag-dark-gen(#e06c63);
 }
 
 .tpc-reason {
+  @include github-styles.github-tag-dark-gen(#d19a66);
+
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
   border-radius: 4px;
   gap: 4px;
-
-  @include github-styles.github-tag-dark-gen(#d19a66);
 }
 
 .tpc-forum {

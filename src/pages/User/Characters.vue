@@ -487,10 +487,10 @@ function handleSwitch(next: boolean): void {
 }
 
 .uc-box-uid {
+  @include github-styles.github-tag-dark-gen(#ffcd0c);
+
   padding: 2px 4px;
   border-radius: 4px;
-
-  @include github-styles.github-tag-dark-gen(#ffcd0c);
 }
 
 .uc-ov-item {
