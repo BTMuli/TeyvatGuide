@@ -40,10 +40,10 @@ function handleAnnoContent(data: string): string {
 /**
  * @description 解析公告内容，转换为结构化数据
  * @since Beta v0.5.3
- * @param {TGApp.BBS.Announcement.ContentItem} anno - 公告内容
+ * @param {TGApp.BBS.Announcement.AnnoDetail} anno - 公告内容
  * @returns {TGApp.BBS.SctPost.Base[]} 结构化数据
  */
-function parseAnnoContent(anno: TGApp.BBS.Announcement.ContentItem): Array<TGApp.BBS.SctPost.Base> {
+function parseAnnoContent(anno: TGApp.BBS.Announcement.AnnoDetail): Array<TGApp.BBS.SctPost.Base> {
   const parser = new DOMParser();
   const first = handleAnnoContent(anno.content);
   const doc = parser.parseFromString(first, "text/html");

@@ -1,10 +1,10 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.7.6
+ * @since Beta v0.7.7
  */
 
-import type { AnnoLang, AnnoServer } from "@req/hk4eReq.js";
+import { AnnoLangEnum, AnnoServerEnum } from "@enum/anno.js";
 import { path } from "@tauri-apps/api";
 import { getInitDeviceInfo } from "@utils/toolFunc.js";
 import { defineStore } from "pinia";
@@ -43,9 +43,9 @@ const useAppStore = defineStore(
     // 设备信息
     const deviceInfo = ref<TGApp.App.Device.DeviceInfo>(getInitDeviceInfo());
     // 服务器
-    const server = ref<AnnoServer>("cn_gf01");
+    const server = ref<TGApp.BBS.Announcement.AnnoServerEnum>(AnnoServerEnum.CN_QD01);
     // 语言
-    const lang = ref<AnnoLang>("zh-cn");
+    const lang = ref<TGApp.BBS.Announcement.AnnoLangEnum>(AnnoLangEnum.CHS);
     // 最近的咨讯类型
     const recentNewsType = ref<NewsType>("notice");
     // 是否开启分辨率回正

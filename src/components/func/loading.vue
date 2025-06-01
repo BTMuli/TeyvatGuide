@@ -142,9 +142,9 @@ defineExpose({ displayBox });
   align-items: center;
   justify-content: center;
   padding: 10px;
-  border: #f4d8a8 1px solid;
+  border: #f4d8a8ff 1px solid;
   border-radius: 5px;
-  color: #f4d8a8;
+  color: #f4d8a8ff;
 }
 
 .loading-title {
@@ -197,7 +197,7 @@ defineExpose({ displayBox });
   display: block;
   width: 32px;
   height: 32px;
-  color: #f4d8a8;
+  color: #f4d8a8ff;
   font-size: 0;
 }
 

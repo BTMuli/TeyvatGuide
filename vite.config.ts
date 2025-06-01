@@ -1,7 +1,7 @@
 /**
  * @file vite.config.ts
  * @description vite 配置文件
- * @since Beta v0.7.6
+ * @since Beta v0.7.7
  */
 
 import vue from "@vitejs/plugin-vue";
@@ -21,6 +21,7 @@ export default defineConfig({
       "@/": "/src/",
       "@styles/": "/src/assets/styles/",
       "@comp/": "/src/components/",
+      "@enum/": "/src/enum/",
       "@Bili/": "/src/plugins/Bili/",
       "@Hutao/": "/src/plugins/Hutao/",
       "@Mys/": "/src/plugins/Mys/",

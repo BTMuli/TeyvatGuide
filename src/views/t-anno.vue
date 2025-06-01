@@ -19,7 +19,7 @@ import TShareBtn from "@comp/app/t-shareBtn.vue";
 import TSwitchTheme from "@comp/app/t-switchTheme.vue";
 import showLoading from "@comp/func/loading.js";
 import TaParser from "@comp/pageAnno/ta-parser.vue";
-import hk4eReq, { type AnnoLang, AnnoServer } from "@req/hk4eReq.js";
+import hk4eReq from "@req/hk4eReq.js";
 import useAppStore from "@store/app.js";
 import { app, webviewWindow } from "@tauri-apps/api";
 import TGLogger from "@utils/TGLogger.js";
@@ -29,10 +29,10 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 const annoId = Number(route.params.anno_id);
-const region = <AnnoServer>route.params.region;
-const lang = <AnnoLang>route.params.lang;
+const region = <TGApp.BBS.Announcement.AnnoServerEnum>route.params.region;
+const lang = <TGApp.BBS.Announcement.AnnoLangEnum>route.params.lang;
 const appVersion = ref<string>();
-const annoData = shallowRef<TGApp.BBS.Announcement.ContentItem>();
+const annoData = shallowRef<TGApp.BBS.Announcement.AnnoDetail>();
 
 onMounted(async () => {
   await showLoading.start("正在加载公告数据");
@@ -43,20 +43,18 @@ onMounted(async () => {
     return;
   }
   await showLoading.update("正在获取数据");
-  try {
-    annoData.value = await hk4eReq.anno.content(annoId, region, lang);
-    await showLoading.update("正在渲染数据");
-    await webviewWindow
-      .getCurrentWebviewWindow()
-      .setTitle(`Anno_${annoId} ${annoData.value.title}`);
-  } catch (error) {
-    if (error instanceof Error)
-      await TGLogger.Error(`[t-anno.vue][${annoId}] ${error.name}：${error.message}`);
-    else console.error(error);
+  const detailResp = await hk4eReq.anno.detail(region, lang);
+  await showLoading.update("正在渲染数据");
+  const find = detailResp.find((item) => item.ann_id === annoId);
+  if (!find) {
     await showLoading.empty("未找到数据", "公告不存在或解析失败");
-    await webviewWindow.getCurrentWebviewWindow().setTitle(`Anno_${annoId} Parsing Error`);
+    await TGLogger.Error(`[t-anno.vue][${annoId}] 未找到公告`);
+    await webviewWindow.getCurrentWebviewWindow().setTitle(`Anno_${annoId} Not Found`);
     return;
   }
+  annoData.value = find;
+  await showLoading.update(`公告ID: ${annoId} - ${annoData.value.title}`);
+  await webviewWindow.getCurrentWebviewWindow().setTitle(`Anno_${annoId} ${annoData.value.title}`);
   const isDev = useAppStore().devMode ?? false;
   if (isDev) await createAnnoJson();
   await showLoading.end();

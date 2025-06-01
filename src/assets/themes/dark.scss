@@ -5,6 +5,7 @@
  */
 
 /* dark mode */
+
 html.dark {
   /* app container */
   --app-page-bg: #1e1e1eff; /* (0, 0, 0) */
@@ -17,7 +18,6 @@ html.dark {
   --box-bg-2: #323844ff;
   --box-bg-3: #282c34ff;
   --box-bg-4: #3d424bff;
-
   --box-bg-blue: var(--tgc-blue-1);
 
   /* box bg transparent */
@@ -35,10 +35,10 @@ html.dark {
   --btn-text: var(--tgc-yellow-1);
 
   /* box-shadow */
-  --common-shadow-1: #FFFFFF1A;
-  --common-shadow-2: #FFFFFF33;
-  --common-shadow-4: #FFFFFF66;
-  --common-shadow-8: #FFFFFFCC;
+  --common-shadow-1: #ffffff1a;
+  --common-shadow-2: #ffffff33;
+  --common-shadow-4: #ffffff66;
+  --common-shadow-8: #ffffffcc;
 
   /* box-shadow-transparent */
   --common-shadow-t-1: #0000001a;

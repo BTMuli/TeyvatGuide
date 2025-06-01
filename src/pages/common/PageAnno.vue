@@ -2,14 +2,14 @@
   <v-app-bar>
     <template #prepend>
       <v-tabs v-model="tab" align-tabs="start" class="anno-tab">
-        <v-tab v-for="(value, index) in tabValues" :key="index" :value="value">
-          {{ annoMap[value] }}
+        <v-tab v-for="(tab, index) in tabList" :key="index" :value="tab.value">
+          {{ tab.text }}
         </v-tab>
       </v-tabs>
       <div class="anno-selects">
         <v-select
           class="anno-select"
-          :items="annoServerList"
+          :items="serverList"
           v-model="server"
           item-title="text"
           item-value="value"
@@ -20,7 +20,7 @@
         />
         <v-select
           class="anno-select"
-          :items="annoLangList"
+          :items="langList"
           v-model="lang"
           item-title="text"
           item-value="value"
@@ -38,15 +38,9 @@
     </template>
   </v-app-bar>
   <v-window v-model="tab">
-    <v-window-item v-for="(value, index) in tabValues" :key="index" :value="value">
+    <v-window-item v-for="(tab, index) in tabList" :key="index" :value="tab.value">
       <div class="anno-grid">
-        <TaCard
-          v-for="item in annoCards[value]"
-          :key="item.id"
-          :model-value="item"
-          :region="server"
-          :lang="lang"
-        />
+        <TaCard v-for="item in annoCards[tab.value]" :key="item.id" :model-value="item" />
       </div>
     </v-window-item>
   </v-window>
@@ -56,7 +50,15 @@
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TaCard from "@comp/pageAnno/ta-card.vue";
-import hk4eReq, { type AnnoLang, type AnnoServer } from "@req/hk4eReq.js";
+import {
+  AnnoLangEnum,
+  AnnoServerEnum,
+  AnnoTypeEnum,
+  getAnnoLangDesc,
+  getAnnoServerDesc,
+  getAnnoTypeDesc,
+} from "@enum/anno.js";
+import hk4eReq from "@req/hk4eReq.js";
 import useAppStore from "@store/app.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -64,46 +66,49 @@ import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 type AnnoSelect<T = string> = { text: string; value: T };
-type AnnoKey = "activity" | "game";
 export type AnnoCard = {
   id: number;
   title: string;
   subtitle: string;
   banner: string;
-  typeLabel: string;
+  typeLabel: TGApp.BBS.Announcement.AnnoTypeEnum;
   tagIcon: string;
   tagLabel: string;
   timeStr: string;
+  detail: TGApp.BBS.Announcement.AnnoDetail;
 };
-type AnnoList = { [key in AnnoKey]: Array<AnnoCard> };
+type AnnoList = Record<TGApp.BBS.Announcement.AnnoTypeEnum, Array<AnnoCard>>;
 
-const annoServerList: Array<AnnoSelect<AnnoServer>> = [
-  { text: "国服-官方服", value: "cn_gf01" },
-  { text: "国服-渠道服", value: "cn_qd01" },
-  { text: "国际服-亚服", value: "os_asia" },
-  { text: "国际服-欧服", value: "os_euro" },
-  { text: "国际服-美服", value: "os_usa" },
-  { text: "国际服-港澳台服", value: "os_cht" },
-];
-const annoLangList: Array<AnnoSelect> = [
-  { text: "简体中文", value: "zh-cn" },
-  { text: "繁体中文", value: "zh-tw" },
-  { text: "English", value: "en" },
-  { text: "日本語", value: "ja" },
-];
-const annoMap: Readonly<Record<AnnoKey, string>> = { activity: "活动公告", game: "游戏公告" };
+const serverList: ReadonlyArray<AnnoSelect<TGApp.BBS.Announcement.AnnoServerEnum>> = [
+  AnnoServerEnum.CN_GF01,
+  AnnoServerEnum.CN_QD01,
+  AnnoServerEnum.OS_ASIA,
+  AnnoServerEnum.OS_EURO,
+  AnnoServerEnum.OS_USA,
+  AnnoServerEnum.OS_CHT,
+].map((i) => ({ text: getAnnoServerDesc(i), value: i }));
+const langList: ReadonlyArray<AnnoSelect<TGApp.BBS.Announcement.AnnoLangEnum>> = [
+  AnnoLangEnum.CHS,
+  AnnoLangEnum.CHT,
+  AnnoLangEnum.EN,
+  AnnoLangEnum.JP,
+].map((i) => ({ text: getAnnoLangDesc(i), value: i }));
+const tabList: ReadonlyArray<AnnoSelect<TGApp.BBS.Announcement.AnnoTypeEnum>> = [
+  AnnoTypeEnum.ACTIVITY,
+  AnnoTypeEnum.GAME,
+].map((i) => ({ text: getAnnoTypeDesc(i), value: i }));
 
 const { server, lang } = storeToRefs(useAppStore());
 const router = useRouter();
-const tabValues: Readonly<Array<AnnoKey>> = ["activity", "game"];
-const tab = ref<AnnoKey>("activity");
+
+const tab = ref<TGApp.BBS.Announcement.AnnoTypeEnum>(AnnoTypeEnum.ACTIVITY);
 const annoCards = shallowRef<AnnoList>({ activity: [], game: [] });
 const isReq = ref<boolean>(false);
 
 watch(
   () => server.value,
   async () => {
-    const name = getRegionName(server.value);
+    const name = getAnnoServerDesc(server.value);
     await TGLogger.Info(`[Announcements][watch][curRegionName] 切换服务器：${name}`);
     await loadData();
     showSnackbar.success(`服务器切换为：${name}`);
@@ -113,7 +118,7 @@ watch(
 watch(
   () => lang.value,
   async () => {
-    const name = getLangName(lang.value);
+    const name = getAnnoLangDesc(lang.value);
     await TGLogger.Info(`[Announcements][watch][curLangName] 切换语言：${name}`);
     await loadData();
     showSnackbar.success(`语言切换为：${name}`);
@@ -130,14 +135,28 @@ async function loadData(): Promise<void> {
   isReq.value = true;
   await showLoading.start(
     "正在获取公告数据",
-    `服务器：${getRegionName(server.value)}，语言：${getLangName(lang.value)}`,
+    `服务器：${getAnnoServerDesc(server.value)}，语言：${getAnnoLangDesc(lang.value)}`,
   );
-  const annoData = await hk4eReq.anno.list(server.value, lang.value);
-  const listCards = annoData.list.map((list) => list.list.map((anno) => getAnnoCard(anno))).flat();
-  annoCards.value = {
-    activity: listCards.filter((item) => item.typeLabel === "activity"),
-    game: listCards.filter((item) => item.typeLabel === "game"),
-  };
+  const listResp = await hk4eReq.anno.list(server.value, lang.value);
+  const detailResp = await hk4eReq.anno.detail(server.value, AnnoLangEnum.CHS);
+  const actCards: Array<AnnoCard> = [];
+  const gameCards: Array<AnnoCard> = [];
+  for (const list of listResp.list) {
+    for (const item of list.list) {
+      const detail = detailResp.find((i) => i.ann_id === item.ann_id);
+      if (detail) {
+        const card = getAnnoCard(item, detail);
+        if (card.typeLabel === "activity") {
+          actCards.push(card);
+        } else if (card.typeLabel === "game") {
+          gameCards.push(card);
+        }
+      } else {
+        await TGLogger.Warn(`[Announcements][loadData] 未找到公告详情：${item.ann_id}`);
+      }
+    }
+  }
+  annoCards.value = { activity: actCards, game: gameCards };
   await showLoading.end();
   isReq.value = false;
 }
@@ -158,7 +177,10 @@ function getAnnoTag(tag: string): string {
   }
 }
 
-function getAnnoCard(anno: TGApp.BBS.Announcement.AnnoSingle): AnnoCard {
+function getAnnoCard(
+  anno: TGApp.BBS.Announcement.AnnoSingle,
+  detail: TGApp.BBS.Announcement.AnnoDetail,
+): AnnoCard {
   const timeStart = anno.start_time.split(" ")[0];
   const timeEnd = anno.end_time.split(" ")[0];
   const time = `${timeStart} ~ ${timeEnd}`;
@@ -171,15 +193,8 @@ function getAnnoCard(anno: TGApp.BBS.Announcement.AnnoSingle): AnnoCard {
     tagIcon: anno.tag_icon,
     tagLabel: getAnnoTag(anno.tag_label),
     timeStr: time,
+    detail: detail,
   };
-}
-
-function getRegionName(value: AnnoServer): string {
-  return annoServerList.find((item) => item.value === value)?.text ?? annoServerList[0].text;
-}
-
-function getLangName(value: AnnoLang): string {
-  return annoLangList.find((item) => item.value === value)?.text ?? annoLangList[0].text;
 }
 
 async function switchNews(): Promise<void> {

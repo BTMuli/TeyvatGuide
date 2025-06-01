@@ -1,16 +1,79 @@
 /**
  * @file types/BBS/Announcement.d.ts
  * @description 从 BBS 获取到的游戏内公告类型定义文件
- * @since Beta v0.4.3
+ * @since Beta v0.7.7
  */
 
-/**
- * @description 游戏内公告类型定义
- * @since Beta v0.4.3
- * @namespace TGApp.BBS.Announcement
- * @memberof TGApp.BBS
- */
 declare namespace TGApp.BBS.Announcement {
+  /**
+   * @description 公告语言类型
+   * @since Beta v0.7.7
+   * @const AnnoLang
+   * @property {string} "zh-cn" - 简体中文
+   * @property {string} "zh-tw" - 繁体中文
+   * @property {string} "en" - 英语
+   * @property {string} "ja" - 日语
+   */
+  const AnnoLang = <const>{
+    CHS: "zh-cn",
+    CHT: "zh-tw",
+    EN: "en",
+    JP: "ja",
+  };
+
+  /**
+   * @description 公告语言类型枚举
+   * @since Beta v0.7.7
+   * @enum AnnoLangEnum
+   */
+  type AnnoLangEnum = (typeof AnnoLang)[keyof typeof AnnoLang];
+
+  /**
+   * @description 公告服务器类型
+   * @since Beta v0.7.7
+   * @const AnnoServer
+   * @property {string} "cn_gf01" - 国内-国服
+   * @property {string} "cn_qd01" - 国内-渠道服
+   * @property {string} "os_usa" - 海外-美国
+   * @property {string} "os_euro" - 海外-欧洲
+   * @property {string} "os_asia" - 海外-亚洲
+   * @property {string} "os_cht" - 海外-繁体中文
+   */
+  const AnnoServer = <const>{
+    CN_GF01: "cn_gf01",
+    CN_QD01: "cn_qd01",
+    OS_USA: "os_usa",
+    OS_EURO: "os_euro",
+    OS_ASIA: "os_asia",
+    OS_CHT: "os_cht",
+  };
+
+  /**
+   * @description 公告服务器类型枚举
+   * @since Beta v0.7.7
+   * @enum AnnoServerEnum
+   */
+  type AnnoServerEnum = (typeof AnnoServer)[keyof typeof AnnoServer];
+
+  /**
+   * @description 公告类型
+   * @since Beta v0.7.7
+   * @const AnnoType
+   * @property {string} "activity" - 活动公告
+   * @property {string} "game" - 游戏公告
+   */
+  const AnnoType = <const>{
+    ACTIVITY: "activity",
+    GAME: "game",
+  };
+
+  /**
+   * @description 公告类型枚举
+   * @since Beta v0.7.7
+   * @enum AnnoTypeEnum
+   */
+  type AnnoTypeEnum = (typeof AnnoType)[keyof typeof AnnoType];
+
   /**
    * @description 需要的参数
    * @interface Params
@@ -23,107 +86,72 @@ declare namespace TGApp.BBS.Announcement {
    * @property {string} region - 区域
    * @property {string} level - 等级
    * @property {string} uid - 用户 ID
-   * @returns Params
    */
-  interface Params {
+  type Params = {
     game: string;
     game_biz: string;
-    lang: string;
+    lang: AnnoLangEnum;
     bundle_id: string;
     platform: string;
-    region: string;
+    region: AnnoServerEnum;
     level: string;
     uid: string;
-  }
+  };
 
   /**
    * @description 公告列表返回响应类型
-   * @interface ListResponse
+   * @interface ListResp
    * @since Alpha v0.1.5
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {ListData} data - 公告列表数据
-   * @return ListResponse
+   * @extends TGApp.BBS.Response.BaseWithData<ListRes>
+   * @return ListResp
    */
-  interface ListResponse extends TGApp.BBS.Response.BaseWithData {
-    data: ListData;
-  }
-
-  /**
-   * @description 公告内容返回响应类型
-   * @interface ContentResponse
-   * @since Alpha v0.1.5
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {ContentData} data - 公告内容数据
-   * @return ContentResponse
-   */
-  interface ContentResponse extends TGApp.BBS.Response.BaseWithData {
-    data: ContentData;
-  }
+  type ListResp = TGApp.BBS.Response.BaseWithData<ListRes>;
 
   /**
    * @description 公告列表数据
-   * @interface ListData
-   * @since Alpha v0.1.5
-   * @property {ListItem[]} list - 公告列表
+   * @interface ListRes
+   * @since Beta v0.7.7
+   * @property {Array<ListItem>} list - 公告列表
    * @property {number} total - 公告总数
-   * @property {ListType[]} type_list - 公告类型列表
+   * @property {Array<ListType>} type_list - 公告类型列表
    * @property {boolean} alert - 是否有紧急公告
    * @property {number} time_zone - 时区
    * @property {string} t - 时间戳，单位为秒
-   * @property {unknown[]} pic_list - 图片列表
+   * @property {Array<unknown>} pic_list - 图片列表
    * @property {number} pic_total - 图片总数
-   * @property {unknown[]} pic_type_list - 图片类型列表
+   * @property {Array<unknown>} pic_type_list - 图片类型列表
    * @property {boolean} pic_alert - 是否有紧急图片
    * @property {number} pic_alert_id - 紧急图片 ID
    * @property {unknown} static_sign - 静态签名
-   * @return ListData
+   * @return ListRes
    */
-  interface ListData {
-    list: ListItem[];
+  type ListRes = {
+    list: Array<ListItem>;
     total: number;
-    type_list: ListType[];
+    type_list: Array<ListType>;
     alert: boolean;
     time_zone: number;
     t: string;
-    pic_list: unknown[];
+    pic_list: Array<unknown>;
     pic_total: number;
-    pic_type_list: unknown[];
+    pic_type_list: Array<unknown>;
     pic_alert: boolean;
     pic_alert_id: number;
     static_sign: unknown;
-  }
-
-  /**
-   * @description 公告内容数据
-   * @interface ContentData
-   * @since Alpha v0.1.5
-   * @property {ContentItem[]} list - 公告内容列表
-   * @property {number} total - 公告内容总数
-   * @property {unknown[]} pic_list - 图片列表
-   * @property {number} pic_total - 图片总数
-   * @return ContentData
-   */
-  interface ContentData {
-    list: ContentItem[];
-    total: number;
-    pic_list: unknown[];
-    pic_total: number;
-  }
+    banner: string;
+    calendar_type: ListCalendar;
+  };
 
   /**
    * @description 公告列表项
    * @interface ListItem
    * @since Alpha v0.1.5
-   * @property {AnnoSingle[]} list - 公告列表
+   * @property {Array<AnnoSingle>} list - 公告列表
    * @property {number} type_id - 公告类型 ID
    * @property {string} type_label - 公告类型标签
    * @return ListItem
    */
-  interface ListItem {
-    list: AnnoSingle[];
-    type_id: number;
-    type_label: string;
-  }
+  type ListItem = { list: Array<AnnoSingle>; type_id: number; type_label: string };
 
   /**
    * @description 单个公告内容
@@ -149,9 +177,16 @@ declare namespace TGApp.BBS.Announcement {
    * @property {number} remind_ver 公告提醒版本
    * @property {boolean} has_content 是否有内容
    * @property {boolean} extra_remind 是否有额外提醒
-   * @return AnnoSingle
+   * @property {string} tag_icon_hover 公告标签悬停图标
+   * @property {number} logout_remind 是否登出提醒
+   * @property {number} logout_remind_ver 登出提醒版本
+   * @property {string} country 公告国家
+   * @property {number} need_remind_text 是否需要提醒文本
+   * @property {string} remind_text 提醒文本
+   * @property {number} weak_remind 弱提醒
+   * @property {number} remind_consumption_type 提醒消费类型
    */
-  interface AnnoSingle {
+  type AnnoSingle = {
     ann_id: number;
     title: string;
     subtitle: string;
@@ -172,7 +207,15 @@ declare namespace TGApp.BBS.Announcement {
     remind_ver: number;
     has_content: boolean;
     extra_remind: boolean;
-  }
+    tag_icon_hover: string;
+    logout_remind: number;
+    logout_remind_ver: number;
+    country: string;
+    need_remind_text: number;
+    remind_text: string;
+    weak_remind: number;
+    remind_consumption_type: number;
+  };
 
   /**
    * @description 公告类型列表项
@@ -181,17 +224,46 @@ declare namespace TGApp.BBS.Announcement {
    * @property {number} id 公告类型 ID
    * @property {string} name 公告类型名称
    * @property {string} mi18n_name 公告类型国际化名称
-   * @return ListType
    */
-  interface ListType {
-    id: number;
-    name: string;
-    mi18n_name: string;
-  }
+  type ListType = { id: number; name: string; mi18n_name: string };
+
+  /**
+   * @description 公告日历类型
+   * @interface ListCalendar
+   * @since Beta v0.7.7
+   * @property {string} mi18n_name 公告日历国际化名称
+   * @property {boolean} enabled 是否启用
+   * @property {boolean} remind 是否提醒
+   */
+  type ListCalendar = { mi18n_name: string; enabled: boolean; remind: boolean };
+
+  /**
+   * @description 公告内容返回响应类型
+   * @interface DetailResp
+   * @since Alpha v0.1.5
+   * @extends TGApp.BBS.Response.BaseWithData<DetailRes>
+   */
+  type DetailResp = TGApp.BBS.Response.BaseWithData<DetailRes>;
+
+  /**
+   * @description 公告内容数据
+   * @interface DetailRes
+   * @since Alpha v0.1.5
+   * @property {Array<AnnoDetail>} list - 公告内容列表
+   * @property {number} total - 公告内容总数
+   * @property {Array<unknown>} pic_list - 图片列表
+   * @property {number} pic_total - 图片总数
+   */
+  type DetailRes = {
+    list: Array<AnnoDetail>;
+    total: number;
+    pic_list: Array<unknown>;
+    pic_total: number;
+  };
 
   /**
    * @description 公告内容列表项
-   * @interface ContentItem
+   * @interface AnnoDetail
    * @since Alpha v0.1.5
    * @property {number} ann_id 公告 ID
    * @property {string} title 公告标题
@@ -199,14 +271,13 @@ declare namespace TGApp.BBS.Announcement {
    * @property {string} banner 公告图片
    * @property {string} content 公告内容，为 html
    * @property {string} lang 公告语言
-   * @return ContentItem
    */
-  interface ContentItem {
+  type AnnoDetail = {
     ann_id: number;
     title: string;
     subtitle: string;
     banner: string;
     content: string;
     lang: string;
-  }
+  };
 }

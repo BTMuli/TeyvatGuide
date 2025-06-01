@@ -73,7 +73,8 @@
 import TPinWin from "@comp/app/t-pinWin.vue";
 import TSwitchTheme from "@comp/app/t-switchTheme.vue";
 import showLoading from "@comp/func/loading.js";
-import hk4eReq, { type AnnoLang, AnnoServer } from "@req/hk4eReq.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import hk4eReq from "@req/hk4eReq.js";
 import useAppStore from "@store/app.js";
 import parseAnnoContent from "@utils/annoParser.js";
 import { storeToRefs } from "pinia";
@@ -82,14 +83,15 @@ import VueJsonPretty from "vue-json-pretty";
 import "vue-json-pretty/lib/styles.css";
 import { useRoute } from "vue-router";
 
-// 数据
+const { theme } = storeToRefs(useAppStore());
+
 const route = useRoute();
 const annoId = Number(route.params.anno_id);
-const region = <AnnoServer>route.params.region;
-const lang = <AnnoLang>route.params.lang;
-const { theme } = storeToRefs(useAppStore());
+const region = <TGApp.BBS.Announcement.AnnoServerEnum>route.params.region;
+const lang = <TGApp.BBS.Announcement.AnnoLangEnum>route.params.lang;
+
 const jsonList = shallowRef<TGApp.BBS.Announcement.AnnoSingle>();
-const jsonContent = shallowRef<TGApp.BBS.Announcement.ContentItem>();
+const jsonContent = shallowRef<TGApp.BBS.Announcement.AnnoDetail>();
 const parsedJson = shallowRef<Array<TGApp.BBS.SctPost.Base>>();
 const jsonTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
@@ -100,8 +102,8 @@ onMounted(async () => {
     return;
   }
   await showLoading.update(`公告ID: ${annoId}`);
-  const listData = await hk4eReq.anno.list(region, lang);
-  for (const listItem of listData.list) {
+  const listResp = await hk4eReq.anno.list(region, lang);
+  for (const listItem of listResp.list) {
     for (const single of listItem.list) {
       if (single.ann_id === annoId) {
         jsonList.value = single;
@@ -109,7 +111,13 @@ onMounted(async () => {
       }
     }
   }
-  jsonContent.value = await hk4eReq.anno.content(annoId, region, lang);
+  const detailResp = await hk4eReq.anno.detail(region, lang);
+  const find = detailResp.find((item) => item.ann_id === annoId);
+  if (!find) {
+    showSnackbar.error("未找到公告数据");
+    return;
+  }
+  jsonContent.value = find;
   parsedJson.value = parseAnnoContent(jsonContent.value);
   await showLoading.end();
 });

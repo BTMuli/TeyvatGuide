@@ -4,11 +4,9 @@
  * @since Beta v0.7.7
  */
 
+import { AnnoLangEnum, AnnoServerEnum } from "@enum/anno.js";
 import TGHttp from "@utils/TGHttp.js";
 import { getDeviceInfo } from "@utils/toolFunc.js";
-
-export type AnnoServer = "cn_gf01" | "cn_qd01" | "os_usa" | "os_euro" | "os_asia" | "os_cht";
-export type AnnoLang = "zh-cn" | "zh-tw" | "en" | "ja";
 
 const AnnoApi: Readonly<string> = "https://hk4e-ann-api.mihoyo.com/common/hk4e_cn/announcement/api";
 const AnnoApiGlobal: Readonly<string> =
@@ -17,34 +15,40 @@ const SdkApi: Readonly<string> = "https://hk4e-sdk.mihoyo.com/hk4e_cn/";
 
 /**
  * @description 判断是否为国内服务器
- * @since Beta v0.7.2
- * @param {AnnoServer} region 服务器
+ * @since Beta v0.7.7
+ * @param {TGApp.BBS.Announcement.AnnoServerEnum} region 服务器
  * @returns {boolean} 是否为国内服务器
  */
-function isCN(region: AnnoServer): boolean {
-  return region.startsWith("cn");
+function isCN(region: TGApp.BBS.Announcement.AnnoServerEnum): boolean {
+  switch (region) {
+    case AnnoServerEnum.CN_QD01:
+    case AnnoServerEnum.CN_GF01:
+      return true;
+    default:
+      return false;
+  }
 }
 
 /**
  * @description 根据服务器获取公告地址
- * @since Beta v0.6.5
- * @param {AnnoServer} region 服务器
+ * @since Beta v0.7.7
+ * @param {TGApp.BBS.Announcement.AnnoServerEnum} region 服务器
  * @returns {string} 公告地址
  */
-function getAnnoApi(region: AnnoServer): string {
+function getAnnoApi(region: TGApp.BBS.Announcement.AnnoServerEnum): string {
   return isCN(region) ? AnnoApi : AnnoApiGlobal;
 }
 
 /**
  * @description 获取游戏内公告参数
- * @since Beta v0.7.2
- * @param {AnnoServer} region 服务器
- * @param {string} lang 语言
+ * @since Beta v0.7.7
+ * @param {TGApp.BBS.Announcement.AnnoServerEnum} region 服务器
+ * @param {TGApp.BBS.Announcement.AnnoLangEnum} lang 语言
  * @returns {TGApp.BBS.Announcement.Params}
  */
 function getAnnoParams(
-  region: AnnoServer = "cn_gf01",
-  lang: AnnoLang = "zh-cn",
+  region: TGApp.BBS.Announcement.AnnoServerEnum = AnnoServerEnum.CN_GF01,
+  lang: TGApp.BBS.Announcement.AnnoLangEnum = AnnoLangEnum.CHS,
 ): TGApp.BBS.Announcement.Params {
   return {
     game: "hk4e",
@@ -60,44 +64,38 @@ function getAnnoParams(
 
 /**
  * @description 获取游戏内公告列表
- * @since Beta v0.5.5
- * @param {string} region 服务器
- * @param {AnnoLang} lang 语言
- * @returns {Promise<TGApp.BBS.Announcement.ListData>}
+ * @since Beta v0.7.7
+ * @param {TGApp.BBS.Announcement.AnnoServerEnum} region 服务器
+ * @param {TGApp.BBS.Announcement.AnnoLangEnum} lang 语言
+ * @returns {Promise<TGApp.BBS.Announcement.ListRes>}
  */
 async function getAnnoList(
-  region: AnnoServer = "cn_gf01",
-  lang: AnnoLang = "zh-cn",
-): Promise<TGApp.BBS.Announcement.ListData> {
-  const resp = await TGHttp<TGApp.BBS.Announcement.ListResponse>(
-    `${getAnnoApi(region)}/getAnnList`,
-    { method: "GET", query: getAnnoParams(region, lang) },
-  );
+  region: TGApp.BBS.Announcement.AnnoServerEnum = AnnoServerEnum.CN_GF01,
+  lang: TGApp.BBS.Announcement.AnnoLangEnum = AnnoLangEnum.CHS,
+): Promise<TGApp.BBS.Announcement.ListRes> {
+  const resp = await TGHttp<TGApp.BBS.Announcement.ListResp>(`${getAnnoApi(region)}/getAnnList`, {
+    method: "GET",
+    query: getAnnoParams(region, lang),
+  });
   return resp.data;
 }
 
 /**
  * @description 获取游戏内公告内容
- * @since Beta v0.5.5
- * @param {number} annId 公告 ID
- * @param {AnnoServer} region 服务器
- * @param {AnnoLang} lang 语言
- * @returns {Promise<TGApp.BBS.Announcement.ContentItem>}
+ * @since Beta v0.7.7
+ * @param {TGApp.BBS.Announcement.AnnoServerEnum} region 服务器
+ * @param {TGApp.BBS.Announcement.AnnoLangEnum} lang 语言
+ * @returns {Promise<Array<TGApp.BBS.Announcement.AnnoDetail>>}
  */
-async function getAnnoContent(
-  annId: number,
-  region: AnnoServer = "cn_gf01",
-  lang: AnnoLang = "zh-cn",
-): Promise<TGApp.BBS.Announcement.ContentItem> {
-  const annoResp = await TGHttp<TGApp.BBS.Announcement.ContentResponse>(
+async function getAnnoDetail(
+  region: TGApp.BBS.Announcement.AnnoServerEnum = AnnoServerEnum.CN_GF01,
+  lang: TGApp.BBS.Announcement.AnnoLangEnum = AnnoLangEnum.CHS,
+): Promise<Array<TGApp.BBS.Announcement.AnnoDetail>> {
+  const resp = await TGHttp<TGApp.BBS.Announcement.DetailResp>(
     `${getAnnoApi(region)}/getAnnContent`,
     { method: "GET", query: getAnnoParams(region, lang) },
   );
-  const annoContent = annoResp.data.list.find((item) => item.ann_id === annId);
-  if (annoContent === undefined) {
-    throw new Error("公告内容不存在");
-  }
-  return annoContent;
+  return resp.data.list;
 }
 
 /**
@@ -170,7 +168,7 @@ async function queryPandaQr(
 }
 
 const hk4eReq = {
-  anno: { list: getAnnoList, content: getAnnoContent },
+  anno: { list: getAnnoList, detail: getAnnoDetail },
   gacha: getGachaLog,
   loginQr: { create: fetchPandaQr, state: queryPandaQr },
 };

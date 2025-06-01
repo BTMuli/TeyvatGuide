@@ -23,7 +23,7 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import hk4eReq from "@req/hk4eReq.js";
+import { AnnoTypeEnum } from "@enum/anno.js";
 import useAppStore from "@store/app.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
@@ -34,20 +34,15 @@ import { onMounted, ref, watch } from "vue";
 
 import type { AnnoCard } from "@/pages/common/PageAnno.vue";
 
-const { server } = storeToRefs(useAppStore());
-type TAnnoCardProps = { region: string; lang: string };
-const props = defineProps<TAnnoCardProps>();
+const { server, lang } = storeToRefs(useAppStore());
 const model = defineModel<AnnoCard>({ required: true });
 const timeStr = ref<string>(model.value.timeStr);
 
-onMounted(async () => await refreshAnnoTime());
+onMounted(() => refreshAnnoTime());
 watch(
   () => model.value,
-  async (newVal, oldVal) => {
-    if (newVal.id !== oldVal.id) {
-      timeStr.value = newVal.timeStr;
-      await refreshAnnoTime();
-    }
+  (newVal, oldVal) => {
+    if (newVal.id !== oldVal.id) refreshAnnoTime();
   },
 );
 
@@ -57,7 +52,7 @@ function parseTitle(title: string): string {
 }
 
 async function createAnno(): Promise<void> {
-  const annoPath = `/anno_detail/${props.region}/${model.value.id}/${props.lang}`;
+  const annoPath = `/anno_detail/${server.value}/${model.value.id}/${lang.value}`;
   const annoTitle = `Anno_${model.value.id} ${model.value.title}`;
   await TGLogger.Info(`[Announcements][createAnno][${model.value.id}] 打开公告窗口`);
   await createTGWindow(annoPath, "Sub_window", annoTitle, 960, 720, false, false);
@@ -74,8 +69,8 @@ async function shareAnno(): Promise<void> {
 }
 
 async function refreshAnnoTime(): Promise<void> {
-  const detail = await hk4eReq.anno.content(model.value.id, server.value, "zh-cn");
-  const strGet = getAnnoTime(detail.content);
+  if (model.value.typeLabel === AnnoTypeEnum.GAME) timeStr.value = model.value.timeStr;
+  const strGet = getAnnoTime(model.value.detail.content);
   if (strGet !== false) timeStr.value = strGet;
 }
 

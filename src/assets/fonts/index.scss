@@ -5,12 +5,12 @@
  */
 
 @font-face {
-  font-family: "Genshin";
+  font-family: "Genshin"; /* stylelint-disable-line font-family-name-quotes */
   src: url("@/assets/fonts/汉仪文黑-85W.ttf") format("truetype");
 }
 
 @font-face {
-  font-family: "Genshin-Light";
+  font-family: "Genshin-Light"; /* stylelint-disable-line font-family-name-quotes */
   src: url("@/assets/fonts/汉仪文黑-55W.ttf") format("truetype");
 }
 
