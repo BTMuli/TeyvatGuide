@@ -172,6 +172,7 @@ import { bytesToSize, getCacheDir, getDeviceInfo, getRandomString } from "@utils
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 
+const appStore = useAppStore();
 const {
   needResize,
   devMode,
@@ -180,8 +181,8 @@ const {
   userDir,
   buildTime,
   imageQualityPercent,
-} = storeToRefs(useAppStore());
-const appStore = useAppStore();
+  incognito,
+} = storeToRefs(appStore);
 const homeStore = useHomeStore();
 
 // @ts-expect-error-next-line
@@ -502,11 +503,11 @@ async function submitResize(): Promise<void> {
 // 开启无痕浏览
 async function switchIncognito(): Promise<void> {
   await event.emitTo("Sub_window", "switchIncognito");
-  if (appStore.incognito) {
-    showSnackbar.success("已关闭无痕浏览!");
+  if (incognito.value) {
+    showSnackbar.success("已开启无痕浏览!");
     return;
   }
-  showSnackbar.success("已开启无痕浏览!");
+  showSnackbar.success("已关闭无痕浏览!");
 }
 </script>
 <style lang="css" scoped>
