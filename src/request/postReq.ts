@@ -1,7 +1,7 @@
 /**
  * @file request/postReq.ts
  * @description 帖子相关的请求
- * @since Beta v0.7.4
+ * @since Beta v0.7.7
  */
 import { getRequestHeader } from "@utils/getRequestHeader.js";
 import TGHttp from "@utils/TGHttp.js";
@@ -12,7 +12,7 @@ const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 
 /**
  * @description 获取单个帖子信息
- * @since Beta v0.7.1
+ * @since Beta v0.7.7
  * @param {number|string} postId 帖子 ID
  * @param {Record<string, string>} cookie Cookie
  * @return {Promise<TGApp.BBS.Post.FullData | TGApp.BBS.Response.Base>}
@@ -23,7 +23,7 @@ async function getPostFull(
 ): Promise<TGApp.BBS.Post.FullData | TGApp.BBS.Response.Base> {
   const param = { post_id: postId, read: 1 };
   let header;
-  if (cookie) {
+  if (cookie !== undefined) {
     header = {
       ...getRequestHeader(cookie, "GET", param, "K2", true),
       "x-rpc-client_type": "2",

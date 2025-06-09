@@ -99,7 +99,7 @@ async function loadCover(): Promise<void> {
     cover.value = poolCover.value[postId];
     return;
   }
-  const resp = await postReq.post(postId);
+  const resp = await postReq.post(postId, {});
   if ("retcode" in resp) {
     showSnackbar.error(`[PhPoolCard][${resp.retcode}] ${resp.message}`);
     await TGLogger.Error(`[PhPoolCard][${resp.retcode}] ${resp.message}`);
