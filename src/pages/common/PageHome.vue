@@ -73,14 +73,9 @@ import useBBSStore from "@store/bbs.js";
 import useHomeStore from "@store/home.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { type Component, computed, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, defineComponent, onMounted, ref, shallowRef, watch } from "vue";
 
-type SFComp = Component & {
-  __file?: string;
-  __hmrId?: string;
-  __name?: string;
-  __scopeId?: string;
-};
+type SFComp = ReturnType<typeof defineComponent>;
 type SelectItem = { icon: string; title: string; gid: number };
 
 const bbsStore = useBBSStore();
@@ -164,7 +159,7 @@ function getName(name: string): string | undefined {
   }
 }
 
-async function loadEnd(item: SFComp): Promise<void> {
+async function loadEnd(item: ReturnType<typeof defineComponent>): Promise<void> {
   const compName = getName(item.__name ?? "");
   if (!compName) return;
   await TGLogger.Info(`[Home][loadEnd] ${compName} 加载完成`);
