@@ -14,7 +14,7 @@
       {{ parseTitle(model.subtitle) }}
     </div>
     <div :title="`标签：${model.tagLabel}`" class="anno-label">
-      <img :src="model.tagIcon" alt="tag" />
+      <TMiImg :src="model.tagIcon" alt="tag" :ori="true" />
       <span>{{ model.tagLabel }}</span>
     </div>
     <div class="anno-id">{{ model.id }}</div>
