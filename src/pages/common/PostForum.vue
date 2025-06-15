@@ -115,12 +115,6 @@
       <TPostCard :model-value="post" :user-click="true" @onUserClick="handleUserClick" />
     </div>
   </div>
-  <div class="posts-load-more">
-    <v-btn class="post-forum-btn" :rounded="true" @click="loadMore()">
-      已加载：{{ posts.length }}，
-      {{ postRaw.isLast ? "已加载完毕" : "加载更多" }}
-    </v-btn>
-  </div>
   <VpOverlaySearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
   <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
 </template>
@@ -132,6 +126,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
+import { usePageReachBottom } from "@hooks/reachBottom.js";
 import ApiHubReq from "@req/apiHubReq.js";
 import painterReq from "@req/painterReq.js";
 import useBBSStore from "@store/bbs.js";
@@ -157,6 +152,8 @@ const curGid = ref<number>(2);
 const curSortType = ref<number>(1);
 const firstLoad = ref<boolean>(false);
 const isReq = ref<boolean>(false);
+
+const { isReachBottom } = usePageReachBottom();
 
 const search = ref<string>("");
 const showSearch = ref<boolean>(false);
@@ -193,6 +190,13 @@ onMounted(async () => {
   await freshPostData();
   firstLoad.value = true;
 });
+watch(
+  () => isReachBottom.value,
+  async () => {
+    if (!isReachBottom.value) return;
+    await loadMore();
+  },
+);
 watch(
   () => curGid.value,
   () => {
@@ -401,15 +405,6 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   grid-auto-rows: auto;
   grid-gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-}
-
-.posts-load-more {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 10px;
-  font-family: var(--font-title);
-  transition: all 0.3s linear;
 }
 
 .select-item {

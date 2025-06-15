@@ -50,12 +50,6 @@
           <TPostCard :model-value="item" />
         </div>
       </div>
-      <div class="load-news">
-        <v-btn class="post-news-btn" :rounded="true" :loading="loading" @click="loadMore(value)">
-          已加载：{{ rawData[value].lastId }}，
-          {{ rawData[value].isLast ? "已加载完毕" : "加载更多" }}
-        </v-btn>
-      </div>
     </v-window-item>
   </v-window>
   <ToChannel v-model="showList" :gid="gid" />
@@ -67,13 +61,14 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import ToChannel from "@comp/pageNews/to-channel.vue";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
+import { usePageReachBottom } from "@hooks/reachBottom.js";
 import painterReq from "@req/painterReq.js";
 import useAppStore, { type NewsType } from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, reactive, Ref, ref, shallowRef } from "vue";
+import { computed, onMounted, reactive, Ref, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 type PostData = { [key in NewsType]: Ref<Array<TGApp.BBS.Post.FullData>> };
@@ -84,6 +79,8 @@ const router = useRouter();
 const { recentNewsType } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(useBBSStore());
 const { gid } = <{ gid: string }>useRoute().params;
+
+const { isReachBottom } = usePageReachBottom();
 
 const tabValues: Readonly<Array<NewsType>> = ["notice", "activity", "news"];
 const tabMap: Readonly<Record<NewsType, string>> = { notice: "1", activity: "2", news: "3" };
@@ -112,6 +109,14 @@ const tab = computed<NewsType>({
 });
 
 onMounted(async () => await firstLoad(tab.value));
+
+watch(
+  () => isReachBottom.value,
+  async () => {
+    if (!isReachBottom.value) return;
+    await loadMore(tab.value);
+  },
+);
 
 async function firstLoad(key: NewsType, refresh: boolean = false): Promise<void> {
   if (loading.value) return;
@@ -191,7 +196,7 @@ async function searchPost(): Promise<void> {
   showSearch.value = false;
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .news-tab {
   margin-bottom: 10px;
   color: var(--common-text-title);
@@ -229,16 +234,5 @@ async function searchPost(): Promise<void> {
   grid-auto-rows: auto;
   grid-gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-}
-
-/* load more */
-
-.load-news {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 10px;
-  font-family: var(--font-title);
-  transition: all 0.3s linear;
 }
 </style>

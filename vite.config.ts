@@ -22,6 +22,7 @@ export default defineConfig({
       "@styles/": "/src/assets/styles/",
       "@comp/": "/src/components/",
       "@enum/": "/src/enum/",
+      "@hooks/": "/src/hooks/",
       "@Bili/": "/src/plugins/Bili/",
       "@Hutao/": "/src/plugins/Hutao/",
       "@Mys/": "/src/plugins/Mys/",

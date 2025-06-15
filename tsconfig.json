@@ -23,14 +23,15 @@
       "@styles/*": ["src/assets/styles/*"],
       "@comp/*": ["src/components/*"],
       "@enum/*": ["src/enum/*"],
+      "@hooks/*": ["src/hooks/*"],
       "@Bili/*": ["src/plugins/Bili/*"],
       "@Hutao/*": ["src/plugins/Hutao/*"],
       "@Mys/*": ["src/plugins/Mys/*"],
       "@Sql/*": ["src/plugins/Sqlite/*"],
       "@Sqlm/*": ["src/plugins/Sqlite/modules/*"],
-      "@utils/*": ["src/utils/*"],
+      "@req/*": ["src/request/*"],
       "@store/*": ["src/store/modules/*"],
-      "@req/*": ["src/request/*"]
+      "@utils/*": ["src/utils/*"]
     }
   },
   "include": [
