@@ -10,9 +10,8 @@
       </div>
       <div class="vo-of-actions">
         <v-btn class="vo-of-btn" @click="loadMore(true)" :loading="loading">刷新</v-btn>
-        <v-btn class="vo-of-btn" @click="loadMore()" :loading="loading">加载更多</v-btn>
       </div>
-      <div class="vp-of-list">
+      <div class="vp-of-list" ref="listRef">
         <TPostcard
           class="vp-of-list-item"
           v-for="(item, index) in posts"
@@ -27,18 +26,31 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostcard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import painterReq from "@req/painterReq.js";
 import useUserStore from "@store/user.js";
 import { storeToRefs } from "pinia";
-import { ref, shallowRef, watch } from "vue";
+import { ref, shallowRef, useTemplateRef, watch } from "vue";
 
 const { cookie } = storeToRefs(useUserStore());
+
+const listEl = useTemplateRef<HTMLElement>("listRef");
+const { isReachBottom } = useBoxReachBottom(listEl);
+
 const visible = defineModel<boolean>();
+
 const offset = ref<number>();
 const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
 const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
 
+watch(
+  () => isReachBottom.value,
+  async () => {
+    if (!isReachBottom.value) return;
+    await loadMore();
+  },
+);
 watch(
   () => visible.value,
   async () => {
@@ -71,6 +83,9 @@ async function loadMore(refresh: boolean = false): Promise<void> {
   else posts.value = posts.value.concat(resp.list);
   loading.value = false;
   showSnackbar.success(`成功加载${resp.list.length}条数据`);
+  if (refresh && listEl.value) {
+    listEl.value.scrollTo({ top: 0, behavior: "smooth" });
+  }
 }
 </script>
 <style lang="scss" scoped>

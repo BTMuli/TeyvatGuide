@@ -21,16 +21,13 @@
         </div>
       </div>
       <div class="vp-ou-mid">
-        <v-btn :loading="load" size="small" class="vp-ou-btn" @click="loadPosts()" rounded>
-          加载更多({{ results.length }})
-        </v-btn>
         <div class="vp-ouu-extra" v-if="userInfo">
           <span>ID:{{ userInfo.uid }}</span>
           <span>IP:{{ userInfo.ip_region }}</span>
         </div>
       </div>
       <div class="vp-ou-divider" />
-      <div class="vp-ou-list">
+      <div class="vp-ou-list" ref="listRef">
         <TPostCard
           class="vp-ou-item"
           :model-value="item"
@@ -46,11 +43,15 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import bbsReq from "@req/bbsReq.js";
 import postReq from "@req/postReq.js";
-import { computed, ref, shallowRef, watch } from "vue";
+import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 type ToPostUserProps = { gid: number; uid: string; postId?: string };
+
+const listEl = useTemplateRef<HTMLElement>("listRef");
+const { isReachBottom } = useBoxReachBottom(listEl);
 
 const props = defineProps<ToPostUserProps>();
 const visible = defineModel<boolean>();
@@ -69,6 +70,13 @@ const levelColor = computed<string>(() => {
   return "var(--tgc-od-white)";
 });
 
+watch(
+  () => isReachBottom.value,
+  async () => {
+    if (!isReachBottom.value) return;
+    await loadPosts();
+  },
+);
 watch(
   () => visible.value,
   async () => {
@@ -117,6 +125,7 @@ async function loadPosts(): Promise<void> {
   isLast.value = resp.is_last;
   results.value = results.value.concat(resp.list);
   load.value = false;
+  showSnackbar.success(`成功加载${resp.list.length}条数据`);
 }
 </script>
 <style lang="scss" scoped>
@@ -258,12 +267,6 @@ async function loadPosts(): Promise<void> {
   width: 100%;
   align-items: center;
   justify-content: space-between;
-}
-
-.vp-ou-btn {
-  width: fit-content;
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
 }
 
 .vp-ouu-extra {

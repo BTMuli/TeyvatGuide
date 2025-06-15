@@ -4,12 +4,9 @@
       <div class="tops-top">查找：{{ search }}</div>
       <div class="tops-act">
         <span>分区：{{ label }}</span>
-        <v-btn :loading="load" size="small" class="tops-btn" @click="searchPosts()" rounded>
-          加载更多({{ results.length }})
-        </v-btn>
       </div>
       <div class="tops-divider" />
-      <div class="tops-list">
+      <div class="tops-list" ref="listRef">
         <TPostCard
           class="tops-item"
           :model-value="item"
@@ -24,14 +21,18 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import useBBSStore from "@store/bbs.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 type ToPostSearchProps = { gid: string; keyword?: string };
 
 const { gameList } = storeToRefs(useBBSStore());
+
+const listEl = useTemplateRef<HTMLElement>("listRef");
+const { isReachBottom } = useBoxReachBottom(listEl);
 
 const props = defineProps<ToPostSearchProps>();
 const visible = defineModel<boolean>();
@@ -54,6 +55,13 @@ onMounted(async () => {
   if (visible.value) await searchPosts();
 });
 
+watch(
+  () => isReachBottom.value,
+  async () => {
+    if (!isReachBottom.value) return;
+    await searchPosts();
+  },
+);
 watch(
   () => visible.value,
   async () => {
@@ -118,6 +126,7 @@ async function searchPosts(): Promise<void> {
   isLast.value = res.is_last;
   load.value = false;
   if (!visible.value) visible.value = true;
+  showSnackbar.success(`成功加载${res.posts.length}条数据`);
 }
 </script>
 <style lang="css" scoped>
@@ -180,11 +189,5 @@ async function searchPosts(): Promise<void> {
 .tops-item {
   height: fit-content;
   flex-shrink: 0;
-}
-
-.tops-btn {
-  width: fit-content;
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
 }
 </style>
