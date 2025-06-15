@@ -193,7 +193,7 @@ onMounted(async () => {
 watch(
   () => isReachBottom.value,
   async () => {
-    if (!isReachBottom.value) return;
+    if (!isReachBottom.value || !firstLoad.value) return;
     await loadMore();
   },
 );
