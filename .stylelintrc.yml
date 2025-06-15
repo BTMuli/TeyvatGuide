@@ -25,10 +25,12 @@ rules:
     - true
     - severity: warning
   order/order:
-    - at-rules
+    - name: include
+      type: at-rule
     - custom-properties
     - declarations
     - rules
+    - at-rules
   prettier/prettier: true
   property-no-vendor-prefix:
     - true
