@@ -14860,6 +14860,36 @@
     "trigger": { "type": "FINISH_QUEST_AND" }
   },
   {
+    "id": 84345,
+    "series": 0,
+    "order": 5124,
+    "name": "未明之际",
+    "description": "击退袭击「烟谜主」的「深渊教团」。",
+    "reward": 5,
+    "version": "5.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84346,
+    "series": 0,
+    "order": 5125,
+    "name": "新世界的交响",
+    "description": "「命运的织机」已编织出「新坎瑞亚」的地脉。",
+    "reward": 5,
+    "version": "5.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84347,
+    "series": 0,
+    "order": 5126,
+    "name": "你存在的时空",
+    "description": "完成「你存在的时空」。",
+    "reward": 10,
+    "version": "5.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 84501,
     "series": 10,
     "order": 4026,

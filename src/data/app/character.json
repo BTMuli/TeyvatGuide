@@ -1,5 +1,17 @@
 [
   {
+    "id": 10000114,
+    "contentId": 505417,
+    "name": "丝柯克",
+    "title": "虚渊暗星",
+    "area": "未知",
+    "birthday": [11, 5],
+    "star": 5,
+    "element": "冰",
+    "weapon": "单手剑",
+    "nameCard": "丝柯克·孤影"
+  },
+  {
     "id": 10000112,
     "contentId": 504976,
     "name": "爱可菲",
@@ -658,6 +670,18 @@
     "element": "冰",
     "weapon": "单手剑",
     "nameCard": "神里绫华·扇子"
+  },
+  {
+    "id": 10000115,
+    "contentId": 505418,
+    "name": "塔利雅",
+    "title": "颂礼祝祭",
+    "area": "蒙德",
+    "birthday": [5, 25],
+    "star": 4,
+    "element": "水",
+    "weapon": "单手剑",
+    "nameCard": "塔利雅·天职"
   },
   {
     "id": 10000113,
