@@ -44,9 +44,6 @@ importers:
       '@tauri-apps/plugin-sql':
         specifier: ^2.2.0
         version: 2.2.0
-      '@zumer/snapdom':
-        specifier: ^1.2.5
-        version: 1.2.5
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
@@ -1207,9 +1204,6 @@ packages:
     peerDependencies:
       vue: ^3.0.0
       vuetify: ^3.0.0
-
-  '@zumer/snapdom@1.2.5':
-    resolution: {integrity: sha512-/zXAzh3Y0s7Gftf8rTNkl+rWJewQKz66mqm3BAhM1zi4FeARVUKa5BEW+BE5cynlKhLndJiElROrorxhNRiXLA==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -4499,8 +4493,6 @@ snapshots:
       upath: 2.0.1
       vue: 3.5.16(typescript@5.8.3)
       vuetify: 3.8.8(typescript@5.8.3)(vite-plugin-vuetify@2.1.1)(vue@3.5.16(typescript@5.8.3))
-
-  '@zumer/snapdom@1.2.5': {}
 
   acorn-jsx@5.3.2(acorn@8.15.0):
     dependencies:
