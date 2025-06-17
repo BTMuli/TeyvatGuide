@@ -11,7 +11,6 @@ import { sep } from "@tauri-apps/api/path";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
-import { snapdom } from "@zumer/snapdom";
 import html2canvas from "html2canvas";
 import { storeToRefs } from "pinia";
 
@@ -86,33 +85,6 @@ function getShareImgBgColor(): string {
 }
 
 /**
- * @description 开发环境生成分享截图
- * @since Beta v0.7.7
- * @see https://github.com/zumerlab/snapdom
- * @param {string} fileName - 文件名
- * @param {HTMLElement} element - 元素
- * @param {number} scale - 缩放比例
- * @returns {Promise<void>} 无返回值
- */
-async function genShareImgDev(
-  fileName: string,
-  element: HTMLElement,
-  scale: number = 1.2,
-): Promise<void> {
-  const bgColor = getShareImgBgColor();
-  await snapdom.download(element, {
-    scale: scale,
-    backgroundColor: bgColor,
-    embedFonts: true,
-    format: "webp",
-    filename: fileName,
-    compress: false,
-    quality: 1,
-    dpr: 1,
-  });
-}
-
-/**
  * @description 生成分享截图
  * @since Beta v0.7.7
  * @param {string} fileName - 文件名
@@ -127,12 +99,6 @@ export async function generateShareImg(
   scale: number = 1.2,
   scrollable: boolean = false,
 ): Promise<void> {
-  if (import.meta.env.DEV) {
-    if (Math.random() < 0.1) {
-      await genShareImgDev(fileName, element, scale);
-    }
-    return;
-  }
   const canvas = document.createElement("canvas");
   const maxHeight = element.style.maxHeight;
   if (scrollable) element.style.maxHeight = "100%";

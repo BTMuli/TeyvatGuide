@@ -29,7 +29,7 @@ export default [
       "src-tauri/tauri.conf.json",
       "src-tauri/**/*.json",
       "qodana.yaml",
-      ".github"
+      ".github",
     ],
   },
 ];

@@ -2,12 +2,27 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2025-05-25
+Update: 2025-06-17
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2025-05-25 14:28:57`
+> 更新于 `2025-06-17 17:08:35`
+
+## [0.7.7](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.7) (2025-06-17)
+
+- 🍱 更新5.7资源
+- ✨ 页面触底加载
+- ✨ 部分浮窗触底加载
+- 🐛 修复五星平均抽数计算异常
+- 🐛 完善帖子ID判断逻辑
+- 🐛 修复公告卡片分享图生成异常
+- ♻️ 重构公告模块，降低界面加载耗时&请求次数
+- 💄 调整投票组件样式
+- 💄 调整链接卡片组件背景
+- 💄 调整帖子等页面网格列宽至360px
+- 🚸 修正无痕浏览状态提示信息
+- 🚸 首页卡池不传递ck
 
 ## [0.7.6](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.6) (2025-05-25)
 

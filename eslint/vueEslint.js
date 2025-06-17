@@ -57,4 +57,3 @@ const vueConfig = {
 const eslintConfigVue = [tsConfig, vueConfig];
 
 export default eslintConfigVue;
-
