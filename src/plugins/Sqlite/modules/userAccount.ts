@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/modules/userAccounts.ts
  * @description 用户账户模块
- * @since Beta v0.7.2
+ * @since Beta v0.7.8
  */
 
 import { path } from "@tauri-apps/api";
@@ -25,15 +25,16 @@ function getInsertGameAccountSql(uid: string, data: TGApp.BBS.Game.Account): str
   return `
       INSERT INTO GameAccount(uid, gameBiz, gameUid, isChosen, isOfficial, level, nickname, region, regionName, updated)
       VALUES ('${uid}', '${data.game_biz}', '${data.game_uid}', ${isChosen}, ${isOfficial}, ${data.level},
-              '${data.nickname}', '${data.region}', '${data.region_name}', '${timeNow}')
-      ON CONFLICT(uid, gameUid, gameBiz) DO UPDATE
-          SET isChosen   = ${isChosen},
-              isOfficial = ${isOfficial},
-              level      = ${data.level},
-              nickname   = '${data.nickname}',
-              region     = '${data.region}',
-              regionName = '${data.region_name}',
-              updated    = '${timeNow}';
+              '${data.nickname}', '${data.region}', '${data.region_name}', '${timeNow}
+              ') ON CONFLICT(uid, gameUid, gameBiz) DO
+      UPDATE
+          SET isChosen = ${isChosen},
+          isOfficial = ${isOfficial},
+          level = ${data.level},
+          nickname = '${data.nickname}',
+          region = '${data.region}',
+          regionName = '${data.region_name}',
+          updated = '${timeNow}';
   `;
 }
 
@@ -47,11 +48,11 @@ function getInsertAccountSql(user: TGApp.App.Account.User): string {
   const table = transUser(user);
   return `
       INSERT INTO UserAccount(uid, cookie, brief, updated)
-      VALUES ('${table.uid}', '${table.cookie}', '${table.brief}', '${table.updated}')
-      ON CONFLICT(uid) DO UPDATE
-          SET cookie  = '${table.cookie}',
-              brief   = '${table.brief}',
-              updated = '${table.updated}';
+      VALUES ('${table.uid}', '${table.cookie}', '${table.brief}', '${table.updated}') ON CONFLICT(uid) DO
+      UPDATE
+          SET cookie = '${table.cookie}',
+          brief = '${table.brief}',
+          updated = '${table.updated}';
   `;
 }
 
@@ -249,15 +250,17 @@ async function switchGameAccount(uid: string, gameUid: string): Promise<void> {
 
 /**
  * @description 获取最近的游戏账户
- * @since Beta v0.6.0
+ * @since Beta v0.7.8
  * @param {string} uid - 米社UID
  * @return {Promise<TGApp.Sqlite.Account.Game|false>}
  */
 async function getCurGameAccount(uid: string): Promise<TGApp.Sqlite.Account.Game | false> {
   const gameAccounts = await getGameAccount(uid);
   if (gameAccounts.length === 0) return false;
-  const curGameAccount = gameAccounts.find((account) => account.isChosen === 1);
-  if (!curGameAccount) return gameAccounts[0];
+  const giAccounts = gameAccounts.filter((account) => account.gameBiz === "hk4e_cn");
+  if (giAccounts.length === 0) return false;
+  const curGameAccount = giAccounts.find((account) => account.isChosen === 1);
+  if (!curGameAccount) return giAccounts[0];
   return curGameAccount;
 }
 
