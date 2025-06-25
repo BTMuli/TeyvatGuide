@@ -10,7 +10,7 @@
       @keyup.enter="searchNameCard()"
     />
     <div class="tw-nc-list">
-      <v-virtual-scroll :items="sortNameCardsData" :item-height="80">
+      <v-virtual-scroll :items="sortNameCardsData" :item-height="80" item-key="id">
         <template #default="{ item }">
           <TopNameCard :data="item" @selected="showNameCard(item)" />
         </template>

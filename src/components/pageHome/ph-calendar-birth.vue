@@ -19,7 +19,7 @@
       <span>的生日哦~</span>
       <img @click="toBirth(true)" src="/source/UI/act_birthday.webp" alt="empty" class="active" />
     </div>
-    <div>即将到来：{{ next[0].role_birthday }}</div>
+    <div>即将到来：{{ next[0]?.role_birthday }}</div>
     <div v-for="i in next" :key="i.role_id" class="tcb-item">
       <TMiImg
         v-if="i.head_icon.startsWith('http')"
