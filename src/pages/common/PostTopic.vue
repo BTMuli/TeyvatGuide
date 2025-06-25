@@ -72,7 +72,7 @@
       <v-btn
         :loading="isReq"
         class="post-topic-btn"
-        @click="firstLoad()"
+        @click="freshPostData()"
         prepend-icon="mdi-refresh"
       >
         刷新
@@ -83,12 +83,6 @@
     <div v-for="post in posts" :key="post.post.post_id">
       <TPostCard :model-value="post" :user-click="true" @onUserClick="handleUserClick" />
     </div>
-  </div>
-  <div class="load-more">
-    <v-btn class="post-topic-btn" @click="freshPostData()">
-      已加载：{{ posts.length }}，
-      {{ postRaw.isLast ? "已加载完毕" : "加载更多" }}
-    </v-btn>
   </div>
   <VpOverlaySearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
   <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
@@ -101,6 +95,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
+import { usePageReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import topicReq from "@req/topicReq.js";
 import useBBSStore from "@store/bbs.js";
@@ -116,6 +111,8 @@ type GameList = TGApp.BBS.Topic.GameInfo & { icon?: string };
 const route = useRoute();
 const router = useRouter();
 
+const { isReachBottom } = usePageReachBottom();
+
 const curGid = ref<number>(0);
 const curSortType = ref<0 | 1 | 2>(0);
 const curTopic = ref<string>("");
@@ -126,6 +123,7 @@ const curUid = ref<string>("");
 const showUser = ref<boolean>(false);
 
 const isReq = ref<boolean>(false);
+const firstLoad = ref<boolean>(false);
 const { gameList } = storeToRefs(useBBSStore());
 const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 });
 const topicInfo = shallowRef<TGApp.BBS.Topic.InfoRes>();
@@ -169,22 +167,30 @@ onMounted(async () => {
   if (tmpGame === undefined) tmpGame = info.game_info_list[0];
   const gameFind = gameList.value.find((i) => i.id === tmpGame?.id);
   curGame.value = { ...tmpGame, icon: gameFind?.app_icon };
-  await firstLoad();
+  await freshPostData();
+  firstLoad.value = true;
 });
 
+watch(
+  () => isReachBottom.value,
+  async () => {
+    if (!isReachBottom.value || !firstLoad.value) return;
+    await loadMore();
+  },
+);
 watch(
   () => curGame.value,
   async () => {
     if (curGame.value) curGid.value = curGame.value.id;
-    await firstLoad();
+    await freshPostData();
   },
 );
 watch(
   () => curSortType.value,
-  async () => await firstLoad(),
+  async () => await freshPostData(),
 );
 
-async function firstLoad(): Promise<void> {
+async function freshPostData(): Promise<void> {
   if (isReq.value) return;
   isReq.value = true;
   await showLoading.start(`正在加载话题${topicInfo.value?.topic.name}信息`);
@@ -212,7 +218,7 @@ async function firstLoad(): Promise<void> {
   showSnackbar.success(`加载了 ${postList.posts.length} 条帖子`);
 }
 
-async function freshPostData(): Promise<void> {
+async function loadMore(): Promise<void> {
   if (isReq.value) return;
   isReq.value = true;
   if (showSearch.value) showSearch.value = false;
@@ -347,15 +353,6 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   grid-auto-rows: auto;
   grid-gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-}
-
-.load-more {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 10px;
-  font-family: var(--font-title);
-  transition: all 0.3s linear;
 }
 
 .select-item {
