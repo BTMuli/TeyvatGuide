@@ -29,7 +29,7 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 const annoId = Number(route.params.anno_id);
-const region = <TGApp.BBS.Announcement.AnnoServerEnum>route.params.region;
+const region = <TGApp.Game.Base.ServerTypeEnum>route.params.region;
 const lang = <TGApp.BBS.Announcement.AnnoLangEnum>route.params.lang;
 const appVersion = ref<string>();
 const annoData = shallowRef<TGApp.BBS.Announcement.AnnoDetail>();

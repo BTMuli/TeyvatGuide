@@ -1,7 +1,7 @@
 /**
  * @file src/enum/anno.ts
  * @description 游戏内公告相关枚举
- * @since Beta v0.7.7
+ * @since Beta v0.8.0
  */
 
 /**
@@ -32,43 +32,6 @@ export function getAnnoLangDesc(lang: TGApp.BBS.Announcement.AnnoLangEnum): stri
       return "英语";
     case AnnoLangEnum.JP:
       return "日语";
-  }
-}
-
-/**
- * @description 公告服务器类型
- * @since Beta v0.7.7
- * @const AnnoServerEnum
- */
-export const AnnoServerEnum: typeof TGApp.BBS.Announcement.AnnoServer = {
-  CN_GF01: "cn_gf01",
-  CN_QD01: "cn_qd01",
-  OS_USA: "os_usa",
-  OS_EURO: "os_euro",
-  OS_ASIA: "os_asia",
-  OS_CHT: "os_cht",
-};
-
-/**
- * @description 获取公告服务器描述
- * @since Beta v0.7.7
- * @param {TGApp.BBS.Announcement.AnnoServerEnum} server 公告服务器
- * @return {string} 公告服务器描述
- */
-export function getAnnoServerDesc(server: TGApp.BBS.Announcement.AnnoServerEnum): string {
-  switch (server) {
-    case AnnoServerEnum.CN_GF01:
-      return "国服-官方服";
-    case AnnoServerEnum.CN_QD01:
-      return "国服-渠道服";
-    case AnnoServerEnum.OS_USA:
-      return "国际服-美服";
-    case AnnoServerEnum.OS_EURO:
-      return "国际服-欧服";
-    case AnnoServerEnum.OS_ASIA:
-      return "国际服-亚服";
-    case AnnoServerEnum.OS_CHT:
-      return "国际服-港澳台服";
   }
 }
 

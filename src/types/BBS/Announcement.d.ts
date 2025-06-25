@@ -1,7 +1,7 @@
 /**
  * @file types/BBS/Announcement.d.ts
  * @description 从 BBS 获取到的游戏内公告类型定义文件
- * @since Beta v0.7.7
+ * @since Beta v0.8.0
  */
 
 declare namespace TGApp.BBS.Announcement {
@@ -29,33 +29,6 @@ declare namespace TGApp.BBS.Announcement {
   type AnnoLangEnum = (typeof AnnoLang)[keyof typeof AnnoLang];
 
   /**
-   * @description 公告服务器类型
-   * @since Beta v0.7.7
-   * @const AnnoServer
-   * @property {string} "cn_gf01" - 国内-国服
-   * @property {string} "cn_qd01" - 国内-渠道服
-   * @property {string} "os_usa" - 海外-美国
-   * @property {string} "os_euro" - 海外-欧洲
-   * @property {string} "os_asia" - 海外-亚洲
-   * @property {string} "os_cht" - 海外-繁体中文
-   */
-  const AnnoServer = <const>{
-    CN_GF01: "cn_gf01",
-    CN_QD01: "cn_qd01",
-    OS_USA: "os_usa",
-    OS_EURO: "os_euro",
-    OS_ASIA: "os_asia",
-    OS_CHT: "os_cht",
-  };
-
-  /**
-   * @description 公告服务器类型枚举
-   * @since Beta v0.7.7
-   * @enum AnnoServerEnum
-   */
-  type AnnoServerEnum = (typeof AnnoServer)[keyof typeof AnnoServer];
-
-  /**
    * @description 公告类型
    * @since Beta v0.7.7
    * @const AnnoType
@@ -77,13 +50,13 @@ declare namespace TGApp.BBS.Announcement {
   /**
    * @description 需要的参数
    * @interface Params
-   * @since Beta v0.4.3
+   * @since Beta v0.8.0
    * @property {string} game - 游戏名称
    * @property {string} game_biz - 游戏业务名称
    * @property {string} lang - 语言
    * @property {string} bundle_id - 包 ID
    * @property {string} platform - 平台
-   * @property {string} region - 区域
+   * @property {TGApp.Game.Base.ServerTypeEnum} region - 区域
    * @property {string} level - 等级
    * @property {string} uid - 用户 ID
    */
@@ -93,7 +66,7 @@ declare namespace TGApp.BBS.Announcement {
     lang: AnnoLangEnum;
     bundle_id: string;
     platform: string;
-    region: AnnoServerEnum;
+    region: TGApp.Game.Base.ServerTypeEnum;
     level: string;
     uid: string;
   };

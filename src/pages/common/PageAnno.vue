@@ -45,19 +45,12 @@
     </v-window-item>
   </v-window>
 </template>
-
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TaCard from "@comp/pageAnno/ta-card.vue";
-import {
-  AnnoLangEnum,
-  AnnoServerEnum,
-  AnnoTypeEnum,
-  getAnnoLangDesc,
-  getAnnoServerDesc,
-  getAnnoTypeDesc,
-} from "@enum/anno.js";
+import { AnnoLangEnum, AnnoTypeEnum, getAnnoLangDesc, getAnnoTypeDesc } from "@enum/anno.js";
+import { getGameServerDesc, GameServerEnum } from "@enum/game.js";
 import hk4eReq from "@req/hk4eReq.js";
 import useAppStore from "@store/app.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -79,14 +72,14 @@ export type AnnoCard = {
 };
 type AnnoList = Record<TGApp.BBS.Announcement.AnnoTypeEnum, Array<AnnoCard>>;
 
-const serverList: ReadonlyArray<AnnoSelect<TGApp.BBS.Announcement.AnnoServerEnum>> = [
-  AnnoServerEnum.CN_GF01,
-  AnnoServerEnum.CN_QD01,
-  AnnoServerEnum.OS_ASIA,
-  AnnoServerEnum.OS_EURO,
-  AnnoServerEnum.OS_USA,
-  AnnoServerEnum.OS_CHT,
-].map((i) => ({ text: getAnnoServerDesc(i), value: i }));
+const serverList: ReadonlyArray<AnnoSelect<TGApp.Game.Base.ServerTypeEnum>> = [
+  GameServerEnum.CN_GF01,
+  GameServerEnum.CN_QD01,
+  GameServerEnum.OS_ASIA,
+  GameServerEnum.OS_EURO,
+  GameServerEnum.OS_USA,
+  GameServerEnum.OS_CHT,
+].map((i) => ({ text: getGameServerDesc(i), value: i }));
 const langList: ReadonlyArray<AnnoSelect<TGApp.BBS.Announcement.AnnoLangEnum>> = [
   AnnoLangEnum.CHS,
   AnnoLangEnum.CHT,
@@ -108,8 +101,8 @@ const isReq = ref<boolean>(false);
 watch(
   () => server.value,
   async () => {
-    const name = getAnnoServerDesc(server.value);
-    await TGLogger.Info(`[Announcements][watch][curRegionName] 切换服务器：${name}`);
+    const name = getGameServerDesc(server.value);
+    await TGLogger.Info(`[Announcements][watch][server] 切换服务器：${name}`);
     await loadData();
     showSnackbar.success(`服务器切换为：${name}`);
   },
@@ -135,7 +128,7 @@ async function loadData(): Promise<void> {
   isReq.value = true;
   await showLoading.start(
     "正在获取公告数据",
-    `服务器：${getAnnoServerDesc(server.value)}，语言：${getAnnoLangDesc(lang.value)}`,
+    `服务器：${getGameServerDesc(server.value)}，语言：${getAnnoLangDesc(lang.value)}`,
   );
   const listResp = await hk4eReq.anno.list(server.value, lang.value);
   const detailResp = await hk4eReq.anno.detail(server.value, AnnoLangEnum.CHS);

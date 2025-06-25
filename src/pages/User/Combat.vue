@@ -295,7 +295,7 @@ async function deleteCombat(): Promise<void> {
   await showLoading.end();
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .uct-left {
   display: flex;
   align-items: center;

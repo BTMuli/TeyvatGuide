@@ -1,10 +1,11 @@
 /**
  * @file request/hk4eReq.ts
  * @description Hk4eApi 请求模块
- * @since Beta v0.7.7
+ * @since Beta v0.8.0
  */
 
-import { AnnoLangEnum, AnnoServerEnum } from "@enum/anno.js";
+import { AnnoLangEnum } from "@enum/anno.js";
+import { GameServerEnum } from "@enum/game.js";
 import TGHttp from "@utils/TGHttp.js";
 import { getDeviceInfo } from "@utils/toolFunc.js";
 
@@ -15,14 +16,14 @@ const SdkApi: Readonly<string> = "https://hk4e-sdk.mihoyo.com/hk4e_cn/";
 
 /**
  * @description 判断是否为国内服务器
- * @since Beta v0.7.7
- * @param {TGApp.BBS.Announcement.AnnoServerEnum} region 服务器
+ * @since Beta v0.8.0
+ * @param {TGApp.Game.Base.ServerTypeEnum} region 服务器
  * @returns {boolean} 是否为国内服务器
  */
-function isCN(region: TGApp.BBS.Announcement.AnnoServerEnum): boolean {
+function isCN(region: TGApp.Game.Base.ServerTypeEnum): boolean {
   switch (region) {
-    case AnnoServerEnum.CN_QD01:
-    case AnnoServerEnum.CN_GF01:
+    case GameServerEnum.CN_QD01:
+    case GameServerEnum.CN_GF01:
       return true;
     default:
       return false;
@@ -31,23 +32,23 @@ function isCN(region: TGApp.BBS.Announcement.AnnoServerEnum): boolean {
 
 /**
  * @description 根据服务器获取公告地址
- * @since Beta v0.7.7
- * @param {TGApp.BBS.Announcement.AnnoServerEnum} region 服务器
+ * @since Beta v0.8.0
+ * @param {TGApp.Game.Base.ServerTypeEnum} region 服务器
  * @returns {string} 公告地址
  */
-function getAnnoApi(region: TGApp.BBS.Announcement.AnnoServerEnum): string {
+function getAnnoApi(region: TGApp.Game.Base.ServerTypeEnum): string {
   return isCN(region) ? AnnoApi : AnnoApiGlobal;
 }
 
 /**
  * @description 获取游戏内公告参数
- * @since Beta v0.7.7
- * @param {TGApp.BBS.Announcement.AnnoServerEnum} region 服务器
+ * @since Beta v0.8.0
+ * @param {TGApp.Game.Base.ServerTypeEnum} region 服务器
  * @param {TGApp.BBS.Announcement.AnnoLangEnum} lang 语言
  * @returns {TGApp.BBS.Announcement.Params}
  */
 function getAnnoParams(
-  region: TGApp.BBS.Announcement.AnnoServerEnum = AnnoServerEnum.CN_GF01,
+  region: TGApp.Game.Base.ServerTypeEnum = GameServerEnum.CN_GF01,
   lang: TGApp.BBS.Announcement.AnnoLangEnum = AnnoLangEnum.CHS,
 ): TGApp.BBS.Announcement.Params {
   return {
@@ -64,13 +65,13 @@ function getAnnoParams(
 
 /**
  * @description 获取游戏内公告列表
- * @since Beta v0.7.7
- * @param {TGApp.BBS.Announcement.AnnoServerEnum} region 服务器
+ * @since Beta v0.8.0
+ * @param {TGApp.Game.Base.ServerTypeEnum} region 服务器
  * @param {TGApp.BBS.Announcement.AnnoLangEnum} lang 语言
  * @returns {Promise<TGApp.BBS.Announcement.ListRes>}
  */
 async function getAnnoList(
-  region: TGApp.BBS.Announcement.AnnoServerEnum = AnnoServerEnum.CN_GF01,
+  region: TGApp.Game.Base.ServerTypeEnum = GameServerEnum.CN_GF01,
   lang: TGApp.BBS.Announcement.AnnoLangEnum = AnnoLangEnum.CHS,
 ): Promise<TGApp.BBS.Announcement.ListRes> {
   const resp = await TGHttp<TGApp.BBS.Announcement.ListResp>(`${getAnnoApi(region)}/getAnnList`, {
@@ -82,13 +83,13 @@ async function getAnnoList(
 
 /**
  * @description 获取游戏内公告内容
- * @since Beta v0.7.7
- * @param {TGApp.BBS.Announcement.AnnoServerEnum} region 服务器
+ * @since Beta v0.8.0
+ * @param {TGApp.Game.Base.ServerTypeEnum} region 服务器
  * @param {TGApp.BBS.Announcement.AnnoLangEnum} lang 语言
  * @returns {Promise<Array<TGApp.BBS.Announcement.AnnoDetail>>}
  */
 async function getAnnoDetail(
-  region: TGApp.BBS.Announcement.AnnoServerEnum = AnnoServerEnum.CN_GF01,
+  region: TGApp.Game.Base.ServerTypeEnum = GameServerEnum.CN_GF01,
   lang: TGApp.BBS.Announcement.AnnoLangEnum = AnnoLangEnum.CHS,
 ): Promise<Array<TGApp.BBS.Announcement.AnnoDetail>> {
   const resp = await TGHttp<TGApp.BBS.Announcement.DetailResp>(

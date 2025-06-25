@@ -87,7 +87,7 @@ const { theme } = storeToRefs(useAppStore());
 
 const route = useRoute();
 const annoId = Number(route.params.anno_id);
-const region = <TGApp.BBS.Announcement.AnnoServerEnum>route.params.region;
+const region = <TGApp.Game.Base.ServerTypeEnum>route.params.region;
 const lang = <TGApp.BBS.Announcement.AnnoLangEnum>route.params.lang;
 
 const jsonList = shallowRef<TGApp.BBS.Announcement.AnnoSingle>();
