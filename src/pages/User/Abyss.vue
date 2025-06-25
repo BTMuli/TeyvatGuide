@@ -13,15 +13,15 @@
           label="游戏UID"
         />
         <v-btn :rounded="true" class="ua-btn" @click="toCombat()">
-          <template #prepend>
-            <img src="/source/UI/userCombat.webp" alt="combat" />
-          </template>
-          <span>幻想真境剧诗</span>
+          <img src="/source/UI/userCombat.webp" alt="combat" />
+          <span>真境剧诗</span>
+        </v-btn>
+        <v-btn :rounded="true" class="ua-btn" @click="toChallenge()">
+          <img src="/source/UI/userChallenge.webp" alt="challenge" />
+          <span>幽境危战</span>
         </v-btn>
         <v-btn :rounded="true" class="ua-btn" @click="toWiki()">
-          <template #prepend>
-            <img src="/source/UI/wikiAbyss.webp" alt="wiki" />
-          </template>
+          <img src="/source/UI/wikiAbyss.webp" alt="wiki" />
           <span>深渊数据库</span>
         </v-btn>
       </div>
@@ -148,7 +148,9 @@ watch(() => uidCur.value, loadAbyss);
 async function toCombat(): Promise<void> {
   await router.push({ name: "真境剧诗" });
 }
-
+async function toChallenge(): Promise<void> {
+  await router.push({ name: "幽境危战" });
+}
 async function toWiki(): Promise<void> {
   await router.push({ name: "深渊数据库" });
 }
@@ -387,6 +389,13 @@ async function deleteAbyss(): Promise<void> {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-text);
+
+  img {
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
+    object-fit: contain;
+  }
 }
 
 .dark .ua-btn {

@@ -50,12 +50,33 @@
           <img src="/source/UI/userAvatar.webp" alt="characters" class="side-icon" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'深渊记录'" :link="true" href="/user/abyss">
-        <template #title>深渊记录</template>
-        <template #prepend>
-          <img src="/source/UI/userAbyss.webp" alt="abyss" class="side-icon" />
+      <v-menu :open-on-click="true" location="end" :offset="[8, 0]">
+        <template #activator="{ props }">
+          <v-list-item :title.attr="'高难挑战'" v-bind="props">
+            <template #title>高难挑战</template>
+            <template #prepend>
+              <img src="/source/UI/userAbyssLab.webp" alt="abyssLab" class="side-icon" />
+            </template>
+          </v-list-item>
         </template>
-      </v-list-item>
+        <v-list class="side-list-menu sub" density="compact" :nav="true">
+          <v-list-item class="side-item-menu" title="深境螺旋" :link="true" href="/user/abyss">
+            <template #prepend>
+              <img src="/source/UI/userAbyss.webp" alt="abyss" class="side-icon-menu" />
+            </template>
+          </v-list-item>
+          <v-list-item class="side-item-menu" title="真境剧诗" :link="true" href="/user/weapons/my">
+            <template #prepend>
+              <img src="/source/UI/userCombat.webp" alt="combat" class="side-icon-menu" />
+            </template>
+          </v-list-item>
+          <v-list-item class="side-item-menu" title="幽境危战" :link="true" href="/user/challenge">
+            <template #prepend>
+              <img src="/source/UI/userChallenge.webp" alt="challenge" class="side-icon-menu" />
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-menu>
       <v-list-item :title.attr="'祈愿记录'" :link="true" href="/user/gacha">
         <template #title>祈愿记录</template>
         <template #prepend>

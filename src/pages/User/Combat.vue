@@ -13,11 +13,15 @@
           label="游戏UID"
         />
         <v-btn :rounded="true" class="uc-btn" @click="toAbyss()">
-          <template #prepend><img src="/source/UI/userAbyss.webp" alt="abyss" /></template>
+          <img src="/source/UI/userAbyss.webp" alt="abyss" />
           <span>深境螺旋</span>
         </v-btn>
+        <v-btn :rounded="true" class="uc-btn" @click="toChallenge()">
+          <img src="/source/UI/userChallenge.webp" alt="challenge" />
+          <span>幽境危战</span>
+        </v-btn>
         <v-btn :rounded="true" class="uc-btn" @click="loadWiki()">
-          <template #prepend><img src="/source/UI/wikiAbyss.webp" alt="abyss" /></template>
+          <img src="/source/UI/wikiAbyss.webp" alt="abyss" />
           <span>统计数据</span>
         </v-btn>
       </div>
@@ -144,7 +148,10 @@ onMounted(async () => {
 watch(() => uidCur.value, loadCombat);
 
 async function toAbyss(): Promise<void> {
-  await router.push({ name: "深渊记录" });
+  await router.push({ name: "深境螺旋" });
+}
+async function toChallenge(): Promise<void> {
+  await router.push({ name: "幽境危战" });
 }
 
 async function loadCombat(): Promise<void> {
@@ -330,6 +337,13 @@ async function deleteCombat(): Promise<void> {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-text);
+
+  img {
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
+    object-fit: contain;
+  }
 }
 
 .dark .uc-btn {

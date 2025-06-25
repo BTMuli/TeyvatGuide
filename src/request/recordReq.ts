@@ -1,9 +1,10 @@
 /**
  * @file request/recordReq.ts
  * @description TakumiRecordGenshinApi 相关请求
- * @since Beta v0.6.3
+ * @since Beta v0.8.0
  */
 
+import { GameServerEnum } from "@enum/game.js";
 import { getRequestHeader } from "@utils/getRequestHeader.js";
 import TGHttp from "@utils/TGHttp.js";
 
@@ -133,11 +134,46 @@ async function spiralAbyss(
   return resp.data;
 }
 
+/**
+ * @description 获取赋光之人列表
+ * @since Beta v0.8.0
+ * @param {TGApp.Game.Base.ServerTypeEnum} server 区服
+ * @returns {Promise<TGApp.Game.Challenge.PopularityResp | TGApp.BBS.Response.Base>}
+ */
+async function hardChallengePopularity(
+  server: TGApp.Game.Base.ServerTypeEnum = GameServerEnum.CN_GF01,
+): Promise<TGApp.Game.Challenge.PopularityResp | TGApp.BBS.Response.Base> {
+  let roleId: number | undefined;
+  switch (server) {
+    case GameServerEnum.CN_GF01:
+      roleId = 147991965; // CN
+      break;
+    case GameServerEnum.CN_QD01:
+      roleId = 500299765; // QD
+      break;
+    default:
+      return <TGApp.BBS.Response.Base>{
+        retcode: -1,
+        message: "不支持的服务器",
+        data: null,
+      };
+  }
+  const resp = await TGHttp<TGApp.Game.Challenge.PopularityResp | TGApp.BBS.Response.Base>(
+    `${trgAbu}hard_challenge/popularity`,
+    { method: "GET", query: { server, role_id: roleId } },
+  );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp;
+}
+
 const recordReq = {
   index: index,
   character: { list: characterList, detail: characterDetail },
   roleCombat: roleCombat,
   spiralAbyss: spiralAbyss,
+  challenge: {
+    pop: hardChallengePopularity,
+  },
 };
 
 export default recordReq;

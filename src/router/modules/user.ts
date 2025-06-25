@@ -1,20 +1,25 @@
 /**
  * @file router modules user.ts
  * @description user 路由模块
- * @since Beta v0.7.0
+ * @since Beta v0.8.0
  */
 import type { RouteRecordRaw } from "vue-router";
 
 const userRoutes = (<const>[
   {
     path: "/user/abyss",
-    name: "深渊记录",
+    name: "深境螺旋",
     component: async () => await import("@/pages/User/Abyss.vue"),
   },
   {
     path: "/user/combat",
     name: "真境剧诗",
     component: async () => await import("@/pages/User/Combat.vue"),
+  },
+  {
+    path: "/user/challenge",
+    name: "幽境危战",
+    component: async () => await import("@/pages/User/Challenge.vue"),
   },
   {
     path: "/user/characters",
