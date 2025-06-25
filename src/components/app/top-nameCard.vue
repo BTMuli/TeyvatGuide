@@ -1,5 +1,5 @@
 <template>
-  <v-list
+  <div
     class="top-nc-box"
     @click="emit('selected', props.data)"
     :class="{ grey: !props.finish }"
@@ -10,14 +10,10 @@
         <span class="desc" :title="props.data.desc">{{ props.data.desc }}</span>
       </template>
       <template #prepend>
-        <v-img
-          width="80px"
-          style="margin-right: 8px"
-          :src="`/WIKI/nameCard/icon/${props.data.name}.webp`"
-        />
+        <img :src="`/WIKI/nameCard/icon/${props.data.name}.webp`" alt="icon" class="icon" />
       </template>
     </v-list-item>
-  </v-list>
+  </div>
 </template>
 <script lang="ts" setup>
 import { computed } from "vue";
@@ -41,8 +37,11 @@ const bgImage = computed<string>(() => {
 .top-nc-box {
   @include github-styles.github-card-shadow;
 
+  display: flex;
   width: 100%;
   height: 80px;
+  align-items: center;
+  justify-content: flex-start;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px 50px 50px 4px;
   margin-bottom: 8px;
@@ -65,6 +64,12 @@ const bgImage = computed<string>(() => {
 
 .dark .top-nc-box {
   @include github-styles.github-card-shadow("dark");
+}
+
+.icon {
+  height: 60px;
+  margin-right: 12px;
+  aspect-ratio: 23 / 15;
 }
 
 .desc {
