@@ -1,10 +1,15 @@
 /**
  * @file plugins/Sqlite/modules/avatarBirth.ts
  * @description 角色生日模块
- * @since Beta v0.7.0
+ * @since Beta v0.8.0
  */
 
-import { AppCharacterData, ArcBirCalendar, ArcBirRole, WikiCharacterData } from "@/data/index.js";
+import {
+  AppCharacterData,
+  ArcBirCalendar,
+  ArcBirRole,
+  getWikiCharacterById,
+} from "@/data/index.js";
 
 /**
  * @description 判断今天是不是角色生日
@@ -47,7 +52,9 @@ function isLeapYear(year: number): boolean {
  * @param {[number,number]} date - 日期
  * @return {TGApp.Archive.Birth.RoleItem[]} 下一个角色生日
  */
-function getNextAvatarBirth(date?: [number, number]): TGApp.Archive.Birth.RoleItem[] {
+async function getNextAvatarBirth(
+  date?: [number, number],
+): Promise<Array<TGApp.Archive.Birth.RoleItem>> {
   let month, day;
   if (date) {
     month = date[0];
@@ -79,7 +86,7 @@ function getNextAvatarBirth(date?: [number, number]): TGApp.Archive.Birth.RoleIt
       res.push(find);
       continue;
     }
-    const find2 = WikiCharacterData.find((j) => j.id === i.id);
+    const find2 = await getWikiCharacterById(i.id);
     if (!find2) continue;
     // 只写了用到的字段
     res.push({

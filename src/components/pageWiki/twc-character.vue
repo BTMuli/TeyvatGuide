@@ -116,7 +116,7 @@ import TwcConstellations from "./twc-constellations.vue";
 import TwcMaterials from "./twc-materials.vue";
 import TwcSkills from "./twc-skills.vue";
 
-import { AppCharacterData, AppNameCardsData, WikiCharacterData } from "@/data/index.js";
+import { AppCharacterData, AppNameCardsData, getWikiCharacterById } from "@/data/index.js";
 
 type TwcCharacterProps = { item: TGApp.App.Character.WikiBriefInfo };
 
@@ -145,9 +145,9 @@ onMounted(() => loadData());
 
 watch(() => props.item, loadData);
 
-function loadData(): void {
-  const res = WikiCharacterData.find((item) => item.id === props.item.id);
-  if (res === undefined) {
+async function loadData(): Promise<void> {
+  const res = await getWikiCharacterById(props.item.id);
+  if (!res) {
     showSnackbar.warn(`未获取到角色 ${props.item.name} 的 Wiki 数据`);
     return;
   }

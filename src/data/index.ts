@@ -1,7 +1,7 @@
 /**
  * @file src/data/index.ts
  * @description 数据文件入口
- * @since Beta v0.5.3
+ * @since Beta v0.8.0
  */
 
 import type { Schema } from "ajv";
@@ -19,7 +19,6 @@ import arcBirRole from "./archive/birth_role.json" with { type: "json" };
 import schemaUiaf from "./schema/uiaf-schema.json" with { type: "json" };
 import schemaUigf from "./schema/uigf-schema.json" with { type: "json" };
 import schemaUigf4 from "./schema/uigf4-schema.json" with { type: "json" };
-import wikiCharacter from "./WIKI/character.json" with { type: "json" };
 import wikiMaterial from "./WIKI/material.json" with { type: "json" };
 import wikiWeapon from "./WIKI/weapon.json" with { type: "json" };
 
@@ -40,6 +39,30 @@ export const ArcBirCalendar: TGApp.Archive.Birth.CalendarData = arcBirCalendar;
 export const ArcBirDraw: Array<TGApp.Archive.Birth.DrawItem> = arcBirDraw;
 export const ArcBirRole: Array<TGApp.Archive.Birth.RoleItem> = arcBirRole;
 // Wiki
-export const WikiCharacterData: Array<TGApp.App.Character.WikiItem> = wikiCharacter;
 export const WikiWeaponData: Array<TGApp.App.Weapon.WikiItem> = wikiWeapon;
 export const WikiMaterialData: Array<TGApp.App.Material.WikiItem> = wikiMaterial;
+
+const avatarFiles = import.meta.glob("./WIKI/character/*.json");
+
+/**
+ * @description 传入角色id，获取对应character/id.json的内容，如果没有则返回false
+ * @param {number} id - 角色id
+ * @return {TGApp.App.Character.WikiItem|false} 角色数据或false
+ */
+export async function getWikiCharacterById(
+  id: number,
+): Promise<TGApp.App.Character.WikiItem | false> {
+  try {
+    const data = await avatarFiles[`./WIKI/character/${id}.json`]();
+    if (data && typeof data === "object" && "default" in data) {
+      console.log(data.default);
+      return <TGApp.App.Character.WikiItem>data.default;
+    } else {
+      console.warn(`角色 ${id} 数据未找到或格式不正确`);
+      return false;
+    }
+  } catch (error) {
+    console.error(`获取角色 ${id} 数据失败:`, error);
+    return false;
+  }
+}

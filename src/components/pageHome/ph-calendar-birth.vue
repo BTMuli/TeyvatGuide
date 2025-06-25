@@ -58,7 +58,7 @@ onBeforeMount(async () => {
     cur.value = check;
     console.log(cur.value);
   }
-  next.value = TSAvatarBirth.getNextAvatarBirth();
+  next.value = await TSAvatarBirth.getNextAvatarBirth();
   console.log(next.value);
 });
 
