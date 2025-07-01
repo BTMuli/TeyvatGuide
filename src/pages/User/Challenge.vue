@@ -95,7 +95,16 @@
         class="ucb-window-item"
       >
         <div :id="`user-challenge-${item.id}`" class="ucb-window-box">
-          {{ JSON.stringify(item, null, 2) }}
+          <div class="ucw-top">
+            <div class="ucw-title">
+              <span>{{ item.name }}</span>
+              <span>{{ item.startTime }} ~ {{ item.endTime }}</span>
+              <span>更新于 {{ item.updated }}</span>
+            </div>
+            <div class="ucw-share">幽境危战 | Render by TeyvatGuide v{{ version }}</div>
+          </div>
+          <TucOverview title="单人模式" :data="item.single" />
+          <TucOverview title="联机模式" :data="item.mp" v-if="item.mp.has_data" />
         </div>
       </v-window-item>
     </v-window>
@@ -109,6 +118,7 @@
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import TucOverview from "@comp/userChallenge/tuc-overview.vue";
 import TucPopItem from "@comp/userChallenge/tuc-pop-item.vue";
 import { GameServerEnum, getGameServerDesc } from "@enum/game.js";
 import recordReq from "@req/recordReq.js";
@@ -150,8 +160,8 @@ const popList = shallowRef<Array<TGApp.Game.Challenge.PopularityItem>>([]);
 onMounted(async () => {
   version.value = await getVersion();
   await TGLogger.Info("[UserCombat][onMounted] 打开幽境危战页面");
-  await refreshPopList();
   await reloadChallenge();
+  await refreshPopList(false);
 });
 
 watch(
@@ -301,10 +311,12 @@ async function deleteChallenge(): Promise<void> {
   await reloadChallenge();
 }
 
-async function refreshPopList(): Promise<void> {
+async function refreshPopList(hint: boolean = true): Promise<void> {
   if (reqPop.value) return;
   reqPop.value = true;
-  await showLoading.start("正在加载赋光之人列表", `服务器： ${getGameServerDesc(server.value)}`);
+  if (hint) {
+    await showLoading.start("正在加载赋光之人列表", `服务器： ${getGameServerDesc(server.value)}`);
+  }
   const resp = await recordReq.challenge.pop(server.value);
   if (resp.retcode !== 0) {
     reqPop.value = false;
@@ -461,7 +473,7 @@ async function refreshPopList(): Promise<void> {
 .ucb-window-box {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 }
 
 .ucb-empty {
@@ -478,5 +490,31 @@ async function refreshPopList(): Promise<void> {
   box-shadow: 0 0 5px var(--common-shadow-2);
   color: var(--common-text-title);
   font-family: var(--font-title);
+}
+
+.ucw-top {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ucw-title {
+  display: flex;
+  flex-direction: column;
+  column-gap: 4px;
+  font-size: 12px;
+
+  :first-child {
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 20px;
+  }
+}
+
+.ucw-share {
+  z-index: -1;
+  font-size: 12px;
+  opacity: 0.8;
 }
 </style>

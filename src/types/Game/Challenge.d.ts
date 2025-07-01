@@ -149,14 +149,14 @@ declare namespace TGApp.Game.Challenge {
    * @since Beta v0.8.0
    * @interface ChallengeList
    * @property {string} name - 怪物名称
-   * @property {number} seconds - 挑战用时（秒）
+   * @property {number} second - 挑战用时（秒）
    * @property {Array<ChallengeTeam>} teams - 挑战队伍列表
    * @property {Array<ChallengeAvatar>} best_avatar - 最佳角色列表
    * @property {ChallengeMonster} monster - 挑战怪物数据
    */
   type ChallengeList = {
     name: string;
-    seconds: number;
+    second: number;
     teams: Array<ChallengeTeam>;
     best_avatar: Array<ChallengeAvatar>;
     monster: ChallengeMonster;
@@ -191,9 +191,9 @@ declare namespace TGApp.Game.Challenge {
    * @property {number} avatar_id - 角色 ID
    * @property {string} side_icon - 角色侧边图标 URL
    * @property {string} dps - 角色 DPS 数据
-   * @property {string} type - 1-最强一击，2-最高总伤害
+   * @property {number} type - 1-最强一击，2-最高总伤害
    */
-  type ChallengeAvatar = { avatar_id: number; side_icon: string; dps: string; type: string };
+  type ChallengeAvatar = { avatar_id: number; side_icon: string; dps: string; type: number };
 
   /**
    * @description 单次挑战怪物数据
