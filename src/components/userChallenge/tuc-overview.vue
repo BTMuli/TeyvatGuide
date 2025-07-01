@@ -1,6 +1,6 @@
 <!-- 幽境危战，单人/联机数据总览 -->
 <template>
-  <div class="tuc-overview-comp" @click="onClick()">
+  <div class="tuc-overview-comp">
     <div class="toc-top-title">
       <div class="title">{{ props.title }}{{ props.data.has_data ? "" : " (无数据) " }}</div>
       <div class="append" v-if="props.data.best">
@@ -8,7 +8,7 @@
         <span>{{ props.data.best.second }}s</span>
         <img
           :title="getDiffTitle(props.data.best)"
-          :src="`/icon/medals/${props.data.best.icon}.webp`"
+          :src="`/icon/challenge/UI_LeyLineChallenge_Medal_${props.data.best.difficulty}.webp`"
           alt="medal"
         />
       </div>
@@ -21,18 +21,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TucChallengeItem from "@comp/userChallenge/tuc-challenge-item.vue";
+import TucChallengeItem from "./tuc-challenge-item.vue";
 
-type TucOverviewProps = {
-  title: string;
-  data: TGApp.Game.Challenge.Challenge;
-};
+type TucOverviewProps = { title: string; data: TGApp.Game.Challenge.Challenge };
 
 const props = defineProps<TucOverviewProps>();
-
-function onClick(): void {
-  console.log(props.data);
-}
 
 function getDiffTitle(best: TGApp.Game.Challenge.ChallengeBest): string {
   switch (best.difficulty) {
@@ -73,8 +66,7 @@ function getDiffTitle(best: TGApp.Game.Challenge.ChallengeBest): string {
 
   .title {
     font-family: var(--font-title);
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 18px;
   }
 
   .append {
@@ -85,11 +77,17 @@ function getDiffTitle(best: TGApp.Game.Challenge.ChallengeBest): string {
 
     span {
       font-size: 14px;
+
+      &:nth-child(2) {
+        color: var(--tgc-yellow-1);
+        font-family: var(--font-title);
+        font-size: 16px;
+      }
     }
 
     img {
-      width: 24px;
-      height: 24px;
+      width: 32px;
+      height: 32px;
       object-fit: contain;
     }
   }

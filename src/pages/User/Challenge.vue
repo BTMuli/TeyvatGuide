@@ -12,6 +12,7 @@
           :items="uidList"
           :hide-details="true"
           label="游戏UID"
+          @update:model-value="switchUid"
         />
         <v-btn :rounded="true" class="ucp-btn" @click="toAbyss()">
           <img src="/source/UI/userAbyss.webp" alt="abyss" />
@@ -101,8 +102,11 @@
               <span>{{ item.startTime }} ~ {{ item.endTime }}</span>
               <span>更新于 {{ item.updated }}</span>
             </div>
-            <div class="ucw-share">幽境危战 | Render by TeyvatGuide v{{ version }}</div>
+            <div class="ucw-share">
+              幽境危战 | UID-{{ item.uid }} | Render by TeyvatGuide v{{ version }}
+            </div>
           </div>
+          <TucBlings :data="item.blings" v-if="item.blings.length > 0" />
           <TucOverview title="单人模式" :data="item.single" />
           <TucOverview title="联机模式" :data="item.mp" v-if="item.mp.has_data" />
         </div>
@@ -118,6 +122,7 @@
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import TucBlings from "@comp/userChallenge/tuc-blings.vue";
 import TucOverview from "@comp/userChallenge/tuc-overview.vue";
 import TucPopItem from "@comp/userChallenge/tuc-pop-item.vue";
 import { GameServerEnum, getGameServerDesc } from "@enum/game.js";
@@ -161,6 +166,7 @@ onMounted(async () => {
   version.value = await getVersion();
   await TGLogger.Info("[UserCombat][onMounted] 打开幽境危战页面");
   await reloadChallenge();
+  if (uidCur.value?.startsWith("5")) server.value = GameServerEnum.CN_QD01;
   await refreshPopList(false);
 });
 
@@ -172,6 +178,17 @@ watch(
     await refreshPopList();
   },
 );
+
+async function switchUid(): Promise<void> {
+  if (uidCur.value === undefined || uidCur.value === "") return;
+  await TGLogger.Info(`[UserChallenge][watch][uidCur] 切换UID: ${uidCur.value}`);
+  await showLoading.start(`正在加载UID ${uidCur.value} 的幽境危战数据`);
+  await loadChallenge();
+  await showLoading.end();
+  showSnackbar.success(
+    `已加载UID ${uidCur.value} 的 ${localChallenge.value.length} 条幽境危战数据`,
+  );
+}
 
 async function toAbyss(): Promise<void> {
   await router.push({ name: "深境螺旋" });
@@ -208,19 +225,20 @@ async function shareChallenge(): Promise<void> {
 
 async function reloadChallenge(): Promise<void> {
   localChallenge.value = [];
-  uidList.value = [];
   await showLoading.start("正在加载UID列表");
   uidList.value = await TSUserChallenge.getAllUid();
   if (uidList.value.length === 0) {
     uidCur.value = "";
   } else {
-    if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
-    else uidCur.value = uidList.value[0];
+    if (uidCur.value === undefined || uidCur.value === "") {
+      if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
+      else uidCur.value = uidList.value[0];
+    }
     await showLoading.update(`正在加载UID${uidCur.value}的幽境危战数据`);
     await loadChallenge();
   }
   await showLoading.end();
-  if (uidCur.value?.length > 0) {
+  if (uidCur.value !== undefined && uidCur.value !== "") {
     showSnackbar.success(
       `已加载UID ${uidCur.value} 的 ${localChallenge.value.length} 条幽境危战数据`,
     );
@@ -288,6 +306,7 @@ async function refreshChallenge(): Promise<void> {
   }
   isReq.value = false;
   await showLoading.end();
+  uidCur.value = account.value.gameUid;
   await reloadChallenge();
 }
 
@@ -308,6 +327,7 @@ async function deleteChallenge(): Promise<void> {
   await showLoading.start("正在删除幽境危战数据", `UID: ${uidCur.value}`);
   await TSUserChallenge.delChallenge(uidCur.value);
   showSnackbar.success(`已清除 ${uidCur.value} 的幽境危战数据`);
+  uidCur.value = "";
   await reloadChallenge();
 }
 

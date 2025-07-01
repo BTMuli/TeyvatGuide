@@ -1,11 +1,9 @@
 <!-- 幽境危战，单个怪物挑战 -->
 <template>
-  <div class="tuc-challenge-item-comp" @click="console.log(props.data)">
+  <div class="tuc-challenge-item-comp">
     <div class="top-title">
       <div class="name">{{ props.data.name }} Lv.{{ props.data.monster.level }}</div>
-      <div class="tags">
-        <TucMonsterTag v-for="(tag, idx) in props.data.monster.tags" :key="idx" :data="tag" />
-      </div>
+      <TucMonsterTag v-for="(tag, idx) in props.data.monster.tags" :key="idx" :data="tag" />
       <div class="append">
         <span>战斗用时：</span>
         <span>{{ props.data.second }}</span>
@@ -45,8 +43,9 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
-import TucMonsterTag from "@comp/userChallenge/tuc-monster-tag.vue";
 import { getZhElement, parseHtmlText } from "@utils/toolFunc.js";
+
+import TucMonsterTag from "./tuc-monster-tag.vue";
 
 import { AppCharacterData } from "@/data/index.js";
 
@@ -114,19 +113,11 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
   width: 100%;
   align-items: center;
   justify-content: flex-start;
-  column-gap: 12px;
+  column-gap: 8px;
 
   .name {
     font-family: var(--font-title);
     font-size: 16px;
-  }
-
-  .tags {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    column-gap: 8px;
   }
 
   .append {
@@ -135,7 +126,7 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
     margin-left: auto;
     color: var(--box-text-2);
     font-family: var(--font-title);
-    font-size: 14px;
+    font-size: 16px;
     gap: 4px;
 
     span {
@@ -226,16 +217,12 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  row-gap: 8px;
+  row-gap: 12px;
 
   span {
     color: var(--box-text-1);
-    font-size: 14px;
-    line-height: 1.4;
+    font-size: 12px;
     text-align: left;
-    white-space: pre-wrap;
-    word-break: break-all;
-    word-wrap: break-word;
 
     :deep(span) {
       font-weight: bold;

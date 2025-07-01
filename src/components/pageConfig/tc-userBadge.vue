@@ -365,7 +365,7 @@ async function loadAccount(ac: string): Promise<void> {
     return;
   }
   account.value = gameAccount;
-  showSnackbar.success(`成功切换到用户${uid}`);
+  showSnackbar.success(`成功切换到用户${uid.value}`);
 }
 
 async function confirmRefreshUser(ac: string): Promise<void> {

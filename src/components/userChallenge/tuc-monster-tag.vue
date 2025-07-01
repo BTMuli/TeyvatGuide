@@ -45,7 +45,6 @@ function getElement(value: string): string {
 }
 
 function parseDesc(desc: string): Array<MonsterDesc> {
-  // {SPRITE_PRESET#11003}元素优势 => [{type: "element", value: "11003"}, {type: "text", value: "元素优势"}]
   const regex = /{SPRITE_PRESET#(\d+)}([^{}]*)/g;
   const result: Array<MonsterDesc> = [];
   let match;
@@ -82,6 +81,7 @@ function parseDesc(desc: string): Array<MonsterDesc> {
     color: var(--box-text-1);
     font-family: var(--font-title);
     font-size: 12px;
+    line-height: 16px;
   }
 
   &.buff-0 {
