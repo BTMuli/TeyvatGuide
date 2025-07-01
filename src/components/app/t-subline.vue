@@ -6,7 +6,9 @@
 </template>
 <style lang="css" scoped>
 .tsl-box {
+  position: relative;
   display: flex;
+  width: 100%;
   align-items: center;
   padding: 4px;
   border-radius: 4px;
