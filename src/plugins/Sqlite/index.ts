@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/index.ts
  * @description Sqlite 数据库操作类
- * @since Beta v0.6.1
+ * @since Beta v0.8.0
  */
 
 import { app } from "@tauri-apps/api";
@@ -19,6 +19,8 @@ class Sqlite {
     "GachaRecords",
     "GameAccount",
     "SpiralAbyss",
+    "RoleCombat",
+    "HardChallenge",
     "UFCollection",
     "UFMap",
     "UFPost",

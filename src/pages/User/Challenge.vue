@@ -37,7 +37,7 @@
           label="服务器"
           width="200px"
           density="compact"
-          :disabled="isReq"
+          :disabled="reqPop"
         />
       </div>
     </template>
@@ -72,14 +72,52 @@
       </div>
     </template>
   </v-app-bar>
+  <div class="user-challenge-box">
+    <v-tabs
+      v-model="userTab"
+      direction="vertical"
+      class="ucb-tabs"
+      center-active
+      v-if="localChallenge.length > 0"
+    >
+      <v-tab v-for="item in localChallenge" :key="item.id" :value="item.id">
+        <div class="ucb-tab">
+          <span>{{ item.name }}</span>
+          <span>{{ item.startTime.slice(0, 10) }} ~ {{ item.endTime.slice(0, 10) }}</span>
+        </div>
+      </v-tab>
+    </v-tabs>
+    <v-window v-model="userTab" class="ucb-window">
+      <v-window-item
+        v-for="item in localChallenge"
+        :key="item.id"
+        :value="item.id"
+        class="ucb-window-item"
+      >
+        <div :id="`user-challenge-${item.id}`" class="ucb-window-box">
+          {{ JSON.stringify(item, null, 2) }}
+        </div>
+      </v-window-item>
+    </v-window>
+    <div v-show="localChallenge.length === 0" class="ucb-empty">
+      <img src="/source/UI/empty.webp" alt="empty" />
+      <span>暂无数据，请尝试刷新</span>
+    </div>
+  </div>
 </template>
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TucPopItem from "@comp/userChallenge/tuc-pop-item.vue";
 import { GameServerEnum, getGameServerDesc } from "@enum/game.js";
 import recordReq from "@req/recordReq.js";
+import TSUserChallenge from "@Sqlm/userChallenge.js";
+import useUserStore from "@store/user.js";
+import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
+import { generateShareImg } from "@utils/TGShare.js";
+import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
@@ -95,19 +133,25 @@ const serverList: ReadonlyArray<SelectItem<TGApp.Game.Base.ServerTypeEnum>> = [
 ].map((i) => ({ text: getGameServerDesc(i), value: i }));
 
 const router = useRouter();
+const { account, cookie } = storeToRefs(useUserStore());
+
+const version = ref<string>();
 
 const isReq = ref<boolean>(false);
+const userTab = ref<number>(0);
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
-const localChallenge = shallowRef<unknown[]>([]);
+const localChallenge = shallowRef<Array<TGApp.Sqlite.Challenge.SingleTable>>([]);
 
 const server = ref<TGApp.Game.Base.ServerTypeEnum>(GameServerEnum.CN_GF01);
 const reqPop = ref<boolean>(false);
 const popList = shallowRef<Array<TGApp.Game.Challenge.PopularityItem>>([]);
 
 onMounted(async () => {
+  version.value = await getVersion();
+  await TGLogger.Info("[UserCombat][onMounted] 打开幽境危战页面");
   await refreshPopList();
-  // TODO: 获取数据库数据
+  await reloadChallenge();
 });
 
 watch(
@@ -132,11 +176,109 @@ async function loadWiki(): Promise<void> {
 }
 
 async function shareChallenge(): Promise<void> {
-  // TODO: 实现分享功能
+  await TGLogger.Info(`[UserChallenge][shareChallenge][${userTab.value}] 生成幽境危战分享图片`);
+  const challengeFind = localChallenge.value.find((i) => i.id === userTab.value);
+  if (!challengeFind) {
+    showSnackbar.warn("未找到对应的挑战记录");
+    await TGLogger.Warn("[UserChallenge][shareChallenge] 未找到对应的挑战记录");
+    return;
+  }
+  const fileName = `【幽境危战】【${challengeFind.name}】${challengeFind.id}-${uidCur.value}.png`;
+  const shareDom = document.querySelector<HTMLDivElement>(`#user-challenge-${challengeFind.id}`);
+  if (shareDom === null) {
+    showSnackbar.warn("未找到对应的挑战记录DOM");
+    await TGLogger.Warn("[UserChallenge][shareChallenge] 未找到对应的挑战记录DOM");
+    return;
+  }
+  await showLoading.start("正在生成分享图片", fileName);
+  await generateShareImg(fileName, shareDom);
+  await showLoading.end();
+  await TGLogger.Info(`[UserChallenge][shareChallenge][${userTab.value}] 成功生成分享图片`);
+}
+
+async function reloadChallenge(): Promise<void> {
+  localChallenge.value = [];
+  uidList.value = [];
+  await showLoading.start("正在加载UID列表");
+  uidList.value = await TSUserChallenge.getAllUid();
+  if (uidList.value.length === 0) {
+    uidCur.value = "";
+  } else {
+    if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
+    else uidCur.value = uidList.value[0];
+    await showLoading.update(`正在加载UID${uidCur.value}的幽境危战数据`);
+    await loadChallenge();
+  }
+  await showLoading.end();
+  if (uidCur.value?.length > 0) {
+    showSnackbar.success(
+      `已加载UID ${uidCur.value} 的 ${localChallenge.value.length} 条幽境危战数据`,
+    );
+  } else {
+    showSnackbar.warn("未检测到可用UID，请尝试刷新数据！");
+  }
+}
+
+async function loadChallenge(): Promise<void> {
+  localChallenge.value = [];
+  if (uidCur.value === undefined || uidCur.value === "") return;
+  localChallenge.value = await TSUserChallenge.getChallenge(uidCur.value);
+  if (localChallenge.value.length > 0) userTab.value = localChallenge.value[0].id;
 }
 
 async function refreshChallenge(): Promise<void> {
-  // TODO: 实现刷新挑战记录功能
+  if (isReq.value) return;
+  if (!cookie.value) {
+    showSnackbar.error("未登录");
+    await TGLogger.Warn("[UserChallenge][refreshChallenge] 未登录");
+    return;
+  }
+  if (uidCur.value && uidCur.value !== account.value.gameUid) {
+    const switchCheck = await showDialog.check(
+      "是否切换游戏账户",
+      `确认则尝试切换至 ${uidCur.value}`,
+    );
+    if (switchCheck) {
+      await useUserStore().switchGameAccount(uidCur.value);
+      await refreshChallenge();
+      return;
+    }
+    const freshCheck = await showDialog.check(
+      "确定刷新？",
+      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
+    );
+    if (!freshCheck) {
+      showSnackbar.cancel("已取消幽境危战数据刷新");
+      return;
+    }
+  }
+  isReq.value = true;
+  await TGLogger.Info("[UserChallenge][refreshChallenge] 开始刷新挑战数据");
+  await showLoading.start(`正在获取${account.value.gameUid}的幽境危战数据`);
+  const res = await recordReq.challenge.detail(cookie.value, account.value);
+  if ("retcode" in res) {
+    await showLoading.end();
+    isReq.value = false;
+    showSnackbar.error(`[${res.retcode}] ${res.message}`);
+    await TGLogger.Error(`[UserChallenge][refreshChallenge] ${res.retcode} - ${res.message}`);
+    return;
+  }
+  if (!res.is_unlock) {
+    await showLoading.end();
+    isReq.value = false;
+    showSnackbar.warn("幽境危战未解锁");
+    await TGLogger.Warn("[UserChallenge][refreshChallenge] 幽境危战未解锁");
+    return;
+  }
+  await showLoading.update("", { title: "正在保存幽境危战数据" });
+  for (const challenge of res.data) {
+    if (challenge.schedule.schedule_id === "0") continue;
+    await showLoading.update(`ScheduleID：${challenge.schedule.schedule_id}`);
+    await TSUserChallenge.saveChallenge(account.value.gameUid, challenge);
+  }
+  isReq.value = false;
+  await showLoading.end();
+  await reloadChallenge();
 }
 
 async function uploadChallenge(): Promise<void> {
@@ -144,11 +286,19 @@ async function uploadChallenge(): Promise<void> {
 }
 
 async function deleteChallenge(): Promise<void> {
-  if (localChallenge.value.length === 0) {
+  if (uidCur.value === undefined || uidCur.value === "" || localChallenge.value.length === 0) {
     showSnackbar.warn("没有可删除的挑战记录");
     return;
   }
-  // TODO: 实现删除挑战记录功能
+  const delCheck = await showDialog.check("确认删除？", "此操作将删除当前UID的所有幽境危战记录");
+  if (!delCheck) {
+    showSnackbar.cancel("已取消幽境危战数据删除");
+    return;
+  }
+  await showLoading.start("正在删除幽境危战数据", `UID: ${uidCur.value}`);
+  await TSUserChallenge.delChallenge(uidCur.value);
+  showSnackbar.success(`已清除 ${uidCur.value} 的幽境危战数据`);
+  await reloadChallenge();
 }
 
 async function refreshPopList(): Promise<void> {
@@ -168,7 +318,9 @@ async function refreshPopList(): Promise<void> {
   popList.value = resp.data.avatar_list;
   await showLoading.end();
   reqPop.value = false;
-  showSnackbar.success(`加载完成，共 ${popList.value.length} 位赋光之人`);
+  showSnackbar.success(
+    `已刷新 ${getGameServerDesc(server.value)} 的 ${popList.value.length} 位赋光之人`,
+  );
 }
 </script>
 <style lang="scss" scoped>
@@ -255,5 +407,76 @@ async function refreshPopList(): Promise<void> {
 
 .dark .pop-btn {
   border: 1px solid var(--common-shadow-2);
+}
+
+.user-challenge-box {
+  display: flex;
+  height: calc(100vh - 144px);
+  align-items: flex-start;
+  justify-content: center;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--box-bg-1);
+}
+
+.ucb-tabs {
+  max-width: 200px;
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.ucb-tab {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+
+  span {
+    &:last-child {
+      font-size: 10px;
+      opacity: 0.6;
+    }
+  }
+}
+
+.ucb-window {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  background: var(--app-page-bg);
+  border-bottom-right-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.ucb-window-item {
+  height: 100%;
+  padding-right: 8px;
+  overflow-y: auto;
+}
+
+.ucb-window-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ucb-empty {
+  position: absolute;
+  top: calc(50vh - 200px);
+  left: calc(50vw - 400px);
+  display: flex;
+  width: 800px;
+  height: 400px;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 5px;
+  background: var(--common-shadow-t-2);
+  box-shadow: 0 0 5px var(--common-shadow-2);
+  color: var(--common-text-title);
+  font-family: var(--font-title);
 }
 </style>

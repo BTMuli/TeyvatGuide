@@ -135,14 +135,15 @@ onMounted(async () => {
   await TGLogger.Info("[UserCombat][onMounted] 打开真境剧诗页面");
   await showLoading.update("正在加载UID列表");
   uidList.value = await TSUserCombat.getAllUid();
-  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
-  else if (uidList.value.length > 0) {
-    uidCur.value = uidList.value[0];
+  if (uidList.value.length === 0) {
+    uidCur.value = "";
+  } else {
+    if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
+    else uidCur.value = uidList.value[0];
     await showLoading.update(`正在加载UID${uidCur.value}的剧诗数据`);
-  } else uidCur.value = "";
+  }
   await loadCombat();
   await showLoading.end();
-  console.log("UserCombat", localCombat.value);
 });
 
 watch(() => uidCur.value, loadCombat);
@@ -150,6 +151,7 @@ watch(() => uidCur.value, loadCombat);
 async function toAbyss(): Promise<void> {
   await router.push({ name: "深境螺旋" });
 }
+
 async function toChallenge(): Promise<void> {
   await router.push({ name: "幽境危战" });
 }
@@ -174,7 +176,7 @@ async function loadWiki(): Promise<void> {
 async function refreshCombat(): Promise<void> {
   if (!cookie.value) {
     showSnackbar.error("未登录");
-    await TGLogger.Warn("[UserCombat][getAbyssData] 未登录");
+    await TGLogger.Warn("[UserCombat][refreshCombat] 未登录");
     return;
   }
   if (uidCur.value && uidCur.value !== account.value.gameUid) {
@@ -196,7 +198,7 @@ async function refreshCombat(): Promise<void> {
       return;
     }
   }
-  await TGLogger.Info("[UserCombat][getCombatData] 更新剧诗数据");
+  await TGLogger.Info("[UserCombat][refreshCombat] 更新剧诗数据");
   await showLoading.start(`正在获取${account.value.gameUid}的剧诗数据`);
   const res = await recordReq.roleCombat(cookie.value, account.value);
   if (res === false) {
@@ -207,8 +209,8 @@ async function refreshCombat(): Promise<void> {
   if ("retcode" in res) {
     await showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);
-    await TGLogger.Error(`[UserCombat][getCombatData] 获取${account.value.gameUid}的剧诗数据失败`);
-    await TGLogger.Error(`[UserCombat][getCombatData] ${res.retcode} ${res.message}`);
+    await TGLogger.Error(`[UserCombat][refreshCombat] 获取${account.value.gameUid}的剧诗数据失败`);
+    await TGLogger.Error(`[UserCombat][refreshCombat] ${res.retcode} ${res.message}`);
     return;
   }
   await showLoading.update("正在保存剧诗数据");
@@ -225,7 +227,7 @@ async function refreshCombat(): Promise<void> {
 
 async function shareCombat(): Promise<void> {
   await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片`);
-  const fileName = `【剧诗数据】${userTab.value}-${account.value.gameUid}.png`;
+  const fileName = `【真境剧诗】${userTab.value}-${uidCur.value}.png`;
   const shareDom = document.querySelector<HTMLElement>(`#user-combat-${userTab.value}`);
   if (shareDom === null) {
     showSnackbar.error("未找到分享数据");

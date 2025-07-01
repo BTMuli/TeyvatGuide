@@ -1,13 +1,14 @@
 /**
  * @file utils/dataBS.ts
  * @description 用户数据的备份、恢复、迁移
- * @since Beta v0.6.7
+ * @since Beta v0.8.0
  */
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAbyss from "@Sqlm/userAbyss.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
+import TSUserChallenge from "@Sqlm/userChallenge.js";
 import TSUserCombat from "@Sqlm/userCombat.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
 import { exists, mkdir } from "@tauri-apps/plugin-fs";
@@ -16,7 +17,7 @@ import TGLogger from "./TGLogger.js";
 
 /**
  * @description 备份用户数据
- * @since Beta v0.6.7
+ * @since Beta v0.8.0
  * @param {string} dir 备份目录路径
  * @returns {Promise<void>}
  */
@@ -33,13 +34,15 @@ export async function backUpUserData(dir: string): Promise<void> {
   await TSUserAbyss.backupAbyss(dir);
   await showLoading.update("正在备份真境剧诗数据");
   await TSUserCombat.backupCombat(dir);
+  await showLoading.update("正在备份幽境危战数据");
+  await TSUserChallenge.backupChallenge(dir);
   await showLoading.update("正在备份UIGF祈愿数据");
   await TSUserGacha.backUpUigf(dir);
 }
 
 /**
  * @description 恢复用户数据
- * @since Beta v0.6.7
+ * @since Beta v0.8.0
  * @param {string} dir 备份目录路径
  * @returns {Promise<void>}
  */
@@ -71,6 +74,12 @@ export async function restoreUserData(dir: string): Promise<void> {
   const restoreCombat = await TSUserCombat.restoreCombat(dir);
   if (!restoreCombat) {
     showSnackbar.error("真境剧诗数据恢复失败");
+    errNum++;
+  }
+  await showLoading.update("正在恢复幽境危战数据");
+  const restoreChallenge = await TSUserChallenge.restoreChallenge(dir);
+  if (!restoreChallenge) {
+    showSnackbar.error("幽境危战数据恢复失败");
     errNum++;
   }
   await showLoading.update("正在恢复祈愿数据");

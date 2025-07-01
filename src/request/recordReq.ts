@@ -166,12 +166,34 @@ async function hardChallengePopularity(
   return resp;
 }
 
+/**
+ * @description 获取挑战数据
+ * @since Beta v0.8.0
+ * @param {TGApp.App.Account.Cookie} cookie Cookie
+ * @param {TGApp.Sqlite.Account.Game} user 用户
+ * @returns {Promise<TGApp.Game.Challenge.ChallengeRes | TGApp.BBS.Response.Base>}
+ */
+async function hardChallengeDetail(
+  cookie: TGApp.App.Account.Cookie,
+  user: TGApp.Sqlite.Account.Game,
+): Promise<TGApp.Game.Challenge.ChallengeRes | TGApp.BBS.Response.Base> {
+  const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
+  const params = { need_detail: true, role_id: user.gameUid, server: user.region };
+  const resp = await TGHttp<TGApp.Game.Challenge.ChallengeResp | TGApp.BBS.Response.Base>(
+    `${trgAbu}hard_challenge`,
+    { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
+  );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
+}
+
 const recordReq = {
   index: index,
   character: { list: characterList, detail: characterDetail },
   roleCombat: roleCombat,
   spiralAbyss: spiralAbyss,
   challenge: {
+    detail: hardChallengeDetail,
     pop: hardChallengePopularity,
   },
 };
