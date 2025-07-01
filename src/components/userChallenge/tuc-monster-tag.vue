@@ -28,13 +28,10 @@ function getElement(value: string): string {
       return "水";
     case "11003":
       return "火";
-    // TODO: 待确认
     case "11004":
       return "雷";
-    // TODO: 待确认
     case "11005":
       return "风";
-    // TODO: 待确认
     case "11006":
       return "岩";
     case "11007":
