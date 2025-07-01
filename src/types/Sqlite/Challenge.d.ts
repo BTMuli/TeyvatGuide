@@ -16,6 +16,7 @@ declare namespace TGApp.Sqlite.Challenge {
    * @property {string} name - 挑战名称
    * @property {string} single - 挑战单个数据（JSON 字符串）
    * @property {string} mp - 挑战多人数据（JSON 字符串）
+   * @property {string} blings - 挑战光环数据（JSON 字符串）
    * @property {string} updated - 更新时间
    */
   type RawTable = {
@@ -26,6 +27,7 @@ declare namespace TGApp.Sqlite.Challenge {
     name: string;
     single: string; // JSON 字符串
     mp: string; // JSON 字符串
+    blings: string; // JSON 字符串
     updated: string;
   };
 
@@ -40,6 +42,7 @@ declare namespace TGApp.Sqlite.Challenge {
    * @property {string} name - 挑战名称
    * @property {TGApp.Game.Challenge.ChallengeSingle} single - 挑战单个数据
    * @property {TGApp.Game.Challenge.ChallengeMp} mp - 挑战多人数据
+   * @property {TGApp.Game.Challenge.ChallengeBlings} blings - 挑战光环数据
    * @property {string} updated - 更新时间
    */
   type SingleTable = {
@@ -50,6 +53,7 @@ declare namespace TGApp.Sqlite.Challenge {
     name: string;
     single: TGApp.Game.Challenge.ChallengeSingle;
     mp: TGApp.Game.Challenge.ChallengeMp;
+    blings: TGApp.Game.Challenge.ChallengeBlings;
     updated: string;
   };
 }

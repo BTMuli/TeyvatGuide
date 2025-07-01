@@ -28,6 +28,7 @@ function transUserChallenge(
     name: data.schedule.name,
     single: data.single,
     mp: data.mp,
+    blings: data.blings,
     updated: timestampToDate(new Date().getTime()),
   };
 }
@@ -42,15 +43,17 @@ function transUserChallenge(
 function getInsertSql(data: TGApp.Sqlite.Challenge.SingleTable, uid?: string): string {
   const timeNow = timestampToDate(new Date().getTime());
   return `
-      INSERT INTO HardChallenge(uid, id, startTime, endTime, name, single, mp, updated)
+      INSERT INTO HardChallenge(uid, id, startTime, endTime, name, single, mp, blings, updated)
       VALUES ('${uid ?? data.uid}', ${data.id}, '${data.startTime}', '${data.endTime}', '${data.name}',
-              '${JSON.stringify(data.single)}', '${JSON.stringify(data.mp)}', '${timeNow}') ON CONFLICT(uid,id) DO
-      UPDATE
+              '${JSON.stringify(data.single)}', '${JSON.stringify(data.mp)}', '${JSON.stringify(data.blings)}',
+              '${timeNow}') 
+      ON CONFLICT(uid,id) DO UPDATE
           SET startTime = '${data.startTime}',
           endTime = '${data.endTime}',
           name = '${data.name}',
           single = '${JSON.stringify(data.single)}',
           mp = '${JSON.stringify(data.mp)}',
+          blings = '${JSON.stringify(data.blings)}',
           updated = '${timeNow}'
   `;
 }
@@ -98,6 +101,7 @@ async function getChallenge(uid?: string): Promise<Array<TGApp.Sqlite.Challenge.
       name: raw.name,
       single: JSON.parse(raw.single),
       mp: JSON.parse(raw.mp),
+      blings: JSON.parse(raw.blings),
       updated: raw.updated,
     });
   }

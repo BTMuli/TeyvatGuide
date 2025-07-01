@@ -84,7 +84,7 @@ async function getCombat(uid?: string): Promise<TGApp.Sqlite.Combat.SingleTable[
     );
   } else {
     resR = await db.select<Array<TGApp.Sqlite.Combat.RawTable>>(
-      "SELECT * FROM RoleCombat WHERE uid = ?;",
+      "SELECT * FROM RoleCombat WHERE uid = ? ORDER BY id DESC;",
       [uid],
     );
   }

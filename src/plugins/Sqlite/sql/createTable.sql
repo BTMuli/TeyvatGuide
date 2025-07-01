@@ -96,6 +96,7 @@ create table if not exists HardChallenge
     name      text,
     single    text,
     mp        text,
+    blings    text,
     updated   text,
     primary key (uid, id)
 );

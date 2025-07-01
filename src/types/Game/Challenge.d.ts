@@ -73,13 +73,13 @@ declare namespace TGApp.Game.Challenge {
    * @property {ChallengeSchedule} schedule - 挑战周期信息
    * @property {ChallengeSingle} single - 单次挑战数据
    * @property {ChallengeMp} mp - 多人挑战数据
-   * @property {Array<unknown>} blings - 挑战相关的其他数据（如成就等）
+   * @property {ChallengeBlings} blings - 赋予辉光数据
    */
   type ChallengeItem = {
     schedule: ChallengeSchedule;
     single: ChallengeSingle;
     mp: ChallengeMp;
-    blings: Array<unknown>;
+    blings: ChallengeBlings;
   };
 
   /**
@@ -231,4 +231,33 @@ declare namespace TGApp.Game.Challenge {
    * @property {string} desc - 标签描述
    */
   type MonsterTag = { type: string; desc: string };
+
+  /**
+   * @description 赋予辉光数据
+   * @since Beta v0.8.0
+   * @interface ChallengeBlings
+   */
+  type ChallengeBlings = Array<ChallengeBling>;
+
+  /**
+   * @description 赋予辉光数据项
+   * @since Beta v0.8.0
+   * @interface ChallengeBling
+   * @property {number} avatar_id - 角色 ID
+   * @property {string} name - 角色名称
+   * @property {string} element - 角色元素
+   * @property {string} image - 角色头像图片 URL
+   * @property {string} side_icon - 角色侧边图标 URL
+   * @property {number} rarity - 角色稀有度
+   * @property {boolean} is_plus - 是否上榜
+   */
+  type ChallengeBling = {
+    avatar_id: number;
+    name: string;
+    element: string;
+    image: string;
+    side_icon: string;
+    rarity: number;
+    is_plus: boolean;
+  };
 }
