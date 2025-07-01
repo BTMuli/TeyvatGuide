@@ -28,7 +28,8 @@
       </div>
       <div class="right-monster">
         <div class="icon">
-          <TMiImg :src="props.data.monster.icon" :alt="props.data.name" :ori="true" />
+          <!--          <TMiImg :src="props.data.monster.icon" :alt="props.data.name" :ori="true" />-->
+          <img :src="props.data.monster.icon" :alt="props.data.name" />
         </div>
         <div class="tags">
           <div class="tag" v-for="(tag, idx) in props.data.monster.tags" :key="idx">
@@ -204,20 +205,22 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
 .right-monster {
   position: relative;
   display: flex;
+  height: 100%;
   flex-direction: column;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: flex-end;
 
   .icon {
-    position: relative;
-    width: 96px;
-    height: 96px;
+    position: absolute;
+    top: -16px;
+    right: 0;
+    height: 100%;
     flex-shrink: 0;
+    aspect-ratio: 1;
 
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
     }
   }
 
