@@ -71,24 +71,16 @@ declare namespace TGApp.Game.Challenge {
    * @since Beta v0.8.0
    * @interface ChallengeItem
    * @property {ChallengeSchedule} schedule - 挑战周期信息
-   * @property {ChallengeSingle} single - 单次挑战数据
-   * @property {ChallengeMp} mp - 多人挑战数据
+   * @property {Challenge} single - 单次挑战数据
+   * @property {Challenge} mp - 多人挑战数据
    * @property {ChallengeBlings} blings - 赋予辉光数据
    */
   type ChallengeItem = {
     schedule: ChallengeSchedule;
-    single: ChallengeSingle;
-    mp: ChallengeMp;
+    single: Challenge;
+    mp: Challenge;
     blings: ChallengeBlings;
   };
-
-  /**
-   * @description 多人挑战数据
-   * @since Beta v0.8.0
-   * @interface ChallengeMp
-   * @todo 待测试
-   */
-  type ChallengeMp = ChallengeSingle;
 
   /**
    * @description 时间对象
@@ -135,45 +127,45 @@ declare namespace TGApp.Game.Challenge {
   /**
    * @description 单次挑战数据
    * @since Beta v0.8.0
-   * @interface ChallengeSingle
-   * @property {SingleBest} best - 最佳挑战数据
-   * @property {Array<SingleChallenge>} challenge - 挑战列表
+   * @interface Challenge
+   * @property {ChallengeBest} best - 最佳挑战数据
+   * @property {Array<ChallengeList>} challenge - 挑战列表
    * @property {boolean} has_data - 是否有数据
    */
-  type ChallengeSingle = { best: SingleBest; challenge: Array<SingleChallenge>; has_data: boolean };
+  type Challenge = { best: ChallengeBest; challenge: Array<ChallengeList>; has_data: boolean };
 
   /**
    * @description 单次挑战最佳数据
    * @since Beta v0.8.0
-   * @interface SingleBest
+   * @interface ChallengeBest
    * @property {number} difficulty - 挑战难度
    * @property {number} second - 挑战用时（秒）
    * @property {string} icon - 挑战图标名称
    */
-  type SingleBest = { difficulty: number; second: number; icon: string };
+  type ChallengeBest = { difficulty: number; second: number; icon: string };
 
   /**
    * @description 单次挑战数据项
    * @since Beta v0.8.0
-   * @interface SingleChallenge
+   * @interface ChallengeList
    * @property {string} name - 怪物名称
    * @property {number} seconds - 挑战用时（秒）
-   * @property {Array<SingleTeam>} teams - 挑战队伍列表
-   * @property {Array<SingleAvatar>} best_avatar - 最佳角色列表
-   * @property {SingleMonster} monster - 挑战怪物数据
+   * @property {Array<ChallengeTeam>} teams - 挑战队伍列表
+   * @property {Array<ChallengeAvatar>} best_avatar - 最佳角色列表
+   * @property {ChallengeMonster} monster - 挑战怪物数据
    */
-  type SingleChallenge = {
+  type ChallengeList = {
     name: string;
     seconds: number;
-    teams: Array<SingleTeam>;
-    best_avatar: Array<SingleAvatar>;
-    monster: SingleMonster;
+    teams: Array<ChallengeTeam>;
+    best_avatar: Array<ChallengeAvatar>;
+    monster: ChallengeMonster;
   };
 
   /**
    * @description 单次挑战队伍数据
    * @since Beta v0.8.0
-   * @interface SingleTeam
+   * @interface ChallengeTeam
    * @property {number} avatar_id - 角色 ID
    * @property {string} name - 角色名称
    * @property {string} element - 角色元素
@@ -182,7 +174,7 @@ declare namespace TGApp.Game.Challenge {
    * @property {number} rarity - 角色稀有度
    * @property {number} rank - 角色命座
    */
-  type SingleTeam = {
+  type ChallengeTeam = {
     avatar_id: number;
     name: string;
     element: string;
@@ -195,18 +187,18 @@ declare namespace TGApp.Game.Challenge {
   /**
    * @description 单次挑战最佳角色数据
    * @since Beta v0.8.0
-   * @interface SingleAvatar
+   * @interface ChallengeAvatar
    * @property {number} avatar_id - 角色 ID
    * @property {string} side_icon - 角色侧边图标 URL
    * @property {string} dps - 角色 DPS 数据
    * @property {string} type - 1-最强一击，2-最高总伤害
    */
-  type SingleAvatar = { avatar_id: number; side_icon: string; dps: string; type: string };
+  type ChallengeAvatar = { avatar_id: number; side_icon: string; dps: string; type: string };
 
   /**
    * @description 单次挑战怪物数据
    * @since Beta v0.8.0
-   * @interface SingleMonster
+   * @interface ChallengeMonster
    * @property {string} name - 怪物名称
    * @property {number} level - 怪物等级
    * @property {string} icon - 怪物图标 URL
@@ -214,7 +206,7 @@ declare namespace TGApp.Game.Challenge {
    * @property {Array<MonsterTag>} tags - 怪物标签列表
    * @property {string} monster_id - 怪物 ID
    */
-  type SingleMonster = {
+  type ChallengeMonster = {
     name: string;
     level: number;
     icon: string;

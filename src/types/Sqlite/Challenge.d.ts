@@ -40,8 +40,8 @@ declare namespace TGApp.Sqlite.Challenge {
    * @property {string} startTime - 开始时间
    * @property {string} endTime - 结束时间
    * @property {string} name - 挑战名称
-   * @property {TGApp.Game.Challenge.ChallengeSingle} single - 挑战单个数据
-   * @property {TGApp.Game.Challenge.ChallengeMp} mp - 挑战多人数据
+   * @property {TGApp.Game.Challenge.Challenge} single - 挑战单个数据
+   * @property {TGApp.Game.Challenge.Challenge} mp - 挑战多人数据
    * @property {TGApp.Game.Challenge.ChallengeBlings} blings - 挑战光环数据
    * @property {string} updated - 更新时间
    */
@@ -51,8 +51,8 @@ declare namespace TGApp.Sqlite.Challenge {
     startTime: string;
     endTime: string;
     name: string;
-    single: TGApp.Game.Challenge.ChallengeSingle;
-    mp: TGApp.Game.Challenge.ChallengeMp;
+    single: TGApp.Game.Challenge.Challenge;
+    mp: TGApp.Game.Challenge.Challenge;
     blings: TGApp.Game.Challenge.ChallengeBlings;
     updated: string;
   };
