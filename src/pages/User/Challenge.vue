@@ -22,10 +22,6 @@
           <img src="/source/UI/userCombat.webp" alt="abyss" />
           <span>真境剧诗</span>
         </v-btn>
-        <v-btn :rounded="true" class="ucp-btn" @click="loadWiki()">
-          <img src="/source/UI/wikiAbyss.webp" alt="abyss" />
-          <span>统计数据</span>
-        </v-btn>
       </div>
     </template>
     <template #append>
@@ -54,9 +50,6 @@
             分享
           </v-btn>
           <v-btn class="ucp-btn" @click="refreshChallenge()" prepend-icon="mdi-refresh">刷新</v-btn>
-          <v-btn class="ucp-btn" @click="uploadChallenge()" prepend-icon="mdi-cloud-upload">
-            上传
-          </v-btn>
           <v-btn class="ucp-btn" @click="deleteChallenge()" prepend-icon="mdi-delete">删除</v-btn>
         </div>
         <div class="pop-list">
@@ -198,10 +191,6 @@ async function toCombat(): Promise<void> {
   await router.push({ name: "真境剧诗" });
 }
 
-async function loadWiki(): Promise<void> {
-  showSnackbar.warn("暂未接入胡桃数据库");
-}
-
 async function shareChallenge(): Promise<void> {
   await TGLogger.Info(`[UserChallenge][shareChallenge][${userTab.value}] 生成幽境危战分享图片`);
   const challengeFind = localChallenge.value.find((i) => i.id === userTab.value);
@@ -308,10 +297,6 @@ async function refreshChallenge(): Promise<void> {
   await showLoading.end();
   uidCur.value = account.value.gameUid;
   await reloadChallenge();
-}
-
-async function uploadChallenge(): Promise<void> {
-  showSnackbar.warn("暂未接入胡桃数据库");
 }
 
 async function deleteChallenge(): Promise<void> {
