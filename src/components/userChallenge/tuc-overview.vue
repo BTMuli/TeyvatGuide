@@ -1,14 +1,16 @@
 <!-- 幽境危战，单人/联机数据总览 -->
 <template>
   <div class="tuc-overview-comp" @click="onClick()">
-    <TSubline>{{ props.title }}{{ props.data.has_data ? "" : " (无数据) " }}</TSubline>
-    <div class="toc-best" v-if="props.data.best">
-      <div class="label">
+    <div class="toc-top-title">
+      <div class="title">{{ props.title }}{{ props.data.has_data ? "" : " (无数据) " }}</div>
+      <div class="append" v-if="props.data.best">
         <span>最佳记录</span>
-      </div>
-      <div class="append" :title="getDiffTitle(props.data.best)">
-        <span>{{ getDiffTitle(props.data.best) }}</span>
         <span>{{ props.data.best.second }}s</span>
+        <img
+          :title="getDiffTitle(props.data.best)"
+          :src="`/icon/medals/${props.data.best.icon}.webp`"
+          alt="medal"
+        />
       </div>
     </div>
     <TucChallengeItem
@@ -19,7 +21,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TSubline from "@comp/app/t-subline.vue";
 import TucChallengeItem from "@comp/userChallenge/tuc-challenge-item.vue";
 
 type TucOverviewProps = {
@@ -63,15 +64,17 @@ function getDiffTitle(best: TGApp.Game.Challenge.ChallengeBest): string {
   row-gap: 12px;
 }
 
-.toc-best {
+.toc-top-title {
   display: flex;
   width: 100%;
   align-items: center;
   justify-content: space-between;
   color: var(--box-text-1);
 
-  .label {
+  .title {
     font-family: var(--font-title);
+    font-size: 16px;
+    font-weight: bold;
   }
 
   .append {
@@ -79,6 +82,16 @@ function getDiffTitle(best: TGApp.Game.Challenge.ChallengeBest): string {
     align-items: center;
     color: var(--box-text-2);
     gap: 4px;
+
+    span {
+      font-size: 14px;
+    }
+
+    img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
   }
 }
 </style>
