@@ -65,7 +65,7 @@
               <img src="/source/UI/userAbyss.webp" alt="abyss" class="side-icon-menu" />
             </template>
           </v-list-item>
-          <v-list-item class="side-item-menu" title="真境剧诗" :link="true" href="/user/weapons/my">
+          <v-list-item class="side-item-menu" title="真境剧诗" :link="true" href="/user/combat">
             <template #prepend>
               <img src="/source/UI/userCombat.webp" alt="combat" class="side-icon-menu" />
             </template>
