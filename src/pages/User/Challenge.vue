@@ -213,7 +213,6 @@ async function shareChallenge(): Promise<void> {
 }
 
 async function reloadChallenge(): Promise<void> {
-  localChallenge.value = [];
   await showLoading.start("正在加载UID列表");
   uidList.value = await TSUserChallenge.getAllUid();
   if (uidList.value.length === 0) {
@@ -237,7 +236,6 @@ async function reloadChallenge(): Promise<void> {
 }
 
 async function loadChallenge(): Promise<void> {
-  localChallenge.value = [];
   if (uidCur.value === undefined || uidCur.value === "") return;
   localChallenge.value = await TSUserChallenge.getChallenge(uidCur.value);
   if (localChallenge.value.length > 0) userTab.value = localChallenge.value[0].id;
