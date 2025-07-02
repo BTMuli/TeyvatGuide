@@ -15,6 +15,7 @@
       />
     </div>
     <v-chart
+      class="gro-chart-box"
       :option="chartOptions"
       autoresize
       :theme="echartsTheme"
@@ -113,8 +114,8 @@ async function getOptions(): Promise<void> {
   width: 100%;
   height: 100%;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   gap: 10px;
   overflow-y: auto;
 }
@@ -132,5 +133,11 @@ async function getOptions(): Promise<void> {
   width: 150px;
   color: var(--common-text-title);
   font-family: var(--font-title);
+}
+
+.gro-chart-box {
+  width: calc(100% - 8px);
+  height: calc(100% - 64px);
+  min-height: 300px;
 }
 </style>
