@@ -63,8 +63,33 @@ function transAvatar(data: TGApp.Game.Record.Avatar): TGApp.Sqlite.Record.Avatar
 }
 
 /**
+ * @description 获取幽境危战难度描述
+ * @since Beta v0.8.0
+ * @param {number} difficulty 幽境危战难度
+ * @return {string} 幽境危战难度描述
+ */
+export function getHardChallengeDesc(difficulty: number): string {
+  switch (difficulty) {
+    case 1:
+      return "普通";
+    case 2:
+      return "进阶";
+    case 3:
+      return "困难";
+    case 4:
+      return "险恶";
+    case 5:
+      return "无畏";
+    case 6:
+      return "绝境";
+    default:
+      return `难度${difficulty}`;
+  }
+}
+
+/**
  * @description 将统计信息转换为数据库中的数据
- * @since Beta v0.6.0
+ * @since Beta v0.8.0
  * @param {TGApp.Game.Record.Stats} data 统计信息
  * @return {TGApp.Sqlite.Record.Stats } 转换后的统计信息
  */
@@ -84,6 +109,9 @@ function transStat(data: TGApp.Game.Record.Stats): TGApp.Sqlite.Record.Stats {
     pyroCulus: data.pyroculus_number,
     sprialAbyss: data.spiral_abyss,
     combatRole: data.role_combat.is_unlock ? `第 ${data.role_combat.max_round_id} 幕` : "未解锁",
+    hardChallenge: data.hard_challenge.is_unlock
+      ? `${data.hard_challenge.name}-${getHardChallengeDesc(data.hard_challenge.difficulty)}`
+      : "未解锁",
     luxuriousChest: data.luxurious_chest_number,
     preciousChest: data.precious_chest_number,
     exquisiteChest: data.exquisite_chest_number,

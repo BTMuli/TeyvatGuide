@@ -1,7 +1,7 @@
 /**
  * @file types/Sqlite/Record.d.ts
  * @description Sqlite 原神战绩相关类型定义文件
- * @since Beta v0.7.2
+ * @since Beta v0.8.0
  */
 
 declare namespace TGApp.Sqlite.Record {
@@ -91,7 +91,7 @@ declare namespace TGApp.Sqlite.Record {
   /**
    * @description 统计信息类型
    * @interface Stats
-   * @since Beta v0.5.5
+   * @since Beta v0.8.0
    * @property {number} activeDays - 活跃天数
    * @property {number} achievementNumber - 成就达成数
    * @property {number} avatarNumber - 获得角色数
@@ -106,6 +106,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {number} pyroCulus - 火神瞳数
    * @property {string} sprialAbyss - 深境螺旋信息
    * @property {string} combatRole - 幻想真境剧诗
+   * @property {string} hardChallenge - 幽境危战挑战
    * @property {number} luxuriousChest - 华丽宝箱数
    * @property {number} preciousChest - 珍贵宝箱数
    * @property {number} exquisiteChest - 精致宝箱数
@@ -128,6 +129,7 @@ declare namespace TGApp.Sqlite.Record {
     pyroCulus: number;
     sprialAbyss: string;
     combatRole: string;
+    hardChallenge: string;
     luxuriousChest: number;
     preciousChest: number;
     exquisiteChest: number;

@@ -1,7 +1,7 @@
 /**
  * @file types/Game/Record.d.ts
  * @description 原神战绩相关类型定义文件
- * @since Beta v0.7.2
+ * @since Beta v0.8.0
  */
 
 declare namespace TGApp.Game.Record {
@@ -95,7 +95,7 @@ declare namespace TGApp.Game.Record {
   /**
    * @description 统计信息类型
    * @interface Stats
-   * @since Beta v0.5.5
+   * @since Beta v0.8.0
    * @property {number} active_day_number - 活跃天数
    * @property {number} achievement_number - 成就数量
    * @property {number} anemoculus_number - 风神瞳数量
@@ -116,7 +116,7 @@ declare namespace TGApp.Game.Record {
    * @property {unknown} field_ext_map - 数据对应链接的map，用不到设为 unknown
    * @property {CombatStats} role_combat - 幻想真境剧诗数据
    * @property {number} full_fetter_avatar_num - 满好感角色数
-   * @return Stats
+   * @property {ChallengeStats} hard_challenge - 幽境危战挑战数据
    */
   type Stats = {
     active_day_number: number;
@@ -139,6 +139,7 @@ declare namespace TGApp.Game.Record {
     field_ext_map: unknown;
     role_combat: CombatStats;
     full_fetter_avatar_num: number;
+    hard_challenge: ChallengeStats;
   };
 
   /**
@@ -156,6 +157,22 @@ declare namespace TGApp.Game.Record {
     max_round_id: number;
     has_data: boolean;
     has_detail_data: boolean;
+  };
+
+  /**
+   * @description 幽境危战挑战数据类型
+   * @interface ChallengeStats
+   * @since Beta v0.8.0
+   * @property {boolean} is_unlock - 是否解锁
+   * @property {number} difficulty - 挑战难度
+   * @property {boolean} has_data - 是否有数据
+   * @property {string} name - 挑战名称
+   */
+  type ChallengeStats = {
+    is_unlock: boolean;
+    difficulty: number;
+    has_data: boolean;
+    name: string;
   };
 
   /**

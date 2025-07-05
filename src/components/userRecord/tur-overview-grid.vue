@@ -1,7 +1,7 @@
 <template>
   <div v-if="!modelValue">暂无数据</div>
   <div v-else>
-    <div class="tur-og-box-3">
+    <div class="tur-og-box">
       <TurOverviewSub
         :text="modelValue.activeDays"
         icon="/source/UI/userRecord.webp"
@@ -17,8 +17,11 @@
         icon="/source/UI/userCombat.webp"
         title="幻想真境剧诗"
       />
-    </div>
-    <div class="tur-og-box">
+      <TurOverviewSub
+        :text="modelValue.hardChallenge"
+        icon="/source/UI/userChallenge.webp"
+        title="幽境危战"
+      />
       <TurOverviewSub
         :text="modelValue.avatarNumber"
         icon="/source/UI/userAvatar.webp"
