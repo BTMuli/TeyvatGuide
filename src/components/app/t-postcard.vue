@@ -144,8 +144,8 @@ export type RenderCard = {
 const stats: Readonly<Array<RenderStatus>> = [
   { stat: 0, label: "未知", color: "var(--tgc-od-red)" },
   { stat: 1, label: "进行中", color: "var(--tgc-od-green)" },
-  { stat: 2, label: "已结束", color: "var(--tgc-od-white)" },
-  { stat: 3, label: "评选中", color: "var(--tgc-od-orange)" },
+  { stat: 2, label: "评选中", color: "var(--tgc-od-orange)" },
+  { stat: 3, label: "已结束", color: "var(--tgc-od-white)" },
 ];
 const route = useRoute();
 const router = useRouter();
