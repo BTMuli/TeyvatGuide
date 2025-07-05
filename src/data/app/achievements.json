@@ -14867,7 +14867,10 @@
     "description": "击退袭击「烟谜主」的「深渊教团」。",
     "reward": 5,
     "version": "5.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 8016, "name": "命运始动的钥匙", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84346,
@@ -14877,7 +14880,10 @@
     "description": "「命运的织机」已编织出「新坎瑞亚」的地脉。",
     "reward": 5,
     "version": "5.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 8018, "name": "你所不在的时空", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84347,
@@ -14887,7 +14893,10 @@
     "description": "完成「你存在的时空」。",
     "reward": 10,
     "version": "5.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 8018, "name": "你所不在的时空", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84501,
