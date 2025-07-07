@@ -2,12 +2,24 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2025-06-17
+Update: 2025-07-07
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2025-06-17 17:08:35`
+> 更新于 `2025-07-07 12:45:35`
+
+## [v0.7.8](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.8) (2025-07-07)
+
+- 🐛 修正游戏账号判断逻辑
+- ✏️ 修正帖子活动卡片状态类型
+- ✨ 幽境危战页面 [`#157`](https://github.com/BTMuli/TeyvatGuide/issues/157)
+- 💄 战绩添加幽境危战数据
+- 💄 修复部分页面渲染异常
+- 🍱 更新下半资源
+- ♻️ 角色json文件拆分
+- ♻️ 名片资源重构
+- ♻️ 调整服务器类型归属
 
 ## [0.7.7](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.7) (2025-06-17)
 
