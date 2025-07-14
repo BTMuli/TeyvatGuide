@@ -1,7 +1,7 @@
 /**
  * @file utils/TGWindow.ts
  * @description 窗口创建相关工具函数
- * @since Beta v0.7.6
+ * @since Beta v0.7.9
  */
 
 import type { RenderCard } from "@comp/app/t-postcard.vue";
@@ -10,7 +10,6 @@ import { core, webviewWindow, window as TauriWindow } from "@tauri-apps/api";
 import { PhysicalSize } from "@tauri-apps/api/dpi";
 import { currentMonitor, WindowOptions } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { type } from "@tauri-apps/plugin-os";
 
 import TGLogger from "./TGLogger.js";
 
@@ -103,7 +102,7 @@ export function getWindowSize(label: string): PhysicalSize {
 
 /**
  * @description 窗口适配
- * @since Beta v0.7.6
+ * @since Beta v0.7.9
  * @returns Promise<void>
  */
 export async function resizeWindow(): Promise<void> {
@@ -117,13 +116,10 @@ export async function resizeWindow(): Promise<void> {
   const designSize = getWindowSize(windowCur.label);
   const widthScale = screen.size.width / 1920;
   const heightScale = screen.size.height / 1080;
-  let targetWidth = Math.round((designSize.width * widthScale) / screen.scaleFactor);
-  let targetHeight = Math.round((designSize.height * heightScale) / screen.scaleFactor);
-  if (type() === "macos") {
-    targetWidth = Math.round(designSize.width * widthScale);
-    targetHeight = Math.round(designSize.height * heightScale);
-  }
+  const targetWidth = Math.round(designSize.width * widthScale);
+  const targetHeight = Math.round(designSize.height * heightScale);
   await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
-  await windowCur.setZoom((1 / screen.scaleFactor) * Math.min(widthScale, heightScale));
+  const targetZoom = Math.min(widthScale, heightScale) / screen.scaleFactor;
+  await windowCur.setZoom(targetZoom);
   await windowCur.setFocus();
 }
